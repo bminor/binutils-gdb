@@ -177,6 +177,7 @@ case "${targ}" in
     ;;
   alpha*-*-*vms*)
     targ_defvec=vms_alpha_vec
+    targ_selvecs=vms_lib_txt_vec
     want64=true
     ;;
   alpha*-*-*)

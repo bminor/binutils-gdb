@@ -690,6 +690,7 @@ BFD32_BACKENDS = \
 	versados.lo \
 	vms-gsd.lo \
 	vms-hdr.lo \
+	vms-lib.lo \
 	vms-misc.lo \
 	vms-tir.lo \
 	vms.lo \
@@ -874,6 +875,7 @@ BFD32_BACKENDS_CFILES = \
 	versados.c \
 	vms-gsd.c \
 	vms-hdr.c \
+	vms-lib.c \
 	vms-misc.c \
 	vms-tir.c \
 	vms.c \
@@ -1488,6 +1490,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/versados.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-gsd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-hdr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-lib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-misc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-tir.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms.Plo@am__quote@

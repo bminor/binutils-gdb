@@ -1,3 +1,30 @@
+2010-04-01  Tristan Gingold  <gingold@adacore.com>
+
+	* vms.h: Include time.h. Add prototypes for vms_get_module_name,
+	vms_time_to_time_t and vms_rawtime_to_time_t.
+	* vms.c (vms_alpha_vec): Add archives support.
+	* vms-misc.c: Include safe-ctype.h
+	(vms_get_module_name): New function.
+	(vms_time_to_time_t, vms_rawtime_to_time_t): Ditto.
+	* vms-hdr.c (_bfd_vms_write_hdr): Put module name creation to the
+	vms_get_module_name function.  Use this function.
+	* targets.c: Declare vms_lib_txt_vec.  Add it to _bfd_target_vector.
+	* libbfd-in.h: Add prototype for _bfd_append_relative_path.
+	Add prototypes for vms-lib.c
+	* libbfd.h: Regenerate.
+	* configure.in (TDEFINES): Add an entry for vms_lib_txt_vec.  Add
+	vms-lib.lo to vms_alpha_vec.
+	* config.bfd (targ_cpu): Add targ_selvecs for alpha*-*-*vms*.
+	* configure: Regenerate.
+	* bfd.c: Add selective_search field.
+	* bfd-in2.h: Regenerate.
+	* archive.c (append_relative_path): Rename to
+	_bfd_append_relative_path and make it public.
+	(_bfd_get_elt_at_filepos): Adjust for above renaming.
+	* Makefile.am (BFD32_BACKENDS): Add vms-lib.lo
+	(BFD32_BACKENDS_CFILES): Add vms-lib.c
+	* Makefile.in: Regenerate.
+
 2010-04-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf2.c (read_attribute_value): Handle CU version 4

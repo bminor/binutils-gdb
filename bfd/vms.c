@@ -1450,16 +1450,16 @@ const bfd_target vms_alpha_vec =
   bfd_getl16, bfd_getl_signed_16, bfd_putl16,
 
   {_bfd_dummy_target, vms_object_p,		/* bfd_check_format.  */
-   _bfd_dummy_target, _bfd_dummy_target},
+   _bfd_vms_lib_alpha_archive_p, _bfd_dummy_target},
   {bfd_false, vms_mkobject,			/* bfd_set_format.  */
-   bfd_false, bfd_false},
+   _bfd_vms_lib_mkarchive, bfd_false},
   {bfd_false, vms_write_object_contents,	/* bfd_write_contents.  */
-   bfd_false, bfd_false},
+   _bfd_vms_lib_write_archive_contents, bfd_false},
 
   BFD_JUMP_TABLE_GENERIC (vms),
   BFD_JUMP_TABLE_COPY (vms),
   BFD_JUMP_TABLE_CORE (_bfd_nocore),
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_vms_lib),
   BFD_JUMP_TABLE_SYMBOLS (vms),
   BFD_JUMP_TABLE_RELOCS (vms),
   BFD_JUMP_TABLE_WRITE (vms),

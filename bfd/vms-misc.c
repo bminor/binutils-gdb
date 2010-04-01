@@ -30,6 +30,7 @@
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
+#include "safe-ctype.h"
 
 #include "vms.h"
 
@@ -1044,4 +1045,94 @@ _bfd_vms_enter_symbol (bfd * abfd, char *name)
   _bfd_vms_debug (7, "-> entry %p, entry->symbol %p\n", entry, entry->symbol);
 #endif
   return entry;
+}
+
+/* Create module name from filename (ie, extract the basename and convert it
+   in upper cases).  Works on both VMS and UNIX pathes.
+   The result has to be free().  */
+
+char *
+vms_get_module_name (const char *filename, bfd_boolean upcase)
+{
+  char *fname, *fptr;
+  const char *fout;
+
+  /* Strip VMS path.  */
+  fout = strrchr (filename, ']');
+  if (fout == NULL)
+    fout = strchr (filename, ':');
+  if (fout != NULL)
+    fout++;
+  else
+    fout = filename;
+      
+  /* Strip UNIX path.  */
+  fptr = strrchr (fout, '/');
+  if (fptr != NULL)
+    fout = fptr + 1;
+  
+  fname = strdup (fout);
+
+  /* Strip suffix.  */
+  fptr = strrchr (fname, '.');
+  if (fptr != 0)
+    *fptr = 0;
+  
+  /* Convert to upper case and truncate at 31 characters.
+     (VMS object file format restricts module name length to 31).  */
+  fptr = fname;
+  for (fptr = fname; *fptr != 0; fptr++)
+    {
+      if (*fptr == ';' || (fptr - fname) >= 31)
+        {
+          *fptr = 0;
+          break;
+        }
+      if (upcase)
+        *fptr = TOUPPER (*fptr);
+    }
+  return fname;
+}
+
+/* Convert a raw VMS time to a unix time.  */
+
+time_t
+vms_time_to_time_t (unsigned int hi, unsigned int lo)
+{
+  const unsigned int off = 3506716800U;
+  const unsigned int factor = 10000000;
+  unsigned int tmp;
+  unsigned int rlo;
+  int i;
+
+  /* First convert to seconds.  */
+  tmp = hi % factor;
+  hi = hi / factor;
+  rlo = 0;
+  for (i = 0; i < 4; i++)
+    {
+      tmp = (tmp << 8) | (lo >> 24);
+      lo <<= 8;
+
+      rlo = (rlo << 8) | (tmp / factor);
+      tmp %= factor;
+    }
+  lo = rlo;
+
+  /* Return 0 in case of overflow.  */
+  if (lo > off && hi > 1)
+    return 0;
+
+  return lo - off;
+}
+
+/* Convert a raw (stored in a buffer) VMS time to a unix time.  */
+
+time_t
+vms_rawtime_to_time_t (unsigned char *buf)
+{
+  unsigned int hi = bfd_getl32 (buf + 4);
+  unsigned int lo = bfd_getl32 (buf + 0);
+
+  return vms_time_to_time_t (hi, lo);
 }

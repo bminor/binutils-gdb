@@ -536,8 +536,8 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 /* Append the relative pathname for a member of the thin archive
    to the pathname of the directory containing the archive.  */
 
-static char *
-append_relative_path (bfd *arch, char *elt_name)
+char *
+_bfd_append_relative_path (bfd *arch, char *elt_name)
 {
   const char *arch_name = arch->filename;
   const char *base_name = lbasename (arch_name);
@@ -591,7 +591,7 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
       /* This is a proxy entry for an external file.  */
       if (! IS_ABSOLUTE_PATH (filename))
         {
-          filename = append_relative_path (archive, filename);
+          filename = _bfd_append_relative_path (archive, filename);
           if (filename == NULL)
             return NULL;
         }

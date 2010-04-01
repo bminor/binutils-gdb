@@ -23,6 +23,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include <time.h>
+
 #undef vms
 #ifndef VMS_H
 #define VMS_H
@@ -479,6 +481,10 @@ extern int _bfd_vms_write_tbt (bfd *abfd, int objtype);
 
 extern int _bfd_vms_get_object_record (bfd *abfd);
 extern int _bfd_vms_get_first_record (bfd *abfd);
+
+extern char *vms_get_module_name (const char *filename, bfd_boolean);
+extern time_t vms_time_to_time_t (unsigned int hi, unsigned int lo);
+extern time_t vms_rawtime_to_time_t (unsigned char *buf);
 
 /* vms-hdr.c.  */
 

@@ -393,6 +393,7 @@ BFD32_BACKENDS = \
 	versados.lo \
 	vms-gsd.lo \
 	vms-hdr.lo \
+	vms-lib.lo \
 	vms-misc.lo \
 	vms-tir.lo \
 	vms.lo \
@@ -577,6 +578,7 @@ BFD32_BACKENDS_CFILES = \
 	versados.c \
 	vms-gsd.c \
 	vms-hdr.c \
+	vms-lib.c \
 	vms-misc.c \
 	vms-tir.c \
 	vms.c \

@@ -142,6 +142,8 @@ bfd_boolean _bfd_add_bfd_to_archive_cache
   (bfd *, file_ptr, bfd *);
 bfd_boolean _bfd_generic_mkarchive
   (bfd *abfd);
+char *_bfd_append_relative_path
+  (bfd *arch, char *elt_name);
 const bfd_target *bfd_generic_archive_p
   (bfd *abfd);
 bfd_boolean bfd_slurp_armap
@@ -355,6 +357,30 @@ extern bfd_boolean _bfd_archive_bsd44_construct_extended_name_table
   bfd_generic_stat_arch_elt
 #define _bfd_archive_bsd44_update_armap_timestamp \
   _bfd_archive_bsd_update_armap_timestamp
+
+/* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get VMS style
+   archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_vms_lib).  Some of them
+   are irrelevant and never called, so defined as NULL.  */
+
+extern bfd_boolean _bfd_vms_lib_write_archive_contents (bfd *arch);
+#define _bfd_vms_lib_slurp_armap NULL
+#define _bfd_vms_lib_slurp_extended_name_table NULL
+#define _bfd_vms_lib_construct_extended_name_table NULL
+#define _bfd_vms_lib_truncate_arname NULL
+#define _bfd_vms_lib_write_armap NULL
+#define _bfd_vms_lib_read_ar_hdr NULL
+#define _bfd_vms_lib_write_ar_hdr NULL
+extern bfd *_bfd_vms_lib_openr_next_archived_file (bfd *, bfd *);
+extern bfd *_bfd_vms_lib_get_elt_at_index (bfd *, symindex);
+extern int _bfd_vms_lib_generic_stat_arch_elt (bfd *, struct stat *);
+#define _bfd_vms_lib_update_armap_timestamp bfd_true
+
+/* Extra routines for VMS style archives.  */
+
+extern symindex _bfd_vms_lib_find_symbol (bfd *, const char *);
+extern bfd *_bfd_vms_lib_get_imagelib_file (bfd *);
+extern const bfd_target *_bfd_vms_lib_alpha_archive_p (bfd *abfd);
+extern bfd_boolean _bfd_vms_lib_mkarchive (bfd *abfd);
 
 /* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol
    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */

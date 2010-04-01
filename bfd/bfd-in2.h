@@ -5119,6 +5119,10 @@ struct bfd
 
   /* Set if this is a thin archive.  */
   unsigned int is_thin_archive : 1;
+
+  /* Set if only required symbols should be added in the link hash table for
+     this object.  Used by VMS linkers.  */
+  unsigned int selective_search : 1;
 };
 
 typedef enum bfd_error

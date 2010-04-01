@@ -237,43 +237,9 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
   /* Create module name from filename.  */
   if (bfd_get_filename (abfd) != 0)
     {
-      /* Strip path and suffix information.  */
-      char *fname, *fout, *fptr;
-
-      fptr = bfd_get_filename (abfd);
-      fname = strdup (fptr);
-
-      /* Strip VMS path.  */
-      fout = strrchr (fname, ']');
-      if (fout == NULL)
-	fout = strchr (fname, ':');
-      if (fout != NULL)
-	fout++;
-      else
-	fout = fname;
-
-      /* Strip UNIX path.  */
-      fptr = strrchr (fout, '/');
-      if (fptr != NULL)
-	fout = fptr + 1;
-
-      /* Strip suffix.  */
-      fptr = strrchr (fout, '.');
-      if (fptr != 0)
-	*fptr = 0;
-
-      /* Convert to upper case and truncate at 31 characters.
-         (VMS object file format restricts module name length to 31).  */
-      fptr = fout;
-      while (*fptr != 0)
-	{
-	  *fptr = TOUPPER (*fptr);
-	  fptr++;
-	  if (*fptr == ';' || (fptr - fout) >= 31)
-	    *fptr = 0;
-	}
-      _bfd_vms_output_counted (abfd, fout);
-      free (fname);
+      char *module = vms_get_module_name (bfd_get_filename (abfd), TRUE);
+      _bfd_vms_output_counted (abfd, module);
+      free (module);
     }
   else
     _bfd_vms_output_counted (abfd, "NONAME");

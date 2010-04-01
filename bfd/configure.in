@@ -919,7 +919,8 @@ do
     vax1knetbsd_vec)		tb="$tb vax1knetbsd.lo aout32.lo" ;;
     vaxbsd_vec)			tb="$tb vaxbsd.lo aout32.lo" ;;
     versados_vec)		tb="$tb versados.lo" ;;
-    vms_alpha_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo"; target_size=64 ;;
+    vms_alpha_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo vms-lib.lo"; target_size=64 ;;
+    vms_lib_txt_vec)		tb="$tb vms-lib.lo vms-misc.lo" ;;
     vms_vax_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo" ;;
     w65_vec)			tb="$tb coff-w65.lo reloc16.lo" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.lo" ;;
