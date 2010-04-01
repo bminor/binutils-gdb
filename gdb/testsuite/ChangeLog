@@ -1,3 +1,9 @@
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.trace/collection.exp (gdb_collect_args_test)
+	(gdb_collect_argarray_test): XFAIL the tests that assume the
+	argarray argument's elements are collected.
+
 2010-03-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-bad-parameter-type.exp,

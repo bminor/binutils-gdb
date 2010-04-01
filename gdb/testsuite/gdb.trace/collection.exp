@@ -166,15 +166,30 @@ proc gdb_collect_args_test { myargs msg } {
 	    "collect $msg: collected arg struct member double"
 
     # array arg as one of several args (near end of list)
+
+    # It isn't clear why is the test assuming the array's elements are
+    # collected.  In C, an array as function parameters is a special
+    # case; it's just a pointer into the caller's array, and as such,
+    # that's what normally the debug info describes.  Maybe this was
+    # originaly written for a compiler where array parameters were
+    # really described as arrays in debug info.
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[0\]" \
 	    "\\$\[0-9\]+ = 111$cr" \
 	    "collect $msg: collected argarray #0"
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[1\]" \
 	    "\\$\[0-9\]+ = 112$cr" \
 	    "collect $msg: collected argarray #1"
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[2\]" \
 	    "\\$\[0-9\]+ = 113$cr" \
 	    "collect $msg: collected argarray #2"
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[3\]" \
 	    "\\$\[0-9\]+ = 114$cr" \
 	    "collect $msg: collected argarray #3"
@@ -237,15 +252,30 @@ proc gdb_collect_argarray_test { myargs msg } {
     run_trace_experiment $msg argarray_test_func
 
     # array arg as only argument
+
+    # It isn't clear why is the test assuming the array's elements are
+    # collected.  In C, an array as function parameters is a special
+    # case; it's just a pointer into the caller's array, and as such,
+    # that's what normally the debug info describes.  Maybe this was
+    # originaly written for a compiler where array parameters were
+    # really described as arrays in debug info.
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[0\]" \
 	    "\\$\[0-9\]+ = 111$cr" \
 	    "collect $msg: collected argarray #0"
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[1\]" \
 	    "\\$\[0-9\]+ = 112$cr" \
 	    "collect $msg: collected argarray #1"
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[2\]" \
 	    "\\$\[0-9\]+ = 113$cr" \
 	    "collect $msg: collected argarray #2"
+
+    setup_xfail "*-*-*"
     gdb_test "print argarray\[3\]" \
 	    "\\$\[0-9\]+ = 114$cr" \
 	    "collect $msg: collected argarray #3"
