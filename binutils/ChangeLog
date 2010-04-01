@@ -7,6 +7,11 @@
 	(display_debug_lines_raw, display_debug_lines_decoded): Handle
 	li_version == 4.
 
+2010-03-30  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Define.
+	* Makefile.in: Regenerate.
+
 2010-03-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* MAINTAINERS: Add self as TI C6X maintainer.
