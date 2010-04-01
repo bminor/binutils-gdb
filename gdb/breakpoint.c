@@ -388,13 +388,11 @@ VEC(bp_location_p) *moribund_locations = NULL;
 
 static int breakpoint_count;
 
-/* If the last command to create a breakpoint created multiple
-   breakpoints, this holds the start and end breakpoint numbers.  */
-static int multi_start;
-static int multi_end;
-/* True if the last breakpoint set was part of a group set with a
-   single command, e.g., "rbreak".  */
-static int last_was_multi;
+/* The value of `breakpoint_count' before the last command that
+   created breakpoints.  If the last (break-like) command created more
+   than one breakpoint, then the difference between BREAKPOINT_COUNT
+   and PREV_BREAKPOINT_COUNT is more than one.  */
+static int prev_breakpoint_count;
 
 /* Number of last tracepoint made.  */
 
@@ -412,29 +410,31 @@ breakpoint_enabled (struct breakpoint *b)
 static void
 set_breakpoint_count (int num)
 {
+  prev_breakpoint_count = breakpoint_count;
   breakpoint_count = num;
-  last_was_multi = 0;
   set_internalvar_integer (lookup_internalvar ("bpnum"), num);
 }
 
+/* Used by `start_rbreak_breakpoints' below, to record the current
+   breakpoint count before "rbreak" creates any breakpoint.  */
+static int rbreak_start_breakpoint_count;
+
 /* Called at the start an "rbreak" command to record the first
    breakpoint made.  */
+
 void
 start_rbreak_breakpoints (void)
 {
-  multi_start = breakpoint_count + 1;
+  rbreak_start_breakpoint_count = breakpoint_count;
 }
 
 /* Called at the end of an "rbreak" command to record the last
    breakpoint made.  */
+
 void
 end_rbreak_breakpoints (void)
 {
-  if (breakpoint_count >= multi_start)
-    {
-      multi_end = breakpoint_count;
-      last_was_multi = 1;
-    }
+  prev_breakpoint_count = rbreak_start_breakpoint_count;
 }
 
 /* Used in run_command to zero the hit count when a new run starts. */
@@ -894,9 +894,14 @@ struct commands_info
 {
   /* True if the command was typed at a tty.  */
   int from_tty;
+
+  /* The breakpoint range spec.  */
+  char *arg;
+
   /* Non-NULL if the body of the commands are being read from this
      already-parsed command.  */
   struct command_line *control;
+
   /* The command lines read from the user, or NULL if they have not
      yet been read.  */
   struct counted_command_line *cmd;
@@ -917,12 +922,23 @@ do_map_commands_command (struct breakpoint *b, void *data)
       if (info->control != NULL)
 	l = copy_command_lines (info->control->body_list[0]);
       else
+	{
+	  struct cleanup *old_chain;
+	  char *str;
 
-	l = read_command_lines (_("Type commands for all specified breakpoints"),
-				info->from_tty, 1,
-				(breakpoint_is_tracepoint (b)
-				 ? check_tracepoint_command : 0),
-				b);
+	  str = xstrprintf (_("Type commands for breakpoint(s) %s, one per line."),
+			    info->arg);
+
+	  old_chain = make_cleanup (xfree, str);
+
+	  l = read_command_lines (str,
+				  info->from_tty, 1,
+				  (breakpoint_is_tracepoint (b)
+				   ? check_tracepoint_command : 0),
+				  b);
+
+	  do_cleanups (old_chain);
+	}
 
       info->cmd = alloc_counted_command_line (l);
     }
@@ -955,16 +971,27 @@ commands_command_1 (char *arg, int from_tty, struct command_line *control)
 
   if (arg == NULL || !*arg)
     {
-      if (last_was_multi)
-	arg = xstrprintf ("%d-%d", multi_start, multi_end);
+      if (breakpoint_count - prev_breakpoint_count > 1)
+	arg = xstrprintf ("%d-%d", prev_breakpoint_count + 1, breakpoint_count);
       else if (breakpoint_count > 0)
 	arg = xstrprintf ("%d", breakpoint_count);
+      else
+	{
+	  /* So that we don't try to free the incoming non-NULL
+	     argument in the cleanup below.  Mapping breakpoint
+	     numbers will fail in this case.  */
+	  arg = NULL;
+	}
     }
   else
     /* The command loop has some static state, so we need to preserve
        our argument.  */
     arg = xstrdup (arg);
-  make_cleanup (xfree, arg);
+
+  if (arg != NULL)
+    make_cleanup (xfree, arg);
+
+  info.arg = arg;
 
   map_breakpoint_numbers (arg, do_map_commands_command, &info);
 
@@ -7239,7 +7266,7 @@ create_breakpoint (struct gdbarch *gdbarch,
   int not_found = 0;
   enum bptype type_wanted;
   int task = 0;
-  int first_bp_set = breakpoint_count + 1;
+  int prev_bkpt_count = breakpoint_count;
 
   sals.sals = NULL;
   sals.nelts = 0;
@@ -7399,9 +7426,7 @@ create_breakpoint (struct gdbarch *gdbarch,
     {
       warning (_("Multiple breakpoints were set.\n"
 		 "Use the \"delete\" command to delete unwanted breakpoints."));
-      multi_start = first_bp_set;
-      multi_end = breakpoint_count;
-      last_was_multi = 1;
+      prev_breakpoint_count = prev_bkpt_count;
     }
 
   /* That's it.  Discard the cleanups for data inserted into the

@@ -4343,8 +4343,9 @@ watchpoint, or catchpoint set (not to the breakpoint most recently
 encountered).  If the most recent breakpoints were set with a single
 command, then the @code{commands} will apply to all the breakpoints
 set by that command.  This applies to breakpoints set by
-@code{rbreak}, and also breakpoints set with @code{break} that have
-multiple locations.
+@code{rbreak}, and also applies when a single @code{break} command
+creates multiple breakpoints (@pxref{Ambiguous Expressions,,Ambiguous
+Expressions}).
 @end table
 
 Pressing @key{RET} as a means of repeating the last @value{GDBN} command is

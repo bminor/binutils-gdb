@@ -1,5 +1,22 @@
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (multi_start, multi_end, last_was_multi): Delete.
+	(prev_breakpoint_count): New.
+	(set_breakpoint_count): Adjust.
+	(rbreak_start_breakpoint_count): New.
+	(start_rbreak_breakpoints): Adjust.
+	(end_rbreak_breakpoints): Adjust.
+	(struct commands_info) <arg>: New field.
+	(do_map_commands_command): Tweak output to include breakpoint spec
+	range.
+	(commands_command_1): Adjust.  Avoid setting an xfree cleanup if
+	ARG was empty on entry.  Set INFO's arg.
+	(create_breakpoint): Adjust.
+
+	* NEWS: Clarify `commands' changes.
+
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* tracepoint.c: Include stack.h.
 	(struct add_local_symbols_data): New.
 	(do_collect_symbol): New.

@@ -1,5 +1,10 @@
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.base/commands.exp: Adjust.
+	* gdb.cp/extern-c.exp: Adjust.
+
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/collection.c (local_test_func): Define a local struct,
 	and instanciate it.
 

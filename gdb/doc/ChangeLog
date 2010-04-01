@@ -1,3 +1,8 @@
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Break Commands): Clarify `commands' changes, and
+	add cross reference.
+
 2010-03-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (TUI Commands): Mention that in some cases, these
