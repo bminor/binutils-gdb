@@ -431,6 +431,8 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
   struct process_info *proc = current_process ();
   switch (type)
     {
+    case '0':
+      return set_gdb_breakpoint_at (addr);
     case '2':
     case '3':
     case '4':
@@ -448,6 +450,8 @@ x86_remove_point (char type, CORE_ADDR addr, int len)
   struct process_info *proc = current_process ();
   switch (type)
     {
+    case '0':
+      return delete_gdb_breakpoint_at (addr);
     case '2':
     case '3':
     case '4':

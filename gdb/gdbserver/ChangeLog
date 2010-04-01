@@ -1,3 +1,61 @@
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_wait_1): Avoid setting need_step_over is
+	there's a GDB breakpoint at stop_pc.  Always report a trap to GDB
+	if we could tell there's a GDB breakpoint at stop_pc.
+	(need_step_over_p): Don't do a step over if we find a GDB
+	breakpoint at the resume PC.
+
+	* mem-break.c (struct raw_breakpoint): New.
+	(enum bkpt_type): New type `gdb_breakpoint'.
+	(struct breakpoint): Delete the `PC', `old_data' and `inserted'
+	fields.  New field `raw'.
+	(find_raw_breakpoint_at): New.
+	(set_raw_breakpoint_at): Handle refcounting.  Create a raw
+	breakpoint instead.
+	(set_breakpoint_at): Adjust.
+	(delete_raw_breakpoint): New.
+	(release_breakpoint): New.
+	(delete_breakpoint): Rename to...
+	(delete_breakpoint_1): ... this.  Add proc parameter.  Use
+	release_breakpoint.  Return ENOENT.
+	(delete_breakpoint): Reimplement.
+	(find_breakpoint_at): Delete.
+	(find_gdb_breakpoint_at): New.
+	(delete_breakpoint_at): Delete.
+	(set_gdb_breakpoint_at): New.
+	(delete_gdb_breakpoint_at): New.
+	(gdb_breakpoint_here): New.
+	(set_reinsert_breakpoint): Use release_breakpoint.
+	(uninsert_breakpoint): Rename to ...
+	(uninsert_raw_breakpoint): ... this.
+	(uninsert_breakpoints_at): Adjust to handle raw breakpoints.
+	(reinsert_raw_breakpoint): Change parameter type to
+	raw_breakpoint.
+	(reinsert_breakpoints_at): Adjust to handle raw breakpoints
+	instead.
+	(check_breakpoints): Adjust.  Use release_breakpoint.
+	(breakpoint_here): Rewrite using find_raw_breakpoint_at.
+	(breakpoint_inserted_here): Ditto.
+	(check_mem_read): Adjust to iterate over raw breakpoints instead.
+	Don't trust the breakpoint's shadow if it is not inserted.
+	(check_mem_write): Adjust to iterate over raw breakpoints instead.
+	(delete_all_breakpoints): Adjust.
+	(free_all_breakpoints): Mark all breakpoints as uninserted, and
+	use delete_breakpoint_1.
+
+	* mem-break.h (breakpoints_supported): Delete declaration.
+	(set_gdb_breakpoint_at): Declare.
+	(gdb_breakpoint_here): Declare.
+	(delete_breakpoint_at): Delete.
+	(delete_gdb_breakpoint_at): Declare.
+
+	* server.h (struct raw_breakpoint): Forward declare.
+	(struct process_info): New field `raw_breakpoints'.
+
+	* linux-x86-low.c (x86_insert_point, x86_remote_point): Handle Z0
+	breakpoints.
+
 2010-03-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (status_pending_p_callback): Fix comment.

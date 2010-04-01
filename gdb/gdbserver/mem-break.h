@@ -25,9 +25,10 @@
 /* Breakpoints are opaque.  */
 struct breakpoint;
 
-/* Returns TRUE if breakpoints are supported on this target.  */
+/* Create a new GDB breakpoint at WHERE.  Returns -1 if breakpoints
+   are not supported on this target, 0 otherwise.  */
 
-int breakpoints_supported (void);
+int set_gdb_breakpoint_at (CORE_ADDR where);
 
 /* Returns TRUE if there's any breakpoint at ADDR in our tables,
    inserted, or not.  */
@@ -38,6 +39,10 @@ int breakpoint_here (CORE_ADDR addr);
 
 int breakpoint_inserted_here (CORE_ADDR addr);
 
+/* Returns TRUE if there's a GDB breakpoint set at ADDR.  */
+
+int gdb_breakpoint_here (CORE_ADDR where);
+
 /* Create a new breakpoint at WHERE, and call HANDLER when
    it is hit.  HANDLER should return 1 if the breakpoint
    should be deleted, 0 otherwise.  */
@@ -45,10 +50,10 @@ int breakpoint_inserted_here (CORE_ADDR addr);
 struct breakpoint *set_breakpoint_at (CORE_ADDR where,
 				      int (*handler) (CORE_ADDR));
 
-/* Delete a breakpoint previously inserted at ADDR with
-   set_breakpoint_at.  */
+/* Delete a GDB breakpoint previously inserted at ADDR with
+   set_gdb_breakpoint_at.  */
 
-void delete_breakpoint_at (CORE_ADDR addr);
+int delete_gdb_breakpoint_at (CORE_ADDR addr);
 
 /* Set a reinsert breakpoint at STOP_AT.  */
 

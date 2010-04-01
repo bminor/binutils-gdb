@@ -191,6 +191,7 @@ struct dll_info
 
 struct sym_cache;
 struct breakpoint;
+struct raw_breakpoint;
 struct process_info_private;
 
 struct process_info
@@ -208,6 +209,9 @@ struct process_info
 
   /* The list of memory breakpoints.  */
   struct breakpoint *breakpoints;
+
+  /* The list of raw memory breakpoints.  */
+  struct raw_breakpoint *raw_breakpoints;
 
   /* Private target data.  */
   struct process_info_private *private;

@@ -1740,7 +1740,8 @@ retry:
 	  if (debug_threads)
 	    fprintf (stderr, "Hit a gdbserver breakpoint.\n");
 
-	  event_child->need_step_over = 1;
+	  if (breakpoint_here (event_child->stop_pc))
+	    event_child->need_step_over = 1;
 	}
     }
   else
@@ -1755,11 +1756,18 @@ retry:
 
   /* Check If GDB would be interested in this event.  If GDB wanted
      this thread to single step, we always want to report the SIGTRAP,
-     and let GDB handle it.  */
+     and let GDB handle it.  Watchpoints should always be reported.
+     So should signals we can't explain.  A SIGTRAP we can't explain
+     could be a GDB breakpoint --- we may or not support Z0
+     breakpoints.  If we do, we're be able to handle GDB breakpoints
+     on top of internal breakpoints, by handling the internal
+     breakpoint and still reporting the event to GDB.  If we don't,
+     we're out of luck, GDB won't see the breakpoint hit.  */
   report_to_gdb = (!maybe_internal_trap
 		   || event_child->last_resume_kind == resume_step
 		   || event_child->stopped_by_watchpoint
-		   || (!step_over_finished && !bp_explains_trap));
+		   || (!step_over_finished && !bp_explains_trap)
+		   || gdb_breakpoint_here (event_child->stop_pc));
 
   /* We found no reason GDB would want us to stop.  We either hit one
      of our own breakpoints, or finished an internal step GDB
@@ -1801,6 +1809,8 @@ retry:
 	fprintf (stderr, "GDB wanted to single-step, reporting event.\n");
       if (event_child->stopped_by_watchpoint)
 	fprintf (stderr, "Stopped by watchpoint.\n");
+      if (gdb_breakpoint_here (event_child->stop_pc))
+	fprintf (stderr, "Stopped by GDB breakpoint.\n");
       if (debug_threads)
 	fprintf (stderr, "Hit a non-gdbserver trap event.\n");
     }
@@ -2401,21 +2411,37 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
   saved_inferior = current_inferior;
   current_inferior = get_lwp_thread (lwp);
 
-  /* We only step over our breakpoints.  */
+  /* We can only step over breakpoints we know about.  */
   if (breakpoint_here (pc))
     {
-      if (debug_threads)
-	fprintf (stderr,
-		 "Need step over [LWP %ld]? yes, found breakpoint at 0x%s\n",
-		 lwpid_of (lwp), paddress (pc));
+      /* Don't step over a breakpoint that GDB expects to hit
+	 though.  */
+      if (gdb_breakpoint_here (pc))
+	{
+	  if (debug_threads)
+	    fprintf (stderr,
+		     "Need step over [LWP %ld]? yes, but found"
+		     " GDB breakpoint at 0x%s; skipping step over\n",
+		     lwpid_of (lwp), paddress (pc));
 
-      /* We've found an lwp that needs stepping over --- return 1 so
-	 that find_inferior stops looking.  */
-      current_inferior = saved_inferior;
+	  current_inferior = saved_inferior;
+	  return 0;
+	}
+      else
+	{
+	  if (debug_threads)
+	    fprintf (stderr,
+		     "Need step over [LWP %ld]? yes, found breakpoint at 0x%s\n",
+		     lwpid_of (lwp), paddress (pc));
 
-      /* If the step over is cancelled, this is set again.  */
-      lwp->need_step_over = 0;
-      return 1;
+	  /* We've found an lwp that needs stepping over --- return 1 so
+	     that find_inferior stops looking.  */
+	  current_inferior = saved_inferior;
+
+	  /* If the step over is cancelled, this is set again.  */
+	  lwp->need_step_over = 0;
+	  return 1;
+	}
     }
 
   current_inferior = saved_inferior;
