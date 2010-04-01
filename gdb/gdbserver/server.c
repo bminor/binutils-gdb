@@ -858,6 +858,18 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (strcmp ("qSymbol::", own_buf) == 0)
     {
+      /* GDB is suggesting new symbols have been loaded.  This may
+	 mean a new shared library has been detected as loaded, so
+	 take the opportunity to check if breakpoints we think are
+	 inserted, still are.  Note that it isn't guaranteed that
+	 we'll see this when a shared library is loaded, and nor will
+	 we see this for unloads (although breakpoints in unloaded
+	 libraries shouldn't trigger), as GDB may not find symbols for
+	 the library at all.  We also re-validate breakpoints when we
+	 see a second GDB breakpoint for the same address, and or when
+	 we access breakpoint shadows.  */
+      validate_breakpoints ();
+
       if (target_running () && the_target->look_up_symbols != NULL)
 	(*the_target->look_up_symbols) ();
 

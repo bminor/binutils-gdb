@@ -65,6 +65,10 @@ struct raw_breakpoint
   /* Non-zero if this breakpoint is currently inserted in the
      inferior.  */
   int inserted;
+
+  /* Non-zero if this breakpoint is currently disabled because we no
+     longer detect it as inserted.  */
+  int shlib_disabled;
 };
 
 /* The type of a breakpoint.  */
@@ -326,6 +330,24 @@ set_gdb_breakpoint_at (CORE_ADDR where)
   if (breakpoint_data == NULL)
     return 1;
 
+  /* If we see GDB inserting a second breakpoint at the same address,
+     then the first breakpoint must have disappeared due to a shared
+     library unload.  On targets where the shared libraries are
+     handled by userspace, like SVR4, for example, GDBserver can't
+     tell if a library was loaded or unloaded.  Since we refcount
+     breakpoints, if we didn't do this, we'd just increase the
+     refcount of the previous breakpoint at this address, but the trap
+     was not planted in the inferior anymore, thus the breakpoint
+     would never be hit.  */
+  bp = find_gdb_breakpoint_at (where);
+  if (bp != NULL)
+    {
+      delete_gdb_breakpoint_at (where);
+
+      /* Might as well validate all other breakpoints.  */
+      validate_breakpoints ();
+    }
+
   bp = set_breakpoint_at (where, NULL);
   if (bp == NULL)
     return -1;
@@ -537,12 +559,70 @@ breakpoint_inserted_here (CORE_ADDR addr)
   return (bp != NULL && bp->inserted);
 }
 
+static int
+validate_inserted_breakpoint (struct raw_breakpoint *bp)
+{
+  unsigned char *buf;
+  int err;
+
+  gdb_assert (bp->inserted);
+
+  buf = alloca (breakpoint_len);
+  err = (*the_target->read_memory) (bp->pc, buf, breakpoint_len);
+  if (err || memcmp (buf, breakpoint_data, breakpoint_len) != 0)
+    {
+      /* Tag it as gone.  */
+      bp->inserted = 0;
+      bp->shlib_disabled = 1;
+      return 0;
+    }
+
+  return 1;
+}
+
+static void
+delete_disabled_breakpoints (void)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp, *next;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = next)
+    {
+      next = bp->next;
+      if (bp->raw->shlib_disabled)
+	delete_breakpoint_1 (proc, bp);
+    }
+}
+
+/* Check if breakpoints we inserted still appear to be inserted.  They
+   may disappear due to a shared library unload, and worse, a new
+   shared library may be reloaded at the same address as the
+   previously unloaded one.  If that happens, we should make sure that
+   the shadow memory of the old breakpoints isn't used when reading or
+   writing memory.  */
+
+void
+validate_breakpoints (void)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    {
+      if (bp->raw->inserted)
+	validate_inserted_breakpoint (bp->raw);
+    }
+
+  delete_disabled_breakpoints ();
+}
+
 void
 check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp = proc->raw_breakpoints;
   CORE_ADDR mem_end = mem_addr + mem_len;
+  int disabled_one = 0;
 
   for (; bp != NULL; bp = bp->next)
     {
@@ -568,8 +648,16 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
       buf_offset = start - mem_addr;
 
       if (bp->inserted)
-	memcpy (buf + buf_offset, bp->old_data + copy_offset, copy_len);
+	{
+	  if (validate_inserted_breakpoint (bp))
+	    memcpy (buf + buf_offset, bp->old_data + copy_offset, copy_len);
+	  else
+	    disabled_one = 1;
+	}
     }
+
+  if (disabled_one)
+    delete_disabled_breakpoints ();
 }
 
 void
@@ -578,6 +666,7 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp = proc->raw_breakpoints;
   CORE_ADDR mem_end = mem_addr + mem_len;
+  int disabled_one = 0;
 
   for (; bp != NULL; bp = bp->next)
     {
@@ -604,8 +693,16 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 
       memcpy (bp->old_data + copy_offset, buf + buf_offset, copy_len);
       if (bp->inserted)
-	memcpy (buf + buf_offset, breakpoint_data + copy_offset, copy_len);
+	{
+	  if (validate_inserted_breakpoint (bp))
+	    memcpy (buf + buf_offset, breakpoint_data + copy_offset, copy_len);
+	  else
+	    disabled_one = 1;
+	}
     }
+
+  if (disabled_one)
+    delete_disabled_breakpoints ();
 }
 
 /* Delete all breakpoints, and un-insert them from the inferior.  */

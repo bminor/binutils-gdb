@@ -104,4 +104,8 @@ void delete_all_breakpoints (void);
 
 void free_all_breakpoints (struct process_info *proc);
 
+/* Check if breakpoints still seem to be inserted in the inferior.  */
+
+void validate_breakpoints (void);
+
 #endif /* MEM_BREAK_H */

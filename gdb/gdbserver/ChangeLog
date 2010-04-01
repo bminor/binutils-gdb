@@ -1,5 +1,22 @@
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* mem-break.c (struct raw_breakpoint): New field shlib_disabled.
+	(set_gdb_breakpoint_at): If GDB is inserting a breakpoint on top
+	of another, then delete the previous, and validate all
+	breakpoints.
+	(validate_inserted_breakpoint): New.
+	(delete_disabled_breakpoints): New.
+	(validate_breakpoints): New.
+	(check_mem_read): Validate breakpoints before trusting their
+	shadow.  Delete disabled breakpoints.
+	(check_mem_write): Validate breakpoints before trusting they
+	should be inserted.  Delete disabled breakpoints.
+	* mem-break.h (validate_breakpoints):
+	* server.c (handle_query): Validate breakpoints when we see a
+	qSymbol query.
+
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.c (linux_wait_1): Avoid setting need_step_over is
 	there's a GDB breakpoint at stop_pc.  Always report a trap to GDB
 	if we could tell there's a GDB breakpoint at stop_pc.
