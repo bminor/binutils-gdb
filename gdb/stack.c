@@ -1455,17 +1455,16 @@ backtrace_full_command (char *arg, int from_tty)
 }
 
 
-/* Print the local variables of a block B active in FRAME on STREAM.
-   Return 1 if any variables were printed; 0 otherwise.  */
+/* Iterate over the local variables of a block B, calling CB with
+   CB_DATA.  */
 
-static int
-print_block_frame_locals (struct block *b, struct frame_info *frame,
-			  int num_tabs, struct ui_file *stream)
+static void
+iterate_over_block_locals (struct block *b,
+			   iterate_over_block_arg_local_vars_cb cb,
+			   void *cb_data)
 {
   struct dict_iterator iter;
   struct symbol *sym;
-  int values_printed = 0;
-  int j;
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
@@ -1477,8 +1476,7 @@ print_block_frame_locals (struct block *b, struct frame_info *frame,
 	case LOC_COMPUTED:
 	  if (SYMBOL_IS_ARGUMENT (sym))
 	    break;
-	  values_printed = 1;
-	  print_variable_and_value (NULL, sym, frame, stream, 4 * num_tabs);
+	  (*cb) (SYMBOL_PRINT_NAME (sym), sym, cb_data);
 	  break;
 
 	default:
@@ -1486,8 +1484,6 @@ print_block_frame_locals (struct block *b, struct frame_info *frame,
 	  break;
 	}
     }
-
-  return values_printed;
 }
 
 
@@ -1539,39 +1535,75 @@ print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
 }
 #endif
 
-/* Print on STREAM all the local variables in frame FRAME, including
-   all the blocks active in that frame at its current PC.
+/* Iterate over all the local variables in block B, including all its
+   superblocks, stopping when the top-level block is reached.  */
 
-   Returns 1 if the job was done, or 0 if nothing was printed because
-   we have no info on the function running in FRAME.  */
+void
+iterate_over_block_local_vars (struct block *block,
+			       iterate_over_block_arg_local_vars_cb cb,
+			       void *cb_data)
+{
+  while (block)
+    {
+      iterate_over_block_locals (block, cb, cb_data);
+      /* After handling the function's top-level block, stop.  Don't
+	 continue to its superblock, the block of per-file
+	 symbols.  */
+      if (BLOCK_FUNCTION (block))
+	break;
+      block = BLOCK_SUPERBLOCK (block);
+    }
+}
+
+/* Data to be passed around in the calls to the locals and args
+   iterators.  */
+
+struct print_variable_and_value_data
+{
+  struct frame_info *frame;
+  int num_tabs;
+  struct ui_file *stream;
+  int values_printed;
+};
+
+/* The callback for the locals and args iterators  */
+
+static void
+do_print_variable_and_value (const char *print_name,
+			     struct symbol *sym,
+			     void *cb_data)
+{
+  struct print_variable_and_value_data *p = cb_data;
+
+  print_variable_and_value (print_name, sym,
+			    p->frame, p->stream, p->num_tabs);
+  p->values_printed = 1;
+}
 
 static void
 print_frame_local_vars (struct frame_info *frame, int num_tabs,
 			struct ui_file *stream)
 {
-  struct block *block = get_frame_block (frame, 0);
-  int values_printed = 0;
+  struct print_variable_and_value_data cb_data;
+  struct block *block;
 
+  block = get_frame_block (frame, 0);
   if (block == 0)
     {
       fprintf_filtered (stream, "No symbol table info available.\n");
       return;
     }
 
-  while (block)
-    {
-      if (print_block_frame_locals (block, frame, num_tabs, stream))
-	values_printed = 1;
-      /* After handling the function's top-level block, stop.  Don't
-         continue to its superblock, the block of per-file symbols.
-         Also do not continue to the containing function of an inlined
-         function.  */
-      if (BLOCK_FUNCTION (block))
-	break;
-      block = BLOCK_SUPERBLOCK (block);
-    }
+  cb_data.frame = frame;
+  cb_data.num_tabs = 4 * num_tabs;
+  cb_data.stream = stream;
+  cb_data.values_printed = 0;
 
-  if (!values_printed)
+  iterate_over_block_local_vars (block,
+				 do_print_variable_and_value,
+				 &cb_data);
+
+  if (!cb_data.values_printed)
     fprintf_filtered (stream, _("No locals.\n"));
 }
 
@@ -1668,29 +1700,23 @@ catch_info (char *ignore, int from_tty)
                           0, gdb_stdout);
 }
 
-static void
-print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
+/* Iterate over all the argument variables in block B.
+
+   Returns 1 if any argument was walked; 0 otherwise.  */
+
+void
+iterate_over_block_arg_vars (struct block *b,
+			     iterate_over_block_arg_local_vars_cb cb,
+			     void *cb_data)
 {
-  struct symbol *func = get_frame_function (frame);
-  struct block *b;
   struct dict_iterator iter;
   struct symbol *sym, *sym2;
-  int values_printed = 0;
 
-  if (func == 0)
-    {
-      fprintf_filtered (stream, _("No symbol table info available.\n"));
-      return;
-    }
-
-  b = SYMBOL_BLOCK_VALUE (func);
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       /* Don't worry about things which aren't arguments.  */
       if (SYMBOL_IS_ARGUMENT (sym))
 	{
-	  values_printed = 1;
-
 	  /* We have to look up the symbol because arguments can have
 	     two entries (one a parameter, one a local) and the one we
 	     want is the local, which lookup_symbol will find for us.
@@ -1704,12 +1730,33 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 
 	  sym2 = lookup_symbol (SYMBOL_LINKAGE_NAME (sym),
 				b, VAR_DOMAIN, NULL);
-	  print_variable_and_value (SYMBOL_PRINT_NAME (sym), sym2,
-				    frame, stream, 0);
+	  (*cb) (SYMBOL_PRINT_NAME (sym), sym2, cb_data);
 	}
     }
+}
 
-  if (!values_printed)
+static void
+print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
+{
+  struct print_variable_and_value_data cb_data;
+  struct symbol *func;
+
+  func = get_frame_function (frame);
+  if (func == NULL)
+    {
+      fprintf_filtered (stream, _("No symbol table info available.\n"));
+      return;
+    }
+
+  cb_data.frame = frame;
+  cb_data.num_tabs = 0;
+  cb_data.stream = gdb_stdout;
+  cb_data.values_printed = 0;
+
+  iterate_over_block_arg_vars (SYMBOL_BLOCK_VALUE (func),
+			       do_print_variable_and_value, &cb_data);
+
+  if (!cb_data.values_printed)
     fprintf_filtered (stream, _("No arguments.\n"));
 }
 

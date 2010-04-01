@@ -1,5 +1,10 @@
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.trace/collection.c (local_test_func): Define a local struct,
+	and instanciate it.
+
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/collection.exp (gdb_collect_args_test)
 	(gdb_collect_argarray_test): XFAIL the tests that assume the
 	argarray argument's elements are collected.

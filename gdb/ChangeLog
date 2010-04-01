@@ -1,3 +1,26 @@
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* tracepoint.c: Include stack.h.
+	(struct add_local_symbols_data): New.
+	(do_collect_symbol): New.
+	(add_local_symbols): Rewrite using iterate_over_block_arg_vars and
+	iterate_over_block_local_vars.
+	* stack.c (print_block_frame_locals): Rewrite as ...
+	(iterate_over_block_locals): ... this.  Take a callback function
+	pointer and generic data pointer, and call that instead of
+	print_variable_and_value.
+	(struct print_variable_and_value_data): New.
+	(do_print_variable_and_value): New.
+	(iterate_over_block_local_vars): New, abstracted out from
+	print_frame_local_vars.
+	(print_frame_local_vars): Rewrite using
+	iterate_over_block_local_vars.
+	(iterate_over_block_arg_vars): New, abstracted out from
+	print_frame_arg_vars.
+	(print_frame_arg_vars): Rewrite using iterate_over_block_arg_vars.
+	* stack.h (iterate_over_block_arg_local_vars_cb): New typedef.
+	(iterate_over_block_arg_vars, iterate_over_block_local_vars): Declare.
+
 2010-03-31  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (thumb_get_next_pc_raw): Correctly detect TBH

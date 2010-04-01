@@ -93,6 +93,7 @@ int local_test_func ()			/* test collecting locals */
   test_struct locst;
   int         locar[4];
   int         i;
+  struct localstruct {} locdefst;
 
   locst.memberc  = 15;
   locst.memberi  = 16;

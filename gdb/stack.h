@@ -27,4 +27,16 @@ void select_frame_command (char *level_exp, int from_tty);
 void find_frame_funname (struct frame_info *frame, char **funname,
 			 enum language *funlang);
 
+typedef void (*iterate_over_block_arg_local_vars_cb) (const char *symbol_print_name,
+						      struct symbol *sym,
+						      void *cb_data);
+
+void iterate_over_block_arg_vars (struct block *block,
+				  iterate_over_block_arg_local_vars_cb cb,
+				  void *cb_data);
+
+void iterate_over_block_local_vars (struct block *block,
+				    iterate_over_block_arg_local_vars_cb cb,
+				    void *cb_data);
+
 #endif /* #ifndef STACK_H */

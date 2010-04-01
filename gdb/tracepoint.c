@@ -44,6 +44,7 @@
 #include "objfiles.h"
 #include "filenames.h"
 #include "gdbthread.h"
+#include "stack.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -1008,40 +1009,77 @@ collect_symbol (struct collection_list *collect,
     }
 }
 
+/* Data to be passed around in the calls to the locals and args
+   iterators.  */
+
+struct add_local_symbols_data
+{
+  struct collection_list *collect;
+  struct gdbarch *gdbarch;
+  CORE_ADDR pc;
+  long frame_regno;
+  long frame_offset;
+  int count;
+};
+
+/* The callback for the locals and args iterators  */
+
+static void
+do_collect_symbol (const char *print_name,
+		   struct symbol *sym,
+		   void *cb_data)
+{
+  struct add_local_symbols_data *p = cb_data;
+
+  collect_symbol (p->collect, sym, p->gdbarch, p->frame_regno,
+		  p->frame_offset, p->pc);
+  p->count++;
+}
+
 /* Add all locals (or args) symbols to collection list */
 static void
 add_local_symbols (struct collection_list *collect,
 		   struct gdbarch *gdbarch, CORE_ADDR pc,
 		   long frame_regno, long frame_offset, int type)
 {
-  struct symbol *sym;
   struct block *block;
-  struct dict_iterator iter;
-  int count = 0;
+  struct add_local_symbols_data cb_data;
 
-  block = block_for_pc (pc);
-  while (block != 0)
+  cb_data.collect = collect;
+  cb_data.gdbarch = gdbarch;
+  cb_data.pc = pc;
+  cb_data.frame_regno = frame_regno;
+  cb_data.frame_offset = frame_offset;
+  cb_data.count = 0;
+
+  if (type == 'L')
     {
-      QUIT;			/* allow user to bail out with ^C */
-      ALL_BLOCK_SYMBOLS (block, iter, sym)
+      block = block_for_pc (pc);
+      if (block == NULL)
 	{
-	  if (SYMBOL_IS_ARGUMENT (sym)
-	      ? type == 'A'	/* collecting Arguments */
-	      : type == 'L')	/* collecting Locals */
-	    {
-	      count++;
-	      collect_symbol (collect, sym, gdbarch,
-			      frame_regno, frame_offset, pc);
-	    }
+	  warning (_("Can't collect locals; "
+		     "no symbol table info available.\n"));
+	  return;
 	}
-      if (BLOCK_FUNCTION (block))
-	break;
-      else
-	block = BLOCK_SUPERBLOCK (block);
+
+      iterate_over_block_local_vars (block, do_collect_symbol, &cb_data);
+      if (cb_data.count == 0)
+	warning (_("No locals found in scope."));
     }
-  if (count == 0)
-    warning (_("No %s found in scope."), 
-	     type == 'L' ? "locals" : "args");
+  else
+    {
+      pc = get_pc_function_start (pc);
+      block = block_for_pc (pc);
+      if (block == NULL)
+	{
+	  warning (_("Can't collect args; no symbol table info available.\n"));
+	  return;
+	}
+
+      iterate_over_block_arg_vars (block, do_collect_symbol, &cb_data);
+      if (cb_data.count == 0)
+	warning (_("No args found in scope."));
+    }
 }
 
 /* worker function */
