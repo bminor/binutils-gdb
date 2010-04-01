@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright 2005, 2006, 2007, 2008, 2009
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -1154,14 +1154,14 @@ read_and_display_attr_value (unsigned long attribute,
 	  uvalue = byte_get (data, pointer_size);
 	  data += pointer_size;
 	}
-      else if (dwarf_version == 3)
+      else if (dwarf_version == 3 || dwarf_version == 4)
 	{
 	  uvalue = byte_get (data, offset_size);
 	  data += offset_size;
 	}
       else
 	{
-	  error (_("Internal error: DWARF version is not 2 or 3.\n"));
+	  error (_("Internal error: DWARF version is not 2, 3 or 4.\n"));
 	}
       break;
 
@@ -1171,8 +1171,13 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     case DW_FORM_strp:
+    case DW_FORM_sec_offset:
       uvalue = byte_get (data, offset_size);
       data += offset_size;
+      break;
+
+    case DW_FORM_flag_present:
+      uvalue = 1;
       break;
 
     case DW_FORM_ref1:
@@ -1233,10 +1238,12 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_data4:
     case DW_FORM_addr:
+    case DW_FORM_sec_offset:
       if (!do_loc)
 	printf (" 0x%lx", uvalue);
       break;
 
+    case DW_FORM_flag_present:
     case DW_FORM_flag:
     case DW_FORM_data1:
     case DW_FORM_data2:
@@ -1272,6 +1279,7 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     case DW_FORM_block:
+    case DW_FORM_exprloc:
       uvalue = read_leb128 (data, & bytes_read, 0);
       block_start = data + bytes_read;
       if (do_loc)
@@ -1352,7 +1360,9 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_segment:
 	case DW_AT_static_link:
 	case DW_AT_use_location:
-    	  if (form == DW_FORM_data4 || form == DW_FORM_data8)
+    	  if (form == DW_FORM_data4
+	      || form == DW_FORM_data8
+	      || form == DW_FORM_sec_offset)
 	    {
 	      /* Process location list.  */
 	      unsigned int lmax = debug_info_p->max_loc_offsets;
@@ -1381,7 +1391,9 @@ read_and_display_attr_value (unsigned long attribute,
 	  break;
 
 	case DW_AT_ranges:
-	  if (form == DW_FORM_data4 || form == DW_FORM_data8)
+	  if (form == DW_FORM_data4
+	      || form == DW_FORM_data8
+	      || form == DW_FORM_sec_offset)
 	    {
 	      /* Process range list.  */
 	      unsigned int lmax = debug_info_p->max_range_lists;
@@ -1591,7 +1603,9 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_segment:
     case DW_AT_static_link:
     case DW_AT_use_location:
-      if (form == DW_FORM_data4 || form == DW_FORM_data8)
+      if (form == DW_FORM_data4
+	  || form == DW_FORM_data8
+	  || form == DW_FORM_sec_offset)
 	printf (_("(location list)"));
       /* Fall through.  */
     case DW_AT_allocated:
@@ -2038,7 +2052,9 @@ process_debug_info (struct dwarf_section *section,
       tags = hdrptr;
       start += compunit.cu_length + initial_length_size;
 
-      if (compunit.cu_version != 2 && compunit.cu_version != 3)
+      if (compunit.cu_version != 2
+	  && compunit.cu_version != 3
+	  && compunit.cu_version != 4)
 	{
 	  warn (_("CU at offset %lx contains corrupt or unsupported version number: %d.\n"),
 		cu_offset, compunit.cu_version);
@@ -2269,9 +2285,11 @@ display_debug_lines_raw (struct dwarf_section *section,
       /* Check its version number.  */
       linfo.li_version = byte_get (hdrptr, 2);
       hdrptr += 2;
-      if (linfo.li_version != 2 && linfo.li_version != 3)
+      if (linfo.li_version != 2
+	  && linfo.li_version != 3
+	  && linfo.li_version != 4)
 	{
-	  warn (_("Only DWARF version 2 and 3 line info is currently supported.\n"));
+	  warn (_("Only DWARF version 2, 3 and 4 line info is currently supported.\n"));
 	  return 0;
 	}
 
@@ -2557,9 +2575,11 @@ display_debug_lines_decoded (struct dwarf_section *section,
       /* Get this CU's Line Number Block version number.  */
       linfo.li_version = byte_get (hdrptr, 2);
       hdrptr += 2;
-      if (linfo.li_version != 2 && linfo.li_version != 3)
+      if (linfo.li_version != 2
+	  && linfo.li_version != 3
+	  && linfo.li_version != 4)
         {
-          warn (_("Only DWARF version 2 and 3 line info is currently "
+          warn (_("Only DWARF version 2, 3 and 4 line info is currently "
                 "supported.\n"));
           return 0;
         }
