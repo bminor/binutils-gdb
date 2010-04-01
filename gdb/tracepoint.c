@@ -1576,6 +1576,13 @@ trace_start_command (char *args, int from_tty)
 {
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
+  if (current_trace_status ()->running)
+    {
+      if (from_tty
+	  && !query (_("A trace is running already.  Start a new run? ")))
+	error (_("New trace run not started."));
+    }
+
   start_tracing ();
 }
 
@@ -1583,6 +1590,9 @@ trace_start_command (char *args, int from_tty)
 static void
 trace_stop_command (char *args, int from_tty)
 {
+  if (!current_trace_status ()->running)
+    error (_("Trace is not running."));
+
   stop_tracing ();
 }
 
