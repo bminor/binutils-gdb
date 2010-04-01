@@ -511,7 +511,10 @@ get_stop_pc (struct lwp_info *lwp)
 
   stop_pc = get_pc (lwp);
 
-  if (WSTOPSIG (lwp->last_status) == SIGTRAP && !lwp->stepping)
+  if (WSTOPSIG (lwp->last_status) == SIGTRAP
+      && !lwp->stepping
+      && !lwp->stopped_by_watchpoint
+      && lwp->last_status >> 16 == 0)
     stop_pc -= the_low_target.decr_pc_after_break;
 
   if (debug_threads)
@@ -1128,15 +1131,6 @@ cancel_breakpoint (struct lwp_info *lwp)
   if (!supports_breakpoints ())
     return 0;
 
-  if (lwp->stepping)
-    {
-      if (debug_threads)
-	fprintf (stderr,
-		 "CB: [%s] is stepping\n",
-		 target_pid_to_str (lwp->head.id));
-      return 0;
-    }
-
   regcache = get_thread_regcache (get_lwp_thread (lwp), 1);
 
   /* breakpoint_at reads from current inferior.  */
@@ -1499,6 +1493,8 @@ cancel_breakpoints_callback (struct inferior_list_entry *entry, void *data)
       && lp->status_pending_p
       && WIFSTOPPED (lp->status_pending)
       && WSTOPSIG (lp->status_pending) == SIGTRAP
+      && !lp->stepping
+      && !lp->stopped_by_watchpoint
       && cancel_breakpoint (lp))
     /* Throw away the SIGTRAP.  */
     lp->status_pending_p = 0;

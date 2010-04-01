@@ -1,5 +1,12 @@
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-low.c (get_stop_pc): Don't adjust the PC if stopped with
+	an extended waitstatus, or by a watchpoint.
+	(cancel_breakpoints_callback): Don't cancel a breakpoint if the
+	thread was stepping or has been stopped by a watchpoint.
+
+2010-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* mem-break.c (struct raw_breakpoint): New field shlib_disabled.
 	(set_gdb_breakpoint_at): If GDB is inserting a breakpoint on top
 	of another, then delete the previous, and validate all
