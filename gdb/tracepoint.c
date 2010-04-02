@@ -2370,54 +2370,21 @@ replace_comma (void *data)
   *comma = ',';
 }
 
-/* tdump command */
+
+/* Helper for trace_dump_command.  Dump the action list starting at
+   ACTION.  STEPPING_ACTIONS is true if we're iterating over the
+   actions of the body of a while-stepping action.  STEPPING_FRAME is
+   set if the current traceframe was determined to be a while-stepping
+   traceframe.  */
+
 static void
-trace_dump_command (char *args, int from_tty)
+trace_dump_actions (struct command_line *action,
+		    int stepping_actions, int stepping_frame,
+		    int from_tty)
 {
-  struct regcache *regcache;
-  struct gdbarch *gdbarch;
-  struct breakpoint *t;
-  struct command_line *action;
   char *action_exp, *next_comma;
-  struct cleanup *old_cleanups;
-  int stepping_actions = 0;
-  int stepping_frame = 0;
-  struct bp_location *loc;
 
-  if (tracepoint_number == -1)
-    {
-      warning (_("No current trace frame."));
-      return;
-    }
-
-  t = get_tracepoint (tracepoint_number);
-
-  if (t == NULL)
-    error (_("No known tracepoint matches 'current' tracepoint #%d."),
-	   tracepoint_number);
-
-  old_cleanups = make_cleanup (null_cleanup, NULL);
-
-  printf_filtered ("Data collected at tracepoint %d, trace frame %d:\n",
-		   tracepoint_number, traceframe_number);
-
-  /* The current frame is a trap frame if the frame PC is equal
-     to the tracepoint PC.  If not, then the current frame was
-     collected during single-stepping.  */
-
-  regcache = get_current_regcache ();
-  gdbarch = get_regcache_arch (regcache);
-
-  /* If the traceframe's address matches any of the tracepoint's
-     locations, assume it is a direct hit rather than a while-stepping
-     frame.  (FIXME this is not reliable, should record each frame's
-     type.)  */
-  stepping_frame = 1;
-  for (loc = t->loc; loc; loc = loc->next)
-    if (loc->address == regcache_read_pc (regcache))
-      stepping_frame = 0;
-
-  for (action = breakpoint_commands (t); action; action = action->next)
+  for (; action != NULL; action = action->next)
     {
       struct cmd_list_element *cmd;
 
@@ -2437,9 +2404,13 @@ trace_dump_command (char *args, int from_tty)
 	error (_("Bad action list item: %s"), action_exp);
 
       if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
-	stepping_actions = 1;
-      else if (cmd_cfunc_eq (cmd, end_actions_pseudocommand))
-	stepping_actions = 0;
+	{
+	  int i;
+
+	  for (i = 0; i < action->body_count; ++i)
+	    trace_dump_actions (action->body_list[i],
+				1, stepping_frame, from_tty);
+	}
       else if (cmd_cfunc_eq (cmd, collect_pseudocommand))
 	{
 	  /* Display the collected data.
@@ -2485,7 +2456,49 @@ trace_dump_command (char *args, int from_tty)
 	    }
 	}
     }
-  discard_cleanups (old_cleanups);
+}
+
+/* The tdump command.  */
+
+static void
+trace_dump_command (char *args, int from_tty)
+{
+  struct regcache *regcache;
+  struct breakpoint *t;
+  int stepping_frame = 0;
+  struct bp_location *loc;
+
+  if (tracepoint_number == -1)
+    {
+      warning (_("No current trace frame."));
+      return;
+    }
+
+  t = get_tracepoint (tracepoint_number);
+
+  if (t == NULL)
+    error (_("No known tracepoint matches 'current' tracepoint #%d."),
+	   tracepoint_number);
+
+  printf_filtered ("Data collected at tracepoint %d, trace frame %d:\n",
+		   tracepoint_number, traceframe_number);
+
+  /* The current frame is a trap frame if the frame PC is equal
+     to the tracepoint PC.  If not, then the current frame was
+     collected during single-stepping.  */
+
+  regcache = get_current_regcache ();
+
+  /* If the traceframe's address matches any of the tracepoint's
+     locations, assume it is a direct hit rather than a while-stepping
+     frame.  (FIXME this is not reliable, should record each frame's
+     type.)  */
+  stepping_frame = 1;
+  for (loc = t->loc; loc; loc = loc->next)
+    if (loc->address == regcache_read_pc (regcache))
+      stepping_frame = 0;
+
+  trace_dump_actions (breakpoint_commands (t), 0, stepping_frame, from_tty);
 }
 
 /* Encode a piece of a tracepoint's source-level definition in a form

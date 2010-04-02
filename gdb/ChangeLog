@@ -1,5 +1,12 @@
 2010-04-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* tracepoint.c (trace_dump_actions): New, factored out from
+	trace_dump_command, and adjusted to recurse into while-stepping's
+	action list.
+	(trace_dump_command): Use it.
+
+2010-04-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.h (struct counted_command_line): Moved definition to
 	breakpoint.c, and forward declare.
 	(breakpoint_commands): Declare.
