@@ -1,3 +1,8 @@
+2010-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (read_namespace_type): Use common "return set_die_type"
+	code form.
+
 2010-04-02  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (OT_DQUAD): New enum.

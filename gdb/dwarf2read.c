@@ -5637,9 +5637,7 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
   TYPE_NAME (type) = (char *) name;
   TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
-  set_die_type (die, type, cu);
-
-  return type;
+  return set_die_type (die, type, cu);
 }
 
 /* Read a C++ namespace.  */
