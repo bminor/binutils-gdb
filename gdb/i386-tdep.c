@@ -2883,6 +2883,7 @@ enum
   OT_WORD,
   OT_LONG,
   OT_QUAD,
+  OT_DQUAD,
 };
 
 /* i386 arith/logic operations */
@@ -3322,7 +3323,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   ir.dflag = 1;
   ir.override = -1;
   ir.popl_esp_hack = 0;
-  ir.regmap = gdbarch_tdep (gdbarch)->record_regmap;
+  ir.regmap = tdep->record_regmap;
   ir.gdbarch = gdbarch;
 
   if (record_debug > 1)
@@ -3440,7 +3441,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  return -1;
 	}
       ir.addr++;
-      opcode = (uint16_t) opcode8 | 0x0f00;
+      opcode = (uint32_t) opcode8 | 0x0f00;
       goto reswitch;
       break;
 
@@ -5103,7 +5104,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* XXX */
     case 0xcc:    /* int3 */
-      printf_unfiltered (_("Process record doesn't support instruction "
+      printf_unfiltered (_("Process record does not support instruction "
 			   "int3.\n"));
       ir.addr -= 1;
       goto no_support;
@@ -5124,15 +5125,15 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  }
 	ir.addr++;
 	if (interrupt != 0x80
-	    || gdbarch_tdep (gdbarch)->i386_intx80_record == NULL)
+	    || tdep->i386_intx80_record == NULL)
 	  {
-	    printf_unfiltered (_("Process record doesn't support "
+	    printf_unfiltered (_("Process record does not support "
 				 "instruction int 0x%02x.\n"),
 			       interrupt);
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
-	ret = gdbarch_tdep (gdbarch)->i386_intx80_record (ir.regcache);
+	ret = tdep->i386_intx80_record (ir.regcache);
 	if (ret)
 	  return ret;
       }
@@ -5140,7 +5141,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* XXX */
     case 0xce:    /* into */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
 			   "instruction into.\n"));
       ir.addr -= 1;
       goto no_support;
@@ -5151,7 +5152,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     case 0x62:    /* bound */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
 			   "instruction bound.\n"));
       ir.addr -= 1;
       goto no_support;
@@ -5187,21 +5188,21 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     case 0x0f30:    /* wrmsr */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
 			   "instruction wrmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
     case 0x0f32:    /* rdmsr */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
 			   "instruction rdmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
     case 0x0f31:    /* rdtsc */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
 			   "instruction rdtsc.\n"));
       ir.addr -= 2;
       goto no_support;
@@ -5215,21 +5216,21 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
             ir.addr -= 2;
             goto no_support;
           }
-	if (gdbarch_tdep (gdbarch)->i386_sysenter_record == NULL)
+	if (tdep->i386_sysenter_record == NULL)
 	  {
-	    printf_unfiltered (_("Process record doesn't support "
+	    printf_unfiltered (_("Process record does not support "
 				 "instruction sysenter.\n"));
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
-	ret = gdbarch_tdep (gdbarch)->i386_sysenter_record (ir.regcache);
+	ret = tdep->i386_sysenter_record (ir.regcache);
 	if (ret)
 	  return ret;
       }
       break;
 
     case 0x0f35:    /* sysexit */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
 			   "instruction sysexit.\n"));
       ir.addr -= 2;
       goto no_support;
@@ -5238,21 +5239,21 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0x0f05:    /* syscall */
       {
 	int ret;
-	if (gdbarch_tdep (gdbarch)->i386_syscall_record == NULL)
+	if (tdep->i386_syscall_record == NULL)
 	  {
-	    printf_unfiltered (_("Process record doesn't support "
+	    printf_unfiltered (_("Process record does not support "
 				 "instruction syscall.\n"));
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
-	ret = gdbarch_tdep (gdbarch)->i386_syscall_record (ir.regcache);
+	ret = tdep->i386_syscall_record (ir.regcache);
 	if (ret)
 	  return ret;
       }
       break;
 
     case 0x0f07:    /* sysret */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
                            "instruction sysret.\n"));
       ir.addr -= 2;
       goto no_support;
@@ -5266,7 +5267,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     case 0xf4:    /* hlt */
-      printf_unfiltered (_("Process record doesn't support "
+      printf_unfiltered (_("Process record does not support "
 			   "instruction hlt.\n"));
       ir.addr -= 1;
       goto no_support;
@@ -5562,14 +5563,816 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* MMX/SSE/SSE2/PNI support */
-      /* XXX */
+    /* MMX 3DNow! SSE SSE2 SSE3 SSSE3 SSE4 */
+
+    case 0x0f0d:    /* 3DNow! prefetch */
+      break;
+
+    case 0x0f0e:    /* 3DNow! femms */
+    case 0x0f77:    /* emms */
+      if (i386_fpc_regnum_p (gdbarch, I387_FTAG_REGNUM(tdep)))
+        goto no_support;
+      record_arch_list_add_reg (ir.regcache, I387_FTAG_REGNUM(tdep));
+      break;
+
+    case 0x0f0f:    /* 3DNow! data */
+      if (i386_record_modrm (&ir))
+	return -1;
+      if (target_read_memory (ir.addr, &opcode8, 1))
+        {
+	  printf_unfiltered (_("Process record: error reading memory at "
+	                       "addr %s len = 1.\n"),
+	                     paddress (gdbarch, ir.addr));
+          return -1;
+        }
+      ir.addr++;
+      switch (opcode8)
+        {
+        case 0x0c:    /* 3DNow! pi2fw */
+        case 0x0d:    /* 3DNow! pi2fd */
+        case 0x1c:    /* 3DNow! pf2iw */
+        case 0x1d:    /* 3DNow! pf2id */
+        case 0x8a:    /* 3DNow! pfnacc */
+        case 0x8e:    /* 3DNow! pfpnacc */
+        case 0x90:    /* 3DNow! pfcmpge */
+        case 0x94:    /* 3DNow! pfmin */
+        case 0x96:    /* 3DNow! pfrcp */
+        case 0x97:    /* 3DNow! pfrsqrt */
+        case 0x9a:    /* 3DNow! pfsub */
+        case 0x9e:    /* 3DNow! pfadd */
+        case 0xa0:    /* 3DNow! pfcmpgt */
+        case 0xa4:    /* 3DNow! pfmax */
+        case 0xa6:    /* 3DNow! pfrcpit1 */
+        case 0xa7:    /* 3DNow! pfrsqit1 */
+        case 0xaa:    /* 3DNow! pfsubr */
+        case 0xae:    /* 3DNow! pfacc */
+        case 0xb0:    /* 3DNow! pfcmpeq */
+        case 0xb4:    /* 3DNow! pfmul */
+        case 0xb6:    /* 3DNow! pfrcpit2 */
+        case 0xb7:    /* 3DNow! pmulhrw */
+        case 0xbb:    /* 3DNow! pswapd */
+        case 0xbf:    /* 3DNow! pavgusb */
+          if (!i386_mmx_regnum_p (gdbarch, I387_MM0_REGNUM (tdep) + ir.reg))
+            goto no_support_3dnow_data;
+          record_arch_list_add_reg (ir.regcache, ir.reg);
+          break;
+
+        default:
+no_support_3dnow_data:
+          opcode = (opcode << 8) | opcode8;
+          goto no_support;
+          break;
+        }
+      break;
+
+    case 0x0faa:    /* rsm */
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RECX_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDX_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REBX_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REBP_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESI_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDI_REGNUM);
+      break;
+
+    case 0x0fae:
+      if (i386_record_modrm (&ir))
+	return -1;
+      switch(ir.reg)
+        {
+        case 0:    /* fxsave */
+          {
+            uint64_t tmpu64;
+
+            I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
+	    if (i386_record_lea_modrm_addr (&ir, &tmpu64))
+	      return -1;
+            if (record_arch_list_add_mem (tmpu64, 512))
+              return -1;
+          }
+          break;
+
+        case 1:    /* fxrstor */
+          {
+            int i;
+
+            I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
+
+            for (i = I387_MM0_REGNUM (tdep);
+                 i386_mmx_regnum_p (gdbarch, i); i++)
+              record_arch_list_add_reg (ir.regcache, i);
+
+            for (i = I387_XMM0_REGNUM (tdep);
+                 i386_sse_regnum_p (gdbarch, i); i++)
+              record_arch_list_add_reg (ir.regcache, i);
+
+            if (i386_mxcsr_regnum_p (gdbarch, I387_MXCSR_REGNUM(tdep)))
+              record_arch_list_add_reg (ir.regcache, I387_MXCSR_REGNUM(tdep));
+
+            for (i = I387_ST0_REGNUM (tdep);
+                 i386_fp_regnum_p (gdbarch, i); i++)
+              record_arch_list_add_reg (ir.regcache, i);
+
+            for (i = I387_FCTRL_REGNUM (tdep);
+                 i386_fpc_regnum_p (gdbarch, i); i++)
+              record_arch_list_add_reg (ir.regcache, i);
+          }
+          break;
+
+        case 2:    /* ldmxcsr */
+          if (!i386_mxcsr_regnum_p (gdbarch, I387_MXCSR_REGNUM(tdep)))
+            goto no_support;
+          record_arch_list_add_reg (ir.regcache, I387_MXCSR_REGNUM(tdep));
+          break;
+
+        case 3:    /* stmxcsr */
+          ir.ot = OT_LONG;
+          if (i386_record_lea_modrm (&ir))
+            return -1;
+          break;
+
+        case 5:    /* lfence */
+        case 6:    /* mfence */
+        case 7:    /* sfence clflush */
+          break;
+
+        default:
+          opcode = (opcode << 8) | ir.modrm;
+          goto no_support;
+          break;
+        }
+      break;
+
+    case 0x0fc3:    /* movnti */
+      ir.ot = (ir.dflag == 2) ? OT_QUAD : OT_LONG;
+      if (i386_record_modrm (&ir))
+	return -1;
+      if (ir.mod == 3)
+        goto no_support;
+      ir.reg |= rex_r;
+      if (i386_record_lea_modrm (&ir))
+        return -1;
+      break;
+
+    /* Add prefix to opcode.  */
+    case 0x0f10:
+    case 0x0f11:
+    case 0x0f12:
+    case 0x0f13:
+    case 0x0f14:
+    case 0x0f15:
+    case 0x0f16:
+    case 0x0f17:
+    case 0x0f28:
+    case 0x0f29:
+    case 0x0f2a:
+    case 0x0f2b:
+    case 0x0f2c:
+    case 0x0f2d:
+    case 0x0f2e:
+    case 0x0f2f:
+    case 0x0f38:
+    case 0x0f39:
+    case 0x0f3a:
+    case 0x0f50:
+    case 0x0f51:
+    case 0x0f52:
+    case 0x0f53:
+    case 0x0f54:
+    case 0x0f55:
+    case 0x0f56:
+    case 0x0f57:
+    case 0x0f58:
+    case 0x0f59:
+    case 0x0f5a:
+    case 0x0f5b:
+    case 0x0f5c:
+    case 0x0f5d:
+    case 0x0f5e:
+    case 0x0f5f:
+    case 0x0f60:
+    case 0x0f61:
+    case 0x0f62:
+    case 0x0f63:
+    case 0x0f64:
+    case 0x0f65:
+    case 0x0f66:
+    case 0x0f67:
+    case 0x0f68:
+    case 0x0f69:
+    case 0x0f6a:
+    case 0x0f6b:
+    case 0x0f6c:
+    case 0x0f6d:
+    case 0x0f6e:
+    case 0x0f6f:
+    case 0x0f70:
+    case 0x0f71:
+    case 0x0f72:
+    case 0x0f73:
+    case 0x0f74:
+    case 0x0f75:
+    case 0x0f76:
+    case 0x0f7c:
+    case 0x0f7d:
+    case 0x0f7e:
+    case 0x0f7f:
+    case 0x0fb8:
+    case 0x0fc2:
+    case 0x0fc4:
+    case 0x0fc5:
+    case 0x0fc6:
+    case 0x0fd0:
+    case 0x0fd1:
+    case 0x0fd2:
+    case 0x0fd3:
+    case 0x0fd4:
+    case 0x0fd5:
+    case 0x0fd6:
+    case 0x0fd7:
+    case 0x0fd8:
+    case 0x0fd9:
+    case 0x0fda:
+    case 0x0fdb:
+    case 0x0fdc:
+    case 0x0fdd:
+    case 0x0fde:
+    case 0x0fdf:
+    case 0x0fe0:
+    case 0x0fe1:
+    case 0x0fe2:
+    case 0x0fe3:
+    case 0x0fe4:
+    case 0x0fe5:
+    case 0x0fe6:
+    case 0x0fe7:
+    case 0x0fe8:
+    case 0x0fe9:
+    case 0x0fea:
+    case 0x0feb:
+    case 0x0fec:
+    case 0x0fed:
+    case 0x0fee:
+    case 0x0fef:
+    case 0x0ff0:
+    case 0x0ff1:
+    case 0x0ff2:
+    case 0x0ff3:
+    case 0x0ff4:
+    case 0x0ff5:
+    case 0x0ff6:
+    case 0x0ff7:
+    case 0x0ff8:
+    case 0x0ff9:
+    case 0x0ffa:
+    case 0x0ffb:
+    case 0x0ffc:
+    case 0x0ffd:
+    case 0x0ffe:
+      switch (prefixes)
+        {
+        case PREFIX_REPNZ:
+          opcode |= 0xf20000;
+          break;
+        case PREFIX_DATA:
+          opcode |= 0x660000;
+          break;
+        case PREFIX_REPZ:
+          opcode |= 0xf30000;
+          break;
+        }
+reswitch_prefix_add:
+      switch (opcode)
+        {
+        case 0x0f38:
+        case 0x660f38:
+        case 0xf20f38:
+        case 0x0f3a:
+        case 0x660f3a:
+          if (target_read_memory (ir.addr, &opcode8, 1))
+            {
+	      printf_unfiltered (_("Process record: error reading memory at "
+	                           "addr %s len = 1.\n"),
+	                         paddress (gdbarch, ir.addr));
+              return -1;
+            }
+          ir.addr++;
+          opcode = (uint32_t) opcode8 | opcode << 8;
+          goto reswitch_prefix_add;
+          break;
+
+        case 0x0f10:        /* movups */
+        case 0x660f10:      /* movupd */
+        case 0xf30f10:      /* movss */
+        case 0xf20f10:      /* movsd */
+        case 0x0f12:        /* movlps */
+        case 0x660f12:      /* movlpd */
+        case 0xf30f12:      /* movsldup */
+        case 0xf20f12:      /* movddup */
+        case 0x0f14:        /* unpcklps */
+        case 0x660f14:      /* unpcklpd */
+        case 0x0f15:        /* unpckhps */
+        case 0x660f15:      /* unpckhpd */
+        case 0x0f16:        /* movhps */
+        case 0x660f16:      /* movhpd */
+        case 0xf30f16:      /* movshdup */
+        case 0x0f28:        /* movaps */
+        case 0x660f28:      /* movapd */
+        case 0x0f2a:        /* cvtpi2ps */
+        case 0x660f2a:      /* cvtpi2pd */
+        case 0xf30f2a:      /* cvtsi2ss */
+        case 0xf20f2a:      /* cvtsi2sd */
+        case 0x0f2c:        /* cvttps2pi */
+        case 0x660f2c:      /* cvttpd2pi */
+        case 0x0f2d:        /* cvtps2pi */
+        case 0x660f2d:      /* cvtpd2pi */
+        case 0x660f3800:    /* pshufb */
+        case 0x660f3801:    /* phaddw */
+        case 0x660f3802:    /* phaddd */
+        case 0x660f3803:    /* phaddsw */
+        case 0x660f3804:    /* pmaddubsw */
+        case 0x660f3805:    /* phsubw */
+        case 0x660f3806:    /* phsubd */
+        case 0x660f3807:    /* phaddsw */
+        case 0x660f3808:    /* psignb */
+        case 0x660f3809:    /* psignw */
+        case 0x660f380a:    /* psignd */
+        case 0x660f380b:    /* pmulhrsw */
+        case 0x660f3810:    /* pblendvb */
+        case 0x660f3814:    /* blendvps */
+        case 0x660f3815:    /* blendvpd */
+        case 0x660f381c:    /* pabsb */
+        case 0x660f381d:    /* pabsw */
+        case 0x660f381e:    /* pabsd */
+        case 0x660f3820:    /* pmovsxbw */
+        case 0x660f3821:    /* pmovsxbd */
+        case 0x660f3822:    /* pmovsxbq */
+        case 0x660f3823:    /* pmovsxwd */
+        case 0x660f3824:    /* pmovsxwq */
+        case 0x660f3825:    /* pmovsxdq */
+        case 0x660f3828:    /* pmuldq */
+        case 0x660f3829:    /* pcmpeqq */
+        case 0x660f382a:    /* movntdqa */
+        case 0x660f3a08:    /* roundps */
+        case 0x660f3a09:    /* roundpd */
+        case 0x660f3a0a:    /* roundss */
+        case 0x660f3a0b:    /* roundsd */
+        case 0x660f3a0c:    /* blendps */
+        case 0x660f3a0d:    /* blendpd */
+        case 0x660f3a0e:    /* pblendw */
+        case 0x660f3a0f:    /* palignr */
+        case 0x660f3a20:    /* pinsrb */
+        case 0x660f3a21:    /* insertps */
+        case 0x660f3a22:    /* pinsrd pinsrq */
+        case 0x660f3a40:    /* dpps */
+        case 0x660f3a41:    /* dppd */
+        case 0x660f3a42:    /* mpsadbw */
+        case 0x660f3a60:    /* pcmpestrm */
+        case 0x660f3a61:    /* pcmpestri */
+        case 0x660f3a62:    /* pcmpistrm */
+        case 0x660f3a63:    /* pcmpistri */
+        case 0x0f51:        /* sqrtps */
+        case 0x660f51:      /* sqrtpd */
+        case 0xf20f51:      /* sqrtsd */
+        case 0xf30f51:      /* sqrtss */
+        case 0x0f52:        /* rsqrtps */
+        case 0xf30f52:      /* rsqrtss */
+        case 0x0f53:        /* rcpps */
+        case 0xf30f53:      /* rcpss */
+        case 0x0f54:        /* andps */
+        case 0x660f54:      /* andpd */
+        case 0x0f55:        /* andnps */
+        case 0x660f55:      /* andnpd */
+        case 0x0f56:        /* orps */
+        case 0x660f56:      /* orpd */
+        case 0x0f57:        /* xorps */
+        case 0x660f57:      /* xorpd */
+        case 0x0f58:        /* addps */
+        case 0x660f58:      /* addpd */
+        case 0xf20f58:      /* addsd */
+        case 0xf30f58:      /* addss */
+        case 0x0f59:        /* mulps */
+        case 0x660f59:      /* mulpd */
+        case 0xf20f59:      /* mulsd */
+        case 0xf30f59:      /* mulss */
+        case 0x0f5a:        /* cvtps2pd */
+        case 0x660f5a:      /* cvtpd2ps */
+        case 0xf20f5a:      /* cvtsd2ss */
+        case 0xf30f5a:      /* cvtss2sd */
+        case 0x0f5b:        /* cvtdq2ps */
+        case 0x660f5b:      /* cvtps2dq */
+        case 0xf30f5b:      /* cvttps2dq */
+        case 0x0f5c:        /* subps */
+        case 0x660f5c:      /* subpd */
+        case 0xf20f5c:      /* subsd */
+        case 0xf30f5c:      /* subss */
+        case 0x0f5d:        /* minps */
+        case 0x660f5d:      /* minpd */
+        case 0xf20f5d:      /* minsd */
+        case 0xf30f5d:      /* minss */
+        case 0x0f5e:        /* divps */
+        case 0x660f5e:      /* divpd */
+        case 0xf20f5e:      /* divsd */
+        case 0xf30f5e:      /* divss */
+        case 0x0f5f:        /* maxps */
+        case 0x660f5f:      /* maxpd */
+        case 0xf20f5f:      /* maxsd */
+        case 0xf30f5f:      /* maxss */
+        case 0x660f60:      /* punpcklbw */
+        case 0x660f61:      /* punpcklwd */
+        case 0x660f62:      /* punpckldq */
+        case 0x660f63:      /* packsswb */
+        case 0x660f64:      /* pcmpgtb */
+        case 0x660f65:      /* pcmpgtw */
+        case 0x660f66:      /* pcmpgtl */
+        case 0x660f67:      /* packuswb */
+        case 0x660f68:      /* punpckhbw */
+        case 0x660f69:      /* punpckhwd */
+        case 0x660f6a:      /* punpckhdq */
+        case 0x660f6b:      /* packssdw */
+        case 0x660f6c:      /* punpcklqdq */
+        case 0x660f6d:      /* punpckhqdq */
+        case 0x660f6e:      /* movd */
+        case 0x660f6f:      /* movdqa */
+        case 0xf30f6f:      /* movdqu */
+        case 0x660f70:      /* pshufd */
+        case 0xf20f70:      /* pshuflw */
+        case 0xf30f70:      /* pshufhw */
+        case 0x660f74:      /* pcmpeqb */
+        case 0x660f75:      /* pcmpeqw */
+        case 0x660f76:      /* pcmpeql */
+        case 0x660f7c:      /* haddpd */
+        case 0xf20f7c:      /* haddps */
+        case 0x660f7d:      /* hsubpd */
+        case 0xf20f7d:      /* hsubps */
+        case 0xf30f7e:      /* movq */
+        case 0x0fc2:        /* cmpps */
+        case 0x660fc2:      /* cmppd */
+        case 0xf20fc2:      /* cmpsd */
+        case 0xf30fc2:      /* cmpss */
+        case 0x660fc4:      /* pinsrw */
+        case 0x0fc6:        /* shufps */
+        case 0x660fc6:      /* shufpd */
+        case 0x660fd0:      /* addsubpd */
+        case 0xf20fd0:      /* addsubps */
+        case 0x660fd1:      /* psrlw */
+        case 0x660fd2:      /* psrld */
+        case 0x660fd3:      /* psrlq */
+        case 0x660fd4:      /* paddq */
+        case 0x660fd5:      /* pmullw */
+        case 0xf30fd6:      /* movq2dq */
+        case 0x660fd8:      /* psubusb */
+        case 0x660fd9:      /* psubusw */
+        case 0x660fda:      /* pminub */
+        case 0x660fdb:      /* pand */
+        case 0x660fdc:      /* paddusb */
+        case 0x660fdd:      /* paddusw */
+        case 0x660fde:      /* pmaxub */
+        case 0x660fdf:      /* pandn */
+        case 0x660fe0:      /* pavgb */
+        case 0x660fe1:      /* psraw */
+        case 0x660fe2:      /* psrad */
+        case 0x660fe3:      /* pavgw */
+        case 0x660fe4:      /* pmulhuw */
+        case 0x660fe5:      /* pmulhw */
+        case 0x660fe6:      /* cvttpd2dq */
+        case 0xf20fe6:      /* cvtpd2dq */
+        case 0xf30fe6:      /* cvtdq2pd */
+        case 0x660fe8:      /* psubsb */
+        case 0x660fe9:      /* psubsw */
+        case 0x660fea:      /* pminsw */
+        case 0x660feb:      /* por */
+        case 0x660fec:      /* paddsb */
+        case 0x660fed:      /* paddsw */
+        case 0x660fee:      /* pmaxsw */
+        case 0x660fef:      /* pxor */
+        case 0x660ff0:      /* lddqu */
+        case 0x660ff1:      /* psllw */
+        case 0x660ff2:      /* pslld */
+        case 0x660ff3:      /* psllq */
+        case 0x660ff4:      /* pmuludq */
+        case 0x660ff5:      /* pmaddwd */
+        case 0x660ff6:      /* psadbw */
+        case 0x660ff8:      /* psubb */
+        case 0x660ff9:      /* psubw */
+        case 0x660ffa:      /* psubl */
+        case 0x660ffb:      /* psubq */
+        case 0x660ffc:      /* paddb */
+        case 0x660ffd:      /* paddw */
+        case 0x660ffe:      /* paddl */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          ir.reg |= rex_r;
+          if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.reg))
+            goto no_support;
+          record_arch_list_add_reg (ir.regcache,
+                                    I387_XMM0_REGNUM (tdep) + ir.reg);
+          if ((opcode & 0xfffffffc) == 0x660f3a60)
+            I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
+          break;
+
+        case 0x0f11:        /* movups */
+        case 0x660f11:      /* movupd */
+        case 0xf30f11:      /* movss */
+        case 0xf20f11:      /* movsd */
+        case 0x0f13:        /* movlps */
+        case 0x660f13:      /* movlpd */
+        case 0x0f17:        /* movhps */
+        case 0x660f17:      /* movhpd */
+        case 0x0f29:        /* movaps */
+        case 0x660f29:      /* movapd */
+        case 0x660f3a14:    /* pextrb */
+        case 0x660f3a15:    /* pextrw */
+        case 0x660f3a16:    /* pextrd pextrq */
+        case 0x660f3a17:    /* extractps */
+        case 0x660f7f:      /* movdqa */
+        case 0xf30f7f:      /* movdqu */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          if (ir.mod == 3)
+            {
+              if (opcode == 0x0f13 || opcode == 0x660f13
+                  || opcode == 0x0f17 || opcode == 0x660f17)
+                goto no_support;
+              ir.rm |= ir.rex_b;
+              if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+                goto no_support;
+              record_arch_list_add_reg (ir.regcache,
+                                        I387_XMM0_REGNUM (tdep) + ir.rm);
+            }
+          else
+            {
+              switch (opcode)
+                {
+                  case 0x660f3a14:
+                    ir.ot = OT_BYTE;
+                    break;
+                  case 0x660f3a15:
+                    ir.ot = OT_WORD;
+                    break;
+                  case 0x660f3a16:
+                    ir.ot = OT_LONG;
+                    break;
+                  case 0x660f3a17:
+                    ir.ot = OT_QUAD;
+                    break;
+                  default:
+                    ir.ot = OT_DQUAD;
+                    break;
+                }
+              if (i386_record_lea_modrm (&ir))
+                return -1;
+            }
+          break;
+
+        case 0x0f2b:      /* movntps */
+        case 0x660f2b:    /* movntpd */
+        case 0x0fe7:      /* movntq */
+        case 0x660fe7:    /* movntdq */
+          if (ir.mod == 3)
+            goto no_support;
+          if (opcode == 0x0fe7)
+            ir.ot = OT_QUAD;
+          else
+            ir.ot = OT_DQUAD;
+          if (i386_record_lea_modrm (&ir))
+            return -1;
+          break;
+
+        case 0xf30f2c:      /* cvttss2si */
+        case 0xf20f2c:      /* cvttsd2si */
+        case 0xf30f2d:      /* cvtss2si */
+        case 0xf20f2d:      /* cvtsd2si */
+        case 0xf20f38f0:    /* crc32 */
+        case 0xf20f38f1:    /* crc32 */
+        case 0x0f50:        /* movmskps */
+        case 0x660f50:      /* movmskpd */
+        case 0x0fc5:        /* pextrw */
+        case 0x660fc5:      /* pextrw */
+        case 0x0fd7:        /* pmovmskb */
+        case 0x660fd7:      /* pmovmskb */
+          I386_RECORD_ARCH_LIST_ADD_REG (ir.reg | rex_r);
+          break;
+
+        case 0x0f3800:    /* pshufb */
+        case 0x0f3801:    /* phaddw */
+        case 0x0f3802:    /* phaddd */
+        case 0x0f3803:    /* phaddsw */
+        case 0x0f3804:    /* pmaddubsw */
+        case 0x0f3805:    /* phsubw */
+        case 0x0f3806:    /* phsubd */
+        case 0x0f3807:    /* phaddsw */
+        case 0x0f3808:    /* psignb */
+        case 0x0f3809:    /* psignw */
+        case 0x0f380a:    /* psignd */
+        case 0x0f380b:    /* pmulhrsw */
+        case 0x0f381c:    /* pabsb */
+        case 0x0f381d:    /* pabsw */
+        case 0x0f381e:    /* pabsd */
+        case 0x0f382b:    /* packusdw */
+        case 0x0f3830:    /* pmovzxbw */
+        case 0x0f3831:    /* pmovzxbd */
+        case 0x0f3832:    /* pmovzxbq */
+        case 0x0f3833:    /* pmovzxwd */
+        case 0x0f3834:    /* pmovzxwq */
+        case 0x0f3835:    /* pmovzxdq */
+        case 0x0f3837:    /* pcmpgtq */
+        case 0x0f3838:    /* pminsb */
+        case 0x0f3839:    /* pminsd */
+        case 0x0f383a:    /* pminuw */
+        case 0x0f383b:    /* pminud */
+        case 0x0f383c:    /* pmaxsb */
+        case 0x0f383d:    /* pmaxsd */
+        case 0x0f383e:    /* pmaxuw */
+        case 0x0f383f:    /* pmaxud */
+        case 0x0f3840:    /* pmulld */
+        case 0x0f3841:    /* phminposuw */
+        case 0x0f3a0f:    /* palignr */
+        case 0x0f60:      /* punpcklbw */
+        case 0x0f61:      /* punpcklwd */
+        case 0x0f62:      /* punpckldq */
+        case 0x0f63:      /* packsswb */
+        case 0x0f64:      /* pcmpgtb */
+        case 0x0f65:      /* pcmpgtw */
+        case 0x0f66:      /* pcmpgtl */
+        case 0x0f67:      /* packuswb */
+        case 0x0f68:      /* punpckhbw */
+        case 0x0f69:      /* punpckhwd */
+        case 0x0f6a:      /* punpckhdq */
+        case 0x0f6b:      /* packssdw */
+        case 0x0f6e:      /* movd */
+        case 0x0f6f:      /* movq */
+        case 0x0f70:      /* pshufw */
+        case 0x0f74:      /* pcmpeqb */
+        case 0x0f75:      /* pcmpeqw */
+        case 0x0f76:      /* pcmpeql */
+        case 0x0fc4:      /* pinsrw */
+        case 0x0fd1:      /* psrlw */
+        case 0x0fd2:      /* psrld */
+        case 0x0fd3:      /* psrlq */
+        case 0x0fd4:      /* paddq */
+        case 0x0fd5:      /* pmullw */
+        case 0xf20fd6:    /* movdq2q */
+        case 0x0fd8:      /* psubusb */
+        case 0x0fd9:      /* psubusw */
+        case 0x0fda:      /* pminub */
+        case 0x0fdb:      /* pand */
+        case 0x0fdc:      /* paddusb */
+        case 0x0fdd:      /* paddusw */
+        case 0x0fde:      /* pmaxub */
+        case 0x0fdf:      /* pandn */
+        case 0x0fe0:      /* pavgb */
+        case 0x0fe1:      /* psraw */
+        case 0x0fe2:      /* psrad */
+        case 0x0fe3:      /* pavgw */
+        case 0x0fe4:      /* pmulhuw */
+        case 0x0fe5:      /* pmulhw */
+        case 0x0fe8:      /* psubsb */
+        case 0x0fe9:      /* psubsw */
+        case 0x0fea:      /* pminsw */
+        case 0x0feb:      /* por */
+        case 0x0fec:      /* paddsb */
+        case 0x0fed:      /* paddsw */
+        case 0x0fee:      /* pmaxsw */
+        case 0x0fef:      /* pxor */
+        case 0x0ff1:      /* psllw */
+        case 0x0ff2:      /* pslld */
+        case 0x0ff3:      /* psllq */
+        case 0x0ff4:      /* pmuludq */
+        case 0x0ff5:      /* pmaddwd */
+        case 0x0ff6:      /* psadbw */
+        case 0x0ff8:      /* psubb */
+        case 0x0ff9:      /* psubw */
+        case 0x0ffa:      /* psubl */
+        case 0x0ffb:      /* psubq */
+        case 0x0ffc:      /* paddb */
+        case 0x0ffd:      /* paddw */
+        case 0x0ffe:      /* paddl */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          if (!i386_mmx_regnum_p (gdbarch, I387_MM0_REGNUM (tdep) + ir.reg))
+            goto no_support;
+          record_arch_list_add_reg (ir.regcache,
+                                    I387_MM0_REGNUM (tdep) + ir.reg);
+          break;
+
+        case 0x0f71:    /* psllw */
+        case 0x0f72:    /* pslld */
+        case 0x0f73:    /* psllq */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          if (!i386_mmx_regnum_p (gdbarch, I387_MM0_REGNUM (tdep) + ir.rm))
+            goto no_support;
+          record_arch_list_add_reg (ir.regcache,
+                                    I387_MM0_REGNUM (tdep) + ir.rm);
+          break;
+
+        case 0x660f71:    /* psllw */
+        case 0x660f72:    /* pslld */
+        case 0x660f73:    /* psllq */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          ir.rm |= ir.rex_b;
+          if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+            goto no_support;
+          record_arch_list_add_reg (ir.regcache,
+                                    I387_XMM0_REGNUM (tdep) + ir.rm);
+          break;
+
+        case 0x0f7e:      /* movd */
+        case 0x660f7e:    /* movd */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          if (ir.mod == 3)
+            I386_RECORD_ARCH_LIST_ADD_REG (ir.rm | ir.rex_b);
+          else
+            {
+              if (ir.dflag == 2)
+                ir.ot = OT_QUAD;
+              else
+                ir.ot = OT_LONG;
+              if (i386_record_lea_modrm (&ir))
+                return -1;
+            }
+          break;
+
+        case 0x0f7f:    /* movq */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          if (ir.mod == 3)
+            {
+              if (!i386_mmx_regnum_p (gdbarch, I387_MM0_REGNUM (tdep) + ir.rm))
+                goto no_support;
+              record_arch_list_add_reg (ir.regcache,
+                                        I387_MM0_REGNUM (tdep) + ir.rm);
+            }
+          else
+            {
+              ir.ot = OT_QUAD;
+              if (i386_record_lea_modrm (&ir))
+                return -1;
+            }
+          break;
+
+        case 0xf30fb8:    /* popcnt */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          I386_RECORD_ARCH_LIST_ADD_REG (ir.reg);
+          I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
+          break;
+
+        case 0x660fd6:    /* movq */
+          if (i386_record_modrm (&ir))
+	    return -1;
+          if (ir.mod == 3)
+            {
+              ir.rm |= ir.rex_b;
+              if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+                goto no_support;
+              record_arch_list_add_reg (ir.regcache,
+                                        I387_XMM0_REGNUM (tdep) + ir.rm);
+            }
+          else
+            {
+              ir.ot = OT_QUAD;
+              if (i386_record_lea_modrm (&ir))
+                return -1;
+            }
+          break;
+
+        case 0x660f3817:    /* ptest */
+        case 0x0f2e:        /* ucomiss */
+        case 0x660f2e:      /* ucomisd */
+        case 0x0f2f:        /* comiss */
+        case 0x660f2f:      /* comisd */
+          I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
+          break;
+
+        case 0x0ff7:    /* maskmovq */
+          regcache_raw_read_unsigned (ir.regcache,
+                                      ir.regmap[X86_RECORD_REDI_REGNUM],
+                                      &addr);
+          if (record_arch_list_add_mem (addr, 64))
+            return -1;
+          break;
+
+        case 0x660ff7:    /* maskmovdqu */
+          regcache_raw_read_unsigned (ir.regcache,
+                                      ir.regmap[X86_RECORD_REDI_REGNUM],
+                                      &addr);
+          if (record_arch_list_add_mem (addr, 128))
+            return -1;
+          break;
+
+        default:
+          goto no_support;
+          break;
+        }
+      break;
 
     default:
-      if (opcode > 0xff)
-	ir.addr -= 2;
-      else
-	ir.addr -= 1;
       goto no_support;
       break;
     }
@@ -5582,9 +6385,10 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   return 0;
 
  no_support:
-  printf_unfiltered (_("Process record doesn't support instruction 0x%02x "
-		       "at address %s.\n"),
-		     (unsigned int) (opcode), paddress (gdbarch, ir.addr));
+  printf_unfiltered (_("Process record does not support instruction 0x%02x "
+                       "at address %s.\n"),
+                     (unsigned int) (opcode),
+                     paddress (gdbarch, ir.orig_addr));
   return -1;
 }
 

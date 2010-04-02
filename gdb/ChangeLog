@@ -1,5 +1,11 @@
 2010-04-02  Hui Zhu  <teawater@gmail.com>
 
+	* i386-tdep.c (OT_DQUAD): New enum.
+	(i386_process_record): Add code for MMX, 3DNow!, SSE, SSE2,
+	SSE3, SSSE3 and SSE4.
+
+2010-04-02  Hui Zhu  <teawater@gmail.com>
+
 	* i386-tdep.c (i386_record_lea_modrm_addr): Remove useless
 	"*addr = 0".
 
