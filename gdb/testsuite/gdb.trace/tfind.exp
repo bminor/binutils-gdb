@@ -334,7 +334,7 @@ set timeout 60
 send_gdb "disassemble gdb_c_test\n"
 # look for disassembly of function label
 gdb_expect {
-    -re "<gdb_c_test(\.\[0-9\]+|)>:.*End of assembler dump.*$gdb_prompt $"      { pass "8.36: trace disassembly" }
+    -re "<(\.\[0-9\]+|)>:.*End of assembler dump.*$gdb_prompt $"      { pass "8.36: trace disassembly" }
     -re ".*$gdb_prompt $"                   { fail "8.36: trace disassembly" }
     timeout                       { fail "8.36: trace disassembly (timeout)" }
 }
