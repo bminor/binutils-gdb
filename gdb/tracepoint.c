@@ -1439,7 +1439,7 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
   gdbarch_virtual_frame_pointer (t->gdbarch,
 				 t->loc->address, &frame_reg, &frame_offset);
 
-  actions = t->commands->commands;
+  actions = breakpoint_commands (t);
 
   /* If there are default expressions to collect, make up a collect
      action and prepend to the action list to encode.  Note that since
@@ -1458,7 +1458,7 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
 
       default_collect_action = xmalloc (sizeof (struct command_line));
       make_cleanup (xfree, default_collect_action);
-      default_collect_action->next = t->commands->commands;
+      default_collect_action->next = actions;
       default_collect_action->line = line;
       actions = default_collect_action;
     }
@@ -2417,7 +2417,7 @@ trace_dump_command (char *args, int from_tty)
     if (loc->address == regcache_read_pc (regcache))
       stepping_frame = 0;
 
-  for (action = t->commands->commands; action; action = action->next)
+  for (action = breakpoint_commands (t); action; action = action->next)
     {
       struct cmd_list_element *cmd;
 

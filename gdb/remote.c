@@ -9507,7 +9507,7 @@ remote_download_tracepoint (struct breakpoint *t)
 		warning (_("Target does not support source download."));
 	    }
 	  remote_download_command_source (t->number, loc->address,
-					  t->commands->commands);
+					  breakpoint_commands (t));
 	}
 
       do_cleanups (old_chain);

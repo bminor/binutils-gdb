@@ -222,6 +222,22 @@ static void disable_trace_command (char *, int);
 
 static void trace_pass_command (char *, int);
 
+/* A reference-counted struct command_line.  This lets multiple
+   breakpoints share a single command list.  */
+struct counted_command_line
+{
+  /* The reference count.  */
+  int refc;
+
+  /* The command list.  */
+  struct command_line *commands;
+};
+
+struct command_line *
+breakpoint_commands (struct breakpoint *b)
+{
+  return b->commands ? b->commands->commands : NULL;
+}
 
 /* Flag indicating that a command has proceeded the inferior past the
    current breakpoint.  */

@@ -384,15 +384,9 @@ typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 
 /* A reference-counted struct command_line.  This lets multiple
-   breakpoints share a single command list.  */
-struct counted_command_line
-{
-  /* The reference count.  */
-  int refc;
-
-  /* The command list.  */
-  struct command_line *commands;
-};
+   breakpoints share a single command list.  This is an implementation
+   detail to the breakpoints module.  */
+struct counted_command_line;
 
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
@@ -813,6 +807,10 @@ extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
 extern void delete_breakpoint (struct breakpoint *);
 
 extern void breakpoint_auto_delete (bpstat);
+
+/* Return the chain of command lines to execute when this breakpoint
+   is hit.  */
+extern struct command_line *breakpoint_commands (struct breakpoint *b);
 
 extern void break_command (char *, int);
 

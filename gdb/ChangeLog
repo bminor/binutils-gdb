@@ -1,3 +1,13 @@
+2010-04-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.h (struct counted_command_line): Moved definition to
+	breakpoint.c, and forward declare.
+	(breakpoint_commands): Declare.
+	* breakpoint.c (struct counted_command_line): Moved here.
+	(breakpoint_commands): New.
+	* tracepoint.c (encode_actions): Use breakpoint_commands.
+	* remote.c (remote_download_tracepoint): Ditto.
+
 2010-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* remote.c (remote_parse_stop_reply): Use hex_string instead
