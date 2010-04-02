@@ -3000,10 +3000,6 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      if (irp->regmap[X86_RECORD_R8_REGNUM] && !havesib)
 		*addr += irp->addr + irp->rip_offset;
 	    }
-	  else
-	    {
-	      *addr = 0;
-	    }
 	  break;
 	case 1:
 	  if (target_read_memory (irp->addr, buf, 1))
@@ -3076,10 +3072,6 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      *addr = extract_signed_integer (buf, 2, byte_order);
 	      irp->rm = 0;
 	      goto no_rm;
-	    }
-	  else
-	    {
-	      *addr = 0;
 	    }
 	  break;
 	case 1:
