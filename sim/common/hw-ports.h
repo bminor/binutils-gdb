@@ -53,13 +53,13 @@ void hw_port_event
  int my_port,
  int value);
 
-/* This port event will then be propogated to any attached
+/* This port event will then be propagated to any attached
    destination ports.
 
-   Any interpretation of PORT and VALUE is model dependant.  As a
+   Any interpretation of PORT and VALUE is model dependent.  As a
    guideline the following are recommended: PCI interrupts A-D should
-   correspond to ports 0-3; level sensative interrupts be requested
-   with a value of one and withdrawn with a value of 0; edge sensative
+   correspond to ports 0-3; level sensitive interrupts be requested
+   with a value of one and withdrawn with a value of 0; edge sensitive
    interrupts always have a value of 1, the event its self is treated
    as the interrupt.
 
@@ -67,7 +67,7 @@ void hw_port_event
    Port destinations
 
    Attached to each port of a device can be zero or more
-   desitinations.  These destinations consist of a device/port pair.
+   destinations.  These destinations consist of a device/port pair.
    A destination is attached/detached to a device line using the
    attach and detach calls. */
 
