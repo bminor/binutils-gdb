@@ -171,6 +171,7 @@ add_thread (ptid_t thread_id, void *target_data)
   memset (new_thread, 0, sizeof (*new_thread));
 
   new_thread->entry.id = thread_id;
+  new_thread->last_status.kind = TARGET_WAITKIND_IGNORE;
 
   add_inferior_to_list (&all_threads, & new_thread->entry);
 

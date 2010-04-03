@@ -1125,13 +1125,10 @@ static int
 cancel_breakpoint (struct lwp_info *lwp)
 {
   struct thread_info *saved_inferior;
-  struct regcache *regcache;
 
   /* There's nothing to do if we don't support breakpoints.  */
   if (!supports_breakpoints ())
     return 0;
-
-  regcache = get_thread_regcache (get_lwp_thread (lwp), 1);
 
   /* breakpoint_at reads from current inferior.  */
   saved_inferior = current_inferior;
@@ -1142,13 +1139,13 @@ cancel_breakpoint (struct lwp_info *lwp)
       if (debug_threads)
 	fprintf (stderr,
 		 "CB: Push back breakpoint for %s\n",
-		 target_pid_to_str (lwp->head.id));
+		 target_pid_to_str (ptid_of (lwp)));
 
       /* Back up the PC if necessary.  */
       if (the_low_target.decr_pc_after_break)
 	{
 	  struct regcache *regcache
-	    = get_thread_regcache (get_lwp_thread (lwp), 1);
+	    = get_thread_regcache (current_inferior, 1);
 	  (*the_low_target.set_pc) (regcache, lwp->stop_pc);
 	}
 
@@ -1161,7 +1158,7 @@ cancel_breakpoint (struct lwp_info *lwp)
 	fprintf (stderr,
 		 "CB: No breakpoint found at %s for [%s]\n",
 		 paddress (lwp->stop_pc),
-		 target_pid_to_str (lwp->head.id));
+		 target_pid_to_str (ptid_of (lwp)));
     }
 
   current_inferior = saved_inferior;
@@ -1584,8 +1581,7 @@ linux_wait_1 (ptid_t ptid,
 	      struct target_waitstatus *ourstatus, int target_options)
 {
   int w;
-  struct thread_info *thread = NULL;
-  struct lwp_info *event_child = NULL;
+  struct lwp_info *event_child;
   int options;
   int pid;
   int step_over_finished;
@@ -1611,6 +1607,8 @@ retry:
       && !ptid_equal (cont_thread, null_ptid)
       && !ptid_equal (cont_thread, minus_one_ptid))
     {
+      struct thread_info *thread;
+
       thread = (struct thread_info *) find_inferior_id (&all_threads,
 							cont_thread);
 
@@ -2615,7 +2613,7 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 
       /* For stop requests, we're done.  */
       lwp->resume = NULL;
-      get_lwp_thread (lwp)->last_status.kind = TARGET_WAITKIND_IGNORE;
+      thread->last_status.kind = TARGET_WAITKIND_IGNORE;
       return 0;
     }
 
@@ -2635,7 +2633,6 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 
       step = (lwp->resume->kind == resume_step);
       linux_resume_one_lwp (lwp, step, lwp->resume->sig, NULL);
-      get_lwp_thread (lwp)->last_status.kind = TARGET_WAITKIND_IGNORE;
     }
   else
     {
@@ -2663,6 +2660,7 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 	}
     }
 
+  thread->last_status.kind = TARGET_WAITKIND_IGNORE;
   lwp->resume = NULL;
   return 0;
 }

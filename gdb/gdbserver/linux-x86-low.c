@@ -325,7 +325,7 @@ x86_breakpoint_at (CORE_ADDR pc)
 {
   unsigned char c;
 
-  read_inferior_memory (pc, &c, 1);
+  (*the_target->read_memory) (pc, &c, 1);
   if (c == 0xCC)
     return 1;
 

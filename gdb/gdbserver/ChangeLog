@@ -1,3 +1,15 @@
+2010-04-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferiors.c (add_thread): Set last_status kind to
+	TARGET_WAITKIND_IGNORE.
+	* linux-low.c (cancel_breakpoint): Remove unnecessary regcache
+	fetch.  Use ptid_of.  Avoid unnecessary get_lwp_thread calls.
+	(linux_wait_1): Move `thread' local definition to block that uses
+	it.  Don't NULL initialize `event_child'.
+	(linux_resume_one_thread): Avoid unnecessary get_lwp_thread calls.
+	Alway set the thread's last_status to TARGET_WAITKIND_IGNORE.
+	* linux-x86-low.c (x86_breakpoint_at): Read raw memory.
+
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (get_stop_pc): Don't adjust the PC if stopped with
