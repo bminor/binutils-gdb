@@ -1030,7 +1030,7 @@ extern struct breakpoint *get_tracepoint_by_number (char **arg, int multi_p,
    is newly allocated; the caller should free when done with it.  */
 extern VEC(breakpoint_p) *all_tracepoints (void);
 
-extern int breakpoint_is_tracepoint (const struct breakpoint *b);
+extern int is_tracepoint (const struct breakpoint *b);
 
 /* Function that can be passed to read_command_line to validate
    that each command is suitable for tracepoint command list.  */

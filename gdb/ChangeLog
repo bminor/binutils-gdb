@@ -1,4 +1,22 @@
 2010-04-04  Stan Shebs  <stan@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* breakpoint.c (breakpoint_1): Add filter argument, return number of
+	breakpoints printed.
+	(is_hardware_watchpoint): Make argument const.
+	(is_watchpoint): Ditto.
+	(is_tracepoint): Merge of tracepoint_type and breakpoint_is_tracepoint,
+	use it everywhere.
+	(breakpoints_info): Pass NULL to breakpoint_1.
+	(maintenance_info_breakpoints): Ditto.
+	(watchpoints_info): New function.
+	(tracepoints_info): Use breakpoint_1 filter.
+	(set_ignore_count): Warn that tracepoint ignore count will be ignored.
+	(_initialize_breakpoint): Make "info watchpoints" its own command.
+	* breakpoint.h (is_tracepoint): Rename from breakpoint_is_tracepoint.
+	* mi/mi-cmd-break.c (mi_cmd_break_commands): Use is_tracepoint.
+
+2010-04-04  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c (tfile_fetch_registers): Add fallback case.
 

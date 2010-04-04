@@ -353,7 +353,7 @@ gdb_test "info vector" "The program has no registers now." "info vector"
 #test info warranty
 gdb_test "info warranty" "15. *Disclaimer of Warranty.*" "info warranty"
 #test info watchpoints
-gdb_test "info watchpoints" "No breakpoints or watchpoints." "info watchpoints"
+gdb_test "info watchpoints" "No watchpoints." "info watchpoints"
 #test inspect
 gdb_test "inspect" "The history is empty." "inspect"
 #test jump

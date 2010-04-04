@@ -74,7 +74,7 @@ gdb_test "info tracepoint $asm_test_num" \
 
 # 2.3 info tracepoint (invalid tracepoint number)
 gdb_test "info tracepoint [expr $c_test_num + $asm_test_num]" \
-    "No breakpoint or watchpoint number [expr $c_test_num + $asm_test_num]." \
+    "No tracepoint number [expr $c_test_num + $asm_test_num]." \
     "2.3: info tracepoint (invalid tracepoint number)"
 
 # 2.4 info tracepoints (list of numbers)

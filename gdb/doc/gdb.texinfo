@@ -3388,7 +3388,6 @@ The @code{rbreak} command can be used to set breakpoints in
 @cindex @code{$_} and @code{info breakpoints}
 @item info breakpoints @r{[}@var{n}@r{]}
 @itemx info break @r{[}@var{n}@r{]}
-@itemx info watchpoints @r{[}@var{n}@r{]}
 Print a table of all breakpoints, watchpoints, and catchpoints set and
 not deleted.  Optional argument @var{n} means print information only
 about the specified breakpoint (or watchpoint or catchpoint).  For
@@ -3705,8 +3704,8 @@ or written into by the program.
 
 @kindex info watchpoints @r{[}@var{n}@r{]}
 @item info watchpoints
-This command prints a list of watchpoints, breakpoints, and catchpoints;
-it is the same as @code{info break} (@pxref{Set Breaks}).
+This command prints a list of watchpoints, using the same format as
+@code{info break} (@pxref{Set Breaks}).
 @end table
 
 @value{GDBN} sets a @dfn{hardware watchpoint} if possible.  Hardware
@@ -4135,10 +4134,10 @@ it had been deleted, but remembers the information on the breakpoint so
 that you can @dfn{enable} it again later.
 
 You disable and enable breakpoints, watchpoints, and catchpoints with
-the @code{enable} and @code{disable} commands, optionally specifying one
-or more breakpoint numbers as arguments.  Use @code{info break} or
-@code{info watch} to print a list of breakpoints, watchpoints, and
-catchpoints if you do not know which numbers to use.
+the @code{enable} and @code{disable} commands, optionally specifying
+one or more breakpoint numbers as arguments.  Use @code{info break} to
+print a list of all breakpoints, watchpoints, and catchpoints if you
+do not know which numbers to use.
 
 Disabling and enabling a breakpoint that has multiple locations
 affects all of its locations.

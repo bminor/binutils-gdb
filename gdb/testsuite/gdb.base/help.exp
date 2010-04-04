@@ -294,7 +294,7 @@ gdb_test "help info variables" "All global and static variable names, or those m
 # test help info warranty
 gdb_test "help info warranty" "Various kinds of warranty you do not have\." "help info warranty"
 # test help info watchpoints
-gdb_test "help info watchpoints" "Synonym for ``info breakpoints''\." "help info watchpoints"
+gdb_test "help info watchpoints" "Status of watchpoints, or watchpoint number NUMBER\." "help info watchpoints"
 # test help inspect
 gdb_test "help inspect" "Same as \"print\" command, except that if you are running in the epoch\[\r\n\]+environment, the value is printed in its own window\." "help inspect"
 # test help jump

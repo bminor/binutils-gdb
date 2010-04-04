@@ -130,7 +130,9 @@ static int watchpoint_locations_match (struct bp_location *loc1,
 
 static void breakpoints_info (char *, int);
 
-static void breakpoint_1 (int, int);
+static void watchpoints_info (char *, int);
+
+static int breakpoint_1 (int, int, int (*) (const struct breakpoint *));
 
 static bpstat bpstat_alloc (const struct bp_location *, bpstat);
 
@@ -204,9 +206,9 @@ static void update_global_location_list (int);
 
 static void update_global_location_list_nothrow (int);
 
-static int is_hardware_watchpoint (struct breakpoint *bpt);
+static int is_hardware_watchpoint (const struct breakpoint *bpt);
 
-static int is_watchpoint (struct breakpoint *bpt);
+static int is_watchpoint (const struct breakpoint *bpt);
 
 static void insert_breakpoint_locations (void);
 
@@ -366,7 +368,7 @@ static int overlay_events_enabled;
 
 #define ALL_TRACEPOINTS(B)  \
   for (B = breakpoint_chain; B; B = B->next)  \
-    if (tracepoint_type (B))
+    if (is_tracepoint (B))
 
 /* Chains of all breakpoints defined.  */
 
@@ -464,14 +466,6 @@ clear_breakpoint_hit_counts (void)
     b->hit_count = 0;
 }
 
-/* Encapsulate tests for different types of tracepoints.  */
-
-static int
-tracepoint_type (const struct breakpoint *b)
-{
-  return (b->type == bp_tracepoint || b->type == bp_fast_tracepoint);
-}
-  
 /* Allocate a new counted_command_line with reference count of 1.
    The new structure owns COMMANDS.  */
 
@@ -817,20 +811,14 @@ check_no_tracepoint_commands (struct command_line *commands)
     }
 }
 
+/* Encapsulate tests for different types of tracepoints.  */
+
 int
-breakpoint_is_tracepoint (const struct breakpoint *b)
+is_tracepoint (const struct breakpoint *b)
 {
-  switch (b->type)
-    {
-    case bp_tracepoint:
-    case bp_fast_tracepoint:
-      return 1;
-    default:
-      return 0;
-
-    }
+  return (b->type == bp_tracepoint || b->type == bp_fast_tracepoint);
 }
-
+  
 /* A helper function that validsates that COMMANDS are valid for a
    breakpoint.  This function will throw an exception if a problem is
    found.  */
@@ -839,7 +827,7 @@ static void
 validate_commands_for_breakpoint (struct breakpoint *b,
 				  struct command_line *commands)
 {
-  if (breakpoint_is_tracepoint (b))
+  if (is_tracepoint (b))
     {
       /* We need to verify that each top-level element of commands
 	 is valid for tracepoints, that there's at most one while-stepping
@@ -949,7 +937,7 @@ do_map_commands_command (struct breakpoint *b, void *data)
 
 	  l = read_command_lines (str,
 				  info->from_tty, 1,
-				  (breakpoint_is_tracepoint (b)
+				  (is_tracepoint (b)
 				   ? check_tracepoint_command : 0),
 				  b);
 
@@ -1175,7 +1163,7 @@ insert_catchpoint (struct ui_out *uo, void *args)
 /* Return true if BPT is of any hardware watchpoint kind.  */
 
 static int
-is_hardware_watchpoint (struct breakpoint *bpt)
+is_hardware_watchpoint (const struct breakpoint *bpt)
 {
   return (bpt->type == bp_hardware_watchpoint
 	  || bpt->type == bp_read_watchpoint
@@ -1186,7 +1174,7 @@ is_hardware_watchpoint (struct breakpoint *bpt)
    software.  */
 
 static int
-is_watchpoint (struct breakpoint *bpt)
+is_watchpoint (const struct breakpoint *bpt)
 {
   return (is_hardware_watchpoint (bpt)
 	  || bpt->type == bp_watchpoint);
@@ -1589,7 +1577,7 @@ should_be_inserted (struct bp_location *bpt)
 
   /* Tracepoints are inserted by the target at a time of its choosing,
      not by us.  */
-  if (tracepoint_type (bpt->owner))
+  if (is_tracepoint (bpt->owner))
     return 0;
 
   return 1;
@@ -3703,7 +3691,7 @@ bpstat_check_location (const struct bp_location *bl,
 
   /* By definition, the inferior does not report stops at
      tracepoints.  */
-  if (tracepoint_type (b))
+  if (is_tracepoint (b))
     return 0;
 
   if (b->type != bp_watchpoint
@@ -4758,7 +4746,7 @@ print_one_breakpoint_location (struct breakpoint *b,
          because the condition is an internal implementation detail
          that we do not want to expose to the user.  */
       annotate_field (7);
-      if (tracepoint_type (b))
+      if (is_tracepoint (b))
 	ui_out_text (uiout, "\ttrace only if ");
       else
 	ui_out_text (uiout, "\tstop only if ");
@@ -4938,7 +4926,7 @@ user_settable_breakpoint (const struct breakpoint *b)
   return (b->type == bp_breakpoint
 	  || b->type == bp_catchpoint
 	  || b->type == bp_hardware_breakpoint
-	  || tracepoint_type (b)
+	  || is_tracepoint (b)
 	  || b->type == bp_watchpoint
 	  || b->type == bp_read_watchpoint
 	  || b->type == bp_access_watchpoint
@@ -4946,11 +4934,14 @@ user_settable_breakpoint (const struct breakpoint *b)
 }
 	
 /* Print information on user settable breakpoint (watchpoint, etc)
-   number BNUM.  If BNUM is -1 print all user settable breakpoints.
-   If ALLFLAG is non-zero, include non- user settable breakpoints. */
+   number BNUM.  If BNUM is -1 print all user-settable breakpoints.
+   If ALLFLAG is non-zero, include non-user-settable breakpoints.  If
+   FILTER is non-NULL, call it on each breakpoint and only include the
+   ones for which it returns non-zero.  Return the total number of
+   breakpoints listed.  */
 
-static void
-breakpoint_1 (int bnum, int allflag)
+static int
+breakpoint_1 (int bnum, int allflag, int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *b;
   struct bp_location *last_loc = NULL;
@@ -4968,6 +4959,10 @@ breakpoint_1 (int bnum, int allflag)
     if (bnum == -1
 	|| bnum == b->number)
       {
+	/* If we have a filter, only list the breakpoints it accepts.  */
+	if (filter && !filter (b))
+	  continue;
+	
 	if (allflag || user_settable_breakpoint (b))
 	  {
 	    int addr_bit = breakpoint_address_bits (b);
@@ -5023,6 +5018,10 @@ breakpoint_1 (int bnum, int allflag)
     if (bnum == -1
 	|| bnum == b->number)
       {
+	/* If we have a filter, only list the breakpoints it accepts.  */
+	if (filter && !filter (b))
+	  continue;
+	
 	/* We only print out user settable breakpoints unless the
 	   allflag is set. */
 	if (allflag || user_settable_breakpoint (b))
@@ -5034,11 +5033,15 @@ breakpoint_1 (int bnum, int allflag)
 
   if (nr_printable_breakpoints == 0)
     {
-      if (bnum == -1)
-	ui_out_message (uiout, 0, "No breakpoints or watchpoints.\n");
-      else
-	ui_out_message (uiout, 0, "No breakpoint or watchpoint number %d.\n",
-			bnum);
+      /* If there's a filter, let the caller decide how to report empty list.  */
+      if (!filter)
+	{
+	  if (bnum == -1)
+	    ui_out_message (uiout, 0, "No breakpoints or watchpoints.\n");
+	  else
+	    ui_out_message (uiout, 0, "No breakpoint or watchpoint number %d.\n",
+			    bnum);
+	}
     }
   else
     {
@@ -5049,6 +5052,8 @@ breakpoint_1 (int bnum, int allflag)
   /* FIXME? Should this be moved up so that it is only called when
      there have been breakpoints? */
   annotate_breakpoints_table_end ();
+
+  return nr_printable_breakpoints;
 }
 
 static void
@@ -5059,7 +5064,26 @@ breakpoints_info (char *bnum_exp, int from_tty)
   if (bnum_exp)
     bnum = parse_and_eval_long (bnum_exp);
 
-  breakpoint_1 (bnum, 0);
+  breakpoint_1 (bnum, 0, NULL);
+}
+
+static void
+watchpoints_info (char *wpnum_exp, int from_tty)
+{
+  int wpnum = -1, num_printed;
+
+  if (wpnum_exp)
+    wpnum = parse_and_eval_long (wpnum_exp);
+
+  num_printed = breakpoint_1 (wpnum, 0, is_watchpoint);
+
+  if (num_printed == 0)
+    {
+      if (wpnum == -1)
+	ui_out_message (uiout, 0, "No watchpoints.\n");
+      else
+	ui_out_message (uiout, 0, "No watchpoint number %d.\n", wpnum);
+    }
 }
 
 static void
@@ -5070,7 +5094,7 @@ maintenance_info_breakpoints (char *bnum_exp, int from_tty)
   if (bnum_exp)
     bnum = parse_and_eval_long (bnum_exp);
 
-  breakpoint_1 (bnum, 1);
+  breakpoint_1 (bnum, 1, NULL);
 }
 
 static int
@@ -5399,7 +5423,7 @@ set_breakpoint_location_function (struct bp_location *loc)
 {
   if (loc->owner->type == bp_breakpoint
       || loc->owner->type == bp_hardware_breakpoint
-      || tracepoint_type (loc->owner))
+      || is_tracepoint (loc->owner))
     {
       find_pc_partial_function (loc->address, &(loc->function_name), 
 				NULL, NULL);
@@ -5686,7 +5710,7 @@ disable_breakpoints_in_shlibs (void)
     if (((b->type == bp_breakpoint)
 	 || (b->type == bp_jit_event)
 	 || (b->type == bp_hardware_breakpoint)
-	 || (tracepoint_type (b)))
+	 || (is_tracepoint (b)))
 	&& loc->pspace == current_program_space
 	&& !loc->shlib_disabled
 #ifdef PC_SOLIB
@@ -9042,7 +9066,7 @@ update_global_location_list (int should_insert)
 	  || !loc->enabled
 	  || loc->shlib_disabled
 	  || !breakpoint_address_is_meaningful (b)
-	  || tracepoint_type (b))
+	  || is_tracepoint (b))
 	continue;
 
       /* Permanent breakpoint should always be inserted.  */
@@ -9702,6 +9726,14 @@ set_ignore_count (int bptnum, int count, int from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bptnum)
     {
+      if (is_tracepoint (b))
+	{
+	  if (from_tty && count != 0)
+	    printf_filtered (_("Ignore count ignored for tracepoint %d."),
+			     bptnum);
+	  return;
+	}
+      
       b->ignore_count = count;
       if (from_tty)
 	{
@@ -10421,29 +10453,20 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 static void
 tracepoints_info (char *tpnum_exp, int from_tty)
 {
-  struct breakpoint *b;
-  int tps_to_list = 0;
+  int tpnum = -1, num_printed;
 
-  /* In the no-arguments case, say "No tracepoints" if none found.  */
-  if (tpnum_exp == 0)
+  if (tpnum_exp)
+    tpnum = parse_and_eval_long (tpnum_exp);
+
+  num_printed = breakpoint_1 (tpnum, 0, is_tracepoint);
+
+  if (num_printed == 0)
     {
-      ALL_TRACEPOINTS (b)
-      {
-	if (b->number >= 0)
-	  {
-	    tps_to_list = 1;
-	    break;
-	  }
-      }
-      if (!tps_to_list)
-	{
-	  ui_out_message (uiout, 0, "No tracepoints.\n");
-	  return;
-	}
+      if (tpnum == -1)
+	ui_out_message (uiout, 0, "No tracepoints.\n");
+      else
+	ui_out_message (uiout, 0, "No tracepoint number %d.\n", tpnum);
     }
-
-  /* Otherwise be the same as "info break".  */
-  breakpoints_info (tpnum_exp, from_tty);
 }
 
 /* The 'enable trace' command enables tracepoints.  
@@ -10492,7 +10515,7 @@ delete_trace_command (char *arg, int from_tty)
 	{
 	  ALL_BREAKPOINTS_SAFE (b, temp)
 	  {
-	    if (tracepoint_type (b)
+	    if (is_tracepoint (b)
 		&& b->number >= 0)
 	      delete_breakpoint (b);
 	  }
@@ -11134,8 +11157,9 @@ A watchpoint stops execution of your program whenever the value of\n\
 an expression is either read or written."));
   set_cmd_completer (c, expression_completer);
 
-  add_info ("watchpoints", breakpoints_info,
-	    _("Synonym for ``info breakpoints''."));
+  add_info ("watchpoints", watchpoints_info, _("\
+Status of watchpoints, or watchpoint number NUMBER."));
+
 
 
   /* XXX: cagney/2005-02-23: This should be a boolean, and should

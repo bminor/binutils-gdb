@@ -1,5 +1,9 @@
 2010-04-04  Stan Shebs  <stan@codesourcery.com>
 
+	* gdb.texinfo (Setting Breakpoints): "info watch" no longer a synonym.
+	(Setting Watchpoints): Update description of "info watch".
+	(Disabling Breakpoints): Only "info break" lists all.
+
 	* gdb.texinfo (Tracepoint Restrictions): Document PC inference.
 	(tdump): Explain how tdump works.
 

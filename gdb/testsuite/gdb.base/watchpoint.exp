@@ -102,9 +102,7 @@ proc initialize {} {
         }
     }
 
-    # "info watch" is the same as "info break"
-
-    if [gdb_test "info watch" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*\r\n3\[ \]*.*watchpoint.*ival3" "watchpoint found in watchpoint/breakpoint table" ] { 
+    if [gdb_test "info watch" "3\[ \]*.*watchpoint.*ival3" "watchpoint found in watchpoint/breakpoint table" ] { 
       return 0; 
     }
 
@@ -176,11 +174,9 @@ proc test_simple_watchpoint {} {
 
         set wp_set 1
 
-	# "info watch" is the same as "info break"
-
 	send_gdb "info watch\n"
 	gdb_expect {
-	    -re "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*\r\n3\[ \]*.*watchpoint.*ival3\r\n$gdb_prompt $" {
+	    -re "3\[ \]*.*watchpoint.*ival3\r\n$gdb_prompt $" {
 	        pass "watchpoint found in watchpoint/breakpoint table"
 	    }
 	    -re ".*$gdb_prompt $" {
@@ -297,7 +293,7 @@ proc test_disabling_watchpoints {} {
     global hex
 
     # "info watch" is the same as "info break"
-    gdb_test "info watch" "\[0-9\]+\[ \]*breakpoint.*marker1.*\r\n\[0-9\]+\[ \]*breakpoint.*marker2.*\r\n\[0-9]+\[ \]*.*watchpoint.*ival3\r\n\.*\[0-9\]+ times.*" "watchpoints found in watchpoint/breakpoint table"
+    gdb_test "info watch" "\[0-9]+\[ \]*.*watchpoint.*ival3\r\n\.*\[0-9\]+ times.*" "watchpoints found in watchpoint/breakpoint table"
 
     # Ensure that the watchpoint is disabled when we startup.
 

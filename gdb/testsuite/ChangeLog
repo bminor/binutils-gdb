@@ -1,5 +1,13 @@
 2010-04-04  Stan Shebs  <stan@codesourcery.com>
 
+	* gdb.base/completion.exp: Update for new "info watchpoints".
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/help.exp: Ditto.
+	* gdb.base/watchpoint.exp: Ditto.
+	* gdb.trace/infotrace.exp: Update "info tracpoints" output.
+	
+2010-04-04  Stan Shebs  <stan@codesourcery.com>
+
 	* gdb.trace/tfile.exp: Sharpen tfind test.
 
 2010-04-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
