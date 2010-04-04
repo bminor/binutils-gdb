@@ -3671,7 +3671,7 @@ tfile_fetch_registers (struct target_ops *ops,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   char block_type;
-  int i, pos, offset, regn, regsize, gotten;
+  int i, pos, offset, regn, regsize, gotten, pc_regno;
   unsigned short mlen;
   char *regs;
 
@@ -3744,6 +3744,44 @@ tfile_fetch_registers (struct target_ops *ops,
 	  error ("Unknown block type '%c' (0x%x) in trace frame",
 		 block_type, block_type);
 	  break;
+	}
+    }
+
+  /* We get here if no register data has been found.  Although we
+     don't like making up numbers, GDB has all manner of troubles when
+     the target says some register is not available.  Filling in with
+     zeroes is a reasonable fallback.  */
+  for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
+    regcache_raw_supply (regcache, regn, NULL);
+
+  /* We can often usefully guess that the PC is going to be the same
+     as the address of the tracepoint.  */
+  pc_regno = gdbarch_pc_regnum (gdbarch);
+  if (pc_regno >= 0 && (regno == -1 || regno == pc_regno))
+    {
+      struct breakpoint *tp = get_tracepoint (tracepoint_number);
+
+      if (tp && tp->loc)
+	{
+	  /* But don't try to guess if tracepoint is multi-location...  */
+	  if (tp->loc->next)
+	    {
+	      warning ("Tracepoint %d has multiple locations, cannot infer $pc",
+		       tp->number);
+	      return;
+	    }
+	  /* ... or does while-stepping.  */
+	  if (tp->step_count > 0)
+	    {
+	      warning ("Tracepoint %d does while-stepping, cannot infer $pc",
+		       tp->number);
+	      return;
+	    }
+
+	  store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
+				  gdbarch_byte_order (gdbarch),
+				  tp->loc->address);
+	  regcache_raw_supply (regcache, pc_regno, regs);
 	}
     }
 }

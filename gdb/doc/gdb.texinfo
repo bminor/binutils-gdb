@@ -9938,6 +9938,16 @@ if you ask for a block so large that it goes past the bottom of the
 stack, the target agent may report an error trying to read from an
 invalid address.
 
+@item
+If you do not collect registers at a tracepoint, @value{GDBN} can
+infer that the value of @code{$pc} must be the same as the address of
+the tracepoint and use that when you are looking at a trace frame
+for that tracepoint.  However, this cannot work if the tracepoint has
+multiple locations (for instance if it was set in a function that was
+inlined), or if it has a @code{while-stepping} loop.  In those cases
+@value{GDBN} will warn you that it can't infer @code{$pc}, and default
+it to zero.
+
 @end itemize
 
 @node Analyze Collected Data
@@ -10140,6 +10150,22 @@ gdb_long_test = 17 '\021'
 
 (@value{GDBP})
 @end smallexample
+
+@code{tdump} works by scanning the tracepoint's current collection
+actions and printing the value of each expression listed.  So
+@code{tdump} can fail, if after a run, you change the tracepoint's
+actions to mention variables that were not collected during the run.
+
+Also, for tracepoints with @code{while-stepping} loops, @code{tdump}
+uses the collected value of @code{$pc} to distinguish between trace
+frames that were collected at the tracepoint hit, and frames that were
+collected while stepping.  This allows it to correctly choose whether
+to display the basic list of collections, or the collections from the
+body of the while-stepping loop.  However, if @code{$pc} was not collected,
+then @code{tdump} will always attempt to dump using the basic collection
+list, and may fail if a while-stepping frame does not include all the
+same data that is collected at the tracepoint hit.
+@c This is getting pretty arcane, example would be good.
 
 @node save-tracepoints
 @subsection @code{save-tracepoints @var{filename}}
