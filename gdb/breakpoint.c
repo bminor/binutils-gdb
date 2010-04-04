@@ -2963,36 +2963,6 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
   return NULL;
 }
 
-/* Find a step_resume breakpoint associated with this bpstat.
-   (If there are multiple step_resume bp's on the list, this function
-   will arbitrarily pick one.)
-
-   It is an error to use this function if BPSTAT doesn't contain a
-   step_resume breakpoint.
-
-   See wait_for_inferior's use of this function.  */
-struct breakpoint *
-bpstat_find_step_resume_breakpoint (bpstat bsp)
-{
-  int current_thread;
-
-  gdb_assert (bsp != NULL);
-
-  current_thread = pid_to_thread_id (inferior_ptid);
-
-  for (; bsp != NULL; bsp = bsp->next)
-    {
-      if ((bsp->breakpoint_at != NULL)
-	  && (bsp->breakpoint_at->owner->type == bp_step_resume)
-	  && (bsp->breakpoint_at->owner->thread == current_thread
-	      || bsp->breakpoint_at->owner->thread == -1))
-	return bsp->breakpoint_at->owner;
-    }
-
-  internal_error (__FILE__, __LINE__, _("No step_resume breakpoint found."));
-}
-
-
 /* Put in *NUM the breakpoint number of the first breakpoint we are stopped
    at.  *BSP upon return is a bpstat which points to the remaining
    breakpoints stopped at (but which is not guaranteed to be good for

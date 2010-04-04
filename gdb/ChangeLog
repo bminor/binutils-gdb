@@ -1,3 +1,8 @@
+2010-04-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (bpstat_find_step_resume_breakpoint): Remove.
+	* breakpoint.h (bpstat_find_step_resume_breakpoint): Remove.
+
 2010-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (read_namespace_type): Use common "return set_die_type"
