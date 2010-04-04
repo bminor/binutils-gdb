@@ -580,8 +580,9 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
      has done its thing; now we are setting up the running program.  */
   post_create_inferior (&current_target, 0);
 
-  /* Start the target running.  */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
+  /* Start the target running.  Do not use -1 continuation as it would skip
+     breakpoint right at the entry point.  */
+  proceed (regcache_read_pc (get_current_regcache ()), TARGET_SIGNAL_0, 0);
 
   /* Since there was no error, there's no need to finish the thread
      states here.  */

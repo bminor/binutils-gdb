@@ -1,5 +1,10 @@
 2010-04-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* infcmd.c (run_command_1): Call proceed with regcache_read_pc address.
+	* config/djgpp/fnchange.lst: Add translation for break-entry.exp.
+
+2010-04-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* breakpoint.c (bpstat_find_step_resume_breakpoint): Remove.
 	* breakpoint.h (bpstat_find_step_resume_breakpoint): Remove.
 
