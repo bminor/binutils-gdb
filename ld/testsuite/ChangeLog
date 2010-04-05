@@ -1,3 +1,9 @@
+2010-04-05  Kai Tietz  <kai.tietz@onevision.com>
+
+	* ld-pe/orphan_nu.d: New test for --no-leading-underscore.
+	* ld-pe/orphana_nu.s: New file.
+	* ld-pe/pe.exp: Add orphan_nu test.
+
 2010-04-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-powerpc/apuinfo-nul.rd: New.

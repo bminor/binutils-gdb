@@ -69,6 +69,7 @@ run_dump_test "longsecn-4"
 run_dump_test "longsecn-5"
 
 run_dump_test "orphan"
+run_dump_test "orphan_nu"
 
 set foreign_sym_test {
   {"non-C aligned common" "" "" {non-c-lang-syms.s}
