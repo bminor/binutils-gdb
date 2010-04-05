@@ -1,3 +1,14 @@
+2010-04-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.stabs/aout.sed: Convert all backslash to double backslash
+	within one line, unless it is followed by a double quote.
+	* gdb.stabs/hppa.sed: Idem.
+	* gdb.stabs/weird.def: Add char and String constants
+	* gdb.stabs/weird.exp: Check for correct parsing of 
+	chhar and string constants.
+	* gdb.stabs/xcoff.sed: Ignore escaped quote quotes
+	in .stabs to .stabx substitution.
+
 2010-04-05  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tfile.c: Add a variable split across two blocks, and a

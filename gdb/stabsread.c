@@ -793,6 +793,75 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    SYMBOL_CLASS (sym) = LOC_CONST;
 	  }
 	  break;
+
+	case 'c':
+	  {
+	    SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_char;
+	    SYMBOL_VALUE (sym) = atoi (p);
+	    SYMBOL_CLASS (sym) = LOC_CONST;
+	  }
+	  break;
+
+	case 's':
+	  {
+	    struct type *range_type;
+	    int ind = 0;
+	    char quote = *p++;
+	    char *startp = p;
+	    gdb_byte *string_local = (gdb_byte *) alloca (strlen (p));
+	    gdb_byte *string_value;
+
+	    if (quote != '\'' && quote != '"')
+	      {
+		SYMBOL_CLASS (sym) = LOC_CONST;
+		SYMBOL_TYPE (sym) = error_type (&p, objfile);
+		SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+		add_symbol_to_list (sym, &file_symbols);
+		return sym;
+	      }
+
+	    /* Find matching quote, rejecting escaped quotes.  */
+	    while (*p && *p != quote)
+	      {
+		if (*p == '\\' && p[1] == quote)
+		  {
+		    string_local[ind] = (gdb_byte) quote;
+		    ind++;
+		    p += 2;
+		  }
+		else if (*p) 
+		  {
+		    string_local[ind] = (gdb_byte) (*p);
+		    ind++;
+		    p++;
+		  }
+	      }
+	    if (*p != quote)
+	      {
+		SYMBOL_CLASS (sym) = LOC_CONST;
+		SYMBOL_TYPE (sym) = error_type (&p, objfile);
+		SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+		add_symbol_to_list (sym, &file_symbols);
+		return sym;
+	      }
+
+	    /* NULL terminate the string.  */
+	    string_local[ind] = 0;
+	    range_type = create_range_type (NULL,
+					    objfile_type (objfile)->builtin_int,
+					    0, ind);
+	    SYMBOL_TYPE (sym) = create_array_type (NULL,
+				  objfile_type (objfile)->builtin_char,
+				  range_type);
+	    string_value = obstack_alloc (&objfile->objfile_obstack, ind + 1);
+	    memcpy (string_value, string_local, ind + 1);
+	    p++;
+
+	    SYMBOL_VALUE_BYTES (sym) = string_value;
+	    SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
+	  }
+	  break;
+
 	case 'e':
 	  /* SYMBOL:c=eTYPE,INTVALUE for a constant symbol whose value
 	     can be represented as integral.

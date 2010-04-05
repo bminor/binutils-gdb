@@ -4,7 +4,7 @@
 1i\
 	.csect .data[RW]
 # .stabs string,type,0,0,value  ->  .stabx string,value,type,0
-s/^[ 	]*\.stabs[ 	]*\("[^"]*"\),[ 	]*\([^,]*\),[ 	]*0,0,[ 	]*\(.*\)$/.stabx \1,\3,\2,0/
+s/^[ 	]*\.stabs[ 	]*("(\"|[^"])*"),[ 	]*([^,]*),[ 	]*0,0,[ 	]*(.*)$/.stabx \1,\4,\3,0/
 s/N_GSYM/128/
 # This needs to be C_DECL, which is used for types, not C_LSYM, which is
 # ignored on the initial scan.

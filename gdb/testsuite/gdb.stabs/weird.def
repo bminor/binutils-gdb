@@ -286,6 +286,20 @@ attr69:
 # Test constant with the type embedded.  
 .stabs "const70:c=e190=bs2;0;16;,70", N_LSYM,0,0, 0
 
+# Test char constant
+.stabs "constchar:c=c97", N_LSYM,0,0, 0
+
+# Test string constant
+.stabs "constString1:c=s'Single quote String1'", N_LSYM,0,0, 0
+# Using double quotes requires an escaping, as the stabs string
+# is a double quote delimited string.
+.stabs "constString2:c=s\"Double quote String2\"", N_LSYM,0,0, 0
+# Escaping sinlge quote with is easy
+.stabs "constString3:c=s'String3 with embedded quote \' in the middle'", N_LSYM,0,0, 0
+# Esaping double quotes is less clear...
+.stabs "constString4:c=s\"String4 with embedded quote \\" in the middle\"", N_LSYM,0,0, 0
+
+
 .stabs "attr38:G338=@& !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,0,0, 0
 
 # Unrecognized negative type number.  

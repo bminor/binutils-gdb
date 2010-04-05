@@ -164,6 +164,12 @@ proc do_tests {} {
 
 	gdb_test "p sizeof (const70)" " = 2" "'e' constant with embedded type"
 
+	gdb_test "p constchar" " = 97 'a'" "char constant"
+        gdb_test "p constString1" " = \"Single quote String1\"" "String constant 1"
+        gdb_test "p constString2" " = \"Double quote String2\"" "String constant 2"
+
+        gdb_test "p constString3" " = \"String3 with embedded quote ' in the middle\"" "String constant 3"
+        gdb_test "p constString4" { = "String4 with embedded quote \\" in the middle"} "String constant 4"
 	gdb_test "p bad_neg0" " = \{field0 = 42, field2 =.*field3 = 45\}" "p bad_neg0"
 
 	gdb_test "ptype inttype" "type = (unsigned int|inttype)" "ptype on inttype"
@@ -251,6 +257,8 @@ proc print_weird_var { var } {
 
 global target_os
 set sedscript ${srcdir}/${subdir}/aout.sed
+set sedoptions ""
+
 switch -glob ${target_triplet} {
     "hppa*-*-*" {
 	set sedscript ${srcdir}/${subdir}/hppa.sed
@@ -260,15 +268,18 @@ switch -glob ${target_triplet} {
     }
     "powerpc-*-aix*" {
 	set sedscript ${srcdir}/${subdir}/xcoff.sed
+	set sedoptions "-r"
     }
     "rs6000-*-aix*" {
 	set sedscript ${srcdir}/${subdir}/xcoff.sed
+	set sedoptions "-r"
     }
     "*-*-aout" {
 	set sedscript ${srcdir}/${subdir}/aout.sed
     }
     "*-*-xcoff" {
 	set sedscript ${srcdir}/${subdir}/xcoff.sed
+	set sedoptions "-r"
     }
     "alpha-*-*" {
 	set sedscript ${srcdir}/${subdir}/ecoff.sed
@@ -276,7 +287,7 @@ switch -glob ${target_triplet} {
 }
 
 # Hope this is a Unix box.
-set exec_output [remote_exec build "sed" "-f ${sedscript}" "${srcdir}/${subdir}/weird.def" "${srcfile}"]
+set exec_output [remote_exec build "sed" "${sedoptions} -f ${sedscript}" "${srcdir}/${subdir}/weird.def" "${srcfile}"]
 if { [lindex $exec_output 0] != 0 } {
     perror "Couldn't make test case. $exec_output"
     return -1

@@ -1,5 +1,10 @@
 2010-04-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* stabsread.c (define_symbol): Add support for char
+	and string constants.
+
+2010-04-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	Remove remaining "%ll" uses.
 	* go32-nat.c (go32_pte_for_address): Replace "0x%llx" using
 	hex_string call.

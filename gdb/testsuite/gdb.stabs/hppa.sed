@@ -9,7 +9,7 @@ Label0:
 s/N_LSYM/0x80/
 s/N_GSYM/0x20/
 s/# Replace a single backslash with a doubled backslash//
-/\.stabs/s/\\/\\\\/
+/\.stabs/s/\\/\\\\/g
 s/# Only labels should be at the beginning of a line, assembler directives//
 s/# and instructions should start somewhere after column zero.//
 /^\./s/^\./	./
