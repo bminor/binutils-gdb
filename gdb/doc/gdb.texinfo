@@ -19873,8 +19873,8 @@ feature, and view its current state.
 @item maint set python auto-load [yes|no]
 Enable or disable the Python auto-loading feature.
 
-@kindex show python auto-load
-@item show python auto-load
+@kindex maint show python auto-load
+@item maint show python auto-load
 Show whether Python auto-loading is enabled or disabled.
 @end table
 
