@@ -1,3 +1,8 @@
+2010-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* breakpoint.c (bpstat_stop_status): Use bpstat_causes_stop.
+
 2010-04-04  Stan Shebs  <stan@codesourcery.com>
 	    Nathan Sidwell  <nathan@codesourcery.com>
 

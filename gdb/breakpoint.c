@@ -4141,12 +4141,8 @@ bpstat_stop_status (struct address_space *aspace,
      not have changed, but the intermediate memory locations we are
      watching may have.  Don't bother if we're stopping; this will get
      done later.  */
-  for (bs = root_bs->next; bs != NULL; bs = bs->next)
-    if (bs->stop)
-      break;
-
   need_remove_insert = 0;
-  if (bs == NULL)
+  if (! bpstat_causes_stop (root_bs->next))
     for (bs = root_bs->next; bs != NULL; bs = bs->next)
       if (!bs->stop
 	  && bs->breakpoint_at->owner
