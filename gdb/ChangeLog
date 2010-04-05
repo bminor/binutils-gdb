@@ -1,3 +1,11 @@
+2010-04-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/10736:
+	* xml-syscall.c (my_gdb_datadir): New variable to keep track of
+	the changes in data-directory.
+	(init_sysinfo): Reload the syscall XML file if the data-directory
+	has changed.
+
 2010-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
