@@ -2047,8 +2047,8 @@ go32_pte_for_address (char *arg, int from_tty)
       int pte_idx = (addr >> 12) & 0x3ff;
       unsigned offs = addr & 0xfff;
 
-      printf_filtered ("Page Table entry for address 0x%llx:\n",
-		       (unsigned long long)addr);
+      printf_filtered ("Page Table entry for address %s:\n",
+		       hex_string(addr));
       display_ptable_entry (get_pte (get_pde (pde_idx), pte_idx), 0, 1, offs);
     }
 }

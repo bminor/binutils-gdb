@@ -200,8 +200,8 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
   int ret = 0;
 #endif
 #if 0
-  printf ("rs6000_ptrace64 (%d, %d, 0x%llx, %08x, 0x%x) = 0x%x\n",
-	  req, id, addr, data, (unsigned int)buf, ret);
+  printf ("rs6000_ptrace64 (%d, %d, %s, %08x, 0x%x) = 0x%x\n",
+	  req, id, hex_string (addr), data, (unsigned int)buf, ret);
 #endif
   return ret;
 }

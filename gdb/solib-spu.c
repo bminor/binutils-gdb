@@ -161,7 +161,8 @@ spu_current_sos (void)
 
       /* Encode FD and object ID in path name.  Choose the name so as not
 	 to conflict with any (normal) SVR4 library path name.  */
-      xsnprintf (new->so_name, sizeof new->so_name, "@0x%llx <%d>", addr, fd);
+      xsnprintf (new->so_name, sizeof new->so_name, "@%s <%d>",
+		 hex_string (addr), fd);
       strcpy (new->so_original_name, new->so_name);
 
       *link_ptr = new;

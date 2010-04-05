@@ -493,17 +493,17 @@ pa64_current_sos (void)
         struct load_module_desc *d = &new->lm_info->desc;
 	printf ("\n+ library \"%s\" is described at index %d\n", new->so_name, 
 		dll_index);
-	printf ("    text_base = 0x%llx\n", d->text_base); 
-	printf ("    text_size = 0x%llx\n", d->text_size); 
-	printf ("    data_base = 0x%llx\n", d->data_base); 
-	printf ("    data_size = 0x%llx\n", d->data_size); 
-	printf ("    unwind_base = 0x%llx\n", d->unwind_base); 
-	printf ("    linkage_ptr = 0x%llx\n", d->linkage_ptr); 
-	printf ("    phdr_base = 0x%llx\n", d->phdr_base); 
-	printf ("    tls_size = 0x%llx\n", d->tls_size); 
-	printf ("    tls_start_addr = 0x%llx\n", d->tls_start_addr); 
-	printf ("    unwind_size = 0x%llx\n", d->unwind_size); 
-	printf ("    tls_index = 0x%llx\n", d->tls_index); 
+	printf ("    text_base = %s\n", hex_string (d->text_base));
+	printf ("    text_size = %s\n", hex_string (d->text_size));
+	printf ("    data_base = %s\n", hex_string (d->data_base));
+	printf ("    data_size = %s\n", hex_string (d->data_size));
+	printf ("    unwind_base = %s\n", hex_string (d->unwind_base));
+	printf ("    linkage_ptr = %s\n", hex_string (d->linkage_ptr));
+	printf ("    phdr_base = %s\n", hex_string (d->phdr_base));
+	printf ("    tls_size = %s\n", hex_string (d->tls_size));
+	printf ("    tls_start_addr = %s\n", hex_string (d->tls_start_addr));
+	printf ("    unwind_size = %s\n", hex_string (d->unwind_size));
+	printf ("    tls_index = %s\n", hex_string (d->tls_index));
       }
 #endif
 

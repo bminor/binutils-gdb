@@ -1,3 +1,17 @@
+2010-04-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Remove remaining "%ll" uses.
+	* go32-nat.c (go32_pte_for_address): Replace "0x%llx" using
+	hex_string call.
+	* rs6000-nat.c (rs6000_ptrace64): Idem.
+	* solib-pa64.c (pa64_current_sos): Idem.
+	* solib-spu.c (spu_current_sos): Idem.
+	* linux-nat.c (linux_nat_find_memory_regions): Replace "%lld" using
+	plongest call.
+	* nto-procfs.c (procfs_meminfo): Replace "0x%016llx" using
+	phex (VAR, 8) call.
+	* sh64-tdep.c (sh64_show_media_regs): Idem.
+
 2010-04-05  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c: Include gdbcore.h.
