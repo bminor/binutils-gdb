@@ -15,6 +15,10 @@ char *tfsizeptr;
 
 int testglob = 31415;
 
+int testglob2 = 271828;
+
+const int constglob = 10000;
+
 int
 start_trace_file (char *filename)
 {
@@ -40,12 +44,30 @@ finish_trace_file (int fd)
   close (fd);
 }
 
+
+void
+add_memory_block (char *addr, int size)
+{
+  short short_x;
+  long long ll_x;
+
+  *((char *) trptr) = 'M';
+  trptr += 1;
+  ll_x = (long) addr;
+  memcpy (trptr, &ll_x, sizeof (long long));
+  trptr += sizeof (long long);
+  short_x = size;
+  memcpy (trptr, &short_x, 2);
+  trptr += 2;
+  memcpy (trptr, addr, size);
+  trptr += size;
+}
+
 void
 write_basic_trace_file (void)
 {
   int fd, int_x;
   short short_x;
-  long long ll_x;
 
   fd = start_trace_file ("basic.tf");
 
@@ -82,16 +104,10 @@ write_basic_trace_file (void)
   trptr += 2;
   tfsizeptr = trptr;
   trptr += 4;
-  *((char *) trptr) = 'M';
-  trptr += 1;
-  ll_x = (long) &testglob;
-  memcpy (trptr, &ll_x, sizeof (long long));
-  trptr += sizeof (long long);
-  short_x = sizeof (testglob);
-  memcpy (trptr, &short_x, 2);
-  trptr += 2;
-  memcpy (trptr, &testglob, sizeof (testglob));
-  trptr += sizeof (testglob);
+  add_memory_block (&testglob, sizeof (testglob));
+  /* Divide a variable between two separate memory blocks.  */
+  add_memory_block (&testglob2, 1);
+  add_memory_block (((char*) &testglob2) + 1, sizeof (testglob2) - 1);
   /* Go back and patch in the frame size.  */
   int_x = trptr - tfsizeptr - sizeof (int);
   memcpy (tfsizeptr, &int_x, 4);

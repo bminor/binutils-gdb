@@ -45,6 +45,7 @@
 #include "filenames.h"
 #include "gdbthread.h"
 #include "stack.h"
+#include "gdbcore.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -3793,7 +3794,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 {
   char block_type;
   int pos, gotten;
-  ULONGEST maddr;
+  ULONGEST maddr, amt;
   unsigned short mlen;
 
   /* We're only doing regular memory for now.  */
@@ -3831,16 +3832,19 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	    perror_with_name (trace_filename);
 	  else if (gotten < 2)
 	    error (_("Premature end of file while reading trace file"));
-	  if (maddr <= offset && (offset + len) <= (maddr + mlen))
-	    {
-	      gotten = read (trace_fd, readbuf, mlen);
-	      if (gotten < 0)
-		perror_with_name (trace_filename);
-	      else if (gotten < mlen)
-		error (_("Premature end of file qwhile reading trace file"));
+	  /* If the block includes the first part of the desired
+	     range, return as much it has; GDB will re-request the
+	     remainder, which might be in a different block of this
+	     trace frame.  */
+	  if (maddr <= offset && offset < (maddr + mlen))
+  	    {
+	      amt = (maddr + mlen) - offset;
+	      if (amt > len)
+		amt = len;
 
-	      return mlen;
-	    }
+	      read (trace_fd, readbuf, amt);
+	      return amt;
+  	    }
 	  lseek (trace_fd, mlen, SEEK_CUR);
 	  pos += (8 + 2 + mlen);
 	  break;
@@ -3854,6 +3858,38 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	  break;
 	}
     }
+
+  /* It's unduly pedantic to refuse to look at the executable for
+     read-only pieces; so do the equivalent of readonly regions aka
+     QTro packet.  */
+  /* FIXME account for relocation at some point */
+  if (exec_bfd)
+    {
+      asection *s;
+      bfd_size_type size;
+      bfd_vma lma;
+
+      for (s = exec_bfd->sections; s; s = s->next)
+	{
+	  if ((s->flags & SEC_LOAD) == 0 ||
+	      (s->flags & SEC_READONLY) == 0)
+	    continue;
+
+	  lma = s->lma;
+	  size = bfd_get_section_size (s);
+	  if (lma <= offset && offset < (lma + size))
+	    {
+	      amt = (lma + size) - offset;
+	      if (amt > len)
+		amt = len;
+
+	      amt = bfd_get_section_contents (exec_bfd, s,
+					      readbuf, offset - lma, amt);
+	      return amt;
+	    }
+	}
+    }
+
   /* Indicate failure to find the requested memory block.  */
   return -1;
 }
@@ -3923,6 +3959,12 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 }
 
 static int
+tfile_has_all_memory (struct target_ops *ops)
+{
+  return 1;
+}
+
+static int
 tfile_has_memory (struct target_ops *ops)
 {
   return 1;
@@ -3958,6 +4000,7 @@ init_tfile_ops (void)
   /* core_stratum might seem more logical, but GDB doesn't like having
      more than one core_stratum vector.  */
   tfile_ops.to_stratum = process_stratum;
+  tfile_ops.to_has_all_memory = tfile_has_all_memory;
   tfile_ops.to_has_memory = tfile_has_memory;
   tfile_ops.to_has_stack = tfile_has_stack;
   tfile_ops.to_has_registers = tfile_has_registers;

@@ -74,7 +74,14 @@ gdb_test "tfind 0" \
 \#0  write_basic_trace_file ().*" \
     "tfind 0 on trace file"
 
+# Note that there is no tracepoint collecting these globals, we
+# just happen to know they are covered by the trace frame.
+
 gdb_test "print testglob" " = 31415" "print testglob on trace file"
+
+gdb_test "print testglob2" " = 271828" "print testglob2 on trace file"
+
+gdb_test "print constglob" " = 10000" "print constglob on trace file"
 
 gdb_test "tfind" "Target failed to find requested trace frame." \
     "tfind does not find a second frame in trace file"
