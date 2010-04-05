@@ -1,5 +1,5 @@
 /* .eh_frame section optimization.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
@@ -636,7 +636,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  REQUIRE (read_byte (&buf, end, &cie->version));
 
 	  /* Cannot handle unknown versions.  */
-	  REQUIRE (cie->version == 1 || cie->version == 3);
+	  REQUIRE (cie->version == 1
+		   || cie->version == 3
+		   || cie->version == 4);
 	  REQUIRE (strlen ((char *) buf) < sizeof (cie->augmentation));
 
 	  strcpy (cie->augmentation, (char *) buf);
@@ -650,6 +652,13 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		 Just skip it.  */
 	      REQUIRE (skip_bytes (&buf, end, ptr_size));
 	      SKIP_RELOCS (buf);
+	    }
+	  if (cie->version >= 4)
+	    {
+	      REQUIRE (buf + 1 < end);
+	      REQUIRE (buf[0] == ptr_size);
+	      REQUIRE (buf[1] == 0);
+	      buf += 2;
 	    }
 	  REQUIRE (read_uleb128 (&buf, end, &cie->code_align));
 	  REQUIRE (read_sleb128 (&buf, end, &cie->data_align));

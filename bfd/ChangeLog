@@ -1,5 +1,9 @@
 2010-04-05  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Handle CIE version 4
+	provided that it has the expected address size and zero segment
+	length.
+
 	* dwarf2.c (struct line_head): Add maximum_ops_per_insn field.
 	(struct line_info): Add op_index field, change end_sequence type to
 	unsigned char.

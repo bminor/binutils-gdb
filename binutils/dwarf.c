@@ -3906,6 +3906,8 @@ typedef struct Frame_Chunk
   int ra;
   unsigned char fde_encoding;
   unsigned char cfa_exp;
+  unsigned char ptr_size;
+  unsigned char segment_size;
 }
 Frame_Chunk;
 
@@ -4114,6 +4116,7 @@ display_debug_frames (struct dwarf_section *section,
   unsigned int length_return;
   int max_regs = 0;
   const char *bad_reg = _("bad register: ");
+  int saved_eh_addr_size = eh_addr_size;
 
   printf (_("Contents of the %s section:\n"), section->name);
 
@@ -4128,7 +4131,7 @@ display_debug_frames (struct dwarf_section *section,
       int need_col_headers = 1;
       unsigned char *augmentation_data = NULL;
       unsigned long augmentation_data_len = 0;
-      int encoded_ptr_size = eh_addr_size;
+      int encoded_ptr_size = saved_eh_addr_size;
       int offset_size;
       int initial_length_size;
 
@@ -4184,48 +4187,36 @@ display_debug_frames (struct dwarf_section *section,
 	  fc->augmentation = (char *) start;
 	  start = (unsigned char *) strchr ((char *) start, '\0') + 1;
 
-	  if (fc->augmentation[0] == 'z')
+	  if (strcmp (fc->augmentation, "eh") == 0)
+	    start += eh_addr_size;
+
+	  if (version >= 4)
 	    {
-	      fc->code_factor = LEB ();
-	      fc->data_factor = SLEB ();
-	      if (version == 1)
-		{
-		  fc->ra = GET (1);
-		}
-	      else
-		{
-		  fc->ra = LEB ();
-		}
-	      augmentation_data_len = LEB ();
-	      augmentation_data = start;
-	      start += augmentation_data_len;
-	    }
-	  else if (strcmp (fc->augmentation, "eh") == 0)
-	    {
-	      start += eh_addr_size;
-	      fc->code_factor = LEB ();
-	      fc->data_factor = SLEB ();
-	      if (version == 1)
-		{
-		  fc->ra = GET (1);
-		}
-	      else
-		{
-		  fc->ra = LEB ();
-		}
+	      fc->ptr_size = GET (1);
+	      fc->segment_size = GET (1);
+	      eh_addr_size = fc->ptr_size;
 	    }
 	  else
 	    {
-	      fc->code_factor = LEB ();
-	      fc->data_factor = SLEB ();
-	      if (version == 1)
-		{
-		  fc->ra = GET (1);
-		}
-	      else
-		{
-		  fc->ra = LEB ();
-		}
+	      fc->ptr_size = eh_addr_size;
+	      fc->segment_size = 0;
+	    }
+	  fc->code_factor = LEB ();
+	  fc->data_factor = SLEB ();
+	  if (version == 1)
+	    {
+	      fc->ra = GET (1);
+	    }
+	  else
+	    {
+	      fc->ra = LEB ();
+	    }
+
+	  if (fc->augmentation[0] == 'z')
+	    {
+	      augmentation_data_len = LEB ();
+	      augmentation_data = start;
+	      start += augmentation_data_len;
 	    }
 	  cie = fc;
 
@@ -4240,6 +4231,11 @@ display_debug_frames (struct dwarf_section *section,
 		      (unsigned long)(saved_start - section_start), length, cie_id);
 	      printf ("  Version:               %d\n", version);
 	      printf ("  Augmentation:          \"%s\"\n", fc->augmentation);
+	      if (version >= 4)
+		{
+		  printf ("  Pointer Size:          %u\n", fc->ptr_size);
+		  printf ("  Segment Size:          %u\n", fc->segment_size);
+		}
 	      printf ("  Code alignment factor: %u\n", fc->code_factor);
 	      printf ("  Data alignment factor: %d\n", fc->data_factor);
 	      printf ("  Return address column: %d\n", fc->ra);
@@ -4286,6 +4282,7 @@ display_debug_frames (struct dwarf_section *section,
 	{
 	  unsigned char *look_for;
 	  static Frame_Chunk fde_fc;
+	  unsigned long segment_selector;
 
 	  fc = & fde_fc;
 	  memset (fc, 0, sizeof (Frame_Chunk));
@@ -4307,6 +4304,8 @@ display_debug_frames (struct dwarf_section *section,
 	      cie = fc;
 	      fc->augmentation = "";
 	      fc->fde_encoding = 0;
+	      fc->ptr_size = eh_addr_size;
+	      fc->segment_size = 0;
 	    }
 	  else
 	    {
@@ -4316,6 +4315,9 @@ display_debug_frames (struct dwarf_section *section,
 	      memcpy (fc->col_type, cie->col_type, fc->ncols * sizeof (short int));
 	      memcpy (fc->col_offset, cie->col_offset, fc->ncols * sizeof (int));
 	      fc->augmentation = cie->augmentation;
+	      fc->ptr_size = cie->ptr_size;
+	      eh_addr_size = cie->ptr_size;
+	      fc->segment_size = cie->segment_size;
 	      fc->code_factor = cie->code_factor;
 	      fc->data_factor = cie->data_factor;
 	      fc->cfa_reg = cie->cfa_reg;
@@ -4328,6 +4330,12 @@ display_debug_frames (struct dwarf_section *section,
 	  if (fc->fde_encoding)
 	    encoded_ptr_size = size_of_encoded_value (fc->fde_encoding);
 
+	  segment_selector = 0;
+	  if (fc->segment_size)
+	    {
+	      segment_selector = byte_get (start, fc->segment_size);
+	      start += fc->segment_size;
+	    }
 	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding);
 	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
 	    fc->pc_begin += section->address + (start - section_start);
@@ -4342,10 +4350,12 @@ display_debug_frames (struct dwarf_section *section,
 	      start += augmentation_data_len;
 	    }
 
-	  printf ("\n%08lx %08lx %08lx FDE cie=%08lx pc=%08lx..%08lx\n",
+	  printf ("\n%08lx %08lx %08lx FDE cie=%08lx pc=",
 		  (unsigned long)(saved_start - section_start), length, cie_id,
-		  (unsigned long)(cie->chunk_start - section_start),
-		  fc->pc_begin, fc->pc_begin + fc->pc_range);
+		  (unsigned long)(cie->chunk_start - section_start));
+	  if (fc->segment_size)
+	    printf ("%04lx:", segment_selector);
+	  printf ("%08lx..%08lx\n", fc->pc_begin, fc->pc_begin + fc->pc_range);
 	  if (! do_debug_frames_interp && augmentation_data_len)
 	    {
 	      unsigned long i;
@@ -4893,6 +4903,7 @@ display_debug_frames (struct dwarf_section *section,
 	frame_display_row (fc, &need_col_headers, &max_regs);
 
       start = block_end;
+      eh_addr_size = saved_eh_addr_size;
     }
 
   printf ("\n");

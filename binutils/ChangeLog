@@ -1,5 +1,9 @@
 2010-04-05  Jakub Jelinek  <jakub@redhat.com>
 
+	* dwarf.c (struct Frame_Chunk): Add ptr_size and segment_size
+	fields.
+	(display_debug_frames): Handle CIE version 4.
+
 	* dwarf.c (struct State_Machine_Registers): Add op_index field,
 	change end_sequence type to unsigned char.
 	(reset_state_machine): Clear op_index.
