@@ -38,6 +38,7 @@
 				    pep_use_nul_prefixed_import_tables
 #define pe_use_coff_long_section_names \
 				    pep_use_coff_long_section_names
+#define pe_leading_underscore	    pep_leading_underscore
 
 /* External globals.  */
 #define pe_data_import_dll          pep_data_import_dll

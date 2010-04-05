@@ -1,3 +1,55 @@
+2010-04-05  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emultempl/pep.em (U): Macro modified.
+	(U_SIZE): New helper macro.
+	(GET_INIT_SYMBOL_NAME): Likewise.
+	(enum options): Add OPTION_NO_LEADING_UNDERSCORE
+	and OPTION_LEADING_UNDERSCORE enumerator-values.
+	(gld${EMULATION_NAME}_add_options): Add --(no-)leading-underscore
+	option.
+	(definfo): Add new member is_c_symbol.
+	(D): Add to macro underscore mode parameter.
+	(init): Add definition for is_c_symbol.
+	(gld_${EMULATION_NAME}_list_options): Display new options.
+	(set_pep_name): Adjust underscoring dependent fixed
+	symbol handling.
+	(gld_${EMULATION_NAME}_set_symbols): Likewise.
+	(saw_option): Likewise.
+	(gld_${EMULATION_NAME}_unrecognized_file): Likewise.
+	(set_entry_point): Initial initial_symbol_char dependent to
+	target's default and new option flag pep_leading_underscore.
+	* emultempl/pe.em (U): Macro modified.
+	(U_SIZE): New helper macro.
+	(GET_INIT_SYMBOL_NAME): Likewise.
+	(OPTION_LEADING_UNDERSCORE): Add new option define.
+	(OPTION_NO_LEADING_UNDERSCORE): Likewise.
+	(gld${EMULATION_NAME}_add_options): Add --(no-)leading-underscore
+	option.
+	(definfo): Add new member is_c_symbol.
+	(D): Add to macro underscore mode parameter.
+	(init): Add definition for is_c_symbol.
+	(gld_${EMULATION_NAME}_list_options): Display new options.
+	(set_pep_name): Adjust underscoring dependent fixed
+	symbol handling.
+	(gld_${EMULATION_NAME}_set_symbols): Likewise.
+	(saw_option): Likewise.
+	(gld_${EMULATION_NAME}_unrecognized_file): Likewise.
+	(set_entry_point): Initial initial_symbol_char dependent to
+	target's default and new option flag pep_leading_underscore.
+	* pe-dll.c (pe_leading_underscore): New flag variable.
+	(pe_detail_list): Remove const to allow modify of
+	member underscore.
+	(pe_dll_id_target): Initialize pe_details' underscore variable
+	dependent to target's default and flag pe_leading_underscore.
+	* pe-dll.h (pe_leading_underscore): Add extern declaration of
+	option flag.
+	* pep-dll.c (pe_leading_underscore): Add alias define for
+	pep_leading_underscore.
+	* pep-dll.h (pep_leading_underscore) Add extern declaration of
+	option flag.
+	* ld.texinfo: Add documentation for --(no-)leading-underscore
+	option.
+
 2010-03-26  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11426

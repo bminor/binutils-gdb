@@ -2218,6 +2218,14 @@ feature is fully enabled and warnings are not printed.  If you specify
 mismatches are considered to be errors.
 [This option is specific to the i386 PE targeted port of the linker]
 
+@kindex --leading-underscore
+@kindex --no-leading-underscore
+@item --leading-underscore
+@itemx --no-leading-underscore
+For most targets default symbol-prefix is an underscore and is defined
+in target's description. By this option it is possible to
+disable/enable the default underscore symbol-prefix.
+
 @cindex DLLs, creating
 @kindex --export-all-symbols
 @item --export-all-symbols

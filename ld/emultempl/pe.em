@@ -123,8 +123,6 @@ fragment <<EOF
 #define PE_DEF_FILE_ALIGNMENT		0x00000200
 #endif
 
-#define U(S) ${INITIAL_SYMBOL_CHAR} S
-
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
 static int pe_subsystem = ${SUBSYSTEM};
@@ -224,8 +222,12 @@ fragment <<EOF
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2 + 1)
 #define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
 					(OPTION_EXCLUDE_MODULES_FOR_IMPLIB + 1)
-#define OPTION_ENABLE_LONG_SECTION_NAMES \
+#define OPTION_NO_LEADING_UNDERSCORE \
 					(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
+#define OPTION_LEADING_UNDERSCORE \
+					(OPTION_NO_LEADING_UNDERSCORE + 1)
+#define OPTION_ENABLE_LONG_SECTION_NAMES \
+					(OPTION_LEADING_UNDERSCORE + 1)
 #define OPTION_DISABLE_LONG_SECTION_NAMES \
 					(OPTION_ENABLE_LONG_SECTION_NAMES + 1)
 /* DLLCharacteristics flags */
@@ -267,6 +269,8 @@ gld${EMULATION_NAME}_add_options
     {"thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
     {"use-nul-prefixed-import-tables", no_argument, NULL,
      OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
+    {"no-leading-underscore", no_argument, NULL, OPTION_NO_LEADING_UNDERSCORE},
+    {"leading-underscore", no_argument, NULL, OPTION_LEADING_UNDERSCORE},
 #ifdef DLL_SUPPORT
     /* getopt allows abbreviations, so we do this to stop it
        from treating -o as an abbreviation for this option.  */
@@ -328,39 +332,58 @@ typedef struct
   int value;
   char *symbol;
   int inited;
+  /* FALSE for an assembly level symbol and TRUE for a C visible symbol.
+     C visible symbols can be prefixed by underscore dependent to target's
+     settings.  */
+  bfd_boolean is_c_symbol;
 } definfo;
 
-#define D(field,symbol,def)  {&pe.field,sizeof(pe.field), def, symbol,0}
+/* Get symbol name dependent to kind and C visible state of
+   underscore.  */
+#define GET_INIT_SYMBOL_NAME(IDX) \
+  (init[(IDX)].symbol \
+  + ((init[(IDX)].is_c_symbol == FALSE || pe_leading_underscore != 0) ? 0 : 1))
+
+/* Decorates the C visible symbol by underscore, if target requires.  */
+#define U(CSTR) \
+  (pe_leading_underscore == 0 ? CSTR : "_" CSTR)
+
+/* Get size of constant string for a possible underscore prefixed
+   C visible symbol.  */
+#define U_SIZE(CSTR) \
+  (sizeof (CSTR) + pe_leading_underscore == 0 ? 0 : 1)
+
+#define D(field,symbol,def,usc)  {&pe.field,sizeof(pe.field), def, symbol, 0, usc}
 
 static definfo init[] =
 {
   /* imagebase must be first */
 #define IMAGEBASEOFF 0
-  D(ImageBase,"__image_base__", NT_EXE_IMAGE_BASE),
+  D(ImageBase,"__image_base__", NT_EXE_IMAGE_BASE, FALSE),
 #define DLLOFF 1
-  {&dll, sizeof(dll), 0, "__dll__", 0},
+  {&dll, sizeof(dll), 0, "__dll__", 0, FALSE},
 #define MSIMAGEBASEOFF	2
-  D(ImageBase, U ("__ImageBase"), NT_EXE_IMAGE_BASE),
-  D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT),
-  D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT),
-  D(MajorOperatingSystemVersion,"__major_os_version__", 4),
-  D(MinorOperatingSystemVersion,"__minor_os_version__", 0),
-  D(MajorImageVersion,"__major_image_version__", 1),
-  D(MinorImageVersion,"__minor_image_version__", 0),
+  D(ImageBase, "___ImageBase", NT_EXE_IMAGE_BASE, TRUE),
+  D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT, FALSE),
+  D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT, FALSE),
+  D(MajorOperatingSystemVersion,"__major_os_version__", 4, FALSE),
+  D(MinorOperatingSystemVersion,"__minor_os_version__", 0, FALSE),
+  D(MajorImageVersion,"__major_image_version__", 1, FALSE),
+  D(MinorImageVersion,"__minor_image_version__", 0, FALSE),
 #if defined(TARGET_IS_armpe)  || defined(TARGET_IS_arm_wince_pe)
-  D(MajorSubsystemVersion,"__major_subsystem_version__", 3),
+  D(MajorSubsystemVersion,"__major_subsystem_version__", 3, FALSE),
 #else
-  D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
+  D(MajorSubsystemVersion,"__major_subsystem_version__", 4, FALSE),
 #endif
-  D(MinorSubsystemVersion,"__minor_subsystem_version__", 0),
-  D(Subsystem,"__subsystem__", ${SUBSYSTEM}),
-  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x200000),
-  D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000),
-  D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
-  D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000),
-  D(LoaderFlags,"__loader_flags__", 0x0),
-  D(DllCharacteristics, "__dll_characteristics__", 0x0), 
-  { NULL, 0, 0, NULL, 0 }
+  D(MinorSubsystemVersion,"__minor_subsystem_version__", 0, FALSE),
+  D(Subsystem,"__subsystem__", ${SUBSYSTEM}, FALSE),
+  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x200000, FALSE),
+  D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000, FALSE),
+  D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000, FALSE),
+  D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000, FALSE),
+  D(LoaderFlags,"__loader_flags__", 0x0, FALSE),
+  D(DllCharacteristics, "__dll_characteristics__", 0x0, FALSE),
+  { NULL, 0, 0, NULL, 0 , FALSE}
 };
 
 
@@ -382,6 +405,7 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --stack <size>                     Set size of the initial stack\n"));
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
+  fprintf (file, _("  --[no-]leading-underscore          Set explicit symbol underscore prefix mode\n"));
   fprintf (file, _("  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"));
 #ifdef DLL_SUPPORT
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
@@ -432,7 +456,7 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
 				       be called in this image\n"));
   fprintf (file, _("  --no-bind			 Do not bind this image\n"));
   fprintf (file, _("  --wdmdriver		 Driver uses the WDM model\n"));
-  fprintf (file, _("  --tsaware       		 Image is Terminal Server aware\n"));
+  fprintf (file, _("  --tsaware                  Image is Terminal Server aware\n"));
 }
 
 
@@ -444,7 +468,7 @@ set_pe_name (char *name, long val)
   /* Find the name and set it.  */
   for (i = 0; init[i].ptr; i++)
     {
-      if (strcmp (name, init[i].symbol) == 0)
+      if (strcmp (name, GET_INIT_SYMBOL_NAME (i)) == 0)
 	{
 	  init[i].value = val;
 	  init[i].inited = 1;
@@ -461,7 +485,7 @@ set_entry_point (void)
 {
   const char *entry;
   const char *initial_symbol_char;
-  int i;
+  int i, u = -1;
 
   static const struct
     {
@@ -504,7 +528,19 @@ set_entry_point (void)
         entry = default_entry;
     }
 
-  initial_symbol_char = ${INITIAL_SYMBOL_CHAR};
+  /* Now we check target's default for getting proper symbol_char.  */
+  u = pe_leading_underscore;
+  if (u == -1 && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
+    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
+
+  if (u == 0)
+    initial_symbol_char = "";
+  else if (u != -1)
+    initial_symbol_char = "_";
+  else
+    abort ();
+  pe_leading_underscore = u;
+
   if (*initial_symbol_char != '\0')
     {
       char *alc_entry;
@@ -693,6 +729,12 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_USE_NUL_PREFIXED_IMPORT_TABLES:
       pe_use_nul_prefixed_import_tables = TRUE;
+      break;
+    case OPTION_NO_LEADING_UNDERSCORE:
+      pe_leading_underscore = 0;
+      break;
+    case OPTION_LEADING_UNDERSCORE:
+      pe_leading_underscore = 1;
       break;
 #ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:
@@ -886,7 +928,8 @@ gld_${EMULATION_NAME}_set_symbols (void)
     {
       long val = init[j].value;
       lang_assignment_statement_type *rv;
-      rv = lang_add_assignment (exp_assop ('=', init[j].symbol,
+
+      rv = lang_add_assignment (exp_assop ('=', GET_INIT_SYMBOL_NAME (j),
 					   exp_intop (val)));
       if (init[j].size == sizeof (short))
 	*(short *) init[j].ptr = val;
@@ -1110,14 +1153,15 @@ This should work unless it involves constant data structures referencing symbols
 
 	      for (i = 0; i < nsyms; i++)
 		{
-		  if (! CONST_STRNEQ (symbols[i]->name, U ("_head_")))
+		  if (! CONST_STRNEQ (symbols[i]->name,
+				      U ("_head_")))
 		    continue;
 
 		  if (pe_dll_extra_pe_debug)
 		    printf ("->%s\n", symbols[i]->name);
 
-		  pe_data_import_dll = (char*) (symbols[i]->name +
-						sizeof (U ("_head_")) - 1);
+		  pe_data_import_dll = (char *) (symbols[i]->name
+						 + U_SIZE ("_head_") - 1);
 		  break;
 		}
 
@@ -1598,7 +1642,7 @@ saw_option (char *option)
   int i;
 
   for (i = 0; init[i].ptr; i++)
-    if (strcmp (init[i].symbol, option) == 0)
+    if (strcmp (GET_INIT_SYMBOL_NAME (i), option) == 0)
       return init[i].inited;
   return 0;
 }
@@ -1632,7 +1676,8 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 	    {
 	      struct bfd_link_hash_entry *h;
 
-	      sprintf (buf, "%s%s", U (""), pe_def_file->exports[i].internal_name);
+	      sprintf (buf, "%s%s", U (""),
+	               pe_def_file->exports[i].internal_name);
 
 	      h = bfd_link_hash_lookup (link_info.hash, buf, TRUE, TRUE, TRUE);
 	      if (h == (struct bfd_link_hash_entry *) NULL)

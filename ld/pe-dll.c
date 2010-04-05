@@ -158,6 +158,7 @@ int pe_dll_compat_implib = 0;
 int pe_dll_extra_pe_debug = 0;
 int pe_use_nul_prefixed_import_tables = 0;
 int pe_use_coff_long_section_names = -1;
+int pe_leading_underscore = -1;
 
 /* Static variables and types.  */
 
@@ -244,7 +245,9 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
 #define PE_ARCH_arm_epoc 5
 #define PE_ARCH_arm_wince 6
 
-static const pe_details_type pe_detail_list[] =
+/* Don't make it constant as underscore mode gets possibly overriden
+   by target or -(no-)leading-underscore option.  */
+static pe_details_type pe_detail_list[] =
 {
   {
 #ifdef pe_use_x86_64
@@ -410,6 +413,11 @@ pe_dll_id_target (const char *target)
     if (strcmp (pe_detail_list[i].target_name, target) == 0
 	|| strcmp (pe_detail_list[i].object_target, target) == 0)
       {
+	int u = pe_leading_underscore; /* Underscoring mode. -1 for use default.  */
+	if (u == -1)
+	  bfd_get_target_info (target, NULL, NULL, &u, NULL);
+	if (u != -1)
+	  pe_detail_list[i].underscored = (u != 0 ? TRUE : FALSE);
 	pe_details = pe_detail_list + i;
 	return;
       }

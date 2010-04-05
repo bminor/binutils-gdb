@@ -38,6 +38,7 @@ extern int pe_dll_compat_implib;
 extern int pe_dll_extra_pe_debug;
 extern int pe_use_nul_prefixed_import_tables;
 extern int pe_use_coff_long_section_names;
+extern int pe_leading_underscore;
 
 typedef enum { EXCLUDESYMS, EXCLUDELIBS, EXCLUDEFORIMPLIB } exclude_type;
 
