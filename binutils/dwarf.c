@@ -264,7 +264,8 @@ typedef struct State_Machine_Registers
   unsigned int column;
   int is_stmt;
   int basic_block;
-  int end_sequence;
+  unsigned char op_index;
+  unsigned char end_sequence;
 /* This variable hold the number of the last entry seen
    in the File Table.  */
   unsigned int last_file_entry;
@@ -276,6 +277,7 @@ static void
 reset_state_machine (int is_stmt)
 {
   state_machine_regs.address = 0;
+  state_machine_regs.op_index = 0;
   state_machine_regs.file = 1;
   state_machine_regs.line = 1;
   state_machine_regs.column = 0;
@@ -322,6 +324,7 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       adr = byte_get (data, len - bytes_read - 1);
       printf (_("set Address to 0x%lx\n"), adr);
       state_machine_regs.address = adr;
+      state_machine_regs.op_index = 0;
       break;
 
     case DW_LNE_define_file:
@@ -2297,6 +2300,18 @@ display_debug_lines_raw (struct dwarf_section *section,
       hdrptr += offset_size;
       linfo.li_min_insn_length = byte_get (hdrptr, 1);
       hdrptr++;
+      if (linfo.li_version >= 4)
+	{
+	  linfo.li_max_ops_per_insn = byte_get (hdrptr, 1);
+	  hdrptr++;
+	  if (linfo.li_max_ops_per_insn == 0)
+	    {
+	      warn (_("Invalid maximum operations per insn.\n"));
+	      return 0;
+	    }
+	}
+      else
+	linfo.li_max_ops_per_insn = 1;
       linfo.li_default_is_stmt = byte_get (hdrptr, 1);
       hdrptr++;
       linfo.li_line_base = byte_get (hdrptr, 1);
@@ -2315,6 +2330,8 @@ display_debug_lines_raw (struct dwarf_section *section,
       printf (_("  DWARF Version:               %d\n"), linfo.li_version);
       printf (_("  Prologue Length:             %d\n"), linfo.li_prologue_length);
       printf (_("  Minimum Instruction Length:  %d\n"), linfo.li_min_insn_length);
+      if (linfo.li_version >= 4)
+	printf (_("  Maximum Ops per Instruction: %d\n"), linfo.li_max_ops_per_insn);
       printf (_("  Initial value of 'is_stmt':  %d\n"), linfo.li_default_is_stmt);
       printf (_("  Line Base:                   %d\n"), linfo.li_line_base);
       printf (_("  Line Range:                  %d\n"), linfo.li_line_range);
@@ -2398,10 +2415,27 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  if (op_code >= linfo.li_opcode_base)
 	    {
 	      op_code -= linfo.li_opcode_base;
-	      uladv = (op_code / linfo.li_line_range) * linfo.li_min_insn_length;
-	      state_machine_regs.address += uladv;
-	      printf (_("  Special opcode %d: advance Address by %lu to 0x%lx"),
-		      op_code, uladv, state_machine_regs.address);
+	      uladv = (op_code / linfo.li_line_range);
+	      if (linfo.li_max_ops_per_insn == 1)
+		{
+		  uladv *= linfo.li_min_insn_length;
+		  state_machine_regs.address += uladv;
+		  printf (_("  Special opcode %d: advance Address by %lu to 0x%lx"),
+			  op_code, uladv, state_machine_regs.address);
+		}
+	      else
+		{
+		  state_machine_regs.address
+		    += ((state_machine_regs.op_index + uladv)
+			/ linfo.li_max_ops_per_insn)
+		       * linfo.li_min_insn_length;
+		  state_machine_regs.op_index
+		    = (state_machine_regs.op_index + uladv)
+		      % linfo.li_max_ops_per_insn;
+		  printf (_("  Special opcode %d: advance Address by %lu to 0x%lx[%d]"),
+			  op_code, uladv, state_machine_regs.address,
+			  state_machine_regs.op_index);
+		}
 	      adv = (op_code % linfo.li_line_range) + linfo.li_line_base;
 	      state_machine_regs.line += adv;
 	      printf (_(" and Line by %d to %d\n"),
@@ -2419,11 +2453,27 @@ display_debug_lines_raw (struct dwarf_section *section,
 
 	    case DW_LNS_advance_pc:
 	      uladv = read_leb128 (data, & bytes_read, 0);
-	      uladv *= linfo.li_min_insn_length;
 	      data += bytes_read;
-	      state_machine_regs.address += uladv;
-	      printf (_("  Advance PC by %lu to 0x%lx\n"), uladv,
-		      state_machine_regs.address);
+	      if (linfo.li_max_ops_per_insn == 1)
+		{
+		  uladv *= linfo.li_min_insn_length;
+		  state_machine_regs.address += uladv;
+		  printf (_("  Advance PC by %lu to 0x%lx\n"), uladv,
+			  state_machine_regs.address);
+		}
+	      else
+		{
+		  state_machine_regs.address
+		    += ((state_machine_regs.op_index + uladv)
+			/ linfo.li_max_ops_per_insn)
+		       * linfo.li_min_insn_length;
+		  state_machine_regs.op_index
+		    = (state_machine_regs.op_index + uladv)
+		      % linfo.li_max_ops_per_insn;
+		  printf (_("  Advance PC by %lu to 0x%lx[%d]\n"), uladv,
+			  state_machine_regs.address,
+			  state_machine_regs.op_index);
+		}
 	      break;
 
 	    case DW_LNS_advance_line:
@@ -2462,17 +2512,34 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      break;
 
 	    case DW_LNS_const_add_pc:
-	      uladv = (((255 - linfo.li_opcode_base) / linfo.li_line_range)
-		      * linfo.li_min_insn_length);
-	      state_machine_regs.address += uladv;
-	      printf (_("  Advance PC by constant %lu to 0x%lx\n"), uladv,
-		      state_machine_regs.address);
+	      uladv = ((255 - linfo.li_opcode_base) / linfo.li_line_range);
+	      if (linfo.li_max_ops_per_insn)
+		{
+		  uladv *= linfo.li_min_insn_length;
+		  state_machine_regs.address += uladv;
+		  printf (_("  Advance PC by constant %lu to 0x%lx\n"), uladv,
+			  state_machine_regs.address);
+		}
+	      else
+		{
+		  state_machine_regs.address
+		    += ((state_machine_regs.op_index + uladv)
+			/ linfo.li_max_ops_per_insn)
+		       * linfo.li_min_insn_length;
+		  state_machine_regs.op_index
+		    = (state_machine_regs.op_index + uladv)
+		      % linfo.li_max_ops_per_insn;
+		  printf (_("  Advance PC by constant %lu to 0x%lx[%d]\n"),
+			  uladv, state_machine_regs.address,
+			  state_machine_regs.op_index);
+		}
 	      break;
 
 	    case DW_LNS_fixed_advance_pc:
 	      uladv = byte_get (data, 2);
 	      data += 2;
 	      state_machine_regs.address += uladv;
+	      state_machine_regs.op_index = 0;
 	      printf (_("  Advance PC by fixed size amount %lu to 0x%lx\n"),
 		      uladv, state_machine_regs.address);
 	      break;
@@ -2588,6 +2655,18 @@ display_debug_lines_decoded (struct dwarf_section *section,
       hdrptr += offset_size;
       linfo.li_min_insn_length = byte_get (hdrptr, 1);
       hdrptr++;
+      if (linfo.li_version >= 4)
+	{
+	  linfo.li_max_ops_per_insn = byte_get (hdrptr, 1);
+	  hdrptr++;
+	  if (linfo.li_max_ops_per_insn == 0)
+	    {
+	      warn (_("Invalid maximum operations per insn.\n"));
+	      return 0;
+	    }
+	}
+      else
+	linfo.li_max_ops_per_insn = 1;
       linfo.li_default_is_stmt = byte_get (hdrptr, 1);
       hdrptr++;
       linfo.li_line_base = byte_get (hdrptr, 1);
@@ -2723,8 +2802,22 @@ display_debug_lines_decoded (struct dwarf_section *section,
           if (op_code >= linfo.li_opcode_base)
 	    {
 	      op_code -= linfo.li_opcode_base;
-              uladv = (op_code / linfo.li_line_range) * linfo.li_min_insn_length;
-              state_machine_regs.address += uladv;
+	      uladv = (op_code / linfo.li_line_range);
+	      if (linfo.li_max_ops_per_insn == 1)
+		{
+		  uladv *= linfo.li_min_insn_length;
+		  state_machine_regs.address += uladv;
+		}
+	      else
+		{
+		  state_machine_regs.address
+		    += ((state_machine_regs.op_index + uladv)
+			/ linfo.li_max_ops_per_insn)
+		       * linfo.li_min_insn_length;
+		  state_machine_regs.op_index
+		    = (state_machine_regs.op_index + uladv)
+		      % linfo.li_max_ops_per_insn;
+		}
 
               adv = (op_code % linfo.li_line_range) + linfo.li_line_base;
               state_machine_regs.line += adv;
@@ -2757,6 +2850,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
                   case DW_LNE_set_address:
                     state_machine_regs.address =
                     byte_get (op_code_data, ext_op_code_len - bytes_read - 1);
+		    state_machine_regs.op_index = 0;
                     break;
                   case DW_LNE_define_file:
                     {
@@ -2785,9 +2879,22 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
             case DW_LNS_advance_pc:
               uladv = read_leb128 (data, & bytes_read, 0);
-              uladv *= linfo.li_min_insn_length;
               data += bytes_read;
-              state_machine_regs.address += uladv;
+	      if (linfo.li_max_ops_per_insn == 1)
+		{
+		  uladv *= linfo.li_min_insn_length;
+		  state_machine_regs.address += uladv;
+		}
+	      else
+		{
+		  state_machine_regs.address
+		    += ((state_machine_regs.op_index + uladv)
+			/ linfo.li_max_ops_per_insn)
+		       * linfo.li_min_insn_length;
+		  state_machine_regs.op_index
+		    = (state_machine_regs.op_index + uladv)
+		      % linfo.li_max_ops_per_insn;
+		}
               break;
 
             case DW_LNS_advance_line:
@@ -2832,15 +2939,29 @@ display_debug_lines_decoded (struct dwarf_section *section,
               break;
 
             case DW_LNS_const_add_pc:
-              uladv = (((255 - linfo.li_opcode_base) / linfo.li_line_range)
-                       * linfo.li_min_insn_length);
-              state_machine_regs.address += uladv;
+	      uladv = ((255 - linfo.li_opcode_base) / linfo.li_line_range);
+	      if (linfo.li_max_ops_per_insn == 1)
+		{
+		  uladv *= linfo.li_min_insn_length;
+		  state_machine_regs.address += uladv;
+		}
+	      else
+		{
+		  state_machine_regs.address
+		    += ((state_machine_regs.op_index + uladv)
+			/ linfo.li_max_ops_per_insn)
+		       * linfo.li_min_insn_length;
+		  state_machine_regs.op_index
+		    = (state_machine_regs.op_index + uladv)
+		      % linfo.li_max_ops_per_insn;
+		}
               break;
 
             case DW_LNS_fixed_advance_pc:
               uladv = byte_get (data, 2);
               data += 2;
               state_machine_regs.address += uladv;
+	      state_machine_regs.op_index = 0;
               break;
 
             case DW_LNS_set_prologue_end:
@@ -2894,13 +3015,27 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
               if (!do_wide || (fileNameLength <= MAX_FILENAME_LENGTH))
                 {
-                  printf (_("%-35s  %11d  %#18lx\n"), newFileName,
-                          state_machine_regs.line, state_machine_regs.address);
+		  if (linfo.li_max_ops_per_insn == 1)
+		    printf (_("%-35s  %11d  %#18lx\n"), newFileName,
+			    state_machine_regs.line,
+			    state_machine_regs.address);
+		  else
+		    printf (_("%-35s  %11d  %#18lx[%d]\n"), newFileName,
+			    state_machine_regs.line,
+			    state_machine_regs.address,
+			    state_machine_regs.op_index);
                 }
               else
                 {
-                  printf (_("%s  %11d  %#18lx\n"), newFileName,
-                          state_machine_regs.line, state_machine_regs.address);
+		  if (linfo.li_max_ops_per_insn == 1)
+		    printf (_("%s  %11d  %#18lx\n"), newFileName,
+			    state_machine_regs.line,
+			    state_machine_regs.address);
+		  else
+		    printf (_("%s  %11d  %#18lx[%d]\n"), newFileName,
+			    state_machine_regs.line,
+			    state_machine_regs.address,
+			    state_machine_regs.op_index);
                 }
 
               if (op_code == DW_LNE_end_sequence)

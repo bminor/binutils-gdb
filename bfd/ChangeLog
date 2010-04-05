@@ -1,3 +1,14 @@
+2010-04-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf2.c (struct line_head): Add maximum_ops_per_insn field.
+	(struct line_info): Add op_index field, change end_sequence type to
+	unsigned char.
+	(new_line_sorts_after): For the same address compare op_index.
+	(add_line_info): Add op_index argument, store it into the structure.
+	(decode_line_info): Complain about unknown versions of .debug_line.
+	Initialize maximum_ops_per_insn.  Add op_index state register and
+	track it.
+
 2010-04-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-ppc.c (apuinfo_set): New static var.

@@ -45,6 +45,7 @@ struct line_head
   unsigned short version;
   bfd_vma prologue_length;
   unsigned char minimum_instruction_length;
+  unsigned char maximum_ops_per_insn;
   unsigned char default_is_stmt;
   int line_base;
   unsigned char line_range;
@@ -928,7 +929,8 @@ struct line_info
   char *filename;
   unsigned int line;
   unsigned int column;
-  int end_sequence;		/* End of (sequential) code sequence.  */
+  unsigned char op_index;
+  unsigned char end_sequence;		/* End of (sequential) code sequence.  */
 };
 
 struct fileinfo
@@ -1002,7 +1004,9 @@ new_line_sorts_after (struct line_info *new_line, struct line_info *line)
 {
   return (new_line->address > line->address
 	  || (new_line->address == line->address
-	      && new_line->end_sequence < line->end_sequence));
+	      && (new_line->op_index > line->op_index
+		  || (new_line->op_index == line->op_index
+		      && new_line->end_sequence < line->end_sequence))));
 }
 
 
@@ -1014,6 +1018,7 @@ new_line_sorts_after (struct line_info *new_line, struct line_info *line)
 static bfd_boolean
 add_line_info (struct line_info_table *table,
 	       bfd_vma address,
+	       unsigned char op_index,
 	       char *filename,
 	       unsigned int line,
 	       unsigned int column,
@@ -1028,6 +1033,7 @@ add_line_info (struct line_info_table *table,
 
   /* Set member data of 'info'.  */
   info->address = address;
+  info->op_index = op_index;
   info->line = line;
   info->column = column;
   info->end_sequence = end_sequence;
@@ -1059,6 +1065,7 @@ add_line_info (struct line_info_table *table,
 
   if (seq
       && seq->last_line->address == address
+      && seq->last_line->op_index == op_index
       && seq->last_line->end_sequence == end_sequence)
     {
       /* We only keep the last entry with the same address and end
@@ -1254,6 +1261,11 @@ compare_sequences (const void* a, const void* b)
   if (seq1->last_line->address > seq2->last_line->address)
     return -1;
 
+  if (seq1->last_line->op_index < seq2->last_line->op_index)
+    return 1;
+  if (seq1->last_line->op_index > seq2->last_line->op_index)
+    return -1;
+
   return 0;
 }
 
@@ -1384,6 +1396,13 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
     }
   line_end = line_ptr + lh.total_length;
   lh.version = read_2_bytes (abfd, line_ptr);
+  if (lh.version < 2 || lh.version > 4)
+    {
+      (*_bfd_error_handler)
+	(_("Dwarf Error: Unhandled .debug_line version %d."), lh.version);
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
   line_ptr += 2;
   if (offset_size == 4)
     lh.prologue_length = read_4_bytes (abfd, line_ptr);
@@ -1392,6 +1411,20 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   line_ptr += offset_size;
   lh.minimum_instruction_length = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
+  if (lh.version >= 4)
+    {
+      lh.maximum_ops_per_insn = read_1_byte (abfd, line_ptr);
+      line_ptr += 1;
+    }
+  else
+    lh.maximum_ops_per_insn = 1;
+  if (lh.maximum_ops_per_insn == 0)
+    {
+      (*_bfd_error_handler)
+	(_("Dwarf Error: Invalid maximum operations per instruction."));
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
   lh.default_is_stmt = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
   lh.line_base = read_1_signed_byte (abfd, line_ptr);
@@ -1472,6 +1505,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
     {
       /* State machine registers.  */
       bfd_vma address = 0;
+      unsigned char op_index = 0;
       char * filename = table->num_files ? concat_filename (table, 1) : NULL;
       unsigned int line = 1;
       unsigned int column = 0;
@@ -1495,11 +1529,21 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	    {
 	      /* Special operand.  */
 	      adj_opcode = op_code - lh.opcode_base;
-	      address += (adj_opcode / lh.line_range)
-		* lh.minimum_instruction_length;
+	      if (lh.maximum_ops_per_insn == 1)
+		address += (adj_opcode / lh.line_range)
+			   * lh.minimum_instruction_length;
+	      else
+		{
+		  address += ((op_index + (adj_opcode / lh.line_range))
+			      / lh.maximum_ops_per_insn)
+			     * lh.minimum_instruction_length;
+		  op_index = (op_index + (adj_opcode / lh.line_range))
+			     % lh.maximum_ops_per_insn;
+		}
 	      line += lh.line_base + (adj_opcode % lh.line_range);
 	      /* Append row to matrix using current values.  */
-	      if (!add_line_info (table, address, filename, line, column, 0))
+	      if (!add_line_info (table, address, op_index, filename,
+				  line, column, 0))
 		goto line_fail;
 	      if (address < low_pc)
 		low_pc = address;
@@ -1518,8 +1562,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-		  if (!add_line_info (table, address, filename, line, column,
-				      end_sequence))
+		  if (!add_line_info (table, address, op_index, filename,
+				      line, column, end_sequence))
 		    goto line_fail;
 		  if (address < low_pc)
 		    low_pc = address;
@@ -1530,6 +1574,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (unit, line_ptr);
+		  op_index = 0;
 		  line_ptr += unit->addr_size;
 		  break;
 		case DW_LNE_define_file:
@@ -1572,7 +1617,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		}
 	      break;
 	    case DW_LNS_copy:
-	      if (!add_line_info (table, address, filename, line, column, 0))
+	      if (!add_line_info (table, address, op_index,
+				  filename, line, column, 0))
 		goto line_fail;
 	      if (address < low_pc)
 		low_pc = address;
@@ -1580,8 +1626,18 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		high_pc = address;
 	      break;
 	    case DW_LNS_advance_pc:
-	      address += lh.minimum_instruction_length
-		* read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	      if (lh.maximum_ops_per_insn == 1)
+		address += lh.minimum_instruction_length
+			   * read_unsigned_leb128 (abfd, line_ptr,
+						   &bytes_read);
+	      else
+		{
+		  bfd_vma adjust = read_unsigned_leb128 (abfd, line_ptr,
+							 &bytes_read);
+		  address = ((op_index + adjust) / lh.maximum_ops_per_insn)
+			    * lh.minimum_instruction_length;
+		  op_index = (op_index + adjust) % lh.maximum_ops_per_insn;
+		}
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_advance_line:
@@ -1611,11 +1667,20 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	    case DW_LNS_set_basic_block:
 	      break;
 	    case DW_LNS_const_add_pc:
-	      address += lh.minimum_instruction_length
-		      * ((255 - lh.opcode_base) / lh.line_range);
+	      if (lh.maximum_ops_per_insn == 1)
+		address += lh.minimum_instruction_length
+			   * ((255 - lh.opcode_base) / lh.line_range);
+	      else
+		{
+		  bfd_vma adjust = ((255 - lh.opcode_base) / lh.line_range);
+		  address += lh.minimum_instruction_length
+			     * ((op_index + adjust) / lh.maximum_ops_per_insn);
+		  op_index = (op_index + adjust) % lh.maximum_ops_per_insn;
+		}
 	      break;
 	    case DW_LNS_fixed_advance_pc:
 	      address += read_2_bytes (abfd, line_ptr);
+	      op_index = 0;
 	      line_ptr += 2;
 	      break;
 	    default:

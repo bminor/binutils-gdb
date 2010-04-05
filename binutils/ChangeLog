@@ -1,3 +1,14 @@
+2010-04-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (struct State_Machine_Registers): Add op_index field,
+	change end_sequence type to unsigned char.
+	(reset_state_machine): Clear op_index.
+	(process_extended_line_op): For DW_LNE_set_address clear op_index.
+	(display_debug_lines_raw): Initialize li_max_ops_per_insn.
+	Track op_index state machine register and print it if
+	li_max_ops_per_insn is != 1.
+	(display_debug_lines_decoded): Likewise.
+
 2010-04-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Don't reject
