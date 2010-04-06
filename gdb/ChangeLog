@@ -1,3 +1,8 @@
+2010-04-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* m32c-tdep.c (make_types): When calling `arch_type', pass size of
+	type in bytes, not bits.
+
 2010-04-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* stabsread.c (define_symbol): Add support for char

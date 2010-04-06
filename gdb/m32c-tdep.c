@@ -194,7 +194,8 @@ make_types (struct gdbarch *arch)
      this is called, so we avoid using them.  */
   tdep->voyd = arch_type (arch, TYPE_CODE_VOID, 1, "void");
   tdep->ptr_voyd
-    = arch_type (arch, TYPE_CODE_PTR, gdbarch_ptr_bit (arch), NULL);
+    = arch_type (arch, TYPE_CODE_PTR, gdbarch_ptr_bit (arch) / TARGET_CHAR_BIT,
+                 NULL);
   TYPE_TARGET_TYPE (tdep->ptr_voyd) = tdep->voyd;
   TYPE_UNSIGNED (tdep->ptr_voyd) = 1;
   tdep->func_voyd = lookup_function_type (tdep->voyd);
@@ -202,14 +203,16 @@ make_types (struct gdbarch *arch)
   sprintf (type_name, "%s_data_addr_t",
 	   gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->data_addr_reg_type
-    = arch_type (arch, TYPE_CODE_PTR, data_addr_reg_bits, xstrdup (type_name));
+    = arch_type (arch, TYPE_CODE_PTR, data_addr_reg_bits / TARGET_CHAR_BIT,
+                 xstrdup (type_name));
   TYPE_TARGET_TYPE (tdep->data_addr_reg_type) = tdep->voyd;
   TYPE_UNSIGNED (tdep->data_addr_reg_type) = 1;
 
   sprintf (type_name, "%s_code_addr_t",
 	   gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->code_addr_reg_type
-    = arch_type (arch, TYPE_CODE_PTR, code_addr_reg_bits, xstrdup (type_name));
+    = arch_type (arch, TYPE_CODE_PTR, code_addr_reg_bits / TARGET_CHAR_BIT,
+                 xstrdup (type_name));
   TYPE_TARGET_TYPE (tdep->code_addr_reg_type) = tdep->func_voyd;
   TYPE_UNSIGNED (tdep->code_addr_reg_type) = 1;
 
