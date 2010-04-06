@@ -1,3 +1,7 @@
+2010-04-06  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (_bfd_vms_lib_write_archive_contents): Fix idd flags.
+
 2010-04-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Handle CIE version 4

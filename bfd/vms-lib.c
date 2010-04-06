@@ -1608,6 +1608,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     unsigned char blk[VMS_BLOCK_SIZE];
     struct vms_lhd *lhd = (struct vms_lhd *)blk;
     struct vms_idd *idd = (struct vms_idd *)(blk + sizeof (*lhd));
+    unsigned int idd_flags;
 
     memset (blk, 0, sizeof (blk));
 
@@ -1638,13 +1639,15 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     bfd_putl32 (vbn - 1, lhd->hiprusd);
 
     /* First index (modules name).  */
-    bfd_putl16 (IDD__FLAGS_ASCII | IDD__FLAGS_VARLENIDX, idd->flags);
+    idd_flags = IDD__FLAGS_ASCII | IDD__FLAGS_VARLENIDX
+      | IDD__FLAGS_NOCASECMP | IDD__FLAGS_NOCASENTR;
+    bfd_putl16 (idd_flags, idd->flags);
     bfd_putl16 (MAX_KEYLEN, idd->keylen);
     bfd_putl16 (mod_idx_vbn, idd->vbn);
     idd++;
 
     /* Second index (symbols name).  */
-    bfd_putl16 (IDD__FLAGS_ASCII | IDD__FLAGS_VARLENIDX, idd->flags);
+    bfd_putl16 (idd_flags, idd->flags);
     bfd_putl16 (MAX_KEYLEN, idd->keylen);
     bfd_putl16 (sym_idx_vbn, idd->vbn);
     idd++;
