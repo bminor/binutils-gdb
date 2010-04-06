@@ -502,7 +502,7 @@ proc test_print_anon_union {} {
 
     set name "print type of anonymous union"
     set re_tag "class_with_anon_union"
-    set re_class "(class $re_tag \{${ws}public:|struct $re_tag\{)"
+    set re_class "(class $re_tag \{${ws}public:|struct $re_tag \{)"
     set re_fields "int one;${ws}union \{${ws}int a;${ws}long( int)? b;${ws}\};"
     gdb_test_multiple "ptype g_anon_union" $name {
 	-re "type = $re_class${ws}$re_fields$nl\}$nl$gdb_prompt $" {

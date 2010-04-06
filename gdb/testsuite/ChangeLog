@@ -1,3 +1,7 @@
+2010-04-06  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.cp/inherit.exp (test_print_anon_union): Fix re_class pattern.
+
 2010-04-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.stabs/aout.sed: Convert all backslash to double backslash
