@@ -1237,6 +1237,15 @@ check_PROGRAMS += plugin_test_5
 plugin_test_5: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms gcctestdir/ld plugin_test.so
 	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms
 
+check_PROGRAMS += plugin_test_6
+check_SCRIPTS += plugin_test_6.sh
+check_DATA += plugin_test_6.err
+MOSTLYCLEANFILES += plugin_test_6.err
+plugin_test_6: plugin_common_test_1.syms plugin_common_test_2.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so" plugin_common_test_1.syms plugin_common_test_2.syms 2>plugin_test_6.err
+plugin_test_6.err: plugin_test_6
+	@touch plugin_test_6.err
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c
@@ -1249,6 +1258,10 @@ two_file_test_1.syms: two_file_test_1.o
 two_file_test_1b.syms: two_file_test_1b.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 two_file_test_2.syms: two_file_test_2.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_common_test_1.syms: plugin_common_test_1.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_common_test_2.syms: plugin_common_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 
 empty.syms:

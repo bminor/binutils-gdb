@@ -503,6 +503,10 @@ Pluginobj::get_symbol_resolution_info(int nsyms, ld_plugin_symbol* syms) const
           // The original symbol was undefined or common.
           if (lsym->source() != Symbol::FROM_OBJECT)
             res = LDPR_RESOLVED_EXEC;
+          else if (lsym->object()->pluginobj() == this)
+            res = (is_visible_from_outside(lsym)
+                   ? LDPR_PREVAILING_DEF
+                   : LDPR_PREVAILING_DEF_IRONLY);
           else if (lsym->object()->pluginobj() != NULL)
             res = LDPR_RESOLVED_IR;
           else if (lsym->object()->is_dynamic())
