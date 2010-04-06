@@ -1,3 +1,7 @@
+2010-04-06  David S. Miller  <davem@davemloft.net>
+
+	* ld-elfvers/vers.exp: Pass -Av9a to assembler on sparc-*-*
+
 2010-04-05  Kai Tietz  <kai.tietz@onevision.com>
 
 	* ld-pe/orphan_nu.d: New test for --no-leading-underscore.

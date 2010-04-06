@@ -97,6 +97,7 @@ if [istarget mips*-*-*] {
 
 case $target_triplet in {
     { ia64-*-* } { set as_options "-x" }
+    { sparc-*-* } { set as_options "-Av9a" }
     default { set as_options "" }
 }
 
