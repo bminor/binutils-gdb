@@ -1,3 +1,10 @@
+2010-04-06  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/476.d ("dccci", "dci", "iccci"): Add tests.
+	* gas/ppc/476.s: Likewise.
+	* gas/ppc/a2.d ("dccci", "dci", "iccci", "ici"): Add tests.
+	* gas/ppc/a2.s: Likewise.
+
 2010-03-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/tic6x: New directory and testcases.

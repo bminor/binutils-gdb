@@ -381,7 +381,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define RAS RAM + 1
   { 0x1f, 16, insert_ras, NULL, PPC_OPERAND_GPR_0 },
 
-  /* The RA field of the tlbwe instruction, which is optional.  */
+  /* The RA field of the tlbwe, dccci and iccci instructions,
+     which are optional.  */
 #define RAOPT RAS + 1
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
 
@@ -396,10 +397,14 @@ const struct powerpc_operand powerpc_operands[] =
 #define RBS RB + 1
   { 0x1f, 11, insert_rbs, extract_rbs, PPC_OPERAND_FAKE },
 
+  /* The RB field of the dccci and iccci instructions, which are optional.  */
+#define RBOPT RBS + 1
+  { 0x1f, 11, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
+
   /* The RS field in a D, DS, X, XFX, XS, M, MD or MDS form
      instruction or the RT field in a D, DS, X, XFX or XO form
      instruction.  */
-#define RS RBS + 1
+#define RS RBOPT + 1
 #define RT RS
 #define RT_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_GPR },
@@ -4181,7 +4186,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mtdcr",	X(31,451), X_MASK, PPC403|BOOKE|PPCA2|PPC476, TITAN,	{SPR, RS}},
 {"mtdcr.",	XRC(31,451,1), X_MASK,       PPCA2,	PPCNONE,	{SPR, RS}},
 
-{"dccci",	X(31,454), XRT_MASK, PPC403|PPC440|TITAN, PPCA2|PPC476,	{RA, RB}},
+{"dccci",	X(31,454), XRT_MASK, PPC403|PPC440|TITAN|PPCA2, PPCNONE, {RAOPT, RBOPT}},
 {"dci",		X(31,454),	XRARB_MASK, PPCA2|PPC476, PPCNONE,	{CT}},
 
 {"divdu",	XO(31,457,0,0),	XO_MASK,     PPC64,	PPCNONE,	{RT, RA, RB}},
@@ -4733,7 +4738,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"extsb",	XRC(31,954,0),	XRB_MASK,    PPC,	PPCNONE,	{RA, RS}},
 {"extsb.",	XRC(31,954,1),	XRB_MASK,    PPC,	PPCNONE,	{RA, RS}},
 
-{"iccci",	X(31,966),     XRT_MASK, PPC403|PPC440|TITAN, PPC476,	{RA, RB}},
+{"iccci",	X(31,966), XRT_MASK, PPC403|PPC440|TITAN|PPCA2, PPCNONE, {RAOPT, RBOPT}},
 {"ici",		X(31,966),	XRARB_MASK,  PPCA2|PPC476, PPCNONE,	{CT}},
 
 {"divduo",	XO(31,457,1,0),	XO_MASK,     PPC64,	PPCNONE,	{RT, RA, RB}},

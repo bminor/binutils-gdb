@@ -93,6 +93,10 @@ ppc476:
 	dcbtstls 10, 11, 12
 	dcbz	1,2
 	dcbz	5,6
+	dccci
+	dci
+	dci	0
+	dci	1
 	divw	10,11,12
 	divw.	11,12,13
 	divwo	10,11,12
@@ -192,6 +196,7 @@ ppc476:
 	icblc	16, 17, 18
 	icbt	5, 8, 9	
 	icbtls	13, 14, 15
+	iccci
 	ici
 	ici	0
 	ici	1

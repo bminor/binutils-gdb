@@ -1,3 +1,9 @@
+2010-04-06  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (RBOPT): New define.
+	("dccci"): Enable for PPCA2.  Make operands optional.
+	("iccci"): Likewise.  Do not deprecate for PPC476.
+
 2010-04-02  Masaki Muranaka  <monaka@monami-software.com>
 
 	* cr16-opc.c (cr16_instruction): Fix typo in comment.
