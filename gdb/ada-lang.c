@@ -5076,7 +5076,6 @@ symbol_completion_match (const char *sym_name,
   return sym_name;
 }
 
-typedef char *char_ptr;
 DEF_VEC_P (char_ptr);
 
 /* A companion function to ada_make_symbol_completion_list().

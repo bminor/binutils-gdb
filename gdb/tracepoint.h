@@ -114,11 +114,7 @@ extern char *default_collect;
 
 /* Struct to collect random info about tracepoints on the target.  */
 
-struct uploaded_string
-{
-  char *str;
-  struct uploaded_string *next;
-};
+DEF_VEC_P (char_ptr);
 
 struct uploaded_tp
 {
@@ -129,11 +125,13 @@ struct uploaded_tp
   int step;
   int pass;
   int orig_size;
+
+  /* String that is the encoded form of the tracepoint's condition.  */
   char *cond;
-  int numactions;
-  char *actions[100];
-  int num_step_actions;
-  char *step_actions[100];
+
+  /* Vectors of strings that are the encoded forms of a tracepoint's actions.  */
+  VEC(char_ptr) *actions;
+  VEC(char_ptr) *step_actions;
 
   /* The original string defining the location of the tracepoint.  */
   char *at_string;
@@ -142,7 +140,7 @@ struct uploaded_tp
   char *cond_string;
 
   /* List of original strings defining the tracepoint's actions.  */
-  struct uploaded_string *cmd_strings;
+  VEC(char_ptr) *cmd_strings;
 
   struct uploaded_tp *next;
 };

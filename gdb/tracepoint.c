@@ -2538,7 +2538,7 @@ trace_save (const char *filename, int target_does_save)
   struct uploaded_tp *uploaded_tps = NULL, *utp;
   struct uploaded_tsv *uploaded_tsvs = NULL, *utsv;
   int a;
-  struct uploaded_string *cmd;
+  char *act;
   LONGEST gotten = 0;
   ULONGEST offset = 0;
 #define MAX_TRACE_UPLOAD 2000
@@ -2646,14 +2646,12 @@ trace_save (const char *filename, int target_does_save)
 	fprintf (fp, ":X%x,%s", (unsigned int) strlen (utp->cond) / 2,
 		 utp->cond);
       fprintf (fp, "\n");
-      for (a = 0; a < utp->numactions; ++a)
+      for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
 	fprintf (fp, "tp A%x:%s:%s\n",
-		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
-		 utp->actions[a]);
-      for (a = 0; a < utp->num_step_actions; ++a)
+		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
+      for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
 	fprintf (fp, "tp S%x:%s:%s\n",
-		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
-		 utp->step_actions[a]);
+		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
       if (utp->at_string)
 	{
 	  encode_source_string (utp->number, utp->addr,
@@ -2666,9 +2664,9 @@ trace_save (const char *filename, int target_does_save)
 				"cond", utp->cond_string, buf, MAX_TRACE_UPLOAD);
 	  fprintf (fp, "tp Z%s\n", buf);
 	}
-      for (cmd = utp->cmd_strings; cmd; cmd = cmd->next)
+      for (a = 0; VEC_iterate (char_ptr, utp->cmd_strings, a, act); ++a)
 	{
-	  encode_source_string (utp->number, utp->addr, "cmd", cmd->str,
+	  encode_source_string (utp->number, utp->addr, "cmd", act,
 				buf, MAX_TRACE_UPLOAD);
 	  fprintf (fp, "tp Z%s\n", buf);
 	}
@@ -2870,6 +2868,9 @@ get_uploaded_tp (int num, ULONGEST addr, struct uploaded_tp **utpp)
   memset (utp, 0, sizeof (struct uploaded_tp));
   utp->number = num;
   utp->addr = addr;
+  utp->actions = NULL;
+  utp->step_actions = NULL;
+  utp->cmd_strings = NULL;
   utp->next = *utpp;
   *utpp = utp;
   return utp;
@@ -3424,12 +3425,12 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
   else if (piece == 'A')
     {
       utp = get_uploaded_tp (num, addr, utpp);
-      utp->actions[utp->numactions++] = xstrdup (p);
+      VEC_safe_push (char_ptr, utp->actions, xstrdup (p));
     }
   else if (piece == 'S')
     {
       utp = get_uploaded_tp (num, addr, utpp);
-      utp->step_actions[utp->num_step_actions++] = xstrdup (p);
+      VEC_safe_push (char_ptr, utp->step_actions, xstrdup (p));
     }
   else if (piece == 'Z')
     {
@@ -3453,21 +3454,7 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
       else if (strncmp (srctype, "cond:", strlen ("cond:")) == 0)
 	utp->cond_string = xstrdup (buf);
       else if (strncmp (srctype, "cmd:", strlen ("cmd:")) == 0)
-	{
-	  /* FIXME consider using a vector? */
-	  struct uploaded_string *last, *newlast;
-	  newlast = (struct uploaded_string *) xmalloc (sizeof (struct uploaded_string));
-	  newlast->str = xstrdup (buf);
-	  newlast->next = NULL;
-	  if (utp->cmd_strings)
-	    {
-	      for (last = utp->cmd_strings; last->next; last = last->next)
-		;
-	      last->next = newlast;
-	    }
-	  else
-	    utp->cmd_strings = newlast;
-	}
+	VEC_safe_push (char_ptr, utp->cmd_strings, xstrdup (buf));
     }
   else
     {

@@ -312,6 +312,10 @@ struct cleanup
 #define ENUM_BITFIELD(TYPE) unsigned int
 #endif
 
+/* vec.h-style vectors of strings want a typedef for char * .  */
+
+typedef char * char_ptr;
+
 /* Needed for various prototypes */
 
 struct symtab;
