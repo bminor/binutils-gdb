@@ -1,3 +1,7 @@
+2010-04-02  Masaki Muranaka  <monaka@monami-software.com>
+
+	* cr16-opc.c (cr16_instruction): Fix typo in comment.
+
 2010-03-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add tic6x-dis.c.
