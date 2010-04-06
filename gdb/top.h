@@ -35,8 +35,6 @@ extern char gdbinit[];
 
 extern void print_gdb_version (struct ui_file *);
 
-extern void source_script (char *, int);
-extern void cd_command (char *, int);
 extern void read_command_file (FILE *);
 extern void init_history (void);
 extern void command_loop (void);

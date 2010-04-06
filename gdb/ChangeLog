@@ -1,3 +1,8 @@
+2010-04-06  Doug Evans  <dje@google.com>
+
+	* top.h (source_script, cd_command): Delete.
+	* main.c: #include "cli/cli-cmds.h"
+
 2010-04-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* m32c-tdep.c (make_types): When calling `arch_type', pass size of

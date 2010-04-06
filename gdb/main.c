@@ -39,8 +39,8 @@
 
 #include "interps.h"
 #include "main.h"
-
 #include "source.h"
+#include "cli/cli-cmds.h"
 
 /* If nonzero, display time usage both at startup and for each command.  */
 
