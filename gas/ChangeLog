@@ -1,3 +1,9 @@
+2010-04-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: New Russian translation.
+	* configure.in (ALL_LINGUAS): Add ru.
+	* configure: Regenerate.
+
 2010-03-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11456

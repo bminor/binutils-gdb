@@ -1,3 +1,7 @@
+2010-04-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: New Vietnamese translation.
+
 2010-03-30  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::using_thumb_only): Handle v6-M
