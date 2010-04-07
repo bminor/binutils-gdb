@@ -614,6 +614,18 @@ General_options::parse_fix_v4bx_interworking(const char*, const char*,
   this->fix_v4bx_ = FIX_V4BX_INTERWORKING;
 }
 
+void
+General_options::parse_EB(const char*, const char*, Command_line*)
+{
+  this->endianness_ = ENDIANNESS_BIG;
+}
+
+void
+General_options::parse_EL(const char*, const char*, Command_line*)
+{
+  this->endianness_ = ENDIANNESS_LITTLE;
+}
+
 } // End namespace gold.
 
 namespace
@@ -845,7 +857,8 @@ General_options::General_options()
     excluded_libs_(),
     symbols_to_retain_(),
     section_starts_(),
-    fix_v4bx_(FIX_V4BX_NONE)
+    fix_v4bx_(FIX_V4BX_NONE),
+    endianness_(ENDIANNESS_NOT_SET)
 {
   // Turn off option registration once construction is complete.
   gold::options::ready_to_register = false;

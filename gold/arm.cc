@@ -602,7 +602,7 @@ class Reloc_stub : public Stub
     // Otherwise, this points a relobj.  We used the unsized and target
     // independent Symbol and Relobj classes instead of Sized_symbol<32> and  
     // Arm_relobj.  This is done to avoid making the stub class a template
-    // as most of the stub machinery is endianity-neutral.  However, it
+    // as most of the stub machinery is endianness-neutral.  However, it
     // may require a bit of casting done by users of this class.
     union
     {
@@ -1065,7 +1065,7 @@ class Arm_exidx_cantunwind : public Output_section_data
   }
 
  private:
-  // Implement do_write for a given endianity.
+  // Implement do_write for a given endianness.
   template<bool big_endian>
   void inline
   do_fixed_endian_write(Output_file*);
@@ -1426,7 +1426,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
       stub_tables_(), local_symbol_is_thumb_function_(),
       attributes_section_data_(NULL), mapping_symbols_info_(),
       section_has_cortex_a8_workaround_(NULL), exidx_section_map_(),
-      output_local_symbol_count_needs_update_(false)
+      output_local_symbol_count_needs_update_(false),
+      merge_flags_and_attributes_(true)
   { }
 
   ~Arm_relobj()
@@ -1565,6 +1566,11 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   void
   update_output_local_symbol_count();
 
+  // Whether we want to merge processor-specific flags and attributes.
+  bool
+  merge_flags_and_attributes() const
+  { return this->merge_flags_and_attributes_; }
+  
  protected:
   // Post constructor setup.
   void
@@ -1665,6 +1671,9 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   Exidx_section_map exidx_section_map_;
   // Whether output local symbol count needs updating.
   bool output_local_symbol_count_needs_update_;
+  // Whether we merge processor flags and attributes of this object to
+  // output.
+  bool merge_flags_and_attributes_;
 };
 
 // Arm_dynobj class.
@@ -4124,7 +4133,7 @@ Stub_template::Stub_template(
 
 // Stub methods.
 
-// Template to implement do_write for a specific target endianity.
+// Template to implement do_write for a specific target endianness.
 
 template<bool big_endian>
 void inline
@@ -4969,7 +4978,7 @@ Arm_input_section<big_endian>::do_reset_address_and_file_offset()
 
 // Arm_exidx_cantunwind methods.
 
-// Write this to Output file OF for a fixed endianity.
+// Write this to Output file OF for a fixed endianness.
 
 template<bool big_endian>
 void
@@ -4990,7 +4999,7 @@ Arm_exidx_cantunwind::do_fixed_endian_write(Output_file* of)
   Arm_address output_offset =
     arm_relobj->get_output_section_offset(this->shndx_);
   Arm_address section_start;
-  if(output_offset != Arm_relobj<big_endian>::invalid_address)
+  if (output_offset != Arm_relobj<big_endian>::invalid_address)
     section_start = os->address() + output_offset;
   else
     {
@@ -5946,7 +5955,7 @@ Arm_relobj<big_endian>::scan_sections_for_stubs(
 	  unsigned int index = this->adjust_shndx(shdr.get_sh_info());
 	  Arm_address output_offset = this->get_output_section_offset(index);
 	  Arm_address output_address;
-	  if(output_offset != invalid_address)
+	  if (output_offset != invalid_address)
 	    output_address = out_sections[index]->address() + output_offset;
 	  else
 	    {
@@ -6327,6 +6336,16 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
   // Call parent class to read symbol information.
   Sized_relobj<32, big_endian>::do_read_symbols(sd);
 
+  // If this input file is a binary file, it has no processor
+  // specific flags and attributes section.
+  Input_file::Format format = this->input_file()->format();
+  if (format != Input_file::FORMAT_ELF)
+    {
+      gold_assert(format == Input_file::FORMAT_BINARY);
+      this->merge_flags_and_attributes_ = false;
+      return;
+    }
+
   // Read processor-specific flags in ELF file header.
   const unsigned char* pehdr = this->get_view(elfcpp::file_header_offset,
 					      elfcpp::Elf_sizes<32>::ehdr_size,
@@ -6340,9 +6359,27 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
   const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
   const unsigned char* pshdrs = sd->section_headers->data();
   const unsigned char *ps = pshdrs + shdr_size;
+  bool must_merge_flags_and_attributes = false;
   for (unsigned int i = 1; i < this->shnum(); ++i, ps += shdr_size)
     {
       elfcpp::Shdr<32, big_endian> shdr(ps);
+
+      // Sometimes an object has no contents except the section name string
+      // table and an empty symbol table with the undefined symbol.  We
+      // don't want to merge processor-specific flags from such an object.
+      if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB)
+	{
+	  // Symbol table is not empty.
+	  const elfcpp::Elf_types<32>::Elf_WXword sym_size =
+	     elfcpp::Elf_sizes<32>::sym_size;
+	  if (shdr.get_sh_size() > sym_size)
+	    must_merge_flags_and_attributes = true;
+	}
+      else if (shdr.get_sh_type() != elfcpp::SHT_STRTAB)
+	// If this is neither an empty symbol table nor a string table,
+	// be conservative.
+	must_merge_flags_and_attributes = true;
+
       if (shdr.get_sh_type() == elfcpp::SHT_ARM_ATTRIBUTES)
 	{
      	  gold_assert(this->attributes_section_data_ == NULL);
@@ -6365,6 +6402,13 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 	  else
 	    this->make_exidx_input_section(i, shdr, text_shndx);
 	}
+    }
+
+  // This is rare.
+  if (!must_merge_flags_and_attributes)
+    {
+      this->merge_flags_and_attributes_ = false;
+      return;
     }
 
   // Some tools are broken and they do not set the link of EXIDX sections. 
@@ -7941,23 +7985,16 @@ Target_arm<big_endian>::do_finalize_sections(
        p != input_objects->relobj_end();
        ++p)
     {
-      // If this input file is a binary file, it has no processor
-      // specific flags and attributes section.
-      Input_file::Format format = (*p)->input_file()->format();
-      if (format != Input_file::FORMAT_ELF)
-	{
-	  gold_assert(format == Input_file::FORMAT_BINARY);
-	  continue;
-	}
-
       Arm_relobj<big_endian>* arm_relobj =
 	Arm_relobj<big_endian>::as_arm_relobj(*p);
-      this->merge_processor_specific_flags(
-	  arm_relobj->name(),
-	  arm_relobj->processor_specific_flags());
-      this->merge_object_attributes(arm_relobj->name().c_str(),
-				    arm_relobj->attributes_section_data());
-
+      if (arm_relobj->merge_flags_and_attributes())
+	{
+	  this->merge_processor_specific_flags(
+	      arm_relobj->name(),
+	      arm_relobj->processor_specific_flags());
+	  this->merge_object_attributes(arm_relobj->name().c_str(),
+					arm_relobj->attributes_section_data());
+	}
     } 
 
   for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
@@ -8046,13 +8083,17 @@ Target_arm<big_endian>::do_finalize_sections(
 	}
     }
 
-  // Create an .ARM.attributes section if there is not one already.
-  Output_attributes_section_data* attributes_section =
-    new Output_attributes_section_data(*this->attributes_section_data_);
-  layout->add_output_section_data(".ARM.attributes",
-				  elfcpp::SHT_ARM_ATTRIBUTES, 0,
-				  attributes_section, false, false, false,
-				  false);
+  // Create an .ARM.attributes section unless we have no regular input
+  // object.  In that case the output will be empty.
+  if (input_objects->number_of_relobjs() != 0)
+    {
+      Output_attributes_section_data* attributes_section =
+      new Output_attributes_section_data(*this->attributes_section_data_);
+      layout->add_output_section_data(".ARM.attributes",
+				      elfcpp::SHT_ARM_ATTRIBUTES, 0,
+				      attributes_section, false, false, false,
+				      false);
+    }
 }
 
 // Return whether a direct absolute static relocation needs to be applied.
@@ -8970,7 +9011,8 @@ Target_arm<big_endian>::merge_processor_specific_flags(
       // Complain about various flag mismatches.
       elfcpp::Elf_Word version1 = elfcpp::arm_eabi_version(flags);
       elfcpp::Elf_Word version2 = elfcpp::arm_eabi_version(out_flags);
-      if (!this->are_eabi_versions_compatible(version1, version2))
+      if (!this->are_eabi_versions_compatible(version1, version2)
+	  && parameters->options().warn_mismatch())
 	gold_error(_("Source object %s has EABI version %d but output has "
 		     "EABI version %d."),
 		   name.c_str(),
@@ -9381,7 +9423,8 @@ Target_arm<big_endian>::merge_object_attributes(
       if (out_attr[elfcpp::Tag_ABI_FP_number_model].int_value() == 0)
 	out_attr[elfcpp::Tag_ABI_VFP_args].set_int_value(
 	    in_attr[elfcpp::Tag_ABI_VFP_args].int_value());
-      else if (in_attr[elfcpp::Tag_ABI_FP_number_model].int_value() != 0)
+      else if (in_attr[elfcpp::Tag_ABI_FP_number_model].int_value() != 0
+	       && parameters->options().warn_mismatch())
         gold_error(_("%s uses VFP register arguments, output does not"),
 		   name);
     }
@@ -9525,7 +9568,7 @@ Target_arm<big_endian>::merge_object_attributes(
 			   && (out_attr[i].int_value() == 'A'
 			       || out_attr[i].int_value() == 'R')))
 		; // Do nothing.
-	      else
+	      else if (parameters->options().warn_mismatch())
 		{
 		  gold_error
 		    (_("conflicting architecture profiles %c/%c"),
@@ -9580,7 +9623,9 @@ Target_arm<big_endian>::merge_object_attributes(
 	case elfcpp::Tag_PCS_config:
 	  if (out_attr[i].int_value() == 0)
 	    out_attr[i].set_int_value(in_attr[i].int_value());
-	  else if (in_attr[i].int_value() != 0 && out_attr[i].int_value() != 0)
+	  else if (in_attr[i].int_value() != 0
+		   && out_attr[i].int_value() != 0
+		   && parameters->options().warn_mismatch())
 	    {
 	      // It's sometimes ok to mix different configs, so this is only
 	      // a warning.
@@ -9590,7 +9635,8 @@ Target_arm<big_endian>::merge_object_attributes(
 	case elfcpp::Tag_ABI_PCS_R9_use:
 	  if (in_attr[i].int_value() != out_attr[i].int_value()
 	      && out_attr[i].int_value() != elfcpp::AEABI_R9_unused
-	      && in_attr[i].int_value() != elfcpp::AEABI_R9_unused)
+	      && in_attr[i].int_value() != elfcpp::AEABI_R9_unused
+	      && parameters->options().warn_mismatch())
 	    {
 	      gold_error(_("%s: conflicting use of R9"), name);
 	    }
@@ -9602,11 +9648,12 @@ Target_arm<big_endian>::merge_object_attributes(
 	      && (in_attr[elfcpp::Tag_ABI_PCS_R9_use].int_value()
 		  != elfcpp::AEABI_R9_SB)
 	      && (out_attr[elfcpp::Tag_ABI_PCS_R9_use].int_value()
-		  != elfcpp::AEABI_R9_unused))
+		  != elfcpp::AEABI_R9_unused)
+	      && parameters->options().warn_mismatch())
 	    {
 	      gold_error(_("%s: SB relative addressing conflicts with use "
 			   "of R9"),
-			 name);
+			   name);
 	    }
 	  // Use the smallest value specified.
 	  if (in_attr[i].int_value() < out_attr[i].int_value())
@@ -9616,7 +9663,8 @@ Target_arm<big_endian>::merge_object_attributes(
 	  // FIXME: Make it possible to turn off this warning.
 	  if (out_attr[i].int_value()
 	      && in_attr[i].int_value()
-	      && out_attr[i].int_value() != in_attr[i].int_value())
+	      && out_attr[i].int_value() != in_attr[i].int_value()
+	      && parameters->options().warn_mismatch())
 	    {
 	      gold_warning(_("%s uses %u-byte wchar_t yet the output is to "
 			     "use %u-byte wchar_t; use of wchar_t values "
@@ -9639,7 +9687,8 @@ Target_arm<big_endian>::merge_object_attributes(
 		}
 	      // FIXME: Make it possible to turn off this warning.
 	      else if (in_attr[i].int_value() != elfcpp::AEABI_enum_forced_wide
-		       && out_attr[i].int_value() != in_attr[i].int_value())
+		       && out_attr[i].int_value() != in_attr[i].int_value()
+		       && parameters->options().warn_mismatch())
 		{
 		  unsigned int in_value = in_attr[i].int_value();
 		  unsigned int out_value = out_attr[i].int_value();
@@ -9656,7 +9705,8 @@ Target_arm<big_endian>::merge_object_attributes(
 	  // Aready done.
 	  break;
 	case elfcpp::Tag_ABI_WMMX_args:
-	  if (in_attr[i].int_value() != out_attr[i].int_value())
+	  if (in_attr[i].int_value() != out_attr[i].int_value()
+	      && parameters->options().warn_mismatch())
 	    {
 	      gold_error(_("%s uses iWMMXt register arguments, output does "
 			   "not"),
@@ -9677,7 +9727,8 @@ Target_arm<big_endian>::merge_object_attributes(
 	case elfcpp::Tag_ABI_FP_16bit_format:
 	  if (in_attr[i].int_value() != 0 && out_attr[i].int_value() != 0)
 	    {
-	      if (in_attr[i].int_value() != out_attr[i].int_value())
+	      if (in_attr[i].int_value() != out_attr[i].int_value()
+		  && parameters->options().warn_mismatch())
 		gold_error(_("fp16 format mismatch between %s and output"),
 			   name);
 	    }
@@ -9714,7 +9765,8 @@ Target_arm<big_endian>::merge_object_attributes(
 		     || in_attr[i].string_value() != "")
 	      err_object = name;
 
-	    if (err_object != NULL)
+	    if (err_object != NULL
+		&& parameters->options().warn_mismatch())
 	      {
 		// Attribute numbers >=64 (mod 128) can be safely ignored.
 		if ((i & 127) < 64)
@@ -9806,7 +9858,7 @@ Target_arm<big_endian>::merge_object_attributes(
 	    }
 	}
 
-      if (err_object)
+      if (err_object && parameters->options().warn_mismatch())
 	{
 	  // Attribute numbers >=64 (mod 128) can be safely ignored.  */
 	  if ((err_tag & 127) < 64)

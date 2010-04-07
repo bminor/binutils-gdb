@@ -713,8 +713,14 @@ class General_options
               N_("Export all dynamic symbols"),
 	      N_("Do not export all dynamic symbols (default)"));
 
+  DEFINE_special(EB, options::ONE_DASH, '\0',
+		 N_("Link big-endian objects."), NULL);
+
   DEFINE_bool(eh_frame_hdr, options::TWO_DASHES, '\0', false,
               N_("Create exception frame header"), NULL);
+
+  DEFINE_special(EL, options::ONE_DASH, '\0',
+		 N_("Link little-endian objects."), NULL);
 
   DEFINE_bool(fatal_warnings, options::TWO_DASHES, '\0', false,
 	      N_("Treat warnings as errors"),
@@ -824,11 +830,17 @@ class General_options
   DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
 		N_("Set output format"), N_("[binary]"));
 
+  DEFINE_bool(p, options::ONE_DASH, '\0', false,
+	      N_("(ARM only) Ignore for backward compatibility"), NULL);
+
   DEFINE_bool(pie, options::ONE_DASH, '\0', false,
 	      N_("Create a position independent executable"), NULL);
   DEFINE_bool_alias(pic_executable, pie, options::TWO_DASHES, '\0',
 		    N_("Create a position independent executable"), NULL,
 		    false);
+
+  DEFINE_bool(pipeline_knowledge, options::ONE_DASH, '\0', false,
+	      NULL, N_("(ARM only) Ignore for backward compatibility"));
 
 #ifdef ENABLE_PLUGINS
   DEFINE_special(plugin, options::TWO_DASHES, '\0',
@@ -991,6 +1003,9 @@ class General_options
 
   DEFINE_bool(warn_constructors, options::TWO_DASHES, '\0', false,
 	      N_("Ignored"), N_("Ignored"));
+
+  DEFINE_bool(warn_mismatch, options::TWO_DASHES, '\0', true,
+	      NULL, N_("Don't warn about mismatched input files"));
 
   DEFINE_bool(warn_multiple_gp, options::TWO_DASHES, '\0', false,
 	      N_("Ignored"), NULL);
@@ -1256,6 +1271,17 @@ class General_options
   fix_v4bx() const
   { return (this->fix_v4bx_); }
 
+  enum Endianness
+  {
+    ENDIANNESS_NOT_SET,
+    ENDIANNESS_BIG,
+    ENDIANNESS_LITTLE
+  };
+
+  Endianness
+  endianness() const
+  { return this->endianness_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1347,6 +1373,8 @@ class General_options
   std::map<std::string, uint64_t> section_starts_;
   // Whether to process armv4 bx instruction relocation.
   Fix_v4bx fix_v4bx_;
+  // Endianness.
+  Endianness endianness_;
 };
 
 // The position-dependent options.  We use this to store the state of

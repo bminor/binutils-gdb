@@ -1,3 +1,43 @@
+2010-04-07  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc: Replace "endianity" with "endianness" in comments.
+	(Arm_exidx_cantunwind): Ditto.
+	(Arm_relobj::Arm_relobj): Initialize merge_flags_and_attribures.
+	(Arm_relobj::merge_flags_and_attributes): New method.
+	(Arm_relobj::merge_flags_and_attributes_): New data member.
+	(Arm_exidx_cantunwind::do_fixed_endian_write): Fix formatting.
+	(Arm_relobj::scan_sections_for_stubs): Ditto.
+	(Arm_relobj::do_read_symbols): Check to see if we really want to
+	merge processor-specific flags and attributes.  Exit early if
+	an object is empty except for section names and the undefined symbol.
+	(Target_arm::do_finalize_sections): Move check for ELF format to
+	Arm_relobj::do_read_symbols.  Merge processor specific flags and
+	attributes from a regular object only when we have determined that
+	it is aapropriate.  Do not create an .ARM.attributes section in
+	output if there is no regular input object.
+	(Target_arm::merge_processor_specific_flags): Check
+	--warn-mismatch before printing any error.
+	(Target_arm::merge_object_attributes): Ditto.
+	* gold.cc (queue_middle_tasks): Handle the case in which there is
+	no regular object in input.
+	* options.cc (General_options::parse_EB): New method.
+	(General_options::parse_EL): Same.
+	(General_options::General_options): Initialize endianness_.
+	* options.h (-EB, -EL, -no-pipeline-knowledge, -p, --warn-mismatch):
+	New options.
+	(General_options::Endianness): New enum.
+	(General_options::endianness): New method.
+	(General_options::endianness_): New data member.
+	* parameters.cc (Parameters::set_options): Check target endianness.
+	(Parameters::set_target_once): Ditto.
+	(Parameters::check_target_endianness): New method.
+	(parameters_force_valid_target): If either -EL or -EB is specified,
+	use it to define endianness of default target.
+	* parameters.h (Parameters::check_target_endianness): New method
+	declaration.
+	* target.h (class Target): Change "endianity" to "endianness"
+	in comments.
+
 2010-04-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure.ac (AM_INIT_AUTOMAKE): Add option no-dist.

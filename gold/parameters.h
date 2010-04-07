@@ -149,6 +149,9 @@ class Parameters
   void
   set_target_once(Target*);
 
+  void
+  check_target_endianness();
+
   friend class Set_parameters_target_once;
 
   Errors* errors_;

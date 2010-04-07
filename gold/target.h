@@ -461,7 +461,7 @@ class Target
 		     std::string*, std::string*) const;
 
   // make_elf_object hooks.  There are four versions of these for
-  // different address sizes and endianities.
+  // different address sizes and endianness.
 
   // Set processor specific flags.
   void
@@ -544,7 +544,7 @@ class Target
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are
-  // almost identical except for their sizes and endianity.  We use a template.
+  // almost identical except for their sizes and endianness.  We use a template.
   // for their implementations.
   template<int size, bool big_endian>
   inline Object*

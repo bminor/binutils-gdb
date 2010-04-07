@@ -532,13 +532,23 @@ queue_middle_tasks(const General_options& options,
         }
     }
 
-  // If we failed to open any input files, it's possible for
-  // THIS_BLOCKER to be NULL here.  There's no real point in
-  // continuing if that happens.
   if (this_blocker == NULL)
     {
-      gold_assert(parameters->errors()->error_count() > 0);
-      gold_exit(false);
+      if (input_objects->number_of_relobjs() == 0)
+	{
+	  // If we are given only archives in input, we have no regular
+	  // objects and THIS_BLOCKER is NULL here.  Create a dummy
+	  // blocker here so that we can run the layout task immediately.
+	  this_blocker = new Task_token(true);
+	}
+      else 
+	{
+	  // If we failed to open any input files, it's possible for
+	  // THIS_BLOCKER to be NULL here.  There's no real point in
+	  // continuing if that happens.
+	  gold_assert(parameters->errors()->error_count() > 0);
+	  gold_exit(false);
+	}
     }
 
   // When all those tasks are complete, we can start laying out the
