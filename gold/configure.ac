@@ -7,7 +7,7 @@ AC_CONFIG_SRCDIR(gold.cc)
 
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([no-dist])
 
 AM_CONFIG_HEADER(config.h:config.in)
 
