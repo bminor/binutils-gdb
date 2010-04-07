@@ -1,3 +1,11 @@
+2010-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11434
+	* ld/testsuite/ld-x86-64/unique1.d: New.
+	* ld/testsuite/ld-x86-64/unique1.s: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run unique1.
+
 2010-04-05  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/pep.em (U): Macro modified.
