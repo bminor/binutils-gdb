@@ -1,5 +1,20 @@
 2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i387-tdep.c: Include "i386-xstate.h".
+	(XSAVE_XSTATE_BV_ADDR): New.
+	(xsave_avxh_offset): Likewise.
+	(XSAVE_AVXH_ADDR): Likewise.
+	(i387_supply_xsave): Likewise.
+	(i387_collect_xsave): Likewise.
+
+	* i387-tdep.h (I387_NUM_YMM_REGS): New.
+	(I387_YMM0H_REGNUM): Likewise.
+	(I387_YMMENDH_REGNUM): Likewise.
+	(i387_supply_xsave): Likewise.
+	(i387_collect_xsave): Likewise.
+
+2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-linux-nat.c: Include "regset.h", "elf/common.h",
 	<sys/uio.h> and "i386-xstate.h".
 	(PTRACE_GETREGSET): New.
