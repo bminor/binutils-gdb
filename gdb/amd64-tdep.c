@@ -43,6 +43,7 @@
 #include "i387-tdep.h"
 
 #include "features/i386/amd64.c"
+#include "features/i386/amd64-avx.c"
 
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
@@ -71,8 +72,21 @@ static const char *amd64_register_names[] =
   "mxcsr",
 };
 
-/* Total number of registers.  */
-#define AMD64_NUM_REGS	ARRAY_SIZE (amd64_register_names)
+static const char *amd64_ymm_names[] = 
+{
+  "ymm0", "ymm1", "ymm2", "ymm3",
+  "ymm4", "ymm5", "ymm6", "ymm7",
+  "ymm8", "ymm9", "ymm10", "ymm11",
+  "ymm12", "ymm13", "ymm14", "ymm15"
+};
+
+static const char *amd64_ymmh_names[] = 
+{
+  "ymm0h", "ymm1h", "ymm2h", "ymm3h",
+  "ymm4h", "ymm5h", "ymm6h", "ymm7h",
+  "ymm8h", "ymm9h", "ymm10h", "ymm11h",
+  "ymm12h", "ymm13h", "ymm14h", "ymm15h"
+};
 
 /* The registers used to pass integer arguments during a function call.  */
 static int amd64_dummy_call_integer_regs[] =
@@ -163,6 +177,8 @@ static const int amd64_dwarf_regmap_len =
 static int
 amd64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int ymm0_regnum = tdep->ymm0_regnum;
   int regnum = -1;
 
   if (reg >= 0 && reg < amd64_dwarf_regmap_len)
@@ -170,6 +186,9 @@ amd64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
   if (regnum == -1)
     warning (_("Unmapped DWARF Register #%d encountered."), reg);
+  else if (ymm0_regnum >= 0
+	   && i386_xmm_regnum_p (gdbarch, regnum))
+    regnum += ymm0_regnum - I387_XMM0_REGNUM (tdep);
 
   return regnum;
 }
@@ -238,6 +257,19 @@ static const char *amd64_dword_names[] =
   "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d"
 };
 
+/* Return the name of register REGNUM, or the empty string if it is
+   an anonymous register. */
+
+static const char *
+amd64_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  /* Hide the upper YMM registers.  */
+  if (i386_ymmh_regnum_p (gdbarch, regnum))
+    return "";
+
+  return tdesc_register_name (gdbarch, regnum);
+}
+
 /* Return the name of register REGNUM.  */
 
 static const char *
@@ -246,6 +278,8 @@ amd64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (i386_byte_regnum_p (gdbarch, regnum))
     return amd64_byte_names[regnum - tdep->al_regnum];
+  else if (i386_ymm_regnum_p (gdbarch, regnum))
+    return amd64_ymm_names[regnum - tdep->ymm0_regnum];
   else if (i386_word_regnum_p (gdbarch, regnum))
     return amd64_word_names[regnum - tdep->ax_regnum];
   else if (i386_dword_regnum_p (gdbarch, regnum))
@@ -2176,6 +2210,28 @@ amd64_collect_fpregset (const struct regset *regset,
   amd64_collect_fxsave (regcache, regnum, fpregs);
 }
 
+/* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64_supply_xstateregset (const struct regset *regset,
+			   struct regcache *regcache, int regnum,
+			   const void *xstateregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+  amd64_supply_xsave (regcache, regnum, xstateregs);
+}
+
+/* Similar to amd64_collect_fpregset, but use XSAVE extended state.  */
+
+static void
+amd64_collect_xstateregset (const struct regset *regset,
+			    const struct regcache *regcache,
+			    int regnum, void *xstateregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+  amd64_collect_xsave (regcache, regnum, xstateregs, 1);
+}
+
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
@@ -2192,6 +2248,16 @@ amd64_regset_from_core_section (struct gdbarch *gdbarch,
 				       amd64_collect_fpregset);
 
       return tdep->fpregset;
+    }
+
+  if (strcmp (sect_name, ".reg-xstate") == 0)
+    {
+      if (tdep->xstateregset == NULL)
+	tdep->xstateregset = regset_alloc (gdbarch,
+					   amd64_supply_xstateregset,
+					   amd64_collect_xstateregset);
+
+      return tdep->xstateregset;
     }
 
   return i386_regset_from_core_section (gdbarch, sect_name, sect_size);
@@ -2256,6 +2322,13 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->num_core_regs = AMD64_NUM_GREGS + I387_NUM_REGS;
   tdep->register_names = amd64_register_names;
 
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx") != NULL)
+    {
+      tdep->ymmh_register_names = amd64_ymmh_names;
+      tdep->num_ymm_regs = 16;
+      tdep->ymm0h_regnum = AMD64_YMM0H_REGNUM;
+    }
+
   tdep->num_byte_regs = 20;
   tdep->num_word_regs = 16;
   tdep->num_dword_regs = 16;
@@ -2268,6 +2341,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				     amd64_pseudo_register_write);
 
   set_tdesc_pseudo_register_name (gdbarch, amd64_pseudo_register_name);
+
+  set_gdbarch_register_name (gdbarch, amd64_register_name);
 
   /* AMD64 has an FPU and 16 SSE registers.  */
   tdep->st0_regnum = AMD64_ST0_REGNUM;
@@ -2349,6 +2424,7 @@ void
 _initialize_amd64_tdep (void)
 {
   initialize_tdesc_amd64 ();
+  initialize_tdesc_amd64_avx ();
 }
 
 
@@ -2384,6 +2460,30 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
     }
 }
 
+/* Similar to amd64_supply_fxsave, but use XSAVE extended state.  */
+
+void
+amd64_supply_xsave (struct regcache *regcache, int regnum,
+		    const void *xsave)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  i387_supply_xsave (regcache, regnum, xsave);
+
+  if (xsave && gdbarch_ptr_bit (gdbarch) == 64)
+    {
+      const gdb_byte *regs = xsave;
+
+      if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
+	regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep),
+			     regs + 12);
+      if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
+	regcache_raw_supply (regcache, I387_FOSEG_REGNUM (tdep),
+			     regs + 20);
+    }
+}
+
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
    *FXSAVE with the value from REGCACHE.  If REGNUM is -1, do this for
    all registers.  This function doesn't touch any of the reserved
@@ -2405,5 +2505,28 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 	regcache_raw_collect (regcache, I387_FISEG_REGNUM (tdep), regs + 12);
       if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
 	regcache_raw_collect (regcache, I387_FOSEG_REGNUM (tdep), regs + 20);
+    }
+}
+
+/* Similar to amd64_collect_fxsave, but but use XSAVE extended state.  */
+
+void
+amd64_collect_xsave (const struct regcache *regcache, int regnum,
+		     void *xsave, int gcore)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  gdb_byte *regs = xsave;
+
+  i387_collect_xsave (regcache, regnum, xsave, gcore);
+
+  if (gdbarch_ptr_bit (gdbarch) == 64)
+    {
+      if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
+	regcache_raw_collect (regcache, I387_FISEG_REGNUM (tdep),
+			      regs + 12);
+      if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
+	regcache_raw_collect (regcache, I387_FOSEG_REGNUM (tdep),
+			      regs + 20);
     }
 }

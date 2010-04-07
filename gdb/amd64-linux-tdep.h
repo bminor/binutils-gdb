@@ -26,13 +26,14 @@
 /* Register number for the "orig_rax" register.  If this register
    contains a value >= 0 it is interpreted as the system call number
    that the kernel is supposed to restart.  */
-#define AMD64_LINUX_ORIG_RAX_REGNUM (AMD64_MXCSR_REGNUM + 1)
+#define AMD64_LINUX_ORIG_RAX_REGNUM (AMD64_YMM15H_REGNUM + 1)
 
 /* Total number of registers for GNU/Linux.  */
 #define AMD64_LINUX_NUM_REGS (AMD64_LINUX_ORIG_RAX_REGNUM + 1)
 
 /* Linux target description.  */
 extern struct target_desc *tdesc_amd64_linux;
+extern struct target_desc *tdesc_amd64_avx_linux;
 
 /* Enum that defines the syscall identifiers for amd64 linux.
    Used for process record/replay, these will be translated into

@@ -23,11 +23,14 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "regset.h"
 #include "linux-nat.h"
 #include "amd64-linux-tdep.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include "elf/common.h"
+#include <sys/uio.h>
 #include <sys/ptrace.h>
 #include <sys/debugreg.h>
 #include <sys/syscall.h>
@@ -51,6 +54,18 @@
 #include "i386-linux-tdep.h"
 #include "amd64-nat.h"
 #include "i386-nat.h"
+#include "i386-xstate.h"
+
+#ifndef PTRACE_GETREGSET
+#define PTRACE_GETREGSET	0x4204
+#endif
+
+#ifndef PTRACE_SETREGSET
+#define PTRACE_SETREGSET	0x4205
+#endif
+
+/* Does the current host support PTRACE_GETREGSET?  */
+static int have_ptrace_getregset = -1;
 
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout.  */
@@ -73,6 +88,8 @@ static int amd64_linux_gregset64_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
   ORIG_RAX * 8
 };
 
@@ -99,6 +116,7 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
   ORIG_RAX * 8			/* "orig_eax" */
 };
 
@@ -183,10 +201,26 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
     {
       elf_fpregset_t fpregs;
 
-      if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
-	perror_with_name (_("Couldn't get floating point status"));
+      if (have_ptrace_getregset)
+	{
+	  char xstateregs[I386_XSTATE_MAX_SIZE];
+	  struct iovec iov;
 
-      amd64_supply_fxsave (regcache, -1, &fpregs);
+	  iov.iov_base = xstateregs;
+	  iov.iov_len = sizeof (xstateregs);
+	  if (ptrace (PTRACE_GETREGSET, tid,
+		      (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)
+	    perror_with_name (_("Couldn't get extended state status"));
+
+	  amd64_supply_xsave (regcache, -1, xstateregs);
+	}
+      else
+	{
+	  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
+	    perror_with_name (_("Couldn't get floating point status"));
+
+	  amd64_supply_fxsave (regcache, -1, &fpregs);
+	}
     }
 }
 
@@ -226,15 +260,33 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
     {
       elf_fpregset_t fpregs;
 
-      if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
-	perror_with_name (_("Couldn't get floating point status"));
+      if (have_ptrace_getregset)
+	{
+	  char xstateregs[I386_XSTATE_MAX_SIZE];
+	  struct iovec iov;
 
-      amd64_collect_fxsave (regcache, regnum, &fpregs);
+	  iov.iov_base = xstateregs;
+	  iov.iov_len = sizeof (xstateregs);
+	  if (ptrace (PTRACE_GETREGSET, tid,
+		      (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)
+	    perror_with_name (_("Couldn't get extended state status"));
 
-      if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
-	perror_with_name (_("Couldn't write floating point status"));
+	  amd64_collect_xsave (regcache, regnum, xstateregs, 0);
 
-      return;
+	  if (ptrace (PTRACE_SETREGSET, tid,
+		      (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)
+	    perror_with_name (_("Couldn't write extended state status"));
+	}
+      else
+	{
+	  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
+	    perror_with_name (_("Couldn't get floating point status"));
+
+	  amd64_collect_fxsave (regcache, regnum, &fpregs);
+
+	  if (ptrace (PTRACE_SETFPREGS, tid, 0, (long) &fpregs) < 0)
+	    perror_with_name (_("Couldn't write floating point status"));
+	}
     }
 }
 
@@ -688,6 +740,8 @@ amd64_linux_read_description (struct target_ops *ops)
 {
   unsigned long cs;
   int tid;
+  int is_64bit;
+  static uint64_t xcr0;
 
   /* GNU/Linux LWP ID's are process ID's.  */
   tid = TIDGET (inferior_ptid);
@@ -701,10 +755,46 @@ amd64_linux_read_description (struct target_ops *ops)
   if (errno != 0)
     perror_with_name (_("Couldn't get CS register"));
 
-  if (cs == AMD64_LINUX_USER64_CS)
-    return tdesc_amd64_linux;
+  is_64bit = cs == AMD64_LINUX_USER64_CS;
+
+  if (have_ptrace_getregset == -1)
+    {
+      uint64_t xstateregs[(I386_XSTATE_SSE_SIZE / sizeof (uint64_t))];
+      struct iovec iov;
+
+      iov.iov_base = xstateregs;
+      iov.iov_len = sizeof (xstateregs);
+
+      /* Check if PTRACE_GETREGSET works.  */
+      if (ptrace (PTRACE_GETREGSET, tid,
+		  (unsigned int) NT_X86_XSTATE, (long) &iov) < 0)
+	have_ptrace_getregset = 0;
+      else
+	{
+	  have_ptrace_getregset = 1;
+
+	  /* Get XCR0 from XSAVE extended state.  */
+	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
+			     / sizeof (uint64_t))];
+	}
+    }
+
+  /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
+  if (have_ptrace_getregset
+      && (xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
+    {
+      if (is_64bit)
+	return tdesc_amd64_avx_linux;
+      else
+	return tdesc_i386_avx_linux;
+    }
   else
-    return tdesc_i386_linux;
+    {
+      if (is_64bit)
+	return tdesc_amd64_linux;
+      else
+	return tdesc_i386_linux;
+    }
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

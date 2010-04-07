@@ -1,5 +1,61 @@
 2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* amd64-linux-nat.c: Include "regset.h", "elf/common.h",
+	<sys/uio.h> and "i386-xstate.h".
+	(PTRACE_GETREGSET): New.
+	(PTRACE_SETREGSET): Likewise.
+	(have_ptrace_getregset): Likewise.
+	(amd64_linux_gregset64_reg_offset): Include 16 upper YMM
+	registers.
+	(amd64_linux_gregset32_reg_offset): Include 8 upper YMM
+	registers.
+	(amd64_linux_fetch_inferior_registers): Support PTRACE_GETFPREGS.
+	(amd64_linux_store_inferior_registers): Likewise.
+	(amd64_linux_read_description): Check and enable AVX target
+	descriptions.
+
+	* amd64-linux-tdep.c: Include "regset.h", "i386-linux-tdep.h"
+	and "features/i386/amd64-avx-linux.c".
+	(amd64_linux_regset_sections): New.
+	(amd64_linux_core_read_description): Check and enable AVX
+	target description.
+	(amd64_linux_init_abi): Set xsave_xcr0_offset.  Call
+	set_gdbarch_core_regset_sections.
+	(_initialize_amd64_linux_tdep): Call
+	initialize_tdesc_amd64_avx_linux.
+
+	* amd64-linux-tdep.h (AMD64_LINUX_ORIG_RAX_REGNUM): Replace
+	AMD64_MXCSR_REGNUM with AMD64_YMM15H_REGNUM.
+	(tdesc_amd64_avx_linux): New.
+	(amd64_linux_update_xstateregset): Likewise.
+
+	* amd64-tdep.c: Include "features/i386/amd64-avx.c".
+	(amd64_ymm_names): New.
+	(amd64_ymmh_names): Likewise.
+	(amd64_register_name): Likewise.
+	(amd64_supply_xstateregset): Likewise.
+	(amd64_collect_xstateregset): Likewise.
+	(amd64_supply_xsave): Likewise.
+	(amd64_collect_xsave): Likewise.
+	(AMD64_NUM_REGS): Removed.
+	(amd64_dwarf_reg_to_regnum): Return %ymmN register number for
+	%xmmN if AVX is available.
+	(amd64_pseudo_register_name): Support pseudo YMM registers.
+	(amd64_regset_from_core_section): Support .reg-xstate section.
+	(amd64_init_abi): Set ymmh_register_names, num_ymm_regs
+	and ymm0h_regnum.  Call set_gdbarch_register_name.
+	(amd64_init_abi): Call initialize_tdesc_amd64_avx.
+
+	* amd64-tdep.h (amd64_regnum): Add AMD64_YMM0H_REGNUM and
+	AMD64_YMM15H_REGNUM.
+	(AMD64_NUM_REGS): New.
+	(amd64_supply_xsave): Likewise.
+	(amd64_collect_xsave): Likewise.
+	(amd64_register_name): Removed.
+	(amd64_register_type): Likewise.
+
+2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i387-tdep.c: Include "i386-xstate.h".
 	(XSAVE_XSTATE_BV_ADDR): New.
 	(xsave_avxh_offset): Likewise.
