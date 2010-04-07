@@ -599,6 +599,8 @@ source_command (char *args, int from_tty)
     }
 
   source_script (file, from_tty);
+
+  do_cleanups (old_cleanups);
 }
 
 

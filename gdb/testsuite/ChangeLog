@@ -1,3 +1,8 @@
+2010-04-06  Doug Evans  <dje@google.com>
+
+	* gdb.base/source-test.gdb: New file.
+	* gdb.base/source.exp: Test source -v.
+
 2010-04-06  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.cp/inherit.exp (test_print_anon_union): Fix re_class pattern.

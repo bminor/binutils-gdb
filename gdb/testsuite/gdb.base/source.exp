@@ -34,5 +34,21 @@ gdb_start
 gdb_test "source ${srcdir}/${subdir}/source-error.gdb" \
     "source-error.gdb:21: Error in sourced command file:\[\r\n\]*Cannot access memory at address 0x0.*" \
     "script contains error"
-    
+
+gdb_test "source -v ${srcdir}/${subdir}/source-test.gdb" \
+    "echo test source options.*" \
+    "source -v"
+
+# There was a bug where -v got stuck in the "on" position.
+# Verify "source script", without the -v, is not verbose.
+set test "source after -v"
+gdb_test_multiple "source ${srcdir}/${subdir}/source-test.gdb" $test {
+    -re "echo test source options" {
+	fail "$test"
+    }
+    -re "test source options" {
+	pass "$test"
+    }
+}
+
 gdb_exit
