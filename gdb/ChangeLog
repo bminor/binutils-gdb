@@ -1,3 +1,33 @@
+2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/djgpp/fnchange.lst: Add x86 AVX XML files.
+
+	* features/Makefile (WHICH): Add i386/i386-avx,
+	i386/i386-avx-linux, i386/x86-64-avx and i386/x86-64-avx-linux.
+	(i386/i386-avx-expedite): New.
+	(i386/i386-avx-linux-expedite): Likewise.
+	(i386/x86-64-avx-expedite):Likewise.
+	(i386/x86-64-avx-linux-expedite): Likewise.
+	($(outdir)/i386/i386-avx.dat): New dependency.
+	($(outdir)/i386/i386-avx-linux.dat): Likewise.
+	($(outdir)/i386/x86-avx-64.dat): Likewise.
+	($(outdir)/i386/x86-64-avx-linux.dat): Likewise.
+
+	* features/i386/32bit-avx.xml: New.
+	* features/i386/64bit-avx.xml: Likewise.
+	* features/i386/i386-avx-linux.c: Likewise.
+	* features/i386/i386-avx-linux.xml: Likewise.
+	* features/i386/i386-avx.c: Likewise.
+	* features/i386/i386-avx.xml: Likewise.
+	* features/i386/x86-64-avx-linux.c: Likewise.
+	* features/i386/x86-64-avx-linux.xml: Likewise.
+	* features/i386/x86-64-avx.c: Likewise.
+	* features/i386/x86-64-avx.xml: Likewise.
+	* regformats/i386/i386-avx-linux.dat: Likewise.
+	* regformats/i386/i386-avx.dat: Likewise.
+	* regformats/i386/x86-64-avx-linux.dat: Likewise.
+	* regformats/i386/x86-64-avx.dat: Likewise.
+
 2010-04-07  Doug Evans  <dje@google.com>
 
 	* top.c (source_file_name): Make const char *.

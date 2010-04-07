@@ -228,6 +228,14 @@
 @V@/gdb/features/rs6000/powerpc-vsx64l.xml @V@/gdb/features/rs6000/ppc-v64l.xml
 @V@/gdb/features/rs6000/powerpc-cell32l.xml @V@/gdb/features/rs6000/ppc-c32l.xml
 @V@/gdb/features/rs6000/powerpc-cell64l.xml @V@/gdb/features/rs6000/ppc-c64l.xml
+@V@/gdb/features/i386/amd64-avx-linux.c @V@/gdb/features/i386/a64-al.c
+@V@/gdb/features/i386/amd64-avx.c @V@/gdb/features/i386/a64-a.c
+@V@/gdb/features/i386/amd64-avx-linux.xml @V@/gdb/features/i386/a64-al.xml
+@V@/gdb/features/i386/amd64-avx.xml @V@/gdb/features/i386/a64-a.xml
+@V@/gdb/features/i386/i386-avx-linux.c @V@/features/i386/i32-al.c
+@V@/gdb/features/i386/i386-avx.c @V@/gdb/features/i386/i32-a.c
+@V@/gdb/features/i386/i386-avx-linux.xml @V@/gdb/features/i386/i32-al.xml
+@V@/gdb/features/i386/i386-avx.xml @V@/gdb/features/i386/i32-a.xml
 @V@/gdb/f-exp.tab.c @V@/gdb/f-exp_tab.c
 @V@/gdb/gdbserver/linux-cris-low.c @V@/gdb/gdbserver/lx-cris.c
 @V@/gdb/gdbserver/linux-crisv32-low.c @V@/gdb/gdbserver/lx-cris32.c

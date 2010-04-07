@@ -33,6 +33,8 @@
 WHICH = arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
 	i386/i386 i386/i386-linux \
 	i386/amd64 i386/amd64-linux \
+	i386/i386-avx i386/i386-avx-linux \
+	i386/amd64-avx i386/amd64-avx-linux \
 	mips-linux mips64-linux \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
@@ -45,6 +47,10 @@ i386/i386-expedite = ebp,esp,eip
 i386/i386-linux-expedite = ebp,esp,eip
 i386/amd64-expedite = rbp,rsp,rip
 i386/amd64-linux-expedite = rbp,rsp,rip
+i386/i386-avx-expedite = ebp,esp,eip
+i386/i386-avx-linux-expedite = ebp,esp,eip
+i386/amd64-avx-expedite = rbp,rsp,rip
+i386/amd64-avx-linux-expedite = rbp,rsp,rip
 mips-expedite = r29,pc
 mips64-expedite = r29,pc
 powerpc-expedite = r1,pc
@@ -90,3 +96,9 @@ $(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
 $(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml
 $(outdir)/i386/amd64-linux.dat: i386/64bit-core.xml i386/64bit-sse.xml \
 			        i386/64bit-linux.xml
+$(outdir)/i386/i386-avx.dat: i386/32bit-core.xml i386/32bit-avx.xml
+$(outdir)/i386/i386-avx-linux.dat: i386/32bit-core.xml i386/32bit-avx.xml \
+			       i386/32bit-linux.xml
+$(outdir)/i386/amd64-avx.dat: i386/64bit-core.xml i386/64bit-avx.xml
+$(outdir)/i386/amd64-avx-linux.dat: i386/64bit-core.xml i386/64bit-avx.xml \
+				    i386/64bit-linux.xml
