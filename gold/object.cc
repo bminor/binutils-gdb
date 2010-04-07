@@ -43,6 +43,28 @@
 namespace gold
 {
 
+// Struct Read_symbols_data.
+
+// Destroy any remaining File_view objects.
+
+Read_symbols_data::~Read_symbols_data()
+{
+  if (this->section_headers != NULL)
+    delete this->section_headers;
+  if (this->section_names != NULL)
+    delete this->section_names;
+  if (this->symbols != NULL)
+    delete this->symbols;
+  if (this->symbol_names != NULL)
+    delete this->symbol_names;
+  if (this->versym != NULL)
+    delete this->versym;
+  if (this->verdef != NULL)
+    delete this->verdef;
+  if (this->verneed != NULL)
+    delete this->verneed;
+}
+
 // Class Xindex.
 
 // Initialize the symtab_xindex_ array.  Find the SHT_SYMTAB_SHNDX

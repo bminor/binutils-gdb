@@ -1,3 +1,17 @@
+2010-04-07  Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (include_member): Destroy Read_symbols_data object before
+	releasing file.
+	* object.cc (Read_symbols_data::~Read_symbols_data) New destructor.
+	* object.h (Read_symbols_data::Read_symbols_data) New constructor.
+	(Read_symbols_data::~Read_symbols_data) New destructor.
+	(Section_relocs::Section_relocs) New constructor.
+	(Section_relocs::~Section_relocs) New destructor.
+	(Read_relocs_data::Read_relocs_data) New constructor.
+	(Read_relocs_data::~Read_relocs_data) New destructor.
+	* testsuite/binary_unittest.cc (Sized_binary_test): Set sd member
+	pointers to NULL after deleting.
+
 2010-04-07  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc: Replace "endianity" with "endianness" in comments.

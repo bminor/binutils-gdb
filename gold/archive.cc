@@ -877,10 +877,12 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
     delete obj;
   else
     {
-      Read_symbols_data sd;
-      obj->read_symbols(&sd);
-      obj->layout(symtab, layout, &sd);
-      obj->add_symbols(symtab, &sd, layout);
+      {
+	Read_symbols_data sd;
+	obj->read_symbols(&sd);
+	obj->layout(symtab, layout, &sd);
+	obj->add_symbols(symtab, &sd, layout);
+      }
 
       // If this is an external member of a thin archive, unlock the file
       // for the next task.

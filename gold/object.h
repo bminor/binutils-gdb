@@ -55,6 +55,13 @@ class Stringpool_template;
 
 struct Read_symbols_data
 {
+  Read_symbols_data()
+    : section_headers(NULL), section_names(NULL), symbols(NULL),
+      symbol_names(NULL), versym(NULL), verdef(NULL), verneed(NULL)
+  { }
+
+  ~Read_symbols_data();
+
   // Section headers.
   File_view* section_headers;
   // Section names.
@@ -102,6 +109,13 @@ struct Symbol_location_info
 
 struct Section_relocs
 {
+  Section_relocs()
+    : contents(NULL)
+  { }
+
+  ~Section_relocs()
+  { delete this->contents; }
+
   // Index of reloc section.
   unsigned int reloc_shndx;
   // Index of section that relocs apply to.
@@ -125,6 +139,13 @@ struct Section_relocs
 
 struct Read_relocs_data
 {
+  Read_relocs_data()
+    : local_symbols(NULL)
+  { }
+
+  ~Read_relocs_data()
+  { delete this->local_symbols; }
+
   typedef std::vector<Section_relocs> Relocs_list;
   // The relocations.
   Relocs_list relocs;

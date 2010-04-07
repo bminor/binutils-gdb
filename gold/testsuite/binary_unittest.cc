@@ -87,9 +87,13 @@ Sized_binary_test()
   Read_symbols_data sd;
   object->read_symbols(&sd);
   delete sd.section_headers;
+  sd.section_headers = NULL;
   delete sd.section_names;
+  sd.section_names = NULL;
   delete sd.symbols;
+  sd.symbols = NULL;
   delete sd.symbol_names;
+  sd.symbol_names = NULL;
 
   Sized_relobj<size, big_endian>* relobj =
     static_cast<Sized_relobj<size, big_endian>*>(object);
