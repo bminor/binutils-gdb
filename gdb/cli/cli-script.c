@@ -1557,7 +1557,7 @@ document_command (char *comname, int from_tty)
 struct source_cleanup_lines_args
 {
   int old_line;
-  char *old_file;
+  const char *old_file;
 };
 
 static void
@@ -1584,7 +1584,7 @@ wrapped_read_command_file (struct ui_out *uiout, void *data)
 /* Used to implement source_command */
 
 void
-script_from_file (FILE *stream, char *file)
+script_from_file (FILE *stream, const char *file)
 {
   struct cleanup *old_cleanups;
   struct source_cleanup_lines_args old_lines;

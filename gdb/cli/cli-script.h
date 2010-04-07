@@ -24,7 +24,7 @@ struct cmd_list_element;
 
 /* Exported to cli/cli-cmds.c */
 
-extern void script_from_file (FILE *stream, char *file);
+extern void script_from_file (FILE *stream, const char *file);
 
 extern void document_command (char *, int);
 

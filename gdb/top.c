@@ -298,7 +298,7 @@ quit_cover (void *s)
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
-/* static */ char *source_file_name;
+/* static */ const char *source_file_name;
 
 /* Clean up on error during a "source" command (or execution of a
    user-defined command).  */

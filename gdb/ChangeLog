@@ -1,3 +1,12 @@
+2010-04-07  Doug Evans  <dje@google.com>
+
+	* top.c (source_file_name): Make const char *.
+	* top.h (source_file_name): Update.
+	* cli/cli-script.c (source_cleanup_lines_args): Make old_file
+	const char *.
+	(script_from_file): Change `file' arg to const char *.
+	* cli/cli-script.h (script_from_file): Update.
+
 2010-04-06  Doug Evans  <dje@google.com>
 
 	* cli/cli-cmds.c (source_command): Run cleanups.
