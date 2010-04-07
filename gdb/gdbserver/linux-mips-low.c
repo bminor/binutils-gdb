@@ -343,12 +343,12 @@ mips_store_fpregset (struct regcache *regcache, const void *buf)
 
 struct regset_info target_regsets[] = {
 #ifdef HAVE_PTRACE_GETREGS
-  { PTRACE_GETREGS, PTRACE_SETREGS, 38 * 8, GENERAL_REGS,
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0, 38 * 8, GENERAL_REGS,
     mips_fill_gregset, mips_store_gregset },
-  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 33 * 8, FP_REGS,
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, 33 * 8, FP_REGS,
     mips_fill_fpregset, mips_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {

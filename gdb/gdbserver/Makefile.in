@@ -217,6 +217,8 @@ clean:
 	rm -f powerpc-isa205-vsx64l.c
 	rm -f s390-linux32.c s390-linux64.c s390x-linux64.c
 	rm -f xml-builtin.c stamp-xml
+	rm -f i386-avx.c i386-avx-linux.c
+	rm -f amd64-avx.c amd64-avx-linux.c
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -351,6 +353,12 @@ i386.c : $(srcdir)/../regformats/i386/i386.dat $(regdat_sh)
 i386-linux.o : i386-linux.c $(regdef_h)
 i386-linux.c : $(srcdir)/../regformats/i386/i386-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-linux.dat i386-linux.c
+i386-avx.o : i386-avx.c $(regdef_h)
+i386-avx.c : $(srcdir)/../regformats/i386/i386-avx.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx.dat i386-avx.c
+i386-avx-linux.o : i386-avx-linux.c $(regdef_h)
+i386-avx-linux.c : $(srcdir)/../regformats/i386/i386-avx-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-linux.dat i386-avx-linux.c
 reg-ia64.o : reg-ia64.c $(regdef_h)
 reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
@@ -438,6 +446,12 @@ amd64.c : $(srcdir)/../regformats/i386/amd64.dat $(regdat_sh)
 amd64-linux.o : amd64-linux.c $(regdef_h)
 amd64-linux.c : $(srcdir)/../regformats/i386/amd64-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-linux.dat amd64-linux.c
+amd64-avx.o : amd64-avx.c $(regdef_h)
+amd64-avx.c : $(srcdir)/../regformats/i386/amd64-avx.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx.dat amd64-avx.c
+amd64-avx-linux.o : amd64-avx-linux.c $(regdef_h)
+amd64-avx-linux.c : $(srcdir)/../regformats/i386/amd64-avx-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-linux.dat amd64-avx-linux.c
 reg-xtensa.o : reg-xtensa.c $(regdef_h)
 reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c

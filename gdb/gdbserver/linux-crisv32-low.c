@@ -365,9 +365,9 @@ cris_store_gregset (const void *buf)
 typedef unsigned long elf_gregset_t[cris_num_regs];
 
 struct regset_info target_regsets[] = {
-  { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0, sizeof (elf_gregset_t),
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {

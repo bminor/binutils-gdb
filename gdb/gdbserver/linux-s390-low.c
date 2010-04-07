@@ -181,8 +181,8 @@ static void s390_fill_gregset (struct regcache *regcache, void *buf)
 }
 
 struct regset_info target_regsets[] = {
-  { 0, 0, 0, GENERAL_REGS, s390_fill_gregset, NULL },
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, 0, GENERAL_REGS, s390_fill_gregset, NULL },
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 

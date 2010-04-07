@@ -1289,6 +1289,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     {
       char *p = &own_buf[10];
 
+      /* Start processing qSupported packet.  */
+      target_process_qsupported (NULL);
+
       /* Process each feature being provided by GDB.  The first
 	 feature will follow a ':', and latter features will follow
 	 ';'.  */
@@ -1304,6 +1307,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		if (target_supports_multi_process ())
 		  multi_process = 1;
 	      }
+	    else
+	      target_process_qsupported (p);
 	  }
 
       sprintf (own_buf, "PacketSize=%x;QPassSignals+", PBUFSIZ - 1);

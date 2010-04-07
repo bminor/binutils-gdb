@@ -1,3 +1,79 @@
+2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (clean): Updated.
+	(i386-avx.o): New.
+	(i386-avx.c): Likewise.
+	(i386-avx-linux.o): Likewise.
+	(i386-avx-linux.c): Likewise.
+	(amd64-avx.o): Likewise.
+	(amd64-avx.c): Likewise.
+	(amd64-avx-linux.o): Likewise.
+	(amd64-avx-linux.c): Likewise.
+
+	* configure.srv (srv_i386_regobj): Add i386-avx.o.
+	(srv_i386_linux_regobj): Add i386-avx-linux.o.
+	(srv_amd64_regobj): Add amd64-avx.o.
+	(srv_amd64_linux_regobj): Add amd64-avx-linux.o.
+	(srv_i386_32bit_xmlfiles): Add i386/32bit-avx.xml.
+	(srv_i386_64bit_xmlfiles): Add i386/64bit-avx.xml.
+	(srv_i386_xmlfiles): Add i386/i386-avx.xml.
+	(srv_amd64_xmlfiles): Add i386/amd64-avx.xml.
+	(srv_i386_linux_xmlfiles): Add i386/i386-avx-linux.xml.
+	(srv_amd64_linux_xmlfiles): Add i386/amd64-avx-linux.xml.
+
+	* i387-fp.c: Include "i386-xstate.h".
+	(i387_xsave): New.
+	(i387_cache_to_xsave): Likewise.
+	(i387_xsave_to_cache): Likewise.
+	(x86_xcr0): Likewise.
+
+	* i387-fp.h (i387_cache_to_xsave): Likewise.
+	(i387_xsave_to_cache): Likewise.
+	(x86_xcr0): Likewise.
+
+	* linux-arm-low.c (target_regsets): Initialize nt_type to 0.
+	* linux-crisv32-low.c (target_regsets): Likewise.
+	* linux-m68k-low.c (target_regsets): Likewise.
+	* linux-mips-low.c (target_regsets): Likewise.
+	* linux-ppc-low.c (target_regsets): Likewise.
+	* linux-s390-low.c (target_regsets): Likewise.
+	* linux-sh-low.c (target_regsets): Likewise.
+	* linux-sparc-low.c (target_regsets): Likewise.
+	* linux-xtensa-low.c (target_regsets): Likewise.
+
+	* linux-low.c: Include <sys/uio.h>.
+	(regsets_fetch_inferior_registers): Support nt_type.
+	(regsets_store_inferior_registers): Likewise.
+	(linux_process_qsupported): New.
+	(linux_target_ops): Add linux_process_qsupported.
+
+	* linux-low.h (regset_info): Add nt_type.
+	(linux_target_ops): Add process_qsupported.
+
+	* linux-x86-low.c: Include "i386-xstate.h", "elf/common.h"
+	and <sys/uio.h>.
+	(init_registers_i386_avx_linux): New.
+	(init_registers_amd64_avx_linux): Likewise.
+	(xmltarget_i386_linux_no_xml): Likewise.
+	(xmltarget_amd64_linux_no_xml): Likewise.
+	(PTRACE_GETREGSET): Likewise.
+	(PTRACE_SETREGSET): Likewise.
+	(x86_fill_xstateregset): Likewise.
+	(x86_store_xstateregset): Likewise.
+	(use_xml): Likewise.
+	(x86_linux_update_xmltarget): Likewise.
+	(x86_linux_process_qsupported): Likewise.
+	(target_regsets): Add NT_X86_XSTATE entry and Initialize nt_type.
+	(x86_arch_setup): Don't call init_registers_amd64_linux nor
+	init_registers_i386_linux here.  Call
+	x86_linux_update_xmltarget.
+	(the_low_target): Add x86_linux_process_qsupported.
+
+	* server.c (handle_query): Call target_process_qsupported.
+
+	* target.h (target_ops): Add process_qsupported.
+	(target_process_qsupported): New.
+
 2010-04-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferiors.c (add_thread): Set last_status kind to

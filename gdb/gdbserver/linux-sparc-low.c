@@ -260,13 +260,13 @@ sparc_reinsert_addr (void)
 
 
 struct regset_info target_regsets[] = {
-  { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0, sizeof (elf_gregset_t),
     GENERAL_REGS,
     sparc_fill_gregset, sparc_store_gregset },
-  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (fpregset_t),
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, sizeof (fpregset_t),
     FP_REGS,
     sparc_fill_fpregset, sparc_store_fpregset },
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {

@@ -39,6 +39,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/vfs.h>
+#include <sys/uio.h>
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
@@ -2977,14 +2978,15 @@ regsets_fetch_inferior_registers (struct regcache *regcache)
   struct regset_info *regset;
   int saw_general_regs = 0;
   int pid;
+  struct iovec iov;
 
   regset = target_regsets;
 
   pid = lwpid_of (get_thread_lwp (current_inferior));
   while (regset->size >= 0)
     {
-      void *buf;
-      int res;
+      void *buf, *data;
+      int nt_type, res;
 
       if (regset->size == 0 || disabled_regsets[regset - target_regsets])
 	{
@@ -2993,10 +2995,21 @@ regsets_fetch_inferior_registers (struct regcache *regcache)
 	}
 
       buf = xmalloc (regset->size);
+
+      nt_type = regset->nt_type;
+      if (nt_type)
+	{
+	  iov.iov_base = buf;
+	  iov.iov_len = regset->size;
+	  data = (void *) &iov;
+	}
+      else
+	data = buf;
+
 #ifndef __sparc__
-      res = ptrace (regset->get_request, pid, 0, buf);
+      res = ptrace (regset->get_request, pid, nt_type, data);
 #else
-      res = ptrace (regset->get_request, pid, buf, 0);
+      res = ptrace (regset->get_request, pid, data, nt_type);
 #endif
       if (res < 0)
 	{
@@ -3034,14 +3047,15 @@ regsets_store_inferior_registers (struct regcache *regcache)
   struct regset_info *regset;
   int saw_general_regs = 0;
   int pid;
+  struct iovec iov;
 
   regset = target_regsets;
 
   pid = lwpid_of (get_thread_lwp (current_inferior));
   while (regset->size >= 0)
     {
-      void *buf;
-      int res;
+      void *buf, *data;
+      int nt_type, res;
 
       if (regset->size == 0 || disabled_regsets[regset - target_regsets])
 	{
@@ -3054,10 +3068,21 @@ regsets_store_inferior_registers (struct regcache *regcache)
       /* First fill the buffer with the current register set contents,
 	 in case there are any items in the kernel's regset that are
 	 not in gdbserver's regcache.  */
+
+      nt_type = regset->nt_type;
+      if (nt_type)
+	{
+	  iov.iov_base = buf;
+	  iov.iov_len = regset->size;
+	  data = (void *) &iov;
+	}
+      else
+	data = buf;
+
 #ifndef __sparc__
-      res = ptrace (regset->get_request, pid, 0, buf);
+      res = ptrace (regset->get_request, pid, nt_type, data);
 #else
-      res = ptrace (regset->get_request, pid, buf, 0);
+      res = ptrace (regset->get_request, pid, &iov, data);
 #endif
 
       if (res == 0)
@@ -3067,9 +3092,9 @@ regsets_store_inferior_registers (struct regcache *regcache)
 
 	  /* Only now do we write the register set.  */
 #ifndef __sparc__
-	  res = ptrace (regset->set_request, pid, 0, buf);
+	  res = ptrace (regset->set_request, pid, nt_type, data);
 #else
-	  res = ptrace (regset->set_request, pid, buf, 0);
+	  res = ptrace (regset->set_request, pid, data, nt_type);
 #endif
 	}
 
@@ -4133,6 +4158,13 @@ linux_core_of_thread (ptid_t ptid)
   return core;
 }
 
+static void
+linux_process_qsupported (const char *query)
+{
+  if (the_low_target.process_qsupported != NULL)
+    the_low_target.process_qsupported (query);
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -4176,7 +4208,8 @@ static struct target_ops linux_target_ops = {
 #else
   NULL,
 #endif
-  linux_core_of_thread
+  linux_core_of_thread,
+  linux_process_qsupported
 };
 
 static void

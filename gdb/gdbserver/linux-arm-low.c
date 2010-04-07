@@ -354,16 +354,16 @@ arm_arch_setup (void)
 }
 
 struct regset_info target_regsets[] = {
-  { PTRACE_GETREGS, PTRACE_SETREGS, 18 * 4,
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0, 18 * 4,
     GENERAL_REGS,
     arm_fill_gregset, arm_store_gregset },
-  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 16 * 8 + 6 * 4,
+  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 0, 16 * 8 + 6 * 4,
     EXTENDED_REGS,
     arm_fill_wmmxregset, arm_store_wmmxregset },
-  { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 32 * 8 + 4,
+  { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 0, 32 * 8 + 4,
     EXTENDED_REGS,
     arm_fill_vfpregset, arm_store_vfpregset },
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {

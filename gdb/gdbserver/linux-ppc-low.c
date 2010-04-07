@@ -593,14 +593,14 @@ struct regset_info target_regsets[] = {
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
      general registers.  Some kernels support these, but not the newer
      PPC_PTRACE_GETREGS.  */
-  { PTRACE_GETVSXREGS, PTRACE_SETVSXREGS, SIZEOF_VSXREGS, EXTENDED_REGS,
+  { PTRACE_GETVSXREGS, PTRACE_SETVSXREGS, 0, SIZEOF_VSXREGS, EXTENDED_REGS,
   ppc_fill_vsxregset, ppc_store_vsxregset },
-  { PTRACE_GETVRREGS, PTRACE_SETVRREGS, SIZEOF_VRREGS, EXTENDED_REGS,
+  { PTRACE_GETVRREGS, PTRACE_SETVRREGS, 0, SIZEOF_VRREGS, EXTENDED_REGS,
     ppc_fill_vrregset, ppc_store_vrregset },
-  { PTRACE_GETEVRREGS, PTRACE_SETEVRREGS, 32 * 4 + 8 + 4, EXTENDED_REGS,
+  { PTRACE_GETEVRREGS, PTRACE_SETEVRREGS, 0, 32 * 4 + 8 + 4, EXTENDED_REGS,
     ppc_fill_evrregset, ppc_store_evrregset },
-  { 0, 0, 0, GENERAL_REGS, ppc_fill_gregset, NULL },
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, 0, GENERAL_REGS, ppc_fill_gregset, NULL },
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {

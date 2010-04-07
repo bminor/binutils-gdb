@@ -112,14 +112,14 @@ m68k_store_fpregset (struct regcache *regcache, const void *buf)
 
 struct regset_info target_regsets[] = {
 #ifdef HAVE_PTRACE_GETREGS
-  { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+  { PTRACE_GETREGS, PTRACE_SETREGS, 0, sizeof (elf_gregset_t),
     GENERAL_REGS,
     m68k_fill_gregset, m68k_store_gregset },
-  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, 0, sizeof (elf_fpregset_t),
     FP_REGS,
     m68k_fill_fpregset, m68k_store_fpregset },
 #endif /* HAVE_PTRACE_GETREGS */
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 static const unsigned char m68k_breakpoint[] = { 0x4E, 0x4F };

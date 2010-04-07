@@ -35,6 +35,9 @@ enum regset_type {
 struct regset_info
 {
   int get_request, set_request;
+  /* If NT_TYPE isn't 0, it will be passed to ptrace as the 3rd
+     argument and the 4th argument should be "const struct iovec *".  */
+  int nt_type;
   int size;
   enum regset_type type;
   regset_fill_func fill_function;
@@ -111,6 +114,9 @@ struct linux_target_ops
 
   /* Hook to call prior to resuming a thread.  */
   void (*prepare_to_resume) (struct lwp_info *);
+
+  /* Hook to support target specific qSupported.  */
+  void (*process_qsupported) (const char *);
 };
 
 extern struct linux_target_ops the_low_target;

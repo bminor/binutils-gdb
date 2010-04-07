@@ -104,8 +104,8 @@ static void sh_fill_gregset (struct regcache *regcache, void *buf)
 }
 
 struct regset_info target_regsets[] = {
-  { 0, 0, 0, GENERAL_REGS, sh_fill_gregset, NULL },
-  { 0, 0, -1, -1, NULL, NULL }
+  { 0, 0, 0, 0, GENERAL_REGS, sh_fill_gregset, NULL },
+  { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {

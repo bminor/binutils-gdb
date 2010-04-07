@@ -286,6 +286,9 @@ struct target_ops
 
   /* Returns the core given a thread, or -1 if not known.  */
   int (*core_of_thread) (ptid_t);
+
+  /* Target specific qSupported support.  */
+  void (*process_qsupported) (const char *);
 };
 
 extern struct target_ops *the_target;
@@ -325,6 +328,10 @@ void set_target_ops (struct target_ops *);
 #define target_supports_multi_process() \
   (the_target->supports_multi_process ? \
    (*the_target->supports_multi_process) () : 0)
+
+#define target_process_qsupported(query) \
+  if (the_target->process_qsupported) \
+    the_target->process_qsupported (query)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 
