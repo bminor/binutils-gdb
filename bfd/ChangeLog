@@ -1,3 +1,8 @@
+2010-04-07  Alan Modra  <amodra@gmail.com>
+
+	* warning.m4 (GCC_WARN_CFLAGS): Only add -Wshadow for gcc-4 and above.
+	* configure: Regenerate.
+
 2010-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11434
