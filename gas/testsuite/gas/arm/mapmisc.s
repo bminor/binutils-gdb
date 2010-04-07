@@ -1,6 +1,8 @@
 	.text
 	.type foo, %function
 foo:
+	.align 2
+	.fill 0, 0, 0
 	nop
 	.ascii "abcd"
 	nop

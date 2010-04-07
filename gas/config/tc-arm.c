@@ -2493,19 +2493,24 @@ make_mapping_symbol (enum mstate state, valueT value, fragS *frag)
   /* Save the mapping symbols for future reference.  Also check that
      we do not place two mapping symbols at the same offset within a
      frag.  We'll handle overlap between frags in
-     check_mapping_symbols.  */
+     check_mapping_symbols.
+
+     If .fill or other data filling directive generates zero sized data,
+     the mapping symbol for the following code will have the same value
+     as the one generated for the data filling directive.  In this case,
+     we replace the old symbol with the new one at the same address.  */
   if (value == 0)
     {
-      know (frag->tc_frag_data.first_map == NULL);
+      if (frag->tc_frag_data.first_map != NULL)
+	{
+	  know (S_GET_VALUE (frag->tc_frag_data.first_map) == 0);
+	  symbol_remove (frag->tc_frag_data.first_map, &symbol_rootP, &symbol_lastP);
+	}
       frag->tc_frag_data.first_map = symbolP;
     }
   if (frag->tc_frag_data.last_map != NULL)
     {
       know (S_GET_VALUE (frag->tc_frag_data.last_map) <= S_GET_VALUE (symbolP));
-      /* If .fill or other data filling directive generates zero sized data,
-	 the mapping symbol for the following code will have the same value
-	 as the one generated for the data filling directive.  In this case,
-	 we replace the old symbol with the new one at the same address.  */
       if (S_GET_VALUE (frag->tc_frag_data.last_map) == S_GET_VALUE (symbolP))
 	symbol_remove (frag->tc_frag_data.last_map, &symbol_rootP, &symbol_lastP);
     }

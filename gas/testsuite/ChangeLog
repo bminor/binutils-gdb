@@ -1,3 +1,8 @@
+2010-04-07  Jie Zhang  <jie@codesourcery.com>
+
+	* gas/arm/mapmisc.s: Test multiple mapping symbols have
+	the same value 0.
+
 2010-04-06  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/476.d ("dccci", "dci", "iccci"): Add tests.
