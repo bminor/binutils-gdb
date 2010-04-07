@@ -43,10 +43,10 @@ gdb_test "source -v ${srcdir}/${subdir}/source-test.gdb" \
 # Verify "source script", without the -v, is not verbose.
 set test "source after -v"
 gdb_test_multiple "source ${srcdir}/${subdir}/source-test.gdb" $test {
-    -re "echo test source options" {
+    -re "echo test source options.*$gdb_prompt $" {
 	fail "$test"
     }
-    -re "test source options" {
+    -re "test source options.*$gdb_prompt $" {
 	pass "$test"
     }
 }
