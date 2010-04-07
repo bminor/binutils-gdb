@@ -51,11 +51,13 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "i386-xstate.h"
 
 #include "record.h"
 #include <stdint.h>
 
 #include "features/i386/i386.c"
+#include "features/i386/i386-avx.c"
 
 /* Register names.  */
 
@@ -72,6 +74,18 @@ static const char *i386_register_names[] =
   "xmm0",  "xmm1",   "xmm2",  "xmm3",
   "xmm4",  "xmm5",   "xmm6",  "xmm7",
   "mxcsr"
+};
+
+static const char *i386_ymm_names[] =
+{
+  "ymm0",  "ymm1",   "ymm2",  "ymm3",
+  "ymm4",  "ymm5",   "ymm6",  "ymm7",
+};
+
+static const char *i386_ymmh_names[] =
+{
+  "ymm0h",  "ymm1h",   "ymm2h",  "ymm3h",
+  "ymm4h",  "ymm5h",   "ymm6h",  "ymm7h",
 };
 
 /* Register names for MMX pseudo-registers.  */
@@ -150,18 +164,47 @@ i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum)
   return regnum >= 0 && regnum < tdep->num_dword_regs;
 }
 
-/* SSE register?  */
-
-static int
-i386_sse_regnum_p (struct gdbarch *gdbarch, int regnum)
+int
+i386_ymmh_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int ymm0h_regnum = tdep->ymm0h_regnum;
 
-  if (I387_NUM_XMM_REGS (tdep) == 0)
+  if (ymm0h_regnum < 0)
     return 0;
 
-  return (I387_XMM0_REGNUM (tdep) <= regnum
-	  && regnum < I387_MXCSR_REGNUM (tdep));
+  regnum -= ymm0h_regnum;
+  return regnum >= 0 && regnum < tdep->num_ymm_regs;
+}
+
+/* AVX register?  */
+
+int
+i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int ymm0_regnum = tdep->ymm0_regnum;
+
+  if (ymm0_regnum < 0)
+    return 0;
+
+  regnum -= ymm0_regnum;
+  return regnum >= 0 && regnum < tdep->num_ymm_regs;
+}
+
+/* SSE register?  */
+
+int
+i386_xmm_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int num_xmm_regs = I387_NUM_XMM_REGS (tdep);
+
+  if (num_xmm_regs == 0)
+    return 0;
+
+  regnum -= I387_XMM0_REGNUM (tdep);
+  return regnum >= 0 && regnum < num_xmm_regs;
 }
 
 static int
@@ -201,6 +244,19 @@ i386_fpc_regnum_p (struct gdbarch *gdbarch, int regnum)
 	  && regnum < I387_XMM0_REGNUM (tdep));
 }
 
+/* Return the name of register REGNUM, or the empty string if it is
+   an anonymous register.  */
+
+static const char *
+i386_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  /* Hide the upper YMM registers.  */
+  if (i386_ymmh_regnum_p (gdbarch, regnum))
+    return "";
+
+  return tdesc_register_name (gdbarch, regnum);
+}
+
 /* Return the name of register REGNUM.  */
 
 const char *
@@ -209,6 +265,8 @@ i386_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_names[regnum - I387_MM0_REGNUM (tdep)];
+  else if (i386_ymm_regnum_p (gdbarch, regnum))
+    return i386_ymm_names[regnum - tdep->ymm0_regnum];
   else if (i386_byte_regnum_p (gdbarch, regnum))
     return i386_byte_names[regnum - tdep->al_regnum];
   else if (i386_word_regnum_p (gdbarch, regnum))
@@ -246,7 +304,13 @@ i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg >= 21 && reg <= 28)
     {
       /* SSE registers.  */
-      return reg - 21 + I387_XMM0_REGNUM (tdep);
+      int ymm0_regnum = tdep->ymm0_regnum;
+
+      if (ymm0_regnum >= 0
+	  && i386_xmm_regnum_p (gdbarch, reg))
+	return reg - 21 + ymm0_regnum;
+      else
+	return reg - 21 + I387_XMM0_REGNUM (tdep);
     }
   else if (reg >= 29 && reg <= 36)
     {
@@ -2184,6 +2248,59 @@ i387_ext_type (struct gdbarch *gdbarch)
   return tdep->i387_ext_type;
 }
 
+/* Construct vector type for pseudo YMM registers.  We can't use
+   tdesc_find_type since YMM isn't described in target description.  */
+
+static struct type *
+i386_ymm_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->i386_ymm_type)
+    {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
+      /* The type we're building is this: */
+#if 0
+      union __gdb_builtin_type_vec256i
+      {
+        int128_t uint128[2];
+        int64_t v2_int64[4];
+        int32_t v4_int32[8];
+        int16_t v8_int16[16];
+        int8_t v16_int8[32];
+        double v2_double[4];
+        float v4_float[8];
+      };
+#endif
+
+      struct type *t;
+
+      t = arch_composite_type (gdbarch,
+			       "__gdb_builtin_type_vec256i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "v8_float",
+				   init_vector_type (bt->builtin_float, 8));
+      append_composite_type_field (t, "v4_double",
+				   init_vector_type (bt->builtin_double, 4));
+      append_composite_type_field (t, "v32_int8",
+				   init_vector_type (bt->builtin_int8, 32));
+      append_composite_type_field (t, "v16_int16",
+				   init_vector_type (bt->builtin_int16, 16));
+      append_composite_type_field (t, "v8_int32",
+				   init_vector_type (bt->builtin_int32, 8));
+      append_composite_type_field (t, "v4_int64",
+				   init_vector_type (bt->builtin_int64, 4));
+      append_composite_type_field (t, "v2_int128",
+				   init_vector_type (bt->builtin_int128, 2));
+
+      TYPE_VECTOR (t) = 1;
+      TYPE_NAME (t) = "builtin_type_vec128i";
+      tdep->i386_ymm_type = t;
+    }
+
+  return tdep->i386_ymm_type;
+}
+
 /* Construct vector type for MMX registers.  */
 static struct type *
 i386_mmx_type (struct gdbarch *gdbarch)
@@ -2234,6 +2351,8 @@ i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_type (gdbarch);
+  else if (i386_ymm_regnum_p (gdbarch, regnum))
+    return i386_ymm_type (gdbarch);
   else
     {
       const struct builtin_type *bt = builtin_type (gdbarch);
@@ -2285,7 +2404,22 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-      if (i386_word_regnum_p (gdbarch, regnum))
+      if (i386_ymm_regnum_p (gdbarch, regnum))
+	{
+	  regnum -= tdep->ymm0_regnum;
+
+	  /* Extract (always little endian).  Read lower 128bits. */
+	  regcache_raw_read (regcache,
+			     I387_XMM0_REGNUM (tdep) + regnum,
+			     raw_buf);
+	  memcpy (buf, raw_buf, 16);
+	  /* Read upper 128bits.  */
+	  regcache_raw_read (regcache,
+			     tdep->ymm0h_regnum + regnum,
+			     raw_buf);
+	  memcpy (buf + 16, raw_buf, 16);
+	}
+      else if (i386_word_regnum_p (gdbarch, regnum))
 	{
 	  int gpnum = regnum - tdep->ax_regnum;
 
@@ -2334,7 +2468,20 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-      if (i386_word_regnum_p (gdbarch, regnum))
+      if (i386_ymm_regnum_p (gdbarch, regnum))
+	{
+	  regnum -= tdep->ymm0_regnum;
+
+	  /* ... Write lower 128bits.  */
+	  regcache_raw_write (regcache,
+			     I387_XMM0_REGNUM (tdep) + regnum,
+			     buf);
+	  /* ... Write upper 128bits.  */
+	  regcache_raw_write (regcache,
+			     tdep->ymm0h_regnum + regnum,
+			     buf + 16);
+	}
+      else if (i386_word_regnum_p (gdbarch, regnum))
 	{
 	  int gpnum = regnum - tdep->ax_regnum;
 
@@ -2581,6 +2728,28 @@ i386_collect_fpregset (const struct regset *regset,
   i387_collect_fsave (regcache, regnum, fpregs);
 }
 
+/* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
+
+static void
+i386_supply_xstateregset (const struct regset *regset,
+			  struct regcache *regcache, int regnum,
+			  const void *xstateregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+  i387_supply_xsave (regcache, regnum, xstateregs);
+}
+
+/* Similar to i386_collect_fpregset , but use XSAVE extended state.  */
+
+static void
+i386_collect_xstateregset (const struct regset *regset,
+			   const struct regcache *regcache,
+			   int regnum, void *xstateregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+  i387_collect_xsave (regcache, regnum, xstateregs, 1);
+}
+
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
@@ -2606,6 +2775,16 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
 	tdep->fpregset = regset_alloc (gdbarch, i386_supply_fpregset,
 				       i386_collect_fpregset);
       return tdep->fpregset;
+    }
+
+  if (strcmp (sect_name, ".reg-xstate") == 0)
+    {
+      if (tdep->xstateregset == NULL)
+	tdep->xstateregset = regset_alloc (gdbarch,
+					   i386_supply_xstateregset,
+					   i386_collect_xstateregset);
+
+      return tdep->xstateregset;
     }
 
   return NULL;
@@ -2801,46 +2980,60 @@ int
 i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
-  int sse_regnum_p, fp_regnum_p, mmx_regnum_p, byte_regnum_p,
-      word_regnum_p, dword_regnum_p;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int fp_regnum_p, mmx_regnum_p, xmm_regnum_p, mxcsr_regnum_p,
+      ymm_regnum_p, ymmh_regnum_p;
 
   /* Don't include pseudo registers, except for MMX, in any register
      groups.  */
-  byte_regnum_p = i386_byte_regnum_p (gdbarch, regnum);
-  if (byte_regnum_p)
+  if (i386_byte_regnum_p (gdbarch, regnum))
     return 0;
 
-  word_regnum_p = i386_word_regnum_p (gdbarch, regnum);
-  if (word_regnum_p)
+  if (i386_word_regnum_p (gdbarch, regnum))
     return 0;
 
-  dword_regnum_p = i386_dword_regnum_p (gdbarch, regnum);
-  if (dword_regnum_p)
+  if (i386_dword_regnum_p (gdbarch, regnum))
     return 0;
 
   mmx_regnum_p = i386_mmx_regnum_p (gdbarch, regnum);
   if (group == i386_mmx_reggroup)
     return mmx_regnum_p;
 
-  sse_regnum_p = (i386_sse_regnum_p (gdbarch, regnum)
-		  || i386_mxcsr_regnum_p (gdbarch, regnum));
+  xmm_regnum_p = i386_xmm_regnum_p (gdbarch, regnum);
+  mxcsr_regnum_p = i386_mxcsr_regnum_p (gdbarch, regnum);
   if (group == i386_sse_reggroup)
-    return sse_regnum_p;
+    return xmm_regnum_p || mxcsr_regnum_p;
+
+  ymm_regnum_p = i386_ymm_regnum_p (gdbarch, regnum);
   if (group == vector_reggroup)
-    return mmx_regnum_p || sse_regnum_p;
+    return (mmx_regnum_p
+	    || ymm_regnum_p
+	    || mxcsr_regnum_p
+	    || (xmm_regnum_p
+		&& ((tdep->xcr0 & I386_XSTATE_AVX_MASK)
+		    == I386_XSTATE_SSE_MASK)));
 
   fp_regnum_p = (i386_fp_regnum_p (gdbarch, regnum)
 		 || i386_fpc_regnum_p (gdbarch, regnum));
   if (group == float_reggroup)
     return fp_regnum_p;
 
+  /* For "info reg all", don't include upper YMM registers nor XMM
+     registers when AVX is supported.  */
+  ymmh_regnum_p = i386_ymmh_regnum_p (gdbarch, regnum);
+  if (group == all_reggroup
+      && ((xmm_regnum_p
+	   && (tdep->xcr0 & I386_XSTATE_AVX))
+	  || ymmh_regnum_p))
+    return 0;
+
   if (group == general_reggroup)
     return (!fp_regnum_p
 	    && !mmx_regnum_p
-	    && !sse_regnum_p
-	    && !byte_regnum_p
-	    && !word_regnum_p
-	    && !dword_regnum_p);
+	    && !mxcsr_regnum_p
+	    && !xmm_regnum_p
+	    && !ymm_regnum_p
+	    && !ymmh_regnum_p);
 
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
@@ -5665,7 +5858,7 @@ no_support_3dnow_data:
               record_arch_list_add_reg (ir.regcache, i);
 
             for (i = I387_XMM0_REGNUM (tdep);
-                 i386_sse_regnum_p (gdbarch, i); i++)
+                 i386_xmm_regnum_p (gdbarch, i); i++)
               record_arch_list_add_reg (ir.regcache, i);
 
             if (i386_mxcsr_regnum_p (gdbarch, I387_MXCSR_REGNUM(tdep)))
@@ -6065,7 +6258,7 @@ reswitch_prefix_add:
           if (i386_record_modrm (&ir))
 	    return -1;
           ir.reg |= rex_r;
-          if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.reg))
+          if (!i386_xmm_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.reg))
             goto no_support;
           record_arch_list_add_reg (ir.regcache,
                                     I387_XMM0_REGNUM (tdep) + ir.reg);
@@ -6097,7 +6290,7 @@ reswitch_prefix_add:
                   || opcode == 0x0f17 || opcode == 0x660f17)
                 goto no_support;
               ir.rm |= ir.rex_b;
-              if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+              if (!i386_xmm_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
                 goto no_support;
               record_arch_list_add_reg (ir.regcache,
                                         I387_XMM0_REGNUM (tdep) + ir.rm);
@@ -6275,7 +6468,7 @@ reswitch_prefix_add:
           if (i386_record_modrm (&ir))
 	    return -1;
           ir.rm |= ir.rex_b;
-          if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+          if (!i386_xmm_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
             goto no_support;
           record_arch_list_add_reg (ir.regcache,
                                     I387_XMM0_REGNUM (tdep) + ir.rm);
@@ -6329,7 +6522,7 @@ reswitch_prefix_add:
           if (ir.mod == 3)
             {
               ir.rm |= ir.rex_b;
-              if (!i386_sse_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+              if (!i386_xmm_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
                 goto no_support;
               record_arch_list_add_reg (ir.regcache,
                                         I387_XMM0_REGNUM (tdep) + ir.rm);
@@ -6449,7 +6642,8 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 		       struct tdesc_arch_data *tdesc_data)
 {
   const struct target_desc *tdesc = tdep->tdesc;
-  const struct tdesc_feature *feature_core, *feature_vector;
+  const struct tdesc_feature *feature_core;
+  const struct tdesc_feature *feature_sse, *feature_avx;
   int i, num_regs, valid_p;
 
   if (! tdesc_has_registers (tdesc))
@@ -6459,12 +6653,36 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
   feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.core");
 
   /* Get SSE registers.  */
-  feature_vector = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse");
+  feature_sse = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse");
 
-  if (feature_core == NULL || feature_vector == NULL)
+  if (feature_core == NULL || feature_sse == NULL)
     return 0;
 
+  /* Try AVX registers.  */
+  feature_avx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx");
+
   valid_p = 1;
+
+  /* The XCR0 bits.  */
+  if (feature_avx)
+    {
+      tdep->xcr0 = I386_XSTATE_AVX_MASK;
+
+      /* It may have been set by OSABI initialization function.  */
+      if (tdep->num_ymm_regs == 0)
+	{
+	  tdep->ymmh_register_names = i386_ymmh_names;
+	  tdep->num_ymm_regs = 8;
+	  tdep->ymm0h_regnum = I386_YMM0H_REGNUM;
+	}
+
+      for (i = 0; i < tdep->num_ymm_regs; i++)
+	valid_p &= tdesc_numbered_register (feature_avx, tdesc_data,
+					    tdep->ymm0h_regnum + i,
+					    tdep->ymmh_register_names[i]);
+    }
+  else
+    tdep->xcr0 = I386_XSTATE_SSE_MASK;
 
   num_regs = tdep->num_core_regs;
   for (i = 0; i < num_regs; i++)
@@ -6474,7 +6692,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
   /* Need to include %mxcsr, so add one.  */
   num_regs += tdep->num_xmm_regs + 1;
   for (; i < num_regs; i++)
-    valid_p &= tdesc_numbered_register (feature_vector, tdesc_data, i,
+    valid_p &= tdesc_numbered_register (feature_sse, tdesc_data, i,
 					tdep->register_names[i]);
 
   return valid_p;
@@ -6489,6 +6707,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct tdesc_arch_data *tdesc_data;
   const struct target_desc *tdesc;
   int mm0_regnum;
+  int ymm0_regnum;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -6508,6 +6727,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Floating-point registers.  */
   tdep->fpregset = NULL;
   tdep->sizeof_fpregset = I387_SIZEOF_FSAVE;
+
+  tdep->xstateregset = NULL;
 
   /* The default settings include the FPU registers, the MMX registers
      and the SSE registers.  This can be overridden for a specific ABI
@@ -6537,6 +6758,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sc_reg_offset = NULL;
   tdep->sc_pc_offset = -1;
   tdep->sc_sp_offset = -1;
+
+  tdep->xsave_xcr0_offset = -1;
 
   tdep->record_regmap = i386_record_regmap;
 
@@ -6654,9 +6877,14 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_type (gdbarch, i386_pseudo_register_type);
   set_tdesc_pseudo_register_name (gdbarch, i386_pseudo_register_name);
 
-  /* The default ABI includes general-purpose registers, 
-     floating-point registers, and the SSE registers.  */
-  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS);
+  /* Override the normal target description method to make the AVX
+     upper halves anonymous.  */
+  set_gdbarch_register_name (gdbarch, i386_register_name);
+
+  /* Even though the default ABI only includes general-purpose registers,
+     floating-point registers and the SSE registers, we have to leave a
+     gap for the upper AVX registers.  */
+  set_gdbarch_num_regs (gdbarch, I386_AVX_NUM_REGS);
 
   /* Get the x86 target description from INFO.  */
   tdesc = info.target_desc;
@@ -6667,26 +6895,21 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->num_core_regs = I386_NUM_GREGS + I387_NUM_REGS;
   tdep->register_names = i386_register_names;
 
+  /* No upper YMM registers.  */
+  tdep->ymmh_register_names = NULL;
+  tdep->ymm0h_regnum = -1;
+
   tdep->num_byte_regs = 8;
   tdep->num_word_regs = 8;
   tdep->num_dword_regs = 0;
   tdep->num_mmx_regs = 8;
+  tdep->num_ymm_regs = 0;
 
   tdesc_data = tdesc_data_alloc ();
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.tdep_info = (void *) tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
-
-  /* Wire in pseudo registers.  Number of pseudo registers may be
-     changed.  */
-  set_gdbarch_num_pseudo_regs (gdbarch, (tdep->num_byte_regs
-					 + tdep->num_word_regs
-					 + tdep->num_dword_regs
-					 + tdep->num_mmx_regs));
-
-  /* Target description may be changed.  */
-  tdesc = tdep->tdesc;
 
   if (!i386_validate_tdesc_p (tdep, tdesc_data))
     {
@@ -6695,6 +6918,17 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       gdbarch_free (gdbarch);
       return NULL;
     }
+
+  /* Wire in pseudo registers.  Number of pseudo registers may be
+     changed.  */
+  set_gdbarch_num_pseudo_regs (gdbarch, (tdep->num_byte_regs
+					 + tdep->num_word_regs
+					 + tdep->num_dword_regs
+					 + tdep->num_mmx_regs
+					 + tdep->num_ymm_regs));
+
+  /* Target description may be changed.  */
+  tdesc = tdep->tdesc;
 
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 
@@ -6705,15 +6939,25 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->al_regnum = gdbarch_num_regs (gdbarch);
   tdep->ax_regnum = tdep->al_regnum + tdep->num_byte_regs;
 
-  mm0_regnum = tdep->ax_regnum + tdep->num_word_regs;
+  ymm0_regnum = tdep->ax_regnum + tdep->num_word_regs;
   if (tdep->num_dword_regs)
     {
       /* Support dword pseudo-registesr if it hasn't been disabled,  */
-      tdep->eax_regnum = mm0_regnum;
-      mm0_regnum = tdep->eax_regnum + tdep->num_dword_regs;
+      tdep->eax_regnum = ymm0_regnum;
+      ymm0_regnum += tdep->num_dword_regs;
     }
   else
     tdep->eax_regnum = -1;
+
+  mm0_regnum = ymm0_regnum;
+  if (tdep->num_ymm_regs)
+    {
+      /* Support YMM pseudo-registesr if it is available,  */
+      tdep->ymm0_regnum = ymm0_regnum;
+      mm0_regnum += tdep->num_ymm_regs;
+    }
+  else
+    tdep->ymm0_regnum = -1;
 
   if (tdep->num_mmx_regs != 0)
     {
@@ -6797,6 +7041,7 @@ is \"default\"."),
 
   /* Initialize the standard target descriptions.  */
   initialize_tdesc_i386 ();
+  initialize_tdesc_i386_avx ();
 
   /* Tell remote stub that we support XML target description.  */
   register_remote_support_xml ("i386");

@@ -109,6 +109,9 @@ struct gdbarch_tdep
   struct regset *fpregset;
   size_t sizeof_fpregset;
 
+  /* XSAVE extended state.  */
+  struct regset *xstateregset;
+
   /* Register number for %st(0).  The register numbers for the other
      registers follow from this one.  Set this to -1 to indicate the
      absence of an FPU.  */
@@ -120,6 +123,13 @@ struct gdbarch_tdep
   /* Register number for %mm0.  Set this to -1 to indicate the absence
      of MMX support.  */
   int mm0_regnum;
+
+  /* Number of pseudo YMM registers.  */
+  int num_ymm_regs;
+
+  /* Register number for %ymm0.  Set this to -1 to indicate the absence
+     of pseudo YMM register support.  */
+  int ymm0_regnum;
 
   /* Number of byte registers.  */
   int num_byte_regs;
@@ -146,8 +156,23 @@ struct gdbarch_tdep
   /* Number of SSE registers.  */
   int num_xmm_regs;
 
+  /* Bits of the extended control register 0 (the XFEATURE_ENABLED_MASK
+     register), excluding the x87 bit, which are supported by this GDB.
+   */
+  uint64_t xcr0;
+
+  /* Offset of XCR0 in XSAVE extended state.  */
+  int xsave_xcr0_offset;
+
   /* Register names.  */
   const char **register_names;
+
+  /* Register number for %ymm0h.  Set this to -1 to indicate the absence
+     of upper YMM register support.  */
+  int ymm0h_regnum;
+
+  /* Upper YMM register names.  Only used for tdesc_numbered_register.  */
+  const char **ymmh_register_names;
 
   /* Target description.  */
   const struct target_desc *tdesc;
@@ -182,6 +207,7 @@ struct gdbarch_tdep
 
   /* ISA-specific data types.  */
   struct type *i386_mmx_type;
+  struct type *i386_ymm_type;
   struct type *i387_ext_type;
 
   /* Process record/replay target.  */
@@ -228,7 +254,9 @@ enum i386_regnum
   I386_FS_REGNUM,		/* %fs */
   I386_GS_REGNUM,		/* %gs */
   I386_ST0_REGNUM,		/* %st(0) */
-  I386_MXCSR_REGNUM = 40	/* %mxcsr */ 
+  I386_MXCSR_REGNUM = 40,	/* %mxcsr */ 
+  I386_YMM0H_REGNUM,		/* %ymm0h */
+  I386_YMM7H_REGNUM = I386_YMM0H_REGNUM + 7
 };
 
 /* Register numbers of RECORD_REGMAP.  */
@@ -265,6 +293,7 @@ enum record_i386_regnum
 #define I386_NUM_XREGS  9
 
 #define I386_SSE_NUM_REGS	(I386_MXCSR_REGNUM + 1)
+#define I386_AVX_NUM_REGS	(I386_YMM7H_REGNUM + 1)
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
@@ -276,6 +305,9 @@ extern struct type *i387_ext_type (struct gdbarch *gdbarch);
 extern int i386_byte_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_word_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_xmm_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_ymmh_regnum_p (struct gdbarch *gdbarch, int regnum);
 
 extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
 					      int regnum);

@@ -1,5 +1,80 @@
 2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-linux-nat.c: Include "regset.h", "elf/common.h",
+	<sys/uio.h> and "i386-xstate.h".
+	(PTRACE_GETREGSET): New.
+	(PTRACE_SETREGSET): Likewise.
+	(fetch_xstateregs): Likewise.
+	(store_xstateregs): Likewise.
+	(GETXSTATEREGS_SUPPLIES): Likewise.
+	(regmap): Include 8 upper YMM registers.
+	(i386_linux_fetch_inferior_registers): Support XSAVE extended
+	state.
+	(i386_linux_store_inferior_registers): Likewise.
+	(i386_linux_read_description): Check and enable AVX target
+	descriptions.
+
+	* i386-linux-tdep.c: Include "regset.h", "i387-tdep.h",
+	"i386-xstate.h" and "features/i386/i386-avx-linux.c".
+	(i386_linux_regset_sections): Add ".reg-xstate".
+	(i386_linux_gregset_reg_offset): Include 8 upper YMM registers.
+	(i386_linux_core_read_xcr0): New.
+	(i386_linux_core_read_description): Check and enable AVX target
+	description.
+	(i386_linux_init_abi): Set xsave_xcr0_offset.
+	(_initialize_i386_linux_tdep): Call
+	initialize_tdesc_i386_avx_linux.
+
+	* i386-linux-tdep.h (I386_LINUX_ORIG_EAX_REGNUM): Replace
+	I386_SSE_NUM_REGS with I386_AVX_NUM_REGS.
+	(i386_linux_core_read_xcr0): New.
+	(tdesc_i386_avx_linux): Likewise.
+	(I386_LINUX_XSAVE_XCR0_OFFSET): Likewise.
+
+	* i386-tdep.c: Include "i386-xstate.h" and
+	"features/i386/i386-avx.c".
+	(i386_ymm_names): New.
+	(i386_ymmh_names): Likewise.
+	(i386_ymmh_regnum_p): Likewise.
+	(i386_ymm_regnum_p): Likewise.
+	(i386_xmm_regnum_p): Likewise.
+	(i386_register_name): Likewise.
+	(i386_ymm_type): Likewise.
+	(i386_supply_xstateregset): Likewise.
+	(i386_collect_xstateregset): Likewise.
+	(i386_sse_regnum_p): Removed.
+	(i386_pseudo_register_name): Support pseudo YMM registers.
+	(i386_pseudo_register_type): Likewise.
+	(i386_pseudo_register_read): Likewise.
+	(i386_pseudo_register_write): Likewise.
+	(i386_dbx_reg_to_regnum): Return %ymmN register number for
+	%xmmN if AVX is available.
+	(i386_regset_from_core_section): Support .reg-xstate section.
+	(i386_register_reggroup_p): Supper upper YMM and YMM registers.
+	(i386_process_record): Replace i386_sse_regnum_p with
+	i386_xmm_regnum_p.
+	(i386_validate_tdesc_p): Support org.gnu.gdb.i386.avx feature.
+	Set ymmh_register_names, num_ymm_regs, ymm0h_regnum and xcr0.
+	(i386_gdbarch_init): Set xstateregset.  Set xsave_xcr0_offset. 
+	Call set_gdbarch_register_name.  Replace I386_SSE_NUM_REGS with
+	I386_AVX_NUM_REGS.  Set ymmh_register_names, ymm0h_regnum and
+	num_ymm_regs.  Add num_ymm_regs to set_gdbarch_num_pseudo_regs.
+	Set ymm0_regnum.
+	(_initialize_i386_tdep): Call initialize_tdesc_i386_avx.
+
+	* i386-tdep.h (gdbarch_tdep): Add xstateregset, ymm0_regnum,
+	xcr0, xsave_xcr0_offset, ymm0h_regnum, ymmh_register_names and
+	i386_ymm_type.
+	(i386_regnum): Add I386_YMM0H_REGNUM, and I386_YMM7H_REGNUM.
+	(I386_AVX_NUM_REGS): New.
+	(i386_xmm_regnum_p): Likewise.
+	(i386_ymm_regnum_p): Likewise.
+	(i386_ymmh_regnum_p): Likewise.
+
+	* common/i386-xstate.h: New.
+
+2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/djgpp/fnchange.lst: Add x86 AVX XML files.
 
 	* features/Makefile (WHICH): Add i386/i386-avx,

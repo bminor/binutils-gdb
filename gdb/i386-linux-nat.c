@@ -23,11 +23,14 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "regset.h"
 #include "target.h"
 #include "linux-nat.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include "elf/common.h"
+#include <sys/uio.h>
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/procfs.h>
@@ -69,6 +72,19 @@
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
+
+#include "i386-xstate.h"
+
+#ifndef PTRACE_GETREGSET
+#define PTRACE_GETREGSET	0x4204
+#endif
+
+#ifndef PTRACE_SETREGSET
+#define PTRACE_SETREGSET	0x4205
+#endif
+
+/* Does the current host support PTRACE_GETREGSET?  */
+static int have_ptrace_getregset = -1;
 
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
@@ -98,6 +114,8 @@ static int regmap[] =
   -1, -1, -1, -1,		/* xmm0, xmm1, xmm2, xmm3 */
   -1, -1, -1, -1,		/* xmm4, xmm5, xmm6, xmm6 */
   -1,				/* mxcsr */
+  -1, -1, -1, -1,		/* ymm0h, ymm1h, ymm2h, ymm3h */
+  -1, -1, -1, -1,		/* ymm4h, ymm5h, ymm6h, ymm6h */
   ORIG_EAX
 };
 
@@ -109,6 +127,9 @@ static int regmap[] =
 
 #define GETFPXREGS_SUPPLIES(regno) \
   (I386_ST0_REGNUM <= (regno) && (regno) < I386_SSE_NUM_REGS)
+
+#define GETXSTATEREGS_SUPPLIES(regno) \
+  (I386_ST0_REGNUM <= (regno) && (regno) < I386_AVX_NUM_REGS)
 
 /* Does the current host support the GETREGS request?  */
 int have_ptrace_getregs =
@@ -355,6 +376,57 @@ static void store_fpregs (const struct regcache *regcache, int tid, int regno) {
 
 /* Transfering floating-point and SSE registers to and from GDB.  */
 
+/* Fetch all registers covered by the PTRACE_GETREGSET request from
+   process/thread TID and store their values in GDB's register array.
+   Return non-zero if successful, zero otherwise.  */
+
+static int
+fetch_xstateregs (struct regcache *regcache, int tid)
+{
+  char xstateregs[I386_XSTATE_MAX_SIZE];
+  struct iovec iov;
+
+  if (!have_ptrace_getregset)
+    return 0;
+
+  iov.iov_base = xstateregs;
+  iov.iov_len = sizeof(xstateregs);
+  if (ptrace (PTRACE_GETREGSET, tid, (unsigned int) NT_X86_XSTATE,
+	      &iov) < 0)
+    perror_with_name (_("Couldn't read extended state status"));
+
+  i387_supply_xsave (regcache, -1, xstateregs);
+  return 1;
+}
+
+/* Store all valid registers in GDB's register array covered by the
+   PTRACE_SETREGSET request into the process/thread specified by TID.
+   Return non-zero if successful, zero otherwise.  */
+
+static int
+store_xstateregs (const struct regcache *regcache, int tid, int regno)
+{
+  char xstateregs[I386_XSTATE_MAX_SIZE];
+  struct iovec iov;
+
+  if (!have_ptrace_getregset)
+    return 0;
+  
+  iov.iov_base = xstateregs;
+  iov.iov_len = sizeof(xstateregs);
+  if (ptrace (PTRACE_GETREGSET, tid, (unsigned int) NT_X86_XSTATE,
+	      &iov) < 0)
+    perror_with_name (_("Couldn't read extended state status"));
+
+  i387_collect_xsave (regcache, regno, xstateregs, 0);
+
+  if (ptrace (PTRACE_SETREGSET, tid, (unsigned int) NT_X86_XSTATE,
+	      (int) &iov) < 0)
+    perror_with_name (_("Couldn't write extended state status"));
+
+  return 1;
+}
+
 #ifdef HAVE_PTRACE_GETFPXREGS
 
 /* Fill GDB's register array with the floating-point and SSE register
@@ -489,6 +561,8 @@ i386_linux_fetch_inferior_registers (struct target_ops *ops,
 	  return;
 	}
 
+      if (fetch_xstateregs (regcache, tid))
+	return;
       if (fetch_fpxregs (regcache, tid))
 	return;
       fetch_fpregs (regcache, tid);
@@ -499,6 +573,12 @@ i386_linux_fetch_inferior_registers (struct target_ops *ops,
     {
       fetch_regs (regcache, tid);
       return;
+    }
+
+  if (GETXSTATEREGS_SUPPLIES (regno))
+    {
+      if (fetch_xstateregs (regcache, tid))
+	return;
     }
 
   if (GETFPXREGS_SUPPLIES (regno))
@@ -553,6 +633,8 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
   if (regno == -1)
     {
       store_regs (regcache, tid, regno);
+      if (store_xstateregs (regcache, tid, regno))
+	return;
       if (store_fpxregs (regcache, tid, regno))
 	return;
       store_fpregs (regcache, tid, regno);
@@ -563,6 +645,12 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
     {
       store_regs (regcache, tid, regno);
       return;
+    }
+
+  if (GETXSTATEREGS_SUPPLIES (regno))
+    {
+      if (store_xstateregs (regcache, tid, regno))
+	return;
     }
 
   if (GETFPXREGS_SUPPLIES (regno))
@@ -858,7 +946,42 @@ i386_linux_child_post_startup_inferior (ptid_t ptid)
 static const struct target_desc *
 i386_linux_read_description (struct target_ops *ops)
 {
-  return tdesc_i386_linux;
+  static uint64_t xcr0;
+
+  if (have_ptrace_getregset == -1)
+    {
+      int tid;
+      uint64_t xstateregs[(I386_XSTATE_SSE_SIZE / sizeof (uint64_t))];
+      struct iovec iov;
+
+      /* GNU/Linux LWP ID's are process ID's.  */
+      tid = TIDGET (inferior_ptid);
+      if (tid == 0)
+	tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+      iov.iov_base = xstateregs;
+      iov.iov_len = sizeof (xstateregs);
+
+      /* Check if PTRACE_GETREGSET works.  */
+      if (ptrace (PTRACE_GETREGSET, tid, (unsigned int) NT_X86_XSTATE,
+		  &iov) < 0)
+	have_ptrace_getregset = 0;
+      else
+	{
+	  have_ptrace_getregset = 1;
+
+	  /* Get XCR0 from XSAVE extended state.  */
+	  xcr0 = xstateregs[(I386_LINUX_XSAVE_XCR0_OFFSET
+			     / sizeof (long long))];
+	}
+    }
+
+  /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
+  if (have_ptrace_getregset
+      && (xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
+    return tdesc_i386_avx_linux;
+  else
+    return tdesc_i386_linux;
 }
 
 void

@@ -30,12 +30,38 @@
 /* Register number for the "orig_eax" pseudo-register.  If this
    pseudo-register contains a value >= 0 it is interpreted as the
    system call number that the kernel is supposed to restart.  */
-#define I386_LINUX_ORIG_EAX_REGNUM I386_SSE_NUM_REGS
+#define I386_LINUX_ORIG_EAX_REGNUM I386_AVX_NUM_REGS
 
 /* Total number of registers for GNU/Linux.  */
 #define I386_LINUX_NUM_REGS (I386_LINUX_ORIG_EAX_REGNUM + 1)
 
+/* Get XSAVE extended state xcr0 from core dump.  */
+extern uint64_t i386_linux_core_read_xcr0
+  (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd);
+
 /* Linux target description.  */
 extern struct target_desc *tdesc_i386_linux;
+extern struct target_desc *tdesc_i386_avx_linux;
+
+/* Format of XSAVE extended state is:
+ 	struct
+	{
+	  fxsave_bytes[0..463]
+	  sw_usable_bytes[464..511]
+	  xstate_hdr_bytes[512..575]
+	  avx_bytes[576..831]
+	  future_state etc
+	};
+
+  Same memory layout will be used for the coredump NT_X86_XSTATE
+  representing the XSAVE extended state registers.
+
+  The first 8 bytes of the sw_usable_bytes[464..467] is the OS enabled
+  extended state mask, which is the same as the extended control register
+  0 (the XFEATURE_ENABLED_MASK register), XCR0.  We can use this mask
+  together with the mask saved in the xstate_hdr_bytes to determine what
+  states the processor/OS supports and what state, used or initialized,
+  the process/thread is in.  */ 
+#define I386_LINUX_XSAVE_XCR0_OFFSET 464
 
 #endif /* i386-linux-tdep.h */

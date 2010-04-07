@@ -23,6 +23,7 @@
 #include "frame.h"
 #include "value.h"
 #include "regcache.h"
+#include "regset.h"
 #include "inferior.h"
 #include "osabi.h"
 #include "reggroups.h"
@@ -36,8 +37,10 @@
 #include "solib-svr4.h"
 #include "symtab.h"
 #include "arch-utils.h"
-#include "regset.h"
 #include "xml-syscall.h"
+
+#include "i387-tdep.h"
+#include "i386-xstate.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"
@@ -47,6 +50,7 @@
 #include <stdint.h>
 
 #include "features/i386/i386-linux.c"
+#include "features/i386/i386-avx-linux.c"
 
 /* Supported register note sections.  */
 static struct core_regset_section i386_linux_regset_sections[] =
@@ -54,6 +58,7 @@ static struct core_regset_section i386_linux_regset_sections[] =
   { ".reg", 144, "general-purpose" },
   { ".reg2", 108, "floating-point" },
   { ".reg-xfp", 512, "extended floating-point" },
+  { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }
 };
 
@@ -533,6 +538,7 @@ static int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
   11 * 4			/* "orig_eax" */
 };
 
@@ -560,6 +566,43 @@ static int i386_linux_sc_reg_offset[] =
   0 * 4				/* %gs */
 };
 
+/* Get XSAVE extended state xcr0 from core dump.  */
+
+uint64_t
+i386_linux_core_read_xcr0 (struct gdbarch *gdbarch,
+			   struct target_ops *target, bfd *abfd)
+{
+  asection *xstate = bfd_get_section_by_name (abfd, ".reg-xstate");
+  uint64_t xcr0;
+
+  if (xstate)
+    {
+      size_t size = bfd_section_size (abfd, xstate);
+
+      /* Check extended state size.  */
+      if (size < I386_XSTATE_AVX_SIZE)
+	xcr0 = I386_XSTATE_SSE_MASK;
+      else
+	{
+	  char contents[8];
+
+	  if (! bfd_get_section_contents (abfd, xstate, contents,
+					  I386_LINUX_XSAVE_XCR0_OFFSET,
+					  8))
+	    {
+	      warning (_("Couldn't read `xcr0' bytes from `.reg-xstate' section in core file."));
+	      return 0;
+	    }
+
+	  xcr0 = bfd_get_64 (abfd, contents);
+	}
+    }
+  else
+    xcr0 = I386_XSTATE_SSE_MASK;
+
+  return xcr0;
+}
+
 /* Get Linux/x86 target description from core dump.  */
 
 static const struct target_desc *
@@ -568,12 +611,17 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 				  bfd *abfd)
 {
   asection *section = bfd_get_section_by_name (abfd, ".reg2");
+  uint64_t xcr0;
 
   if (section == NULL)
     return NULL;
 
   /* Linux/i386.  */
-  return tdesc_i386_linux;
+  xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
+  if ((xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
+    return tdesc_i386_avx_linux;
+  else
+    return tdesc_i386_linux;
 }
 
 static void
@@ -622,6 +670,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigcontext_addr = i386_linux_sigcontext_addr;
   tdep->sc_reg_offset = i386_linux_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
+
+  tdep->xsave_xcr0_offset = I386_LINUX_XSAVE_XCR0_OFFSET;
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
   set_gdbarch_process_record_signal (gdbarch, i386_linux_record_signal);
@@ -840,4 +890,5 @@ _initialize_i386_linux_tdep (void)
 
   /* Initialize the Linux target description  */
   initialize_tdesc_i386_linux ();
+  initialize_tdesc_i386_avx_linux ();
 }
