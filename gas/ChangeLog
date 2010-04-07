@@ -1,3 +1,7 @@
+2010-04-07  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2010-04-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: New Russian translation.

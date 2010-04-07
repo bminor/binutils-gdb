@@ -1,3 +1,7 @@
+2010-04-07  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2010-04-06  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (RBOPT): New define.
