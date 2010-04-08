@@ -1,5 +1,9 @@
 2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i387-tdep.c (i387_collect_xsave): Re-indent.
+
+2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-linux-nat.c (have_ptrace_getfpxregs): Initialize to -1
 	if HAVE_PTRACE_GETFPXREGS is defined.
 	(i386_linux_read_description): Set have_ptrace_getfpxregs and

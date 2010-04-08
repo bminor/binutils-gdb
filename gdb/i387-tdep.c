@@ -1033,68 +1033,68 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  switch (regclass)
 	    {
 	    default:
-		  abort ();
+	      abort ();
 
-		case avxh:
-		  /* This is an upper YMM register.  */
-		  p = XSAVE_AVXH_ADDR (tdep, regs, regnum);
-		  if (memcmp (raw, p, 16))
-		    {
-		      xstate_bv |= I386_XSTATE_AVX;
-		      memcpy (p, raw, 16);
-		    }
-		  break;
-
-		case sse:
-		  /* This is an SSE register.  */
-		  p = FXSAVE_ADDR (tdep, regs, regnum);
-		  if (memcmp (raw, p, 16))
-		    {
-		      xstate_bv |= I386_XSTATE_SSE;
-		      memcpy (p, raw, 16);
-		    }
-		  break;
-
-		case x87:
-		  /* This is an x87 register.  */
-		  p = FXSAVE_ADDR (tdep, regs, regnum);
-		  if (memcmp (raw, p, 10))
-		    {
-		      xstate_bv |= I386_XSTATE_X87;
-		      memcpy (p, raw, 10);
-		    }
-		  break;
-		}
-	    }
-
-	  /* Update the corresponding bits in `xstate_bv' if any SSE/AVX
-	     registers are changed.  */
-	  if (xstate_bv)
-	    {
-	      /* The supported bits in `xstat_bv' are 1 byte.  */
-	      *xstate_bv_p |= (gdb_byte) xstate_bv;
-
-	      switch (regclass)
+	    case avxh:
+	      /* This is an upper YMM register.  */
+	      p = XSAVE_AVXH_ADDR (tdep, regs, regnum);
+	      if (memcmp (raw, p, 16))
 		{
-		default:
-		  abort ();
-
-		case all:
-		  break;
-
-		case x87:
-		case sse:
-		case avxh:
-		  /* Register REGNUM has been updated.  Return.  */
-		  return;
+		  xstate_bv |= I386_XSTATE_AVX;
+		  memcpy (p, raw, 16);
 		}
+	      break;
+
+	    case sse:
+	      /* This is an SSE register.  */
+	      p = FXSAVE_ADDR (tdep, regs, regnum);
+	      if (memcmp (raw, p, 16))
+		{
+		  xstate_bv |= I386_XSTATE_SSE;
+		  memcpy (p, raw, 16);
+		}
+	      break;
+
+	    case x87:
+	      /* This is an x87 register.  */
+	      p = FXSAVE_ADDR (tdep, regs, regnum);
+	      if (memcmp (raw, p, 10))
+		{
+		  xstate_bv |= I386_XSTATE_X87;
+		  memcpy (p, raw, 10);
+		}
+	      break;
 	    }
-	  else
+	}
+
+      /* Update the corresponding bits in `xstate_bv' if any SSE/AVX
+	 registers are changed.  */
+      if (xstate_bv)
+	{
+	  /* The supported bits in `xstat_bv' are 1 byte.  */
+	  *xstate_bv_p |= (gdb_byte) xstate_bv;
+
+	  switch (regclass)
 	    {
-	      /* Return if REGNUM isn't changed.  */
-	      if (regclass != all)
-		return;
+	    default:
+	      abort ();
+
+	    case all:
+	      break;
+
+	    case x87:
+	    case sse:
+	    case avxh:
+	      /* Register REGNUM has been updated.  Return.  */
+	      return;
 	    }
+	}
+      else
+	{
+	  /* Return if REGNUM isn't changed.  */
+	  if (regclass != all)
+	    return;
+	}
     }
 
   /* Only handle x87 control registers.  */
@@ -1113,7 +1113,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	    if (i == I387_FOP_REGNUM (tdep))
 	      {
 		/* The opcode occupies only 11 bits.  Make sure we
-                   don't touch the other bits.  */
+		   don't touch the other bits.  */
 		buf[1] &= ((1 << 3) - 1);
 		buf[1] |= ((FXSAVE_ADDR (tdep, regs, i))[1] & ~((1 << 3) - 1));
 	      }
