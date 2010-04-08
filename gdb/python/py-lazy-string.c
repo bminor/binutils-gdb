@@ -97,7 +97,7 @@ stpy_convert_to_value  (PyObject *self, PyObject *args)
   if (self_string->address == 0)
     {
       PyErr_SetString (PyExc_MemoryError,
-		       "Cannot create a value from NULL");
+		       _("Cannot create a value from NULL"));
       return NULL;
     }
 
