@@ -236,6 +236,10 @@
 @V@/gdb/features/i386/i386-avx.c @V@/gdb/features/i386/i32-a.c
 @V@/gdb/features/i386/i386-avx-linux.xml @V@/gdb/features/i386/i32-al.xml
 @V@/gdb/features/i386/i386-avx.xml @V@/gdb/features/i386/i32-a.xml
+@V@/gdb/features/i386/i386-mmx-linux.c @V@/features/i386/i32-ml.c
+@V@/gdb/features/i386/i386-mmx.c @V@/gdb/features/i386/i32-m.c
+@V@/gdb/features/i386/i386-mmx-linux.xml @V@/gdb/features/i386/i32-ml.xml
+@V@/gdb/features/i386/i386-mmx.xml @V@/gdb/features/i386/i32-m.xml
 @V@/gdb/f-exp.tab.c @V@/gdb/f-exp_tab.c
 @V@/gdb/gdbserver/linux-cris-low.c @V@/gdb/gdbserver/lx-cris.c
 @V@/gdb/gdbserver/linux-crisv32-low.c @V@/gdb/gdbserver/lx-cris32.c

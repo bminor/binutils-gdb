@@ -150,7 +150,7 @@ int have_ptrace_getregs =
    for this to be a simple variable.  */
 int have_ptrace_getfpxregs =
 #ifdef HAVE_PTRACE_GETFPXREGS
-  1
+  -1
 #else
   0
 #endif
@@ -946,18 +946,32 @@ i386_linux_child_post_startup_inferior (ptid_t ptid)
 static const struct target_desc *
 i386_linux_read_description (struct target_ops *ops)
 {
+  int tid;
   static uint64_t xcr0;
+
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+#ifdef HAVE_PTRACE_GETFPXREGS
+  if (have_ptrace_getfpxregs == -1)
+    {
+      elf_fpxregset_t fpxregs;
+
+      if (ptrace (PTRACE_GETFPXREGS, tid, 0, (int) &fpxregs) < 0)
+	{
+	  have_ptrace_getfpxregs = 0;
+	  have_ptrace_getregset = 0;
+	  return tdesc_i386_mmx_linux;
+	}
+    }
+#endif
 
   if (have_ptrace_getregset == -1)
     {
-      int tid;
       uint64_t xstateregs[(I386_XSTATE_SSE_SIZE / sizeof (uint64_t))];
       struct iovec iov;
-
-      /* GNU/Linux LWP ID's are process ID's.  */
-      tid = TIDGET (inferior_ptid);
-      if (tid == 0)
-	tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
       iov.iov_base = xstateregs;
       iov.iov_len = sizeof (xstateregs);

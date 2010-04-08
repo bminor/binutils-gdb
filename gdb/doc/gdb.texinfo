@@ -33850,7 +33850,7 @@ targets.  It should describe the following registers:
 
 The register sets may be different, depending on the target.
 
-The @samp{org.gnu.gdb.i386.sse} feature is required.  It should
+The @samp{org.gnu.gdb.i386.sse} feature is optional.  It should
 describe registers:
 
 @itemize @minus
@@ -33862,7 +33862,8 @@ describe registers:
 @samp{mxcsr}
 @end itemize
 
-The @samp{org.gnu.gdb.i386.avx} feature is optional.  It should
+The @samp{org.gnu.gdb.i386.avx} feature is optional and requires the
+@samp{org.gnu.gdb.i386.sse} feature.  It should
 describe the upper 128 bits of @sc{ymm} registers:
 
 @itemize @minus

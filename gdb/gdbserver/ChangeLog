@@ -1,3 +1,20 @@
+2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (clean): Also remove i386-mmx.c i386-mmx-linux.c.
+	(i386-mmx.o): New.
+	(i386-mmx.c): Likewise.
+	(i386-mmx-linux.o): Likewise.
+	(i386-mmx-linux.c): Likewise.
+
+	* configure.srv (srv_i386_regobj): Add i386-mmx.o.
+	(srv_i386_linux_regobj): Add i386-mmx-linux.o.
+	(srv_i386_xmlfiles): Add i386/i386-mmx.xml.
+	(srv_i386_linux_xmlfiles): Add i386/i386-mmx-linux.xml.
+
+	* linux-x86-low.c (init_registers_i386_mmx_linux): New.
+	(x86_linux_update_xmltarget): Call init_registers_i386_mmx_linux
+	and return if ptrace PTRACE_GETFPXREGS failed in 32bit.
+
 2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (clean): Updated.

@@ -58,6 +58,7 @@
 
 #include "features/i386/i386.c"
 #include "features/i386/i386-avx.c"
+#include "features/i386/i386-mmx.c"
 
 /* Register names.  */
 
@@ -2937,8 +2938,8 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->jb_pc_offset = 36;
 
   /* DJGPP does not support the SSE registers.  */
-  tdep->num_xmm_regs = 0;
-  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I387_NUM_REGS);
+  if (! tdesc_has_registers (info.target_desc))
+    tdep->tdesc = tdesc_i386_mmx;
 
   /* Native compiler is GCC, which uses the SVR4 register numbering
      even in COFF and STABS.  See the comment in i386_gdbarch_init,
@@ -6649,12 +6650,11 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 
   /* Get core registers.  */
   feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.core");
+  if (feature_core == NULL)
+    return 0;
 
   /* Get SSE registers.  */
   feature_sse = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse");
-
-  if (feature_core == NULL || feature_sse == NULL)
-    return 0;
 
   /* Try AVX registers.  */
   feature_avx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx");
@@ -6664,6 +6664,10 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
   /* The XCR0 bits.  */
   if (feature_avx)
     {
+      /* AVX register description requires SSE register description.  */
+      if (!feature_sse)
+	return 0;
+
       tdep->xcr0 = I386_XSTATE_AVX_MASK;
 
       /* It may have been set by OSABI initialization function.  */
@@ -6679,19 +6683,27 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 					    tdep->ymm0h_regnum + i,
 					    tdep->ymmh_register_names[i]);
     }
-  else
+  else if (feature_sse)
     tdep->xcr0 = I386_XSTATE_SSE_MASK;
+  else
+    {
+      tdep->xcr0 = I386_XSTATE_X87_MASK;
+      tdep->num_xmm_regs = 0;
+    }
 
   num_regs = tdep->num_core_regs;
   for (i = 0; i < num_regs; i++)
     valid_p &= tdesc_numbered_register (feature_core, tdesc_data, i,
 					tdep->register_names[i]);
 
-  /* Need to include %mxcsr, so add one.  */
-  num_regs += tdep->num_xmm_regs + 1;
-  for (; i < num_regs; i++)
-    valid_p &= tdesc_numbered_register (feature_sse, tdesc_data, i,
-					tdep->register_names[i]);
+  if (feature_sse)
+    {
+      /* Need to include %mxcsr, so add one.  */
+      num_regs += tdep->num_xmm_regs + 1;
+      for (; i < num_regs; i++)
+	valid_p &= tdesc_numbered_register (feature_sse, tdesc_data, i,
+					    tdep->register_names[i]);
+    }
 
   return valid_p;
 }
@@ -6732,15 +6744,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      and the SSE registers.  This can be overridden for a specific ABI
      by adjusting the members `st0_regnum', `mm0_regnum' and
      `num_xmm_regs' of `struct gdbarch_tdep', otherwise the registers
-     will show up in the output of "info all-registers".  Ideally we
-     should try to autodetect whether they are available, such that we
-     can prevent "info all-registers" from displaying registers that
-     aren't available.
-
-     NOTE: kevinb/2003-07-13: ... if it's a choice between printing
-     [the SSE registers] always (even when they don't exist) or never
-     showing them to the user (even when they do exist), I prefer the
-     former over the latter.  */
+     will show up in the output of "info all-registers".  */
 
   tdep->st0_regnum = I386_ST0_REGNUM;
 
@@ -7039,6 +7043,7 @@ is \"default\"."),
 
   /* Initialize the standard target descriptions.  */
   initialize_tdesc_i386 ();
+  initialize_tdesc_i386_mmx ();
   initialize_tdesc_i386_avx ();
 
   /* Tell remote stub that we support XML target description.  */

@@ -37,6 +37,8 @@ void init_registers_amd64_linux (void);
 void init_registers_i386_avx_linux (void);
 /* Defined in auto-generated file amd64-avx-linux.c.  */
 void init_registers_amd64_avx_linux (void);
+/* Defined in auto-generated file i386-mmx-linux.c.  */
+void init_registers_i386_mmx_linux (void);
 
 /* Backward compatibility for gdb without XML support.  */
 
@@ -828,19 +830,56 @@ static int use_xml;
 static void
 x86_linux_update_xmltarget (void)
 {
+  int pid;
+  struct regset_info *regset;
   static unsigned long long xcr0;
   static int have_ptrace_getregset = -1;
+#ifdef HAVE_PTRACE_GETFPXREGS
+  static int have_ptrace_getfpxregs = -1;
+#endif
 
   if (!current_inferior)
     return;
 
+  pid = pid_of (get_thread_lwp (current_inferior));
 #ifdef __x86_64__
   if (num_xmm_registers == 8)
     init_registers_i386_linux ();
   else
     init_registers_amd64_linux ();
 #else
-  init_registers_i386_linux ();
+    {
+# ifdef HAVE_PTRACE_GETFPXREGS
+      if (have_ptrace_getfpxregs == -1)
+	{
+	  elf_fpxregset_t fpxregs;
+
+	  if (ptrace (PTRACE_GETFPXREGS, pid, 0, (int) &fpxregs) < 0)
+	    {
+	      have_ptrace_getfpxregs = 0;
+	      x86_xcr0 = I386_XSTATE_X87_MASK;
+
+	      /* Disable PTRACE_GETFPXREGS.  */
+	      for (regset = target_regsets;
+		   regset->fill_function != NULL; regset++)
+		if (regset->get_request == PTRACE_GETFPXREGS)
+		  {
+		    regset->size = 0;
+		    break;
+		  }
+	    }
+	  else
+	    have_ptrace_getfpxregs = 1;
+	}
+
+      if (!have_ptrace_getfpxregs)
+	{
+	  init_registers_i386_mmx_linux ();
+	  return;
+	}
+# endif
+      init_registers_i386_linux ();
+    }
 #endif
 
   if (!use_xml)
@@ -863,10 +902,8 @@ x86_linux_update_xmltarget (void)
   /* Check if XSAVE extended state is supported.  */
   if (have_ptrace_getregset == -1)
     {
-      int pid = pid_of (get_thread_lwp (current_inferior));
       unsigned long long xstateregs[I386_XSTATE_SSE_SIZE / sizeof (long long)];
       struct iovec iov;
-      struct regset_info *regset;
 
       iov.iov_base = xstateregs;
       iov.iov_len = sizeof (xstateregs);

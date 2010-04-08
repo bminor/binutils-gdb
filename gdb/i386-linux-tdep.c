@@ -50,6 +50,7 @@
 #include <stdint.h>
 
 #include "features/i386/i386-linux.c"
+#include "features/i386/i386-mmx-linux.c"
 #include "features/i386/i386-avx-linux.c"
 
 /* Supported register note sections.  */
@@ -616,6 +617,10 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
   if (section == NULL)
     return NULL;
 
+  section = bfd_get_section_by_name (abfd, ".reg-xfp");
+  if (section == NULL)
+    return tdesc_i386_mmx_linux;
+
   /* Linux/i386.  */
   xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
   if ((xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
@@ -890,5 +895,6 @@ _initialize_i386_linux_tdep (void)
 
   /* Initialize the Linux target description  */
   initialize_tdesc_i386_linux ();
+  initialize_tdesc_i386_mmx_linux ();
   initialize_tdesc_i386_avx_linux ();
 }

@@ -219,6 +219,7 @@ clean:
 	rm -f xml-builtin.c stamp-xml
 	rm -f i386-avx.c i386-avx-linux.c
 	rm -f amd64-avx.c amd64-avx-linux.c
+	rm -f i386-mmx.c i386-mmx-linux.c
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -359,6 +360,12 @@ i386-avx.c : $(srcdir)/../regformats/i386/i386-avx.dat $(regdat_sh)
 i386-avx-linux.o : i386-avx-linux.c $(regdef_h)
 i386-avx-linux.c : $(srcdir)/../regformats/i386/i386-avx-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-avx-linux.dat i386-avx-linux.c
+i386-mmx.o : i386-mmx.c $(regdef_h)
+i386-mmx.c : $(srcdir)/../regformats/i386/i386-mmx.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mmx.dat i386-mmx.c
+i386-mmx-linux.o : i386-mmx-linux.c $(regdef_h)
+i386-mmx-linux.c : $(srcdir)/../regformats/i386/i386-mmx-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-mmx-linux.dat i386-mmx-linux.c
 reg-ia64.o : reg-ia64.c $(regdef_h)
 reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c

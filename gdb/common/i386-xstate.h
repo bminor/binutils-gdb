@@ -26,6 +26,7 @@
 #define I386_XSTATE_AVX		(1ULL << 2)
 
 /* Supported mask and size of the extended state.  */
+#define I386_XSTATE_X87_MASK	I386_XSTATE_X87
 #define I386_XSTATE_SSE_MASK	(I386_XSTATE_X87 | I386_XSTATE_SSE)
 #define I386_XSTATE_AVX_MASK	(I386_XSTATE_SSE_MASK | I386_XSTATE_AVX)
 

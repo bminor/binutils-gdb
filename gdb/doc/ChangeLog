@@ -1,3 +1,9 @@
+2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.texinfo (i386 Features): Make org.gnu.gdb.i386.avx
+	optional.  Make org.gnu.gdb.i386.avx requires
+	org.gnu.gdb.i386.avx.
+
 2010-04-08  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Command Files): Document that gdb skips $cdir in

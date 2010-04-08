@@ -1,3 +1,43 @@
+2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-linux-nat.c (have_ptrace_getfpxregs): Initialize to -1
+	if HAVE_PTRACE_GETFPXREGS is defined.
+	(i386_linux_read_description): Set have_ptrace_getfpxregs and
+	have_ptrace_getregset to 0 if ptrace PTRACE_GETFPXREGS failed.
+
+	* i386-linux-tdep.c: Include "features/i386/i386-mmx-linux.c"
+	(i386_linux_core_read_description): Return tdesc_i386_mmx_linux
+	if .reg-xfp section doesn't exist.
+	(_initialize_i386_linux_tdep): Call initialize_tdesc_i386_mmx_linux.
+
+	* i386-linux-tdep.h (tdesc_i386_mmx_linux): New.
+
+	* i386-tdep.c: Include "features/i386/i386-mmx.c".
+	(i386_go32_init_abi): Set tdesc to tdesc_i386_mmx.
+	(i386_validate_tdesc_p): Make org.gnu.gdb.i386.sse optional.  Set
+	xcr0 to I386_XSTATE_X87_MASK if SSE isn't available.
+	(i386_gdbarch_init): Update comments.
+	(_initialize_i386_tdep): Call initialize_tdesc_i386_mmx.
+
+	* common/i386-xstate.h (I386_XSTATE_X87_MASK): New.
+
+	* config/djgpp/fnchange.lst: Add i386 MMX XML files.
+
+	* features/Makefile (i386/i386-mmx-expedite): New.
+	(i386/i386-mmx-linux-expedite): Likewise.
+	($(outdir)/i386/i386-mmx.dat): Likewise.
+	($(outdir)/i386/i386-mmx-linux.dat): Likewise.
+
+	* features/i386/i386-mmx-linux.c: New.
+	* features/i386/i386-mmx-linux.xml: Likewise.
+	* features/i386/i386-mmx.c: Likewise.
+	* features/i386/i386-mmx.xml: Likewise.
+	* regformats/i386/i386-mmx-linux.dat: Likewise.
+	* regformats/i386/i386-mmx.dat: Likewise.
+
+	* features/Makefile (WHICH): Add i386/i386-mmx and
+	i386/i386-mmx-linux.
+
 2010-04-08  Doug Evans  <dje@google.com>
 
 	* source.c (openp): Skip $cdir in PATH.
@@ -5,11 +45,10 @@
 2010-04-08  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/11417
-
 	* python/py-lazy-string.c (stpy_convert_to_value): Check for
-          a NULL address.
-	  (gdbpy_create_lazy_string_object): Allow strings with a NULL
-          address and a zero length.
+	a NULL address.
+	(gdbpy_create_lazy_string_object): Allow strings with a NULL
+	address and a zero length.
 
 2010-04-08  Hui Zhu  <teawater@gmail.com>
 
