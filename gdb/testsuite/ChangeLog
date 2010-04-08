@@ -1,3 +1,9 @@
+2010-04-08  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-value: Add null string variable.
+	  (test_lazy_string): Test zero length, NULL address lazy
+	  strings.
+
 2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.arch/i386-avx.c: New.

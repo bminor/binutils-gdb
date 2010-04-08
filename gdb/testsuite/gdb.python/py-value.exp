@@ -267,6 +267,12 @@ proc test_lazy_strings {} {
   gdb_py_test_silent_cmd "python lstr = sptr.lazy_string()" "Aquire lazy string" 1
   gdb_test "python print lstr.type" "const char \*." "Test type name equality"
   gdb_test "python print sptr.type" "const char \*." "Test type name equality"
+  gdb_test "print sn" "0x0"
+  gdb_py_test_silent_cmd "python snptr = gdb.history (0)" "Get value from history" 1
+  gdb_test "python snstr = snptr.lazy_string(length=5)" ".*Cannot create a lazy string with address.*" "Test lazy string"
+  gdb_py_test_silent_cmd "python snstr = snptr.lazy_string(length=0)" "Succesfully create a lazy string" 1
+  gdb_test "python print snstr.length" "0" "Test lazy string length"
+  gdb_test "python print snstr.address" "0" "Test lazy string address"
 }
 
 

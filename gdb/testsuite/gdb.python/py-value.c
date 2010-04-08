@@ -59,7 +59,7 @@ main (int argc, char *argv[])
   int *p = a;
   int i = 2;
   int *ptr_i = &i;
-
+  const char *sn = 0;
   s.a = 3;
   s.b = 5;
   u.a = 7;

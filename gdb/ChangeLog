@@ -1,3 +1,12 @@
+2010-04-08  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/11417
+
+	* python/py-lazy-string.c (stpy_convert_to_value): Check for
+          a NULL address.
+	  (gdbpy_create_lazy_string_object): Allow strings with a NULL
+          address and a zero length.
+
 2010-04-08  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Add support for insn
