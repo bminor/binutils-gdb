@@ -1,3 +1,8 @@
+2010-04-07  Doug Evans  <dje@google.com>
+
+	* python/python.c (source_python_script): Use ensure_python_env
+	to prepare environment for script.
+
 2010-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-linux-nat.c: Include "regset.h", "elf/common.h",

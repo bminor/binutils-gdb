@@ -367,14 +367,14 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 void
 source_python_script (FILE *stream, char *file)
 {
-  PyGILState_STATE state;
+  struct cleanup *cleanup;
 
-  state = PyGILState_Ensure ();
+  cleanup = ensure_python_env (get_current_arch (), current_language);
 
   PyRun_SimpleFile (stream, file);
 
   fclose (stream);
-  PyGILState_Release (state);
+  do_cleanups (cleanup);
 }
 
 
