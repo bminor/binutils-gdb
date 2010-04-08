@@ -1,3 +1,17 @@
+2010-04-08  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR Breakpoints/11408:
+	* cp-namespace.c (cp_add_using): Deleted.
+	(cp_add_using_directive): Use obstack allocations.
+	Merged the function cp_add_using into this one.
+	Added 'struct obstack *' argument.
+	(cp_scan_for_anonymous_namespaces): Updated.
+	* cp-support.h: Updated.
+	* dwarf2read.c (read_import_statement): Updated.
+	(read_namespace): Updated.
+	* buildsym.c (finish_block): Reset using_directives pointer
+	after block initialization.
+
 2010-03-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.1.0.20100318-cvs.

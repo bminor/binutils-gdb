@@ -1,3 +1,8 @@
+2010-04-08  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/gdb2384-base.h: Created 'namespace B'.
+	* gdb.cp/gdb2384-base.cc: Use 'namespace B'.
+
 2010-03-18  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.mi/gdb680.exp: Revert 2009-06-17 change.
