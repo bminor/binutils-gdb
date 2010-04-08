@@ -5866,9 +5866,16 @@ Arm_relobj<big_endian>::scan_section_for_cortex_a8_erratum(
     this->mapping_symbols_info_.lower_bound(section_start);
 
   // There are no mapping symbols for this section.  Treat it as a data-only
-  // section.
+  // section.  Issue a warning if section is marked as containing
+  // instructions.
   if (p == this->mapping_symbols_info_.end() || p->first.first != shndx)
-    return;
+    {
+      if ((this->section_flags(shndx) & elfcpp::SHF_EXECINSTR) != 0)
+	gold_warning(_("cannot scan executable section %u of %s for Cortex-A8 "
+		       "erratum because it has no mapping symbols."),
+		     shndx, this->name().c_str());
+      return;
+    }
 
   Arm_address output_address =
     this->simple_input_section_output_address(shndx, os);
@@ -6101,7 +6108,10 @@ Arm_relobj<big_endian>::do_count_local_symbols(
       const char* sym_name = pnames + sym.get_st_name();
       if (Target_arm<big_endian>::is_mapping_symbol_name(sym_name))
 	{
-	  unsigned int input_shndx = sym.get_st_shndx();  
+	  bool is_ordinary;
+	  unsigned int input_shndx =
+	    this->adjust_sym_shndx(i, sym.get_st_shndx(), &is_ordinary);
+	  gold_assert(is_ordinary);
 
 	  // Strip of LSB in case this is a THUMB symbol.
 	  Mapping_symbol_position msp(input_shndx, input_value & ~1U);
@@ -6284,7 +6294,10 @@ Arm_relobj<big_endian>::find_linked_text_section(
       elfcpp::Sym<32, big_endian> sym(psyms + r_sym * sym_size);
       if (sym.get_st_type() == elfcpp::STT_SECTION)
 	{
-	  *pshndx = this->adjust_shndx(sym.get_st_shndx());
+	  bool is_ordinary;
+	  *pshndx =
+	    this->adjust_sym_shndx(r_sym, sym.get_st_shndx(), &is_ordinary);
+	  gold_assert(is_ordinary);
 	  return true;
 	}
       else

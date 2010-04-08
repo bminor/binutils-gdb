@@ -1,3 +1,12 @@
+2010-04-07  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::scan_section_for_cortex_a8_erratum): Warn
+	if section is marked as containing instructions but has no mapping
+	symbols.
+	(Arm_relobj::do_count_local_symbols): Call adjust_sym_shndx to get
+	correct section index.
+	(Arm_relobj::find_linked_text_section): Ditto.
+
 2010-04-07  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (include_member): Destroy Read_symbols_data object before
