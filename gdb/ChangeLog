@@ -1,3 +1,7 @@
+2010-04-08  Doug Evans  <dje@google.com>
+
+	* source.c (openp): Skip $cdir in PATH.
+
 2010-04-08  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/11417

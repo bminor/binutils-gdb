@@ -1,3 +1,9 @@
+2010-04-08  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Command Files): Document that gdb skips $cdir in
+	search path, and document that gdb only scans the search path if
+	the script's path doesn't specify a directory.
+
 2010-04-05  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (maint show python auto-load): Fix typo.

@@ -764,6 +764,16 @@ openp (const char *path, int opts, const char *string,
 	  /* Normal file name in path -- just use it.  */
 	  strncpy (filename, p, len);
 	  filename[len] = 0;
+
+	  /* Don't search $cdir.  It's also a magic path like $cwd, but we
+	     don't have enough information to expand it.  The user *could*
+	     have an actual directory named '$cdir' but handling that would
+	     be confusing, it would mean different things in different
+	     contexts.  If the user really has '$cdir' one can use './$cdir'.
+	     We can get $cdir when loading scripts.  When loading source files
+	     $cdir must have already been expanded to the correct value.  */
+	  if (strcmp (filename, "$cdir") == 0)
+	    continue;
 	}
 
       /* Remove trailing slashes */

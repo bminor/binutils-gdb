@@ -19383,8 +19383,12 @@ unless the order of execution is changed by one of the
 printed as they are executed.  An error in any command terminates
 execution of the command file and control is returned to the console.
 
-@value{GDBN} searches for @var{filename} in the current directory and then
-on the search path (specified with the @samp{directory} command).
+@value{GDBN} first searches for @var{filename} in the current directory.
+If the file is not found there, and @var{filename} does not specify a
+directory, then @value{GDBN} also looks for the file on the source search path
+(specified with the @samp{directory} command);
+except that @file{$cdir} is not searched because the compilation directory
+is not relevant to scripts.
 
 If @code{-v}, for verbose mode, is given then @value{GDBN} displays
 each command as it is executed.  The option must be given before
