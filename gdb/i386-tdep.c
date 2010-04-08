@@ -5395,10 +5395,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     case 0x0f31:    /* rdtsc */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction rdtsc.\n"));
-      ir.addr -= 2;
-      goto no_support;
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
+      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDX_REGNUM);
       break;
 
     case 0x0f34:    /* sysenter */
