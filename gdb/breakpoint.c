@@ -5052,6 +5052,25 @@ breakpoint_1 (int bnum, int allflag, int (*filter) (const struct breakpoint *))
   return nr_printable_breakpoints;
 }
 
+/* Display the value of default-collect in a way that is generally
+   compatible with the breakpoint list.  */
+
+static void
+default_collect_info (void)
+{
+  /* If it has no value (which is frequently the case), say nothing; a
+     message like "No default-collect." gets in user's face when it's
+     not wanted.  */
+  if (!*default_collect)
+    return;
+
+  /* The following phrase lines up nicely with per-tracepoint collect
+     actions.  */
+  ui_out_text (uiout, "default collect ");
+  ui_out_field_string (uiout, "default-collect", default_collect);
+  ui_out_text (uiout, " \n");
+}
+  
 static void
 breakpoints_info (char *bnum_exp, int from_tty)
 {
@@ -5061,6 +5080,8 @@ breakpoints_info (char *bnum_exp, int from_tty)
     bnum = parse_and_eval_long (bnum_exp);
 
   breakpoint_1 (bnum, 0, NULL);
+
+  default_collect_info ();
 }
 
 static void
@@ -5091,6 +5112,8 @@ maintenance_info_breakpoints (char *bnum_exp, int from_tty)
     bnum = parse_and_eval_long (bnum_exp);
 
   breakpoint_1 (bnum, 1, NULL);
+
+  default_collect_info ();
 }
 
 static int
@@ -10462,6 +10485,8 @@ tracepoints_info (char *tpnum_exp, int from_tty)
       else
 	ui_out_message (uiout, 0, "No tracepoint number %d.\n", tpnum);
     }
+
+  default_collect_info ();
 }
 
 /* The 'enable trace' command enables tracepoints.  
