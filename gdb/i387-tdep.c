@@ -1033,7 +1033,8 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  switch (regclass)
 	    {
 	    default:
-	      abort ();
+	      internal_error (__FILE__, __LINE__,
+			      _("invalid i387 regclass"));
 
 	    case avxh:
 	      /* This is an upper YMM register.  */
@@ -1077,7 +1078,8 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  switch (regclass)
 	    {
 	    default:
-	      abort ();
+	      internal_error (__FILE__, __LINE__,
+			      _("invalid i387 regclass"));
 
 	    case all:
 	      break;

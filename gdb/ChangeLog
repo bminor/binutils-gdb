@@ -1,3 +1,8 @@
+2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i387-tdep.c (i387_collect_xsave): Replace abort with
+	internal_error.
+
 2010-04-08  Stan Shebs  <stan@codesourcery.com>
 
 	* breakpoint.c (default_collect_info): New function.
