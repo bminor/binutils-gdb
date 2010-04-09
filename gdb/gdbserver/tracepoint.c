@@ -1853,12 +1853,13 @@ cmd_qtstatus (char *packet)
       convert_int_to_ascii ((gdb_byte *) result_name, p, strlen (result_name));
     }
 
-  sprintf (packet, "T%c;%s:%x;tframes:%x;tcreated:%x;tfree:%x;tsize:%s",
-	   (tracing ? '1' : '0'),
+  sprintf (packet, "T%d;%s:%x;tframes:%x;tcreated:%x;tfree:%x;tsize:%s;circular:%d",
+	   tracing ? 1 : 0,
 	   stop_reason_rsp, tracing_stop_tpnum,
 	   traceframe_count, traceframes_created,
 	   free_space (),
-	   phex_nz (trace_buffer_hi - trace_buffer_lo, 0));
+	   phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
+	   circular_trace_buffer);
 }
 
 /* State variables to help return all the tracepoint bits.  */
