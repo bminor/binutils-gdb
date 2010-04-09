@@ -32,8 +32,10 @@ int c3;
 int c4 = 40;
 int c5;
 
+extern void foo (void);
+
 void
-foo ()
+foo (void)
 {
   c1 = 10;
   c2 = 20;

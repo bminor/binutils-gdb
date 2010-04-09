@@ -1,3 +1,8 @@
+2010-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/plugin_common_test_1.c (foo): Add prototype.
+	* testsuite/plugin_common_test_2.c (foo): Likewise.
+
 2010-04-08  Doug Kwan  <dougkwan@google.com>
 
 	* merge.cc (Output_merge_data::set_final_data_size): Handle empty

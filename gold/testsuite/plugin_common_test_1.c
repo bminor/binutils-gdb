@@ -32,6 +32,8 @@ extern int c3;
 int c4;
 int c5 = 50;
 
+extern void foo (void);
+
 int
 main (int argc __attribute__ ((unused)), char** argv __attribute__ ((unused)))
 {
