@@ -1,6 +1,11 @@
+2010-04-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (condition_command): Pass condition expression to
+	set_breakpoint_condition stripped from breakpoint number.
+
 2010-04-09  Phil Muldoon  <pmuldoon@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
-   	    Tom Tromey  <tromey@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (condition_command): Simplify.  Move condition
 	setting code to ...

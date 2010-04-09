@@ -784,7 +784,7 @@ condition_command (char *arg, int from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
       {
-	set_breakpoint_condition (b, arg, from_tty);
+	set_breakpoint_condition (b, p, from_tty);
 	return;
       }
 
