@@ -1,3 +1,8 @@
+2010-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix non-GNU make compatibility.
+	* Makefile.in ($(TEST_TARGETS)): Conditionalize it by @GMAKE_TRUE@.
+
 2010-04-09  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-breakpoint.exp: New File.

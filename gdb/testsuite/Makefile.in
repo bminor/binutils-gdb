@@ -174,9 +174,9 @@ check-parallel:
 	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
 	  $(addsuffix /gdb.log,$(TEST_DIRS)) > gdb.log
 
-$(filter-out check-gdb.base%,$(TEST_TARGETS)): check-gdb.%: all $(abs_builddir)/site.exp
-	@if test ! -d gdb.$*; then mkdir gdb.$*; fi
-	$(DO_RUNTEST) --directory=gdb.$* --outdir=gdb.$* $(RUNTESTFLAGS)
+@GMAKE_TRUE@$(filter-out check-gdb.base%,$(TEST_TARGETS)): check-gdb.%: all $(abs_builddir)/site.exp
+@GMAKE_TRUE@	@if test ! -d gdb.$*; then mkdir gdb.$*; fi
+@GMAKE_TRUE@	$(DO_RUNTEST) --directory=gdb.$* --outdir=gdb.$* $(RUNTESTFLAGS)
 
 # Each half (roughly) of the .exp files from gdb.base.
 BASE1_FILES = $(patsubst $(srcdir)/%,%,$(wildcard $(srcdir)/gdb.base/[a-m]*.exp))
