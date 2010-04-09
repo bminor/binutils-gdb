@@ -2295,6 +2295,18 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
 			   SYMBOL_OBJ_SECTION (sym), 0);
 
+  /* We always should have a line for the function start address.
+     If we don't, something is odd.  Create a plain SAL refering
+     just the PC and hope that skip_prologue_sal (if requested)
+     can find a line number for after the prologue.  */
+  if (sal.pc < BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))
+    {
+      init_sal (&sal);
+      sal.pspace = current_program_space;
+      sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      sal.section = SYMBOL_OBJ_SECTION (sym);
+    }
+
   if (funfirstline)
     skip_prologue_sal (&sal);
 

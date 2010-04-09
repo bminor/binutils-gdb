@@ -1,3 +1,8 @@
+2010-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* symtab.c (find_function_start_sal): Never return SAL pointing
+	before function start address, even if line info is missing.
+
 2010-04-09  Pedro  Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention tracepoints support.
