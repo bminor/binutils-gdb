@@ -135,6 +135,7 @@ gdb_test "save-tracepoints savetrace.tr" \
 # 10.2 Read back tracepoint definitions
 
 gdb_delete_tracepoints
+gdb_test "set default-collect" "" "10.2: clear default-collect"
 gdb_test "info tracepoints" "No tracepoints." "10.2: delete tracepoints"
 gdb_test "source savetrace.tr" \
 	"Tracepoint \[0-9\]+ at .*" \
@@ -151,6 +152,7 @@ gdb_test "save-tracepoints $objdir/savetrace.tr" \
 	"10.3: save tracepoint definitions, full path"
 
 gdb_delete_tracepoints
+gdb_test "set default-collect" "" "10.3: clear default-collect"
 gdb_test "info tracepoints" "No tracepoints." "10.3: delete tracepoints"
 gdb_test "source $objdir/savetrace.tr" \
 	"Tracepoint \[0-9\]+ at .*" \
