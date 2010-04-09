@@ -425,7 +425,10 @@ Output_merge_data::set_final_data_size()
 {
   // Release the memory we don't need.
   this->p_ = static_cast<unsigned char*>(realloc(this->p_, this->len_));
-  gold_assert(this->p_ != NULL);
+  // An Output_merge_data object may be empty and realloc is allowed
+  // to return a NULL pointer in this case.  An Output_merge_data is empty
+  // if all its input sections have sizes that are not multiples of entsize.
+  gold_assert(this->p_ != NULL || this->len_ == 0);
   this->set_data_size(this->len_);
 }
 

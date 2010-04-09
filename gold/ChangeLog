@@ -1,3 +1,12 @@
+2010-04-08  Doug Kwan  <dougkwan@google.com>
+
+	* merge.cc (Output_merge_data::set_final_data_size): Handle empty
+	Output_merge_data.
+	* output.cc (Output_section::add_merge_input_section): Simplify
+	code and return status of Output_merge_base::add_input_section.
+	Update merge section map only if Output_merge_base::add_input_section 
+	returns true.
+
 2010-04-07  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::scan_section_for_cortex_a8_erratum): Warn
