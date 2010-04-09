@@ -1,3 +1,8 @@
+2010-04-09  Stan Shebs  <stan@codesourcery.com>
+
+	* tracepoint.c (trace_dump_command): Include default-collect
+	expressions.
+
 2010-04-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* symtab.c (find_function_start_sal): Never return SAL pointing

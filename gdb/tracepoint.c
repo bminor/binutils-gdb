@@ -2481,6 +2481,9 @@ trace_dump_command (char *args, int from_tty)
   struct breakpoint *t;
   int stepping_frame = 0;
   struct bp_location *loc;
+  char *line, *default_collect_line = NULL;
+  struct command_line *actions, *default_collect_action = NULL;
+  struct cleanup *old_chain = NULL;
 
   if (tracepoint_number == -1)
     {
@@ -2512,7 +2515,29 @@ trace_dump_command (char *args, int from_tty)
     if (loc->address == regcache_read_pc (regcache))
       stepping_frame = 0;
 
-  trace_dump_actions (breakpoint_commands (t), 0, stepping_frame, from_tty);
+  actions = breakpoint_commands (t);
+
+  /* If there is a default-collect list, make up a collect command,
+     prepend to the tracepoint's commands, and pass the whole mess to
+     the trace dump scanner.  We need to validate because
+     default-collect might have been junked since the trace run.  */
+  if (*default_collect)
+    {
+      default_collect_line = xstrprintf ("collect %s", default_collect);
+      old_chain = make_cleanup (xfree, default_collect_line);
+      line = default_collect_line;
+      validate_actionline (&line, t);
+      default_collect_action = xmalloc (sizeof (struct command_line));
+      make_cleanup (xfree, default_collect_action);
+      default_collect_action->next = actions;
+      default_collect_action->line = line;
+      actions = default_collect_action;
+    }
+
+  trace_dump_actions (actions, 0, stepping_frame, from_tty);
+
+  if (*default_collect)
+    do_cleanups (old_chain);
 }
 
 /* Encode a piece of a tracepoint's source-level definition in a form
