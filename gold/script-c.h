@@ -61,6 +61,18 @@ typedef Expression* Expression_ptr;
 typedef void* Expression_ptr;
 #endif
 
+/* Script_section type.  */
+enum Script_section_type
+{
+  /* No section type.  */
+  SCRIPT_SECTION_TYPE_NONE,
+  SCRIPT_SECTION_TYPE_NOLOAD,
+  SCRIPT_SECTION_TYPE_DSECT,
+  SCRIPT_SECTION_TYPE_COPY,
+  SCRIPT_SECTION_TYPE_INFO,
+  SCRIPT_SECTION_TYPE_OVERLAY
+};
+
 /* A constraint for whether to use a particular output section
    definition.  */
 
@@ -83,6 +95,8 @@ struct Parser_output_section_header
 {
   /* The address.  This may be NULL.  */
   Expression_ptr address;
+  /* Section type.  May be NULL string.  */ 
+  enum Script_section_type section_type;
   /* The load address, from the AT specifier.  This may be NULL.  */
   Expression_ptr load_address;
   /* The alignment, from the ALIGN specifier.  This may be NULL.  */

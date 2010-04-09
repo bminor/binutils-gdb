@@ -2894,6 +2894,16 @@ class Output_section : public Output_data
   void
   adjust_section_offsets();
 
+  // Whether this is a NOLOAD section.
+  bool
+  is_noload() const
+  { return this->is_noload_; }
+
+  // Set NOLOAD flag.
+  void
+  set_is_noload()
+  { this->is_noload_ = true; }
+
   // Print merge statistics to stderr.
   void
   print_merge_stats();
@@ -3659,6 +3669,8 @@ class Output_section : public Output_data
   bool is_entsize_zero_ : 1;
   // Whether section offsets need adjustment due to relaxation.
   bool section_offsets_need_adjustment_ : 1;
+  // Whether this is a NOLOAD section.
+  bool is_noload_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;

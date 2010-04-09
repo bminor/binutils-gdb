@@ -502,11 +502,25 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
       Script_sections* ss = this->script_options_->script_sections();
       const char* file_name = relobj == NULL ? NULL : relobj->name().c_str();
       Output_section** output_section_slot;
-      name = ss->output_section_name(file_name, name, &output_section_slot);
+      Script_sections::Section_type script_section_type;
+      name = ss->output_section_name(file_name, name, &output_section_slot,
+				     &script_section_type);
       if (name == NULL)
 	{
 	  // The SECTIONS clause says to discard this input section.
 	  return NULL;
+	}
+
+      // We can only handle script section types ST_NONE and ST_NOLOAD.
+      switch (script_section_type)
+	{
+	case Script_sections::ST_NONE:
+	  break;
+	case Script_sections::ST_NOLOAD:
+	  flags &= elfcpp::SHF_ALLOC;
+	  break;
+	default:
+	  gold_unreachable();
 	}
 
       // If this is an orphan section--one not mentioned in the linker
@@ -533,6 +547,25 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
 				      is_dynamic_linker_section, is_relro,
 				      is_last_relro, is_first_non_relro);
 	  os->set_found_in_sections_clause();
+
+	  // Special handling for NOLOAD sections.
+	  if (script_section_type == Script_sections::ST_NOLOAD)
+	    {
+	      os->set_is_noload();
+
+	      // The constructor of Output_section sets addresses of non-ALLOC
+	      // sections to 0 by default.  We don't want that for NOLOAD
+	      // sections even if they have no SHF_ALLOC flag.
+	      if ((os->flags() & elfcpp::SHF_ALLOC) == 0
+		  && os->is_address_valid())
+		{
+		  gold_assert(os->address() == 0
+			      && !os->is_offset_valid()
+			      && !os->is_data_size_valid());
+		  os->reset_address_and_file_offset();
+		}
+	    }
+
 	  *output_section_slot = os;
 	  return os;
 	}
@@ -1157,13 +1190,20 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
 // Make an output section for a script.
 
 Output_section*
-Layout::make_output_section_for_script(const char* name)
+Layout::make_output_section_for_script(
+    const char* name,
+    Script_sections::Section_type section_type)
 {
   name = this->namepool_.add(name, false, NULL);
+  elfcpp::Elf_Xword sh_flags = elfcpp::SHF_ALLOC;
+  if (section_type == Script_sections::ST_NOLOAD)
+    sh_flags = 0;
   Output_section* os = this->make_output_section(name, elfcpp::SHT_PROGBITS,
-						 elfcpp::SHF_ALLOC, false,
+						 sh_flags, false,
 						 false, false, false, false);
   os->set_found_in_sections_clause();
+  if (section_type == Script_sections::ST_NOLOAD)
+    os->set_is_noload();
   return os;
 }
 

@@ -77,6 +77,7 @@
   struct Version_dependency_list* deplist;
   struct Version_expression_list* versyms;
   struct Version_tree* versnode;
+  enum Script_section_type section_type;
 }
 
 /* Operators, including a precedence table for expressions.  */
@@ -121,11 +122,13 @@
 %token BYTE
 %token CONSTANT
 %token CONSTRUCTORS
+%token COPY
 %token CREATE_OBJECT_SYMBOLS
 %token DATA_SEGMENT_ALIGN
 %token DATA_SEGMENT_END
 %token DATA_SEGMENT_RELRO_END
 %token DEFINED
+%token DSECT
 %token ENTRY
 %token EXCLUDE_FILE
 %token EXTERN
@@ -137,6 +140,7 @@
 %token HLL
 %token INCLUDE
 %token INHIBIT_COMMON_ALLOCATION
+%token INFO
 %token INPUT
 %token KEEP
 %token LENGTH		/* LENGTH, l, len */
@@ -150,6 +154,7 @@
 %token NEXT
 %token NOCROSSREFS
 %token NOFLOAT
+%token NOLOAD
 %token ONLY_IF_RO
 %token ONLY_IF_RW
 %token ORIGIN		/* ORIGIN, o, org */
@@ -197,9 +202,10 @@
 
 /* Non-terminal types, where needed.  */
 
-%type <expr> parse_exp exp opt_address_and_section_type
+%type <expr> parse_exp exp
 %type <expr> opt_at opt_align opt_subalign opt_fill
-%type <output_section_header> section_header
+%type <output_section_header> section_header opt_address_and_section_type
+%type <section_type> section_type
 %type <output_section_trailer> section_trailer
 %type <constraint> opt_constraint
 %type <string_list> opt_phdr
@@ -343,7 +349,8 @@ section_header:
 	    { script_pop_lex_mode(closure); }
 	  opt_constraint
 	    {
-	      $$.address = $2;
+	      $$.address = $2.address;
+	      $$.section_type = $2.section_type;
 	      $$.load_address = $3;
 	      $$.align = $4;
 	      $$.subalign = $5;
@@ -356,18 +363,61 @@ section_header:
    '(' in section_header.  */
 
 opt_address_and_section_type:
-	  ':'
-	    { $$ = NULL; }
-	| '(' ')' ':'
-	    { $$ = NULL; }
-	| exp ':'
-	    { $$ = $1; }
-	| exp '(' ')' ':'
-	    { $$ = $1; }
-	| exp '(' string ')' ':'
+	':'
 	    {
-	      yyerror(closure, "section types are not supported");
-	      $$ = $1;
+	      $$.address = NULL;
+	      $$.section_type = SCRIPT_SECTION_TYPE_NONE;
+	    }
+	| '(' ')' ':'
+	    {
+	      $$.address = NULL;
+	      $$.section_type = SCRIPT_SECTION_TYPE_NONE;
+	    }
+	| exp ':'
+	    {
+	      $$.address = $1;
+	      $$.section_type = SCRIPT_SECTION_TYPE_NONE;
+	    }
+	| exp '(' ')' ':'
+	    {
+	      $$.address = $1;
+	      $$.section_type = SCRIPT_SECTION_TYPE_NONE;
+	    }
+	| '(' section_type ')' ':'
+	    {
+	      $$.address = NULL;
+	      $$.section_type = $2;
+	    }
+	| exp '(' section_type ')' ':'
+	    {
+	      $$.address = $1;
+	      $$.section_type = $3;
+	    }
+	;
+
+/* We only support NOLOAD.  */
+section_type:
+	NOLOAD
+	    { $$ = SCRIPT_SECTION_TYPE_NOLOAD; }
+	| DSECT
+	    {
+	      yyerror(closure, "DSECT section type is unsupported");
+	      $$ = SCRIPT_SECTION_TYPE_DSECT;
+	    }
+	| COPY
+	    {
+	      yyerror(closure, "COPY section type is unsupported");
+	      $$ = SCRIPT_SECTION_TYPE_COPY;
+	    }
+	| INFO
+	    {
+	      yyerror(closure, "INFO section type is unsupported");
+	      $$ = SCRIPT_SECTION_TYPE_INFO;
+	    }
+	| OVERLAY
+	    {
+	      yyerror(closure, "OVERLAY section type is unsupported");
+	      $$ = SCRIPT_SECTION_TYPE_OVERLAY;
 	    }
 	;
 

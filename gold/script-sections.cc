@@ -356,7 +356,8 @@ class Sections_element
   // section name.  This only real implementation is in
   // Output_section_definition.
   virtual const char*
-  output_section_name(const char*, const char*, Output_section***)
+  output_section_name(const char*, const char*, Output_section***,
+		      Script_sections::Section_type*)
   { return NULL; }
 
   // Initialize OSP with an output section.
@@ -1617,7 +1618,7 @@ class Output_section_definition : public Sections_element
   // section name.
   const char*
   output_section_name(const char* file_name, const char* section_name,
-		      Output_section***);
+		      Output_section***, Script_sections::Section_type*);
 
   // Initialize OSP with an output section.
   void
@@ -1665,7 +1666,14 @@ class Output_section_definition : public Sections_element
   void
   print(FILE*) const;
 
+  // Return the output section type if specified or Script_sections::ST_NONE.
+  Script_sections::Section_type
+  section_type() const;
+
  private:
+  static const char*
+  script_section_type_name(Script_section_type);
+
   typedef std::vector<Output_section_element*> Output_section_elements;
 
   // The output section name.
@@ -1698,6 +1706,8 @@ class Output_section_definition : public Sections_element
   uint64_t evaluated_addralign_;
   // The output section is relro.
   bool is_relro_;
+  // The output section type if specified.
+  enum Script_section_type script_section_type_;
 };
 
 // Constructor.
@@ -1719,7 +1729,8 @@ Output_section_definition::Output_section_definition(
     evaluated_address_(0),
     evaluated_load_address_(0),
     evaluated_addralign_(0),
-    is_relro_(false)
+    is_relro_(false),
+    script_section_type_(header->section_type)
 {
 }
 
@@ -1815,7 +1826,8 @@ Output_section_definition::create_sections(Layout* layout)
       if ((*p)->needs_output_section())
 	{
 	  const char* name = this->name_.c_str();
-	  this->output_section_ = layout->make_output_section_for_script(name);
+	  this->output_section_ =
+	    layout->make_output_section_for_script(name, this->section_type());
 	  return;
 	}
     }
@@ -1873,9 +1885,11 @@ Output_section_definition::finalize_symbols(Symbol_table* symtab,
 // Return the output section name to use for an input section name.
 
 const char*
-Output_section_definition::output_section_name(const char* file_name,
-					       const char* section_name,
-					       Output_section*** slot)
+Output_section_definition::output_section_name(
+    const char* file_name,
+    const char* section_name,
+    Output_section*** slot,
+    Script_sections::Section_type *psection_type)
 {
   // Ask each element whether it matches NAME.
   for (Output_section_elements::const_iterator p = this->elements_.begin();
@@ -1887,6 +1901,7 @@ Output_section_definition::output_section_name(const char* file_name,
 	  // We found a match for NAME, which means that it should go
 	  // into this output section.
 	  *slot = &this->output_section_;
+	  *psection_type = this->section_type();
 	  return this->name_.c_str();
 	}
     }
@@ -1906,6 +1921,9 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
                                                  uint64_t* load_address)
 {
   uint64_t address;
+  uint64_t old_dot_value = *dot_value;
+  uint64_t old_load_address = *load_address;
+
   if (this->address_ == NULL)
     address = *dot_value;
   else
@@ -1941,10 +1959,11 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 
   *dot_value = address;
 
-  // The address of non-SHF_ALLOC sections is forced to zero,
-  // regardless of what the linker script wants.
+  // Except for NOLOAD sections, the address of non-SHF_ALLOC sections is
+  // forced to zero, regardless of what the linker script wants.
   if (this->output_section_ != NULL
-      && (this->output_section_->flags() & elfcpp::SHF_ALLOC) != 0)
+      && ((this->output_section_->flags() & elfcpp::SHF_ALLOC) != 0
+	  || this->output_section_->is_noload()))
     this->output_section_->set_address(address);
 
   this->evaluated_address_ = address;
@@ -2029,6 +2048,13 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 	this->output_section_->set_is_relro();
       else
 	this->output_section_->clear_is_relro();
+
+      // If this is a NOLOAD section, keep dot and load address unchanged.
+      if (this->output_section_->is_noload())
+	{
+	  *dot_value = old_dot_value;
+	  *load_address = old_load_address;
+	}
     }
 }
 
@@ -2186,6 +2212,10 @@ Output_section_definition::print(FILE* f) const
       fprintf(f, " ");
     }
 
+  if (this->script_section_type_ != SCRIPT_SECTION_TYPE_NONE)
+      fprintf(f, "(%s) ",
+	      this->script_section_type_name(this->script_section_type_));
+
   fprintf(f, ": ");
 
   if (this->load_address_ != NULL)
@@ -2233,6 +2263,52 @@ Output_section_definition::print(FILE* f) const
     }
 
   fprintf(f, "\n");
+}
+
+Script_sections::Section_type
+Output_section_definition::section_type() const
+{
+  switch (this->script_section_type_)
+    {
+    case SCRIPT_SECTION_TYPE_NONE:
+      return Script_sections::ST_NONE;
+    case SCRIPT_SECTION_TYPE_NOLOAD:
+      return Script_sections::ST_NOLOAD;
+    case SCRIPT_SECTION_TYPE_COPY:
+    case SCRIPT_SECTION_TYPE_DSECT:
+    case SCRIPT_SECTION_TYPE_INFO:
+    case SCRIPT_SECTION_TYPE_OVERLAY:
+      // There are not really support so we treat them as ST_NONE.  The
+      // parse should have issued errors for them already.
+      return Script_sections::ST_NONE;
+    default:
+      gold_unreachable();
+    }
+}
+
+// Return the name of a script section type.
+
+const char*
+Output_section_definition::script_section_type_name (
+    Script_section_type script_section_type)
+{
+  switch (script_section_type)
+    {
+    case SCRIPT_SECTION_TYPE_NONE:
+      return "NONE";
+    case SCRIPT_SECTION_TYPE_NOLOAD:
+      return "NOLOAD";
+    case SCRIPT_SECTION_TYPE_DSECT:
+      return "DSECT";
+    case SCRIPT_SECTION_TYPE_COPY:
+      return "COPY";
+    case SCRIPT_SECTION_TYPE_INFO:
+      return "INFO";
+    case SCRIPT_SECTION_TYPE_OVERLAY:
+      return "OVERLAY";
+    default:
+      gold_unreachable();
+    }
 }
 
 // An output section created to hold orphaned input sections.  These
@@ -2724,16 +2800,19 @@ Script_sections::finalize_symbols(Symbol_table* symtab, const Layout* layout)
 // and section name.
 
 const char*
-Script_sections::output_section_name(const char* file_name,
-				     const char* section_name,
-				     Output_section*** output_section_slot)
+Script_sections::output_section_name(
+    const char* file_name,
+    const char* section_name,
+    Output_section*** output_section_slot,
+    Script_sections::Section_type *psection_type)
 {
   for (Sections_elements::const_iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
        ++p)
     {
       const char* ret = (*p)->output_section_name(file_name, section_name,
-						  output_section_slot);
+						  output_section_slot,
+						  psection_type);
 
       if (ret != NULL)
 	{
@@ -2742,6 +2821,7 @@ Script_sections::output_section_name(const char* file_name,
 	  if (strcmp(ret, "/DISCARD/") == 0)
 	    {
 	      *output_section_slot = NULL;
+	      *psection_type = Script_sections::ST_NONE;
 	      return NULL;
 	    }
 	  return ret;
@@ -2752,6 +2832,7 @@ Script_sections::output_section_name(const char* file_name,
   // gets the name of the input section.
 
   *output_section_slot = NULL;
+  *psection_type = Script_sections::ST_NONE;
 
   return section_name;
 }
@@ -2967,6 +3048,12 @@ Sort_output_sections::operator()(const Output_section* os1,
   if (os1->type() == elfcpp::SHT_NOBITS && os2->type() == elfcpp::SHT_PROGBITS)
     return false;
 
+  // Sort non-NOLOAD before NOLOAD.
+  if (os1->is_noload() && !os2->is_noload())
+    return true;
+  if (!os1->is_noload() && os2->is_noload())
+    return true;
+  
   // Otherwise we don't care.
   return false;
 }
