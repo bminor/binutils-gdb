@@ -1,3 +1,8 @@
+2010-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config/djgpp/fnchange.lst: Fix typo in translations for
+	symbol-without-target_section.exp and symbol-without-target_section.c.
+
 2010-04-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (condition_command): Pass condition expression to
