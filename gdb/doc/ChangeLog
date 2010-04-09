@@ -1,3 +1,8 @@
+2010-04-08  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Tracepoint Packets): Describe disconn and circular
+	trace status fields.
+
 2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.texinfo (i386 Features): Make org.gnu.gdb.i386.avx

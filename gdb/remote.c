@@ -9776,11 +9776,16 @@ remote_set_disconnected_tracing (int val)
 {
   struct remote_state *rs = get_remote_state ();
 
-  sprintf (rs->buf, "QTDisconnected:%x", val);
-  putpkt (rs->buf);
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK"))
-    error (_("Target does not support this command."));
+  if (rs->disconnected_tracing)
+    {
+      sprintf (rs->buf, "QTDisconnected:%x", val);
+      putpkt (rs->buf);
+      remote_get_noisy_reply (&target_buf, &target_buf_size);
+      if (strcmp (target_buf, "OK"))
+	error (_("Target does not support this command."));
+    }
+  else if (val)
+    warning (_("Target does not support disconnected tracing."));
 }
 
 static int

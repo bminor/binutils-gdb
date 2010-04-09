@@ -1626,10 +1626,6 @@ trace_status_command (char *args, int from_tty)
   else if (ts->running)
     {
       printf_filtered (_("Trace is running on the target.\n"));
-      if (disconnected_tracing)
-	printf_filtered (_("Trace will continue if GDB disconnects.\n"));
-      else
-	printf_filtered (_("Trace will stop if GDB disconnects.\n"));
     }
   else
     {
@@ -1698,6 +1694,14 @@ trace_status_command (char *args, int from_tty)
 	printf_filtered (_("Trace buffer has %d bytes free.\n"),
 			 ts->buffer_free);
     }
+
+  if (ts->disconnected_tracing)
+    printf_filtered (_("Trace will continue if GDB disconnects.\n"));
+  else
+    printf_filtered (_("Trace will stop if GDB disconnects.\n"));
+
+  if (ts->circular_buffer)
+    printf_filtered (_("Trace buffer is circular.\n"));
 
   /* Now report on what we're doing with tfind.  */
   if (traceframe_number >= 0)
@@ -1801,9 +1805,11 @@ trace_status_mi (int on_stop)
     ui_out_field_int (uiout, "buffer-free",  (int) ts->buffer_free);
 }
 
-
+/* This function handles the details of what to do about an ongoing
+   tracing run if the user has asked to detach or otherwise disconnect
+   from the target.  */
 void
-disconnect_or_stop_tracing (int from_tty)
+disconnect_tracing (int from_tty)
 {
   /* It can happen that the target that was tracing went away on its
      own, and we didn't notice.  Get a status update, and if the
@@ -1812,18 +1818,23 @@ disconnect_or_stop_tracing (int from_tty)
   if (target_get_trace_status (current_trace_status ()) < 0)
     current_trace_status ()->running = 0;
 
+  /* If running interactively, give the user the option to cancel and
+     then decide what to do differently with the run.  Scripts are
+     just going to disconnect and let the target deal with it,
+     according to how it's been instructed previously via
+     disconnected-tracing.  */
   if (current_trace_status ()->running && from_tty)
     {
-      int cont = query (_("Trace is running.  Continue tracing after detach? "));
-      /* Note that we send the query result without affecting the
-	 user's setting of disconnected_tracing, so that the answer is
-	 a one-time-only.  */
-      send_disconnected_tracing_value (cont);
-
-      /* Also ensure that we do the equivalent of a tstop command if
-	 tracing is not to continue after the detach.  */
-      if (!cont)
-	stop_tracing ();
+      if (current_trace_status ()->disconnected_tracing)
+	{
+	  if (!query (_("Trace is running and will continue after detach; detach anyway? ")))
+	    error (_("Not confirmed."));
+	}
+      else
+	{
+	  if (!query (_("Trace is running but will stop on detach; detach anyway? ")))
+	    error (_("Not confirmed."));
+	}
     }
 
   /* Also we want to be out of tfind mode, otherwise things can get
@@ -2599,6 +2610,10 @@ trace_save (const char *filename, int target_does_save)
     fprintf (fp, ";tfree:%x", ts->buffer_free);
   if (ts->buffer_size >= 0)
     fprintf (fp, ";tsize:%x", ts->buffer_size);
+  if (ts->disconnected_tracing)
+    fprintf (fp, ";disconn:%x", ts->disconnected_tracing);
+  if (ts->circular_buffer)
+    fprintf (fp, ";circular:%x", ts->circular_buffer);
   fprintf (fp, "\n");
 
   /* Note that we want to upload tracepoints and save those, rather
@@ -3167,6 +3182,8 @@ tfile_open (char *filename, int from_tty)
   ts->stop_reason = trace_stop_reason_unknown;
   ts->traceframe_count = -1;
   ts->buffer_free = 0;
+  ts->disconnected_tracing = 0;
+  ts->circular_buffer = 0;
 
   /* Read through a section of newline-terminated lines that
      define things like tracepoints.  */
@@ -3282,6 +3299,8 @@ parse_trace_status (char *line, struct trace_status *ts)
   ts->traceframes_created = -1;
   ts->buffer_free = -1;
   ts->buffer_size = -1;
+  ts->disconnected_tracing = 0;
+  ts->circular_buffer = 0;
 
   while (*p++)
     {
@@ -3309,6 +3328,11 @@ Status line: '%s'\n"), p, line);
 	{
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->stop_reason = tstop_command;
+	}
+      else if (strncmp (p, stop_reason_names[trace_disconnected], p1 - p) == 0)
+	{
+	  p = unpack_varlen_hex (++p1, &val);
+	  ts->stop_reason = trace_disconnected;
 	}
       else if (strncmp (p, stop_reason_names[tracepoint_error], p1 - p) == 0)
 	{
@@ -3347,6 +3371,16 @@ Status line: '%s'\n"), p, line);
 	{
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->buffer_size = val;
+	}
+      else if (strncmp (p, "disconn", p1 - p) == 0)
+	{
+	  p = unpack_varlen_hex (++p1, &val);
+	  ts->disconnected_tracing = val;
+	}
+      else if (strncmp (p, "circular", p1 - p) == 0)
+	{
+	  p = unpack_varlen_hex (++p1, &val);
+	  ts->circular_buffer = val;
 	}
       else
 	{

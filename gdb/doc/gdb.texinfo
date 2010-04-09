@@ -31508,10 +31508,11 @@ The trace stopped for some other reason.
 
 @end table
 
-Additional optional fields supply statistical information.  Although
-not required, they are extremely useful for users monitoring the
-progress of a trace run.  If a trace has stopped, and these numbers
-are reported, they must reflect the state of the just-stopped trace.
+Additional optional fields supply statistical and other information.
+Although not required, they are extremely useful for users monitoring
+the progress of a trace run.  If a trace has stopped, and these
+numbers are reported, they must reflect the state of the just-stopped
+trace.
 
 @table @samp
 
@@ -31527,6 +31528,17 @@ The total size of the trace buffer, in bytes.
 
 @item tfree:@var{n}
 The number of bytes still unused in the buffer.
+
+@item circular:@var{n}
+The value of the circular trace buffer flag.  @code{1} means that the
+trace buffer is circular and old trace frames will be discarded if
+necessary to make room, @code{0} means that the trace buffer is linear
+and may fill up.
+
+@item disconn:@var{n}
+The value of the disconnected tracing flag.  @code{1} means that
+tracing will continue after @value{GDBN} disconnects, @code{0} means
+that the trace run will stop.
 
 @end table
 

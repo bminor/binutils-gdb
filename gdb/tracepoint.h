@@ -106,6 +106,16 @@ struct trace_status
   /* Unused bytes left in the target's trace buffer.  */
 
   int buffer_free;
+
+  /* 1 if the target will continue tracing after disconnection, else
+     0.  If the target does not report a value, assume 0.  */
+
+  int disconnected_tracing;
+
+  /* 1 if the target is using a circular trace buffer, else 0.  If the
+     target does not report a value, assume 0.  */
+
+  int circular_buffer;
 };
 
 struct trace_status *current_trace_status (void);
@@ -189,7 +199,7 @@ extern struct breakpoint *create_tracepoint_from_upload (struct uploaded_tp *utp
 extern void merge_uploaded_tracepoints (struct uploaded_tp **utpp);
 extern void merge_uploaded_trace_state_variables (struct uploaded_tsv **utsvp);
 
-extern void disconnect_or_stop_tracing (int from_tty);
+extern void disconnect_tracing (int from_tty);
 
 extern void start_tracing (void);
 extern void stop_tracing (void);

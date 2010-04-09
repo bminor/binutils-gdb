@@ -2547,7 +2547,7 @@ detach_command (char *args, int from_tty)
   if (ptid_equal (inferior_ptid, null_ptid))
     error (_("The program is not being run."));
 
-  disconnect_or_stop_tracing (from_tty);
+  disconnect_tracing (from_tty);
 
   target_detach (args, from_tty);
 
