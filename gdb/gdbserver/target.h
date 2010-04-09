@@ -289,6 +289,16 @@ struct target_ops
 
   /* Target specific qSupported support.  */
   void (*process_qsupported) (const char *);
+
+  /* Return 1 if the target supports tracepoints, 0 (or leave the
+     callback NULL) otherwise.  */
+  int (*supports_tracepoints) (void);
+
+  /* Read PC from REGCACHE.  */
+  CORE_ADDR (*read_pc) (struct regcache *regcache);
+
+  /* Write PC to REGCACHE.  */
+  void (*write_pc) (struct regcache *regcache, CORE_ADDR pc);
 };
 
 extern struct target_ops *the_target;
@@ -332,6 +342,10 @@ void set_target_ops (struct target_ops *);
 #define target_process_qsupported(query) \
   if (the_target->process_qsupported) \
     the_target->process_qsupported (query)
+
+#define target_supports_tracepoints()			\
+  (the_target->supports_tracepoints			\
+   ? (*the_target->supports_tracepoints) () : 0)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

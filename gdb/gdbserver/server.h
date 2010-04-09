@@ -85,6 +85,7 @@ typedef unsigned char gdb_byte;
    least the size of a (void *).  */
 typedef long long CORE_ADDR;
 
+typedef long long LONGEST;
 typedef unsigned long long ULONGEST;
 
 /* The ptid struct is a collection of the various "ids" necessary
@@ -180,6 +181,31 @@ struct thread_info
 
   /* The last wait status reported for this thread.  */
   struct target_waitstatus last_status;
+
+  /* Given `while-stepping', a thread may be collecting data for more
+     than one tracepoint simultaneously.  E.g.:
+
+    ff0001  INSN1 <-- TP1, while-stepping 10 collect $regs
+    ff0002  INSN2
+    ff0003  INSN3 <-- TP2, collect $regs
+    ff0004  INSN4 <-- TP3, while-stepping 10 collect $regs
+    ff0005  INSN5
+
+   Notice that when instruction INSN5 is reached, the while-stepping
+   actions of both TP1 and TP3 are still being collected, and that TP2
+   had been collected meanwhile.  The whole range of ff0001-ff0005
+   should be single-stepped, due to at least TP1's while-stepping
+   action covering the whole range.
+
+   On the other hand, the same tracepoint with a while-stepping action
+   may be hit by more than one thread simultaneously, hence we can't
+   keep the current step count in the tracepoint itself.
+
+   This is the head of the list of the states of `while-stepping'
+   tracepoint actions this thread is now collecting; NULL if empty.
+   Each item in the list holds the current step of the while-stepping
+   action.  */
+  struct wstep_state *while_stepping;
 };
 
 struct dll_info
@@ -371,6 +397,7 @@ int hexify (char *hex, const char *bin, int count);
 int remote_escape_output (const gdb_byte *buffer, int len,
 			  gdb_byte *out_buf, int *out_len,
 			  int out_maxlen);
+char *unpack_varlen_hex (char *buff,  ULONGEST *result);
 
 void clear_symbol_cache (struct sym_cache **symcache_p);
 int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
@@ -416,6 +443,7 @@ void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
 /* Functions from utils.c */
 
 void *xmalloc (size_t) ATTR_MALLOC;
+void *xrealloc (void *, size_t);
 void *xcalloc (size_t, size_t) ATTR_MALLOC;
 char *xstrdup (const char *) ATTR_MALLOC;
 void freeargv (char **argv);
@@ -426,6 +454,9 @@ void internal_error (const char *file, int line, const char *, ...)
      ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
 void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
 char *paddress (CORE_ADDR addr);
+char *pulongest (ULONGEST u);
+char *plongest (LONGEST l);
+char *phex_nz (ULONGEST l, int sizeof_l);
 
 #define gdb_assert(expr)                                                      \
   ((void) ((expr) ? 0 :                                                       \
@@ -463,6 +494,28 @@ char *paddress (CORE_ADDR addr);
    value to accomodate multiple register formats.  This value must be at least
    as large as the largest register set supported by gdbserver.  */
 #define PBUFSIZ 16384
+
+/* Functions from tracepoint.c */
+
+void initialize_tracepoint (void);
+
+int handle_tracepoint_general_set (char *own_buf);
+int handle_tracepoint_query (char *own_buf);
+
+int tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc);
+int tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc);
+
+void release_while_stepping_state_list (struct thread_info *tinfo);
+
+extern int current_traceframe;
+
+int in_readonly_region (CORE_ADDR addr, ULONGEST length);
+int traceframe_read_mem (int tfnum, CORE_ADDR addr,
+			 unsigned char *buf, ULONGEST length,
+			 ULONGEST *nbytes);
+int fetch_traceframe_registers (int tfnum,
+				struct regcache *regcache,
+				int regnum);
 
 /* Version information, from version.c.  */
 extern const char version[];

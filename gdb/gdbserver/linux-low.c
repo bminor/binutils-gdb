@@ -1117,6 +1117,39 @@ retry:
   return child;
 }
 
+/* This function should only be called if the LWP got a SIGTRAP.
+
+   Handle any tracepoint steps or hits.  Return true if a tracepoint
+   event was handled, 0 otherwise.  */
+
+static int
+handle_tracepoints (struct lwp_info *lwp)
+{
+  struct thread_info *tinfo = get_lwp_thread (lwp);
+  int tpoint_related_event = 0;
+
+  /* And we need to be sure that any all-threads-stopping doesn't try
+     to move threads out of the jump pads, as it could deadlock the
+     inferior (LWP could be in the jump pad, maybe even holding the
+     lock.)  */
+
+  /* Do any necessary step collect actions.  */
+  tpoint_related_event |= tracepoint_finished_step (tinfo, lwp->stop_pc);
+
+  /* See if we just hit a tracepoint and do its main collect
+     actions.  */
+  tpoint_related_event |= tracepoint_was_hit (tinfo, lwp->stop_pc);
+
+  if (tpoint_related_event)
+    {
+      if (debug_threads)
+	fprintf (stderr, "got a tracepoint event\n");
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Arrange for a breakpoint to be hit again later.  We don't keep the
    SIGTRAP status and don't forward the SIGTRAP signal to the LWP.  We
    will handle the current event, eventually we will resume this LWP,
@@ -1589,6 +1622,7 @@ linux_wait_1 (ptid_t ptid,
   int bp_explains_trap;
   int maybe_internal_trap;
   int report_to_gdb;
+  int trace_event;
 
   /* Translate generic target options into linux options.  */
   options = __WALL;
@@ -1727,6 +1761,11 @@ retry:
       /* Now invoke the callbacks of any internal breakpoints there.  */
       check_breakpoints (event_child->stop_pc);
 
+      /* Handle tracepoint data collecting.  This may overflow the
+	 trace buffer, and cause a tracing stop, removing
+	 breakpoints.  */
+      trace_event = handle_tracepoints (event_child);
+
       if (bp_explains_trap)
 	{
 	  /* If we stepped or ran into an internal breakpoint, we've
@@ -1744,6 +1783,8 @@ retry:
       /* We have some other signal, possibly a step-over dance was in
 	 progress, and it should be cancelled too.  */
       step_over_finished = finish_step_over (event_child);
+
+      trace_event = 0;
     }
 
   /* We have all the data we need.  Either report the event to GDB, or
@@ -1761,7 +1802,7 @@ retry:
   report_to_gdb = (!maybe_internal_trap
 		   || event_child->last_resume_kind == resume_step
 		   || event_child->stopped_by_watchpoint
-		   || (!step_over_finished && !bp_explains_trap)
+		   || (!step_over_finished && !bp_explains_trap && !trace_event)
 		   || gdb_breakpoint_here (event_child->stop_pc));
 
   /* We found no reason GDB would want us to stop.  We either hit one
@@ -1775,6 +1816,8 @@ retry:
 	    fprintf (stderr, "Hit a gdbserver breakpoint.\n");
 	  if (step_over_finished)
 	    fprintf (stderr, "Step-over finished.\n");
+	  if (trace_event)
+	    fprintf (stderr, "Tracepoint event.\n");
 	}
 
       /* We're not reporting this breakpoint to GDB, so apply the
@@ -2135,6 +2178,15 @@ linux_resume_one_lwp (struct lwp_info *lwp,
   if (lwp->stopped == 0)
     return;
 
+  /* Cancel actions that rely on GDB not changing the PC (e.g., the
+     user used the "jump" command, or "set $pc = foo").  */
+  if (lwp->stop_pc != get_pc (lwp))
+    {
+      /* Collecting 'while-stepping' actions doesn't make sense
+	 anymore.  */
+      release_while_stepping_state_list (get_lwp_thread (lwp));
+    }
+
   /* If we have pending signals or status, and a new signal, enqueue the
      signal.  Also enqueue the signal if we are waiting to reinsert a
      breakpoint; it will be picked up again below.  */
@@ -2197,6 +2249,24 @@ linux_resume_one_lwp (struct lwp_info *lwp,
 
       /* Postpone any pending signal.  It was enqueued above.  */
       signal = 0;
+    }
+
+  /* If we have while-stepping actions in this thread set it stepping.
+     If we have a signal to deliver, it may or may not be set to
+     SIG_IGN, we don't know.  Assume so, and allow collecting
+     while-stepping into a signal handler.  A possible smart thing to
+     do would be to set an internal breakpoint at the signal return
+     address, continue, and carry on catching this while-stepping
+     action only when that breakpoint is hit.  A future
+     enhancement.  */
+  if (get_lwp_thread (lwp)->while_stepping != NULL
+      && can_hardware_single_step ())
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "lwp %ld has a while-stepping action -> forcing step.\n",
+		 lwpid_of (lwp));
+      step = 1;
     }
 
   if (debug_threads && the_low_target.get_pc != NULL)
@@ -4165,6 +4235,32 @@ linux_process_qsupported (const char *query)
     the_low_target.process_qsupported (query);
 }
 
+static int
+linux_supports_tracepoints (void)
+{
+  if (*the_low_target.supports_tracepoints == NULL)
+    return 0;
+
+  return (*the_low_target.supports_tracepoints) ();
+}
+
+static CORE_ADDR
+linux_read_pc (struct regcache *regcache)
+{
+  if (the_low_target.get_pc == NULL)
+    return 0;
+
+  return (*the_low_target.get_pc) (regcache);
+}
+
+static void
+linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  gdb_assert (the_low_target.set_pc != NULL);
+
+  (*the_low_target.set_pc) (regcache, pc);
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -4209,7 +4305,10 @@ static struct target_ops linux_target_ops = {
   NULL,
 #endif
   linux_core_of_thread,
-  linux_process_qsupported
+  linux_process_qsupported,
+  linux_supports_tracepoints,
+  linux_read_pc,
+  linux_write_pc
 };
 
 static void

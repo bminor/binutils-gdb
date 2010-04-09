@@ -1,3 +1,60 @@
+2010-04-09  Stan Shebs  <stan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* server.h (LONGEST): New.
+	(struct thread_info) <while_stepping>: New field.
+	(unpack_varlen_hex, xrealloc, pulongest, plongest, phex_nz):
+	Declare.
+	(initialize_tracepoint, handle_tracepoint_general_set)
+	(handle_tracepoint_query, tracepoint_finished_step)
+	(tracepoint_was_hit, release_while_stepping_state_list):
+	(current_traceframe): Declare.
+	* server.c (handle_general_set): Handle tracepoint packets.
+	(read_memory): New.
+	(write_memory): New.
+	(handle_search_memory_1): Use read_memory.
+	(handle_query): Report support for conditional tracepoints, trace
+	state variables, and tracepoint sources.  Handle tracepoint
+	queries.
+	(main): Initialize the tracepoints module.
+	(process_serial_event): Handle traceframe reads/writes.
+
+	* linux-low.c (handle_tracepoints): New.
+	(linux_wait_1): Call it.
+	(linux_resume_one_lwp): Handle while-stepping.
+	(linux_supports_tracepoints, linux_read_pc, linux_write_pc): New.
+	(linux_target_ops): Install them.
+	* linux-low.h (struct linux_target_ops) <supports_tracepoints>:
+	New field.
+	* linux-x86-low.c (x86_supports_tracepoints): New.
+	(the_low_target). Install it.
+
+	* mem-break.h (delete_breakpoint): Declare.
+	* mem-break.c (delete_breakpoint): Make external.
+
+	* target.h (struct target_ops): Add `supports_tracepoints',
+	`read_pc', and `write_pc' fields.
+	(target_supports_tracepoints): Define.
+	* utils.c (xrealloc, decimal2str, pulongest, plongest, thirty_two)
+	(phex_nz): New.
+
+	* regcache.h (struct regcache) <registers_owned>: New field.
+	(init_register_cache, regcache_cpy): Declare.
+	(regcache_read_pc, regcache_write_pc): Declare.
+	(register_cache_size): Declare.
+	(supply_regblock): Declare.
+	* regcache.c (init_register_cache): New.
+	(new_register_cache): Use it.
+	(regcache_cpy): New.
+	(register_cache_size): New.
+	(supply_regblock): New.
+	(regcache_read_pc, regcache_write_pc): New.
+	
+	* tracepoint.c: New.
+
+	* Makefile.in (OBS): Add tracepoint.o.
+	(tracepoint.o): New rule.
+
 2010-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (clean): Also remove i386-mmx.c i386-mmx-linux.c.

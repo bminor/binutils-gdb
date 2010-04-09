@@ -117,6 +117,9 @@ struct linux_target_ops
 
   /* Hook to support target specific qSupported.  */
   void (*process_qsupported) (const char *);
+
+  /* Returns true if the low target supports tracepoints.  */
+  int (*supports_tracepoints) (void);
 };
 
 extern struct linux_target_ops the_low_target;

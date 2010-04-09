@@ -30,8 +30,14 @@ struct thread_info;
 struct regcache
 {
   int registers_valid;
+  int registers_owned;
   unsigned char *registers;
 };
+
+struct regcache *init_register_cache (struct regcache *regcache,
+				      unsigned char *regbuf);
+
+void regcache_cpy (struct regcache *dst, struct regcache *src);
 
 /* Create a new register cache for INFERIOR.  */
 
@@ -57,11 +63,17 @@ void registers_to_string (struct regcache *regcache, char *buf);
 
 void registers_from_string (struct regcache *regcache, char *buf);
 
+CORE_ADDR regcache_read_pc (struct regcache *regcache);
+
+void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
+
 /* Return a pointer to the description of register ``n''.  */
 
 struct reg *find_register_by_number (int n);
 
 int register_size (int n);
+
+int register_cache_size (void);
 
 int find_regno (const char *name);
 
@@ -74,6 +86,8 @@ void supply_register (struct regcache *regcache, int n, const void *buf);
 
 void supply_register_by_name (struct regcache *regcache,
 			      const char *name, const void *buf);
+
+void supply_regblock (struct regcache *regcache, const void *buf);
 
 void collect_register (struct regcache *regcache, int n, void *buf);
 

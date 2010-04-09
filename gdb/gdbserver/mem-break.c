@@ -302,7 +302,7 @@ delete_breakpoint_1 (struct process_info *proc, struct breakpoint *todel)
   return ENOENT;
 }
 
-static int
+int
 delete_breakpoint (struct breakpoint *todel)
 {
   struct process_info *proc = current_process ();

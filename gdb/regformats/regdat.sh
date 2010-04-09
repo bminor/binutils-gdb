@@ -119,8 +119,8 @@ EOF
 
 exec > new-$2
 copyright $1
+echo '#include "server.h"'
 echo '#include "regdef.h"'
-echo '#include "regcache.h"'
 echo
 offset=0
 i=0

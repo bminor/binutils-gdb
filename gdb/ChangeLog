@@ -1,3 +1,8 @@
+2010-04-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* regformats/regdat.sh: Include server.h.  Don't include
+	regcache.h.
+
 2010-04-08  Stan Shebs  <stan@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

@@ -449,6 +449,10 @@ handle_general_set (char *own_buf)
       return;
     }
 
+  if (target_supports_tracepoints ()
+      && handle_tracepoint_general_set (own_buf))
+    return;
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -506,6 +510,43 @@ monitor_show_help (void)
   monitor_output ("    Quit GDBserver\n");
 }
 
+/* Read trace frame or inferior memory.  */
+
+static int
+read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
+{
+  if (current_traceframe >= 0)
+    {
+      ULONGEST nbytes;
+      ULONGEST length = len;
+
+      if (traceframe_read_mem (current_traceframe,
+			       memaddr, myaddr, len, &nbytes))
+	return EIO;
+      /* Data read from trace buffer, we're done.  */
+      if (nbytes == length)
+	return 0;
+      if (!in_readonly_region (memaddr, length))
+	return EIO;
+      /* Otherwise we have a valid readonly case, fall through.  */
+      /* (assume no half-trace half-real blocks for now) */
+    }
+
+  return read_inferior_memory (memaddr, myaddr, len);
+}
+
+/* Write trace frame or inferior memory.  Actually, writing to trace
+   frames is forbidden.  */
+
+static int
+write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
+{
+  if (current_traceframe >= 0)
+    return EIO;
+  else
+    return write_inferior_memory (memaddr, myaddr, len);
+}
+
 /* Subroutine of handle_search_memory to simplify it.  */
 
 static int
@@ -517,7 +558,7 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 {
   /* Prime the search buffer.  */
 
-  if (read_inferior_memory (start_addr, search_buf, search_buf_size) != 0)
+  if (read_memory (start_addr, search_buf, search_buf_size) != 0)
     {
       warning ("Unable to access target memory at 0x%lx, halting search.",
 	       (long) start_addr);
@@ -568,7 +609,7 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 			? search_space_len - keep_len
 			: chunk_size);
 
-	  if (read_inferior_memory (read_addr, search_buf + keep_len,
+	  if (read_memory (read_addr, search_buf + keep_len,
 				    nr_to_read) != 0)
 	    {
 	      warning ("Unable to access target memory at 0x%lx, halting search.",
@@ -1346,6 +1387,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       strcat (own_buf, ";qXfer:threads:read+");
 
+      if (target_supports_tracepoints ())
+	{
+	  strcat (own_buf, ";ConditionalTracepoints+");
+	  strcat (own_buf, ";TraceStateVariables+");
+	  strcat (own_buf, ";TracepointSource+");
+	}
+
       return;
     }
 
@@ -1505,6 +1553,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       sprintf (own_buf, "C%lx", (unsigned long) crc);
       return;
     }
+
+  if (target_supports_tracepoints () && handle_tracepoint_query (own_buf))
+    return;
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -2275,6 +2326,8 @@ main (int argc, char *argv[])
   initialize_inferiors ();
   initialize_async_io ();
   initialize_low ();
+  if (target_supports_tracepoints ())
+    initialize_tracepoint ();
 
   own_buf = xmalloc (PBUFSIZ + 1);
   mem_buf = xmalloc (PBUFSIZ);
@@ -2541,20 +2594,35 @@ process_serial_event (void)
 	}
       break;
     case 'g':
-      {
-	struct regcache *regcache;
+      require_running (own_buf);
+      if (current_traceframe >= 0)
+	{
+	  struct regcache *regcache = new_register_cache ();
 
-	require_running (own_buf);
-	set_desired_inferior (1);
-	regcache = get_thread_regcache (current_inferior, 1);
-	registers_to_string (regcache, own_buf);
-      }
-      break;
-    case 'G':
- 	{
+	  if (fetch_traceframe_registers (current_traceframe,
+					  regcache, -1) == 0)
+	    registers_to_string (regcache, own_buf);
+	  else
+	    write_enn (own_buf);
+	  free_register_cache (regcache);
+	}
+      else
+	{
 	  struct regcache *regcache;
 
-	  require_running (own_buf);
+	  set_desired_inferior (1);
+	  regcache = get_thread_regcache (current_inferior, 1);
+	  registers_to_string (regcache, own_buf);
+	}
+      break;
+    case 'G':
+      require_running (own_buf);
+      if (current_traceframe >= 0)
+	write_enn (own_buf);
+      else
+	{
+	  struct regcache *regcache;
+
 	  set_desired_inferior (1);
 	  regcache = get_thread_regcache (current_inferior, 1);
 	  registers_from_string (regcache, &own_buf[1]);
@@ -2564,7 +2632,7 @@ process_serial_event (void)
     case 'm':
       require_running (own_buf);
       decode_m_packet (&own_buf[1], &mem_addr, &len);
-      if (read_inferior_memory (mem_addr, mem_buf, len) == 0)
+      if (read_memory (mem_addr, mem_buf, len) == 0)
 	convert_int_to_ascii (mem_buf, own_buf, len);
       else
 	write_enn (own_buf);
@@ -2572,7 +2640,7 @@ process_serial_event (void)
     case 'M':
       require_running (own_buf);
       decode_M_packet (&own_buf[1], &mem_addr, &len, mem_buf);
-      if (write_inferior_memory (mem_addr, mem_buf, len) == 0)
+      if (write_memory (mem_addr, mem_buf, len) == 0)
 	write_ok (own_buf);
       else
 	write_enn (own_buf);
@@ -2581,7 +2649,7 @@ process_serial_event (void)
       require_running (own_buf);
       if (decode_X_packet (&own_buf[1], packet_len - 1,
 			   &mem_addr, &len, mem_buf) < 0
-	  || write_inferior_memory (mem_addr, mem_buf, len) != 0)
+	  || write_memory (mem_addr, mem_buf, len) != 0)
 	write_enn (own_buf);
       else
 	write_ok (own_buf);

@@ -57,6 +57,26 @@ xmalloc (size_t size)
   return newmem;
 }
 
+/* Reallocate memory without fail.  This works like xmalloc. */
+
+void *
+xrealloc (void *ptr, size_t size)
+{
+  void *val;
+
+  if (size == 0)
+    size = 1;
+
+  if (ptr != NULL)
+    val = realloc (ptr, size);	/* OK: realloc */
+  else
+    val = malloc (size);	/* OK: malloc */
+  if (val == NULL)
+    malloc_failure (size);
+
+  return val;
+}
+
 /* Allocate memory without fail and set it to zero.
    If malloc fails, this will print a message to stderr and exit.  */
 
@@ -227,5 +247,110 @@ paddress (CORE_ADDR addr)
 {
   char *str = get_cell ();
   xsnprintf (str, CELLSIZE, "%lx", (long) addr);
+  return str;
+}
+
+static char *
+decimal2str (char *sign, ULONGEST addr, int width)
+{
+  /* Steal code from valprint.c:print_decimal().  Should this worry
+     about the real size of addr as the above does? */
+  unsigned long temp[3];
+  char *str = get_cell ();
+
+  int i = 0;
+  do
+    {
+      temp[i] = addr % (1000 * 1000 * 1000);
+      addr /= (1000 * 1000 * 1000);
+      i++;
+      width -= 9;
+    }
+  while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
+
+  width = 9;
+  if (width < 0)
+    width = 0;
+
+  switch (i)
+    {
+    case 1:
+      xsnprintf (str, CELLSIZE, "%s%0*lu", sign, width, temp[0]);
+      break;
+    case 2:
+      xsnprintf (str, CELLSIZE, "%s%0*lu%09lu", sign, width,
+		 temp[1], temp[0]);
+      break;
+    case 3:
+      xsnprintf (str, CELLSIZE, "%s%0*lu%09lu%09lu", sign, width,
+		 temp[2], temp[1], temp[0]);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "failed internal consistency check");
+    }
+
+  return str;
+}
+
+/* %u for ULONGEST.  The result is stored in a circular static buffer,
+   NUMCELLS deep.  */
+
+char *
+pulongest (ULONGEST u)
+{
+  return decimal2str ("", u, 0);
+}
+
+/* %d for LONGEST.  The result is stored in a circular static buffer,
+   NUMCELLS deep.  */
+
+char *
+plongest (LONGEST l)
+{
+  if (l < 0)
+    return decimal2str ("-", -l, 0);
+  else
+    return decimal2str ("", l, 0);
+}
+
+/* Eliminate warning from compiler on 32-bit systems.  */
+static int thirty_two = 32;
+
+/* Convert a ULONGEST into a HEX string, like %lx.  The result is
+   stored in a circular static buffer, NUMCELLS deep.  */
+
+char *
+phex_nz (ULONGEST l, int sizeof_l)
+{
+  char *str;
+
+  switch (sizeof_l)
+    {
+    case 8:
+      {
+	unsigned long high = (unsigned long) (l >> thirty_two);
+	str = get_cell ();
+	if (high == 0)
+	  xsnprintf (str, CELLSIZE, "%lx",
+		     (unsigned long) (l & 0xffffffff));
+	else
+	  xsnprintf (str, CELLSIZE, "%lx%08lx", high,
+		     (unsigned long) (l & 0xffffffff));
+	break;
+      }
+    case 4:
+      str = get_cell ();
+      xsnprintf (str, CELLSIZE, "%lx", (unsigned long) l);
+      break;
+    case 2:
+      str = get_cell ();
+      xsnprintf (str, CELLSIZE, "%x", (unsigned short) (l & 0xffff));
+      break;
+    default:
+      str = phex_nz (l, sizeof (l));
+      break;
+    }
+
   return str;
 }

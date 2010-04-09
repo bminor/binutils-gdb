@@ -55,6 +55,10 @@ struct breakpoint *set_breakpoint_at (CORE_ADDR where,
 
 int delete_gdb_breakpoint_at (CORE_ADDR addr);
 
+/* Delete a breakpoint.  */
+
+int delete_breakpoint (struct breakpoint *bkpt);
+
 /* Set a reinsert breakpoint at STOP_AT.  */
 
 void set_reinsert_breakpoint (CORE_ADDR stop_at);

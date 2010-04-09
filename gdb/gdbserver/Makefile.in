@@ -127,7 +127,7 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
-	mem-break.o hostio.o event-loop.o \
+	mem-break.o hostio.o event-loop.o tracepoint.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
@@ -285,6 +285,7 @@ remote-utils.o: remote-utils.c terminal.h $(server_h)
 server.o: server.c $(server_h)
 target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h)
+tracepoint.o: tracepoint.c $(server_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
 

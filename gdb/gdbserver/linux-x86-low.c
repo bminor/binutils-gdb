@@ -1027,6 +1027,12 @@ x86_arch_setup (void)
   x86_linux_update_xmltarget ();
 }
 
+static int
+x86_supports_tracepoints (void)
+{
+  return 1;
+}
+
 /* This is initialized assuming an amd64 target.
    x86_arch_setup will correct it for i386 or amd64 targets.  */
 
@@ -1058,5 +1064,6 @@ struct linux_target_ops the_low_target =
   x86_linux_new_process,
   x86_linux_new_thread,
   x86_linux_prepare_to_resume,
-  x86_linux_process_qsupported 
+  x86_linux_process_qsupported,
+  x86_supports_tracepoints
 };
