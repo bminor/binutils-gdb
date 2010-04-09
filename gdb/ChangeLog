@@ -1,5 +1,7 @@
 2010-04-09  Stan Shebs  <stan@codesourcery.com>
 
+	* tracepoint.c (trace_status_mi): Report frames created.
+
 	* tracepoint.c (trace_dump_command): Include default-collect
 	expressions.
 

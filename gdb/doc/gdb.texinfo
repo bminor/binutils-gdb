@@ -26421,13 +26421,16 @@ present iff the @samp{stop-reason} field has the value of
 @samp{passcount}.
 
 @item frames
-This field is an integer number of currently collected frames.  This
-field is optional.
+@itemx frames-created
+The @samp{frames} field is a count of the total number of trace frames
+in the trace buffer, while @samp{frames-created} is the total created
+during the run, including ones that were discarded, such as when a
+circular trace buffer filled up.  Both fields are optional.
 
 @item buffer-size
 @itemx buffer-free
 These fields tell the current size of the tracing buffer and the
-remaining space.  These field is optional.
+remaining space.  These fields are optional.
 
 @item circular
 The value of the circular trace buffer flag.  @code{1} means that the

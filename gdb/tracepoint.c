@@ -1798,6 +1798,8 @@ trace_status_mi (int on_stop)
 
   if (ts->traceframe_count != -1)
     ui_out_field_int (uiout, "frames", ts->traceframe_count);
+  if (ts->traceframes_created != -1)
+    ui_out_field_int (uiout, "frames-created", ts->traceframes_created);
   if (ts->buffer_size != -1)
     ui_out_field_int (uiout, "buffer-size", ts->buffer_size);
   if (ts->buffer_free != -1)
