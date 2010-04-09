@@ -668,6 +668,7 @@ Enables or disables auto-loading of Python code when an object is opened."),
   gdbpy_initialize_functions ();
   gdbpy_initialize_types ();
   gdbpy_initialize_objfile ();
+  gdbpy_initialize_breakpoints ();
   gdbpy_initialize_lazy_string ();
 
   PyRun_SimpleString ("import gdb");
@@ -725,6 +726,9 @@ static PyMethodDef GdbMethods[] =
     "Execute a gdb command" },
   { "parameter", gdbpy_parameter, METH_VARARGS,
     "Return a gdb parameter's value" },
+
+  { "breakpoints", gdbpy_breakpoints, METH_NOARGS,
+    "Return a tuple of all breakpoint objects" },
 
   { "default_visualizer", gdbpy_default_visualizer, METH_VARARGS,
     "Find the default visualizer for a Value." },

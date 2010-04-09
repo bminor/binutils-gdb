@@ -75,6 +75,7 @@ extern PyTypeObject block_object_type;
 extern PyTypeObject symbol_object_type;
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
+PyObject *gdbpy_breakpoints (PyObject *, PyObject *);
 PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
 PyObject *gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
@@ -82,6 +83,7 @@ PyObject *gdbpy_block_for_pc (PyObject *self, PyObject *args);
 PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 					   const char *encoding, struct type *type);
+PyObject *gdbpy_get_hook_function (const char *);
 
 PyObject *symtab_and_line_to_sal_object (struct symtab_and_line sal);
 PyObject *symtab_to_symtab_object (struct symtab *symtab);
@@ -111,6 +113,7 @@ void gdbpy_initialize_blocks (void);
 void gdbpy_initialize_types (void);
 void gdbpy_initialize_functions (void);
 void gdbpy_initialize_objfile (void);
+void gdbpy_initialize_breakpoints (void);
 void gdbpy_initialize_lazy_string (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
@@ -131,6 +134,18 @@ extern const struct language_defn *python_language;
 			     "%s", Exception.message);			\
     } while (0)
 
+/* Use this after a TRY_EXCEPT to throw the appropriate Python
+   exception.  This macro is for use inside setter functions.  */
+#define GDB_PY_SET_HANDLE_EXCEPTION(Exception)				\
+    do {								\
+      if (Exception.reason < 0)						\
+        {								\
+	  PyErr_Format (Exception.reason == RETURN_QUIT			\
+			? PyExc_KeyboardInterrupt : PyExc_RuntimeError, \
+			"%s", Exception.message);			\
+	  return -1;							\
+	}								\
+    } while (0)
 
 void gdbpy_print_stack (void);
 

@@ -1,3 +1,19 @@
+2010-04-09  Phil Muldoon  <pmuldoon@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+   	    Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (condition_command): Simplify.  Move condition
+	setting code to ...
+	(set_breakpoint_condition): ... here.  New function.
+	* breakpoint.h  (set_breakpoint_condition): Declare.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-breakpoint.
+	(SUBDIR_PYTHON_SRCS): Likewise.
+	(py-breakpoint.o): New rule.
+	* python/py-breakpoint.c: New file.
+	* python/python-internal.h (gdbpy_breakpoints)
+	(gdbpy_initialize_breakpoints): Declare.
+	(GDB_PY_SET_HANDLE_EXCEPTION) Define.
+
 2010-04-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* regformats/regdat.sh: Include server.h.  Don't include

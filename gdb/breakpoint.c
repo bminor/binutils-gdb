@@ -709,6 +709,61 @@ get_breakpoint (int num)
 }
 
 
+
+void
+set_breakpoint_condition (struct breakpoint *b, char *exp,
+			  int from_tty)
+{
+  struct bp_location *loc = b->loc;
+
+  for (; loc; loc = loc->next)
+    {
+      xfree (loc->cond);
+      loc->cond = NULL;
+    }
+  xfree (b->cond_string);
+  b->cond_string = NULL;
+  xfree (b->cond_exp);
+  b->cond_exp = NULL;
+
+  if (*exp == 0)
+    {
+      if (from_tty)
+	printf_filtered (_("Breakpoint %d now unconditional.\n"), b->number);
+    }
+  else
+    {
+      char *arg = exp;
+      /* I don't know if it matters whether this is the string the user
+	 typed in or the decompiled expression.  */
+      b->cond_string = xstrdup (arg);
+      b->condition_not_parsed = 0;
+
+      if (is_watchpoint (b))
+	{
+	  innermost_block = NULL;
+	  arg = exp;
+	  b->cond_exp = parse_exp_1 (&arg, 0, 0);
+	  if (*arg)
+	    error (_("Junk at end of expression"));
+	  b->cond_exp_valid_block = innermost_block;
+	}
+      else
+	{
+	  for (loc = b->loc; loc; loc = loc->next)
+	    {
+	      arg = exp;
+	      loc->cond =
+		parse_exp_1 (&arg, block_for_pc (loc->address), 0);
+	      if (*arg)
+		error (_("Junk at end of expression"));
+	    }
+	}
+    }
+  breakpoints_changed ();
+  observer_notify_breakpoint_modified (b->number);
+}
+
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
 
 static void
@@ -729,53 +784,7 @@ condition_command (char *arg, int from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
       {
-	struct bp_location *loc = b->loc;
-	for (; loc; loc = loc->next)
-	  {
-	    xfree (loc->cond);
-	    loc->cond = NULL;
-	  }
-	xfree (b->cond_string);
-	b->cond_string = NULL;
-	xfree (b->cond_exp);
-	b->cond_exp = NULL;
-
-	if (*p == 0)
-	  {
-	    if (from_tty)
-	      printf_filtered (_("Breakpoint %d now unconditional.\n"), bnum);
-	  }
-	else
-	  {
-	    arg = p;
-	    /* I don't know if it matters whether this is the string the user
-	       typed in or the decompiled expression.  */
-	    b->cond_string = xstrdup (arg);
-	    b->condition_not_parsed = 0;
-
-	    if (is_watchpoint (b))
-	      {
-		innermost_block = NULL;
-		arg = p;
-		b->cond_exp = parse_exp_1 (&arg, 0, 0);
-		if (*arg)
-		  error (_("Junk at end of expression"));
-		b->cond_exp_valid_block = innermost_block;
-	      }
-	    else
-	      {
-		for (loc = b->loc; loc; loc = loc->next)
-		  {
-		    arg = p;
-		    loc->cond =
-		      parse_exp_1 (&arg, block_for_pc (loc->address), 0);
-		    if (*arg)
-		      error (_("Junk at end of expression"));
-		  }
-	      }
-	  }
-	breakpoints_changed ();
-	observer_notify_breakpoint_modified (b->number);
+	set_breakpoint_condition (b, arg, from_tty);
 	return;
       }
 

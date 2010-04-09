@@ -19714,6 +19714,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Symbols In Python::           Python representation of symbols.
 * Symbol Tables In Python::     Python representation of symbol tables.
 * Lazy Strings In Python::      Python representation of lazy strings.
+* Breakpoints In Python::       Manipulating breakpoints using Python.
 @end menu
 
 @node Basic Python
@@ -19737,6 +19738,12 @@ If no exceptions occur, this function returns @code{None}.
 @var{from_tty} specifies whether @value{GDBN} ought to consider this
 command as having originated from the user invoking it interactively.
 It must be a boolean value.  If omitted, it defaults to @code{False}.
+@end defun
+
+@findex gdb.breakpoints
+@defun breakpoints
+Return a sequence holding all of @value{GDBN}'s breakpoints.
+@xref{Breakpoints In Python}, for more information.
 @end defun
 
 @findex gdb.parameter
@@ -21278,6 +21285,163 @@ The following methods are provided:
 Return the symbol table's source absolute file name.
 @end defmethod
 @end table
+
+@node Breakpoints In Python
+@subsubsection Manipulating breakpoints using Python
+
+@cindex breakpoints in python
+@tindex gdb.Breakpoint
+
+Python code can manipulate breakpoints via the @code{gdb.Breakpoint}
+class.
+
+@defmethod Breakpoint __init__ spec @r{[}type@r{]} @r{[}wp_class@r{]}
+Create a new breakpoint.  @var{spec} is a string naming the
+location of the breakpoint, or an expression that defines a
+watchpoint.  The contents can be any location recognized by the
+@code{break} command, or in the case of a watchpoint, by the @code{watch}
+command.  The optional @var{type} denotes the breakpoint to create
+from the types defined later in this chapter.  This argument can be
+either: @code{BP_BREAKPOINT} or @code{BP_WATCHPOINT}.  @var{type}
+defaults to @code{BP_BREAKPOINT}.  The optional @var{wp_class}
+argument defines the class of watchpoint to create, if @var{type} is
+defined as @code{BP_WATCHPOINT}.  If a watchpoint class is not
+provided, it is assumed to be a @var{WP_WRITE} class.
+@end defmethod
+
+The available watchpoint types represented by constants are defined in the
+@code{gdb} module:
+
+@table @code
+@findex WP_READ
+@findex gdb.WP_READ
+@item WP_READ
+Read only watchpoint.
+
+@findex WP_WRITE
+@findex gdb.WP_WRITE
+@item WP_WRITE
+Write only watchpoint.
+
+@findex WP_ACCESS
+@findex gdb.WP_ACCESS
+@item WP_ACCESS
+Read/Write watchpoint.
+@end table
+
+@defmethod Breakpoint is_valid
+Return @code{True} if this @code{Breakpoint} object is valid,
+@code{False} otherwise.  A @code{Breakpoint} object can become invalid
+if the user deletes the breakpoint.  In this case, the object still
+exists, but the underlying breakpoint does not.  In the cases of
+watchpoint scope, the watchpoint remains valid even if execution of the
+inferior leaves the scope of that watchpoint.
+@end defmethod
+
+@defivar Breakpoint enabled
+This attribute is @code{True} if the breakpoint is enabled, and
+@code{False} otherwise.  This attribute is writable.
+@end defivar
+
+@defivar Breakpoint silent
+This attribute is @code{True} if the breakpoint is silent, and
+@code{False} otherwise.  This attribute is writable.
+
+Note that a breakpoint can also be silent if it has commands and the
+first command is @code{silent}.  This is not reported by the
+@code{silent} attribute.
+@end defivar
+
+@defivar Breakpoint thread
+If the breakpoint is thread-specific, this attribute holds the thread
+id.  If the breakpoint is not thread-specific, this attribute is
+@code{None}.  This attribute is writable.
+@end defivar
+
+@defivar Breakpoint task
+If the breakpoint is Ada task-specific, this attribute holds the Ada task
+id.  If the breakpoint is not task-specific (or the underlying
+language is not Ada), this attribute is @code{None}.  This attribute
+is writable.
+@end defivar
+
+@defivar Breakpoint ignore_count
+This attribute holds the ignore count for the breakpoint, an integer.
+This attribute is writable.
+@end defivar
+
+@defivar Breakpoint number
+This attribute holds the breakpoint's number --- the identifier used by
+the user to manipulate the breakpoint.  This attribute is not writable.
+@end defivar
+
+@defivar Breakpoint type
+This attribute holds the breakpoint's type --- the identifier used to
+determine the actual breakpoint type or use-case.  This attribute is not
+writable.
+@end defivar
+
+The available types are represented by constants defined in the @code{gdb}
+module:
+
+@table @code
+@findex BP_BREAKPOINT
+@findex gdb.BP_BREAKPOINT
+@item BP_BREAKPOINT
+Normal code breakpoint.
+
+@findex BP_WATCHPOINT
+@findex gdb.BP_WATCHPOINT
+@item BP_WATCHPOINT
+Watchpoint breakpoint.
+
+@findex BP_HARDWARE_WATCHPOINT
+@findex gdb.BP_HARDWARE_WATCHPOINT
+@item BP_HARDWARE_WATCHPOINT
+Hardware assisted watchpoint.
+
+@findex BP_READ_WATCHPOINT
+@findex gdb.BP_READ_WATCHPOINT
+@item BP_READ_WATCHPOINT
+Hardware assisted read watchpoint.
+
+@findex BP_ACCESS_WATCHPOINT
+@findex gdb.BP_ACCESS_WATCHPOINT
+@item BP_ACCESS_WATCHPOINT
+Hardware assisted access watchpoint.
+@end table
+
+@defivar Breakpoint hit_count
+This attribute holds the hit count for the breakpoint, an integer.
+This attribute is writable, but currently it can only be set to zero.
+@end defivar
+
+@defivar Breakpoint location
+This attribute holds the location of the breakpoint, as specified by
+the user.  It is a string.  If the breakpoint does not have a location
+(that is, it is a watchpoint) the attribute's value is @code{None}.  This
+attribute is not writable.
+@end defivar
+
+@defivar Breakpoint expression
+This attribute holds a breakpoint expression, as specified by
+the user.  It is a string.  If the breakpoint does not have an
+expression (the breakpoint is not a watchpoint) the attribute's value
+is @code{None}.  This attribute is not writable.
+@end defivar
+
+@defivar Breakpoint condition
+This attribute holds the condition of the breakpoint, as specified by
+the user.  It is a string.  If there is no condition, this attribute's
+value is @code{None}.  This attribute is writable.
+@end defivar
+
+@defivar Breakpoint commands
+This attribute holds the commands attached to the breakpoint.  If
+there are commands, this attribute's value is a string holding all the
+commands, separated by newlines.  If there are no commands, this
+attribute is @code{None}.  This attribute is not writable.
+@end defivar
 
 @node Lazy Strings In Python
 @subsubsection Python representation of lazy strings.

@@ -1005,6 +1005,10 @@ extern int breakpoints_always_inserted_mode (void);
    in our opinion won't ever trigger.  */
 extern void breakpoint_retire_moribund (void);
 
+/* Set break condition of breakpoint B to EXP.  */
+extern void set_breakpoint_condition (struct breakpoint *b, char *exp,
+				      int from_tty);
+
 /* Checks if we are catching syscalls or not.
    Returns 0 if not, greater than 0 if we are.  */
 extern int catch_syscall_enabled (void);
