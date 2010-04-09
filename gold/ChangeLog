@@ -1,3 +1,55 @@
+2010-04-09  Doug Kwan  <dougkwan@google.com>
+
+	* layout.cc (Layout::choose_output_section): Handle script section
+	types.
+	(Layout::make_output_section_for_script): Add section type parameter.
+	Handle script section types.
+	* layout.h (Layout::make_output_section_for_script): Add section
+	type parameter.
+	* output.cc (Output_section::Output_section): Initialize data member
+	is_noload_.
+	(Output_section::do_reset_address_and_file_offset): Do not set address
+	to 0 if section is a NOLOAD section.
+	* output.h (Output_section::is_noload): New method.
+	(Output_section::set_is_noload): Ditto.
+	(Output_section::is_noload_): New data member.
+	* script-c.h (Script_section_type): New enum type.
+	(struct Parser_output_section_header): Add new file section_type.
+	* script-sections.cc (Sections_element::output_section_name): Add
+	parameter for returning script section type.
+	(Output_section_definition::output_section_name): Ditto.
+	(Output_section_definition::section_type)P; New method.
+	(Output_section_definiton::script_section_type_name): Ditto.
+	(Output_section_definition::script_section_type_): New data member.
+	(Output_section_definition::Output_section_definition): Initialize
+	data member Output_section_definition::script_section_type_.
+	(Output_section_definition::create_sections): Pass script section type
+	to Layout::make_output_section_for_script.
+	(Output_section_definition::output_section_name): Return script
+	section type to caller.
+	(Output_section_definition::set_section_address): Do not advance
+	dot value and load address if section type is NOLOAD.  Set address
+	of NOLOAD sections regardless of section flags.
+	(Output_section_definition::print): Print section type if it is
+	not SCRIPT_SECTION_TYPE_NONE.
+	(Output_section_definition::section_type): New method.
+	(Output_section_definition::script_section_type_name): Ditto.
+	(Script_sections::output_section_name): Add new parameter
+	PSECTION_TYPE for returning script section type.  Pass it to
+	section elements.  Handle discard sections.
+	(Sort_output_sections::operator()): Handle NOLOAD sections.
+	* script-sections.h (Script_sections::Section_type): New enum type.
+   	(Script_sections::output_section_name): Add a new parameter for
+	returning script section type.
+	* script.cc (script_keyword_parsecodes): Add keywords COPY, DSECT,
+	INFO and NOLOAD.
+	* yyscript.y (union): Add new field SECTION_TYPE.
+	(COPY, DSECT, INFO, NOLOAD): New tokens.
+	(opt_address_and_section_type): Change type to output_section_header.
+	(section_type): New non-terminal
+	(section_header): Handle section type.
+ 	(opt_address_and_section_type): Return section type value.
+
 2010-04-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/plugin_common_test_1.c (foo): Add prototype.
