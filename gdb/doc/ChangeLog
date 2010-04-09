@@ -1,6 +1,11 @@
+2010-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.texinfo (maint print registers): Mention unavailable and
+	invisible registers.
+
 2010-04-09  Phil Muldoon  <pmuldoon@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
-   	    Tom Tromey  <tromey@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Breakpoints In Python): New Node.
 

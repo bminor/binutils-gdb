@@ -29246,8 +29246,9 @@ Print @value{GDBN}'s internal register data structures.
 
 The command @code{maint print raw-registers} includes the contents of
 the raw register cache; the command @code{maint print cooked-registers}
-includes the (cooked) value of all registers; and the command
-@code{maint print register-groups} includes the groups that each
+includes the (cooked) value of all registers, including registers which
+aren't available on the target nor visible to user; and the
+command @code{maint print register-groups} includes the groups that each
 register is a member of.  @xref{Registers,, Registers, gdbint,
 @value{GDBN} Internals}.
 
