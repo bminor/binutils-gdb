@@ -1,3 +1,8 @@
+2010-04-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (gdb/mi Tracepoint Commands) <-trace-status>:
+	Describe the `circular' and `disconnected' fields.
+
 2010-04-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.texinfo (maint print registers): Mention unavailable and

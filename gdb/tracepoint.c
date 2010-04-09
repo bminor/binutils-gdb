@@ -1796,13 +1796,15 @@ trace_status_mi (int on_stop)
 	}
     }
 
-
-  if ((int) ts->traceframe_count != -1)
+  if (ts->traceframe_count != -1)
     ui_out_field_int (uiout, "frames", ts->traceframe_count);
-  if ((int) ts->buffer_size != -1)
-    ui_out_field_int (uiout, "buffer-size",  (int) ts->buffer_size);
-  if ((int) ts->buffer_free != -1)
-    ui_out_field_int (uiout, "buffer-free",  (int) ts->buffer_free);
+  if (ts->buffer_size != -1)
+    ui_out_field_int (uiout, "buffer-size", ts->buffer_size);
+  if (ts->buffer_free != -1)
+    ui_out_field_int (uiout, "buffer-free", ts->buffer_free);
+
+  ui_out_field_int (uiout, "disconnected",  ts->disconnected_tracing);
+  ui_out_field_int (uiout, "circular",  ts->circular_buffer);
 }
 
 /* This function handles the details of what to do about an ongoing

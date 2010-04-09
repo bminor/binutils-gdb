@@ -26387,7 +26387,7 @@ The corresponding @value{GDBN} command is @samp{tstart}.
  -trace-status
 @end smallexample
 
-Obtains the status of a tracing experiement.  The result may include
+Obtains the status of a tracing experiment.  The result may include
 the following fields:
 
 @table @samp
@@ -26428,6 +26428,17 @@ field is optional.
 @itemx buffer-free
 These fields tell the current size of the tracing buffer and the
 remaining space.  These field is optional.
+
+@item circular
+The value of the circular trace buffer flag.  @code{1} means that the
+trace buffer is circular and old trace frames will be discarded if
+necessary to make room, @code{0} means that the trace buffer is linear
+and may fill up.
+
+@item disconnected
+The value of the disconnected tracing flag.  @code{1} means that
+tracing will continue after @value{GDBN} disconnects, @code{0} means
+that the trace run will stop.
 
 @end table
 

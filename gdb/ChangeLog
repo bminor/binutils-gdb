@@ -1,3 +1,8 @@
+2010-04-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* tracepoint.c (trace_status_mi): Report disconnected tracing and
+	circular trace buffer statuses.
+
 2010-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* config/djgpp/fnchange.lst: Fix typo in translations for
