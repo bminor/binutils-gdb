@@ -1146,7 +1146,6 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
 {
   list_info_type *list = head;
   file_info_type *current_hll_file = (file_info_type *) NULL;
-  char *message;
   char *buffer;
   char *p;
   int show_listing = 1;
@@ -1211,8 +1210,6 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
 	{
 	  /* Scan down the list and print all the stuff which can be done
 	     with this line (or lines).  */
-	  message = 0;
-
 	  if (list->hll_file)
 	    current_hll_file = list->hll_file;
 

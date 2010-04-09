@@ -1,3 +1,26 @@
+2010-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (process_debug_info): Remove unused variable
+	cu_abbrev_offset_ptr.
+	(display_debug_lines_decoded): Remove unused variable prev_line.
+	* elfedit.c (process_archive): Remove unused variable
+	file_name_size.
+	* ieee.c (ieee_start_compilation_unit): Remove unused variable
+	nindx.
+	(ieee_set_type): Remove unused variables info, targetindx and
+	baseindx.
+	* objdump.c (disassmble_byte): Remove unused variable done_dot.
+	* rddbg.c (read_section_stabs_debugging_info): Remove unused
+	variable other.
+	* readelf.c (dump_section_as_strings): Remove unused variable
+	addr.
+	(process_archive): Remove unused variable file_name_size.
+	* stabs.c (parse_stab_string): Mark desc parameter as unused.
+	Remove unused variable lineno.
+	(parse_stab_struct_type): Remove unused variable orig.
+	(stab_demangle_type): Remove unused variables constp, volatilep
+	and hold.
+
 2010-04-07  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

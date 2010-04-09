@@ -1278,13 +1278,11 @@ _bfd_elf_maybe_strip_eh_frame_hdr (struct bfd_link_info *info)
 
 bfd_vma
 _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info,
+				  struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				  asection *sec,
 				  bfd_vma offset)
 {
   struct eh_frame_sec_info *sec_info;
-  struct elf_link_hash_table *htab;
-  struct eh_frame_hdr_info *hdr_info;
   unsigned int lo, hi, mid;
 
   if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
@@ -1293,9 +1291,6 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (offset >= sec->rawsize)
     return offset - sec->rawsize + sec->size;
-
-  htab = elf_hash_table (info);
-  hdr_info = &htab->eh_info;
 
   lo = 0;
   hi = sec_info->count;

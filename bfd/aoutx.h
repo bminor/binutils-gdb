@@ -1,6 +1,6 @@
 /* BFD semi-generic back-end for a.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -5233,8 +5233,6 @@ aout_link_write_symbols (struct aout_final_link_info *finfo, bfd *input_bfd)
 static bfd_boolean
 aout_link_input_bfd (struct aout_final_link_info *finfo, bfd *input_bfd)
 {
-  bfd_size_type sym_count;
-
   BFD_ASSERT (bfd_get_format (input_bfd) == bfd_object);
 
   /* If this is a dynamic object, it may need special handling.  */
@@ -5247,8 +5245,6 @@ aout_link_input_bfd (struct aout_final_link_info *finfo, bfd *input_bfd)
      finfo->info->keep_memory is FALSE.  */
   if (! aout_get_external_symbols (input_bfd))
     return FALSE;
-
-  sym_count = obj_aout_external_sym_count (input_bfd);
 
   /* Write out the symbols and get a map of the new indices.  The map
      is placed into finfo->symbol_map.  */

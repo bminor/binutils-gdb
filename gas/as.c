@@ -1055,7 +1055,6 @@ create_obj_attrs_section (void)
 {
   segT s;
   char *p;
-  addressT addr;
   offsetT size;
   const char *name;
 
@@ -1069,7 +1068,7 @@ create_obj_attrs_section (void)
       elf_section_type (s)
 	= get_elf_backend_data (stdoutput)->obj_attrs_section_type;
       bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
-      addr = frag_now_fix ();
+      frag_now_fix ();
       p = frag_more (size);
       bfd_elf_set_obj_attr_contents (stdoutput, (bfd_byte *)p, size);
     }

@@ -2325,14 +2325,12 @@ wild_sort (lang_wild_statement_type *wild,
 	   lang_input_statement_type *file,
 	   asection *section)
 {
-  const char *section_name;
   lang_statement_union_type *l;
 
   if (!wild->filenames_sorted
       && (sec == NULL || sec->spec.sorted == none))
     return NULL;
 
-  section_name = bfd_get_section_name (file->the_bfd, section);
   for (l = wild->children.head; l != NULL; l = l->header.next)
     {
       lang_input_section_type *ls;

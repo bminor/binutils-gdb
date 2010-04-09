@@ -1,3 +1,8 @@
+2010-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* i386-dis.c (print_insn): Remove unused variable op.
+	(OP_sI): Remove unused variable mask.
+
 2010-04-07  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

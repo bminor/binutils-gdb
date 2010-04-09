@@ -1,6 +1,6 @@
 /* stabs.c -- Parse stabs debugging information
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -677,7 +677,7 @@ parse_stab (void *dhandle, void *handle, int type, int desc, bfd_vma value,
 
 static bfd_boolean
 parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
-		   int desc, bfd_vma value, const char *string)
+		   int desc ATTRIBUTE_UNUSED, bfd_vma value, const char *string)
 {
   const char *p;
   char *name;
@@ -685,7 +685,6 @@ parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
   debug_type dtype;
   bfd_boolean synonym;
   bfd_boolean self_crossref;
-  unsigned int lineno;
   debug_type *slot;
 
   p = strchr (string, ':');
@@ -702,14 +701,6 @@ parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
 	  return FALSE;
 	}
     }
-
-  /* GCC 2.x puts the line number in desc.  SunOS apparently puts in
-     the number of bytes occupied by a type or object, which we
-     ignore.  */
-  if (info->gcc_compiled >= 2)
-    lineno = desc;
-  else
-    lineno = 0;
 
   /* FIXME: Sometimes the special C++ names start with '.'.  */
   name = NULL;
@@ -2028,7 +2019,6 @@ parse_stab_struct_type (void *dhandle, struct stab_handle *info,
 			const char *tagname, const char **pp,
 			bfd_boolean structp, const int *typenums)
 {
-  const char *orig;
   bfd_vma size;
   debug_baseclass *baseclasses;
   debug_field *fields;
@@ -2036,8 +2026,6 @@ parse_stab_struct_type (void *dhandle, struct stab_handle *info,
   debug_method *methods;
   debug_type vptrbase;
   bfd_boolean ownvptr;
-
-  orig = *pp;
 
   /* Get the size.  */
   size = parse_number (pp, (bfd_boolean *) NULL);
@@ -4667,7 +4655,7 @@ stab_demangle_type (struct stab_demangle_info *minfo, const char **pp,
     case 'M':
     case 'O':
       {
-	bfd_boolean memberp, constp, volatilep;
+	bfd_boolean memberp;
 	debug_type class_type = DEBUG_TYPE_NULL;
 	debug_type *args;
 	bfd_boolean varargs;
@@ -4675,8 +4663,6 @@ stab_demangle_type (struct stab_demangle_info *minfo, const char **pp,
 	const char *name;
 
 	memberp = **pp == 'M';
-	constp = FALSE;
-	volatilep = FALSE;
 	args = NULL;
 	varargs = FALSE;
 
@@ -4720,12 +4706,10 @@ stab_demangle_type (struct stab_demangle_info *minfo, const char **pp,
 	  {
 	    if (**pp == 'C')
 	      {
-		constp = TRUE;
 		++*pp;
 	      }
 	    else if (**pp == 'V')
 	      {
-		volatilep = TRUE;
 		++*pp;
 	      }
 	    if (**pp != 'F')
@@ -4786,9 +4770,6 @@ stab_demangle_type (struct stab_demangle_info *minfo, const char **pp,
 
     case 'Q':
       {
-	const char *hold;
-
-	hold = *pp;
 	if (! stab_demangle_qualified (minfo, pp, ptype))
 	  return FALSE;
       }

@@ -1,7 +1,7 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+   2010  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1641,7 +1641,7 @@ void
 s_data (int ignore ATTRIBUTE_UNUSED)
 {
   segT section;
-  register int temp;
+  int temp;
 
   temp = get_absolute_expression ();
   if (flag_readonly_data_in_text)
@@ -1683,7 +1683,7 @@ s_app_file_string (char *file, int appfile ATTRIBUTE_UNUSED)
 void
 s_app_file (int appfile)
 {
-  register char *s;
+  char *s;
   int length;
 
   /* Some assemblers tolerate immediately following '"'.  */
@@ -1917,7 +1917,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS rep_exp;
   long size = 1;
-  register long fill = 0;
+  long fill = 0;
   char *p;
 
 #ifdef md_flush_pending_output
@@ -2428,11 +2428,11 @@ s_lcomm_bytes (int needs_align)
 void
 s_lsym (int ignore ATTRIBUTE_UNUSED)
 {
-  register char *name;
-  register char c;
-  register char *p;
+  char *name;
+  char c;
+  char *p;
   expressionS exp;
-  register symbolS *symbolP;
+  symbolS *symbolP;
 
   /* We permit ANY defined expression: BSD4.2 demands constants.  */
   name = input_line_pointer;
@@ -2607,10 +2607,15 @@ s_mexit (int ignore ATTRIBUTE_UNUSED)
 void
 s_mri (int ignore ATTRIBUTE_UNUSED)
 {
-  int on, old_flag;
+  int on;
+#ifdef MRI_MODE_CHANGE
+  int old_flag;
+#endif
 
   on = get_absolute_expression ();
+#ifdef MRI_MODE_CHANGE
   old_flag = flag_mri;
+#endif
   if (on != 0)
     {
       flag_mri = 1;
@@ -2680,9 +2685,9 @@ do_org (segT segment, expressionS *exp, int fill)
 void
 s_org (int ignore ATTRIBUTE_UNUSED)
 {
-  register segT segment;
+  segT segment;
   expressionS exp;
-  register long temp_fill;
+  long temp_fill;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -3452,7 +3457,7 @@ s_struct (int ignore ATTRIBUTE_UNUSED)
 void
 s_text (int ignore ATTRIBUTE_UNUSED)
 {
-  register int temp;
+  int temp;
 
   temp = get_absolute_expression ();
   subseg_set (text_section, (subsegT) temp);
@@ -3820,7 +3825,7 @@ do_parse_cons_expression (expressionS *exp,
    Clobbers input_line_pointer and checks end-of-line.  */
 
 static void
-cons_worker (register int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
+cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 	     int rva)
 {
   int c;
@@ -4014,7 +4019,7 @@ void
 emit_expr (expressionS *exp, unsigned int nbytes)
 {
   operatorT op;
-  register char *p;
+  char *p;
   valueT extra_digit = 0;
 
   /* Don't do anything if we are going to make another pass.  */
@@ -4191,11 +4196,11 @@ emit_expr (expressionS *exp, unsigned int nbytes)
 
   if (op == O_constant)
     {
-      register valueT get;
-      register valueT use;
-      register valueT mask;
+      valueT get;
+      valueT use;
+      valueT mask;
       valueT hibit;
-      register valueT unmask;
+      valueT unmask;
 
       /* JF << of >= number of bits in the object is undefined.  In
 	 particular SPARC (Sun 4) has problems.  */
@@ -4550,7 +4555,7 @@ parse_repeat_cons (exp, nbytes)
      unsigned int nbytes;
 {
   expressionS count;
-  register int i;
+  int i;
 
   expression (exp);
 
@@ -4685,11 +4690,11 @@ hex_float (int float_type, char *bytes)
 
 void
 float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
-	    register int float_type	/* 'f':.ffloat ... 'F':.float ...  */)
+	    int float_type	/* 'f':.ffloat ... 'F':.float ...  */)
 {
-  register char *p;
+  char *p;
   int length;			/* Number of chars in an object.  */
-  register char *err;		/* Error from scanning floating literal.  */
+  char *err;		/* Error from scanning floating literal.  */
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
 
   if (is_it_end_of_statement ())
@@ -4786,8 +4791,8 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
 static inline int
 sizeof_sleb128 (offsetT value)
 {
-  register int size = 0;
-  register unsigned byte;
+  int size = 0;
+  unsigned byte;
 
   do
     {
@@ -4807,12 +4812,10 @@ sizeof_sleb128 (offsetT value)
 static inline int
 sizeof_uleb128 (valueT value)
 {
-  register int size = 0;
-  register unsigned byte;
+  int size = 0;
 
   do
     {
-      byte = (value & 0x7f);
       value >>= 7;
       size += 1;
     }
@@ -4835,8 +4838,8 @@ sizeof_leb128 (valueT value, int sign)
 static inline int
 output_sleb128 (char *p, offsetT value)
 {
-  register char *orig = p;
-  register int more;
+  char *orig = p;
+  int more;
 
   do
     {
@@ -5243,7 +5246,7 @@ stringer (int bits_appendzero)
 unsigned int
 next_char_of_string (void)
 {
-  register unsigned int c;
+  unsigned int c;
 
   c = *input_line_pointer++ & CHAR_MASK;
   switch (c)
@@ -5363,9 +5366,9 @@ next_char_of_string (void)
 }
 
 static segT
-get_segmented_expression (register expressionS *expP)
+get_segmented_expression (expressionS *expP)
 {
-  register segT retval;
+  segT retval;
 
   retval = expression (expP);
   if (expP->X_op == O_illegal
@@ -5381,9 +5384,9 @@ get_segmented_expression (register expressionS *expP)
 }
 
 static segT
-get_known_segmented_expression (register expressionS *expP)
+get_known_segmented_expression (expressionS *expP)
 {
-  register segT retval;
+  segT retval;
 
   if ((retval = get_segmented_expression (expP)) == undefined_section)
     {
@@ -5417,11 +5420,11 @@ get_absolute_expression_and_terminator (long *val_pointer /* Return value of exp
 char *
 demand_copy_C_string (int *len_pointer)
 {
-  register char *s;
+  char *s;
 
   if ((s = demand_copy_string (len_pointer)) != 0)
     {
-      register int len;
+      int len;
 
       for (len = *len_pointer; len > 0; len--)
 	{
@@ -5444,8 +5447,8 @@ demand_copy_C_string (int *len_pointer)
 char *
 demand_copy_string (int *lenP)
 {
-  register unsigned int c;
-  register int len;
+  unsigned int c;
+  int len;
   char *retval;
 
   len = 0;

@@ -1,3 +1,11 @@
+2010-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (create_obj_attrs_section): Remove unused variable addr.
+	* listing.c (listing_listing): Remove unused variable message.
+	* read.c: Remove unnecessary register type qualifiers.
+	(s_mri): Only define/use old_flag variable if MRI_MODE_CHANGE is
+	defined.
+
 2010-04-07  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add support for atmega16a, atmega168a,

@@ -1,3 +1,7 @@
+2010-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (wild_sort): Remove unused variable section_name.
+
 2010-04-07  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

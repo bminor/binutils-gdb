@@ -1,6 +1,6 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1922,7 +1922,6 @@ pe_print_reloc (bfd * abfd, void * vfile)
   FILE *file = (FILE *) vfile;
   bfd_byte *data = 0;
   asection *section = bfd_get_section_by_name (abfd, ".reloc");
-  bfd_size_type datasize;
   bfd_size_type i;
   bfd_size_type start, stop;
 
@@ -1935,7 +1934,6 @@ pe_print_reloc (bfd * abfd, void * vfile)
   fprintf (file,
 	   _("\n\nPE File Base Relocations (interpreted .reloc section contents)\n"));
 
-  datasize = section->size;
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
       if (data != NULL)

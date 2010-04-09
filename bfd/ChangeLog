@@ -1,3 +1,16 @@
+2010-04-09  Nick Clifton  <nickc@redhat.com>
+
+	* aoutx.h (aout_link_input_bfd): Remove unused variable sym_count.
+	* elf-eh-frame.c (_bfd_elf_eh_frame_section_offset): Remove unused
+	variables htab and hdr_info and mark info parameter as unused.
+	* elf.c (prep_headers): Remove unused variable i_phdrp.
+	(_bfd_elf_write_object_contents): Remove unused variable i_ehdrp.
+	* elf32-i386.c (elf_i386_relocate_section): Mark variabled warned
+	as unused.
+	* peXXigen.c (pe_print_reloc): Remove unused variable datasize.
+	* verilog.c (verilog_write_section): Remove unused variable
+	address.
+
 2010-04-07  Alan Modra  <amodra@gmail.com>
 
 	* warning.m4 (GCC_WARN_CFLAGS): Only add -Wshadow for gcc-4 and above.

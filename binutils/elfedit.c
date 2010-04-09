@@ -780,7 +780,6 @@ process_archive (const char * file_name, FILE * file,
   struct archive_info arch;
   struct archive_info nested_arch;
   size_t got;
-  size_t file_name_size;
   int ret;
 
   /* The ARCH structure is used to hold information about this archive.  */
@@ -805,7 +804,6 @@ process_archive (const char * file_name, FILE * file,
       goto out;
     }
 
-  file_name_size = strlen (file_name);
   ret = 0;
 
   while (1)
