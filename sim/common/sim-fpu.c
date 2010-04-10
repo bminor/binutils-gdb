@@ -2532,26 +2532,20 @@ sim_fpu_print_status (int status,
 	case sim_fpu_status_invalid_sqrt:
 	  print (arg, "%sSQRT", prefix);
 	  break;
-	  break;
 	case sim_fpu_status_inexact:
 	  print (arg, "%sX", prefix);
-	  break;
 	  break;
 	case sim_fpu_status_overflow:
 	  print (arg, "%sO", prefix);
 	  break;
-	  break;
 	case sim_fpu_status_underflow:
 	  print (arg, "%sU", prefix);
-	  break;
 	  break;
 	case sim_fpu_status_invalid_div0:
 	  print (arg, "%s/", prefix);
 	  break;
-	  break;
 	case sim_fpu_status_rounded:
 	  print (arg, "%sR", prefix);
-	  break;
 	  break;
 	}
       i <<= 1;
