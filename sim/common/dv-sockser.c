@@ -99,7 +99,8 @@ dv_sockser_init (SIM_DESC sd)
   struct sockaddr_in sockaddr;
   char hostname[100];
   const char *port_str;
-  int tmp,port;
+  unsigned tmp;
+  int port;
 
   if (STATE_ENVIRONMENT (sd) != OPERATING_ENVIRONMENT
       || sockser_addr == NULL)

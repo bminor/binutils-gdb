@@ -540,7 +540,7 @@ sim_core_read_buffer (SIM_DESC sd,
 #if (WITH_HW)
     if (mapping->device != NULL)
       {
-	int nr_bytes = len - count;
+	unsigned nr_bytes = len - count;
 	if (raddr + nr_bytes - 1> mapping->bound)
 	  nr_bytes = mapping->bound - raddr + 1;
 	/* If the access was initiated by a cpu, pass it down so errors can
@@ -598,7 +598,7 @@ sim_core_write_buffer (SIM_DESC sd,
 #if (WITH_HW)
       if (mapping->device != NULL)
 	{
-	  int nr_bytes = len - count;
+	  unsigned nr_bytes = len - count;
 	  if (raddr + nr_bytes - 1 > mapping->bound)
 	    nr_bytes = mapping->bound - raddr + 1;
 	  /* If the access was initiated by a cpu, pass it down so errors can

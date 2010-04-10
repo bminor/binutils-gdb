@@ -122,7 +122,7 @@ int hw_port_encode
 (struct hw *me,
  int port_number,
  char *buf,
- int sizeof_buf,
+ unsigned sizeof_buf,
  port_direction direction);
 
 

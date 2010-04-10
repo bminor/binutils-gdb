@@ -81,7 +81,7 @@ split_device_specifier (struct hw *current,
     {
       struct hw *aliases = hw_tree_find_device (current, "/aliases");
       char alias[32];
-      int len = 0;
+      unsigned len = 0;
       while (device_specifier[len] != '\0'
 	     && device_specifier[len] != '/'
 	     && device_specifier[len] != ':'
@@ -445,14 +445,14 @@ skip_token (const char *chp)
 
 /* count the number of entries */
 
-static int
+static unsigned
 count_entries (struct hw *current,
 	       const char *property_name,
 	       const char *property_value,
-	       int modulo)
+	       unsigned modulo)
 {
   const char *chp = property_value;
-  int nr_entries = 0;
+  unsigned nr_entries = 0;
   while (*chp != '\0')
     {
       nr_entries += 1;
@@ -530,8 +530,8 @@ parse_reg_property (struct hw *current,
 		    const char *property_name,
 		    const char *property_value)
 {
-  int nr_regs;
-  int reg_nr;
+  unsigned nr_regs;
+  unsigned reg_nr;
   reg_property_spec *regs;
   const char *chp;
 
@@ -566,8 +566,8 @@ parse_ranges_property (struct hw *current,
 		       const char *property_name,
 		       const char *property_value)
 {
-  int nr_ranges;
-  int range_nr;
+  unsigned nr_ranges;
+  unsigned range_nr;
   range_property_spec *ranges;
   const char *chp;
 
@@ -646,8 +646,8 @@ parse_string_property (struct hw *current,
 {
   char **strings;
   const char *chp;
-  int nr_strings;
-  int approx_nr_strings;
+  unsigned nr_strings;
+  unsigned approx_nr_strings;
 
   /* get an estimate as to the number of strings by counting double
      quotes */
@@ -1115,7 +1115,7 @@ print_properties (struct hw *me,
 		if ((property->sizeof_array % sizeof (signed_cell)) == 0)
 		  {
 		    unsigned_cell *w = (unsigned_cell*) property->array;
-		    int cell_nr;
+		    unsigned cell_nr;
 		    for (cell_nr = 0;
 			 cell_nr < (property->sizeof_array / sizeof (unsigned_cell));
 			 cell_nr++)
