@@ -45,6 +45,10 @@ SECTION
 #include "libiberty.h"
 #include "safe-ctype.h"
 
+#ifdef CORE_HEADER
+#include CORE_HEADER
+#endif
+
 static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bfd_boolean prep_headers (bfd *);

@@ -1,5 +1,8 @@
 /* config.in.  Generated from configure.in by autoheader.  */
 
+/* Name of host specific core header file to include in elf.c. */
+#undef CORE_HEADER
+
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS

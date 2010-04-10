@@ -13810,6 +13810,7 @@ fi
 # If we are configured native, pick a core file support file.
 COREFILE=
 COREFLAG=
+CORE_HEADER=
 TRAD_HEADER=
 if test "${target}" = "${host}"; then
   case "${host}" in
@@ -14033,6 +14034,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   vax-*-*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/vaxbsd.h"'
+	;;
+  x86_64-*-linux*)
+	CORE_HEADER='"hosts/x86-64linux.h"'
 	;;
   x86_64-*-netbsd* | x86_64-*-openbsd*)
 	COREFILE=netbsd-core.lo
@@ -14701,6 +14705,13 @@ $as_echo "$bfd_cv_have_sys_procfs_type_win32_pstatus_t" >&6; }
 fi
 
 
+if test -n "$CORE_HEADER"; then
+
+cat >>confdefs.h <<_ACEOF
+#define CORE_HEADER $CORE_HEADER
+_ACEOF
+
+fi
 if test -n "$TRAD_HEADER"; then
 
 cat >>confdefs.h <<_ACEOF

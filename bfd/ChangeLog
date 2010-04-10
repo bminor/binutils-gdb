@@ -1,3 +1,18 @@
+2010-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR corefiles/11467
+	* configure.in (CORE_HEADER): New. Set to hosts/x86-64linux.h
+	for x86_64-*-linux*.
+	* config.in: Regenerated.
+	* configure: Likewise.
+
+	* elf.c: Include CORE_HEADER if it is defined.
+
+2010-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* hosts/x86-64linux.h: New.
+
 2010-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* aoutx.h (aout_link_input_bfd): Remove unused variable sym_count.
