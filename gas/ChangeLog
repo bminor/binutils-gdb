@@ -1,3 +1,8 @@
+2010-04-10  Alan Modra  <amodra@gmail.com>
+
+	PR gas/11486
+	* config/tc-ppc.c (ppc_elf_cons): Clear frag contents.
+
 2010-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (create_obj_attrs_section): Remove unused variable addr.
