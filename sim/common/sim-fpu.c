@@ -2497,7 +2497,7 @@ sim_fpu_print_status (int status,
 		      void *arg)
 {
   int i = 1;
-  char *prefix = "";
+  const char *prefix = "";
   while (status >= i)
     {
       switch ((sim_fpu_status) (status & i))

@@ -1,5 +1,10 @@
 2010-04-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-fpu.c (sim_fpu_print_status): Add const markings to local
+	"prefix" var.
+
+2010-04-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-fpu.c (sim_fpu_print_status): Remove duplicate break statements.
 
 2010-04-10  Mike Frysinger  <vapier@gentoo.org>
