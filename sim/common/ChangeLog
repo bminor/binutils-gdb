@@ -2,6 +2,7 @@
 
 	* sim-fpu.c (sim_fpu_print_status): Add const markings to local
 	"prefix" var.
+	(sim_fpu_print_func): Add const markings to format buffer.
 
 2010-04-10  Mike Frysinger  <vapier@gentoo.org>
 

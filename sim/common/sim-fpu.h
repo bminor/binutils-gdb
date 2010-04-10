@@ -404,7 +404,7 @@ extern const sim_fpu sim_fpu_max64;
 
 /* For debugging */
 
-typedef void sim_fpu_print_func (void *, char *, ...);
+typedef void sim_fpu_print_func (void *, const char *, ...);
 
 /* Print a sim_fpu with full precision.  */
 INLINE_SIM_FPU (void) sim_fpu_print_fpu (const sim_fpu *f,
