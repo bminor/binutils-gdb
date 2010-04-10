@@ -1,5 +1,11 @@
 2010-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* hosts/x86-64linux.h (HAVE_PRPSINFO32_T): Undefine before
+	define.
+	(HAVE_PRSTATUS32_T): Likewise.
+
+2010-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR corefiles/11467
 	* configure.in (CORE_HEADER): New. Set to hosts/x86-64linux.h
 	for x86_64-*-linux*.

@@ -38,7 +38,10 @@
 typedef unsigned int uint32_t;
 #endif
 
+#undef HAVE_PRPSINFO32_T
 #define HAVE_PRPSINFO32_T
+
+#undef HAVE_PRSTATUS32_T
 #define HAVE_PRSTATUS32_T
 
 /* These are the 32-bit x86 structures.  */
