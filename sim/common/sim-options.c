@@ -265,7 +265,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       if (WITH_ENVIRONMENT != ALL_ENVIRONMENT
 	  && WITH_ENVIRONMENT != STATE_ENVIRONMENT (sd))
 	{
-	  char *type;
+	  const char *type;
 	  switch (WITH_ENVIRONMENT)
 	    {
 	    case USER_ENVIRONMENT: type = "user"; break;

@@ -1,3 +1,8 @@
+2010-04-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c (standard_option_handler): Add const markings to
+	local "type" var.
+
 2010-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* hw-ports.h: Fix spelling typos.
