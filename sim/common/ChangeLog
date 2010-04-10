@@ -1,5 +1,9 @@
 2010-04-10  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-trace.c (save_data): Add const markings to "buf" argument.
+
+2010-04-10  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-options.c (standard_option_handler): Add const markings to
 	local "type" var.
 

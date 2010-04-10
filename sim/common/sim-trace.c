@@ -513,7 +513,7 @@ save_data (SIM_DESC sd,
 	   TRACE_DATA *data,
 	   data_fmt fmt,
 	   long size,
-	   void *buf)
+	   const void *buf)
 {
   int i = TRACE_INPUT_IDX (data);
   if (i == sizeof (TRACE_INPUT_FMT (data)))
