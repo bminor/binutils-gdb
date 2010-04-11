@@ -1,3 +1,9 @@
+2010-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-tdep.c (amd64_supply_xstateregset): Remove the unused
+	tdep.
+	(amd64_collect_xstateregset): Likewise.
+
 2010-04-09  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c (trace_status_mi): Report frames created.
