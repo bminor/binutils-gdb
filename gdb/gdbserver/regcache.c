@@ -138,6 +138,8 @@ realloc_register_cache (struct inferior_list_entry *thread_p)
   struct regcache *regcache
     = (struct regcache *) inferior_regcache_data (thread);
 
+  if (regcache != NULL)
+    regcache_invalidate_one (thread_p);
   free_register_cache (regcache);
   set_inferior_regcache_data (thread, new_register_cache ());
 }

@@ -1,3 +1,8 @@
+2010-04-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.c (realloc_register_cache): Invalidate inferior's
+	regcache before recreating it.
+
 2010-04-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* tracepoint.c (cmd_qtstatus): Report trace buffer circularity.
