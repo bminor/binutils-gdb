@@ -92,6 +92,7 @@ int remote_debug = 0;
 struct ui_file *gdb_stdlog;
 
 static int remote_desc = INVALID_DESCRIPTOR;
+static int listen_desc = INVALID_DESCRIPTOR;
 
 /* FIXME headerize? */
 extern int using_threads;
@@ -107,15 +108,88 @@ int transport_is_reliable = 0;
 # define write(fd, buf, len) send (fd, (char *) buf, len, 0)
 #endif
 
+int
+gdb_connected (void)
+{
+  return remote_desc != INVALID_DESCRIPTOR;
+}
+
+static void
+enable_async_notification (int fd)
+{
+#if defined(F_SETFL) && defined (FASYNC)
+  int save_fcntl_flags;
+
+  save_fcntl_flags = fcntl (fd, F_GETFL, 0);
+  fcntl (fd, F_SETFL, save_fcntl_flags | FASYNC);
+#if defined (F_SETOWN)
+  fcntl (fd, F_SETOWN, getpid ());
+#endif
+#endif
+}
+
+static int
+handle_accept_event (int err, gdb_client_data client_data)
+{
+  struct sockaddr_in sockaddr;
+  socklen_t tmp;
+
+  if (debug_threads)
+    fprintf (stderr, "handling possible accept event\n");
+
+  tmp = sizeof (sockaddr);
+  remote_desc = accept (listen_desc, (struct sockaddr *) &sockaddr, &tmp);
+  if (remote_desc == -1)
+    perror_with_name ("Accept failed");
+
+  /* Enable TCP keep alive process. */
+  tmp = 1;
+  setsockopt (remote_desc, SOL_SOCKET, SO_KEEPALIVE,
+	      (char *) &tmp, sizeof (tmp));
+
+  /* Tell TCP not to delay small packets.  This greatly speeds up
+     interactive response. */
+  tmp = 1;
+  setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
+	      (char *) &tmp, sizeof (tmp));
+
+#ifndef USE_WIN32API
+  close (listen_desc);		/* No longer need this */
+
+  signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbserver simply
+				   exits when the remote side dies.  */
+#else
+  closesocket (listen_desc);	/* No longer need this */
+#endif
+
+  delete_file_handler (listen_desc);
+
+  /* Convert IP address to string.  */
+  fprintf (stderr, "Remote debugging from host %s\n",
+	   inet_ntoa (sockaddr.sin_addr));
+
+  enable_async_notification (remote_desc);
+
+  /* Register the event loop handler.  */
+  add_file_handler (remote_desc, handle_serial_event, NULL);
+
+  /* We have a new GDB connection now.  If we were disconnected
+     tracing, there's a window where the target could report a stop
+     event to the event loop, and since we have a connection now, we'd
+     try to send vStopped notifications to GDB.  But, don't do that
+     until GDB as selected all-stop/non-stop, and has queried the
+     threads' status ('?').  */
+  target_async (0);
+
+  return 0;
+}
+
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
 void
 remote_open (char *name)
 {
-#if defined(F_SETFL) && defined (FASYNC)
-  int save_fcntl_flags;
-#endif
   char *port_str;
 
   port_str = strchr (name, ':');
@@ -183,9 +257,14 @@ remote_open (char *name)
 #endif
 
       fprintf (stderr, "Remote debugging using %s\n", name);
-#endif /* USE_WIN32API */
 
       transport_is_reliable = 0;
+
+      enable_async_notification (remote_desc);
+
+      /* Register the event loop handler.  */
+      add_file_handler (remote_desc, handle_serial_event, NULL);
+#endif /* USE_WIN32API */
     }
   else
     {
@@ -195,7 +274,6 @@ remote_open (char *name)
       int port;
       struct sockaddr_in sockaddr;
       socklen_t tmp;
-      int tmp_desc;
       char *port_end;
 
       port = strtoul (port_str + 1, &port_end, 10);
@@ -212,21 +290,21 @@ remote_open (char *name)
 	}
 #endif
 
-      tmp_desc = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
-      if (tmp_desc < 0)
+      listen_desc = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
+      if (listen_desc < 0)
 	perror_with_name ("Can't open socket");
 
       /* Allow rapid reuse of this port. */
       tmp = 1;
-      setsockopt (tmp_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp,
+      setsockopt (listen_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp,
 		  sizeof (tmp));
 
       sockaddr.sin_family = PF_INET;
       sockaddr.sin_port = htons (port);
       sockaddr.sin_addr.s_addr = INADDR_ANY;
 
-      if (bind (tmp_desc, (struct sockaddr *) &sockaddr, sizeof (sockaddr))
-	  || listen (tmp_desc, 1))
+      if (bind (listen_desc, (struct sockaddr *) &sockaddr, sizeof (sockaddr))
+	  || listen (listen_desc, 1))
 	perror_with_name ("Can't bind address");
 
       /* If port is zero, a random port will be selected, and the
@@ -234,7 +312,7 @@ remote_open (char *name)
       if (port == 0)
 	{
 	  socklen_t len = sizeof (sockaddr);
-	  if (getsockname (tmp_desc, (struct sockaddr *) &sockaddr, &len) < 0
+	  if (getsockname (listen_desc, (struct sockaddr *) &sockaddr, &len) < 0
 	      || len < sizeof (sockaddr))
 	    perror_with_name ("Can't determine port");
 	  port = ntohs (sockaddr.sin_port);
@@ -243,49 +321,11 @@ remote_open (char *name)
       fprintf (stderr, "Listening on port %d\n", port);
       fflush (stderr);
 
-      tmp = sizeof (sockaddr);
-      remote_desc = accept (tmp_desc, (struct sockaddr *) &sockaddr, &tmp);
-      if (remote_desc == -1)
-	perror_with_name ("Accept failed");
-
-      /* Enable TCP keep alive process. */
-      tmp = 1;
-      setsockopt (remote_desc, SOL_SOCKET, SO_KEEPALIVE,
-		  (char *) &tmp, sizeof (tmp));
-
-      /* Tell TCP not to delay small packets.  This greatly speeds up
-	 interactive response. */
-      tmp = 1;
-      setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
-		  (char *) &tmp, sizeof (tmp));
-
-
-#ifndef USE_WIN32API
-      close (tmp_desc);		/* No longer need this */
-
-      signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbserver simply
-					   exits when the remote side dies.  */
-#else
-      closesocket (tmp_desc);	/* No longer need this */
-#endif
-
-      /* Convert IP address to string.  */
-      fprintf (stderr, "Remote debugging from host %s\n",
-	       inet_ntoa (sockaddr.sin_addr));
+      /* Register the event loop handler.  */
+      add_file_handler (listen_desc, handle_accept_event, NULL);
 
       transport_is_reliable = 1;
     }
-
-#if defined(F_SETFL) && defined (FASYNC)
-  save_fcntl_flags = fcntl (remote_desc, F_GETFL, 0);
-  fcntl (remote_desc, F_SETFL, save_fcntl_flags | FASYNC);
-#if defined (F_SETOWN)
-  fcntl (remote_desc, F_SETOWN, getpid ());
-#endif
-#endif
-
-  /* Register the event loop handler.  */
-  add_file_handler (remote_desc, handle_serial_event, NULL);
 }
 
 void
@@ -298,6 +338,7 @@ remote_close (void)
 #else
   close (remote_desc);
 #endif
+  remote_desc = INVALID_DESCRIPTOR;
 }
 
 /* Convert hex digit A to a number.  */

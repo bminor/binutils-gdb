@@ -201,9 +201,6 @@ struct lwp_info
      and then processed and cleared in linux_resume_one_lwp.  */
   struct thread_resume *resume;
 
-  /* The last resume GDB requested on this thread.  */
-  enum resume_kind last_resume_kind;
-
   /* True if the LWP was seen stop at an internal breakpoint and needs
      stepping over later when it is resumed.  */
   int need_step_over;
@@ -229,7 +226,8 @@ struct lwp_info *find_lwp_pid (ptid_t ptid);
 
 /* From thread-db.c  */
 int thread_db_init (int use_events);
-void thread_db_free (struct process_info *, int detaching);
+void thread_db_detach (struct process_info *);
+void thread_db_mourn (struct process_info *);
 int thread_db_handle_monitor_command (char *);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);

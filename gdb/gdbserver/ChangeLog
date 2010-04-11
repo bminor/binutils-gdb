@@ -1,5 +1,104 @@
 2010-04-11  Pedro Alves  <pedro@codesourcery.com>
 
+	GDBserver disconnected tracing support.
+
+	* linux-low.c (linux_remove_process): Delete.
+	(add_lwp): Don't set last_resume_kind here.
+	(linux_kill): Use `mourn'.
+	(linux_detach): Use `thread_db_detach', and `mourn'.
+	(linux_mourn): New.
+	(linux_attach_lwp_1): Adjust comment.
+	(linux_attach): last_resume_kind moved the thread_info; adjust.
+	(status_pending_p_callback): Adjust.
+	(linux_wait_for_event_1): Adjust.
+	(count_events_callback, select_singlestep_lwp_callback)
+	(select_event_lwp_callback, cancel_breakpoints_callback)
+	(db_wants_lwp_stopped, linux_wait_1, need_step_over_p)
+	(proceed_one_lwp): Adjust.
+	(linux_async): Add debug output.
+	(linux_thread_stopped): New.
+	(linux_pause_all): New.
+	(linux_target_ops): Install linux_mourn, linux_thread_stopped and
+	linux_pause_all.
+	* linux-low.h (struct lwp_info): Delete last_resume_kind field.
+	(thread_db_free): Delete declaration.
+	(thread_db_detach, thread_db_mourn): Declare.
+	* thread-db.c (thread_db_init): Use thread_db_mourn.
+	(thread_db_free): Delete, split in two.
+	(disable_thread_event_reporting): New.
+	(thread_db_detach): New.
+	(thread_db_mourn): New.
+
+	* server.h (struct thread_info) <last_resume_kind>: New field.
+	<attached>: Add comment.
+	<gdb_detached>: New field.
+	(handler_func): Change return type to int.
+	(handle_serial_event, handle_target_event): Ditto.
+	(gdb_connected): Declare.
+	(tracing): Delete.
+	(disconnected_tracing): Declare.
+	(stop_tracing): Declare.
+
+	* server.c (handle_query) <qSupported>: Report support for
+	disconnected tracing.
+	(queue_stop_reply_callback): Account for running threads.
+	(gdb_wants_thread_stopped): New.
+	(gdb_wants_all_threads_stopped): New.
+	(gdb_reattached_process): New.
+	(handle_status): Clear the `gdb_detached' flag of all processes.
+	In all-stop, stop all threads.
+	(main): Be sure to leave tfind mode.  Handle disconnected tracing.
+	(process_serial_event): If the remote connection breaks, or if an
+	exit was forced with "monitor exit", force an event loop exit.
+	Handle disconnected tracing on detach.
+	(handle_serial_event): Adjust.
+	(handle_target_event): If GDB isn't connected, forward events back
+	to the inferior, unless the last process exited, in which case,
+	exit gdbserver.  Adjust interface.
+
+	* remote-utils.c (remote_open): Don't block in accept.  Instead
+	register an event loop source on the listen socket file
+	descriptor.  Refactor bits into ...
+	(listen_desc): ... this new global.
+	(gdb_connected): ... this new function.
+	(enable_async_notification): ... this new function.
+	(handle_accept_event): ... this new function.
+	(remote_close): Clear remote_desc.
+
+	* inferiors.c (add_thread): Set the new thread's last_resume_kind.
+
+	* target.h (struct target_ops) <mourn, thread_stopped, pause_all>:
+	New fields.
+	(mourn_inferior): Define.
+	(target_process_qsupported): Avoid the dangling else problem.
+	(thread_stopped): Define.
+	(pause_all): Define.
+	(target_waitstatus_to_string): Declare.
+	* target.c (target_waitstatus_to_string): New.
+
+	* tracepoint.c (tracing): Make extern.
+	(disconnected_tracing): New.
+	(stop_tracing): Make extern.  Handle tracing stops due to GDB
+	disconnecting.
+	(cmd_qtdisconnected): New.
+	(cmd_qtstatus): Report disconnected tracing status in trace reply.
+	(handle_tracepoint_general_set): Handle QTDisconnected.
+
+	* event-loop.c (event_handler_func): Change return type to int.
+	(process_event): Bail out if the event handler wants the event
+	loop to stop.
+	(handle_file_event): Ditto.
+	(start_event_loop): Bail out if the event handler wants the event
+	loop to stop.
+
+	* nto-low.c (nto_target_ops): Adjust.
+	* spu-low.c (spu_wait): Don't remove the process here.
+	(spu_target_ops): Adjust.
+	* win32-low.c (win32_wait): Don't remove the process here.
+	(win32_target_ops): Adjust.
+
+2010-04-11  Pedro Alves  <pedro@codesourcery.com>
+
 	* regcache.c (realloc_register_cache): Invalidate inferior's
 	regcache before recreating it.
 

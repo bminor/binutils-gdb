@@ -558,7 +558,11 @@ static struct readonly_region *readonly_regions;
 
 /* The global that controls tracing overall.  */
 
-static int tracing;
+int tracing;
+
+/* Controls whether tracing should continue after GDB disconnects.  */
+
+int disconnected_tracing;
 
 /* The reason for the last tracing run to have stopped.  We initialize
    to a distinct string so that GDB can distinguish between "stopped
@@ -1699,7 +1703,7 @@ cmd_qtstart (char *packet)
 /* End a tracing run, filling in a stop reason to report back to GDB,
    and removing the tracepoints from the code.  */
 
-static void
+void
 stop_tracing (void)
 {
   if (!tracing)
@@ -1736,6 +1740,11 @@ stop_tracing (void)
       tracing_stop_reason = eval_result_names[expr_eval_result];
       tracing_stop_tpnum = error_tracepoint->number;
     }
+  else if (!gdb_connected ())
+    {
+      trace_debug ("Stopping the trace because GDB disconnected");
+      tracing_stop_reason = "tdisconnected";
+    }
   else
     {
       trace_debug ("Stopping the trace because of a tstop command");
@@ -1754,6 +1763,21 @@ cmd_qtstop (char *packet)
 {
   stop_tracing ();
   write_ok (packet);
+}
+
+static void
+cmd_qtdisconnected (char *own_buf)
+{
+  ULONGEST setting;
+  char *packet = own_buf;
+
+  packet += strlen ("QTDisconnected:");
+
+  unpack_varlen_hex (packet, &setting);
+
+  write_ok (own_buf);
+
+  disconnected_tracing = setting;
 }
 
 static void
@@ -1853,13 +1877,19 @@ cmd_qtstatus (char *packet)
       convert_int_to_ascii ((gdb_byte *) result_name, p, strlen (result_name));
     }
 
-  sprintf (packet, "T%d;%s:%x;tframes:%x;tcreated:%x;tfree:%x;tsize:%s;circular:%d",
+  sprintf (packet,
+	   "T%d;"
+	   "%s:%x;"
+	   "tframes:%x;tcreated:%x;"
+	   "tfree:%x;tsize:%s;"
+	   "circular:%d;"
+	   "disconn:%d",
 	   tracing ? 1 : 0,
 	   stop_reason_rsp, tracing_stop_tpnum,
 	   traceframe_count, traceframes_created,
-	   free_space (),
-	   phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
-	   circular_trace_buffer);
+	   free_space (), phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
+	   circular_trace_buffer,
+	   disconnected_tracing);
 }
 
 /* State variables to help return all the tracepoint bits.  */
@@ -2166,6 +2196,12 @@ handle_tracepoint_general_set (char *packet)
   else if (strcmp ("QTStop", packet) == 0)
     {
       cmd_qtstop (packet);
+      return 1;
+    }
+  else if (strncmp ("QTDisconnected:", packet,
+		    strlen ("QTDisconnected:")) == 0)
+    {
+      cmd_qtdisconnected (packet);
       return 1;
     }
   else if (strncmp ("QTFrame:", packet, strlen ("QTFrame:")) == 0)

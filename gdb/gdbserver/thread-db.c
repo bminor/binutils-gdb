@@ -743,7 +743,7 @@ thread_db_init (int use_events)
       if (use_events && thread_db_enable_reporting () == 0)
 	{
 	  /* Keep trying; maybe event reporting will work later.  */
-	  thread_db_free (proc, 0);
+	  thread_db_mourn (proc);
 	  return 0;
 	}
       thread_db_find_new_threads ();
@@ -768,41 +768,64 @@ any_thread_of (struct inferior_list_entry *entry, void *args)
 
 /* Disconnect from libthread_db and free resources.  */
 
-void
-thread_db_free (struct process_info *proc, int detaching)
+static void
+disable_thread_event_reporting (struct process_info *proc)
 {
   struct thread_db *thread_db = proc->private->thread_db;
   if (thread_db)
     {
-      struct thread_info *saved_inferior;
-      int pid;
-      td_err_e (*td_ta_delete_p) (td_thragent_t *);
       td_err_e (*td_ta_clear_event_p) (const td_thragent_t *ta,
 				       td_thr_events_t *event);
 
 #ifndef USE_LIBTHREAD_DB_DIRECTLY
       td_ta_clear_event_p = dlsym (thread_db->handle, "td_ta_clear_event");
-      td_ta_delete_p = dlsym (thread_db->handle, "td_ta_delete");
 #else
-      td_ta_delete_p = &td_ta_delete;
       td_ta_clear_event_p = &td_ta_clear_event;
 #endif
 
-      pid = pid_of (proc);
-      saved_inferior = current_inferior;
-      current_inferior =
-	(struct thread_info *) find_inferior (&all_threads,
-					      any_thread_of, &pid);
-
-      if (detaching && td_ta_clear_event_p != NULL)
+      if (td_ta_clear_event_p != NULL)
 	{
+	  struct thread_info *saved_inferior;
 	  td_thr_events_t events;
+	  int pid;
+
+	  pid = pid_of (proc);
+	  saved_inferior = current_inferior;
+	  current_inferior =
+	    (struct thread_info *) find_inferior (&all_threads,
+						  any_thread_of, &pid);
 
 	  /* Set the process wide mask saying we aren't interested
 	     in any events anymore.  */
 	  td_event_fillset (&events);
 	  (*td_ta_clear_event_p) (thread_db->thread_agent, &events);
+
+	  current_inferior = saved_inferior;
 	}
+    }
+}
+
+void
+thread_db_detach (struct process_info *proc)
+{
+  disable_thread_event_reporting (proc);
+}
+
+/* Disconnect from libthread_db and free resources.  */
+
+void
+thread_db_mourn (struct process_info *proc)
+{
+  struct thread_db *thread_db = proc->private->thread_db;
+  if (thread_db)
+    {
+      td_err_e (*td_ta_delete_p) (td_thragent_t *);
+
+#ifndef USE_LIBTHREAD_DB_DIRECTLY
+      td_ta_delete_p = dlsym (thread_db->handle, "td_ta_delete");
+#else
+      td_ta_delete_p = &td_ta_delete;
+#endif
 
       if (td_ta_delete_p != NULL)
 	(*td_ta_delete_p) (thread_db->thread_agent);
@@ -813,7 +836,6 @@ thread_db_free (struct process_info *proc, int detaching)
 
       free (thread_db);
       proc->private->thread_db = NULL;
-      current_inferior = saved_inferior;
     }
 }
 

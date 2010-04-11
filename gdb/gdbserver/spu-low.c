@@ -448,7 +448,6 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
       ourstatus->kind =  TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = WEXITSTATUS (w);
       clear_inferiors ();
-      remove_process (find_process_pid (ret));
       return pid_to_ptid (ret);
     }
   else if (!WIFSTOPPED (w))
@@ -457,7 +456,6 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
       ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
       ourstatus->value.sig = target_signal_from_host (WTERMSIG (w));
       clear_inferiors ();
-      remove_process (find_process_pid (ret));
       return pid_to_ptid (ret);
     }
 
@@ -608,6 +606,7 @@ static struct target_ops spu_target_ops = {
   spu_attach,
   spu_kill,
   spu_detach,
+  NULL, /* mourn */
   spu_join,
   spu_thread_alive,
   spu_resume,

@@ -39,7 +39,7 @@
 #endif
 
 typedef struct gdb_event gdb_event;
-typedef void (event_handler_func) (int);
+typedef int (event_handler_func) (int);
 
 /* Tell create_file_handler what events we are interested in.  */
 
@@ -211,7 +211,8 @@ process_event (void)
       free (event_ptr);
 
       /* Now call the procedure associated with the event.  */
-      (*proc) (fd);
+      if ((*proc) (fd))
+	return -1;
       return 1;
     }
 
@@ -347,7 +348,7 @@ delete_file_handler (int fd)
    through event_ptr->proc.  EVENT_FILE_DESC is file descriptor of the
    event in the front of the event queue.  */
 
-static void
+static int
 handle_file_event (int event_file_desc)
 {
   file_handler *file_ptr;
@@ -378,10 +379,16 @@ handle_file_event (int event_file_desc)
 
 	  /* If there was a match, then call the handler.  */
 	  if (mask != 0)
-	    (*file_ptr->proc) (file_ptr->error, file_ptr->client_data);
+	    {
+	      if ((*file_ptr->proc) (file_ptr->error,
+				     file_ptr->client_data) < 0)
+		return -1;
+	    }
 	  break;
 	}
     }
+
+  return 0;
 }
 
 /* Create a file event, to be enqueued in the event queue for
@@ -491,7 +498,13 @@ start_event_loop (void)
   while (1)
     {
       /* Any events already waiting in the queue?  */
-      if (process_event ())
+      int res = process_event ();
+
+      /* Did the event handler want the event loop to stop?  */
+      if (res == -1)
+	return;
+
+      if (res)
 	continue;
 
       /* Wait for a new event.  If wait_for_event returns -1, we

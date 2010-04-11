@@ -138,6 +138,10 @@ struct target_ops
 
   int (*detach) (int pid);
 
+  /* The inferior process has died.  Do what is right.  */
+
+  void (*mourn) (struct process_info *proc);
+
   /* Wait for inferior PID to exit.  */
   void (*join) (int pid);
 
@@ -299,6 +303,12 @@ struct target_ops
 
   /* Write PC to REGCACHE.  */
   void (*write_pc) (struct regcache *regcache, CORE_ADDR pc);
+
+  /* Return true if THREAD is known to be stopped now.  */
+  int (*thread_stopped) (struct thread_info *thread);
+
+  /* Pause all threads.  */
+  void (*pause_all) (void);
 };
 
 extern struct target_ops *the_target;
@@ -316,6 +326,9 @@ void set_target_ops (struct target_ops *);
 
 #define detach_inferior(pid) \
   (*the_target->detach) (pid)
+
+#define mourn_inferior(PROC) \
+  (*the_target->mourn) (PROC)
 
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)
@@ -339,13 +352,26 @@ void set_target_ops (struct target_ops *);
   (the_target->supports_multi_process ? \
    (*the_target->supports_multi_process) () : 0)
 
-#define target_process_qsupported(query) \
-  if (the_target->process_qsupported) \
-    the_target->process_qsupported (query)
+#define target_process_qsupported(query)		\
+  do							\
+    {							\
+      if (the_target->process_qsupported)		\
+	the_target->process_qsupported (query);		\
+    } while (0)
 
 #define target_supports_tracepoints()			\
   (the_target->supports_tracepoints			\
    ? (*the_target->supports_tracepoints) () : 0)
+
+#define thread_stopped(thread) \
+  (*the_target->thread_stopped) (thread)
+
+#define pause_all()			\
+  do					\
+    {					\
+      if (the_target->pause_all)	\
+	(*the_target->pause_all) ();	\
+    } while (0)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 
@@ -362,5 +388,7 @@ int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 void set_desired_inferior (int id);
 
 const char *target_pid_to_str (ptid_t);
+
+const char *target_waitstatus_to_string (const struct target_waitstatus *);
 
 #endif /* TARGET_H */

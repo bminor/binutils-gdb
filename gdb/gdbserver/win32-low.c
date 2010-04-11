@@ -1581,9 +1581,6 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 	case TARGET_WAITKIND_EXITED:
 	  OUTMSG2 (("Child exited with retcode = %x\n",
 		    ourstatus->value.integer));
-
-	  process = find_process_pid (current_process_id);
-	  remove_process (process);
 	  win32_clear_inferiors ();
 	  return pid_to_ptid (current_event.dwProcessId);
 	case TARGET_WAITKIND_STOPPED:
@@ -1755,6 +1752,7 @@ static struct target_ops win32_target_ops = {
   win32_attach,
   win32_kill,
   win32_detach,
+  NULL,
   win32_join,
   win32_thread_alive,
   win32_resume,

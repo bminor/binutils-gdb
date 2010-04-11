@@ -179,6 +179,9 @@ struct thread_info
   void *target_data;
   void *regcache_data;
 
+  /* The last resume GDB requested on this thread.  */
+  enum resume_kind last_resume_kind;
+
   /* The last wait status reported for this thread.  */
   struct target_waitstatus last_status;
 
@@ -224,7 +227,13 @@ struct process_info
 {
   struct inferior_list_entry head;
 
+  /* Nonzero if this child process was attached rather than
+     spawned.  */
   int attached;
+
+  /* True if GDB asked us to detach from this process, but we remained
+     attached anyway.  */
+  int gdb_detached;
 
   /* The symbol cache.  */
   struct sym_cache *symbol_cache;
@@ -327,7 +336,7 @@ extern int non_stop;
 
 /* Functions from event-loop.c.  */
 typedef void *gdb_client_data;
-typedef void (handler_func) (int, gdb_client_data);
+typedef int (handler_func) (int, gdb_client_data);
 
 extern void delete_file_handler (int fd);
 extern void add_file_handler (int fd, handler_func *proc,
@@ -336,8 +345,8 @@ extern void add_file_handler (int fd, handler_func *proc,
 extern void start_event_loop (void);
 
 /* Functions from server.c.  */
-extern void handle_serial_event (int err, gdb_client_data client_data);
-extern void handle_target_event (int err, gdb_client_data client_data);
+extern int handle_serial_event (int err, gdb_client_data client_data);
+extern int handle_target_event (int err, gdb_client_data client_data);
 
 extern void push_event (ptid_t ptid, struct target_waitstatus *status);
 
@@ -353,6 +362,8 @@ extern int remote_debug;
 extern int all_symbols_looked_up;
 extern int noack_mode;
 extern int transport_is_reliable;
+
+int gdb_connected (void);
 
 ptid_t read_ptid (char *buf, char **obuf);
 char *write_ptid (char *buf, ptid_t ptid);
@@ -498,6 +509,11 @@ char *phex_nz (ULONGEST l, int sizeof_l);
 /* Functions from tracepoint.c */
 
 void initialize_tracepoint (void);
+
+extern int tracing;
+extern int disconnected_tracing;
+
+void stop_tracing (void);
 
 int handle_tracepoint_general_set (char *own_buf);
 int handle_tracepoint_query (char *own_buf);

@@ -1392,6 +1392,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";ConditionalTracepoints+");
 	  strcat (own_buf, ";TraceStateVariables+");
 	  strcat (own_buf, ";TracepointSource+");
+	  strcat (own_buf, ";DisconnectedTracing+");
 	}
 
       return;
@@ -1976,21 +1977,72 @@ myresume (char *own_buf, int step, int sig)
 static int
 queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
 {
-  int pid = * (int *) arg;
+  struct thread_info *thread = (struct thread_info *) entry;
 
-  if (pid == -1
-      || ptid_get_pid (entry->id) == pid)
+  /* For now, assume targets that don't have this callback also don't
+     manage the thread's last_status field.  */
+  if (the_target->thread_stopped == NULL)
     {
       struct target_waitstatus status;
 
       status.kind = TARGET_WAITKIND_STOPPED;
       status.value.sig = TARGET_SIGNAL_TRAP;
 
-      /* Pass the last stop reply back to GDB, but don't notify.  */
-      queue_stop_reply (entry->id, &status);
+      /* Pass the last stop reply back to GDB, but don't notify
+	 yet.  */
+      queue_stop_reply (entry->id, &thread->last_status);
+    }
+  else
+    {
+      if (thread_stopped (thread))
+	{
+	  if (debug_threads)
+	    fprintf (stderr, "Reporting thread %s as already stopped with %s\n",
+		     target_pid_to_str (entry->id),
+		     target_waitstatus_to_string (&thread->last_status));
+
+	  /* Pass the last stop reply back to GDB, but don't notify
+	     yet.  */
+	  queue_stop_reply (entry->id, &thread->last_status);
+	}
     }
 
   return 0;
+}
+
+/* Set this inferior LWP's state as "want-stopped".  We won't resume
+   this LWP until the client gives us another action for it.  */
+
+static void
+gdb_wants_thread_stopped (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+
+  thread->last_resume_kind = resume_stop;
+
+  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE)
+    {
+      thread->last_status.kind = TARGET_WAITKIND_STOPPED;
+      thread->last_status.value.sig = TARGET_SIGNAL_0;
+    }
+}
+
+/* Set all threads' states as "want-stopped".  */
+
+static void
+gdb_wants_all_threads_stopped (void)
+{
+  for_each_inferior (&all_threads, gdb_wants_thread_stopped);
+}
+
+/* Clear the gdb_detached flag of every process.  */
+
+static void
+gdb_reattached_process (struct inferior_list_entry *entry)
+{
+  struct process_info *process = (struct process_info *) entry;
+
+  process->gdb_detached = 0;
 }
 
 /* Status handler for the '?' packet.  */
@@ -1998,9 +2050,8 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
 static void
 handle_status (char *own_buf)
 {
-  struct target_waitstatus status;
-  status.kind = TARGET_WAITKIND_STOPPED;
-  status.value.sig = TARGET_SIGNAL_TRAP;
+  /* GDB is connected, don't forward events to the target anymore.  */
+  for_each_inferior (&all_processes, gdb_reattached_process);
 
   /* In non-stop mode, we must send a stop reply for each stopped
      thread.  In all-stop mode, just send one for the first stopped
@@ -2008,9 +2059,8 @@ handle_status (char *own_buf)
 
   if (non_stop)
     {
-      int pid = -1;
-      discard_queued_stop_replies (pid);
-      find_inferior (&all_threads, queue_stop_reply_callback, &pid);
+      discard_queued_stop_replies (-1);
+      find_inferior (&all_threads, queue_stop_reply_callback, NULL);
 
       /* The first is sent immediatly.  OK is sent if there is no
 	 stopped thread, which is the same handling of the vStopped
@@ -2019,9 +2069,18 @@ handle_status (char *own_buf)
     }
   else
     {
+      pause_all ();
+      gdb_wants_all_threads_stopped ();
+
       if (all_threads.head)
-	prepare_resume_reply (own_buf,
-			      all_threads.head->id, &status);
+	{
+	  struct target_waitstatus status;
+
+	  status.kind = TARGET_WAITKIND_STOPPED;
+	  status.value.sig = TARGET_SIGNAL_TRAP;
+	  prepare_resume_reply (own_buf,
+				all_threads.head->id, &status);
+	}
       else
 	strcpy (own_buf, "W00");
     }
@@ -2390,7 +2449,8 @@ main (int argc, char *argv[])
     {
       noack_mode = 0;
       multi_process = 0;
-      non_stop = 0;
+      /* Be sure we're out of tfind mode.  */
+      current_traceframe = -1;
 
       remote_open (port);
 
@@ -2405,7 +2465,7 @@ main (int argc, char *argv[])
 	}
 
       /* Wait for events.  This will return when all event sources are
-	 removed from the event loop. */
+	 removed from the event loop.  */
       start_event_loop ();
 
       /* If an exit was requested (using the "monitor exit" command),
@@ -2418,9 +2478,37 @@ main (int argc, char *argv[])
 	  detach_or_kill_for_exit ();
 	  exit (0);
 	}
-      else
-	fprintf (stderr, "Remote side has terminated connection.  "
-		 "GDBserver will reopen the connection.\n");
+
+      fprintf (stderr,
+	       "Remote side has terminated connection.  "
+	       "GDBserver will reopen the connection.\n");
+
+      if (tracing)
+	{
+	  if (disconnected_tracing)
+	    {
+	      /* Try to enable non-stop/async mode, so we we can both
+		 wait for an async socket accept, and handle async
+		 target events simultaneously.  There's also no point
+		 either in having the target always stop all threads,
+		 when we're going to pass signals down without
+		 informing GDB.  */
+	      if (!non_stop)
+		{
+		  if (start_non_stop (1))
+		    non_stop = 1;
+
+		  /* Detaching implicitly resumes all threads; simply
+		     disconnecting does not.  */
+		}
+	    }
+	  else
+	    {
+	      fprintf (stderr,
+		       "Disconnected tracing disabled; stopping trace run.\n");
+	      stop_tracing ();
+	    }
+	}
     }
 }
 
@@ -2429,7 +2517,7 @@ main (int argc, char *argv[])
    a brisk pace, so we read the rest of the packet with a blocking
    getpkt call.  */
 
-static void
+static int
 process_serial_event (void)
 {
   char ch;
@@ -2455,9 +2543,9 @@ process_serial_event (void)
   packet_len = getpkt (own_buf);
   if (packet_len <= 0)
     {
-      target_async (0);
       remote_close ();
-      return;
+      /* Force an event loop break.  */
+      return -1;
     }
   response_needed = 1;
 
@@ -2483,7 +2571,49 @@ process_serial_event (void)
 	pid =
 	  ptid_get_pid (((struct inferior_list_entry *) current_inferior)->id);
 
+      if (tracing && disconnected_tracing)
+	{
+	  struct thread_resume resume_info;
+	  struct process_info *process = find_process_pid (pid);
+
+	  if (process == NULL)
+	    {
+	      write_enn (own_buf);
+	      break;
+	    }
+
+	  fprintf (stderr,
+		   "Disconnected tracing in effect, "
+		   "leaving gdbserver attached to the process\n");
+
+	  /* Make sure we're in non-stop/async mode, so we we can both
+	     wait for an async socket accept, and handle async target
+	     events simultaneously.  There's also no point either in
+	     having the target stop all threads, when we're going to
+	     pass signals down without informing GDB.  */
+	  if (!non_stop)
+	    {
+	      if (debug_threads)
+		fprintf (stderr, "Forcing non-stop mode\n");
+
+	      non_stop = 1;
+	      start_non_stop (1);
+	    }
+
+	  process->gdb_detached = 1;
+
+	  /* Detaching implicitly resumes all threads.  */
+	  resume_info.thread = minus_one_ptid;
+	  resume_info.kind = resume_continue;
+	  resume_info.sig = 0;
+	  (*the_target->resume) (&resume_info, 1);
+
+	  write_ok (own_buf);
+	  break; /* from switch/case */
+	}
+
       fprintf (stderr, "Detaching from process %d\n", pid);
+      stop_tracing ();
       if (detach_inferior (pid) != 0)
 	write_enn (own_buf);
       else
@@ -2727,7 +2857,7 @@ process_serial_event (void)
       if (!target_running ())
 	/* The packet we received doesn't make sense - but we can't
 	   reply to it, either.  */
-	return;
+	return 0;
 
       fprintf (stderr, "Killing all inferiors\n");
       for_each_inferior (&all_processes, kill_inferior_callback);
@@ -2738,13 +2868,11 @@ process_serial_event (void)
 	{
 	  last_status.kind = TARGET_WAITKIND_EXITED;
 	  last_status.value.sig = TARGET_SIGNAL_KILL;
-	  return;
+	  return 0;
 	}
       else
-	{
-	  exit (0);
-	  break;
-	}
+	exit (0);
+
     case 'T':
       {
 	ptid_t gdb_id, thread_id;
@@ -2785,7 +2913,7 @@ process_serial_event (void)
 	      last_status.kind = TARGET_WAITKIND_EXITED;
 	      last_status.value.sig = TARGET_SIGNAL_KILL;
 	    }
-	  return;
+	  return 0;
 	}
       else
 	{
@@ -2826,27 +2954,35 @@ process_serial_event (void)
 	  exit (0);
 	}
     }
+
+  if (exit_requested)
+    return -1;
+
+  return 0;
 }
 
 /* Event-loop callback for serial events.  */
 
-void
+int
 handle_serial_event (int err, gdb_client_data client_data)
 {
   if (debug_threads)
     fprintf (stderr, "handling possible serial event\n");
 
   /* Really handle it.  */
-  process_serial_event ();
+  if (process_serial_event () < 0)
+    return -1;
 
   /* Be sure to not change the selected inferior behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
   set_desired_inferior (1);
+
+  return 0;
 }
 
 /* Event-loop callback for target events.  */
 
-void
+int
 handle_target_event (int err, gdb_client_data client_data)
 {
   if (debug_threads)
@@ -2857,11 +2993,58 @@ handle_target_event (int err, gdb_client_data client_data)
 
   if (last_status.kind != TARGET_WAITKIND_IGNORE)
     {
-      /* Something interesting.  Tell GDB about it.  */
-      push_event (last_ptid, &last_status);
+      int pid = ptid_get_pid (last_ptid);
+      struct process_info *process = find_process_pid (pid);
+      int forward_event = !gdb_connected () || process->gdb_detached;
+
+      if (last_status.kind == TARGET_WAITKIND_EXITED
+	  || last_status.kind == TARGET_WAITKIND_SIGNALLED)
+	{
+	  mourn_inferior (process);
+	  remove_process (process);
+	}
+
+      if (forward_event)
+	{
+	  if (!target_running ())
+	    {
+	      /* The last process exited.  We're done.  */
+	      exit (0);
+	    }
+
+	  if (last_status.kind == TARGET_WAITKIND_STOPPED)
+	    {
+	      /* A thread stopped with a signal, but gdb isn't
+		 connected to handle it.  Pass it down to the
+		 inferior, as if it wasn't being traced.  */
+	      struct thread_resume resume_info;
+
+	      if (debug_threads)
+		fprintf (stderr,
+			 "GDB not connected; forwarding event %d for [%s]\n",
+			 (int) last_status.kind,
+			 target_pid_to_str (last_ptid));
+
+	      resume_info.thread = last_ptid;
+	      resume_info.kind = resume_continue;
+	      resume_info.sig = last_status.value.sig;
+	      (*the_target->resume) (&resume_info, 1);
+	    }
+	  else if (debug_threads)
+	    fprintf (stderr, "GDB not connected; ignoring event %d for [%s]\n",
+		     (int) last_status.kind,
+		     target_pid_to_str (last_ptid));
+	}
+      else
+	{
+	  /* Something interesting.  Tell GDB about it.  */
+	  push_event (last_ptid, &last_status);
+	}
     }
 
   /* Be sure to not change the selected inferior behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
   set_desired_inferior (1);
+
+  return 0;
 }
