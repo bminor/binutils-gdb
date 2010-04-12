@@ -841,6 +841,11 @@ x86_linux_update_xmltarget (void)
   if (!current_inferior)
     return;
 
+  /* Before changing the register cache internal layout or the target
+     regsets, flush the contents of the current valid caches back to
+     the threads.  */
+  regcache_invalidate ();
+
   pid = pid_of (get_thread_lwp (current_inferior));
 #ifdef __x86_64__
   if (num_xmm_registers == 8)

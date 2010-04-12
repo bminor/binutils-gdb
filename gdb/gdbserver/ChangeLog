@@ -1,3 +1,12 @@
+2010-04-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.c (set_register_cache): Invalidate regcaches before
+	changing the register cache layout.
+	(regcache_invalidate_one): Allow a NULL regcache.
+	* linux-x86-low.c (x86_linux_update_xmltarget): Invalidate
+	regcaches before changing the register cache layout or the target
+	regsets.
+
 2010-04-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* linux-x86-low.c (x86_linux_update_xmltarget): Avoid unused
