@@ -50,6 +50,7 @@ enum gdb_regnum {
   ARM_WCGR7_REGNUM = ARM_WCGR0_REGNUM + 7,
   ARM_D0_REGNUM,		/* VFP double-precision registers.  */
   ARM_D31_REGNUM = ARM_D0_REGNUM + 31,
+  ARM_FPSCR_REGNUM,
 
   ARM_NUM_REGS,
 

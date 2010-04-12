@@ -1,3 +1,17 @@
+2010-04-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-tdep.h (gdb_regnum): Add ARM_FPSCR_REGNUM
+	* arm-linux-nat.c (arm_linux_vfp_register_count): New
+	variable.
+	(fetch_vfp_registers): New function to fetch VFP registers.
+	(store_vfp_registers): New function to store VFP registers.
+	(arm_linux_fetch_inferior_registers): Add support for VFP
+	registers.
+	(arm_linux_store_inferior_registers): Likewise.
+	(arm_linux_read_description): Likewise.
+	(_initialize_arm_linux_nat): Delay initialising iWMMX tdesc
+	until we need it.
+
 2010-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-tdep.c (amd64_supply_xstateregset): Remove the unused
