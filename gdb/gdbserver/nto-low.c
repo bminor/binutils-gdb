@@ -406,6 +406,12 @@ nto_detach (int pid)
   return 0;
 }
 
+static void
+nto_mourn (struct process_info *process)
+{
+  remove_process (process);
+}
+
 /* Check if the given thread is alive.  
 
    Return 1 if alive, 0 otherwise.  */
@@ -900,7 +906,7 @@ static struct target_ops nto_target_ops = {
   nto_attach,
   nto_kill,
   nto_detach,
-  NULL, /* nto_mourn */
+  nto_mourn,
   NULL, /* nto_join */
   nto_thread_alive,
   nto_resume,

@@ -763,6 +763,12 @@ win32_detach (int pid)
   return 0;
 }
 
+static void
+win32_mourn (struct process_info *process)
+{
+  remove_process (process);
+}
+
 /* Wait for inferiors to end.  */
 static void
 win32_join (int pid)
@@ -1752,7 +1758,7 @@ static struct target_ops win32_target_ops = {
   win32_attach,
   win32_kill,
   win32_detach,
-  NULL,
+  win32_mourn,
   win32_join,
   win32_thread_alive,
   win32_resume,

@@ -901,6 +901,8 @@ linux_mourn (struct process_info *process)
   free (priv->arch_private);
   free (priv);
   process->private = NULL;
+
+  remove_process (process);
 }
 
 static void

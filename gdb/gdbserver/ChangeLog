@@ -1,5 +1,17 @@
 2010-04-12  Pedro Alves  <pedro@codesourcery.com>
 
+	gdb/gdbserver/
+	* linux-low.c (linux_mourn): Also remove the process.
+	* server.c (handle_target_event): Don't remove the process here.
+	* nto-low.c (nto_mourn): New.
+	(nto_target_ops): Install it.
+	* spu-low.c (spu_mourn): New.
+	(spu_target_ops): Install it.
+	* win32-low.c (win32_mourn): New.
+	(win32_target_ops): Install it.
+
+2010-04-12  Pedro Alves  <pedro@codesourcery.com>
+
 	* server.h (buffer_xml_printf): Remove redundant `;'.
 
 2010-04-12  Pedro Alves  <pedro@codesourcery.com>

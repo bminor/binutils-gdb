@@ -355,6 +355,12 @@ spu_detach (int pid)
 }
 
 static void
+spu_mourn (struct process_info *process)
+{
+  remove_process (process);
+}
+
+static void
 spu_join (int pid)
 {
   int status, ret;
@@ -606,7 +612,7 @@ static struct target_ops spu_target_ops = {
   spu_attach,
   spu_kill,
   spu_detach,
-  NULL, /* mourn */
+  spu_mourn,
   spu_join,
   spu_thread_alive,
   spu_resume,
