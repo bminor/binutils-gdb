@@ -113,5 +113,5 @@ dv_core_finish (struct hw *me)
 
 const struct hw_descriptor dv_core_descriptor[] = {
   { "core", dv_core_finish, },
-  { NULL },
+  { NULL, NULL },
 };

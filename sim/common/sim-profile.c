@@ -60,56 +60,56 @@ enum {
 static const OPTION profile_options[] = {
   { {"profile", optional_argument, NULL, 'p'},
       'p', "on|off", "Perform profiling",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-insn", optional_argument, NULL, OPTION_PROFILE_INSN},
       '\0', "on|off", "Perform instruction profiling",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-memory", optional_argument, NULL, OPTION_PROFILE_MEMORY},
       '\0', "on|off", "Perform memory profiling",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-core", optional_argument, NULL, OPTION_PROFILE_CORE},
       '\0', "on|off", "Perform CORE profiling",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-model", optional_argument, NULL, OPTION_PROFILE_MODEL},
       '\0', "on|off", "Perform model profiling",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-cpu-frequency", required_argument, NULL,
      OPTION_PROFILE_CPU_FREQUENCY},
       '\0', "CPU FREQUENCY", "Specify the speed of the simulated cpu clock",
-      profile_option_handler },
+      profile_option_handler, NULL },
 
   { {"profile-file", required_argument, NULL, OPTION_PROFILE_FILE},
       '\0', "FILE NAME", "Specify profile output file",
-      profile_option_handler },
+      profile_option_handler, NULL },
 
   { {"profile-pc", optional_argument, NULL, OPTION_PROFILE_PC},
       '\0', "on|off", "Perform PC profiling",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-pc-frequency", required_argument, NULL, 'F'},
       'F', "PC PROFILE FREQUENCY", "Specified PC profiling frequency",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-pc-size", required_argument, NULL, 'S'},
       'S', "PC PROFILE SIZE", "Specify PC profiling size",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-pc-granularity", required_argument, NULL, OPTION_PROFILE_PC_GRANULARITY},
       '\0', "PC PROFILE GRANULARITY", "Specify PC profiling sample coverage",
-      profile_option_handler },
+      profile_option_handler, NULL },
   { {"profile-pc-range", required_argument, NULL, OPTION_PROFILE_PC_RANGE},
       '\0', "BASE,BOUND", "Specify PC profiling address range",
-      profile_option_handler },
+      profile_option_handler, NULL },
 
 #ifdef SIM_HAVE_ADDR_RANGE
   { {"profile-range", required_argument, NULL, OPTION_PROFILE_RANGE},
       '\0', "START,END", "Specify range of addresses for instruction and model profiling",
-      profile_option_handler },
+      profile_option_handler, NULL },
 #if 0 /*wip*/
   { {"profile-function", required_argument, NULL, OPTION_PROFILE_FUNCTION},
       '\0', "FUNCTION", "Specify function to profile",
-      profile_option_handler },
+      profile_option_handler, NULL },
 #endif
 #endif
 
-  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
 
 /* Set/reset the profile options indicated in MASK.  */

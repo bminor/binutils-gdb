@@ -51,7 +51,7 @@ struct hw_port_data {
 };
 
 const struct hw_port_descriptor empty_hw_ports[] = {
-  { NULL, },
+  { NULL, 0, 0, 0 },
 };
 
 static void

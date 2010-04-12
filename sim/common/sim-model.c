@@ -37,8 +37,8 @@ static MODULE_INIT_FN sim_model_init;
 static const OPTION model_options[] = {
   { {"model", required_argument, NULL, OPTION_MODEL},
       '\0', "MODEL", "Specify model to simulate",
-      model_option_handler },
-  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+      model_option_handler, NULL },
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
 
 static SIM_RC

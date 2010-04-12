@@ -120,11 +120,11 @@ static const OPTION standard_options[] =
 {
   { {"verbose", no_argument, NULL, OPTION_VERBOSE},
       'v', NULL, "Verbose output",
-      standard_option_handler },
+      standard_option_handler, NULL },
 
   { {"endian", required_argument, NULL, OPTION_ENDIAN},
       'E', "big|little", "Set endianness",
-      standard_option_handler },
+      standard_option_handler, NULL },
 
 #ifdef SIM_HAVE_ENVIRONMENT
   /* This option isn't supported unless all choices are supported in keeping
@@ -205,9 +205,9 @@ static const OPTION standard_options[] =
   { {"sysroot", required_argument, NULL, OPTION_SYSROOT},
       '\0', "SYSROOT",
     "Root for system calls with absolute file-names and cwd at start",
-      standard_option_handler },
+      standard_option_handler, NULL },
 
-  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
 
 static SIM_RC

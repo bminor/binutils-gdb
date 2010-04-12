@@ -104,8 +104,8 @@ static const OPTION sockser_options[] =
 {
   { { "sockser-addr", required_argument, NULL, OPTION_ADDR },
       '\0', "SOCKET ADDRESS", "Set serial emulation socket address",
-      sockser_option_handler },
-  { { NULL, no_argument, NULL, 0 }, '\0', NULL, NULL, NULL }
+      sockser_option_handler, NULL },
+  { { NULL, no_argument, NULL, 0 }, '\0', NULL, NULL, NULL, NULL }
 };
 
 static SIM_RC

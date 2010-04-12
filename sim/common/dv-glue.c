@@ -357,8 +357,8 @@ hw_glue_port_event (struct hw *me,
 
 
 static const struct hw_port_descriptor hw_glue_ports[] = {
-  { "int", 0, max_nr_ports },
-  { NULL }
+  { "int", 0, max_nr_ports, 0 },
+  { NULL, 0, 0, 0 }
 };
 
 
@@ -370,5 +370,5 @@ const struct hw_descriptor dv_glue_descriptor[] = {
   { "glue-xor", hw_glue_finish, },
   { "glue-nor", hw_glue_finish, },
   { "glue-not", hw_glue_finish, },
-  { NULL },
+  { NULL, NULL },
 };

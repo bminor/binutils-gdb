@@ -212,7 +212,7 @@ static const struct hw_port_descriptor hw_pal_ports[] = {
   { "countdown", COUNTDOWN_PORT, 0, output_port, },
   { "timer", TIMER_PORT, 0, output_port, },
   { "int", INT_PORT, MAX_NR_PROCESSORS, output_port, },
-  { NULL }
+  { NULL, 0, 0, 0 }
 };
 
 
@@ -602,5 +602,5 @@ hw_pal_finish (struct hw *hw)
 
 const struct hw_descriptor dv_pal_descriptor[] = {
   { "pal", hw_pal_finish, },
-  { NULL },
+  { NULL, NULL },
 };

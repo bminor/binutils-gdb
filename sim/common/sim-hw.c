@@ -110,31 +110,31 @@ static const OPTION hw_options[] =
 {
   { {"hw-info", no_argument, NULL, OPTION_HW_INFO },
       '\0', NULL, "List configurable hw regions",
-      hw_option_handler },
+      hw_option_handler, NULL },
   { {"info-hw", no_argument, NULL, OPTION_HW_INFO },
       '\0', NULL, NULL,
-      hw_option_handler },
+      hw_option_handler, NULL },
 
   { {"hw-trace", optional_argument, NULL, OPTION_HW_TRACE },
       '\0', "on|off", "Trace all hardware devices",
-      hw_option_handler },
+      hw_option_handler, NULL },
   { {"trace-hw", optional_argument, NULL, OPTION_HW_TRACE },
       '\0', NULL, NULL,
-      hw_option_handler },
+      hw_option_handler, NULL },
 
   { {"hw-device", required_argument, NULL, OPTION_HW_DEVICE },
       '\0', "DEVICE", "Add the specified device",
-      hw_option_handler },
+      hw_option_handler, NULL },
 
   { {"hw-list", no_argument, NULL, OPTION_HW_LIST },
       '\0', NULL, "List the device tree",
-      hw_option_handler },
+      hw_option_handler, NULL },
 
   { {"hw-file", required_argument, NULL, OPTION_HW_FILE },
       '\0', "FILE", "Add the devices listed in the file",
-      hw_option_handler },
+      hw_option_handler, NULL },
 
-  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
 
 
