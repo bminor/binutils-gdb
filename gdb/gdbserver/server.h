@@ -444,7 +444,7 @@ char* buffer_finish (struct buffer *buffer);
 /* Simple printf to BUFFER function.  Current implemented formatters:
    %s - grow an xml escaped text in OBSTACK.  */
 void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
-  ATTR_FORMAT (printf, 2, 3);;
+  ATTR_FORMAT (printf, 2, 3);
 
 #define buffer_grow_str(BUFFER,STRING)         \
   buffer_grow (BUFFER, STRING, strlen (STRING))

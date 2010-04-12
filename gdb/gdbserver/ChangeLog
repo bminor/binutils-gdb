@@ -1,5 +1,9 @@
 2010-04-12  Pedro Alves  <pedro@codesourcery.com>
 
+	* server.h (buffer_xml_printf): Remove redundant `;'.
+
+2010-04-12  Pedro Alves  <pedro@codesourcery.com>
+
 	* regcache.c (set_register_cache): Invalidate regcaches before
 	changing the register cache layout.
 	(regcache_invalidate_one): Allow a NULL regcache.
