@@ -1020,7 +1020,7 @@ m32r_prepare_to_store (struct regcache *regcache)
 static void
 m32r_files_info (struct target_ops *target)
 {
-  char *file = "nothing";
+  const char *file = "nothing";
 
   if (exec_bfd)
     {

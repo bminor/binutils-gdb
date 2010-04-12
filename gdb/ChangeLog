@@ -1,3 +1,8 @@
+2010-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-m32r-sdi.c (m32r_files_info): Add const to local "file" var.
+	* remote-sim.c (gdbsim_files_info): Likewise.
+
 2010-04-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm-tdep.h (gdb_regnum): Add ARM_FPSCR_REGNUM
