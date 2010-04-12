@@ -489,15 +489,15 @@ standard_install (SIM_DESC sd)
 #define ARG_HASH(a) ((256 * (unsigned char) a[0] + (unsigned char) a[1]) % ARG_HASH_SIZE)
 
 static int
-dup_arg_p (char *arg)
+dup_arg_p (const char *arg)
 {
   int hash;
-  static char **arg_table = NULL;
+  static const char **arg_table = NULL;
 
   if (arg == NULL)
     {
       if (arg_table == NULL)
-	arg_table = (char **) xmalloc (ARG_HASH_SIZE * sizeof (char *));
+	arg_table = (const char **) xmalloc (ARG_HASH_SIZE * sizeof (char *));
       memset (arg_table, 0, ARG_HASH_SIZE * sizeof (char *));
       return 0;
     }

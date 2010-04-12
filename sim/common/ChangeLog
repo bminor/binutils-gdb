@@ -1,3 +1,8 @@
+2010-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c (dup_arg_p): Add "const" to the "arg" argument,
+	the local "arg_table" variable, and the xmalloc cast.
+
 2010-04-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-fpu.c (sim_fpu_print_status): Add const markings to local
