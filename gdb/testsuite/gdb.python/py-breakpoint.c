@@ -17,6 +17,7 @@
 */
 
 
+int result = 0;
 
 int multiply (int i)
 {
@@ -33,7 +34,6 @@ int main (int argc, char *argv[])
 {
   int foo = 5;
   int bar = 42;
-  int result = 0;
   int i;
 
   for (i = 0; i < 10; i++)
