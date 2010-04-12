@@ -290,6 +290,22 @@ do { \
 #define PROFILE_COUNT_CORE(cpu, addr, size, map)
 #endif /* ! core */
 
+#if WITH_PROFILE_MODEL_P
+#define PROFILE_BRANCH_TAKEN(cpu) \
+do { \
+  if (PROFILE_MODEL_P (cpu)) \
+    ++ PROFILE_MODEL_TAKEN_COUNT (CPU_PROFILE_DATA (cpu)); \
+} while (0)
+#define PROFILE_BRANCH_UNTAKEN(cpu) \
+do { \
+  if (PROFILE_MODEL_P (cpu)) \
+    ++ PROFILE_MODEL_UNTAKEN_COUNT (CPU_PROFILE_DATA (cpu)); \
+} while (0)
+#else
+#define PROFILE_BRANCH_TAKEN(cpu)
+#define PROFILE_BRANCH_UNTAKEN(cpu)
+#endif /* ! model */
+
 /* Misc. utilities.  */
 
 extern void sim_profile_print_bar (SIM_DESC, unsigned int, unsigned int, unsigned int);

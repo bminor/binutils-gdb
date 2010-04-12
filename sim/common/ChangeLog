@@ -1,5 +1,10 @@
 2010-04-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-profile.h (PROFILE_BRANCH_TAKEN, PROFILE_BRANCH_UNTAKEN): New
+	defines.
+
+2010-04-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-core.c (dv_core_descriptor): Add NULL initializer.
 	* dv-glue.c (hw_glue_ports, dv_glue_descriptor): Likewise.
 	* dv-pal.c (hw_pal_ports, dv_pal_descriptor): Likewise.
