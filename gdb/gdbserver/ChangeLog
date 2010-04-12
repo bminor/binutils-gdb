@@ -1,3 +1,8 @@
+2010-04-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* linux-x86-low.c (x86_linux_update_xmltarget): Avoid unused
+	variable warning on Linux/x86-64.
+
 2010-04-11  Pedro Alves  <pedro@codesourcery.com>
 
 	GDBserver disconnected tracing support.

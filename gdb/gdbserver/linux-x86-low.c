@@ -834,7 +834,7 @@ x86_linux_update_xmltarget (void)
   struct regset_info *regset;
   static unsigned long long xcr0;
   static int have_ptrace_getregset = -1;
-#ifdef HAVE_PTRACE_GETFPXREGS
+#if !defined(__x86_64__) && defined(HAVE_PTRACE_GETFPXREGS)
   static int have_ptrace_getfpxregs = -1;
 #endif
 
