@@ -1,3 +1,8 @@
+2010-04-13  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_input_section::set_final_data_size): Compute
+	accurate final data size instead of using current data size.
+
 2010-04-09  Doug Kwan  <dougkwan@google.com>
 
 	* layout.cc (Layout::choose_output_section): Handle script section
