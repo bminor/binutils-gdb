@@ -3892,7 +3892,14 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	      if (amt > len)
 		amt = len;
 
-	      read (trace_fd, readbuf, amt);
+	      gotten = read (trace_fd, readbuf, amt);
+	      if (gotten < 0)
+		perror_with_name (trace_filename);
+	      /* While it's acceptable to return less than was
+		 originally asked for, it's not acceptable to return
+		 less than what this block claims to contain.  */
+	      else if (gotten < amt)
+		error (_("Premature end of file while reading trace file"));
 	      return amt;
   	    }
 	  lseek (trace_fd, mlen, SEEK_CUR);
