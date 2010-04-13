@@ -1,3 +1,8 @@
+2010-04-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/11419
+	* dwarf.c (process_debug_info): Initialise the signature array.
+
 2010-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (process_debug_info): Remove unused variable

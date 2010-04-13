@@ -1961,7 +1961,7 @@ process_debug_info (struct dwarf_section *section,
       unsigned long cu_offset;
       int offset_size;
       int initial_length_size;
-      unsigned char signature[8];
+      unsigned char signature[8] = { 0 };
       unsigned long type_offset = 0;
 
       hdrptr = start;
