@@ -1,3 +1,8 @@
+2010-04-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-hrw.c (sim_write): Add const to buf arg.
+	* sim-utils.h (sim_write_fn): Likewise.
+
 2010-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-profile.h (PROFILE_BRANCH_TAKEN, PROFILE_BRANCH_UNTAKEN): New
