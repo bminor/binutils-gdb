@@ -1,3 +1,21 @@
+2010-04-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_get_noisy_reply): Don't error out on empty
+	replies.
+	(remote_start_remote): Update and merge tracepoints and trace
+	state variables as long as the target supports tracepoints.
+	(remote_trace_init): Fix prototype.
+	(remote_download_trace_state_variable): Validate reply.
+	(remote_trace_set_readonly_regions): Fix prototype.
+	(remote_trace_start): Fix prototype.  Check for empty reply.
+	(remote_get_trace_status): Small cleanup.
+	(remote_trace_stop): Fix prototype.  Check for empty reply.
+	(remote_trace_find): Check for empty reply.
+	(remote_save_trace_data): Validate reply.
+	(remote_set_disconnected_tracing): Check for empty reply, and
+	validate reply.
+	(remote_set_circular_trace_buffer): Ditto.
+
 2010-04-13  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Suppress unused value warning during compilation.

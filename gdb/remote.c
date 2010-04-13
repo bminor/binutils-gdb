@@ -430,12 +430,9 @@ remote_get_noisy_reply (char **buf_p,
       QUIT;			/* allow user to bail out with ^C */
       getpkt (buf_p, sizeof_buf, 0);
       buf = *buf_p;
-      if (buf[0] == 0)
-	error (_("Target does not support this command."));
-      else if (buf[0] == 'E')
+      if (buf[0] == 'E')
 	trace_error (buf);
-      else if (buf[0] == 'O' &&
-	       buf[1] != 'K')
+      else if (buf[0] == 'O' && buf[1] != 'K')
 	remote_console_output (buf + 1);	/* 'O' message from stub */
       else
 	return buf;		/* here's the actual reply */
@@ -3168,12 +3165,11 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
   /* Possibly the target has been engaged in a trace run started
      previously; find out where things are at.  */
-  if (rs->disconnected_tracing)
+  if (remote_get_trace_status (current_trace_status ()) != -1)
     {
       struct uploaded_tp *uploaded_tps = NULL;
       struct uploaded_tsv *uploaded_tsvs = NULL;
 
-      remote_get_trace_status (current_trace_status ());
       if (current_trace_status ()->running)
 	printf_filtered (_("Trace is already running on the target.\n"));
 
@@ -9290,11 +9286,11 @@ remote_supports_fast_tracepoints (void)
 }
 
 static void
-remote_trace_init ()
+remote_trace_init (void)
 {
   putpkt ("QTinit");
   remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK"))
+  if (strcmp (target_buf, "OK") != 0)
     error (_("Target does not support this command."));
 }
 
@@ -9529,10 +9525,14 @@ remote_download_trace_state_variable (struct trace_state_variable *tsv)
   *p++ = '\0';
   putpkt (rs->buf);
   remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (*target_buf == '\0')
+    error (_("Target does not support this command."));
+  if (strcmp (target_buf, "OK") != 0)
+    error (_("Error on target while downloading trace state variable."));
 }
 
 static void
-remote_trace_set_readonly_regions ()
+remote_trace_set_readonly_regions (void)
 {
   asection *s;
   bfd_size_type size;
@@ -9568,11 +9568,13 @@ remote_trace_set_readonly_regions ()
 }
 
 static void
-remote_trace_start ()
+remote_trace_start (void)
 {
   putpkt ("QTStart");
   remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK"))
+  if (*target_buf == '\0')
+    error (_("Target does not support this command."));
+  if (strcmp (target_buf, "OK") != 0)
     error (_("Bogus reply from target: %s"), target_buf);
 }
 
@@ -9586,10 +9588,7 @@ remote_get_trace_status (struct trace_status *ts)
   trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;
 
   putpkt ("qTStatus");
-  getpkt (&target_buf, &target_buf_size, 0);
-  /* FIXME should handle more variety of replies */
-
-  p = target_buf;
+  p = remote_get_noisy_reply (&target_buf, &target_buf_size);
 
   /* If the remote target doesn't do tracing, flag it.  */
   if (*p == '\0')
@@ -9613,11 +9612,13 @@ remote_get_trace_status (struct trace_status *ts)
 }
 
 static void
-remote_trace_stop ()
+remote_trace_stop (void)
 {
   putpkt ("QTStop");
   remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK"))
+  if (*target_buf == '\0')
+    error (_("Target does not support this command."));
+  if (strcmp (target_buf, "OK") != 0)
     error (_("Bogus reply from target: %s"), target_buf);
 }
 
@@ -9656,6 +9657,8 @@ remote_trace_find (enum trace_find_type type, int num,
 
   putpkt (rs->buf);
   reply = remote_get_noisy_reply (&(rs->buf), &sizeof_pkt);
+  if (*reply == '\0')
+    error (_("Target does not support this command."));
 
   while (reply && *reply)
     switch (*reply)
@@ -9724,7 +9727,11 @@ remote_save_trace_data (const char *filename)
   p += 2 * bin2hex ((gdb_byte *) filename, p, 0);
   *p++ = '\0';
   putpkt (rs->buf);
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
+  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (*reply != '\0')
+    error (_("Target does not support this command."));
+  if (strcmp (reply, "OK") != 0)
+    error (_("Bogus reply from target: %s"), reply);
   return 0;
 }
 
@@ -9778,11 +9785,15 @@ remote_set_disconnected_tracing (int val)
 
   if (rs->disconnected_tracing)
     {
+      char *reply;
+
       sprintf (rs->buf, "QTDisconnected:%x", val);
       putpkt (rs->buf);
-      remote_get_noisy_reply (&target_buf, &target_buf_size);
-      if (strcmp (target_buf, "OK"))
+      reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+      if (*reply == '\0')
 	error (_("Target does not support this command."));
+      if (strcmp (reply, "OK") != 0)
+        error (_("Bogus reply from target: %s"), reply);
     }
   else if (val)
     warning (_("Target does not support disconnected tracing."));
@@ -9801,12 +9812,15 @@ static void
 remote_set_circular_trace_buffer (int val)
 {
   struct remote_state *rs = get_remote_state ();
+  char *reply;
 
   sprintf (rs->buf, "QTBuffer:circular:%x", val);
   putpkt (rs->buf);
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK"))
+  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (*reply == '\0')
     error (_("Target does not support this command."));
+  if (strcmp (reply, "OK") != 0)
+    error (_("Bogus reply from target: %s"), reply);
 }
 
 static void
