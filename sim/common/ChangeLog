@@ -1,5 +1,11 @@
 2010-04-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-sockser.h (DV_SOCKSER_DISCONNECTED): Define.
+	* dv-sockser.c (dv_sockser_status): Set DV_SOCKSER_DISCONNECTED
+	initially.
+
+2010-04-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-hrw.c (sim_write): Add const to buf arg.
 	* sim-utils.h (sim_write_fn): Likewise.
 

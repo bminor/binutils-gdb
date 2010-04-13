@@ -298,7 +298,8 @@ dv_sockser_status (SIM_DESC sd)
   fd_set readfds,writefds;
 
   /* status to return if the socket isn't set up, or select fails */
-  status = DV_SOCKSER_INPUT_EMPTY | DV_SOCKSER_OUTPUT_EMPTY;
+  status = DV_SOCKSER_INPUT_EMPTY | DV_SOCKSER_OUTPUT_EMPTY |
+	   DV_SOCKSER_DISCONNECTED;
 
   if (! connected_p (sd))
     return status;
