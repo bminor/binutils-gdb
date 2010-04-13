@@ -1,3 +1,8 @@
+2010-04-13  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Correct NOP location
+	when optimizing high got_tlsgd/ld insns.
+
 2010-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* hosts/x86-64linux.h (HAVE_PRPSINFO32_T): Undefine before

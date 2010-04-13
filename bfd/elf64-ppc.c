@@ -11650,8 +11650,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  + R_PPC64_GOT_TPREL16_DS);
 	      else
 		{
-		  bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
 		  rel->r_offset -= d_offset;
+		  bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
 		  r_type = R_PPC64_NONE;
 		}
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
