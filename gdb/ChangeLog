@@ -1,3 +1,10 @@
+2010-04-13  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Suppress unused value warning during compilation.
+	* tui/tui-regs.c (tui_display_register): Cast wstandout and wstandend
+	calls to void.
+	* tui/tui-stack.c (tui_show_locator_content): Likewise.
+
 2010-04-12  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c (tfile_xfer_partial): Check read result.

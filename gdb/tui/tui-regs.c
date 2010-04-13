@@ -541,7 +541,7 @@ tui_display_register (struct tui_data_element *data,
       int i;
 
       if (data->highlight)
-	wstandout (win_info->handle);
+	(void) wstandout (win_info->handle);
       
       wmove (win_info->handle, 0, 0);
       for (i = 1; i < win_info->width; i++)
@@ -551,7 +551,7 @@ tui_display_register (struct tui_data_element *data,
         waddstr (win_info->handle, data->content);
 
       if (data->highlight)
-	wstandend (win_info->handle);
+	(void) wstandend (win_info->handle);
       tui_refresh_win (win_info);
     }
 }

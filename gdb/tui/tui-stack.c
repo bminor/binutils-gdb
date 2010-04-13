@@ -256,10 +256,10 @@ tui_show_locator_content (void)
 
       string = tui_make_status_line (&element->which_element.locator);
       wmove (locator->handle, 0, 0);
-      wstandout (locator->handle);
+      (void) wstandout (locator->handle);
       waddstr (locator->handle, string);
       wclrtoeol (locator->handle);
-      wstandend (locator->handle);
+      (void) wstandend (locator->handle);
       tui_refresh_win (locator);
       wmove (locator->handle, 0, 0);
       xfree (string);
