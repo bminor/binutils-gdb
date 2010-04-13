@@ -1,3 +1,12 @@
+2010-04-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c (i386_linux_regset_sections): Remove extended
+	register note sections.
+	(i386_linux_sse_regset_sections, i386_linux_avx_regset_sections):
+	New variables.
+	(i386_linux_init_abi): Install list of supported register note
+	sections that matches the target description.
+
 2010-04-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_get_noisy_reply): Don't error out on empty

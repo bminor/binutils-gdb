@@ -58,7 +58,19 @@ static struct core_regset_section i386_linux_regset_sections[] =
 {
   { ".reg", 144, "general-purpose" },
   { ".reg2", 108, "floating-point" },
+  { NULL, 0 }
+};
+
+static struct core_regset_section i386_linux_sse_regset_sections[] =
+{
+  { ".reg", 144, "general-purpose" },
   { ".reg-xfp", 512, "extended floating-point" },
+  { NULL, 0 }
+};
+
+static struct core_regset_section i386_linux_avx_regset_sections[] =
+{
+  { ".reg", 144, "general-purpose" },
   { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }
 };
@@ -862,7 +874,12 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 
   /* Install supported register note sections.  */
-  set_gdbarch_core_regset_sections (gdbarch, i386_linux_regset_sections);
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx"))
+    set_gdbarch_core_regset_sections (gdbarch, i386_linux_avx_regset_sections);
+  else if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse"))
+    set_gdbarch_core_regset_sections (gdbarch, i386_linux_sse_regset_sections);
+  else
+    set_gdbarch_core_regset_sections (gdbarch, i386_linux_regset_sections);
 
   set_gdbarch_core_read_description (gdbarch,
 				     i386_linux_core_read_description);
