@@ -1,3 +1,16 @@
+2010-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Avoid rereading shared libraries that haven't changed.
+
+	* solib.c (free_so_symbols): New function, from ...
+	(free_so): ... here.  Call it.
+	(solib_read_symbols): Don't warn here if symbols have already been
+	loaded.
+	(solib_add): Warn here instead, if a pattern was specified.
+	(reload_shared_libraries_1): New.
+	(reload_shared_libraries): Rewrite to not fetch the library list.
+
 2010-04-14  Doug Evans  <dje@google.com>
 
 	* source.c (openp): Strip DOS drive letter if present before

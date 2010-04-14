@@ -437,6 +437,39 @@ solib_map_sections (struct so_list *so)
   return 1;
 }
 
+/* Free symbol-file related contents of SO.  If we have opened a BFD
+   for SO, close it.  If we have placed SO's sections in some target's
+   section table, the caller is responsible for removing them.
+
+   This function doesn't mess with objfiles at all.  If there is an
+   objfile associated with SO that needs to be removed, the caller is
+   responsible for taking care of that.  */
+
+static void
+free_so_symbols (struct so_list *so)
+{
+  char *bfd_filename = 0;
+
+  if (so->sections)
+    {
+      xfree (so->sections);
+      so->sections = so->sections_end = NULL;
+    }
+
+  gdb_bfd_unref (so->abfd);
+  so->abfd = NULL;
+
+  /* Our caller closed the objfile, possibly via objfile_purge_solibs.  */
+  so->symbols_loaded = 0;
+  so->objfile = NULL;
+
+  so->addr_low = so->addr_high = 0;
+
+  /* Restore the target-supplied file name.  SO_NAME may be the path
+     of the symbol file.  */
+  strcpy (so->so_name, so->so_original_name);
+}
+
 /* LOCAL FUNCTION
 
    free_so --- free a `struct so_list' object
@@ -463,11 +496,7 @@ free_so (struct so_list *so)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch);
 
-  if (so->sections)
-    xfree (so->sections);
-
-  gdb_bfd_unref (so->abfd);
-
+  free_so_symbols (so);
   ops->free_so (so);
 
   xfree (so);
@@ -492,8 +521,7 @@ solib_read_symbols (struct so_list *so, int flags)
 
   if (so->symbols_loaded)
     {
-      if (from_tty || info_verbose)
-	printf_unfiltered (_("Symbols already loaded for %s\n"), so->so_name);
+      /* If needed, we've already warned in our caller.  */
     }
   else if (so->abfd == NULL)
     {
@@ -815,8 +843,19 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
             (readsyms || libpthread_solib_p (gdb));
 
 	  any_matches = 1;
-	  if (add_this_solib && solib_read_symbols (gdb, flags))
-	    loaded_any_symbols = 1;
+	  if (add_this_solib)
+	    {
+	      if (gdb->symbols_loaded)
+		{
+		  /* If no pattern was given, be quiet for shared
+		     libraries we have already loaded.  */
+		  if (pattern && (from_tty || info_verbose))
+		    printf_unfiltered (_("Symbols already loaded for %s\n"),
+				       gdb->so_name);
+		}
+	      else if (solib_read_symbols (gdb, flags))
+		loaded_any_symbols = 1;
+	    }
 	}
 
     if (loaded_any_symbols)
@@ -1166,11 +1205,77 @@ no_shared_libraries (char *ignored, int from_tty)
   objfile_purge_solibs ();
 }
 
+/* Reload shared libraries, but avoid reloading the same symbol file
+   we already have loaded.  */
+
+static void
+reload_shared_libraries_1 (int from_tty)
+{
+  struct so_list *so;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+
+  for (so = so_list_head; so != NULL; so = so->next)
+    {
+      char *filename, *found_pathname = NULL;
+      bfd *abfd;
+      int scratch_chan;
+      int was_loaded = so->symbols_loaded;
+      const int flags =
+	SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
+
+      filename = tilde_expand (so->so_original_name);
+      abfd = solib_bfd_open (filename);
+      if (abfd != NULL)
+	{
+	  found_pathname = xstrdup (bfd_get_filename (abfd));
+	  make_cleanup (xfree, found_pathname);
+	  gdb_bfd_close_or_warn (abfd);
+	}
+
+      /* If this shared library is no longer associated with its previous
+	 symbol file, close that.  */
+      if ((found_pathname == NULL && was_loaded)
+	  || (found_pathname != NULL
+	      && strcmp (found_pathname, so->so_name) != 0))
+	{
+	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED))
+	    free_objfile (so->objfile);
+	  remove_target_sections (so->abfd);
+	  free_so_symbols (so);
+	}
+
+      /* If this shared library is now associated with a new symbol
+	 file, open it.  */
+      if (found_pathname != NULL
+	  && (!was_loaded
+	      || strcmp (found_pathname, so->so_name) != 0))
+	{
+	  volatile struct gdb_exception e;
+
+	  TRY_CATCH (e, RETURN_MASK_ERROR)
+	    solib_map_sections (so);
+
+	  if (e.reason < 0)
+	    exception_fprintf (gdb_stderr, e, _("\
+Error while mapping shared library sections:\n"));
+	  else if (auto_solib_add || was_loaded || libpthread_solib_p (so))
+	    solib_read_symbols (so, flags);
+	}
+    }
+
+  do_cleanups (old_chain);
+}
+
 static void
 reload_shared_libraries (char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
-  no_shared_libraries (NULL, from_tty);
+  struct target_so_ops *ops;
+
+  reload_shared_libraries_1 (from_tty);
+
+  ops = solib_ops (target_gdbarch);
+
   /* Creating inferior hooks here has two purposes. First, if we reload 
      shared libraries then the address of solib breakpoint we've computed
      previously might be no longer valid.  For example, if we forgot to set
@@ -1182,6 +1287,15 @@ reload_shared_libraries (char *ignored, int from_tty,
      about ld.so.  */
   if (target_has_execution)
     {
+      /* Reset or free private data structures not associated with
+	 so_list entries.  */
+      ops->clear_solib ();
+
+      /* Remove any previous solib event breakpoint.  This is usually
+	 done in common code, at breakpoint_init_inferior time, but
+	 we're not really starting up the inferior here.  */
+      remove_solib_event_breakpoints ();
+
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
       SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #else
@@ -1198,11 +1312,16 @@ reload_shared_libraries (char *ignored, int from_tty,
 
   solib_add (NULL, 0, NULL, auto_solib_add);
 
-  /* We have unloaded and then reloaded debug info for all shared libraries.
-     However, frames may still reference them, for example a frame's 
-     unwinder might still point of DWARF FDE structures that are now freed.
-     Reinit frame cache to avoid crashing.  */
+  breakpoint_re_set ();
+
+  /* We may have loaded or unloaded debug info for some (or all)
+     shared libraries.  However, frames may still reference them.  For
+     example, a frame's unwinder might still point at DWARF FDE
+     structures that are now freed.  Also, getting new symbols may
+     change our opinion about what is frameless.  */
   reinit_frame_cache ();
+
+  ops->special_symbol_handling ();
 }
 
 static void
