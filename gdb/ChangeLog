@@ -1,5 +1,24 @@
 2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
 
+	* python/py-block.c (gdbpy_block_for_pc): Use i8n to encompass
+	error/warning messages.  Capitalize and use complete sentences.
+	(blpy_block_syms_iternext): Likewise.
+	* python/py-cmd.c (parse_command_name, cmdpy_init): Likewise.
+	* python/py-frame.c (FRAPY_REQUIRE_VALID, frapy_block)
+	(frame_info_to_frame_object, frapy_read_var)
+	(gdbpy_frame_stop_reason_string): Likewise.
+	* python/py-lazy-string.c (stpy_convert_to_value)
+	(gdbpy_create_lazy_string_object): Likewise.
+	* python/py-objfile.c (objfpy_set_printers): Likewise.
+	* python/py-prettyprint.c (gdbpy_default_visualizer): Likewise.
+	* python/python.c (parameter_to_python): Likewise.
+	* python/py-type.c (typy_range, typy_target): Likewise.
+	* python/py-value.c (valpy_cast, valpy_length, valpy_getitem)
+	(valpy_richcompare, valpy_int, valpy_long, valpy_float): Likewise.
+
+
+2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
+
 	PR python/11381
 
 	* python/py-prettyprint.c (pretty_print_one_value): Test for

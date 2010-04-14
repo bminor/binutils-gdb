@@ -249,7 +249,8 @@ parameter_to_python (struct cmd_list_element *cmd)
       }
     }
 
-  return PyErr_Format (PyExc_RuntimeError, "programmer error: unhandled type");
+  return PyErr_Format (PyExc_RuntimeError, 
+		       _("Programmer error: unhandled type."));
 }
 
 /* A Python function which returns a gdb parameter's value as a Python
@@ -276,10 +277,11 @@ gdbpy_parameter (PyObject *self, PyObject *args)
   GDB_PY_HANDLE_EXCEPTION (except);
   if (!found)
     return PyErr_Format (PyExc_RuntimeError,
-			 "could not find parameter `%s'", arg);
+			 _("Could not find parameter `%s'."), arg);
 
   if (! cmd->var)
-    return PyErr_Format (PyExc_RuntimeError, "`%s' is not a parameter", arg);
+    return PyErr_Format (PyExc_RuntimeError, 
+			 _("`%s' is not a parameter."), arg);
   return parameter_to_python (cmd);
 }
 

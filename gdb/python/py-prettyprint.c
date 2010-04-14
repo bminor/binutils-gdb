@@ -663,7 +663,8 @@ gdbpy_default_visualizer (PyObject *self, PyObject *args)
   value = value_object_to_value (val_obj);
   if (! value)
     {
-      PyErr_SetString (PyExc_TypeError, "argument must be a gdb.Value");
+      PyErr_SetString (PyExc_TypeError, 
+		       _("Argument must be a gdb.Value."));
       return NULL;
     }
 

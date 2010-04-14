@@ -304,7 +304,8 @@ valpy_cast (PyObject *self, PyObject *args)
   type = type_object_to_type (type_obj);
   if (! type)
     {
-      PyErr_SetString (PyExc_RuntimeError, "argument must be a Type");
+      PyErr_SetString (PyExc_RuntimeError, 
+		       _("Argument must be a type."));
       return NULL;
     }
 
@@ -322,7 +323,7 @@ valpy_length (PyObject *self)
 {
   /* We don't support getting the number of elements in a struct / class.  */
   PyErr_SetString (PyExc_NotImplementedError,
-		   "Invalid operation on gdb.Value.");
+		   _("Invalid operation on gdb.Value."));
   return -1;
 }
 
@@ -364,7 +365,7 @@ valpy_getitem (PyObject *self, PyObject *key)
 	      type = check_typedef (value_type (tmp));
 	      if (TYPE_CODE (type) != TYPE_CODE_ARRAY
 		  && TYPE_CODE (type) != TYPE_CODE_PTR)
-		  error( _("Cannot subscript requested type"));
+		  error( _("Cannot subscript requested type."));
 	      else
 		res_val = value_subscript (tmp, value_as_long (idx));
 	    }
@@ -728,7 +729,7 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
       default:
 	/* Can't happen.  */
 	PyErr_SetString (PyExc_NotImplementedError,
-			 "Invalid operation on gdb.Value.");
+			 _("Invalid operation on gdb.Value."));
 	return NULL;
     }
 
@@ -765,7 +766,7 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
 	default:
 	  /* Can't happen.  */
 	  PyErr_SetString (PyExc_NotImplementedError,
-			   "Invalid operation on gdb.Value.");
+			   _("Invalid operation on gdb.Value."));
 	  result = -1;
 	  break;
       }
@@ -806,7 +807,8 @@ valpy_int (PyObject *self)
   CHECK_TYPEDEF (type);
   if (!is_intlike (type, 0))
     {
-      PyErr_SetString (PyExc_RuntimeError, "cannot convert value to int");
+      PyErr_SetString (PyExc_RuntimeError, 
+		       _("Cannot convert value to int."));
       return NULL;
     }
 
@@ -837,7 +839,8 @@ valpy_long (PyObject *self)
 
   if (!is_intlike (type, 1))
     {
-      PyErr_SetString (PyExc_RuntimeError, "cannot convert value to long");
+      PyErr_SetString (PyExc_RuntimeError, 
+		       _("Cannot convert value to long."));
       return NULL;
     }
 
@@ -866,7 +869,8 @@ valpy_float (PyObject *self)
   CHECK_TYPEDEF (type);
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
     {
-      PyErr_SetString (PyExc_RuntimeError, "cannot convert value to float");
+      PyErr_SetString (PyExc_RuntimeError, 
+		       _("Cannot convert value to float."));
       return NULL;
     }
 
@@ -977,7 +981,7 @@ convert_value_from_python (PyObject *obj)
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
-	PyErr_Format (PyExc_TypeError, _("Could not convert Python object: %s"),
+	PyErr_Format (PyExc_TypeError, _("Could not convert Python object: %s."),
 		      PyString_AsString (PyObject_Str (obj)));
     }
   if (except.reason < 0)

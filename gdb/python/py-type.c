@@ -290,7 +290,7 @@ typy_range (PyObject *self, PyObject *args)
       && TYPE_CODE (type) != TYPE_CODE_RANGE)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       "This type does not have a range.");
+		       _("This type does not have a range."));
       return NULL;
     }
 
@@ -362,7 +362,8 @@ typy_target (PyObject *self, PyObject *args)
 
   if (!TYPE_TARGET_TYPE (type))
     {
-      PyErr_SetString (PyExc_RuntimeError, "type does not have a target");
+      PyErr_SetString (PyExc_RuntimeError, 
+		       _("Type does not have a target."));
       return NULL;
     }
 

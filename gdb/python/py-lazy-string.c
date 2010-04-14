@@ -97,7 +97,7 @@ stpy_convert_to_value  (PyObject *self, PyObject *args)
   if (self_string->address == 0)
     {
       PyErr_SetString (PyExc_MemoryError,
-		       _("Cannot create a value from NULL"));
+		       _("Cannot create a value from NULL."));
       return NULL;
     }
 
@@ -129,7 +129,7 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
   if (!type)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       "A lazy string's type cannot be NULL.");
+		       _("A lazy string's type cannot be NULL."));
       return NULL;
     }
 

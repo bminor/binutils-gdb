@@ -51,7 +51,7 @@ typedef struct {
     do {						\
       frame = frame_object_to_frame_info (frame_obj);	\
       if (frame == NULL)				\
-	error ("Frame is invalid.");			\
+	error (_("Frame is invalid."));			\
     } while (0)
 
 static PyTypeObject frame_object_type;
@@ -227,7 +227,7 @@ frapy_block (PyObject *self, PyObject *args)
   if (!sal.symtab || !sal.symtab->objfile)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       "Cannot locate object file for block.");
+		       _("Cannot locate object file for block."));
       return NULL;
     }
 
@@ -273,7 +273,8 @@ frame_info_to_frame_object (struct frame_info *frame)
   frame_obj = PyObject_New (frame_object, &frame_object_type);
   if (frame_obj == NULL)
     {
-      PyErr_SetString (PyExc_MemoryError, "Could not allocate frame object.");
+      PyErr_SetString (PyExc_MemoryError, 
+		       _("Could not allocate frame object."));
       return NULL;
     }
 
@@ -436,7 +437,7 @@ frapy_read_var (PyObject *self, PyObject *args)
       if (!var)
 	{
 	  PyErr_Format (PyExc_ValueError,
-			_("variable '%s' not found"), var_name);
+			_("Variable '%s' not found."), var_name);
 	  do_cleanups (cleanup);
 
 	  return NULL;
@@ -447,7 +448,7 @@ frapy_read_var (PyObject *self, PyObject *args)
   else
     {
       PyErr_SetString (PyExc_TypeError,
-		       _("argument must be a symbol or string"));
+		       _("Argument must be a symbol or string."));
       return NULL;
     }
 
@@ -524,7 +525,8 @@ gdbpy_frame_stop_reason_string (PyObject *self, PyObject *args)
 
   if (reason < 0 || reason > UNWIND_NO_SAVED_PC)
     {
-      PyErr_SetString (PyExc_ValueError, "Invalid frame stop reason.");
+      PyErr_SetString (PyExc_ValueError, 
+		       _("Invalid frame stop reason."));
       return NULL;
     }
 

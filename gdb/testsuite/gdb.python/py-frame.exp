@@ -100,7 +100,7 @@ gdb_test "python print 'result =', f0.pc ()" " = \[0-9\]+" "test Frame.pc"
 gdb_test "python print 'result =', f0.older () == f1" " = True" "test Frame.older"
 gdb_test "python print 'result =', f1.newer () == f0" " = True" "test Frame.newer"
 gdb_test "python print 'result =', f0.read_var ('variable_which_surely_doesnt_exist')" \
-  "ValueError: variable 'variable_which_surely_doesnt_exist' not found.*Error while executing Python code." \
+  "ValueError: Variable 'variable_which_surely_doesnt_exist' not found.*Error while executing Python code." \
   "test Frame.read_var - error"
 gdb_test "python print 'result =', f0.read_var ('a')" " = 1" "test Frame.read_var - success"
 

@@ -93,14 +93,14 @@ objfpy_set_printers (PyObject *o, PyObject *value, void *ignore)
   if (! value)
     {
       PyErr_SetString (PyExc_TypeError,
-		       "cannot delete the pretty_printers attribute");
+		       _("Cannot delete the pretty_printers attribute."));
       return -1;
     }
 
   if (! PyList_Check (value))
     {
       PyErr_SetString (PyExc_TypeError,
-		       "the pretty_printers attribute must be a list");
+		       _("The pretty_printers attribute must be a list."));
       return -1;
     }
 
