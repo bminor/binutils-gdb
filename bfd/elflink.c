@@ -1013,6 +1013,11 @@ _bfd_elf_merge_symbol (bfd *abfd,
       break;
     }
 
+  /* Differentiate strong and weak symbols.  */
+  newweak = bind == STB_WEAK;
+  oldweak = (h->root.type == bfd_link_hash_defweak
+	     || h->root.type == bfd_link_hash_undefweak);
+
   /* In cases involving weak versioned symbols, we may wind up trying
      to merge a symbol with itself.  Catch that here, to avoid the
      confusion that results if we try to override a symbol with
@@ -1020,6 +1025,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
      _GLOBAL_OFFSET_TABLE_, which are regular symbols defined in a
      dynamic object, which we do want to handle here.  */
   if (abfd == oldbfd
+      && (newweak || oldweak)
       && ((abfd->flags & DYNAMIC) == 0
 	  || !h->def_regular))
     return TRUE;
@@ -1240,11 +1246,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
       h->type = 0;
       return TRUE;
     }
-
-  /* Differentiate strong and weak symbols.  */
-  newweak = bind == STB_WEAK;
-  oldweak = (h->root.type == bfd_link_hash_defweak
-	     || h->root.type == bfd_link_hash_undefweak);
 
   if (bind == STB_GNU_UNIQUE)
     h->unique_global = 1;
