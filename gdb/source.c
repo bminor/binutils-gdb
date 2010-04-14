@@ -724,6 +724,10 @@ openp (const char *path, int opts, const char *string,
 	    goto done;
     }
 
+  /* For dos paths, d:/foo -> /foo, and d:foo -> foo.  */
+  if (HAS_DRIVE_SPEC (string))
+    string = STRIP_DRIVE_SPEC (string);
+
   /* /foo => foo, to avoid multiple slashes that Emacs doesn't like. */
   while (IS_DIR_SEPARATOR(string[0]))
     string++;

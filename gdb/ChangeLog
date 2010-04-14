@@ -1,3 +1,8 @@
+2010-04-14  Doug Evans  <dje@google.com>
+
+	* source.c (open): Strip DOS drive letter if present before
+	concatenating string to search path.
+
 2010-04-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* objfiles.h (gdb_bfd_close_or_warn): Declare.
