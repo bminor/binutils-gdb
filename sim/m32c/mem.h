@@ -27,7 +27,7 @@ void mem_put_hi (int address, unsigned short value);
 void mem_put_psi (int address, unsigned long value);
 void mem_put_si (int address, unsigned long value);
 
-void mem_put_blk (int address, void *bufptr, int nbytes);
+void mem_put_blk (int address, const void *bufptr, int nbytes);
 
 unsigned char mem_get_pc ();
 

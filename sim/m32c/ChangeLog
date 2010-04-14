@@ -1,3 +1,9 @@
+2010-04-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c (sim_write): Add const to buf arg.
+	* mem.h (mem_put_blk): Add const to bufptr arg.
+	* mem.c (mem_put_blk): Likewise, and add const to cast.
+
 2010-01-20  DJ Delorie  <dj@redhat.com>
 
 	* m32c.opc (MATH_OP): When doing subtraction, also set carry if

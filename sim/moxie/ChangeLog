@@ -1,3 +1,7 @@
+2010-04-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_write): Add const to buffer arg.
+
 2010-02-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* interp.c (sim_create_inferior): Fix crashes on zero PROG_BFD or ARGV.

@@ -351,7 +351,7 @@ int
 sim_write(sd, mem, buf, length)
      SIM_DESC sd;
     SIM_ADDR             mem;
-    unsigned char  *buf;
+    const unsigned char  *buf;
     int             length;
 {
     return (sis_memory_write(mem, buf, length));

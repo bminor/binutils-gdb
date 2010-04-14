@@ -1028,7 +1028,7 @@ int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd;
      SIM_ADDR addr;
-     unsigned char * buffer;
+     const unsigned char * buffer;
      int size;
 {
   sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */

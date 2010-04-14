@@ -365,13 +365,13 @@ mem_put_si (int address, unsigned long value)
 }
 
 void
-mem_put_blk (int address, void *bufptr, int nbytes)
+mem_put_blk (int address, const void *bufptr, int nbytes)
 {
   S ("<=");
   if (enable_counting)
     mem_counters[1][1] += nbytes;
   while (nbytes--)
-    mem_put_byte (address++, *(unsigned char *) bufptr++);
+    mem_put_byte (address++, *(const unsigned char *) bufptr++);
   E ();
 }
 

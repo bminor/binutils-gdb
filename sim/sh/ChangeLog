@@ -1,3 +1,7 @@
+2010-04-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_write): Add const to buffer arg.
+
 2010-01-12  Masaki Muranaka  <monaka@monami-software.com>
 
 	* interp.c: Don't include sysdep.h.

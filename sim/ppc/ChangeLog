@@ -1,3 +1,7 @@
+2010-04-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim_calls.c (sim_write): Add const to buf arg.
+
 2010-02-14  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ppc-instructions: Fix missing assignment in last change.

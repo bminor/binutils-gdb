@@ -761,7 +761,7 @@ int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd;
      SIM_ADDR addr;
-     unsigned char *buffer;
+     const unsigned char *buffer;
      int size;
 {
   /* FIXME: this should be performing a virtual transfer */

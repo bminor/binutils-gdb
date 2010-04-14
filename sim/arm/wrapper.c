@@ -158,7 +158,7 @@ int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      SIM_ADDR addr;
-     unsigned char * buffer;
+     const unsigned char * buffer;
      int size;
 {
   int i;

@@ -81,7 +81,7 @@
 
 extern unsigned short sh_jump_table[], sh_dsp_table[0x1000], ppi_table[];
 
-int sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size);
+int sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size);
 
 #define O_RECOMPILE 85
 #define DEFINE_TABLE
@@ -2141,7 +2141,7 @@ int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd;
      SIM_ADDR addr;
-     unsigned char *buffer;
+     const unsigned char *buffer;
      int size;
 {
   int i;

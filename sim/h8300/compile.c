@@ -4616,7 +4616,7 @@ sim_trace (SIM_DESC sd)
 }
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
+sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   int i;
 
