@@ -1,3 +1,83 @@
+2010-04-14  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.am (BFD32_BACKENDS): Remove vms-gsd.lo, vms-hdr.lo,
+	vms-tir.lo, vms.lo and add vms-alpha.lo
+	(BFD32_BACKENDS_CFILES): Remove vms-gsd.c, vms-hdr.c,
+	vms-tir.c, vms.c and add vms-alpha.c
+	* Makefile.in: Regenerate.
+	* configure.in (TDEFINES): Adjust file list for vms_alpha_vec.
+	Remove vms_vax_vec.
+	* configure: Regenerate.
+	* targets.c (vms_vax_vec): Remove the declaration.
+	(_bfd_target_vector): Remove vms_vax_vec.
+	* vms-alpha.c: New file.
+	* vms-gsd.c: Removed, rewritten in vms-alpha.c
+	* vms-hdr.c: Ditto.
+	* vms-tir.c: Ditto.
+	* vms.c: Ditto.
+	* vms-misc.c: Fix indentation and comments.  Replace most of
+	#if VMS_DEBUG/vms_debug with vms_debug2.
+	(_bfd_vms_hash_newfunc): Moved to vms-alpha.c
+	(hash_string): Ditto.
+	(_bfd_vms_length_hash_symbol): Ditto.
+	(maybe_adjust_record_pointer_for_object): Ditto.
+	(_bfd_vms_get_object_record): Ditto.
+	(vms_get_remaining_object_record): Ditto.
+	(_bfd_vms_push): Ditto.
+	(_bfd_vms_pop): Ditto.
+	(_bfd_vms_get_header_values): Removed.
+	(_bfd_vms_get_first_record): Removed.
+	(vms_get_remaining_image_record): Removed.
+	(new_symbol): Removed.
+	(_bfd_vms_enter_symbol): Removed.
+	(_bfd_vms_save_sized_string): Use memcpy instead of strncpy.
+	(_bfd_vms_output_begin): Remove rechead parameter.  Replace bfd
+	parameter with struct vms_rec_wr.
+	(_bfd_vms_output_push): Removed and replaced by ...
+	(_bfd_vms_output_begin_subrec): ... new function.
+	(_bfd_vms_output_alignment): Replace bfd parameter with
+	struct vms_rec_wr, and adjust.
+	(_bfd_vms_output_check): Ditto
+	(_bfd_vms_output_byte): Ditto.
+	(_bfd_vms_output_short): Ditto.
+	(_bfd_vms_output_long): Ditto.
+	(_bfd_vms_output_quad): Ditto.
+	(_bfd_vms_output_counted): Ditto.
+	(_bfd_vms_output_dump): Ditto.
+	(_bfd_vms_output_fill): Ditto.
+	(_bfd_vms_output_pop): Removed and replaced by ...
+	(_bfd_vms_output_end_subrec): ... new function.
+	(_bfd_vms_output_flush): Removed.
+	(_bfd_vms_output_align): New function.
+	(_bfd_vms_output_end): Add recwr parameter.  Adjust for this new
+	parameter.
+	(vms_convert_to_var): New function imported from vms.c
+	(vms_convert_to_var_1): Ditto.
+	(vms_convert_to_var_unix_filename): Ditto.
+	(vms_get_module_name): Ditto.
+	(get_vms_time_string): Ditto.
+	(vms_time_to_time_t): Ditto.
+	(vms_rawtime_to_time_t): Ditto.
+	* vms.h: All macros for the VMS file format are now in include/vms.
+	Prototypes for vms.c, vms-gsd.c, vms-misc.c, vms-hdr.c, vms-tir.c
+	have been removed.
+	(struct vms_symbol_struct, struct stack_struct): Moved to vms-alpha.c
+	(struct fileinfo, struct srecinfo, struct lineinfo): Ditto.
+	(struct funcinfo, struct vms_private_data_struct): Ditto.
+	(struct vms_section_data_struct): Ditto.
+	(struct vms_rec_rd, stryct vms_rec_wr): New declarations.
+	(vms_get_module_name, get_vms_time_string): New declarations.
+	(vms_time_to_time_t, vms_rawtime_to_time_t): Ditto.
+	(_bfd_vms_output_begin_subrec, _bfd_vms_output_end_subrec): Ditto.
+	(_bfd_vms_save_sized_string, _bfd_vms_save_counted_string): Adjusted.
+	(_bfd_vms_output_begin, _bfd_vms_output_alignment): Ditto.
+	(_bfd_vms_output_end,_bfd_vms_output_check): Ditto.
+	(_bfd_vms_output_byte, _bfd_vms_output_short): Ditto.
+	(_bfd_vms_output_long, _bfd_vms_output_quad): Ditto.
+	(_bfd_vms_output_counted, _bfd_vms_output_dump): Ditto.
+	(_bfd_vms_output_fill): Ditto.
+	(bfd_vms_set_section_flags): Ditto.
+
 2010-04-14  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Tighten up the test for early

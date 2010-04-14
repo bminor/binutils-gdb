@@ -391,12 +391,9 @@ BFD32_BACKENDS = \
 	vaxbsd.lo \
 	vaxnetbsd.lo \
 	versados.lo \
-	vms-gsd.lo \
-	vms-hdr.lo \
+	vms-alpha.lo \
 	vms-lib.lo \
 	vms-misc.lo \
-	vms-tir.lo \
-	vms.lo \
 	xcofflink.lo \
 	xsym.lo \
 	xtensa-isa.lo \
@@ -576,12 +573,9 @@ BFD32_BACKENDS_CFILES = \
 	vaxbsd.c \
 	vaxnetbsd.c \
 	versados.c \
-	vms-gsd.c \
-	vms-hdr.c \
+	vms-alpha.c \
 	vms-lib.c \
 	vms-misc.c \
-	vms-tir.c \
-	vms.c \
 	xcofflink.c \
 	xsym.c \
 	xtensa-isa.c \
