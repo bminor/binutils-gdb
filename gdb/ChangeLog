@@ -1,5 +1,6 @@
 2010-04-13  Mark Kettenis  <kettenis@gnu.org>
 
+	PR corefiles/11467
 	* i386-linux-tdep.c (i386_linux_regset_sections): Remove extended
 	register note sections.
 	(i386_linux_sse_regset_sections, i386_linux_avx_regset_sections):
