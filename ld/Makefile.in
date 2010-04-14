@@ -406,6 +406,7 @@ ALL_EMULATIONS = \
 	eaixppc.o \
 	eaixrs6.o \
 	ealpha.o \
+	ealphavms.o \
 	earcelf.o \
 	earm_epoc_pe.o \
 	earm_wince_pe.o \
@@ -924,6 +925,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eaixppc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eaixrs6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ealpha.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ealphavms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earcelf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earm_epoc_pe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earm_wince_pe.Po@am__quote@
@@ -1962,6 +1964,10 @@ eaixrs6.c: $(srcdir)/emulparams/aixrs6.sh \
 ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha "$(tdir_alpha)"
+ealphavms.c: $(srcdir)/emulparams/alphavms.sh \
+  $(srcdir)/emultempl/vms.em $(srcdir)/scripttempl/alphavms.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} alphavms "$(tdir_alphavms)"
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"

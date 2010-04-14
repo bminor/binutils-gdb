@@ -118,6 +118,7 @@ ALL_EMULATIONS = \
 	eaixppc.o \
 	eaixrs6.o \
 	ealpha.o \
+	ealphavms.o \
 	earcelf.o \
 	earm_epoc_pe.o \
 	earm_wince_pe.o \
@@ -611,6 +612,10 @@ eaixrs6.c: $(srcdir)/emulparams/aixrs6.sh \
 ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha "$(tdir_alpha)"
+ealphavms.c: $(srcdir)/emulparams/alphavms.sh \
+  $(srcdir)/emultempl/vms.em $(srcdir)/scripttempl/alphavms.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} alphavms "$(tdir_alphavms)"
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"

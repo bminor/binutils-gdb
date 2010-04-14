@@ -1,3 +1,13 @@
+2010-04-14  Tristan Gingold  <gingold@adacore.com>
+
+	* emulparams/alphavms.sh: New file.
+	* emultempl/vms.em: New file.
+	* scripttempl/alphavms.sc: New file.
+	* configure.tgt (alpha*-*-*vms*): Added.
+	* Makefile.am (ALL_EMULATIONS): Add ealphavms.o
+	(ealphavms.c): New target.
+	* Makefile.in: Regenerate.
+
 2010-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* ldlang.c (wild_sort): Remove unused variable section_name.
