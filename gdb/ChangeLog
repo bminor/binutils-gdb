@@ -1,3 +1,22 @@
+2010-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Group errors for many missing shared libraries.
+
+	* solist.h (struct so_list): Remove from_tty.
+	* solib.c (solib_bfd_open): Return NULL if we failed to open a BFD.
+	(solib_map_sections): Take so_list argument.  Return 0 if we
+	failed to open a BFD.  Add target sections here.
+	(symbol_add_stub): Delete.
+	(solib_read_symbols): Inline symbol_add_stub.  Use current flags,
+	not from_tty copied from the so_list.  Don't warn a second time
+	for a missing library.
+	(update_solib_list): Don't save from_tty.  Use TRY_CATCH.  Do not
+	add to the section table here.  Print out a single warning for all
+	missing libraries.
+	* bsd-uthread.c (bsd_uthread_solib_loaded): Always pass 0 for
+	flags.
+
 2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/py-block.c (gdbpy_block_for_pc): Use i8n to encompass

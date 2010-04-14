@@ -250,7 +250,7 @@ bsd_uthread_solib_loaded (struct so_list *so)
     {
       if (strncmp (so->so_original_name, *names, strlen (*names)) == 0)
 	{
-	  solib_read_symbols (so, so->from_tty ? SYMFILE_VERBOSE : 0);
+	  solib_read_symbols (so, 0);
 
 	  if (bsd_uthread_activate (so->objfile))
 	    {

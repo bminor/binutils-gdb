@@ -319,7 +319,14 @@ solib_bfd_open (char *pathname)
   /* Search for shared library file.  */
   found_pathname = solib_find (pathname, &found_file);
   if (found_pathname == NULL)
-    perror_with_name (pathname);
+    {
+      /* Return failure if the file could not be found, so that we can
+	 accumulate messages about missing libraries.  */
+      if (errno == ENOENT)
+	return NULL;
+
+      perror_with_name (pathname);
+    }
 
   /* Open bfd for shared library.  */
   abfd = solib_bfd_fopen (found_pathname, found_file);
@@ -372,9 +379,8 @@ solib_bfd_open (char *pathname)
  */
 
 static int
-solib_map_sections (void *arg)
+solib_map_sections (struct so_list *so)
 {
-  struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   struct target_so_ops *ops = solib_ops (target_gdbarch);
   char *filename;
   struct target_section *p;
@@ -385,6 +391,9 @@ solib_map_sections (void *arg)
   old_chain = make_cleanup (xfree, filename);
   abfd = ops->bfd_open (filename);
   do_cleanups (old_chain);
+
+  if (abfd == NULL)
+    return 0;
 
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so->abfd = gdb_bfd_ref (abfd);
@@ -419,7 +428,13 @@ solib_map_sections (void *arg)
 	}
     }
 
-  return (1);
+  /* Add the shared object's sections to the current set of file
+     section tables.  Do this immediately after mapping the object so
+     that later nodes in the list can query this object, as is needed
+     in solib-osf.c.  */
+  add_target_sections (so->sections, so->sections_end);
+
+  return 1;
 }
 
 /* LOCAL FUNCTION
@@ -466,27 +481,6 @@ master_so_list (void)
   return so_list_head;
 }
 
-static void
-symbol_add_stub (struct so_list *so, int flags)
-{
-  struct section_addr_info *sap;
-
-  /* Have we already loaded this shared object?  */
-  ALL_OBJFILES (so->objfile)
-    {
-      if (strcmp (so->objfile->name, so->so_name) == 0)
-	return;
-    }
-
-  sap = build_section_addr_info_from_section_table (so->sections,
-                                                    so->sections_end);
-
-  so->objfile = symbol_file_add_from_bfd (so->abfd, flags, sap, OBJF_SHARED);
-  free_section_addr_info (sap);
-
-  return;
-}
-
 /* Read in symbols for shared object SO.  If SYMFILE_VERBOSE is set in FLAGS,
    be chatty about it.  Return non-zero if any symbols were actually
    loaded.  */
@@ -503,25 +497,46 @@ solib_read_symbols (struct so_list *so, int flags)
     }
   else if (so->abfd == NULL)
     {
-      if (from_tty || info_verbose)
-	printf_unfiltered (_("Symbol file not found for %s\n"), so->so_name);
+      /* We've already warned about this library, when trying to open
+	 it.  */
     }
   else
     {
-      volatile struct gdb_exception exception;
-      TRY_CATCH (exception, RETURN_MASK_ALL)
-        {
-          symbol_add_stub (so, flags);
-        }
-      if (exception.reason != 0)
-        {
-          exception_fprintf (gdb_stderr, exception,
-                             "Error while reading shared library symbols:\n");
-          return 0;
-        }
-      if (from_tty || info_verbose)
-        printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
-      so->symbols_loaded = 1;
+      volatile struct gdb_exception e;
+
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+	{
+	  struct section_addr_info *sap;
+
+	  /* Have we already loaded this shared object?  */
+	  ALL_OBJFILES (so->objfile)
+	    {
+	      if (strcmp (so->objfile->name, so->so_name) == 0)
+		break;
+	    }
+	  if (so->objfile != NULL)
+	    break;
+
+	  sap = build_section_addr_info_from_section_table (so->sections,
+							    so->sections_end);
+	  so->objfile = symbol_file_add_from_bfd (so->abfd,
+						  flags, sap, OBJF_SHARED);
+	  free_section_addr_info (sap);
+	}
+
+      if (e.reason < 0)
+	{
+	  if (from_tty)
+	    exception_fprintf
+	      (gdb_stderr, e,
+	       _("Error while reading shared library symbols:\n"));
+	}
+      else
+	{
+	  if (from_tty || info_verbose)
+	    printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
+	  so->symbols_loaded = 1;
+	}
       return 1;
     }
 
@@ -667,6 +682,9 @@ update_solib_list (int from_tty, struct target_ops *target)
      to GDB's shared object list.  */
   if (inferior)
     {
+      int not_found = 0;
+      const char *not_found_filename = NULL;
+
       struct so_list *i;
 
       /* Add the new shared objects to GDB's list.  */
@@ -675,24 +693,48 @@ update_solib_list (int from_tty, struct target_ops *target)
       /* Fill in the rest of each of the `struct so_list' nodes.  */
       for (i = inferior; i; i = i->next)
 	{
-	  i->from_tty = from_tty;
+	  volatile struct gdb_exception e;
+
 	  i->pspace = current_program_space;
 
-	  /* Fill in the rest of the `struct so_list' node.  */
-	  catch_errors (solib_map_sections, i,
-			"Error while mapping shared library sections:\n",
-			RETURN_MASK_ALL);
+	  TRY_CATCH (e, RETURN_MASK_ERROR)
+	    {
+	      /* Fill in the rest of the `struct so_list' node.  */
+	      if (!solib_map_sections (i))
+		{
+		  not_found++;
+		  if (not_found_filename == NULL)
+		    not_found_filename = i->so_original_name;
+		}
+	    }
 
-	  /* Add the shared object's sections to the current set of
-	     file section tables.  Do this immediately after mapping
-	     the object so that later nodes in the list can query this
-	     object, as is needed in solib-osf.c.  */
-	  add_target_sections (i->sections, i->sections_end);
+	  if (e.reason < 0)
+	    exception_fprintf (gdb_stderr, e, _("\
+Error while mapping shared library sections:\n"));
 
 	  /* Notify any observer that the shared object has been
-             loaded now that we've added it to GDB's tables.  */
+	     loaded now that we've added it to GDB's tables.  */
 	  observer_notify_solib_loaded (i);
 	}
+
+      /* If a library was not found, issue an appropriate warning
+	 message.  We have to use a single call to warning in case the
+	 front end does something special with warnings, e.g., pop up
+	 a dialog box.  It Would Be Nice if we could get a "warning: "
+	 prefix on each line in the CLI front end, though - it doesn't
+	 stand out well.  */
+
+      if (not_found == 1)
+	warning (_("\
+Could not load shared library symbols for %s.\n\
+Do you need \"set solib-search-path\" or \"set sysroot\"?"),
+		 not_found_filename);
+      else if (not_found > 1)
+	warning (_("\
+Could not load shared library symbols for %d libraries, e.g. %s.\n\
+Use the \"info sharedlibrary\" command to see the complete listing.\n\
+Do you need \"set solib-search-path\" or \"set sysroot\"?"),
+		 not_found, not_found_filename);
     }
 }
 

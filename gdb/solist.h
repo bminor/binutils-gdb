@@ -63,7 +63,6 @@ struct so_list
 
     bfd *abfd;
     char symbols_loaded;	/* flag: symbols read in yet? */
-    char from_tty;		/* flag: print msgs? */
     struct objfile *objfile;	/* objfile for loaded lib */
     struct target_section *sections;
     struct target_section *sections_end;
