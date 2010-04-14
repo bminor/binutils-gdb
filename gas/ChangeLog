@@ -1,3 +1,11 @@
+2010-04-14  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c: Includes vms/egps.h on EVAX.
+	(s_alpha_comm): Used new EGPS macros from egps.h
+	(RGPS__V_NO_SHIFT, EGPS__V_MASK): New local macros.
+	(s_alpha_section_word): Add comments.  Use new EGPS macros.
+	Adjust for modified bfd_vms_set_section_flags function.
+
 2010-04-10  Alan Modra  <amodra@gmail.com>
 
 	PR gas/11486

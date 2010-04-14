@@ -62,6 +62,7 @@
 
 #ifdef OBJ_EVAX
 #include "vms.h"
+#include "vms/egps.h"
 #endif
 
 #include "dwarf2dbg.h"
@@ -3561,8 +3562,8 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
       sec = subseg_new (sec_name, 0);
       S_SET_SEGMENT (sec_symbol, sec);
       symbol_get_bfdsym (sec_symbol)->flags |= BSF_SECTION_SYM;
-      bfd_vms_set_section_flags (stdoutput, sec,
-				 EGPS_S_V_OVR | EGPS_S_V_GBL | EGPS_S_V_NOMOD);
+      bfd_vms_set_section_flags (stdoutput, sec, 0,
+				 EGPS__V_OVR | EGPS__V_GBL | EGPS__V_NOMOD);
       record_alignment (sec, log_align);
 
       /* Reuse stab_string_size to store the size of the section.  */
@@ -4210,6 +4211,14 @@ s_alpha_section_name (void)
   return name;
 }
 
+/* Put clear/set flags in one flagword.  The LSBs are flags to be set,
+   the MSBs are the flags to be cleared.  */
+
+#define EGPS__V_NO_SHIFT 16
+#define EGPS__V_MASK	 0xffff
+
+/* Parse one VMS section flag.  */
+
 static flagword
 s_alpha_section_word (char *str, size_t len)
 {
@@ -4226,30 +4235,30 @@ s_alpha_section_word (char *str, size_t len)
   if (len == 3)
     {
       if (strncmp (str, "PIC", 3) == 0)
-	flag = EGPS_S_V_PIC;
+	flag = EGPS__V_PIC;
       else if (strncmp (str, "LIB", 3) == 0)
-	flag = EGPS_S_V_LIB;
+	flag = EGPS__V_LIB;
       else if (strncmp (str, "OVR", 3) == 0)
-	flag = EGPS_S_V_OVR;
+	flag = EGPS__V_OVR;
       else if (strncmp (str, "REL", 3) == 0)
-	flag = EGPS_S_V_REL;
+	flag = EGPS__V_REL;
       else if (strncmp (str, "GBL", 3) == 0)
-	flag = EGPS_S_V_GBL;
+	flag = EGPS__V_GBL;
       else if (strncmp (str, "SHR", 3) == 0)
-	flag = EGPS_S_V_SHR;
+	flag = EGPS__V_SHR;
       else if (strncmp (str, "EXE", 3) == 0)
-	flag = EGPS_S_V_EXE;
+	flag = EGPS__V_EXE;
       else if (strncmp (str, "WRT", 3) == 0)
-	flag = EGPS_S_V_WRT;
+	flag = EGPS__V_WRT;
       else if (strncmp (str, "VEC", 3) == 0)
-	flag = EGPS_S_V_VEC;
+	flag = EGPS__V_VEC;
       else if (strncmp (str, "MOD", 3) == 0)
 	{
-	  flag = no ? EGPS_S_V_NOMOD : EGPS_S_V_NOMOD << EGPS_S_V_NO_SHIFT;
+	  flag = no ? EGPS__V_NOMOD : EGPS__V_NOMOD << EGPS__V_NO_SHIFT;
 	  no = 0;
 	}
       else if (strncmp (str, "COM", 3) == 0)
-	flag = EGPS_S_V_COM;
+	flag = EGPS__V_COM;
     }
 
   if (flag == 0)
@@ -4262,7 +4271,7 @@ s_alpha_section_word (char *str, size_t len)
     }
 
   if (no)
-    return flag << EGPS_S_V_NO_SHIFT;
+    return flag << EGPS__V_NO_SHIFT;
   else
     return flag;
 }
@@ -4315,7 +4324,10 @@ s_alpha_section (int secid)
 	symbol = symbol_find_or_make (name);
 	S_SET_SEGMENT (symbol, sec);
 	symbol_get_bfdsym (symbol)->flags |= BSF_SECTION_SYM;
-        bfd_vms_set_section_flags (stdoutput, sec, vms_flags);
+        bfd_vms_set_section_flags
+          (stdoutput, sec,
+           (vms_flags >> EGPS__V_NO_SHIFT) & EGPS__V_MASK,
+           vms_flags & EGPS__V_MASK);
     }
   else
     {
