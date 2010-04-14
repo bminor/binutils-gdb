@@ -1,3 +1,16 @@
+2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/11381
+
+	* python/py-prettyprint.c (pretty_print_one_value): Test for
+	Py_None.
+	(print_string_repr): Test for Py_None.  Set flags accordingly.
+	Return value depending on return type.
+	(print_children): Take a value indicating whether data was printed
+	before this function was called.  Alter output accordingly.
+	(apply_val_pretty_printer): Capture return value from
+	print_string_repr and pass to print_children.
+
 2010-04-13  Mark Kettenis  <kettenis@gnu.org>
 
 	PR corefiles/11481

@@ -61,6 +61,16 @@ mi_list_varobj_children container {
 
 mi_delete_varobj container "delete varobj"
 
+mi_create_dynamic_varobj nscont nstype \
+  "create nscont varobj, no pretty-printing"
+
+mi_list_varobj_children nscont {
+  { nscont.len len 0 int }
+  { nscont.elements elements 1 "int ." }
+} "examine nscont children=0, no pretty-printing"
+
+mi_delete_varobj nscont "delete varobj"
+
 mi_gdb_test "-enable-pretty-printing" ""
 
 mi_create_varobj_checked string string_1 \
@@ -238,5 +248,30 @@ mi_continue_to_line \
     "step to second breakpoint"
 
 mi_varobj_update_with_type_change container int 0 "update after type change"
+
+
+mi_continue_to_line \
+    [gdb_get_line_number {break to inspect struct and union} ${testfile}.c] \
+    "step to outer breakpoint"
+
+mi_create_dynamic_varobj nscont nstype \
+  "create nstype varobj"
+
+mi_list_varobj_children nscont {
+    { {nscont.\[0\]} {\[0\]} 0 int }
+    { {nscont.\[1\]} {\[1\]} 0 int }
+} "list children after setting update range"
+
+mi_gdb_test "-var-set-visualizer nscont None" \
+  "\\^done" \
+  "clear visualizer"
+
+mi_gdb_test "-var-update nscont" \
+  "\\^done,changelist=\\\[\\\]" \
+  "varobj update after clearing"
+
+mi_gdb_test "-var-set-visualizer nscont gdb.default_visualizer" \
+  "\\^done" \
+  "choose default visualizer"
 
 remote_file host delete ${remote_python_file}

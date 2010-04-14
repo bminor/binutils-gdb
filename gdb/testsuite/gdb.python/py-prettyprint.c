@@ -119,6 +119,15 @@ typedef struct string_repr
 
 /* This lets us avoid malloc.  */
 int array[100];
+int narray[10];
+
+struct justchildren
+{
+  int len;
+  int *elements;
+};
+
+typedef struct justchildren nostring_type;
 
 struct container
 {
@@ -196,7 +205,9 @@ main ()
   const struct string_repr cstring = { { "const string" } };
   /* Clearing by being `static' could invoke an other GDB C++ bug.  */
   struct nullstr nullstr;
-
+  nostring_type nstype;
+  nstype.elements = narray;
+  nstype.len = 0;
 
   init_ss(&ss, 1, 2);
   init_ss(ssa+0, 3, 4);
@@ -249,5 +260,9 @@ main ()
   do_nothing ();
 #endif
 
+  nstype.elements[0] = 7;
+  nstype.elements[1] = 42;
+  nstype.len = 2;
+  
   return 0;      /* break to inspect struct and union */
 }

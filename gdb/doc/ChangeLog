@@ -1,3 +1,8 @@
+2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Pretty Printing): Document behaviour when to_string
+	returns None.
+
 2010-04-09  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (gdb/mi Tracepoint Commands) <-trace-status>:

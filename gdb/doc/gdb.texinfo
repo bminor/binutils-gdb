@@ -20435,6 +20435,9 @@ the resulting value.  Again, this may result in a call to another
 pretty-printer.  Python scalars (integers, floats, and booleans) and
 strings are convertible to @code{gdb.Value}; other types are not.
 
+Finally, if this method returns @code{None} then no further operations
+are peformed in this method and nothing is printed.
+
 If the result is not one of these types, an exception is raised.
 @end defop
 

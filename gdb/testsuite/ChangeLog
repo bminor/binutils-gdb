@@ -1,3 +1,10 @@
+2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-prettyprint.py (NoStringContainerPrinter): New printer.
+	* gdb.python/py-prettyprint.c: Add justchildren struct, typedefs.
+	* gdb.python/py-prettyprint.exp: New test for to_string returning None.
+	* gdb.python/py-mi.exp: New test for to_string returning None.
+
 2010-04-12  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-breakpoint.c: Make result global.
