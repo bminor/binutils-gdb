@@ -1,3 +1,12 @@
+2010-04-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* objfiles.h (gdb_bfd_close_or_warn): Declare.
+	* objfiles.c (gdb_bfd_close_or_warn): New.
+	* corelow.c: Include objfiles.h
+	(core_close): Use gdb_bfd_close_or_warn.
+	* elfread.c (build_id_verify): Ditto.
+	* exec.c (exec_close, exec_close_1): Ditto.
+
 2010-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

@@ -533,6 +533,7 @@ extern void *objfile_data (struct objfile *objfile,
 
 extern struct bfd *gdb_bfd_ref (struct bfd *abfd);
 extern void gdb_bfd_unref (struct bfd *abfd);
+extern int gdb_bfd_close_or_warn (struct bfd *abfd);
 
 
 /* Traverse all object files in the current program space.

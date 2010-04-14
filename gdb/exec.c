@@ -101,9 +101,7 @@ exec_close (void)
       bfd *abfd = exec_bfd;
       char *name = bfd_get_filename (abfd);
 
-      if (!bfd_close (abfd))
-	warning (_("cannot close \"%s\": %s"),
-		 name, bfd_errmsg (bfd_get_error ()));
+      gdb_bfd_close_or_warn (abfd);
       xfree (name);
 
       /* Removing target sections may close the exec_ops target.
@@ -141,9 +139,7 @@ exec_close_1 (int quitting)
 	}
       else if (vp->bfd != exec_bfd)
 	/* FIXME-leak: We should be freeing vp->name too, I think.  */
-	if (!bfd_close (vp->bfd))
-	  warning (_("cannot close \"%s\": %s"),
-		   vp->name, bfd_errmsg (bfd_get_error ()));
+	gdb_bfd_close_or_warn (vp->bfd);
 
       xfree (vp);
     }

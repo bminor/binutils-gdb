@@ -46,6 +46,7 @@
 #include "solib.h"
 #include "filenames.h"
 #include "progspace.h"
+#include "objfiles.h"
 
 
 #ifndef O_LARGEFILE
@@ -221,9 +222,7 @@ core_close (int quitting)
       core_has_fake_pid = 0;
 
       name = bfd_get_filename (core_bfd);
-      if (!bfd_close (core_bfd))
-	warning (_("cannot close \"%s\": %s"),
-		 name, bfd_errmsg (bfd_get_error ()));
+      gdb_bfd_close_or_warn (core_bfd);
       xfree (name);
       core_bfd = NULL;
     }

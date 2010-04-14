@@ -618,9 +618,7 @@ build_id_verify (const char *filename, struct build_id *check)
   else
     retval = 1;
 
-  if (!bfd_close (abfd))
-    warning (_("cannot close \"%s\": %s"), filename,
-	     bfd_errmsg (bfd_get_error ()));
+  gdb_bfd_close_or_warn (abfd);
 
   xfree (found);
 

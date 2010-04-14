@@ -1471,6 +1471,23 @@ objfiles_changed (void)
   get_objfile_pspace_data (current_program_space)->objfiles_changed_p = 1;
 }
 
+/* Close ABFD, and warn if that fails.  */
+
+int
+gdb_bfd_close_or_warn (struct bfd *abfd)
+{
+  int ret;
+  char *name = bfd_get_filename (abfd);
+
+  ret = bfd_close (abfd);
+
+  if (!ret)
+    warning (_("cannot close \"%s\": %s"),
+	     name, bfd_errmsg (bfd_get_error ()));
+
+  return ret;
+}
+
 /* Add reference to ABFD.  Returns ABFD.  */
 struct bfd *
 gdb_bfd_ref (struct bfd *abfd)
@@ -1519,9 +1536,7 @@ gdb_bfd_unref (struct bfd *abfd)
   bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
 
   name = bfd_get_filename (abfd);
-  if (!bfd_close (abfd))
-    warning (_("cannot close \"%s\": %s"),
-	     name, bfd_errmsg (bfd_get_error ()));
+  gdb_bfd_close_or_warn (abfd);
   xfree (name);
 }
 
