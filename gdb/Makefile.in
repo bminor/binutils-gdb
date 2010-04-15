@@ -275,6 +275,7 @@ SUBDIR_PYTHON_OBS = \
 	py-lazy-string.o \
 	py-objfile.o \
 	py-prettyprint.o \
+	py-progspace.o \
 	py-symbol.o \
 	py-symtab.o \
 	py-type.o \
@@ -290,6 +291,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-lazy-string.c \
 	python/py-objfile.c \
 	python/py-prettyprint.c \
+	python/py-progspace.c \
 	python/py-symbol.c \
 	python/py-symtab.c \
 	python/py-type.c \
@@ -2014,6 +2016,10 @@ py-objfile.o: $(srcdir)/python/py-objfile.c
 
 py-prettyprint.o: $(srcdir)/python/py-prettyprint.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-prettyprint.c
+	$(POSTCOMPILE)
+
+py-progspace.o: $(srcdir)/python/py-progspace.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-progspace.c
 	$(POSTCOMPILE)
 
 py-symbol.o: $(srcdir)/python/py-symbol.c

@@ -1,5 +1,8 @@
 2010-04-15  Doug Evans  <dje@google.com>
 
+	* gdb.python/py-progspace.c: New file.
+	* gdb.python/py-progspace.exp: New file.
+
 	* gdb.base/source-test.gdb: New file.
 	* gdb.base/source.exp: Add tests for "source -s".
 

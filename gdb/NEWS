@@ -35,9 +35,12 @@
 * Python scripting
 
 ** The GDB Python API now has access to breakpoints, symbols, symbol
-   tables, and frame's code blocks.
+   tables, program spaces, and frame's code blocks.
 
-** New methods gdb.target_charset and gdb.target_wide_charset.
+** New functions gdb.target_charset, gdb.target_wide_charset,
+   gdb.progspaces, and gdb.current_progspace.
+
+** Pretty-printers are now also looked up in the current program space.
 
 * Tracepoint actions were unified with breakpoint commands. In particular,
 there are no longer differences in "info break" output for breakpoints and

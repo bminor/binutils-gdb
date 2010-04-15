@@ -1,5 +1,23 @@
 2010-04-15  Doug Evans  <dje@google.com>
 
+	* NEWS: Add entry for python program space support.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-progspace.o.
+	(SUBDIR_PYTHON_SRCS): Add py-progspace.c.
+	(py-progspace.o): New rule.
+	* python/py-prettyprint.c (find_pretty_printer_from_objfiles): New
+	function.
+	(find_pretty_printer_from_progspace): New function.
+	(find_pretty_printer_from_gdb): New function.
+	(find_pretty_printer): Rewrite.
+	* python/py-progspace.c: New file.
+	* python/python-internal.h (program_space): Add forward decl.
+	(pspace_to_pspace_object, pspy_get_printers): Declare.
+	(gdbpy_initialize_pspace): Declare.
+	* python/python.c: #include "progspace.h".
+	(gdbpy_get_current_progspace, gdbpy_progspaces): New functions.
+	(_initialize_python): Call gdbpy_initialize_pspace.
+	(GdbMethods): Add current_progspace, progspaces.
+
 	Add -s option to source command.
 	* NEWS: Document new option.
 	* cli/cli-cmds.c (find_and_open_script): Add function comment.

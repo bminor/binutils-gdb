@@ -29,12 +29,12 @@
 #ifdef HAVE_PYTHON
 #include "python-internal.h"
 
-
 /* Helper function for find_pretty_printer which iterates over a list,
    calls each function and inspects output.  This will return a
    printer object if one recognizes VALUE.  If no printer is found, it
    will return None.  On error, it will set the Python error and
    return NULL.  */
+
 static PyObject *
 search_pp_list (PyObject *list, PyObject *value)
 {
@@ -60,18 +60,19 @@ search_pp_list (PyObject *list, PyObject *value)
   Py_RETURN_NONE;
 }
 
-/* Find the pretty-printing constructor function for VALUE.  If no
-   pretty-printer exists, return None.  If one exists, return a new
-   reference.  On error, set the Python error and return NULL.  */
-static PyObject *
-find_pretty_printer (PyObject *value)
-{
-  PyObject *pp_list = NULL;
-  PyObject *function = NULL;
-  struct objfile *obj;
-  volatile struct gdb_exception except;
+/* Subroutine of find_pretty_printer to simplify it.
+   Look for a pretty-printer to print VALUE in all objfiles.
+   The result is NULL if there's an error and the search should be terminated.
+   The result is Py_None, suitably inc-ref'd, if no pretty-printer was found.
+   Otherwise the result is the pretty-printer function, suitably inc-ref'd.  */
 
-  /* Look at the pretty-printer dictionary for each objfile.  */
+static PyObject *
+find_pretty_printer_from_objfiles (PyObject *value)
+{
+  PyObject *pp_list;
+  PyObject *function;
+  struct objfile *obj;
+
   ALL_OBJFILES (obj)
   {
     PyObject *objf = objfile_to_objfile_object (obj);
@@ -84,44 +85,95 @@ find_pretty_printer (PyObject *value)
 
     pp_list = objfpy_get_printers (objf, NULL);
     function = search_pp_list (pp_list, value);
+    Py_XDECREF (pp_list);
 
-    /* If there is an error in any objfile list, abort the search and
-       exit.  */
+    /* If there is an error in any objfile list, abort the search and exit.  */
     if (! function)
-      {
-	Py_XDECREF (pp_list);
-	return NULL;
-      }
+      return NULL;
 
     if (function != Py_None)
-      goto done;
+      return function;
     
     Py_DECREF (function);
-    Py_XDECREF (pp_list);
   }
 
-  pp_list = NULL;
-  /* Fetch the global pretty printer dictionary.  */
-  if (! PyObject_HasAttrString (gdb_module, "pretty_printers"))
-    {
-      function = Py_None;
-      Py_INCREF (function);
-      goto done;
-    }
-  pp_list = PyObject_GetAttrString (gdb_module, "pretty_printers");
-  if (! pp_list)
-    goto done;
-  if (! PyList_Check (pp_list))
-    goto done;
+  Py_RETURN_NONE;
+}
 
+/* Subroutine of find_pretty_printer to simplify it.
+   Look for a pretty-printer to print VALUE in the current program space.
+   The result is NULL if there's an error and the search should be terminated.
+   The result is Py_None, suitably inc-ref'd, if no pretty-printer was found.
+   Otherwise the result is the pretty-printer function, suitably inc-ref'd.  */
+
+static PyObject *
+find_pretty_printer_from_progspace (PyObject *value)
+{
+  PyObject *pp_list;
+  PyObject *function;
+  PyObject *obj = pspace_to_pspace_object (current_program_space);
+
+  if (!obj)
+    return NULL;
+  pp_list = pspy_get_printers (obj, NULL);
   function = search_pp_list (pp_list, value);
-
- done:
   Py_XDECREF (pp_list);
-  
   return function;
 }
 
+/* Subroutine of find_pretty_printer to simplify it.
+   Look for a pretty-printer to print VALUE in the gdb module.
+   The result is NULL if there's an error and the search should be terminated.
+   The result is Py_None, suitably inc-ref'd, if no pretty-printer was found.
+   Otherwise the result is the pretty-printer function, suitably inc-ref'd.  */
+
+static PyObject *
+find_pretty_printer_from_gdb (PyObject *value)
+{
+  PyObject *pp_list;
+  PyObject *function;
+
+  /* Fetch the global pretty printer dictionary.  */
+  if (! PyObject_HasAttrString (gdb_module, "pretty_printers"))
+    Py_RETURN_NONE;
+  pp_list = PyObject_GetAttrString (gdb_module, "pretty_printers");
+  if (pp_list == NULL || ! PyList_Check (pp_list))
+    {
+      Py_XDECREF (pp_list);
+      Py_RETURN_NONE;
+    }
+
+  function = search_pp_list (pp_list, value);
+  Py_XDECREF (pp_list);
+  return function;
+}
+
+/* Find the pretty-printing constructor function for VALUE.  If no
+   pretty-printer exists, return None.  If one exists, return a new
+   reference.  On error, set the Python error and return NULL.  */
+
+static PyObject *
+find_pretty_printer (PyObject *value)
+{
+  PyObject *function;
+
+  /* Look at the pretty-printer dictionary for each objfile
+     in the current program-space.  */
+  function = find_pretty_printer_from_objfiles (value);
+  if (function == NULL || function != Py_None)
+    return function;
+  Py_DECREF (function);
+
+  /* Look at the pretty-printer dictionary for the current program-space.  */
+  function = find_pretty_printer_from_progspace (value);
+  if (function == NULL || function != Py_None)
+    return function;
+  Py_DECREF (function);
+
+  /* Look at the pretty-printer dictionary in the gdb module.  */
+  function = find_pretty_printer_from_gdb (value);
+  return function;
+}
 
 /* Pretty-print a single value, via the printer object PRINTER.
    If the function returns a string, a PyObject containing the string

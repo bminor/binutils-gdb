@@ -1,5 +1,10 @@
 2010-04-15  Doug Evans  <dje@google.com>
 
+	* gdb.texinfo (Python API): Add progspaces section.
+	(Selecting Pretty-Printers): Progspace pretty-printers are
+	searched too.
+	(Progspaces In Python): New section.
+
 	* gdb.texinfo (Command Files): Add docs for new "source -s" option.
 
 2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>

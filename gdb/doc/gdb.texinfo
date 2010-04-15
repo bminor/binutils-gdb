@@ -19723,6 +19723,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
 * Commands In Python::          Implementing new commands in Python.
 * Functions In Python::         Writing new convenience functions.
+* Progspaces In Python::        Program spaces.
 * Objfiles In Python::          Object files.
 * Frames In Python::            Accessing inferior stack frames from Python.
 * Blocks In Python::            Accessing frame blocks from Python.
@@ -20461,6 +20462,7 @@ If the result is not one of these types, an exception is raised.
 
 The Python list @code{gdb.pretty_printers} contains an array of
 functions that have been registered via addition as a pretty-printer.
+Each @code{gdb.Progspace} contains a @code{pretty_printers} attribute.
 Each @code{gdb.Objfile} also contains a @code{pretty_printers}
 attribute.
 
@@ -20471,8 +20473,12 @@ cannot create a pretty-printer for the value, it should return
 @code{None}.
 
 @value{GDBN} first checks the @code{pretty_printers} attribute of each
-@code{gdb.Objfile} and iteratively calls each function in the list for
-that @code{gdb.Objfile} until it receives a pretty-printer object.
+@code{gdb.Objfile} in the current program space and iteratively calls
+each function in the list for that @code{gdb.Objfile} until it receives
+a pretty-printer object.
+If no pretty-printer is found in the objfile lists, @value{GDBN} then
+searches the pretty-printer list of the current program space,
+calling each function until an object is returned.
 After these lists have been exhausted, it tries the global
 @code{gdb.pretty-printers} list, again calling each function until an
 object is returned.
@@ -20869,6 +20875,49 @@ The last line instantiates the class, and is necessary to trigger the
 registration of the function with @value{GDBN}.  Depending on how the
 Python code is read into @value{GDBN}, you may need to import the
 @code{gdb} module explicitly.
+
+@node Progspaces In Python
+@subsubsection Program Spaces In Python
+
+@cindex progspaces in python
+@tindex gdb.Progspace
+@tindex Progspace
+A program space, or @dfn{progspace}, represents a symbolic view
+of an address space.
+It consists of all of the objfiles of the program.
+@xref{Objfiles In Python}.
+@xref{Inferiors and Programs, program spaces}, for more details
+about program spaces.
+
+The following progspace-related functions are available in the
+@code{gdb} module:
+
+@findex gdb.current_progspace
+@defun current_progspace
+This function returns the program space of the currently selected inferior.
+@xref{Inferiors and Programs}.
+@end defun
+
+@findex gdb.progspaces
+@defun progspaces
+Return a sequence of all the progspaces currently known to @value{GDBN}.
+@end defun
+
+Each progspace is represented by an instance of the @code{gdb.Progspace}
+class.
+
+@defivar Progspace filename
+The file name of the progspace as a string.
+@end defivar
+
+@defivar Progspace pretty_printers
+The @code{pretty_printers} attribute is a list of functions.  It is
+used to look up pretty-printers.  A @code{Value} is passed to each
+function in order; if the function returns @code{None}, then the
+search continues.  Otherwise, the return value should be an object
+which is used to format the value.  @xref{Pretty Printing}, for more
+information.
+@end defivar
 
 @node Objfiles In Python
 @subsubsection Objfiles In Python

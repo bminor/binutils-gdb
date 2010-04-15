@@ -68,6 +68,7 @@ typedef int Py_ssize_t;
 struct block;
 struct value;
 struct language_defn;
+struct program_space;
 
 extern PyObject *gdb_module;
 extern PyTypeObject value_object_type;
@@ -91,8 +92,11 @@ PyObject *symbol_to_symbol_object (struct symbol *sym);
 PyObject *block_to_block_object (struct block *block, struct objfile *objfile);
 PyObject *value_to_value_object (struct value *v);
 PyObject *type_to_type_object (struct type *);
-PyObject *objfile_to_objfile_object (struct objfile *);
 
+PyObject *pspace_to_pspace_object (struct program_space *);
+PyObject *pspy_get_printers (PyObject *, void *);
+
+PyObject *objfile_to_objfile_object (struct objfile *);
 PyObject *objfpy_get_printers (PyObject *, void *);
 
 struct block *block_object_to_block (PyObject *obj);
@@ -112,6 +116,7 @@ void gdbpy_initialize_symtabs (void);
 void gdbpy_initialize_blocks (void);
 void gdbpy_initialize_types (void);
 void gdbpy_initialize_functions (void);
+void gdbpy_initialize_pspace (void);
 void gdbpy_initialize_objfile (void);
 void gdbpy_initialize_breakpoints (void);
 void gdbpy_initialize_lazy_string (void);

@@ -23,6 +23,7 @@
 #include "ui-out.h"
 #include "cli/cli-script.h"
 #include "gdbcmd.h"
+#include "progspace.h"
 #include "objfiles.h"
 #include "observer.h"
 #include "value.h"
@@ -417,6 +418,47 @@ gdbpy_print_stack (void)
 
 
 
+/* Return the current Progspace.
+   There always is one.  */
+
+static PyObject *
+gdbpy_get_current_progspace (PyObject *unused1, PyObject *unused2)
+{
+  PyObject *result;
+
+  result = pspace_to_pspace_object (current_program_space);
+  if (result)
+    Py_INCREF (result);
+  return result;
+}
+
+/* Return a sequence holding all the Progspaces.  */
+
+static PyObject *
+gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
+{
+  struct program_space *ps;
+  PyObject *list;
+
+  list = PyList_New (0);
+  if (!list)
+    return NULL;
+
+  ALL_PSPACES (ps)
+  {
+    PyObject *item = pspace_to_pspace_object (ps);
+    if (!item || PyList_Append (list, item) == -1)
+      {
+	Py_DECREF (list);
+	return NULL;
+      }
+  }
+
+  return list;
+}
+
+
+
 /* The "current" objfile.  This is set when gdb detects that a new
    objfile has been loaded.  It is only set for the duration of a call
    to gdbpy_new_objfile; it is NULL at other times.  */
@@ -512,6 +554,7 @@ gdbpy_get_current_objfile (PyObject *unused1, PyObject *unused2)
 }
 
 /* Return a sequence holding all the Objfiles.  */
+
 static PyObject *
 gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
 {
@@ -668,6 +711,7 @@ Enables or disables auto-loading of Python code when an object is opened."),
   gdbpy_initialize_blocks ();
   gdbpy_initialize_functions ();
   gdbpy_initialize_types ();
+  gdbpy_initialize_pspace ();
   gdbpy_initialize_objfile ();
   gdbpy_initialize_breakpoints ();
   gdbpy_initialize_lazy_string ();
@@ -733,6 +777,11 @@ static PyMethodDef GdbMethods[] =
 
   { "default_visualizer", gdbpy_default_visualizer, METH_VARARGS,
     "Find the default visualizer for a Value." },
+
+  { "current_progspace", gdbpy_get_current_progspace, METH_NOARGS,
+    "Return the current Progspace." },
+  { "progspaces", gdbpy_progspaces, METH_NOARGS,
+    "Return a sequence of all progspaces." },
 
   { "current_objfile", gdbpy_get_current_objfile, METH_NOARGS,
     "Return the current Objfile being loaded, or None." },
