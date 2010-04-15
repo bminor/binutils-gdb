@@ -1,3 +1,7 @@
+2010-04-15  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd (vax*-*-*vms*): Delete.
+
 2010-04-14  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (BFD32_BACKENDS): Remove vms-gsd.lo, vms-hdr.lo,
