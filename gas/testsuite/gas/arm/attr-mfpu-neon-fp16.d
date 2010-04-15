@@ -9,6 +9,6 @@ Attribute Section: aeabi
 File Attributes
   Tag_ARM_ISA_use: Yes
   Tag_THUMB_ISA_use: Thumb-1
-  Tag_VFP_arch: VFPv3
+  Tag_FP_arch: VFPv3
   Tag_Advanced_SIMD_arch: NEONv1
-  Tag_VFP_HP_extension: Allowed
+  Tag_FP_HP_extension: Allowed

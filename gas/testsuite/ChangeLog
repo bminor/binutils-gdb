@@ -1,3 +1,28 @@
+2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/attr-mcpu.d: Update for new attribute tag names.
+	* gas/arm/attr-mfpu-arm1020e.d: Likewise.
+	* gas/arm/attr-mfpu-arm1020t.d: Likewise.
+	* gas/arm/attr-mfpu-arm1136jf-s.d: Likewise.
+	* gas/arm/attr-mfpu-arm1136jfs.d: Likewise.
+	* gas/arm/attr-mfpu-neon-fp16.d: Likewise.
+	* gas/arm/attr-mfpu-neon.d: Likewise.
+	* gas/arm/attr-mfpu-softvfp+vfp.d: Likewise.
+	* gas/arm/attr-mfpu-vfp.d: Likewise.
+	* gas/arm/attr-mfpu-vfp10-r0.d: Likewise.
+	* gas/arm/attr-mfpu-vfp10.d: Likewise.
+	* gas/arm/attr-mfpu-vfp3.d: Likewise.
+	* gas/arm/attr-mfpu-vfp9.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv2.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv3-d16.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv3.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv4-d16.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv4.d: Likewise.
+	* gas/arm/attr-mfpu-vfpxd.d: Likewise.
+	* gas/arm/attr-names.d: Add test to make sure all attribute names 
+	are recognised.
+	* gas/arm/attr-names.s: Likewise.
+
 2010-04-07  Jie Zhang  <jie@codesourcery.com>
 
 	* gas/arm/mapmisc.s: Test multiple mapping symbols have

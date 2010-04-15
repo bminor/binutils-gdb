@@ -1,3 +1,8 @@
+2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Support additions to
+	attributes in v2.08 of the ABI.
+
 2010-04-15  Alan Modra  <amodra@gmail.com>
 
 	* config.bfd (vax*-*-*vms*): Delete.

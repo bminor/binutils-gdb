@@ -1,3 +1,9 @@
+2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (arm_convert_symbolic_attribute): Add support for
+	new tag names in v2.08 of ARM ABI.
+	* doc/c-arm.texi: Document new tag names in ABI.
+
 2010-04-14  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-alpha.c: Includes vms/egps.h on EVAX.

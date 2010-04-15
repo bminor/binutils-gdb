@@ -1,3 +1,12 @@
+2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* readelf.c (arm_attr_tag_FP_arch): Rename from arm_attr_tag_VFP_arch.
+	(arm_attr_tag_ABI_align8_needed): Remove.
+	(arm_attr_tag_ABI_align8_preserved): Remove.
+	(arm_attr_tag_ABI_HardFP_use): Update text strings.
+	(arm_attr_public_tags): Add strings for ABI v2.08 attribute tags.
+	(display_arm_attribute): Add decoding of ABI v2.08 attributes.
+
 2010-04-13  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/11419

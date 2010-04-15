@@ -575,19 +575,19 @@ Set the EABI object attribute @var{tag} to @var{value}.
 The @var{tag} is either an attribute number, or one of the following:
 @code{Tag_CPU_raw_name}, @code{Tag_CPU_name}, @code{Tag_CPU_arch},
 @code{Tag_CPU_arch_profile}, @code{Tag_ARM_ISA_use},
-@code{Tag_THUMB_ISA_use}, @code{Tag_VFP_arch}, @code{Tag_WMMX_arch},
+@code{Tag_THUMB_ISA_use}, @code{Tag_FP_arch}, @code{Tag_WMMX_arch},
 @code{Tag_Advanced_SIMD_arch}, @code{Tag_PCS_config},
 @code{Tag_ABI_PCS_R9_use}, @code{Tag_ABI_PCS_RW_data},
 @code{Tag_ABI_PCS_RO_data}, @code{Tag_ABI_PCS_GOT_use},
 @code{Tag_ABI_PCS_wchar_t}, @code{Tag_ABI_FP_rounding},
 @code{Tag_ABI_FP_denormal}, @code{Tag_ABI_FP_exceptions},
 @code{Tag_ABI_FP_user_exceptions}, @code{Tag_ABI_FP_number_model},
-@code{Tag_ABI_align8_needed}, @code{Tag_ABI_align8_preserved},
+@code{Tag_ABI_align_needed}, @code{Tag_ABI_align_preserved},
 @code{Tag_ABI_enum_size}, @code{Tag_ABI_HardFP_use},
 @code{Tag_ABI_VFP_args}, @code{Tag_ABI_WMMX_args},
 @code{Tag_ABI_optimization_goals}, @code{Tag_ABI_FP_optimization_goals},
 @code{Tag_compatibility}, @code{Tag_CPU_unaligned_access},
-@code{Tag_VFP_HP_extension}, @code{Tag_ABI_FP_16bit_format},
+@code{Tag_FP_HP_extension}, @code{Tag_ABI_FP_16bit_format},
 @code{Tag_MPextension_use}, @code{Tag_DIV_use},
 @code{Tag_nodefaults}, @code{Tag_also_compatible_with},
 @code{Tag_conformance}, @code{Tag_T2EE_use},
@@ -595,6 +595,10 @@ The @var{tag} is either an attribute number, or one of the following:
 
 The @var{value} is either a @code{number}, @code{"string"}, or
 @code{number, "string"} depending on the tag.
+
+Note - the following legacy values are also accepted by @var{tag}:
+@code{Tag_VFP_arch}, @code{Tag_ABI_align8_needed}, 
+@code{Tag_ABI_align8_preserved}, @code{Tag_VFP_HP_extension},
 
 @cindex @code{.even} directive, ARM
 @item .even

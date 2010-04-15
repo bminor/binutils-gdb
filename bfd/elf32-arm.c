@@ -10003,27 +10003,26 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	case Tag_ABI_FP_exceptions:
 	case Tag_ABI_FP_user_exceptions:
 	case Tag_ABI_FP_number_model:
-	case Tag_VFP_HP_extension:
+	case Tag_FP_HP_extension:
 	case Tag_CPU_unaligned_access:
 	case Tag_T2EE_use:
-	case Tag_Virtualization_use:
 	case Tag_MPextension_use:
 	  /* Use the largest value specified.  */
 	  if (in_attr[i].i > out_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 
-	case Tag_ABI_align8_preserved:
+	case Tag_ABI_align_preserved:
 	case Tag_ABI_PCS_RO_data:
 	  /* Use the smallest value specified.  */
 	  if (in_attr[i].i < out_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 
-	case Tag_ABI_align8_needed:
+	case Tag_ABI_align_needed:
 	  if ((in_attr[i].i > 0 || out_attr[i].i > 0)
-	      && (in_attr[Tag_ABI_align8_preserved].i == 0
-		  || out_attr[Tag_ABI_align8_preserved].i == 0))
+	      && (in_attr[Tag_ABI_align_preserved].i == 0
+		  || out_attr[Tag_ABI_align_preserved].i == 0))
 	    {
 	      /* This error message should be enabled once all non-conformant
 		 binaries in the toolchain have had the attributes set
@@ -10044,6 +10043,27 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 
+	case Tag_Virtualization_use:
+	  /* The virtualization tag effectively stores two bits of
+	     information: the intended use of TrustZone (in bit 0), and the
+	     intended use of Virtualization (in bit 1).  */
+	  if (out_attr[i].i == 0)
+	    out_attr[i].i = in_attr[i].i;
+	  else if (in_attr[i].i != 0
+		   && in_attr[i].i != out_attr[i].i)
+	    {
+	      if (in_attr[i].i <= 3 && out_attr[i].i <= 3)
+		out_attr[i].i = 3;
+	      else
+		{
+		  _bfd_error_handler
+		    (_("error: %B: unable to merge virtualization attributes "
+		       "with %B"),
+		     obfd, ibfd);
+		  result = FALSE;
+		}
+	    }
+	  break;
 
 	case Tag_CPU_arch_profile:
 	  if (out_attr[i].i != in_attr[i].i)
@@ -10071,7 +10091,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		}
 	    }
 	  break;
-	case Tag_VFP_arch:
+	case Tag_FP_arch:
 	    {
 	      static const struct
 	      {

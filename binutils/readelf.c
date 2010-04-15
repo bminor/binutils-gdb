@@ -9801,7 +9801,7 @@ static const char * arm_attr_tag_CPU_arch[] =
 static const char * arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char * arm_attr_tag_THUMB_ISA_use[] =
   {"No", "Thumb-1", "Thumb-2"};
-static const char * arm_attr_tag_VFP_arch[] =
+static const char * arm_attr_tag_FP_arch[] =
   {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16", "VFPv4", "VFPv4-D16"};
 static const char * arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
 static const char * arm_attr_tag_Advanced_SIMD_arch[] = 
@@ -9826,13 +9826,10 @@ static const char * arm_attr_tag_ABI_FP_exceptions[] = {"Unused", "Needed"};
 static const char * arm_attr_tag_ABI_FP_user_exceptions[] = {"Unused", "Needed"};
 static const char * arm_attr_tag_ABI_FP_number_model[] =
   {"Unused", "Finite", "RTABI", "IEEE 754"};
-static const char * arm_attr_tag_ABI_align8_needed[] = {"No", "Yes", "4-byte"};
-static const char * arm_attr_tag_ABI_align8_preserved[] =
-  {"No", "Yes, except leaf SP", "Yes"};
 static const char * arm_attr_tag_ABI_enum_size[] =
   {"Unused", "small", "int", "forced to int"};
 static const char * arm_attr_tag_ABI_HardFP_use[] =
-  {"As Tag_VFP_arch", "SP only", "DP only", "SP and DP"};
+  {"As Tag_FP_arch", "SP only", "DP only", "SP and DP"};
 static const char * arm_attr_tag_ABI_VFP_args[] =
   {"AAPCS", "VFP registers", "custom"};
 static const char * arm_attr_tag_ABI_WMMX_args[] =
@@ -9844,7 +9841,7 @@ static const char * arm_attr_tag_ABI_FP_optimization_goals[] =
   {"None", "Prefer Speed", "Aggressive Speed", "Prefer Size",
     "Aggressive Size", "Prefer Accuracy", "Aggressive Accuracy"};
 static const char * arm_attr_tag_CPU_unaligned_access[] = {"None", "v6"};
-static const char * arm_attr_tag_VFP_HP_extension[] =
+static const char * arm_attr_tag_FP_HP_extension[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_ABI_FP_16bit_format[] =
   {"None", "IEEE 754", "Alternative Format"};
@@ -9870,7 +9867,7 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   {7, "CPU_arch_profile", 0, NULL},
   LOOKUP(8, ARM_ISA_use),
   LOOKUP(9, THUMB_ISA_use),
-  LOOKUP(10, VFP_arch),
+  LOOKUP(10, FP_arch),
   LOOKUP(11, WMMX_arch),
   LOOKUP(12, Advanced_SIMD_arch),
   LOOKUP(13, PCS_config),
@@ -9884,8 +9881,8 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(21, ABI_FP_exceptions),
   LOOKUP(22, ABI_FP_user_exceptions),
   LOOKUP(23, ABI_FP_number_model),
-  LOOKUP(24, ABI_align8_needed),
-  LOOKUP(25, ABI_align8_preserved),
+  {24, "ABI_align_needed", 0, NULL},
+  {25, "ABI_align_preserved", 0, NULL},
   LOOKUP(26, ABI_enum_size),
   LOOKUP(27, ABI_HardFP_use),
   LOOKUP(28, ABI_VFP_args),
@@ -9894,7 +9891,7 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(31, ABI_FP_optimization_goals),
   {32, "compatibility", 0, NULL},
   LOOKUP(34, CPU_unaligned_access),
-  LOOKUP(36, VFP_HP_extension),
+  LOOKUP(36, FP_HP_extension),
   LOOKUP(38, ABI_FP_16bit_format),
   LOOKUP(42, MPextension_use),
   LOOKUP(44, DIV_use),
@@ -9946,7 +9943,46 @@ display_arm_attribute (unsigned char * p)
 		case 'A': printf ("Application\n"); break;
 		case 'R': printf ("Realtime\n"); break;
 		case 'M': printf ("Microcontroller\n"); break;
+		case 'S': printf ("Application or Realtime\n"); break;
 		default: printf ("??? (%d)\n", val); break;
+		}
+	      break;
+
+	    case 24: /* Tag_align_needed.  */
+	      val = read_uleb128 (p, &len);
+	      p += len;
+	      switch (val)
+		{
+		case 0: printf ("None\n"); break;
+		case 1: printf ("8-byte\n"); break;
+		case 2: printf ("4-byte\n"); break;
+		case 3: printf ("??? 3\n"); break;
+		default:
+		  if (val <= 12)
+		    printf ("8-byte and up to %d-byte extended\n", 
+			    1 << val);
+		  else
+		    printf ("??? (%d)\n", val);
+		  break;
+		}
+	      break;
+
+	    case 25: /* Tag_align_preserved.  */
+	      val = read_uleb128 (p, &len);
+	      p += len;
+	      switch (val)
+		{
+		case 0: printf ("None\n"); break;
+		case 1: printf ("8-byte, except leaf SP\n"); break;
+		case 2: printf ("8-byte\n"); break;
+		case 3: printf ("??? 3\n"); break;
+		default:
+		  if (val <= 12)
+		    printf ("8-byte and up to %d-byte extended\n", 
+			    1 << val);
+		  else
+		    printf ("??? (%d)\n", val);
+		  break;
 		}
 	      break;
 
