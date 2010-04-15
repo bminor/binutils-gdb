@@ -1,3 +1,9 @@
+2010-04-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* ppc-linux-tdep.c (bsd_uthread_solib_loaded): Always pass 0 for
+	flags.
+	* solib-spu.c (spu_solib_loaded): Always pass 0 for flags.
+
 2010-04-15  Doug Evans  <dje@google.com>
 
 	* NEWS: Add entry for python program space support.

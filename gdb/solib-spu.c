@@ -428,7 +428,7 @@ spu_solib_loaded (struct so_list *so)
 {
   if (strstr (so->so_original_name, "/libspe") != NULL)
     {
-      solib_read_symbols (so, so->from_tty ? SYMFILE_VERBOSE : 0);
+      solib_read_symbols (so, 0);
       spu_enable_break (so->objfile);
     }
 }
