@@ -51,4 +51,17 @@ gdb_test_multiple "source ${srcdir}/${subdir}/source-test.gdb" $test {
     }
 }
 
+gdb_test "dir ${srcdir}/${subdir}" ""
+gdb_test "source -s ./source-test.gdb" \
+    "test source options" \
+    "source -s"
+
+# Test -v and -s in either order.
+gdb_test "source -s -v ./source-test.gdb" \
+    "echo test source options.*" \
+    "source -s -v"
+gdb_test "source -v -s ./source-test.gdb" \
+    "echo test source options.*" \
+    "source -v -s"
+
 gdb_exit

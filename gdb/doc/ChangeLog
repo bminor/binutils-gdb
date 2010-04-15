@@ -1,3 +1,7 @@
+2010-04-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Command Files): Add docs for new "source -s" option.
+
 2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Pretty Printing): Document behaviour when to_string

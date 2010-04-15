@@ -1,3 +1,19 @@
+2010-04-15  Doug Evans  <dje@google.com>
+
+	Add -s option to source command.
+	* NEWS: Document new option.
+	* cli/cli-cmds.c (find_and_open_script): Add function comment.
+	Delete from_tty and cleanupp args.  Split filep arg into file and
+	full_pathp.  New arg search_path.
+	(source_script_from_stream): New function.
+	(source_script_with_search): New function.
+	(source_script): Rewrite.
+	(source_command): Parse "-s" option.
+	(init_cli_cmds): Add "-s" docs to source command help, and reformat.
+	* python/python.c (source_python_script): Make file arg a const char *.
+	Don't call fclose, leave for caller.
+	* python/python.h (source_python_script): Update.
+
 2010-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

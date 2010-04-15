@@ -19373,7 +19373,7 @@ using the @code{script-extension} setting.
 @table @code
 @kindex source
 @cindex execute commands from a file
-@item source [@code{-v}] @var{filename}
+@item source [-s] [-v] @var{filename}
 Execute the command file @var{filename}.
 @end table
 
@@ -19389,6 +19389,21 @@ directory, then @value{GDBN} also looks for the file on the source search path
 (specified with the @samp{directory} command);
 except that @file{$cdir} is not searched because the compilation directory
 is not relevant to scripts.
+
+If @code{-s} is specified, then @value{GDBN} searches for @var{filename}
+on the search path even if @var{filename} specifies a directory.
+The search is done by appending @var{filename} to each element of the
+search path.  So, for example, if @var{filename} is @file{mylib/myscript}
+and the search path contains @file{/home/user} then @value{GDBN} will
+look for the script @file{/home/user/mylib/myscript}.
+The search is also done if @var{filename} is an absolute path.
+For example, if @var{filename} is @file{/tmp/myscript} and
+the search path contains @file{/home/user} then @value{GDBN} will
+look for the script @file{/home/user/tmp/myscript}.
+For DOS-like systems, if @var{filename} contains a drive specification,
+it is stripped before concatenation.  For example, if @var{filename} is
+@file{d:myscript} and the search path contains @file{c:/tmp} then @value{GDBN}
+will look for the script @file{c:/tmp/myscript}.
 
 If @code{-v}, for verbose mode, is given then @value{GDBN} displays
 each command as it is executed.  The option must be given before

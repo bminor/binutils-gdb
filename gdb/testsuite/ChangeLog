@@ -1,3 +1,8 @@
+2010-04-15  Doug Evans  <dje@google.com>
+
+	* gdb.base/source-test.gdb: New file.
+	* gdb.base/source.exp: Add tests for "source -s".
+
 2010-04-14  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-prettyprint.py (NoStringContainerPrinter): New printer.

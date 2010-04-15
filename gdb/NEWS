@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.1
 
+* The source command now accepts a -s option to force searching for the
+  script in the source search path even if the script name specifies
+  a directory.
+
 * New features in the GDB remote stub, GDBserver
 
   - GDBserver now support tracepoints.  The feature is currently

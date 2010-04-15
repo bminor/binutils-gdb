@@ -364,10 +364,11 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 }
 
 /* Read a file as Python code.  STREAM is the input file; FILE is the
-   name of the file.  */
+   name of the file.
+   STREAM is not closed, that is the caller's responsibility.  */
 
 void
-source_python_script (FILE *stream, char *file)
+source_python_script (FILE *stream, const char *file)
 {
   struct cleanup *cleanup;
 
@@ -375,7 +376,6 @@ source_python_script (FILE *stream, char *file)
 
   PyRun_SimpleFile (stream, file);
 
-  fclose (stream);
   do_cleanups (cleanup);
 }
 
@@ -562,9 +562,8 @@ eval_python_from_control_command (struct command_line *cmd)
 }
 
 void
-source_python_script (FILE *stream, char *file)
+source_python_script (FILE *stream, const char *file)
 {
-  fclose (stream);
   throw_error (UNSUPPORTED_ERROR,
 	       _("Python scripting is not supported in this copy of GDB."));
 }
