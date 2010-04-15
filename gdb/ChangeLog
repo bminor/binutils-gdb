@@ -459,7 +459,7 @@
 	i386_xmm_regnum_p.
 	(i386_validate_tdesc_p): Support org.gnu.gdb.i386.avx feature.
 	Set ymmh_register_names, num_ymm_regs, ymm0h_regnum and xcr0.
-	(i386_gdbarch_init): Set xstateregset.  Set xsave_xcr0_offset. 
+	(i386_gdbarch_init): Set xstateregset.  Set xsave_xcr0_offset.
 	Call set_gdbarch_register_name.  Replace I386_SSE_NUM_REGS with
 	I386_AVX_NUM_REGS.  Set ymmh_register_names, ymm0h_regnum and
 	num_ymm_regs.  Add num_ymm_regs to set_gdbarch_num_pseudo_regs.
@@ -722,7 +722,7 @@
 2010-03-31  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (thumb_get_next_pc_raw): Correctly detect TBH
-	instructions.  Use the PC+4 if the base of the TBB or TBH is the 
+	instructions.  Use the PC+4 if the base of the TBB or TBH is the
 	PC register.
 
 2010-03-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
@@ -735,7 +735,7 @@
 2010-03-31  Stan Shebs  <stan@codesourcery.com>
 
 	* breakpoint.c (tracepoint_save_command): Include variables,
- 	conditionals, tracepoint types, and default-collect.
+	conditionals, tracepoint types, and default-collect.
 	* tracepoint.c (save_trace_state_variables): New function.
 	* tracepoint.h (save_trace_state_variables): Declare it.
 
@@ -930,7 +930,7 @@
 
 2010-03-24  Michael Snyder  <msnyder@localhost.localdomain>
 
-	* elfread.c (find_separate_debug_file_by_buildid): 
+	* elfread.c (find_separate_debug_file_by_buildid):
 	Remove unused local variable.
 
 2010-03-24  Tom Tromey  <tromey@redhat.com>
@@ -1231,7 +1231,7 @@
 
 2010-03-19  Stan Shebs  <stan@codesourcery.com>
 
-	* ax-general.c (ax_const_l): Fix a sizing bug. 
+	* ax-general.c (ax_const_l): Fix a sizing bug.
 
 2010-03-18  Joel Brobecker  <brobecker@adacore.com>
 
@@ -1850,8 +1850,8 @@
 	If the extracted function name and the original name are the same,
 	we don't have a C++ method.
 
-	From Jan Kratochvil  <jan.kratochvil@redhat.com>:    
-    	* dwarf2read.c (new_symbol <DW_TAG_enumerator>): Call dwarf2_full_name.
+	From Jan Kratochvil  <jan.kratochvil@redhat.com>:
+	* dwarf2read.c (new_symbol <DW_TAG_enumerator>): Call dwarf2_full_name.
 
 	* ada-lang.c (ada_lookup_symbol): Remove linkage_name parameters
 	and arguments from symbol lookups.
@@ -1926,7 +1926,7 @@
 	(MON_ROCKHOPPER): New mips_monitor_type.
 	(read_hex_value): New function.
 	(mips_request): Send 8-byte values with a 'T' packet.  Read the
-	packet argument as a string and use read_hex_value to parse it.  
+	packet argument as a string and use read_hex_value to parse it.
 	(mips_exit_debug): Wait for response when using MON_ROCKHOPPER.
 	(rockhopper_open): New function.
 	(mips_wait): Read the PC, FP and SP fields as strings.  Use
@@ -2331,7 +2331,7 @@
 	(amd64_register_name): Likewise.
 	(amd64_register_type): Likewise.
 	(amd64_init_abi):  Set num_core_regs and register_names.  Set
-	target description to tdesc_amd64 if needed.  Don't call 
+	target description to tdesc_amd64 if needed.  Don't call
 	set_gdbarch_register_name nor set_gdbarch_register_type.
 	(_initialize_amd64_tdep): New.
 
@@ -2487,7 +2487,7 @@
 	(typy_lookup_type): Likewise.
 
 2010-02-25  Daniel Jacobowitz  <dan@codesourcery.com>
- 
+
 	Symbian config
 
 	gdb/
@@ -2508,7 +2508,7 @@
 	* mi/mi-main.c (mi_cmd_execute): Fix typo.
 
 2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
-   	    Tom Tromey  <tromey@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* python/python.c (_initialize_python): Call
@@ -3018,18 +3018,18 @@
 	* infrun.c (handle_inferior_event): Do not look up regcache
 	for exited processes.
 
-Mon Feb  8 13:17:10 2010  Chris Moller  <moller@mollerware.com>
+2010-02-08  Chris Moller  <moller@mollerware.com>
 
 	PR gdb/10728
 	* valarith.c (value_ptrdiff): Added a test for a zero type length,
-	warn if found, and assume length = 1. 
+	warn if found, and assume length = 1.
 
 2010-02-08  Chris Moller  <cmoller@redhat.com>
 
 	PR gdb/9067
 	* cp-valprint.c (cp_print_value_fields) Fix use of obstacks.
 	cp_print_static_field)  Fix use of obstacks.
-	
+
 2010-02-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_resume): In non-stop, also only tag
@@ -3565,7 +3565,7 @@ Mon Feb  8 13:17:10 2010  Chris Moller  <moller@mollerware.com>
 	* breakpoint.c (watchpoint_check): Check the call
 	gdbarch_in_function_epilogue_p before calling frame_find_by_id.
 	Extend the comment.
-	* config/djgpp/fnchange.lst: Add translations for 
+	* config/djgpp/fnchange.lst: Add translations for
 	watchpoint-cond-gone.exp, watchpoint-cond-gone.c and
 	watchpoint-cond-gone-stripped.c.
 
@@ -4152,8 +4152,8 @@ Mon Feb  8 13:17:10 2010  Chris Moller  <moller@mollerware.com>
 	tramp-frame.h.
 	(SIGTRAMP_FRAME_SIZE, SIGCONTEXT_PC_OFF, SIGCONTEXT_REGS_OFF)
 	(SIGCONTEXT_FPREGS_OFF, SIGCONTEXT_FPCSR_OFF, SIGCONTEXT_HI_OFF)
-	(SIGCONTEXT_LO_OFF): New macros. 
-	(mips_irix_n32_tramp_frame_init): New function. 
+	(SIGCONTEXT_LO_OFF): New macros.
+	(mips_irix_n32_tramp_frame_init): New function.
 	(mips_irix_n32_tramp_frame): New static constant.
 	(mips_irix_init_abi): Prepend the mips_irix_n32_tramp_frame unwinder.
 
