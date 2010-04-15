@@ -741,8 +741,7 @@
 
 2010-03-31  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	* src/gdb/remote.c (end_thread): ARI fix: Use xstrdup instead of
-	strdup.
+	* remote.c (end_thread): ARI fix: Use xstrdup instead of strdup.
 
 2010-03-30  Keith Seitz  <keiths@redhat.com>
 
