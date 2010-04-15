@@ -5696,8 +5696,10 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 	  unsigned int text_shndx = exidx_input_section->link();
 	  gold_assert(symtab->is_section_folded(p->relobj(), text_shndx));
 
-	  // Remove this from link.
+	  // Remove this from link.  We also need to recount the
+	  // local symbols.
 	  p->relobj()->set_output_section(p->shndx(), NULL);
+	  arm_relobj->set_output_local_symbol_count_needs_update();
 	}
     }
     

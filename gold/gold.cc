@@ -276,6 +276,16 @@ queue_middle_gc_tasks(const General_options& options,
 				       next_blocker));
       this_blocker = next_blocker;
     }
+
+  // If we are given only archives in input, we have no regular
+  // objects and THIS_BLOCKER is NULL here.  Create a dummy
+  // blocker here so that we can run the middle tasks immediately.
+  if (this_blocker == NULL)
+    {
+      gold_assert(input_objects->number_of_relobjs() == 0);
+      this_blocker = new Task_token(true);
+    }
+
   workqueue->queue(new Task_function(new Middle_runner(options,
                                                        input_objects,
                                                        symtab,

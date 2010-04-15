@@ -1,3 +1,10 @@
+2010-04-14  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_output_section::fix_exidx_coverage): Mark object
+	for local symbol recounting if we remove a section due to ICF.
+	* gold.cc (queue_middle_gc_tasks): Create a dummy blocker if
+	there are no regular objects in input.
+
 2010-04-13  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_input_section::set_final_data_size): Compute
