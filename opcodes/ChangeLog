@@ -1,3 +1,8 @@
+2010-04-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (get_valid_dis386): Return bad_opcode on unknown
+	bits in opcode.
+
 2010-04-09  Nick Clifton  <nickc@redhat.com>
 
 	* i386-dis.c (print_insn): Remove unused variable op.

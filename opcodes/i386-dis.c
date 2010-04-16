@@ -11058,7 +11058,9 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       switch ((*codep & 0x1f))
 	{
 	default:
-	  BadOp ();
+	  dp = &bad_opcode;
+	  return dp;
+	  break;
 	case 0x8:
 	  vex_table_index = XOP_08;
 	  break;
@@ -11077,7 +11079,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
       if (address_mode != mode_64bit
 	  && vex.register_specifier > 0x7)
-	BadOp ();
+	{
+	  dp = &bad_opcode;
+	  return dp;
+	}
 
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
@@ -11115,7 +11120,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       switch ((*codep & 0x1f))
 	{
 	default:
-	  BadOp ();
+	  dp = &bad_opcode;
+	  return dp;
 	case 0x1:
 	  vex_table_index = VEX_0F;
 	  break;
@@ -11134,7 +11140,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
       if (address_mode != mode_64bit
 	  && vex.register_specifier > 0x7)
-	BadOp ();
+	{
+	  dp = &bad_opcode;
+	  return dp;
+	}
 
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
@@ -11176,7 +11185,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       vex.register_specifier = (~(*codep >> 3)) & 0xf;
       if (address_mode != mode_64bit
 	  && vex.register_specifier > 0x7)
-	BadOp ();
+	{
+	  dp = &bad_opcode;
+	  return dp;
+	}
 
       vex.w = 0;
 
