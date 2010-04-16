@@ -1,3 +1,11 @@
+2010-04-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* m32c-tdep.c (m32c_m16c_address_to_pointer): Print warning
+	instead of an error if no PLT entry is found.  Return a
+	potentially useful result.
+	(m32c_m16c_pointer_to_address): Add code to search for function
+	address when no .plt entry is found.
+
 2010-04-16  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c (trace_variable_command): Run a cleanup.

@@ -2431,8 +2431,8 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       struct minimal_symbol *func_msym = lookup_minimal_symbol_by_pc (addr);
 
       if (! func_msym)
-        error ("Cannot convert code address %s to function pointer:\n"
-               "couldn't find a symbol at that address, to find trampoline.",
+        error (_("Cannot convert code address %s to function pointer:\n"
+               "couldn't find a symbol at that address, to find trampoline."),
                paddress (gdbarch, addr));
 
       func_name = SYMBOL_LINKAGE_NAME (func_msym);
@@ -2448,12 +2448,39 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       xfree (tramp_name);
 
       if (! tramp_msym)
-        error ("Cannot convert code address %s to function pointer:\n"
-               "couldn't find trampoline named '%s.plt'.",
-               paddress (gdbarch, addr), func_name);
+	{
+	  CORE_ADDR ptrval;
 
-      /* The trampoline's address is our pointer.  */
-      addr = SYMBOL_VALUE_ADDRESS (tramp_msym);
+	  /* No PLT entry found.  Mask off the upper bits of the address
+	     to make a pointer.  As noted in the warning to the user
+	     below, this value might be useful if converted back into
+	     an address by GDB, but will otherwise, almost certainly,
+	     be garbage.
+	     
+	     Using this masked result does seem to be useful
+	     in gdb.cp/cplusfuncs.exp in which ~40 FAILs turn into
+	     PASSes.  These results appear to be correct as well.
+	     
+	     We print a warning here so that the user can make a
+	     determination about whether the result is useful or not.  */
+	  ptrval = addr & 0xffff;
+
+	  warning (_("Cannot convert code address %s to function pointer:\n"
+		   "couldn't find trampoline named '%s.plt'.\n"
+		   "Returning pointer value %s instead; this may produce\n"
+		   "a useful result if converted back into an address by GDB,\n"
+		   "but will most likely not be useful otherwise.\n"),
+		   paddress (gdbarch, addr), func_name,
+		   paddress (gdbarch, ptrval));
+
+	  addr = ptrval;
+
+	}
+      else
+	{
+	  /* The trampoline's address is our pointer.  */
+	  addr = SYMBOL_VALUE_ADDRESS (tramp_msym);
+	}
     }
 
   store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr);
@@ -2508,6 +2535,18 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
                 ptr = SYMBOL_VALUE_ADDRESS (func_msym);
             }
         }
+      else
+	{
+	  int aspace;
+
+	  for (aspace = 1; aspace <= 15; aspace++)
+	    {
+	      ptr_msym = lookup_minimal_symbol_by_pc ((aspace << 16) | ptr);
+	      
+	      if (ptr_msym)
+		ptr |= aspace << 16;
+	    }
+	}
     }
 
   return ptr;
