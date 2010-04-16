@@ -256,6 +256,11 @@ tui_show_locator_content (void)
 
       string = tui_make_status_line (&element->which_element.locator);
       wmove (locator->handle, 0, 0);
+      /* We ignore the return value from wstandout and wstandend, casting
+	 them to void in order to avoid a compiler warning.  The warning
+	 itself was introduced by a patch to ncurses 5.7 dated 2009-08-29,
+	 changing these macro to expand to code that causes the compiler
+	 to generate an unused-value warning.  */
       (void) wstandout (locator->handle);
       waddstr (locator->handle, string);
       wclrtoeol (locator->handle);

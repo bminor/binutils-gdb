@@ -1,3 +1,9 @@
+2010-04-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* tui/tui-regs.c (tui_display_register): Add comment about
+	a couple of casts.
+	* tui/tui-stack.c (tui_show_locator_content): Ditto.
+
 2010-04-15  Stan Shebs  <stan@codesourcery.com>
 
 	* frame.c: Include tracepoint.h.

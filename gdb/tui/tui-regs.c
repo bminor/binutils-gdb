@@ -541,6 +541,11 @@ tui_display_register (struct tui_data_element *data,
       int i;
 
       if (data->highlight)
+	/* We ignore the return value, casting it to void in order to avoid
+	   a compiler warning.  The warning itself was introduced by a patch
+	   to ncurses 5.7 dated 2009-08-29, changing this macro to expand
+	   to code that causes the compiler to generate an unused-value
+	   warning.  */
 	(void) wstandout (win_info->handle);
       
       wmove (win_info->handle, 0, 0);
@@ -551,6 +556,11 @@ tui_display_register (struct tui_data_element *data,
         waddstr (win_info->handle, data->content);
 
       if (data->highlight)
+	/* We ignore the return value, casting it to void in order to avoid
+	   a compiler warning.  The warning itself was introduced by a patch
+	   to ncurses 5.7 dated 2009-08-29, changing this macro to expand
+	   to code that causes the compiler to generate an unused-value
+	   warning.  */
 	(void) wstandend (win_info->handle);
       tui_refresh_win (win_info);
     }
