@@ -365,6 +365,7 @@ trace_variable_command (char *args, int from_tty)
       tsv->initial_value = initval;
       printf_filtered (_("Trace state variable $%s now has initial value %s.\n"),
 		       tsv->name, plongest (tsv->initial_value));
+      do_cleanups (old_chain);
       return;
     }
 
