@@ -4334,7 +4334,8 @@ static struct target_ops linux_target_ops = {
   linux_read_pc,
   linux_write_pc,
   linux_thread_stopped,
-  linux_pause_all
+  linux_pause_all,
+  NULL,	      /* get_tib_address (Windows OS specific).  */
 };
 
 static void

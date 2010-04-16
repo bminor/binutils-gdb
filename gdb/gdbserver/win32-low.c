@@ -178,7 +178,7 @@ thread_rec (ptid_t ptid, int get_context)
 
 /* Add a thread to the thread list.  */
 static win32_thread_info *
-child_add_thread (DWORD pid, DWORD tid, HANDLE h)
+child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 {
   win32_thread_info *th;
   ptid_t ptid = ptid_build (pid, tid, 0);
@@ -189,6 +189,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h)
   th = xcalloc (1, sizeof (*th));
   th->tid = tid;
   th->h = h;
+  th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
 
   add_thread (ptid, th);
   set_inferior_regcache_data ((struct thread_info *)
@@ -1455,7 +1456,8 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       /* Record the existence of this thread.  */
       child_add_thread (current_event.dwProcessId,
 			current_event.dwThreadId,
-			current_event.u.CreateThread.hThread);
+			current_event.u.CreateThread.hThread,
+			current_event.u.CreateThread.lpThreadLocalBase);
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
@@ -1485,7 +1487,8 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       /* Add the main thread.  */
       child_add_thread (current_event.dwProcessId,
 			main_thread_id,
-			current_event.u.CreateProcessInfo.hThread);
+			current_event.u.CreateProcessInfo.hThread,
+			current_event.u.CreateProcessInfo.lpThreadLocalBase);
 
       ourstatus->value.related_pid = debug_event_ptid (&current_event);
 #ifdef _WIN32_WCE
@@ -1753,6 +1756,20 @@ wince_hostio_last_error (char *buf)
 }
 #endif
 
+/* Write Windows OS Thread Information Block address.  */
+
+static int
+win32_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+{
+  win32_thread_info *th;
+  th = thread_rec (ptid, 0);
+  if (th == NULL)
+    return 0;
+  if (addr != NULL)
+    *addr = th->thread_local_base;
+  return 1;
+}
+
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
   win32_attach,
@@ -1767,21 +1784,36 @@ static struct target_ops win32_target_ops = {
   win32_store_inferior_registers,
   win32_read_inferior_memory,
   win32_write_inferior_memory,
-  NULL,
+  NULL, /* lookup_symbols */
   win32_request_interrupt,
-  NULL,
+  NULL, /* read_auxv */
   win32_insert_point,
   win32_remove_point,
   win32_stopped_by_watchpoint,
   win32_stopped_data_address,
-  NULL,
-  NULL,
-  NULL,
+  NULL, /* read_offsets */
+  NULL, /* get_tls_address */
+  NULL, /* qxfer_spu */
 #ifdef _WIN32_WCE
   wince_hostio_last_error,
 #else
   hostio_last_error_from_errno,
 #endif
+  NULL, /* qxfer_osdata */
+  NULL, /* qxfer_siginfo */
+  NULL, /* supports_non_stop */
+  NULL, /* async */
+  NULL, /* start_non_stop */
+  NULL, /* supports_multi_process */
+  NULL, /* handle_monitor_command */
+  NULL, /* core_of_thread */
+  NULL, /* process_qsupported */
+  NULL, /* supports_tracepoints */
+  NULL, /* read_pc */
+  NULL, /* write_pc */
+  NULL, /* thread_stopped */
+  NULL, /* pause_all */
+  win32_get_tib_address,
 };
 
 /* Initialize the Win32 backend.  */

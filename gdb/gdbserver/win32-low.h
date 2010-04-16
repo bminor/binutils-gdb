@@ -28,6 +28,9 @@ typedef struct win32_thread_info
   /* The handle to the thread.  */
   HANDLE h;
 
+  /* Thread Information Block address.  */
+  CORE_ADDR thread_local_base;
+
   /* Non zero if SuspendThread was called on this thread.  */
   int suspended;
 

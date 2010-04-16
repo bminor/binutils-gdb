@@ -1,3 +1,51 @@
+2010-04-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Support for Windows OS Thread Information Block.
+	* NEWS: Document new feature.
+	* remote.c (PACKET_qGetTIBAddr): New enum element.
+	(remote_get_tib_address): New function.
+	(init_remote_ops): Set to_get_tib_address field
+	to remote_get_tib_address.
+	(_initialize_remote): Add add_packet_config_cmd
+	for PACKET_qGetTIBAddr.
+	* target.c (update_current_target): Set default value for
+	new to_get_tib_address field.
+	* target.h (target_ops): New field to_get_tib_address.
+	(target_get_tib_address): New macro.
+	* windows-nat.c (thread_info): Add thread_local_base field.
+	(windows_add_thread): Add tlb argument of type 'void *'.
+	(fake_create_process): Adapt windows_add_thread call.
+	(get_windows_debug_event): Idem.
+	(windows_get_tib_address): New function.
+	(init_windows_ops): Set to_get_tib_address field
+	to remote_get_tib_address.
+	(_initialize_windows_nat): Replace info_w32_cmdlist
+	initialization by a call to init_w32_command_list.
+	(info_w32_command, info_w32_cmdlist): Removed from here...
+	to windows-tdep.c file.
+	* windows-tdep.h (info_w32_cmdlist): Declare.
+	(init_w32_command_list): New external function 
+	declaration.
+	* windows-tdep.c: Add several headers.
+	(info_w32_cmdlist): to here, made global.
+	(thread_information_32): New struct.
+	(thread_information_64): New struct.
+	(TIB_NAME): New char array.
+	(MAX_TIB32, MAX_TIB64, FULL_TIB_SIZE): New constants.
+	(maint_display_all_tib): New static variable.
+	(windows_get_tlb_type): New function.
+	(tlb_value_read, tlb_value_write): New functions.
+	(tlb_value_funcs): New static struct.
+	(tlb_make_value): New function.
+	(display_one_tib): New function.
+	(display_tib): New function.
+	(show_maint_show_all_tib):New function.
+	(info_w32_command): Moved from windows-nat.c.
+	(init_w32_command_list): New function.
+	(_initialize_windows_tdep): New function.
+	New "maint set/show show-all-tib" command
+	New "$_tlb" internal variable.
+
 2010-04-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* tui/tui-regs.c (tui_display_register): Add comment about

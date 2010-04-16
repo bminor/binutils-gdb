@@ -191,6 +191,7 @@ typedef struct thread_info_struct
     struct thread_info_struct *next;
     DWORD id;
     HANDLE h;
+    CORE_ADDR thread_local_base;
     char *name;
     int suspended;
     int reload_context;
@@ -320,7 +321,7 @@ thread_rec (DWORD id, int get_context)
 
 /* Add a thread to the thread list.  */
 static thread_info *
-windows_add_thread (ptid_t ptid, HANDLE h)
+windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
 {
   thread_info *th;
   DWORD id;
@@ -335,6 +336,7 @@ windows_add_thread (ptid_t ptid, HANDLE h)
   th = XZALLOC (thread_info);
   th->id = id;
   th->h = h;
+  th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
   th->next = thread_head.next;
   thread_head.next = th;
   add_thread (ptid);
@@ -1074,15 +1076,6 @@ display_selectors (char * args, int from_tty)
     }
 }
 
-static struct cmd_list_element *info_w32_cmdlist = NULL;
-
-static void
-info_w32_command (char *args, int from_tty)
-{
-  help_list (info_w32_cmdlist, "info w32 ", class_info, gdb_stdout);
-}
-
-
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
   printf_unfiltered ("gdb: Target exception %s at %s\n", x, \
     host_address_to_string (\
@@ -1271,9 +1264,11 @@ fake_create_process (void)
       /*  We can not debug anything in that case.  */
     }
   main_thread_id = current_event.dwThreadId;
-  current_thread = windows_add_thread (ptid_build (current_event.dwProcessId, 0,
-						   current_event.dwThreadId),
-				       current_event.u.CreateThread.hThread);
+  current_thread = windows_add_thread (
+		     ptid_build (current_event.dwProcessId, 0,
+				 current_event.dwThreadId),
+		     current_event.u.CreateThread.hThread,
+		     current_event.u.CreateThread.lpThreadLocalBase);
   return main_thread_id;
 }
 
@@ -1447,7 +1442,9 @@ get_windows_debug_event (struct target_ops *ops,
       retval = current_event.dwThreadId;
       th = windows_add_thread (ptid_build (current_event.dwProcessId, 0,
 					 current_event.dwThreadId),
-			     current_event.u.CreateThread.hThread);
+			     current_event.u.CreateThread.hThread,
+			     current_event.u.CreateThread.lpThreadLocalBase);
+
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
@@ -1481,7 +1478,8 @@ get_windows_debug_event (struct target_ops *ops,
       /* Add the main thread */
       th = windows_add_thread (ptid_build (current_event.dwProcessId, 0,
 					   current_event.dwThreadId),
-			       current_event.u.CreateProcessInfo.hThread);
+	     current_event.u.CreateProcessInfo.hThread,
+	     current_event.u.CreateProcessInfo.lpThreadLocalBase);
       retval = current_event.dwThreadId;
       break;
 
@@ -2266,6 +2264,24 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 }
 
+/* Provide thread local base, i.e. Thread Information Block address.
+   Returns 1 if ptid is found and sets *ADDR to thread_local_base.  */
+
+static int
+windows_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+{
+  thread_info *th;
+
+  th = thread_rec (ptid_get_tid (ptid), 0);
+  if (th == NULL)
+    return 0;
+
+  if (addr != NULL)
+    *addr = th->thread_local_base;
+
+  return 1;
+}
+
 static ptid_t
 windows_get_ada_task_ptid (long lwp, long thread)
 {
@@ -2314,6 +2330,7 @@ init_windows_ops (void)
   windows_ops.to_has_execution = default_child_has_execution;
   windows_ops.to_pid_to_exec_file = windows_pid_to_exec_file;
   windows_ops.to_get_ada_task_ptid = windows_get_ada_task_ptid;
+  windows_ops.to_get_tib_address = windows_get_tib_address;
 
   i386_use_watchpoints (&windows_ops);
 
@@ -2415,9 +2432,7 @@ Show whether to display kernel exceptions in child process."), NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  add_prefix_cmd ("w32", class_info, info_w32_command,
-		  _("Print information specific to Win32 debugging."),
-		  &info_w32_cmdlist, "info w32 ", 0, &infolist);
+  init_w32_command_list ();
 
   add_cmd ("selector", class_info, display_selectors,
 	   _("Display selectors infos."),

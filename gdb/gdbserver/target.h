@@ -309,6 +309,9 @@ struct target_ops
 
   /* Pause all threads.  */
   void (*pause_all) (void);
+
+  /* Read Thread Information Block address.  */
+  int (*get_tib_address) (ptid_t ptid, CORE_ADDR *address);
 };
 
 extern struct target_ops *the_target;

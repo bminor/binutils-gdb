@@ -682,6 +682,10 @@ struct target_ops
     int (*to_verify_memory) (struct target_ops *, const gdb_byte *data,
 			     CORE_ADDR memaddr, ULONGEST size);
 
+    /* Return the address of the start of the Thread Information Block
+       a Windows OS specific feature.  */
+    int (*to_get_tib_address) (ptid_t ptid, CORE_ADDR *addr);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1370,6 +1374,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define	target_set_circular_trace_buffer(val)	\
   (*current_target.to_set_circular_trace_buffer) (val)
+
+#define target_get_tib_address(ptid, addr) \
+  (*current_target.to_get_tib_address) ((ptid), (addr))
 
 /* Command logging facility.  */
 

@@ -660,6 +660,7 @@ update_current_target (void)
       INHERIT (to_get_raw_trace_data, t);
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_set_circular_trace_buffer, t);
+      INHERIT (to_get_tib_address, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -853,6 +854,9 @@ update_current_target (void)
   de_fault (to_set_circular_trace_buffer,
 	    (void (*) (int))
 	    target_ignore);
+  de_fault (to_get_tib_address,
+	    (int (*) (ptid_t, CORE_ADDR *))
+	    tcomplain);
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed

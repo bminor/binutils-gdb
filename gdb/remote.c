@@ -1136,6 +1136,7 @@ enum {
   PACKET_qXfer_spu_write,
   PACKET_qXfer_osdata,
   PACKET_qXfer_threads,
+  PACKET_qGetTIBAddr,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
@@ -8437,6 +8438,48 @@ remote_get_thread_local_address (struct target_ops *ops,
   return 0;
 }
 
+/* Provide thread local base, i.e. Thread Information Block address.
+   Returns 1 if ptid is found and thread_local_base is non zero.  */
+
+int
+remote_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+{
+  if (remote_protocol_packets[PACKET_qGetTIBAddr].support != PACKET_DISABLE)
+    {
+      struct remote_state *rs = get_remote_state ();
+      char *p = rs->buf;
+      char *endp = rs->buf + get_remote_packet_size ();
+      enum packet_result result;
+
+      strcpy (p, "qGetTIBAddr:");
+      p += strlen (p);
+      p = write_ptid (p, endp, ptid);
+      *p++ = '\0';
+
+      putpkt (rs->buf);
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      result = packet_ok (rs->buf,
+			  &remote_protocol_packets[PACKET_qGetTIBAddr]);
+      if (result == PACKET_OK)
+	{
+	  ULONGEST result;
+
+	  unpack_varlen_hex (rs->buf, &result);
+	  if (addr)
+	    *addr = (CORE_ADDR) result;
+	  return 1;
+	}
+      else if (result == PACKET_UNKNOWN)
+	error (_("Remote target doesn't support qGetTIBAddr packet"));
+      else
+	error (_("Remote target failed to process qGetTIBAddr request"));
+    }
+  else
+    error (_("qGetTIBAddr not supported or disabled on this target"));
+  /* Not reached.  */
+  return 0;
+}
+
 /* Support for inferring a target description based on the current
    architecture and the size of a 'g' packet.  While the 'g' packet
    can have any size (since optional registers can be left off the
@@ -9904,6 +9947,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_set_circular_trace_buffer = remote_set_circular_trace_buffer;
   remote_ops.to_core_of_thread = remote_core_of_thread;
   remote_ops.to_verify_memory = remote_verify_memory;
+  remote_ops.to_get_tib_address = remote_get_tib_address;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -10321,6 +10365,10 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTIBAddr],
+			 "qGetTIBAddr", "get-thread-information-block-address",
 			 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_bc],

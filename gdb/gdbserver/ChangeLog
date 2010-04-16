@@ -1,3 +1,16 @@
+2010-04-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* server.c (handle_query): Handle 'qGetTIBAddr' query.
+	* target.h (target_ops): New get_tib_address field.
+	* win32-low.h (win32_thread_info): Add thread_local_base field.
+	* win32-low.c (child_add_thread): Add tlb argument.
+	Set thread_local_base field to TLB.
+	(get_child_debug_event): Adapt to child_add_thread change.
+	(win32_get_tib_address): New function.
+	(win32_target_ops): Set get_tib_address field to
+	win32_get_tib_address.
+	* linux-low.c (linux_target_ops): Set get_tib_address field to NULL.
+
 2010-04-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (linux_mourn): Also remove the process.

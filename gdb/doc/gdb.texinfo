@@ -8054,6 +8054,15 @@ The variable @code{$_siginfo} contains extra signal information
 (@pxref{extra signal information}).  Note that @code{$_siginfo}
 could be empty, if the application has not yet received any signals.
 For example, it will be empty before you execute the @code{run} command.
+
+@item $_tlb
+@vindex $_tlb@r{, convenience variable}
+The variable @code{$_tlb} is automatically set when debugging
+applications running on MS-Windows in native mode or connected to
+gdbserver that supports the @code{qGetTIBAddr} request. 
+@xref{General Query Packets}.
+This variable contains the address of the thread information block.
+
 @end table
 
 On HP-UX systems, if you refer to a function or variable name that
@@ -15755,6 +15764,10 @@ are:
 @tab @code{qGetTLSAddr}
 @tab Displaying @code{__thread} variables
 
+@item @code{get-thread-information-block-address}
+@tab @code{qGetTIBAddr}
+@tab Display MS-Windows Thread Information Block.
+
 @item @code{search-memory}
 @tab @code{qSearch:memory}
 @tab @code{find}
@@ -16533,6 +16546,11 @@ It takes an optional argument that is evaluated to
 a long value to give the information about this given selector.
 Without argument, this command displays information
 about the six segment registers.
+
+@item info w32 thread-information-block
+This command displays thread specific information stored in the
+Thread Information Block (readable on the X86 CPU family using @code{$fs}
+selector for 32-bit programs and @code{$gs} for 64-bit programs).
 
 @kindex info dll
 @item info dll
@@ -29449,6 +29467,14 @@ enabled, the debug registers values are shown when @value{GDBN} inserts or
 removes a hardware breakpoint or watchpoint, and when the inferior
 triggers a hardware-assisted breakpoint or watchpoint.
 
+@kindex maint set show-all-tib
+@kindex maint show show-all-tib
+@item maint set show-all-tib
+@itemx maint show show-all-tib
+Control whether to show all non zero areas within a 1k block starting
+at thread local base, when using the @samp{info w32 thread-information-block}
+command.
+
 @kindex maint space
 @cindex memory used by commands
 @item maint space
@@ -30660,6 +30686,27 @@ An error occurred.  @var{nn} are hex digits.
 
 @item
 An empty reply indicates that @samp{qGetTLSAddr} is not supported by the stub.
+@end table
+
+@item qGetTIBAddr:@var{thread-id}
+@cindex get thread information block address
+@cindex @samp{qGetTIBAddr} packet
+Fetch address of the Windows OS specific Thread Information Block.
+
+@var{thread-id} is the thread ID associated with the thread.
+
+Reply:
+@table @samp
+@item @var{XX}@dots{}
+Hex encoded (big endian) bytes representing the linear address of the
+thread information block.
+
+@item E @var{nn}
+An error occured.  This means that either the thread was not found, or the
+address could not be retrieved.
+
+@item
+An empty reply indicates that @samp{qGetTIBAddr} is not supported by the stub.
 @end table
 
 @item qL @var{startflag} @var{threadcount} @var{nextthread}

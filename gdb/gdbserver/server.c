@@ -1463,6 +1463,29 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       /* Otherwise, pretend we do not understand this packet.  */
     }
 
+  /* Windows OS Thread Information Block address support.  */
+  if (the_target->get_tib_address != NULL
+      && strncmp ("qGetTIBAddr:", own_buf, 12) == 0)
+    {
+      char *annex;
+      int n;
+      CORE_ADDR tlb;
+      ptid_t ptid = read_ptid (own_buf + 12, &annex);
+
+      n = (*the_target->get_tib_address) (ptid, &tlb);
+      if (n == 1)
+	{
+	  sprintf (own_buf, "%llx", tlb);
+	  return;
+	}
+      else if (n == 0)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+      return;
+    }
+
   /* Handle "monitor" commands.  */
   if (strncmp ("qRcmd,", own_buf, 6) == 0)
     {

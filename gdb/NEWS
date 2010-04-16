@@ -3,6 +3,21 @@
 
 *** Changes since GDB 7.1
 
+* Windows Thread Information Block access.
+
+  On Windows targets, GDB now supports displaying the Windows Thread
+  Information Block (TIB) structure.  This structure is visible either
+  by using the new command `info w32 thread-information-block' or, by
+  dereferencing the new convenience variable named `$_tlb', a
+  thread-specific pointer to the TIB.  This feature is also supported
+  when remote debugging using GDBserver.
+
+* New remote packets
+
+qGetTIBAddr
+
+  Return the address of the Windows Thread Information Block of a given thread.
+
 * The source command now accepts a -s option to force searching for the
   script in the source search path even if the script name specifies
   a directory.
