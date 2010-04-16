@@ -492,7 +492,7 @@ _bfd_vms_slurp_eihd (bfd *abfd, unsigned int *eisd_offset,
                size, imgtype, (unsigned long)symvva,
                *eisd_offset, *eihs_offset));
 
-  return FALSE;
+  return TRUE;
 }
 
 /* Read & process EISD record.
@@ -753,15 +753,12 @@ maybe_adjust_record_pointer_for_object (bfd *abfd)
 static int
 _bfd_vms_get_object_record (bfd *abfd)
 {
-  unsigned int test_len;
+  unsigned int test_len = 6;
   int type;
-  int off = 0;
 
   vms_debug2 ((8, "_bfd_vms_get_obj_record\n"));
 
-  test_len = 6;
-
-  /* Skip odd alignment byte.  */
+  /* Skip alignment byte if the current position is odd.  */
   if (bfd_tell (abfd) & 1)
     {
       if (bfd_bread (PRIV (recrd.buf), 1, abfd) != 1)
@@ -769,16 +766,10 @@ _bfd_vms_get_object_record (bfd *abfd)
           bfd_set_error (bfd_error_file_truncated);
           return -1;
         }
-      /* Alignment byte may be present or not.  This is not easy to
-         detect but all object record types are not 0 (on Alpha VMS).
-         We also hope that pad byte is 0.  */
-      if (PRIV (recrd.buf)[0])
-        off = 1;
     }
 
   /* Read the record header  */
-  if (bfd_bread (PRIV (recrd.buf) + off, test_len - off, abfd)
-      != test_len - off)
+  if (bfd_bread (PRIV (recrd.buf), test_len, abfd) != test_len)
     {
       bfd_set_error (bfd_error_file_truncated);
       return -1;

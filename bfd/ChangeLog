@@ -1,3 +1,10 @@
+2010-04-16  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_eihd): Fix typo.
+	(_bfd_vms_get_object_record): Always assume there is a pad byte
+	for alignment.
+	* vms-lib.c: Add a few comments.
+
 2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Support additions to

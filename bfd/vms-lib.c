@@ -557,6 +557,7 @@ vms_lib_bread_raw (struct bfd *abfd, void *buf, file_ptr nbytes)
       if (!vms_lib_read_block (abfd))
         return -1;
 
+      /* Do not read past the data block, do not read more than requested.  */
       l = DATA__LENGTH - vec->blk_off;
       if (l > nbytes)
         l = nbytes;
@@ -564,11 +565,13 @@ vms_lib_bread_raw (struct bfd *abfd, void *buf, file_ptr nbytes)
         return 0;
       if (buf != NULL)
         {
+          /* Really read into BUF.  */
           if (bfd_bread (buf, l, abfd->my_archive) != l)
             return -1;
         }
       else
         {
+          /* Make as if we are reading.  */
           if (bfd_seek (abfd->my_archive, l, SEEK_CUR) != 0)
             return -1;
         }
@@ -818,6 +821,7 @@ vms_lib_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
 
       if (vec->rec_rem == 0)
         {
+          /* End of record reached.  */
           if (bfd_libdata (abfd->my_archive)->kind == vms_lib_txt)
             {
               if ((vec->rec_len & 1) == 1
