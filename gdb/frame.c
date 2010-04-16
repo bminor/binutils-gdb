@@ -43,6 +43,7 @@
 #include "gdbthread.h"
 #include "block.h"
 #include "inline-frame.h"
+#include  "tracepoint.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
@@ -1144,12 +1145,16 @@ get_current_frame (void)
     error (_("No stack."));
   if (!target_has_memory)
     error (_("No memory."));
-  if (ptid_equal (inferior_ptid, null_ptid))
-    error (_("No selected thread."));
-  if (is_exited (inferior_ptid))
-    error (_("Invalid selected thread."));
-  if (is_executing (inferior_ptid))
-    error (_("Target is executing."));
+  /* Traceframes are effectively a substitute for the live inferior.  */
+  if (get_traceframe_number () < 0)
+    {
+      if (ptid_equal (inferior_ptid, null_ptid))
+	error (_("No selected thread."));
+      if (is_exited (inferior_ptid))
+	error (_("Invalid selected thread."));
+      if (is_executing (inferior_ptid))
+	error (_("Target is executing."));
+    }
 
   if (current_frame == NULL)
     {
