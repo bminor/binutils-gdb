@@ -7966,6 +7966,7 @@ alpha_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     {
       struct vms_symbol_entry *e = PRIV (syms)[i];
       struct alpha_vms_link_hash_entry *h;
+      struct bfd_link_hash_entry *h_root;
       asymbol sym;
 
       if (!alpha_vms_convert_symbol (abfd, e, &sym))
@@ -7983,10 +7984,12 @@ alpha_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       else
         h = NULL;
 
+      h_root = (struct bfd_link_hash_entry *) h;
       if (_bfd_generic_link_add_one_symbol
           (info, abfd, sym.name, sym.flags, sym.section, sym.value,
-           NULL, FALSE, FALSE, (struct bfd_link_hash_entry **)&h) == FALSE)
+           NULL, FALSE, FALSE, &h_root) == FALSE)
         return FALSE;
+      h = (struct alpha_vms_link_hash_entry *) h_root;
 
       if ((e->flags & EGSY__V_DEF)
           && h->sym == NULL
