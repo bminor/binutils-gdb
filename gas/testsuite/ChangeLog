@@ -1,3 +1,10 @@
+2010-04-16  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/11395
+	* gas/hppa/basic/add2.s: Add test of simple 32-bit instruction.
+	* gas/hppa/basic/basic.exp (do_add2): Add grep for expected
+	disassembly.
+
 2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/attr-mcpu.d: Update for new attribute tag names.
@@ -19,7 +26,7 @@
 	* gas/arm/attr-mfpu-vfpv4-d16.d: Likewise.
 	* gas/arm/attr-mfpu-vfpv4.d: Likewise.
 	* gas/arm/attr-mfpu-vfpxd.d: Likewise.
-	* gas/arm/attr-names.d: Add test to make sure all attribute names 
+	* gas/arm/attr-names.d: Add test to make sure all attribute names
 	are recognised.
 	* gas/arm/attr-names.s: Likewise.
 

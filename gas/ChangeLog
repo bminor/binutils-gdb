@@ -1,3 +1,11 @@
+2010-04-16  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/11395
+	* config/tc-hppa.c (pa_ip): Do not allow 64-bit add condition
+	matcher to accept and unconditional 32-bit add instruction.
+	(pa_build_unwind_subspace): Cope with error conditions not
+	allowing the start symbol to be set.
+
 2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (arm_convert_symbolic_attribute): Add support for

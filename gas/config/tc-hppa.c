@@ -3968,6 +3968,12 @@ pa_ip (char *str)
 
 		  /* Handle an add condition.  */
 		  case 'A':
+		    /* PR gas/11395
+		       If we are looking for 64-bit add conditions and we
+		       do not have the ",*" prefix, then we have no match.  */
+		    if (*s != ',')
+		      break;
+		    /* Fall through.  */
 		  case 'a':
 		    cmpltr = 0;
 		    flag = 0;
@@ -5967,6 +5973,10 @@ pa_build_unwind_subspace (struct call_info *call_info)
   if ((bfd_get_section_flags (stdoutput, now_seg)
        & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
       != (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
+    return;
+
+  if (call_info->start_symbol == NULL)
+    /* This can happen if there were errors earlier on in the assembly.  */
     return;
 
   /* Replace the start symbol with a local symbol that will be reduced
