@@ -4153,6 +4153,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -4188,6 +4190,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -4223,6 +4227,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -4258,6 +4264,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
