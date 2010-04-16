@@ -1,3 +1,13 @@
+2010-04-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* solib-frv.c (enable_break1_done): Delete.
+	(enable_break2): Do not check enable_break1_done.  Move the
+	enable_break2_done setting and call to
+	remove_solib_event_breakpoints() to the end.  Return without
+	warning when the contents of _dl_debug_addr are 0.
+	(enable_break): Do not set enable_break1_done.
+	(frv_clear_solib): Likewise.
+
 2010-04-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* m32c-tdep.c (m32c_m16c_address_to_pointer): Print warning

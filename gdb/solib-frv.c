@@ -631,7 +631,6 @@ enable_break_failure_warning (void)
 
  */
 
-static int enable_break1_done = 0;
 static int enable_break2_done = 0;
 
 static int
@@ -642,14 +641,8 @@ enable_break2 (void)
   char **bkpt_namep;
   asection *interp_sect;
 
-  if (!enable_break1_done || enable_break2_done)
+  if (enable_break2_done)
     return 1;
-
-  enable_break2_done = 1;
-
-  /* First, remove all the solib event breakpoints.  Their addresses
-     may have changed since the last time we ran the program.  */
-  remove_solib_event_breakpoints ();
 
   interp_text_sect_low = interp_text_sect_high = 0;
   interp_plt_sect_low = interp_plt_sect_high = 0;
@@ -771,6 +764,22 @@ enable_break2 (void)
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
+      if (solib_frv_debug)
+	fprintf_unfiltered (gdb_stdlog,
+	                    "enable_break: _dl_debug_addr[0..3] = %s\n",
+	                    hex_string_custom (addr, 8));
+
+      /* If it's zero, then the ldso hasn't initialized yet, and so
+         there are no shared libs yet loaded.  */
+      if (addr == 0)
+	{
+	  if (solib_frv_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+	                        "enable_break: ldso not yet initialized\n");
+	  /* Do not warn, but mark to run again.  */
+	  return 0;
+	}
+
       /* Fetch the r_brk field.  It's 8 bytes from the start of
          _dl_debug_addr.  */
       if (target_read_memory (addr + 8, addr_buf, sizeof addr_buf) != 0)
@@ -800,8 +809,14 @@ enable_break2 (void)
       /* We're also done with the loadmap.  */
       xfree (ldm);
 
+      /* Remove all the solib event breakpoints.  Their addresses
+         may have changed since the last time we ran the program.  */
+      remove_solib_event_breakpoints ();
+
       /* Now (finally!) create the solib breakpoint.  */
       create_solib_event_breakpoint (target_gdbarch, addr);
+
+      enable_break2_done = 1;
 
       return 1;
     }
@@ -847,7 +862,6 @@ enable_break (void)
       return 0;
     }
 
-  enable_break1_done = 1;
   create_solib_event_breakpoint (target_gdbarch,
 				 symfile_objfile->ei.entry_point);
 
@@ -997,7 +1011,6 @@ static void
 frv_clear_solib (void)
 {
   lm_base_cache = 0;
-  enable_break1_done = 0;
   enable_break2_done = 0;
   main_lm_addr = 0;
   if (main_executable_lm_info != 0)
