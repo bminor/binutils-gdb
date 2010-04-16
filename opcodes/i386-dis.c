@@ -11060,7 +11060,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	default:
 	  dp = &bad_opcode;
 	  return dp;
-	  break;
 	case 0x8:
 	  vex_table_index = XOP_08;
 	  break;
