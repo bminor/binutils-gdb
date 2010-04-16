@@ -1,5 +1,9 @@
 2010-04-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* p-lang.c (pascal_one_char): Do not restrict C to 0..255 range.
+
+2010-04-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	Support for Windows OS Thread Information Block.
 	* NEWS: Document new feature.
 	* remote.c (PACKET_qGetTIBAddr): New enum element.

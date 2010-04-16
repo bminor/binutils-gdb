@@ -158,9 +158,7 @@ static void
 pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
 {
 
-  c &= 0xFF;			/* Avoid sign bit follies */
-
-  if ((c == '\'') || (PRINT_LITERAL_FORM (c)))
+  if (c == '\'' || ((unsigned int) c <= 0xff && (PRINT_LITERAL_FORM (c))))
     {
       if (!(*in_quotes))
 	fputs_filtered ("'", stream);
