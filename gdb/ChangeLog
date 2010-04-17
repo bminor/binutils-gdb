@@ -1,3 +1,22 @@
+2010-04-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (watchpoints_triggered): Use
+	is_hardware_watchpoint.
+	(watchpoints_triggered): Ditto.
+	(bpstat_check_location): Use is_watchpoint and
+	is_hardware_watchpoint.
+	(bpstat_check_watchpoint): Use is_watchpoint and
+	is_hardware_watchpoint.
+	(bpstat_stop_status): Fix comment.
+	(user_settable_breakpoint): Use is_watchpoint.
+	(hw_watchpoint_used_count): Use is_hardware_watchpoint.
+	(disable_watchpoints_before_interactive_call_start): Use
+	is_watchpoint.
+	(enable_watchpoints_after_interactive_call_stop): Use
+	is_watchpoint.
+	(clear_command): Use is_watchpoint.
+	(do_enable_breakpoint): Use is_watchpoint.
+
 2010-04-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* solib-frv.c (enable_break1_done): Delete.

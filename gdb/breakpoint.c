@@ -3494,9 +3494,7 @@ watchpoints_triggered (struct target_waitstatus *ws)
       /* We were not stopped by a watchpoint.  Mark all watchpoints
 	 as not triggered.  */
       ALL_BREAKPOINTS (b)
-	if (b->type == bp_hardware_watchpoint
-	    || b->type == bp_read_watchpoint
-	    || b->type == bp_access_watchpoint)
+	if (is_hardware_watchpoint (b))
 	  b->watchpoint_triggered = watch_triggered_no;
 
       return 0;
@@ -3507,9 +3505,7 @@ watchpoints_triggered (struct target_waitstatus *ws)
       /* We were stopped by a watchpoint, but we don't know where.
 	 Mark all watchpoints as unknown.  */
       ALL_BREAKPOINTS (b)
-	if (b->type == bp_hardware_watchpoint
-	    || b->type == bp_read_watchpoint
-	    || b->type == bp_access_watchpoint)
+	if (is_hardware_watchpoint (b))
 	  b->watchpoint_triggered = watch_triggered_unknown;
 
       return stopped_by_watchpoint;
@@ -3520,9 +3516,7 @@ watchpoints_triggered (struct target_waitstatus *ws)
      triggered.  */
 
   ALL_BREAKPOINTS (b)
-    if (b->type == bp_hardware_watchpoint
-	|| b->type == bp_read_watchpoint
-	|| b->type == bp_access_watchpoint)
+    if (is_hardware_watchpoint (b))
       {
 	struct bp_location *loc;
 	struct value *v;
@@ -3703,10 +3697,7 @@ bpstat_check_location (const struct bp_location *bl,
   if (is_tracepoint (b))
     return 0;
 
-  if (b->type != bp_watchpoint
-      && b->type != bp_hardware_watchpoint
-      && b->type != bp_read_watchpoint
-      && b->type != bp_access_watchpoint
+  if (!is_watchpoint (b)
       && b->type != bp_hardware_breakpoint
       && b->type != bp_catchpoint)	/* a non-watchpoint bp */
     {
@@ -3718,17 +3709,15 @@ bpstat_check_location (const struct bp_location *bl,
 	  && !section_is_mapped (bl->section))
 	return 0;
     }
-  
+
   /* Continuable hardware watchpoints are treated as non-existent if the
      reason we stopped wasn't a hardware watchpoint (we didn't stop on
      some data address).  Otherwise gdb won't stop on a break instruction
      in the code (not from a breakpoint) when a hardware watchpoint has
      been defined.  Also skip watchpoints which we know did not trigger
      (did not match the data address).  */
-  
-  if ((b->type == bp_hardware_watchpoint
-       || b->type == bp_read_watchpoint
-       || b->type == bp_access_watchpoint)
+
+  if (is_hardware_watchpoint (b)
       && b->watchpoint_triggered == watch_triggered_no)
     return 0;
   
@@ -3761,10 +3750,7 @@ bpstat_check_watchpoint (bpstat bs)
   const struct bp_location *bl = bs->breakpoint_at;
   struct breakpoint *b = bl->owner;
 
-  if (b->type == bp_watchpoint
-      || b->type == bp_read_watchpoint
-      || b->type == bp_access_watchpoint
-      || b->type == bp_hardware_watchpoint)
+  if (is_watchpoint (b))
     {
       CORE_ADDR addr;
       struct value *v;
@@ -4063,9 +4049,9 @@ bpstat_stop_status (struct address_space *aspace,
       for (bl = b->loc; bl != NULL; bl = bl->next)
 	{
 	  /* For hardware watchpoints, we look only at the first location.
-	     The watchpoint_check function will work on entire expression,
-	     not the individual locations.  For read watchopints, the
-	     watchpoints_triggered function have checked all locations
+	     The watchpoint_check function will work on the entire expression,
+	     not the individual locations.  For read watchpoints, the
+	     watchpoints_triggered function has checked all locations
 	     already.  */
 	  if (b->type == bp_hardware_watchpoint && bl != b->loc)
 	    break;
@@ -4932,10 +4918,7 @@ user_settable_breakpoint (const struct breakpoint *b)
 	  || b->type == bp_catchpoint
 	  || b->type == bp_hardware_breakpoint
 	  || is_tracepoint (b)
-	  || b->type == bp_watchpoint
-	  || b->type == bp_read_watchpoint
-	  || b->type == bp_access_watchpoint
-	  || b->type == bp_hardware_watchpoint);
+	  || is_watchpoint (b));
 }
 	
 /* Print information on user settable breakpoint (watchpoint, etc)
@@ -6398,9 +6381,7 @@ hw_watchpoint_used_count (enum bptype type, int *other_type_used)
       {
 	if (b->type == type)
 	  i++;
-	else if ((b->type == bp_hardware_watchpoint
-		  || b->type == bp_read_watchpoint
-		  || b->type == bp_access_watchpoint))
+	else if (is_hardware_watchpoint (b))
 	  *other_type_used = 1;
       }
   }
@@ -6414,11 +6395,7 @@ disable_watchpoints_before_interactive_call_start (void)
 
   ALL_BREAKPOINTS (b)
   {
-    if (((b->type == bp_watchpoint)
-	 || (b->type == bp_hardware_watchpoint)
-	 || (b->type == bp_read_watchpoint)
-	 || (b->type == bp_access_watchpoint))
-	&& breakpoint_enabled (b))
+    if (is_watchpoint (b) && breakpoint_enabled (b))
       {
 	b->enable_state = bp_call_disabled;
 	update_global_location_list (0);
@@ -6433,11 +6410,7 @@ enable_watchpoints_after_interactive_call_stop (void)
 
   ALL_BREAKPOINTS (b)
   {
-    if (((b->type == bp_watchpoint)
-	 || (b->type == bp_hardware_watchpoint)
-	 || (b->type == bp_read_watchpoint)
-	 || (b->type == bp_access_watchpoint))
-	&& (b->enable_state == bp_call_disabled))
+    if (is_watchpoint (b) && b->enable_state == bp_call_disabled)
       {
 	b->enable_state = bp_enabled;
 	update_global_location_list (1);
@@ -8680,11 +8653,7 @@ clear_command (char *arg, int from_tty)
 	{
 	  int match = 0;
 	  /* Are we going to delete b? */
-	  if (b->type != bp_none
-	      && b->type != bp_watchpoint
-	      && b->type != bp_hardware_watchpoint
-	      && b->type != bp_read_watchpoint
-	      && b->type != bp_access_watchpoint)
+	  if (b->type != bp_none && !is_watchpoint (b))
 	    {
 	      struct bp_location *loc = b->loc;
 	      for (; loc; loc = loc->next)
@@ -9990,10 +9959,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	error (_("Hardware breakpoints used exceeds limit."));
     }
 
-  if (bpt->type == bp_watchpoint
-      || bpt->type == bp_hardware_watchpoint
-      || bpt->type == bp_read_watchpoint
-      || bpt->type == bp_access_watchpoint)
+  if (is_watchpoint (bpt))
     {
       struct gdb_exception e;
 
