@@ -1,3 +1,10 @@
+2010-04-17  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* configure.ac: Use `ws2_32' library for srv_mingw.
+	* configure: Regenerate.
+	* gdbreplay.c: Include winsock2.h instead of winsock.h.
+	* remote-utils.c: Likewise.
+
 2010-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* linux-x86-low.c (xmltarget_amd64_linux_no_xml): Define only

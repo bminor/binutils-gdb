@@ -63,7 +63,7 @@
 #endif
 
 #if USE_WIN32API
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 
 #if __QNX__

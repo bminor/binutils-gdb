@@ -118,7 +118,7 @@ esac
 if test "${srv_mingwce}" = "yes"; then
   LIBS="$LIBS -lws2"
 elif test "${srv_mingw}" = "yes"; then
-  LIBS="$LIBS -lwsock32"
+  LIBS="$LIBS -lws2_32"
 elif test "${srv_qnx}" = "yes"; then
   LIBS="$LIBS -lsocket"
 fi
