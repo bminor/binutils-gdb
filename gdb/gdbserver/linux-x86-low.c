@@ -46,10 +46,13 @@ static const char *xmltarget_i386_linux_no_xml = "@<target>\
 <architecture>i386</architecture>\
 <osabi>GNU/Linux</osabi>\
 </target>";
+
+#ifdef __x86_64__
 static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 <architecture>i386:x86-64</architecture>\
 <osabi>GNU/Linux</osabi>\
 </target>";
+#endif
 
 #include <sys/reg.h>
 #include <sys/procfs.h>

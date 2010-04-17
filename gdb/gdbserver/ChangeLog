@@ -1,3 +1,8 @@
+2010-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* linux-x86-low.c (xmltarget_amd64_linux_no_xml): Define only
+	if __x86_64__ is defined.
+
 2010-04-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* configure: Regenerate.
