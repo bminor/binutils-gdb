@@ -1,3 +1,9 @@
+2010-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR corefiles/11511
+	* amd64-linux-tdep.c (amd64_linux_gregset_reg_offset): Support
+	orig_rax.
+
 2010-04-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (watchpoints_triggered): Use

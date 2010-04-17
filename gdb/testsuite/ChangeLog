@@ -1,3 +1,9 @@
+2010-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR corefiles/11511
+	* gdb.arch/system-gcore.exp: New.
+	* gdb.arch/gcore.c: Likewise.
+
 2010-04-15  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-progspace.c: New file.
