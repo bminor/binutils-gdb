@@ -1,3 +1,8 @@
+2010-04-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* ui-file.c (tee_file_isatty): Return whether `tee->one' is a tty,
+	instead of always false.
+
 2010-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR corefiles/11511

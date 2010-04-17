@@ -648,5 +648,6 @@ tee_file_isatty (struct ui_file *file)
   if (tee->magic != &tee_file_magic)
     internal_error (__FILE__, __LINE__,
 		    _("tee_file_isatty: bad magic number"));
-  return (0);
+
+  return ui_file_isatty (tee->one);
 }
