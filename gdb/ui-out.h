@@ -27,7 +27,6 @@
 /* The ui_out structure */
 
 struct ui_out;
-struct ui_out_data;
 struct ui_file;
 
 /* the current ui_out */
@@ -264,13 +263,16 @@ struct ui_out_impl
     int is_mi_like_p;
   };
 
-extern struct ui_out_data *ui_out_data (struct ui_out *uiout);
+extern void *ui_out_data (struct ui_out *uiout);
 
+extern void uo_field_string (struct ui_out *uiout, int fldno, int width,
+			     enum ui_align align, const char *fldname,
+			     const char *string);
 
 /* Create a ui_out object */
 
 extern struct ui_out *ui_out_new (struct ui_out_impl *impl,
-				  struct ui_out_data *data,
+				  void *data,
 				  int flags);
 
 /* Redirect the ouptut of a ui_out object temporarily.  */

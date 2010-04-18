@@ -27,13 +27,7 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 
-struct ui_out_data
-  {
-    struct ui_file *stream;
-    struct ui_file *original_stream;
-    int suppress_output;
-  };
-typedef struct ui_out_data cli_out_data;
+typedef struct cli_ui_out_data cli_out_data;
 
 /* These are the CLI output functions */
 
@@ -72,7 +66,7 @@ static int cli_redirect (struct ui_out *uiout, struct ui_file *outstream);
 /* FIXME: This can be initialized dynamically after default is set to
    handle initial output in main.c */
 
-static struct ui_out_impl cli_ui_out_impl =
+struct ui_out_impl cli_ui_out_impl =
 {
   cli_table_begin,
   cli_table_body,
@@ -102,10 +96,6 @@ static void field_separator (void);
 static void out_field_fmt (struct ui_out *uiout, int fldno,
 			   const char *fldname,
 			   const char *format,...) ATTR_FORMAT (printf, 4, 5);
-
-/* local variables */
-
-/* (none yet) */
 
 /* Mark beginning of a table */
 
@@ -154,7 +144,10 @@ cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
   cli_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
-  cli_field_string (uiout, 0, width, alignment, 0, colhdr);
+
+  /* Always go through the function pointer (virtual function call).
+     We may have been extended.  */
+  uo_field_string (uiout, 0, width, alignment, 0, colhdr);
 }
 
 /* Mark beginning of a list */
@@ -195,7 +188,10 @@ cli_field_int (struct ui_out *uiout, int fldno, int width,
   if (data->suppress_output)
     return;
   sprintf (buffer, "%d", value);
-  cli_field_string (uiout, fldno, width, alignment, fldname, buffer);
+
+  /* Always go through the function pointer (virtual function call).
+     We may have been extended.  */
+  uo_field_string (uiout, fldno, width, alignment, fldname, buffer);
 }
 
 /* used to ommit a field */
@@ -208,7 +204,10 @@ cli_field_skip (struct ui_out *uiout, int fldno, int width,
   cli_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
-  cli_field_string (uiout, fldno, width, alignment, fldname, "");
+
+  /* Always go through the function pointer (virtual function call).
+     We may have been extended.  */
+  uo_field_string (uiout, fldno, width, alignment, fldname, "");
 }
 
 /* other specific cli_field_* end up here so alignment and field
@@ -330,7 +329,7 @@ cli_flush (struct ui_out *uiout)
 int
 cli_redirect (struct ui_out *uiout, struct ui_file *outstream)
 {
-  struct ui_out_data *data = ui_out_data (uiout);
+  cli_out_data *data = ui_out_data (uiout);
   if (outstream != NULL)
     {
       data->original_stream = data->stream;
@@ -374,7 +373,17 @@ field_separator (void)
   fputc_filtered (' ', data->stream);
 }
 
-/* Initalize private members at startup.  */
+/* Constructor for a `cli_out_data' object.  */
+
+void
+cli_out_data_ctor (cli_out_data *self, struct ui_file *stream)
+{
+  self->stream = stream;
+  self->original_stream = NULL;
+  self->suppress_output = 0;
+}
+
+/* Initialize private members at startup.  */
 
 struct ui_out *
 cli_out_new (struct ui_file *stream)
@@ -382,9 +391,7 @@ cli_out_new (struct ui_file *stream)
   int flags = ui_source_list;
 
   cli_out_data *data = XMALLOC (cli_out_data);
-  data->stream = stream;
-  data->original_stream = NULL;
-  data->suppress_output = 0;
+  cli_out_data_ctor (data, stream);
   return ui_out_new (&cli_ui_out_impl, data, flags);
 }
 

@@ -1,3 +1,55 @@
+2010-04-18  Pedro Alves  <pedro@codesourcery.com>
+
+	PR tui/9217
+
+	* tui/tui-out.c: Include cli-out.h.
+	(tui_table_begin, tui_table_body, tui_table_end, tui_table_header)
+	(tui_begin, tui_end, tui_field_int, tui_field_skip)
+	(tui_field_string, tui_field_fmt, tui_spaces, tui_text)
+	(tui_message, tui_wrap_hint, tui_flush): Delete forward
+	declarations.
+	(struct ui_out_data): Rename to...
+	(struct tui_ui_out_data): ... this.  Remove `stream' and
+	`suppress_output' fields, and inherit cli_ui_out_data.
+	(tui_out_data): New typedef.
+	(tui_ui_out_impl): Don't initialize fields staticaly.
+	(tui_table_begin, tui_table_body, tui_table_end, tui_table_header)
+	(tui_begin, tui_end): Delete.
+	(tui_field_int): Adjust to delegate most work to the base type.
+	(tui_field_skip): Delete.
+	(tui_field_string, tui_field_fmt): Adjust comment.  Adjust to
+	delegate most work to the base type.
+	(tui_spaces): Delete.
+	(tui_text): Adjust to delegate most work to the base type.
+	(tui_message): Delete.
+	(tui_wrap_hint): Delete.
+	(tui_flush): Delete.
+	(out_field_fmt): Delete.
+	(field_separator): Delete.
+	(tui_out_new): Adjust to initialize the base type.
+	(_initialize_tui_out): Initialize tui_ui_out_impl.
+	* cli-out.c (struct ui_out_data): Moved out to cli-out.h, renamed
+	cli_ui_out_data.
+	(cli_out_data): Adjust.
+	(cli_ui_out_impl): Make extern.
+	(cli_table_header, cli_field_int, cli_field_skip): Use
+	uo_field_string instead of cli_field_string.
+	(cli_redirect): Adjust to use cli_out_data.
+	(cli_out_data_ctor): New.
+	(cli_out_new): Use it.
+	* cli-out.h (struct ui_file): Remove forward declaration.
+	(struct cli_ui_out_data): New, moved from cli-out.c, and renamed.
+	(cli_ui_out_impl): Declare.
+	(cli_out_data_ctor): Declare.
+	* ui-out.c (struct ui_out) <data>: Change type to void pointer.
+	(uo_field_string): No longer static.
+	(ui_out_data): Change return type to void pointer.
+	(ui_out_new): Change `data' parameter type to void pointer.
+	* ui-out.h (struct ui_out_data): Don't forward declare.
+	(ui_out_data): Change return type to void pointer.
+	(ui_out_new): Change `data' parameter type to void pointer.
+	(uo_field_string): Declare.
+
 2010-04-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* ui-file.c (tee_file_isatty): Return whether `tee->one' is a tty,
