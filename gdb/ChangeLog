@@ -1,5 +1,11 @@
 2010-04-19  Pedro Alves  <pedro@codesourcery.com>
 
+	* ada-lang.c (print_recreate_exception)
+	<ex_catch_exception_unhandled>: It's "catch exception unhandled",
+	not "catch unhandled".
+
+2010-04-19  Pedro Alves  <pedro@codesourcery.com>
+
 	PR breakpoints/8554.
 
 	Implement `save-breakpoints'.

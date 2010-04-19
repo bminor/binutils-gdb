@@ -10364,7 +10364,7 @@ print_recreate_exception (enum exception_catchpoint_kind ex,
 	break;
 
       case ex_catch_exception_unhandled:
-	fprintf_filtered (fp, "catch unhandled");
+	fprintf_filtered (fp, "catch exception unhandled");
 	break;
 
       case ex_catch_assert:
