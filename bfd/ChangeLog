@@ -1,8 +1,16 @@
+2010-04-19  Nick Clifton  <nickc@redhat.com>
+
+	* archive64.c (bfd_elf64_archive_slurp_armap): Remove unused
+	arhdrpos variable.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Add unused
+	attribute to warned variable.  Remove unused val, type and type2
+	variables.
+
 2010-04-16  Andreas Schwab  <schwab@redhat.com>
 
 	* vms-alpha.c (alpha_vms_link_add_object_symbols): Avoid breaking
 	strict-aliasing rules.
-	
+
 2010-04-16  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_slurp_eihd): Fix typo.

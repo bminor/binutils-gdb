@@ -1,6 +1,6 @@
 /* MIPS-specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007,
+   2010  Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
    Linker support added by Mark Mitchell, CodeSourcery, LLC.
    <mark@codesourcery.com>
@@ -43,7 +43,6 @@ bfd_elf64_archive_slurp_armap (bfd *abfd)
 {
   struct artdata *ardata = bfd_ardata (abfd);
   char nextname[17];
-  file_ptr arhdrpos;
   bfd_size_type i, parsed_size, nsymz, stringsize, carsym_size, ptrsize;
   struct areltdata *mapdata;
   bfd_byte int_buf[8];
@@ -55,7 +54,6 @@ bfd_elf64_archive_slurp_armap (bfd *abfd)
   ardata->symdefs = NULL;
 
   /* Get the name of the first element.  */
-  arhdrpos = bfd_tell (abfd);
   i = bfd_bread (nextname, 16, abfd);
   if (i == 0)
     return TRUE;
