@@ -1,3 +1,10 @@
+2010-04-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-mn103ser.c (sockser_addr, USE_SOCKSER_P): Delete
+	(do_polling_event): Change USE_SOCKSER_P to dv_sockser_status.
+	(read_status_reg): Likewise.
+	(write_txb): Likewise.
+
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
