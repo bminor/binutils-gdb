@@ -32,12 +32,23 @@ static DECLARE_OPTION_HANDLER (model_option_handler);
 
 static MODULE_INIT_FN sim_model_init;
 
-#define OPTION_MODEL (OPTION_START + 0)
+enum {
+  OPTION_MODEL = OPTION_START,
+  OPTION_MODEL_INFO,
+};
 
 static const OPTION model_options[] = {
   { {"model", required_argument, NULL, OPTION_MODEL},
       '\0', "MODEL", "Specify model to simulate",
       model_option_handler, NULL },
+
+  { {"model-info", no_argument, NULL, OPTION_MODEL_INFO},
+      '\0', NULL, "List selectable models",
+      model_option_handler, NULL },
+  { {"info-model", no_argument, NULL, OPTION_MODEL_INFO},
+      '\0', NULL, NULL,
+      model_option_handler, NULL },
+
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
 
@@ -56,6 +67,22 @@ model_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	    return SIM_RC_FAIL;
 	  }
 	sim_model_set (sd, cpu, model);
+	break;
+      }
+
+    case OPTION_MODEL_INFO :
+      {
+	const MACH **machp;
+	const MODEL *model;
+	for (machp = & sim_machs[0]; *machp != NULL; ++machp)
+	  {
+	    sim_io_printf (sd, "Models for architecture `%s':\n",
+			   MACH_NAME (*machp));
+	    for (model = MACH_MODELS (*machp); MODEL_NAME (model) != NULL;
+		 ++model)
+	      sim_io_printf (sd, " %s", MODEL_NAME (model));
+	    sim_io_printf (sd, "\n");
+	  }
 	break;
       }
     }

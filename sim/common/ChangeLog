@@ -1,3 +1,10 @@
+2010-04-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-model.c (OPTION_MODEL): Convert to enum.
+	(OPTION_MODEL_INFO): New enum.
+	(model_options): Add model-info/info-model entries.
+	(model_option_handler): Handle OPTION_MODEL_INFO.
+
 2010-04-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-sockser.h (DV_SOCKSER_DISCONNECTED): Define.
