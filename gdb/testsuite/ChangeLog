@@ -1,3 +1,11 @@
+2010-04-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/solib-display.exp: Replace gdb_exit, gdb_start,
+	gdb_reinitialize_dir and gdb_load by clean_restart.  Remove trailing
+	gdb_exit and return.
+	(executable): New variable.
+	(binfile): Use it.
+
 2010-04-19  Pedro Alves  <pedro@codesourcery.com>
 
 	PR breakpoints/8554.

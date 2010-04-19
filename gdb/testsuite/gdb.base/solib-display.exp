@@ -40,7 +40,8 @@ set lib_flags [list debug]
 # Binary file.
 set testfile "solib-display-main"
 set srcfile ${srcdir}/${subdir}/${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set executable ${testfile}
+set binfile ${objdir}/${subdir}/${executable}
 set bin_flags [list debug shlib=${binfile_lib}]
 
 if [get_compiler_info ${binfile}] {
@@ -53,10 +54,7 @@ if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
   return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${executable}
 
 if ![runto_main] then {
   fail "Can't run to main"
@@ -107,9 +105,3 @@ gdb_test "" "6: a_static = 46\\r\\n4: main_global = 44\\r\\n.*"
 gdb_test "break [gdb_get_line_number "break here" ${testfile}.c]" \
 	".*Breakpoint.* at .*" 
 gdb_test "continue" "6: a_static = 46\\r\\n5: a_local = 45\\r\\n4: main_global = 44\\r\\n.*"
-
-gdb_exit
-
-return 0
-
-
