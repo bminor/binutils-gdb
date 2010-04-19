@@ -1,3 +1,8 @@
+2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* windows-tdep.c (windows_get_tlb_type): Change current_seh.handle
+	type to void function.
+
 2010-04-19  Stan Shebs  <stan@codesourcery.com>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 

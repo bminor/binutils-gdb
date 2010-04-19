@@ -133,7 +133,8 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   TYPE_TARGET_TYPE (seh_ptr_type) = seh_type;
 
   append_composite_type_field (seh_type, "next_seh", seh_ptr_type);
-  append_composite_type_field (seh_type, "handler", void_ptr_type);
+  append_composite_type_field (seh_type, "handler",
+			       builtin_type (gdbarch)->builtin_func_ptr);
 
   /* struct _PEB_LDR_DATA */
   peb_ldr_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
