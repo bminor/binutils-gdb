@@ -1178,6 +1178,16 @@ find_methods (struct symtab *symtab, char type,
 
 	  QUIT;
 
+	  /* Check the symbol name first as this can be done entirely without
+	     sending any query to the target.  */
+	  symname = SYMBOL_NATURAL_NAME (msymbol);
+	  if (symname == NULL)
+	    continue;
+
+	  if ((symname[0] != '-' && symname[0] != '+') || (symname[1] != '['))
+	    /* Not a method name.  */
+	    continue;
+
 	  /* The minimal symbol might point to a function descriptor;
 	     resolve it to the actual code address instead.  */
 	  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, pc,
@@ -1188,14 +1198,7 @@ find_methods (struct symtab *symtab, char type,
 	      /* Not in the specified symtab.  */
 	      continue;
 
-	  symname = SYMBOL_NATURAL_NAME (msymbol);
-	  if (symname == NULL)
-	    continue;
-
-	  if ((symname[0] != '-' && symname[0] != '+') || (symname[1] != '['))
-	    /* Not a method name.  */
-	    continue;
-      
+	  /* Now that thinks are a bit sane, clean up the symname.  */
 	  while ((strlen (symname) + 1) >= tmplen)
 	    {
 	      tmplen = (tmplen == 0) ? 1024 : tmplen * 2;
