@@ -362,6 +362,9 @@ struct breakpoint_ops
   /* Display information about this breakpoint after setting it (roughly
      speaking; this is called from "mention").  */
   void (*print_mention) (struct breakpoint *);
+
+  /* Print to FP the CLI command that recreates this breakpoint.  */
+  void (*print_recreate) (struct breakpoint *, struct ui_file *fp);
 };
 
 enum watchpoint_triggered

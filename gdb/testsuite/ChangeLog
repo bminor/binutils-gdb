@@ -1,3 +1,9 @@
+2010-04-19  Pedro Alves  <pedro@codesourcery.com>
+
+	PR breakpoints/8554.
+
+	* gdb.trace/save-trace.exp: Adjust.
+
 2010-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR corefiles/11511

@@ -1,3 +1,12 @@
+2010-04-19  Pedro Alves  <pedro@codesourcery.com>
+
+	PR breakpoints/8554.
+
+	* gdb.texinfo (Save Breakpoints): New node.
+	(save-tracepoints): Rename to ...
+	(save tracepoints): ... this.  Mention that `save-tracepoints' is
+	a deprecated alias to `save tracepoints'.
+
 2010-04-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	gdb.texinfo ($_tlb): Document new automatic convinience variable.

@@ -416,6 +416,10 @@ static int prev_breakpoint_count;
 
 static int tracepoint_count;
 
+static struct cmd_list_element *breakpoint_set_cmdlist;
+static struct cmd_list_element *breakpoint_show_cmdlist;
+static struct cmd_list_element *save_cmdlist;
+
 /* Return whether a breakpoint is an active enabled breakpoint.  */
 static int
 breakpoint_enabled (struct breakpoint *b)
@@ -5853,6 +5857,15 @@ print_mention_catch_fork (struct breakpoint *b)
   printf_filtered (_("Catchpoint %d (fork)"), b->number);
 }
 
+/* Implement the "print_recreate" breakpoint_ops method for fork
+   catchpoints.  */
+
+static void
+print_recreate_catch_fork (struct breakpoint *b, struct ui_file *fp)
+{
+  fprintf_unfiltered (fp, "catch fork");
+}
+
 /* The breakpoint_ops structure to be used in fork catchpoints.  */
 
 static struct breakpoint_ops catch_fork_breakpoint_ops =
@@ -5862,7 +5875,8 @@ static struct breakpoint_ops catch_fork_breakpoint_ops =
   breakpoint_hit_catch_fork,
   print_it_catch_fork,
   print_one_catch_fork,
-  print_mention_catch_fork
+  print_mention_catch_fork,
+  print_recreate_catch_fork
 };
 
 /* Implement the "insert" breakpoint_ops method for vfork catchpoints.  */
@@ -5934,6 +5948,15 @@ print_mention_catch_vfork (struct breakpoint *b)
   printf_filtered (_("Catchpoint %d (vfork)"), b->number);
 }
 
+/* Implement the "print_recreate" breakpoint_ops method for vfork
+   catchpoints.  */
+
+static void
+print_recreate_catch_vfork (struct breakpoint *b, struct ui_file *fp)
+{
+  fprintf_unfiltered (fp, "catch vfork");
+}
+
 /* The breakpoint_ops structure to be used in vfork catchpoints.  */
 
 static struct breakpoint_ops catch_vfork_breakpoint_ops =
@@ -5943,7 +5966,8 @@ static struct breakpoint_ops catch_vfork_breakpoint_ops =
   breakpoint_hit_catch_vfork,
   print_it_catch_vfork,
   print_one_catch_vfork,
-  print_mention_catch_vfork
+  print_mention_catch_vfork,
+  print_recreate_catch_vfork
 };
 
 /* Implement the "insert" breakpoint_ops method for syscall
@@ -6182,6 +6206,33 @@ print_mention_catch_syscall (struct breakpoint *b)
                      b->number);
 }
 
+/* Implement the "print_recreate" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static void
+print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
+{
+  fprintf_unfiltered (fp, "catch syscall");
+
+  if (b->syscalls_to_be_caught)
+    {
+      int i, iter;
+
+      for (i = 0;
+           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           i++)
+        {
+          struct syscall s;
+
+          get_syscall_by_number (iter, &s);
+          if (s.name)
+            fprintf_unfiltered (fp, " %s", s.name);
+          else
+            fprintf_unfiltered (fp, " %d", s.number);
+        }
+    }
+}
+
 /* The breakpoint_ops structure to be used in syscall catchpoints.  */
 
 static struct breakpoint_ops catch_syscall_breakpoint_ops =
@@ -6191,7 +6242,8 @@ static struct breakpoint_ops catch_syscall_breakpoint_ops =
   breakpoint_hit_catch_syscall,
   print_it_catch_syscall,
   print_one_catch_syscall,
-  print_mention_catch_syscall
+  print_mention_catch_syscall,
+  print_recreate_catch_syscall
 };
 
 /* Returns non-zero if 'b' is a syscall catchpoint.  */
@@ -6327,6 +6379,15 @@ print_mention_catch_exec (struct breakpoint *b)
   printf_filtered (_("Catchpoint %d (exec)"), b->number);
 }
 
+/* Implement the "print_recreate" breakpoint_ops method for exec
+   catchpoints.  */
+
+static void
+print_recreate_catch_exec (struct breakpoint *b, struct ui_file *fp)
+{
+  fprintf_unfiltered (fp, "catch exec");
+}
+
 static struct breakpoint_ops catch_exec_breakpoint_ops =
 {
   insert_catch_exec,
@@ -6334,7 +6395,8 @@ static struct breakpoint_ops catch_exec_breakpoint_ops =
   breakpoint_hit_catch_exec,
   print_it_catch_exec,
   print_one_catch_exec,
-  print_mention_catch_exec
+  print_mention_catch_exec,
+  print_recreate_catch_exec
 };
 
 static void
@@ -8284,13 +8346,29 @@ print_mention_exception_catchpoint (struct breakpoint *b)
 			       : _(" (catch)"));
 }
 
+/* Implement the "print_recreate" breakpoint_ops method for throw and
+   catch catchpoints.  */
+
+static void
+print_recreate_exception_catchpoint (struct breakpoint *b, struct ui_file *fp)
+{
+  int bp_temp;
+  int bp_throw;
+
+  bp_temp = b->disposition == disp_del;
+  bp_throw = strstr (b->addr_string, "throw") != NULL;
+  fprintf_unfiltered (fp, bp_temp ? "tcatch " : "catch ");
+  fprintf_unfiltered (fp, bp_throw ? "throw" : "catch");
+}
+
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
   print_exception_catchpoint,
   print_one_exception_catchpoint,
-  print_mention_exception_catchpoint
+  print_mention_exception_catchpoint,
+  print_recreate_exception_catchpoint
 };
 
 static int
@@ -10644,62 +10722,133 @@ get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
   return NULL;
 }
 
-/* save-tracepoints command */
+/* Save information on user settable breakpoints (watchpoints, etc) to
+   a new script file named FILENAME.  If FILTER is non-NULL, call it
+   on each breakpoint and only include the ones for which it returns
+   non-zero.  */
+
 static void
-tracepoint_save_command (char *args, int from_tty)
+save_breakpoints (char *filename, int from_tty,
+		  int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *tp;
-  int any_tp = 0;
-  struct command_line *line;
+  int any = 0;
   char *pathname;
-  char tmp[40];
   struct cleanup *cleanup;
   struct ui_file *fp;
+  int extra_trace_bits = 0;
 
-  if (args == 0 || *args == 0)
-    error (_("Argument required (file name in which to save tracepoints)"));
+  if (filename == 0 || *filename == 0)
+    error (_("Argument required (file name in which to save)"));
 
   /* See if we have anything to save.  */
-  ALL_TRACEPOINTS (tp)
+  ALL_BREAKPOINTS (tp)
   {
-    any_tp = 1;
-    break;
+    /* Skip internal and momentary breakpoints.  */
+    if (!user_settable_breakpoint (tp))
+      continue;
+
+    /* If we have a filter, only save the breakpoints it accepts.  */
+    if (filter && !filter (tp))
+      continue;
+
+    any = 1;
+
+    if (is_tracepoint (tp))
+      {
+	extra_trace_bits = 1;
+
+	/* We can stop searching.  */
+	break;
+      }
   }
-  if (!any_tp)
+
+  if (!any)
     {
-      warning (_("save-tracepoints: no tracepoints to save."));
+      warning (_("Nothing to save."));
       return;
     }
 
-  pathname = tilde_expand (args);
+  pathname = tilde_expand (filename);
   cleanup = make_cleanup (xfree, pathname);
   fp = gdb_fopen (pathname, "w");
   if (!fp)
-    error (_("Unable to open file '%s' for saving tracepoints (%s)"),
-	   args, safe_strerror (errno));
+    error (_("Unable to open file '%s' for saving (%s)"),
+	   filename, safe_strerror (errno));
   make_cleanup_ui_file_delete (fp);
 
-  save_trace_state_variables (fp);
+  if (extra_trace_bits)
+    save_trace_state_variables (fp);
 
-  ALL_TRACEPOINTS (tp)
+  ALL_BREAKPOINTS (tp)
   {
-    if (tp->type == bp_fast_tracepoint)
-      fprintf_unfiltered (fp, "ftrace");
-    else
-      fprintf_unfiltered (fp, "trace");
+    /* Skip internal and momentary breakpoints.  */
+    if (!user_settable_breakpoint (tp))
+      continue;
 
-    if (tp->addr_string)
-      fprintf_unfiltered (fp, " %s", tp->addr_string);
+    /* If we have a filter, only save the breakpoints it accepts.  */
+    if (filter && !filter (tp))
+      continue;
+
+    if (tp->ops != NULL)
+      (tp->ops->print_recreate) (tp, fp);
     else
       {
-	sprintf_vma (tmp, tp->loc->address);
-	fprintf_unfiltered (fp, " *0x%s", tmp);
+	if (tp->type == bp_fast_tracepoint)
+	  fprintf_unfiltered (fp, "ftrace");
+	else if (tp->type == bp_tracepoint)
+	  fprintf_unfiltered (fp, "trace");
+	else if (tp->type == bp_breakpoint && tp->disposition == disp_del)
+	  fprintf_unfiltered (fp, "tbreak");
+	else if (tp->type == bp_breakpoint)
+	  fprintf_unfiltered (fp, "break");
+	else if (tp->type == bp_hardware_breakpoint
+		 && tp->disposition == disp_del)
+	  fprintf_unfiltered (fp, "thbreak");
+	else if (tp->type == bp_hardware_breakpoint)
+	  fprintf_unfiltered (fp, "hbreak");
+	else if (tp->type == bp_watchpoint)
+	  fprintf_unfiltered (fp, "watch");
+	else if (tp->type == bp_hardware_watchpoint)
+	  fprintf_unfiltered (fp, "watch");
+	else if (tp->type == bp_read_watchpoint)
+	  fprintf_unfiltered (fp, "rwatch");
+	else if (tp->type == bp_access_watchpoint)
+	  fprintf_unfiltered (fp, "awatch");
+	else
+	  internal_error (__FILE__, __LINE__,
+			  _("unhandled breakpoint type %d"), (int) tp->type);
+
+	if (tp->exp_string)
+	  fprintf_unfiltered (fp, " %s", tp->exp_string);
+	else if (tp->addr_string)
+	  fprintf_unfiltered (fp, " %s", tp->addr_string);
+	else
+	  {
+	    char tmp[40];
+
+	    sprintf_vma (tmp, tp->loc->address);
+	    fprintf_unfiltered (fp, " *0x%s", tmp);
+	  }
       }
 
-    if (tp->cond_string)
-      fprintf_unfiltered (fp, " if %s", tp->cond_string);
+    if (tp->thread != -1)
+      fprintf_unfiltered (fp, " thread %d", tp->thread);
+
+    if (tp->task != 0)
+      fprintf_unfiltered (fp, " task %d", tp->task);
 
     fprintf_unfiltered (fp, "\n");
+
+    /* Note, we can't rely on tp->number for anything, as we can't
+       assume the recreated breakpoint numbers will match.  Use $bpnum
+       instead.  */
+
+    if (tp->cond_string)
+      fprintf_unfiltered (fp, "  condition $bpnum %s\n", tp->cond_string);
+
+    if (tp->ignore_count)
+      fprintf_unfiltered (fp, "  ignore $bpnum %d\n", tp->ignore_count);
 
     if (tp->pass_count)
       fprintf_unfiltered (fp, "  passcount %d\n", tp->pass_count);
@@ -10708,7 +10857,7 @@ tracepoint_save_command (char *args, int from_tty)
       {
 	volatile struct gdb_exception ex;	
 
-	fprintf_unfiltered (fp, "  actions\n");
+	fprintf_unfiltered (fp, "  commands\n");
 	
 	ui_out_redirect (uiout, fp);
 	TRY_CATCH (ex, RETURN_MASK_ERROR)
@@ -10722,15 +10871,46 @@ tracepoint_save_command (char *args, int from_tty)
 
 	fprintf_unfiltered (fp, "  end\n");
       }
+
+    if (tp->enable_state == bp_disabled)
+      fprintf_unfiltered (fp, "disable\n");
+
+    /* If this is a multi-location breakpoint, check if the locations
+       should be individually disabled.  Watchpoint locations are
+       special, and not user visible.  */
+    if (!is_watchpoint (tp) && tp->loc && tp->loc->next)
+      {
+	struct bp_location *loc;
+	int n = 1;
+
+	for (loc = tp->loc; loc != NULL; loc = loc->next, n++)
+	  if (!loc->enabled)
+	    fprintf_unfiltered (fp, "disable $bpnum.%d\n", n);
+      }
   }
 
-  if (*default_collect)
+  if (extra_trace_bits && *default_collect)
     fprintf_unfiltered (fp, "set default-collect %s\n", default_collect);
 
   do_cleanups (cleanup);
   if (from_tty)
-    printf_filtered (_("Tracepoints saved to file '%s'.\n"), args);
-  return;
+    printf_filtered (_("Saved to file '%s'.\n"), filename);
+}
+
+/* The `save breakpoints' command.  */
+
+static void
+save_breakpoints_command (char *args, int from_tty)
+{
+  save_breakpoints (args, from_tty, NULL);
+}
+
+/* The `save tracepoints' command.  */
+
+static void
+save_tracepoints_command (char *args, int from_tty)
+{
+  save_breakpoints (args, from_tty, is_tracepoint);
 }
 
 /* Create a vector of all tracepoints.  */
@@ -10809,11 +10989,17 @@ clear_syscall_counts (struct inferior *inf)
   VEC_free (int, inf->syscalls_counts);
 }
 
+static void
+save_command (char *arg, int from_tty)
+{
+  printf_unfiltered (_("\
+\"save\" must be followed by the name of a save subcommand.\n"));
+  help_list (save_cmdlist, "save ", -1, gdb_stdout);
+}
+
 void
 _initialize_breakpoint (void)
 {
-  static struct cmd_list_element *breakpoint_set_cmdlist;
-  static struct cmd_list_element *breakpoint_show_cmdlist;
   struct cmd_list_element *c;
 
   observer_attach_solib_unloaded (disable_breakpoints_in_unloaded_shlib);
@@ -11227,10 +11413,27 @@ The trace will end when the tracepoint has been passed 'count' times.\n\
 Usage: passcount COUNT TPNUM, where TPNUM may also be \"all\";\n\
 if TPNUM is omitted, passcount refers to the last tracepoint defined."));
 
-  c = add_com ("save-tracepoints", class_trace, tracepoint_save_command, _("\
-Save current tracepoint definitions as a script.\n\
-Use the 'source' command in another debug session to restore them."));
+  add_prefix_cmd ("save", class_breakpoint, save_command,
+		  _("Save breakpoint definitions as a script."),
+		  &save_cmdlist, "save ",
+		  0/*allow-unknown*/, &cmdlist);
+
+  c = add_cmd ("breakpoints", class_breakpoint, save_breakpoints_command, _("\
+Save current breakpoint definitions as a script.\n\
+This includes all types of breakpoints (breakpoints, watchpoints, \n\
+catchpoints, tracepoints).  Use the 'source' command in another debug\n\
+session to restore them."),
+	       &save_cmdlist);
   set_cmd_completer (c, filename_completer);
+
+  c = add_cmd ("tracepoints", class_trace, save_tracepoints_command, _("\
+Save current tracepoint definitions as a script.\n\
+Use the 'source' command in another debug session to restore them."),
+	       &save_cmdlist);
+  set_cmd_completer (c, filename_completer);
+
+  c = add_com_alias ("save-tracepoints", "save tracepoints", class_trace, 0);
+  deprecate_cmd (c, "save tracepoints");
 
   add_prefix_cmd ("breakpoint", class_maintenance, set_breakpoint_cmd, _("\
 Breakpoint specific settings\n\

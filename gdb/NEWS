@@ -47,6 +47,16 @@ qGetTIBAddr
   single `break' command creates multiple breakpoints (e.g.,
   breakpoints on overloaded c++ functions).
 
+* New commands
+
+save breakpoints <filename>
+  Save all current breakpoint definitions to a file suitable for use
+  in a later debugging session.  To read the saved breakpoint
+  definitions, use the `source' command.
+
+`save tracepoints' is a new alias for `save-tracepoints'.  The latter
+is now deprecated.
+
 * Python scripting
 
 ** The GDB Python API now has access to breakpoints, symbols, symbol

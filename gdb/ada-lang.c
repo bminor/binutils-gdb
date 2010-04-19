@@ -10348,6 +10348,34 @@ print_mention_exception (enum exception_catchpoint_kind ex,
     }
 }
 
+/* Implement the PRINT_RECREATE method in the breakpoint_ops structure
+   for all exception catchpoint kinds.  */
+
+static void
+print_recreate_exception (enum exception_catchpoint_kind ex,
+			  struct breakpoint *b, struct ui_file *fp)
+{
+  switch (ex)
+    {
+      case ex_catch_exception:
+	fprintf_filtered (fp, "catch exception");
+	if (b->exp_string != NULL)
+	  fprintf_filtered (fp, " %s", b->exp_string);
+	break;
+
+      case ex_catch_exception_unhandled:
+	fprintf_filtered (fp, "catch unhandled");
+	break;
+
+      case ex_catch_assert:
+	fprintf_filtered (fp, "catch assert");
+	break;
+
+      default:
+	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+    }
+}
+
 /* Virtual table for "catch exception" breakpoints.  */
 
 static enum print_stop_action
@@ -10368,6 +10396,12 @@ print_mention_catch_exception (struct breakpoint *b)
   print_mention_exception (ex_catch_exception, b);
 }
 
+static void
+print_recreate_catch_exception (struct breakpoint *b, struct ui_file *fp)
+{
+  print_recreate_exception (ex_catch_exception, b, fp);
+}
+
 static struct breakpoint_ops catch_exception_breakpoint_ops =
 {
   NULL, /* insert */
@@ -10375,7 +10409,8 @@ static struct breakpoint_ops catch_exception_breakpoint_ops =
   NULL, /* breakpoint_hit */
   print_it_catch_exception,
   print_one_catch_exception,
-  print_mention_catch_exception
+  print_mention_catch_exception,
+  print_recreate_catch_exception
 };
 
 /* Virtual table for "catch exception unhandled" breakpoints.  */
@@ -10399,13 +10434,21 @@ print_mention_catch_exception_unhandled (struct breakpoint *b)
   print_mention_exception (ex_catch_exception_unhandled, b);
 }
 
+static void
+print_recreate_catch_exception_unhandled (struct breakpoint *b,
+					  struct ui_file *fp)
+{
+  print_recreate_exception (ex_catch_exception_unhandled, b, fp);
+}
+
 static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
   print_it_catch_exception_unhandled,
   print_one_catch_exception_unhandled,
-  print_mention_catch_exception_unhandled
+  print_mention_catch_exception_unhandled,
+  print_recreate_catch_exception_unhandled
 };
 
 /* Virtual table for "catch assert" breakpoints.  */
@@ -10428,13 +10471,20 @@ print_mention_catch_assert (struct breakpoint *b)
   print_mention_exception (ex_catch_assert, b);
 }
 
+static void
+print_recreate_catch_assert (struct breakpoint *b, struct ui_file *fp)
+{
+  print_recreate_exception (ex_catch_assert, b, fp);
+}
+
 static struct breakpoint_ops catch_assert_breakpoint_ops = {
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
   print_it_catch_assert,
   print_one_catch_assert,
-  print_mention_catch_assert
+  print_mention_catch_assert,
+  print_recreate_catch_assert
 };
 
 /* Return non-zero if B is an Ada exception catchpoint.  */

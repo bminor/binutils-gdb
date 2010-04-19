@@ -129,7 +129,7 @@ gdb_verify_tracepoints "10.x: verify trace setup";
 
 remote_file host delete savetrace.tr
 gdb_test "save-tracepoints savetrace.tr" \
-	"Tracepoints saved to file 'savetrace.tr'." \
+	"Saved to file 'savetrace.tr'." \
 	"10.1: save tracepoint definitions"
 
 # 10.2 Read back tracepoint definitions
@@ -148,7 +148,7 @@ remote_file host delete savetrace.tr
 set escapedfilename [string_to_regexp $objdir/savetrace.tr]
 remote_file host delete $objdir/savetrace.tr
 gdb_test "save-tracepoints $objdir/savetrace.tr" \
-	"Tracepoints saved to file '${escapedfilename}'." \
+	"Saved to file '${escapedfilename}'." \
 	"10.3: save tracepoint definitions, full path"
 
 gdb_delete_tracepoints

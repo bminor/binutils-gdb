@@ -1,3 +1,45 @@
+2010-04-19  Pedro Alves  <pedro@codesourcery.com>
+
+	PR breakpoints/8554.
+
+	Implement `save-breakpoints'.
+
+	* breakpoint.c (save_cmdlist): New.
+	(breakpoint_set_cmdlist, breakpoint_show_cmdlist): Moved up close
+	to save_cmdlist.
+	(print_recreate_catch_fork): New.
+	(catch_fork_breakpoint_ops): Install it.
+	(print_recreate_catch_vfork): New.
+	(catch_vfork_breakpoint_ops): Install it.
+	(print_recreate_catch_syscall): New.
+	(catch_syscall_breakpoint_ops): Install it.
+	(print_recreate_catch_exec): New.
+	(catch_exec_breakpoint_ops): Install it.
+	(print_recreate_exception_catchpoint): New.
+	(gnu_v3_exception_catchpoint_ops): Install it.
+	(save_breakpoints): New, based on tracepoint_save_command, but
+	handle all breakpoint types.
+	(save_breakpoints_command): New.
+	(tracepoint_save_command): Rename to...
+	(save_tracepoints_command): ... this, and reimplement using
+	save_breakpoints.
+	(save_command): New.
+	(_initialize_breakpoints): Install the "save" command prefix.
+	Install the "save breakpoints" command.  Make "save-tracepoints" a
+	deprecated alias for "save tracepoints".
+	* breakpoint.h (struct breakpoint_ops): New field `print_recreate'.
+	* ada-lang.c (print_recreate_exception): New.
+	(print_recreate_catch_exception): New.
+	(catch_exception_breakpoint_ops): Install it.
+	(print_recreate_catch_exception_unhandled): New.
+	(catch_exception_unhandled_breakpoint_ops): Install it.
+	(print_recreate_catch_assert): New.
+	(catch_assert_breakpoint_ops): Install it.
+
+	* NEWS: Mention the new `save breakpoints' command.  Mention the
+	new `save tracepoints' alias and that `save-tracepoints' is now
+	deprecated.
+
 2010-04-18  Pedro Alves  <pedro@codesourcery.com>
 
 	PR tui/9217
