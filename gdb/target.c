@@ -832,7 +832,7 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_trace_find,
 	    (int (*) (enum trace_find_type, int, ULONGEST, ULONGEST, int *))
-	    return_zero);
+	    return_minus_one);
   de_fault (to_get_trace_state_variable_value,
 	    (int (*) (int, LONGEST *))
 	    return_zero);

@@ -1949,8 +1949,10 @@ tfind_1 (enum trace_find_type type, int num,
     {
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "found", "0");
-      else
-	printf_unfiltered (_("No trace frame found"));
+      else if (type == tfind_number && num == -1)
+	printf_unfiltered (_("No longer looking at any trace frame\n"));
+      else /* this case may never occur, check */
+	printf_unfiltered (_("No trace frame found\n"));
     }
 
   /* If we're in nonstop mode and getting out of looking at trace
