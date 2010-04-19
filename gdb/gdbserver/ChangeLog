@@ -1,3 +1,8 @@
+2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* configure.srv (srv_amd64_regobj): Replace `x86-64-avx.o' by
+	`amd64-avx.o'.
+
 2010-04-17  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* configure.ac: Use `ws2_32' library for srv_mingw.
