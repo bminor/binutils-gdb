@@ -1,5 +1,10 @@
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* procfs.c (find_signalled_thread, find_stop_signal): Move
+	these functions down to define them only when used.
+
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* valprint.c (common_val_print): Fix the value before extracting
 	its contents.
 	* ada-lang.c (ada_to_fixed_value): Make this function extern.

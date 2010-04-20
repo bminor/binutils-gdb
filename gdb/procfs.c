@@ -6049,28 +6049,6 @@ procfs_first_available (void)
   return pid_to_ptid (procinfo_list ? procinfo_list->pid : -1);
 }
 
-static int
-find_signalled_thread (struct thread_info *info, void *data)
-{
-  if (info->stop_signal != TARGET_SIGNAL_0
-      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
-    return 1;
-
-  return 0;
-}
-
-static enum target_signal
-find_stop_signal (void)
-{
-  struct thread_info *info =
-    iterate_over_threads (find_signalled_thread, NULL);
-
-  if (info)
-    return info->stop_signal;
-  else
-    return TARGET_SIGNAL_0;
-}
-
 /* ===================  GCORE .NOTE "MODULE" =================== */
 #if defined (UNIXWARE) || defined (PIOCOPENLWP) || defined (PCAGENT)
 /* gcore only implemented on solaris and unixware (so far) */
@@ -6146,6 +6124,28 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
 						    args->stop_signal);
     }
   return 0;
+}
+
+static int
+find_signalled_thread (struct thread_info *info, void *data)
+{
+  if (info->stop_signal != TARGET_SIGNAL_0
+      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+    return 1;
+
+  return 0;
+}
+
+static enum target_signal
+find_stop_signal (void)
+{
+  struct thread_info *info =
+    iterate_over_threads (find_signalled_thread, NULL);
+
+  if (info)
+    return info->stop_signal;
+  else
+    return TARGET_SIGNAL_0;
 }
 
 static char *
