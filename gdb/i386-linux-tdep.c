@@ -56,21 +56,21 @@
 /* Supported register note sections.  */
 static struct core_regset_section i386_linux_regset_sections[] =
 {
-  { ".reg", 144, "general-purpose" },
+  { ".reg", 68, "general-purpose" },
   { ".reg2", 108, "floating-point" },
   { NULL, 0 }
 };
 
 static struct core_regset_section i386_linux_sse_regset_sections[] =
 {
-  { ".reg", 144, "general-purpose" },
+  { ".reg", 68, "general-purpose" },
   { ".reg-xfp", 512, "extended floating-point" },
   { NULL, 0 }
 };
 
 static struct core_regset_section i386_linux_avx_regset_sections[] =
 {
-  { ".reg", 144, "general-purpose" },
+  { ".reg", 68, "general-purpose" },
   { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }
 };

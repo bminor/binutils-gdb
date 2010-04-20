@@ -1,3 +1,10 @@
+2010-04-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c (i386_linux_regset_sections): Size of the
+	general-purpose register set should be 68 instead of 144.
+	(i386_linux_sse_regset_sections): Likewise.
+	(i386_linux_avx_regset_sections): Likewise.
+
 2010-04-20  Stan Shebs  <stan@codesourcery.com>
 	    Nathan Sidwell  <nathan@codesourcery.com>
 
