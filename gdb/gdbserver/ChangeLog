@@ -1,5 +1,14 @@
 2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* win32-i386-low.c: Add 64-bit support.
+	(CONTEXT_EXTENDED_REGISTERS): Set macro to zero if not exisiting.
+	(init_registers_amd64): Declare.
+	(mappings): Add 64-bit version of array.
+	(init_windows_x86): New function.
+	(the_low_target): Change init_arch field to init_windows_x86.
+
+2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* win32-low.c: Adapt to support also 64-bit architecture.
 	(child_xfer_memory): Use uintptr_t type for local variable `addr'.
 	(get_image_name): Use SIZE_T type for local variable `done'.

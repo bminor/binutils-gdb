@@ -19,13 +19,22 @@
 #include "win32-low.h"
 #include "i386-low.h"
 
+#ifndef CONTEXT_EXTENDED_REGISTERS
+#define CONTEXT_EXTENDED_REGISTERS 0
+#endif
+
 #define FCS_REGNUM 27
 #define FOP_REGNUM 31
 
 #define FLAG_TRACE_BIT 0x100
 
+#ifdef __x86_64
+/* Defined in auto-generated file reg-i386.c.  */
+void init_registers_amd64 (void);
+#else
 /* Defined in auto-generated file reg-i386.c.  */
 void init_registers_i386 (void);
+#endif
 
 static struct i386_debug_reg_state debug_reg_state;
 
@@ -214,6 +223,8 @@ i386_single_step (win32_thread_info *th)
   th->context.EFlags |= FLAG_TRACE_BIT;
 }
 
+#ifndef __x86_64
+
 /* An array of offset mappings into a Win32 Context structure.
    This is a one-to-one mapping which is indexed by gdb's register
    numbers.  It retrieves an offset into the context structure where
@@ -269,6 +280,75 @@ static const int mappings[] = {
 };
 #undef context_offset
 
+#else /* __x86_64 */
+
+#define context_offset(x) (offsetof (CONTEXT, x))
+static const int mappings[] =
+{
+  context_offset (Rax),
+  context_offset (Rbx),
+  context_offset (Rcx),
+  context_offset (Rdx),
+  context_offset (Rsi),
+  context_offset (Rdi),
+  context_offset (Rbp),
+  context_offset (Rsp),
+  context_offset (R8),
+  context_offset (R9),
+  context_offset (R10),
+  context_offset (R11),
+  context_offset (R12),
+  context_offset (R13),
+  context_offset (R14),
+  context_offset (R15),
+  context_offset (Rip),
+  context_offset (EFlags),
+  context_offset (SegCs),
+  context_offset (SegSs),
+  context_offset (SegDs),
+  context_offset (SegEs),
+  context_offset (SegFs),
+  context_offset (SegGs),
+  context_offset (FloatSave.FloatRegisters[0]),
+  context_offset (FloatSave.FloatRegisters[1]),
+  context_offset (FloatSave.FloatRegisters[2]),
+  context_offset (FloatSave.FloatRegisters[3]),
+  context_offset (FloatSave.FloatRegisters[4]),
+  context_offset (FloatSave.FloatRegisters[5]),
+  context_offset (FloatSave.FloatRegisters[6]),
+  context_offset (FloatSave.FloatRegisters[7]),
+  context_offset (FloatSave.ControlWord),
+  context_offset (FloatSave.StatusWord),
+  context_offset (FloatSave.TagWord),
+  context_offset (FloatSave.ErrorSelector),
+  context_offset (FloatSave.ErrorOffset),
+  context_offset (FloatSave.DataSelector),
+  context_offset (FloatSave.DataOffset),
+  context_offset (FloatSave.ErrorSelector)
+  /* XMM0-7 */ ,
+  context_offset (Xmm0),
+  context_offset (Xmm1),
+  context_offset (Xmm2),
+  context_offset (Xmm3),
+  context_offset (Xmm4),
+  context_offset (Xmm5),
+  context_offset (Xmm6),
+  context_offset (Xmm7),
+  context_offset (Xmm8),
+  context_offset (Xmm9),
+  context_offset (Xmm10),
+  context_offset (Xmm11),
+  context_offset (Xmm12),
+  context_offset (Xmm13),
+  context_offset (Xmm14),
+  context_offset (Xmm15),
+  /* MXCSR */
+  context_offset (FloatSave.MxCsr)
+};
+#undef context_offset
+
+#endif /* __x86_64 */
+
 /* Fetch register from gdbserver regcache data.  */
 static void
 i386_fetch_inferior_register (struct regcache *regcache,
@@ -303,8 +383,18 @@ i386_store_inferior_register (struct regcache *regcache,
 static const unsigned char i386_win32_breakpoint = 0xcc;
 #define i386_win32_breakpoint_len 1
 
+static void
+init_windows_x86 (void)
+{
+#ifdef __x86_64
+  init_registers_amd64 ();
+#else
+  init_registers_i386 ();
+#endif
+}
+
 struct win32_target_ops the_low_target = {
-  init_registers_i386,
+  init_windows_x86,
   sizeof (mappings) / sizeof (mappings[0]),
   i386_initial_stuff,
   i386_get_thread_context,
