@@ -1,5 +1,12 @@
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* rs6000-aix-tdep.c: #include exceptions.h.
+	(rs6000_convert_from_func_ptr_addr): If an exception is thrown
+	while reading the memory at ADDR, then ADDR cannot be a function
+	descriptor.
+
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-typeprint.c (ada_print_typedef): New function.
 	* ada-lang.h (ada_print_typedef): Add declaration.
 	* ada-lang.c (ada_language_defn): set la_print_typdef field

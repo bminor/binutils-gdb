@@ -34,6 +34,7 @@
 #include "breakpoint.h"
 #include "rs6000-tdep.h"
 #include "ppc-tdep.h"
+#include "exceptions.h"
 
 /* Hook for determining the TOC address when calling functions in the
    inferior under AIX. The initialization code in rs6000-nat.c sets
@@ -582,9 +583,22 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
      the target address itself points to a section that is executable.  */
   if (s && (s->the_bfd_section->flags & SEC_CODE) == 0)
     {
-      CORE_ADDR pc =
-        read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
-      struct obj_section *pc_section = find_pc_section (pc);
+      CORE_ADDR pc;
+      struct obj_section *pc_section;
+      struct gdb_exception e;
+
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+        {
+          pc = read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
+        }
+      if (e.reason < 0)
+        {
+          /* An error occured during reading.  Probably a memory error
+             due to the section not being loaded yet.  This address
+             cannot be a function descriptor.  */
+          return addr;
+        }
+      pc_section = find_pc_section (pc);
 
       if (pc_section && (pc_section->the_bfd_section->flags & SEC_CODE))
         return pc;
