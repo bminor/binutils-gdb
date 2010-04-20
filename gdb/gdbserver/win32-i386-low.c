@@ -28,8 +28,8 @@
 
 #define FLAG_TRACE_BIT 0x100
 
-#ifdef __x86_64
-/* Defined in auto-generated file reg-i386.c.  */
+#ifdef __x86_64__
+/* Defined in auto-generated file reg-amd64.c.  */
 void init_registers_amd64 (void);
 #else
 /* Defined in auto-generated file reg-i386.c.  */
@@ -223,7 +223,7 @@ i386_single_step (win32_thread_info *th)
   th->context.EFlags |= FLAG_TRACE_BIT;
 }
 
-#ifndef __x86_64
+#ifndef __x86_64__
 
 /* An array of offset mappings into a Win32 Context structure.
    This is a one-to-one mapping which is indexed by gdb's register
@@ -280,7 +280,7 @@ static const int mappings[] = {
 };
 #undef context_offset
 
-#else /* __x86_64 */
+#else /* __x86_64__ */
 
 #define context_offset(x) (offsetof (CONTEXT, x))
 static const int mappings[] =
@@ -347,7 +347,7 @@ static const int mappings[] =
 };
 #undef context_offset
 
-#endif /* __x86_64 */
+#endif /* __x86_64__ */
 
 /* Fetch register from gdbserver regcache data.  */
 static void
@@ -386,7 +386,7 @@ static const unsigned char i386_win32_breakpoint = 0xcc;
 static void
 init_windows_x86 (void)
 {
-#ifdef __x86_64
+#ifdef __x86_64__
   init_registers_amd64 ();
 #else
   init_registers_i386 ();

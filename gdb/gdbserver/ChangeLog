@@ -1,3 +1,10 @@
+2010-04-20  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-i386-low.c: Use __x86_64__ macro instead of __x86_64 to
+	be consistent with other sources of this directory.
+	(init_registers_amd64): Correct name of source file of this function
+	in the comment.
+
 2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* configure.srv (x86_64-*-mingw*): New configuration for Windows
