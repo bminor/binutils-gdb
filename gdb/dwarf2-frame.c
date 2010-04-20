@@ -85,6 +85,9 @@ struct dwarf2_cie
 
   /* The version recorded in the CIE.  */
   unsigned char version;
+
+  /* The segment size.  */
+  unsigned char segment_size;
 };
 
 struct dwarf2_cie_table
@@ -1714,7 +1717,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
 
       /* Check version number.  */
       cie_version = read_1_byte (unit->abfd, buf);
-      if (cie_version != 1 && cie_version != 3)
+      if (cie_version != 1 && cie_version != 3 && cie_version != 4)
 	return NULL;
       cie->version = cie_version;
       buf += 1;
@@ -1736,6 +1739,20 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
 	  /* Skip.  */
 	  buf += gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
 	  augmentation += 2;
+	}
+
+      if (cie->version >= 4)
+	{
+	  /* FIXME: check that this is the same as from the CU header.  */
+	  cie->addr_size = read_1_byte (unit->abfd, buf);
+	  ++buf;
+	  cie->segment_size = read_1_byte (unit->abfd, buf);
+	  ++buf;
+	}
+      else
+	{
+	  cie->addr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+	  cie->segment_size = 0;
 	}
 
       cie->code_alignment_factor =

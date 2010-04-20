@@ -1,3 +1,20 @@
+2010-04-20  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2-frame.c (decode_frame_entry_1): Handle CIE version 4.
+	(struct dwarf2_cie) <segment_size>: New field.
+	* dwarf2read.c (partial_read_comp_unit_head): Accept DWARF 4.
+	(skip_one_die): Handle DW_FORM_flag_present, DW_FORM_sec_offset,
+	DW_FORM_exprloc.
+	(read_attribute_value): Handle DW_FORM_flag_present,
+	DW_FORM_sec_offset, DW_FORM_exprloc.
+	(dump_die_shallow): Likewise.
+	(attr_form_is_section_offset): Handle DW_FORM_sec_offset.
+	(dwarf2_const_value): Handle DW_FORM_exprloc.
+	(attr_form_is_block): Likewise.
+	(struct line_header) <maximum_ops_per_instruction>: New field.
+	(dwarf_decode_line_header): Set new field.
+	(dwarf_decode_lines): Handle new field.
+
 2010-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* f-exp.y: Add new production to recognize the `logical*8' type.

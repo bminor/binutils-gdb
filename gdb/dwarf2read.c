@@ -396,6 +396,7 @@ struct line_header
   unsigned short version;
   unsigned int header_length;
   unsigned char minimum_instruction_length;
+  unsigned char maximum_ops_per_instruction;
   unsigned char default_is_stmt;
   int line_base;
   unsigned char line_range;
@@ -1488,10 +1489,10 @@ partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 
   info_ptr = read_comp_unit_head (header, info_ptr, abfd);
 
-  if (header->version != 2 && header->version != 3)
+  if (header->version != 2 && header->version != 3 && header->version != 4)
     error (_("Dwarf Error: wrong version in compilation unit header "
-	   "(is %d, should be %d) [in module %s]"), header->version,
-	   2, bfd_get_filename (abfd));
+	   "(is %d, should be 2, 3, or 4) [in module %s]"), header->version,
+	   bfd_get_filename (abfd));
 
   if (header->abbrev_offset >= dwarf2_per_objfile->abbrev.size)
     error (_("Dwarf Error: bad offset (0x%lx) in compilation unit header "
@@ -2776,6 +2777,8 @@ skip_one_die (gdb_byte *buffer, gdb_byte *info_ptr,
 	case DW_FORM_flag:
 	  info_ptr += 1;
 	  break;
+	case DW_FORM_flag_present:
+	  break;
 	case DW_FORM_data2:
 	case DW_FORM_ref2:
 	  info_ptr += 2;
@@ -2793,9 +2796,11 @@ skip_one_die (gdb_byte *buffer, gdb_byte *info_ptr,
 	  read_string (abfd, info_ptr, &bytes_read);
 	  info_ptr += bytes_read;
 	  break;
+	case DW_FORM_sec_offset:
 	case DW_FORM_strp:
 	  info_ptr += cu->header.offset_size;
 	  break;
+	case DW_FORM_exprloc:
 	case DW_FORM_block:
 	  info_ptr += read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
 	  info_ptr += bytes_read;
@@ -7129,6 +7134,10 @@ read_attribute_value (struct attribute *attr, unsigned form,
       DW_UNSND (attr) = read_8_bytes (abfd, info_ptr);
       info_ptr += 8;
       break;
+    case DW_FORM_sec_offset:
+      DW_UNSND (attr) = read_offset (abfd, info_ptr, &cu->header, &bytes_read);
+      info_ptr += bytes_read;
+      break;
     case DW_FORM_string:
       DW_STRING (attr) = read_string (abfd, info_ptr, &bytes_read);
       DW_STRING_IS_CANONICAL (attr) = 0;
@@ -7140,6 +7149,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       DW_STRING_IS_CANONICAL (attr) = 0;
       info_ptr += bytes_read;
       break;
+    case DW_FORM_exprloc:
     case DW_FORM_block:
       blk = dwarf_alloc_block (cu);
       blk->size = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
@@ -7163,6 +7173,9 @@ read_attribute_value (struct attribute *attr, unsigned form,
     case DW_FORM_flag:
       DW_UNSND (attr) = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
+      break;
+    case DW_FORM_flag_present:
+      DW_UNSND (attr) = 1;
       break;
     case DW_FORM_sdata:
       DW_SND (attr) = read_signed_leb128 (abfd, info_ptr, &bytes_read);
@@ -7680,7 +7693,7 @@ dwarf2_attr_no_follow (struct die_info *die, unsigned int name,
 
 /* Return non-zero iff the attribute NAME is defined for the given DIE,
    and holds a non-zero value.  This function should only be used for
-   DW_FORM_flag attributes.  */
+   DW_FORM_flag or DW_FORM_flag_present attributes.  */
 
 static int
 dwarf2_flag_true_p (struct die_info *die, unsigned name, struct dwarf2_cu *cu)
@@ -7862,6 +7875,21 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   line_ptr += offset_size;
   lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
+  if (lh->version >= 4)
+    {
+      lh->maximum_ops_per_instruction = read_1_byte (abfd, line_ptr);
+      line_ptr += 1;
+    }
+  else
+    lh->maximum_ops_per_instruction = 1;
+
+  if (lh->maximum_ops_per_instruction == 0)
+    {
+      lh->maximum_ops_per_instruction = 1;
+      complaint (&symfile_complaints,
+		 _("invalid maximum_ops_per_instruction in `.debug_line' section"));
+    }
+
   lh->default_is_stmt = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
   lh->line_base = read_1_signed_byte (abfd, line_ptr);
@@ -8010,6 +8038,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
       int basic_block = 0;
       int end_sequence = 0;
       CORE_ADDR addr;
+      unsigned char op_index = 0;
 
       if (!decode_for_pst_p && lh->num_file_names >= file)
 	{
@@ -8041,12 +8070,17 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	    {		
 	      /* Special operand.  */
 	      adj_opcode = op_code - lh->opcode_base;
-	      address += (adj_opcode / lh->line_range)
-		* lh->minimum_instruction_length;
+	      address += (((op_index + (adj_opcode / lh->line_range))
+			   / lh->maximum_ops_per_instruction)
+			  * lh->minimum_instruction_length);
+	      op_index = ((op_index + (adj_opcode / lh->line_range))
+			  % lh->maximum_ops_per_instruction);
 	      line += lh->line_base + (adj_opcode % lh->line_range);
 	      if (lh->num_file_names < file || file == 0)
 		dwarf2_debug_line_missing_file_complaint ();
-	      else
+	      /* For now we ignore lines not starting on an
+		 instruction boundary.  */
+	      else if (op_index == 0)
 		{
 		  lh->file_names[file - 1].included_p = 1;
 		  if (!decode_for_pst_p && is_stmt)
@@ -8081,6 +8115,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr, cu, &bytes_read);
+		  op_index = 0;
 		  line_ptr += bytes_read;
 		  address += baseaddr;
 		  break;
@@ -8146,9 +8181,17 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
-	      address += lh->minimum_instruction_length
-		* read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-	      line_ptr += bytes_read;
+	      {
+		CORE_ADDR adjust
+		  = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+
+		address += (((op_index + adjust)
+			     / lh->maximum_ops_per_instruction)
+			    * lh->minimum_instruction_length);
+		op_index = ((op_index + adjust)
+			    % lh->maximum_ops_per_instruction);
+		line_ptr += bytes_read;
+	      }
 	      break;
 	    case DW_LNS_advance_line:
 	      line += read_signed_leb128 (abfd, line_ptr, &bytes_read);
@@ -8195,11 +8238,19 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	       instruction length since special opcode 255 would have
 	       scaled the the increment.  */
 	    case DW_LNS_const_add_pc:
-	      address += (lh->minimum_instruction_length
-			  * ((255 - lh->opcode_base) / lh->line_range));
+	      {
+		CORE_ADDR adjust = (255 - lh->opcode_base) / lh->line_range;
+
+		address += (((op_index + adjust)
+			     / lh->maximum_ops_per_instruction)
+			    * lh->minimum_instruction_length);
+		op_index = ((op_index + adjust)
+			    % lh->maximum_ops_per_instruction);
+	      }
 	      break;
 	    case DW_LNS_fixed_advance_pc:
 	      address += read_2_bytes (abfd, line_ptr);
+	      op_index = 0;
 	      line_ptr += 2;
 	      break;
 	    default:
@@ -8761,6 +8812,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     case DW_FORM_block2:
     case DW_FORM_block4:
     case DW_FORM_block:
+    case DW_FORM_exprloc:
       blk = DW_BLOCK (attr);
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != blk->size)
 	dwarf2_const_value_length_mismatch_complaint (SYMBOL_PRINT_NAME (sym),
@@ -10308,6 +10360,10 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_block1:
 	  fprintf_unfiltered (f, "block: size %d", DW_BLOCK (&die->attrs[i])->size);
 	  break;
+	case DW_FORM_exprloc:
+	  fprintf_unfiltered (f, "expression: size %u",
+			      DW_BLOCK (&die->attrs[i])->size);
+	  break;
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:
 	case DW_FORM_ref4:
@@ -10321,6 +10377,10 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_udata:
 	case DW_FORM_sdata:
 	  fprintf_unfiltered (f, "constant: %s",
+			      pulongest (DW_UNSND (&die->attrs[i])));
+	  break;
+	case DW_FORM_sec_offset:
+	  fprintf_unfiltered (f, "section offset: %s",
 			      pulongest (DW_UNSND (&die->attrs[i])));
 	  break;
 	case DW_FORM_sig8:
@@ -10342,6 +10402,9 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	    fprintf_unfiltered (f, "flag: TRUE");
 	  else
 	    fprintf_unfiltered (f, "flag: FALSE");
+	  break;
+	case DW_FORM_flag_present:
+	  fprintf_unfiltered (f, "flag: TRUE");
 	  break;
 	case DW_FORM_indirect:
 	  /* the reader will have reduced the indirect form to
@@ -11520,7 +11583,8 @@ attr_form_is_block (struct attribute *attr)
       attr->form == DW_FORM_block1
       || attr->form == DW_FORM_block2
       || attr->form == DW_FORM_block4
-      || attr->form == DW_FORM_block);
+      || attr->form == DW_FORM_block
+      || attr->form == DW_FORM_exprloc);
 }
 
 /* Return non-zero if ATTR's value is a section offset --- classes
@@ -11535,7 +11599,8 @@ static int
 attr_form_is_section_offset (struct attribute *attr)
 {
   return (attr->form == DW_FORM_data4
-          || attr->form == DW_FORM_data8);
+          || attr->form == DW_FORM_data8
+	  || attr->form == DW_FORM_sec_offset);
 }
 
 
