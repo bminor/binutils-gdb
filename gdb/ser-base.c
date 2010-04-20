@@ -361,7 +361,7 @@ generic_readchar (struct serial *scb, int timeout,
 	    break;
 
 	  s = read (scb->error_fd, &buf, to_read);
-	  if (s == -1)
+	  if (s <= 0)
 	    break;
 
 	  /* In theory, embedded newlines are not a problem.

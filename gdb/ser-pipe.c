@@ -66,7 +66,11 @@ pipe_open (struct serial *scb, const char *name)
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, err_pdes) < 0)
-    return -1;
+    {
+      close (pdes[0]);
+      close (pdes[1]);
+      return -1;
+    }
 
   /* Create the child process to run the command in.  Note that the
      apparent call to vfork() below *might* actually be a call to
@@ -123,6 +127,8 @@ pipe_open (struct serial *scb, const char *name)
 
   /* Parent. */
   close (pdes[1]);
+  if (err_pdes[1] != -1)
+    close (err_pdes[1]);
   /* :end chunk */
   state = XMALLOC (struct pipe_state);
   state->pid = pid;
@@ -145,10 +151,15 @@ pipe_close (struct serial *scb)
       int pid = state->pid;
       close (scb->fd);
       scb->fd = -1;
+      if (scb->error_fd != -1)
+	close (scb->error_fd);
+      scb->error_fd = -1;
       xfree (state);
       scb->state = NULL;
       kill (pid, SIGTERM);
-      /* Might be useful to check that the child does die. */
+      /* Might be useful to check that the child does die,
+	 and while we're waiting for it to die print any remaining
+	 stderr output.  */
     }
 }
 

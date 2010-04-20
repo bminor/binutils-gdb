@@ -1,3 +1,9 @@
+2010-04-19  Doug Evans  <dje@google.com>
+
+	* ser-base.c (generic_readchar): Watch for EOF in read of error_fd.
+	* ser-pipe.c (pipe_open): Fix file descriptor leaks.
+	(pipe_close): Ditto.
+
 2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* configure.tgt (x86_64-*-mingw*): Set BUILD_GDBSERVER to yes.
