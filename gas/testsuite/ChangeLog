@@ -1,3 +1,9 @@
+2010-04-20  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/11507
+	* gas/macros/altmacro.s: New test.
+	* gas/macros/altmacro.d: Expected output.
+
 2010-04-16  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/11395

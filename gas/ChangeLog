@@ -1,3 +1,9 @@
+2010-04-20  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/11507
+	* macro.c (macro_expand_body): Do not treat LOCAL as a keyword in
+	altmacro mode if found inside a quoted string.
+
 2010-04-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-lex.l (parse_int): Change index() to strchr().

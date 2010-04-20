@@ -868,7 +868,9 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	  if (! macro
 	      || src + 5 >= in->len
 	      || strncasecmp (in->ptr + src, "LOCAL", 5) != 0
-	      || ! ISWHITE (in->ptr[src + 5]))
+	      || ! ISWHITE (in->ptr[src + 5])
+	      /* PR 11507: Skip keyword LOCAL if it is found inside a quoted string.  */
+	      || inquote)
 	    {
 	      sb_reset (&t);
 	      src = sub_actual (src, in, &t, formal_hash,
