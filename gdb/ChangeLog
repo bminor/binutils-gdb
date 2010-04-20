@@ -1,5 +1,12 @@
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* procfs.c (iterate_over_mappings_cb_ftype): New typedef.
+	(iterate_over_mappings): Adjust function profile. Add declaration.
+	(insert_dbx_link_bpt_in_region, info_mappings_callback):
+	Adjust accordingly.
+
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* procfs.c (solib_mappings_callback): Move function up to avoid
 	a compiler warning.
 

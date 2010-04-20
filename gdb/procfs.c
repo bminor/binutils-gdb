@@ -445,6 +445,19 @@ static void free_syscalls (procinfo *pi);
 static int find_syscall (procinfo *pi, char *name);
 #endif /* DYNAMIC_SYSCALLS */
 
+/* A function type used as a callback back iterate_over_mappings.  */
+typedef int (iterate_over_mappings_cb_ftype)
+  (CORE_ADDR vaddr, unsigned long size, int read, int write, int execute,
+   void *data);
+
+static int iterate_over_mappings
+  (procinfo *pi,
+   iterate_over_mappings_cb_ftype *child_func,
+   void *data,
+   int (*func) (struct prmap *map,
+                iterate_over_mappings_cb_ftype *child_func,
+                void *data));
+
 /* The head of the procinfo list: */
 static procinfo * procinfo_list;
 
@@ -4096,7 +4109,7 @@ solib_mappings_callback (struct prmap *map, int (*func) (int, CORE_ADDR),
 
 static int
 insert_dbx_link_bpt_in_region (struct prmap *map,
-                               int (*child_func) (),
+                               iterate_over_mappings_cb_ftype *child_func,
                                void *data)
 {
   procinfo *pi = (procinfo *) data;
@@ -5617,9 +5630,11 @@ procfs_use_watchpoints (struct target_ops *t)
  */
 
 static int
-iterate_over_mappings (procinfo *pi, int (*child_func) (), void *data,
+iterate_over_mappings (procinfo *pi,
+		       iterate_over_mappings_cb_ftype *child_func,
+		       void *data,
 		       int (*func) (struct prmap *map,
-				    int (*child_func) (),
+				    iterate_over_mappings_cb_ftype *child_func,
 				    void *data))
 {
   char pathname[MAX_PROC_NAME_SIZE];
@@ -5767,7 +5782,9 @@ mappingflags (long flags)
  */
 
 static int
-info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
+info_mappings_callback (struct prmap *map,
+			iterate_over_mappings_cb_ftype *ignore,
+			void *unused)
 {
   unsigned int pr_off;
 
