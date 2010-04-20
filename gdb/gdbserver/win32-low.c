@@ -280,7 +280,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 		   int write, struct target_ops *target)
 {
   SIZE_T done;
-  long addr = (long) memaddr;
+  uintptr_t addr = (uintptr_t) memaddr;
 
   if (write)
     {
@@ -941,7 +941,7 @@ get_image_name (HANDLE h, void *address, int unicode)
   char *address_ptr;
   int len = 0;
   char b[2];
-  DWORD done;
+  SIZE_T done;
 
   /* Attempt to read the name of the dll that was detected.
      This is documented to work only when actively debugging
@@ -1019,7 +1019,7 @@ load_psapi (void)
 }
 
 static int
-psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
+psapi_get_dll_name (LPVOID BaseAddress, char *dll_name_ret)
 {
   DWORD len;
   MODULEINFO mi;
@@ -1064,7 +1064,7 @@ psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
 		 (int) err, strwinerror (err));
 	}
 
-      if ((DWORD) (mi.lpBaseOfDll) == BaseAddress)
+      if (mi.lpBaseOfDll == BaseAddress)
 	{
 	  len = (*win32_GetModuleFileNameExA) (current_process_handle,
 					       DllHandle[i],
@@ -1134,7 +1134,7 @@ load_toolhelp (void)
 }
 
 static int
-toolhelp_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
+toolhelp_get_dll_name (LPVOID BaseAddress, char *dll_name_ret)
 {
   HANDLE snapshot_module;
   MODULEENTRY32 modEntry = { sizeof (MODULEENTRY32) };
@@ -1151,7 +1151,7 @@ toolhelp_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
   /* Ignore the first module, which is the exe.  */
   if (win32_Module32First (snapshot_module, &modEntry))
     while (win32_Module32Next (snapshot_module, &modEntry))
-      if ((DWORD) modEntry.modBaseAddr == BaseAddress)
+      if (modEntry.modBaseAddr == BaseAddress)
 	{
 #ifdef UNICODE
 	  wcstombs (dll_name_ret, modEntry.szExePath, MAX_PATH + 1);
@@ -1176,21 +1176,21 @@ handle_load_dll (void)
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   char dll_buf[MAX_PATH + 1];
   char *dll_name = NULL;
-  DWORD load_addr;
+  CORE_ADDR load_addr;
 
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
   /* Windows does not report the image name of the dlls in the debug
      event on attaches.  We resort to iterating over the list of
      loaded dlls looking for a match by image base.  */
-  if (!psapi_get_dll_name ((DWORD) event->lpBaseOfDll, dll_buf))
+  if (!psapi_get_dll_name (event->lpBaseOfDll, dll_buf))
     {
       if (!server_waiting)
 	/* On some versions of Windows and Windows CE, we can't create
 	   toolhelp snapshots while the inferior is stopped in a
 	   LOAD_DLL_DEBUG_EVENT due to a dll load, but we can while
 	   Windows is reporting the already loaded dlls.  */
-	toolhelp_get_dll_name ((DWORD) event->lpBaseOfDll, dll_buf);
+	toolhelp_get_dll_name (event->lpBaseOfDll, dll_buf);
     }
 
   dll_name = dll_buf;
@@ -1205,7 +1205,7 @@ handle_load_dll (void)
      the offset from 0 of the first byte in an image - because
      of the file header and the section alignment. */
 
-  load_addr = (DWORD) event->lpBaseOfDll + 0x1000;
+  load_addr = (CORE_ADDR) (uintptr_t) event->lpBaseOfDll + 0x1000;
   win32_add_one_solib (dll_name, load_addr);
 }
 
@@ -1213,7 +1213,7 @@ static void
 handle_unload_dll (void)
 {
   CORE_ADDR load_addr =
-	  (CORE_ADDR) (DWORD) current_event.u.UnloadDll.lpBaseOfDll;
+	  (CORE_ADDR) (uintptr_t) current_event.u.UnloadDll.lpBaseOfDll;
   load_addr += 0x1000;
   unloaded_dll (NULL, load_addr);
 }
@@ -1314,10 +1314,10 @@ handle_exception (struct target_waitstatus *ourstatus)
 	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 	  return;
 	}
-      OUTMSG2 (("gdbserver: unknown target exception 0x%08lx at 0x%08lx",
+      OUTMSG2 (("gdbserver: unknown target exception 0x%08lx at 0x%s",
 		current_event.u.Exception.ExceptionRecord.ExceptionCode,
-		(DWORD) current_event.u.Exception.ExceptionRecord.
-		ExceptionAddress));
+		phex_nz ((uintptr_t) current_event.u.Exception.ExceptionRecord.
+		ExceptionAddress, sizeof (uintptr_t))));
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
       break;
     }
@@ -1577,7 +1577,6 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 static ptid_t
 win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
-  struct process_info *process;
   struct regcache *regcache;
 
   while (1)

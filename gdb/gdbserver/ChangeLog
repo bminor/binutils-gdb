@@ -1,5 +1,18 @@
 2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* win32-low.c: Adapt to support also 64-bit architecture.
+	(child_xfer_memory): Use uintptr_t type for local variable `addr'.
+	(get_image_name): Use SIZE_T type for local variable `done'.
+	(psapi_get_dll_name): Use LPVOID type for parameter `BaseAddress'.
+	(toolhelp_get_dll_name): Idem.
+	(handle_load_dll): Use CORE_ADDR type for local variable `load_addr'.
+	Use uintptr_t typecast to avoid warning.
+	(handle_unload_dll): Use uintptr_t typecast to avoid warning.
+	(handle_exception): Use phex_nz to avoid warning.
+	(win32_wait): Remove unused local variable `process'.
+
+2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* configure.srv (srv_amd64_regobj): Replace `x86-64-avx.o' by
 	`amd64-avx.o'.
 
