@@ -590,6 +590,7 @@ x86_64-*-mingw*)
 	gdb_target_obs="amd64-tdep.o amd64-windows-tdep.o \
                         i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \
                         solib-target.o windows-tdep.o"
+	build_gdbserver=yes
         ;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 	# Target: NetBSD/amd64
