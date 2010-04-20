@@ -1,3 +1,12 @@
+2010-04-20  Chris Moller  <cmoller@redhat.com>
+	
+	PR 10867
+
+	* cp-valprint.c (global): Adding new static array recursion
+	detection obstack.
+	(cp_print_value_fields, cp_print_static_field): Added new static
+	array recursion detection code.
+
 2010-04-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c (i386_linux_regset_sections): Size of the

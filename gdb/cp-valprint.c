@@ -71,6 +71,7 @@ show_static_field_print (struct ui_file *file, int from_tty,
 
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
+static struct obstack dont_print_stat_array_obstack;
 
 extern void _initialize_cp_valprint (void);
 
@@ -155,12 +156,17 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 {
   int i, len, n_baseclasses;
   int fields_seen = 0;
+  static int last_set_recurse = -1;
 
   CHECK_TYPEDEF (type);
   
-  if (recurse == 0
-      && obstack_object_size (&dont_print_statmem_obstack) > 0)
-    obstack_free (&dont_print_statmem_obstack, NULL);
+  if (recurse == 0)
+    {
+      if (obstack_object_size (&dont_print_statmem_obstack) > 0)
+	obstack_free (&dont_print_statmem_obstack, NULL);
+      if (obstack_object_size (&dont_print_stat_array_obstack) > 0)
+	obstack_free (&dont_print_stat_array_obstack, NULL);
+    }
 
   fprintf_filtered (stream, "{");
   len = TYPE_NFIELDS (type);
@@ -181,12 +187,20 @@ cp_print_value_fields (struct type *type, struct type *real_type,
   else
     {
       void *statmem_obstack_top = NULL;
+      void *stat_array_obstack_top = NULL;
       
       if (dont_print_statmem == 0)
 	{
 	  /* Set the current printed-statics stack top.  */
 	  statmem_obstack_top
 	    = obstack_next_free (&dont_print_statmem_obstack);
+
+	  if (last_set_recurse != recurse)
+	    {
+	      stat_array_obstack_top
+		= obstack_next_free (&dont_print_stat_array_obstack);
+	      last_set_recurse = recurse;
+	    }
 	}
 
       for (i = n_baseclasses; i < len; i++)
@@ -307,9 +321,16 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
       if (dont_print_statmem == 0)
 	{
-	  /* In effect, a pop of the printed-statics stack.  */
 	  if (obstack_object_size (&dont_print_statmem_obstack) > 0) 
 	    obstack_free (&dont_print_statmem_obstack, statmem_obstack_top);
+
+	  if (last_set_recurse != recurse)
+	    {
+	      if (obstack_object_size (&dont_print_stat_array_obstack) > 0) 
+		obstack_free (&dont_print_stat_array_obstack,
+			      stat_array_obstack_top);
+	      last_set_recurse = -1;
+	    }
 	}
 
       if (options->pretty)
@@ -508,6 +529,7 @@ cp_print_static_field (struct type *type,
 		       const struct value_print_options *options)
 {
   struct value_print_options opts;
+  
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print;
@@ -540,6 +562,32 @@ cp_print_static_field (struct type *type,
 			     value_embedded_offset (val), addr,
 			     stream, recurse, options, NULL, 1);
       return;
+    }
+
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    {
+      struct type **first_dont_print;
+      int i;
+      struct type *target_type = TYPE_TARGET_TYPE (type);
+
+      first_dont_print
+	= (struct type **) obstack_base (&dont_print_stat_array_obstack);
+      i = obstack_object_size (&dont_print_stat_array_obstack)
+	/ sizeof (CORE_ADDR);
+
+      while (--i >= 0)
+	{
+	  if (target_type == first_dont_print[i])
+	    {
+	      fputs_filtered ("<same as static member of an already"
+			      " seen type>",
+			      stream);
+	      return;
+	    }
+	}
+
+      obstack_grow (&dont_print_stat_array_obstack, (char *) &target_type,
+		    sizeof (struct type *));
     }
 
   opts = *options;
@@ -672,6 +720,7 @@ Show printing of object's derived type based on vtable info."), NULL,
 			   show_objectprint,
 			   &setprintlist, &showprintlist);
 
+  obstack_begin (&dont_print_stat_array_obstack, 32 * sizeof (CORE_ADDR));
   obstack_begin (&dont_print_statmem_obstack, 32 * sizeof (CORE_ADDR));
   obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
 }
