@@ -1950,13 +1950,15 @@ find_abstract_instance_name (struct comp_unit *unit,
 	      switch (attr.name)
 		{
 		case DW_AT_name:
-		  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
+		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
+		     over DW_AT_name.  */
 		  if (name == NULL)
 		    name = attr.u.str;
 		  break;
 		case DW_AT_specification:
 		  name = find_abstract_instance_name (unit, &attr);
 		  break;
+		case DW_AT_linkage_name:
 		case DW_AT_MIPS_linkage_name:
 		  name = attr.u.str;
 		  break;
@@ -2126,11 +2128,13 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  break;
 
 		case DW_AT_name:
-		  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
+		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
+		     over DW_AT_name.  */
 		  if (func->name == NULL)
 		    func->name = attr.u.str;
 		  break;
 
+		case DW_AT_linkage_name:
 		case DW_AT_MIPS_linkage_name:
 		  func->name = attr.u.str;
 		  break;
