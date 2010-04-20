@@ -1,5 +1,9 @@
 2010-04-20  Nick Clifton  <nickc@redhat.com>
 
+	* po/fr.po: Updated french translation.
+
+2010-04-20  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c: Add _() macros to constant strings that are
 	translatable.
 
