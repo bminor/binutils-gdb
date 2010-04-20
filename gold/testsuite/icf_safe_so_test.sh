@@ -27,8 +27,7 @@
 
 error_if_symbol_absent()
 {
-    is_symbol_present $1 $2
-    if [ $? != 0 ];
+    if ! is_symbol_present $1 $2;
     then
       echo "Symbol" $2 "not present, possibly folded."
       exit 1
@@ -37,7 +36,7 @@ error_if_symbol_absent()
 
 is_symbol_present()
 {
-    result=`grep $2 $1`
+    grep $2 $1 > /dev/null 2>&1
     return $?
 }
 
@@ -56,14 +55,12 @@ check_nofold()
 
 check_fold()
 {
-    is_symbol_present $1 $2
-    if [ $? != 0 ];
+    if ! is_symbol_present $1 $2
     then
       return 0
     fi
 
-    is_symbol_present $1 $3
-    if [ $? != 0 ];
+    if ! is_symbol_present $1 $3
     then
       return 0
     fi
@@ -89,13 +86,13 @@ arch_specific_safe_fold()
 
 X86_32_specific_safe_fold()
 {
-    grep -q -e "Intel 80386" $1 >& /dev/null
+    grep -e "Intel 80386" $1 > /dev/null 2>&1
     arch_specific_safe_fold $? $2 $3 $4
 }
 
 X86_64_specific_safe_fold()
 {
-    grep -q -e "Advanced Micro Devices X86-64" $1 >& /dev/null
+    grep -e "Advanced Micro Devices X86-64" $1 > /dev/null 2>&1
     arch_specific_safe_fold $? $2 $3 $4
 }
 
@@ -105,5 +102,4 @@ X86_32_specific_safe_fold icf_safe_so_test_2.stdout icf_safe_so_test_1.stdout "f
 X86_32_specific_safe_fold icf_safe_so_test_2.stdout icf_safe_so_test_1.stdout "foo_hidden" "foo_internal"
 X86_32_specific_safe_fold icf_safe_so_test_2.stdout icf_safe_so_test_1.stdout "foo_hidden" "foo_static"
 X86_32_specific_safe_fold icf_safe_so_test_2.stdout icf_safe_so_test_1.stdout "foo_internal" "foo_static"
-X86_64_specific_safe_fold icf_safe_so_test_2.stdout icf_safe_so_test_1.stdout \
-  "foo_glob" "bar_glob"
+check_nofold icf_safe_so_test_1.stdout "foo_glob" "bar_glob"

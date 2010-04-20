@@ -1398,14 +1398,10 @@ Target_x86_64::Scan::unsupported_reloc_global(Sized_relobj<64, false>* object,
 	     object->name().c_str(), r_type, gsym->demangled_name().c_str());
 }
 
-// Returns true if this relocation type could be that of a function pointer
-// only if the target is not position-independent code.
+// Returns true if this relocation type could be that of a function pointer.
 inline bool
 Target_x86_64::Scan::possible_function_pointer_reloc(unsigned int r_type)
 {
-  if (parameters->options().shared())
-    return false;
-
   switch (r_type)
     {
     case elfcpp::R_X86_64_64:
@@ -1413,6 +1409,11 @@ Target_x86_64::Scan::possible_function_pointer_reloc(unsigned int r_type)
     case elfcpp::R_X86_64_32S:
     case elfcpp::R_X86_64_16:
     case elfcpp::R_X86_64_8:
+    case elfcpp::R_X86_64_GOT64:
+    case elfcpp::R_X86_64_GOT32:
+    case elfcpp::R_X86_64_GOTPCREL64:
+    case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPLT64:
       {
         return true;
       }

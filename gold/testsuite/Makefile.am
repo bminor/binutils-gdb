@@ -193,6 +193,33 @@ icf_safe_so_test_1.stdout: icf_safe_so_test
 icf_safe_so_test_2.stdout: icf_safe_so_test
 	$(TEST_READELF) -h icf_safe_so_test > icf_safe_so_test_2.stdout
 
+check_SCRIPTS += icf_virtual_function_folding_test.sh
+MOSTLYCLEANFILES += icf_virtual_function_folding_test
+icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIE -g -o $@ $<
+icf_virtual_function_folding_test: icf_virtual_function_folding_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all icf_virtual_function_folding_test.o -pie
+
+check_SCRIPTS += icf_preemptible_functions_test.sh
+check_DATA += icf_preemptible_functions_test.stdout
+MOSTLYCLEANFILES += icf_preemptible_functions_test
+icf_preemptible_functions_test.o: icf_preemptible_functions_test.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
+icf_preemptible_functions_test: icf_preemptible_functions_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all icf_preemptible_functions_test.o -fPIC -shared
+icf_preemptible_functions_test.stdout: icf_preemptible_functions_test
+	$(TEST_NM) icf_preemptible_functions_test > icf_preemptible_functions_test.stdout
+
+check_SCRIPTS += icf_string_merge_test.sh
+check_DATA += icf_string_merge_test.stdout
+MOSTLYCLEANFILES += icf_string_merge_test
+icf_string_merge_test.o: icf_string_merge_test.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
+icf_string_merge_test: icf_string_merge_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all icf_string_merge_test.o
+icf_string_merge_test.stdout: icf_string_merge_test
+	$(TEST_NM) icf_string_merge_test > icf_string_merge_test.stdout
+
 check_PROGRAMS += basic_test
 check_PROGRAMS += basic_static_test
 check_PROGRAMS += basic_pic_test

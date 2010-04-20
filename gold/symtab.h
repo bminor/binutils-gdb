@@ -274,7 +274,7 @@ class Symbol
   // Return whether this symbol should be added to the dynamic symbol
   // table.
   bool
-  should_add_dynsym_entry() const;
+  should_add_dynsym_entry(Symbol_table*) const;
 
   // Return whether this symbol has been seen in a regular object.
   bool

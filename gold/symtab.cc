@@ -306,7 +306,7 @@ Sized_symbol<size>::allocate_common(Output_data* od, Value_type value)
 // table.
 
 inline bool
-Symbol::should_add_dynsym_entry() const
+Symbol::should_add_dynsym_entry(Symbol_table* symtab) const
 {
   // If the symbol is used by a dynamic relocation, we need to add it.
   if (this->needs_dynsym_entry())
@@ -324,7 +324,8 @@ Symbol::should_add_dynsym_entry() const
       bool is_ordinary;
       unsigned int shndx = this->shndx(&is_ordinary);
       if (is_ordinary && shndx != elfcpp::SHN_UNDEF
-          && !relobj->is_section_included(shndx))
+          && !relobj->is_section_included(shndx)
+          && !symtab->is_section_folded(relobj, shndx))
         return false;
     }
 
@@ -1072,7 +1073,8 @@ Symbol_table::add_from_relobj(
       bool is_defined_in_discarded_section = false;
       if (st_shndx != elfcpp::SHN_UNDEF
 	  && is_ordinary
-	  && !relobj->is_section_included(st_shndx))
+	  && !relobj->is_section_included(st_shndx)
+          && !this->is_section_folded(relobj, st_shndx))
 	{
 	  st_shndx = elfcpp::SHN_UNDEF;
 	  is_defined_in_discarded_section = true;
@@ -2253,7 +2255,7 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
       // some symbols appear more than once in the symbol table, with
       // and without a version.
 
-      if (!sym->should_add_dynsym_entry())
+      if (!sym->should_add_dynsym_entry(this))
 	sym->set_dynsym_index(-1U);
       else if (!sym->has_dynsym_index())
 	{

@@ -83,7 +83,8 @@ scan_relocs(
 	  shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
 	  if (is_ordinary
 	      && shndx != elfcpp::SHN_UNDEF
-	      && !object->is_section_included(shndx))
+	      && !object->is_section_included(shndx)
+              && !symtab->is_section_folded(object, shndx))
 	    {
 	      // RELOC is a relocation against a local symbol in a
 	      // section we are discarding.  We can ignore this
@@ -102,7 +103,6 @@ scan_relocs(
 
 	      continue;
 	    }
-
 	  scan.local(symtab, layout, target, object, data_shndx,
 		     output_section, reloc, r_type, lsym);
 	}

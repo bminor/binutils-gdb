@@ -304,7 +304,12 @@ get_section_contents(bool first_iteration,
             symtab->icf()->section_to_int_map();
           Icf::Uniq_secn_id_map::iterator section_id_map_it =
             section_id_map.find(reloc_secn);
-          if (section_id_map_it != section_id_map.end())
+          bool is_sym_preemptible = (*it_s != NULL
+				     && !(*it_s)->is_from_dynobj()
+				     && !(*it_s)->is_undefined()
+				     && (*it_s)->is_preemptible());
+          if (!is_sym_preemptible
+              && section_id_map_it != section_id_map.end())
             {
               // This is a reloc to a section that might be folded.
               if (num_tracked_relocs)
@@ -338,7 +343,14 @@ get_section_contents(bool first_iteration,
                 {
                   uint64_t entsize =
                     (it_v->first)->section_entsize(it_v->second);
-                  long long offset = it_a->first + it_a->second;
+		  long long offset = it_a->first;
+
+                  unsigned long long addend = it_a->second;
+                  // Ignoring the addend when it is a negative value.  See the 
+                  // comments in Merged_symbol_value::Value in object.h.
+                  if (addend < 0xffffff00)
+                    offset = offset + addend;
+
                   section_size_type secn_len;
                   const unsigned char* str_contents =
                   (it_v->first)->section_contents(it_v->second,

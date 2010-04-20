@@ -1,3 +1,29 @@
+2010-04-18  Sriraman Tallam  <tmsriram@google.com>
+
+	* icf.cc (get_section_contents): Check for preemptible functions.
+	Ignore addend when appropriate.
+	* symtab.cc (should_add_dynsym_entry): Add new parameter.  Check for
+	section folded.
+	(add_from_relobj): Check for section folded.
+	(set_dynsym_indexes): Fix call to should_add_dynsym_entry.
+	* symtab.h (should_add_dynsym_entry): Add new parameter.
+	* target-reloc.h (scan_relocs): Check for section folded.
+	* x86_64.cc (Target_x86_64::Scan::possible_function_pointer_reloc):
+	Check reloc types for function pointers in shared objects.
+	* testsuite/Makefile.am (icf_virtual_function_folding_test): New test
+	case.
+	(icf_preemptible_functions_test): New test case.
+	(icf_string_merge_test): New test case.
+	* testsuite.Makefile.in: Regenerate.
+	* testsuite/icf_safe_so_test.sh: Change to not fold foo_glob and
+	bar_glob.  Refactor code.
+	* testsuite/icf_preemptible_functions_test.cc: New file.
+	* testsuite/icf_preemptible_functions_test.sh: New file.
+	* testsuite/icf_string_merge_test.cc: New file.
+	* testsuite/icf_string_merge_test.sh: New file.
+	* testsuite/icf_virtual_function_folding_test.cc: New file.
+	* testsuite/icf_virtual_function_folding_test.sh: New file.
+
 2010-04-14  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_output_section::fix_exidx_coverage): Mark object
