@@ -924,12 +924,9 @@ int
 ada_value_print (struct value *val0, struct ui_file *stream,
 		 const struct value_print_options *options)
 {
-  const gdb_byte *valaddr = value_contents (val0);
-  CORE_ADDR address = value_address (val0);
-  struct type *type =
-    ada_to_fixed_type (value_type (val0), valaddr, address, NULL, 1);
-  struct value *val =
-    value_from_contents_and_address (type, valaddr, address);
+  struct value *val = ada_to_fixed_value (val0);
+  CORE_ADDR address = value_address (val);
+  struct type *type = value_type (val);
   struct value_print_options opts;
 
   /* If it is a pointer, indicate what it points to.  */

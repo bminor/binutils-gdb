@@ -35,6 +35,7 @@
 #include "exceptions.h"
 #include "dfp.h"
 #include "python/python.h"
+#include "ada-lang.h"
 
 #include <errno.h>
 
@@ -360,6 +361,13 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
 {
   if (!value_check_printable (val, stream))
     return 0;
+
+  if (language->la_language == language_ada)
+    /* The value might have a dynamic type, which would cause trouble
+       below when trying to extract the value contents (since the value
+       size is determined from the type size which is unknown).  So
+       get a fixed representation of our value.  */
+    val = ada_to_fixed_value (val);
 
   return val_print (value_type (val), value_contents_all (val),
 		    value_embedded_offset (val), value_address (val),

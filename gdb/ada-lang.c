@@ -226,8 +226,6 @@ static int find_struct_field (char *, struct type *, int,
 static struct value *ada_to_fixed_value_create (struct type *, CORE_ADDR,
                                                 struct value *);
 
-static struct value *ada_to_fixed_value (struct value *);
-
 static int ada_resolve_function (struct ada_symbol_info *, int,
                                  struct value **, int, const char *,
                                  struct type *);
@@ -7449,7 +7447,7 @@ ada_to_fixed_value_create (struct type *type0, CORE_ADDR address,
    that correctly describes it.  Does not necessarily create a new
    value.  */
 
-static struct value *
+struct value *
 ada_to_fixed_value (struct value *val)
 {
   return ada_to_fixed_value_create (value_type (val),

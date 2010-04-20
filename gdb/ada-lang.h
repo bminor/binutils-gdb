@@ -312,6 +312,8 @@ extern struct type *ada_to_fixed_type (struct type *, const gdb_byte *,
 				       CORE_ADDR, struct value *,
                                        int check_tag);
 
+extern struct value *ada_to_fixed_value (struct value *val);
+
 extern struct type *ada_template_to_fixed_record_type_1 (struct type *type,
 							 const gdb_byte *valaddr,
 							 CORE_ADDR address,

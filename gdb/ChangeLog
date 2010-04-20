@@ -1,3 +1,13 @@
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* valprint.c (common_val_print): Fix the value before extracting
+	its contents.
+	* ada-lang.c (ada_to_fixed_value): Make this function extern.
+	* ada-lang.h (ada_to_fixed_value): New function declaration.
+	* ada-valprint.c (ada_value_print): Use ada_to_fixed_value
+	to avoid code duplication and fix a bug in the handling of
+	fixed types contents.
+
 2010-04-20  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_compute_name): Handle DW_AT_linkage_name.
