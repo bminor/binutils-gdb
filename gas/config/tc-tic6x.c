@@ -24,6 +24,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/tic6x.h"
+#include "elf32-tic6x.h"
 
 /* Truncate and sign-extend at 32 bits, so that building on a 64-bit
    host gives identical results to a 32-bit host.  */
@@ -45,7 +46,8 @@ enum
     OPTION_MATOMIC,
     OPTION_MNO_ATOMIC,
     OPTION_MBIG_ENDIAN,
-    OPTION_MLITTLE_ENDIAN
+    OPTION_MLITTLE_ENDIAN,
+    OPTION_MGENERATE_REL
   };
 
 struct option md_longopts[] =
@@ -55,6 +57,7 @@ struct option md_longopts[] =
     { "mno-atomic", no_argument, NULL, OPTION_MNO_ATOMIC },
     { "mbig-endian", no_argument, NULL, OPTION_MBIG_ENDIAN },
     { "mlittle-endian", no_argument, NULL, OPTION_MLITTLE_ENDIAN },
+    { "mgenerate-rel", no_argument, NULL, OPTION_MGENERATE_REL },
     { NULL, no_argument, NULL, 0 }
   };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -94,6 +97,9 @@ static bfd_boolean tic6x_long_data_constraints;
 
 /* Whether compact instructions are available.  */
 static bfd_boolean tic6x_compact_insns;
+
+/* Whether to generate RELA relocations.  */
+static bfd_boolean tic6x_generate_rela = TRUE;
 
 /* Table of supported architecture variants.  */
 typedef struct
@@ -162,6 +168,10 @@ md_parse_option (int c, char *arg)
       target_big_endian = 0;
       break;
 
+    case OPTION_MGENERATE_REL:
+      tic6x_generate_rela = FALSE;
+      break;
+
     default:
       return 0;
     }
@@ -180,6 +190,8 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
   fprintf (stream, _("  -mno-atomic             disable atomic operation instructions\n"));
   fprintf (stream, _("  -mbig-endian            generate big-endian code\n"));
   fprintf (stream, _("  -mlittle-endian         generate little-endian code\n"));
+  /* -mgenerate-rel is only for testsuite use and is deliberately
+      undocumented.  */
 
   fputc ('\n', stream);
   fprintf (stream, _("Supported ARCH values are:"));
@@ -510,6 +522,15 @@ void
 tic6x_cleanup (void)
 {
   tic6x_end_of_line ();
+}
+
+/* Do target-specific initialization after arguments have been
+   processed and the output file created.  */
+
+void
+tic6x_init_after_args (void)
+{
+  elf32_tic6x_set_use_rela_p (stdoutput, tic6x_generate_rela);
 }
 
 /* Handle a data alignment of N bytes.  */
@@ -3111,8 +3132,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (fixP->fx_done || !seg->use_rela_p)
 	{
 	  offsetT newval = md_chars_to_number (buf, 4);
+	  int shift;
 
-	  MODIFY_VALUE (newval, value, 0, 7, 16);
+	  switch (fixP->fx_r_type)
+	    {
+	    case BFD_RELOC_C6000_SBR_L16_H:
+	      shift = 1;
+	      break;
+
+	    case BFD_RELOC_C6000_SBR_L16_W:
+	    case BFD_RELOC_C6000_SBR_GOT_L16_W:
+	      shift = 2;
+	      break;
+
+	    default:
+	      shift = 0;
+	      break;
+	    }
+
+	  MODIFY_VALUE (newval, value, shift, 7, 16);
 	  if ((value < -0x8000 || value > 0x7fff)
 	      && (fixP->fx_r_type == BFD_RELOC_C6000_ABS_S16
 		  || fixP->fx_r_type == BFD_RELOC_C6000_SBR_S16))
@@ -3135,8 +3173,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (fixP->fx_done || !seg->use_rela_p)
 	{
 	  offsetT newval = md_chars_to_number (buf, 4);
+	  int shift;
 
-	  MODIFY_VALUE (newval, value, 16, 7, 16);
+	  switch (fixP->fx_r_type)
+	    {
+	    case BFD_RELOC_C6000_SBR_H16_H:
+	      shift = 17;
+	      break;
+
+	    case BFD_RELOC_C6000_SBR_H16_W:
+	    case BFD_RELOC_C6000_SBR_GOT_H16_W:
+	      shift = 18;
+	      break;
+
+	    default:
+	      shift = 16;
+	      break;
+	    }
+
+	  MODIFY_VALUE (newval, value, shift, 7, 16);
 
 	  md_number_to_chars (buf, newval, 4);
 	}
@@ -3348,8 +3403,12 @@ md_operand (expressionS *op ATTRIBUTE_UNUSED)
    packet.  */
 
 long
-md_pcrel_from (fixS *fixp)
+tic6x_pcrel_from_section (fixS *fixp, segT sec)
 {
+  if (fixp->fx_addsy != NULL
+      && (!S_IS_DEFINED (fixp->fx_addsy)
+	  || S_GET_SEGMENT (fixp->fx_addsy) != sec))
+    return 0;
   return (fixp->fx_where + fixp->fx_frag->fr_address) & ~(long) 0x1f;
 }
 
@@ -3386,7 +3445,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-  reloc->addend = fixp->fx_offset;
+  reloc->addend = (tic6x_generate_rela ? fixp->fx_offset : 0);
   r_type = fixp->fx_r_type;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, r_type);
 
@@ -3397,6 +3456,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 		    bfd_get_reloc_code_name (r_type));
       return NULL;
     }
+
+  /* Correct for adjustments bfd_install_relocation will make.  */
+  if (reloc->howto->pcrel_offset && reloc->howto->partial_inplace)
+    reloc->addend += reloc->address;
 
   return reloc;
 }

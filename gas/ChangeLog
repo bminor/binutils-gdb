@@ -1,3 +1,21 @@
+2010-04-20  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-tic6x.c (OPTION_MGENERATE_REL): New.
+	(md_longopts): Add -mgenerate-rel.
+	(tic6x_generate_rela): New.
+	(md_parse_option): Handle -mgenerate-rel.
+	(md_show_usage): Add comment that -mgenerate-rel is undocumented.
+	(tic6x_init_after_args): New.
+	(md_apply_fix): Correct shift calculations for SB-relative
+	relocations.
+	(md_pcrel_from): Change to tic6x_pcrel_from_section.  Do not
+	adjust addresses for relocations referencing symbols in other
+	sections.
+	(tc_gen_reloc): Adjust addend calculations for REL relocations.
+	* config/tc-tic6x.h (MD_PCREL_FROM_SECTION,
+	tic6x_pcrel_from_section, tc_init_after_args,
+	tic6x_init_after_args): New.
+
 2010-04-20  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/11507

@@ -96,6 +96,9 @@ extern void tic6x_cons_align (int n);
 extern int tic6x_parse_name (const char *name, expressionS *exprP,
 			     enum expr_mode mode, char *nextchar);
 
+#define MD_PCREL_FROM_SECTION(FIX, SEC) tic6x_pcrel_from_section (FIX, SEC)
+extern long tic6x_pcrel_from_section (struct fix *fixp, segT sec);
+
 #define md_start_line_hook() tic6x_start_line_hook ()
 extern void tic6x_start_line_hook (void);
 
@@ -106,6 +109,9 @@ extern void tic6x_cons_fix_new (fragS *frag, int where, int size,
 
 #define tc_frob_label(sym) tic6x_frob_label (sym)
 extern void tic6x_frob_label (symbolS *sym);
+
+#define tc_init_after_args() tic6x_init_after_args ()
+extern void tic6x_init_after_args (void);
 
 #define tc_unrecognized_line(c) tic6x_unrecognized_line (c)
 extern int tic6x_unrecognized_line (int c);

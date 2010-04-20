@@ -1,3 +1,20 @@
+2010-04-20  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-tic6x/data-reloc-global-rel.d,
+	ld-tic6x/data-reloc-global-rel.s,
+	ld-tic6x/data-reloc-local-r-rel.d,
+	ld-tic6x/data-reloc-local-rel.d, ld-tic6x/mvk-reloc-global-rel.d,
+	ld-tic6x/mvk-reloc-global-rel.s, ld-tic6x/mvk-reloc-local-1-rel.s,
+	ld-tic6x/mvk-reloc-local-2-rel.s,
+	ld-tic6x/mvk-reloc-local-r-rel.d, ld-tic6x/mvk-reloc-local-rel.d,
+	ld-tic6x/pcrel-reloc-global-rel.d,
+	ld-tic6x/pcrel-reloc-local-r-rel.d,
+	ld-tic6x/pcrel-reloc-local-rel.d, ld-tic6x/sbr-reloc-global-rel.d,
+	ld-tic6x/sbr-reloc-global-rel.s, ld-tic6x/sbr-reloc-local-1-rel.s,
+	ld-tic6x/sbr-reloc-local-2-rel.s,
+	ld-tic6x/sbr-reloc-local-r-rel.d, ld-tic6x/sbr-reloc-local-rel.d:
+	New.
+
 2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/attr-merge-2.attr: Update for changes in attribute output.

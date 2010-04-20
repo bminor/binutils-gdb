@@ -1,3 +1,16 @@
+2010-04-20  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-tic6x.h: New.
+	* elf-bfd.h (enum elf_target_id): Define TIC6X_ELF_DATA.
+	* elf32-tic6x.c (struct elf32_tic6x_obj_tdata, elf32_tic6x_tdata,
+	elf32_tic6x_howto_table_rel, elf32_tic6x_info_to_howto_rel,
+	elf32_tic6x_set_use_rela_p, elf32_tic6x_mkobject,
+	elf32_tic6x_new_section_hook, elf32_tic6x_rel_relocation_p,
+	bfd_elf32_mkobject, bfd_elf32_new_section_hook): New.
+	(elf32_tic6x_reloc_type_lookup, elf32_tic6x_reloc_name_lookup,
+	elf32_tic6x_relocate_section): Handle REL relocations.
+	(elf_info_to_howto_rel): Define to elf32_tic6x_info_to_howto_rel.
+
 2010-04-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf2.c (find_abstract_instance_name, scan_unit_for_symbols): Treat
