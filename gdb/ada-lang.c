@@ -3863,6 +3863,25 @@ ada_convert_actual (struct value *actual, struct type *formal_type0,
   return actual;
 }
 
+/* Convert VALUE (which must be an address) to a CORE_ADDR that is a pointer of
+   type TYPE.  This is usually an inefficient no-op except on some targets
+   (such as AVR) where the representation of a pointer and an address
+   differs.  */
+
+static CORE_ADDR
+value_pointer (struct value *value, struct type *type)
+{
+  struct gdbarch *gdbarch = get_type_arch (type);
+  unsigned len = TYPE_LENGTH (type);
+  gdb_byte *buf = alloca (len);
+  CORE_ADDR addr;
+
+  addr = value_address (value);
+  gdbarch_address_to_pointer (gdbarch, type, buf, addr);
+  addr = extract_unsigned_integer (buf, len, gdbarch_byte_order (gdbarch));
+  return addr;
+}
+
 
 /* Push a descriptor of type TYPE for array value ARR on the stack at
    *SP, updating *SP to reflect the new descriptor.  Return either
@@ -3898,13 +3917,15 @@ make_array_descriptor (struct type *type, struct value *arr,
 
   modify_general_field (value_type (descriptor),
 			value_contents_writeable (descriptor),
-                        value_address (ensure_lval (arr, gdbarch, sp)),
+                        value_pointer (ensure_lval (arr, gdbarch, sp),
+                                       TYPE_FIELD_TYPE (desc_type, 0)),
                         fat_pntr_data_bitpos (desc_type),
                         fat_pntr_data_bitsize (desc_type));
 
   modify_general_field (value_type (descriptor),
 			value_contents_writeable (descriptor),
-                        value_address (bounds),
+                        value_pointer (bounds,
+                                       TYPE_FIELD_TYPE (desc_type, 1)),
                         fat_pntr_bounds_bitpos (desc_type),
                         fat_pntr_bounds_bitsize (desc_type));
 
