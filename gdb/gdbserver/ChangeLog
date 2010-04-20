@@ -1,5 +1,10 @@
 2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* configure.srv (x86_64-*-mingw*): New configuration for Windows
+	64-bit executables.
+
+2010-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* win32-i386-low.c: Add 64-bit support.
 	(CONTEXT_EXTENDED_REGISTERS): Set macro to zero if not exisiting.
 	(init_registers_amd64): Declare.
