@@ -828,3 +828,14 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	break;
       }
 }
+
+/* Implement the la_print_typedef language method for Ada.  */
+
+void
+ada_print_typedef (struct type *type, struct symbol *new_symbol,
+                   struct ui_file *stream)
+{
+  type = ada_check_typedef (type);
+  ada_print_type (type, "", stream, 0, 0);
+  fprintf_filtered (stream, "\n");
+}

@@ -1,5 +1,9 @@
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* info_types.c, info_types.exp: New files.
+
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/dyn_loc: New testcase.
 
 2010-04-20  Chris Moller  <cmoller@redhat.com>

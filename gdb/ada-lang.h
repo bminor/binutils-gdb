@@ -159,6 +159,9 @@ extern void ada_error (char *); /* Defined in ada-exp.y */
 extern void ada_print_type (struct type *, char *, struct ui_file *, int,
                             int);
 
+extern void ada_print_typedef (struct type *type, struct symbol *new_symbol,
+			       struct ui_file *stream);
+
 extern int ada_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
                           struct ui_file *, int,
 			  const struct value_print_options *);

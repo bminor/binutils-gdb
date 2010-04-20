@@ -1,5 +1,12 @@
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-typeprint.c (ada_print_typedef): New function.
+	* ada-lang.h (ada_print_typedef): Add declaration.
+	* ada-lang.c (ada_language_defn): set la_print_typdef field
+	to ada_print_typedef.
+
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* procfs.c (procfs_address_to_host_pointer): Only define when used.
 
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
