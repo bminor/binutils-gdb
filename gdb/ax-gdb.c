@@ -329,7 +329,7 @@ maybe_const_expr (union exp_element **pc)
 
    Setting the flag trace_kludge to non-zero enables the code that
    emits the trace bytecodes at the appropriate points.  */
-static int trace_kludge;
+int trace_kludge;
 
 /* Scan for all static fields in the given class, including any base
    classes, and generate tracing bytecodes for each.  */

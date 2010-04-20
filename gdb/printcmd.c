@@ -1148,20 +1148,21 @@ sym_info (char *arg, int from_tty)
 static void
 address_info (char *exp, int from_tty)
 {
+  struct block *block;
   struct gdbarch *gdbarch;
   int regno;
   struct symbol *sym;
   struct minimal_symbol *msymbol;
   long val;
   struct obj_section *section;
-  CORE_ADDR load_addr;
+  CORE_ADDR load_addr, context_pc = 0;
   int is_a_field_of_this;	/* C++: lookup_symbol sets this to nonzero
 				   if exp is a field of `this'. */
 
   if (exp == 0)
     error (_("Argument required."));
 
-  sym = lookup_symbol (exp, get_selected_block (0), VAR_DOMAIN,
+  sym = lookup_symbol (exp, get_selected_block (&context_pc), VAR_DOMAIN,
 		       &is_a_field_of_this);
   if (sym == NULL)
     {
@@ -1242,7 +1243,7 @@ address_info (char *exp, int from_tty)
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
 	 function) location in a function's symbol.  Oops!  For the
 	 moment enable this when/where applicable.  */
-      SYMBOL_COMPUTED_OPS (sym)->describe_location (sym, gdb_stdout);
+      SYMBOL_COMPUTED_OPS (sym)->describe_location (sym, context_pc, gdb_stdout);
       break;
 
     case LOC_REGISTER:

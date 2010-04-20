@@ -1,3 +1,23 @@
+2010-04-20  Stan Shebs  <stan@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* dwarf2loc.c (struct axs_var_loc): New struct.
+	(dwarf2_tracepoint_var_loc): New function.
+	(dwarf2_tracepoint_var_access): New function.
+	(dwarf2_tracepoint_var_ref): Use dwarf2_tracepoint_var_loc, deal
+	with DW_OP_piece.
+	(locexpr_describe_location_piece): New function.
+	(locexpr_describe_location_1): New function.
+	(locexpr_describe_location): Call it, update signature.
+	(loclist_describe_location): Rewrite to loop over locations,
+	update signature.
+	* symtab.h (struct symbol_computed_ops): Add address to
+	describe_location arguments, return void.
+	* printcmd.c (address_info): Get context PC, pass to computed
+	location description.
+	* tracepoint.c (scope_info): Ditto.
+	* ax-gdb.c (trace_kludge): Export.
+
 2010-04-20  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2-frame.c (decode_frame_entry_1): Handle CIE version 4.

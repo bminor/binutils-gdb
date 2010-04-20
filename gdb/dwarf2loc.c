@@ -614,28 +614,47 @@ dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
   return baton.needs_frame || in_reg;
 }
 
-static void
-dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
-			   struct agent_expr *ax, struct axs_value *value,
-			   gdb_byte *data, int size)
+/* This struct keeps track of the pieces that make up a multi-location
+   object, for use in agent expression generation.  It is
+   superficially similar to struct dwarf_expr_piece, but
+   dwarf_expr_piece is designed for use in immediate evaluation, and
+   does not, for example, have a way to record both base register and
+   offset.  */
+
+struct axs_var_loc
 {
-  if (!data || size == 0)
+  /* Memory vs register, etc */
+  enum axs_lvalue_kind kind;
+
+  /* If non-zero, number of bytes in this fragment */
+  unsigned bytes;
+
+  /* (GDB-numbered) reg, or base reg if >= 0 */
+  int reg;
+
+  /* offset from reg */
+  LONGEST offset;
+};
+
+static gdb_byte *
+dwarf2_tracepoint_var_loc (struct symbol *symbol,
+			   struct agent_expr *ax,
+			   struct axs_var_loc *loc,
+			   struct gdbarch *gdbarch,
+			   gdb_byte *data, gdb_byte *end)
+{
+  if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
     {
-      value->optimized_out = 1;
-    }
-  else if (size == 1
-      && data[0] >= DW_OP_reg0
-      && data[0] <= DW_OP_reg31)
-    {
-      value->kind = axs_lvalue_register;
-      value->u.reg = data[0] - DW_OP_reg0;
+      loc->kind = axs_lvalue_register;
+      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, data[0] - DW_OP_reg0);
+      data += 1;
     }
   else if (data[0] == DW_OP_regx)
     {
       ULONGEST reg;
-      read_uleb128 (data + 1, data + size, &reg);
-      value->kind = axs_lvalue_register;
-      value->u.reg = reg;
+      data = read_uleb128 (data + 1, end, &reg);
+      loc->kind = axs_lvalue_register;
+      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
     }
   else if (data[0] == DW_OP_fbreg)
     {
@@ -643,7 +662,6 @@ dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
       struct symbol *framefunc;
       int frame_reg = 0;
       LONGEST frame_offset;
-      gdb_byte *buf_end;
       gdb_byte *base_data;
       size_t base_size;
       LONGEST base_offset = 0;
@@ -661,57 +679,202 @@ dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
       dwarf_expr_frame_base_1 (framefunc, ax->scope,
 			       &base_data, &base_size);
 
-      if (base_data[0] >= DW_OP_breg0
-	   && base_data[0] <= DW_OP_breg31)
+      if (base_data[0] >= DW_OP_breg0 && base_data[0] <= DW_OP_breg31)
 	{
+	  gdb_byte *buf_end;
+	  
 	  frame_reg = base_data[0] - DW_OP_breg0;
-	  buf_end = read_sleb128 (base_data + 1, base_data + base_size, &base_offset);
+	  buf_end = read_sleb128 (base_data + 1,
+				  base_data + base_size, &base_offset);
 	  if (buf_end != base_data + base_size)
 	    error (_("Unexpected opcode after DW_OP_breg%u for symbol \"%s\"."),
 		   frame_reg, SYMBOL_PRINT_NAME (symbol));
+	}
+      else if (base_data[0] >= DW_OP_reg0 && base_data[0] <= DW_OP_reg31)
+	{
+	  /* The frame base is just the register, with no offset.  */
+	  frame_reg = base_data[0] - DW_OP_reg0;
+	  base_offset = 0;
 	}
       else
 	{
 	  /* We don't know what to do with the frame base expression,
 	     so we can't trace this variable; give up.  */
-	  error (_("Cannot generate expression to collect symbol \"%s\"; DWARF 2 encoding not handled"),
-		 SYMBOL_PRINT_NAME (symbol));
+	  error (_("Cannot generate expression to collect symbol \"%s\"; DWARF 2 encoding not handled, first opcode in base data is 0x%x."),
+		 SYMBOL_PRINT_NAME (symbol), base_data[0]);
 	}
 
-      buf_end = read_sleb128 (data + 1, data + size, &frame_offset);
-      if (buf_end != data + size)
-	error (_("Unexpected opcode after DW_OP_fbreg for symbol \"%s\"."),
-	       SYMBOL_PRINT_NAME (symbol));
+      data = read_sleb128 (data + 1, end, &frame_offset);
 
-      ax_reg (ax, frame_reg);
-      ax_const_l (ax, base_offset + frame_offset);
-      ax_simple (ax, aop_add);
-
-      value->kind = axs_lvalue_memory;
+      loc->kind = axs_lvalue_memory;
+      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, frame_reg);
+      loc->offset = base_offset + frame_offset;
     }
-  else if (data[0] >= DW_OP_breg0
-	   && data[0] <= DW_OP_breg31)
+  else if (data[0] >= DW_OP_breg0 && data[0] <= DW_OP_breg31)
     {
       unsigned int reg;
       LONGEST offset;
-      gdb_byte *buf_end;
 
       reg = data[0] - DW_OP_breg0;
-      buf_end = read_sleb128 (data + 1, data + size, &offset);
-      if (buf_end != data + size)
-	error (_("Unexpected opcode after DW_OP_breg%u for symbol \"%s\"."),
-	       reg, SYMBOL_PRINT_NAME (symbol));
+      data = read_sleb128 (data + 1, end, &offset);
 
-      ax_reg (ax, reg);
-      ax_const_l (ax, offset);
-      ax_simple (ax, aop_add);
-
-      value->kind = axs_lvalue_memory;
+      loc->kind = axs_lvalue_memory;
+      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
+      loc->offset = offset;
     }
   else
     error (_("Unsupported DWARF opcode 0x%x in the location of \"%s\"."),
 	   data[0], SYMBOL_PRINT_NAME (symbol));
+  
+  return data;
 }
+
+/* Given the location of a piece, issue bytecodes that will access it.  */
+
+static void
+dwarf2_tracepoint_var_access (struct agent_expr *ax,
+			      struct axs_value *value,
+			      struct axs_var_loc *loc)
+{
+  value->kind = loc->kind;
+  
+  switch (loc->kind)
+    {
+    case axs_lvalue_register:
+      value->u.reg = loc->reg;
+      break;
+      
+    case axs_lvalue_memory:
+      ax_reg (ax, loc->reg);
+      if (loc->offset)
+	{
+	  ax_const_l (ax, loc->offset);
+	  ax_simple (ax, aop_add);
+	}
+      break;
+      
+    default:
+      internal_error (__FILE__, __LINE__, _("Unhandled value kind in dwarf2_tracepoint_var_access"));
+    }
+}
+
+static void
+dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
+			   struct agent_expr *ax, struct axs_value *value,
+			   gdb_byte *data, int size)
+{
+  gdb_byte *end = data + size;
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  /* In practice, a variable is not going to be spread across
+     dozens of registers or memory locations.  If someone comes up
+     with a real-world example, revisit this.  */
+#define MAX_FRAGS 16
+  struct axs_var_loc fragments[MAX_FRAGS];
+  int nfrags = 0, frag;
+  int length = 0;
+  int piece_ok = 0;
+  int bad = 0;
+  int first = 1;
+      
+  if (!data || size == 0)
+    {
+      value->optimized_out = 1;
+      return;
+    }
+
+  while (data < end)
+    {
+      if (!piece_ok)
+	{
+	  if (nfrags == MAX_FRAGS)
+	    error (_("Too many pieces in location for \"%s\"."),
+		   SYMBOL_PRINT_NAME (symbol));
+
+	  fragments[nfrags].bytes = 0;
+	  data = dwarf2_tracepoint_var_loc (symbol, ax, &fragments[nfrags],
+					    gdbarch, data, end);
+	  nfrags++;
+	  piece_ok = 1;
+	}
+      else if (data[0] == DW_OP_piece)
+	{
+	  ULONGEST bytes;
+	      
+	  data = read_uleb128 (data + 1, end, &bytes);
+	  /* Only deal with 4 byte fragments for now.  */
+	  if (bytes != 4)
+	    error (_("DW_OP_piece %s not supported in location for \"%s\"."),
+		   pulongest (bytes), SYMBOL_PRINT_NAME (symbol));
+	  fragments[nfrags - 1].bytes = bytes;
+	  length += bytes;
+	  piece_ok = 0;
+	}
+      else
+	{
+	  bad = 1;
+	  break;
+	}
+    }
+
+  if (bad || data > end)
+    error (_("Corrupted DWARF expression for \"%s\"."),
+	   SYMBOL_PRINT_NAME (symbol));
+
+  /* If single expression, no pieces, convert to external format.  */
+  if (length == 0)
+    {
+      dwarf2_tracepoint_var_access (ax, value, &fragments[0]);
+      return;
+    }
+
+  if (length != TYPE_LENGTH (value->type))
+    error (_("Inconsistent piece information for \"%s\"."),
+	   SYMBOL_PRINT_NAME (symbol));
+
+  /* Emit bytecodes to assemble the pieces into a single stack entry.  */
+
+  for ((frag = (byte_order == BFD_ENDIAN_BIG ? 0 : nfrags - 1));
+       nfrags--;
+       (frag += (byte_order == BFD_ENDIAN_BIG ? 1 : -1)))
+    {
+      if (!first)
+	{
+	  /* shift the previous fragment up 32 bits */
+	  ax_const_l (ax, 32);
+	  ax_simple (ax, aop_lsh);
+	}
+
+      dwarf2_tracepoint_var_access (ax, value, &fragments[frag]);
+
+      switch (value->kind)
+	{
+	case axs_lvalue_register:
+	  ax_reg (ax, value->u.reg);
+	  break;
+
+	case axs_lvalue_memory:
+	  {
+	    extern int trace_kludge;  /* Ugh. */
+
+	    gdb_assert (fragments[frag].bytes == 4);
+	    if (trace_kludge)
+	      ax_trace_quick (ax, 4);
+	    ax_simple (ax, aop_ref32);
+	  }
+	  break;
+	}
+
+      if (!first)
+	{
+	  /* or the new fragment into the previous */
+	  ax_zero_ext (ax, 32);
+	  ax_simple (ax, aop_bit_or);
+	}
+      first = 0;
+    }
+  value->kind = axs_rvalue;
+}
+
 
 /* Return the value of SYMBOL in FRAME using the DWARF-2 expression
    evaluator to calculate the location.  */
@@ -735,26 +898,104 @@ locexpr_read_needs_frame (struct symbol *symbol)
 				      dlbaton->per_cu);
 }
 
-/* Print a natural-language description of SYMBOL to STREAM.  */
-static int
-locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
-{
-  /* FIXME: be more extensive.  */
-  struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
-  int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+/* Describe a single piece of a location, returning an updated
+   position in the bytecode sequence.  */
 
-  if (dlbaton->size == 1
-      && dlbaton->data[0] >= DW_OP_reg0
-      && dlbaton->data[0] <= DW_OP_reg31)
+static gdb_byte *
+locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
+				 CORE_ADDR addr, struct objfile *objfile,
+				 gdb_byte *data, int size, unsigned int addr_size)
+{
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  int regno;
+
+  if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
     {
-      struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
-      int regno = gdbarch_dwarf2_reg_to_regnum (gdbarch,
-						dlbaton->data[0] - DW_OP_reg0);
-      fprintf_filtered (stream,
-			"a variable in register %s",
+      regno = gdbarch_dwarf2_reg_to_regnum (gdbarch, data[0] - DW_OP_reg0);
+      fprintf_filtered (stream, _("a variable in $%s"),
 			gdbarch_register_name (gdbarch, regno));
-      return 1;
+      data += 1;
+    }
+  else if (data[0] == DW_OP_regx)
+    {
+      ULONGEST reg;
+
+      data = read_uleb128 (data + 1, data + size, &reg);
+      regno = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
+      fprintf_filtered (stream, _("a variable in $%s"),
+			gdbarch_register_name (gdbarch, regno));
+    }
+  else if (data[0] == DW_OP_fbreg)
+    {
+      struct block *b;
+      struct symbol *framefunc;
+      int frame_reg = 0;
+      LONGEST frame_offset;
+      gdb_byte *base_data;
+      size_t base_size;
+      LONGEST base_offset = 0;
+
+      b = block_for_pc (addr);
+
+      if (!b)
+	error (_("No block found for address for symbol \"%s\"."),
+	       SYMBOL_PRINT_NAME (symbol));
+
+      framefunc = block_linkage_function (b);
+
+      if (!framefunc)
+	error (_("No function found for block for symbol \"%s\"."),
+	       SYMBOL_PRINT_NAME (symbol));
+
+      dwarf_expr_frame_base_1 (framefunc, addr, &base_data, &base_size);
+
+      if (base_data[0] >= DW_OP_breg0 && base_data[0] <= DW_OP_breg31)
+	{
+	  gdb_byte *buf_end;
+	  
+	  frame_reg = base_data[0] - DW_OP_breg0;
+	  buf_end = read_sleb128 (base_data + 1,
+				  base_data + base_size, &base_offset);
+	  if (buf_end != base_data + base_size)
+	    error (_("Unexpected opcode after DW_OP_breg%u for symbol \"%s\"."),
+		   frame_reg, SYMBOL_PRINT_NAME (symbol));
+	}
+      else if (base_data[0] >= DW_OP_reg0 && base_data[0] <= DW_OP_reg31)
+	{
+	  /* The frame base is just the register, with no offset.  */
+	  frame_reg = base_data[0] - DW_OP_reg0;
+	  base_offset = 0;
+	}
+      else
+	{
+	  /* We don't know what to do with the frame base expression,
+	     so we can't trace this variable; give up.  */
+	  error (_("Cannot describe location of symbol \"%s\"; "
+		   "DWARF 2 encoding not handled, "
+		   "first opcode in base data is 0x%x."),
+		 SYMBOL_PRINT_NAME (symbol), base_data[0]);
+	}
+
+      regno = gdbarch_dwarf2_reg_to_regnum (gdbarch, frame_reg);
+
+      data = read_sleb128 (data + 1, data + size, &frame_offset);
+
+      fprintf_filtered (stream, _("a variable at frame base reg $%s offset %s+%s"),
+			gdbarch_register_name (gdbarch, regno),
+			plongest (base_offset), plongest (frame_offset));
+    }
+  else if (data[0] >= DW_OP_breg0 && data[0] <= DW_OP_breg31)
+    {
+      LONGEST offset;
+
+      regno = gdbarch_dwarf2_reg_to_regnum (gdbarch, data[0] - DW_OP_breg0);
+
+      data = read_sleb128 (data + 1, data + size, &offset);
+
+      fprintf_filtered (stream,
+			_("a variable at offset %s from base reg $%s"),
+			plongest (offset),
+			gdbarch_register_name (gdbarch, regno));
     }
 
   /* The location expression for a TLS variable looks like this (on a
@@ -769,37 +1010,93 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
      The operand represents the offset at which the variable is within
      the thread local storage.  */
 
-  if (dlbaton->size > 1 
-      && dlbaton->data[dlbaton->size - 1] == DW_OP_GNU_push_tls_address)
-    if (dlbaton->data[0] == DW_OP_addr)
-      {
-	struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
-	struct gdbarch *gdbarch = get_objfile_arch (objfile);
-	CORE_ADDR offset = dwarf2_read_address (gdbarch,
-						&dlbaton->data[1],
-						&dlbaton->data[dlbaton->size - 1],
-						addr_size);
-	fprintf_filtered (stream, 
-			  "a thread-local variable at offset %s in the "
-			  "thread-local storage for `%s'",
-			  paddress (gdbarch, offset), objfile->name);
-	return 1;
-      }
-  
+  else if (size > 1
+	   && data[size - 1] == DW_OP_GNU_push_tls_address
+	   && data[0] == DW_OP_addr)
+    {
+      CORE_ADDR offset = dwarf2_read_address (gdbarch,
+					      data + 1,
+					      data + size - 1,
+					      addr_size);
+      fprintf_filtered (stream, 
+			_("a thread-local variable at offset %s "
+			  "in the thread-local storage for `%s'"),
+			paddress (gdbarch, offset), objfile->name);
 
-  fprintf_filtered (stream,
-		    "a variable with complex or multiple locations (DWARF2)");
-  return 1;
+      data += 1 + addr_size + 1;
+    }
+  else
+    fprintf_filtered (stream,
+		      _("a variable with complex or multiple locations (DWARF2)"));
+
+  return data;
 }
 
+/* Describe a single location, which may in turn consist of multiple
+   pieces.  */
+
+static void
+locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
+			     struct ui_file *stream, gdb_byte *data, int size,
+			     struct objfile *objfile, unsigned int addr_size)
+{
+  gdb_byte *end = data + size;
+  int piece_done = 0, first_piece = 1, bad = 0;
+
+  /* A multi-piece description consists of multiple sequences of bytes
+     each followed by DW_OP_piece + length of piece.  */
+  while (data < end)
+    {
+      if (!piece_done)
+	{
+	  if (first_piece)
+	    first_piece = 0;
+	  else
+	    fprintf_filtered (stream, _(", and "));
+
+	  data = locexpr_describe_location_piece (symbol, stream, addr, objfile,
+						  data, size, addr_size);
+	  piece_done = 1;
+	}
+      else if (data[0] == DW_OP_piece)
+	{
+	  ULONGEST bytes;
+	      
+	  data = read_uleb128 (data + 1, end, &bytes);
+
+	  fprintf_filtered (stream, _(" [%s-byte piece]"), pulongest (bytes));
+
+	  piece_done = 0;
+	}
+      else
+	{
+	  bad = 1;
+	  break;
+	}
+    }
+
+  if (bad || data > end)
+    error (_("Corrupted DWARF2 expression for \"%s\"."),
+	   SYMBOL_PRINT_NAME (symbol));
+}
+
+/* Print a natural-language description of SYMBOL to STREAM.  This
+   version is for a symbol with a single location.  */
+
+static void
+locexpr_describe_location (struct symbol *symbol, CORE_ADDR addr,
+			   struct ui_file *stream)
+{
+  struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+  struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
+  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+
+  locexpr_describe_location_1 (symbol, addr, stream, dlbaton->data, dlbaton->size,
+			       objfile, addr_size);
+}
 
 /* Describe the location of SYMBOL as an agent value in VALUE, generating
-   any necessary bytecode in AX.
-
-   NOTE drow/2003-02-26: This function is extremely minimal, because
-   doing it correctly is extremely complicated and there is no
-   publicly available stub with tracepoint support for me to test
-   against.  When there is one this function should be revisited.  */
+   any necessary bytecode in AX.  */
 
 static void
 locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
@@ -863,13 +1160,89 @@ loclist_read_needs_frame (struct symbol *symbol)
   return 1;
 }
 
-/* Print a natural-language description of SYMBOL to STREAM.  */
-static int
-loclist_describe_location (struct symbol *symbol, struct ui_file *stream)
+/* Print a natural-language description of SYMBOL to STREAM.  This
+   version applies when there is a list of different locations, each
+   with a specified address range.  */
+
+static void
+loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
+			   struct ui_file *stream)
 {
-  /* FIXME: Could print the entire list of locations.  */
-  fprintf_filtered (stream, "a variable with multiple locations");
-  return 1;
+  struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+  CORE_ADDR low, high;
+  gdb_byte *loc_ptr, *buf_end;
+  int length, first = 1;
+  struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+  CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
+  /* Adjust base_address for relocatable objects.  */
+  CORE_ADDR base_offset = ANOFFSET (objfile->section_offsets,
+				    SECT_OFF_TEXT (objfile));
+  CORE_ADDR base_address = dlbaton->base_address + base_offset;
+
+  loc_ptr = dlbaton->data;
+  buf_end = dlbaton->data + dlbaton->size;
+
+  fprintf_filtered (stream, _("multi-location ("));
+
+  /* Iterate through locations until we run out.  */
+  while (1)
+    {
+      if (buf_end - loc_ptr < 2 * addr_size)
+	error (_("Corrupted DWARF expression for symbol \"%s\"."),
+	       SYMBOL_PRINT_NAME (symbol));
+
+      low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      loc_ptr += addr_size;
+
+      /* A base-address-selection entry.  */
+      if (low == base_mask)
+	{
+	  base_address = dwarf2_read_address (gdbarch,
+					      loc_ptr, buf_end, addr_size);
+	  fprintf_filtered (stream, _("[base address %s]"),
+			    paddress (gdbarch, base_address));
+	  loc_ptr += addr_size;
+	  continue;
+	}
+
+      high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      loc_ptr += addr_size;
+
+      /* An end-of-list entry.  */
+      if (low == 0 && high == 0)
+	{
+	  /* Indicate the end of the list, for readability.  */
+	  fprintf_filtered (stream, _(")"));
+	  return;
+	}
+
+      /* Otherwise, a location expression entry.  */
+      low += base_address;
+      high += base_address;
+
+      length = extract_unsigned_integer (loc_ptr, 2, byte_order);
+      loc_ptr += 2;
+
+      /* Separate the different locations with a semicolon.  */
+      if (first)
+	first = 0;
+      else
+	fprintf_filtered (stream, _("; "));
+
+      /* (It would improve readability to print only the minimum
+	 necessary digits of the second number of the range.)  */
+      fprintf_filtered (stream, _("range %s-%s, "),
+			paddress (gdbarch, low), paddress (gdbarch, high));
+
+      /* Now describe this particular location.  */
+      locexpr_describe_location_1 (symbol, low, stream, loc_ptr, length,
+				   objfile, addr_size);
+
+      loc_ptr += length;
+    }
 }
 
 /* Describe the location of SYMBOL as an agent value in VALUE, generating

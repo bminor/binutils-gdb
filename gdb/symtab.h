@@ -516,8 +516,9 @@ struct symbol_computed_ops
   int (*read_needs_frame) (struct symbol * symbol);
 
   /* Write to STREAM a natural-language description of the location of
-     SYMBOL.  */
-  int (*describe_location) (struct symbol * symbol, struct ui_file * stream);
+     SYMBOL, in the context of ADDR.  */
+  void (*describe_location) (struct symbol * symbol, CORE_ADDR addr,
+			     struct ui_file * stream);
 
   /* Tracepoint support.  Append bytecodes to the tracepoint agent
      expression AX that push the address of the object SYMBOL.  Set
