@@ -3377,7 +3377,9 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 	 but we haven't started looking at this enhancement yet.  */
       struct attribute *attr;
 
-      attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+      attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
+      if (attr == NULL)
+	attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
       if (attr && DW_STRING (attr))
 	name = DW_STRING (attr);
     }
@@ -6849,7 +6851,11 @@ read_partial_die (struct partial_die_info *part_die,
 	      break;
 	    }
 	  break;
+	case DW_AT_linkage_name:
 	case DW_AT_MIPS_linkage_name:
+	  /* Note that both forms of linkage name might appear.  We
+	     assume they will be the same, and we only store the last
+	     one we see.  */
 	  if (cu->language == language_ada)
 	    part_die->name = DW_STRING (&attr);
 	  break;
@@ -9685,6 +9691,8 @@ dwarf_attr_name (unsigned attr)
     /* DWARF 4 values.  */
     case DW_AT_signature:
       return "DW_AT_signature";
+    case DW_AT_linkage_name:
+      return "DW_AT_linkage_name";
     /* SGI/MIPS extensions.  */
 #ifdef MIPS /* collides with DW_AT_HP_block_index */
     case DW_AT_MIPS_fde:

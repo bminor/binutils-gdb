@@ -1,3 +1,9 @@
+2010-04-20  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_compute_name): Handle DW_AT_linkage_name.
+	(read_partial_die): Likewise.
+	(dwarf_attr_name): Likewise.
+
 2010-04-20  Chris Moller  <cmoller@redhat.com>
 	
 	PR 10867
