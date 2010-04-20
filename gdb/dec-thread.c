@@ -394,22 +394,15 @@ dec_thread_add_gdb_thread (struct thread_info *info, void *context)
   return 0;
 }
 
-/* Resynchronize the list of threads known by GDB with the actual
-   list of threads reported by libpthread_debug.  */
+/* Implement the find_new_thread target_ops method.  */
 
 static void
-resync_thread_list (void)
+dec_thread_find_new_threads (struct target_ops *ops)
 {
   int i;
   struct dec_thread_info *info;
-  int num_gdb_threads = 0;
-  struct thread_info **gdb_thread_list;
-  struct thread_info **next_thread_info;
 
   update_dec_thread_list ();
-
-  /* Add new threads.  */
-
   for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info); i++)
     {
       ptid_t ptid = ptid_build_from_info (*info);
@@ -417,6 +410,21 @@ resync_thread_list (void)
       if (!in_thread_list (ptid))
         add_thread (ptid);
     }
+}
+
+/* Resynchronize the list of threads known by GDB with the actual
+   list of threads reported by libpthread_debug.  */
+
+static void
+resync_thread_list (struct target_ops *ops)
+{
+  int i;
+  int num_gdb_threads = 0;
+  struct thread_info **gdb_thread_list;
+  struct thread_info **next_thread_info;
+
+  /* Add new threads.  */
+  dec_thread_find_new_threads (ops);
 
   /* Remove threads that no longer exist.  To help with the search,
      we build an array of GDB threads, and then iterate over this
@@ -479,7 +487,7 @@ dec_thread_wait (struct target_ops *ops,
 
   /* The ptid returned by the target beneath us is the ptid of the process.
      We need to find which thread is currently active and return its ptid.  */
-  resync_thread_list ();
+  resync_thread_list (ops);
   active_ptid = get_active_ptid ();
   if (ptid_equal (active_ptid, null_ptid))
     return ptid;
@@ -708,6 +716,7 @@ init_dec_thread_ops (void)
   dec_thread_ops.to_store_registers    = dec_thread_store_registers;
   dec_thread_ops.to_mourn_inferior     = dec_thread_mourn_inferior;
   dec_thread_ops.to_thread_alive       = dec_thread_thread_alive;
+  dec_thread_ops.to_find_new_threads   = dec_thread_find_new_threads;
   dec_thread_ops.to_pid_to_str         = dec_thread_pid_to_str;
   dec_thread_ops.to_stratum            = thread_stratum;
   dec_thread_ops.to_get_ada_task_ptid  = dec_thread_get_ada_task_ptid;

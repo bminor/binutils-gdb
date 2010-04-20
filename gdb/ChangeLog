@@ -1,5 +1,15 @@
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
+	Implement thread support with core files on alpha-tru64.
+	* dec-thread.c (dec_thread_find_new_threads): New function,
+	extracted from resync_thread_list.
+	(resync_thread_list): Add OPS parameter.  Replace extracted-out
+	code by call to dec_thread_find_new_threads.
+	(dec_thread_wait): Update call to resync_thread_list.
+	(init_dec_thread_ops): Set dec_thread_ops.to_find_new_threads.
+
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (value_pointer): New function.
 	(make_array_descriptor): Call value_pointer to convert addresses to
 	pointers.
