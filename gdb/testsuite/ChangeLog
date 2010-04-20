@@ -1,3 +1,7 @@
+2010-04-19  Doug Evans  <dje@google.com>
+
+	* gdb.base/help.exp (help source): Update expected output.
+
 2010-04-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/solib-display.exp: Replace gdb_exit, gdb_start,

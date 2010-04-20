@@ -606,7 +606,9 @@ gdb_test "help stepi" "Step one instruction exactly\.\[\r\n\]+Argument N means d
 gdb_test "help signal" "Continue program giving it signal.*" "help signal"
 # test help source
 # vxgdb reads .vxgdbinit
-gdb_test "help source" "Read commands from a file named FILE\.\[\r\n\]+Optional -v switch \\(before the filename\\) causes each command in\[\r\n\]+FILE to be echoed as it is executed\.\[\r\n\]+Note that the file \"\[^\"\]*\" is read automatically in this way\[\r\n\]+when GDB is started\." "help source"
+# ".-s. .-v." is written that way to avoid the complications of trying
+# to get "[-s] [-v]" through expect and tcl.
+gdb_test "help source" "Read commands from a file named FILE\.\[\r\n\]+Usage: source .-s. .-v. FILE\[\r\n\]+-s: search for the script in the source search path,\[\r\n\]+\[ \]+even if FILE contains directories\.\[\r\n\]+-v: each command in FILE is echoed as it is executed\.\[\r\n\]+Note that the file \"\[^\"\]*\" is read automatically in this way\[\r\n\]+when GDB is started\." "help source"
 # test help stack
 test_class_help "stack" {
     "Examining the stack\..*\[\r\n\]+"
