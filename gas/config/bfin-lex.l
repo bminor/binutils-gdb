@@ -483,7 +483,7 @@ static long parse_int (char **end)
     {
       char c;
       c = *arg++;
-      if (c == 0 || !index (char_bag, c))
+      if (c == 0 || !strchr (char_bag, c))
 	{
           not_done = 0;
           *--arg = c;
