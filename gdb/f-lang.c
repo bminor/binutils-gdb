@@ -259,6 +259,7 @@ enum f_primitive_types {
   f_primitive_type_logical,
   f_primitive_type_logical_s1,
   f_primitive_type_logical_s2,
+  f_primitive_type_logical_s8,
   f_primitive_type_integer,
   f_primitive_type_integer_s2,
   f_primitive_type_real,
@@ -289,6 +290,8 @@ f_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_logical_s1;
   lai->primitive_type_vector [f_primitive_type_logical_s2]
     = builtin->builtin_logical_s2;
+  lai->primitive_type_vector [f_primitive_type_logical_s8]
+    = builtin->builtin_logical_s8;
   lai->primitive_type_vector [f_primitive_type_real]
     = builtin->builtin_real;
   lai->primitive_type_vector [f_primitive_type_real_s8]
@@ -371,6 +374,10 @@ build_fortran_types (struct gdbarch *gdbarch)
   builtin_f_type->builtin_logical_s2
     = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1,
 			 "logical*2");
+
+  builtin_f_type->builtin_logical_s8
+    = arch_boolean_type (gdbarch, gdbarch_long_long_bit (gdbarch), 1,
+			 "logical*8");
 
   builtin_f_type->builtin_integer
     = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0,

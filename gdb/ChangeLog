@@ -1,3 +1,13 @@
+2010-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* f-exp.y: Add new production to recognize the `logical*8' type.
+	(LOGICAL_S8_KEYWORD): New token.
+	* f-lang.c (enum f_primitive_types)
+	<f_primitive_type_logical_s8>: New field.
+	(f_language_arch_info): Handling `logical*8' type.
+	(build_fortran_types): Building `logical*8' type.
+	* f-lang.h (struct builtin_f_type) <builtin_logical_s8>: New field.
+
 2010-04-19  Doug Evans  <dje@google.com>
 
 	* ser-base.c (generic_readchar): Watch for EOF in read of error_fd.

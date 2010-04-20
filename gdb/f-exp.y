@@ -196,6 +196,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 %token INT_KEYWORD INT_S2_KEYWORD LOGICAL_S1_KEYWORD LOGICAL_S2_KEYWORD 
+%token LOGICAL_S8_KEYWORD
 %token LOGICAL_KEYWORD REAL_KEYWORD REAL_S8_KEYWORD REAL_S16_KEYWORD 
 %token COMPLEX_S8_KEYWORD COMPLEX_S16_KEYWORD COMPLEX_S32_KEYWORD 
 %token BOOL_AND BOOL_OR BOOL_NOT   
@@ -606,6 +607,8 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = parse_f_type->builtin_integer_s2; }
 	|	CHARACTER 
 			{ $$ = parse_f_type->builtin_character; }
+	|	LOGICAL_S8_KEYWORD
+			{ $$ = parse_f_type->builtin_logical_s8; }
 	|	LOGICAL_KEYWORD 
 			{ $$ = parse_f_type->builtin_logical; }
 	|	LOGICAL_S2_KEYWORD
@@ -858,6 +861,7 @@ static const struct token f77_keywords[] =
   { "integer_2", INT_S2_KEYWORD, BINOP_END },
   { "logical_1", LOGICAL_S1_KEYWORD, BINOP_END },
   { "logical_2", LOGICAL_S2_KEYWORD, BINOP_END },
+  { "logical_8", LOGICAL_S8_KEYWORD, BINOP_END },
   { "complex_8", COMPLEX_S8_KEYWORD, BINOP_END },
   { "integer", INT_KEYWORD, BINOP_END },
   { "logical", LOGICAL_KEYWORD, BINOP_END },

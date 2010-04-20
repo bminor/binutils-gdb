@@ -1,3 +1,9 @@
+2010-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.fortran/logical.exp: New testcase.
+	* gdb.fortran/logical.f90: New file.
+
 2010-04-19  Doug Evans  <dje@google.com>
 
 	* gdb.base/help.exp (help source): Update expected output.
