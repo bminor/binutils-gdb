@@ -263,10 +263,10 @@ static void (* byte_put) (unsigned char *, bfd_vma, int);
 
 #define UNKNOWN -1
 
-#define SECTION_NAME(X)	\
-  ((X) == NULL ? "<none>" \
-  : string_table == NULL ? "<no-name>" \
-  : ((X)->sh_name >= string_table_length ? "<corrupt>" \
+#define SECTION_NAME(X)						\
+  ((X) == NULL ? _("<none>")					\
+   : string_table == NULL ? _("<no-name>")			\
+   : ((X)->sh_name >= string_table_length ? _("<corrupt>")	\
   : string_table + (X)->sh_name))
 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
@@ -1302,7 +1302,7 @@ dump_relocations (FILE * file,
       else if (symtab_index)
 	{
 	  if (symtab == NULL || symtab_index >= nsyms)
-	    printf (" bad symbol index: %08lx", (unsigned long) symtab_index);
+	    printf (_(" bad symbol index: %08lx"), (unsigned long) symtab_index);
 	  else
 	    {
 	      Elf_Internal_Sym * psym;
@@ -2200,7 +2200,7 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
     }
 
   if (unknown)
-    strcat (buf,", <unknown>");
+    strcat (buf,_(", <unknown>"));
 }
 
 static char *
@@ -2326,10 +2326,10 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", emb");
 
 	  if (e_flags & EF_PPC_RELOCATABLE)
-	    strcat (buf, ", relocatable");
+	    strcat (buf, _(", relocatable"));
 
 	  if (e_flags & EF_PPC_RELOCATABLE_LIB)
-	    strcat (buf, ", relocatable-lib");
+	    strcat (buf, _(", relocatable-lib"));
 	  break;
 
 	case EM_V850:
@@ -2346,7 +2346,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	      strcat (buf, ", v850");
 	      break;
 	    default:
-	      strcat (buf, ", unknown v850 architecture variant");
+	      strcat (buf, _(", unknown v850 architecture variant"));
 	      break;
 	    }
 	  break;
@@ -2402,7 +2402,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	       MIPS ELF does not specify EF_MIPS_MACH, it is a GNU
 	       extension.  */
 	      break;
-	    default: strcat (buf, ", unknown CPU"); break;
+	    default: strcat (buf, _(", unknown CPU")); break;
 	    }
 
 	  switch ((e_flags & EF_MIPS_ABI))
@@ -2417,7 +2417,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	       This means it is likely to be an o32 file, but not for
 	       sure.  */
 	      break;
-	    default: strcat (buf, ", unknown ABI"); break;
+	    default: strcat (buf, _(", unknown ABI")); break;
 	    }
 
 	  if (e_flags & EF_MIPS_ARCH_ASE_MDMX)
@@ -2437,7 +2437,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_ARCH_32R2: strcat (buf, ", mips32r2"); break;
 	    case E_MIPS_ARCH_64: strcat (buf, ", mips64"); break;
 	    case E_MIPS_ARCH_64R2: strcat (buf, ", mips64r2"); break;
-	    default: strcat (buf, ", unknown ISA"); break;
+	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
 
 	  break;
@@ -2466,7 +2466,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case EF_SH2A_SH3_NOFPU: strcat (buf, ", sh2a-nofpu-or-sh3-nommu"); break;
 	    case EF_SH2A_SH4: strcat (buf, ", sh2a-or-sh4"); break;
 	    case EF_SH2A_SH3E: strcat (buf, ", sh2a-or-sh3e"); break;
-	    default: strcat (buf, ", unknown ISA"); break;
+	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
 
 	  break;
@@ -3455,7 +3455,7 @@ process_file_header (void)
 	      (elf_header.e_ident[EI_VERSION] == EV_CURRENT
 	       ? "(current)"
 	       : (elf_header.e_ident[EI_VERSION] != EV_NONE
-		  ? "<unknown: %lx>"
+		  ? _("<unknown: %lx>")
 		  : "")));
       printf (_("  OS/ABI:                            %s\n"),
 	      get_osabi_name (elf_header.e_ident[EI_OSABI]));
@@ -3504,7 +3504,7 @@ process_file_header (void)
 	printf (" (%u)", section_headers[0].sh_link);
       else if (elf_header.e_shstrndx != SHN_UNDEF
 	       && elf_header.e_shstrndx >= elf_header.e_shnum)
-	printf (" <corrupt: out of range>");
+	printf (_(" <corrupt: out of range>"));
       putc ('\n', stdout);
     }
 
@@ -4328,7 +4328,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 	      *p++ = ',';
 	      *p++ = ' ';
 	    }
-	  sprintf (p, "UNKNOWN (%*.*lx)", field_size, field_size,
+	  sprintf (p, _("UNKNOWN (%*.*lx)"), field_size, field_size,
 		   (unsigned long) unknown_flags);
 	  p += 10 + field_size;
 	}
@@ -4925,7 +4925,7 @@ process_section_groups (FILE * file)
 		  strtab_size = strtab != NULL ? strtab_sec->sh_size : 0;
 		}
 	      group_name = sym->st_name < strtab_size
-			   ? strtab + sym->st_name : "<corrupt>";
+		? strtab + sym->st_name : _("<corrupt>");
 	    }
 
 	  start = (unsigned char *) get_data (NULL, file, section->sh_offset,
@@ -4939,7 +4939,7 @@ process_section_groups (FILE * file)
 
 	  if (do_section_groups)
 	    {
-	      printf ("\n%sgroup section [%5u] `%s' [%s] contains %u sections:\n",
+	      printf (_("\n%sgroup section [%5u] `%s' [%s] contains %u sections:\n"),
 		      get_group_flags (entry), i, name, group_name, size);
 
 	      printf (_("   [Index]    Name\n"));
@@ -5251,7 +5251,7 @@ find_symbol_for_address (Elf_Internal_Sym * symtab,
   if (best)
     {
       *symname = (best->st_name >= strtab_size
-		  ? "<corrupt>" : strtab + best->st_name);
+		  ? _("<corrupt>") : strtab + best->st_name);
       *offset = dist;
       return;
     }
@@ -5305,7 +5305,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info * aux)
 
       if (UNW_VER (stamp) != 1)
 	{
-	  printf ("\tUnknown version.\n");
+	  printf (_("\tUnknown version.\n"));
 	  continue;
 	}
 
@@ -6120,7 +6120,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
     }					\
   else					\
     {					\
-      printf ("[Truncated opcode]\n");	\
+      printf (_("[Truncated opcode]\n"));	\
       return;				\
     }					\
   printf (_("0x%02x "), OP)
@@ -6232,6 +6232,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	      unsigned int mask = ((op & 0x0f) << 8) | op2;
 	      int first = 1;
 	      int i;
+
 	      printf ("pop {");
 	      for (i = 0; i < 12; i++)
 		if (mask & (1 << i))
@@ -6513,7 +6514,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
     {
     case DT_MIPS_FLAGS:
       if (entry->d_un.d_val == 0)
-	printf ("NONE\n");
+	printf (_("NONE\n"));
       else
 	{
 	  static const char * opts[] =
@@ -6526,6 +6527,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 	  };
 	  unsigned int cnt;
 	  int first = 1;
+
 	  for (cnt = 0; cnt < ARRAY_SIZE (opts); ++cnt)
 	    if (entry->d_un.d_val & (1 << cnt))
 	      {
@@ -6538,9 +6540,9 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 
     case DT_MIPS_IVERSION:
       if (VALID_DYNAMIC_NAME (entry->d_un.d_val))
-	printf ("Interface Version: %s\n", GET_DYNAMIC_NAME (entry->d_un.d_val));
+	printf (_("Interface Version: %s\n"), GET_DYNAMIC_NAME (entry->d_un.d_val));
       else
-	printf ("<corrupt: %ld>\n", (long) entry->d_un.d_ptr);
+	printf (_("<corrupt: %ld>\n"), (long) entry->d_un.d_ptr);
       break;
 
     case DT_MIPS_TIME_STAMP:
@@ -6553,7 +6555,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 	snprintf (timebuf, sizeof (timebuf), "%04u-%02u-%02uT%02u:%02u:%02u",
 		  tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
 		  tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
-	printf ("Time Stamp: %s\n", timebuf);
+	printf (_("Time Stamp: %s\n"), timebuf);
       }
       break;
 
@@ -6577,7 +6579,6 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
       printf ("%#lx\n", (unsigned long) entry->d_un.d_ptr);
     }
 }
-
 
 static void
 dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
@@ -6776,7 +6777,7 @@ print_dynamic_flags (bfd_vma flags)
 	case DF_TEXTREL:	fputs ("TEXTREL", stdout); break;
 	case DF_BIND_NOW:	fputs ("BIND_NOW", stdout); break;
 	case DF_STATIC_TLS:	fputs ("STATIC_TLS", stdout); break;
-	default:		fputs ("unknown", stdout); break;
+	default:		fputs (_("unknown"), stdout); break;
 	}
     }
   puts ("");
@@ -7253,7 +7254,7 @@ process_dynamic_section (FILE * file)
 	  if (do_dynamic)
 	    {
 	      print_vma (entry->d_un.d_val, UNSIGNED);
-	      printf (" (bytes)\n");
+	      printf (_(" (bytes)\n"));
 	    }
 	  break;
 
@@ -7383,7 +7384,7 @@ get_ver_flags (unsigned int flags)
     }
 
   if (flags & ~(VER_FLG_BASE | VER_FLG_WEAK | VER_FLG_INFO))
-    strcat (buff, "| <unknown>");
+    strcat (buff, _("| <unknown>"));
 
   return buff;
 }
@@ -7425,7 +7426,7 @@ process_version_sections (FILE * file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    section->sh_link < elf_header.e_shnum
 		    ? SECTION_NAME (section_headers + section->sh_link)
-		    : "<corrupt>");
+		    : _("<corrupt>"));
 
 	    edefs = (Elf_External_Verdef *)
                 get_data (NULL, file, section->sh_offset, 1,section->sh_size,
@@ -7527,7 +7528,7 @@ process_version_sections (FILE * file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    section->sh_link < elf_header.e_shnum
 		    ? SECTION_NAME (section_headers + section->sh_link)
-		    : "<corrupt>");
+		    : _("<corrupt>"));
 
 	    eneed = (Elf_External_Verneed *) get_data (NULL, file,
                                                        section->sh_offset, 1,
@@ -8075,7 +8076,7 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
   if (VALID_DYNAMIC_NAME (psym->st_name))
     print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
   else
-    printf (" <corrupt: %14ld>", psym->st_name);
+    printf (_(" <corrupt: %14ld>"), psym->st_name);
   putchar ('\n');
 }
 
@@ -8382,7 +8383,7 @@ process_symbol_table (FILE * file)
 		printf (" [%s] ", get_symbol_other (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other)));
 	      printf (" %4s ", get_symbol_index_type (psym->st_shndx));
 	      print_symbol (25, psym->st_name < strtab_size
-			    ? strtab + psym->st_name : "<corrupt>");
+			    ? strtab + psym->st_name : _("<corrupt>"));
 
 	      if (section->sh_type == SHT_DYNSYM &&
 		  version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
@@ -8462,7 +8463,7 @@ process_symbol_table (FILE * file)
 			    {
 			      printf ("@%s (%d)",
 				      ivna.vna_name < strtab_size
-				      ? strtab + ivna.vna_name : "<corrupt>",
+				      ? strtab + ivna.vna_name : _("<corrupt>"),
 				      ivna.vna_other);
 			      check_def = 0;
 			    }
@@ -8515,7 +8516,7 @@ process_symbol_table (FILE * file)
 				printf ((vers_data & VERSYM_HIDDEN)
 					? "@%s" : "@@%s",
 					ivda.vda_name < strtab_size
-					? strtab + ivda.vda_name : "<corrupt>");
+					? strtab + ivda.vda_name : _("<corrupt>"));
 			    }
 			}
 		    }
@@ -8691,7 +8692,7 @@ process_syminfo (FILE * file ATTRIBUTE_UNUSED)
       if (VALID_DYNAMIC_NAME (dynamic_symbols[i].st_name))
 	print_symbol (30, GET_DYNAMIC_NAME (dynamic_symbols[i].st_name));
       else
-	printf ("<corrupt: %19ld>", dynamic_symbols[i].st_name);
+	printf (_("<corrupt: %19ld>"), dynamic_symbols[i].st_name);
       putchar (' ');
 
       switch (dynamic_syminfo[i].si_boundto)
@@ -9939,11 +9940,11 @@ display_arm_attribute (unsigned char * p)
 	      p += len;
 	      switch (val)
 		{
-		case 0: printf ("None\n"); break;
-		case 'A': printf ("Application\n"); break;
-		case 'R': printf ("Realtime\n"); break;
-		case 'M': printf ("Microcontroller\n"); break;
-		case 'S': printf ("Application or Realtime\n"); break;
+		case 0: printf (_("None\n")); break;
+		case 'A': printf (_("Application\n")); break;
+		case 'R': printf (_("Realtime\n")); break;
+		case 'M': printf (_("Microcontroller\n")); break;
+		case 'S': printf (_("Application or Realtime\n")); break;
 		default: printf ("??? (%d)\n", val); break;
 		}
 	      break;
@@ -9953,13 +9954,13 @@ display_arm_attribute (unsigned char * p)
 	      p += len;
 	      switch (val)
 		{
-		case 0: printf ("None\n"); break;
-		case 1: printf ("8-byte\n"); break;
-		case 2: printf ("4-byte\n"); break;
+		case 0: printf (_("None\n")); break;
+		case 1: printf (_("8-byte\n")); break;
+		case 2: printf (_("4-byte\n")); break;
 		case 3: printf ("??? 3\n"); break;
 		default:
 		  if (val <= 12)
-		    printf ("8-byte and up to %d-byte extended\n", 
+		    printf (_("8-byte and up to %d-byte extended\n"), 
 			    1 << val);
 		  else
 		    printf ("??? (%d)\n", val);
@@ -9972,13 +9973,13 @@ display_arm_attribute (unsigned char * p)
 	      p += len;
 	      switch (val)
 		{
-		case 0: printf ("None\n"); break;
-		case 1: printf ("8-byte, except leaf SP\n"); break;
-		case 2: printf ("8-byte\n"); break;
+		case 0: printf (_("None\n")); break;
+		case 1: printf (_("8-byte, except leaf SP\n")); break;
+		case 2: printf (_("8-byte\n")); break;
 		case 3: printf ("??? 3\n"); break;
 		default:
 		  if (val <= 12)
-		    printf ("8-byte and up to %d-byte extended\n", 
+		    printf (_("8-byte and up to %d-byte extended\n"), 
 			    1 << val);
 		  else
 		    printf ("??? (%d)\n", val);
@@ -9989,13 +9990,13 @@ display_arm_attribute (unsigned char * p)
 	    case 32: /* Tag_compatibility.  */
 	      val = read_uleb128 (p, &len);
 	      p += len;
-	      printf ("flag = %d, vendor = %s\n", val, p);
+	      printf (_("flag = %d, vendor = %s\n"), val, p);
 	      p += strlen ((char *) p) + 1;
 	      break;
 
 	    case 64: /* Tag_nodefaults.  */
 	      p++;
-	      printf ("True\n");
+	      printf (_("True\n"));
 	      break;
 
 	    case 65: /* Tag_also_compatible_with.  */
@@ -10079,7 +10080,7 @@ display_gnu_attribute (unsigned char * p,
     {
       val = read_uleb128 (p, &len);
       p += len;
-      printf ("flag = %d, vendor = %s\n", val, p);
+      printf (_("flag = %d, vendor = %s\n"), val, p);
       p += strlen ((char *) p) + 1;
       return p;
     }
@@ -10124,16 +10125,16 @@ display_power_gnu_attribute (unsigned char * p, int tag)
       switch (val)
 	{
 	case 0:
-	  printf ("Hard or soft float\n");
+	  printf (_("Hard or soft float\n"));
 	  break;
 	case 1:
-	  printf ("Hard float\n");
+	  printf (_("Hard float\n"));
 	  break;
 	case 2:
-	  printf ("Soft float\n");
+	  printf (_("Soft float\n"));
 	  break;
 	case 3:
-	  printf ("Single-precision hard float\n");
+	  printf (_("Single-precision hard float\n"));
 	  break;
 	default:
 	  printf ("??? (%d)\n", val);
@@ -10150,10 +10151,10 @@ display_power_gnu_attribute (unsigned char * p, int tag)
       switch (val)
 	{
 	case 0:
-	  printf ("Any\n");
+	  printf (_("Any\n"));
 	  break;
 	case 1:
-	  printf ("Generic\n");
+	  printf (_("Generic\n"));
 	  break;
 	case 2:
 	  printf ("AltiVec\n");
@@ -10176,13 +10177,13 @@ display_power_gnu_attribute (unsigned char * p, int tag)
       switch (val)
        {
        case 0:
-         printf ("Any\n");
+         printf (_("Any\n"));
          break;
        case 1:
          printf ("r3/r4\n");
          break;
        case 2:
-         printf ("Memory\n");
+         printf (_("Memory\n"));
          break;
        default:
          printf ("??? (%d)\n", val);
@@ -10228,19 +10229,19 @@ display_mips_gnu_attribute (unsigned char * p, int tag)
       switch (val)
 	{
 	case 0:
-	  printf ("Hard or soft float\n");
+	  printf (_("Hard or soft float\n"));
 	  break;
 	case 1:
-	  printf ("Hard float (-mdouble-float)\n");
+	  printf (_("Hard float (double precision)\n"));
 	  break;
 	case 2:
-	  printf ("Hard float (-msingle-float)\n");
+	  printf (_("Hard float (single precision)\n"));
 	  break;
 	case 3:
-	  printf ("Soft float\n");
+	  printf (_("Soft float\n"));
 	  break;
 	case 4:
-	  printf ("64-bit float (-mips32r2 -mfp64)\n");
+	  printf (_("64-bit float (-mips32r2 -mfp64)\n"));
 	  break;
 	default:
 	  printf ("??? (%d)\n", val);
@@ -10321,7 +10322,7 @@ process_attributes (FILE * file,
 		}
 
 	      len -= section_len;
-	      printf ("Attribute Section: %s\n", p);
+	      printf (_("Attribute Section: %s\n"), p);
 
 	      if (public_name && streq ((char *) p, public_name))
 		public_section = TRUE;
@@ -10358,13 +10359,13 @@ process_attributes (FILE * file,
 		  switch (tag)
 		    {
 		    case 1:
-		      printf ("File Attributes\n");
+		      printf (_("File Attributes\n"));
 		      break;
 		    case 2:
-		      printf ("Section Attributes:");
+		      printf (_("Section Attributes:"));
 		      goto do_numlist;
 		    case 3:
-		      printf ("Symbol Attributes:");
+		      printf (_("Symbol Attributes:"));
 		    do_numlist:
 		      for (;;)
 			{
@@ -10379,7 +10380,7 @@ process_attributes (FILE * file,
 		      printf ("\n");
 		      break;
 		    default:
-		      printf ("Unknown tag: %d\n", tag);
+		      printf (_("Unknown tag: %d\n"), tag);
 		      public_section = FALSE;
 		      break;
 		    }
@@ -10398,7 +10399,7 @@ process_attributes (FILE * file,
 		  else
 		    {
 		      /* ??? Do something sensible, like dump hex.  */
-		      printf ("  Unknown section contexts\n");
+		      printf (_("  Unknown section contexts\n"));
 		      p = end;
 		    }
 		}
@@ -10442,7 +10443,7 @@ print_mips_got_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr)
     printf ("%10s", "");
   printf (" ");
   if (data == NULL)
-    printf ("%*s", is_32bit_elf ? 8 : 16, "<unknown>");
+    printf ("%*s", is_32bit_elf ? 8 : 16, _("<unknown>"));
   else
     {
       bfd_vma entry;
@@ -10464,7 +10465,7 @@ print_mips_pltgot_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr)
   print_vma (addr, LONG_HEX);
   printf (" ");
   if (data == NULL)
-    printf ("%*s", is_32bit_elf ? 8 : 16, "<unknown>");
+    printf ("%*s", is_32bit_elf ? 8 : 16, _("<unknown>"));
   else
     {
       bfd_vma entry;
@@ -10562,9 +10563,9 @@ process_mips_specific (FILE * file)
                                               _("liblist"));
       if (elib)
 	{
-	  printf ("\nSection '.liblist' contains %lu entries:\n",
+	  printf (_("\nSection '.liblist' contains %lu entries:\n"),
 		  (unsigned long) liblistno);
-	  fputs ("     Library              Time Stamp          Checksum   Version Flags\n",
+	  fputs (_("     Library              Time Stamp          Checksum   Version Flags\n"),
 		 stdout);
 
 	  for (cnt = 0; cnt < liblistno; ++cnt)
@@ -10590,12 +10591,12 @@ process_mips_specific (FILE * file)
 	      if (VALID_DYNAMIC_NAME (liblist.l_name))
 		print_symbol (20, GET_DYNAMIC_NAME (liblist.l_name));
 	      else
-		printf ("<corrupt: %9ld>", liblist.l_name);
+		printf (_("<corrupt: %9ld>"), liblist.l_name);
 	      printf (" %s %#10lx %-7ld", timebuf, liblist.l_checksum,
 		      liblist.l_version);
 
 	      if (liblist.l_flags == 0)
-		puts (" NONE");
+		puts (_(" NONE"));
 	      else
 		{
 		  static const struct
@@ -10894,7 +10895,7 @@ process_mips_specific (FILE * file)
 	  if (VALID_DYNAMIC_NAME (psym->st_name))
 	    print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
 	  else
-	    printf ("<corrupt: %14ld>", psym->st_name);
+	    printf (_("<corrupt: %14ld>"), psym->st_name);
 	  putchar ('\n');
 	}
 
@@ -10923,16 +10924,16 @@ process_mips_specific (FILE * file)
 
       printf (_(" Reserved entries:\n"));
       printf (_("  %*s %10s %*s Purpose\n"),
-	      addr_size * 2, "Address", "Access",
-	      addr_size * 2, "Initial");
+	      addr_size * 2, _("Address"), _("Access"),
+	      addr_size * 2, _("Initial"));
       ent = print_mips_got_entry (data, pltgot, ent);
-      printf (" Lazy resolver\n");
+      printf (_(" Lazy resolver\n"));
       if (data
 	  && (byte_get (data + ent - pltgot, addr_size)
 	      >> (addr_size * 8 - 1)) != 0)
 	{
 	  ent = print_mips_got_entry (data, pltgot, ent);
-	  printf (" Module pointer (GNU extension)\n");
+	  printf (_(" Module pointer (GNU extension)\n"));
 	}
       printf ("\n");
 
@@ -10940,8 +10941,8 @@ process_mips_specific (FILE * file)
 	{
 	  printf (_(" Local entries:\n"));
 	  printf (_("  %*s %10s %*s\n"),
-		  addr_size * 2, "Address", "Access",
-		  addr_size * 2, "Initial");
+		  addr_size * 2, _("Address"), _("Access"),
+		  addr_size * 2, _("Initial"));
 	  while (ent < local_end)
 	    {
 	      ent = print_mips_got_entry (data, pltgot, ent);
@@ -10956,9 +10957,9 @@ process_mips_specific (FILE * file)
 
 	  printf (_(" Global entries:\n"));
 	  printf (_("  %*s %10s %*s %*s %-7s %3s %s\n"),
-		  addr_size * 2, "Address", "Access",
-		  addr_size * 2, "Initial",
-		  addr_size * 2, "Sym.Val.", "Type", "Ndx", "Name");
+		  addr_size * 2, _("Address"), _("Access"),
+		  addr_size * 2, _("Initial"),
+		  addr_size * 2, _("Sym.Val."), _("Type"), _("Ndx"), _("Name"));
 	  sym_width = (is_32bit_elf ? 80 : 160) - 28 - addr_size * 6 - 1;
 	  for (i = gotsym; i < symtabno; i++)
 	    {
@@ -10974,7 +10975,7 @@ process_mips_specific (FILE * file)
 	      if (VALID_DYNAMIC_NAME (psym->st_name))
 		print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
 	      else
-		printf ("<corrupt: %14ld>", psym->st_name);
+		printf (_("<corrupt: %14ld>"), psym->st_name);
 	      printf ("\n");
 	    }
 	  printf ("\n");
@@ -11015,18 +11016,18 @@ process_mips_specific (FILE * file)
       printf (_("\nPLT GOT:\n\n"));
       printf (_(" Reserved entries:\n"));
       printf (_("  %*s %*s Purpose\n"),
-	      addr_size * 2, "Address", addr_size * 2, "Initial");
+	      addr_size * 2, _("Address"), addr_size * 2, _("Initial"));
       ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
-      printf (" PLT lazy resolver\n");
+      printf (_(" PLT lazy resolver\n"));
       ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
-      printf (" Module pointer\n");
+      printf (_(" Module pointer\n"));
       printf ("\n");
 
       printf (_(" Entries:\n"));
       printf (_("  %*s %*s %*s %-7s %3s %s\n"),
-	      addr_size * 2, "Address",
-	      addr_size * 2, "Initial",
-	      addr_size * 2, "Sym.Val.", "Type", "Ndx", "Name");
+	      addr_size * 2, _("Address"),
+	      addr_size * 2, _("Initial"),
+	      addr_size * 2, _("Sym.Val."), _("Type"), _("Ndx"), _("Name"));
       sym_width = (is_32bit_elf ? 80 : 160) - 17 - addr_size * 6 - 1;
       for (i = 0; i < count; i++)
 	{
@@ -11042,7 +11043,7 @@ process_mips_specific (FILE * file)
 	  if (VALID_DYNAMIC_NAME (psym->st_name))
 	    print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
 	  else
-	    printf ("<corrupt: %14ld>", psym->st_name);
+	    printf (_("<corrupt: %14ld>"), psym->st_name);
 	  printf ("\n");
 	}
       printf ("\n");
@@ -11103,7 +11104,7 @@ process_gnu_liblist (FILE * file)
 		  SECTION_NAME (section),
 		  (unsigned long) (section->sh_size / sizeof (Elf32_External_Lib)));
 
-	  puts ("     Library              Time Stamp          Checksum   Version Flags");
+	  puts (_("     Library              Time Stamp          Checksum   Version Flags"));
 
 	  for (cnt = 0; cnt < section->sh_size / sizeof (Elf32_External_Lib);
 	       ++cnt)
@@ -11128,10 +11129,10 @@ process_gnu_liblist (FILE * file)
 	      printf ("%3lu: ", (unsigned long) cnt);
 	      if (do_wide)
 		printf ("%-20s", liblist.l_name < strtab_size
-				 ? strtab + liblist.l_name : "<corrupt>");
+			? strtab + liblist.l_name : _("<corrupt>"));
 	      else
 		printf ("%-20.20s", liblist.l_name < strtab_size
-				    ? strtab + liblist.l_name : "<corrupt>");
+			? strtab + liblist.l_name : _("<corrupt>"));
 	      printf (" %s %#010lx %-7ld %-7ld\n", timebuf, liblist.l_checksum,
 		      liblist.l_version, liblist.l_flags);
 	    }
@@ -11268,9 +11269,9 @@ get_netbsd_elfcore_note_type (unsigned e_type)
     case EM_SPARCV9:
       switch (e_type)
 	{
-	case NT_NETBSDCORE_FIRSTMACH+0:
+	case NT_NETBSDCORE_FIRSTMACH + 0:
 	  return _("PT_GETREGS (reg structure)");
-	case NT_NETBSDCORE_FIRSTMACH+2:
+	case NT_NETBSDCORE_FIRSTMACH + 2:
 	  return _("PT_GETFPREGS (fpreg structure)");
 	default:
 	  break;
@@ -11282,9 +11283,9 @@ get_netbsd_elfcore_note_type (unsigned e_type)
     default:
       switch (e_type)
 	{
-	case NT_NETBSDCORE_FIRSTMACH+1:
+	case NT_NETBSDCORE_FIRSTMACH + 1:
 	  return _("PT_GETREGS (reg structure)");
-	case NT_NETBSDCORE_FIRSTMACH+3:
+	case NT_NETBSDCORE_FIRSTMACH + 3:
 	  return _("PT_GETFPREGS (fpreg structure)");
 	default:
 	  break;
