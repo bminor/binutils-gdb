@@ -1,5 +1,10 @@
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* procfs.c (solib_mappings_callback): Move function up to avoid
+	a compiler warning.
+
+2010-04-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* procfs.c (find_signalled_thread, find_stop_signal): Move
 	these functions down to define them only when used.
 

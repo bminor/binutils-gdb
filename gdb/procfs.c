@@ -4043,6 +4043,53 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
   return 0;
 }
 
+/* Calls the supplied callback function once for each mapped address
+   space in the process.  The callback function  receives an open
+   file descriptor for the file corresponding to that mapped
+   address space (if there is one), and the base address of the
+   mapped space.  Quit when the callback function returns a
+   nonzero value, or at teh end of the mappings.
+
+   Returns: the first non-zero return value of the callback function,
+   or zero.  */
+
+static int
+solib_mappings_callback (struct prmap *map, int (*func) (int, CORE_ADDR),
+			 void *data)
+{
+  procinfo *pi = data;
+  int fd;
+
+#ifdef NEW_PROC_API
+  char name[MAX_PROC_NAME_SIZE + sizeof (map->pr_mapname)];
+
+  if (map->pr_vaddr == 0 && map->pr_size == 0)
+    return -1;		/* sanity */
+
+  if (map->pr_mapname[0] == 0)
+    {
+      fd = -1;	/* no map file */
+    }
+  else
+    {
+      sprintf (name, "/proc/%d/object/%s", pi->pid, map->pr_mapname);
+      /* Note: caller's responsibility to close this fd!  */
+      fd = open_with_retry (name, O_RDONLY);
+      /* Note: we don't test the above call for failure;
+	 we just pass the FD on as given.  Sometimes there is
+	 no file, so the open may return failure, but that's
+	 not a problem.  */
+    }
+#else
+  fd = ioctl (pi->ctl_fd, PIOCOPENM, &map->pr_vaddr);
+  /* Note: we don't test the above call for failure;
+     we just pass the FD on as given.  Sometimes there is
+     no file, so the ioctl may return failure, but that's
+     not a problem.  */
+#endif
+  return (*func) (fd, (CORE_ADDR) map->pr_vaddr);
+}
+
 /* If the given memory region MAP contains a symbol named __dbx_link,
    insert a breakpoint at this location and return nonzero.  Return
    zero otherwise.  */
@@ -5621,57 +5668,6 @@ iterate_over_mappings (procinfo *pi, int (*child_func) (), void *data,
       return funcstat;
 
   return 0;
-}
-
-/*
- * Function: solib_mappings_callback
- *
- * Calls the supplied callback function once for each mapped address
- * space in the process.  The callback function  receives an open
- * file descriptor for the file corresponding to that mapped
- * address space (if there is one), and the base address of the
- * mapped space.  Quit when the callback function returns a
- * nonzero value, or at teh end of the mappings.
- *
- * Returns: the first non-zero return value of the callback function,
- * or zero.
- */
-
-int solib_mappings_callback (struct prmap *map,
-			     int (*func) (int, CORE_ADDR),
-			     void *data)
-{
-  procinfo *pi = data;
-  int fd;
-
-#ifdef NEW_PROC_API
-  char name[MAX_PROC_NAME_SIZE + sizeof (map->pr_mapname)];
-
-  if (map->pr_vaddr == 0 && map->pr_size == 0)
-    return -1;		/* sanity */
-
-  if (map->pr_mapname[0] == 0)
-    {
-      fd = -1;	/* no map file */
-    }
-  else
-    {
-      sprintf (name, "/proc/%d/object/%s", pi->pid, map->pr_mapname);
-      /* Note: caller's responsibility to close this fd!  */
-      fd = open_with_retry (name, O_RDONLY);
-      /* Note: we don't test the above call for failure;
-	 we just pass the FD on as given.  Sometimes there is
-	 no file, so the open may return failure, but that's
-	 not a problem.  */
-    }
-#else
-  fd = ioctl (pi->ctl_fd, PIOCOPENM, &map->pr_vaddr);
-  /* Note: we don't test the above call for failure;
-     we just pass the FD on as given.  Sometimes there is
-     no file, so the ioctl may return failure, but that's
-     not a problem.  */
-#endif
-  return (*func) (fd, (CORE_ADDR) map->pr_vaddr);
 }
 
 /*
