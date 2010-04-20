@@ -2902,10 +2902,11 @@ proc_parent_pid (procinfo *pi)
   return pi->prstatus.pr_ppid;
 }
 
-
 /* Convert a target address (a.k.a. CORE_ADDR) into a host address
    (a.k.a void pointer)!  */
 
+#if (defined (PCWATCH) || defined (PIOCSWATCH)) \
+    && !(defined (PIOCOPENLWP) || defined (UNIXWARE))
 static void *
 procfs_address_to_host_pointer (CORE_ADDR addr)
 {
@@ -2917,6 +2918,7 @@ procfs_address_to_host_pointer (CORE_ADDR addr)
 			      (gdb_byte *) &ptr, addr);
   return ptr;
 }
+#endif
 
 /*
  * Function: proc_set_watchpoint
