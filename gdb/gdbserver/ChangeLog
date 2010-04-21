@@ -1,3 +1,8 @@
+2010-04-21  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* Makefile.in (nto_low_h nto-low.o nto-x86-low.o): New dependency lists.
+	* nto-x86-low.c: Include server.h
+
 2010-04-20  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-i386-low.c: Use __x86_64__ macro instead of __x86_64 to
