@@ -17,8 +17,8 @@
 
 	PR 9167
 	* cp-valprint.c (cp_print_value_fields): Replaced obstack_base()
-        method of popping recursion-detection stack with a method based on
-        obstack_object_size().
+	method of popping recursion-detection stack with a method based on
+	obstack_object_size().
 
 2010-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
