@@ -80,12 +80,13 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
-	  /* For an array of chars, print with string syntax.  */
-	  if ((eltlen == 1 || eltlen == 2 || eltlen == 4)
-	      && ((TYPE_CODE (elttype) == TYPE_CODE_INT)
-	       || ((current_language->la_language == language_pascal)
-		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))
-	      && (options->format == 0 || options->format == 's'))
+	  /* If 's' format is used, try to print out as string.
+	     If no format is given, print as string if element type
+	     is of TYPE_CODE_CHAR and element size is 1,2 or 4.  */
+	  if (options->format == 's'
+	      || ((eltlen == 1 || eltlen == 2 || eltlen == 4)
+		  && TYPE_CODE (elttype) == TYPE_CODE_CHAR
+		  && options->format == 0))
 	    {
 	      /* If requested, look for the first null char and only print
 	         elements up to it.  */

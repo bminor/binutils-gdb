@@ -1,3 +1,9 @@
+2010-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	PR pascal/11492.
+	* gdb.pascal/gdb11492.pas: New file.
+	* gdb.pascal/gdb11492.exp: New file.
+
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/info_types.c, gdb.ada/info_types.exp: New files.
