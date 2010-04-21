@@ -1,5 +1,19 @@
 2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/11509
+	* config/tc-i386-intel.c (i386_intel_simplify_register): New.
+	(i386_intel_simplify): Use i386_is_register and
+	i386_intel_simplify_register. Set X_md for O_register and
+	check X_md for O_constant.
+	(i386_intel_operand): Use i386_is_register.
+
+	* config/tc-i386.c (i386_is_register): New.
+	(x86_cons): Initialize the X_md field.  Use i386_is_register.
+	(parse_register): Use i386_is_register.
+	(tc_x86_parse_to_dw2regnum): Likewise.
+
+2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* expr.c (expr): Initialize the X_md field.
 
 2010-04-20  Joseph Myers  <joseph@codesourcery.com>

@@ -1,3 +1,9 @@
+2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11509
+	* gas/i386/equ.s: Add tests for ".equ symbol, reg + NUM".
+	* gas/i386/equ.d: Updated.
+
 2010-04-20  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/11507

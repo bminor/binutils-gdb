@@ -3534,6 +3534,15 @@ swap_operands (void)
     }
 }
 
+static int
+i386_is_register (const expressionS *e, int is_intel_syntax)
+{
+  return (e->X_op == O_register
+	  || (is_intel_syntax
+	      && e->X_op == O_constant
+	      && e->X_md));
+}
+
 /* Try to ensure constant immediates are represented in the smallest
    opcode possible.  */
 static void
@@ -6451,6 +6460,7 @@ x86_cons (expressionS *exp, int size)
 {
   intel_syntax = -intel_syntax;
 
+  exp->X_md = 0;
   if (size == 4 || (object_64bit && size == 8))
     {
       /* Handle @GOTOFF and the like in an expression.  */
@@ -6477,7 +6487,7 @@ x86_cons (expressionS *exp, int size)
 	  if (exp->X_op == O_constant
 	      || exp->X_op == O_absent
 	      || exp->X_op == O_illegal
-	      || exp->X_op == O_register
+	      || i386_is_register (exp, intel_syntax)
 	      || exp->X_op == O_big)
 	    {
 	      char c = *input_line_pointer;
@@ -7956,7 +7966,7 @@ parse_register (char *reg_string, char **end_op)
 	{
 	  const expressionS *e = symbol_get_value_expression (symbolP);
 
-	  know (e->X_op == O_register);
+	  know (i386_is_register (e, intel_syntax));
 	  know (e->X_add_number >= 0
 		&& (valueT) e->X_add_number < i386_regtab_size);
 	  r = i386_regtab + e->X_add_number;
@@ -8863,7 +8873,7 @@ tc_x86_parse_to_dw2regnum (expressionS *exp)
   register_chars['.'] = saved_register_dot;
   allow_naked_reg = saved_naked_reg;
 
-  if (exp->X_op == O_register && exp->X_add_number >= 0)
+  if (i386_is_register (exp, intel_syntax) && exp->X_add_number >= 0)
     {
       if ((addressT) exp->X_add_number < i386_regtab_size)
 	{
