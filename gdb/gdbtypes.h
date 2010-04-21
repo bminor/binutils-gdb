@@ -1099,6 +1099,9 @@ struct builtin_type
   struct type *builtin_int128;
   struct type *builtin_uint128;
 
+  /* Wide character types.  */
+  struct type *builtin_char16;
+  struct type *builtin_char32;
 
   /* Pointer types.  */
 

@@ -3474,6 +3474,13 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   TYPE_NOTTEXT (builtin_type->builtin_int8) = 1;
   TYPE_NOTTEXT (builtin_type->builtin_uint8) = 1;
 
+  /* Wide character types.  */
+  builtin_type->builtin_char16
+    = arch_integer_type (gdbarch, 16, 0, "char16_t");
+  builtin_type->builtin_char32
+    = arch_integer_type (gdbarch, 32, 0, "char32_t");
+	
+
   /* Default data/code pointer types.  */
   builtin_type->builtin_data_ptr
     = lookup_pointer_type (builtin_type->builtin_void);

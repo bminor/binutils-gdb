@@ -1,3 +1,8 @@
+2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.texinfo (Examining memory): Update for change in string
+	display with explicit size.
+
 2010-04-19  Pedro Alves  <pedro@codesourcery.com>
 
 	PR breakpoints/8554.

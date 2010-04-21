@@ -7262,8 +7262,16 @@ Giant words (eight bytes).
 @end table
 
 Each time you specify a unit size with @code{x}, that size becomes the
-default unit the next time you use @code{x}.  (For the @samp{s} and
-@samp{i} formats, the unit size is ignored and is normally not written.)
+default unit the next time you use @code{x}.  For the @samp{i} format,
+the unit size is ignored and is normally not written.  For the @samp{s} format,
+the unit size defaults to @samp{b}, unless it is explicitly given.
+Use @kbd{x /hs} to display 16-bit char strings and @kbd{x /ws} to display
+32-bit strings.  The next use of @kbd{x /s} will again display 8-bit strings.
+Note that the results depend on the programming language of the
+current compilation unit.  If the language is C, the @samp{s}
+modifier will use the UTF-16 encoding while @samp{w} will use
+UTF-32.  The encoding is set by the programming language and cannot
+be altered.
 
 @item @var{addr}, starting display address
 @var{addr} is the address where you want @value{GDBN} to begin displaying

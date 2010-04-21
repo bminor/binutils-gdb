@@ -1,4 +1,10 @@
-Wed Apr 21 12:47:26 2010  Chris Moller  <cmoller@redhat.com>
+2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/charset.c (Strin16, String32): New variables.
+	* gdb.base/charset.exp (gdb_test): Test correct display
+	of 16 or 32 bit strings.
+
+2010-04-21  Chris Moller  <cmoller@redhat.com>
 
 	PR 9167
 	* gdb.cp/Makefile.in (EXECUTABLES): Added pr9167.

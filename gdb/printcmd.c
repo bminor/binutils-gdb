@@ -260,6 +260,11 @@ decode_format (char **string_ptr, int oformat, int osize)
 	/* Characters default to one byte.  */
 	val.size = osize ? 'b' : osize;
 	break;
+      case 's':
+	/* Display strings with byte size chars unless explicitly specified.  */
+	val.size = '\0';
+	break;
+
       default:
 	/* The default is the size most recently specified.  */
 	val.size = osize;
@@ -295,7 +300,7 @@ print_formatted (struct value *val, int size,
 	    next_address = (value_address (val)
 			    + val_print_string (elttype,
 						value_address (val), -1,
-						stream, options));
+						stream, options) * len);
 	  }
 	  return;
 
@@ -802,9 +807,11 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   next_gdbarch = gdbarch;
   next_address = addr;
 
-  /* String or instruction format implies fetch single bytes
-     regardless of the specified size.  */
-  if (format == 's' || format == 'i')
+  /* Instruction format implies fetch single bytes
+     regardless of the specified size.
+     The case of strings is handled in decode_format, only explicit
+     size operator are not changed to 'b'.  */
+  if (format == 'i')
     size = 'b';
 
   if (size == 'a')
@@ -830,6 +837,27 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
     val_type = builtin_type (next_gdbarch)->builtin_int32;
   else if (size == 'g')
     val_type = builtin_type (next_gdbarch)->builtin_int64;
+
+  if (format == 's')
+    {
+      struct type *char_type = NULL;
+      /* Search for "char16_t"  or "char32_t" types or fall back to 8-bit char
+	 if type is not found.  */
+      if (size == 'h')
+	char_type = builtin_type (next_gdbarch)->builtin_char16;
+      else if (size == 'w')
+	char_type = builtin_type (next_gdbarch)->builtin_char32;
+      if (char_type)
+        val_type = char_type;
+      else
+        {
+	  if (size != '\0' && size != 'b')
+	    warning (_("Unable to display strings with size '%c', using 'b' \
+instead."), size);
+	  size = 'b';
+	  val_type = builtin_type (next_gdbarch)->builtin_int8;
+        }
+    }
 
   maxelts = 8;
   if (size == 'w')
@@ -1413,8 +1441,11 @@ x_command (char *exp, int from_tty)
   do_examine (fmt, next_gdbarch, next_address);
 
   /* If the examine succeeds, we remember its size and format for next
-     time.  */
-  last_size = fmt.size;
+     time.  Set last_size to 'b' for strings.  */
+  if (fmt.format == 's')
+    last_size = 'b';
+  else
+    last_size = fmt.size;
   last_format = fmt.format;
 
   /* Set a couple of internal variables if appropriate. */

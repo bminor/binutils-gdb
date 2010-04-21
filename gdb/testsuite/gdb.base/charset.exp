@@ -616,4 +616,21 @@ gdb_test "print 'a' == 'a' || 'b' == 'b'" \
   ".* = 1" \
   "EVAL_SKIP cleanup handling regression test"
 
+
+proc string_display { var_name set_prefix x_size x_type} {
+  gdb_test "set ${var_name} = ${set_prefix}\"Test String\\0with zeroes\"" "" "Assign ${var_name} with prefix ${set_prefix}"
+  gdb_test "x /2${x_size}s ${var_name}" ".* ${x_type}\"Test String\"\[\r\n\]+.* ${x_type}\"with zeroes\"" "Display String ${var_name} with x/${x_size}s"
+}
+
+string_display String16 u h u
+if {$wchar_size == 2} {
+  string_display String16 L h u
+}
+ 
+string_display String32 U w U
+if {$wchar_size == 4} {
+  string_display String32 L w U
+}
+
+
 gdb_exit 

@@ -1,3 +1,18 @@
+2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdbtypes.h (builtin_type): Add builtin_char16 and builtin_char32
+	fields.
+	* gdbtypes.c (gdbtypes_post_init): Set builtin_char16 and 
+	builtin_char32 fields.
+	* printcmd.c (decode_format): Set char size to '\0'
+	for strings unless explicit size is given.
+	(print_formatted): Correct calculation of NEXT_ADDRESS
+	for 16 or 32 bit strings.
+	(do_examine): Do not force byte size for strings.
+	Use builtin_char16 and builtin_char32 types to display
+	16 or 32 bit-wide strings. 
+	(x_command): Set LAST_SIZE to 'b' for string type.
+
 2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR corefiles/11523
