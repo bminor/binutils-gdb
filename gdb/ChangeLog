@@ -1,3 +1,8 @@
+2010-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb/sparc-tdep.c (sparc32_store_return_value): Add gdb_assert ()
+	for len <= 8.
+
 2010-04-21  Chris Moller  <cmoller@redhat.com>
 
 	PR 9167

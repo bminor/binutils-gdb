@@ -1105,6 +1105,7 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 
   gdb_assert (!sparc_structure_or_union_p (type));
   gdb_assert (!(sparc_floating_p (type) && len == 16));
+  gdb_assert (len <= 8);
 
   if (sparc_floating_p (type))
     {
