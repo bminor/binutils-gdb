@@ -471,7 +471,6 @@ get_absolute_expression (void)
 {
   expressionS exp;
 
-  exp.X_md = 0;
   return get_absolute_expr (&exp);
 }
 
