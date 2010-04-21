@@ -1,3 +1,7 @@
+2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* expr.c (expr): Initialize the X_md field.
+
 2010-04-20  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-tic6x.c (OPTION_MGENERATE_REL): New.
