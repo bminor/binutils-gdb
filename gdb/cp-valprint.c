@@ -186,14 +186,13 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      void *statmem_obstack_top = NULL;
+      int obstack_initial_size = 0;
       void *stat_array_obstack_top = NULL;
       
       if (dont_print_statmem == 0)
 	{
-	  /* Set the current printed-statics stack top.  */
-	  statmem_obstack_top
-	    = obstack_next_free (&dont_print_statmem_obstack);
+	  obstack_initial_size =
+	    obstack_object_size (&dont_print_statmem_obstack);
 
 	  if (last_set_recurse != recurse)
 	    {
@@ -321,8 +320,19 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
       if (dont_print_statmem == 0)
 	{
-	  if (obstack_object_size (&dont_print_statmem_obstack) > 0) 
-	    obstack_free (&dont_print_statmem_obstack, statmem_obstack_top);
+	  int obstack_final_size =
+           obstack_object_size (&dont_print_statmem_obstack);
+
+	  if (obstack_final_size > obstack_initial_size) {
+	    /* In effect, a pop of the printed-statics stack.  */
+
+	    void *free_to_ptr =
+	      obstack_next_free (&dont_print_statmem_obstack) -
+	      (obstack_final_size - obstack_initial_size);
+
+	    obstack_free (&dont_print_statmem_obstack,
+			  free_to_ptr);
+	  }
 
 	  if (last_set_recurse != recurse)
 	    {
@@ -555,7 +565,6 @@ cp_print_static_field (struct type *type,
       addr = value_address (val);
       obstack_grow (&dont_print_statmem_obstack, (char *) &addr,
 		    sizeof (CORE_ADDR));
-
       CHECK_TYPEDEF (type);
       cp_print_value_fields (type, value_enclosing_type (val),
 			     value_contents_all (val),
