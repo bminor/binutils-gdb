@@ -1,3 +1,13 @@
+2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR corefiles/11523
+	* amd64-linux-tdep.c (amd64_linux_core_read_description): Check
+	XCR0 first.
+
+	* i386-linux-tdep.c (i386_linux_core_read_xcr0): Return 0 if
+	there is no .reg-xstate section.
+	(i386_linux_core_read_description): Check XCR0 first.
+
 2010-04-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* gdb/sparc-tdep.c (sparc32_store_return_value): Add gdb_assert ()

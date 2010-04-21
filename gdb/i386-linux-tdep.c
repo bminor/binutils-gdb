@@ -611,7 +611,7 @@ i386_linux_core_read_xcr0 (struct gdbarch *gdbarch,
 	}
     }
   else
-    xcr0 = I386_XSTATE_SSE_MASK;
+    xcr0 = 0;
 
   return xcr0;
 }
@@ -623,22 +623,24 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 				  struct target_ops *target,
 				  bfd *abfd)
 {
-  asection *section = bfd_get_section_by_name (abfd, ".reg2");
-  uint64_t xcr0;
-
-  if (section == NULL)
-    return NULL;
-
-  section = bfd_get_section_by_name (abfd, ".reg-xfp");
-  if (section == NULL)
-    return tdesc_i386_mmx_linux;
-
   /* Linux/i386.  */
-  xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
-  if ((xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
-    return tdesc_i386_avx_linux;
-  else
+  uint64_t xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
+  switch ((xcr0 & I386_XSTATE_AVX_MASK))
+    {
+    case I386_XSTATE_AVX_MASK:
+      return tdesc_i386_avx_linux;
+    case I386_XSTATE_SSE_MASK:
+      return tdesc_i386_linux;
+    case I386_XSTATE_X87_MASK:
+      return tdesc_i386_mmx_linux;
+    default:
+      break;
+    }
+
+  if (bfd_get_section_by_name (abfd, ".reg-xfp") != NULL)
     return tdesc_i386_linux;
+  else
+    return tdesc_i386_mmx_linux;
 }
 
 static void

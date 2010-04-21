@@ -1269,18 +1269,15 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 				  struct target_ops *target,
 				  bfd *abfd)
 {
-  asection *section = bfd_get_section_by_name (abfd, ".reg2");
-  uint64_t xcr0;
-
-  if (section == NULL)
-    return NULL;
-
   /* Linux/x86-64.  */
-  xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
-  if ((xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
-    return tdesc_amd64_avx_linux;
-  else
-    return tdesc_amd64_linux;
+  uint64_t xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
+  switch ((xcr0 & I386_XSTATE_AVX_MASK))
+    {
+    case I386_XSTATE_AVX_MASK:
+      return tdesc_amd64_avx_linux;
+    default:
+      return tdesc_amd64_linux;
+    }
 }
 
 static void
