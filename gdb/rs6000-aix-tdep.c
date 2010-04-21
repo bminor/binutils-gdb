@@ -583,7 +583,7 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
      the target address itself points to a section that is executable.  */
   if (s && (s->the_bfd_section->flags & SEC_CODE) == 0)
     {
-      CORE_ADDR pc;
+      CORE_ADDR pc = 0;
       struct obj_section *pc_section;
       struct gdb_exception e;
 

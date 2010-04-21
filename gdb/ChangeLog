@@ -1,3 +1,9 @@
+2010-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix compilation warning on gcc-4.1.2.
+	* rs6000-aix-tdep.c (rs6000_convert_from_func_ptr_addr): Initialize
+	local variable`pc' to zero.
+
 2010-04-20  Joel Brobecker  <brobecker@adacore.com>
 
 	Implement thread support with core files on alpha-tru64.
