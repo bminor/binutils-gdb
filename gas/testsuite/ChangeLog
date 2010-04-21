@@ -1,3 +1,8 @@
+2010-04-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x/insns-c674x.s, gas/tic6x/insns-c674x.d: Also test
+	"b .S2 b3".
+
 2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11509

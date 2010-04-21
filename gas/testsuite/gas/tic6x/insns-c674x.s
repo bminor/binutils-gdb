@@ -173,6 +173,7 @@ f:
 	avgu4 .M2 b26,b29,b0
 	[a2] avgu4 .M2X b3,a6,b9
 	b .S2 b4
+	b .S2 b3
 	[b2] b .S2X a4
 	[!a2] call .S2 b4
 	call .S2X a4
