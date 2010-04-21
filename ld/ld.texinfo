@@ -5939,6 +5939,10 @@ The @samp{--fix-cortex-a8} switch enables a link-time workaround for an erratum 
 
 The erratum only affects Thumb-2 code.  Please contact ARM for further details.
 
+@kindex --merge-exidx-entries
+@kindex --no-merge-exidx-entries
+The @samp{--no-merge-exidx-entries} switch disables the merging of adjacent exidx entries in debuginfo.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

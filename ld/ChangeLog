@@ -1,3 +1,10 @@
+2010-04-15  Andrew Haley  <aph@redhat.com>
+
+	* emultempl/armelf.em (merge_exidx_entries): New variable.
+	(OPTION_NO_MERGE_EXIDX_ENTRIES): New definition.
+	("no-merge-exidx-entries"): New option.
+	* ld.texinfo (merge-exidx-entries): Document this option.
+
 2010-04-14  Tristan Gingold  <gingold@adacore.com>
 
 	* emulparams/alphavms.sh: New file.

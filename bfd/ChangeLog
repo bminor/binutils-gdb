@@ -1,3 +1,11 @@
+2010-04-15  Andrew Haley  <aph@redhat.com>
+
+	* bfd-in.h (elf32_arm_fix_exidx_coverage): Add new flag:
+	merge_exidx_entries.
+	* bfd-in2.h: Likewise.
+	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Likewise.  Use it to
+	control merging of exidx entries.
+	
 2010-04-20  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-tic6x.h: New.

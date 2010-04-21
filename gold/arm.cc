@@ -1226,10 +1226,12 @@ class Arm_input_section : public Output_relaxed_input_section
 class Arm_exidx_fixup
 {
  public:
-  Arm_exidx_fixup(Output_section* exidx_output_section)
+  Arm_exidx_fixup(Output_section* exidx_output_section,
+		  bool merge_exidx_entries = true)
     : exidx_output_section_(exidx_output_section), last_unwind_type_(UT_NONE),
       last_inlined_entry_(0), last_input_section_(NULL),
-      section_offset_map_(NULL), first_output_text_section_(NULL)
+      section_offset_map_(NULL), first_output_text_section_(NULL),
+      merge_exidx_entries_(merge_exidx_entries)
   { }
 
   ~Arm_exidx_fixup()
@@ -1301,6 +1303,8 @@ class Arm_exidx_fixup
   // Output section for the text section which is linked to the first exidx
   // input in output.
   Output_section* first_output_text_section_;
+
+  bool merge_exidx_entries_;
 };
 
 // Arm output section class.  This is defined mainly to add a number of
@@ -1340,7 +1344,8 @@ class Arm_output_section : public Output_section
   void
   fix_exidx_coverage(Layout* layout,
 		     const Text_section_list& sorted_text_section,
-		     Symbol_table* symtab);
+		     Symbol_table* symtab,
+		     bool merge_exidx_entries);
 
  private:
   // For convenience.
@@ -2260,6 +2265,11 @@ class Target_arm : public Sized_target<32, big_endian>
   bool
   fix_cortex_a8() const
   { return this->fix_cortex_a8_; }
+
+  // Whether we merge exidx entries in debuginfo.
+  bool
+  merge_exidx_entries() const
+  { return parameters->options().merge_exidx_entries(); }
 
   // Whether we fix R_ARM_V4BX relocation.
   // 0 - do not fix
@@ -5186,7 +5196,8 @@ Arm_exidx_fixup::process_exidx_entry(uint32_t second_word)
   else if ((second_word & 0x80000000) != 0)
     {
       // Inlined unwinding data.  Merge if equal to previous.
-      delete_entry = (this->last_unwind_type_ == UT_INLINED_ENTRY
+      delete_entry = (merge_exidx_entries_
+		      && this->last_unwind_type_ == UT_INLINED_ENTRY
 		      && this->last_inlined_entry_ == second_word);
       this->last_unwind_type_ = UT_INLINED_ENTRY;
       this->last_inlined_entry_ = second_word;
@@ -5553,7 +5564,8 @@ void
 Arm_output_section<big_endian>::fix_exidx_coverage(
     Layout* layout,
     const Text_section_list& sorted_text_sections,
-    Symbol_table* symtab)
+    Symbol_table* symtab,
+    bool merge_exidx_entries)
 {
   // We should only do this for the EXIDX output section.
   gold_assert(this->type() == elfcpp::SHT_ARM_EXIDX);
@@ -5585,7 +5597,7 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
       known_input_sections.insert(Section_id(p->relobj(), p->shndx()));
     }
 
-  Arm_exidx_fixup exidx_fixup(this);
+  Arm_exidx_fixup exidx_fixup(this, merge_exidx_entries);
 
   // Go over the sorted text sections.
   Section_id_set processed_input_sections;
@@ -10884,7 +10896,8 @@ Target_arm<big_endian>::fix_exidx_coverage(
       arm_output_section->append_text_sections_to_list(&sorted_text_sections);
     } 
 
-  exidx_section->fix_exidx_coverage(layout, sorted_text_sections, symtab);
+  exidx_section->fix_exidx_coverage(layout, sorted_text_sections, symtab,
+				    merge_exidx_entries());
 }
 
 Target_selector_arm<false> target_selector_arm;

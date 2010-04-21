@@ -733,6 +733,10 @@ class General_options
 	      N_("(ARM only) Fix binaries for Cortex-A8 erratum."),
 	      N_("(ARM only) Do not fix binaries for Cortex-A8 erratum."));
 
+  DEFINE_bool(merge_exidx_entries, options::TWO_DASHES, '\0', true,
+	      N_("(ARM only) Merge exidx entries in debuginfo."),
+	      N_("(ARM only) Do not merge exidx entries in debuginfo."));
+
   DEFINE_special(fix_v4bx, options::TWO_DASHES, '\0',
                  N_("(ARM only) Rewrite BX rn as MOV pc, rn for ARMv4"),
                  NULL);

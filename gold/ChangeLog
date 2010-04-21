@@ -1,3 +1,17 @@
+2010-04-15  Andrew Haley  <aph@redhat.com>
+
+	* options.h (merge_exidx_entries): New option.
+	* arm.cc (class Arm_exidx_fixup): Add new arg, merge_exidx_entries.
+	(class Arm_exidx_fixup::merge_exidx_entries_): New member.
+	(Output_section::fix_exidx_coverage): Add new arg, merge_exidx_entries.
+	(Target_arm::merge_exidx_entries): New function.
+	(process_exidx_entry): Don't merge if merge_exidx_entries_ is false.
+	(Arm_output_section::fix_exidx_coverage): Pass merge_exidx_entries
+	to Arm_exidx_fixup constructor.
+	Add new arg, merge_exidx_entries.
+	(Target_arm::fix_exidx_coverage): pass merge_exidx_entries to
+	Arm_output_section::fix_exidx_coverage.
+
 2010-04-18  Sriraman Tallam  <tmsriram@google.com>
 
 	* icf.cc (get_section_contents): Check for preemptible functions.
