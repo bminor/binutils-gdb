@@ -65,4 +65,6 @@ extern struct target_desc *tdesc_i386_avx_linux;
   the process/thread is in.  */ 
 #define I386_LINUX_XSAVE_XCR0_OFFSET 464
 
+extern int i386_linux_gregset_reg_offset[];
+
 #endif /* i386-linux-tdep.h */

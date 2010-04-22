@@ -529,7 +529,7 @@ i386_linux_get_syscall_number (struct gdbarch *gdbarch,
    format and GDB's register cache layout.  */
 
 /* From <sys/reg.h>.  */
-static int i386_linux_gregset_reg_offset[] =
+int i386_linux_gregset_reg_offset[] =
 {
   6 * 4,			/* %eax */
   1 * 4,			/* %ecx */

@@ -99,26 +99,6 @@ static int have_ptrace_getregset = -1;
    those names are now used for the register sets used in the
    `mcontext_t' type, and have a different size and layout.  */
 
-/* Mapping between the general-purpose registers in `struct user'
-   format and GDB's register array layout.  */
-static int regmap[] = 
-{
-  EAX, ECX, EDX, EBX,
-  UESP, EBP, ESI, EDI,
-  EIP, EFL, CS, SS,
-  DS, ES, FS, GS,
-  -1, -1, -1, -1,		/* st0, st1, st2, st3 */
-  -1, -1, -1, -1,		/* st4, st5, st6, st7 */
-  -1, -1, -1, -1,		/* fctrl, fstat, ftag, fiseg */
-  -1, -1, -1, -1,		/* fioff, foseg, fooff, fop */
-  -1, -1, -1, -1,		/* xmm0, xmm1, xmm2, xmm3 */
-  -1, -1, -1, -1,		/* xmm4, xmm5, xmm6, xmm6 */
-  -1,				/* mxcsr */
-  -1, -1, -1, -1,		/* ymm0h, ymm1h, ymm2h, ymm3h */
-  -1, -1, -1, -1,		/* ymm4h, ymm5h, ymm6h, ymm6h */
-  ORIG_EAX
-};
-
 /* Which ptrace request retrieves which registers?
    These apply to the corresponding SET requests as well.  */
 
@@ -168,7 +148,7 @@ fetch_register (struct regcache *regcache, int regno)
   int val;
 
   gdb_assert (!have_ptrace_getregs);
-  if (regmap[regno] == -1)
+  if (i386_linux_gregset_reg_offset[regno] == -1)
     {
       regcache_raw_supply (regcache, regno, NULL);
       return;
@@ -180,7 +160,8 @@ fetch_register (struct regcache *regcache, int regno)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
-  val = ptrace (PTRACE_PEEKUSER, tid, 4 * regmap[regno], 0);
+  val = ptrace (PTRACE_PEEKUSER, tid,
+		i386_linux_gregset_reg_offset[regno], 0);
   if (errno != 0)
     error (_("Couldn't read register %s (#%d): %s."), 
 	   gdbarch_register_name (get_regcache_arch (regcache), regno),
@@ -198,7 +179,7 @@ store_register (const struct regcache *regcache, int regno)
   int val;
 
   gdb_assert (!have_ptrace_getregs);
-  if (regmap[regno] == -1)
+  if (i386_linux_gregset_reg_offset[regno] == -1)
     return;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -208,7 +189,8 @@ store_register (const struct regcache *regcache, int regno)
 
   errno = 0;
   regcache_raw_collect (regcache, regno, &val);
-  ptrace (PTRACE_POKEUSER, tid, 4 * regmap[regno], val);
+  ptrace (PTRACE_POKEUSER, tid,
+	  i386_linux_gregset_reg_offset[regno], val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."),
 	   gdbarch_register_name (get_regcache_arch (regcache), regno),
@@ -225,16 +207,17 @@ store_register (const struct regcache *regcache, int regno)
 void
 supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 {
-  const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
+  const gdb_byte *regp = (const gdb_byte *) gregsetp;
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
-    regcache_raw_supply (regcache, i, regp + regmap[i]);
+    regcache_raw_supply (regcache, i,
+			 regp + i386_linux_gregset_reg_offset[i]);
 
   if (I386_LINUX_ORIG_EAX_REGNUM
 	< gdbarch_num_regs (get_regcache_arch (regcache)))
     regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM,
-			 regp + ORIG_EAX);
+			  regp + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -245,18 +228,19 @@ void
 fill_gregset (const struct regcache *regcache,
 	      elf_gregset_t *gregsetp, int regno)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  gdb_byte *regp = (gdb_byte *) gregsetp;
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_raw_collect (regcache, i, regp + regmap[i]);
+      regcache_raw_collect (regcache, i,
+			    regp + i386_linux_gregset_reg_offset[i]);
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
       && I386_LINUX_ORIG_EAX_REGNUM
 	   < gdbarch_num_regs (get_regcache_arch (regcache)))
     regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM,
-			  regp + ORIG_EAX);
+			  regp + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

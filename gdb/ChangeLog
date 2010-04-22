@@ -1,3 +1,17 @@
+2010-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-linux-nat.c (regmap): Removed.
+	(fetch_register): Replace regmap with
+	i386_linux_gregset_reg_offset.
+	(store_register): Likewise.
+	(supply_gregset): Likewise.
+	(fill_gregset): Likewise.
+
+	* i386-linux-tdep.c (i386_linux_gregset_reg_offset): Make it
+	global.
+
+	* i386-linux-tdep.h (i386_linux_gregset_reg_offset): New.
+
 2010-04-22  Chris Moller  <cmoller@redhat.com>
 
 	* cp-valprint.c (cp_print_value_fields): Replaced obstack_base()
