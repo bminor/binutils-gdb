@@ -4453,32 +4453,17 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		      && ((this_hdr->sh_flags & SHF_TLS) == 0
 			  || p->p_type == PT_TLS))))
 	    {
-	      bfd_signed_vma adjust = sec->vma - (p->p_vaddr + p->p_memsz);
+	      bfd_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
 
-	      if (sec->vma < p->p_vaddr + p->p_memsz)
+	      if (sec->lma < p->p_paddr + p->p_memsz)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B: section %A vma 0x%lx overlaps previous sections"),
-		     abfd, sec, (unsigned long) sec->vma);
+		    (_("%B: section %A lma 0x%lx overlaps previous sections"),
+		     abfd, sec, (unsigned long) sec->lma);
 		  adjust = 0;
-		}
-	      p->p_memsz += adjust;
-
-	      if (p->p_paddr + p->p_memsz != sec->lma)
-		{
-		  /* This behavior is a compromise--ld has long
-		     silently changed the lma of sections when
-		     lma - vma is not equal for every section in a
-		     pheader--but only in the internal elf structures.
-		     Silently changing the lma is probably a bug, but
-		     changing it would have subtle and unknown
-		     consequences for existing scripts.
-
-		     Instead modify the bfd data structure to reflect
-		     what happened.  This at least fixes the values
-		     for the lma in the mapfile.  */
 		  sec->lma = p->p_paddr + p->p_memsz;
 		}
+	      p->p_memsz += adjust;
 
 	      if (this_hdr->sh_type != SHT_NOBITS)
 		{
@@ -4581,8 +4566,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  (_("%B: section `%A' can't be allocated in segment %d"),
 		   abfd, sec, j);
 		print_segment_map (m);
-		bfd_set_error (bfd_error_bad_value);
-		return FALSE;
 	      }
 	  }
     }

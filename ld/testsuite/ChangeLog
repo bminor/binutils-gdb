@@ -1,3 +1,8 @@
+2010-04-22  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/extract-symbol-1sec.d: Update lma.
+	* ld-i386/alloc.d: Expect a warning, not an error.
+
 2010-04-20  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-tic6x/data-reloc-global-rel.d,

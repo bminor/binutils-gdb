@@ -1,3 +1,8 @@
+2010-04-22  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Revert 2008-05-29
+	change.  Tidy.  Don't error on sections not allocated in segment.
+
 2010-04-15  Andrew Haley  <aph@redhat.com>
 
 	* bfd-in.h (elf32_arm_fix_exidx_coverage): Add new flag:
