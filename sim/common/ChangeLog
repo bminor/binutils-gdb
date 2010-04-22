@@ -1,3 +1,17 @@
+2010-04-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-profile.c (profile_vprintf, profile_printf): New functions.
+	(profile_print_pc): Convert sim_io_printf to profile_printf.
+	(profile_print_insn): Likewise.
+	(profile_print_memory): Likewise.
+	(profile_print_core): Likewise.
+	(profile_print_model): Likewise.
+	(sim_profile_print_bar): Likewise.
+	(profile_print_speed): Likewise.
+	(profile_print_addr_ranges): Likewise.
+	(profile_info): Likewise.
+	* sim-profile.h (sim_profile_print_bar): Add cpu argument.
+
 2010-04-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-model.c (OPTION_MODEL): Convert to enum.

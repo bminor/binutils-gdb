@@ -452,6 +452,31 @@ profile_option_handler (SIM_DESC sd,
   return SIM_RC_OK;
 }
 
+/* Profiling output hooks.  */
+
+static void
+profile_vprintf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, va_list ap)
+{
+  FILE *fp = PROFILE_FILE (CPU_PROFILE_DATA (cpu));
+
+  /* If an output file was given, redirect output to that.  */
+  if (fp != NULL)
+    vfprintf (fp, fmt, ap);
+  else
+    sim_io_evprintf (sd, fmt, ap);
+}
+
+__attribute__ ((format (printf, 3, 4)))
+static void
+profile_printf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  profile_vprintf (sd, cpu, fmt, ap);
+  va_end (ap);
+}
+
 /* PC profiling support */
 
 #if WITH_PROFILE_PC_P
@@ -600,7 +625,7 @@ profile_print_pc (sim_cpu *cpu, int verbose)
   if (PROFILE_PC_COUNT (profile) == 0)
     return;
 
-  sim_io_printf (sd, "Program Counter Statistics:\n\n");
+  profile_printf (sd, cpu, "Program Counter Statistics:\n\n");
 
   /* First pass over data computes various things.  */
   max_val = 0;
@@ -612,45 +637,45 @@ profile_print_pc (sim_cpu *cpu, int verbose)
 	max_val = PROFILE_PC_COUNT (profile) [i];
     }
 
-  sim_io_printf (sd, "  Total samples: %s\n",
-		 COMMAS (total));
-  sim_io_printf (sd, "  Granularity: %s bytes per bucket\n",
-		 COMMAS (PROFILE_PC_BUCKET_SIZE (profile)));
-  sim_io_printf (sd, "  Size: %s buckets\n",
-		 COMMAS (PROFILE_PC_NR_BUCKETS (profile)));
-  sim_io_printf (sd, "  Frequency: %s cycles per sample\n",
-		 COMMAS (PROFILE_PC_FREQ (profile)));
+  profile_printf (sd, cpu, "  Total samples: %s\n",
+		  COMMAS (total));
+  profile_printf (sd, cpu, "  Granularity: %s bytes per bucket\n",
+		  COMMAS (PROFILE_PC_BUCKET_SIZE (profile)));
+  profile_printf (sd, cpu, "  Size: %s buckets\n",
+		  COMMAS (PROFILE_PC_NR_BUCKETS (profile)));
+  profile_printf (sd, cpu, "  Frequency: %s cycles per sample\n",
+		  COMMAS (PROFILE_PC_FREQ (profile)));
 
   if (PROFILE_PC_END (profile) != 0)
-    sim_io_printf (sd, "  Range: 0x%lx 0x%lx\n",
-		   (long) PROFILE_PC_START (profile),
+    profile_printf (sd, cpu, "  Range: 0x%lx 0x%lx\n",
+		    (long) PROFILE_PC_START (profile),
 		   (long) PROFILE_PC_END (profile));
 
   if (verbose && max_val != 0)
     {
       /* Now we can print the histogram.  */
-      sim_io_printf (sd, "\n");
+      profile_printf (sd, cpu, "\n");
       for (i = 0; i <= PROFILE_PC_NR_BUCKETS (profile); ++i)
 	{
 	  if (PROFILE_PC_COUNT (profile) [i] != 0)
 	    {
-	      sim_io_printf (sd, "  ");
+	      profile_printf (sd, cpu, "  ");
 	      if (i == PROFILE_PC_NR_BUCKETS (profile))
-		sim_io_printf (sd, "%10s:", "overflow");
+		profile_printf (sd, cpu, "%10s:", "overflow");
 	      else
-		sim_io_printf (sd, "0x%08lx:",
-			       (long) (PROFILE_PC_START (profile)
-				       + (i * PROFILE_PC_BUCKET_SIZE (profile))));
-	      sim_io_printf (sd, " %*s",
-			     max_val < 10000 ? 5 : 10,
-			     COMMAS (PROFILE_PC_COUNT (profile) [i]));
-	      sim_io_printf (sd, " %4.1f",
-			     (PROFILE_PC_COUNT (profile) [i] * 100.0) / total);
-	      sim_io_printf (sd, ": ");
-	      sim_profile_print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
+		profile_printf (sd, cpu, "0x%08lx:",
+				(long) (PROFILE_PC_START (profile)
+					+ (i * PROFILE_PC_BUCKET_SIZE (profile))));
+	      profile_printf (sd, cpu, " %*s",
+			      max_val < 10000 ? 5 : 10,
+			      COMMAS (PROFILE_PC_COUNT (profile) [i]));
+	      profile_printf (sd, cpu, " %4.1f",
+			      (PROFILE_PC_COUNT (profile) [i] * 100.0) / total);
+	      profile_printf (sd, cpu, ": ");
+	      sim_profile_print_bar (sd, cpu, PROFILE_HISTOGRAM_WIDTH,
 				     PROFILE_PC_COUNT (profile) [i],
 				     max_val);
-	      sim_io_printf (sd, "\n");
+	      profile_printf (sd, cpu, "\n");
 	    }
 	}
     }
@@ -709,7 +734,7 @@ profile_print_pc (sim_cpu *cpu, int verbose)
       }
   }
 
-  sim_io_printf (sd, "\n");
+  profile_printf (sd, cpu, "\n");
 }
 
 #endif
@@ -746,12 +771,12 @@ profile_print_insn (sim_cpu *cpu, int verbose)
   if (CPU_MAX_INSNS (cpu) == 0)
     return;
 
-  sim_io_printf (sd, "Instruction Statistics");
+  profile_printf (sd, cpu, "Instruction Statistics");
 #ifdef SIM_HAVE_ADDR_RANGE
   if (PROFILE_RANGE (data)->ranges)
-    sim_io_printf (sd, " (for selected address range(s))");
+    profile_printf (sd, cpu, " (for selected address range(s))");
 #endif
-  sim_io_printf (sd, "\n\n");
+  profile_printf (sd, cpu, "\n\n");
 
   /* First pass over data computes various things.  */
   max_val = 0;
@@ -774,12 +799,12 @@ profile_print_insn (sim_cpu *cpu, int verbose)
   if (! PROFILE_TOTAL_INSN_COUNT (data))
     PROFILE_TOTAL_INSN_COUNT (data) = total;
 
-  sim_io_printf (sd, "  Total: %s insns\n", COMMAS (total));
+  profile_printf (sd, cpu, "  Total: %s insns\n", COMMAS (total));
 
   if (verbose && max_val != 0)
     {
       /* Now we can print the histogram.  */
-      sim_io_printf (sd, "\n");
+      profile_printf (sd, cpu, "\n");
       for (i = 0; i < CPU_MAX_INSNS (cpu); ++i)
 	{
 	  const char *name = (*CPU_INSN_NAME (cpu)) (cpu, i);
@@ -788,19 +813,19 @@ profile_print_insn (sim_cpu *cpu, int verbose)
 	    continue;
 	  if (PROFILE_INSN_COUNT (data) [i] != 0)
 	    {
-	      sim_io_printf (sd, "   %*s: %*s: ",
-			     max_name_len, name,
-			     max_val < 10000 ? 5 : 10,
-			     COMMAS (PROFILE_INSN_COUNT (data) [i]));
-	      sim_profile_print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
+	      profile_printf (sd, cpu, "   %*s: %*s: ",
+			      max_name_len, name,
+			      max_val < 10000 ? 5 : 10,
+			      COMMAS (PROFILE_INSN_COUNT (data) [i]));
+	      sim_profile_print_bar (sd, cpu, PROFILE_HISTOGRAM_WIDTH,
 				     PROFILE_INSN_COUNT (data) [i],
 				     max_val);
-	      sim_io_printf (sd, "\n");
+	      profile_printf (sd, cpu, "\n");
 	    }
 	}
     }
 
-  sim_io_printf (sd, "\n");
+  profile_printf (sd, cpu, "\n");
 }
 
 #endif
@@ -818,7 +843,7 @@ profile_print_memory (sim_cpu *cpu, int verbose)
   PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
   char comma_buf[20];
 
-  sim_io_printf (sd, "Memory Access Statistics\n\n");
+  profile_printf (sd, cpu, "Memory Access Statistics\n\n");
 
   /* First pass over data computes various things.  */
   max_val = total_read = total_write = max_name_len = 0;
@@ -836,45 +861,45 @@ profile_print_memory (sim_cpu *cpu, int verbose)
     }
 
   /* One could use PROFILE_LABEL_WIDTH here.  I chose not to.  */
-  sim_io_printf (sd, "  Total read:  %s accesses\n",
-		 COMMAS (total_read));
-  sim_io_printf (sd, "  Total write: %s accesses\n",
-		 COMMAS (total_write));
+  profile_printf (sd, cpu, "  Total read:  %s accesses\n",
+		  COMMAS (total_read));
+  profile_printf (sd, cpu, "  Total write: %s accesses\n",
+		  COMMAS (total_write));
 
   if (verbose && max_val != 0)
     {
       /* FIXME: Need to separate instruction fetches from data fetches
 	 as the former swamps the latter.  */
       /* Now we can print the histogram.  */
-      sim_io_printf (sd, "\n");
+      profile_printf (sd, cpu, "\n");
       for (i = 0; i < MODE_TARGET_MAX; ++i)
 	{
 	  if (PROFILE_READ_COUNT (data) [i] != 0)
 	    {
-	      sim_io_printf (sd, "   %*s read:  %*s: ",
-			     max_name_len, MODE_NAME (i),
-			     max_val < 10000 ? 5 : 10,
-			     COMMAS (PROFILE_READ_COUNT (data) [i]));
-	      sim_profile_print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
+	      profile_printf (sd, cpu, "   %*s read:  %*s: ",
+			      max_name_len, MODE_NAME (i),
+			      max_val < 10000 ? 5 : 10,
+			      COMMAS (PROFILE_READ_COUNT (data) [i]));
+	      sim_profile_print_bar (sd, cpu, PROFILE_HISTOGRAM_WIDTH,
 				     PROFILE_READ_COUNT (data) [i],
 				     max_val);
-	      sim_io_printf (sd, "\n");
+	      profile_printf (sd, cpu, "\n");
 	    }
 	  if (PROFILE_WRITE_COUNT (data) [i] != 0)
 	    {
-	      sim_io_printf (sd, "   %*s write: %*s: ",
-			     max_name_len, MODE_NAME (i),
-			     max_val < 10000 ? 5 : 10,
-			     COMMAS (PROFILE_WRITE_COUNT (data) [i]));
-	      sim_profile_print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
+	      profile_printf (sd, cpu, "   %*s write: %*s: ",
+			      max_name_len, MODE_NAME (i),
+			      max_val < 10000 ? 5 : 10,
+			      COMMAS (PROFILE_WRITE_COUNT (data) [i]));
+	      sim_profile_print_bar (sd, cpu, PROFILE_HISTOGRAM_WIDTH,
 				     PROFILE_WRITE_COUNT (data) [i],
 				     max_val);
-	      sim_io_printf (sd, "\n");
+	      profile_printf (sd, cpu, "\n");
 	    }
 	}
     }
 
-  sim_io_printf (sd, "\n");
+  profile_printf (sd, cpu, "\n");
 }
 
 #endif
@@ -891,7 +916,7 @@ profile_print_core (sim_cpu *cpu, int verbose)
   PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
   char comma_buf[20];
 
-  sim_io_printf (sd, "CORE Statistics\n\n");
+  profile_printf (sd, cpu, "CORE Statistics\n\n");
 
   /* First pass over data computes various things.  */
   {
@@ -907,31 +932,31 @@ profile_print_core (sim_cpu *cpu, int verbose)
   }
 
   /* One could use PROFILE_LABEL_WIDTH here.  I chose not to.  */
-  sim_io_printf (sd, "  Total:  %s accesses\n",
-		 COMMAS (total));
+  profile_printf (sd, cpu, "  Total:  %s accesses\n",
+		  COMMAS (total));
 
   if (verbose && max_val != 0)
     {
       unsigned map;
       /* Now we can print the histogram.  */
-      sim_io_printf (sd, "\n");
+      profile_printf (sd, cpu, "\n");
       for (map = 0; map < nr_maps; map++)
 	{
 	  if (PROFILE_CORE_COUNT (data) [map] != 0)
 	    {
-	      sim_io_printf (sd, "%10s:", map_to_str (map));
-	      sim_io_printf (sd, "%*s: ",
-			     max_val < 10000 ? 5 : 10,
-			     COMMAS (PROFILE_CORE_COUNT (data) [map]));
-	      sim_profile_print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
+	      profile_printf (sd, cpu, "%10s:", map_to_str (map));
+	      profile_printf (sd, cpu, "%*s: ",
+			      max_val < 10000 ? 5 : 10,
+			      COMMAS (PROFILE_CORE_COUNT (data) [map]));
+	      sim_profile_print_bar (sd, cpu, PROFILE_HISTOGRAM_WIDTH,
 				     PROFILE_CORE_COUNT (data) [map],
 				     max_val);
-	      sim_io_printf (sd, "\n");
+	      profile_printf (sd, cpu, "\n");
 	    }
 	}
     }
 
-  sim_io_printf (sd, "\n");
+  profile_printf (sd, cpu, "\n");
 }
 
 #endif
@@ -948,35 +973,35 @@ profile_print_model (sim_cpu *cpu, int verbose)
   unsigned long total_cycles = PROFILE_MODEL_TOTAL_CYCLES (data);
   char comma_buf[20];
 
-  sim_io_printf (sd, "Model %s Timing Information",
-		 MODEL_NAME (CPU_MODEL (cpu)));
+  profile_printf (sd, cpu, "Model %s Timing Information",
+		  MODEL_NAME (CPU_MODEL (cpu)));
 #ifdef SIM_HAVE_ADDR_RANGE
   if (PROFILE_RANGE (data)->ranges)
-    sim_io_printf (sd, " (for selected address range(s))");
+    profile_printf (sd, cpu, " (for selected address range(s))");
 #endif
-  sim_io_printf (sd, "\n\n");
-  sim_io_printf (sd, "  %-*s %s\n",
-		 PROFILE_LABEL_WIDTH, "Taken branches:",
-		 COMMAS (PROFILE_MODEL_TAKEN_COUNT (data)));
-  sim_io_printf (sd, "  %-*s %s\n",
-		 PROFILE_LABEL_WIDTH, "Untaken branches:",
-		 COMMAS (PROFILE_MODEL_UNTAKEN_COUNT (data)));
-  sim_io_printf (sd, "  %-*s %s\n",
-		 PROFILE_LABEL_WIDTH, "Cycles stalled due to branches:",
-		 COMMAS (cti_stall_cycles));
-  sim_io_printf (sd, "  %-*s %s\n",
-		 PROFILE_LABEL_WIDTH, "Cycles stalled due to loads:",
-		 COMMAS (load_stall_cycles));
-  sim_io_printf (sd, "  %-*s %s\n",
-		 PROFILE_LABEL_WIDTH, "Total cycles (*approximate*):",
-		 COMMAS (total_cycles));
-  sim_io_printf (sd, "\n");
+  profile_printf (sd, cpu, "\n\n");
+  profile_printf (sd, cpu, "  %-*s %s\n",
+		  PROFILE_LABEL_WIDTH, "Taken branches:",
+		  COMMAS (PROFILE_MODEL_TAKEN_COUNT (data)));
+  profile_printf (sd, cpu, "  %-*s %s\n",
+		  PROFILE_LABEL_WIDTH, "Untaken branches:",
+		  COMMAS (PROFILE_MODEL_UNTAKEN_COUNT (data)));
+  profile_printf (sd, cpu, "  %-*s %s\n",
+		  PROFILE_LABEL_WIDTH, "Cycles stalled due to branches:",
+		  COMMAS (cti_stall_cycles));
+  profile_printf (sd, cpu, "  %-*s %s\n",
+		  PROFILE_LABEL_WIDTH, "Cycles stalled due to loads:",
+		  COMMAS (load_stall_cycles));
+  profile_printf (sd, cpu, "  %-*s %s\n",
+		  PROFILE_LABEL_WIDTH, "Total cycles (*approximate*):",
+		  COMMAS (total_cycles));
+  profile_printf (sd, cpu, "\n");
 }
 
 #endif
 
 void
-sim_profile_print_bar (SIM_DESC sd, unsigned int width,
+sim_profile_print_bar (SIM_DESC sd, sim_cpu *cpu, unsigned int width,
 		       unsigned int val, unsigned int max_val)
 {
   unsigned int i, count;
@@ -984,7 +1009,7 @@ sim_profile_print_bar (SIM_DESC sd, unsigned int width,
   count = ((double) val / (double) max_val) * (double) width;
 
   for (i = 0; i < count; ++i)
-    sim_io_printf (sd, "*");
+    profile_printf (sd, cpu, "*");
 }
 
 /* Print the simulator's execution speed for CPU.  */
@@ -1000,13 +1025,13 @@ profile_print_speed (sim_cpu *cpu)
   double secs;
   char comma_buf[20];
 
-  sim_io_printf (sd, "Simulator Execution Speed\n\n");
+  profile_printf (sd, cpu, "Simulator Execution Speed\n\n");
 
   if (total != 0)
-    sim_io_printf (sd, "  Total instructions:      %s\n", COMMAS (total));
+    profile_printf (sd, cpu, "  Total instructions:      %s\n", COMMAS (total));
 
   if (milliseconds < 1000)
-    sim_io_printf (sd, "  Total execution time:    < 1 second\n\n");
+    profile_printf (sd, cpu, "  Total execution time:    < 1 second\n\n");
   else
     {
       /* The printing of the time rounded to 2 decimal places makes the speed
@@ -1015,13 +1040,13 @@ profile_print_speed (sim_cpu *cpu)
 	 better that the user not perceive there's a math error.  */
       secs = (double) milliseconds / 1000;
       secs = ((double) (unsigned long) (secs * 100 + .5)) / 100;
-      sim_io_printf (sd, "  Total execution time   : %.2f seconds\n", secs);
+      profile_printf (sd, cpu, "  Total execution time   : %.2f seconds\n", secs);
       /* Don't confuse things with data that isn't useful.
 	 If we ran for less than 2 seconds, only use the data if we
 	 executed more than 100,000 insns.  */
       if (secs >= 2 || total >= 100000)
-	sim_io_printf (sd, "  Simulator speed:         %s insns/second\n",
-		       COMMAS ((unsigned long) ((double) total / secs)));
+	profile_printf (sd, cpu, "  Simulator speed:         %s insns/second\n",
+			COMMAS ((unsigned long) ((double) total / secs)));
     }
 
   /* Print simulated execution time if the cpu frequency has been specified.  */
@@ -1029,10 +1054,10 @@ profile_print_speed (sim_cpu *cpu)
   if (clock != 0)
     {
       if (clock >= 1000000)
-	sim_io_printf (sd, "  Simulated cpu frequency: %.2f MHz\n",
-		       clock / 1000000);
+	profile_printf (sd, cpu, "  Simulated cpu frequency: %.2f MHz\n",
+			clock / 1000000);
       else
-	sim_io_printf (sd, "  Simulated cpu frequency: %.2f Hz\n", clock);
+	profile_printf (sd, cpu, "  Simulated cpu frequency: %.2f Hz\n", clock);
 
 #if WITH_PROFILE_MODEL_P
       if (PROFILE_FLAGS (data) [PROFILE_MODEL_IDX])
@@ -1044,8 +1069,8 @@ profile_print_speed (sim_cpu *cpu)
 	     error.  */
 	  secs = PROFILE_MODEL_TOTAL_CYCLES (data) / clock;
 	  secs = ((double) (unsigned long) (secs * 100 + .5)) / 100;
-	  sim_io_printf (sd, "  Simulated execution time: %.2f seconds\n",
-			 secs);
+	  profile_printf (sd, cpu, "  Simulated execution time: %.2f seconds\n",
+			  secs);
 	}
 #endif /* WITH_PROFILE_MODEL_P */
     }
@@ -1062,14 +1087,14 @@ profile_print_addr_ranges (sim_cpu *cpu)
 
   if (asr)
     {
-      sim_io_printf (sd, "Selected address ranges\n\n");
+      profile_printf (sd, cpu, "Selected address ranges\n\n");
       while (asr != NULL)
 	{
-	  sim_io_printf (sd, "  0x%lx - 0x%lx\n",
-			 (long) asr->start, (long) asr->end);
+	  profile_printf (sd, cpu, "  0x%lx - 0x%lx\n",
+			  (long) asr->start, (long) asr->end);
 	  asr = asr->next;
 	}
-      sim_io_printf (sd, "\n");
+      profile_printf (sd, cpu, "\n");
     }
 }
 #endif
@@ -1104,11 +1129,11 @@ profile_info (SIM_DESC sd, int verbose)
 
       for (i = 0; i < MAX_PROFILE_VALUES; ++i)
 	if (PROFILE_FLAGS (data) [i])
-	  print_title_p = 1;
-      /* One could break out early if print_title_p is set.  */
+	  {
+	    profile_printf (sd, cpu, "Summary profiling results:\n\n");
+	    print_title_p = 1;
+	  }
     }
-  if (print_title_p)
-    sim_io_printf (sd, "Summary profiling results:\n\n");
 
   /* Loop, cpu by cpu, printing results.  */
 
@@ -1139,7 +1164,7 @@ profile_info (SIM_DESC sd, int verbose)
 #endif
 	      ))
 	{
-	  sim_io_printf (sd, "CPU %d\n\n", c);
+	  profile_printf (sd, cpu, "CPU %d\n\n", c);
 	}
 
 #ifdef SIM_HAVE_ADDR_RANGE
