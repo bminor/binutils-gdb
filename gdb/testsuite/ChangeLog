@@ -1,3 +1,14 @@
+2010-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix crashes on dangling display expressions.
+	* gdb.base/solib-display.exp: Call gdb_gnu_strip_debug if LIBSEPDEBUG
+	is SEP.
+	(lib_flags): Remove the "debug" keyword.
+	(libsepdebug): New variable for iterating new loop.
+	(save_pf_prefix): New variable wrapping the loop.
+	(sep_lib_flags): New variable derived from LIB_FLAGS.  Use it.
+	* lib/gdb.exp (gdb_gnu_strip_debug): Document the return code.
+
 2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.threads/watchthreads.exp: Change to obtain consistent output.

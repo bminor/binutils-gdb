@@ -2896,6 +2896,9 @@ proc build_id_debug_filename_get { exec } {
 # Create stripped files for DEST, replacing it.  If ARGS is passed, it is a
 # list of optional flags.  The only currently supported flag is no-main,
 # which removes the symbol entry for main from the separate debug file.
+#
+# Function returns zero on success.  Function will return non-zero failure code
+# on some targets not supporting separate debug info (such as i386-msdos).
 
 proc gdb_gnu_strip_debug { dest args } {
 

@@ -10887,6 +10887,36 @@ ada_operator_length (struct expression *exp, int pc, int *oplenp, int *argsp)
     }
 }
 
+/* Implementation of the exp_descriptor method operator_check.  */
+
+static int
+ada_operator_check (struct expression *exp, int pos,
+		    int (*objfile_func) (struct objfile *objfile, void *data),
+		    void *data)
+{
+  const union exp_element *const elts = exp->elts;
+  struct type *type = NULL;
+
+  switch (elts[pos].opcode)
+    {
+      case UNOP_IN_RANGE:
+      case UNOP_QUAL:
+	type = elts[pos + 1].type;
+	break;
+
+      default:
+	return operator_check_standard (exp, pos, objfile_func, data);
+    }
+
+  /* Invoke callbacks for TYPE and OBJFILE if they were set as non-NULL.  */
+
+  if (type && TYPE_OBJFILE (type)
+      && (*objfile_func) (TYPE_OBJFILE (type), data))
+    return 1;
+
+  return 0;
+}
+
 static char *
 ada_op_name (enum exp_opcode opcode)
 {
@@ -11275,6 +11305,7 @@ parse (void)
 static const struct exp_descriptor ada_exp_descriptor = {
   ada_print_subexp,
   ada_operator_length,
+  ada_operator_check,
   ada_op_name,
   ada_dump_subexp_body,
   ada_evaluate_subexp

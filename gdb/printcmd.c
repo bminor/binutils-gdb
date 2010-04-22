@@ -46,7 +46,6 @@
 #include "exceptions.h"
 #include "observer.h"
 #include "solist.h"
-#include "solib.h"
 #include "parser-defs.h"
 #include "charset.h"
 #include "arch-utils.h"
@@ -1891,51 +1890,6 @@ disable_display_command (char *args, int from_tty)
       }
 }
 
-/* Return 1 if D uses SOLIB (and will become dangling when SOLIB
-   is unloaded), otherwise return 0.  */
-
-static int
-display_uses_solib_p (const struct display *d,
-		      const struct so_list *solib)
-{
-  int endpos;
-  struct expression *const exp = d->exp;
-  const union exp_element *const elts = exp->elts;
-
-  if (d->block != NULL
-      && d->pspace == solib->pspace
-      && solib_contains_address_p (solib, d->block->startaddr))
-    return 1;
-
-  for (endpos = exp->nelts; endpos > 0; )
-    {
-      int i, args, oplen = 0;
-
-      exp->language_defn->la_exp_desc->operator_length (exp, endpos,
-							&oplen, &args);
-      gdb_assert (oplen > 0);
-
-      i = endpos - oplen;
-      if (elts[i].opcode == OP_VAR_VALUE)
-	{
-	  const struct block *const block = elts[i + 1].block;
-	  const struct symbol *const symbol = elts[i + 2].symbol;
-
-	  if (block != NULL
-	      && solib_contains_address_p (solib,
-					   block->startaddr))
-	    return 1;
-
-	  /* SYMBOL_OBJ_SECTION (symbol) may be NULL.  */
-	  if (SYMBOL_SYMTAB (symbol)->objfile == solib->objfile)
-	    return 1;
-	}
-      endpos -= oplen;
-    }
-
-  return 0;
-}
-
 /* display_chain items point to blocks and expressions.  Some expressions in
    turn may point to symbols.
    Both symbols and blocks are obstack_alloc'd on objfile_stack, and are
@@ -1947,17 +1901,28 @@ display_uses_solib_p (const struct display *d,
 static void
 clear_dangling_display_expressions (struct so_list *solib)
 {
+  struct objfile *objfile = solib->objfile;
   struct display *d;
-  struct objfile *objfile = NULL;
 
-  for (d = display_chain; d; d = d->next)
+  /* With no symbol file we cannot have a block or expression from it.  */
+  if (objfile == NULL)
+    return;
+  if (objfile->separate_debug_objfile_backlink)
+    objfile = objfile->separate_debug_objfile_backlink;
+  gdb_assert (objfile->pspace == solib->pspace);
+
+  for (d = display_chain; d != NULL; d = d->next)
     {
-      if (d->exp && display_uses_solib_p (d, solib))
-	{
-	  xfree (d->exp);
-	  d->exp = NULL;
-	  d->block = NULL;
-	}
+      if (d->pspace != solib->pspace)
+	continue;
+
+      if (lookup_objfile_from_block (d->block) == objfile
+	  || (d->exp && exp_uses_objfile (d->exp, objfile)))
+      {
+	xfree (d->exp);
+	d->exp = NULL;
+	d->block = NULL;
+      }
     }
 }
 

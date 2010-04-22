@@ -36,7 +36,7 @@ if { [skip_shlib_tests] || [is_remote target] } {
 set libname "solib-display-lib"
 set srcfile_lib ${srcdir}/${subdir}/${libname}.c
 set binfile_lib ${objdir}/${subdir}/${libname}.so
-set lib_flags [list debug]
+set lib_flags {}
 # Binary file.
 set testfile "solib-display-main"
 set srcfile ${srcdir}/${subdir}/${testfile}.c
@@ -48,60 +48,92 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
-     || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
-  untested "Could not compile $binfile_lib or $binfile."
-  return -1
+set save_pf_prefix $pf_prefix
+# SEP must be last for the possible `unsupported' error path.
+foreach libsepdebug {NO IN SEP} {
+
+    set pf_prefix $save_pf_prefix
+    lappend pf_prefix "$libsepdebug:"
+
+    set sep_lib_flags $lib_flags
+    if {$libsepdebug != "NO"} {
+	lappend sep_lib_flags {debug}
+    }
+    if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $sep_lib_flags] != ""
+	 || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
+      untested "Could not compile $binfile_lib or $binfile."
+      return -1
+    }
+
+    if {$libsepdebug == "SEP"} {
+	if {[gdb_gnu_strip_debug $binfile_lib] != 0} {
+	    unsupported "Could not split debug of $binfile_lib."
+	    return
+	} else {
+	    pass "split solib"
+	}
+    }
+
+    clean_restart $executable
+
+    if ![runto_main] then {
+      fail "Can't run to main"
+      return 0
+    }
+
+    gdb_test "display a_global" "1: a_global = 41"
+    gdb_test "display b_global" "2: b_global = 42"
+    gdb_test "display c_global" "3: c_global = 43"
+
+    if { [gdb_start_cmd] < 0 } {
+	fail "Can't run to main (2)"
+	continue
+    }
+
+    gdb_test "" "3: c_global = 43\\r\\n2: b_global = 42\\r\\n1: a_global = 41" "after rerun"
+
+    # Now rebuild the library without b_global
+    if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} \
+	      "$sep_lib_flags additional_flags=-DNO_B_GLOBAL"] != ""} {
+	fail "Can't rebuild $binfile_lib"
+    }
+
+    if {$libsepdebug == "SEP"} {
+	set test "split solib second time"
+	if {[gdb_gnu_strip_debug $binfile_lib] != 0} {
+	    fail $test
+	    continue
+	} else {
+	    pass $test
+	}
+    }
+
+    if { [gdb_start_cmd] < 0 } {
+	fail "Can't run to main (3)"
+	continue
+    }
+
+    gdb_test "" "3: c_global = 43\\r\\nwarning: .*b_global.*\\r\\n1: a_global = 41" "after rerun (2)"
+
+    # Now verify that displays which are not in the shared library
+    # are not cleared permaturely.
+
+    gdb_test "break [gdb_get_line_number "break here" ${testfile}.c]" \
+	    ".*Breakpoint.* at .*" 
+
+    gdb_test "continue"
+    gdb_test "display main_global" "4: main_global = 44"
+    gdb_test "display a_local" "5: a_local = 45"
+    gdb_test "display a_static" "6: a_static = 46"
+
+    if { [gdb_start_cmd] < 0 } {
+	fail "Can't run to main (4)"
+	continue
+    }
+
+    gdb_test "" "6: a_static = 46\\r\\n4: main_global = 44\\r\\n.*"
+    gdb_test "break [gdb_get_line_number "break here" ${testfile}.c]" \
+	    ".*Breakpoint.* at .*" 
+    gdb_test "continue" "6: a_static = 46\\r\\n5: a_local = 45\\r\\n4: main_global = 44\\r\\n.*"
 }
-
-clean_restart ${executable}
-
-if ![runto_main] then {
-  fail "Can't run to main"
-  return 0
-}
-
-gdb_test "display a_global" "1: a_global = 41"
-gdb_test "display b_global" "2: b_global = 42"
-gdb_test "display c_global" "3: c_global = 43"
-
-if { [gdb_start_cmd] < 0 } {
-    fail "Can't run to main (2)"
-    return 0
-}
-
-gdb_test "" "3: c_global = 43\\r\\n2: b_global = 42\\r\\n1: a_global = 41" "after rerun"
-
-# Now rebuild the library without b_global
-if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} \
-	  "$lib_flags additional_flags=-DNO_B_GLOBAL"] != ""} {
-    fail "Can't rebuild $binfile_lib"
-}
-
-if { [gdb_start_cmd] < 0 } {
-    fail "Can't run to main (3)"
-    return 0
-}
-
-gdb_test "" "3: c_global = 43\\r\\nwarning: .*b_global.*\\r\\n1: a_global = 41" "after rerun"
-
-# Now verify that displays which are not in the shared library
-# are not cleared permaturely.
-
-gdb_test "break [gdb_get_line_number "break here" ${testfile}.c]" \
-	".*Breakpoint.* at .*" 
-
-gdb_test "continue"
-gdb_test "display main_global" "4: main_global = 44"
-gdb_test "display a_local" "5: a_local = 45"
-gdb_test "display a_static" "6: a_static = 46"
-
-if { [gdb_start_cmd] < 0 } {
-    fail "Can't run to main (4)"
-    return 0
-}
-
-gdb_test "" "6: a_static = 46\\r\\n4: main_global = 44\\r\\n.*"
-gdb_test "break [gdb_get_line_number "break here" ${testfile}.c]" \
-	".*Breakpoint.* at .*" 
-gdb_test "continue" "6: a_static = 46\\r\\n5: a_local = 45\\r\\n4: main_global = 44\\r\\n.*"
+set pf_prefix $save_pf_prefix

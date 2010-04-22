@@ -62,6 +62,7 @@ const struct exp_descriptor exp_descriptor_standard =
   {
     print_subexp_standard,
     operator_length_standard,
+    operator_check_standard,
     op_name_standard,
     dump_subexp_body_standard,
     evaluate_subexp_standard
@@ -1371,6 +1372,150 @@ parser_fprintf (FILE *x, const char *y, ...)
       vfprintf_unfiltered (gdb_stderr, y, args);
     }
   va_end (args);
+}
+
+/* Implementation of the exp_descriptor method operator_check.  */
+
+int
+operator_check_standard (struct expression *exp, int pos,
+			 int (*objfile_func) (struct objfile *objfile,
+					      void *data),
+			 void *data)
+{
+  const union exp_element *const elts = exp->elts;
+  struct type *type = NULL;
+  struct objfile *objfile = NULL;
+
+  /* Extended operators should have been already handled by exp_descriptor
+     iterate method of its specific language.  */
+  gdb_assert (elts[pos].opcode < OP_EXTENDED0);
+
+  /* Track the callers of write_exp_elt_type for this table.  */
+
+  switch (elts[pos].opcode)
+    {
+    case BINOP_VAL:
+    case OP_COMPLEX:
+    case OP_DECFLOAT:
+    case OP_DOUBLE:
+    case OP_LONG:
+    case OP_SCOPE:
+    case OP_TYPE:
+    case UNOP_CAST:
+    case UNOP_DYNAMIC_CAST:
+    case UNOP_REINTERPRET_CAST:
+    case UNOP_MAX:
+    case UNOP_MEMVAL:
+    case UNOP_MIN:
+      type = elts[pos + 1].type;
+      break;
+
+    case TYPE_INSTANCE:
+      {
+	LONGEST arg, nargs = elts[pos + 1].longconst;
+
+	for (arg = 0; arg < nargs; arg++)
+	  {
+	    struct type *type = elts[pos + 2 + arg].type;
+	    struct objfile *objfile = TYPE_OBJFILE (type);
+
+	    if (objfile && (*objfile_func) (objfile, data))
+	      return 1;
+	  }
+      }
+      break;
+
+    case UNOP_MEMVAL_TLS:
+      objfile = elts[pos + 1].objfile;
+      type = elts[pos + 2].type;
+      break;
+
+    case OP_VAR_VALUE:
+      {
+	const struct block *const block = elts[pos + 1].block;
+	const struct symbol *const symbol = elts[pos + 2].symbol;
+
+	/* Check objfile where the variable itself is placed.
+	   SYMBOL_OBJ_SECTION (symbol) may be NULL.  */
+	if ((*objfile_func) (SYMBOL_SYMTAB (symbol)->objfile, data))
+	  return 1;
+
+	/* Check objfile where is placed the code touching the variable.  */
+	objfile = lookup_objfile_from_block (block);
+
+	type = SYMBOL_TYPE (symbol);
+      }
+      break;
+    }
+
+  /* Invoke callbacks for TYPE and OBJFILE if they were set as non-NULL.  */
+
+  if (type && TYPE_OBJFILE (type)
+      && (*objfile_func) (TYPE_OBJFILE (type), data))
+    return 1;
+  if (objfile && (*objfile_func) (objfile, data))
+    return 1;
+
+  return 0;
+}
+
+/* Call OBJFILE_FUNC for any TYPE and OBJFILE found being referenced by EXP.
+   The functions are never called with NULL OBJFILE.  Functions get passed an
+   arbitrary caller supplied DATA pointer.  If any of the functions returns
+   non-zero value then (any other) non-zero value is immediately returned to
+   the caller.  Otherwise zero is returned after iterating through whole EXP.
+   */
+
+static int
+exp_iterate (struct expression *exp,
+	     int (*objfile_func) (struct objfile *objfile, void *data),
+	     void *data)
+{
+  int endpos;
+  const union exp_element *const elts = exp->elts;
+
+  for (endpos = exp->nelts; endpos > 0; )
+    {
+      int pos, args, oplen = 0;
+
+      exp->language_defn->la_exp_desc->operator_length (exp, endpos,
+							&oplen, &args);
+      gdb_assert (oplen > 0);
+
+      pos = endpos - oplen;
+      if (exp->language_defn->la_exp_desc->operator_check (exp, pos,
+							   objfile_func, data))
+	return 1;
+
+      endpos = pos;
+    }
+
+  return 0;
+}
+
+/* Helper for exp_uses_objfile.  */
+
+static int
+exp_uses_objfile_iter (struct objfile *exp_objfile, void *objfile_voidp)
+{
+  struct objfile *objfile = objfile_voidp;
+
+  if (exp_objfile->separate_debug_objfile_backlink)
+    exp_objfile = exp_objfile->separate_debug_objfile_backlink;
+
+  return exp_objfile == objfile;
+}
+
+/* Return 1 if EXP uses OBJFILE (and will become dangling when OBJFILE
+   is unloaded), otherwise return 0.  OBJFILE must not be a separate debug info
+   file.  */
+
+int
+exp_uses_objfile (struct expression *exp, struct objfile *objfile)
+{
+  gdb_assert (objfile->separate_debug_objfile_backlink == NULL);
+
+  return exp_iterate (exp, exp_uses_objfile_iter, objfile);
 }
 
 void

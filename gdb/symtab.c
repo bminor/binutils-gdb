@@ -1150,7 +1150,7 @@ lookup_symbol_aux_local (const char *name, const struct block *block,
 
 /* Look up OBJFILE to BLOCK.  */
 
-static struct objfile *
+struct objfile *
 lookup_objfile_from_block (const struct block *block)
 {
   struct objfile *obj;

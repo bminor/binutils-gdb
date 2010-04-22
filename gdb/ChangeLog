@@ -1,3 +1,26 @@
+2010-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix crashes on dangling display expressions.
+	* ada-lang.c (ada_operator_check): New function.
+	(ada_exp_descriptor): Fill-in the field operator_check.
+	* c-lang.c (exp_descriptor_c): Fill-in the field operator_check.
+	* jv-lang.c (exp_descriptor_java): Likewise.
+	* m2-lang.c (exp_descriptor_modula2): Likewise.
+	* scm-lang.c (exp_descriptor_scm): Likewise.
+	* parse.c (exp_descriptor_standard): Likewise.
+	(operator_check_standard): New function.
+	(exp_iterate, exp_uses_objfile_iter, exp_uses_objfile): New functions.
+	* parser-defs.h (struct exp_descriptor): New field operator_check.
+	(operator_check_standard, exp_uses_objfile): New declarations.
+	* printcmd.c: Remove the inclusion of solib.h.
+	(display_uses_solib_p): Remove the function.
+	(clear_dangling_display_expressions): Call lookup_objfile_from_block
+	and exp_uses_objfile instead of display_uses_solib_p.
+	* solist.h (struct so_list) <objfile>: New comment.
+	* symtab.c (lookup_objfile_from_block): Remove the static qualifier.
+	* symtab.h (lookup_objfile_from_block): New declaration.
+	(struct general_symbol_info) <obj_section>: Extend the comment.
+
 2010-04-22  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

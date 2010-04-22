@@ -148,7 +148,7 @@ struct general_symbol_info
 
   short section;
 
-  /* The section associated with this symbol. */
+  /* The section associated with this symbol.  It can be NULL.  */
 
   struct obj_section *obj_section;
 };
@@ -1206,5 +1206,7 @@ int producer_is_realview (const char *producer);
 
 void fixup_section (struct general_symbol_info *ginfo,
 		    CORE_ADDR addr, struct objfile *objfile);
+
+struct objfile *lookup_objfile_from_block (const struct block *block);
 
 #endif /* !defined(SYMTAB_H) */
