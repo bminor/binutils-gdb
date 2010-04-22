@@ -122,8 +122,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = basic_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = icf_virtual_function_folding_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pie_test constructor_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_static_test \
@@ -395,7 +396,8 @@ libgoldtest_a_LIBADD =
 am_libgoldtest_a_OBJECTS = test.$(OBJEXT) testmain.$(OBJEXT) \
 	testfile.$(OBJEXT)
 libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_1 = basic_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_1 = icf_virtual_function_folding_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test$(EXEEXT) \
@@ -649,6 +651,14 @@ flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES =  \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+icf_virtual_function_folding_test_SOURCES =  \
+	icf_virtual_function_folding_test.c
+icf_virtual_function_folding_test_OBJECTS =  \
+	icf_virtual_function_folding_test.$(OBJEXT)
+icf_virtual_function_folding_test_LDADD = $(LDADD)
+icf_virtual_function_folding_test_DEPENDENCIES = libgoldtest.a \
+	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS = initpri1.$(OBJEXT)
 initpri1_OBJECTS = $(am_initpri1_OBJECTS)
 initpri1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri1_LDFLAGS) \
@@ -1084,16 +1094,17 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(exclude_libs_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	$(initpri1_SOURCES) $(justsyms_SOURCES) $(large_SOURCES) \
-	local_labels_test.c many_sections_r_test.c \
-	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	permission_test.c plugin_test_1.c plugin_test_2.c \
-	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
-	plugin_test_6.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
-	$(relro_script_test_SOURCES) $(relro_test_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(searched_file_test_SOURCES) \
-	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
+	icf_virtual_function_folding_test.c $(initpri1_SOURCES) \
+	$(justsyms_SOURCES) $(large_SOURCES) local_labels_test.c \
+	many_sections_r_test.c $(many_sections_test_SOURCES) \
+	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
+	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
+	plugin_test_5.c plugin_test_6.c $(protected_1_SOURCES) \
+	$(protected_2_SOURCES) $(relro_script_test_SOURCES) \
+	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(searched_file_test_SOURCES) $(thin_archive_test_1_SOURCES) \
+	$(thin_archive_test_2_SOURCES) \
 	$(tls_phdrs_script_test_SOURCES) $(tls_pic_test_SOURCES) \
 	tls_pie_pic_test.c tls_pie_test.c $(tls_script_test_SOURCES) \
 	$(tls_shared_gd_to_ie_test_SOURCES) \
@@ -1823,6 +1834,12 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
 @NATIVE_LINKER_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
+@GCC_FALSE@icf_virtual_function_folding_test$(EXEEXT): $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f icf_virtual_function_folding_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@icf_virtual_function_folding_test$(EXEEXT): $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f icf_virtual_function_folding_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_LDADD) $(LIBS)
 initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES) 
 	@rm -f initpri1$(EXEEXT)
 	$(initpri1_LINK) $(initpri1_OBJECTS) $(initpri1_LDADD) $(LIBS)
@@ -2127,6 +2144,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icf_virtual_function_folding_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large-large.Po@am__quote@

@@ -1,3 +1,9 @@
+2010-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/Makefile.am (check_PROGRAMS): Add
+	icf_virtual_function_folding_test.
+	* testsuite/Makefile.in: Regenerated.
+
 2010-04-15  Andrew Haley  <aph@redhat.com>
 
 	* options.h (merge_exidx_entries): New option.
@@ -100,7 +106,7 @@
 	(opt_address_and_section_type): Change type to output_section_header.
 	(section_type): New non-terminal
 	(section_header): Handle section type.
- 	(opt_address_and_section_type): Return section type value.
+	(opt_address_and_section_type): Return section type value.
 
 2010-04-09  H.J. Lu  <hongjiu.lu@intel.com>
 
