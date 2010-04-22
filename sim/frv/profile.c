@@ -2042,7 +2042,7 @@ print_parallel (SIM_CPU *cpu, int verbose)
 				 max_name_len, slot_names[i],
 				 max_val < 10000 ? 5 : 10,
 				 COMMAS (INSNS_IN_SLOT (i)));
-		  sim_profile_print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
+		  sim_profile_print_bar (sd, cpu, PROFILE_HISTOGRAM_WIDTH,
 					 INSNS_IN_SLOT (i),
 					 max_val);
 		  sim_io_printf (sd, "\n");
