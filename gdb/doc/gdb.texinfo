@@ -6731,6 +6731,7 @@ Table}.
 * Memory::                      Examining memory
 * Auto Display::                Automatic display
 * Print Settings::              Print settings
+* Pretty Printing::             Python pretty printing
 * Value History::               Value history
 * Convenience Vars::            Convenience variables
 * Registers::                   Registers
@@ -7908,6 +7909,42 @@ Do not pretty print C@t{++} virtual function tables.
 @item show print vtbl
 Show whether C@t{++} virtual function tables are pretty printed, or not.
 @end table
+
+@node Pretty Printing
+@section Pretty Printing
+
+@value{GDBN} provides a mechanism to allow pretty-printing of values using
+Python code.  It greatly simplifies the display of complex objects.  This
+mechanism works for both MI and the CLI.
+
+For example, here is how a C@t{++} @code{std::string} looks without a
+pretty-printer:
+
+@smallexample
+(@value{GDBP}) print s
+$1 = @{
+  static npos = 4294967295, 
+  _M_dataplus = @{
+    <std::allocator<char>> = @{
+      <__gnu_cxx::new_allocator<char>> = @{
+        <No data fields>@}, <No data fields>
+      @},
+    members of std::basic_string<char, std::char_traits<char>,
+      std::allocator<char> >::_Alloc_hider:
+    _M_p = 0x804a014 "abcd"
+  @}
+@}
+@end smallexample
+
+With a pretty-printer for @code{std::string} only the contents are printed:
+
+@smallexample
+(@value{GDBP}) print s
+$2 = "abcd"
+@end smallexample
+
+For implementing pretty printers for new types you should read the Python API
+details (@pxref{Pretty Printing API}).
 
 @node Value History
 @section Value History
@@ -19770,8 +19807,8 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Exception Handling::
 * Auto-loading::                Automatically loading Python code.
 * Values From Inferior::
-* Types In Python::		Python representation of types.
-* Pretty Printing::		Pretty-printing values.
+* Types In Python::             Python representation of types.
+* Pretty Printing API::         Pretty-printing values.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
 * Commands In Python::          Implementing new commands in Python.
 * Functions In Python::         Writing new convenience functions.
@@ -20398,37 +20435,10 @@ A function internal to @value{GDBN}.  This is the type used to represent
 convenience functions.
 @end table
 
-@node Pretty Printing
-@subsubsection Pretty Printing
+@node Pretty Printing API
+@subsubsection Pretty Printing API
 
-@value{GDBN} provides a mechanism to allow pretty-printing of values
-using Python code.  The pretty-printer API allows application-specific
-code to greatly simplify the display of complex objects.  This
-mechanism works for both MI and the CLI.
-
-For example, here is how a C@t{++} @code{std::string} looks without a
-pretty-printer:
-
-@smallexample
-(@value{GDBP}) print s
-$1 = @{
-  static npos = 4294967295, 
-  _M_dataplus = @{
-    <std::allocator<char>> = @{
-      <__gnu_cxx::new_allocator<char>> = @{<No data fields>@}, <No data fields>@}, 
-    members of std::basic_string<char, std::char_traits<char>, std::allocator<char> >::_Alloc_hider: 
-    _M_p = 0x804a014 "abcd"
-  @}
-@}
-@end smallexample
-
-After a pretty-printer for @code{std::string} has been installed, only
-the contents are printed:
-
-@smallexample
-(@value{GDBP}) print s
-$2 = "abcd"
-@end smallexample
+An example output is provided (@pxref{Pretty Printing}).
 
 A pretty-printer is just an object that holds a value and implements a
 specific interface, defined here.
@@ -20520,7 +20530,7 @@ attribute.
 
 A function on one of these lists is passed a single @code{gdb.Value}
 argument and should return a pretty-printer object conforming to the
-interface definition above (@pxref{Pretty Printing}).  If a function
+interface definition above (@pxref{Pretty Printing API}).  If a function
 cannot create a pretty-printer for the value, it should return
 @code{None}.
 
@@ -20601,7 +20611,7 @@ printers with a specific objfile, @value{GDBN} will find the correct
 printers for the specific version of the library used by each
 inferior.
 
-To continue the @code{std::string} example (@pxref{Pretty Printing}),
+To continue the @code{std::string} example (@pxref{Pretty Printing API}),
 this code might appear in @code{gdb.libstdcxx.v6}:
 
 @smallexample
@@ -20967,7 +20977,7 @@ The @code{pretty_printers} attribute is a list of functions.  It is
 used to look up pretty-printers.  A @code{Value} is passed to each
 function in order; if the function returns @code{None}, then the
 search continues.  Otherwise, the return value should be an object
-which is used to format the value.  @xref{Pretty Printing}, for more
+which is used to format the value.  @xref{Pretty Printing API}, for more
 information.
 @end defivar
 
@@ -21012,7 +21022,7 @@ The @code{pretty_printers} attribute is a list of functions.  It is
 used to look up pretty-printers.  A @code{Value} is passed to each
 function in order; if the function returns @code{None}, then the
 search continues.  Otherwise, the return value should be an object
-which is used to format the value.  @xref{Pretty Printing}, for more
+which is used to format the value.  @xref{Pretty Printing API}, for more
 information.
 @end defivar
 
@@ -25269,7 +25279,7 @@ then this attribute will not be present.
 @item displayhint
 A dynamic varobj can supply a display hint to the front end.  The
 value comes directly from the Python pretty-printer object's
-@code{display_hint} method.  @xref{Pretty Printing}.
+@code{display_hint} method.  @xref{Pretty Printing API}.
 @end table
 
 Typical output will look like this:
@@ -25441,7 +25451,7 @@ The result may have its own attributes:
 @item displayhint
 A dynamic varobj can supply a display hint to the front end.  The
 value comes directly from the Python pretty-printer object's
-@code{display_hint} method.  @xref{Pretty Printing}.
+@code{display_hint} method.  @xref{Pretty Printing API}.
 
 @item has_more
 This is an integer attribute which is nonzero if there are children
@@ -25805,7 +25815,7 @@ single argument.  @value{GDBN} will call this object with the value of
 the varobj @var{name} as an argument (this is done so that the same
 Python pretty-printing code can be used for both the CLI and MI).
 When called, this object must return an object which conforms to the
-pretty-printing interface (@pxref{Pretty Printing}).
+pretty-printing interface (@pxref{Pretty Printing API}).
 
 The pre-defined function @code{gdb.default_visualizer} may be used to
 select a visualizer by following the built-in process
