@@ -1,3 +1,10 @@
+2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	PR stabs/11479.
+	* stabsread.c (set_length_in_type_chain): New function.
+	(read_struct_type): Call set_length_in_type_chain function.
+	(read_enum_type): Idem.
+
 2010-04-21  Stan Shebs  <stan@codesourcery.com>
 	    Nathan Sidwell  <nathan@codesourcery.com>
 
