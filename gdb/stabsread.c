@@ -3416,7 +3416,7 @@ complain_about_struct_wipeout (struct type *type)
    untouched during the main type replacement...  */
 
 static void
-set_length_in_type_chain (struct type * type)
+set_length_in_type_chain (struct type *type)
 {
   struct type *ntype = TYPE_CHAIN (type);
 
