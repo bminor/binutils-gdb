@@ -1,5 +1,9 @@
 2010-04-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* profile.c (sim_profile_print_bar): Add cpu argument.
+
+2010-04-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-profile.h (sim_profile_print_bar): Use sim_cpu, not SIM_CPU.
 
 2010-04-21  Mike Frysinger  <vapier@gentoo.org>

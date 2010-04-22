@@ -466,7 +466,7 @@ scache_print_profile (SIM_CPU *cpu, int verbose)
 			 i,
 			 max_val < 10000 ? 5 : 10,
 			 sim_add_commas (buf, sizeof (buf), lengths[i]));
-	  sim_profile_print_bar (sd, PROFILE_HISTOGRAM_WIDTH,
+	  sim_profile_print_bar (sd, cpu, PROFILE_HISTOGRAM_WIDTH,
 				 lengths[i], max_val);
 	  sim_io_printf (sd, "\n");
 	}
