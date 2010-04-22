@@ -2616,7 +2616,7 @@ trace_save (const char *filename, int target_does_save)
   pathname = tilde_expand (filename);
   cleanup = make_cleanup (xfree, pathname);
 
-  fp = fopen (pathname, "w");
+  fp = fopen (pathname, "wb");
   if (!fp)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
 	   filename, safe_strerror (errno));
