@@ -8872,7 +8872,7 @@ tc_x86_parse_to_dw2regnum (expressionS *exp)
   register_chars['.'] = saved_register_dot;
   allow_naked_reg = saved_naked_reg;
 
-  if (i386_is_register (exp) && exp->X_add_number >= 0)
+  if (exp->X_op == O_register && exp->X_add_number >= 0)
     {
       if ((addressT) exp->X_add_number < i386_regtab_size)
 	{

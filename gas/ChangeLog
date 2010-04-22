@@ -1,5 +1,10 @@
 2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (tc_x86_parse_to_dw2regnum): Don't use
+	i386_is_register.
+
+2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (i386_is_register): Remove is_intel_syntax.
 	(x86_cons): Updated.
 	(parse_register): Likewise.
