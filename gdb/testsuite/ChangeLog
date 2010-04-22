@@ -1,5 +1,11 @@
 2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	PR stabs/11479.
+	* gdb.stabs/gdb11479.exp: New file.
+	* gdb.stabs/gdb11479.c: New file.
+
+2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* gdb.base/charset.c (Strin16, String32): New variables.
 	* gdb.base/charset.exp (gdb_test): Test correct display
 	of 16 or 32 bit strings.
