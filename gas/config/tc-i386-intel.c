@@ -347,7 +347,7 @@ static int i386_intel_simplify (expressionS *e)
 	intel_state.op_modifier = e->X_op;
       /* FALLTHROUGH */
     case O_short:
-      if (i386_is_register (symbol_get_value_expression (e->X_add_symbol)))
+      if (symbol_get_value_expression (e->X_add_symbol)->X_op == O_register)
 	{
 	  as_bad (_("invalid use of register"));
 	  return 0;
@@ -358,7 +358,7 @@ static int i386_intel_simplify (expressionS *e)
       break;
 
     case O_full_ptr:
-      if (i386_is_register (symbol_get_value_expression (e->X_op_symbol)))
+      if (symbol_get_value_expression (e->X_op_symbol)->X_op == O_register)
 	{
 	  as_bad (_("invalid use of register"));
 	  return 0;
@@ -857,7 +857,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		break;
 	      intel_state.seg = expP->X_add_symbol;
 	    }
-	  if (!i386_is_register (expP))
+	  if (expP->X_op != O_register)
 	    {
 	      as_bad (_("segment register name expected"));
 	      return 0;

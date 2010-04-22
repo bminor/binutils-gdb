@@ -3534,14 +3534,6 @@ swap_operands (void)
     }
 }
 
-/* The X_md field is set to register number plus 1 to indicate register
-   expression in Intel syntax.  */
-static int
-i386_is_register (const expressionS *e)
-{
-  return e->X_op == O_register || e->X_md;
-}
-
 /* Try to ensure constant immediates are represented in the smallest
    opcode possible.  */
 static void
@@ -6486,7 +6478,7 @@ x86_cons (expressionS *exp, int size)
 	  if (exp->X_op == O_constant
 	      || exp->X_op == O_absent
 	      || exp->X_op == O_illegal
-	      || i386_is_register (exp)
+	      || exp->X_op == O_register
 	      || exp->X_op == O_big)
 	    {
 	      char c = *input_line_pointer;
@@ -7965,7 +7957,7 @@ parse_register (char *reg_string, char **end_op)
 	{
 	  const expressionS *e = symbol_get_value_expression (symbolP);
 
-	  know (i386_is_register (e));
+	  know (e->X_op == O_register);
 	  know (e->X_add_number >= 0
 		&& (valueT) e->X_add_number < i386_regtab_size);
 	  r = i386_regtab + e->X_add_number;

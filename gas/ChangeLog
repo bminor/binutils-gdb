@@ -1,5 +1,13 @@
 2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (i386_is_register): Removed.
+	(x86_cons): Don't use i386_is_register.
+	(parse_register): Likewise.
+	* config/tc-i386-intel.c (i386_intel_simplify): Likewise.
+	(i386_intel_operand): Likewise.
+
+2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (tc_x86_parse_to_dw2regnum): Don't use
 	i386_is_register.
 
