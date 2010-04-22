@@ -9647,6 +9647,10 @@ terminate the actions list with a line containing just @code{end}.  So
 far, the only defined actions are @code{collect}, @code{teval}, and
 @code{while-stepping}.
 
+@code{actions} is actually equivalent to @code{commands} (@pxref{Break
+Commands, ,Breakpoint Command Lists}), except that only the defined
+actions are allowed; any other @value{GDBN} command is rejected.
+
 @cindex remove actions from a tracepoint
 To remove all actions from a tracepoint, type @samp{actions @var{num}}
 and follow it immediately with @samp{end}.
@@ -9675,7 +9679,7 @@ Enter actions for tracepoint 1, one per line:
 > collect bar,baz
 > collect $regs
 > while-stepping 12
-  > collect $fp, $sp
+  > collect $pc, arr[i]
   > end
 end
 @end smallexample
@@ -9700,7 +9704,7 @@ collect all local variables.
 
 You can give several consecutive @code{collect} commands, each one
 with a single argument, or one @code{collect} command with several
-arguments separated by commas: the effect is the same.
+arguments separated by commas; the effect is the same.
 
 The command @code{info scope} (@pxref{Symbols, info scope}) is
 particularly useful for figuring out what data to collect.
@@ -9771,24 +9775,18 @@ tracing:
 @itemize @bullet
 @item
 its passcount as given by the @code{passcount @var{n}} command
-@item
-its step count as given by the @code{while-stepping @var{n}} command
-@item
-its action list as given by the @code{actions} command.  The actions
-are prefixed with an @samp{A} so as to distinguish them from commands.
 @end itemize
 
 @smallexample
 (@value{GDBP}) @b{info trace}
 Num     Type           Disp Enb Address    What
 1       tracepoint     keep y   0x0804ab57 in foo() at main.cxx:7
+        while-stepping 20
+          collect globfoo, $regs
+        end
+        collect globfoo2
+        end
         pass count 1200 
-        step count 20 
-      A while-stepping 20
-      A collect globfoo, $regs
-      A end
-      A collect globfoo2
-      A end
 (@value{GDBP})
 @end smallexample
 
