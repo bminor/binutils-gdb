@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.20\n"
+"Project-Id-Version: opcodes 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 14:08+0200\n"
-"PO-Revision-Date: 2010-02-13 18:54+1030\n"
+"POT-Creation-Date: 2010-03-03 15:04+0100\n"
+"PO-Revision-Date: 2010-04-22 22:25+0930\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
 "Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -116,18 +116,18 @@ msgid "<illegal precision>"
 msgstr "<độ chính xác cấm>"
 
 #. XXX - should break 'option' at following delimiter.
-#: arm-dis.c:4014
+#: arm-dis.c:4018
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr "Không nhận ra tập hợp tên thanh ghi: %s\n"
 
 #. XXX - should break 'option' at following delimiter.
-#: arm-dis.c:4022
+#: arm-dis.c:4026
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr "Không nhận ra tùy chọn rã: %s\n"
 
-#: arm-dis.c:4519
+#: arm-dis.c:4522
 #, c-format
 msgid ""
 "\n"
@@ -1018,12 +1018,12 @@ msgstr "tác tử không hợp lệ. kiểu chỉ có thể có giá trị 0,1,2
 msgid "$<undefined>"
 msgstr "$<chưa xác định>"
 
-#: ppc-dis.c:222
+#: ppc-dis.c:248
 #, c-format
 msgid "warning: ignoring unknown -M%s option\n"
 msgstr "cảnh báo : đang bở qua tuỳ chọn « -M%s » không rõ\n"
 
-#: ppc-dis.c:511
+#: ppc-dis.c:537
 #, c-format
 msgid ""
 "\n"
@@ -1033,43 +1033,43 @@ msgstr ""
 "\n"
 "Những tùy chọn rã đặc trưng cho PPC theo đây được hỗ trợ để sử dụng với đối số « -M »:\n"
 
-#: ppc-opc.c:870 ppc-opc.c:898
+#: ppc-opc.c:873 ppc-opc.c:901
 msgid "invalid conditional option"
 msgstr "tùy chọn điều kiện không hợp lệ"
 
-#: ppc-opc.c:900
+#: ppc-opc.c:903
 msgid "attempt to set y bit when using + or - modifier"
 msgstr "thử đặt « bit y » khi sử dụng điều sửa đổi + hay -"
 
-#: ppc-opc.c:932
+#: ppc-opc.c:935
 msgid "invalid mask field"
 msgstr "trường mặt nạ không hợp lệ"
 
-#: ppc-opc.c:958
+#: ppc-opc.c:961
 msgid "ignoring invalid mfcr mask"
 msgstr "đang bỏ qua mặt nạ mfcr không hợp lệ"
 
-#: ppc-opc.c:1008 ppc-opc.c:1043
+#: ppc-opc.c:1011 ppc-opc.c:1046
 msgid "illegal bitmask"
 msgstr "gặp mặt nặ bit cấm"
 
-#: ppc-opc.c:1163
+#: ppc-opc.c:1166
 msgid "index register in load range"
 msgstr "thanh ghi cơ số trong phạm vi nạp"
 
-#: ppc-opc.c:1179
+#: ppc-opc.c:1182
 msgid "source and target register operands must be different"
 msgstr "tác tử thanh ghi kiểu nguồn và đích phải là khác nhau"
 
-#: ppc-opc.c:1194
+#: ppc-opc.c:1197
 msgid "invalid register operand when updating"
 msgstr "gặp tác tử thanh ghi không hợp lệ khi cập nhật"
 
-#: ppc-opc.c:1273
+#: ppc-opc.c:1276
 msgid "invalid sprg number"
 msgstr "số sprg không hợp lệ"
 
-#: ppc-opc.c:1443
+#: ppc-opc.c:1446
 msgid "invalid constant"
 msgstr "hằng không hợp lệ"
 

@@ -1,3 +1,12 @@
+2010-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/binutils.pot: Updated by the Translation project.
+	* po/fi.po: Updated Finnish translation.
+	* po/vi.po: Updated Vietnamese translation.
+	* po/bg.po: New Bulgarian translation.
+	* configure.in (ALL_LINGUAS): Add bg.
+	* configure: Regenerate.
+
 2010-04-20  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated french translation.

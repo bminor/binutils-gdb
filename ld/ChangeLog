@@ -1,3 +1,9 @@
+2010-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/ld.pot: Updated by the Translation project.
+	* po/vi.po: Updated Vietnamese translation.
+	* po/bg.po: Updated Bulgarian translation.
+
 2010-04-15  Andrew Haley  <aph@redhat.com>
 
 	* emultempl/armelf.em (merge_exidx_entries): New variable.

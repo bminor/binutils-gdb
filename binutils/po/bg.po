@@ -1,37 +1,34 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
+# Translation of binutils to Bulgarian
+# Copyright (C) 2010 Free Software Foundation, Inc.
+# This file is distributed under the same license as the binutils package.
+# Roumen Petrov <transl@roumenpetrov.info>, 2010.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: binutils 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-03-03 14:57+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2010-04-21 23:50+0300\n"
+"Last-Translator: Roumen Petrov <transl@roumenpetrov.info>\n"
+"Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: addr2line.c:76
 #, c-format
 msgid "Usage: %s [option(s)] [addr(s)]\n"
-msgstr ""
+msgstr "Употреба: %s [команда(-и)] [адрес(-и)]\n"
 
 #: addr2line.c:77
 #, c-format
 msgid " Convert addresses into line number/file name pairs.\n"
-msgstr ""
+msgstr " Преобразува адрес към двойката номер на ред/име на файл.\n"
 
 #: addr2line.c:78
 #, c-format
-msgid ""
-" If no addresses are specified on the command line, they will be read from "
-"stdin\n"
-msgstr ""
+msgid " If no addresses are specified on the command line, they will be read from stdin\n"
+msgstr " Ако на командния ред не са зададени адреси, те ще бъдат четени от стандартния вход\n"
 
 #: addr2line.c:79
 #, c-format
@@ -49,113 +46,120 @@ msgid ""
 "  -v --version           Display the program's version\n"
 "\n"
 msgstr ""
+" Командите са:\n"
+"  @<файл>                Прочитане на команди от <файл>\n"
+"  -b --target=<bfd_име>  Установява формата на двоичния файл\n"
+"  -e --exe=<изпълним>    Установява името на входящия файл (по подразбиране е a.out)\n"
+"  -i --inlines           Развиване на вградени функции\n"
+"  -j --section=<име>     Прочита относителни то раздела отмествания вместо адреси\n"
+"  -s --basenames         Премахва имена на директории\n"
+"  -f --functions         Показва имена на функции\n"
+"  -C --demangle[=начин]  Декориране на имена на функции\n"
+"  -h --help              Показва тази информация\n"
+"  -v --version           Показва версия на програмата\n"
+"\n"
 
 #: addr2line.c:94 ar.c:295 coffdump.c:469 dlltool.c:3838 dllwrap.c:510
 #: nlmconv.c:1113 objcopy.c:563 objcopy.c:598 readelf.c:2935 size.c:99
 #: srconv.c:1741 strings.c:676 sysdump.c:653 windmc.c:233 windres.c:698
 #, c-format
 msgid "Report bugs to %s\n"
-msgstr ""
+msgstr "Подавайте доклади за грешки на %s\n"
 
 #: addr2line.c:292
 #, c-format
 msgid "%s: cannot get addresses from archive"
-msgstr ""
+msgstr "%s: не може да се получат адреси от архива"
 
 #: addr2line.c:309
 #, c-format
 msgid "%s: cannot find section %s"
-msgstr ""
+msgstr "%s: не може да се намери секцията %s"
 
 #: addr2line.c:375 nm.c:1554 objdump.c:3234
 #, c-format
 msgid "unknown demangling style `%s'"
-msgstr ""
+msgstr "непознат начин за декориране '%s'"
 
 #: ar.c:218
 #, c-format
 msgid "no entry %s in archive\n"
-msgstr ""
+msgstr "в архива липсва входна точка %s\n"
 
 #: ar.c:236
 #, c-format
-msgid ""
-"Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrstx}"
-"[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"
-msgstr ""
+msgid "Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"
+msgstr "Употреба: %s [опции за подражаване] [--plugin <име>] [-]{dmpqrstx}[abcfilNoPsSuvV] [член-име] [брой] архивен-файл файл...\n"
 
 #: ar.c:238
 #, c-format
-msgid ""
-"Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] "
-"[count] archive-file file...\n"
-msgstr ""
+msgid "Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"
+msgstr "Употреба: %s [опции за подражаване] [-]{dmpqrstx}[abcfilNoPsSuvV] [член-име] [брой] архивен-файл файл...\n"
 
 #: ar.c:243
 #, c-format
 msgid "       %s -M [<mri-script]\n"
-msgstr ""
+msgstr "       %s -M [<mri-скрипт]\n"
 
 #: ar.c:244
 #, c-format
 msgid " commands:\n"
-msgstr ""
+msgstr " команди:\n"
 
 #: ar.c:245
 #, c-format
 msgid "  d            - delete file(s) from the archive\n"
-msgstr ""
+msgstr "  d            - изтриване на файл(-ове) от архива\n"
 
 #: ar.c:246
 #, c-format
 msgid "  m[ab]        - move file(s) in the archive\n"
-msgstr ""
+msgstr "  m[ab]        - преместване на файл(-ове) в архива\n"
 
 #: ar.c:247
 #, c-format
 msgid "  p            - print file(s) found in the archive\n"
-msgstr ""
+msgstr "  p            - извеждане на файл(-ове) намерен в архива\n"
 
 #: ar.c:248
 #, c-format
 msgid "  q[f]         - quick append file(s) to the archive\n"
-msgstr ""
+msgstr "  q[f]         - бързо добавяне на файл/-ове към архива\n"
 
 #: ar.c:249
 #, c-format
-msgid ""
-"  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"
-msgstr ""
+msgid "  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"
+msgstr "  r[ab][f][u]  - замества съществуващ или добавя нов файл/-ове в архива\n"
 
 #: ar.c:250
 #, c-format
 msgid "  t            - display contents of archive\n"
-msgstr ""
+msgstr "  t            - показване съдържанието на архива\n"
 
 #: ar.c:251
 #, c-format
 msgid "  x[o]         - extract file(s) from the archive\n"
-msgstr ""
+msgstr "  x[o]         - изваждане на файл/-ове от архива\n"
 
 #: ar.c:252
 #, c-format
 msgid " command specific modifiers:\n"
-msgstr ""
+msgstr " уточнители характерни за команда:\n"
 
 #: ar.c:253
 #, c-format
 msgid "  [a]          - put file(s) after [member-name]\n"
-msgstr ""
+msgstr "  [a]          - поставане на файл/-ове след [член-име]\n"
 
 #: ar.c:254
 #, c-format
 msgid "  [b]          - put file(s) before [member-name] (same as [i])\n"
-msgstr ""
+msgstr "  [b]          - поставане на файл/-ове преди [член-име] (също като [i])\n"
 
 #: ar.c:255
 #, c-format
 msgid "  [D]          - use zero for timestamps and uids/gids\n"
-msgstr ""
+msgstr "  [D]          - използване на нула за дата и час и идентификатори за потребител и група\n"
 
 #: ar.c:256
 #, c-format
@@ -165,84 +169,82 @@ msgstr ""
 #: ar.c:257
 #, c-format
 msgid "  [f]          - truncate inserted file names\n"
-msgstr ""
+msgstr "  [f]          - отрязване на вмъкнати имена на файлове\n"
 
 #: ar.c:258
 #, c-format
 msgid "  [P]          - use full path names when matching\n"
-msgstr ""
+msgstr "  [P]          - използване на пълни имена за пътища ако съвпадат\n"
 
 #: ar.c:259
 #, c-format
 msgid "  [o]          - preserve original dates\n"
-msgstr ""
+msgstr "  [o]          - запазване на първоначалните дати\n"
 
 #: ar.c:260
 #, c-format
-msgid ""
-"  [u]          - only replace files that are newer than current archive "
-"contents\n"
-msgstr ""
+msgid "  [u]          - only replace files that are newer than current archive contents\n"
+msgstr "  [u]          - да се заместят само файловете, които са по-нови от текущото съдържание на архива\n"
 
 #: ar.c:261
 #, c-format
 msgid " generic modifiers:\n"
-msgstr ""
+msgstr " основни уточнители:\n"
 
 #: ar.c:262
 #, c-format
 msgid "  [c]          - do not warn if the library had to be created\n"
-msgstr ""
+msgstr "  [c]          - без предупреждение, ако трябва да се създаде библиотека\n"
 
 #: ar.c:263
 #, c-format
 msgid "  [s]          - create an archive index (cf. ranlib)\n"
-msgstr ""
+msgstr "  [s]          - създаване на индекс на архива (виж ranlib)\n"
 
 #: ar.c:264
 #, c-format
 msgid "  [S]          - do not build a symbol table\n"
-msgstr ""
+msgstr "  [S]          - без създаване на таблица за имена\n"
 
 #: ar.c:265
 #, c-format
 msgid "  [T]          - make a thin archive\n"
-msgstr ""
+msgstr "  [T]          - създаване на \"тънък\" архив\n"
 
 #: ar.c:266
 #, c-format
 msgid "  [v]          - be verbose\n"
-msgstr ""
+msgstr "  [v]          - с подробности\n"
 
 #: ar.c:267
 #, c-format
 msgid "  [V]          - display the version number\n"
-msgstr ""
+msgstr "  [V]          - показване номер на версия\n"
 
 #: ar.c:268
 #, c-format
 msgid "  @<file>      - read options from <file>\n"
-msgstr ""
+msgstr "  @<файл>      - прочитане на команди от <файл>\n"
 
 #: ar.c:270
 #, c-format
 msgid " optional:\n"
-msgstr ""
+msgstr " възможни:\n"
 
 #: ar.c:271
 #, c-format
 msgid "  --plugin <p> - load the specified plugin\n"
-msgstr ""
+msgstr "  --plugin <п> - зареждане на указаната приставка\n"
 
 #: ar.c:278
 #, c-format
 msgid "Usage: %s [options] archive\n"
-msgstr ""
+msgstr "Употреба: %s [команди] архив\n"
 
 #: ar.c:279
 #, c-format
 msgid " Generate an index to speed access to archives\n"
-msgstr ""
+msgstr " Създаване на индекс за ускоряване достъпа до архивите\n"
 
 #: ar.c:280
 #, c-format
@@ -250,11 +252,13 @@ msgid ""
 " The options are:\n"
 "  @<file>                      Read options from <file>\n"
 msgstr ""
+" Командите са:\n"
+"  @<файл>                      Прочитане на команди от <файл>\n"
 
 #: ar.c:283
 #, c-format
 msgid "  --plugin <name>              Load the specified plugin\n"
-msgstr ""
+msgstr "  --plugin <име>               Зарежда указаната приставка\n"
 
 #: ar.c:286
 #, c-format
@@ -263,59 +267,62 @@ msgid ""
 "  -h --help                    Print this help message\n"
 "  -v --version                 Print version information\n"
 msgstr ""
+"  -t                           Обновява дата и час на изобразените имена на архива\n"
+"  -h --help                    Извежда това помощно съобщение\n"
+"  -v --version                 Извежда информация за версията\n"
 
 #: ar.c:512 nm.c:1626
 #, c-format
 msgid "sorry - this program has been built without plugin support\n"
-msgstr ""
+msgstr "за съжаление, тази програма е създадена без поддръжка на приставки\n"
 
 #: ar.c:539
 msgid "two different operation options specified"
-msgstr ""
+msgstr "указани са две различни опции за операция"
 
 #: ar.c:620
 #, c-format
 msgid "illegal option -- %c"
-msgstr ""
+msgstr "незаконна команда -- %c"
 
 #: ar.c:663
 msgid "no operation specified"
-msgstr ""
+msgstr "не е зададена операция"
 
 #: ar.c:666
 msgid "`u' is only meaningful with the `r' option."
-msgstr ""
+msgstr "'u' има смисъл само с команда 'r'."
 
 #: ar.c:669
 msgid "`u' is not meaningful with the `D' option."
-msgstr ""
+msgstr "'u' няма смисъл с опция 'D'."
 
 #: ar.c:677
 msgid "`N' is only meaningful with the `x' and `d' options."
-msgstr ""
+msgstr "'N' има смисъл само с команди 'x' и 'd'."
 
 #: ar.c:680
 msgid "Value for `N' must be positive."
-msgstr ""
+msgstr "Стойността на 'N' трябва да е положителна."
 
 #: ar.c:692
 msgid "`x' cannot be used on thin archives."
-msgstr ""
+msgstr "'x' не може да се използва в архиви \"посредници\"(thin archives)."
 
 #: ar.c:733
 #, c-format
 msgid "internal error -- this option not implemented"
-msgstr ""
+msgstr "вътрешна грешка -- тази команда не е внедрена"
 
 #: ar.c:802
 #, c-format
 msgid "creating %s"
-msgstr ""
+msgstr "създаване на %s"
 
 #: ar.c:851 ar.c:906 ar.c:1234 objcopy.c:2027
 #, c-format
 msgid "internal stat error on %s"
-msgstr ""
+msgstr "вътрешна грешка при определяне атрибутите на файл %s"
 
 #: ar.c:855
 #, c-format
@@ -324,172 +331,175 @@ msgid ""
 "<%s>\n"
 "\n"
 msgstr ""
+"\n"
+"<%s>\n"
+"\n"
 
 #: ar.c:871 ar.c:939
 #, c-format
 msgid "%s is not a valid archive"
-msgstr ""
+msgstr "%s е невалиден архив"
 
 #: ar.c:1139
 #, c-format
 msgid "No member named `%s'\n"
-msgstr ""
+msgstr "Няма част с име '%s'\n"
 
 #: ar.c:1189
 #, c-format
 msgid "no entry %s in archive %s!"
-msgstr ""
+msgstr "няма входна точка %s в архива %s!"
 
 #: ar.c:1328
 #, c-format
 msgid "%s: no archive map to update"
-msgstr ""
+msgstr "%s: липсва \"изображение на архива\" за обновяване"
 
 #: arsup.c:89
 #, c-format
 msgid "No entry %s in archive.\n"
-msgstr ""
+msgstr "В архива няма входна точка %s.\n"
 
 #: arsup.c:114
 #, c-format
 msgid "Can't open file %s\n"
-msgstr ""
+msgstr "не може да се отвори файл '%s'\n"
 
 #: arsup.c:164
 #, c-format
 msgid "%s: Can't open output archive %s\n"
-msgstr ""
+msgstr "%s: Не може да се отвори \"изходен\" архив %s\n"
 
 #: arsup.c:181
 #, c-format
 msgid "%s: Can't open input archive %s\n"
-msgstr ""
+msgstr "%s: Не може да се отвори \"входен\" архив %s\n"
 
 #: arsup.c:190
 #, c-format
 msgid "%s: file %s is not an archive\n"
-msgstr ""
+msgstr "%s: файла %s не е архив\n"
 
 #: arsup.c:230
 #, c-format
 msgid "%s: no output archive specified yet\n"
-msgstr ""
+msgstr "%s: не е зададен \"изходен\" архив\n"
 
 #: arsup.c:250 arsup.c:288 arsup.c:330 arsup.c:350 arsup.c:416
 #, c-format
 msgid "%s: no open output archive\n"
-msgstr ""
+msgstr "%s: няма отворен \"изходен\" архив\n"
 
 #: arsup.c:261 arsup.c:371 arsup.c:397
 #, c-format
 msgid "%s: can't open file %s\n"
-msgstr ""
+msgstr "%s: не може да се отвори файл %s\n"
 
 #: arsup.c:315 arsup.c:393 arsup.c:474
 #, c-format
 msgid "%s: can't find module file %s\n"
-msgstr ""
+msgstr "%s: не може да се намери файлов модул %s\n"
 
 #: arsup.c:425
 #, c-format
 msgid "Current open archive is %s\n"
-msgstr ""
+msgstr "Текущия отворен архив е %s\n"
 
 #: arsup.c:449
 #, c-format
 msgid "%s: no open archive\n"
-msgstr ""
+msgstr "%s: няма отворен архив\n"
 
 #: bin2c.c:59
 #, c-format
 msgid "Usage: %s < input_file > output_file\n"
-msgstr ""
+msgstr "Употреба: %s < входящ_файл > изходящ_файл\n"
 
 #: bin2c.c:60
 #, c-format
 msgid "Prints bytes from stdin in hex format.\n"
-msgstr ""
+msgstr "Извеждане байтовете от стандартния вход в шестнадесетичен форма.\n"
 
 #: binemul.c:38
 #, c-format
 msgid "  No emulation specific options\n"
-msgstr ""
+msgstr "  Без опции характерни за подражаване\n"
 
 #. Macros for common output.
 #: binemul.h:43
 #, c-format
 msgid " emulation options: \n"
-msgstr ""
+msgstr " опции за подражаване: \n"
 
 #: bucomm.c:157
 #, c-format
 msgid "can't set BFD default target to `%s': %s"
-msgstr ""
+msgstr "подразбираща се BFD цел не може да се установи на '%s': %s"
 
 #: bucomm.c:168
 #, c-format
 msgid "%s: Matching formats:"
-msgstr ""
+msgstr "%s: Съвпадащи формати:"
 
 #: bucomm.c:183
 #, c-format
 msgid "Supported targets:"
-msgstr ""
+msgstr "Поддържани цели:"
 
 #: bucomm.c:185
 #, c-format
 msgid "%s: supported targets:"
-msgstr ""
+msgstr "%s: поддържани цели:"
 
 #: bucomm.c:202
 #, c-format
 msgid "Supported architectures:"
-msgstr ""
+msgstr "Поддържани архитектури:"
 
 #: bucomm.c:204
 #, c-format
 msgid "%s: supported architectures:"
-msgstr ""
+msgstr "%s: поддържани архитектури:"
 
 #: bucomm.c:399
 #, c-format
 msgid "BFD header file version %s\n"
-msgstr ""
+msgstr "BFD заглавен файл версия %s\n"
 
 #: bucomm.c:548
 #, c-format
 msgid "%s: bad number: %s"
-msgstr ""
+msgstr "%s: погрешно число: %s"
 
 #: bucomm.c:565 strings.c:422
 #, c-format
 msgid "'%s': No such file"
-msgstr ""
+msgstr "'%s': Няма такъв файл"
 
 #: bucomm.c:567 strings.c:424
 #, c-format
 msgid "Warning: could not locate '%s'.  reason: %s"
-msgstr ""
+msgstr "Предупреждение: не може да се намери '%s', причина: %s"
 
 #: bucomm.c:571
 #, c-format
 msgid "Warning: '%s' is not an ordinary file"
-msgstr ""
+msgstr "Предупреждение: '%s' не е обикновен файл"
 
 #: coffdump.c:106
 #, c-format
 msgid "#lines %d "
-msgstr ""
+msgstr "#редове %d "
 
 #: coffdump.c:460 sysdump.c:646
 #, c-format
 msgid "Usage: %s [option(s)] in-file\n"
-msgstr ""
+msgstr "Употреба: %s [команда(-и)] вх-файл\n"
 
 #: coffdump.c:461
 #, c-format
 msgid " Print a human readable interpretation of a SYSROFF object file\n"
-msgstr ""
+msgstr " Извеждане на разбираемо от човек обяснение за SYSROFF обектен файл\n"
 
 #: coffdump.c:462
 #, c-format
@@ -500,340 +510,342 @@ msgid ""
 "  -v --version           Display the program's version\n"
 "\n"
 msgstr ""
+" Командите са:\n"
+"  @<файл>                Прочитане на команди от <файл>\n"
+"  -h --help              Показване на тази информация\n"
+"  -v --version           Показване на версията на програмата\n"
+"\n"
 
 #: coffdump.c:531 srconv.c:1831 sysdump.c:710
 msgid "no input file specified"
-msgstr ""
+msgstr "не е зададен входящ файл "
 
 #: cxxfilt.c:119 nm.c:264 objdump.c:251
 #, c-format
 msgid "Report bugs to %s.\n"
-msgstr ""
+msgstr "Подавайте доклади за грешки на %s.\n"
 
 #: debug.c:647
 msgid "debug_add_to_current_namespace: no current file"
-msgstr ""
+msgstr "debug_add_to_current_namespace: липсва текущ файл"
 
 #: debug.c:726
 msgid "debug_start_source: no debug_set_filename call"
-msgstr ""
+msgstr "debug_start_source: липсва извикване на debug_set_filename"
 
 #: debug.c:782
 msgid "debug_record_function: no debug_set_filename call"
-msgstr ""
+msgstr "debug_record_function: липсва извикване на debug_set_filename"
 
 #: debug.c:834
 msgid "debug_record_parameter: no current function"
-msgstr ""
+msgstr "debug_record_parameter: липсва текуща функция"
 
 #: debug.c:866
 msgid "debug_end_function: no current function"
-msgstr ""
+msgstr "debug_end_function: липсва текуща функция"
 
 #: debug.c:872
 msgid "debug_end_function: some blocks were not closed"
-msgstr ""
+msgstr "debug_end_function: не са затворени някой от блоковете"
 
 #: debug.c:900
 msgid "debug_start_block: no current block"
-msgstr ""
+msgstr "debug_start_block: липсва текущ блок"
 
 #: debug.c:936
 msgid "debug_end_block: no current block"
-msgstr ""
+msgstr "debug_end_block: липсва текущ блок"
 
 #: debug.c:943
 msgid "debug_end_block: attempt to close top level block"
-msgstr ""
+msgstr "debug_end_block: опит за затваряне на най-горния блок"
 
 #: debug.c:966
 msgid "debug_record_line: no current unit"
-msgstr ""
+msgstr "debug_record_line: липсва текуща част"
 
 #. FIXME
 #: debug.c:1019
 msgid "debug_start_common_block: not implemented"
-msgstr ""
+msgstr "debug_start_common_block: не е реализирана"
 
 #. FIXME
 #: debug.c:1030
 msgid "debug_end_common_block: not implemented"
-msgstr ""
+msgstr "debug_end_common_block: не е реализирана"
 
 #. FIXME.
 #: debug.c:1114
 msgid "debug_record_label: not implemented"
-msgstr ""
+msgstr "debug_record_label: не е реализирана"
 
 #: debug.c:1136
 msgid "debug_record_variable: no current file"
-msgstr ""
+msgstr "debug_record_variable: липсва текущ файл"
 
 #: debug.c:1664
 msgid "debug_make_undefined_type: unsupported kind"
-msgstr ""
+msgstr "debug_make_undefined_type: неподдържан начин"
 
 #: debug.c:1841
 msgid "debug_name_type: no current file"
-msgstr ""
+msgstr "debug_name_type: липсва текущ файл"
 
 #: debug.c:1886
 msgid "debug_tag_type: no current file"
-msgstr ""
+msgstr "debug_tag_type: липсва текущ файл"
 
 #: debug.c:1894
 msgid "debug_tag_type: extra tag attempted"
-msgstr ""
+msgstr "debug_tag_type: опитан е белег в повече"
 
 #: debug.c:1931
 #, c-format
 msgid "Warning: changing type size from %d to %d\n"
-msgstr ""
+msgstr "Предупреждение: промяна на размера на типа от %d на %d\n"
 
 #: debug.c:1953
 msgid "debug_find_named_type: no current compilation unit"
-msgstr ""
+msgstr "debug_find_named_type: няма текуща единица за компилиране"
 
 #: debug.c:2056
 #, c-format
 msgid "debug_get_real_type: circular debug information for %s\n"
-msgstr ""
+msgstr "debug_get_real_type: циклична информация за тестване за %s\n"
 
 #: debug.c:2483
 msgid "debug_write_type: illegal type encountered"
-msgstr ""
+msgstr "debug_write_type: сблъскване с незаконен тип"
 
 #: dlltool.c:884 dlltool.c:910 dlltool.c:941
 #, c-format
 msgid "Internal error: Unknown machine type: %d"
-msgstr ""
+msgstr "Вътрешна грешка: Неизвестен тип машина: %d"
 
 #: dlltool.c:982
 #, c-format
 msgid "Can't open def file: %s"
-msgstr ""
+msgstr "Не може да се отвори def-файл: %s"
 
 #: dlltool.c:987
 #, c-format
 msgid "Processing def file: %s"
-msgstr ""
+msgstr "Обработка на def-файл: %s"
 
 #: dlltool.c:991
 msgid "Processed def file"
-msgstr ""
+msgstr "Обработен def-файл"
 
 #: dlltool.c:1015
 #, c-format
 msgid "Syntax error in def file %s:%d"
-msgstr ""
+msgstr "Синтактична грешка в def-файл %s:%d"
 
 #: dlltool.c:1050
 #, c-format
 msgid "%s: Path components stripped from image name, '%s'."
-msgstr ""
+msgstr "%s: компонента за път е премахнат от името на образа '%s'."
 
 #: dlltool.c:1068
 #, c-format
 msgid "NAME: %s base: %x"
-msgstr ""
+msgstr "NAME(програма): %s базов адрес: %x"
 
 #: dlltool.c:1071 dlltool.c:1087
 msgid "Can't have LIBRARY and NAME"
-msgstr ""
+msgstr "Заедно не може LIBRARY(библиотека) и NAME(програма)"
 
 #: dlltool.c:1084
 #, c-format
 msgid "LIBRARY: %s base: %x"
-msgstr ""
+msgstr "LIBRARY(библотека): %s базов адрес: %x"
 
 #: dlltool.c:1320 resrc.c:293
 #, c-format
 msgid "wait: %s"
-msgstr ""
+msgstr "чакане: %s"
 
 #: dlltool.c:1325 dllwrap.c:410 resrc.c:298
 #, c-format
 msgid "subprocess got fatal signal %d"
-msgstr ""
+msgstr "подпроцеса получи сигнал за прекъсване %d"
 
 #: dlltool.c:1331 dllwrap.c:417 resrc.c:305
 #, c-format
 msgid "%s exited with status %d"
-msgstr ""
+msgstr "%s завърши с код за изход %d"
 
 #: dlltool.c:1362
 #, c-format
 msgid "Sucking in info from %s section in %s"
-msgstr ""
+msgstr "Нагазване в информацията на секция %s от %s"
 
 #: dlltool.c:1487
 #, c-format
 msgid "Excluding symbol: %s"
-msgstr ""
+msgstr "Игнориране на: %s"
 
 #: dlltool.c:1576 dlltool.c:1587 nm.c:1001 nm.c:1012
 #, c-format
 msgid "%s: no symbols"
-msgstr ""
+msgstr "%s: липсват имена"
 
 #. FIXME: we ought to read in and block out the base relocations.
 #: dlltool.c:1613
 #, c-format
 msgid "Done reading %s"
-msgstr ""
+msgstr "Завърши четенето на %s"
 
 #: dlltool.c:1623
 #, c-format
 msgid "Unable to open object file: %s"
-msgstr ""
+msgstr "Не можа да се отвори обектния файл: %s"
 
 #: dlltool.c:1626
 #, c-format
 msgid "Scanning object file %s"
-msgstr ""
+msgstr "Сканиране на обектния файл %s"
 
 #: dlltool.c:1641
 #, c-format
 msgid "Cannot produce mcore-elf dll from archive file: %s"
-msgstr ""
+msgstr "Не може да се създаде mcore-elf dll от архива: %s"
 
 #: dlltool.c:1741
 msgid "Adding exports to output file"
-msgstr ""
+msgstr "Добавяне на \"изнасяния\" към изходния файл"
 
 #: dlltool.c:1789
 msgid "Added exports to output file"
-msgstr ""
+msgstr "Добавени \"изнасяния\" към изходния файл"
 
 #: dlltool.c:1930
 #, c-format
 msgid "Generating export file: %s"
-msgstr ""
+msgstr "Създаване на файл с \"изнасяния\" : %s"
 
 #: dlltool.c:1935
 #, c-format
 msgid "Unable to open temporary assembler file: %s"
-msgstr ""
+msgstr "Не може да се отвори временен файл на асемблер: %s"
 
 #: dlltool.c:1938
 #, c-format
 msgid "Opened temporary file: %s"
-msgstr ""
+msgstr "Отворен временен файл: %s"
 
 #: dlltool.c:2113
 msgid "failed to read the number of entries from base file"
-msgstr ""
+msgstr "пропадна прочитането на броя записи от базовия файл"
 
 #: dlltool.c:2161
 msgid "Generated exports file"
-msgstr ""
+msgstr "Създаден на файл с \"изнасяния\""
 
 #: dlltool.c:2370
 #, c-format
 msgid "bfd_open failed open stub file: %s"
-msgstr ""
+msgstr "bfd_open не успя да отвори stub файл: %s"
 
 #: dlltool.c:2373
 #, c-format
 msgid "Creating stub file: %s"
-msgstr ""
+msgstr "Създаване на stub файл: %s"
 
 #: dlltool.c:2837 dlltool.c:2906
 #, c-format
 msgid "failed to open temporary head file: %s"
-msgstr ""
+msgstr "не успя да се отвори временен head файл: %s"
 
 #: dlltool.c:2979
 #, c-format
 msgid "failed to open temporary tail file: %s"
-msgstr ""
+msgstr "не успя да се отвори временен tail файл: %s"
 
 #: dlltool.c:3052
 #, c-format
 msgid "Can't open .lib file: %s"
-msgstr ""
+msgstr "Не може да се отвори .lib файл: %s"
 
 #: dlltool.c:3055
 #, c-format
 msgid "Creating library file: %s"
-msgstr ""
+msgstr "Създаване на библиотечен файл: %s"
 
 #: dlltool.c:3146 dlltool.c:3152
 #, c-format
 msgid "cannot delete %s: %s"
-msgstr ""
+msgstr "не може да се изтрие %s: %s"
 
 #: dlltool.c:3157
 msgid "Created lib file"
-msgstr ""
+msgstr "Библиотечният файл е създаден"
 
 #: dlltool.c:3375 dlltool.c:3397
 #, c-format
 msgid "%s is not a library"
-msgstr ""
+msgstr "%s не е библиотека"
 
 #: dlltool.c:3415
 #, c-format
 msgid "Import library `%s' specifies two or more dlls"
-msgstr ""
+msgstr "Import библиотека '%s' задава две или повече dlls"
 
 #: dlltool.c:3426
 #, c-format
 msgid "Unable to determine dll name for `%s' (not an import library?)"
-msgstr ""
+msgstr "Не може да се определи име на dll за '%s' (не е библиотека за внасяне?)"
 
 #: dlltool.c:3647
 #, c-format
 msgid "Warning, ignoring duplicate EXPORT %s %d,%d"
-msgstr ""
+msgstr "Предупреждение, игнориране на повторен EXPORT %s %d,%d"
 
 #: dlltool.c:3653
 #, c-format
 msgid "Error, duplicate EXPORT with ordinals: %s"
-msgstr ""
+msgstr "Грешка, повторен EXPORT с номер: %s"
 
 #: dlltool.c:3758
 msgid "Processing definitions"
-msgstr ""
+msgstr "Обработване на определенията"
 
 #: dlltool.c:3790
 msgid "Processed definitions"
-msgstr ""
+msgstr "Определенията са обработени"
 
 #. xgetext:c-format
 #: dlltool.c:3797 dllwrap.c:471
 #, c-format
 msgid "Usage %s <option(s)> <object-file(s)>\n"
-msgstr ""
+msgstr "Употреба %s <опции> <обектни файлове>\n"
 
 #. xgetext:c-format
 #: dlltool.c:3799
 #, c-format
-msgid ""
-"   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"
-msgstr ""
+msgid "   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"
+msgstr "   -m --machine <машина>     Създаване на DLL за <машина>.  [по подразбиране: %s]\n"
 
 #: dlltool.c:3800
 #, c-format
-msgid ""
-"        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, "
-"ppc, thumb\n"
-msgstr ""
+msgid "        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"
+msgstr "        възможна <машина>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"
 
 #: dlltool.c:3801
 #, c-format
 msgid "   -e --output-exp <outname> Generate an export file.\n"
-msgstr ""
+msgstr "   -e --output-exp <изх_име> Създаване на файл с \"изнасяния\".\n"
 
 #: dlltool.c:3802
 #, c-format
 msgid "   -l --output-lib <outname> Generate an interface library.\n"
-msgstr ""
+msgstr "   -l --output-lib <изх_име> Създаване на интерфейсна библиотека.\n"
 
 #: dlltool.c:3803
 #, c-format
 msgid "   -y --output-delaylib <outname> Create a delay-import library.\n"
-msgstr ""
+msgstr "   -y --output-delaylib <изх_име> Създаване на delay-import библиотека.\n"
 
 #: dlltool.c:3804
 #, c-format
@@ -842,8 +854,7 @@ msgstr ""
 
 #: dlltool.c:3805
 #, c-format
-msgid ""
-"   -D --dllname <name>       Name of input dll to put into interface lib.\n"
+msgid "   -D --dllname <name>       Name of input dll to put into interface lib.\n"
 msgstr ""
 
 #: dlltool.c:3806
@@ -893,23 +904,17 @@ msgstr ""
 
 #: dlltool.c:3815
 #, c-format
-msgid ""
-"      --use-nul-prefixed-import-tables Use zero prefixed idata$4 and idata"
-"$5.\n"
+msgid "      --use-nul-prefixed-import-tables Use zero prefixed idata$4 and idata$5.\n"
 msgstr ""
 
 #: dlltool.c:3816
 #, c-format
-msgid ""
-"   -U --add-underscore       Add underscores to all symbols in interface "
-"library.\n"
+msgid "   -U --add-underscore       Add underscores to all symbols in interface library.\n"
 msgstr ""
 
 #: dlltool.c:3817
 #, c-format
-msgid ""
-"      --add-stdcall-underscore Add underscores to stdcall symbols in "
-"interface library.\n"
+msgid "      --add-stdcall-underscore Add underscores to stdcall symbols in interface library.\n"
 msgstr ""
 
 #: dlltool.c:3818
@@ -939,35 +944,27 @@ msgstr ""
 
 #: dlltool.c:3823
 #, c-format
-msgid ""
-"   -C --compat-implib        Create backward compatible import library.\n"
+msgid "   -C --compat-implib        Create backward compatible import library.\n"
 msgstr ""
 
 #: dlltool.c:3824
 #, c-format
-msgid ""
-"   -n --no-delete            Keep temp files (repeat for extra "
-"preservation).\n"
+msgid "   -n --no-delete            Keep temp files (repeat for extra preservation).\n"
 msgstr ""
 
 #: dlltool.c:3825
 #, c-format
-msgid ""
-"   -t --temp-prefix <prefix> Use <prefix> to construct temp file names.\n"
+msgid "   -t --temp-prefix <prefix> Use <prefix> to construct temp file names.\n"
 msgstr ""
 
 #: dlltool.c:3826
 #, c-format
-msgid ""
-"   -I --identify <implib>    Report the name of the DLL associated with "
-"<implib>.\n"
+msgid "   -I --identify <implib>    Report the name of the DLL associated with <implib>.\n"
 msgstr ""
 
 #: dlltool.c:3827
 #, c-format
-msgid ""
-"      --identify-strict      Causes --identify to report error when multiple "
-"DLLs.\n"
+msgid "      --identify-strict      Causes --identify to report error when multiple DLLs.\n"
 msgstr ""
 
 #: dlltool.c:3828
@@ -988,12 +985,11 @@ msgstr ""
 #: dlltool.c:3831
 #, c-format
 msgid "   @<file>                   Read options from <file>.\n"
-msgstr ""
+msgstr "   @<файл>                   Прочитане на команди от <файл>.\n"
 
 #: dlltool.c:3833
 #, c-format
-msgid ""
-"   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"
+msgid "   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"
 msgstr ""
 
 #: dlltool.c:3834
@@ -1074,7 +1070,7 @@ msgstr ""
 #: dllwrap.c:473
 #, c-format
 msgid "   @<file>                Read options from <file>\n"
-msgstr ""
+msgstr "   @<файл>                Прочитане на команди от <файл>\n"
 
 #: dllwrap.c:474
 #, c-format
@@ -1441,9 +1437,7 @@ msgstr ""
 
 #: dwarf.c:1597
 #, c-format
-msgid ""
-"Offset %lx used as value for DW_AT_import attribute of DIE at offset %lx is "
-"too big.\n"
+msgid "Offset %lx used as value for DW_AT_import attribute of DIE at offset %lx is too big.\n"
 msgstr ""
 
 #: dwarf.c:1771
@@ -1511,9 +1505,7 @@ msgstr ""
 
 #: dwarf.c:1955
 #, c-format
-msgid ""
-"Debug info is corrupted, length of CU at %lx extends beyond end of section "
-"(length = %lx)\n"
+msgid "Debug info is corrupted, length of CU at %lx extends beyond end of section (length = %lx)\n"
 msgstr ""
 
 #: dwarf.c:1964
@@ -1523,15 +1515,12 @@ msgstr ""
 
 #: dwarf.c:1974
 #, c-format
-msgid ""
-"Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section "
-"size (%lx)\n"
+msgid "Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"
 msgstr ""
 
 #: dwarf.c:2021
 #, c-format
-msgid ""
-"Bogus end-of-siblings marker detected at offset %lx in .debug_info section\n"
+msgid "Bogus end-of-siblings marker detected at offset %lx in .debug_info section\n"
 msgstr ""
 
 #: dwarf.c:2025
@@ -1545,8 +1534,7 @@ msgstr ""
 
 #: dwarf.c:2049
 #, c-format
-msgid ""
-"DIE at offset %lx refers to abbreviation number %lu which does not exist\n"
+msgid "DIE at offset %lx refers to abbreviation number %lu which does not exist\n"
 msgstr ""
 
 #: dwarf.c:2055
@@ -1563,9 +1551,7 @@ msgstr ""
 
 #: dwarf.c:2184
 #, c-format
-msgid ""
-"The information in section %s appears to be corrupt - the section is too "
-"small\n"
+msgid "The information in section %s appears to be corrupt - the section is too small\n"
 msgstr ""
 
 #: dwarf.c:2194 dwarf.c:2482
@@ -1814,15 +1800,12 @@ msgstr ""
 
 #: dwarf.c:2835 dwarf.c:3112 dwarf.c:3534
 #, c-format
-msgid ""
-"Unable to load/parse the .debug_info section, so cannot interpret the %s "
-"section.\n"
+msgid "Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"
 msgstr ""
 
 #: dwarf.c:2916 dwarf.c:3419
 #, c-format
-msgid ""
-".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"
+msgid ".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"
 msgstr ""
 
 #: dwarf.c:2930
@@ -2552,19 +2535,15 @@ msgid ""
 "  -a, --debug-syms       Display debugger-only symbols\n"
 "  -A, --print-file-name  Print name of the input file before every symbol\n"
 "  -B                     Same as --format=bsd\n"
-"  -C, --demangle[=STYLE] Decode low-level symbol names into user-level "
-"names\n"
-"                          The STYLE, if specified, can be `auto' (the "
-"default),\n"
-"                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', "
-"`java'\n"
+"  -C, --demangle[=STYLE] Decode low-level symbol names into user-level names\n"
+"                          The STYLE, if specified, can be `auto' (the default),\n"
+"                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n"
 "                          or `gnat'\n"
 "      --no-demangle      Do not demangle low-level symbol names\n"
 "  -D, --dynamic          Display dynamic symbols instead of normal symbols\n"
 "      --defined-only     Display only defined symbols\n"
 "  -e                     (ignored)\n"
-"  -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be "
-"`bsd',\n"
+"  -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be `bsd',\n"
 "                           `sysv' or `posix'.  The default is `bsd'\n"
 "  -g, --extern-only      Display only external symbols\n"
 "  -l, --line-numbers     Use debugging information to find a filename and\n"
@@ -2652,16 +2631,14 @@ msgstr ""
 #: nm.c:1246 nm.c:1297
 #, c-format
 msgid ""
-"Name                  Value   Class        Type         Size     Line  "
-"Section\n"
+"Name                  Value   Class        Type         Size     Line  Section\n"
 "\n"
 msgstr ""
 
 #: nm.c:1249 nm.c:1300
 #, c-format
 msgid ""
-"Name                  Value           Class        Type         "
-"Size             Line  Section\n"
+"Name                  Value           Class        Type         Size             Line  Section\n"
 "\n"
 msgstr ""
 
@@ -2724,125 +2701,90 @@ msgstr ""
 #, c-format
 msgid ""
 "  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n"
-"  -O --output-target <bfdname>     Create an output file in format "
-"<bfdname>\n"
-"  -B --binary-architecture <arch>  Set arch of output file, when input is "
-"binary\n"
-"  -F --target <bfdname>            Set both input and output format to "
-"<bfdname>\n"
-"     --debugging                   Convert debugging information, if "
-"possible\n"
-"  -p --preserve-dates              Copy modified/access timestamps to the "
-"output\n"
+"  -O --output-target <bfdname>     Create an output file in format <bfdname>\n"
+"  -B --binary-architecture <arch>  Set arch of output file, when input is binary\n"
+"  -F --target <bfdname>            Set both input and output format to <bfdname>\n"
+"     --debugging                   Convert debugging information, if possible\n"
+"  -p --preserve-dates              Copy modified/access timestamps to the output\n"
 "  -j --only-section <name>         Only copy section <name> into the output\n"
-"     --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to "
-"<file>\n"
+"     --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n"
 "  -R --remove-section <name>       Remove section <name> from the output\n"
-"  -S --strip-all                   Remove all symbol and relocation "
-"information\n"
+"  -S --strip-all                   Remove all symbol and relocation information\n"
 "  -g --strip-debug                 Remove all debugging symbols & sections\n"
-"     --strip-unneeded              Remove all symbols not needed by "
-"relocations\n"
+"     --strip-unneeded              Remove all symbols not needed by relocations\n"
 "  -N --strip-symbol <name>         Do not copy symbol <name>\n"
 "     --strip-unneeded-symbol <name>\n"
-"                                   Do not copy symbol <name> unless needed "
-"by\n"
+"                                   Do not copy symbol <name> unless needed by\n"
 "                                     relocations\n"
-"     --only-keep-debug             Strip everything but the debug "
-"information\n"
+"     --only-keep-debug             Strip everything but the debug information\n"
 "     --extract-symbol              Remove section contents but keep symbols\n"
 "  -K --keep-symbol <name>          Do not strip symbol <name>\n"
 "     --keep-file-symbols           Do not strip file symbol(s)\n"
 "     --localize-hidden             Turn all ELF hidden symbols into locals\n"
-"  -L --localize-symbol <name>      Force symbol <name> to be marked as a "
-"local\n"
-"     --globalize-symbol <name>     Force symbol <name> to be marked as a "
-"global\n"
+"  -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n"
+"     --globalize-symbol <name>     Force symbol <name> to be marked as a global\n"
 "  -G --keep-global-symbol <name>   Localize all symbols except <name>\n"
-"  -W --weaken-symbol <name>        Force symbol <name> to be marked as a "
-"weak\n"
-"     --weaken                      Force all global symbols to be marked as "
-"weak\n"
+"  -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n"
+"     --weaken                      Force all global symbols to be marked as weak\n"
 "  -w --wildcard                    Permit wildcard in symbol comparison\n"
 "  -x --discard-all                 Remove all non-global symbols\n"
 "  -X --discard-locals              Remove any compiler-generated symbols\n"
-"  -i --interleave <number>         Only copy one out of every <number> "
-"bytes\n"
-"  -b --byte <num>                  Select byte <num> in every interleaved "
-"block\n"
+"  -i --interleave <number>         Only copy one out of every <number> bytes\n"
+"  -b --byte <num>                  Select byte <num> in every interleaved block\n"
 "     --gap-fill <val>              Fill gaps between sections with <val>\n"
-"     --pad-to <addr>               Pad the last section up to address "
-"<addr>\n"
+"     --pad-to <addr>               Pad the last section up to address <addr>\n"
 "     --set-start <addr>            Set the start address to <addr>\n"
 "    {--change-start|--adjust-start} <incr>\n"
 "                                   Add <incr> to the start address\n"
 "    {--change-addresses|--adjust-vma} <incr>\n"
-"                                   Add <incr> to LMA, VMA and start "
-"addresses\n"
+"                                   Add <incr> to LMA, VMA and start addresses\n"
 "    {--change-section-address|--adjust-section-vma} <name>{=|+|-}<val>\n"
-"                                   Change LMA and VMA of section <name> by "
-"<val>\n"
+"                                   Change LMA and VMA of section <name> by <val>\n"
 "     --change-section-lma <name>{=|+|-}<val>\n"
-"                                   Change the LMA of section <name> by "
-"<val>\n"
+"                                   Change the LMA of section <name> by <val>\n"
 "     --change-section-vma <name>{=|+|-}<val>\n"
-"                                   Change the VMA of section <name> by "
-"<val>\n"
+"                                   Change the VMA of section <name> by <val>\n"
 "    {--[no-]change-warnings|--[no-]adjust-warnings}\n"
 "                                   Warn if a named section does not exist\n"
 "     --set-section-flags <name>=<flags>\n"
-"                                   Set section <name>'s properties to "
-"<flags>\n"
-"     --add-section <name>=<file>   Add section <name> found in <file> to "
-"output\n"
+"                                   Set section <name>'s properties to <flags>\n"
+"     --add-section <name>=<file>   Add section <name> found in <file> to output\n"
 "     --rename-section <old>=<new>[,<flags>] Rename section <old> to <new>\n"
 "     --long-section-names {enable|disable|keep}\n"
-"                                   Handle long section names in Coff "
-"objects.\n"
-"     --change-leading-char         Force output format's leading character "
-"style\n"
-"     --remove-leading-char         Remove leading character from global "
-"symbols\n"
-"     --reverse-bytes=<num>         Reverse <num> bytes at a time, in output "
-"sections with content\n"
+"                                   Handle long section names in Coff objects.\n"
+"     --change-leading-char         Force output format's leading character style\n"
+"     --remove-leading-char         Remove leading character from global symbols\n"
+"     --reverse-bytes=<num>         Reverse <num> bytes at a time, in output sections with content\n"
 "     --redefine-sym <old>=<new>    Redefine symbol name <old> to <new>\n"
 "     --redefine-syms <file>        --redefine-sym for all symbol pairs \n"
 "                                     listed in <file>\n"
-"     --srec-len <number>           Restrict the length of generated "
-"Srecords\n"
-"     --srec-forceS3                Restrict the type of generated Srecords "
-"to S3\n"
+"     --srec-len <number>           Restrict the length of generated Srecords\n"
+"     --srec-forceS3                Restrict the type of generated Srecords to S3\n"
 "     --strip-symbols <file>        -N for all symbols listed in <file>\n"
 "     --strip-unneeded-symbols <file>\n"
-"                                   --strip-unneeded-symbol for all symbols "
-"listed\n"
+"                                   --strip-unneeded-symbol for all symbols listed\n"
 "                                     in <file>\n"
 "     --keep-symbols <file>         -K for all symbols listed in <file>\n"
 "     --localize-symbols <file>     -L for all symbols listed in <file>\n"
 "     --globalize-symbols <file>    --globalize-symbol for all in <file>\n"
 "     --keep-global-symbols <file>  -G for all symbols listed in <file>\n"
 "     --weaken-symbols <file>       -W for all symbols listed in <file>\n"
-"     --alt-machine-code <index>    Use the target's <index>'th alternative "
-"machine\n"
+"     --alt-machine-code <index>    Use the target's <index>'th alternative machine\n"
 "     --writable-text               Mark the output text as writable\n"
 "     --readonly-text               Make the output text write protected\n"
 "     --pure                        Mark the output file as demand paged\n"
 "     --impure                      Mark the output file as impure\n"
-"     --prefix-symbols <prefix>     Add <prefix> to start of every symbol "
-"name\n"
-"     --prefix-sections <prefix>    Add <prefix> to start of every section "
-"name\n"
+"     --prefix-symbols <prefix>     Add <prefix> to start of every symbol name\n"
+"     --prefix-sections <prefix>    Add <prefix> to start of every section name\n"
 "     --prefix-alloc-sections <prefix>\n"
-"                                   Add <prefix> to start of every "
-"allocatable\n"
+"                                   Add <prefix> to start of every allocatable\n"
 "                                     section name\n"
 "     --file-alignment <num>        Set PE file alignment to <num>\n"
 "     --heap <reserve>[,<commit>]   Set PE reserve/commit heap to <reserve>/\n"
 "                                   <commit>\n"
 "     --image-base <address>        Set PE image base to <address>\n"
 "     --section-alignment <num>     Set PE section alignment to <num>\n"
-"     --stack <reserve>[,<commit>]  Set PE reserve/commit stack to "
-"<reserve>/\n"
+"     --stack <reserve>[,<commit>]  Set PE reserve/commit stack to <reserve>/\n"
 "                                   <commit>\n"
 "     --subsystem <name>[:<version>]\n"
 "                                   Set PE subsystem to <name> [& <version>]\n"
@@ -2850,8 +2792,7 @@ msgid ""
 "  @<file>                          Read options from <file>\n"
 "  -V --version                     Display this program's version number\n"
 "  -h --help                        Display this output\n"
-"     --info                        List object formats & architectures "
-"supported\n"
+"     --info                        List object formats & architectures supported\n"
 msgstr ""
 
 #: objcopy.c:570
@@ -2868,20 +2809,14 @@ msgstr ""
 #, c-format
 msgid ""
 "  -I --input-target=<bfdname>      Assume input file is in format <bfdname>\n"
-"  -O --output-target=<bfdname>     Create an output file in format "
-"<bfdname>\n"
-"  -F --target=<bfdname>            Set both input and output format to "
-"<bfdname>\n"
-"  -p --preserve-dates              Copy modified/access timestamps to the "
-"output\n"
+"  -O --output-target=<bfdname>     Create an output file in format <bfdname>\n"
+"  -F --target=<bfdname>            Set both input and output format to <bfdname>\n"
+"  -p --preserve-dates              Copy modified/access timestamps to the output\n"
 "  -R --remove-section=<name>       Remove section <name> from the output\n"
-"  -s --strip-all                   Remove all symbol and relocation "
-"information\n"
+"  -s --strip-all                   Remove all symbol and relocation information\n"
 "  -g -S -d --strip-debug           Remove all debugging symbols & sections\n"
-"     --strip-unneeded              Remove all symbols not needed by "
-"relocations\n"
-"     --only-keep-debug             Strip everything but the debug "
-"information\n"
+"     --strip-unneeded              Remove all symbols not needed by relocations\n"
+"     --only-keep-debug             Strip everything but the debug information\n"
 "  -N --strip-symbol=<name>         Do not copy symbol <name>\n"
 "  -K --keep-symbol=<name>          Do not strip symbol <name>\n"
 "     --keep-file-symbols           Do not strip file symbol(s)\n"
@@ -2891,8 +2826,7 @@ msgid ""
 "  -v --verbose                     List all object files modified\n"
 "  -V --version                     Display this program's version number\n"
 "  -h --help                        Display this output\n"
-"     --info                        List object formats & architectures "
-"supported\n"
+"     --info                        List object formats & architectures supported\n"
 "  -o <file>                        Place stripped output into <file>\n"
 msgstr ""
 
@@ -3085,8 +3019,7 @@ msgstr ""
 #. User must pad the section up in order to do this.
 #: objcopy.c:2659
 #, c-format
-msgid ""
-"cannot reverse bytes: length of section %s must be evenly divisible by %d"
+msgid "cannot reverse bytes: length of section %s must be evenly divisible by %d"
 msgstr ""
 
 #: objcopy.c:2843
@@ -3203,8 +3136,7 @@ msgid "architecture %s unknown"
 msgstr ""
 
 #: objcopy.c:3845
-msgid ""
-"Warning: input target 'binary' required for binary architecture parameter."
+msgid "Warning: input target 'binary' required for binary architecture parameter."
 msgstr ""
 
 #: objcopy.c:3846
@@ -3219,8 +3151,7 @@ msgstr ""
 
 #: objcopy.c:3863
 #, c-format
-msgid ""
-"warning: could not create temporary file whilst copying '%s', (error: %s)"
+msgid "warning: could not create temporary file whilst copying '%s', (error: %s)"
 msgstr ""
 
 #: objcopy.c:3891 objcopy.c:3905
@@ -3248,28 +3179,23 @@ msgstr ""
 msgid ""
 "  -a, --archive-headers    Display archive header information\n"
 "  -f, --file-headers       Display the contents of the overall file header\n"
-"  -p, --private-headers    Display object format specific file header "
-"contents\n"
+"  -p, --private-headers    Display object format specific file header contents\n"
 "  -h, --[section-]headers  Display the contents of the section headers\n"
 "  -x, --all-headers        Display the contents of all headers\n"
-"  -d, --disassemble        Display assembler contents of executable "
-"sections\n"
+"  -d, --disassemble        Display assembler contents of executable sections\n"
 "  -D, --disassemble-all    Display assembler contents of all sections\n"
 "  -S, --source             Intermix source code with disassembly\n"
-"  -s, --full-contents      Display the full contents of all sections "
-"requested\n"
+"  -s, --full-contents      Display the full contents of all sections requested\n"
 "  -g, --debugging          Display debug information in object file\n"
 "  -e, --debugging-tags     Display debug information using ctags style\n"
 "  -G, --stabs              Display (in raw form) any STABS info in the file\n"
 "  -W[lLiaprmfFsoR] or\n"
-"  --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,"
-"=frames,=str,=loc,=Ranges]\n"
+"  --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n"
 "                           Display DWARF info in the file\n"
 "  -t, --syms               Display the contents of the symbol table(s)\n"
 "  -T, --dynamic-syms       Display the contents of the dynamic symbol table\n"
 "  -r, --reloc              Display the relocation entries in the file\n"
-"  -R, --dynamic-reloc      Display the dynamic relocation entries in the "
-"file\n"
+"  -R, --dynamic-reloc      Display the dynamic relocation entries in the file\n"
 "  @<file>                  Read options from <file>\n"
 "  -v, --version            Display this program's version number\n"
 "  -i, --info               List object formats and architectures supported\n"
@@ -3286,40 +3212,28 @@ msgstr ""
 #: objdump.c:218
 #, c-format
 msgid ""
-"  -b, --target=BFDNAME           Specify the target object format as "
-"BFDNAME\n"
+"  -b, --target=BFDNAME           Specify the target object format as BFDNAME\n"
 "  -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n"
 "  -j, --section=NAME             Only display information for section NAME\n"
 "  -M, --disassembler-options=OPT Pass text OPT on to the disassembler\n"
-"  -EB --endian=big               Assume big endian format when "
-"disassembling\n"
-"  -EL --endian=little            Assume little endian format when "
-"disassembling\n"
-"      --file-start-context       Include context from start of file (with -"
-"S)\n"
+"  -EB --endian=big               Assume big endian format when disassembling\n"
+"  -EL --endian=little            Assume little endian format when disassembling\n"
+"      --file-start-context       Include context from start of file (with -S)\n"
 "  -I, --include=DIR              Add DIR to search list for source files\n"
-"  -l, --line-numbers             Include line numbers and filenames in "
-"output\n"
-"  -F, --file-offsets             Include file offsets when displaying "
-"information\n"
+"  -l, --line-numbers             Include line numbers and filenames in output\n"
+"  -F, --file-offsets             Include file offsets when displaying information\n"
 "  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n"
-"                                  The STYLE, if specified, can be `auto', "
-"`gnu',\n"
-"                                  `lucid', `arm', `hp', `edg', `gnu-v3', "
-"`java'\n"
+"                                  The STYLE, if specified, can be `auto', `gnu',\n"
+"                                  `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n"
 "                                  or `gnat'\n"
 "  -w, --wide                     Format output for more than 80 columns\n"
-"  -z, --disassemble-zeroes       Do not skip blocks of zeroes when "
-"disassembling\n"
+"  -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n"
 "      --start-address=ADDR       Only process data whose address is >= ADDR\n"
 "      --stop-address=ADDR        Only process data whose address is <= ADDR\n"
-"      --prefix-addresses         Print complete address alongside "
-"disassembly\n"
+"      --prefix-addresses         Print complete address alongside disassembly\n"
 "      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n"
-"      --insn-width=WIDTH         Display WIDTH bytes on a signle line for -"
-"d\n"
-"      --adjust-vma=OFFSET        Add OFFSET to all displayed section "
-"addresses\n"
+"      --insn-width=WIDTH         Display WIDTH bytes on a signle line for -d\n"
+"      --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"
 "      --special-syms             Include special symbols in symbol dumps\n"
 "      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n"
 "      --prefix-strip=LEVEL       Strip initial directory names for -S\n"
@@ -3338,9 +3252,7 @@ msgstr ""
 
 #: objdump.c:442
 #, c-format
-msgid ""
-"Idx Name          Size      VMA               LMA               File off  "
-"Algn"
+msgid "Idx Name          Size      VMA               LMA               File off  Algn"
 msgstr ""
 
 #: objdump.c:446
@@ -3565,8 +3477,7 @@ msgstr ""
 
 #: readelf.c:909
 #, c-format
-msgid ""
-" Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"
+msgid " Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"
 msgstr ""
 
 #: readelf.c:911
@@ -3586,29 +3497,22 @@ msgstr ""
 
 #: readelf.c:926
 #, c-format
-msgid ""
-"    Offset             Info             Type               Symbol's Value  "
-"Symbol's Name + Addend\n"
+msgid "    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend\n"
 msgstr ""
 
 #: readelf.c:928
 #, c-format
-msgid ""
-"  Offset          Info           Type           Sym. Value    Sym. Name + "
-"Addend\n"
+msgid "  Offset          Info           Type           Sym. Value    Sym. Name + Addend\n"
 msgstr ""
 
 #: readelf.c:933
 #, c-format
-msgid ""
-"    Offset             Info             Type               Symbol's Value  "
-"Symbol's Name\n"
+msgid "    Offset             Info             Type               Symbol's Value  Symbol's Name\n"
 msgstr ""
 
 #: readelf.c:935
 #, c-format
-msgid ""
-"  Offset          Info           Type           Sym. Value    Sym. Name\n"
+msgid "  Offset          Info           Type           Sym. Value    Sym. Name\n"
 msgstr ""
 
 #: readelf.c:1222 readelf.c:1381 readelf.c:1389
@@ -3737,23 +3641,17 @@ msgid ""
 "  -u --unwind            Display the unwind info (if present)\n"
 "  -d --dynamic           Display the dynamic section (if present)\n"
 "  -V --version-info      Display the version sections (if present)\n"
-"  -A --arch-specific     Display architecture specific information (if "
-"any).\n"
+"  -A --arch-specific     Display architecture specific information (if any).\n"
 "  -c --archive-index     Display the symbol/file index in an archive\n"
-"  -D --use-dynamic       Use the dynamic section info when displaying "
-"symbols\n"
+"  -D --use-dynamic       Use the dynamic section info when displaying symbols\n"
 "  -x --hex-dump=<number|name>\n"
-"                         Dump the contents of section <number|name> as "
-"bytes\n"
+"                         Dump the contents of section <number|name> as bytes\n"
 "  -p --string-dump=<number|name>\n"
-"                         Dump the contents of section <number|name> as "
-"strings\n"
+"                         Dump the contents of section <number|name> as strings\n"
 "  -R --relocated-dump=<number|name>\n"
-"                         Dump the contents of section <number|name> as "
-"relocated bytes\n"
+"                         Dump the contents of section <number|name> as relocated bytes\n"
 "  -w[lLiaprmfFsoR] or\n"
-"  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,"
-"=frames,=str,=loc,=Ranges]\n"
+"  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n"
 "                         Display the contents of DWARF2 debug sections\n"
 msgstr ""
 
@@ -3959,15 +3857,12 @@ msgstr ""
 
 #: readelf.c:3432
 #, c-format
-msgid ""
-"  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"
+msgid "  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"
 msgstr ""
 
 #: readelf.c:3435
 #, c-format
-msgid ""
-"  Type           Offset   VirtAddr           PhysAddr           FileSiz  "
-"MemSiz   Flg Align\n"
+msgid "  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align\n"
 msgstr ""
 
 #: readelf.c:3439
@@ -4001,9 +3896,7 @@ msgid "Unable to find program interpreter name\n"
 msgstr ""
 
 #: readelf.c:3583
-msgid ""
-"Internal error: failed to create format string to display program "
-"interpreter\n"
+msgid "Internal error: failed to create format string to display program interpreter\n"
 msgstr ""
 
 #: readelf.c:3587
@@ -4114,9 +4007,7 @@ msgstr ""
 
 #: readelf.c:4316
 #, c-format
-msgid ""
-"  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk "
-"Inf Al\n"
+msgid "  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"
 msgstr ""
 
 #: readelf.c:4323
@@ -4126,9 +4017,7 @@ msgstr ""
 
 #: readelf.c:4327
 #, c-format
-msgid ""
-"  [Nr] Name              Type            Address          Off    Size   ES "
-"Flg Lk Inf Al\n"
+msgid "  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n"
 msgstr ""
 
 #: readelf.c:4334
@@ -4703,9 +4592,7 @@ msgstr ""
 
 #: readelf.c:8082
 #, c-format
-msgid ""
-"Missing knowledge of 32-bit reloc types used in DWARF sections of machine "
-"number %d\n"
+msgid "Missing knowledge of 32-bit reloc types used in DWARF sections of machine number %d\n"
 msgstr ""
 
 #: readelf.c:8375
@@ -4750,9 +4637,7 @@ msgstr ""
 
 #: readelf.c:8514
 #, c-format
-msgid ""
-"  Note: This section has relocations against it, but these have NOT been "
-"applied to this dump.\n"
+msgid "  Note: This section has relocations against it, but these have NOT been applied to this dump.\n"
 msgstr ""
 
 #: readelf.c:8543
@@ -4769,9 +4654,7 @@ msgstr ""
 
 #: readelf.c:8589
 #, c-format
-msgid ""
-" NOTE: This section has relocations against it, but these have NOT been "
-"applied to this dump.\n"
+msgid " NOTE: This section has relocations against it, but these have NOT been applied to this dump.\n"
 msgstr ""
 
 #: readelf.c:8727
@@ -5121,9 +5004,7 @@ msgstr ""
 
 #: readelf.c:10998
 #, c-format
-msgid ""
-"%s: the archive index is supposed to have %ld entries, but the size in the "
-"header is too small\n"
+msgid "%s: the archive index is supposed to have %ld entries, but the size in the header is too small\n"
 msgstr ""
 
 #: readelf.c:11006
@@ -5204,9 +5085,7 @@ msgstr ""
 
 #: readelf.c:11352
 #, c-format
-msgid ""
-"%s: symbols remain in the index symbol table, but without corresponding "
-"entries in the index table\n"
+msgid "%s: symbols remain in the index symbol table, but without corresponding entries in the index table\n"
 msgstr ""
 
 #: readelf.c:11357
@@ -5667,10 +5546,8 @@ msgstr ""
 msgid ""
 " The options are:\n"
 "  -A|-B     --format={sysv|berkeley}  Select output style (default is %s)\n"
-"  -o|-d|-x  --radix={8|10|16}         Display numbers in octal, decimal or "
-"hex\n"
-"  -t        --totals                  Display the total sizes (Berkeley "
-"only)\n"
+"  -o|-d|-x  --radix={8|10|16}         Display numbers in octal, decimal or hex\n"
+"  -t        --totals                  Display the total sizes (Berkeley only)\n"
 "            --common                  Display total size for *COM* syms\n"
 "            --target=<bfdname>        Set the binary file format\n"
 "            @<file>                   Read options from <file>\n"
@@ -5817,47 +5694,47 @@ msgstr ""
 #: stabs.c:5155
 #, c-format
 msgid "Unexpected type in v3 arglist demangling\n"
-msgstr ""
+msgstr "Неочакван тип при 3-та вер. за декориране на arglist\n"
 
 #: stabs.c:5222
 #, c-format
 msgid "Unrecognized demangle component %d\n"
-msgstr ""
+msgstr "Неразпозната компонента за декориране %d\n"
 
 #: stabs.c:5274
 #, c-format
 msgid "Failed to print demangled template\n"
-msgstr ""
+msgstr "Пропадна извеждането на шаблон за декориране\n"
 
 #: stabs.c:5354
 #, c-format
 msgid "Couldn't get demangled builtin type\n"
-msgstr ""
+msgstr "Не можа да се определи вградения тип за декориране\n"
 
 #: stabs.c:5403
 #, c-format
 msgid "Unexpected demangled varargs\n"
-msgstr ""
+msgstr "Неочавана променлива за декориране \"varargs\"\n"
 
 #: stabs.c:5410
 #, c-format
 msgid "Unrecognized demangled builtin type\n"
-msgstr ""
+msgstr "Неразпознат вграден тип за декориране\n"
 
 #: strings.c:201 strings.c:260
 #, c-format
 msgid "invalid integer argument %s"
-msgstr ""
+msgstr "неправилен аргумент за цяло число %s"
 
 #: strings.c:263
 #, c-format
 msgid "invalid minimum string length %d"
-msgstr ""
+msgstr "неправилна минимална дължина на низ %d"
 
 #: strings.c:660
 #, c-format
 msgid " Display printable strings in [file(s)] (stdin by default)\n"
-msgstr ""
+msgstr " Показва пачатимите низове в [файл/-ове] (станд.изход по подразбиране)\n"
 
 #: strings.c:661
 #, c-format
@@ -5865,25 +5742,35 @@ msgid ""
 " The options are:\n"
 "  -a - --all                Scan the entire file, not just the data section\n"
 "  -f --print-file-name      Print the name of the file before each string\n"
-"  -n --bytes=[number]       Locate & print any NUL-terminated sequence of "
-"at\n"
+"  -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n"
 "  -<number>                   least [number] characters (default 4).\n"
-"  -t --radix={o,d,x}        Print the location of the string in base 8, 10 "
-"or 16\n"
+"  -t --radix={o,d,x}        Print the location of the string in base 8, 10 or 16\n"
 "  -o                        An alias for --radix=o\n"
 "  -T --target=<BFDNAME>     Specify the binary file format\n"
 "  -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n"
-"                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-"
-"bit\n"
+"                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n"
 "  @<file>                   Read options from <file>\n"
 "  -h --help                 Display this information\n"
 "  -v -V --version           Print the program's version number\n"
 msgstr ""
+" Командите са:\n"
+"  -a - --all                Обработване на целия файл, а не само раздела за данни\n"
+"  -f --print-file-name      Извежда инето на файла преди всеки низ\n"
+"  -n --bytes=[число]        Намира и извежда всяка завършваща на NUL последователност от\n"
+"  -<число>                    най-малко [число] знака (по подразбиране 4).\n"
+"  -t --radix={o,d,x}        Извежда мястото на низа при основа 8, 10 или 16\n"
+"  -o                        Синоним за --radix=o\n"
+"  -T --target=<BFD_ИМЕ>     Задава формата на двоичния файл\n"
+"  -e --encoding={s,S,b,l,B,L} Избира размер на знака и побредба на байтовете:\n"
+"                            s = 7-битов, S = 8-витов, {b,l} = 16-битов, {B,L} = 32-битов (b или B за старши, l или L за младши)\n"
+"  @<файл>                   Прочитане на команди от <файл>\n"
+"  -h --help                 Показва тази информация\n"
+"  -v -V --version           Извежда номер на версия на програмата\n"
 
 #: sysdump.c:647
 #, c-format
 msgid "Print a human readable interpretation of a SYSROFF object file\n"
-msgstr ""
+msgstr "Извежда четимо представяне на SYSROFF обектен файл\n"
 
 #: sysdump.c:648
 #, c-format
@@ -5892,25 +5779,30 @@ msgid ""
 "  -h --help        Display this information\n"
 "  -v --version     Print the program's version number\n"
 msgstr ""
+" Опциите са:\n"
+"  -h --help        Показва тази информация\n"
+"  -v --version     Извежда номер на версия на програмата\n"
 
 #: sysdump.c:715
 #, c-format
 msgid "cannot open input file %s"
-msgstr ""
+msgstr "не можа да се отвори входящ файл %s"
 
 #: version.c:35
 #, c-format
 msgid "Copyright 2009 Free Software Foundation, Inc.\n"
-msgstr ""
+msgstr "Авторско право 2009 Free Software Foundation, Inc.\n"
 
 #: version.c:36
 #, c-format
 msgid ""
 "This program is free software; you may redistribute it under the terms of\n"
-"the GNU General Public License version 3 or (at your option) any later "
-"version.\n"
+"the GNU General Public License version 3 or (at your option) any later version.\n"
 "This program has absolutely no warranty.\n"
 msgstr ""
+"Тази програма е свободен софтуер: можете да я разпространявате под условията\n"
+"на Всеобщ Публичен Лиценз ГНУ версия 3 или по ваш избор, следваща версия.\n"
+"Тази програма е без гаранции.\n"
 
 #: windmc.c:195
 #, c-format
@@ -5920,7 +5812,7 @@ msgstr ""
 #: windmc.c:203
 #, c-format
 msgid "Usage: %s [option(s)] [input-file]\n"
-msgstr ""
+msgstr "Употреба: %s [опция/-и] [входящ-файл]\n"
 
 #: windmc.c:205
 #, c-format
@@ -5928,26 +5820,22 @@ msgid ""
 " The options are:\n"
 "  -a --ascii_in                Read input file as ASCII file\n"
 "  -A --ascii_out               Write binary messages as ASCII\n"
-"  -b --binprefix               .bin filename is prefixed by .mc filename_ "
-"for uniqueness.\n"
+"  -b --binprefix               .bin filename is prefixed by .mc filename_ for uniqueness.\n"
 "  -c --customflag              Set custom flags for messages\n"
 "  -C --codepage_in=<val>       Set codepage when reading mc text file\n"
 "  -d --decimal_values          Print values to text files decimal\n"
-"  -e --extension=<extension>   Set header extension used on export header "
-"file\n"
+"  -e --extension=<extension>   Set header extension used on export header file\n"
 "  -F --target <target>         Specify output target for endianess.\n"
 "  -h --headerdir=<directory>   Set the export directory for headers\n"
 "  -u --unicode_in              Read input file as UTF16 file\n"
 "  -U --unicode_out             Write binary messages as UFT16\n"
 "  -m --maxlength=<val>         Set the maximal allowed message length\n"
 "  -n --nullterminate           Automatic add a zero termination to strings\n"
-"  -o --hresult_use             Use HRESULT definition instead of status code "
-"definition\n"
+"  -o --hresult_use             Use HRESULT definition instead of status code definition\n"
 "  -O --codepage_out=<val>      Set codepage used for writing text file\n"
 "  -r --rcdir=<directory>       Set the export directory for rc files\n"
 "  -x --xdbg=<directory>        Where to create the .dbg C include file\n"
-"                               that maps message ID's to their symbolic "
-"name.\n"
+"                               that maps message ID's to their symbolic name.\n"
 msgstr ""
 
 #: windmc.c:225
@@ -5957,11 +5845,14 @@ msgid ""
 "  -v --verbose                 Verbose - tells you what it's doing\n"
 "  -V --version                 Print version information\n"
 msgstr ""
+"  -H --help                    Извежда това помощно съобщение\n"
+"  -v --verbose                 Подробно - показва какво се прави\n"
+"  -V --version                 Извежда информация за версията\n"
 
 #: windmc.c:296 windres.c:415
 #, c-format
 msgid "%s: warning: "
-msgstr ""
+msgstr "%s: предупреждение: "
 
 #: windmc.c:297
 #, c-format
@@ -5985,7 +5876,7 @@ msgstr ""
 #: windmc.c:1159
 #, c-format
 msgid "unable to read contents of %s"
-msgstr ""
+msgstr "не можа да се прочете съдържанието на %s"
 
 #: windmc.c:1171
 msgid "input file does not seems to be UFT16.\n"
@@ -6048,8 +5939,7 @@ msgid ""
 "  -v --verbose                 Verbose - tells you what it's doing\n"
 "  -c --codepage=<codepage>     Specify default codepage\n"
 "  -l --language=<val>          Set language when reading rc file\n"
-"     --use-temp-file           Use a temporary file instead of popen to "
-"read\n"
+"     --use-temp-file           Use a temporary file instead of popen to read\n"
 "                               the preprocessor output\n"
 "     --no-use-temp-file        Use popen (default)\n"
 msgstr ""
@@ -6057,7 +5947,7 @@ msgstr ""
 #: windres.c:682
 #, c-format
 msgid "     --yydebug                 Turn on parser debugging\n"
-msgstr ""
+msgstr "     --yydebug                 Включва проследяване на разбора\n"
 
 #: windres.c:685
 #, c-format
@@ -6067,6 +5957,10 @@ msgid ""
 "  -h --help                    Print this help message\n"
 "  -V --version                 Print version information\n"
 msgstr ""
+"  -r                           Пренебрегнат (съвместимост с rc)\n"
+"  @<файл>                      Прочитане на команди от <файл>\n"
+"  -h --help                    Извежда това помощно съобщение\n"
+"  -V --version                 Извежда информация за версията\n"
 
 #: windres.c:690
 #, c-format
@@ -6090,9 +5984,7 @@ msgstr ""
 
 #: windres.c:927
 #, c-format
-msgid ""
-"Option -I is deprecated for setting the input format, please use -J "
-"instead.\n"
+msgid "Option -I is deprecated for setting the input format, please use -J instead.\n"
 msgstr ""
 
 #: windres.c:1037

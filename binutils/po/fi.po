@@ -2,14 +2,14 @@
 # Copyright © 2005, 2007, 2009, 2010 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 # Jorma Karvonen <karvjorm@users.sf.net>, 2005, 2007.
-# Jorma Karvonen <karvonen.jorma@gmail.com>, 2009.
+# Jorma Karvonen <karvonen.jorma@gmail.com>, 2009, 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: binutils 2.20\n"
+"Project-Id-Version: binutils 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 14:08+0200\n"
-"PO-Revision-Date: 2010-01-09 18:25+0200\n"
+"POT-Creation-Date: 2010-03-03 14:57+0100\n"
+"PO-Revision-Date: 2010-04-21 18:04+0200\n"
 "Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -66,8 +66,8 @@ msgstr ""
 "  -v --version                Näyttää ohjelman version\n"
 "\n"
 
-#: addr2line.c:94 ar.c:295 coffdump.c:469 dlltool.c:3832 dllwrap.c:510
-#: nlmconv.c:1113 objcopy.c:563 objcopy.c:598 readelf.c:2922 size.c:99
+#: addr2line.c:94 ar.c:295 coffdump.c:469 dlltool.c:3838 dllwrap.c:510
+#: nlmconv.c:1113 objcopy.c:563 objcopy.c:598 readelf.c:2935 size.c:99
 #: srconv.c:1741 strings.c:676 sysdump.c:653 windmc.c:233 windres.c:698
 #, c-format
 msgid "Report bugs to %s\n"
@@ -75,17 +75,17 @@ msgstr ""
 "Ilmoita ohjelmistovioista englanniksi osoitteeseen %s\n"
 "Suomennoksen virheistä voi ilmoittaa (suomeksi) osoitteeseen <mailto:translation-team-fi@lists.sourceforge.net>\n"
 
-#: addr2line.c:281
+#: addr2line.c:292
 #, c-format
 msgid "%s: cannot get addresses from archive"
 msgstr "%s: osoitteita ei saa arkistosta"
 
-#: addr2line.c:298
+#: addr2line.c:309
 #, c-format
 msgid "%s: cannot find section %s"
 msgstr "%s: lohkoa %s ei löydy"
 
-#: addr2line.c:364 nm.c:1554 objdump.c:3229
+#: addr2line.c:375 nm.c:1554 objdump.c:3234
 #, c-format
 msgid "unknown demangling style `%s'"
 msgstr "tuntematon eheytystyyli ”%s”"
@@ -332,7 +332,7 @@ msgid "creating %s"
 msgstr "luodaan %s"
 
 #  stat on *nix-ympäristön vakiokomentoja (katso: man stat)
-#: ar.c:851 ar.c:906 ar.c:1234 objcopy.c:2026
+#: ar.c:851 ar.c:906 ar.c:1234 objcopy.c:2027
 #, c-format
 msgid "internal stat error on %s"
 msgstr "sisäinen stat-kutsuvirhe kohteessa %s"
@@ -476,28 +476,28 @@ msgstr "Tuetut arkkitehtuurit:"
 msgid "%s: supported architectures:"
 msgstr "%s: tuetut arkkitehtuurit:"
 
-#: bucomm.c:398
+#: bucomm.c:399
 #, c-format
 msgid "BFD header file version %s\n"
 msgstr "BFD-otsaketiedoston versio %s\n"
 
-#: bucomm.c:547
+#: bucomm.c:548
 #, c-format
 msgid "%s: bad number: %s"
 msgstr "%s: virheellinen numero: %s"
 
-#: bucomm.c:564 strings.c:422
+#: bucomm.c:565 strings.c:422
 #, c-format
 msgid "'%s': No such file"
 msgstr "”%s”: Tiedostoa ei löydy"
 
 #  stat-kutsu epäonnistui, ensimmäinen parametri on tiedostonimi
-#: bucomm.c:566 strings.c:424
+#: bucomm.c:567 strings.c:424
 #, c-format
 msgid "Warning: could not locate '%s'.  reason: %s"
 msgstr "Varoitus: tiedostoa ”%s” ei löytynyt.  syy: %s"
 
-#: bucomm.c:570
+#: bucomm.c:571
 #, c-format
 msgid "Warning: '%s' is not an ordinary file"
 msgstr "Varoitus: ”%s” ei ole tavallinen tiedosto"
@@ -813,255 +813,255 @@ msgstr "ei voi poistaa kohdetta %s: %s"
 msgid "Created lib file"
 msgstr "Luotu lib-tiedosto"
 
-#: dlltool.c:3369 dlltool.c:3391
+#: dlltool.c:3375 dlltool.c:3397
 #, c-format
 msgid "%s is not a library"
 msgstr "%s ei ole kirjasto"
 
-#: dlltool.c:3409
+#: dlltool.c:3415
 #, c-format
 msgid "Import library `%s' specifies two or more dlls"
 msgstr "Tuontikirjasto ”%s” määrittelee kaksi tai useampia dll-komponentteja"
 
-#: dlltool.c:3420
+#: dlltool.c:3426
 #, c-format
 msgid "Unable to determine dll name for `%s' (not an import library?)"
 msgstr "Ei voi määritellä dll-nimeä kohteelle ”%s” (ei tuontikirjasto?)"
 
-#: dlltool.c:3641
+#: dlltool.c:3647
 #, c-format
 msgid "Warning, ignoring duplicate EXPORT %s %d,%d"
 msgstr "Varoitus, ei oteta huomioon EXPORT-kaksoiskappaletta %s %d,%d"
 
-#: dlltool.c:3647
+#: dlltool.c:3653
 #, c-format
 msgid "Error, duplicate EXPORT with ordinals: %s"
 msgstr "Virhe, EXPORT-kaksoiskappale järjestysluvuilla: %s"
 
-#: dlltool.c:3752
+#: dlltool.c:3758
 msgid "Processing definitions"
 msgstr "Käsitellään määrittelyjä"
 
-#: dlltool.c:3784
+#: dlltool.c:3790
 msgid "Processed definitions"
 msgstr "Käsiteltiin määrittelyjä"
 
 #. xgetext:c-format
-#: dlltool.c:3791 dllwrap.c:471
+#: dlltool.c:3797 dllwrap.c:471
 #, c-format
 msgid "Usage %s <option(s)> <object-file(s)>\n"
 msgstr "Käyttö %s <valitsimet> <objektitiedosto(t)>\n"
 
 #. xgetext:c-format
-#: dlltool.c:3793
+#: dlltool.c:3799
 #, c-format
 msgid "   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"
 msgstr "   -m --machine <kone>       Luo DLL:nä kohteelle <kone>.  [oletus: %s]\n"
 
-#: dlltool.c:3794
+#: dlltool.c:3800
 #, c-format
 msgid "        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"
 msgstr "        mahdolliset <koneet>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"
 
-#: dlltool.c:3795
+#: dlltool.c:3801
 #, c-format
 msgid "   -e --output-exp <outname> Generate an export file.\n"
 msgstr "   -e --output-exp <tulostenimi>    Tuota vientitiedosto.\n"
 
-#: dlltool.c:3796
+#: dlltool.c:3802
 #, c-format
 msgid "   -l --output-lib <outname> Generate an interface library.\n"
 msgstr "   -l --output-lib <tulostenimi>    Tuota rajapintakirjasto.\n"
 
-#: dlltool.c:3797
+#: dlltool.c:3803
 #, c-format
 msgid "   -y --output-delaylib <outname> Create a delay-import library.\n"
 msgstr "   -y --output-delaylib <tulostenimi>  Luo viive-tuontikirjasto.\n"
 
 #  Lisäsin lainausmerkit käsitteen selventämiseksi
-#: dlltool.c:3798
+#: dlltool.c:3804
 #, c-format
 msgid "   -a --add-indirect         Add dll indirects to export file.\n"
 msgstr "   -a --add-indirect                Lisää ”dll indirects” vientitiedostoon.\n"
 
-#: dlltool.c:3799
+#: dlltool.c:3805
 #, c-format
 msgid "   -D --dllname <name>       Name of input dll to put into interface lib.\n"
 msgstr "   -D --dllname <nimi>              Rajapintakirjastoon sijoitettavan syöte-dll:n nimi.\n"
 
-#: dlltool.c:3800
+#: dlltool.c:3806
 #, c-format
 msgid "   -d --input-def <deffile>  Name of .def file to be read in.\n"
 msgstr "   -d --input-def <def-tiedosto>    Luettavan .def-syötetiedoston nimi.\n"
 
-#: dlltool.c:3801
+#: dlltool.c:3807
 #, c-format
 msgid "   -z --output-def <deffile> Name of .def file to be created.\n"
 msgstr "   -z --output-def <def-tiedosto>   Luotavan .def-tiedoston nimi.\n"
 
-#: dlltool.c:3802
+#: dlltool.c:3808
 #, c-format
 msgid "      --export-all-symbols   Export all symbols to .def\n"
 msgstr "      --export-all-symbols          Vie kaikki symbolit .def-tiedostoon\n"
 
-#: dlltool.c:3803
+#: dlltool.c:3809
 #, c-format
 msgid "      --no-export-all-symbols  Only export listed symbols\n"
 msgstr "      --no-export-all-symbols       Vie vain luetellut symbolit\n"
 
 #  Tässä "list" suomennettiin sanalla "lista", koska ohjetekstin jälkiosan tekstin alku ei osu samalle kohdalle eri riveillä, jos alkuosa on liian pitkä.
-#: dlltool.c:3804
+#: dlltool.c:3810
 #, c-format
 msgid "      --exclude-symbols <list> Don't export <list>\n"
 msgstr "      --exclude-symbols <lista>     Älä vie <listan> symboleja\n"
 
-#: dlltool.c:3805
+#: dlltool.c:3811
 #, c-format
 msgid "      --no-default-excludes  Clear default exclude symbols\n"
 msgstr "      --no-default-excludes         Nollaa oletuspoissulkevat symbolit\n"
 
-#: dlltool.c:3806
+#: dlltool.c:3812
 #, c-format
 msgid "   -b --base-file <basefile> Read linker generated base file.\n"
 msgstr "   -b --base-file <kantatiedosto>   Lue linkkerin tuottama perustiedosto.\n"
 
-#: dlltool.c:3807
+#: dlltool.c:3813
 #, c-format
 msgid "   -x --no-idata4            Don't generate idata$4 section.\n"
 msgstr "   -x --no-idata4                   Älä tuota idata$4-lohkoa.\n"
 
-#: dlltool.c:3808
+#: dlltool.c:3814
 #, c-format
 msgid "   -c --no-idata5            Don't generate idata$5 section.\n"
 msgstr "   -c --no-idata5                   Älä tuota idata$5-lohkoa.\n"
 
-#: dlltool.c:3809
+#: dlltool.c:3815
 #, c-format
 msgid "      --use-nul-prefixed-import-tables Use zero prefixed idata$4 and idata$5.\n"
 msgstr "      --use-nul-prefixed-import-tables Käytä nollaetuliitteistä idata$4 ja idata$5.\n"
 
-#: dlltool.c:3810
+#: dlltool.c:3816
 #, c-format
 msgid "   -U --add-underscore       Add underscores to all symbols in interface library.\n"
 msgstr "   -U --add-underscore              Lisää alaviivat rajapintakirjaston kaikkiin symboleihin.\n"
 
-#: dlltool.c:3811
+#: dlltool.c:3817
 #, c-format
 msgid "      --add-stdcall-underscore Add underscores to stdcall symbols in interface library.\n"
 msgstr "   -U --add-underscore              Lisää alaviivat rajapintakirjaston std-kutsusymboleihin.\n"
 
-#: dlltool.c:3812
+#: dlltool.c:3818
 #, c-format
 msgid "   -k --kill-at              Kill @<n> from exported names.\n"
 msgstr "   -k --kill-at                     Tuhoa @<numeron> viedyistä nimistä.\n"
 
-#: dlltool.c:3813
+#: dlltool.c:3819
 #, c-format
 msgid "   -A --add-stdcall-alias    Add aliases without @<n>.\n"
 msgstr "   -A --add-stdcall-alias           Lisää aliaksia ilman @<numeroa>.\n"
 
-#: dlltool.c:3814
+#: dlltool.c:3820
 #, c-format
 msgid "   -p --ext-prefix-alias <prefix> Add aliases with <prefix>.\n"
 msgstr "   -p --ext-prefix-alias <prefiksi> Lisää aliaksiin <prefiksin>.\n"
 
-#: dlltool.c:3815
+#: dlltool.c:3821
 #, c-format
 msgid "   -S --as <name>            Use <name> for assembler.\n"
 msgstr "   -S --as <nimi>                   Käytä <nimeä> assemblerina.\n"
 
-#: dlltool.c:3816
+#: dlltool.c:3822
 #, c-format
 msgid "   -f --as-flags <flags>     Pass <flags> to the assembler.\n"
 msgstr "   -f --as-flags <liput>            Välitä <liput> assemblerille.\n"
 
-#: dlltool.c:3817
+#: dlltool.c:3823
 #, c-format
 msgid "   -C --compat-implib        Create backward compatible import library.\n"
 msgstr "   -C --compat-implib               Luo taaksepäin yhteensopiva tuontikirjasto.\n"
 
 #  Laskuria dontdeltemps kasvatetaan joka kerta kun -n esiintyy komentorivillä.
-#: dlltool.c:3818
+#: dlltool.c:3824
 #, c-format
 msgid "   -n --no-delete            Keep temp files (repeat for extra preservation).\n"
 msgstr "   -n --no-delete                   Pidä tilapäistiedostot (toisto lisäsäilytykseksi).\n"
 
-#: dlltool.c:3819
+#: dlltool.c:3825
 #, c-format
 msgid "   -t --temp-prefix <prefix> Use <prefix> to construct temp file names.\n"
 msgstr "   -t --temp-prefix <prefiksi>      Liitä <prefiksi> tilapäistiedostojen nimen eteen.\n"
 
-#: dlltool.c:3820
+#: dlltool.c:3826
 #, c-format
 msgid "   -I --identify <implib>    Report the name of the DLL associated with <implib>.\n"
 msgstr "   -I --identify <implib>    Ilmoita DLL-nimi, joka liittyi <implib>-kirjastoon.\n"
 
-#: dlltool.c:3821
+#: dlltool.c:3827
 #, c-format
 msgid "      --identify-strict      Causes --identify to report error when multiple DLLs.\n"
 msgstr "      --identify-strict      Saa valitsimen --identify ilmoittamaan virheestä kun DLL-moduleita on useita.\n"
 
-#: dlltool.c:3822
+#: dlltool.c:3828
 #, c-format
 msgid "   -v --verbose              Be verbose.\n"
 msgstr "   -v --verbose                     Laveasti.\n"
 
-#: dlltool.c:3823
+#: dlltool.c:3829
 #, c-format
 msgid "   -V --version              Display the program version.\n"
 msgstr "   -V --version                     Näytä ohjelman versio.\n"
 
-#: dlltool.c:3824
+#: dlltool.c:3830
 #, c-format
 msgid "   -h --help                 Display this information.\n"
 msgstr "   -h --help                        Näytä nämä tiedot.\n"
 
-#: dlltool.c:3825
+#: dlltool.c:3831
 #, c-format
 msgid "   @<file>                   Read options from <file>.\n"
 msgstr "   @<tiedosto>                      Lue valitsimet tiedostosta <tiedosto>.\n"
 
-#: dlltool.c:3827
+#: dlltool.c:3833
 #, c-format
 msgid "   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"
 msgstr "   -M --mcore-elf <tulostenimi>     Käsittele mcore-elf-objektitiedostot kohteeseen <tulostenimi>.\n"
 
-#: dlltool.c:3828
+#: dlltool.c:3834
 #, c-format
 msgid "   -L --linker <name>        Use <name> as the linker.\n"
 msgstr "   -L --linker <nimi>               Käytä parametriä <nimi> linkkerinä.\n"
 
-#: dlltool.c:3829
+#: dlltool.c:3835
 #, c-format
 msgid "   -F --linker-flags <flags> Pass <flags> to the linker.\n"
 msgstr "   -F --linker-flags <liput>        Välitä <liput> linkkerille.\n"
 
-#: dlltool.c:3966
+#: dlltool.c:3972
 #, c-format
 msgid "Path components stripped from dllname, '%s'."
 msgstr "Polkukomponentit riisuttu dll-nimestä, ”%s”."
 
-#: dlltool.c:4014
+#: dlltool.c:4020
 #, c-format
 msgid "Unable to open base-file: %s"
 msgstr "Ei voi avata perustiedostoa: %s"
 
-#: dlltool.c:4049
+#: dlltool.c:4055
 #, c-format
 msgid "Machine '%s' not supported"
 msgstr "Konetta ”%s” ei tueta"
 
-#: dlltool.c:4118
+#: dlltool.c:4124
 #, c-format
 msgid "Warning, machine type (%d) not supported for delayimport."
 msgstr "Varoitus, konetyyppi (%d) ei tue viivetuontia."
 
-#: dlltool.c:4186 dllwrap.c:201
+#: dlltool.c:4192 dllwrap.c:201
 #, c-format
 msgid "Tried file: %s"
 msgstr "Yritettiin tiedostoa: %s"
 
-#: dlltool.c:4193 dllwrap.c:208
+#: dlltool.c:4199 dllwrap.c:208
 #, c-format
 msgid "Using file: %s"
 msgstr "Käytetään tiedostoa: %s"
@@ -1314,21 +1314,21 @@ msgstr "YKSIKKÖ-nimi       : %s\n"
 msgid "DRIVER options  : %s\n"
 msgstr "YKSIKKÖ-valitsimet : %s\n"
 
-#: dwarf.c:101 dwarf.c:145 readelf.c:355 readelf.c:520
+#: dwarf.c:106 dwarf.c:155 readelf.c:357 readelf.c:525
 #, c-format
 msgid "Unhandled data length: %d\n"
 msgstr "Käsittelemätön data-pituus: %d\n"
 
-#: dwarf.c:294 dwarf.c:2625
+#: dwarf.c:304 dwarf.c:2649
 msgid "badly formed extended line op encountered!\n"
 msgstr "virheellisesti muotoiltu laajennusrivin käskykoodi tavattu!\n"
 
-#: dwarf.c:301
+#: dwarf.c:311
 #, c-format
 msgid "  Extended opcode %d: "
 msgstr "  Laajennettu käskykoodi %d: "
 
-#: dwarf.c:306
+#: dwarf.c:316
 #, c-format
 msgid ""
 "End of Sequence\n"
@@ -1337,32 +1337,32 @@ msgstr ""
 "Sekvenssin loppu\n"
 "\n"
 
-#: dwarf.c:312
+#: dwarf.c:322
 #, c-format
 msgid "set Address to 0x%lx\n"
 msgstr "aseta osoitteeksi 0x%lx\n"
 
-#: dwarf.c:317
+#: dwarf.c:327
 #, c-format
 msgid "  define new File Table entry\n"
 msgstr "  määrittele uusi tiedostotaulualkio\n"
 
-#: dwarf.c:318 dwarf.c:2240
+#: dwarf.c:328 dwarf.c:2263
 #, c-format
 msgid "  Entry\tDir\tTime\tSize\tName\n"
 msgstr "  Alkio\tHakemisto\tAika\tKoko\tNimi\n"
 
-#: dwarf.c:320
+#: dwarf.c:330
 #, c-format
 msgid "   %d\t"
 msgstr "   %d\t"
 
-#: dwarf.c:323 dwarf.c:325 dwarf.c:327 dwarf.c:2252 dwarf.c:2254 dwarf.c:2256
+#: dwarf.c:333 dwarf.c:335 dwarf.c:337 dwarf.c:2275 dwarf.c:2277 dwarf.c:2279
 #, c-format
 msgid "%lu\t"
 msgstr "%lu\t"
 
-#: dwarf.c:328
+#: dwarf.c:338
 #, c-format
 msgid ""
 "%s\n"
@@ -1371,7 +1371,7 @@ msgstr ""
 "%s\n"
 "\n"
 
-#: dwarf.c:332
+#: dwarf.c:342
 #, c-format
 msgid "set Discriminator to %lu\n"
 msgstr "aseta Erottajan arvoksi %lu\n"
@@ -1380,140 +1380,140 @@ msgstr "aseta Erottajan arvoksi %lu\n"
 #. the limited range of the unsigned char data type used
 #. for op_code.
 #. && op_code <= DW_LNE_hi_user
-#: dwarf.c:374
+#: dwarf.c:384
 #, c-format
 msgid "user defined: length %d\n"
 msgstr "käyttäjän määrittelemä: pituus %d\n"
 
-#: dwarf.c:376 dwarf.c:2656
+#: dwarf.c:386 dwarf.c:2680
 #, c-format
 msgid "UNKNOWN: length %d\n"
 msgstr "TUNTEMATON: pituus %d\n"
 
-#: dwarf.c:389
+#: dwarf.c:399
 msgid "<no .debug_str section>"
 msgstr "<ei .debug_str-lohkoa>"
 
-#: dwarf.c:395
+#: dwarf.c:405
 #, c-format
 msgid "DW_FORM_strp offset too big: %lx\n"
 msgstr "DW_FORM_strp-siirros liian suuri: %lx\n"
 
-#: dwarf.c:396
+#: dwarf.c:406
 msgid "<offset is too big>"
 msgstr "<siirros on liian suuri>"
 
-#: dwarf.c:629
+#: dwarf.c:639
 #, c-format
 msgid "Unknown TAG value: %lx"
 msgstr "Tuntematon tunnistearvo: %lx"
 
-#: dwarf.c:665
+#: dwarf.c:675
 #, c-format
 msgid "Unknown FORM value: %lx"
 msgstr "Tuntematon FORM-arvo: %lx"
 
-#: dwarf.c:674
+#: dwarf.c:684
 #, c-format
 msgid " %lu byte block: "
 msgstr " %lu:n tavun lohko: "
 
-#: dwarf.c:1092
+#: dwarf.c:1102
 #, c-format
 msgid "(User defined location op)"
 msgstr "(Käyttäjän määrittelemä sijoituskäskykoodi)"
 
-#: dwarf.c:1094
+#: dwarf.c:1104
 #, c-format
 msgid "(Unknown location op)"
 msgstr "(Tuntematon sijoituskäskykoodi)"
 
-#: dwarf.c:1142
+#: dwarf.c:1152
 msgid "Internal error: DWARF version is not 2 or 3.\n"
 msgstr "Sisäinen virhe: DWARF-versio ei ole 2 eikä 3.\n"
 
-#: dwarf.c:1241
+#: dwarf.c:1251
 msgid "DW_FORM_data8 is unsupported when sizeof (unsigned long) != 8\n"
 msgstr "DW_FORM_data8 ei ole tuettu, kun sizeof (unsigned long) != 8\n"
 
-#: dwarf.c:1290
+#: dwarf.c:1300
 #, c-format
 msgid " (indirect string, offset: 0x%lx): %s"
 msgstr " (epäsuora merkkijono, siirros: 0x%lx): %s"
 
-#: dwarf.c:1299
+#: dwarf.c:1309
 #, c-format
 msgid "Unrecognized form: %lu\n"
 msgstr "Tunnistamaton muoto: %lu\n"
 
-#: dwarf.c:1383
+#: dwarf.c:1393
 #, c-format
 msgid "(not inlined)"
 msgstr "(ei inline-funktiona)"
 
-#: dwarf.c:1386
+#: dwarf.c:1396
 #, c-format
 msgid "(inlined)"
 msgstr "(inline-funktiona)"
 
-#: dwarf.c:1389
+#: dwarf.c:1399
 #, c-format
 msgid "(declared as inline but ignored)"
 msgstr "(esitelty inline-funktiona, mutta esittelyä ei ole otettu huomioon)"
 
-#: dwarf.c:1392
+#: dwarf.c:1402
 #, c-format
 msgid "(declared as inline and inlined)"
 msgstr "(esitelty inline-funktiona ja toteutettu sellaisena)"
 
-#: dwarf.c:1395
+#: dwarf.c:1405
 #, c-format
 msgid "  (Unknown inline attribute value: %lx)"
 msgstr "  (Tuntematon inline-funktion attribuuttiarvo: %lx)"
 
-#: dwarf.c:1556
+#: dwarf.c:1566
 #, c-format
 msgid "(location list)"
 msgstr "(sijoitusluettelo)"
 
-#: dwarf.c:1575 dwarf.c:3257
+#: dwarf.c:1585 dwarf.c:3281
 #, c-format
 msgid " [without DW_AT_frame_base]"
 msgstr " [DW_AT_frame_base puuttuu]"
 
-#: dwarf.c:1587
+#: dwarf.c:1597
 #, c-format
 msgid "Offset %lx used as value for DW_AT_import attribute of DIE at offset %lx is too big.\n"
 msgstr "Siirros %lx, jota käytettiin DIE:n DW_AT_import-attribuutin arvona siirrososoitteessa %lx on liian suuri.\n"
 
-#: dwarf.c:1761
+#: dwarf.c:1771
 #, c-format
 msgid "Unknown AT value: %lx"
 msgstr "Tuntematon AT-arvo: %lx"
 
-#: dwarf.c:1828
+#: dwarf.c:1838
 #, c-format
 msgid "Reserved length value (%lx) found in section %s\n"
 msgstr "Varattu pituusarvo (%lx) löytyi lohkossa %s\n"
 
-#: dwarf.c:1839
+#: dwarf.c:1849
 #, c-format
 msgid "Corrupt unit length (%lx) found in section %s\n"
 msgstr "Rikkinäinen yksikköpituus (%lx) löytyi lohkossa %s\n"
 
 #  comp units tarkoittanee compilation unit eli käännösyksikköä?
-#: dwarf.c:1846
+#: dwarf.c:1856
 #, c-format
 msgid "No comp units in %s section ?"
 msgstr "Ei käännösyksikköjä %s-lohkossa ?"
 
-#: dwarf.c:1855
+#: dwarf.c:1865
 #, c-format
 msgid "Not enough memory for a debug info array of %u entries"
 msgstr "Muistia ei ole tarpeeksi %u:n alkion virheenjäljitystietotaulukolle"
 
-#: dwarf.c:1863 dwarf.c:2858 dwarf.c:2952 dwarf.c:3026 dwarf.c:3143
-#: dwarf.c:3292 dwarf.c:3350 dwarf.c:3546
+#: dwarf.c:1873 dwarf.c:2882 dwarf.c:2976 dwarf.c:3050 dwarf.c:3167
+#: dwarf.c:3316 dwarf.c:3374 dwarf.c:3571
 #, c-format
 msgid ""
 "Contents of the %s section:\n"
@@ -1522,80 +1522,80 @@ msgstr ""
 "Lohkon %s sisältö:\n"
 "\n"
 
-#: dwarf.c:1871
+#: dwarf.c:1881
 #, c-format
 msgid "Unable to locate %s section!\n"
 msgstr "Ei voi paikantaa %s-lohkoa!\n"
 
-#: dwarf.c:1934
+#: dwarf.c:1944
 #, c-format
 msgid "  Compilation Unit @ offset 0x%lx:\n"
 msgstr "  Käännösyksikkö @ siirros 0x%lx:\n"
 
 #  Välilyöntilisäys
-#: dwarf.c:1935
+#: dwarf.c:1945
 #, c-format
 msgid "   Length:        0x%lx (%s)\n"
 msgstr "   Pituus:        0x%lx (%s)\n"
 
 #  Välilyöntilisäys
-#: dwarf.c:1937
+#: dwarf.c:1947
 #, c-format
 msgid "   Version:       %d\n"
 msgstr "   Versio:         %d\n"
 
 #  Välilyöntilisäys
-#: dwarf.c:1938
+#: dwarf.c:1948
 #, c-format
 msgid "   Abbrev Offset: %ld\n"
 msgstr "   Lyhennesiirros: %ld\n"
 
 #  Välilyöntilisäys
-#: dwarf.c:1939
+#: dwarf.c:1949
 #, c-format
 msgid "   Pointer Size:  %d\n"
 msgstr "   Osoitinkoko:    %d\n"
 
-#: dwarf.c:1945
+#: dwarf.c:1955
 #, c-format
 msgid "Debug info is corrupted, length of CU at %lx extends beyond end of section (length = %lx)\n"
 msgstr "Virheenjäljitystieto on rikkinäinen, keskusyksikön pituus osoitteessa %lx ulottuu lohkon lopun ylitse (pituus = %lx)\n"
 
-#: dwarf.c:1954
+#: dwarf.c:1964
 #, c-format
 msgid "CU at offset %lx contains corrupt or unsupported version number: %d.\n"
 msgstr "Keskusyksikkö siirrososoitteessa %lx sisältää rikkinäisen tai tukemattoman versionumeron: %d.\n"
 
-#: dwarf.c:1964
+#: dwarf.c:1974
 #, c-format
 msgid "Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"
 msgstr "Virheenjäljitystieto on rikkinäinen, lyhennyssiirros (%lx) on laajempi kuin lyhennyslohkon koko (%lx)\n"
 
-#: dwarf.c:1998
+#: dwarf.c:2021
 #, c-format
 msgid "Bogus end-of-siblings marker detected at offset %lx in .debug_info section\n"
 msgstr "Valesisarusloppumerkitsijä havaittu siirrososoitteessa %lx lohkossa .debug_info\n"
 
-#: dwarf.c:2002
+#: dwarf.c:2025
 msgid "Further warnings about bogus end-of-sibling markers suppressed\n"
 msgstr "Lisävaroitukset valesisarusloppumerkitsijöistä on vaimennettu\n"
 
-#: dwarf.c:2009
+#: dwarf.c:2032
 #, c-format
 msgid " <%d><%lx>: Abbrev Number: %lu"
 msgstr " <%d><%lx>: Lyhennenumero: %lu"
 
-#: dwarf.c:2026
+#: dwarf.c:2049
 #, c-format
 msgid "DIE at offset %lx refers to abbreviation number %lu which does not exist\n"
 msgstr "DIE siirrososoitteessa %lx viittaa lyhennenumeroon %lu, jota ei ole olemassa\n"
 
-#: dwarf.c:2032
+#: dwarf.c:2055
 #, c-format
 msgid " (%s)\n"
 msgstr " (%s)\n"
 
-#: dwarf.c:2123
+#: dwarf.c:2146
 #, c-format
 msgid ""
 "Raw dump of debug contents of section %s:\n"
@@ -1604,66 +1604,66 @@ msgstr ""
 "Lohkon %s virheenjäljityssisällön raakavedos:\n"
 "\n"
 
-#: dwarf.c:2161
+#: dwarf.c:2184
 #, c-format
 msgid "The information in section %s appears to be corrupt - the section is too small\n"
 msgstr "Tiedot lohkossa %s näyttävät olevan rikkinäisiä - lohko on liian pieni\n"
 
-#: dwarf.c:2171 dwarf.c:2459
+#: dwarf.c:2194 dwarf.c:2482
 msgid "Only DWARF version 2 and 3 line info is currently supported.\n"
 msgstr "Vain DWARF-versioiden 2 ja 3 rivitiedot on nykyisin tuettu.\n"
 
 #  DWARF2_Internal_LineInfo-lohkon pituus
-#: dwarf.c:2192
+#: dwarf.c:2215
 #, c-format
 msgid "  Offset:                      0x%lx\n"
 msgstr "  Siirros:                     0x%lx\n"
 
 #  DWARF2_Internal_LineInfo-lohkon pituus
-#: dwarf.c:2193
+#: dwarf.c:2216
 #, c-format
 msgid "  Length:                      %ld\n"
 msgstr "  Pituus:                      %ld\n"
 
-#: dwarf.c:2194
+#: dwarf.c:2217
 #, c-format
 msgid "  DWARF Version:               %d\n"
 msgstr "  DWARF-versio:                %d\n"
 
-#: dwarf.c:2195
+#: dwarf.c:2218
 #, c-format
 msgid "  Prologue Length:             %d\n"
 msgstr "  Esitoimipituus:              %d\n"
 
-#: dwarf.c:2196
+#: dwarf.c:2219
 #, c-format
 msgid "  Minimum Instruction Length:  %d\n"
 msgstr "  Minimikäskypituus:           %d\n"
 
-#: dwarf.c:2197
+#: dwarf.c:2220
 #, c-format
 msgid "  Initial value of 'is_stmt':  %d\n"
 msgstr "  Kohteen ”is_stmt” alkuarvo: %d\n"
 
 #  Välilyönti lisätty tarkoituksella.
-#: dwarf.c:2198
+#: dwarf.c:2221
 #, c-format
 msgid "  Line Base:                   %d\n"
 msgstr "  Rivin kantaluku:             %d\n"
 
 #  Välilyönti lisätty tarkoituksella.
-#: dwarf.c:2199
+#: dwarf.c:2222
 #, c-format
 msgid "  Line Range:                  %d\n"
 msgstr "  Rivinumeroalue:              %d\n"
 
 #  Välilyönti lisätty tarkoituksella.
-#: dwarf.c:2200
+#: dwarf.c:2223
 #, c-format
 msgid "  Opcode Base:                 %d\n"
 msgstr "  Käskykoodin kantaluku:       %d\n"
 
-#: dwarf.c:2209
+#: dwarf.c:2232
 #, c-format
 msgid ""
 "\n"
@@ -1672,12 +1672,12 @@ msgstr ""
 "\n"
 " Käskykoodit:\n"
 
-#: dwarf.c:2212
+#: dwarf.c:2235
 #, c-format
 msgid "  Opcode %d has %d args\n"
 msgstr "  Käskykoodilla %d on %d argumenttia\n"
 
-#: dwarf.c:2218
+#: dwarf.c:2241
 #, c-format
 msgid ""
 "\n"
@@ -1686,7 +1686,7 @@ msgstr ""
 "\n"
 " Hakemistotaulu on tyhjä.\n"
 
-#: dwarf.c:2221
+#: dwarf.c:2244
 #, c-format
 msgid ""
 "\n"
@@ -1695,12 +1695,12 @@ msgstr ""
 "\n"
 " Hakemistotaulu:\n"
 
-#: dwarf.c:2225
+#: dwarf.c:2248
 #, c-format
 msgid "  %s\n"
 msgstr "  %s\n"
 
-#: dwarf.c:2236
+#: dwarf.c:2259
 #, c-format
 msgid ""
 "\n"
@@ -1709,7 +1709,7 @@ msgstr ""
 "\n"
 " Tiedostonimitaulu on tyhjä.\n"
 
-#: dwarf.c:2239
+#: dwarf.c:2262
 #, c-format
 msgid ""
 "\n"
@@ -1718,18 +1718,18 @@ msgstr ""
 "\n"
 " Tiedostonimitaulu:\n"
 
-#: dwarf.c:2247
+#: dwarf.c:2270
 #, c-format
 msgid "  %d\t"
 msgstr "  %d\t"
 
-#: dwarf.c:2258
+#: dwarf.c:2281
 #, c-format
 msgid "%s\n"
 msgstr "%s\n"
 
 #. Now display the statements.
-#: dwarf.c:2266
+#: dwarf.c:2289
 #, c-format
 msgid ""
 "\n"
@@ -1738,82 +1738,82 @@ msgstr ""
 "\n"
 " Rivi Numero Lauseet:\n"
 
-#: dwarf.c:2282
+#: dwarf.c:2305
 #, c-format
 msgid "  Special opcode %d: advance Address by %lu to 0x%lx"
 msgstr "  Erikoiskäskykoodi %d: kasvata %lu tavua osoitteeseen 0x%lx"
 
-#: dwarf.c:2286
+#: dwarf.c:2309
 #, c-format
 msgid " and Line by %d to %d\n"
 msgstr " ja %d riviä riville %d\n"
 
-#: dwarf.c:2296
+#: dwarf.c:2319
 #, c-format
 msgid "  Copy\n"
 msgstr "  Kopioi\n"
 
-#: dwarf.c:2304
+#: dwarf.c:2327
 #, c-format
 msgid "  Advance PC by %lu to 0x%lx\n"
 msgstr "  Kasvata PC:tä arvolla %lu arvoon 0x%lx\n"
 
-#: dwarf.c:2312
+#: dwarf.c:2335
 #, c-format
 msgid "  Advance Line by %d to %d\n"
 msgstr "  Kasvata riviä arvolla %d arvoon %d\n"
 
-#: dwarf.c:2319
+#: dwarf.c:2342
 #, c-format
 msgid "  Set File Name to entry %d in the File Name Table\n"
 msgstr "  Aseta tiedostonimi tiedostonimitaulun alkioon %d\n"
 
-#: dwarf.c:2327
+#: dwarf.c:2350
 #, c-format
 msgid "  Set column to %lu\n"
 msgstr "  Aseta sarakkeeksi %lu\n"
 
-#: dwarf.c:2334
+#: dwarf.c:2357
 #, c-format
 msgid "  Set is_stmt to %d\n"
 msgstr "  Aseta is_stmt-arvoksi %d\n"
 
-#: dwarf.c:2339
+#: dwarf.c:2362
 #, c-format
 msgid "  Set basic block\n"
 msgstr "  Aseta peruslohko\n"
 
-#: dwarf.c:2347
+#: dwarf.c:2370
 #, c-format
 msgid "  Advance PC by constant %lu to 0x%lx\n"
 msgstr "  Kasvata PC:tä vakiolla %lu arvoon 0x%lx\n"
 
-#: dwarf.c:2355
+#: dwarf.c:2378
 #, c-format
 msgid "  Advance PC by fixed size amount %lu to 0x%lx\n"
 msgstr "  Kasvata PC:tä kiinteäkokoisella summalla %lu arvoon 0x%lx\n"
 
-#: dwarf.c:2360
+#: dwarf.c:2383
 #, c-format
 msgid "  Set prologue_end to true\n"
 msgstr "  Aseta prologue_end-arvoksi true\n"
 
-#: dwarf.c:2364
+#: dwarf.c:2387
 #, c-format
 msgid "  Set epilogue_begin to true\n"
 msgstr "  Aseta epilogue_begin-arvoksi true\n"
 
-#: dwarf.c:2370 dwarf.c:2734
+#: dwarf.c:2393 dwarf.c:2758
 #, c-format
 msgid "  Set ISA to %lu\n"
 msgstr "  Aseta ISA-arvoksi %lu\n"
 
-#: dwarf.c:2374 dwarf.c:2738
+#: dwarf.c:2397 dwarf.c:2762
 #, c-format
 msgid "  Unknown opcode %d with operands: "
 msgstr "  Tuntematon käskykoodi %d, jonka operandit ovat: "
 
-#: dwarf.c:2407
+#: dwarf.c:2430
 #, c-format
 msgid ""
 "Decoded dump of debug contents of section %s:\n"
@@ -1822,32 +1822,32 @@ msgstr ""
 "Lohkon %s virheenjäljityssisällön dekoodattu vedos:\n"
 "\n"
 
-#: dwarf.c:2449
+#: dwarf.c:2472
 msgid "The line info appears to be corrupt - the section is too small\n"
 msgstr "Rivitiedot näyttävät olevan rikkinäisiä - lohko on liian pieni\n"
 
-#: dwarf.c:2568
+#: dwarf.c:2592
 #, c-format
 msgid "CU: %s:\n"
 msgstr "Keskusyksikkö: %s:\n"
 
-#: dwarf.c:2569 dwarf.c:2582
+#: dwarf.c:2593 dwarf.c:2606
 #, c-format
 msgid "File name                            Line number    Starting address\n"
 msgstr "Tiedostonimi                         Rivinumero     Aloitusosoite\n"
 
-#: dwarf.c:2575
+#: dwarf.c:2599
 #, c-format
 msgid "CU: %s/%s:\n"
 msgstr "Keskusyksikkö: %s/%s:\n"
 
-#: dwarf.c:2580 dwarf.c:2652
+#: dwarf.c:2604 dwarf.c:2676
 #, c-format
 msgid "%s:\n"
 msgstr "%s:\n"
 
 #. If directory index is 0, that means current directory.
-#: dwarf.c:2685
+#: dwarf.c:2709
 #, c-format
 msgid ""
 "\n"
@@ -1857,7 +1857,7 @@ msgstr ""
 "./%s:[++]\n"
 
 #. The directory index starts counting at 1.
-#: dwarf.c:2691
+#: dwarf.c:2715
 #, c-format
 msgid ""
 "\n"
@@ -1866,52 +1866,52 @@ msgstr ""
 "\n"
 "%s/%s:\n"
 
-#: dwarf.c:2776
+#: dwarf.c:2800
 #, c-format
 msgid "%-35s  %11d  %#18lx\n"
 msgstr "%-35s  %11d  %#18lx\n"
 
-#: dwarf.c:2781
+#: dwarf.c:2805
 #, c-format
 msgid "%s  %11d  %#18lx\n"
 msgstr "%s  %11d  %#18lx\n"
 
-#: dwarf.c:2811 dwarf.c:3088 dwarf.c:3510
+#: dwarf.c:2835 dwarf.c:3112 dwarf.c:3534
 #, c-format
 msgid "Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"
 msgstr "Ei kyetä lataamaan/jäsentämään .debug_info-lohkoa, joten ei voida tulkita %s-lohkoa.\n"
 
-#: dwarf.c:2892 dwarf.c:3395
+#: dwarf.c:2916 dwarf.c:3419
 #, c-format
 msgid ".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"
 msgstr ".debug_info-siirrososoite: 0x%lx lohkossa %s ei osoita keskusyksikköotsakkeeseen.\n"
 
 #  tarkoittaako pubnames julkisia nimiä?
-#: dwarf.c:2906
+#: dwarf.c:2930
 msgid "Only DWARF 2 and 3 pubnames are currently supported\n"
 msgstr "Vain DWARF 2:n ja 3:n pub-nimet ovat nykyisin tuettuja\n"
 
-#: dwarf.c:2913
+#: dwarf.c:2937
 #, c-format
 msgid "  Length:                              %ld\n"
 msgstr "  Pituus:                              %ld\n"
 
-#: dwarf.c:2915
+#: dwarf.c:2939
 #, c-format
 msgid "  Version:                             %d\n"
 msgstr "  Versio:                              %d\n"
 
-#: dwarf.c:2917
+#: dwarf.c:2941
 #, c-format
 msgid "  Offset into .debug_info section:     0x%lx\n"
 msgstr "  Siirros lohkoon .debug_info:         0x%lx\n"
 
-#: dwarf.c:2919
+#: dwarf.c:2943
 #, c-format
 msgid "  Size of area in .debug_info section: %ld\n"
 msgstr "  Alueen koko .debug_info-lohkossa:    %ld\n"
 
-#: dwarf.c:2922
+#: dwarf.c:2946
 #, c-format
 msgid ""
 "\n"
@@ -1920,60 +1920,60 @@ msgstr ""
 "\n"
 "    Siirros\tNimi\n"
 
-#: dwarf.c:2973
+#: dwarf.c:2997
 #, c-format
 msgid " DW_MACINFO_start_file - lineno: %d filenum: %d\n"
 msgstr " DW_MACINFO_start_file - rivinro:%d tied.nro:%d\n"
 
-#: dwarf.c:2979
+#: dwarf.c:3003
 #, c-format
 msgid " DW_MACINFO_end_file\n"
 msgstr " DW_MACINFO_end_file\n"
 
 #  lineno tarkoittaa ilmeisesti rivinumeroa
-#: dwarf.c:2987
+#: dwarf.c:3011
 #, c-format
 msgid " DW_MACINFO_define - lineno : %d macro : %s\n"
 msgstr " DW_MACINFO_define - rivinro: %d makro : %s\n"
 
 #  lineno tarkoittaa ilmeisesti rivinumeroa
-#: dwarf.c:2996
+#: dwarf.c:3020
 #, c-format
 msgid " DW_MACINFO_undef - lineno : %d macro : %s\n"
 msgstr " DW_MACINFO_undef - rivinro: %d makro : %s\n"
 
-#: dwarf.c:3008
+#: dwarf.c:3032
 #, c-format
 msgid " DW_MACINFO_vendor_ext - constant : %d string : %s\n"
 msgstr " DW_MACINFO_vendor_ext - vakio : %d merkkijono : %s\n"
 
 #  Seuraava on taulukon otsikko. Itse taulukko on leveydeltään: "   %ld      %s    [%s]". Viimeinen [%s] sisältää tekstin "has children" tai "no children".
-#: dwarf.c:3037
+#: dwarf.c:3061
 #, c-format
 msgid "  Number TAG\n"
 msgstr "  Numero Tunniste\n"
 
 #  Tämä pitäisi oikeastaan jättää pois käännettävistä teksteistä !!
-#: dwarf.c:3043
+#: dwarf.c:3067
 #, c-format
 msgid "   %ld      %s    [%s]\n"
 msgstr "   %ld      %s    [%s]\n"
 
-#: dwarf.c:3046
+#: dwarf.c:3070
 msgid "has children"
 msgstr "on jälkeläisiä"
 
-#: dwarf.c:3046
+#: dwarf.c:3070
 msgid "no children"
 msgstr "ei jälkeläisiä"
 
 #  Seuraava pitäisi oikeastaan jättää pois käännettävistä teksteistä.
-#: dwarf.c:3049
+#: dwarf.c:3073
 #, c-format
 msgid "    %-18s %s\n"
 msgstr "    %-18s %s\n"
 
-#: dwarf.c:3082 dwarf.c:3288 dwarf.c:3504
+#: dwarf.c:3106 dwarf.c:3312 dwarf.c:3528
 #, c-format
 msgid ""
 "\n"
@@ -1983,101 +1983,101 @@ msgstr ""
 "Lohko %s on tyhjä.\n"
 
 #. FIXME: Should we handle this case?
-#: dwarf.c:3132
+#: dwarf.c:3156
 msgid "Location lists in .debug_info section aren't in ascending order!\n"
 msgstr "Sijaintiluettelot .debug_info-lohkossa eivät ole nousevassa järjestyksessä!\n"
 
-#: dwarf.c:3135
+#: dwarf.c:3159
 msgid "No location lists in .debug_info section!\n"
 msgstr "Ei sijaintiluetteloja .debug_info-lohkossa!\n"
 
-#: dwarf.c:3140
+#: dwarf.c:3164
 #, c-format
 msgid "Location lists in %s section start at 0x%lx\n"
 msgstr "Sijaintiluettelot %s-lohkossa alkavat osoitteesta 0x%lx\n"
 
-#: dwarf.c:3144
+#: dwarf.c:3168
 #, c-format
 msgid "    Offset   Begin    End      Expression\n"
 msgstr "    Siirros  Alku     Loppu    Lauseke\n"
 
-#: dwarf.c:3175
+#: dwarf.c:3199
 #, c-format
 msgid "There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"
 msgstr "Lohkossa .debug_loc on aukko [0x%lx - 0x%lx].\n"
 
-#: dwarf.c:3179
+#: dwarf.c:3203
 #, c-format
 msgid "There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"
 msgstr "Lohkossa .debug_loc on päällekkäisyys [0x%lx - 0x%lx].\n"
 
-#: dwarf.c:3187
+#: dwarf.c:3211
 #, c-format
 msgid "Offset 0x%lx is bigger than .debug_loc section size.\n"
 msgstr "Siirros 0x%lx on suurempi kuin .debug_loc-lohkon koko.\n"
 
-#: dwarf.c:3196 dwarf.c:3231 dwarf.c:3241
+#: dwarf.c:3220 dwarf.c:3255 dwarf.c:3265
 #, c-format
 msgid "Location list starting at offset 0x%lx is not terminated.\n"
 msgstr "Siirroksesta 0x%lx alkavaa sijaintiluetteloa ei ole päätetty.\n"
 
-#: dwarf.c:3215 dwarf.c:3597
+#: dwarf.c:3239 dwarf.c:3622
 #, c-format
 msgid "<End of list>\n"
 msgstr "<Luettelon loppu>\n"
 
-#: dwarf.c:3225
+#: dwarf.c:3249
 #, c-format
 msgid "(base address)\n"
 msgstr "(perusosoite)\n"
 
-#: dwarf.c:3260
+#: dwarf.c:3284
 msgid " (start == end)"
 msgstr " (alku == loppu)"
 
-#: dwarf.c:3262
+#: dwarf.c:3286
 msgid " (start > end)"
 msgstr " (alku > loppu)"
 
-#: dwarf.c:3272
+#: dwarf.c:3296
 #, c-format
 msgid "There are %ld unused bytes at the end of section %s\n"
 msgstr "Käyttämättömiä tavuja on %ld lohkon %s lopussa\n"
 
-#: dwarf.c:3406
+#: dwarf.c:3430
 msgid "Only DWARF 2 and 3 aranges are currently supported.\n"
 msgstr "Vain DWARF 2- ja 3-aranges on nykyisin tuettu.\n"
 
-#: dwarf.c:3410
+#: dwarf.c:3434
 #, c-format
 msgid "  Length:                   %ld\n"
 msgstr "  Pituus:                      %ld\n"
 
-#: dwarf.c:3411
+#: dwarf.c:3435
 #, c-format
 msgid "  Version:                  %d\n"
 msgstr "  Versio:                      %d\n"
 
-#: dwarf.c:3412
+#: dwarf.c:3436
 #, c-format
 msgid "  Offset into .debug_info:  0x%lx\n"
 msgstr "  Siirros lohkoon .debug_info: 0x%lx\n"
 
-#: dwarf.c:3413
+#: dwarf.c:3437
 #, c-format
 msgid "  Pointer Size:             %d\n"
 msgstr "  Osoitinkoko:                 %d\n"
 
-#: dwarf.c:3414
+#: dwarf.c:3438
 #, c-format
 msgid "  Segment Size:             %d\n"
 msgstr "  Segmenttikoko:               %d\n"
 
-#: dwarf.c:3423
+#: dwarf.c:3447
 msgid "Pointer size + Segment size is not a power of two.\n"
 msgstr "Osoitinkoko + segmenttikoko ei ole kahden potenssi.\n"
 
-#: dwarf.c:3428
+#: dwarf.c:3452
 #, c-format
 msgid ""
 "\n"
@@ -2086,7 +2086,7 @@ msgstr ""
 "\n"
 "    Osoite            Pituus\n"
 
-#: dwarf.c:3430
+#: dwarf.c:3454
 #, c-format
 msgid ""
 "\n"
@@ -2095,73 +2095,73 @@ msgstr ""
 "\n"
 "    Osoite    Pituus\n"
 
-#: dwarf.c:3520
+#: dwarf.c:3544
 msgid "No range lists in .debug_info section!\n"
 msgstr "Ei lukualueluetteloja .debug_info-lohkossa!\n"
 
-#: dwarf.c:3543
+#: dwarf.c:3568
 #, c-format
 msgid "Range lists in %s section start at 0x%lx\n"
 msgstr "Lukualueluettelot %s-lohkossa alkavat osoitteesta 0x%lx\n"
 
-#: dwarf.c:3547
+#: dwarf.c:3572
 #, c-format
 msgid "    Offset   Begin    End\n"
 msgstr "    Siirros  Alku     Loppu\n"
 
-#: dwarf.c:3568
+#: dwarf.c:3593
 #, c-format
 msgid "There is a hole [0x%lx - 0x%lx] in %s section.\n"
 msgstr "Aukko [0x%lx - 0x%lx] lohkossa %s.\n"
 
-#: dwarf.c:3572
+#: dwarf.c:3597
 #, c-format
 msgid "There is an overlap [0x%lx - 0x%lx] in %s section.\n"
 msgstr "Päällekkäisyys [0x%lx - 0x%lx] lohkossa %s.\n"
 
-#: dwarf.c:3615
+#: dwarf.c:3640
 msgid "(start == end)"
 msgstr "(alku == loppu)"
 
-#: dwarf.c:3617
+#: dwarf.c:3642
 msgid "(start > end)"
 msgstr "(alku > loppu)"
 
-#: dwarf.c:3853
+#: dwarf.c:3879
 msgid "bad register: "
 msgstr "virheellinen rekisteri: "
 
-#: dwarf.c:3855
+#: dwarf.c:3881
 #, c-format
 msgid "Contents of the %s section:\n"
 msgstr "Lohkon %s sisältö:\n"
 
-#: dwarf.c:4619
+#: dwarf.c:4646
 #, c-format
 msgid "  DW_CFA_??? (User defined call frame op: %#x)\n"
 msgstr "  DW_CFA_??? (Käyttäjämääritelty kutsukehyskäsky: %#x)\n"
 
-#: dwarf.c:4621
+#: dwarf.c:4648
 #, c-format
 msgid "unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"
 msgstr "tukematon tai tuntematon Dwarf-kutsukehyskäskynumero: %#x\n"
 
-#: dwarf.c:4645
+#: dwarf.c:4672
 #, c-format
 msgid "Displaying the debug contents of section %s is not yet supported.\n"
 msgstr "Lohkon %s virheenjäljityssisällön näyttäminen ei ole vielä tuettu.\n"
 
-#: dwarf.c:4687
+#: dwarf.c:4714
 #, c-format
 msgid "%s: Error: "
 msgstr "%s: Virhe: "
 
-#: dwarf.c:4698
+#: dwarf.c:4725
 #, c-format
 msgid "%s: Warning: "
 msgstr "%s: Varoitus: "
 
-#: dwarf.c:4796 dwarf.c:4862
+#: dwarf.c:4823 dwarf.c:4889
 #, c-format
 msgid "Unrecognized debug option '%s'\n"
 msgstr "Tunnistamaton virheenjäljitysvalitsin ”%s”\n"
@@ -2187,240 +2187,240 @@ msgid "  [-X32_64]    - accepts 32 and 64 bit objects\n"
 msgstr "  [-X32_64]    - hyväksyy 32- ja 64-bittiset objektit\n"
 
 #  Lähdekoodin kommentti ennen tulostusta: Report an unexpected EOF in the IEEE debugging information.
-#: ieee.c:309
+#: ieee.c:311
 msgid "unexpected end of debugging information"
 msgstr "odottamaton IEEE-virheenjäljitystietojen loppu"
 
-#: ieee.c:396
+#: ieee.c:398
 msgid "invalid number"
 msgstr "virheellinen numero"
 
-#: ieee.c:449
+#: ieee.c:451
 msgid "invalid string length"
 msgstr "virheellinen merkkijonopituus"
 
-#: ieee.c:504 ieee.c:545
+#: ieee.c:506 ieee.c:547
 msgid "expression stack overflow"
 msgstr "lausekepinon ylivuoto"
 
-#: ieee.c:524
+#: ieee.c:526
 msgid "unsupported IEEE expression operator"
 msgstr "ei-tuettu IEEE-lausekeoperaattori"
 
-#: ieee.c:539
+#: ieee.c:541
 msgid "unknown section"
 msgstr "tuntematon lohko"
 
-#: ieee.c:560
+#: ieee.c:562
 msgid "expression stack underflow"
 msgstr "lausekepinon ehtyminen"
 
-#: ieee.c:574
+#: ieee.c:576
 msgid "expression stack mismatch"
 msgstr "lausekepinon täsmäämättömyys"
 
-#: ieee.c:611
+#: ieee.c:613
 msgid "unknown builtin type"
 msgstr "tuntematon rakenteeseen sisältyvä tyyppi"
 
-#: ieee.c:756
+#: ieee.c:758
 msgid "BCD float type not supported"
 msgstr "ei-tuettu binäärikoodattu desimaaliliukulukutyyppi"
 
-#: ieee.c:893
+#: ieee.c:895
 msgid "unexpected number"
 msgstr "odottamaton numero"
 
-#: ieee.c:900
+#: ieee.c:902
 msgid "unexpected record type"
 msgstr "odottamaton tietuetyyppi"
 
-#: ieee.c:933
+#: ieee.c:935
 msgid "blocks left on stack at end"
 msgstr "lohkoja jäi pinoon lopussa"
 
 #  Handle an IEEE BB record.
-#: ieee.c:1206
+#: ieee.c:1208
 msgid "unknown BB type"
 msgstr "tuntematon IEEE-BB-tietuetyyppi"
 
-#: ieee.c:1215
+#: ieee.c:1217
 msgid "stack overflow"
 msgstr "pinon ylivuoto"
 
-#: ieee.c:1238
+#: ieee.c:1240
 msgid "stack underflow"
 msgstr "pinon ehtyminen"
 
-#: ieee.c:1350 ieee.c:1420 ieee.c:2118
+#: ieee.c:1352 ieee.c:1422 ieee.c:2120
 msgid "illegal variable index"
 msgstr "virheellinen muuttujaindeksi"
 
-#: ieee.c:1398
+#: ieee.c:1400
 msgid "illegal type index"
 msgstr "virheellinen tyyppi-indeksi"
 
-#: ieee.c:1408 ieee.c:1445
+#: ieee.c:1410 ieee.c:1447
 msgid "unknown TY code"
 msgstr "tuntematon TY-koodi"
 
-#: ieee.c:1427
+#: ieee.c:1429
 msgid "undefined variable in TY"
 msgstr "määrittelemätön muuttuja kohteessa TY"
 
 #. Pascal file name.  FIXME.
-#: ieee.c:1839
+#: ieee.c:1841
 msgid "Pascal file name not supported"
 msgstr "Pascal-tiedostonimeä ei tueta"
 
-#: ieee.c:1887
+#: ieee.c:1889
 msgid "unsupported qualifier"
 msgstr "ei-tuettu tarkenne"
 
-#: ieee.c:2156
+#: ieee.c:2158
 msgid "undefined variable in ATN"
 msgstr "määrittelemätön muuttuja kohteessa ATN"
 
-#: ieee.c:2199
+#: ieee.c:2201
 msgid "unknown ATN type"
 msgstr "tuntematon ATN-tyyppi"
 
 #. Reserved for FORTRAN common.
-#: ieee.c:2321
+#: ieee.c:2323
 msgid "unsupported ATN11"
 msgstr "ei-tuettu ATN11"
 
 #. We have no way to record this information.  FIXME.
-#: ieee.c:2348
+#: ieee.c:2350
 msgid "unsupported ATN12"
 msgstr "ei-tuettu ATN12"
 
 #  Kahdessa seuraavassa on kyse samasta tietueesta.
-#: ieee.c:2408
+#: ieee.c:2410
 msgid "unexpected string in C++ misc"
 msgstr "odottamaton merkkijono C++-misc-tietueessa"
 
-#: ieee.c:2421
+#: ieee.c:2423
 msgid "bad misc record"
 msgstr "virheellinen misc-tietue"
 
-#: ieee.c:2462
+#: ieee.c:2464
 msgid "unrecognized C++ misc record"
 msgstr "tunnistamaton C++-misc-tietue"
 
-#: ieee.c:2577
+#: ieee.c:2579
 msgid "undefined C++ object"
 msgstr "määrittelemätön C++-objekti"
 
-#: ieee.c:2611
+#: ieee.c:2613
 msgid "unrecognized C++ object spec"
 msgstr "tunnistamaton C++-objektimäärittely"
 
-#: ieee.c:2647
+#: ieee.c:2649
 msgid "unsupported C++ object type"
 msgstr "ei-tuettu C++-objektityyppi"
 
-#: ieee.c:2657
+#: ieee.c:2659
 msgid "C++ base class not defined"
 msgstr "C++-kantaluokkaa ei ole määritelty"
 
-#: ieee.c:2669 ieee.c:2774
+#: ieee.c:2671 ieee.c:2776
 msgid "C++ object has no fields"
 msgstr "C++-objektissa ei ole kenttiä"
 
-#: ieee.c:2688
+#: ieee.c:2690
 msgid "C++ base class not found in container"
 msgstr "C++-kantaluokkaa ei löytynyt containerista"
 
-#: ieee.c:2795
+#: ieee.c:2797
 msgid "C++ data member not found in container"
 msgstr "C++-data-jäsentä ei löytynyt containerista"
 
-#: ieee.c:2836 ieee.c:2986
+#: ieee.c:2838 ieee.c:2988
 msgid "unknown C++ visibility"
 msgstr "tuntematon C++-näkyvyys"
 
-#: ieee.c:2870
+#: ieee.c:2872
 msgid "bad C++ field bit pos or size"
 msgstr "virheellinen C++-kenttäbittisijainti tai koko"
 
-#: ieee.c:2962
+#: ieee.c:2964
 msgid "bad type for C++ method function"
 msgstr "virheellinen C++-metodifunktion tyyppi"
 
-#: ieee.c:2972
+#: ieee.c:2974
 msgid "no type information for C++ method function"
 msgstr "ei tyyppitietoa C++-metodifunktiossa"
 
-#: ieee.c:3011
+#: ieee.c:3013
 msgid "C++ static virtual method"
 msgstr "C++ staattinen virtuaalimetodi"
 
-#: ieee.c:3106
+#: ieee.c:3108
 msgid "unrecognized C++ object overhead spec"
 msgstr "tunnistamaton C++-objektin yleisrasitemääritys"
 
-#: ieee.c:3145
+#: ieee.c:3147
 msgid "undefined C++ vtable"
 msgstr "määrittelemätön C++-vtable"
 
-#: ieee.c:3214
+#: ieee.c:3216
 msgid "C++ default values not in a function"
 msgstr "funktiossa ei ole C++-oletusarvoja"
 
-#: ieee.c:3254
+#: ieee.c:3256
 msgid "unrecognized C++ default type"
 msgstr "tunnistamaton C++-oletustyyppi"
 
-#: ieee.c:3285
+#: ieee.c:3287
 msgid "reference parameter is not a pointer"
 msgstr "viiteparametri ei ole osoitin"
 
-#: ieee.c:3368
+#: ieee.c:3370
 msgid "unrecognized C++ reference type"
 msgstr "tunnistamaton C++-viitetyyppi"
 
-#: ieee.c:3450
+#: ieee.c:3452
 msgid "C++ reference not found"
 msgstr "C++-viite ei löytynyt"
 
-#: ieee.c:3458
+#: ieee.c:3460
 msgid "C++ reference is not pointer"
 msgstr "C++-viite ei ole osoitin"
 
-#: ieee.c:3484 ieee.c:3492
+#: ieee.c:3486 ieee.c:3494
 msgid "missing required ASN"
 msgstr "vaadittu ASN puuttuu"
 
-#: ieee.c:3519 ieee.c:3527
+#: ieee.c:3521 ieee.c:3529
 msgid "missing required ATN65"
 msgstr "vaadittu ATN65 puuttuu"
 
-#: ieee.c:3541
+#: ieee.c:3543
 msgid "bad ATN65 record"
 msgstr "virheellinen ATN65-tietue"
 
-#: ieee.c:4169
+#: ieee.c:4171
 #, c-format
 msgid "IEEE numeric overflow: 0x"
 msgstr "IEEE numeerinen ylivuoto: 0x"
 
-#: ieee.c:4213
+#: ieee.c:4215
 #, c-format
 msgid "IEEE string length overflow: %u\n"
 msgstr "IEEE merkkijonopituuden ylivuoto: %u\n"
 
-#: ieee.c:5210
+#: ieee.c:5212
 #, c-format
 msgid "IEEE unsupported integer type size %u\n"
 msgstr "ei-tuettu IEEE kokonaislukutyyppikoko %u\n"
 
-#: ieee.c:5244
+#: ieee.c:5246
 #, c-format
 msgid "IEEE unsupported float type size %u\n"
 msgstr "ei-tuettu IEEE liukulukutyyppikoko %u\n"
 
-#: ieee.c:5278
+#: ieee.c:5280
 #, c-format
 msgid "IEEE unsupported complex type size %u\n"
 msgstr "ei-tuettu IEEE kompleksilukutyyppikoko %u\n"
@@ -2730,17 +2730,17 @@ msgstr "%s: virheellinen kantaluku"
 msgid "%s: invalid output format"
 msgstr "%s: virheellinen tulostemuoto"
 
-#: nm.c:337 readelf.c:6917 readelf.c:6962
+#: nm.c:337 readelf.c:7016 readelf.c:7061
 #, c-format
 msgid "<processor specific>: %d"
 msgstr "<suoritinkohtainen>: %d"
 
-#: nm.c:339 readelf.c:6926 readelf.c:6980
+#: nm.c:339 readelf.c:7025 readelf.c:7079
 #, c-format
 msgid "<OS specific>: %d"
 msgstr "<Käyttöjärjestelmäkohtainen>: %d"
 
-#: nm.c:341 readelf.c:6929 readelf.c:6983
+#: nm.c:341 readelf.c:7028 readelf.c:7082
 #, c-format
 msgid "<unknown>: %d"
 msgstr "<tuntematon>: %d"
@@ -3126,7 +3126,7 @@ msgstr "tuetut liput: %s"
 msgid "cannot open '%s': %s"
 msgstr "ei voi avata kohdetta ”%s”: %s"
 
-#: objcopy.c:751 objcopy.c:3335
+#: objcopy.c:751 objcopy.c:3336
 #, c-format
 msgid "%s: fread failed"
 msgstr "%s: fread-kutsu epäonnistui"
@@ -3136,308 +3136,308 @@ msgstr "%s: fread-kutsu epäonnistui"
 msgid "%s:%d: Ignoring rubbish found on this line"
 msgstr "%s:%d: Ei oteta huomioon tältä riviltä löydettyä roskaa"
 
-#: objcopy.c:1120
+#: objcopy.c:1121
 #, c-format
 msgid "not stripping symbol `%s' because it is named in a relocation"
 msgstr "ei riisuta symbolia ”%s” koska se on nimetty uudelleensijoituksessa"
 
-#: objcopy.c:1203
+#: objcopy.c:1204
 #, c-format
 msgid "%s: Multiple redefinition of symbol \"%s\""
 msgstr "%s: Useita symbolin ”%s” uudelleenmäärittelyjä"
 
-#: objcopy.c:1207
+#: objcopy.c:1208
 #, c-format
 msgid "%s: Symbol \"%s\" is target of more than one redefinition"
 msgstr "%s: Symboli ”%s” on kohteena useammalle kuin yhdelle uudelleenmäärittelylle"
 
-#: objcopy.c:1235
+#: objcopy.c:1236
 #, c-format
 msgid "couldn't open symbol redefinition file %s (error: %s)"
 msgstr "ei voitu avata symbolien uudelleenmäärittelytiedostoa %s (virhe: %s)"
 
-#: objcopy.c:1313
+#: objcopy.c:1314
 #, c-format
 msgid "%s:%d: garbage found at end of line"
 msgstr "%s:%d: rivin lopusta löytyi roskaa"
 
-#: objcopy.c:1316
+#: objcopy.c:1317
 #, c-format
 msgid "%s:%d: missing new symbol name"
 msgstr "%s:%d: uusi symbolinimi puuttuu"
 
-#: objcopy.c:1326
+#: objcopy.c:1327
 #, c-format
 msgid "%s:%d: premature end of file"
 msgstr "%s:%d: ennenaikainen tiedoston loppu"
 
 #  stat on *nix-ympäristön vakiokomentoja (katso: man stat)
-#: objcopy.c:1352
+#: objcopy.c:1353
 #, c-format
 msgid "stat returns negative size for `%s'"
 msgstr "stat-kutsu palauttaa negatiivisen koon kohteelle ”%s”"
 
-#: objcopy.c:1364
+#: objcopy.c:1365
 #, c-format
 msgid "copy from `%s' [unknown] to `%s' [unknown]\n"
 msgstr "kopioidaan arvosta ”%s” [tuntematon] arvoon ”%s” [tuntematon]\n"
 
-#: objcopy.c:1419
+#: objcopy.c:1420
 msgid "Unable to change endianness of input file(s)"
 msgstr "Ei voi muuttaa syötetiedosto(je)n tavujärjestystyyppiä"
 
-#: objcopy.c:1428
+#: objcopy.c:1429
 #, c-format
 msgid "copy from `%s' [%s] to `%s' [%s]\n"
 msgstr "kopioidaan kohteesta ”%s” [%s] kohteeseen ”%s” [%s]\n"
 
-#: objcopy.c:1473
+#: objcopy.c:1474
 #, c-format
 msgid "Unable to recognise the format of the input file `%s'"
 msgstr "Syötetiedoston ”%s” muotoa ei voi tunnistaa"
 
-#: objcopy.c:1476
+#: objcopy.c:1477
 #, c-format
 msgid "Warning: Output file cannot represent architecture `%s'"
 msgstr "Varoitus: Tulostetiedosto ei voi edustaa arkkitehtuuria ”%s”"
 
-#: objcopy.c:1539
+#: objcopy.c:1540
 #, c-format
 msgid "warning: file alignment (0x%s) > section alignment (0x%s)"
 msgstr "varoitus: tiedostotasaus (0x%s) > lohkotasaus (0x%s)"
 
-#: objcopy.c:1598
+#: objcopy.c:1599
 #, c-format
 msgid "can't add section '%s'"
 msgstr "ei voi lisätä lohkoa ”%s”"
 
-#: objcopy.c:1607
+#: objcopy.c:1608
 #, c-format
 msgid "can't create section `%s'"
 msgstr "ei voi luoda lohkoa ”%s”"
 
-#: objcopy.c:1653
+#: objcopy.c:1654
 #, c-format
 msgid "cannot create debug link section `%s'"
 msgstr "ei voi luoda virheenjäljityslinkkilohkoa ”%s”"
 
-#: objcopy.c:1746
+#: objcopy.c:1747
 msgid "Can't fill gap after section"
 msgstr "Ei voi täyttää väliä lohkon jälkeen"
 
-#: objcopy.c:1770
+#: objcopy.c:1771
 msgid "can't add padding"
 msgstr "ei voi lisätä täytettä"
 
-#: objcopy.c:1861
+#: objcopy.c:1862
 #, c-format
 msgid "cannot fill debug link section `%s'"
 msgstr "ei voi täyttää virheenjäljityslinkkilohkoa ”%s”"
 
-#: objcopy.c:1924
+#: objcopy.c:1925
 msgid "error copying private BFD data"
 msgstr "virhe kopioitaessa yksityistä BFD-dataa"
 
-#: objcopy.c:1935
+#: objcopy.c:1936
 #, c-format
 msgid "this target does not support %lu alternative machine codes"
 msgstr "tämä kohde ei tue %lu vaihtoehtoisia konekoodeja"
 
-#: objcopy.c:1939
+#: objcopy.c:1940
 msgid "treating that number as an absolute e_machine value instead"
 msgstr "käsitellään tuota numeroa absoluuttisena e_machine-arvona eikä"
 
-#: objcopy.c:1943
+#: objcopy.c:1944
 msgid "ignoring the alternative value"
 msgstr "ei oteta huomioon vaihtoehtoista arvoa"
 
-#: objcopy.c:1974 objcopy.c:2009
+#: objcopy.c:1975 objcopy.c:2010
 #, c-format
 msgid "cannot create tempdir for archive copying (error: %s)"
 msgstr "ei voi luoda tempdir-hakemistoa arkiston kopiointiin (virhe: %s)"
 
-#: objcopy.c:2070
+#: objcopy.c:2071
 msgid "Unable to recognise the format of file"
 msgstr "Tiedoston muotoa ei voi tunnistaa"
 
-#: objcopy.c:2167
+#: objcopy.c:2168
 #, c-format
 msgid "error: the input file '%s' is empty"
 msgstr "virhe: syötetiedosto ”%s” on tyhjä"
 
-#: objcopy.c:2299
+#: objcopy.c:2300
 #, c-format
 msgid "Multiple renames of section %s"
 msgstr "Useita lohkon %s uudelleennimeämisiä"
 
-#: objcopy.c:2350
+#: objcopy.c:2351
 msgid "error in private header data"
 msgstr "virhe yksityisessä otsakedatassa"
 
-#: objcopy.c:2428
+#: objcopy.c:2429
 msgid "failed to create output section"
 msgstr "tulostelohkon luominen epäonnistui"
 
-#: objcopy.c:2442
+#: objcopy.c:2443
 msgid "failed to set size"
 msgstr "koon asettaminen epäonnistui"
 
-#: objcopy.c:2456
+#: objcopy.c:2457
 msgid "failed to set vma"
 msgstr "virtuaalisen muistiosoitteen asettaminen epäonnistui"
 
-#: objcopy.c:2481
+#: objcopy.c:2482
 msgid "failed to set alignment"
 msgstr "tasauksen asettaminen epäonnistui"
 
-#: objcopy.c:2515
+#: objcopy.c:2516
 msgid "failed to copy private data"
 msgstr "yksityisen datan kopioiminen epäonnistui"
 
-#: objcopy.c:2597
+#: objcopy.c:2598
 msgid "relocation count is negative"
 msgstr "uudelleensijoituslaskuri on negatiivinen"
 
 #. User must pad the section up in order to do this.
-#: objcopy.c:2658
+#: objcopy.c:2659
 #, c-format
 msgid "cannot reverse bytes: length of section %s must be evenly divisible by %d"
 msgstr "ei voi kääntää tavujen järjestystä päinvastaiseksi: lohkon %s pituuden on oltava parillisesti jaollinen %d:lla"
 
-#: objcopy.c:2842
+#: objcopy.c:2843
 msgid "can't create debugging section"
 msgstr "ei voi luoda virheenjäljityslohkoa"
 
-#: objcopy.c:2855
+#: objcopy.c:2856
 msgid "can't set debugging section contents"
 msgstr "ei voi asettaa virheenjäljityslohkon sisältöä"
 
-#: objcopy.c:2863
+#: objcopy.c:2864
 #, c-format
 msgid "don't know how to write debugging information for %s"
 msgstr "ei tiedetä kuinka kirjoittaa virheenjäljitystietoja kohteelle %s"
 
-#: objcopy.c:3005
+#: objcopy.c:3006
 msgid "could not create temporary file to hold stripped copy"
 msgstr "ei voi luoda tilapäistä tiedostoa tallentamaan riisuttua kopiota"
 
-#: objcopy.c:3077
+#: objcopy.c:3078
 #, c-format
 msgid "%s: bad version in PE subsystem"
 msgstr "%s: virheellinen versio PE-alijärjestelmässä"
 
-#: objcopy.c:3107
+#: objcopy.c:3108
 #, c-format
 msgid "unknown PE subsystem: %s"
 msgstr "tuntematon PE-alijärjestelmä: %s"
 
-#: objcopy.c:3167
+#: objcopy.c:3168
 msgid "byte number must be non-negative"
 msgstr "tavunumeron on oltava ei-negatiivinen"
 
-#: objcopy.c:3177
+#: objcopy.c:3178
 msgid "interleave must be positive"
 msgstr "lomituksen täytyy olla positiivinen"
 
-#: objcopy.c:3197 objcopy.c:3205
+#: objcopy.c:3198 objcopy.c:3206
 #, c-format
 msgid "%s both copied and removed"
 msgstr "%s sekä kopioitu että poistettu"
 
-#: objcopy.c:3306 objcopy.c:3380 objcopy.c:3480 objcopy.c:3511 objcopy.c:3535
-#: objcopy.c:3539 objcopy.c:3559
+#: objcopy.c:3307 objcopy.c:3381 objcopy.c:3481 objcopy.c:3512 objcopy.c:3536
+#: objcopy.c:3540 objcopy.c:3560
 #, c-format
 msgid "bad format for %s"
 msgstr "virheellinen muoto kohteelle %s"
 
-#: objcopy.c:3330
+#: objcopy.c:3331
 #, c-format
 msgid "cannot open: %s: %s"
 msgstr "ei voi avata: %s: %s"
 
-#: objcopy.c:3449
+#: objcopy.c:3450
 #, c-format
 msgid "Warning: truncating gap-fill from 0x%s to 0x%x"
 msgstr "Varoitus: katkaistaan välitäyte 0x%s tavumuodoksi 0x%x"
 
-#: objcopy.c:3610
+#: objcopy.c:3611
 #, c-format
 msgid "unknown long section names option '%s'"
 msgstr "tuntematon pitkä lohkonimien valitsin ”%s”"
 
-#: objcopy.c:3628
+#: objcopy.c:3629
 msgid "unable to parse alternative machine code"
 msgstr "ei voida jäsentää vaihtoehtoista konekoodia"
 
-#: objcopy.c:3673
+#: objcopy.c:3674
 msgid "number of bytes to reverse must be positive and even"
 msgstr "päinvastaiseen järjestykseen asetettujen tavujen lukumäärän on oltava positiivinen ja parillinen"
 
-#: objcopy.c:3676
+#: objcopy.c:3677
 #, c-format
 msgid "Warning: ignoring previous --reverse-bytes value of %d"
 msgstr "Varoitus: ei oteta huomioon edellistä %d:n ”--reverse-bytes”-arvoa"
 
-#: objcopy.c:3691
+#: objcopy.c:3692
 #, c-format
 msgid "%s: invalid reserve value for --heap"
 msgstr "%s: virheellinen reserve-arvo valitsimelle --heap"
 
-#: objcopy.c:3697
+#: objcopy.c:3698
 #, c-format
 msgid "%s: invalid commit value for --heap"
 msgstr "%s: virheellinen commit-arvo valitsimelle --heap"
 
-#: objcopy.c:3722
+#: objcopy.c:3723
 #, c-format
 msgid "%s: invalid reserve value for --stack"
 msgstr "%s: virheellinen reserve-arvo valitsimelle --stack"
 
-#: objcopy.c:3728
+#: objcopy.c:3729
 #, c-format
 msgid "%s: invalid commit value for --stack"
 msgstr "%s: virheellinen commit-arvo valitsimelle --stack"
 
-#: objcopy.c:3757
+#: objcopy.c:3758
 msgid "byte number must be less than interleave"
 msgstr "tavunumeron on oltava lomitusta pienempi"
 
-#: objcopy.c:3784
+#: objcopy.c:3785
 #, c-format
 msgid "unknown input EFI target: %s"
 msgstr "tuntematon syöte-EFI-kohde: %s"
 
-#: objcopy.c:3815
+#: objcopy.c:3816
 #, c-format
 msgid "unknown output EFI target: %s"
 msgstr "tuntematon tuloste-EFI-kohde: ”%s”"
 
-#: objcopy.c:3840
+#: objcopy.c:3841
 #, c-format
 msgid "architecture %s unknown"
 msgstr "arkkitehtuuri %s tuntematon"
 
-#: objcopy.c:3844
+#: objcopy.c:3845
 msgid "Warning: input target 'binary' required for binary architecture parameter."
 msgstr "Varoitus: syötekohde ”binary” vaatii binaariarkkitehtuuriparametrin."
 
-#: objcopy.c:3845
+#: objcopy.c:3846
 #, c-format
 msgid " Argument %s ignored"
 msgstr " Argumenttia %s ei oteta huomioon"
 
-#: objcopy.c:3851
+#: objcopy.c:3852
 #, c-format
 msgid "warning: could not locate '%s'.  System error message: %s"
 msgstr "varoitus: kohdetta ”%s” ei voitu sijoittaa.  Järjestelmävirhesanoma: %s"
 
-#: objcopy.c:3862
+#: objcopy.c:3863
 #, c-format
 msgid "warning: could not create temporary file whilst copying '%s', (error: %s)"
 msgstr "varoitus: ei voitu luoda tilapäistä tiedostoa kopioitaessa kohdetta ”%s”, (virhe: %s)"
 
 #  Ensimmäinen %s sisältää tekstin "--change-section-vma", toinen %s sisältää jonkin nimen, %c sisältää joko '=' tai '+' -merkin, viimeinen %s sisältää jonkun korkeintaan 20-merkkisen puskurin sisällön.
-#: objcopy.c:3890 objcopy.c:3904
+#: objcopy.c:3891 objcopy.c:3905
 #, c-format
 msgid "%s %s%c0x%s never used"
 msgstr "%s %s%c0x%s ei käytetty koskaan"
@@ -3613,7 +3613,7 @@ msgstr "%s: ei ole dynaaminen objekti"
 msgid " (File Offset: 0x%lx)"
 msgstr " (Tiedostosiirros: 0x%lx)"
 
-#: objdump.c:1885
+#: objdump.c:1886
 #, c-format
 msgid ""
 "\n"
@@ -3622,17 +3622,17 @@ msgstr ""
 "\n"
 "Lohkon %s disassembly:\n"
 
-#: objdump.c:2058
+#: objdump.c:2062
 #, c-format
 msgid "Can't use supplied machine %s"
 msgstr "Ei voi käyttää annettua konetta %s"
 
-#: objdump.c:2077
+#: objdump.c:2081
 #, c-format
 msgid "Can't disassemble for architecture %s\n"
 msgstr "Ei voi disassembloida arkkitehtuuria %s\n"
 
-#: objdump.c:2168
+#: objdump.c:2172
 #, c-format
 msgid ""
 "\n"
@@ -3641,7 +3641,7 @@ msgstr ""
 "\n"
 "Lohkon ”%s” sisältöjä ei saada.\n"
 
-#: objdump.c:2179
+#: objdump.c:2183
 #, c-format
 msgid ""
 "\n"
@@ -3650,7 +3650,7 @@ msgstr ""
 "\n"
 "Ei voida poistaa lohkon ”%s” tiivistystä.\n"
 
-#: objdump.c:2307
+#: objdump.c:2312
 #, c-format
 msgid ""
 "No %s section present\n"
@@ -3659,12 +3659,12 @@ msgstr ""
 "Ei ole %s-lohkoa\n"
 "\n"
 
-#: objdump.c:2316
+#: objdump.c:2321
 #, c-format
 msgid "Reading %s section of %s failed: %s"
 msgstr "Lohkon %s lukeminen kohteesta %s epäonnistui: %s"
 
-#: objdump.c:2360
+#: objdump.c:2365
 #, c-format
 msgid ""
 "Contents of %s section:\n"
@@ -3673,17 +3673,17 @@ msgstr ""
 "Lohkon %s sisältö:\n"
 "\n"
 
-#: objdump.c:2491
+#: objdump.c:2496
 #, c-format
 msgid "architecture: %s, "
 msgstr "arkkitehtuuri: %s, "
 
-#: objdump.c:2494
+#: objdump.c:2499
 #, c-format
 msgid "flags 0x%08x:\n"
 msgstr "liput 0x%08x:\n"
 
-#: objdump.c:2508
+#: objdump.c:2513
 #, c-format
 msgid ""
 "\n"
@@ -3692,32 +3692,32 @@ msgstr ""
 "\n"
 "aloitusosoite 0x"
 
-#: objdump.c:2571
+#: objdump.c:2576
 #, c-format
 msgid "Contents of section %s:"
 msgstr "Lohkon %s sisältö:"
 
-#: objdump.c:2573
+#: objdump.c:2578
 #, c-format
 msgid "  (Starting at file offset: 0x%lx)"
 msgstr "  (Aloitus tiedostosiirroksessa: 0x%lx)"
 
-#: objdump.c:2680
+#: objdump.c:2685
 #, c-format
 msgid "no symbols\n"
 msgstr "ei symboleja\n"
 
-#: objdump.c:2687
+#: objdump.c:2692
 #, c-format
 msgid "no information for symbol number %ld\n"
 msgstr "ei tietoja symbolinumerolla %ld\n"
 
-#: objdump.c:2690
+#: objdump.c:2695
 #, c-format
 msgid "could not determine the type of symbol number %ld\n"
 msgstr "ei voitu määritellä symbolinumeron %ld tyyppiä\n"
 
-#: objdump.c:2970
+#: objdump.c:2975
 #, c-format
 msgid ""
 "\n"
@@ -3726,39 +3726,39 @@ msgstr ""
 "\n"
 "%s:     tiedostomuoto %s\n"
 
-#: objdump.c:3028
+#: objdump.c:3033
 #, c-format
 msgid "%s: printing debugging information failed"
 msgstr "%s: virheenjäljitystietojen tulostaminen epäonnistui"
 
-#: objdump.c:3128
+#: objdump.c:3133
 #, c-format
 msgid "In archive %s:\n"
 msgstr "Arkistossa %s:\n"
 
-#: objdump.c:3244
+#: objdump.c:3249
 msgid "error: the start address should be before the end address"
 msgstr "virhe: aloitusosoitteen pitäisi olla ennen loppuosoitetta"
 
-#: objdump.c:3249
+#: objdump.c:3254
 msgid "error: the stop address should be after the start address"
 msgstr "virhe: pysähtymisosoitteen tulisi olla alkuosoitteen jälkeen"
 
-#: objdump.c:3261
+#: objdump.c:3266
 msgid "error: prefix strip must be non-negative"
 msgstr "virhe: etuliitenauhan on oltava ei-negatiivinen"
 
-#: objdump.c:3266
+#: objdump.c:3271
 msgid "error: instruction width must be positive"
 msgstr "virhe: käskyleveyden täytyy olla positiivinen"
 
 #  Lisäsin lainausmerkit väliviivan ja valitsinmerkin erottamiseksi
-#: objdump.c:3275
+#: objdump.c:3280
 msgid "unrecognized -E option"
 msgstr "tunnistamaton ”-E”-valitsin"
 
 #  Middle-Endian ? --endian-tavujärjestystyyppi lyhennetty tavujärjestystyypiksi, joka kertoo jo kaiken.
-#: objdump.c:3286
+#: objdump.c:3291
 #, c-format
 msgid "unrecognized --endian type `%s'"
 msgstr "tunnistamaton tavujärjestystyyppi ”%s”"
@@ -3817,168 +3817,168 @@ msgstr "Muisti loppui varattaessa 0x%lx tavua kohteelle %s\n"
 msgid "Unable to read in 0x%lx bytes of %s\n"
 msgstr "Ei voi lukea 0x%lx tavua kohteesta %s\n"
 
-#: readelf.c:640
+#: readelf.c:645
 msgid "Don't know about relocations on this machine architecture\n"
 msgstr "Tämän konearkkitehtuurin uudelleensijoituksia ei tunneta\n"
 
 #  Viimeinen %s-parametri virheilmoitukseen: Unable to seek to 0x%x for %s\n
 #  Määritelty ainakin <linux/elf.h> -tiedostossa.
-#: readelf.c:660 readelf.c:688 readelf.c:754 readelf.c:782
+#: readelf.c:666 readelf.c:696 readelf.c:764 readelf.c:793
 msgid "relocs"
 msgstr "relocs"
 
-#: readelf.c:671 readelf.c:699 readelf.c:765 readelf.c:793
+#: readelf.c:678 readelf.c:708 readelf.c:775 readelf.c:804
 msgid "out of memory parsing relocs\n"
 msgstr "muisti loppui jäsenneltäessä relocs-alkioita\n"
 
-#: readelf.c:898
+#: readelf.c:909
 #, c-format
 msgid " Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"
 msgstr " Siirros    Tiedot  Tyyppi              Sym. arvo   Symbolin nimi + Lisättävä\n"
 
-#: readelf.c:900
+#: readelf.c:911
 #, c-format
 msgid " Offset     Info    Type            Sym.Value  Sym. Name + Addend\n"
 msgstr " Siirros    Tiedot  Tyyppi          Sym.arvo   Sym. nimi + Lisättävä\n"
 
-#: readelf.c:905
+#: readelf.c:916
 #, c-format
 msgid " Offset     Info    Type                Sym. Value  Symbol's Name\n"
 msgstr " Siirros    Tiedot  Tyyppi              Sym. arvo   Symbolin nimi\n"
 
-#: readelf.c:907
+#: readelf.c:918
 #, c-format
 msgid " Offset     Info    Type            Sym.Value  Sym. Name\n"
 msgstr " Siirros  Tiedot   Tyyppi           Sym.arvo   Sym. nimi\n"
 
-#: readelf.c:915
+#: readelf.c:926
 #, c-format
 msgid "    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend\n"
 msgstr "    Siirros            Tiedot           Tyyppi             Symbolin arvo   Symbolin nimi + Lisättävä\n"
 
-#: readelf.c:917
+#: readelf.c:928
 #, c-format
 msgid "  Offset          Info           Type           Sym. Value    Sym. Name + Addend\n"
 msgstr "  Siirros         Tiedot         Tyyppi         Sym. arvo     Sym. nimi + Lisättävä\n"
 
-#: readelf.c:922
+#: readelf.c:933
 #, c-format
 msgid "    Offset             Info             Type               Symbol's Value  Symbol's Name\n"
 msgstr "    Siirros            Tiedot           Tyyppi             Symbolin arvo   Symbolin nimi\n"
 
-#: readelf.c:924
+#: readelf.c:935
 #, c-format
 msgid "  Offset          Info           Type           Sym. Value    Sym. Name\n"
 msgstr "  Siirros         Tiedot         Tyyppi         Sym. arvo     Symbolinimi\n"
 
-#: readelf.c:1211 readelf.c:1370 readelf.c:1378
+#: readelf.c:1222 readelf.c:1381 readelf.c:1389
 #, c-format
 msgid "unrecognized: %-7lx"
 msgstr "tunnistamaton: %-7lx"
 
-#: readelf.c:1236
+#: readelf.c:1247
 #, c-format
 msgid "<unknown addend: %lx>"
 msgstr "<tuntematon lisättävä: %lx>"
 
-#: readelf.c:1328
+#: readelf.c:1339
 #, c-format
 msgid "<string table index: %3ld>"
 msgstr "<merkkijonotaulun indeksi: %3ld>"
 
-#: readelf.c:1330
+#: readelf.c:1341
 #, c-format
 msgid "<corrupt string table index: %3ld>"
 msgstr "<rikkinäinen merkkijonotauluindeksi: %3ld>"
 
-#: readelf.c:1703
+#: readelf.c:1716
 #, c-format
 msgid "Processor Specific: %lx"
 msgstr "Suoritinkohtainen: %lx"
 
-#: readelf.c:1727
+#: readelf.c:1740
 #, c-format
 msgid "Operating System specific: %lx"
 msgstr "Käyttöjärjestelmäkohtainen: %lx"
 
-#: readelf.c:1731 readelf.c:2613
+#: readelf.c:1744 readelf.c:2626
 #, c-format
 msgid "<unknown>: %lx"
 msgstr "<tuntematon>: %lx"
 
-#: readelf.c:1744
+#: readelf.c:1757
 msgid "NONE (None)"
 msgstr "NONE (Ei mitään)"
 
-#: readelf.c:1745
+#: readelf.c:1758
 msgid "REL (Relocatable file)"
 msgstr "REL (Uudelleensijoitettava tiedosto)"
 
-#: readelf.c:1746
+#: readelf.c:1759
 msgid "EXEC (Executable file)"
 msgstr "EXEC (Suoritettava tiedosto)"
 
-#: readelf.c:1747
+#: readelf.c:1760
 msgid "DYN (Shared object file)"
 msgstr "DYN (Jaettu objektitiedosto)"
 
-#: readelf.c:1748
+#: readelf.c:1761
 msgid "CORE (Core file)"
 msgstr "CORE (Muistivedos)"
 
-#: readelf.c:1752
+#: readelf.c:1765
 #, c-format
 msgid "Processor Specific: (%x)"
 msgstr "Suoritinkohtainen: (%x)"
 
-#: readelf.c:1754
+#: readelf.c:1767
 #, c-format
 msgid "OS Specific: (%x)"
 msgstr "Käyttöjärjestelmäkohtainen: (%x)"
 
-#: readelf.c:1756 readelf.c:2830
+#: readelf.c:1769 readelf.c:2843
 #, c-format
 msgid "<unknown>: %x"
 msgstr "<tuntematon>: %x"
 
-#: readelf.c:1768
+#: readelf.c:1781
 msgid "None"
 msgstr "Ei mitään"
 
-#: readelf.c:1879
+#: readelf.c:1892
 #, c-format
 msgid "<unknown>: 0x%x"
 msgstr "<tuntematon>: 0x%x"
 
-#: readelf.c:2136
+#: readelf.c:2149
 msgid "unknown"
 msgstr "tuntematon"
 
-#: readelf.c:2137
+#: readelf.c:2150
 msgid "unknown mac"
 msgstr "tuntematon mac"
 
-#: readelf.c:2450
+#: readelf.c:2463
 msgid "Standalone App"
 msgstr "Erillinen sovellus"
 
-#: readelf.c:2453 readelf.c:3159 readelf.c:3175
+#: readelf.c:2466 readelf.c:3174 readelf.c:3190
 #, c-format
 msgid "<unknown: %x>"
 msgstr "<tuntematon: %x>"
 
-#: readelf.c:2878
+#: readelf.c:2891
 #, c-format
 msgid "Usage: readelf <option(s)> elf-file(s)\n"
 msgstr "Käyttö: readelf <valitsimet> elf-tiedosto(t)\n"
 
-#: readelf.c:2879
+#: readelf.c:2892
 #, c-format
 msgid " Display information about the contents of ELF format files\n"
 msgstr " Näytä tietoja ELF-muotoisten tiedostojen sisällöstä\n"
 
 #  Alla "core notes" on hiukan hankala suomentaa. Notes viittaan note-lohkoihin, joita valmistaja käyttää lisätietojen sisällyttämiseksi tiedostoon. Lisätiedot olisi ehkä merkitykseltään paras suomennos. Tiedostossa saattaa esiintyä yksi tai useampi maaginen .note-lohko, jota käytetään lisätietojen tallentamiseen. Ohjelmoijille .note-lohko voi olla tuttu, mutta he eivät välttämättä osaa yhdistää sanaa "lisätiedot" lohkoon .note.
-#: readelf.c:2880
+#: readelf.c:2893
 #, c-format
 msgid ""
 " Options are:\n"
@@ -4040,7 +4040,7 @@ msgstr ""
 "  --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n"
 "                         Näytä DWARF2-virheenjäljityslohkojen sisältö\n"
 
-#: readelf.c:2910
+#: readelf.c:2923
 #, c-format
 msgid ""
 "  -i --instruction-dump=<number|name>\n"
@@ -4049,7 +4049,7 @@ msgstr ""
 "  -i --instruction-dump=<numero|nimi>\n"
 "                         Disassembloi lohkon <numero|nimi> sisältö\n"
 
-#: readelf.c:2914
+#: readelf.c:2927
 #, c-format
 msgid ""
 "  -I --histogram         Display histogram of bucket list lengths\n"
@@ -4064,105 +4064,105 @@ msgstr ""
 "  -H --help              Näytä nämä tiedot\n"
 "  -v --version           Näytä readelf-ohjelman versionumero\n"
 
-#: readelf.c:2942 readelf.c:2970 readelf.c:2974 readelf.c:11443
+#: readelf.c:2956 readelf.c:2985 readelf.c:2989 readelf.c:11591
 msgid "Out of memory allocating dump request table.\n"
 msgstr "Muisti loppui varattaessa tiedostovedospyyntötaulua.\n"
 
-#: readelf.c:3129
+#: readelf.c:3144
 #, c-format
 msgid "Invalid option '-%c'\n"
 msgstr "Virheellinen valitsin ”-%c”\n"
 
-#: readelf.c:3143
+#: readelf.c:3158
 msgid "Nothing to do.\n"
 msgstr "Ei mitään tehtävää.\n"
 
-#: readelf.c:3155 readelf.c:3171 readelf.c:6440
+#: readelf.c:3170 readelf.c:3186 readelf.c:6536
 msgid "none"
 msgstr "ei mitään"
 
 #  Selvennetty ylimääräisillä lainausmerkeillä
-#: readelf.c:3172
+#: readelf.c:3187
 msgid "2's complement, little endian"
 msgstr "kahden komplementti, ”little endian”-tavujärjestys"
 
 #  Selvennetty ylimääräisillä lainausmerkeillä
-#: readelf.c:3173
+#: readelf.c:3188
 msgid "2's complement, big endian"
 msgstr "kahden komplementti, ”big endian”-tavujärjestys"
 
 #  Valinnaisessa COFF-otsakkeessa on magic-kenttä, joka kertoo tiedoston tyypin.
-#: readelf.c:3191
+#: readelf.c:3206
 msgid "Not an ELF file - it has the wrong magic bytes at the start\n"
 msgstr "Ei ELF-tiedosto - siinä on väärät maagiset tavut alussa\n"
 
-#: readelf.c:3201
+#: readelf.c:3216
 #, c-format
 msgid "ELF Header:\n"
 msgstr "ELF-otsake:\n"
 
 #  Valinnaisessa COFF-otsakkeessa on magic-kenttä, joka kertoo tiedoston tyypin. Joillakin COFF-lohkoilla voi olla magic-nimi, joka kertoo lohkon erikoistarkoituksesta.
-#: readelf.c:3202
+#: readelf.c:3217
 #, c-format
 msgid "  Magic:   "
 msgstr "  Maaginen numero:   "
 
 #  Levennetty tarkoituksella
-#: readelf.c:3206
+#: readelf.c:3221
 #, c-format
 msgid "  Class:                             %s\n"
 msgstr "  Luokka:                               %s\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3208
+#: readelf.c:3223
 #, c-format
 msgid "  Data:                              %s\n"
 msgstr "  Data:                                 %s\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3210
+#: readelf.c:3225
 #, c-format
 msgid "  Version:                           %d %s\n"
 msgstr "  Versio:                               %d %s\n"
 
 #  Levennetty tarkoituksella. ABI on lyhennys sanoista Application Binary Interface
-#: readelf.c:3217
+#: readelf.c:3232
 #, c-format
 msgid "  OS/ABI:                            %s\n"
 msgstr "  Käyttöjärjestelmä/ABI:                %s\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3219
+#: readelf.c:3234
 #, c-format
 msgid "  ABI Version:                       %d\n"
 msgstr "  ABI-versio:                           %d\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3221
+#: readelf.c:3236
 #, c-format
 msgid "  Type:                              %s\n"
 msgstr "  Tyyppi:                               %s\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3223
+#: readelf.c:3238
 #, c-format
 msgid "  Machine:                           %s\n"
 msgstr "  Kone:                                 %s\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3225
+#: readelf.c:3240
 #, c-format
 msgid "  Version:                           0x%lx\n"
 msgstr "  Versio:                               0x%lx\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3228
+#: readelf.c:3243
 #, c-format
 msgid "  Entry point address:               "
 msgstr "  Tulokohtaosoite:                      "
 
 #  Levennetty tarkoituksella
-#: readelf.c:3230
+#: readelf.c:3245
 #, c-format
 msgid ""
 "\n"
@@ -4172,7 +4172,7 @@ msgstr ""
 "  Ohjelmaotsakkeiden alku:              "
 
 #  Levennetty tarkoituksella
-#: readelf.c:3232
+#: readelf.c:3247
 #, c-format
 msgid ""
 " (bytes into file)\n"
@@ -4181,66 +4181,66 @@ msgstr ""
 " (tavua tiedostoon)\n"
 "  Lohko-otsakkeiden alku:               "
 
-#: readelf.c:3234
+#: readelf.c:3249
 #, c-format
 msgid " (bytes into file)\n"
 msgstr " (tavua tiedostoon)\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3236
+#: readelf.c:3251
 #, c-format
 msgid "  Flags:                             0x%lx%s\n"
 msgstr "  Liput:                                0x%lx%s\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3239
+#: readelf.c:3254
 #, c-format
 msgid "  Size of this header:               %ld (bytes)\n"
 msgstr "  Tämän otsakkeen koko:                 %ld (tavua)\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3241
+#: readelf.c:3256
 #, c-format
 msgid "  Size of program headers:           %ld (bytes)\n"
 msgstr "  Ohjelmaotsakkeiden koko:              %ld (tavua)\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3243
+#: readelf.c:3258
 #, c-format
 msgid "  Number of program headers:         %ld\n"
 msgstr "  Ohjelmaotsakkeiden lukumäärä:         %ld\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3245
+#: readelf.c:3260
 #, c-format
 msgid "  Size of section headers:           %ld (bytes)\n"
 msgstr "  Lohko-otsakkeiden koko:               %ld (tavua)\n"
 
 #  Levennetty tarkoituksella
-#: readelf.c:3247
+#: readelf.c:3262
 #, c-format
 msgid "  Number of section headers:         %ld"
 msgstr "  Lohko-otsakkeiden lukumäärä:          %ld"
 
 #  Yläpuolella olevat on levennetty tarkoituksella tämän levyisiksi
-#: readelf.c:3252
+#: readelf.c:3267
 #, c-format
 msgid "  Section header string table index: %ld"
 msgstr "  Lohko-otsakemerkkijonotaulun indeksi: %ld"
 
-#: readelf.c:3289 readelf.c:3322
+#: readelf.c:3305 readelf.c:3339
 msgid "program headers"
 msgstr "ohjelmaotsakkeet"
 
-#: readelf.c:3360 readelf.c:3658 readelf.c:3699 readelf.c:3758 readelf.c:3823
-#: readelf.c:4494 readelf.c:4518 readelf.c:5770 readelf.c:5815 readelf.c:6014
-#: readelf.c:7087 readelf.c:7101 readelf.c:7611 readelf.c:7627 readelf.c:7670
-#: readelf.c:7695 readelf.c:9642 readelf.c:9834 readelf.c:10362
-#: readelf.c:10736 readelf.c:10750 readelf.c:11109
+#: readelf.c:3378 readelf.c:3678 readelf.c:3721 readelf.c:3782 readelf.c:3849
+#: readelf.c:4575 readelf.c:4599 readelf.c:5863 readelf.c:5909 readelf.c:6110
+#: readelf.c:7186 readelf.c:7200 readelf.c:7711 readelf.c:7727 readelf.c:7770
+#: readelf.c:7795 readelf.c:9780 readelf.c:9972 readelf.c:10507
+#: readelf.c:10881 readelf.c:10895 readelf.c:11256
 msgid "Out of memory\n"
 msgstr "Muisti loppui\n"
 
-#: readelf.c:3387
+#: readelf.c:3405
 #, c-format
 msgid ""
 "\n"
@@ -4249,7 +4249,7 @@ msgstr ""
 "\n"
 "Tässä tiedostossa ei ole ohjelmaotsakkeita.\n"
 
-#: readelf.c:3393
+#: readelf.c:3411
 #, c-format
 msgid ""
 "\n"
@@ -4258,12 +4258,12 @@ msgstr ""
 "\n"
 "Elf-tiedostotyyppi on %s\n"
 
-#: readelf.c:3394
+#: readelf.c:3412
 #, c-format
 msgid "Entry point "
 msgstr "Tulokohta "
 
-#: readelf.c:3396
+#: readelf.c:3414
 #, c-format
 msgid ""
 "\n"
@@ -4272,7 +4272,7 @@ msgstr ""
 "\n"
 "Ohjelmaotsakkeita on %d kpl, alkaen siirroksesta "
 
-#: readelf.c:3408 readelf.c:3410
+#: readelf.c:3426 readelf.c:3428
 #, c-format
 msgid ""
 "\n"
@@ -4281,55 +4281,55 @@ msgstr ""
 "\n"
 "Ohjelmaotsakkeet:\n"
 
-#: readelf.c:3414
+#: readelf.c:3432
 #, c-format
 msgid "  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"
 msgstr "  Tyyppi         Siirros  VirtOsoite FyysOsoite TiedKok MuisKok Lip Tasaus\n"
 
-#: readelf.c:3417
+#: readelf.c:3435
 #, c-format
 msgid "  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align\n"
 msgstr "  Tyyppi         Siirros  VirtuaaliOsoite    FyysinenOsoite     TiedKoko MuisKoko Lip Tasaus\n"
 
-#: readelf.c:3421
+#: readelf.c:3439
 #, c-format
 msgid "  Type           Offset             VirtAddr           PhysAddr\n"
 msgstr "  Tyyppi         Siirros            VirtuaaliOsoite    FyysinenOsoite\n"
 
-#: readelf.c:3423
+#: readelf.c:3441
 #, c-format
 msgid "                 FileSiz            MemSiz              Flags  Align\n"
 msgstr "                 TiedostoKoko       MuistiKoko          Liput  Tasaus\n"
 
-#: readelf.c:3516
+#: readelf.c:3534
 msgid "more than one dynamic segment\n"
 msgstr "useampi kuin yksi dynaaminen segmentti\n"
 
-#: readelf.c:3532
+#: readelf.c:3550
 msgid "no .dynamic section in the dynamic segment\n"
 msgstr "ei .dynamic-lohkoa dynaamisessa segmentissä\n"
 
-#: readelf.c:3547
+#: readelf.c:3565
 msgid "the .dynamic section is not contained within the dynamic segment\n"
 msgstr ".dynamic-lohko ei ole dynaamisen segmentin sisällä\n"
 
-#: readelf.c:3550
+#: readelf.c:3568
 msgid "the .dynamic section is not the first section in the dynamic segment.\n"
 msgstr ".dynamic-lohko ei ole dynaamisen segmentin ensimmäinen lohko.\n"
 
-#: readelf.c:3558
+#: readelf.c:3576
 msgid "Unable to find program interpreter name\n"
 msgstr "Ohjelmatulkin nimeä ei löydy\n"
 
-#: readelf.c:3565
+#: readelf.c:3583
 msgid "Internal error: failed to create format string to display program interpreter\n"
 msgstr "Sisäinen virhe: ei voitu luoda muotomerkkijonoa ohjelmatulkin näyttämiseksi\n"
 
-#: readelf.c:3569
+#: readelf.c:3587
 msgid "Unable to read program interpreter name\n"
 msgstr "Ohjelmatulkin nimeä ei voitu lukea\n"
 
-#: readelf.c:3572
+#: readelf.c:3590
 #, c-format
 msgid ""
 "\n"
@@ -4339,7 +4339,7 @@ msgstr ""
 "      [Pyydetään ohjelmatulkkia: %s]"
 
 #  Kartassa kohteet sijoitetaan kartalle toistensa suhteen eri paikkoihin.
-#: readelf.c:3584
+#: readelf.c:3602
 #, c-format
 msgid ""
 "\n"
@@ -4348,35 +4348,35 @@ msgstr ""
 "\n"
 " Lohkosta Segmenttiin sijoittelu:\n"
 
-#: readelf.c:3585
+#: readelf.c:3603
 #, c-format
 msgid "  Segment Sections...\n"
 msgstr "  Segmenttilohkot...\n"
 
-#: readelf.c:3620
+#: readelf.c:3638
 msgid "Cannot interpret virtual addresses without program headers.\n"
 msgstr "Virtuaalisia osoitteita ei voi tulkata ilman ohjelmaotsakkeita.\n"
 
-#: readelf.c:3636
+#: readelf.c:3654
 #, c-format
 msgid "Virtual address 0x%lx not located in any PT_LOAD segment.\n"
 msgstr "Virtuaaliosoite 0x%lx ei sijaitse missään PT_LOAD-segmentissä.\n"
 
-#: readelf.c:3650 readelf.c:3691
+#: readelf.c:3669 readelf.c:3712
 msgid "section headers"
 msgstr "lohko-otsakkeet"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:3735 readelf.c:3800
+#: readelf.c:3757 readelf.c:3824
 msgid "symbols"
 msgstr "symbolit"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:3745 readelf.c:3810
+#: readelf.c:3769 readelf.c:3836
 msgid "symtab shndx"
 msgstr "”symtab shndx”-taululle"
 
-#: readelf.c:4070 readelf.c:4478
+#: readelf.c:4112 readelf.c:4559
 #, c-format
 msgid ""
 "\n"
@@ -4385,42 +4385,42 @@ msgstr ""
 "\n"
 "Tässä tiedostossa ei ole lohkoja.\n"
 
-#: readelf.c:4076
+#: readelf.c:4118
 #, c-format
 msgid "There are %d section headers, starting at offset 0x%lx:\n"
 msgstr "Lohko-otsakkeita on %d kpl, alkaen siirroksesta 0x%lx:\n"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:4096 readelf.c:4595 readelf.c:4821 readelf.c:5116 readelf.c:5524
-#: readelf.c:7421
+#: readelf.c:4139 readelf.c:4676 readelf.c:4903 readelf.c:5203 readelf.c:5616
+#: readelf.c:7521
 msgid "string table"
 msgstr "merkkijonotaulu"
 
-#: readelf.c:4163
+#: readelf.c:4206
 #, c-format
 msgid "Section %d has invalid sh_entsize %lx (expected %lx)\n"
 msgstr "Lohkossa %d on virheellinen sh_entsize %lx (odotettiin %lx)\n"
 
-#: readelf.c:4183
+#: readelf.c:4226
 msgid "File contains multiple dynamic symbol tables\n"
 msgstr "Tiedosto sisältää useita dynaamisia symbolitauluja\n"
 
-#: readelf.c:4196
+#: readelf.c:4239
 msgid "File contains multiple dynamic string tables\n"
 msgstr "Tiedosto sisältää useita dynaamisia merkkijonotauluja\n"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:4201
+#: readelf.c:4245
 msgid "dynamic strings"
 msgstr "dynaamiset merkkijonot"
 
 #  Lisäsin lainausmerkit selventämään lausetta.
-#: readelf.c:4208
+#: readelf.c:4252
 msgid "File contains multiple symtab shndx tables\n"
 msgstr "Tiedosto sisältää useita ”symtab shndx”-tauluja\n"
 
 #  monikkomuoto seuraavasta msgid:stä
-#: readelf.c:4259
+#: readelf.c:4303
 #, c-format
 msgid ""
 "\n"
@@ -4430,7 +4430,7 @@ msgstr ""
 "Lohko-otsakkeet:\n"
 
 #  yksikkömuoto edellisestä msgid:stä
-#: readelf.c:4261
+#: readelf.c:4305
 #, c-format
 msgid ""
 "\n"
@@ -4439,63 +4439,68 @@ msgstr ""
 "\n"
 "Lohko-otsake:\n"
 
-#: readelf.c:4267 readelf.c:4278 readelf.c:4289
+#: readelf.c:4311 readelf.c:4322 readelf.c:4333
 #, c-format
 msgid "  [Nr] Name\n"
 msgstr "  [Numero] Nimi\n"
 
 #  ES on kokonaiskoko, Flg on liput, Lk on Linkki, Inf on Tiedot
-#: readelf.c:4268
+#: readelf.c:4312
 #, c-format
 msgid "       Type            Addr     Off    Size   ES   Lk Inf Al\n"
 msgstr "       Tyyppi          Osoite   Siirr. Koko   Yht  LnkTdt Tasaus\n"
 
 #  ES on kokonaiskoko, Flg on liput, Lk on Linkki, Inf on Tiedot
-#: readelf.c:4272
+#: readelf.c:4316
 #, c-format
 msgid "  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"
 msgstr "  [Nr] Nimi              Tyyppi          Osoite   Siirr. Koko  Yht Lip Lk Tdt Tasaus\n"
 
 #  ES on kokonaiskoko, Flg on liput, Lk on Linkki, Inf on Tiedot
-#: readelf.c:4279
+#: readelf.c:4323
 #, c-format
 msgid "       Type            Address          Off    Size   ES   Lk Inf Al\n"
 msgstr "       Tyyppi          Osoite          Siirros Koko   Yht  Lk Tdt Tasaus\n"
 
 #  ES on kokonaiskoko, Flg on liput, Lk on Linkki, Inf on Tiedot
-#: readelf.c:4283
+#: readelf.c:4327
 #, c-format
 msgid "  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n"
 msgstr "  [Nr] Nimi              Tyyppi          Osoite           Siirr. Koko  Yht Lip Lk Tdt Tasaus\n"
 
-#: readelf.c:4290
+#: readelf.c:4334
 #, c-format
 msgid "       Type              Address          Offset            Link\n"
 msgstr "       Tyyppi           Osoite            Siirros           Linkki\n"
 
 #  EntSize voi tarkoittaa Entire Size tai Entity Size
-#: readelf.c:4291
+#: readelf.c:4335
 #, c-format
 msgid "       Size              EntSize          Info              Align\n"
 msgstr "       Koko              KokonaisKoko     Tiedot            Tasaus\n"
 
-#: readelf.c:4295
+#: readelf.c:4339
 #, c-format
 msgid "  [Nr] Name              Type             Address           Offset\n"
 msgstr "  [Nr] Nimi              Tyyppi           Osoite            Siirros\n"
 
 #  EntSize voi tarkoittaa Entire Size tai Entity Size
-#: readelf.c:4296
+#: readelf.c:4340
 #, c-format
 msgid "       Size              EntSize          Flags  Link  Info  Align\n"
 msgstr "       Koko              KokonaisKoko     Liput  Link  Tied. Tasaus\n"
 
-#: readelf.c:4301
+#: readelf.c:4345
 #, c-format
 msgid "       Flags\n"
 msgstr "       Liput\n"
 
-#: readelf.c:4435
+#: readelf.c:4420
+#, c-format
+msgid "section %u: sh_link value of %u is larger than the number of sections\n"
+msgstr "lohko %u: %u-linkkiarvo sh_link on suurempi kuin lohkojen lukumäärä\n"
+
+#: readelf.c:4516
 #, c-format
 msgid ""
 "Key to Flags:\n"
@@ -4509,16 +4514,16 @@ msgstr ""
 "  O (vaatii käyttöjärjestelmäkohtaista lisäkäsittelyä) o (Käyttöjärjestelmäkohtainen),\n"
 "  p (suoritinkohtainen)\n"
 
-#: readelf.c:4453
+#: readelf.c:4534
 #, c-format
 msgid "[<unknown>: 0x%x]"
 msgstr "[<tuntematon>: 0x%x]"
 
-#: readelf.c:4485
+#: readelf.c:4566
 msgid "Section headers are not available!\n"
 msgstr "Lohko-otsakkeita ei ole saatavilla!\n"
 
-#: readelf.c:4509
+#: readelf.c:4590
 #, c-format
 msgid ""
 "\n"
@@ -4528,43 +4533,43 @@ msgstr ""
 "Tässä tiedostossa ei ole lohkoryhmiä.\n"
 
 #  The sh_link field of this section contains the index of the associated SHT_SYMTAB
-#: readelf.c:4546
+#: readelf.c:4627
 #, c-format
 msgid "Bad sh_link in group section `%s'\n"
 msgstr "Virheellinen sh_link-kenttä ryhmälohkossa ”%s”\n"
 
 #  The sh_info field holds the section header index, which is displayed in decimal.
-#: readelf.c:4565
+#: readelf.c:4646
 #, c-format
 msgid "Bad sh_info in group section `%s'\n"
 msgstr "Virheellinen sh_info-kenttä ryhmälohkossa ”%s”\n"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:4603
+#: readelf.c:4685
 msgid "section data"
 msgstr "lohkodata"
 
-#: readelf.c:4615
+#: readelf.c:4697
 #, c-format
 msgid "   [Index]    Name\n"
 msgstr "   [Indeksi]  Nimi\n"
 
-#: readelf.c:4629
+#: readelf.c:4711
 #, c-format
 msgid "section [%5u] in group section [%5u] > maximum section [%5u]\n"
 msgstr "lohko [%5u] ryhmälohkossa [%5u] > maksimilohko [%5u]\n"
 
-#: readelf.c:4638
+#: readelf.c:4720
 #, c-format
 msgid "section [%5u] in group section [%5u] already in group section [%5u]\n"
 msgstr "lohko [%5u] ryhmälohkossa [%5u] on jo ryhmälohkossa [%5u]\n"
 
-#: readelf.c:4651
+#: readelf.c:4733
 #, c-format
 msgid "section 0 in group section [%5u]\n"
 msgstr "lohko 0 ryhmälohkossa [%5u]\n"
 
-#: readelf.c:4746
+#: readelf.c:4828
 #, c-format
 msgid ""
 "\n"
@@ -4573,7 +4578,7 @@ msgstr ""
 "\n"
 "”%s” uudelleensijoituslohko siirroksessa 0x%lx sisältää %ld tavua:\n"
 
-#: readelf.c:4758
+#: readelf.c:4840
 #, c-format
 msgid ""
 "\n"
@@ -4583,7 +4588,7 @@ msgstr ""
 "Tässä tiedostossa ei ole dynaamisia uudelleensijoituksia.\n"
 
 #  Kolme seuraava kuuluu yhteen. Siksi ensimmäinen genetiivimuodossa.
-#: readelf.c:4782
+#: readelf.c:4864
 #, c-format
 msgid ""
 "\n"
@@ -4593,18 +4598,18 @@ msgstr ""
 "Uudelleensijoituslohkon "
 
 #  Kuuluu yhteen edellisen ja seuraavan kanssa.
-#: readelf.c:4787 readelf.c:5192 readelf.c:5206 readelf.c:5539
+#: readelf.c:4869 readelf.c:5279 readelf.c:5294 readelf.c:5631
 #, c-format
 msgid "'%s'"
 msgstr "”%s”"
 
 #  Kuuluu yhteen kahden edellisen kanssa.
-#: readelf.c:4789 readelf.c:5208 readelf.c:5541
+#: readelf.c:4871 readelf.c:5296 readelf.c:5633
 #, c-format
 msgid " at offset 0x%lx contains %lu entries:\n"
 msgstr " siirroksessa 0x%lx on %lu alkiota:\n"
 
-#: readelf.c:4840
+#: readelf.c:4922
 #, c-format
 msgid ""
 "\n"
@@ -4614,17 +4619,17 @@ msgstr ""
 "Tässä tiedostossa ei ole uudelleensijoituksia.\n"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:5022 readelf.c:5390
+#: readelf.c:5107 readelf.c:5480
 msgid "unwind table"
 msgstr "palautustaulu"
 
-#: readelf.c:5063 readelf.c:5471
+#: readelf.c:5149 readelf.c:5562
 #, c-format
 msgid "Skipping unexpected relocation type %s\n"
 msgstr "Ohittaa odottamattoman uudelleensijoitustyypin %s\n"
 
 #  Unwind tarkoittaa ilmeisesti jonkun aikaisemman tilanteen palautusta esimerkiksi virhetilanteessa.
-#: readelf.c:5124 readelf.c:5532 readelf.c:5585
+#: readelf.c:5211 readelf.c:5624 readelf.c:5677
 #, c-format
 msgid ""
 "\n"
@@ -4634,7 +4639,7 @@ msgstr ""
 "Tässä tiedostossa ei ole palautuslohkoja.\n"
 
 #  Unwind tarkoittaa ilmeisesti jonkun aikaisemman tilanteen palautusta esimerkiksi virhetilanteessa.
-#: readelf.c:5187
+#: readelf.c:5274
 #, c-format
 msgid ""
 "\n"
@@ -4644,12 +4649,12 @@ msgstr ""
 "Ei voitu löytää palautustietolohkoja kohteelle "
 
 #  Unwind tarkoittaa ilmeisesti jonkun aikaisemman tilanteen palautusta esimerkiksi virhetilanteessa.
-#: readelf.c:5199
+#: readelf.c:5287
 msgid "unwind info"
 msgstr "palautustiedot"
 
 #  Unwind on maaginen lohkonimi ja siksi sitä ei voi kääntää.
-#: readelf.c:5201 readelf.c:5538
+#: readelf.c:5289 readelf.c:5630
 #, c-format
 msgid ""
 "\n"
@@ -4658,11 +4663,11 @@ msgstr ""
 "\n"
 "Unwind-lohko "
 
-#: readelf.c:5751 readelf.c:5796
+#: readelf.c:5843 readelf.c:5889
 msgid "dynamic section"
 msgstr "dynaaminen lohko"
 
-#: readelf.c:5873
+#: readelf.c:5967
 #, c-format
 msgid ""
 "\n"
@@ -4671,31 +4676,31 @@ msgstr ""
 "\n"
 "Tässä tiedostossa ei ole dynaamista lohkoa.\n"
 
-#: readelf.c:5911
+#: readelf.c:6005
 msgid "Unable to seek to end of file!\n"
 msgstr "Hakua ei voi suorittaa tiedoston loppuun!\n"
 
-#: readelf.c:5924
+#: readelf.c:6018
 msgid "Unable to determine the number of symbols to load\n"
 msgstr "Ei voi määritellä ladattavien symbolien lukumäärää\n"
 
-#: readelf.c:5959
+#: readelf.c:6053
 msgid "Unable to seek to end of file\n"
 msgstr "Hakua ei voi suorittaa tiedoston loppuun\n"
 
-#: readelf.c:5966
+#: readelf.c:6060
 msgid "Unable to determine the length of the dynamic string table\n"
 msgstr "Dynaamisen merkkijonotaulun pituutta ei voi määritellä\n"
 
-#: readelf.c:5971
+#: readelf.c:6066
 msgid "dynamic string table"
 msgstr "dynaaminen merkkijonotaulu"
 
-#: readelf.c:6007
+#: readelf.c:6103
 msgid "symbol information"
 msgstr "symbolitiedot"
 
-#: readelf.c:6032
+#: readelf.c:6128
 #, c-format
 msgid ""
 "\n"
@@ -4704,79 +4709,79 @@ msgstr ""
 "\n"
 "Dynaaminen lohko siirroksessa 0x%lx sisältää %u alkiota:\n"
 
-#: readelf.c:6035
+#: readelf.c:6131
 #, c-format
 msgid "  Tag        Type                         Name/Value\n"
 msgstr "  Tunniste   Tyyppi                       Nimi/Arvo\n"
 
-#: readelf.c:6071
+#: readelf.c:6167
 #, c-format
 msgid "Auxiliary library"
 msgstr "Apukirjasto"
 
-#: readelf.c:6075
+#: readelf.c:6171
 #, c-format
 msgid "Filter library"
 msgstr "Suodatinkirjasto"
 
-#: readelf.c:6079
+#: readelf.c:6175
 #, c-format
 msgid "Configuration file"
 msgstr "Alustustiedosto"
 
-#: readelf.c:6083
+#: readelf.c:6179
 #, c-format
 msgid "Dependency audit library"
 msgstr "Riippuvuustarkastuskirjasto"
 
-#: readelf.c:6087
+#: readelf.c:6183
 #, c-format
 msgid "Audit library"
 msgstr "Tarkastuskirjasto"
 
-#: readelf.c:6105 readelf.c:6133 readelf.c:6161
+#: readelf.c:6201 readelf.c:6229 readelf.c:6257
 #, c-format
 msgid "Flags:"
 msgstr "Liput:"
 
-#: readelf.c:6108 readelf.c:6136 readelf.c:6163
+#: readelf.c:6204 readelf.c:6232 readelf.c:6259
 #, c-format
 msgid " None\n"
 msgstr "Ei mitään\n"
 
-#: readelf.c:6284
+#: readelf.c:6380
 #, c-format
 msgid "Shared library: [%s]"
 msgstr "Jaettu kirjasto: [%s]"
 
-#: readelf.c:6287
+#: readelf.c:6383
 #, c-format
 msgid " program interpreter"
 msgstr " ohjelmatulkki"
 
 #  soname tarkoittanee *nix-ympäristössä dynaamisen kirjaston libxml.so.6.0.1 -tyyppistä nimeä
-#: readelf.c:6291
+#: readelf.c:6387
 #, c-format
 msgid "Library soname: [%s]"
 msgstr "Kirjaston so-nimi: [%s]"
 
 #  rpath tarkoittanee samaa kuin run-path
-#: readelf.c:6295
+#: readelf.c:6391
 #, c-format
 msgid "Library rpath: [%s]"
 msgstr "Kirjaston rpath: [%s]"
 
-#: readelf.c:6299
+#: readelf.c:6395
 #, c-format
 msgid "Library runpath: [%s]"
 msgstr "Kirjaston run-polku: [%s]"
 
-#: readelf.c:6362
+#: readelf.c:6458
 #, c-format
 msgid "Not needed object: [%s]\n"
 msgstr "Tarpeeton objekti: [%s]\n"
 
-#: readelf.c:6487
+#: readelf.c:6583
 #, c-format
 msgid ""
 "\n"
@@ -4785,62 +4790,62 @@ msgstr ""
 "\n"
 "Versiomäärittelylohko ”%s” sisältää %u alkiota:\n"
 
-#: readelf.c:6490
+#: readelf.c:6586
 #, c-format
 msgid "  Addr: 0x"
 msgstr "  Osoite: 0x"
 
-#: readelf.c:6492 readelf.c:6594 readelf.c:6715
+#: readelf.c:6588 readelf.c:6690 readelf.c:6813
 #, c-format
 msgid "  Offset: %#08lx  Link: %u (%s)\n"
 msgstr "  Siirros: %#08lx Linkki: %u (%s)\n"
 
-#: readelf.c:6500
+#: readelf.c:6596
 msgid "version definition section"
 msgstr "versiomäärittelylohko"
 
 #  Rev on ilmeisesti revision.
-#: readelf.c:6529
+#: readelf.c:6625
 #, c-format
 msgid "  %#06x: Rev: %d  Flags: %s"
 msgstr "  %#06x: Rev: %d  Liput: %s"
 
-#: readelf.c:6532
+#: readelf.c:6628
 #, c-format
 msgid "  Index: %d  Cnt: %d  "
 msgstr "  Indeksi: %d  Lkm: %d  "
 
-#: readelf.c:6543
+#: readelf.c:6639
 #, c-format
 msgid "Name: %s\n"
 msgstr "Nimi: %s\n"
 
-#: readelf.c:6545
+#: readelf.c:6641
 #, c-format
 msgid "Name index: %ld\n"
 msgstr "Nimi-indeksi: %ld\n"
 
-#: readelf.c:6562
+#: readelf.c:6658
 #, c-format
 msgid "  %#06x: Parent %d: %s\n"
 msgstr "  %#06x: Lähde %d: %s\n"
 
-#: readelf.c:6565
+#: readelf.c:6661
 #, c-format
 msgid "  %#06x: Parent %d, name index: %ld\n"
 msgstr "  %#06x: Lähde %d, nimi-indeksi: %ld\n"
 
-#: readelf.c:6569
+#: readelf.c:6665
 #, c-format
 msgid "  Version def aux past end of section\n"
 msgstr "  Versiomäärittely lohkon lopun ohitse\n"
 
-#: readelf.c:6574
+#: readelf.c:6670
 #, c-format
 msgid "  Version definition past end of section\n"
 msgstr "  Versiomäärittely lohkon lopun ohitse\n"
 
-#: readelf.c:6589
+#: readelf.c:6685
 #, c-format
 msgid ""
 "\n"
@@ -4849,68 +4854,68 @@ msgstr ""
 "\n"
 "Versiotarpeet-lohko ”%s” sisältää %u alkiota:\n"
 
-#: readelf.c:6592
+#: readelf.c:6688
 #, c-format
 msgid " Addr: 0x"
 msgstr " Osoite: 0x"
 
 #  kolme msgid ylempänä on Version needs section. Ilmeisesti tässä pitäisi olla sama
-#: readelf.c:6602
+#: readelf.c:6699
 msgid "version need section"
 msgstr "versiotarve-lohko"
 
-#: readelf.c:6627
+#: readelf.c:6724
 #, c-format
 msgid "  %#06x: Version: %d"
 msgstr "  %#06x: Versio:  %d"
 
-#: readelf.c:6630
+#: readelf.c:6727
 #, c-format
 msgid "  File: %s"
 msgstr "  Tiedosto: %s"
 
-#: readelf.c:6632
+#: readelf.c:6729
 #, c-format
 msgid "  File: %lx"
 msgstr "  Tiedosto: %lx"
 
-#: readelf.c:6634
+#: readelf.c:6731
 #, c-format
 msgid "  Cnt: %d\n"
 msgstr "  Lkm: %d\n"
 
-#: readelf.c:6654
+#: readelf.c:6751
 #, c-format
 msgid "  %#06x:   Name: %s"
 msgstr "  %#06x:   Nimi: %s"
 
-#: readelf.c:6657
+#: readelf.c:6754
 #, c-format
 msgid "  %#06x:   Name index: %lx"
 msgstr "  %#06x:   Nimi-indeksi: %lx"
 
-#: readelf.c:6660
+#: readelf.c:6757
 #, c-format
 msgid "  Flags: %s  Version: %d\n"
 msgstr "  Liput: %s  Versio: %d\n"
 
 #  hiukan ylempänä on Version needs section. Ilmeisesti tässä pitäisi olla sama
-#: readelf.c:6667
+#: readelf.c:6764
 #, c-format
 msgid "  Version need aux past end of section\n"
 msgstr "  Versiotarve lohkon lopun ohitse\n"
 
 #  hiukan ylempänä on Version needs section. Ilmeisesti tässä pitäisi olla sama
-#: readelf.c:6672
+#: readelf.c:6769
 #, c-format
 msgid "  Version need past end of section\n"
 msgstr "  Versiotarve lohkon lopun ohitse\n"
 
-#: readelf.c:6706
+#: readelf.c:6804
 msgid "version string table"
 msgstr "versiomerkkijonotaulu"
 
-#: readelf.c:6710
+#: readelf.c:6808
 #, c-format
 msgid ""
 "\n"
@@ -4919,55 +4924,55 @@ msgstr ""
 "\n"
 "Versiosymbolilohko ”%s” sisältää %d alkiota:\n"
 
-#: readelf.c:6713
+#: readelf.c:6811
 #, c-format
 msgid " Addr: "
 msgstr " Osoite: "
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:6723
+#: readelf.c:6822
 msgid "version symbol data"
 msgstr "versiosymbolidata"
 
 #  Pituus maksimissaan 9 merkkiä, "*yleinen*" on tasan 9-merkkiä. Suomennos on hiukan slanginen
-#: readelf.c:6750
+#: readelf.c:6849
 msgid "   0 (*local*)    "
 msgstr "   0 (*lokaali*)  "
 
 #  Pituus maksimissaan 9 merkkiä, (*globaali*) on liian pitkä
-#: readelf.c:6754
+#: readelf.c:6853
 msgid "   1 (*global*)   "
 msgstr "   1 (*yleinen*)  "
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
 #  Viittaa Elf_External_Verneed-rakenteeseen
-#: readelf.c:6791 readelf.c:7488
+#: readelf.c:6890 readelf.c:7588
 msgid "version need"
 msgstr "versiotarve"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n.
 #  Viittaa Elf_External_Vernaux -rakenteeseen.
-#: readelf.c:6801
+#: readelf.c:6900
 msgid "version need aux (2)"
 msgstr "ulkoinen versiotarve (2)"
 
-#: readelf.c:6816 readelf.c:6871
+#: readelf.c:6915 readelf.c:6970
 msgid "*invalid*"
 msgstr "*virheellinen*"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n.
 #  Viittaa Elf_External_Verdef-rakenteeseen.
-#: readelf.c:6846 readelf.c:7553
+#: readelf.c:6945 readelf.c:7653
 msgid "version def"
 msgstr "versiomäärittely"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n.
 #  Viittaa Elf_External_Verdaux-rakenteeseen.
-#: readelf.c:6866 readelf.c:7568
+#: readelf.c:6965 readelf.c:7668
 msgid "version def aux"
 msgstr "ulkoinen versiomäärittely"
 
-#: readelf.c:6900
+#: readelf.c:6999
 #, c-format
 msgid ""
 "\n"
@@ -4976,32 +4981,32 @@ msgstr ""
 "\n"
 "Tästä tiedostosta ei löytynyt versiotietoja.\n"
 
-#: readelf.c:7034
+#: readelf.c:7133
 #, c-format
 msgid "<other>: %x"
 msgstr "<toinen>: %x"
 
-#: readelf.c:7093
+#: readelf.c:7192
 msgid "Unable to read in dynamic data\n"
 msgstr "Ei voi lukea dynaamista dataa\n"
 
-#: readelf.c:7184 readelf.c:7234 readelf.c:7258 readelf.c:7288 readelf.c:7312
+#: readelf.c:7283 readelf.c:7333 readelf.c:7357 readelf.c:7387 readelf.c:7411
 msgid "Unable to seek to start of dynamic information\n"
 msgstr "Ei voi hakea dynaamisten tietojen alkua\n"
 
-#: readelf.c:7190 readelf.c:7240
+#: readelf.c:7289 readelf.c:7339
 msgid "Failed to read in number of buckets\n"
 msgstr "Buckets-lukumäärän lukeminen epäonnistui\n"
 
-#: readelf.c:7196
+#: readelf.c:7295
 msgid "Failed to read in number of chains\n"
 msgstr "Ketjujen lukumäärän lukeminen epäonnistui\n"
 
-#: readelf.c:7296
+#: readelf.c:7395
 msgid "Failed to determine last chain length\n"
 msgstr "Viimeisen ketjupituuden määritteleminen epäonnistui\n"
 
-#: readelf.c:7340
+#: readelf.c:7439
 #, c-format
 msgid ""
 "\n"
@@ -5010,18 +5015,18 @@ msgstr ""
 "\n"
 "Symbolitaulu tiedostovedokselle:\n"
 
-#: readelf.c:7342 readelf.c:7360
+#: readelf.c:7441 readelf.c:7459
 #, c-format
 msgid "  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"
 msgstr "  Buc-lkm:    Arvo   Koko   Tyyppi Sidnta Näkyvyys Ind Nimi\n"
 
 #  Num tarkoittaa ilmeisesti number-sanaa. Bind tarkoittaa ehkä samaa kuin jossain muussa taulukossa BoundTo ?
-#: readelf.c:7344 readelf.c:7362
+#: readelf.c:7443 readelf.c:7461
 #, c-format
 msgid "  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"
 msgstr "  Buc-lkm:    Arvo           Koko   Tyyppi Sidnta Näkyvyys Ind Nimi\n"
 
-#: readelf.c:7358
+#: readelf.c:7457
 #, c-format
 msgid ""
 "\n"
@@ -5030,7 +5035,7 @@ msgstr ""
 "\n"
 "Symbolitaulu ”.gnu.hash” tiedostovedokselle:\n"
 
-#: readelf.c:7397
+#: readelf.c:7496
 #, c-format
 msgid ""
 "\n"
@@ -5039,32 +5044,32 @@ msgstr ""
 "\n"
 "Symbolitaulu ”%s” sisältää %lu alkiota:\n"
 
-#: readelf.c:7401
+#: readelf.c:7500
 #, c-format
 msgid "   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"
 msgstr "   Num:    Arvo   Koko Tyyppi  Sidnta Näkyvyys Ind Nimi\n"
 
-#: readelf.c:7403
+#: readelf.c:7502
 #, c-format
 msgid "   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"
 msgstr "   Num:    Arvo           Koko Tyyppi  Sidnta Näkyvyys Ind Nimi\n"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:7459
+#: readelf.c:7559
 msgid "version data"
 msgstr "versiodata"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
 #  Viittaa Elf_External_Vernaux-rakenteeseen
-#: readelf.c:7501
+#: readelf.c:7601
 msgid "version need aux (3)"
 msgstr "ulkoinen versiotarve (3)"
 
-#: readelf.c:7528
+#: readelf.c:7628
 msgid "bad dynamic symbol\n"
 msgstr "virheellinen dynaaminen symboli\n"
 
-#: readelf.c:7592
+#: readelf.c:7692
 #, c-format
 msgid ""
 "\n"
@@ -5073,7 +5078,7 @@ msgstr ""
 "\n"
 "Dynaamisia symbolitietoja ei ole näytettäville symboleille.\n"
 
-#: readelf.c:7604
+#: readelf.c:7704
 #, c-format
 msgid ""
 "\n"
@@ -5082,12 +5087,12 @@ msgstr ""
 "\n"
 "Bucket-luettelopituuden histogrammi (yhteensä %lu bucketista):\n"
 
-#: readelf.c:7606 readelf.c:7676
+#: readelf.c:7706 readelf.c:7776
 #, c-format
 msgid " Length  Number     %% of total  Coverage\n"
 msgstr " Pituus  Numero     %% kaikesta  Yhteensä\n"
 
-#: readelf.c:7674
+#: readelf.c:7774
 #, c-format
 msgid ""
 "\n"
@@ -5096,7 +5101,7 @@ msgstr ""
 "\n"
 "”.gnu.hash”-bucket-luettelopituuden histogrammi (yhteensä %lu bucketista):\n"
 
-#: readelf.c:7740
+#: readelf.c:7840
 #, c-format
 msgid ""
 "\n"
@@ -5105,36 +5110,36 @@ msgstr ""
 "\n"
 "Dynaaminen info-segmentti siirroksessa 0x%lx sisältää %d alkiota:\n"
 
-#: readelf.c:7743
+#: readelf.c:7843
 #, c-format
 msgid " Num: Name                           BoundTo     Flags\n"
 msgstr " Num: Nimi                           Sidotaan    Liput\n"
 
-#: readelf.c:7834
+#: readelf.c:7934
 msgid "Unhandled MN10300 reloc type found after SYM_DIFF reloc"
 msgstr "Käsittelemätön MN10300 reloc-tyyppi löytyi SYM_DIFF reloc-tyypin jäljestä"
 
-#: readelf.c:7982
+#: readelf.c:8082
 #, c-format
 msgid "Missing knowledge of 32-bit reloc types used in DWARF sections of machine number %d\n"
 msgstr "Kolmekymmentäkaksibittisten reloc-tyyppien puuttuvaa tietoa käytetään konenumeron %d DWARF-lohkoissa\n"
 
-#: readelf.c:8251
+#: readelf.c:8375
 #, c-format
 msgid "unable to apply unsupported reloc type %d to section %s\n"
 msgstr "ei kyetä soveltamaan tukematonta reloc-tyyppiä %d lohkoon %s\n"
 
-#: readelf.c:8259
+#: readelf.c:8383
 #, c-format
 msgid "skipping invalid relocation offset 0x%lx in section %s\n"
 msgstr "hypättiin virheellisen uudelleensijoitussiirroksen 0x%lx yli lohkossa %s\n"
 
-#: readelf.c:8283
+#: readelf.c:8407
 #, c-format
 msgid "skipping unexpected symbol type %s in %ld'th relocation in section %s\n"
 msgstr "hypättiin odottamattoman symbolityypin %s yli %ld:ssa uudelleensijoituksessa lohkossa %s\n"
 
-#: readelf.c:8315
+#: readelf.c:8449
 #, c-format
 msgid ""
 "\n"
@@ -5143,7 +5148,7 @@ msgstr ""
 "\n"
 "Lohkon %s assembly-vedos\n"
 
-#: readelf.c:8336
+#: readelf.c:8470
 #, c-format
 msgid ""
 "\n"
@@ -5152,11 +5157,11 @@ msgstr ""
 "\n"
 "Lohkossa ”%s” ei ole vedostettavaa dataa.\n"
 
-#: readelf.c:8342
+#: readelf.c:8476
 msgid "section contents"
 msgstr "lohkosisältö"
 
-#: readelf.c:8362
+#: readelf.c:8496
 #, c-format
 msgid ""
 "\n"
@@ -5165,17 +5170,17 @@ msgstr ""
 "\n"
 "Lohkon ”%s” merkkijonovedos:\n"
 
-#: readelf.c:8380
+#: readelf.c:8514
 #, c-format
 msgid "  Note: This section has relocations against it, but these have NOT been applied to this dump.\n"
 msgstr " Huomaa: Tässä lohkossa on uudelleensijoituksia sitä vastaan, mutta niitä EI ole liitetty tähän vedokseen.\n"
 
-#: readelf.c:8409
+#: readelf.c:8543
 #, c-format
 msgid "  No strings found in this section."
 msgstr "  Tästä lohkosta ei löytynyt merkkijonoja."
 
-#: readelf.c:8431
+#: readelf.c:8565
 #, c-format
 msgid ""
 "\n"
@@ -5184,18 +5189,18 @@ msgstr ""
 "\n"
 "Lohkon ”%s” heksadesimaalilukuvedos:\n"
 
-#: readelf.c:8455
+#: readelf.c:8589
 #, c-format
 msgid " NOTE: This section has relocations against it, but these have NOT been applied to this dump.\n"
 msgstr " HUOMAA: Tässä lohkossa on uudelleensijoituksia sitä vastaan, mutta niitä EI ole liitetty tähän vedokseen.\n"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:8593
+#: readelf.c:8727
 #, c-format
 msgid "%s section data"
 msgstr "%s lohkodata"
 
-#: readelf.c:8658
+#: readelf.c:8793
 #, c-format
 msgid ""
 "\n"
@@ -5208,55 +5213,55 @@ msgstr ""
 #. which has the NOBITS type - the bits in the file will be random.
 #. This can happen when a file containing a .eh_frame section is
 #. stripped with the --only-keep-debug command line option.
-#: readelf.c:8667
+#: readelf.c:8802
 #, c-format
 msgid "section '%s' has the NOBITS type - its contents are unreliable.\n"
 msgstr "lohkossa ”%s” on NOBITS-tyyppi - sen sisältö on epäluotettava.\n"
 
-#: readelf.c:8702
+#: readelf.c:8838
 #, c-format
 msgid "Unrecognized debug section: %s\n"
 msgstr "Tunnistamaton virheenjäljityslohko: %s\n"
 
-#: readelf.c:8730
+#: readelf.c:8866
 #, c-format
 msgid "Section '%s' was not dumped because it does not exist!\n"
 msgstr "Lohkoa ”%s” ei voitu vedostaa, koska sitä ei ole olemassa!\n"
 
-#: readelf.c:8771
+#: readelf.c:8907
 #, c-format
 msgid "Section %d was not dumped because it does not exist!\n"
 msgstr "Lohkoa %d ei voitu vedostaa, koska sitä ei ole olemassa!\n"
 
-#: readelf.c:9285
+#: readelf.c:9421
 msgid "attributes"
 msgstr "attribuutit"
 
-#: readelf.c:9306
+#: readelf.c:9442
 #, c-format
 msgid "ERROR: Bad section length (%d > %d)\n"
 msgstr "VIRHE: Virheellinen lohkopituus (%d > %d)\n"
 
-#: readelf.c:9337
+#: readelf.c:9473
 #, c-format
 msgid "ERROR: Bad subsection length (%d > %d)\n"
 msgstr "VIRHE: Virheellinen alilohkopituus (%d > %d)\n"
 
-#: readelf.c:9396
+#: readelf.c:9532
 #, c-format
 msgid "Unknown format '%c'\n"
 msgstr "Tuntematon muototyyppi ”%c”\n"
 
 #  liblist-merkkijonotaulu ?
-#: readelf.c:9549 readelf.c:10065
+#: readelf.c:9686 readelf.c:10208
 msgid "liblist"
 msgstr "liblist"
 
-#: readelf.c:9636
+#: readelf.c:9773
 msgid "options"
 msgstr "valitsimet"
 
-#: readelf.c:9666
+#: readelf.c:9804
 #, c-format
 msgid ""
 "\n"
@@ -5266,16 +5271,16 @@ msgstr ""
 "Lohko ”%s” sisältää %d alkiota:\n"
 
 #  Virheilmoitus ennen maagisen .conflict-lohkon luontia (.conflict-lohkoa ei luoda).
-#: readelf.c:9827
+#: readelf.c:9965
 msgid "conflict list found without a dynamic symbol table\n"
 msgstr "ristiriitaluettelo löydetty ilman dynaamista symbolitaulua\n"
 
 #  conflict-lohko ?
-#: readelf.c:9843 readelf.c:9857
+#: readelf.c:9982 readelf.c:9997
 msgid "conflict"
 msgstr "ristiriita"
 
-#: readelf.c:9867
+#: readelf.c:10007
 #, c-format
 msgid ""
 "\n"
@@ -5285,15 +5290,15 @@ msgstr ""
 "Lohko ”.conflict” sisältää %lu alkiota:\n"
 
 #  Num on ehkä numero?
-#: readelf.c:9869
+#: readelf.c:10009
 msgid "  Num:    Index       Value  Name"
 msgstr "  Num:    Indeksi     Arvo   Nimi"
 
-#: readelf.c:9901
+#: readelf.c:10042
 msgid "GOT"
 msgstr "GOT"
 
-#: readelf.c:9902
+#: readelf.c:10043
 #, c-format
 msgid ""
 "\n"
@@ -5302,48 +5307,48 @@ msgstr ""
 "\n"
 "Ensisijainen GOT:\n"
 
-#: readelf.c:9903
+#: readelf.c:10044
 #, c-format
 msgid " Canonical gp value: "
 msgstr " Sääntöjenmukainen yleiskäyttöarvo: "
 
-#: readelf.c:9907 readelf.c:9998
+#: readelf.c:10048 readelf.c:10140
 #, c-format
 msgid " Reserved entries:\n"
 msgstr " Varatut alkiot:\n"
 
-#: readelf.c:9908
+#: readelf.c:10049
 #, c-format
 msgid "  %*s %10s %*s Purpose\n"
 msgstr "  %*s %10s %*s Tarkoitus\n"
 
-#: readelf.c:9924
+#: readelf.c:10065
 #, c-format
 msgid " Local entries:\n"
 msgstr " Paikallisalkiot:\n"
 
 #  Seuraava pitäisi oikeastaan jättää pois käännettävistä teksteistä.
-#: readelf.c:9925
+#: readelf.c:10066
 #, c-format
 msgid "  %*s %10s %*s\n"
 msgstr "  %*s %10s %*s\n"
 
-#: readelf.c:9940
+#: readelf.c:10081
 #, c-format
 msgid " Global entries:\n"
 msgstr " Yleisalkiot:\n"
 
-#: readelf.c:9941
+#: readelf.c:10082
 #, c-format
 msgid "  %*s %10s %*s %*s %-7s %3s %s\n"
 msgstr "  %*s %10s %*s %*s %-7s %3s %s\n"
 
 #  the Global Offset Table (GOT) ja the Procedure Linkage Table (PLT)
-#: readelf.c:9996
+#: readelf.c:10138
 msgid "PLT GOT"
 msgstr "PLT GOT"
 
-#: readelf.c:9997
+#: readelf.c:10139
 #, c-format
 msgid ""
 "\n"
@@ -5354,26 +5359,26 @@ msgstr ""
 "PLT GOT:\n"
 "\n"
 
-#: readelf.c:9999
+#: readelf.c:10141
 #, c-format
 msgid "  %*s %*s Purpose\n"
 msgstr "  %*s %*s Tarkoitus\n"
 
-#: readelf.c:10007
+#: readelf.c:10149
 #, c-format
 msgid " Entries:\n"
 msgstr " Alkiot:\n"
 
-#: readelf.c:10008
+#: readelf.c:10150
 #, c-format
 msgid "  %*s %*s %*s %-7s %3s %s\n"
 msgstr "  %*s %*s %*s %-7s %3s %s\n"
 
-#: readelf.c:10072
+#: readelf.c:10216
 msgid "liblist string table"
 msgstr "liblist-merkkijonotaulu"
 
-#: readelf.c:10082
+#: readelf.c:10226
 #, c-format
 msgid ""
 "\n"
@@ -5382,118 +5387,118 @@ msgstr ""
 "\n"
 "Kirjastoluettelolohko ”%s” sisältää %lu alkiota:\n"
 
-#: readelf.c:10135
+#: readelf.c:10279
 msgid "NT_AUXV (auxiliary vector)"
 msgstr "NT_AUXV (apuvektori)"
 
-#: readelf.c:10137
+#: readelf.c:10281
 msgid "NT_PRSTATUS (prstatus structure)"
 msgstr "NT_PRSTATUS (prstatus-rakenne)"
 
-#: readelf.c:10139
+#: readelf.c:10283
 msgid "NT_FPREGSET (floating point registers)"
 msgstr "NT_FPREGSET (liukulukurekistereitä)"
 
-#: readelf.c:10141
+#: readelf.c:10285
 msgid "NT_PRPSINFO (prpsinfo structure)"
 msgstr "NT_PRPSINFO (prpsinfo-rakenne)"
 
 #  task on suomeksi tehtävä, mutta tässä tarkoitetaan ilmeisesti task (struct)-rakennetta
-#: readelf.c:10143
+#: readelf.c:10287
 msgid "NT_TASKSTRUCT (task structure)"
 msgstr "NT_TASKSTRUCT (task-rakenne)"
 
-#: readelf.c:10145
+#: readelf.c:10289
 msgid "NT_PRXFPREG (user_xfpregs structure)"
 msgstr "NT_PRXFPREG (user_xfpregs-rakenne)"
 
-#: readelf.c:10147
+#: readelf.c:10291
 msgid "NT_PPC_VMX (ppc Altivec registers)"
 msgstr "NT_PPC_VMX (ppc Altivec-rekisterit)"
 
-#: readelf.c:10149
+#: readelf.c:10293
 msgid "NT_PPC_VSX (ppc VSX registers)"
 msgstr "NT_PPC_VSX (ppc VSX-rekisterit)"
 
-#: readelf.c:10151
+#: readelf.c:10295
 msgid "NT_PSTATUS (pstatus structure)"
 msgstr "NT_PSTATUS (pstatus-rakenne)"
 
-#: readelf.c:10153
+#: readelf.c:10297
 msgid "NT_FPREGS (floating point registers)"
 msgstr "NT_FPREGS (liukulukurekistereitä)"
 
-#: readelf.c:10155
+#: readelf.c:10299
 msgid "NT_PSINFO (psinfo structure)"
 msgstr "NT_PSINFO (psinfo-rakenne)"
 
-#: readelf.c:10157
+#: readelf.c:10301
 msgid "NT_LWPSTATUS (lwpstatus_t structure)"
 msgstr "NT_LWPSTATUS (lwpstatus_t-rakenne)"
 
-#: readelf.c:10159
+#: readelf.c:10303
 msgid "NT_LWPSINFO (lwpsinfo_t structure)"
 msgstr "NT_LWPSINFO (lwpsinfo_t-rakenne)"
 
-#: readelf.c:10161
+#: readelf.c:10305
 msgid "NT_WIN32PSTATUS (win32_pstatus structure)"
 msgstr "NT_WIN32PSTATUS (win32_pstatus-rakenne)"
 
-#: readelf.c:10169
+#: readelf.c:10313
 msgid "NT_VERSION (version)"
 msgstr "NT_VERSION (versio)"
 
-#: readelf.c:10171
+#: readelf.c:10315
 msgid "NT_ARCH (architecture)"
 msgstr "NT_ARCH (arkkitehtuuri)"
 
-#: readelf.c:10176 readelf.c:10199 readelf.c:10221
+#: readelf.c:10320 readelf.c:10343 readelf.c:10365
 #, c-format
 msgid "Unknown note type: (0x%08x)"
 msgstr "Tuntematon note-segmenttityyppi: (0x%08x)"
 
-#: readelf.c:10188
+#: readelf.c:10332
 msgid "NT_GNU_ABI_TAG (ABI version tag)"
 msgstr "NT_GNU_ABI_TAG (ABI-versiotunniste)"
 
-#: readelf.c:10190
+#: readelf.c:10334
 msgid "NT_GNU_HWCAP (DSO-supplied software HWCAP info)"
 msgstr "NT_GNU_HWCAP (DSO-tuettu ohjelmisto-HWCAP-tiedot)"
 
-#: readelf.c:10192
+#: readelf.c:10336
 msgid "NT_GNU_BUILD_ID (unique build ID bitstring)"
 msgstr "NT_GNU_BUILD_ID (uniikki rakentamistunnistebittimerkkijono)"
 
-#: readelf.c:10194
+#: readelf.c:10338
 msgid "NT_GNU_GOLD_VERSION (gold version)"
 msgstr "NT_GNU_GOLD_VERSION (kultaversio)"
 
 #. NetBSD core "procinfo" structure.
-#: readelf.c:10211
+#: readelf.c:10355
 msgid "NetBSD procinfo structure"
 msgstr "NetBSD procinfo-rakenne"
 
 #  reg on ehkä rekisteri
-#: readelf.c:10238 readelf.c:10252
+#: readelf.c:10382 readelf.c:10396
 msgid "PT_GETREGS (reg structure)"
 msgstr "PT_GETREGS (reg-rakenne)"
 
 #  fpreg viittaa ilmeisesti floating point registers eli liukulukurekistereihin
-#: readelf.c:10240 readelf.c:10254
+#: readelf.c:10384 readelf.c:10398
 msgid "PT_GETFPREGS (fpreg structure)"
 msgstr "PT_GETFPREGS (fpreg-rakenne)"
 
-#: readelf.c:10260
+#: readelf.c:10404
 #, c-format
 msgid "PT_FIRSTMACH+%d"
 msgstr "PT_FIRSTMACH+%d"
 
 #  Viimeinen %s-parametri virheilmoituksessa: Unable to seek to 0x%x for %s\n
-#: readelf.c:10316
+#: readelf.c:10461
 msgid "notes"
 msgstr "notes"
 
-#: readelf.c:10322
+#: readelf.c:10467
 #, c-format
 msgid ""
 "\n"
@@ -5503,28 +5508,28 @@ msgstr ""
 "Notes-segmenttejä siirroksessa 0x%08lx pituudella 0x%08lx:\n"
 
 #  Toinen sarkain pois ensimmäisestä väliköstä, koska Omistajat on pitempi kuin Owner
-#: readelf.c:10324
+#: readelf.c:10469
 #, c-format
 msgid "  Owner\t\tData size\tDescription\n"
 msgstr "  Omistajat\tData-koko\tKuvaus\n"
 
-#: readelf.c:10343
+#: readelf.c:10488
 #, c-format
 msgid "corrupt note found at offset %lx into core notes\n"
 msgstr "rikkoutunut note-segmentti löytyi siirroksesta %lx kohteeseen ydin notes\n"
 
 #  Tarkoittaako descsize samaa kuin description size?
-#: readelf.c:10345
+#: readelf.c:10490
 #, c-format
 msgid " type: %lx, namesize: %08lx, descsize: %08lx\n"
 msgstr " tyyppi:%lx, nimikoko:%08lx, kuvauskoko: %08lx\n"
 
-#: readelf.c:10443
+#: readelf.c:10588
 #, c-format
 msgid "No note segments present in the core file.\n"
 msgstr "Ydintiedostossa ei ole note-segmenttejä.\n"
 
-#: readelf.c:10527
+#: readelf.c:10672
 msgid ""
 "This instance of readelf has been built without support for a\n"
 "64 bit data type and so it cannot read 64 bit ELF files.\n"
@@ -5532,12 +5537,12 @@ msgstr ""
 "Tähän readelf-binaariin ei ole käännetty tukea 64-bittiselle\n"
 "datatyypille, joten 64-bittisiä ELF-tiedostoja ei voida lukea.\n"
 
-#: readelf.c:10574
+#: readelf.c:10719
 #, c-format
 msgid "%s: Failed to read file header\n"
 msgstr "%s: Tiedosto-otsakkeen lukeminen epäonnistui\n"
 
-#: readelf.c:10587
+#: readelf.c:10732
 #, c-format
 msgid ""
 "\n"
@@ -5546,159 +5551,159 @@ msgstr ""
 "\n"
 "Tiedosto: %s\n"
 
-#: readelf.c:10802
+#: readelf.c:10947
 #, c-format
 msgid "%s: failed to seek to first archive header\n"
 msgstr "%s: ensimmäisen arkisto-otsakkeen haku epäonnistui\n"
 
-#: readelf.c:10811 readelf.c:11076 readelf.c:11246
+#: readelf.c:10956 readelf.c:11223 readelf.c:11393
 #, c-format
 msgid "%s: failed to read archive header\n"
 msgstr "%s: ei voi lukea arkisto-otsaketta\n"
 
-#: readelf.c:10836
+#: readelf.c:10981
 #, c-format
 msgid "%s: the archive index is empty\n"
 msgstr "%s: arkistoindeksi on tyhjä\n"
 
-#: readelf.c:10844 readelf.c:10867
+#: readelf.c:10989 readelf.c:11013
 #, c-format
 msgid "%s: failed to read archive index\n"
 msgstr "%s: arkistoindeksin lukeminen epäonnistui\n"
 
-#: readelf.c:10853
+#: readelf.c:10998
 #, c-format
 msgid "%s: the archive index is supposed to have %ld entries, but the size in the header is too small\n"
 msgstr "%s: arkistoindeksissä otaksutaan olevan %ld alkiota, mutta otsakkeen koko on liian pieni\n"
 
-#: readelf.c:10860
+#: readelf.c:11006
 msgid "Out of memory whilst trying to read archive symbol index\n"
 msgstr "Muisti loppui kun yritettiin lukea arkiston symboli-indeksiä\n"
 
-#: readelf.c:10877
+#: readelf.c:11024
 msgid "Out of memory whilst trying to convert the archive symbol index\n"
 msgstr "Muisti loppui kun yritettiin muuntaa arkiston symboli-indeksiä\n"
 
-#: readelf.c:10889
+#: readelf.c:11036
 #, c-format
 msgid "%s: the archive has an index but no symbols\n"
 msgstr "%s: arkistossa on indeksi, mutta ei symboleja\n"
 
-#: readelf.c:10896
+#: readelf.c:11043
 msgid "Out of memory whilst trying to read archive index symbol table\n"
 msgstr "Muisti loppui yritettäessä lukea arkistoindeksisymbolitaulua\n"
 
-#: readelf.c:10902
+#: readelf.c:11049
 #, c-format
 msgid "%s: failed to read archive index symbol table\n"
 msgstr "%s: arkistoindekstisymbolitaulun lukeminen epäonnistui\n"
 
-#: readelf.c:10910
+#: readelf.c:11057
 #, c-format
 msgid "%s: failed to skip archive symbol table\n"
 msgstr "%s: ei voi hypätä arkistosymbolitaulun yli\n"
 
-#: readelf.c:10921
+#: readelf.c:11068
 #, c-format
 msgid "%s: failed to read archive header following archive index\n"
 msgstr "%s: arkisto-otsaketta seuraavan arkistoindeksin lukeminen epäonnistui\n"
 
-#: readelf.c:10926
+#: readelf.c:11073
 #, c-format
 msgid "%s has no archive index\n"
 msgstr "%s ei ole arkistoindeksiä\n"
 
-#: readelf.c:10937
+#: readelf.c:11084
 msgid "Out of memory reading long symbol names in archive\n"
 msgstr "Muisti loppui luettaessa pitkiä symbolinimiä arkistossa\n"
 
-#: readelf.c:10945
+#: readelf.c:11092
 #, c-format
 msgid "%s: failed to read long symbol name string table\n"
 msgstr "%s: pitkän symbolinimimerkkijonotaulun lukeminen epäonnistui\n"
 
-#: readelf.c:11070
+#: readelf.c:11217
 #, c-format
 msgid "%s: failed to seek to next file name\n"
 msgstr "%s: seuraavan tiedostonimen haku epäonnistui\n"
 
-#: readelf.c:11081 readelf.c:11252
+#: readelf.c:11228 readelf.c:11399
 #, c-format
 msgid "%s: did not find a valid archive header\n"
 msgstr "%s: kelvollista arkisto-otsaketta ei löytynyt\n"
 
-#: readelf.c:11162
+#: readelf.c:11309
 #, c-format
 msgid "%s: unable to dump the index as none was found\n"
 msgstr "%s: ei kyetä vedostamaan indeksiä, koska mitään ei löytynyt\n"
 
-#: readelf.c:11168
+#: readelf.c:11315
 #, c-format
 msgid "Index of archive %s: (%ld entries, 0x%lx bytes in the symbol table)\n"
 msgstr "Arkiston %s indeksi: (%ld alkiota, 0x%lx tavua symbolitaulussa)\n"
 
-#: readelf.c:11186
+#: readelf.c:11333
 #, c-format
 msgid "Binary %s contains:\n"
 msgstr "Binaari %s sisältää:\n"
 
-#: readelf.c:11194
+#: readelf.c:11341
 #, c-format
 msgid "%s: end of the symbol table reached before the end of the index\n"
 msgstr "%s: symbolitaulun loppu tavoitettiin ennen indeksin loppua\n"
 
-#: readelf.c:11205
+#: readelf.c:11352
 #, c-format
 msgid "%s: symbols remain in the index symbol table, but without corresponding entries in the index table\n"
 msgstr "%s: symbolit jäävät indeksisymbolitauluun, mutta ilman vastaavia alkioita indeksitaulussa\n"
 
-#: readelf.c:11210
+#: readelf.c:11357
 #, c-format
 msgid "%s: failed to seek back to start of object files in the archive\n"
 msgstr "%s: objektitiedostojen alkuunpaluun haku arkistossa epäonnistui\n"
 
-#: readelf.c:11238
+#: readelf.c:11385
 #, c-format
 msgid "%s: failed to seek to next archive header\n"
 msgstr "%s: seuraavan arkisto-otsakkeen haku epäonnistui\n"
 
-#: readelf.c:11266 readelf.c:11275
+#: readelf.c:11413 readelf.c:11422
 #, c-format
 msgid "%s: bad archive file name\n"
 msgstr "%s: virheellinen arkistotiedostonimi\n"
 
-#: readelf.c:11294 readelf.c:11370
+#: readelf.c:11441 readelf.c:11517
 #, c-format
 msgid "Input file '%s' is not readable.\n"
 msgstr "Syötetiedosto ”%s” ei ole luettava.\n"
 
-#: readelf.c:11316
+#: readelf.c:11463
 #, c-format
 msgid "%s: failed to seek to archive member.\n"
 msgstr "%s: arkistojäsenen haku epäonnistui.\n"
 
-#: readelf.c:11354
+#: readelf.c:11501
 #, c-format
 msgid "'%s': No such file\n"
 msgstr "”%s”: Tiedostoa ei löydy\n"
 
 #  stat-kutsu tiedostonimellä %s epäonnistui, seurauksena tämä sanoma
-#: readelf.c:11356
+#: readelf.c:11503
 #, c-format
 msgid "Could not locate '%s'.  System error message: %s\n"
 msgstr "Tiedostoa ”%s” ei löytynyt. Järjestelmävirhesanoma: %s\n"
 
-#: readelf.c:11363
+#: readelf.c:11510
 #, c-format
 msgid "'%s' is not an ordinary file\n"
 msgstr "”%s” ei ole tavallinen tiedosto\n"
 
-#: readelf.c:11376
+#: readelf.c:11523
 #, c-format
 msgid "%s: Failed to read file's magic number\n"
 msgstr "%s: Tiedoston maagisen numeron lukeminen epäonnistui\n"
 
-#: readelf.c:11388
+#: readelf.c:11535
 #, c-format
 msgid "File %s is not an archive so its index cannot be displayed.\n"
 msgstr "Tiedosto %s ei ole arkisto, joten sen indeksiä ei voi näyttää.\n"

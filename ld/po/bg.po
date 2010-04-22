@@ -4,10 +4,10 @@
 # Roumen Petrov <transl@roumenpetrov.info>, 20100.
 msgid ""
 msgstr ""
-"Project-Id-Version: ld 2.20\n"
+"Project-Id-Version: ld 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 14:10+0200\n"
-"PO-Revision-Date: 2009-11-15 16:18+0300\n"
+"POT-Creation-Date: 2010-03-03 15:06+0100\n"
+"PO-Revision-Date: 2010-04-21 22:47+0300\n"
 "Last-Translator: Roumen Petrov <transl@roumenpetrov.info>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "MIME-Version: 1.0\n"
@@ -30,13 +30,13 @@ msgstr "  --thumb-entry=<знак>         Установяване на вхо�
 msgid "Errors encountered processing file %s"
 msgstr "Сблъскване с грешки при обработване на файл %s"
 
-#: emultempl/armcoff.em:190 emultempl/pe.em:1710
+#: emultempl/armcoff.em:190 emultempl/pe.em:1696
 msgid "%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"
 msgstr "%P: предупреждение: '--thumb-entry %s' прегазва '-e %s'\n"
 
-#: emultempl/armcoff.em:195 emultempl/pe.em:1715
+#: emultempl/armcoff.em:195 emultempl/pe.em:1701
 msgid "%P: warning: cannot find thumb start symbol %s\n"
-msgstr "%P: предупреждение: не е намерен като начален отбелязания знак %s\n"
+msgstr "%P: предупреждение: не е намерен, като начален, отбелязания знак %s\n"
 
 #: emultempl/pe.em:371
 #, c-format
@@ -46,7 +46,7 @@ msgstr "  --base_file <базов_файл>           Създаване на б
 #: emultempl/pe.em:372
 #, c-format
 msgid "  --dll                              Set image base to the default for DLLs\n"
-msgstr "  --dll                              Установява базовия адрес то подразбиращия се за DLLs\n"
+msgstr "  --dll                              Установява базовия адрес на подразбиращия се за DLLs\n"
 
 #: emultempl/pe.em:373
 #, c-format
@@ -189,7 +189,7 @@ msgid ""
 "  --compat-implib                    Create backward compatible import libs;\n"
 "                                       create __imp_<SYMBOL> as well.\n"
 msgstr ""
-"  --compat-implib                    Създава съвместими с преди библиотеки                                        за внясяне;\n"
+"  --compat-implib                    Създава съвместими с преди библиотеки за внясяне;\n"
 "                                       също така създава __imp_<ИМЕ>.\n"
 
 #: emultempl/pe.em:403
@@ -240,7 +240,7 @@ msgid ""
 "                                       runtime.\n"
 msgstr ""
 "  --enable-runtime-pseudo-reloc      Преодоляване на ограниченията на автоматичните\n"
-"                                       внасяния с добавяне на псевдо премествания,\n"
+"                                       внасяния с добавяне на лъже-премествания,\n"
 "                                       определяни по време на работа.\n"
 
 #: emultempl/pe.em:415
@@ -249,7 +249,7 @@ msgid ""
 "  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations for\n"
 "                                       auto-imported DATA.\n"
 msgstr ""
-"  --disable-runtime-pseudo-reloc     Без псевдо премествания, по време на работа,\n"
+"  --disable-runtime-pseudo-reloc     Без лъже-премествания, по време на работа,\n"
 "                                       за автоматично внесени данни.\n"
 
 #: emultempl/pe.em:417
@@ -267,8 +267,8 @@ msgid ""
 "  --large-address-aware              Executable supports virtual addresses\n"
 "                                       greater than 2 gigabytes\n"
 msgstr ""
-"  --large-address-aware              Програмата поддържа виртуални аддреси\n"
-"                                       по-големи от 2 гигабайта\n"
+"  --large-address-aware              Програмата поддържа виртуални адреси\n"
+"                                       по-голями от 2 гигабайта\n"
 
 #: emultempl/pe.em:422
 #, c-format
@@ -361,34 +361,34 @@ msgstr "%s: Не може да се отвори базов файл %s\n"
 msgid "%P: warning, file alignment > section alignment.\n"
 msgstr "%P: предупреждение, подравняване за файл > подравняване за раздел.\n"
 
-#: emultempl/pe.em:899
+#: emultempl/pe.em:883
 msgid "%P: warning: --export-dynamic is not supported for PE targets, did you mean --export-all-symbols?\n"
 msgstr "%P: предупреждение: --export-dynamic не се поддържа при PE резултат, може би --export-all-symbols?\n"
 
-#: emultempl/pe.em:963 emultempl/pe.em:990
+#: emultempl/pe.em:949 emultempl/pe.em:976
 #, c-format
 msgid "Warning: resolving %s by linking to %s\n"
 msgstr "Предупрежение: разрешаване на %s със свързване към %s\n"
 
-#: emultempl/pe.em:968 emultempl/pe.em:995
+#: emultempl/pe.em:954 emultempl/pe.em:981
 msgid "Use --enable-stdcall-fixup to disable these warnings\n"
 msgstr "Да се използва --enable-stdcall-fixup, за да се забранят тези предупреждения\n"
 
-#: emultempl/pe.em:969 emultempl/pe.em:996
+#: emultempl/pe.em:955 emultempl/pe.em:982
 msgid "Use --disable-stdcall-fixup to disable these fixups\n"
 msgstr "Да се използва --disable-stdcall-fixup, за да се забранят тези предупреждения\n"
 
-#: emultempl/pe.em:1015
+#: emultempl/pe.em:1001
 #, c-format
 msgid "%C: Cannot get section contents - auto-import exception\n"
 msgstr "%C: Не можа да се вземе съдържанието на раздел - изключение при автоматично внасяне\n"
 
-#: emultempl/pe.em:1055
+#: emultempl/pe.em:1041
 #, c-format
 msgid "Info: resolving %s by linking to %s (auto-import)\n"
 msgstr "Информация: разрешаване на %s със свързване към %s (само-внасяне)\n"
 
-#: emultempl/pe.em:1062
+#: emultempl/pe.em:1048
 msgid ""
 "%P: warning: auto-importing has been activated without --enable-auto-import specified on the command line.\n"
 "This should work unless it involves constant data structures referencing symbols from auto-imported DLLs.\n"
@@ -396,28 +396,28 @@ msgstr ""
 "%P: предупр.: само-внасяне е активирано без да се зададе --enable-auto-import на командния ред.\n"
 "Това работи, освен ако не е свързано с константни структури за данни, които указват към имена от само-внасяни DLL-ли.\n"
 
-#: emultempl/pe.em:1069 emultempl/pe.em:1268 emultempl/pe.em:1474 ldcref.c:488
-#: ldcref.c:586 ldmain.c:1107 ldmisc.c:285 pe-dll.c:683 pe-dll.c:1227
+#: emultempl/pe.em:1055 emultempl/pe.em:1254 emultempl/pe.em:1460 ldcref.c:490
+#: ldcref.c:588 ldmain.c:1111 ldmisc.c:285 pe-dll.c:683 pe-dll.c:1227
 #: pe-dll.c:1324
 msgid "%B%F: could not read symbols: %E\n"
 msgstr "%B%F: не могат да се прочетат имената: %E\n"
 
-#: emultempl/pe.em:1149
+#: emultempl/pe.em:1135
 msgid "%F%P: cannot perform PE operations on non PE output file '%B'.\n"
 msgstr "%F%P: не може да се извърши \"PE\"-операции на изходен файл '%B', който не е \"PE\".\n"
 
-#: emultempl/pe.em:1515
+#: emultempl/pe.em:1501
 #, c-format
 msgid "Errors encountered processing file %s\n"
 msgstr "Открити са грешки при обработката на файл %s\n"
 
-#: emultempl/pe.em:1538
+#: emultempl/pe.em:1524
 #, c-format
 msgid "Errors encountered processing file %s for interworking\n"
 msgstr "Открити са грешки при обработката на файл %s за съвместна работа\n"
 
-#: emultempl/pe.em:1599 ldexp.c:539 ldlang.c:3276 ldlang.c:6636 ldlang.c:6667
-#: ldmain.c:1052
+#: emultempl/pe.em:1585 ldexp.c:539 ldlang.c:3284 ldlang.c:6649 ldlang.c:6680
+#: ldmain.c:1056
 msgid "%P%F: bfd_link_hash_lookup failed: %E\n"
 msgstr "%P%F: bfd_link_hash_lookup не успя: %E\n"
 
@@ -433,7 +433,7 @@ msgstr "%X%P: cref_hash_lookup не успя: %E\n"
 msgid "%X%P: cref alloc failed: %E\n"
 msgstr "%X%P: пропадна заделяне(на памет) за cref: %E\n"
 
-#: ldcref.c:364
+#: ldcref.c:366
 #, c-format
 msgid ""
 "\n"
@@ -444,25 +444,25 @@ msgstr ""
 "Таблица на кръстосани връзки\n"
 "\n"
 
-#: ldcref.c:365
+#: ldcref.c:367
 msgid "Symbol"
 msgstr "Символ"
 
-#: ldcref.c:373
+#: ldcref.c:375
 #, c-format
 msgid "File\n"
 msgstr "Файл\n"
 
-#: ldcref.c:377
+#: ldcref.c:379
 #, c-format
 msgid "No symbols\n"
 msgstr "Без имена\n"
 
-#: ldcref.c:530
+#: ldcref.c:532
 msgid "%P: symbol `%T' missing from main hash table\n"
 msgstr "%P: име '%T' липсва в главната хеш-таблица\n"
 
-#: ldcref.c:648 ldcref.c:655 ldmain.c:1141 ldmain.c:1148
+#: ldcref.c:650 ldcref.c:657 ldmain.c:1145 ldmain.c:1152
 msgid "%B%F: could not read relocs: %E\n"
 msgstr "%B%F: не могат да се прочетат \"преместванията\": %E\n"
 
@@ -470,7 +470,7 @@ msgstr "%B%F: не могат да се прочетат \"преместван�
 #. in OUTSECNAME.  This reloc is from a section which is
 #. mapped into a section from which references to OUTSECNAME
 #. are prohibited.  We must report an error.
-#: ldcref.c:682
+#: ldcref.c:684
 msgid "%X%C: prohibited cross reference from %s to `%T' in %s\n"
 msgstr "%X%C: забранено е кръстосана отпратка от %s към `%T' в %s\n"
 
@@ -482,15 +482,15 @@ msgstr "%P%X: Различни \"преместванията\" се изпол�
 msgid "%P%X: Different object file formats composing set %s\n"
 msgstr "%P%X: Различни формати на обектни файлове в набора %s\n"
 
-#: ldctor.c:279 ldctor.c:293
+#: ldctor.c:281 ldctor.c:295
 msgid "%P%X: %s does not support reloc %s for set %s\n"
 msgstr "%P%X: %s не се поддържа преместване %s за набор %s\n"
 
-#: ldctor.c:314
+#: ldctor.c:316
 msgid "%P%X: Unsupported size %d for set %s\n"
 msgstr "%P%X: Неподдържан размер %d за множеството %s\n"
 
-#: ldctor.c:335
+#: ldctor.c:337
 msgid ""
 "\n"
 "Set                 Symbol\n"
@@ -500,25 +500,25 @@ msgstr ""
 "Множество           Символ\n"
 "\n"
 
-#: ldemul.c:239
+#: ldemul.c:265
 #, c-format
 msgid "%S SYSLIB ignored\n"
 msgstr "%S SYSLIB е изоставен\n"
 
-#: ldemul.c:245
+#: ldemul.c:271
 #, c-format
 msgid "%S HLL ignored\n"
 msgstr "%S HLL е изоставен\n"
 
-#: ldemul.c:265
+#: ldemul.c:291
 msgid "%P: unrecognised emulation mode: %s\n"
 msgstr "%P: неразпознат режим за подражаване: %s\n"
 
-#: ldemul.c:266
+#: ldemul.c:292
 msgid "Supported emulations: "
 msgstr "Поддържани подражавания: "
 
-#: ldemul.c:308
+#: ldemul.c:334
 #, c-format
 msgid "  no emulation specific options.\n"
 msgstr "  без особени възможности за подражаване.\n"
@@ -642,35 +642,35 @@ msgstr "%P%F: не може да се отвори \"скрипт\"-файл п�
 msgid "%P%F: cannot represent machine `%s'\n"
 msgstr "%P%F: не може да се представи машина '%s'\n"
 
-#: ldlang.c:1142 ldlang.c:1184 ldlang.c:3006
+#: ldlang.c:1145 ldlang.c:1187 ldlang.c:3014
 msgid "%P%F: can not create hash table: %E\n"
 msgstr "%P%F: н може да се създаде хеш-таблицата: %E\n"
 
-#: ldlang.c:1235
+#: ldlang.c:1238
 msgid "%P:%S: warning: redeclaration of memory region `%s'\n"
 msgstr "%P:%S: предупреждение: повторно определение за регион памет '%s'\n"
 
-#: ldlang.c:1241
+#: ldlang.c:1244
 msgid "%P:%S: warning: memory region `%s' not declared\n"
 msgstr "%P: %S: предупр.: региона за памет '%s' не е обявен\n"
 
-#: ldlang.c:1275
+#: ldlang.c:1278
 msgid "%F%P:%S: error: alias for default memory region\n"
 msgstr "%F%P:%S: грешка: синоним за регион памет по подразбиране\n"
 
-#: ldlang.c:1286
+#: ldlang.c:1289
 msgid "%F%P:%S: error: redefinition of memory region alias `%s'\n"
 msgstr "%F%P:%S: грешка: повторен определение на синоним за регион памет '%s'\n"
 
-#: ldlang.c:1293
+#: ldlang.c:1296
 msgid "%F%P:%S: error: memory region `%s' for alias `%s' does not exist\n"
 msgstr "%F%P:%S: грешка: региона памет '%s' за синонима '%s' не съществува\n"
 
-#: ldlang.c:1345 ldlang.c:1384
+#: ldlang.c:1348 ldlang.c:1387
 msgid "%P%F: failed creating section `%s': %E\n"
 msgstr "%P%F: пропадна създаването на раздел '%s': %E\n"
 
-#: ldlang.c:1927
+#: ldlang.c:1930
 #, c-format
 msgid ""
 "\n"
@@ -681,7 +681,7 @@ msgstr ""
 "Отхвърлени входни раздели\n"
 "\n"
 
-#: ldlang.c:1935
+#: ldlang.c:1938
 msgid ""
 "\n"
 "Memory Configuration\n"
@@ -691,23 +691,23 @@ msgstr ""
 "Конфигурация на паметта\n"
 "\n"
 
-#: ldlang.c:1937
+#: ldlang.c:1940
 msgid "Name"
 msgstr "Име"
 
-#: ldlang.c:1937
+#: ldlang.c:1940
 msgid "Origin"
 msgstr "Произход"
 
-#: ldlang.c:1937
+#: ldlang.c:1940
 msgid "Length"
 msgstr "Дължина"
 
-#: ldlang.c:1937
+#: ldlang.c:1940
 msgid "Attributes"
 msgstr "Атрибути"
 
-#: ldlang.c:1977
+#: ldlang.c:1980
 #, c-format
 msgid ""
 "\n"
@@ -718,178 +718,178 @@ msgstr ""
 "Текст при свързване и изображения на паметта\n"
 "\n"
 
-#: ldlang.c:2045
+#: ldlang.c:2050
 msgid "%P%F: Illegal use of `%s' section\n"
 msgstr "%P%F: Неправилно използване на раздел '%s'\n"
 
-#: ldlang.c:2054
+#: ldlang.c:2059
 msgid "%P%F: output format %s cannot represent section called %s\n"
 msgstr "%P%F: в изходния формат %s, не може да се представи раздел именуван %s\n"
 
-#: ldlang.c:2602
+#: ldlang.c:2607
 msgid "%B: file not recognized: %E\n"
 msgstr "%B: файлът не е разпознат: %E\n"
 
-#: ldlang.c:2603
+#: ldlang.c:2608
 msgid "%B: matching formats:"
 msgstr "%B: съвпадащи формати:"
 
-#: ldlang.c:2610
+#: ldlang.c:2615
 msgid "%F%B: file not recognized: %E\n"
 msgstr "%F%B: файлът не е разпознат: %E\n"
 
-#: ldlang.c:2677
+#: ldlang.c:2685
 msgid "%F%B: member %B in archive is not an object\n"
 msgstr "%F%B: членът, на архива %B, не е обект\n"
 
-#: ldlang.c:2688 ldlang.c:2702
+#: ldlang.c:2696 ldlang.c:2710
 msgid "%F%B: could not read symbols: %E\n"
 msgstr "%F%B: не може да се прочетат имената: %E\n"
 
-#: ldlang.c:2976
+#: ldlang.c:2984
 msgid "%P: warning: could not find any targets that match endianness requirement\n"
 msgstr "%P: предупреждение: не може да се открие резултат, който да отговаря на изискванията за подредба(на байтовете)\n"
 
-#: ldlang.c:2990
+#: ldlang.c:2998
 msgid "%P%F: target %s not found\n"
 msgstr "%P%F: целта %s не е намерена\n"
 
-#: ldlang.c:2992
+#: ldlang.c:3000
 msgid "%P%F: cannot open output file %s: %E\n"
 msgstr "%P%F: не може да се отвори входящ файл %s: %E\n"
 
-#: ldlang.c:2998
+#: ldlang.c:3006
 msgid "%P%F:%s: can not make object file: %E\n"
 msgstr "%P%F:%s: не може да се създаде обектен файл: %E\n"
 
-#: ldlang.c:3002
+#: ldlang.c:3010
 msgid "%P%F:%s: can not set architecture: %E\n"
 msgstr "%P%F:%s: не може да се зададе архитектура: %E\n"
 
-#: ldlang.c:3143
+#: ldlang.c:3151
 msgid "%P: warning: %s contains output sections; did you forget -T?\n"
 msgstr "%P: предупр.: %s съдържа изходящ раздел; забравен -T?\n"
 
-#: ldlang.c:3169
+#: ldlang.c:3177
 msgid "%P%F: bfd_hash_lookup failed creating symbol %s\n"
 msgstr "%P%F: bfd_hash_lookup не успя да създаде име %s\n"
 
-#: ldlang.c:3187
+#: ldlang.c:3195
 msgid "%P%F: bfd_hash_allocate failed creating symbol %s\n"
 msgstr "%P%F: bfd_hash_allocate не успя да създаде име %s\n"
 
-#: ldlang.c:3566
+#: ldlang.c:3574
 msgid "%F%P: %s not found for insert\n"
 msgstr "%F%P: %s не е намерен(за добавяне)\n"
 
-#: ldlang.c:3781
+#: ldlang.c:3789
 msgid " load address 0x%V"
 msgstr " адрес на зареждане 0x%V"
 
-#: ldlang.c:4052
+#: ldlang.c:4061
 msgid "%W (size before relaxing)\n"
 msgstr "%W (размер преди намаляване)\n"
 
-#: ldlang.c:4143
+#: ldlang.c:4152
 #, c-format
 msgid "Address of section %s set to "
 msgstr "Адресът на раздел %s е установен на "
 
-#: ldlang.c:4296
+#: ldlang.c:4305
 #, c-format
 msgid "Fail with %d\n"
 msgstr "Не успя при %d\n"
 
-#: ldlang.c:4579
+#: ldlang.c:4589
 msgid "%X%P: section %s loaded at [%V,%V] overlaps section %s loaded at [%V,%V]\n"
 msgstr "%X%P: раздел %s зареден в [%V,%V] припокрива раздел %s зареден в [%V,%V]\n"
 
-#: ldlang.c:4595
+#: ldlang.c:4605
 msgid "%X%P: region `%s' overflowed by %ld bytes\n"
 msgstr "%X%P: регионът '%s' е препълнен с %ld байта\n"
 
-#: ldlang.c:4618
+#: ldlang.c:4628
 msgid "%X%P: address 0x%v of %B section `%s' is not within region `%s'\n"
 msgstr "%X%P: адресът 0x%v от %B, раздел '%s', не е в регион '%s'\n"
 
-#: ldlang.c:4629
+#: ldlang.c:4639
 msgid "%X%P: %B section `%s' will not fit in region `%s'\n"
 msgstr "%X%P: %B раздел '%s' не се побира в регион '%s'\n"
 
-#: ldlang.c:4669
+#: ldlang.c:4687
 #, c-format
 msgid "%F%S: non constant or forward reference address expression for section %s\n"
 msgstr "%F%S: адресния израз не е константен или отпратка за по нататък при раздел %s\n"
 
-#: ldlang.c:4694
+#: ldlang.c:4712
 msgid "%P%X: Internal error on COFF shared library section %s\n"
 msgstr "%P%X: Вътрешна грешка при раздел от COFF споделена библиотека %s\n"
 
-#: ldlang.c:4753
+#: ldlang.c:4771
 msgid "%P%F: error: no memory region specified for loadable section `%s'\n"
 msgstr "%P%F: грешка: без зададени региони памет за заредим раздел '%s'\n"
 
-#: ldlang.c:4758
+#: ldlang.c:4776
 msgid "%P: warning: no memory region specified for loadable section `%s'\n"
 msgstr "%P: предупреждение: без зададени региони памет за заредим раздел '%s'\n"
 
-#: ldlang.c:4780
+#: ldlang.c:4798
 msgid "%P: warning: changing start of section %s by %lu bytes\n"
 msgstr "%P: предупреждение: промяна на началото на раздел %s с %lu байта\n"
 
-#: ldlang.c:4862
+#: ldlang.c:4875
 msgid "%P: warning: dot moved backwards before `%s'\n"
 msgstr "%P: предупреждение: точката е преместена назад преди '%s'\n"
 
-#: ldlang.c:5035
+#: ldlang.c:5048
 msgid "%P%F: can't relax section: %E\n"
 msgstr "%P%F: не може да се намали раздел: %E\n"
 
-#: ldlang.c:5357
+#: ldlang.c:5370
 msgid "%F%P: invalid data statement\n"
 msgstr "%F%P: неправилен сегмент за данни\n"
 
-#: ldlang.c:5390
+#: ldlang.c:5403
 msgid "%F%P: invalid reloc statement\n"
 msgstr "%F%P: неправилен сегмент за преместване\n"
 
-#: ldlang.c:5509
+#: ldlang.c:5522
 msgid "%P%F: gc-sections requires either an entry or an undefined symbol\n"
 msgstr "%P%F: gc-раздели изискват или вход или неопределено име\n"
 
-#: ldlang.c:5534
+#: ldlang.c:5547
 msgid "%P%F:%s: can't set start address\n"
 msgstr "%P%F:%s: не може да се установи начален адрес\n"
 
-#: ldlang.c:5547 ldlang.c:5566
+#: ldlang.c:5560 ldlang.c:5579
 msgid "%P%F: can't set start address\n"
 msgstr "%P%F: не може да се установи начален адрес\n"
 
-#: ldlang.c:5559
+#: ldlang.c:5572
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
 msgstr "%P: предупреждение: не е намерено входно име %s; по подразбиране - %V\n"
 
-#: ldlang.c:5571
+#: ldlang.c:5584
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
 msgstr "%P: предупреждение: не е намерен входно име %s; без начален адрес\n"
 
-#: ldlang.c:5621
+#: ldlang.c:5634
 msgid "%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"
 msgstr "%P%F: Свързване с премествания от формат %s (%B) към формат %s (%B) не се поддържа\n"
 
-#: ldlang.c:5631
+#: ldlang.c:5644
 msgid "%P%X: %s architecture of input file `%B' is incompatible with %s output\n"
 msgstr "%P%X: %s архитектурата на входен файл '%B' е несъвместима с %s изход\n"
 
-#: ldlang.c:5653
+#: ldlang.c:5666
 msgid "%P%X: failed to merge target specific data of file %B\n"
 msgstr "%P%X: пропадна сливането, на специфични за резултата данни, от файл %B\n"
 
-#: ldlang.c:5724
+#: ldlang.c:5737
 msgid "%P%F: Could not define common symbol `%T': %E\n"
 msgstr "%P%F: Не може да се определят общите имена '%T': %E\n"
 
-#: ldlang.c:5736
+#: ldlang.c:5749
 msgid ""
 "\n"
 "Allocating common symbols\n"
@@ -897,7 +897,7 @@ msgstr ""
 "\n"
 "Заделяне на общи имена\n"
 
-#: ldlang.c:5737
+#: ldlang.c:5750
 msgid ""
 "Common symbol       size              file\n"
 "\n"
@@ -905,55 +905,55 @@ msgstr ""
 "Общо име            размер            файл\n"
 "\n"
 
-#: ldlang.c:5878
+#: ldlang.c:5891
 msgid "%P%F: invalid syntax in flags\n"
 msgstr "%P%F: неправилен синтаксис при флаговете\n"
 
-#: ldlang.c:6270
+#: ldlang.c:6283
 msgid "%P%F: Failed to create hash table\n"
 msgstr "%P%F: Не успя създаването на хеш-таблица\n"
 
-#: ldlang.c:6549
+#: ldlang.c:6562
 msgid "%P%F: multiple STARTUP files\n"
 msgstr "%P%F: многократни STARTUP файлове\n"
 
-#: ldlang.c:6597
+#: ldlang.c:6610
 msgid "%X%P:%S: section has both a load address and a load region\n"
 msgstr "%X%P:%S: раздел едновременно с адрес и регион за зареждане\n"
 
-#: ldlang.c:6844
+#: ldlang.c:6857
 msgid "%F%P: no sections assigned to phdrs\n"
 msgstr "%F%P: към phdrs не са присвоени раздели\n"
 
-#: ldlang.c:6881
+#: ldlang.c:6895
 msgid "%F%P: bfd_record_phdr failed: %E\n"
 msgstr "%F%P: bfd_record_phdr не успя: %E\n"
 
-#: ldlang.c:6901
+#: ldlang.c:6915
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
 msgstr "%X%P: раздел '%s' е присвоен към несъществуващ phdr `%s'\n"
 
-#: ldlang.c:7299
+#: ldlang.c:7316
 msgid "%X%P: unknown language `%s' in version information\n"
 msgstr "%X%P: непоснат език '%s' при информация за версия\n"
 
-#: ldlang.c:7441
+#: ldlang.c:7461
 msgid "%X%P: anonymous version tag cannot be combined with other version tags\n"
 msgstr "%X%P: безименна отметка за версия не може да се смесва с други отметки за версии\n"
 
-#: ldlang.c:7450
+#: ldlang.c:7470
 msgid "%X%P: duplicate version tag `%s'\n"
 msgstr "%X%P: повторена отметка за версия '%s'\n"
 
-#: ldlang.c:7470 ldlang.c:7479 ldlang.c:7496 ldlang.c:7506
+#: ldlang.c:7491 ldlang.c:7500 ldlang.c:7518 ldlang.c:7528
 msgid "%X%P: duplicate expression `%s' in version information\n"
 msgstr "%X%P: повторен израз '%s'при информация за версия\n"
 
-#: ldlang.c:7546
+#: ldlang.c:7568
 msgid "%X%P: unable to find version dependency `%s'\n"
 msgstr "%X%P: не може да се намери зависимост за версия '%s'\n"
 
-#: ldlang.c:7568
+#: ldlang.c:7590
 msgid "%X%P: unable to read .exports section contents\n"
 msgstr "%X%P: не може да се прочете съдържанието на раздел .exports\n"
 
@@ -1013,7 +1013,7 @@ msgstr "%X%P: не можа да се отвори целта на копиет�
 msgid "%P: Error writing file `%s'\n"
 msgstr "%P: Грешка при запис на файла '%s'\n"
 
-#: ldmain.c:531 pe-dll.c:1687
+#: ldmain.c:531 pe-dll.c:1706
 #, c-format
 msgid "%P: Error closing file `%s'\n"
 msgstr "%P: Грешка при затваряне на файла '%s'\n"
@@ -1032,27 +1032,27 @@ msgstr "%s: размер на данни %ld\n"
 msgid "%P%F: missing argument to -m\n"
 msgstr "%P%F: липсва аргумент за -m\n"
 
-#: ldmain.c:680 ldmain.c:699 ldmain.c:730
+#: ldmain.c:681 ldmain.c:701 ldmain.c:733
 msgid "%P%F: bfd_hash_table_init failed: %E\n"
 msgstr "%P%F: bfd_hash_table_init не успя: %E\n"
 
-#: ldmain.c:684 ldmain.c:703
+#: ldmain.c:685 ldmain.c:705
 msgid "%P%F: bfd_hash_lookup failed: %E\n"
 msgstr "%P%F: bfd_hash_lookup не успя: %E\n"
 
-#: ldmain.c:717
+#: ldmain.c:719
 msgid "%X%P: error: duplicate retain-symbols-file\n"
 msgstr "%X%P: грешка: повторен retain-symbols-file\n"
 
-#: ldmain.c:760
+#: ldmain.c:763
 msgid "%P%F: bfd_hash_lookup for insertion failed: %E\n"
 msgstr "%P%F: bfd_hash_lookup не успя при вмъкване: %E\n"
 
-#: ldmain.c:765
+#: ldmain.c:768
 msgid "%P: `-retain-symbols-file' overrides `-s' and `-S'\n"
 msgstr "%P: '-retain-symbols-file' отменя '-s' и '-S'\n"
 
-#: ldmain.c:829
+#: ldmain.c:833
 #, c-format
 msgid ""
 "Archive member included because of file (symbol)\n"
@@ -1061,133 +1061,133 @@ msgstr ""
 "Членове на архива включени заради файл(име)\n"
 "\n"
 
-#: ldmain.c:899
+#: ldmain.c:903
 msgid "%X%C: multiple definition of `%T'\n"
 msgstr "%X%C: многократни определения за '%T'\n"
 
-#: ldmain.c:902
+#: ldmain.c:906
 msgid "%D: first defined here\n"
 msgstr "%D: първото определение тук\n"
 
-#: ldmain.c:906
+#: ldmain.c:910
 msgid "%P: Disabling relaxation: it will not work with multiple definitions\n"
 msgstr "%P: Забранява намаляването: не работи с многократни определения\n"
 
-#: ldmain.c:936
+#: ldmain.c:940
 msgid "%B: warning: definition of `%T' overriding common\n"
 msgstr "%B: предупр.: определението за '%T' припокрива общ\n"
 
-#: ldmain.c:939
+#: ldmain.c:943
 msgid "%B: warning: common is here\n"
 msgstr "%B: предупр.: общия е тук\n"
 
-#: ldmain.c:946
+#: ldmain.c:950
 msgid "%B: warning: common of `%T' overridden by definition\n"
 msgstr "%B: предупр.: общия на '%T' е припокрит от определение\n"
 
-#: ldmain.c:949
+#: ldmain.c:953
 msgid "%B: warning: defined here\n"
 msgstr "%B: предупр.: определено тук\n"
 
-#: ldmain.c:956
+#: ldmain.c:960
 msgid "%B: warning: common of `%T' overridden by larger common\n"
 msgstr "B: предупр.: общия на '%T' е припокрит от по-голям общ\n"
 
-#: ldmain.c:959
+#: ldmain.c:963
 msgid "%B: warning: larger common is here\n"
 msgstr "%B: предупр.: по-големият общ е тук\n"
 
-#: ldmain.c:963
+#: ldmain.c:967
 msgid "%B: warning: common of `%T' overriding smaller common\n"
 msgstr "%B: предупр.: общия на '%T' припокрива по-малък общ\n"
 
-#: ldmain.c:966
+#: ldmain.c:970
 msgid "%B: warning: smaller common is here\n"
 msgstr "%B: предупр.: тук е по-малкият общ\n"
 
-#: ldmain.c:970
+#: ldmain.c:974
 msgid "%B: warning: multiple common of `%T'\n"
 msgstr "%B: предупр.: многократeн общ за '%T'\n"
 
-#: ldmain.c:972
+#: ldmain.c:976
 msgid "%B: warning: previous common is here\n"
 msgstr "%B: предупр.: тук е предишният общ\n"
 
-#: ldmain.c:992 ldmain.c:1030
+#: ldmain.c:996 ldmain.c:1034
 msgid "%P: warning: global constructor %s used\n"
 msgstr "%P: предупр.: използван общ конструктор %s\n"
 
-#: ldmain.c:1040
+#: ldmain.c:1044
 msgid "%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n"
 msgstr "%P%F: BFD грешка: BFD_RELOC_CTOR неподдържан\n"
 
 #. We found a reloc for the symbol we are looking for.
-#: ldmain.c:1094 ldmain.c:1096 ldmain.c:1098 ldmain.c:1116 ldmain.c:1161
+#: ldmain.c:1098 ldmain.c:1100 ldmain.c:1102 ldmain.c:1120 ldmain.c:1165
 msgid "warning: "
 msgstr "предупр.: "
 
-#: ldmain.c:1196
+#: ldmain.c:1201
 msgid "%F%P: bfd_hash_table_init failed: %E\n"
 msgstr "%F%P: bfd_hash_table_init не успя: %E\n"
 
-#: ldmain.c:1203
+#: ldmain.c:1208
 msgid "%F%P: bfd_hash_lookup failed: %E\n"
 msgstr "%F%P: bfd_hash_lookup не успя: %E\n"
 
-#: ldmain.c:1224
+#: ldmain.c:1229
 msgid "%X%C: undefined reference to `%T'\n"
 msgstr "%X%C: неопределена отпратка към '%T'\n"
 
-#: ldmain.c:1227
+#: ldmain.c:1232
 msgid "%C: warning: undefined reference to `%T'\n"
 msgstr "%C: предупр.: неопределена отпратка към '%T'\n"
 
-#: ldmain.c:1233
+#: ldmain.c:1238
 msgid "%X%D: more undefined references to `%T' follow\n"
 msgstr "%X%D: следват още неопределени отпратки към '%T'\n"
 
-#: ldmain.c:1236
+#: ldmain.c:1241
 msgid "%D: warning: more undefined references to `%T' follow\n"
 msgstr "%D: предупр.: следват още неопределени отпратки към '%T'\n"
 
-#: ldmain.c:1247
+#: ldmain.c:1252
 msgid "%X%B: undefined reference to `%T'\n"
 msgstr "%X%B: неопределена отпратка към '%T'\n"
 
-#: ldmain.c:1250
+#: ldmain.c:1255
 msgid "%B: warning: undefined reference to `%T'\n"
 msgstr "%B: предупр.: неопределена отпратка към '%T'\n"
 
-#: ldmain.c:1256
+#: ldmain.c:1261
 msgid "%X%B: more undefined references to `%T' follow\n"
 msgstr "%X%B: още неопределени отпратки към '%T' следват\n"
 
-#: ldmain.c:1259
+#: ldmain.c:1264
 msgid "%B: warning: more undefined references to `%T' follow\n"
 msgstr "%B: предупр.: още неопределени отпратки към '%T' следват\n"
 
-#: ldmain.c:1298
+#: ldmain.c:1303
 msgid " additional relocation overflows omitted from the output\n"
 msgstr " допълнителен излишък за премествания изпуснат в резултата\n"
 
-#: ldmain.c:1311
+#: ldmain.c:1316
 msgid " relocation truncated to fit: %s against undefined symbol `%T'"
 msgstr " преместването отрязано, за да съвпадне: %s срещу неопределеното име '%T'"
 
-#: ldmain.c:1316
+#: ldmain.c:1321
 msgid " relocation truncated to fit: %s against symbol `%T' defined in %A section in %B"
 msgstr " преместването отрязано, за да съвпадне: %s срещу име '%T' определено в раздел %A от %B"
 
-#: ldmain.c:1328
+#: ldmain.c:1333
 msgid " relocation truncated to fit: %s against `%T'"
 msgstr " преместването отрязано, за да съвпадне:  %s срещу '%T'"
 
-#: ldmain.c:1345
+#: ldmain.c:1350
 #, c-format
 msgid "%X%C: dangerous relocation: %s\n"
 msgstr "%X%C: опасно преместване: %s\n"
 
-#: ldmain.c:1360
+#: ldmain.c:1365
 msgid "%X%C: reloc refers to symbol `%T' which is not being output\n"
 msgstr "%X%C: преместването указва към име '%T', което не е изходящо\n"
 
@@ -1252,286 +1252,286 @@ msgstr "  Поддържани подражавания:\n"
 msgid "%P%F: bfd_new_link_order failed\n"
 msgstr "%P%F: пропадна bfd_new_link_order\n"
 
-#: ldwrite.c:354
+#: ldwrite.c:355
 msgid "%F%P: cannot create split section name for %s\n"
 msgstr "%F%P: при разцепване на раздел, не можа да се създаде име за %s\n"
 
-#: ldwrite.c:366
+#: ldwrite.c:367
 msgid "%F%P: clone section failed: %E\n"
 msgstr "%F%P: пропадна копирането на раздел: %E\n"
 
-#: ldwrite.c:404
+#: ldwrite.c:405
 #, c-format
 msgid "%8x something else\n"
 msgstr "%8x други\n"
 
-#: ldwrite.c:574
+#: ldwrite.c:575
 msgid "%F%P: final link failed: %E\n"
 msgstr "%F%P: пропадна заключителното свързване: %E\n"
 
-#: lexsup.c:209 lexsup.c:349
+#: lexsup.c:211 lexsup.c:351
 msgid "KEYWORD"
 msgstr "КЛЮЧ"
 
-#: lexsup.c:209
+#: lexsup.c:211
 msgid "Shared library control for HP/UX compatibility"
 msgstr "Управление на споделени библиотеки за съвместимост с HP/UX"
 
-#: lexsup.c:212
+#: lexsup.c:214
 msgid "ARCH"
 msgstr "АРХИТЕКТУРА"
 
-#: lexsup.c:212
+#: lexsup.c:214
 msgid "Set architecture"
 msgstr "Задава архитектура"
 
-#: lexsup.c:214 lexsup.c:459
+#: lexsup.c:216 lexsup.c:461
 msgid "TARGET"
 msgstr "РЕЗУЛТАТ"
 
-#: lexsup.c:214
+#: lexsup.c:216
 msgid "Specify target for following input files"
 msgstr "Задава вида на резултата за следващите входни файлове"
 
-#: lexsup.c:217 lexsup.c:268 lexsup.c:280 lexsup.c:293 lexsup.c:295
-#: lexsup.c:413 lexsup.c:471 lexsup.c:533 lexsup.c:546
+#: lexsup.c:219 lexsup.c:270 lexsup.c:282 lexsup.c:295 lexsup.c:297
+#: lexsup.c:415 lexsup.c:473 lexsup.c:535 lexsup.c:548
 msgid "FILE"
 msgstr "ФАЙЛ"
 
-#: lexsup.c:217
+#: lexsup.c:219
 msgid "Read MRI format linker script"
 msgstr "Използва скрипт за свързване в MRI формат"
 
-#: lexsup.c:219
+#: lexsup.c:221
 msgid "Force common symbols to be defined"
 msgstr "Принудително определяне на общи имена"
 
-#: lexsup.c:223 lexsup.c:515 lexsup.c:517 lexsup.c:519 lexsup.c:521
+#: lexsup.c:225 lexsup.c:517 lexsup.c:519 lexsup.c:521 lexsup.c:523
 msgid "ADDRESS"
 msgstr "АДРЕС"
 
-#: lexsup.c:223
+#: lexsup.c:225
 msgid "Set start address"
 msgstr "Задава начален адрес"
 
-#: lexsup.c:225
+#: lexsup.c:227
 msgid "Export all dynamic symbols"
 msgstr "Изнасяне на всички динамични имена"
 
-#: lexsup.c:227
+#: lexsup.c:229
 msgid "Undo the effect of --export-dynamic"
 msgstr "Отменя действието на --export-dynamic"
 
-#: lexsup.c:229
+#: lexsup.c:231
 msgid "Link big-endian objects"
 msgstr "Свързване на обекти със старши байт първи"
 
-#: lexsup.c:231
+#: lexsup.c:233
 msgid "Link little-endian objects"
 msgstr "Свързване на обекти със младши байт първи"
 
-#: lexsup.c:233 lexsup.c:236
+#: lexsup.c:235 lexsup.c:238
 msgid "SHLIB"
 msgstr "СПОД_БИБЛ"
 
-#: lexsup.c:233
+#: lexsup.c:235
 msgid "Auxiliary filter for shared object symbol table"
 msgstr "Допълнителен филтър за таблицата с имена на споделени обекти"
 
-#: lexsup.c:236
+#: lexsup.c:238
 msgid "Filter for shared object symbol table"
 msgstr "Филтър за таблицата с имена на споделени обекти"
 
-#: lexsup.c:239
+#: lexsup.c:241
 msgid "Ignored"
 msgstr "Пренебрегнат"
 
-#: lexsup.c:241
+#: lexsup.c:243
 msgid "SIZE"
 msgstr "РАЗМЕР"
 
-#: lexsup.c:241
+#: lexsup.c:243
 msgid "Small data size (if no size, same as --shared)"
 msgstr "Данни с по-малък размер (без размер е като --shared)"
 
-#: lexsup.c:244
+#: lexsup.c:246
 msgid "FILENAME"
 msgstr "ИМЕ_ФАЙЛ"
 
-#: lexsup.c:244
+#: lexsup.c:246
 msgid "Set internal name of shared library"
 msgstr "Задавя вътрешно име на споделена библиотека"
 
-#: lexsup.c:246
+#: lexsup.c:248
 msgid "PROGRAM"
 msgstr "ПРОГРАМА"
 
-#: lexsup.c:246
+#: lexsup.c:248
 msgid "Set PROGRAM as the dynamic linker to use"
 msgstr "Задава ПРОГРАМА за използване при динамично свързване"
 
-#: lexsup.c:249
+#: lexsup.c:251
 msgid "LIBNAME"
 msgstr "БИБЛ_ИМЕ"
 
-#: lexsup.c:249
+#: lexsup.c:251
 msgid "Search for library LIBNAME"
 msgstr "Търсене на библиотека БИБЛ_ИМЕ"
 
-#: lexsup.c:251
+#: lexsup.c:253
 msgid "DIRECTORY"
 msgstr "ДИРЕКТОРИЯ"
 
-#: lexsup.c:251
+#: lexsup.c:253
 msgid "Add DIRECTORY to library search path"
 msgstr "Добавя ДИРЕКТОРИЯ към пътя за търсене на библиотеки"
 
-#: lexsup.c:254
+#: lexsup.c:256
 msgid "Override the default sysroot location"
 msgstr "Припокрива подразбиращия се systoot"
 
-#: lexsup.c:256
+#: lexsup.c:258
 msgid "EMULATION"
 msgstr "ПОДРАЖАВАНЕ"
 
-#: lexsup.c:256
+#: lexsup.c:258
 msgid "Set emulation"
 msgstr "Задава подражаване"
 
-#: lexsup.c:258
+#: lexsup.c:260
 msgid "Print map file on standard output"
 msgstr "Извежда на стандартния изход файл с изобразяванията"
 
-#: lexsup.c:260
+#: lexsup.c:262
 msgid "Do not page align data"
 msgstr "Да не се подравняват данните на страници"
 
-#: lexsup.c:262
+#: lexsup.c:264
 msgid "Do not page align data, do not make text readonly"
 msgstr "Да не се подравняват данните на страници, кода да не е само за четене"
 
-#: lexsup.c:265
+#: lexsup.c:267
 msgid "Page align data, make text readonly"
 msgstr "Подравняват данните на страници, кода да е само за четене"
 
-#: lexsup.c:268
+#: lexsup.c:270
 msgid "Set output file name"
 msgstr "Задава име на файл за извеждане"
 
-#: lexsup.c:270
+#: lexsup.c:272
 msgid "Optimize output file"
 msgstr "Оптимизиране на извеждания файл"
 
-#: lexsup.c:272
+#: lexsup.c:274
 msgid "Ignored for SVR4 compatibility"
 msgstr "Пренебрегнат(съвместимост със SVR4)"
 
-#: lexsup.c:276
+#: lexsup.c:278
 msgid "Generate relocatable output"
 msgstr "Създаване на преместваем резултат"
 
-#: lexsup.c:280
+#: lexsup.c:282
 msgid "Just link symbols (if directory, same as --rpath)"
 msgstr "Само свързване на имената (ако е директория, като --rpath)"
 
-#: lexsup.c:283
+#: lexsup.c:285
 msgid "Strip all symbols"
 msgstr "Премахване на всички имена"
 
-#: lexsup.c:285
+#: lexsup.c:287
 msgid "Strip debugging symbols"
 msgstr "Премахване на имена за трасиране"
 
-#: lexsup.c:287
+#: lexsup.c:289
 msgid "Strip symbols in discarded sections"
 msgstr "Премахване на имена в отхвърлени раздели"
 
-#: lexsup.c:289
+#: lexsup.c:291
 msgid "Do not strip symbols in discarded sections"
 msgstr "Без премахване на имена в отхвърлени раздели"
 
-#: lexsup.c:291
+#: lexsup.c:293
 msgid "Trace file opens"
 msgstr "Проследяване на отваряните файлове"
 
-#: lexsup.c:293
+#: lexsup.c:295
 msgid "Read linker script"
 msgstr "Използва скрипт за свързване"
 
-#: lexsup.c:295
+#: lexsup.c:297
 msgid "Read default linker script"
 msgstr "Използва скрипт за свързване по подразбиране"
 
-#: lexsup.c:299 lexsup.c:317 lexsup.c:390 lexsup.c:411 lexsup.c:508
-#: lexsup.c:536 lexsup.c:575
+#: lexsup.c:301 lexsup.c:319 lexsup.c:392 lexsup.c:413 lexsup.c:510
+#: lexsup.c:538 lexsup.c:577
 msgid "SYMBOL"
 msgstr "ИМЕ"
 
-#: lexsup.c:299
+#: lexsup.c:301
 msgid "Start with undefined reference to SYMBOL"
 msgstr "Начало с неопределена отпратка към ИМЕ"
 
-#: lexsup.c:302
+#: lexsup.c:304
 msgid "[=SECTION]"
 msgstr "=РАЗДЕЛ"
 
-#: lexsup.c:303
+#: lexsup.c:305
 msgid "Don't merge input [SECTION | orphan] sections"
 msgstr "Без сливане на входящи [РАЗДЕЛ | осиротял] раздели"
 
-#: lexsup.c:305
+#: lexsup.c:307
 msgid "Build global constructor/destructor tables"
 msgstr "Изграждане на общи конструтор/деструктор таблици"
 
-#: lexsup.c:307
+#: lexsup.c:309
 msgid "Print version information"
 msgstr "Извеждане на информация за версия"
 
-#: lexsup.c:309
+#: lexsup.c:311
 msgid "Print version and emulation information"
 msgstr "Извеждане на информация за версия и подражаване"
 
-#: lexsup.c:311
+#: lexsup.c:313
 msgid "Discard all local symbols"
 msgstr "Отхвърляне на всички местни имена"
 
-#: lexsup.c:313
+#: lexsup.c:315
 msgid "Discard temporary local symbols (default)"
 msgstr "Отхвърляне на временни местни имена (по подразбиране)"
 
-#: lexsup.c:315
+#: lexsup.c:317
 msgid "Don't discard any local symbols"
 msgstr "Без отхвърляне на местни имена"
 
-#: lexsup.c:317
+#: lexsup.c:319
 msgid "Trace mentions of SYMBOL"
 msgstr "Проследяване на посочванията на ИМЕ"
 
-#: lexsup.c:319 lexsup.c:473 lexsup.c:475
+#: lexsup.c:321 lexsup.c:475 lexsup.c:477
 msgid "PATH"
 msgstr "ПЪТ"
 
-#: lexsup.c:319
+#: lexsup.c:321
 msgid "Default search path for Solaris compatibility"
 msgstr "Път за търсене по подразбиране за съвместимост със Соларис"
 
-#: lexsup.c:322
+#: lexsup.c:324
 msgid "Start a group"
 msgstr "Начало на група"
 
-#: lexsup.c:324
+#: lexsup.c:326
 msgid "End a group"
 msgstr "Край на група"
 
-#: lexsup.c:328
+#: lexsup.c:330
 msgid "Accept input files whose architecture cannot be determined"
 msgstr "Приемане на входящи файлове, чиято архитектура не може да се определи"
 
-#: lexsup.c:332
+#: lexsup.c:334
 msgid "Reject input files whose architecture is unknown"
 msgstr "Игнориране на входни файлове с непозната архитектура"
 
-#: lexsup.c:335
+#: lexsup.c:337
 msgid ""
 "Set DT_NEEDED tags for DT_NEEDED entries in\n"
 "                                following dynamic libs"
@@ -1539,7 +1539,7 @@ msgstr ""
 "Установява DT_NEEDED отметки за DT_NEEDED записи в\n"
 "                                следните динамични библ."
 
-#: lexsup.c:339
+#: lexsup.c:341
 msgid ""
 "Do not set DT_NEEDED tags for DT_NEEDED entries\n"
 "                                in following dynamic libs"
@@ -1547,171 +1547,171 @@ msgstr ""
 "Без установяване на DT_NEEDED отметки за DT_NEEDED записи\n"
 "                                в следните динамични библ."
 
-#: lexsup.c:343
+#: lexsup.c:345
 msgid "Only set DT_NEEDED for following dynamic libs if used"
 msgstr "Установява се DT_NEEDED за следните динамични библ., само ако се използва"
 
-#: lexsup.c:346
+#: lexsup.c:348
 msgid "Always set DT_NEEDED for following dynamic libs"
 msgstr "Винаги се установява DT_NEEDED за следните динамични библ."
 
-#: lexsup.c:349
+#: lexsup.c:351
 msgid "Ignored for SunOS compatibility"
 msgstr "Пренебрегнат(съвместимост със SunOS)"
 
-#: lexsup.c:351
+#: lexsup.c:353
 msgid "Link against shared libraries"
 msgstr "Свързване със споделени библиотеки"
 
-#: lexsup.c:357
+#: lexsup.c:359
 msgid "Do not link against shared libraries"
 msgstr "Без свързване със споделени библиотеки"
 
-#: lexsup.c:365
+#: lexsup.c:367
 msgid "Bind global references locally"
 msgstr "Привързване на общи препратки като местни"
 
-#: lexsup.c:367
+#: lexsup.c:369
 msgid "Bind global function references locally"
 msgstr "Привързване на общи препратки за функции като местни"
 
-#: lexsup.c:369
+#: lexsup.c:371
 msgid "Check section addresses for overlaps (default)"
 msgstr "Проверка за припокриване на адресите на раздели (по подразбиране)"
 
-#: lexsup.c:372
+#: lexsup.c:374
 msgid "Do not check section addresses for overlaps"
 msgstr "Без проверка за припокриване за адресите на раздели"
 
-#: lexsup.c:375
+#: lexsup.c:377
 msgid "Output cross reference table"
 msgstr "Извежда таблица с кръстосани отпратки"
 
-#: lexsup.c:377
+#: lexsup.c:379
 msgid "SYMBOL=EXPRESSION"
 msgstr "ИМЕ=ИЗРАЗ"
 
-#: lexsup.c:377
+#: lexsup.c:379
 msgid "Define a symbol"
 msgstr "Задаване на име"
 
-#: lexsup.c:379
+#: lexsup.c:381
 msgid "[=STYLE]"
 msgstr "[=НАЧИН]"
 
-#: lexsup.c:379
+#: lexsup.c:381
 msgid "Demangle symbol names [using STYLE]"
 msgstr "Декориране на имена [използвайки НАЧИН]"
 
-#: lexsup.c:382
+#: lexsup.c:384
 msgid "Generate embedded relocs"
 msgstr "Създаване на вградени премествания"
 
-#: lexsup.c:384
+#: lexsup.c:386
 msgid "Treat warnings as errors"
 msgstr "Третиране на предупреждения като грешки"
 
-#: lexsup.c:387
+#: lexsup.c:389
 msgid "Do not treat warnings as errors (default)"
 msgstr "Да не се третиране предупреждения като грешки (по подразбиране)"
 
-#: lexsup.c:390
+#: lexsup.c:392
 msgid "Call SYMBOL at unload-time"
 msgstr "Извикване на ИМЕ по време разтоварване"
 
-#: lexsup.c:392
+#: lexsup.c:394
 msgid "Force generation of file with .exe suffix"
 msgstr "Принудително създаване на файл с наставка .exe "
 
-#: lexsup.c:394
+#: lexsup.c:396
 msgid "Remove unused sections (on some targets)"
 msgstr "Изтриване на неизползвани раздели (за някои резултати)"
 
-#: lexsup.c:397
+#: lexsup.c:399
 msgid "Don't remove unused sections (default)"
 msgstr "Без изтриване на неизползвани раздели (по подразбиране)"
 
-#: lexsup.c:400
+#: lexsup.c:402
 msgid "List removed unused sections on stderr"
 msgstr "Извеждане, на изхода за грешки, на изтритите неизползвани раздели"
 
-#: lexsup.c:403
+#: lexsup.c:405
 msgid "Do not list removed unused sections"
 msgstr "Без извеждане на изтритите неизползвани раздели"
 
-#: lexsup.c:406
+#: lexsup.c:408
 msgid "Set default hash table size close to <NUMBER>"
 msgstr "Установява размер по подразбиране на таблицат за хеш близък до <ЧИСЛО>"
 
-#: lexsup.c:409
+#: lexsup.c:411
 msgid "Print option help"
 msgstr "Извеждане на помощ за опците"
 
-#: lexsup.c:411
+#: lexsup.c:413
 msgid "Call SYMBOL at load-time"
 msgstr "Извикване на ИМЕ по време на зареждане"
 
-#: lexsup.c:413
+#: lexsup.c:415
 msgid "Write a map file"
 msgstr "Записване на файл с изобразявания"
 
-#: lexsup.c:415
+#: lexsup.c:417
 msgid "Do not define Common storage"
 msgstr "Без определяне на адрес за общи имена"
 
-#: lexsup.c:417
+#: lexsup.c:419
 msgid "Do not demangle symbol names"
 msgstr "Без декорация за имената"
 
-#: lexsup.c:419
+#: lexsup.c:421
 msgid "Use less memory and more disk I/O"
 msgstr "Използване на по-малко памет и повече дискови операции"
 
-#: lexsup.c:421
+#: lexsup.c:423
 msgid "Do not allow unresolved references in object files"
 msgstr "Непозволява несвързани отпратки при обектни файлове"
 
-#: lexsup.c:424
+#: lexsup.c:426
 msgid "Allow unresolved references in shared libaries"
 msgstr "Позволява несвързани отпратки при споделени библиотеки"
 
-#: lexsup.c:428
+#: lexsup.c:430
 msgid "Do not allow unresolved references in shared libs"
 msgstr "Непозволява несвързани отпратки при споделени библиотеки"
 
-#: lexsup.c:432
+#: lexsup.c:434
 msgid "Allow multiple definitions"
 msgstr "Позволява повтаряне на определения"
 
-#: lexsup.c:434
+#: lexsup.c:436
 msgid "Disallow undefined version"
 msgstr "Непозволява неопределена версия"
 
-#: lexsup.c:436
+#: lexsup.c:438
 msgid "Create default symbol version"
 msgstr "Създаване на подразбираща се версия за име"
 
-#: lexsup.c:439
+#: lexsup.c:441
 msgid "Create default symbol version for imported symbols"
 msgstr "Създаване на подразбираща се версия за име при внесените имена"
 
-#: lexsup.c:442
+#: lexsup.c:444
 msgid "Don't warn about mismatched input files"
 msgstr "Без предупреждениe за несъответстващи входящи файлове"
 
-#: lexsup.c:445
+#: lexsup.c:447
 msgid "Don't warn on finding an incompatible library"
 msgstr "Без предупреждения при откриване на несъвместими библиотеки"
 
-#: lexsup.c:448
+#: lexsup.c:450
 msgid "Turn off --whole-archive"
 msgstr "Изключване на --whole-archive"
 
-#: lexsup.c:450
+#: lexsup.c:452
 msgid "Create an output file even if errors occur"
 msgstr "Създаване на изходен файл, дори при грешки"
 
-#: lexsup.c:455
+#: lexsup.c:457
 msgid ""
 "Only use library directories specified on\n"
 "                                the command line"
@@ -1719,123 +1719,123 @@ msgstr ""
 "Използване само на директорите за библиотеки\n"
 "                                 зададени на командния ред"
 
-#: lexsup.c:459
+#: lexsup.c:461
 msgid "Specify target of output file"
 msgstr "Задаване на целта за резултата"
 
-#: lexsup.c:462
+#: lexsup.c:464
 msgid "Ignored for Linux compatibility"
 msgstr "Пренебрегнат(съвместимост с линукс)"
 
-#: lexsup.c:465
+#: lexsup.c:467
 msgid "Reduce memory overheads, possibly taking much longer"
 msgstr "Намаляване на използваната памет, възможно е свързването да протече по-дълго"
 
-#: lexsup.c:468
+#: lexsup.c:470
 msgid "Relax branches on certain targets"
 msgstr "Намаляване на разклоненията за някой цели"
 
-#: lexsup.c:471
+#: lexsup.c:473
 msgid "Keep only symbols listed in FILE"
 msgstr "Запазване само на имената изброени във ФАЙЛ"
 
-#: lexsup.c:473
+#: lexsup.c:475
 msgid "Set runtime shared library search path"
 msgstr "Задава път за търсене на споделена библиотека по време на изпълнение"
 
-#: lexsup.c:475
+#: lexsup.c:477
 msgid "Set link time shared library search path"
 msgstr "Задава път за търсене на споделена библиотека по време на свързване"
 
-#: lexsup.c:478
+#: lexsup.c:480
 msgid "Create a shared library"
 msgstr "Създаване на споделена библиотека"
 
-#: lexsup.c:482
+#: lexsup.c:484
 msgid "Create a position independent executable"
 msgstr "Създаване на позиционно независим изпълним файл"
 
-#: lexsup.c:486
+#: lexsup.c:488
 msgid "[=ascending|descending]"
 msgstr "[=възходящ|низходящ]"
 
-#: lexsup.c:487
+#: lexsup.c:489
 msgid "Sort common symbols by alignment [in specified order]"
 msgstr "Подреждане на общите имена по подравняване [в зададения ред]"
 
-#: lexsup.c:492
+#: lexsup.c:494
 msgid "name|alignment"
 msgstr "име|подравняване"
 
-#: lexsup.c:493
+#: lexsup.c:495
 msgid "Sort sections by name or maximum alignment"
 msgstr "Подреждане на раздели по име или максимално подравняваме"
 
-#: lexsup.c:495
+#: lexsup.c:497
 msgid "COUNT"
 msgstr "БРОЙ"
 
-#: lexsup.c:495
+#: lexsup.c:497
 msgid "How many tags to reserve in .dynamic section"
 msgstr "Колко отметки да се заделят за раздел .dynamic"
 
-#: lexsup.c:498
+#: lexsup.c:500
 msgid "[=SIZE]"
 msgstr "[=РАЗМЕР]"
 
-#: lexsup.c:498
+#: lexsup.c:500
 msgid "Split output sections every SIZE octets"
 msgstr "Разделяне на резултатните раздели на всеки РАЗМЕР осморки"
 
-#: lexsup.c:501
+#: lexsup.c:503
 msgid "[=COUNT]"
 msgstr "[=БРОЙ]"
 
-#: lexsup.c:501
+#: lexsup.c:503
 msgid "Split output sections every COUNT relocs"
 msgstr "Разделяне на резултатните раздели на всеки БРОЙ премествания"
 
-#: lexsup.c:504
+#: lexsup.c:506
 msgid "Print memory usage statistics"
 msgstr "Извеждане на статистика за изполване на паметта"
 
-#: lexsup.c:506
+#: lexsup.c:508
 msgid "Display target specific options"
 msgstr "Извеждане на опции, специфични за целта"
 
-#: lexsup.c:508
+#: lexsup.c:510
 msgid "Do task level linking"
 msgstr "Свързване на ниво задача"
 
-#: lexsup.c:510
+#: lexsup.c:512
 msgid "Use same format as native linker"
 msgstr "Използване на същия формат като стандартната програма за свързване"
 
-#: lexsup.c:512
+#: lexsup.c:514
 msgid "SECTION=ADDRESS"
 msgstr "РАЗДЕЛ=АДРЕС"
 
-#: lexsup.c:512
+#: lexsup.c:514
 msgid "Set address of named section"
 msgstr "Задаване на адрес на именуван раздел"
 
-#: lexsup.c:515
+#: lexsup.c:517
 msgid "Set address of .bss section"
 msgstr "Задаване на адрес на раздел .bss"
 
-#: lexsup.c:517
+#: lexsup.c:519
 msgid "Set address of .data section"
 msgstr "Задаване на адрес на раздел .data"
 
-#: lexsup.c:519
+#: lexsup.c:521
 msgid "Set address of .text section"
 msgstr "Задаване на адрес на раздел .text"
 
-#: lexsup.c:521
+#: lexsup.c:523
 msgid "Set address of text segment"
 msgstr "Задаване адрес на раздел .text"
 
-#: lexsup.c:524
+#: lexsup.c:526
 msgid ""
 "How to handle unresolved symbols.  <method> is:\n"
 "                                ignore-all, report-all, ignore-in-object-files,\n"
@@ -1845,15 +1845,15 @@ msgstr ""
 "                                ignore-all, report-all, ignore-in-object-files,\n"
 "                                ignore-in-shared-libs"
 
-#: lexsup.c:529
+#: lexsup.c:531
 msgid "Output lots of information during link"
 msgstr "Извеждане, при свързване, на допълнителна информация"
 
-#: lexsup.c:533
+#: lexsup.c:535
 msgid "Read version information script"
 msgstr "Използва скрипт с информация за версии"
 
-#: lexsup.c:536
+#: lexsup.c:538
 msgid ""
 "Take export symbols list from .exports, using\n"
 "                                SYMBOL as the version."
@@ -1861,91 +1861,91 @@ msgstr ""
 "Използване на списък с имена за експорт от .exports, използвайки\n"
 "                                ИМЕ като версия."
 
-#: lexsup.c:540
+#: lexsup.c:542
 msgid "Add data symbols to dynamic list"
 msgstr "Добавяне на имената на данните към динамичен списък"
 
-#: lexsup.c:542
+#: lexsup.c:544
 msgid "Use C++ operator new/delete dynamic list"
 msgstr "Използване на динамичен списък за C++ оператори new/delete"
 
-#: lexsup.c:544
+#: lexsup.c:546
 msgid "Use C++ typeinfo dynamic list"
 msgstr "Използване на динамичен списък за \"C++ информация за тип\""
 
-#: lexsup.c:546
+#: lexsup.c:548
 msgid "Read dynamic list"
 msgstr "Използва динамичен списък"
 
-#: lexsup.c:548
+#: lexsup.c:550
 msgid "Warn about duplicate common symbols"
 msgstr "Предупреждение при повторени общи имена"
 
-#: lexsup.c:550
+#: lexsup.c:552
 msgid "Warn if global constructors/destructors are seen"
 msgstr "Предупреждение, ако се срещнат общи конструтори/деструктори"
 
-#: lexsup.c:553
+#: lexsup.c:555
 msgid "Warn if the multiple GP values are used"
 msgstr "Предупреждение за използване на няколко GP стойности"
 
-#: lexsup.c:555
+#: lexsup.c:557
 msgid "Warn only once per undefined symbol"
 msgstr "Еднократно предупреждение за неопределено име"
 
-#: lexsup.c:557
+#: lexsup.c:559
 msgid "Warn if start of section changes due to alignment"
 msgstr "Предупреждение, ако началото на раздел се променя заради подравняване"
 
-#: lexsup.c:560
+#: lexsup.c:562
 msgid "Warn if shared object has DT_TEXTREL"
 msgstr "Предупреждение, ако споделен обект съдържа DT_TEXTREL"
 
-#: lexsup.c:563
+#: lexsup.c:565
 msgid "Warn if an object has alternate ELF machine code"
 msgstr "Предупреждение ако обекта е с друг ELF ELF код за машина"
 
-#: lexsup.c:567
+#: lexsup.c:569
 msgid "Report unresolved symbols as warnings"
 msgstr "Рапортуване като предупреждения, на несвързани имена"
 
-#: lexsup.c:570
+#: lexsup.c:572
 msgid "Report unresolved symbols as errors"
 msgstr "Рапортуване, като грешки, на несвързани имена"
 
-#: lexsup.c:572
+#: lexsup.c:574
 msgid "Include all objects from following archives"
 msgstr "Включване на всички обекти от следните архиви"
 
-#: lexsup.c:575
+#: lexsup.c:577
 msgid "Use wrapper functions for SYMBOL"
 msgstr "Използване на 'обвиващи' функции за ИМЕ"
 
-#: lexsup.c:722
+#: lexsup.c:726
 msgid "%P: unrecognized option '%s'\n"
 msgstr "%P: неразпозната опция '%s'\n"
 
-#: lexsup.c:726
+#: lexsup.c:730
 msgid "%P%F: use the --help option for usage information\n"
 msgstr "%P%F: за информация за употреба се използва опция --help \n"
 
-#: lexsup.c:744
+#: lexsup.c:748
 msgid "%P%F: unrecognized -a option `%s'\n"
 msgstr "%P%F: неразпозната опция -a '%s'\n"
 
-#: lexsup.c:757
+#: lexsup.c:761
 msgid "%P%F: unrecognized -assert option `%s'\n"
 msgstr "%P%F: неразпозната опция -assert '%s'\n"
 
-#: lexsup.c:800
+#: lexsup.c:804
 msgid "%F%P: unknown demangling style `%s'"
 msgstr "%F%P: непознат начин за декориране на имена '%s'"
 
-#: lexsup.c:866
+#: lexsup.c:870
 msgid "%P%F: invalid number `%s'\n"
 msgstr "%P%F: неправилно число '%s'\n"
 
-#: lexsup.c:964
+#: lexsup.c:968
 msgid "%P%F: bad --unresolved-symbols option: %s\n"
 msgstr "%P%F: грешна опция --unresolved-symbols: %s\n"
 
@@ -1957,109 +1957,109 @@ msgstr "%P%F: грешна опция --unresolved-symbols: %s\n"
 #. an error message here.  We cannot just make this a warning,
 #. increment optind, and continue because getopt is too confused
 #. and will seg-fault the next time around.
-#: lexsup.c:1038
+#: lexsup.c:1042
 msgid "%P%F: bad -rpath option\n"
 msgstr "%P%F: грешна опция -rpath\n"
 
-#: lexsup.c:1149
+#: lexsup.c:1153
 msgid "%P%F: -shared not supported\n"
 msgstr "%P%F: -shared не се поддържа\n"
 
-#: lexsup.c:1158
+#: lexsup.c:1162
 msgid "%P%F: -pie not supported\n"
 msgstr "%P%F: -pie не се поддържа\n"
 
-#: lexsup.c:1166
+#: lexsup.c:1170
 msgid "descending"
 msgstr "низходящ"
 
-#: lexsup.c:1168
+#: lexsup.c:1172
 msgid "ascending"
 msgstr "възходящ"
 
-#: lexsup.c:1171
+#: lexsup.c:1175
 msgid "%P%F: invalid common section sorting option: %s\n"
 msgstr "%P%F: неправилна обща опция за подреждане на : %s\n"
 
-#: lexsup.c:1175
+#: lexsup.c:1179
 msgid "name"
 msgstr "име"
 
-#: lexsup.c:1177
+#: lexsup.c:1181
 msgid "alignment"
 msgstr "подравняване"
 
-#: lexsup.c:1180
+#: lexsup.c:1184
 msgid "%P%F: invalid section sorting option: %s\n"
 msgstr "%P%F: неправилна опция за подреждане на раздел: %s\n"
 
-#: lexsup.c:1214
+#: lexsup.c:1218
 msgid "%P%F: invalid argument to option \"--section-start\"\n"
 msgstr "%P%F: неправилен аргумент за опцията \"--section-start\"\n"
 
-#: lexsup.c:1221
+#: lexsup.c:1225
 msgid "%P%F: missing argument(s) to option \"--section-start\"\n"
 msgstr "%P%F: липсват аргументи за опцията \"--section-start\"\n"
 
-#: lexsup.c:1441
+#: lexsup.c:1445
 msgid "%P%F: may not nest groups (--help for usage)\n"
 msgstr "%P%F: не може да се вграждат групи (--help за употреба)\n"
 
-#: lexsup.c:1448
+#: lexsup.c:1452
 msgid "%P%F: group ended before it began (--help for usage)\n"
 msgstr "%P%F: групата  завърши преди да е започната (--help за употреба)\n"
 
-#: lexsup.c:1476
+#: lexsup.c:1480
 msgid "%P%X: --hash-size needs a numeric argument\n"
 msgstr "%P%X: --hash-size изисква число за аргумент\n"
 
-#: lexsup.c:1527 lexsup.c:1540
+#: lexsup.c:1531 lexsup.c:1544
 msgid "%P%F: invalid hex number `%s'\n"
 msgstr "%P%F: неправилно шест. число '%s'\n"
 
-#: lexsup.c:1576
+#: lexsup.c:1580
 #, c-format
 msgid "Usage: %s [options] file...\n"
 msgstr "Употреба: %s [опции] файл...\n"
 
-#: lexsup.c:1578
+#: lexsup.c:1582
 #, c-format
 msgid "Options:\n"
 msgstr "Команди:\n"
 
-#: lexsup.c:1656
+#: lexsup.c:1660
 #, c-format
 msgid "  @FILE"
 msgstr "  @ФАЙЛ"
 
-#: lexsup.c:1659
+#: lexsup.c:1663
 #, c-format
 msgid "Read options from FILE\n"
 msgstr "Използва опции от ФАЙЛ\n"
 
 #. Note: Various tools (such as libtool) depend upon the
 #. format of the listings below - do not change them.
-#: lexsup.c:1664
+#: lexsup.c:1668
 #, c-format
 msgid "%s: supported targets:"
 msgstr "%s: поддържани цели:"
 
-#: lexsup.c:1672
+#: lexsup.c:1676
 #, c-format
 msgid "%s: supported emulations: "
 msgstr "%s: поддържани емулации: "
 
-#: lexsup.c:1677
+#: lexsup.c:1681
 #, c-format
 msgid "%s: emulation specific options:\n"
 msgstr "%s: специфични опции при емулация:\n"
 
-#: lexsup.c:1682
+#: lexsup.c:1686
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr "Подавайте доклади за грешки на %s\n"
 
-#: mri.c:291
+#: mri.c:292
 msgid "%P%F: unknown format type %s\n"
 msgstr "%P%F: непознат формат %s\n"
 
@@ -2103,51 +2103,51 @@ msgstr "%XНе може да се изнесе %s: името липсва\n"
 msgid "%XError, ordinal used twice: %d (%s vs %s)\n"
 msgstr "%XГрешка, номера е използван два пъти: %d (%s с/у %s)\n"
 
-#: pe-dll.c:1410
+#: pe-dll.c:1429
 #, c-format
 msgid "%XError: %d-bit reloc in dll\n"
 msgstr "%XГрешка: %d-битово преместване в dll\n"
 
-#: pe-dll.c:1538
+#: pe-dll.c:1557
 #, c-format
 msgid "%s: Can't open output def file %s\n"
 msgstr "%s: Не може да се отвори за извеждане def-файл %s\n"
 
-#: pe-dll.c:1683
+#: pe-dll.c:1702
 #, c-format
 msgid "; no contents available\n"
 msgstr "; липсва съдържание\n"
 
-#: pe-dll.c:2600
+#: pe-dll.c:2619
 msgid "%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"
 msgstr "%C: променливата '%T' не може да се внесе автоматично. Да се прочете документацията на ld --enable-auto-import за повече информация.\n"
 
-#: pe-dll.c:2630
+#: pe-dll.c:2649
 #, c-format
 msgid "%XCan't open .lib file: %s\n"
 msgstr "%XНе може да се отвори lib-файл: %s\n"
 
-#: pe-dll.c:2635
+#: pe-dll.c:2654
 #, c-format
 msgid "Creating library file: %s\n"
 msgstr "Създаване на библиотека: %s\n"
 
-#: pe-dll.c:2664
+#: pe-dll.c:2683
 #, c-format
 msgid "%Xbfd_openr %s: %E\n"
 msgstr "%Xbfd_openr %s: %E\n"
 
-#: pe-dll.c:2676
+#: pe-dll.c:2695
 #, c-format
 msgid "%X%s(%s): can't find member in non-archive file"
 msgstr "%X%s(%s): не е намерена член в файл, който не е архив"
 
-#: pe-dll.c:2688
+#: pe-dll.c:2707
 #, c-format
 msgid "%X%s(%s): can't find member in archive"
 msgstr "%X%s(%s): не е намерен член в архива"
 
-#: pe-dll.c:3078
+#: pe-dll.c:3097
 #, c-format
 msgid "%XError: can't use long section names on this arch\n"
 msgstr "%XError: на тази архитектура не може да се използват дълги имена за раздели\n"

@@ -1,3 +1,7 @@
+2010-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/gas.pot: Updated by the Translation project.
+
 2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_is_register): Removed.

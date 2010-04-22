@@ -1,3 +1,8 @@
+2010-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/opcodes.pot: Updated by the Translation project.
+	* po/vi.po: Updated Vietnamese translation.
+
 2010-04-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (get_valid_dis386): Return bad_opcode on unknown

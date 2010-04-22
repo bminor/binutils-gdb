@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.20\n"
+"Project-Id-Version: gprof 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 14:10+0200\n"
-"PO-Revision-Date: 2010-02-13 18:57+1030\n"
+"POT-Creation-Date: 2010-03-03 15:06+0100\n"
+"PO-Revision-Date: 2010-04-22 22:27+0930\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
 "Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -269,12 +269,12 @@ msgstr "%s: không thể làm « -c »\n"
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: tùy chọn « -c »  không được hỗ trợ trên kiến trúc %s\n"
 
-#: corefile.c:505 corefile.c:588
+#: corefile.c:505 corefile.c:590
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: tập tin « %s » không có ký hiệu\n"
 
-#: corefile.c:848
+#: corefile.c:851
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: sai đếm: ltab.len=%d thay cho %ld\n"

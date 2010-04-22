@@ -1,3 +1,8 @@
+2010-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* po/bfd.pot: Updated by the Translation project.
+	* po/vi.po: Updated Vietnamese translation.
+
 2010-04-22  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Revert 2008-05-29
@@ -10,7 +15,7 @@
 	* bfd-in2.h: Likewise.
 	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Likewise.  Use it to
 	control merging of exidx entries.
-	
+
 2010-04-20  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-tic6x.h: New.

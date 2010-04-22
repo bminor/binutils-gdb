@@ -5,10 +5,10 @@
 # Roumen Petrov <transl@roumenpetrov.info>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.20\n"
+"Project-Id-Version: gprof 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 14:10+0200\n"
-"PO-Revision-Date: 2009-11-15 15:19+0300\n"
+"POT-Creation-Date: 2010-03-03 15:06+0100\n"
+"PO-Revision-Date: 2010-04-21 22:47+0300\n"
 "Last-Translator: Roumen Petrov <transl@roumenpetrov.info>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 
 #: alpha.c:102 mips.c:54
 msgid "<indirect child>"
-msgstr "<непряко дете>"
+msgstr "<косвен потомък>"
 
 #: alpha.c:107 mips.c:59
 #, c-format
@@ -28,7 +28,7 @@ msgstr "[find_call] %s: 0x%lx към 0x%lx\n"
 #: alpha.c:129
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
-msgstr "[find_call] 0x%lx: jsr%s <непряко_дете>\n"
+msgstr "[find_call] 0x%lx: jsr%s <косвен_потомък>\n"
 
 #: alpha.c:139
 #, c-format
@@ -179,9 +179,9 @@ msgid "index"
 msgstr "индекс"
 
 #: cg_print.c:98
-#, c-format
+#, fuzzy, c-format
 msgid "%time"
-msgstr "%time"
+msgstr "време"
 
 #: cg_print.c:98 cg_print.c:99
 msgid "self"
@@ -197,12 +197,12 @@ msgstr "име"
 
 #: cg_print.c:101
 msgid "children"
-msgstr "деца"
+msgstr "потомци"
 
 #: cg_print.c:106
 #, c-format
 msgid "index %% time    self  children    called     name\n"
-msgstr "индекс%% време   собс. деца        извик.     име \n"
+msgstr "индекс%% време   собс. потомци      извик.     име \n"
 
 #: cg_print.c:129
 #, c-format
@@ -268,12 +268,12 @@ msgstr "%s: не може с команда -c\n"
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: -c не се поддържа за архитектура %s\n"
 
-#: corefile.c:505 corefile.c:588
+#: corefile.c:505 corefile.c:590
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: файлът '%s' е без символи\n"
 
-#: corefile.c:848
+#: corefile.c:851
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: нещо не е преброено: ltab.len=%d вместо %ld\n"
