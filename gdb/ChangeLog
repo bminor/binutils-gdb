@@ -1,3 +1,47 @@
+2010-04-22  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-linux-nat.c (PTRACE_GET_DEBUGREG): Update comment.
+	(PPC_PTRACE_GETWDBGINFO, PPC_PTRACE_SETHWDEBUG, PPC_PTRACE_DELHWDEBUG,
+	ppc_debug_info, PPC_DEBUG_FEATURE_INSN_BP_RANGE,
+	PPC_DEBUG_FEATURE_INSN_BP_MASK, PPC_DEBUG_FEATURE_DATA_BP_RANGE,
+	PPC_DEBUG_FEATURE_DATA_BP_MASK, ppc_hw_breakpoint,
+	PPC_BREAKPOINT_TRIGGER_EXECUTE, PPC_BREAKPOINT_TRIGGER READ,
+	PPC_BREAKPOINT_TRIGGER_WRITE, PPC_BREAKPOINT_TRIGGER_RW,
+	PPC_BREAKPOINT_MODE_EXACT PPC_BREAKPOINT_MODE_RANGE_INCLUSIVE,
+	PPC_BREAKPOINT_MODE_RANGE_EXCLUSIVE, PPC_BREAKPOINT_MODE_MASK,
+	PPC_BREAKPOINT_CONDITION_NONE, PPC_BREAKPOINT_CONDITION_AND,
+	PPC_BREAKPOINT_CONDITION_EXACT, PPC_BREAKPOINT_CONDITION_OR,
+	PPC_BREAKPOINT_CONDITION_AND_OR, PPC_BREAKPOINT_CONDITION_BE_ALL,
+	PPC_BREAKPOINT_CONDITION_BE_SHIFT, PPC_BREAKPOINT_CONDITION_BE):
+	Define, in case <ptrace.h> doesn't provide it.
+	(booke_debug_info): New variable.
+	(max_slots_number): Ditto.
+	(hw_break_tuple): New struct.
+	(thread_points): Ditto.
+	(ppc_threads): New variable.
+	(PPC_DEBUG_CURRENT_VERSION): New define.
+	(have_ptrace_new_debug_booke): New function.
+	(ppc_linux_check_watch_resources): Renamed to ...
+	(ppc_linux_can_use_hw_breakpoint): ... this.  Handle BookE processors.
+	(ppc_linux_region_ok_for_hw_watchpoint): Handle BookE processors.
+	(booke_cmp_hw_point): New function.
+	(booke_find_thread_points_by_tid): Ditto.
+	(booke_insert_point): Ditto.
+	(booke_remove_point): Ditto.
+	(ppc_linux_insert_hw_breakpoint): Ditto.
+	(ppc_linux_remove_hw_breakpoint): Ditto.
+	(get_trigger_type): Ditto.
+	(ppc_linux_insert_watchpoint): Handle BookE processors.
+	(ppc_linux_remove_watchpoint): Ditto.
+	(ppc_linux_new_thread): Ditto.
+	(ppc_linux_thread_exit): New function..
+	(ppc_linux_stopped_data_address): Handle BookE processors.
+	(ppc_linux_watchpoint_addr_within_range): Ditto.
+	(_initialize_ppc_linux_nat): Initialize to_insert_hw_breakpoint and
+	to_remove_hw_breakpoint fields of the target operations struct.
+	Add observe for the thread_exit event.
+
 2010-04-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-linux-nat.c (regmap): Removed.
