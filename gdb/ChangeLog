@@ -1,3 +1,9 @@
+2010-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (addr_info_make_relative): Move sect declaration to the
+	outer block.  Initialize it to NULL.  Prefer SECT->next more than
+	bfd_get_section_by_name.
+
 2010-04-08  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	PR Breakpoints/11408:

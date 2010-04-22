@@ -566,6 +566,7 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
   asection *lower_sect;
   CORE_ADDR lower_offset;
   int i;
+  asection *sect;
 
   /* Find lowest loadable section to be used as starting point for
      continguous sections.  */
@@ -590,10 +591,23 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
      (the loadable section directly below it in memory).
      this_offset = lower_offset = lower_addr - lower_orig_addr */
 
+  sect = NULL;
   for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
     {
-      asection *sect = bfd_get_section_by_name (abfd, addrs->other[i].name);
+      const char *sect_name = addrs->other[i].name;
 
+      /* Prefer the next section of that we have found last.  The separate
+	 debug info files have either the same section layout or just a few
+	 sections are missing there.  On the other hand the section name is not
+	 unique and we could find an inappropraite section by its name.  */
+
+      if (sect)
+	sect = sect->next;
+      if (sect && strcmp (sect_name, bfd_get_section_name (abfd, sect)) != 0)
+	sect = NULL;
+
+      if (sect == NULL)
+	sect = bfd_get_section_by_name (abfd, sect_name);
       if (sect)
 	{
 	  /* This is the index used by BFD. */

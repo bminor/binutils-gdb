@@ -1,3 +1,7 @@
+2010-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/dup-sect.exp, gdb.base/dup-sect.S: New.
+
 2010-04-08  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/gdb2384-base.h: Created 'namespace B'.
