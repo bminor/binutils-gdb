@@ -186,18 +186,18 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      int obstack_initial_size = 0;
-      void *stat_array_obstack_top = NULL;
+      int statmem_obstack_initial_size = 0;
+      int stat_array_obstack_initial_size = 0;
       
       if (dont_print_statmem == 0)
 	{
-	  obstack_initial_size =
+	  statmem_obstack_initial_size =
 	    obstack_object_size (&dont_print_statmem_obstack);
 
 	  if (last_set_recurse != recurse)
 	    {
-	      stat_array_obstack_top
-		= obstack_next_free (&dont_print_stat_array_obstack);
+	      stat_array_obstack_initial_size =
+		obstack_object_size (&dont_print_stat_array_obstack);
 	      last_set_recurse = recurse;
 	    }
 	}
@@ -323,12 +323,12 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	  int obstack_final_size =
            obstack_object_size (&dont_print_statmem_obstack);
 
-	  if (obstack_final_size > obstack_initial_size) {
+	  if (obstack_final_size > statmem_obstack_initial_size) {
 	    /* In effect, a pop of the printed-statics stack.  */
 
 	    void *free_to_ptr =
 	      obstack_next_free (&dont_print_statmem_obstack) -
-	      (obstack_final_size - obstack_initial_size);
+	      (obstack_final_size - statmem_obstack_initial_size);
 
 	    obstack_free (&dont_print_statmem_obstack,
 			  free_to_ptr);
@@ -336,9 +336,18 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
 	  if (last_set_recurse != recurse)
 	    {
-	      if (obstack_object_size (&dont_print_stat_array_obstack) > 0) 
-		obstack_free (&dont_print_stat_array_obstack,
-			      stat_array_obstack_top);
+	      int obstack_final_size =
+		obstack_object_size (&dont_print_stat_array_obstack);
+	      
+	      if (obstack_final_size > stat_array_obstack_initial_size)
+		{
+		  void *free_to_ptr =
+		    obstack_next_free (&dont_print_stat_array_obstack) -
+		    (obstack_final_size - stat_array_obstack_initial_size);
+
+		  obstack_free (&dont_print_stat_array_obstack,
+				free_to_ptr);
+		}
 	      last_set_recurse = -1;
 	    }
 	}
