@@ -109,6 +109,9 @@ void amd64_classify (struct type *type, enum amd64_reg_class class[2]);
 
 
 
+/* Variables exported from amd64-linux-tdep.c.  */
+extern int amd64_linux_gregset_reg_offset[];
+
 /* Variables exported from amd64nbsd-tdep.c.  */
 extern int amd64nbsd_r_reg_offset[];
 

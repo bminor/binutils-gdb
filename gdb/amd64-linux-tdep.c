@@ -62,7 +62,7 @@ static struct core_regset_section amd64_linux_regset_sections[] =
    format and GDB's register cache layout.  */
 
 /* From <sys/reg.h>.  */
-static int amd64_linux_gregset_reg_offset[] =
+int amd64_linux_gregset_reg_offset[] =
 {
   10 * 8,			/* %rax */
   5 * 8,			/* %rbx */

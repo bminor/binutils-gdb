@@ -68,33 +68,6 @@
 static int have_ptrace_getregset = -1;
 
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
-   `struct user' format and GDB's register cache layout.  */
-
-static int amd64_linux_gregset64_reg_offset[] =
-{
-  RAX * 8, RBX * 8,		/* %rax, %rbx */
-  RCX * 8, RDX * 8,		/* %rcx, %rdx */
-  RSI * 8, RDI * 8,		/* %rsi, %rdi */
-  RBP * 8, RSP * 8,		/* %rbp, %rsp */
-  R8 * 8, R9 * 8,		/* %r8 ... */
-  R10 * 8, R11 * 8,
-  R12 * 8, R13 * 8,
-  R14 * 8, R15 * 8,		/* ... %r15 */
-  RIP * 8, EFLAGS * 8,		/* %rip, %eflags */
-  CS * 8, SS * 8,		/* %cs, %ss */
-  DS * 8, ES * 8,		/* %ds, %es */
-  FS * 8, GS * 8,		/* %fs, %gs */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  ORIG_RAX * 8
-};
-
-
-/* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout for GNU/Linux
    i386.
 
@@ -807,13 +780,11 @@ _initialize_amd64_linux_nat (void)
 
   amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
-  amd64_native_gregset64_reg_offset = amd64_linux_gregset64_reg_offset;
+  amd64_native_gregset64_reg_offset = amd64_linux_gregset_reg_offset;
   amd64_native_gregset64_num_regs = AMD64_LINUX_NUM_REGS;
 
   gdb_assert (ARRAY_SIZE (amd64_linux_gregset32_reg_offset)
 	      == amd64_native_gregset32_num_regs);
-  gdb_assert (ARRAY_SIZE (amd64_linux_gregset64_reg_offset)
-	      == amd64_native_gregset64_num_regs);
 
   /* Fill in the generic GNU/Linux methods.  */
   t = linux_target ();

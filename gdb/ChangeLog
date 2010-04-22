@@ -1,3 +1,15 @@
+2010-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-linux-nat.c (amd64_linux_gregset64_reg_offset): Removed.
+	(_initialize_amd64_linux_nat): Replace
+	amd64_linux_gregset64_reg_offset with
+	amd64_linux_gregset_reg_offset.
+
+	* amd64-linux-tdep.c (amd64_linux_gregset_reg_offset): Make it
+	global.
+
+	* amd64-tdep.h (amd64_linux_gregset_reg_offset): New.
+
 2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	PR stabs/11479.
