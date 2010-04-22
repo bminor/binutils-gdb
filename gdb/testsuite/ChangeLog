@@ -1,5 +1,9 @@
 2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* gdb.threads/watchthreads.exp: Change to obtain consistent output.
+
+2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	PR stabs/11479.
 	* gdb.stabs/gdb11479.exp: New file.
 	* gdb.stabs/gdb11479.c: New file.
