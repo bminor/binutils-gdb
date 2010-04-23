@@ -1,5 +1,17 @@
 2010-04-23  Doug Evans  <dje@google.com>
 
+	* configure.ac (CONFIG_SRCS): Add py-auto-load.o even if not using
+	python.
+	* configure: Regenerate.
+	* main.c: #include "python/python.h".
+	(captured_main): Defer loading auto-loaded scripts until after
+	local_gdbinit has been sourced.
+	* python/py-auto-load.c (gdbpy_global_auto_load): New global.
+	(load_auto_scripts_for_objfile): New function.
+	(auto_load_new_objfile): Call it.
+	* python/python.h (gdbpy_global_auto_load): Declare.
+	(load_auto_scripts_for_objfile): Declare.
+
 	Add support for auto-loading scripts from .debug_gdb_scripts section.
 	* NEWS: Add entry for .debug_gdb_scripts.
 	* Makefile.in SUBDIR_PYTHON_OBS): Add py-auto-load.o.

@@ -41,6 +41,7 @@
 #include "main.h"
 #include "source.h"
 #include "cli/cli-cmds.h"
+#include "python/python.h"
 
 /* If nonzero, display time usage both at startup and for each command.  */
 
@@ -291,6 +292,7 @@ captured_main (void *data)
   char *local_gdbinit;
 
   int i;
+  int save_auto_load;
 
   long time_at_startup = get_run_time ();
 
@@ -798,6 +800,11 @@ Excess command line arguments ignored. (%s%s)\n"),
     catch_command_errors (directory_switch, dirarg[i], 0, RETURN_MASK_ALL);
   xfree (dirarg);
 
+  /* Skip auto-loading section-specified scripts until we've sourced
+     local_gdbinit (which is often used to augment the source search path).  */
+  save_auto_load = gdbpy_global_auto_load;
+  gdbpy_global_auto_load = 0;
+
   if (execarg != NULL
       && symarg != NULL
       && strcmp (execarg, symarg) == 0)
@@ -856,6 +863,14 @@ Can't attach to process and specify a core file at the same time."));
      the same as the $HOME/.gdbinit file (it should exist, also).  */
   if (local_gdbinit && !inhibit_gdbinit)
     catch_command_errors (source_script, local_gdbinit, 0, RETURN_MASK_ALL);
+
+  /* Now that all .gdbinit's have been read and all -d options have been
+     processed, we can read any scripts mentioned in SYMARG.
+     We wait until now because it is common to add to the source search
+     path in local_gdbinit.  */
+  gdbpy_global_auto_load = save_auto_load;
+  if (symfile_objfile != NULL)
+    load_auto_scripts_for_objfile (symfile_objfile);
 
   for (i = 0; i < ncmd; i++)
     {

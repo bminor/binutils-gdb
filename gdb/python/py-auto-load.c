@@ -28,8 +28,23 @@
 #include "progspace.h"
 #include "objfiles.h"
 #include "python.h"
-#include "python-internal.h"
 #include "cli/cli-cmds.h"
+
+/* Internal-use flag to enable/disable auto-loading.
+   This is true if we should auto-load python code when an objfile is opened,
+   false otherwise.
+
+   Both gdbpy_auto_load && gdbpy_global_auto_load must be true to enable
+   auto-loading.
+
+   This flag exists to facilitate deferring auto-loading during start-up
+   until after ./.gdbinit has been read; it may augment the search directories
+   used to find the scripts.  */
+int gdbpy_global_auto_load = 1;
+
+#ifdef HAVE_PYTHON
+
+#include "python-internal.h"
 
 /* NOTE: It's trivial to also support auto-loading normal gdb scripts.
    There has yet to be a need so it's not implemented.  */
@@ -66,7 +81,9 @@ struct loaded_script_entry
   const char *full_path;
 };
 
-/* This is true if we should auto-load python code when an objfile is opened,
+/* User-settable option to enable/disable auto-loading:
+   maint set python auto-load on|off
+   This is true if we should auto-load python code when an objfile is opened,
    false otherwise.  */
 static int gdbpy_auto_load = 1;
 
@@ -377,7 +394,15 @@ auto_load_new_objfile (struct objfile *objfile)
   if (!objfile->name)
     return;
 
-  if (gdbpy_auto_load)
+  load_auto_scripts_for_objfile (objfile);
+}
+
+/* Load any auto-loaded scripts for OBJFILE.  */
+
+void
+load_auto_scripts_for_objfile (struct objfile *objfile)
+{
+  if (gdbpy_auto_load && gdbpy_global_auto_load)
     {
       auto_load_objfile_script (objfile, GDBPY_AUTO_FILE_NAME);
       auto_load_section_scripts (objfile, GDBPY_AUTO_SECTION_NAME);
@@ -457,3 +482,12 @@ Enables or disables auto-loading of Python code when an object is opened."),
 	   _("Print dump of auto-loaded section scripts matching REGEXP."),
 	   &maintenanceprintlist);
 }
+
+#else /* ! HAVE_PYTHON */
+
+void
+load_auto_scripts_for_objfile (struct objfile *objfile)
+{
+}
+
+#endif /* ! HAVE_PYTHON */
