@@ -560,16 +560,16 @@ trace_actions_command (char *args, int from_tty)
    internal errors.  */
 
 static void
-report_agent_reqs_errors (struct agent_expr *aexpr, struct agent_reqs *areqs)
+report_agent_reqs_errors (struct agent_expr *aexpr)
 {
   /* All of the "flaws" are serious bytecode generation issues that
      should never occur.  */
-  if (areqs->flaw != agent_flaw_none)
+  if (aexpr->flaw != agent_flaw_none)
     internal_error (__FILE__, __LINE__, _("expression is malformed"));
 
   /* If analysis shows a stack underflow, GDB must have done something
      badly wrong in its bytecode generation.  */
-  if (areqs->min_height < 0)
+  if (aexpr->min_height < 0)
     internal_error (__FILE__, __LINE__,
 		    _("expression has min height < 0"));
 
@@ -579,7 +579,7 @@ report_agent_reqs_errors (struct agent_expr *aexpr, struct agent_reqs *areqs)
      depth roughly corresponds to parenthesization, so a limit of 20
      amounts to 20 levels of expression nesting, which is actually
      a pretty big hairy expression.  */
-  if (areqs->max_height > 20)
+  if (aexpr->max_height > 20)
     error (_("Expression is too complicated."));
 }
 
@@ -593,7 +593,6 @@ validate_actionline (char **line, struct breakpoint *t)
   char *p, *tmp_p;
   struct bp_location *loc;
   struct agent_expr *aexpr;
-  struct agent_reqs areqs;
 
   /* if EOF is typed, *line is NULL */
   if (*line == NULL)
@@ -663,10 +662,9 @@ validate_actionline (char **line, struct breakpoint *t)
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
 		error (_("Expression is too complicated."));
 
-	      ax_reqs (aexpr, &areqs);
-	      (void) make_cleanup (xfree, areqs.reg_mask);
+	      ax_reqs (aexpr);
 
-	      report_agent_reqs_errors (aexpr, &areqs);
+	      report_agent_reqs_errors (aexpr);
 
 	      do_cleanups (old_chain);
 	    }
@@ -699,10 +697,8 @@ validate_actionline (char **line, struct breakpoint *t)
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
 		error (_("Expression is too complicated."));
 
-	      ax_reqs (aexpr, &areqs);
-	      (void) make_cleanup (xfree, areqs.reg_mask);
-
-	      report_agent_reqs_errors (aexpr, &areqs);
+	      ax_reqs (aexpr);
+	      report_agent_reqs_errors (aexpr);
 
 	      do_cleanups (old_chain);
 	    }
@@ -974,7 +970,6 @@ collect_symbol (struct collection_list *collect,
     {
       struct agent_expr *aexpr;
       struct cleanup *old_chain1 = NULL;
-      struct agent_reqs areqs;
 
       aexpr = gen_trace_for_var (scope, gdbarch, sym);
 
@@ -990,26 +985,26 @@ collect_symbol (struct collection_list *collect,
 
       old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
-      ax_reqs (aexpr, &areqs);
+      ax_reqs (aexpr);
 
-      report_agent_reqs_errors (aexpr, &areqs);
+      report_agent_reqs_errors (aexpr);
 
       discard_cleanups (old_chain1);
       add_aexpr (collect, aexpr);
 
       /* take care of the registers */
-      if (areqs.reg_mask_len > 0)
+      if (aexpr->reg_mask_len > 0)
 	{
 	  int ndx1, ndx2;
 
-	  for (ndx1 = 0; ndx1 < areqs.reg_mask_len; ndx1++)
+	  for (ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
 	    {
 	      QUIT;	/* allow user to bail out with ^C */
-	      if (areqs.reg_mask[ndx1] != 0)
+	      if (aexpr->reg_mask[ndx1] != 0)
 		{
 		  /* assume chars have 8 bits */
 		  for (ndx2 = 0; ndx2 < 8; ndx2++)
-		    if (areqs.reg_mask[ndx1] & (1 << ndx2))
+		    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
 		      /* it's used -- record it */
 		      add_register (collect, ndx1 * 8 + ndx2);
 		}
@@ -1287,7 +1282,6 @@ encode_actions_1 (struct command_line *action,
 		  unsigned long addr, len;
 		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
-		  struct agent_reqs areqs;
 
 		  exp = parse_exp_1 (&action_exp, 
 				     block_for_pc (tloc->address), 1);
@@ -1333,27 +1327,27 @@ encode_actions_1 (struct command_line *action,
 
 		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
-		      ax_reqs (aexpr, &areqs);
+		      ax_reqs (aexpr);
 
-		      report_agent_reqs_errors (aexpr, &areqs);
+		      report_agent_reqs_errors (aexpr);
 
 		      discard_cleanups (old_chain1);
 		      add_aexpr (collect, aexpr);
 
 		      /* take care of the registers */
-		      if (areqs.reg_mask_len > 0)
+		      if (aexpr->reg_mask_len > 0)
 			{
 			  int ndx1;
 			  int ndx2;
 
-			  for (ndx1 = 0; ndx1 < areqs.reg_mask_len; ndx1++)
+			  for (ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
 			    {
 			      QUIT;	/* allow user to bail out with ^C */
-			      if (areqs.reg_mask[ndx1] != 0)
+			      if (aexpr->reg_mask[ndx1] != 0)
 				{
 				  /* assume chars have 8 bits */
 				  for (ndx2 = 0; ndx2 < 8; ndx2++)
-				    if (areqs.reg_mask[ndx1] & (1 << ndx2))
+				    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
 				      /* it's used -- record it */
 				      add_register (collect, 
 						    ndx1 * 8 + ndx2);
@@ -1379,7 +1373,6 @@ encode_actions_1 (struct command_line *action,
 		  unsigned long addr, len;
 		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
-		  struct agent_reqs areqs;
 
 		  exp = parse_exp_1 (&action_exp, 
 				     block_for_pc (tloc->address), 1);
@@ -1388,9 +1381,8 @@ encode_actions_1 (struct command_line *action,
 		  aexpr = gen_eval_for_expr (tloc->address, exp);
 		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
-		  ax_reqs (aexpr, &areqs);
-
-		  report_agent_reqs_errors (aexpr, &areqs);
+		  ax_reqs (aexpr);
+		  report_agent_reqs_errors (aexpr);
 
 		  discard_cleanups (old_chain1);
 		  /* Even though we're not officially collecting, add

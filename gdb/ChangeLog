@@ -1,3 +1,28 @@
+2010-04-23  Stan Shebs  <stan@codesourcery.com>
+
+	* ax.h (struct agent_expr): Merge in agent_reqs fields, add some
+	comments.
+	(struct agent_reqs): Remove.
+	(ax_reg_mask): Declare.
+	* ax-general.c (new_agent_expr): Add gdbarch argument, set new fields.
+	(free_agent_expr): Free reg_mask.
+	(ax_print): Add scope and register mask info.
+	(ax_reqs): Remove agent_reqs argument, use agent expression
+	fields, and move part of register mask computation to...
+	(ax_reg_mask): New function.
+	* ax-gdb.c (gen_trace_static_fields): Call it.
+	(gen_traced_pop): Ditto.
+	(is_nontrivial_conversion): Add dummy gdbarch to new_agent_expr.
+	(gen_trace_for_var): Pass gdbarch to new_agent_expr.
+	(gen_trace_for_expr): Ditto, and clear optimized_out flag.
+	(gen_eval_for_expr): Ditto, and require an rvalue.
+	(agent_command): Call ax_reqs.
+	(agent_eval_command): Ditto.
+	* tracepoint.c (report_agent_reqs_errors): Use agent expression fields.
+	(validate_action_line): Ditto.
+	(collect_symbol): Ditto.
+	(encode_actions_1): Ditto.
+
 2010-04-23  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Paul Pluzhnikov  <ppluzhnikov@google.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>

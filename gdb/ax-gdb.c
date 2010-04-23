@@ -363,10 +363,9 @@ gen_trace_static_fields (struct gdbarch *gdbarch,
 	      break;
 
 	    case axs_lvalue_register:
-	      /* We need to mention the register somewhere in the bytecode,
-		 so ax_reqs will pick it up and add it to the mask of
-		 registers used.  */
-	      ax_reg (ax, value.u.reg);
+	      /* We don't actually need the register's value to be pushed,
+		 just note that we need it to be collected.  */
+	      ax_reg_mask (ax, value.u.reg);
 
 	    default:
 	      break;
@@ -414,11 +413,11 @@ gen_traced_pop (struct gdbarch *gdbarch,
 	break;
 
       case axs_lvalue_register:
-	/* We need to mention the register somewhere in the bytecode,
-	   so ax_reqs will pick it up and add it to the mask of
-	   registers used.  */
-	ax_reg (ax, value->u.reg);
-	ax_simple (ax, aop_pop);
+	/* We don't actually need the register's value to be on the
+	   stack, and the target will get heartburn if the register is
+	   larger than will fit in a stack, so just mark it for
+	   collection and be done with it.  */
+	ax_reg_mask (ax, value->u.reg);
 	break;
       }
   else
@@ -898,7 +897,7 @@ gen_conversion (struct agent_expr *ax, struct type *from, struct type *to)
 static int
 is_nontrivial_conversion (struct type *from, struct type *to)
 {
-  struct agent_expr *ax = new_agent_expr (0);
+  struct agent_expr *ax = new_agent_expr (NULL, 0);
   int nontrivial;
 
   /* Actually generate the code, and see if anything came out.  At the
@@ -2324,7 +2323,7 @@ gen_trace_for_var (CORE_ADDR scope, struct gdbarch *gdbarch,
 		   struct symbol *var)
 {
   struct cleanup *old_chain = 0;
-  struct agent_expr *ax = new_agent_expr (scope);
+  struct agent_expr *ax = new_agent_expr (gdbarch, scope);
   struct axs_value value;
 
   old_chain = make_cleanup_free_agent_expr (ax);
@@ -2364,7 +2363,7 @@ struct agent_expr *
 gen_trace_for_expr (CORE_ADDR scope, struct expression *expr)
 {
   struct cleanup *old_chain = 0;
-  struct agent_expr *ax = new_agent_expr (scope);
+  struct agent_expr *ax = new_agent_expr (expr->gdbarch, scope);
   union exp_element *pc;
   struct axs_value value;
 
@@ -2372,6 +2371,7 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr)
 
   pc = expr->elts;
   trace_kludge = 1;
+  value.optimized_out = 0;
   gen_expr (expr, &pc, ax, &value);
 
   /* Make sure we record the final object, and get rid of it.  */
@@ -2398,7 +2398,7 @@ struct agent_expr *
 gen_eval_for_expr (CORE_ADDR scope, struct expression *expr)
 {
   struct cleanup *old_chain = 0;
-  struct agent_expr *ax = new_agent_expr (scope);
+  struct agent_expr *ax = new_agent_expr (expr->gdbarch, scope);
   union exp_element *pc;
   struct axs_value value;
 
@@ -2406,7 +2406,10 @@ gen_eval_for_expr (CORE_ADDR scope, struct expression *expr)
 
   pc = expr->elts;
   trace_kludge = 0;
+  value.optimized_out = 0;
   gen_expr (expr, &pc, ax, &value);
+
+  require_rvalue (ax, &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax, aop_end);
@@ -2440,6 +2443,7 @@ agent_command (char *exp, int from_tty)
   old_chain = make_cleanup (free_current_contents, &expr);
   agent = gen_trace_for_expr (get_frame_pc (fi), expr);
   make_cleanup_free_agent_expr (agent);
+  ax_reqs (agent);
   ax_print (gdb_stdout, agent);
 
   /* It would be nice to call ax_reqs here to gather some general info
@@ -2475,6 +2479,7 @@ agent_eval_command (char *exp, int from_tty)
   old_chain = make_cleanup (free_current_contents, &expr);
   agent = gen_eval_for_expr (get_frame_pc (fi), expr);
   make_cleanup_free_agent_expr (agent);
+  ax_reqs (agent);
   ax_print (gdb_stdout, agent);
 
   /* It would be nice to call ax_reqs here to gather some general info
