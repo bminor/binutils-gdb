@@ -1,3 +1,8 @@
+2010-04-23  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix ARI warning.
+	* ppc-linux-nat.c (booke_cmp_hw_point): Do not mark inline.
+
 2010-04-20  Chris Moller  <cmoller@redhat.com>
 
 	PR 10179

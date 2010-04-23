@@ -1508,7 +1508,7 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 }
 
 /* This function compares two ppc_hw_breakpoint structs field-by-field.  */
-static inline int
+static int
 booke_cmp_hw_point (struct ppc_hw_breakpoint *a, struct ppc_hw_breakpoint *b)
 {
   return (a->trigger_type       == b->trigger_type
