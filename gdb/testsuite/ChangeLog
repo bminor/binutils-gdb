@@ -1,3 +1,9 @@
+2010-04-23  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-section-script.c: New file.
+	* gdb.python/py-section-script.exp: New file.
+	* gdb.python/py-section-script.py: New file.
+
 2010-04-20  Chris Moller  <cmoller@redhat.com>
 
 	PR 10179

@@ -1,3 +1,26 @@
+2010-04-23  Doug Evans  <dje@google.com>
+
+	Add support for auto-loading scripts from .debug_gdb_scripts section.
+	* NEWS: Add entry for .debug_gdb_scripts.
+	* Makefile.in SUBDIR_PYTHON_OBS): Add py-auto-load.o.
+	(SUBDIR_PYTHON_SRCS): Add py-auto-load.c.
+	(py-auto-load.o): New rule.
+	* cli/cli-cmds.c (find_and_open_script): Make externally visible.
+	* cli/cli-cmds.h (find_and_open_script): Update prototype.
+	* python/py-auto-load.c: New file.
+	* python/python-internal.h: #include <stdio.h>.
+	(set_python_list, show_python_list): Declare.
+	(gdbpy_initialize_auto_load): Declare.
+	(source_python_script_for_objfile): Declare.
+	* python/python.c: Remove #include of observer.h.
+	(gdbpy_auto_load): Moved to py-auto-load.c.
+	(GDBPY_AUTO_FILENAME): Ditto.
+	(gdbpy_new_objfile): Delete.
+	(source_python_script_for_objfile): New function.
+	(set_python_list, show_python_list): Make externally visible.
+	(_initialize_python): Move "auto-load" command to py-auto-load.c
+	and observer_attach_new_objfile to py-auto-load.c.
+
 2010-04-23  Jerome Guitton  <guitton@adacore.com>
     
 	* alpha-tdep.c (INSN_OPCODE, MEM_RA, MEM_RB, MEM_DISP, BR_RA)

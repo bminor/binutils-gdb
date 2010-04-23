@@ -1,3 +1,10 @@
+2010-04-23  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Python): Move Auto-loading section here ...
+	(Python API): from here.
+	(Auto-loading): Add docs for .debug_gdb_scripts auto-loaded scripts.
+	(Maintenance Commands): Add docs for "maint print section-scripts".
+
 2010-04-20  Chris Moller  <cmoller@redhat.com>
 
 	* gdb.texinfo (Setting Breakpoints): Added description of
