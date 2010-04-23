@@ -272,6 +272,16 @@ LM_NEXT (struct so_list *so)
 }
 
 static CORE_ADDR
+LM_PREV (struct so_list *so)
+{
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+
+  return extract_typed_address (so->lm_info->lm + lmo->l_prev_offset,
+				ptr_type);
+}
+
+static CORE_ADDR
 LM_NAME (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
@@ -284,16 +294,12 @@ LM_NAME (struct so_list *so)
 static int
 IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
-  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
-
   /* Assume that everything is a library if the dynamic loader was loaded
      late by a static executable.  */
   if (exec_bfd && bfd_get_section_by_name (exec_bfd, ".dynamic") == NULL)
     return 0;
 
-  return extract_typed_address (so->lm_info->lm + lmo->l_prev_offset,
-				ptr_type) == 0;
+  return LM_PREV (so) == 0;
 }
 
 /* Per pspace SVR4 specific data.  */
@@ -1101,7 +1107,7 @@ svr4_default_sos (void)
 static struct so_list *
 svr4_current_sos (void)
 {
-  CORE_ADDR lm;
+  CORE_ADDR lm, prev_lm;
   struct so_list *head = 0;
   struct so_list **link_ptr = &head;
   CORE_ADDR ldsomap = 0;
@@ -1120,6 +1126,7 @@ svr4_current_sos (void)
 
   /* Walk the inferior's link map list, and build our list of
      `struct so_list' nodes.  */
+  prev_lm = 0;
   lm = solib_svr4_r_map (info);
 
   while (lm)
@@ -1127,6 +1134,7 @@ svr4_current_sos (void)
       struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
       struct so_list *new = XZALLOC (struct so_list);
       struct cleanup *old_chain = make_cleanup (xfree, new);
+      CORE_ADDR next_lm;
 
       new->lm_info = xmalloc (sizeof (struct lm_info));
       make_cleanup (xfree, new->lm_info);
@@ -1138,14 +1146,21 @@ svr4_current_sos (void)
 
       read_memory (lm, new->lm_info->lm, lmo->link_map_size);
 
-      lm = LM_NEXT (new);
+      next_lm = LM_NEXT (new);
+
+      if (LM_PREV (new) != prev_lm)
+	{
+	  warning (_("Corrupted shared library list"));
+	  free_so (new);
+	  next_lm = 0;
+	}
 
       /* For SVR4 versions, the first entry in the link map is for the
          inferior executable, so we must ignore it.  For some versions of
          SVR4, it has no name.  For others (Solaris 2.3 for example), it
          does have a name, so we can no longer use a missing name to
          decide when to ignore it. */
-      if (IGNORE_FIRST_LINK_MAP_ENTRY (new) && ldsomap == 0)
+      else if (IGNORE_FIRST_LINK_MAP_ENTRY (new) && ldsomap == 0)
 	{
 	  info->main_lm_addr = new->lm_info->lm_addr;
 	  free_so (new);
@@ -1182,12 +1197,18 @@ svr4_current_sos (void)
 	    }
 	}
 
+      prev_lm = lm;
+      lm = next_lm;
+
       /* On Solaris, the dynamic linker is not in the normal list of
 	 shared objects, so make sure we pick it up too.  Having
 	 symbol information for the dynamic linker is quite crucial
 	 for skipping dynamic linker resolver code.  */
       if (lm == 0 && ldsomap == 0)
-	lm = ldsomap = solib_svr4_r_ldsomap (info);
+	{
+	  lm = ldsomap = solib_svr4_r_ldsomap (info);
+	  prev_lm = 0;
+	}
 
       discard_cleanups (old_chain);
     }

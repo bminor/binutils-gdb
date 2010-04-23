@@ -397,6 +397,7 @@
 @V@/gdb/testsuite/gdb.base/siginfo-obj.c @V@/gdb/testsuite/gdb.base/si-obj.c
 @V@/gdb/testsuite/gdb.base/siginfo-addr.exp @V@/gdb/testsuite/gdb.base/si-addr.exp
 @V@/gdb/testsuite/gdb.base/siginfo-obj.exp @V@/gdb/testsuite/gdb.base/si-obj.exp
+@V@/gdb/testsuite/gdb.base/solib-corrupted.exp @V@/gdb/testsuite/gdb.base/so-crptd.exp
 @V@/gdb/testsuite/gdb.base/solib-disc.c @V@/gdb/testsuite/gdb.base/so-disc.c
 @V@/gdb/testsuite/gdb.base/solib-display-lib.c @V@/gdb/testsuite/gdb.base/so-displib.c
 @V@/gdb/testsuite/gdb.base/solib-display-main.c @V@/gdb/testsuite/gdb.base/so-dispmain.c

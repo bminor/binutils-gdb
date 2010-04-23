@@ -1,3 +1,14 @@
+2010-04-23  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Paul Pluzhnikov  <ppluzhnikov@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix deadlock on looped list of loaded shared objects.
+	* solib-svr4.c (LM_PREV): New function.
+	(IGNORE_FIRST_LINK_MAP_ENTRY): Use it.
+	(svr4_current_sos): Check for correct l_prev.  New variables prev_lm
+	and next_lm.  Clear prev_lm for solib_svr4_r_ldsomap.
+	* config/djgpp/fnchange.lst: Add translation for solib-corrupted.exp.
+
 2010-04-23  Doug Evans  <dje@google.com>
 
 	* configure.ac (CONFIG_SRCS): Add py-auto-load.o even if not using
