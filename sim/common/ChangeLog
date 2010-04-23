@@ -1,3 +1,7 @@
+2010-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-fpu.c (sim_fpu_zero, sim_fpu_qnan): Add 0 initializers.
+
 2010-04-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* profile.c (sim_profile_print_bar): Add cpu argument.
