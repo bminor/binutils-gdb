@@ -483,7 +483,7 @@ Script filename extension recognition is \"%s\".\n"),
    NOTE: This calls openp which uses xfullpath to compute the full path
    instead of gdb_realpath.  Symbolic links are not resolved.  */
 
-static int
+int
 find_and_open_script (const char *script_file, int search_path,
 		      FILE **streamp, char **full_pathp)
 {

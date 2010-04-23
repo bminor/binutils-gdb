@@ -71,6 +71,10 @@ is now deprecated.
 
 ** Pretty-printers are now also looked up in the current program space.
 
+** GDB now looks for names of Python scripts to auto-load in a
+   special section named `.debug_gdb_scripts', in addition to looking
+   for a OBJFILE-gdb.py script when OBJFILE is read by the debugger.
+
 * Tracepoint actions were unified with breakpoint commands. In particular,
 there are no longer differences in "info break" output for breakpoints and
 tracepoints and the "commands" command can be used for both tracepoints and

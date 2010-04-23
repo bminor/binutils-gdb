@@ -267,6 +267,7 @@ SUBDIR_TUI_CFLAGS= \
 #
 SUBDIR_PYTHON_OBS = \
 	python.o \
+	py-auto-load.o \
 	py-block.o \
 	py-breakpoint.o \
 	py-cmd.o \
@@ -283,6 +284,7 @@ SUBDIR_PYTHON_OBS = \
 	py-value.o
 SUBDIR_PYTHON_SRCS = \
 	python/python.c \
+	python/py-auto-load.c \
 	python/py-block.c \
 	python/py-breakpoint.c \
 	python/py-cmd.c \
@@ -1984,6 +1986,10 @@ PYTHON_CFLAGS=@PYTHON_CFLAGS@
 
 python.o: $(srcdir)/python/python.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
+	$(POSTCOMPILE)
+
+py-auto-load.o: $(srcdir)/python/py-auto-load.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-auto-load.c
 	$(POSTCOMPILE)
 
 py-block.o: $(srcdir)/python/py-block.c

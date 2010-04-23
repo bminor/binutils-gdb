@@ -25,7 +25,6 @@
 #include "gdbcmd.h"
 #include "progspace.h"
 #include "objfiles.h"
-#include "observer.h"
 #include "value.h"
 #include "language.h"
 #include "exceptions.h"
@@ -35,10 +34,6 @@
 /* True if we should print the stack when catching a Python error,
    false otherwise.  */
 static int gdbpy_should_print_stack = 1;
-
-/* This is true if we should auto-load python code when an objfile is
-   opened, false otherwise.  */
-static int gdbpy_auto_load = 1;
 
 #ifdef HAVE_PYTHON
 
@@ -460,85 +455,33 @@ gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 
 
 /* The "current" objfile.  This is set when gdb detects that a new
-   objfile has been loaded.  It is only set for the duration of a call
-   to gdbpy_new_objfile; it is NULL at other times.  */
+   objfile has been loaded.  It is only set for the duration of a call to
+   source_python_script_for_objfile; it is NULL at other times.  */
 static struct objfile *gdbpy_current_objfile;
 
-/* The file name we attempt to read.  */
-#define GDBPY_AUTO_FILENAME "-gdb.py"
+/* Set the current objfile to OBJFILE and then read STREAM,FILE as
+   Python code.  */
 
-/* This is a new_objfile observer callback which loads python code
-   based on the path to the objfile.  */
-static void
-gdbpy_new_objfile (struct objfile *objfile)
+void
+source_python_script_for_objfile (struct objfile *objfile,
+				  FILE *stream, const char *file)
 {
-  char *realname;
-  char *filename, *debugfile;
-  int len;
-  FILE *input;
   struct cleanup *cleanups;
 
-  if (!gdbpy_auto_load || !objfile || !objfile->name)
-    return;
-
   cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
-
   gdbpy_current_objfile = objfile;
 
-  realname = gdb_realpath (objfile->name);
-  len = strlen (realname);
-  filename = xmalloc (len + sizeof (GDBPY_AUTO_FILENAME));
-  memcpy (filename, realname, len);
-  strcpy (filename + len, GDBPY_AUTO_FILENAME);
-
-  input = fopen (filename, "r");
-  debugfile = filename;
-
-  make_cleanup (xfree, filename);
-  make_cleanup (xfree, realname);
-
-  if (!input && debug_file_directory)
-    {
-      /* Also try the same file in the separate debug info directory.  */
-      debugfile = xmalloc (strlen (filename)
-			   + strlen (debug_file_directory) + 1);
-      strcpy (debugfile, debug_file_directory);
-      /* FILENAME is absolute, so we don't need a "/" here.  */
-      strcat (debugfile, filename);
-
-      make_cleanup (xfree, debugfile);
-      input = fopen (debugfile, "r");
-    }
-
-  if (!input && gdb_datadir)
-    {
-      /* Also try the same file in a subdirectory of gdb's data
-	 directory.  */
-      debugfile = xmalloc (strlen (gdb_datadir) + strlen (filename)
-			   + strlen ("/auto-load") + 1);
-      strcpy (debugfile, gdb_datadir);
-      strcat (debugfile, "/auto-load");
-      /* FILENAME is absolute, so we don't need a "/" here.  */
-      strcat (debugfile, filename);
-
-      make_cleanup (xfree, debugfile);
-      input = fopen (debugfile, "r");
-    }
-
-  if (input)
-    {
-      /* We don't want to throw an exception here -- but the user
-	 would like to know that something went wrong.  */
-      if (PyRun_SimpleFile (input, debugfile))
-	gdbpy_print_stack ();
-      fclose (input);
-    }
+  /* We don't want to throw an exception here -- but the user
+     would like to know that something went wrong.  */
+  if (PyRun_SimpleFile (stream, file))
+    gdbpy_print_stack ();
 
   do_cleanups (cleanups);
   gdbpy_current_objfile = NULL;
 }
 
 /* Return the current Objfile, or None if there isn't one.  */
+
 static PyObject *
 gdbpy_get_current_objfile (PyObject *unused1, PyObject *unused2)
 {
@@ -617,8 +560,8 @@ source_python_script (FILE *stream, const char *file)
 
 /* Lists for 'maint set python' commands.  */
 
-static struct cmd_list_element *set_python_list;
-static struct cmd_list_element *show_python_list;
+struct cmd_list_element *set_python_list;
+struct cmd_list_element *show_python_list;
 
 /* Function for use by 'maint set python' prefix command.  */
 
@@ -683,15 +626,6 @@ Enables or disables printing of Python stack traces."),
 			   &set_python_list,
 			   &show_python_list);
 
-  add_setshow_boolean_cmd ("auto-load", class_maintenance,
-			   &gdbpy_auto_load, _("\
-Enable or disable auto-loading of Python code when an object is opened."), _("\
-Show whether Python code will be auto-loaded when an object is opened."), _("\
-Enables or disables auto-loading of Python code when an object is opened."),
-			   NULL, NULL,
-			   &set_python_list,
-			   &show_python_list);
-
 #ifdef HAVE_PYTHON
   Py_Initialize ();
   PyEval_InitThreads ();
@@ -703,6 +637,7 @@ Enables or disables auto-loading of Python code when an object is opened."),
   PyModule_AddStringConstant (gdb_module, "HOST_CONFIG", (char*) host_name);
   PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG", (char*) target_name);
 
+  gdbpy_initialize_auto_load ();
   gdbpy_initialize_values ();
   gdbpy_initialize_frames ();
   gdbpy_initialize_commands ();
@@ -718,8 +653,6 @@ Enables or disables auto-loading of Python code when an object is opened."),
 
   PyRun_SimpleString ("import gdb");
   PyRun_SimpleString ("gdb.pretty_printers = []");
-
-  observer_attach_new_objfile (gdbpy_new_objfile);
 
   gdbpy_to_string_cst = PyString_FromString ("to_string");
   gdbpy_children_cst = PyString_FromString ("children");
