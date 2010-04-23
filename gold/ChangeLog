@@ -1,3 +1,14 @@
+2010-04-23  Sriraman Tallam  <tmsriram@google.com>
+
+	* gc.h (gc_process_relocs): Pass information on relocs pointing to
+	sections that are not ordinary to icf.
+	* icf.cc (get_section_contents): Handle relocation pointing to section
+	with no object or shndx information.
+	* testsuite/Makefile.am: Remove icf_virtual_function_folding_test.sh
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/icf_virtual_function_folding_test.cc: Remove printf.
+	* testsuite/icf_virtual_function_folding_test.sh: Delete file.
+
 2010-04-22  Ian Lance Taylor  <iant@google.com>
 
 	* expression.cc (Expression::Expression_eval_info): Add

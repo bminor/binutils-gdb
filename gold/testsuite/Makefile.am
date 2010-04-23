@@ -193,7 +193,6 @@ icf_safe_so_test_1.stdout: icf_safe_so_test
 icf_safe_so_test_2.stdout: icf_safe_so_test
 	$(TEST_READELF) -h icf_safe_so_test > icf_safe_so_test_2.stdout
 
-check_SCRIPTS += icf_virtual_function_folding_test.sh
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc

@@ -25,11 +25,8 @@
 // for the virtual call fn1 entry in the vtable.  This test makes sure
 // the call to Foo::fn1 works correctly after the folding.
 
-#include <stdio.h>
-
 int fn2(void *)
 {
-  printf("fn1==fn2\n");
   return 0xA;
 }
 
@@ -54,7 +51,6 @@ class Foo : public Bar
 
 int Foo::fn1()
 {
-  printf("fn1==fn2\n");
   return 0xA;
 }
 

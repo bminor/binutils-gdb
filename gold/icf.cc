@@ -263,8 +263,11 @@ get_section_contents(bool first_iteration,
     {
       Icf::Sections_reachable_info v =
         (it_reloc_info_list->second).section_info;
+      // Stores the information of the symbol pointed to by the reloc.
       Icf::Symbol_info s = (it_reloc_info_list->second).symbol_info;
+      // Stores the addend and the symbol value.
       Icf::Addend_info a = (it_reloc_info_list->second).addend_info;
+      // Stores the offset of the reloc.
       Icf::Offset_info o = (it_reloc_info_list->second).offset_info;
       Icf::Sections_reachable_info::iterator it_v = v.begin();
       Icf::Symbol_info::iterator it_s = s.begin();
@@ -285,6 +288,24 @@ get_section_contents(bool first_iteration,
                    static_cast<long long>((*it_a).first),
 		   static_cast<long long>((*it_a).second),
 		   static_cast<unsigned long long>(*it_o));
+
+	  // If the symbol pointed to by the reloc is not in an ordinary
+	  // section or if the symbol type is not FROM_OBJECT, then the
+	  // object is NULL.
+	  if (it_v->first == NULL)
+            {
+	      if (first_iteration)
+                {
+		  // If the symbol name is available, use it.
+                  if ((*it_s) != NULL)
+                      buffer.append((*it_s)->name());
+                  // Append the addend.
+                  buffer.append(addend_str);
+                  buffer.append("@");
+		}
+	      continue;
+	    }
+
           Section_id reloc_secn(it_v->first, it_v->second);
 
           // If this reloc turns back and points to the same section,
@@ -406,8 +427,7 @@ get_section_contents(bool first_iteration,
               else if ((*it_s) != NULL)
                 {
                   // If symbol name is available use that.
-                  const char *sym_name = (*it_s)->name();
-                  buffer.append(sym_name);
+                  buffer.append((*it_s)->name());
                   // Append the addend.
                   buffer.append(addend_str);
                   buffer.append("@");
