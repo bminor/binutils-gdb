@@ -325,7 +325,8 @@ break $\ldots$ if {\it expr}&break conditionally on nonzero {\it expr}\cr
 cond {\it n} \opt{\it expr}&new conditional expression on breakpoint
 {\it n}; make unconditional if no {\it expr}\cr
 tbreak $\ldots$&temporary break; disable when reached\cr
-rbreak {\it regex}&break on all functions matching {\it regex}\cr
+rbreak \opt{\it file\tt:}{\it regex}&break on all functions matching {\it
+regex} \opt{in \it file}\cr
 watch {\it expr}&set a watchpoint for expression {\it expr}\cr
 catch {\it event}&break at {\it event}, which may be {\tt catch}, {\tt throw},
 {\tt exec}, {\tt fork}, {\tt vfork}, {\tt load}, or {\tt unload}.\cr

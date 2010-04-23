@@ -3355,7 +3355,7 @@ See also @ref{Conditions, ,Break Conditions}.
 
 @kindex rbreak
 @cindex regular expression
-@cindex breakpoints in functions matching a regexp
+@cindex breakpoints at functions matching a regexp
 @cindex set breakpoints in many functions
 @item rbreak @var{regex}
 Set breakpoints on all functions matching the regular expression
@@ -3384,6 +3384,19 @@ The @code{rbreak} command can be used to set breakpoints in
 @smallexample
 (@value{GDBP}) rbreak .
 @end smallexample
+
+@item rbreak @var{file}:@var{regex}
+If @code{rbreak} is called with a filename qualification, it limits
+the search for functions matching the given regular expression to the
+specified @var{file}.  This can be used, for example, to set breakpoints on
+every function in a given file:
+
+@smallexample
+(@value{GDBP}) rbreak file.c:.
+@end smallexample
+
+The colon separating the filename qualifier from the regex may
+optionally be surrounded by spaces.
 
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}

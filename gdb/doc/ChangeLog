@@ -1,3 +1,10 @@
+2010-04-20  Chris Moller  <cmoller@redhat.com>
+
+	* gdb.texinfo (Setting Breakpoints): Added description of
+	filename-qualified rbreak.
+	* refcard.tex (Breakpoints and Watchpoints): Added brief
+	description of filename-qualified rbreak.
+
 2010-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Data): New @menu reference to Pretty Printing.

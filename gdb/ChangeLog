@@ -1,3 +1,11 @@
+2010-04-20  Chris Moller  <cmoller@redhat.com>
+
+	PR 10179
+
+	* symtab.c (rbreak_command): Added code to include a filename
+	specification in the rbreak argument.
+	* NEWS: Added a brief description of filename-qualified rbreak.
+
 2010-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crashes on dangling display expressions.

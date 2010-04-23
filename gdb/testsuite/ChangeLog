@@ -1,3 +1,12 @@
+2010-04-20  Chris Moller  <cmoller@redhat.com>
+
+	PR 10179
+
+	* gdb.base/Makefile.in (EXECUTABLES): Added pr10179.
+	* gdb.base/pr10179-a.c:
+	* gdb.base/pr10179-b.c:
+	* gdb.base/pr10179.exp: New files.
+
 2010-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crashes on dangling display expressions.

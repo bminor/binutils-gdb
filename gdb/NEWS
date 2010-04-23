@@ -47,6 +47,10 @@ qGetTIBAddr
   single `break' command creates multiple breakpoints (e.g.,
   breakpoints on overloaded c++ functions).
 
+* The `rbreak' command now accepts a filename specification as part of
+  its argument, limiting the functions selected by the regex to those
+  in the specified file.
+
 * New commands
 
 save breakpoints <filename>
