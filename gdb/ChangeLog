@@ -1,3 +1,18 @@
+2010-04-23  Jerome Guitton  <guitton@adacore.com>
+    
+	* alpha-tdep.c (INSN_OPCODE, MEM_RA, MEM_RB, MEM_DISP, BR_RA)
+	(OPR_FUNCTION, OPR_HAS_IMMEDIATE, OPR_RA, OPR_RC, OPR_LIT): New macros.
+	(lda_opcode, stq_opcode, bne_opcode, subq_opcode, subq_function):
+	New constants.
+	(alpha_heuristic_analyze_probing_loop): New function.
+	(alpha_heuristic_frame_unwind_cache): In the prologue analysis, detect
+	and handle cases when a stack probe loop is generated.
+	* alpha-mdebug-tdep.c (alpha_mdebug_frameless): New function.
+	(alpha_mdebug_max_frame_size_exceeded): New function.
+	(alpha_mdebug_after_prologue): Use alpha_mdebug_frameless.
+	(alpha_mdebug_frame_sniffer, alpha_mdebug_frame_base_sniffer):
+	Return 0 when the maximum debuggable frame size has been exceeded.
+
 2010-04-23  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix ARI warning.
