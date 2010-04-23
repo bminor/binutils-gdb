@@ -1,3 +1,34 @@
+2010-04-22  Ian Lance Taylor  <iant@google.com>
+
+	* expression.cc (Expression::Expression_eval_info): Add
+	result_alignment_pointer field.
+	(Expression::eval_with_dot): Add result_alignment_pointer
+	parameter.  Change all callers.
+	(Expression::eval_maybe_dot): Likewise.
+	(class Binary_expression): Add alignment_pointer parameter to
+	left_value and right_value.  Change all callers.
+	(BINARY_EXPRESSION): Set result alignment.
+	(class Trinary_expression): Add alignment_pointer parameter to
+	arg2_value and arg3_value.  Change all callers.
+	(Trinary_cond::value): Set result alignment.
+	(Max_expression::value, Min_expression::value): Likewise.
+	(Align_expression::value): Likewise.
+	* script-sections.cc (class Sections_element): Add dot_alignment
+	parameter to set_section_addresses virtual function.  Update
+	instantiations.
+	(class Output_section_element): Likewise.
+	(Script_sections::create_segments): Add dot_alignment parameter.
+	Change all callers.
+	(Script_sections::create_segments_from_phdrs_clause): Likewise.
+	(Script_sections::set_phdrs_clause_addresses): Likewise.
+	* script-sections.h: Update declarations.
+	* script.h: Update declarations.
+	* output.h (Output_segment::set_minimum_p_align): Don't decrease
+	min_p_align.
+	* testsuite/script_test_3.t: Set large alignment.
+	* testsuite/script_test_3.sh: Make sure that at least one LOAD
+	segment has expected alignment.
+
 2010-04-22  Nick Clifton  <nickc@redhat.com>
 
 	* po/gold.pot: Updated by the Translation project.

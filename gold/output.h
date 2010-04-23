@@ -3833,7 +3833,10 @@ class Output_segment
   // upward based on the section alignments.
   void
   set_minimum_p_align(uint64_t align)
-  { this->min_p_align_ = align; }
+  {
+    if (align > this->min_p_align_)
+      this->min_p_align_ = align;
+  }
 
   // Set the offset of this segment based on the section.  This should
   // only be called for a non-PT_LOAD segment.

@@ -66,6 +66,8 @@ struct Expression::Expression_eval_info
   Output_section* dot_section;
   // Points to where the section of the result should be stored.
   Output_section** result_section_pointer;
+  // Pointer to where the alignment of the result should be stored.
+  uint64_t* result_alignment_pointer;
 };
 
 // Evaluate an expression.
@@ -76,7 +78,7 @@ Expression::eval(const Symbol_table* symtab, const Layout* layout,
 {
   Output_section* dummy;
   return this->eval_maybe_dot(symtab, layout, check_assertions,
-			      false, 0, NULL, &dummy);
+			      false, 0, NULL, &dummy, NULL);
 }
 
 // Evaluate an expression which may refer to the dot symbol.
@@ -85,10 +87,12 @@ uint64_t
 Expression::eval_with_dot(const Symbol_table* symtab, const Layout* layout,
 			  bool check_assertions, uint64_t dot_value,
 			  Output_section* dot_section,
-			  Output_section** result_section_pointer)
+			  Output_section** result_section_pointer,
+			  uint64_t* result_alignment_pointer)
 {
   return this->eval_maybe_dot(symtab, layout, check_assertions, true,
-			      dot_value, dot_section, result_section_pointer);
+			      dot_value, dot_section, result_section_pointer,
+			      result_alignment_pointer);
 }
 
 // Evaluate an expression which may or may not refer to the dot
@@ -98,7 +102,8 @@ uint64_t
 Expression::eval_maybe_dot(const Symbol_table* symtab, const Layout* layout,
 			   bool check_assertions, bool is_dot_available,
 			   uint64_t dot_value, Output_section* dot_section,
-			   Output_section** result_section_pointer)
+			   Output_section** result_section_pointer,
+			   uint64_t* result_alignment_pointer)
 {
   Expression_eval_info eei;
   eei.symtab = symtab;
@@ -112,6 +117,8 @@ Expression::eval_maybe_dot(const Symbol_table* symtab, const Layout* layout,
   // if we find a section relative reference.
   *result_section_pointer = NULL;
   eei.result_section_pointer = result_section_pointer;
+
+  eei.result_alignment_pointer = result_alignment_pointer;
 
   return this->value(&eei);
 }
@@ -247,7 +254,8 @@ class Unary_expression : public Expression
 				      eei->is_dot_available,
 				      eei->dot_value,
 				      eei->dot_section,
-				      arg_section_pointer);
+				      arg_section_pointer,
+				      eei->result_alignment_pointer);
   }
 
   void
@@ -317,26 +325,30 @@ class Binary_expression : public Expression
  protected:
   uint64_t
   left_value(const Expression_eval_info* eei,
-	     Output_section** section_pointer) const
+	     Output_section** section_pointer,
+	     uint64_t* alignment_pointer) const
   {
     return this->left_->eval_maybe_dot(eei->symtab, eei->layout,
 				       eei->check_assertions,
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
-				       section_pointer);
+				       section_pointer,
+				       alignment_pointer);
   }
 
   uint64_t
   right_value(const Expression_eval_info* eei,
-	      Output_section** section_pointer) const
+	      Output_section** section_pointer,
+	      uint64_t* alignment_pointer) const
   {
     return this->right_->eval_maybe_dot(eei->symtab, eei->layout,
 					eei->check_assertions,
 					eei->is_dot_available,
 					eei->dot_value,
 					eei->dot_section,
-					section_pointer);
+					section_pointer,
+					alignment_pointer);
   }
 
   void
@@ -385,15 +397,27 @@ class Binary_expression : public Expression
     value(const Expression_eval_info* eei)				\
     {									\
       Output_section* left_section;					\
-      uint64_t left = this->left_value(eei, &left_section);		\
+      uint64_t left_alignment;						\
+      uint64_t left = this->left_value(eei, &left_section,		\
+				       &left_alignment);		\
       Output_section* right_section;					\
-      uint64_t right = this->right_value(eei, &right_section);		\
+      uint64_t right_alignment;						\
+      uint64_t right = this->right_value(eei, &right_section,		\
+					 &right_alignment);		\
       if (KEEP_RIGHT && left_section == NULL && right_section != NULL)	\
-	*eei->result_section_pointer = right_section;			\
+	{								\
+	  *eei->result_section_pointer = right_section;			\
+	  if (eei->result_alignment_pointer != NULL)			\
+	    *eei->result_alignment_pointer = right_alignment;		\
+	}								\
       else if (KEEP_LEFT						\
 	       && left_section != NULL					\
 	       && right_section == NULL)				\
-	*eei->result_section_pointer = left_section;			\
+	{								\
+	  *eei->result_section_pointer = left_section;			\
+	  if (eei->result_alignment_pointer != NULL)			\
+	    *eei->result_alignment_pointer = right_alignment;		\
+	}								\
       else if ((WARN || left_section != right_section)			\
 	       && (left_section != NULL || right_section != NULL)	\
 	       && parameters->options().relocatable())			\
@@ -469,31 +493,36 @@ class Trinary_expression : public Expression
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
-				       section_pointer);
+				       section_pointer,
+				       NULL);
   }
 
   uint64_t
   arg2_value(const Expression_eval_info* eei,
-	     Output_section** section_pointer) const
+	     Output_section** section_pointer,
+	     uint64_t* alignment_pointer) const
   {
     return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
 				       eei->check_assertions,
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
-				       section_pointer);
+				       section_pointer,
+				       alignment_pointer);
   }
 
   uint64_t
   arg3_value(const Expression_eval_info* eei,
-	     Output_section** section_pointer) const
+	     Output_section** section_pointer,
+	     uint64_t* alignment_pointer) const
   {
     return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
 				       eei->check_assertions,
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
-				       section_pointer);
+				       section_pointer,
+				       alignment_pointer);
   }
 
   void
@@ -529,8 +558,10 @@ class Trinary_cond : public Trinary_expression
     Output_section* arg1_section;
     uint64_t arg1 = this->arg1_value(eei, &arg1_section);
     return (arg1
-	    ? this->arg2_value(eei, eei->result_section_pointer)
-	    : this->arg3_value(eei, eei->result_section_pointer));
+	    ? this->arg2_value(eei, eei->result_section_pointer,
+			       eei->result_alignment_pointer)
+	    : this->arg3_value(eei, eei->result_section_pointer,
+			       eei->result_alignment_pointer));
   }
 
   void
@@ -565,14 +596,27 @@ class Max_expression : public Binary_expression
   value(const Expression_eval_info* eei)
   {
     Output_section* left_section;
-    uint64_t left = this->left_value(eei, &left_section);
+    uint64_t left_alignment;
+    uint64_t left = this->left_value(eei, &left_section, &left_alignment);
     Output_section* right_section;
-    uint64_t right = this->right_value(eei, &right_section);
+    uint64_t right_alignment;
+    uint64_t right = this->right_value(eei, &right_section, &right_alignment);
     if (left_section == right_section)
       *eei->result_section_pointer = left_section;
     else if ((left_section != NULL || right_section != NULL)
 	     && parameters->options().relocatable())
       gold_warning(_("max applied to section relative value"));
+    if (eei->result_alignment_pointer != NULL)
+      {
+	uint64_t ra = *eei->result_alignment_pointer;
+	if (left > right)
+	  ra = std::max(ra, left_alignment);
+	else if (right > left)
+	  ra = std::max(ra, right_alignment);
+	else
+	  ra = std::max(ra, std::max(left_alignment, right_alignment));
+	*eei->result_alignment_pointer = ra;
+      }
     return std::max(left, right);
   }
 
@@ -600,14 +644,27 @@ class Min_expression : public Binary_expression
   value(const Expression_eval_info* eei)
   {
     Output_section* left_section;
-    uint64_t left = this->left_value(eei, &left_section);
+    uint64_t left_alignment;
+    uint64_t left = this->left_value(eei, &left_section, &left_alignment);
     Output_section* right_section;
-    uint64_t right = this->right_value(eei, &right_section);
+    uint64_t right_alignment;
+    uint64_t right = this->right_value(eei, &right_section, &right_alignment);
     if (left_section == right_section)
       *eei->result_section_pointer = left_section;
     else if ((left_section != NULL || right_section != NULL)
 	     && parameters->options().relocatable())
       gold_warning(_("min applied to section relative value"));
+    if (eei->result_alignment_pointer != NULL)
+      {
+	uint64_t ra = *eei->result_alignment_pointer;
+	if (left < right)
+	  ra = std::max(ra, left_alignment);
+	else if (right < left)
+	  ra = std::max(ra, right_alignment);
+	else
+	  ra = std::max(ra, std::max(left_alignment, right_alignment));
+	*eei->result_alignment_pointer = ra;
+      }
     return std::min(left, right);
   }
 
@@ -734,12 +791,21 @@ class Align_expression : public Binary_expression
   value(const Expression_eval_info* eei)
   {
     Output_section* align_section;
-    uint64_t align = this->right_value(eei, &align_section);
+    uint64_t align = this->right_value(eei, &align_section, NULL);
     if (align_section != NULL
 	&& parameters->options().relocatable())
       gold_warning(_("aligning to section relative value"));
 
-    uint64_t value = this->left_value(eei, eei->result_section_pointer);
+    if (eei->result_alignment_pointer != NULL
+	&& align > *eei->result_alignment_pointer)
+      {
+	uint64_t a = align;
+	while ((a & (a - 1)) != 0)
+	  a &= a - 1;
+	*eei->result_alignment_pointer = a;
+      }
+
+    uint64_t value = this->left_value(eei, eei->result_section_pointer, NULL);
     if (align <= 1)
       return value;
     return ((value + align - 1) / align) * align;

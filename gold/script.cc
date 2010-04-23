@@ -955,7 +955,7 @@ Symbol_assignment::sized_finalize(Symbol_table* symtab, const Layout* layout,
   uint64_t final_val = this->val_->eval_maybe_dot(symtab, layout, true,
 						  is_dot_available,
 						  dot_value, dot_section,
-						  &section);
+						  &section, NULL);
   Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(this->sym_);
   ssym->set_value(final_val);
   if (section != NULL)
@@ -974,7 +974,7 @@ Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
   Output_section* val_section;
   uint64_t val = this->val_->eval_maybe_dot(symtab, layout, false,
 					    is_dot_available, dot_value,
-					    NULL, &val_section);
+					    NULL, &val_section, NULL);
   if (val_section != NULL)
     return;
 

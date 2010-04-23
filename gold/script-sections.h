@@ -232,7 +232,7 @@ class Script_sections
 
   // Create segments.
   Output_segment*
-  create_segments(Layout*);
+  create_segments(Layout*, uint64_t);
 
   // Create PT_NOTE and PT_TLS segments.
   void
@@ -253,7 +253,7 @@ class Script_sections
 
   // Create the segments from a PHDRS clause.
   Output_segment*
-  create_segments_from_phdrs_clause(Layout* layout);
+  create_segments_from_phdrs_clause(Layout* layout, uint64_t);
 
   // Attach sections to segments from a PHDRS clause.
   void
@@ -261,7 +261,7 @@ class Script_sections
 
   // Set addresses of segments from a PHDRS clause.
   Output_segment*
-  set_phdrs_clause_addresses(Layout*);
+  set_phdrs_clause_addresses(Layout*, uint64_t);
 
   // True if we ever saw a SECTIONS clause.
   bool saw_sections_clause_;

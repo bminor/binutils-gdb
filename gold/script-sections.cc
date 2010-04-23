@@ -369,7 +369,8 @@ class Sections_element
   // Set section addresses.  This includes applying assignments if the
   // the expression is an absolute value.
   virtual void
-  set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*)
+  set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*,
+			uint64_t*)
   { }
 
   // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
@@ -447,7 +448,7 @@ class Sections_element_assignment : public Sections_element
   // absolute symbols when setting dot.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout,
-			uint64_t* dot_value, uint64_t*)
+			uint64_t* dot_value, uint64_t*, uint64_t*)
   {
     this->assignment_.set_if_absolute(symtab, layout, true, *dot_value);
   }
@@ -484,17 +485,18 @@ class Sections_element_dot_assignment : public Sections_element
     // to be absolute.
     Output_section* dummy;
     *dot_value = this->val_->eval_with_dot(symtab, layout, true, *dot_value,
-					   NULL, &dummy);
+					   NULL, &dummy, NULL);
   }
 
   // Update the dot symbol while setting section addresses.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout,
-			uint64_t* dot_value, uint64_t* load_address)
+			uint64_t* dot_value, uint64_t* dot_alignment,
+			uint64_t* load_address)
   {
     Output_section* dummy;
     *dot_value = this->val_->eval_with_dot(symtab, layout, false, *dot_value,
-					   NULL, &dummy);
+					   NULL, &dummy, dot_alignment);
     *load_address = *dot_value;
   }
 
@@ -577,7 +579,7 @@ class Output_section_element
   // the expression is an absolute value.
   virtual void
   set_section_addresses(Symbol_table*, Layout*, Output_section*, uint64_t,
-			uint64_t*, Output_section**, std::string*,
+			uint64_t*, uint64_t*, Output_section**, std::string*,
 			Input_section_list*)
   { }
 
@@ -635,8 +637,8 @@ class Output_section_element_assignment : public Output_section_element
   // absolute symbols when setting dot.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout, Output_section*,
-			uint64_t, uint64_t* dot_value, Output_section**,
-			std::string*, Input_section_list*)
+			uint64_t, uint64_t* dot_value, uint64_t*,
+			Output_section**, std::string*, Input_section_list*)
   {
     this->assignment_.set_if_absolute(symtab, layout, true, *dot_value);
   }
@@ -668,14 +670,14 @@ class Output_section_element_dot_assignment : public Output_section_element
 		   uint64_t* dot_value, Output_section** dot_section)
   {
     *dot_value = this->val_->eval_with_dot(symtab, layout, true, *dot_value,
-					   *dot_section, dot_section);
+					   *dot_section, dot_section, NULL);
   }
 
   // Update the dot symbol while setting section addresses.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout, Output_section*,
-			uint64_t, uint64_t* dot_value, Output_section**,
-			std::string*, Input_section_list*);
+			uint64_t, uint64_t* dot_value, uint64_t*,
+			Output_section**, std::string*, Input_section_list*);
 
   // Print for debugging.
   void
@@ -699,13 +701,14 @@ Output_section_element_dot_assignment::set_section_addresses(
     Output_section* output_section,
     uint64_t,
     uint64_t* dot_value,
+    uint64_t* dot_alignment,
     Output_section** dot_section,
     std::string* fill,
     Input_section_list*)
 {
   uint64_t next_dot = this->val_->eval_with_dot(symtab, layout, false,
 						*dot_value, *dot_section,
-						dot_section);
+						dot_section, dot_alignment);
   if (next_dot < *dot_value)
     gold_error(_("dot may not move backward"));
   if (next_dot > *dot_value && output_section != NULL)
@@ -807,7 +810,7 @@ Output_data_expression::do_write_to_buffer(unsigned char* buf)
   Output_section* dummy;
   uint64_t val = this->val_->eval_with_dot(this->symtab_, this->layout_,
 					   true, this->dot_value_,
-					   this->dot_section_, &dummy);
+					   this->dot_section_, &dummy, NULL);
 
   if (parameters->target().is_big_endian())
     this->endian_write_to_buffer<true>(val, buf);
@@ -868,8 +871,8 @@ class Output_section_element_data : public Output_section_element
   // Store the value in the section.
   void
   set_section_addresses(Symbol_table*, Layout*, Output_section*, uint64_t,
-			uint64_t* dot_value, Output_section**, std::string*,
-			Input_section_list*);
+			uint64_t* dot_value, uint64_t*, Output_section**,
+			std::string*, Input_section_list*);
 
   // Print for debugging.
   void
@@ -893,6 +896,7 @@ Output_section_element_data::set_section_addresses(
     Output_section* os,
     uint64_t,
     uint64_t* dot_value,
+    uint64_t*,
     Output_section** dot_section,
     std::string*,
     Input_section_list*)
@@ -949,14 +953,14 @@ class Output_section_element_fill : public Output_section_element
   // Update the fill value while setting section addresses.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout, Output_section*,
-			uint64_t, uint64_t* dot_value,
+			uint64_t, uint64_t* dot_value, uint64_t*,
 			Output_section** dot_section,
 			std::string* fill, Input_section_list*)
   {
     Output_section* fill_section;
     uint64_t fill_val = this->val_->eval_with_dot(symtab, layout, false,
 						  *dot_value, *dot_section,
-						  &fill_section);
+						  &fill_section, NULL);
     if (fill_section != NULL)
       gold_warning(_("fill value is not absolute"));
     // FIXME: The GNU linker supports fill values of arbitrary length.
@@ -1012,7 +1016,7 @@ class Output_section_element_input : public Output_section_element
   // Set the section address.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout, Output_section*,
-			uint64_t subalign, uint64_t* dot_value,
+			uint64_t subalign, uint64_t* dot_value, uint64_t*,
 			Output_section**, std::string* fill,
 			Input_section_list*);
 
@@ -1309,6 +1313,7 @@ Output_section_element_input::set_section_addresses(
     Output_section* output_section,
     uint64_t subalign,
     uint64_t* dot_value,
+    uint64_t*,
     Output_section** dot_section,
     std::string* fill,
     Input_section_list* input_sections)
@@ -1629,7 +1634,8 @@ class Output_section_definition : public Sections_element
   // Set the section address.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout,
-			uint64_t* dot_value, uint64_t* load_address);
+			uint64_t* dot_value, uint64_t*,
+			uint64_t* load_address);
 
   // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
   // this section is constrained, and the input sections do not match,
@@ -1861,7 +1867,7 @@ Output_section_definition::finalize_symbols(Symbol_table* symtab,
 	  Output_section* dummy;
 	  address = this->address_->eval_with_dot(symtab, layout, true,
 						  *dot_value, NULL,
-						  &dummy);
+						  &dummy, NULL);
 	}
       if (this->align_ != NULL)
 	{
@@ -1869,7 +1875,7 @@ Output_section_definition::finalize_symbols(Symbol_table* symtab,
 	  uint64_t align = this->align_->eval_with_dot(symtab, layout, true,
 						       *dot_value,
 						       NULL,
-						       &dummy);
+						       &dummy, NULL);
 	  address = align_address(address, align);
 	}
       *dot_value = address;
@@ -1918,6 +1924,7 @@ void
 Output_section_definition::set_section_addresses(Symbol_table* symtab,
 						 Layout* layout,
 						 uint64_t* dot_value,
+						 uint64_t* dot_alignment,
                                                  uint64_t* load_address)
 {
   uint64_t address;
@@ -1930,7 +1937,8 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     {
       Output_section* dummy;
       address = this->address_->eval_with_dot(symtab, layout, true,
-					      *dot_value, NULL, &dummy);
+					      *dot_value, NULL, &dummy,
+					      dot_alignment);
     }
 
   uint64_t align;
@@ -1945,7 +1953,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     {
       Output_section* align_section;
       align = this->align_->eval_with_dot(symtab, layout, true, *dot_value,
-					  NULL, &align_section);
+					  NULL, &align_section, NULL);
       if (align_section != NULL)
 	gold_warning(_("alignment of section %s is not absolute"),
 		     this->name_.c_str());
@@ -1976,7 +1984,8 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       Output_section* dummy;
       uint64_t laddr =
 	this->load_address_->eval_with_dot(symtab, layout, true, *dot_value,
-					   this->output_section_, &dummy);
+					   this->output_section_, &dummy,
+					   NULL);
       if (this->output_section_ != NULL)
         this->output_section_->set_load_address(laddr);
       this->evaluated_load_address_ = laddr;
@@ -1990,7 +1999,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       Output_section* subalign_section;
       subalign = this->subalign_->eval_with_dot(symtab, layout, true,
 						*dot_value, NULL,
-						&subalign_section);
+						&subalign_section, NULL);
       if (subalign_section != NULL)
 	gold_warning(_("subalign of section %s is not absolute"),
 		     this->name_.c_str());
@@ -2004,8 +2013,8 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       Output_section* fill_section;
       uint64_t fill_val = this->fill_->eval_with_dot(symtab, layout, true,
 						     *dot_value,
-						     NULL,
-						     &fill_section);
+						     NULL, &fill_section,
+						     NULL);
       if (fill_section != NULL)
 	gold_warning(_("fill of section %s is not absolute"),
 		     this->name_.c_str());
@@ -2031,8 +2040,8 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
        p != this->elements_.end();
        ++p)
     (*p)->set_section_addresses(symtab, layout, this->output_section_,
-				subalign, dot_value, &dot_section, &fill,
-				&input_sections);
+				subalign, dot_value, dot_alignment,
+				&dot_section, &fill, &input_sections);
 
   gold_assert(input_sections.empty());
 
@@ -2339,7 +2348,8 @@ class Orphan_output_section : public Sections_element
 
   // Set section addresses.
   void
-  set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*);
+  set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*,
+			uint64_t*);
 
   // Get the list of segments to use for an allocated section when
   // using a PHDRS clause.
@@ -2368,6 +2378,7 @@ class Orphan_output_section : public Sections_element
 void
 Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
 					     uint64_t* dot_value,
+					     uint64_t*,
                                              uint64_t* load_address)
 {
   typedef std::list<Output_section::Simple_input_section> Input_section_list;
@@ -2950,6 +2961,7 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 
   // For a relocatable link, we implicitly set dot to zero.
   uint64_t dot_value = 0;
+  uint64_t dot_alignment = 0;
   uint64_t load_address = 0;
 
   // Check to see if we want to use any of -Ttext, -Tdata and -Tbss options
@@ -2995,7 +3007,8 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 	    }
 	}
 
-      (*p)->set_section_addresses(symtab, layout, &dot_value, &load_address);
+      (*p)->set_section_addresses(symtab, layout, &dot_value, &dot_alignment,
+				  &load_address);
     } 
 
   if (this->phdrs_elements_ != NULL)
@@ -3006,7 +3019,7 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 	(*p)->eval_load_address(symtab, layout);
     }
 
-  return this->create_segments(layout);
+  return this->create_segments(layout, dot_alignment);
 }
 
 // Sort the sections in order to put them into segments.
@@ -3114,7 +3127,7 @@ Script_sections::header_size_adjustment(uint64_t lma,
 // if any.
 
 Output_segment*
-Script_sections::create_segments(Layout* layout)
+Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
 {
   gold_assert(this->saw_sections_clause_);
 
@@ -3122,7 +3135,7 @@ Script_sections::create_segments(Layout* layout)
     return NULL;
 
   if (this->saw_phdrs_clause())
-    return create_segments_from_phdrs_clause(layout);
+    return create_segments_from_phdrs_clause(layout, dot_alignment);
 
   Layout::Section_list sections;
   layout->get_allocated_sections(&sections);
@@ -3195,6 +3208,7 @@ Script_sections::create_segments(Layout* layout)
 	  current_seg = layout->make_output_segment(elfcpp::PT_LOAD,
 						    seg_flags);
 	  current_seg->set_addresses(vma, lma);
+	  current_seg->set_minimum_p_align(dot_alignment);
 	  if (first_seg == NULL)
 	    first_seg = current_seg;
 	  is_current_seg_readonly = true;
@@ -3388,10 +3402,11 @@ Script_sections::expected_segment_count(const Layout* layout) const
 // should hold the file header and program headers, if any.
 
 Output_segment*
-Script_sections::create_segments_from_phdrs_clause(Layout* layout)
+Script_sections::create_segments_from_phdrs_clause(Layout* layout,
+						   uint64_t dot_alignment)
 {
   this->attach_sections_using_phdrs_clause(layout);
-  return this->set_phdrs_clause_addresses(layout);
+  return this->set_phdrs_clause_addresses(layout, dot_alignment);
 }
 
 // Create the segments from the PHDRS clause, and put the output
@@ -3485,7 +3500,8 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
 // if any.
 
 Output_segment*
-Script_sections::set_phdrs_clause_addresses(Layout* layout)
+Script_sections::set_phdrs_clause_addresses(Layout* layout,
+					    uint64_t dot_alignment)
 {
   Output_segment* load_seg = NULL;
   for (Phdrs_elements::const_iterator p = this->phdrs_elements_->begin();
@@ -3507,6 +3523,8 @@ Script_sections::set_phdrs_clause_addresses(Layout* layout)
 	    gold_error(_("may only specify load address for PT_LOAD segment"));
 	  continue;
 	}
+
+      oseg->set_minimum_p_align(dot_alignment);
 
       // The output sections should have addresses from the SECTIONS
       // clause.  The addresses don't have to be in order, so find the

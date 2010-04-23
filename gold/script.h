@@ -86,11 +86,14 @@ class Expression
   // value is defined.  If the value is absolute *RESULT_SECTION will
   // be NULL.  Note that the returned value is still an absolute
   // value; to get a section relative value the caller must subtract
-  // the section address.
+  // the section address.  If RESULT_ALIGNMENT is not NULL, this sets
+  // *RESULT_ALIGNMENT to the alignment of the value of that alignment
+  // is larger than *RESULT_ALIGNMENT; this will only be non-zero if
+  // this is an ALIGN expression.
   uint64_t
   eval_with_dot(const Symbol_table*, const Layout*, bool check_assertions,
 		uint64_t dot_value, Output_section* dot_section,
-		Output_section** result_section);
+		Output_section** result_section, uint64_t* result_alignment);
 
   // Return the value of an expression which may or may not be
   // permitted to refer to the dot symbol, depending on
@@ -99,7 +102,7 @@ class Expression
   eval_maybe_dot(const Symbol_table*, const Layout*, bool check_assertions,
 		 bool is_dot_available, uint64_t dot_value,
 		 Output_section* dot_section,
-		 Output_section** result_section);
+		 Output_section** result_section, uint64_t* result_alignment);
 
   // Print the expression to the FILE.  This is for debugging.
   virtual void
