@@ -23,6 +23,7 @@ static struct
   {
     operatorT op_modifier;	/* Operand modifier.  */
     int is_mem;			/* 1 if operand is memory reference.  */
+    int is_indirect;		/* 1 if operand is indirect reference.  */
     int has_offset;		/* 1 if operand has offset.  */
     unsigned int in_offset;	/* >=1 if processing operand of offset.  */
     unsigned int in_bracket;	/* >=1 if processing operand in brackets.  */
@@ -491,6 +492,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
   /* Initialize state structure.  */
   intel_state.op_modifier = O_absent;
   intel_state.is_mem = 0;
+  intel_state.is_indirect = 0;
   intel_state.has_offset = 0;
   intel_state.base = NULL;
   intel_state.index = NULL;
@@ -528,7 +530,10 @@ i386_intel_operand (char *operand_string, int got_a_float)
   else if (!intel_state.has_offset
 	   && input_line_pointer > buf
 	   && *(input_line_pointer - 1) == ']')
-    intel_state.is_mem |= 1;
+    {
+      intel_state.is_mem |= 1;
+      intel_state.is_indirect = 1;
+    }
 
   input_line_pointer = saved_input_line_pointer;
   free (buf);
@@ -674,7 +679,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      {
 		intel_state.is_mem = 1;
 		if (intel_state.op_modifier == O_absent)
-		  break;
+		  {
+		    if (intel_state.is_indirect == 1)
+		      i.types[this_operand].bitfield.jumpabsolute = 1;
+		    break;
+		  }
 		as_bad (_("cannot infer the segment part of the operand"));
 		return 0;
 	      }

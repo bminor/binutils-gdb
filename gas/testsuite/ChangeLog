@@ -1,3 +1,9 @@
+2010-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11535
+	* gas/i386/intelok.s: Add tests for "call|jmp [xtrn]".
+	* gas/i386/intelok.d: Updated.
+
 2010-04-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/tic6x/insns-c674x.s, gas/tic6x/insns-c674x.d: Also test

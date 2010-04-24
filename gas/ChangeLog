@@ -1,3 +1,10 @@
+2010-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11535
+	* config/tc-i386-intel.c (intel_state): Add is_indirect.
+	(i386_intel_operand): Initialize intel_state.is_indirect.  Check
+	intel_state.is_indirect for "call|jmp [symbol]".
+
 2010-04-22  Nick Clifton  <nickc@redhat.com>
 
 	* po/gas.pot: Updated by the Translation project.
