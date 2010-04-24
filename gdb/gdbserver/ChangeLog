@@ -1,3 +1,7 @@
+2010-04-23  Doug Evans  <dje@google.com>
+
+	* server.c (start_inferior): Print inferior argv if --debug.
+
 2010-04-21  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* Makefile.in (nto_low_h nto-low.o nto-x86-low.o): New dependency lists.

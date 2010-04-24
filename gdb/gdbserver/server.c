@@ -241,6 +241,14 @@ start_inferior (char **argv)
       new_argv[count] = NULL;
     }
 
+  if (debug_threads)
+    {
+      int i;
+      for (i = 0; new_argv[i]; ++i)
+	fprintf (stderr, "new_argv[%d] = \"%s\"\n", i, new_argv[i]);
+      fflush (stderr);
+    }
+
 #ifdef SIGTTOU
   signal (SIGTTOU, SIG_DFL);
   signal (SIGTTIN, SIG_DFL);
