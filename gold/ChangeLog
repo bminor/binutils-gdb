@@ -1,3 +1,8 @@
+2010-04-24  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::layout_reloc): In relocatable link don't
+	combine reloc sections for grouped sections.
+
 2010-04-23  Sriraman Tallam  <tmsriram@google.com>
 
 	* gc.h (gc_process_relocs): Pass information on relocs pointing to

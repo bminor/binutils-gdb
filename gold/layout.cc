@@ -699,11 +699,20 @@ Layout::layout_reloc(Sized_relobj<size, big_endian>* object,
     gold_unreachable();
   name += data_section->name();
 
-  Output_section* os = this->choose_output_section(object, name.c_str(),
-						   sh_type,
-						   shdr.get_sh_flags(),
-						   false, false, false,
-						   false, false, false);
+  // In a relocatable link relocs for a grouped section must not be
+  // combined with other reloc sections.
+  Output_section* os;
+  if (!parameters->options().relocatable()
+      || (data_section->flags() & elfcpp::SHF_GROUP) == 0)
+    os = this->choose_output_section(object, name.c_str(), sh_type,
+				     shdr.get_sh_flags(), false, false,
+				     false, false, false, false);
+  else
+    {
+      const char* n = this->namepool_.add(name.c_str(), true, NULL);
+      os = this->make_output_section(n, sh_type, shdr.get_sh_flags(),
+				     false, false, false, false, false);
+    }
 
   os->set_should_link_to_symtab();
   os->set_info_section(data_section);
