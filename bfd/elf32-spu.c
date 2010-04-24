@@ -272,7 +272,8 @@ spu_elf_object_p (bfd *abfd)
 	      {
 		Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[j];
 
-		if (ELF_IS_SECTION_IN_SEGMENT_MEMORY (shdr, phdr))
+		if (ELF_SECTION_SIZE (shdr, phdr) != 0
+		    && ELF_SECTION_IN_SEGMENT (shdr, phdr))
 		  {
 		    asection *sec = shdr->bfd_section;
 		    spu_elf_section_data (sec)->u.o.ovl_index = num_ovl;

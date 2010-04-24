@@ -978,7 +978,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	{
 	  if (phdr->p_type == PT_LOAD
-	      && ELF_IS_SECTION_IN_SEGMENT (hdr, phdr))
+	      && ELF_SECTION_IN_SEGMENT (hdr, phdr))
 	    {
 	      if ((flags & SEC_LOAD) == 0)
 		newsect->lma = (phdr->p_paddr
@@ -4552,22 +4552,38 @@ assign_file_positions_for_load_sections (bfd *abfd,
       /* Check that all sections are in a PT_LOAD segment.
 	 Don't check funky gdb generated core files.  */
       if (p->p_type == PT_LOAD && bfd_get_format (abfd) != bfd_core)
-	for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
-	  {
-	    Elf_Internal_Shdr *this_hdr;
-	    asection *sec;
+	{
+	  bfd_boolean check_vma = TRUE;
 
-	    sec = *secpp;
-	    this_hdr = &(elf_section_data(sec)->this_hdr);
-	    if (this_hdr->sh_size != 0
-		&& !ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, p))
+	  for (i = 1; i < m->count; i++)
+	    if (m->sections[i]->vma == m->sections[i - 1]->vma
+		&& ELF_SECTION_SIZE (&(elf_section_data (m->sections[i])
+				       ->this_hdr), p) != 0
+		&& ELF_SECTION_SIZE (&(elf_section_data (m->sections[i - 1])
+				       ->this_hdr), p) != 0)
 	      {
-		(*_bfd_error_handler)
-		  (_("%B: section `%A' can't be allocated in segment %d"),
-		   abfd, sec, j);
-		print_segment_map (m);
+		/* Looks like we have overlays packed into the segment.  */
+		check_vma = FALSE;
+		break;
 	      }
-	  }
+
+	  for (i = 0; i < m->count; i++)
+	    {
+	      Elf_Internal_Shdr *this_hdr;
+	      asection *sec;
+
+	      sec = m->sections[i];
+	      this_hdr = &(elf_section_data(sec)->this_hdr);
+	      if (this_hdr->sh_size != 0
+		  && !ELF_SECTION_IN_SEGMENT_1 (this_hdr, p, check_vma))
+		{
+		  (*_bfd_error_handler)
+		    (_("%B: section `%A' can't be allocated in segment %d"),
+		     abfd, sec, j);
+		  print_segment_map (m);
+		}
+	    }
+	}
     }
 
   elf_tdata (abfd)->next_file_pos = off;
@@ -5837,7 +5853,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	   section = section->next)
 	{
 	  this_hdr = &(elf_section_data(section)->this_hdr);
-	  if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
+	  if (this_hdr->sh_size != 0
+	      && ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 	    {
 	      if (!first_section)
 		first_section = lowest_section = section;
@@ -5916,7 +5933,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	       section = section->next)
 	    {
 	      this_hdr = &(elf_section_data(section)->this_hdr);
-	      if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
+	      if (this_hdr->sh_size != 0
+		  && ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 		{
 		  map->sections[isec++] = section->output_section;
 		  if (isec == section_count)
@@ -5993,7 +6011,8 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 	      /* Check if this section is covered by the segment.  */
 	      this_hdr = &(elf_section_data(section)->this_hdr);
-	      if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
+	      if (this_hdr->sh_size != 0
+		  && ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 		{
 		  /* FIXME: Check if its output section is changed or
 		     removed.  What else do we need to check?  */

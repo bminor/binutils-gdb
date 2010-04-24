@@ -1,3 +1,8 @@
+2010-04-23  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_program_headers): Replace use of
+	ELF_IS_SECTION_IN_SEGMENT_MEMORY with ELF_SECTION_IN_SEGMENT.
+
 2010-04-22  Nick Clifton  <nickc@redhat.com>
 
 	* po/binutils.pot: Updated by the Translation project.
