@@ -1,3 +1,9 @@
+2010-04-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Commands to specify files): Describe what how GDB
+	looks up DOS-based filesystem paths on the system root.  Document
+	the new `set/show target-file-system-kind' commands.
+
 2010-04-23  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Python): Move Auto-loading section here ...

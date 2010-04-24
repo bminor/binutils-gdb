@@ -2947,6 +2947,8 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      set_gdbarch_sdb_reg_to_regnum.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
   set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
+
+  set_gdbarch_has_dos_based_file_system (gdbarch, 1);
 }
 
 

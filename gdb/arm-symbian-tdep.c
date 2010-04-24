@@ -78,6 +78,10 @@ arm_symbian_init_abi (struct gdbarch_info info,
      corresponding ELF files on the host's filesystem.  */
   set_gdbarch_solib_symbols_extension (gdbarch, "sym");
 
+  /* Canonical paths on this target look like `c:\sys\bin\bar.dll',
+     for example.  */
+  set_gdbarch_has_dos_based_file_system (gdbarch, 1);
+
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }
 

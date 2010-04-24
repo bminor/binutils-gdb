@@ -1,3 +1,22 @@
+2010-04-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* defs.h: Adjust comment.
+	* filesystem.h, filesystem.c: New files.
+	* Makefile.in (SFILES): Add filesystem.c.
+	(COMMON_OBS): Add filesystem.o.
+	* solib.c (solib_find): Handle DOS-based filesystems.  Handle
+	different target and host path flavours.
+	* arm-symbian-tdep.c (arm_symbian_init_abi): Set
+	has_dos_based_file_system on the gdbarch.
+	* arm-wince-tdep.c (arm_wince_init_abi): Ditto.
+	* i386-cygwin-tdep.c (i386_cygwin_init_abi): Ditto.
+	* i386-tdep.c (i386_go32_init_abi): Ditto.
+	* gdbarch.sh (has_dos_based_file_system): New.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* NEWS: Mention improved support for remote targets with DOS-based
+	filesystems.  Mention new `set/show target-file-system-kind'
+	commands.
+
 2010-04-23  Stan Shebs  <stan@codesourcery.com>
 
 	* ax.h (struct agent_expr): Merge in agent_reqs fields, add some

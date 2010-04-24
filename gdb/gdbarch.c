@@ -264,6 +264,7 @@ struct gdbarch
   gdbarch_auto_charset_ftype *auto_charset;
   gdbarch_auto_wide_charset_ftype *auto_wide_charset;
   const char * solib_symbols_extension;
+  int has_dos_based_file_system;
 };
 
 
@@ -411,6 +412,7 @@ struct gdbarch startup_gdbarch =
   default_auto_charset,  /* auto_charset */
   default_auto_wide_charset,  /* auto_wide_charset */
   0,  /* solib_symbols_extension */
+  0,  /* has_dos_based_file_system */
   /* startup_gdbarch() */
 };
 
@@ -682,6 +684,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of qsupported, invalid_p == 0 */
   /* Skip verify of auto_charset, invalid_p == 0 */
   /* Skip verify of auto_wide_charset, invalid_p == 0 */
+  /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -926,6 +929,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_syscall_number = <%s>\n",
                       host_address_to_string (gdbarch->get_syscall_number));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: has_dos_based_file_system = %s\n",
+                      plongest (gdbarch->has_dos_based_file_system));
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_global_breakpoints = %s\n",
                       plongest (gdbarch->has_global_breakpoints));
@@ -3674,6 +3680,23 @@ set_gdbarch_solib_symbols_extension (struct gdbarch *gdbarch,
                                      const char * solib_symbols_extension)
 {
   gdbarch->solib_symbols_extension = solib_symbols_extension;
+}
+
+int
+gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_has_dos_based_file_system called\n");
+  return gdbarch->has_dos_based_file_system;
+}
+
+void
+set_gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch,
+                                       int has_dos_based_file_system)
+{
+  gdbarch->has_dos_based_file_system = has_dos_based_file_system;
 }
 
 

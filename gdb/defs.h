@@ -1155,9 +1155,9 @@ extern int (*deprecated_ui_load_progress_hook) (const char *section,
 
 extern int use_windows;
 
-/* Symbolic definitions of filename-related things.  */
-/* FIXME, this doesn't work very well if host and executable
-   filesystems conventions are different.  */
+/* Definitions of filename-related things.  */
+
+/* Host specific things.  */
 
 #ifdef __MSDOS__
 # define CANT_FORK

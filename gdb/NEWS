@@ -51,7 +51,23 @@ qGetTIBAddr
   its argument, limiting the functions selected by the regex to those
   in the specified file.
 
+* Support for remote debugging Windows and SymbianOS shared libraries
+  from Unix hosts has been improved.  Non Windows GDB builds now can
+  understand target reported file names that follow MS-DOS based file
+  system semantics, such as file names that include drive letters and
+  use the backslash character as directory separator.  This makes it
+  possible to transparently use the "set sysroot" and "set
+  solib-search-path" on Unix hosts to point as host copies of the
+  target's shared libraries.  See the new command "set
+  target-file-system-kind" described below, and the "Commands to
+  specify files" section in the user manual for more information.
+
 * New commands
+
+set target-file-system-kind unix|dos-based|auto
+show target-file-system-kind
+  Set or show the assumed file system kind for target reported file
+  names.
 
 save breakpoints <filename>
   Save all current breakpoint definitions to a file suitable for use

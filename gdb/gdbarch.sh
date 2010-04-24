@@ -782,6 +782,11 @@ f:const char *:auto_wide_charset:void::default_auto_wide_charset:default_auto_wi
 # where the names of the files run on the target differ in extension
 # compared to the names of the files GDB should load for debug info.
 v:const char *:solib_symbols_extension:::::::pstring (gdbarch->solib_symbols_extension)
+
+# If true, the target OS has DOS-based file system semantics.  That
+# is, absolute paths include a drive name, and the backslash is
+# considered a directory separator.
+v:int:has_dos_based_file_system:::0:0::0
 EOF
 }
 

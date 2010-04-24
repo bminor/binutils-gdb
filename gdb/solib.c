@@ -47,6 +47,7 @@
 #include "remote.h"
 #include "solib.h"
 #include "interps.h"
+#include "filesystem.h"
 
 /* Architecture-specific operations.  */
 
@@ -104,6 +105,13 @@ The search path for loading non-absolute shared library symbol files is %s.\n"),
 		    value);
 }
 
+/* Same as HAVE_DOS_BASED_FILE_SYSTEM, but useable as an rvalue.  */
+#if (HAVE_DOS_BASED_FILE_SYSTEM)
+#  define DOS_BASED_FILE_SYSTEM 1
+#else
+#  define DOS_BASED_FILE_SYSTEM 0
+#endif
+
 /*
 
    GLOBAL FUNCTION
@@ -133,7 +141,7 @@ The search path for loading non-absolute shared library symbol files is %s.\n"),
    * If gdb_sysroot is NOT set, perform the following two searches:
    *   Look in inferior's $PATH.
    *   Look in inferior's $LD_LIBRARY_PATH.
-   *   
+   *
    * The last check avoids doing this search when targetting remote
    * machines since gdb_sysroot will almost always be set.
 
@@ -152,6 +160,9 @@ solib_find (char *in_pathname, int *fd)
   int gdb_sysroot_is_empty;
   const char *solib_symbols_extension
     = gdbarch_solib_symbols_extension (target_gdbarch);
+  const char *fskind = effective_target_file_system_kind ();
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  char *sysroot = NULL;
 
   /* If solib_symbols_extension is set, replace the file's
      extension.  */
@@ -177,9 +188,7 @@ solib_find (char *in_pathname, int *fd)
 
   gdb_sysroot_is_empty = (gdb_sysroot == NULL || *gdb_sysroot == 0);
 
-  if (! IS_ABSOLUTE_PATH (in_pathname) || gdb_sysroot_is_empty)
-    temp_pathname = in_pathname;
-  else
+  if (!gdb_sysroot_is_empty)
     {
       int prefix_len = strlen (gdb_sysroot);
 
@@ -188,61 +197,152 @@ solib_find (char *in_pathname, int *fd)
 	     && IS_DIR_SEPARATOR (gdb_sysroot[prefix_len - 1]))
 	prefix_len--;
 
+      sysroot = savestring (gdb_sysroot, prefix_len);
+      make_cleanup (xfree, sysroot);
+    }
+
+  /* If we're on a non-DOS-based system, backslashes won't be
+     understood as directory separator, so, convert them to forward
+     slashes, iff we're supposed to handle DOS-based file system
+     semantics for target paths.  */
+  if (!DOS_BASED_FILE_SYSTEM && fskind == file_system_kind_dos_based)
+    {
+      char *p;
+
+      /* Avoid clobbering our input.  */
+      p = alloca (strlen (in_pathname) + 1);
+      strcpy (p, in_pathname);
+      in_pathname = p;
+
+      for (; *p; p++)
+	{
+	  if (*p == '\\')
+	    *p = '/';
+	}
+    }
+
+  /* Note, we're interested in IS_TARGET_ABSOLUTE_PATH, not
+     IS_ABSOLUTE_PATH.  The latter is for host paths only, while
+     IN_PATHNAME is a target path.  For example, if we're supposed to
+     be handling DOS-like semantics we want to consider a
+     'c:/foo/bar.dll' path as an absolute path, even on a Unix box.
+     With such a path, before giving up on the sysroot, we'll try:
+
+       1st attempt, c:/foo/bar.dll ==> /sysroot/c:/foo/bar.dll
+       2nd attempt, c:/foo/bar.dll ==> /sysroot/c/foo/bar.dll
+       3rd attempt, c:/foo/bar.dll ==> /sysroot/foo/bar.dll
+  */
+
+  if (!IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname) || gdb_sysroot_is_empty)
+    temp_pathname = xstrdup (in_pathname);
+  else
+    {
+      int need_dir_separator;
+
+      need_dir_separator = !IS_DIR_SEPARATOR (in_pathname[0]);
+
       /* Cat the prefixed pathname together.  */
-      temp_pathname = alloca (prefix_len + strlen (in_pathname) + 1);
-      strncpy (temp_pathname, gdb_sysroot, prefix_len);
-      temp_pathname[prefix_len] = '\0';
-      strcat (temp_pathname, in_pathname);
+      temp_pathname = concat (sysroot,
+			      need_dir_separator ? SLASH_STRING : "",
+			      in_pathname, (char *) NULL);
     }
 
   /* Handle remote files.  */
   if (remote_filename_p (temp_pathname))
     {
       *fd = -1;
-      return xstrdup (temp_pathname);
+      return temp_pathname;
     }
 
   /* Now see if we can open it.  */
   found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
+  if (found_file < 0)
+    xfree (temp_pathname);
 
-  /* We try to find the library in various ways.  After each attempt
-     (except for the one above), either found_file >= 0 and
-     temp_pathname is a malloc'd string, or found_file < 0 and
-     temp_pathname does not point to storage that needs to be
-     freed.  */
+  /* If the search in gdb_sysroot failed, and the path name has a
+     drive spec (e.g, c:/foo), try stripping ':' from the drive spec,
+     and retrying in the sysroot:
+       c:/foo/bar.dll ==> /sysroot/c/foo/bar.dll.  */
 
-    if (found_file < 0)
-      temp_pathname = NULL;
-    else
-      temp_pathname = xstrdup (temp_pathname);
+  if (found_file < 0
+      && !gdb_sysroot_is_empty
+      && HAS_TARGET_DRIVE_SPEC (fskind, in_pathname))
+    {
+      int need_dir_separator = !IS_DIR_SEPARATOR (in_pathname[2]);
+      char *drive = savestring (in_pathname, 1);
+
+      temp_pathname = concat (sysroot,
+			      SLASH_STRING,
+			      drive,
+			      need_dir_separator ? SLASH_STRING : "",
+			      in_pathname + 2, (char *) NULL);
+      xfree (drive);
+
+      found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
+      if (found_file < 0)
+	{
+	  char *p;
+
+	  xfree (temp_pathname);
+
+	  /* If the search in gdb_sysroot still failed, try fully
+	     stripping the drive spec, and trying once more in the
+	     sysroot before giving up.
+
+	     c:/foo/bar.dll ==> /sysroot/foo/bar.dll.  */
+
+	  temp_pathname = concat (sysroot,
+				  need_dir_separator ? SLASH_STRING : "",
+				  in_pathname + 2, (char *) NULL);
+
+	  found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
+	  if (found_file < 0)
+	    xfree (temp_pathname);
+	}
+    }
+
+  do_cleanups (old_chain);
+
+  /* We try to find the library in various ways.  After each attempt,
+     either found_file >= 0 and temp_pathname is a malloc'd string, or
+     found_file < 0 and temp_pathname does not point to storage that
+     needs to be freed.  */
+
+  if (found_file < 0)
+    temp_pathname = NULL;
+
+  /* If not found, search the solib_search_path (if any).  */
+  if (found_file < 0 && solib_search_path != NULL)
+    found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
+			in_pathname, O_RDONLY | O_BINARY, &temp_pathname);
 
   /* If the search in gdb_sysroot failed, and the path name is
      absolute at this point, make it relative.  (openp will try and open the
      file according to its absolute path otherwise, which is not what we want.)
      Affects subsequent searches for this solib.  */
-  if (found_file < 0 && IS_ABSOLUTE_PATH (in_pathname))
+  if (found_file < 0 && IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname))
     {
       /* First, get rid of any drive letters etc.  */
-      while (!IS_DIR_SEPARATOR (*in_pathname))
-        in_pathname++;
+      while (!IS_TARGET_DIR_SEPARATOR (fskind, *in_pathname))
+	in_pathname++;
 
       /* Next, get rid of all leading dir separators.  */
-      while (IS_DIR_SEPARATOR (*in_pathname))
-        in_pathname++;
+      while (IS_TARGET_DIR_SEPARATOR (fskind, *in_pathname))
+	in_pathname++;
     }
-  
+
   /* If not found, search the solib_search_path (if any).  */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
 			in_pathname, O_RDONLY | O_BINARY, &temp_pathname);
-  
+
   /* If not found, next search the solib_search_path (if any) for the basename
      only (ignoring the path).  This is to allow reading solibs from a path
      that differs from the opened path.  */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
-                        lbasename (in_pathname), O_RDONLY | O_BINARY,
-                        &temp_pathname);
+			target_lbasename (fskind, in_pathname),
+			O_RDONLY | O_BINARY, &temp_pathname);
 
   /* If not found, try to use target supplied solib search method */
   if (found_file < 0 && ops->find_and_open_solib)
@@ -256,7 +356,7 @@ solib_find (char *in_pathname, int *fd)
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY,
 			&temp_pathname);
 
-  /* If not found, next search the inferior's $LD_LIBRARY_PATH 
+  /* If not found, next search the inferior's $LD_LIBRARY_PATH
      environment variable. */
   if (found_file < 0 && gdb_sysroot_is_empty)
     found_file = openp (get_in_environ (current_inferior ()->environment,

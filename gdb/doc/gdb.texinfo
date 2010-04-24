@@ -14404,6 +14404,59 @@ The part of @var{path} following the initial @file{remote:}
 that happens to be named @file{remote:}, you need to use some equivalent
 variant of the name like @file{./remote:}.}
 
+For targets with an MS-DOS based filesystem, such as MS-Windows and
+SymbianOS, @value{GDBN} tries prefixing a few variants of the target
+absolute file name with @var{path}.  But first, on Unix hosts,
+@value{GDBN} converts all backslash directory separators into forward
+slashes, because the backslash is not a directory separator on Unix:
+
+@smallexample
+  c:\foo\bar.dll @result{} c:/foo/bar.dll
+@end smallexample
+
+Then, @value{GDBN} attempts prefixing the target file name with
+@var{path}, and looks for the resulting file name in the host file
+system:
+
+@smallexample
+  c:/foo/bar.dll @result{} /path/to/sysroot/c:/foo/bar.dll
+@end smallexample
+
+If that does not find the shared library, @value{GDBN} tries removing
+the @samp{:} character from the drive spec, both for convenience, and,
+for the case of the host file system not supporting file names with
+colons:
+
+@smallexample
+  c:/foo/bar.dll @result{} /path/to/sysroot/c/foo/bar.dll
+@end smallexample
+
+This makes it possible to have a system root that mirrors a target
+with more than one drive.  E.g., you may want to setup your local
+copies of the target system shared libraries like so (note @samp{c} vs
+@samp{z}):
+
+@smallexample
+ @file{/path/to/sysroot/c/sys/bin/foo.dll}
+ @file{/path/to/sysroot/c/sys/bin/bar.dll}
+ @file{/path/to/sysroot/z/sys/bin/bar.dll}
+@end smallexample
+
+@noindent
+and point the system root at @file{/path/to/sysroot}, so that
+@value{GDBN} can find the correct copies of both
+@file{c:\sys\bin\foo.dll}, and @file{z:\sys\bin\bar.dll}.
+
+If that still does not find the shared library, @value{GDBN} tries
+removing the whole drive spec from the target file name:
+
+@smallexample
+  c:/foo/bar.dll @result{} /path/to/sysroot/foo/bar.dll
+@end smallexample
+
+This last lookup makes it possible to not care about the drive name,
+if you don't want or need to.
+
 The @code{set solib-absolute-prefix} command is an alias for @code{set
 sysroot}.
 
@@ -14435,6 +14488,55 @@ of shared library symbols.
 @kindex show solib-search-path
 @item show solib-search-path
 Display the current shared library search path.
+
+@cindex DOS file-name semantics of file names.
+@kindex set target-file-system-kind (unix|dos-based|auto)
+@kindex show target-file-system-kind
+@item set target-file-system-kind @var{kind}
+Set assumed file system kind for target reported file names.
+
+Shared library file names as reported by the target system may not
+make sense as is on the system @value{GDBN} is running on.  For
+example, when remote debugging a target that has MS-DOS based file
+system semantics, from a Unix host, the target may be reporting to
+@value{GDBN} a list of loaded shared libraries with file names such as
+@file{c:\Windows\kernel32.dll}.  On Unix hosts, there's no concept of
+drive letters, so the @samp{c:\} prefix is not normally understood as
+indicating an absolute file name, and neither is the backslash
+normally considered a directory separator character.  In that case,
+the native file system would interpret this whole absolute file name
+as a relative file name with no directory components.  This would make
+it impossible to point @value{GDBN} at a copy of the remote target's
+shared libraries on the host using @code{set sysroot}, and impractical
+with @code{set solib-search-path}.  Setting
+@code{target-file-system-kind} to @code{dos-based} tells @value{GDBN}
+to interpret such file names similarly to how the target would, and to
+map them to file names valid on @value{GDBN}'s native file system
+semantics.  The value of @var{kind} can be @code{"auto"}, in addition
+to one of the supported file system kinds.  In that case, @value{GDBN}
+tries to determine the appropriate file system variant based on the
+current target's operating system (@pxref{ABI, ,Configuring the
+Current ABI}).  The supported file system settings are:
+
+@table @code
+@item unix
+Instruct @value{GDBN} to assume the target file system is of Unix
+kind.  Only file names starting the forward slash (@samp{/}) character
+are considered absolute, and the directory separator character is also
+the forward slash.
+
+@item dos-based
+Instruct @value{GDBN} to assume the target file system is DOS based.
+File names starting with either a forward slash, or a drive letter
+followed by a colon (e.g., @samp{c:}), are considered absolute, and
+both the slash (@samp{/}) and the backslash (@samp{\\}) characters are
+considered directory separators.
+
+@item auto
+Instruct @value{GDBN} to use the file system kind associated with the
+target operating system (@pxref{ABI, ,Configuring the Current ABI}).
+This is the default.
+@end table
 @end table
 
 

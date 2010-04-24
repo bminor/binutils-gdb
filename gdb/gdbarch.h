@@ -950,6 +950,13 @@ extern void set_gdbarch_auto_wide_charset (struct gdbarch *gdbarch, gdbarch_auto
 extern const char * gdbarch_solib_symbols_extension (struct gdbarch *gdbarch);
 extern void set_gdbarch_solib_symbols_extension (struct gdbarch *gdbarch, const char * solib_symbols_extension);
 
+/* If true the target OS has DOS-based file system semantics.  That is,
+   absolute paths include a drive name, and the backslash is considered
+   a path separator. */
+
+extern int gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch);
+extern void set_gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch, int has_dos_based_file_system);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

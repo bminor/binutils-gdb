@@ -235,6 +235,10 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, windows_core_xfer_shared_libraries);
 
   set_gdbarch_auto_wide_charset (gdbarch, i386_cygwin_auto_wide_charset);
+
+  /* Canonical paths on this target look like
+     `c:\Program Files\Foo App\mydll.dll', for example.  */
+  set_gdbarch_has_dos_based_file_system (gdbarch, 1);
 }
 
 static enum gdb_osabi
