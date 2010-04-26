@@ -379,7 +379,8 @@ write_qxfer_response (char *buf, const void *data, int len, int is_more)
 }
 
 /* Handle all of the extended 'Q' packets.  */
-void
+
+static void
 handle_general_set (char *own_buf)
 {
   if (strncmp ("QPassSignals:", own_buf, strlen ("QPassSignals:")) == 0)
