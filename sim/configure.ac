@@ -36,119 +36,19 @@ yes | no) ;;
 *)	AC_MSG_ERROR(bad value ${enableval} given for --enable-sim option) ;;
 esac])
 
-# WHEN ADDING ENTRIES TO THIS MATRIX:
-
-# Make sure that the left side always has two dashes.  Otherwise you
-# can get spurious matches.  Even for unambiguous cases, do this as a
-# convention, else the table becomes a real mess to understand and
-# maintain.
-
+m4_define([SIM_ARCH], [
+  sim_arch=$1
+  AC_CONFIG_SUBDIRS($1)
+])
 if test "${enable_sim}" != no; then
-   testsuite=no
-   common=yes
-   igen=no
-   case "${target}" in
-       arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
-           AC_CONFIG_SUBDIRS(arm)
-	   testsuite=yes
-	   ;;
-       avr*-*-*)
-           AC_CONFIG_SUBDIRS(avr)
-	   ;;
-       cr16*-*-*)
-	   AC_CONFIG_SUBDIRS(cr16)
-	   testsuite=yes
-	   ;;
-       cris-*-* | crisv32-*-*)
-	   AC_CONFIG_SUBDIRS(cris)
-	   testsuite=yes
-	   ;;
-       d10v-*-*)
-           AC_CONFIG_SUBDIRS(d10v)
-	   ;;
-       frv-*-*)
-           AC_CONFIG_SUBDIRS(frv)
-	   testsuite=yes
-	   ;;
-       h8300*-*-*)
-           AC_CONFIG_SUBDIRS(h8300)
-	   testsuite=yes
-	   ;;
-       iq2000-*-*)
-           AC_CONFIG_SUBDIRS(iq2000)
-	   testsuite=yes
-	   ;;
-       lm32-*-*)
-           AC_CONFIG_SUBDIRS(lm32)
-	   testsuite=yes
-           ;;
-       m32c-*-*)
-           AC_CONFIG_SUBDIRS(m32c)
-           ;;
-       m32r-*-*)
-           AC_CONFIG_SUBDIRS(m32r)
-	   testsuite=yes
-	   ;;
-       m68hc11-*-*|m6811-*-*)
-           AC_CONFIG_SUBDIRS(m68hc11)
-	   testsuite=yes
-	   ;;
-       mcore-*-*)
-           AC_CONFIG_SUBDIRS(mcore)
-	   testsuite=yes
-	   ;;
-       microblaze-*-*)
-           AC_CONFIG_SUBDIRS(microblaze)
-	   testsuite=yes
-	   ;;
-       mips*-*-*)
-           AC_CONFIG_SUBDIRS(mips)
-	   testsuite=yes
-	   igen=yes
-	   ;;
-       mn10300*-*-*)
-           AC_CONFIG_SUBDIRS(mn10300)
-	   igen=yes
-	   ;;
-       moxie-*-*)
-	   AC_CONFIG_SUBDIRS(moxie)
-	   testsuite=yes
-	   ;;
-       rx-*-*)
-           AC_CONFIG_SUBDIRS(rx)
-	   ;;
-       sh64*-*-*)
-           AC_CONFIG_SUBDIRS(sh64)
-	   testsuite=yes
-	   ;;
-       sh*-*-*)
-           AC_CONFIG_SUBDIRS(sh)
-	   testsuite=yes
-	   ;;
-       sparc-*-rtems*|sparc-*-elf*)
-	   AC_CONFIG_SUBDIRS(erc32)
-	   testsuite=yes
-	   ;;
-       powerpc*-*-* )
-           AC_CONFIG_SUBDIRS(ppc)
-	   ;;
-       v850*-*-* )
-           AC_CONFIG_SUBDIRS(v850)
-	   igen=yes
-	   testsuite=yes
-	   ;;
-       *)
-	   # No simulator subdir, so the subdir "common" isn't needed.
-	   common=no
-	   ;;
-   esac
-   if test "$testsuite" = yes; then
+   sinclude(configure.tgt)
+   if test "$sim_testsuite" = yes; then
       AC_CONFIG_SUBDIRS(testsuite)
    fi
-   if test "$common" = yes; then
+   if test "$sim_common" = yes; then
       AC_CONFIG_SUBDIRS(common)
    fi
-   if test "$igen" = yes; then
+   if test "$sim_igen" = yes; then
       AC_CONFIG_SUBDIRS(igen)
    fi
 fi

@@ -88,6 +88,15 @@ proc sim_run { prog sim_opts prog_opts redir options } {
     verbose "testcase timeout is set to $testcase_timeout" 1
 
     set sim [board_info target sim]
+    if [string equal "" $sim] {
+	# Special case the simulator.  These tests are designed to
+	# be run inside of the simulator, not on the native host.
+	# So if the sim target isn't set, default to the target run.
+	# These global variables come from generated site.exp.
+	global objdir
+	global arch
+	set sim "$objdir/../$arch/run"
+    }
 
     if [is_remote host] {
 	set prog [remote_download host $prog]

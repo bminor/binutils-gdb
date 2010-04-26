@@ -554,6 +554,7 @@ ac_unique_file="Makefile.in"
 enable_option_checking=no
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+sim_arch
 subdirs
 CFLAGS_FOR_BUILD
 CC_FOR_BUILD
@@ -3604,6 +3605,9 @@ esac
 fi
 
 
+
+if test "${enable_sim}" != no; then
+
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 
 # Make sure that the left side always has two dashes.  Otherwise you
@@ -3611,139 +3615,212 @@ fi
 # convention, else the table becomes a real mess to understand and
 # maintain.
 
-if test "${enable_sim}" != no; then
-   testsuite=no
-   common=yes
-   igen=no
-   case "${target}" in
-       arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
+
+
+sim_testsuite=no
+sim_common=yes
+sim_igen=no
+sim_arch=
+case "${target}" in
+   arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
+
+  sim_arch=arm
 
 
 subdirs="$subdirs arm"
 
-	   testsuite=yes
-	   ;;
-       avr*-*-*)
-           subdirs="$subdirs avr"
 
-	   ;;
-       cr16*-*-*)
-	   subdirs="$subdirs cr16"
+       sim_testsuite=yes
+       ;;
+   avr*-*-*)
 
-	   testsuite=yes
-	   ;;
-       cris-*-* | crisv32-*-*)
-	   subdirs="$subdirs cris"
+  sim_arch=avr
+  subdirs="$subdirs avr"
 
-	   testsuite=yes
-	   ;;
-       d10v-*-*)
-           subdirs="$subdirs d10v"
 
-	   ;;
-       frv-*-*)
-           subdirs="$subdirs frv"
+       ;;
+   cr16*-*-*)
 
-	   testsuite=yes
-	   ;;
-       h8300*-*-*)
-           subdirs="$subdirs h8300"
+  sim_arch=cr16
+  subdirs="$subdirs cr16"
 
-	   testsuite=yes
-	   ;;
-       iq2000-*-*)
-           subdirs="$subdirs iq2000"
 
-	   testsuite=yes
-	   ;;
-       lm32-*-*)
-           subdirs="$subdirs lm32"
+       sim_testsuite=yes
+       ;;
+   cris-*-* | crisv32-*-*)
 
-	   testsuite=yes
-           ;;
-       m32c-*-*)
-           subdirs="$subdirs m32c"
+  sim_arch=cris
+  subdirs="$subdirs cris"
 
-           ;;
-       m32r-*-*)
-           subdirs="$subdirs m32r"
 
-	   testsuite=yes
-	   ;;
-       m68hc11-*-*|m6811-*-*)
-           subdirs="$subdirs m68hc11"
+       sim_testsuite=yes
+       ;;
+   d10v-*-*)
 
-	   testsuite=yes
-	   ;;
-       mcore-*-*)
-           subdirs="$subdirs mcore"
+  sim_arch=d10v
+  subdirs="$subdirs d10v"
 
-	   testsuite=yes
-	   ;;
-       microblaze-*-*)
-           subdirs="$subdirs microblaze"
 
-	   testsuite=yes
-	   ;;
-       mips*-*-*)
-           subdirs="$subdirs mips"
+       ;;
+   frv-*-*)
 
-	   testsuite=yes
-	   igen=yes
-	   ;;
-       mn10300*-*-*)
-           subdirs="$subdirs mn10300"
+  sim_arch=frv
+  subdirs="$subdirs frv"
 
-	   igen=yes
-	   ;;
-       moxie-*-*)
-	   subdirs="$subdirs moxie"
 
-	   testsuite=yes
-	   ;;
-       rx-*-*)
-           subdirs="$subdirs rx"
+       sim_testsuite=yes
+       ;;
+   h8300*-*-*)
 
-	   ;;
-       sh64*-*-*)
-           subdirs="$subdirs sh64"
+  sim_arch=h8300
+  subdirs="$subdirs h8300"
 
-	   testsuite=yes
-	   ;;
-       sh*-*-*)
-           subdirs="$subdirs sh"
 
-	   testsuite=yes
-	   ;;
-       sparc-*-rtems*|sparc-*-elf*)
-	   subdirs="$subdirs erc32"
+       sim_testsuite=yes
+       ;;
+   iq2000-*-*)
 
-	   testsuite=yes
-	   ;;
-       powerpc*-*-* )
-           subdirs="$subdirs ppc"
+  sim_arch=iq2000
+  subdirs="$subdirs iq2000"
 
-	   ;;
-       v850*-*-* )
-           subdirs="$subdirs v850"
 
-	   igen=yes
-	   testsuite=yes
-	   ;;
-       *)
-	   # No simulator subdir, so the subdir "common" isn't needed.
-	   common=no
-	   ;;
-   esac
-   if test "$testsuite" = yes; then
+       sim_testsuite=yes
+       ;;
+   lm32-*-*)
+
+  sim_arch=lm32
+  subdirs="$subdirs lm32"
+
+
+       sim_testsuite=yes
+       ;;
+   m32c-*-*)
+
+  sim_arch=m32c
+  subdirs="$subdirs m32c"
+
+
+       ;;
+   m32r-*-*)
+
+  sim_arch=m32r
+  subdirs="$subdirs m32r"
+
+
+       sim_testsuite=yes
+       ;;
+   m68hc11-*-*|m6811-*-*)
+
+  sim_arch=m68hc11
+  subdirs="$subdirs m68hc11"
+
+
+       sim_testsuite=yes
+       ;;
+   mcore-*-*)
+
+  sim_arch=mcore
+  subdirs="$subdirs mcore"
+
+
+       sim_testsuite=yes
+       ;;
+   microblaze-*-*)
+
+  sim_arch=microblaze
+  subdirs="$subdirs microblaze"
+
+
+       sim_testsuite=yes
+       ;;
+   mips*-*-*)
+
+  sim_arch=mips
+  subdirs="$subdirs mips"
+
+
+       sim_testsuite=yes
+       sim_igen=yes
+       ;;
+   mn10300*-*-*)
+
+  sim_arch=mn10300
+  subdirs="$subdirs mn10300"
+
+
+       sim_igen=yes
+       ;;
+   moxie-*-*)
+
+  sim_arch=moxie
+  subdirs="$subdirs moxie"
+
+
+       sim_testsuite=yes
+       ;;
+   rx-*-*)
+
+  sim_arch=rx
+  subdirs="$subdirs rx"
+
+
+       ;;
+   sh64*-*-*)
+
+  sim_arch=sh64
+  subdirs="$subdirs sh64"
+
+
+       sim_testsuite=yes
+       ;;
+   sh*-*-*)
+
+  sim_arch=sh
+  subdirs="$subdirs sh"
+
+
+       sim_testsuite=yes
+       ;;
+   sparc-*-rtems*|sparc-*-elf*)
+
+  sim_arch=erc32
+  subdirs="$subdirs erc32"
+
+
+       sim_testsuite=yes
+       ;;
+   powerpc*-*-*)
+
+  sim_arch=ppc
+  subdirs="$subdirs ppc"
+
+
+       ;;
+   v850*-*-*)
+
+  sim_arch=v850
+  subdirs="$subdirs v850"
+
+
+       sim_igen=yes
+       sim_testsuite=yes
+       ;;
+   *)
+       # No simulator subdir, so the subdir "common" isn't needed.
+       sim_common=no
+       ;;
+esac
+
+
+   if test "$sim_testsuite" = yes; then
       subdirs="$subdirs testsuite"
 
    fi
-   if test "$common" = yes; then
+   if test "$sim_common" = yes; then
       subdirs="$subdirs common"
 
    fi
-   if test "$igen" = yes; then
+   if test "$sim_igen" = yes; then
       subdirs="$subdirs igen"
 
    fi

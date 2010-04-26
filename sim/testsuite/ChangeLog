@@ -1,3 +1,10 @@
+2010-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (arch): Set to @sim_arch@.
+	* configure.ac: Delete arch logic and include ../configure.tgt.
+	* configure: Regenerated.
+	* lib/sim-defs.exp (sim_run): Default sim to ../arch/run.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

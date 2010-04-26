@@ -32,9 +32,8 @@ proc run_hilo_test {testfile models nops} {
 }
 
 
-# Only test mips*-*-elf (e.g., no mips*-*-linux), and only test if the target
-# board really is a simulator (sim tests don't work on real HW).
-if {[istarget mips*-*-elf] && [board_info target exists is_simulator]} {
+# Only test mips*-*-elf (e.g., no mips*-*-linux)
+if {[istarget mips*-*-elf]} {
 
     set dspmodels ""
     set mdmxmodels ""

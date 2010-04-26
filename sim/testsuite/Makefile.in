@@ -30,7 +30,7 @@ target_canonical = @target@
 target_alias = @target_alias@
 program_transform_name = @program_transform_name@
 
-arch = @arch@
+arch = @sim_arch@
 
 SHELL = /bin/sh
 SUBDIRS = @subdirs@

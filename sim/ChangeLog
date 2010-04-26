@@ -1,3 +1,9 @@
+2010-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Target logic moved out to and included from ...
+	* configure.tgt: ... this new file.
+	* configure: Regenerated.
+
 2010-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* README-HACKING: Add more sections.

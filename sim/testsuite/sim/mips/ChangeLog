@@ -1,3 +1,7 @@
+2010-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* basic.exp: Delete sim target check.
+
 2007-08-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* testutils.inc: Change license to GPL version 3.
