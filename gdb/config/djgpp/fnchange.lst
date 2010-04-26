@@ -136,7 +136,6 @@
 @V@/gdb/config/i386/nm-linux64.h @V@/gdb/config/i386/nm-lx64.h
 @V@/gdb/config/i386/nm-i386sco4.h @V@/gdb/config/i386/nm-sco4.h
 @V@/gdb/config/i386/nm-i386sco5.h @V@/gdb/config/i386/nm-sco5.h
-@V@/gdb/config/i386/nm-i386sol2.h @V@/gdb/config/i386/nm-sol2.h
 @V@/gdb/config/i386/nm-i386v4.h @V@/gdb/config/i386/nm-v4.h
 @V@/gdb/config/i386/nm-i386v42mp.h @V@/gdb/config/i386/nm-v42mp.h
 @V@/gdb/config/i386/tm-i386sol2.h @V@/gdb/config/i386/tm-sol2.h

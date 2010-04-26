@@ -1,5 +1,14 @@
 2010-04-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	Removal of config/i386/nm-i386sol2.h native configuration file.
+	* config/i386/nm-i386sol2.h: Remove file.
+	* config/i386/i386sol2.mh: Remove NAT_FILE definition.
+	* config/i386/sol2-64.mh: Idem.
+	* config/djgpp/fnchange.lst: Idem.
+	* Makefile.in (HFILES_NO_SRCDIR): Remove reference to that file.
+
+2010-04-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	PR breakpoints/11531.
 	* config/i386/nm-i386sol2.h (CANNOT_STEP_HW_WATCHPOINTS): Remove
 	macro definition and related comment.
