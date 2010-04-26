@@ -4,8 +4,8 @@
 	* config/i386/nm-i386sol2.h: Remove file.
 	* config/i386/i386sol2.mh: Remove NAT_FILE definition.
 	* config/i386/sol2-64.mh: Idem.
-	* config/djgpp/fnchange.lst: Idem.
-	* Makefile.in (HFILES_NO_SRCDIR): Remove reference to that file.
+	* config/djgpp/fnchange.lst: Remove reference to that file.
+	* Makefile.in (HFILES_NO_SRCDIR): Idem.
 
 2010-04-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
