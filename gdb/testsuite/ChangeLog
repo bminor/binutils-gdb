@@ -1,3 +1,8 @@
+2010-04-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/completion.exp: Add tests for completion and deprecated
+	commands.
+
 2010-04-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.pascal/gdb11492.exp (print integer_array, print /d char_array)

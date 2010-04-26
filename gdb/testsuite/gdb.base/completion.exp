@@ -847,6 +847,12 @@ gdb_expect  {
         eof             { fail "(eof) Completing non-existing component #2" }
         }
 
+# If there is a non-deprecated completion, it should be returned.
+gdb_test "complete sav" "save" "test non-deprecated completion"
+# If there is only a deprecated completion, then it should be returned.
+gdb_test "complete save-t" "save-tracepoints" "test deprecated completion"
+
+
 # Restore globals modified in this test...
 set timeout $oldtimeout1
 

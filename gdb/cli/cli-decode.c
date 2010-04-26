@@ -1597,43 +1597,65 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
   int sizeof_matchlist;
   int matches;
   int textlen = strlen (text);
+  int pass;
+  int saw_deprecated_match = 0;
 
   sizeof_matchlist = 10;
   matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
   matches = 0;
 
-  for (ptr = list; ptr; ptr = ptr->next)
-    if (!strncmp (ptr->name, text, textlen)
-	&& !ptr->abbrev_flag
-	&& (ptr->func
-	    || ptr->prefixlist))
-      {
-	if (matches == sizeof_matchlist)
+  /* We do one or two passes.  In the first pass, we skip deprecated
+     commands.  If we see no matching commands in the first pass, and
+     if we did happen to see a matching deprecated command, we do
+     another loop to collect those.  */
+  for (pass = 0; matches == 0 && pass < 2; ++pass)
+    {
+      for (ptr = list; ptr; ptr = ptr->next)
+	if (!strncmp (ptr->name, text, textlen)
+	    && !ptr->abbrev_flag
+	    && (ptr->func
+		|| ptr->prefixlist))
 	  {
-	    sizeof_matchlist *= 2;
-	    matchlist = (char **) xrealloc ((char *) matchlist,
-					    (sizeof_matchlist
-					     * sizeof (char *)));
-	  }
+	    if (pass == 0)
+	      {
+		if ((ptr->flags & CMD_DEPRECATED) != 0)
+		  {
+		    saw_deprecated_match = 1;
+		    continue;
+		  }
+	      }
 
-	matchlist[matches] = (char *)
-	  xmalloc (strlen (word) + strlen (ptr->name) + 1);
-	if (word == text)
-	  strcpy (matchlist[matches], ptr->name);
-	else if (word > text)
-	  {
-	    /* Return some portion of ptr->name.  */
-	    strcpy (matchlist[matches], ptr->name + (word - text));
+	    if (matches == sizeof_matchlist)
+	      {
+		sizeof_matchlist *= 2;
+		matchlist = (char **) xrealloc ((char *) matchlist,
+						(sizeof_matchlist
+						 * sizeof (char *)));
+	      }
+
+	    matchlist[matches] = (char *)
+	      xmalloc (strlen (word) + strlen (ptr->name) + 1);
+	    if (word == text)
+	      strcpy (matchlist[matches], ptr->name);
+	    else if (word > text)
+	      {
+		/* Return some portion of ptr->name.  */
+		strcpy (matchlist[matches], ptr->name + (word - text));
+	      }
+	    else
+	      {
+		/* Return some of text plus ptr->name.  */
+		strncpy (matchlist[matches], word, text - word);
+		matchlist[matches][text - word] = '\0';
+		strcat (matchlist[matches], ptr->name);
+	      }
+	    ++matches;
 	  }
-	else
-	  {
-	    /* Return some of text plus ptr->name.  */
-	    strncpy (matchlist[matches], word, text - word);
-	    matchlist[matches][text - word] = '\0';
-	    strcat (matchlist[matches], ptr->name);
-	  }
-	++matches;
-      }
+      /* If we saw no matching deprecated commands in the first pass,
+	 just bail out.  */
+      if (!saw_deprecated_match)
+	break;
+    }
 
   if (matches == 0)
     {

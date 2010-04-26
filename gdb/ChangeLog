@@ -1,3 +1,8 @@
+2010-04-26  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (complete_on_cmdlist): Make two passes over the
+	command list.
+
 2010-04-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Removal of config/i386/nm-i386sol2.h native configuration file.
