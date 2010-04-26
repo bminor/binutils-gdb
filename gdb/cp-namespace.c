@@ -264,12 +264,12 @@ cp_lookup_symbol_in_namespace (const char *namespace,
   else
     {
       char *concatenated_name = alloca (strlen (namespace) + 2 +
-                                        strlen (name+ 1));
+                                        strlen (name) + 1);
       strcpy (concatenated_name, namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
       return lookup_symbol_file (concatenated_name, block,
-				 domain,cp_is_anonymous (namespace));
+				 domain, cp_is_anonymous (namespace));
     }
 }
 

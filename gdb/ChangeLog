@@ -1,3 +1,8 @@
+2010-04-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cp-namespace.c (cp_lookup_symbol_in_namespace): Fix alloca size.
+	Fix whitespace.
+
 2010-04-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* defs.h: Adjust comment.
