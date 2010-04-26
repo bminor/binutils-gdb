@@ -1,3 +1,8 @@
+2010-04-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdbint.texinfo (CANNOT_STEP_HW_WATCHPOINTS): Remove explanation
+	of macro deleted from GDB code.
+
 2010-04-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Commands to specify files): Describe what how GDB

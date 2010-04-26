@@ -19,14 +19,4 @@
 
 #ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints */
 
-/* Solaris x86 2.6 and 2.7 targets have a kernel bug when stepping
-   over an instruction that causes a page fault without triggering
-   a hardware watchpoint. The kernel properly notices that it shouldn't
-   stop, because the hardware watchpoint is not triggered, but it forgets
-   the step request and continues the program normally.
-   Work around the problem by removing hardware watchpoints if a step is
-   requested, GDB will check for a hardware watchpoint trigger after the
-   step anyway.  */
-#define CANNOT_STEP_HW_WATCHPOINTS
-
 #endif /* NEW_PROC_API */

@@ -781,11 +781,6 @@ inferior after a watchpoint has been hit.  This is usually set
 when watchpoints trigger at the instruction following an interesting
 read or write.
 
-@findex CANNOT_STEP_HW_WATCHPOINTS
-@item CANNOT_STEP_HW_WATCHPOINTS
-If this is defined to a non-zero value, @value{GDBN} will remove all
-watchpoints before stepping the inferior.
-
 @findex STOPPED_BY_WATCHPOINT
 @item STOPPED_BY_WATCHPOINT (@var{wait_status})
 Return non-zero if stopped by a watchpoint.  @var{wait_status} is of

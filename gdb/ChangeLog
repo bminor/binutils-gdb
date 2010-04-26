@@ -1,3 +1,11 @@
+2010-04-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	PR breakpoints/11531.
+	* config/i386/nm-i386sol2.h (CANNOT_STEP_HW_WATCHPOINTS): Remove
+	macro definition and related comment.
+	* infrun.c (CANNOT_STEP_HW_WATCHPOINTS): Remove macro.
+	(resume): Remove code and comment related to this macro.
+
 2010-04-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cp-namespace.c (cp_lookup_symbol_in_namespace): Fix alloca size.
