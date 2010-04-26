@@ -1,3 +1,7 @@
+2010-04-26  Doug Evans  <dje@google.com>
+
+	* serial.c (serial_write): Handle serial_debug_p akin to serial_read.
+
 2010-04-26  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-decode.c (complete_on_cmdlist): Make two passes over the
