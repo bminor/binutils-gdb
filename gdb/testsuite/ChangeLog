@@ -1,3 +1,8 @@
+2010-04-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.pascal/gdb11492.exp (print integer_array, print /d char_array)
+	(print /x char_array): Escape curly brackets.
+
 2010-04-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix deadlock on looped list of loaded shared objects.

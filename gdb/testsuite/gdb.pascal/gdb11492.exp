@@ -46,12 +46,12 @@ if { [gdb_start_cmd] < 0 } {
 gdb_test "" ".* at .*${srcfile}.*" "start"
 gdb_test "continue" ""
 
-gdb_test "print integer_array" " = {50, 51, 52, 53, 54, 55, 56, 57}" 
+gdb_test "print integer_array" { = \{50, 51, 52, 53, 54, 55, 56, 57\}}
 gdb_test "print /s integer_array" " = '23456789'" 
 
 gdb_test "print char_array" " = '23456789'" 
-gdb_test "print /d char_array" " = {50, 51, 52, 53, 54, 55, 56, 57}" 
-gdb_test "print /x char_array" " = {0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39}" 
+gdb_test "print /d char_array" { = \{50, 51, 52, 53, 54, 55, 56, 57\}}
+gdb_test "print /x char_array" { = \{0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39\}}
 # Use next two times to avoid GPC line numbering problem
 gdb_test "next" ""
 gdb_test "next" ""
