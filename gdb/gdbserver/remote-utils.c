@@ -80,6 +80,8 @@ typedef int socklen_t;
 # define INVALID_DESCRIPTOR -1
 #endif
 
+static int readchar (void);
+
 /* A cache entry for a successfully looked-up symbol.  */
 struct sym_cache
 {
@@ -691,8 +693,8 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
   int i;
   unsigned char csum = 0;
   char *buf2;
-  char buf3[1];
   char *p;
+  int cc;
 
   buf2 = xmalloc (PBUFSIZ);
 
@@ -718,8 +720,6 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
 
   do
     {
-      int cc;
-
       if (write (remote_desc, buf2, p - buf2) != p - buf2)
 	{
 	  perror ("putpkt(write)");
@@ -746,29 +746,26 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
 	  fprintf (stderr, "putpkt (\"%s\"); [looking for ack]\n", buf2);
 	  fflush (stderr);
 	}
-      cc = read (remote_desc, buf3, 1);
-      if (remote_debug)
-	{
-	  fprintf (stderr, "[received '%c' (0x%x)]\n", buf3[0], buf3[0]);
-	  fflush (stderr);
-	}
 
-      if (cc <= 0)
-	{
-	  if (cc == 0)
-	    fprintf (stderr, "putpkt(read): Got EOF\n");
-	  else
-	    perror ("putpkt(read)");
+      cc = readchar ();
 
+      if (cc < 0)
+	{
 	  free (buf2);
 	  return -1;
 	}
 
+      if (remote_debug)
+	{
+	  fprintf (stderr, "[received '%c' (0x%x)]\n", cc, cc);
+	  fflush (stderr);
+	}
+
       /* Check for an input interrupt while we're here.  */
-      if (buf3[0] == '\003' && current_inferior != NULL)
+      if (cc == '\003' && current_inferior != NULL)
 	(*the_target->request_interrupt) ();
     }
-  while (buf3[0] != '+');
+  while (cc != '+');
 
   free (buf2);
   return 1;			/* Success! */
@@ -798,7 +795,8 @@ putpkt_notif (char *buf)
 
 /* Come here when we get an input interrupt from the remote side.  This
    interrupt should only be active while we are waiting for the child to do
-   something.  About the only thing that should come through is a ^C, which
+   something.  Thus this assumes readchar:bufcnt is 0.
+   About the only thing that should come through is a ^C, which
    will cause us to request child interruption.  */
 
 static void

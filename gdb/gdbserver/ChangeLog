@@ -1,3 +1,9 @@
+2010-04-26  Doug Evans  <dje@google.com>
+
+	* remote-utils.c (putpkt_binary_1): Call readchar instead of read.
+	Print received char after testing for error/eof instead of before.
+	(input_interrupt): Tweak comment.
+
 2010-04-23  Doug Evans  <dje@google.com>
 
 	* server.c (start_inferior): Print inferior argv if --debug.
