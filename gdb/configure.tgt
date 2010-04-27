@@ -15,7 +15,6 @@ case $targ in
  d10v-*-* | \
  hppa*-*-hiux* | \
  i[34567]86-ncr-* | \
- i[34567]86-*-lynxos* | \
  m68*-cisco*-* | \
  m68*-tandem-* | \
  m68*-*-os68k* | \

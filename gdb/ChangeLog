@@ -1,3 +1,8 @@
+2010-04-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.tgt: Treat x86-lynxos targets as x86 bareboard targets
+	in terms of configuration.
+
 2010-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* objfiles.c: Include solist.h.
