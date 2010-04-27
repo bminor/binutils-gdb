@@ -12,7 +12,8 @@
 	* gdbtypes.h (struct main_type): Expand comment about target_type
 	field.
 
-2010-04-27  Joel Brobecker  <brobecker@adacore.com>
+2010-04-27  Pedro Alves  <pedro@codesourcery.com>
+	    Tristan Gingold  <gingold@adacore.com>
 
 	* symfile.c (reread_symbols): Also search for file in libraries.
 	Update comment.
