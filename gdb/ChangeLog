@@ -1,3 +1,9 @@
+2010-04-27  Joel Brobecker  <brobecker@adacore.com>
+
+	ARI warning fix.
+	* python/py-auto-load.c (source_section_scripts): Remove trailing
+	new-line in i18n string.
+
 2010-04-26  Doug Evans  <dje@google.com>
 
 	* serial.c (serial_write): Handle serial_debug_p akin to serial_read.

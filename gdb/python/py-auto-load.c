@@ -260,7 +260,7 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
 	  /* We don't throw an error, the program is still debuggable.
 	     Check in_hash_table to only print the warning once.  */
 	  if (! in_hash_table)
-	    warning (_("%s (referenced in %s): %s\n"),
+	    warning (_("%s (referenced in %s): %s"),
 		     file, GDBPY_AUTO_SECTION_NAME, safe_strerror (errno));
 	  continue;
 	}
