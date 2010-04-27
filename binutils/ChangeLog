@@ -1,3 +1,8 @@
+2010-04-27  Kai Tietz  <kai.tietz@onevision.com>
+
+	* dlltool.c (main): Query for bfd's underscoring default for
+	default target case.
+
 2010-04-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.

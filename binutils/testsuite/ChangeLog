@@ -1,3 +1,8 @@
+2010-04-27  Kai Tietz  <kai.tietz@onevision.com>
+
+	* binutils-all/dlltool.exp: Allow test for
+	arm-wince-pe target.
+
 2010-03-30  Kai TIetz  <kai.tietz@onevision.com>
 
 	* binutils-all/objcopy.exp: Mark simple copy executable

@@ -14,13 +14,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
-if {![istarget "i*86-*-*"] && ![istarget "x86_64-*-mingw*"] } {
+if {![istarget "i*86-*-*"] && ![istarget "x86_64-*-mingw*"] && ![istarget "arm-*-pe*]} {
     return
 }
 
 if {![istarget "i*86-*-*pe*"] \
     && ![istarget "i*86-*-cygwin*"] \
     && ![istarget "i*86-*-mingw32*"] \
+    && ![istarget "arm-*-pe*"] \
     && ![istarget "x86_64-*-mingw*"] } {
     set target_xfail "yes"
 } else {
@@ -35,8 +36,8 @@ if {[which $DLLTOOL] == 0} then {
     return
 }
 
-verbose "$DLLTOOL -d $srcdir/$subdir/fastcall.def" 1
-catch "exec $DLLTOOL -d $srcdir/$subdir/fastcall.def" err
+verbose "$DLLTOOL --leading-underscore -d $srcdir/$subdir/fastcall.def" 1
+catch "exec $DLLTOOL --leading-underscore -d $srcdir/$subdir/fastcall.def" err
 
 if ![string match "" $err] then {
     send_log "$err\n"
@@ -50,8 +51,8 @@ if { "$target_xfail" == "yes" } {
     setup_xfail *-*
 }
 
-verbose "$DLLTOOL -p prefix -l tmpdir/libalias.a -d $srcdir/$subdir/alias.def $dlltool_gas_flag" 1
-catch "exec $DLLTOOL -p prefix -l tmpdir/libalias.a -d $srcdir/$subdir/alias.def $dlltool_gas_flag" err
+verbose "$DLLTOOL -p prefix --leading-underscore -l tmpdir/libalias.a -d $srcdir/$subdir/alias.def $dlltool_gas_flag" 1
+catch "exec $DLLTOOL -p prefix --leading-underscore -l tmpdir/libalias.a -d $srcdir/$subdir/alias.def $dlltool_gas_flag" err
 
 if ![string match "" $err] then {
     send_log "$err\n"
@@ -80,8 +81,8 @@ if [regexp $want $got] then {
     fail "dlltool -p (import name)"
 }
 
-verbose "$DLLTOOL -p prefix -l tmpdir/libalias2.a -d $srcdir/$subdir/alias-2.def $dlltool_gas_flag" 1
-catch "exec $DLLTOOL -p prefix -l tmpdir/libalias2.a -d $srcdir/$subdir/alias-2.def $dlltool_gas_flag" err
+verbose "$DLLTOOL -p prefix --leading-underscore -l tmpdir/libalias2.a -d $srcdir/$subdir/alias-2.def $dlltool_gas_flag" 1
+catch "exec $DLLTOOL -p prefix --leading-underscore -l tmpdir/libalias2.a -d $srcdir/$subdir/alias-2.def $dlltool_gas_flag" err
 
 if ![string match "" $err] then {
     send_log "$err\n"

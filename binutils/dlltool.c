@@ -4143,6 +4143,16 @@ main (int ac, char **av)
   /* Check if we generated PE+.  */
   create_for_pep = strcmp (mname, "i386:x86-64") == 0;
 
+  {
+    /* Check the default underscore */
+    int u = leading_underscore; /* Underscoring mode. -1 for use default.  */
+    if (u == -1)
+      bfd_get_target_info (mtable[machine].how_bfd_target, NULL,
+                           NULL, &u, NULL);
+    if (u != -1)
+      leading_underscore = (u != 0 ? TRUE : FALSE);
+  }
+
   if (!dll_name && exp_name)
     {
       /* If we are inferring dll_name from exp_name,
