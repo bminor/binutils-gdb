@@ -1,3 +1,23 @@
+2010-04-27  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-tic6x.h (tic6x_label_list): New.
+	(tic6x_segment_info_type): Keep a list of labels and a current
+	frag instead of a boolean for whether labels seen and a count of
+	instructions.
+	(tic6x_frag_info, TC_FRAG_TYPE, TC_FRAG_INIT, tic6x_frag_init,
+	md_do_align, tic6x_do_align, md_end, tic6x_end): New.
+	* config/tc-tic6x.c (tic6x_frob_label): Put label on list.
+	(tic6x_cleanup): Correct comment.
+	(tic6x_free_label_list): New.
+	(tic6x_cons_align): Free label list and update for
+	tic6x_segment_info_type changes.
+	(tic6x_do_align): New.
+	(md_assemble): Handle list of labels and saved frag for execute
+	packet.  Create machine-dependent frag for new execute packet and
+	adjust labels accordingly.
+	(tic6x_adjust_section, tic6x_frag_init, tic6x_end): New.
+	(md_convert_frag, md_estimate_size_before_relax): Update comments.
+
 2010-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11535

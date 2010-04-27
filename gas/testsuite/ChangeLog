@@ -1,3 +1,9 @@
+2010-04-27  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x/align-1-be.d, gas/tic6x/align-1.d,
+	gas/tic6x/align-1.s, gas/tic6x/align-2.d, gas/tic6x/align-2.s:
+	New.
+
 2010-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11535

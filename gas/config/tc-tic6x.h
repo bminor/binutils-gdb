@@ -37,18 +37,25 @@
 			 ? "elf32-tic6x-be"	\
 			 : "elf32-tic6x-le")
 
+typedef struct tic6x_label_list
+{
+  struct tic6x_label_list *next;
+  symbolS *label;
+} tic6x_label_list;
+
 typedef struct
 {
-  /* Number of instructions in the current execute packet.  */
-  unsigned int num_execute_packet_insns;
-
-  /* Whether a label has been seen since the last instruction or data
-     (in which case a following instruction may not have parallel
-     bars, but must start a new execute packet).  */
-  bfd_boolean seen_label;
+  /* Any labels seen since the last instruction or data.  If not NULL,
+     a following instruction may not have parallel bars, but must
+     start a new execute packet.  */
+  tic6x_label_list *label_list;
 
   /* Whether compact instructions are forbidden here.  */
   bfd_boolean nocmp;
+
+  /* If there is a current execute packet, the frag being used for
+     that execute packet.  */
+  fragS *execute_packet_frag;
 
   /* If there is a current execute packet, a pointer to the
      least-significant byte of the last instruction in it (for setting
@@ -67,6 +74,20 @@ typedef struct
   int sploop_ii;
 } tic6x_segment_info_type;
 #define TC_SEGMENT_INFO_TYPE tic6x_segment_info_type
+
+typedef struct
+{
+  /* Whether this machine-dependent frag is used for instructions (as
+     opposed to code alignment).  */
+  bfd_boolean is_insns;
+
+  /* For a frag used for instructions, whether it is may cross a fetch
+     packet boundary (subject to alignment requirements).  */
+  bfd_boolean can_cross_fp_boundary;
+} tic6x_frag_info;
+#define TC_FRAG_TYPE tic6x_frag_info
+#define TC_FRAG_INIT(fragP) tic6x_frag_init (fragP)
+extern void tic6x_frag_init (fragS *fragp);
 
 typedef struct
 {
@@ -90,6 +111,16 @@ extern void tic6x_cleanup (void);
 
 #define md_cons_align(n) tic6x_cons_align (n)
 extern void tic6x_cons_align (int n);
+
+#define md_do_align(n, fill, len, max, label)	\
+  do {						\
+    if (tic6x_do_align (n, fill, len, max))	\
+      goto label;				\
+  } while (0)
+extern bfd_boolean tic6x_do_align (int n, char *fill, int len, int max);
+
+#define md_end() tic6x_end ();
+extern void tic6x_end (void);
 
 #define md_parse_name(name, exprP, mode, nextcharP)	\
   tic6x_parse_name (name, exprP, mode, nextcharP)

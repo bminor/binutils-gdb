@@ -465,8 +465,11 @@ tic6x_unrecognized_line (int c)
 /* Do any target-specific handling of a label required.  */
 
 void
-tic6x_frob_label (symbolS *sym ATTRIBUTE_UNUSED)
+tic6x_frob_label (symbolS *sym)
 {
+  segment_info_type *si;
+  tic6x_label_list *list;
+
   if (tic6x_line_parallel)
     {
       as_bad (_("label after '||'"));
@@ -480,7 +483,11 @@ tic6x_frob_label (symbolS *sym ATTRIBUTE_UNUSED)
       tic6x_line_z = 0;
     }
 
-  seg_info (now_seg)->tc_segment_info_data.seen_label = TRUE;
+  si = seg_info (now_seg);
+  list = si->tc_segment_info_data.label_list;
+  si->tc_segment_info_data.label_list = xmalloc (sizeof (tic6x_label_list));
+  si->tc_segment_info_data.label_list->next = list;
+  si->tc_segment_info_data.label_list->label = sym;
 
   /* Defining tc_frob_label overrides the ELF definition of
      obj_frob_label, so we need to apply its effects here.  */
@@ -515,8 +522,9 @@ tic6x_start_line_hook (void)
   tic6x_end_of_line ();
 }
 
-/* Do target-specific handling immediately after all input files have
-   been read.  */
+/* Do target-specific handling immediately after an input file from
+   the command line, and any other inputs it includes, have been
+   read.  */
 
 void
 tic6x_cleanup (void)
@@ -533,6 +541,20 @@ tic6x_init_after_args (void)
   elf32_tic6x_set_use_rela_p (stdoutput, tic6x_generate_rela);
 }
 
+/* Free LIST of labels (possibly NULL).  */
+
+static void
+tic6x_free_label_list (tic6x_label_list *list)
+{
+  while (list)
+    {
+      tic6x_label_list *old = list;
+
+      list = list->next;
+      free (old);
+    }
+}
+
 /* Handle a data alignment of N bytes.  */
 
 void
@@ -542,10 +564,61 @@ tic6x_cons_align (int n ATTRIBUTE_UNUSED)
 
   /* Data means there is no current execute packet, and that any label
      applies to that data rather than a subsequent instruction.  */
-  seginfo->tc_segment_info_data.num_execute_packet_insns = 0;
-  seginfo->tc_segment_info_data.seen_label = FALSE;
+  tic6x_free_label_list (seginfo->tc_segment_info_data.label_list);
+  seginfo->tc_segment_info_data.label_list = NULL;
+  seginfo->tc_segment_info_data.execute_packet_frag = NULL;
   seginfo->tc_segment_info_data.last_insn_lsb = NULL;
   seginfo->tc_segment_info_data.spmask_addr = NULL;
+}
+
+/* Handle an alignment directive.  Return TRUE if the
+   machine-independent frag generation should be skipped.  */
+
+bfd_boolean
+tic6x_do_align (int n, char *fill, int len ATTRIBUTE_UNUSED, int max)
+{
+  /* Given code alignments of 4, 8, 16 or 32 bytes, we try to handle
+     them in the md_end pass by inserting NOPs in parallel with
+     previous instructions.  We only do this in sections containing
+     nothing but instructions.  Code alignments of 1 or 2 bytes have
+     no effect in such sections (but we record them with
+     machine-dependent frags anyway so they can be skipped or
+     converted to machine-independent), while those of more than 64
+     bytes cannot reliably be handled in this way.  */
+  if (n > 0
+      && max >= 0
+      && max < (1 << n)
+      && !need_pass_2
+      && fill == NULL
+      && subseg_text_p (now_seg))
+    {
+      fragS *align_frag;
+      char *p;
+
+      if (n > 5)
+	return FALSE;
+
+      /* Machine-independent code would generate a frag here, but we
+	 wish to handle it in a machine-dependent way.  */
+      if (frag_now_fix () != 0)
+	{
+	  if (frag_now->fr_type != rs_machine_dependent)
+	    frag_wane (frag_now);
+
+	  frag_new (0);
+	}
+      frag_grow (32);
+      align_frag = frag_now;
+      p = frag_var (rs_machine_dependent, 32, 32, max, NULL, n, NULL);
+      /* This must be the same as the frag to which a pointer was just
+	 saved.  */
+      if (p != align_frag->fr_literal)
+	abort ();
+      align_frag->tc_frag_data.is_insns = FALSE;
+      return TRUE;
+    }
+  else
+    return FALSE;
 }
 
 /* Types of operand for parsing purposes.  These are used as bit-masks
@@ -2474,7 +2547,7 @@ md_assemble (char *str)
   bfd_boolean this_line_spmask;
   unsigned int this_line_creg;
   unsigned int this_line_z;
-  bfd_boolean this_insn_label;
+  tic6x_label_list *this_insn_label_list;
   segment_info_type *seginfo;
   tic6x_opcode_list *opc_list, *opc;
   tic6x_func_unit_base func_unit_base = tic6x_func_unit_nfu;
@@ -2502,6 +2575,7 @@ md_assemble (char *str)
   int fix_pcrel = 0;
   bfd_reloc_code_real_type fx_r_type = BFD_RELOC_UNUSED;
   bfd_boolean fix_adda = FALSE;
+  fragS *insn_frag;
   char *output;
 
   p = str;
@@ -2524,8 +2598,8 @@ md_assemble (char *str)
   tic6x_line_creg = 0;
   tic6x_line_z = 0;
   seginfo = seg_info (now_seg);
-  this_insn_label = seginfo->tc_segment_info_data.seen_label;
-  seginfo->tc_segment_info_data.seen_label = FALSE;
+  this_insn_label_list = seginfo->tc_segment_info_data.label_list;
+  seginfo->tc_segment_info_data.label_list = NULL;
 
   opc_list = hash_find_n (opcode_hash, str, p - str);
   if (opc_list == NULL)
@@ -2979,19 +3053,20 @@ md_assemble (char *str)
 
   if (this_line_parallel)
     {
-      if (seginfo->tc_segment_info_data.num_execute_packet_insns == 0)
+      insn_frag = seginfo->tc_segment_info_data.execute_packet_frag;
+      if (insn_frag == NULL)
 	{
 	  as_bad (_("parallel instruction not following another instruction"));
 	  return;
 	}
 
-      if (seginfo->tc_segment_info_data.num_execute_packet_insns >= 8)
+      if (insn_frag->fr_fix >= 32)
 	{
 	  as_bad (_("too many instructions in execute packet"));
 	  return;
 	}
 
-      if (this_insn_label)
+      if (this_insn_label_list != NULL)
 	as_bad (_("label not at start of execute packet"));
 
       if (opct->flags & TIC6X_FLAG_FIRST)
@@ -2999,11 +3074,40 @@ md_assemble (char *str)
 		opc_len, str);
 
       *seginfo->tc_segment_info_data.last_insn_lsb |= 0x1;
+      output = insn_frag->fr_literal + insn_frag->fr_fix;
     }
   else
     {
-      seginfo->tc_segment_info_data.num_execute_packet_insns = 0;
+      tic6x_label_list *l;
+
       seginfo->tc_segment_info_data.spmask_addr = NULL;
+
+      /* Start a new frag for this execute packet.  */
+      if (frag_now_fix () != 0)
+	{
+	  if (frag_now->fr_type != rs_machine_dependent)
+	    frag_wane (frag_now);
+
+	  frag_new (0);
+	}
+      frag_grow (32);
+      insn_frag = seginfo->tc_segment_info_data.execute_packet_frag = frag_now;
+      for (l = this_insn_label_list; l; l = l->next)
+	{
+	  symbol_set_frag (l->label, frag_now);
+	  S_SET_VALUE (l->label, 0);
+	  S_SET_SEGMENT (l->label, now_seg);
+	}
+      tic6x_free_label_list (this_insn_label_list);
+      dwarf2_emit_insn (0);
+      output = frag_var (rs_machine_dependent, 32, 32, 0, NULL, 0, NULL);
+      /* This must be the same as the frag to which a pointer was just
+	 saved.  */
+      if (output != insn_frag->fr_literal)
+	abort ();
+      insn_frag->tc_frag_data.is_insns = TRUE;
+      insn_frag->tc_frag_data.can_cross_fp_boundary
+	= tic6x_can_cross_fp_boundary;
     }
 
   if (opct->flags & TIC6X_FLAG_SPLOOP)
@@ -3050,17 +3154,16 @@ md_assemble (char *str)
     }
 
   record_alignment (now_seg, 5);
-  output = frag_more (4);
   md_number_to_chars (output, opcode_value, 4);
   if (fix_needed)
-    tic6x_fix_new_exp (frag_now, output - frag_now->fr_literal, 4, fix_exp,
+    tic6x_fix_new_exp (insn_frag, output - insn_frag->fr_literal, 4, fix_exp,
 		       fix_pcrel, fx_r_type, fix_adda);
-  seginfo->tc_segment_info_data.num_execute_packet_insns++;
+  insn_frag->fr_fix += 4;
+  insn_frag->fr_var -= 4;
   seginfo->tc_segment_info_data.last_insn_lsb
     = (target_big_endian ? output + 3 : output);
   if (opct->flags & TIC6X_FLAG_SPMASK)
     seginfo->tc_segment_info_data.spmask_addr = output;
-  dwarf2_emit_insn (4);
 }
 
 /* Modify NEWVAL (32-bit) by inserting VALUE, shifted right by SHIFT
@@ -3363,7 +3466,319 @@ md_atof (int type, char *litP, int *sizeP)
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
-/* No machine-dependent frags yet.  */
+/* Adjust the frags in SECTION (see tic6x_end).  */
+
+static void
+tic6x_adjust_section (bfd *abfd ATTRIBUTE_UNUSED, segT section,
+		      void *dummy ATTRIBUTE_UNUSED)
+{
+  segment_info_type *info;
+  frchainS *frchp;
+  fragS *fragp;
+  bfd_boolean have_code = FALSE;
+  bfd_boolean have_non_code = FALSE;
+
+  info = seg_info (section);
+  if (info == NULL)
+    return;
+
+  for (frchp = info->frchainP; frchp; frchp = frchp->frch_next)
+    for (fragp = frchp->frch_root; fragp; fragp = fragp->fr_next)
+      switch (fragp->fr_type)
+	{
+	case rs_machine_dependent:
+	  if (fragp->tc_frag_data.is_insns)
+	    have_code = TRUE;
+	  break;
+
+	case rs_dummy:
+	case rs_fill:
+	  if (fragp->fr_fix > 0)
+	    have_non_code = TRUE;
+	  break;
+
+	default:
+	  have_non_code = TRUE;
+	  break;
+	}
+
+  /* Process alignment requirements in a code-only section.  */
+  if (have_code && !have_non_code)
+    {
+      /* If we need to insert an odd number of instructions to meet an
+	 alignment requirement, there must have been an odd number of
+	 instructions since the last 8-byte-aligned execute packet
+	 boundary.  So there must have been an execute packet with an
+	 odd number (and so a number fewer than 8) of instructions
+	 into which we can insert a NOP without breaking any previous
+	 alignments.
+
+	 If then we need to insert a number 2 mod 4 of instructions,
+	 the number of instructions since the last 16-byte-aligned
+	 execute packet boundary must be 2 mod 4.  So between that
+	 boundary and the following 8-byte-aligned boundary there must
+	 either be at least one execute packet with 2-mod-4
+	 instructions, or at least two with an odd number of
+	 instructions; again, greedily inserting NOPs as soon as
+	 possible suffices to meet the alignment requirement.
+
+	 If then we need to insert 4 instructions, we look between the
+	 last 32-byte-aligned boundary and the following
+	 16-byte-aligned boundary.  The sizes of the execute packets
+	 in this range total 4 instructions mod 8, so again there is
+	 room for greedy insertion of NOPs to meet the alignment
+	 requirement, and before any intermediate point with 8-byte
+	 (2-instruction) alignment requirement the sizes of execute
+	 packets (and so the room for NOPs) will total 2 instructions
+	 mod 4 so greedy insertion will not break such alignments.
+
+	 So we can always meet these alignment requirements by
+	 inserting NOPs in parallel with existing execute packets, and
+	 by induction the approach described above inserts the minimum
+	 number of such NOPs.  */
+
+      /* The number of NOPs we are currently looking to insert, if we
+	 have gone back to insert NOPs.  */
+      unsigned int want_insert = 0;
+
+      /* Out of that number, the number inserted so far in the current
+	 stage of the above algorithm.  */
+      unsigned int want_insert_done_so_far = 0;
+
+      /* The position mod 32 at the start of the current frag.  */
+      unsigned int pos = 0;
+
+      /* The locations in the frag chain of the most recent frags at
+	 the start of which there is the given alignment.  */
+      frchainS *frchp_last32, *frchp_last16, *frchp_last8;
+      fragS *fragp_last32, *fragp_last16, *fragp_last8;
+      unsigned int pos_last32, pos_last16, pos_last8;
+
+      frchp_last32 = frchp_last16 = frchp_last8 = info->frchainP;
+      fragp_last32 = fragp_last16 = fragp_last8 = info->frchainP->frch_root;
+      pos_last32 = pos_last16 = pos_last8 = 0;
+
+      for (frchp = info->frchainP; frchp; frchp = frchp->frch_next)
+	for (fragp = frchp->frch_root; fragp; fragp = fragp->fr_next)
+	look_at_frag:
+	  {
+	    bfd_boolean go_back = FALSE;
+	    frchainS *frchp_next;
+	    fragS *fragp_next;
+
+	    if (fragp->fr_type != rs_machine_dependent)
+	      continue;
+
+	    if (fragp->tc_frag_data.is_insns
+		&& pos + fragp->fr_fix > 32
+		&& !fragp->tc_frag_data.can_cross_fp_boundary)
+	      {
+		/* As described above, we should always have met an
+		   alignment requirement by the time we come back to
+		   it.  */
+		if (want_insert)
+		  abort ();
+
+		if (pos & 3)
+		  abort ();
+		want_insert = (32 - pos) >> 2;
+		if (want_insert > 7)
+		  abort ();
+		want_insert_done_so_far = 0;
+		go_back = TRUE;
+	      }
+
+	    if (!fragp->tc_frag_data.is_insns)
+	      {
+		unsigned int would_insert_bytes;
+
+		if (!(pos & ((1 << fragp->fr_offset) - 1)))
+		  /* This alignment requirement is already met.  */
+		  continue;
+
+		/* As described above, we should always have met an
+		   alignment requirement by the time we come back to
+		   it.  */
+		if (want_insert)
+		  abort ();
+
+		/* We may not be able to meet this requirement within
+		   the given number of characters.  */
+		would_insert_bytes
+		  = ((1 << fragp->fr_offset)
+		     - (pos & ((1 << fragp->fr_offset) - 1)));
+
+		if (fragp->fr_subtype != 0
+		    && would_insert_bytes > fragp->fr_subtype)
+		  continue;
+
+		/* An unmet alignment must be 8, 16 or 32 bytes;
+		   smaller ones must always be met within code-only
+		   sections and larger ones cause the section not to
+		   be code-only.  */
+		if (fragp->fr_offset != 3
+		    && fragp->fr_offset != 4
+		    && fragp->fr_offset != 5)
+		  abort ();
+
+		if (would_insert_bytes & 3)
+		  abort ();
+		want_insert = would_insert_bytes >> 2;
+		if (want_insert > 7)
+		  abort ();
+		want_insert_done_so_far = 0;
+		go_back = TRUE;
+	      }
+	    else if (want_insert && !go_back)
+	      {
+		unsigned int num_insns = fragp->fr_fix >> 2;
+		unsigned int max_poss_nops = 8 - num_insns;
+
+		if (max_poss_nops)
+		  {
+		    unsigned int cur_want_nops, max_want_nops, do_nops, i;
+
+		    if (want_insert & 1)
+		      cur_want_nops = 1;
+		    else if (want_insert & 2)
+		      cur_want_nops = 2;
+		    else if (want_insert & 4)
+		      cur_want_nops = 4;
+		    else
+		      abort ();
+
+		    max_want_nops = cur_want_nops - want_insert_done_so_far;
+
+		    do_nops = (max_poss_nops < max_want_nops
+			       ? max_poss_nops
+			       : max_want_nops);
+		    for (i = 0; i < do_nops; i++)
+		      {
+			md_number_to_chars (fragp->fr_literal + fragp->fr_fix,
+					    0, 4);
+			if (target_big_endian)
+			  fragp->fr_literal[fragp->fr_fix - 1] |= 0x1;
+			else
+			  fragp->fr_literal[fragp->fr_fix - 4] |= 0x1;
+			fragp->fr_fix += 4;
+			fragp->fr_var -= 4;
+		      }
+		    want_insert_done_so_far += do_nops;
+		    if (want_insert_done_so_far == cur_want_nops)
+		      {
+			want_insert -= want_insert_done_so_far;
+			want_insert_done_so_far = 0;
+			if (want_insert)
+			  go_back = TRUE;
+		      }
+		  }
+	      }
+	    if (go_back)
+	      {
+		if (want_insert & 1)
+		  {
+		    frchp = frchp_last8;
+		    fragp = fragp_last8;
+		    pos = pos_last8;
+		  }
+		else if (want_insert & 2)
+		  {
+		    frchp = frchp_last8 = frchp_last16;
+		    fragp = fragp_last8 = fragp_last16;
+		    pos = pos_last8 = pos_last16;
+		  }
+		else if (want_insert & 4)
+		  {
+		    frchp = frchp_last8 = frchp_last16 = frchp_last32;
+		    fragp = fragp_last8 = fragp_last16 = fragp_last32;
+		    pos = pos_last8 = pos_last16 = pos_last32;
+		  }
+		else
+		  abort ();
+
+		goto look_at_frag;
+	      }
+
+	    /* Update current position for moving past a code
+	       frag.  */
+	    pos += fragp->fr_fix;
+	    pos &= 31;
+	    frchp_next = frchp;
+	    fragp_next = fragp->fr_next;
+	    if (fragp_next == NULL)
+	      {
+		frchp_next = frchp->frch_next;
+		if (frchp_next != NULL)
+		  fragp_next = frchp_next->frch_root;
+	      }
+	    if (!(pos & 7))
+	      {
+		frchp_last8 = frchp_next;
+		fragp_last8 = fragp_next;
+		pos_last8 = pos;
+	      }
+	    if (!(pos & 15))
+	      {
+		frchp_last16 = frchp_next;
+		fragp_last16 = fragp_next;
+		pos_last16 = pos;
+	      }
+	    if (!(pos & 31))
+	      {
+		frchp_last32 = frchp_next;
+		fragp_last32 = fragp_next;
+		pos_last32 = pos;
+	      }
+	  }
+    }
+
+  /* Now convert the machine-dependent frags to machine-independent
+     ones.  */
+  for (frchp = info->frchainP; frchp; frchp = frchp->frch_next)
+    for (fragp = frchp->frch_root; fragp; fragp = fragp->fr_next)
+      {
+	if (fragp->fr_type == rs_machine_dependent)
+	  {
+	    if (fragp->tc_frag_data.is_insns)
+	      frag_wane (fragp);
+	    else
+	      {
+		fragp->fr_type = rs_align_code;
+		fragp->fr_var = 1;
+		*fragp->fr_literal = 0;
+	      }
+	  }
+      }
+}
+
+/* Initialize the machine-dependent parts of a frag.  */
+
+void
+tic6x_frag_init (fragS *fragp)
+{
+  fragp->tc_frag_data.is_insns = FALSE;
+  fragp->tc_frag_data.can_cross_fp_boundary = FALSE;
+}
+
+/* Do machine-dependent manipulations of the frag chains after all
+   input has been read and before the machine-independent sizing and
+   relaxing.  */
+
+void
+tic6x_end (void)
+{
+  /* Meeting alignment requirements may require inserting NOPs in
+     parallel in execute packets earlier in the segment.  Future
+     16-bit instruction generation involves whole-segment optimization
+     to determine the best choice and ordering of 32-bit or 16-bit
+     instructions.  This doesn't fit will in the general relaxation
+     framework, so handle alignment and 16-bit instruction generation
+     here.  */
+  bfd_map_over_sections (stdoutput, tic6x_adjust_section, NULL);
+}
+
+/* No machine-dependent frags at this stage; all converted in
+   tic6x_end.  */
 
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec ATTRIBUTE_UNUSED,
@@ -3372,7 +3787,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec ATTRIBUTE_UNUSED,
   abort ();
 }
 
-/* No machine-dependent frags yet.  */
+/* No machine-dependent frags at this stage; all converted in
+   tic6x_end.  */
 
 int
 md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,
