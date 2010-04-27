@@ -1,5 +1,9 @@
 2010-04-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* solib-svr4.c (solib_svr4_r_map): Expand function description.
+
+2010-04-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* symfile.c (init_filename_language_table): Register .dg files
 	with language_ada.
 
