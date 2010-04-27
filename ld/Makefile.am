@@ -95,7 +95,7 @@ CXX_FOR_TARGET = ` \
     fi; \
   fi`
 
-transform = s/^ld-new$$/ld/;@program_transform_name@
+transform = s/^ld-new$$/$(installed_linker)/;@program_transform_name@
 bin_PROGRAMS = ld-new
 info_TEXINFOS = ld.texinfo
 ld_TEXINFOS = configdoc.texi
@@ -1995,13 +1995,23 @@ CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s spu_ovl.o spu_icache.s spu_ica
 
 .PHONY: install-exec-local install-data-local
 
-install-exec-local: ld-new$(EXEEXT)
+install-exec-local: ld-new$(EXEEXT) install-binPROGRAMS
 	$(mkinstalldirs) $(DESTDIR)$(tooldir)/bin
-	n=`echo ld | sed '$(transform)'`; \
-	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/ld$(EXEEXT)" ]; then \
-	  rm -f $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
-	  ln $(DESTDIR)$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
-	  || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
+	n=`echo $(installed_linker) | sed '$(transform)'`; \
+	if test "$(bindir)" != "$(tooldir)/bin"; then \
+	  rm -f $(DESTDIR)$(tooldir)/bin/$(installed_linker)$(EXEEXT); \
+	  ln $(DESTDIR)$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(tooldir)/bin/$(installed_linker)$(EXEEXT) >/dev/null 2>/dev/null \
+	  || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(tooldir)/bin/$(installed_linker)$(EXEEXT); \
+	fi; \
+	if test "x$(install_as_default)" = "xyes"; then \
+	  rm -f $(DESTDIR)$(bindir)/ld$(EXEEXT); \
+	  ln $(DESTDIR)$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(bindir)/ld$(EXEEXT) >/dev/null 2>/dev/null \
+	  || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(bindir)/ld$(EXEEXT); \
+	  if test "$(bindir)" != "$(tooldir)/bin"; then \
+	    rm -f $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
+	    ln $(DESTDIR)$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
+	    || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
+	  fi; \
 	fi
 
 install-data-local:

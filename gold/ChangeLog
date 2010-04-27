@@ -1,3 +1,16 @@
+2010-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (install_as_default): Define and set to false
+	unless --enable-gold or --enable-gold=both/gold has been
+	specified.
+	* configure: Regenerate.
+
+	* Makefile.am (install-exec-local): Install the executable as
+	'ld.gold'.  If install_as_default is true then also install it as
+	'ld'.
+	* Makefile.in: Regenerated.
+
 2010-04-24  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::layout_reloc): In relocatable link don't

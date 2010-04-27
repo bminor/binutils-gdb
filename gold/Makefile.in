@@ -258,7 +258,9 @@ host_vendor = @host_vendor@
 htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
+install_as_default = @install_as_default@
 install_sh = @install_sh@
+installed_linker = @installed_linker@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
@@ -1002,12 +1004,22 @@ check: libgold.a
 
 install-exec-local: ld-new$(EXEEXT)
 	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(tooldir)/bin
-	n=`echo ld | sed '$(transform)'`; \
+	n=`echo $(installed_linker) | sed '$(transform)'`; \
 	$(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(bindir)/$${n}$(EXEEXT); \
 	if test "$(bindir)" != "$(tooldir)/bin"; then \
-	  rm -f $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
-	  ln $(DESTDIR)$(bindir)/$${n}$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
+	  rm -f $(DESTDIR)$(tooldir)/bin/$(installed_linker)$(EXEEXT); \
+	  ln $(DESTDIR)$(bindir)/$${n}$(EXEEXT) $(DESTDIR)$(tooldir)/bin/$(installed_linker)$(EXEEXT) >/dev/null 2>/dev/null \
+	  || $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(tooldir)/bin/$(installed_linker)$(EXEEXT); \
+	fi; \
+	if test "x$(install_as_default)" = "xyes"; then \
+	  rm -f $(DESTDIR)$(bindir)/ld$(EXEEXT); \
+	  ln $(DESTDIR)$(bindir)/$${n}$(EXEEXT) $(DESTDIR)$(bindir)/ld$(EXEEXT) >/dev/null 2>/dev/null \
+	  || $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(bindir)/ld$(EXEEXT); \
+	  if test "$(bindir)" != "$(tooldir)/bin"; then \
+	    rm -f $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
+	    ln $(DESTDIR)$(bindir)/$${n}$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
 	    || $(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
+	  fi; \
 	fi
 
 # We want install to imply install-info as per GNU standards, despite

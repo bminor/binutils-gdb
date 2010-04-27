@@ -1,3 +1,16 @@
+2010-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (install_as_default): Define and set to true
+	unless --enable-gold=both/gold has been specified.
+	* configure: Regenerate.
+
+	* Makefile.am (transform): Use ld.bfd as the default name of
+	the linker.
+	(install-exec-local): Also install the executable as a binary
+	named 'ld' if install_as_default is true.
+	* Makefile.in: Regenerate.
+
 2010-04-22  Nick Clifton  <nickc@redhat.com>
 
 	* po/ld.pot: Updated by the Translation project.
