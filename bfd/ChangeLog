@@ -1,5 +1,11 @@
 2010-04-27  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/11512
+	* coffgen.c (coff_find_nearest_line): Incldue the section address
+	of function name symbols in address comparisons.
+
+2010-04-27  Nick Clifton  <nickc@redhat.com>
+
 	* po/fr.po: Updated French translation.
 
 2010-04-23  Alan Modra  <amodra@gmail.com>

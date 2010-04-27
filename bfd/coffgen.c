@@ -2152,6 +2152,7 @@ coff_find_nearest_line (bfd *abfd,
       maxdiff = (bfd_vma) 0 - (bfd_vma) 1;
       while (1)
 	{
+	  bfd_vma file_addr;
 	  combined_entry_type *p2;
 
 	  for (p2 = p + 1 + p->u.syment.n_numaux;
@@ -2170,11 +2171,16 @@ coff_find_nearest_line (bfd *abfd,
 		}
 	    }
 
+	  file_addr = (bfd_vma) p2->u.syment.n_value;
+	  /* PR 11512: Include the section address of the function name symbol.  */
+	  if (p2->u.syment.n_scnum > 0)
+	    file_addr += coff_section_from_bfd_index (abfd,
+						      p2->u.syment.n_scnum)->vma;
 	  /* We use <= MAXDIFF here so that if we get a zero length
              file, we actually use the next file entry.  */
 	  if (p2 < pend
-	      && offset + sec_vma >= (bfd_vma) p2->u.syment.n_value
-	      && offset + sec_vma - (bfd_vma) p2->u.syment.n_value <= maxdiff)
+	      && offset + sec_vma >= file_addr
+	      && offset + sec_vma - file_addr <= maxdiff)
 	    {
 	      *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
 	      maxdiff = offset + sec_vma - p2->u.syment.n_value;
