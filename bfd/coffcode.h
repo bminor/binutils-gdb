@@ -2648,7 +2648,7 @@ coff_write_relocs (bfd * abfd, int first_undef)
 	     entries know which symbol index they point to.  So we
 	     have to look up the output symbol here.  */
 
-	  if (q->sym_ptr_ptr[0]->the_bfd != abfd)
+	  if (q->sym_ptr_ptr[0] != NULL && q->sym_ptr_ptr[0]->the_bfd != abfd)
 	    {
 	      int j;
 	      const char *sname = q->sym_ptr_ptr[0]->name;
@@ -2677,7 +2677,7 @@ coff_write_relocs (bfd * abfd, int first_undef)
 	    n.r_symndx = q->addend;
 	  else
 #endif
-	    if (q->sym_ptr_ptr)
+	    if (q->sym_ptr_ptr && q->sym_ptr_ptr[0] != NULL)
 	      {
 #ifdef SECTION_RELATIVE_ABSOLUTE_SYMBOL_P
 		if (SECTION_RELATIVE_ABSOLUTE_SYMBOL_P (q, s))

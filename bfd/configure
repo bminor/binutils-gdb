@@ -785,6 +785,7 @@ enable_64_bit_bfd
 enable_targets
 with_mmap
 enable_secureplt
+enable_leading_mingw64_underscores
 with_separate_debug_dir
 enable_elf_stt_common
 with_pkgversion
@@ -1435,6 +1436,8 @@ Optional Features:
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
   --enable-targets        alternative target configurations
   --enable-secureplt      Default to creating read-only plt entries
+  --enable-leading-mingw64-underscores
+                          Enable leading underscores on 64 bit mingw targets
   --enable-elf-stt-common Allow the generation of ELF symbols with the STT_COMMON type
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
@@ -11402,7 +11405,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11405 "configure"
+#line 11408 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11508,7 +11511,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11511 "configure"
+#line 11514 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12046,6 +12049,17 @@ fi
 if test $use_secureplt = true; then
 
 $as_echo "#define USE_SECUREPLT 1" >>confdefs.h
+
+fi
+
+# Check whether --enable-leading-mingw64-underscores was given.
+if test "${enable_leading_mingw64_underscores+set}" = set; then :
+  enableval=$enable_leading_mingw64_underscores;
+fi
+
+if  test x"$enable_leading_mingw64_underscores" = xyes ; then :
+
+$as_echo "#define USE_MINGW64_LEADING_UNDERSCORES 1" >>confdefs.h
 
 fi
 

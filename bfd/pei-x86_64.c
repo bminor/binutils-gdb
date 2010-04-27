@@ -29,7 +29,11 @@
 #define COFF_WITH_PE
 #define COFF_WITH_pex64
 #define PCRELOFFSET 		TRUE
+#if defined (USE_MINGW64_LEADING_UNDERSCORES)
 #define TARGET_UNDERSCORE 	'_'
+#else
+#define TARGET_UNDERSCORE 	0
+#endif
 /* Long section names not allowed in executable images, only object files.  */
 #define COFF_LONG_SECTION_NAMES 0
 #define COFF_SUPPORT_GNU_LINKONCE

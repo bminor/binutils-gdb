@@ -1,3 +1,17 @@
+2010-04-27  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe-x86_64.c (TARGET_UNDERSCORE): Set value dependent
+	to USE_MINGW64_LEADING_UNDERSCORES.
+        * pei-x86_64.c (TARGET_UNDERSCORE): Likewise.
+	* config.bfd: Change underscoring default for x64 mingw
+	to false.
+	* coffcode.h (coff_write_relocs): Add check that dereferenced
+	sym_ptr_ptr isn't NULL.
+	* config.in (USE_MINGW64_LEADING_UNDERSCORES): New.
+	* configure: Regenerated.
+	* configure.in: Add option '--enable-leading-mingw64-underscores'
+	and define config.in variable USE_MINGW64_LEADING_UNDERSCORES.
+
 2010-04-27  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/11512

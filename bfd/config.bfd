@@ -177,7 +177,6 @@ case "${targ}" in
     ;;
   alpha*-*-*vms*)
     targ_defvec=vms_alpha_vec
-    targ_selvecs=vms_lib_txt_vec
     want64=true
     ;;
   alpha*-*-*)
@@ -640,7 +639,7 @@ case "${targ}" in
     targ_defvec=x86_64pe_vec
     targ_selvecs="x86_64pe_vec x86_64pei_vec bfd_elf64_x86_64_vec bfd_elf64_l1om_vec"
     want64=true
-    targ_underscore=yes
+    targ_underscore=no
     ;;
 #endif
   i[3-7]86-*-lynxos*)
@@ -1509,6 +1508,10 @@ case "${targ}" in
 
   vax-*-linux-*)
     targ_defvec=bfd_elf32_vax_vec
+    ;;
+
+  vax*-*-*vms*)
+    targ_defvec=vms_vax_vec
     ;;
 
   we32k-*-*)
