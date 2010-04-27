@@ -459,6 +459,9 @@ struct main_type
      For a function or method type, describes the type of the return value.
      For a range type, describes the type of the full range.
      For a complex type, describes the type of each coordinate.
+     For a special record or union type encoding a dynamic-sized type
+     in GNAT, a memoized pointer to a corresponding static version of
+     the type.
      Unused otherwise.  */
 
   struct type *target_type;
