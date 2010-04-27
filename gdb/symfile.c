@@ -2290,14 +2290,13 @@ reread_symbols (void)
       if (objfile->separate_debug_objfile_backlink)
 	continue;
 
-#ifdef DEPRECATED_IBM6000_TARGET
-      /* If this object is from a shared library, then you should
-	 stat on the library name, not member name. */
-
+      /* If this object is from an archive (what you usually create with
+	 `ar', often called a `static library' on most systems, though
+	 a `shared library' on AIX is also an archive), then you should
+	 stat on the archive name, not member name.  */
       if (objfile->obfd->my_archive)
 	res = stat (objfile->obfd->my_archive->filename, &new_statbuf);
       else
-#endif
 	res = stat (objfile->name, &new_statbuf);
       if (res != 0)
 	{
