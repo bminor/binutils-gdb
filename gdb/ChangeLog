@@ -1,5 +1,10 @@
 2010-04-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* symfile.c (init_filename_language_table): Register .dg files
+	with language_ada.
+
+2010-04-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.h (struct main_type): Expand comment about target_type
 	field.
 
