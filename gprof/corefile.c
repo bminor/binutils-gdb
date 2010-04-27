@@ -1,7 +1,7 @@
 /* corefile.c
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009,
+   2010  Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -517,7 +517,7 @@ core_create_syms_from (const char * sym_table_file)
       done (1);
     }
 
-  while (!feof (f) && fgets (buf, sizeof (buf), f))
+  while (!feof (f) && fgets (buf, BUFSIZE - 1, f))
     {
       if (sscanf (buf, "%s %c %s", address, &type, name) == 3)
         if (type != 't' && type != 'T')
