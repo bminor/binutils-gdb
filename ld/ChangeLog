@@ -1,4 +1,10 @@
 2010-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (install-exec-local): Properly install ld as
+	default cross linker.
+	* Makefile.in: Regenerated.
+
+2010-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 	    Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (install_as_default): Define and set to true
