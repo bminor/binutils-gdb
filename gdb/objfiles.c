@@ -53,6 +53,7 @@
 #include "observer.h"
 #include "complaints.h"
 #include "psymtab.h"
+#include "solist.h"
 
 /* Prototypes for local functions */
 
@@ -688,6 +689,11 @@ void
 free_all_objfiles (void)
 {
   struct objfile *objfile, *temp;
+  struct so_list *so;
+
+  /* Any objfile referencewould become stale.  */
+  for (so = master_so_list (); so; so = so->next)
+    gdb_assert (so->objfile == NULL);
 
   ALL_OBJFILES_SAFE (objfile, temp)
   {

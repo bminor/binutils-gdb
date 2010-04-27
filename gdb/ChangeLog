@@ -1,3 +1,10 @@
+2010-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* objfiles.c: Include solist.h.
+	(free_all_objfiles): New variable so.  Check stale solist objfiles.
+	* symfile.c (symbol_file_clear): Swap the order of free_all_objfiles
+	and no_shared_libraries.
+
 2010-04-27  Joel Brobecker  <brobecker@adacore.com>
 
 	ARI warning fix.

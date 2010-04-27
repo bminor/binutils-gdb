@@ -1228,12 +1228,11 @@ symbol_file_clear (int from_tty)
 	  : !query (_("Discard symbol table? "))))
     error (_("Not confirmed."));
 
-  free_all_objfiles ();
-
-  /* solib descriptors may have handles to objfiles.  Since their
-     storage has just been released, we'd better wipe the solib
-     descriptors as well.  */
+  /* solib descriptors may have handles to objfiles.  Wipe them before their
+     objfiles get stale by free_all_objfiles.  */
   no_shared_libraries (NULL, from_tty);
+
+  free_all_objfiles ();
 
   gdb_assert (symfile_objfile == NULL);
   if (from_tty)
