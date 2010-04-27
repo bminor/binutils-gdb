@@ -1,3 +1,7 @@
+2010-04-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2010-04-23  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_program_headers): Replace use of
