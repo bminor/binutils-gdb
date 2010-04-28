@@ -1,3 +1,8 @@
+2010-04-28  Kai Tietz  <kai.tietz@onevision.com>
+
+	* config.bfd: Correct accidential reverted patch
+	about vax*-*-*vms*.
+
 2010-04-27  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe-x86_64.c (TARGET_UNDERSCORE): Set value dependent

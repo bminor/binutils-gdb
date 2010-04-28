@@ -1510,10 +1510,6 @@ case "${targ}" in
     targ_defvec=bfd_elf32_vax_vec
     ;;
 
-  vax*-*-*vms*)
-    targ_defvec=vms_vax_vec
-    ;;
-
   we32k-*-*)
     targ_defvec=we32kcoff_vec
     ;;
