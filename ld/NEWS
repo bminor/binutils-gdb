@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Turn off underscoring for x86_64 PE+-COFF targets.  For old behavior the
+  option --enable-leading-mingw64-underscores can be used on configure of
+  bfd.
+
 * Add support for the TMS320C6000 (TI C6X) processor family.
 
 * --add-needed renamed to --copy-dt-needed-entries in order to avoid confusion

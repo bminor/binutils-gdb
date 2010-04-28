@@ -1,3 +1,11 @@
+2010-04-27  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe-dll.c (_nm_-symbols): Use always underscored variant
+	for symbols.
+	(__imp_-symbols): Likewise.
+	(___imp_-symbols): Likewise.
+	* NEWS: Mention ABI change for x64 PE-COFF.
+
 2010-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (install-exec-local): Properly install ld as

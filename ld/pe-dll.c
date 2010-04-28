@@ -385,7 +385,7 @@ static const autofilter_entry_type autofilter_symbolprefixlist[] =
   { STRING_COMMA_LEN ("__rtti_") },
   { STRING_COMMA_LEN ("__builtin_") },
   /* Don't re-export auto-imported symbols.  */
-  { STRING_COMMA_LEN ("_nm_") },
+  { STRING_COMMA_LEN ("__nm_") },
   /* Don't export symbols specifying internal DLL layout.  */
   { STRING_COMMA_LEN ("_head_") },
   { STRING_COMMA_LEN ("_IMPORT_DESCRIPTOR_") },
@@ -2135,11 +2135,11 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
       /* Symbol to reference ord/name of imported
 	 data symbol, used to implement auto-import.  */
       if (exp->flag_data)
-	quick_symbol (abfd, U ("_nm_"), U (""), exp->internal_name, id6,
+	quick_symbol (abfd, "__nm_", U (""), exp->internal_name, id6,
 		      BSF_GLOBAL,0);
     }
   if (pe_dll_compat_implib)
-    quick_symbol (abfd, U ("__imp_"), exp->internal_name, "", id5,
+    quick_symbol (abfd, "___imp_", exp->internal_name, "", id5,
 		  BSF_GLOBAL, 0);
 
   if (include_jmp_stub)
@@ -2286,7 +2286,7 @@ make_singleton_name_imp (const char *import, bfd *parent)
   symptr = 0;
   symtab = xmalloc (3 * sizeof (asymbol *));
   id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
-  quick_symbol (abfd, U ("_imp_"), import, "", id5, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__imp_", import, "", id5, BSF_GLOBAL, 0);
 
   /* We need space for the real thunk and for the null terminator.  */
   bfd_set_section_size (abfd, id5, PE_IDATA5_SIZE * 2);
@@ -2327,8 +2327,8 @@ make_singleton_name_thunk (const char *import, bfd *parent)
   symptr = 0;
   symtab = xmalloc (3 * sizeof (asymbol *));
   id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
-  quick_symbol (abfd, U ("_nm_thnk_"), import, "", id4, BSF_GLOBAL, 0);
-  quick_symbol (abfd, U ("_nm_"), import, "", UNDSEC, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__nm_thnk_", import, "", id4, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__nm_", import, "", UNDSEC, BSF_GLOBAL, 0);
 
   /* We need space for the real thunk and for the null terminator.  */
   bfd_set_section_size (abfd, id4, PE_IDATA4_SIZE * 2);
@@ -2420,12 +2420,12 @@ make_import_fixup_entry (const char *name,
   symtab = xmalloc (6 * sizeof (asymbol *));
   id2 = quick_section (abfd, ".idata$2", SEC_HAS_CONTENTS, 2);
 
-  quick_symbol (abfd, U ("_nm_thnk_"), name, "", UNDSEC, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__nm_thnk_", name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
   /* For relocator v2 we have to use the .idata$5 element and not 
      fixup_name.  */
   if (link_info.pei386_runtime_pseudo_reloc == 2)
-    quick_symbol (abfd, U ("_imp_"), name, "", UNDSEC, BSF_GLOBAL, 0);
+    quick_symbol (abfd, "__imp_", name, "", UNDSEC, BSF_GLOBAL, 0);
   else
     quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
 
@@ -2495,7 +2495,7 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
 		  size += 12;
 		  runtime_pseudp_reloc_v2_init = 1;
 	    }
-      quick_symbol (abfd, U ("_imp_"), name, "", UNDSEC, BSF_GLOBAL, 0);
+      quick_symbol (abfd, "__imp_", name, "", UNDSEC, BSF_GLOBAL, 0);
 
       bfd_set_section_size (abfd, rt_rel, size);
       rt_rel_d = xmalloc (size);
@@ -2588,10 +2588,10 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend)
   bfd *b;
   int need_import_table = 1;
 
-  sprintf (buf, U ("_imp_%s"), name);
+  sprintf (buf, "__imp_%s", name);
   name_imp_sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
 
-  sprintf (buf, U ("_nm_thnk_%s"), name);
+  sprintf (buf, "__nm_thnk_%s", name);
 
   name_thunk_sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
 
@@ -2803,8 +2803,9 @@ pe_undef_alias_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
 
   sl = strlen (string);
   if (h->type == bfd_link_hash_undefined
-      && ((*hs == '@' && *string == '_'
-	   && strncmp (hs + 1, string + 1, sl - 1) == 0)
+      && ((*hs == '@' && (!pe_details->underscored || *string == '_')
+	   && strncmp (hs + 1, string + (pe_details->underscored != 0),
+		       sl - (pe_details->underscored != 0)) == 0)
 	  || strncmp (hs, string, sl) == 0)
       && h->root.string[sl] == '@')
     {
@@ -3149,7 +3150,7 @@ pe_implied_import_dll (const char *filename)
 
       /* Skip unwanted symbols, which are
 	 exported in buggy auto-import releases.  */
-      if (! CONST_STRNEQ (erva + name_rva, "_nm_"))
+      if (! CONST_STRNEQ (erva + name_rva, "__nm_"))
  	{
  	  /* is_data is true if the address is in the data, rdata or bss
 	     segment.  */
