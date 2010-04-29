@@ -3567,7 +3567,7 @@
 	addr_bit.  Adjust LOAD_ADDR sign for cross-arch inferiors.
 
 2010-02-17  Tristan Gingold  <gingold@adacore.com>
-	    Petr Hluzín <petr.hluzin@gmail.com>
+	    Petr Hluzin  <petr.hluzin@gmail.com>
 
 	* avr-tdep.c (avr_scan_prologue): Convert an if statement to a
 	gdb_assert.  Fix info->size for SIG prologue.
