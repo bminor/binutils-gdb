@@ -159,5 +159,6 @@ extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
 
 extern void registers_changed (void);
+extern void registers_changed_ptid (ptid_t);
 
 #endif /* REGCACHE_H */

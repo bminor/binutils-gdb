@@ -2192,6 +2192,7 @@ target_resume (ptid_t ptid, int step, enum target_signal signal)
 				step ? "step" : "continue",
 				target_signal_to_name (signal));
 
+	  registers_changed_ptid (ptid);
 	  set_executing (ptid, 1);
 	  set_running (ptid, 1);
 	  clear_inline_frame_state (ptid);

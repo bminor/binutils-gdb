@@ -518,15 +518,27 @@ regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
    Indicate that registers may have changed, so invalidate the cache.  */
 
 void
-registers_changed (void)
+registers_changed_ptid (ptid_t ptid)
 {
-  struct regcache_list *list, *next;
+  struct regcache_list *list, **list_link;
 
-  for (list = current_regcache; list; list = next)
+  list = current_regcache;
+  list_link = &current_regcache;
+  while (list)
     {
-      next = list->next;
-      regcache_xfree (list->regcache);
-      xfree (list);
+      if (ptid_match (list->regcache->ptid, ptid))
+	{
+	  struct regcache_list *dead = list;
+
+	  *list_link = list->next;
+	  regcache_xfree (list->regcache);
+	  list = *list_link;
+	  xfree (dead);
+	  continue;
+	}
+
+      list_link = &list->next;
+      list = *list_link;
     }
 
   current_regcache = NULL;
@@ -545,6 +557,11 @@ registers_changed (void)
   alloca (0);
 }
 
+void
+registers_changed (void)
+{
+  registers_changed_ptid (minus_one_ptid);
+}
 
 void
 regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)

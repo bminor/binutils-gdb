@@ -1,3 +1,10 @@
+2010-04-29  Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/11557
+
+	* gdb.mi/mi-ns-stale-regcache.exp, gdb.mi/ns-stale-regcache.c: New
+	files.
+
 2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
 
         * gdb.python/py-param.exp: New File.

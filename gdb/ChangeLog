@@ -1,3 +1,14 @@
+2010-04-29  Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/11557
+
+	* regcache.c (registers_changed): Rename to ...
+	(registers_changed_ptid): ... this, and only delete register cache
+	entries matching the ptid filter argument.
+	(registers_changed): Reimplement on top of registers_changed_ptid.
+	* regcache.h (registers_changed_ptid): Declare.
+	* target.c (target_resume): Flush register caches.
+
 2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
             Tom Tromey  <tromey@redhat.com>
             Thiago Jung Bauermann  <bauerman@br.ibm.com>
