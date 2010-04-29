@@ -26,7 +26,6 @@ struct ui_file;
 extern int generic_readchar (struct serial *scb, int timeout,
 			     int (*do_readchar) (struct serial *scb,
 						 int timeout));
-extern void reschedule (struct serial *scb);
 extern int ser_base_flush_output (struct serial *scb);
 extern int ser_base_flush_input (struct serial *scb);
 extern int ser_base_send_break (struct serial *scb);

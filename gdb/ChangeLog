@@ -1,3 +1,8 @@
+2010-04-29  Doug Evans  <dje@google.com>
+
+	* ser-base.h (reschedule): Delete prototype.
+	* ser-base.c (reschedule): Make static.
+
 2010-04-29  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm-linux-tdep.c (ARM_LINUX_JB_PC): Remove.

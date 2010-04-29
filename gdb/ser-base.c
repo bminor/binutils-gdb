@@ -63,7 +63,7 @@ enum {
    the need to make redundant calls into the event-loop - the next
    scheduled task is only changed when needed. */
 
-void
+static void
 reschedule (struct serial *scb)
 {
   if (serial_is_async_p (scb))
