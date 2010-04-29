@@ -1,3 +1,11 @@
+2010-04-29  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/arm/weakdef-1.s: New.
+	* gas/arm/weakdef-1.d: New.
+	* gas/arm/weakdef-2.s: New.
+	* gas/arm/weakdef-2.d: New.
+	* gas/arm/weakdef-2.l: New.
+
 2010-04-27  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/tic6x/align-1-be.d, gas/tic6x/align-1.d,

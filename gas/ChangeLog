@@ -1,3 +1,11 @@
+2010-04-29  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* write.c (fixup_segment): Do not assume we know the section a
+	defined weak symbol is in.
+	* config/tc-arm.c (relax_adr, relax_branch, md_apply_fix): Treat
+	weak symbols as not known to be in the same section, even if they
+	are defined.
+
 2010-04-27  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-tic6x.h (tic6x_label_list): New.

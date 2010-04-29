@@ -18530,7 +18530,8 @@ relax_adr (fragS *fragp, asection *sec, long stretch)
   /* Assume worst case for symbols not known to be in the same section.  */
   if (fragp->fr_symbol == NULL
       || !S_IS_DEFINED (fragp->fr_symbol)
-      || sec != S_GET_SEGMENT (fragp->fr_symbol))
+      || sec != S_GET_SEGMENT (fragp->fr_symbol)
+      || S_IS_WEAK (fragp->fr_symbol))
     return 4;
 
   val = relaxed_symbol_addr (fragp, stretch);
@@ -18573,7 +18574,8 @@ relax_branch (fragS *fragp, asection *sec, int bits, long stretch)
 
   /* Assume worst case for symbols not known to be in the same section.  */
   if (!S_IS_DEFINED (fragp->fr_symbol)
-      || sec != S_GET_SEGMENT (fragp->fr_symbol))
+      || sec != S_GET_SEGMENT (fragp->fr_symbol)
+      || S_IS_WEAK (fragp->fr_symbol))
     return 4;
 
 #ifdef OBJ_ELF
@@ -19784,22 +19786,23 @@ md_apply_fix (fixS *	fixP,
 	 not have a reloc for it, so tc_gen_reloc will reject it.  */
       fixP->fx_done = 1;
 
-      if (fixP->fx_addsy
-	  && ! S_IS_DEFINED (fixP->fx_addsy))
+      if (fixP->fx_addsy)
 	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("undefined symbol %s used as an immediate value"),
-			S_GET_NAME (fixP->fx_addsy));
-	  break;
-	}
+	  const char *msg = 0;
 
-      if (fixP->fx_addsy
-	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
-	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("symbol %s is in a different section"),
-			S_GET_NAME (fixP->fx_addsy));
-	  break;
+	  if (! S_IS_DEFINED (fixP->fx_addsy))
+	    msg = _("undefined symbol %s used as an immediate value");
+	  else if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	    msg = _("symbol %s is in a different section");
+	  else if (S_IS_WEAK (fixP->fx_addsy))
+	    msg = _("symbol %s is weak and may be overridden later");
+
+	  if (msg)
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    msg, S_GET_NAME (fixP->fx_addsy));
+	      break;
+	    }
 	}
 
       newimm = encode_arm_immediate (value);
@@ -19825,24 +19828,25 @@ md_apply_fix (fixS *	fixP,
 	unsigned int highpart = 0;
 	unsigned int newinsn  = 0xe1a00000; /* nop.  */
 
-	if (fixP->fx_addsy
-	    && ! S_IS_DEFINED (fixP->fx_addsy))
+	if (fixP->fx_addsy)
 	  {
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("undefined symbol %s used as an immediate value"),
-			  S_GET_NAME (fixP->fx_addsy));
-	    break;
-	  }
+	    const char *msg = 0;
 
-	if (fixP->fx_addsy
-	    && S_GET_SEGMENT (fixP->fx_addsy) != seg)
-	  {
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("symbol %s is in a different section"),
-			  S_GET_NAME (fixP->fx_addsy));
-	    break;
-	  }
+	    if (! S_IS_DEFINED (fixP->fx_addsy))
+	      msg = _("undefined symbol %s used as an immediate value");
+	    else if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	      msg = _("symbol %s is in a different section");
+	    else if (S_IS_WEAK (fixP->fx_addsy))
+	      msg = _("symbol %s is weak and may be overridden later");
 
+	    if (msg)
+	      {
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      msg, S_GET_NAME (fixP->fx_addsy));
+		break;
+	      }
+	  }
+	
 	newimm = encode_arm_immediate (value);
 	temp = md_chars_to_number (buf, INSN_SIZE);
 
