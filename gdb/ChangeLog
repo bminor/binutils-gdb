@@ -1,3 +1,12 @@
+2010-04-29  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-linux-tdep.c (ARM_LINUX_JB_PC): Remove.
+	(ARM_LINUX_JB_PC_FPA): Add, offset of PC in longjmp buffer for FPA.
+	(ARM_LINUX_JB_PC_EABI): Add, offset of PC in longjmp buffer for 
+	EABI.
+	(arm_linux_init_abi): Set up JB_PC field dependent on FP model in 
+	use.
+
 2010-04-29  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/11557

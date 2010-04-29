@@ -82,9 +82,20 @@ static const char arm_linux_thumb2_be_breakpoint[] = { 0xf7, 0xf0, 0xa0, 0x00 };
 
 static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
 
-/* Description of the longjmp buffer.  */
+/* Description of the longjmp buffer.  The buffer is treated as an array of 
+   elements of size ARM_LINUX_JB_ELEMENT_SIZE.
+
+   The location of saved registers in this buffer (in particular the PC
+   to use after longjmp is called) varies depending on the ABI (in 
+   particular the FP model) and also (possibly) the C Library.
+
+   For glibc, eglibc, and uclibc the following holds:  If the FP model is 
+   SoftVFP or VFP (which implies EABI) then the PC is at offset 9 in the 
+   buffer.  This is also true for the SoftFPA model.  However, for the FPA 
+   model the PC is at offset 21 in the buffer.  */
 #define ARM_LINUX_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
-#define ARM_LINUX_JB_PC			21
+#define ARM_LINUX_JB_PC_FPA		21
+#define ARM_LINUX_JB_PC_EABI		9
 
 /*
    Dynamic Linking on ARM GNU/Linux
@@ -877,7 +888,22 @@ arm_linux_init_abi (struct gdbarch_info info,
   if (tdep->fp_model == ARM_FLOAT_AUTO)
     tdep->fp_model = ARM_FLOAT_FPA;
 
-  tdep->jb_pc = ARM_LINUX_JB_PC;
+  switch (tdep->fp_model)
+    {
+    case ARM_FLOAT_FPA:
+      tdep->jb_pc = ARM_LINUX_JB_PC_FPA;
+      break;
+    case ARM_FLOAT_SOFT_FPA:
+    case ARM_FLOAT_SOFT_VFP:
+    case ARM_FLOAT_VFP:
+      tdep->jb_pc = ARM_LINUX_JB_PC_EABI;
+      break;
+    default:
+      internal_error
+	(__FILE__, __LINE__,
+         _("arm_linux_init_abi: Floating point model not supported"));
+      break;
+    }
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
   set_solib_svr4_fetch_link_map_offsets
