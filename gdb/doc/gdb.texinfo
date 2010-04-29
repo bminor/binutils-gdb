@@ -214,6 +214,9 @@ You can use @value{GDBN} to debug programs written in C and C@t{++}.
 For more information, see @ref{Supported Languages,,Supported Languages}.
 For more information, see @ref{C,,C and C++}.
 
+Support for D is partial.  For information on D, see
+@ref{D,,D}.
+
 @cindex Modula-2
 Support for Modula-2 is partial.  For information on Modula-2, see
 @ref{Modula-2,,Modula-2}.
@@ -10824,6 +10827,9 @@ C source file
 @itemx .c++
 C@t{++} source file
 
+@item .d
+D source file
+
 @item .m
 Objective-C source file
 
@@ -11101,7 +11107,7 @@ being set automatically by @value{GDBN}.
 @node Supported Languages
 @section Supported Languages
 
-@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, Pascal,
+@value{GDBN} supports C, C@t{++}, D, Objective-C, Fortran, Java, Pascal,
 assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
@@ -11120,6 +11126,7 @@ language reference or tutorial.
 
 @menu
 * C::                           C and C@t{++}
+* D::                           D
 * Objective-C::                 Objective-C
 * Fortran::                     Fortran
 * Pascal::                      Pascal
@@ -11656,6 +11663,14 @@ underflow, overflow and divide by zero exceptions.
 In the PowerPC architecture, @value{GDBN} provides a set of pseudo-registers
 to inspect @code{_Decimal128} values stored in floating point registers.
 See @ref{PowerPC,,PowerPC} for more details.
+
+@node D
+@subsection D
+
+@cindex D
+@value{GDBN} can be used to debug programs written in D and compiled with
+GDC, LDC or DMD compilers. Currently @value{GDBN} supports only one D
+specific feature --- dynamic arrays.
 
 @node Objective-C
 @subsection Objective-C

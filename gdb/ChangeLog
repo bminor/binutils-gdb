@@ -1,3 +1,25 @@
+2010-04-29  Mihail Zenkov  <mihail.zenkov@gmail.com>
+
+	D language support.
+	* Makefile.in (SFILES): Add d-lang.c d-valprint.c.
+	(COMMON_OBS): Add d-lang.o d-valprint.o.
+	(HFILES_NO_SRCDIR): Add d-lang.h.
+	* NEWS: Mention D language support.
+	* c-lang.c (c_emit_char, exp_descriptor_c): Make public.
+	* c-lang.h (c_emit_char, exp_descriptor_c): Add declaration.
+	* d-lang.c: New file.
+	* d-lang.h: New file.
+	* d-valprint.c: New file.
+	* defs.h (enum language): Add language_d.
+	* dwarf2read.c (set_cu_language): Add DW_LANG_D.
+	* language.c (binop_result_type, integral_type, character_type)
+	(string_type, boolean_type, structured_type): Add language_d.
+	* symfile.c (init_filename_language_table): Add language_d.
+	* symtab.c: Include d-lang.h.
+	(symbol_init_language_specific, symbol_find_demangled_name)
+	(symbol_natural_name, lookup_symbol_in_language)
+	(symbol_demangled_name, symbol_matches_domain): Add language_d.
+
 2010-04-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-svr4.c (solib_svr4_r_map): Expand function description.

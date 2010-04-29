@@ -188,6 +188,7 @@ enum language
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
     language_cplus,		/* C++ */
+    language_d,			/* D */
     language_objc,		/* Objective-C */
     language_java,		/* Java */
     language_fortran,		/* Fortran */

@@ -7619,6 +7619,9 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_C_plus_plus:
       cu->language = language_cplus;
       break;
+    case DW_LANG_D:
+      cu->language = language_d;
+      break;
     case DW_LANG_Fortran77:
     case DW_LANG_Fortran90:
     case DW_LANG_Fortran95:

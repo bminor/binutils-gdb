@@ -253,8 +253,9 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig, int orig_len,
    string whose delimiter is QUOTER.  Note that that format for printing
    characters and strings is language specific. */
 
-static void
-c_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
+void
+c_emit_char (int c, struct type *type,
+	     struct ui_file *stream, int quoter)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   struct obstack wchar_buf, output;
@@ -1135,7 +1136,7 @@ c_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_int;
 }
 
-static const struct exp_descriptor exp_descriptor_c = 
+const struct exp_descriptor exp_descriptor_c = 
 {
   print_subexp_standard,
   operator_length_standard,

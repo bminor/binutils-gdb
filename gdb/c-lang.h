@@ -87,6 +87,11 @@ extern void c_printstr (struct ui_file * stream, struct type *elttype,
 extern void c_language_arch_info (struct gdbarch *gdbarch,
 				  struct language_arch_info *lai);
 
+extern const struct exp_descriptor exp_descriptor_c;
+
+extern void c_emit_char (int c, struct type *type,
+			 struct ui_file *stream, int quoter);
+
 /* These are in c-typeprint.c: */
 
 extern void c_type_print_base (struct type *, struct ui_file *, int, int);

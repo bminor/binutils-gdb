@@ -1,3 +1,9 @@
+2010-04-29  Mihail Zenkov  <mihail.zenkov@gmail.com>
+
+	* gdb.texinfo: (Summary) Add mention about D language support.
+	(Filenames): Add D suffixes.
+	(D): New node.
+
 2010-04-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdbint.texinfo (CANNOT_STEP_HW_WATCHPOINTS): Remove explanation

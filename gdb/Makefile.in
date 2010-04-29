@@ -658,6 +658,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	charset.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
+	d-lang.c d-valprint.c \
 	cp-name-parser.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
@@ -725,7 +726,7 @@ cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h varobj.h frv-tdep.h nto-tdep.h serial.h \
-c-lang.h frame.h event-loop.h block.h cli/cli-setshow.h	\
+c-lang.h d-lang.h frame.h event-loop.h block.h cli/cli-setshow.h	\
 cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h \
 cli/cli-script.h macrotab.h symtab.h version.h gnulib/wchar.in.h \
 gnulib/string.in.h gnulib/str-two-way.h gnulib/extra/link-warning.h \
@@ -831,7 +832,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	dbxread.o coffread.o coff-pe-read.o \
 	dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
-	ada-lang.o c-lang.o f-lang.o objc-lang.o \
+	ada-lang.o c-lang.o d-lang.o f-lang.o objc-lang.o \
 	ada-tasks.o \
 	ui-out.o cli-out.o \
 	varobj.o vec.o wrapper.o \
@@ -841,7 +842,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	sentinel-frame.o \
 	complaints.o typeprint.o \
 	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
-	ada-valprint.o c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
+	ada-valprint.o c-valprint.o cp-valprint.o d-valprint.o f-valprint.o \
+	m2-valprint.o \
 	serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	user-regs.o \

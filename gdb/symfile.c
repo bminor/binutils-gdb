@@ -2616,6 +2616,7 @@ init_filename_language_table (void)
       filename_language_table =
 	xmalloc (fl_table_size * sizeof (*filename_language_table));
       add_filename_language (".c", language_c);
+      add_filename_language (".d", language_d);
       add_filename_language (".C", language_cplus);
       add_filename_language (".cc", language_cplus);
       add_filename_language (".cp", language_cplus);

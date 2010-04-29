@@ -39,6 +39,7 @@
 #include "source.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 #include "objc-lang.h"
+#include "d-lang.h"
 #include "ada-lang.h"
 #include "p-lang.h"
 #include "addrmap.h"
@@ -346,6 +347,7 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
 {
   gsymbol->language = language;
   if (gsymbol->language == language_cplus
+      || gsymbol->language == language_d
       || gsymbol->language == language_java
       || gsymbol->language == language_objc)
     {
@@ -446,6 +448,16 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
       if (demangled != NULL)
 	{
 	  gsymbol->language = language_java;
+	  return demangled;
+	}
+    }
+  if (gsymbol->language == language_d
+      || gsymbol->language == language_auto)
+    {
+      demangled = d_demangle(mangled, 0);
+      if (demangled != NULL)
+	{
+	  gsymbol->language = language_d;
 	  return demangled;
 	}
     }
@@ -626,6 +638,7 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
   switch (gsymbol->language)
     {
     case language_cplus:
+    case language_d:
     case language_java:
     case language_objc:
       if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
@@ -651,6 +664,7 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
   switch (gsymbol->language)
     {
     case language_cplus:
+    case language_d:
     case language_java:
     case language_objc:
       if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
@@ -940,7 +954,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 
   modified_name = name;
 
-  /* If we are using C++ or Java, demangle the name before doing a lookup, so
+  /* If we are using C++, D, or Java, demangle the name before doing a lookup, so
      we can always binary search. */
   if (lang == language_cplus)
     {
@@ -966,6 +980,15 @@ lookup_symbol_in_language (const char *name, const struct block *block,
     {
       demangled_name = cplus_demangle (name,
 		      		       DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
+      if (demangled_name)
+	{
+	  modified_name = demangled_name;
+	  make_cleanup (xfree, demangled_name);
+	}
+    }
+  else if (lang == language_d)
+    {
+      demangled_name = d_demangle (name, 0);
       if (demangled_name)
 	{
 	  modified_name = demangled_name;
@@ -1412,6 +1435,7 @@ symbol_matches_domain (enum language symbol_language,
      A Java class declaration also defines a typedef for the class.
      Similarly, any Ada type declaration implicitly defines a typedef.  */
   if (symbol_language == language_cplus
+      || symbol_language == language_d
       || symbol_language == language_java
       || symbol_language == language_ada)
     {

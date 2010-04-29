@@ -486,6 +486,7 @@ binop_result_type (struct value *v1, struct value *v2)
     {
     case language_c:
     case language_cplus:
+    case language_d:
     case language_objc:
       if (TYPE_CODE (t1) == TYPE_CODE_FLT)
 	return TYPE_CODE (t2) == TYPE_CODE_FLT && l2 > l1 ?
@@ -597,6 +598,7 @@ integral_type (struct type *type)
     {
     case language_c:
     case language_cplus:
+    case language_d:
     case language_objc:
       return (TYPE_CODE (type) != TYPE_CODE_INT) &&
 	(TYPE_CODE (type) != TYPE_CODE_ENUM) ? 0 : 1;
@@ -637,6 +639,7 @@ character_type (struct type *type)
 
     case language_c:
     case language_cplus:
+    case language_d:
     case language_objc:
       return (TYPE_CODE (type) == TYPE_CODE_INT) &&
 	TYPE_LENGTH (type) == sizeof (char)
@@ -659,6 +662,7 @@ string_type (struct type *type)
 
     case language_c:
     case language_cplus:
+    case language_d:
     case language_objc:
       /* C does not have distinct string type. */
       return (0);
@@ -678,6 +682,7 @@ boolean_type (struct type *type)
     {
     case language_c:
     case language_cplus:
+    case language_d:
     case language_objc:
       /* Might be more cleanly handled by having a
          TYPE_CODE_INT_NOT_BOOL for (the deleted) CHILL and such
@@ -717,6 +722,7 @@ structured_type (struct type *type)
     {
     case language_c:
     case language_cplus:
+    case language_d:
     case language_objc:
       return (TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
 	(TYPE_CODE (type) == TYPE_CODE_UNION) ||
