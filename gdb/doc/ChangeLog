@@ -1,3 +1,9 @@
+2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
+            Tom Tromey  <tromey@redhat.com>
+            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+       * gdb.texinfo (Parameters In Python): New Node.
+
 2010-04-29  Mihail Zenkov  <mihail.zenkov@gmail.com>
 
 	* gdb.texinfo: (Summary) Add mention about D language support.

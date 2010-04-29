@@ -275,6 +275,7 @@ SUBDIR_PYTHON_OBS = \
 	py-function.o \
 	py-lazy-string.o \
 	py-objfile.o \
+	py-param.o \
 	py-prettyprint.o \
 	py-progspace.o \
 	py-symbol.o \
@@ -292,6 +293,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-function.c \
 	python/py-lazy-string.c \
 	python/py-objfile.c \
+	python/py-param.c \
 	python/py-prettyprint.c \
 	python/py-progspace.c \
 	python/py-symbol.c \
@@ -2021,6 +2023,10 @@ py-lazy-string.o: $(srcdir)/python/py-lazy-string.c
 
 py-objfile.o: $(srcdir)/python/py-objfile.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-objfile.c
+	$(POSTCOMPILE)
+
+py-param.o: $(srcdir)/python/py-param.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-param.c
 	$(POSTCOMPILE)
 
 py-prettyprint.o: $(srcdir)/python/py-prettyprint.c

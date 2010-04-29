@@ -1,3 +1,24 @@
+2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
+            Tom Tromey  <tromey@redhat.com>
+            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+        * Makefile.in (SUBDIR_PYTHON_OBS): Add py-parameter.
+        (SUBDIR_PYTHON_SRCS): Likewise.
+        (py-parameter.o): New rule.
+        * python/py-parameter.c: New file.
+        * python/python-internal.h (gdbpy_initialize_parameter)
+        (gdbpy_parameter, gdbpy_parameter_value)
+        (gdbpy_parse_command_name): Declare.
+        * python/py-cmd.c (parse_command_name): Rename to
+        gdbpy_parse_command_name.
+        (gdbpy_parse_command_name): Accept a starting list parameter and
+        use over cmdlist.
+        (cmdpy_init): Use gdbpy_parse_command_name.
+        * python/python.c (parameter_to_python): Rename to
+        gdbpy_parameter_to_python.  Accept enum var_types and value.
+        (gdbpy_parameter): Use gdbpy_parameter_value.
+        (_initialize_python): Call gdbpy_initialize_parameters.
+
 2010-04-29  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* MAINTAINERS: Add myself for write after approval privileges.

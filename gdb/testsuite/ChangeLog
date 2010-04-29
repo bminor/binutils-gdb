@@ -1,3 +1,7 @@
+2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
+
+        * gdb.python/py-param.exp: New File.
+
 2010-04-29  Mihail Zenkov  <mihail.zenkov@gmail.com>
 
 	* gdb.base/default.exp: Fix "set language" test.

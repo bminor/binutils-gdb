@@ -67,6 +67,9 @@ typedef int Py_ssize_t;
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"
 
+/* Also needed to parse enum var_types. */
+#include "command.h"
+
 struct block;
 struct value;
 struct language_defn;
@@ -90,6 +93,11 @@ PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 					   const char *encoding, struct type *type);
 PyObject *gdbpy_get_hook_function (const char *);
+PyObject *gdbpy_parameter (PyObject *self, PyObject *args);
+PyObject *gdbpy_parameter_value (enum var_types type, void *var);
+char *gdbpy_parse_command_name (char *text,
+				struct cmd_list_element ***base_list,
+				struct cmd_list_element **start_list);
 
 PyObject *symtab_and_line_to_sal_object (struct symtab_and_line sal);
 PyObject *symtab_to_symtab_object (struct symtab *symtab);
@@ -126,6 +134,7 @@ void gdbpy_initialize_pspace (void);
 void gdbpy_initialize_objfile (void);
 void gdbpy_initialize_breakpoints (void);
 void gdbpy_initialize_lazy_string (void);
+void gdbpy_initialize_parameters (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 

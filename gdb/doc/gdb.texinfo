@@ -19941,6 +19941,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Pretty Printing API::         Pretty-printing values.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
 * Commands In Python::          Implementing new commands in Python.
+* Parameters In Python::        Adding new @value{GDBN} parameters.
 * Functions In Python::         Writing new convenience functions.
 * Progspaces In Python::        Program spaces.
 * Objfiles In Python::          Object files.
@@ -20961,6 +20962,152 @@ The last line instantiates the class, and is necessary to trigger the
 registration of the command with @value{GDBN}.  Depending on how the
 Python code is read into @value{GDBN}, you may need to import the
 @code{gdb} module explicitly.
+
+@node Parameters In Python
+@subsubsection Parameters In Python
+
+@cindex parameters in python
+@cindex python parameters
+@tindex gdb.Parameter
+@tindex Parameter
+You can implement new @value{GDBN} parameters using Python.  A new
+parameter is implemented as an instance of the @code{gdb.Parameter}
+class.
+
+Parameters are exposed to the user via the @code{set} and
+@code{show} commands.  @xref{Help}.
+
+There are many parameters that already exist and can be set in
+@value{GDBN}.  Two examples are: @code{set follow fork} and
+@code{set charset}.  Setting these parameters influences certain
+behavior in @value{GDBN}.  Similarly, you can define parameters that
+can be used to influence behavior in custom Python scripts and commands.
+
+@defmethod Parameter __init__ name @var{command-class} @var{parameter-class} @r{[}@var{enum-sequence}@r{]}
+The object initializer for @code{Parameter} registers the new
+parameter with @value{GDBN}.  This initializer is normally invoked
+from the subclass' own @code{__init__} method.
+
+@var{name} is the name of the new parameter.  If @var{name} consists
+of multiple words, then the initial words are looked for as prefix
+parameters.  An example of this can be illustrated with the
+@code{set print} set of parameters.  If @var{name} is
+@code{print foo}, then @code{print} will be searched as the prefix
+parameter.  In this case the parameter can subsequently be accessed in
+@value{GDBN} as @code{set print foo}.
+
+If @var{name} consists of multiple words, and no prefix parameter group
+can be found, an exception is raised.
+
+@var{command-class} should be one of the @samp{COMMAND_} constants
+(@pxref{Commands In Python}).  This argument tells @value{GDBN} how to
+categorize the new parameter in the help system.
+
+@var{parameter-class} should be one of the @samp{PARAM_} constants
+defined below.  This argument tells @value{GDBN} the type of the new
+parameter; this information is used for input validation and
+completion.
+
+If @var{parameter-class} is @code{PARAM_ENUM}, then
+@var{enum-sequence} must be a sequence of strings.  These strings
+represent the possible values for the parameter.
+
+If @var{parameter-class} is not @code{PARAM_ENUM}, then the presence
+of a fourth argument will cause an exception to be thrown.
+
+The help text for the new parameter is taken from the Python
+documentation string for the parameter's class, if there is one.  If
+there is no documentation string, a default value is used.
+@end defmethod
+
+@defivar Parameter set_doc
+If this attribute exists, and is a string, then its value is used as
+the help text for this parameter's @code{set} command.  The value is
+examined when @code{Parameter.__init__} is invoked; subsequent changes
+have no effect.
+@end defivar
+
+@defivar Parameter show_doc
+If this attribute exists, and is a string, then its value is used as
+the help text for this parameter's @code{show} command.  The value is
+examined when @code{Parameter.__init__} is invoked; subsequent changes
+have no effect.
+@end defivar
+
+@defivar Parameter value
+The @code{value} attribute holds the underlying value of the
+parameter.  It can be read and assigned to just as any other
+attribute.  @value{GDBN} does validation when assignments are made.
+@end defivar
+
+
+When a new parameter is defined, its type must be specified.  The
+available types are represented by constants defined in the @code{gdb}
+module:
+
+@table @code
+@findex PARAM_BOOLEAN
+@findex gdb.PARAM_BOOLEAN
+@item PARAM_BOOLEAN
+The value is a plain boolean.  The Python boolean values, @code{True}
+and @code{False} are the only valid values.
+
+@findex PARAM_AUTO_BOOLEAN
+@findex gdb.PARAM_AUTO_BOOLEAN
+@item PARAM_AUTO_BOOLEAN
+The value has three possible states: true, false, and @samp{auto}.  In
+Python, true and false are represented using boolean constants, and
+@samp{auto} is represented using @code{None}.
+
+@findex PARAM_UINTEGER
+@findex gdb.PARAM_UINTEGER
+@item PARAM_UINTEGER
+The value is an unsigned integer.  The value of 0 should be
+interpreted to mean ``unlimited''.
+
+@findex PARAM_INTEGER
+@findex gdb.PARAM_INTEGER
+@item PARAM_INTEGER
+The value is a signed integer.  The value of 0 should be interpreted
+to mean ``unlimited''.
+
+@findex PARAM_STRING
+@findex gdb.PARAM_STRING
+@item PARAM_STRING
+The value is a string.  When the user modifies the string, any escape
+sequences, such as @samp{\t}, @samp{\f}, and octal escapes, are
+translated into corresponding characters and encoded into the current
+host charset.
+
+@findex PARAM_STRING_NOESCAPE
+@findex gdb.PARAM_STRING_NOESCAPE
+@item PARAM_STRING_NOESCAPE
+The value is a string.  When the user modifies the string, escapes are
+passed through untranslated.
+
+@findex PARAM_OPTIONAL_FILENAME
+@findex gdb.PARAM_OPTIONAL_FILENAME
+@item PARAM_OPTIONAL_FILENAME
+The value is a either a filename (a string), or @code{None}.
+
+@findex PARAM_FILENAME
+@findex gdb.PARAM_FILENAME
+@item PARAM_FILENAME
+The value is a filename.  This is just like
+@code{PARAM_STRING_NOESCAPE}, but uses file names for completion.
+
+@findex PARAM_ZINTEGER
+@findex gdb.PARAM_ZINTEGER
+@item PARAM_ZINTEGER
+The value is an integer.  This is like @code{PARAM_INTEGER}, except 0
+is interpreted as itself.
+
+@findex PARAM_ENUM
+@findex gdb.PARAM_ENUM
+@item PARAM_ENUM
+The value is a string, which must be one of a collection string
+constants provided when the parameter is created.
+@end table
 
 @node Functions In Python
 @subsubsection Writing new convenience functions
