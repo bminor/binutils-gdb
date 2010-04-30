@@ -97,12 +97,18 @@ static int maint_display_all_tib = 0;
 static struct type *
 windows_get_tlb_type (struct gdbarch *gdbarch)
 {
+  static struct gdbarch *last_gdbarch = NULL;
+  static struct type *last_tlb_type = NULL;
   struct type *dword_ptr_type, *dword32_type, *void_ptr_type;
   struct type *peb_ldr_type, *peb_ldr_ptr_type;
   struct type *peb_type, *peb_ptr_type, *list_type, *list_ptr_type;
   struct type *module_list_ptr_type;
   struct type *tib_type, *seh_type, *tib_ptr_type, *seh_ptr_type;
 
+  /* Do not rebuild type if same gdbarch as last time.  */
+  if (last_tlb_type && last_gdbarch == gdbarch)
+    return last_tlb_type;
+  
   dword_ptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
 				 1, "DWORD_PTR");
   dword32_type = arch_integer_type (gdbarch, 32,
@@ -210,6 +216,9 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   tib_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
 			    TYPE_LENGTH (void_ptr_type), NULL);
   TYPE_TARGET_TYPE (tib_ptr_type) = tib_type;
+
+  last_tlb_type = tib_ptr_type;
+  last_gdbarch = gdbarch;
 
   return tib_ptr_type;
 }

@@ -1,5 +1,10 @@
 2010-04-30  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* windows-tdep.c (windows_get_tlb_type): Remember last GDBARCH
+	and created type for re-use.
+
+2010-04-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* NEWS: Mention gdbserver support for x86_64 Windows 64-bit.
 
 2010-04-29  Doug Evans  <dje@google.com>
