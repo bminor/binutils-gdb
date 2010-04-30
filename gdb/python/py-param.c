@@ -36,7 +36,7 @@ struct parm_constant
 
 struct parm_constant parm_constants[] =
 {
-  { "PARAM_BOOLEAN", var_boolean },
+  { "PARAM_BOOLEAN", var_boolean }, /* ARI: var_boolean */
   { "PARAM_AUTO_BOOLEAN", var_auto_boolean },
   { "PARAM_UINTEGER", var_uinteger },
   { "PARAM_INTEGER", var_integer },
@@ -475,7 +475,8 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
       return -1;
     }
 
-  if (parmclass != var_boolean && parmclass != var_auto_boolean
+  if (parmclass != var_boolean /* ARI: var_boolean */
+      && parmclass != var_auto_boolean
       && parmclass != var_uinteger && parmclass != var_integer
       && parmclass != var_string && parmclass != var_string_noescape
       && parmclass != var_optional_filename && parmclass != var_filename
