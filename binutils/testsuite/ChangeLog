@@ -1,3 +1,7 @@
+2010-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/dlltool.exp: Add a missing `"'.
+
 2010-04-27  Kai Tietz  <kai.tietz@onevision.com>
 
 	* binutils-all/dlltool.exp: Allow test for
