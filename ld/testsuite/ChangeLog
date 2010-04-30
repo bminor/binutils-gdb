@@ -1,3 +1,13 @@
+2010-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11542
+	* ld-elf/discard.ld: New.
+	* ld-elf/discard1.d: Likewise.
+	* ld-elf/discard1.s: Likewise.
+	* ld-elf/discard2.d: Likewise.
+	* ld-elf/discard2.s: Likewise.
+	* ld-elf/discard3.d: Likewise.
+
 2010-04-22  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/extract-symbol-1sec.d: Update lma.

@@ -1,3 +1,11 @@
+2010-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11542
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): New.
+
+	* elf32-i386.c (elf_i386_relocate_section): Use it.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+
 2010-04-30  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-lib.c (vms_read_block): New function.
