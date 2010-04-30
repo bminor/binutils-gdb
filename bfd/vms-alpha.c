@@ -8040,7 +8040,7 @@ alpha_vms_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
   for (pundef = &info->hash->undefs; *pundef != NULL; pundef = next_pundef)
     {
       struct bfd_link_hash_entry *h;
-      file_ptr file_offset;
+      symindex symidx;
       bfd *element;
       bfd *orig_element;
 
@@ -8066,14 +8066,14 @@ alpha_vms_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
 
       /* Look for this symbol in the archive hash table.  */
-      file_offset = _bfd_vms_lib_find_symbol (abfd, h->root.string);
-      if (file_offset == 0)
+      symidx = _bfd_vms_lib_find_symbol (abfd, h->root.string);
+      if (symidx == BFD_NO_MORE_SYMBOLS)
 	{
 	  /* Nothing in this slot.  */
 	  continue;
 	}
 
-      element = bfd_get_elt_at_index (abfd, file_offset);
+      element = bfd_get_elt_at_index (abfd, symidx);
       if (element == NULL)
 	return FALSE;
 

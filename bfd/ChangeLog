@@ -1,3 +1,29 @@
+2010-04-30  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (struct lib_tdata): Field artdata added, fields nbr_syms
+	and syms removed.
+	(struct carsym_mem): New structure.
+	(vms_add_index): New function.
+	(vms_add_indexes_from_list): New function.
+	(vms_traverse_index): Parameter carsym changed to carsym_mem.
+	Code adjusted to handle elfidx.
+	(vms_lib_read_index): Adjusted for vms_traverse_index changes.
+	Parameter NBREL is now a pointer.
+	(_bfd_vms_lib_archive_p): Adjust for above change.  Handle ia64
+	archives.
+	(_bfd_vms_lib_mkarchive): Adjusted for changes in struct lib_tdata.
+	(_bfd_vms_lib_find_symbol): Ditto.
+	(vms_lib_bopen): Fix two typos: return FALSE in case of error,
+	check MHD id.
+	(_bfd_vms_lib_get_module): New function.
+	(_bfd_vms_lib_get_elt_at_index): Rewritten using the above
+	function.
+	(_bfd_vms_lib_openr_next_archived_file): Use _bfd_vms_lib_get_module.
+	(_bfd_vms_lib_generic_stat_arch_elt): Handle ia64 archives.
+	(vms_write_index): Adjust for structure renamed.
+	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Adjust for
+	changes of _bfd_vms_lib_find_symbol.
+
 2010-04-28  Kai Tietz  <kai.tietz@onevision.com>
 
 	* config.bfd: Correct accidential reverted patch
