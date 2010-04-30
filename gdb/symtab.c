@@ -590,7 +590,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 
 	 It turns out that it is actually important to still save such
 	 an entry in the hash table, because storing this name gives
-	 us better backache hit rates for partial symbols.  */
+	 us better bcache hit rates for partial symbols.  */
       if (!copy_name && lookup_name == linkage_name)
 	{
 	  *slot = obstack_alloc (&objfile->objfile_obstack,

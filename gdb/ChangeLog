@@ -1,3 +1,7 @@
+2010-04-30  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (symbol_set_names): Fix typo.
+
 2010-04-30  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* python/py-param.c (parm_constants): Avoid ARI warning
