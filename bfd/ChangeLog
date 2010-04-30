@@ -1,5 +1,10 @@
 2010-04-30  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-lib.c (vms_read_block): New function.
+	(vms_traverse_index): Use vms_read_block.  Handle long key names.
+
+2010-04-30  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-lib.c (struct lib_tdata): Field artdata added, fields nbr_syms
 	and syms removed.
 	(struct carsym_mem): New structure.

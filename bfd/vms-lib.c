@@ -186,6 +186,22 @@ vms_add_indexes_from_list (bfd *abfd, struct carsym_mem *cs, char *name,
     }
 }
 
+/* Read block VBN from ABFD and store it into BLK.  */
+
+static bfd_boolean
+vms_read_block (bfd *abfd, unsigned int vbn, void *blk)
+{
+  file_ptr off;
+
+  /* Read the index block.  */
+  off = (vbn - 1) * VMS_BLOCK_SIZE;
+  if (bfd_seek (abfd, off, SEEK_SET) != 0
+      || bfd_bread (blk, VMS_BLOCK_SIZE, abfd) != VMS_BLOCK_SIZE)
+    return FALSE;
+
+  return TRUE;
+}
+
 /* Read index block VBN and put the entry in **IDX (which is updated).
    If the entry is indirect, recurse.  */
 
@@ -198,9 +214,8 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
   unsigned char *endp;
 
   /* Read the index block.  */
-  off = (vbn - 1) * VMS_BLOCK_SIZE;
-  if (bfd_seek (abfd, off, SEEK_SET) != 0
-      || bfd_bread (&indexdef, sizeof (indexdef), abfd) != sizeof (indexdef))
+  BFD_ASSERT (sizeof (indexdef) == VMS_BLOCK_SIZE);
+  if (!vms_read_block (abfd, vbn, &indexdef))
     return FALSE;
 
   /* Traverse it.  */
@@ -244,10 +259,6 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
       if (idx_vbn == 0)
         return FALSE;
 
-      /* Long symbol names are not yet supported.  */
-      if (flags & ELFIDX__SYMESC)
-        return FALSE;
-
       if (idx_off == RFADEF__C_INDEX)
         {
           /* Indirect entry.  Recurse.  */
@@ -259,10 +270,58 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
           /* Add a new entry.  */
           char *name;
 
-          name = bfd_alloc (abfd, keylen + 1);
-          if (name == NULL)
-            return FALSE;
-          memcpy (name, keyname, keylen);
+          if (flags & ELFIDX__SYMESC)
+            {
+              /* Extended key name.  */
+              unsigned int noff = 0;
+              unsigned int koff;
+              unsigned int kvbn;
+              struct vms_kbn *kbn;
+              unsigned char kblk[VMS_BLOCK_SIZE];
+
+              /* Sanity check.  */
+              if (keylen != sizeof (struct vms_kbn))
+                return FALSE;
+
+              kbn = (struct vms_kbn *)keyname;
+              keylen = bfd_getl16 (kbn->keylen);
+
+              name = bfd_alloc (abfd, keylen + 1);
+              if (name == NULL)
+                return FALSE;
+              kvbn = bfd_getl32 (kbn->rfa.vbn);
+              koff = bfd_getl16 (kbn->rfa.offset);
+
+              /* Read the key, chunk by chunk.  */
+              do
+                {
+                  unsigned int klen;
+
+                  if (!vms_read_block (abfd, kvbn, kblk))
+                    return FALSE;
+                  kbn = (struct vms_kbn *)(kblk + koff);
+                  klen = bfd_getl16 (kbn->keylen);
+                  kvbn = bfd_getl32 (kbn->rfa.vbn);
+                  koff = bfd_getl16 (kbn->rfa.offset);
+
+                  memcpy (name + noff, kbn + 1, klen);
+                  noff += klen;
+                }
+              while (kvbn != 0);
+
+              /* Sanity check.  */
+              if (noff != keylen)
+                return FALSE;
+            }
+          else
+            {
+              /* Usual key name.  */
+              name = bfd_alloc (abfd, keylen + 1);
+              if (name == NULL)
+                return FALSE;
+
+              memcpy (name, keyname, keylen);
+            }
           name[keylen] = 0;
 
           if (flags & ELFIDX__LISTRFA)
