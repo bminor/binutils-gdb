@@ -1,3 +1,16 @@
+2010-04-30  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_kill_one_lwp, linux_kill)
+	(linux_detach_one_lwp): Adjust to send_sigstop interface change.
+	(send_sigstop): Take an lwp_info as parameter instead.  Queue a
+	SIGSTOP even if the LWP is stopped.
+	(send_sigstop_callback): New.
+	(stop_all_lwps): Use send_sigstop_callback instead.
+	(linux_resume_one_thread): Adjust.
+	(proceed_one_lwp): Still proceed an LWP that the client has
+	requested to stop, if we haven't reported it as stopped yet.  Make
+	sure that LWPs the client want stopped, have a pending SIGSTOP.
+
 2010-04-26  Doug Evans  <dje@google.com>
 
 	* server.c (handle_general_set): Make static.

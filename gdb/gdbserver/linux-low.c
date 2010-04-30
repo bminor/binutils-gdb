@@ -192,7 +192,7 @@ static int linux_event_pipe[2] = { -1, -1 };
 /* True if we're currently in async mode.  */
 #define target_is_async_p() (linux_event_pipe[0] != -1)
 
-static void send_sigstop (struct inferior_list_entry *entry);
+static void send_sigstop (struct lwp_info *lwp);
 static void wait_for_sigstop (struct inferior_list_entry *entry);
 
 /* Accepts an integer PID; Returns a string representing a file that
@@ -741,7 +741,7 @@ linux_kill_one_lwp (struct inferior_list_entry *entry, void *args)
   /* If we're killing a running inferior, make sure it is stopped
      first, as PTRACE_KILL will not work otherwise.  */
   if (!lwp->stopped)
-    send_sigstop (&lwp->head);
+    send_sigstop (lwp);
 
   do
     {
@@ -781,7 +781,7 @@ linux_kill (int pid)
   /* If we're killing a running inferior, make sure it is stopped
      first, as PTRACE_KILL will not work otherwise.  */
   if (!lwp->stopped)
-    send_sigstop (&lwp->head);
+    send_sigstop (lwp);
 
   do
     {
@@ -814,7 +814,7 @@ linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
       int lwpid = lwpid_of (lwp);
 
       stopping_threads = 1;
-      send_sigstop (&lwp->head);
+      send_sigstop (lwp);
 
       /* If this detects a new thread through a clone event, the new
 	 thread is appended to the end of the lwp list, so we'll
@@ -2020,13 +2020,9 @@ kill_lwp (unsigned long lwpid, int signo)
 }
 
 static void
-send_sigstop (struct inferior_list_entry *entry)
+send_sigstop (struct lwp_info *lwp)
 {
-  struct lwp_info *lwp = (struct lwp_info *) entry;
   int pid;
-
-  if (lwp->stopped)
-    return;
 
   pid = lwpid_of (lwp);
 
@@ -2045,6 +2041,17 @@ send_sigstop (struct inferior_list_entry *entry)
 
   lwp->stop_expected = 1;
   kill_lwp (pid, SIGSTOP);
+}
+
+static void
+send_sigstop_callback (struct inferior_list_entry *entry)
+{
+  struct lwp_info *lwp = (struct lwp_info *) entry;
+
+  if (lwp->stopped)
+    return;
+
+  send_sigstop (lwp);
 }
 
 static void
@@ -2159,7 +2166,7 @@ static void
 stop_all_lwps (void)
 {
   stopping_threads = 1;
-  for_each_inferior (&all_lwps, send_sigstop);
+  for_each_inferior (&all_lwps, send_sigstop_callback);
   for_each_inferior (&all_lwps, wait_for_sigstop);
   stopping_threads = 0;
 }
@@ -2661,7 +2668,7 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 
 	  /* Stop the thread, and wait for the event asynchronously,
 	     through the event loop.  */
-	  send_sigstop (&lwp->head);
+	  send_sigstop (lwp);
 	}
       else
 	{
@@ -2681,7 +2688,7 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 	     the thread already has a pending status to report, we
 	     will still report it the next time we wait - see
 	     status_pending_p_callback.  */
-	  send_sigstop (&lwp->head);
+	  send_sigstop (lwp);
 	}
 
       /* For stop requests, we're done.  */
@@ -2822,10 +2829,12 @@ proceed_one_lwp (struct inferior_list_entry *entry)
 
   thread = get_lwp_thread (lwp);
 
-  if (thread->last_resume_kind == resume_stop)
+  if (thread->last_resume_kind == resume_stop
+      && thread->last_status.kind != TARGET_WAITKIND_IGNORE)
     {
       if (debug_threads)
-	fprintf (stderr, "   client wants LWP %ld stopped\n", lwpid_of (lwp));
+	fprintf (stderr, "   client wants LWP to remain %ld stopped\n",
+		 lwpid_of (lwp));
       return;
     }
 
@@ -2842,6 +2851,27 @@ proceed_one_lwp (struct inferior_list_entry *entry)
       if (debug_threads)
 	fprintf (stderr, "   LWP %ld is suspended\n", lwpid_of (lwp));
       return;
+    }
+
+  if (thread->last_resume_kind == resume_stop)
+    {
+      /* We haven't reported this LWP as stopped yet (otherwise, the
+	 last_status.kind check above would catch it, and we wouldn't
+	 reach here.  This LWP may have been momentarily paused by a
+	 stop_all_lwps call while handling for example, another LWP's
+	 step-over.  In that case, the pending expected SIGSTOP signal
+	 that was queued at vCont;t handling time will have already
+	 been consumed by wait_for_sigstop, and so we need to requeue
+	 another one here.  Note that if the LWP already has a SIGSTOP
+	 pending, this is a no-op.  */
+
+      if (debug_threads)
+	fprintf (stderr,
+		 "Client wants LWP %ld to stop. "
+		 "Making sure it has a SIGSTOP pending\n",
+		 lwpid_of (lwp));
+
+      send_sigstop (lwp);
     }
 
   step = thread->last_resume_kind == resume_step;
