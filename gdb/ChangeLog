@@ -1,3 +1,7 @@
+2010-04-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* NEWS: Mention gdbserver support for x86_64 Windows 64-bit.
+
 2010-04-29  Doug Evans  <dje@google.com>
 
 	* ser-base.h (reschedule): Delete prototype.

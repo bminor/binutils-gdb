@@ -27,6 +27,8 @@ qGetTIBAddr
   - GDBserver now support tracepoints.  The feature is currently
     supported by the i386-linux and amd64-linux builds.
 
+  - GDBserver now supports x86_64 Windows 64-bit debugging.
+
 * GDB now sends xmlRegisters= in qSupported packet to indicate that
   it understands register description.
 
