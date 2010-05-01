@@ -150,6 +150,7 @@ static void unstop_all_lwps (struct lwp_info *except);
 static int finish_step_over (struct lwp_info *lwp);
 static CORE_ADDR get_stop_pc (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
+static void linux_enable_event_reporting (int pid);
 
 /* True if the low target can hardware single-step.  Such targets
    don't need a BREAKPOINT_REINSERT_ADDR callback.  */
@@ -396,7 +397,7 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 	    warning ("wait returned unexpected status 0x%x", status);
 	}
 
-      ptrace (PTRACE_SETOPTIONS, new_pid, 0, (PTRACE_ARG4_TYPE) PTRACE_O_TRACECLONE);
+      linux_enable_event_reporting (new_pid);
 
       ptid = ptid_build (pid_of (event_child), new_pid, 0);
       new_lwp = (struct lwp_info *) add_lwp (ptid);
@@ -1318,8 +1319,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 
       if (event_child->must_set_ptrace_flags)
 	{
-	  ptrace (PTRACE_SETOPTIONS, lwpid_of (event_child),
-		  0, (PTRACE_ARG4_TYPE) PTRACE_O_TRACECLONE);
+	  linux_enable_event_reporting (lwpid_of (event_child));
 	  event_child->must_set_ptrace_flags = 0;
 	}
 
@@ -3414,6 +3414,15 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 
 /* Non-zero if the kernel supports PTRACE_O_TRACEFORK.  */
 static int linux_supports_tracefork_flag;
+
+static void
+linux_enable_event_reporting (int pid)
+{
+  if (!linux_supports_tracefork_flag)
+    return;
+
+  ptrace (PTRACE_SETOPTIONS, pid, 0, (PTRACE_ARG4_TYPE) PTRACE_O_TRACECLONE);
+}
 
 /* Helper functions for linux_test_for_tracefork, called via clone ().  */
 
