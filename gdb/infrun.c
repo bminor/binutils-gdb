@@ -2368,6 +2368,14 @@ prepare_for_detach (void)
 	 state.  */
       old_chain_2 = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
 
+      /* In non-stop mode, each thread is handled individually.
+	 Switch early, so the global state is set correctly for this
+	 thread.  */
+      if (non_stop
+	  && ecs->ws.kind != TARGET_WAITKIND_EXITED
+	  && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
+	context_switch (ecs->ptid);
+
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
 
