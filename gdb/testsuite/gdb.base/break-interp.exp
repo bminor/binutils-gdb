@@ -636,10 +636,6 @@ foreach ldprelink {NO YES} {
 		    }
 		    if {$binsepdebug == "SEP"} {
 			gdb_gnu_strip_debug $exec
-			# Just a sanity check.  As gdb_gnu_strip_debug uses the
-			# "[file dirname $exec]/.debug/[file tail $exec].debug"
-			# variant delete the higher-priority exec.debug file.
-			file delete "$exec.debug"
 		    }
 
 		    # Supply a self-sufficent directory $dir with the required

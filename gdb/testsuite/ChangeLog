@@ -1,3 +1,13 @@
+2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/break-interp.exp: Remove $exec.debug safety removal.
+	* gdb.base/sepdebug.exp: Remove .debug subdirectory handling.  New
+	variable different_dir. Move debugfile into a full directory pathname
+	under DIFFERENT_DIR.
+	* lib/gdb.exp (separate_debug_filename): Remove.
+	(gdb_gnu_strip_debug): No longer call separate_debug_filename.  Remove
+	variable debug_dir and mkdir of it.  Update function comments.
+
 2010-04-29  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/11557

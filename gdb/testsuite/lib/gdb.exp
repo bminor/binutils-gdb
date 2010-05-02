@@ -2833,8 +2833,8 @@ proc gdb_skip_xml_test { } {
 # Note: the procedure gdb_gnu_strip_debug will produce an executable called
 # ${binfile}.dbglnk, which is just like the executable ($binfile) but without
 # the debuginfo. Instead $binfile has a .gnu_debuglink section which contains
-# the name of a debuginfo only file. This file will be stored in the 
-# gdb.base/.debug subdirectory.
+# the name of a debuginfo only file. This file will be stored in the same
+# subdirectory.
 
 # Functions for separate debug info testing
 
@@ -2843,26 +2843,8 @@ proc gdb_skip_xml_test { } {
 
 # at the end of the process we have:
 # foo.stripped --> foo w/o debug info
-# .debug/foo.debug --> foo's debug info
+# foo.debug --> foo's debug info
 # foo --> like foo, but with a new .gnu_debuglink section pointing to foo.debug.
-
-# Return the name of the file in which we should stor EXEC's separated
-# debug info. EXEC contains the full path.
-proc separate_debug_filename { exec } {
-
-    # In a .debug subdirectory off the same directory where the testcase
-    # executable is going to be. Something like:
-    # <your-path>/gdb/testsuite/gdb.base/.debug/blah.debug.
-    # This is the default location where gdb expects to findi
-    # the debug info file.
-
-    set exec_dir [file dirname $exec]
-    set exec_file [file tail $exec]
-    set debug_dir [file join $exec_dir ".debug"]
-    set debug_file [file join $debug_dir "${exec_file}.debug"]
-
-    return $debug_file
-}
 
 # Return the build-id hex string (usually 160 bits as 40 hex characters)
 # converted to the form: .build-id/ab/cdef1234...89.debug
@@ -2902,16 +2884,12 @@ proc build_id_debug_filename_get { exec } {
 
 proc gdb_gnu_strip_debug { dest args } {
 
-    set debug_file [separate_debug_filename $dest]
+    # Use the first separate debug info file location searched by GDB so the
+    # run cannot be broken by some stale file searched with higher precedence.
+    set debug_file "${dest}.debug"
+
     set strip_to_file_program [transform strip]
     set objcopy_program [transform objcopy]
-
-    # Make sure the directory that will hold the separated debug
-    # info actually exists.
-    set debug_dir [file dirname $debug_file]
-    if {! [file isdirectory $debug_dir]} {
-	file mkdir $debug_dir
-    }
 
     set debug_link [file tail $debug_file]
     set stripped_file "${dest}.stripped"
