@@ -374,7 +374,7 @@ print_any_exception (struct ui_file *file, const char *prefix,
     }
 }
 
-NORETURN static void ATTR_NORETURN ATTR_FORMAT (printf, 3, 0)
+NORETURN static void ATTR_NORETURN ATTRIBUTE_PRINTF (3, 0)
 throw_it (enum return_reason reason, enum errors error, const char *fmt,
 	  va_list ap)
 {

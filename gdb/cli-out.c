@@ -38,7 +38,7 @@ static void field_separator (void);
 
 static void out_field_fmt (struct ui_out *uiout, int fldno,
 			   const char *fldname,
-			   const char *format,...) ATTR_FORMAT (printf, 4, 5);
+			   const char *format,...) ATTRIBUTE_PRINTF (4, 5);
 
 /* These are the CLI output functions */
 
@@ -209,7 +209,7 @@ cli_field_string (struct ui_out *uiout,
 
 /* This is the only field function that does not align.  */
 
-static void
+static void ATTRIBUTE_PRINTF (6, 0)
 cli_field_fmt (struct ui_out *uiout, int fldno,
 	       int width, enum ui_align align,
 	       const char *fldname,
@@ -244,7 +244,7 @@ cli_text (struct ui_out *uiout, const char *string)
   fputs_filtered (string, data->stream);
 }
 
-static void ATTR_FORMAT (printf, 3,0)
+static void ATTRIBUTE_PRINTF (3, 0)
 cli_message (struct ui_out *uiout, int verbosity,
 	     const char *format, va_list args)
 {

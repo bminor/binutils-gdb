@@ -1,3 +1,40 @@
+2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ada-lang.c (lim_warning): Change ATTR_FORMAT to ATTRIBUTE_PRINTF.
+	* amd64-tdep.c (amd64_insn_length_fprintf): Likewise.
+	* cli-out.c (cli_field_fmt): New ATTRIBUTE_PRINTF.
+	(cli_message, out_field_fmt): Change ATTR_FORMAT to ATTRIBUTE_PRINTF.
+	* complaints.c (find_complaint): New ATTRIBUTE_PRINTF.
+	(vcomplaint): Change ATTR_FORMAT to ATTRIBUTE_PRINTF.
+	* complaints.h (complaint, internal_complaint): Likewise.
+	* defs.h: Change ATTR_FORMAT to ATTRIBUTE_PRINTF in the top comment.
+	(ATTR_FORMAT): Remove.
+	(query, nquery, yquery, vprintf_filtered, vfprintf_filtered)
+	(fprintf_filtered, fprintfi_filtered, printf_filtered, printfi_filtered)
+	(vprintf_unfiltered, vfprintf_unfiltered, fprintf_unfiltered)
+	(printf_unfiltered, xasprintf, xvasprintf, xstrprintf, xstrvprintf)
+	(xsnprintf, verror, error, vfatal, fatal, internal_verror)
+	(internal_error, internal_vwarning, internal_warning, warning)
+	(vwarning): Change ATTR_FORMAT to ATTRIBUTE_PRINTF.
+	* disasm.c (fprintf_disasm): Likewise.
+	* exceptions.c (throw_it): Likewise.
+	* exceptions.h (exception_fprintf, throw_verror, throw_vfatal)
+	(throw_error): Likewise.
+	* language.h (type_error, range_error): Likewise.
+	* linespec.c (cplusplus_error): Likewise.
+	* mi/mi-interp.c (mi_interp_query_hook): Likewise.
+	* mi/mi-out.c (mi_field_fmt, mi_message): Likewise.
+	* monitor.c (monitor_debug): Likewise.
+	* parser-defs.h (parser_fprintf): Likewise.
+	* serial.h (serial_printf): Likewise.
+	* tui/tui-hooks.c (tui_query_hook): Likewise.
+	* ui-out.c (default_field_fmt, default_message, uo_field_fmt)
+	(uo_message): Likewise.
+	* ui-out.h (ui_out_field_fmt, ui_out_message): Likewise.
+	* utils.c (vfprintf_maybe_filtered, internal_vproblem, defaulted_query):
+	Likewise.
+	* xml-support.h (gdb_xml_debug, gdb_xml_error): Likewise.
+
 2010-05-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* cli-out.c (cli_table_begin, cli_table_body, cli_table_end)

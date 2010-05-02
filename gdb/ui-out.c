@@ -177,12 +177,12 @@ static void default_field_fmt (struct ui_out *uiout, int fldno,
 			       int width, enum ui_align align,
 			       const char *fldname,
 			       const char *format,
-			       va_list args) ATTR_FORMAT (printf, 6, 0);
+			       va_list args) ATTRIBUTE_PRINTF (6, 0);
 static void default_spaces (struct ui_out *uiout, int numspaces);
 static void default_text (struct ui_out *uiout, const char *string);
 static void default_message (struct ui_out *uiout, int verbosity,
 			     const char *format,
-			     va_list args) ATTR_FORMAT (printf, 3, 0);
+			     va_list args) ATTRIBUTE_PRINTF (3, 0);
 static void default_wrap_hint (struct ui_out *uiout, char *identstring);
 static void default_flush (struct ui_out *uiout);
 
@@ -245,12 +245,12 @@ static void uo_field_skip (struct ui_out *uiout, int fldno, int width,
 static void uo_field_fmt (struct ui_out *uiout, int fldno, int width,
 			  enum ui_align align, const char *fldname,
 			  const char *format, va_list args)
-     ATTR_FORMAT (printf, 6, 0);
+     ATTRIBUTE_PRINTF (6, 0);
 static void uo_spaces (struct ui_out *uiout, int numspaces);
 static void uo_text (struct ui_out *uiout, const char *string);
 static void uo_message (struct ui_out *uiout, int verbosity,
 			const char *format, va_list args)
-     ATTR_FORMAT (printf, 3, 0);
+     ATTRIBUTE_PRINTF (3, 0);
 static void uo_wrap_hint (struct ui_out *uiout, char *identstring);
 static void uo_flush (struct ui_out *uiout);
 static int uo_redirect (struct ui_out *uiout, struct ui_file *outstream);

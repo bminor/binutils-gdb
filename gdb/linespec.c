@@ -80,7 +80,7 @@ static struct symtabs_and_lines find_method (int funfirstline,
 
 static NORETURN void cplusplus_error (const char *name,
 				      const char *fmt, ...)
-     ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
+     ATTR_NORETURN ATTRIBUTE_PRINTF (2, 3);
 
 static int total_number_of_methods (struct type *type);
 

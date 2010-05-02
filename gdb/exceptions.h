@@ -153,7 +153,7 @@ int exceptions_state_mc_action_iter_1 (void);
 extern void exception_print (struct ui_file *file, struct gdb_exception e);
 extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
 			       const char *prefix,
-			       ...) ATTR_FORMAT (printf, 3, 4);
+			       ...) ATTRIBUTE_PRINTF (3, 4);
 
 /* Throw an exception (as described by "struct gdb_exception").  Will
    execute a LONG JUMP to the inner most containing exception handler
@@ -168,11 +168,11 @@ extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
 
 extern NORETURN void throw_exception (struct gdb_exception exception) ATTR_NORETURN;
 extern NORETURN void throw_verror (enum errors, const char *fmt, va_list ap)
-     ATTR_NORETURN ATTR_FORMAT (printf, 2, 0);
+     ATTR_NORETURN ATTRIBUTE_PRINTF (2, 0);
 extern NORETURN void throw_vfatal (const char *fmt, va_list ap)
-     ATTR_NORETURN ATTR_FORMAT (printf, 1, 0);
+     ATTR_NORETURN ATTRIBUTE_PRINTF (1, 0);
 extern NORETURN void throw_error (enum errors error, const char *fmt,
-				  ...) ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
+				  ...) ATTR_NORETURN ATTRIBUTE_PRINTF (2, 3);
 
 /* Instead of deprecated_throw_reason, code should use catch_exception
    and throw_exception.  */

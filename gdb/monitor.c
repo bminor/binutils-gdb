@@ -119,7 +119,7 @@ static ptid_t monitor_ptid;
 /* Monitor specific debugging information.  Typically only useful to
    the developer of a new monitor interface. */
 
-static void monitor_debug (const char *fmt, ...) ATTR_FORMAT(printf, 1, 2);
+static void monitor_debug (const char *fmt, ...) ATTRIBUTE_PRINTF (1, 2);
 
 static int monitor_debug_p = 0;
 

@@ -87,7 +87,7 @@ extern int serial_write (struct serial *scb, const char *str, int len);
 /* Write a printf style string onto the serial port.  */
 
 extern void serial_printf (struct serial *desc, 
-			   const char *,...) ATTR_FORMAT (printf, 2, 3);
+			   const char *,...) ATTRIBUTE_PRINTF (2, 3);
 
 /* Allow pending output to drain.  */
 

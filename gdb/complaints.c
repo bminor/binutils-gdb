@@ -120,7 +120,7 @@ get_complaints (struct complaints **c)
   return (*c);
 }
 
-static struct complain *
+static struct complain * ATTRIBUTE_PRINTF (4, 0)
 find_complaint (struct complaints *complaints, const char *file,
 		int line, const char *fmt)
 {
@@ -164,7 +164,7 @@ static int stop_whining = 0;
 /* Print a complaint, and link the complaint block into a chain for
    later handling.  */
 
-static void ATTR_FORMAT (printf, 4, 0)
+static void ATTRIBUTE_PRINTF (4, 0)
 vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 	    va_list args)
 {

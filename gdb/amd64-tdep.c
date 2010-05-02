@@ -1026,7 +1026,7 @@ amd64_skip_prefixes (gdb_byte *insn)
    This function is a nop, we don't want to print anything, we just want to
    compute the length of the insn.  */
 
-static int ATTR_FORMAT (printf, 2, 3)
+static int ATTRIBUTE_PRINTF (2, 3)
 amd64_insn_length_fprintf (void *stream, const char *format, ...)
 {
   return 0;

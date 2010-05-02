@@ -124,7 +124,7 @@ extern void ui_out_field_stream (struct ui_out *uiout, const char *fldname,
 
 extern void ui_out_field_fmt (struct ui_out *uiout, const char *fldname,
 			      const char *format, ...)
-     ATTR_FORMAT (printf, 3, 4);
+     ATTRIBUTE_PRINTF (3, 4);
 
 extern void ui_out_field_skip (struct ui_out *uiout, const char *fldname);
 
@@ -134,7 +134,7 @@ extern void ui_out_text (struct ui_out *uiout, const char *string);
 
 extern void ui_out_message (struct ui_out *uiout, int verbosity,
 			    const char *format, ...)
-     ATTR_FORMAT (printf, 3, 4);
+     ATTRIBUTE_PRINTF (3, 4);
 
 extern struct ui_stream *ui_out_stream_new (struct ui_out *uiout);
 

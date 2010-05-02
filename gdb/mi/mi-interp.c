@@ -44,7 +44,7 @@ static void mi_command_loop (int mi_version);
    so we can report interesting things that happened "behind the mi's
    back" in this command */
 static int mi_interp_query_hook (const char *ctlstr, va_list ap)
-     ATTR_FORMAT (printf, 1, 0);
+     ATTRIBUTE_PRINTF (1, 0);
 
 static void mi3_command_loop (void);
 static void mi2_command_loop (void);

@@ -461,9 +461,9 @@ extern void binop_type_check (struct value *, struct value *, int);
 
 /* Error messages */
 
-extern void type_error (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern void type_error (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
-extern void range_error (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern void range_error (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 /* Data:  Does this value represent "truth" to the current language?  */
 

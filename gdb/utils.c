@@ -92,7 +92,7 @@ void (*deprecated_error_begin_hook) (void);
 /* Prototypes for local functions */
 
 static void vfprintf_maybe_filtered (struct ui_file *, const char *,
-				     va_list, int) ATTR_FORMAT (printf, 2, 0);
+				     va_list, int) ATTRIBUTE_PRINTF (2, 0);
 
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
@@ -916,7 +916,7 @@ struct internal_problem
    has been reported, and assuming GDB didn't quit, the caller can
    either allow execution to resume or throw an error.  */
 
-static void ATTR_FORMAT (printf, 4, 0)
+static void ATTRIBUTE_PRINTF (4, 0)
 internal_vproblem (struct internal_problem *problem,
 		   const char *file, int line, const char *fmt, va_list ap)
 {
@@ -1452,7 +1452,7 @@ gdb_print_host_address (const void *addr, struct ui_file *stream)
    ARGS are the arguments passed along with the CTLSTR argument to
    printf.  */
 
-static int ATTR_FORMAT (printf, 1, 0)
+static int ATTRIBUTE_PRINTF (1, 0)
 defaulted_query (const char *ctlstr, const char defchar, va_list args)
 {
   int answer;

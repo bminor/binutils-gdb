@@ -1,4 +1,5 @@
-/* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
+/* *INDENT-OFF* */ /* ATTRIBUTE_PRINTF confuses indent, avoid running it
+		      for now.  */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright (C) 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
    1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009,
@@ -296,14 +297,6 @@ struct cleanup
 #endif
 #endif
 
-#ifndef ATTR_FORMAT
-#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
-#define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
-#else
-#define ATTR_FORMAT(type, x, y)	/* nothing */
-#endif
-#endif
-
 /* Be conservative and use enum bitfields only with GCC.
    This is copied from gcc 3.3.1, system.h.  */
 
@@ -404,9 +397,9 @@ extern void null_cleanup (void *);
 
 extern int myread (int, char *, int);
 
-extern int query (const char *, ...) ATTR_FORMAT (printf, 1, 2);
-extern int nquery (const char *, ...) ATTR_FORMAT (printf, 1, 2);
-extern int yquery (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern int query (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
+extern int nquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
+extern int yquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void init_page_info (void);
 
@@ -492,25 +485,25 @@ extern void puts_filtered_tabular (char *string, int width, int right);
 
 extern void puts_debug (char *prefix, char *string, char *suffix);
 
-extern void vprintf_filtered (const char *, va_list) ATTR_FORMAT (printf, 1, 0);
+extern void vprintf_filtered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
-extern void vfprintf_filtered (struct ui_file *, const char *, va_list) ATTR_FORMAT (printf, 2, 0);
+extern void vfprintf_filtered (struct ui_file *, const char *, va_list) ATTRIBUTE_PRINTF (2, 0);
 
-extern void fprintf_filtered (struct ui_file *, const char *, ...) ATTR_FORMAT (printf, 2, 3);
+extern void fprintf_filtered (struct ui_file *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
-extern void fprintfi_filtered (int, struct ui_file *, const char *, ...) ATTR_FORMAT (printf, 3, 4);
+extern void fprintfi_filtered (int, struct ui_file *, const char *, ...) ATTRIBUTE_PRINTF (3, 4);
 
-extern void printf_filtered (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern void printf_filtered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
-extern void printfi_filtered (int, const char *, ...) ATTR_FORMAT (printf, 2, 3);
+extern void printfi_filtered (int, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
-extern void vprintf_unfiltered (const char *, va_list) ATTR_FORMAT (printf, 1, 0);
+extern void vprintf_unfiltered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
-extern void vfprintf_unfiltered (struct ui_file *, const char *, va_list) ATTR_FORMAT (printf, 2, 0);
+extern void vfprintf_unfiltered (struct ui_file *, const char *, va_list) ATTRIBUTE_PRINTF (2, 0);
 
-extern void fprintf_unfiltered (struct ui_file *, const char *, ...) ATTR_FORMAT (printf, 2, 3);
+extern void fprintf_unfiltered (struct ui_file *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
-extern void printf_unfiltered (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern void printf_unfiltered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void print_spaces (int, struct ui_file *);
 
@@ -900,19 +893,19 @@ extern void *xzalloc (size_t);
 
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
-extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
+extern void xasprintf (char **ret, const char *format, ...) ATTRIBUTE_PRINTF (2, 3);
 extern void xvasprintf (char **ret, const char *format, va_list ap)
-     ATTR_FORMAT (printf, 2, 0);
+     ATTRIBUTE_PRINTF (2, 0);
 
 /* Like asprintf and vasprintf, but return the string, throw an error
    if no memory.  */
-extern char *xstrprintf (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
+extern char *xstrprintf (const char *format, ...) ATTRIBUTE_PRINTF (1, 2);
 extern char *xstrvprintf (const char *format, va_list ap)
-     ATTR_FORMAT (printf, 1, 0);
+     ATTRIBUTE_PRINTF (1, 0);
 
 /* Like snprintf, but throw an error if the output buffer is too small.  */
 extern int xsnprintf (char *str, size_t size, const char *format, ...)
-     ATTR_FORMAT (printf, 3, 4);
+     ATTRIBUTE_PRINTF (3, 4);
 
 extern int parse_escape (struct gdbarch *, char **);
 
@@ -929,36 +922,36 @@ extern char *quit_pre_print;
 extern char *warning_pre_print;
 
 extern NORETURN void verror (const char *fmt, va_list ap)
-     ATTR_NORETURN ATTR_FORMAT (printf, 1, 0);
+     ATTR_NORETURN ATTRIBUTE_PRINTF (1, 0);
 
-extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
 extern NORETURN void vfatal (const char *fmt, va_list ap)
-     ATTR_NORETURN ATTR_FORMAT (printf, 1, 0);
+     ATTR_NORETURN ATTRIBUTE_PRINTF (1, 0);
 
-extern NORETURN void fatal (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+extern NORETURN void fatal (const char *fmt, ...) ATTR_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 extern NORETURN void internal_verror (const char *file, int line,
 				      const char *, va_list ap)
-     ATTR_NORETURN ATTR_FORMAT (printf, 3, 0);
+     ATTR_NORETURN ATTRIBUTE_PRINTF (3, 0);
 
 extern NORETURN void internal_error (const char *file, int line,
-				     const char *, ...) ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
+				     const char *, ...) ATTR_NORETURN ATTRIBUTE_PRINTF (3, 4);
 
 extern void internal_vwarning (const char *file, int line,
 			       const char *, va_list ap)
-     ATTR_FORMAT (printf, 3, 0);
+     ATTRIBUTE_PRINTF (3, 0);
 
 extern void internal_warning (const char *file, int line,
-			      const char *, ...) ATTR_FORMAT (printf, 3, 4);
+			      const char *, ...) ATTRIBUTE_PRINTF (3, 4);
 
 extern NORETURN void nomem (long) ATTR_NORETURN;
 
-extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern void warning (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
-extern void vwarning (const char *, va_list args) ATTR_FORMAT (printf, 1, 0);
+extern void vwarning (const char *, va_list args) ATTRIBUTE_PRINTF (1, 0);
 
 /* List of known OS ABIs.  If you change this, make sure to update the
    table in osabi.c.  */

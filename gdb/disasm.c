@@ -335,7 +335,7 @@ do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 /* Initialize the disassemble info struct ready for the specified
    stream.  */
 
-static int ATTR_FORMAT (printf, 2, 3)
+static int ATTRIBUTE_PRINTF (2, 3)
 fprintf_disasm (void *stream, const char *format, ...)
 {
   va_list args;
