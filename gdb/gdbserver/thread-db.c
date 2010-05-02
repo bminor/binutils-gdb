@@ -52,6 +52,16 @@ struct thread_db
   void *handle;
 #endif
 
+  /* Thread creation event breakpoint.  The code at this location in
+     the child process will be called by the pthread library whenever
+     a new thread is created.  By setting a special breakpoint at this
+     location, GDB can detect when a new thread is created.  We obtain
+     this location via the td_ta_event_addr call.  Note that if the
+     running kernel supports tracing clones, then we don't need to use
+     (and in fact don't use) this magic thread event breakpoint to
+     learn about threads.  */
+  struct breakpoint *td_create_bp;
+
   /* Addresses of libthread_db functions.  */
   td_err_e (*td_ta_new_p) (struct ps_prochandle * ps, td_thragent_t **ta);
   td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
@@ -205,7 +215,7 @@ thread_db_create_event (CORE_ADDR where)
 }
 
 static int
-thread_db_enable_reporting ()
+thread_db_enable_reporting (void)
 {
   td_thr_events_t events;
   td_notify_t notify;
@@ -239,8 +249,9 @@ thread_db_enable_reporting ()
 	       thread_db_err_str (err));
       return 0;
     }
-  set_breakpoint_at ((CORE_ADDR) (unsigned long) notify.u.bptaddr,
-		     thread_db_create_event);
+  thread_db->td_create_bp
+    = set_breakpoint_at ((CORE_ADDR) (unsigned long) notify.u.bptaddr,
+			 thread_db_create_event);
 
   return 1;
 }
@@ -501,6 +512,8 @@ thread_db_load_search (void)
   if (proc->private->thread_db != NULL)
     fatal ("unexpected: proc->private->thread_db != NULL");
 
+  memset (&tdb, 0, sizeof (tdb));
+
   tdb.td_ta_new_p = &td_ta_new;
 
   /* Attempt to open a connection to the thread library.  */
@@ -543,6 +556,8 @@ try_thread_db_load_1 (void *handle)
 
   if (proc->private->thread_db != NULL)
     fatal ("unexpected: proc->private->thread_db != NULL");
+
+  memset (&tdb, 0, sizeof (tdb));
 
   tdb.handle = handle;
 
@@ -766,6 +781,16 @@ any_thread_of (struct inferior_list_entry *entry, void *args)
   return 0;
 }
 
+static void
+switch_to_process (struct process_info *proc)
+{
+  int pid = pid_of (proc);
+
+  current_inferior =
+    (struct thread_info *) find_inferior (&all_threads,
+					  any_thread_of, &pid);
+}
+
 /* Disconnect from libthread_db and free resources.  */
 
 static void
@@ -785,15 +810,10 @@ disable_thread_event_reporting (struct process_info *proc)
 
       if (td_ta_clear_event_p != NULL)
 	{
-	  struct thread_info *saved_inferior;
+	  struct thread_info *saved_inferior = current_inferior;
 	  td_thr_events_t events;
-	  int pid;
 
-	  pid = pid_of (proc);
-	  saved_inferior = current_inferior;
-	  current_inferior =
-	    (struct thread_info *) find_inferior (&all_threads,
-						  any_thread_of, &pid);
+	  switch_to_process (proc);
 
 	  /* Set the process wide mask saying we aren't interested
 	     in any events anymore.  */
@@ -805,10 +825,34 @@ disable_thread_event_reporting (struct process_info *proc)
     }
 }
 
+static void
+remove_thread_event_breakpoints (struct process_info *proc)
+{
+  struct thread_db *thread_db = proc->private->thread_db;
+
+  if (thread_db->td_create_bp != NULL)
+    {
+      struct thread_info *saved_inferior = current_inferior;
+
+      switch_to_process (proc);
+
+      delete_breakpoint (thread_db->td_create_bp);
+      thread_db->td_create_bp = NULL;
+
+      current_inferior = saved_inferior;
+    }
+}
+
 void
 thread_db_detach (struct process_info *proc)
 {
-  disable_thread_event_reporting (proc);
+  struct thread_db *thread_db = proc->private->thread_db;
+
+  if (thread_db)
+    {
+      disable_thread_event_reporting (proc);
+      remove_thread_event_breakpoints (proc);
+    }
 }
 
 /* Disconnect from libthread_db and free resources.  */

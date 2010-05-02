@@ -1,3 +1,29 @@
+2010-05-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_kill_one_lwp): Assume the lwp is stopped.
+	(linux_kill): Stop all lwps here.  Don't delete the main lwp here.
+	(linux_detach_one_lwp): Assume the lwp is stopped.
+	(any_thread_of): Delete.
+	(linux_detach): Stop all lwps here.  Don't blindly delete all
+	breakpoints.
+	(delete_lwp_callback): New.
+	(linux_mourn): Delete all lwps of the process that is gone.
+	(linux_wait_1): Don't delete the last lwp of the process here.
+	* mem-break.h (mark_breakpoints_out): Declare.
+	* mem-break.c (mark_breakpoints_out): New.
+	(free_all_breakpoints): Use it.
+	* server.c (handle_target_event): If the process is gone, mark
+	breakpoints out.
+	* thread-db.c (struct thread_db) <create_bp>: New field.
+	(thread_db_enable_reporting): Fix prototype.  Store a thread event
+	breakpoint reference in the thread_db struct.
+	(thread_db_load_search): Clear the thread_db object.
+	(try_thread_db_load_1): Ditto.
+	(switch_to_process): New.
+	(disable_thread_event_reporting): Use it.
+	(remove_thread_event_breakpoints): New.
+	(thread_db_detach, thread_db_mourn): Use it.
+
 2010-05-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (linux_enable_event_reporting): New.

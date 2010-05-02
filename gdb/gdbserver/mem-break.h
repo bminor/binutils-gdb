@@ -103,6 +103,10 @@ void set_breakpoint_data (const unsigned char *bp_data, int bp_len);
 
 void delete_all_breakpoints (void);
 
+/* Clear the "inserted" flag in all breakpoints of PROC.  */
+
+void mark_breakpoints_out (struct process_info *proc);
+
 /* Delete all breakpoints, but do not try to un-insert them from the
    inferior.  */
 

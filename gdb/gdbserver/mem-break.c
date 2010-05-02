@@ -716,16 +716,24 @@ delete_all_breakpoints (void)
     delete_breakpoint_1 (proc, proc->breakpoints);
 }
 
+/* Clear the "inserted" flag in all breakpoints.  */
+
+void
+mark_breakpoints_out (struct process_info *proc)
+{
+  struct raw_breakpoint *raw_bp;
+
+  for (raw_bp = proc->raw_breakpoints; raw_bp != NULL; raw_bp = raw_bp->next)
+    raw_bp->inserted = 0;
+}
+
 /* Release all breakpoints, but do not try to un-insert them from the
    inferior.  */
 
 void
 free_all_breakpoints (struct process_info *proc)
 {
-  struct raw_breakpoint *raw_bp;
-
-  for (raw_bp = proc->raw_breakpoints; raw_bp != NULL; raw_bp = raw_bp->next)
-    raw_bp->inserted = 0;
+  mark_breakpoints_out (proc);
 
   /* Note: use PROC explicitly instead of deferring to
      delete_all_breakpoints --- CURRENT_INFERIOR may already have been

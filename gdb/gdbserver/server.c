@@ -3031,7 +3031,10 @@ handle_target_event (int err, gdb_client_data client_data)
 
       if (last_status.kind == TARGET_WAITKIND_EXITED
 	  || last_status.kind == TARGET_WAITKIND_SIGNALLED)
-	mourn_inferior (process);
+	{
+	  mark_breakpoints_out (process);
+	  mourn_inferior (process);
+	}
 
       if (forward_event)
 	{
