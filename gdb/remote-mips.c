@@ -473,7 +473,7 @@ close_ports (void)
    all hell to break loose--the rest of GDB will tend to get left in an
    inconsistent state.  */
 
-static NORETURN void
+static void ATTRIBUTE_NORETURN
 mips_error (char *string,...)
 {
   va_list args;

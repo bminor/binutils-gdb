@@ -1,8 +1,13 @@
-2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
-            Tom Tromey  <tromey@redhat.com>
-            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
-       * gdb.texinfo (Parameters In Python): New Node.
+	* gdbint.texinfo (Host Definition): Remove items NORETURN and
+	ATTR_NORETURN.
+
+2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (Parameters In Python): New Node.
 
 2010-04-29  Mihail Zenkov  <mihail.zenkov@gmail.com>
 

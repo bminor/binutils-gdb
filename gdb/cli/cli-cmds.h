@@ -128,11 +128,6 @@ extern void source_script (char *, int);
 extern int find_and_open_script (const char *file, int search_path,
 				 FILE **streamp, char **full_path);
 
-/* Used everywhere whenever at least one parameter is required and
-  none is specified. */
-
-extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
-
 /* Command tracing state.  */
 
 extern int source_verbose;

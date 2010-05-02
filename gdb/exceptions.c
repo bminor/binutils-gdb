@@ -210,7 +210,7 @@ exceptions_state_mc_action_iter_1 (void)
 
 /* Return EXCEPTION to the nearest containing catch_errors().  */
 
-NORETURN void
+void
 throw_exception (struct gdb_exception exception)
 {
   struct thread_info *tp = NULL;
@@ -239,7 +239,7 @@ throw_exception (struct gdb_exception exception)
 
 static char *last_message;
 
-NORETURN void
+void
 deprecated_throw_reason (enum return_reason reason)
 {
   struct gdb_exception exception;
@@ -374,7 +374,7 @@ print_any_exception (struct ui_file *file, const char *prefix,
     }
 }
 
-NORETURN static void ATTR_NORETURN ATTRIBUTE_PRINTF (3, 0)
+static void ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0)
 throw_it (enum return_reason reason, enum errors error, const char *fmt,
 	  va_list ap)
 {
@@ -396,19 +396,19 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
   throw_exception (e);
 }
 
-NORETURN void
+void
 throw_verror (enum errors error, const char *fmt, va_list ap)
 {
   throw_it (RETURN_ERROR, error, fmt, ap);
 }
 
-NORETURN void
+void
 throw_vfatal (const char *fmt, va_list ap)
 {
   throw_it (RETURN_QUIT, GDB_NO_ERROR, fmt, ap);
 }
 
-NORETURN void
+void
 throw_error (enum errors error, const char *fmt, ...)
 {
   va_list args;

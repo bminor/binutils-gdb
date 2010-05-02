@@ -2784,19 +2784,6 @@ Define this if @code{lseek (n)} does not necessarily move to byte number
 @code{n} in the file.  This is only used when reading source files.  It
 is normally faster to define @code{CRLF_SOURCE_FILES} when possible.
 
-@item NORETURN
-If defined, this should be one or more tokens, such as @code{volatile},
-that can be used in both the declaration and definition of functions to
-indicate that they never return.  The default is already set correctly
-if compiling with GCC.  This will almost never need to be defined.
-
-@item ATTR_NORETURN
-If defined, this should be one or more tokens, such as
-@code{__attribute__ ((noreturn))}, that can be used in the declarations
-of functions to indicate that they never return.  The default is already
-set correctly if compiling with GCC.  This will almost never need to be
-defined.
-
 @item lint
 Define this to help placate @code{lint} in some situations.
 

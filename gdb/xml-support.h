@@ -205,7 +205,7 @@ void gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)
    parsing.  */
 
 void gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
-     ATTR_NORETURN ATTRIBUTE_PRINTF (2, 0);
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
 
 /* Parse an integer attribute into a ULONGEST.  */
 

@@ -267,36 +267,6 @@ struct cleanup
     void *arg;
   };
 
-
-/* The ability to declare that a function never returns is useful, but
-   not really required to compile GDB successfully, so the NORETURN and
-   ATTR_NORETURN macros normally expand into nothing.  */
-
-/* If compiling with older versions of GCC, a function may be declared
-   "volatile" to indicate that it does not return.  */
-
-#ifndef NORETURN
-#if defined(__GNUC__) \
-     && (__GNUC__ == 1 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7))
-#define NORETURN volatile
-#else
-#define NORETURN		/* nothing */
-#endif
-#endif
-
-/* GCC 2.5 and later versions define a function attribute "noreturn",
-   which is the preferred way to declare that a function never returns.
-   However GCC 2.7 appears to be the first version in which this fully
-   works everywhere we use it. */
-
-#ifndef ATTR_NORETURN
-#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
-#define ATTR_NORETURN __attribute__ ((noreturn))
-#else
-#define ATTR_NORETURN		/* nothing */
-#endif
-#endif
-
 /* Be conservative and use enum bitfields only with GCC.
    This is copied from gcc 3.3.1, system.h.  */
 
@@ -552,7 +522,7 @@ extern char *hex_string_custom (LONGEST, int);
 extern void fprintf_symbol_filtered (struct ui_file *, char *,
 				     enum language, int);
 
-extern NORETURN void perror_with_name (const char *) ATTR_NORETURN;
+extern void perror_with_name (const char *) ATTRIBUTE_NORETURN;
 
 extern void print_sys_errmsg (const char *, int);
 
@@ -921,24 +891,26 @@ extern char *quit_pre_print;
 
 extern char *warning_pre_print;
 
-extern NORETURN void verror (const char *fmt, va_list ap)
-     ATTR_NORETURN ATTRIBUTE_PRINTF (1, 0);
+extern void verror (const char *fmt, va_list ap)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
 
-extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTRIBUTE_PRINTF (1, 2);
+extern void error (const char *fmt, ...)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
-extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
+extern void error_stream (struct ui_file *) ATTRIBUTE_NORETURN;
 
-extern NORETURN void vfatal (const char *fmt, va_list ap)
-     ATTR_NORETURN ATTRIBUTE_PRINTF (1, 0);
+extern void vfatal (const char *fmt, va_list ap)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
 
-extern NORETURN void fatal (const char *fmt, ...) ATTR_NORETURN ATTRIBUTE_PRINTF (1, 2);
+extern void fatal (const char *fmt, ...)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
-extern NORETURN void internal_verror (const char *file, int line,
-				      const char *, va_list ap)
-     ATTR_NORETURN ATTRIBUTE_PRINTF (3, 0);
+extern void internal_verror (const char *file, int line, const char *,
+			     va_list ap)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0);
 
-extern NORETURN void internal_error (const char *file, int line,
-				     const char *, ...) ATTR_NORETURN ATTRIBUTE_PRINTF (3, 4);
+extern void internal_error (const char *file, int line, const char *, ...)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 4);
 
 extern void internal_vwarning (const char *file, int line,
 			       const char *, va_list ap)
@@ -947,7 +919,7 @@ extern void internal_vwarning (const char *file, int line,
 extern void internal_warning (const char *file, int line,
 			      const char *, ...) ATTRIBUTE_PRINTF (3, 4);
 
-extern NORETURN void nomem (long) ATTR_NORETURN;
+extern void nomem (long) ATTRIBUTE_NORETURN;
 
 extern void warning (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 

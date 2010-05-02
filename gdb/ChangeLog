@@ -1,5 +1,34 @@
 2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* cli/cli-cmds.h (error_no_arg): Remove.  Move the comment ...
+	* command.h (error_no_arg): ... here.  Remove NORETURN, change
+	ATTR_NORETURN to ATTRIBUTE_NORETURN.
+	* defs.h (NORETURN, ATTR_NORETURN): Remove.
+	(perror_with_name, verror, error, error_stream, vfatal, fatal)
+	(internal_verror, internal_error, nomem): Remove NORETURN, change
+	ATTR_NORETURN to ATTRIBUTE_NORETURN.
+	* exceptions.c (throw_exception, deprecated_throw_reason, throw_verror)
+	(throw_vfatal, throw_error): Remove NORETURN.
+	(throw_it): Remove NORETURN, change ATTR_NORETURN to ATTRIBUTE_NORETURN.
+	* exceptions.h (throw_exception, throw_verror, throw_vfatal)
+	(throw_error, deprecated_throw_reason): Remove NORETURN, change
+	ATTR_NORETURN to ATTRIBUTE_NORETURN.
+	* linespec.c (cplusplus_error): Remove NORETURN, change ATTR_NORETURN
+	to ATTRIBUTE_NORETURN for prototype, for the definition only remove
+	NORETURN.
+	* remote-mips.c (mips_error): Change NORETURN to ATTRIBUTE_NORETURN.
+	* remote-sim.c (gdb_os_error): Change ATTR_NORETURN to
+	ATTRIBUTE_NORETURN.
+	* target.c (tcomplain): Likewise.
+	* target.h (noprocess): Remove NORETURN, change ATTR_NORETURN to
+	ATTRIBUTE_NORETURN.
+	* utils.c (verror, error, vfatal, fatal, error_stream, internal_verror)
+	(internal_error, perror_with_name, nomem): Remove NORETURN.
+	* xml-support.h (gdb_xml_error): Change ATTR_NORETURN to
+	ATTRIBUTE_NORETURN.
+
+2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* ada-lang.c (lim_warning): Change ATTR_FORMAT to ATTRIBUTE_PRINTF.
 	* amd64-tdep.c (amd64_insn_length_fprintf): Likewise.
 	* cli-out.c (cli_field_fmt): New ATTRIBUTE_PRINTF.

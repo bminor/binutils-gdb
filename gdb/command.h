@@ -341,7 +341,10 @@ extern void add_setshow_zuinteger_cmd (char *name,
 
 extern void cmd_show_list (struct cmd_list_element *, int, char *);
 
-extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
+/* Used everywhere whenever at least one parameter is required and
+   none is specified. */
+
+extern void error_no_arg (char *) ATTRIBUTE_NORETURN;
 
 extern void dont_repeat (void);
 

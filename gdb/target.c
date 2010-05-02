@@ -56,7 +56,7 @@ static int default_region_ok_for_hw_watchpoint (CORE_ADDR, int);
 
 static int nosymbol (char *, CORE_ADDR *);
 
-static void tcomplain (void) ATTR_NORETURN;
+static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
 

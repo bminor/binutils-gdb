@@ -78,9 +78,8 @@ static struct symtabs_and_lines find_method (int funfirstline,
 					     struct symbol *sym_class,
 					     int *not_found_ptr);
 
-static NORETURN void cplusplus_error (const char *name,
-				      const char *fmt, ...)
-     ATTR_NORETURN ATTRIBUTE_PRINTF (2, 3);
+static void cplusplus_error (const char *name, const char *fmt, ...)
+     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
 
 static int total_number_of_methods (struct type *type);
 
@@ -146,7 +145,7 @@ symtabs_and_lines minsym_found (int funfirstline,
    single quoted demangled C++ symbols as part of the completion
    error.  */
 
-static NORETURN void
+static void
 cplusplus_error (const char *name, const char *fmt, ...)
 {
   struct ui_file *tmp_stream;
