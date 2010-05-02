@@ -1,3 +1,7 @@
+2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cli/cli-dump.h (parse_and_eval_with_error): Remove the declaration.
+
 2010-05-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (prepare_for_detach): In non-stop, context switch to

@@ -34,6 +34,4 @@ extern FILE *fopen_with_cleanup (const char *filename, const char *mode);
 
 extern char *skip_spaces (char *inp);
 
-extern struct value *parse_and_eval_with_error (char *exp, const char *fmt, ...) ATTR_FORMAT (printf, 2, 3);
-
 #endif
