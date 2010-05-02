@@ -1,5 +1,9 @@
 2010-05-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* README: Use consistent `GDB' and `GDBserver' spellings.
+
+2010-05-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.c (linux_kill_one_lwp): Assume the lwp is stopped.
 	(linux_kill): Stop all lwps here.  Don't delete the main lwp here.
 	(linux_detach_one_lwp): Assume the lwp is stopped.

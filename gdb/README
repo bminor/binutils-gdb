@@ -22,8 +22,8 @@ files, the BFD ("binary file description") library, the readline
 library, and other libraries all have directories of their own
 underneath the gdb-6.3 directory.  The idea is that a variety of GNU
 tools can share a common copy of these things.  Be aware of variation
-over time--for example don't try to build gdb with a copy of bfd from
-a release other than the gdb release (such as a binutils release),
+over time--for example don't try to build GDB with a copy of bfd from
+a release other than the GDB release (such as a binutils release),
 especially if the releases are more than a few weeks apart.
 Configuration scripts and makefiles exist to cruise up and down this
 directory tree and automatically build all the pieces in the right
@@ -73,10 +73,10 @@ argument, e.g., `./configure sun4' or `./configure decstation'.
       /berman/migchain/source/gdb-6.3/configure      # RIGHT
       /berman/migchain/source/gdb-6.3/gdb/configure  # WRONG
 
-   The gdb package contains several subdirectories, such as 'gdb',
+   The GDB package contains several subdirectories, such as 'gdb',
 'bfd', and 'readline'.  If your 'configure' line ends in
 'gdb-6.3/gdb/configure', then you are configuring only the gdb
-subdirectory, not the whole gdb package.  This leads to build errors
+subdirectory, not the whole GDB package.  This leads to build errors
 such as:
 
       make: *** No rule to make target `../bfd/bfd.h', needed by `gdb.o'.  Stop.
@@ -88,7 +88,7 @@ Bugs' section below; there are a few known problems.
 C compiler for your system, you may be able to download and install
 the GNU CC compiler.  It is available via anonymous FTP from the
 directory `ftp://ftp.gnu.org/pub/gnu/gcc'.  GDB also requires an ISO
-C standard library.  The GDB remote server, gdbserver, builds with some
+C standard library.  The GDB remote server, GDBserver, builds with some
 non-ISO standard libraries - e.g. for Windows CE.
 
    GDB uses Expat, an XML parsing library, to implement some target-specific
@@ -545,12 +545,12 @@ standalone on an m68k, i386, or SPARC cpu and communicate properly
 with the remote.c stub over a serial line.
 
    The directory gdb/gdbserver/ contains `gdbserver', a program that
-allows remote debugging for Unix applications.  gdbserver is only
+allows remote debugging for Unix applications.  GDBserver is only
 supported for some native configurations, including Sun 3, Sun 4, and
 Linux.
-The file gdb/gdbserver/README includes further notes on gdbserver; in
-particular, it explains how to build gdbserver for cross-debugging
-(where gdbserver runs on the target machine, which is of a different
+The file gdb/gdbserver/README includes further notes on GDBserver; in
+particular, it explains how to build GDBserver for cross-debugging
+(where GDBserver runs on the target machine, which is of a different
 architecture than the host machine running GDB).
 
    There are a number of remote interfaces for talking to existing ROM

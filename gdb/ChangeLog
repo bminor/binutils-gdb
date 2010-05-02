@@ -1,3 +1,7 @@
+2010-05-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* README: Use consistent `GDB' and `GDBserver' spellings.
+
 2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cli/cli-dump.h (parse_and_eval_with_error): Remove the declaration.
