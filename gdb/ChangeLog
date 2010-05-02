@@ -1,5 +1,15 @@
 2010-05-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* cli-out.c (cli_table_begin, cli_table_body, cli_table_end)
+	(cli_table_header, cli_begin, cli_end, cli_field_int)
+	(cli_field_skip, cli_field_string, cli_field_fmt, cli_spaces)
+	(cli_text, cli_message, cli_wrap_hint, cli_flush, cli_redirect):
+	Delete forward declarations.
+	(cli_ui_out_impl): Move below the callbacks.
+	(_initialize_cli_out): Delete.
+
+2010-05-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* README: Use consistent `GDB' and `GDBserver' spellings.
 
 2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>

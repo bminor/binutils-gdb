@@ -29,67 +29,10 @@
 
 typedef struct cli_ui_out_data cli_out_data;
 
-/* These are the CLI output functions */
-
-static void cli_table_begin (struct ui_out *uiout, int nbrofcols,
-			     int nr_rows, const char *tblid);
-static void cli_table_body (struct ui_out *uiout);
-static void cli_table_end (struct ui_out *uiout);
-static void cli_table_header (struct ui_out *uiout, int width,
-			      enum ui_align alig, const char *col_name,
-			      const char *colhdr);
-static void cli_begin (struct ui_out *uiout, enum ui_out_type type,
-		       int level, const char *lstid);
-static void cli_end (struct ui_out *uiout, enum ui_out_type type, int level);
-static void cli_field_int (struct ui_out *uiout, int fldno, int width,
-			   enum ui_align alig, const char *fldname, int value);
-static void cli_field_skip (struct ui_out *uiout, int fldno, int width,
-			    enum ui_align alig, const char *fldname);
-static void cli_field_string (struct ui_out *uiout, int fldno, int width,
-			      enum ui_align alig, const char *fldname,
-			      const char *string);
-static void cli_field_fmt (struct ui_out *uiout, int fldno,
-			   int width, enum ui_align align,
-			   const char *fldname, const char *format,
-			   va_list args) ATTR_FORMAT (printf, 6, 0);
-static void cli_spaces (struct ui_out *uiout, int numspaces);
-static void cli_text (struct ui_out *uiout, const char *string);
-static void cli_message (struct ui_out *uiout, int verbosity,
-			 const char *format, va_list args)
-     ATTR_FORMAT (printf, 3, 0);
-static void cli_wrap_hint (struct ui_out *uiout, char *identstring);
-static void cli_flush (struct ui_out *uiout);
-static int cli_redirect (struct ui_out *uiout, struct ui_file *outstream);
-
-/* This is the CLI ui-out implementation functions vector */
-
-/* FIXME: This can be initialized dynamically after default is set to
-   handle initial output in main.c */
-
-struct ui_out_impl cli_ui_out_impl =
-{
-  cli_table_begin,
-  cli_table_body,
-  cli_table_end,
-  cli_table_header,
-  cli_begin,
-  cli_end,
-  cli_field_int,
-  cli_field_skip,
-  cli_field_string,
-  cli_field_fmt,
-  cli_spaces,
-  cli_text,
-  cli_message,
-  cli_wrap_hint,
-  cli_flush,
-  cli_redirect,
-  0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
-};
 
 /* Prototypes for local functions */
 
-extern void _initialize_cli_out (void);
+static void cli_text (struct ui_out *uiout, const char *string);
 
 static void field_separator (void);
 
@@ -97,9 +40,11 @@ static void out_field_fmt (struct ui_out *uiout, int fldno,
 			   const char *fldname,
 			   const char *format,...) ATTR_FORMAT (printf, 4, 5);
 
+/* These are the CLI output functions */
+
 /* Mark beginning of a table */
 
-void
+static void
 cli_table_begin (struct ui_out *uiout, int nbrofcols,
 		 int nr_rows,
 		 const char *tblid)
@@ -115,7 +60,7 @@ cli_table_begin (struct ui_out *uiout, int nbrofcols,
 
 /* Mark beginning of a table body */
 
-void
+static void
 cli_table_body (struct ui_out *uiout)
 {
   cli_out_data *data = ui_out_data (uiout);
@@ -127,7 +72,7 @@ cli_table_body (struct ui_out *uiout)
 
 /* Mark end of a table */
 
-void
+static void
 cli_table_end (struct ui_out *uiout)
 {
   cli_out_data *data = ui_out_data (uiout);
@@ -136,7 +81,7 @@ cli_table_end (struct ui_out *uiout)
 
 /* Specify table header */
 
-void
+static void
 cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		  const char *col_name,
 		  const char *colhdr)
@@ -152,7 +97,7 @@ cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 
 /* Mark beginning of a list */
 
-void
+static void
 cli_begin (struct ui_out *uiout,
 	   enum ui_out_type type,
 	   int level,
@@ -165,7 +110,7 @@ cli_begin (struct ui_out *uiout,
 
 /* Mark end of a list */
 
-void
+static void
 cli_end (struct ui_out *uiout,
 	 enum ui_out_type type,
 	 int level)
@@ -177,7 +122,7 @@ cli_end (struct ui_out *uiout,
 
 /* output an int field */
 
-void
+static void
 cli_field_int (struct ui_out *uiout, int fldno, int width,
 	       enum ui_align alignment,
 	       const char *fldname, int value)
@@ -196,7 +141,7 @@ cli_field_int (struct ui_out *uiout, int fldno, int width,
 
 /* used to ommit a field */
 
-void
+static void
 cli_field_skip (struct ui_out *uiout, int fldno, int width,
 		enum ui_align alignment,
 		const char *fldname)
@@ -213,7 +158,7 @@ cli_field_skip (struct ui_out *uiout, int fldno, int width,
 /* other specific cli_field_* end up here so alignment and field
    separators are both handled by cli_field_string */
 
-void
+static void
 cli_field_string (struct ui_out *uiout,
 		  int fldno,
 		  int width,
@@ -264,7 +209,7 @@ cli_field_string (struct ui_out *uiout,
 
 /* This is the only field function that does not align.  */
 
-void
+static void
 cli_field_fmt (struct ui_out *uiout, int fldno,
 	       int width, enum ui_align align,
 	       const char *fldname,
@@ -281,7 +226,7 @@ cli_field_fmt (struct ui_out *uiout, int fldno,
     field_separator ();
 }
 
-void
+static void
 cli_spaces (struct ui_out *uiout, int numspaces)
 {
   cli_out_data *data = ui_out_data (uiout);
@@ -290,7 +235,7 @@ cli_spaces (struct ui_out *uiout, int numspaces)
   print_spaces_filtered (numspaces, data->stream);
 }
 
-void
+static void
 cli_text (struct ui_out *uiout, const char *string)
 {
   cli_out_data *data = ui_out_data (uiout);
@@ -299,7 +244,7 @@ cli_text (struct ui_out *uiout, const char *string)
   fputs_filtered (string, data->stream);
 }
 
-void
+static void ATTR_FORMAT (printf, 3,0)
 cli_message (struct ui_out *uiout, int verbosity,
 	     const char *format, va_list args)
 {
@@ -310,7 +255,7 @@ cli_message (struct ui_out *uiout, int verbosity,
     vfprintf_unfiltered (data->stream, format, args);
 }
 
-void
+static void
 cli_wrap_hint (struct ui_out *uiout, char *identstring)
 {
   cli_out_data *data = ui_out_data (uiout);
@@ -319,14 +264,14 @@ cli_wrap_hint (struct ui_out *uiout, char *identstring)
   wrap_here (identstring);
 }
 
-void
+static void
 cli_flush (struct ui_out *uiout)
 {
   cli_out_data *data = ui_out_data (uiout);
   gdb_flush (data->stream);
 }
 
-int
+static int
 cli_redirect (struct ui_out *uiout, struct ui_file *outstream)
 {
   cli_out_data *data = ui_out_data (uiout);
@@ -373,6 +318,32 @@ field_separator (void)
   fputc_filtered (' ', data->stream);
 }
 
+/* This is the CLI ui-out implementation functions vector */
+
+/* FIXME: This can be initialized dynamically after default is set to
+   handle initial output in main.c */
+
+struct ui_out_impl cli_ui_out_impl =
+{
+  cli_table_begin,
+  cli_table_body,
+  cli_table_end,
+  cli_table_header,
+  cli_begin,
+  cli_end,
+  cli_field_int,
+  cli_field_skip,
+  cli_field_string,
+  cli_field_fmt,
+  cli_spaces,
+  cli_text,
+  cli_message,
+  cli_wrap_hint,
+  cli_flush,
+  cli_redirect,
+  0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
+};
+
 /* Constructor for a `cli_out_data' object.  */
 
 void
@@ -402,11 +373,4 @@ cli_out_set_stream (struct ui_out *uiout, struct ui_file *stream)
   struct ui_file *old = data->stream;
   data->stream = stream;
   return old;
-}
-
-/* Standard gdb initialization hook.  */
-void
-_initialize_cli_out (void)
-{
-  /* nothing needs to be done */
 }
