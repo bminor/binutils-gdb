@@ -1314,43 +1314,6 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	  continue;
 	}
 
-      /* If GDB is not interested in this signal, don't stop other
-	 threads, and don't report it to GDB.  Just resume the
-	 inferior right away.  We do this for threading-related
-	 signals as well as any that GDB specifically requested we
-	 ignore.  But never ignore SIGSTOP if we sent it ourselves,
-	 and do not ignore signals when stepping - they may require
-	 special handling to skip the signal handler.  */
-      /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
-	 thread library?  */
-      if (WIFSTOPPED (*wstat)
-	  && !event_child->stepping
-	  && (
-#if defined (USE_THREAD_DB) && defined (__SIGRTMIN)
-	      (current_process ()->private->thread_db != NULL
-	       && (WSTOPSIG (*wstat) == __SIGRTMIN
-		   || WSTOPSIG (*wstat) == __SIGRTMIN + 1))
-	      ||
-#endif
-	      (pass_signals[target_signal_from_host (WSTOPSIG (*wstat))]
-	       && !(WSTOPSIG (*wstat) == SIGSTOP
-		    && event_child->stop_expected))))
-	{
-	  siginfo_t info, *info_p;
-
-	  if (debug_threads)
-	    fprintf (stderr, "Ignored signal %d for LWP %ld.\n",
-		     WSTOPSIG (*wstat), lwpid_of (event_child));
-
-	  if (ptrace (PTRACE_GETSIGINFO, lwpid_of (event_child), 0, &info) == 0)
-	    info_p = &info;
-	  else
-	    info_p = NULL;
-	  linux_resume_one_lwp (event_child, event_child->stepping,
-				WSTOPSIG (*wstat), info_p);
-	  continue;
-	}
-
       if (WIFSTOPPED (*wstat)
 	  && WSTOPSIG (*wstat) == SIGSTOP
 	  && event_child->stop_expected)
@@ -1764,18 +1727,53 @@ retry:
       trace_event = 0;
     }
 
-  /* We have all the data we need.  Either report the event to GDB, or
-     resume threads and keep waiting for more.  */
+  /* Check whether GDB would be interested in this event.  */
 
-  /* Check If GDB would be interested in this event.  If GDB wanted
-     this thread to single step, we always want to report the SIGTRAP,
-     and let GDB handle it.  Watchpoints should always be reported.
-     So should signals we can't explain.  A SIGTRAP we can't explain
-     could be a GDB breakpoint --- we may or not support Z0
-     breakpoints.  If we do, we're be able to handle GDB breakpoints
-     on top of internal breakpoints, by handling the internal
-     breakpoint and still reporting the event to GDB.  If we don't,
-     we're out of luck, GDB won't see the breakpoint hit.  */
+  /* If GDB is not interested in this signal, don't stop other
+     threads, and don't report it to GDB.  Just resume the inferior
+     right away.  We do this for threading-related signals as well as
+     any that GDB specifically requested we ignore.  But never ignore
+     SIGSTOP if we sent it ourselves, and do not ignore signals when
+     stepping - they may require special handling to skip the signal
+     handler.  */
+  /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
+     thread library?  */
+  if (WIFSTOPPED (w)
+      && current_inferior->last_resume_kind != resume_step
+      && (
+#if defined (USE_THREAD_DB) && defined (__SIGRTMIN)
+	  (current_process ()->private->thread_db != NULL
+	   && (WSTOPSIG (w) == __SIGRTMIN
+	       || WSTOPSIG (w) == __SIGRTMIN + 1))
+	  ||
+#endif
+	  (pass_signals[target_signal_from_host (WSTOPSIG (w))]
+	   && !(WSTOPSIG (w) == SIGSTOP
+		&& current_inferior->last_resume_kind == resume_stop))))
+    {
+      siginfo_t info, *info_p;
+
+      if (debug_threads)
+	fprintf (stderr, "Ignored signal %d for LWP %ld.\n",
+		 WSTOPSIG (w), lwpid_of (event_child));
+
+      if (ptrace (PTRACE_GETSIGINFO, lwpid_of (event_child), 0, &info) == 0)
+	info_p = &info;
+      else
+	info_p = NULL;
+      linux_resume_one_lwp (event_child, event_child->stepping,
+			    WSTOPSIG (w), info_p);
+      goto retry;
+    }
+
+  /* If GDB wanted this thread to single step, we always want to
+     report the SIGTRAP, and let GDB handle it.  Watchpoints should
+     always be reported.  So should signals we can't explain.  A
+     SIGTRAP we can't explain could be a GDB breakpoint --- we may or
+     not support Z0 breakpoints.  If we do, we're be able to handle
+     GDB breakpoints on top of internal breakpoints, by handling the
+     internal breakpoint and still reporting the event to GDB.  If we
+     don't, we're out of luck, GDB won't see the breakpoint hit.  */
   report_to_gdb = (!maybe_internal_trap
 		   || current_inferior->last_resume_kind == resume_step
 		   || event_child->stopped_by_watchpoint

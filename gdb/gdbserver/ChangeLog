@@ -1,3 +1,10 @@
+2010-05-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_wait_for_event_1): Move passing the signal to
+	the inferior right away from here...
+	(linux_wait_1): ... to here, and adjust to check the thread's
+	last_resume_kind instead of the lwp's step or stop_expected flags.
+
 2010-05-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* README: Use consistent `GDB' and `GDBserver' spellings.
