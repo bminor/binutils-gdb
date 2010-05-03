@@ -355,12 +355,14 @@ cp_lookup_symbol_imports (const char *scope,
 	searched_cleanup = make_cleanup (reset_directive_searched, current);
 
 	/* If there is an import of a single declaration, compare the imported
-	   declaration with the sought out name.  If there is a match pass
-	   current->import_src as NAMESPACE to direct the search towards the
-	   imported namespace.  */
-	if (current->declaration && strcmp (name, current->declaration) == 0)
+	   declaration (after optional renaming by its alias) with the sought
+	   out name.  If there is a match pass current->import_src as NAMESPACE
+	   to direct the search towards the imported namespace.  */
+	if (current->declaration
+	    && strcmp (name, current->alias ? current->alias
+					    : current->declaration) == 0)
 	  sym = cp_lookup_symbol_in_namespace (current->import_src,
-	                                       name,
+	                                       current->declaration,
 	                                       block,
 	                                       domain);
 

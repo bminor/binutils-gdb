@@ -1,3 +1,9 @@
+2010-05-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cp-namespace.c (cp_lookup_symbol_imports): Support ALIAS for the
+	CURRENT->DECLARATION case.
+	* cp-support.h (struct using_direct): Provide extended comment.
+
 2010-05-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppaobsd-tdep.c (HPPAOBSD_SIZEOF_GREGS): Renamed from

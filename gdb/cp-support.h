@@ -37,19 +37,44 @@ struct type;
 struct demangle_component;
 
 /* This struct is designed to store data from using directives.  It
-   says that names from namespace IMPORT_SRC should be visible within
-   namespace IMPORT_DEST.  These form a linked list; NEXT is the next element
-   of the list.  If the imported namespace has been aliased, ALIAS is set to a
-   string representing the alias.  Otherwise, ALIAS is NULL.
-   Eg:
-       namespace C = A::B;
-   ALIAS = "C"
-   DECLARATION is the name of the imported declaration, if this import
-   statement represents one.
-   Eg:
-       using A::x;
-   Where x is variable in namespace A.  DECLARATION is set to x.
-*/
+   says that names from namespace IMPORT_SRC should be visible within namespace
+   IMPORT_DEST.  These form a linked list; NEXT is the next element of the
+   list.  If the imported namespace or declaration has been aliased within the
+   IMPORT_DEST namespace, ALIAS is set to a string representing the alias.
+   Otherwise, ALIAS is NULL.  DECLARATION is the name of the imported
+   declaration, if this import statement represents one.  Otherwise DECLARATION
+   is NULL and this import statement represents a namespace.
+
+   C++:      using namespace A;
+   Fortran:  use A
+   import_src = "A"
+   import_dest = local scope of the import statement even such as ""
+   alias = NULL
+   declaration = NULL
+
+   C++:      using A::x;
+   Fortran:  use A, only: x
+   import_src = "A"
+   import_dest = local scope of the import statement even such as ""
+   alias = NULL
+   declaration = "x"
+   The declaration will get imported as import_dest::x.
+
+   C++:      namespace LOCALNS = A;
+   Fortran has no way to address non-local namespace/module.
+   import_src = "A"
+   import_dest = local scope of the import statement even such as ""
+   alias = "LOCALNS"
+   declaration = NULL
+   The namespace will get imported as the import_dest::LOCALNS namespace.
+
+   C++ cannot express it, it would be something like:  using localname = A::x;
+   Fortran:  use A, only localname => x
+   import_src = "A"
+   import_dest = local scope of the import statement even such as ""
+   alias = "localname"
+   declaration = "x"
+   The declaration will get imported as localname or `import_dest`localname.  */
 
 struct using_direct
 {
