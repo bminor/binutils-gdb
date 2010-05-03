@@ -1,3 +1,10 @@
+2010-05-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_notice_signals): New.
+	(remote_start_remote): In non-stop mode, update the remote end on
+	which signals it can silently pass.
+	(init_remote_ops): Install remote_notice_signals.
+
 2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cli/cli-cmds.h (error_no_arg): Remove.  Move the comment ...

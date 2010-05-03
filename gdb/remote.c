@@ -1535,6 +1535,14 @@ remote_pass_signals (void)
     }
 }
 
+static void
+remote_notice_signals (ptid_t ptid)
+{
+  /* Update the remote on signals to silently pass, if they've
+     changed.  */
+  remote_pass_signals ();
+}
+
 /* If PTID is MAGIC_NULL_PTID, don't set any thread.  If PTID is
    MINUS_ONE_PTID, set the thread to -1, so the stub returns the
    thread.  If GEN is set, set the general thread, if not, then set
@@ -3155,6 +3163,11 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       /* In non-stop mode, any cached wait status will be stored in
 	 the stop reply queue.  */
       gdb_assert (wait_status == NULL);
+
+      /* Update the remote on signals to silently pass, or more
+	 importantly, which to not ignore, in case a previous session
+	 had set some different set of signals to be ignored.  */
+      remote_pass_signals ();
     }
 
   /* If we connected to a live target, do some additional setup.  */
@@ -9898,6 +9911,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_kill = remote_kill;
   remote_ops.to_load = generic_load;
   remote_ops.to_mourn_inferior = remote_mourn;
+  remote_ops.to_notice_signals = remote_notice_signals;
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_find_new_threads = remote_threads_info;
   remote_ops.to_pid_to_str = remote_pid_to_str;
