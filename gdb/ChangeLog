@@ -1,3 +1,9 @@
+2010-05-03  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	PR pascal/11349.
+	* p-valprint.c (pascal_value_print): Always dereference a value with
+	type code TYPE_CODE_REF.
+	
 2010-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_notice_signals): New.

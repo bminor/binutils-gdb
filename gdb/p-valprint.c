@@ -544,6 +544,9 @@ pascal_value_print (struct value *val, struct ui_file *stream,
 		    const struct value_print_options *options)
 {
   struct type *type = value_type (val);
+  struct value_print_options opts = *options;
+
+  opts.deref_ref = 1;
 
   /* If it is a pointer, indicate what it points to.
 
@@ -570,7 +573,7 @@ pascal_value_print (struct value *val, struct ui_file *stream,
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  return common_val_print (val, stream, 0, options, current_language);
+  return common_val_print (val, stream, 0, &opts, current_language);
 }
 
 
