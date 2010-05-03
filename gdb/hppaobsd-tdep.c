@@ -32,21 +32,25 @@
 /* Core file support.  */
 
 /* Sizeof `struct reg' in <machine/reg.h>.  */
-#define HPPABSD_SIZEOF_GREGS	(34 * 4)
+#define HPPAOBSD_SIZEOF_GREGS	(34 * 4)
+
+/* Sizeof `struct fpreg' in <machine/reg.h>.  */
+#define HPPAOBSD_SIZEOF_FPREGS	(32 * 8)
 
 /* Supply register REGNUM from the buffer specified by GREGS and LEN
    in the general-purpose register set REGSET to register cache
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
-hppabsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
-		     int regnum, const void *gregs, size_t len)
+hppaobsd_supply_gregset (const struct regset *regset,
+			 struct regcache *regcache,
+			 int regnum, const void *gregs, size_t len)
 {
   const gdb_byte *regs = gregs;
   size_t offset;
   int i;
 
-  gdb_assert (len >= HPPABSD_SIZEOF_GREGS);
+  gdb_assert (len >= HPPAOBSD_SIZEOF_GREGS);
 
   for (i = HPPA_R1_REGNUM, offset = 4; i <= HPPA_R31_REGNUM; i++, offset += 4)
     {
@@ -62,12 +66,40 @@ hppabsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
     regcache_raw_supply (regcache, HPPA_PCOQ_TAIL_REGNUM, regs + 33 * 4);
 }
 
-/* OpenBSD/hppa register set.  */
+/* Supply register REGNUM from the buffer specified by FPREGS and LEN
+   in the floating-point register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
-static struct regset hppabsd_gregset =
+static void
+hppaobsd_supply_fpregset (const struct regset *regset,
+			  struct regcache *regcache,
+			  int regnum, const void *fpregs, size_t len)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  const gdb_byte *regs = fpregs;
+  int i;
+
+  gdb_assert (len >= HPPAOBSD_SIZEOF_FPREGS);
+
+  for (i = HPPA_FP0_REGNUM; i <= HPPA_FP31R_REGNUM; i++)
+    {
+      if (regnum == i || regnum == -1)
+	regcache_raw_supply (regcache, i, regs + (i - HPPA_FP0_REGNUM) * 4);
+    }
+}
+
+/* OpenBSD/hppa register sets.  */
+
+static struct regset hppaobsd_gregset =
 {
   NULL,
-  hppabsd_supply_gregset
+  hppaobsd_supply_gregset
+};
+
+static struct regset hppaobsd_fpregset =
+{
+  NULL,
+  hppaobsd_supply_fpregset
 };
 
 /* Return the appropriate register set for the core section identified
@@ -77,8 +109,11 @@ static const struct regset *
 hppaobsd_regset_from_core_section (struct gdbarch *gdbarch,
 				  const char *sect_name, size_t sect_size)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= HPPABSD_SIZEOF_GREGS)
-    return &hppabsd_gregset;
+  if (strcmp (sect_name, ".reg") == 0 && sect_size >= HPPAOBSD_SIZEOF_GREGS)
+    return &hppaobsd_gregset;
+
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= HPPAOBSD_SIZEOF_FPREGS)
+    return &hppaobsd_fpregset;
 
   return NULL;
 }
@@ -93,7 +128,6 @@ hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Core file support.  */
   set_gdbarch_regset_from_core_section
     (gdbarch, hppaobsd_regset_from_core_section);
-
 }
 
 
