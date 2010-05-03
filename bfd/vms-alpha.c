@@ -89,6 +89,7 @@
 #define ALPHA_R_BSR		15
 #define ALPHA_R_LDA		16
 #define ALPHA_R_BOH		17
+
 /* These are used with DST_S_C_LINE_NUM.  */
 #define DST_S_C_LINE_NUM_HEADER_SIZE 4
 
@@ -291,7 +292,6 @@ struct vms_private_data_struct
   /* Content reading.  */
   asection *image_section;		/* section for image_ptr  */
   file_ptr image_offset;		/* Offset for image_ptr.  */
-  bfd_boolean image_autoextend;		/* Resize section if necessary.  */
 
   struct module *modules;		/* list of all compilation units */
 
@@ -1383,30 +1383,6 @@ dst_retrieve_location (bfd *abfd, unsigned int loc)
   return PRIV (dst_ptr_offsets)[loc];
 }
 
-/* Check that the DST section is big enough for the specified
-   amount of bytes.  */
-
-static void
-dst_check_allocation (bfd *abfd, unsigned int size)
-{
-  asection *section = PRIV (image_section);
-
-  section->size += size;
-
-  /* Grow the section as necessary */
-  if (section->size <= section->rawsize)
-    return;
-  do
-    {
-      if (section->rawsize == 0)
-        section->rawsize = 1024;
-      else
-        section->rawsize *= 2;
-    }
-  while (section->size > section->rawsize);
-  section->contents = bfd_realloc (section->contents, section->rawsize);
-}
-
 /* Write multiple bytes to section image.  */
 
 static bfd_boolean
@@ -1417,9 +1393,6 @@ image_write (bfd *abfd, unsigned char *ptr, int size)
                   (long)PRIV (image_offset));
   _bfd_hexdump (9, ptr, size, 0);
 #endif
-
-  if (PRIV (image_autoextend))
-    dst_check_allocation (abfd, size);
 
   if (PRIV (image_section)->contents != NULL)
     {
@@ -1666,6 +1639,10 @@ alpha_vms_fix_sec_rel (bfd *abfd, struct bfd_link_info *info,
   else
     return vma + sec->vma;
 }
+
+/* Read an ETIR record from ABFD.  If INFO is not null, put the content into
+   the output section (used during linking).
+   Return FALSE in case of error.  */
 
 static bfd_boolean
 _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
@@ -2263,11 +2240,11 @@ vms_slurp_debug (bfd *abfd)
 
   PRIV (image_section) = section;
   PRIV (image_offset) = section->size;
-  PRIV (image_autoextend) = FALSE;
 
   if (!_bfd_vms_slurp_etir (abfd, NULL))
     return FALSE;
 
+  section->size = PRIV (image_offset);
   return TRUE;
 }
 
@@ -2279,7 +2256,7 @@ _bfd_vms_slurp_edbg (bfd *abfd)
 {
   vms_debug2 ((2, "EDBG\n"));
 
-  abfd->flags |= (HAS_DEBUG | HAS_LINENO);
+  abfd->flags |= HAS_DEBUG | HAS_LINENO;
 
   return vms_slurp_debug (abfd);
 }
@@ -2334,20 +2311,19 @@ _bfd_vms_slurp_eeom (bfd *abfd)
 static bfd_boolean
 _bfd_vms_slurp_object_records (bfd * abfd)
 {
-  int err, new_type, type = -1;
+  bfd_boolean err;
+  int type;
 
   do
     {
       vms_debug2 ((7, "reading at %08lx\n", (unsigned long)bfd_tell (abfd)));
 
-      new_type = _bfd_vms_get_object_record (abfd);
-      if (new_type < 0)
+      type = _bfd_vms_get_object_record (abfd);
+      if (type < 0)
 	{
 	  vms_debug2 ((2, "next_record failed\n"));
 	  return FALSE;
 	}
-
-      type = new_type;
 
       switch (type)
 	{
@@ -2598,6 +2574,8 @@ alpha_vms_file_position_block (bfd *abfd)
   PRIV (file_pos) -= (PRIV (file_pos) % VMS_BLOCK_SIZE);
 }
 
+/* Convert from internal structure SRC to external structure DST.  */
+
 static void
 alpha_vms_swap_eisd_out (struct vms_internal_eisd_map *src,
                          struct vms_eisd *dst)
@@ -2635,6 +2613,9 @@ alpha_vms_append_extra_eisd (bfd *abfd, struct vms_internal_eisd_map *eisd)
     PRIV (gbl_eisd_tail)->next = eisd;
   PRIV (gbl_eisd_tail) = eisd;
 }
+
+/* Create an EISD for shared image SHRIMG.
+   Return FALSE in case of error.  */
 
 static bfd_boolean
 alpha_vms_create_eisd_for_shared (bfd *abfd, bfd *shrimg)
@@ -2676,6 +2657,9 @@ alpha_vms_create_eisd_for_shared (bfd *abfd, bfd *shrimg)
 
   return TRUE;
 }
+
+/* Create an EISD for section SEC.
+   Return FALSE in case of failure.  */
 
 static bfd_boolean
 alpha_vms_create_eisd_for_section (bfd *abfd, asection *sec)
@@ -2732,6 +2716,9 @@ alpha_vms_create_eisd_for_section (bfd *abfd, asection *sec)
   return TRUE;
 }
 
+/* Layout executable ABFD and write it to the disk.
+   Return FALSE in case of failure.  */
+
 static bfd_boolean
 alpha_vms_write_exec (bfd *abfd)
 {
@@ -2743,7 +2730,9 @@ alpha_vms_write_exec (bfd *abfd)
   struct vms_internal_eisd_map *first_eisd;
   struct vms_internal_eisd_map *eisd;
   asection *dst;
+  asection *dmt;
 
+  /* Build the EIHD.  */
   PRIV (file_pos) = EIHD__C_LENGTH;
 
   memset (&eihd, 0, sizeof (eihd));
@@ -2821,9 +2810,8 @@ alpha_vms_write_exec (bfd *abfd)
   eihi->imgbid[0] = 0;
 
   /* Alloc EIHS.  */
-  dst = bfd_get_section_by_name (abfd, "$DST$");
-  if (dst == NULL || dst->size == 0)
-    dst = bfd_get_section_by_name (abfd, "$TBT$");
+  dst = PRIV (dst_section);
+  dmt = bfd_get_section_by_name (abfd, "$DMT$");
   if (dst != NULL && dst->size != 0)
     {
       eihs = (struct vms_eihs *)((char *) &eihd + PRIV (file_pos));
@@ -2840,7 +2828,7 @@ alpha_vms_write_exec (bfd *abfd)
       bfd_putl32 (0, eihs->dmtsize);
     }
 
-  /* One per section.  */
+  /* One EISD per section.  */
   for (sec = abfd->sections; sec; sec = sec->next)
     {
       if (!alpha_vms_create_eisd_for_section (abfd, sec))
@@ -2920,6 +2908,12 @@ alpha_vms_write_exec (bfd *abfd)
     {
       bfd_putl32 ((dst->filepos / VMS_BLOCK_SIZE) + 1, eihs->dstvbn);
       bfd_putl32 (dst->size, eihs->dstsize);
+
+      if (dmt != NULL)
+        {
+          bfd_putl32 ((dmt->filepos / VMS_BLOCK_SIZE) + 1, eihs->dmtvbn);
+          bfd_putl32 (dmt->size, eihs->dmtsize);
+        }
     }
 
   /* Write EISD in hdr.  */
@@ -7362,8 +7356,8 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
                (unsigned)bfd_getl32 (eihs.minorid));
       dst_vbn = bfd_getl32 (eihs.dstvbn);
       dst_size = bfd_getl32 (eihs.dstsize);
-      fprintf (file, _(" debug symbol table : vbn: %u, size: %u\n"),
-               dst_vbn, dst_size);
+      fprintf (file, _(" debug symbol table : vbn: %u, size: %u (0x%x)\n"),
+               dst_vbn, dst_size, dst_size);
       gst_vbn = bfd_getl32 (eihs.gstvbn);
       gst_size = bfd_getl32 (eihs.gstsize);
       fprintf (file, _(" global symbol table: vbn: %u, records: %u\n"),
@@ -7499,7 +7493,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
             }
           count = bfd_getl16 (dmth.psect_count);
           fprintf (file,
-                   _(" module address: 0x%08x, size: 0x%08x, (%u psect)\n"),
+                   _(" module address: 0x%08x, size: 0x%08x, (%u psects)\n"),
                    (unsigned)bfd_getl32 (dmth.modbeg),
                    (unsigned)bfd_getl32 (dmth.size), count);
           dmt_size -= sizeof (dmth);
@@ -7745,7 +7739,7 @@ vms_bfd_print_private_bfd_data (bfd *abfd, void *ptr)
 
 /* Linking.  */
 
-/* Slurp an ordered set of VMS object records.  */
+/* Slurp ETIR/EDBG/ETBT VMS object records.  */
 
 static bfd_boolean
 alpha_vms_read_sections_content (bfd *abfd, struct bfd_link_info *info)
@@ -7758,8 +7752,6 @@ alpha_vms_read_sections_content (bfd *abfd, struct bfd_link_info *info)
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
     return FALSE;
 
-  PRIV (image_autoextend) = FALSE;
-
   cur_section = NULL;
   cur_offset = 0;
 
@@ -7769,6 +7761,7 @@ alpha_vms_read_sections_content (bfd *abfd, struct bfd_link_info *info)
     {
       if (info->strip == strip_all || info->strip == strip_debugger)
         {
+          /* Discard the DST section.  */
           dst_offset = 0;
           dst_section = NULL;
         }
@@ -7805,9 +7798,7 @@ alpha_vms_read_sections_content (bfd *abfd, struct bfd_link_info *info)
             continue;
           PRIV (image_section) = dst_section;
           PRIV (image_offset) = dst_offset;
-          PRIV (image_autoextend) = TRUE;
           res = _bfd_vms_slurp_etir (abfd, info);
-          PRIV (image_autoextend) = FALSE;
           dst_offset = PRIV (image_offset);
           break;
         case EOBJ__C_EEOM:
@@ -8372,6 +8363,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *fixupsec;
   bfd_vma base_addr;
   bfd_vma last_addr;
+  asection *dst;
 
   bfd_get_outsymbols (abfd) = NULL;
   bfd_get_symcount (abfd) = 0;
@@ -8415,7 +8407,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 #endif
 
-  /* Find entry point.  */
+  /* Find the entry point.  */
   if (bfd_get_start_address (abfd) == 0)
     {
       bfd *startbfd = NULL;
@@ -8454,7 +8446,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
         }
     }
 
-  /* Allocate content.  */
+  /* Allocate contents.  */
   base_addr = (bfd_vma)-1;
   last_addr = 0;
   for (o = abfd->sections; o != NULL; o = o->next)
@@ -8474,6 +8466,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
         }
     }
 
+  /* Create the fixup section.  */
   fixupsec = bfd_make_section_anyway_with_flags
     (info->output_bfd, "$FIXUP$",
      SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_LINKER_CREATED);
@@ -8523,6 +8516,91 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Compute fixups.  */
   if (!alpha_vms_build_fixups (info))
     return FALSE;
+
+  /* Compute the DMT.  */
+  dst = PRIV (dst_section);
+  if (dst != NULL && dst->size == 0)
+    dst = NULL;
+  if (dst != NULL)
+    {
+      asection *dmt;
+      int pass;
+      unsigned char *contents = NULL;
+
+      dmt = bfd_make_section_anyway_with_flags
+        (info->output_bfd, "$DMT$",
+         SEC_DEBUGGING | SEC_HAS_CONTENTS | SEC_LINKER_CREATED);
+      if (dmt == NULL)
+        return FALSE;
+
+      /* In pass 1, compute the size.  In pass 2, write the DMT contents.  */
+      for (pass = 0; pass < 2; pass++)
+        {
+          unsigned int off = 0;
+
+          /* For each object file (ie for each module).  */
+          for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+            {
+              asection *sub_dst;
+              struct vms_dmt_header *dmth = NULL;
+              unsigned int psect_count;
+
+              /* Skip this module if it has no DST.  */
+              sub_dst = PRIV2 (sub, dst_section);
+              if (sub_dst == NULL || sub_dst->size == 0)
+                continue;
+
+              if (pass == 1)
+                {
+                  /* Write the header.  */
+                  dmth = (struct vms_dmt_header *)(contents + off);
+                  bfd_putl32 (sub_dst->output_offset, dmth->modbeg);
+                  bfd_putl32 (sub_dst->size, dmth->size);
+                }
+
+              off += sizeof (struct vms_dmt_header);
+              psect_count = 0;
+
+              /* For each section (ie for each psect).  */
+              for (o = sub->sections; o != NULL; o = o->next)
+                {
+                  /* Only consider interesting sections.  */
+                  if (!(o->flags & SEC_ALLOC))
+                    continue;
+                  if (o->flags & SEC_LINKER_CREATED)
+                    continue;
+
+                  if (pass == 1)
+                    {
+                      /* Write an entry.  */
+                      struct vms_dmt_psect *dmtp;
+
+                      dmtp = (struct vms_dmt_psect *)(contents + off);
+                      bfd_putl32 (o->output_offset + o->output_section->vma,
+                                  dmtp->start);
+                      bfd_putl32 (o->size, dmtp->length);
+                      psect_count++;
+                    }
+                  off += sizeof (struct vms_dmt_psect);
+                }
+              if (pass == 1)
+                bfd_putl32 (psect_count, dmth->psect_count);
+            }
+
+          if (pass == 0)
+            {
+              contents = bfd_zalloc (info->output_bfd, off);
+              if (contents == NULL)
+                return FALSE;
+              dmt->contents = contents;
+              dmt->size = off;
+            }
+          else
+            {
+              BFD_ASSERT (off == dmt->size);
+            }
+        }
+    }
 
   return TRUE;
 }

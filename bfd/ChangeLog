@@ -1,5 +1,19 @@
 2010-05-03  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c: Add comments.
+	(struct vms_private_data_struct): Remove image_autoextend field.
+	(dst_check_allocation): Removed.
+	(image_write): Remove call to dst_check_allocation.
+	(vms_slurp_debug): Do not set image_autoextend.  Adjust section
+	size.
+	(_bfd_vms_slurp_object_records): Remove useless new_type variable.
+	(alpha_vms_write_exec): Use dst_section to get the dst section.
+	Write the dmt section.
+	(evax_bfd_print_image): Also print the dst size in hexa.  Fix typo.
+	(alpha_vms_read_sections_content): Do not set image_autoextend.
+
+2010-05-03  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-lib.c (_bfd_vms_lib_archive_p): Adjust for a possible empty
 	next array.
 	(vms_lib_dcx): Adjust for the above change.
