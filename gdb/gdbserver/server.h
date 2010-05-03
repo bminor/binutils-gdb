@@ -333,10 +333,14 @@ extern int non_stop;
 /* Functions from event-loop.c.  */
 typedef void *gdb_client_data;
 typedef int (handler_func) (int, gdb_client_data);
+typedef int (callback_handler_func) (gdb_client_data);
 
 extern void delete_file_handler (int fd);
 extern void add_file_handler (int fd, handler_func *proc,
 			      gdb_client_data client_data);
+extern int append_callback_event (callback_handler_func *proc,
+				   gdb_client_data client_data);
+extern void delete_callback_event (int id);
 
 extern void start_event_loop (void);
 

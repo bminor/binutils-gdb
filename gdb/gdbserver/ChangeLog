@@ -1,3 +1,20 @@
+2010-05-03  Doug Evans  <dje@google.com>
+
+	* event-loop.c (struct callback_event): New struct.
+	(callback_list): New global.
+	(append_callback_event, delete_callback_event): New functions.
+	(process_callback): New function.
+	(start_event_loop): Call it.
+	* remote-utils.c (NOT_SCHEDULED): Define.
+	(readchar_buf, readchar_bufcnt, readchar_bufp): New static globals,
+	moved out of readchar.
+	(readchar): Rewrite.  Call reschedule before returning.
+	(reset_readchar): New function.
+	(remote_close): Call it.
+	(process_remaining, reschedule): New functions.
+	* server.h (callback_handler_func): New typedef.
+	(append_callback_event, delete_callback_event): Declare.
+
 2010-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* proc-service.c (ps_pglobal_lookup): Use
