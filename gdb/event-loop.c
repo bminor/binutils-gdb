@@ -218,8 +218,7 @@ struct gdb_timer
     struct gdb_timer *next;
     timer_handler_func *proc;	/* Function to call to do the work */
     gdb_client_data client_data;	/* Argument to async_handler_func */
-  }
-gdb_timer;
+  };
 
 /* List of currently active timers. It is sorted in order of
    increasing timers. */
@@ -1188,7 +1187,7 @@ create_timer (int milliseconds, timer_handler_func * proc, gdb_client_data clien
 
   gettimeofday (&time_now, NULL);
 
-  timer_ptr = (struct gdb_timer *) xmalloc (sizeof (gdb_timer));
+  timer_ptr = (struct gdb_timer *) xmalloc (sizeof (*timer_ptr));
   timer_ptr->when.tv_sec = time_now.tv_sec + delta.tv_sec;
   timer_ptr->when.tv_usec = time_now.tv_usec + delta.tv_usec;
   /* carry? */
