@@ -307,11 +307,23 @@ struct target_ops
   /* Return true if THREAD is known to be stopped now.  */
   int (*thread_stopped) (struct thread_info *thread);
 
-  /* Pause all threads.  */
-  void (*pause_all) (void);
-
   /* Read Thread Information Block address.  */
   int (*get_tib_address) (ptid_t ptid, CORE_ADDR *address);
+
+  /* Pause all threads.  If FREEZE, arrange for any resume attempt be
+     be ignored until an unpause_all call unfreezes threads again.
+     There can be nested calls to pause_all, so a freeze counter
+     should be maintained.  */
+  void (*pause_all) (int freeze);
+
+  /* Unpause all threads.  Threads that hadn't been resumed by the
+     client should be left stopped.  Basically a pause/unpause call
+     pair should not end up resuming threads that were stopped before
+     the pause call.  */
+  void (*unpause_all) (int unfreeze);
+
+  /* Cancel all pending breakpoints hits in all threads.  */
+  void (*cancel_breakpoints) (void);
 };
 
 extern struct target_ops *the_target;
@@ -369,11 +381,25 @@ void set_target_ops (struct target_ops *);
 #define thread_stopped(thread) \
   (*the_target->thread_stopped) (thread)
 
-#define pause_all()			\
-  do					\
-    {					\
-      if (the_target->pause_all)	\
-	(*the_target->pause_all) ();	\
+#define pause_all(freeze)			\
+  do						\
+    {						\
+      if (the_target->pause_all)		\
+	(*the_target->pause_all) (freeze);	\
+    } while (0)
+
+#define unpause_all(unfreeze)			\
+  do						\
+    {						\
+      if (the_target->unpause_all)		\
+	(*the_target->unpause_all) (unfreeze);	\
+    } while (0)
+
+#define cancel_breakpoints()			\
+  do						\
+    {						\
+      if (the_target->cancel_breakpoints)     	\
+	(*the_target->cancel_breakpoints) ();  	\
     } while (0)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */

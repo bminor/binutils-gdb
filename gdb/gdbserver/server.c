@@ -2101,7 +2101,7 @@ handle_status (char *own_buf)
     }
   else
     {
-      pause_all ();
+      pause_all (0);
       gdb_wants_all_threads_stopped ();
 
       if (all_threads.head)

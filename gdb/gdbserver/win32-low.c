@@ -1811,8 +1811,7 @@ static struct target_ops win32_target_ops = {
   NULL, /* read_pc */
   NULL, /* write_pc */
   NULL, /* thread_stopped */
-  NULL, /* pause_all */
-  win32_get_tib_address,
+  win32_get_tib_address
 };
 
 /* Initialize the Win32 backend.  */

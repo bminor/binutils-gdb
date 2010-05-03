@@ -1,5 +1,49 @@
 2010-05-03  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-low.c (linux_kill, linux_detach): Adjust.
+	(status_pending_p_callback): Remove redundant statement.  Check
+	for !TARGET_WAITIKIND_IGNORE, instead of
+	TARGET_WAITKIND_STOPPED.
+	(handle_tracepoints): Make sure LWP is locked.  Adjust.
+	(linux_wait_for_event_1): Adjust.
+	(linux_cancel_breakpoints): New.
+	(unsuspend_one_lwp): New.
+	(unsuspend_all_lwps): New.
+	(linux_wait_1): If finishing a step-over, unsuspend all lwps.
+	(send_sigstop_callback): Change return type to int, add new
+	`except' parameter and handle it.
+	(suspend_and_send_sigstop_callback): New.
+	(stop_all_lwps): Add new `suspend' and `expect' parameters, and
+	pass them down.  If SUSPEND, also increment the lwp's suspend
+	count.
+	(linux_resume_one_lwp): Add notice about resuming a suspended LWP.
+	(need_step_over_p): Don't consider suspended LWPs.
+	(start_step_over): Adjust.
+	(proceed_one_lwp): Change return type to int, add new `except'
+	parameter and handle it.
+	(unsuspend_and_proceed_one_lwp): New.
+	(proceed_all_lwps): Use find_inferior instead of
+	for_each_inferior.
+	(unstop_all_lwps): Add `unsuspend' parameter.  If UNSUSPEND, them
+	also decrement the suspend count of LWPs.  Pass `except' down,
+	instead of hacking its suspend count.
+	(linux_pause_all): Add `freeze' parameter.  Adjust.
+	(linux_unpause_all): New.
+	(linux_target_ops): Install linux_unpause_all.
+	* server.c (handle_status): Adjust.
+	* target.h (struct target_ops): New fields `unpause_all' and
+	`cancel_breakpoints'.  Add new parameter to `pause_all'.
+	(pause_all): Add new `freeze' parameter.
+	(unpause_all): New.
+	(cancel_breakpoints): New.
+	* tracepoint.c (clear_installed_tracepoints): Pause threads, and
+	cancel breakpoints.
+	(cmd_qtstart): Pause threads.
+	(stop_tracing): Pause threads, and cancel breakpoints.
+	* win32-low.c (win32_target_ops): Adjust.
+
+2010-05-03  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.c (linux_wait_for_event_1): Move passing the signal to
 	the inferior right away from here...
 	(linux_wait_1): ... to here, and adjust to check the thread's

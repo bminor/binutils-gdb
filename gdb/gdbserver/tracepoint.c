@@ -1336,6 +1336,9 @@ clear_installed_tracepoints (void)
   struct tracepoint *tpoint;
   struct tracepoint *prev_stpoint;
 
+  pause_all (1);
+  cancel_breakpoints ();
+
   prev_stpoint = NULL;
 
   /* Restore any bytes overwritten by tracepoints.  */
@@ -1357,6 +1360,8 @@ clear_installed_tracepoints (void)
       delete_breakpoint (tpoint->handle);
       tpoint->handle = NULL;
     }
+
+  unpause_all (1);
 }
 
 /* Parse a packet that defines a tracepoint.  */
@@ -1656,6 +1661,9 @@ cmd_qtstart (char *packet)
 
   *packet = '\0';
 
+  /* Pause all threads temporarily while we patch tracepoints.  */
+  pause_all (1);
+
   /* Install tracepoints.  */
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
@@ -1686,6 +1694,7 @@ cmd_qtstart (char *packet)
       clear_installed_tracepoints ();
       if (*packet == '\0')
 	write_enn (packet);
+      unpause_all (1);
       return;
     }
 
@@ -1696,6 +1705,8 @@ cmd_qtstart (char *packet)
 
   /* Tracing is now active, hits will now start being logged.  */
   tracing = 1;
+
+  unpause_all (1);
 
   write_ok (packet);
 }
@@ -1713,6 +1724,12 @@ stop_tracing (void)
     }
 
   trace_debug ("Stopping the trace");
+
+  /* Pause all threads before removing breakpoints from memory.  */
+  pause_all (1);
+  /* Since we're removing breakpoints, cancel breakpoint hits,
+     possibly related to the breakpoints we're about to delete.  */
+  cancel_breakpoints ();
 
   /* Stop logging. Tracepoints can still be hit, but they will not be
      recorded.  */
@@ -1756,6 +1773,8 @@ stop_tracing (void)
 
   /* Clear out the tracepoints.  */
   clear_installed_tracepoints ();
+
+  unpause_all (1);
 }
 
 static void
