@@ -65,7 +65,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
 {
   CORE_ADDR addr;
 
-  if (look_up_one_symbol (name, &addr) == 0)
+  if (thread_db_look_up_one_symbol (name, &addr) == 0)
     return PS_NOSYM;
 
   *sym_addr = (psaddr_t) (unsigned long) addr;

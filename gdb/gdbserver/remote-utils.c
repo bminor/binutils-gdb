@@ -1411,11 +1411,12 @@ clear_symbol_cache (struct sym_cache **symcache_p)
   *symcache_p = NULL;
 }
 
-/* Ask GDB for the address of NAME, and return it in ADDRP if found.
+/* Get the address of NAME, and return it in ADDRP if found.  if
+   MAY_ASK_GDB is false, assume symbol cache misses are failures.
    Returns 1 if the symbol is found, 0 if it is not, -1 on error.  */
 
 int
-look_up_one_symbol (const char *name, CORE_ADDR *addrp)
+look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
 {
   char own_buf[266], *p, *q;
   int len;
@@ -1432,12 +1433,9 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 	return 1;
       }
 
-  /* If we've passed the call to thread_db_look_up_symbols, then
-     anything not in the cache must not exist; we're not interested
-     in any libraries loaded after that point, only in symbols in
-     libpthread.so.  It might not be an appropriate time to look
-     up a symbol, e.g. while we're trying to fetch registers.  */
-  if (proc->all_symbols_looked_up)
+  /* It might not be an appropriate time to look up a symbol,
+     e.g. while we're trying to fetch registers.  */
+  if (!may_ask_gdb)
     return 0;
 
   /* Send the request.  */

@@ -1,5 +1,27 @@
 2010-05-03  Pedro Alves  <pedro@codesourcery.com>
 
+	* proc-service.c (ps_pglobal_lookup): Use
+	thread_db_look_up_one_symbol.
+	* remote-utils.c (look_up_one_symbol): Add new `may_ask_gdb'
+	parameter.  Use it instead of all_symbols_looked_up.
+	* server.h (struct process_info) <all_symbols_looked_up>: Delete
+	field.
+	(all_symbols_looked_up): Don't declare.
+	(look_up_one_symbol): Add new `may_ask_gdb' parameter.
+	* thread-db.c (struct thread_db) <all_symbols_looked_up>: New
+	field.
+	(thread_db_look_up_symbols): Adjust call to look_up_one_symbol.
+	Set all_symbols_looked_up here.
+	(thread_db_look_up_one_symbol): New.
+	(thread_db_get_tls_address): Adjust.
+	(thread_db_load_search, try_thread_db_load_1): Always allocate the
+	thread_db object on the heap, and tentatively set it in the
+	process structure.
+	(thread_db_init): Don't set all_symbols_looked_up here.
+	* linux-low.h (thread_db_look_up_one_symbol): Declare.
+
+2010-05-03  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.c (linux_kill, linux_detach): Adjust.
 	(status_pending_p_callback): Remove redundant statement.  Check
 	for !TARGET_WAITIKIND_IGNORE, instead of

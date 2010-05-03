@@ -238,10 +238,6 @@ struct process_info
   /* The symbol cache.  */
   struct sym_cache *symbol_cache;
 
-  /* If this flag has been set, assume symbol cache misses are
-     failures.  */
-  int all_symbols_looked_up;
-
   /* The list of memory breakpoints.  */
   struct breakpoint *breakpoints;
 
@@ -359,7 +355,6 @@ extern void hostio_last_error_from_errno (char *own_buf);
 /* From remote-utils.c */
 
 extern int remote_debug;
-extern int all_symbols_looked_up;
 extern int noack_mode;
 extern int transport_is_reliable;
 
@@ -411,7 +406,7 @@ int remote_escape_output (const gdb_byte *buffer, int len,
 char *unpack_varlen_hex (char *buff,  ULONGEST *result);
 
 void clear_symbol_cache (struct sym_cache **symcache_p);
-int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
+int look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb);
 
 void monitor_output (const char *msg);
 
