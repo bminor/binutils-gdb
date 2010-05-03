@@ -8364,6 +8364,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   bfd_vma base_addr;
   bfd_vma last_addr;
   asection *dst;
+  asection *dmt;
 
   bfd_get_outsymbols (abfd) = NULL;
   bfd_get_symcount (abfd) = 0;
@@ -8478,6 +8479,21 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   alpha_vms_link_hash (info)->fixup = fixupsec;
   alpha_vms_link_hash (info)->base_addr = base_addr;
 
+  /* Create the DMT section, if necessary.  */
+  dst = PRIV (dst_section);
+  if (dst != NULL && dst->size == 0)
+    dst = NULL;
+  if (dst != NULL)
+    {
+      dmt = bfd_make_section_anyway_with_flags
+        (info->output_bfd, "$DMT$",
+         SEC_DEBUGGING | SEC_HAS_CONTENTS | SEC_LINKER_CREATED);
+      if (dmt == NULL)
+        return FALSE;
+    }
+  else
+    dmt = NULL;
+
   /* Read all sections from the inputs.  */
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
@@ -8491,7 +8507,8 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
         return FALSE;
     }
 
-  /* Handle all the link order information for the sections.  */
+  /* Handle all the link order information for the sections.
+     Note: past this point, it is not possible to create new sections.  */
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       for (p = o->map_head.link_order; p != NULL; p = p->next)
@@ -8518,20 +8535,10 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Compute the DMT.  */
-  dst = PRIV (dst_section);
-  if (dst != NULL && dst->size == 0)
-    dst = NULL;
-  if (dst != NULL)
+  if (dmt != NULL)
     {
-      asection *dmt;
       int pass;
       unsigned char *contents = NULL;
-
-      dmt = bfd_make_section_anyway_with_flags
-        (info->output_bfd, "$DMT$",
-         SEC_DEBUGGING | SEC_HAS_CONTENTS | SEC_LINKER_CREATED);
-      if (dmt == NULL)
-        return FALSE;
 
       /* In pass 1, compute the size.  In pass 2, write the DMT contents.  */
       for (pass = 0; pass < 2; pass++)

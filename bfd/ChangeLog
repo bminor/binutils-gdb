@@ -1,5 +1,13 @@
 2010-05-03  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-lib.c (vms_lib_bopen): Fix the size threshold to read
+	selective_search flag.
+	Add comments.
+	* vms-alpha.c (alpha_vms_bfd_final_link): Create the DMT section
+	before output_has_begun is set.
+
+2010-05-03  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c: Add comments.
 	(struct vms_private_data_struct): Remove image_autoextend field.
 	(dst_check_allocation): Removed.
@@ -11,6 +19,7 @@
 	Write the dmt section.
 	(evax_bfd_print_image): Also print the dst size in hexa.  Fix typo.
 	(alpha_vms_read_sections_content): Do not set image_autoextend.
+	(alpha_vms_bfd_final_link): Generate the dst.
 
 2010-05-03  Tristan Gingold  <gingold@adacore.com>
 
