@@ -1,3 +1,9 @@
+2010-05-03  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (_bfd_vms_lib_archive_p): Adjust for a possible empty
+	next array.
+	(vms_lib_dcx): Adjust for the above change.
+
 2010-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11542

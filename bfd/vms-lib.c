@@ -552,6 +552,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
           struct dcxsbm_desc *sbmdesc = &tdata->dcxsbm[i];
           unsigned int sbm_len;
           unsigned int sbm_sz;
+          unsigned int off;
           unsigned char *data = (unsigned char *)sbm;
           unsigned char *buf1;
           unsigned int l, j;
@@ -565,16 +566,28 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
           sbmdesc->max_char = sbm->max_char;
           sbm_len = sbmdesc->max_char - sbmdesc->min_char + 1;
           l = (2 * sbm_len + 7) / 8;
-          BFD_ASSERT (sbm_sz >= sizeof (struct vms_dcxsbm) + l + 3 * sbm_len);
+          BFD_ASSERT
+            (sbm_sz >= sizeof (struct vms_dcxsbm) + l + 3 * sbm_len
+             || (tdata->nbr_dcxsbm == 1
+                 && sbm_sz >= sizeof (struct vms_dcxsbm) + l + sbm_len));
           sbmdesc->flags = (unsigned char *)bfd_alloc (abfd, l);
           memcpy (sbmdesc->flags, data + bfd_getl16 (sbm->flags), l);
           sbmdesc->nodes = (unsigned char *)bfd_alloc (abfd, 2 * sbm_len);
           memcpy (sbmdesc->nodes, data + bfd_getl16 (sbm->nodes), 2 * sbm_len);
-          sbmdesc->next = (unsigned short *)bfd_alloc
-            (abfd, sbm_len * sizeof (unsigned short));
-          buf1 = data + bfd_getl16 (sbm->next);
-          for (j = 0; j < sbm_len; j++)
-            sbmdesc->next[j] = bfd_getl16 (buf1 + j * 2);
+          off = bfd_getl16 (sbm->next);
+          if (off != 0)
+            {
+              sbmdesc->next = (unsigned short *)bfd_alloc
+                (abfd, sbm_len * sizeof (unsigned short));
+              buf1 = data + off;
+              for (j = 0; j < sbm_len; j++)
+                sbmdesc->next[j] = bfd_getl16 (buf1 + j * 2);
+            }
+          else
+            {
+              BFD_ASSERT (tdata->nbr_dcxsbm == 1);
+              sbmdesc->next = NULL;
+            }
         }
       free (buf);
     }
@@ -850,7 +863,8 @@ vms_lib_dcx (struct vms_lib_iovec *vec, unsigned char *buf, file_ptr nbytes)
             {
               unsigned char v = sbm->nodes[offset];
 
-              sbm = vec->dcxsbms + sbm->next[v];
+              if (sbm->next != NULL)
+                sbm = vec->dcxsbms + sbm->next[v];
               offset = 0;
               res++;
 
