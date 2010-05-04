@@ -1120,13 +1120,15 @@ add_internal_problem_command (struct internal_problem *problem)
   add_prefix_cmd ((char*) problem->name,
 		  class_maintenance, set_internal_problem_cmd, set_doc,
 		  set_cmd_list,
-		  concat ("maintenance set ", problem->name, " ", NULL),
+		  concat ("maintenance set ", problem->name, " ",
+			  (char *) NULL),
 		  0/*allow-unknown*/, &maintenance_set_cmdlist);
 
   add_prefix_cmd ((char*) problem->name,
 		  class_maintenance, show_internal_problem_cmd, show_doc,
 		  show_cmd_list,
-		  concat ("maintenance show ", problem->name, " ", NULL),
+		  concat ("maintenance show ", problem->name, " ",
+			  (char *) NULL),
 		  0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   set_doc = xstrprintf (_("\
@@ -3346,9 +3348,9 @@ xfullpath (const char *filename)
      directory separator, avoid doubling it.  */
   real_path = gdb_realpath (dir_name);
   if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
-    result = concat (real_path, base_name, (char *)NULL);
+    result = concat (real_path, base_name, (char *) NULL);
   else
-    result = concat (real_path, SLASH_STRING, base_name, (char *)NULL);
+    result = concat (real_path, SLASH_STRING, base_name, (char *) NULL);
 
   xfree (real_path);
   return result;

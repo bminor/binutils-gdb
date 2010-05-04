@@ -1,3 +1,11 @@
+2010-05-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* remote.c (register_remote_support_xml)
+	(remote_query_supported_append, remote_query_supported): Add cast
+	to NULL used as sentinel.
+	* tracepoint.c (tvariables_info_1): Likewise.
+	* utils.c (add_internal_problem_command): Likewise.
+
 2010-05-04  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* dwarf2loc.c (read_pieced_value, write_pieced_value,

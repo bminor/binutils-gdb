@@ -3486,7 +3486,7 @@ register_remote_support_xml (const char *xml ATTRIBUTE_UNUSED)
 {
 #if defined(HAVE_LIBEXPAT)
   if (remote_support_xml == NULL)
-    remote_support_xml = concat ("xmlRegisters=", xml, NULL);
+    remote_support_xml = concat ("xmlRegisters=", xml, (char *) NULL);
   else
     {
       char *copy = xstrdup (remote_support_xml + 13);
@@ -3504,7 +3504,7 @@ register_remote_support_xml (const char *xml ATTRIBUTE_UNUSED)
       while ((p = strtok (NULL, ",")) != NULL);
       xfree (copy);
 
-      p = concat (remote_support_xml, ",", xml, NULL);
+      p = concat (remote_support_xml, ",", xml, (char *) NULL);
       xfree (remote_support_xml);
       remote_support_xml = p;
     }
@@ -3516,7 +3516,7 @@ remote_query_supported_append (char *msg, const char *append)
 {
   if (msg)
     {
-      char *p = concat (msg, ";", append, NULL);
+      char *p = concat (msg, ";", append, (char *) NULL);
       xfree (msg);
       return p;
     }
@@ -3556,7 +3556,7 @@ remote_query_supported (void)
 
       if (q)
 	{
-	  char *p = concat ("qSupported:", q, NULL);
+	  char *p = concat ("qSupported:", q, (char *) NULL);
 	  xfree (q);
 	  putpkt (p);
 	  xfree (p);

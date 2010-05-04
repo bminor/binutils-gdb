@@ -446,7 +446,7 @@ tvariables_info_1 (void)
 
       back_to2 = make_cleanup_ui_out_tuple_begin_end (uiout, "variable");
 
-      name = concat ("$", tsv->name, NULL);
+      name = concat ("$", tsv->name, (char *) NULL);
       make_cleanup (xfree, name);
       ui_out_field_string (uiout, "name", name);
       ui_out_field_string (uiout, "initial", plongest (tsv->initial_value));
@@ -3171,7 +3171,7 @@ tfile_open (char *filename, int from_tty)
   filename = tilde_expand (filename);
   if (!IS_ABSOLUTE_PATH(filename))
     {
-      temp = concat (current_directory, "/", filename, (char *)NULL);
+      temp = concat (current_directory, "/", filename, (char *) NULL);
       xfree (filename);
       filename = temp;
     }
