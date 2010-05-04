@@ -669,6 +669,7 @@ print_section_info (struct target_section_table *t, bfd *abfd)
     {
       /* gcc-3.4 does not like the initialization in <p == t->sections_end>.  */
       bfd_vma displacement = 0;
+      bfd_vma entry_point;
 
       for (p = t->sections; p < t->sections_end; p++)
 	{
@@ -690,9 +691,11 @@ print_section_info (struct target_section_table *t, bfd *abfd)
 	warning (_("Cannot find section for the entry point of %s.\n"),
 		 bfd_get_filename (abfd));
 
+      entry_point = gdbarch_addr_bits_remove (gdbarch, 
+					      bfd_get_start_address (abfd) 
+						+ displacement);
       printf_filtered (_("\tEntry point: %s\n"),
-		       paddress (gdbarch, (bfd_get_start_address (abfd)
-					   + displacement)));
+		       paddress (gdbarch, entry_point));
     }
   for (p = t->sections; p < t->sections_end; p++)
     {
