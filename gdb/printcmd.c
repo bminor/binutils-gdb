@@ -1420,7 +1420,7 @@ x_command (char *exp, int from_tty)
       old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
       if (TYPE_CODE (value_type (val)) == TYPE_CODE_REF)
-	val = value_ind (val);
+	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
          pointers to functions.  This makes "x/i main" work.  */
       if (/* last_format == 'i'  && */ 

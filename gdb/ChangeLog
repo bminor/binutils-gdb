@@ -1,3 +1,9 @@
+2010-05-04  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	PR exp/11349.
+	* printcmd.c (x_command): Only dereference once implicitly for
+	TYPE_CODE_REF.
+
 2010-05-03  Doug Evans  <dje@google.com>
 
 	* event-loop.c (gdb_timer): Delete unused global.

@@ -1,3 +1,9 @@
+2010-05-04  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	PR exp/11349.
+	* testsuite/gdb.cp/ref-types.exp: Add test to examine
+	use a reference local variable.
+
 2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/break-interp.exp: Remove $exec.debug safety removal.

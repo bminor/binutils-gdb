@@ -200,6 +200,11 @@ gdb_expect {
     timeout           { fail "(timeout) print value of *rps" }
   }
 
+# GDB had a bug about dereferencing a pointer type
+# that would lead to wrong results
+# if we try to examine memory at pointer value.
+
+gdb_test "x /hd rps" "$hex:\[ \t\]*-1" "examine value at rps"
 
 send_gdb "ptype rps\n"
 gdb_expect {
