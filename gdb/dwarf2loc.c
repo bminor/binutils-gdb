@@ -284,8 +284,16 @@ read_pieced_value (struct value *v)
 	      /* Big-endian, and we want less than full size.  */
 	      reg_offset = register_size (arch, gdb_regnum) - p->size;
 
-	    get_frame_register_bytes (frame, gdb_regnum, reg_offset, p->size,
-				      contents + offset);
+	    if (gdb_regnum != -1)
+	      {
+		get_frame_register_bytes (frame, gdb_regnum, reg_offset, 
+					  p->size, contents + offset);
+	      }
+	    else
+	      {
+		error (_("Unable to access DWARF register number %s"),
+		       paddress (arch, p->v.expr.value));
+	      }
 	  }
 	  break;
 
@@ -356,8 +364,16 @@ write_pieced_value (struct value *to, struct value *from)
 	      /* Big-endian, and we want less than full size.  */
 	      reg_offset = register_size (arch, gdb_regnum) - p->size;
 
-	    put_frame_register_bytes (frame, gdb_regnum, reg_offset, p->size,
-				      contents + offset);
+	    if (gdb_regnum != -1)
+	      {
+		put_frame_register_bytes (frame, gdb_regnum, reg_offset, 
+					  p->size, contents + offset);
+	      }
+	    else
+	      {
+		error (_("Unable to write to DWARF register number %s"),
+		       paddress (arch, p->v.expr.value));
+	      }
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:
@@ -454,7 +470,16 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_regnum);
-	    retval = value_from_register (SYMBOL_TYPE (var), gdb_regnum, frame);
+	    if (gdb_regnum != -1)
+	      {
+		retval = value_from_register (SYMBOL_TYPE (var),
+					      gdb_regnum, frame);
+	      }
+	    else
+	      {
+		error (_("Unable to access DWARF register number %s"),
+		       paddress (arch, dwarf_regnum));
+	      }
 	  }
 	  break;
 

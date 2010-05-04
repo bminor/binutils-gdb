@@ -1,5 +1,11 @@
 2010-05-04  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* dwarf2loc.c (read_pieced_value, write_pieced_value,
+	dwarf2_evaluate_loc_desc): Handle not being able to access DWARF
+	registers gracefully.
+
+2010-05-04  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* exec.c (print_section_info): Display entry point without arch 
 	specific parts.
 
