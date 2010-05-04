@@ -1,3 +1,9 @@
+2010-05-04  Nick Clifton  <nickc@redhat.com>
+
+	* write.c (fixup_segment): Revert previous delta.
+	* config/tc-arm.h (TC_FORCE_RELOCATION_LOCAL): Also force the
+	generation of relocations for fixups against weak symbols.
+
 2010-04-29  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* write.c (fixup_segment): Do not assume we know the section a

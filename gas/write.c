@@ -992,9 +992,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 
       if (fixP->fx_addsy)
 	{
-	  if (S_IS_WEAK (fixP->fx_addsy))
-	    ; // even if it is defined, it might be overridden later
-	  else if (add_symbol_segment == this_segment
+	  if (add_symbol_segment == this_segment
 	      && !TC_FORCE_RELOCATION_LOCAL (fixP))
 	    {
 	      /* This fixup was made when the symbol's segment was

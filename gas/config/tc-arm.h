@@ -183,6 +183,7 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
   (!(FIX)->fx_pcrel					\
    || (FIX)->fx_r_type == BFD_RELOC_ARM_GOT32		\
    || (FIX)->fx_r_type == BFD_RELOC_32			\
+   || ((FIX)->fx_addsy != NULL && S_IS_WEAK ((FIX)->fx_addsy))	\
    || TC_FORCE_RELOCATION (FIX))
 
 /* Force output of R_ARM_REL32 relocations against thumb function symbols.
