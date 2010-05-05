@@ -1,3 +1,7 @@
+2010-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2010-05-03  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-lib.c (vms_lib_bopen): Fix the size threshold to read

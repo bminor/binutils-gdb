@@ -1,14 +1,14 @@
-# Mensajes en español para opcodes-2.19.90.
-# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+# Mensajes en español para opcodes-2.20.1.
+# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Cristian Othón Martínez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009.
+# Cristian Othón Martínez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.19.90\n"
+"Project-Id-Version: opcodes 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 14:08+0200\n"
-"PO-Revision-Date: 2009-09-17 17:13-0500\n"
+"POT-Creation-Date: 2010-03-03 15:04+0100\n"
+"PO-Revision-Date: 2010-04-27 14:02-0500\n"
 "Last-Translator: Cristian Othón Martínez Vera <cfuga@itam.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -114,18 +114,18 @@ msgid "<illegal precision>"
 msgstr "<precisión ilegal>"
 
 #. XXX - should break 'option' at following delimiter.
-#: arm-dis.c:4014
+#: arm-dis.c:4018
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr "No se reconoce el conjunto de nombres de registro: %s\n"
 
 #. XXX - should break 'option' at following delimiter.
-#: arm-dis.c:4022
+#: arm-dis.c:4026
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr "No se reconoce la opción de desensamblador: %s\n"
 
-#: arm-dis.c:4519
+#: arm-dis.c:4522
 #, c-format
 msgid ""
 "\n"
@@ -1020,12 +1020,12 @@ msgstr "operando inválid.  El tipo sólo puede tener valores 0,1,2."
 msgid "$<undefined>"
 msgstr "$<sin definir>"
 
-#: ppc-dis.c:222
+#: ppc-dis.c:248
 #, c-format
 msgid "warning: ignoring unknown -M%s option\n"
 msgstr "aviso: se descarta la opción -M%s desconocida\n"
 
-#: ppc-dis.c:511
+#: ppc-dis.c:537
 #, c-format
 msgid ""
 "\n"
@@ -1036,43 +1036,43 @@ msgstr ""
 "Las siguientes opciones de desensamblador específicas de PPC se admiten con\n"
 "el interruptor -M:\n"
 
-#: ppc-opc.c:870 ppc-opc.c:898
+#: ppc-opc.c:873 ppc-opc.c:901
 msgid "invalid conditional option"
 msgstr "opción condicional inválida"
 
-#: ppc-opc.c:900
+#: ppc-opc.c:903
 msgid "attempt to set y bit when using + or - modifier"
 msgstr "intento de establecer el bit y al usar el modificador + ó -"
 
-#: ppc-opc.c:932
+#: ppc-opc.c:935
 msgid "invalid mask field"
 msgstr "campo de máscara inválido"
 
-#: ppc-opc.c:958
+#: ppc-opc.c:961
 msgid "ignoring invalid mfcr mask"
 msgstr "se descarta la máscara mfcr inválida"
 
-#: ppc-opc.c:1008 ppc-opc.c:1043
+#: ppc-opc.c:1011 ppc-opc.c:1046
 msgid "illegal bitmask"
 msgstr "máscara de bits ilegal"
 
-#: ppc-opc.c:1163
+#: ppc-opc.c:1166
 msgid "index register in load range"
 msgstr "registro índice en el rango de carga"
 
-#: ppc-opc.c:1179
+#: ppc-opc.c:1182
 msgid "source and target register operands must be different"
 msgstr "los operandos de registros fuente y objetivo deben ser diferentes"
 
-#: ppc-opc.c:1194
+#: ppc-opc.c:1197
 msgid "invalid register operand when updating"
 msgstr "operando de registro inválido al actualizar"
 
-#: ppc-opc.c:1273
+#: ppc-opc.c:1276
 msgid "invalid sprg number"
 msgstr "número sprg inválido"
 
-#: ppc-opc.c:1443
+#: ppc-opc.c:1446
 msgid "invalid constant"
 msgstr "constante inválida"
 

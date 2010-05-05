@@ -1,3 +1,7 @@
+2010-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2010-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (install-exec-local): Properly install gold as

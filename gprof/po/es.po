@@ -1,14 +1,14 @@
-# Mensajes en español para gprof 2.19.90.
-# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+# Mensajes en español para gprof 2.20.1
+# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Cristian Othón Martínez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009.
+# Cristian Othón Martínez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.19.90\n"
+"Project-Id-Version: gprof 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 14:10+0200\n"
-"PO-Revision-Date: 2009-09-17 15:27-0500\n"
+"POT-Creation-Date: 2010-03-03 15:06+0100\n"
+"PO-Revision-Date: 2010-04-27 14:00-0500\n"
 "Last-Translator: Cristian Othón Martínez Vera <cfuga@itam.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -267,12 +267,12 @@ msgstr "%s: no se puede hacer -c\n"
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: -c no se admite en la arquitectura %s\n"
 
-#: corefile.c:505 corefile.c:588
+#: corefile.c:505 corefile.c:590
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: el fichero `%s' no tiene símbolos\n"
 
-#: corefile.c:848
+#: corefile.c:851
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: alguien contó mal: ltab.len=%d en lugar de %ld\n"
