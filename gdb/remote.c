@@ -2512,8 +2512,8 @@ remote_threads_info (struct target_ops *ops)
 	{
 	  struct gdb_xml_parser *parser;
 	  struct threads_parsing_context context;
-	  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
+	  make_cleanup (null_cleanup, NULL);
 	  context.items = 0;
 	  parser = gdb_xml_create_parser_and_cleanup (_("threads"),
 						      threads_elements,
@@ -5079,7 +5079,6 @@ process_stop_reply (struct stop_reply *stop_reply,
 		    struct target_waitstatus *status)
 {
   ptid_t ptid;
-  struct thread_info *info;
 
   *status = stop_reply->ws;
   ptid = stop_reply->ptid;
@@ -9637,8 +9636,7 @@ remote_trace_start (void)
 static int
 remote_get_trace_status (struct trace_status *ts)
 {
-  char *p, *p1, *p_temp;
-  ULONGEST val;
+  char *p;
   /* FIXME we need to get register block size some other way */
   extern int trace_regblock_size;
   trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;

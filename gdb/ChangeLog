@@ -1,5 +1,9 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* remote.c (remote_threads_info): Delete unused variable.
+	(process_stop_reply): Delete unused variable.
+	(remote_get_trace_status): Delete unused variables.
+
 	* linux-thread-db.c (add_thread_db_info): Delete unused variable.
 	(thread_from_lwp): Delete unused variable.
 	(enable_thread_event_reporting): Delete unused variable.
