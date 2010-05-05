@@ -1,3 +1,7 @@
+2010-05-05  Hui Zhu  <teawater@gmail.com>
+
+	* gdbarch.h (gdbarch_has_dos_based_file_system): Update comment.
+
 2010-05-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* remote.c (register_remote_support_xml)
