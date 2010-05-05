@@ -829,8 +829,6 @@ record_linux_system_call (enum gdb_syscall syscall,
             if (tmpulongest)
               {
                 gdb_byte *a = alloca (tdep->size_ulong * 2);
-                int addrlen;
-                gdb_byte *addrlenp;
                 ULONGEST len;
 
                 tmpulongest += tdep->size_ulong;
@@ -892,8 +890,6 @@ record_linux_system_call (enum gdb_syscall syscall,
           if (tmpulongest)
             {
               gdb_byte *a = alloca (tdep->size_ulong * 2);
-              int addrlen;
-              gdb_byte *addrlenp;
               ULONGEST len;
 
               tmpulongest += tdep->size_ulong * 4;

@@ -1,5 +1,8 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-record.c (record_linux_system_call): 
+	Delete unused variables.
+
 	* corelow.c (core_xfer_partial): Delete unused variables.
 
 	* solib-svr4.c (find_program_interpreter): Delete unused variable.
