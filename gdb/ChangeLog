@@ -1,5 +1,9 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* solib-svr4.c (find_program_interpreter): Delete unused variable.
+	(svr4_solib_create_inferior_hook): Add ifdef around 
+	conditionally-used variable declarations.
+
 	* solib.c (solib_find): Delete unused variable.
 	(free_so_symbols): Delete unused variable.
 	(info_sharedlibrary_command): Delete unused variable.

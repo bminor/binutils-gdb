@@ -581,7 +581,6 @@ find_program_interpreter (void)
      interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
      if (interp_sect != NULL)
       {
-	CORE_ADDR sect_addr = bfd_section_vma (exec_bfd, interp_sect);
 	int sect_size = bfd_section_size (exec_bfd, interp_sect);
 
 	buf = xmalloc (sect_size);
@@ -1910,8 +1909,10 @@ svr4_relocate_main_executable (void)
 static void
 svr4_solib_create_inferior_hook (int from_tty)
 {
+#if defined(_SCO_DS)
   struct inferior *inf;
   struct thread_info *tp;
+#endif /* defined(_SCO_DS) */
   struct svr4_info *info;
 
   info = get_svr4_info ();
