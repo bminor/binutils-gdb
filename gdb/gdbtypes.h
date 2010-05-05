@@ -1185,16 +1185,6 @@ extern const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN];
 
 
-/* Maximum and minimum values of built-in types */
-
-#define	MAX_OF_TYPE(t)	\
-   (TYPE_UNSIGNED(t) ? UMAX_OF_SIZE(TYPE_LENGTH(t)) \
-    : MAX_OF_SIZE(TYPE_LENGTH(t)))
-
-#define MIN_OF_TYPE(t)	\
-   (TYPE_UNSIGNED(t) ? UMIN_OF_SIZE(TYPE_LENGTH(t)) \
-    : MIN_OF_SIZE(TYPE_LENGTH(t)))
-
 /* Allocate space for storing data associated with a particular type.
    We ensure that the space is allocated using the same mechanism that
    was used to allocate the space for the type structure itself.  I.E.

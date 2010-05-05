@@ -527,11 +527,6 @@ check_size (const struct type *type)
     error (_("object size is larger than varsize-limit"));
 }
 
-
-/* Note: would have used MAX_OF_TYPE and MIN_OF_TYPE macros from
-   gdbtypes.h, but some of the necessary definitions in that file
-   seem to have gone missing. */
-
 /* Maximum value of a SIZE-byte signed integer type. */
 static LONGEST
 max_of_size (int size)
