@@ -1,5 +1,18 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-nat.c (top level): Delete unused global variable.
+	(linux_tracefork_child): Delete unused variable.
+	(linux_child_follow_fork): Delete unused variable.
+	(linux_nat_detach): Delete unused variable.
+	(linux_handle_extended_wait): Delete unused variable.
+	(linux_nat_has_pending_sigint): Delete unused variable.
+	(linux_nat_find_memory_regions): Delete unused variable.
+	(linux_nat_make_corefile_notes): Delete unused variables.
+	(linux_nat_info_proc_cmd): Delete unused variable.
+	(linux_proc_pending_signals): Delete unused variable.
+	(linux_nat_stop_lwp): Delete unused variables.
+	(_initialize_linux_nat): Delete unused variable.
+
 	* ser-pipe.c (top level): Delete unused global variable.
 
 	* linux-record.c (record_linux_system_call): 

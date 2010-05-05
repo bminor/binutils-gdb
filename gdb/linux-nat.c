@@ -270,8 +270,6 @@ this platform."));
 #endif /* !HAVE_PERSONALITY */
 }
 
-static int linux_parent_pid;
-
 struct simple_pid_list
 {
   int pid;
@@ -405,8 +403,6 @@ linux_record_stopped_pid (int pid, int status)
 static void
 linux_tracefork_child (void)
 {
-  int ret;
-
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   kill (getpid (), SIGSTOP);
   fork ();
@@ -867,7 +863,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
     }
   else
     {
-      struct thread_info *tp;
       struct inferior *parent_inf, *child_inf;
       struct lwp_info *lp;
       struct program_space *parent_pspace;
@@ -1752,7 +1747,6 @@ linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int pid;
   int status;
-  enum target_signal sig;
   struct lwp_info *main_lwp;
 
   pid = GET_PID (inferior_ptid);
@@ -2215,8 +2209,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	ourstatus->kind = TARGET_WAITKIND_VFORKED;
       else
 	{
-	  struct cleanup *old_chain;
-
 	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
 	  new_lp = add_lwp (BUILD_LWP (new_pid, GET_PID (lp->ptid)));
 	  new_lp->cloned = 1;
@@ -2475,7 +2467,6 @@ static int
 linux_nat_has_pending_sigint (int pid)
 {
   sigset_t pending, blocked, ignored;
-  int i;
 
   linux_proc_pending_signals (pid, &pending, &blocked, &ignored);
 
@@ -4059,7 +4050,6 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
   long long addr, endaddr, size, offset, inode;
   char permissions[8], device[8], filename[MAXPATHLEN];
   int read, write, exec;
-  int ret;
   struct cleanup *cleanup;
 
   /* Compose the filename for the /proc memory map, and open it.  */
@@ -4367,13 +4357,11 @@ static char *
 linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 {
   struct linux_nat_corefile_thread_data thread_args;
-  struct cleanup *old_chain;
   /* The variable size must be >= sizeof (prpsinfo_t.pr_fname).  */
   char fname[16] = { '\0' };
   /* The variable size must be >= sizeof (prpsinfo_t.pr_psargs).  */
   char psargs[80] = { '\0' };
   char *note_data = NULL;
-  ptid_t current_ptid = inferior_ptid;
   ptid_t filter = pid_to_ptid (ptid_get_pid (inferior_ptid));
   gdb_byte *auxv;
   int auxv_len;
@@ -4443,7 +4431,6 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   int cwd_f = 1;
   int exe_f = 1;
   int mappings_f = 0;
-  int environ_f = 0;
   int status_f = 0;
   int stat_f = 0;
   int all = 0;
@@ -4898,7 +4885,6 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
 {
   FILE *procfile;
   char buffer[MAXPATHLEN], fname[MAXPATHLEN];
-  int signum;
   struct cleanup *cleanup;
 
   sigemptyset (pending);
@@ -5363,7 +5349,6 @@ linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 {
   if (!lwp->stopped)
     {
-      int pid, status;
       ptid_t ptid = lwp->ptid;
 
       if (debug_linux_nat)
@@ -5624,8 +5609,6 @@ extern initialize_file_ftype _initialize_linux_nat;
 void
 _initialize_linux_nat (void)
 {
-  sigset_t mask;
-
   add_info ("proc", linux_nat_info_proc_cmd, _("\
 Show /proc process information about any running process.\n\
 Specify any process id, or use the program being debugged by default.\n\
