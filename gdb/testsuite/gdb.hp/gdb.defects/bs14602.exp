@@ -13,8 +13,6 @@ if { [skip_hp_tests] } { continue }
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 
 set testfile bs14602

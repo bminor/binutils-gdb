@@ -20,8 +20,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile "funcargs"
 set srcfile ${testfile}.c

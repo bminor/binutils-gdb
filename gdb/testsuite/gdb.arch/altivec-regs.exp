@@ -26,8 +26,6 @@ if $tracelevel then {
 # This file uses altivec-regs.c for input.
 #
 
-set prms_id 0
-set bug_id 0
 
 if {![istarget "powerpc*"] || [skip_altivec_tests]} then {
     verbose "Skipping altivec register tests."

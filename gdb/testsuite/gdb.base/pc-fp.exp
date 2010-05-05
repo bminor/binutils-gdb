@@ -28,8 +28,6 @@ if $tracelevel then {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile "pc-fp"
 set srcfile ${testfile}.c

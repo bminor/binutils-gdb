@@ -25,8 +25,6 @@ if $tracelevel then {
 # This file uses e500-abi.c for input.
 #
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "powerpc-*eabispe"] then {
     verbose "Skipping e500 abi tests."

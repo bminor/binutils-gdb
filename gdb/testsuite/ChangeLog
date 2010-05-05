@@ -1,3 +1,7 @@
+2010-05-05  Joel Brobecker  <brobecker@adacore.com>
+
+	Remove the use of prms_id and bug_id throughout the testsuite.
+
 2010-05-04  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	PR exp/11349.

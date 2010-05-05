@@ -22,8 +22,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
     verbose "Skipping x86 SSE tests."

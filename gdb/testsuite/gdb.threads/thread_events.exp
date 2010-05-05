@@ -37,8 +37,6 @@ if $tracelevel then {
         strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile "thread_events"
 set srcfile ${testfile}.c

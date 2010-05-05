@@ -17,8 +17,6 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile info-target
 if { [prepare_for_testing ${testfile}.exp $testfile start.c] } {

@@ -33,8 +33,6 @@ if $tracelevel then {
         strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 set prototypes 0
 set testfile "varargs"

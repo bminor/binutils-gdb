@@ -27,8 +27,6 @@ if $tracelevel {
 
 # Test SH backtraces with >256 byte frame stack. (PR:1291)
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "sh-*-*"] then {
     verbose "Skipping SH backtrace tests."

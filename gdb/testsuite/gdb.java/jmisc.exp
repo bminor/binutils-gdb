@@ -52,8 +52,6 @@ proc set_lang_java {} {
 	"set language to \"java\""]
 }
 
-set prms_id 0
-set bug_id 0
 
 # Start with a fresh gdb.
 

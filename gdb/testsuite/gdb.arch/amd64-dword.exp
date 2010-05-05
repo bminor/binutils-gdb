@@ -22,8 +22,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 if { ![istarget x86_64-*-* ] } {
     verbose "Skipping amd64 dword register tests."

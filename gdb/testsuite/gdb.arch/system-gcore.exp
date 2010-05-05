@@ -18,8 +18,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 if { ![istarget i?86-*-linux*] && ![istarget x86_64-*-linux* ] } {
     verbose "Skipping system register gcore tests."

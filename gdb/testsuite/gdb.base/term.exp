@@ -35,8 +35,6 @@ gdb_start
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 if { [prepare_for_testing term.exp term run.c] } {
     return -1

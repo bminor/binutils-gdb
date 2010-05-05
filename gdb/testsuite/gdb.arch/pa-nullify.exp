@@ -19,8 +19,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 # Test handling of nullified instructions for the pa target.
 

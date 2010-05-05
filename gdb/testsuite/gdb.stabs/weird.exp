@@ -27,8 +27,6 @@ if ![file isdirectory ${objdir}/${subdir}] then {
     return 0
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile weird
 set srcfile ${objdir}/${subdir}/weird.s

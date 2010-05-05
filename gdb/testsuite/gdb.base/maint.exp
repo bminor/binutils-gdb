@@ -57,8 +57,6 @@ global usestubs
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile "break"
 set srcfile ${testfile}.c

@@ -30,8 +30,6 @@ if $tracelevel then {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 if { [skip_hp_tests] } then { continue }
 

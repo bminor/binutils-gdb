@@ -31,8 +31,6 @@ if {[compile_java_from_source ${srcfile} ${binfile} "-g"] != ""} {
     continue
 }
 
-set prms_id 0
-set bug_id 0
 
 # Start with a fresh gdb.
 

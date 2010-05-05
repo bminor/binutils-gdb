@@ -19,8 +19,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 # Define if you want to skip this test
 # (could be very time-consuming on remote targets with slow connection).

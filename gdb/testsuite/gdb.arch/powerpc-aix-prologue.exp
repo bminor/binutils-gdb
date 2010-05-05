@@ -21,8 +21,6 @@ if $tracelevel {
 
 # Test rs6000 prologue analyzer.
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "powerpc-*-aix*"] then {
     verbose "Skipping powerpc-aix prologue tests."

@@ -24,8 +24,6 @@ if $tracelevel then {
 # Test the use of VSX registers, for Powerpc.
 #
 
-set prms_id 0
-set bug_id 0
 
 if {![istarget "powerpc*"] || [skip_vsx_tests]} then {
     verbose "Skipping vsx register tests."

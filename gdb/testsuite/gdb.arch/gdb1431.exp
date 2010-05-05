@@ -29,8 +29,6 @@ if $tracelevel {
 
 # Observe that the until command doesn't go all the way to sub2.
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "sh-*-*"] then {
     verbose "Skipping SH backtrace tests."

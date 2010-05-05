@@ -20,8 +20,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 # Only GNU/Linux is known to support this.
 if { ! [istarget "*-*-linux*"] } {

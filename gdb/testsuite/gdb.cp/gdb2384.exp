@@ -18,6 +18,8 @@
 # from objfile gdb2384-base.so.  When the program is rerun the type
 # information for base-in-so-base.so is discarded leaving
 # TYPE_VPTR_BASETYPE dangling.
+#
+# PR c++/9489.
 
 if $tracelevel then {
     strace $tracelevel
@@ -25,9 +27,6 @@ if $tracelevel then {
 
 if { [skip_cplus_tests] } { continue }
 if { [skip_shlib_tests] } { continue }
-
-set prms_id 2384
-set bug_id 0
 
 set testfile "gdb2384"
 set srcfile ${testfile}.cc

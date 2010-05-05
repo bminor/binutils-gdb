@@ -231,13 +231,9 @@ proc test_virtual_calls {} {
 }
 
 proc do_tests {} {
-    global prms_id
-    global bug_id
     global srcdir subdir binfile
     global gdb_prompt
 
-    set prms_id 0
-    set bug_id 0
 
     gdb_exit
     gdb_start

@@ -21,8 +21,6 @@ if $tracelevel {
 
 # Test PowerPC E500 prologue analyzer.
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "powerpc-*"] then {
     verbose "Skipping powerpc E500 prologue tests."

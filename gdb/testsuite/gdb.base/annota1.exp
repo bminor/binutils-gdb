@@ -34,8 +34,6 @@ if [is_remote target] then {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile "annota1"
 set srcfile ${testfile}.c

@@ -27,8 +27,6 @@ if ![istarget "hppa*-*-*"] {
 }
 
 
-set prms_id 0
-set bug_id 0
 
 set testfile "hppa"
 set srcfile ${srcdir}/${subdir}/${testfile}.s

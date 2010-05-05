@@ -26,6 +26,8 @@
 # inferior function call.  These tests test the functionality around
 # unwinding that sequence and also tests the flag behaviour gating this
 # functionality.
+#
+# PR c++/9600.
 
 # This test is largely based of gdb.base/callfuncs.exp.
 
@@ -44,9 +46,6 @@ if [target_info exists gdb,nosignals] {
 if { [istarget "spu*-*-*"] } {
         return 0
 }
-
-set prms_id 2495
-set bug_id 0
 
 set testfile "gdb2495"
 set srcfile ${testfile}.cc

@@ -25,8 +25,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "sh-*-*"] then {
     verbose "Skipping SH breakpoint test."

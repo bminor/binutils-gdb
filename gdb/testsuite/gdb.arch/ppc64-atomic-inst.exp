@@ -24,8 +24,6 @@ if $tracelevel {
 # a lwarx/ldarx instruction and ending with a stwcx/stdcx
 # instruction.
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "powerpc64-*"] then {
     verbose "Skipping testing of powerpc64 single stepping over atomic sequences."

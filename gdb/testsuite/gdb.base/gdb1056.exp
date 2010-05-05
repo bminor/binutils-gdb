@@ -22,8 +22,6 @@ if $tracelevel then {
 
 # test SIGFPE (such as division by 0) inside gdb itself
 
-set prms_id 0
-set bug_id 0
 
 gdb_start
 

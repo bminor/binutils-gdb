@@ -28,8 +28,6 @@ if {![istarget "*-*-linux*"]} then {
     continue
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile "checkpoint"
 set srcfile ${testfile}.c

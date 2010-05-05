@@ -27,8 +27,6 @@ global usestubs
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile "xdb"
 set srcfile ${testfile}.c

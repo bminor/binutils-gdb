@@ -17,8 +17,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "alpha*-*-*"] then {
     verbose "Skipping alpha step tests."

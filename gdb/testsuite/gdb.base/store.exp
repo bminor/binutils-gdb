@@ -23,8 +23,6 @@ if $tracelevel {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile "store"
 set srcfile ${testfile}.c

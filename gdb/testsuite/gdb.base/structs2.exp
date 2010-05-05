@@ -17,9 +17,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
-
 set prototypes 1
 set testfile "structs2"
 set srcfile ${testfile}.c
@@ -55,9 +52,6 @@ if { ![runto_main] } then {
 }
 
 # Ok, we're finally ready to actually do our tests.
-
-set prms_id 13536
-set bug_id 0
 
 gdb_test "f" \
     ".*bkpt = 0.*" \

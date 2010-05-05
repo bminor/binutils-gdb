@@ -41,8 +41,6 @@ set additional_flags "additional_flags=${storage}"
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile "miscexprs"
 set srcfile ${testfile}.c

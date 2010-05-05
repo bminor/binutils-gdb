@@ -32,8 +32,6 @@ if $tracelevel then {
 # This file uses shreloc.c, shreloc1.c and shreloc2.c
 #
 
-set prms_id 0
-set bug_id 0
 
 set workdir ${objdir}/${subdir}
 set testfile "shreloc"

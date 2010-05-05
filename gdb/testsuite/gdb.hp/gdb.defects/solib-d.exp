@@ -50,8 +50,6 @@ if $tracelevel {
 
 if { [skip_hp_tests] } { continue }
 
-set prms_id 0
-set bug_id 0
 
 # are we on a target board
 if ![isnative] {

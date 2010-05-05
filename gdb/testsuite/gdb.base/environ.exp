@@ -23,8 +23,6 @@ global usestubs
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 # This test exists solely to exercise the "environment" commands for
 # code-coverage on HP-UX.

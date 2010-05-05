@@ -59,8 +59,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile "killed"
 set srcfile ${testfile}.c

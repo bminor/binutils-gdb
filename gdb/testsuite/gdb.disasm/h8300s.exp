@@ -24,8 +24,6 @@ if ![istarget "h8300*-*-*"] {
     return
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile "h8300s"
 set srcfile ${srcdir}/${subdir}/${testfile}.s

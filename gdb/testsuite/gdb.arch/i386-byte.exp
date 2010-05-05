@@ -22,8 +22,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 if { ![istarget i?86-*-*] } {
     verbose "Skipping i386 byte register tests."

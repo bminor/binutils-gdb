@@ -27,8 +27,6 @@ if [target_info exists gdb,nosignals] {
     continue
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile "unwindonsignal"
 set srcfile ${testfile}.c

@@ -22,8 +22,6 @@ if $tracelevel then {
 #
 # test special commands (if, while, etc)
 #
-set prms_id 0
-set bug_id 0
 
 if { [prepare_for_testing commands.exp commands run.c {debug additional_flags=-DFAKEARGV}] } {
     return -1

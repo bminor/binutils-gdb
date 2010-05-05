@@ -28,8 +28,6 @@ if $tracelevel then {
 set ws "\[\r\n\t \]+"
 set nl "\[\r\n\]+"
 
-set prms_id 0
-set bug_id 0
 
 if { [skip_cplus_tests] } { continue }
 

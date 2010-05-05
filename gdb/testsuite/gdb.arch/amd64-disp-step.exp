@@ -21,8 +21,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "x86_64-*-linux*"] then {
     verbose "Skipping x86_64 displaced stepping tests."

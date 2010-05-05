@@ -19,8 +19,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 # re-use the program from the "return2" test.
 if { [prepare_for_testing finish.exp finish return2.c] } {

@@ -29,8 +29,6 @@ if ![file isdirectory ${objdir}/${subdir}] then {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile exclfwd
 set binfile ${objdir}/${subdir}/${testfile}

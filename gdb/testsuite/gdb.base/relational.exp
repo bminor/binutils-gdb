@@ -28,8 +28,6 @@ if $tracelevel then {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 if { [prepare_for_testing relational.exp relational int-type.c {debug nowarnings}] } {
     return -1

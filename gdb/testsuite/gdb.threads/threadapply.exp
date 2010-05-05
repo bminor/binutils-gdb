@@ -19,8 +19,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 # This test verifies that a macro using backtrace can be applied to all threads
 # and will continue for each thread even though an error may occur in

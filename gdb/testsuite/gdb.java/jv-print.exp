@@ -21,8 +21,6 @@ load_lib "java.exp"
 
 if { [skip_java_tests] } { continue }
 
-set prms_id 0
-set bug_id 0
 
 # Set the current language to Java.  This counts as a test.  If it
 # fails, then we skip the other tests.

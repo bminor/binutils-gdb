@@ -157,16 +157,12 @@ proc test_cond_wait {} {
 }
 
 proc do_tests {} {
-    global prms_id
-    global bug_id
     global subdir
     global objdir
     global srcdir
     global binfile
     global gdb_prompt
 
-    set prms_id 0
-    set bug_id 0
 
     # Start with a fresh gdb.
 

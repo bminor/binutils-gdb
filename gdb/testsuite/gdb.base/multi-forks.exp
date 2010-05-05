@@ -29,8 +29,6 @@ if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-*-linux*"]} then {
     continue
 }
 
-set prms_id 0
-set bug_id 0
 
 set testfile "multi-forks"
 set srcfile ${testfile}.c

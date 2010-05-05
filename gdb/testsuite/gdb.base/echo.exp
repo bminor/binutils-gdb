@@ -27,15 +27,4 @@ if $tracelevel then {
 # test the echo command
 #
 
-# this sets the prms id number.  This is the number that will appear
-# on all the output logs.
-#	ex: set prms_id 643
-set prms_id 0
-
-# this sets the bug id id.  This is the number that will appear
-# on all the output logs. This is optional and if it is not set
-# it will appear on all output logs as a 0.
-#	ex: set bug_id 12
-set bug_id 0
-
 gdb_test "echo Hello world!\\n" "Hello world!" "Echo test"

@@ -23,8 +23,6 @@ if $tracelevel then {
 
 if { [skip_fortran_tests] } { continue }
 
-set prms_id 0
-set bug_id 0
 
 # Set the current language to fortran.  This counts as a test.  If it
 # fails, then we skip the other tests.

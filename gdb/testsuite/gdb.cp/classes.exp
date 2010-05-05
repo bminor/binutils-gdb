@@ -546,8 +546,6 @@ proc test_static_members {} {
 }
 
 proc do_tests {} {
-    global prms_id
-    global bug_id
     global subdir
     global objdir
     global srcdir
@@ -555,8 +553,6 @@ proc do_tests {} {
     global gdb_prompt
     global nl
 
-    set prms_id 0
-    set bug_id 0
 
     # Start with a fresh gdb.
 

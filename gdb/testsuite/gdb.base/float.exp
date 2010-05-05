@@ -26,8 +26,6 @@ if $tracelevel {
 # Test floating-point related functionality.
 #
 
-set prms_id 0
-set bug_id 0
 
 if { [prepare_for_testing float.exp float run.c] } {
     return -1

@@ -134,8 +134,6 @@ if ![file exists $objdir/$subdir/$binfile] then {
     return
 }
 
-set prms_id 0
-set bug_id 0
 
 # Start with a fresh gdb.
 

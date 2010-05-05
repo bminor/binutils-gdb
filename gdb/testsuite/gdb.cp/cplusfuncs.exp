@@ -697,8 +697,6 @@ proc test_paddr_hairy_functions {} {
 }
 
 proc do_tests {} {
-    global prms_id
-    global bug_id
     global subdir
     global objdir
     global srcdir
@@ -706,8 +704,6 @@ proc do_tests {} {
     global gdb_prompt
     global dm_type_int_star
 
-    set prms_id 0
-    set bug_id 0
 
     # Start with a fresh gdb.
 

@@ -17,7 +17,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set bug_id 0
 
 set testfile complex
 set srcfile ${testfile}.c

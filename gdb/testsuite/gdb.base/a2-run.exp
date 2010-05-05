@@ -28,8 +28,6 @@ if $tracelevel then {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 set testfile a2-run
 if { [prepare_for_testing ${testfile}.exp $testfile run.c] } {

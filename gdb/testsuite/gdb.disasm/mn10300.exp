@@ -26,8 +26,6 @@ if ![istarget "mn10300*-*-*"] {
 }
 
 global exec_output
-set prms_id 0
-set bug_id 0
 
 set testfile "mn10300"
 set srcfile ${srcdir}/${subdir}/${testfile}.s

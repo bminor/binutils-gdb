@@ -43,8 +43,6 @@
 # reproduction recipe is more delicate than I would like.  I welcome
 # suggestions for improving this.
 
-set prms_id 0
-set bug_id 0
 
 set testfile "freebpcmd"
 set srcfile ${testfile}.c

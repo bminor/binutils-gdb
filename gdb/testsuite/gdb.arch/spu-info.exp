@@ -18,8 +18,6 @@
 # Contributed by Markus Deuling <deuling@de.ibm.com>.
 # Tests for 'info spu' commands.
 
-set prms_id 0
-set bug_id 0
 
 if { ![istarget "spu-*-elf"] } then {
   verbose "Skipping SPU-only testcase"

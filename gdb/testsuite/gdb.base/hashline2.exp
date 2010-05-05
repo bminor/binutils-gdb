@@ -16,14 +16,11 @@
 # This file is part of the gdb testsuite.
 
 # Test loading of line number information with an absolute path with extra
-# /'s in #line, bug 2360.
+# /'s in #line, PR symtab/9465.
 
 if $tracelevel then {
     strace $tracelevel
 }
-
-set prms_id 2360
-set bug_id 0
 
 # srcfile is in objdir because we need to machine generate it in order
 # to get the correct path in the #line directive.

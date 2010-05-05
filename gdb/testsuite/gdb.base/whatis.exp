@@ -23,8 +23,6 @@ if $tracelevel {
 #
 # test running programs
 #
-set prms_id 0
-set bug_id 0
 
 if [target_info exists no_long_long] {
     set exec_opts [list debug additional_flags=-DNO_LONG_LONG]

@@ -21,8 +21,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-set prms_id 0
-set bug_id 0
 
 # Are we on a target board?  As of 2004-02-12, GDB didn't have a
 # mechanism that would let it efficiently access a remote corefile.

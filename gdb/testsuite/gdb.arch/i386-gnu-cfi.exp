@@ -26,8 +26,6 @@ if $tracelevel {
 
 # Test i386 unwinder.
 
-set prms_id 0
-set bug_id 0
 
 if ![istarget "i?86-*-*"] then {
     verbose "Skipping i386 unwinder tests."
