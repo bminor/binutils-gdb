@@ -205,7 +205,6 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		       struct frame_info *frame, const char *args)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
-  gdb_byte buf[4];
   ULONGEST fctrl;
   ULONGEST fstat;
   ULONGEST ftag;

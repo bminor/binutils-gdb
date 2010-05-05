@@ -2736,7 +2736,6 @@ i386_supply_xstateregset (const struct regset *regset,
 			  struct regcache *regcache, int regnum,
 			  const void *xstateregs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
   i387_supply_xsave (regcache, regnum, xstateregs);
 }
 
@@ -2747,7 +2746,6 @@ i386_collect_xstateregset (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *xstateregs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
   i387_collect_xsave (regcache, regnum, xstateregs, 1);
 }
 

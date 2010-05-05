@@ -1,13 +1,17 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* i386-tdep.c (i386_supply_xstateregset) Delete unused variable.
+	(i386_collect_xstateregset): Delete unused variable.
+	* i387-tdep.c (i387_print_float_info): Delete unused variable.
+
 	* features/i386/i386-mmx.c (initialize_tdesc_i386_mmx):
 	Delete unused variable 'type'.
 
 2010-05-05  Joel Brobecker  <brobecker@adacore.com>
 
-	* gdbtypes.h (MAX_OF_TYPE, MIN_OF_TYPE): Delete macros.
-	* ada-lang.c: Remove comment mentioning these macros.
-	* m2-exp.y: Delete commented out code.
+	* gdbtypes.h (MAX_OF_TYPE, MIN_OF_TYPE): Delete macros.  *
+	ada-lang.c: Remove comment mentioning these macros.  * m2-exp.y:
+	Delete commented out code.
 
 2010-05-05  Joel Brobecker  <brobecker@adacore.com>
 
