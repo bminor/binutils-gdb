@@ -1,12 +1,40 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
-	* cli-dump.c (dump_memory_to_file): Delete unused variable.
+	* remote.c (remote_threads_info): Revert questionable part of
+	the previous change.
+
+2010-05-05  Michael Snyder  <msnyder@vmware.com>
+
+	* mi/mi-out.c (mi_table_begin): Delete unused variable.
+	* mi/mi-cmd-var.c (print_varobj): Delete unused variable.
+	(mi_cmd_var_list_children): Delete unused variable.
+	(varobj_update_one): Delete unused variable.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Delete unused variables.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): 
+	Delete unused variable.
+	(mi_cmd_stack_list_variables): Delete unused variable.
+	(list_args_or_locals): Delete unused variable.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file): 
+	Delete unused variables.
+	(mi_cmd_file_list_exec_source_files): Delete unused variable.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_delete): 
+	Delete unused variable.
+	* mi/mi-interp.c (mi_interpreter_exec): Delete unused variable.
+	(mi_cmd_interpreter_exec): Delete unused variable.
+	(mi_on_normal_stop): Delete unused variable.
+	* mi/mi-main.c (run_one_inferior): Delete unused variable.
+	(print_one_inferior): Delete unused variables.
+	(mi_execute_command): Delete unused variable.
+	(mi_cmd_execute): Delete unused variable.
+	(timestamp): Delete unused variable.
+
+	* cli/cli-dump.c (dump_memory_to_file): Delete unused variable.
 	(restore_binary_file): Delete unused variable.
-	* cli-decode.c (deprecated_cmd_warning): Delete unused variables.
-	* cli-script.c (define_command): Delete unused variables.
+	* cli/cli-decode.c (deprecated_cmd_warning): Delete unused variables.
+	* cli/cli-script.c (define_command): Delete unused variables.
 	(recurse_read_control_structure): Delete unused variable.
 	(script_from_file): Delete unused variable.
-	* cli-cmds.c (complete_command): Delete unused variable.
+	* cli/cli-cmds.c (complete_command): Delete unused variable.
 	(disassemble_command): Delete unused variable.
 
 	* ax-gdb.c (gen_struct_elt_for_reference): Delete unused variables.
