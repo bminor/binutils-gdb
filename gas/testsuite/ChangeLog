@@ -1,3 +1,10 @@
+2010-05-05  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/all/byte.s: New.
+	* gas/all/byte.l: New.
+	* gas/all/byte.d: New.
+	* gas/all/gas.exp: Add it.
+
 2010-04-29  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/arm/weakdef-1.s: New.

@@ -329,6 +329,8 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] && ![istarget "hppa*-
     run_dump_test relax
 }
 
+run_dump_test byte
+
 # .quad is 16 bytes on i960.
 if { ![istarget "i960-*-*"] } {
     run_dump_test quad

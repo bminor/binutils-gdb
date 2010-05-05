@@ -3865,7 +3865,15 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 	parse_mri_cons (&exp, (unsigned int) nbytes);
       else
 #endif
-	TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
+        {
+	  if (*input_line_pointer == '"')
+	    {
+	      as_bad (_("unexpected `\"' in expression"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	  TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
+	}
 
       if (rva)
 	{

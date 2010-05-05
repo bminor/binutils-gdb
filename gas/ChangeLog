@@ -1,3 +1,7 @@
+2010-05-05  Julian Brown  <julian@codesourcery.com>
+
+	* read.c (cons_worker): Detect and reject unexpected string argument.
+
 2010-05-04  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (fixup_segment): Revert previous delta.
