@@ -417,7 +417,6 @@ DCACHE *
 dcache_init (void)
 {
   DCACHE *dcache;
-  int i;
 
   dcache = (DCACHE *) xmalloc (sizeof (*dcache));
 
@@ -585,7 +584,7 @@ static void
 dcache_info (char *exp, int tty)
 {
   splay_tree_node n;
-  int i, refcount, lineno;
+  int i, refcount;
 
   if (exp)
     {

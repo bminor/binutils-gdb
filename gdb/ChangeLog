@@ -1,7 +1,10 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* dcache.c (dcache_init): Delete unused variable.
+	(dcache_info): Delete unused variable.
+
 	* remote.c (remote_threads_info): Delete unused variable.
-	(process_stop_reply): Delete unused variable.
+	(process_stop_reply) :Delete unused variable.
 	(remote_get_trace_status): Delete unused variables.
 
 	* linux-thread-db.c (add_thread_db_info): Delete unused variable.
