@@ -281,8 +281,6 @@ solib_find (char *in_pathname, int *fd)
       found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
       if (found_file < 0)
 	{
-	  char *p;
-
 	  xfree (temp_pathname);
 
 	  /* If the search in gdb_sysroot still failed, try fully
@@ -548,8 +546,6 @@ solib_map_sections (struct so_list *so)
 static void
 free_so_symbols (struct so_list *so)
 {
-  char *bfd_filename = 0;
-
   if (so->sections)
     {
       xfree (so->sections);
@@ -1000,7 +996,6 @@ static void
 info_sharedlibrary_command (char *pattern, int from_tty)
 {
   struct so_list *so = NULL;	/* link map state variable */
-  int header_done = 0;
   int so_missing_debug_info = 0;
   int addr_width;
   int nr_libs;
@@ -1318,7 +1313,6 @@ reload_shared_libraries_1 (int from_tty)
     {
       char *filename, *found_pathname = NULL;
       bfd *abfd;
-      int scratch_chan;
       int was_loaded = so->symbols_loaded;
       const int flags =
 	SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
@@ -1454,8 +1448,6 @@ extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 void
 _initialize_solib (void)
 {
-  struct cmd_list_element *c;
-
   solib_data = gdbarch_data_register_pre_init (solib_init);
 
   add_com ("sharedlibrary", class_files, sharedlibrary_command,

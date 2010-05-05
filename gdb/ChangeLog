@@ -1,5 +1,11 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* solib.c (solib_find): Delete unused variable.
+	(free_so_symbols): Delete unused variable.
+	(info_sharedlibrary_command): Delete unused variable.
+	(reload_shared_libraries_1): Delete unused variable.
+	(_initialize_solib): Delete unused variable.
+
 	* i386-tdep.c (i386_supply_xstateregset) Delete unused variable.
 	(i386_collect_xstateregset): Delete unused variable.
 	* i387-tdep.c (i387_print_float_info): Delete unused variable.
