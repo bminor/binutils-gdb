@@ -1,5 +1,7 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* ser-pipe.c (top level): Delete unused global variable.
+
 	* linux-record.c (record_linux_system_call): 
 	Delete unused variables.
 
