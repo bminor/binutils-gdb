@@ -3702,7 +3702,7 @@ insn_references_pc (uint32_t insn, uint32_t bitmask)
    matter what address they are executed at: in those cases, use this.  */
 
 static int
-copy_unmodified (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
+copy_unmodified (struct gdbarch *gdbarch, uint32_t insn,
 		 const char *iname, struct displaced_step_closure *dsc)
 {
   if (debug_displaced)
@@ -3718,7 +3718,7 @@ copy_unmodified (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
 /* Preload instructions with immediate offset.  */
 
 static void
-cleanup_preload (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+cleanup_preload (struct gdbarch *gdbarch,
 		 struct regcache *regs, struct displaced_step_closure *dsc)
 {
   displaced_write_reg (regs, dsc, 0, dsc->tmp[0], CANNOT_WRITE_PC);
@@ -3803,7 +3803,7 @@ copy_preload_reg (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
 /* Copy/cleanup coprocessor load and store instructions.  */
 
 static void
-cleanup_copro_load_store (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+cleanup_copro_load_store (struct gdbarch *gdbarch,
 			  struct regcache *regs,
 			  struct displaced_step_closure *dsc)
 {
@@ -3857,7 +3857,7 @@ copy_copro_load_store (struct gdbarch *gdbarch, uint32_t insn,
    PC).  */
 
 static void
-cleanup_branch (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, struct regcache *regs,
+cleanup_branch (struct gdbarch *gdbarch, struct regcache *regs,
 		struct displaced_step_closure *dsc)
 {
   ULONGEST from = dsc->insn_addr;
@@ -3881,7 +3881,7 @@ cleanup_branch (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, struct regcache *regs,
 /* Copy B/BL/BLX instructions with immediate destinations.  */
 
 static int
-copy_b_bl_blx (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
+copy_b_bl_blx (struct gdbarch *gdbarch, uint32_t insn,
 	       struct regcache *regs, struct displaced_step_closure *dsc)
 {
   unsigned int cond = bits (insn, 28, 31);
@@ -3928,7 +3928,7 @@ copy_b_bl_blx (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
 /* Copy BX/BLX with register-specified destinations.  */
 
 static int
-copy_bx_blx_reg (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
+copy_bx_blx_reg (struct gdbarch *gdbarch, uint32_t insn,
 		 struct regcache *regs, struct displaced_step_closure *dsc)
 {
   unsigned int cond = bits (insn, 28, 31);
@@ -3966,7 +3966,7 @@ copy_bx_blx_reg (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
 /* Copy/cleanup arithmetic/logic instruction with immediate RHS. */
 
 static void
-cleanup_alu_imm (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+cleanup_alu_imm (struct gdbarch *gdbarch,
 		 struct regcache *regs, struct displaced_step_closure *dsc)
 {
   ULONGEST rd_val = displaced_read_reg (regs, dsc->insn_addr, 0);
@@ -4027,7 +4027,7 @@ copy_alu_imm (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
 /* Copy/cleanup arithmetic/logic insns with register RHS.  */
 
 static void
-cleanup_alu_reg (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+cleanup_alu_reg (struct gdbarch *gdbarch,
 		 struct regcache *regs, struct displaced_step_closure *dsc)
 {
   ULONGEST rd_val;
@@ -4096,7 +4096,7 @@ copy_alu_reg (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
 /* Cleanup/copy arithmetic/logic insns with shifted register RHS.  */
 
 static void
-cleanup_alu_shifted_reg (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+cleanup_alu_shifted_reg (struct gdbarch *gdbarch,
 			 struct regcache *regs,
 			 struct displaced_step_closure *dsc)
 {
@@ -4170,7 +4170,7 @@ copy_alu_shifted_reg (struct gdbarch *gdbarch, uint32_t insn,
 /* Clean up load instructions.  */
 
 static void
-cleanup_load (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, struct regcache *regs,
+cleanup_load (struct gdbarch *gdbarch, struct regcache *regs,
 	      struct displaced_step_closure *dsc)
 {
   ULONGEST rt_val, rt_val2 = 0, rn_val;
@@ -4200,7 +4200,7 @@ cleanup_load (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, struct regcache *regs,
 /* Clean up store instructions.  */
 
 static void
-cleanup_store (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, struct regcache *regs,
+cleanup_store (struct gdbarch *gdbarch, struct regcache *regs,
 	       struct displaced_step_closure *dsc)
 {
   CORE_ADDR from = dsc->insn_addr;
@@ -4533,7 +4533,7 @@ cleanup_block_store_pc (struct gdbarch *gdbarch, struct regcache *regs,
    must undo that here.  */
 
 static void
-cleanup_block_load_pc (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+cleanup_block_load_pc (struct gdbarch *gdbarch,
 		       struct regcache *regs,
 		       struct displaced_step_closure *dsc)
 {
@@ -4729,7 +4729,7 @@ copy_block_xfer (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
    for Linux, where some SVC instructions must be treated specially.  */
 
 static void
-cleanup_svc (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, struct regcache *regs,
+cleanup_svc (struct gdbarch *gdbarch, struct regcache *regs,
 	     struct displaced_step_closure *dsc)
 {
   CORE_ADDR from = dsc->insn_addr;
@@ -4773,7 +4773,7 @@ copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
 /* Copy undefined instructions.  */
 
 static int
-copy_undef (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
+copy_undef (struct gdbarch *gdbarch, uint32_t insn,
 	    struct displaced_step_closure *dsc)
 {
   if (debug_displaced)
@@ -4788,7 +4788,7 @@ copy_undef (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
 /* Copy unpredictable instructions.  */
 
 static int
-copy_unpred (struct gdbarch *gdbarch ATTRIBUTE_UNUSED, uint32_t insn,
+copy_unpred (struct gdbarch *gdbarch, uint32_t insn,
 	     struct displaced_step_closure *dsc)
 {
   if (debug_displaced)

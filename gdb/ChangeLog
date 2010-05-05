@@ -1,3 +1,26 @@
+2010-05-04  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI fix: Remove ATTRIBUTE_UNUSED throughout.
+	* arm-linux-tdep.c (arm_linux_cleanup_svc): Remove 
+	ATTRIBUTE_UNUSED.
+	(cleanup_kernel_helper_return): Likewise.
+	* arm-tdep.c (copy_unmodified): Likewise.
+	(copy_preload): Likewise.
+	(copy_copro_load_store): Likewise.
+	(cleanup_branch): Likewise.
+	(copy_b_bl_blx): Likewise.
+	(copy_bx_blx_reg): Likewise.
+	(copy_alu_imm): Likewise.
+	(copy_alu_reg): Likewise.
+	(copy_alu_shifted_reg): Likewise.
+	(cleanup_load): Likewise.
+	(cleanup_store): Likewise.
+	(cleanup_block_load_pc): Likewise.
+	(cleanup_svc): Likewise.
+	(copy_undef): Likewise.
+	(copy_unpred): Likewise.
+	* remote.c (register_remote_support_xml): Likewise.
+
 2010-05-05  Hui Zhu  <teawater@gmail.com>
 
 	* gdbarch.h (gdbarch_has_dos_based_file_system): Update comment.

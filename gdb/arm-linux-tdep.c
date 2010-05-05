@@ -655,7 +655,7 @@ arm_linux_software_single_step (struct frame_info *frame)
 /* Support for displaced stepping of Linux SVC instructions.  */
 
 static void
-arm_linux_cleanup_svc (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 		       struct regcache *regs,
 		       struct displaced_step_closure *dsc)
 {
@@ -776,7 +776,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
    would have been called from the non-displaced location).  */
 
 static void
-cleanup_kernel_helper_return (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+cleanup_kernel_helper_return (struct gdbarch *gdbarch,
 			      struct regcache *regs,
 			      struct displaced_step_closure *dsc)
 {

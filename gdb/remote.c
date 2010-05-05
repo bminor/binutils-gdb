@@ -3482,7 +3482,7 @@ static char *remote_support_xml;
 /* Register string appended to "xmlRegisters=" in qSupported query.  */
 
 void
-register_remote_support_xml (const char *xml ATTRIBUTE_UNUSED)
+register_remote_support_xml (const char *xml)
 {
 #if defined(HAVE_LIBEXPAT)
   if (remote_support_xml == NULL)
