@@ -2512,7 +2512,7 @@ remote_threads_info (struct target_ops *ops)
 	{
 	  struct gdb_xml_parser *parser;
 	  struct threads_parsing_context context;
-	  struct cleanup back_to = make_cleanup (null_cleanup, NULL);
+	  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
 	  context.items = 0;
 	  parser = gdb_xml_create_parser_and_cleanup (_("threads"),

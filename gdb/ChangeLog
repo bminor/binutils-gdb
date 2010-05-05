@@ -1,3 +1,8 @@
+2010-05-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_threads_info): Really revert previous previous
+	change.
+
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
 	* tui/tui-interp.c (_initialize_tui_interp): 
