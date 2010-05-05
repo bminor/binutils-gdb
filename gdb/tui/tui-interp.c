@@ -222,7 +222,6 @@ _initialize_tui_interp (void)
     tui_display_prompt_p,
     tui_command_loop,
   };
-  struct interp *tui_interp;
 
   /* Create a default uiout builder for the TUI.  */
   tui_out = tui_out_new (gdb_stdout);

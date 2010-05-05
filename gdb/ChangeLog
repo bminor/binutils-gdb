@@ -1,5 +1,18 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* tui/tui-interp.c (_initialize_tui_interp): 
+	Delete unused variable.
+	* tui/tui-regs.c tui_display_registers_from): 
+	Delete unused variable.
+	(tui_check_register_values): Delete unused variable.
+	(tui_register_format): Delete unused variable.
+	* tui/tui-win.c (_initialize_tui_win): Delete unused variable.
+	* tui/tui-windata.c (tui_display_data_from_line): 
+	Delete unused variables.
+	(tui_vertical_data_scroll): Delete unused variables.
+
+2010-05-05  Michael Snyder  <msnyder@vmware.com>
+
 	* remote.c (remote_threads_info): Revert questionable part of
 	the previous change.
 

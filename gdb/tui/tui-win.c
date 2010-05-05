@@ -356,7 +356,6 @@ extern initialize_file_ftype _initialize_tui_win;
 void
 _initialize_tui_win (void)
 {
-  struct cmd_list_element *c;
   static struct cmd_list_element *tui_setlist;
   static struct cmd_list_element *tui_showlist;
 

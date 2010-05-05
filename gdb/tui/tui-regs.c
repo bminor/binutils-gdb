@@ -321,7 +321,7 @@ tui_display_registers_from (int start_element_no)
       && display_info->regs_content_count > 0)
     {
       int i = start_element_no;
-      int j, value_chars_wide, item_win_width, cur_y;
+      int j, item_win_width, cur_y;
 
       int max_len = 0;
       for (i = 0; i < display_info->regs_content_count; i++)
@@ -504,7 +504,7 @@ tui_check_register_values (struct frame_info *frame)
 	tui_show_registers (display_info->current_group);
       else
 	{
-	  int i, j;
+	  int i;
 
 	  for (i = 0; (i < display_info->regs_content_count); i++)
 	    {
@@ -684,7 +684,6 @@ tui_register_format (struct frame_info *frame,
   const char *name;
   struct cleanup *cleanups;
   char *p, *s;
-  int pos;
   struct type *type = register_type (gdbarch, regnum);
 
   name = gdbarch_register_name (gdbarch, regnum);
