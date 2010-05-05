@@ -807,7 +807,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    struct type *range_type;
 	    int ind = 0;
 	    char quote = *p++;
-	    char *startp = p;
 	    gdb_byte *string_local = (gdb_byte *) alloca (strlen (p));
 	    gdb_byte *string_value;
 

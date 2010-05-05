@@ -223,7 +223,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 		 int copy_names)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  long storage_needed;
   asymbol *sym;
   long i;
   CORE_ADDR symaddr;
@@ -688,13 +687,6 @@ build_id_to_debug_filename (struct build_id *build_id)
 static char *
 find_separate_debug_file_by_buildid (struct objfile *objfile)
 {
-  asection *sect;
-  char *basename, *name_copy, *debugdir;
-  char *dir = NULL;
-  char *debugfile = NULL;
-  char *canon_name = NULL;
-  bfd_size_type debuglink_size;
-  int i;
   struct build_id *build_id;
 
   build_id = build_id_bfd_get (objfile->obfd);
@@ -751,7 +743,6 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;
   struct cleanup *back_to;
-  CORE_ADDR offset;
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
   asymbol *synthsyms;

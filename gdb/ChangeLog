@@ -5,6 +5,38 @@
 
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* elfread.c (elf_symtab_read): Delete unused variable.
+	(find_separate_debug_file_by_buildid): Delete unused variables.
+	(elf_symfile_read): Delete unused variable.
+
+	* coffread.c (coff_symfile_read): Delete unused variables.
+
+	* coff-pe-read.c (add_pe_exported_sym): Delete unused variable.
+	(read_pe_exported_syms): Delete unused variable.
+
+	* stabsread.c (define_symbol): Delete unused variable.
+
+	* dwarf2read.c (read_type_comp_unit_head): Delete unused variable.
+	(process_psymtab_comp_unit): Delete unused variable.
+	(dwarf2_build_psymtabs_hard): Delete unused variable.
+	(load_partial_comp_unit): Delete unused variable.
+	(create_all_comp_units): Delete unused variable.
+	(scan_partial_symbols): Delete unused variable.
+	(add_partial_symbol): Delete unused variable.
+	(add_partial_namespace): Delete unused variable.
+	(add_partial_enumeration): Delete unused variable.
+	(load_full_comp_unit): Delete unused variable.
+	(process_full_comp_unit): Delete unused variable.
+	(read_file_scope): Delete unused variable.
+	(read_type_unit_scope): Delete unused variable.
+	(process_structure_scope): Delete unused variable.
+	(process_enumeration_scope): Delete unused variable.
+	(read_tag_ptr_to_member_type): Delete unused variable.
+	(read_typedef): Delete unused variable.
+	(read_partial_die): Delete unused variable.
+	(decode_locdesc): Delete unused variable.
+	(zeroed_partial_die): Delete unused global variable.
+
 	* tui/tui-interp.c (_initialize_tui_interp): 
 	Delete unused variable.
 	* tui/tui-regs.c tui_display_registers_from): 
@@ -86,7 +118,7 @@
 	(checkpoint_command): Delete unused variable.
 	(linux_fork_context): Delete unused variables.
 
-	* linux-nat.c (top level): Delete unused global variable.
+	* linux-nat.c (linux_parent_pid): Delete unused global variable.
 	(linux_tracefork_child): Delete unused variable.
 	(linux_child_follow_fork): Delete unused variable.
 	(linux_nat_detach): Delete unused variable.
@@ -99,7 +131,7 @@
 	(linux_nat_stop_lwp): Delete unused variables.
 	(_initialize_linux_nat): Delete unused variable.
 
-	* ser-pipe.c (top level): Delete unused global variable.
+	* ser-pipe.c (pipe_ops): Delete unused global variable.
 
 	* linux-record.c (record_linux_system_call): 
 	Delete unused variables.

@@ -513,8 +513,6 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   int stringtab_offset;
   struct cleanup *back_to, *cleanup_minimal_symbols;
   int stabstrsize;
-  int len;
-  char * target;
   
   info = (struct coff_symfile_info *) objfile->deprecated_sym_private;
   dbxinfo = objfile->deprecated_sym_stab_info;

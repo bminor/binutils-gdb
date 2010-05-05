@@ -593,9 +593,6 @@ struct dwarf_block
 #define DW_FIELD_ALLOC_CHUNK 4
 #endif
 
-/* A zeroed version of a partial die for initialization purposes.  */
-static struct partial_die_info zeroed_partial_die;
-
 /* FIXME: We might want to set this from BFD via bfd_arch_bits_per_byte,
    but this would require a corresponding change in unpack_field_as_long
    and friends.  */
@@ -1520,10 +1517,10 @@ read_type_comp_unit_head (struct comp_unit_head *cu_header,
 			  ULONGEST *signature,
 			  gdb_byte *types_ptr, bfd *abfd)
 {
-  unsigned int bytes_read;
   gdb_byte *initial_types_ptr = types_ptr;
 
-  dwarf2_read_section (dwarf2_per_objfile->objfile, &dwarf2_per_objfile->types);
+  dwarf2_read_section (dwarf2_per_objfile->objfile, 
+		       &dwarf2_per_objfile->types);
   cu_header->offset = types_ptr - dwarf2_per_objfile->types.buffer;
 
   types_ptr = read_comp_unit_head (cu_header, types_ptr, abfd);
@@ -1794,10 +1791,8 @@ process_psymtab_comp_unit (struct objfile *objfile,
   CORE_ADDR baseaddr;
   struct cleanup *back_to_inner;
   struct dwarf2_cu cu;
-  unsigned int bytes_read;
   int has_children, has_pc_info;
   struct attribute *attr;
-  const char *name;
   CORE_ADDR best_lowpc = 0, best_highpc = 0;
   struct die_reader_specs reader_specs;
 
@@ -1999,7 +1994,6 @@ build_type_psymtabs (struct objfile *objfile)
 static void
 dwarf2_build_psymtabs_hard (struct objfile *objfile)
 {
-  bfd *abfd = objfile->obfd;
   gdb_byte *info_ptr;
   struct cleanup *back_to;
 
@@ -2061,7 +2055,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
   gdb_byte *info_ptr, *beg_of_comp_unit;
   struct die_info *comp_unit_die;
   struct dwarf2_cu *cu;
-  unsigned int bytes_read;
   struct cleanup *back_to;
   struct attribute *attr;
   int has_children;
@@ -2140,7 +2133,6 @@ create_all_comp_units (struct objfile *objfile)
   while (info_ptr < dwarf2_per_objfile->info.buffer + dwarf2_per_objfile->info.size)
     {
       unsigned int length, initial_length_size;
-      gdb_byte *beg_of_comp_unit;
       struct dwarf2_per_cu_data *this_cu;
       unsigned int offset;
 
@@ -2190,8 +2182,6 @@ static void
 scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		      CORE_ADDR *highpc, int need_pc, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
-  bfd *abfd = objfile->obfd;
   struct partial_die_info *pdi;
 
   /* Now, march along the PDI's, descending into ones which have
@@ -2373,7 +2363,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   CORE_ADDR addr = 0;
   char *actual_name = NULL;
-  const char *my_prefix;
   const struct partial_symbol *psym = NULL;
   CORE_ADDR baseaddr;
   int built_actual_name = 0;
@@ -2535,8 +2524,6 @@ add_partial_namespace (struct partial_die_info *pdi,
 		       CORE_ADDR *lowpc, CORE_ADDR *highpc,
 		       int need_pc, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
-
   /* Add a symbol for the namespace.  */
 
   add_partial_symbol (pdi, cu);
@@ -2662,8 +2649,6 @@ static void
 add_partial_enumeration (struct partial_die_info *enum_pdi,
 			 struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
-  bfd *abfd = objfile->obfd;
   struct partial_die_info *pdi;
 
   if (enum_pdi->name != NULL)
@@ -3046,7 +3031,6 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
   gdb_byte *info_ptr, *beg_of_comp_unit;
   struct cleanup *back_to, *free_cu_cleanup;
   struct attribute *attr;
-  CORE_ADDR baseaddr;
 
   gdb_assert (! per_cu->from_debug_types);
 
@@ -3116,7 +3100,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
   struct partial_symtab *pst = per_cu->psymtab;
   struct dwarf2_cu *cu = per_cu->cu;
   struct objfile *objfile = pst->objfile;
-  bfd *abfd = objfile->obfd;
   CORE_ADDR lowpc, highpc;
   struct symtab *symtab;
   struct cleanup *back_to;
@@ -3532,7 +3515,6 @@ static void
 read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct comp_unit_head *cu_header = &cu->header;
   struct cleanup *back_to = make_cleanup (null_cleanup, 0);
   CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
@@ -3662,7 +3644,6 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
   char *comp_dir = NULL;
   struct die_info *child_die;
   bfd *abfd = objfile->obfd;
-  struct line_header *line_header = 0;
 
   /* start_symtab needs a low pc, but we don't really have one.
      Do what read_file_scope would do in the absence of such info.  */
@@ -5250,7 +5231,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 static void
 process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
   struct die_info *child_die = die->child;
   struct type *this_type;
 
@@ -5347,7 +5327,6 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 static void
 process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
   struct die_info *child_die;
   struct field *fields;
   struct symbol *sym;
@@ -5795,7 +5774,6 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 static struct type *
 read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
   struct type *type;
   struct type *to_type;
   struct type *domain;
@@ -6012,7 +5990,6 @@ static struct type *
 read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct attribute *attr;
   const char *name = NULL;
   struct type *this_type;
 
@@ -6806,7 +6783,7 @@ read_partial_die (struct partial_die_info *part_die,
 		  gdb_byte *buffer, gdb_byte *info_ptr,
 		  struct dwarf2_cu *cu)
 {
-  unsigned int bytes_read, i;
+  unsigned int i;
   struct attribute attr;
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
@@ -10829,7 +10806,6 @@ static CORE_ADDR
 decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct comp_unit_head *cu_header = &cu->header;
   int i;
   int size = blk->size;
   gdb_byte *data = blk->data;
