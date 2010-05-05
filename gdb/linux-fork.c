@@ -468,11 +468,8 @@ static void
 info_checkpoints_command (char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
-  struct frame_info *cur_frame;
   struct symtab_and_line sal;
-  struct symtab *cur_symtab;
   struct fork_info *fp;
-  int cur_line;
   ULONGEST pc;
   int requested = -1;
   struct fork_info *printed = NULL;
@@ -554,7 +551,6 @@ checkpoint_command (char *args, int from_tty)
   struct fork_info *fp;
   pid_t retpid;
   struct cleanup *old_chain;
-  long i;
 
   /* Make the inferior fork, record its (and gdb's) state.  */
 
@@ -607,8 +603,6 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
 {
   /* Now we attempt to switch processes.  */
   struct fork_info *oldfp;
-  ptid_t ptid;
-  int id, i;
 
   gdb_assert (newfp != NULL);
 

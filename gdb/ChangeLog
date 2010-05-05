@@ -1,5 +1,15 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-thread-db.c (add_thread_db_info): Delete unused variable.
+	(thread_from_lwp): Delete unused variable.
+	(enable_thread_event_reporting): Delete unused variable.
+	(check_for_thread_db): Delete unused variables.
+	(thread_db_find_new_threads_2): Delete unused variable.
+	
+	* linux-fork.c (info_checkpoints_command): Delete unused variables.
+	(checkpoint_command): Delete unused variable.
+	(linux_fork_context): Delete unused variables.
+
 	* linux-nat.c (top level): Delete unused global variable.
 	(linux_tracefork_child): Delete unused variable.
 	(linux_child_follow_fork): Delete unused variable.

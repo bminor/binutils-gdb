@@ -172,7 +172,6 @@ static void thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new);
 static struct thread_db_info *
 add_thread_db_info (void *handle)
 {
-  int pid;
   struct thread_db_info *info;
 
   info = xcalloc (1, sizeof (*info));
@@ -402,7 +401,6 @@ thread_from_lwp (ptid_t ptid)
 {
   td_thrhandle_t th;
   td_err_e err;
-  ptid_t thread_ptid;
   struct thread_db_info *info;
   struct thread_get_info_inout io = {0};
 
@@ -527,7 +525,6 @@ static void
 enable_thread_event_reporting (void)
 {
   td_thr_events_t events;
-  td_notify_t notify;
   td_err_e err;
 #ifdef HAVE_GNU_LIBC_VERSION_H
   const char *libc_version;
@@ -959,9 +956,6 @@ check_thread_signals (void)
 void
 check_for_thread_db (void)
 {
-  td_err_e err;
-  static void *last_loaded;
-
   /* Do nothing if we couldn't load libthread_db.so.1.  */
   if (!thread_db_load ())
     return;
@@ -1440,8 +1434,6 @@ thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new)
     }
   else
     {
-      td_err_e err;
-
       find_new_threads_once (info, 0, &err);
       if (err != TD_OK)
 	error (_("Cannot find new threads: %s"), thread_db_err_str (err));
