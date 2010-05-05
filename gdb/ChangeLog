@@ -1,5 +1,7 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* corelow.c (core_xfer_partial): Delete unused variables.
+
 	* solib-svr4.c (find_program_interpreter): Delete unused variable.
 	(svr4_solib_create_inferior_hook): Add ifdef around 
 	conditionally-used variable declarations.
