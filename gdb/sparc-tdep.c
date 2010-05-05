@@ -221,7 +221,11 @@ sparc_floating_p (const struct type *type)
   return 0;
 }
 
-/* Check whether TYPE is "Structure or Union".  */
+/* Check whether TYPE is "Structure or Union".
+
+   In terms of Ada subprogram calls, arrays are treated the same as
+   struct and union types.  So this function also returns non-zero
+   for array types.  */
 
 static int
 sparc_structure_or_union_p (const struct type *type)
@@ -230,6 +234,7 @@ sparc_structure_or_union_p (const struct type *type)
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_ARRAY:
       return 1;
     default:
       break;
