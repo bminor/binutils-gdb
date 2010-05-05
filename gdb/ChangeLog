@@ -1,3 +1,8 @@
+2010-05-05  Michael Snyder  <msnyder@vmware.com>
+
+	* features/i386/i386-mmx.c (initialize_tdesc_i386_mmx):
+	Delete unused variable 'type'.
+
 2010-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.h (MAX_OF_TYPE, MIN_OF_TYPE): Delete macros.
