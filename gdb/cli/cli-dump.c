@@ -223,7 +223,6 @@ dump_memory_to_file (char *cmd, char *mode, char *file_format)
   void *buf;
   char *lo_exp;
   char *hi_exp;
-  int len;
 
   /* Open the file.  */
   filename = scan_filename_with_cleanup (&cmd, NULL);
@@ -513,7 +512,6 @@ static void
 restore_binary_file (char *filename, struct callback_data *data)
 {
   FILE *file = fopen_with_cleanup (filename, FOPEN_RB);
-  int status;
   gdb_byte *buf;
   long len;
 

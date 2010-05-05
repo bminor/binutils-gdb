@@ -1422,8 +1422,6 @@ deprecated_cmd_warning (char **text)
   struct cmd_list_element *alias = NULL;
   struct cmd_list_element *prefix_cmd = NULL;
   struct cmd_list_element *cmd = NULL;
-  struct cmd_list_element *c;
-  char *type;
 
   if (!lookup_cmd_composition (*text, &alias, &prefix_cmd, &cmd))
     /* return if text doesn't evaluate to a command */

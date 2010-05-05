@@ -255,7 +255,6 @@ compare_strings (const void *arg1, const void *arg2)
 static void
 complete_command (char *arg, int from_tty)
 {
-  int i;
   int argpoint;
   char **completions, *point, *arg_prefix;
 
@@ -1117,7 +1116,7 @@ disassemble_command (char *arg, int from_tty)
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR low, high;
   char *name;
-  CORE_ADDR pc, pc_masked;
+  CORE_ADDR pc;
   int flags;
 
   name = NULL;

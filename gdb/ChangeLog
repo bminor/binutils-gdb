@@ -1,5 +1,28 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* cli-dump.c (dump_memory_to_file): Delete unused variable.
+	(restore_binary_file): Delete unused variable.
+	* cli-decode.c (deprecated_cmd_warning): Delete unused variables.
+	* cli-script.c (define_command): Delete unused variables.
+	(recurse_read_control_structure): Delete unused variable.
+	(script_from_file): Delete unused variable.
+	* cli-cmds.c (complete_command): Delete unused variable.
+	(disassemble_command): Delete unused variable.
+
+	* ax-gdb.c (gen_struct_elt_for_reference): Delete unused variables.
+	* tracepoint.c (delete_trace_variable_command): 
+	Delete unused variables.
+	(encode_actions_1): Delete unused variables.
+	(start_tracing): Delete unused variable.
+	(trace_status_mi): Delete unused variable.
+	(tfind_1): Delete unused variable.
+	(trace_find_pc_command): Delete unused variable.
+	(trace_find_line_command): Delete unused variables.
+	(trace_find_range_command): Delete unused variables.
+	(trace_find_outside_command): Delete unused variables.
+	(parse_tracepoint_definition): Delete unused variables.
+	(tfile_fetch_registers): Delete unused variable.
+
 	* dcache.c (dcache_init): Delete unused variable.
 	(dcache_info): Delete unused variable.
 
