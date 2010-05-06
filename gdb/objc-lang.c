@@ -350,7 +350,6 @@ objc_printstr (struct ui_file *stream, struct type *type,
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
-  int width = TYPE_LENGTH (type);
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in

@@ -111,7 +111,6 @@ m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
-  int width = TYPE_LENGTH (type);
 
   if (length == 0)
     {

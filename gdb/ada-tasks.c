@@ -293,7 +293,6 @@ get_known_tasks_addr (void)
 
   if (ada_tasks_check_symbol_table)
     {
-      struct symbol *sym;
       struct minimal_symbol *msym;
 
       msym = lookup_minimal_symbol (KNOWN_TASKS_NAME, NULL, NULL);

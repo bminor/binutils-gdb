@@ -1,5 +1,19 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* ada-lang.c (add_defn_to_vec): Delete unused variable.
+	(decode_constrained_packed_array_type): Delete unused variable.
+	(add_defn_to_vec): Delete unused variable.
+	(symbol_completion_match): Delete unused variable.
+	(value_tag_from_contents_and_address): Delete unused variable.
+	(ada_evaluate_subexp): Delete unused variable.
+	* c-lang.c (classify_type): Delete unused variable.
+	* f-lang.c (f_printstr): Delete unused variable.
+	* objc-lang.c (objc_printstr): Delete unused variable.
+	* ada-tasks.c (get_known_tasks_addr): Delete unused variable.
+	* jv-lang.c (type_from_class): ifdef unused variable.
+	(java_class_name_from_physname): Delete unused variable.
+	* m2-lang.c (m2_printstr): Delete unused variable.
+
 	* objfiles.c (objfile_relocate): Delete unused variable.
 	* maint.c (_initialize_maint_cmds): Delete unused variable.
 	* demangle.c (_initialize_demangler): Delete unused variable.

@@ -76,7 +76,6 @@ static enum c_string_type
 classify_type (struct type *elttype, struct gdbarch *gdbarch,
 	       const char **encoding)
 {
-  struct type *saved_type;
   enum c_string_type result;
 
   /* We loop because ELTTYPE may be a typedef, and we want to

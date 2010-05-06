@@ -1823,14 +1823,11 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
 static struct type *
 decode_constrained_packed_array_type (struct type *type)
 {
-  struct symbol *sym;
-  struct block **blocks;
   char *raw_name = ada_type_name (ada_check_typedef (type));
   char *name;
   char *tail;
   struct type *shadow_type;
   long bits;
-  int i, n;
 
   if (!raw_name)
     raw_name = ada_type_name (desc_base_type (type));
@@ -4050,7 +4047,6 @@ add_defn_to_vec (struct obstack *obstackp,
                  struct block *block)
 {
   int i;
-  size_t tmp;
   struct ada_symbol_info *prevDefns = defns_collected (obstackp, 0);
 
   /* Do not try to complete stub types, as the debugger is probably
@@ -5018,7 +5014,6 @@ symbol_completion_match (const char *sym_name,
                          const char *text, int text_len,
                          int wild_match, int encoded)
 {
-  char *result;
   const int verbatim_match = (text[0] == '<');
   int match = 0;
 
@@ -5409,7 +5404,7 @@ value_tag_from_contents_and_address (struct type *type,
 				     const gdb_byte *valaddr,
                                      CORE_ADDR address)
 {
-  int tag_byte_offset, dummy1, dummy2;
+  int tag_byte_offset;
   struct type *tag_type;
   if (find_struct_field ("_tag", type, 0, &tag_type, &tag_byte_offset,
                          NULL, NULL, NULL))
@@ -8575,7 +8570,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                      int *pos, enum noside noside)
 {
   enum exp_opcode op;
-  int tem, tem2, tem3;
+  int tem;
   int pc;
   struct value *arg1 = NULL, *arg2 = NULL, *arg3;
   struct type *type;
