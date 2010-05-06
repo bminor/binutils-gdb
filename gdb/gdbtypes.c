@@ -540,7 +540,6 @@ make_qualified_type (struct type *type, int new_flags,
 struct type *
 make_type_with_address_space (struct type *type, int space_flag)
 {
-  struct type *ntype;
   int new_flags = ((TYPE_INSTANCE_FLAGS (type)
 		    & ~(TYPE_INSTANCE_FLAG_CODE_SPACE
 			| TYPE_INSTANCE_FLAG_DATA_SPACE
@@ -567,11 +566,10 @@ make_cv_type (int cnst, int voltl,
 	      struct type **typeptr)
 {
   struct type *ntype;	/* New type */
-  struct type *tmp_type = type;	/* tmp type */
-  struct objfile *objfile;
 
   int new_flags = (TYPE_INSTANCE_FLAGS (type)
-		   & ~(TYPE_INSTANCE_FLAG_CONST | TYPE_INSTANCE_FLAG_VOLATILE));
+		   & ~(TYPE_INSTANCE_FLAG_CONST 
+		       | TYPE_INSTANCE_FLAG_VOLATILE));
 
   if (cnst)
     new_flags |= TYPE_INSTANCE_FLAG_CONST;

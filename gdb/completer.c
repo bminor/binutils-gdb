@@ -79,10 +79,6 @@ static char *gdb_completer_file_name_break_characters = " \t\n*|\"';?><@";
 static char *gdb_completer_file_name_break_characters = " \t\n*|\"';:?><";
 #endif
 
-/* These are used when completing on locations, which can mix file
-   names and symbol names separated by a colon.  */
-static char *gdb_completer_loc_break_characters = " \t\n*|\"';:?><,";
-
 /* Characters that can be used to quote completion strings.  Note that we
    can't include '"' because the gdb C parser treats such quoted sequences
    as strings.  */

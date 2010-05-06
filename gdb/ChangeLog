@@ -1,5 +1,18 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* macrocmd.c (_initialize_macrocmd): Delete unused variable.
+	* macroexp.c (gather_arguments): Delete unused variable.
+	(substitute_args): Delete unused variable.
+	* completer.c (gdb_completer_loc_break_characters): Unused, delete.
+	* gdbarch.sh (gdbarch_printable_names): Delete unused variable.
+	(_initialize_gdbarch): Delete unused variable.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* arch-utils.c (initialize_current_architecture): 
+	Delete unused variable.
+	(_initialize_gdbarch_utils): Delete unused variable.
+	* gdbtypes.c (make_cv_type): Delete unused variable.
+	(make_type_with_address_space): Delete unused variable.
+
 	* linespec.c (decode_compound): Delete unused variable.
 	* dictionary.c (iterator_next_hashed): Delete unused variable.
 	* infcall.c (call_function_by_hand): Delete unused variable.

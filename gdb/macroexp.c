@@ -805,8 +805,6 @@ gather_arguments (const char *name, struct macro_buffer *src,
       depth = 0;
       for (;;)
         {
-          char *start = src->text;
-
           if (! get_token (&tok, src))
             error (_("Malformed argument list for macro `%s'."), name);
       
@@ -1004,7 +1002,7 @@ substitute_args (struct macro_buffer *dest,
 	       && lookahead.text[0] == '#'
 	       && lookahead.text[1] == '#')
 	{
-	  int arg, finished = 0;
+	  int finished = 0;
 	  int prev_was_comma = 0;
 
 	  /* Note that GCC warns if the result of splicing is not a

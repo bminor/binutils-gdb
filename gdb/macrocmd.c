@@ -387,8 +387,6 @@ extern initialize_file_ftype _initialize_macrocmd; /* -Wmissing-prototypes */
 void
 _initialize_macrocmd (void)
 {
-  struct cmd_list_element *c;
-
   /* We introduce a new command prefix, `macro', under which we'll put
      the various commands for working with preprocessor macros.  */
   add_prefix_cmd ("macro", class_info, macro_command,
