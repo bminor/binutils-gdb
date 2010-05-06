@@ -1,5 +1,17 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* eval.c (evaluate_subexp_standard): Delete unused variable.
+	* valops.c (value_cast_pointers): Delete unused variable.
+	(value_dynamic_cast): Delete unused variable.
+	(value_array): Delete unused variable.
+	(find_overload_match): Delete unused variable.
+	* valarith.c (value_subscript): Delete unused variable.
+	(value_binop): Delete unused variable.
+	* valprint.c (_initialize_valprint): Delete unused variable.
+	* printcmd.c (print_command_1): Delete unused variable.
+	(address_info): Delete unused variable.
+	(printf_command): Delete unused variable.
+
 	* auxv.c (target_auxv_search): Delete unused variable.
 	* blockframe.c (get_frame_block): Delete unused variable.
 	* regcache.c (regcache_cpy): Delete unused variable.

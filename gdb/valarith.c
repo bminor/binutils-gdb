@@ -146,7 +146,6 @@ an integer nor a pointer of the same type."));
 struct value *
 value_subscript (struct value *array, LONGEST index)
 {
-  struct value *bound;
   int c_style = current_language->c_style_arrays;
   struct type *tarray;
 
@@ -881,7 +880,6 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
       || TYPE_CODE (type2) == TYPE_CODE_DECFLOAT)
     {
-      struct type *v_type;
       int len_v1, len_v2, len_v;
       enum bfd_endian byte_order_v1, byte_order_v2, byte_order_v;
       gdb_byte v1[16], v2[16];

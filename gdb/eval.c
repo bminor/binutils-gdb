@@ -690,7 +690,7 @@ evaluate_subexp_standard (struct type *expect_type,
   struct type *type;
   int nargs;
   struct value **argvec;
-  int upper, lower, retcode;
+  int upper, lower;
   int code;
   int ix;
   long mem_offset;
@@ -1418,7 +1418,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	{
 	  /* Unpack it locally so we can properly handle overload
 	     resolution.  */
-	  struct type *qual_type;
 	  char *name;
 	  int local_tem;
 

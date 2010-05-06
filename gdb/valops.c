@@ -298,7 +298,6 @@ value_cast_structs (struct type *type, struct value *v2)
 struct value *
 value_cast_pointers (struct type *type, struct value *arg2)
 {
-  struct type *type1 = check_typedef (type);
   struct type *type2 = check_typedef (value_type (arg2));
   struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type));
   struct type *t2 = check_typedef (TYPE_TARGET_TYPE (type2));
@@ -695,7 +694,7 @@ dynamic_cast_check_2 (struct type *desired_type,
 struct value *
 value_dynamic_cast (struct type *type, struct value *arg)
 {
-  int unambiguous = 0, full, top, using_enc;
+  int full, top, using_enc;
   struct type *resolved_type = check_typedef (type);
   struct type *arg_type = check_typedef (value_type (arg));
   struct type *class_type, *rtti_type;
@@ -1614,7 +1613,6 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   unsigned int typelength;
   struct value *val;
   struct type *arraytype;
-  CORE_ADDR addr;
 
   /* Validate that the bounds are reasonable and that each of the
      elements have the same size.  */
@@ -2334,8 +2332,6 @@ find_overload_match (struct type **arg_types, int nargs,
   int num_fns = 0;
   struct type *basetype = NULL;
   int boffset;
-  int ix;
-  int static_offset;
   struct cleanup *old_cleanups = NULL;
 
   const char *obj_type_name = NULL;
