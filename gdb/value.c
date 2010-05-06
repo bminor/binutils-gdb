@@ -1481,7 +1481,6 @@ preserve_values (struct objfile *objfile)
   htab_t copied_types;
   struct value_history_chunk *cur;
   struct internalvar *var;
-  struct value *val;
   int i;
 
   /* Create the hash table.  We allocate on the objfile's obstack, since
@@ -2243,7 +2242,6 @@ value_from_double (struct type *type, DOUBLEST num)
   struct value *val = allocate_value (type);
   struct type *base_type = check_typedef (type);
   enum type_code code = TYPE_CODE (base_type);
-  int len = TYPE_LENGTH (base_type);
 
   if (code == TYPE_CODE_FLT)
     {

@@ -1,3 +1,20 @@
+2010-05-06  Michael Snyder  <msnyder@vmware.com>
+
+	* auxv.c (target_auxv_search): Delete unused variable.
+	* blockframe.c (get_frame_block): Delete unused variable.
+	* regcache.c (regcache_cpy): Delete unused variable.
+	(regcache_cpy_no_passthrough): Delete unused variable.
+	* charset.c (wchar_iterate): Delete unused variable.
+	(find_charset_names): Delete unused variable.
+	(_initialize_charset): Delete unused variable.
+	* disasm.c (do_mixed_source_and_assembly): 
+	Delete unused variable.
+	* source.c (set_default_source_symtab_and_line): 
+	Delete unused variable.
+	(set_substitute_path_command): Delete unused variable.
+	* value.c (preserve_values): Delete unused variable.
+	(value_from_double): Delete unused variable.
+
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
 	* psymtab.c (lookup_partial_symbol): Delete unused variable.

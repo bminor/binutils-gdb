@@ -634,7 +634,6 @@ wchar_iterate (struct wchar_iterator *iter,
       size_t orig_in = iter->bytes;
       size_t out_avail = out_request * sizeof (gdb_wchar_t);
       size_t num;
-      gdb_wchar_t result;
 
       size_t r = iconv (iter->desc,
 			(ICONV_CONST char **) &iter->input, &iter->bytes,
@@ -814,7 +813,7 @@ find_charset_names (void)
 	  /* The size of buf is chosen arbitrarily.  */
 	  char buf[1024];
 	  char *start, *r;
-	  int len, keep_going;
+	  int len;
 
 	  r = fgets (buf, sizeof (buf), in);
 	  if (!r)
@@ -909,8 +908,6 @@ default_auto_wide_charset (void)
 void
 _initialize_charset (void)
 {
-  struct cmd_list_element *new_cmd;
-
   /* The first element is always "auto".  */
   VEC_safe_push (char_ptr, charsets, xstrdup ("auto"));
   find_charset_names ();

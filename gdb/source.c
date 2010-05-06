@@ -176,8 +176,6 @@ get_current_source_symtab_and_line (void)
 void
 set_default_source_symtab_and_line (void)
 {
-  struct symtab_and_line cursal;
-
   if (!have_full_symbols () && !have_partial_symbols ())
     error (_("No symbol table is loaded.  Use the \"file\" command."));
 
@@ -1874,7 +1872,6 @@ unset_substitute_path_command (char *args, int from_tty)
 static void
 set_substitute_path_command (char *args, int from_tty)
 {
-  char *from_path, *to_path;
   char **argv;
   struct substitute_path_rule *rule;
   

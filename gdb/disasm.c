@@ -180,7 +180,6 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   int i;
   int out_of_order = 0;
   int next_line = 0;
-  CORE_ADDR pc;
   int num_displayed = 0;
   struct cleanup *ui_out_chain;
   struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
