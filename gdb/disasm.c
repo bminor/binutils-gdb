@@ -429,3 +429,76 @@ gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
     }
   return length;
 }
+
+static void
+do_ui_file_delete (void *arg)
+{
+  ui_file_delete (arg);
+}
+
+/* Return the length in bytes of the instruction at address MEMADDR in
+   debugged memory.  */
+
+int
+gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  static struct ui_file *null_stream = NULL;
+
+  /* Dummy file descriptor for the disassembler.  */
+  if (!null_stream)
+    {
+      null_stream = ui_file_new ();
+      make_final_cleanup (do_ui_file_delete, null_stream);
+    }
+
+  return gdb_print_insn (gdbarch, addr, null_stream, NULL);
+}
+
+/* fprintf-function for gdb_buffered_insn_length.  This function is a
+   nop, we don't want to print anything, we just want to compute the
+   length of the insn.  */
+
+static int ATTRIBUTE_PRINTF (2, 3)
+gdb_buffered_insn_length_fprintf (void *stream, const char *format, ...)
+{
+  return 0;
+}
+
+/* Initialize a struct disassemble_info for gdb_buffered_insn_length.  */
+
+static void
+gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
+				   struct disassemble_info *di,
+				   const gdb_byte *insn, int max_len,
+				   CORE_ADDR addr)
+{
+  init_disassemble_info (di, NULL, gdb_buffered_insn_length_fprintf);
+
+  /* init_disassemble_info installs buffer_read_memory, etc.
+     so we don't need to do that here.
+     The cast is necessary until disassemble_info is const-ified.  */
+  di->buffer = (gdb_byte *) insn;
+  di->buffer_length = max_len;
+  di->buffer_vma = addr;
+
+  di->arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+  di->mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  di->endian = gdbarch_byte_order (gdbarch);
+  di->endian_code = gdbarch_byte_order_for_code (gdbarch);
+
+  disassemble_init_for_target (di);
+}
+
+/* Return the length in bytes of INSN.  MAX_LEN is the size of the
+   buffer containing INSN.  */
+
+int
+gdb_buffered_insn_length (struct gdbarch *gdbarch,
+			  const gdb_byte *insn, int max_len, CORE_ADDR addr)
+{
+  struct disassemble_info di;
+
+  gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr);
+
+  return gdbarch_print_insn (gdbarch, addr, &di);
+}

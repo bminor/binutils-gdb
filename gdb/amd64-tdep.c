@@ -36,7 +36,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "symfile.h"
-
+#include "disasm.h"
 #include "gdb_assert.h"
 
 #include "amd64-tdep.h"
@@ -1022,57 +1022,6 @@ amd64_skip_prefixes (gdb_byte *insn)
   return insn;
 }
 
-/* fprintf-function for amd64_insn_length.
-   This function is a nop, we don't want to print anything, we just want to
-   compute the length of the insn.  */
-
-static int ATTRIBUTE_PRINTF (2, 3)
-amd64_insn_length_fprintf (void *stream, const char *format, ...)
-{
-  return 0;
-}
-
-/* Initialize a struct disassemble_info for amd64_insn_length.	*/
-
-static void
-amd64_insn_length_init_dis (struct gdbarch *gdbarch,
-			    struct disassemble_info *di,
-			    const gdb_byte *insn, int max_len,
-			    CORE_ADDR addr)
-{
-  init_disassemble_info (di, NULL, amd64_insn_length_fprintf);
-
-  /* init_disassemble_info installs buffer_read_memory, etc.
-     so we don't need to do that here.
-     The cast is necessary until disassemble_info is const-ified.  */
-  di->buffer = (gdb_byte *) insn;
-  di->buffer_length = max_len;
-  di->buffer_vma = addr;
-
-  di->arch = gdbarch_bfd_arch_info (gdbarch)->arch;
-  di->mach = gdbarch_bfd_arch_info (gdbarch)->mach;
-  di->endian = gdbarch_byte_order (gdbarch);
-  di->endian_code = gdbarch_byte_order_for_code (gdbarch);
-
-  disassemble_init_for_target (di);
-}
-
-/* Return the length in bytes of INSN.
-   MAX_LEN is the size of the buffer containing INSN.
-   libopcodes currently doesn't export a utility to compute the
-   instruction length, so use the disassembler until then.  */
-
-static int
-amd64_insn_length (struct gdbarch *gdbarch,
-		   const gdb_byte *insn, int max_len, CORE_ADDR addr)
-{
-  struct disassemble_info di;
-
-  amd64_insn_length_init_dis (gdbarch, &di, insn, max_len, addr);
-
-  return gdbarch_print_insn (gdbarch, addr, &di);
-}
-
 /* Return an integer register (other than RSP) that is unused as an input
    operand in INSN.
    In order to not require adding a rex prefix if the insn doesn't already
@@ -1238,7 +1187,8 @@ fixup_riprel (struct gdbarch *gdbarch, struct displaced_step_closure *dsc,
 
   /* Compute the rip-relative address.	*/
   disp = extract_signed_integer (insn, sizeof (int32_t), byte_order);
-  insn_length = amd64_insn_length (gdbarch, dsc->insn_buf, dsc->max_len, from);
+  insn_length = gdb_buffered_insn_length (gdbarch, dsc->insn_buf,
+					  dsc->max_len, from);
   rip_base = from + insn_length;
 
   /* We need a register to hold the address.

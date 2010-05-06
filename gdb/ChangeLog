@@ -1,5 +1,20 @@
 2010-05-06  Pedro Alves  <pedro@codesourcery.com>
 
+	* amd64-tdep.c: Include disasm.h.
+	(amd64_insn_length_fprintf, amd64_insn_length_init_dis)
+	(amd64_insn_length): Moved to disasm.c and renamed.
+	(fixup_riprel): Adjust.
+	* disasm.c (do_ui_file_delete): New.
+	(gdb_insn_length): New.
+	(gdb_buffered_insn_length_fprintf)
+	(gdb_buffered_insn_length_init_dis)
+	(gdb_buffered_insn_length): New, moved from amd64-tdep.c, and
+	renamed.
+	* disasm.h (gdb_insn_length): Declare.
+	(gdb_buffered_insn_length): Declare.
+
+2010-05-06  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (clear_threads_parsing_context): New.
 	(remote_threads_info): Delete unused null_cleanup.  Install a
 	cleanup to clear the threads_parsing_context in case parsing

@@ -37,4 +37,16 @@ extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 extern int gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 			   struct ui_file *stream, int *branch_delay_insns);
 
+/* Return the length in bytes of the instruction at address MEMADDR in
+   debugged memory.  */
+
+extern int gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR memaddr);
+
+/* Return the length in bytes of INSN, originally at MEMADDR.  MAX_LEN
+   is the size of the buffer containing INSN.  */
+
+extern int gdb_buffered_insn_length (struct gdbarch *gdbarch,
+				     const gdb_byte *insn, int max_len,
+				     CORE_ADDR memaddr);
+
 #endif
