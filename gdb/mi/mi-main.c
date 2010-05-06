@@ -358,8 +358,6 @@ mi_cmd_exec_interrupt (char *command, char **argv, int argc)
 static int
 run_one_inferior (struct inferior *inf, void *arg)
 {
-  struct thread_info *tp = 0;
-
   if (inf->pid != 0)
     {
       if (inf->pid != ptid_get_pid (inferior_ptid))
@@ -559,8 +557,6 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 
       if (!VEC_empty (int, data.cores))
 	{
-	  int elt;
-	  int i;
 	  int *b, *e;
 	  struct cleanup *back_to_2 =
 	    make_cleanup_ui_out_list_begin_end (uiout, "cores");
@@ -1702,7 +1698,6 @@ void
 mi_execute_command (char *cmd, int from_tty)
 {
   struct mi_parse *command;
-  struct ui_out *saved_uiout = uiout;
 
   /* This is to handle EOF (^D). We just quit gdb.  */
   /* FIXME: we should call some API function here.  */
@@ -1793,7 +1788,6 @@ static void
 mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
-  int i;
 
   prepare_execute_command ();
 
@@ -2027,7 +2021,6 @@ mi_load_progress (const char *section_name,
 static void 
 timestamp (struct mi_timestamp *tv)
   {
-    long usec;
     gettimeofday (&tv->wallclock, NULL);
 #ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &rusage);
@@ -2036,11 +2029,14 @@ timestamp (struct mi_timestamp *tv)
     tv->stime.tv_sec = rusage.ru_stime.tv_sec;
     tv->stime.tv_usec = rusage.ru_stime.tv_usec;
 #else
-    usec = get_run_time ();
-    tv->utime.tv_sec = usec/1000000L;
-    tv->utime.tv_usec = usec - 1000000L*tv->utime.tv_sec;
-    tv->stime.tv_sec = 0;
-    tv->stime.tv_usec = 0;
+    {
+      long usec = get_run_time ();
+
+      tv->utime.tv_sec = usec/1000000L;
+      tv->utime.tv_usec = usec - 1000000L*tv->utime.tv_sec;
+      tv->stime.tv_sec = 0;
+      tv->stime.tv_usec = 0;
+    }
 #endif
   }
 

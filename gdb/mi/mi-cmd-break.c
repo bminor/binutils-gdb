@@ -66,7 +66,6 @@ void
 mi_cmd_break_insert (char *command, char **argv, int argc)
 {
   char *address = NULL;
-  enum bp_type type = REG_BP;
   int hardware = 0;
   int temp_p = 0;
   int thread = -1;
@@ -77,8 +76,6 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   int tracepoint = 0;
   struct cleanup *back_to;
 
-  struct gdb_exception e;
-  struct gdb_events *old_hooks;
   enum opt
     {
       HARDWARE_OPT, TEMP_OPT, CONDITION_OPT,

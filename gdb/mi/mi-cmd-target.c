@@ -76,7 +76,7 @@ mi_cmd_target_file_delete (char *command, char **argv, int argc)
 {
   int optind = 0;
   char *optarg;
-  const char *remote_file, *local_file;
+  const char *remote_file;
   static struct mi_opt opts[] =
   {
     { 0, 0, 0 }

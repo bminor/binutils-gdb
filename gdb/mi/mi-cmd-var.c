@@ -50,7 +50,6 @@ static void
 print_varobj (struct varobj *var, enum print_values print_values,
 	      int print_expression)
 {
-  struct type *gdb_type;
   char *type;
   int thread_id;
   char *display_hint;
@@ -394,7 +393,6 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   struct varobj *var;  
   VEC(varobj_p) *children;
   struct varobj *child;
-  int numchild;
   enum print_values print_values;
   int ix;
   int from, to;
@@ -712,7 +710,6 @@ static void
 varobj_update_one (struct varobj *var, enum print_values print_values,
 		   int explicit)
 {
-  struct varobj **cc;
   struct cleanup *cleanup = NULL;
   VEC (varobj_update_result) *changes;
   varobj_update_result *r;

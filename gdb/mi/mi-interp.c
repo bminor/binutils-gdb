@@ -169,7 +169,6 @@ mi_interpreter_suspend (void *data)
 static struct gdb_exception
 mi_interpreter_exec (void *data, const char *command)
 {
-  static struct gdb_exception ok;
   char *tmp = alloca (strlen (command) + 1);
   strcpy (tmp, command);
   mi_execute_command_wrapper (tmp);
@@ -188,7 +187,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
   int i;
-  struct interp_procs *procs;
   char *mi_error_message = NULL;
   struct cleanup *old_chain;
 
@@ -375,7 +373,6 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
      using cli interpreter, be sure to use MI uiout for output,
      not the current one.  */
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
-  struct mi_interp *mi = top_level_interpreter_data ();
 
   if (print_frame)
     {

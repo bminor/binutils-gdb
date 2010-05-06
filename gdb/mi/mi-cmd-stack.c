@@ -145,7 +145,6 @@ void
 mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 {
   struct frame_info *frame;
-  enum print_values print_values;
 
   if (argc != 1)
     error (_("mi_cmd_stack_list_locals: Usage: PRINT_VALUES"));
@@ -223,7 +222,6 @@ void
 mi_cmd_stack_list_variables (char *command, char **argv, int argc)
 {
   struct frame_info *frame;
-  enum print_values print_values;
 
   if (argc != 1)
     error (_("Usage: PRINT_VALUES"));
@@ -244,7 +242,6 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
   struct block *block;
   struct symbol *sym;
   struct dict_iterator iter;
-  int nsyms;
   struct cleanup *cleanup_list;
   static struct ui_stream *stb = NULL;
   struct type *type;
