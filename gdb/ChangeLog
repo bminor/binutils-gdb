@@ -1,3 +1,26 @@
+2010-05-05  Michael Snyder  <msnyder@vmware.com>
+
+	* breakpoint.c (validate_commands_for_breakpoint): 
+	Delete unused variables.
+	(insert_catchpoint): Delete unused variable.
+	(update_watchpoint): Delete unused variable.
+	(insert_bp_location): Delete unused variable.
+	(insert_breakpoint_locations): Delete unused variable.
+	(remove_breakpoint_1): Delete unused variable.
+	(software_breakpoint_inserted_here_p): Delete unused variable.
+	(watchpoints_triggered): Delete unused variable.
+	(bpstat_check_watchpoint): Delete unused variable.
+	(bpstat_stop_status): Delete unused variable.
+	(print_one_breakpoint_location): Delete unused variable.
+	(allocate_bp_location): Delete unused variable.
+	(create_breakpoint): Delete unused variable.
+	(watch_command_1): Delete unused variable.
+	(catch_exception_command_1): Delete unused variable.
+	(catch_ada_exception_command): Delete unused variable.
+	(delete_breakpoint): Delete unused variable.
+	(breakpoint_re_set_one): Delete unused variable.
+	(do_enable_breakpoint): Delete unused variable.
+
 2010-05-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* amd64-tdep.c: Include disasm.h.

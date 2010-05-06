@@ -850,7 +850,6 @@ validate_commands_for_breakpoint (struct breakpoint *b,
       struct command_line *while_stepping = 0;
       for (c = commands; c; c = c->next)
 	{
-	  char *l = c->line;
 	  if (c->control_type == while_stepping_control)
 	    {
 	      if (b->type == bp_fast_tracepoint)
@@ -870,7 +869,6 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 	  c2 = while_stepping->body_list[0];
 	  for (; c2; c2 = c2->next)
 	    {
-	      char *l = c2->line;
 	      if (c2->control_type == while_stepping_control)
 		error (_("The 'while-stepping' command cannot be nested"));
 	    }
@@ -1165,7 +1163,6 @@ static void
 insert_catchpoint (struct ui_out *uo, void *args)
 {
   struct breakpoint *b = (struct breakpoint *) args;
-  int val = -1;
 
   gdb_assert (b->type == bp_catchpoint);
   gdb_assert (b->ops != NULL && b->ops->insert != NULL);
@@ -1342,9 +1339,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
 {
   int within_current_scope;
   struct frame_id saved_frame_id;
-  struct bp_location *loc;
   int frame_saved;
-  bpstat bs;
 
   /* If this is a local watchpoint, we only want to check if the
      watchpoint frame is in scope if the current thread is the thread
@@ -1645,7 +1640,6 @@ insert_bp_location (struct bp_location *bpt,
 	    {
 	      if (automatic_hardware_breakpoints)
 		{
-		  int changed = 0;
 		  enum bp_loc_type new_type;
 		  
 		  if (mr->attrib.mode != MEM_RW)
@@ -1936,9 +1930,6 @@ insert_breakpoint_locations (void)
 
   ALL_BP_LOCATIONS (b, bp_tmp)
     {
-      struct thread_info *tp;
-      CORE_ADDR last_addr;
-
       if (!should_be_inserted (b) || b->inserted)
 	continue;
 
@@ -2393,7 +2384,6 @@ static int
 remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
 {
   int val;
-  struct cleanup *old_chain;
 
   if (b->owner->enable_state == bp_permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
@@ -2480,9 +2470,6 @@ remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
     }
   else if (b->loc_type == bp_loc_hardware_watchpoint)
     {
-      struct value *v;
-      struct value *n;
-
       b->inserted = (is == mark_inserted);
       val = target_remove_watchpoint (b->address, b->length, 
 				      b->watchpoint_type);
@@ -2755,7 +2742,6 @@ int
 software_breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
   struct bp_location *bpt, **bptp_tmp;
-  int any_breakpoint_here = 0;
 
   ALL_BP_LOCATIONS (bpt, bptp_tmp)
     {
@@ -3523,7 +3509,6 @@ watchpoints_triggered (struct target_waitstatus *ws)
     if (is_hardware_watchpoint (b))
       {
 	struct bp_location *loc;
-	struct value *v;
 
 	b->watchpoint_triggered = watch_triggered_no;
 	for (loc = b->loc; loc; loc = loc->next)
@@ -3756,8 +3741,6 @@ bpstat_check_watchpoint (bpstat bs)
 
   if (is_watchpoint (b))
     {
-      CORE_ADDR addr;
-      struct value *v;
       int must_check_value = 0;
       
       if (b->type == bp_watchpoint)
@@ -4032,7 +4015,7 @@ bpstat_stop_status (struct address_space *aspace,
 		    CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b = NULL;
-  struct bp_location *bl, **blp_tmp;
+  struct bp_location *bl;
   struct bp_location *loc;
   /* Root of the chain of bpstat's */
   struct bpstats root_bs[1];
@@ -4493,7 +4476,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 			       int allflag)
 {
   struct command_line *l;
-  struct symbol *sym;
   struct ep_type_description
     {
       enum bptype type;
@@ -5325,7 +5307,7 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
 static struct bp_location *
 allocate_bp_location (struct breakpoint *bpt)
 {
-  struct bp_location *loc, *loc_p;
+  struct bp_location *loc;
 
   loc = xmalloc (sizeof (struct bp_location));
   memset (loc, 0, sizeof (*loc));
@@ -7328,7 +7310,6 @@ create_breakpoint (struct gdbarch *gdbarch,
   struct symtabs_and_lines sals;
   struct symtab_and_line pending_sal;
   char *copy_arg;
-  char *err_msg;
   char *addr_start = arg;
   char **addr_string;
   struct cleanup *old_chain;
@@ -7469,7 +7450,6 @@ create_breakpoint (struct gdbarch *gdbarch,
     }
   else
     {
-      struct symtab_and_line sal = {0};
       struct breakpoint *b;
 
       make_cleanup (xfree, copy_arg);
@@ -7700,7 +7680,6 @@ stopat_command (char *arg, int from_tty)
 static void
 watch_command_1 (char *arg, int accessflag, int from_tty)
 {
-  struct gdbarch *gdbarch = get_current_arch ();
   struct breakpoint *b, *scope_breakpoint = NULL;
   struct expression *exp;
   struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
@@ -8401,7 +8380,6 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
 			   int tempflag, int from_tty)
 {
   char *cond_string = NULL;
-  struct symtab_and_line *sal = NULL;
 
   if (!arg)
     arg = "";
@@ -8501,7 +8479,6 @@ catch_ada_exception_command (char *arg, int from_tty,
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   struct symtab_and_line sal;
-  enum bptype type;
   char *addr_string = NULL;
   char *exp_string = NULL;
   char *cond_string = NULL;
@@ -9238,7 +9215,6 @@ void
 delete_breakpoint (struct breakpoint *bpt)
 {
   struct breakpoint *b;
-  struct bp_location *loc, *next;
 
   gdb_assert (bpt != NULL);
 
@@ -9554,14 +9530,11 @@ breakpoint_re_set_one (void *bint)
 {
   /* get past catch_errs */
   struct breakpoint *b = (struct breakpoint *) bint;
-  struct value *mark;
-  int i;
   int not_found = 0;
   int *not_found_ptr = &not_found;
   struct symtabs_and_lines sals = {0};
   struct symtabs_and_lines expanded = {0};
   char *s;
-  enum enable_state save_enable;
   struct gdb_exception e;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
@@ -10021,8 +9994,7 @@ disable_command (char *args, int from_tty)
 static void
 do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 {
-  int target_resources_ok, other_type_used;
-  struct value *mark;
+  int target_resources_ok;
 
   if (bpt->type == bp_hardware_breakpoint)
     {
