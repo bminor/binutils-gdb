@@ -1209,7 +1209,6 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   struct symbol *sym;
   char *copy;
   struct symbol *sym_class;
-  struct symbol **sym_arr;
   struct type *t;
   char *saved_java_argptr = NULL;
 

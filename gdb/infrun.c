@@ -650,7 +650,6 @@ show_follow_exec_mode_string (struct ui_file *file, int from_tty,
 static void
 follow_exec (ptid_t pid, char *execd_pathname)
 {
-  struct target_ops *tgt;
   struct thread_info *th = inferior_thread ();
   struct inferior *inf = current_inferior ();
 
@@ -726,7 +725,6 @@ follow_exec (ptid_t pid, char *execd_pathname)
   if (follow_exec_mode_string == follow_exec_mode_new)
     {
       struct program_space *pspace;
-      struct inferior *new_inf;
 
       /* The user wants to keep the old inferior and program spaces
 	 around.  Create a new fresh one, and switch to it.  */
@@ -4884,7 +4882,7 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
 				    struct execution_control_state *ecs)
 {
   struct symtab *s;
-  struct symtab_and_line stop_func_sal, sr_sal;
+  struct symtab_and_line stop_func_sal;
 
   s = find_pc_symtab (stop_pc);
   if (s && s->language != language_asm)
@@ -6438,7 +6436,6 @@ _initialize_infrun (void)
 {
   int i;
   int numsigs;
-  struct cmd_list_element *c;
 
   add_info ("signals", signals_info, _("\
 What debugger does when program gets various signals.\n\

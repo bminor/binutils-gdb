@@ -865,9 +865,6 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
     numargs = 0;
   else
     {
-      char *addr_string;
-      struct cleanup *tmp_cleanup;
-
       numargs = 0;
       while (1)
 	{
@@ -994,7 +991,7 @@ frame_info (char *addr_exp, int from_tty)
   struct symbol *func;
   struct symtab *s;
   struct frame_info *calling_frame_info;
-  int i, count, numregs;
+  int numregs;
   char *funname = 0;
   enum language funlang = language_unknown;
   const char *pc_regname;
@@ -1314,8 +1311,6 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 
   if (info_verbose)
     {
-      struct partial_symtab *ps;
-
       /* Read in symbols for all of the frames.  Need to do this in a
          separate pass so that "Reading in symbols for xxx" messages
          don't screw up the appearance of the backtrace.  Also if
@@ -1693,8 +1688,6 @@ locals_info (char *args, int from_tty)
 static void
 catch_info (char *ignore, int from_tty)
 {
-  struct symtab_and_line *sal;
-
   /* Assume g++ compiled code; old GDB 4.16 behaviour.  */
   print_frame_label_vars (get_selected_frame (_("No frame selected.")),
                           0, gdb_stdout);

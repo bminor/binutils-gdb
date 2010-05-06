@@ -1,5 +1,19 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* linespec.c (decode_compound): Delete unused variable.
+	* dictionary.c (iterator_next_hashed): Delete unused variable.
+	* infcall.c (call_function_by_hand): Delete unused variable.
+	* infcmd.c (step_1): Delete unused variable.
+	(registers_info): Delete unused variable.
+	(attach_command): Delete unused variable.
+	* infrun.c (follow_exec): Delete unused variable.
+	(handle_step_into_function_backwards): Delete unused variable.
+	(_initialize_infrun): Delete unused variable.
+	* stack.c (parse_frame_specification_1): Delete unused variable.
+	(frame_info): Delete unused variable.
+	(backtrace_command_1): Delete unused variable.
+	(catch_info): Delete unused variable.
+
 	* eval.c (evaluate_subexp_standard): Delete unused variable.
 	* valops.c (value_cast_pointers): Delete unused variable.
 	(value_dynamic_cast): Delete unused variable.

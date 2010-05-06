@@ -578,7 +578,6 @@ iterator_first_hashed (const struct dictionary *dict,
 static struct symbol *
 iterator_next_hashed (struct dict_iterator *iterator)
 {
-  const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
   struct symbol *next;
 
   next = DICT_ITERATOR_CURRENT (iterator)->hash_next;

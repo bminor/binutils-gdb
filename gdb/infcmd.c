@@ -832,7 +832,6 @@ static void
 step_1 (int skip_subroutines, int single_inst, char *count_string)
 {
   int count = 1;
-  struct frame_info *frame;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   int async_exec = 0;
   int thread = -1;
@@ -1994,8 +1993,6 @@ registers_info (char *addr_exp, int fpregs)
 {
   struct frame_info *frame;
   struct gdbarch *gdbarch;
-  int regnum, numregs;
-  char *end;
 
   if (!target_has_registers)
     error (_("The program has no registers now."));
@@ -2356,8 +2353,6 @@ attach_command_continuation_free_args (void *args)
 void
 attach_command (char *args, int from_tty)
 {
-  char *exec_file;
-  char *full_exec_path = NULL;
   int async_exec = 0;
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
