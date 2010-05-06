@@ -2482,6 +2482,21 @@ const struct gdb_xml_element threads_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
+/* Discard the contents of the constructed thread info context.  */
+
+static void
+clear_threads_parsing_context (void *p)
+{
+  struct threads_parsing_context *context = p;
+  int i;
+  struct thread_item *item;
+
+  for (i = 0; VEC_iterate (thread_item_t, context->items, i, item); ++i)
+    xfree (item->extra);
+
+  VEC_free (thread_item_t, context->items);
+}
+
 #endif
 
 /*
@@ -2512,14 +2527,19 @@ remote_threads_info (struct target_ops *ops)
 	{
 	  struct gdb_xml_parser *parser;
 	  struct threads_parsing_context context;
-	  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+	  struct cleanup *clear_parsing_context;
 
 	  context.items = 0;
+	  /* Note: this parser cleanup is already guarded by BACK_TO
+	     above.  */
 	  parser = gdb_xml_create_parser_and_cleanup (_("threads"),
 						      threads_elements,
 						      &context);
 
 	  gdb_xml_use_dtd (parser, "threads.dtd");
+
+	  clear_parsing_context
+	    = make_cleanup (clear_threads_parsing_context, &context);
 
 	  if (gdb_xml_parse (parser, xml) == 0)
 	    {
@@ -2542,13 +2562,12 @@ remote_threads_info (struct target_ops *ops)
 		      info = demand_private_info (item->ptid);
 		      info->core = item->core;
 		      info->extra = item->extra;
-		      item->extra = 0;
+		      item->extra = NULL;
 		    }
-		  xfree (item->extra);
 		}
 	    }
 
-	  VEC_free (thread_item_t, context.items);
+	  do_cleanups (clear_parsing_context);
 	}
 
       do_cleanups (back_to);

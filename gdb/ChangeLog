@@ -1,3 +1,10 @@
+2010-05-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (clear_threads_parsing_context): New.
+	(remote_threads_info): Delete unused null_cleanup.  Install a
+	cleanup to clear the threads_parsing_context in case parsing
+	throws.
+
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
 	* c-exp.y (parse_string_or_char): Delete unused variable.
