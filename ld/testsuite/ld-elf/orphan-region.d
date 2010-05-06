@@ -1,5 +1,5 @@
 #source: orphan-region.s
-#ld: -T orphan-region.ld
+#ld: -T orphan-region.ld -N
 #readelf: -S -l --wide
 
 #...
@@ -9,7 +9,7 @@
 #...
 Program Headers:
   Type.*
-  LOAD[ \t]+0x[0-9a-f]+ 0x0*40000000 0x0*40000000 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x[0-9a-f]+
+  LOAD[ \t]+0x[0-9a-f]+ 0x0*40000000 0x0*40000000 0x[0-9a-f]+ 0x[0-9a-f]+ RWE 0x[0-9a-f]+
 
  Section to Segment mapping:
   Segment Sections...

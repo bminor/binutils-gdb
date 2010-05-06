@@ -1,3 +1,7 @@
+2010-05-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-elf/orphan-region.d: Use ld -N.
+
 2010-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11542
