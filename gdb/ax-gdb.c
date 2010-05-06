@@ -1567,7 +1567,6 @@ gen_struct_elt_for_reference (struct expression *exp,
 {
   struct type *t = type;
   int i;
-  struct value *v, *result;
 
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)

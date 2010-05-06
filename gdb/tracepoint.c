@@ -382,10 +382,9 @@ trace_variable_command (char *args, int from_tty)
 void
 delete_trace_variable_command (char *args, int from_tty)
 {
-  int i, ix;
+  int ix;
   char **argv;
   struct cleanup *back_to;
-  struct trace_state_variable *tsv;
 
   if (args == NULL)
     {
@@ -398,12 +397,12 @@ delete_trace_variable_command (char *args, int from_tty)
   argv = gdb_buildargv (args);
   back_to = make_cleanup_freeargv (argv);
 
-  for (i = 0; argv[i] != NULL; i++)
+  for (ix = 0; argv[ix] != NULL; ix++)
     {
-      if (*argv[i] == '$')
-	delete_trace_state_variable (argv[i] + 1);
+      if (*argv[ix] == '$')
+	delete_trace_state_variable (argv[ix] + 1);
       else
-	warning (_("Name \"%s\" not prefixed with '$', ignoring"), argv[i]);
+	warning (_("Name \"%s\" not prefixed with '$', ignoring"), argv[ix]);
     }
 
   do_cleanups (back_to);
@@ -1226,7 +1225,6 @@ encode_actions_1 (struct command_line *action,
 {
   char *action_exp;
   struct expression *exp = NULL;
-  struct command_line *actions;
   int i;
   struct value *tempval;
   struct cmd_list_element *cmd;
@@ -1370,7 +1368,6 @@ encode_actions_1 (struct command_line *action,
 		action_exp++;
 
 		{
-		  unsigned long addr, len;
 		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
 
@@ -1401,8 +1398,8 @@ encode_actions_1 (struct command_line *action,
 	     here.  */
 	  gdb_assert (stepping_list);
 
-	  encode_actions_1 (action->body_list[0], t, tloc, frame_reg, frame_offset,
-			    stepping_list, NULL);
+	  encode_actions_1 (action->body_list[0], t, tloc, frame_reg,
+			    frame_offset, stepping_list, NULL);
 	}
       else
 	error (_("Invalid tracepoint command '%s'"), action->line);
@@ -1488,7 +1485,6 @@ add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
 void
 start_tracing (void)
 {
-  char buf[2048];
   VEC(breakpoint_p) *tp_vec = NULL;
   int ix;
   struct breakpoint *t;
@@ -1715,7 +1711,6 @@ trace_status_mi (int on_stop)
 {
   struct trace_status *ts = current_trace_status ();
   int status;
-  char *string_status;
 
   status = target_get_trace_status (ts);
 
@@ -1850,7 +1845,6 @@ tfind_1 (enum trace_find_type type, int num,
 {
   int target_frameno = -1, target_tracept = -1;
   struct frame_id old_frame_id = null_frame_id;
-  char *reply;
   struct breakpoint *tp;
 
   /* Only try to get the current stack frame if we have a chance of
@@ -2049,7 +2043,6 @@ static void
 trace_find_pc_command (char *args, int from_tty)
 {
   CORE_ADDR pc;
-  char tmp[40];
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
     error ("May not look at trace frames while trace is running.");
@@ -2107,7 +2100,6 @@ trace_find_line_command (char *args, int from_tty)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct cleanup *old_chain;
-  char   startpc_str[40], endpc_str[40];
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
     error ("May not look at trace frames while trace is running.");
@@ -2171,7 +2163,6 @@ static void
 trace_find_range_command (char *args, int from_tty)
 {
   static CORE_ADDR start, stop;
-  char start_str[40], stop_str[40];
   char *tmp;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
@@ -2205,7 +2196,6 @@ static void
 trace_find_outside_command (char *args, int from_tty)
 {
   CORE_ADDR start, stop;
-  char start_str[40], stop_str[40];
   char *tmp;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
@@ -3438,9 +3428,9 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
   char *p;
   char piece;
   ULONGEST num, addr, step, pass, orig_size, xlen, start;
-  int enabled, i, end;
+  int enabled, end;
   enum bptype type;
-  char *cond, *srctype, *src, *buf;
+  char *cond, *srctype, *buf;
   struct uploaded_tp *utp = NULL;
 
   p = line;
@@ -3727,7 +3717,7 @@ tfile_fetch_registers (struct target_ops *ops,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   char block_type;
-  int i, pos, offset, regn, regsize, gotten, pc_regno;
+  int pos, offset, regn, regsize, gotten, pc_regno;
   unsigned short mlen;
   char *regs;
 
