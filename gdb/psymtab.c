@@ -427,7 +427,6 @@ struct partial_symbol *
 lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		       int global, domain_enum domain)
 {
-  struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
   struct partial_symbol **top, **real_top, **bottom, **center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
@@ -563,7 +562,6 @@ relocate_psymtabs (struct objfile *objfile,
 static struct symtab *
 find_last_source_symtab_from_partial (struct objfile *ofp)
 {
-  struct symtab *result;
   struct partial_symtab *ps;
   struct partial_symtab *cs_pst = 0;
 

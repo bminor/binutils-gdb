@@ -1,5 +1,22 @@
 2010-05-05  Michael Snyder  <msnyder@vmware.com>
 
+	* psymtab.c (lookup_partial_symbol): Delete unused variable.
+	(find_last_source_symtab_from_partial): Delete unused variable.
+	* symfile.c (place_section): Delete unused variable.
+	(default_symfile_offsets): Delete unused variable.
+	(get_debug_link_info): Delete unused variable.
+	(find_separate_debug_file_by_debuglink): Delete unused variable.
+	(add_symbol_file_command): Delete unused variable.
+	(symfile_find_segment_sections): Delete unused variable.
+	* symmisc.c (free_symtab): Delete unused variable.
+	(dump_symtab_1): Delete unused variable.
+	* symtab.c (lookup_symbil_aux_quick): Delete unused variable.
+	(find_pc_sect_symtab): Delete unused variable.
+	(skip_prologue_using_lineinfo): Delete unused variable.
+	(sources_info): Delete unused variable.
+	(completion_list_add_name): Delete unused variable.
+	(expand_line_sal): Delete unused variable.
+
 	* breakpoint.c (validate_commands_for_breakpoint): 
 	Delete unused variables.
 	(insert_catchpoint): Delete unused variable.

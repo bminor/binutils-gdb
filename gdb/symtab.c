@@ -1295,7 +1295,6 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
   struct symtab *symtab;
   struct blockvector *bv;
   const struct block *block;
-  struct partial_symtab *ps;
   struct symbol *sym;
 
   if (!objfile->sf)
@@ -1661,7 +1660,6 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
   struct blockvector *bv;
   struct symtab *s = NULL;
   struct symtab *best_s = NULL;
-  struct partial_symtab *ps;
   struct objfile *objfile;
   struct program_space *pspace;
   CORE_ADDR distance = 0;
@@ -2273,9 +2271,7 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
 {
   CORE_ADDR func_start, func_end;
   struct linetable *l;
-  int ind, i, len;
-  int best_lineno = 0;
-  CORE_ADDR best_pc = func_addr;
+  int i;
 
   /* Give up if this symbol has no lineinfo table.  */
   l = LINETABLE (symtab);
@@ -2708,7 +2704,6 @@ static void
 sources_info (char *ignore, int from_tty)
 {
   struct symtab *s;
-  struct partial_symtab *ps;
   struct objfile *objfile;
   int first;
 
@@ -3367,7 +3362,6 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
 			  char *text, char *word)
 {
   int newsize;
-  int i;
 
   /* clip symbols that cannot match */
 
@@ -4175,7 +4169,6 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
       if (prologue_sal.symtab->language != language_asm)
 	{
 	  struct linetable *linetable = LINETABLE (prologue_sal.symtab);
-	  int exact;
 	  int idx = 0;
 
 	  /* Skip any earlier lines, and any end-of-sequence marker
@@ -4435,11 +4428,9 @@ append_exact_match_to_sals (char *filename, char *fullname, int lineno,
 struct symtabs_and_lines
 expand_line_sal (struct symtab_and_line sal)
 {
-  struct symtabs_and_lines ret, this_line;
+  struct symtabs_and_lines ret;
   int i, j;
   struct objfile *objfile;
-  struct partial_symtab *psymtab;
-  struct symtab *symtab;
   int lineno;
   int deleted = 0;
   struct block **blocks = NULL;
@@ -4519,9 +4510,6 @@ expand_line_sal (struct symtab_and_line sal)
   blocks = alloca (ret.nelts * sizeof (struct block *));
   for (i = 0; i < ret.nelts; ++i)
     {
-      struct blockvector *bl;
-      struct block *b;
-
       set_current_program_space (ret.sals[i].pspace);
 
       filter[i] = 1;
