@@ -1,7 +1,3 @@
-2010-05-06  Maciej W. Rozycki <macro@codesourcery.com>
-
-	* cpu-mips.c (arch_info_struct): Fixup XLR entry.
-
 2010-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
