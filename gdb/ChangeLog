@@ -1,5 +1,16 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* osabi.c (_initialize_gdb_osabi): Delete unused variable.
+	* memattr.c (mem_delete): Delete unused variable.
+	(invalidate_target_mem_regions): Delete unused variable.
+	* mem-break.c (default_memory_insert_breakpoint):
+	Delete unused variable.
+	* target.c (target_get_osdata): Delete unused variable.
+	* parse.c (length_of_subexp): Delete unused variable.
+	(prefixify_subexp): Delete unused variable.
+	(exp_iterate): Delete unused variable.
+	* reverse.c (delete_bookmark_command): Delete unused variable.
+
 	* macrocmd.c (_initialize_macrocmd): Delete unused variable.
 	* macroexp.c (gather_arguments): Delete unused variable.
 	(substitute_args): Delete unused variable.

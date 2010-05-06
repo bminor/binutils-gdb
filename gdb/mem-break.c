@@ -46,7 +46,6 @@ default_memory_insert_breakpoint (struct gdbarch *gdbarch,
 {
   int val;
   const unsigned char *bp;
-  int bplen;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = gdbarch_breakpoint_from_pc

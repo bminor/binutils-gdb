@@ -213,7 +213,7 @@ delete_all_bookmarks (void)
 static void
 delete_bookmark_command (char *args, int from_tty)
 {
-  struct bookmark *b, *b1;
+  struct bookmark *b;
   unsigned long num;
 
   if (bookmark_chain == NULL)

@@ -2575,7 +2575,6 @@ target_supports_non_stop (void)
 char *
 target_get_osdata (const char *type)
 {
-  char *document;
   struct target_ops *t;
 
   /* If we're already connected to something that can get us OS

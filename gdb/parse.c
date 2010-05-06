@@ -776,7 +776,7 @@ prefixify_expression (struct expression *expr)
 int
 length_of_subexp (struct expression *expr, int endpos)
 {
-  int oplen, args, i;
+  int oplen, args;
 
   operator_length (expr, endpos, &oplen, &args);
 
@@ -984,7 +984,6 @@ prefixify_subexp (struct expression *inexpr,
   int args;
   int i;
   int *arglens;
-  enum exp_opcode opcode;
   int result = -1;
 
   operator_length (inexpr, inend, &oplen, &args);
@@ -1472,7 +1471,6 @@ exp_iterate (struct expression *exp,
 	     void *data)
 {
   int endpos;
-  const union exp_element *const elts = exp->elts;
 
   for (endpos = exp->nelts; endpos > 0; )
     {
