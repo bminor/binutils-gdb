@@ -859,7 +859,6 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
     {
       struct section_addr_info *objfile_addrs;
       struct section_offsets *new_debug_offsets;
-      int new_debug_num_sections;
       struct cleanup *my_cleanups;
 
       objfile_addrs = build_section_addr_info_from_objfile (objfile);
@@ -872,8 +871,8 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 
       gdb_assert (debug_objfile->num_sections
 		  == bfd_count_sections (debug_objfile->obfd));
-      new_debug_offsets = xmalloc (SIZEOF_N_SECTION_OFFSETS
-						 (debug_objfile->num_sections));
+      new_debug_offsets = 
+	xmalloc (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections));
       make_cleanup (xfree, new_debug_offsets);
       relative_addr_info_to_section_offsets (new_debug_offsets,
 					     debug_objfile->num_sections,

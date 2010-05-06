@@ -1,5 +1,12 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* objfiles.c (objfile_relocate): Delete unused variable.
+	* maint.c (_initialize_maint_cmds): Delete unused variable.
+	* demangle.c (_initialize_demangler): Delete unused variable.
+	* corefile.c (reopen_exec_file): Delete unused variable.
+	* dwarf2expr.c (dwarf2_read_address): Delete unused variable.
+	* dwarf2-frame.c (decode_frame_entry): Delete unused variable.
+
 	* osabi.c (_initialize_gdb_osabi): Delete unused variable.
 	* memattr.c (mem_delete): Delete unused variable.
 	(invalidate_target_mem_regions): Delete unused variable.

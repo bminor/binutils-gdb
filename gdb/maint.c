@@ -736,8 +736,6 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
 void
 _initialize_maint_cmds (void)
 {
-  struct cmd_list_element *tmpcmd;
-
   add_prefix_cmd ("maintenance", class_maintenance, maintenance_command, _("\
 Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\

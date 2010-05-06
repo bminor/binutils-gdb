@@ -177,7 +177,6 @@ is_cplus_marker (int c)
 void
 _initialize_demangler (void)
 {
-  struct cmd_list_element *set, *show;
   int i, ndems;
 
   /* Fill the demangling_style_names[] array.  */

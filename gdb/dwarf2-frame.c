@@ -1921,7 +1921,6 @@ decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
 {
   enum { NONE, ALIGN4, ALIGN8, FAIL } workaround = NONE;
   gdb_byte *ret;
-  const char *msg;
   ptrdiff_t start_offset;
 
   while (1)

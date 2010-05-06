@@ -250,7 +250,6 @@ dwarf2_read_address (struct gdbarch *gdbarch, gdb_byte *buf,
 		     gdb_byte *buf_end, int addr_size)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  CORE_ADDR result;
 
   if (buf_end - buf < addr_size)
     error (_("dwarf2_read_address: Corrupted DWARF expression."));

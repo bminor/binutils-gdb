@@ -152,7 +152,6 @@ reopen_exec_file (void)
   char *filename;
   int res;
   struct stat st;
-  long mtime;
   struct cleanup *cleanups;
 
   /* Don't do anything if there isn't an exec file. */
