@@ -1708,7 +1708,7 @@ static int
 parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
 		      int *host_chars)
 {
-  int quote, i;
+  int quote;
   enum c_string_type type;
 
   /* Build the gdb internal form of the input string in tempbuf.  Note
@@ -2437,7 +2437,6 @@ static int
 yylex (void)
 {
   token_and_value current;
-  char *name;
   int first_was_coloncolon, last_was_coloncolon, first_iter;
 
   if (popping && !VEC_empty (token_and_value, token_fifo))

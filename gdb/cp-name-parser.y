@@ -1541,7 +1541,7 @@ yylex (void)
 {
   int c;
   int namelen;
-  const char *tokstart, *tokptr;
+  const char *tokstart;
 
  retry:
   prev_lexptr = lexptr;

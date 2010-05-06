@@ -547,7 +547,6 @@ CastExpression:
 		  write_exp_elt_opcode (UNOP_CAST); }
 |	'(' Expression ')' UnaryExpressionNotPlusMinus
 		{
-		  int exp_size = expout_ptr;
 		  int last_exp_size = length_of_subexp(expout, expout_ptr);
 		  struct type *type;
 		  int i;
@@ -1358,7 +1357,6 @@ push_expression_name (struct stoken name)
 {
   char *tmp;
   struct type *typ;
-  char *ptr;
   int i;
 
   for (i = 0;  i < name.length;  i++)

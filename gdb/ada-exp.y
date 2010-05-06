@@ -1091,7 +1091,6 @@ find_primitive_type (char *name)
     {
       /* Check to see if we have a regular definition of this
 	 type that just didn't happen to have been read yet.  */
-      int ntypes;
       struct symbol *sym;
       char *expanded_name = 
 	(char *) alloca (strlen (name) + sizeof ("standard__"));
@@ -1366,7 +1365,6 @@ write_var_or_type (struct block *block, struct stoken name0)
 	    }
 	  else if (nsyms == 0) 
 	    {
-	      int i;
 	      struct minimal_symbol *msym 
 		= ada_lookup_simple_minsym (encoded_name);
 	      if (msym != NULL)

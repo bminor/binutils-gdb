@@ -1,3 +1,14 @@
+2010-05-05  Michael Snyder  <msnyder@vmware.com>
+
+	* c-exp.y (parse_string_or_char): Delete unused variable.
+	(c_lex): Delete unused variable.
+	* cp-name-parser.y (cpname_lex): Delete unused variable.
+	* ada-exp.y (find_primitive_type): Delete unused variable.
+	(write_var_or_type): Delete unused variable.
+	* jv-exp.y (java_parse): Delete unused variable.
+	(push_expression_name): Delete unused variable.
+	* p-exp.y (pascal_lex): Delete unused variable.
+
 2010-05-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_threads_info): Really revert previous previous
