@@ -3992,6 +3992,7 @@ init_dwarf_regnames (unsigned int e_machine)
       break;
 
     case EM_X86_64:
+    case EM_L1OM:
       dwarf_regnames = dwarf_regnames_x86_64;
       dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_x86_64);
       break;

@@ -4213,6 +4213,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		case EM_386:
 		case EM_486:
 		case EM_X86_64:
+		case EM_L1OM:
 		case EM_OLD_SPARCV9:
 		case EM_SPARC32PLUS:
 		case EM_SPARCV9:
@@ -4633,6 +4634,7 @@ process_section_headers (FILE * file)
 		case EM_386:
 		case EM_486:
 		case EM_X86_64:
+		case EM_L1OM:
 		case EM_OLD_SPARCV9:
 		case EM_SPARC32PLUS:
 		case EM_SPARCV9:

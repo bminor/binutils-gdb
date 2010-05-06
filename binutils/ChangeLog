@@ -1,3 +1,9 @@
+2010-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (init_dwarf_regnames): Handle EM_L1OM.
+	* readelf.c (get_elf_section_flags): Likewise.
+	(process_section_headers): Likewise.
+
 2010-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
