@@ -1288,6 +1288,40 @@ info_solthreads (char *args, int from_tty)
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
 }
 
+/* Callback routine used to find a thread based on the TID part of
+   its PTID.  */
+
+static int
+thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
+{
+  long *tid = (long *) data;
+
+  if (ptid_get_tid (thread->ptid) == *tid)
+    return 1;
+
+  return 0;
+}
+
+static ptid_t
+sol_get_ada_task_ptid (long lwp, long thread)
+{
+  struct thread_info *thread_info =
+    iterate_over_threads (thread_db_find_thread_from_tid, &thread);
+
+  if (thread_info == NULL)
+    {
+      /* The list of threads is probably not up to date.  Find any
+         thread that is missing from the list, and try again.  */
+      sol_find_new_threads (&current_target);
+      thread_info = iterate_over_threads (thread_db_find_thread_from_tid,
+                                          &thread);
+    }
+
+  gdb_assert (thread_info != NULL);
+
+  return (thread_info->ptid);
+}
+
 static void
 init_sol_thread_ops (void)
 {
@@ -1305,6 +1339,7 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_pid_to_str = solaris_pid_to_str;
   sol_thread_ops.to_find_new_threads = sol_find_new_threads;
   sol_thread_ops.to_stratum = thread_stratum;
+  sol_thread_ops.to_get_ada_task_ptid = sol_get_ada_task_ptid;
   sol_thread_ops.to_magic = OPS_MAGIC;
 }
 

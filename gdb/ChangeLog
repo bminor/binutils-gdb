@@ -30,6 +30,13 @@
 	* fbsd-nat.c (fbsd_make_corefile_notes): Add cast to NULL used as
 	sentinel.
 
+2010-05-07  Joel Brobecker  <brobecker@adacore.com>
+
+	Implement task switching on solaris targets.
+	* sol-thread.c (thread_db_find_thread_from_tid)
+	(sol_get_ada_task_ptid): New functions.
+	(init_sol_thread_ops): Set sol_thread_ops.to_get_ada_task_ptid.
+
 2010-05-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_query_supported_append): Use reconcat.
