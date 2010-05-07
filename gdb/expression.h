@@ -347,6 +347,10 @@ enum exp_opcode
        Then comes another OP_DECFLOAT.  */
     OP_DECFLOAT,
 
+    /* OP_ADL_FUNC specifies that the function is to be looked up in an
+       Argument Dependent manner (Koenig lookup).  */
+    OP_ADL_FUNC,
+
      /* First extension operator.  Individual language modules define
 	extra operators in *.inc include files below always starting with
 	numbering at OP_EXTENDED0:

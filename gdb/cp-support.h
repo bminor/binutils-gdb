@@ -110,6 +110,10 @@ extern char *cp_remove_params (const char *demangled_name);
 extern struct symbol **make_symbol_overload_list (const char *,
 						  const char *);
 
+extern struct symbol **make_symbol_overload_list_adl (struct type **arg_types,
+                                                      int nargs,
+                                                      const char *func_name);
+
 extern struct type *cp_lookup_rtti_type (const char *name,
 					 struct block *block);
 

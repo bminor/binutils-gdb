@@ -731,6 +731,7 @@ evaluate_subexp_standard (struct type *expect_type,
       return value_from_decfloat (exp->elts[pc + 1].type,
 				  exp->elts[pc + 2].decfloatconst);
 
+    case OP_ADL_FUNC:
     case OP_VAR_VALUE:
       (*pos) += 3;
       if (noside == EVAL_SKIP)
@@ -1452,6 +1453,17 @@ evaluate_subexp_standard (struct type *expect_type,
 	      tem = 2;
 	    }
 	}
+      else if (op == OP_ADL_FUNC)
+        {
+          /* Save the function position and move pos so that the arguments
+             can be evaluated.  */
+          int func_name_len;
+          save_pos1 = *pos;
+          tem = 1;
+
+          func_name_len = longest_to_int (exp->elts[save_pos1 + 3].longconst);
+          (*pos) += 6 + BYTES_TO_EXP_ELEM (func_name_len + 1);
+        }
       else
 	{
 	  /* Non-method function call */
@@ -1482,6 +1494,32 @@ evaluate_subexp_standard (struct type *expect_type,
 
       /* signal end of arglist */
       argvec[tem] = 0;
+      if (op == OP_ADL_FUNC)
+        {
+          struct symbol *symp;
+          char *func_name;
+          int  name_len;
+          int string_pc = save_pos1 + 3;
+
+          /* Extract the function name.  */
+          name_len = longest_to_int (exp->elts[string_pc].longconst);
+          func_name = (char *) alloca (name_len + 1);
+          strcpy (func_name, &exp->elts[string_pc + 1].string);
+
+          /* Prepare list of argument types for overload resolution */
+          arg_types = (struct type **) alloca (nargs * (sizeof (struct type *)));
+          for (ix = 1; ix <= nargs; ix++)
+            arg_types[ix - 1] = value_type (argvec[ix]);
+
+          find_overload_match (arg_types, nargs, func_name,
+                               0 /* not method */ , 0 /* strict match */ ,
+                               NULL, NULL /* pass NULL symbol since symbol is unknown */ ,
+                               NULL, &symp, NULL, 0);
+
+          /* Now fix the expression being evaluated.  */
+          exp->elts[save_pos1 + 2].symbol = symp;
+          argvec[0] = evaluate_subexp_with_coercion (exp, &save_pos1, noside);
+        }
 
       if (op == STRUCTOP_STRUCT || op == STRUCTOP_PTR
 	  || (op == OP_SCOPE && function_name != NULL))
@@ -1513,7 +1551,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      (void) find_overload_match (arg_types, nargs, tstr,
 				     1 /* method */ , 0 /* strict match */ ,
 					  &arg2 /* the object */ , NULL,
-					  &valp, NULL, &static_memfuncp);
+					  &valp, NULL, &static_memfuncp, 0);
 
 	      if (op == OP_SCOPE && !static_memfuncp)
 		{
@@ -1565,6 +1603,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	    {
 	      /* Language is C++, do some overload resolution before evaluation */
 	      struct symbol *symp;
+	      int no_adl = 0;
+
+	      /* If a scope has been specified disable ADL.  */
+	      if (op == OP_SCOPE)
+		no_adl = 1;
 
 	      if (op == OP_VAR_VALUE)
 		function = exp->elts[save_pos1+2].symbol;
@@ -1577,7 +1620,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      (void) find_overload_match (arg_types, nargs, NULL /* no need for name */ ,
 				 0 /* not method */ , 0 /* strict match */ ,
 		      NULL, function /* the function */ ,
-					  NULL, &symp, NULL);
+					  NULL, &symp, NULL, no_adl);
 
 	      if (op == OP_VAR_VALUE)
 		{

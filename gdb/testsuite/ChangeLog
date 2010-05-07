@@ -1,3 +1,8 @@
+2010-05-07  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/koenig.exp: New test.
+	* gdb.cp/koenig.cc: New test program.
+
 2010-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	Remove the use of prms_id and bug_id throughout the testsuite.

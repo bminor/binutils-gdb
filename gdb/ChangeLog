@@ -1,3 +1,30 @@
+2010-05-07  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR C++/7943:
+	* valops.c (find_overload_match): Handle fsym == NULL case.
+	Add int no_adl argument.
+	(find_oload_champ_namespace_loop): Call make_symbol_overload_list_adl
+	when appropriate.
+	Add int no_adl argument.
+	(find_oload_champ_namespace): 	Add int no_adl argument.
+	* parse.c (operator_length_standard): Return length for OP_ADL_FUNC
+	expression.
+	* expprint.c (op_name_standard): Added string for OP_ADL_FUNC case.
+	* eval.c (evaluate_subexp_standard): Added OP_ADL_FUNC case.
+	Evaluate arguments and use them to perform ADL lookup.
+	Pass no_adl argument to find_overload_match.
+	Disable adl lookup when evaluating a fully qualified OP_FUNCALL.
+	* cp-support.h: Added prototype for
+	make_symbol_overload_list_namespace.
+	* cp-support.c (make_symbol_overload_list_namespace): New function.
+	(make_symbol_overload_list_adl_namespace): New function.
+	(make_symbol_overload_list_adl): New function.
+	(make_symbol_overload_list_using): Moved code to add function to
+	overload set to make_symbol_overload_list_namespace.
+	* c-exp.y: create UNKNOWN_CPP_NAME token.
+	Add parse rule for ADL functions.
+	(classify_name): Recognize an UNKNOWN_CPP_NAME.
+
 2010-05-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* fbsd-nat.c (fbsd_make_corefile_notes): Add cast to NULL used as

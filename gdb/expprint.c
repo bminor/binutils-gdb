@@ -816,6 +816,8 @@ op_name_standard (enum exp_opcode opcode)
       return "OP_TYPE";
     case OP_LABELED:
       return "OP_LABELED";
+    case OP_ADL_FUNC:
+      return "OP_ADL_FUNC";
     }
 }
 

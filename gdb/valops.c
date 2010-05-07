@@ -63,13 +63,15 @@ static struct value *search_struct_method (const char *, struct value **,
 static int find_oload_champ_namespace (struct type **, int,
 				       const char *, const char *,
 				       struct symbol ***,
-				       struct badness_vector **);
+				       struct badness_vector **,
+				       const int no_adl);
 
 static
 int find_oload_champ_namespace_loop (struct type **, int,
 				     const char *, const char *,
 				     int, struct symbol ***,
-				     struct badness_vector **, int *);
+				     struct badness_vector **, int *,
+				     const int no_adl);
 
 static int find_oload_champ (struct type **, int, int, int,
 			     struct fn_field *, struct symbol **,
@@ -2306,6 +2308,10 @@ value_find_oload_method_list (struct value **argp, const char *method,
    If a method is being searched for, and it is a static method,
    then STATICP will point to a non-zero value.
 
+   If NO_ADL argument dependent lookup is disabled.  This is used to prevent
+   ADL overload candidates when performing overload resolution for a fully
+   qualified name.
+
    Note: This function does *not* check the value of
    overload_resolution.  Caller must check it to see whether overload
    resolution is permitted.
@@ -2316,7 +2322,7 @@ find_overload_match (struct type **arg_types, int nargs,
 		     const char *name, int method, int lax, 
 		     struct value **objp, struct symbol *fsym,
 		     struct value **valp, struct symbol **symp, 
-		     int *staticp)
+		     int *staticp, const int no_adl)
 {
   struct value *obj = (objp ? *objp : NULL);
   /* Index of best overloaded function.  */
@@ -2332,10 +2338,11 @@ find_overload_match (struct type **arg_types, int nargs,
   int num_fns = 0;
   struct type *basetype = NULL;
   int boffset;
-  struct cleanup *old_cleanups = NULL;
+
+  struct cleanup *all_cleanups = make_cleanup (null_cleanup, NULL);
 
   const char *obj_type_name = NULL;
-  char *func_name = NULL;
+  const char *func_name = NULL;
   enum oload_classification match_quality;
 
   /* Get the list of overloaded methods or functions.  */
@@ -2380,24 +2387,39 @@ find_overload_match (struct type **arg_types, int nargs,
     }
   else
     {
-      const char *qualified_name = SYMBOL_NATURAL_NAME (fsym);
+      const char *qualified_name = NULL;
 
-      /* If we have a function with a C++ name, try to extract just
-	 the function part.  Do not try this for non-functions (e.g.
-	 function pointers).  */
-      if (qualified_name
-	  && TYPE_CODE (check_typedef (SYMBOL_TYPE (fsym))) == TYPE_CODE_FUNC)
+      if (fsym)
+        {
+          qualified_name = SYMBOL_NATURAL_NAME (fsym);
+
+          /* If we have a function with a C++ name, try to extract just
+	     the function part.  Do not try this for non-functions (e.g.
+	     function pointers).  */
+          if (qualified_name
+              && TYPE_CODE (check_typedef (SYMBOL_TYPE (fsym))) == TYPE_CODE_FUNC)
+            {
+	      char *temp;
+
+	      temp = cp_func_name (qualified_name);
+
+	      /* If cp_func_name did not remove anything, the name of the
+	         symbol did not include scope or argument types - it was
+	         probably a C-style function.  */
+	      if (temp)
+		{
+		  make_cleanup (xfree, temp);
+		  if (strcmp (temp, qualified_name) == 0)
+		    func_name = NULL;
+		  else
+		    func_name = temp;
+		}
+            }
+        }
+      else
 	{
-	  func_name = cp_func_name (qualified_name);
-
-	  /* If cp_func_name did not remove anything, the name of the
-	     symbol did not include scope or argument types - it was
-	     probably a C-style function.  */
-	  if (func_name && strcmp (func_name, qualified_name) == 0)
-	    {
-	      xfree (func_name);
-	      func_name = NULL;
-	    }
+	  func_name = name;
+	  qualified_name = name;
 	}
 
       /* If there was no C++ name, this must be a C-style function or
@@ -2409,7 +2431,6 @@ find_overload_match (struct type **arg_types, int nargs,
           return 0;
         }
 
-      old_cleanups = make_cleanup (xfree, func_name);
       make_cleanup (xfree, oload_syms);
       make_cleanup (xfree, oload_champ_bv);
 
@@ -2417,11 +2438,15 @@ find_overload_match (struct type **arg_types, int nargs,
 						func_name,
 						qualified_name,
 						&oload_syms,
-						&oload_champ_bv);
+						&oload_champ_bv,
+						no_adl);
     }
 
-  /* Check how bad the best match is.  */
+  /* Did we find a match ?  */
+  if (oload_champ == -1)
+    error ("No symbol \"%s\" in current context.", name);
 
+  /* Check how bad the best match is.  */
   match_quality =
     classify_oload_match (oload_champ_bv, nargs,
 			  oload_method_static (method, fns_ptr,
@@ -2478,8 +2503,8 @@ find_overload_match (struct type **arg_types, int nargs,
 	}
       *objp = temp;
     }
-  if (old_cleanups != NULL)
-    do_cleanups (old_cleanups);
+
+  do_cleanups (all_cleanups);
 
   switch (match_quality)
     {
@@ -2497,14 +2522,16 @@ find_overload_match (struct type **arg_types, int nargs,
    runs out of namespaces.  It stores the overloaded functions in
    *OLOAD_SYMS, and the badness vector in *OLOAD_CHAMP_BV.  The
    calling function is responsible for freeing *OLOAD_SYMS and
-   *OLOAD_CHAMP_BV.  */
+   *OLOAD_CHAMP_BV.  If NO_ADL, argument dependent lookup is not 
+   performned.  */
 
 static int
 find_oload_champ_namespace (struct type **arg_types, int nargs,
 			    const char *func_name,
 			    const char *qualified_name,
 			    struct symbol ***oload_syms,
-			    struct badness_vector **oload_champ_bv)
+			    struct badness_vector **oload_champ_bv,
+			    const int no_adl)
 {
   int oload_champ;
 
@@ -2512,7 +2539,8 @@ find_oload_champ_namespace (struct type **arg_types, int nargs,
 				   func_name,
 				   qualified_name, 0,
 				   oload_syms, oload_champ_bv,
-				   &oload_champ);
+				   &oload_champ,
+				   no_adl);
 
   return oload_champ;
 }
@@ -2520,7 +2548,8 @@ find_oload_champ_namespace (struct type **arg_types, int nargs,
 /* Helper function for find_oload_champ_namespace; NAMESPACE_LEN is
    how deep we've looked for namespaces, and the champ is stored in
    OLOAD_CHAMP.  The return value is 1 if the champ is a good one, 0
-   if it isn't.
+   if it isn't.  Other arguments are the same as in
+   find_oload_champ_namespace
 
    It is the caller's responsibility to free *OLOAD_SYMS and
    *OLOAD_CHAMP_BV.  */
@@ -2532,7 +2561,8 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
 				 int namespace_len,
 				 struct symbol ***oload_syms,
 				 struct badness_vector **oload_champ_bv,
-				 int *oload_champ)
+				 int *oload_champ,
+				 const int no_adl)
 {
   int next_namespace_len = namespace_len;
   int searched_deeper = 0;
@@ -2566,7 +2596,7 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
 					   func_name, qualified_name,
 					   next_namespace_len,
 					   oload_syms, oload_champ_bv,
-					   oload_champ))
+					   oload_champ, no_adl))
 	{
 	  return 1;
 	}
@@ -2587,6 +2617,12 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
   new_namespace[namespace_len] = '\0';
   new_oload_syms = make_symbol_overload_list (func_name,
 					      new_namespace);
+
+  /* If we have reached the deepest level perform argument
+     determined lookup.  */
+  if (!searched_deeper && !no_adl)
+    make_symbol_overload_list_adl (arg_types, nargs, func_name);
+
   while (new_oload_syms[num_fns])
     ++num_fns;
 
@@ -2619,7 +2655,6 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
     }
   else
     {
-      gdb_assert (new_oload_champ != -1);
       *oload_syms = new_oload_syms;
       *oload_champ = new_oload_champ;
       *oload_champ_bv = new_oload_champ_bv;

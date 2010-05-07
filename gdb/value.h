@@ -451,7 +451,7 @@ extern int find_overload_match (struct type **arg_types, int nargs,
 				const char *name, int method, int lax,
 				struct value **objp, struct symbol *fsym,
 				struct value **valp, struct symbol **symp,
-				int *staticp);
+				int *staticp, const int no_adl);
 
 extern struct value *value_field (struct value *arg1, int fieldno);
 

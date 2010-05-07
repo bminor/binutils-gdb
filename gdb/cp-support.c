@@ -52,7 +52,7 @@ static void demangled_name_complaint (const char *name);
 
 /* Functions/variables related to overload resolution.  */
 
-static int sym_return_val_size;
+static int sym_return_val_size = -1;
 static int sym_return_val_index;
 static struct symbol **sym_return_val;
 
@@ -709,6 +709,87 @@ make_symbol_overload_list (const char *func_name,
   return sym_return_val;
 }
 
+/* Adds the function FUNC_NAME from NAMESPACE to the overload set.  */
+
+static void
+make_symbol_overload_list_namespace (const char *func_name,
+                                     const char *namespace)
+{
+
+  if (namespace[0] == '\0')
+    make_symbol_overload_list_qualified (func_name);
+  else
+    {
+      char *concatenated_name
+	= alloca (strlen (namespace) + 2 + strlen (func_name) + 1);
+      strcpy (concatenated_name, namespace);
+      strcat (concatenated_name, "::");
+      strcat (concatenated_name, func_name);
+      make_symbol_overload_list_qualified (concatenated_name);
+    }
+}
+
+/* Search the namespace of the given type and namespace of and public base
+ types.  */
+
+static void
+make_symbol_overload_list_adl_namespace (struct type *type,
+                                         const char *func_name)
+{
+  char *namespace;
+  char *type_name;
+  int i, prefix_len;
+
+  while (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_CODE (type) == TYPE_CODE_REF
+         || TYPE_CODE (type) == TYPE_CODE_ARRAY
+         || TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+    {
+      if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+	type = check_typedef(type);
+      else
+	type = TYPE_TARGET_TYPE (type);
+    }
+
+  type_name = TYPE_NAME (type);
+
+  prefix_len = cp_entire_prefix_len (type_name);
+
+  if (prefix_len != 0)
+    {
+      namespace = alloca (prefix_len + 1);
+      strncpy (namespace, type_name, prefix_len);
+      namespace[prefix_len] = '\0';
+
+      make_symbol_overload_list_namespace (func_name, namespace);
+    }
+
+  /* Check public base type */
+  if (TYPE_CODE (type) == TYPE_CODE_CLASS)
+    for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
+      {
+	if (BASETYPE_VIA_PUBLIC (type, i))
+	  make_symbol_overload_list_adl_namespace (TYPE_BASECLASS (type, i),
+						   func_name);
+      }
+}
+
+/* Adds the the overload list overload candidates for FUNC_NAME found through
+   argument dependent lookup.  */
+
+struct symbol **
+make_symbol_overload_list_adl (struct type **arg_types, int nargs,
+                               const char *func_name)
+{
+  int i;
+
+  gdb_assert (sym_return_val_size != -1);
+
+  for (i = 1; i <= nargs; i++)
+    make_symbol_overload_list_adl_namespace (arg_types[i - 1], func_name);
+
+  return sym_return_val;
+}
+
 /* This applies the using directives to add namespaces to search in,
    and then searches for overloads in all of those namespaces.  It
    adds the symbols found to sym_return_val.  Arguments are as in
@@ -736,20 +817,7 @@ make_symbol_overload_list_using (const char *func_name,
     }
 
   /* Now, add names for this namespace.  */
-  
-  if (namespace[0] == '\0')
-    {
-      make_symbol_overload_list_qualified (func_name);
-    }
-  else
-    {
-      char *concatenated_name
-	= alloca (strlen (namespace) + 2 + strlen (func_name) + 1);
-      strcpy (concatenated_name, namespace);
-      strcat (concatenated_name, "::");
-      strcat (concatenated_name, func_name);
-      make_symbol_overload_list_qualified (concatenated_name);
-    }
+  make_symbol_overload_list_namespace (func_name, namespace);
 }
 
 /* This does the bulk of the work of finding overloaded symbols.

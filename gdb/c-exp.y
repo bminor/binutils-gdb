@@ -186,6 +186,7 @@ static struct stoken operator_stoken (const char *);
 %token <tsval> STRING
 %token <tsval> CHAR
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
+%token <ssym> UNKNOWN_CPP_NAME
 %token <voidval> COMPLETE
 %token <tsym> TYPENAME
 %type <sval> name
@@ -389,6 +390,29 @@ exp	:	exp '('
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
 			  write_exp_elt_opcode (OP_FUNCALL); }
+	;
+
+exp	:	UNKNOWN_CPP_NAME '('
+			{
+			  /* This could potentially be a an argument defined
+			     lookup function (Koenig).  */
+			  write_exp_elt_opcode (OP_ADL_FUNC);
+			  write_exp_elt_block (expression_context_block);
+			  write_exp_elt_sym (NULL); /* Placeholder.  */
+			  write_exp_string ($1.stoken);
+			  write_exp_elt_opcode (OP_ADL_FUNC);
+
+			/* This is to save the value of arglist_len
+			   being accumulated by an outer function call.  */
+
+			  start_arglist ();
+			}
+		arglist ')'	%prec ARROW
+			{
+			  write_exp_elt_opcode (OP_FUNCALL);
+			  write_exp_elt_longcst ((LONGEST) end_arglist ());
+			  write_exp_elt_opcode (OP_FUNCALL);
+			}
 	;
 
 lcurly	:	'{'
@@ -1224,6 +1248,7 @@ name	:	NAME { $$ = $1.stoken; }
 	|	BLOCKNAME { $$ = $1.stoken; }
 	|	TYPENAME { $$ = $1.stoken; }
 	|	NAME_OR_INT  { $$ = $1.stoken; }
+	|	UNKNOWN_CPP_NAME  { $$ = $1.stoken; }
 	|	operator { $$ = $1; }
 	;
 
@@ -1244,6 +1269,7 @@ name_not_typename :	NAME
 						  VAR_DOMAIN,
 						  &$$.is_a_field_of_this);
 			}
+	|	UNKNOWN_CPP_NAME
 	;
 
 %%
@@ -2387,6 +2413,12 @@ classify_name (struct block *block)
   /* Any other kind of symbol */
   yylval.ssym.sym = sym;
   yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+
+  if (sym == NULL
+      && parse_language->la_language == language_cplus
+      && !lookup_minimal_symbol (copy, NULL, NULL))
+    return UNKNOWN_CPP_NAME;
+
   return NAME;
 }
 
