@@ -681,7 +681,6 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
   unsigned int len;
   int i;
   struct type *elttype;
-  unsigned int eltlen;
   LONGEST val;
   const gdb_byte *valaddr = valaddr0 + embedded_offset;
 

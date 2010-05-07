@@ -1,5 +1,18 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* p-typeprint.c (pascal_type_print_base): Delete unused variable.
+	(pascal_type_print_varspec_prefix): Delete unused variable.
+	* f-typeprint.c (f_type_print_base): Delete unused variable.
+	(f_type_print_varspec_suffix): Delete unused variable.
+	* m2-typeprint.c (m2_print_type): Delete unused variable.
+	(m2_long_set): Delete unused variable.
+	* ada-valprint.c (ada_val_print_1): Delete unused variable.
+	* d-valprint.c (dynamic_array_type): Delete unused variable.
+	* f-valprint.c (f77_get_dynamic_length_of_aggregate): 
+	Delete unused variable.
+	(f77_create_arrayprint_offset_tbl): Delete unused variable.
+	* m2-valprint.c (m2_val_print): Delete unused variable.
+
 	* ui-out.c (ui_out_field_int): Delete unused variable.
 	(ui_out_field_fmt_int): Delete unused variable.
 	* varobj.c (varobj_list_children): Delete unused variable.

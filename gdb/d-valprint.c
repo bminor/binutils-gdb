@@ -42,7 +42,6 @@ dynamic_array_type (struct type *type, const gdb_byte *valaddr,
       struct type *elttype;
       struct type *true_type;
       struct type *ptr_type;
-      struct type *range_type;
       const gdb_byte *ptraddr;
       struct value *val;
       int length;

@@ -322,8 +322,6 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   unsigned len;
   struct type *elttype;
   unsigned eltlen;
-  int length_pos, length_size, string_pos;
-  int char_size;
   LONGEST val;
   CORE_ADDR addr;
 

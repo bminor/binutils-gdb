@@ -153,7 +153,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 			     int arrayprint_recurse_level)
 {
   int upper_bound, lower_bound;
-  int retcode;
+
   /* No static variables are permitted as an error call may occur during
      execution of this function.  */
 
@@ -258,9 +258,7 @@ void
 f_type_print_base (struct type *type, struct ui_file *stream, int show,
 		   int level)
 {
-  int retcode;
   int upper_bound;
-
   int index;
 
   QUIT;

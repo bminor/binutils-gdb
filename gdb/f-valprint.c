@@ -92,7 +92,6 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
 {
   int upper_bound = -1;
   int lower_bound = 1;
-  int retcode;
 
   /* Recursively go all the way down into a possibly multi-dimensional
      F77 array and get the bounds.  For simple arrays, this is pretty
@@ -126,7 +125,7 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
   struct type *tmp_type;
   int eltlen;
   int ndimen = 1;
-  int upper, lower, retcode;
+  int upper, lower;
 
   tmp_type = type;
 
