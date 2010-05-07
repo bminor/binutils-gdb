@@ -1,5 +1,16 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* ui-out.c (ui_out_field_int): Delete unused variable.
+	(ui_out_field_fmt_int): Delete unused variable.
+	* varobj.c (varobj_list_children): Delete unused variable.
+	(varobj_set_value): Delete unused variable.
+	(install_new_value_visualizer): Delete unused variable.
+	(varobj_set_visualizer): Delete unused variable.
+	(varobj_update): Delete unused variable.
+	(varobj_editable_p): Delete unused variable.
+	(c_value_of_root): Delete unused variable.
+	(cplus_describe_child): Delete unused variable.
+
 	* ada-lang.c (add_defn_to_vec): Delete unused variable.
 	(decode_constrained_packed_array_type): Delete unused variable.
 	(add_defn_to_vec): Delete unused variable.

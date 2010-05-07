@@ -1116,7 +1116,6 @@ varobj_get_num_children (struct varobj *var)
 VEC (varobj_p)*
 varobj_list_children (struct varobj *var, int *from, int *to)
 {
-  struct varobj *child;
   char *name;
   int i, children_changed;
 
@@ -1263,8 +1262,6 @@ int
 varobj_set_value (struct varobj *var, char *expression)
 {
   struct value *val;
-  int offset = 0;
-  int error = 0;
 
   /* The argument "expression" contains the variable's new value.
      We need to first construct a legal expression for this -- ugh! */
@@ -1273,7 +1270,6 @@ varobj_set_value (struct varobj *var, char *expression)
   struct value *value;
   int saved_input_radix = input_radix;
   char *s = expression;
-  int i;
 
   gdb_assert (varobj_editable_p (var));
 
@@ -1413,7 +1409,6 @@ install_new_value_visualizer (struct varobj *var)
   if (var->constructor != Py_None && var->value)
     {
       struct cleanup *cleanup;
-      PyObject *pretty_printer = NULL;
 
       cleanup = varobj_ensure_python_env (var);
 
@@ -1633,8 +1628,8 @@ void
 varobj_set_visualizer (struct varobj *var, const char *visualizer)
 {
 #if HAVE_PYTHON
-  PyObject *mainmod, *globals, *pretty_printer, *constructor;
-  struct cleanup *back_to, *value;
+  PyObject *mainmod, *globals, *constructor;
+  struct cleanup *back_to;
 
   back_to = varobj_ensure_python_env (var);
 
@@ -1684,14 +1679,9 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
   int changed = 0;
   int type_changed = 0;
   int i;
-  int vleft;
-  struct varobj *v;
-  struct varobj **cv;
-  struct varobj **templist = NULL;
   struct value *new;
   VEC (varobj_update_result) *stack = NULL;
   VEC (varobj_update_result) *result = NULL;
-  struct frame_info *fi;
 
   /* Frozen means frozen -- we don't check for any change in
      this varobj, including its going out of scope, or
@@ -2571,7 +2561,6 @@ int
 varobj_editable_p (struct varobj *var)
 {
   struct type *type;
-  struct value *value;
 
   if (!(var->root->is_valid && var->value && VALUE_LVAL (var->value)))
     return 0;
@@ -2948,7 +2937,6 @@ c_value_of_root (struct varobj **var_handle)
 {
   struct value *new_val = NULL;
   struct varobj *var = *var_handle;
-  struct frame_info *fi;
   int within_scope = 0;
   struct cleanup *back_to;
 								 
@@ -3194,7 +3182,6 @@ cplus_describe_child (struct varobj *parent, int index,
 		      char **cname, struct value **cvalue, struct type **ctype,
 		      char **cfull_expression)
 {
-  char *name = NULL;
   struct value *value;
   struct type *type;
   int was_ptr;
