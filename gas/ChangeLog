@@ -1,3 +1,9 @@
+2010-05-07  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.in: Regenerate with automake 1.11.1.
+	* aclocal.m4: Ditto.
+	* doc/Makefile.in: Ditto.
+
 2010-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
