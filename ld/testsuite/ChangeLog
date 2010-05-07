@@ -1,3 +1,8 @@
+2010-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/cortex-a8-fix-bl-rel-plt.d: New file.
+	* ld-arm/arm-elf.exp (armelftests): Run cortex-a8-fix-bl-rel-plt.d.
+
 2010-05-06  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-elf/orphan-region.d: Use ld -N.

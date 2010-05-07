@@ -2409,9 +2409,10 @@ struct a8_erratum_fix {
 struct a8_erratum_reloc {
   bfd_vma from;
   bfd_vma destination;
+  struct elf32_arm_link_hash_entry *hash;
+  const char *sym_name;
   unsigned int r_type;
   unsigned char st_type;
-  const char *sym_name;
   bfd_boolean non_a8_stub;
 };
 
@@ -4101,6 +4102,7 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 		    {
 		      char *error_message = NULL;
 		      struct elf_link_hash_entry *entry;
+		      bfd_boolean use_plt = FALSE;
 
 		      /* We don't care about the error returned from this
 		         function, only if there is glue or not.  */
@@ -4110,12 +4112,18 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 		      if (entry)
 			found->non_a8_stub = TRUE;
 
-		      if (found->r_type == R_ARM_THM_CALL
-			  && found->st_type != STT_ARM_TFUNC)
-			force_target_arm = TRUE;
-		      else if (found->r_type == R_ARM_THM_CALL
-			       && found->st_type == STT_ARM_TFUNC)
-			force_target_thumb = TRUE;
+		      /* Keep a simpler condition, for the sake of clarity.  */
+		      if (htab->splt != NULL && found->hash != NULL
+			  && found->hash->root.plt.offset != (bfd_vma) -1)
+			use_plt = TRUE;
+
+		      if (found->r_type == R_ARM_THM_CALL)
+			{
+			  if (found->st_type != STT_ARM_TFUNC || use_plt)
+			    force_target_arm = TRUE;
+			  else
+			    force_target_thumb = TRUE;
+			}
 		    }
 
                   /* Check if we have an offending branch instruction.  */
@@ -4682,6 +4690,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
                           a8_relocs[num_a8_relocs].st_type = st_type;
                           a8_relocs[num_a8_relocs].sym_name = sym_name;
                           a8_relocs[num_a8_relocs].non_a8_stub = created_stub;
+                          a8_relocs[num_a8_relocs].hash = hash;
 
                           num_a8_relocs++;
                         }

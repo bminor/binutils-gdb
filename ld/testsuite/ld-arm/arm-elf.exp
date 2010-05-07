@@ -194,6 +194,11 @@ set armelftests {
      "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
      {{objdump -dr cortex-a8-fix-bl-rel-thumb.d}}
      "cortex-a8-fix-bl-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate bl.w to PLT"
+     "-EL --section-start=.plt=0x8e00 -Ttext=0x8f00 --fix-cortex-a8 -shared"
+     "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
+     {{objdump -dr cortex-a8-fix-bl-rel-plt.d}}
+     "cortex-a8-fix-bl-rel-thumb"}
     {"Cortex-A8 erratum fix, relocate b<cond>.w to Thumb"
      "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bcc-rel.s}
      {{objdump -dr cortex-a8-fix-bcc-rel-thumb.d}}

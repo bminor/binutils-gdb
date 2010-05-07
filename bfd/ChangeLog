@@ -1,3 +1,10 @@
+2010-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (struct a8_erratum_reloc): Add hash member.  Move
+	sym_name to improve packing.
+	(cortex_a8_erratum_scan): Check for PLT entries.
+	(elf32_arm_size_stubs): Save the target symbol for a8 relocs.
+
 2010-05-07  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.in: Regenerate with automake 1.11.1.
