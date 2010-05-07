@@ -923,11 +923,6 @@ typedef int (gdbarch_fast_tracepoint_valid_at_ftype) (struct gdbarch *gdbarch, C
 extern int gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr, int *isize, char **msg);
 extern void set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at);
 
-/* Not NULL if a target has additonal field for qSupported. */
-
-extern const char * gdbarch_qsupported (struct gdbarch *gdbarch);
-extern void set_gdbarch_qsupported (struct gdbarch *gdbarch, const char * qsupported);
-
 /* Return the "auto" target charset. */
 
 typedef const char * (gdbarch_auto_charset_ftype) (void);

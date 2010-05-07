@@ -3562,13 +3562,9 @@ remote_query_supported (void)
   if (remote_protocol_packets[PACKET_qSupported].support != PACKET_DISABLE)
     {
       char *q = NULL;
-      const char *qsupported = gdbarch_qsupported (target_gdbarch);
 
       if (rs->extended)
 	q = remote_query_supported_append (q, "multiprocess+");
-      
-      if (qsupported)
-	q = remote_query_supported_append (q, qsupported);
 
       if (remote_support_xml)
 	q = remote_query_supported_append (q, remote_support_xml);

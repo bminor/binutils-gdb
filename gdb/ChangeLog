@@ -1,3 +1,10 @@
+2010-05-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbarch.sh (qsupported): Delete.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* remote.c (remote_query_supported): Remove use of
+	gdbarch_qsupported.
+
 2010-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* xml-syscall.c (syscall_start_syscalls_info): Remove unused

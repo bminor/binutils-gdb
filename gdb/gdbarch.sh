@@ -767,9 +767,6 @@ m:int:has_shared_address_space:void:::default_has_shared_address_space::0
 # True if a fast tracepoint can be set at an address.
 m:int:fast_tracepoint_valid_at:CORE_ADDR addr, int *isize, char **msg:addr, isize, msg::default_fast_tracepoint_valid_at::0
 
-# Not NULL if a target has additonal field for qSupported.
-v:const char *:qsupported:::0:0::0:gdbarch->qsupported
-
 # Return the "auto" target charset.
 f:const char *:auto_charset:void::default_auto_charset:default_auto_charset::0
 # Return the "auto" target wide charset.
