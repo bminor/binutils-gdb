@@ -1,3 +1,8 @@
+2010-05-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* fbsd-nat.c (fbsd_make_corefile_notes): Add cast to NULL used as
+	sentinel.
+
 2010-05-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_query_supported_append): Use reconcat.

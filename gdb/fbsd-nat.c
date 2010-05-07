@@ -208,7 +208,8 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
       char *psargs = xstrdup (fname);
 
       if (get_inferior_args ())
-	psargs = reconcat (psargs, psargs, " ", get_inferior_args (), NULL);
+	psargs = reconcat (psargs, psargs, " ", get_inferior_args (),
+			   (char *) NULL);
 
       note_data = elfcore_write_prpsinfo (obfd, note_data, note_size,
 					  fname, psargs);
