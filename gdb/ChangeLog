@@ -445,8 +445,8 @@
 2010-05-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.h (MAX_OF_TYPE, MIN_OF_TYPE): Delete macros.  *
-	ada-lang.c: Remove comment mentioning these macros.  * m2-exp.y:
-	Delete commented out code.
+	ada-lang.c: Remove comment mentioning these macros.
+	* m2-exp.y: Delete commented out code.
 
 2010-05-05  Joel Brobecker  <brobecker@adacore.com>
 
