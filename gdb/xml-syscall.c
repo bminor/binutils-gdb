@@ -169,17 +169,6 @@ syscall_create_syscall_desc (struct syscalls_info *sysinfo,
   VEC_safe_push (syscall_desc_p, sysinfo->syscalls, sysdesc);
 }
 
-/* Handle the start of a <syscalls_info> element.  */
-static void
-syscall_start_syscalls_info (struct gdb_xml_parser *parser,
-                             const struct gdb_xml_element *element,
-                             void *user_data,
-                             VEC(gdb_xml_value_s) *attributes)
-{
-  struct syscall_parsing_data *data = user_data;
-  struct syscalls_info *sysinfo = data->sysinfo;
-}
-
 /* Handle the start of a <syscall> element.  */
 static void
 syscall_start_syscall (struct gdb_xml_parser *parser,
@@ -226,7 +215,7 @@ static const struct gdb_xml_element syscalls_info_children[] = {
 
 static const struct gdb_xml_element syselements[] = {
   { "syscalls_info", NULL, syscalls_info_children,
-    GDB_XML_EF_NONE, syscall_start_syscalls_info, NULL },
+    GDB_XML_EF_NONE, NULL, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 

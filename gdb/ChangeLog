@@ -1,3 +1,8 @@
+2010-05-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* xml-syscall.c (syscall_start_syscalls_info): Remove unused
+	function.
+
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
 	* xml-support.c (xinclude_start_include): Delete unused variable.
