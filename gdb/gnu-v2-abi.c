@@ -185,13 +185,8 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {
   struct type *known_type;
   struct type *rtti_type;
-  CORE_ADDR coreptr;
-  struct value *vp;
-  long top_offset = 0;
-  char rtti_type_name[256];
   CORE_ADDR vtbl;
   struct minimal_symbol *minsym;
-  struct symbol *sym;
   char *demangled_name, *p;
   struct type *btype;
   struct type *known_type_vptr_basetype;

@@ -136,7 +136,6 @@ trad_frame_get_prev_register (struct frame_info *this_frame,
 			      struct trad_frame_saved_reg this_saved_regs[],
 			      int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   if (trad_frame_addr_p (this_saved_regs, regnum))
     /* The register was saved in memory.  */
     return frame_unwind_got_memory (this_frame, regnum,

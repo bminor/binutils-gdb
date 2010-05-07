@@ -1,5 +1,18 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* frame-unwind.c (frame_unwind_find_by_frame): 
+	Delete unused variable.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Delete unused variable.
+	* cp-support.c (mangled_name_to_comp): Delete unused variable.
+	(method_name_from_physname): Delete unused variable.
+	(cp_func_name): Delete unused variable.
+	(cp_validate_operator): Delete unused variable.
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): 
+	Delete unused variable.
+	* trad-frame.c (trad_frame_get_prev_register): 
+	Delete unused variable.
+	* tramp-frame.c (tramp_frame_cache): Delete unused variable.
+
 	* serial.c (serial_for_fd): Delete unused variable.
 	* mdebugread.c (psymtab_to_symtab_1): Delete unused variable.
 	* top.c (execute_command): Delete unused variable.

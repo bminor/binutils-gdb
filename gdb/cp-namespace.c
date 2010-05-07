@@ -81,7 +81,6 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
       const char *name = SYMBOL_DEMANGLED_NAME (symbol);
       unsigned int previous_component;
       unsigned int next_component;
-      const char *len;
 
       /* Start with a quick-and-dirty check for mention of "(anonymous
 	 namespace)".  */

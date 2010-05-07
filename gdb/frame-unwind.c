@@ -90,11 +90,10 @@ frame_unwind_append_unwinder (struct gdbarch *gdbarch,
 const struct frame_unwind *
 frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
 {
-  int i;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
   struct frame_unwind_table_entry *entry;
-  struct cleanup *old_cleanup;
+
   for (entry = table->list; entry != NULL; entry = entry->next)
     {
       struct cleanup *old_cleanup;
