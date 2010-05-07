@@ -321,7 +321,6 @@ symtab_and_line_to_sal_object (struct symtab_and_line sal)
 
 {
   sal_object *sal_obj;
-  symtab_object *symtab_obj;
   int success = 0;
   sal_obj = PyObject_New (sal_object, &sal_object_type);
 

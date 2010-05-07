@@ -57,7 +57,6 @@ static struct value *
 fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 	   void *cookie, int argc, struct value **argv)
 {
-  int i;
   struct value *value = NULL;
   PyObject *result, *callable, *args;
   struct cleanup *cleanup;

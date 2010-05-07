@@ -1,5 +1,30 @@
 2010-05-07  Michael Snyder  <msnyder@vmware.com>
 
+	* python/python.c (execute_gdb_command): Remove unused variables.
+	* python/py-block.c (gdbpy_block_for_pc): Remove unused variable.
+	* python/py-breakpoint.c (gdbpy_breakpoint_created): 
+	Remove unused variable.
+	* python/py-cmd.c (cmdpy_function): Remove unused variable.
+	(cmdpy_completer): Remove unused variable.
+	* python/py-frame.c (frapy_find_sal): Remove unused variable.
+	* python/py-function.c (fnpy_call): Remove unused variable.
+	* python/py-objfile.c (objfile_to_objfile_object):
+	Remove unused variable.
+	* python/py-param.c (parmpy_init): Remove unused variable.
+	* python/py-prettyprint.c (apply_varobj_pretty_printer): 
+	Remove unused variable.
+	(gdbpy_default_visualizer): Remove unused variable.
+	* python/py-progspace.c (pspace_to_pspace_object):
+	Remove unused variable.
+	* python/py-symtab.c (symtab_and_line_to_sal_object): 
+	Remove unused variable.
+	* python/py-type.c (typy_template_argument): 
+	Remove unused variable.
+	* python/py-value.c (valpy_string): Remove unused variable.
+	(convert_value_from_python): Remove unused variables.
+
+2010-05-07  Michael Snyder  <msnyder@vmware.com>
+
 	* valops.c (value_cast_pointers): Restore unused variable 'type1',
 	and use it to compute variable 't1'.
 

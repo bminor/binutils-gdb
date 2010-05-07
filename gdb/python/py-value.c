@@ -259,7 +259,7 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 {
-  int length = -1, ret = 0;
+  int length = -1;
   gdb_byte *buffer;
   struct value *value = ((value_object *) self)->value;
   volatile struct gdb_exception except;
@@ -923,7 +923,6 @@ struct value *
 convert_value_from_python (PyObject *obj)
 {
   struct value *value = NULL; /* -Wall */
-  PyObject *target_str, *unicode_str;
   struct cleanup *old;
   volatile struct gdb_exception except;
   int cmp;

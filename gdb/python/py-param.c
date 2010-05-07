@@ -456,7 +456,6 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   char *cmd_name;
   int parmclass, cmdtype;
   PyObject *enum_values = NULL;
-  struct cmd_list_element *cmd_list;
   struct cmd_list_element **set_list, **show_list;
   volatile struct gdb_exception except;
 

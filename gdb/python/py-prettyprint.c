@@ -661,7 +661,6 @@ PyObject *
 apply_varobj_pretty_printer (PyObject *printer_obj,
 			     struct value **replacement)
 {
-  int size = 0;
   PyObject *py_str = NULL;
 
   *replacement = NULL;
@@ -707,7 +706,7 @@ PyObject *
 gdbpy_default_visualizer (PyObject *self, PyObject *args)
 {
   PyObject *val_obj;
-  PyObject *cons, *printer = NULL;
+  PyObject *cons;
   struct value *value;
 
   if (! PyArg_ParseTuple (args, "O", &val_obj))

@@ -148,7 +148,6 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
   if (! result)
     {
       PyObject *ptype, *pvalue, *ptraceback;
-      char *s, *str;
 
       PyErr_Fetch (&ptype, &pvalue, &ptraceback);
 
@@ -224,7 +223,6 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
       result = (char **) xmalloc ((len + 1) * sizeof (char *));
       for (i = out = 0; i < len; ++i)
 	{
-	  int l;
 	  PyObject *elt = PySequence_GetItem (resultobj, i);
 	  if (elt == NULL || ! gdbpy_is_string (elt))
 	    {

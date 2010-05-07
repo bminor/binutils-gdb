@@ -365,7 +365,6 @@ frapy_find_sal (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
   struct symtab_and_line sal;
-  struct objfile *objfile = NULL;
   volatile struct gdb_exception except;
   PyObject *sal_obj = NULL;   /* Initialize to appease gcc warning.  */
 

@@ -144,8 +144,6 @@ objfile_to_objfile_object (struct objfile *objfile)
       object = PyObject_New (objfile_object, &objfile_object_type);
       if (object)
 	{
-	  PyObject *dict;
-
 	  object->objfile = objfile;
 
 	  object->printers = PyList_New (0);

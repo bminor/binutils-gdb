@@ -303,8 +303,7 @@ gdbpy_target_wide_charset (PyObject *self, PyObject *args)
 static PyObject *
 execute_gdb_command (PyObject *self, PyObject *args)
 {
-  struct cmd_list_element *alias, *prefix, *cmd;
-  char *arg, *newarg;
+  char *arg;
   PyObject *from_tty_obj = NULL;
   int from_tty;
   int cmp;

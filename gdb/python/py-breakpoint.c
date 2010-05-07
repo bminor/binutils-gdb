@@ -706,8 +706,6 @@ gdbpy_breakpoint_created (int num)
     newbp = PyObject_New (breakpoint_object, &breakpoint_object_type);
   if (newbp)
     {
-      PyObject *hookfn;
-
       newbp->number = num;
       newbp->bp = bp;
       bppy_breakpoints[num] = newbp;

@@ -154,8 +154,6 @@ pspace_to_pspace_object (struct program_space *pspace)
       object = PyObject_New (pspace_object, &pspace_object_type);
       if (object)
 	{
-	  PyObject *dict;
-
 	  object->pspace = pspace;
 
 	  object->printers = PyList_New (0);

@@ -271,7 +271,6 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
   struct block *block;
   struct obj_section *section;
   struct symtab *symtab;
-  PyObject *sym_obj;
 
   if (!PyArg_ParseTuple (args, "K", &pc))
     return NULL;
