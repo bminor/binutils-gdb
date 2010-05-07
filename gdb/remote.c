@@ -3523,9 +3523,9 @@ register_remote_support_xml (const char *xml)
       while ((p = strtok (NULL, ",")) != NULL);
       xfree (copy);
 
-      p = concat (remote_support_xml, ",", xml, (char *) NULL);
-      xfree (remote_support_xml);
-      remote_support_xml = p;
+      remote_support_xml = reconcat (remote_support_xml,
+				     remote_support_xml, ",", xml,
+				     (char *) NULL);
     }
 #endif
 }
@@ -3534,11 +3534,7 @@ static char *
 remote_query_supported_append (char *msg, const char *append)
 {
   if (msg)
-    {
-      char *p = concat (msg, ";", append, (char *) NULL);
-      xfree (msg);
-      return p;
-    }
+    return reconcat (msg, msg, ";", append, (char *) NULL);
   else
     return xstrdup (append);
 }
@@ -3562,6 +3558,7 @@ remote_query_supported (void)
   if (remote_protocol_packets[PACKET_qSupported].support != PACKET_DISABLE)
     {
       char *q = NULL;
+      struct cleanup *old_chain = make_cleanup (free_current_contents, &q);
 
       if (rs->extended)
 	q = remote_query_supported_append (q, "multiprocess+");
@@ -3571,13 +3568,13 @@ remote_query_supported (void)
 
       if (q)
 	{
-	  char *p = concat ("qSupported:", q, (char *) NULL);
-	  xfree (q);
-	  putpkt (p);
-	  xfree (p);
+	  q = reconcat (q, "qSupported:", q, (char *) NULL);
+	  putpkt (q);
 	}
       else
 	putpkt ("qSupported");
+
+      do_cleanups (old_chain);
 
       getpkt (&rs->buf, &rs->buf_size, 0);
 

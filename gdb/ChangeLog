@@ -1,5 +1,10 @@
 2010-05-07  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (remote_query_supported_append): Use reconcat.
+	(remote_query_supported): Install a cleanup.  Use reconcat.
+
+2010-05-07  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbarch.sh (qsupported): Delete.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* remote.c (remote_query_supported): Remove use of
