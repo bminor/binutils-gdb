@@ -8049,7 +8049,6 @@ assign_aggregate (struct value *container,
   int max_indices, num_indices;
   int is_array_aggregate;
   int i;
-  struct value *mark = value_mark ();
 
   *pos += 3;
   if (noside != EVAL_NORMAL)

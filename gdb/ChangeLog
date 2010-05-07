@@ -1,3 +1,7 @@
+2010-05-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (assign_aggregate): Remove unused variable.
+
 2010-05-07  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	PR C++/7943:
