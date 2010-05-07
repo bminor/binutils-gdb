@@ -838,8 +838,6 @@ record_core_open_1 (char *name, int from_tty)
 static void
 record_open_1 (char *name, int from_tty)
 {
-  struct target_ops *t;
-
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_open\n");
 
@@ -2174,7 +2172,6 @@ record_restore (void)
 
   while (1)
     {
-      int ret;
       uint8_t rectype;
       uint32_t regnum, len, signal, count;
       uint64_t addr;
@@ -2333,7 +2330,6 @@ static void
 cmd_record_save (char *args, int from_tty)
 {
   char *recfilename, recfilename_buffer[40];
-  int recfd;
   struct record_entry *cur_record_list;
   uint32_t magic;
   struct regcache *regcache;

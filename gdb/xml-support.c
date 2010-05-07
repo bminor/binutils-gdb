@@ -720,7 +720,6 @@ xinclude_start_include (struct gdb_xml_parser *parser,
   char *href = VEC_index (gdb_xml_value_s, attributes, 0)->value;
   struct cleanup *back_to;
   char *text, *output;
-  int ret;
 
   gdb_xml_debug (parser, _("Processing XInclude of \"%s\""), href);
 
@@ -832,7 +831,6 @@ xml_process_xincludes (const char *name, const char *text,
 		       xml_fetch_another fetcher, void *fetcher_baton,
 		       int depth)
 {
-  enum XML_Error err;
   struct gdb_xml_parser *parser;
   struct xinclude_parsing_data *data;
   struct cleanup *back_to;

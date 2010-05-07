@@ -152,7 +152,6 @@ tdesc_start_target (struct gdb_xml_parser *parser,
 		    const struct gdb_xml_element *element,
 		    void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
-  struct tdesc_parsing_data *data = user_data;
   char *version = VEC_index (gdb_xml_value_s, attributes, 0)->value;
 
   if (strcmp (version, "1.0") != 0)

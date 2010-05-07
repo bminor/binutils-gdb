@@ -527,8 +527,6 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
   /* Compute number of inferiors we will print.  */
   for (inf = inferior_list; inf; inf = inf->next)
     {
-      struct cleanup *chain2;
-
       if (requested_inferior != -1 && inf->num != requested_inferior)
 	continue;
 

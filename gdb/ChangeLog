@@ -1,5 +1,22 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* xml-support.c (xinclude_start_include): Delete unused variable.
+	(xml_process_xincludes): Delete unused variable.
+	* xml-syscall.c (syscall_parse_xml): Delete unused variable.
+	* target-descriptions.c (tdesc_gdb_type): Delete unused variable.
+	(tdesc_find_arch_register): Delete unused variable.
+	(tdesc_use_registers): Delete unused variable.
+	* xml-tdesc.c (tdesc_start_target): Delete unused variable.
+	* inferior.c (print_inferior): Delete unused variable.
+	* record.c (record_open_1): Delete unused variable.
+	(record_restore): Delete unused variable.
+	(cmd_record_save): Delete unused variable.
+	* gcore.c (derive_heap_segment): Delete unused variable.
+	(objfile_find_memory_regions): Use unused variable.
+	* jit.c (jit_inferior_init): Delete unused variable.
+	* progspace.c (clone_program_space): Delete unused variable.
+	(pspace_empty_p): Delete unused variable.
+	
 	* frame-unwind.c (frame_unwind_find_by_frame): 
 	Delete unused variable.
 	* gnu-v2-abi.c (gnuv2_value_rtti_type): Delete unused variable.

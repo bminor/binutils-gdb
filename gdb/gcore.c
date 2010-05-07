@@ -300,7 +300,6 @@ call_target_sbrk (int sbrk_arg)
 static int
 derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 {
-  struct gdbarch *gdbarch;
   bfd_vma top_of_data_memory = 0;
   bfd_vma top_of_heap = 0;
   bfd_size_type sec_size;
@@ -476,14 +475,13 @@ objfile_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
       bfd *ibfd = objfile->obfd;
       asection *isec = objsec->the_bfd_section;
       flagword flags = bfd_get_section_flags (ibfd, isec);
-      int ret;
 
       if ((flags & SEC_ALLOC) || (flags & SEC_LOAD))
 	{
 	  int size = bfd_section_size (ibfd, isec);
 	  int ret;
 
-	  ret = (*func) (obj_section_addr (objsec), bfd_section_size (ibfd, isec),
+	  ret = (*func) (obj_section_addr (objsec), size, 
 			 1, /* All sections will be readable.  */
 			 (flags & SEC_READONLY) == 0, /* Writable.  */
 			 (flags & SEC_CODE) != 0, /* Executable.  */

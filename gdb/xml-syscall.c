@@ -237,8 +237,6 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher,
   struct cleanup *result_cleanup;
   struct gdb_xml_parser *parser;
   struct syscall_parsing_data data;
-  char *expanded_text;
-  int i;
 
   parser = gdb_xml_create_parser_and_cleanup (_("syscalls info"),
 					      syselements, &data);
