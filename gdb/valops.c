@@ -300,8 +300,9 @@ value_cast_structs (struct type *type, struct value *v2)
 struct value *
 value_cast_pointers (struct type *type, struct value *arg2)
 {
+  struct type *type1 = check_typedef (type);
   struct type *type2 = check_typedef (value_type (arg2));
-  struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type));
+  struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type1));
   struct type *t2 = check_typedef (TYPE_TARGET_TYPE (type2));
 
   if (TYPE_CODE (t1) == TYPE_CODE_STRUCT
