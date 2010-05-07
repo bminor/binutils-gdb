@@ -1,5 +1,17 @@
 2010-05-06  Michael Snyder  <msnyder@vmware.com>
 
+	* serial.c (serial_for_fd): Delete unused variable.
+	* mdebugread.c (psymtab_to_symtab_1): Delete unused variable.
+	* top.c (execute_command): Delete unused variable.
+	(init_main): Delete unused variable.
+	* utils.c (do_fclose_cleanup): Delete unused variable.
+	(do_all_inferior_continuations): Delete unused variable.
+	(initialize_utils): Delete unused variable.
+	(internal_problem_mode): Delete unused global.
+	* frame.c (get_prev_frame): Delete unused global.
+	(get_frame_locals_address): Delete unused global.
+	(get_frame_args_address): Delete unused global.
+
 	* p-typeprint.c (pascal_type_print_base): Delete unused variable.
 	(pascal_type_print_varspec_prefix): Delete unused variable.
 	* f-typeprint.c (f_type_print_base): Delete unused variable.

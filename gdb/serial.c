@@ -247,7 +247,6 @@ struct serial *
 serial_for_fd (int fd)
 {
   struct serial *scb;
-  struct serial_ops *ops;
 
   for (scb = scb_base; scb; scb = scb->next)
     if (scb->fd == fd)

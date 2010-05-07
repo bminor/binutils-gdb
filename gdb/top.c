@@ -360,7 +360,6 @@ execute_command (char *p, int from_tty)
 #ifdef HAVE_SBRK
   long space_at_cmd_start = 0;
 #endif
-  extern int display_time;
   extern int display_space;
 
   if (target_can_async_p ())
@@ -1516,8 +1515,6 @@ Notification of completion for asynchronous execution commands is %s.\n"),
 static void
 init_main (void)
 {
-  struct cmd_list_element *c;
-
   /* initialize the prompt stack to a simple "(gdb) " prompt or to
      whatever the DEFAULT_PROMPT is.  */
   the_prompts.top = 0;

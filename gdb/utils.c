@@ -266,7 +266,6 @@ make_cleanup_close (int fd)
 static void
 do_fclose_cleanup (void *arg)
 {
-  FILE *file = arg;
   fclose (arg);
 }
 
@@ -553,7 +552,6 @@ add_inferior_continuation (void (*continuation_hook) (void *), void *args,
 void
 do_all_inferior_continuations (void)
 {
-  struct cleanup *old_chain;
   struct cleanup *as_cleanup;
   struct inferior *inf = current_inferior ();
 
@@ -899,7 +897,6 @@ static const char *internal_problem_modes[] =
   internal_problem_no,
   NULL
 };
-static const char *internal_problem_mode = internal_problem_ask;
 
 /* Print a message reporting an internal error/warning. Ask the user
    if they want to continue, dump core, or just exit.  Return
@@ -2823,8 +2820,6 @@ show_debug_timestamp (struct ui_file *file, int from_tty,
 void
 initialize_utils (void)
 {
-  struct cmd_list_element *c;
-
   add_setshow_uinteger_cmd ("width", class_support, &chars_per_line, _("\
 Set number of characters gdb thinks are in a line."), _("\
 Show number of characters gdb thinks are in a line."), NULL,

@@ -1677,8 +1677,6 @@ inside_entry_func (struct frame_info *this_frame)
 struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
 {
-  struct frame_info *prev_frame;
-
   /* There is always a frame.  If this assertion fails, suspect that
      something should be calling get_selected_frame() or
      get_current_frame().  */
@@ -1906,7 +1904,6 @@ get_frame_base_address (struct frame_info *fi)
 CORE_ADDR
 get_frame_locals_address (struct frame_info *fi)
 {
-  void **cache;
   if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   /* If there isn't a frame address method, find it.  */
@@ -1922,7 +1919,6 @@ get_frame_locals_address (struct frame_info *fi)
 CORE_ADDR
 get_frame_args_address (struct frame_info *fi)
 {
-  void **cache;
   if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   /* If there isn't a frame address method, find it.  */
