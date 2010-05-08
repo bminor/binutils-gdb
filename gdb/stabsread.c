@@ -1279,9 +1279,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
           SYMBOL_VALUE (struct_sym) = valu;
           SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
           if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-            TYPE_NAME (SYMBOL_TYPE (sym))
-              = obconcat (&objfile->objfile_obstack, "", "",
-                          SYMBOL_LINKAGE_NAME (sym));
+            TYPE_NAME (SYMBOL_TYPE (sym)) = obconcat (&objfile->objfile_obstack,
+						      SYMBOL_LINKAGE_NAME (sym),
+						      (char *) NULL);
           add_symbol_to_list (struct_sym, &file_symbols);
         }
       
@@ -1306,9 +1306,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
       if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
-	TYPE_TAG_NAME (SYMBOL_TYPE (sym))
-	  = obconcat (&objfile->objfile_obstack, "", "",
-		      SYMBOL_LINKAGE_NAME (sym));
+	TYPE_TAG_NAME (SYMBOL_TYPE (sym)) = obconcat (&objfile->objfile_obstack,
+						      SYMBOL_LINKAGE_NAME (sym),
+						      (char *) NULL);
       add_symbol_to_list (sym, &file_symbols);
 
       if (synonym)
@@ -1321,9 +1321,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	    TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->objfile_obstack, "", "",
-			  SYMBOL_LINKAGE_NAME (sym));
+	    TYPE_NAME (SYMBOL_TYPE (sym)) = obconcat (&objfile->objfile_obstack,
+						      SYMBOL_LINKAGE_NAME (sym),
+						      (char *) NULL);
 	  add_symbol_to_list (typedef_sym, &file_symbols);
 	}
       break;
@@ -2609,8 +2609,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      make_cleanup (xfree, destr_fnlist);
 	      memset (destr_fnlist, 0, sizeof (struct next_fnfieldlist));
 	      destr_fnlist->fn_fieldlist.name
-		= obconcat (&objfile->objfile_obstack, "", "~",
-			    new_fnlist->fn_fieldlist.name);
+		= obconcat (&objfile->objfile_obstack, "~",
+			    new_fnlist->fn_fieldlist.name, (char *) NULL);
 
 	      destr_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
 		obstack_alloc (&objfile->objfile_obstack,
@@ -2747,8 +2747,8 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 	  {
 		  name = "";
 	  }
-	  fip->list->field.name =
-	    obconcat (&objfile->objfile_obstack, vptr_name, name, "");
+	  fip->list->field.name = obconcat (&objfile->objfile_obstack,
+					    vptr_name, name, (char *) NULL);
 	  break;
 
 	case 'b':		/* $vb -- a virtual bsomethingorother */
@@ -2760,15 +2760,15 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 			 symnum);
 	      name = "FOO";
 	    }
-	  fip->list->field.name =
-	    obconcat (&objfile->objfile_obstack, vb_name, name, "");
+	  fip->list->field.name = obconcat (&objfile->objfile_obstack, vb_name,
+					    name, (char *) NULL);
 	  break;
 
 	default:
 	  invalid_cpp_abbrev_complaint (*pp);
-	  fip->list->field.name =
-	    obconcat (&objfile->objfile_obstack,
-		      "INVALID_CPLUSPLUS_ABBREV", "", "");
+	  fip->list->field.name = obconcat (&objfile->objfile_obstack,
+					    "INVALID_CPLUSPLUS_ABBREV",
+					    (char *) NULL);
 	  break;
 	}
 

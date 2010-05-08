@@ -1,3 +1,14 @@
+2010-05-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (typename_concat): Use (char *) NULL terminated stdarg
+	list for the obconcat call.
+	* mdebugread.c (parse_symbol): Likewise.
+	* stabsread.c (define_symbol, read_member_functions, read_cpp_abbrev):
+	Likewise.
+	* symfile.c (obconcat): Replace the s1, s2 and s3 parameters by `...'.
+	New variable ap.  Remove variables len and val.
+	* symfile.h (obconcat): Likewise for the prototype.
+
 2010-05-07  Michael Snyder  <msnyder@vmware.com>
 
 	* python/python.c (execute_gdb_command): Remove unused variables.

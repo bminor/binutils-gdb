@@ -9200,7 +9200,7 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
   else
     {
       /* We have an obstack.  */
-      return obconcat (obs, prefix, sep, suffix);
+      return obconcat (obs, prefix, sep, suffix, (char *) NULL);
     }
 }
 

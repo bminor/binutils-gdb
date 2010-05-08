@@ -212,19 +212,29 @@ obsavestring (const char *ptr, int size, struct obstack *obstackp)
   return p;
 }
 
-/* Concatenate strings S1, S2 and S3; return the new string.  Space is found
-   in the obstack pointed to by OBSTACKP.  */
+/* Concatenate NULL terminated variable argument list of `const char *' strings;
+   return the new string.  Space is found in the OBSTACKP.  Argument list must
+   be terminated by a sentinel expression `(char *) NULL'.  */
 
 char *
-obconcat (struct obstack *obstackp, const char *s1, const char *s2,
-	  const char *s3)
+obconcat (struct obstack *obstackp, ...)
 {
-  int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
-  char *val = (char *) obstack_alloc (obstackp, len);
-  strcpy (val, s1);
-  strcat (val, s2);
-  strcat (val, s3);
-  return val;
+  va_list ap;
+
+  va_start (ap, obstackp);
+  for (;;)
+    {
+      const char *s = va_arg (ap, const char *);
+
+      if (s == NULL)
+	break;
+
+      obstack_grow_str (obstackp, s);
+    }
+  va_end (ap);
+  obstack_1grow (obstackp, 0);
+
+  return obstack_finish (obstackp);
 }
 
 /* True if we are reading a symbol table. */

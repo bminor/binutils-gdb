@@ -458,11 +458,11 @@ extern struct partial_symtab *start_psymtab_common (struct objfile *,
 
 extern char *obsavestring (const char *, int, struct obstack *);
 
-/* Concatenate strings S1, S2 and S3; return the new string.  Space is
-   found in the OBSTACKP  */
+/* Concatenate NULL terminated variable argument list of `const char *' strings;
+   return the new string.  Space is found in the OBSTACKP.  Argument list must
+   be terminated by a sentinel expression `(char *) NULL'.  */
 
-extern char *obconcat (struct obstack *obstackp, const char *, const char *,
-		       const char *);
+extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
 
 			/*   Variables   */
 

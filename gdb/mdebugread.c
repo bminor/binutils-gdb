@@ -998,8 +998,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	if (sh->iss == 0 || name[0] == '.' || name[0] == '\0')
 	  TYPE_TAG_NAME (t) = NULL;
 	else
-	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->objfile_obstack,
-					"", "", name);
+	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->objfile_obstack, name,
+					(char *) NULL);
 
 	TYPE_CODE (t) = type_code;
 	TYPE_LENGTH (t) = sh->value;
