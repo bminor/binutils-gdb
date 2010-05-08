@@ -1,3 +1,9 @@
+2010-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	Implement task switching on pa-hpux.
+	* inf-ttrace.c (inf_ttrace_get_ada_task_ptid): New function.
+	(inf_ttrace_target): Set t->to_get_ada_task_ptid.
+
 2010-05-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* valops.c (find_overload_match): Add missing i18n markup.

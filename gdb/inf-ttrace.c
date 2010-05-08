@@ -1243,6 +1243,15 @@ inf_ttrace_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 
+/* Implement the get_ada_task_ptid target_ops method.  */
+
+static ptid_t
+inf_ttrace_get_ada_task_ptid (long lwp, long thread)
+{
+  return ptid_build (ptid_get_pid (inferior_ptid), lwp, 0);
+}
+
+
 struct target_ops *
 inf_ttrace_target (void)
 {
@@ -1267,6 +1276,7 @@ inf_ttrace_target (void)
   t->to_extra_thread_info = inf_ttrace_extra_thread_info;
   t->to_pid_to_str = inf_ttrace_pid_to_str;
   t->to_xfer_partial = inf_ttrace_xfer_partial;
+  t->to_get_ada_task_ptid = inf_ttrace_get_ada_task_ptid;
 
   return t;
 }
