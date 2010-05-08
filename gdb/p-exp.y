@@ -525,6 +525,9 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
+exp	:	SIZEOF  '(' exp ')'      %prec UNARY
+			{ write_exp_elt_opcode (UNOP_SIZEOF); }
+	
 exp	:	STRING
 			{ /* C strings are converted into array constants with
 			     an explicit null byte added at the end.  Thus
