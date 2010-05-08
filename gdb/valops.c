@@ -2445,7 +2445,7 @@ find_overload_match (struct type **arg_types, int nargs,
 
   /* Did we find a match ?  */
   if (oload_champ == -1)
-    error ("No symbol \"%s\" in current context.", name);
+    error (_("No symbol \"%s\" in current context."), name);
 
   /* Check how bad the best match is.  */
   match_quality =

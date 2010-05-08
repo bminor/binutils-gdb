@@ -1,5 +1,9 @@
 2010-05-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* valops.c (find_overload_match): Add missing i18n markup.
+
+2010-05-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* p-exp.y (exp : SIZEOF '(' exp ')'): New rule.
 
 2010-05-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
