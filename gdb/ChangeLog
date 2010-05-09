@@ -1,3 +1,7 @@
+2010-05-09  Doug Evans  <dje@google.com>
+
+	* record.c (init_record_core_ops): Rename record_core to record-core.
+
 2010-05-08  Joel Brobecker  <brobecker@adacore.com>
 
 	Implement task switching on pa-hpux.

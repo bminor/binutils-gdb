@@ -1861,7 +1861,7 @@ record_core_has_execution (struct target_ops *ops)
 static void
 init_record_core_ops (void)
 {
-  record_core_ops.to_shortname = "record_core";
+  record_core_ops.to_shortname = "record-core";
   record_core_ops.to_longname = "Process record and replay target";
   record_core_ops.to_doc =
     "Log program while executing and replay execution from log.";
