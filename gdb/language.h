@@ -381,9 +381,9 @@ struct type *language_lookup_primitive_type_by_name (const struct language_defn 
 
 /* "cast" really means conversion */
 /* FIXME -- should be a setting in language_defn */
-#define CAST_IS_CONVERSION (current_language->la_language == language_c  || \
-			    current_language->la_language == language_cplus || \
-			    current_language->la_language == language_objc)
+#define CAST_IS_CONVERSION(LANG) ((LANG)->la_language == language_c  || \
+				  (LANG)->la_language == language_cplus || \
+				  (LANG)->la_language == language_objc)
 
 extern void language_info (int);
 

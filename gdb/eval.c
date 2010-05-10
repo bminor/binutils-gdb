@@ -633,7 +633,7 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 }
 
 static int
-ptrmath_type_p (struct type *type)
+ptrmath_type_p (const struct language_defn *lang, struct type *type)
 {
   type = check_typedef (type);
   if (TYPE_CODE (type) == TYPE_CODE_REF)
@@ -646,7 +646,7 @@ ptrmath_type_p (struct type *type)
       return 1;
 
     case TYPE_CODE_ARRAY:
-      return current_language->c_style_arrays;
+      return lang->c_style_arrays;
 
     default:
       return 0;
@@ -1906,10 +1906,12 @@ evaluate_subexp_standard (struct type *expect_type,
       op = exp->elts[pc + 1].opcode;
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op, noside);
-      else if (op == BINOP_ADD && ptrmath_type_p (value_type (arg1))
+      else if (op == BINOP_ADD && ptrmath_type_p (exp->language_defn,
+						  value_type (arg1))
 	       && is_integral_type (value_type (arg2)))
 	arg2 = value_ptradd (arg1, value_as_long (arg2));
-      else if (op == BINOP_SUB && ptrmath_type_p (value_type (arg1))
+      else if (op == BINOP_SUB && ptrmath_type_p (exp->language_defn,
+						  value_type (arg1))
 	       && is_integral_type (value_type (arg2)))
 	arg2 = value_ptradd (arg1, - value_as_long (arg2));
       else
@@ -1935,10 +1937,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
-      else if (ptrmath_type_p (value_type (arg1))
+      else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
 	       && is_integral_type (value_type (arg2)))
 	return value_ptradd (arg1, value_as_long (arg2));
-      else if (ptrmath_type_p (value_type (arg2))
+      else if (ptrmath_type_p (exp->language_defn, value_type (arg2))
 	       && is_integral_type (value_type (arg1)))
 	return value_ptradd (arg2, value_as_long (arg1));
       else
@@ -1954,14 +1956,14 @@ evaluate_subexp_standard (struct type *expect_type,
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
-      else if (ptrmath_type_p (value_type (arg1))
-	       && ptrmath_type_p (value_type (arg2)))
+      else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
+	       && ptrmath_type_p (exp->language_defn, value_type (arg2)))
 	{
 	  /* FIXME -- should be ptrdiff_t */
 	  type = builtin_type (exp->gdbarch)->builtin_long;
 	  return value_from_longest (type, value_ptrdiff (arg1, arg2));
 	}
-      else if (ptrmath_type_p (value_type (arg1))
+      else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
 	       && is_integral_type (value_type (arg2)))
 	return value_ptradd (arg1, - value_as_long (arg2));
       else
@@ -2031,8 +2033,8 @@ evaluate_subexp_standard (struct type *expect_type,
       error (_("':' operator used in invalid context"));
 
     case BINOP_SUBSCRIPT:
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
@@ -2572,7 +2574,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  if (ptrmath_type_p (value_type (arg1)))
+	  if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
 	    arg2 = value_ptradd (arg1, 1);
 	  else
 	    {
@@ -2595,7 +2597,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  if (ptrmath_type_p (value_type (arg1)))
+	  if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
 	    arg2 = value_ptradd (arg1, -1);
 	  else
 	    {
@@ -2618,7 +2620,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  if (ptrmath_type_p (value_type (arg1)))
+	  if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
 	    arg2 = value_ptradd (arg1, 1);
 	  else
 	    {
@@ -2642,7 +2644,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  if (ptrmath_type_p (value_type (arg1)))
+	  if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
 	    arg2 = value_ptradd (arg1, -1);
 	  else
 	    {
@@ -2832,7 +2834,7 @@ evaluate_subexp_with_coercion (struct expression *exp,
       var = exp->elts[pc + 2].symbol;
       type = check_typedef (SYMBOL_TYPE (var));
       if (TYPE_CODE (type) == TYPE_CODE_ARRAY
-	  && CAST_IS_CONVERSION)
+	  && CAST_IS_CONVERSION (exp->language_defn))
 	{
 	  (*pos) += 4;
 	  val = address_of_variable (var, exp->elts[pc + 1].block);
