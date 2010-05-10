@@ -1,3 +1,7 @@
+2010-05-10  Michael Snyder  <msnyder@vmware.com>
+
+	* utils.c (do_fclose_cleanup) Restore local variable.
+
 2010-05-09  Doug Evans  <dje@google.com>
 
 	* record.c (init_record_core_ops): Rename record_core to record-core.

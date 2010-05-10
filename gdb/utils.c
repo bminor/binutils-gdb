@@ -266,7 +266,8 @@ make_cleanup_close (int fd)
 static void
 do_fclose_cleanup (void *arg)
 {
-  fclose (arg);
+  FILE *file = arg;
+  fclose (file);
 }
 
 /* Return a new cleanup that closes FILE.  */
