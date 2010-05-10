@@ -250,6 +250,7 @@ static void
 do_close_cleanup (void *arg)
 {
   int *fd = arg;
+
   close (*fd);
 }
 
@@ -257,6 +258,7 @@ struct cleanup *
 make_cleanup_close (int fd)
 {
   int *saved_fd = xmalloc (sizeof (fd));
+
   *saved_fd = fd;
   return make_cleanup_dtor (do_close_cleanup, saved_fd, xfree);
 }
@@ -267,6 +269,7 @@ static void
 do_fclose_cleanup (void *arg)
 {
   FILE *file = arg;
+
   fclose (file);
 }
 
@@ -284,6 +287,7 @@ static void
 do_obstack_free (void *arg)
 {
   struct obstack *ob = arg;
+
   obstack_free (ob, NULL);
 }
 
@@ -329,6 +333,7 @@ static void
 restore_integer (void *p)
 {
   struct restore_integer_closure *closure = p;
+
   *(closure->variable) = closure->value;
 }
 
@@ -339,6 +344,7 @@ make_cleanup_restore_integer (int *variable)
 {
   struct restore_integer_closure *c =
     xmalloc (sizeof (struct restore_integer_closure));
+
   c->variable = variable;
   c->value = *variable;
 
@@ -390,6 +396,7 @@ do_my_cleanups (struct cleanup **pmy_chain,
 		struct cleanup *old_chain)
 {
   struct cleanup *ptr;
+
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;	/* Do this first incase recursion */
@@ -420,6 +427,7 @@ discard_my_cleanups (struct cleanup **pmy_chain,
 		     struct cleanup *old_chain)
 {
   struct cleanup *ptr;
+
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
@@ -482,6 +490,7 @@ void
 free_current_contents (void *ptr)
 {
   void **location = ptr;
+
   if (location == NULL)
     internal_error (__FILE__, __LINE__,
 		    _("free_current_contents: NULL pointer"));
@@ -577,6 +586,7 @@ void
 discard_all_inferior_continuations (struct inferior *inf)
 {
   struct cleanup *continuation_ptr = &inf->continuations->base;
+
   discard_my_cleanups (&continuation_ptr, NULL);
   inf->continuations = NULL;
 }
@@ -585,6 +595,7 @@ static void
 restore_thread_cleanup (void *arg)
 {
   ptid_t *ptid_p = arg;
+
   switch_to_thread (*ptid_p);
 }
 
@@ -665,6 +676,7 @@ discard_all_continuations_thread_callback (struct thread_info *thread,
 					   void *data)
 {
   struct cleanup *continuation_ptr = &thread->continuations->base;
+
   discard_my_cleanups (&continuation_ptr, NULL);
   thread->continuations = NULL;
   return 0;
@@ -741,6 +753,7 @@ discard_all_intermediate_continuations_thread_callback (struct thread_info *thre
 							void *data)
 {
   struct cleanup *continuation_ptr = &thread->intermediate_continuations->base;
+
   discard_my_cleanups (&continuation_ptr, NULL);
   thread->intermediate_continuations = NULL;
   return 0;
@@ -796,6 +809,7 @@ void
 warning (const char *string, ...)
 {
   va_list args;
+
   va_start (args, string);
   vwarning (string, args);
   va_end (args);
@@ -815,6 +829,7 @@ void
 error (const char *string, ...)
 {
   va_list args;
+
   va_start (args, string);
   throw_verror (GENERIC_ERROR, string, args);
   va_end (args);
@@ -834,6 +849,7 @@ void
 fatal (const char *string, ...)
 {
   va_list args;
+
   va_start (args, string);
   throw_vfatal (string, args);
   va_end (args);
@@ -843,6 +859,7 @@ void
 error_stream (struct ui_file *stream)
 {
   char *message = ui_file_xstrdup (stream, NULL);
+
   make_cleanup (xfree, message);
   error (("%s"), message);
 }
@@ -1045,6 +1062,7 @@ void
 internal_error (const char *file, int line, const char *string, ...)
 {
   va_list ap;
+
   va_start (ap, string);
   internal_verror (file, line, string, ap);
   va_end (ap);
@@ -1064,6 +1082,7 @@ void
 internal_warning (const char *file, int line, const char *string, ...)
 {
   va_list ap;
+
   va_start (ap, string);
   internal_vwarning (file, line, string, ap);
   va_end (ap);
@@ -1343,6 +1362,7 @@ xstrprintf (const char *format, ...)
 {
   char *ret;
   va_list args;
+
   va_start (args, format);
   ret = xstrvprintf (format, args);
   va_end (args);
@@ -1353,6 +1373,7 @@ void
 xasprintf (char **ret, const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   (*ret) = xstrvprintf (format, args);
   va_end (args);
@@ -1369,6 +1390,7 @@ xstrvprintf (const char *format, va_list ap)
 {
   char *ret = NULL;
   int status = vasprintf (&ret, format, ap);
+
   /* NULL is returned when there was a memory allocation problem, or
      any other error (for instance, a bad format string).  A negative
      status (the printed length) with a non-NULL buffer should never
@@ -1422,6 +1444,7 @@ char *
 savestring (const char *ptr, size_t size)
 {
   char *p = (char *) xmalloc (size + 1);
+
   memcpy (p, ptr, size);
   p[size] = 0;
   return p;
@@ -1697,6 +1720,7 @@ parse_escape (struct gdbarch *gdbarch, char **string_ptr)
 {
   int target_char = -2;	/* initialize to avoid GCC warnings */
   int c = *(*string_ptr)++;
+
   switch (c)
     {
       case '\n':
@@ -1844,6 +1868,7 @@ fputstrn_filtered (const char *str, int n, int quoter,
 		   struct ui_file *stream)
 {
   int i;
+
   for (i = 0; i < n; i++)
     printchar (str[i], fputs_filtered, fprintf_filtered, stream, quoter);
 }
@@ -2315,6 +2340,7 @@ int
 putchar_unfiltered (int c)
 {
   char buf = c;
+
   ui_file_write (gdb_stdout, &buf, 1);
   return c;
 }
@@ -2332,6 +2358,7 @@ int
 fputc_unfiltered (int c, struct ui_file *stream)
 {
   char buf = c;
+
   ui_file_write (stream, &buf, 1);
   return c;
 }
@@ -2513,6 +2540,7 @@ void
 fprintf_filtered (struct ui_file *stream, const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   vfprintf_filtered (stream, format, args);
   va_end (args);
@@ -2522,6 +2550,7 @@ void
 fprintf_unfiltered (struct ui_file *stream, const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   vfprintf_unfiltered (stream, format, args);
   va_end (args);
@@ -2535,6 +2564,7 @@ fprintfi_filtered (int spaces, struct ui_file *stream, const char *format,
 		   ...)
 {
   va_list args;
+
   va_start (args, format);
   print_spaces_filtered (spaces, stream);
 
@@ -2547,6 +2577,7 @@ void
 printf_filtered (const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);
@@ -2557,6 +2588,7 @@ void
 printf_unfiltered (const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   vfprintf_unfiltered (gdb_stdout, format, args);
   va_end (args);
@@ -2569,6 +2601,7 @@ void
 printfi_filtered (int spaces, const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   print_spaces_filtered (spaces, gdb_stdout);
   vfprintf_filtered (gdb_stdout, format, args);
@@ -2788,6 +2821,7 @@ int
 subset_compare (char *string_to_compare, char *template_string)
 {
   int match;
+
   if (template_string != (char *) NULL && string_to_compare != (char *) NULL
       && strlen (string_to_compare) <= strlen (template_string))
     match =
@@ -2899,6 +2933,7 @@ get_cell (void)
 {
   static char buf[NUMCELLS][CELLSIZE];
   static int cell = 0;
+
   if (++cell >= NUMCELLS)
     cell = 0;
   return buf[cell];
@@ -3097,6 +3132,7 @@ char *
 hex_string (LONGEST num)
 {
   char *result = get_cell ();
+
   xsnprintf (result, CELLSIZE, "0x%s", phex_nz (num, sizeof (num)));
   return result;
 }
@@ -3175,6 +3211,7 @@ const char *
 core_addr_to_string (const CORE_ADDR addr)
 {
   char *str = get_cell ();
+
   strcpy (str, "0x");
   strcat (str, phex (addr, sizeof (addr)));
   return str;
@@ -3184,6 +3221,7 @@ const char *
 core_addr_to_string_nz (const CORE_ADDR addr)
 {
   char *str = get_cell ();
+
   strcpy (str, "0x");
   strcat (str, phex_nz (addr, sizeof (addr)));
   return str;
@@ -3447,6 +3485,7 @@ hashtab_obstack_allocate (void *data, size_t size, size_t count)
 {
   unsigned int total = size * count;
   void *ptr = obstack_alloc ((struct obstack *) data, total);
+
   memset (ptr, 0, total);
   return ptr;
 }
@@ -3598,6 +3637,7 @@ char **
 gdb_buildargv (const char *s)
 {
   char **argv = buildargv (s);
+
   if (s != NULL && argv == NULL)
     nomem (0);
   return argv;
