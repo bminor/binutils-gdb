@@ -2033,8 +2033,8 @@ evaluate_subexp_standard (struct type *expect_type,
       error (_("':' operator used in invalid context"));
 
     case BINOP_SUBSCRIPT:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))

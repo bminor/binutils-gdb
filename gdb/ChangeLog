@@ -1,3 +1,7 @@
+2010-05-11  Tom Tromey  <tromey@redhat.com>
+
+	* eval.c (evaluate_subexp_standard): Revert inadvertent change.
+
 2010-05-10  Michael Snyder  <msnyder@vmware.com>
 
 	* utils.c: White space cleanup.
