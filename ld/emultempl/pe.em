@@ -145,6 +145,17 @@ extern const char *output_filename;
 static void
 gld_${EMULATION_NAME}_before_parse (void)
 {
+  int u;
+  /* Now we check target's default for getting proper symbol_char.  */
+  u = pe_leading_underscore;
+  if (u == -1
+      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
+    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
+
+  if (u == -1)
+    abort ();
+  pe_leading_underscore = u;
+
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
 #ifdef DLL_SUPPORT
@@ -463,7 +474,17 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
 static void
 set_pe_name (char *name, long val)
 {
-  int i;
+  int i, u;
+
+  /* Now we check target's default for getting proper symbol_char.  */
+  u = pe_leading_underscore;
+  if (u == -1
+      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
+    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
+
+  if (u == -1)
+    abort ();
+  pe_leading_underscore = u;
 
   /* Find the name and set it.  */
   for (i = 0; init[i].ptr; i++)
@@ -530,15 +551,13 @@ set_entry_point (void)
 
   /* Now we check target's default for getting proper symbol_char.  */
   u = pe_leading_underscore;
-  if (u == -1 && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
+  if (u == -1
+      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
     bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
 
-  if (u == 0)
-    initial_symbol_char = "";
-  else if (u != -1)
-    initial_symbol_char = "_";
-  else
+  if (u == -1)
     abort ();
+  initial_symbol_char = (u == 1 ? "_" : "");
   pe_leading_underscore = u;
 
   if (*initial_symbol_char != '\0')
@@ -896,7 +915,16 @@ gld_${EMULATION_NAME}_set_symbols (void)
 {
   /* Run through and invent symbols for all the
      names and insert the defaults.  */
-  int j;
+  int j, u;
+  /* Now we check target's default for getting proper symbol_char.  */
+  u = pe_leading_underscore;
+  if (u == -1
+      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
+    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
+
+  if (u == -1)
+    abort ();
+  pe_leading_underscore = u;
 
   if (!init[IMAGEBASEOFF].inited)
     {
