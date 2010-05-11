@@ -1313,6 +1313,34 @@ proc_what (procinfo *pi)
 #endif
 }
 
+/*
+ * Function: proc_watchpoint_address
+ *
+ *   This function is only called when PI is stopped by a watchpoint.
+ *   Assuming OS supports it, write to *ADDR the data address which
+ * triggered it and return 1.
+ * Return 0 if it is not possible to know the address.
+ */
+
+static int
+proc_watchpoint_address (procinfo *pi, CORE_ADDR *addr)
+{
+  if (!pi->status_valid)
+    if (!proc_get_status (pi))
+      return 0;
+
+#ifdef NEW_PROC_API
+  *addr = (CORE_ADDR) gdbarch_pointer_to_address (target_gdbarch,
+	    builtin_type (target_gdbarch)->builtin_data_ptr,
+	    (gdb_byte *) &pi->prstatus.pr_lwp.pr_info.si_addr);
+#else
+  *addr = (CORE_ADDR) gdbarch_pointer_to_address (target_gdbarch,
+	    builtin_type (target_gdbarch)->builtin_data_ptr,
+	    (gdb_byte *) &pi->prstatus.pr_info.si_addr);
+#endif
+  return 1;
+}
+
 #ifndef PIOCSSPCACT	/* The following is not supported on OSF.  */
 /*
  * Function: proc_nsysarg
@@ -5541,9 +5569,6 @@ procfs_stopped_by_watchpoint (void)
 
   pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
 
-  if (!pi)	/* If no process, then not stopped by watchpoint!  */
-    return 0;
-
   if (proc_flags (pi) & (PR_STOPPED | PR_ISTOP))
     {
       if (proc_why (pi) == PR_FAULTED)
@@ -5559,6 +5584,26 @@ procfs_stopped_by_watchpoint (void)
 	}
     }
   return 0;
+}
+
+/*
+ * Function procfs_stopped_data_address
+ * 
+ * Returns 1 if we the OS knows the position of the triggered
+ * watchpoint.  Sets *ADDR to that address.
+ * Returns 0 if OS cannot report that address.
+ * This function is only called if procfs_stopped_by_watchpoint
+ * returned 1, thus no further checks are done.
+ * The function also assumes that ADDR is not NULL.
+ */
+
+static int
+procfs_stopped_data_address (struct target_ops *targ, CORE_ADDR *addr)
+{
+  procinfo *pi;
+
+  pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
+  return proc_watchpoint_address (pi, addr);
 }
 
 static int
@@ -5607,6 +5652,7 @@ procfs_use_watchpoints (struct target_ops *t)
   t->to_remove_watchpoint = procfs_remove_watchpoint;
   t->to_region_ok_for_hw_watchpoint = procfs_region_ok_for_hw_watchpoint;
   t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
+  t->to_stopped_data_address = procfs_stopped_data_address;
 }
 
 /*
