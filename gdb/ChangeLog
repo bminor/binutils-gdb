@@ -1,5 +1,11 @@
 2010-05-11  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	PR exp/11530.
+	* gdbtypes.c (lookup_struct_elt_type): Also lookup
+	names of unnamed structures or unions.
+
+2010-05-11  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* procfs.c (proc_watchpoint_address): New function.
 	(procfs_stopped_by_watchpoint): Remove useless check after 
 	find_procinfo_or_die call.

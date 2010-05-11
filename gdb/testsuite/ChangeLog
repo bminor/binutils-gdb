@@ -1,3 +1,9 @@
+2010-05-11  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	PR exp/11530.
+	* gdb.base/gdb11530.c: New file.
+	* gdb.base/gdb11530.exp: New file.
+
 2010-05-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-modula2-self-type.exp: New.

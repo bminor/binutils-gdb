@@ -1244,6 +1244,13 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
 	{
 	  return TYPE_FIELD_TYPE (type, i);
 	}
+     else if (!t_field_name || *t_field_name == '\0')
+	{
+	  struct type *subtype = lookup_struct_elt_type (
+				   TYPE_FIELD_TYPE (type, i), name, 1);
+	  if (subtype != NULL)
+	    return subtype;
+	}
     }
 
   /* OK, it's not in this class.  Recursively check the baseclasses.  */
