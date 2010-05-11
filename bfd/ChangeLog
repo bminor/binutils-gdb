@@ -1,3 +1,8 @@
+2010-05-11  Alan Modra  <amodra@gmail.com>
+
+	* coffcode.h (coff_write_object_contents): Enclose all occurrences
+	of hasdebug and is_reloc_section in #ifdef COFF_IMAGE_WITH_PE.
+
 2010-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (struct a8_erratum_reloc): Add hash member.  Move
