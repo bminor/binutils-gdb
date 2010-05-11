@@ -1,3 +1,54 @@
+2010-05-11  Andrew Stubbs  <ams@codesourcery.com>
+
+	* ld-arm/attr-merge-2.attr: Add Tag_DIV_use.
+	* ld-arm/attr-merge-2a.s: Likewise.
+	* ld-arm/attr-merge-2b.s: Likewise.
+	* ld-arm/attr-merge-3a.s: Likewise.
+	* ld-arm/attr-merge-3b.s: Likewise.
+	* ld-arm/attr-merge-4.attr: Likewise.
+	* ld-arm/attr-merge-5.attr: Likewise.
+	* ld-arm/attr-merge-6.attr: Likewise.
+	* ld-arm/attr-merge-7.attr: Likewise.
+	* ld-arm/attr-merge-arch-1.attr: Likewise.
+	* ld-arm/attr-merge-arch-2.attr: Likewise.
+	* ld-arm/attr-merge-unknown-2.d: Likewise.
+	* ld-arm/attr-merge-unknown-2r.d: Likewise.
+	* ld-arm/attr-merge-unknown-3.d: Likewise.
+	* ld-arm/attr-merge-vfp-1.d: Likewise.
+	* ld-arm/attr-merge-vfp-1r.d: Likewise.
+	* ld-arm/attr-merge-vfp-2.d: Likewise.
+	* ld-arm/attr-merge-vfp-2r.d: Likewise.
+	* ld-arm/attr-merge-vfp-3.d: Likewise.
+	* ld-arm/attr-merge-vfp-3r.d: Likewise.
+	* ld-arm/attr-merge-vfp-4.d: Likewise.
+	* ld-arm/attr-merge-vfp-4r.d: Likewise.
+	* ld-arm/attr-merge-vfp-5.d: Likewise.
+	* ld-arm/attr-merge-vfp-5r.d: Likewise.
+	* ld-arm/attr-merge-wchar-00-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-00.d: Likewise.
+	* ld-arm/attr-merge-wchar-02-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-02.d: Likewise.
+	* ld-arm/attr-merge-wchar-04-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-04.d: Likewise.
+	* ld-arm/attr-merge-wchar-20-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-20.d: Likewise.
+	* ld-arm/attr-merge-wchar-22-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-22.d: Likewise.
+	* ld-arm/attr-merge-wchar-24-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-40-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-40.d: Likewise.
+	* ld-arm/attr-merge-wchar-42-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-44-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-44.d: Likewise.
+	* ld-arm/attr-merge.attr: Likewise.
+
+2010-05-11  Jie Zhang  <jie@codesourcery.com>
+
+	* ld-arm/attr-merge-vfp-6.d: New test.
+	* ld-arm/attr-merge-vfp-6r.d: New test.
+	* ld-arm/attr-merge-vfpv3xd.s: New test.
+	* ld-arm/arm-elf.exp: Add attr-merge-vfp-6 and attr-merge-vfp-6r.
+
 2010-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/cortex-a8-fix-bl-rel-plt.d: New file.

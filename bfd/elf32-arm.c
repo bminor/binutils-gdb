@@ -10106,6 +10106,11 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  break;
 	case Tag_FP_arch:
 	    {
+	      /* Tag_ABI_HardFP_use is handled along with Tag_FP_arch since
+		 the meaning of Tag_ABI_HardFP_use depends on Tag_FP_arch
+		 when it's 0.  It might mean absence of FP hardware if
+		 Tag_FP_arch is zero, otherwise it is effectively SP + DP.  */
+
 	      static const struct
 	      {
 		  int ver;
@@ -10123,6 +10128,40 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      int ver;
 	      int regs;
 	      int newval;
+
+	      /* If the output has no requirement about FP hardware,
+		 follow the requirement of the input.  */
+	      if (out_attr[i].i == 0)
+		{
+		  BFD_ASSERT (out_attr[Tag_ABI_HardFP_use].i == 0);
+		  out_attr[i].i = in_attr[i].i;
+		  out_attr[Tag_ABI_HardFP_use].i
+		    = in_attr[Tag_ABI_HardFP_use].i;
+		  break;
+		}
+	      /* If the input has no requirement about FP hardware, do
+		 nothing.  */
+	      else if (in_attr[i].i == 0)
+		{
+		  BFD_ASSERT (in_attr[Tag_ABI_HardFP_use].i == 0);
+		  break;
+		}
+
+	      /* Both the input and the output have nonzero Tag_FP_arch.
+		 So Tag_ABI_HardFP_use is (SP & DP) when it's zero.  */
+
+	      /* If both the input and the output have zero Tag_ABI_HardFP_use,
+		 do nothing.  */
+	      if (in_attr[Tag_ABI_HardFP_use].i == 0
+		  && out_attr[Tag_ABI_HardFP_use].i == 0)
+		;
+	      /* If the input and the output have different Tag_ABI_HardFP_use,
+		 the combination of them is 3 (SP & DP).  */
+	      else if (in_attr[Tag_ABI_HardFP_use].i
+		       != out_attr[Tag_ABI_HardFP_use].i)
+		out_attr[Tag_ABI_HardFP_use].i = 3;
+
+	      /* Now we can handle Tag_FP_arch.  */
 
 	      /* Values greater than 6 aren't defined, so just pick the
 	         biggest */
@@ -10244,12 +10283,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  /* Merged in target-independent code.  */
 	  break;
 	case Tag_ABI_HardFP_use:
-	  /* 1 (SP) and 2 (DP) conflict, so combine to 3 (SP & DP).  */
-	  if ((in_attr[i].i == 1 && out_attr[i].i == 2)
-	      || (in_attr[i].i == 2 && out_attr[i].i == 1))
-	    out_attr[i].i = 3;
-	  else if (in_attr[i].i > out_attr[i].i)
-	    out_attr[i].i = in_attr[i].i;
+	  /* This is handled along with Tag_FP_arch.  */
 	  break;
 	case Tag_ABI_FP_16bit_format:
 	  if (in_attr[i].i != 0 && out_attr[i].i != 0)

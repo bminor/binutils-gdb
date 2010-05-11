@@ -559,7 +559,7 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> e854 1f81 	ldrex	r1, \[r4, #516\].*
 0[0-9a-f]+ <[^>]+> e844 2181 	strex	r1, r2, \[r4, #516\].*
 0[0-9a-f]+ <[^>]+> c80e      	ldmia	r0!, \{r1, r2, r3\}
-0[0-9a-f]+ <[^>]+> ca07      	ldmia	r2!, \{r0, r1, r2\}
+0[0-9a-f]+ <[^>]+> ca07      	ldmia	r2, \{r0, r1, r2\}
 0[0-9a-f]+ <[^>]+> e892 0007 	ldmia\.w	r2, \{r0, r1, r2\}
 0[0-9a-f]+ <[^>]+> e899 0007 	ldmia\.w	r9, \{r0, r1, r2\}
 0[0-9a-f]+ <[^>]+> e890 0580 	ldmia\.w	r0, \{r7, r8, sl\}

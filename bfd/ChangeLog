@@ -1,3 +1,8 @@
+2010-05-11  Jie Zhang  <jie@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Merge
+	Tag_ABI_HardFP_use correctly.
+
 2010-05-11  Alan Modra  <amodra@gmail.com>
 
 	* coffcode.h (coff_write_object_contents): Enclose all occurrences

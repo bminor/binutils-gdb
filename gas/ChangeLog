@@ -1,3 +1,12 @@
+2010-05-11  Andrew Stubbs  <ams@codesourcery.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Set Tag_DIV_use.
+
+2010-05-11  Jie Zhang  <jie@codesourcery.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Set
+	Tag_ABI_HardFP_use to 1 if a single precision FPU is selected.
+
 2010-05-07  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.in: Regenerate with automake 1.11.1.

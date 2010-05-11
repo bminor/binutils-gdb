@@ -1,3 +1,9 @@
+2010-05-11  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-dis.c (thumb_opcodes): Update ldmia entry to use new %W
+	format.
+	(print_insn_thumb16): Add support for new %W format.
+
 2010-05-07  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.in: Regenerate with automake 1.11.1.

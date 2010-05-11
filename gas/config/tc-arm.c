@@ -22856,6 +22856,11 @@ aeabi_set_public_attributes (void)
            || ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1xd))
     aeabi_set_attribute_int (Tag_VFP_arch, 1);
 
+  /* Tag_ABI_HardFP_use.  */
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1xd)
+      && !ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1))
+    aeabi_set_attribute_int (Tag_ABI_HardFP_use, 1);
+
   /* Tag_WMMX_arch.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_cext_iwmmxt2))
     aeabi_set_attribute_int (Tag_WMMX_arch, 2);
@@ -22871,6 +22876,15 @@ aeabi_set_public_attributes (void)
   /* Tag_VFP_HP_extension (formerly Tag_NEON_FP16_arch).  */
   if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_fp16))
     aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
+
+  /* Tag_DIV_use.  */
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_div))
+    aeabi_set_attribute_int (Tag_DIV_use, 0);
+  /* Fill this in when gas supports v7a sdiv/udiv.
+    else if (... v7a with div extension used ...)
+      aeabi_set_attribute_int (Tag_DIV_use, 2);  */
+  else
+    aeabi_set_attribute_int (Tag_DIV_use, 1);
 }
 
 /* Add the default contents for the .ARM.attributes section.  */

@@ -1,3 +1,83 @@
+2010-05-11  Andrew Stubbs  <ams@codesourcery.com>
+
+	* gas/arm/attr-cpu-directive.d: Add Tag_DIV_use.
+	* gas/arm/attr-default.d: Likewise.
+	* gas/arm/attr-march-armv1.d: Likewise.
+	* gas/arm/attr-march-armv2.d: Likewise.
+	* gas/arm/attr-march-armv2a.d: Likewise.
+	* gas/arm/attr-march-armv2s.d: Likewise.
+	* gas/arm/attr-march-armv3.d: Likewise.
+	* gas/arm/attr-march-armv3m.d: Likewise.
+	* gas/arm/attr-march-armv4.d: Likewise.
+	* gas/arm/attr-march-armv4t.d: Likewise.
+	* gas/arm/attr-march-armv4txm.d: Likewise.
+	* gas/arm/attr-march-armv4xm.d: Likewise.
+	* gas/arm/attr-march-armv5.d: Likewise.
+	* gas/arm/attr-march-armv5t.d: Likewise.
+	* gas/arm/attr-march-armv5te.d: Likewise.
+	* gas/arm/attr-march-armv5tej.d: Likewise.
+	* gas/arm/attr-march-armv5texp.d: Likewise.
+	* gas/arm/attr-march-armv5txm.d: Likewise.
+	* gas/arm/attr-march-armv6-m.d: Likewise.
+	* gas/arm/attr-march-armv6.d: Likewise.
+	* gas/arm/attr-march-armv6j.d: Likewise.
+	* gas/arm/attr-march-armv6k.d: Likewise.
+	* gas/arm/attr-march-armv6kt2.d: Likewise.
+	* gas/arm/attr-march-armv6t2.d: Likewise.
+	* gas/arm/attr-march-armv6z.d: Likewise.
+	* gas/arm/attr-march-armv6zk.d: Likewise.
+	* gas/arm/attr-march-armv6zkt2.d: Likewise.
+	* gas/arm/attr-march-armv6zt2.d: Likewise.
+	* gas/arm/attr-march-armv7-a.d: Likewise.
+	* gas/arm/attr-march-armv7.d: Likewise.
+	* gas/arm/attr-march-armv7a.d: Likewise.
+	* gas/arm/attr-march-iwmmxt.d: Likewise.
+	* gas/arm/attr-march-iwmmxt2.d: Likewise.
+	* gas/arm/attr-march-marvell-f.d: Likewise.
+	* gas/arm/attr-march-xscale.d: Likewise.
+	* gas/arm/attr-mcpu.d: Likewise.
+	* gas/arm/attr-mfpu-arm1020e.d: Likewise.
+	* gas/arm/attr-mfpu-arm1020t.d: Likewise.
+	* gas/arm/attr-mfpu-arm1136jf-s.d: Likewise.
+	* gas/arm/attr-mfpu-arm1136jfs.d: Likewise.
+	* gas/arm/attr-mfpu-arm7500fe.d: Likewise.
+	* gas/arm/attr-mfpu-fpa.d: Likewise.
+	* gas/arm/attr-mfpu-fpa10.d: Likewise.
+	* gas/arm/attr-mfpu-fpa11.d: Likewise.
+	* gas/arm/attr-mfpu-fpe.d: Likewise.
+	* gas/arm/attr-mfpu-fpe2.d: Likewise.
+	* gas/arm/attr-mfpu-fpe3.d: Likewise.
+	* gas/arm/attr-mfpu-maverick.d: Likewise.
+	* gas/arm/attr-mfpu-neon-fp16.d: Likewise.
+	* gas/arm/attr-mfpu-neon.d: Likewise.
+	* gas/arm/attr-mfpu-softfpa.d: Likewise.
+	* gas/arm/attr-mfpu-softvfp+vfp.d: Likewise.
+	* gas/arm/attr-mfpu-softvfp.d: Likewise.
+	* gas/arm/attr-mfpu-vfp.d: Likewise.
+	* gas/arm/attr-mfpu-vfp10-r0.d: Likewise.
+	* gas/arm/attr-mfpu-vfp10.d: Likewise.
+	* gas/arm/attr-mfpu-vfp3.d: Likewise.
+	* gas/arm/attr-mfpu-vfp9.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv2.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv3-d16.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv3.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv4-d16.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv4.d: Likewise.
+	* gas/arm/attr-mfpu-vfpxd.d: Likewise.
+	* gas/arm/attr-order.d: Likewise.
+	* gas/arm/attr-override-cpu-directive.d: Likewise.
+	* gas/arm/attr-override-mcpu.d: Likewise.
+	* gas/arm/eabi_attr_1.d: Likewise.
+
+2010-05-11  Jie Zhang  <jie@codesourcery.com>
+
+	* gas/arm/attr-mfpu-vfpxd.d: New test.
+
+2010-05-11  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/thumb32.d: Fix expected disassembly of ldmia
+	instruction.
+
 2010-05-05  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/all/byte.s: New.

@@ -1161,6 +1161,7 @@ static const struct opcode32 arm_opcodes[] =
    %x			print warning if conditional an not at end of IT block"
    %X			print "\t; unpredictable <IT:code>" if conditional
    %I			print IT instruction suffix and operands
+   %W			print Thumb Writeback indicator for LDMIA
    %<bitfield>r		print bitfield as an ARM register
    %<bitfield>d		print bitfield as a decimal
    %<bitfield>H         print (bitfield * 2) as a decimal
@@ -1274,7 +1275,7 @@ static const struct opcode16 thumb_opcodes[] =
   {ARM_EXT_V4T, 0xA800, 0xF800, "add%c\t%8-10r, sp, #%0-7W"},
   /* format 15 */
   {ARM_EXT_V4T, 0xC000, 0xF800, "stmia%c\t%8-10r!, %M"},
-  {ARM_EXT_V4T, 0xC800, 0xF800, "ldmia%c\t%8-10r!, %M"},
+  {ARM_EXT_V4T, 0xC800, 0xF800, "ldmia%c\t%8-10r%W, %M"},
   /* format 17 */
   {ARM_EXT_V4T, 0xDF00, 0xFF00, "svc%c\t%0-7d"},
   /* format 16 */
@@ -3437,6 +3438,14 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 		  func (stream, "}");
 		}
 		break;
+
+	      case 'W':
+		/* Print writeback indicator for a LDMIA.  We are doing a
+		   writeback if the base register is not in the register
+		   mask.  */
+		if ((given & (1 << ((given & 0x0700) >> 8))) == 0)
+		  func (stream, "!");
+	      	break;
 
 	      case 'b':
 		/* Print ARM V6T2 CZB address: pc+4+6 bits.  */
