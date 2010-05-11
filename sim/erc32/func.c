@@ -421,7 +421,7 @@ exec_cmd(sregs, cmd)
 	    }
 	} else if (strncmp(cmd1, "cont", clen) == 0) {
 	    if ((cmd1 = strtok(NULL, " \t\n\r")) == NULL) {
-		stat = run_sim(sregs, -1, 0);
+		stat = run_sim(sregs, UINT64_MAX, 0);
 	    } else {
 		stat = run_sim(sregs, VAL(cmd1), 0);
 	    }
@@ -472,7 +472,7 @@ exec_cmd(sregs, cmd)
 	    if ((cmd2 = strtok(NULL, " \t\n\r")) != NULL) {
 		stat = run_sim(sregs, VAL(cmd2), 0);
 	    } else {
-		stat = run_sim(sregs, -1, 0);
+		stat = run_sim(sregs, UINT64_MAX, 0);
 	    }
 	    daddr = sregs->pc;
 	    sim_halt();
@@ -544,7 +544,7 @@ exec_cmd(sregs, cmd)
 	    reset_all();
 	    reset_stat(sregs);
 	    if ((cmd1 = strtok(NULL, " \t\n\r")) == NULL) {
-		stat = run_sim(sregs, -1, 0);
+		stat = run_sim(sregs, UINT64_MAX, 0);
 	    } else {
 		stat = run_sim(sregs, VAL(cmd1), 0);
 	    }
@@ -560,7 +560,7 @@ exec_cmd(sregs, cmd)
 	    sim_halt();
 	} else if (strncmp(cmd1, "tcont", clen) == 0) {
 	    sregs->tlimit = limcalc(sregs->freq);
-	    stat = run_sim(sregs, -1, 0);
+	    stat = run_sim(sregs, UINT64_MAX, 0);
 	    daddr = sregs->pc;
 	    sim_halt();
 	} else if (strncmp(cmd1, "tgo", clen) == 0) {
@@ -573,7 +573,7 @@ exec_cmd(sregs, cmd)
 	    sregs->pc = len & ~3;
 	    sregs->npc = sregs->pc + 4;
 	    printf("resuming at 0x%08x\n",sregs->pc);
-	    stat = run_sim(sregs, -1, 0);
+	    stat = run_sim(sregs, UINT64_MAX, 0);
 	    daddr = sregs->pc;
 	    sim_halt();
 	} else if (strncmp(cmd1, "tlimit", clen) == 0) {
@@ -583,7 +583,7 @@ exec_cmd(sregs, cmd)
 		sregs->tlimit / sregs->freq / 1000);
 	} else if (strncmp(cmd1, "tra", clen) == 0) {
 	    if ((cmd1 = strtok(NULL, " \t\n\r")) == NULL) {
-		stat = run_sim(sregs, -1, 1);
+		stat = run_sim(sregs, UINT64_MAX, 1);
 	    } else {
 		stat = run_sim(sregs, VAL(cmd1), 1);
 	    }
@@ -595,7 +595,7 @@ exec_cmd(sregs, cmd)
 	    reset_all();
 	    reset_stat(sregs);
 	    sregs->tlimit = limcalc(sregs->freq);
-	    stat = run_sim(sregs, -1, 0);
+	    stat = run_sim(sregs, UINT64_MAX, 0);
 	    daddr = sregs->pc;
 	    sim_halt();
 	} else
@@ -833,7 +833,7 @@ void
 event(cfunc, arg, delta)
     void            (*cfunc) ();
     int32           arg;
-    uint32          delta;
+    uint64          delta;
 {
     struct evcell  *ev1, *evins;
 
@@ -900,7 +900,8 @@ advance_time(sregs)
 
     struct evcell  *evrem;
     void            (*cfunc) ();
-    uint32          arg, endtime;
+    uint32          arg;
+    uint64          endtime;
 
 #ifdef STAT
     sregs->fholdt += sregs->fhold;
@@ -938,7 +939,8 @@ wait_for_irq()
 {
     struct evcell  *evrem;
     void            (*cfunc) ();
-    int32           arg, endtime;
+    int32           arg;
+    uint64          endtime;
 
     if (ebase.eq.nxt == NULL)
 	printf("Warning: event queue empty - power-down mode not entered\n");

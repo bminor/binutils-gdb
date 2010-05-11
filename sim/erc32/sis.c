@@ -82,7 +82,7 @@ extern int era;
 int
 run_sim(sregs, icount, dis)
     struct pstate  *sregs;
-    unsigned int    icount;
+    uint64          icount;
     int             dis;
 {
     int             irq, mexc, deb, asi;

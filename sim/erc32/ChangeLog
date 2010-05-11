@@ -1,3 +1,14 @@
+2010-04-20  Tiemen Schut    <T.Schut@sron.nl>
+
+	* erc32.c (sis_memory_write): Change prototype to const unsigned char *.
+	* func.c (exec_cmd, event, advance_time, wait_for_irq): Use uint64
+	for counts.
+	* interf.c (run_sim): Change icount to uint64_t. Use strtol directly.
+	(sim_resume): Specify maximum run time as uint64.
+	* sis.c (run_sim): Change icount to uint64_t.
+	* sis.h: Define uint64 as uint64_t. Change various fields and
+	prototypes to uint64 to support longer simulations.
+
 2010-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_write): Add const to buf arg.

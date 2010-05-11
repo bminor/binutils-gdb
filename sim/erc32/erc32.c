@@ -1860,9 +1860,9 @@ get_mem_ptr(addr, size)
 
 int
 sis_memory_write(addr, data, length)
-    uint32          addr;
-    char           *data;
-    uint32          length;
+    uint32               addr;
+    const unsigned char *data;
+    uint32               length;
 {
     char           *mem;
 

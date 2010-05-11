@@ -23,6 +23,7 @@
 #include "ansidecl.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
+#include <stdint.h>
 
 #include "end.h"
 
@@ -52,8 +53,8 @@ typedef float   float32;	/* 32-bit float */
 typedef double  float64;	/* 64-bit float */
 
 /* FIXME: what about host compilers that don't support 64-bit ints? */
-typedef unsigned long long uint64; /* 64-bit unsigned int */
-typedef long long int64;	/* 64-bit signed int */
+typedef uint64_t uint64; /* 64-bit unsigned int */
+typedef int64_t int64;	/* 64-bit signed int */
 
 struct pstate {
 
@@ -108,22 +109,22 @@ struct pstate {
     float32         freq;	/* Simulated processor frequency */
 
 
-    uint32          tottime;
-    uint32          ninst;
-    uint32          fholdt;
-    uint32          holdt;
-    uint32          icntt;
-    uint32          finst;
-    uint32          simstart;
-    uint32          starttime;
-    uint32          tlimit;	/* Simulation time limit */
-    uint32          pwdtime;	/* Cycles in power-down mode */
-    uint32          nstore;	/* Number of load instructions */
-    uint32          nload;	/* Number of store instructions */
-    uint32          nannul;	/* Number of annuled instructions */
-    uint32          nbranch;	/* Number of branch instructions */
+    uint64          tottime;
+    uint64          ninst;
+    uint64          fholdt;
+    uint64          holdt;
+    uint64          icntt;
+    uint64          finst;
+    uint64          simstart;
+    uint64          starttime;
+    uint64          tlimit;	/* Simulation time limit */
+    uint64          pwdtime;	/* Cycles in power-down mode */
+    uint64          nstore;	/* Number of load instructions */
+    uint64          nload;	/* Number of store instructions */
+    uint64          nannul;	/* Number of annuled instructions */
+    uint64          nbranch;	/* Number of branch instructions */
     uint32          ildreg;	/* Destination of last load instruction */
-    uint32          ildtime;	/* Last time point for load dependency */
+    uint64          ildtime;	/* Last time point for load dependency */
 
     int             rett_err;	/* IU in jmpl/restore error state (Rev.0) */
     int             jmpltime;
@@ -132,14 +133,14 @@ struct pstate {
 struct evcell {
     void            (*cfunc) ();
     int32           arg;
-    uint32          time;
+    uint64          time;
     struct evcell  *nxt;
 };
 
 struct estate {
     struct evcell   eq;
     struct evcell  *freeq;
-    uint32          simtime;
+    uint64          simtime;
 };
 
 struct irqcell {
@@ -168,8 +169,8 @@ extern int	memory_read PARAMS ((int32 asi, uint32 addr, uint32 *data,
 				     int32 sz, int32 *ws));
 extern int	memory_write PARAMS ((int32 asi, uint32 addr, uint32 *data,
 				    int32 sz, int32 *ws));
-extern int	sis_memory_write PARAMS ((uint32 addr, char *data,
-					  uint32 length));
+extern int	sis_memory_write PARAMS ((uint32 addr,
+				    const unsigned char *data, uint32 length));
 extern int	sis_memory_read PARAMS ((uint32 addr, char *data,
 					 uint32 length));
 
@@ -186,7 +187,7 @@ extern void	init_signals PARAMS ((void));
 struct disassemble_info;
 extern void	dis_mem PARAMS ((uint32 addr, uint32 len,
 				 struct disassemble_info *info));
-extern void	event PARAMS ((void (*cfunc) (), int32 arg, uint32 delta));
+extern void	event PARAMS ((void (*cfunc) (), int32 arg, uint64 delta));
 extern void	set_int PARAMS ((int32 level, void (*callback) (), int32 arg));
 extern void	advance_time PARAMS ((struct pstate  *sregs));
 extern uint32	now PARAMS ((void));
@@ -205,7 +206,7 @@ extern void	init_regs PARAMS ((struct pstate *sregs));
 
 /* interf.c */
 extern int	run_sim PARAMS ((struct pstate *sregs,
-				 unsigned int icount, int dis));
+				 uint64 icount, int dis));
 
 /* float.c */
 extern int	get_accex PARAMS ((void));

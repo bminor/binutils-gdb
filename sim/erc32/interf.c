@@ -37,8 +37,6 @@
 
 #define PSR_CWP 0x7
 
-#define	VAL(x)	strtol(x,(char **)NULL,0)
-
 extern struct disassemble_info dinfo;
 extern struct pstate sregs;
 extern struct estate ebase;
@@ -69,7 +67,7 @@ host_callback *sim_callback;
 int
 run_sim(sregs, icount, dis)
     struct pstate  *sregs;
-    unsigned int    icount;
+    uint64          icount;
     int             dis;
 {
     int             mexc, irq;
@@ -234,7 +232,7 @@ sim_open (kind, callback, abfd, argv)
 	    } else
 	    if (strcmp(argv[stat], "-freq") == 0) {
 		if ((stat + 1) < argc) {
-		    freq = VAL(argv[++stat]);
+		    freq = strtol(argv[++stat], (char **)NULL, 0);
 		}
 	    } else {
 		(*sim_callback->printf_filtered) (sim_callback,
@@ -461,7 +459,7 @@ flush_windows ()
 void
 sim_resume(SIM_DESC sd, int step, int siggnal)
 {
-    simstat = run_sim(&sregs, -1, 0);
+    simstat = run_sim(&sregs, UINT64_MAX, 0);
 
     if (sis_gdb_break) flush_windows ();
 }
