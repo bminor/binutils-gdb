@@ -8877,7 +8877,6 @@ dwarf2_const_value_data (struct attribute *attr,
 static struct type *
 die_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct type *type;
   struct attribute *type_attr;
   struct die_info *type_die;
 
@@ -8890,14 +8889,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
 
   type_die = follow_die_ref_or_sig (die, type_attr, &cu);
 
-  type = tag_type_to_type (type_die, cu);
-  if (!type)
-    {
-      dump_die_for_error (type_die);
-      error (_("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]"),
-		      cu->objfile->name);
-    }
-  return type;
+  return tag_type_to_type (type_die, cu);
 }
 
 /* True iff CU's producer generates GNAT Ada auxiliary information
@@ -8926,7 +8918,6 @@ need_gnat_info (struct dwarf2_cu *cu)
 static struct type *
 die_descriptive_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct type *type;
   struct attribute *type_attr;
   struct die_info *type_die;
 
@@ -8935,14 +8926,7 @@ die_descriptive_type (struct die_info *die, struct dwarf2_cu *cu)
     return NULL;
 
   type_die = follow_die_ref (die, type_attr, &cu);
-  type = tag_type_to_type (type_die, cu);
-  if (!type)
-    {
-      dump_die_for_error (type_die);
-      error (_("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]"),
-		      cu->objfile->name);
-    }
-  return type;
+  return tag_type_to_type (type_die, cu);
 }
 
 /* If DIE has a descriptive_type attribute, then set the TYPE's
@@ -8967,24 +8951,16 @@ set_descriptive_type (struct type *type, struct die_info *die,
 static struct type *
 die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct type *type = NULL;
   struct attribute *type_attr;
-  struct die_info *type_die = NULL;
+  struct die_info *type_die;
 
   type_attr = dwarf2_attr (die, DW_AT_containing_type, cu);
-  if (type_attr)
-    {
-      type_die = follow_die_ref_or_sig (die, type_attr, &cu);
-      type = tag_type_to_type (type_die, cu);
-    }
-  if (!type)
-    {
-      if (type_die)
-	dump_die_for_error (type_die);
-      error (_("Dwarf Error: Problem turning containing type into gdb type [in module %s]"), 
-		      cu->objfile->name);
-    }
-  return type;
+  if (!type_attr)
+    error (_("Dwarf Error: Problem turning containing type into gdb type "
+	     "[in module %s]"), cu->objfile->name);
+
+  type_die = follow_die_ref_or_sig (die, type_attr, &cu);
+  return tag_type_to_type (type_die, cu);
 }
 
 static struct type *

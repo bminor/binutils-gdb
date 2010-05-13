@@ -1,3 +1,11 @@
+2010-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* dwarf2read.c (die_type, die_descriptive_type): Remove variable type.
+	Remove check of NULL returned by tag_type_to_type.
+	(die_containing_type): Remove variable type.  Remove type_die variable
+	initialization.  Remove check of NULL returned by tag_type_to_type.
+
 2010-05-11  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	PR exp/11530.
