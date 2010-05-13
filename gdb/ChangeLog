@@ -1,5 +1,7 @@
 2010-05-13  Michael Snyder  <msnyder@vmware.com>
 
+	* bcache.c: White space.
+
 	* gdbarch.sh: White space, add blank lines.
 	* arch-utils.c: Ditto.
 	* gdbarch.c: Regenerate.

@@ -98,17 +98,17 @@ struct bcache
 unsigned long
 hash(const void *addr, int length)
 {
-		const unsigned char *k, *e;
-		unsigned long h;
-		
-		k = (const unsigned char *)addr;
-		e = k+length;
-		for (h=0; k< e;++k)
-		{
-				h *=16777619;
-				h ^= *k;
-		}
-		return (h);
+  const unsigned char *k, *e;
+  unsigned long h;
+
+  k = (const unsigned char *)addr;
+  e = k+length;
+  for (h=0; k< e;++k)
+    {
+      h *=16777619;
+      h ^= *k;
+    }
+  return (h);
 }
 
 /* Growing the bcache's hash table.  */
@@ -152,6 +152,7 @@ expand_hash_table (struct bcache *bcache)
   /* Allocate the new table.  */
   {
     size_t new_size = new_num_buckets * sizeof (new_buckets[0]);
+
     new_buckets = (struct bstring **) xmalloc (new_size);
     memset (new_buckets, 0, new_size);
 
@@ -257,6 +258,7 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
   {
     struct bstring *new
       = obstack_alloc (&bcache->cache, BSTRING_SIZE (length));
+
     memcpy (&new->d.data, addr, length);
     new->length = length;
     new->next = bcache->bucket[hash_index];
@@ -281,6 +283,7 @@ bcache_xmalloc (void)
 {
   /* Allocate the bcache pre-zeroed.  */
   struct bcache *b = XCALLOC (1, struct bcache);
+
   return b;
 }
 
