@@ -1,5 +1,7 @@
 2010-05-13  Michael Snyder  <msnyder@vmware.com>
 
+	* frame.c: White space, add blank lines.
+
 	* stack.c: White space, add blank lines.
 	(initialize_stack): Remove long-dead code.
 
