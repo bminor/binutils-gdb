@@ -1,5 +1,9 @@
 2010-05-13  Michael Snyder  <msnyder@vmware.com>
 
+	* gdbarch.sh: White space, add blank lines.
+	* arch-utils.c: Ditto.
+	* gdbarch.c: Regenerate.
+
 	* frame.c: White space, add blank lines.
 
 	* stack.c: White space, add blank lines.

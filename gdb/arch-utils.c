@@ -533,6 +533,7 @@ gdbarch_from_bfd (bfd *abfd)
 {
   struct gdbarch_info info;
   gdbarch_info_init (&info);
+
   info.abfd = abfd;
   return gdbarch_find_by_info (info);
 }
@@ -580,9 +581,9 @@ void
 initialize_current_architecture (void)
 {
   const char **arches = gdbarch_printable_names ();
+  struct gdbarch_info info;
 
   /* determine a default architecture and byte order. */
-  struct gdbarch_info info;
   gdbarch_info_init (&info);
   
   /* Find a default architecture. */

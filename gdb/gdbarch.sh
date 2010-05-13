@@ -1443,6 +1443,7 @@ void *
 gdbarch_obstack_zalloc (struct gdbarch *arch, long size)
 {
   void *data = obstack_alloc (arch->obstack, size);
+
   memset (data, 0, size);
   return data;
 }
@@ -1458,6 +1459,7 @@ void
 gdbarch_free (struct gdbarch *arch)
 {
   struct obstack *obstack;
+
   gdb_assert (arch != NULL);
   gdb_assert (!arch->initialized_p);
   obstack = arch->obstack;
@@ -1479,6 +1481,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   struct cleanup *cleanups;
   long length;
   char *buf;
+
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
@@ -1543,6 +1546,7 @@ void
 gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 {
   const char *gdb_nm_file = "<not-defined>";
+
 #if defined (GDB_NM_FILE)
   gdb_nm_file = GDB_NM_FILE;
 #endif
@@ -1747,7 +1751,8 @@ gdbarch_data_register (gdbarch_data_pre_init_ftype *pre_init,
 		       gdbarch_data_post_init_ftype *post_init)
 {
   struct gdbarch_data_registration **curr;
-  /* Append the new registraration.  */
+
+  /* Append the new registration.  */
   for (curr = &gdbarch_data_registry.registrations;
        (*curr) != NULL;
        curr = &(*curr)->next);
@@ -1866,6 +1871,7 @@ gdbarch_printable_names (void)
   int nr_arches = 0;
   const char **arches = NULL;
   struct gdbarch_registration *rego;
+
   for (rego = gdbarch_registry;
        rego != NULL;
        rego = rego->next)
@@ -1894,6 +1900,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
 {
   struct gdbarch_registration **curr;
   const struct bfd_arch_info *bfd_arch_info;
+
   /* Check that BFD recognizes this architecture */
   bfd_arch_info = bfd_lookup_arch (bfd_architecture, 0);
   if (bfd_arch_info == NULL)
