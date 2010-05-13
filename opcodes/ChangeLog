@@ -1,3 +1,7 @@
+2010-05-13  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Correct wclr encoding.
+
 2010-05-11  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm-dis.c (thumb_opcodes): Update ldmia entry to use new %W

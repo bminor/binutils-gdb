@@ -1,3 +1,7 @@
+2010-05-13  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/a2.d: Correct wclr encoding.
+
 2010-05-11  Andrew Stubbs  <ams@codesourcery.com>
 
 	* gas/arm/attr-cpu-directive.d: Add Tag_DIV_use.

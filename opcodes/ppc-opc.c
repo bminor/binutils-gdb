@@ -4530,10 +4530,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stvrx",	X(31,679),	X_MASK,      CELL,	PPCNONE,	{VS, RA0, RB}},
 {"sthfcmux",	APU(31,679,0), 	APU_MASK,    PPC405,	PPCNONE,	{FCRT, RA, RB}},
 
-{"wclrone",	XOPL2(31,694,2),XRT_MASK,    PPCA2,	PPCNONE,	{RA0, RB}},
-{"wclrall",	X(31,694),	XRARB_MASK,  PPCA2,	PPCNONE,	{L}},
-{"wclr",	X(31,694),	X_MASK,	     PPCA2,	PPCNONE,	{L, RA0, RB}},
-
 {"stbcx.",	XRC(31,694,1),	X_MASK,      POWER7,	PPCNONE,	{RS, RA0, RB}},
 
 {"stfsux",	X(31,695),	X_MASK,      COM,	PPCNONE,	{FRS, RAS, RB}},
@@ -4716,6 +4712,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"exts.",	XRC(31,922,1),	XRB_MASK,    PWRCOM,	PPCNONE,	{RA, RS}},
 
 {"stfddx",	X(31,931),	X_MASK,      E500MC,	PPCNONE,	{FRS, RA, RB}},
+
+{"wclrone",	XOPL2(31,934,2),XRT_MASK,    PPCA2,	PPCNONE,	{RA0, RB}},
+{"wclrall",	X(31,934),	XRARB_MASK,  PPCA2,	PPCNONE,	{L}},
+{"wclr",	X(31,934),	X_MASK,	     PPCA2,	PPCNONE,	{L, RA0, RB}},
 
 {"stvrxl",	X(31,935),	X_MASK,      CELL,	PPCNONE,	{VS, RA0, RB}},
 

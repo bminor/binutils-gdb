@@ -573,9 +573,9 @@ Disassembly of section \.text:
  884:	7c 00 01 6c 	wchkall 
  888:	7c 00 01 6c 	wchkall 
  88c:	7d 80 01 6c 	wchkall cr3
- 890:	7c 2a 5d 6c 	wclr    1,r10,r11
- 894:	7c 20 05 6c 	wclrall 1
- 898:	7c 4a 5d 6c 	wclrone r10,r11
+ 890:	7c 2a 5f 4c 	wclr    1,r10,r11
+ 894:	7c 20 07 4c 	wclrall 1
+ 898:	7c 4a 5f 4c 	wclrone r10,r11
  89c:	7d 40 01 06 	wrtee   r10
  8a0:	7c 00 81 46 	wrteei  1
  8a4:	7d 6a 62 79 	xor\.    r10,r11,r12
