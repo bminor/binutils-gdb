@@ -674,7 +674,7 @@ void
 push_subfile (void)
 {
   struct subfile_stack *tem
-  = (struct subfile_stack *) xmalloc (sizeof (struct subfile_stack));
+    = (struct subfile_stack *) xmalloc (sizeof (struct subfile_stack));
 
   tem->next = subfile_stack;
   subfile_stack = tem;
@@ -708,8 +708,8 @@ void
 record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 {
   struct linetable_entry *e;
-  /* Ignore the dummy line number in libg.o */
 
+  /* Ignore the dummy line number in libg.o */
   if (line == 0xffff)
     {
       return;

@@ -137,6 +137,7 @@ struct symbol *
 find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
 {
   struct block *b = block_for_pc_sect (pc, section);
+
   if (b == 0)
     return 0;
   return block_linkage_function (b);

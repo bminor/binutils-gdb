@@ -1,13 +1,14 @@
 2010-05-13  Michael Snyder  <msnyder@vmware.com>
 
+	* blockframe.c: White space.
+	* breakpoint.c: White space.
+	* buildsym.c: White space.
+	* blockframe.c: White space.
 	* bcache.c: White space.
-
 	* gdbarch.sh: White space, add blank lines.
 	* arch-utils.c: Ditto.
 	* gdbarch.c: Regenerate.
-
 	* frame.c: White space, add blank lines.
-
 	* stack.c: White space, add blank lines.
 	(initialize_stack): Remove long-dead code.
 

@@ -252,6 +252,7 @@ bpdisp_text (enum bpdisp disp)
   /* NOTE: the following values are a part of MI protocol and represent
      values of 'disp' field returned when inferior stops at a breakpoint.  */
   static char *bpdisps[] = {"del", "dstp", "dis", "keep"};
+
   return bpdisps[(int) disp];
 }
 
@@ -478,6 +479,7 @@ alloc_counted_command_line (struct command_line *commands)
 {
   struct counted_command_line *result
     = xmalloc (sizeof (struct counted_command_line));
+
   result->refc = 1;
   result->commands = commands;
   return result;
@@ -738,6 +740,7 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
   else
     {
       char *arg = exp;
+
       /* I don't know if it matters whether this is the string the user
 	 typed in or the decompiled expression.  */
       b->cond_string = xstrdup (arg);
@@ -803,6 +806,7 @@ static void
 check_no_tracepoint_commands (struct command_line *commands)
 {
   struct command_line *c;
+
   for (c = commands; c; c = c->next)
     {
       int i;
@@ -899,6 +903,7 @@ void
 check_tracepoint_command (char *line, void *closure)
 {
   struct breakpoint *b = closure;
+
   validate_actionline (&line, b);
 }
 
@@ -1650,6 +1655,7 @@ insert_bp_location (struct bp_location *bpt,
 		  if (new_type != bpt->loc_type)
 		    {
 		      static int said = 0;
+
 		      bpt->loc_type = new_type;
 		      if (!said)
 			{
@@ -3447,6 +3453,7 @@ breakpoint_cond_eval (void *exp)
 {
   struct value *mark = value_mark ();
   int i = !value_true (evaluate_expression ((struct expression *) exp));
+
   value_free_to_mark (mark);
   return i;
 }
@@ -4395,6 +4402,7 @@ int
 bpstat_should_step (void)
 {
   struct breakpoint *b;
+
   ALL_BREAKPOINTS (b)
     if (breakpoint_enabled (b) && b->type == bp_watchpoint && b->loc != NULL)
       return 1;
@@ -4868,11 +4876,13 @@ do_captured_breakpoint_query (struct ui_out *uiout, void *data)
   struct captured_breakpoint_query_args *args = data;
   struct breakpoint *b;
   struct bp_location *dummy_loc = NULL;
+
   ALL_BREAKPOINTS (b)
     {
       if (args->bnum == b->number)
 	{
 	  int print_address_bits = breakpoint_address_bits (b);
+
 	  print_one_breakpoint (b, &dummy_loc, print_address_bits, 0);
 	  return GDB_RC_OK;
 	}
@@ -4884,6 +4894,7 @@ enum gdb_rc
 gdb_breakpoint_query (struct ui_out *uiout, int bnum, char **error_message)
 {
   struct captured_breakpoint_query_args args;
+
   args.bnum = bnum;
   /* For the moment we don't trust print_one_breakpoint() to not throw
      an error. */
@@ -5100,6 +5111,7 @@ breakpoint_has_pc (struct breakpoint *b,
 		   CORE_ADDR pc, struct obj_section *section)
 {
   struct bp_location *bl = b->loc;
+
   for (; bl; bl = bl->next)
     {
       if (bl->pspace == pspace
@@ -5510,6 +5522,7 @@ void
 make_breakpoint_permanent (struct breakpoint *b)
 {
   struct bp_location *bl;
+
   b->enable_state = bp_permanent;
 
   /* By definition, permanent breakpoints are already present in the code. 
@@ -5539,6 +5552,7 @@ set_longjmp_breakpoint (int thread)
 	&& b->type == bp_longjmp_master)
       {
 	struct breakpoint *clone = clone_momentary_breakpoint (b);
+
 	clone->type = bp_longjmp;
 	clone->thread = thread;
       }
@@ -5742,6 +5756,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
   ALL_BP_LOCATIONS (loc, locp_tmp)
   {
     struct breakpoint *b = loc->owner;
+
     if ((loc->loc_type == bp_loc_hardware_breakpoint
 	 || loc->loc_type == bp_loc_software_breakpoint)
 	&& solib->pspace == loc->pspace
@@ -5966,11 +5981,13 @@ insert_catch_syscall (struct breakpoint *b)
   else
     {
       int i, iter;
+
       for (i = 0;
            VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
            i++)
 	{
           int elem;
+
 	  if (iter >= VEC_length (int, inf->syscalls_counts))
 	    {
               int old_size = VEC_length (int, inf->syscalls_counts);
@@ -6008,6 +6025,7 @@ remove_catch_syscall (struct breakpoint *b)
   else
     {
       int i, iter;
+
       for (i = 0;
            VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
            i++)
@@ -6046,6 +6064,7 @@ breakpoint_hit_catch_syscall (struct breakpoint *b)
   if (b->syscalls_to_be_caught)
     {
       int i, iter;
+
       for (i = 0;
            VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
            i++)
@@ -6127,6 +6146,7 @@ print_one_catch_syscall (struct breakpoint *b,
     {
       int i, iter;
       char *text = xstrprintf ("%s", "");
+
       for (i = 0;
            VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
            i++)
@@ -7073,6 +7093,7 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 			int enabled)
 {
   int i;
+
   for (i = 0; i < sals.nelts; ++i)
     {
       struct symtabs_and_lines expanded = 
@@ -7096,6 +7117,7 @@ parse_breakpoint_sals (char **address,
 		       int *not_found_ptr)
 {
   char *addr_start = *address;
+
   *addr_string = NULL;
   /* If no arg given, or if first arg is 'if ', use the default
      breakpoint. */
@@ -7105,6 +7127,7 @@ parse_breakpoint_sals (char **address,
       if (default_breakpoint_valid)
 	{
 	  struct symtab_and_line sal;
+
 	  init_sal (&sal);		/* initialize to zeroes */
 	  sals->sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
@@ -7155,11 +7178,13 @@ parse_breakpoint_sals (char **address,
   if (addr_start != (*address))
     {
       int i;
+
       for (i = 0; i < sals->nelts; i++)
 	{
 	  /* Add the string if not present. */
 	  if ((*addr_string)[i] == NULL)
-	    (*addr_string)[i] = savestring (addr_start, (*address) - addr_start);
+	    (*addr_string)[i] = savestring (addr_start, 
+					    (*address) - addr_start);
 	}
     }
 }
@@ -7173,6 +7198,7 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
 		       char *address)
 {    
   int i;
+
   for (i = 0; i < sals->nelts; i++)
     resolve_sal_pc (&sals->sals[i]);
 }
@@ -7236,6 +7262,7 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
       int toklen;
       char *cond_start = NULL;
       char *cond_end = NULL;
+
       while (*tok == ' ' || *tok == '\t')
 	tok++;
       
@@ -7517,7 +7544,6 @@ break_command_1 (char *arg, int flag, int from_tty)
 		     from_tty,
 		     1 /* enabled */);
 }
-
 
 
 /* Helper function for break_command_1 and disassemble_command.  */
@@ -8182,7 +8208,8 @@ typedef enum
 catch_fork_kind;
 
 static void
-catch_fork_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
+catch_fork_command_1 (char *arg, int from_tty, 
+		      struct cmd_list_element *command)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   char *cond_string = NULL;
@@ -8228,7 +8255,8 @@ catch_fork_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
 }
 
 static void
-catch_exec_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
+catch_exec_command_1 (char *arg, int from_tty, 
+		      struct cmd_list_element *command)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
@@ -8288,9 +8316,11 @@ print_exception_catchpoint (struct breakpoint *b)
 }
 
 static void
-print_one_exception_catchpoint (struct breakpoint *b, struct bp_location **last_loc)
+print_one_exception_catchpoint (struct breakpoint *b, 
+				struct bp_location **last_loc)
 {
   struct value_print_options opts;
+
   get_user_print_options (&opts);
   if (opts.addressprint)
     {
@@ -8406,6 +8436,7 @@ static void
 catch_catch_command (char *arg, int from_tty, struct cmd_list_element *command)
 {
   int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
   catch_exception_command_1 (EX_EVENT_CATCH, arg, tempflag, from_tty);
 }
 
@@ -8415,6 +8446,7 @@ static void
 catch_throw_command (char *arg, int from_tty, struct cmd_list_element *command)
 {
   int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
   catch_exception_command_1 (EX_EVENT_THROW, arg, tempflag, from_tty);
 }
 
@@ -8556,7 +8588,8 @@ catch_syscall_split_args (char *arg)
 /* Implement the "catch syscall" command.  */
 
 static void
-catch_syscall_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
+catch_syscall_command_1 (char *arg, int from_tty, 
+			 struct cmd_list_element *command)
 {
   int tempflag;
   VEC(int) *filter;
@@ -9181,6 +9214,7 @@ static void
 update_global_location_list_nothrow (int inserting)
 {
   struct gdb_exception e;
+
   TRY_CATCH (e, RETURN_MASK_ERROR)
     update_global_location_list (inserting);
 }
@@ -9190,6 +9224,7 @@ static void
 bpstat_remove_breakpoint (bpstat bps, struct breakpoint *bpt)
 {
   bpstat bs;
+
   for (bs = bps; bs; bs = bs->next)
     if (bs->breakpoint_at && bs->breakpoint_at->owner == bpt)
       {
@@ -9204,6 +9239,7 @@ static int
 bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
 {
   struct breakpoint *bpt = data;
+
   bpstat_remove_breakpoint (th->stop_bpstat, bpt);
   return 0;
 }
@@ -9390,7 +9426,8 @@ ambiguous_names_p (struct bp_location *loc)
 {
   struct bp_location *l;
   htab_t htab = htab_create_alloc (13, htab_hash_string,
-				   (int (*) (const void *, const void *)) streq,
+				   (int (*) (const void *, 
+					     const void *)) streq,
 				   NULL, xcalloc, xfree);
 
   for (l = loc; l != NULL; l = l->next)
@@ -9959,6 +9996,7 @@ static void
 disable_command (char *args, int from_tty)
 {
   struct breakpoint *bpt;
+
   if (args == 0)
     ALL_BREAKPOINTS (bpt)
       switch (bpt->type)
@@ -10058,6 +10096,7 @@ static void
 enable_command (char *args, int from_tty)
 {
   struct breakpoint *bpt;
+
   if (args == 0)
     ALL_BREAKPOINTS (bpt)
       switch (bpt->type)
@@ -10159,6 +10198,7 @@ struct symtabs_and_lines
 decode_line_spec_1 (char *string, int funfirstline)
 {
   struct symtabs_and_lines sals;
+
   if (string == 0)
     error (_("Empty line specification."));
   if (default_breakpoint_valid)
@@ -10279,7 +10319,8 @@ remove_single_step_breakpoints (void)
 /* Check whether a software single-step breakpoint is inserted at PC.  */
 
 static int
-single_step_breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
+single_step_breakpoint_inserted_here_p (struct address_space *aspace, 
+					CORE_ADDR pc)
 {
   int i;
 
@@ -10347,6 +10388,7 @@ catch_syscall_completer (struct cmd_list_element *cmd,
                          char *text, char *word)
 {
   const char **list = get_syscall_names ();
+
   return (list == NULL) ? NULL : complete_on_enum (list, text, word);
 }
 
