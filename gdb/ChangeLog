@@ -1,6 +1,12 @@
 2010-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Change the parameter to type.
+	(locexpr_read_variable, loclist_read_variable): Update the callers.
+
+2010-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* dwarf2read.c (die_type, die_descriptive_type): Remove variable type.
 	Remove check of NULL returned by tag_type_to_type.
 	(die_containing_type): Remove variable type.  Remove type_die variable

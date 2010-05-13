@@ -413,10 +413,11 @@ static struct lval_funcs pieced_value_funcs = {
 };
 
 /* Evaluate a location description, starting at DATA and with length
-   SIZE, to find the current location of variable VAR in the context
+   SIZE, to find the current location of variable of TYPE in the context
    of FRAME.  */
+
 static struct value *
-dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
+dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 			  gdb_byte *data, unsigned short size,
 			  struct dwarf2_per_cu_data *per_cu)
 {
@@ -427,7 +428,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 
   if (size == 0)
     {
-      retval = allocate_value (SYMBOL_TYPE (var));
+      retval = allocate_value (type);
       VALUE_LVAL (retval) = not_lval;
       set_value_optimized_out (retval, 1);
       return retval;
@@ -456,9 +457,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 
       c = allocate_piece_closure (ctx->num_pieces, ctx->pieces,
 				  ctx->addr_size);
-      retval = allocate_computed_value (SYMBOL_TYPE (var),
-					&pieced_value_funcs,
-					c);
+      retval = allocate_computed_value (type, &pieced_value_funcs, c);
       VALUE_FRAME_ID (retval) = frame_id;
     }
   else
@@ -471,15 +470,10 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	    CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_regnum);
 	    if (gdb_regnum != -1)
-	      {
-		retval = value_from_register (SYMBOL_TYPE (var),
-					      gdb_regnum, frame);
-	      }
+	      retval = value_from_register (type, gdb_regnum, frame);
 	    else
-	      {
-		error (_("Unable to access DWARF register number %s"),
-		       paddress (arch, dwarf_regnum));
-	      }
+	      error (_("Unable to access DWARF register number %s"),
+		     paddress (arch, dwarf_regnum));
 	  }
 	  break;
 
@@ -488,7 +482,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	    CORE_ADDR address = dwarf_expr_fetch (ctx, 0);
 	    int in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
 
-	    retval = allocate_value (SYMBOL_TYPE (var));
+	    retval = allocate_value (type);
 	    VALUE_LVAL (retval) = lval_memory;
 	    set_value_lazy (retval, 1);
 	    if (in_stack_memory)
@@ -503,10 +497,10 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	    bfd_byte *contents;
 	    size_t n = ctx->addr_size;
 
-	    retval = allocate_value (SYMBOL_TYPE (var));
+	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
-	    if (n > TYPE_LENGTH (SYMBOL_TYPE (var)))
-	      n = TYPE_LENGTH (SYMBOL_TYPE (var));
+	    if (n > TYPE_LENGTH (type))
+	      n = TYPE_LENGTH (type);
 	    store_unsigned_integer (contents, n,
 				    gdbarch_byte_order (ctx->gdbarch),
 				    value);
@@ -518,10 +512,10 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	    bfd_byte *contents;
 	    size_t n = ctx->len;
 
-	    retval = allocate_value (SYMBOL_TYPE (var));
+	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
-	    if (n > TYPE_LENGTH (SYMBOL_TYPE (var)))
-	      n = TYPE_LENGTH (SYMBOL_TYPE (var));
+	    if (n > TYPE_LENGTH (type))
+	      n = TYPE_LENGTH (type);
 	    memcpy (contents, ctx->data, n);
 	  }
 	  break;
@@ -908,8 +902,8 @@ locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
 {
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   struct value *val;
-  val = dwarf2_evaluate_loc_desc (symbol, frame, dlbaton->data, dlbaton->size,
-				  dlbaton->per_cu);
+  val = dwarf2_evaluate_loc_desc (SYMBOL_TYPE (symbol), frame, dlbaton->data,
+				  dlbaton->size, dlbaton->per_cu);
 
   return val;
 }
@@ -1166,7 +1160,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
       set_value_optimized_out (val, 1);
     }
   else
-    val = dwarf2_evaluate_loc_desc (symbol, frame, data, size,
+    val = dwarf2_evaluate_loc_desc (SYMBOL_TYPE (symbol), frame, data, size,
 				    dlbaton->per_cu);
 
   return val;
