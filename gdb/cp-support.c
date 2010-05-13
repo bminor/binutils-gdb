@@ -715,13 +715,13 @@ static void
 make_symbol_overload_list_namespace (const char *func_name,
                                      const char *namespace)
 {
-
   if (namespace[0] == '\0')
     make_symbol_overload_list_qualified (func_name);
   else
     {
       char *concatenated_name
 	= alloca (strlen (namespace) + 2 + strlen (func_name) + 1);
+
       strcpy (concatenated_name, namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, func_name);
@@ -996,18 +996,20 @@ cp_validate_operator (const char *input)
   if (strncmp (p, "operator", 8) == 0)
     {
       int valid = 0;
-      p += 8;
 
+      p += 8;
       SKIP_SPACE (p);
       for (i = 0; i < sizeof (operator_tokens) / sizeof (operator_tokens[0]);
 	   ++i)
 	{
 	  int length = strlen (operator_tokens[i]);
+
 	  /* By using strncmp here, we MUST have operator_tokens ordered!
 	     See additional notes where operator_tokens is defined above.  */
 	  if (strncmp (p, operator_tokens[i], length) == 0)
 	    {
 	      const char *op = p;
+
 	      valid = 1;
 	      p += length;
 

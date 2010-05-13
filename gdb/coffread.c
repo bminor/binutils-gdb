@@ -260,6 +260,7 @@ static void
 find_targ_sec (bfd *abfd, asection *sect, void *obj)
 {
   struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
+
   if (sect->target_index == args->targ_index)
     *args->resultp = sect;
 }
@@ -282,6 +283,7 @@ static int
 cs_to_section (struct coff_symbol *cs, struct objfile *objfile)
 {
   asection *sect = cs_to_bfd_section (cs, objfile);
+
   if (sect == NULL)
     return SECT_OFF_TEXT (objfile);
   return sect->index;
@@ -414,6 +416,7 @@ record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
 		       struct objfile *objfile)
 {
   struct bfd_section *bfd_section;
+
   /* We don't want TDESC entry points in the minimal symbol table */
   if (cs->c_name[0] == '@')
     return NULL;
@@ -644,6 +647,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
       if (debugfile)
 	{
 	  bfd *abfd = symfile_bfd_open (debugfile);
+
 	  symbol_file_add_separate (abfd, symfile_flags, objfile);
 	  xfree (debugfile);
 	}
@@ -779,6 +783,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	{
 	  /* Record all functions -- external and static -- in minsyms. */
 	  int section = cs_to_section (cs, objfile);
+
 	  tmpaddr = cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	  record_minimal_symbol (cs, tmpaddr, mst_text, section, objfile);
 
@@ -884,6 +889,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		/* This is a common symbol.  See if the target
 		   environment knows where it has been relocated to.  */
 		CORE_ADDR reladdr;
+
 		if (target_lookup_symbol (cs->c_name, &reladdr))
 		  {
 		    /* Error in lookup; ignore symbol.  */
@@ -908,6 +914,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	    else
 	      {
 		asection *bfd_section = cs_to_bfd_section (cs, objfile);
+
 		sec = cs_to_section (cs, objfile);
 		tmpaddr = cs->c_value;
  		/* Statics in a PE file also get relocated */
@@ -949,6 +956,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	    if (SDB_TYPE (cs->c_type))
 	      {
 		struct symbol *sym;
+
 		sym = process_coff_symbol
 		  (cs, &main_aux, objfile);
 		SYMBOL_VALUE (sym) = tmpaddr;
@@ -1497,8 +1505,8 @@ process_coff_symbol (struct coff_symbol *cs,
 		     struct objfile *objfile)
 {
   struct symbol *sym
-  = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
-				     sizeof (struct symbol));
+    = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
+				       sizeof (struct symbol));
   char *name;
 
   memset (sym, 0, sizeof (struct symbol));
@@ -2098,6 +2106,7 @@ coff_read_enum_type (int index, int length, int lastsym,
       for (; j < syms->nsyms; j++, n++)
 	{
 	  struct symbol *xsym = syms->symbol[j];
+
 	  SYMBOL_TYPE (xsym) = type;
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_LINKAGE_NAME (xsym);
 	  SET_FIELD_BITPOS (TYPE_FIELD (type, n), SYMBOL_VALUE (xsym));

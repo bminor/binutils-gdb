@@ -254,6 +254,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
+
 	  print_function_pointer_address (gdbarch, addr, stream,
 					  options->addressprint);
 	  break;
@@ -343,6 +344,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	{
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
+
 	  fprintf_filtered (stream, "@");
 	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  if (options->deref_ref)
@@ -354,9 +356,10 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
 	    {
 	      struct value *deref_val =
-	      value_at
-	      (TYPE_TARGET_TYPE (type),
-	       unpack_pointer (type, valaddr + embedded_offset));
+		value_at
+		(TYPE_TARGET_TYPE (type),
+		 unpack_pointer (type, valaddr + embedded_offset));
+
 	      common_val_print (deref_val, stream, recurse, options,
 				current_language);
 	    }
@@ -481,6 +484,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  print_scalar_formatted (valaddr + embedded_offset, type,

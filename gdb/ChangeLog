@@ -1,5 +1,19 @@
 2010-05-13  Michael Snyder  <msnyder@vmware.com>
 
+	* charset.c: White space.
+	* c-lang.c: White space.
+	* cli-out.c: White space.
+	* coffread.c: White space.
+	* complaints.c: White space.
+	* completer.c: White space.
+	* corefile.c: White space.
+	* corelow.c: White space.
+	* cp-abi.c: White space.
+	* cp-namespace.c: White space.
+	* cp-support.c: White space.
+	* cp-valprint.c: White space.
+	* c-typeprint.c: White space.
+	* c-valprint.c: White space.
 	* blockframe.c: White space.
 	* breakpoint.c: White space.
 	* buildsym.c: White space.

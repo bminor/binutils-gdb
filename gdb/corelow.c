@@ -418,6 +418,7 @@ core_open (char *filename, int from_tty)
 	 usually happen, but we're dealing with input here, which can
 	 always be broken in different ways.  */
       struct thread_info *thread = first_thread_of_process (-1);
+
       if (thread == NULL)
 	{
 	  inferior_appeared (current_inferior (), CORELOW_PID);
@@ -764,8 +765,8 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 
 	  struct bfd_section *section;
 	  bfd_size_type size;
-
 	  char sectionstr[100];
+
 	  xsnprintf (sectionstr, sizeof sectionstr, "SPU/%s", annex);
 
 	  section = bfd_get_section_by_name (core_bfd, sectionstr);
@@ -792,6 +793,7 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	{
 	  /* NULL annex requests list of all present spuids.  */
 	  struct spuid_list list;
+
 	  list.buf = readbuf;
 	  list.offset = offset;
 	  list.len = len;
@@ -856,6 +858,7 @@ core_pid_to_str (struct target_ops *ops, ptid_t ptid)
       && gdbarch_core_pid_to_str_p (core_gdbarch))
     {
       char *ret = gdbarch_core_pid_to_str (core_gdbarch, ptid);
+
       if (ret != NULL)
 	return ret;
     }

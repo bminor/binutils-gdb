@@ -198,6 +198,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    {
 	      stat_array_obstack_initial_size =
 		obstack_object_size (&dont_print_stat_array_obstack);
+
 	      last_set_recurse = recurse;
 	    }
 	}
@@ -280,6 +281,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      else
 		{
 		  struct value_print_options opts = *options;
+
 		  opts.deref_ref = 0;
 		  v = value_from_longest
 		    (TYPE_FIELD_TYPE (type, i), 
@@ -298,6 +300,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
 		  struct value *v = value_static_field (type, i);
+
 		  if (v == NULL)
 		    fputs_filtered ("<optimized out>", stream);
 		  else
@@ -307,6 +310,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      else
 		{
 		  struct value_print_options opts = *options;
+
 		  opts.deref_ref = 0;
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr, offset + TYPE_FIELD_BITPOS (type, i) / 8,
@@ -374,7 +378,8 @@ cp_print_value_fields_rtti (struct type *type,
 			    CORE_ADDR address,
 			    struct ui_file *stream, int recurse,
 			    const struct value_print_options *options,
-			    struct type **dont_print_vb, int dont_print_statmem)
+			    struct type **dont_print_vb, 
+			    int dont_print_statmem)
 {
   struct value *value;
   int full, top, using_enc;
@@ -462,6 +467,7 @@ cp_print_value (struct type *type, struct type *real_type,
 	    {
 	      /* FIXME (alloca): unsafe if baseclass is really really large. */
 	      gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
+
 	      base_valaddr = buf;
 	      if (target_read_memory (address + boffset, buf,
 				      TYPE_LENGTH (baseclass)) != 0)
@@ -697,6 +703,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
   if (domain != NULL)
     {
       char *name;
+
       fputs_filtered (prefix, stream);
       name = type_name_no_tag (domain);
       if (name)

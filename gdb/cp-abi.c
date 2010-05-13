@@ -92,6 +92,7 @@ value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {
   struct type *ret = NULL;
   struct gdb_exception e;
+
   if ((current_cp_abi.rtti_type) == NULL)
     return NULL;
   TRY_CATCH (e, RETURN_MASK_ERROR)
@@ -238,8 +239,8 @@ list_cp_abis (int from_tty)
 {
   struct cleanup *cleanup_chain;
   int i;
-  ui_out_text (uiout, "The available C++ ABIs are:\n");
 
+  ui_out_text (uiout, "The available C++ ABIs are:\n");
   cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "cp-abi-list");
   for (i = 0; i < num_cp_abis; i++)
     {

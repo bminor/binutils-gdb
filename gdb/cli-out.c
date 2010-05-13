@@ -50,6 +50,7 @@ cli_table_begin (struct ui_out *uiout, int nbrofcols,
 		 const char *tblid)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (nr_rows == 0)
     data->suppress_output = 1;
   else
@@ -64,6 +65,7 @@ static void
 cli_table_body (struct ui_out *uiout)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   /* first, close the table header line */
@@ -76,6 +78,7 @@ static void
 cli_table_end (struct ui_out *uiout)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   data->suppress_output = 0;
 }
 
@@ -87,6 +90,7 @@ cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		  const char *colhdr)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
 
@@ -104,6 +108,7 @@ cli_begin (struct ui_out *uiout,
 	   const char *id)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
 }
@@ -116,6 +121,7 @@ cli_end (struct ui_out *uiout,
 	 int level)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
 }
@@ -127,9 +133,9 @@ cli_field_int (struct ui_out *uiout, int fldno, int width,
 	       enum ui_align alignment,
 	       const char *fldname, int value)
 {
-  char buffer[20];		/* FIXME: how many chars long a %d can become? */
-
+  char buffer[20];	/* FIXME: how many chars long a %d can become? */
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   sprintf (buffer, "%d", value);
@@ -147,6 +153,7 @@ cli_field_skip (struct ui_out *uiout, int fldno, int width,
 		const char *fldname)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
 
@@ -168,8 +175,8 @@ cli_field_string (struct ui_out *uiout,
 {
   int before = 0;
   int after = 0;
-
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
 
@@ -217,6 +224,7 @@ cli_field_fmt (struct ui_out *uiout, int fldno,
 	       va_list args)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
 
@@ -230,6 +238,7 @@ static void
 cli_spaces (struct ui_out *uiout, int numspaces)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   print_spaces_filtered (numspaces, data->stream);
@@ -239,6 +248,7 @@ static void
 cli_text (struct ui_out *uiout, const char *string)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   fputs_filtered (string, data->stream);
@@ -249,6 +259,7 @@ cli_message (struct ui_out *uiout, int verbosity,
 	     const char *format, va_list args)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   if (ui_out_get_verblvl (uiout) >= verbosity)
@@ -259,6 +270,7 @@ static void
 cli_wrap_hint (struct ui_out *uiout, char *identstring)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   wrap_here (identstring);
@@ -268,6 +280,7 @@ static void
 cli_flush (struct ui_out *uiout)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   gdb_flush (data->stream);
 }
 
@@ -275,6 +288,7 @@ static int
 cli_redirect (struct ui_out *uiout, struct ui_file *outstream)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   if (outstream != NULL)
     {
       data->original_stream = data->stream;
@@ -315,6 +329,7 @@ static void
 field_separator (void)
 {
   cli_out_data *data = ui_out_data (uiout);
+
   fputc_filtered (' ', data->stream);
 }
 
@@ -360,8 +375,8 @@ struct ui_out *
 cli_out_new (struct ui_file *stream)
 {
   int flags = ui_source_list;
-
   cli_out_data *data = XMALLOC (cli_out_data);
+
   cli_out_data_ctor (data, stream);
   return ui_out_new (&cli_ui_out_impl, data, flags);
 }
@@ -371,6 +386,7 @@ cli_out_set_stream (struct ui_out *uiout, struct ui_file *stream)
 {
   cli_out_data *data = ui_out_data (uiout);
   struct ui_file *old = data->stream;
+
   data->stream = stream;
   return old;
 }

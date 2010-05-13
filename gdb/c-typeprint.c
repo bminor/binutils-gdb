@@ -233,6 +233,7 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 			     int show, int passed_a_ptr, int need_post_space)
 {
   char *name;
+
   if (type == 0)
     return;
 
@@ -919,6 +920,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	      int len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      int j;
+
 	      for (j = 0; j < len2; j++)
 		if (!TYPE_FN_FIELD_ARTIFICIAL (f, j))
 		  real_len++;
@@ -934,13 +936,14 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
 	      char *name = type_name_no_tag (type);
 	      int is_constructor = name && strcmp (method_name, name) == 0;
+
 	      for (j = 0; j < len2; j++)
 		{
 		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 		  int is_full_physname_constructor =
-		   is_constructor_name (physname) 
-		   || is_destructor_name (physname)
-		   || method_name[0] == '~';
+		    is_constructor_name (physname) 
+		    || is_destructor_name (physname)
+		    || method_name[0] == '~';
 
 		  /* Do not print out artificial methods.  */
 		  if (TYPE_FN_FIELD_ARTIFICIAL (f, j))
@@ -1013,6 +1016,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 			{
 			  int staticp = TYPE_FN_FIELD_STATIC_P (f, j);
 			  struct type *mtype = TYPE_FN_FIELD_TYPE (f, j);
+
 			  cp_type_print_method_args (mtype,
 						     "",
 						     method_name,
@@ -1034,6 +1038,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      if (p != NULL)
 			{
 			  int length = p - demangled_no_class;
+
 			  demangled_no_static = (char *) xmalloc (length + 1);
 			  strncpy (demangled_no_static, demangled_no_class, length);
 			  *(demangled_no_static + length) = '\0';

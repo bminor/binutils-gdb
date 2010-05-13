@@ -171,6 +171,7 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
   struct complaints *complaints = get_complaints (c);
   struct complain *complaint = find_complaint (complaints, file, line, fmt);
   enum complaint_series series;
+
   gdb_assert (complaints != NULL);
 
   complaint->counter++;
@@ -243,6 +244,7 @@ void
 complaint (struct complaints **complaints, const char *fmt, ...)
 {
   va_list args;
+
   va_start (args, fmt);
   vcomplaint (complaints, NULL/*file*/, 0/*line*/, fmt, args);
   va_end (args);
