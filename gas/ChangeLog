@@ -1,3 +1,10 @@
+2010-05-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-arm.c (md_assemble): Clarify current mode in error
+	messages about unsupported instructions.
+	(UT): Delete #define.
+	(insns): Adjust cbnz, cbz appropriately.
+
 2010-05-11  Andrew Stubbs  <ams@codesourcery.com>
 
 	* config/tc-arm.c (aeabi_set_public_attributes): Set Tag_DIV_use.

@@ -15719,7 +15719,7 @@ md_assemble (char *str)
 	  || (thumb_mode == 1
 	      && !ARM_CPU_HAS_FEATURE (variant, *opcode->tvariant)))
 	{
-	  as_bad (_("selected processor does not support `%s'"), str);
+	  as_bad (_("selected processor does not support Thumb mode `%s'"), str);
 	  return;
 	}
       if (inst.cond != COND_ALWAYS && !unified_syntax
@@ -15744,7 +15744,7 @@ md_assemble (char *str)
 		inst.size_req = 2;
 	      else if (inst.size_req == 4)
 		{
-		  as_bad (_("selected processor does not support `%s'"), str);
+		  as_bad (_("selected processor does not support Thumb-2 mode `%s'"), str);
 		  return;
 		}
 	    }
@@ -15810,7 +15810,7 @@ md_assemble (char *str)
 	  && !(opcode->avariant &&
 	       ARM_CPU_HAS_FEATURE (cpu_variant, *opcode->avariant)))
 	{
-	  as_bad (_("selected processor does not support `%s'"), str);
+	  as_bad (_("selected processor does not support ARM mode `%s'"), str);
 	  return;
 	}
       if (inst.size_req)
@@ -16439,9 +16439,6 @@ static struct asm_barrier_opt barrier_opt_names[] =
 
 #define do_0 0
 
-/* Thumb-only, unconditional.  */
-#define UT(mnem,  op, nops, ops, te) TUE (mnem,  0, op, nops, ops, 0, te)
-
 static const struct asm_opcode insns[] =
 {
 #define ARM_VARIANT &arm_ext_v1 /* Core ARM Instructions.  */
@@ -16898,8 +16895,11 @@ static const struct asm_opcode insns[] =
  TC3("ldrsbt",	03000d0, f9100e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
  TC3("strht",	02000b0, f8200e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
 
-  UT("cbnz",      b900,    2, (RR, EXP), t_cbz),
-  UT("cbz",       b100,    2, (RR, EXP), t_cbz),
+ /* Thumb-only instructions.  */
+#undef ARM_VARIANT
+#define ARM_VARIANT NULL
+  TUE("cbnz",     0,           b900,     2, (RR, EXP), 0, t_cbz),
+  TUE("cbz",      0,           b100,     2, (RR, EXP), 0, t_cbz),
 
  /* ARM does not really have an IT instruction, so always allow it.
     The opcode is copied from Thumb in order to allow warnings in

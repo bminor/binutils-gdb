@@ -1,3 +1,13 @@
+2010-05-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/arm/armv1-bad.l: Adjust expected error text.
+	* gas/arm/arch7em-bad.l: Likewise.
+	* gas/arm/arch7m-bad.l: Likewise.
+	* gas/arm/thumb-w-bad.l: Likewise.
+	* gas/arm/arm7-bad.d: New.
+	* gas/arm/arm7-bad.l: New.
+	* gas/arm/arm7-bad.s: New.
+
 2010-05-13  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/gas.exp: Don't run byte test on powerpc.
