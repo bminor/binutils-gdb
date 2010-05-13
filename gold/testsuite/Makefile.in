@@ -344,7 +344,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 @DEFAULT_TARGET_ARM_TRUE@am__append_38 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh \
-@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh
+@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh arm_attr_merge.sh
 @DEFAULT_TARGET_ARM_TRUE@am__append_39 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_out_of_range.stdout \
@@ -358,7 +358,10 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx.stdout
+@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_7.stdout
 @DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
@@ -370,7 +373,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_in_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range arm_fix_v4bx \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking \
-@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx
+@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx arm_attr_merge_6 \
+@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r arm_attr_merge_7
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -1244,7 +1248,9 @@ host_vendor = @host_vendor@
 htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
+install_as_default = @install_as_default@
 install_sh = @install_sh@
+installed_linker = @installed_linker@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
@@ -3283,6 +3289,36 @@ uninstall-am:
 
 @DEFAULT_TARGET_ARM_TRUE@arm_no_fix_v4bx: arm_fix_v4bx.o ../ld-new
 @DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6.stdout: arm_attr_merge_6
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -A $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_attr_merge_6a.o arm_attr_merge_6b.o
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6a.o: arm_attr_merge_6a.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6b.o: arm_attr_merge_6b.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6r.stdout: arm_attr_merge_6r
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -A $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_attr_merge_6b.o arm_attr_merge_6a.o
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7.stdout: arm_attr_merge_7
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -A $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_attr_merge_7a.o arm_attr_merge_7b.o
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7a.o: arm_attr_merge_7a.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7b.o: arm_attr_merge_7b.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -255,7 +255,7 @@ enum
   Tag_CPU_arch_profile = 7,
   Tag_ARM_ISA_use = 8,
   Tag_THUMB_ISA_use = 9,
-  Tag_VFP_arch = 10,
+  Tag_FP_arch = 10,
   Tag_WMMX_arch = 11,
   Tag_Advanced_SIMD_arch = 12,
   Tag_PCS_config = 13,
@@ -269,8 +269,8 @@ enum
   Tag_ABI_FP_exceptions = 21,
   Tag_ABI_FP_user_exceptions = 22,
   Tag_ABI_FP_number_model = 23,
-  Tag_ABI_align8_needed = 24,
-  Tag_ABI_align8_preserved = 25,
+  Tag_ABI_align_needed = 24,
+  Tag_ABI_align_preserved = 25,
   Tag_ABI_enum_size = 26,
   Tag_ABI_HardFP_use = 27,
   Tag_ABI_VFP_args = 28,
@@ -281,17 +281,28 @@ enum
   Tag_undefined33 = 33,
   Tag_CPU_unaligned_access = 34,
   Tag_undefined35 = 35,
-  Tag_VFP_HP_extension = 36,
+  Tag_FP_HP_extension = 36,
   Tag_undefined37 = 37,
   Tag_ABI_FP_16bit_format = 38,
   Tag_undefined39 = 39,
+  Tag_undefined40 = 40,
+  Tag_undefined41 = 41,
+  Tag_MPextension_use = 42,
+  Tag_undefined43 = 43,
+  Tag_DIV_use = 44,
   Tag_nodefaults = 64,
   Tag_also_compatible_with = 65,
   Tag_T2EE_use = 66,
   Tag_conformance = 67,
   Tag_Virtualization_use = 68,
   Tag_undefined69 = 69,
-  Tag_MPextension_use = 70
+  Tag_MPextension_use_legacy = 70,
+
+  // The following tags are legacy names for other tags.
+  Tag_VFP_arch = Tag_FP_arch,
+  Tag_ABI_align8_needed = Tag_ABI_align_needed,
+  Tag_ABI_align8_preserved = Tag_ABI_align_preserved,
+  Tag_VFP_HP_extension = Tag_FP_HP_extension
 };
 
 // Values for Tag_ABI_PCS_R9_use.

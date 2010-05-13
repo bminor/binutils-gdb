@@ -1666,4 +1666,40 @@ arm_no_fix_v4bx: arm_fix_v4bx.o ../ld-new
 
 MOSTLYCLEANFILES += arm_fix_v4bx arm_fix_v4bx_interworking arm_no_fix_v4bx
 
+check_SCRIPTS += arm_attr_merge.sh
+check_DATA += arm_attr_merge_6.stdout arm_attr_merge_6r.stdout \
+	arm_attr_merge_7.stdout
+
+arm_attr_merge_6.stdout: arm_attr_merge_6
+	$(TEST_READELF) -A $< > $@
+
+arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o
+	../ld-new -o $@ arm_attr_merge_6a.o arm_attr_merge_6b.o
+
+arm_attr_merge_6a.o: arm_attr_merge_6a.s
+	$(TEST_AS) -o $@ $<
+
+arm_attr_merge_6b.o: arm_attr_merge_6b.s
+	$(TEST_AS) -o $@ $<
+
+arm_attr_merge_6r.stdout: arm_attr_merge_6r
+	$(TEST_READELF) -A $< > $@
+
+arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o
+	../ld-new -o $@ arm_attr_merge_6b.o arm_attr_merge_6a.o
+
+arm_attr_merge_7.stdout: arm_attr_merge_7
+	$(TEST_READELF) -A $< > $@
+
+arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o
+	../ld-new -o $@ arm_attr_merge_7a.o arm_attr_merge_7b.o
+
+arm_attr_merge_7a.o: arm_attr_merge_7a.s
+	$(TEST_AS) -o $@ $<
+
+arm_attr_merge_7b.o: arm_attr_merge_7b.s
+	$(TEST_AS) -o $@ $<
+
+MOSTLYCLEANFILES += arm_attr_merge_6 arm_attr_merge_6r arm_attr_merge_7
+
 endif DEFAULT_TARGET_ARM

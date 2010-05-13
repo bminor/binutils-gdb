@@ -7998,11 +7998,6 @@ Target_arm<big_endian>::do_finalize_sections(
     const Input_objects* input_objects,
     Symbol_table* symtab)
 {
-  // Create an empty uninitialized attribute section if we still don't have it
-  // at this moment.
-  if (this->attributes_section_data_ == NULL)
-    this->attributes_section_data_ = new Attributes_section_data(NULL, 0);
-
   // Merge processor-specific flags.
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
@@ -8032,6 +8027,12 @@ Target_arm<big_endian>::do_finalize_sections(
       this->merge_object_attributes(arm_dynobj->name().c_str(),
 				    arm_dynobj->attributes_section_data());
     }
+
+  // Create an empty uninitialized attribute section if we still don't have it
+  // at this moment.  This happens if there is no attributes sections in all
+  // inputs.
+  if (this->attributes_section_data_ == NULL)
+    this->attributes_section_data_ = new Attributes_section_data(NULL, 0);
 
   // Check BLX use.
   const Object_attribute* cpu_arch_attr =
@@ -9427,13 +9428,35 @@ Target_arm<big_endian>::merge_object_attributes(
     return;
 
   // If output has no object attributes, just copy.
+  const int vendor = Object_attribute::OBJ_ATTR_PROC;
   if (this->attributes_section_data_ == NULL)
     {
       this->attributes_section_data_ = new Attributes_section_data(*pasd);
+      Object_attribute* out_attr =
+	this->attributes_section_data_->known_attributes(vendor);
+
+      // We do not output objects with Tag_MPextension_use_legacy - we move
+      //  the attribute's value to Tag_MPextension_use.  */
+      if (out_attr[elfcpp::Tag_MPextension_use_legacy].int_value() != 0)
+	{
+	  if (out_attr[elfcpp::Tag_MPextension_use].int_value() != 0
+	      && out_attr[elfcpp::Tag_MPextension_use_legacy].int_value()
+	        != out_attr[elfcpp::Tag_MPextension_use].int_value())
+	    {
+	      gold_error(_("%s has both the current and legacy "
+			   "Tag_MPextension_use attributes"),
+			 name);
+	    }
+
+	  out_attr[elfcpp::Tag_MPextension_use] =
+	    out_attr[elfcpp::Tag_MPextension_use_legacy];
+	  out_attr[elfcpp::Tag_MPextension_use_legacy].set_type(0);
+	  out_attr[elfcpp::Tag_MPextension_use_legacy].set_int_value(0);
+	}
+
       return;
     }
 
-  const int vendor = Object_attribute::OBJ_ATTR_PROC;
   const Object_attribute* in_attr = pasd->known_attributes(vendor);
   Object_attribute* out_attr =
     this->attributes_section_data_->known_attributes(vendor);
@@ -9757,6 +9780,51 @@ Target_arm<big_endian>::merge_object_attributes(
 	    }
 	  if (in_attr[i].int_value() != 0)
 	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+
+	case elfcpp::Tag_DIV_use:
+	  // This tag is set to zero if we can use UDIV and SDIV in Thumb
+	  // mode on a v7-M or v7-R CPU; to one if we can not use UDIV or
+	  // SDIV at all; and to two if we can use UDIV or SDIV on a v7-A
+	  // CPU.  We will merge as follows: If the input attribute's value
+	  // is one then the output attribute's value remains unchanged.  If
+	  // the input attribute's value is zero or two then if the output
+	  // attribute's value is one the output value is set to the input
+	  // value, otherwise the output value must be the same as the
+	  // inputs.  */ 
+	  if (in_attr[i].int_value() != 1 && out_attr[i].int_value() != 1) 
+	    { 
+	      if (in_attr[i].int_value() != out_attr[i].int_value())
+		{
+		  gold_error(_("DIV usage mismatch between %s and output"),
+			     name);
+		}
+	    } 
+
+	  if (in_attr[i].int_value() != 1)
+	    out_attr[i].set_int_value(in_attr[i].int_value()); 
+	  
+	  break;
+
+	case elfcpp::Tag_MPextension_use_legacy:
+	  // We don't output objects with Tag_MPextension_use_legacy - we
+	  // move the value to Tag_MPextension_use.
+	  if (in_attr[i].int_value() != 0
+	      && in_attr[elfcpp::Tag_MPextension_use].int_value() != 0)
+	    {
+	      if (in_attr[elfcpp::Tag_MPextension_use].int_value()
+		  != in_attr[i].int_value())
+		{
+		  gold_error(_("%s has has both the current and legacy "
+			       "Tag_MPextension_use attributes"), 
+			     name);
+		}
+	    }
+
+	  if (in_attr[i].int_value()
+	      > out_attr[elfcpp::Tag_MPextension_use].int_value())
+	    out_attr[elfcpp::Tag_MPextension_use] = in_attr[i];
+
 	  break;
 
 	case elfcpp::Tag_nodefaults:

@@ -1,3 +1,23 @@
+2010-05-12  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::do_finalize_sections): Create an empty
+	attributes section only if there no attributes section after merging.
+	(Target_arm::merge_object_attributes): Move value of
+	Tag_MPextension_use_legacy to that of Tag_MPextension_use. 
+	Handle Tag_DIV_use and Tag_MPextension_use_legacy.
+	* testsuite/Makefile.am (check_SCRIPTS): Add arm_attr_merge.sh
+	(check_DATA): Add arm_attr_merge_6.stdout, arm_attr_merge_6r_stdout
+	and arm_attr_merge_7.stdout.
+	(arm_attr_merge_6.stdout, arm_attr_merge_6 arm_attr_merge_6a.o
+	arm_attr_merge_6b.o, arm_attr_merge_6r.stdout, arm_attr_merge_6r,
+	arm_attr_merge_7.stdout, arm_attr_merge_7, arm_attr_merge_7a.o,
+	arm_attr_merge_7b.o): New rules.
+	(MOSTLYCLEANFILES): Add arm_attr_merge_6, arm_attr_merge_6r and
+	arm_attr_merge_7
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_attr_merge.sh: New file.
+	* testsuite/arm_attr_merge_[67][ab].s: Same.
+
 2010-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
