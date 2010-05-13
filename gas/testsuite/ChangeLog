@@ -1,5 +1,7 @@
 2010-05-13  Alan Modra  <amodra@gmail.com>
 
+	* gas/all/gas.exp: Don't run byte test on powerpc.
+
 	* gas/ppc/a2.d: Correct wclr encoding.
 
 2010-05-11  Andrew Stubbs  <ams@codesourcery.com>

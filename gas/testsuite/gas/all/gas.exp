@@ -329,7 +329,10 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] && ![istarget "hppa*-
     run_dump_test relax
 }
 
-run_dump_test byte
+# powerpc allows a string argument to .byte
+if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000*-*-*"] } {
+    run_dump_test byte
+}
 
 # .quad is 16 bytes on i960.
 if { ![istarget "i960-*-*"] } {
