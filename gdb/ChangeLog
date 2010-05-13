@@ -1,3 +1,7 @@
+2010-05-13  Michael Snyder  <msnyder@vmware.com>
+
+	* stack.c (initialize_stack): Remove long-dead code.
+
 2010-05-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

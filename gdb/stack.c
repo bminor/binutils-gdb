@@ -2140,10 +2140,6 @@ void _initialize_stack (void);
 void
 _initialize_stack (void)
 {
-#if 0
-  backtrace_limit = 30;
-#endif
-
   add_com ("return", class_stack, return_command, _("\
 Make selected stack frame return to its caller.\n\
 Control remains in the debugger, but when you continue\n\
@@ -2248,12 +2244,4 @@ source line."),
 			        show_disassemble_next_line,
 			        &setlist, &showlist);
   disassemble_next_line = AUTO_BOOLEAN_FALSE;
-
-#if 0
-  add_cmd ("backtrace-limit", class_stack, set_backtrace_limit_command, _(\
-"Specify maximum number of frames for \"backtrace\" to print by default."),
-	   &setlist);
-  add_info ("backtrace-limit", backtrace_limit_info, _("\
-The maximum number of frames for \"backtrace\" to print by default."));
-#endif
 }
