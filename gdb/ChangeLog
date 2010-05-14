@@ -1,5 +1,14 @@
 2010-05-14  Michael Snyder  <msnyder@vmware.com>
 
+	* elfread.c: White space.
+	* environ.c: White space.
+	* eval.c: White space.
+	* event-loop.c: White space.
+	* event-top.c: White space.
+	* exceptions.c: White space.
+	* exec.c: White space.
+	* expprint.c: White space.
+
 	* dbxread.c: White space.
 	* dcache.c: White space.
 	* disasm.c: White space.

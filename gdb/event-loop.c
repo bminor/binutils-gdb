@@ -858,8 +858,8 @@ gdb_wait_for_event (int block)
   else
     {
       struct timeval select_timeout;
-
       struct timeval *timeout_p;
+
       if (block)
 	timeout_p = gdb_notifier.timeout_valid
 	  ? &gdb_notifier.select_timeout : NULL;

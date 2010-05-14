@@ -504,6 +504,7 @@ command_handler (char *command)
     {
 #ifdef HAVE_SBRK
       char *lim = (char *) sbrk (0);
+
       space_at_cmd_start = lim - lim_at_start;
 #endif
     }
@@ -555,7 +556,6 @@ command_line_handler (char *rl)
   extern int linesize;
   char *nline;
   char got_eof = 0;
-
 
   int repeat = (instream == stdin);
 
@@ -990,6 +990,7 @@ static void
 async_stop_sig (gdb_client_data arg)
 {
   char *prompt = get_prompt ();
+
 #if STOP_SIGNAL == SIGTSTP
   signal (SIGTSTP, SIG_DFL);
 #if HAVE_SIGPROCMASK

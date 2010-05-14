@@ -425,6 +425,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 		  /* Named Local variable in a Data section.
 		     Check its name for stabs-in-elf.  */
 		  int special_local_sect;
+
 		  if (strcmp ("Bbss.bss", sym->name) == 0)
 		    special_local_sect = SECT_OFF_BSS (objfile);
 		  else if (strcmp ("Ddata.data", sym->name) == 0)
@@ -889,6 +890,7 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
       if (debugfile)
 	{
 	  bfd *abfd = symfile_bfd_open (debugfile);
+
 	  symbol_file_add_separate (abfd, symfile_flags, objfile);
 	  xfree (debugfile);
 	}

@@ -104,6 +104,7 @@ static void
 catcher_pop (void)
 {
   struct catcher *old_catcher = current_catcher;
+
   current_catcher = old_catcher->prev;
 
   /* Restore the cleanup chain, the error/quit messages, and the uiout
@@ -174,6 +175,7 @@ exceptions_state_mc (enum catcher_action action)
 	case CATCH_ITER:
 	  {
 	    struct gdb_exception exception = *current_catcher->exception;
+
 	    if (current_catcher->mask & RETURN_MASK (exception.reason))
 	      {
 		/* Exit normally if this catcher can handle this
@@ -243,6 +245,7 @@ void
 deprecated_throw_reason (enum return_reason reason)
 {
   struct gdb_exception exception;
+
   memset (&exception, 0, sizeof exception);
 
   exception.reason = reason;
@@ -299,6 +302,7 @@ print_exception (struct ui_file *file, struct gdb_exception e)
      as that way the MI's behavior is preserved.  */
   const char *start;
   const char *end;
+
   for (start = e.message; start != NULL; start = end)
     {
       end = strchr (start, '\n');
@@ -412,6 +416,7 @@ void
 throw_error (enum errors error, const char *fmt, ...)
 {
   va_list args;
+
   va_start (args, fmt);
   throw_it (RETURN_ERROR, error, fmt, args);
   va_end (args);
@@ -457,6 +462,7 @@ catch_exception (struct ui_out *uiout,
 		 return_mask mask)
 {
   volatile struct gdb_exception exception;
+
   TRY_CATCH (exception, mask)
     {
       (*func) (uiout, func_args);
@@ -473,6 +479,7 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 {
   volatile struct gdb_exception exception;
   volatile int val = 0;
+
   TRY_CATCH (exception, mask)
     {
       val = (*func) (uiout, func_args);
@@ -505,6 +512,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 {
   volatile int val = 0;
   volatile struct gdb_exception exception;
+
   TRY_CATCH (exception, mask)
     {
       val = func (func_args);
@@ -520,6 +528,7 @@ catch_command_errors (catch_command_errors_ftype * command,
 		      char *arg, int from_tty, return_mask mask)
 {
   volatile struct gdb_exception e;
+
   TRY_CATCH (e, mask)
     {
       command (arg, from_tty);

@@ -81,6 +81,7 @@ init_environ (struct gdb_environ *e)
     {
       int len = strlen (e->vector[i]);
       char *new = (char *) xmalloc (len + 1);
+
       memcpy (new, e->vector[i], len + 1);
       e->vector[i] = new;
     }

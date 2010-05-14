@@ -162,6 +162,7 @@ struct value *
 evaluate_expression (struct expression *exp)
 {
   int pc = 0;
+
   return evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_NORMAL);
 }
 
@@ -172,6 +173,7 @@ struct value *
 evaluate_type (struct expression *exp)
 {
   int pc = 0;
+
   return evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_AVOID_SIDE_EFFECTS);
 }
 
@@ -196,6 +198,7 @@ extract_field_op (struct expression *exp, int *subexp)
 {
   int tem;
   char *result;
+
   if (exp->elts[*subexp].opcode != STRUCTOP_STRUCT
       && exp->elts[*subexp].opcode != STRUCTOP_PTR)
     return NULL;
@@ -216,6 +219,7 @@ get_label (struct expression *exp, int *pos)
       int pc = (*pos)++;
       char *name = &exp->elts[pc + 2].string;
       int tem = longest_to_int (exp->elts[pc + 1].longconst);
+
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       return name;
     }
@@ -237,6 +241,7 @@ evaluate_struct_tuple (struct value *struct_val,
   int fieldno = -1;
   int variantno = -1;
   int subfieldno = -1;
+
   while (--nargs >= 0)
     {
       int pc = *pos;
@@ -252,12 +257,14 @@ evaluate_struct_tuple (struct value *struct_val,
       do
 	{
 	  char *label = get_label (exp, &pc);
+
 	  if (label)
 	    {
 	      for (fieldno = 0; fieldno < TYPE_NFIELDS (struct_type);
 		   fieldno++)
 		{
 		  char *field_name = TYPE_FIELD_NAME (struct_type, fieldno);
+
 		  if (field_name != NULL && strcmp (field_name, label) == 0)
 		    {
 		      variantno = -1;
@@ -270,6 +277,7 @@ evaluate_struct_tuple (struct value *struct_val,
 		   fieldno++)
 		{
 		  char *field_name = TYPE_FIELD_NAME (struct_type, fieldno);
+
 		  field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
 		  if ((field_name == 0 || *field_name == '\0')
 		      && TYPE_CODE (field_type) == TYPE_CODE_UNION)
@@ -381,6 +389,7 @@ init_array_element (struct value *array, struct value *element,
 {
   LONGEST index;
   int element_size = TYPE_LENGTH (value_type (element));
+
   if (exp->elts[*pos].opcode == BINOP_COMMA)
     {
       (*pos)++;
@@ -392,6 +401,7 @@ init_array_element (struct value *array, struct value *element,
   else if (exp->elts[*pos].opcode == BINOP_RANGE)
     {
       LONGEST low, high;
+
       (*pos)++;
       low = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
       high = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
@@ -464,6 +474,7 @@ unop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	     it needs to modify this function.  */
 	  {
 	    struct type *builtin_int = builtin_type (gdbarch)->builtin_int;
+
 	    if (TYPE_LENGTH (type1) < TYPE_LENGTH (builtin_int))
 	      *arg1 = value_cast (builtin_int, *arg1);
 	  }
@@ -848,6 +859,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  && TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	{
 	  struct value *rec = allocate_value (expect_type);
+
 	  memset (value_contents_raw (rec), '\0', TYPE_LENGTH (type));
 	  return evaluate_struct_tuple (rec, exp, pos, noside, nargs);
 	}
@@ -860,6 +872,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  struct value *array = allocate_value (expect_type);
 	  int element_size = TYPE_LENGTH (check_typedef (element_type));
 	  LONGEST low_bound, high_bound, index;
+
 	  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
 	    {
 	      low_bound = 0;
@@ -871,6 +884,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    {
 	      struct value *element;
 	      int index_pc = 0;
+
 	      if (exp->elts[*pos].opcode == BINOP_RANGE)
 		{
 		  index_pc = ++(*pos);
@@ -882,6 +896,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      if (index_pc)
 		{
 		  int continue_pc = *pos;
+
 		  *pos = index_pc;
 		  index = init_array_element (array, element, exp, pos, noside,
 					      low_bound, high_bound);
@@ -924,6 +939,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      LONGEST range_low, range_high;
 	      struct type *range_low_type, *range_high_type;
 	      struct value *elem_val;
+
 	      if (exp->elts[*pos].opcode == BINOP_RANGE)
 		{
 		  (*pos)++;
@@ -968,6 +984,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      for (; range_low <= range_high; range_low++)
 		{
 		  int bit_index = (unsigned) range_low % TARGET_CHAR_BIT;
+
 		  if (gdbarch_bits_big_endian (exp->gdbarch))
 		    bit_index = TARGET_CHAR_BIT - 1 - bit_index;
 		  valaddr[(unsigned) range_low / TARGET_CHAR_BIT]
@@ -991,9 +1008,10 @@ evaluate_subexp_standard (struct type *expect_type,
       {
 	struct value *array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	int lowbound
-	= value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 	int upper
-	= value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+
 	if (noside == EVAL_SKIP)
 	  goto nosideret;
 	return value_slice (array, lowbound, upper - lowbound + 1);
@@ -1003,9 +1021,10 @@ evaluate_subexp_standard (struct type *expect_type,
       {
 	struct value *array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	int lowbound
-	= value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 	int length
-	= value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+
 	return value_slice (array, lowbound, length);
       }
 
@@ -1101,6 +1120,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (gnu_runtime)
 	  {
 	    struct type *type = selector_type;
+
 	    type = lookup_function_type (type);
 	    type = lookup_pointer_type (type);
 	    type = lookup_function_type (type);
@@ -1286,6 +1306,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	       it. */
 
 	    struct type *type = value_type (called_method);
+
 	    if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
 	      type = TYPE_TARGET_TYPE (type);
 	    type = TYPE_TARGET_TYPE (type);
@@ -1367,6 +1388,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    {
 	      struct type *method_type = check_typedef (value_type (arg1));
+
 	      arg1 = value_zero (method_type, not_lval);
 	    }
 	  else
@@ -1458,6 +1480,7 @@ evaluate_subexp_standard (struct type *expect_type,
           /* Save the function position and move pos so that the arguments
              can be evaluated.  */
           int func_name_len;
+
           save_pos1 = *pos;
           tem = 1;
 
@@ -1567,6 +1590,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    /* Non-C++ case -- or no overload resolution */
 	    {
 	      struct value *temp = arg2;
+
 	      argvec[0] = value_struct_elt (&temp, argvec + 1, tstr,
 					    &static_memfuncp,
 					    op == STRUCTOP_STRUCT
@@ -1773,6 +1797,7 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  struct value *temp = arg1;
+
 	  return value_struct_elt (&temp, NULL, &exp->elts[pc + 2].string,
 				   NULL, "structure");
 	}
@@ -1818,6 +1843,7 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  struct value *temp = arg1;
+
 	  return value_struct_elt (&temp, NULL, &exp->elts[pc + 2].string,
 				   NULL, "structure pointer");
 	}
@@ -2501,6 +2527,7 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  struct value *retvalp = evaluate_subexp_for_address (exp, pos, noside);
+
 	  return retvalp;
 	}
 
@@ -2559,6 +2586,7 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  CORE_ADDR tls_addr;
+
 	  tls_addr = target_translate_tls_address (exp->elts[pc + 1].objfile,
 						   value_as_address (arg1));
 	  return value_at_lazy (exp->elts[pc + 2].type, tls_addr);
@@ -2579,6 +2607,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    {
 	      struct value *tmp = arg1;
+
 	      arg2 = value_one (value_type (arg1), not_lval);
 	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
 	      arg2 = value_binop (tmp, arg2, BINOP_ADD);
@@ -2602,6 +2631,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    {
 	      struct value *tmp = arg1;
+
 	      arg2 = value_one (value_type (arg1), not_lval);
 	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
 	      arg2 = value_binop (tmp, arg2, BINOP_SUB);
@@ -2625,6 +2655,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    {
 	      struct value *tmp = arg1;
+
 	      arg2 = value_one (value_type (arg1), not_lval);
 	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
 	      arg2 = value_binop (tmp, arg2, BINOP_ADD);
@@ -2649,6 +2680,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    {
 	      struct value *tmp = arg1;
+
 	      arg2 = value_one (value_type (arg1), not_lval);
 	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
 	      arg2 = value_binop (tmp, arg2, BINOP_SUB);
@@ -2675,6 +2707,7 @@ evaluate_subexp_standard (struct type *expect_type,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  struct type *type = exp->elts[pc + 1].type;
+
 	  /* If this is a typedef, then find its immediate target.  We
 	     use check_typedef to resolve stubs, but we ignore its
 	     result because we do not want to dig past all
@@ -2757,7 +2790,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  struct type *type =
-	  lookup_pointer_type (SYMBOL_TYPE (var));
+	    lookup_pointer_type (SYMBOL_TYPE (var));
 	  enum address_class sym_class = SYMBOL_CLASS (var);
 
 	  if (sym_class == LOC_CONST
@@ -2907,6 +2940,7 @@ parse_and_eval_type (char *p, int length)
 {
   char *tmp = (char *) alloca (length + 4);
   struct expression *expr;
+
   tmp[0] = '(';
   memcpy (tmp + 1, p, length);
   tmp[length + 1] = ')';
