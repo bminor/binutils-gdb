@@ -126,6 +126,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
   if (*s == '+')
     {
       LONGEST len;
+
       ++s;
       v = parse_to_comma_and_eval (&s);
       len = value_as_long (v);
@@ -145,6 +146,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
   else
     {
       CORE_ADDR end_addr;
+
       v = parse_to_comma_and_eval (&s);
       end_addr = value_as_address (v);
       if (start_addr > end_addr)
@@ -179,6 +181,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 	  > pattern_buf_size)
 	{
 	  size_t current_offset = pattern_buf_end - pattern_buf;
+
 	  pattern_buf_size *= 2;
 	  pattern_buf = xrealloc (pattern_buf, pattern_buf_size);
 	  pattern_buf_end = pattern_buf + current_offset;
@@ -298,6 +301,7 @@ find_command (char *args, int from_tty)
   if (found_count > 0)
     {
       struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+
       set_internalvar (lookup_internalvar ("_"),
 		       value_from_pointer (ptr_type, last_found_addr));
     }

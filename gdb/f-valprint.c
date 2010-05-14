@@ -311,6 +311,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	{
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
+
 	  fprintf_filtered (stream, "@");
 	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  if (options->deref_ref)
@@ -322,9 +323,10 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
 	    {
 	      struct value *deref_val =
-	      value_at
-	      (TYPE_TARGET_TYPE (type),
-	       unpack_pointer (type, valaddr + embedded_offset));
+		value_at
+		(TYPE_TARGET_TYPE (type),
+		 unpack_pointer (type, valaddr + embedded_offset));
+
 	      common_val_print (deref_val, stream, recurse,
 				options, current_language);
 	    }
@@ -352,6 +354,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  print_scalar_formatted (valaddr, type, &opts, 0, stream);
@@ -403,6 +406,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  print_scalar_formatted (valaddr, type, &opts, 0, stream);
@@ -451,6 +455,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       for (index = 0; index < TYPE_NFIELDS (type); index++)
         {
           int offset = TYPE_FIELD_BITPOS (type, index) / 8;
+
           f_val_print (TYPE_FIELD_TYPE (type, index), valaddr + offset,
                        embedded_offset, address, stream, recurse, options);
           if (index != TYPE_NFIELDS (type) - 1)
@@ -537,7 +542,7 @@ info_common_command (char *comname, int from_tty)
   else
     {
       struct minimal_symbol *msymbol =
-      lookup_minimal_symbol_by_pc (get_frame_pc (fi));
+	lookup_minimal_symbol_by_pc (get_frame_pc (fi));
 
       if (msymbol != NULL)
 	funname = SYMBOL_LINKAGE_NAME (msymbol);
@@ -626,7 +631,7 @@ there_is_a_visible_common_named (char *comname)
   else
     {
       struct minimal_symbol *msymbol =
-      lookup_minimal_symbol_by_pc (fi->pc);
+	lookup_minimal_symbol_by_pc (fi->pc);
 
       if (msymbol != NULL)
 	funname = SYMBOL_LINKAGE_NAME (msymbol);

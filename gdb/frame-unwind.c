@@ -49,6 +49,7 @@ frame_unwind_init (struct obstack *obstack)
 {
   struct frame_unwind_table *table
     = OBSTACK_ZALLOC (obstack, struct frame_unwind_table);
+
   /* Start the table out with a few default sniffers.  OSABI code
      can't override this.  */
   table->list = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);

@@ -1,5 +1,13 @@
 2010-05-14  Michael Snyder  <msnyder@vmware.com>
 
+	* findcmd.c: White space.
+	* findvar.c: White space.
+	* fork-child.c: White space.
+	* frame-base.c: White space.
+	* frame.c: White space.
+	* frame-unwind.c: White space.
+	* f-valprint.c: White space.
+
 	* elfread.c: White space.
 	* environ.c: White space.
 	* eval.c: White space.

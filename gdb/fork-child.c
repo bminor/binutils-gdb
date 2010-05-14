@@ -178,6 +178,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	 assuming that every other character is a separate
 	 argument.  */
       int argc = (strlen (allargs) + 1) / 2 + 2;
+
       argv = (char **) xmalloc (argc * sizeof (*argv));
       argv[0] = exec_file;
       breakup_args (allargs, &argv[1]);

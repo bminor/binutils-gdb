@@ -592,6 +592,7 @@ frame_find_by_id (struct frame_id id)
   for (frame = get_current_frame (); ; frame = prev_frame)
     {
       struct frame_id this = get_frame_id (frame);
+
       if (frame_id_eq (id, this))
 	/* An exact match.  */
 	return frame;
@@ -620,6 +621,7 @@ frame_unwind_pc (struct frame_info *this_frame)
   if (!this_frame->prev_pc.p)
     {
       CORE_ADDR pc;
+
       if (gdbarch_unwind_pc_p (frame_unwind_arch (this_frame)))
 	{
 	  /* The right way.  The `pure' way.  The one true way.  This
@@ -942,6 +944,7 @@ put_frame_register (struct frame_info *frame, int regnum,
 	/* FIXME: write_memory doesn't yet take constant buffers.
            Arrrg!  */
 	gdb_byte tmp[MAX_REGISTER_SIZE];
+
 	memcpy (tmp, buf, register_size (gdbarch, regnum));
 	write_memory (addr, tmp, register_size (gdbarch, regnum));
 	break;
@@ -998,6 +1001,7 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
   for (i = regnum; i < numregs; i++)
     {
       int thissize = register_size (gdbarch, i);
+
       if (thissize == 0)
 	break;	/* This register is not available on this architecture.  */
       maxsize += thissize;
@@ -1013,6 +1017,7 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
   while (len > 0)
     {
       int curr_len = register_size (gdbarch, regnum) - offset;
+
       if (curr_len > len)
 	curr_len = len;
 
@@ -1024,6 +1029,7 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
       else
 	{
 	  gdb_byte buf[MAX_REGISTER_SIZE];
+
 	  if (!frame_register_read (frame, regnum, buf))
 	    return 0;
 	  memcpy (myaddr, buf + offset, curr_len);
@@ -1055,6 +1061,7 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
   while (len > 0)
     {
       int curr_len = register_size (gdbarch, regnum) - offset;
+
       if (curr_len > len)
 	curr_len = len;
 
@@ -1065,6 +1072,7 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
       else
 	{
 	  gdb_byte buf[MAX_REGISTER_SIZE];
+
 	  frame_register_read (frame, regnum, buf);
 	  memcpy (buf + offset, myaddr, curr_len);
 	  put_frame_register (frame, regnum, buf);
