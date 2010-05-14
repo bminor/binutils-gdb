@@ -1,3 +1,9 @@
+2010-05-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11583
+	* ldexp.c (exp_fold_tree_1): If assignment source expression is
+	invalid, make the destination symbol undefined.
+
 2010-05-11  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):

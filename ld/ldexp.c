@@ -830,6 +830,14 @@ exp_fold_tree_1 (etree_type *tree)
 						    hsrc);
 		}
 	    }
+	  else if (expld.phase == lang_final_phase_enum)
+	    {
+	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
+					FALSE, FALSE, TRUE);
+	      if (h != NULL
+		  && h->type == bfd_link_hash_new)
+		h->type = bfd_link_hash_undefined;
+	    }
 	}
       break;
 
