@@ -79,6 +79,7 @@ java_value_print (struct value *val, struct ui_file *stream,
       int reps;
       struct type *el_type
 	= java_primitive_type_from_name (gdbarch, name, i - 2);
+
       i = 0;
       read_memory (address + get_java_object_header_size (gdbarch), buf4, 4);
 
@@ -319,6 +320,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  if (field_is_static (&TYPE_FIELD (type, i)))
 	    {
 	      char *name = TYPE_FIELD_NAME (type, i);
+
 	      if (!options->static_field_print)
 		continue;
 	      if (name != NULL && strcmp (name, "class") == 0)
@@ -412,12 +414,14 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
 		  struct value *v = value_static_field (type, i);
+
 		  if (v == NULL)
 		    fputs_filtered ("<optimized out>", stream);
 		  else
 		    {
 		      struct value_print_options opts;
 		      struct type *t = check_typedef (value_type (v));
+
 		      if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
 			v = value_addr (v);
 		      opts = *options;
@@ -431,6 +435,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	      else
 		{
 		  struct value_print_options opts = *options;
+
 		  opts.deref_ref = 0;
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
@@ -522,6 +527,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  print_scalar_formatted (valaddr, type, &opts, 0, stream);

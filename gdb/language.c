@@ -773,8 +773,8 @@ void
 type_error (const char *string,...)
 {
   va_list args;
-  va_start (args, string);
 
+  va_start (args, string);
   switch (type_check)
     {
     case type_check_warn:
@@ -799,8 +799,8 @@ void
 range_error (const char *string,...)
 {
   va_list args;
-  va_start (args, string);
 
+  va_start (args, string);
   switch (range_check)
     {
     case range_check_warn:
@@ -981,6 +981,7 @@ skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
       if (languages[i]->skip_trampoline)
 	{
 	  CORE_ADDR real_pc = (languages[i]->skip_trampoline) (frame, pc);
+
 	  if (real_pc)
 	    return real_pc;
 	}
@@ -1298,6 +1299,7 @@ language_string_char_type (const struct language_defn *la,
 {
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
+
   return ld->arch_info[la->la_language].string_char_type;
 }
 
@@ -1311,11 +1313,13 @@ language_bool_type (const struct language_defn *la,
   if (ld->arch_info[la->la_language].bool_type_symbol)
     {
       struct symbol *sym;
+
       sym = lookup_symbol (ld->arch_info[la->la_language].bool_type_symbol,
 			   NULL, VAR_DOMAIN, NULL);
       if (sym)
 	{
 	  struct type *type = SYMBOL_TYPE (sym);
+
 	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
 	    return type;
 	}
@@ -1332,6 +1336,7 @@ language_lookup_primitive_type_by_name (const struct language_defn *la,
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
   struct type *const *p;
+
   for (p = ld->arch_info[la->la_language].primitive_type_vector;
        (*p) != NULL;
        p++)

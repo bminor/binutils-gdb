@@ -120,6 +120,7 @@ get_java_class_symtab (struct gdbarch *gdbarch)
       struct objfile *objfile = get_dynamics_objfile (gdbarch);
       struct blockvector *bv;
       struct block *bl;
+
       class_symtab = allocate_symtab ("<java-classes>", objfile);
       class_symtab->language = language_java;
       bv = (struct blockvector *)
@@ -149,6 +150,7 @@ add_class_symtab_symbol (struct symbol *sym)
   struct symtab *symtab
     = get_java_class_symtab (get_objfile_arch (SYMBOL_SYMTAB (sym)->objfile));
   struct blockvector *bv = BLOCKVECTOR (symtab);
+
   dict_add_symbol (BLOCK_DICT (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)), sym);
 }
 
@@ -156,6 +158,7 @@ static struct symbol *
 add_class_symbol (struct type *type, CORE_ADDR addr)
 {
   struct symbol *sym;
+
   sym = (struct symbol *)
     obstack_alloc (&dynamics_objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
@@ -183,11 +186,13 @@ struct type *
 java_lookup_class (char *name)
 {
   struct symbol *sym;
+
   sym = lookup_symbol (name, expression_context_block, STRUCT_DOMAIN, NULL);
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
 #if 0
   CORE_ADDR addr;
+
   if (called from parser)
     {
       call lookup_class (or similar) in inferior;
@@ -199,6 +204,7 @@ java_lookup_class (char *name)
   else
     addr = 0;
   struct type *type;
+
   type = alloc_type (objfile);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (type);
@@ -222,6 +228,7 @@ get_java_utf8_name (struct obstack *obstack, struct value *name)
   struct value *temp = name;
   int name_length;
   CORE_ADDR data_addr;
+
   temp = value_struct_elt (&temp, NULL, "length", NULL, "structure");
   name_length = (int) value_as_long (temp);
   data_addr = value_address (temp) + TYPE_LENGTH (value_type (temp));
@@ -253,6 +260,7 @@ java_class_is_primitive (struct value *clas)
 {
   struct value *vtable = value_struct_elt (&clas, NULL, "vtable", NULL, "struct");
   CORE_ADDR i = value_as_address (vtable);
+
   return (int) (i & 0x7fffffff) == (int) 0x7fffffff;
 }
 
@@ -297,6 +305,7 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
   if (java_class_is_primitive (clas))
     {
       struct value *sig;
+
       temp = clas;
       sig = value_struct_elt (&temp, NULL, "method_count", NULL, "structure");
       return java_primitive_type (gdbarch, value_as_long (sig));
@@ -325,6 +334,7 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
     {
       char *signature = name;
       int namelen = java_demangled_signature_length (signature);
+
       if (namelen > strlen (name))
 	name = obstack_alloc (&objfile->objfile_obstack, namelen + 1);
       java_demangled_signature_copy (name, signature);
@@ -446,6 +456,7 @@ java_link_class_type (struct gdbarch *gdbarch,
     {
       int accflags;
       int boffset;
+
       if (fields == NULL)
 	{
 	  temp = clas;
@@ -456,6 +467,7 @@ java_link_class_type (struct gdbarch *gdbarch,
 	{			/* Re-use field value for next field. */
 	  CORE_ADDR addr
 	    = value_address (field) + TYPE_LENGTH (value_type (field));
+
 	  set_value_address (field, addr);
 	  set_value_lazy (field, 1);
 	}
@@ -493,6 +505,7 @@ java_link_class_type (struct gdbarch *gdbarch,
       else
 	{
 	  struct type *ftype;
+
 	  temp = field;
 	  temp = value_struct_elt (&temp, NULL, "type", NULL, "structure");
 	  ftype = type_from_class (gdbarch, temp);
@@ -518,6 +531,7 @@ java_link_class_type (struct gdbarch *gdbarch,
     {
       char *mname;
       int k;
+
       if (methods == NULL)
 	{
 	  temp = clas;
@@ -528,6 +542,7 @@ java_link_class_type (struct gdbarch *gdbarch,
 	{			/* Re-use method value for next method. */
 	  CORE_ADDR addr
 	    = value_address (method) + TYPE_LENGTH (value_type (method));
+
 	  set_value_address (method, addr);
 	  set_value_lazy (method, 1);
 	}
@@ -559,6 +574,7 @@ java_link_class_type (struct gdbarch *gdbarch,
 	  if (strcmp (mname, fn_fieldlists[j].name) == 0)
 	    {			/* Found an existing method with the same name. */
 	      int l;
+
 	      if (mname != unqualified_name)
 		obstack_free (&objfile->objfile_obstack, mname);
 	      mname = fn_fieldlists[j].name;
@@ -619,6 +635,7 @@ get_java_object_type (void)
   if (java_object_type == NULL)
     {
       struct symbol *sym;
+
       sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN, NULL);
       if (sym == NULL)
 	error (_("cannot find java.lang.Object"));
@@ -631,6 +648,7 @@ int
 get_java_object_header_size (struct gdbarch *gdbarch)
 {
   struct type *objtype = get_java_object_type ();
+
   if (objtype == NULL)
     return (2 * gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
   else
@@ -774,6 +792,7 @@ static int
 java_demangled_signature_length (char *signature)
 {
   int array = 0;
+
   for (; *signature == '['; signature++)
     array += 2;			/* Two chars for "[]". */
   switch (signature[0])
@@ -794,6 +813,7 @@ java_demangled_signature_copy (char *result, char *signature)
   int array = 0;
   char *ptr;
   int i;
+
   while (*signature == '[')
     {
       array++;
@@ -835,6 +855,7 @@ java_demangle_type_signature (char *signature)
 {
   int length = java_demangled_signature_length (signature);
   char *result = xmalloc (length + 1);
+
   java_demangled_signature_copy (result, signature);
   result[length] = '\0';
   return result;
@@ -911,6 +932,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
   struct value *arg1;
   struct value *arg2;
   struct type *type;
+
   switch (op)
     {
     case UNOP_IND:

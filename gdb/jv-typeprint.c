@@ -90,8 +90,8 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
   int len;
   char *mangled_name;
   char *demangled_name;
-  QUIT;
 
+  QUIT;
   wrap_here ("    ");
 
   if (type == NULL)
@@ -122,6 +122,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (TYPE_TAG_NAME (type) != NULL && TYPE_TAG_NAME (type)[0] == '[')
 	{			/* array type */
 	  char *name = java_demangle_type_signature (TYPE_TAG_NAME (type));
+
 	  fputs_filtered (name, stream);
 	  xfree (name);
 	  break;

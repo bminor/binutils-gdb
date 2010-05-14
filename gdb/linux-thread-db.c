@@ -324,6 +324,7 @@ static int
 have_threads_callback (struct thread_info *thread, void *args)
 {
   int pid = * (int *) args;
+
   if (ptid_get_pid (thread->ptid) != pid)
     return 0;
 
@@ -601,10 +602,10 @@ thread_db_find_new_threads_silently (ptid_t ptid)
     }
 
   if (except.reason < 0 && info_verbose)
-  {
-    exception_fprintf (gdb_stderr, except,
-                       "Warning: thread_db_find_new_threads_silently: ");
-  }
+    {
+      exception_fprintf (gdb_stderr, except,
+			 "Warning: thread_db_find_new_threads_silently: ");
+    }
 }
 
 /* Lookup a library in which given symbol resides.
@@ -794,12 +795,15 @@ thread_db_load_search (void)
   while (*search_path)
     {
       const char *end = strchr (search_path, ':');
+
       if (end)
 	{
 	  size_t len = end - search_path;
+
           if (len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
             {
               char *cp = xmalloc (len + 1);
+
               memcpy (cp, search_path, len);
               cp[len] = '\0';
               warning (_("libthread_db_search_path component too long,"
@@ -1329,6 +1333,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (info->need_stale_parent_threads_check)
     {
       int tgid = linux_proc_get_tgid (ti.ti_lid);
+
       if (tgid != -1 && tgid != info->pid)
 	return 0;
     }

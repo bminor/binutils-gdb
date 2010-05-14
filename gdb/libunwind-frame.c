@@ -101,6 +101,7 @@ libunwind_descr_init (struct gdbarch *gdbarch)
 {
   struct libunwind_descr *descr = GDBARCH_OBSTACK_ZALLOC (gdbarch,
 							  struct libunwind_descr);
+
   return descr;
 }
 
@@ -201,6 +202,7 @@ void
 libunwind_frame_dealloc_cache (struct frame_info *self, void *this_cache)
 {
   struct libunwind_frame_cache *cache = this_cache;
+
   if (cache->as)
     unw_destroy_addr_space_p (cache->as);
 }

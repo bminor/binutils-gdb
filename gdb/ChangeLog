@@ -1,5 +1,15 @@
 2010-05-14  Michael Snyder  <msnyder@vmware.com>
 
+	* jv-lang.c: White space.
+	* jv-typeprint.c: White space.
+	* jv-valprint.c: White space.
+	* language.c: White space.
+	* libunwind-frame.c: White space.
+	* linespec.c: White space.
+	* linux-nat.c: White space.
+	* linux-record.c: White space.
+	* linux-thread-db.c: White space.
+
 	* infcall.c: White space.
 	* inf-child.c: White space.
 	* infcmd.c: White space.
