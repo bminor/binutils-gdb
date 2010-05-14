@@ -759,7 +759,7 @@ _bfd_vms_get_object_record (bfd *abfd)
   vms_debug2 ((8, "_bfd_vms_get_obj_record\n"));
 
   /* Skip alignment byte if the current position is odd.  */
-  if (bfd_tell (abfd) & 1)
+  if (PRIV (recrd.file_format) == FF_FOREIGN && (bfd_tell (abfd) & 1))
     {
       if (bfd_bread (PRIV (recrd.buf), 1, abfd) != 1)
         {
@@ -2449,6 +2449,10 @@ alpha_vms_object_p (bfd *abfd)
 
       /* Extract the header size.  */
       PRIV (recrd.rec_size) = bfd_getl32 (buf + EIHD__L_SIZE);
+
+      /* The header size is 0 for DSF files.  */
+      if (PRIV (recrd.rec_size) == 0)
+        PRIV (recrd.rec_size) = sizeof (struct vms_eihd);
 
       if (PRIV (recrd.rec_size) > PRIV (recrd.buf_size))
         {

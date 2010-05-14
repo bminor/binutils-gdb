@@ -1,5 +1,11 @@
 2010-05-14  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (alpha_vms_object_p): Accept header size of 0.
+	(_bfd_vms_get_object_record): Handle align byte only in the
+	foreign case.
+
+2010-05-14  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-lib.c (_bfd_vms_lib_ia64_archive_p): New function.
 	* libbfd-in.h (_bfd_vms_lib_ia64_archive_p): Add prototype.
 	* libbfd.h: Regenerate.
