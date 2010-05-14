@@ -1,3 +1,9 @@
+2010-05-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+ 	PR python/11482
+
+	* gdb.python/py-value.exp (test_value_hash): New function.
+
 2010-05-11  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	PR exp/11530.

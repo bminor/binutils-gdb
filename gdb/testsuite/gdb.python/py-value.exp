@@ -393,6 +393,23 @@ proc test_parse_and_eval {} {
     "parse_and_eval type test"
 }
 
+# Test that values are hashable.
+proc test_value_hash {} {
+  gdb_py_test_multiple "Simple Python value dictionary" \
+    "python" "" \
+    "one = gdb.Value(1)" "" \
+    "two = gdb.Value(2)" "" \
+    "three = gdb.Value(3)" "" \
+    "vdict = {one:\"one str\",two:\"two str\",three:\"three str\"}" "" \
+    "end"
+    gdb_test "python print vdict\[one\]" "one str" "Test dictionary hash"
+    gdb_test "python print vdict\[two\]" "two str" "Test dictionary hash"
+    gdb_test "python print vdict\[three\]" "three str" "Test dictionary hash"
+    gdb_test "python print one.__hash__() == hash(one)" "True" "Test inbuilt hash"
+    gdb_test "python print one.__hash__() == id(one)" "True" "Test inbuilt id"
+}
+
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -409,6 +426,7 @@ test_value_boolean
 test_value_compare
 test_objfiles
 test_parse_and_eval
+test_value_hash
 
 # The following tests require execution.
 

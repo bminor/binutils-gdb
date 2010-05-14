@@ -432,6 +432,14 @@ valpy_get_is_optimized_out (PyObject *self, void *closure)
   Py_RETURN_FALSE;
 }
 
+/* Calculate and return the address of the PyObject as the value of
+   the builtin __hash__ call.  */
+static long 
+valpy_hash (PyObject *self)
+{
+  return (long) (intptr_t) self;
+}
+
 enum valpy_opcode
 {
   VALPY_ADD,
@@ -1097,7 +1105,7 @@ PyTypeObject value_object_type = {
   &value_object_as_number,	  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
   &value_object_as_mapping,	  /*tp_as_mapping*/
-  0,				  /*tp_hash */
+  valpy_hash,		          /*tp_hash*/
   0,				  /*tp_call*/
   valpy_str,			  /*tp_str*/
   0,				  /*tp_getattro*/
