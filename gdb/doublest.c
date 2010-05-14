@@ -66,6 +66,7 @@ get_field (const bfd_byte *data, enum floatformat_byteorders order,
 	 represents the number of bits from the end of our starting
 	 byte needed to get to bit 0. */
       int excess = FLOATFORMAT_CHAR_BIT - (total_len % FLOATFORMAT_CHAR_BIT);
+
       cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) 
                  - ((start + len + excess) / FLOATFORMAT_CHAR_BIT);
       cur_bitshift = ((start + len + excess) % FLOATFORMAT_CHAR_BIT) 
@@ -190,6 +191,7 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
   if (kind == float_infinite || kind == float_nan)
     {
       double dto;
+
       floatformat_to_double (fmt, from, &dto);
       *to = (DOUBLEST) dto;
       return;
@@ -203,6 +205,7 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
   if (fmt->split_half)
     {
       DOUBLEST dtop, dbot;
+
       floatformat_to_doublest (fmt->split_half, ufrom, &dtop);
       /* Preserve the sign of 0, which is the sign of the top
 	 half.  */
@@ -292,6 +295,7 @@ put_field (unsigned char *data, enum floatformat_byteorders order,
   if (order == floatformat_little)
     {
       int excess = FLOATFORMAT_CHAR_BIT - (total_len % FLOATFORMAT_CHAR_BIT);
+
       cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) 
                  - ((start + len + excess) / FLOATFORMAT_CHAR_BIT);
       cur_bitshift = ((start + len + excess) % FLOATFORMAT_CHAR_BIT) 
@@ -418,6 +422,7 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
 	 the result of converting to double.  */
       static volatile double dtop, dbot;
       DOUBLEST dtopnv, dbotnv;
+
       dtop = (double) dfrom;
       /* If the rounded top half is Inf, the bottom must be 0 not NaN
 	 or Inf.  */
@@ -479,6 +484,7 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
   while (mant_bits_left > 0)
     {
       unsigned long mant_long;
+
       mant_bits = mant_bits_left < 32 ? mant_bits_left : 32;
 
       mant *= 4294967296.0;
@@ -703,18 +709,21 @@ floatformat_to_doublest (const struct floatformat *fmt,
   if (fmt == host_float_format)
     {
       float val;
+
       memcpy (&val, in, sizeof (val));
       *out = val;
     }
   else if (fmt == host_double_format)
     {
       double val;
+
       memcpy (&val, in, sizeof (val));
       *out = val;
     }
   else if (fmt == host_long_double_format)
     {
       long double val;
+
       memcpy (&val, in, sizeof (val));
       *out = val;
     }
@@ -730,16 +739,19 @@ floatformat_from_doublest (const struct floatformat *fmt,
   if (fmt == host_float_format)
     {
       float val = *in;
+
       memcpy (out, &val, sizeof (val));
     }
   else if (fmt == host_double_format)
     {
       double val = *in;
+
       memcpy (out, &val, sizeof (val));
     }
   else if (fmt == host_long_double_format)
     {
       long double val = *in;
+
       memcpy (out, &val, sizeof (val));
     }
   else
@@ -764,6 +776,7 @@ static const struct floatformat *
 floatformat_from_length (struct gdbarch *gdbarch, int len)
 {
   const struct floatformat *format;
+
   if (len * TARGET_CHAR_BIT == gdbarch_float_bit (gdbarch))
     format = gdbarch_float_format (gdbarch)
 	       [gdbarch_byte_order (gdbarch)];
@@ -794,6 +807,7 @@ const struct floatformat *
 floatformat_from_type (const struct type *type)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
+
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
   if (TYPE_FLOATFORMAT (type) != NULL)
     return TYPE_FLOATFORMAT (type)[gdbarch_byte_order (gdbarch)];

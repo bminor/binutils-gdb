@@ -41,6 +41,7 @@ struct dwarf_expr_context *
 new_dwarf_expr_context (void)
 {
   struct dwarf_expr_context *retval;
+
   retval = xcalloc (1, sizeof (struct dwarf_expr_context));
   retval->stack_len = 0;
   retval->stack_allocated = 10;
@@ -87,6 +88,7 @@ dwarf_expr_grow_stack (struct dwarf_expr_context *ctx, size_t need)
   if (ctx->stack_len + need > ctx->stack_allocated)
     {
       size_t newlen = ctx->stack_len + need + 10;
+
       ctx->stack = xrealloc (ctx->stack,
 			     newlen * sizeof (struct dwarf_stack_value));
       ctx->stack_allocated = newlen;
@@ -337,6 +339,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		  gdb_byte *op_ptr, gdb_byte *op_end)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (ctx->gdbarch);
+
   ctx->location = DWARF_VALUE_MEMORY;
   ctx->initialized = 1;  /* Default is initialized.  */
 
@@ -498,6 +501,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_implicit_value:
 	  {
 	    ULONGEST len;
+
 	    op_ptr = read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
 	      error (_("DW_OP_implicit_value: too few bytes available."));
@@ -655,6 +659,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    case DW_OP_deref:
 	      {
 		gdb_byte *buf = alloca (ctx->addr_size);
+
 		(ctx->read_mem) (ctx->baton, buf, result, ctx->addr_size);
 		result = dwarf2_read_address (ctx->gdbarch,
 					      buf, buf + ctx->addr_size,
@@ -666,6 +671,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      {
 		int addr_size = *op_ptr++;
 		gdb_byte *buf = alloca (addr_size);
+
 		(ctx->read_mem) (ctx->baton, buf, result, addr_size);
 		result = dwarf2_read_address (ctx->gdbarch,
 					      buf, buf + addr_size,

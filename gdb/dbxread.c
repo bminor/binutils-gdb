@@ -490,6 +490,7 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
       /* Same with virtual function tables, both global and static.  */
       {
 	char *tempstring = name;
+
 	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
 	  ++tempstring;
 	if (is_vtable_name (tempstring))
@@ -810,6 +811,7 @@ fill_symbuf (bfd *sym_bfd)
       if (symbuf_left <= 0)
 	{
 	  file_ptr filepos = symbuf_sections->section->filepos;
+
 	  if (bfd_seek (sym_bfd, filepos, SEEK_SET) != 0)
 	    perror_with_name (bfd_get_filename (sym_bfd));
 	  symbuf_left = bfd_section_size (sym_bfd, symbuf_sections->section);
@@ -902,6 +904,7 @@ add_bincl_to_list (struct partial_symtab *pst, char *name, int instance)
   if (next_bincl >= bincl_list + bincls_allocated)
     {
       int offset = next_bincl - bincl_list;
+
       bincls_allocated *= 2;
       bincl_list = (struct header_file_location *)
 	xrealloc ((char *) bincl_list,
@@ -1091,8 +1094,8 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
     {
       arelent *rel = *relptr;
       CORE_ADDR address =
-      rel->address + ANOFFSET (objfile->section_offsets,
-			       SECT_OFF_DATA (objfile));
+	rel->address + ANOFFSET (objfile->section_offsets,
+				 SECT_OFF_DATA (objfile));
 
       switch (bfd_get_arch (abfd))
 	{
@@ -1554,6 +1557,7 @@ read_dbx_symtab (struct objfile *objfile)
 	case N_BINCL:
 	  {
 	    enum language tmp_language;
+
 	    /* Add this bincl to the bincl_list for future EXCLs.  No
 	       need to save the string; it'll be around until
 	       read_dbx_symtab function returns */
@@ -1590,8 +1594,8 @@ pos %d"),
 	case N_SOL:
 	  {
 	    enum language tmp_language;
-	    /* Mark down an include file in the current psymtab */
 
+	    /* Mark down an include file in the current psymtab */
 	    namestring = set_namestring (objfile, &nlist);
 	    tmp_language = deduce_language_from_filename (namestring);
 
@@ -1618,6 +1622,7 @@ pos %d"),
 	      continue;
 	    {
 	      int i;
+
 	      for (i = 0; i < includes_used; i++)
 		if (strcmp (namestring, psymtab_include_list[i]) == 0)
 		  {
@@ -1688,6 +1693,7 @@ pos %d"),
  	    {
  	      char *new_name, *name = xmalloc (p - namestring + 1);
  	      memcpy (name, namestring, p - namestring);
+
  	      name[p - namestring] = '\0';
  	      new_name = cp_canonicalize_string (name);
  	      if (new_name != NULL)
@@ -1865,6 +1871,7 @@ pos %d"),
 		{
 		  int name_len = p - namestring;
 		  char *name = xmalloc (name_len + 1);
+
 		  memcpy (name, namestring, name_len);
 		  name[name_len] = '\0';
 		  function_outside_compilation_unit_complaint (name);
@@ -1884,6 +1891,7 @@ pos %d"),
 		    find_stab_function_addr (namestring, 
 					     pst ? pst->filename : NULL, 
 					     objfile);
+
 		  /* find_stab_function_addr will return 0 if the minimal
 		     symbol wasn't found.  (Unfortunately, this might also
 		     be a valid address.)  Anyway, if it *does* return 0,
@@ -1933,6 +1941,7 @@ pos %d"),
 		{
 		  int name_len = p - namestring;
 		  char *name = xmalloc (name_len + 1);
+
 		  memcpy (name, namestring, name_len);
 		  name[name_len] = '\0';
 		  function_outside_compilation_unit_complaint (name);
@@ -1952,6 +1961,7 @@ pos %d"),
 		    find_stab_function_addr (namestring, 
 					     pst ? pst->filename : NULL, 
 					     objfile);
+
 		  /* find_stab_function_addr will return 0 if the minimal
 		     symbol wasn't found.  (Unfortunately, this might also
 		     be a valid address.)  Anyway, if it *does* return 0,
@@ -2074,6 +2084,7 @@ pos %d"),
 		if (dependencies_used >= dependencies_allocated)
 		  {
 		    struct partial_symtab **orig = dependency_list;
+
 		    dependency_list =
 		      (struct partial_symtab **)
 		      alloca ((dependencies_allocated *= 2)
@@ -2186,8 +2197,8 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
 	       struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
-  start_psymtab_common (objfile, objfile->section_offsets,
-			filename, textlow, global_syms, static_syms);
+    start_psymtab_common (objfile, objfile->section_offsets,
+			  filename, textlow, global_syms, static_syms);
 
   result->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 					       sizeof (struct symloc));
@@ -2329,7 +2340,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
   for (i = 0; i < num_includes; i++)
     {
       struct partial_symtab *subpst =
-      allocate_psymtab (include_list[i], objfile);
+	allocate_psymtab (include_list[i], objfile);
 
       /* Copy the sesction_offsets array from the main psymtab. */
       subpst->section_offsets = pst->section_offsets;
@@ -2476,6 +2487,7 @@ Shouldn't happen.\n",
 	    = symfile_relocate_debug_section (pst->objfile,
 					      DBX_STAB_SECTION (pst->objfile),
 					      NULL);
+
 	  if (stabs_data)
 	    back_to = make_cleanup (free_current_contents,
 				    (void *) &stabs_data);
@@ -2658,8 +2670,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 #endif
 	}
       else if (type & N_EXT || type == (unsigned char) N_TEXT
-	       || type == (unsigned char) N_NBTEXT
-	)
+	       || type == (unsigned char) N_NBTEXT)
 	{
 	  /* Global symbol: see if we came across a dbx defintion for
 	     a corresponding symbol.  If so, store the value.  Remove
@@ -2787,6 +2798,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	  if (sline_found_in_function)
 	    {
 	      CORE_ADDR addr = last_function_start + valu;
+
 	      record_line (current_subfile, 0,
 			   gdbarch_addr_bits_remove (gdbarch, addr));
 	    }
@@ -3007,6 +3019,7 @@ no enclosing block"));
 	{
 	  CORE_ADDR addr = processing_gcc_compilation == 2 ?
 			   last_function_start : valu;
+
 	  record_line (current_subfile, desc,
 		       gdbarch_addr_bits_remove (gdbarch, addr));
 	  sline_found_in_function = 1;
@@ -3141,6 +3154,7 @@ no enclosing block"));
 	{
 	  int deftype;
 	  char *colon_pos = strchr (name, ':');
+
 	  if (colon_pos == NULL)
 	    deftype = '\0';
 	  else

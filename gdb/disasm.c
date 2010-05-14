@@ -64,6 +64,7 @@ static void
 dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
   struct gdbarch *gdbarch = info->application_data;
+
   print_address (gdbarch, addr, info->stream);
 }
 
@@ -142,6 +143,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
           CORE_ADDR old_pc = pc;
           bfd_byte data;
           int status;
+
           pc += gdbarch_print_insn (gdbarch, pc, di);
           for (;old_pc < pc; old_pc++)
             {
@@ -338,6 +340,7 @@ static int ATTRIBUTE_PRINTF (2, 3)
 fprintf_disasm (void *stream, const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   vfprintf_filtered (stream, format, args);
   va_end (args);
@@ -349,6 +352,7 @@ static struct disassemble_info
 gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
 {
   struct disassemble_info di;
+
   init_disassemble_info (&di, file, fprintf_disasm);
   di.flavour = bfd_target_unknown_flavour;
   di.memory_error_func = dis_asm_memory_error;

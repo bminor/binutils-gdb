@@ -1,3 +1,16 @@
+2010-05-14  Michael Snyder  <msnyder@vmware.com>
+
+	* dbxread.c: White space.
+	* dcache.c: White space.
+	* disasm.c: White space.
+	* doublest.c: White space.
+	* dsrec.c: White space.
+	* dummy-frame.c: White space.
+	* dwarf2expr.c: White space.
+	* dwarf2-frame.c: White space.
+	* dwarf2loc.c: White space.
+	* dwarf2read.c: White space.
+
 2010-05-14  Phil Muldoon  <pmuldoon@redhat.com>
 
  	PR python/11482

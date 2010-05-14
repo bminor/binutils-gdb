@@ -647,6 +647,7 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 		 unwinder.  */
 	      {
 		int size = register_size (gdbarch, 0);
+
 		dwarf2_frame_state_alloc_regs (&fs->regs, 32);
 		for (reg = 8; reg < 16; reg++)
 		  {
@@ -1186,6 +1187,7 @@ dwarf2_frame_sniffer (const struct frame_unwind *self,
      select the FDE of the previous function.  */
   CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
   struct dwarf2_fde *fde = dwarf2_frame_find_fde (&block_addr);
+
   if (!fde)
     return 0;
 
@@ -1256,6 +1258,7 @@ const struct frame_base *
 dwarf2_frame_base_sniffer (struct frame_info *this_frame)
 {
   CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
+
   if (dwarf2_frame_find_fde (&block_addr))
     return &dwarf2_frame_base;
 
@@ -1466,6 +1469,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       {
 	ULONGEST value;
 	gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+
 	*bytes_read_ptr += read_uleb128 (buf, end_buf, &value) - buf;
 	return base + value;
       }
@@ -1482,6 +1486,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       {
 	LONGEST value;
 	gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+
 	*bytes_read_ptr += read_sleb128 (buf, end_buf, &value) - buf;
 	return base + value;
       }
@@ -1553,6 +1558,7 @@ bsearch_fde_cmp (const void *key, const void *element)
 {
   CORE_ADDR seek_pc = *(CORE_ADDR *) key;
   struct dwarf2_fde *fde = *(struct dwarf2_fde **) element;
+
   if (seek_pc < fde->initial_location)
     return -1;
   if (seek_pc < fde->initial_location + fde->address_range)
