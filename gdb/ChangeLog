@@ -1,3 +1,13 @@
+2010-05-14  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
+	* linux-fork.c (gdbthread.h): New include.
+	(fork_info): Add parent_ptid.
+	(inferior_call_waitpid_cleanup, inferior_call_waitpid): New
+	functions.
+	(delete_checkpoint_command): Call inferior_call_waitpid.
+	(checkpoint_command): Set parent_ptid.
+
 2010-05-13  Michael Snyder  <msnyder@vmware.com>
 
 	* dictionary.c: Re-indent to GNU coding standard.
