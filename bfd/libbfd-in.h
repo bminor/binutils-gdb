@@ -375,6 +375,7 @@ extern int _bfd_vms_lib_generic_stat_arch_elt (bfd *, struct stat *);
 extern symindex _bfd_vms_lib_find_symbol (bfd *, const char *);
 extern bfd *_bfd_vms_lib_get_imagelib_file (bfd *);
 extern const bfd_target *_bfd_vms_lib_alpha_archive_p (bfd *abfd);
+extern const bfd_target *_bfd_vms_lib_ia64_archive_p (bfd *abfd);
 extern bfd_boolean _bfd_vms_lib_mkarchive (bfd *abfd);
 
 /* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol

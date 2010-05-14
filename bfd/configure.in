@@ -801,7 +801,7 @@ do
     bfd_elf64_ia64_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_hpux_big_vec) tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_little_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_ia64_vms_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
+    bfd_elf64_ia64_vms_vec)	tb="$tb elf64-ia64.lo elf64.lo vms-lib.lo vms-misc.lo $elf"; target_size=64 ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_mmix_vec) 	tb="$tb elf64-mmix.lo elf64.lo $elf" target_size=64 ;;
@@ -992,7 +992,7 @@ if test x${all_targets} = xtrue ; then
   bfd_backends="${bfd_backends}"' $(ALL_BACKENDS)'
   bfd_machines="${bfd_machines}"' $(ALL_MACHINES)'
   selvecs=
-  havevecs=
+  havevecs=-DHAVE_all_vecs
   selarchs=
   test -n "$assocvecs" &&
     assocvecs=`echo $assocvecs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
@@ -1077,8 +1077,8 @@ test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
 test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
 test -n "${assocvecs}" && tdefaults="${tdefaults} -DASSOCIATED_VECS='${assocvecs}'"
 test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
-test -n "${havevecs}" && tdefaults="${tdefaults} ${havevecs}"
 AC_SUBST(tdefaults)
+AC_SUBST(havevecs)
 
 dnl AC_CHECK_HEADERS(sys/mman.h)
 AC_FUNC_MMAP

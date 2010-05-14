@@ -67,6 +67,15 @@
   MIN_PLT	Created by PLTOFF entries against dynamic symbols.  This
  		does not require dynamic relocations.  */
 
+/* Only add code for vms when the vms target is enabled.  This is required
+   because it depends on vms-lib.c for its archive format and we don't want
+   to compile that code if it is not used.  */
+#if ARCH_SIZE == 64 && \
+  (defined (HAVE_bfd_elf64_ia64_vms_vec) || defined (HAVE_all_vecs))
+#define INCLUDE_IA64_VMS
+#endif
+
+
 #define NELEMS(a)	((int) (sizeof (a) / sizeof ((a)[0])))
 
 typedef struct bfd_hash_entry *(*new_hash_entry_func)
@@ -5723,6 +5732,8 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
     }
 }
 
+#ifdef INCLUDE_IA64_VMS
+
 static bfd_boolean
 elfNN_vms_section_from_shdr (bfd *abfd,
 			     Elf_Internal_Shdr *hdr,
@@ -5984,6 +5995,7 @@ elfNN_vms_close_and_cleanup (bfd *abfd)
 
   return _bfd_generic_close_and_cleanup (abfd);
 }
+#endif /* INCLUDE_IA64_VMS */
 
 #define TARGET_LITTLE_SYM		bfd_elfNN_ia64_little_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
@@ -6117,6 +6129,7 @@ elfNN_vms_close_and_cleanup (bfd *abfd)
 #include "elfNN-target.h"
 
 /* VMS-specific vectors.  */
+#ifdef INCLUDE_IA64_VMS
 
 #undef  TARGET_LITTLE_SYM
 #define TARGET_LITTLE_SYM		bfd_elfNN_ia64_vms_vec
@@ -6160,4 +6173,36 @@ elfNN_vms_close_and_cleanup (bfd *abfd)
 #undef  elfNN_bed
 #define elfNN_bed elfNN_ia64_vms_bed
 
+/* Use VMS-style archives (in particular, don't use the standard coff
+   archive format).  */
+#define bfd_elfNN_archive_functions
+
+#undef bfd_elfNN_archive_p
+#define bfd_elfNN_archive_p _bfd_vms_lib_ia64_archive_p
+
+#define bfd_elfNN_archive_slurp_armap \
+  _bfd_vms_lib_slurp_armap
+#define bfd_elfNN_archive_slurp_extended_name_table \
+  _bfd_vms_lib_slurp_extended_name_table
+#define bfd_elfNN_archive_construct_extended_name_table \
+  _bfd_vms_lib_construct_extended_name_table
+#define bfd_elfNN_archive_truncate_arname \
+  _bfd_vms_lib_truncate_arname
+#define bfd_elfNN_archive_write_armap \
+  _bfd_vms_lib_write_armap
+#define bfd_elfNN_archive_read_ar_hdr \
+  _bfd_vms_lib_read_ar_hdr
+#define bfd_elfNN_archive_write_ar_hdr \
+  _bfd_vms_lib_write_ar_hdr
+#define bfd_elfNN_archive_openr_next_archived_file \
+  _bfd_vms_lib_openr_next_archived_file
+#define bfd_elfNN_archive_get_elt_at_index \
+  _bfd_vms_lib_get_elt_at_index
+#define bfd_elfNN_archive_generic_stat_arch_elt \
+  _bfd_vms_lib_generic_stat_arch_elt
+#define bfd_elfNN_archive_update_armap_timestamp \
+  _bfd_vms_lib_update_armap_timestamp
+
 #include "elfNN-target.h"
+
+#endif /* INCLUDE_IA64_VMS */

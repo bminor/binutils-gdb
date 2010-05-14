@@ -1,3 +1,30 @@
+2010-05-14  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (_bfd_vms_lib_ia64_archive_p): New function.
+	* libbfd-in.h (_bfd_vms_lib_ia64_archive_p): Add prototype.
+	* libbfd.h: Regenerate.
+	* configure.in (havevecs): Define HAVE_all_vecs when
+	--enable-targets=all is set.  Use AC_SUBST on it.
+	(tdefaults): Do not add havevecs.
+	(bfd_elf64_ia64_vms_vec): Add vms-lib.lo and vms-misc.lo
+	* configure: Regenerate.
+	* Makefile.am (HAVEVECS): New variable.
+	(INCLUDES): Add HAVEVECS.
+	* Makefile.in: Regenerate.
+	* elfxx-ia64.c (INCLUDE_IA64_VMS): New macro, defined if vms
+	target is selected.  Add #ifdef/#endif around vms specific code.
+	(bfd_elfNN_archive_p, bfd_elfNN_archive_slurp_armap,
+	bfd_elfNN_archive_slurp_extended_name_table,
+	bfd_elfNN_archive_construct_extended_name_table,
+	bfd_elfNN_archive_truncate_arname,
+	bfd_elfNN_archive_write_armap,
+	bfd_elfNN_archive_read_ar_hdr,
+	bfd_elfNN_archive_write_ar_hdr,
+	bfd_elfNN_archive_openr_next_archived_file,
+	bfd_elfNN_archive_get_elt_at_index,
+	bfd_elfNN_archive_generic_stat_arch_elt,
+	bfd_elfNN_archive_update_armap_timestamp): Define to use vms archives.
+
 2010-05-11  Jie Zhang  <jie@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Merge

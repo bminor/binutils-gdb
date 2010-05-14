@@ -682,8 +682,10 @@ ALL_BACKENDS = @all_backends@
 BFD_BACKENDS = @bfd_backends@
 BFD_MACHINES = @bfd_machines@
 TDEFAULTS = @tdefaults@
+HAVEVECS = @havevecs@
 
-INCLUDES = @HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) @INCINTL@
+INCLUDES = @HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) \
+	$(HAVEVECS) @INCINTL@
 
 # C source files that correspond to .o's.
 SOURCE_CFILES = \

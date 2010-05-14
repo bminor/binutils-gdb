@@ -619,6 +619,14 @@ _bfd_vms_lib_alpha_archive_p (bfd *abfd)
   return _bfd_vms_lib_archive_p (abfd, vms_lib_alpha);
 }
 
+/* Standard function for ia64 libraries.  */
+
+const bfd_target *
+_bfd_vms_lib_ia64_archive_p (bfd *abfd)
+{
+  return _bfd_vms_lib_archive_p (abfd, vms_lib_ia64);
+}
+
 /* Standard function for text libraries.  */
 
 static const bfd_target *
