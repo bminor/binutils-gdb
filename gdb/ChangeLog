@@ -1,5 +1,12 @@
 2010-05-14  Michael Snyder  <msnyder@vmware.com>
 
+	* gcore.c: White space.
+	* gdb.c: White space.
+	* gdbtypes.c: White space.
+	* gnu-nat.c: White space.
+	* gnu-v2-abi.c: White space.
+	* gnu-v3-abi.c: White space.
+
 	* findcmd.c: White space.
 	* findvar.c: White space.
 	* fork-child.c: White space.

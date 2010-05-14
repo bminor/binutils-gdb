@@ -52,6 +52,7 @@ bfd *
 create_gcore_bfd (char *filename)
 {
   bfd *obfd = bfd_openw (filename, default_gcore_target ());
+
   if (!obfd)
     error (_("Failed to open '%s' for output."), filename);
   bfd_set_format (obfd, bfd_core);
@@ -413,6 +414,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 								    asec);
 	  bfd_vma start = obj_section_addr (objsec) & -align;
 	  bfd_vma end = (obj_section_endaddr (objsec) + align - 1) & -align;
+
 	  /* Match if either the entire memory region lies inside the
 	     section (i.e. a mapping covering some pages of a large
 	     segment) or the entire section lies inside the memory region

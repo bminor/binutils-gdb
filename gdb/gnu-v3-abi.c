@@ -586,6 +586,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 	{
 	  char *demangled_name = cplus_demangle (physname,
 						 DMGL_ANSI | DMGL_PARAMS);
+
 	  fprintf_filtered (stream, "&virtual ");
 	  if (demangled_name == NULL)
 	    fputs_filtered (physname, stream);
@@ -628,6 +629,7 @@ gnuv3_method_ptr_size (struct type *type)
 {
   struct type *domain_type = check_typedef (TYPE_DOMAIN_TYPE (type));
   struct gdbarch *gdbarch = get_type_arch (domain_type);
+
   return 2 * TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
 }
 
@@ -710,6 +712,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   if (vbit)
     {
       LONGEST voffset;
+
       voffset = ptr_value / TYPE_LENGTH (vtable_ptrdiff_type (gdbarch));
       return gnuv3_get_virtual_fn (gdbarch, value_ind (*this_p),
 				   method_type, voffset);
