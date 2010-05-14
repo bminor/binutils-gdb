@@ -724,21 +724,24 @@ expand_hashtable (struct dictionary *dict)
   DICT_HASHED_NBUCKETS (dict) = new_nbuckets;
   DICT_HASHED_BUCKETS (dict) = new_buckets;
 
-  for (i = 0; i < old_nbuckets; ++i) {
-    struct symbol *sym, *next_sym;
+  for (i = 0; i < old_nbuckets; ++i)
+    {
+      struct symbol *sym, *next_sym;
 
-    sym = old_buckets[i];
-    if (sym != NULL) {
-      for (next_sym = sym->hash_next;
-	   next_sym != NULL;
-	   next_sym = sym->hash_next) {
-	insert_symbol_hashed (dict, sym);
-	sym = next_sym;
-      }
+      sym = old_buckets[i];
+      if (sym != NULL) 
+	{
+	  for (next_sym = sym->hash_next;
+	       next_sym != NULL;
+	       next_sym = sym->hash_next)
+	    {
+	      insert_symbol_hashed (dict, sym);
+	      sym = next_sym;
+	    }
 
-      insert_symbol_hashed (dict, sym);
+	  insert_symbol_hashed (dict, sym);
+	}
     }
-  }
 
   xfree (old_buckets);
 }
@@ -821,13 +824,14 @@ add_symbol_linear_expandable (struct dictionary *dict,
   int nsyms = ++DICT_LINEAR_NSYMS (dict);
 
   /* Do we have enough room?  If not, grow it.  */
-  if (nsyms > DICT_LINEAR_EXPANDABLE_CAPACITY (dict)) {
-    DICT_LINEAR_EXPANDABLE_CAPACITY (dict) *= 2;
-    DICT_LINEAR_SYMS (dict)
-      = xrealloc (DICT_LINEAR_SYMS (dict),
-		  DICT_LINEAR_EXPANDABLE_CAPACITY (dict)
-		  * sizeof (struct symbol *));
-  }
+  if (nsyms > DICT_LINEAR_EXPANDABLE_CAPACITY (dict))
+    {
+      DICT_LINEAR_EXPANDABLE_CAPACITY (dict) *= 2;
+      DICT_LINEAR_SYMS (dict)
+	= xrealloc (DICT_LINEAR_SYMS (dict),
+		    DICT_LINEAR_EXPANDABLE_CAPACITY (dict)
+		    * sizeof (struct symbol *));
+    }
 
   DICT_LINEAR_SYM (dict, nsyms - 1) = sym;
 }

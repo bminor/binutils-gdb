@@ -1,5 +1,7 @@
 2010-05-13  Michael Snyder  <msnyder@vmware.com>
 
+	* dictionary.c: Re-indent to GNU coding standard.
+
 	* charset.c: White space.
 	* c-lang.c: White space.
 	* cli-out.c: White space.
