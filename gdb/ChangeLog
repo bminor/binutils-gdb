@@ -1,5 +1,14 @@
 2010-05-14  Michael Snyder  <msnyder@vmware.com>
 
+	* infcall.c: White space.
+	* inf-child.c: White space.
+	* infcmd.c: White space.
+	* inferior.c: White space.
+	* inf-loop.c: White space.
+	* inflow.c: White space.
+	* inline-frame.c: White space.
+	* interps.c: White space.
+
 	* gcore.c: White space.
 	* gdb.c: White space.
 	* gdbtypes.c: White space.

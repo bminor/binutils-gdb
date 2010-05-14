@@ -306,6 +306,7 @@ static int
 interp_set_quiet (struct interp *interp, int quiet)
 {
   int old_val = interp->quiet_p;
+
   interp->quiet_p = quiet;
   return old_val;
 }
@@ -400,6 +401,7 @@ interpreter_exec_cmd (char *args, int from_tty)
   for (i = 1; i < nrules; i++)
     {
       struct gdb_exception e = interp_exec (interp_to_use, prules[i]);
+
       if (e.reason < 0)
 	{
 	  interp_set (old_interp, 0);

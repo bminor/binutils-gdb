@@ -121,6 +121,7 @@ static PROCESS_GROUP_TYPE
 gdb_getpgrp (void)
 {
   int process_group = -1;
+
 #ifdef HAVE_TERMIOS
   process_group = tcgetpgrp (0);
 #endif

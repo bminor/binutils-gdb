@@ -709,6 +709,7 @@ follow_exec (ptid_t pid, char *execd_pathname)
       char *name = alloca (strlen (gdb_sysroot)
 			    + strlen (execd_pathname)
 			    + 1);
+
       strcpy (name, gdb_sysroot);
       strcat (name, execd_pathname);
       execd_pathname = name;
@@ -1210,6 +1211,7 @@ static void
 write_memory_ptid (ptid_t ptid, CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
   struct cleanup *ptid_cleanup = save_inferior_ptid ();
+
   inferior_ptid = ptid;
   write_memory (memaddr, myaddr, len);
   do_cleanups (ptid_cleanup);
@@ -1236,6 +1238,7 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
   /* Restore the contents of the copy area.  */
   {
     ULONGEST len = gdbarch_max_insn_length (displaced->step_gdbarch);
+
     write_memory_ptid (displaced->step_ptid, displaced->step_copy,
 		       displaced->step_saved_copy, len);
     if (debug_displaced)
@@ -1260,6 +1263,7 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
          relocate the PC.  */
       struct regcache *regcache = get_thread_regcache (event_ptid);
       CORE_ADDR pc = regcache_read_pc (regcache);
+
       pc = displaced->step_original + (pc - displaced->step_copy);
       regcache_write_pc (regcache, pc);
     }
@@ -1413,6 +1417,18 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
     {
       scheduler_mode = schedlock_off;
       error (_("Target '%s' cannot support this command."), target_shortname);
+    }
+}
+
+/* reset_schedlock -- public */
+ 
+void
+reset_schedlock ()
+{
+  if (scheduler_mode == schedlock_on)
+    {
+      warning ("Resetting scheduler-lock mode to 'off'");
+      scheduler_mode = schedlock_off;
     }
 }
 
@@ -1990,8 +2006,8 @@ void
 start_remote (int from_tty)
 {
   struct inferior *inferior;
-  init_wait_for_inferior ();
 
+  init_wait_for_inferior ();
   inferior = current_inferior ();
   inferior->stop_soon = STOP_QUIETLY_REMOTE;
 
@@ -2252,6 +2268,7 @@ delete_step_thread_step_resume_breakpoint (void)
 	 longjmp-resume breakpoint of the thread that just stopped
 	 stepping.  */
       struct thread_info *tp = inferior_thread ();
+
       delete_step_resume_breakpoint (tp);
     }
   else
@@ -2724,6 +2741,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
       || (non_stop && moribund_breakpoint_here_p (aspace, breakpoint_pc)))
     {
       struct cleanup *old_cleanups = NULL;
+
       if (RECORD_IS_USED)
 	old_cleanups = record_gdb_operation_disable_set ();
 
@@ -2877,6 +2895,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
     {
       struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
+
       gdb_assert (inf);
       stop_soon = inf->stop_soon;
     }
@@ -3348,6 +3367,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
       if (target_stopped_by_watchpoint ())
 	{
           CORE_ADDR addr;
+
 	  fprintf_unfiltered (gdb_stdlog, "infrun: stopped by watchpoint\n");
 
           if (target_stopped_data_address (&current_target, &addr))
@@ -3686,6 +3706,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 the instruction and once for the delay slot.  */
       int step_through_delay
 	= gdbarch_single_step_through_delay (gdbarch, frame);
+
       if (debug_infrun && step_through_delay)
 	fprintf_unfiltered (gdb_stdlog, "infrun: step through delay\n");
       if (ecs->event_thread->step_range_end == 0 && step_through_delay)
@@ -4137,6 +4158,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
   if (!non_stop)
     {
       struct thread_info *tp;
+
       tp = iterate_over_threads (currently_stepping_or_nexting_callback,
 				 ecs->event_thread);
       if (tp)
@@ -4325,6 +4347,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  /* Set up a step-resume breakpoint at the address
 	     indicated by SKIP_SOLIB_RESOLVER.  */
 	  struct symtab_and_line sr_sal;
+
 	  init_sal (&sr_sal);
 	  sr_sal.pc = pc_after_resolver;
 	  sr_sal.pspace = get_frame_program_space (frame);
@@ -4463,6 +4486,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
       if (real_stop_pc != 0 && in_solib_dynsym_resolve_code (real_stop_pc))
 	{
 	  struct symtab_and_line sr_sal;
+
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
 	  sr_sal.pspace = get_frame_program_space (frame);
@@ -4511,6 +4535,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  /* Set a breakpoint at callee's start address.
 	     From there we can step once and be back in the caller.  */
 	  struct symtab_and_line sr_sal;
+
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
 	  sr_sal.pspace = get_frame_program_space (frame);
@@ -4549,6 +4574,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	     Set a breakpoint at its start and continue, then
 	     one more step will take us out.  */
 	  struct symtab_and_line sr_sal;
+
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
 	  sr_sal.pspace = get_frame_program_space (frame);
@@ -4566,6 +4592,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
     {
       /* Determine where this trampoline returns.  */
       CORE_ADDR real_stop_pc;
+
       real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
 
       if (debug_infrun)
@@ -5074,6 +5101,7 @@ keep_going (struct execution_control_state *ecs)
       if (ecs->event_thread->stepping_over_breakpoint)
 	{
 	  struct regcache *thread_regcache = get_thread_regcache (ecs->ptid);
+
 	  if (!use_displaced_stepping (get_regcache_arch (thread_regcache)))
 	    /* Since we can't do a displaced step, we have to remove
 	       the breakpoint while we step it.  To keep things
@@ -5083,6 +5111,7 @@ keep_going (struct execution_control_state *ecs)
       else
 	{
 	  struct gdb_exception e;
+
 	  /* Stop stepping when inserting breakpoints
 	     has failed.  */
 	  TRY_CATCH (e, RETURN_MASK_ERROR)
@@ -5450,6 +5479,7 @@ Further execution is probably impossible.\n"));
 	 This also restores inferior state prior to the call
 	 (struct inferior_thread_state).  */
       struct frame_info *frame = get_current_frame ();
+
       gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
       frame_pop (frame);
       /* frame_pop() calls reinit_frame_cache as the last thing it does
@@ -5537,6 +5567,7 @@ int
 signal_stop_update (int signo, int state)
 {
   int ret = signal_stop[signo];
+
   signal_stop[signo] = state;
   return ret;
 }
@@ -5545,6 +5576,7 @@ int
 signal_print_update (int signo, int state)
 {
   int ret = signal_print[signo];
+
   signal_print[signo] = state;
   return ret;
 }
@@ -5553,6 +5585,7 @@ int
 signal_pass_update (int signo, int state)
 {
   int ret = signal_program[signo];
+
   signal_program[signo] = state;
   return ret;
 }
@@ -5836,6 +5869,7 @@ static void
 signals_info (char *signum_exp, int from_tty)
 {
   enum target_signal oursig;
+
   sig_print_header ();
 
   if (signum_exp)
@@ -5934,6 +5968,7 @@ siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var)
       && gdbarch_get_siginfo_type_p (gdbarch))
     {
       struct type *type = gdbarch_get_siginfo_type (gdbarch);
+
       return allocate_computed_value (type, &siginfo_value_funcs, NULL);
     }
 
@@ -6330,6 +6365,7 @@ static void
 restore_inferior_ptid (void *arg)
 {
   ptid_t *saved_ptid_ptr = arg;
+
   inferior_ptid = *saved_ptid_ptr;
   xfree (arg);
 }

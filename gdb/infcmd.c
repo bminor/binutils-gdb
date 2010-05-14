@@ -197,6 +197,7 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
   /* Note that we ignore the passed-in value in favor of computing it
      directly.  */
   const char *inferior_io_terminal = get_inferior_io_terminal ();
+
   if (inferior_io_terminal == NULL)
     inferior_io_terminal = "";
   fprintf_filtered (gdb_stdout,
@@ -669,7 +670,7 @@ continue_1 (int all_threads)
   if (non_stop && all_threads)
     {
       /* Don't error out if the current thread is running, because
-        there may be other stopped threads.  */
+	 there may be other stopped threads.  */
       struct cleanup *old_chain;
 
       /* Backup current thread and selected frame.  */
@@ -875,6 +876,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
       for (; count > 0; count--)
 	{
 	  struct thread_info *tp;
+
 	  step_once (skip_subroutines, single_inst, count, thread);
 
 	  if (target_has_execution
@@ -968,6 +970,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	 INFERIOR_PTID thread instead, which is the same thread when
 	 THREAD is set.  */
       struct thread_info *tp = inferior_thread ();
+
       clear_proceed_status ();
       set_step_frame ();
 
@@ -998,6 +1001,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	  else if (tp->step_range_end == 0)
 	    {
 	      char *name;
+
 	      if (find_pc_partial_function (pc, &name,
 					    &tp->step_range_start,
 					    &tp->step_range_end) == 0)
@@ -1625,6 +1629,7 @@ finish_command (char *arg, int from_tty)
 	 and not step over the rest of this inlined function call.  */
       struct thread_info *tp = inferior_thread ();
       struct symtab_and_line empty_sal;
+
       init_sal (&empty_sal);
       set_step_info (frame, empty_sal);
       tp->step_range_start = tp->step_range_end = get_frame_pc (frame);
@@ -1684,6 +1689,7 @@ program_info (char *args, int from_tty)
   else
     {
       struct target_waitstatus ws;
+
       get_last_target_status (&ptid, &ws);
     }
 
@@ -1737,6 +1743,7 @@ environment_info (char *var, int from_tty)
   if (var)
     {
       char *val = get_in_environ (current_inferior ()->environment, var);
+
       if (val)
 	{
 	  puts_filtered (var);
@@ -1754,6 +1761,7 @@ environment_info (char *var, int from_tty)
   else
     {
       char **vector = environ_vector (current_inferior ()->environment);
+
       while (*vector)
 	{
 	  puts_filtered (*vector++);
@@ -1861,6 +1869,7 @@ path_command (char *dirname, int from_tty)
 {
   char *exec_path;
   char *env;
+
   dont_repeat ();
   env = get_in_environ (current_inferior ()->environment, path_var_name);
   /* Can be null if path is not set */
@@ -1954,6 +1963,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	  for (j = 0; j < register_size (gdbarch, i); j++)
 	    {
 	      int idx;
+
 	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 		idx = j;
 	      else
@@ -2036,6 +2046,7 @@ registers_info (char *addr_exp, int fpregs)
       /* A register name?  */
       {
 	int regnum = user_reg_map_name_to_regnum (gdbarch, start, end - start);
+
 	if (regnum >= 0)
 	  {
 	    /* User registers lie completely outside of the range of
@@ -2064,6 +2075,7 @@ registers_info (char *addr_exp, int fpregs)
       /* A register group?  */
       {
 	struct reggroup *group;
+
 	for (group = reggroup_next (gdbarch, NULL);
 	     group != NULL;
 	     group = reggroup_next (gdbarch, group))
@@ -2077,6 +2089,7 @@ registers_info (char *addr_exp, int fpregs)
 	if (group != NULL)
 	  {
 	    int regnum;
+
 	    for (regnum = 0;
 		 regnum < gdbarch_num_regs (gdbarch)
 			  + gdbarch_num_pseudo_regs (gdbarch);
@@ -2339,6 +2352,7 @@ static void
 attach_command_continuation (void *args)
 {
   struct attach_command_continuation_args *a = args;
+
   attach_command_post_wait (a->args, a->from_tty, a->async_exec);
 }
 
@@ -2346,6 +2360,7 @@ static void
 attach_command_continuation_free_args (void *args)
 {
   struct attach_command_continuation_args *a = args;
+
   xfree (a->args);
   xfree (a);
 }
@@ -2583,6 +2598,7 @@ void
 interrupt_target_1 (int all_threads)
 {
   ptid_t ptid;
+
   if (all_threads)
     ptid = minus_one_ptid;
   else

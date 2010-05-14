@@ -75,6 +75,7 @@ find_inline_frame_state (ptid_t ptid)
 	{
 	  struct regcache *regcache = get_thread_regcache (ptid);
 	  CORE_ADDR current_pc = regcache_read_pc (regcache);
+
 	  if (current_pc != state->saved_pc)
 	    {
 	      /* PC has changed - this context is invalid.  Use the
@@ -124,6 +125,7 @@ clear_inline_frame_state (ptid_t ptid)
     {
       VEC (inline_state_s) *new_states = NULL;
       int pid = ptid_get_pid (ptid);
+
       for (ix = 0; VEC_iterate (inline_state_s, inline_states, ix, state); ix++)
 	if (pid != ptid_get_pid (state->ptid))
 	  VEC_safe_push (inline_state_s, new_states, state);

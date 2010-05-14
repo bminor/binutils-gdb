@@ -46,6 +46,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 {
   struct gdb_exception e;
   int was_sync = 0;
+
   switch (event_type)
     {
     case INF_ERROR:

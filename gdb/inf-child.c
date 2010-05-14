@@ -174,6 +174,7 @@ struct target_ops *
 inf_child_target (void)
 {
   struct target_ops *t = XZALLOC (struct target_ops);
+
   t->to_shortname = "child";
   t->to_longname = "Unix child process";
   t->to_doc = "Unix child process (started by the \"run\" command).";

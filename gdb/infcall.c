@@ -268,10 +268,12 @@ find_function_addr (struct value *function, struct type **retval_type)
 	{
 	  /* Handle function descriptors lacking debug info.  */
 	  int found_descriptor = 0;
+
 	  funaddr = 0;	/* pacify "gcc -Werror" */
 	  if (VALUE_LVAL (function) == lval_memory)
 	    {
 	      CORE_ADDR nfunaddr;
+
 	      funaddr = value_as_address (value_addr (function));
 	      nfunaddr = funaddr;
 	      funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
@@ -321,6 +323,7 @@ get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
 {
   {
     struct symbol *symbol = find_pc_function (funaddr);
+
     if (symbol)
       return SYMBOL_PRINT_NAME (symbol);
   }
@@ -328,6 +331,7 @@ get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
   {
     /* Try the minimal symbols.  */
     struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (funaddr);
+
     if (msymbol)
       return SYMBOL_PRINT_NAME (msymbol);
   }
@@ -335,6 +339,7 @@ get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
   {
     char *tmp = xstrprintf (_(RAW_FUNCTION_ADDRESS_FORMAT),
                             hex_string (funaddr));
+
     gdb_assert (strlen (tmp) + 1 <= buf_size);
     strcpy (buf, tmp);
     xfree (tmp);
@@ -483,6 +488,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* Ensure that the initial SP is correctly aligned.  */
   {
     CORE_ADDR old_sp = get_frame_sp (frame);
+
     if (gdbarch_frame_align_p (gdbarch))
       {
 	sp = gdbarch_frame_align (gdbarch, old_sp);
@@ -641,6 +647,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
   {
     int i;
+
     for (i = nargs - 1; i >= 0; i--)
       {
 	int prototyped;
@@ -675,6 +682,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   if (struct_return || lang_struct_return)
     {
       int len = TYPE_LENGTH (values_type);
+
       if (gdbarch_inner_than (gdbarch, 1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
@@ -737,6 +745,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   {
     struct breakpoint *bpt;
     struct symtab_and_line sal;
+
     init_sal (&sal);		/* initialize to zeroes */
     sal.pspace = current_program_space;
     sal.pc = bp_addr;

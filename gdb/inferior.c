@@ -68,6 +68,7 @@ static void
 restore_inferior (void *arg)
 {
   struct inferior *saved_inferior = arg;
+
   set_current_inferior (saved_inferior);
 }
 
@@ -80,6 +81,7 @@ save_current_inferior (void)
 {
   struct cleanup *old_chain = make_cleanup (restore_inferior,
 					    current_inferior_);
+
   return old_chain;
 }
 
@@ -283,6 +285,7 @@ void
 exit_inferior (int pid)
 {
   struct inferior *inf = find_inferior_pid (pid);
+
   exit_inferior_1 (inf, 0);
 
   if (print_inferior_events)
@@ -293,6 +296,7 @@ void
 exit_inferior_silent (int pid)
 {
   struct inferior *inf = find_inferior_pid (pid);
+
   exit_inferior_1 (inf, 1);
 }
 
@@ -308,6 +312,7 @@ void
 detach_inferior (int pid)
 {
   struct inferior *inf = find_inferior_pid (pid);
+
   exit_inferior_1 (inf, 1);
 
   if (print_inferior_events)
