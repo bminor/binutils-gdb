@@ -142,20 +142,24 @@ static char *pe_dll_search_prefix = NULL;
 
 extern const char *output_filename;
 
-static void
-gld_${EMULATION_NAME}_before_parse (void)
+static int is_underscoring (void)
 {
-  int u;
-  /* Now we check target's default for getting proper symbol_char.  */
-  u = pe_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
+  int u = 0;
+  if (pe_leading_underscore != -1)
+    return pe_leading_underscore;
+  if (!bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
     bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
 
   if (u == -1)
     abort ();
-  pe_leading_underscore = u;
+  pe_leading_underscore = (u != 0 ? 1 : 0);
+  return pe_leading_underscore;
+}
 
+static void
+gld_${EMULATION_NAME}_before_parse (void)
+{
+  is_underscoring ();
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
 #ifdef DLL_SUPPORT
@@ -353,16 +357,16 @@ typedef struct
    underscore.  */
 #define GET_INIT_SYMBOL_NAME(IDX) \
   (init[(IDX)].symbol \
-  + ((init[(IDX)].is_c_symbol == FALSE || pe_leading_underscore != 0) ? 0 : 1))
+  + ((init[(IDX)].is_c_symbol == FALSE || (is_underscoring () != 0)) ? 0 : 1))
 
 /* Decorates the C visible symbol by underscore, if target requires.  */
 #define U(CSTR) \
-  (pe_leading_underscore == 0 ? CSTR : "_" CSTR)
+  ((is_underscoring () == 0) ? CSTR : "_" CSTR)
 
 /* Get size of constant string for a possible underscore prefixed
    C visible symbol.  */
 #define U_SIZE(CSTR) \
-  (sizeof (CSTR) + pe_leading_underscore == 0 ? 0 : 1)
+  (sizeof (CSTR) + (is_underscoring () == 0 ? 0 : 1))
 
 #define D(field,symbol,def,usc)  {&pe.field,sizeof(pe.field), def, symbol, 0, usc}
 
@@ -474,17 +478,8 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
 static void
 set_pe_name (char *name, long val)
 {
-  int i, u;
-
-  /* Now we check target's default for getting proper symbol_char.  */
-  u = pe_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
-    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
-
-  if (u == -1)
-    abort ();
-  pe_leading_underscore = u;
+  int i;
+  is_underscoring ();
 
   /* Find the name and set it.  */
   for (i = 0; init[i].ptr; i++)
@@ -506,7 +501,7 @@ set_entry_point (void)
 {
   const char *entry;
   const char *initial_symbol_char;
-  int i, u = -1;
+  int i;
 
   static const struct
     {
@@ -549,16 +544,7 @@ set_entry_point (void)
         entry = default_entry;
     }
 
-  /* Now we check target's default for getting proper symbol_char.  */
-  u = pe_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
-    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
-
-  if (u == -1)
-    abort ();
-  initial_symbol_char = (u == 1 ? "_" : "");
-  pe_leading_underscore = u;
+  initial_symbol_char = (is_underscoring () != 0 ? "_" : "");
 
   if (*initial_symbol_char != '\0')
     {
@@ -915,16 +901,9 @@ gld_${EMULATION_NAME}_set_symbols (void)
 {
   /* Run through and invent symbols for all the
      names and insert the defaults.  */
-  int j, u;
-  /* Now we check target's default for getting proper symbol_char.  */
-  u = pe_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
-    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
+  int j;
 
-  if (u == -1)
-    abort ();
-  pe_leading_underscore = u;
+  is_underscoring ();
 
   if (!init[IMAGEBASEOFF].inited)
     {

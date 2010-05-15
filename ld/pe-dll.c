@@ -261,7 +261,11 @@ static pe_details_type pe_detail_list[] =
 #endif
     PE_ARCH_i386,
     bfd_arch_i386,
+#ifdef pe_use_x86_64
+    FALSE,
+#else
     TRUE,
+#endif
     autofilter_symbollist_i386
   },
   {
@@ -416,9 +420,11 @@ pe_dll_id_target (const char *target)
 	int u = pe_leading_underscore; /* Underscoring mode. -1 for use default.  */
 	if (u == -1)
 	  bfd_get_target_info (target, NULL, NULL, &u, NULL);
-	if (u != -1)
-	  pe_detail_list[i].underscored = (u != 0 ? TRUE : FALSE);
+	if (u == -1)
+	  abort ();
+	pe_detail_list[i].underscored = (u != 0 ? TRUE : FALSE);
 	pe_details = pe_detail_list + i;
+	pe_leading_underscore = (u != 0 ? 1 : 0);
 	return;
       }
   einfo (_("%XUnsupported PEI architecture: %s\n"), target);

@@ -115,20 +115,25 @@ static char * pep_dll_search_prefix = NULL;
 
 extern const char *output_filename;
 
-static void
-gld_${EMULATION_NAME}_before_parse (void)
+static int is_underscoring (void)
 {
-  int u;
-  /* Now we check target's default for getting proper symbol_char.  */
-  u = pep_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
+  int u = 0;
+  if (pep_leading_underscore != -1)
+    return pep_leading_underscore;
+  if (!bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
     bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
 
   if (u == -1)
     abort ();
-  pep_leading_underscore = u;
+  pep_leading_underscore = (u != 0 ? 1 : 0);
+  return pep_leading_underscore;
+}
 
+
+static void
+gld_${EMULATION_NAME}_before_parse (void)
+{
+  is_underscoring ();
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
 #ifdef DLL_SUPPORT
@@ -297,16 +302,16 @@ typedef struct
 
 #define GET_INIT_SYMBOL_NAME(IDX) \
   (init[(IDX)].symbol \
-  + ((init[(IDX)].is_c_symbol == FALSE || pep_leading_underscore == 1) ? 0 : 1))
+  + ((init[(IDX)].is_c_symbol == FALSE || (is_underscoring () == 1)) ? 0 : 1))
 
 /* Decorates the C visible symbol by underscore, if target requires.  */
 #define U(CSTR) \
-  (pep_leading_underscore != 1 ? CSTR : "_" CSTR)
+  ((is_underscoring () == 0) ? CSTR : "_" CSTR)
 
 /* Get size of constant string for a possible underscore prefixed
    C visible symbol.  */
 #define U_SIZE(CSTR) \
-  (sizeof (CSTR) + pep_leading_underscore == 1 ? 0 : 1)
+  (sizeof (CSTR) + (is_underscoring () == 0 ? 0 : 1))
 
 #define D(field,symbol,def,usc)  {&pep.field,sizeof(pep.field), def, symbol,0, usc}
 
@@ -411,18 +416,8 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
 static void
 set_pep_name (char *name, bfd_vma val)
 {
-  int i, u;
-
-  /* Now we check target's default for getting proper symbol_char.  */
-  u = pep_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
-    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
-
-  if (u == -1)
-    abort ();
-  pep_leading_underscore = u;
-
+  int i;
+  is_underscoring ();
   /* Find the name and set it.  */
   for (i = 0; init[i].ptr; i++)
     {
@@ -443,7 +438,7 @@ set_entry_point (void)
 {
   const char *entry;
   const char *initial_symbol_char;
-  int i, u = -1;
+  int i;
 
   static const struct
     {
@@ -482,15 +477,7 @@ set_entry_point (void)
     }
 
   /* Now we check target's default for getting proper symbol_char.  */
-  u = pep_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
-    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
-
-  if (u == -1)
-    abort ();
-  initial_symbol_char = (u == 1 ? "_" : "");
-  pep_leading_underscore = u;
+  initial_symbol_char = (is_underscoring () != 0 ? "_" : "");
 
   if (*initial_symbol_char != '\0')
     {
@@ -616,6 +603,7 @@ set_pep_stack_heap (char *resname, char *comname)
 static bfd_boolean
 gld${EMULATION_NAME}_handle_option (int optc)
 {
+  is_underscoring ();
   switch (optc)
     {
     default:
@@ -840,16 +828,9 @@ gld_${EMULATION_NAME}_set_symbols (void)
 {
   /* Run through and invent symbols for all the
      names and insert the defaults.  */
-  int j, u;
-  /* Now we check target's default for getting proper symbol_char.  */
-  u = pep_leading_underscore;
-  if (u == -1
-      && !bfd_get_target_info ("${OUTPUT_FORMAT}", NULL, NULL, &u, NULL))
-    bfd_get_target_info ("${RELOCATEABLE_OUTPUT_FORMAT}", NULL, NULL, &u, NULL);
+  int j;
 
-  if (u == -1)
-    abort ();
-  pep_leading_underscore = u;
+  is_underscoring ();
 
   if (!init[IMAGEBASEOFF].inited)
     {
@@ -1191,6 +1172,7 @@ debug_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
 static void
 gld_${EMULATION_NAME}_after_open (void)
 {
+  is_underscoring ();
 #ifdef DLL_SUPPORT
   if (pep_dll_extra_pe_debug)
     {
@@ -1485,6 +1467,7 @@ gld_${EMULATION_NAME}_after_open (void)
 static void
 gld_${EMULATION_NAME}_before_allocation (void)
 {
+  is_underscoring ();
   before_allocation_default ();
 }
 
@@ -1496,6 +1479,8 @@ static int
 saw_option (char *option)
 {
   int i;
+
+  is_underscoring ();
 
   for (i = 0; init[i].ptr; i++)
     if (strcmp (GET_INIT_SYMBOL_NAME (i), option) == 0)
@@ -1587,6 +1572,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 static bfd_boolean
 gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
 {
+  is_underscoring ();
 #ifdef DLL_SUPPORT
 #ifdef TARGET_IS_i386pep
   pep_dll_id_target ("pei-x86-64");
@@ -1600,6 +1586,7 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 static void
 gld_${EMULATION_NAME}_finish (void)
 {
+  is_underscoring ();
   finish_default ();
 
 #ifdef DLL_SUPPORT
