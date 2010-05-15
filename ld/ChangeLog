@@ -1,3 +1,7 @@
+2010-05-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* pe-dll.c: Removed trailing whitespaces.
+
 2010-05-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11583

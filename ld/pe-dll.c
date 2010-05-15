@@ -185,7 +185,7 @@ typedef struct
   int pe_arch;
   int bfd_arch;
   bfd_boolean underscored;
-  const autofilter_entry_type* autofilter_symbollist; 
+  const autofilter_entry_type* autofilter_symbollist;
 }
 pe_details_type;
 
@@ -222,7 +222,7 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
   { STRING_COMMA_LEN ("_cygwin_crt0_common@8") },
   { STRING_COMMA_LEN ("_cygwin_noncygwin_dll_entry@12") },
   { STRING_COMMA_LEN ("cygwin_attach_dll") },
-#endif  
+#endif
   { STRING_COMMA_LEN ("cygwin_premain0") },
   { STRING_COMMA_LEN ("cygwin_premain1") },
   { STRING_COMMA_LEN ("cygwin_premain2") },
@@ -573,7 +573,7 @@ auto_export (bfd *abfd, def_file *d, const char *n)
 	 that begin with '__'; this was tried and
 	 it is too restrictive.  Instead we have
 	 a target specific list to use:  */
-      afptr = pe_details->autofilter_symbollist; 
+      afptr = pe_details->autofilter_symbollist;
 
       while (afptr->name)
 	{
@@ -1365,7 +1365,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  bfd_vma sym_vma;
 		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 
-		  /* Don't create relocs for undefined weak symbols.  */ 
+		  /* Don't create relocs for undefined weak symbols.  */
 		  if (sym->flags == BSF_WEAK)
 		    {
 		      struct bfd_link_hash_entry *blhe
@@ -2422,7 +2422,7 @@ make_import_fixup_entry (const char *name,
 
   quick_symbol (abfd, "__nm_thnk_", name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
-  /* For relocator v2 we have to use the .idata$5 element and not 
+  /* For relocator v2 we have to use the .idata$5 element and not
      fixup_name.  */
   if (link_info.pei386_runtime_pseudo_reloc == 2)
     quick_symbol (abfd, "__imp_", name, "", UNDSEC, BSF_GLOBAL, 0);
