@@ -346,6 +346,7 @@ clear_entries (struct pv_area *area)
       do
         {
           struct area_entry *next = e->next;
+
           xfree (e);
           e = next;
         }
@@ -468,6 +469,7 @@ pv_area_store (struct pv_area *area,
       while (e && overlaps (area, e, offset, size))
         {
           struct area_entry *next = (e->next == e) ? 0 : e->next;
+
           e->prev->next = e->next;
           e->next->prev = e->prev;
 
@@ -492,6 +494,7 @@ pv_area_store (struct pv_area *area,
     {
       CORE_ADDR offset = addr.k;
       struct area_entry *e = (struct area_entry *) xmalloc (sizeof (*e));
+
       e->offset = offset;
       e->size = size;
       e->value = value;

@@ -137,6 +137,7 @@ is_pascal_string_type (struct type *type,int *length_pos,
           if (char_type)
 	    {
 	      *char_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 2));
+
 	      if (TYPE_CODE (*char_type) == TYPE_CODE_ARRAY)
 		*char_type = TYPE_TARGET_TYPE (*char_type);
 	    }
@@ -157,7 +158,6 @@ static void pascal_one_char (int, struct ui_file *, int *);
 static void
 pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
 {
-
   if (c == '\'' || ((unsigned int) c <= 0xff && (PRINT_LITERAL_FORM (c))))
     {
       if (!(*in_quotes))
@@ -190,6 +190,7 @@ static void
 pascal_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
   int in_quotes = 0;
+
   pascal_one_char (c, stream, &in_quotes);
   if (in_quotes)
     fputs_filtered ("'", stream);
@@ -199,6 +200,7 @@ void
 pascal_printchar (int c, struct type *type, struct ui_file *stream)
 {
   int in_quotes = 0;
+
   pascal_one_char (c, stream, &in_quotes);
   if (in_quotes)
     fputs_filtered ("'", stream);
@@ -370,6 +372,7 @@ pascal_language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai)
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
+
   lai->string_char_type = builtin->builtin_char;
   lai->primitive_type_vector
     = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_pascal_primitive_types + 1,

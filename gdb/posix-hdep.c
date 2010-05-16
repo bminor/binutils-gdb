@@ -37,6 +37,7 @@ safe_strerror (int errnum)
   if (msg == NULL)
     {
       static char buf[32];
+
       xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
       msg = buf;
     }

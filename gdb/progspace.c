@@ -227,6 +227,7 @@ static void
 restore_program_space (void *arg)
 {
   struct program_space *saved_pspace = arg;
+
   set_current_program_space (saved_pspace);
 }
 
@@ -239,6 +240,7 @@ save_current_program_space (void)
 {
   struct cleanup *old_chain = make_cleanup (restore_program_space,
 					    current_program_space);
+
   return old_chain;
 }
 
@@ -435,6 +437,7 @@ update_address_spaces (void)
   if (shared_aspace)
     {
       struct address_space *aspace = new_address_space ();
+
       free_address_space (current_program_space->aspace);
       ALL_PSPACES (pspace)
 	pspace->aspace = aspace;

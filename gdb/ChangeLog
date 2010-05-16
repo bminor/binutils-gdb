@@ -1,5 +1,15 @@
 2010-05-15  Michael Snyder  <msnyder@vmware.com>
 
+	* parse.c: White space.
+	* p-lang.c: White space.
+	* posix-hdep.c: White space.
+	* printcmd.c: White space.
+	* progspace.c: White space.
+	* prologue-value.c: White space.
+	* psymtab.c: White space.
+	* p-typeprint.c: White space.
+	* p-valprint.c: White space.
+
 	* objc-lang.c: White space.
 	* objfiles.c: White space.
 	* observer.c: White space.

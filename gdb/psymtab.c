@@ -236,6 +236,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 	  if (overlay_debugging && msymbol && section)
 	    {
 	      struct partial_symbol *p;
+
 	      /* NOTE: This assumes that every psymbol has a
 		 corresponding msymbol, which is not necessarily
 		 true; the debug info might be much richer than the
@@ -518,6 +519,7 @@ psymtab_to_symtab (struct partial_symtab *pst)
   if (!pst->readin)
     {
       struct cleanup *back_to = increment_reading_symtab ();
+
       (*pst->read_symtab) (pst);
       do_cleanups (back_to);
     }
@@ -569,6 +571,7 @@ find_last_source_symtab_from_partial (struct objfile *ofp)
     {
       const char *name = ps->filename;
       int len = strlen (name);
+
       if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
 			|| strcmp (name, "<<C++-namespaces>>") == 0)))
 	cs_pst = ps;
@@ -768,6 +771,7 @@ print_psymtab_stats_for_objfile (struct objfile *objfile)
 {
   int i;
   struct partial_symtab *ps;
+
   i = 0;
   ALL_OBJFILE_PSYMTABS (objfile, ps)
     {
@@ -854,6 +858,7 @@ map_symbol_names_psymtab (struct objfile *objfile,
 			  void (*fun) (const char *, void *), void *data)
 {
   struct partial_symtab *ps;
+
   ALL_OBJFILE_PSYMTABS (objfile, ps)
     {
       struct partial_symbol **psym;
@@ -991,12 +996,14 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
       if (global)
         {
           int U;
+
           i = 0;
           U = length - 1;
           while (U - i > 4)
             {
               int M = (U + i) >> 1;
               struct partial_symbol *psym = start[M];
+
               if (SYMBOL_LINKAGE_NAME (psym)[0] < name[0])
                 i = M + 1;
               else if (SYMBOL_LINKAGE_NAME (psym)[0] > name[0])
@@ -1035,12 +1042,14 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
       if (global)
         {
           int U;
+
           i = 0;
           U = length - 1;
           while (U - i > 4)
             {
               int M = (U + i) >> 1;
               struct partial_symbol *psym = start[M];
+
               if (SYMBOL_LINKAGE_NAME (psym)[0] < '_')
                 i = M + 1;
               else if (SYMBOL_LINKAGE_NAME (psym)[0] > '_')
@@ -1106,6 +1115,7 @@ map_ada_symtabs (struct objfile *objfile,
 					wild_match, is_name_suffix))
 	{
 	  struct symtab *s = PSYMTAB_TO_SYMTAB (ps);
+
 	  if (s == NULL || !s->primary)
 	    continue;
 	  (*callback) (objfile, s, data);
@@ -1456,6 +1466,7 @@ extend_psymbol_list (struct psymbol_allocation_list *listp,
 		     struct objfile *objfile)
 {
   int new_size;
+
   if (listp->size == 0)
     {
       new_size = 255;
@@ -1641,6 +1652,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
   ALL_PSYMTABS (objfile, ps)
   {
     struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
     s = PSYMTAB_TO_SYMTAB (ps);
     if (s == NULL)
       continue;
