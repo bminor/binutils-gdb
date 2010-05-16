@@ -50,6 +50,7 @@ macro_expand_command (char *exp, int from_tty)
   struct macro_scope *ms = NULL;
   char *expanded = NULL;
   struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
+
   make_cleanup (free_current_contents, &expanded);
 
   /* You know, when the user doesn't specify any expression, it would be
@@ -249,6 +250,7 @@ free_macro_definition_ptr (void *ptr)
 {
   int i;
   struct macro_definition *loc = (struct macro_definition *) ptr;
+
   for (i = 0; i < loc->argc; ++i)
     xfree ((char *) loc->argv[i]);
   xfree ((char *) loc->argv);
@@ -362,6 +364,7 @@ print_one_macro (const char *name, const struct macro_definition *macro,
   if (macro->kind == macro_function_like)
     {
       int i;
+
       fprintf_filtered (gdb_stdout, "(");
       for (i = 0; i < macro->argc; ++i)
 	fprintf_filtered (gdb_stdout, "%s%s", (i > 0) ? ", " : "",

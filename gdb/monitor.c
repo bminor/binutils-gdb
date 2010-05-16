@@ -133,6 +133,7 @@ monitor_debug (const char *fmt, ...)
   if (monitor_debug_p)
     {
       va_list args;
+
       va_start (args, fmt);
       vfprintf_filtered (gdb_stdlog, fmt, args);
       va_end (args);
@@ -212,6 +213,7 @@ monitor_error (char *function, char *message,
 {
   int real_len = (len == 0 && string != (char *) 0) ? strlen (string) : len;
   char *safe_string = alloca ((real_len * 4) + 1);
+
   monitor_printable_string (safe_string, string, real_len);
 
   if (final_char)
@@ -326,6 +328,7 @@ monitor_printf_noecho (char *pattern,...)
   if (monitor_debug_p)
     {
       char *safe_string = (char *) alloca ((strlen (sndbuf) * 4) + 1);
+
       monitor_printable_string (safe_string, sndbuf, 0);
       fprintf_unfiltered (gdb_stdlog, "sent[%s]\n", safe_string);
     }
@@ -354,6 +357,7 @@ monitor_printf (char *pattern,...)
   if (monitor_debug_p)
     {
       char *safe_string = (char *) alloca ((len * 4) + 1);
+
       monitor_printable_string (safe_string, sndbuf, 0);
       fprintf_unfiltered (gdb_stdlog, "sent[%s]\n", safe_string);
     }
@@ -437,6 +441,7 @@ readchar (int timeout)
 	  if (monitor_debug_p || remote_debug)
 	    {
 	      char buf[2];
+
 	      buf[0] = c;
 	      buf[1] = '\0';
 	      puts_debug ("read -->", buf, "<--");
@@ -594,6 +599,7 @@ monitor_expect_regexp (struct re_pattern_buffer *pat, char *buf, int buflen)
 {
   char *mybuf;
   char *p;
+
   monitor_debug ("MON Expecting regexp\n");
   if (buf)
     mybuf = buf;
@@ -960,6 +966,7 @@ parse_register_dump (struct regcache *regcache, char *buf, int len)
     {
       int regnamelen, vallen;
       char *regname, *val;
+
       /* Element 0 points to start of register name, and element 1
          points to the start of the register value.  */
       struct re_registers register_strings;
@@ -1044,6 +1051,7 @@ monitor_wait_filter (char *buf,
 		     struct target_waitstatus *status)
 {
   int resp_len;
+
   do
     {
       resp_len = monitor_expect_prompt (buf, bufmax);
@@ -1206,6 +1214,7 @@ monitor_fetch_register (struct regcache *regcache, int regno)
   if (current_monitor->flags & MO_HEX_PREFIX)
     {
       int c;
+
       c = readchar (timeout);
       while (c == ' ')
 	c = readchar (timeout);
@@ -1223,6 +1232,7 @@ monitor_fetch_register (struct regcache *regcache, int regno)
   for (i = 0; i < register_size (get_regcache_arch (regcache), regno) * 2; i++)
     {
       int c;
+
       c = readchar (timeout);
       while (c == ' ')
 	c = readchar (timeout);
@@ -1268,6 +1278,7 @@ monitor_dump_reg_block (struct regcache *regcache, char *block_cmd)
 {
   char buf[TARGET_BUF_SIZE];
   int resp_len;
+
   monitor_printf (block_cmd);
   resp_len = monitor_expect_prompt (buf, sizeof (buf));
   parse_register_dump (regcache, buf, resp_len);
@@ -1283,6 +1294,7 @@ monitor_dump_regs (struct regcache *regcache)
 {
   char buf[TARGET_BUF_SIZE];
   int resp_len;
+
   if (current_monitor->dumpregs)
     (*(current_monitor->dumpregs)) (regcache);	/* call supplied function */
   else if (current_monitor->dump_registers)	/* default version */
@@ -1483,7 +1495,6 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
     monitor_printf_noecho (cmd, memaddr, val);
   else if (current_monitor->flags & MO_SETMEM_INTERACTIVE)
     {
-
       monitor_printf_noecho (cmd, memaddr);
 
       if (current_monitor->setmem.resp_delim)
@@ -1499,7 +1510,7 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 	  monitor_printf ("%x\r", val);
 	}
       if (current_monitor->setmem.term_cmd)
-	{			/* Emit this to get out of the memory editing state */
+	{	/* Emit this to get out of the memory editing state */
 	  monitor_printf ("%s", current_monitor->setmem.term_cmd);
 	  /* Drop through to expecting a prompt */
 	}
@@ -1518,6 +1529,7 @@ monitor_write_memory_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned char val;
   int written = 0;
+
   if (len == 0)
     return 0;
   /* Enter the sub mode */
@@ -1546,6 +1558,7 @@ longlongendswap (unsigned char *a)
 {
   int i, j;
   unsigned char x;
+
   i = 0;
   j = 7;
   while (i < 4)
@@ -1573,10 +1586,12 @@ longlong_hexchars (unsigned long long value,
       unsigned char *scan, *limit;	/* loop controls */
       unsigned char c, nib;
       int leadzero = 1;
+
       scan = disbuf;
       limit = scan + 8;
       {
 	unsigned long long *dp;
+
 	dp = (unsigned long long *) scan;
 	*dp = value;
       }
@@ -1613,6 +1628,7 @@ monitor_write_memory_longlongs (CORE_ADDR memaddr, char *myaddr, int len)
   long long *llptr;
   long long value;
   int written = 0;
+
   llptr = (unsigned long long *) myaddr;
   if (len == 0)
     return 0;
@@ -1657,6 +1673,7 @@ static int
 monitor_write_memory_block (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int written;
+
   written = 0;
   /* FIXME: This would be a good place to put the zero test */
 #if 1
@@ -1744,6 +1761,7 @@ monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
 
   {
     int i;
+
     for (i = 0; i < len * 2; i++)
       {
 	int c;
@@ -1883,6 +1901,7 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
     {
       int retval, tmp;
       struct re_registers resp_strings;
+
       monitor_debug ("MON getmem.resp_delim %s\n", current_monitor->getmem.resp_delim);
 
       memset (&resp_strings, 0, sizeof (struct re_registers));

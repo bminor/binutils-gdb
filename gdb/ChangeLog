@@ -1,3 +1,18 @@
+2010-05-15  Michael Snyder  <msnyder@vmware.com>
+
+	* m2-lang.c: White space.
+	* m2-valprint.c: White space.
+	* macrocmd.c: White space.
+	* macroexp.c: White space.
+	* macroscope.c: White space.
+	* macrotab.c: White space.
+	* main.c: White space.
+	* maint.c: White space.
+	* mdebugread.c: White space.
+	* memattr.c: White space.
+	* minsyms.c: White space.
+	* monitor.c: White space.
+
 2010-05-14  Michael Snyder  <msnyder@vmware.com>
 
 	* jv-lang.c: White space.

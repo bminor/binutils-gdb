@@ -82,6 +82,7 @@ unsigned int
 msymbol_hash_iw (const char *string)
 {
   unsigned int hash = 0;
+
   while (*string && *string != '(')
     {
       while (isspace (*string))
@@ -101,6 +102,7 @@ unsigned int
 msymbol_hash (const char *string)
 {
   unsigned int hash = 0;
+
   for (; *string; ++string)
     hash = hash * 67 + *string - 113;
   return hash;
@@ -115,6 +117,7 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
     {
       unsigned int hash
 	= msymbol_hash (SYMBOL_LINKAGE_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+
       sym->hash_next = table[hash];
       table[hash] = sym;
     }
@@ -130,6 +133,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
     {
       unsigned int hash
 	= msymbol_hash_iw (SYMBOL_SEARCH_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+
       sym->demangled_hash_next = table[hash];
       table[hash] = sym;
     }
@@ -195,6 +199,7 @@ lookup_minimal_symbol (const char *name, const char *sfile,
   if (sfile != NULL)
     {
       char *p = strrchr (sfile, '/');
+
       if (p != NULL)
 	sfile = p + 1;
     }
@@ -204,6 +209,7 @@ lookup_minimal_symbol (const char *name, const char *sfile,
   if (current_language->la_language == language_cplus)
     {
       char *cname = cp_canonicalize_string (name);
+
       if (cname)
 	{
 	  modified_name = cname;
@@ -1161,6 +1167,7 @@ install_minimal_symbols (struct objfile *objfile)
 	       mixing ABIs then the user will need to "set cp-abi"
 	       manually.  */
 	    const char *name = SYMBOL_LINKAGE_NAME (&objfile->msymbols[i]);
+
 	    if (name[0] == '_' && name[1] == 'Z'
 		&& SYMBOL_DEMANGLED_NAME (&objfile->msymbols[i]) != NULL)
 	      {
@@ -1239,6 +1246,7 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
 		       SYMBOL_LINKAGE_NAME (tsymbol)) == 0)
 	  {
 	    CORE_ADDR func;
+
 	    func = gdbarch_convert_from_func_ptr_addr
 		    (get_objfile_arch (objfile),
 		     SYMBOL_VALUE_ADDRESS (msymbol),

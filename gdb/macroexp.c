@@ -525,6 +525,7 @@ get_token (struct macro_buffer *tok,
       {
         /* How many characters did we consume, including whitespace?  */
         int consumed = p - src->text + tok->len;
+
         src->text += consumed;
         src->len -= consumed;
         return 1;
@@ -767,6 +768,7 @@ gather_arguments (const char *name, struct macro_buffer *src,
      paren.  */
   {
     struct macro_buffer temp;
+
     init_shared_buffer (&temp, src->text, src->len);
 
     if (! get_token (&tok, &temp)
@@ -1016,6 +1018,7 @@ substitute_args (struct macro_buffer *dest,
 	    {
 	      int arg = find_parameter (&tok, is_varargs, va_arg_name,
 					def->argc, def->argv);
+
 	      if (arg != -1)
 		appendmem (dest, argv[arg].text, argv[arg].len);
 	      else
@@ -1055,6 +1058,7 @@ substitute_args (struct macro_buffer *dest,
 		{
 		  int arg = find_parameter (&tok, is_varargs, va_arg_name,
 					    def->argc, def->argv);
+
 		  if (arg != -1)
 		    appendmem (dest, argv[arg].text, argv[arg].len);
 		  else
@@ -1193,6 +1197,7 @@ expand (const char *id,
 	  else
 	    {
 	      int len = strlen (def->argv[def->argc - 1]);
+
 	      if (len > 3
 		  && strcmp (def->argv[def->argc - 1] + len - 3, "...") == 0)
 		{
@@ -1297,6 +1302,7 @@ maybe_expand (struct macro_buffer *dest,
          lookup function expects.  */
       char *id = xmalloc (src_first->len + 1);
       struct cleanup *back_to = make_cleanup (xfree, id);
+
       memcpy (id, src_first->text, src_first->len);
       id[src_first->len] = 0;
           

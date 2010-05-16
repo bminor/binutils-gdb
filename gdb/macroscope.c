@@ -88,6 +88,7 @@ struct macro_scope *
 user_macro_scope (void)
 {
   struct macro_scope *ms;
+
   ms = XNEW (struct macro_scope);
   ms->file = macro_main (macro_user_macros);
   ms->line = -1;

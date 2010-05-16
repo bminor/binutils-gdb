@@ -354,6 +354,7 @@ print_objfile_section_info (bfd *abfd,
     {
       struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
       int addr_size = gdbarch_addr_bit (gdbarch) / 8;
+
       maint_print_section_info (name, flags,
 				obj_section_addr (asect),
 				obj_section_endaddr (asect),
@@ -425,6 +426,7 @@ maintenance_print_architecture (char *args, int from_tty)
     {
       struct cleanup *cleanups;
       struct ui_file *file = gdb_fopen (args, "w");
+
       if (file == NULL)
 	perror_with_name (_("maintenance print architecture"));
       cleanups = make_cleanup_ui_file_delete (file);
@@ -571,7 +573,6 @@ the command you want to undeprecate.\n"));
 static void
 maintenance_do_deprecate (char *text, int deprecate)
 {
-
   struct cmd_list_element *alias = NULL;
   struct cmd_list_element *prefix_cmd = NULL;
   struct cmd_list_element *cmd = NULL;
@@ -618,7 +619,6 @@ maintenance_do_deprecate (char *text, int deprecate)
      memory. */
   if (alias)
     {
-
       if (alias->flags & MALLOCED_REPLACEMENT)
 	xfree (alias->replacement);
 
@@ -722,6 +722,7 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
   else
     {
       extern void _mcleanup (void);
+
       _mcleanup ();
     }
 }

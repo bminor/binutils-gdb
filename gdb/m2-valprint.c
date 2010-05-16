@@ -259,6 +259,7 @@ print_variable_at_address (struct type *type,
     {
       struct value *deref_val =
 	value_at (TYPE_TARGET_TYPE (type), unpack_pointer (type, valaddr));
+
       common_val_print (deref_val, stream, recurse, options, current_language);
     }
   else
@@ -395,6 +396,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	{
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
+
 	  fprintf_filtered (stream, "@");
 	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  if (options->deref_ref)
@@ -409,6 +411,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		value_at
 		(TYPE_TARGET_TYPE (type),
 		 unpack_pointer (type, valaddr + embedded_offset));
+
 	      common_val_print (deref_val, stream, recurse, options,
 				current_language);
 	    }
@@ -483,6 +486,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  print_scalar_formatted (valaddr + embedded_offset, type,
@@ -520,6 +524,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  print_scalar_formatted (valaddr + embedded_offset, type,
@@ -533,6 +538,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  print_scalar_formatted (valaddr + embedded_offset, type,
@@ -596,6 +602,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      int element = value_bit_index (type, valaddr + embedded_offset,
 					     i);
+
 	      if (element < 0)
 		{
 		  i = element;
@@ -615,6 +622,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 					  ++i))
 		    {
 		      int j = i;
+
 		      fputs_filtered ("..", stream);
 		      while (i + 1 <= high_bound
 			     && value_bit_index (type,

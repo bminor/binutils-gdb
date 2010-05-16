@@ -271,7 +271,6 @@ static char *mdebug_next_symbol_text (struct objfile *);
 static void
 mdebug_psymtab_to_symtab (struct partial_symtab *pst)
 {
-
   if (!pst)
     return;
 
@@ -753,6 +752,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       if (sh->st == stProc)
 	{
 	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+
 	  /* The next test should normally be true, but provides a
 	     hook for nested functions (which we don't want to make
 	     global).  */
@@ -1154,6 +1154,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); i++)
 	    {
 	      struct block *b_bad = BLOCKVECTOR_BLOCK (bv, i);
+
 	      if (BLOCK_SUPERBLOCK (b_bad) == b
 		  && BLOCK_START (b_bad) == top_stack->procadr
 		  && BLOCK_END (b_bad) == top_stack->procadr)
@@ -1174,6 +1175,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      if (nparams > 0)
 		{
 		  struct dict_iterator iter;
+
 		  TYPE_NFIELDS (ftype) = nparams;
 		  TYPE_FIELDS (ftype) = (struct field *)
 		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
@@ -1576,6 +1578,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   if (t->fBitfield)
     {
       int width = AUX_GET_WIDTH (bigend, ax);
+
       /* Inhibit core dumps if TIR is corrupted.  */
       if (bs == (int *) NULL)
 	{
@@ -1663,7 +1666,6 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	}
       else
 	{
-
 	  /* Usually, TYPE_CODE(tp) is already type_code.  The main
 	     exception is if we guessed wrong re struct/union/enum.
 	     But for struct vs. union a wrong guess is harmless, so
@@ -1968,6 +1970,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
          the same name exists, lookup_symbol will eventually read in the symtab
          for the global function and clobber cur_fdr.  */
       FDR *save_cur_fdr = cur_fdr;
+
       s = lookup_symbol (sh_name, NULL, VAR_DOMAIN, 0);
       cur_fdr = save_cur_fdr;
 #else
@@ -2401,6 +2404,7 @@ parse_partial_symbols (struct objfile *objfile)
   fdr_to_pst++;
   {
     struct partial_symtab *pst = new_psymtab ("", objfile);
+
     fdr_to_pst[-1].pst = pst;
     FDR_IDX (pst) = -1;
   }
@@ -2809,6 +2813,7 @@ parse_partial_symbols (struct objfile *objfile)
 	      {
 		char *stabstring = debug_info->ss + fh->issBase + sh.iss;
 		int len = strlen (stabstring);
+
 		while (stabstring[len - 1] == '\\')
 		  {
 		    SYMR sh2;
@@ -2845,6 +2850,7 @@ parse_partial_symbols (struct objfile *objfile)
 		switch (type_code)
 		  {
 		    char *p;
+
 		    /*
 		     * Standard, external, non-debugger, symbols
 		     */
@@ -2951,7 +2957,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      past_first_source_file = 1;
 
 		      if (prev_so_symnum != symnum - 1)
-			{			/* Here if prev stab wasn't N_SO */
+			{		/* Here if prev stab wasn't N_SO */
 			  first_so_symnum = symnum;
 
 			  if (pst)
@@ -2997,6 +3003,7 @@ parse_partial_symbols (struct objfile *objfile)
 		  case N_SOL:
 		    {
 		      enum language tmp_language;
+
 		      /* Mark down an include file in the current psymtab */
 
 		      /* SET_NAMESTRING ();*/
@@ -3025,8 +3032,10 @@ parse_partial_symbols (struct objfile *objfile)
 			 in a binary tree, if profiling shows this is a major hog).  */
 		      if (pst && strcmp (namestring, pst->filename) == 0)
 			continue;
+
 		      {
 			int i;
+
 			for (i = 0; i < includes_used; i++)
 			  if (strcmp (namestring,
 				      psymtab_include_list[i]) == 0)
@@ -3232,6 +3241,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  {
 			    int name_len = p - namestring;
 			    char *name = xmalloc (name_len + 1);
+
 			    memcpy (name, namestring, name_len);
 			    name[name_len] = '\0';
 			    function_outside_compilation_unit_complaint (name);
@@ -3253,6 +3263,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  {
 			    int name_len = p - namestring;
 			    char *name = xmalloc (name_len + 1);
+
 			    memcpy (name, namestring, name_len);
 			    name[name_len] = '\0';
 			    function_outside_compilation_unit_complaint (name);
@@ -4031,9 +4042,9 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		  /* Make up special symbol to contain
 		     procedure specific info */
 		  struct mdebug_extra_func_info *e =
-		  ((struct mdebug_extra_func_info *)
-		   obstack_alloc (&current_objfile->objfile_obstack,
-				  sizeof (struct mdebug_extra_func_info)));
+		    ((struct mdebug_extra_func_info *)
+		     obstack_alloc (&current_objfile->objfile_obstack,
+				    sizeof (struct mdebug_extra_func_info)));
 		  struct symbol *s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 
 		  memset (e, 0, sizeof (struct mdebug_extra_func_info));
@@ -4730,7 +4741,6 @@ new_linetable (int size)
 static struct linetable *
 shrink_linetable (struct linetable *lt)
 {
-
   return (struct linetable *) xrealloc ((void *) lt,
 					(sizeof (struct linetable)
 					 + ((lt->nitems - 1)

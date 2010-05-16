@@ -143,6 +143,7 @@ relocate_directory (const char *progname, const char *initial, int flag)
   if (*dir)
     {
       char *canon_sysroot = lrealpath (dir);
+
       if (canon_sysroot)
 	{
 	  xfree (dir);
@@ -742,6 +743,7 @@ Excess command line arguments ignored. (%s%s)\n"),
   {
     /* Find it.  */
     struct interp *interp = interp_lookup (interpreter_p);
+
     if (interp == NULL)
       error (_("Interpreter `%s' unrecognized"), interpreter_p);
     /* Install it.  */

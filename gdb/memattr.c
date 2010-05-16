@@ -440,6 +440,7 @@ mem_info_command (char *args, int from_tty)
   for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
     {
       char *tmp;
+
       printf_filtered ("%-3d %-3c\t",
 		       m->number,
 		       m->enabled_p ? 'y' : 'n');
@@ -452,17 +453,17 @@ mem_info_command (char *args, int from_tty)
 
       if (gdbarch_addr_bit (target_gdbarch) <= 32)
 	{
-	if (m->hi == 0)
-	  tmp = "0x100000000";
-	else
-	  tmp = hex_string_custom ((unsigned long) m->hi, 8);
+	  if (m->hi == 0)
+	    tmp = "0x100000000";
+	  else
+	    tmp = hex_string_custom ((unsigned long) m->hi, 8);
 	}
       else
 	{
-	if (m->hi == 0)
-	  tmp = "0x10000000000000000";
-	else
-	  tmp = hex_string_custom ((unsigned long) m->hi, 16);
+	  if (m->hi == 0)
+	    tmp = "0x10000000000000000";
+	  else
+	    tmp = hex_string_custom ((unsigned long) m->hi, 16);
 	}
 
       printf_filtered ("%s ", tmp);
