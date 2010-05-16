@@ -1,5 +1,10 @@
 2010-05-16  Michael Snyder  <msnyder@vmware.com>
 
+	* source.c (_initialize_source): Add "rev" as an abbreviation
+	for the "reverse-search" command.
+
+2010-05-16  Michael Snyder  <msnyder@vmware.com>
+
 	* record.c: White space.
 	* regcache.c: White space.
 	* reggroups.c: White space.

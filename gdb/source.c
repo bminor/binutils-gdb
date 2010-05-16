@@ -1971,6 +1971,7 @@ The matching line number is also stored as the value of \"$_\"."));
   add_com ("reverse-search", class_files, reverse_search_command, _("\
 Search backward for regular expression (see regex(3)) from last line listed.\n\
 The matching line number is also stored as the value of \"$_\"."));
+  add_com_alias ("rev", "reverse-search", class_files, 1);
 
   if (xdb_commands)
     {
