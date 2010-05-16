@@ -124,6 +124,7 @@ spu_current_sos (void)
       if (size == 4)
 	{
 	  int fd = extract_unsigned_integer (buf, 4, byte_order);
+
 	  spu_relocate_main_executable (fd);
 
 	  /* Re-enable breakpoints after main SPU context was established;
@@ -307,9 +308,11 @@ spu_bfd_open (char *pathname)
   if (spu_name)
     {
       int sect_size = bfd_section_size (abfd, spu_name);
+
       if (sect_size > 20)
 	{
 	  char *buf = alloca (sect_size - 20 + strlen (original_name) + 1);
+
 	  bfd_get_section_contents (abfd, spu_name, buf, 20, sect_size - 20);
 	  buf[sect_size - 20] = '\0';
 
@@ -352,6 +355,7 @@ spu_enable_break (struct objfile *objfile)
   if (spe_event_sym)
     {
       CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (spe_event_sym);
+
       addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch, addr,
                                                  &current_target);
       create_solib_event_breakpoint (target_gdbarch, addr);

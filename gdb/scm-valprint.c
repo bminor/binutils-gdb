@@ -135,6 +135,7 @@ scm_scmlist_print (struct type *type, LONGEST svalue,
 #define SCM_SIZE (TYPE_LENGTH (type))
 #define SCM_BYTE_ORDER (gdbarch_byte_order (get_type_arch (type)))
   unsigned int more = options->print_max;
+
   if (recurse > 6)
     {
       fputs_filtered ("...", stream);
@@ -240,6 +241,7 @@ taloop:
 #if 0
 	      SCM name;
 #endif
+
 	      fputs_filtered ("#<latte ", stream);
 #if 1
 	      fputs_filtered ("???", stream);
@@ -313,6 +315,7 @@ taloop:
 	    int i;
 	    LONGEST elements = SCM_CDR (svalue);
 	    LONGEST val;
+
 	    fputs_filtered ("#(", stream);
 	    for (i = 0; i < len; ++i)
 	      {
@@ -329,6 +332,7 @@ taloop:
 	  {
 	    SCM result;
 	    SCM hook;
+
 	    hook = scm_get_lvector_hook (exp, LV_PRINT_FN);
 	    if (hook == BOOL_F)
 	      {
@@ -370,6 +374,7 @@ taloop:
 #define SCM_CHARS(x) ((char *)(SCM_CDR(x)))
 	    char *str = CHARS (SNAME (exp));
 #endif
+
 	    fprintf_filtered (stream, "#<primitive-procedure %s>",
 			      str);
 	  }
@@ -447,6 +452,7 @@ scm_value_print (struct value *val, struct ui_file *stream,
 		 const struct value_print_options *options)
 {
   struct value_print_options opts = *options;
+
   opts.deref_ref = 1;
   return (common_val_print (val, stream, 0, &opts, current_language));
 }

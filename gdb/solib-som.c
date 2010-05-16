@@ -816,8 +816,8 @@ void
 som_solib_select (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  set_solib_ops (gdbarch, &som_so_ops);
 
+  set_solib_ops (gdbarch, &som_so_ops);
   tdep->solib_thread_start_addr = som_solib_thread_start_addr;
   tdep->solib_get_got_by_pc = som_solib_get_got_by_pc;
   tdep->solib_get_solib_by_pc = som_solib_get_solib_by_pc;

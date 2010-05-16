@@ -205,6 +205,7 @@ obsavestring (const char *ptr, int size, struct obstack *obstackp)
     const char *p1 = ptr;
     char *p2 = p;
     const char *end = ptr + size;
+
     while (p1 != end)
       *p2++ = *p1++;
   }
@@ -1010,7 +1011,6 @@ syms_from_objfile (struct objfile *objfile,
 void
 new_symfile_objfile (struct objfile *objfile, int add_flags)
 {
-
   /* If this is the main symbol file we have to clean up all users of the
      old main symbol file. Otherwise it is sufficient to fixup all the
      breakpoints that may have been redefined by this symbol file.  */
@@ -1608,6 +1608,7 @@ symfile_bfd_open (char *name)
   if (desc < 0)
     {
       char *exename = alloca (strlen (name) + 5);
+
       strcat (strcpy (exename, name), ".exe");
       desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, exename,
 		    O_RDONLY | O_BINARY, &absolute_name);

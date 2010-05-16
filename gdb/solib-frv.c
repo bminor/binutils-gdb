@@ -1047,6 +1047,7 @@ frv_relocate_section_addresses (struct so_list *so,
           && sec->addr < map->segs[seg].p_vaddr + map->segs[seg].p_memsz)
 	{
 	  CORE_ADDR displ = map->segs[seg].addr - map->segs[seg].p_vaddr;
+
 	  sec->addr += displ;
 	  sec->endaddr += displ;
 	  break;

@@ -68,6 +68,7 @@ static struct target_so_ops *
 solib_ops (struct gdbarch *gdbarch)
 {
   struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+
   return *ops;
 }
 
@@ -77,6 +78,7 @@ void
 set_solib_ops (struct gdbarch *gdbarch, struct target_so_ops *new_ops)
 {
   struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+
   *ops = new_ops;
 }
 
@@ -169,6 +171,7 @@ solib_find (char *in_pathname, int *fd)
   if (solib_symbols_extension)
     {
       char *p = in_pathname + strlen (in_pathname);
+
       while (p > in_pathname && *p != '.')
 	p--;
 
@@ -1200,6 +1203,7 @@ clear_solib (void)
   while (so_list_head)
     {
       struct so_list *so = so_list_head;
+
       so_list_head = so->next;
       observer_notify_solib_unloaded (so);
       if (so->abfd)
@@ -1229,6 +1233,7 @@ void
 solib_create_inferior_hook (int from_tty)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch);
+
   ops->solib_create_inferior_hook (from_tty);
 }
 
@@ -1252,6 +1257,7 @@ int
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch);
+
   return ops->in_dynsym_resolve_code (pc);
 }
 

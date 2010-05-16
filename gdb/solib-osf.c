@@ -192,6 +192,7 @@ static int
 lm_sec_cmp (const void *p1, const void *p2)
 {
   const struct lm_sec *lms1 = p1, *lms2 = p2;
+
   return strcmp (lms1->name, lms2->name);
 }
 

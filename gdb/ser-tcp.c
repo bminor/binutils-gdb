@@ -119,6 +119,7 @@ wait_for_connect (struct serial *scb, int *polls)
   if (scb)
     {
       fd_set rset, wset, eset;
+
       FD_ZERO (&rset);
       FD_SET (scb->fd, &rset);
       wset = rset;
@@ -272,6 +273,7 @@ net_open (struct serial *scb, const char *name)
   {
     int res, err;
     socklen_t len;
+
     len = sizeof (err);
     /* On Windows, the fourth parameter to getsockopt is a "char *";
        on UNIX systems it is generally "void *".  The cast to "void *"
@@ -372,6 +374,7 @@ _initialize_ser_tcp (void)
      ser-mingw.c.  */
 #else
   struct serial_ops *ops;
+
   ops = XMALLOC (struct serial_ops);
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "tcp";

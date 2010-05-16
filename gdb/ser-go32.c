@@ -677,6 +677,7 @@ static int
 dos_flush_input (struct serial *scb)
 {
   struct dos_ttystate *port = &ports[scb->fd];
+
   disable ();
   port->first = port->count = 0;
   if (port->fifo)

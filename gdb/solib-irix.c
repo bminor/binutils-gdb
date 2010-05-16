@@ -163,6 +163,7 @@ fetch_lm_info (CORE_ADDR addr)
       CORE_ADDR obj_addr = extract_mips_address (&buf.ol32.data,
 						 sizeof (buf.ol32.data),
 						 byte_order);
+
       li.next = extract_mips_address (&buf.ol32.next,
 				      sizeof (buf.ol32.next), byte_order);
 
@@ -325,7 +326,6 @@ static int
 disable_break (void)
 {
   int status = 1;
-
 
   /* Note that breakpoint address and original contents are in our address
      space, so we just need to write the original contents back. */

@@ -306,6 +306,7 @@ hardwire_drain_output (struct serial *scb)
      to be discarded. */
   {
     struct hardwire_ttystate state;
+
     if (get_tty_state (scb, &state))
       {
 	return (-1);
@@ -888,6 +889,7 @@ void
 _initialize_ser_hardwire (void)
 {
   struct serial_ops *ops = XMALLOC (struct serial_ops);
+
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "hardwire";
   ops->next = 0;

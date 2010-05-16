@@ -36,6 +36,7 @@ sentinel_frame_cache (struct regcache *regcache)
 {
   struct frame_unwind_cache *cache = 
     FRAME_OBSTACK_ZALLOC (struct frame_unwind_cache);
+
   cache->regcache = regcache;
   return cache;
 }
@@ -81,6 +82,7 @@ sentinel_frame_prev_arch (struct frame_info *this_frame,
 			  void **this_prologue_cache)
 {
   struct frame_unwind_cache *cache = *this_prologue_cache;
+
   return get_regcache_arch (cache->regcache);
 }
 

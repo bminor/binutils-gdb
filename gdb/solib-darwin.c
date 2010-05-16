@@ -158,6 +158,7 @@ lookup_symbol_from_bfd (bfd *abfd, char *symname)
   for (i = 0; i < number_of_symbols; i++)
     {
       asymbol *sym = symbol_table[i];
+
       if (strcmp (sym->name, symname) == 0
 	  && (sym->section->flags & (SEC_CODE | SEC_DATA)) != 0)
 	{
@@ -320,6 +321,7 @@ darwin_solib_create_inferior_hook (int from_tty)
   if (dyld_bfd)
     {
       bfd *sub;
+
       sub = bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
 				    gdbarch_bfd_arch_info (target_gdbarch));
       if (sub)

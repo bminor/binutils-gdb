@@ -1,5 +1,36 @@
 2010-05-16  Michael Snyder  <msnyder@vmware.com>
 
+	* scm-exp.c: White space.
+	* scm-lang.c: White space.
+	* scm-valprint.c: White space.
+	* sentinel-frame.c: White space.
+	* ser-base.c: White space.
+	* ser-go32.c: White space.
+	* serial.c: White space.
+	* ser-mingw.c: White space.
+	* ser-pipe.c: White space.
+	* ser-tcp.c: White space.
+	* ser-unix.c: White space.
+	* solib.c: White space.
+	* solib-darwin.c: White space.
+	* solib-frv.c: White space.
+	* solib-irix.c: White space.
+	* solib-osf.c: White space.
+	* solib-pa64.c: White space.
+	* solib-som.c: White space.
+	* solib-spu.c: White space.
+	* solib-svr4.c: White space.
+	* solib-target.c: White space.
+	* source.c: White space.
+	* stabsread.c: White space.
+	* stack.c: White space.
+	* std-regs.c: White space.
+	* symfile.c: White space.
+	* symmisc.c: White space.
+	* symtab.c: White space.
+
+2010-05-16  Michael Snyder  <msnyder@vmware.com>
+
 	* source.c (_initialize_source): Add "rev" as an abbreviation
 	for the "reverse-search" command.
 

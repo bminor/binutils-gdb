@@ -63,6 +63,7 @@ pipe_open (struct serial *scb, const char *name)
   int pdes[2];
   int err_pdes[2];
   int pid;
+
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, err_pdes) < 0)
@@ -146,6 +147,7 @@ static void
 pipe_close (struct serial *scb)
 {
   struct pipe_state *state = scb->state;
+
   if (state != NULL)
     {
       int pid = state->pid;
@@ -167,6 +169,7 @@ void
 _initialize_ser_pipe (void)
 {
   struct serial_ops *ops = XMALLOC (struct serial_ops);
+
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "pipe";
   ops->next = 0;

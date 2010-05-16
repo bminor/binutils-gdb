@@ -391,6 +391,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
 	      struct print_symbol_args s;
+
 	      s.gdbarch = gdbarch;
 	      s.symbol = sym;
 	      s.depth = depth + 1;
@@ -551,6 +552,7 @@ print_symbol (void *args)
 	  {
 	    unsigned i;
 	    struct type *type = check_typedef (SYMBOL_TYPE (symbol));
+
 	    fprintf_filtered (outfile, "const %u hex bytes:",
 			      TYPE_LENGTH (type));
 	    for (i = 0; i < TYPE_LENGTH (type); i++)
@@ -782,6 +784,7 @@ static int
 block_depth (struct block *block)
 {
   int i = 0;
+
   while ((block = BLOCK_SUPERBLOCK (block)) != NULL)
     {
       i++;

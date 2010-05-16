@@ -751,6 +751,7 @@ ser_console_get_tty_state (struct serial *scb)
   if (isatty (scb->fd))
     {
       struct ser_console_ttystate *state;
+
       state = (struct ser_console_ttystate *) xmalloc (sizeof *state);
       state->is_a_tty = 1;
       return state;
@@ -985,6 +986,7 @@ pipe_avail (struct serial *scb, int fd)
   HANDLE h = (HANDLE) _get_osfhandle (fd);
   DWORD numBytes;
   BOOL r = PeekNamedPipe (h, NULL, 0, NULL, &numBytes, NULL);
+
   if (r == FALSE)
     numBytes = 0;
   return numBytes;

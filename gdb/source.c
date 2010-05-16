@@ -267,6 +267,7 @@ select_source_symtab (struct symtab *s)
 	{
 	  const char *name = s->filename;
 	  int len = strlen (name);
+
 	  if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
 	      || strcmp (name, "<<C++-namespaces>>") == 0)))
 	    {
@@ -519,6 +520,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 	  if (stat (name, &st) < 0)
 	    {
 	      int save_errno = errno;
+
 	      fprintf_unfiltered (gdb_stderr, "Warning: ");
 	      print_sys_errmsg (name, save_errno);
 	    }
@@ -813,6 +815,7 @@ done:
 			    IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
 			    ? "" : SLASH_STRING,
 			    filename, (char *)NULL);
+
 	  *filename_opened = xfullpath (f);
 	  xfree (f);
 	}
@@ -1910,6 +1913,7 @@ void
 _initialize_source (void)
 {
   struct cmd_list_element *c;
+
   current_source_symtab = 0;
   init_source_path ();
 

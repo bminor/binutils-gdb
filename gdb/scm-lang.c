@@ -70,6 +70,7 @@ scm_get_field (LONGEST svalue, int index, int size,
 	       enum bfd_endian byte_order)
 {
   gdb_byte buffer[20];
+
   read_memory (SCM2PTR (svalue) + index * size, buffer, size);
   return extract_signed_integer (buffer, size, byte_order);
 }
@@ -135,6 +136,7 @@ in_eval_c (void)
     {
       char *filename = cursal.symtab->filename;
       int len = strlen (filename);
+
       if (len >= 6 && strcmp (filename + len - 6, "eval.c") == 0)
 	return 1;
     }
@@ -188,6 +190,7 @@ scm_evaluate_string (char *str, int len)
   struct value *func;
   struct value *addr = value_allocate_space_in_inferior (len + 1);
   LONGEST iaddr = value_as_long (addr);
+
   write_memory (iaddr, (gdb_byte *) str, len);
   /* FIXME - should find and pass env */
   write_memory (iaddr + len, (gdb_byte *) "", 1);
@@ -202,6 +205,7 @@ evaluate_exp (struct type *expect_type, struct expression *exp,
   enum exp_opcode op = exp->elts[*pos].opcode;
   int len, pc;
   char *str;
+
   switch (op)
     {
     case OP_NAME:

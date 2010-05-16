@@ -528,6 +528,7 @@ serial_async (struct serial *scb,
 	      void *context)
 {
   int changed = ((scb->async_handler == NULL) != (handler == NULL));
+
   scb->async_handler = handler;
   scb->async_context = context;
   /* Only change mode if there is a need.  */

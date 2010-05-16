@@ -491,6 +491,7 @@ pa64_current_sos (void)
 #ifdef SOLIB_PA64_DBG
       {
         struct load_module_desc *d = &new->lm_info->desc;
+
 	printf ("\n+ library \"%s\" is described at index %d\n", new->so_name, 
 		dll_index);
 	printf ("    text_base = %s\n", hex_string (d->text_base));
@@ -662,8 +663,8 @@ _initialize_pa64_solib (void)
 void pa64_solib_select (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  set_solib_ops (gdbarch, &pa64_so_ops);
 
+  set_solib_ops (gdbarch, &pa64_so_ops);
   tdep->solib_thread_start_addr = pa64_solib_thread_start_addr;
   tdep->solib_get_got_by_pc = pa64_solib_get_got_by_pc;
   tdep->solib_get_solib_by_pc = pa64_solib_get_solib_by_pc;

@@ -69,6 +69,7 @@ reschedule (struct serial *scb)
   if (serial_is_async_p (scb))
     {
       int next_state;
+
       switch (scb->async_state)
 	{
 	case FD_SCHEDULED:
@@ -170,6 +171,7 @@ static void
 push_event (void *context)
 {
   struct serial *scb = context;
+
   scb->async_state = NOTHING_SCHEDULED; /* Timers are one-off */
   scb->async_handler (scb, scb->async_context);
   /* re-schedule */
