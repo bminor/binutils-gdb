@@ -648,7 +648,7 @@ mips_readchar (int timeout)
   static int state = 0;
   int mips_monitor_prompt_len = strlen (mips_monitor_prompt);
 
-  {
+  { /* FIXME this whole block is dead code! */
     int i;
 
     i = timeout;
@@ -1348,6 +1348,7 @@ mips_enter_debug (void)
 
   {
     char buff[DATA_MAXLEN + 1];
+
     if (mips_receive_packet (buff, 1, 3) < 0)
       mips_error ("Failed to initialize (didn't receive packet).");
   }
@@ -2014,6 +2015,7 @@ mips_fetch_registers (struct target_ops *ops,
       /* If PMON doesn't support this register, don't waste serial
          bandwidth trying to read it.  */
       int pmon_reg = mips_map_regno (gdbarch, regno);
+
       if (regno != 0 && pmon_reg == 0)
 	val = 0;
       else
@@ -2182,6 +2184,7 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
       for (i = 0; i < count; i++, addr += 4)
 	{
 	  int word;
+
 	  word = extract_unsigned_integer (&buffer[i * 4], 4, byte_order);
 	  status = mips_store_word (addr, word, NULL);
 	  /* Report each kilobyte (we download 32-bit words at a time) */
@@ -2467,6 +2470,7 @@ mips_check_lsi_error (CORE_ADDR addr, int rerrflg)
       if (monitor_warnings)
 	{
 	  int found = 0;
+
 	  for (err = lsi_warning_table; err->code != 0; err++)
 	    {
 	      if ((err->code & rerrflg) == err->code)
@@ -2657,6 +2661,7 @@ mips_common_breakpoint: Bad response from remote board: %s",
       if (set)			/* set a breakpoint */
 	{
 	  char *flags;
+
 	  switch (type)
 	    {
 	    case BREAK_WRITE:	/* write */
@@ -3095,6 +3100,7 @@ pmon_make_fastrec (char **outbuf, unsigned char *inbuf, int *inptr,
       else
 	{
 	  unsigned int value = ((inbuf[*inptr + 0] << 16) | (inbuf[*inptr + 1] << 8) | inbuf[*inptr + 2]);
+
 	  /* Simple check for zero data. TODO: A better check would be
 	     to check the last, and then the middle byte for being zero
 	     (if the first byte is not). We could then check for
@@ -3203,6 +3209,7 @@ static void
 pmon_check_entry_address (char *entry_address, int final)
 {
   char hexnumber[9];		/* includes '\0' space */
+
   mips_expect_timeout (entry_address, tftp_in_use ? 15 : remote_timeout);
   sprintf (hexnumber, "%x", final);
   mips_expect (hexnumber);
@@ -3217,6 +3224,7 @@ static int
 pmon_check_total (int bintotal)
 {
   char hexnumber[9];		/* includes '\0' space */
+
   mips_expect ("\r\ntotal = 0x");
   sprintf (hexnumber, "%x", bintotal);
   mips_expect (hexnumber);

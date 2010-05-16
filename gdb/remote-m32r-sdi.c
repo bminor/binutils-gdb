@@ -231,6 +231,7 @@ static int
 send_cmd (unsigned char cmd)
 {
   unsigned char buf[1];
+
   buf[0] = cmd;
   return send_data (buf, 1);
 }
@@ -239,6 +240,7 @@ static int
 send_one_arg_cmd (unsigned char cmd, unsigned char arg1)
 {
   unsigned char buf[2];
+
   buf[0] = cmd;
   buf[1] = arg1;
   return send_data (buf, 2);
@@ -248,6 +250,7 @@ static int
 send_two_arg_cmd (unsigned char cmd, unsigned char arg1, unsigned long arg2)
 {
   unsigned char buf[6];
+
   buf[0] = cmd;
   buf[1] = arg1;
   store_long_parameter (buf + 2, arg2);
@@ -259,6 +262,7 @@ send_three_arg_cmd (unsigned char cmd, unsigned long arg1, unsigned long arg2,
 		    unsigned long arg3)
 {
   unsigned char buf[13];
+
   buf[0] = cmd;
   store_long_parameter (buf + 1, arg1);
   store_long_parameter (buf + 5, arg2);
@@ -270,6 +274,7 @@ static unsigned char
 recv_char_data (void)
 {
   unsigned char val;
+
   recv_data (&val, 1);
   return val;
 }
@@ -278,6 +283,7 @@ static unsigned long
 recv_long_data (void)
 {
   unsigned long val;
+
   recv_data (&val, 4);
   return ntohl (val);
 }
@@ -1463,6 +1469,7 @@ static int
 m32r_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
   int rc = 0;
+
   if (hit_watchpoint_addr != 0x00000000)
     {
       *addr_p = hit_watchpoint_addr;
@@ -1475,6 +1482,7 @@ static int
 m32r_stopped_by_watchpoint (void)
 {
   CORE_ADDR addr;
+
   return m32r_stopped_data_address (&current_target, &addr);
 }
 

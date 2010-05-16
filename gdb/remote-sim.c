@@ -123,6 +123,7 @@ dump_mem (char *buf, int len)
       if (len == 8 || len == 4)
 	{
 	  long l[2];
+
 	  memcpy (l, buf, len);
 	  printf_filtered ("\t0x%lx", l[0]);
 	  if (len == 8)
@@ -132,6 +133,7 @@ dump_mem (char *buf, int len)
       else
 	{
 	  int i;
+
 	  printf_filtered ("\t");
 	  for (i = 0; i < len; i++)
 	    printf_filtered ("0x%x ", buf[i]);
@@ -229,10 +231,9 @@ static void
 gdb_os_printf_filtered (host_callback * p, const char *format,...)
 {
   va_list args;
+
   va_start (args, format);
-
   vfprintf_filtered (gdb_stdout, format, args);
-
   va_end (args);
 }
 
@@ -258,6 +259,7 @@ static void
 gdb_os_error (host_callback * p, const char *format, ...)
 {
   va_list args;
+
   va_start (args, format);
   verror (format, args);
   va_end (args);
@@ -276,6 +278,7 @@ gdbsim_fetch_register (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
   if (regno == -1)
     {
       for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
@@ -293,6 +296,7 @@ gdbsim_fetch_register (struct target_ops *ops,
            as an ``unavailable'' register.  */
 	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
+
 	memset (buf, 0, MAX_REGISTER_SIZE);
 	regcache_raw_supply (regcache, regno, buf);
 	break;
@@ -303,6 +307,7 @@ gdbsim_fetch_register (struct target_ops *ops,
 	static int warn_user = 1;
 	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
+
 	gdb_assert (regno >= 0 && regno < gdbarch_num_regs (gdbarch));
 	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (gdbsim_desc,
@@ -355,6 +360,7 @@ gdbsim_store_register (struct target_ops *ops,
     {
       char tmp[MAX_REGISTER_SIZE];
       int nr_bytes;
+
       regcache_cooked_read (regcache, regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
 				     gdbarch_register_sim_regno

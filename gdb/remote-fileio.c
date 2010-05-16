@@ -109,6 +109,7 @@ static int
 remote_fileio_fd_to_targetfd (int fd)
 {
   int target_fd = remote_fileio_next_free_fd ();
+
   remote_fio_data.fd_map[target_fd] = fd;
   return target_fd;
 }
@@ -1477,6 +1478,7 @@ set_system_call_allowed (char *args, int from_tty)
     {
       char *arg_end;
       int val = strtoul (args, &arg_end, 10);
+
       if (*args && *arg_end == '\0')
         {
 	  remote_fio_system_call_allowed = !!val;

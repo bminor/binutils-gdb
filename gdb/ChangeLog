@@ -1,5 +1,12 @@
 2010-05-16  Michael Snyder  <msnyder@vmware.com>
 
+	* record.c: White space.
+	* regcache.c: White space.
+	* reggroups.c: White space.
+	* remote-fileio.c: White space.
+	* remote-m32r-sdi.c: White space.
+	* remote-mips.c: White space.
+	* remote-sim.c: White space.
 	* remote.c: White space.
 	(process_g_packet): Remove orphan braces.
 
