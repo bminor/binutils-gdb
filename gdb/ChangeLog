@@ -1,3 +1,8 @@
+2010-05-16  Michael Snyder  <msnyder@vmware.com>
+
+	* remote.c: White space.
+	(process_g_packet): Remove orphan braces.
+
 2010-05-15  Michael Snyder  <msnyder@vmware.com>
 
 	* parse.c: White space.

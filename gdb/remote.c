@@ -427,6 +427,7 @@ remote_get_noisy_reply (char **buf_p,
   do				/* Loop on reply from remote stub.  */
     {
       char *buf;
+
       QUIT;			/* allow user to bail out with ^C */
       getpkt (buf_p, sizeof_buf, 0);
       buf = *buf_p;
@@ -587,6 +588,7 @@ packet_reg_from_regnum (struct remote_arch_state *rsa, long regnum)
   else
     {
       struct packet_reg *r = &rsa->regs[regnum];
+
       gdb_assert (r->regnum == regnum);
       return r;
     }
@@ -596,9 +598,11 @@ static struct packet_reg *
 packet_reg_from_pnum (struct remote_arch_state *rsa, LONGEST pnum)
 {
   int i;
+
   for (i = 0; i < gdbarch_num_regs (target_gdbarch); i++)
     {
       struct packet_reg *r = &rsa->regs[i];
+
       if (r->pnum == pnum)
 	return r;
     }
@@ -812,6 +816,7 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
 {
   int fixed_p = config->fixed_p;
   long size = config->size;
+
   if (args == NULL)
     error (_("Argument required (integer, `fixed' or `limited')."));
   else if (strcmp (args, "hard") == 0
@@ -823,6 +828,7 @@ set_memory_packet_size (char *args, struct memory_packet_config *config)
   else
     {
       char *end;
+
       size = strtoul (args, &end, 0);
       if (args == end)
 	error (_("Invalid %s (bad syntax)."), config->name);
@@ -904,6 +910,7 @@ static long
 get_memory_read_packet_size (void)
 {
   long size = get_memory_packet_size (&memory_read_packet_config);
+
   /* FIXME: cagney/1999-11-07: Functions like getpkt() need to get an
      extra buffer size argument before the memory read size can be
      increased beyond this.  */
@@ -963,6 +970,7 @@ static void
 show_packet_config_cmd (struct packet_config *config)
 {
   char *support = "internal-error";
+
   switch (config->support)
     {
     case PACKET_ENABLE:
@@ -1019,6 +1027,7 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
   if (legacy)
     {
       char *legacy_name;
+
       legacy_name = xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
 		     &remote_set_cmdlist);
@@ -1221,6 +1230,7 @@ set_remote_protocol_Z_packet_cmd (char *args, int from_tty,
 				  struct cmd_list_element *c)
 {
   int i;
+
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     {
       remote_protocol_packets[PACKET_Z0 + i].detect = remote_Z_packet_detect;
@@ -1234,6 +1244,7 @@ show_remote_protocol_Z_packet_cmd (struct ui_file *file, int from_tty,
 				   const char *value)
 {
   int i;
+
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     {
       show_packet_config_cmd (&remote_protocol_packets[PACKET_Z0 + i]);
@@ -2650,6 +2661,7 @@ remote_threads_extra_info (struct thread_info *tp)
   if (remote_protocol_packets[PACKET_qXfer_threads].support == PACKET_ENABLE)
     {
       struct thread_info *info = find_thread_ptid (tp->ptid);
+
       if (info && info->private)
 	return info->private->extra;
       else
@@ -3248,6 +3260,7 @@ static void
 init_all_packet_configs (void)
 {
   int i;
+
   for (i = 0; i < PACKET_MAX; i++)
     update_packet_config (&remote_protocol_packets[i]);
 }
@@ -3416,6 +3429,7 @@ remote_multi_process_feature (const struct protocol_feature *feature,
 			      enum packet_support support, const char *value)
 {
   struct remote_state *rs = get_remote_state ();
+
   rs->multi_process_aware = (support == PACKET_ENABLE);
 }
 
@@ -3424,6 +3438,7 @@ remote_non_stop_feature (const struct protocol_feature *feature,
 			      enum packet_support support, const char *value)
 {
   struct remote_state *rs = get_remote_state ();
+
   rs->non_stop_aware = (support == PACKET_ENABLE);
 }
 
@@ -3433,6 +3448,7 @@ remote_cond_tracepoint_feature (const struct protocol_feature *feature,
 				       const char *value)
 {
   struct remote_state *rs = get_remote_state ();
+
   rs->cond_tracepoints = (support == PACKET_ENABLE);
 }
 
@@ -3442,6 +3458,7 @@ remote_fast_tracepoint_feature (const struct protocol_feature *feature,
 				const char *value)
 {
   struct remote_state *rs = get_remote_state ();
+
   rs->fast_tracepoints = (support == PACKET_ENABLE);
 }
 
@@ -3451,6 +3468,7 @@ remote_disconnected_tracing_feature (const struct protocol_feature *feature,
 				     const char *value)
 {
   struct remote_state *rs = get_remote_state ();
+
   rs->disconnected_tracing = (support == PACKET_ENABLE);
 }
 
@@ -4093,6 +4111,7 @@ int
 bin2hex (const gdb_byte *bin, char *hex, int count)
 {
   int i;
+
   /* May use a length, or a nul-terminated string as input.  */
   if (count == 0)
     count = strlen ((char *) bin);
@@ -4610,6 +4629,7 @@ remote_console_output (char *msg)
     {
       char tb[2];
       char c = fromhex (p[0]) * 16 + fromhex (p[1]);
+
       tb[0] = c;
       tb[1] = 0;
       fputs_unfiltered (tb, gdb_stdtarg);
@@ -4651,6 +4671,7 @@ static struct stop_reply *
 stop_reply_xmalloc (void)
 {
   struct stop_reply *r = XMALLOC (struct stop_reply);
+
   r->next = NULL;
   return r;
 }
@@ -4708,6 +4729,7 @@ static void
 do_stop_reply_xfree (void *arg)
 {
   struct stop_reply *r = arg;
+
   stop_reply_xfree (r);
 }
 
@@ -4879,6 +4901,7 @@ Packet: '%s'\n"),
 	      else if (strncmp (p, "core", p1 - p) == 0)
 		{
 		  ULONGEST c;
+
 		  p = unpack_varlen_hex (++p1, &c);
 		  event->core = c;
 		}
@@ -4978,6 +5001,7 @@ Packet: '%s'\n"),
 			      "process:", sizeof ("process:") - 1) == 0)
 	      {
 		ULONGEST upid;
+
 		p += sizeof ("process:") - 1;
 		unpack_varlen_hex (p, &upid);
 		pid = upid;
@@ -5515,30 +5539,28 @@ process_g_packet (struct regcache *regcache)
       p += 2;
     }
 
-  {
-    int i;
-    for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
-      {
-	struct packet_reg *r = &rsa->regs[i];
-	if (r->in_g_packet)
-	  {
-	    if (r->offset * 2 >= strlen (rs->buf))
-	      /* This shouldn't happen - we adjusted in_g_packet above.  */
-	      internal_error (__FILE__, __LINE__,
-			      "unexpected end of 'g' packet reply");
-	    else if (rs->buf[r->offset * 2] == 'x')
-	      {
-		gdb_assert (r->offset * 2 < strlen (rs->buf));
-		/* The register isn't available, mark it as such (at
-                   the same time setting the value to zero).  */
-		regcache_raw_supply (regcache, r->regnum, NULL);
-	      }
-	    else
-	      regcache_raw_supply (regcache, r->regnum,
-				   regs + r->offset);
-	  }
-      }
-  }
+  for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
+    {
+      struct packet_reg *r = &rsa->regs[i];
+
+      if (r->in_g_packet)
+	{
+	  if (r->offset * 2 >= strlen (rs->buf))
+	    /* This shouldn't happen - we adjusted in_g_packet above.  */
+	    internal_error (__FILE__, __LINE__,
+			    "unexpected end of 'g' packet reply");
+	  else if (rs->buf[r->offset * 2] == 'x')
+	    {
+	      gdb_assert (r->offset * 2 < strlen (rs->buf));
+	      /* The register isn't available, mark it as such (at
+		 the same time setting the value to zero).  */
+	      regcache_raw_supply (regcache, r->regnum, NULL);
+	    }
+	  else
+	    regcache_raw_supply (regcache, r->regnum,
+				 regs + r->offset);
+	}
+    }
 }
 
 static void
@@ -5560,6 +5582,7 @@ remote_fetch_registers (struct target_ops *ops,
   if (regnum >= 0)
     {
       struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
+
       gdb_assert (reg != NULL);
 
       /* If this register might be in the 'g' packet, try that first -
@@ -5675,11 +5698,13 @@ store_registers_using_G (const struct regcache *regcache)
      local buffer.  */
   {
     int i;
+
     regs = alloca (rsa->sizeof_g_packet);
     memset (regs, 0, rsa->sizeof_g_packet);
     for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
+
 	if (r->in_g_packet)
 	  regcache_raw_collect (regcache, r->regnum, regs + r->offset);
       }
@@ -5714,6 +5739,7 @@ remote_store_registers (struct target_ops *ops,
   if (regnum >= 0)
     {
       struct packet_reg *reg = packet_reg_from_regnum (rsa, regnum);
+
       gdb_assert (reg != NULL);
 
       /* Always prefer to store registers using the 'P' packet if
@@ -5763,6 +5789,7 @@ static int
 hexnumstr (char *buf, ULONGEST num)
 {
   int len = hexnumlen (num);
+
   return hexnumnstr (buf, num, len);
 }
 
@@ -5791,6 +5818,7 @@ static CORE_ADDR
 remote_address_masked (CORE_ADDR addr)
 {
   int address_size = remote_address_size;
+
   /* If "remoteaddresssize" was not set, default to target address size.  */
   if (!address_size)
     address_size = gdbarch_addr_bit (target_gdbarch);
@@ -5801,6 +5829,7 @@ remote_address_masked (CORE_ADDR addr)
       /* Only create a mask when that mask can safely be constructed
          in a ULONGEST variable.  */
       ULONGEST mask = 1;
+
       mask = (mask << address_size) - 1;
       addr &= mask;
     }
@@ -6258,6 +6287,7 @@ handle_notification (char *buf, size_t length)
 	{
 	  struct cleanup *old_chain;
 	  struct stop_reply *reply = stop_reply_xmalloc ();
+
 	  old_chain = make_cleanup (do_stop_reply_xfree, reply);
 
 	  remote_parse_stop_reply (buf + 5, reply);
@@ -6314,8 +6344,8 @@ remote_send_printf (const char *format, ...)
 {
   struct remote_state *rs = get_remote_state ();
   int max_size = get_remote_packet_size ();
-
   va_list ap;
+
   va_start (ap, format);
 
   rs->buf[0] = '\0';
@@ -6335,6 +6365,7 @@ static void
 restore_remote_timeout (void *p)
 {
   int value = *(int *)p;
+
   remote_timeout = value;
 }
 
@@ -6350,9 +6381,9 @@ remote_flash_erase (struct target_ops *ops,
   int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
   int saved_remote_timeout = remote_timeout;
   enum packet_result ret;
-
   struct cleanup *back_to = make_cleanup (restore_remote_timeout,
                                           &saved_remote_timeout);
+
   remote_timeout = remote_flash_timeout;
 
   ret = remote_send_printf ("vFlashErase:%s,%s",
@@ -6828,8 +6859,8 @@ Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	case '*':		/* Run length encoding.  */
           {
 	    int repeat;
- 	    csum += c;
 
+ 	    csum += c;
 	    c = readchar (remote_timeout);
 	    csum += c;
 	    repeat = c - ' ' + 3;	/* Compute repeat count.  */
@@ -7520,6 +7551,7 @@ static int
 remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
   int rc = 0;
+
   if (remote_stopped_by_watchpoint ())
     {
       *addr_p = remote_watch_data_address;
@@ -7878,6 +7910,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   if (object == TARGET_OBJECT_MEMORY)
     {
       int xfered;
+
       errno = 0;
 
       /* If the remote target is connected but not running, we should
@@ -8179,6 +8212,7 @@ remote_rcmd (char *command,
       for (p = buf; p[0] != '\0' && p[1] != '\0'; p += 2)
 	{
 	  char c = (fromhex (p[0]) << 4) + fromhex (p[1]);
+
 	  fputc_unfiltered (c, outbuf);
 	}
       break;
@@ -8195,6 +8229,7 @@ remote_memory_map (struct target_ops *ops)
   if (text)
     {
       struct cleanup *back_to = make_cleanup (xfree, text);
+
       result = parse_memory_map (text);
       do_cleanups (back_to);
     }
@@ -9335,6 +9370,7 @@ static int
 remote_supports_multi_process (void)
 {
   struct remote_state *rs = get_remote_state ();
+
   return remote_multi_process_p (rs);
 }
 
@@ -9342,6 +9378,7 @@ int
 remote_supports_cond_tracepoints (void)
 {
   struct remote_state *rs = get_remote_state ();
+
   return rs->cond_tracepoints;
 }
 
@@ -9349,6 +9386,7 @@ int
 remote_supports_fast_tracepoints (void)
 {
   struct remote_state *rs = get_remote_state ();
+
   return rs->fast_tracepoints;
 }
 
@@ -9651,6 +9689,7 @@ remote_get_trace_status (struct trace_status *ts)
   char *p;
   /* FIXME we need to get register block size some other way */
   extern int trace_regblock_size;
+
   trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;
 
   putpkt ("qTStatus");
@@ -9869,6 +9908,7 @@ static int
 remote_core_of_thread (struct target_ops *ops, ptid_t ptid)
 {
   struct thread_info *info = find_thread_ptid (ptid);
+
   if (info && info->private)
     return info->private->core;
   return -1;
@@ -10069,6 +10109,7 @@ static int
 remote_async_mask (int new_mask)
 {
   int curr_mask = remote_async_mask_value;
+
   remote_async_mask_value = new_mask;
   return curr_mask;
 }
@@ -10099,6 +10140,7 @@ show_remote_cmd (char *args, int from_tty)
       {
 	struct cleanup *option_chain
 	  = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
+
 	ui_out_field_string (uiout, "name", list->name);
 	ui_out_text (uiout, ":  ");
 	if (list->type == show_cmd)
