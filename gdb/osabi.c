@@ -588,6 +588,7 @@ set_osabi (char *args, int from_tty, struct cmd_list_element *c)
   else
     {
       int i;
+
       for (i = 1; i < GDB_OSABI_INVALID; i++)
 	if (strcmp (set_osabi_string, gdbarch_osabi_name (i)) == 0)
 	  {

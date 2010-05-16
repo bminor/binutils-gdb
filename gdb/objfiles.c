@@ -707,26 +707,26 @@ free_all_objfiles (void)
    Return non-zero iff any change happened.  */
 
 static int
-objfile_relocate1 (struct objfile *objfile, struct section_offsets *new_offsets)
+objfile_relocate1 (struct objfile *objfile, 
+		   struct section_offsets *new_offsets)
 {
   struct obj_section *s;
   struct section_offsets *delta =
     ((struct section_offsets *) 
      alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections)));
 
-  {
-    int i;
-    int something_changed = 0;
-    for (i = 0; i < objfile->num_sections; ++i)
-      {
-	delta->offsets[i] =
-	  ANOFFSET (new_offsets, i) - ANOFFSET (objfile->section_offsets, i);
-	if (ANOFFSET (delta, i) != 0)
-	  something_changed = 1;
-      }
-    if (!something_changed)
-      return 0;
-  }
+  int i;
+  int something_changed = 0;
+
+  for (i = 0; i < objfile->num_sections; ++i)
+    {
+      delta->offsets[i] =
+	ANOFFSET (new_offsets, i) - ANOFFSET (objfile->section_offsets, i);
+      if (ANOFFSET (delta, i) != 0)
+	something_changed = 1;
+    }
+  if (!something_changed)
+    return 0;
 
   /* OK, get all the symtabs.  */
   {
@@ -794,6 +794,7 @@ objfile_relocate1 (struct objfile *objfile, struct section_offsets *new_offsets)
 
   {
     struct minimal_symbol *msym;
+
     ALL_OBJFILE_MSYMBOLS (objfile, msym)
       if (SYMBOL_SECTION (msym) >= 0)
       SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
@@ -816,6 +817,7 @@ objfile_relocate1 (struct objfile *objfile, struct section_offsets *new_offsets)
 
   {
     int i;
+
     for (i = 0; i < objfile->num_sections; ++i)
       (objfile->section_offsets)->offsets[i] = ANOFFSET (new_offsets, i);
   }
@@ -1009,65 +1011,64 @@ qsort_cmp (const void *a, const void *b)
   else if (sect1_addr > sect2_addr)
     return 1;
   else
-   {
-     /* Sections are at the same address.  This could happen if
-	A) we have an objfile and a separate debuginfo.
-	B) we are confused, and have added sections without proper relocation,
-	or something like that. */
+    {
+      /* Sections are at the same address.  This could happen if
+	 A) we have an objfile and a separate debuginfo.
+	 B) we are confused, and have added sections without proper relocation,
+	 or something like that. */
 
-     const struct objfile *const objfile1 = sect1->objfile;
-     const struct objfile *const objfile2 = sect2->objfile;
+      const struct objfile *const objfile1 = sect1->objfile;
+      const struct objfile *const objfile2 = sect2->objfile;
 
-     if (objfile1->separate_debug_objfile == objfile2
-	 || objfile2->separate_debug_objfile == objfile1)
-       {
-	 /* Case A.  The ordering doesn't matter: separate debuginfo files
-	    will be filtered out later.  */
+      if (objfile1->separate_debug_objfile == objfile2
+	  || objfile2->separate_debug_objfile == objfile1)
+	{
+	  /* Case A.  The ordering doesn't matter: separate debuginfo files
+	     will be filtered out later.  */
 
-	 return 0;
-       }
+	  return 0;
+	}
 
-     /* Case B.  Maintain stable sort order, so bugs in GDB are easier to
-	triage.  This section could be slow (since we iterate over all
-	objfiles in each call to qsort_cmp), but this shouldn't happen
-	very often (GDB is already in a confused state; one hopes this
-	doesn't happen at all).  If you discover that significant time is
-	spent in the loops below, do 'set complaints 100' and examine the
-	resulting complaints.  */
+      /* Case B.  Maintain stable sort order, so bugs in GDB are easier to
+	 triage.  This section could be slow (since we iterate over all
+	 objfiles in each call to qsort_cmp), but this shouldn't happen
+	 very often (GDB is already in a confused state; one hopes this
+	 doesn't happen at all).  If you discover that significant time is
+	 spent in the loops below, do 'set complaints 100' and examine the
+	 resulting complaints.  */
 
-     if (objfile1 == objfile2)
-       {
-	 /* Both sections came from the same objfile.  We are really confused.
-	    Sort on sequence order of sections within the objfile.  */
+      if (objfile1 == objfile2)
+	{
+	  /* Both sections came from the same objfile.  We are really confused.
+	     Sort on sequence order of sections within the objfile.  */
 
-	 const struct obj_section *osect;
+	  const struct obj_section *osect;
 
-	 ALL_OBJFILE_OSECTIONS (objfile1, osect)
-	   if (osect == sect1)
-	     return -1;
-	   else if (osect == sect2)
-	     return 1;
+	  ALL_OBJFILE_OSECTIONS (objfile1, osect)
+	    if (osect == sect1)
+	      return -1;
+	    else if (osect == sect2)
+	      return 1;
 
-	 /* We should have found one of the sections before getting here.  */
-	 gdb_assert (0);
-       }
-     else
-       {
-	 /* Sort on sequence number of the objfile in the chain.  */
+	  /* We should have found one of the sections before getting here.  */
+	  gdb_assert (0);
+	}
+      else
+	{
+	  /* Sort on sequence number of the objfile in the chain.  */
 
-	 const struct objfile *objfile;
+	  const struct objfile *objfile;
 
-	 ALL_OBJFILES (objfile)
-	   if (objfile == objfile1)
-	     return -1;
-	   else if (objfile == objfile2)
-	     return 1;
+	  ALL_OBJFILES (objfile)
+	    if (objfile == objfile1)
+	      return -1;
+	    else if (objfile == objfile2)
+	      return 1;
 
-	 /* We should have found one of the objfiles before getting here.  */
-	 gdb_assert (0);
-       }
-
-   }
+	  /* We should have found one of the objfiles before getting here.  */
+	  gdb_assert (0);
+	}
+    }
 
   /* Unreachable.  */
   gdb_assert (0);

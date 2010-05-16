@@ -1,5 +1,11 @@
 2010-05-15  Michael Snyder  <msnyder@vmware.com>
 
+	* objc-lang.c: White space.
+	* objfiles.c: White space.
+	* observer.c: White space.
+	* osabi.c: White space.
+	* osdata.c: White space.
+
 	* m2-lang.c: White space.
 	* m2-valprint.c: White space.
 	* macrocmd.c: White space.

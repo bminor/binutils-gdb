@@ -91,6 +91,7 @@ static struct observer_list *
 xalloc_observer_list_node (void)
 {
   struct observer_list *node = XMALLOC (struct observer_list);
+
   node->observer = XMALLOC (struct observer);
   return node;
 }
