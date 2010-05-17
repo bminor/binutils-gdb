@@ -390,6 +390,19 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
   int finished = 0;
   int need_escape = 0;
 
+  if (length == -1)
+    {
+      unsigned long current_char = 1;
+
+      for (i = 0; current_char; ++i)
+	{
+	  QUIT;
+	  current_char = extract_unsigned_integer (string + i * width,
+						   width, byte_order);
+	}
+      length = i;
+    }
+
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C
      style.  */
@@ -422,19 +435,6 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
     {
       fputs_filtered ("\"\"", stream);
       return;
-    }
-
-  if (length == -1)
-    {
-      unsigned long current_char = 1;
-
-      for (i = 0; current_char; ++i)
-	{
-	  QUIT;
-	  current_char = extract_unsigned_integer (string + i * width,
-						   width, byte_order);
-	}
-      length = i;
     }
 
   /* Arrange to iterate over the characters, in wchar_t form.  */

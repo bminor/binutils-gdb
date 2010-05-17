@@ -1,3 +1,9 @@
+2010-05-17  Andreas Schwab  <schwab@redhat.com>
+
+	PR gdb/11092
+	* c-lang.c (c_printstr): Compute real length of NUL terminated
+	string at first.
+
 2010-05-17  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* dwarf2read.c (read_set_type): Set type length if
