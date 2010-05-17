@@ -859,6 +859,7 @@ sysset_t_alloc (procinfo * pi)
 {
   sysset_t *ret;
   int size = sysset_t_size (pi);
+
   ret = xmalloc (size);
 #ifdef DYNAMIC_SYSCALLS
   ret->pr_size = ((pi->num_syscalls + (8 * sizeof (uint64_t) - 1))
@@ -1000,6 +1001,7 @@ static int
 find_syscall (procinfo *pi, char *name)
 {
   int i;
+
   for (i = 0; i < pi->num_syscalls; i++)
     {
       if (pi->syscall_names[i] && strcmp (name, pi->syscall_names[i]) == 0)
@@ -1565,6 +1567,7 @@ proc_stop_process (procinfo *pi)
     {
 #ifdef NEW_PROC_API
       procfs_ctl_t cmd = PCSTOP;
+
       win = (write (pi->ctl_fd, (char *) &cmd, sizeof (cmd)) == sizeof (cmd));
 #else	/* ioctl method */
       win = (ioctl (pi->ctl_fd, PIOCSTOP, &pi->prstatus) >= 0);
@@ -1602,6 +1605,7 @@ proc_wait_for_stop (procinfo *pi)
 #ifdef NEW_PROC_API
   {
     procfs_ctl_t cmd = PCWSTOP;
+
     win = (write (pi->ctl_fd, (char *) &cmd, sizeof (cmd)) == sizeof (cmd));
     /* We been runnin' and we stopped -- need to update status.  */
     pi->status_valid = 0;
@@ -2275,6 +2279,7 @@ proc_clear_current_fault (procinfo *pi)
 #ifdef NEW_PROC_API
   {
     procfs_ctl_t cmd = PCCFAULT;
+
     win = (write (pi->ctl_fd, (void *) &cmd, sizeof (cmd)) == sizeof (cmd));
   }
 #else
@@ -3209,6 +3214,7 @@ procfs_debug_inferior (procinfo *pi)
 #ifdef DYNAMIC_SYSCALLS
   {
     int callnum = find_syscall (pi, "_exit");
+
     if (callnum >= 0)
       gdb_praddsysset (traced_syscall_entries, callnum);
   }
@@ -3267,6 +3273,7 @@ procfs_debug_inferior (procinfo *pi)
 #ifdef DYNAMIC_SYSCALLS
   {
     int callnum = find_syscall (pi, "execve");
+
     if (callnum >= 0)
       gdb_praddsysset (traced_syscall_exits, callnum);
     callnum = find_syscall (pi, "ra_execve");
@@ -3564,7 +3571,6 @@ procfs_store_registers (struct target_ops *ops,
 static int
 syscall_is_lwp_exit (procinfo *pi, int scall)
 {
-
 #ifdef SYS_lwp_exit
   if (scall == SYS_lwp_exit)
     return 1;
@@ -4501,6 +4507,7 @@ static void
 procfs_files_info (struct target_ops *ignore)
 {
   struct inferior *inf = current_inferior ();
+
   printf_filtered (_("\tUsing the running image of %s %s via /proc.\n"),
 		   inf->attach_flag? "attached": "child",
 		   target_pid_to_str (inferior_ptid));
@@ -5102,6 +5109,7 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
      will be generated when the host and target pointer sizes are
      different.  */
   struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+
   if (sizeof (void *) != TYPE_LENGTH (ptr_type))
     return 0;
 
@@ -5693,6 +5701,7 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
   if (pi != NULL)
     {
       ptid_t ptid = MERGEPID (pi->pid, thread->tid);
+
       args->note_data = procfs_do_thread_registers (args->obfd, ptid,
 						    args->note_data,
 						    args->note_size,
