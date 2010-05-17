@@ -480,6 +480,14 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	    fputs_filtered ("[", stream);
 
 	  i = get_discrete_bounds (range, &low_bound, &high_bound);
+	  if (low_bound == 0 && high_bound == -1 && TYPE_LENGTH (type) > 0)
+	    {
+	      /* If we know the size of the set type, we can figure out the
+	      maximum value.  */
+	      i = 0;
+	      high_bound = TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1;
+	      TYPE_HIGH_BOUND (range) = high_bound;
+	    }
 	maybe_bad_bstring:
 	  if (i < 0)
 	    {

@@ -1,3 +1,8 @@
+2010-05-17  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-valprint.c (pascal_val_print): Handle set type if range limits
+	are undefined but size is known.
+
 2010-05-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* procfs.c: Reformat.
