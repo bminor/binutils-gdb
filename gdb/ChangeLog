@@ -6,6 +6,12 @@
 
 2010-05-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* jv-lang.c (java_lookup_class): Remove commented out code.
+	(type_from_class): Likewise.
+	(java_op_print_tab): Remove commented-out elements.
+
+2010-05-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (to_fixed_range_type): The the raw index type as
 	argument instead of the raw type name.  Remove orig_type parameter.
 	Update calls throughout.

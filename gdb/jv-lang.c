@@ -190,32 +190,8 @@ java_lookup_class (char *name)
   sym = lookup_symbol (name, expression_context_block, STRUCT_DOMAIN, NULL);
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
-#if 0
-  CORE_ADDR addr;
-
-  if (called from parser)
-    {
-      call lookup_class (or similar) in inferior;
-      if not
-      found:
-	return NULL;
-      addr = found in inferior;
-    }
-  else
-    addr = 0;
-  struct type *type;
-
-  type = alloc_type (objfile);
-  TYPE_CODE (type) = TYPE_CODE_STRUCT;
-  INIT_CPLUS_SPECIFIC (type);
-  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name), &objfile->objfile_obstack);
-  TYPE_STUB (type) = 1;
-  TYPE ? = addr;
-  return type;
-#else
   /* FIXME - should search inferior's symbol table. */
   return NULL;
-#endif
 }
 
 /* Return a nul-terminated string (allocated on OBSTACK) for
@@ -276,10 +252,6 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
   struct value *utf8_name;
   char *nptr;
   CORE_ADDR addr;
-#if 0
-  struct block *bl;
-  struct dict_iterator iter;
-#endif
   int is_array = 0;
 
   type = check_typedef (value_type (clas));
@@ -290,16 +262,6 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
       clas = value_ind (clas);
     }
   addr = value_address (clas);
-
-#if 0
-  get_java_class_symtab ();
-  bl = BLOCKVECTOR_BLOCK (BLOCKVECTOR (class_symtab), GLOBAL_BLOCK);
-  ALL_BLOCK_SYMBOLS (block, iter, sym)
-    {
-      if (SYMBOL_VALUE_ADDRESS (sym) == addr)
-	return SYMBOL_TYPE (sym);
-    }
-#endif
 
   objfile = get_dynamics_objfile (gdbarch);
   if (java_class_is_primitive (clas))
@@ -1114,9 +1076,6 @@ const struct op_print java_op_print_tab[] =
   {"<", BINOP_LESS, PREC_ORDER, 0},
   {">>", BINOP_RSH, PREC_SHIFT, 0},
   {"<<", BINOP_LSH, PREC_SHIFT, 0},
-#if 0
-  {">>>", BINOP_ ? ? ?, PREC_SHIFT, 0},
-#endif
   {"+", BINOP_ADD, PREC_ADD, 0},
   {"-", BINOP_SUB, PREC_ADD, 0},
   {"*", BINOP_MUL, PREC_MUL, 0},
@@ -1126,9 +1085,6 @@ const struct op_print java_op_print_tab[] =
   {"!", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
   {"~", UNOP_COMPLEMENT, PREC_PREFIX, 0},
   {"*", UNOP_IND, PREC_PREFIX, 0},
-#if 0
-  {"instanceof", ? ? ?, ? ? ?, 0},
-#endif
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
   {NULL, 0, 0, 0}
