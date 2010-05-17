@@ -1420,10 +1420,11 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
     }
 }
 
-/* reset_schedlock -- public */
+/* If SCHEDULER_MODE is on, then set it back to off.  Warn the user
+   about the change.  */
  
 void
-reset_schedlock ()
+reset_schedlock (void)
 {
   if (scheduler_mode == schedlock_on)
     {

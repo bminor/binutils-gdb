@@ -1,3 +1,10 @@
+2010-05-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.h (reset_schedlock): Add declaration.
+	* infrun.c (reset_schedlock): Add missing void in function profile.
+	* target.c (target_mourn_inferior): Delete local declaration of
+	reset_schedlock.  Style-fix in comment.
+
 2010-05-17  Hui Zhu  <teawater@gmail.com>
 
 	* target.c (target_mourn_inferior): Extern reset_schedlock.

@@ -2244,9 +2244,8 @@ void
 target_mourn_inferior (void)
 {
   struct target_ops *t;
-  extern void reset_schedlock ();
 
-  /* Clear schedlock in infrun.c */
+  /* Clear schedlock in infrun.c.  */
   reset_schedlock ();
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
