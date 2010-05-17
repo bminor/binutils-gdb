@@ -51,6 +51,7 @@
 #include "vms/eobjrec.h"
 #include "vms/egsd.h"
 #include "vms/egps.h"
+#include "vms/esgps.h"
 #include "vms/eeom.h"
 #include "vms/emh.h"
 #include "vms/eiaf.h"
@@ -63,6 +64,7 @@
 #include "vms/esdfv.h"
 #include "vms/esrf.h"
 #include "vms/egst.h"
+#include "vms/eidc.h"
 #include "vms/dsc.h"
 #include "vms/prt.h"
 #include "vms/internal.h"
@@ -1240,7 +1242,10 @@ _bfd_vms_slurp_egsd (bfd * abfd)
           }
 	  break;
 
-	case EGSD__C_IDC:
+        case EGSD__C_SPSC:
+        case EGSD__C_IDC:
+          /* Currently ignored.  */
+          break;
 	case EGSD__C_SYMM:
 	case EGSD__C_SYMV:
 	default:
@@ -5629,6 +5634,37 @@ exav_bfd_print_egsy_flags (unsigned int flags, FILE *file)
 }
 
 static void
+evax_bfd_print_egsd_flags (FILE *file, unsigned int flags)
+{
+  if (flags & EGPS__V_PIC)
+    fputs (_(" PIC"), file);
+  if (flags & EGPS__V_LIB)
+    fputs (_(" LIB"), file);
+  if (flags & EGPS__V_OVR)
+    fputs (_(" OVR"), file);
+  if (flags & EGPS__V_REL)
+    fputs (_(" REL"), file);
+  if (flags & EGPS__V_GBL)
+    fputs (_(" GBL"), file);
+  if (flags & EGPS__V_SHR)
+    fputs (_(" SHR"), file);
+  if (flags & EGPS__V_EXE)
+    fputs (_(" EXE"), file);
+  if (flags & EGPS__V_RD)
+    fputs (_(" RD"), file);
+  if (flags & EGPS__V_WRT)
+    fputs (_(" WRT"), file);
+  if (flags & EGPS__V_VEC)
+    fputs (_(" VEC"), file);
+  if (flags & EGPS__V_NOMOD)
+    fputs (_(" NOMOD"), file);
+  if (flags & EGPS__V_COM)
+    fputs (_(" COM"), file);
+  if (flags & EGPS__V_ALLOC_64BIT)
+    fputs (_(" 64B"), file);
+}
+
+static void
 evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
 {
   unsigned int off = sizeof (struct vms_egsd);
@@ -5661,37 +5697,33 @@ evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
             fprintf (file, _("PSC - Program section definition\n"));
             fprintf (file, _("   alignment  : 2**%u\n"), egps->align);
             fprintf (file, _("   flags      : 0x%04x"), flags);
-            if (flags & EGPS__V_PIC)
-              fputs (_(" PIC"), file);
-            if (flags & EGPS__V_LIB)
-              fputs (_(" LIB"), file);
-            if (flags & EGPS__V_OVR)
-              fputs (_(" OVR"), file);
-            if (flags & EGPS__V_REL)
-              fputs (_(" REL"), file);
-            if (flags & EGPS__V_GBL)
-              fputs (_(" GBL"), file);
-            if (flags & EGPS__V_SHR)
-              fputs (_(" SHR"), file);
-            if (flags & EGPS__V_EXE)
-              fputs (_(" EXE"), file);
-            if (flags & EGPS__V_RD)
-              fputs (_(" RD"), file);
-            if (flags & EGPS__V_WRT)
-              fputs (_(" WRT"), file);
-            if (flags & EGPS__V_VEC)
-              fputs (_(" VEC"), file);
-            if (flags & EGPS__V_NOMOD)
-              fputs (_(" NOMOD"), file);
-            if (flags & EGPS__V_COM)
-              fputs (_(" COM"), file);
-            if (flags & EGPS__V_ALLOC_64BIT)
-              fputs (_(" 64B"), file);
+            evax_bfd_print_egsd_flags (file, flags);
             fputc ('\n', file);
             l = bfd_getl32 (egps->alloc);
             fprintf (file, _("   alloc (len): %u (0x%08x)\n"), l, l);
             fprintf (file, _("   name       : %.*s\n"),
                      egps->namlng, egps->name);
+          }
+          break;
+        case EGSD__C_SPSC:
+          {
+            struct vms_esgps *esgps = (struct vms_esgps *)e;
+            unsigned int flags = bfd_getl16 (esgps->flags);
+            unsigned int l;
+
+            fprintf (file, _("SPSC - Shared Image Program section def\n"));
+            fprintf (file, _("   alignment  : 2**%u\n"), esgps->align);
+            fprintf (file, _("   flags      : 0x%04x"), flags);
+            evax_bfd_print_egsd_flags (file, flags);
+            fputc ('\n', file);
+            l = bfd_getl32 (esgps->alloc);
+            fprintf (file, _("   alloc (len)   : %u (0x%08x)\n"), l, l);
+            fprintf (file, _("   image offset  : 0x%08x\n"),
+                     (unsigned int)bfd_getl32 (esgps->base));
+            fprintf (file, _("   symvec offset : 0x%08x\n"),
+                     (unsigned int)bfd_getl32 (esgps->value));
+            fprintf (file, _("   name          : %.*s\n"),
+                     esgps->namlng, esgps->name);
           }
           break;
         case EGSD__C_SYM:
@@ -5729,6 +5761,33 @@ evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
                 fprintf (file, _("   name       : %.*s\n"),
                          esrf->namlng, esrf->name);
               }
+          }
+          break;
+        case EGSD__C_IDC:
+          {
+            struct vms_eidc *eidc = (struct vms_eidc *)e;
+            unsigned int flags = bfd_getl32 (eidc->flags);
+            unsigned char *p;
+
+            fprintf (file, _("IDC - Ident Consistency check\n"));
+            fprintf (file, _("   flags         : 0x%08x"), flags);
+            if (flags & EIDC__V_BINIDENT)
+              fputs (" BINDENT", file);
+            fputc ('\n', file);
+            fprintf (file, _("   id match      : %x\n"),
+                     (flags >> EIDC__V_IDMATCH_SH) & EIDC__V_IDMATCH_MASK);
+            fprintf (file, _("   error severity: %x\n"),
+                     (flags >> EIDC__V_ERRSEV_SH) & EIDC__V_ERRSEV_MASK);
+            p = eidc->name;
+            fprintf (file, _("   entity name   : %.*s\n"), p[0], p + 1);
+            p += 1 + p[0];
+            fprintf (file, _("   object name   : %.*s\n"), p[0], p + 1);
+            p += 1 + p[0];
+            if (flags & EIDC__V_BINIDENT)
+              fprintf (file, _("   binary ident  : 0x%08x\n"),
+                       (unsigned)bfd_getl32 (p + 1));
+            else
+              fprintf (file, _("   ascii ident   : %.*s\n"), p[0], p + 1);
           }
           break;
         case EGSD__C_SYMG:
