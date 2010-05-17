@@ -1,3 +1,8 @@
+2010-05-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/gdb11530.exp: Delete setting of prms_id and bug_id.
+	* gdb.cp/koenig.exp: Likewise.
+
 2010-05-14  Phil Muldoon  <pmuldoon@redhat.com>
 
  	PR python/11482
