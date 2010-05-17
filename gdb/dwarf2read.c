@@ -5547,7 +5547,10 @@ static struct type *
 read_set_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct type *set_type = create_set_type (NULL, die_type (die, cu));
+  struct attribute *attr = dwarf2_attr (die, DW_AT_byte_size, cu);
 
+  if (attr)
+    TYPE_LENGTH (set_type) = DW_UNSND (attr);
   return set_die_type (die, set_type, cu);
 }
 

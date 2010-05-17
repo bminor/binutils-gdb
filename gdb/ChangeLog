@@ -1,5 +1,10 @@
 2010-05-17  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* dwarf2read.c (read_set_type): Set type length if
+	DW_AT_byte_size attribute is present.
+
+2010-05-17  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* p-valprint.c (pascal_val_print): Handle set type if range limits
 	are undefined but size is known.
 
