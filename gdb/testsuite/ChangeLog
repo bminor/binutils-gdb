@@ -1,5 +1,10 @@
 2010-05-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/watch_arg/watch.adb: Rewrite testcase to avoid the
+	parameter that we want to watch being a constant.
+
+2010-05-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/cond_lang: New testcase.
 
 2010-05-17  Joel Brobecker  <brobecker@adacore.com>

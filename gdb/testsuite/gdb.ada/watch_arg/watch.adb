@@ -15,15 +15,15 @@
 
 procedure Watch is
 
-   procedure Foo (X : access Integer) is
+   procedure Foo (X : in out Integer) is
    begin
-      X.all := 3;  -- BREAK1
+      X := 3;  -- BREAK1
    end Foo;
 
-   X : aliased Integer := 1;
+   X : Integer := 1;
 
 begin
-   Foo (X'Access);
+   Foo (X);
    X := 2;  -- BREAK2
 end Watch;
 
