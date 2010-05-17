@@ -319,6 +319,7 @@ py_restore_tstate (void *p)
 {
   PyFrameObject *frame = p;
   PyThreadState *tstate = PyThreadState_GET ();
+
   tstate->frame = frame;
 }
 

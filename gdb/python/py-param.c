@@ -103,6 +103,7 @@ get_attr (PyObject *obj, PyObject *attr_name)
       && ! strcmp (PyString_AsString (attr_name), "value"))
     {
       parmpy_object *self = (parmpy_object *) obj;
+
       return gdbpy_parameter_value (self->type, &self->value);
     }
 
@@ -394,6 +395,7 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
   for (i = 0; i < size; ++i)
     {
       PyObject *item = PySequence_GetItem (enum_values, i);
+
       if (! item)
 	return 0;
       if (! gdbpy_is_string (item))
@@ -414,9 +416,11 @@ static char *
 get_doc_string (PyObject *object, PyObject *attr)
 {
   char *result = NULL;
+
   if (PyObject_HasAttr (object, attr))
     {
       PyObject *ds_obj = PyObject_GetAttr (object, attr);
+
       if (ds_obj && gdbpy_is_string (ds_obj))
 	result = python_string_to_host_string (ds_obj);
     }

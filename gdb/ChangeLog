@@ -1,5 +1,21 @@
 2010-05-17  Michael Snyder  <msnyder@vmware.com>
 
+	* python/py-auto-load.c: White space.
+	* python/py-block.c: White space.
+	* python/py-breakpoint.c: White space.
+	* python/py-cmd.c: White space.
+	* python/py-function.c: White space.
+	* python/py-lazy-string.c: White space.
+	* python/py-objfile.c: White space.
+	* python/py-param.c: White space.
+	* python/py-prettyprint.c: White space.
+	* python/py-progspace.c: White space.
+	* python/py-symtab.c: White space.
+	* python/python.c: White space.
+	* python/py-type.c: White space.
+	* python/py-utils.c: White space.
+	* python/py-value.c: White space.
+
 	* mi/mi-cmd-break.c: White space.
 	* mi/mi-cmd-env.c: White space.
 	* mi/mi-cmds.c: White space.

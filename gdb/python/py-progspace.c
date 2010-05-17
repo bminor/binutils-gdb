@@ -47,9 +47,11 @@ static PyObject *
 pspy_get_filename (PyObject *self, void *closure)
 {
   pspace_object *obj = (pspace_object *) self;
+
   if (obj->pspace)
     {
       struct objfile *objfile = obj->pspace->symfile_object_file;
+
       if (objfile && objfile->name)
 	return PyString_Decode (objfile->name, strlen (objfile->name),
 				host_charset (), NULL);
@@ -61,6 +63,7 @@ static void
 pspy_dealloc (PyObject *self)
 {
   pspace_object *ps_self = (pspace_object *) self;
+
   Py_XDECREF (ps_self->printers);
   self->ob_type->tp_free (self);
 }
@@ -69,6 +72,7 @@ static PyObject *
 pspy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 {
   pspace_object *self = (pspace_object *) type->tp_alloc (type, 0);
+
   if (self)
     {
       self->pspace = NULL;
@@ -87,6 +91,7 @@ PyObject *
 pspy_get_printers (PyObject *o, void *ignore)
 {
   pspace_object *self = (pspace_object *) o;
+
   Py_INCREF (self->printers);
   return self->printers;
 }
@@ -96,6 +101,7 @@ pspy_set_printers (PyObject *o, PyObject *value, void *ignore)
 {
   PyObject *tmp;
   pspace_object *self = (pspace_object *) o;
+
   if (! value)
     {
       PyErr_SetString (PyExc_TypeError,

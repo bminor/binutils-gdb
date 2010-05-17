@@ -45,6 +45,7 @@ static PyObject *
 objfpy_get_filename (PyObject *self, void *closure)
 {
   objfile_object *obj = (objfile_object *) self;
+
   if (obj->objfile && obj->objfile->name)
     return PyString_Decode (obj->objfile->name, strlen (obj->objfile->name),
 			    host_charset (), NULL);
@@ -55,6 +56,7 @@ static void
 objfpy_dealloc (PyObject *o)
 {
   objfile_object *self = (objfile_object *) o;
+
   Py_XDECREF (self->printers);
   self->ob_type->tp_free ((PyObject *) self);
 }
@@ -63,6 +65,7 @@ static PyObject *
 objfpy_new (PyTypeObject *type, PyObject *args, PyObject *keywords)
 {
   objfile_object *self = (objfile_object *) type->tp_alloc (type, 0);
+
   if (self)
     {
       self->objfile = NULL;
@@ -81,6 +84,7 @@ PyObject *
 objfpy_get_printers (PyObject *o, void *ignore)
 {
   objfile_object *self = (objfile_object *) o;
+
   Py_INCREF (self->printers);
   return self->printers;
 }
@@ -90,6 +94,7 @@ objfpy_set_printers (PyObject *o, PyObject *value, void *ignore)
 {
   PyObject *tmp;
   objfile_object *self = (objfile_object *) o;
+
   if (! value)
     {
       PyErr_SetString (PyExc_TypeError,

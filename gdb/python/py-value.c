@@ -207,6 +207,7 @@ static PyObject *
 valpy_get_type (PyObject *self, void *closure)
 {
   value_object *obj = (value_object *) self;
+
   if (!obj->type)
     {
       obj->type = type_to_type_object (value_type (obj->value));
@@ -356,11 +357,13 @@ valpy_getitem (PyObject *self, PyObject *key)
 	     value code throw an exception if the index has an invalid
 	     type.  */
 	  struct value *idx = convert_value_from_python (key);
+
 	  if (idx != NULL)
 	    {
 	      /* Check the value's type is something that can be accessed via
 		 a subscript.  */
 	      struct type *type;
+
 	      tmp = coerce_ref (tmp);
 	      type = check_typedef (value_type (tmp));
 	      if (TYPE_CODE (type) != TYPE_CODE_ARRAY
@@ -632,6 +635,7 @@ static PyObject *
 valpy_absolute (PyObject *self)
 {
   struct value *value = ((value_object *) self)->value;
+
   if (value_less (value, value_zero (value_type (value), not_lval)))
     return valpy_negative (self);
   else
@@ -917,6 +921,7 @@ struct value *
 value_object_to_value (PyObject *self)
 {
   value_object *real;
+
   if (! PyObject_TypeCheck (self, &value_object_type))
     return NULL;
   real = (value_object *) self;
@@ -984,6 +989,7 @@ convert_value_from_python (PyObject *obj)
 	{
 	  PyObject *result;
 	  PyObject *function = PyString_FromString ("value");
+
 	  result = PyObject_CallMethodObjArgs (obj, function,  NULL);
 	  value = value_copy (((value_object *) result)->value);
 	}

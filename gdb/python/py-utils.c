@@ -29,6 +29,7 @@ static void
 py_decref (void *p)
 {
   PyObject *py = p;
+
   /* Note that we need the extra braces in this 'if' to avoid a
      warning from gcc.  */
   if (py)

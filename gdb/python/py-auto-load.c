@@ -128,6 +128,7 @@ static hashval_t
 hash_loaded_script_entry (const void *data)
 {
   const struct loaded_script_entry *e = data;
+
   return htab_hash_string (e->name);
 }
 
@@ -138,6 +139,7 @@ eq_loaded_script_entry (const void *a, const void *b)
 {
   const struct loaded_script_entry *ea = a;
   const struct loaded_script_entry *eb = b;
+
   return strcmp (ea->name, eb->name) == 0;
 }
 
@@ -202,6 +204,7 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
       if (p == end)
 	{
 	  char *buf = alloca (p - file + 1);
+
 	  memcpy (buf, file, p - file);
 	  buf[p - file] = '\0';
 	  warning (_("Non-null-terminated path in %s: %s"),
@@ -236,6 +239,7 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
       if (! in_hash_table)
 	{
 	  char *p;
+
 	  *slot = xmalloc (sizeof (**slot)
 			   + strlen (file) + 1
 			   + (opened ? (strlen (full_path) + 1) : 0));

@@ -38,6 +38,7 @@ convert_values_to_python (int argc, struct value **argv)
 {
   int i;
   PyObject *result = PyTuple_New (argc);
+
   for (i = 0; i < argc; ++i)
     {
       PyObject *elt = value_to_value_object (argv[i]);
@@ -103,6 +104,7 @@ static int
 fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 {
   char *name, *docstring = NULL;
+
   if (! PyArg_ParseTuple (args, "s", &name))
     return -1;
   Py_INCREF (self);

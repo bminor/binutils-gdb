@@ -52,6 +52,7 @@ static PyObject *
 stpy_get_address (PyObject *self, void *closure)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
+
   return PyLong_FromUnsignedLongLong (self_string->address);
 }
 
@@ -78,6 +79,7 @@ static PyObject *
 stpy_get_length (PyObject *self, void *closure)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
+
   return PyLong_FromLong (self_string->length);
 }
 
@@ -85,6 +87,7 @@ PyObject *
 stpy_get_type (PyObject *self, void *closure)
 {
   lazy_string_object *str_obj = (lazy_string_object *) self;
+
   return type_to_type_object (str_obj->type);
 }
 
@@ -109,6 +112,7 @@ static void
 stpy_dealloc (PyObject *self)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
+
   xfree (self_string->encoding);
 }
 

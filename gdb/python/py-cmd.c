@@ -156,8 +156,8 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	  /* Make a temporary copy of the string data.  */
 	  char *s = PyString_AsString (pvalue);
 	  char *copy = alloca (strlen (s) + 1);
-	  strcpy (copy, s);
 
+	  strcpy (copy, s);
 	  PyErr_Restore (ptype, pvalue, ptraceback);
 	  gdbpy_print_stack ();
 	  error (_("Error occurred in Python command: %s"), copy);
@@ -217,6 +217,7 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
     {
       Py_ssize_t i, len = PySequence_Size (resultobj);
       Py_ssize_t out;
+
       if (len < 0)
 	goto done;
 
@@ -224,6 +225,7 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
       for (i = out = 0; i < len; ++i)
 	{
 	  PyObject *elt = PySequence_GetItem (resultobj, i);
+
 	  if (elt == NULL || ! gdbpy_is_string (elt))
 	    {
 	      /* Skip problem elements.  */
@@ -240,6 +242,7 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  */
       long value = PyInt_AsLong (resultobj);
+
       if (value >= 0 && value < (long) N_COMPLETERS)
 	result = completers[value].completer (command, text, word);
     }
@@ -438,6 +441,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
     {
       PyObject *ds_obj = PyObject_GetAttr (self, gdbpy_doc_cst);
+
       if (ds_obj && gdbpy_is_string (ds_obj))
 	docstring = python_string_to_host_string (ds_obj);
     }

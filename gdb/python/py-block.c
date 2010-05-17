@@ -259,6 +259,7 @@ static void
 blpy_block_syms_dealloc (PyObject *obj)
 {
   block_syms_iterator_object *iter_obj = (block_syms_iterator_object *) obj;
+
   Py_XDECREF (iter_obj->source);
 }
 
@@ -300,6 +301,7 @@ static void
 del_objfile_blocks (struct objfile *objfile, void *datum)
 {
   block_object *obj = datum;
+
   while (obj)
     {
       block_object *next = obj->next;
