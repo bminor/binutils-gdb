@@ -2480,6 +2480,11 @@ if ![info exists gdb_test_timeout] {
     set gdb_test_timeout $timeout
 }
 
+# A list of global variables that GDB testcases should not use.
+# We try to prevent their use by monitoring write accesses and raising
+# an error when that happens.
+set banned_variables { bug_id prms_id }
+
 proc gdb_init { args } {
     # Reset the timeout value to the default.  This way, any testcase
     # that changes the timeout value without resetting it cannot affect
@@ -2487,6 +2492,13 @@ proc gdb_init { args } {
     global gdb_test_timeout
     global timeout
     set timeout $gdb_test_timeout
+
+    # Block writes to all banned variables...
+    global banned_variables
+    foreach banned_var $banned_variables {
+        global "$banned_var"
+        trace variable "$banned_var" w error
+    }
 
     return [eval default_gdb_init $args];
 }
@@ -2500,6 +2512,14 @@ proc gdb_finish { } {
     if { [llength $cleanfiles] > 0 } {
 	eval remote_file target delete $cleanfiles
 	set cleanfiles {}
+    }
+
+    # Unblock write access to the banned variables.  Dejagnu typically
+    # resets some of them between testcases.
+    global banned_variables
+    foreach banned_var $banned_variables {
+        global "$banned_var"
+        trace remove variable "$banned_var" write error
     }
 }
 

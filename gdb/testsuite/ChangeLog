@@ -1,5 +1,12 @@
 2010-05-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* lib/gdb.exp (banned_variables): New variable/constant.
+	(gdb_init): Add write trace on variables listed in banned_variables.
+	(gdb_finish): Remove write traces on variables listed in
+	banned_variables.
+
+2010-05-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/gdb11530.exp: Delete setting of prms_id and bug_id.
 	* gdb.cp/koenig.exp: Likewise.
 
