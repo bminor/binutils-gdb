@@ -1,3 +1,7 @@
+2010-05-17  Hui Zhu  <teawater@gmail.com>
+
+	* target.c (target_mourn_inferior): Extern reset_schedlock.
+
 2010-05-16  Michael Snyder  <msnyder@vmware.com>
 
 	* target.c: White space.
