@@ -1,3 +1,7 @@
+2010-05-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* procfs.c: Reformat.
+
 2010-05-16  Michael Snyder  <msnyder@vmware.com>
 
 	* target.c: White space.
