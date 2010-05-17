@@ -395,6 +395,7 @@ value_print (struct value *val, struct ui_file *stream,
 					value_address (val),
 					stream, 0, options,
 					current_language);
+
       if (r)
 	return r;
     }
@@ -1141,6 +1142,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
   else
     {
       long low, hi;
+
       if (get_array_bounds (type, &low, &hi))
         len = hi - low + 1;
       else

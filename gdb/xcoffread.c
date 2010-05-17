@@ -240,6 +240,7 @@ find_targ_sec (bfd *abfd, asection *sect, void *obj)
 {
   struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
   struct objfile *objfile = args->objfile;
+
   if (sect->target_index == args->targ_index)
     {
       /* This is the section.  Figure out what SECT_OFF_* code it is.  */
@@ -258,6 +259,7 @@ static int
 secnum_to_section (int secnum, struct objfile *objfile)
 {
   int off = SECT_OFF_TEXT (objfile);
+
   asection *sect = NULL;
   struct find_targ_sec_arg args;
   args.targ_index = secnum;
@@ -273,6 +275,7 @@ static asection *
 secnum_to_bfd_section (int secnum, struct objfile *objfile)
 {
   int off = SECT_OFF_TEXT (objfile);
+
   asection *sect = NULL;
   struct find_targ_sec_arg args;
   args.targ_index = secnum;
@@ -372,6 +375,7 @@ compare_lte (const void *lte1p, const void *lte2p)
 {
   struct linetable_entry *lte1 = (struct linetable_entry *) lte1p;
   struct linetable_entry *lte2 = (struct linetable_entry *) lte2p;
+
   return lte1->pc - lte2->pc;
 }
 
@@ -399,10 +403,8 @@ arrange_linetable (struct linetable *oldLineTb)
 
   for (function_count = 0, ii = 0; ii < oldLineTb->nitems; ++ii)
     {
-
       if (oldLineTb->item[ii].line == 0)
 	{			/* function entry found. */
-
 	  if (function_count >= fentry_size)
 	    {			/* make sure you have room. */
 	      fentry_size *= 2;
@@ -553,8 +555,8 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 {
   int offset, ii;
   file_ptr max_offset =
-  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)
-  ->max_lineno_offset;
+    ((struct coff_symfile_info *) this_symtab_psymtab->objfile
+     ->deprecated_sym_private)->max_lineno_offset;
 
   /* subfile structure for the main compilation unit.  */
   struct subfile main_subfile;
@@ -614,7 +616,6 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    }
 	  else
 	    {
-
 	      /* Have a new subfile for the include file.  */
 
 	      tmpSubfile = inclTable[ii].subfile =
@@ -708,6 +709,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	       one when passed to deduce_language_from_filename.  Kludge on
 	       top of kludge.  */
 	    char *fakename = strrchr (inclTable[ii].name, '.');
+
 	    if (fakename == NULL)
 	      fakename = " ?";
 	    start_subfile (fakename, (char *) 0);
@@ -851,11 +853,13 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoff
 #define	RECORD_MINIMAL_SYMBOL(NAME, ADDR, TYPE, SECTION, OBJFILE) \
 {						\
   char *namestr;				\
-  namestr = (NAME); \
-  if (namestr[0] == '.') ++namestr; \
-  prim_record_minimal_symbol_and_info (namestr, (ADDR), (TYPE), \
-				       (SECTION), (asection *)NULL, (OBJFILE)); \
-  misc_func_recorded = 1;					\
+						\
+  namestr = (NAME);				\
+  if (namestr[0] == '.') ++namestr;		\
+  prim_record_minimal_symbol_and_info (namestr, (ADDR), (TYPE),     \
+				       (SECTION), (asection *)NULL, \
+				       (OBJFILE));		    \
+  misc_func_recorded = 1;			\
 }
 
 
@@ -885,6 +889,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
 {
   struct internal_syment symbol;
   char *retval;
+
   /* FIXME: is this the same as the passed arg? */
   if (this_symtab_psymtab)
     objfile = this_symtab_psymtab->objfile;
@@ -926,9 +931,10 @@ read_xcoff_symtab (struct partial_symtab *pst)
   struct objfile *objfile = pst->objfile;
   bfd *abfd = objfile->obfd;
   char *raw_auxptr;		/* Pointer to first raw aux entry for sym */
-  char *strtbl = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl;
+  char *strtbl = 
+    ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl;
   char *debugsec =
-  ((struct coff_symfile_info *) objfile->deprecated_sym_private)->debugsec;
+    ((struct coff_symfile_info *) objfile->deprecated_sym_private)->debugsec;
   char *debugfmt = bfd_xcoff_is_xcoff64 (abfd) ? "XCOFF64" : "XCOFF";
 
   struct internal_syment symbol[1];
@@ -979,7 +985,6 @@ read_xcoff_symtab (struct partial_symtab *pst)
 
   while (symnum < max_symnum)
     {
-
       QUIT;			/* make this command interruptable.  */
 
       /* READ_ONE_SYMBOL (symbol, cs, symname_alloced); */
@@ -1008,6 +1013,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	    if (cs->c_name[E_SYMNMLEN - 1] != '\0')
 	      {
 		char *p;
+
 		p = obstack_alloc (&objfile->objfile_obstack, E_SYMNMLEN + 1);
 		strncpy (p, cs->c_name, E_SYMNMLEN);
 		p[E_SYMNMLEN] = '\0';
@@ -1222,7 +1228,6 @@ read_xcoff_symtab (struct partial_symtab *pst)
 
       switch (cs->c_sclass)
 	{
-
 	case C_FILE:
 
 	  /* c_value field contains symnum of next .file entry in table
@@ -1275,6 +1280,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	    {
 	      CORE_ADDR off = ANOFFSET (objfile->section_offsets,
 					SECT_OFF_TEXT (objfile));
+
 	      bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
 				    0, cs->c_naux, &main_aux);
 
@@ -1290,7 +1296,6 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	    }
 	  else if (strcmp (cs->c_name, ".ef") == 0)
 	    {
-
 	      bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
 				    0, cs->c_naux, &main_aux);
 
@@ -1300,7 +1305,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	         contains number of lines to '}' */
 
 	      if (context_stack_depth <= 0)
-		{		/* We attempted to pop an empty context stack */
+		{	/* We attempted to pop an empty context stack */
 		  ef_complaint (cs->c_symnum);
 		  within_function = 0;
 		  break;
@@ -1612,9 +1617,10 @@ static void
 read_symbol (struct internal_syment *symbol, int symno)
 {
   int nsyms =
-  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)->symtbl_num_syms;
+    ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)->symtbl_num_syms;
   char *stbl =
-  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)->symtbl;
+    ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)->symtbl;
+
   if (symno < 0 || symno >= nsyms)
     {
       complaint (&symfile_complaints, _("Invalid symbol offset"));
@@ -1686,6 +1692,7 @@ read_symbol_lineno (int symno)
       if (symbol->n_sclass == C_FCN)
 	{
 	  char *name = xcoff64 ? strtbl + symbol->n_offset : symbol->n_name;
+
 	  if (strcmp (name, ".bf") == 0)
 	    goto gotit;
 	}
@@ -1953,11 +1960,11 @@ xcoff_start_psymtab (struct objfile *objfile, char *filename, int first_symnum,
 		     struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
-  start_psymtab_common (objfile, objfile->section_offsets,
-			filename,
-			/* We fill in textlow later.  */
-			0,
-			global_syms, static_syms);
+    start_psymtab_common (objfile, objfile->section_offsets,
+			  filename,
+			  /* We fill in textlow later.  */
+			  0,
+			  global_syms, static_syms);
 
   result->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 					       sizeof (struct symloc));
@@ -2018,7 +2025,7 @@ xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
   for (i = 0; i < num_includes; i++)
     {
       struct partial_symtab *subpst =
-      allocate_psymtab (include_list[i], objfile);
+	allocate_psymtab (include_list[i], objfile);
 
       subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
@@ -2089,6 +2096,7 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
 	  /* FIXME: wastes memory for symbols which we don't end up putting
 	     into the minimal symbols.  */
 	  char *p;
+
 	  p = obstack_alloc (&objfile->objfile_obstack, E_SYMNMLEN + 1);
 	  strncpy (p, symbol->n_name, E_SYMNMLEN);
 	  p[E_SYMNMLEN] = '\0';
@@ -2281,7 +2289,8 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    if (pst != NULL)
 		      {
 			CORE_ADDR highval =
-			symbol.n_value + csect_aux.x_csect.x_scnlen.l;
+			  symbol.n_value + csect_aux.x_csect.x_scnlen.l;
+
 			if (highval > pst->texthigh)
 			  pst->texthigh = highval;
 			if (pst->textlow == 0 || symbol.n_value < pst->textlow)
@@ -2413,7 +2422,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 
 	    if (last_csect_name && !misc_func_recorded)
 	      {
-
 		/* If no misc. function recorded in the last seen csect, enter
 		   it as a function.  This will take care of functions like
 		   strcmp() compiled by xlc.  */
@@ -2507,6 +2515,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	    /* We probably could save a few instructions by assuming that
 	       C_LSYM, C_PSYM, etc., never have auxents.  */
 	    int naux1 = symbol.n_numaux + 1;
+
 	    ssymnum += naux1;
 	    sraw_symbol += bfd_coff_symesz (abfd) * naux1;
 	  }
@@ -2516,6 +2525,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	  {
 	    /* Mark down an include file in the current psymtab */
 	    enum language tmp_language;
+
 	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		      &ssymnum, objfile);
 
@@ -2542,8 +2552,10 @@ scan_xcoff_symtab (struct objfile *objfile)
 	       in a binary tree, if profiling shows this is a major hog).  */
 	    if (pst && strcmp (namestring, pst->filename) == 0)
 	      continue;
+
 	    {
 	      int i;
+
 	      for (i = 0; i < includes_used; i++)
 		if (strcmp (namestring, psymtab_include_list[i]) == 0)
 		  {
@@ -2578,6 +2590,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	case C_STSYM:
 	  {
 	    char *p;
+
 	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		      &ssymnum, objfile);
 
@@ -2742,6 +2755,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		  {
 		    int name_len = p - namestring;
 		    char *name = xmalloc (name_len + 1);
+
 		    memcpy (name, namestring, name_len);
 		    name[name_len] = '\0';
 		    function_outside_compilation_unit_complaint (name);
@@ -2763,6 +2777,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		  {
 		    int name_len = p - namestring;
 		    char *name = xmalloc (name_len + 1);
+
 		    memcpy (name, namestring, name_len);
 		    name[name_len] = '\0';
 		    function_outside_compilation_unit_complaint (name);

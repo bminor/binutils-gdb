@@ -134,6 +134,7 @@ struct value *
 find_function_in_inferior (const char *name, struct objfile **objf_p)
 {
   struct symbol *sym;
+
   sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
   if (sym != NULL)
     {
@@ -152,6 +153,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
     {
       struct minimal_symbol *msymbol = 
 	lookup_minimal_symbol (name, NULL, NULL);
+
       if (msymbol != NULL)
 	{
 	  struct objfile *objfile = msymbol_objfile (msymbol);
@@ -285,6 +287,7 @@ value_cast_structs (struct type *type, struct value *v2)
 	{
 	  /* Downcasting is possible (t1 is superclass of v2).  */
 	  CORE_ADDR addr2 = value_address (v2);
+
 	  addr2 -= value_address (v) + value_embedded_offset (v);
 	  return value_at (type, addr2);
 	}
@@ -322,6 +325,7 @@ value_cast_pointers (struct type *type, struct value *arg2)
       if (v2)
 	{
 	  struct value *v = value_addr (v2);
+
 	  deprecated_set_value_type (v, type);
 	  return v;
 	}
@@ -364,6 +368,7 @@ value_cast (struct type *type, struct value *arg2)
       struct type *t1 = check_typedef (type);
       struct type *dereftype = check_typedef (TYPE_TARGET_TYPE (t1));
       struct value *val =  value_cast (dereftype, arg2);
+
       return value_ref (val); 
     }
 
@@ -389,11 +394,13 @@ value_cast (struct type *type, struct value *arg2)
     {
       struct type *element_type = TYPE_TARGET_TYPE (type);
       unsigned element_length = TYPE_LENGTH (check_typedef (element_type));
+
       if (element_length > 0 && TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
 	{
 	  struct type *range_type = TYPE_INDEX_TYPE (type);
 	  int val_length = TYPE_LENGTH (type2);
 	  LONGEST low_bound, high_bound, new_length;
+
 	  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
 	    low_bound = 0, high_bound = 0;
 	  new_length = val_length / element_length;
@@ -444,6 +451,7 @@ value_cast (struct type *type, struct value *arg2)
       && TYPE_NAME (type) != 0)
     {
       struct value *v = value_cast_structs (type, arg2);
+
       if (v)
 	return v;
     }
@@ -504,8 +512,8 @@ value_cast (struct type *type, struct value *arg2)
 	 pointers and four byte addresses.  */
 
       int addr_bit = gdbarch_addr_bit (get_type_arch (type2));
-
       LONGEST longest = value_as_long (arg2);
+
       if (addr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
 	{
 	  if (longest >= ((LONGEST) 1 << addr_bit)
@@ -518,6 +526,7 @@ value_cast (struct type *type, struct value *arg2)
 	   && value_as_long (arg2) == 0)
     {
       struct value *result = allocate_value (type);
+
       cplus_make_method_ptr (type, value_contents_writeable (result), 0, 0);
       return result;
     }
@@ -625,6 +634,7 @@ dynamic_cast_check_1 (struct type *desired_type,
   for (i = 0; i < TYPE_N_BASECLASSES (search_type) && result_count < 2; ++i)
     {
       int offset = baseclass_offset (search_type, i, contents, address);
+
       if (offset == -1)
 	error (_("virtual baseclass botch"));
       if (class_types_same_p (desired_type, TYPE_BASECLASS (search_type, i)))
@@ -810,8 +820,8 @@ struct value *
 value_zero (struct type *type, enum lval_type lv)
 {
   struct value *val = allocate_value (type);
-  VALUE_LVAL (val) = lv;
 
+  VALUE_LVAL (val) = lv;
   return val;
 }
 
@@ -827,6 +837,7 @@ value_one (struct type *type, enum lval_type lv)
     {
       enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
       gdb_byte v[16];
+
       decimal_from_string (v, TYPE_LENGTH (type), byte_order, "1");
       val = value_from_decfloat (type, v);
     }
@@ -934,6 +945,7 @@ value_fetch_lazy (struct value *val)
 					 value_bitpos (val),
 					 value_bitsize (val));
       int length = TYPE_LENGTH (type);
+
       store_signed_integer (value_contents_raw (val), length, byte_order, num);
     }
   else if (VALUE_LVAL (val) == lval_memory)
@@ -1110,8 +1122,8 @@ value_assign (struct value *toval, struct value *fromval)
 	if (value_bitsize (toval))
 	  {
 	    struct value *parent = value_parent (toval);
-	    changed_addr = value_address (parent) + value_offset (toval);
 
+	    changed_addr = value_address (parent) + value_offset (toval);
 	    changed_len = (value_bitpos (toval)
 			   + value_bitsize (toval)
 			   + HOST_CHAR_BIT - 1)
@@ -1248,6 +1260,7 @@ value_assign (struct value *toval, struct value *fromval)
 
       {
 	struct frame_info *fi = frame_find_by_id (old_frame);
+
 	if (fi != NULL)
 	  select_frame (fi);
       }
@@ -1355,6 +1368,7 @@ address_of_variable (struct symbol *var, struct block *b)
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
       CORE_ADDR addr = value_address (val);
+
       return value_from_pointer (lookup_pointer_type (type), addr);
     }
 
@@ -1496,8 +1510,8 @@ struct value *
 value_addr (struct value *arg1)
 {
   struct value *arg2;
-
   struct type *type = check_typedef (value_type (arg1));
+
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     {
       /* Copy the value, but change the type from (T&) to (T*).  We
@@ -1539,8 +1553,8 @@ struct value *
 value_ref (struct value *arg1)
 {
   struct value *arg2;
-
   struct type *type = check_typedef (value_type (arg1));
+
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     return arg1;
 
@@ -1565,6 +1579,7 @@ value_ind (struct value *arg1)
   if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
     {
       struct type *enc_type;
+
       /* We may be pointing to something embedded in a larger object.
          Get the real type of the enclosing object.  */
       enc_type = check_typedef (value_enclosing_type (arg1));
@@ -1704,6 +1719,7 @@ value_bitstring (char *ptr, int len, struct type *index_type)
   struct type *domain_type
     = create_range_type (NULL, index_type, 0, len - 1);
   struct type *type = create_set_type (NULL, domain_type);
+
   TYPE_CODE (type) = TYPE_CODE_BITSTRING;
   val = allocate_value (type);
   memcpy (value_contents_raw (val), ptr, TYPE_LENGTH (type));
@@ -1824,6 +1840,7 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 	if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	  {
 	    struct value *v;
+
 	    if (field_is_static (&TYPE_FIELD (type, i)))
 	      {
 		v = value_static_field (type, i);
@@ -1846,6 +1863,7 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 		    && (strcmp_iw (t_field_name, "else") == 0))))
 	  {
 	    struct type *field_type = TYPE_FIELD_TYPE (type, i);
+
 	    if (TYPE_CODE (field_type) == TYPE_CODE_UNION
 		|| TYPE_CODE (field_type) == TYPE_CODE_STRUCT)
 	      {
@@ -1977,6 +1995,7 @@ search_struct_method (const char *name, struct value **arg1p,
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
       char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+
       /* FIXME!  May need to check for ARM demangling here */
       if (strncmp (t_field_name, "__", 2) == 0 ||
 	  strncmp (t_field_name, "op", 2) == 0 ||
@@ -1991,8 +2010,8 @@ search_struct_method (const char *name, struct value **arg1p,
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
-	  name_matched = 1;
 
+	  name_matched = 1;
 	  check_stub_method_group (type, i);
 	  if (j > 0 && args == 0)
 	    error (_("cannot resolve overloaded method `%s': no arguments supplied"), name);
@@ -2041,6 +2060,7 @@ search_struct_method (const char *name, struct value **arg1p,
 	  if (offset < 0 || offset >= TYPE_LENGTH (type))
 	    {
 	      gdb_byte *tmp = alloca (TYPE_LENGTH (baseclass));
+
 	      if (target_read_memory (value_address (*arg1p) + offset,
 				      tmp, TYPE_LENGTH (baseclass)) != 0)
 		error (_("virtual baseclass botch"));
@@ -2204,6 +2224,7 @@ find_method_list (struct value **argp, const char *method,
     {
       /* pai: FIXME What about operators and type conversions?  */
       char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+
       if (fn_field_name && (strcmp_iw (fn_field_name, method) == 0))
 	{
 	  int len = TYPE_FN_FIELDLIST_LENGTH (type, i);
@@ -2224,6 +2245,7 @@ find_method_list (struct value **argp, const char *method,
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
       int base_offset;
+
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  base_offset = value_offset (*argp) + offset;
@@ -2496,6 +2518,7 @@ find_overload_match (struct type **arg_types, int nargs,
     {
       struct type *temp_type = check_typedef (value_type (temp));
       struct type *obj_type = check_typedef (value_type (*objp));
+
       if (TYPE_CODE (temp_type) != TYPE_CODE_PTR
 	  && (TYPE_CODE (obj_type) == TYPE_CODE_PTR
 	      || TYPE_CODE (obj_type) == TYPE_CODE_REF))
@@ -2845,6 +2868,7 @@ check_field (struct type *type, const char *name)
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
+
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	return 1;
     }
@@ -2929,6 +2953,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
   if ((TYPE_NFIELDS (t1) - start) == TYPE_NFIELDS (t2))
     {
       int i;
+
       for (i = 0; i < TYPE_NFIELDS (t2); ++i)
 	{
 	  if (rank_one_type (TYPE_FIELD_TYPE (t1, start + i),
@@ -3068,6 +3093,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 			       0, VAR_DOMAIN, 0);
+
 	      if (s == NULL)
 		return NULL;
 
@@ -3098,6 +3124,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 			       0, VAR_DOMAIN, 0);
+
 	      if (s == NULL)
 		return NULL;
 
@@ -3393,11 +3420,13 @@ value_slice (struct value *array, int lowbound, int length)
 	  int element = value_bit_index (array_type,
 					 value_contents (array),
 					 lowbound + i);
+
 	  if (element < 0)
 	    error (_("internal error accessing bitstring"));
 	  else if (element > 0)
 	    {
 	      int j = i % TARGET_CHAR_BIT;
+
 	      if (gdbarch_bits_big_endian (get_type_arch (array_type)))
 		j = TARGET_CHAR_BIT - 1 - j;
 	      value_contents_raw (slice)[i / TARGET_CHAR_BIT] |= (1 << j);

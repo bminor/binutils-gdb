@@ -261,6 +261,7 @@ tdesc_start_struct (struct gdb_xml_parser *parser,
     {
       int size = (int) * (ULONGEST *)
 	VEC_index (gdb_xml_value_s, attributes, 1)->value;
+
       tdesc_set_struct_size (type, size);
       data->current_type_size = size;
     }

@@ -1,3 +1,14 @@
+2010-05-17  Michael Snyder  <msnyder@vmware.com>
+
+	* valarith.c: White space.
+	* valops.c: White space.
+	* valprint.c: White space.
+	* value.c: White space.
+	* varobj.c: White space.
+	* xcoffread.c: White space.
+	* xml-support.c: White space.
+	* xml-tdesc.c: White space.
+
 2010-05-17  Andreas Schwab  <schwab@redhat.com>
 
 	PR gdb/11092

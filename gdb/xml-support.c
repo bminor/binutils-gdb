@@ -560,6 +560,7 @@ gdb_xml_parse (struct gdb_xml_parser *parser, const char *buffer)
   else if (status == XML_STATUS_ERROR)
     {
       enum XML_Error err = XML_GetErrorCode (parser->expat_parser);
+
       error_string = XML_ErrorString (err);
     }
   else
@@ -1016,6 +1017,7 @@ obstack_xml_printf (struct obstack *obstack, const char *format, ...)
              {
                char *p;
                char *a = va_arg (ap, char *);
+
                obstack_grow (obstack, prev, f - prev - 1);
                p = xml_escape_text (a);
                obstack_grow_str (obstack, p);
@@ -1046,6 +1048,7 @@ xml_fetch_content_from_file (const char *filename, void *baton)
   if (dirname && *dirname)
     {
       char *fullname = concat (dirname, "/", filename, (char *) NULL);
+
       if (fullname == NULL)
 	nomem (0);
       file = fopen (fullname, FOPEN_RT);

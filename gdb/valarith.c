@@ -157,8 +157,8 @@ value_subscript (struct value *array, LONGEST index)
     {
       struct type *range_type = TYPE_INDEX_TYPE (tarray);
       LONGEST lowerbound, upperbound;
-      get_discrete_bounds (range_type, &lowerbound, &upperbound);
 
+      get_discrete_bounds (range_type, &lowerbound, &upperbound);
       if (VALUE_LVAL (array) != lval_memory)
 	return value_subscripted_rvalue (array, index, lowerbound);
 
@@ -304,6 +304,7 @@ int
 unop_user_defined_p (enum exp_opcode op, struct value *arg1)
 {
   struct type *type1;
+
   if (op == UNOP_ADDR)
     return 0;
   type1 = check_typedef (value_type (arg1));
@@ -470,6 +471,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  struct type *return_type;
+
 	  return_type
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
@@ -568,6 +570,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  struct type *return_type;
+
 	  return_type
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
@@ -623,6 +626,7 @@ value_concat (struct value *arg1, struct value *arg2)
   if (TYPE_CODE (type2) == TYPE_CODE_INT)
     {
       struct type *tmp = type1;
+
       type1 = tmp;
       tmp = type2;
       inval1 = arg2;
@@ -649,6 +653,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	  if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	    {
 	      char_type = type2;
+
 	      inchar = (char) unpack_long (type2,
 					   value_contents (inval2));
 	      for (idx = 0; idx < count; idx++)
@@ -659,6 +664,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	  else
 	    {
 	      char_type = TYPE_TARGET_TYPE (type2);
+
 	      for (idx = 0; idx < count; idx++)
 		{
 		  memcpy (ptr + (idx * inval2len), value_contents (inval2),
@@ -692,11 +698,13 @@ value_concat (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type1) == TYPE_CODE_CHAR)
 	{
 	  char_type = type1;
+
 	  *ptr = (char) unpack_long (type1, value_contents (inval1));
 	}
       else
 	{
 	  char_type = TYPE_TARGET_TYPE (type1);
+
 	  memcpy (ptr, value_contents (inval1), inval1len);
 	}
       if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
@@ -927,6 +935,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
          in target format.  real.c in GCC probably has the necessary
          code.  */
       DOUBLEST v1, v2, v = 0;
+
       v1 = value_as_double (arg1);
       v2 = value_as_double (arg2);
 
@@ -985,6 +994,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	   || TYPE_CODE (type2) == TYPE_CODE_BOOL)
     {
       LONGEST v1, v2, v = 0;
+
       v1 = value_as_long (arg1);
       v2 = value_as_long (arg2);
 
@@ -1048,6 +1058,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	{
 	  LONGEST v2_signed = value_as_long (arg2);
 	  ULONGEST v1, v2, v = 0;
+
 	  v1 = (ULONGEST) value_as_long (arg1);
 	  v2 = (ULONGEST) v2_signed;
 
@@ -1173,6 +1184,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       else
 	{
 	  LONGEST v1, v2, v = 0;
+
 	  v1 = value_as_long (arg1);
 	  v2 = value_as_long (arg2);
 
@@ -1397,6 +1409,7 @@ value_equal (struct value *arg1, struct value *arg2)
       /* NOTE: kettenis/20050816: Avoid compiler bug on systems where
 	 `long double' values are returned in static storage (m68k).  */
       DOUBLEST d = value_as_double (arg1);
+
       return d == value_as_double (arg2);
     }
   else if ((code1 == TYPE_CODE_DECFLOAT || is_int1)
@@ -1492,6 +1505,7 @@ value_less (struct value *arg1, struct value *arg2)
       /* NOTE: kettenis/20050816: Avoid compiler bug on systems where
 	 `long double' values are returned in static storage (m68k).  */
       DOUBLEST d = value_as_double (arg1);
+
       return d < value_as_double (arg2);
     }
   else if ((code1 == TYPE_CODE_DECFLOAT || is_int1)
@@ -1613,6 +1627,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   LONGEST word;
   unsigned rel_index;
   struct type *range = TYPE_INDEX_TYPE (type);
+
   if (get_discrete_bounds (range, &low_bound, &high_bound) < 0)
     return -2;
   if (index < low_bound || index > high_bound)
@@ -1632,6 +1647,7 @@ value_in (struct value *element, struct value *set)
   int member;
   struct type *settype = check_typedef (value_type (set));
   struct type *eltype = check_typedef (value_type (element));
+
   if (TYPE_CODE (eltype) == TYPE_CODE_RANGE)
     eltype = TYPE_TARGET_TYPE (eltype);
   if (TYPE_CODE (settype) != TYPE_CODE_SET)

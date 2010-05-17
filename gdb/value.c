@@ -304,6 +304,7 @@ struct value *
 allocate_value (struct type *type)
 {
   struct value *val = allocate_value_lazy (type);
+
   allocate_value_contents (val);
   val->lazy = 0;
   return val;
@@ -320,6 +321,7 @@ allocate_repeat_value (struct type *type, int count)
      done with it.  */
   struct type *array_type
     = lookup_array_range_type (type, low_bound, count + low_bound - 1);
+
   return allocate_value (array_type);
 }
 
@@ -329,6 +331,7 @@ allocate_computed_value (struct type *type,
                          void *closure)
 {
   struct value *v = allocate_value (type);
+
   VALUE_LVAL (v) = lval_computed;
   v->location.computed.funcs = funcs;
   v->location.computed.closure = closure;
@@ -817,7 +820,8 @@ record_latest_value (struct value *val)
   if (i == 0)
     {
       struct value_history_chunk *new
-      = (struct value_history_chunk *)
+	= (struct value_history_chunk *)
+
       xmalloc (sizeof (struct value_history_chunk));
       memset (new->values, 0, sizeof new->values);
       new->next = value_history_chain;
@@ -894,6 +898,7 @@ show_values (char *num_exp, int from_tty)
   for (i = num; i < num + 10 && i <= value_history_count; i++)
     {
       struct value_print_options opts;
+
       val = access_value_history (i);
       printf_filtered (("$%d = "), i);
       get_user_print_options (&opts);
@@ -1054,6 +1059,7 @@ struct internalvar *
 create_internalvar (const char *name)
 {
   struct internalvar *var;
+
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
   var->name = concat (name, (char *)NULL);
   var->kind = INTERNALVAR_VOID;
@@ -1071,6 +1077,7 @@ struct internalvar *
 create_internalvar_type_lazy (char *name, internalvar_make_value fun)
 {
   struct internalvar *var = create_internalvar (name);
+
   var->kind = INTERNALVAR_MAKE_VALUE;
   var->u.make_value = fun;
   return var;
@@ -1354,6 +1361,7 @@ create_internal_function (const char *name,
 			  internal_function_fn handler, void *cookie)
 {
   struct internal_function *ifn = XNEW (struct internal_function);
+
   ifn->name = xstrdup (name);
   ifn->handler = handler;
   ifn->cookie = cookie;
@@ -1818,14 +1826,16 @@ value_static_field (struct type *type, int fieldno)
   else
     {
       char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
-	/*TYPE_FIELD_NAME (type, fieldno);*/
+      /*TYPE_FIELD_NAME (type, fieldno);*/
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
 
       if (sym == NULL)
 	{
-	  /* With some compilers, e.g. HP aCC, static data members are reported
-	     as non-debuggable symbols */
-	  struct minimal_symbol *msym = lookup_minimal_symbol (phys_name, NULL, NULL);
+	  /* With some compilers, e.g. HP aCC, static data members are
+	     reported as non-debuggable symbols */
+	  struct minimal_symbol *msym = lookup_minimal_symbol (phys_name,
+							       NULL, NULL);
+
 	  if (!msym)
 	    return NULL;
 	  else
@@ -2201,7 +2211,6 @@ value_from_longest (struct type *type, LONGEST num)
   struct value *val = allocate_value (type);
 
   pack_long (value_contents_raw (val), type, num);
-
   return val;
 }
 
@@ -2212,6 +2221,7 @@ struct value *
 value_from_pointer (struct type *type, CORE_ADDR addr)
 {
   struct value *val = allocate_value (type);
+
   store_typed_address (value_contents_raw (val), check_typedef (type), addr);
   return val;
 }
@@ -2227,6 +2237,7 @@ value_from_contents_and_address (struct type *type,
 				 CORE_ADDR address)
 {
   struct value *v = allocate_value (type);
+
   if (valaddr == NULL)
     set_value_lazy (v, 1);
   else
@@ -2259,7 +2270,6 @@ value_from_decfloat (struct type *type, const gdb_byte *dec)
   struct value *val = allocate_value (type);
 
   memcpy (value_contents_raw (val), dec, TYPE_LENGTH (type));
-
   return val;
 }
 
@@ -2267,6 +2277,7 @@ struct value *
 coerce_ref (struct value *arg)
 {
   struct type *value_type_arg_tmp = check_typedef (value_type (arg));
+
   if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)
     arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),
 			 unpack_pointer (value_type (arg),		
