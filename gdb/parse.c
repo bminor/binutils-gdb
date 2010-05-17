@@ -1068,6 +1068,7 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
 {
   volatile struct gdb_exception except;
   struct cleanup *old_chain;
+  const struct language_defn *lang = NULL;
   int subexp;
 
   lexptr = *stringptr;
@@ -1105,17 +1106,43 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
 	expression_context_pc = BLOCK_START (expression_context_block);
     }
 
+  if (language_mode == language_mode_auto && block != NULL)
+    {
+      /* Find the language associated to the given context block.
+         Default to the current language if it can not be determined.
+
+         Note that using the language corresponding to the current frame
+         can sometimes give unexpected results.  For instance, this
+         routine is often called several times during the inferior
+         startup phase to re-parse breakpoint expressions after
+         a new shared library has been loaded.  The language associated
+         to the current frame at this moment is not relevant for
+         the breakpoint. Using it would therefore be silly, so it seems
+         better to rely on the current language rather than relying on
+         the current frame language to parse the expression. That's why
+         we do the following language detection only if the context block
+         has been specifically provided.  */
+      struct symbol *func = block_linkage_function (block);
+
+      if (func != NULL)
+        lang = language_def (SYMBOL_LANGUAGE (func));
+      if (lang == NULL || lang->la_language == language_unknown)
+        lang = current_language;
+    }
+  else
+    lang = current_language;
+
   expout_size = 10;
   expout_ptr = 0;
   expout = (struct expression *)
     xmalloc (sizeof (struct expression) + EXP_ELEM_TO_BYTES (expout_size));
-  expout->language_defn = current_language;
+  expout->language_defn = lang;
   expout->gdbarch = get_current_arch ();
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      if (current_language->la_parser ())
-	current_language->la_error (NULL);
+      if (lang->la_parser ())
+        lang->la_error (NULL);
     }
   if (except.reason < 0)
     {
@@ -1148,7 +1175,7 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
   if (out_subexp)
     *out_subexp = subexp;
 
-  current_language->la_post_parser (&expout, void_context_p);
+  lang->la_post_parser (&expout, void_context_p);
 
   if (expressiondebug)
     dump_prefix_expression (expout, gdb_stdlog);

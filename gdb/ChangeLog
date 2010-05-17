@@ -6,6 +6,12 @@
 
 2010-05-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* parse.c (parse_exp_in_context): When block is not NULL, use
+	its associated language to parse the expression instead of
+	the current_language.
+
+2010-05-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* jv-lang.c (java_lookup_class): Remove commented out code.
 	(type_from_class): Likewise.
 	(java_op_print_tab): Remove commented-out elements.
