@@ -873,8 +873,6 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 
 /* From infrun.c.  */
 
-extern void reset_schedlock (void);
-
 extern int inferior_has_forked (ptid_t pid, ptid_t *child_pid);
 
 extern int inferior_has_vforked (ptid_t pid, ptid_t *child_pid);
