@@ -1474,7 +1474,7 @@ add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
     {
       collect->aexpr_list =
 	xrealloc (collect->aexpr_list,
-		2 * collect->aexpr_listsize * sizeof (struct agent_expr *));
+		  2 * collect->aexpr_listsize * sizeof (struct agent_expr *));
       collect->aexpr_listsize *= 2;
     }
   collect->aexpr_list[collect->next_aexpr_elt] = aexpr;
@@ -2622,6 +2622,7 @@ trace_save (const char *filename, int target_does_save)
   if (ts->stop_reason == tracepoint_error)
     {
       char *buf = (char *) alloca (strlen (ts->error_desc) * 2 + 1);
+
       bin2hex ((gdb_byte *) ts->error_desc, buf, 0);
       fprintf (fp, ":%s", buf);
     }

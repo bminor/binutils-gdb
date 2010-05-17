@@ -864,6 +864,7 @@ static struct tdesc_reg *
 tdesc_find_register (struct gdbarch *gdbarch, int regno)
 {
   struct tdesc_arch_reg *reg = tdesc_find_arch_register (gdbarch, regno);
+
   return reg? reg->reg : NULL;
 }
 
@@ -883,6 +884,7 @@ tdesc_register_name (struct gdbarch *gdbarch, int regno)
   if (regno >= num_regs && regno < num_regs + num_pseudo_regs)
     {
       struct tdesc_arch_data *data = gdbarch_data (gdbarch, tdesc_data);
+
       gdb_assert (data->pseudo_register_name != NULL);
       return data->pseudo_register_name (gdbarch, regno);
     }
@@ -901,6 +903,7 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
   if (reg == NULL && regno >= num_regs && regno < num_regs + num_pseudo_regs)
     {
       struct tdesc_arch_data *data = gdbarch_data (gdbarch, tdesc_data);
+
       gdb_assert (data->pseudo_register_type != NULL);
       return data->pseudo_register_type (gdbarch, regno);
     }
@@ -1038,6 +1041,7 @@ tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regno,
   if (regno >= num_regs && regno < num_regs + num_pseudo_regs)
     {
       struct tdesc_arch_data *data = gdbarch_data (gdbarch, tdesc_data);
+
       if (data->pseudo_register_reggroup_p != NULL)
 	return data->pseudo_register_reggroup_p (gdbarch, regno, reggroup);
       /* Otherwise fall through to the default reggroup_p.  */
@@ -1198,7 +1202,6 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 static void
 tdesc_free_type (struct tdesc_type *type)
 {
-
   switch (type->kind)
     {
     case TDESC_TYPE_STRUCT:

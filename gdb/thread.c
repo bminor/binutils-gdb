@@ -397,6 +397,7 @@ ptid_t
 thread_id_to_pid (int num)
 {
   struct thread_info *thread = find_thread_id (num);
+
   if (thread)
     return thread->ptid;
   else
@@ -560,6 +561,7 @@ set_running (ptid_t ptid, int running)
   if (all || ptid_is_pid (ptid))
     {
       int any_started = 0;
+
       for (tp = thread_list; tp; tp = tp->next)
 	if (all || ptid_get_pid (tp->ptid) == ptid_get_pid (ptid))
 	  {
@@ -575,6 +577,7 @@ set_running (ptid_t ptid, int running)
   else
     {
       int started = 0;
+
       tp = find_thread_ptid (ptid);
       gdb_assert (tp);
       gdb_assert (tp->state_ != THREAD_EXITED);
@@ -814,6 +817,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
       if (ui_out_is_mi_like_p (uiout))
 	{
 	  char *state = "stopped";
+
 	  if (tp->state_ == THREAD_RUNNING)
 	    state = "running";
 	  ui_out_field_string (uiout, "state", state);
@@ -1005,6 +1009,7 @@ restore_current_thread_cleanup_dtor (void *arg)
 {
   struct current_thread_cleanup *old = arg;
   struct thread_info *tp;
+
   tp = find_thread_ptid (old->inferior_ptid);
   if (tp)
     tp->refcount--;

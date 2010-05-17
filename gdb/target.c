@@ -457,6 +457,7 @@ target_create_inferior (char *exec_file, char *args,
 			char **env, int from_tty)
 {
   struct target_ops *t;
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_create_inferior != NULL)	
@@ -908,6 +909,7 @@ push_target (struct target_ops *t)
       /* There's already something at this stratum level.  Close it,
          and un-hook it from the stack.  */
       struct target_ops *tmp = (*cur);
+
       (*cur) = (*cur)->beneath;
       tmp->beneath = NULL;
       target_close (tmp, 0);
@@ -976,7 +978,8 @@ pop_target (void)
   fprintf_unfiltered (gdb_stderr,
 		      "pop_target couldn't find target %s\n",
 		      current_target.to_shortname);
-  internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+  internal_error (__FILE__, __LINE__,
+		  _("failed internal consistency check"));
 }
 
 void
@@ -1148,6 +1151,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
       if (bufptr - buffer + tlen > buffer_allocated)
 	{
 	  unsigned int bytes;
+
 	  bytes = bufptr - buffer;
 	  buffer_allocated *= 2;
 	  buffer = xrealloc (buffer, buffer_allocated);
@@ -1231,11 +1235,13 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
   if (readbuf != NULL && overlay_debugging)
     {
       struct obj_section *section = find_pc_overlay (memaddr);
+
       if (pc_in_unmapped_range (memaddr, section))
 	{
 	  struct target_section_table *table
 	    = target_get_section_table (ops);
 	  const char *section_name = section->the_bfd_section->name;
+
 	  memaddr = overlay_mapped_address (memaddr, section);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len,
@@ -1386,8 +1392,8 @@ struct cleanup *
 make_show_memory_breakpoints_cleanup (int show)
 {
   int current = show_memory_breakpoints;
-  show_memory_breakpoints = show;
 
+  show_memory_breakpoints = show;
   return make_cleanup (restore_show_memory_breakpoints,
 		       (void *) (uintptr_t) current);
 }
@@ -1581,13 +1587,13 @@ target_flash_erase (ULONGEST address, LONGEST length)
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_flash_erase != NULL)
-	{
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
-                                hex_string (address), phex (length, 0));
-	  t->to_flash_erase (t, address, length);
-	  return;
-	}
+      {
+	if (targetdebug)
+	  fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
+			      hex_string (address), phex (length, 0));
+	t->to_flash_erase (t, address, length);
+	return;
+      }
 
   tcomplain ();
 }
@@ -1599,12 +1605,12 @@ target_flash_done (void)
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_flash_done != NULL)
-	{
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_flash_done\n");
-	  t->to_flash_done (t);
-	  return;
-	}
+      {
+	if (targetdebug)
+	  fprintf_unfiltered (gdb_stdlog, "target_flash_done\n");
+	t->to_flash_done (t);
+	return;
+      }
 
   tcomplain ();
 }
@@ -1631,11 +1637,13 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
        "deprecated_xfer_memory" method.  */
     {
       int xfered = -1;
+
       errno = 0;
       if (writebuf != NULL)
 	{
 	  void *buffer = xmalloc (len);
 	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
+
 	  memcpy (buffer, writebuf, len);
 	  xfered = ops->deprecated_xfer_memory (offset, buffer, len,
 						1/*write*/, NULL, ops);
@@ -1707,11 +1715,13 @@ target_read (struct target_ops *ops,
 	     ULONGEST offset, LONGEST len)
 {
   LONGEST xfered = 0;
+
   while (xfered < len)
     {
       LONGEST xfer = target_read_partial (ops, object, annex,
 					  (gdb_byte *) buf + xfered,
 					  offset + xfered, len - xfered);
+
       /* Call an observer, notifying them of the xfer progress?  */
       if (xfer == 0)
 	return xfered;
@@ -1730,11 +1740,13 @@ target_read_until_error (struct target_ops *ops,
 			 ULONGEST offset, LONGEST len)
 {
   LONGEST xfered = 0;
+
   while (xfered < len)
     {
       LONGEST xfer = target_read_partial (ops, object, annex,
 					  (gdb_byte *) buf + xfered,
 					  offset + xfered, len - xfered);
+
       /* Call an observer, notifying them of the xfer progress?  */
       if (xfer == 0)
 	return xfered;
@@ -1951,8 +1963,8 @@ get_target_memory (struct target_ops *ops, CORE_ADDR addr, gdb_byte *buf,
 }
 
 ULONGEST
-get_target_memory_unsigned (struct target_ops *ops,
-			    CORE_ADDR addr, int len, enum bfd_endian byte_order)
+get_target_memory_unsigned (struct target_ops *ops, CORE_ADDR addr,
+			    int len, enum bfd_endian byte_order)
 {
   gdb_byte buf[sizeof (ULONGEST)];
 
@@ -2215,6 +2227,7 @@ target_follow_fork (int follow_child)
       if (t->to_follow_fork != NULL)
 	{
 	  int retval = t->to_follow_fork (t, follow_child);
+
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_follow_fork (%d) = %d\n",
 				follow_child, retval);
@@ -2231,6 +2244,10 @@ void
 target_mourn_inferior (void)
 {
   struct target_ops *t;
+
+  /* Clear schedlock in infrun.c */
+  reset_schedlock ();
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_mourn_inferior != NULL)	
@@ -2331,6 +2348,7 @@ simple_search_memory (struct target_ops *ops,
       if (found_ptr != NULL)
 	{
 	  CORE_ADDR found_addr = start_addr + (found_ptr - search_buf);
+
 	  *found_addrp = found_addr;
 	  do_cleanups (old_cleanups);
 	  return 1;
@@ -2564,6 +2582,7 @@ int
 target_supports_non_stop (void)
 {
   struct target_ops *t;
+
   for (t = &current_target; t != NULL; t = t->beneath)
     if (t->to_supports_non_stop)
       return t->to_supports_non_stop ();
@@ -2881,6 +2900,7 @@ void
 target_attach (char *args, int from_tty)
 {
   struct target_ops *t;
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_attach != NULL)	
@@ -2901,6 +2921,7 @@ int
 target_thread_alive (ptid_t ptid)
 {
   struct target_ops *t;
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_thread_alive != NULL)
@@ -2923,6 +2944,7 @@ void
 target_find_new_threads (void)
 {
   struct target_ops *t;
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_find_new_threads != NULL)
@@ -2991,6 +3013,7 @@ debug_print_register (const char * func,
 		      struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
   fprintf_unfiltered (gdb_stdlog, "%s ", func);
   if (regno >= 0 && regno < gdbarch_num_regs (gdbarch)
       && gdbarch_register_name (gdbarch, regno) != NULL
@@ -3004,6 +3027,7 @@ debug_print_register (const char * func,
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int i, size = register_size (gdbarch, regno);
       unsigned char buf[MAX_REGISTER_SIZE];
+
       regcache_raw_collect (regcache, regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
       for (i = 0; i < size; i++)
@@ -3013,6 +3037,7 @@ debug_print_register (const char * func,
       if (size <= sizeof (LONGEST))
 	{
 	  ULONGEST val = extract_unsigned_integer (buf, size, byte_order);
+
 	  fprintf_unfiltered (gdb_stdlog, " %s %s",
 			      core_addr_to_string_nz (val), plongest (val));
 	}
@@ -3024,6 +3049,7 @@ void
 target_fetch_registers (struct regcache *regcache, int regno)
 {
   struct target_ops *t;
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_fetch_registers != NULL)
@@ -3039,8 +3065,8 @@ target_fetch_registers (struct regcache *regcache, int regno)
 void
 target_store_registers (struct regcache *regcache, int regno)
 {
-
   struct target_ops *t;
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_store_registers != NULL)
@@ -3067,6 +3093,7 @@ target_core_of_thread (ptid_t ptid)
       if (t->to_core_of_thread != NULL)
 	{
 	  int retval = t->to_core_of_thread (t, ptid);
+
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_core_of_thread (%d) = %d\n",
 				PIDGET (ptid), retval);
@@ -3087,6 +3114,7 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
       if (t->to_verify_memory != NULL)
 	{
 	  int retval = t->to_verify_memory (t, data, memaddr, size);
+
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_verify_memory (%s, %s) = %d\n",
 				paddress (target_gdbarch, memaddr),

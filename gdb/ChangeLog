@@ -1,5 +1,18 @@
 2010-05-16  Michael Snyder  <msnyder@vmware.com>
 
+	* target.c: White space.
+	* target-descriptions.c: White space.
+	* target-memory.c: White space.
+	* thread.c: White space.
+	* top.c: White space.
+	* tracepoint.c: White space.
+	* trad-frame.c: White space.
+	* tramp-frame.c: White space.
+	* ui-file.c: White space.
+	* ui-out.c: White space.
+	* user-regs.c: White space.
+	* utils.c: White space.
+
 	* scm-exp.c: White space.
 	* scm-lang.c: White space.
 	* scm-valprint.c: White space.

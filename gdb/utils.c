@@ -943,6 +943,7 @@ internal_vproblem (struct internal_problem *problem,
   /* Don't allow infinite error/warning recursion.  */
   {
     static char msg[] = "Recursive internal problem.\n";
+
     switch (dejavu)
       {
       case 0:
@@ -976,6 +977,7 @@ internal_vproblem (struct internal_problem *problem,
      so that the user knows that they are living on the edge.  */
   {
     char *msg;
+
     msg = xstrvprintf (fmt, ap);
     reason = xstrprintf ("\
 %s:%d: %s: %s\n\
@@ -1801,7 +1803,6 @@ printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
 	   void (*do_fprintf) (struct ui_file *, const char *, ...)
 	   ATTRIBUTE_FPTR_PRINTF_2, struct ui_file *stream, int quoter)
 {
-
   c &= 0xFF;			/* Avoid sign bit follies */
 
   if (c < 0x20 ||		/* Low control chars */
@@ -1878,6 +1879,7 @@ fputstrn_unfiltered (const char *str, int n, int quoter,
 		     struct ui_file *stream)
 {
   int i;
+
   for (i = 0; i < n; i++)
     printchar (str[i], fputs_unfiltered, fprintf_unfiltered, stream, quoter);
 }
@@ -2073,6 +2075,7 @@ prompt_for_continue (void)
   if (ignore)
     {
       char *p = ignore;
+
       while (*p == ' ' || *p == '\t')
 	++p;
       if (p[0] == 'q')
@@ -2965,8 +2968,8 @@ decimal2str (char *sign, ULONGEST addr, int width)
      about the real size of addr as the above does? */
   unsigned long temp[3];
   char *str = get_cell ();
-
   int i = 0;
+
   do
     {
       temp[i] = addr % (1000 * 1000 * 1000);
@@ -3006,8 +3009,8 @@ octal2str (ULONGEST addr, int width)
 {
   unsigned long temp[3];
   char *str = get_cell ();
-
   int i = 0;
+
   do
     {
       temp[i] = addr % (0100000 * 0100000);
@@ -3101,6 +3104,7 @@ phex_nz (ULONGEST l, int sizeof_l)
     case 8:
       {
 	unsigned long high = (unsigned long) (l >> thirty_two);
+
 	str = get_cell ();
 	if (high == 0)
 	  xsnprintf (str, CELLSIZE, "%lx",
@@ -3177,6 +3181,7 @@ int_string (LONGEST val, int radix, int is_signed, int width,
     case 16:
       {
 	char *result;
+
 	if (width == 0)
 	  result = hex_string (val);
 	else
@@ -3195,6 +3200,7 @@ int_string (LONGEST val, int radix, int is_signed, int width,
     case 8:
       {
 	char *result = octal2str (val, width);
+
 	if (use_c_format || val == 0)
 	  return result;
 	else
@@ -3237,6 +3243,7 @@ string_to_core_addr (const char *my_string)
     {
       /* Assume that it is in hex.  */
       int i;
+
       for (i = 2; my_string[i] != '\0'; i++)
 	{
 	  if (isdigit (my_string[i]))
@@ -3251,6 +3258,7 @@ string_to_core_addr (const char *my_string)
     {
       /* Assume that it is in decimal.  */
       int i;
+
       for (i = 0; my_string[i] != '\0'; i++)
 	{
 	  if (isdigit (my_string[i]))
@@ -3290,6 +3298,7 @@ gdb_realpath (const char *filename)
 # endif
 # if defined (USE_REALPATH)
     const char *rp = realpath (filename, buf);
+
     if (rp == NULL)
       rp = filename;
     return xstrdup (rp);
@@ -3303,6 +3312,7 @@ gdb_realpath (const char *filename)
 #if defined(HAVE_CANONICALIZE_FILE_NAME)
   {
     char *rp = canonicalize_file_name (filename);
+
     if (rp == NULL)
       return xstrdup (filename);
     else
@@ -3330,11 +3340,13 @@ gdb_realpath (const char *filename)
   {
     /* Find out the max path size.  */
     long path_max = pathconf ("/", _PC_PATH_MAX);
+
     if (path_max > 0)
       {
 	/* PATH_MAX is bounded.  */
 	char *buf = alloca (path_max);
 	char *rp = realpath (filename, buf);
+
 	return xstrdup (rp ? rp : filename);
       }
   }
