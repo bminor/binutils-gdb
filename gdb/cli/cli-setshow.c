@@ -40,6 +40,7 @@ parse_auto_binary_operation (const char *arg)
   if (arg != NULL && *arg != '\0')
     {
       int length = strlen (arg);
+
       while (isspace (arg[length - 1]) && length > 0)
 	length--;
       if (strncmp (arg, "on", length) == 0
@@ -195,6 +196,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  {
 	    /* Clear trailing whitespace of filename.  */
 	    char *ptr = arg + strlen (arg) - 1;
+
 	    while (ptr >= arg && (*ptr == ' ' || *ptr == '\t'))
 	      ptr--;
 	    *(ptr + 1) = '\0';
@@ -217,6 +219,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	case var_integer:
 	  {
 	    unsigned int val;
+
 	    if (arg == NULL)
 	      error_no_arg (_("integer to set it to."));
 	    val = parse_and_eval_long (arg);
@@ -251,6 +254,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	      {
 		char *msg;
 		int msg_len = 0;
+
 		for (i = 0; c->enums[i]; i++)
 		  msg_len += strlen (c->enums[i]) + 2;
 
@@ -385,6 +389,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       else
 	{
 	  char *value = ui_file_xstrdup (stb->stream, NULL);
+
 	  make_cleanup (xfree, value);
 	  if (c->show_value_func != NULL)
 	    c->show_value_func (gdb_stdout, from_tty, c, value);
@@ -417,6 +422,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 	  struct cleanup *optionlist_chain
 	    = make_cleanup_ui_out_tuple_begin_end (uiout, "optionlist");
 	  char *new_prefix = strstr (list->prefixname, "show ") + 5;
+
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "prefix", new_prefix);
 	  cmd_show_list (*list->prefixlist, from_tty, new_prefix);
@@ -427,6 +433,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 	{
 	  struct cleanup *option_chain
 	    = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
+
 	  ui_out_text (uiout, prefix);
 	  ui_out_field_string (uiout, "name", list->name);
 	  ui_out_text (uiout, ":  ");

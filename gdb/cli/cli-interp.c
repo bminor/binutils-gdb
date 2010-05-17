@@ -118,6 +118,7 @@ do_captured_execute_command (struct ui_out *uiout, void *data)
 {
   struct captured_execute_command_args *args =
     (struct captured_execute_command_args *) data;
+
   execute_command (args->command, args->from_tty);
 }
 
@@ -126,6 +127,7 @@ safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 {
   struct gdb_exception e;
   struct captured_execute_command_args args;
+
   args.command = command;
   args.from_tty = from_tty;
   e = catch_exception (uiout, do_captured_execute_command, &args,

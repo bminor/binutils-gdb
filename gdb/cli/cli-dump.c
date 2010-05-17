@@ -52,6 +52,7 @@ scan_expression_with_cleanup (char **cmd, const char *def)
   if ((*cmd) == NULL || (**cmd) == '\0')
     {
       char *exp = xstrdup (def);
+
       make_cleanup (xfree, exp);
       return exp;
     }
@@ -108,6 +109,7 @@ FILE *
 fopen_with_cleanup (const char *filename, const char *mode)
 {
   FILE *file = fopen (filename, mode);
+
   if (file == NULL)
     perror_with_name (filename);
   make_cleanup_fclose (file);
@@ -389,6 +391,7 @@ static void
 call_dump_func (struct cmd_list_element *c, char *args, int from_tty)
 {
   struct dump_context *d = get_cmd_context (c);
+
   d->func (args, d->mode);
 }
 
@@ -664,6 +667,7 @@ void
 _initialize_cli_dump (void)
 {
   struct cmd_list_element *c;
+
   add_prefix_cmd ("dump", class_vars, dump_command, _("\
 Dump target code/data to a local file."),
 		  &dump_cmdlist, "dump ",

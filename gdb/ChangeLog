@@ -1,5 +1,13 @@
 2010-05-17  Michael Snyder  <msnyder@vmware.com>
 
+	* cli/cli-cmds.c: White space.
+	* cli/cli-decode.c: White space.
+	* cli/cli-dump.c: White space.
+	* cli/cli-interp.c: White space.
+	* cli/cli-logging.c: White space.
+	* cli/cli-script.c: White space.
+	* cli/cli-setshow.c: White space.
+
 	* valarith.c: White space.
 	* valops.c: White space.
 	* valprint.c: White space.

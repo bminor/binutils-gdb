@@ -247,6 +247,7 @@ compare_strings (const void *arg1, const void *arg2)
 {
   const char **s1 = (const char **) arg1;
   const char **s2 = (const char **) arg2;
+
   return strcmp (*s1, *s2);
 }
 
@@ -296,6 +297,7 @@ complete_command (char *arg, int from_tty)
       while (item < size)
 	{
 	  int next_item;
+
 	  printf_unfiltered ("%s%s\n", arg_prefix, completions[item]);
 	  next_item = item + 1;
 	  while (next_item < size
@@ -427,6 +429,7 @@ cd_command (char *dir, int from_tty)
 	      /* Search backwards for the directory just before the "/.."
 	         and obliterate it and the "/..".  */
 	      char *q = p;
+
 	      while (q != current_directory && !IS_DIR_SEPARATOR (q[-1]))
 		--q;
 
@@ -780,7 +783,6 @@ edit_command (char *arg, int from_tty)
     }
   else
     {
-
       /* Now should only be one argument -- decode it in SAL.  */
 
       arg1 = arg;
@@ -811,6 +813,7 @@ edit_command (char *arg, int from_tty)
       if (*arg == '*')
         {
 	  struct gdbarch *gdbarch;
+
           if (sal.symtab == 0)
 	    /* FIXME-32x64--assumes sal.pc fits in long.  */
 	    error (_("No source file for address %s."),
@@ -976,6 +979,7 @@ list_command (char *arg, int from_tty)
   if (*arg == '*')
     {
       struct gdbarch *gdbarch;
+
       if (sal.symtab == 0)
 	/* FIXME-32x64--assumes sal.pc fits in long.  */
 	error (_("No source file for address %s."),
@@ -1209,6 +1213,7 @@ show_user (char *args, int from_tty)
   if (args)
     {
       char *comname = args;
+
       c = lookup_cmd (&comname, cmdlist, "", 0, 1);
       if (c->class != class_user)
 	error (_("Not a user command."));
@@ -1234,6 +1239,7 @@ apropos_command (char *searchstr, int from_tty)
   regex_t pattern;
   char *pattern_fastmap;
   char errorbuffer[512];
+
   pattern_fastmap = xcalloc (256, sizeof (char));
   if (searchstr == NULL)
       error (_("REGEXP string is empty"));

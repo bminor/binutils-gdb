@@ -142,7 +142,6 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
   list = cmd;
   while (list)
     {
-
       if (depth)
 	ui_out_spaces (uiout, 2 * depth);
 
@@ -263,6 +262,7 @@ static void
 clear_hook_in_cleanup (void *data)
 {
   struct cmd_list_element *c = data;
+
   c->hook_in = 0; /* Allow hook to work again once it is complete */
 }
 
@@ -284,6 +284,7 @@ execute_cmd_post_hook (struct cmd_list_element *c)
   if ((c->hook_post) && (!c->hook_in))
     {
       struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
+
       c->hook_in = 1; /* Prevent recursive hooking */
       execute_user_command (c->hook_post, (char *) 0);
       do_cleanups (cleanups);
@@ -294,7 +295,8 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 static void
 do_restore_user_call_depth (void * call_depth)
 {	
-  int * depth = call_depth;
+  int *depth = call_depth;
+
   (*depth)--;
   if ((*depth) == 0)
     in_user_command = 0;
@@ -433,6 +435,7 @@ execute_control_command (struct command_line *cmd)
     case while_control:
       {
 	char *buffer = alloca (strlen (cmd->line) + 7);
+
 	sprintf (buffer, "while %s", cmd->line);
 	print_command_trace (buffer);
 
@@ -500,6 +503,7 @@ execute_control_command (struct command_line *cmd)
     case if_control:
       {
 	char *buffer = alloca (strlen (cmd->line) + 4);
+
 	sprintf (buffer, "if %s", cmd->line);
 	print_command_trace (buffer);
 
@@ -623,6 +627,7 @@ static void
 arg_cleanup (void *ignore)
 {
   struct user_args *oargs = user_args;
+
   if (!user_args)
     internal_error (__FILE__, __LINE__,
 		    _("arg_cleanup called with no user args.\n"));
@@ -808,10 +813,10 @@ insert_args (char *line)
 	  i = p[4] - '0';
 	  len = user_args->a[i].len;
 	  if (len)
-	  {
-	    memcpy (new_line, user_args->a[i].arg, len);
-	    new_line += len;
-	  }
+	    {
+	      memcpy (new_line, user_args->a[i].arg, len);
+	      new_line += len;
+	    }
 	}
       line = p + 5;
     }
@@ -950,6 +955,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
       else if (p_end - p > 5 && !strncmp (p, "while", 5))
 	{
 	  char *first_arg;
+
 	  first_arg = p + 5;
 	  while (first_arg < p_end && isspace (*first_arg))
 	    first_arg++;
@@ -958,6 +964,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
       else if (p_end - p > 2 && !strncmp (p, "if", 2))
 	{
 	  char *first_arg;
+
 	  first_arg = p + 2;
 	  while (first_arg < p_end && isspace (*first_arg))
 	    first_arg++;
@@ -966,6 +973,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
       else if (p_end - p >= 8 && !strncmp (p, "commands", 8))
 	{
 	  char *first_arg;
+
 	  first_arg = p + 8;
 	  while (first_arg < p_end && isspace (*first_arg))
 	    first_arg++;
@@ -1016,6 +1024,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
   if (validator)
     {
       volatile struct gdb_exception ex;
+
       TRY_CATCH (ex, RETURN_MASK_ALL)
 	{
 	  validator ((*command)->line, closure);
@@ -1430,6 +1439,7 @@ define_command (char *comname, int from_tty)
   if (c)
     {
       int q;
+
       if (c->class == class_user || c->class == class_alias)
 	q = query (_("Redefine command \"%s\"? "), c->name);
       else
@@ -1563,7 +1573,8 @@ static void
 source_cleanup_lines (void *args)
 {
   struct source_cleanup_lines_args *p =
-  (struct source_cleanup_lines_args *) args;
+    (struct source_cleanup_lines_args *) args;
+
   source_line_number = p->old_line;
   source_file_name = p->old_file;
 }
@@ -1577,6 +1588,7 @@ static void
 wrapped_read_command_file (struct ui_out *uiout, void *data)
 {
   struct wrapped_read_command_file_args *args = data;
+
   read_command_file (args->stream);
 }
 
@@ -1605,6 +1617,7 @@ script_from_file (FILE *stream, const char *file)
   {
     struct gdb_exception e;
     struct wrapped_read_command_file_args args;
+
     args.stream = stream;
     e = catch_exception (uiout, wrapped_read_command_file, &args,
 			 RETURN_MASK_ERROR);
@@ -1639,6 +1652,7 @@ show_user_1 (struct cmd_list_element *c, char *prefix, char *name,
   if (c->prefixlist != NULL)
     {
       char *prefixname = c->prefixname;
+
       for (c = *c->prefixlist; c != NULL; c = c->next)
 	if (c->class == class_user || c->prefixlist != NULL)
 	  show_user_1 (c, prefixname, c->name, gdb_stdout);
