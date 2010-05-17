@@ -355,6 +355,7 @@ tui_show_frame_info (struct frame_info *fi)
       for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
 	  union tui_which_element *item;
+
 	  win_info = (tui_source_windows ())->list[i];
 
 	  item = &((struct tui_win_element *) locator->content[0])->which_element;
@@ -378,6 +379,7 @@ tui_show_frame_info (struct frame_info *fi)
 	  if (win_info == TUI_SRC_WIN)
 	    {
 	      struct tui_line_or_address l;
+
 	      l.loa = LOA_LINE;
 	      l.u.line_no = start_line;
 	      if (!(source_already_displayed
@@ -395,6 +397,7 @@ tui_show_frame_info (struct frame_info *fi)
 	      if (win_info == TUI_DISASM_WIN)
 		{
 		  struct tui_line_or_address a;
+
 		  a.loa = LOA_ADDRESS;
 		  a.u.addr = low;
 		  if (!tui_addr_is_displayed (item->locator.addr, win_info, TRUE))

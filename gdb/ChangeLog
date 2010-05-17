@@ -1,5 +1,18 @@
 2010-05-17  Michael Snyder  <msnyder@vmware.com>
 
+	* tui/tui.c: White space.
+	* tui/tui-data.c: White space.
+	* tui/tui-disasm.c: White space.
+	* tui/tui-file.c: White space.
+	* tui/tui-interp.c: White space.
+	* tui/tui-main.c: White space.
+	* tui/tui-out.c: White space.
+	* tui/tui-regs.c: White space.
+	* tui/tui-source.c: White space.
+	* tui/tui-stack.c: White space.
+	* tui/tui-win.c: White space.
+	* tui/tui-winsource.c: White space.
+
 	* procfs.c: White space.
 
 	* python/py-auto-load.c: White space.

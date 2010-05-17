@@ -27,6 +27,7 @@ int
 main (int argc, char **argv)
 {
   struct captured_main_args args;
+
   memset (&args, 0, sizeof args);
   args.argc = argc;
   args.argv = argv;

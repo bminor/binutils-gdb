@@ -214,6 +214,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   for (i = 0; i < max_lines; i++)
     {
       size_t len = strlen (asm_lines[i].addr_string);
+
       if (len > addr_size)
         addr_size = len;
 

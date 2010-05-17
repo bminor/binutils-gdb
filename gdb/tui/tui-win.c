@@ -827,6 +827,7 @@ tui_initialize_win (void)
 #ifdef SIGWINCH
 #ifdef HAVE_SIGACTION
   struct sigaction old_winch;
+
   memset (&old_winch, 0, sizeof (old_winch));
   old_winch.sa_handler = &tui_sigwinch_handler;
   sigaction (SIGWINCH, &old_winch, NULL);
@@ -1241,6 +1242,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		      if ((TUI_CMD_WIN->generic.height + diff) < 1)
 			{
 			  int i;
+
 			  for (i = TUI_CMD_WIN->generic.height + diff;
 			       (i < 1); i++)
 			    if (primary_win_info == first_win)

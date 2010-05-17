@@ -402,6 +402,7 @@ tui_partial_win_by_name (char *name)
           if (tui_win_list[i] != 0)
             {
               char *cur_name = tui_win_name (&tui_win_list[i]->generic);
+
               if (strlen (name) <= strlen (cur_name)
 		  && strncmp (name, cur_name, strlen (name)) == 0)
                 win_info = tui_win_list[i];

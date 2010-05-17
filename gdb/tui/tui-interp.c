@@ -169,6 +169,7 @@ tui_command_loop (void *data)
   while (1)
     {
       int result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
+
       if (result < 0)
 	break;
 

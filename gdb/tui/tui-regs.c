@@ -743,8 +743,8 @@ tui_get_register (struct frame_info *frame,
   if (target_has_registers)
     {
       gdb_byte buf[MAX_REGISTER_SIZE];
-      get_frame_register (frame, regnum, buf);
 
+      get_frame_register (frame, regnum, buf);
       if (changedp)
 	{
 	  struct gdbarch *gdbarch = get_frame_arch (frame);

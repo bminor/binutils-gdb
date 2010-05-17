@@ -53,6 +53,7 @@ tui_field_int (struct ui_out *uiout,
 	       int value)
 {
   tui_out_data *data = ui_out_data (uiout);
+
   if (data->base.suppress_output)
     return;
 
@@ -80,6 +81,7 @@ tui_field_string (struct ui_out *uiout,
 		  const char *string)
 {
   tui_out_data *data = ui_out_data (uiout);
+
   if (data->base.suppress_output)
     return;
 
@@ -110,6 +112,7 @@ tui_field_fmt (struct ui_out *uiout, int fldno,
 	       va_list args)
 {
   tui_out_data *data = ui_out_data (uiout);
+
   if (data->base.suppress_output)
     return;
 
@@ -124,6 +127,7 @@ static void
 tui_text (struct ui_out *uiout, const char *string)
 {
   tui_out_data *data = ui_out_data (uiout);
+
   if (data->base.suppress_output)
     return;
   data->start_of_line ++;
@@ -166,7 +170,7 @@ extern void _initialize_tui_out (void);
 void
 _initialize_tui_out (void)
 {
-/* Inherit the CLI version.  */
+  /* Inherit the CLI version.  */
   tui_ui_out_impl = cli_ui_out_impl;
 
   /* Override a few methods.  */
