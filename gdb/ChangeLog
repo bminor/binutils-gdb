@@ -4,6 +4,20 @@
 	* c-lang.c (c_printstr): Compute real length of NUL terminated
 	string at first.
 
+2010-05-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (to_fixed_range_type): The the raw index type as
+	argument instead of the raw type name.  Remove orig_type parameter.
+	Update calls throughout.
+	(ada_fixup_array_indexes_type): New function.
+	(ada_array_bound_from_type): Add call to ada_fixup_array_indexes_type.
+	* ada-lang.h (ada_fixup_array_indexes_type): Add declaration.
+	* ada-typeprint.c (print_range_type): Renames print_range_type_named.
+	Remove name parameter.
+	(print_array_type): Add call to ada_fixup_array_indexes_type.
+	Update calls to print_range_type.
+	(ada_print_type): Update calls to print_range_type.
+
 2010-05-17  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* dwarf2read.c (read_set_type): Set type length if

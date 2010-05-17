@@ -187,6 +187,8 @@ struct value *ada_convert_actual (struct value *actual,
 extern struct value *ada_value_subscript (struct value *, int,
                                           struct value **);
 
+extern void ada_fixup_array_indexes_type (struct type *index_desc_type);
+
 extern struct type *ada_array_element_type (struct type *, int);
 
 extern int ada_array_arity (struct type *);

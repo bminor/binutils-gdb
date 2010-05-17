@@ -55,7 +55,7 @@ static void
 print_dynamic_range_bound (struct type *, const char *, int,
 			   const char *, struct ui_file *);
 
-static void print_range_type_named (char *, struct type *, struct ui_file *);
+static void print_range_type (struct type *, struct ui_file *);
 
 
 
@@ -212,19 +212,19 @@ print_dynamic_range_bound (struct type *type, const char *name, int name_len,
     fprintf_filtered (stream, "?");
 }
 
-/* Print the range type named NAME.  If symbol lookup fails, fall back
-   to ORIG_TYPE as base type.  */
+/* Print RAW_TYPE as a range type, using any bound information
+   following the GNAT encoding (if available).  */
 
 static void
-print_range_type_named (char *name, struct type *orig_type,
-			struct ui_file *stream)
+print_range_type (struct type *raw_type, struct ui_file *stream)
 {
-  struct type *raw_type = ada_find_any_type (name);
+  char *name;
   struct type *base_type;
   char *subtype_info;
 
-  if (raw_type == NULL)
-    raw_type = orig_type;
+  gdb_assert (raw_type != NULL);
+  name = TYPE_NAME (raw_type);
+  gdb_assert (name != NULL);
 
   if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
     base_type = TYPE_TARGET_TYPE (raw_type);
@@ -341,9 +341,11 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
     {
       if (ada_is_simple_array_type (type))
 	{
-	  struct type *range_desc_type =
-	    ada_find_parallel_type (type, "___XA");
+	  struct type *range_desc_type;
 	  struct type *arr_type;
+
+	  range_desc_type = ada_find_parallel_type (type, "___XA");
+	  ada_fixup_array_indexes_type (range_desc_type);
 
 	  bitsize = 0;
 	  if (range_desc_type == NULL)
@@ -368,9 +370,8 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 		{
 		  if (k > 0)
 		    fprintf_filtered (stream, ", ");
-		  print_range_type_named (TYPE_FIELD_NAME
-					  (range_desc_type, k),
-					  TYPE_INDEX_TYPE (arr_type), stream);
+		  print_range_type (TYPE_FIELD_TYPE (range_desc_type, k),
+				    stream);
 		  if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
 		    bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
 		}
@@ -786,7 +787,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	    else
 	      {
 		fprintf_filtered (stream, "range ");
-		print_range_type_named (name, type, stream);
+		print_range_type (type, stream);
 	      }
 	  }
 	break;
