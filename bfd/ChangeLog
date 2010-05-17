@@ -2,8 +2,8 @@
 
 	* vms-alpha.c: Include esgps.h and eidc.h.
 	(_bfd_vms_slurp_egsd): Ignore SPSC and IDC sub-records.
-	(evax_bfd_print_egsd_flags): New function, extracted from evax_bfd_print_egsd.
-	(evax_bfd_print_egsd): Calls evax_bfd_print_egsd_flags.  Handles
+	(evax_bfd_print_egsd_flags): New function, extracted from ...
+	(evax_bfd_print_egsd): ..., calls evax_bfd_print_egsd_flags.  Handles
 	EGSD__C_SPSC and EGSD__C_IDC.
 
 2010-05-14  Tristan Gingold  <gingold@adacore.com>
