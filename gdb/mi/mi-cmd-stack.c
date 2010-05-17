@@ -204,6 +204,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
        i++, fi = get_prev_frame (fi))
     {
       struct cleanup *cleanup_frame;
+
       QUIT;
       cleanup_frame = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
       ui_out_field_int (uiout, "level", i);
@@ -309,6 +310,7 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 	      struct cleanup *cleanup_tuple = NULL;
 	      struct symbol *sym2;
 	      struct value *val;
+
 	      if (values != PRINT_NO_VALUES || what == all)
 		cleanup_tuple =
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
@@ -333,6 +335,7 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 		      && TYPE_CODE (type) != TYPE_CODE_UNION)
 		    {
 		      struct value_print_options opts;
+
 		      val = read_var_value (sym2, fi);
 		      get_raw_print_options (&opts);
 		      opts.deref_ref = 1;
@@ -345,6 +348,7 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 		case PRINT_ALL_VALUES:
 		  {
 		    struct value_print_options opts;
+
 		    val = read_var_value (sym2, fi);
 		    get_raw_print_options (&opts);
 		    opts.deref_ref = 1;

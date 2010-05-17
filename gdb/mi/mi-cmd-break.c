@@ -99,6 +99,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
      to denote the end of the option list. */
   int optind = 0;
   char *optarg;
+
   while (1)
     {
       int opt = mi_getopt ("mi_cmd_break_insert", argc, argv, opts, &optind, &optarg);
@@ -217,9 +218,12 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
   /* Parse arguments. */
   int optind = 0;
   char *optarg;
+
   while (1)
     {
-      int opt = mi_getopt ("mi_cmd_break_watch", argc, argv, opts, &optind, &optarg);
+      int opt = mi_getopt ("mi_cmd_break_watch", argc, argv,
+			   opts, &optind, &optarg);
+
       if (opt < 0)
 	break;
       switch ((enum opt) opt)

@@ -30,6 +30,7 @@ mi_getopt (const char *prefix,
 {
   char *arg;
   struct mi_opt *opt;
+
   /* We assume that argv/argc are ok. */
   if (*optind > argc || *optind < 0)
     internal_error (__FILE__, __LINE__,

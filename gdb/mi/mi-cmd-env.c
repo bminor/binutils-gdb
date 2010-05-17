@@ -52,6 +52,7 @@ env_execute_cli_command (const char *cmd, const char *args)
     {
       struct cleanup *old_cleanups;
       char *run;
+
       if (args != NULL)
 	run = xstrprintf ("%s %s", cmd, args);
       else
@@ -141,6 +142,7 @@ mi_cmd_env_path (char *command, char **argv, int argc)
     {
       int opt = mi_getopt ("mi_cmd_env_path", argc, argv, opts,
                            &optind, &optarg);
+
       if (opt < 0)
         break;
       switch ((enum opt) opt)
@@ -211,6 +213,7 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
     {
       int opt = mi_getopt ("mi_cmd_env_dir", argc, argv, opts,
                            &optind, &optarg);
+
       if (opt < 0)
         break;
       switch ((enum opt) opt)

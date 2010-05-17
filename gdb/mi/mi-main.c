@@ -218,6 +218,7 @@ static int
 proceed_thread_callback (struct thread_info *thread, void *arg)
 {
   int pid = *(int *)arg;
+
   proceed_thread (thread, pid);
   return 0;
 }
@@ -253,6 +254,7 @@ exec_continue (char **argv, int argc)
   else
     {
       struct cleanup *back_to = make_cleanup_restore_integer (&sched_multi);
+
       if (current_context->all)
 	{
 	  sched_multi = 1;
@@ -344,6 +346,7 @@ mi_cmd_exec_interrupt (char *command, char **argv, int argc)
   else if (current_context->thread_group != -1)
     {
       struct inferior *inf = find_inferior_id (current_context->thread_group);
+
       iterate_over_threads (interrupt_thread_callback, &inf->pid);
     }
   else
@@ -388,6 +391,7 @@ mi_cmd_exec_run (char *command, char **argv, int argc)
   if (current_context->all)
     {
       struct cleanup *back_to = save_current_space_and_thread ();
+
       iterate_over_inferiors (run_one_inferior, NULL);
       do_cleanups (back_to);
     }
@@ -403,6 +407,7 @@ static int
 find_thread_of_process (struct thread_info *ti, void *p)
 {
   int pid = *(int *)p;
+
   if (PIDGET (ti->ptid) == pid && !is_exited (ti->ptid))
     return 1;
 
@@ -420,6 +425,7 @@ mi_cmd_target_detach (char *command, char **argv, int argc)
       struct thread_info *tp;
       char *end = argv[0];
       int pid = strtol (argv[0], &end, 10);
+
       if (*end != '\0')
 	error (_("Cannot parse thread group id '%s'"), argv[0]);
 
@@ -500,6 +506,7 @@ collect_cores (struct thread_info *ti, void *xdata)
   if (ptid_get_pid (ti->ptid) == data->pid)
     {
       int core = target_core_of_thread (ti->ptid);
+
       if (core != -1)
 	VEC_safe_push (int, data->cores, core);
     }
@@ -511,6 +518,7 @@ static int *
 unique (int *b, int *e)
 {
   int *d = b;
+
   while (++b != e)
     if (*d != *b)
       *++d = *b;
@@ -607,6 +615,7 @@ static void
 free_vector_of_ints (void *xvector)
 {
   VEC (int) **vector = xvector;
+
   VEC_free (int, *vector);
 }
 
@@ -619,6 +628,7 @@ static void
 free_vector_of_osdata_items (splay_tree_value xvalue)
 {
   VEC (osdata_item_s) *value = (VEC (osdata_item_s) *) xvalue;
+
   /* We don't free the items itself, it will be done separately.  */
   VEC_free (osdata_item_s, value);
 }
@@ -628,6 +638,7 @@ splay_tree_int_comparator (splay_tree_key xa, splay_tree_key xb)
 {
   int a = xa;
   int b = xb;
+
   return a - b;
 }
 
@@ -644,6 +655,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
   struct osdata *data;
   struct osdata_item *item;
   int ix_items;
+
   /* This keeps a map from integer (pid) to VEC (struct osdata_item *)*
      The vector contains information about all threads for the given pid.
      This is assigned an initial value to avoid "may be used uninitialized"
@@ -657,8 +669,8 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
   if (recurse)
     {
       struct osdata *threads = get_osdata ("threads");
-      make_cleanup_osdata_free (threads);
 
+      make_cleanup_osdata_free (threads);
       tree = splay_tree_new (splay_tree_int_comparator,
 			     do_nothing,
 			     free_vector_of_osdata_items);
@@ -741,9 +753,9 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 		{
 		  struct cleanup *back_to_2 =
 		    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-
 		  const char *tid = get_osdata_column (child, "tid");
 		  const char *tcore = get_osdata_column (child, "core");
+
 		  ui_out_field_string (uiout, "id", tid);
 		  if (tcore)
 		    ui_out_field_string (uiout, "core", tcore);
@@ -783,6 +795,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
     {
       int opt = mi_getopt ("-list-thread-groups", argc, argv, opts,
 			   &optind, &optarg);
+
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -805,6 +818,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
     {
       char *end;
       int inf = strtoul (argv[optind], &end, 0);
+
       if (*end != '\0')
 	error ("invalid group id '%s'", argv[optind]);
       VEC_safe_push (int, ids, inf);
@@ -824,6 +838,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
     {
       /* Local thread groups, single id. */
       int pid = *VEC_address (int, ids);
+
       if (!in_inferior_list (pid))
 	error ("Invalid thread group id '%d'", pid);
       print_thread_info (uiout, -1, pid);
@@ -831,6 +846,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
   else
     {
       struct print_one_inferior_data data;
+
       data.recurse = recurse;
       data.inferiors = ids;
 
@@ -1094,6 +1110,7 @@ get_register (struct frame_info *frame, int regnum, int format)
 	{
 	  int idx = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ?
 		    j : register_size (gdbarch, regnum) - 1 - j;
+
 	  sprintf (ptr, "%02x", (unsigned char) buffer[idx]);
 	  ptr += 2;
 	}
@@ -1103,6 +1120,7 @@ get_register (struct frame_info *frame, int regnum, int format)
   else
     {
       struct value_print_options opts;
+
       get_formatted_print_options (&opts, format);
       opts.deref_ref = 1;
       val_print (register_type (gdbarch, regnum), buffer, 0, 0,
@@ -1259,6 +1277,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
     {
       int opt = mi_getopt ("mi_cmd_data_read_memory", argc, argv, opts,
 			   &optind, &optarg);
+
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -1351,6 +1370,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
     struct cleanup *cleanup_list_memory;
     int row;
     int row_byte;
+
     cleanup_list_memory = make_cleanup_ui_out_list_begin_end (uiout, "memory");
     for (row = 0, row_byte = 0;
 	 row < nr_rows;
@@ -1387,6 +1407,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	if (aschar)
 	  {
 	    int byte;
+
 	    ui_file_rewind (stream->stream);
 	    for (byte = row_byte; byte < row_byte + word_size * nr_cols; byte++)
 	      {
@@ -1457,6 +1478,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
     {
       int opt = mi_getopt ("mi_cmd_data_write_memory", argc, argv, opts,
 			   &optind, &optarg);
+
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
@@ -1525,8 +1547,8 @@ mi_cmd_list_features (char *command, char **argv, int argc)
   if (argc == 0)
     {
       struct cleanup *cleanup = NULL;
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
 
+      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
       ui_out_field_string (uiout, NULL, "frozen-varobjs");
       ui_out_field_string (uiout, NULL, "pending-breakpoints");
       ui_out_field_string (uiout, NULL, "thread-info");
@@ -1548,8 +1570,8 @@ mi_cmd_list_target_features (char *command, char **argv, int argc)
   if (argc == 0)
     {
       struct cleanup *cleanup = NULL;
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
 
+      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
       if (target_can_async_p ())
 	ui_out_field_string (uiout, NULL, "async");
       
@@ -1655,6 +1677,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
     case CLI_COMMAND:
       {
 	char *argv[2];
+
 	/* A CLI command was read from the input stream.  */
 	/* This "feature" will be removed as soon as we have a
 	   complete set of mi commands.  */
@@ -1761,12 +1784,14 @@ mi_execute_command (char *cmd, int from_tty)
 	  else if (!ptid_equal (inferior_ptid, null_ptid))
 	    {
 	      struct thread_info *ti = inferior_thread ();
+
 	      report_change = (ti->num != command->thread);
 	    }
 
 	  if (report_change)
 	    {     
 	      struct thread_info *ti = inferior_thread ();
+
 	      target_terminal_ours ();
 	      fprintf_unfiltered (mi->event_channel, 
 				  "thread-selected,id=\"%d\"",
@@ -1827,6 +1852,7 @@ mi_cmd_execute (struct mi_parse *parse)
   if (parse->thread != -1)
     {
       struct thread_info *tp = find_thread_id (parse->thread);
+
       if (!tp)
 	error (_("Invalid thread id: %d"), parse->thread);
 
@@ -1840,6 +1866,7 @@ mi_cmd_execute (struct mi_parse *parse)
     {
       struct frame_info *fid;
       int frame = parse->frame;
+
       fid = find_relative_frame (get_current_frame (), &frame);
       if (frame == 0)
 	/* find_relative_frame was successful */
@@ -1888,6 +1915,7 @@ mi_execute_cli_command (const char *cmd, int args_p, const char *args)
     {
       struct cleanup *old_cleanups;
       char *run;
+
       if (args_p)
 	run = xstrprintf ("%s %s", cmd, args);
       else
@@ -1977,6 +2005,7 @@ mi_load_progress (const char *section_name,
   if (new_section)
     {
       struct cleanup *cleanup_tuple;
+
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
@@ -1997,6 +2026,7 @@ mi_load_progress (const char *section_name,
       delta.tv_usec >= update_threshold.tv_usec)
     {
       struct cleanup *cleanup_tuple;
+
       last_update.tv_sec = time_now.tv_sec;
       last_update.tv_usec = time_now.tv_usec;
       if (current_token)
@@ -2044,6 +2074,7 @@ static void
 print_diff_now (struct mi_timestamp *start)
   {
     struct mi_timestamp now;
+
     timestamp (&now);
     print_diff (start, &now);
   }
@@ -2093,6 +2124,7 @@ mi_cmd_trace_define_variable (char *command, char **argv, int argc)
   if (expr->nelts == 3 && expr->elts[0].opcode == OP_INTERNALVAR)
     {
       struct internalvar *intvar = expr->elts[1].internalvar;
+
       if (intvar)
 	name = internalvar_name (intvar);
     }

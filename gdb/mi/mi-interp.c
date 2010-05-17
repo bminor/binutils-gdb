@@ -113,8 +113,8 @@ static int
 mi_interpreter_resume (void *data)
 {
   struct mi_interp *mi = data;
-  /* As per hack note in mi_interpreter_init, swap in the output channels... */
 
+  /* As per hack note in mi_interpreter_init, swap in the output channels... */
   gdb_setup_readline ();
 
   /* These overwrite some of the initialization done in
@@ -170,6 +170,7 @@ static struct gdb_exception
 mi_interpreter_exec (void *data, const char *command)
 {
   char *tmp = alloca (strlen (command) + 1);
+
   strcpy (tmp, command);
   mi_execute_command_wrapper (tmp);
   return exception_none;
@@ -213,6 +214,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   for (i = 1; i < argc; i++)
     {
       struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
+
       if (e.reason < 0)
 	{
 	  mi_error_message = xstrdup (e.message);
@@ -327,6 +329,7 @@ static void
 mi_inferior_added (struct inferior *inf)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
 		      "thread-group-added,id=\"i%d\"",
@@ -338,6 +341,7 @@ static void
 mi_inferior_appeared (struct inferior *inf)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
 		      "thread-group-started,id=\"i%d\",pid=\"%d\"",
@@ -349,6 +353,7 @@ static void
 mi_inferior_exit (struct inferior *inf)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel, "thread-group-exited,id=\"i%d\"",
 		      inf->num);
@@ -359,6 +364,7 @@ static void
 mi_inferior_removed (struct inferior *inf)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
 		      "thread-group-removed,id=\"i%d\"",
@@ -377,6 +383,7 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
   if (print_frame)
     {
       int core;
+
       if (uiout != mi_uiout)
 	{
 	  /* The normal_stop function has printed frame information into 
@@ -385,6 +392,7 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	     the frame again.  In practice, this can only happen when running
 	     a CLI command in MI.  */
 	  struct ui_out *saved_uiout = uiout;
+
 	  uiout = mi_uiout;
 	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
 	  uiout = saved_uiout;
@@ -396,8 +404,9 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	{
 	  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end 
 	    (mi_uiout, "stopped-threads");
+
 	  ui_out_field_int (mi_uiout, NULL,
-			    pid_to_thread_id (inferior_ptid));		  		  
+			    pid_to_thread_id (inferior_ptid));
 	  do_cleanups (back_to);
 	}
       else
@@ -424,6 +433,7 @@ mi_about_to_proceed (void)
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
       struct thread_info *tp = inferior_thread ();
+
       if (tp->in_infcall)
 	return;
     }
@@ -503,6 +513,7 @@ mi_on_resume (ptid_t ptid)
   else
     {
       struct thread_info *ti = find_thread_ptid (ptid);
+
       gdb_assert (ti);
       fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n", ti->num);
     }
@@ -525,6 +536,7 @@ static void
 mi_solib_loaded (struct so_list *solib)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+
   target_terminal_ours ();
   if (gdbarch_has_global_solist (target_gdbarch))
     fprintf_unfiltered (mi->event_channel,
@@ -548,6 +560,7 @@ static void
 mi_solib_unloaded (struct so_list *solib)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
+
   target_terminal_ours ();
   if (gdbarch_has_global_solist (target_gdbarch))
     fprintf_unfiltered (mi->event_channel,
@@ -573,6 +586,7 @@ report_initial_inferior (struct inferior *inf, void *closure)
      and top_level_interpreter_data is set, we cannot call
      it here.  */
   struct mi_interp *mi = closure;
+
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel,
 		      "thread-group-added,id=\"i%d\"",

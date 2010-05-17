@@ -35,6 +35,7 @@ static int
 mi_parse_escape (char **string_ptr)
 {
   int c = *(*string_ptr)++;
+
   switch (c)
     {
       case '\n':
@@ -54,6 +55,7 @@ mi_parse_escape (char **string_ptr)
 	{
 	  int i = host_hex_value (c);
 	  int count = 0;
+
 	  while (++count < 3)
 	    {
 	      c = (**string_ptr);
@@ -106,10 +108,12 @@ mi_parse_argv (char *args, struct mi_parse *parse)
   char *chp = args;
   int argc = 0;
   char **argv = xmalloc ((argc + 1) * sizeof (char *));
+
   argv[argc] = NULL;
   while (1)
     {
       char *arg;
+
       /* skip leading white space */
       while (isspace (*chp))
 	chp++;
@@ -125,6 +129,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 	    /* A quoted string. */
 	    int len;
 	    char *start = chp + 1;
+
 	    /* Determine the buffer size. */
 	    chp = start;
 	    len = 0;
@@ -182,6 +187,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 	       characters into a buffer. */
 	    int len;
 	    char *start = chp;
+
 	    while (*chp != '\0' && !isspace (*chp))
 	      {
 		chp++;
@@ -223,6 +229,7 @@ mi_parse (char *cmd)
 {
   char *chp;
   struct mi_parse *parse = XMALLOC (struct mi_parse);
+
   memset (parse, 0, sizeof (*parse));
   parse->all = 0;
   parse->thread_group = -1;
@@ -253,6 +260,7 @@ mi_parse (char *cmd)
   /* Extract the command. */
   {
     char *tmp = chp + 1;	/* discard ``-'' */
+
     for (; *chp && !isspace (*chp); chp++)
       ;
     parse->command = xmalloc ((chp - tmp + 1) * sizeof (char *));
@@ -289,6 +297,7 @@ mi_parse (char *cmd)
       size_t tgs = sizeof ("--thread-group ") - 1;
       size_t ts = sizeof ("--thread ") - 1;
       size_t fs = sizeof ("--frame ") - 1;
+
       if (strncmp (chp, "--all ", as) == 0)
 	{
 	  parse->all = 1;

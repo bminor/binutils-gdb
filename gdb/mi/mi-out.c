@@ -120,6 +120,7 @@ void
 mi_table_body (struct ui_out *uiout)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   /* close the table header line if there were any headers */
@@ -133,6 +134,7 @@ void
 mi_table_end (struct ui_out *uiout)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   data->suppress_output = 0;
   mi_close (uiout, ui_out_type_list); /* body */
   mi_close (uiout, ui_out_type_tuple);
@@ -146,6 +148,7 @@ mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 		 const char *colhdr)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   mi_open (uiout, NULL, ui_out_type_tuple);
@@ -165,6 +168,7 @@ mi_begin (struct ui_out *uiout,
 	  const char *id)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   mi_open (uiout, id, type);
@@ -178,6 +182,7 @@ mi_end (struct ui_out *uiout,
 	int level)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   mi_close (uiout, type);
@@ -189,8 +194,9 @@ void
 mi_field_int (struct ui_out *uiout, int fldno, int width,
               enum ui_align alignment, const char *fldname, int value)
 {
-  char buffer[20];		/* FIXME: how many chars long a %d can become? */
+  char buffer[20];	/* FIXME: how many chars long a %d can become? */
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
 
@@ -205,6 +211,7 @@ mi_field_skip (struct ui_out *uiout, int fldno, int width,
                enum ui_align alignment, const char *fldname)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   mi_field_string (uiout, fldno, width, alignment, fldname, "");
@@ -222,6 +229,7 @@ mi_field_string (struct ui_out *uiout,
 		 const char *string)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   field_separator (uiout);
@@ -243,6 +251,7 @@ mi_field_fmt (struct ui_out *uiout, int fldno,
 	      va_list args)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_output)
     return;
   field_separator (uiout);
@@ -281,6 +290,7 @@ void
 mi_flush (struct ui_out *uiout)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   gdb_flush (data->buffer);
 }
 
@@ -292,6 +302,7 @@ static void
 field_separator (struct ui_out *uiout)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   if (data->suppress_field_separator)
     data->suppress_field_separator = 0;
   else
@@ -304,6 +315,7 @@ mi_open (struct ui_out *uiout,
 	 enum ui_out_type type)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   field_separator (uiout);
   data->suppress_field_separator = 1;
   if (name)
@@ -326,6 +338,7 @@ mi_close (struct ui_out *uiout,
 	  enum ui_out_type type)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   switch (type)
     {
     case ui_out_type_tuple:
@@ -346,6 +359,7 @@ void
 mi_out_buffered (struct ui_out *uiout, char *string)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   fprintf_unfiltered (data->buffer, "%s", string);
 }
 
@@ -355,6 +369,7 @@ void
 mi_out_rewind (struct ui_out *uiout)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   ui_file_rewind (data->buffer);
 }
 
@@ -371,6 +386,7 @@ mi_out_put (struct ui_out *uiout,
 	    struct ui_file *stream)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   ui_file_put (data->buffer, do_write, stream);
   ui_file_rewind (data->buffer);
 }
@@ -381,6 +397,7 @@ int
 mi_version (struct ui_out *uiout)
 {
   mi_out_data *data = ui_out_data (uiout);
+
   return data->mi_version;
 }
 
@@ -390,6 +407,7 @@ struct ui_out *
 mi_out_new (int mi_version)
 {
   int flags = 0;
+
   mi_out_data *data = XMALLOC (mi_out_data);
   data->suppress_field_separator = 0;
   data->suppress_output = 0;

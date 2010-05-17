@@ -164,6 +164,7 @@ lookup_table (const char *command)
 {
   const char *chp;
   unsigned int index = 0;
+
   /* compute our hash */
   for (chp = command; *chp; chp++)
     {
@@ -203,6 +204,7 @@ build_table (struct mi_cmd *commands)
   for (command = commands; command->name != 0; command++)
     {
       struct mi_cmd **entry = lookup_table (command->name);
+
       if (*entry)
 	internal_error (__FILE__, __LINE__,
 			_("command `%s' appears to be duplicated"),
