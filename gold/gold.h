@@ -121,7 +121,7 @@ struct hash<T*>
 
 #define Unordered_set std::set
 #define Unordered_map std::map
-#define Unordered_map std::multimap
+#define Unordered_multimap std::multimap
 
 #define reserve_unordered_map(map, n)
 

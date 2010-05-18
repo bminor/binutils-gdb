@@ -1,3 +1,8 @@
+2010-05-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* gold.h (Unordered_multimap, Unordered_map): Fix defines for
+	when neither HAVE_TR1_UNORDERED_MAP nor HAVE_EXT_HASH_MAP are set.
+
 2010-05-18  Rafael Espindola  <espindola@google.com>
 
 	* options.cc (General_options::finalize): Handle -nostdlib.
