@@ -6954,19 +6954,25 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
                     break;
                   case DST__K_INCR_LINUM:
                     val = buf[1];
-                    fprintf (file, _("incr_linum: +%u\n"), val);
+                    fprintf (file, _("incr_linum(b): +%u\n"), val);
                     line += val;
                     cmdlen = 2;
                     break;
                   case DST__K_INCR_LINUM_W:
                     val = bfd_getl16 (buf + 1);
-                    fprintf (file, _("incr_linum: +%u\n"), val);
+                    fprintf (file, _("incr_linum_w: +%u\n"), val);
                     line += val;
                     cmdlen = 3;
                     break;
+                  case DST__K_INCR_LINUM_L:
+                    val = bfd_getl32 (buf + 1);
+                    fprintf (file, _("incr_linum_l: +%u\n"), val);
+                    line += val;
+                    cmdlen = 5;
+                    break;
                   case DST__K_SET_LINUM:
-                    line = (unsigned)bfd_getl16 (buf + 1);
-                    fprintf (file, _("set_line_num %u\n"), line);
+                    line = bfd_getl16 (buf + 1);
+                    fprintf (file, _("set_line_num(w) %u\n"), line);
                     cmdlen = 3;
                     break;
                   case DST__K_SET_LINUM_B:
@@ -6975,12 +6981,12 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
                     cmdlen = 2;
                     break;
                   case DST__K_SET_LINUM_L:
-                    line = (unsigned)bfd_getl32 (buf + 1);
+                    line = bfd_getl32 (buf + 1);
                     fprintf (file, _("set_line_num_l %u\n"), line);
                     cmdlen = 5;
                     break;
                   case DST__K_SET_ABS_PC:
-                    pc = (unsigned)bfd_getl32 (buf + 1);
+                    pc = bfd_getl32 (buf + 1);
                     fprintf (file, _("set_abs_pc: 0x%08x\n"), pc);
                     cmdlen = 5;
                     break;
@@ -6990,7 +6996,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
                     cmdlen = 5;
                     break;
                   case DST__K_TERM:
-                    fprintf (file, _("term: 0x%02x"), buf[1]);
+                    fprintf (file, _("term(b): 0x%02x"), buf[1]);
                     pc += buf[1];
                     fprintf (file, _("        pc: 0x%08x\n"), pc);
                     cmdlen = 2;
@@ -7556,7 +7562,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
             }
           count = bfd_getl16 (dmth.psect_count);
           fprintf (file,
-                   _(" module address: 0x%08x, size: 0x%08x, (%u psects)\n"),
+                   _(" module offset: 0x%08x, size: 0x%08x, (%u psects)\n"),
                    (unsigned)bfd_getl32 (dmth.modbeg),
                    (unsigned)bfd_getl32 (dmth.size), count);
           dmt_size -= sizeof (dmth);

@@ -1,3 +1,9 @@
+2010-05-18  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (evax_bfd_print_dst): Handle INCR_LINUM_L.
+	Add details in the messages.
+	(evax_bfd_print_image): Change message.
+
 2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11600
