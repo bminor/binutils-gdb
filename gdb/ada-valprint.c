@@ -163,6 +163,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 
   {
     LONGEST high;
+
     if (get_discrete_bounds (index_type, &low, &high) < 0)
       len = 1;
     else
@@ -213,6 +214,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
       if (i - i0 > options->repeat_count_threshold)
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.deref_ref = 0;
 	  val_print (elttype, value_contents (v0), 0, 0, stream,
 		     recurse + 1, &opts, current_language);
@@ -225,6 +227,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	{
 	  int j;
 	  struct value_print_options opts = *options;
+
 	  opts.deref_ref = 0;
 	  for (j = i0; j < i; j += 1)
 	    {
@@ -598,6 +601,7 @@ static int
 ada_val_print_stub (void *args0)
 {
   struct ada_val_print_args *argsp = (struct ada_val_print_args *) args0;
+
   return ada_val_print_1 (argsp->type, argsp->valaddr0,
 			  argsp->embedded_offset, argsp->address,
 			  argsp->stream, argsp->recurse, argsp->options);
@@ -692,6 +696,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       int retn;
       struct value *mark = value_mark ();
       struct value *val;
+
       val = value_from_contents_and_address (type, valaddr, address);
       val = ada_coerce_to_simple_array_ptr (val);
       if (val == NULL)
@@ -720,11 +725,13 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       {
 	int ret = c_val_print (type, valaddr0, embedded_offset, address, 
 			       stream, recurse, options);
+
 	if (ada_is_tag_type (type))
 	  {
 	    struct value *val = 
 	      value_from_contents_and_address (type, valaddr, address);
 	    const char *name = ada_tag_name (val);
+
 	    if (name != NULL) 
 	      fprintf_filtered (stream, " (%s)", name);
 	    return 0;
@@ -746,6 +753,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       else if (TYPE_CODE (type) == TYPE_CODE_RANGE)
 	{
 	  struct type *target_type = TYPE_TARGET_TYPE (type);
+
 	  if (TYPE_LENGTH (type) != TYPE_LENGTH (target_type))
 	    {
 	      /* Obscure case of range type that has different length from
@@ -755,6 +763,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	      struct value *v = value_cast (target_type,
 					    value_from_contents_and_address
 					    (type, valaddr, 0));
+
 	      return ada_val_print_1 (target_type, value_contents (v), 0, 0,
 				      stream, recurse + 1, options);
 	    }
@@ -767,9 +776,11 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	{
 	  int format = (options->format ? options->format
 			: options->output_format);
+
 	  if (format)
 	    {
 	      struct value_print_options opts = *options;
+
 	      opts.format = format;
 	      print_scalar_formatted (valaddr, type, &opts, 0, stream);
 	    }
@@ -822,6 +833,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       if (i < len)
 	{
 	  const char *name = ada_enum_name (TYPE_FIELD_NAME (type, i));
+
 	  if (name[0] == '\'')
 	    fprintf_filtered (stream, "%ld %s", (long) val, name);
 	  else
@@ -876,12 +888,14 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
         {
           LONGEST deref_val_int = (LONGEST) unpack_pointer (type, valaddr);
+
           if (deref_val_int != 0)
             {
               struct value *deref_val =
                 ada_value_ind (value_from_longest
                                (lookup_pointer_type (elttype),
                                 deref_val_int));
+
               val_print (value_type (deref_val),
                          value_contents (deref_val), 0,
                          value_address (deref_val), stream, recurse + 1,
@@ -1098,6 +1112,7 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
       else
 	{
 	  struct value_print_options opts = *options;
+
 	  opts.deref_ref = 0;
 	  ada_val_print (TYPE_FIELD_TYPE (type, i),
 			 valaddr + TYPE_FIELD_BITPOS (type, i) / HOST_CHAR_BIT,

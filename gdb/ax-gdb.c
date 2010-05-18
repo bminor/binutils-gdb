@@ -219,6 +219,7 @@ const_expr (union exp_element **pc)
       {
 	struct type *type = (*pc)[1].type;
 	LONGEST k = (*pc)[2].longconst;
+
 	(*pc) += 4;
 	return value_from_longest (type, k);
       }
@@ -226,6 +227,7 @@ const_expr (union exp_element **pc)
     case OP_VAR_VALUE:
       {
 	struct value *v = const_var_ref ((*pc)[2].symbol);
+
 	(*pc) += 4;
 	return v;
       }
@@ -453,6 +455,7 @@ static void
 gen_extend (struct agent_expr *ax, struct type *type)
 {
   int bits = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+
   /* I just had to.  */
   ((TYPE_UNSIGNED (type) ? ax_zero_ext : ax_ext) (ax, bits));
 }
@@ -691,6 +694,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
       {
 	struct minimal_symbol *msym
 	  = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
+
 	if (!msym)
 	  error (_("Couldn't resolve symbol `%s'."), SYMBOL_PRINT_NAME (var));
 
@@ -818,6 +822,7 @@ gen_usual_unary (struct expression *exp, struct agent_expr *ax,
     case TYPE_CODE_ARRAY:
       {
 	struct type *elements = TYPE_TARGET_TYPE (value->type);
+
 	value->type = lookup_pointer_type (elements);
 	value->kind = axs_rvalue;
 	/* We don't need to generate any code; the address of the array
@@ -1238,8 +1243,7 @@ gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
 {
   /* Note that ops[i] fetches 8 << i bits.  */
   static enum agent_op ops[]
-  =
-  {aop_ref8, aop_ref16, aop_ref32, aop_ref64};
+    = {aop_ref8, aop_ref16, aop_ref32, aop_ref64};
   static int num_ops = (sizeof (ops) / sizeof (ops[0]));
 
   /* We don't want to touch any byte that the bitfield doesn't
@@ -1689,6 +1693,7 @@ gen_repeat (struct expression *exp, union exp_element **pc,
 	    struct agent_expr *ax, struct axs_value *value)
 {
   struct axs_value value1;
+
   /* We don't want to turn this into an rvalue, so no conversions
      here.  */
   gen_expr (exp, pc, ax, &value1);
@@ -1737,6 +1742,7 @@ gen_sizeof (struct expression *exp, union exp_element **pc,
      So we generate code for the operand, and then throw it away,
      replacing it with code that simply pushes its size.  */
   int start = ax->len;
+
   gen_expr (exp, pc, ax, value);
 
   /* Throw away the code we just generated.  */
@@ -1873,6 +1879,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	{
 	  char *name = internalvar_name ((*pc)[1].internalvar);
 	  struct trace_state_variable *tsv;
+
 	  (*pc) += 3;
 	  gen_expr (exp, pc, ax, value);
 	  tsv = find_trace_state_variable (name);
@@ -1898,6 +1905,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	{
 	  char *name = internalvar_name ((*pc)[1].internalvar);
 	  struct trace_state_variable *tsv;
+
 	  (*pc) += 3;
 	  tsv = find_trace_state_variable (name);
 	  if (tsv)
@@ -1944,6 +1952,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       {
 	struct type *type = (*pc)[1].type;
 	LONGEST k = (*pc)[2].longconst;
+
 	(*pc) += 4;
 	gen_int_literal (ax, value, k, type);
       }
@@ -1963,6 +1972,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       {
 	const char *name = &(*pc)[2].string;
 	int reg;
+
 	(*pc) += 4 + BYTES_TO_EXP_ELEM ((*pc)[1].longconst + 1);
 	reg = user_reg_map_name_to_regnum (exp->gdbarch, name, strlen (name));
 	if (reg == -1)
@@ -1982,6 +1992,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       {
 	const char *name = internalvar_name ((*pc)[1].internalvar);
 	struct trace_state_variable *tsv;
+
 	(*pc) += 3;
 	tsv = find_trace_state_variable (name);
 	if (tsv)
@@ -2008,6 +2019,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case UNOP_CAST:
       {
 	struct type *type = (*pc)[1].type;
+
 	(*pc) += 3;
 	gen_expr (exp, pc, ax, value);
 	gen_cast (ax, value, type);
@@ -2017,6 +2029,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case UNOP_MEMVAL:
       {
 	struct type *type = check_typedef ((*pc)[1].type);
+
 	(*pc) += 3;
 	gen_expr (exp, pc, ax, value);
 	/* I'm not sure I understand UNOP_MEMVAL entirely.  I think

@@ -240,6 +240,7 @@ target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
                   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   struct target_ops *t;
+
   for (t = ops; t != NULL; t = t->beneath)
     if (t->to_auxv_parse != NULL)
       return t->to_auxv_parse (t, readptr, endptr, typep, valp);
@@ -373,6 +374,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	case str:
 	  {
 	    struct value_print_options opts;
+
 	    get_user_print_options (&opts);
 	    if (opts.addressprint)
 	      fprintf_filtered (file, "%s", paddress (target_gdbarch, val));
@@ -400,6 +402,7 @@ info_auxv_command (char *cmd, int from_tty)
   else
     {
       int ents = fprint_target_auxv (gdb_stdout, &current_target);
+
       if (ents < 0)
 	error (_("No auxiliary vector found, or failed reading it."));
       else if (ents == 0)

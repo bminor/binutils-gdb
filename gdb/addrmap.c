@@ -224,8 +224,8 @@ static splay_tree_key
 allocate_key (struct addrmap_mutable *map, CORE_ADDR addr)
 {
   CORE_ADDR *key = obstack_alloc (map->obstack, sizeof (*key));
-  *key = addr;
 
+  *key = addr;
   return (splay_tree_key) key;
 }
 

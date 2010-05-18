@@ -151,6 +151,7 @@ print_range_bound (struct type *type, char *bounds, int *n,
 		   struct ui_file *stream)
 {
   LONGEST B;
+
   if (ada_scan_number (bounds, *n, &B, n))
     {
       /* STABS decodes all range types which bounds are 0 .. -1 as
@@ -363,6 +364,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	  else
 	    {
 	      int k;
+
 	      n_indices = TYPE_NFIELDS (range_desc_type);
 	      for (k = 0, arr_type = type;
 		   k < n_indices;
@@ -380,6 +382,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
       else
 	{
 	  int i, i0;
+
 	  for (i = i0 = ada_array_arity (type); i > 0; i -= 1)
 	    fprintf_filtered (stream, "%s<>", i == i0 ? "" : ", ");
 	}
@@ -435,6 +438,7 @@ print_choices (struct type *type, int field_num, struct ui_file *stream,
 	case 'S':
 	  {
 	    LONGEST W;
+
 	    if (!ada_scan_number (name, p + 1, &W, &p))
 	      goto Huh;
 	    ada_print_scalar (val_type, W, stream);
@@ -443,6 +447,7 @@ print_choices (struct type *type, int field_num, struct ui_file *stream,
 	case 'R':
 	  {
 	    LONGEST L, U;
+
 	    if (!ada_scan_number (name, p + 1, &L, &p)
 		|| name[p] != 'T' || !ada_scan_number (name, p + 1, &U, &p))
 	      goto Huh;
@@ -781,6 +786,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	else
 	  {
 	    char *name = ada_type_name (type);
+
 	    if (!ada_is_range_type_name (name))
 	      fprintf_filtered (stream, _("<%d-byte integer>"),
 				TYPE_LENGTH (type));

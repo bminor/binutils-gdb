@@ -1,3 +1,12 @@
+2010-05-18  Michael Snyder  <msnyder@vmware.com>
+
+	* ada-lang.c: White space.
+	* ada-typeprint.c: White space.
+	* ada-valprint.c: White space.
+	* addrmap.c: White space.
+	* auxv.c: White space.
+	* ax-gdb.c: White space.
+
 2010-05-18  Hui Zhu  <teawater@gmail.com>
 
 	* linux-fork.c (inferior_call_waitpid_cleanup): Add check

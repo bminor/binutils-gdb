@@ -377,6 +377,7 @@ static int
 field_name_match (const char *field_name, const char *target)
 {
   int len = strlen (target);
+
   return
     (strncmp (field_name, target, len) == 0
      && (field_name[len] == '\0'
@@ -422,6 +423,7 @@ ada_name_prefix_len (const char *name)
   else
     {
       const char *p = strstr (name, "___");
+
       if (p == NULL)
         return strlen (name);
       else
@@ -436,6 +438,7 @@ static int
 is_suffix (const char *str, const char *suffix)
 {
   int len1, len2;
+
   if (str == NULL)
     return 0;
   len1 = strlen (str);
@@ -506,8 +509,8 @@ static void
 lim_warning (const char *format, ...)
 {
   va_list args;
-  va_start (args, format);
 
+  va_start (args, format);
   warnings_issued += 1;
   if (warnings_issued <= warning_limit)
     vwarning (format, args);
@@ -531,6 +534,7 @@ static LONGEST
 max_of_size (int size)
 {
   LONGEST top_bit = (LONGEST) 1 << (size * 8 - 2);
+
   return top_bit | (top_bit - 1);
 }
 
@@ -546,6 +550,7 @@ static ULONGEST
 umax_of_size (int size)
 {
   ULONGEST top_bit = (ULONGEST) 1 << (size * 8 - 1);
+
   return top_bit | (top_bit - 1);
 }
 
@@ -781,6 +786,7 @@ ada_fold_name (const char *name)
   else
     {
       int i;
+
       for (i = 0; i <= len; i += 1)
         fold_buffer[i] = tolower (name[i]);
     }
@@ -811,6 +817,7 @@ ada_remove_trailing_digits (const char *encoded, int *len)
   if (*len > 1 && isdigit (encoded[*len - 1]))
     {
       int i = *len - 2;
+
       while (i > 0 && isdigit (encoded[i]))
         i--;
       if (i >= 0 && encoded[i] == '.')
@@ -967,6 +974,7 @@ ada_decode (const char *encoded)
       if (at_start_name && encoded[i] == 'O')
         {
           int k;
+
           for (k = 0; ada_opname_table[k].encoded != NULL; k += 1)
             {
               int op_len = strlen (ada_opname_table[k].encoded);
@@ -1143,12 +1151,15 @@ ada_decode_symbol (const struct general_symbol_info *gsymbol)
 {
   char **resultp =
     (char **) &gsymbol->language_specific.cplus_specific.demangled_name;
+
   if (*resultp == NULL)
     {
       const char *decoded = ada_decode (gsymbol->name);
+
       if (gsymbol->obj_section != NULL)
         {
 	  struct objfile *objf = gsymbol->obj_section->objfile;
+
 	  *resultp = obsavestring (decoded, strlen (decoded),
 				   &objf->objfile_obstack);
         }
@@ -1160,6 +1171,7 @@ ada_decode_symbol (const struct general_symbol_info *gsymbol)
         {
           char **slot = (char **) htab_find_slot (decoded_names_store,
                                                   decoded, INSERT);
+
           if (*slot == NULL)
             *slot = xstrdup (decoded);
           *resultp = *slot;
@@ -1192,6 +1204,7 @@ ada_match_name (const char *sym_name, const char *name, int wild)
   else
     {
       int len_name = strlen (name);
+
       return (strncmp (sym_name, name, len_name) == 0
               && is_name_suffix (sym_name + len_name))
         || (strncmp (sym_name, "_ada_", 5) == 0
@@ -1315,6 +1328,7 @@ static struct type *
 thin_descriptor_type (struct type *type)
 {
   struct type *base_type = desc_base_type (type);
+
   if (base_type == NULL)
     return NULL;
   if (is_suffix (ada_type_name (base_type), "___XVE"))
@@ -1322,6 +1336,7 @@ thin_descriptor_type (struct type *type)
   else
     {
       struct type *alt_type = ada_find_parallel_type (base_type, "___XVE");
+
       if (alt_type == NULL)
         return base_type;
       else
@@ -1336,6 +1351,7 @@ thin_data_pntr (struct value *val)
 {
   struct type *type = value_type (val);
   struct type *data_type = desc_data_target_type (thin_descriptor_type (type));
+
   data_type = lookup_pointer_type (data_type);
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
@@ -1391,6 +1407,7 @@ static struct value *
 desc_bounds (struct value *arr)
 {
   struct type *type = ada_check_typedef (value_type (arr));
+
   if (is_thin_pntr (type))
     {
       struct type *bounds_type =
@@ -1475,6 +1492,7 @@ static struct value *
 desc_data (struct value *arr)
 {
   struct type *type = value_type (arr);
+
   if (is_thin_pntr (type))
     return thin_data_pntr (arr);
   else if (is_thick_pntr (type))
@@ -1691,8 +1709,8 @@ ada_type_of_array (struct value *arr, int bounds)
           struct type *array_type = alloc_type_copy (value_type (arr));
           struct value *low = desc_one_bound (descriptor, arity, 0);
           struct value *high = desc_one_bound (descriptor, arity, 1);
-          arity -= 1;
 
+          arity -= 1;
           create_range_type (range_type, value_type (low),
                              longest_to_int (value_as_long (low)),
                              longest_to_int (value_as_long (high)));
@@ -1718,6 +1736,7 @@ ada_coerce_to_simple_array_ptr (struct value *arr)
   if (ada_is_array_descriptor_type (value_type (arr)))
     {
       struct type *arrType = ada_type_of_array (arr, 1);
+
       if (arrType == NULL)
         return NULL;
       return value_cast (arrType, value_copy (desc_data (arr)));
@@ -1738,6 +1757,7 @@ ada_coerce_to_simple_array (struct value *arr)
   if (ada_is_array_descriptor_type (value_type (arr)))
     {
       struct value *arrVal = ada_coerce_to_simple_array_ptr (arr);
+
       if (arrVal == NULL)
         error (_("Bounds unavailable for null array pointer."));
       check_size (TYPE_TARGET_TYPE (value_type (arrVal)));
@@ -2093,6 +2113,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   if (obj != NULL)
     {
       CORE_ADDR new_addr;
+
       set_value_component_location (v, obj);
       new_addr = value_address (obj) + offset;
       set_value_bitpos (v, bit_offset + value_bitpos (obj));
@@ -2169,6 +2190,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
         1;
       /* Sign-extend bits for this byte.  */
       unsigned int signMask = sign & ~unusedMSMask;
+
       accum |=
         (((bytes[src] >> unusedLS) & unusedMSMask) | signMask) << accumSize;
       accumSize += HOST_CHAR_BIT - unusedLS;
@@ -2221,6 +2243,7 @@ move_bits (gdb_byte *target, int targ_offset, const gdb_byte *source,
       while (n > 0)
         {
           int unused_right;
+
           accum = (accum << HOST_CHAR_BIT) + (unsigned char) *source;
           accum_bits += HOST_CHAR_BIT;
           source += 1;
@@ -2428,6 +2451,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
                        low, high);
   struct type *slice_type =
     create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+
   return value_at_lazy (slice_type, base);
 }
 
@@ -2440,6 +2464,7 @@ ada_value_slice (struct value *array, int low, int high)
     create_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
   struct type *slice_type =
     create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+
   return value_cast (slice_type, value_slice (array, low, high - low + 1));
 }
 
@@ -2647,6 +2672,7 @@ empty_array (struct type *arr_type, int low)
     create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type)),
                        low, low - 1);
   struct type *elt_type = ada_array_element_type (arr_type, 1);
+
   return allocate_value (create_array_type (NULL, elt_type, index_type));
 }
 
@@ -3131,7 +3157,8 @@ ada_args_match (struct symbol *func, struct value **actuals, int n_actuals)
         return 0;
       else
         {
-          struct type *ftype = ada_check_typedef (TYPE_FIELD_TYPE (func_type, i));
+          struct type *ftype = ada_check_typedef (TYPE_FIELD_TYPE (func_type,
+								   i));
           struct type *atype = ada_check_typedef (value_type (actuals[i]));
 
           if (!ada_type_match (ftype, atype, 1))
@@ -3239,6 +3266,7 @@ encoded_ordered_before (char *N0, char *N1)
   else
     {
       int k0, k1;
+
       for (k0 = strlen (N0) - 1; k0 > 0 && isdigit (N0[k0]); k0 -= 1)
         ;
       for (k1 = strlen (N1) - 1; k1 > 0 && isdigit (N1[k1]); k1 -= 1)
@@ -3247,6 +3275,7 @@ encoded_ordered_before (char *N0, char *N1)
           && (N1[k1] == '_' || N1[k1] == '$') && N1[k1 + 1] != '\000')
         {
           int n0, n1;
+
           n0 = k0;
           while (N0[n0] == '_' && n0 > 0 && N0[n0 - 1] == '_')
             n0 -= 1;
@@ -3267,6 +3296,7 @@ static void
 sort_choices (struct ada_symbol_info syms[], int nsyms)
 {
   int i;
+
   for (i = 1; i < nsyms; i += 1)
     {
       struct ada_symbol_info sym = syms[i];
@@ -3331,6 +3361,7 @@ See set/show multiple-symbol."));
         {
           struct symtab_and_line sal =
             find_function_start_sal (syms[i].sym, 1);
+
 	  if (sal.symtab == NULL)
 	    printf_unfiltered (_("[%d] %s at <no source file available>:%d\n"),
 			       i + first_choice,
@@ -3464,6 +3495,7 @@ get_selections (int *choices, int n_choices, int max_results,
       if (j < 0 || choice != choices[j])
         {
           int k;
+
           for (k = n_chosen - 1; k > j; k -= 1)
             choices[k + 1] = choices[k];
           choices[j + 1] = choice;
@@ -3883,6 +3915,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0,
 	   || TYPE_CODE (formal_type) == TYPE_CODE_REF)
     {
       struct value *result;
+
       if (TYPE_CODE (formal_target) == TYPE_CODE_ARRAY
           && ada_is_array_descriptor_type (actual_target))
 	result = desc_data (actual);
@@ -3891,6 +3924,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0,
           if (VALUE_LVAL (actual) != lval_memory)
             {
               struct value *val;
+
               actual_type = ada_check_typedef (value_type (actual));
               val = allocate_value (actual_type);
               memcpy ((char *) value_contents_raw (val),
@@ -4079,6 +4113,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
         char *name0 = SYMBOL_LINKAGE_NAME (sym0);
         char *name1 = SYMBOL_LINKAGE_NAME (sym1);
         int len0 = strlen (name0);
+
         return
           TYPE_CODE (type0) == TYPE_CODE (type1)
           && (equiv_types (type0, type1)
@@ -4206,6 +4241,7 @@ static int
 is_nondebugging_type (struct type *type)
 {
   char *name = ada_type_name (type);
+
   return (name != NULL && strcmp (name, "<variable, no debug info>") == 0);
 }
 
@@ -4441,6 +4477,7 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
 	{
 	  int name_len = suffix - name;
 	  int j;
+
 	  is_new_style_renaming = 1;
 	  for (j = 0; j < nsyms; j += 1)
 	    if (i != j && syms[j].sym != NULL
@@ -4489,6 +4526,7 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
           && old_renaming_is_invisible (syms[i].sym, current_function_name))
         {
           int j;
+
           for (j = i + 1; j < nsyms; j += 1)
             syms[j - 1] = syms[j];
           nsyms -= 1;
@@ -4553,6 +4591,7 @@ ada_add_psyms (struct objfile *objfile, struct symtab *s, void *user_data)
 {
   struct ada_psym_data *data = user_data;
   const int block_kind = data->global ? GLOBAL_BLOCK : STATIC_BLOCK;
+
   ada_add_block_symbols (data->obstackp,
 			 BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), block_kind),
 			 data->name, data->domain, objfile, data->wild_match);
@@ -4905,6 +4944,7 @@ wild_match (const char *patn0, int patn_len, const char *name0)
 {
   char* match;
   const char* start;
+
   start = name0;
   while (1)
     {
@@ -4946,6 +4986,7 @@ ada_add_block_symbols (struct obstack *obstackp,
   if (wild)
     {
       struct symbol *sym;
+
       ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
         if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
@@ -4974,6 +5015,7 @@ ada_add_block_symbols (struct obstack *obstackp,
                                    SYMBOL_DOMAIN (sym), domain))
           {
             int cmp = strncmp (name, SYMBOL_LINKAGE_NAME (sym), name_len);
+
             if (cmp == 0
                 && is_name_suffix (SYMBOL_LINKAGE_NAME (sym) + name_len))
               {
@@ -5215,6 +5257,7 @@ static void
 ada_add_partial_symbol_completions (const char *name, void *user_data)
 {
   struct add_partial_datum *data = user_data;
+
   symbol_completion_add (data->completions, name,
 			 data->text, data->text_len, data->text0, data->word,
 			 data->wild_match, data->encoded);
@@ -5429,6 +5472,7 @@ ada_is_tag_type (struct type *type)
   else
     {
       const char *name = ada_type_name (TYPE_TARGET_TYPE (type));
+
       return (name != NULL
               && strcmp (name, "ada__tags__dispatch_table") == 0);
     }
@@ -5461,6 +5505,7 @@ value_tag_from_contents_and_address (struct type *type,
 {
   int tag_byte_offset;
   struct type *tag_type;
+
   if (find_struct_field ("_tag", type, 0, &tag_type, &tag_byte_offset,
                          NULL, NULL, NULL))
     {
@@ -5478,6 +5523,7 @@ static struct type *
 type_from_tag (struct value *tag)
 {
   const char *type_name = ada_tag_name (tag);
+
   if (type_name != NULL)
     return ada_find_any_type (ada_encode (type_name));
   return NULL;
@@ -5505,6 +5551,7 @@ ada_tag_name_1 (void *args0)
   static char name[1024];
   char *p;
   struct value *val;
+
   args->name = NULL;
   val = ada_value_struct_elt (args->tag, "tsd", 1);
   if (val == NULL)
@@ -5562,6 +5609,7 @@ const char *
 ada_tag_name (struct value *tag)
 {
   struct tag_args args;
+
   if (!ada_is_tag_type (value_type (tag)))
     return NULL;
   args.tag = tag;
@@ -5607,6 +5655,7 @@ int
 ada_is_parent_field (struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (ada_check_typedef (type), field_num);
+
   return (name != NULL
           && (strncmp (name, "PARENT", 6) == 0
               || strncmp (name, "_parent", 7) == 0));
@@ -5622,6 +5671,7 @@ int
 ada_is_wrapper_field (struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (type, field_num);
+
   return (name != NULL
           && (strncmp (name, "PARENT", 6) == 0
               || strcmp (name, "REP") == 0
@@ -5637,6 +5687,7 @@ int
 ada_is_variant_part (struct type *type, int field_num)
 {
   struct type *field_type = TYPE_FIELD_TYPE (type, field_num);
+
   return (TYPE_CODE (field_type) == TYPE_CODE_UNION
           || (is_dynamic_field (type, field_num)
               && (TYPE_CODE (TYPE_TARGET_TYPE (field_type)) 
@@ -5652,6 +5703,7 @@ struct type *
 ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
 {
   char *name = ada_variant_discrim_name (var_type);
+
   return ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
 }
 
@@ -5663,6 +5715,7 @@ int
 ada_is_others_clause (struct type *type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (type, field_num);
+
   return (name != NULL && name[0] == 'O');
 }
 
@@ -5782,6 +5835,7 @@ ada_in_variant (LONGEST val, struct type *type, int field_num)
         case 'S':
           {
             LONGEST W;
+
             if (!ada_scan_number (name, p + 1, &W, &p))
               return 0;
             if (val == W)
@@ -5791,6 +5845,7 @@ ada_in_variant (LONGEST val, struct type *type, int field_num)
         case 'R':
           {
             LONGEST L, U;
+
             if (!ada_scan_number (name, p + 1, &L, &p)
                 || name[p] != 'T' || !ada_scan_number (name, p + 1, &U, &p))
               return 0;
@@ -5883,6 +5938,7 @@ find_struct_field (char *name, struct type *type, int offset,
       else if (name != NULL && field_name_match (t_field_name, name))
         {
           int bit_size = TYPE_FIELD_BITSIZE (type, i);
+
 	  if (field_type_p != NULL)
 	    *field_type_p = TYPE_FIELD_TYPE (type, i);
 	  if (byte_offset_p != NULL)
@@ -5930,6 +5986,7 @@ static int
 num_visible_fields (struct type *type)
 {
   int n;
+
   n = 0;
   find_struct_field (NULL, type, 0, NULL, NULL, NULL, NULL, &n);
   return n;
@@ -5946,8 +6003,8 @@ ada_search_struct_field (char *name, struct value *arg, int offset,
                          struct type *type)
 {
   int i;
-  type = ada_check_typedef (type);
 
+  type = ada_check_typedef (type);
   for (i = 0; i < TYPE_NFIELDS (type); i += 1)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
@@ -5964,6 +6021,7 @@ ada_search_struct_field (char *name, struct value *arg, int offset,
             ada_search_struct_field (name, arg,
                                      offset + TYPE_FIELD_BITPOS (type, i) / 8,
                                      TYPE_FIELD_TYPE (type, i));
+
           if (v != NULL)
             return v;
         }
@@ -5972,7 +6030,8 @@ ada_search_struct_field (char *name, struct value *arg, int offset,
         {
 	  /* PNH: Do we ever get here?  See find_struct_field. */
           int j;
-          struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type, i));
+          struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type,
+									i));
           int var_offset = offset + TYPE_FIELD_BITPOS (type, i) / 8;
 
           for (j = 0; j < TYPE_NFIELDS (field_type); j += 1)
@@ -5981,6 +6040,7 @@ ada_search_struct_field (char *name, struct value *arg, int offset,
                 (name, arg,
                  var_offset + TYPE_FIELD_BITPOS (field_type, j) / 8,
                  TYPE_FIELD_TYPE (field_type, j));
+
               if (v != NULL)
                 return v;
             }
@@ -6027,6 +6087,7 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
             ada_index_struct_field_1 (index_p, arg,
 				      offset + TYPE_FIELD_BITPOS (type, i) / 8,
 				      TYPE_FIELD_TYPE (type, i));
+
           if (v != NULL)
             return v;
         }
@@ -6233,7 +6294,8 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
       else if (ada_is_variant_part (type, i))
         {
           int j;
-          struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type, i));
+          struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type,
+									i));
 
           for (j = TYPE_NFIELDS (field_type) - 1; j >= 0; j -= 1)
             {
@@ -6294,6 +6356,7 @@ static int
 is_unchecked_variant (struct type *var_type, struct type *outer_type)
 {
   char *discrim_name = ada_variant_discrim_name (var_type);
+
   return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1, NULL) 
 	  == NULL);
 }
@@ -6378,6 +6441,7 @@ struct value *
 ada_value_ind (struct value *val0)
 {
   struct value *val = unwrap_value (value_ind (val0));
+
   return ada_to_fixed_value (val);
 }
 
@@ -6390,6 +6454,7 @@ ada_coerce_ref (struct value *val0)
   if (TYPE_CODE (value_type (val0)) == TYPE_CODE_REF)
     {
       struct value *val = val0;
+
       val = coerce_ref (val);
       val = unwrap_value (val);
       return ada_to_fixed_value (val);
@@ -6537,6 +6602,7 @@ find_old_style_renaming_symbol (const char *name, struct block *block)
   else
     {
       const int rename_len = strlen (name) + 6;
+
       rename = (char *) alloca (rename_len * sizeof (char));
       xsnprintf (rename, rename_len * sizeof (char), "%s___XR", name);
     }
@@ -6691,6 +6757,7 @@ dynamic_template_type (struct type *type)
   else
     {
       int len = strlen (ada_type_name (type));
+
       if (len > 6 && strcmp (ada_type_name (type) + len - 6, "___XVE") == 0)
         return type;
       else
@@ -6705,6 +6772,7 @@ static int
 is_dynamic_field (struct type *templ_type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (templ_type, field_num);
+
   return name != NULL
     && TYPE_CODE (TYPE_FIELD_TYPE (templ_type, field_num)) == TYPE_CODE_PTR
     && strstr (name, "___XVL") != NULL;
@@ -6735,6 +6803,7 @@ static struct type *
 empty_record (struct type *template)
 {
   struct type *type = alloc_type_copy (template);
+
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   TYPE_NFIELDS (type) = 0;
   TYPE_FIELDS (type) = NULL;
@@ -7072,6 +7141,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   if (branch_type == NULL)
     {
       int f;
+
       for (f = variant_field + 1; f < nfields; f += 1)
         TYPE_FIELDS (rtype)[f - 1] = TYPE_FIELDS (rtype)[f];
       TYPE_NFIELDS (rtype) -= 1;
@@ -7209,6 +7279,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   if (index_type_desc == NULL)
     {
       struct type *elt_type0 = ada_check_typedef (TYPE_TARGET_TYPE (type0));
+
       /* NOTE: elt_type---the fixed version of elt_type0---should never
          depend on the contents of the array in properly constructed
          debugging data.  */
@@ -7259,6 +7330,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
         {
           struct type *range_type =
             to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, i), dval);
+
           result = create_array_type (alloc_type_copy (elt_type0),
                                       result, range_type);
 	  elt_type0 = TYPE_TARGET_TYPE (elt_type0);
@@ -7313,6 +7385,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
         struct type *static_type = to_static_fixed_type (type);
         struct type *fixed_record_type =
           to_fixed_record_type (type, valaddr, address, NULL);
+
         /* If STATIC_TYPE is a tagged type and we know the object's address,
            then we can determine its tag, and compute the object's actual
            type from there. Note that we have to use the fixed record
@@ -7327,6 +7400,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
                              (fixed_record_type,
                               valaddr,
                               address));
+
             if (real_type != NULL)
               return to_fixed_record_type (real_type, valaddr, address, NULL);
           }
@@ -7452,6 +7526,7 @@ static_unwrap_type (struct type *type)
   else
     {
       struct type *raw_real_type = ada_get_base_type (type);
+
       if (raw_real_type == type)
         return type;
       else
@@ -7488,6 +7563,7 @@ ada_check_typedef (struct type *type)
     {
       char *name = TYPE_TAG_NAME (type);
       struct type *type1 = ada_find_any_type (name);
+
       return (type1 == NULL) ? type : type1;
     }
 }
@@ -7503,6 +7579,7 @@ ada_to_fixed_value_create (struct type *type0, CORE_ADDR address,
                            struct value *val0)
 {
   struct type *type = ada_to_fixed_type (type0, 0, address, NULL, 1);
+
   if (type == type0 && val0 != NULL)
     return val0;
   else
@@ -7599,6 +7676,7 @@ value_val_atr (struct type *type, struct value *arg)
   if (TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
       long pos = value_as_long (arg);
+
       if (pos < 0 || pos >= TYPE_NFIELDS (type))
         error (_("argument to 'VAL out of range"));
       return value_from_longest (type, TYPE_FIELD_BITPOS (type, pos));
@@ -7797,6 +7875,7 @@ ada_enum_name (const char *name)
   if (name[0] == 'Q')
     {
       int v;
+
       if (name[1] == 'U' || name[1] == 'W')
         {
           if (sscanf (name + 2, "%x", &v) != 1)
@@ -7849,10 +7928,12 @@ static struct value *
 unwrap_value (struct value *val)
 {
   struct type *type = ada_check_typedef (value_type (val));
+
   if (ada_is_aligner_type (type))
     {
       struct value *v = ada_value_struct_elt (val, "F", 0);
       struct type *val_type = ada_check_typedef (value_type (v));
+
       if (ada_type_name (val_type) == NULL)
         TYPE_NAME (val_type) = ada_type_name (type);
 
@@ -7891,6 +7972,7 @@ cast_to_fixed (struct type *type, struct value *arg)
   else
     {
       DOUBLEST argd = value_as_double (arg);
+
       val = ada_float_to_fixed (type, argd);
     }
 
@@ -7902,6 +7984,7 @@ cast_from_fixed (struct type *type, struct value *arg)
 {
   DOUBLEST val = ada_fixed_to_float (value_type (arg),
                                      value_as_long (arg));
+
   return value_from_double (type, val);
 }
 
@@ -7912,6 +7995,7 @@ static struct value *
 coerce_for_assign (struct type *type, struct value *val)
 {
   struct type *type2 = value_type (val);
+
   if (type == type2)
     return val;
 
@@ -8030,6 +8114,7 @@ static int
 num_component_specs (struct expression *exp, int pc)
 {
   int n, m, i;
+
   m = exp->elts[pc + 1].longconst;
   pc += 3;
   n = 0;
@@ -8061,10 +8146,12 @@ assign_component (struct value *container, struct value *lhs, LONGEST index,
 {
   struct value *mark = value_mark ();
   struct value *elt;
+
   if (TYPE_CODE (value_type (lhs)) == TYPE_CODE_ARRAY)
     {
       struct type *index_type = builtin_type (exp->gdbarch)->builtin_int;
       struct value *index_val = value_from_longest (index_type, index);
+
       elt = unwrap_value (ada_value_subscript (lhs, 1, &index_val));
     }
   else
@@ -8109,6 +8196,7 @@ assign_aggregate (struct value *container,
   if (noside != EVAL_NORMAL)
     {
       int i;
+
       for (i = 0; i < n; i += 1)
 	ada_evaluate_subexp (NULL, exp, pos, noside);
       return container;
@@ -8227,6 +8315,7 @@ aggregate_assign_from_choices (struct value *container,
     {
       LONGEST lower, upper;
       enum exp_opcode op = exp->elts[choice_pos].opcode;
+
       if (op == OP_DISCRETE_RANGE)
 	{
 	  choice_pos += 1;
@@ -8245,6 +8334,7 @@ aggregate_assign_from_choices (struct value *container,
 	{
 	  int ind;
 	  char *name;
+
 	  switch (op)
 	    {
 	    case OP_NAME:
@@ -8272,6 +8362,7 @@ aggregate_assign_from_choices (struct value *container,
       while (lower <= upper)
 	{
 	  int pos1;
+
 	  pos1 = expr_pc;
 	  assign_component (container, lhs, lower, exp, &pos1);
 	  lower += 1;
@@ -8296,9 +8387,11 @@ aggregate_assign_others (struct value *container,
   for (i = 0; i < num_indices - 2; i += 2)
     {
       LONGEST ind;
+
       for (ind = indices[i + 1] + 1; ind < indices[i + 2]; ind += 1)
 	{
 	  int pos;
+
 	  pos = expr_pc;
 	  assign_component (container, lhs, ind, exp, &pos);
 	}
@@ -8315,10 +8408,12 @@ add_component_interval (LONGEST low, LONGEST high,
 			LONGEST* indices, int *size, int max_size)
 {
   int i, j;
+
   for (i = 0; i < *size; i += 2) {
     if (high >= indices[i] && low <= indices[i + 1])
       {
 	int kh;
+
 	for (kh = i + 2; kh < *size; kh += 2)
 	  if (high < indices[kh])
 	    break;
@@ -8658,6 +8753,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case OP_STRING:
       {
         struct value *result;
+
         *pos -= 1;
         result = evaluate_subexp_standard (expect_type, exp, pos, noside);
         /* The result type will have code OP_STRING, bashed there from 
@@ -9025,6 +9121,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           evaluate_subexp (NULL_TYPE, exp, pos, noside);
         LONGEST low_bound;
         LONGEST high_bound;
+
         low_bound_val = coerce_ref (low_bound_val);
         high_bound_val = coerce_ref (high_bound_val);
         low_bound = pos_atr (low_bound_val);
@@ -9081,6 +9178,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                 struct type *arr_type0 =
                   to_fixed_array_type (TYPE_TARGET_TYPE (value_type (array)),
                                        NULL, 1);
+
                 return ada_value_slice_from_ptr (array, arr_type0,
                                                  longest_to_int (low_bound),
                                                  longest_to_int (high_bound));
@@ -9181,6 +9279,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case OP_ATR_LENGTH:
       {
         struct type *type_arg;
+
         if (exp->elts[*pos].opcode == OP_TYPE)
           {
             evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
@@ -9235,6 +9334,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           {
             struct type *range_type;
             char *name = ada_type_name (type_arg);
+
             range_type = NULL;
             if (name != NULL && TYPE_CODE (type_arg) != TYPE_CODE_ENUM)
               range_type = to_fixed_range_type (type_arg, NULL);
@@ -9317,8 +9417,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case OP_ATR_MODULUS:
       {
         struct type *type_arg = check_typedef (exp->elts[pc + 2].type);
-        evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
 
+        evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
         if (noside == EVAL_SKIP)
           goto nosideret;
 
@@ -9417,6 +9517,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             /* GDB allows dereferencing GNAT array descriptors.  */
             {
               struct type *arrType = ada_type_of_array (arg1, 0);
+
               if (arrType == NULL)
                 error (_("Attempt to dereference null array pointer."));
               return value_at_lazy (arrType, 0);
@@ -9479,6 +9580,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
         {
           struct type *type1 = value_type (arg1);
+
           if (ada_is_tagged_type (type1, 1))
             {
               type = ada_lookup_struct_elt_type (type1,
@@ -9560,6 +9662,7 @@ fixed_type_info (struct type *type)
   if ((code == TYPE_CODE_INT || code == TYPE_CODE_RANGE) && name != NULL)
     {
       const char *tail = strstr (name, "___XF_");
+
       if (tail == NULL)
         return NULL;
       else
@@ -9779,6 +9882,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
     {
       LONGEST L = ada_discrete_type_low_bound (raw_type);
       LONGEST U = ada_discrete_type_high_bound (raw_type);
+
       if (L < INT_MIN || U > INT_MAX)
 	return raw_type;
       else
@@ -9818,6 +9922,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       else
         {
           int ok;
+
           strcpy (name_buf + prefix_len, "___L");
           L = get_int_var_value (name_buf, &ok);
           if (!ok)
@@ -9836,6 +9941,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       else
         {
           int ok;
+
           strcpy (name_buf + prefix_len, "___U");
           U = get_int_var_value (name_buf, &ok);
           if (!ok)
@@ -11015,6 +11121,7 @@ ada_forward_operator_length (struct expression *exp, int pc,
     case OP_NAME:
       {
 	int len = longest_to_int (exp->elts[pc + 1].longconst);
+
 	*oplenp = 4 + BYTES_TO_EXP_ELEM (len + 1);
 	*argsp = 0;
 	break;
@@ -11076,6 +11183,7 @@ ada_dump_subexp_body (struct expression *exp, struct ui_file *stream, int elt)
       {
 	char *name = &exp->elts[elt + 2].string;
 	int len = longest_to_int (exp->elts[elt + 1].longconst);
+
 	fprintf_filtered (stream, "Text: `%.*s'", len, name);
 	break;
       }
@@ -11162,6 +11270,7 @@ ada_print_subexp (struct expression *exp, int *pos,
       if (nargs > 1)
         {
           int tem;
+
           for (tem = 1; tem < nargs; tem += 1)
             {
               fputs_filtered ((tem == 1) ? " (" : ", ", stream);
@@ -11283,6 +11392,7 @@ ada_language_arch_info (struct gdbarch *gdbarch,
 			struct language_arch_info *lai)
 {
   const struct builtin_type *builtin = builtin_type (gdbarch);
+
   lai->primitive_type_vector
     = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_ada_primitive_types + 1,
 			      struct type *);
