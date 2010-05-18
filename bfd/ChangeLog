@@ -1,5 +1,15 @@
 2010-05-18  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (_bfd_vms_write_emh): New function.
+	(_bfd_vms_write_lmn): New function.
+	(_bfd_vms_write_eeom): Moved.
+	(hash_string): Likewise.
+	(_bfd_vms_length_hash_symbol): Likewise.
+	(_bfd_vms_write_ehdr): Code moved to _bfd_vms_write_emh
+	and _bfd_vms_write_lmn, and call these functions.
+
+2010-05-18  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (evax_bfd_print_dst): Handle INCR_LINUM_L.
 	Add details in the messages.
 	(evax_bfd_print_image): Change message.

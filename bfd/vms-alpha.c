@@ -2555,6 +2555,178 @@ alpha_vms_object_p (bfd *abfd)
 
 /* Image write.  */
 
+/* Write an EMH/MHD record.  */
+
+static void
+_bfd_vms_write_emh (bfd *abfd)
+{
+  struct vms_rec_wr *recwr = &PRIV (recwr);
+
+  _bfd_vms_output_alignment (recwr, 2);
+
+  /* EMH.  */
+  _bfd_vms_output_begin (recwr, EOBJ__C_EMH);
+  _bfd_vms_output_short (recwr, EMH__C_MHD);
+  _bfd_vms_output_short (recwr, EOBJ__C_STRLVL);
+  _bfd_vms_output_long (recwr, 0);
+  _bfd_vms_output_long (recwr, 0);
+  _bfd_vms_output_long (recwr, MAX_OUTREC_SIZE);
+
+  /* Create module name from filename.  */
+  if (bfd_get_filename (abfd) != 0)
+    {
+      char *module = vms_get_module_name (bfd_get_filename (abfd), TRUE);
+      _bfd_vms_output_counted (recwr, module);
+      free (module);
+    }
+  else
+    _bfd_vms_output_counted (recwr, "NONAME");
+
+  _bfd_vms_output_counted (recwr, BFD_VERSION_STRING);
+  _bfd_vms_output_dump (recwr, get_vms_time_string (), EMH_DATE_LENGTH);
+  _bfd_vms_output_fill (recwr, 0, EMH_DATE_LENGTH);
+  _bfd_vms_output_end (abfd, recwr);
+}
+
+/* Write an EMH/LMN record.  */
+
+static void
+_bfd_vms_write_lmn (bfd *abfd, const char *name)
+{
+  char version [64];
+  struct vms_rec_wr *recwr = &PRIV (recwr);
+  unsigned int ver = BFD_VERSION / 10000;
+
+  /* LMN.  */
+  _bfd_vms_output_begin (recwr, EOBJ__C_EMH);
+  _bfd_vms_output_short (recwr, EMH__C_LNM);
+  snprintf (version, sizeof (version), "%s %d.%d.%d", name,
+            ver / 10000, (ver / 100) % 100, ver % 100);
+  _bfd_vms_output_dump (recwr, (unsigned char *)version, strlen (version));
+  _bfd_vms_output_end (abfd, recwr);
+}
+
+
+/* Write eom record for bfd abfd.  Return FALSE on error.  */
+
+static bfd_boolean
+_bfd_vms_write_eeom (bfd *abfd)
+{
+  struct vms_rec_wr *recwr = &PRIV (recwr);
+
+  vms_debug2 ((2, "vms_write_eeom\n"));
+
+  _bfd_vms_output_alignment (recwr, 2);
+
+  _bfd_vms_output_begin (recwr, EOBJ__C_EEOM);
+  _bfd_vms_output_long (recwr, (unsigned long) (PRIV (vms_linkage_index) >> 1));
+  _bfd_vms_output_byte (recwr, 0);	/* Completion code.  */
+  _bfd_vms_output_byte (recwr, 0);	/* Fill byte.  */
+
+  if ((abfd->flags & EXEC_P) == 0
+      && bfd_get_start_address (abfd) != (bfd_vma)-1)
+    {
+      asection *section;
+
+      section = bfd_get_section_by_name (abfd, ".link");
+      if (section == 0)
+	{
+	  bfd_set_error (bfd_error_nonrepresentable_section);
+	  return FALSE;
+	}
+      _bfd_vms_output_short (recwr, 0);
+      _bfd_vms_output_long (recwr, (unsigned long) (section->index));
+      _bfd_vms_output_long (recwr,
+			     (unsigned long) bfd_get_start_address (abfd));
+      _bfd_vms_output_long (recwr, 0);
+    }
+
+  _bfd_vms_output_end (abfd, recwr);
+  return TRUE;
+}
+
+/* This hash routine borrowed from GNU-EMACS, and strengthened
+   slightly.  ERY.  */
+
+static int
+hash_string (const char *ptr)
+{
+  const unsigned char *p = (unsigned char *) ptr;
+  const unsigned char *end = p + strlen (ptr);
+  unsigned char c;
+  int hash = 0;
+
+  while (p != end)
+    {
+      c = *p++;
+      hash = ((hash << 3) + (hash << 15) + (hash >> 28) + c);
+    }
+  return hash;
+}
+
+/* Generate a length-hashed VMS symbol name (limited to maxlen chars).  */
+
+static char *
+_bfd_vms_length_hash_symbol (bfd *abfd, const char *in, int maxlen)
+{
+  unsigned long result;
+  int in_len;
+  char *new_name;
+  const char *old_name;
+  int i;
+  static char outbuf[EOBJ__C_SYMSIZ + 1];
+  char *out = outbuf;
+
+#if VMS_DEBUG
+  vms_debug (4, "_bfd_vms_length_hash_symbol \"%s\"\n", in);
+#endif
+
+  if (maxlen > EOBJ__C_SYMSIZ)
+    maxlen = EOBJ__C_SYMSIZ;
+
+  /* Save this for later.  */
+  new_name = out;
+
+  /* We may need to truncate the symbol, save the hash for later.  */
+  in_len = strlen (in);
+
+  result = (in_len > maxlen) ? hash_string (in) : 0;
+
+  old_name = in;
+
+  /* Do the length checking.  */
+  if (in_len <= maxlen)
+    i = in_len;
+  else
+    {
+      if (PRIV (flag_hash_long_names))
+	i = maxlen - 9;
+      else
+	i = maxlen;
+    }
+
+  strncpy (out, in, (size_t) i);
+  in += i;
+  out += i;
+
+  if ((in_len > maxlen)
+      && PRIV (flag_hash_long_names))
+    sprintf (out, "_%08lx", result);
+  else
+    *out = 0;
+
+#if VMS_DEBUG
+  vms_debug (4, "--> [%d]\"%s\"\n", (int)strlen (outbuf), outbuf);
+#endif
+
+  if (in_len > maxlen
+	&& PRIV (flag_hash_long_names)
+	&& PRIV (flag_show_after_trunc))
+    printf (_("Symbol %s replaced by %s\n"), old_name, new_name);
+
+  return outbuf;
+}
+
 static void
 vector_grow1 (struct vector_type *vec, size_t elsz)
 {
@@ -2988,88 +3160,6 @@ alpha_vms_write_exec (bfd *abfd)
 
 /* Object write.  */
 
-/* This hash routine borrowed from GNU-EMACS, and strengthened
-   slightly.  ERY.  */
-
-static int
-hash_string (const char *ptr)
-{
-  const unsigned char *p = (unsigned char *) ptr;
-  const unsigned char *end = p + strlen (ptr);
-  unsigned char c;
-  int hash = 0;
-
-  while (p != end)
-    {
-      c = *p++;
-      hash = ((hash << 3) + (hash << 15) + (hash >> 28) + c);
-    }
-  return hash;
-}
-
-/* Generate a length-hashed VMS symbol name (limited to maxlen chars).  */
-
-static char *
-_bfd_vms_length_hash_symbol (bfd *abfd, const char *in, int maxlen)
-{
-  unsigned long result;
-  int in_len;
-  char *new_name;
-  const char *old_name;
-  int i;
-  static char outbuf[EOBJ__C_SYMSIZ + 1];
-  char *out = outbuf;
-
-#if VMS_DEBUG
-  vms_debug (4, "_bfd_vms_length_hash_symbol \"%s\"\n", in);
-#endif
-
-  if (maxlen > EOBJ__C_SYMSIZ)
-    maxlen = EOBJ__C_SYMSIZ;
-
-  /* Save this for later.  */
-  new_name = out;
-
-  /* We may need to truncate the symbol, save the hash for later.  */
-  in_len = strlen (in);
-
-  result = (in_len > maxlen) ? hash_string (in) : 0;
-
-  old_name = in;
-
-  /* Do the length checking.  */
-  if (in_len <= maxlen)
-    i = in_len;
-  else
-    {
-      if (PRIV (flag_hash_long_names))
-	i = maxlen - 9;
-      else
-	i = maxlen;
-    }
-
-  strncpy (out, in, (size_t) i);
-  in += i;
-  out += i;
-
-  if ((in_len > maxlen)
-      && PRIV (flag_hash_long_names))
-    sprintf (out, "_%08lx", result);
-  else
-    *out = 0;
-
-#if VMS_DEBUG
-  vms_debug (4, "--> [%d]\"%s\"\n", (int)strlen (outbuf), outbuf);
-#endif
-
-  if (in_len > maxlen
-	&& PRIV (flag_hash_long_names)
-	&& PRIV (flag_show_after_trunc))
-    printf (_("Symbol %s replaced by %s\n"), old_name, new_name);
-
-  return outbuf;
-}
-
 /* Write section and symbol directory of bfd abfd.  Return FALSE on error.  */
 
 static bfd_boolean
@@ -3297,42 +3387,14 @@ _bfd_vms_write_ehdr (bfd *abfd)
   unsigned int symnum;
   int had_case = 0;
   int had_file = 0;
-  char version [256];
   struct vms_rec_wr *recwr = &PRIV (recwr);
 
   vms_debug2 ((2, "vms_write_ehdr (%p)\n", abfd));
 
   _bfd_vms_output_alignment (recwr, 2);
 
-  /* EMH.  */
-  _bfd_vms_output_begin (recwr, EOBJ__C_EMH);
-  _bfd_vms_output_short (recwr, EMH__C_MHD);
-  _bfd_vms_output_short (recwr, EOBJ__C_STRLVL);
-  _bfd_vms_output_long (recwr, 0);
-  _bfd_vms_output_long (recwr, 0);
-  _bfd_vms_output_long (recwr, MAX_OUTREC_SIZE);
-
-  /* Create module name from filename.  */
-  if (bfd_get_filename (abfd) != 0)
-    {
-      char *module = vms_get_module_name (bfd_get_filename (abfd), TRUE);
-      _bfd_vms_output_counted (recwr, module);
-      free (module);
-    }
-  else
-    _bfd_vms_output_counted (recwr, "NONAME");
-
-  _bfd_vms_output_counted (recwr, BFD_VERSION_STRING);
-  _bfd_vms_output_dump (recwr, get_vms_time_string (), EMH_DATE_LENGTH);
-  _bfd_vms_output_fill (recwr, 0, EMH_DATE_LENGTH);
-  _bfd_vms_output_end (abfd, recwr);
-
-  /* LMN.  */
-  _bfd_vms_output_begin (recwr, EOBJ__C_EMH);
-  _bfd_vms_output_short (recwr, EMH__C_LNM);
-  snprintf (version, sizeof (version), "GAS BFD v%s", BFD_VERSION_STRING);
-  _bfd_vms_output_dump (recwr, (unsigned char *)version, strlen (version));
-  _bfd_vms_output_end (abfd, recwr);
+  _bfd_vms_write_emh (abfd);
+  _bfd_vms_write_lmn (abfd, "GNU AS");
 
   /* SRC.  */
   _bfd_vms_output_begin (recwr, EOBJ__C_EMH);
@@ -3861,41 +3923,6 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
     }
 
   _bfd_vms_output_alignment (recwr, 2);
-  return TRUE;
-}
-
-/* Write eom record for bfd abfd.  Return FALSE on error.  */
-
-static bfd_boolean
-_bfd_vms_write_eeom (bfd *abfd)
-{
-  struct vms_rec_wr *recwr = &PRIV (recwr);
-
-  vms_debug2 ((2, "vms_write_eeom\n"));
-
-  _bfd_vms_output_begin (recwr, EOBJ__C_EEOM);
-  _bfd_vms_output_long (recwr, (unsigned long) (PRIV (vms_linkage_index) >> 1));
-  _bfd_vms_output_byte (recwr, 0);	/* Completion code.  */
-  _bfd_vms_output_byte (recwr, 0);	/* Fill byte.  */
-
-  if (bfd_get_start_address (abfd) != (bfd_vma)-1)
-    {
-      asection *section;
-
-      section = bfd_get_section_by_name (abfd, ".link");
-      if (section == 0)
-	{
-	  bfd_set_error (bfd_error_nonrepresentable_section);
-	  return FALSE;
-	}
-      _bfd_vms_output_short (recwr, 0);
-      _bfd_vms_output_long (recwr, (unsigned long) (section->index));
-      _bfd_vms_output_long (recwr,
-			     (unsigned long) bfd_get_start_address (abfd));
-      _bfd_vms_output_long (recwr, 0);
-    }
-
-  _bfd_vms_output_end (abfd, recwr);
   return TRUE;
 }
 
