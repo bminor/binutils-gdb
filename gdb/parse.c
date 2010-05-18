@@ -1510,8 +1510,7 @@ exp_iterate (struct expression *exp,
     {
       int pos, args, oplen = 0;
 
-      exp->language_defn->la_exp_desc->operator_length (exp, endpos,
-							&oplen, &args);
+      operator_length (exp, endpos, &oplen, &args);
       gdb_assert (oplen > 0);
 
       pos = endpos - oplen;

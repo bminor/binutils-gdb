@@ -1,3 +1,9 @@
+2010-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	Code cleanup.
+	* parse.c (exp_iterate): Use operator_length wrapper function.
+
 2010-05-18  Michael Snyder  <msnyder@vmware.com>
 
 	* ada-lang.c: White space.
