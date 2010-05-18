@@ -800,6 +800,10 @@ class General_options
   DEFINE_dirlist(library_path, options::TWO_DASHES, 'L',
                  N_("Add directory to search path"), N_("DIR"));
 
+  DEFINE_bool(nostdlib, options::ONE_DASH, '\0', false,
+              N_(" Only search directories specified on the command line."),
+              NULL);
+
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
                 N_("Ignored for compatibility"), N_("EMULATION"));
 

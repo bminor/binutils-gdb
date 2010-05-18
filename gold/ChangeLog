@@ -1,3 +1,9 @@
+2010-05-18  Rafael Espindola  <espindola@google.com>
+
+	* options.cc (General_options::finalize): Handle -nostdlib.
+	* options.h (nostdlib): New option.
+	* script.cc (script_add_search_dir): Handle -nostdlib.
+
 2010-05-12  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_finalize_sections): Create an empty

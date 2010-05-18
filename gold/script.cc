@@ -2767,7 +2767,7 @@ script_add_search_dir(void* closurev, const char* option, size_t length)
     gold_warning(_("%s:%d:%d: ignoring SEARCH_DIR; SEARCH_DIR is only valid"
 		   " for scripts specified via -T/--script"),
 		 closure->filename(), closure->lineno(), closure->charpos());
-  else
+  else if (!closure->command_line()->options().nostdlib())
     {
       std::string s = "-L" + std::string(option, length);
       script_parse_option(closurev, s.c_str(), s.size());

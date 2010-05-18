@@ -1074,7 +1074,7 @@ General_options::finalize()
 	}
       while (next_pos != std::string::npos);
     }
-  else
+  else if (!this->nostdlib())
     {
       // Even if they don't specify it, we add -L /lib and -L /usr/lib.
       // FIXME: We should only do this when configured in native mode.
