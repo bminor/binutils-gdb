@@ -375,9 +375,6 @@ i370_elf_section_from_shdr (bfd *abfd,
 
   newsect = hdr->bfd_section;
   flags = bfd_get_section_flags (abfd, newsect);
-  if (hdr->sh_flags & SHF_EXCLUDE)
-    flags |= SEC_EXCLUDE;
-
   if (hdr->sh_type == SHT_ORDERED)
     flags |= SEC_SORT_ENTRIES;
 

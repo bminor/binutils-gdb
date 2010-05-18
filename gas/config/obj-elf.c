@@ -673,6 +673,7 @@ obj_elf_change_section (const char *name,
 	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0)
 	   | ((attr & SHF_MERGE) ? SEC_MERGE : 0)
 	   | ((attr & SHF_STRINGS) ? SEC_STRINGS : 0)
+	   | ((attr & SHF_EXCLUDE) ? SEC_EXCLUDE: 0)
 	   | ((attr & SHF_TLS) ? SEC_THREAD_LOCAL : 0));
 #ifdef md_elf_section_flags
   flags = md_elf_section_flags (flags, attr, type);
@@ -745,6 +746,9 @@ obj_elf_parse_section_letters (char *str, size_t len)
 	case 'a':
 	  attr |= SHF_ALLOC;
 	  break;
+	case 'e':
+	  attr |= SHF_EXCLUDE;
+	  break;
 	case 'w':
 	  attr |= SHF_WRITE;
 	  break;
@@ -777,7 +781,7 @@ obj_elf_parse_section_letters (char *str, size_t len)
 	    }
 	default:
 	  {
-	    char *bad_msg = _("unrecognized .section attribute: want a,w,x,M,S,G,T");
+	    char *bad_msg = _("unrecognized .section attribute: want a,e,w,x,M,S,G,T");
 #ifdef md_elf_section_letter
 	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr > 0)
@@ -834,6 +838,8 @@ obj_elf_section_word (char *str, size_t len, int *type)
     return SHF_ALLOC;
   if (len == 9 && strncmp (str, "execinstr", 9) == 0)
     return SHF_EXECINSTR;
+  if (len == 7 && strncmp (str, "exclude", 7) == 0)
+    return SHF_EXCLUDE;
   if (len == 3 && strncmp (str, "tls", 3) == 0)
     return SHF_TLS;
 

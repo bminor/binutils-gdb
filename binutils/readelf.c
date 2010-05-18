@@ -4152,8 +4152,9 @@ get_elf_section_flags (bfd_vma sh_flags)
       /* 15 */ { STRING_COMMA_LEN ("VMS_VECTOR") },
       /* 16 */ { STRING_COMMA_LEN ("VMS_ALLOC_64BIT") },
       /* 17 */ { STRING_COMMA_LEN ("VMS_PROTECTED") },
-      /* SPARC specific.  */
+      /* Generic.  */
       /* 18 */ { STRING_COMMA_LEN ("EXCLUDE") },
+      /* SPARC specific.  */
       /* 19 */ { STRING_COMMA_LEN ("ORDERED") }
     };
 
@@ -4185,6 +4186,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 	    case SHF_OS_NONCONFORMING:	sindex = 7; break;
 	    case SHF_GROUP:		sindex = 8; break;
 	    case SHF_TLS:		sindex = 9; break;
+	    case SHF_EXCLUDE:		sindex = 18; break;
 
 	    default:
 	      sindex = -1;
@@ -4218,9 +4220,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 		case EM_SPARC32PLUS:
 		case EM_SPARCV9:
 		case EM_SPARC:
-		  if (flag == SHF_EXCLUDE)
-		    sindex = 18;
-		  else if (flag == SHF_ORDERED)
+		  if (flag == SHF_ORDERED)
 		    sindex = 19;
 		  break;
 		default:
@@ -4263,6 +4263,7 @@ get_elf_section_flags (bfd_vma sh_flags)
 	    case SHF_OS_NONCONFORMING:	*p = 'O'; break;
 	    case SHF_GROUP:		*p = 'G'; break;
 	    case SHF_TLS:		*p = 'T'; break;
+	    case SHF_EXCLUDE:		*p = 'E'; break;
 
 	    default:
 	      if ((elf_header.e_machine == EM_X86_64

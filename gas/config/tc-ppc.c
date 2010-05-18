@@ -3089,26 +3089,7 @@ ppc_macro (char *str, const struct powerpc_macro *macro)
 }
 
 #ifdef OBJ_ELF
-/* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED.  */
-
-bfd_vma
-ppc_section_letter (int letter, char **ptr_msg)
-{
-  if (letter == 'e')
-    return SHF_EXCLUDE;
-
-  *ptr_msg = _("Bad .section directive: want a,e,w,x,M,S,G,T in string");
-  return -1;
-}
-
-bfd_vma
-ppc_section_word (char *str, size_t len)
-{
-  if (len == 7 && strncmp (str, "exclude", 7) == 0)
-    return SHF_EXCLUDE;
-
-  return -1;
-}
+/* For ELF, add support for SHT_ORDERED.  */
 
 int
 ppc_section_type (char *str, size_t len)
@@ -3124,9 +3105,6 @@ ppc_section_flags (flagword flags, bfd_vma attr, int type)
 {
   if (type == SHT_ORDERED)
     flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
-
-  if (attr & SHF_EXCLUDE)
-    flags |= SEC_EXCLUDE;
 
   return flags;
 }

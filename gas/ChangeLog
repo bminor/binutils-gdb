@@ -1,3 +1,19 @@
+2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11600
+	* obj-elf.c (obj_elf_change_section): Handle SHF_EXCLUDE.
+	(obj_elf_parse_section_letters): Likewise.
+	(obj_elf_section_word): Likewise.
+
+	* config/tc-ppc.c (ppc_section_letter): Removed.
+	(ppc_section_word): Likewise.
+	* config/tc-ppc.h (ppc_section_letter): Likewise.
+	(ppc_section_word): Likewise.
+	(md_elf_section_letter): Likewise.
+	(md_elf_section_word): Likewise.
+
+	* doc/as.texinfo: Document `e' and `#exclude'.
+
 2010-05-13  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-arm.c (md_assemble): Clarify current mode in error

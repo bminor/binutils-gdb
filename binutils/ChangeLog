@@ -1,3 +1,9 @@
+2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11600
+	* readelf.c (get_elf_section_flags): Treat SHF_EXCLUDE as a
+	generic flag.
+
 2010-05-07  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.in: Regenerate with automake 1.11.1.

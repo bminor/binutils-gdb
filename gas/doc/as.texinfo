@@ -5874,6 +5874,8 @@ combination of the following characters:
 @table @code
 @item a
 section is allocatable
+@item e
+section is excluded from executable and shared library.
 @item w
 section is writable
 @item x
@@ -5971,6 +5973,8 @@ section is allocatable
 section is writable
 @item #execinstr
 section is executable
+@item #exclude
+section is excluded from executable and shared library.
 @item #tls
 section is used for thread local storage
 @end table

@@ -876,6 +876,8 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       return FALSE;
   if ((hdr->sh_flags & SHF_TLS) != 0)
     flags |= SEC_THREAD_LOCAL;
+  if ((hdr->sh_flags & SHF_EXCLUDE) != 0)
+    flags |= SEC_EXCLUDE;
 
   if ((flags & SEC_ALLOC) == 0)
     {
@@ -2627,6 +2629,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
 	    }
 	}
     }
+  if ((asect->flags & (SEC_GROUP | SEC_EXCLUDE)) == SEC_EXCLUDE)
+    this_hdr->sh_flags |= SHF_EXCLUDE;
 
   /* Check for processor-specific section types.  */
   sh_type = this_hdr->sh_type;

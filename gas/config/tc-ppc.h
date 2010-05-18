@@ -206,15 +206,11 @@ extern const char       ppc_symbol_chars[];
 
 #ifdef OBJ_ELF
 
-/* Support for SHF_EXCLUDE and SHT_ORDERED */
-extern bfd_vma ppc_section_letter (int, char **);
+/* Support for SHT_ORDERED */
 extern int ppc_section_type (char *, size_t);
-extern bfd_vma ppc_section_word (char *, size_t);
 extern int ppc_section_flags (flagword, bfd_vma, int);
 
-#define md_elf_section_letter(LETTER, PTR_MSG)	ppc_section_letter (LETTER, PTR_MSG)
 #define md_elf_section_type(STR, LEN)		ppc_section_type (STR, LEN)
-#define md_elf_section_word(STR, LEN)		ppc_section_word (STR, LEN)
 #define md_elf_section_flags(FLAGS, ATTR, TYPE)	ppc_section_flags (FLAGS, ATTR, TYPE)
 
 #define tc_comment_chars ppc_comment_chars

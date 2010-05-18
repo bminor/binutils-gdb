@@ -1,3 +1,11 @@
+2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11600
+	* ld-elf/exclude3.s: New.
+	* ld-elf/exclude3a.d: Likewise.
+	* ld-elf/exclude3b.d: Likewise.
+	* ld-elf/exclude3c.d: Likewise.
+
 2010-05-11  Andrew Stubbs  <ams@codesourcery.com>
 
 	* ld-arm/attr-merge-2.attr: Add Tag_DIV_use.

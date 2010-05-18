@@ -1,3 +1,13 @@
+2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11600
+	* binutils-all/objcopy.exp: Run exclude-1a and exclude-1b for
+	ELF targets.
+
+	* binutils-all/exclude-1.s: New.
+	* binutils-all/exclude-1a.d: Likewise.
+	* binutils-all/exclude-1b.d: Likewise.
+
 2010-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/dlltool.exp: Add a missing `"'.

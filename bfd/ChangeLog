@@ -1,3 +1,13 @@
+2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11600
+	* elf.c (_bfd_elf_make_section_from_shdr): Handle SHF_EXCLUDE
+	(elf_fake_sections): Likewise.
+
+	* elf32-i370.c (i370_elf_section_from_shdr): Don't handle
+	SHF_EXCLUDE here.
+	* elf32-ppc.c (ppc_elf_fake_sections): Likewise.
+
 2010-05-17  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c: Include esgps.h and eidc.h.

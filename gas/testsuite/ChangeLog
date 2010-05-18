@@ -1,3 +1,11 @@
+2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11600
+	* gas/elf/elf.exp: Run section8.
+
+	* gas/elf/section8.d: New.
+	* gas/elf/section8.s: Likewise.
+
 2010-05-13  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/arm/armv1-bad.l: Adjust expected error text.

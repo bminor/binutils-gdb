@@ -157,4 +157,5 @@ if { ([istarget "*-*-*elf*"]
 
     run_dump_test "section6" 
     run_dump_test "section7" 
+    run_dump_test "section8" 
 }
