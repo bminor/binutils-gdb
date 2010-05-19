@@ -1,3 +1,8 @@
+2010-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Enable divdeu, devweu, divde,
+	divwe, divdeuo, divweuo, divdeo, divweo for A2.  Add icswepx.
+
 2010-05-13  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes): Correct wclr encoding.
