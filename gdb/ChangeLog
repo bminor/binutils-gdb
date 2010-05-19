@@ -1,3 +1,9 @@
+2010-05-19  Doug Evans  <dje@google.com>
+
+	* python.c (source_python_script): Add comment.
+	(source_python_script_for_objfile): Remove unnecessary call to
+	gdbpy_print_stack.
+
 2010-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 

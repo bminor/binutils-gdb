@@ -377,6 +377,8 @@ source_python_script (FILE *stream, const char *file)
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
 
+  /* Note: If an exception occurs python will print the traceback and
+     clear the error indicator.  */
   PyRun_SimpleFile (stream, file);
 
   do_cleanups (cleanup);
@@ -480,10 +482,9 @@ source_python_script_for_objfile (struct objfile *objfile,
   cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
   gdbpy_current_objfile = objfile;
 
-  /* We don't want to throw an exception here -- but the user
-     would like to know that something went wrong.  */
-  if (PyRun_SimpleFile (stream, file))
-    gdbpy_print_stack ();
+  /* Note: If an exception occurs python will print the traceback and
+     clear the error indicator.  */
+  PyRun_SimpleFile (stream, file);
 
   do_cleanups (cleanups);
   gdbpy_current_objfile = NULL;
