@@ -1,3 +1,13 @@
+2010-05-19  Rafael Espindola  <espindola@google.com>
+
+	* script-sections.cc (Output_section_definition::allocate_to_segment):
+	Update the phdrs_list even when the output section is NULL.
+	* testsuite/Makefile.am: Add test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_9.cc: New.
+	* testsuite/script_test_9.sh: New.
+	* testsuite/script_test_9.t: New.
+
 2010-05-19  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_input_section::original_size): New method.

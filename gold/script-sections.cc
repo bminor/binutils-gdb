@@ -2169,13 +2169,16 @@ Output_section*
 Output_section_definition::allocate_to_segment(String_list** phdrs_list,
 					       bool* orphan)
 {
+  // Update phdrs_list even if we don't have an output section. It
+  // might be used by the following sections.
+  if (this->phdrs_ != NULL)
+    *phdrs_list = this->phdrs_;
+
   if (this->output_section_ == NULL)
     return NULL;
   if ((this->output_section_->flags() & elfcpp::SHF_ALLOC) == 0)
     return NULL;
   *orphan = false;
-  if (this->phdrs_ != NULL)
-    *phdrs_list = this->phdrs_;
   return this->output_section_;
 }
 

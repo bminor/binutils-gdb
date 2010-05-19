@@ -75,7 +75,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_6.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_7.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.sh dynamic_list.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.sh dynamic_list.sh
 
 # Create the data files that debug_msg.sh analyzes.
 
@@ -110,6 +111,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_6.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_7.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = incremental_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
@@ -2967,6 +2969,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	-Wl,-Ttext=0x20001000 -Wl,-Tdata=0x20200000 -Wl,-Tbss=0x20400000
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_8.stdout: script_test_8
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SlW script_test_8 > script_test_8.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_9.o: script_test_9.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_9: gcctestdir/ld $(srcdir)/script_test_9.t script_test_9.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ script_test_9.o -T $(srcdir)/script_test_9.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_9.stdout: script_test_9
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lW script_test_9 > script_test_9.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \

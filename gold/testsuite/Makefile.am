@@ -1167,6 +1167,17 @@ script_test_8: basic_test.o gcctestdir/ld $(srcdir)/script_test_7.t
 script_test_8.stdout: script_test_8
 	$(TEST_READELF) -SlW script_test_8 > script_test_8.stdout
 
+
+check_SCRIPTS += script_test_9.sh
+check_DATA += script_test_9.stdout
+script_test_9.o: script_test_9.cc
+	$(CXXCOMPILE) -O0 -c -o $@ $<
+script_test_9: gcctestdir/ld $(srcdir)/script_test_9.t script_test_9.o
+	$(CXXLINK) -Bgcctestdir/ script_test_9.o -T $(srcdir)/script_test_9.t
+script_test_9.stdout: script_test_9
+	$(TEST_READELF) -lW script_test_9 > script_test_9.stdout
+
+
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
 
