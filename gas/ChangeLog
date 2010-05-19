@@ -1,3 +1,8 @@
+2010-05-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-h8300.c (h8300_elf_section): Add .zdebug to the list
+	of known section prefixes.
+
 2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11600
