@@ -1,5 +1,10 @@
 2010-05-19  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
+	* linux-m68k-low.c (ps_get_thread_area): Don't define if kernel
+	doesn't provide PTRACE_GET_THREAD_AREA.
+
+2010-05-19  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
 	* linux-m68k-low.c: Include <asm/ptrace.h>
 	(ps_get_thread_area): Implement.
 

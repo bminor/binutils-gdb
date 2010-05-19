@@ -156,6 +156,7 @@ m68k_breakpoint_at (CORE_ADDR pc)
 
 #include <asm/ptrace.h>
 
+#ifdef PTRACE_GET_THREAD_AREA
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
@@ -172,6 +173,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 
   return PS_OK;
 }
+#endif /* PTRACE_GET_THREAD_AREA */
 
 struct linux_target_ops the_low_target = {
   init_registers_m68k,
