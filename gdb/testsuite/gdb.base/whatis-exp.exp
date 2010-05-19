@@ -55,147 +55,23 @@ gdb_test "set variable y=2" "" "set variable y=2"
 gdb_test "set variable z=2" "" "set variable z=2"
 gdb_test "set variable w=3" "" "set variable w=3"
 
-send_gdb "print x\n"
-gdb_expect {
-    -re ".*14.*$gdb_prompt $" {
-        pass "print value of x"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of x" }
-    timeout           { fail "(timeout) print value of x" }    
-  }
+gdb_test "print x" " = 14" "print value of x"
+gdb_test "print y" " = 2" "print value of y"
+gdb_test "print z" " = 2" "print value of z"
+gdb_test "print w" " = 3" "print value of w"
 
+gdb_test "whatis x+y" "type = int" "whatis value of x+y"
+gdb_test "whatis x-y" "type = int" "whatis value of x-y"
+gdb_test "whatis x*y" "type = int" "whatis value of x*y"
+gdb_test "whatis x/y" "type = int" "whatis value of x/y"
+gdb_test "whatis x%y" "type = int" "whatis value of x%y"
+gdb_test "whatis x=y" "type = int" "whatis value of x=y"
 
-send_gdb "print y\n"
-gdb_expect {
-    -re ".*2.*$gdb_prompt $" {
-        pass "print value of y"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of y" }
-    timeout           { fail "(timeout) print value of y" }    
-  }
-
-send_gdb "print z\n"
-gdb_expect {
-    -re ".*2.*$gdb_prompt $" {
-        pass "print value of z"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of z" }
-    timeout           { fail "(timeout) print value of z" }    
-  }
-
-send_gdb "print w\n"
-gdb_expect {
-    -re ".*3.*$gdb_prompt $" {
-        pass "print value of w"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of w" }
-    timeout           { fail "(timeout) print value of w" }    
-  }
-
-
-
-send_gdb "whatis x+y\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x+y"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x+y" }
-    timeout           { fail "(timeout) whatis value of x+y" }    
-  }
-
-send_gdb "whatis x-y\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x-y"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x-y" }
-    timeout           { fail "(timeout) whatis value of x-y" }    
-  }
-
-send_gdb "whatis x*y\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x*y"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x*y" }
-    timeout           { fail "(timeout) whatis value of x*y" }    
-  }
-
-send_gdb "whatis x/y\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x/y"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x/y" }
-    timeout           { fail "(timeout) whatis value of x/y" }    
-  }
-
-send_gdb "whatis x%y\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x%y"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x%y" }
-    timeout           { fail "(timeout) whatis value of x%y" }    
-  }
-
-
-
-send_gdb "whatis x=y\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x=y"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x=y" }
-    timeout           { fail "(timeout) whatis value of x=y" }
-  }
-
-
-send_gdb "whatis x+=2\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x+=2"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x+=2" }
-    timeout           { fail "(timeout) whatis value of x+=2" }
-  }
-
-
-send_gdb "whatis ++x\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of ++x"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of ++x" }
-    timeout           { fail "(timeout) whatis value of ++x" }
-  }
-
-send_gdb "whatis --x\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of --x"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of --x" }
-    timeout           { fail "(timeout) whatis value of --x" }
-  }
-
-send_gdb "whatis x++\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x++"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x++" }
-    timeout           { fail "(timeout) whatis value of x++" }
-  }
-
-send_gdb "whatis x--\n"
-gdb_expect {
-    -re ".*type = int.*$gdb_prompt $" {
-        pass "whatis value of x--"
-      }
-    -re ".*$gdb_prompt $" { fail "whatis value of x--" }
-    timeout           { fail "(timeout) whatis value of x--" }
-  }
+gdb_test "whatis x+=2" "type = int" "whatis value of x+=2"
+gdb_test "whatis ++x" "type = int" "whatis value of  ++x"
+gdb_test "whatis --x" "type = int" "whatis value of  --x"
+gdb_test "whatis x++" "type = int" "whatis value of  x++"
+gdb_test "whatis x--" "type = int" "whatis value of  x--"
 
 gdb_exit
 return 0

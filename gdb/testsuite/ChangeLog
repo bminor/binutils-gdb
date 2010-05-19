@@ -1,3 +1,7 @@
+2010-05-19  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/whatis.exp: Replace send_gdb with gdb_test.
+
 2010-05-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/watch_arg/watch.adb: Rewrite testcase to avoid the
