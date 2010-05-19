@@ -416,7 +416,13 @@ void
 gdbpy_print_stack (void)
 {
   if (gdbpy_should_print_stack)
-    PyErr_Print ();
+    {
+      PyErr_Print ();
+      /* PyErr_Print doesn't necessarily end output with a newline.
+	 This works because Python's stdout/stderr is fed through
+	 printf_filtered.  */
+      begin_line ();
+    }
   else
     PyErr_Clear ();
 }
