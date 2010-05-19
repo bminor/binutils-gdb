@@ -1,3 +1,48 @@
+2010-05-19  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_input_section::original_size): New method.
+	(Arm_input_section::do_addralign): Add a cast.
+	(Arm_input_section::do_output_offset): Remove static cast.
+	(Arm_input_section::original_addralign,
+	 Arm_input_section::original_size_): Change type to uint32_t.
+	(Arm_input_section::init): Add safe casts for section alignment
+	and size.
+	(Arm_input_section::set_final_data_size): Do not set address and
+	offset of stub table.
+	(Arm_output_section::fix_exidx_coverage): Change use of of
+	Output_section::Simple_input_section to that of
+	Output_section::Input_section.
+	(Target_arm::do_relax): Set addresses and file offsets of Stub_tables
+	except for the first pass.
+	* output.cc (Output_section::get_input_sections): Change type of
+	input_sections to std::list<Input_section>.
+	(Output_section::add_script_input_section): Rename from
+	Output_section::add_simple_input_section.  Change type of SIS
+	parameter from Simple_input_section to Input_section.
+	* output.h (Output_section::Simple_input_section): Remove class.
+	(Output_section::Input_section): Change class visibility to public.
+	(Output_section::Input_section::addralign): Use stored alignments
+	for special input sections if set.
+	(Output_section::Input_section::set_addralign): New method.
+	(Output_section::get_input_sections): Change parameter type from
+	list of Simple_input_section to list of Input_section.
+	(Output_section::add_script_input_section): Rename from
+	Output_section::add_simple_input_section. Change first parameter's
+	type from Simple_input_section to Input_section and remove the
+	second and third parameters.
+	* script-sections.cc (Input_section::Input_section_list): Change
+	type to list of Output_section::Input_section/
+	(Input_section_info::Input_section_info): Change parameter type of
+	INPUT_SECTION to Output_section::Input_section.
+	(Input_section_info::input_section): Change return type.
+	(Input_section_info::input_section_): Change type to
+	Output_section::Input_section.
+	(Output_section_element_input::set_section_addresses): Adjust code
+	to use Output_section::Input_section instead of
+	Output_section::Simple_input_section.  Adjust code for renaming
+	of Output_section::add_simple_input_section.
+	(Orphan_output_section::set_section_addresses): Ditto.
+
 2010-05-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* gold.h (Unordered_multimap, Unordered_map): Fix defines for

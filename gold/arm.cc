@@ -1164,6 +1164,11 @@ class Arm_input_section : public Output_relaxed_input_section
   as_arm_input_section(Output_relaxed_input_section* poris)
   { return static_cast<Arm_input_section<big_endian>*>(poris); }
 
+  // Return the original size of the section.
+  uint32_t
+  original_size() const
+  { return this->original_size_; }
+
  protected:
   // Write data to output file.
   void
@@ -1175,7 +1180,7 @@ class Arm_input_section : public Output_relaxed_input_section
   {
     if (this->is_stub_table_owner())
       return std::max(this->stub_table_->addralign(),
-		      this->original_addralign_);
+		      static_cast<uint64_t>(this->original_addralign_));
     else
       return this->original_addralign_;
   }
@@ -1197,8 +1202,7 @@ class Arm_input_section : public Output_relaxed_input_section
     if ((object == this->relobj())
 	&& (shndx == this->shndx())
 	&& (offset >= 0)
-	&& (convert_types<uint64_t, section_offset_type>(offset)
-	    <= this->original_size_))
+	&& (offset <= this->original_size_))
       {
 	*poutput = offset;
 	return true;
@@ -1213,9 +1217,9 @@ class Arm_input_section : public Output_relaxed_input_section
   Arm_input_section& operator=(const Arm_input_section&);
 
   // Address alignment of the original input section.
-  uint64_t original_addralign_;
+  uint32_t original_addralign_;
   // Section size of the original input section.
-  uint64_t original_size_;
+  uint32_t original_size_;
   // Stub table.
   Stub_table<big_endian>* stub_table_;
 };
@@ -4909,8 +4913,10 @@ Arm_input_section<big_endian>::init()
 
   // Cache these to speed up size and alignment queries.  It is too slow
   // to call section_addraglin and section_size every time.
-  this->original_addralign_ = relobj->section_addralign(shndx);
-  this->original_size_ = relobj->section_size(shndx);
+  this->original_addralign_ =
+    convert_types<uint32_t, uint64_t>(relobj->section_addralign(shndx));
+  this->original_size_ =
+    convert_types<uint32_t, uint64_t>(relobj->section_size(shndx));
 
   // We want to make this look like the original input section after
   // output sections are finalized.
@@ -4949,10 +4955,8 @@ Arm_input_section<big_endian>::set_final_data_size()
 
   if (this->is_stub_table_owner())
     {
-      // The stub table comes after the original section contents.
+      this->stub_table_->finalize_data_size();
       off = align_address(off, this->stub_table_->addralign());
-      this->stub_table_->set_address_and_file_offset(this->address() + off,
-						     this->offset() + off);
       off += this->stub_table_->data_size();
     }
   this->set_data_size(off);
@@ -5576,8 +5580,8 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 
   // Remove all input sections.
   uint64_t address = this->address();
-  typedef std::list<Simple_input_section> Simple_input_section_list;
-  Simple_input_section_list input_sections;
+  typedef std::list<Output_section::Input_section> Input_section_list;
+  Input_section_list input_sections;
   this->reset_address_and_file_offset();
   this->get_input_sections(address, std::string(""), &input_sections);
 
@@ -5586,20 +5590,23 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
   
   // Go through all the known input sections and record them.
   typedef Unordered_set<Section_id, Section_id_hash> Section_id_set;
-  Section_id_set known_input_sections;
-  for (Simple_input_section_list::const_iterator p = input_sections.begin();
+  typedef Unordered_map<Section_id, const Output_section::Input_section*,
+			Section_id_hash> Text_to_exidx_map;
+  Text_to_exidx_map text_to_exidx_map;
+  for (Input_section_list::const_iterator p = input_sections.begin();
        p != input_sections.end();
        ++p)
     {
       // This should never happen.  At this point, we should only see
       // plain EXIDX input sections.
       gold_assert(!p->is_relaxed_input_section());
-      known_input_sections.insert(Section_id(p->relobj(), p->shndx()));
+      text_to_exidx_map[Section_id(p->relobj(), p->shndx())] = &(*p);
     }
 
   Arm_exidx_fixup exidx_fixup(this, merge_exidx_entries);
 
   // Go over the sorted text sections.
+  typedef Unordered_set<Section_id, Section_id_hash> Section_id_set;
   Section_id_set processed_input_sections;
   for (Text_section_list::const_iterator p = sorted_text_sections.begin();
        p != sorted_text_sections.end();
@@ -5624,7 +5631,8 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
       Relobj* exidx_relobj = exidx_input_section->relobj();
       unsigned int exidx_shndx = exidx_input_section->shndx();
       Section_id sid(exidx_relobj, exidx_shndx);
-      if (known_input_sections.find(sid) == known_input_sections.end())
+      Text_to_exidx_map::const_iterator iter = text_to_exidx_map.find(sid);
+      if (iter == text_to_exidx_map.end())
 	{
 	  // This is odd.  We have not seen this EXIDX input section before.
 	  // We cannot do fix-up.  If we saw a SECTIONS clause in a script,
@@ -5679,9 +5687,9 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 	{
 	  // Just add back the EXIDX input section.
 	  gold_assert(section_offset_map == NULL);
-	  Output_section::Simple_input_section sis(exidx_relobj, exidx_shndx);
-	  this->add_simple_input_section(sis, exidx_input_section->size(),
-					 exidx_input_section->addralign());
+	  const Output_section::Input_section* pis = iter->second;
+	  gold_assert(pis->is_input_section());
+	  this->add_script_input_section(*pis);
 	}
 
       processed_input_sections.insert(Section_id(exidx_relobj, exidx_shndx)); 
@@ -5691,7 +5699,7 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
   exidx_fixup.add_exidx_cantunwind_as_needed();
 
   // Remove any known EXIDX input sections that are not processed.
-  for (Simple_input_section_list::const_iterator p = input_sections.begin();
+  for (Input_section_list::const_iterator p = input_sections.begin();
        p != input_sections.end();
        ++p)
     {
@@ -10444,6 +10452,7 @@ Target_arm<big_endian>::do_relax(
   // If this is the first pass, we need to group input sections into
   // stub groups.
   bool done_exidx_fixup = false;
+  typedef typename Stub_table_list::iterator Stub_table_iterator;
   if (pass == 1)
     {
       // Determine the stub group size.  The group size is the absolute
@@ -10492,13 +10501,27 @@ Target_arm<big_endian>::do_relax(
 	  done_exidx_fixup = true;
 	}
     }
+  else
+    {
+      // If this is not the first pass, addresses and file offsets have
+      // been reset at this point, set them here.
+      for (Stub_table_iterator sp = this->stub_tables_.begin();
+	   sp != this->stub_tables_.end();
+	   ++sp)
+	{
+	  Arm_input_section<big_endian>* owner = (*sp)->owner();
+	  off_t off = align_address(owner->original_size(),
+				    (*sp)->addralign());
+	  (*sp)->set_address_and_file_offset(owner->address() + off,
+					     owner->offset() + off);
+	}
+    }
 
   // The Cortex-A8 stubs are sensitive to layout of code sections.  At the
   // beginning of each relaxation pass, just blow away all the stubs.
   // Alternatively, we could selectively remove only the stubs and reloc
   // information for code sections that have moved since the last pass.
   // That would require more book-keeping.
-  typedef typename Stub_table_list::iterator Stub_table_iterator;
   if (this->fix_cortex_a8_)
     {
       // Clear all Cortex-A8 reloc information.

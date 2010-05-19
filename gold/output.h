@@ -2766,263 +2766,6 @@ class Output_section : public Output_data
 
   // The next few calls are for linker script support.
 
-  // We need to export the input sections to linker scripts.  Previously
-  // we export a pair of Relobj pointer and section index.  We now need to
-  // handle relaxed input sections as well.  So we use this class.
-  class Simple_input_section
-  {
-   private:
-    static const unsigned int invalid_shndx = static_cast<unsigned int>(-1);
-
-   public:
-    Simple_input_section(Relobj *relobj, unsigned int shndx)
-      : shndx_(shndx)
-    {
-      gold_assert(shndx != invalid_shndx);
-      this->u_.relobj = relobj;
-    }
- 
-    Simple_input_section(Output_relaxed_input_section* section)
-      : shndx_(invalid_shndx)
-    { this->u_.relaxed_input_section = section; }
-
-    // Whether this is a relaxed section.
-    bool
-    is_relaxed_input_section() const
-    { return this->shndx_ == invalid_shndx; }
-
-    // Return object of an input section.
-    Relobj*
-    relobj() const
-    {
-      return ((this->shndx_ != invalid_shndx)
-	      ? this->u_.relobj
-	      : this->u_.relaxed_input_section->relobj());
-    }
-
-    // Return index of an input section.
-    unsigned int
-    shndx() const
-    {
-      return ((this->shndx_ != invalid_shndx)
-	      ? this->shndx_
-	      : this->u_.relaxed_input_section->shndx());
-    }
-
-    // Return the Output_relaxed_input_section object of a relaxed section.
-    Output_relaxed_input_section*
-    relaxed_input_section() const
-    {
-      gold_assert(this->shndx_ == invalid_shndx);
-      return this->u_.relaxed_input_section;
-    }
-
-   private:
-    // Pointer to either an Relobj or an Output_relaxed_input_section.
-    union
-    {
-      Relobj* relobj;
-      Output_relaxed_input_section* relaxed_input_section;
-    } u_;
-    // Section index for an non-relaxed section or invalid_shndx for
-    // a relaxed section.
-    unsigned int shndx_;
-  };
- 
-  // Store the list of input sections for this Output_section into the
-  // list passed in.  This removes the input sections, leaving only
-  // any Output_section_data elements.  This returns the size of those
-  // Output_section_data elements.  ADDRESS is the address of this
-  // output section.  FILL is the fill value to use, in case there are
-  // any spaces between the remaining Output_section_data elements.
-  uint64_t
-  get_input_sections(uint64_t address, const std::string& fill,
-		     std::list<Simple_input_section>*);
-
-  // Add a simple input section.
-  void
-  add_simple_input_section(const Simple_input_section& input_section,
-			   off_t data_size, uint64_t addralign);
-
-  // Set the current size of the output section.
-  void
-  set_current_data_size(off_t size)
-  { this->set_current_data_size_for_child(size); }
-
-  // Get the current size of the output section.
-  off_t
-  current_data_size() const
-  { return this->current_data_size_for_child(); }
-
-  // End of linker script support.
-
-  // Save states before doing section layout.
-  // This is used for relaxation.
-  void
-  save_states();
-
-  // Restore states prior to section layout.
-  void
-  restore_states();
-
-  // Discard states.
-  void
-  discard_states();
-
-  // Convert existing input sections to relaxed input sections.
-  void
-  convert_input_sections_to_relaxed_sections(
-      const std::vector<Output_relaxed_input_section*>& sections);
-
-  // Find a relaxed input section to an input section in OBJECT
-  // with index SHNDX.  Return NULL if none is found.
-  const Output_relaxed_input_section*
-  find_relaxed_input_section(const Relobj* object, unsigned int shndx) const;
-  
-  // Whether section offsets need adjustment due to relaxation.
-  bool
-  section_offsets_need_adjustment() const
-  { return this->section_offsets_need_adjustment_; }
-
-  // Set section_offsets_need_adjustment to be true.
-  void
-  set_section_offsets_need_adjustment()
-  { this->section_offsets_need_adjustment_ = true; }
-
-  // Adjust section offsets of input sections in this.  This is
-  // requires if relaxation caused some input sections to change sizes.
-  void
-  adjust_section_offsets();
-
-  // Whether this is a NOLOAD section.
-  bool
-  is_noload() const
-  { return this->is_noload_; }
-
-  // Set NOLOAD flag.
-  void
-  set_is_noload()
-  { this->is_noload_ = true; }
-
-  // Print merge statistics to stderr.
-  void
-  print_merge_stats();
-
- protected:
-  // Return the output section--i.e., the object itself.
-  Output_section*
-  do_output_section()
-  { return this; }
-
-  const Output_section*
-  do_output_section() const
-  { return this; }
-
-  // Return the section index in the output file.
-  unsigned int
-  do_out_shndx() const
-  {
-    gold_assert(this->out_shndx_ != -1U);
-    return this->out_shndx_;
-  }
-
-  // Set the output section index.
-  void
-  do_set_out_shndx(unsigned int shndx)
-  {
-    gold_assert(this->out_shndx_ == -1U || this->out_shndx_ == shndx);
-    this->out_shndx_ = shndx;
-  }
-
-  // Set the final data size of the Output_section.  For a typical
-  // Output_section, there is nothing to do, but if there are any
-  // Output_section_data objects we need to set their final addresses
-  // here.
-  virtual void
-  set_final_data_size();
-
-  // Reset the address and file offset.
-  void
-  do_reset_address_and_file_offset();
-
-  // Return true if address and file offset already have reset values. In
-  // other words, calling reset_address_and_file_offset will not change them.
-  bool
-  do_address_and_file_offset_have_reset_values() const;
-
-  // Write the data to the file.  For a typical Output_section, this
-  // does nothing: the data is written out by calling Object::Relocate
-  // on each input object.  But if there are any Output_section_data
-  // objects we do need to write them out here.
-  virtual void
-  do_write(Output_file*);
-
-  // Return the address alignment--function required by parent class.
-  uint64_t
-  do_addralign() const
-  { return this->addralign_; }
-
-  // Return whether there is a load address.
-  bool
-  do_has_load_address() const
-  { return this->has_load_address_; }
-
-  // Return the load address.
-  uint64_t
-  do_load_address() const
-  {
-    gold_assert(this->has_load_address_);
-    return this->load_address_;
-  }
-
-  // Return whether this is an Output_section.
-  bool
-  do_is_section() const
-  { return true; }
-
-  // Return whether this is a section of the specified type.
-  bool
-  do_is_section_type(elfcpp::Elf_Word type) const
-  { return this->type_ == type; }
-
-  // Return whether the specified section flag is set.
-  bool
-  do_is_section_flag_set(elfcpp::Elf_Xword flag) const
-  { return (this->flags_ & flag) != 0; }
-
-  // Set the TLS offset.  Called only for SHT_TLS sections.
-  void
-  do_set_tls_offset(uint64_t tls_base);
-
-  // Return the TLS offset, relative to the base of the TLS segment.
-  // Valid only for SHT_TLS sections.
-  uint64_t
-  do_tls_offset() const
-  { return this->tls_offset_; }
-
-  // This may be implemented by a child class.
-  virtual void
-  do_finalize_name(Layout*)
-  { }
-
-  // Print to the map file.
-  virtual void
-  do_print_to_mapfile(Mapfile*) const;
-
-  // Record that this section requires postprocessing after all
-  // relocations have been applied.  This is called by a child class.
-  void
-  set_requires_postprocessing()
-  {
-    this->requires_postprocessing_ = true;
-    this->after_input_sections_ = true;
-  }
-
-  // Write all the data of an Output_section into the postprocessing
-  // buffer.
-  void
-  write_to_postprocessing_buffer();
-
   // In some cases we need to keep a list of the input sections
   // associated with this output section.  We only need the list if we
   // might have to change the offsets of the input section within the
@@ -3088,13 +2831,29 @@ class Output_section : public Output_data
     uint64_t
     addralign() const
     {
-      if (!this->is_input_section())
+      if (this->p2align_ != 0)
+	return static_cast<uint64_t>(1) << (this->p2align_ - 1);
+      else if (!this->is_input_section())
 	return this->u2_.posd->addralign();
-      return (this->p2align_ == 0
-	      ? 0
-	      : static_cast<uint64_t>(1) << (this->p2align_ - 1));
+      else
+	return 0;
     }
 
+    // Set the required alignment, which must be either 0 or a power of 2.
+    // For input sections that are sub-classes of Output_section_data, a
+    // alignment of zero means asking the underlying object for alignment.
+    void
+    set_addralign(uint64_t addralign)
+    {
+      if (addralign == 0)
+	this->p2align_ = 0;
+      else
+	{
+	  gold_assert((addralign & (addralign - 1)) == 0);
+	  this->p2align_ = ffsll(static_cast<long long>(addralign));
+	}
+    }
+ 
     // Return the required size.
     off_t
     data_size() const;
@@ -3293,6 +3052,200 @@ class Output_section : public Output_data
       Output_relaxed_input_section* poris;
     } u2_;
   };
+
+  // Store the list of input sections for this Output_section into the
+  // list passed in.  This removes the input sections, leaving only
+  // any Output_section_data elements.  This returns the size of those
+  // Output_section_data elements.  ADDRESS is the address of this
+  // output section.  FILL is the fill value to use, in case there are
+  // any spaces between the remaining Output_section_data elements.
+  uint64_t
+  get_input_sections(uint64_t address, const std::string& fill,
+		     std::list<Input_section>*);
+
+  // Add a script input section.  A script input section can either be
+  // a plain input section or a sub-class of Output_section_data.
+  void
+  add_script_input_section(const Input_section& input_section);
+
+  // Set the current size of the output section.
+  void
+  set_current_data_size(off_t size)
+  { this->set_current_data_size_for_child(size); }
+
+  // Get the current size of the output section.
+  off_t
+  current_data_size() const
+  { return this->current_data_size_for_child(); }
+
+  // End of linker script support.
+
+  // Save states before doing section layout.
+  // This is used for relaxation.
+  void
+  save_states();
+
+  // Restore states prior to section layout.
+  void
+  restore_states();
+
+  // Discard states.
+  void
+  discard_states();
+
+  // Convert existing input sections to relaxed input sections.
+  void
+  convert_input_sections_to_relaxed_sections(
+      const std::vector<Output_relaxed_input_section*>& sections);
+
+  // Find a relaxed input section to an input section in OBJECT
+  // with index SHNDX.  Return NULL if none is found.
+  const Output_relaxed_input_section*
+  find_relaxed_input_section(const Relobj* object, unsigned int shndx) const;
+  
+  // Whether section offsets need adjustment due to relaxation.
+  bool
+  section_offsets_need_adjustment() const
+  { return this->section_offsets_need_adjustment_; }
+
+  // Set section_offsets_need_adjustment to be true.
+  void
+  set_section_offsets_need_adjustment()
+  { this->section_offsets_need_adjustment_ = true; }
+
+  // Adjust section offsets of input sections in this.  This is
+  // requires if relaxation caused some input sections to change sizes.
+  void
+  adjust_section_offsets();
+
+  // Whether this is a NOLOAD section.
+  bool
+  is_noload() const
+  { return this->is_noload_; }
+
+  // Set NOLOAD flag.
+  void
+  set_is_noload()
+  { this->is_noload_ = true; }
+
+  // Print merge statistics to stderr.
+  void
+  print_merge_stats();
+
+ protected:
+  // Return the output section--i.e., the object itself.
+  Output_section*
+  do_output_section()
+  { return this; }
+
+  const Output_section*
+  do_output_section() const
+  { return this; }
+
+  // Return the section index in the output file.
+  unsigned int
+  do_out_shndx() const
+  {
+    gold_assert(this->out_shndx_ != -1U);
+    return this->out_shndx_;
+  }
+
+  // Set the output section index.
+  void
+  do_set_out_shndx(unsigned int shndx)
+  {
+    gold_assert(this->out_shndx_ == -1U || this->out_shndx_ == shndx);
+    this->out_shndx_ = shndx;
+  }
+
+  // Set the final data size of the Output_section.  For a typical
+  // Output_section, there is nothing to do, but if there are any
+  // Output_section_data objects we need to set their final addresses
+  // here.
+  virtual void
+  set_final_data_size();
+
+  // Reset the address and file offset.
+  void
+  do_reset_address_and_file_offset();
+
+  // Return true if address and file offset already have reset values. In
+  // other words, calling reset_address_and_file_offset will not change them.
+  bool
+  do_address_and_file_offset_have_reset_values() const;
+
+  // Write the data to the file.  For a typical Output_section, this
+  // does nothing: the data is written out by calling Object::Relocate
+  // on each input object.  But if there are any Output_section_data
+  // objects we do need to write them out here.
+  virtual void
+  do_write(Output_file*);
+
+  // Return the address alignment--function required by parent class.
+  uint64_t
+  do_addralign() const
+  { return this->addralign_; }
+
+  // Return whether there is a load address.
+  bool
+  do_has_load_address() const
+  { return this->has_load_address_; }
+
+  // Return the load address.
+  uint64_t
+  do_load_address() const
+  {
+    gold_assert(this->has_load_address_);
+    return this->load_address_;
+  }
+
+  // Return whether this is an Output_section.
+  bool
+  do_is_section() const
+  { return true; }
+
+  // Return whether this is a section of the specified type.
+  bool
+  do_is_section_type(elfcpp::Elf_Word type) const
+  { return this->type_ == type; }
+
+  // Return whether the specified section flag is set.
+  bool
+  do_is_section_flag_set(elfcpp::Elf_Xword flag) const
+  { return (this->flags_ & flag) != 0; }
+
+  // Set the TLS offset.  Called only for SHT_TLS sections.
+  void
+  do_set_tls_offset(uint64_t tls_base);
+
+  // Return the TLS offset, relative to the base of the TLS segment.
+  // Valid only for SHT_TLS sections.
+  uint64_t
+  do_tls_offset() const
+  { return this->tls_offset_; }
+
+  // This may be implemented by a child class.
+  virtual void
+  do_finalize_name(Layout*)
+  { }
+
+  // Print to the map file.
+  virtual void
+  do_print_to_mapfile(Mapfile*) const;
+
+  // Record that this section requires postprocessing after all
+  // relocations have been applied.  This is called by a child class.
+  void
+  set_requires_postprocessing()
+  {
+    this->requires_postprocessing_ = true;
+    this->after_input_sections_ = true;
+  }
+
+  // Write all the data of an Output_section into the postprocessing
+  // buffer.
+  void
+  write_to_postprocessing_buffer();
 
   typedef std::vector<Input_section> Input_section_list;
 

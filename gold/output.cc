@@ -3046,7 +3046,7 @@ uint64_t
 Output_section::get_input_sections(
     uint64_t address,
     const std::string& fill,
-    std::list<Simple_input_section>* input_sections)
+    std::list<Input_section>* input_sections)
 {
   if (this->checkpoint_ != NULL
       && !this->checkpoint_->input_sections_saved())
@@ -3064,12 +3064,8 @@ Output_section::get_input_sections(
        p != this->input_sections_.end();
        ++p)
     {
-      if (p->is_input_section())
-	input_sections->push_back(Simple_input_section(p->relobj(),
-						       p->shndx()));
-      else if (p->is_relaxed_input_section())
-	input_sections->push_back(
-	    Simple_input_section(p->relaxed_input_section()));
+      if (p->is_input_section() || p->is_relaxed_input_section())
+	input_sections->push_back(*p);
       else
 	{
 	  uint64_t aligned_address = align_address(address, p->addralign());
@@ -3104,13 +3100,16 @@ Output_section::get_input_sections(
   return data_size;
 }
 
-// Add an simple input section.
+// Add a script input section.  SIS is an Output_section::Input_section,
+// which can be either a plain input section or a special input section like
+// a relaxed input section.  For a special input section, its size must be
+// finalized.
 
 void
-Output_section::add_simple_input_section(const Simple_input_section& sis,
-					 off_t data_size,
-					 uint64_t addralign)
+Output_section::add_script_input_section(const Input_section& sis)
 {
+  uint64_t data_size = sis.data_size();
+  uint64_t addralign = sis.addralign();
   if (addralign > this->addralign_)
     this->addralign_ = addralign;
 
@@ -3121,11 +3120,7 @@ Output_section::add_simple_input_section(const Simple_input_section& sis,
   this->set_current_data_size_for_child(aligned_offset_in_section
 					+ data_size);
 
-  Input_section is =
-    (sis.is_relaxed_input_section()
-     ? Input_section(sis.relaxed_input_section())
-     : Input_section(sis.relobj(), sis.shndx(), data_size, addralign));
-  this->input_sections_.push_back(is);
+  this->input_sections_.push_back(sis);
 }
 
 // Save states for relaxation.
