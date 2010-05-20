@@ -1,3 +1,10 @@
+2010-05-20  Pedro Alves  <pedro@codesourcery.com>
+            Joel Brobecker  <brobecker@adacore.com>
+
+	* lib/gdb.exp (gdb_test_no_output): New function.
+	* lib/gdb.ada/arrayidx.exp: Use gdb_test_no_output instead of gdb_test
+	when testing commands that should produce no output.
+
 2010-05-19  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/whatis.exp: Replace send_gdb with gdb_test.

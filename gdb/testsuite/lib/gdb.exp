@@ -877,6 +877,31 @@ proc gdb_test { args } {
 	}
      }]
 }
+
+# gdb_test_no_output COMMAND MESSAGE
+# Send a command to GDB and verify that this command generated no output.
+#
+# See gdb_test_multiple for a description of the COMMAND and MESSAGE
+# parameters.  If MESSAGE is ommitted, then COMMAND will be used as
+# the message.
+
+proc gdb_test_no_output { args } {
+    global gdb_prompt
+    set command [lindex $args 0]
+    if [llength $args]>1 then {
+	set message [lindex $args 1]
+    } else {
+	set message $command
+    }
+
+    set command_regex [string_to_regexp $command]
+    gdb_test_multiple $command $message {
+        -re "^$command_regex\r\n$gdb_prompt $" {
+            pass $message
+        }
+    }
+}
+
 
 # Test that a command gives an error.  For pass or fail, return
 # a 1 to indicate that more tests can proceed.  However a timeout
