@@ -1,3 +1,9 @@
+2010-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* sis.h: Remove #include <stdint.h>.
+	(uint64, int64): Redefine without using stdint.h.
+	(UINT64_MAX): Define.
+
 2010-04-20  Tiemen Schut    <T.Schut@sron.nl>
 
 	* erc32.c (sis_memory_write): Change prototype to const unsigned char *.
