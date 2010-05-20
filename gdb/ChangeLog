@@ -1,3 +1,8 @@
+2010-05-20  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-valprint.c (pascal_val_print): Call get_array_bounds
+	to obtain the number of elements in an array.
+
 2010-05-19  Doug Evans  <dje@google.com>
 
 	* python.c (gdbpy_print_stack): Ensure output ends with a newline.

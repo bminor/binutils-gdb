@@ -60,6 +60,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
+  long low_bound, high_bound;
   struct type *elttype;
   unsigned eltlen;
   int length_pos, length_size, string_pos;
@@ -71,11 +72,11 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+      if (get_array_bounds (type, &low_bound, &high_bound)) 
 	{
+	  len = high_bound - low_bound + 1;
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	  eltlen = TYPE_LENGTH (elttype);
-	  len = TYPE_LENGTH (type) / eltlen;
 	  if (options->prettyprint_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
