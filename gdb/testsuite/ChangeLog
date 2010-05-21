@@ -1,5 +1,10 @@
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/pieces.exp (pieces_test_f2): New proc.
+	Call it.
+
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2.pieces.exp: New file.
 	* gdb.dwarf2.pieces.S: New file.
 	* gdb.dwarf2.pieces.c: New file.

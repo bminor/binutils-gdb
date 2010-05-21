@@ -54,4 +54,18 @@ proc pieces_test_f1 {} {
     gdb_test "print a.j" " = 14" "print a.j in pieces:f1"
 }
 
+# Function f2 tests for a bug when indexing into an array created
+# using DW_OP_piece.
+proc pieces_test_f2 {} {
+    global csrcfile
+    set line [gdb_get_line_number "f2 breakpoint" $csrcfile]
+    gdb_test "break pieces.c:$line" "Breakpoint 3.*" \
+       "set f2 breakpoint for pieces"
+    gdb_continue_to_breakpoint "continue to f2 breakpoint for pieces"
+    gdb_test "print a" " = .4, 14." "print a in pieces:f2"
+    gdb_test "print a\[0\]" " = 4" "print a\[0\] in pieces:f2"
+    gdb_test "print a\[1\]" " = 14" "print a\[1\] in pieces:f2"
+}
+
 pieces_test_f1
+pieces_test_f2

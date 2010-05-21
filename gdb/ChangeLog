@@ -1,3 +1,8 @@
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
+	* eval.c (evaluate_subexp_standard) <BINOP_SUBSCRIPT>: Call
+	evaluate_subexp, not evaluate_subexp_with_coercion.
+
 2010-05-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* dwarf2read.c (new_symbol): Handle DW_AT_variable_parameter
