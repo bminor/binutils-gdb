@@ -1,3 +1,9 @@
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (read_pieced_value): Work properly when 'v' has an
+	offset.
+	(write_pieced_value): Likewise.
+
 2010-05-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* dwarf2read.c (process_die): Also allow DW_TAG_const_type

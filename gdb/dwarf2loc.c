@@ -264,14 +264,46 @@ read_pieced_value (struct value *v)
 {
   int i;
   long offset = 0;
+  ULONGEST bytes_to_skip;
   gdb_byte *contents;
   struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (v));
+  size_t type_len;
+
+  if (value_type (v) != value_enclosing_type (v))
+    internal_error (__FILE__, __LINE__,
+		    _("Should not be able to create a lazy value with "
+		      "an enclosing type"));
 
   contents = value_contents_raw (v);
-  for (i = 0; i < c->n_pieces; i++)
+  bytes_to_skip = value_offset (v);
+  type_len = TYPE_LENGTH (value_type (v));
+  for (i = 0; i < c->n_pieces && offset < type_len; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
+      size_t this_size;
+      long dest_offset, source_offset;
+
+      if (bytes_to_skip > 0 && bytes_to_skip >= p->size)
+	{
+	  bytes_to_skip -= p->size;
+	  continue;
+	}
+      this_size = p->size;
+      if (this_size > type_len - offset)
+	this_size = type_len - offset;
+      if (bytes_to_skip > 0)
+	{
+	  dest_offset = 0;
+	  source_offset = bytes_to_skip;
+	  this_size -= bytes_to_skip;
+	  bytes_to_skip = 0;
+	}
+      else
+	{
+	  dest_offset = offset;
+	  source_offset = 0;
+	}
 
       switch (p->location)
 	{
@@ -280,17 +312,17 @@ read_pieced_value (struct value *v)
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch,
 							   p->v.expr.value);
-	    int reg_offset = 0;
+	    int reg_offset = source_offset;
 
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& p->size < register_size (arch, gdb_regnum))
+		&& this_size < register_size (arch, gdb_regnum))
 	      /* Big-endian, and we want less than full size.  */
-	      reg_offset = register_size (arch, gdb_regnum) - p->size;
+	      reg_offset = register_size (arch, gdb_regnum) - this_size;
 
 	    if (gdb_regnum != -1)
 	      {
 		get_frame_register_bytes (frame, gdb_regnum, reg_offset, 
-					  p->size, contents + offset);
+					  this_size, contents + dest_offset);
 	      }
 	    else
 	      {
@@ -302,38 +334,60 @@ read_pieced_value (struct value *v)
 
 	case DWARF_VALUE_MEMORY:
 	  if (p->v.expr.in_stack_memory)
-	    read_stack (p->v.expr.value, contents + offset, p->size);
+	    read_stack (p->v.expr.value + source_offset,
+			contents + dest_offset, this_size);
 	  else
-	    read_memory (p->v.expr.value, contents + offset, p->size);
+	    read_memory (p->v.expr.value + source_offset,
+			 contents + dest_offset, this_size);
 	  break;
 
 	case DWARF_VALUE_STACK:
 	  {
 	    struct gdbarch *gdbarch = get_type_arch (value_type (v));
-	    size_t n = p->size;
+	    size_t n = this_size;
 
-	    if (n > c->addr_size)
-	      n = c->addr_size;
-	    store_unsigned_integer (contents + offset, n,
-				    gdbarch_byte_order (gdbarch),
-				    p->v.expr.value);
+	    if (n > c->addr_size - source_offset)
+	      n = (c->addr_size >= source_offset
+		   ? c->addr_size - source_offset
+		   : 0);
+	    if (n == 0)
+	      {
+		/* Nothing.  */
+	      }
+	    else if (source_offset == 0)
+	      store_unsigned_integer (contents + dest_offset, n,
+				      gdbarch_byte_order (gdbarch),
+				      p->v.expr.value);
+	    else
+	      {
+		gdb_byte bytes[sizeof (ULONGEST)];
+
+		store_unsigned_integer (bytes, n + source_offset,
+					gdbarch_byte_order (gdbarch),
+					p->v.expr.value);
+		memcpy (contents + dest_offset, bytes + source_offset, n);
+	      }
 	  }
 	  break;
 
 	case DWARF_VALUE_LITERAL:
 	  {
-	    size_t n = p->size;
+	    size_t n = this_size;
 
-	    if (n > p->v.literal.length)
-	      n = p->v.literal.length;
-	    memcpy (contents + offset, p->v.literal.data, n);
+	    if (n > p->v.literal.length - source_offset)
+	      n = (p->v.literal.length >= source_offset
+		   ? p->v.literal.length - source_offset
+		   : 0);
+	    if (n != 0)
+	      memcpy (contents + dest_offset,
+		      p->v.literal.data + source_offset, n);
 	  }
 	  break;
 
 	default:
 	  internal_error (__FILE__, __LINE__, _("invalid location type"));
 	}
-      offset += p->size;
+      offset += this_size;
     }
 }
 
@@ -342,9 +396,11 @@ write_pieced_value (struct value *to, struct value *from)
 {
   int i;
   long offset = 0;
-  gdb_byte *contents;
+  ULONGEST bytes_to_skip;
+  const gdb_byte *contents;
   struct piece_closure *c = (struct piece_closure *) value_computed_closure (to);
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (to));
+  size_t type_len;
 
   if (frame == NULL)
     {
@@ -352,10 +408,35 @@ write_pieced_value (struct value *to, struct value *from)
       return;
     }
 
-  contents = value_contents_raw (from);
-  for (i = 0; i < c->n_pieces; i++)
+  contents = value_contents (from);
+  bytes_to_skip = value_offset (to);
+  type_len = TYPE_LENGTH (value_type (to));
+  for (i = 0; i < c->n_pieces && offset < type_len; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
+      size_t this_size;
+      long dest_offset, source_offset;
+
+      if (bytes_to_skip > 0 && bytes_to_skip >= p->size)
+	{
+	  bytes_to_skip -= p->size;
+	  continue;
+	}
+      this_size = p->size;
+      if (this_size > type_len - offset)
+	this_size = type_len - offset;
+      if (bytes_to_skip > 0)
+	{
+	  dest_offset = bytes_to_skip;
+	  source_offset = 0;
+	  this_size -= bytes_to_skip;
+	  bytes_to_skip = 0;
+	}
+      else
+	{
+	  dest_offset = 0;
+	  source_offset = offset;
+	}
 
       switch (p->location)
 	{
@@ -363,17 +444,17 @@ write_pieced_value (struct value *to, struct value *from)
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.expr.value);
-	    int reg_offset = 0;
+	    int reg_offset = dest_offset;
 
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& p->size < register_size (arch, gdb_regnum))
+		&& this_size <= register_size (arch, gdb_regnum))
 	      /* Big-endian, and we want less than full size.  */
-	      reg_offset = register_size (arch, gdb_regnum) - p->size;
+	      reg_offset = register_size (arch, gdb_regnum) - this_size;
 
 	    if (gdb_regnum != -1)
 	      {
 		put_frame_register_bytes (frame, gdb_regnum, reg_offset, 
-					  p->size, contents + offset);
+					  this_size, contents + source_offset);
 	      }
 	    else
 	      {
@@ -383,13 +464,14 @@ write_pieced_value (struct value *to, struct value *from)
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:
-	  write_memory (p->v.expr.value, contents + offset, p->size);
+	  write_memory (p->v.expr.value + dest_offset,
+			contents + source_offset, this_size);
 	  break;
 	default:
 	  set_value_optimized_out (to, 1);
 	  return;
 	}
-      offset += p->size;
+      offset += this_size;
     }
 }
 

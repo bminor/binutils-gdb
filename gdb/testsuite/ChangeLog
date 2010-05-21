@@ -1,3 +1,9 @@
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2.pieces.exp: New file.
+	* gdb.dwarf2.pieces.S: New file.
+	* gdb.dwarf2.pieces.c: New file.
+
 2010-05-20  Pedro Alves  <pedro@codesourcery.com>
             Joel Brobecker  <brobecker@adacore.com>
 
