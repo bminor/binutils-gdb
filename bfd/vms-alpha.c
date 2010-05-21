@@ -667,12 +667,6 @@ _bfd_vms_slurp_eihs (bfd *abfd, unsigned int offset)
 
   if (gstvbn)
     {
-      flagword bfd_flags = SEC_HAS_CONTENTS;
-
-      section = bfd_make_section (abfd, "$GST$");
-      if (!section)
-	return FALSE;
-
       if (bfd_seek (abfd, VMS_BLOCK_SIZE * (gstvbn - 1), SEEK_SET))
 	{
 	  bfd_set_error (bfd_error_file_truncated);
@@ -680,12 +674,6 @@ _bfd_vms_slurp_eihs (bfd *abfd, unsigned int offset)
 	}
 
       if (_bfd_vms_slurp_object_records (abfd) != TRUE)
-	return FALSE;
-
-      section->filepos = VMS_BLOCK_SIZE * (gstvbn - 1);
-      section->size = bfd_tell (abfd) - section->filepos;
-
-      if (!bfd_set_section_flags (abfd, section, bfd_flags))
 	return FALSE;
 
       abfd->flags |= HAS_SYMS;
