@@ -1,5 +1,16 @@
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2loc.c (read_pieced_value): Exit loop when result is full.
+	<DWARF_VALUE_OPTIMIZED_OUT>: New case.
+	* dwarf2expr.h (enum dwarf_value_location)
+	<DWARF_VALUE_OPTIMIZED_OUT>: New constant.
+	* dwarf2expr.c (dwarf_expr_stack_empty_p): New function.
+	(add_piece): Handle empty piece.
+	(execute_stack_op) <DW_OP_piece>: Handle
+	DWARF_VALUE_OPTIMIZED_OUT.
+
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
 	* eval.c (evaluate_subexp_standard) <BINOP_SUBSCRIPT>: Call
 	evaluate_subexp, not evaluate_subexp_with_coercion.
 

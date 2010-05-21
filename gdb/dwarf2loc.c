@@ -384,6 +384,16 @@ read_pieced_value (struct value *v)
 	  }
 	  break;
 
+	case DWARF_VALUE_OPTIMIZED_OUT:
+	  /* We just leave the bits empty for now.  This is not ideal
+	     but gdb currently does not have a nice way to represent
+	     optimized-out pieces.  */
+	  warning (_("bytes %ld-%ld in computed object were optimized out; "
+		     "replacing with zeroes"),
+		   offset,
+		   offset + (long) this_size);
+	  break;
+
 	default:
 	  internal_error (__FILE__, __LINE__, _("invalid location type"));
 	}
@@ -609,6 +619,9 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 	  }
 	  break;
 
+	  /* DWARF_VALUE_OPTIMIZED_OUT can't occur in this context --
+	     it can only be encountered when making a piece.  */
+	case DWARF_VALUE_OPTIMIZED_OUT:
 	default:
 	  internal_error (__FILE__, __LINE__, _("invalid location type"));
 	}

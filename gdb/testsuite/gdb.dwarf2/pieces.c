@@ -22,6 +22,7 @@
 
 struct A { int i; int j; };
 struct B { int : 4; int i : 12; int j : 12; int : 4; };
+struct C { int i; int j; int q; };
 
 __attribute__((noinline)) void
 bar (int x)
@@ -84,6 +85,18 @@ f5 (int k)
   return a.i + a.j;		/* f5 breakpoint */
 }
 
+__attribute__((noinline)) int
+f6 (int k)
+{
+  int z = 23;
+  struct C a = { k, k, z};
+  asm ("" : "+r" (a.i));
+  a.j++;
+  bar (a.i);
+  bar (a.j);
+  return a.i + a.j;		/* f6 breakpoint */
+}
+
 int
 main (void)
 {
@@ -94,5 +107,6 @@ main (void)
   f3 (k);
   f4 (k);
   f5 (k);
+  f6 (k);
   return 0;
 }

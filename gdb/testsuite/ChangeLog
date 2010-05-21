@@ -1,5 +1,13 @@
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/pieces.exp (pieces_test_f6): New proc.
+	Call it.
+	* gdb.dwarf2/pieces.c (struct C): New.
+	(f6): New function.
+	* gdb.dwarf2/pieces.S: Replace.
+
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/pieces.exp (pieces_test_f2): New proc.
 	Call it.
 

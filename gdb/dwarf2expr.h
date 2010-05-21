@@ -38,7 +38,10 @@ enum dwarf_value_location
   DWARF_VALUE_STACK,
 
   /* The piece is a literal.  */
-  DWARF_VALUE_LITERAL
+  DWARF_VALUE_LITERAL,
+
+  /* The piece was optimized out.  */
+  DWARF_VALUE_OPTIMIZED_OUT
 };
 
 /* The dwarf expression stack.  */

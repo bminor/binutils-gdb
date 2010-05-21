@@ -37,19 +37,19 @@
 bar:
 .LFB0:
 	.file 1 "pieces.c"
-	# pieces.c:28
-	.loc 1 28 0
+	# pieces.c:29
+	.loc 1 29 0
 .LVL0:
 	# basic block 2
 	pushl	%ebp
 .LCFI0:
 	movl	%esp, %ebp
 .LCFI1:
-	# pieces.c:29
-	.loc 1 29 0
-	movl	8(%ebp), %eax
 	# pieces.c:30
 	.loc 1 30 0
+	movl	8(%ebp), %eax
+	# pieces.c:31
+	.loc 1 31 0
 	popl	%ebp
 .LCFI2:
 	ret
@@ -60,8 +60,8 @@ bar:
 	.type	f1, @function
 f1:
 .LFB1:
-	# pieces.c:34
-	.loc 1 34 0
+	# pieces.c:35
+	.loc 1 35 0
 .LVL1:
 	# basic block 2
 	pushl	%ebp
@@ -73,36 +73,36 @@ f1:
 .LCFI5:
 	movl	%esi, -4(%ebp)
 .LCFI6:
-	# pieces.c:37
-	.loc 1 37 0
+	# pieces.c:38
+	.loc 1 38 0
 	movl	8(%ebp), %esi
-	# pieces.c:34
-	.loc 1 34 0
+	# pieces.c:35
+	.loc 1 35 0
 	movl	%ebx, -8(%ebp)
 .LCFI7:
-	# pieces.c:36
-	.loc 1 36 0
-	movl	$4, %ebx
-.LVL3:
-	# pieces.c:38
-	.loc 1 38 0
-	movl	%ebx, (%esp)
 	# pieces.c:37
 	.loc 1 37 0
-	addl	$7, %esi
-.LVL4:
-	# pieces.c:38
-	.loc 1 38 0
-	call	bar
+	movl	$4, %ebx
+.LVL3:
 	# pieces.c:39
 	.loc 1 39 0
-	movl	%esi, (%esp)
+	movl	%ebx, (%esp)
+	# pieces.c:38
+	.loc 1 38 0
+	addl	$7, %esi
+.LVL4:
+	# pieces.c:39
+	.loc 1 39 0
 	call	bar
 	# pieces.c:40
 	.loc 1 40 0
-	leal	(%ebx,%esi), %eax
+	movl	%esi, (%esp)
+	call	bar
 	# pieces.c:41
 	.loc 1 41 0
+	leal	(%ebx,%esi), %eax
+	# pieces.c:42
+	.loc 1 42 0
 	movl	-8(%ebp), %ebx
 .LVL5:
 	movl	-4(%ebp), %esi
@@ -119,8 +119,8 @@ f1:
 	.type	f2, @function
 f2:
 .LFB2:
-	# pieces.c:45
-	.loc 1 45 0
+	# pieces.c:46
+	.loc 1 46 0
 .LVL7:
 	# basic block 2
 	pushl	%ebp
@@ -132,36 +132,36 @@ f2:
 .LCFI12:
 	movl	%esi, -4(%ebp)
 .LCFI13:
-	# pieces.c:48
-	.loc 1 48 0
+	# pieces.c:49
+	.loc 1 49 0
 	movl	8(%ebp), %esi
-	# pieces.c:45
-	.loc 1 45 0
+	# pieces.c:46
+	.loc 1 46 0
 	movl	%ebx, -8(%ebp)
 .LCFI14:
-	# pieces.c:47
-	.loc 1 47 0
-	movl	$4, %ebx
-.LVL9:
-	# pieces.c:49
-	.loc 1 49 0
-	movl	%ebx, (%esp)
 	# pieces.c:48
 	.loc 1 48 0
-	addl	$7, %esi
-.LVL10:
-	# pieces.c:49
-	.loc 1 49 0
-	call	bar
+	movl	$4, %ebx
+.LVL9:
 	# pieces.c:50
 	.loc 1 50 0
-	movl	%esi, (%esp)
+	movl	%ebx, (%esp)
+	# pieces.c:49
+	.loc 1 49 0
+	addl	$7, %esi
+.LVL10:
+	# pieces.c:50
+	.loc 1 50 0
 	call	bar
 	# pieces.c:51
 	.loc 1 51 0
-	leal	(%ebx,%esi), %eax
+	movl	%esi, (%esp)
+	call	bar
 	# pieces.c:52
 	.loc 1 52 0
+	leal	(%ebx,%esi), %eax
+	# pieces.c:53
+	.loc 1 53 0
 	movl	-8(%ebp), %ebx
 .LVL11:
 	movl	-4(%ebp), %esi
@@ -178,59 +178,59 @@ f2:
 	.type	f3, @function
 f3:
 .LFB3:
-	# pieces.c:56
-	.loc 1 56 0
+	# pieces.c:57
+	.loc 1 57 0
 .LVL13:
 	# basic block 2
 	pushl	%ebp
 .LCFI17:
-	# pieces.c:58
-	.loc 1 58 0
+	# pieces.c:59
+	.loc 1 59 0
 	movl	$4, %edx
-	# pieces.c:56
-	.loc 1 56 0
+	# pieces.c:57
+	.loc 1 57 0
 	movl	%esp, %ebp
 .LCFI18:
 .LVL14:
 	subl	$12, %esp
 .LCFI19:
-	# pieces.c:58
-	.loc 1 58 0
+	# pieces.c:59
+	.loc 1 59 0
 .LVL15:
-	# pieces.c:56
-	.loc 1 56 0
+	# pieces.c:57
+	.loc 1 57 0
 	movl	%esi, -4(%ebp)
 .LCFI20:
-	# pieces.c:60
-	.loc 1 60 0
+	# pieces.c:61
+	.loc 1 61 0
 	movswl	%dx, %esi
-	# pieces.c:56
-	.loc 1 56 0
+	# pieces.c:57
+	.loc 1 57 0
 	movl	%ebx, -8(%ebp)
 .LCFI21:
-	# pieces.c:60
-	.loc 1 60 0
+	# pieces.c:61
+	.loc 1 61 0
 	movl	%esi, (%esp)
 	call	bar
 .LVL16:
-	# pieces.c:57
-	.loc 1 57 0
+	# pieces.c:58
+	.loc 1 58 0
 	movl	8(%ebp), %edx
 	sall	$4, %edx
-	# pieces.c:59
-	.loc 1 59 0
+	# pieces.c:60
+	.loc 1 60 0
 	addl	$112, %edx
 	sarw	$4, %dx
-	# pieces.c:61
-	.loc 1 61 0
+	# pieces.c:62
+	.loc 1 62 0
 	movswl	%dx, %ebx
 	movl	%ebx, (%esp)
 	call	bar
-	# pieces.c:62
-	.loc 1 62 0
-	leal	(%esi,%ebx), %eax
 	# pieces.c:63
 	.loc 1 63 0
+	leal	(%esi,%ebx), %eax
+	# pieces.c:64
+	.loc 1 64 0
 	movl	-8(%ebp), %ebx
 	movl	-4(%ebp), %esi
 .LVL17:
@@ -246,8 +246,8 @@ f3:
 	.type	f4, @function
 f4:
 .LFB4:
-	# pieces.c:67
-	.loc 1 67 0
+	# pieces.c:68
+	.loc 1 68 0
 .LVL18:
 	# basic block 2
 	pushl	%ebp
@@ -262,28 +262,28 @@ f4:
 .LVL19:
 	movl	%ebx, -8(%ebp)
 .LCFI28:
-	# pieces.c:69
-	.loc 1 69 0
-	movl	%esi, %ebx
 	# pieces.c:70
 	.loc 1 70 0
-	addl	$1, %esi
-	# pieces.c:69
-	.loc 1 69 0
-.LVL20:
+	movl	%esi, %ebx
 	# pieces.c:71
 	.loc 1 71 0
-	movl	%ebx, (%esp)
-	call	bar
+	addl	$1, %esi
+	# pieces.c:70
+	.loc 1 70 0
+.LVL20:
 	# pieces.c:72
 	.loc 1 72 0
-	movl	%esi, (%esp)
+	movl	%ebx, (%esp)
 	call	bar
 	# pieces.c:73
 	.loc 1 73 0
-	leal	(%ebx,%esi), %eax
+	movl	%esi, (%esp)
+	call	bar
 	# pieces.c:74
 	.loc 1 74 0
+	leal	(%ebx,%esi), %eax
+	# pieces.c:75
+	.loc 1 75 0
 	movl	-8(%ebp), %ebx
 .LVL21:
 	movl	-4(%ebp), %esi
@@ -300,8 +300,8 @@ f4:
 	.type	f5, @function
 f5:
 .LFB5:
-	# pieces.c:78
-	.loc 1 78 0
+	# pieces.c:79
+	.loc 1 79 0
 .LVL23:
 	# basic block 2
 	pushl	%ebp
@@ -316,28 +316,28 @@ f5:
 .LVL24:
 	movl	%ebx, -8(%ebp)
 .LCFI35:
-	# pieces.c:80
-	.loc 1 80 0
-	movl	%esi, %ebx
 	# pieces.c:81
 	.loc 1 81 0
-	addl	$1, %esi
-	# pieces.c:80
-	.loc 1 80 0
-.LVL25:
+	movl	%esi, %ebx
 	# pieces.c:82
 	.loc 1 82 0
-	movl	%ebx, (%esp)
-	call	bar
+	addl	$1, %esi
+	# pieces.c:81
+	.loc 1 81 0
+.LVL25:
 	# pieces.c:83
 	.loc 1 83 0
-	movl	%esi, (%esp)
+	movl	%ebx, (%esp)
 	call	bar
 	# pieces.c:84
 	.loc 1 84 0
-	leal	(%ebx,%esi), %eax
+	movl	%esi, (%esp)
+	call	bar
 	# pieces.c:85
 	.loc 1 85 0
+	leal	(%ebx,%esi), %eax
+	# pieces.c:86
+	.loc 1 86 0
 	movl	-8(%ebp), %ebx
 .LVL26:
 	movl	-4(%ebp), %esi
@@ -350,60 +350,118 @@ f5:
 .LFE5:
 	.size	f5, .-f5
 	.p2align 4,,15
-.globl main
-	.type	main, @function
-main:
+.globl f6
+	.type	f6, @function
+f6:
 .LFB6:
-	# pieces.c:89
-	.loc 1 89 0
+	# pieces.c:90
+	.loc 1 90 0
+.LVL28:
 	# basic block 2
 	pushl	%ebp
 .LCFI38:
 	movl	%esp, %ebp
 .LCFI39:
-	pushl	%ebx
+	subl	$12, %esp
 .LCFI40:
-	# pieces.c:91
-	.loc 1 91 0
-	movl	$7, %ebx
-	# pieces.c:89
-	.loc 1 89 0
-	subl	$4, %esp
+	movl	%esi, -4(%ebp)
 .LCFI41:
-	# pieces.c:91
-	.loc 1 91 0
-.LVL28:
-	# pieces.c:92
-	.loc 1 92 0
-	movl	%ebx, (%esp)
-	call	f1
+	movl	8(%ebp), %esi
+.LVL29:
+	movl	%ebx, -8(%ebp)
+.LCFI42:
 	# pieces.c:93
 	.loc 1 93 0
-	movl	%ebx, (%esp)
-	call	f2
+	movl	%esi, %ebx
 	# pieces.c:94
 	.loc 1 94 0
-	movl	%ebx, (%esp)
-	call	f3
+	addl	$1, %esi
+	# pieces.c:93
+	.loc 1 93 0
+.LVL30:
 	# pieces.c:95
 	.loc 1 95 0
 	movl	%ebx, (%esp)
-	call	f4
+	call	bar
 	# pieces.c:96
 	.loc 1 96 0
-	movl	%ebx, (%esp)
-	call	f5
+	movl	%esi, (%esp)
+	call	bar
+	# pieces.c:97
+	.loc 1 97 0
+	leal	(%ebx,%esi), %eax
 	# pieces.c:98
 	.loc 1 98 0
+	movl	-8(%ebp), %ebx
+.LVL31:
+	movl	-4(%ebp), %esi
+.LVL32:
+	movl	%ebp, %esp
+.LCFI43:
+	popl	%ebp
+.LCFI44:
+	ret
+.LFE6:
+	.size	f6, .-f6
+	.p2align 4,,15
+.globl main
+	.type	main, @function
+main:
+.LFB7:
+	# pieces.c:102
+	.loc 1 102 0
+	# basic block 2
+	pushl	%ebp
+.LCFI45:
+	movl	%esp, %ebp
+.LCFI46:
+	pushl	%ebx
+.LCFI47:
+	# pieces.c:104
+	.loc 1 104 0
+	movl	$7, %ebx
+	# pieces.c:102
+	.loc 1 102 0
+	subl	$4, %esp
+.LCFI48:
+	# pieces.c:104
+	.loc 1 104 0
+.LVL33:
+	# pieces.c:105
+	.loc 1 105 0
+	movl	%ebx, (%esp)
+	call	f1
+	# pieces.c:106
+	.loc 1 106 0
+	movl	%ebx, (%esp)
+	call	f2
+	# pieces.c:107
+	.loc 1 107 0
+	movl	%ebx, (%esp)
+	call	f3
+	# pieces.c:108
+	.loc 1 108 0
+	movl	%ebx, (%esp)
+	call	f4
+	# pieces.c:109
+	.loc 1 109 0
+	movl	%ebx, (%esp)
+	call	f5
+	# pieces.c:110
+	.loc 1 110 0
+	movl	%ebx, (%esp)
+	call	f6
+	# pieces.c:112
+	.loc 1 112 0
 	addl	$4, %esp
 	xorl	%eax, %eax
 	popl	%ebx
-.LCFI42:
-.LVL29:
+.LCFI49:
+.LVL34:
 	popl	%ebp
-.LCFI43:
+.LCFI50:
 	ret
-.LFE6:
+.LFE7:
 	.size	main, .-main
 #APP
 	.section	.debug_frame,"",@progbits
@@ -649,20 +707,57 @@ main:
 	.byte	0xd	# DW_CFA_def_cfa_register
 	.uleb128 0x5
 	.byte	0x4	# DW_CFA_advance_loc4
-	.long	.LCFI40-.LCFI39
+	.long	.LCFI41-.LCFI39
+	.byte	0x86	# DW_CFA_offset, column 0x6
+	.uleb128 0x3
+	.byte	0x4	# DW_CFA_advance_loc4
+	.long	.LCFI42-.LCFI41
+	.byte	0x83	# DW_CFA_offset, column 0x3
+	.uleb128 0x4
+	.byte	0x4	# DW_CFA_advance_loc4
+	.long	.LCFI43-.LCFI42
+	.byte	0xd	# DW_CFA_def_cfa_register
+	.uleb128 0x4
+	.byte	0xc6	# DW_CFA_restore, column 0x6
+	.byte	0xc3	# DW_CFA_restore, column 0x3
+	.byte	0x4	# DW_CFA_advance_loc4
+	.long	.LCFI44-.LCFI43
+	.byte	0xc5	# DW_CFA_restore, column 0x5
+	.byte	0xe	# DW_CFA_def_cfa_offset
+	.uleb128 0x4
+	.align 4
+.LEFDE12:
+.LSFDE14:
+	.long	.LEFDE14-.LASFDE14	# FDE Length
+.LASFDE14:
+	.long	.Lframe0	# FDE CIE offset
+	.long	.LFB7	# FDE initial location
+	.long	.LFE7-.LFB7	# FDE address range
+	.byte	0x4	# DW_CFA_advance_loc4
+	.long	.LCFI45-.LFB7
+	.byte	0xe	# DW_CFA_def_cfa_offset
+	.uleb128 0x8
+	.byte	0x85	# DW_CFA_offset, column 0x5
+	.uleb128 0x2
+	.byte	0x4	# DW_CFA_advance_loc4
+	.long	.LCFI46-.LCFI45
+	.byte	0xd	# DW_CFA_def_cfa_register
+	.uleb128 0x5
+	.byte	0x4	# DW_CFA_advance_loc4
+	.long	.LCFI47-.LCFI46
 	.byte	0x83	# DW_CFA_offset, column 0x3
 	.uleb128 0x3
 	.byte	0x4	# DW_CFA_advance_loc4
-	.long	.LCFI42-.LCFI40
+	.long	.LCFI49-.LCFI47
 	.byte	0xc3	# DW_CFA_restore, column 0x3
 	.byte	0x4	# DW_CFA_advance_loc4
-	.long	.LCFI43-.LCFI42
+	.long	.LCFI50-.LCFI49
 	.byte	0xc5	# DW_CFA_restore, column 0x5
 	.byte	0xc	# DW_CFA_def_cfa
 	.uleb128 0x4
 	.uleb128 0x4
 	.align 4
-.LEFDE12:
+.LEFDE14:
 #NO_APP
 	.text
 .Letext0:
@@ -1130,6 +1225,11 @@ main:
 	.byte	0x75	# DW_OP_breg5
 	.sleb128 8
 	.long	.LCFI43-.Ltext0	# Location list begin address (*.LLST11)
+	.long	.LCFI44-.Ltext0	# Location list end address (*.LLST11)
+	.value	0x2	# Location expression size
+	.byte	0x74	# DW_OP_breg4
+	.sleb128 8
+	.long	.LCFI44-.Ltext0	# Location list begin address (*.LLST11)
 	.long	.LFE6-.Ltext0	# Location list end address (*.LLST11)
 	.value	0x2	# Location expression size
 	.byte	0x74	# DW_OP_breg4
@@ -1137,14 +1237,74 @@ main:
 	.long	0	# Location list terminator begin (*.LLST11)
 	.long	0	# Location list terminator end (*.LLST11)
 .LLST12:
-	.long	.LVL28-.Ltext0	# Location list begin address (*.LLST12)
-	.long	.LVL29-.Ltext0	# Location list end address (*.LLST12)
-	.value	0x1	# Location expression size
+	.long	.LVL29-.Ltext0	# Location list begin address (*.LLST12)
+	.long	.LVL30-.Ltext0	# Location list end address (*.LLST12)
+	.value	0xa	# Location expression size
+	.byte	0x91	# DW_OP_fbreg
+	.sleb128 0
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.byte	0x91	# DW_OP_fbreg
+	.sleb128 0
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.long	.LVL30-.Ltext0	# Location list begin address (*.LLST12)
+	.long	.LVL31-.Ltext0	# Location list end address (*.LLST12)
+	.value	0x8	# Location expression size
 	.byte	0x53	# DW_OP_reg3
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.byte	0x56	# DW_OP_reg6
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.long	.LVL31-.Ltext0	# Location list begin address (*.LLST12)
+	.long	.LVL32-.Ltext0	# Location list end address (*.LLST12)
+	.value	0x7	# Location expression size
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.byte	0x56	# DW_OP_reg6
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x4
 	.long	0	# Location list terminator begin (*.LLST12)
 	.long	0	# Location list terminator end (*.LLST12)
+.LLST13:
+	.long	.LFB7-.Ltext0	# Location list begin address (*.LLST13)
+	.long	.LCFI45-.Ltext0	# Location list end address (*.LLST13)
+	.value	0x2	# Location expression size
+	.byte	0x74	# DW_OP_breg4
+	.sleb128 4
+	.long	.LCFI45-.Ltext0	# Location list begin address (*.LLST13)
+	.long	.LCFI46-.Ltext0	# Location list end address (*.LLST13)
+	.value	0x2	# Location expression size
+	.byte	0x74	# DW_OP_breg4
+	.sleb128 8
+	.long	.LCFI46-.Ltext0	# Location list begin address (*.LLST13)
+	.long	.LCFI50-.Ltext0	# Location list end address (*.LLST13)
+	.value	0x2	# Location expression size
+	.byte	0x75	# DW_OP_breg5
+	.sleb128 8
+	.long	.LCFI50-.Ltext0	# Location list begin address (*.LLST13)
+	.long	.LFE7-.Ltext0	# Location list end address (*.LLST13)
+	.value	0x2	# Location expression size
+	.byte	0x74	# DW_OP_breg4
+	.sleb128 4
+	.long	0	# Location list terminator begin (*.LLST13)
+	.long	0	# Location list terminator end (*.LLST13)
+.LLST14:
+	.long	.LVL33-.Ltext0	# Location list begin address (*.LLST14)
+	.long	.LVL34-.Ltext0	# Location list end address (*.LLST14)
+	.value	0x1	# Location expression size
+	.byte	0x53	# DW_OP_reg3
+	.long	0	# Location list terminator begin (*.LLST14)
+	.long	0	# Location list terminator end (*.LLST14)
 	.section	.debug_info
-	.long	0x1e3	# Length of Compilation Unit Info
+	.long	0x252	# Length of Compilation Unit Info
 	.value	0x2	# DWARF version number
 	.long	.Ldebug_abbrev0	# Offset Into Abbrev. Section
 	.byte	0x4	# Pointer Size (in bytes)
@@ -1212,182 +1372,245 @@ main:
 	.byte	0x23	# DW_OP_plus_uconst
 	.uleb128 0
 	.byte	0	# end of children of DIE 0x4f
-	.uleb128 0x6	# (DIE (0x78) DW_TAG_subprogram)
+	.uleb128 0x2	# (DIE (0x78) DW_TAG_structure_type)
+	.ascii "C\0"	# DW_AT_name
+	.byte	0xc	# DW_AT_byte_size
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x19	# DW_AT_decl_line
+	.long	0xa7	# DW_AT_sibling
+	.uleb128 0x3	# (DIE (0x82) DW_TAG_member)
+	.ascii "i\0"	# DW_AT_name
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x19	# DW_AT_decl_line
+	.long	0x48	# DW_AT_type
+	.byte	0x2	# DW_AT_data_member_location
+	.byte	0x23	# DW_OP_plus_uconst
+	.uleb128 0
+	.uleb128 0x3	# (DIE (0x8e) DW_TAG_member)
+	.ascii "j\0"	# DW_AT_name
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x19	# DW_AT_decl_line
+	.long	0x48	# DW_AT_type
+	.byte	0x2	# DW_AT_data_member_location
+	.byte	0x23	# DW_OP_plus_uconst
+	.uleb128 0x4
+	.uleb128 0x3	# (DIE (0x9a) DW_TAG_member)
+	.ascii "q\0"	# DW_AT_name
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x19	# DW_AT_decl_line
+	.long	0x48	# DW_AT_type
+	.byte	0x2	# DW_AT_data_member_location
+	.byte	0x23	# DW_OP_plus_uconst
+	.uleb128 0x8
+	.byte	0	# end of children of DIE 0x78
+	.uleb128 0x6	# (DIE (0xa7) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
 	.ascii "bar\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x1b	# DW_AT_decl_line
+	.byte	0x1c	# DW_AT_decl_line
 	.byte	0x1	# DW_AT_prototyped
 	.long	.LFB0	# DW_AT_low_pc
 	.long	.LFE0	# DW_AT_high_pc
 	.long	.LLST0	# DW_AT_frame_base
-	.long	0x9e	# DW_AT_sibling
-	.uleb128 0x7	# (DIE (0x91) DW_TAG_formal_parameter)
+	.long	0xcd	# DW_AT_sibling
+	.uleb128 0x7	# (DIE (0xc0) DW_TAG_formal_parameter)
 	.ascii "x\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x1b	# DW_AT_decl_line
+	.byte	0x1c	# DW_AT_decl_line
 	.long	0x48	# DW_AT_type
 	.byte	0x2	# DW_AT_location
 	.byte	0x91	# DW_OP_fbreg
 	.sleb128 0
-	.byte	0	# end of children of DIE 0x78
-	.uleb128 0x8	# (DIE (0x9e) DW_TAG_subprogram)
+	.byte	0	# end of children of DIE 0xa7
+	.uleb128 0x8	# (DIE (0xcd) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
 	.ascii "f1\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x21	# DW_AT_decl_line
+	.byte	0x22	# DW_AT_decl_line
 	.byte	0x1	# DW_AT_prototyped
 	.long	0x48	# DW_AT_type
 	.long	.LFB1	# DW_AT_low_pc
 	.long	.LFE1	# DW_AT_high_pc
 	.long	.LLST1	# DW_AT_frame_base
-	.long	0xd4	# DW_AT_sibling
-	.uleb128 0x7	# (DIE (0xba) DW_TAG_formal_parameter)
+	.long	0x103	# DW_AT_sibling
+	.uleb128 0x7	# (DIE (0xe9) DW_TAG_formal_parameter)
 	.ascii "k\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x21	# DW_AT_decl_line
+	.byte	0x22	# DW_AT_decl_line
 	.long	0x48	# DW_AT_type
 	.byte	0x2	# DW_AT_location
 	.byte	0x91	# DW_OP_fbreg
 	.sleb128 0
-	.uleb128 0x9	# (DIE (0xc6) DW_TAG_variable)
+	.uleb128 0x9	# (DIE (0xf5) DW_TAG_variable)
 	.ascii "a\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x23	# DW_AT_decl_line
+	.byte	0x24	# DW_AT_decl_line
 	.long	0x25	# DW_AT_type
 	.long	.LLST2	# DW_AT_location
-	.byte	0	# end of children of DIE 0x9e
-	.uleb128 0x8	# (DIE (0xd4) DW_TAG_subprogram)
+	.byte	0	# end of children of DIE 0xcd
+	.uleb128 0x8	# (DIE (0x103) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
 	.ascii "f2\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x2c	# DW_AT_decl_line
+	.byte	0x2d	# DW_AT_decl_line
 	.byte	0x1	# DW_AT_prototyped
 	.long	0x48	# DW_AT_type
 	.long	.LFB2	# DW_AT_low_pc
 	.long	.LFE2	# DW_AT_high_pc
 	.long	.LLST3	# DW_AT_frame_base
-	.long	0x10a	# DW_AT_sibling
-	.uleb128 0x7	# (DIE (0xf0) DW_TAG_formal_parameter)
+	.long	0x139	# DW_AT_sibling
+	.uleb128 0x7	# (DIE (0x11f) DW_TAG_formal_parameter)
 	.ascii "k\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x2c	# DW_AT_decl_line
+	.byte	0x2d	# DW_AT_decl_line
 	.long	0x48	# DW_AT_type
 	.byte	0x2	# DW_AT_location
 	.byte	0x91	# DW_OP_fbreg
 	.sleb128 0
-	.uleb128 0x9	# (DIE (0xfc) DW_TAG_variable)
+	.uleb128 0x9	# (DIE (0x12b) DW_TAG_variable)
 	.ascii "a\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x2e	# DW_AT_decl_line
-	.long	0x10a	# DW_AT_type
+	.byte	0x2f	# DW_AT_decl_line
+	.long	0x139	# DW_AT_type
 	.long	.LLST4	# DW_AT_location
-	.byte	0	# end of children of DIE 0xd4
-	.uleb128 0xa	# (DIE (0x10a) DW_TAG_array_type)
+	.byte	0	# end of children of DIE 0x103
+	.uleb128 0xa	# (DIE (0x139) DW_TAG_array_type)
 	.long	0x48	# DW_AT_type
-	.long	0x11a	# DW_AT_sibling
-	.uleb128 0xb	# (DIE (0x113) DW_TAG_subrange_type)
-	.long	0x11a	# DW_AT_type
+	.long	0x149	# DW_AT_sibling
+	.uleb128 0xb	# (DIE (0x142) DW_TAG_subrange_type)
+	.long	0x149	# DW_AT_type
 	.byte	0x1	# DW_AT_upper_bound
-	.byte	0	# end of children of DIE 0x10a
-	.uleb128 0xc	# (DIE (0x11a) DW_TAG_base_type)
+	.byte	0	# end of children of DIE 0x139
+	.uleb128 0xc	# (DIE (0x149) DW_TAG_base_type)
 	.byte	0x4	# DW_AT_byte_size
 	.byte	0x7	# DW_AT_encoding
-	.uleb128 0x8	# (DIE (0x11d) DW_TAG_subprogram)
+	.uleb128 0x8	# (DIE (0x14c) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
 	.ascii "f3\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x37	# DW_AT_decl_line
+	.byte	0x38	# DW_AT_decl_line
 	.byte	0x1	# DW_AT_prototyped
 	.long	0x48	# DW_AT_type
 	.long	.LFB3	# DW_AT_low_pc
 	.long	.LFE3	# DW_AT_high_pc
 	.long	.LLST5	# DW_AT_frame_base
-	.long	0x153	# DW_AT_sibling
-	.uleb128 0x7	# (DIE (0x139) DW_TAG_formal_parameter)
+	.long	0x182	# DW_AT_sibling
+	.uleb128 0x7	# (DIE (0x168) DW_TAG_formal_parameter)
 	.ascii "k\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x37	# DW_AT_decl_line
+	.byte	0x38	# DW_AT_decl_line
 	.long	0x48	# DW_AT_type
 	.byte	0x2	# DW_AT_location
 	.byte	0x91	# DW_OP_fbreg
 	.sleb128 0
-	.uleb128 0x9	# (DIE (0x145) DW_TAG_variable)
+	.uleb128 0x9	# (DIE (0x174) DW_TAG_variable)
 	.ascii "a\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x39	# DW_AT_decl_line
+	.byte	0x3a	# DW_AT_decl_line
 	.long	0x4f	# DW_AT_type
 	.long	.LLST6	# DW_AT_location
-	.byte	0	# end of children of DIE 0x11d
-	.uleb128 0x8	# (DIE (0x153) DW_TAG_subprogram)
+	.byte	0	# end of children of DIE 0x14c
+	.uleb128 0x8	# (DIE (0x182) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
 	.ascii "f4\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x42	# DW_AT_decl_line
+	.byte	0x43	# DW_AT_decl_line
 	.byte	0x1	# DW_AT_prototyped
 	.long	0x48	# DW_AT_type
 	.long	.LFB4	# DW_AT_low_pc
 	.long	.LFE4	# DW_AT_high_pc
 	.long	.LLST7	# DW_AT_frame_base
-	.long	0x189	# DW_AT_sibling
-	.uleb128 0x7	# (DIE (0x16f) DW_TAG_formal_parameter)
+	.long	0x1b8	# DW_AT_sibling
+	.uleb128 0x7	# (DIE (0x19e) DW_TAG_formal_parameter)
 	.ascii "k\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x42	# DW_AT_decl_line
+	.byte	0x43	# DW_AT_decl_line
 	.long	0x48	# DW_AT_type
 	.byte	0x2	# DW_AT_location
 	.byte	0x91	# DW_OP_fbreg
 	.sleb128 0
-	.uleb128 0x9	# (DIE (0x17b) DW_TAG_variable)
+	.uleb128 0x9	# (DIE (0x1aa) DW_TAG_variable)
 	.ascii "a\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x44	# DW_AT_decl_line
-	.long	0x10a	# DW_AT_type
+	.byte	0x45	# DW_AT_decl_line
+	.long	0x139	# DW_AT_type
 	.long	.LLST8	# DW_AT_location
-	.byte	0	# end of children of DIE 0x153
-	.uleb128 0x8	# (DIE (0x189) DW_TAG_subprogram)
+	.byte	0	# end of children of DIE 0x182
+	.uleb128 0x8	# (DIE (0x1b8) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
 	.ascii "f5\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x4d	# DW_AT_decl_line
+	.byte	0x4e	# DW_AT_decl_line
 	.byte	0x1	# DW_AT_prototyped
 	.long	0x48	# DW_AT_type
 	.long	.LFB5	# DW_AT_low_pc
 	.long	.LFE5	# DW_AT_high_pc
 	.long	.LLST9	# DW_AT_frame_base
-	.long	0x1bf	# DW_AT_sibling
-	.uleb128 0x7	# (DIE (0x1a5) DW_TAG_formal_parameter)
+	.long	0x1ee	# DW_AT_sibling
+	.uleb128 0x7	# (DIE (0x1d4) DW_TAG_formal_parameter)
 	.ascii "k\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x4d	# DW_AT_decl_line
+	.byte	0x4e	# DW_AT_decl_line
 	.long	0x48	# DW_AT_type
 	.byte	0x2	# DW_AT_location
 	.byte	0x91	# DW_OP_fbreg
 	.sleb128 0
-	.uleb128 0x9	# (DIE (0x1b1) DW_TAG_variable)
+	.uleb128 0x9	# (DIE (0x1e0) DW_TAG_variable)
 	.ascii "a\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x4f	# DW_AT_decl_line
+	.byte	0x50	# DW_AT_decl_line
 	.long	0x25	# DW_AT_type
 	.long	.LLST10	# DW_AT_location
-	.byte	0	# end of children of DIE 0x189
-	.uleb128 0xd	# (DIE (0x1bf) DW_TAG_subprogram)
+	.byte	0	# end of children of DIE 0x1b8
+	.uleb128 0x8	# (DIE (0x1ee) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
-	.long	.LASF0	# DW_AT_name: "main"
+	.ascii "f6\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x58	# DW_AT_decl_line
+	.byte	0x59	# DW_AT_decl_line
 	.byte	0x1	# DW_AT_prototyped
 	.long	0x48	# DW_AT_type
 	.long	.LFB6	# DW_AT_low_pc
 	.long	.LFE6	# DW_AT_high_pc
 	.long	.LLST11	# DW_AT_frame_base
-	.uleb128 0x9	# (DIE (0x1d8) DW_TAG_variable)
+	.long	0x22e	# DW_AT_sibling
+	.uleb128 0x7	# (DIE (0x20a) DW_TAG_formal_parameter)
 	.ascii "k\0"	# DW_AT_name
 	.byte	0x1	# DW_AT_decl_file (pieces.c)
-	.byte	0x5a	# DW_AT_decl_line
+	.byte	0x59	# DW_AT_decl_line
 	.long	0x48	# DW_AT_type
+	.byte	0x2	# DW_AT_location
+	.byte	0x91	# DW_OP_fbreg
+	.sleb128 0
+	.uleb128 0xd	# (DIE (0x216) DW_TAG_variable)
+	.ascii "z\0"	# DW_AT_name
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x5b	# DW_AT_decl_line
+	.long	0x48	# DW_AT_type
+	.byte	0x17	# DW_AT_const_value
+	.uleb128 0x9	# (DIE (0x220) DW_TAG_variable)
+	.ascii "a\0"	# DW_AT_name
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x5c	# DW_AT_decl_line
+	.long	0x78	# DW_AT_type
 	.long	.LLST12	# DW_AT_location
-	.byte	0	# end of children of DIE 0x1bf
+	.byte	0	# end of children of DIE 0x1ee
+	.uleb128 0xe	# (DIE (0x22e) DW_TAG_subprogram)
+	.byte	0x1	# DW_AT_external
+	.long	.LASF0	# DW_AT_name: "main"
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x65	# DW_AT_decl_line
+	.byte	0x1	# DW_AT_prototyped
+	.long	0x48	# DW_AT_type
+	.long	.LFB7	# DW_AT_low_pc
+	.long	.LFE7	# DW_AT_high_pc
+	.long	.LLST13	# DW_AT_frame_base
+	.uleb128 0x9	# (DIE (0x247) DW_TAG_variable)
+	.ascii "k\0"	# DW_AT_name
+	.byte	0x1	# DW_AT_decl_file (pieces.c)
+	.byte	0x67	# DW_AT_decl_line
+	.long	0x48	# DW_AT_type
+	.long	.LLST14	# DW_AT_location
+	.byte	0	# end of children of DIE 0x22e
 	.byte	0	# end of children of DIE 0xb
 	.section	.debug_abbrev
 	.uleb128 0x1	# (abbrev code)
@@ -1577,6 +1800,21 @@ main:
 	.byte	0
 	.byte	0
 	.uleb128 0xd	# (abbrev code)
+	.uleb128 0x34	# (TAG: DW_TAG_variable)
+	.byte	0	# DW_children_no
+	.uleb128 0x3	# (DW_AT_name)
+	.uleb128 0x8	# (DW_FORM_string)
+	.uleb128 0x3a	# (DW_AT_decl_file)
+	.uleb128 0xb	# (DW_FORM_data1)
+	.uleb128 0x3b	# (DW_AT_decl_line)
+	.uleb128 0xb	# (DW_FORM_data1)
+	.uleb128 0x49	# (DW_AT_type)
+	.uleb128 0x13	# (DW_FORM_ref4)
+	.uleb128 0x1c	# (DW_AT_const_value)
+	.uleb128 0xb	# (DW_FORM_data1)
+	.byte	0
+	.byte	0
+	.uleb128 0xe	# (abbrev code)
 	.uleb128 0x2e	# (TAG: DW_TAG_subprogram)
 	.byte	0x1	# DW_children_yes
 	.uleb128 0x3f	# (DW_AT_external)
@@ -1601,34 +1839,38 @@ main:
 	.byte	0
 	.byte	0
 	.section	.debug_pubnames,"",@progbits
-	.long	0x42	# Length of Public Names Info
+	.long	0x49	# Length of Public Names Info
 	.value	0x2	# DWARF Version
 	.long	.Ldebug_info0	# Offset of Compilation Unit Info
-	.long	0x1e7	# Compilation Unit Length
-	.long	0x78	# DIE offset
+	.long	0x256	# Compilation Unit Length
+	.long	0xa7	# DIE offset
 	.ascii "bar\0"	# external name
-	.long	0x9e	# DIE offset
+	.long	0xcd	# DIE offset
 	.ascii "f1\0"	# external name
-	.long	0xd4	# DIE offset
+	.long	0x103	# DIE offset
 	.ascii "f2\0"	# external name
-	.long	0x11d	# DIE offset
+	.long	0x14c	# DIE offset
 	.ascii "f3\0"	# external name
-	.long	0x153	# DIE offset
+	.long	0x182	# DIE offset
 	.ascii "f4\0"	# external name
-	.long	0x189	# DIE offset
+	.long	0x1b8	# DIE offset
 	.ascii "f5\0"	# external name
-	.long	0x1bf	# DIE offset
+	.long	0x1ee	# DIE offset
+	.ascii "f6\0"	# external name
+	.long	0x22e	# DIE offset
 	.ascii "main\0"	# external name
 	.long	0
 	.section	.debug_pubtypes,"",@progbits
-	.long	0x1a	# Length of Public Type Names Info
+	.long	0x20	# Length of Public Type Names Info
 	.value	0x2	# DWARF Version
 	.long	.Ldebug_info0	# Offset of Compilation Unit Info
-	.long	0x1e7	# Compilation Unit Length
+	.long	0x256	# Compilation Unit Length
 	.long	0x25	# DIE offset
 	.ascii "A\0"	# external name
 	.long	0x4f	# DIE offset
 	.ascii "B\0"	# external name
+	.long	0x78	# DIE offset
+	.ascii "C\0"	# external name
 	.long	0
 	.section	.debug_aranges,"",@progbits
 	.long	0x1c	# Length of Address Ranges Info

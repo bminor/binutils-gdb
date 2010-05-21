@@ -67,5 +67,28 @@ proc pieces_test_f2 {} {
     gdb_test "print a\[1\]" " = 14" "print a\[1\] in pieces:f2"
 }
 
+# Function f6 tests for an empty DW_OP_piece.
+proc pieces_test_f6 {} {
+    global csrcfile
+    set line [gdb_get_line_number "f6 breakpoint" $csrcfile]
+    gdb_test "break pieces.c:$line" "Breakpoint 4.*" \
+       "set f6 breakpoint for pieces"
+    gdb_continue_to_breakpoint "continue to f6 breakpoint for pieces"
+    gdb_test "print a" \
+	"warning: bytes .* in computed object were.* = {i = 7, j = 8, q = 0}" \
+	"print a with optimized out piece"
+    # Note: no warning for this case.
+    gdb_test_multiple "print a.i" \
+	"print a.i with optimized out piece" {
+	    -re "warning: some bits in computed object" {
+		fail "print a.i with optimized out piece"
+	    }
+	    -re " = 7" {
+		pass "print a.i with optimized out piece"
+	    }
+	}
+}
+
 pieces_test_f1
 pieces_test_f2
+pieces_test_f6
