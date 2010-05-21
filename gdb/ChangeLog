@@ -1,5 +1,20 @@
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2loc.c (extract_bits_primitive): New function.
+	(extract_bits): Likewise.
+	(insert_bits): Likewise.
+	(copy_bitwise): Likewise.
+	(read_pieced_value): Do all operations in bits.
+	(write_pieced_value): Likewise.
+	* dwarf2expr.h (struct dwarf_expr_piece) <offset>: New field.
+	* dwarf2expr.c (add_piece): New arguments bit_piece, offset.
+	Always use xrealloc to resize piece array.
+	(execute_stack_op) <DW_OP_reg0>: Handle DW_OP_bit_piece.
+	<DW_OP_piece>: Update.
+	<DW_OP_bit_piece>: New case.
+
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2loc.c (read_pieced_value): Exit loop when result is full.
 	<DWARF_VALUE_OPTIMIZED_OUT>: New case.
 	* dwarf2expr.h (enum dwarf_value_location)

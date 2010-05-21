@@ -21,7 +21,7 @@
    However, it is used to extract breakpoint line numbers.  */
 
 struct A { int i; int j; };
-struct B { int : 4; int i : 12; int j : 12; int : 4; };
+struct B { int i : 12; int j : 12; int : 4; };
 struct C { int i; int j; int q; };
 
 __attribute__((noinline)) void
@@ -89,7 +89,7 @@ __attribute__((noinline)) int
 f6 (int k)
 {
   int z = 23;
-  struct C a = { k, k, z};
+  struct C a = { k, k, z };
   asm ("" : "+r" (a.i));
   a.j++;
   bar (a.i);

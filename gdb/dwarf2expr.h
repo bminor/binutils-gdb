@@ -155,7 +155,7 @@ struct dwarf_expr_context
 };
 
 
-/* A piece of an object, as recorded by DW_OP_piece.  */
+/* A piece of an object, as recorded by DW_OP_piece or DW_OP_bit_piece.  */
 struct dwarf_expr_piece
 {
   enum dwarf_value_location location;
@@ -181,8 +181,10 @@ struct dwarf_expr_piece
     } literal;
   } v;
 
-  /* The length of the piece, in bytes.  */
+  /* The length of the piece, in bits.  */
   ULONGEST size;
+  /* The piece offset, in bits.  */
+  ULONGEST offset;
 };
 
 struct dwarf_expr_context *new_dwarf_expr_context (void);

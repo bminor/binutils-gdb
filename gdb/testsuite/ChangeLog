@@ -1,5 +1,12 @@
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/pieces.exp (pieces_test_f3): New proc.
+	Call it.
+	* gdb.dwarf2/pieces.S: Update.
+	* gdb.dwarf2/pieces.c (struct B): Remove initial field.
+
+2010-05-21  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/pieces.exp (pieces_test_f6): New proc.
 	Call it.
 	* gdb.dwarf2/pieces.c (struct C): New.

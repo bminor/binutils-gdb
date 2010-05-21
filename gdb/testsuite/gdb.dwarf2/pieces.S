@@ -989,23 +989,18 @@ main:
 .LLST6:
 	.long	.LVL13-.Ltext0	# Location list begin address (*.LLST6)
 	.long	.LVL14-.Ltext0	# Location list end address (*.LLST6)
-	.value	0xa	# Location expression size
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.value	0x8	# Location expression size
 	.byte	0x34	# DW_OP_lit4
 	.byte	0x9f	# DW_OP_stack_value
 	.byte	0x9d	# DW_OP_bit_piece
 	.uleb128 0xc
 	.uleb128 0
-	.byte	0x93	# DW_OP_piece
-	.uleb128 0x2
+	.byte	0x9d	# DW_OP_bit_piece
+	.uleb128 0x14
+	.uleb128 0
 	.long	.LVL14-.Ltext0	# Location list begin address (*.LLST6)
 	.long	.LVL15-.Ltext0	# Location list end address (*.LLST6)
-	.value	0x15	# Location expression size
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.value	0x11	# Location expression size
 	.byte	0x34	# DW_OP_lit4
 	.byte	0x9f	# DW_OP_stack_value
 	.byte	0x9d	# DW_OP_bit_piece
@@ -1021,15 +1016,11 @@ main:
 	.byte	0x9d	# DW_OP_bit_piece
 	.uleb128 0xc
 	.uleb128 0
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x1
 	.long	.LVL15-.Ltext0	# Location list begin address (*.LLST6)
 	.long	.LVL16-1-.Ltext0	# Location list end address (*.LLST6)
-	.value	0x14	# Location expression size
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.value	0x10	# Location expression size
 	.byte	0x52	# DW_OP_reg2
 	.byte	0x9d	# DW_OP_bit_piece
 	.uleb128 0xc
@@ -1044,15 +1035,11 @@ main:
 	.byte	0x9d	# DW_OP_bit_piece
 	.uleb128 0xc
 	.uleb128 0
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x1
 	.long	.LVL16-1-.Ltext0	# Location list begin address (*.LLST6)
 	.long	.LVL17-.Ltext0	# Location list end address (*.LLST6)
-	.value	0x14	# Location expression size
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.value	0x10	# Location expression size
 	.byte	0x56	# DW_OP_reg6
 	.byte	0x9d	# DW_OP_bit_piece
 	.uleb128 0xc
@@ -1067,14 +1054,14 @@ main:
 	.byte	0x9d	# DW_OP_bit_piece
 	.uleb128 0xc
 	.uleb128 0
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x1
 	.long	.LVL17-.Ltext0	# Location list begin address (*.LLST6)
 	.long	.LFE3-.Ltext0	# Location list end address (*.LLST6)
 	.value	0xf	# Location expression size
-	.byte	0x93	# DW_OP_piece
-	.uleb128 0x2
+	.byte	0x9d	# DW_OP_bit_piece
+	.uleb128 0xc
+	.uleb128 0
 	.byte	0x91	# DW_OP_fbreg
 	.sleb128 0
 	.byte	0x94	# DW_OP_deref_size
@@ -1085,9 +1072,8 @@ main:
 	.byte	0x9d	# DW_OP_bit_piece
 	.uleb128 0xc
 	.uleb128 0
-	.byte	0x9d	# DW_OP_bit_piece
-	.uleb128 0x4
-	.uleb128 0
+	.byte	0x93	# DW_OP_piece
+	.uleb128 0x1
 	.long	0	# Location list terminator begin (*.LLST6)
 	.long	0	# Location list terminator end (*.LLST6)
 .LLST7:
@@ -1356,7 +1342,7 @@ main:
 	.long	0x48	# DW_AT_type
 	.byte	0x4	# DW_AT_byte_size
 	.byte	0xc	# DW_AT_bit_size
-	.byte	0x10	# DW_AT_bit_offset
+	.byte	0x14	# DW_AT_bit_offset
 	.byte	0x2	# DW_AT_data_member_location
 	.byte	0x23	# DW_OP_plus_uconst
 	.uleb128 0
@@ -1367,7 +1353,7 @@ main:
 	.long	0x48	# DW_AT_type
 	.byte	0x4	# DW_AT_byte_size
 	.byte	0xc	# DW_AT_bit_size
-	.byte	0x4	# DW_AT_bit_offset
+	.byte	0x8	# DW_AT_bit_offset
 	.byte	0x2	# DW_AT_data_member_location
 	.byte	0x23	# DW_OP_plus_uconst
 	.uleb128 0
