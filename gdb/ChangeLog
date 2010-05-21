@@ -1,3 +1,8 @@
+2010-05-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* dwarf2read.c (new_symbol): Handle DW_AT_variable_parameter
+	attribute.
+
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (read_pieced_value): Work properly when 'v' has an
