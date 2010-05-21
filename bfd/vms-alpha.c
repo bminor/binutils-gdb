@@ -547,12 +547,14 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
 	 what's in each section without examining the data.  This is
 	 especially true of DWARF debug sections.  */
       bfd_flags = SEC_ALLOC;
+      if (vbn != 0)
+        bfd_flags |= SEC_HAS_CONTENTS | SEC_LOAD;
 
       if (flags & EISD__M_EXE)
-	bfd_flags |= SEC_CODE | SEC_HAS_CONTENTS | SEC_LOAD;
+	bfd_flags |= SEC_CODE;
 
       if (flags & EISD__M_NONSHRADR)
-	bfd_flags |= SEC_DATA | SEC_HAS_CONTENTS | SEC_LOAD;
+	bfd_flags |= SEC_DATA;
 
       if (!(flags & EISD__M_WRT))
 	bfd_flags |= SEC_READONLY;
@@ -561,10 +563,10 @@ _bfd_vms_slurp_eisd (bfd *abfd, unsigned int offset)
 	bfd_flags |= SEC_DATA;
 
       if (flags & EISD__M_FIXUPVEC)
-	bfd_flags |= SEC_DATA | SEC_HAS_CONTENTS | SEC_LOAD;
+	bfd_flags |= SEC_DATA;
 
       if (flags & EISD__M_CRF)
-	bfd_flags |= SEC_HAS_CONTENTS | SEC_LOAD;
+	bfd_flags |= SEC_DATA;
 
       if (flags & EISD__M_GBL)
 	{
@@ -8944,7 +8946,8 @@ vms_get_symbol_info (bfd * abfd ATTRIBUTE_UNUSED,
     ret->type = 'U';
   else if (bfd_is_ind_section (sec))
     ret->type = 'I';
-  else if (bfd_get_section_flags (abfd, sec) & SEC_CODE)
+  else if ((symbol->flags & BSF_FUNCTION)
+           || (bfd_get_section_flags (abfd, sec) & SEC_CODE))
     ret->type = 'T';
   else if (bfd_get_section_flags (abfd, sec) & SEC_DATA)
     ret->type = 'D';

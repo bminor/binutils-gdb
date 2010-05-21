@@ -1,3 +1,9 @@
+2010-05-21  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_eisd): Set SEC_HAS_CONTENTS and
+	SEC_LOAD if isect has data.
+	(vms_get_symbol_info): Refine the condition for 'T' type.
+
 2010-05-18  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_write_emh): New function.
