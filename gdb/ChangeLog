@@ -1,3 +1,9 @@
+2010-05-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* dwarf2read.c (process_die): Also allow DW_TAG_const_type
+	and DW_TAG_volatile_type.
+	(new_symbol): Likewise.
+
 2010-05-20  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-valprint.c (pascal_val_print): Call get_array_bounds
