@@ -1202,7 +1202,7 @@ class Arm_input_section : public Output_relaxed_input_section
     if ((object == this->relobj())
 	&& (shndx == this->shndx())
 	&& (offset >= 0)
-	&& (offset <= this->original_size_))
+	&& (offset <= static_cast<section_offset_type>(this->original_size_)))
       {
 	*poutput = offset;
 	return true;
