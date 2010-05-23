@@ -1,5 +1,5 @@
-/* Copyright (C) 1991,92,93,94,96,97,98,2000,2004,2007,2008,2009,2010
-Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1992, 1993, 1994, 1996, 1997, 1998, 2000, 2004, 2007,
+   2008, 2009, 2010 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ Free Software Foundation, Inc.
    HAYSTACK.  */
 void *
 memmem (const void *haystack_start, size_t haystack_len,
-	const void *needle_start, size_t needle_len)
+        const void *needle_start, size_t needle_len)
 {
   /* Abstract memory is considered to be an array of 'unsigned char' values,
      not an array of 'char' values.  See ISO C 99 section 6.2.6.1.  */
@@ -63,10 +63,10 @@ memmem (const void *haystack_start, size_t haystack_len,
     {
       haystack = memchr (haystack, *needle, haystack_len);
       if (!haystack || __builtin_expect (needle_len == 1, 0))
-	return (void *) haystack;
+        return (void *) haystack;
       haystack_len -= haystack - (const unsigned char *) haystack_start;
       if (haystack_len < needle_len)
-	return NULL;
+        return NULL;
       return two_way_short_needle (haystack, haystack_len, needle, needle_len);
     }
   else

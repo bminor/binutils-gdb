@@ -566,27 +566,6 @@ if test x"${install_sh}" != xset; then
 fi
 AC_SUBST(install_sh)])
 
-# Copyright (C) 2003, 2005  Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# serial 2
-
-# Check whether the underlying file-system supports filenames
-# with a leading dot.  For instance MS-DOS doesn't.
-AC_DEFUN([AM_SET_LEADING_DOT],
-[rm -rf .tst 2>/dev/null
-mkdir .tst 2>/dev/null
-if test -d .tst; then
-  am__leading_dot=.
-else
-  am__leading_dot=_
-fi
-rmdir .tst 2>/dev/null
-AC_SUBST([am__leading_dot])])
-
 # Add --enable-maintainer-mode option to configure.         -*- Autoconf -*-
 # From Jim Meyering
 
@@ -989,18 +968,25 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
+m4_include([gnulib/m4/00gnulib.m4])
 m4_include([gnulib/m4/extensions.m4])
 m4_include([gnulib/m4/gnulib-common.m4])
 m4_include([gnulib/m4/gnulib-comp.m4])
 m4_include([gnulib/m4/include_next.m4])
 m4_include([gnulib/m4/longlong.m4])
 m4_include([gnulib/m4/memchr.m4])
-m4_include([gnulib/m4/memcmp.m4])
 m4_include([gnulib/m4/memmem.m4])
-m4_include([gnulib/m4/onceonly_2_57.m4])
+m4_include([gnulib/m4/mmap-anon.m4])
+m4_include([gnulib/m4/multiarch.m4])
+m4_include([gnulib/m4/onceonly.m4])
+m4_include([gnulib/m4/stddef_h.m4])
 m4_include([gnulib/m4/stdint.m4])
 m4_include([gnulib/m4/string_h.m4])
-m4_include([gnulib/m4/wchar.m4])
+m4_include([gnulib/m4/warn-on-use.m4])
+m4_include([gnulib/m4/wchar_h.m4])
+m4_include([gnulib/m4/wchar_t.m4])
+m4_include([gnulib/m4/wint_t.m4])
 m4_include([../config/largefile.m4])
+m4_include([../config/lead-dot.m4])
 m4_include([../config/plugins.m4])
 m4_include([acinclude.m4])

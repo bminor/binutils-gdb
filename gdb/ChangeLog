@@ -1,3 +1,53 @@
+2010-05-23  Pedro Alves  <pedro@codesourcery.com>
+
+	Update gnulib from latest git.
+	(250b80067c1e1d8faa0c42fb572f721975b929c5)
+
+	* gnulib/memcmp.c: Removed.
+	* gnulib/memchr.valgrind: New.
+	* gnulib/stddef.in.h: New.
+	* gnulib/Makefile.am: Updated.
+	* gnulib/memchr.c: Updated.
+	* gnulib/memmem.c: Updated.
+	* gnulib/stdint.in.h: Updated.
+	* gnulib/str-two-way.h: Updated.
+	* gnulib/string.in.h: Updated.
+	* gnulib/wchar.in.h: Updated.
+
+	* gnulib/extra/link-warning.h: Removed.
+	* gnulib/extra/c++defs.h: New.
+	* gnulib/extra/warn-on-use.h: New.
+	* gnulib/extra/arg-nonnull.h: Updated.
+
+	* gnulib/m4/extensions.m4: Updated.
+	* gnulib/m4/gnulib-cache.m4: Updated.
+	* gnulib/m4/gnulib-common.m4: Updated.
+	* gnulib/m4/gnulib-comp.m4: Updated.
+	* gnulib/m4/gnulib-tool.m4: Updated.
+	* gnulib/m4/include_next.m4: Updated.
+	* gnulib/m4/longlong.m4: Updated.
+	* gnulib/m4/memchr.m4: Updated.
+	* gnulib/m4/memmem.m4: Updated.
+	* gnulib/m4/stdint.m4: Updated.
+	* gnulib/m4/string_h.m4: Updated.
+	* gnulib/m4/memcmp.m4: Removed.
+	* gnulib/m4/onceonly_2_57.m4: Removed.
+	* gnulib/m4/00gnulib.m4: New.
+	* gnulib/m4/mmap-anon.m4: New.
+	* gnulib/m4/multiarch.m4: New.
+	* gnulib/m4/onceonly.m4: New.
+	* gnulib/m4/stddef_h.m4: New.
+	* gnulib/m4/warn-on-use.m4: New.
+	* gnulib/m4/wchar.m4: Removed.
+	* gnulib/m4/wchar_h.m4: New.
+	* gnulib/m4/wchar_t.m4: New.
+	* gnulib/m4/wint_t.m4: New.
+
+	* aclocal.m4: Regenerate.
+	* config.in: Likewise.
+	* configure: Likewise.
+	* gnulib/Makefile.in: Likewise.
+
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (extract_bits_primitive): New function.

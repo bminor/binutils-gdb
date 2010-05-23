@@ -1,5 +1,4 @@
-/* Copyright (C) 2001-2002, 2004-2007, 2009, 2010
-Free Software Foundation, Inc.
+/* Copyright (C) 2001-2002, 2004-2010 Free Software Foundation, Inc.
    Written by Paul Eggert, Bruno Haible, Sam Steingold, Peter Burwood.
    This file is part of gnulib.
 
@@ -23,6 +22,10 @@ Free Software Foundation, Inc.
  */
 
 #ifndef _GL_STDINT_H
+
+#if __GNUC__ >= 3
+@PRAGMA_SYSTEM_HEADER@
+#endif
 
 /* When including a system file that in turn includes <inttypes.h>,
    use the system <inttypes.h>, not our substitute.  This avoids
@@ -87,15 +90,6 @@ Free Software Foundation, Inc.
 # include <sys/bitypes.h>
 #endif
 
-#if ! defined __cplusplus || defined __STDC_CONSTANT_MACROS
-
-/* Get WCHAR_MIN, WCHAR_MAX.  */
-# if ! (defined WCHAR_MIN && defined WCHAR_MAX)
-#  include <wchar.h>
-# endif
-
-#endif
-
 #undef _GL_JUST_INCLUDE_SYSTEM_INTTYPES_H
 
 /* Minimum and maximum values for a integer type under the usual assumption.
@@ -109,8 +103,8 @@ Free Software Foundation, Inc.
   ((signed) \
    ? ~ _STDINT_MIN (signed, bits, zero) \
    : /* The expression for the unsigned case.  The subtraction of (signed) \
-	is a nop in the unsigned case and avoids "signed integer overflow" \
-	warnings in the signed case.  */ \
+        is a nop in the unsigned case and avoids "signed integer overflow" \
+        warnings in the signed case.  */ \
      ((((zero) + 1) << ((bits) ? (bits) - 1 - (signed) : 0)) - 1) * 2 + 1)
 
 /* 7.18.1.1. Exact-width integer types */
@@ -120,46 +114,58 @@ Free Software Foundation, Inc.
 
 #undef int8_t
 #undef uint8_t
-#define int8_t signed char
-#define uint8_t unsigned char
+typedef signed char gl_int8_t;
+typedef unsigned char gl_uint8_t;
+#define int8_t gl_int8_t
+#define uint8_t gl_uint8_t
 
 #undef int16_t
 #undef uint16_t
-#define int16_t short int
-#define uint16_t unsigned short int
+typedef short int gl_int16_t;
+typedef unsigned short int gl_uint16_t;
+#define int16_t gl_int16_t
+#define uint16_t gl_uint16_t
 
 #undef int32_t
 #undef uint32_t
-#define int32_t int
-#define uint32_t unsigned int
+typedef int gl_int32_t;
+typedef unsigned int gl_uint32_t;
+#define int32_t gl_int32_t
+#define uint32_t gl_uint32_t
 
 /* Do not undefine int64_t if gnulib is not being used with 64-bit
    types, since otherwise it breaks platforms like Tandem/NSK.  */
 #if LONG_MAX >> 31 >> 31 == 1
 # undef int64_t
-# define int64_t long int
+typedef long int gl_int64_t;
+# define int64_t gl_int64_t
 # define GL_INT64_T
 #elif defined _MSC_VER
 # undef int64_t
-# define int64_t __int64
+typedef __int64 gl_int64_t;
+# define int64_t gl_int64_t
 # define GL_INT64_T
 #elif @HAVE_LONG_LONG_INT@
 # undef int64_t
-# define int64_t long long int
+typedef long long int gl_int64_t;
+# define int64_t gl_int64_t
 # define GL_INT64_T
 #endif
 
 #if ULONG_MAX >> 31 >> 31 >> 1 == 1
 # undef uint64_t
-# define uint64_t unsigned long int
+typedef unsigned long int gl_uint64_t;
+# define uint64_t gl_uint64_t
 # define GL_UINT64_T
 #elif defined _MSC_VER
 # undef uint64_t
-# define uint64_t unsigned __int64
+typedef unsigned __int64 gl_uint64_t;
+# define uint64_t gl_uint64_t
 # define GL_UINT64_T
 #elif @HAVE_UNSIGNED_LONG_LONG_INT@
 # undef uint64_t
-# define uint64_t unsigned long long int
+typedef unsigned long long int gl_uint64_t;
+# define uint64_t gl_uint64_t
 # define GL_UINT64_T
 #endif
 
@@ -214,12 +220,18 @@ Free Software Foundation, Inc.
 #undef uint_fast32_t
 #undef int_fast64_t
 #undef uint_fast64_t
-#define int_fast8_t long int
-#define uint_fast8_t unsigned int_fast8_t
-#define int_fast16_t long int
-#define uint_fast16_t unsigned int_fast16_t
-#define int_fast32_t long int
-#define uint_fast32_t unsigned int_fast32_t
+typedef long int gl_int_fast8_t;
+typedef unsigned long int gl_uint_fast8_t;
+typedef long int gl_int_fast16_t;
+typedef unsigned long int gl_uint_fast16_t;
+typedef long int gl_int_fast32_t;
+typedef unsigned long int gl_uint_fast32_t;
+#define int_fast8_t gl_int_fast8_t
+#define uint_fast8_t gl_uint_fast8_t
+#define int_fast16_t gl_int_fast16_t
+#define uint_fast16_t gl_uint_fast16_t
+#define int_fast32_t gl_int_fast32_t
+#define uint_fast32_t gl_uint_fast32_t
 #ifdef GL_INT64_T
 # define int_fast64_t int64_t
 #endif
@@ -231,8 +243,10 @@ Free Software Foundation, Inc.
 
 #undef intptr_t
 #undef uintptr_t
-#define intptr_t long int
-#define uintptr_t unsigned long int
+typedef long int gl_intptr_t;
+typedef unsigned long int gl_uintptr_t;
+#define intptr_t gl_intptr_t
+#define uintptr_t gl_uintptr_t
 
 /* 7.18.1.5. Greatest-width integer types */
 
@@ -241,20 +255,24 @@ Free Software Foundation, Inc.
 
 #undef intmax_t
 #if @HAVE_LONG_LONG_INT@ && LONG_MAX >> 30 == 1
-# define intmax_t long long int
+typedef long long int gl_intmax_t;
+# define intmax_t gl_intmax_t
 #elif defined GL_INT64_T
 # define intmax_t int64_t
 #else
-# define intmax_t long int
+typedef long int gl_intmax_t;
+# define intmax_t gl_intmax_t
 #endif
 
 #undef uintmax_t
 #if @HAVE_UNSIGNED_LONG_LONG_INT@ && ULONG_MAX >> 31 == 1
-# define uintmax_t unsigned long long int
+typedef unsigned long long int gl_uintmax_t;
+# define uintmax_t gl_uintmax_t
 #elif defined GL_UINT64_T
 # define uintmax_t uint64_t
 #else
-# define uintmax_t unsigned long int
+typedef unsigned long int gl_uintmax_t;
+# define uintmax_t gl_uintmax_t
 #endif
 
 /* Verify that intmax_t and uintmax_t have the same size.  Too much code
@@ -417,27 +435,54 @@ typedef int _verify_intmax_size[2 * (sizeof (intmax_t) == sizeof (uintmax_t)) - 
 /* ptrdiff_t limits */
 #undef PTRDIFF_MIN
 #undef PTRDIFF_MAX
-#define PTRDIFF_MIN  \
-   _STDINT_MIN (1, @BITSIZEOF_PTRDIFF_T@, 0@PTRDIFF_T_SUFFIX@)
-#define PTRDIFF_MAX  \
-   _STDINT_MAX (1, @BITSIZEOF_PTRDIFF_T@, 0@PTRDIFF_T_SUFFIX@)
+#if @APPLE_UNIVERSAL_BUILD@
+# ifdef _LP64
+#  define PTRDIFF_MIN  _STDINT_MIN (1, 64, 0l)
+#  define PTRDIFF_MAX  _STDINT_MAX (1, 64, 0l)
+# else
+#  define PTRDIFF_MIN  _STDINT_MIN (1, 32, 0)
+#  define PTRDIFF_MAX  _STDINT_MAX (1, 32, 0)
+# endif
+#else
+# define PTRDIFF_MIN  \
+    _STDINT_MIN (1, @BITSIZEOF_PTRDIFF_T@, 0@PTRDIFF_T_SUFFIX@)
+# define PTRDIFF_MAX  \
+    _STDINT_MAX (1, @BITSIZEOF_PTRDIFF_T@, 0@PTRDIFF_T_SUFFIX@)
+#endif
 
 /* sig_atomic_t limits */
 #undef SIG_ATOMIC_MIN
 #undef SIG_ATOMIC_MAX
 #define SIG_ATOMIC_MIN  \
    _STDINT_MIN (@HAVE_SIGNED_SIG_ATOMIC_T@, @BITSIZEOF_SIG_ATOMIC_T@, \
-		0@SIG_ATOMIC_T_SUFFIX@)
+                0@SIG_ATOMIC_T_SUFFIX@)
 #define SIG_ATOMIC_MAX  \
    _STDINT_MAX (@HAVE_SIGNED_SIG_ATOMIC_T@, @BITSIZEOF_SIG_ATOMIC_T@, \
-		0@SIG_ATOMIC_T_SUFFIX@)
+                0@SIG_ATOMIC_T_SUFFIX@)
 
 
 /* size_t limit */
 #undef SIZE_MAX
-#define SIZE_MAX  _STDINT_MAX (0, @BITSIZEOF_SIZE_T@, 0@SIZE_T_SUFFIX@)
+#if @APPLE_UNIVERSAL_BUILD@
+# ifdef _LP64
+#  define SIZE_MAX  _STDINT_MAX (0, 64, 0ul)
+# else
+#  define SIZE_MAX  _STDINT_MAX (0, 32, 0ul)
+# endif
+#else
+# define SIZE_MAX  _STDINT_MAX (0, @BITSIZEOF_SIZE_T@, 0@SIZE_T_SUFFIX@)
+#endif
 
 /* wchar_t limits */
+/* Get WCHAR_MIN, WCHAR_MAX.
+   This include is not on the top, above, because on OSF/1 4.0 we have a sequence of nested
+   includes <wchar.h> -> <stdio.h> -> <getopt.h> -> <stdlib.h>, and the latter includes
+   <stdint.h> and assumes its types are already defined.  */
+#if ! (defined WCHAR_MIN && defined WCHAR_MAX)
+# define _GL_JUST_INCLUDE_SYSTEM_WCHAR_H
+# include <wchar.h>
+# undef _GL_JUST_INCLUDE_SYSTEM_WCHAR_H
+#endif
 #undef WCHAR_MIN
 #undef WCHAR_MAX
 #define WCHAR_MIN  \
