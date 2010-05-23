@@ -304,6 +304,26 @@ Output_merge_base::do_is_merge_section_for(const Relobj* object,
   return this->merge_map_.is_merge_section_for(object, shndx);
 }
 
+// Record a merged input section for script processing.
+
+void
+Output_merge_base::record_input_section(Relobj* relobj, unsigned int shndx)
+{
+  gold_assert(this->keeps_input_sections_ && relobj != NULL);
+  // If this is the first input section, record it.  We need do this because
+  // this->input_sections_ is unordered.
+  if (this->first_relobj_ == NULL)
+    {
+      this->first_relobj_ = relobj;
+      this->first_shndx_ = shndx;
+    }
+
+  std::pair<Input_sections::iterator, bool> result =
+    this->input_sections_.insert(Section_id(relobj, shndx));
+  // We should insert a merge section once only.
+  gold_assert(result.second);
+}
+
 // Class Output_merge_data.
 
 // Compute the hash code for a fixed-size constant.
@@ -414,6 +434,10 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
       this->add_mapping(object, shndx, i, entsize, k);
     }
 
+  // For script processing, we keep the input sections.
+  if (this->keeps_input_sections())
+    record_input_section(object, shndx);
+
   return true;
 }
 
@@ -516,6 +540,10 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
     }
 
   this->input_count_ += count;
+
+  // For script processing, we keep the input sections.
+  if (this->keeps_input_sections())
+    record_input_section(object, shndx);
 
   return true;
 }

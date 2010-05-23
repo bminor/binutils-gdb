@@ -1,3 +1,82 @@
+2010-05-23  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_input_section::do_output_offset): Use convert_types
+	instead of a cast.
+	(Target_arm::apply_cortex_a8_workaround): Rewrite a conditional branch
+	with a direct branch, not a conditional branch, to a stub.
+	* merge.cc (Output_merge_base::record_input_section): New method
+	defintion.
+	(Output_merge_data::do_add_input_section): Record input section if
+	keeps-input-sections flag is set.
+	(Output_merge_string::do_add_input_section): Ditto.
+	* merge.h (Output_merge_base::Output_merge_base): Initialize new data
+	members KEEPS_INPUT_SECTIONS_, FIRST_RELOBJ_, FIRST_SHNDX_ and
+	INPUT_SECTIONS_.
+	(Output_merge_base::keeps_input_sections,
+	Output_merge_base::set_keeps_input_sections,
+	Output_merge_base::first_relobj, Output_merge_base::first_shndx): New
+	method definitions.
+	(Output_merge_base::Input_sections): New type declaration.
+	(Output_merge_base::input_sections_begin,
+	Output_merge_base::input_sections_end,
+	Output_merge_base::do_set_keeps_input_sections): New method definitions.
+	(Output_merge_base::bool keeps_input_sections_,
+	Output_merge_base::first_relobj_, Output_merge_base::first_shndx_,
+	Output_merge_base::input_sections_): New data members.
+	(Output_merge_data::do_set_keeps_input_sections): New method
+	defintion.
+	(Output_merge_string::do_set_keeps_input_sections): Ditto.
+	* output.cc (Output_section::Input_section::relobj): Move method
+	defintion from class declaration to here and handle merge sections.
+	(Output_section::Input_section::shndx): Ditto.
+	(Output_section::Output_section): Remove initializations of removed
+	data members and initialize new data member LOOKUP_MAPS_.
+	(Output_section::add_input_section): Set keeps-input-sections flag
+	for a newly created merge output section as appropriate.  Adjust code
+	to use Output_section_lookup_maps class.
+	(Output_section::add_relaxed_input_section): Adjst code for lookup
+	maps code refactoring.
+ 	(Output_section::add_merge_input_section): Add a new parameter
+	KEEPS_INPUT_SECTION.  Adjust code to use Output_section_lookup_maps
+	class.  If adding input section to a newly created merge output
+	section fails, remove the new merge section.
+	(Output_section::convert_input_sections_in_list_to_relaxed_input_sections):
+	Adjust code for use of the Output_section_lookup_maps class. 
+ 	(Output_section::find_merge_section): Ditto.
+	(Output_section::build_lookup_maps): New method defintion.
+ 	(Output_section::find_relaxed_input_section): Adjust code to use
+	Output_section_lookup_maps class.
+	(Output_section::get_input_sections): Export merge sections.  Adjust
+	code to use Output_section_lookup_maps class.
+	(Output_section:::add_script_input_section): Adjust code to use
+	Output_section_lookup_maps class.  Update lookup maps for merge
+	sections also.
+	(Output_section::discard_states): Use Output_section_lookup_maps.
+	(Output_section::restore_states): Same.
+	* output.h (Merge_section_properties): Move class defintion out of
+	Output_section.
+	(Output_section_lookup_maps): New class.
+	(Output_section::Input_section::is_merge_section): New method
+	defintion.
+	(Output_section::Input_section::relobj): Move defintion out of class
+	defintion.  Declare method only.
+	(Output_section::Input_section::shndx): Ditto.
+	(Output_section::Input_section::output_merge_base): New method defintion.
+     	(Output_section::Input_section::u2_.pomb): New union field.
+	(Output_section::Merge_section_by_properties_map,
+	Output_section::Output_section_data_by_input_section_map,
+	Output_section::Ouptut_relaxed_input_section_by_input_section_map):
+	Remove types.
+   	(Output_section::add_merge_input_section): Add new parameter
+	KEEPS_INPUT_SECTIONS.
+	(Output_section::build_lookup_maps): New method declaration.
+	(Output_section::merge_section_map_,
+	Output_section::merge_section_by_properties_map_,
+	Output_section::relaxed_input_section_map_,
+	Output_section::is_relaxed_input_section_map_valid_): Remove data
+	members.
+	(Output_section::lookup_maps_): New data member.
+
 2010-05-21  Doug Kwan  <dougkwan@google.com>
 
 	PR gold/11619

@@ -1749,6 +1749,42 @@ Output_section::Input_section::data_size() const
     return this->u2_.posd->data_size();
 }
 
+// Return the object for an input section.
+
+Relobj*
+Output_section::Input_section::relobj() const
+{
+  if (this->is_input_section())
+    return this->u2_.object;
+  else if (this->is_merge_section())
+    {
+      gold_assert(this->u2_.pomb->first_relobj() != NULL);
+      return this->u2_.pomb->first_relobj();
+    }
+  else if (this->is_relaxed_input_section())
+    return this->u2_.poris->relobj();
+  else
+    gold_unreachable();
+}
+
+// Return the input section index for an input section.
+
+unsigned int
+Output_section::Input_section::shndx() const
+{
+  if (this->is_input_section())
+    return this->shndx_;
+  else if (this->is_merge_section())
+    {
+      gold_assert(this->u2_.pomb->first_relobj() != NULL);
+      return this->u2_.pomb->first_shndx();
+    }
+  else if (this->is_relaxed_input_section())
+    return this->u2_.poris->shndx();
+  else
+    gold_unreachable();
+}
+
 // Set the address and file offset.
 
 void
@@ -1914,10 +1950,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     is_noload_(false),
     tls_offset_(0),
     checkpoint_(NULL),
-    merge_section_map_(),
-    merge_section_by_properties_map_(),
-    relaxed_input_section_map_(),
-    is_relaxed_input_section_map_valid_(true)
+    lookup_maps_(new Output_section_lookup_maps)
 {
   // An unallocated section has no address.  Forcing this means that
   // we don't need special treatment for symbols defined in debug
@@ -2001,8 +2034,12 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       && reloc_shndx == 0
       && shdr.get_sh_size() > 0)
     {
-      if (this->add_merge_input_section(object, shndx, sh_flags,
-					entsize, addralign))
+      // Keep information about merged input sections for rebuilding fast
+      // lookup maps if we have sections-script or we do relaxation.
+      bool keeps_input_sections =
+	have_sections_script || parameters->target().may_relax();
+      if (this->add_merge_input_section(object, shndx, sh_flags, entsize,
+					addralign, keeps_input_sections))
 	{
 	  // Tell the relocation routines that they need to call the
 	  // output_offset method to determine the final address.
@@ -2092,11 +2129,9 @@ Output_section::add_relaxed_input_section(Output_relaxed_input_section* poris)
 {
   Input_section inp(poris);
   this->add_output_section_data(&inp);
-  if (this->is_relaxed_input_section_map_valid_)
-    {
-      Const_section_id csid(poris->relobj(), poris->shndx());
-      this->relaxed_input_section_map_[csid] = poris;
-    }
+  if (this->lookup_maps_->is_valid())
+    this->lookup_maps_->add_relaxed_input_section(poris->relobj(),
+						  poris->shndx(), poris);
 
   // For a relaxed section, we use the current data size.  Linker scripts
   // get all the input sections, including relaxed one from an output
@@ -2142,7 +2177,8 @@ Output_section::add_output_merge_section(Output_section_data* posd,
 bool
 Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 					uint64_t flags, uint64_t entsize,
-					uint64_t addralign)
+					uint64_t addralign,
+					bool keeps_input_sections)
 {
   bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
 
@@ -2155,13 +2191,15 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
   gold_assert(this->checkpoint_ == NULL);
 
   // Look up merge sections by required properties.
-  Output_merge_base* pomb;
+  // Currently, we only invalidate the lookup maps in script processing
+  // and relaxation.  We should not have done either when we reach here.
+  // So we assume that the lookup maps are valid to simply code.
+  gold_assert(this->lookup_maps_->is_valid());
   Merge_section_properties msp(is_string, entsize, addralign);
-  Merge_section_by_properties_map::const_iterator p =
-    this->merge_section_by_properties_map_.find(msp);
-  if (p != this->merge_section_by_properties_map_.end())
+  Output_merge_base* pomb = this->lookup_maps_->find_merge_section(msp);
+  bool is_new = false;
+  if (pomb != NULL)
     {
-      pomb = p->second;
       gold_assert(pomb->is_string() == is_string
 		  && pomb->entsize() == entsize
 		  && pomb->addralign() == addralign);
@@ -2188,22 +2226,36 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 	      return false;
 	    }
 	}
-      // Add new merge section to this output section and link merge
-      // section properties to new merge section in map.
-      this->add_output_merge_section(pomb, is_string, entsize);
-      this->merge_section_by_properties_map_[msp] = pomb;
+      // If we need to do script processing or relaxation, we need to keep
+      // the original input sections to rebuild the fast lookup maps.
+      if (keeps_input_sections)
+	pomb->set_keeps_input_sections();
+      is_new = true;
     }
 
   if (pomb->add_input_section(object, shndx))
     {
+      // Add new merge section to this output section and link merge
+      // section properties to new merge section in map.
+      if (is_new)
+	{
+	  this->add_output_merge_section(pomb, is_string, entsize);
+	  this->lookup_maps_->add_merge_section(msp, pomb);
+	}
+
       // Add input section to new merge section and link input section to new
       // merge section in map.
-      Const_section_id csid(object, shndx);
-      this->merge_section_map_[csid] = pomb;
+      this->lookup_maps_->add_merge_input_section(object, shndx, pomb);
       return true;
     }
   else
-    return false;
+    {
+      // If add_input_section failed, delete new merge section to avoid
+      // exporting empty merge sections in Output_section::get_input_section.
+      if (is_new)
+	delete pomb;
+      return false;
+    }
 }
 
 // Build a relaxation map to speed up relaxation of existing input sections.
@@ -2298,12 +2350,12 @@ Output_section::convert_input_sections_to_relaxed_sections(
 	    &this->input_sections_);
 
   // Update fast look-up map.
-  if (this->is_relaxed_input_section_map_valid_)
+  if (this->lookup_maps_->is_valid())
     for (size_t i = 0; i < relaxed_sections.size(); ++i)
       {
 	Output_relaxed_input_section* poris = relaxed_sections[i];
-	Const_section_id csid(poris->relobj(), poris->shndx());
-	this->relaxed_input_section_map_[csid] = poris;
+	this->lookup_maps_->add_relaxed_input_section(poris->relobj(),
+						      poris->shndx(), poris);
       }
 }
 
@@ -2348,17 +2400,47 @@ Output_section_data*
 Output_section::find_merge_section(const Relobj* object,
 				   unsigned int shndx) const
 {
-  Const_section_id csid(object, shndx);
-  Output_section_data_by_input_section_map::const_iterator p =
-    this->merge_section_map_.find(csid);
-  if (p != this->merge_section_map_.end())
+  if (!this->lookup_maps_->is_valid())
+    this->build_lookup_maps();
+  return this->lookup_maps_->find_merge_section(object, shndx);
+}
+
+// Build the lookup maps for merge and relaxed sections.  This is needs
+// to be declared as a const methods so that it is callable with a const
+// Output_section pointer.  The method only updates states of the maps.
+
+void
+Output_section::build_lookup_maps() const
+{
+  this->lookup_maps_->clear();
+  for (Input_section_list::const_iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
     {
-      Output_section_data* posd = p->second;
-      gold_assert(posd->is_merge_section_for(object, shndx));
-      return posd;
+      if (p->is_merge_section())
+	{
+	  Output_merge_base* pomb = p->output_merge_base();
+	  Merge_section_properties msp(pomb->is_string(), pomb->entsize(),
+				       pomb->addralign());
+	  this->lookup_maps_->add_merge_section(msp, pomb);
+	  for (Output_merge_base::Input_sections::const_iterator is =
+		 pomb->input_sections_begin();
+	       is != pomb->input_sections_end();
+	       ++is) 
+	    {
+	      const Const_section_id& csid = *is;
+	    this->lookup_maps_->add_merge_input_section(csid.first,
+							csid.second, pomb);
+	    }
+	    
+	}
+      else if (p->is_relaxed_input_section())
+	{
+	  Output_relaxed_input_section* poris = p->relaxed_input_section();
+	  this->lookup_maps_->add_relaxed_input_section(poris->relobj(),
+							poris->shndx(), poris);
+	}
     }
-  else
-    return NULL;
 }
 
 // Find an relaxed input section corresponding to an input section
@@ -2368,31 +2450,9 @@ const Output_relaxed_input_section*
 Output_section::find_relaxed_input_section(const Relobj* object,
 					   unsigned int shndx) const
 {
-  // Be careful that the map may not be valid due to input section export
-  // to scripts or a check-point restore.
-  if (!this->is_relaxed_input_section_map_valid_)
-    {
-      // Rebuild the map as needed.
-      this->relaxed_input_section_map_.clear();
-      for (Input_section_list::const_iterator p = this->input_sections_.begin();
-	   p != this->input_sections_.end();
-	   ++p)
-	if (p->is_relaxed_input_section())
-	  {
-	    Const_section_id csid(p->relobj(), p->shndx());
-	    this->relaxed_input_section_map_[csid] =
-	      p->relaxed_input_section();
-	  }
-      this->is_relaxed_input_section_map_valid_ = true;
-    }
-
-  Const_section_id csid(object, shndx);
-  Output_relaxed_input_section_by_input_section_map::const_iterator p =
-    this->relaxed_input_section_map_.find(csid);
-  if (p != this->relaxed_input_section_map_.end())
-    return p->second;
-  else
-    return NULL;
+  if (!this->lookup_maps_->is_valid())
+    this->build_lookup_maps();
+  return this->lookup_maps_->find_relaxed_input_section(object, shndx);
 }
 
 // Given an address OFFSET relative to the start of input section
@@ -3052,8 +3112,8 @@ Output_section::get_input_sections(
       && !this->checkpoint_->input_sections_saved())
     this->checkpoint_->save_input_sections();
 
-  // Invalidate the relaxed input section map.
-  this->is_relaxed_input_section_map_valid_ = false;
+  // Invalidate fast look-up maps.
+  this->lookup_maps_->invalidate();
 
   uint64_t orig_address = address;
 
@@ -3064,7 +3124,9 @@ Output_section::get_input_sections(
        p != this->input_sections_.end();
        ++p)
     {
-      if (p->is_input_section() || p->is_relaxed_input_section())
+      if (p->is_input_section()
+	  || p->is_relaxed_input_section()
+	  || p->is_merge_section())
 	input_sections->push_back(*p);
       else
 	{
@@ -3121,6 +3183,30 @@ Output_section::add_script_input_section(const Input_section& sis)
 					+ data_size);
 
   this->input_sections_.push_back(sis);
+
+  // Update fast lookup maps if necessary. 
+  if (this->lookup_maps_->is_valid())
+    {
+      if (sis.is_merge_section())
+	{
+	  Output_merge_base* pomb = sis.output_merge_base();
+	  Merge_section_properties msp(pomb->is_string(), pomb->entsize(),
+				       pomb->addralign());
+	  this->lookup_maps_->add_merge_section(msp, pomb);
+	  for (Output_merge_base::Input_sections::const_iterator p =
+		 pomb->input_sections_begin();
+	       p != pomb->input_sections_end();
+	       ++p)
+	    this->lookup_maps_->add_merge_input_section(p->first, p->second,
+							pomb);
+	}
+      else if (sis.is_relaxed_input_section())
+	{
+	  Output_relaxed_input_section* poris = sis.relaxed_input_section();
+	  this->lookup_maps_->add_relaxed_input_section(poris->relobj(),
+							poris->shndx(), poris);
+	}
+    }
 }
 
 // Save states for relaxation.
@@ -3146,9 +3232,9 @@ Output_section::discard_states()
   this->checkpoint_ = NULL;
   gold_assert(this->fills_.empty());
 
-  // Simply invalidate the relaxed input section map since we do not keep
-  // track of it.
-  this->is_relaxed_input_section_map_valid_ = false;
+  // Simply invalidate the fast lookup maps since we do not keep
+  // track of them.
+  this->lookup_maps_->invalidate();
 }
 
 void
@@ -3180,9 +3266,9 @@ Output_section::restore_states()
   this->attached_input_sections_are_sorted_ =
     checkpoint->attached_input_sections_are_sorted();
 
-  // Simply invalidate the relaxed input section map since we do not keep
-  // track of it.
-  this->is_relaxed_input_section_map_valid_ = false;
+  // Simply invalidate the fast lookup maps since we do not keep
+  // track of them.
+  this->lookup_maps_->invalidate();
 }
 
 // Update the section offsets of input sections in this.  This is required if

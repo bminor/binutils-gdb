@@ -1202,7 +1202,8 @@ class Arm_input_section : public Output_relaxed_input_section
     if ((object == this->relobj())
 	&& (shndx == this->shndx())
 	&& (offset >= 0)
-	&& (offset <= static_cast<section_offset_type>(this->original_size_)))
+	&& (offset <=
+	    convert_types<section_offset_type, uint32_t>(this->original_size_)))
       {
 	*poutput = offset;
 	return true;
@@ -10898,13 +10899,11 @@ Target_arm<big_endian>::apply_cortex_a8_workaround(
   switch (stub->stub_template()->type())
     {
     case arm_stub_a8_veneer_b_cond:
-      gold_assert(!utils::has_overflow<21>(branch_offset));
-      upper_insn = RelocFuncs::thumb32_cond_branch_upper(upper_insn,
-							 branch_offset);
-      lower_insn = RelocFuncs::thumb32_cond_branch_lower(lower_insn,
-							 branch_offset);
-      break;
-
+      // For a conditional branch, we re-write it to be a uncondition
+      // branch to the stub.  We use the THUMB-2 encoding here.
+      upper_insn = 0xf000U;
+      lower_insn = 0xb800U;
+      // Fall through
     case arm_stub_a8_veneer_b:
     case arm_stub_a8_veneer_bl:
     case arm_stub_a8_veneer_blx:

@@ -216,7 +216,9 @@ class Output_merge_base : public Output_section_data
 {
  public:
   Output_merge_base(uint64_t entsize, uint64_t addralign)
-    : Output_section_data(addralign), merge_map_(), entsize_(entsize)
+    : Output_section_data(addralign), merge_map_(), entsize_(entsize),
+      keeps_input_sections_(false), first_relobj_(NULL), first_shndx_(-1),
+      input_sections_()
   { }
 
   // Return the entry size.
@@ -230,6 +232,52 @@ class Output_merge_base : public Output_section_data
   is_string()
   { return this->do_is_string(); }
 
+  // Whether this keeps input sections.
+  bool
+  keeps_input_sections() const
+  { return this->keeps_input_sections_; }
+
+  // Set the keeps-input-sections flag.  This is virtual so that sub-classes
+  // can perform additional checks.
+  void
+  set_keeps_input_sections()
+  { this->do_set_keeps_input_sections(); }
+
+  // Return the object of the first merged input section.  This used
+  // for script processing.  This is NULL if merge section is empty.
+  Relobj*
+  first_relobj() const
+  { return this->first_relobj_; }
+
+  // Return the section index of the first merged input section.  This
+  // is used for script processing.  This is valid only if merge section
+  // is not valid.
+  unsigned int
+  first_shndx() const
+  { 
+    gold_assert(this->first_relobj_ != NULL);
+    return this->first_shndx_;
+  }
+ 
+  // Set of merged input sections.
+  typedef Unordered_set<Section_id, Section_id_hash> Input_sections;
+
+  // Beginning of merged input sections.
+  Input_sections::const_iterator
+  input_sections_begin() const
+  {
+    gold_assert(this->keeps_input_sections_);
+    return this->input_sections_.begin();
+  }
+
+  // Beginning of merged input sections.
+  Input_sections::const_iterator
+  input_sections_end() const
+  {
+    gold_assert(this->keeps_input_sections_);
+    return this->input_sections_.end();
+  }
+ 
  protected:
   // Return the output offset for an input offset.
   bool
@@ -257,6 +305,15 @@ class Output_merge_base : public Output_section_data
   do_is_string()
   { return false; }
 
+  // This may be overridden by the child class.
+  virtual void
+  do_set_keeps_input_sections()
+  { this->keeps_input_sections_ = true; }
+
+  // Record the merged input section for script processing.
+  void
+  record_input_section(Relobj* relobj, unsigned int shndx);
+
  private:
   // A mapping from input object/section/offset to offset in output
   // section.
@@ -264,6 +321,15 @@ class Output_merge_base : public Output_section_data
   // The entry size.  For fixed-size constants, this is the size of
   // the constants.  For strings, this is the size of a character.
   uint64_t entsize_;
+  // Whether we keep input sections.
+  bool keeps_input_sections_;
+  // Object of the first merged input section.  We use this for script
+  // processing.
+  Relobj* first_relobj_;
+  // Section index of the first merged input section. 
+  unsigned int first_shndx_;
+  // Input sections.  We only keep them is keeps_input_sections_ is true.
+  Input_sections input_sections_;
 };
 
 // Handle SHF_MERGE sections with fixed-size constant data.
@@ -302,6 +368,14 @@ class Output_merge_data : public Output_merge_base
   // Print merge stats to stderr.
   void
   do_print_merge_stats(const char* section_name);
+
+  // Set keeps-input-sections flag.
+  void
+  do_set_keeps_input_sections()
+  {
+    gold_assert(this->input_count_ == 0);
+    Output_merge_base::do_set_keeps_input_sections();
+  }
 
  private:
   // We build a hash table of the fixed-size constants.  Each constant
@@ -439,6 +513,14 @@ class Output_merge_string : public Output_merge_base
   virtual bool
   do_is_string()
   { return true; }
+
+  // Set keeps-input-sections flag.
+  void
+  do_set_keeps_input_sections()
+  {
+    gold_assert(this->input_count_ == 0);
+    Output_merge_base::do_set_keeps_input_sections();
+  }
 
  private:
   // The name of the string type, for stats.

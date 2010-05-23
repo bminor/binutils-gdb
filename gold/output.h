@@ -2314,6 +2314,188 @@ class Output_relaxed_input_section : public Output_section_data_build
   unsigned int shndx_;
 };
 
+// This class describes properties of merge data sections.  It is used
+// as a key type for maps.
+class Merge_section_properties
+{
+ public:
+  Merge_section_properties(bool is_string, uint64_t entsize,
+			     uint64_t addralign)
+    : is_string_(is_string), entsize_(entsize), addralign_(addralign)
+  { }
+
+  // Whether this equals to another Merge_section_properties MSP.
+  bool
+  eq(const Merge_section_properties& msp) const
+  {
+    return ((this->is_string_ == msp.is_string_)
+	    && (this->entsize_ == msp.entsize_)
+	    && (this->addralign_ == msp.addralign_));
+  }
+
+  // Compute a hash value for this using 64-bit FNV-1a hash.
+  size_t
+  hash_value() const
+  {
+    uint64_t h = 14695981039346656037ULL;	// FNV offset basis.
+    uint64_t prime = 1099511628211ULL;
+    h = (h ^ static_cast<uint64_t>(this->is_string_)) * prime;
+    h = (h ^ static_cast<uint64_t>(this->entsize_)) * prime;
+    h = (h ^ static_cast<uint64_t>(this->addralign_)) * prime;
+    return h;
+  }
+    
+  // Functors for associative containers.
+  struct equal_to
+  {
+    bool
+    operator()(const Merge_section_properties& msp1,
+	       const Merge_section_properties& msp2) const
+    { return msp1.eq(msp2); }
+  };
+
+  struct hash
+  {
+    size_t
+    operator()(const Merge_section_properties& msp) const
+    { return msp.hash_value(); }
+  };
+
+ private:
+  // Whether this merge data section is for strings.
+  bool is_string_;
+  // Entsize of this merge data section.
+  uint64_t entsize_;
+  // Address alignment.
+  uint64_t addralign_;
+};
+
+// This class is used to speed up look up of special input sections in an
+// Output_section.
+
+class Output_section_lookup_maps
+{
+ public:
+  Output_section_lookup_maps()
+    : is_valid_(true), merge_sections_by_properties_(),
+      merge_sections_by_id_(), relaxed_input_sections_by_id_()
+  { }
+
+  // Whether the maps are valid.
+  bool
+  is_valid() const
+  { return this->is_valid_; }
+
+  // Invalidate the maps.
+  void
+  invalidate()
+  { this->is_valid_ = false; }
+
+  // Clear the maps.
+  void
+  clear()
+  {
+    this->merge_sections_by_properties_.clear();
+    this->merge_sections_by_id_.clear();
+    this->relaxed_input_sections_by_id_.clear();
+    // A cleared map is valid.
+    this->is_valid_ = true;
+  }
+  
+  // Find a merge section by merge section properties.  Return NULL if none
+  // is found.
+  Output_merge_base*
+  find_merge_section(const Merge_section_properties& msp) const
+  {
+    gold_assert(this->is_valid_);
+    Merge_sections_by_properties::const_iterator p =
+      this->merge_sections_by_properties_.find(msp);
+    return p != this->merge_sections_by_properties_.end() ? p->second : NULL;
+  }
+
+  // Find a merge section by section ID of a merge input section.  Return NULL
+  // if none is found.
+  Output_merge_base*
+  find_merge_section(const Object* object, unsigned int shndx) const
+  {
+    gold_assert(this->is_valid_);
+    Merge_sections_by_id::const_iterator p =
+      this->merge_sections_by_id_.find(Const_section_id(object, shndx));
+    return p != this->merge_sections_by_id_.end() ? p->second : NULL;
+  }
+
+  // Add a merge section pointed by POMB with properties MSP.
+  void
+  add_merge_section(const Merge_section_properties& msp,
+		    Output_merge_base* pomb)
+  {
+    std::pair<Merge_section_properties, Output_merge_base*> value(msp, pomb);
+    std::pair<Merge_sections_by_properties::iterator, bool> result =
+      this->merge_sections_by_properties_.insert(value);
+    gold_assert(value.second);
+  }
+  
+  // Add a mapping from a merged input section in OBJECT with index SHNDX
+  // to a merge output section pointed by POMB.
+  void
+  add_merge_input_section(const Object* object, unsigned int shndx,
+			  Output_merge_base* pomb)
+  {
+    Const_section_id csid(object, shndx);
+    std::pair<Const_section_id, Output_merge_base*> value(csid, pomb);
+    std::pair<Merge_sections_by_id::iterator, bool> result =
+      this->merge_sections_by_id_.insert(value);
+    gold_assert(value.second);
+  }
+
+  // Find a relaxed input section of OBJECT with index SHNDX.
+  Output_relaxed_input_section*
+  find_relaxed_input_section(const Object* object, unsigned int shndx) const
+  {
+    gold_assert(this->is_valid_);
+    Relaxed_input_sections_by_id::const_iterator p =
+      this->relaxed_input_sections_by_id_.find(Const_section_id(object, shndx));
+    return p != this->relaxed_input_sections_by_id_.end() ? p->second : NULL;
+  }
+
+  // Add a relaxed input section pointed by POMB and whose original input
+  // section is in OBJECT with index SHNDX.
+  void
+  add_relaxed_input_section(const Relobj* relobj, unsigned int shndx,
+			    Output_relaxed_input_section* poris)
+  {
+    Const_section_id csid(relobj, shndx);
+    std::pair<Const_section_id, Output_relaxed_input_section*>
+      value(csid, poris);
+    std::pair<Relaxed_input_sections_by_id::iterator, bool> result =
+      this->relaxed_input_sections_by_id_.insert(value);
+    gold_assert(value.second);
+  }
+
+ private:
+  typedef Unordered_map<Const_section_id, Output_merge_base*,
+			Const_section_id_hash>
+    Merge_sections_by_id;
+
+  typedef Unordered_map<Merge_section_properties, Output_merge_base*,
+			Merge_section_properties::hash,
+			Merge_section_properties::equal_to>
+    Merge_sections_by_properties;
+
+  typedef Unordered_map<Const_section_id, Output_relaxed_input_section*,
+			Const_section_id_hash>
+    Relaxed_input_sections_by_id;
+
+  // Whether this is valid
+  bool is_valid_;
+  // Merge sections by merge section properties.
+  Merge_sections_by_properties merge_sections_by_properties_;
+  // Merge sections by section IDs.
+  Merge_sections_by_id merge_sections_by_id_;
+  // Relaxed sections by section IDs.
+  Relaxed_input_sections_by_id relaxed_input_sections_by_id_;
+};
+
 // An output section.  We don't expect to have too many output
 // sections, so we don't bother to do a template on the size.
 
@@ -2881,6 +3063,14 @@ class Output_section : public Output_data
               && this->addralign() == addralign);
     }
 
+    // Return whether this is a merge section for some input section.
+    bool
+    is_merge_section() const
+    {
+      return (this->shndx_ == MERGE_DATA_SECTION_CODE
+	      || this->shndx_ == MERGE_STRING_SECTION_CODE);
+    }
+
     // Return whether this is a relaxed input section.
     bool
     is_relaxed_input_section() const
@@ -2895,27 +3085,11 @@ class Output_section : public Output_data
 
     // Return the object for an input section.
     Relobj*
-    relobj() const
-    {
-      if (this->is_input_section())
-        return this->u2_.object;
-      else if (this->is_relaxed_input_section())
-	return this->u2_.poris->relobj();
-      else
-	gold_unreachable();
-    }
+    relobj() const;
 
     // Return the input section index for an input section.
     unsigned int
-    shndx() const
-    {
-      if (this->is_input_section())
-        return this->shndx_;
-      else if (this->is_relaxed_input_section())
-	return this->u2_.poris->shndx();
-      else
-	gold_unreachable();
-    }
+    shndx() const;
 
     // For non-input-sections, return the associated Output_section_data
     // object.
@@ -2926,6 +3100,14 @@ class Output_section : public Output_data
       return this->u2_.posd;
     }
  
+    // For a merge section, return the Output_merge_base pointer.
+    Output_merge_base*
+    output_merge_base() const
+    {
+      gold_assert(this->is_merge_section());
+      return this->u2_.pomb;
+    }
+
     // Return the Output_relaxed_input_section object.
     Output_relaxed_input_section*
     relaxed_input_section() const
@@ -3048,6 +3230,7 @@ class Output_section : public Output_data
       // For OUTPUT_SECTION_CODE or MERGE_DATA_SECTION_CODE or
       // MERGE_STRING_SECTION_CODE, the data.
       Output_section_data* posd;
+      Output_merge_base* pomb;
       // For RELAXED_INPUT_SECTION_CODE, the data.
       Output_relaxed_input_section* poris;
     } u2_;
@@ -3389,78 +3572,6 @@ class Output_section : public Output_data
 
   typedef std::vector<Fill> Fill_list;
 
-  // This class describes properties of merge data sections.  It is used
-  // as a key type for maps.
-  class Merge_section_properties
-  {
-   public:
-    Merge_section_properties(bool is_string, uint64_t entsize,
-			     uint64_t addralign)
-      : is_string_(is_string), entsize_(entsize), addralign_(addralign)
-    { }
-
-    // Whether this equals to another Merge_section_properties MSP.
-    bool
-    eq(const Merge_section_properties& msp) const
-    {
-      return ((this->is_string_ == msp.is_string_)
-	      && (this->entsize_ == msp.entsize_)
-	      && (this->addralign_ == msp.addralign_));
-    }
-
-    // Compute a hash value for this using 64-bit FNV-1a hash.
-    size_t
-    hash_value() const
-    {
-      uint64_t h = 14695981039346656037ULL;	// FNV offset basis.
-      uint64_t prime = 1099511628211ULL;
-      h = (h ^ static_cast<uint64_t>(this->is_string_)) * prime;
-      h = (h ^ static_cast<uint64_t>(this->entsize_)) * prime;
-      h = (h ^ static_cast<uint64_t>(this->addralign_)) * prime;
-      return h;
-    }
-    
-    // Functors for associative containers.
-    struct equal_to
-    {
-      bool
-      operator()(const Merge_section_properties& msp1,
-		 const Merge_section_properties& msp2) const
-      { return msp1.eq(msp2); }
-    };
-
-    struct hash
-    {
-      size_t
-      operator()(const Merge_section_properties& msp) const
-      { return msp.hash_value(); }
-    };
-
-   private:
-    // Whether this merge data section is for strings.
-    bool is_string_;
-    // Entsize of this merge data section.
-    uint64_t entsize_;
-    // Address alignment.
-    uint64_t addralign_;
-  };
-
-  // Map that link Merge_section_properties to Output_merge_base.
-  typedef Unordered_map<Merge_section_properties, Output_merge_base*,
-			Merge_section_properties::hash,
-			Merge_section_properties::equal_to>
-    Merge_section_by_properties_map;
-
-  // Map that link Const_section_id to Output_section_data.
-  typedef Unordered_map<Const_section_id, Output_section_data*,
-			Const_section_id_hash>
-    Output_section_data_by_input_section_map;
-
-  // Map that link Const_section_id to Output_relaxed_input_section.
-  typedef Unordered_map<Const_section_id, Output_relaxed_input_section*,
-			Const_section_id_hash>
-    Output_relaxed_input_section_by_input_section_map;
-
   // Map used during relaxation of existing sections.  This map
   // a section id an input section list index.  We assume that
   // Input_section_list is a vector.
@@ -3471,10 +3582,12 @@ class Output_section : public Output_data
   add_output_section_data(Input_section*);
 
   // Add an SHF_MERGE input section.  Returns true if the section was
-  // handled.
+  // handled.  If KEEPS_INPUT_SECTIONS is true, the output merge section
+  // stores information about the merged input sections.
   bool
   add_merge_input_section(Relobj* object, unsigned int shndx, uint64_t flags,
-			  uint64_t entsize, uint64_t addralign);
+			  uint64_t entsize, uint64_t addralign,
+			  bool keeps_input_sections);
 
   // Add an output SHF_MERGE section POSD to this output section.
   // IS_STRING indicates whether it is a SHF_STRINGS section, and
@@ -3506,6 +3619,10 @@ class Output_section : public Output_data
       const std::vector<Output_relaxed_input_section*>& relaxed_sections,
       const Relaxation_map& map,
       Input_section_list* input_sections);
+
+  // Build the lookup maps for merge and relaxed input sections.
+  void
+  build_lookup_maps() const;
 
   // Most of these fields are only valid after layout.
 
@@ -3629,17 +3746,8 @@ class Output_section : public Output_data
   uint64_t tls_offset_;
   // Saved checkpoint.
   Checkpoint_output_section* checkpoint_;
-  // Map from input sections to merge sections.
-  Output_section_data_by_input_section_map merge_section_map_;
-  // Map from merge section properties to merge_sections;
-  Merge_section_by_properties_map merge_section_by_properties_map_;
-  // Map from input sections to relaxed input sections.  This is mutable
-  // because it is updated lazily.  We may need to update it in a
-  // const qualified method.
-  mutable Output_relaxed_input_section_by_input_section_map
-    relaxed_input_section_map_;
-  // Whether relaxed_input_section_map_ is valid.
-  mutable bool is_relaxed_input_section_map_valid_;
+  // Fast lookup maps for merged and relaxed input sections.
+  Output_section_lookup_maps* lookup_maps_;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
