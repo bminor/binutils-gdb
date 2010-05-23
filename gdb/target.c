@@ -872,14 +872,11 @@ update_current_target (void)
 /* Push a new target type into the stack of the existing target accessors,
    possibly superseding some of the existing accessors.
 
-   Result is zero if the pushed target ended up on top of the stack,
-   nonzero if at least one target is on top of it.
-
    Rather than allow an empty stack, we always have the dummy target at
    the bottom stratum, so we can call the function vectors without
    checking them.  */
 
-int
+void
 push_target (struct target_ops *t)
 {
   struct target_ops **cur;
@@ -920,9 +917,6 @@ push_target (struct target_ops *t)
   (*cur) = t;
 
   update_current_target ();
-
-  /* Not on top?  */
-  return (t != target_stack);
 }
 
 /* Remove a target_ops vector from the stack, wherever it may be.

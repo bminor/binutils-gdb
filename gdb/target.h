@@ -1414,7 +1414,7 @@ int target_verify_memory (const gdb_byte *data,
 
 extern void add_target (struct target_ops *);
 
-extern int push_target (struct target_ops *);
+extern void push_target (struct target_ops *);
 
 extern int unpush_target (struct target_ops *);
 

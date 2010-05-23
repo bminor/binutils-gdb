@@ -1,3 +1,10 @@
+2010-05-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* target.c (push_target): Return only void.  Remove the return value
+	comment.
+	* target.h (push_target): Return only void.
+
 2010-05-23  Pedro Alves  <pedro@codesourcery.com>
 
 	Update gnulib from latest git.
