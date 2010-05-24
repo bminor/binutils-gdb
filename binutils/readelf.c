@@ -3141,7 +3141,8 @@ usage (FILE * stream)
                          Dump the contents of section <number|name> as relocated bytes\n\
   -w[lLiaprmfFsoRt] or\n\
   --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
-               =frames-interp,=str,=loc,=Ranges,=pubtypes]\n\
+               =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
+               =trace_info,=trace_abbrev,=trace_aranges]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
@@ -4539,6 +4540,21 @@ process_section_headers (FILE * file)
 	request_dump_bynumber (i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
 	request_dump_bynumber (i, DEBUG_DUMP);
+      /* Trace sections for Itanium VMS.  */
+      else if ((do_debugging || do_trace_info || do_trace_abbrevs
+                || do_trace_aranges)
+	       && const_strneq (name, ".trace_"))
+	{
+          name += sizeof (".trace_") - 1;
+
+	  if (do_debugging
+	      || (do_trace_info     && streq (name, "info"))
+	      || (do_trace_abbrevs  && streq (name, "abbrev"))
+	      || (do_trace_aranges  && streq (name, "aranges"))
+	      )
+	    request_dump_bynumber (i, DEBUG_DUMP);
+	}
+
     }
 
   if (! do_sections)

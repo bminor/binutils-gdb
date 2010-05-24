@@ -53,6 +53,9 @@ int do_debug_frames_interp;
 int do_debug_macinfo;
 int do_debug_str;
 int do_debug_loc;
+int do_trace_info;
+int do_trace_abbrevs;
+int do_trace_aranges;
 int do_wide;
 
 /* Values for do_debug_lines.  */
@@ -1873,6 +1876,7 @@ read_and_display_attr (unsigned long attribute,
 static int
 process_debug_info (struct dwarf_section *section,
 		    void *file,
+                    enum dwarf_section_display_enum abbrev_sec,
 		    int do_loc,
 		    int do_types)
 {
@@ -1944,11 +1948,11 @@ process_debug_info (struct dwarf_section *section,
       load_debug_section (str, file);
     }
 
-  load_debug_section (abbrev, file);
-  if (debug_displays [abbrev].section.start == NULL)
+  load_debug_section (abbrev_sec, file);
+  if (debug_displays [abbrev_sec].section.start == NULL)
     {
       warn (_("Unable to locate %s section!\n"),
-	    debug_displays [abbrev].section.name);
+	    debug_displays [abbrev_sec].section.name);
       return 0;
     }
 
@@ -2066,16 +2070,17 @@ process_debug_info (struct dwarf_section *section,
 
       /* Process the abbrevs used by this compilation unit. DWARF
 	 sections under Mach-O have non-zero addresses.  */
-      if (compunit.cu_abbrev_offset >= debug_displays [abbrev].section.size)
+      if (compunit.cu_abbrev_offset >= debug_displays [abbrev_sec].section.size)
 	warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"),
 	      (unsigned long) compunit.cu_abbrev_offset,
-	      (unsigned long) debug_displays [abbrev].section.size);
+	      (unsigned long) debug_displays [abbrev_sec].section.size);
       else
 	process_abbrev_section
-	  ((unsigned char *) debug_displays [abbrev].section.start
-	   + compunit.cu_abbrev_offset - debug_displays [abbrev].section.address,
-	   (unsigned char *) debug_displays [abbrev].section.start
-	   + debug_displays [abbrev].section.size);
+	  ((unsigned char *) debug_displays [abbrev_sec].section.start
+	   + compunit.cu_abbrev_offset
+           - debug_displays [abbrev_sec].section.address,
+	   (unsigned char *) debug_displays [abbrev_sec].section.start
+	   + debug_displays [abbrev_sec].section.size);
 
       level = 0;
       while (tags < start)
@@ -2226,7 +2231,7 @@ load_debug_info (void * file)
     return num_debug_info_entries;
 
   if (load_debug_section (info, file)
-      && process_debug_info (&debug_displays [info].section, file, 1, 0))
+      && process_debug_info (&debug_displays [info].section, file, abbrev, 1, 0))
     return num_debug_info_entries;
 
   num_debug_info_entries = DEBUG_INFO_UNAVAILABLE;
@@ -3588,13 +3593,19 @@ display_debug_str (struct dwarf_section *section,
 static int
 display_debug_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, 0, 0);
+  return process_debug_info (section, file, abbrev, 0, 0);
 }
 
 static int
 display_debug_types (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, 0, 1);
+  return process_debug_info (section, file, abbrev, 0, 1);
+}
+
+static int
+display_trace_info (struct dwarf_section *section, void *file)
+{
+  return process_debug_info (section, file, trace_abbrev, 0, 0);
 }
 
 static int
@@ -5035,6 +5046,10 @@ dwarf_select_sections_by_names (const char *names)
 	 with earlier versions of readelf.  */
       { "ranges", & do_debug_aranges, 1 },
       { "str", & do_debug_str, 1 },
+      /* These trace_* sections are used by Itanium VMS.  */
+      { "trace_abbrev", & do_trace_abbrevs, 1 },
+      { "trace_aranges", & do_trace_aranges, 1 },
+      { "trace_info", & do_trace_info, 1 },
       { NULL, NULL, 0 }
     };
 
@@ -5155,40 +5170,49 @@ dwarf_select_sections_all (void)
   do_debug_macinfo = 1;
   do_debug_str = 1;
   do_debug_loc = 1;
+  do_trace_info = 1;
+  do_trace_abbrevs = 1;
+  do_trace_aranges = 1;
 }
 
 struct dwarf_section_display debug_displays[] =
 {
-  { { ".debug_abbrev",		".zdebug_abbrev",	NULL,	NULL,	0,	0 },
+  { { ".debug_abbrev",		".zdebug_abbrev",	NULL, NULL, 0, 0 },
     display_debug_abbrev,		&do_debug_abbrevs,	0 },
-  { { ".debug_aranges",		".zdebug_aranges",	NULL,	NULL,	0,	0 },
+  { { ".debug_aranges",		".zdebug_aranges",	NULL, NULL, 0, 0 },
     display_debug_aranges,		&do_debug_aranges,	1 },
-  { { ".debug_frame",		".zdebug_frame",	NULL,	NULL,	0,	0 },
+  { { ".debug_frame",		".zdebug_frame",	NULL, NULL, 0, 0 },
     display_debug_frames,		&do_debug_frames,	1 },
-  { { ".debug_info",		".zdebug_info",		NULL,	NULL,	0,	0 },
+  { { ".debug_info",		".zdebug_info",		NULL, NULL, 0, 0 },
     display_debug_info,			&do_debug_info,		1 },
-  { { ".debug_line",		".zdebug_line",		NULL,	NULL,	0,	0 },
+  { { ".debug_line",		".zdebug_line",		NULL, NULL, 0, 0 },
     display_debug_lines,		&do_debug_lines,	1 },
-  { { ".debug_pubnames",	".zdebug_pubnames",	NULL,	NULL,	0,	0 },
+  { { ".debug_pubnames",	".zdebug_pubnames",	NULL, NULL, 0, 0 },
     display_debug_pubnames,		&do_debug_pubnames,	0 },
-  { { ".eh_frame",		"",			NULL,	NULL,	0,	0 },
+  { { ".eh_frame",		"",			NULL, NULL, 0, 0 },
     display_debug_frames,		&do_debug_frames,	1 },
-  { { ".debug_macinfo",		".zdebug_macinfo",	NULL,	NULL,	0,	0 },
+  { { ".debug_macinfo",		".zdebug_macinfo",	NULL, NULL, 0, 0 },
     display_debug_macinfo,		&do_debug_macinfo,	0 },
-  { { ".debug_str",		".zdebug_str",		NULL,	NULL,	0,	0 },
+  { { ".debug_str",		".zdebug_str",		NULL, NULL, 0, 0 },
     display_debug_str,			&do_debug_str,		0 },
-  { { ".debug_loc",		".zdebug_loc",		NULL,	NULL,	0,	0 },
+  { { ".debug_loc",		".zdebug_loc",		NULL, NULL, 0, 0 },
     display_debug_loc,			&do_debug_loc,		1 },
-  { { ".debug_pubtypes",	".zdebug_pubtypes",	NULL,	NULL,	0,	0 },
+  { { ".debug_pubtypes",	".zdebug_pubtypes",	NULL, NULL, 0, 0 },
     display_debug_pubnames,		&do_debug_pubtypes,	0 },
-  { { ".debug_ranges",		".zdebug_ranges",	NULL,	NULL,	0,	0 },
+  { { ".debug_ranges",		".zdebug_ranges",	NULL, NULL, 0, 0 },
     display_debug_ranges,		&do_debug_ranges,	1 },
-  { { ".debug_static_func",	".zdebug_static_func",	NULL,	NULL,	0,	0 },
+  { { ".debug_static_func",	".zdebug_static_func",	NULL, NULL, 0, 0 },
     display_debug_not_supported,	NULL,			0 },
-  { { ".debug_static_vars",	".zdebug_static_vars",	NULL,	NULL,	0,	0 },
+  { { ".debug_static_vars",	".zdebug_static_vars",	NULL, NULL, 0, 0 },
     display_debug_not_supported,	NULL,			0 },
-  { { ".debug_types",		".zdebug_types",	NULL,	NULL,	0,	0 },
+  { { ".debug_types",		".zdebug_types",	NULL, NULL, 0, 0 },
     display_debug_types,		&do_debug_info,		1 },
-  { { ".debug_weaknames",	".zdebug_weaknames",	NULL,	NULL,	0,	0 },
-    display_debug_not_supported,	NULL,			0 }
+  { { ".debug_weaknames",	".zdebug_weaknames",	NULL, NULL, 0, 0 },
+    display_debug_not_supported,	NULL,			0 },
+  { { ".trace_info",		"",			NULL, NULL, 0, 0 },
+    display_trace_info,			&do_trace_info,		1 },
+  { { ".trace_abbrev",		"",			NULL, NULL, 0, 0 },
+    display_debug_abbrev,		&do_trace_abbrevs,	0 },
+  { { ".trace_aranges",		"",			NULL, NULL, 0, 0 },
+    display_debug_aranges,		&do_trace_aranges,	0 }
 };

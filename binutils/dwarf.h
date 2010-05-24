@@ -71,6 +71,9 @@ enum dwarf_section_display_enum
   static_vars,
   types,
   weaknames,
+  trace_info,
+  trace_abbrev,
+  trace_aranges,
   max
 };
 
@@ -113,6 +116,9 @@ extern int do_debug_frames_interp;
 extern int do_debug_macinfo;
 extern int do_debug_str;
 extern int do_debug_loc;
+extern int do_trace_info;
+extern int do_trace_abbrevs;
+extern int do_trace_aranges;
 extern int do_wide;
 
 extern void init_dwarf_regnames (unsigned int);

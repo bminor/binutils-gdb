@@ -205,7 +205,8 @@ usage (FILE *stream, int status)
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
   -W[lLiaprmfFsoRt] or\n\
   --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
-          =frames-interp,=str,=loc,=Ranges,=pubtypes]\n\
+          =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
+          =trace_info,=trace_abbrev,=trace_aranges]\n\
                            Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\

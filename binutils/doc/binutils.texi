@@ -1707,7 +1707,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
         [@option{-W[lLiaprmfFsoRt]}|
-         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes]]
+         @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges]]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
         [@option{-T}|@option{--dynamic-syms}]
@@ -2080,12 +2080,15 @@ Display @var{width} bytes on a single line when disassembling
 instructions.
 
 @item -W[lLiaprmfFsoRt]
-@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes]
+@itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges]
 @cindex DWARF
 @cindex debug symbols
 Displays the contents of the debug sections in the file, if any are
 present.  If one of the optional letters or words follows the switch
 then only data found in those specific sections will be dumped.
+
+Note that there is no single letter option to display the content of
+trace sections.
 
 @item -G
 @itemx --stabs
@@ -3907,7 +3910,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
         [@option{-c}|@option{--archive-index}]
         [@option{-w[lLiaprmfFsoRt]}|
-         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes]]
+         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges]]
         [@option{-I}|@option{--histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
@@ -4059,10 +4062,13 @@ of binary archives.  Performs the same function as the @option{t}
 command to @command{ar}, but without using the BFD library.  @xref{ar}.
 
 @item -w[lLiaprmfFsoRt]
-@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes]
+@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges]
 Displays the contents of the debug sections in the file, if any are
 present.  If one of the optional letters or words follows the switch
 then only data found in those specific sections will be dumped.
+
+Note that there is no single letter option to display the content of
+trace sections.
 
 Note: the @option{=decodedline} option will display the interpreted
 contents of a .debug_line section whereas the @option{=rawline} option

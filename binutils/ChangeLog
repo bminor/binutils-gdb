@@ -1,3 +1,26 @@
+2010-05-24  Tristan Gingold  <gingold@adacore.com>
+
+	* readelf.c (usage): Add new trace sections for --debug-dump.
+	(process_section_headers): Handle dump of trace sections.
+	* objdump.c (usage): Add new trace sections for --dwarf.
+	* dwarf.h (do_trace_info, do_trace_abbrevs): New variables.
+	(do_trace_aranges): Ditto.
+	(enum dwarf_section_display_enum): Add trace_info, trace_abbrev
+	and trace_aranges literals.
+	* dwarf.c (do_trace_info, do_trace_abbrevs): New variables.
+	(do_trace_aranges): Ditto.
+	(process_debug_info): Add abbrev_sec argument and replace
+	abbrev with abbrev_sec.
+	(load_debug_info): Adjust call of process_debug_info.
+	(display_debug_info): Ditto.
+	(display_trace_info): New function.
+	(dwarf_select_sections_by_names): Add trace_info, trace_abbrevs
+	and trace_aranges sections name.
+	(dwarf_select_sections_all): Also select trace sections.
+	(debug_displays): Reindent.  Add entries for the trace sections.
+	* doc/binutils.texi (readelf): Document new --dwarf parameters.
+	(objdump): Ditto.
+
 2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11600
