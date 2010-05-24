@@ -271,8 +271,11 @@ struct vms_private_data_struct
 
   struct hdr_struct hdr_data;		/* data from HDR/EMH record  */
   struct eom_struct eom_data;		/* data from EOM/EEOM record  */
-  unsigned int section_count;		/* # of sections in following array  */
-  asection **sections;			/* array of GSD/EGSD sections  */
+
+  /* Array of GSD sections to get the correspond BFD one.  */
+  unsigned int section_max; 		/* Size of the sections array.  */
+  unsigned int section_count;		/* Number of GSD sections.  */
+  asection **sections;
 
   /* Array of raw symbols.  */
   struct vms_symbol_entry **syms;
@@ -1143,6 +1146,23 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    section->vma = (bfd_vma)base_addr;
 	    base_addr += section->size;
 	    section->filepos = (unsigned int)-1;
+
+            /* Append it to the section array.  */
+            if (PRIV (section_count) >= PRIV (section_max))
+              {
+                if (PRIV (section_max) == 0)
+                  PRIV (section_max) = 16;
+                else
+                  PRIV (section_max) *= 2;
+                PRIV (sections) = bfd_realloc_or_free
+                  (PRIV (sections), PRIV (section_max) * sizeof (asection *));
+                if (PRIV (sections) == NULL)
+                  return FALSE;
+              }
+
+            PRIV (sections)[PRIV (section_count)] = section;
+            PRIV (section_count)++;
+
 #if VMS_DEBUG
 	    vms_debug (4, "EGSD P-section %d (%s, flags %04x) ",
 		       section->index, name, old_flags);
@@ -8827,27 +8847,10 @@ vms_new_section_hook (bfd * abfd, asection *section)
 {
   bfd_size_type amt;
 
-  /* Count hasn't been incremented yet.  */
-  unsigned int section_count = abfd->section_count + 1;
-
-  vms_debug2 ((1, "vms_new_section_hook (%p, [%d]%s), count %d\n",
-               abfd, section->index, section->name, section_count));
+  vms_debug2 ((1, "vms_new_section_hook (%p, [%d]%s)\n",
+               abfd, section->index, section->name));
 
   bfd_set_section_alignment (abfd, section, 0);
-
-  if (section_count > PRIV (section_count))
-    {
-      amt = section_count;
-      amt *= sizeof (asection *);
-      PRIV (sections) = bfd_realloc_or_free (PRIV (sections), amt);
-      if (PRIV (sections) == NULL)
-	return FALSE;
-      PRIV (section_count) = section_count;
-    }
-
-  vms_debug2 ((6, "section_count: %d\n", PRIV (section_count)));
-
-  PRIV (sections)[section->index] = section;
 
   vms_debug2 ((7, "%d: %s\n", section->index, section->name));
 

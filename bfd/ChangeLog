@@ -1,5 +1,13 @@
 2010-05-24  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (struct vms_private_data_struct): Add section_max
+	field.
+	(_bfd_vms_slurp_egsd): Put PSC into the sections array.
+	(vms_new_section_hook): Do not put section in the sections
+	array.
+
+2010-05-24  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Fix indentation.
 	(alpha_vms_write_exec): Add a comment.
 	(_bfd_vms_write_egsd): Ditto.
