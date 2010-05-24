@@ -1,10 +1,7 @@
 2010-05-24  Tristan Gingold  <gingold@adacore.com>
 
-	* vms-alpha.c (struct vms_private_data_struct): Add section_max
-	field.
-	(_bfd_vms_slurp_egsd): Put PSC into the sections array.
-	(vms_new_section_hook): Do not put section in the sections
-	array.
+	* vms-alpha.c (add_symbol_entry): New function extrated from ...
+	(add_symbol): ... adjusted.
 
 2010-05-24  Tristan Gingold  <gingold@adacore.com>
 

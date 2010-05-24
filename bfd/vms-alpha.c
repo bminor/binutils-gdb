@@ -1043,23 +1043,12 @@ vms_esecflag_by_name (struct sec_flags_struct *section_flags,
   return section_flags[i].vflags_always;
 }
 
-/* Input routines.  */
+/* Add SYM to the symbol table of ABFD.
+   Return FALSE in case of error.  */
 
-static struct vms_symbol_entry *
-add_symbol (bfd *abfd, const unsigned char *ascic)
+static bfd_boolean
+add_symbol_entry (bfd *abfd, struct vms_symbol_entry *sym)
 {
-  struct vms_symbol_entry *entry;
-  int len;
-
-  len = *ascic++;
-  entry = (struct vms_symbol_entry *)bfd_zalloc (abfd, sizeof (*entry) + len);
-  if (entry == NULL)
-    return NULL;
-  entry->namelen = len;
-  memcpy (entry->name, ascic, len);
-  entry->name[len] = 0;
-  entry->owner = abfd;
-
   if (PRIV (gsd_sym_count) >= PRIV (max_sym_count))
     {
       if (PRIV (max_sym_count) == 0)
@@ -1076,10 +1065,33 @@ add_symbol (bfd *abfd, const unsigned char *ascic)
              (PRIV (max_sym_count) * sizeof (struct vms_symbol_entry *)));
         }
       if (PRIV (syms) == NULL)
-        return NULL;
+        return FALSE;
     }
 
-  PRIV (syms)[PRIV (gsd_sym_count)++] = entry;
+  PRIV (syms)[PRIV (gsd_sym_count)++] = sym;
+  return TRUE;
+}
+
+/* Create a symbol whose name is ASCIC and add it to ABFD.
+   Return NULL in case of error.  */
+
+static struct vms_symbol_entry *
+add_symbol (bfd *abfd, const unsigned char *ascic)
+{
+  struct vms_symbol_entry *entry;
+  int len;
+
+  len = *ascic++;
+  entry = (struct vms_symbol_entry *)bfd_zalloc (abfd, sizeof (*entry) + len);
+  if (entry == NULL)
+    return NULL;
+  entry->namelen = len;
+  memcpy (entry->name, ascic, len);
+  entry->name[len] = 0;
+  entry->owner = abfd;
+
+  if (!add_symbol_entry (abfd, entry))
+    return NULL;
   return entry;
 }
 
