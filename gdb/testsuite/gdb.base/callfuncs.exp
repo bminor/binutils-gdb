@@ -58,27 +58,17 @@ if [target_info exists gdb,cannot_call_functions] {
 proc set_lang_c {} {
     global gdb_prompt
 
-    send_gdb "set language c\n"
-    gdb_expect {
-	-re ".*$gdb_prompt $" {}
-	timeout { fail "set language c (timeout)" ; return 0; }
-    }
+    gdb_test_no_output "set language c" 
 
-    send_gdb "show language\n"
-    gdb_expect {
+    set success 0
+
+    gdb_test_multiple "show language" "set language to \"c\"" {
 	-re ".* source language is \"c\".*$gdb_prompt $" {
 	    pass "set language to \"c\""
-	    return 1
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "setting language to \"c\""
-	    return 0
-	}
-	timeout {
-	    fail "can't show language (timeout)"
-	    return 0
+	    set success 1
 	}
     }
+    return $success
 }
 
 # FIXME:  Before calling this proc, we should probably verify that

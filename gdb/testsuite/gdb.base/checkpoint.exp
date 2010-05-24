@@ -337,18 +337,9 @@ gdb_load ${binfile}
 runto_main
 gdb_breakpoint $break1_loc
 
-send_gdb "commands\n"
-send_gdb "  silent\n"
-send_gdb "  if (lines % 2)\n"
-send_gdb "    checkpoint\n"
-send_gdb "  end\n"
-send_gdb "  continue\n"
-send_gdb "end\n"
-
-gdb_expect {
-    -re ".*$gdb_prompt $" { pass "set checkpoint breakpoint" }
-    timeout { fail "(timeout) set checkpoint breakpoint" }
-}
+gdb_test "commands\nsilent\nif (lines % 2)\ncheckpoint\nend\n  continue\nend" \
+    "" \
+    "set checkpoint breakpoint"
 
 set prev_timeout $timeout
 set timeout [expr $timeout + 120]

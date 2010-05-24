@@ -374,15 +374,7 @@ foreach target_charset $charset_subset {
 	set param target-charset
 	set L ""
     }
-    send_gdb "set $param $target_charset\n" 
-    gdb_expect {
-        -re "$gdb_prompt $" {
-            pass "set $param $target_charset"
-        }
-        timeout {
-            fail "set $param $target_charset (timeout)"
-        }
-    }
+    gdb_test_no_output "set $param $target_charset"
 
     # Try printing the null character.  There seems to be a bug in
     # gdb_test that requires us to use gdb_expect here.

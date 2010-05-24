@@ -90,52 +90,26 @@ proc local_compiler_xfail_check_2 { } {
     }
 }
 
-send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
+gdb_test "break marker1" "Breakpoint $decimal at .*" 
 
-    send_gdb "cont\n"
-    gdb_expect {
-        -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
-            send_gdb "up\n"
-            gdb_expect {
-		-re ".*main.*$gdb_prompt $" {
-		    pass "up from marker1"
-		}
-                -re ".*$gdb_prompt $" {
-		    fail "up from marker1"
-		}
-                timeout { fail "up from marker1 (timeout)" }
-            }
-        }
-        -re "Break.* marker1__.* \\(\\) at .*:$decimal.*$gdb_prompt $" {
-	    fail "continue to marker1 (demangling)"
-            send_gdb "up\n"
-            gdb_expect {
-		-re ".*main.*$gdb_prompt $" {
-		    pass "up from marker1"
-		}
-                -re ".*$gdb_prompt $" {
-		    fail "up from marker1"
-		}
-                timeout { fail "up from marker1 (timeout)" }
-            }
-        }
-        -re "$gdb_prompt $" { fail "continue to marker1"  }
-        timeout { fail "(timeout) continue to marker1"  }
+gdb_test_multiple "cont" "up from marker1" {
+    -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
+	pass "continue to marker1"
+	gdb_test "up" " main .*" "up from marker1"
     }
+    -re "Break.* marker1__.* \\(\\) at .*:$decimal.*$gdb_prompt $" {
+	fail "continue to marker1 (demangling)"
+	gdb_test "up" " main .*" "up from marker1"
+    }
+}
 
 # test function parameters
 
 local_compiler_xfail_check
 local_compiler_xfail_check_2
 
-send_gdb "ptype qux1\n"
-gdb_expect {
-    -re "type = int \\(const char, const char, const char \\*, char \\* const\\).*$gdb_prompt $" {
-        pass "ptype qux1"
-    }
-    -re ".*$gdb_prompt $" { fail "ptype qux1" }
-    timeout           { fail "(timeout) ptype qux1" }
-}   
+gdb_test "ptype qux1" \
+    "type = int \\(const char, const char, const char \\*, char \\* const\\).*"
 
 # test vars and pointers
 

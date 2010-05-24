@@ -136,15 +136,13 @@ proc if_while_breakpoint_command_test {} {
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #1"
 
-    send_gdb "commands\n"
-    gdb_expect {
-	-re "End with" {
-	    pass "commands in if_while_breakpoint_command_test"
+    gdb_test_multiple "commands" \
+	"commands in if_while_breakpoint_command_test" {
+	    -re "End with" {
+		pass "commands in if_while_breakpoint_command_test"
+	    }
 	}
-        default {
-	    fail "(timeout or eof) commands in if_while_breakpoint_command_test"
-	}
-    }
+
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
     gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" \
 	    "" \
@@ -182,21 +180,18 @@ proc infrun_breakpoint_command_test {} {
 # to get around a synchronization problem in expect.
 # part1: issue the gdb command "commands"
 # part2: send the list of commands
-    send_gdb "commands\n"
-    gdb_expect {
-	-re "End with" {
-	    pass "commands in infrun_breakpoint_command_test #1"
+    gdb_test_multiple "commands" \
+	"commands in infrun_breakpoint_command_test #1" {
+	    -re "End with" {
+		pass "commands in infrun_breakpoint_command_test #1"
+	    }
 	}
-        default {
-	    fail "(timeout or eof) commands in infrun_breakpoint_command_test"
-	}
-    }
     gdb_test "step\nstep\nstep\nstep\nend" "" \
 	"commands in infrun_breakpoint_command_test #2"
 
-	gdb_test "continue" \
-		"Continuing.*.*.*Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*\[0-9\]*\[      \]*if \\(value > 1\\) \{.*\[0-9\]*\[      \]*value \\*= factorial \\(value - 1\\);.*" \
-		"continue in infrun_breakpoint_command_test"
+    gdb_test "continue" \
+	"Continuing.*.*.*Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*\[0-9\]*\[      \]*if \\(value > 1\\) \{.*\[0-9\]*\[      \]*value \\*= factorial \\(value - 1\\);.*" \
+	"continue in infrun_breakpoint_command_test"
 
     gdb_stop_suppressing_tests;
 }
@@ -229,15 +224,13 @@ proc user_defined_command_test {} {
 
     gdb_test "set \$foo = 4" "" "set foo in user_defined_command_test"
 
-    send_gdb "define mycommand\n"
-    gdb_expect {
-	-re "End with"  {
-	    pass "define mycommand in user_defined_command_test"
+    gdb_test_multiple "define mycommand" \
+	"define mycommand in user_defined_command_test" {
+	    -re "End with"  {
+		pass "define mycommand in user_defined_command_test"
+	    }
 	}
-        default {
-	    fail "(timeout or eof) define mycommand in user_defined_command_test"
-	}
-    }
+
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
     gdb_test "while \$arg0 > 0\nset \$arg0 -= 1\nif \(\$arg0 % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" \
 	    "" \
@@ -282,52 +275,37 @@ proc watchpoint_command_test {} {
     #
     set wp_id -1
 
-    send_gdb "watch local_var\n"
-    gdb_expect {
-        -re ".*\[Ww\]atchpoint (\[0-9\]*): local_var.*$gdb_prompt $" {
+    gdb_test_multiple "watch local_var" "watch local_var" {
+        -re "\[Ww\]atchpoint (\[0-9\]*): local_var.*$gdb_prompt $" {
             set wp_id $expect_out(1,string)
             pass "watch local_var"
         }
-        -re "$gdb_prompt $"\
-            {fail "watch local_var"}
-        timeout {fail "(timeout) watch local_var"}
     }
 
     if {$wp_id == -1} {return}
 
-    send_gdb "commands $wp_id\n"
-    gdb_expect {
-      -re "Type commands for breakpoint.*, one per line.*>" {
-	  pass "begin commands on watch"
-      }
-      -re "$gdb_prompt $" {fail "begin commands on watch"}
-      timeout             {fail "(timeout) begin commands on watch"}
-    }
-    send_gdb "print value\n"
-    gdb_expect {
-	-re ">"               {pass "add print command to watch"}
-	-re "$gdb_prompt $"   {fail "add print command to watch"}
-	timeout               {fail "(timeout) add print command to watch"}
-    }
-    send_gdb "continue\n"
-    gdb_expect {
-	-re ">"               {pass "add continue command to watch"}
-	-re "$gdb_prompt $"   {fail "add continue command to watch"}
-	timeout               {fail "(timeout) add continue command to watch"}
-    }
-    send_gdb "end\n"
-    gdb_expect {
-	-re "$gdb_prompt $"   {pass "end commands on watch"}
-	timeout               {fail "(timeout) end commands on watch"}
-    }
-    send_gdb "continue\n"
-    gdb_expect {
-	-re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:(57|82).*$gdb_prompt $" {
-	    pass "continue with watch"
+    gdb_test_multiple "commands $wp_id\n" "begin commands on watch" {
+	-re "Type commands for breakpoint.*, one per line.*>$" {
+	    pass "begin commands on watch"
 	}
-	-re "$gdb_prompt $"   {fail "continue with watch"}
-	timeout               {fail "(timeout) continue with watch"}
     }
+    gdb_test_multiple "print value" "add print command to watch" {
+	-re ">$" {
+	    pass "add print command to watch"
+	}
+    }
+    gdb_test_multiple "continue" "add continue command to watch" {
+	-re ">$" {
+	    pass "add continue command to watch"
+	}
+    }
+    gdb_test "end" \
+	"" \
+	"end commands on watch"
+
+    gdb_test "continue" \
+	"Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:(57|82).*" \
+	"continue with watch"
 }
 
 proc test_command_prompt_position {} {
@@ -448,41 +426,35 @@ proc bp_deleted_in_command_test {} {
              "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
              "breakpoint in bp_deleted_in_command_test"
     
-    send_gdb "commands\n"
-    gdb_expect {
-      -re "Type commands for breakpoint.*>" {
+    gdb_test_multiple "commands" "begin commands in bp_deleted_in_command_test" {
+      -re "Type commands for breakpoint.*>$" {
           pass "begin commands in bp_deleted_in_command_test"
       }
-      -re "$gdb_prompt $" {fail "begin commands in bp_deleted_in_command_test"}
-      timeout             {fail "(timeout) begin commands bp_deleted_in_command_test"}
     }
-    send_gdb "silent\n"
-    gdb_expect {
-        -re ">"               {pass "add silent command"}
-        -re "$gdb_prompt $"   {fail "add silent command"}
-        timeout               {fail "(timeout) add silent command"}
+    gdb_test_multiple "silent" "add silent command" {
+        -re ">$" {
+	    pass "add silent command"
+	}
     }
-    send_gdb "clear factorial\n"
-    gdb_expect {
-        -re ">"               {pass "add clear command"}
-        -re "$gdb_prompt $"   {fail "add clear command"}
-        timeout               {fail "(timeout) add clear command"} }
-    send_gdb "printf \"factorial command-list executed\\n\"\n"
-    gdb_expect {
-        -re ">"               {pass "add printf command"}
-        -re "$gdb_prompt $"   {fail "add printf command"}
-        timeout               {fail "(timeout) add printf command"}
+    gdb_test_multiple "clear factorial" "add clear command" {
+        -re ">$" {
+	    pass "add clear command"
+	}
     }
-    send_gdb "cont\n"
-    gdb_expect {
-        -re ">"               {pass "add cont command"}
-        -re "$gdb_prompt $"   {fail "add cont command"}
-        timeout               {fail "(timeout) add cont command"} }
-    send_gdb "end\n"
-    gdb_expect {
-        -re "$gdb_prompt $"   {pass "end commands"}
-        timeout               {fail "(timeout) end commands"}
+    gdb_test_multiple "printf \"factorial command-list executed\\n\"" \
+	"add printf command" {
+        -re ">$" {
+	    pass "add printf command"
+	}
     }
+    gdb_test_multiple "cont" "add cont command" {
+        -re ">$" {
+	    pass "add cont command"
+	}
+    }
+    gdb_test "end" \
+	"" \
+	"end commands"
 
     gdb_run_cmd
     gdb_expect {
@@ -515,36 +487,31 @@ proc temporary_breakpoint_commands {} {
 	    "Temporary breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
 	    "breakpoint in temporary_breakpoint_commands"
     
-    send_gdb "commands\n"
-    gdb_expect {
-	-re "Type commands for breakpoint.*>" {
-	    pass "begin commands in bp_deleted_in_command_test"
+    gdb_test_multiple "commands" \
+	"begin commands in bp_deleted_in_command_test" {
+	    -re "Type commands for breakpoint.*>$" {
+		pass "begin commands in bp_deleted_in_command_test"
+	    }
 	}
-	-re "$gdb_prompt $" {fail "begin commands in bp_deleted_in_command_test"}
-	timeout             {fail "(timeout) begin commands bp_deleted_in_command_test"}
+    gdb_test_multiple "silent" "add silent tbreak command" {
+	-re ">$" {
+	    pass "add silent tbreak command"
+	}
     }
-    send_gdb "silent\n"
-    gdb_expect {
-	-re ">"               {pass "add silent tbreak command"}
-	-re "$gdb_prompt $"   {fail "add silent tbreak command"}
-	timeout               {fail "(timeout) add silent tbreak command"}
-     }
-    send_gdb "printf \"factorial tbreak commands executed\\n\"\n"
-    gdb_expect {
-	-re ">"               {pass "add printf tbreak command"}
-	-re "$gdb_prompt $"   {fail "add printf tbreak command"}
-	timeout               {fail "(timeout) add printf tbreak command"}
-     }
-    send_gdb "cont\n"
-    gdb_expect {
-	-re ">"               {pass "add cont tbreak command"}
-	-re "$gdb_prompt $"   {fail "add cont tbreak command"}
-	timeout               {fail "(timeout) add cont tbreak command"} }
-    send_gdb "end\n"
-    gdb_expect {
-	-re "$gdb_prompt $"   {pass "end tbreak commands"}
-	timeout               {fail "(timeout) end tbreak commands"}
-     }
+    gdb_test_multiple "printf \"factorial tbreak commands executed\\n\"\n" \
+	"add printf tbreak command" {
+	    -re ">$" {
+		pass "add printf tbreak command"
+	    }
+	}
+    gdb_test_multiple "cont" "add cont tbreak command" {
+	-re ">$" {
+	    pass "add cont tbreak command"
+	}
+    }
+    gdb_test "end" \
+	"" \
+	"end tbreak commands"
 
     gdb_run_cmd
     gdb_expect {

@@ -58,44 +58,15 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
-# Set the current language to C.  This counts as a test.  If it
-# fails, then we skip the other tests.
-
-proc set_lang_c {} {
-    global gdb_prompt
-
-    send_gdb "set language c\n"
-    gdb_expect {
-	-re ".*$gdb_prompt $" {}
-	timeout { fail "set language c (timeout)" ; return 0; }
-    }
-
-    send_gdb "show language\n"
-    gdb_expect {
-	-re ".* source language is \"c\".*$gdb_prompt $" {
-	    pass "set language to \"c\""
-	    return 1
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "setting language to \"c\""
-	    return 0
-	}
-	timeout {
-	    fail "can't show language (timeout)"
-	    return 0
-	}
-    }
-}
-
 # Start with a fresh gdb.
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 
 if ![runto_main] then {
@@ -108,28 +79,16 @@ gdb_test "break loop_count" \
     "Breakpoint.* file .*call-rt-st.c, line 128\\." \
     "breakpoint loop_count"
 
+gdb_test "continue" \
+    "Continuing\\..*Breakpoint.*loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+128\[\t \]+for \\(index=0; index.4; index..\\);\[\r\n \]+" \
+    "continue to loop_count"
 
-send_gdb "continue\n"
-gdb_expect {
- -re  "Continuing\\..*Breakpoint.*loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+128\[\t \]+for \\(index=0; index.4; index..\\);\[\r\n \]+$gdb_prompt $" {
-                 pass "continue to loop_count"}
-      -re ".*$gdb_prompt $" { fail "continue to loop_count"}           
-      timeout           { fail "(timeout) continue to loop_count"}
-}
-
-send_gdb "finish\n"
-gdb_expect {
-    -re  "Run till exit from .0  loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+main \\(\\) at.*call-rt-st.c:777\[ \t\r\n\]+777\[\t \]+return 0;.*$gdb_prompt $" {
+gdb_test_multiple "finish" "finish out from loop count" {
+    -re "Run till exit from .0  loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+main \\(\\) at.*call-rt-st.c:777\[ \t\r\n\]+777\[\t \]+return 0;.*$gdb_prompt $" {
 	pass "finish out from loop_count (line 777)"
     }
     -re  "Run till exit from .0  loop_count \\(\\) at.*call-rt-st.c:128\[ \t\r\n\]+main \\(\\) at.*call-rt-st.c:775\[ \t\r\n\]+775\[\t \]+loop_count.*$gdb_prompt $" {
 	pass "finish out from loop_count (line 775)"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "finish out from loop_count"
-    }
-    timeout {
-	fail "finish out from loop_count (timeout)"
     }
 }
 
@@ -142,19 +101,12 @@ proc print_struct_call { expr result } {
     global gdb_prompt
 
     set command "print $expr"
-    send_gdb "${command}\n"
-    gdb_expect {
+    gdb_test_multiple "${command}" "${command}" {
         -re "$result\[\r\n\]+$gdb_prompt $" {
             pass "$command"
         }
         -re "Function return value unknown.\[\r\n\]+$gdb_prompt $" {
             unsupported "$command"
-        }
-        -re "$gdb_prompt $" {
-            fail "$command"
-        }
-        timeout {
-            fail "$command (timeout)"
         }
     }
 }

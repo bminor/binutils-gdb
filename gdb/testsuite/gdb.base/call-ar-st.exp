@@ -61,24 +61,19 @@ set timeout [expr "$timeout + 60"]
 proc set_lang_c {} {
     global gdb_prompt
 
-    send_gdb "set language c\n"
-    gdb_expect {
-	-re ".*$gdb_prompt $" {}
-	timeout { fail "set language c (timeout)" ; return 0; }
-    }
+    gdb_test_no_output "set language c"
 
-    send_gdb "show language\n"
-    gdb_expect {
+    gdb_test_multiple "show language" "set language to \"c\"" {
 	-re ".* source language is \"c\".*$gdb_prompt $" {
 	    pass "set language to \"c\""
 	    return 1
 	}
 	-re ".*$gdb_prompt $" {
-	    fail "setting language to \"c\""
+	    fail "set language to \"c\""
 	    return 0
 	}
 	timeout {
-	    fail "can't show language (timeout)"
+	    fail "(timeout) set language to \"c\""
 	    return 0
 	}
     }
@@ -90,9 +85,9 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 
 if ![runto_main] then {
@@ -201,28 +196,15 @@ if {![gdb_skip_float_test "continuing to breakpoint 1220"] && \
 }
 
 #step
-send_gdb "step\n"
-gdb_expect {
-    -re "print_all_arrays \\(array_i=, array_c=.ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa., array_f=, array_d=\\) at .*call-ar-st.c:306\[ \t\r\n\]+306.*print_int_array\\(array_i\\);.*$gdb_prompt $" {pass "step inside print_all_arrays"}
-    -re ".*$gdb_prompt $" { fail "step inside print_all_arrays" }
-    timeout { fail "step inside print_all_arrays (timeout)" }
-}
-
+gdb_test "step" \
+    "print_all_arrays \\(array_i=, array_c=.ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa., array_f=, array_d=\\) at .*call-ar-st.c:306\[ \t\r\n\]+306.*print_int_array\\(array_i\\);.*" \
+    "step inside print_all_arrays"
 
 #step -over
 if ![gdb_skip_stdio_test "next over print_int_array in print_all_arrays"] {
-    send_gdb "next\n"
-    gdb_expect {
-	-re "array_i :.*307.*print_char_array.*$gdb_prompt $" {
-	    pass "next over print_int_array in print-all_arrays"
-	}
-	-re ".*$gdb_prompt $" { 
-	    fail "next over print_int_array in print-all_arrays" 
-	}
-	timeout { 
-	    fail "next over print_int_array in print-all_arrays (timeout)"
-	}
-    }
+    gdb_test "next" \
+	"array_i :.*307.*print_char_array.*" \
+	"next over print_int_array in print-all_arrays"
 } else {
     gdb_test "next" "" ""
 }
@@ -265,24 +247,16 @@ if {![gdb_skip_float_test "continuing to 1236"] && \
 #call sum_array_print(10, *list1, *list2, *list3, *list4)
 
 if ![gdb_skip_stdio_test "print sum_array_print(...)"] {
-    send_gdb "print sum_array_print(10, *list1, *list2, *list3, *list4)\n"
-    gdb_expect {
-	-re ".*Sum of 4 arrays, by element \\(add in seed as well\\):\[ \t\r\n\]+Seed: 10\[ \t\r\n\]+Element Index . Sum\[ \t\r\n\]+-------------------------\[ \t\r\n\]+.*\[ \t\]+0\[ \t\]+52\[ \t\r\n\]+1\[ \t\]+60\[ \t\r\n\]+2\[ \t\]+68\[ \t\r\n\]+3\[ \t\]+76\[ \t\r\n\]+4\[ \t\]+84\[ \t\r\n\]+5\[ \t\]+92\[ \t\r\n\]+6\[ \t\]+100\[ \t\r\n\]+7\[ \t\]+108\[ \t\r\n\]+8\[ \t\]+116\[ \t\r\n\]+9\[ \t\]+124\[ \t\r\n\]+.*$gdb_prompt $" {
-	    pass "print sum_array_print(10, *list1, *list2, *list3, *list4)"
-	}
-	-re ".*$gdb_prompt $" { fail "print sum_array_print(10, *list1, *list2, *list3, *list4)" }
-	timeout           { fail "(timeout) print sum_array_print(10, *list1, *list2, *list3, *list4)" }
-    }
+    gdb_test "print sum_array_print(10, *list1, *list2, *list3, *list4)" \
+	".*Sum of 4 arrays, by element \\(add in seed as well\\):\[ \t\r\n\]+Seed: 10\[ \t\r\n\]+Element Index . Sum\[ \t\r\n\]+-------------------------\[ \t\r\n\]+.*\[ \t\]+0\[ \t\]+52\[ \t\r\n\]+1\[ \t\]+60\[ \t\r\n\]+2\[ \t\]+68\[ \t\r\n\]+3\[ \t\]+76\[ \t\r\n\]+4\[ \t\]+84\[ \t\r\n\]+5\[ \t\]+92\[ \t\r\n\]+6\[ \t\]+100\[ \t\r\n\]+7\[ \t\]+108\[ \t\r\n\]+8\[ \t\]+116\[ \t\r\n\]+9\[ \t\]+124\[ \t\r\n\]+.*" \
+	"print sum_array_print(10, *list1, *list2, *list3, *list4)"
 }
 
 #step over
 if ![gdb_skip_stdio_test "next to 1237"] {
-    send_gdb "next\n"
-    gdb_expect {
-	-re ".*BYE BYE FOR NOW.*1237.*printf\\(.VERY GREEN GRASS.n.\\);.*$gdb_prompt $" { pass "next to 1237"}
-	-re ".*$gdb_prompt $" { fail "next to 1237" }
-	timeout { fail "next to 1237(timeout)" }
-    }
+    gdb_test "next" \
+	"BYE BYE FOR NOW.*1237.*printf\\(.VERY GREEN GRASS.n.\\);.*" \
+	"next to 1237"
 } else {
     gdb_test "next" "" ""
 }
@@ -290,18 +264,9 @@ if ![gdb_skip_stdio_test "next to 1237"] {
 #call print_array_rep(\*list1, \*list2, \*list3)
 
 if ![gdb_skip_stdio_test "print print_array_rep(...)"] {
-    send_gdb "print print_array_rep(\*list1, \*list2, \*list3)\n"
-    gdb_expect {
-	-re ".*$gdb_prompt $" {
-	    pass "print print_array_rep(*list1, *list2, *list3)"
-	}
-	-re ".*$gdb_prompt $" { 
-	    fail "print print_array_rep(*list1, *list2, *list3)" 
-	}
-	timeout               {
-	    fail "(timeout) print print_array_rep(*list1, *list2, *list3)" 
-	}
-    }
+    gdb_test "print print_array_rep(\*list1, \*list2, \*list3)" \
+	"Contents of linked list3:.*" \
+	"print print_array_rep(*list1, *list2, *list3)"
 }
 
 #go -until 1241
@@ -309,14 +274,9 @@ gdb_test "tbreak 1241" \
     "Temporary breakpoint..* file .*$srcfile, line 1241.*" \
     "tbreakpoint line 1241"
 
-send_gdb  "continue\n"
-gdb_expect {
- -re ".*main \\(\\) at .*call-ar-st.c:1241\r\n1241\[\t \]+sum_array_print\\(10, \\*list1, \\*list2, \\*list3, \\*list4\\);.*$gdb_prompt $" {
-                   pass "continue to 1241"}
- -re ".*$gdb_prompt $" { fail "continue to 1241"}
- timeout           { fail "(timeout) continue to 1241"}
-}
-
+gdb_test "continue" \
+    "main \\(\\) at .*call-ar-st.c:1241\r\n1241\[\t \]+sum_array_print\\(10, \\*list1, \\*list2, \\*list3, \\*list4\\);.*" \
+    "continue to 1241"
 
 
 # Run into sum_array_print, and verify that the arguments were passed
@@ -355,14 +315,9 @@ gdb_test "tbreak 1281" \
     "tbreakpoint line 1281"
 
 if ![gdb_skip_stdio_test "continuing to 1281"] {
-    send_gdb "continue\n"
-    gdb_expect {
-	-re  "Continuing\\..*Sum of 4 arrays.*Contents of linked list1.*Contents of two_floats_t.*main \\(\\) at .*call-ar-st.c:1281.*c = 0.*$gdb_prompt $" {
-	    pass "continue to 1281"
-	}
-	-re ".*$gdb_prompt $" { fail "continue to 1281"}           
-	timeout           { fail "(timeout) continue to 1281"}
-    }
+    gdb_test "continue" \
+	"Continuing\\..*Sum of 4 arrays.*Contents of linked list1.*Contents of two_floats_t.*main \\(\\) at .*call-ar-st.c:1281.*c = 0.*" \
+	"continue to 1281"
 } else {
     gdb_test "continue" "" ""
 }
@@ -412,14 +367,9 @@ if {![gdb_skip_float_test "print print_small_structs(...)"] && \
 }
 
 #call compute_with_small_structs(20)
-send_gdb "print compute_with_small_structs(20)\n"
-gdb_expect {
-    -re ".*\[0-9\]+ =.*$gdb_prompt $" {
-        pass "print compute_with_small_structs(20)"
-      }
-    -re ".*$gdb_prompt $" { fail "print compute_with_small_structs(20)" }
-    timeout           { fail "(timeout) compute_with_small_structs(20)" }
-  }
+gdb_test "print compute_with_small_structs(20)" \
+    "\[0-9\]+ = void" \
+    "print compute_with_small_structs(20)"
 
 
 #call print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 
@@ -456,12 +406,9 @@ if { [istarget "hppa*-*-hpux*"] } {
     # FIXME: use step for hppa* testing for now
     # guo 990621
     #
-    send_gdb "step\n"
-    gdb_expect {
-        -re ".*print_long_arg_list.*\\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.375\}, d3=\{double1 = 675.09375\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at .*${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {pass "step into print_long_arg_list"}
-        -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
-        timeout { fail "step into print_long_arg_list (timeout)" }
-    }
+    gdb_test "step" \
+	"print_long_arg_list.*\\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.375\}, d3=\{double1 = 675.09375\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at .*${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);" \
+	"step into print_long_arg_list"
 } else {
 
     # We can't just assume that a "step" will get us into
@@ -472,21 +419,20 @@ if { [istarget "hppa*-*-hpux*"] } {
     # The short match case below handles cases where a buffer
     # overflows or something, and expect can't deal with the full
     # line.  Perhaps a more elegant solution exists... -sts 1999-08-17
-    send_gdb "continue\n"
     if {![gdb_skip_float_test "step into print_long_arg_list"]} {
-	gdb_expect {
-	    -re ".*print_long_arg_list \\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.375\}, d3=\{double1 = 675.09375\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at .*${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" { pass "step into print_long_arg_list" }
-	    -re ".*print_long_arg_list.*\\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}.*\\) at .*${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {pass "step into print_long_arg_list (short match)"}
-	    -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
-	    timeout { fail "step into print_long_arg_list (timeout)" }
+	gdb_test_multiple "continue" "step into print_long_arg_list" {
+	    -re ".*print_long_arg_list \\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.375\}, d3=\{double1 = 675.09375\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at .*${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {
+		pass "step into print_long_arg_list"
+	    }
+	    -re ".*print_long_arg_list.*\\(a=22.25, b=33.375, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}.*\\) at .*${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {
+		pass "step into print_long_arg_list (short match)"
+	    }
 	}
     } else {
 	# If skipping float tests, don't expect anything in arg list.
-	gdb_expect {
-	    -re ".*print_long_arg_list \\(.*\\).*$gdb_prompt $" { pass "step into print_long_arg_list" }
-	    -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
-	    timeout { fail "step into print_long_arg_list (timeout)" }
-	}
+	gdb_test "continue" \
+	    "print_long_arg_list \\(.*\\).*" \
+	    "step into print_long_arg_list"
     }
 }
 
@@ -558,29 +504,15 @@ if ![gdb_skip_stdio_test "continuing to 1300"] {
 }
 
 #step
-    send_gdb "step\n"
-    gdb_expect {
-        -re "
-init_bit_flags_combo \\(bit_flags_combo=, a=1, b=0, ch1=121 .y., g=1, d=0, ch2=110 .n., e=1, o=0\\) at .*call-ar-st.c:416\[ \t\n\r\]+416.*bit_flags_combo->alpha = a;.*$gdb_prompt $" {
-                            pass "step into init_bit_flags_combo"}
-        -re ".*$gdb_prompt $" { fail "step into init_bit_flags_combo" }
-        timeout { fail "step into init_bit_flags_combo (timeout)" }
-    }
+gdb_test "step" \
+    "init_bit_flags_combo \\(bit_flags_combo=, a=1, b=0, ch1=121 .y., g=1, d=0, ch2=110 .n., e=1, o=0\\) at .*call-ar-st.c:416\[ \t\n\r\]+416.*bit_flags_combo->alpha = a;" \
+    "step into init_bit_flags_combo"
 
 #call print_bit_flags_combo(*bit_flags_combo)
 if ![gdb_skip_stdio_test "continuing to 1300"] {
-    send_gdb "print print_bit_flags_combo(*bit_flags_combo)\n"
-    gdb_expect {
-	-re ".*alpha.*gamma.*epsilon.*ch1: y.*ch2: n.*$gdb_prompt $" {
-	    pass "print print_bit_flags_combo from init_bit_flags_combo"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "print print_bit_flags_combo from init_bit_flags_combo" 
-	}
-	timeout           {
-	    fail "(timeout) print_bit_flags_combo from init_bit_flags_combo" 
-	}
-    }
+    gdb_test "print print_bit_flags_combo(*bit_flags_combo)" \
+	"alpha.*gamma.*epsilon.*ch1: y.*ch2: n.*" \
+	"print print_bit_flags_combo from init_bit_flags_combo"
 }
 
 
@@ -655,18 +587,9 @@ gdb_test continue "Continuing\\..*main \\(\\) at .*call-ar-st.c:1311\[ \t\n\r\]+
 
 #call sum_struct_print(10, *struct1, *struct2, *struct3, *struct4)
 if ![gdb_skip_stdio_test "print sum_struct_print(...)"] {
-    send_gdb "print sum_struct_print(10, *struct1, *struct2, *struct3, *struct4)\n"
-    gdb_expect {
-	-re ".*Sum of the 4 struct values and seed :\[ \t\n\r\]+218.*$gdb_prompt $" {
-	    pass "print sum_struct_print(10, *struct1, *struct2, *struct3, *struct4)"
-	}
-	-re ".*$gdb_prompt $" { 
-	    fail "print sum_struct_print(10, *struct1, *struct2, *struct3, *struct4)" 
-	}
-	timeout           { 
-	    fail "(timeout) sum_struct_print(10, *struct1, *struct2, *struct3, *struct4)" 
-	}
-    }
+    gdb_test "print sum_struct_print(10,*struct1,*struct2,*struct3,*struct4)" \
+	"Sum of the 4 struct values and seed :\[ \t\n\r\]+218.*" \
+	"print sum_struct_print(10, *struct1, *struct2, *struct3, *struct4)"
 }
 
 
@@ -685,18 +608,9 @@ if ![gdb_skip_stdio_test "print print_struct_rep(...)"] {
 }
 
 if ![gdb_skip_stdio_test "print print_one_large_struct(...)"] {
-    send_gdb "print print_one_large_struct(*list1)\n"
-    gdb_expect {
-	-re ".*         4         1.*$gdb_prompt $" {
-	    pass "print print_one_large_struct(*list1)"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "print print_one_large_struct(*list1)"
-	}
-	timeout           {
-	    fail "(timeout) print_one_large_struct(*list1)"
-	}
-    }
+    gdb_test "print print_one_large_struct(*list1)" \
+	"         4         1.*" \
+	"print print_one_large_struct(*list1)"
 }
 
 set timeout $oldtimeout

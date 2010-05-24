@@ -1,3 +1,20 @@
+2010-05-24  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/call-ar-st.exp: Replace send_gdb with gdb_test.
+	* gdb.base/callfuncs.exp: Replace send_gdb with gdb_test.
+	* gdb.base/call-rt-st.exp: Replace send_gdb with gdb_test.
+	* gdb.base/call-signal-resume.exp: Replace send_gdb with gdb_test.
+	* gdb.base/call-strs.exp: Replace send_gdb with gdb_test.
+	* gdb.base/catch-syscall.exp: Replace send_gdb with gdb_test.
+	* gdb.base/charset.exp: Replace send_gdb with gdb_test.
+	* gdb.base/checkpoint.exp: Replace send_gdb with gdb_test.
+	* gdb.base/commands.exp: Replace send_gdb with gdb_test.
+	* gdb.base/condbreak.exp: Replace send_gdb with gdb_test.
+	* gdb.base/cond-exprs.exp: Replace send_gdb with gdb_test.
+	* gdb.base/consecutive.exp: Replace send_gdb with gdb_test.
+	* gdb.base/constvars.exp: Replace send_gdb with gdb_test.
+	* gdb.base/corefile.exp: Replace send_gdb with gdb_test.
+
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/pieces.exp (pieces_test_f3): New proc.
@@ -30,10 +47,6 @@
 	* lib/gdb.exp (gdb_test_no_output): New function.
 	* lib/gdb.ada/arrayidx.exp: Use gdb_test_no_output instead of gdb_test
 	when testing commands that should produce no output.
-
-2010-05-19  Michael Snyder  <msnyder@vmware.com>
-
-	* gdb.base/whatis.exp: Replace send_gdb with gdb_test.
 
 2010-05-17  Joel Brobecker  <brobecker@adacore.com>
 
