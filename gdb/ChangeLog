@@ -1,3 +1,7 @@
+2010-05-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* config.in: Regenerate.
+
 2010-05-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
