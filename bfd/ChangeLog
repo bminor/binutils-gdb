@@ -1,3 +1,10 @@
+2010-05-24  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Fix indentation.
+	(alpha_vms_write_exec): Add a comment.
+	(_bfd_vms_write_egsd): Ditto.
+	(alpha_vms_convert_symbol): Remove a blank line.
+
 2010-05-21  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_slurp_eihs): Do not create a bfd section

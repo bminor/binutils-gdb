@@ -1083,7 +1083,7 @@ add_symbol (bfd *abfd, const unsigned char *ascic)
 /* Read and process EGSD.  Return FALSE on failure.  */
 
 static bfd_boolean
-_bfd_vms_slurp_egsd (bfd * abfd)
+_bfd_vms_slurp_egsd (bfd *abfd)
 {
   int gsd_type, gsd_size;
   asection *section;
@@ -1116,10 +1116,12 @@ _bfd_vms_slurp_egsd (bfd * abfd)
 	  {
 	    /* Program section definition.  */
             struct vms_egps *egps = (struct vms_egps *)vms_rec;
+
 	    name = _bfd_vms_save_counted_string (&egps->namlng);
 	    section = bfd_make_section (abfd, name);
 	    if (!section)
 	      return FALSE;
+
 	    old_flags = bfd_getl16 (egps->flags);
             vms_section_data (section)->flags = old_flags;
             vms_section_data (section)->no_flags = 0;
@@ -3075,6 +3077,7 @@ alpha_vms_write_exec (bfd *abfd)
       PRIV (file_pos) += sec->size;
     }
 
+  /* Update EIHS.  */
   if (eihs != NULL && dst != NULL)
     {
       bfd_putl32 ((dst->filepos / VMS_BLOCK_SIZE) + 1, eihs->dstvbn);
@@ -3210,10 +3213,11 @@ _bfd_vms_write_egsd (bfd *abfd)
 	}
 
       /* Don't know if this is necessary for the linker but for now it keeps
-	 vms_slurp_gsd happy  */
+	 vms_slurp_gsd happy.  */
       sname = (char *)section->name;
       if (*sname == '.')
 	{
+          /* Remove leading dot.  */
 	  sname++;
 	  if ((*sname == 't') && (strcmp (sname, "text") == 0))
 	    sname = EVAX_CODE_NAME;
@@ -3359,7 +3363,6 @@ done:
       _bfd_vms_output_counted (recwr, hash);
 
       _bfd_vms_output_end_subrec (recwr);
-
     }
 
   _bfd_vms_output_alignment (recwr, 8);
@@ -4663,7 +4666,6 @@ alpha_vms_convert_symbol (bfd *abfd, struct vms_symbol_entry *e, asymbol *sym)
         value -= sbase;
       }
 #endif
-
       break;
 
     default:
