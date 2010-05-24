@@ -40,8 +40,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # Does this gdb support gcore?
-send_gdb "help gcore\n"
-gdb_expect {
+gdb_test_multiple "help gcore" "help gcore" {
     -re "Undefined command: .gcore.*$gdb_prompt $" {
 	# gcore command not supported -- nothing to test here.
 	unsupported "gdb does not support gcore on this target"
@@ -49,12 +48,6 @@ gdb_expect {
     }
     -re "Save a core file .*$gdb_prompt $" {
 	pass "help gcore"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "help gcore"
-    }
-    timeout {
-	fail "help gcore (timeout)"
     }
 }
 

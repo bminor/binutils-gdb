@@ -77,14 +77,10 @@ if { ! [ runto checkpoint1 ] } then {
 
 # Get the endianness for the later use with endianless formats.
 
-send_gdb "show endian\n"
-gdb_expect {
+gdb_test_multiple "show endian" "show endian" {
     -re ".* (big|little) endian.*$gdb_prompt $" { 
 	set endian $expect_out(1,string) 
 	pass "endianness: $endian"
-    }
-    default {
-	fail "(timeout) getting target endianness"
     }
 }
 
@@ -93,13 +89,11 @@ gdb_expect {
 proc make_dump_file { command msg } {
   global gdb_prompt
 
-    send_gdb "${command}\n"
-    gdb_expect {
+    gdb_test_multiple "${command}" "$msg" {
 	-re ".*\[Ee\]rror.*$gdb_prompt $"      { fail $msg }
 	-re ".*\[Ww\]arning.*$gdb_prompt $"    { fail $msg }
 	-re ".*\[Uu\]ndefined .*$gdb_prompt $" { fail $msg }
-	-re ".*$gdb_prompt $" { pass $msg }
-	timeout                                { fail "$msg (timeout)" }
+	-re ".*$gdb_prompt $"                  { pass $msg }
     }
 }
 
@@ -210,13 +204,9 @@ gdb_file_cmd ${binfile}
 
 # Now fix the endianness at the correct state.
 
-send_gdb "set endian $endian\n"
-gdb_expect {
+gdb_test_multiple "set endian $endian" "set endianness" {
     -re ".* (big|little) endian.*$gdb_prompt $" { 
 	pass "setting $endian endianness"
-    }
-    default {
-	fail "(timeout) setting $endian endianness"
     }
 }
 

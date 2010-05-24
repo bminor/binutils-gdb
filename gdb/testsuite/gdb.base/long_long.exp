@@ -61,17 +61,6 @@ if { ![runto known_types] } then {
    return 
 }
 
-set target_bigendian_p 1
-send_gdb "show endian\n"
-gdb_expect {
-    -re "little endian.*$gdb_prompt $" { set target_bigendian_p 0 }
-    -re "big endian.*$gdb_prompt $" { }
-    -re "$gdb_prompt $" {
-	 fail "getting target endian"
-    }
-    default	{ fail "(timeout) getting target endian" }
-}
-
 # Detect the size of the target's basic types.
 
 set sizeof_char [get_sizeof "char" 1]
@@ -100,16 +89,6 @@ proc gdb_test_xxx { test pat name } {
 	gdb_test $test "xxx" $name
     } else {
 	gdb_test $test $pat $name
-    }
-}
-
-proc gdb_test_bi { test be le } {
-    global target_bigendian_p
-
-    if { $target_bigendian_p } {
-	gdb_test_xxx $test $be $test
-    } else {
-	gdb_test_xxx $test $le $test
     }
 }
 

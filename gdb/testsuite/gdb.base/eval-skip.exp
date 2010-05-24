@@ -65,278 +65,87 @@ gdb_test "set variable y=2" "" "set variable y=2"
 gdb_test "set variable z=2" "" "set variable z=2"
 gdb_test "set variable w=3" "" "set variable w=3"
 
-send_gdb "print (0 && (x+y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x+y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x+y))" }
-    timeout           { fail "(timeout) print value of (0 && (x+y))" }
-  }
+gdb_test "print (0 && (x+y))" ".$decimal = $false" \
+    "print value of (0 && (x+y))"
 
+gdb_test "print (0 && (x-y))" ".$decimal = $false" \
+    "print value of (0 && (x-y))"
 
-send_gdb "print (0 && (x-y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x-y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x-y))" }
-    timeout           { fail "(timeout) print value of (0 && (x-y))" }
-  }
+gdb_test "print (0 && (x*y))" ".$decimal = $false" \
+    "print value of (0 && (x*y))"
 
+gdb_test "print (0 && (x/y))" ".$decimal = $false" \
+    "print value of (0 && (x/y))"
 
-send_gdb "print (0 && (x*y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x*y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x*y))" }
-    timeout           { fail "(timeout) print value of (0 && (x*y))" }
-  }
+gdb_test "print (0 && (x%y))" ".$decimal = $false" \
+    "print value of (0 && (x%y))"
 
+gdb_test "print (0 && (x&&y))" ".$decimal = $false" \
+    "print value of (0 && (x&&y))"
 
+gdb_test "print (0 && (x||y))" ".$decimal = $false" \
+    "print value of (0 && (x||y))"
 
-send_gdb "print (0 && (x/y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x/y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x/y))" }
-    timeout           { fail "(timeout) print value of (0 && (x/y))" }
-  }
+gdb_test "print (0 && (x&y))" ".$decimal = $false" \
+    "print value of (0 && (x&y))"
 
+gdb_test "print (0 && (x|y))" ".$decimal = $false" \
+    "print value of (0 && (x|y))"
 
-send_gdb "print (0 && (x%y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x%y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x%y))" }
-    timeout           { fail "(timeout) print value of (0 && (x%y))" }
-  }
+gdb_test "print (0 && (x^y))" ".$decimal = $false" \
+    "print value of (0 && (x^y))"
 
+gdb_test "print (0 && (x < y))" ".$decimal = $false" \
+    "print value of (0 && (x < y))"
 
-send_gdb "print (0 && (x&&y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x&&y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x&&y))" }
-    timeout           { fail "(timeout) print value of (0 && (x&&y))" }
-  }
+gdb_test "print (0 && (x <= y))" ".$decimal = $false" \
+    "print value of (0 && (x <= y))"
 
+gdb_test "print (0 && (x>y))" ".$decimal = $false" \
+    "print value of (0 && (x>y))"
 
+gdb_test "print (0 && (x>=y))" ".$decimal = $false" \
+    "print value of (0 && (x>=y))"
 
-send_gdb "print (0 && (x||y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x||y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x||y))" }
-    timeout           { fail "(timeout) print value of (0 && (x||y))" }
-  }
+gdb_test "print (0 && (x==y))" ".$decimal = $false" \
+    "print value of (0 && (x==y))"
 
+gdb_test "print (0 && (x!=y))" ".$decimal = $false" \
+    "print value of (0 && (x!=y))"
 
+gdb_test "print (0 && (x<<31))" ".$decimal = $false" \
+    "print value of (0 && (x<<31))"
 
-send_gdb "print (0 && (x&y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x&y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x&y))" }
-    timeout           { fail "(timeout) print value of (0 && (x&y))" }
-  }
+gdb_test "print (0 && (x>>31))" ".$decimal = $false" \
+    "print value of (0 && (x>>31))"
 
+gdb_test "print (0 && (!x))" ".$decimal = $false" \
+    "print value of (0 && (!x))"
 
-send_gdb "print (0 && (x|y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x|y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x|y))" }
-    timeout           { fail "(timeout) print value of (0 && (x|y))" }
-  }
+gdb_test "print (0 && (~x))" ".$decimal = $false" \
+    "print value of (0 && (~x))"
 
+gdb_test "print (0 && (-x))" ".$decimal = $false" \
+    "print value of (0 && (-x))"
 
-send_gdb "print (0 && (x^y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x^y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x^y))" }
-    timeout           { fail "(timeout) print value of (0 && (x^y))" }
-  }
+gdb_test "print (0 && (x++))" ".$decimal = $false" \
+    "print value of (0 && (x++))"
 
+gdb_test "print (0 && (++x))" ".$decimal = $false" \
+    "print value of (0 && (++x))"
 
+gdb_test "print (0 && (x--))" ".$decimal = $false" \
+    "print value of (0 && (x--))"
 
-send_gdb "print (0 && (x < y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x < y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x < y))" }
-    timeout           { fail "(timeout) print value of (0 && (x < y))" }
-  }
+gdb_test "print (0 && (--x))" ".$decimal = $false" \
+    "print value of (0 && (--x))"
 
+gdb_test "print (0 && (x+=7))" ".$decimal = $false" \
+    "print value of (0 && (x+=7))"
 
-send_gdb "print (0 && (x <= y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x <= y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x <= y))" }
-    timeout           { fail "(timeout) print value of (0 && (x <= y))" }
-  }
+gdb_test "print (0 && (x=y))" ".$decimal = $false" \
+    "print value of (0 && (x=y))"
 
-
-
-send_gdb "print (0 && (x>y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x>y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x>y))" }
-    timeout           { fail "(timeout) print value of (0 && (x>y))" }
-  }
-
-
-send_gdb "print (0 && (x>=y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x>=y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x>=y))" }
-    timeout           { fail "(timeout) print value of (0 && (x>=y))" }
-  }
-
-
-
-send_gdb "print (0 && (x==y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x==y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x==y))" }
-    timeout           { fail "(timeout) print value of (0 && (x==y))" }
-  }
-
-
-send_gdb "print (0 && (x!=y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x!=y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x!=y))" }
-    timeout           { fail "(timeout) print value of (0 && (x!=y))" }
-  }
-
-
-send_gdb "print (0 && (x<<31))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x<<31))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x<<31))" }
-    timeout           { fail "(timeout) print value of (0 && (x<<31))" }
-  }
-
-
-send_gdb "print (0 && (x>>31))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x>>31))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x>>31))" }
-    timeout           { fail "(timeout) print value of (0 && (x>>31))" }
-  }
-
-
-
-send_gdb "print (0 && (!x))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (!x))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (!x))" }
-    timeout           { fail "(timeout) print value of (0 && (!x))" }
-  }
-
-
-send_gdb "print (0 && (~x))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (~x))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (~x))" }
-    timeout           { fail "(timeout) print value of (0 && (~x))" }
-  }
-
-send_gdb "print (0 && (-x))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (-x))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (-x))" }
-    timeout           { fail "(timeout) print value of (0 && (-x))" }
-  }
-
-
-send_gdb "print (0 && (x++))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x++))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x++))" }
-    timeout           { fail "(timeout) print value of (0 && (x++))" }
-  }
-
-
-send_gdb "print (0 && (++x))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (++x))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (++x))" }
-    timeout           { fail "(timeout) print value of (0 && (++x))" }
-  }
-
-
-send_gdb "print (0 && (x--))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x--))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x--))" }
-    timeout           { fail "(timeout) print value of (0 && (x--))" }
-  }
-
-
-send_gdb "print (0 && (--x))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (--x))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (--x))" }
-    timeout           { fail "(timeout) print value of (0 && (--x))" }
-  }
-
-send_gdb "print (0 && (x+=7))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x+=7))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x+=7))" }
-    timeout           { fail "(timeout) print value of (0 && (x+=7))" }
-  }
-
-send_gdb "print (0 && (x=y))\n"
-gdb_expect {
-    -re ".$decimal = $false\r\n$gdb_prompt $" {
-        pass "print value of (0 && (x=y))"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of (0 && (x=y))" }
-    timeout           { fail "(timeout) print value of (0 && (x=y))" }
-  }
 
 gdb_exit
 return 0

@@ -455,27 +455,12 @@ proc discard_and_shuffle {} {
 	setup_xfail "mips-sgi-irix5*"
     }
 
-    send_gdb "backtrace 100\n"
-    gdb_expect {
-	-re "backtrace 100\[\r\n\]+
-.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
-.* main \\(.*\\) .*\r
-$gdb_prompt $" {
+    gdb_test_multiple "backtrace 100" "backtrace from call6a" {
+	-re " call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .* main \\(.*\\) .*$gdb_prompt $" {
 	    pass "backtrace from call6a"
 	}
-	-re "backtrace 100\[\r\n\]+
-.* call6a \\(c=97 'a', s=1, i=2, l=3, f=.*, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
-.* main \\(.*\\) .*\r
-$gdb_prompt $" {
+	-re " call6a \\(c=97 'a', s=1, i=2, l=3, f=.*, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .* main \\(.*\\) .*$gdb_prompt $" {
 	    xfail "backtrace from call6a"
-	}
-	-re "$gdb_prompt $" {
-	    fail "backtrace from call6a"
-	    gdb_suppress_tests
-	}
-	timeout {
-	    fail "(timeout) backtrace from call6a"
-	    gdb_suppress_tests
 	}
     }
 
@@ -707,22 +692,13 @@ proc shuffle_round_robin {} {
     }
 
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "mips-sgi-irix5*" }
-    send_gdb "backtrace 100\n"
-    gdb_expect {
-	-re "backtrace 100\[\r\n\]+
-.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
-.* main \\(.*\\) .*\r
-$gdb_prompt $" {
+    gdb_test_multiple "backtrace 100" "backtrace from call7a" {
+	-re " call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .* main \\(.*\\) .*$gdb_prompt $" {
 	    pass "backtrace from call7a"
 	}
-	-re "backtrace 100\[\r\n\]+
-.* call7a \\(c=97 'a', i=2, s=1, l=3, f=.*, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
-.* main \\(.*\\) .*\r
-$gdb_prompt $" {
+	-re " call7a \\(c=97 'a', i=2, s=1, l=3, f=.*, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .* main \\(.*\\) .*$gdb_prompt $" {
 	    xfail "backtrace from call7a"
 	}
-	-re "$gdb_prompt $" { fail "backtrace from call7a" ; return }
-	timeout { fail "(timeout) backtrace from call7a" ; return }
     }
 
     # Continue; should stop at call7b and print actual arguments.
@@ -1057,22 +1033,25 @@ proc localvars_in_indirect_call { } {
     # second indirect call.
     #
 
-    send_gdb "finish\n"
-    gdb_expect {
-	 -re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*First.*$gdb_prompt $" {
-#On hppa2.0w-hp-hpux11.00, gdb finishes at one line earlier than 
-#hppa1.1-hp-hpux11.00. Therefore, an extra "step" is necessary to continue the test.
+    gdb_test_multiple "finish" "finish from indirectly called function" {
+	-re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*First.*$gdb_prompt $" {
+	    #On hppa2.0w-hp-hpux11.00, gdb finishes at one line earlier than 
+	    #hppa1.1-hp-hpux11.00. Therefore, an extra "step" is necessary 
+	    #to continue the test.
 	    send_gdb "step\n"
 	    exp_continue
 	}
-	 -re ".*\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*Second.*$gdb_prompt $" {
+	-re ".*\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*Second.*$gdb_prompt $" {
 	    pass "finish from indirectly called function"
 	}
-	 -re ".*$gdb_prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "finish from indirectly called function"
 	    gdb_suppress_tests;
 	}
-	 default { fail "finish from indirectly called function" ; gdb_suppress_tests; }
+	default { 
+	    fail "finish from indirectly called function"
+	    gdb_suppress_tests; 
+	}
     }
 
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
@@ -1095,19 +1074,21 @@ proc test_stepping_over_trampolines { } {
     if { ! [ runto marker_call_with_trampolines ] } then { gdb_suppress_tests; }
 
     # Cater for gdb stopping in midline, see comment for finish above.
-    send_gdb "finish\n"
-    gdb_expect {
-	 -re "marker_call_with_trampolines ..;.*$gdb_prompt $" {
+    gdb_test_multiple "finish" "finish from marker_call_with_trampolines" {
+	-re "marker_call_with_trampolines ..;.*$gdb_prompt $" {
 	    send_gdb "step\n"
 	    exp_continue
 	}
-	 -re "pointer_to_call_with_trampolines.*$gdb_prompt $" {
+	-re "pointer_to_call_with_trampolines.*$gdb_prompt $" {
 	    pass "finish from marker_call_with_trampolines"
 	}
-	 -re ".*$gdb_prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "finish from marker_call_with_trampolines"
 	}
-	 default { fail "finish from marker_call_with_trampolines" ; gdb_suppress_tests; }
+	default { 
+	    fail "finish from marker_call_with_trampolines"
+	    gdb_suppress_tests
+	}
     }
 
     # Try to step into the target function.
@@ -1122,20 +1103,22 @@ proc test_stepping_over_trampolines { } {
     # Stepping back to main might stop again after the gdb_suppress_tests; statement
     # or immediately transfer control back to main if optimizations
     # are performed.
-    send_gdb "step\n"
-    gdb_expect {
-	 -re "main .* at.*$gdb_prompt $" {
-	     pass "stepping back to main from function called with trampolines" ;
-	     gdb_suppress_tests
+    gdb_test_multiple "step" "stepping back to main from function called with trampolines" {
+	-re "main .* at.*$gdb_prompt $" {
+	    pass "stepping back to main from function called with trampolines"
+	    gdb_suppress_tests
 	}
-	 -re "\}.*End of call_with_trampolines.*$gdb_prompt $" {
+	-re "\}.*End of call_with_trampolines.*$gdb_prompt $" {
 	    send_gdb "step\n"
 	    exp_continue
 	}
-	 -re ".*$gdb_prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "stepping back to main from function called with trampolines"
 	}
-	 default { fail "stepping back to main from function called with trampolines" ; gdb_suppress_tests; }
+	default {
+	    fail "stepping back to main from function called with trampolines"
+	    gdb_suppress_tests
+	}
     }
     gdb_stop_suppressing_tests;
 }
@@ -1157,38 +1140,41 @@ if [istarget "mips*tx39-*"] {
 # Determine expected output for unsigned long variables,
 # the output varies with sizeof (unsigned long).
 
-set target_sizeof_long 4
-send_gdb "print sizeof (long)\n"
-gdb_expect {
-    -re ".\[0-9\]* = 4.*$gdb_prompt $" { }
-    -re ".\[0-9\]* = 8.*$gdb_prompt $" { set target_sizeof_long 8 } 
-    -re ".*$gdb_prompt $" {
-	 fail "getting sizeof long"
+gdb_test_multiple "print sizeof (long)" "getting sizeof long" {
+    -re ".\[0-9\]* = 4.*$gdb_prompt $" {
+	set target_sizeof_long 4
+	# pass silently
     }
-    default	{ fail "(timeout) getting sizeof long" }
+    -re ".\[0-9\]* = 8.*$gdb_prompt $" {
+	set target_sizeof_long 8
+	# pass silently
+    }
 }
 
-set target_sizeof_int 4
-send_gdb "print sizeof (int)\n"
-gdb_expect {
-    -re ".\[0-9\]* = 2.*$gdb_prompt $" { set target_sizeof_int 2 }
-    -re ".\[0-9\]* = 4.*$gdb_prompt $" { }
-    -re ".\[0-9\]* = 8.*$gdb_prompt $" { set target_sizeof_int 8 } 
-    -re ".*$gdb_prompt $" {
-	 fail "getting sizeof unsigned long"
+gdb_test_multiple "print sizeof (int)" "getting sizeof int" {
+    -re ".\[0-9\]* = 2.*$gdb_prompt $" {
+	set target_sizeof_int 2
+	# pass silently
     }
-    default	{ fail "(timeout) getting sizeof int" }
+    -re ".\[0-9\]* = 4.*$gdb_prompt $" {
+	set target_sizeof_int 4
+	# pass silently
+    }
+    -re ".\[0-9\]* = 8.*$gdb_prompt $" {
+	set target_sizeof_int 8
+	# pass silently
+    }
 }
 
-set target_bigendian_p 1
-send_gdb "show endian\n"
-gdb_expect {
-    -re ".*little endian.*$gdb_prompt $" { set target_bigendian_p 0 }
-    -re ".*big endian.*$gdb_prompt $" { }
-    -re ".*$gdb_prompt $" {
-	 fail "getting target endian"
+gdb_test_multiple "show endian" "getting target endian" {
+    -re ".*little endian.*$gdb_prompt $" {
+	set target_bigendian_p 0
+	# pass silently
     }
-    default	{ fail "(timeout) getting target endian" }
+    -re ".*big endian.*$gdb_prompt $" {
+	set target_bigendian_p 1
+	# pass silently
+    }
 }
 
 # Perform tests

@@ -59,69 +59,37 @@ if ![runto_main] then { fail "define tests suppressed" }
 
 # Verify that GDB allows a user to define their very own commands.
 #
-send_gdb "define nextwhere\n"
-gdb_expect {
-  -re "Type commands for definition of \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-          {send_gdb "next\nbt\nend\n"
-           gdb_expect {
-             -re "$gdb_prompt $"\
-                     {pass "define user command: nextwhere"}
-             timeout {fail "(timeout) define user command: nextwhere"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "define user command: nextwhere"}
-  timeout {fail "(timeout) define user command: nextwhere"}
+gdb_test_multiple "define nextwhere" "define user command: nextwhere" {
+    -re "Type commands for definition of \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "next\nbt\nend" "" \
+	    "define user command: nextwhere"
+    }
 }
 
 # Verify that those commands work as gdb_expected.
 #
-send_gdb "nextwhere\n"
-gdb_expect {
-  -re ".*$bp_location1\[ \t\]*printf.*#0\[ \t\]*main.*:$bp_location1.*$gdb_prompt $"\
-          {pass "use user command: nextwhere"}
-  -re "$gdb_prompt $"\
-          {fail "use user command: nextwhere"}
-  timeout {fail "(timeout) use user command: nextwhere"}
-}
+gdb_test "nextwhere" \
+    "$bp_location1\[ \t\]*printf.*#0\[ \t\]*main.*:$bp_location1.*" \
+    "use user command: nextwhere"
 
 # Verify that a user can define a command whose spelling is a
 # proper substring of another user-defined command.
 #
-send_gdb "define nextwh\n"
-gdb_expect {
-  -re "Type commands for definition of \"nextwh\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-          {send_gdb "next 2\nbt\nend\n"
-           gdb_expect {
-             -re "$gdb_prompt $"\
-                     {pass "define user command: nextwh"}
-             timeout {fail "(timeout) define user command: nextwh"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "define user command: nextwh"}
-  timeout {fail "(timeout) define user command: nextwh"}
+gdb_test_multiple "define nextwh" "define user command: nextwh" {
+    -re "Type commands for definition of \"nextwh\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "next 2\nbt\nend" "" \
+	    "define user command: nextwh"
+    }
 }
 
 # Verify that a user can redefine their commands.  (Test both the
 # confirmed and unconfirmed cases.)
 #
-send_gdb "define nextwhere\n"
-gdb_expect {
-  -re "Redefine command \"nextwhere\".*y or n. $"\
-          {send_gdb "n\n"
-           gdb_expect {
-             -re "Command \"nextwhere\" not redefined.*$gdb_prompt $"\
-                     {pass "redefine user command aborted: nextwhere"}
-             -re "$gdb_prompt $"\
-                     {fail "redefine user command aborted: nextwhere"}
-             timeout {fail "(timeout) redefine user command aborted: nextwhere"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "redefine user command aborted: nextwhere"}
-  timeout {fail "(timeout) redefine user command aborted: nextwhere"}
-}
+gdb_test "define nextwhere" \
+    "Command \"nextwhere\" not redefined.*" \
+    "redefine user command aborted: nextwhere" \
+    "Redefine command \"nextwhere\".*y or n. $" \
+    "n"
 
 send_gdb "define nextwhere\n"
 gdb_expect {
@@ -147,81 +115,45 @@ gdb_expect {
 # Verify that GDB gracefully handles an attempt to redefine the
 # help text for a builtin command.
 #
-send_gdb "document step\n"
-gdb_expect {
-  -re "Command \"step\" is built-in..*$gdb_prompt $"\
-          {pass "redocumenting builtin command disallowed"}
-  -re "$gdb_prompt $"\
-          {fail "redocumenting builtin command disallowed"}
-  timeout {fail "(timeout) redocumenting builtin command disallowed"}
-}
+gdb_test "document step" "Command \"step\" is built-in.*" \
+    "redocumenting builtin command disallowed"
 
 # Verify that a user can document their own commands.  (And redocument
 # them.)
 #
-send_gdb "document nextwhere\n"
-gdb_expect {
-  -re "Type documentation for \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-          {send_gdb "A next command that frist shows you where you're stepping from.\nend\n"
-           gdb_expect {
-             -re "$gdb_prompt $"\
-                     {pass "document user command: nextwhere"}
-             timeout {fail "(timeout) document user command: nextwhere"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "document user command: nextwhere"}
-  timeout {fail "(timeout) document user command: nextwhere"}
+gdb_test_multiple "document nextwhere" "document user command: nextwhere" {
+    -re "Type documentation for \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "A next command that first shows you where you're stepping from.\nend" \
+	    "" \
+	    "document user command: nextwhere"
+    }
 }
 
-send_gdb "document nextwhere\n"
-gdb_expect {
-  -re "Type documentation for \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-          {send_gdb "A next command that first shows you where you're stepping from.\nend\n"
-           gdb_expect {
-             -re "$gdb_prompt $"\
-                     {pass "re-document user command: nextwhere"}
-             timeout {fail "(timeout) re-document user command: nextwhere"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "re-document user command: nextwhere"}
-  timeout {fail "(timeout) re-document user command: nextwhere"}
+gdb_test_multiple "document nextwhere" "re-document user command: nextwhere" {
+    -re "Type documentation for \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "A next command that first shows you where you're stepping from.\nend" \
+	    "" \
+	    "re-document user command: nextwhere"
+    }
 }
 
-send_gdb "help nextwhere\n"
-gdb_expect {
-  -re "A next command that first shows you where you're stepping from.\r\n$gdb_prompt $"\
-          {pass "help user command: nextwhere"}
-  -re "$gdb_prompt $"\
-          {fail "help user command: nextwhere"}
-  timeout {fail "(timeout) help user command: nextwhere"}
-}
+gdb_test "help nextwhere" \
+    "A next command that first shows you where you're stepping from.*" \
+    "help user command: nextwhere"
 
 # Verify that the document command preserves whitespace in the beginning of the line.
 #
-send_gdb "document nextwhere\n"
-gdb_expect {
-  -re "Type documentation for \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-          {send_gdb "   A next command that first shows you where you're stepping from.\nend\n"
-           gdb_expect {
-             -re "$gdb_prompt $" {}
-             timeout {fail "(timeout) preserve whitespace in help string"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "preserve whitespace in help string"}
-  timeout {fail "(timeout) preserve whitespace in help string"}
+gdb_test_multiple "document nextwhere" "set up whitespace in help string" {
+    -re "Type documentation for \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "   A next command that first shows you where you're stepping from.\nend" \
+	    "" \
+	    "set up whitespace in help string"
+    }
 }
 
-send_gdb "help nextwhere\n"
-gdb_expect {
-  -re "   A next command that first shows you where you're stepping from.\r\n$gdb_prompt $"\
-          {pass "preserve whitespace in help string"}
-  -re "$gdb_prompt $"\
-          {fail "preserve whitespace in help string"}
-  timeout {fail "(timeout) preserve whitespace in help string"}
-}
+gdb_test "help nextwhere" \
+    "   A next command that first shows you where you're stepping from.*" \
+    "preserve whitespace in help string"
 
 # Verify that the command parser doesn't require a space after an 'if'
 # command in a user defined function.
@@ -261,65 +193,34 @@ gdb_test "whilenospace" ".*hi there.*" "test whilenospace is parsed correctly"
 # hook the "stop" pseudo command, and we'll define it to use a user-
 # define command.
 #
-send_gdb "define user-bt\n"
-gdb_expect {
-  -re "Type commands for definition of \"user-bt\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-          {send_gdb "bt\nend\n"
-           gdb_expect {
-             -re "$gdb_prompt $"\
-                       {pass "define user command: user-bt"}
-             timeout {fail "(timeout) define user command: user-bt"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "define user command: user-bt"}
-  timeout {fail "(timeout) define user command: user-bt"}
+gdb_test_multiple "define user-bt" "define user command: user-bt" {
+    -re "Type commands for definition of \"user-bt\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "bt\nend" \
+	    "" \
+	    "define user command: user-bt"
+    }
 }
 
-send_gdb "define hook-stop\n"
-gdb_expect {
-  -re "Type commands for definition of \"hook-stop\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-          {send_gdb "user-b\nend\n"
-           gdb_expect {
-             -re "$gdb_prompt $"\
-                       {pass "define hook-stop command"}
-             timeout {fail "(timeout) define hook-stop command"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "define hook-stop command"}
-  timeout {fail "(timeout) define hook-stop command"}
+gdb_test_multiple "define hook-stop" "define hook-stop command" {
+    -re "Type commands for definition of \"hook-stop\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "user-b\nend" \
+	    "" \
+	    "define hook-stop command"
+    }
 }
 
-send_gdb "next\n"
-gdb_expect {
-  -re "#0\[ \t\]*main.*:$bp_location11.*$gdb_prompt $"\
-          {pass "use hook-stop command"}
-  -re "$gdb_prompt $"\
-          {fail "use hook-stop command"}
-  timeout {fail "(timeout) use hook-stop command"}
-}
+gdb_test "next" "#0\[ \t\]*main.*:$bp_location11.*" \
+    "use hook-stop command"
 
 # Verify that GDB responds gracefully to an attempt to define a "hook
 # command" which doesn't exist.  (Test both the confirmed and unconfirmed
 # cases.)
 #
-send_gdb "define hook-bar\n"
-gdb_expect {
-  -re "warning: Your new `hook-bar' command does not hook any existing command.\r\nProceed.*y or n. $"\
-          {send_gdb "n\n"
-           gdb_expect {
-             -re "Not confirmed.*$gdb_prompt $"\
-                     {pass "define hook undefined command aborted: bar"}
-             -re "$gdb_prompt $"\
-                     {fail "define hook undefined command aborted: bar"}
-             timeout {fail "(timeout) define hook undefined command aborted: bar"}
-           }
-          }
-  -re "$gdb_prompt $"\
-          {fail "define hook undefined command aborted: bar"}
-  timeout {fail "(timeout) define hook undefined command aborted: bar"}
-}
+gdb_test "define hook-bar" \
+    "Not confirmed.*" \
+    "define hook undefined command aborted: bar" \
+    "warning: Your new `hook-bar' command does not hook any existing command.\r\nProceed.*y or n. $" \
+    "n"
 
 send_gdb "define hook-bar\n"
 gdb_expect {
@@ -378,20 +279,16 @@ gdb_test "target testsuite" "one\r\nhello\r\ntwo" "target testsuite with hooks"
 # This is a quasi-define command: Verify that the user can redefine
 # GDB's gdb_prompt.
 #
-send_gdb "set prompt \\(blah\\) \n"
-gdb_expect {
-  -re "\\(blah\\) $"\
-          {pass "set gdb_prompt"}
-  -re "$gdb_prompt $"\
-          {fail "set gdb_prompt"}
-  timeout {fail "(timeout) set gdb_prompt"}
+gdb_test_multiple "set prompt \\(blah\\) " "set gdb_prompt" {
+    -re "\\(blah\\) $" {
+	pass "set gdb_prompt"
+    }
 }
 
-send_gdb "set prompt \\(gdb\\) \n"
-gdb_expect {
-  -re "$gdb_prompt $"\
-          {pass "reset gdb_prompt"}
-  timeout {fail "(timeout) reset gdb_prompt"}
+gdb_test_multiple "set prompt \\(gdb\\) " "reset gdb_prompt" {
+    -re "$gdb_prompt $" {
+	pass "reset gdb_prompt"
+    }
 }
 
 gdb_exit

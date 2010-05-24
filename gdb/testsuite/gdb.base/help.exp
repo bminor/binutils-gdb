@@ -199,25 +199,21 @@ gdb_test "help finish" "Execute until selected stack frame returns\.\[\r\n\]+Upo
 # test help forward-search
 gdb_test "help forward-search" "Search for regular expression \\(see regex\\(3\\)\\) from last line listed.*" "help forward-search"
 # test help gcore
-send_gdb "help gcore\n"
-gdb_expect {
+gdb_test_multiple "help gcore" "help gcore" {
     -re "Undefined command: \"gcore\"\.  Try \"help\".*$gdb_prompt $" {
 	pass "help gcore"
     }
     -re "Save a core file with the current state of the debugged process\.\[\r\n\]+Argument is optional filename\.  Default filename is 'core\.<process_id>'.*$gdb_prompt $" {
 	pass "help gcore"
     }
-    default { fail "help gcore" }
 }
-send_gdb "help generate-core-file\n"
-gdb_expect {
+gdb_test_multiple "help generate-core-file" "help generate-core-file" {
     -re "Undefined command: \"generate-core-file\"\.  Try \"help\".*$gdb_prompt $" {
 	pass "help gcore"
     }
     -re "Save a core file with the current state of the debugged process\.\[\r\n\]+Argument is optional filename\.  Default filename is 'core\.<process_id>'.*$gdb_prompt $" {
 	pass "help gcore"
     }
-    default { fail "help gcore" }
 }
 # test help help "h" abbreviation 
 gdb_test "help h" "Print list of commands\." "help help \"h\" abbreviation"

@@ -46,8 +46,7 @@ if ![runto marker] then {
 } 
 gdb_test "up" ".*foo.*" "up from marker"
 
-send_gdb "print s24\n"
-gdb_expect {
+gdb_test_multiple "print s24" "print s24" {
     -re "\\\$\[0-9\]* = \\{field_0 = 1170, field_1 = 64701\\}\r\n$gdb_prompt $" {
 	pass "print s24"
     }
@@ -55,11 +54,5 @@ gdb_expect {
 	# happens with gcc 2.95.3, which actually puts s24 in registers.
 	# gdb cannot find the second register and prints garbage.
 	kfail "gdb/1090" "print s24"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "print s24"
-    }
-    timeout {
-	fail "print s24 (timeout)"
     }
 }

@@ -14,6 +14,25 @@
 	* gdb.base/consecutive.exp: Replace send_gdb with gdb_test.
 	* gdb.base/constvars.exp: Replace send_gdb with gdb_test.
 	* gdb.base/corefile.exp: Replace send_gdb with gdb_test.
+	* gdb.base/default.exp: Replace send_gdb with gdb_test.
+	* gdb.base/define.exp: Replace send_gdb with gdb_test.
+	* gdb.base/display.exp: Replace send_gdb with gdb_test.
+	* gdb.base/dump.exp: Replace send_gdb with gdb_test.
+	* gdb.base/ending-run.exp: Replace send_gdb with gdb_test.
+	* gdb.base/eval-skip.exp: Replace send_gdb with gdb_test.
+	* gdb.base/exprs.exp: Replace send_gdb with gdb_test.
+	* gdb.base/fileio.exp: Replace send_gdb with gdb_test.
+	* gdb.base/finish.exp: Replace send_gdb with gdb_test.
+	* gdb.base/foll-fork.exp: Replace send_gdb with gdb_test.
+	* gdb.base/funcargs.exp: Replace send_gdb with gdb_test.
+	* gdb.base/gcore-buffer-overflow.exp: Replace send_gdb with gdb_test.
+	* gdb.base/gcore.exp: Replace send_gdb with gdb_test.
+	* gdb.base/gdb1090.exp: Replace send_gdb with gdb_test.
+	* gdb.base/gdbvars.exp: Replace send_gdb with gdb_test.
+	* gdb.base/help.exp: Replace send_gdb with gdb_test.
+	* gdb.base/info-proc.exp: Replace send_gdb with gdb_test.
+	* gdb.base/jump.exp: Replace send_gdb with gdb_test.
+	* gdb.base/long_long.exp: Replace send_gdb with gdb_test.
 
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 

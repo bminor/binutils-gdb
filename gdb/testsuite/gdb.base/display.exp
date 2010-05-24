@@ -112,28 +112,12 @@ gdb_test "info disp"    ".*Auto-display expressions now in effect.*y  /f f.*y  /
 
 gdb_test "cont" ".*\[Ww\]atch.*5.1415.*.*i = 0.*" "next hit"
 
-send_gdb "undisp\n"
-gdb_expect {
-    -re ".*Delete all auto-display expressions.*y or n. $" {
-        send_gdb "y\n"
-        gdb_expect {
-            -re "y\r\n$gdb_prompt $" {
-                pass "undisp all"
-            }
-            -re ".*$gdb_prompt $" {
-                fail "some un-helpful response"
-            }
-            -re ".*Delete all.*$" {
-                fail "re-ask question"
-            }
-            timeout { fail "timeout" }
-        }
-    }
-    -re ".*$gdb_prompt $" {
-        fail "undisp all"
-    }
-    timeout { fail "timeout" }
-}
+gdb_test "undisp" \
+    "" \
+    "undisp all" \
+    ".*Delete all auto-display expressions.*y or n. $" \
+    "y"
+
 
 gdb_test "disab 3" ".*.*" "disab 3"
 gdb_test "cont" ".*Breakpoint 4.*" "watch off"
@@ -144,22 +128,13 @@ gdb_test "cont" ".*Breakpoint 4.*" "watch off"
 # targets, including but not limited to the m68k, i386 & PA.  So we
 # have to arrange to step until we hit the line with the call to
 # "do_vars".
-send_gdb "finish\n"
-gdb_expect {
+gdb_test_multiple "finish" "finish" {
     -re ".*do_loops\\(\\);.*$gdb_prompt $" {
 	send_gdb "step\n"
 	exp_continue
     }
     -re ".*do_vars.*$gdb_prompt $" {
 	pass "finish"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "finish"
-	gdb_suppress_tests
-    }
-    timeout  {
-	fail "(timeout) finish"
-	gdb_suppress_tests
     }
 }
 

@@ -54,17 +54,17 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
-
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
     continue
 }
 
-send_gdb "break stop\n" ; gdb_expect -re "Breakpoint .*$srcfile.*$gdb_prompt $"
+gdb_test "break stop" "Breakpoint .*$srcfile.*" 
+
 set stop_msg ".*Breakpoint .* stop \\(\\) at.*$srcfile:.*static void stop \\(\\) {}.*"
 
 gdb_test continue \
@@ -83,7 +83,8 @@ gdb_test continue \
 "Continuing\\..*open 4:.*ENOENT$stop_msg" \
 "Opening nonexistant file returns ENOENT"
 
-send_gdb "continue\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test "continue" "" ""
+
 catch "system \"chmod -f -w nowrt.fileio.test\""
 
 gdb_test continue \
@@ -179,7 +180,8 @@ gdb_test continue \
 "Continuing\\..*system 1:.*OK$stop_msg" \
 "System says shell is available"
 
-send_gdb "set remote system-call-allowed 1\n"; gdb_expect -re ".*$gdb_prompt $"
+gdb_test_no_output "set remote system-call-allowed 1"
+
 gdb_test continue \
 "Continuing\\..*system 2:.*OK$stop_msg" \
 "System(3) call"

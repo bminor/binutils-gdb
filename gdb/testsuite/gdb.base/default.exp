@@ -40,22 +40,19 @@ gdb_test "append binary memory" "Missing filename\."
 gdb_test "append binary value"  "Missing filename\." 
 
 setup_xfail "mips-idt-*"
-send_gdb "attach\n"
-gdb_expect {
+gdb_test_multiple "attach" "attach" {
     -re "Argument required .(process-id|program) to attach.*$gdb_prompt $"\
-			{ pass "attach" }
+	{ pass "attach" }
     -re "You can't do that when your target is `None'.*$gdb_prompt $"\
-			{ pass "attach" }
+	{ pass "attach" }
     -re "You can't do that without a process to debug.*$gdb_prompt $"\
-			{ pass "attach" }
+	{ pass "attach" }
     -re "Don't know how to attach.  Try \"help target\"..*$gdb_prompt $"\
-			{ pass "attach" }
+	{ pass "attach" }
     -re "Kill it. .y or n." {
 	send_gdb "y\n"
 	exp_continue
     }
-    -re "$gdb_prompt $" { fail "attach" }
-    timeout { fail "(timeout) attach" }
 }
 
 if ![target_info exists use_gdb_stub] {
@@ -117,18 +114,13 @@ gdb_test "define" "Argument required \[(\]name of command to define\[)\]." "defi
 gdb_test "delete breakpoints" "" "delete breakpoints"
 #test delete display
 # FIXME -- need to dump full output to detailed log
-send_gdb "delete display\n"
-gdb_expect {
-    -re "Delete all auto-display expressions.*y or n. $" {
-	send_gdb "y\n"
-	gdb_expect {
-	    -re "$gdb_prompt $"     { pass "delete display prompt" }
-	    timeout		{ fail "(timeout) delete display prompt" }
-	}
-    }
-    timeout		{ fail "(timeout) delete display prompt" }
 
-}
+gdb_test "delete display" \
+    "" \
+    "delete display prompt" \
+    "Delete all auto-display expressions.*y or n. $" \
+    "y"
+
 
 #test detach
 gdb_test "detach" "" "detach"
@@ -141,17 +133,11 @@ if [istarget "h8300-*-hms"] then {
 #test directory
 # FIXME -- need to dump full output to detailed log
 
-send_gdb "directory\n"
-gdb_expect {
-    -re "Reinitialize source path to empty.*y or n. $"  {
-	send_gdb "y\n"
-	gdb_expect {
-	    -re "Source directories searched: .cdir\[:;\].cwd.*$gdb_prompt $"\
-		    { pass "directory prompt" }
-	    timeout		{ fail "(timeout) directory prompt" }
-	}
-    }
-}
+gdb_test "directory" \
+    "Source directories searched: .cdir\[:;\].cwd.*" \
+    "directory prompt" \
+    "Reinitialize source path to empty.*y or n. $" \
+    "y"
 
 #test disable "dis" abbreviation
 gdb_test "dis" "" "disable \"dis\" abbreviation"
@@ -256,26 +242,25 @@ gdb_test "finish" "The program is not being run." "finish"
 # vary on different systems.
 gdb_test "forward-search" "No previous regular expression.*|There is no previous regular expression.*" "forward-search"
 #test gcore
-send_gdb "gcore\n"
-gdb_expect {
+
+gdb_test_multiple "gcore" "gcore" {
     -re "You can\'t do that without a process to debug.*$gdb_prompt $" {
 	pass "gcore"
     }
     -re "Undefined command: .*$gdb_prompt $" {
 	pass "gcore"
     }
-    default { fail "gcore" }
 }
-send_gdb "generate-core-file\n"
-gdb_expect {
+
+gdb_test_multiple "generate-core-file" "generate-core-file" {
     -re "You can\'t do that without a process to debug.*$gdb_prompt $" {
 	pass "generate-core-file"
     }
     -re "Undefined command: .*$gdb_prompt $" {
 	pass "generate-core-file"
     }
-    default { fail "generate-core-file" }
 }
+
 #test help "h" abbreviation
 gdb_test "h" "List of classes of commands:(\[^\r\n\]*\[\r\n\])+aliases -- Aliases of other commands(\[^\r\n\]*\[\r\n\])+breakpoints -- Making program stop at certain points(\[^\r\n\]*\[\r\n\])+data -- Examining data(\[^\r\n\]*\[\r\n\])+files -- Specifying and examining files(\[^\r\n\]*\[\r\n\])+obscure -- Obscure features(\[^\r\n\]*\[\r\n\])+running -- Running the program(\[^\r\n\]*\[\r\n\])+stack -- Examining the stack(\[^\r\n\]*\[\r\n\])+status -- Status inquiries(\[^\r\n\]*\[\r\n\])+support -- Support facilities(\[^\r\n\]*\[\r\n\])+user-defined -- User-defined commands(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by a class name for a list of commands in that class.(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by command name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "help \"h\" abbreviation"
 #test help
@@ -415,29 +400,20 @@ You must specify a function name to run, and arguments if any"\
     gdb_test "set args main" "" "" 
 
 } else {
-    send_gdb "r\n"
-    gdb_expect {
-	    -re "Starting program:  .*
-You can't do that when your target is `None'.*$gdb_prompt $"\
-			{ pass "run \"r\" abbreviation" }
-	    -re "Starting program:  .*
-No executable file specified.*
-Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
-			{ pass "run \"r\" abbreviation" }
-	    -re "Starting program:  .*
-No executable specified, use .target exec.\\..*$gdb_prompt $"\
-			{ pass "run \"r\" abbreviation" }
-	    -re "Starting program:  .*
-No image loaded into target.*$gdb_prompt $"\
-			{ pass "run \"r\" abbreviation" }
-	    -re "Starting program:  .*
-No program loaded.*$gdb_prompt $"\
-			{ pass "run \"r\" abbreviation" }
-	    -re "Don't know how to run.  Try \"help target\"..*$gdb_prompt $"\
-			{ pass "run \"r\" abbreviation" }
-	    -re ".*$gdb_prompt $"	{ fail "run \"r\" abbreviation" }
-	    timeout		{ fail "(timeout) run \"r\" abbreviation" }
-	}
+    gdb_test_multiple "r" "run \"r\" abbreviation" {
+	-re "Starting program:  .*You can't do that when your target is `None'.*$gdb_prompt $"\
+	    { pass "run \"r\" abbreviation" }
+	-re "Starting program:  .*No executable file specified.*Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
+	    { pass "run \"r\" abbreviation" }
+	-re "Starting program:  .*No executable specified, use .target exec.\\..*$gdb_prompt $"\
+	    { pass "run \"r\" abbreviation" }
+	-re "Starting program:  .*No image loaded into target.*$gdb_prompt $"\
+	    { pass "run \"r\" abbreviation" }
+	-re "Starting program:  .*No program loaded.*$gdb_prompt $"\
+	    { pass "run \"r\" abbreviation" }
+	-re "Don't know how to run.  Try \"help target\"..*$gdb_prompt $"\
+	    { pass "run \"r\" abbreviation" }
+    }
 }
 
 #test run
@@ -449,27 +425,20 @@ You must specify a function name to run, and arguments if any"
     gdb_test "set args main" "" "" 
 
 } else {
-    send_gdb "run\n"
-    gdb_expect {
-	    -re "Starting program:.*You can't do that when your target is `None'.*$gdb_prompt $" { pass "run" }
-	    -re "Starting program:  .*
-No executable file specified.*
-Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
-			{ pass "run" }
-	    -re "Starting program:  .*
-No executable specified, use .target exec.\\..*$gdb_prompt $"\
-			{ pass "run" }
-	    -re "Starting program:  .*
-No image loaded into target.*$gdb_prompt $"\
-			{ pass "run" }
-	    -re "Starting program:  .*
-No program loaded.*$gdb_prompt $"\
-			{ pass "run \"r\" abbreviation" }
-	    -re "Don't know how to run.  Try \"help target\"..*$gdb_prompt $"\
-			{ pass "run" }
-	    -re ".*$gdb_prompt $"	{ fail "run" }
-	    timeout		{ fail "(timeout) run" }
-	}
+    gdb_test_multiple "run" "run" {
+	-re "Starting program:.*You can't do that when your target is `None'.*$gdb_prompt $"\
+	    { pass "run" }
+	-re "Starting program:  .*No executable file specified.*Use the \"file\" or \"exec-file\" command.*$gdb_prompt $"\
+	    { pass "run" }
+	-re "Starting program:  .*No executable specified, use .target exec.\\..*$gdb_prompt $"\
+	    { pass "run" }
+	-re "Starting program:  .*No image loaded into target.*$gdb_prompt $"\
+	    { pass "run" }
+	-re "Starting program:  .*No program loaded.*$gdb_prompt $"\
+	    { pass "run" }
+	-re "Don't know how to run.  Try \"help target\"..*$gdb_prompt $"\
+	    { pass "run" }
+    }
 }
 
 #test rbreak
@@ -758,34 +727,20 @@ gdb_test "u" "The program is not being run." "until \"u\" abbreviation"
 gdb_test "until" "The program is not being run." "until"
 #test undisplay
 # FIXME -- need to dump full output to detailed log
-send_gdb "undisplay\n"
-gdb_expect {
-    -re "Delete all auto-display expressions.*y or n. $" {
-	send_gdb "y\n"
-	gdb_expect {
-	    -re "$gdb_prompt $" { pass "undisplay prompt" }
-	    timeout { fail "(timeout) (timeout) undisplay prompt"    }
-	}
-    }
-    timeout		{ fail "(timeout) (timeout) undisplay prompt" }
-}
+
+gdb_test "undisplay" \
+    "" \
+    "undisplay prompt" \
+    "Delete all auto-display expressions.*y or n. $" \
+    "y"
 
 #test unset environment
-send_gdb "unset environment\n"
-gdb_expect {
-    -re "Delete all environment variables?.*y or n. $" { 
-	send_gdb "y\n"
-	gdb_expect {
-	    -re "$gdb_prompt $" { pass "unset environmentprompt" }
-	    timeout {
-		fail "(timeout) (timeout) unset environment prompt"
-	    }
-	}
-    }
-    timeout { 
-	fail "(timeout) (timeout) unset environment prompt"
-    }
-}
+
+gdb_test "unset environment" \
+    "" \
+    "unset environment prompt" \
+    "Delete all environment variables?.*y or n. $" \
+    "y"
 
 #test unset
 gdb_test "unset" "\"unset\" must be followed by the name of an unset subcommand.(\[^\r\n\]*\[\r\n\])+List of unset subcommands:(\[^\r\n\]*\[\r\n\])+unset environment -- Cancel environment variable VAR for the program(\[^\r\n\]*\[\r\n\])+Type \"help unset\" followed by unset subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "unset"
