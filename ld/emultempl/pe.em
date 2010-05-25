@@ -172,9 +172,15 @@ EOF
 case ${target} in
   *-*-cygwin*)
     default_auto_import=1
+    default_merge_rdata=1
+    ;;
+  *-w64-mingw*)
+    default_auto_import=1
+    default_merge_rdata=0
     ;;
   *)
     default_auto_import=-1
+    default_merge_rdata=1
     ;;
 esac
 
@@ -185,6 +191,10 @@ fragment <<EOF
 #endif
 }
 
+/* Indicates if RDATA shall be merged into DATA when pseudo-relocation
+   version 2 is used and auto-import is enabled.  */
+#define MERGE_RDATA_V2 ${default_merge_rdata}
+
 /* PE format extra command line options.  */
 
 /* Used for setting flags in the PE header.  */
@@ -2159,7 +2169,7 @@ sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c
 echo '  ; else if (!config.magic_demand_paged) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xn			>> e${EMULATION_NAME}.c
 if test -n "$GENERATE_AUTO_IMPORT_SCRIPT" ; then
-echo '  ; else if (link_info.pei386_auto_import == 1) return'	>> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.pei386_auto_import == 1 && (MERGE_RDATA_V2 || link_info.pei386_runtime_pseudo_reloc != 2)) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xa			>> e${EMULATION_NAME}.c
 fi
 echo '  ; else return'					>> e${EMULATION_NAME}.c
