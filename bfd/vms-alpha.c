@@ -167,11 +167,11 @@ struct vms_symbol_entry
   unsigned short flags;
 
   /* Section and offset/value of the symbol.  */
-  unsigned int section;
   unsigned int value;
+  asection *section;
 
   /* Section and offset/value for the entry point (only for subprg).  */
-  unsigned int code_section;
+  asection *code_section;
   unsigned int code_value;
 
   /* Symbol vector offset.  */
@@ -1217,14 +1217,15 @@ _bfd_vms_slurp_egsd (bfd *abfd)
                 struct vms_esdf *esdf = (struct vms_esdf *)vms_rec;
 
 		entry->value = bfd_getl64 (esdf->value);
-		entry->section = bfd_getl32 (esdf->psindx);
+		entry->section = PRIV (sections)[bfd_getl32 (esdf->psindx)];
 
                 if (old_flags & EGSY__V_NORM)
                   {
                     PRIV (norm_sym_count)++;
 
                     entry->code_value = bfd_getl64 (esdf->code_address);
-                    entry->code_section = bfd_getl32 (esdf->ca_psindx);
+                    entry->code_section =
+                      PRIV (sections)[bfd_getl32 (esdf->ca_psindx)];
                   }
               }
 	  }
@@ -1253,7 +1254,11 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
             entry->symbol_vector = bfd_getl32 (egst->value);
 
-            entry->section = bfd_getl32 (egst->psindx);
+            if (old_flags & EGSY__V_REL)
+              entry->section = PRIV (sections)[bfd_getl32 (egst->psindx)];
+            else
+              entry->section = bfd_abs_section_ptr;
+
             entry->value = bfd_getl64 (egst->lp_2);
 
             if (old_flags & EGSY__V_NORM)
@@ -1261,7 +1266,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
                 PRIV (norm_sym_count)++;
 
                 entry->code_value = bfd_getl64 (egst->lp_1);
-                entry->code_section = 0;
+                entry->code_section = bfd_abs_section_ptr;
               }
           }
 	  break;
@@ -1641,16 +1646,9 @@ alpha_vms_sym_to_ctxt (struct alpha_vms_link_hash_entry *h)
 }
 
 static bfd_vma
-alpha_vms_get_sym_value (unsigned int sect, bfd_vma addr,
-                         struct alpha_vms_link_hash_entry *h)
+alpha_vms_get_sym_value (asection *sect, bfd_vma addr)
 {
-  asection *s;
-
-  BFD_ASSERT (h && (h->root.type == bfd_link_hash_defined
-                    || h->root.type == bfd_link_hash_defweak));
-
-  s = PRIV2 (h->root.u.def.section->owner, sections)[sect];
-  return s->output_section->vma + s->output_offset + addr;
+  return sect->output_section->vma + sect->output_offset + addr;
 }
 
 static bfd_vma
@@ -1857,7 +1855,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
               else
                 {
                   op1 = alpha_vms_get_sym_value (h->sym->section,
-                                                 h->sym->value, h);
+                                                 h->sym->value);
                   alpha_vms_add_qw_reloc (info);
                 }
             }
@@ -1881,7 +1879,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
                   else
                     {
                       op1 = alpha_vms_get_sym_value (h->sym->code_section,
-                                                     h->sym->code_value, h);
+                                                     h->sym->code_value);
                       alpha_vms_add_qw_reloc (info);
                     }
                 }
@@ -1991,9 +1989,9 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
               else
                 {
                   op1 = alpha_vms_get_sym_value (h->sym->code_section,
-                                                 h->sym->code_value, h);
+                                                 h->sym->code_value);
                   op2 = alpha_vms_get_sym_value (h->sym->section,
-                                                h->sym->value, h);
+                                                h->sym->value);
                 }
             }
           else
@@ -4644,7 +4642,7 @@ alpha_vms_convert_symbol (bfd *abfd, struct vms_symbol_entry *e, asymbol *sym)
           if (e->flags & EGSY__V_NORM)
             flags |= BSF_FUNCTION;
           value = e->value;
-          sec = PRIV (sections)[e->section];
+          sec = e->section;
         }
       else
         {
@@ -4670,34 +4668,9 @@ alpha_vms_convert_symbol (bfd *abfd, struct vms_symbol_entry *e, asymbol *sym)
       if (e->flags & EGSY__V_NORM)
         flags |= BSF_FUNCTION;
 
-      value = e->symbol_vector;
-
-      /* Adding this offset is necessary in order for GDB to
-         read the DWARF-2 debug info from shared libraries.  */
-      if ((abfd->flags & DYNAMIC) && strstr (name, "$DWARF2.DEBUG") != 0)
-        value += PRIV (symvva);
-
+      value = e->value;
+      /* sec = e->section; */
       sec = bfd_abs_section_ptr;
-#if 0
-      /* Find containing section.  */
-      {
-        bfd_vma sbase = 0;
-        asection *s;
-
-        for (s = abfd->sections; s; s = s->next)
-          {
-            if (value >= s->vma
-                && s->vma > sbase
-                && !(s->flags & SEC_COFF_SHARED_LIBRARY)
-                && (s->size > 0 || !(e->flags & EGSY__V_REL)))
-              {
-                sbase = s->vma;
-                sec = s;
-              }
-          }
-        value -= sbase;
-      }
-#endif
       break;
 
     default:
@@ -5504,43 +5477,18 @@ alpha_vms_get_synthetic_symtab (bfd *abfd,
       switch (e->typ)
         {
         case EGSD__C_SYM:
-          if ((e->flags & EGSY__V_DEF) && (e->flags & EGSY__V_NORM))
-            {
-              value = e->code_value;
-              sec = PRIV (sections)[e->code_section];
-            }
-          else
-            continue;
-          break;
-
         case EGSD__C_SYMG:
           if ((e->flags & EGSY__V_DEF) && (e->flags & EGSY__V_NORM))
             {
-              bfd_vma sbase = 0;
-              asection *s;
-
               value = e->code_value;
-
-              /* Find containing section.  */
-              for (s = abfd->sections; s; s = s->next)
-                {
-                  if (value >= s->vma
-                      && s->vma > sbase
-                      && !(s->flags & SEC_COFF_SHARED_LIBRARY)
-                      && (s->size > 0 || !(e->flags & EGSY__V_REL)))
-                    {
-                      sbase = s->vma;
-                      sec = s;
-                    }
-                }
-              value -= sbase;
+              sec = e->code_section;
             }
           else
             continue;
           break;
 
         default:
-          abort ();
+          continue;
         }
 
       l = strlen (name);
@@ -8941,7 +8889,7 @@ vms_get_symbol_info (bfd * abfd ATTRIBUTE_UNUSED,
   if (ret == NULL)
     return;
 
-  if (sec == 0)
+  if (sec == NULL)
     ret->type = 'U';
   else if (bfd_is_com_section (sec))
     ret->type = 'C';
