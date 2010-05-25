@@ -1,5 +1,7 @@
 2010-05-25  Doug Evans  <dje@google.com>
 
+	* ser-pipe.c (pipe_open): Ignore SIGINTs in child.
+
 	* event-loop.h (GDB_READABLE, GDB_WRITABLE, GDB_EXCEPTION): Move to ...
 	* event-loop.c: ... here.
 	* tui/tui-io.c (tui_readline_output): Rename parameter `code' to

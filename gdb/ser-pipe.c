@@ -99,6 +99,15 @@ pipe_open (struct serial *scb, const char *name)
   /* Child. */
   if (pid == 0)
     {
+      /* We don't want ^c to kill the connection.  */
+#ifdef HAVE_SETSID
+      pid_t sid = setsid ();
+      if (sid == -1)
+	signal (SIGINT, SIG_IGN);
+#else
+      signal (SIGINT, SIG_IGN);
+#endif
+
       /* re-wire pdes[1] to stdin/stdout */
       close (pdes[0]);
       if (pdes[1] != STDOUT_FILENO)
