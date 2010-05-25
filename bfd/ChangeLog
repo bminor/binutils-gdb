@@ -1,3 +1,98 @@
+2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+	    Andrew Stubbs  <ams@codesourcery.com>
+
+	* config.bfd (sh-*-uclinux* | sh[12]-*-uclinux*): Add
+	bfd_elf32_shl_vec, and FDPIC vectors to targ_selvecs.
+	* configure.in: Handle FDPIC vectors.
+	* elf32-sh-relocs.h: Add FDPIC and movi20 relocations.
+	* elf32-sh.c (DEFAULT_STACK_SIZE): Define.
+	(SYMBOL_FUNCDESC_LOCAL): Define.  Use it instead of
+	SYMBOL_REFERENCES_LOCAL for function descriptors.
+	(fdpic_object_p): New.
+	(sh_reloc_map): Add FDPIC and movi20 relocations.
+	(sh_elf_info_to_howto, sh_elf_relocate_section): Handle new invalid
+	range.
+	(struct elf_sh_plt_info): Add got20 and short_plt.  Update all
+	definitions.
+	(FDPIC_PLT_ENTRY_SIZE, FDPIC_PLT_LAZY_OFFSET): Define.
+	(fdpic_sh_plt_entry_be, fdpic_sh_plt_entry_le, fdpic_sh_plts): New.
+	(FDPIC_SH2A_PLT_ENTRY_SIZE, FDPIC_SH2A_PLT_LAZY_OFFSET): Define.
+	(fdpic_sh2a_plt_entry_be, fdpic_sh2a_plt_entry_le)
+	(fdpic_sh2a_short_plt_be, fdpic_sh2a_short_plt_le, fdpic_sh2a_plts):
+	New.
+	(get_plt_info): Handle FDPIC.
+	(MAX_SHORT_PLT): Define.
+	(get_plt_index, get_plt_offset): Handle short_plt.
+	(union gotref): New.
+	(struct elf_sh_link_hash_entry): Add funcdesc, rename tls_type to
+	got_type and adjust all uses.  Add GOT_FUNCDESC.
+	(struct sh_elf_obj_tdata): Add local_funcdesc.	Rename
+	local_got_tls_type to local_got_type.
+	(sh_elf_local_got_type): Renamed from sh_elf_local_got_tls_type.  All
+	users changed.
+	(sh_elf_local_funcdesc): Define.
+	(struct elf_sh_link_hash_table): Add sfuncdesc, srelfuncdesc, fdpic_p,
+	and srofixup.
+	(sh_elf_link_hash_newfunc): Initialize new fields.
+	(sh_elf_link_hash_table_create): Set fdpic_p.
+	(sh_elf_omit_section_dynsym): New.
+	(create_got_section): Create .got.funcdesc, .rela.got.funcdesc
+	and .rofixup.
+	(allocate_dynrelocs): Allocate local function descriptors and space
+	for R_SH_FUNCDESC-related relocations, and for rofixups.
+	Handle GOT_FUNCDESC.  Create fixups.  Handle GOT entries which
+	require function descriptors.
+	(sh_elf_always_size_sections): Handle PT_GNU_STACK and __stacksize.
+	(sh_elf_modify_program_headers): New.
+	(sh_elf_size_dynamic_sections): Allocate function descriptors for
+	local symbols.  Allocate .got.funcdesc contents.  Allocate rofixups.
+	Handle local GOT entries of type GOT_FUNCDESC.	Create fixups for
+	local GOT entries.  Ensure that FDPIC libraries always have a PLTGOT
+	entry in the .dynamic section.
+	(sh_elf_add_dyn_reloc, sh_elf_got_offset, sh_elf_initialize_funcdesc)
+	(sh_elf_add_rofixup, sh_elf_osec_to_segment)
+	(sh_elf_osec_readonly_p, install_movi20_field): New functions.
+	(sh_elf_relocate_section): Handle new relocations, R_SH_FUNCDESC,
+	R_SH_GOTFUNCDESC and R_SH_GOTOFFFUNCDESC.  Use sh_elf_got_offset
+	and .got.plt throughout to find _GLOBAL_OFFSET_TABLE_.	Add rofixup
+	read-only section warnings.  Handle undefined weak symbols.  Generate
+	fixups for R_SH_DIR32 and GOT entries.	Check for cross-segment
+	relocations and clear EF_SH_PIC.  Handle 20-bit relocations.
+	Always generate R_SH_DIR32 for FDPIC instead of R_SH_RELATIVE.
+	(sh_elf_gc_sweep_hook): Handle R_SH_FUNCDESC, R_SH_GOTOFF20,
+	R_SH_GOTFUNCDESC, R_SH_GOTFUNCDESC20, and R_SH_GOTOFFFUNCDESC.
+	Handle 20-bit relocations.
+	(sh_elf_copy_indirect_symbol): Copy function descriptor reference
+	counts.
+	(sh_elf_check_relocs): Handle new relocations.  Make symbols
+	dynamic for FDPIC relocs.  Account for rofixups.  Error for FDPIC
+	symbol mismatches.  Allocate a GOT for R_SH_DIR32. Allocate fixups
+	for R_SH_DIR32.
+	(sh_elf_copy_private_data): Copy PT_GNU_STACK size.
+	(sh_elf_merge_private_data): Copy initial flags.  Do not clobber
+	non-mach flags.  Set EF_SH_PIC for FDPIC.  Reject FDPIC mismatches.
+	(sh_elf_finish_dynamic_symbol): Do not handle got_funcdesc entries
+	here.  Rename sgot to sgotplt and srel to srelplt.  Handle short_plt,
+	FDPIC descriptors, and got20.  Create R_SH_FUNCDESC_VALUE for FDPIC.
+	Use install_movi20_field.  Rename srel to srelgot.  Always generate
+	R_SH_DIR32 for FDPIC instead of R_SH_RELATIVE.
+	(sh_elf_finish_dynamic_sections): Fill in the GOT pointer in rofixup.
+	Do not fill in reserved GOT entries for FDPIC.	Correct DT_PLTGOT.
+	Rename sgot to sgotplt.  Assert that the right number of rofixups
+	and dynamic relocations were allocated.
+	(sh_elf_use_relative_eh_frame, sh_elf_encode_eh_address): New.
+	(elf_backend_omit_section_dynsym): Use sh_elf_omit_section_dynsym.
+	(elf_backend_can_make_relative_eh_frame)
+	(elf_backend_can_make_lsda_relative_eh_frame)
+	(elf_backend_encode_eh_address): Define.
+	(TARGET_BIG_SYM, TARGET_BIG_NAME, TARGET_LITTLE_SYM)
+	(TARGET_LITTLE_NAME, elf_backend_modify_program_headers, elf32_bed):
+	Redefine for FDPIC vector.
+	* reloc.c: Add SH FDPIC and movi20 relocations.
+	* targets.c (_bfd_target_vector): Add FDPIC vectors.
+	* configure, bfd-in2.h, libbfd.h: Regenerated.
+
 2010-05-25  Jay Krell  <jay.krell@cornell.edu>
 
 	PR ld/11624

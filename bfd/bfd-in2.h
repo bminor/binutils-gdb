@@ -3276,6 +3276,13 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_SH_TLS_DTPMOD32,
   BFD_RELOC_SH_TLS_DTPOFF32,
   BFD_RELOC_SH_TLS_TPOFF32,
+  BFD_RELOC_SH_GOT20,
+  BFD_RELOC_SH_GOTOFF20,
+  BFD_RELOC_SH_GOTFUNCDESC,
+  BFD_RELOC_SH_GOTFUNCDESC20,
+  BFD_RELOC_SH_GOTOFFFUNCDESC,
+  BFD_RELOC_SH_GOTOFFFUNCDESC20,
+  BFD_RELOC_SH_FUNCDESC,
 
 /* ARC Cores relocs.
 ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are

@@ -550,7 +550,7 @@ sh-*-elf* | sh[1234]*-*-elf | sh-*-rtems* | sh-*-kaos*)
 			targ_extra_emuls="shlelf sh shl" ;;
 sh-*-uclinux* | sh[12]-*-uclinux*)
 			targ_emul=shelf_uclinux
-			targ_extra_emuls="shelf shlelf sh shl" ;;
+			targ_extra_emuls="shelf shlelf sh shl shelf_fd shlelf_fd" ;;
 sh-*-vxworks)		targ_emul=shelf_vxworks
 			targ_extra_emuls=shlelf_vxworks ;;
 sh-*-nto*)		targ_emul=shelf_nto

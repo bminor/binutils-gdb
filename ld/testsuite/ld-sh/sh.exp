@@ -122,7 +122,7 @@ if { [which $CC] == 0 } {
     return
 }
 
-if [istarget sh*-linux-*] {
+if [istarget sh*-*linux*] {
     exec sed -e s/_main/main/ -e s/_trap/trap/ -e s/_stack/stack/ \
 	    < $srcdir/$subdir/start.s >tmpdir/start.s
 } else {

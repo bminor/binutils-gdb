@@ -1,3 +1,15 @@
+2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+	    Andrew Stubbs  <ams@codesourcery.com>
+
+	* gas/sh/basic.exp: Run new tests.  Handle uClinux like Linux.
+	* gas/sh/fdpic.d: New file.
+	* gas/sh/fdpic.s: New file.
+	* gas/sh/reg-prefix.d: Force big-endian.
+	* gas/sh/sh2a-pic.d: New file.
+	* gas/sh/sh2a-pic.s: New file.
+	* lib/gas-defs.exp (is_elf_format): Include sh*-*-uclinux*.
+
 2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11600

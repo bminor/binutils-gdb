@@ -1257,7 +1257,7 @@ case "${targ}" in
 
   sh-*-uclinux* | sh[12]-*-uclinux*)
     targ_defvec=bfd_elf32_sh_vec
-    targ_selvecs="bfd_elf32_shblin_vec bfd_elf32_shlin_vec"
+    targ_selvecs="bfd_elf32_shl_vec bfd_elf32_shblin_vec bfd_elf32_shlin_vec bfd_elf32_shfd_vec bfd_elf32_shbfd_vec"
 #ifdef BFD64
     targ_selvecs="${targ_selvecs} bfd_elf32_sh64lin_vec bfd_elf32_sh64blin_vec bfd_elf64_sh64lin_vec bfd_elf64_sh64blin_vec"
 #endif

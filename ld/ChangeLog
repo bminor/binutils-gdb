@@ -1,3 +1,16 @@
+2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+	    Andrew Stubbs  <ams@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eshelf_fd.o and eshlelf_fd.o.
+	(eshelf_fd.c, eshlelf_fd.c): New rules.
+	* Makefile.in: Regenerate.
+	* configure.tgt (sh-*-uclinux*): Add shelf_fd and shlelf_fd
+	emulations.
+	* emulparams/shelf_fd.sh: New file.
+	* emulparams/shlelf_fd.sh: New file.
+	* emulparams/shlelf_linux.sh: Update comment.
+
 2010-05-25  Jay Krell  <jay.krell@cornell.edu>
 
 	PR ld/11621

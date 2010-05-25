@@ -404,6 +404,7 @@ proc is_elf_format {} {
 	 && ![istarget *-*-linux*] \
 	 && ![istarget frv-*-uclinux*] \
 	 && ![istarget bfin-*-uclinux] \
+	 && ![istarget sh*-*-uclinux*] \
 	 && ![istarget *-*-irix5*] \
 	 && ![istarget *-*-irix6*] \
 	 && ![istarget *-*-netbsd*] \

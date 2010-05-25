@@ -15135,7 +15135,9 @@ do
     bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" ;;
     bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf cofflink.lo" ;;
     bfd_elf32_sh_vec)		tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
+    bfd_elf32_shbfd_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shblin_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
+    bfd_elf32_shfd_vec)		tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shl_symbian_vec)	tb="$tb elf32-sh-symbian.lo elf32-sh64-com.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh.lo elf-vxworks.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;

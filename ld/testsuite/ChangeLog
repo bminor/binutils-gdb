@@ -1,3 +1,46 @@
+2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+	    Andrew Stubbs  <ams@codesourcery.com>
+
+	* ld-sh/sh.exp: Handle uClinux like Linux.
+	* lib/ld-lib.exp (is_elf_format): Include sh*-*-uclinux*.
+	* ld-sh/fdpic-funcdesc-shared.d: New file.
+	* ld-sh/fdpic-funcdesc-shared.s: New file.
+	* ld-sh/fdpic-funcdesc-static.d: New file.
+	* ld-sh/fdpic-funcdesc-static.s: New file.
+	* ld-sh/fdpic-gotfuncdesc-shared.d: New file.
+	* ld-sh/fdpic-gotfuncdesc-shared.s: New file.
+	* ld-sh/fdpic-gotfuncdesc-static.d: New file.
+	* ld-sh/fdpic-gotfuncdesc-static.s: New file.
+	* ld-sh/fdpic-gotfuncdesci20-shared.d: New file.
+	* ld-sh/fdpic-gotfuncdesci20-shared.s: New file.
+	* ld-sh/fdpic-gotfuncdesci20-static.d: New file.
+	* ld-sh/fdpic-gotfuncdesci20-static.s: New file.
+	* ld-sh/fdpic-goti20-shared.d: New file.
+	* ld-sh/fdpic-goti20-shared.s: New file.
+	* ld-sh/fdpic-goti20-static.d: New file.
+	* ld-sh/fdpic-goti20-static.s: New file.
+	* ld-sh/fdpic-gotofffuncdesc-shared.d: New file.
+	* ld-sh/fdpic-gotofffuncdesc-shared.s: New file.
+	* ld-sh/fdpic-gotofffuncdesc-static.d: New file.
+	* ld-sh/fdpic-gotofffuncdesc-static.s: New file.
+	* ld-sh/fdpic-gotofffuncdesci20-shared.d: New file.
+	* ld-sh/fdpic-gotofffuncdesci20-shared.s: New file.
+	* ld-sh/fdpic-gotofffuncdesci20-static.d: New file.
+	* ld-sh/fdpic-gotofffuncdesci20-static.s: New file.
+	* ld-sh/fdpic-gotoffi20-shared.d: New file.
+	* ld-sh/fdpic-gotoffi20-shared.s: New file.
+	* ld-sh/fdpic-gotoffi20-static.d: New file.
+	* ld-sh/fdpic-gotoffi20-static.s: New file.
+	* ld-sh/fdpic-plt-be.d: New file.
+	* ld-sh/fdpic-plt-le.d: New file.
+	* ld-sh/fdpic-plt.s: New file.
+	* ld-sh/fdpic-plti20-be.d: New file.
+	* ld-sh/fdpic-plti20-le.d: New file.
+	* ld-sh/fdpic-stack-default.d: New file.
+	* ld-sh/fdpic-stack-size.d: New file.
+	* ld-sh/fdpic-stack.s: New file.
+
 2010-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11600

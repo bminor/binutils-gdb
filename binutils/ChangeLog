@@ -1,3 +1,9 @@
+2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+	    Andrew Stubbs  <ams@codesourcery.com>
+
+	* readelf.c (get_machine_flags): Handle EF_SH_PIC and EF_SH_FDPIC.
+
 2010-05-25  Jay Krell  <jay.krell@cornell.edu>
 
 	PR ld/11621

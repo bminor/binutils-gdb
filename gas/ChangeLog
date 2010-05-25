@@ -1,3 +1,24 @@
+2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+	    Andrew Stubbs  <ams@codesourcery.com>
+
+	* config/tc-sh.c (sh_fdpic): New.
+	(sh_check_fixup): Handle relocations on movi20.
+	(parse_exp): Do not reject PIC operators here.
+	(build_Mytes): Check for unhandled PIC operators here.  Use
+	sh_check_fixup for movi20.
+	(enum options): Add OPTION_FDPIC.
+	(md_longopts, md_parse_option, md_show_usage): Add --fdpic.
+	(sh_fix_adjustable, md_apply_fix): Handle FDPIC and movi20 relocations.
+	(sh_elf_final_processing): Handle --fdpic.
+	(sh_uclinux_target_format): New.
+	(sh_parse_name): Handle FDPIC relocation operators.
+	* config/tc-sh.h (TARGET_FORMAT): Define specially for TE_UCLINUX.
+	(sh_uclinux_target_format): Declare for TE_UCLINUX.
+	* configure.tgt (sh-*-uclinux* | sh[12]-*-uclinux*): Set
+	em=uclinux.
+	* doc/c-sh.texi (SH Options): Document --fdpic.
+
 2010-05-25  Jay Krell  <jay.krell@cornell.edu>
 
 	PR ld/11621

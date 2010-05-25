@@ -2440,6 +2440,11 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
 
+	  if (e_flags & EF_SH_PIC)
+	    strcat (buf, ", pic");
+
+	  if (e_flags & EF_SH_FDPIC)
+	    strcat (buf, ", fdpic");
 	  break;
 
 	case EM_SH:
