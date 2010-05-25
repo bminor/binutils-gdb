@@ -77,7 +77,7 @@ proc pieces_test_f3 {} {
     gdb_test "print a.i" " = 4" "print a.i in pieces:f3"
     gdb_test "print a.j" " = 14" "print a.j in pieces:f3"
     # Right now gdb says "value optimized out" here, but that is wrong.
-    setup_kfail "no bug yet" *-*-*
+    setup_kfail "exp/11636" *-*-*
     gdb_test "print a.i = 7" " = 7" "set a.i in pieces:f3"
     gdb_test "print a.i" " = 7" "print new a.i in pieces:f3"
 }

@@ -1,3 +1,7 @@
+2010-05-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/pieces.exp (pieces_test_f3): Mention PR 11636.
+
 2010-05-25  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/call-ar-st.exp: Replace send_gdb with gdb_test.
