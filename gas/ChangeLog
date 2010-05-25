@@ -1,3 +1,7 @@
+2010-05-25  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_section_flags): Add ATTRIBUTE_UNUSED to "attr".
+
 2010-05-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-h8300.c (h8300_elf_section): Add .zdebug to the list

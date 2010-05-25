@@ -3101,7 +3101,7 @@ ppc_section_type (char *str, size_t len)
 }
 
 int
-ppc_section_flags (flagword flags, bfd_vma attr, int type)
+ppc_section_flags (flagword flags, bfd_vma attr ATTRIBUTE_UNUSED, int type)
 {
   if (type == SHT_ORDERED)
     flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
