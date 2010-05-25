@@ -139,7 +139,7 @@ gld_${EMULATION_NAME}_before_parse (void)
 #ifdef DLL_SUPPORT
   config.dynamic_link = TRUE;
   config.has_shared = 1;
-  link_info.pei386_auto_import = -1;
+  link_info.pei386_auto_import = 1;
   link_info.pei386_runtime_pseudo_reloc = 2; /* Use by default version 2.  */
 #endif
 }
@@ -185,7 +185,6 @@ enum options
   OPTION_EXCLUDE_LIBS,
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC,
   OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC,
-  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1,
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2,
   OPTION_EXCLUDE_MODULES_FOR_IMPLIB,
   OPTION_USE_NUL_PREFIXED_IMPORT_TABLES,
@@ -263,7 +262,6 @@ gld${EMULATION_NAME}_add_options
     {"enable-extra-pep-debug", no_argument, NULL, OPTION_ENABLE_EXTRA_PE_DEBUG},
     {"enable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC},
     {"disable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC},
-    {"enable-runtime-pseudo-reloc-v1", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1},
     {"enable-runtime-pseudo-reloc-v2", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2},
 #endif
     {"enable-long-section-names", no_argument, NULL, OPTION_ENABLE_LONG_SECTION_NAMES},
@@ -736,9 +734,6 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC:
       link_info.pei386_runtime_pseudo_reloc = 0;
       break;
-    case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1:
-      link_info.pei386_runtime_pseudo_reloc = 1;
-      break;
     case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2:
       link_info.pei386_runtime_pseudo_reloc = 2;
       break;
@@ -1096,22 +1091,6 @@ pep_find_data_imports (void)
 	      bfd *b = sym->u.def.section->owner;
 	      asymbol **symbols;
 	      int nsyms, i;
-
-	      if (link_info.pei386_auto_import == -1)
-		{
-		  static bfd_boolean warned = FALSE;
-
-		  info_msg (_("Info: resolving %s by linking to %s (auto-import)\n"),
-			    undef->root.string, buf);
-
-		  /* PR linker/4844.  */
-		  if (! warned)
-		    {
-		      warned = TRUE;
-		      einfo (_("%P: warning: auto-importing has been activated without --enable-auto-import specified on the command line.\n\
-This should work unless it involves constant data structures referencing symbols from auto-imported DLLs.\n"));
-		    }
-		}
 
 	      if (!bfd_generic_link_read_symbols (b))
 		{
@@ -1928,7 +1907,7 @@ sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c
 echo '  ; else if (!config.magic_demand_paged) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xn			>> e${EMULATION_NAME}.c
 if test -n "$GENERATE_AUTO_IMPORT_SCRIPT" ; then
-echo '  ; else if (link_info.pei386_auto_import == 1) return'	>> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.pei386_auto_import == 1 && link_info.pei386_runtime_pseudo_reloc != 2) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xa			>> e${EMULATION_NAME}.c
 fi
 echo '  ; else return'					>> e${EMULATION_NAME}.c

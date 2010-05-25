@@ -1,5 +1,12 @@
 2010-05-25  Kai Tietz  <kai.tietz@onevision.com>
 
+	* emultempl/pep.em (gld_${EMULATION_NAME}_before_parse): Enable by
+	default auto_import.
+	(gld${EMULATION_NAME}_handle_option): Warn about v1.
+	(pep_find_data_imports): Remove superflous warnings about
+	auto-import.
+	(gld_${EMULATION_NAME}_get_script): Don't merge for auto-import
+	and active pseudo-relocation-v2 rdata into data section.
 	* emultempl/pe.em (default_merge_rdata): New shell variable.
 	(MERGE_RDATA_V2): New macro.
 	(gld_${EMULATION_NAME}_get_script): Adjust rule for auto-import
