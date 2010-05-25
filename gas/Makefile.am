@@ -586,7 +586,7 @@ cgen.@OBJEXT@: cgen.c cgen.h cgen-desc.h subsegs.h \
 # Remake the info files.
 
 MOSTLYCLEANFILES = $(STAGESTUFF) core \
-	testsuite/*.@OBJEXT@ testsuite/*.@OBJEXT@ut testsuite/gas.log testsuite/gas.sum \
+	testsuite/*.@OBJEXT@ testsuite/*.out testsuite/gas.log testsuite/gas.sum \
 	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
 .PHONY: install-exec-local install-data-local
