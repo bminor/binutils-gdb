@@ -72,7 +72,7 @@ struct dwarf2_frame_state_reg
   union {
     LONGEST offset;
     ULONGEST reg;
-    unsigned char *exp;
+    const gdb_byte *exp;
     struct value *(*fn) (struct frame_info *this_frame, void **this_cache,
 			 int regnum);
   } loc;

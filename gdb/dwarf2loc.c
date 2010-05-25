@@ -44,7 +44,7 @@
 
 static void
 dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
-			 gdb_byte **start, size_t *length);
+			 const gdb_byte **start, size_t *length);
 
 /* A helper function for dealing with location lists.  Given a
    symbol baton (BATON) and a pc value (PC), find the appropriate
@@ -153,7 +153,7 @@ dwarf_expr_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
    describing the frame base.  Return a pointer to it in START and
    its length in LENGTH.  */
 static void
-dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
+dwarf_expr_frame_base (void *baton, const gdb_byte **start, size_t * length)
 {
   /* FIXME: cagney/2003-03-26: This code should be using
      get_frame_base_address(), and then implement a dwarf2 specific
@@ -178,7 +178,7 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
 
 static void
 dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
-			 gdb_byte **start, size_t *length)
+			 const gdb_byte **start, size_t *length)
 {
   if (SYMBOL_LOCATION_BATON (framefunc) == NULL)
     *start = NULL;
@@ -463,7 +463,7 @@ read_pieced_value (struct value *v)
       struct dwarf_expr_piece *p = &c->pieces[i];
       size_t this_size, this_size_bits;
       long dest_offset_bits, source_offset_bits, source_offset;
-      gdb_byte *intermediate_buffer;
+      const gdb_byte *intermediate_buffer;
 
       /* Compute size, source, and destination offsets for copying, in
 	 bits.  */
@@ -917,7 +917,7 @@ needs_frame_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
 
 /* Frame-relative accesses do require a frame.  */
 static void
-needs_frame_frame_base (void *baton, gdb_byte **start, size_t * length)
+needs_frame_frame_base (void *baton, const gdb_byte **start, size_t * length)
 {
   static gdb_byte lit0 = DW_OP_lit0;
   struct needs_frame_baton *nf_baton = baton;
@@ -1017,12 +1017,12 @@ struct axs_var_loc
   LONGEST offset;
 };
 
-static gdb_byte *
+static const gdb_byte *
 dwarf2_tracepoint_var_loc (struct symbol *symbol,
 			   struct agent_expr *ax,
 			   struct axs_var_loc *loc,
 			   struct gdbarch *gdbarch,
-			   gdb_byte *data, gdb_byte *end)
+			   const gdb_byte *data, const gdb_byte *end)
 {
   if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
     {
@@ -1044,7 +1044,7 @@ dwarf2_tracepoint_var_loc (struct symbol *symbol,
       struct symbol *framefunc;
       int frame_reg = 0;
       LONGEST frame_offset;
-      gdb_byte *base_data;
+      const gdb_byte *base_data;
       size_t base_size;
       LONGEST base_offset = 0;
 
@@ -1063,8 +1063,8 @@ dwarf2_tracepoint_var_loc (struct symbol *symbol,
 
       if (base_data[0] >= DW_OP_breg0 && base_data[0] <= DW_OP_breg31)
 	{
-	  gdb_byte *buf_end;
-	  
+	  const gdb_byte *buf_end;
+
 	  frame_reg = base_data[0] - DW_OP_breg0;
 	  buf_end = read_sleb128 (base_data + 1,
 				  base_data + base_size, &base_offset);
@@ -1143,9 +1143,9 @@ dwarf2_tracepoint_var_access (struct agent_expr *ax,
 static void
 dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 			   struct agent_expr *ax, struct axs_value *value,
-			   gdb_byte *data, int size)
+			   const gdb_byte *data, int size)
 {
-  gdb_byte *end = data + size;
+  const gdb_byte *end = data + size;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* In practice, a variable is not going to be spread across
      dozens of registers or memory locations.  If someone comes up
@@ -1285,10 +1285,11 @@ locexpr_read_needs_frame (struct symbol *symbol)
 /* Describe a single piece of a location, returning an updated
    position in the bytecode sequence.  */
 
-static gdb_byte *
+static const gdb_byte *
 locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 				 CORE_ADDR addr, struct objfile *objfile,
-				 gdb_byte *data, int size, unsigned int addr_size)
+				 const gdb_byte *data, int size,
+				 unsigned int addr_size)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   int regno;
@@ -1315,7 +1316,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       struct symbol *framefunc;
       int frame_reg = 0;
       LONGEST frame_offset;
-      gdb_byte *base_data;
+      const gdb_byte *base_data;
       size_t base_size;
       LONGEST base_offset = 0;
 
@@ -1335,7 +1336,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
       if (base_data[0] >= DW_OP_breg0 && base_data[0] <= DW_OP_breg31)
 	{
-	  gdb_byte *buf_end;
+	  const gdb_byte *buf_end;
 	  
 	  frame_reg = base_data[0] - DW_OP_breg0;
 	  buf_end = read_sleb128 (base_data + 1,
@@ -1422,10 +1423,11 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
 static void
 locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
-			     struct ui_file *stream, gdb_byte *data, int size,
+			     struct ui_file *stream,
+			     const gdb_byte *data, int size,
 			     struct objfile *objfile, unsigned int addr_size)
 {
-  gdb_byte *end = data + size;
+  const gdb_byte *end = data + size;
   int piece_done = 0, first_piece = 1, bad = 0;
 
   /* A multi-piece description consists of multiple sequences of bytes

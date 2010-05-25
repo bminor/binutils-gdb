@@ -1,3 +1,34 @@
+2010-05-25  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (dwarf_expr_frame_base): Constify.
+	(dwarf_expr_frame_base_1): Likewise.
+	(read_pieced_value): Update.
+	(needs_frame_frame_base): Constify.
+	(dwarf2_tracepoint_var_loc): Likewise.
+	(dwarf2_tracepoint_var_access): Likewise.
+	(locexpr_describe_location_piece): Likewise.
+	(locexpr_describe_location_1): Likewise.
+	* dwarf2expr.h (struct dwarf_expr_context) <get_frame_base>:
+	Constify.
+	(data): Now const.
+	(struct dwarf_expr_piece) <v.literal.data>: Likewise.
+	(dwarf_expr_eval, read_uleb128, read_sleb128)
+	(dwarf2_read_address): Update.
+	* dwarf2expr.c (dwarf_expr_eval): Constify.
+	(read_uleb128): Likewise.
+	(read_sleb128): Likewise.
+	(dwarf2_read_address): Likewise.
+	(require_composition): Likewise.
+	(execute_stack_op): Likewise.
+	* dwarf2-frame.h (struct dwarf2_frame_state_reg) <loc.exp>: Now a
+	"const gdb_byte *".
+	* dwarf2-frame.c (struct dwarf2_frame_state_reg_info) <cfa_exp>:
+	Now const.
+	(no_get_frame_base): Constify.
+	(execute_stack_op): Likewise.
+	(execute_cfa_program): Likewise.
+	(read_encoded_value): Likewise.
+
 2010-05-25  Doug Evans  <dje@google.com>
 
 	* ser-pipe.c (pipe_open): Ignore SIGINTs in child.

@@ -32,7 +32,7 @@
 /* Local prototypes.  */
 
 static void execute_stack_op (struct dwarf_expr_context *,
-			      gdb_byte *, gdb_byte *);
+			      const gdb_byte *, const gdb_byte *);
 static struct type *unsigned_address_type (struct gdbarch *, int);
 
 /* Create a new context for the expression evaluator.  */
@@ -193,7 +193,8 @@ add_piece (struct dwarf_expr_context *ctx, ULONGEST size, ULONGEST offset)
    CTX.  */
 
 void
-dwarf_expr_eval (struct dwarf_expr_context *ctx, gdb_byte *addr, size_t len)
+dwarf_expr_eval (struct dwarf_expr_context *ctx, const gdb_byte *addr,
+		 size_t len)
 {
   int old_recursion_depth = ctx->recursion_depth;
 
@@ -208,8 +209,8 @@ dwarf_expr_eval (struct dwarf_expr_context *ctx, gdb_byte *addr, size_t len)
    by R, and return the new value of BUF.  Verify that it doesn't extend
    past BUF_END.  */
 
-gdb_byte *
-read_uleb128 (gdb_byte *buf, gdb_byte *buf_end, ULONGEST * r)
+const gdb_byte *
+read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end, ULONGEST * r)
 {
   unsigned shift = 0;
   ULONGEST result = 0;
@@ -234,8 +235,8 @@ read_uleb128 (gdb_byte *buf, gdb_byte *buf_end, ULONGEST * r)
    by R, and return the new value of BUF.  Verify that it doesn't extend
    past BUF_END.  */
 
-gdb_byte *
-read_sleb128 (gdb_byte *buf, gdb_byte *buf_end, LONGEST * r)
+const gdb_byte *
+read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, LONGEST * r)
 {
   unsigned shift = 0;
   LONGEST result = 0;
@@ -263,8 +264,8 @@ read_sleb128 (gdb_byte *buf, gdb_byte *buf_end, LONGEST * r)
    doesn't extend past BUF_END.  */
 
 CORE_ADDR
-dwarf2_read_address (struct gdbarch *gdbarch, gdb_byte *buf,
-		     gdb_byte *buf_end, int addr_size)
+dwarf2_read_address (struct gdbarch *gdbarch, const gdb_byte *buf,
+		     const gdb_byte *buf_end, int addr_size)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -334,7 +335,8 @@ signed_address_type (struct gdbarch *gdbarch, int addr_size)
    expression, or that it is followed by a composition operator.  */
 
 static void
-require_composition (gdb_byte *op_ptr, gdb_byte *op_end, const char *op_name)
+require_composition (const gdb_byte *op_ptr, const gdb_byte *op_end,
+		     const char *op_name)
 {
   /* It seems like DW_OP_GNU_uninit should be handled here.  However,
      it doesn't seem to make sense for DW_OP_*_value, and it was not
@@ -351,7 +353,7 @@ require_composition (gdb_byte *op_ptr, gdb_byte *op_end, const char *op_name)
 
 static void
 execute_stack_op (struct dwarf_expr_context *ctx,
-		  gdb_byte *op_ptr, gdb_byte *op_end)
+		  const gdb_byte *op_ptr, const gdb_byte *op_end)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (ctx->gdbarch);
 
@@ -583,7 +585,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 	case DW_OP_fbreg:
 	  {
-	    gdb_byte *datastart;
+	    const gdb_byte *datastart;
 	    size_t datalen;
 	    unsigned int before_stack_len;
 

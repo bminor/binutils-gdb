@@ -156,7 +156,7 @@ static int dwarf2_frame_adjust_regnum (struct gdbarch *gdbarch, int regnum,
 				       int eh_frame_p);
 
 static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
-				     int ptr_len, gdb_byte *buf,
+				     int ptr_len, const gdb_byte *buf,
 				     unsigned int *bytes_read_ptr,
 				     CORE_ADDR func_base);
 
@@ -179,7 +179,7 @@ struct dwarf2_frame_state
       CFA_REG_OFFSET,
       CFA_EXP
     } cfa_how;
-    gdb_byte *cfa_exp;
+    const gdb_byte *cfa_exp;
 
     /* Used to implement DW_CFA_remember_state.  */
     struct dwarf2_frame_state_reg_info *prev;
@@ -306,7 +306,7 @@ read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
 }
 
 static void
-no_get_frame_base (void *baton, gdb_byte **start, size_t *length)
+no_get_frame_base (void *baton, const gdb_byte **start, size_t *length)
 {
   internal_error (__FILE__, __LINE__,
 		  _("Support for DW_OP_fbreg is unimplemented"));
@@ -359,7 +359,7 @@ register %s (#%d) at %s"),
 }
 
 static CORE_ADDR
-execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
+execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  struct frame_info *this_frame, CORE_ADDR initial,
 		  int initial_in_stack_memory)
 {
@@ -400,8 +400,8 @@ execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
 
 
 static void
-execute_cfa_program (struct dwarf2_fde *fde, gdb_byte *insn_ptr,
-		     gdb_byte *insn_end, struct frame_info *this_frame,
+execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
+		     const gdb_byte *insn_end, struct frame_info *this_frame,
 		     struct dwarf2_frame_state *fs)
 {
   int eh_frame_p = fde->eh_frame_p;
@@ -1411,7 +1411,8 @@ encoding_for_size (unsigned int size)
 
 static CORE_ADDR
 read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
-		    int ptr_len, gdb_byte *buf, unsigned int *bytes_read_ptr,
+		    int ptr_len, const gdb_byte *buf,
+		    unsigned int *bytes_read_ptr,
 		    CORE_ADDR func_base)
 {
   ptrdiff_t offset;
@@ -1468,7 +1469,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
     case DW_EH_PE_uleb128:
       {
 	ULONGEST value;
-	gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+	const gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
 
 	*bytes_read_ptr += read_uleb128 (buf, end_buf, &value) - buf;
 	return base + value;
@@ -1485,7 +1486,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
     case DW_EH_PE_sleb128:
       {
 	LONGEST value;
-	gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+	const gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
 
 	*bytes_read_ptr += read_sleb128 (buf, end_buf, &value) - buf;
 	return base + value;
