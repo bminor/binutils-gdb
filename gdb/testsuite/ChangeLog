@@ -1,9 +1,4 @@
-2010-05-25  Doug Evans  <dje@google.com>
-
-	* gdb.python/py-cmd.exp: Add tests for gdb.GdbError and
-	gdb.string_to_argv.
-
-2010-05-24  Michael Snyder  <msnyder@vmware.com>
+2010-05-25  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/call-ar-st.exp: Replace send_gdb with gdb_test.
 	* gdb.base/callfuncs.exp: Replace send_gdb with gdb_test.
@@ -38,6 +33,16 @@
 	* gdb.base/info-proc.exp: Replace send_gdb with gdb_test.
 	* gdb.base/jump.exp: Replace send_gdb with gdb_test.
 	* gdb.base/long_long.exp: Replace send_gdb with gdb_test.
+	* gdb.base/maint.exp: Replace send_gdb with gdb_test.
+	* gdb.base/miscexprs.exp: Replace send_gdb with gdb_test.
+	* gdb.base/nodebug.exp: Replace send_gdb with gdb_test.
+	* gdb.base/pointers.exp: Replace send_gdb with gdb_test.
+	* gdb.base/ptype.exp: Replace send_gdb with gdb_test.
+
+2010-05-25  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-cmd.exp: Add tests for gdb.GdbError and
+	gdb.string_to_argv.
 
 2010-05-21  Tom Tromey  <tromey@redhat.com>
 

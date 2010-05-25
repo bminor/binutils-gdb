@@ -58,18 +58,15 @@ gdb_load ${binfile}
 # with stabs compilers which fail to use a nameless stab (such as
 # pre-2.4.5 versions of gcc and most non-gcc compilers).
 
-send_gdb "ptype red1\n"
-gdb_expect {
-    -re "type = enum primary1_tag \{red1, green1, blue1\}.*$gdb_prompt $"\
-	{
-	    # The workaround is in effect.  As this is a compiler, not GDB,
-	    # bug, we'll make it a PASS but perhaps it should be an XFAIL.
-	    pass "ptype unnamed enumeration member (worked around)"
-	}
-    -re "type = enum \{red1, green1, blue1\}.*$gdb_prompt $"\
-			{ pass "ptype unnamed enumeration member" }
-    -re ".*$gdb_prompt $"	{ fail "ptype unnamed enumeration member" }
-    timeout		{ fail "(timeout) ptype unnamed enumeration member" }
+gdb_test_multiple "ptype red1" "ptype unnamed enumeration member" {
+    -re "type = enum primary1_tag \{red1, green1, blue1\}.*$gdb_prompt $" {
+	# The workaround is in effect.  As this is a compiler, not GDB,
+	# bug, we'll make it a PASS but perhaps it should be an XFAIL.
+	pass "ptype unnamed enumeration member (worked around)"
+    }
+    -re "type = enum \{red1, green1, blue1\}.*$gdb_prompt $" {
+	pass "ptype unnamed enumeration member"
+    }
 }
 
 #
@@ -571,8 +568,7 @@ proc ptype_maybe_prototyped { id prototyped plain { overprototyped "NO-MATCH" } 
 	eval "set $var \$val"
     }
 
-    send_gdb "ptype $id\n"
-    gdb_expect {
+    gdb_test_multiple "ptype $id" "ptype $id" {
         -re "type = $prototyped\[\r\n\]+$gdb_prompt $" {
             pass "ptype $id"
         }
@@ -585,12 +581,6 @@ proc ptype_maybe_prototyped { id prototyped plain { overprototyped "NO-MATCH" } 
 		setup_xfail "*-*-*"
 	    }
             fail "ptype $id (compiler doesn't emit unprototyped types)"
-        }
-        -re "$gdb_prompt $" {
-            fail "ptype $id"
-        }
-        timeout {
-            fail "ptype $id (timeout)"
         }
     }
 }
