@@ -222,3 +222,53 @@ gdbpy_is_string (PyObject *obj)
 {
   return PyString_Check (obj) || PyUnicode_Check (obj);
 }
+
+/* Return the string representation of OBJ, i.e., str (obj).
+   Space for the result is malloc'd, the caller must free.
+   If the result is NULL a python error occurred, the caller must clear it.  */
+
+char *
+gdbpy_obj_to_string (PyObject *obj)
+{
+  PyObject *str_obj = PyObject_Str (obj);
+
+  if (str_obj != NULL)
+    {
+      char *msg = xstrdup (PyString_AsString (str_obj));
+
+      Py_DECREF (str_obj);
+      return msg;
+    }
+
+  return NULL;
+}
+
+/* Return the string representation of the exception represented by
+   TYPE, VALUE which is assumed to have been obtained with PyErr_Fetch,
+   i.e., the error indicator is currently clear.
+   Space for the result is malloc'd, the caller must free.
+   If the result is NULL a python error occurred, the caller must clear it.  */
+
+char *
+gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue)
+{
+  PyObject *str_obj = PyObject_Str (pvalue);
+  char *str;
+
+  /* There are a few cases to consider.
+     For example:
+     pvalue is a string when PyErr_SetString is used.
+     pvalue is not a string when raise "foo" is used, instead it is None
+     and ptype is "foo".
+     So the algorithm we use is to print `str (pvalue)' if it's not
+     None, otherwise we print `str (ptype)'.
+     Using str (aka PyObject_Str) will fetch the error message from
+     gdb.GdbError ("message").  */
+
+  if (pvalue && pvalue != Py_None)
+    str = gdbpy_obj_to_string (pvalue);
+  else
+    str = gdbpy_obj_to_string (ptype);
+
+  return str;
+}

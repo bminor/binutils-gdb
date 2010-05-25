@@ -1,3 +1,21 @@
+2010-05-25  Doug Evans  <dje@google.com>
+
+	Add python gdb.GdbError and gdb.string_to_argv.
+	* NEWS: Document them.
+	* python/py-cmd.c (cmdpy_function): Don't print a traceback if
+	the exception is gdb.GdbError.  Print a second traceback if there's
+	an error computing the error message.
+	(gdbpy_string_to_argv): New function.
+	* python/py-utils.c (gdbpy_obj_to_string): New function.
+	(gdbpy_exception_to_string): New function.
+	* python/python-internal.h (gdbpy_string_to_argv): Declare.
+	(gdbpy_obj_to_string, gdbpy_exception_to_string): Declare.
+	(gdbpy_gdberror_exc): Declare.
+	* python/python.c (gdbpy_gdberror_exc): New global.
+	(_initialize_python): Initialize gdbpy_gdberror_exc and create
+	gdb.GdbError.
+	(GdbMethods): Add string_to_argv.
+
 2010-05-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* windows-nat.c (display_selector): Call GetLastError to give better

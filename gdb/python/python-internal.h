@@ -92,6 +92,7 @@ PyObject *gdbpy_block_for_pc (PyObject *self, PyObject *args);
 PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 					   const char *encoding, struct type *type);
+PyObject *gdbpy_string_to_argv (PyObject *self, PyObject *args);
 PyObject *gdbpy_get_hook_function (const char *);
 PyObject *gdbpy_parameter (PyObject *self, PyObject *args);
 PyObject *gdbpy_parameter_value (enum var_types type, void *var);
@@ -179,6 +180,9 @@ PyObject *python_string_to_target_python_string (PyObject *obj);
 char *python_string_to_host_string (PyObject *obj);
 PyObject *target_string_to_unicode (const gdb_byte *str, int length);
 int gdbpy_is_string (PyObject *obj);
+char *gdbpy_obj_to_string (PyObject *obj);
+char *gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue);
+
 int gdbpy_is_lazy_string (PyObject *result);
 gdb_byte *gdbpy_extract_lazy_string (PyObject *string,
 				     struct type **str_type, 
@@ -196,5 +200,7 @@ extern PyObject *gdbpy_doc_cst;
 extern PyObject *gdbpy_children_cst;
 extern PyObject *gdbpy_to_string_cst;
 extern PyObject *gdbpy_display_hint_cst;
+
+extern PyObject *gdbpy_gdberror_exc;
 
 #endif /* GDB_PYTHON_INTERNAL_H */

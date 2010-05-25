@@ -1,3 +1,8 @@
+2010-05-25  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Exception Handling): Document gdb.GdbError.
+	(Commands In Python): Document gdb.string_to_argv.
+
 2010-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbint.texinfo (Host Definition): Remove items NORETURN and

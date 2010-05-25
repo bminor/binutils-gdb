@@ -87,7 +87,9 @@ is now deprecated.
    set/show in the CLI.
 
 ** New functions gdb.target_charset, gdb.target_wide_charset,
-   gdb.progspaces, and gdb.current_progspace.
+   gdb.progspaces, gdb.current_progspace, and gdb.string_to_argv.
+
+** New exception gdb.GdbError.
 
 ** Pretty-printers are now also looked up in the current program space.
 

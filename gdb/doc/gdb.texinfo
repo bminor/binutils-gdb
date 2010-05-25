@@ -20082,6 +20082,30 @@ message as its value, and the Python call stack backtrace at the
 Python statement closest to where the @value{GDBN} error occured as the
 traceback.
 
+@findex gdb.GdbError
+When implementing @value{GDBN} commands in Python via @code{gdb.Command},
+it is useful to be able to throw an exception that doesn't cause a
+traceback to be printed.  For example, the user may have invoked the
+command incorrectly.  Use the @code{gdb.GdbError} exception
+to handle this case.  Example:
+
+@smallexample
+(gdb) python
+>class HelloWorld (gdb.Command):
+>  """Greet the whole world."""
+>  def __init__ (self):
+>    super (HelloWorld, self).__init__ ("hello-world", gdb.COMMAND_OBSCURE)
+>  def invoke (self, args, from_tty):
+>    argv = gdb.string_to_argv (args)
+>    if len (argv) != 0:
+>      raise gdb.GdbError ("hello-world takes no arguments")
+>    print "Hello, World!"
+>HelloWorld ()
+>end
+(gdb) hello-world 42
+hello-world takes no arguments
+@end smallexample
+
 @node Values From Inferior
 @subsubsection Values From Inferior
 @cindex values from inferior, with Python
@@ -20773,6 +20797,20 @@ that the command came from elsewhere.
 
 If this method throws an exception, it is turned into a @value{GDBN}
 @code{error} call.  Otherwise, the return value is ignored.
+
+@findex gdb.string_to_argv
+To break @var{argument} up into an argv-like string use
+@code{gdb.string_to_argv}.  This function behaves identically to
+@value{GDBN}'s internal argument lexer @code{buildargv}.
+It is recommended to use this for consistency.
+Arguments are separated by spaces and may be quoted.
+Example:
+
+@smallexample
+print gdb.string_to_argv ("1 2\ \\\"3 '4 \"5' \"6 '7\"")
+['1', '2 "3', '4 "5', "6 '7"]
+@end smallexample
+
 @end defmethod
 
 @cindex completion of Python commands
