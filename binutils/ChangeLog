@@ -1,3 +1,9 @@
+2010-05-25  Jay Krell  <jay.krell@cornell.edu>
+
+	PR ld/11621
+	* Makefile.am: Replace all occurences of .o with .@OBJEXT@
+	* Makefile.in: Regenerate.
+
 2010-05-24  Tristan Gingold  <gingold@adacore.com>
 
 	* readelf.c (usage): Add new trace sections for --debug-dump.
