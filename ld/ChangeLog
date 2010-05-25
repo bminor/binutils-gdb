@@ -1,3 +1,8 @@
+2010-05-25  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am: Fix typo.
+	* Makefile.in: Regenerate.
+
 2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Joseph Myers  <joseph@codesourcery.com>
 	    Andrew Stubbs  <ams@codesourcery.com>

@@ -1944,9 +1944,9 @@ bootstrap: ld3$(EXEEXT)
 #	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
 #	  cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ $(HOSTING_LIBS)
 #
-#cdtest.@OBJEXT@ut: cdtest
+#cdtest.out: cdtest
 #	./cdtest > cdtest.tmp
-#	mv cdtest.tmp cdtest.@OBJEXT@ut
+#	mv cdtest.tmp cdtest.out
 #
 #cdtest-ur.@OBJEXT@: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
 #	./ld.new $(HOSTING_EMU) -o cdtest-ur.@OBJEXT@ -Ur cdtest-main.@OBJEXT@ \
@@ -1956,13 +1956,13 @@ bootstrap: ld3$(EXEEXT)
 #	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.@OBJEXT@ \
 #	  $(HOSTING_LIBS)
 #
-#cdtest-ur.@OBJEXT@ut: cdtest-ur
+#cdtest-ur.out: cdtest-ur
 #	./cdtest-ur > cdtest-ur.tmp
-#	mv cdtest-ur.tmp cdtest-ur.@OBJEXT@ut
+#	mv cdtest-ur.tmp cdtest-ur.out
 #
-#check-cdtest: cdtest.@OBJEXT@ut cdtest-ur.@OBJEXT@ut $(srcdir)/cdtest.exp
-#	diff $(srcdir)/cdtest.exp cdtest.@OBJEXT@ut
-#	diff $(srcdir)/cdtest.exp cdtest-ur.@OBJEXT@ut
+#check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
+#	diff $(srcdir)/cdtest.exp cdtest.out
+#	diff $(srcdir)/cdtest.exp cdtest-ur.out
 #
 #.PHONY: check-cdtest
 
