@@ -1,5 +1,9 @@
 2010-05-25  Kai Tietz  <kai.tietz@onevision.com>
 
+	
+	* deffilep.y (opt_name): Allow leading dot.
+	(dot_name): Likewise.
+	(anylang_id): Likewise.
 	* emultempl/pep.em (gld_${EMULATION_NAME}_before_parse): Enable by
 	default auto_import.
 	(gld${EMULATION_NAME}_handle_option): Warn about v1.

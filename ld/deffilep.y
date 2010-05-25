@@ -224,6 +224,12 @@ attr:
 	;
 
 opt_name: ID		{ $$ = $1; }
+	| '.' ID
+	  {
+	    char *name = xmalloc (strlen ($2) + 2);
+	    sprintf (name, ".%s", $2);
+	    $$ = name;
+	  }
 	| ID '.' ID	
 	  { 
 	    char *name = xmalloc (strlen ($1) + 1 + strlen ($3) + 1);
@@ -252,6 +258,12 @@ opt_base: BASE	'=' NUMBER	{ $$ = $3;}
 	;
 
 dot_name: ID		{ $$ = $1; }
+	| '.' ID
+	  {
+	    char *name = xmalloc (strlen ($2) + 2);
+	    sprintf (name, ".%s", $2);
+	    $$ = name;
+	  }
 	| dot_name '.' ID	
 	  { 
 	    char *name = xmalloc (strlen ($1) + 1 + strlen ($3) + 1);
@@ -261,6 +273,12 @@ dot_name: ID		{ $$ = $1; }
 	;
 
 anylang_id: ID		{ $$ = $1; }
+	| '.' ID
+	  {
+	    char *id = xmalloc (strlen ($2) + 2);
+	    sprintf (id, ".%s", $2);
+	    $$ = id;
+	  }
 	| anylang_id '.' opt_digits opt_id
 	  {
 	    char *id = xmalloc (strlen ($1) + 1 + strlen ($3) + strlen ($4) + 1);
