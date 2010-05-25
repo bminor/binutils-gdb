@@ -133,7 +133,7 @@ test_output_radix 8 "8" "10"
     test_one_output 8  "0xf"        "17"
     test_one_output 8  "10"         "12"
     test_one_output 8  "100"        "144"
-    setup_kfail *-*-* "gdb/1715"
+    setup_kfail "gdb/1715" *-*-*
     test_one_output 8  "20."        "24"
     test_one_output 8  "(int) 20."  "24"
 
@@ -150,7 +150,7 @@ test_output_radix 16 "10" "20"
     test_one_output 16 "0xf"        "f"
     test_one_output 16 "10"         "a"
     test_one_output 16 "100"        "64"
-    setup_kfail *-*-* "gdb/1715"
+    setup_kfail "gdb/1715" *-*-*
     test_one_output 16 "20."        "14"
     test_one_output 16 "(int) 20."  "14"
 

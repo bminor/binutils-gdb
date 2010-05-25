@@ -52,13 +52,13 @@ set bpmain "Breakpoint .* file .*jmain.java, line 5\."
 set earlybpmain "Breakpoint .* file .*jmain.java, line 4\."
 
 gdb_load "${binfile}"
-setup_kfail *-*-* java/1567
+setup_kfail java/1567 *-*-*
 gdb_test "break main" "${bpmain}"
 
 # Check that an unqualified "main" works.
 
 gdb_load "${binfile}"
-setup_kfail *-*-* java/1565
+setup_kfail java/1565 *-*-*
 gdb_test "break jmain.main" "${bpmain}"
 
 # Check that a fully qualified "main" works.

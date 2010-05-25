@@ -61,7 +61,7 @@ proc test_string_literal_types_accepted {} {
 
     # Test various character values.
 
-    setup_kfail *-*-* gdb/2326
+    setup_kfail gdb/2326 *-*-*
     gdb_test "pt 'a simple string'" "type = string"
 }
 

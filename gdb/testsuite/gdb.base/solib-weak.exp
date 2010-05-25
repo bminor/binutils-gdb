@@ -106,7 +106,7 @@ proc do_test { lib1opts lib2opts lib1first } {
 
     if {(${lib1opts} == "" && ${lib2opts} != "" && ${lib1first} == 1)
 	|| (${lib1opts} != "" && ${lib2opts} == "" && ${lib1first} == 0)} {
-	setup_kfail *-*-* gdb/1824
+	setup_kfail gdb/1824 *-*-*
     }
 
     gdb_test "continue" "Breakpoint .* bar .*${expected_file}\\..*" \

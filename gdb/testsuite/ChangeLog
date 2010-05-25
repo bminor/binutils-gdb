@@ -1,5 +1,33 @@
 2010-05-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.arch/i386-prologue.exp (skip_breakpoint): Fix setup_kfail
+	argument order.
+	* gdb.base/macscp.exp: Fix setup_kfail argument order.
+	* gdb.base/long_long.exp (gdb_test_xxx): Fix setup_kfail argument
+	order.
+	* gdb.base/sigbpt.exp (stepi_out): Fix setup_kfail argument
+	order.
+	* gdb.base/call-sc.exp (setup_kfails): Remove.
+	(setup_compiler_kfails): Remove.
+	* gdb.base/callfuncs.exp (do_function_calls): Fix setup_kfail
+	argument order.
+	* gdb.base/siginfo.exp: Fix setup_kfail argument order.
+	* gdb.base/sigstep.exp (advance): Fix setup_kfail argument order.
+	(advancei): Fix setup_kfail argument order.
+	* gdb.base/radix.exp: Fix setup_kfail argument order.
+	* gdb.base/solib-weak.exp (do_test): Fix setup_kfail argument
+	order.
+	* gdb.base/structs.exp (setup_kfails): Remove.
+	(setup_compiler_kfails): Fix setup_kfail argument order.
+	* gdb.base/sigaltstack.exp (finish_test): Fix setup_kfail argument
+	order.
+	* gdb.java/jmain.exp: Fix setup_kfail argument order.
+	* gdb.pascal/types.exp (test_string_literal_types_accepted): Fix
+	setup_kfail argument order.
+	* gdb.cp/overload.exp: Fix setup_kfail argument order.
+
+2010-05-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/pieces.exp (pieces_test_f3): Mention PR 11636.
 
 2010-05-25  Michael Snyder  <msnyder@vmware.com>

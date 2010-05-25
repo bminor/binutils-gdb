@@ -43,22 +43,6 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
-# Use the file name, compiler and tuples to set up any needed KFAILs.
-
-proc setup_kfails { file tuples bug } {
-    global testfile
-    if [string match $file $testfile] {
-	foreach f $tuples { setup_kfail $f $bug }
-    }
-}
-
-proc setup_compiler_kfails { file compiler format tuples bug } {
-    global testfile
-    if {[string match $file $testfile] && [test_compiler_info $compiler]  && [test_debug_format $format]} {
-	foreach f $tuples { setup_kfail $f $bug }
-    }
-}
-
 # Compile a variant of scalars.c using TYPE to specify the type of the
 # parameter and return-type.  Run the compiled program up to "main".
 # Also updates the global "testfile" to reflect the most recent build.
@@ -133,22 +117,6 @@ proc I2A { n } {
     return [string toupper [i2a $n]]
 }
 
-
-# Use the file name, compiler and tuples to set up any needed KFAILs.
-
-proc setup_kfails { file tuples bug } {
-    global testfile
-    if [string match $file $testfile] {
-	foreach f $tuples { setup_kfail $f $bug }
-    }
-}
-
-proc setup_compiler_kfails { file compiler format tuples bug } {
-    global testfile
-    if {[string match $file $testfile] && [test_compiler_info $compiler]  && [test_debug_format $format]} {
-	foreach f $tuples { setup_kfail $f $bug }
-    }
-}
 
 # Test GDB's ability to make inferior function calls to functions
 # returning (or passing) in a single scalar.

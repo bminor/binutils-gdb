@@ -85,7 +85,7 @@ proc pat2 { n pats } {
 
 proc gdb_test_xxx { test pat name } {
     if { $pat == "" } {
-	setup_kfail *-*-* gdb/1672
+	setup_kfail gdb/1672 *-*-*
 	gdb_test $test "xxx" $name
     } else {
 	gdb_test $test $pat $name

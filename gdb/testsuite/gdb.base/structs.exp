@@ -215,17 +215,10 @@ proc I2A { n } {
 
 # Use the file name, compiler and tuples to set up any needed KFAILs.
 
-proc setup_kfails { file tuples bug } {
-    global testfile
-    if [string match $file $testfile] {
-	foreach f $tuples { setup_kfail $f $bug }
-    }
-}
-
 proc setup_compiler_kfails { file compiler format tuples bug } {
     global testfile
     if {[string match $file $testfile] && [test_compiler_info $compiler]  && [test_debug_format $format]} {
-	foreach f $tuples { setup_kfail $f $bug }
+	foreach f $tuples { setup_kfail $bug $f }
     }
 }
 

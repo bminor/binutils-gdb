@@ -83,8 +83,8 @@ proc finish_test { pattern msg } {
 	    # Some platforms use a special read-only page for signal
 	    # trampolines.  We can't set a breakpoint there, and we
 	    # don't gracefully fall back to single-stepping.
-	    setup_kfail "i?86-*-linux*" gdb/1736
-	    setup_kfail "*-*-openbsd*" gdb/1736
+	    setup_kfail gdb/1736 "i?86-*-linux*"
+	    setup_kfail gdb/1736 "*-*-openbsd*"
 	    fail "$msg (could not set breakpoint)"
 	}
 	-re "$pattern.*${gdb_prompt} $" {
