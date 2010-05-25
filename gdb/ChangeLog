@@ -1,5 +1,12 @@
 2010-05-25  Doug Evans  <dje@google.com>
 
+	* event-loop.h (GDB_READABLE, GDB_WRITABLE, GDB_EXCEPTION): Move to ...
+	* event-loop.c: ... here.
+	* tui/tui-io.c (tui_readline_output): Rename parameter `code' to
+	`error' for clarity.
+	(tui_getc): Pass correct value for `error' parameter to
+	tui_readline_output.
+
 	Add python gdb.GdbError and gdb.string_to_argv.
 	* NEWS: Document them.
 	* python/py-cmd.c (cmdpy_function): Don't print a traceback if
