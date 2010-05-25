@@ -1032,7 +1032,11 @@ display_selector (HANDLE thread, DWORD sel)
     }
   else
     {
-      printf_filtered ("Invalid selector 0x%lx.\n",sel);
+      DWORD err = GetLastError ();
+      if (err == ERROR_NOT_SUPPORTED)
+	printf_filtered ("Function not supported\n");
+      else
+	printf_filtered ("Invalid selector 0x%lx.\n",sel);
       return 0;
     }
 }
