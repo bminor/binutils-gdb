@@ -1,7 +1,7 @@
 /* vms-misc.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2007, 2008, 2009  Free Software Foundation, Inc.
+   2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
    Miscellaneous functions.
 
@@ -33,6 +33,9 @@
 #include "safe-ctype.h"
 
 #ifdef VMS
+#if defined(__GNUC__) && !defined(globalref)
+#define globalref extern
+#endif
 #include <rms.h>
 #include <unixlib.h>
 #include <starlet.h>
@@ -399,8 +402,8 @@ _bfd_vms_output_fill (struct vms_rec_wr *recwr, int value, int count)
    using undocumented system call sys$modify().
    Pure VMS version.  */
 
-static void
-vms_convert_to_var (char *vms_filename)
+void
+_bfd_vms_convert_to_var (char * vms_filename)
 {
   struct FAB fab = cc$rms_fab;
 

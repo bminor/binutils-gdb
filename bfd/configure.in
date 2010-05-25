@@ -223,7 +223,7 @@ CORE_HEADER=
 TRAD_HEADER=
 if test "${target}" = "${host}"; then
   case "${host}" in
-  alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
+  alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu | alpha*-*-*vms*)
 	COREFILE=''
 	;;
   alpha*-*-linux-*)
@@ -233,9 +233,11 @@ if test "${target}" = "${host}"; then
   alpha*-*-netbsd* | alpha*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  alpha*-*-*)		COREFILE=osf-core.lo ;;
+  alpha*-*-*)
+        COREFILE=osf-core.lo
+	;;
   arm-*-freebsd* | arm-*-kfreebsd*-gnu)
-			COREFILE='' ;;
+	COREFILE='' ;;
   arm-*-netbsd* | arm-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;

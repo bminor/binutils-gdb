@@ -8844,7 +8844,7 @@ vms_close_and_cleanup (bfd * abfd)
 	 format.  */
       if (bfd_cache_close (abfd) != TRUE)
 	return FALSE;
-      if (vms_convert_to_var_unix_filename (abfd->filename) != TRUE)
+      if (_bfd_vms_convert_to_var_unix_filename (abfd->filename) != TRUE)
 	return FALSE;
     }
 #endif

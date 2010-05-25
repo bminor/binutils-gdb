@@ -303,6 +303,15 @@ eq_file_ptr (const PTR p1, const PTR p2)
   return arc1->ptr == arc2->ptr;
 }
 
+/* The calloc function doesn't always take size_t (e.g. on VMS)
+   so wrap it to avoid a compile time warning.   */
+
+static void *
+_bfd_calloc_wrapper (size_t a, size_t b)
+{
+  return calloc (a, b);
+}
+
 /* Kind of stupid to call cons for each one, but we don't do too many.  */
 
 bfd_boolean
@@ -315,7 +324,7 @@ _bfd_add_bfd_to_archive_cache (bfd *arch_bfd, file_ptr filepos, bfd *new_elt)
   if (hash_table == NULL)
     {
       hash_table = htab_create_alloc (16, hash_file_ptr, eq_file_ptr,
-				      NULL, calloc, free);
+				      NULL, _bfd_calloc_wrapper, free);
       if (hash_table == NULL)
 	return FALSE;
       bfd_ardata (arch_bfd)->cache = hash_table;

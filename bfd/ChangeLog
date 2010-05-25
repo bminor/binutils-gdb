@@ -1,3 +1,19 @@
+2010-05-25  Jay Krell  <jay.krell@cornell.edu>
+
+	PR ld/11624
+	* archive.c (_bfd_calloc_wrapper): New function.
+	(_bfd_add_bfd_to_archive_cache): Use it.
+
+	* configure.in: Add alpha*-*-*vms* to list of natives.
+	* configure: Regenerate.
+
+	* vms-misc.c: Define globalref if necessary.
+	(vms_convert_to_var_unix_filename): Rename to
+	_bfd_vms_convert_to_var_unix_filename and export.
+	* vms.h: Add prototype for _bfd_vms_convert_to_var_unix_filename.
+	* vms-alpha.c (vms_close_and_cleanup): Update invocation of
+	vms_convert_to_var_unix_filename.
+
 2010-05-24  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (add_symbol_entry): New function extrated from ...

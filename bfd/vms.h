@@ -1,6 +1,6 @@
 /* vms.h -- Header file for VMS (Alpha and Vax) support.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007,
-   2008, 2009 Free Software Foundation, Inc.
+   2008, 2009, 2010 Free Software Foundation, Inc.
 
    Main header file.
 
@@ -111,26 +111,27 @@ extern void _bfd_hexdump   (int, unsigned char *, int, int);
 #define vms_debug2(X)
 #endif
 
-extern char *vms_get_module_name (const char *filename, bfd_boolean);
+extern char * vms_get_module_name (const char *, bfd_boolean);
 extern unsigned char *get_vms_time_string (void);
 extern time_t vms_time_to_time_t (unsigned int hi, unsigned int lo);
-extern time_t vms_rawtime_to_time_t (unsigned char *buf);
+extern time_t vms_rawtime_to_time_t (unsigned char *);
 
-extern char *_bfd_vms_save_sized_string (unsigned char *, int);
-extern char *_bfd_vms_save_counted_string (unsigned char *);
-extern void _bfd_vms_output_begin (struct vms_rec_wr *, int);
-extern void _bfd_vms_output_alignment (struct vms_rec_wr *, int);
-extern void _bfd_vms_output_begin_subrec (struct vms_rec_wr *, int);
-extern void _bfd_vms_output_end_subrec (struct vms_rec_wr *);
-extern void _bfd_vms_output_end (bfd *, struct vms_rec_wr *);
-extern int _bfd_vms_output_check (struct vms_rec_wr *, int);
-extern void _bfd_vms_output_byte (struct vms_rec_wr *, unsigned);
-extern void _bfd_vms_output_short (struct vms_rec_wr *, unsigned);
-extern void _bfd_vms_output_long (struct vms_rec_wr *, unsigned long);
-extern void _bfd_vms_output_quad (struct vms_rec_wr *, bfd_vma);
-extern void _bfd_vms_output_counted (struct vms_rec_wr *, char *);
-extern void _bfd_vms_output_dump (struct vms_rec_wr *, unsigned char *, int);
-extern void _bfd_vms_output_fill (struct vms_rec_wr *, int, int);
+extern char * _bfd_vms_save_sized_string (unsigned char *, int);
+extern char * _bfd_vms_save_counted_string (unsigned char *);
+extern void   _bfd_vms_output_begin (struct vms_rec_wr *, int);
+extern void   _bfd_vms_output_alignment (struct vms_rec_wr *, int);
+extern void   _bfd_vms_output_begin_subrec (struct vms_rec_wr *, int);
+extern void   _bfd_vms_output_end_subrec (struct vms_rec_wr *);
+extern void   _bfd_vms_output_end (bfd *, struct vms_rec_wr *);
+extern int    _bfd_vms_output_check (struct vms_rec_wr *, int);
+extern void   _bfd_vms_output_byte (struct vms_rec_wr *, unsigned);
+extern void   _bfd_vms_output_short (struct vms_rec_wr *, unsigned);
+extern void   _bfd_vms_output_long (struct vms_rec_wr *, unsigned long);
+extern void   _bfd_vms_output_quad (struct vms_rec_wr *, bfd_vma);
+extern void   _bfd_vms_output_counted (struct vms_rec_wr *, char *);
+extern void   _bfd_vms_output_dump (struct vms_rec_wr *, unsigned char *, int);
+extern void   _bfd_vms_output_fill (struct vms_rec_wr *, int, int);
+extern int    _bfd_vms_convert_to_var_unix_filename (const char *);
 
 /* vms-alpha.c  */
 
