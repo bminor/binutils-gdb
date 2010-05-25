@@ -1,5 +1,9 @@
 2010-05-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/macscp.exp: Add missing space after setup_kfail.
+
+2010-05-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.arch/i386-prologue.exp (skip_breakpoint): Fix setup_kfail
 	argument order.
 	* gdb.base/macscp.exp: Fix setup_kfail argument order.

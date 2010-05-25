@@ -243,7 +243,7 @@ switch -exact -- [info_macro WHERE] {
         pass "info macro WHERE after `list macscp_4_2_from_macscp2'"
     }
     {macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}} {
-        setup_kfail"gdb/555" *-*-* 
+        setup_kfail "gdb/555" *-*-* 
         fail "info macro WHERE after `list macscp_4_2_from_macscp2' (gdb/555)"
     }
     timeout { 
@@ -258,7 +258,7 @@ switch -exact -- [info_macro WHERE] {
         pass "info macro WHERE after `list macscp_4_2_from_macscp3'"
     }
     {macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}} {
-        setup_kfail"gdb/555" *-*-* 
+        setup_kfail "gdb/555" *-*-* 
         fail "info macro WHERE after `list macscp_4_2_from_macscp3' (gdb/555)"
     }
     timeout {
@@ -370,7 +370,7 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
     if {[string compare $result $expected] == 0} {
         pass "info macro WHERE stopped in $func"
     } elseif {[string compare $result $kfail_expected] == 0} {
-        setup_kfail"gdb/555" *-*-* 
+        setup_kfail "gdb/555" *-*-* 
         fail "info macro WHERE stopped in $func (gdb/555)"
     } elseif {[string compare $result timeout] == 0} {
         fail "info macro WHERE stopped in $func (timeout)"
