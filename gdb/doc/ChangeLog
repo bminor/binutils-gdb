@@ -1,3 +1,13 @@
+2010-05-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (General Query Packets) <qSupported>: Describe the
+	`qRelocInsn' feature.
+	(Relocate instruction reply packet): New subsection
+	of `Tracepoint Packets'.
+	(Tracepoint Packets): Mention that packets QTDP and QTStart
+	support the qRelocInsn request, and add cross reference to new
+	subsection.
+
 2010-05-25  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Exception Handling): Document gdb.GdbError.

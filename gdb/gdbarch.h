@@ -806,6 +806,24 @@ typedef CORE_ADDR (gdbarch_displaced_step_location_ftype) (struct gdbarch *gdbar
 extern CORE_ADDR gdbarch_displaced_step_location (struct gdbarch *gdbarch);
 extern void set_gdbarch_displaced_step_location (struct gdbarch *gdbarch, gdbarch_displaced_step_location_ftype *displaced_step_location);
 
+/* Relocate an instruction to execute at a different address.  OLDLOC
+   is the address in the inferior memory where the instruction to
+   relocate is currently at.  On input, TO points to the destination
+   where we want the instruction to be copied (and possibly adjusted)
+   to.  On output, it points to one past the end of the resulting
+   instruction(s).  The effect of executing the instruction at TO shall
+   be the same as if executing it at FROM.  For example, call
+   instructions that implicitly push the return address on the stack
+   should be adjusted to return to the instruction after OLDLOC;
+   relative branches, and other PC-relative instructions need the
+   offset adjusted; etc. */
+
+extern int gdbarch_relocate_instruction_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_relocate_instruction_ftype) (struct gdbarch *gdbarch, CORE_ADDR *to, CORE_ADDR from);
+extern void gdbarch_relocate_instruction (struct gdbarch *gdbarch, CORE_ADDR *to, CORE_ADDR from);
+extern void set_gdbarch_relocate_instruction (struct gdbarch *gdbarch, gdbarch_relocate_instruction_ftype *relocate_instruction);
+
 /* Refresh overlay mapped state for section OSECT. */
 
 extern int gdbarch_overlay_update_p (struct gdbarch *gdbarch);

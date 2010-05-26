@@ -242,6 +242,8 @@ static void remote_terminal_ours (void);
 
 static int remote_read_description_p (struct target_ops *target);
 
+char *unpack_varlen_hex (char *buff, ULONGEST *result);
+
 /* The non-stop remote protocol provisions for one pending stop reply.
    This is where we keep it until it is acknowledged.  */
 
@@ -433,6 +435,55 @@ remote_get_noisy_reply (char **buf_p,
       buf = *buf_p;
       if (buf[0] == 'E')
 	trace_error (buf);
+      else if (strncmp (buf, "qRelocInsn:", strlen ("qRelocInsn:")) == 0)
+	{
+	  ULONGEST ul;
+	  CORE_ADDR from, to, org_to;
+	  char *p, *pp;
+	  int adjusted_size = 0;
+	  volatile struct gdb_exception ex;
+
+	  p = buf + strlen ("qRelocInsn:");
+	  pp = unpack_varlen_hex (p, &ul);
+	  if (*pp != ';')
+	    error (_("invalid qRelocInsn packet: %s\n"), buf);
+	  from = ul;
+
+	  p = pp + 1;
+	  pp = unpack_varlen_hex (p, &ul);
+	  to = ul;
+
+	  org_to = to;
+
+	  TRY_CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      gdbarch_relocate_instruction (target_gdbarch, &to, from);
+	    }
+	  if (ex.reason >= 0)
+	    {
+	      adjusted_size = to - org_to;
+
+	      sprintf (buf, "qRelocInsn:%x", adjusted_size);
+	      putpkt (buf);
+	    }
+	  else if (ex.reason < 0 && ex.error == MEMORY_ERROR)
+	    {
+	      /* Propagate memory errors silently back to the target.
+		 The stub may have limited the range of addresses we
+		 can write to, for example.  */
+	      putpkt ("E01");
+	    }
+	  else
+	    {
+	      /* Something unexpectedly bad happened.  Be verbose so
+		 we can tell what, and propagate the error back to the
+		 stub, so it doesn't get stuck waiting for a
+		 response.  */
+	      exception_fprintf (gdb_stderr, ex,
+				 _("warning: relocating instruction: "));
+	      putpkt ("E01");
+	    }
+	}
       else if (buf[0] == 'O' && buf[1] != 'K')
 	remote_console_output (buf + 1);	/* 'O' message from stub */
       else
@@ -3584,13 +3635,10 @@ remote_query_supported (void)
       if (remote_support_xml)
 	q = remote_query_supported_append (q, remote_support_xml);
 
-      if (q)
-	{
-	  q = reconcat (q, "qSupported:", q, (char *) NULL);
-	  putpkt (q);
-	}
-      else
-	putpkt ("qSupported");
+      q = remote_query_supported_append (q, "qRelocInsn+");
+
+      q = reconcat (q, "qSupported:", q, (char *) NULL);
+      putpkt (q);
 
       do_cleanups (old_chain);
 

@@ -1,3 +1,17 @@
+2010-05-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* NEWS: Mention the `qRelocInsn' feature.
+	* gdbarch.sh (relocate_instruction): New.
+	* amd64-tdep.c (rip_relative_offset): New.
+	(append_insns): New.
+	(amd64_relocate_instruction): New.
+	(amd64_init_abi): Install it.
+	* i386-tdep.c (append_insns): New.
+	(i386_relocate_instruction): New.
+	(i386_gdbarch_init): Install it.
+	* remote.c (remote_get_noisy_reply): Handle qRelocInsn requests.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2010-05-26  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.h (struct dwarf2_locexpr_baton) <data>: Now const.

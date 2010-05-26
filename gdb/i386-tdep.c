@@ -658,6 +658,86 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
                             paddress (gdbarch, retaddr));
     }
 }
+
+static void
+append_insns (CORE_ADDR *to, ULONGEST len, const gdb_byte *buf)
+{
+  target_write_memory (*to, buf, len);
+  *to += len;
+}
+
+static void
+i386_relocate_instruction (struct gdbarch *gdbarch,
+			   CORE_ADDR *to, CORE_ADDR oldloc)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  gdb_byte buf[I386_MAX_INSN_LEN];
+  int offset = 0, rel32, newrel;
+  int insn_length;
+  gdb_byte *insn = buf;
+
+  read_memory (oldloc, buf, I386_MAX_INSN_LEN);
+
+  insn_length = gdb_buffered_insn_length (gdbarch, insn,
+					  I386_MAX_INSN_LEN, oldloc);
+
+  /* Get past the prefixes.  */
+  insn = i386_skip_prefixes (insn, I386_MAX_INSN_LEN);
+
+  /* Adjust calls with 32-bit relative addresses as push/jump, with
+     the address pushed being the location where the original call in
+     the user program would return to.  */
+  if (insn[0] == 0xe8)
+    {
+      gdb_byte push_buf[16];
+      unsigned int ret_addr;
+
+      /* Where "ret" in the original code will return to.  */
+      ret_addr = oldloc + insn_length;
+      push_buf[0] = 0x68; /* pushq $... */
+      memcpy (&push_buf[1], &ret_addr, 4);
+      /* Push the push.  */
+      append_insns (to, 5, push_buf);
+
+      /* Convert the relative call to a relative jump.  */
+      insn[0] = 0xe9;
+
+      /* Adjust the destination offset.  */
+      rel32 = extract_signed_integer (insn + 1, 4, byte_order);
+      newrel = (oldloc - *to) + rel32;
+      store_signed_integer (insn + 1, 4, newrel, byte_order);
+
+      /* Write the adjusted jump into its displaced location.  */
+      append_insns (to, 5, insn);
+      return;
+    }
+
+  /* Adjust jumps with 32-bit relative addresses.  Calls are already
+     handled above.  */
+  if (insn[0] == 0xe9)
+    offset = 1;
+  /* Adjust conditional jumps.  */
+  else if (insn[0] == 0x0f && (insn[1] & 0xf0) == 0x80)
+    offset = 2;
+
+  if (offset)
+    {
+      rel32 = extract_signed_integer (insn + offset, 4, byte_order);
+      newrel = (oldloc - *to) + rel32;
+      store_signed_integer (insn + offset, 4, newrel, byte_order);
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Adjusted insn rel32=0x%s at 0x%s to"
+			    " rel32=0x%s at 0x%s\n",
+			    hex_string (rel32), paddress (gdbarch, oldloc),
+			    hex_string (newrel), paddress (gdbarch, *to));
+    }
+
+  /* Write the adjusted instructions into their displaced
+     location.  */
+  append_insns (to, insn_length, buf);
+}
+
 
 #ifdef I386_REGNO_TO_SYMMETRY
 #error "The Sequent Symmetry is no longer supported."
@@ -6908,6 +6988,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->num_ymm_regs = 0;
 
   tdesc_data = tdesc_data_alloc ();
+
+  set_gdbarch_relocate_instruction (gdbarch, i386_relocate_instruction);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.tdep_info = (void *) tdesc_data;

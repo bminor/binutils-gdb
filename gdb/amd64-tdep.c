@@ -1507,6 +1507,123 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 			    paddress (gdbarch, retaddr));
     }
 }
+
+/* If the instruction INSN uses RIP-relative addressing, return the
+   offset into the raw INSN where the displacement to be adjusted is
+   found.  Returns 0 if the instruction doesn't use RIP-relative
+   addressing.  */
+
+static int
+rip_relative_offset (struct amd64_insn *insn)
+{
+  if (insn->modrm_offset != -1)
+    {
+      gdb_byte modrm = insn->raw_insn[insn->modrm_offset];
+
+      if ((modrm & 0xc7) == 0x05)
+	{
+	  /* The displacement is found right after the ModRM byte.  */
+	  return insn->modrm_offset + 1;
+	}
+    }
+
+  return 0;
+}
+
+static void
+append_insns (CORE_ADDR *to, ULONGEST len, const gdb_byte *buf)
+{
+  target_write_memory (*to, buf, len);
+  *to += len;
+}
+
+void
+amd64_relocate_instruction (struct gdbarch *gdbarch,
+			    CORE_ADDR *to, CORE_ADDR oldloc)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int len = gdbarch_max_insn_length (gdbarch);
+  /* Extra space for sentinels.  */
+  int fixup_sentinel_space = len;
+  gdb_byte *buf = xmalloc (len + fixup_sentinel_space);
+  struct amd64_insn insn_details;
+  int offset = 0;
+  LONGEST rel32, newrel;
+  gdb_byte *insn;
+  int insn_length;
+
+  read_memory (oldloc, buf, len);
+
+  /* Set up the sentinel space so we don't have to worry about running
+     off the end of the buffer.  An excessive number of leading prefixes
+     could otherwise cause this.  */
+  memset (buf + len, 0, fixup_sentinel_space);
+
+  insn = buf;
+  amd64_get_insn_details (insn, &insn_details);
+
+  insn_length = gdb_buffered_insn_length (gdbarch, insn, len, oldloc);
+
+  /* Skip legacy instruction prefixes.  */
+  insn = amd64_skip_prefixes (insn);
+
+  /* Adjust calls with 32-bit relative addresses as push/jump, with
+     the address pushed being the location where the original call in
+     the user program would return to.  */
+  if (insn[0] == 0xe8)
+    {
+      gdb_byte push_buf[16];
+      unsigned int ret_addr;
+
+      /* Where "ret" in the original code will return to.  */
+      ret_addr = oldloc + insn_length;
+      push_buf[0] = 0x68; /* pushq $... */
+      memcpy (&push_buf[1], &ret_addr, 4);
+      /* Push the push.  */
+      append_insns (to, 5, push_buf);
+
+      /* Convert the relative call to a relative jump.  */
+      insn[0] = 0xe9;
+
+      /* Adjust the destination offset.  */
+      rel32 = extract_signed_integer (insn + 1, 4, byte_order);
+      newrel = (oldloc - *to) + rel32;
+      store_signed_integer (insn + 1, 4, newrel, byte_order);
+
+      /* Write the adjusted jump into its displaced location.  */
+      append_insns (to, 5, insn);
+      return;
+    }
+
+  offset = rip_relative_offset (&insn_details);
+  if (!offset)
+    {
+      /* Adjust jumps with 32-bit relative addresses.  Calls are
+	 already handled above.  */
+      if (insn[0] == 0xe9)
+	offset = 1;
+      /* Adjust conditional jumps.  */
+      else if (insn[0] == 0x0f && (insn[1] & 0xf0) == 0x80)
+	offset = 2;
+    }
+
+  if (offset)
+    {
+      rel32 = extract_signed_integer (insn + offset, 4, byte_order);
+      newrel = (oldloc - *to) + rel32;
+      store_signed_integer (insn + offset, 4, newrel, byte_order);
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Adjusted insn rel32=0x%s at 0x%s to"
+			    " rel32=0x%s at 0x%s\n",
+			    hex_string (rel32), paddress (gdbarch, oldloc),
+			    hex_string (newrel), paddress (gdbarch, *to));
+    }
+
+  /* Write the adjusted instruction into its displaced location.  */
+  append_insns (to, insn_length, buf);
+}
+
 
 /* The maximum number of saved registers.  This should include %rip.  */
 #define AMD64_NUM_SAVED_REGS	AMD64_NUM_GREGS
@@ -2363,6 +2480,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					  amd64_regset_from_core_section);
 
   set_gdbarch_get_longjmp_target (gdbarch, amd64_get_longjmp_target);
+
+  set_gdbarch_relocate_instruction (gdbarch, amd64_relocate_instruction);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

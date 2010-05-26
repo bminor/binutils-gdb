@@ -31446,6 +31446,11 @@ This feature indicates that @value{GDBN} supports the XML target
 description.  If the stub sees @samp{xmlRegisters=} with target
 specific strings separated by a comma, it will report register
 description.
+
+@item qRelocInsn
+This feature indicates whether @value{GDBN} supports the
+@samp{qRelocInsn} packet (@pxref{Tracepoint Packets,,Relocate
+instruction reply packet}).
 @end table
 
 Stubs should ignore any unknown values for
@@ -32054,6 +32059,8 @@ Replies:
 @table @samp
 @item OK
 The packet was understood and carried out.
+@item qRelocInsn
+@xref{Tracepoint Packets,,Relocate instruction reply packet}.
 @item 
 The packet was not recognized.
 @end table
@@ -32118,6 +32125,8 @@ Replies:
 @table @samp
 @item OK
 The packet was understood and carried out.
+@item qRelocInsn
+@xref{Tracepoint Packets,,Relocate instruction reply packet}.
 @item 
 The packet was not recognized.
 @end table
@@ -32209,8 +32218,10 @@ Like @samp{QTFrame:range:@var{start}:@var{end}}, but select the first
 frame @emph{outside} the given range of addresses (exclusive).
 
 @item QTStart
-Begin the tracepoint experiment.  Begin collecting data from tracepoint
-hits in the trace frame buffer.
+Begin the tracepoint experiment.  Begin collecting data from
+tracepoint hits in the trace frame buffer.  This packet supports the
+@samp{qRelocInsn} reply (@pxref{Tracepoint Packets,,Relocate
+instruction reply packet}).
 
 @item QTStop
 End the tracepoint experiment.  Stop collecting trace frames.
@@ -32369,6 +32380,44 @@ available.
 This packet directs the target to use a circular trace buffer if
 @var{value} is 1, or a linear buffer if the value is 0.
 
+@end table
+
+@subsection Relocate instruction reply packet
+When installing fast tracepoints in memory, the target may need to
+relocate the instruction currently at the tracepoint address to a
+different address in memory.  For most instructions, a simple copy is
+enough, but, for example, call instructions that implicitly push the
+return address on the stack, and relative branches or other
+PC-relative instructions require offset adjustment, so that the effect
+of executing the instruction at a different address is the same as if
+it had executed in the original location.
+
+In response to several of the tracepoint packets, the target may also
+respond with a number of intermediate @samp{qRelocInsn} request
+packets before the final result packet, to have @value{GDBN} handle
+this relocation operation.  If a packet supports this mechanism, its
+documentation will explicitly say so.  See for example the above
+descriptions for the @samp{QTStart} and @samp{QTDP} packets.  The
+format of the request is:
+
+@table @samp
+@item qRelocInsn:@var{from};@var{to}
+
+This requests @value{GDBN} to copy instruction at address @var{from}
+to address @var{to}, possibly adjusted so that executing the
+instruction at @var{to} has the same effect as executing it at
+@var{from}.  @value{GDBN} writes the adjusted instruction to target
+memory starting at @var{to}.
+@end table
+
+Replies:
+@table @samp
+@item qRelocInsn:@var{adjusted_size}
+Informs the stub the relocation is complete.  @var{adjusted_size} is
+the length in bytes of resulting relocated instruction sequence.
+@item E @var{NN}
+A badly formed request was detected, or an error was encountered while
+relocating the instruction.
 @end table
 
 @node Host I/O Packets

@@ -18,6 +18,15 @@ qGetTIBAddr
 
   Return the address of the Windows Thread Information Block of a given thread.
 
+qRelocInsn
+
+  In response to several of the tracepoint packets, the target may now
+  also respond with a number of intermediate `qRelocInsn' request
+  packets before the final result packet, to have GDB handle
+  relocating an instruction to execute at a different address.  This
+  is particularly useful for stubs that support fast tracepoints.  GDB
+  reports support for this feature in the qSupported packet.
+
 * The source command now accepts a -s option to force searching for the
   script in the source search path even if the script name specifies
   a directory.

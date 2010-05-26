@@ -708,6 +708,19 @@ m:void:displaced_step_free_closure:struct displaced_step_closure *closure:closur
 # see the comments in infrun.c.
 m:CORE_ADDR:displaced_step_location:void:::NULL::(! gdbarch->displaced_step_location) != (! gdbarch->displaced_step_copy_insn)
 
+# Relocate an instruction to execute at a different address.  OLDLOC
+# is the address in the inferior memory where the instruction to
+# relocate is currently at.  On input, TO points to the destination
+# where we want the instruction to be copied (and possibly adjusted)
+# to.  On output, it points to one past the end of the resulting
+# instruction(s).  The effect of executing the instruction at TO shall
+# be the same as if executing it at FROM.  For example, call
+# instructions that implicitly push the return address on the stack
+# should be adjusted to return to the instruction after OLDLOC;
+# relative branches, and other PC-relative instructions need the
+# offset adjusted; etc.
+M:void:relocate_instruction:CORE_ADDR *to, CORE_ADDR from:to, from::NULL
+
 # Refresh overlay mapped state for section OSECT.
 F:void:overlay_update:struct obj_section *osect:osect
 
