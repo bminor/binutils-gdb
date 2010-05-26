@@ -39,12 +39,11 @@ proc do_steps_and_nexts {} {
 
     set unlikely_line 0
     for {set count 0} {$count < 32} {incr count} {
-	send_gdb "list\n"
 	# NOTE: carlton/2002-12-11: The "initial brace" and
 	# "current_directory initialization" possibilities happen to
 	# me with GCC 3.1 on i686-pc-linux-gnu when I compile with
 	# optimization.
-	gdb_expect {
+	gdb_test_multiple "list" "list" {
 	    -re ".*context = data.*$gdb_prompt $" {
 		set description "step over context initialization"
 		set command "step"
@@ -227,8 +226,7 @@ proc do_steps_and_nexts {} {
 		return
 	    }
 	}
-	send_gdb "$command\n"
-	gdb_expect {
+	gdb_test_multiple "$command" "$description" {
 	    -re ".*No such file or directory.\r\n$gdb_prompt $" {
 		fail "$description (no source available)"
 	    }
@@ -237,9 +235,6 @@ proc do_steps_and_nexts {} {
 	    }
 	    -re ".*$gdb_prompt $" {
 		pass "$description"
-	    }
-	    timeout {
-		fail "$description (timeout)"
 	    }
 	}
     }
@@ -312,8 +307,7 @@ proc test_with_self { executable } {
     set timeout 600
 
     set description "run until breakpoint at captured_main"
-    send_gdb "run -nw\n"
-    gdb_expect {
+    gdb_test_multiple "run -nw" "$description" {
 	-re "Starting program.*Breakpoint \[0-9\]+,.*captured_main .data.* at .*main.c:.*$gdb_prompt $" {
 	    pass "$description"
 	}
@@ -332,17 +326,13 @@ proc test_with_self { executable } {
 	    verbose "Timeout is now $timeout seconds" 2
 	    return -1
 	}
-	timeout {
-	    fail "$description (timeout)"
-	}
     }
 
     set timeout $oldtimeout
     verbose "Timeout is now $timeout seconds" 2
 
     # do we have a version number ?
-    send_gdb "print version\n"
-    gdb_expect {
+    gdb_test_multiple "print version" "printed version" {
 	-re ".\[0-9\]+ = .\[0-9.\]+.*$gdb_prompt $" {
 	    pass "printed version as string"
 	}
@@ -352,8 +342,6 @@ proc test_with_self { executable } {
 	-re ".\[0-9\]+ = +.+ +0x.*\[0-9.\]+.*$gdb_prompt $" {
 	    pass "printed version with cast"
 	}
-	-re ".*$gdb_prompt $"	{ fail "printed version" }
-	timeout		{ fail "(timeout) printed version" }
     }
 
     do_steps_and_nexts
@@ -370,8 +358,7 @@ proc test_with_self { executable } {
     set stepped_back 0
     setup_xfail "alpha-*-*" "mips-*-*"
     set description "step into xmalloc call"
-    send_gdb "step\n"
-    gdb_expect {
+    gdb_test_multiple "step" "$description" {
 	-re "ncmd = 0;.*$gdb_prompt $" {
 	    set stepped_back 1
 	    send_gdb "step\n"
@@ -404,48 +391,26 @@ proc test_with_self { executable } {
 	-re "A file or directory .* does not exist..\r\n$gdb_prompt $" {
 	    pass "$description (no source available)"
 	}
-	-re ".*$gdb_prompt $" {
-	    fail "$description"
-	}
-	timeout {
-	    fail "$description (timeout)"
-	}
     }
 
     # start the "xgdb" process
-    send_gdb "continue\n"
-    gdb_expect {
-	-re "GNU gdb \[0-9\.\]*.*
-Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*
-License GPLv3\\+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.*
-This is free software: you are free to change and redistribute it.*
-There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\".*
-and \"show warranty\" for details.*
-This GDB was configured as .*$gdb_prompt $"\
-	    { pass "xgdb is at prompt" }
-	-re "GNU gdb \[0-9\.\]*.*
-Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*
-GDB is free software, covered by the GNU General Public License, and you are.*
-welcome to change it and/or distribute copies of it under certain conditions.*
-Type \"show copying\" to see the conditions.*
-There is absolutely no warranty for GDB.  Type \"show warranty\" for details.*
-This GDB was configured as .*$gdb_prompt $"\
-	    { pass "xgdb is at prompt (obsolescent gdb 2)" }
-	-re "GDB is free software and you are welcome to distribute copies of it.*
- under certain conditions; type \"show copying\" to see the conditions..*
-There is absolutely no warranty for GDB; type \"show warranty\" for details..*
-GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
-	    { pass "xgdb is at prompt (obsolescent gdb 1)" }
-	-re ".*$gdb_prompt $"       { fail "xgdb is at prompt" }
-	timeout	            { fail "(timeout) xgdb is at prompt" }
+    gdb_test_multiple "continue" "xgdb is at prompt" {
+	-re "GNU gdb \[0-9\.\]*.*Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*License GPLv3\\+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.*This is free software: you are free to change and redistribute it.*There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\".*and \"show warranty\" for details.*This GDB was configured as .*$gdb_prompt $" {
+	    pass "xgdb is at prompt"
+	}
+	-re "GNU gdb \[0-9\.\]*.*Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*GDB is free software, covered by the GNU General Public License, and you are.*welcome to change it and/or distribute copies of it under certain conditions.*Type \"show copying\" to see the conditions.*There is absolutely no warranty for GDB.  Type \"show warranty\" for details.*This GDB was configured as .*$gdb_prompt $" {
+	    pass "xgdb is at prompt (obsolescent gdb 2)"
+	}
+	-re "GDB is free software and you are welcome to distribute copies of it.* under certain conditions; type \"show copying\" to see the conditions..*There is absolutely no warranty for GDB; type \"show warranty\" for details..*GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $" {
+	    pass "xgdb is at prompt (obsolescent gdb 1)"
+	}
     }
     
     # set xgdb prompt so we can tell which is which
-    send_gdb "set prompt (xgdb) \n"
-    gdb_expect {
-	-re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $"	{ pass "Set xgdb prompt" }
-	-re ".*$gdb_prompt $"		{ fail "Set xgdb prompt" }
-	default				{ fail "(timeout) Set xgdb prompt" }
+    gdb_test_multiple "set prompt (xgdb) " "Set xgdb_prompt" {
+	-re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $" {
+	    pass "Set xgdb prompt"
+	}
     }
     
     # kill the xgdb process
@@ -464,18 +429,9 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     }
     
     set description "send SIGINT signal to child process"
-    send_gdb "signal SIGINT\n"
-    gdb_expect {
-	-re "Continuing with signal SIGINT.*$gdb_prompt $" {
-	    pass "$description"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "$description"
-	}
-	timeout {
-	    fail "$description (timeout)"
-	}
-    }
+    gdb_test "signal SIGINT" \
+	"Continuing with signal SIGINT.*" \
+	"$description"
     
     # get a stack trace
     #
@@ -484,8 +440,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     # The testsuite failures may not be limited to just aout systems.
     setup_xfail "i*86-pc-linuxaout-gnu"
     set description "backtrace through signal handler"
-    send_gdb "backtrace\n"
-    gdb_expect {
+    gdb_test_multiple "backtrace" "$description" {
 	-re "#0.*(read|poll).*in main \\(.*\\) at .*gdb\\.c.*$gdb_prompt $" {
 	    pass "$description"
 	}
@@ -497,9 +452,6 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
 	    # away.
 	    setup_xfail "alpha*-*-osf*"
 	    fail "$description"
-	}
-	timeout {
-	    fail "$description (timeout)"
 	}
     }
 

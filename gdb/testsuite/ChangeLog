@@ -1,5 +1,9 @@
 2010-05-26  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
+	* gdb.gdb/complaints.exp: Replace send_gdb with gdb_test.
+	* gdb.gdb/selftest.exp: Replace send_gdb with gdb_test.
+	* gdb.gdb/xfullpath.exp: Replace send_gdb with gdb_test.
+
 	* gdb.reverse/consecutive-reverse.exp: Replace send_gdb with gdb_test.
 	* gdb.reverse/consecutive-precsave.exp: Replace send_gdb with gdb_test.
 

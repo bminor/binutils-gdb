@@ -72,8 +72,7 @@ proc setup_test { executable } {
     set timeout 600
 
     set description "run until breakpoint at captured_main"
-    send_gdb "run -nw\n"
-    gdb_expect {
+    gdb_test_multiple "run -nw" "$description" {
         -re "Starting program.*Breakpoint \[0-9\]+,.*captured_main .data.* at .*main.c:.*$gdb_prompt $" {
             pass "$description"
         }
@@ -91,9 +90,6 @@ proc setup_test { executable } {
             set timeout $oldtimeout
             verbose "Timeout is now $timeout seconds" 2
             return -1
-        }
-        timeout {
-            fail "$description (timeout)"
         }
     }
 
