@@ -1461,6 +1461,11 @@ Sized_relobj<size, big_endian>::do_layout_deferred_sections(Layout* layout)
        ++deferred)
     {
       typename This::Shdr shdr(deferred->shdr_data_);
+      // If the section is not included, it is because the garbage collector
+      // decided it is not needed.  Avoid reverting that decision.
+      if (!this->is_section_included(deferred->shndx_))
+        continue;
+
       this->layout_section(layout, deferred->shndx_, deferred->name_.c_str(),
                            shdr, deferred->reloc_shndx_, deferred->reloc_type_);
     }

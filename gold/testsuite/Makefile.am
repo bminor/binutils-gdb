@@ -1284,6 +1284,24 @@ plugin_test_6: plugin_common_test_1.syms plugin_common_test_2.syms gcctestdir/ld
 plugin_test_6.err: plugin_test_6
 	@touch plugin_test_6.err
 
+check_PROGRAMS += plugin_test_7
+check_SCRIPTS += plugin_test_7.sh
+check_DATA += plugin_test_7.err plugin_test_7.syms
+MOSTLYCLEANFILES += plugin_test_7.err
+plugin_test_7: plugin_test_7_1.o plugin_test_7_1.syms plugin_test_7_2.o gcctestdir/ld plugin_test.so
+	$(LINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--gc-sections,--print-gc-sections plugin_test_7_1.syms plugin_test_7_2.o 2>plugin_test_7.err
+plugin_test_7.syms: plugin_test_7
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_test_7_1.o: plugin_test_7_1.c
+	$(COMPILE) -DLTO -O0 -c -ffunction-sections -fdata-sections -o $@ $<
+plugin_test_7_1_orig.o: plugin_test_7_1.c
+	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
+plugin_test_7_1.syms: plugin_test_7_1_orig.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+plugin_test_7_2.o: plugin_test_7_2.c
+	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
+plugin_test_7.err: plugin_test_7
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c

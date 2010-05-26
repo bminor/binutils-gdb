@@ -1,5 +1,16 @@
 2010-05-26  Rafael Espindola  <espindola@google.com>
 
+       PR 11604
+	* gold/object.cc(Sized_relobj::do_layout_deferred_sections): Avoid
+	adding sections the garbage collector removed.
+	* gold/testsuite/Makefile.am: Add test.
+	* gold/testsuite/Makefile.in: Regenerate.
+	* gold/testsuite/plugin_test_7.sh: New.
+	* gold/testsuite/plugin_test_7_1.c: New.
+	* gold/testsuite/plugin_test_7_2.c: New.
+
+2010-05-26  Rafael Espindola  <espindola@google.com>
+
 	* script-sections.cc (Output_section_definition::set_section_addresses):
 	Check for --section-start.
 
