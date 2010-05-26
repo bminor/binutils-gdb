@@ -1,4 +1,9 @@
 2010-05-26  Catherine Moore  <clm@codesoucery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* gas/mips/set-arch.d: Expect ehb.
+
+2010-05-26  Catherine Moore  <clm@codesoucery.com>
 
 	* gas/mips/mips-no-jalx.l: Delete.
 	* gas/mips/mips-no-jalx.s: Delete.

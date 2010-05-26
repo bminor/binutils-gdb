@@ -1,3 +1,9 @@
+2010-05-26  Catherine Moore <clm@codesourcery.com>
+	    David Ung  <davidu@mips.com>
+
+	* mips-opc.c: Change membership to I1 for instructions ssnop and
+	ehb.
+
 2010-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (sib): New.
