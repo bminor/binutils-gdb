@@ -54,12 +54,12 @@ dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
    For now, only return the first matching location expression; there
    can be more than one in the list.  */
 
-static gdb_byte *
+static const gdb_byte *
 find_location_expression (struct dwarf2_loclist_baton *baton,
 			  size_t *locexpr_length, CORE_ADDR pc)
 {
   CORE_ADDR low, high;
-  gdb_byte *loc_ptr, *buf_end;
+  const gdb_byte *loc_ptr, *buf_end;
   int length;
   struct objfile *objfile = dwarf2_per_cu_objfile (baton->per_cu);
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
@@ -773,7 +773,7 @@ static struct lval_funcs pieced_value_funcs = {
 
 static struct value *
 dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
-			  gdb_byte *data, unsigned short size,
+			  const gdb_byte *data, unsigned short size,
 			  struct dwarf2_per_cu_data *per_cu)
 {
   struct value *retval;
@@ -953,7 +953,7 @@ needs_frame_tls_address (void *baton, CORE_ADDR offset)
    requires a frame to evaluate.  */
 
 static int
-dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
+dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
 			     struct dwarf2_per_cu_data *per_cu)
 {
   struct needs_frame_baton baton;
@@ -1515,7 +1515,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   struct value *val;
-  gdb_byte *data;
+  const gdb_byte *data;
   size_t size;
 
   data = find_location_expression (dlbaton, &size,
@@ -1557,7 +1557,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   CORE_ADDR low, high;
-  gdb_byte *loc_ptr, *buf_end;
+  const gdb_byte *loc_ptr, *buf_end;
   int length, first = 1;
   struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
@@ -1639,7 +1639,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 			    struct agent_expr *ax, struct axs_value *value)
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
-  gdb_byte *data;
+  const gdb_byte *data;
   size_t size;
 
   data = find_location_expression (dlbaton, &size, ax->scope);

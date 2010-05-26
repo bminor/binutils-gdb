@@ -1,3 +1,14 @@
+2010-05-26  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.h (struct dwarf2_locexpr_baton) <data>: Now const.
+	(struct dwarf2_loclist_baton) <data>: Likewise.
+	* dwarf2loc.c (find_location_expression): Constify return type.
+	(dwarf2_evaluate_loc_desc): Make 'data' argument const.
+	(dwarf2_loc_desc_needs_frame): Likewise.
+	(loclist_read_variable): Constify.
+	(loclist_describe_location): Likewise.
+	(loclist_tracepoint_var_ref): Likewise.
+
 2010-05-25  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (dwarf_expr_frame_base): Constify.

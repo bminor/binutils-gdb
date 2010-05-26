@@ -43,7 +43,7 @@ CORE_ADDR dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *cu);
 struct dwarf2_locexpr_baton
 {
   /* Pointer to the start of the location expression.  */
-  gdb_byte *data;
+  const gdb_byte *data;
 
   /* Length of the location expression.  */
   unsigned long size;
@@ -60,7 +60,7 @@ struct dwarf2_loclist_baton
   CORE_ADDR base_address;
 
   /* Pointer to the start of the location list.  */
-  gdb_byte *data;
+  const gdb_byte *data;
 
   /* Length of the location list.  */
   unsigned long size;
