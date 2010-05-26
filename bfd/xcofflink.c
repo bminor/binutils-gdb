@@ -3976,7 +3976,9 @@ bfd_xcoff_link_generate_rtinit (bfd *abfd,
   abfd->format = bfd_object;
   abfd->iostream = (void *) bim;
   abfd->flags = BFD_IN_MEMORY;
+  abfd->iovec = &_bfd_memory_iovec;
   abfd->direction = write_direction;
+  abfd->origin = 0;
   abfd->where = 0;
 
   if (! bfd_xcoff_generate_rtinit (abfd, init, fini, rtld))

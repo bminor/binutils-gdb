@@ -845,6 +845,7 @@ struct bfd_iovec
   void *(*bmmap) (struct bfd *abfd, void *addr, bfd_size_type len,
                   int prot, int flags, file_ptr offset);
 };
+extern const struct bfd_iovec _bfd_memory_iovec;
 /* Extracted from bfdwin.c.  */
 struct _bfd_window_internal {
   struct _bfd_window_internal *next;

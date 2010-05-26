@@ -1,3 +1,33 @@
+2010-05-26  Tristan Gingold  <gingold@adacore.com>
+
+	* bfdio.c: Declare and define _bfd_memory_iovec.
+	(bfd_bread): Move code for BFD_IN_MEMORY...
+	(bfd_bwrite): ... Ditto ...
+	(bfd_tell): ... Ditto ...
+	(bfd_flush): ... Ditto ...
+	(bfd_stat): ... Ditto ...
+	(bfd_seek): ... Ditto ...
+	(bfd_get_size): ... Ditto ...
+	(bfd_mmap): ... Ditto ...
+	(memory_bread): ... to these new functions.
+	(memory_bwrite): Ditto.
+	(memory_btell): Ditto.
+	(memory_bseek): Ditto.
+	(memory_bflush): Ditto.
+	(memory_bstat): Ditto.
+	(memory_bmmap): Ditto.
+	(memory_bclose): New function.
+	* peicode.h (pe_ILF_build_a_bfd): Use BFD_IN_MEMORY.
+	* xcofflink.c (bfd_xcoff_link_generate_rtinit): Ditto.
+	* opncls.c (bfd_close): Do not handle BFD_IN_MEMORY case.
+	(bfd_make_writable): Use _bfd_memory_iovec.
+	* elfcode.h (bfd_from_remote_memory): Use _bfd_memory_iovec.
+	* coff-alpha.c (alpha_ecoff_get_elt_at_filepos): Use
+	_bfd_memory_iovec.
+	(alpha_ecoff_openr_next_archived_file): Use proxy_origin
+	instead of origin.
+	* libbfd.h: Regenerate.
+
 2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Joseph Myers  <joseph@codesourcery.com>
 	    Andrew Stubbs  <ams@codesourcery.com>

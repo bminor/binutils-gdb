@@ -2226,6 +2226,8 @@ alpha_ecoff_get_elt_at_filepos (archive, filepos)
 
   nbfd->flags |= BFD_IN_MEMORY;
   nbfd->iostream = (PTR) bim;
+  nbfd->iovec = &_bfd_memory_iovec;
+  nbfd->origin = 0;
   BFD_ASSERT (! nbfd->cacheable);
 
   return nbfd;
@@ -2264,7 +2266,7 @@ alpha_ecoff_openr_next_archived_file (archive, last_file)
       /* Pad to an even boundary...
 	 Note that last_file->origin can be odd in the case of
 	 BSD-4.4-style element with a long odd size.  */
-      filestart = last_file->origin + size;
+      filestart = last_file->proxy_origin + size;
       filestart += filestart % 2;
     }
 

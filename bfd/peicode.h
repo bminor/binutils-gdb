@@ -1002,7 +1002,9 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
   abfd->iostream = (void *) vars.bim;
   abfd->flags |= BFD_IN_MEMORY /* | HAS_LOCALS */;
+  abfd->iovec = &_bfd_memory_iovec;
   abfd->where = 0;
+  abfd->origin = 0;
   obj_sym_filepos (abfd) = 0;
 
   /* Now create a symbol describing the imported value.  */

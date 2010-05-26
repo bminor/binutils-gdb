@@ -696,20 +696,7 @@ bfd_close (bfd *abfd)
   if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
     return FALSE;
 
-  if ((abfd->flags & BFD_IN_MEMORY) != 0)
-    {
-      /* FIXME: cagney/2004-02-15: Need to implement a BFD_IN_MEMORY io
-	 vector.
-	 Until that's done, at least don't leak memory.  */
-      struct bfd_in_memory *bim = (struct bfd_in_memory *) abfd->iostream;
-
-      if (bim->buffer != NULL)
-	free (bim->buffer);
-      free (bim);
-      ret = TRUE;
-    }
-  else
-    ret = abfd->iovec->bclose (abfd);
+  ret = abfd->iovec->bclose (abfd);
 
   if (ret)
     _maybe_make_executable (abfd);
@@ -823,6 +810,8 @@ bfd_make_writable (bfd *abfd)
   bim->buffer = 0;
 
   abfd->flags |= BFD_IN_MEMORY;
+  abfd->iovec = &_bfd_memory_iovec;
+  abfd->origin = 0;
   abfd->direction = write_direction;
   abfd->where = 0;
 
@@ -860,7 +849,6 @@ bfd_make_readable (bfd *abfd)
 
   if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
     return FALSE;
-
 
   abfd->arch_info = &bfd_default_arch_struct;
 
