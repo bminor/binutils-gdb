@@ -1,3 +1,12 @@
+2010-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11628
+	* ld-elf/textaddr3.d: New.
+	* ld-elf/textaddr4.d: Likewise.
+	* ld-elf/textaddr5.d: Likewise.
+	* ld-elf/textaddr6.d: Likewise.
+	* ld-elf/textaddr7.d: Likewise.
+
 2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Joseph Myers  <joseph@codesourcery.com>
 	    Andrew Stubbs  <ams@codesourcery.com>

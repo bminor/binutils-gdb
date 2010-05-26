@@ -299,6 +299,11 @@ fold_binary (etree_type *tree)
       for (seg = segments; seg; seg = seg->next) 
 	if (strcmp (seg->name, segment_name) == 0)
 	  {
+	    if (!seg->used
+		&& config.magic_demand_paged
+		&& (seg->value % config.maxpagesize) != 0)
+	      einfo (_("%P: warning: address of `%s' isn't multiple of maximum page size\n"),
+		     segment_name);
 	    seg->used = TRUE;
 	    expld.result.value = seg->value;
 	    expld.result.str = NULL;

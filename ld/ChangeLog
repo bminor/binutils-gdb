@@ -1,3 +1,9 @@
+2010-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11628
+	* ldexp.c (fold_binary): Warn if value of SEGMENT_START isn't
+	multiple of maximum page size.
+
 2010-05-25  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am: Fix typo.
