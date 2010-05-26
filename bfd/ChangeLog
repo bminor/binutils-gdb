@@ -1,5 +1,14 @@
 2010-05-26  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c: Update comments.
+	(alpha_vms_write_exec): Set lnkflags.  Write the GST.
+	(alpha_vms_link_output_symbol): New function.
+	(alpha_vms_bfd_final_link): Generate the VMS symbol table.
+	Set dst_section private field.
+	(alpha_vms_bfd_final_link): Remove code that set dst_section.
+
+2010-05-26  Tristan Gingold  <gingold@adacore.com>
+
 	* bfdio.c: Declare and define _bfd_memory_iovec.
 	(bfd_bread): Move code for BFD_IN_MEMORY...
 	(bfd_bwrite): ... Ditto ...

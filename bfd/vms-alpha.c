@@ -21,15 +21,16 @@
    MA 02110-1301, USA.  */
 
 /* TODO:
-   o  DMT
+   o  overlayed sections
    o  PIC
    o  Generation of shared image
-   o  Generation of GST in image
    o  Relocation optimizations
    o  EISD for the stack
    o  Vectors isect
    o  64 bits sections
    o  Entry point
+   o  LIB$INITIALIZE
+   o  protected sections (for messages)
    ...
 */
 
@@ -1631,7 +1632,8 @@ alpha_vms_sym_to_ctxt (struct alpha_vms_link_hash_entry *h)
         return RELC_SHR_BASE + PRIV2 (h->sym->owner, shr_index);
       else
         {
-          /* Can this happen ?  I'd like to see an example.  */
+          /* Can this happen (non-relocatable symg) ?  I'd like to see
+             an example.  */
           abort ();
         }
     }
@@ -2934,6 +2936,8 @@ alpha_vms_write_exec (bfd *abfd)
   struct vms_internal_eisd_map *eisd;
   asection *dst;
   asection *dmt;
+  file_ptr gst_filepos = 0;
+  unsigned int lnkflags = 0;
 
   /* Build the EIHD.  */
   PRIV (file_pos) = EIHD__C_LENGTH;
@@ -2962,7 +2966,6 @@ alpha_vms_write_exec (bfd *abfd)
 
   bfd_putl32 ((sizeof (eihd) + VMS_BLOCK_SIZE - 1) / VMS_BLOCK_SIZE,
               eihd.hdrblkcnt);
-  bfd_putl32 (0, eihd.lnkflags);
   bfd_putl32 (0, eihd.ident);
   bfd_putl32 (0, eihd.sysver);
 
@@ -3115,8 +3118,16 @@ alpha_vms_write_exec (bfd *abfd)
 
       if (dmt != NULL)
         {
+          lnkflags |= EIHD__M_DBGDMT;
           bfd_putl32 ((dmt->filepos / VMS_BLOCK_SIZE) + 1, eihs->dmtvbn);
           bfd_putl32 (dmt->size, eihs->dmtsize);
+        }
+      if (PRIV (gsd_sym_count) != 0)
+        {
+          alpha_vms_file_position_block (abfd);
+          gst_filepos = PRIV (file_pos);
+          bfd_putl32 ((gst_filepos / VMS_BLOCK_SIZE) + 1, eihs->gstvbn);
+          bfd_putl32 ((PRIV (gsd_sym_count) + 4) / 5 + 4, eihs->gstsize);
         }
     }
 
@@ -3127,6 +3138,7 @@ alpha_vms_write_exec (bfd *abfd)
       (eisd, (struct vms_eisd *)((char *)&eihd + eisd->file_pos));
 
   /* Write first block.  */
+  bfd_putl32 (lnkflags, eihd.lnkflags);
   if (bfd_bwrite (&eihd, sizeof (eihd), abfd) != sizeof (eihd))
     return FALSE;
 
@@ -3178,6 +3190,68 @@ alpha_vms_write_exec (bfd *abfd)
         }
     }
 
+  /* Write GST.  */
+  if (gst_filepos != 0)
+    {
+      struct vms_rec_wr *recwr = &PRIV (recwr);
+      unsigned int i;
+
+      _bfd_vms_write_emh (abfd);
+      _bfd_vms_write_lmn (abfd, "GNU LD");
+
+      /* PSC for the absolute section.  */
+      _bfd_vms_output_begin (recwr, EOBJ__C_EGSD);
+      _bfd_vms_output_long (recwr, 0);
+      _bfd_vms_output_begin_subrec (recwr, EGSD__C_PSC);
+      _bfd_vms_output_short (recwr, 0);
+      _bfd_vms_output_short (recwr, EGPS__V_PIC | EGPS__V_LIB | EGPS__V_RD);
+      _bfd_vms_output_long (recwr, 0);
+      _bfd_vms_output_counted (recwr, ".$$ABS$$.");
+      _bfd_vms_output_end_subrec (recwr);
+      _bfd_vms_output_end (abfd, recwr);
+
+      for (i = 0; i < PRIV (gsd_sym_count); i++)
+        {
+          struct vms_symbol_entry *sym = PRIV (syms)[i];
+          char *hash;
+          bfd_vma val;
+          bfd_vma ep;
+
+          if ((i % 5) == 0)
+            {
+              _bfd_vms_output_alignment (recwr, 8);
+              _bfd_vms_output_begin (recwr, EOBJ__C_EGSD);
+              _bfd_vms_output_long (recwr, 0);
+            }
+          _bfd_vms_output_begin_subrec (recwr, EGSD__C_SYMG);
+          _bfd_vms_output_short (recwr, 0); /* Data type, alignment.  */
+          _bfd_vms_output_short (recwr, sym->flags);
+
+          if (sym->code_section)
+            ep = alpha_vms_get_sym_value (sym->code_section, sym->code_value);
+          else
+            {
+              BFD_ASSERT (sym->code_value == 0);
+              ep = 0;
+            }
+          val = alpha_vms_get_sym_value (sym->section, sym->value);
+          _bfd_vms_output_quad
+            (recwr, sym->typ == EGSD__C_SYMG ? sym->symbol_vector : val);
+	  _bfd_vms_output_quad (recwr, ep);
+	  _bfd_vms_output_quad (recwr, val);
+	  _bfd_vms_output_long (recwr, 0);
+          hash = _bfd_vms_length_hash_symbol (abfd, sym->name, EOBJ__C_SYMSIZ);
+          _bfd_vms_output_counted (recwr, hash);
+          _bfd_vms_output_end_subrec (recwr);
+          if ((i % 5) == 4)
+            _bfd_vms_output_end (abfd, recwr);
+        }
+      if ((i % 5) != 0)
+        _bfd_vms_output_end (abfd, recwr);
+
+      if (!_bfd_vms_write_eeom (abfd))
+        return FALSE;
+    }
   return TRUE;
 }
 
@@ -8422,6 +8496,80 @@ alpha_vms_build_fixups (struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Called by bfd_link_hash_traverse to fill the symbol table.
+   Return FALSE in case of failure.  */
+
+static bfd_boolean
+alpha_vms_link_output_symbol (struct bfd_link_hash_entry *hc, void *infov)
+{
+  struct bfd_link_info *info = (struct bfd_link_info *)infov;
+  struct alpha_vms_link_hash_entry *h = (struct alpha_vms_link_hash_entry *)hc;
+  struct vms_symbol_entry *sym;
+
+  switch (h->root.type)
+    {
+    case bfd_link_hash_new:
+    case bfd_link_hash_undefined:
+      abort ();
+    case bfd_link_hash_undefweak:
+      return TRUE;
+    case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
+      {
+        asection *sec = h->root.u.def.section;
+
+        /* FIXME: this is certainly a symbol from a dynamic library.  */
+        if (bfd_is_abs_section (sec))
+          return TRUE;
+
+        if (sec->owner->flags & DYNAMIC)
+          return TRUE;
+      }
+      break;
+    case bfd_link_hash_common:
+      break;
+    case bfd_link_hash_indirect:
+    case bfd_link_hash_warning:
+      return TRUE;
+    }
+
+  /* Do not write not kept symbols.  */
+  if (info->strip == strip_some
+      && bfd_hash_lookup (info->keep_hash, h->root.root.string,
+                          FALSE, FALSE) != NULL)
+    return TRUE;
+
+  if (h->sym == NULL)
+    {
+      /* This symbol doesn't come from a VMS object.  So we suppose it is
+         a data.  */
+      int len = strlen (h->root.root.string);
+
+      sym = (struct vms_symbol_entry *)bfd_zalloc (info->output_bfd,
+                                                   sizeof (*sym) + len);
+      if (sym == NULL)
+        abort ();
+      sym->namelen = len;
+      memcpy (sym->name, h->root.root.string, len);
+      sym->name[len] = 0;
+      sym->owner = info->output_bfd;
+
+      sym->typ = EGSD__C_SYMG;
+      sym->data_type = 0;
+      sym->flags = EGSY__V_DEF | EGSY__V_REL;
+      sym->symbol_vector = h->root.u.def.value;
+      sym->section = h->root.u.def.section;
+      sym->value = h->root.u.def.value;
+    }
+  else
+    sym = h->sym;
+
+  if (!add_symbol_entry (info->output_bfd, sym))
+    return FALSE;
+
+  return TRUE;
+}
+
 static bfd_boolean
 alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 {
@@ -8475,6 +8623,11 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 #endif
+
+  /* Generate the symbol table.  */
+  BFD_ASSERT (PRIV (syms) == NULL);
+  if (info->strip != strip_all)
+    bfd_link_hash_traverse (info->hash, alpha_vms_link_output_symbol, info);
 
   /* Find the entry point.  */
   if (bfd_get_start_address (abfd) == 0)
@@ -8548,11 +8701,13 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   alpha_vms_link_hash (info)->base_addr = base_addr;
 
   /* Create the DMT section, if necessary.  */
-  dst = PRIV (dst_section);
+  BFD_ASSERT (PRIV (dst_section) == NULL);
+  dst = bfd_get_section_by_name (abfd, "$DST$");
   if (dst != NULL && dst->size == 0)
     dst = NULL;
   if (dst != NULL)
     {
+      PRIV (dst_section) = dst;
       dmt = bfd_make_section_anyway_with_flags
         (info->output_bfd, "$DMT$",
          SEC_DEBUGGING | SEC_HAS_CONTENTS | SEC_LINKER_CREATED);
@@ -8818,9 +8973,6 @@ vms_new_section_hook (bfd * abfd, asection *section)
   section->used_by_bfd = (PTR) bfd_zalloc (abfd, amt);
   if (section->used_by_bfd == NULL)
     return FALSE;
-
-  if (strcmp (bfd_get_section_name (abfd, section), "$DST$") == 0)
-    PRIV (dst_section) = section;
 
   /* Create the section symbol.  */
   return _bfd_generic_new_section_hook (abfd, section);
