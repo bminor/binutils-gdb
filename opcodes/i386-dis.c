@@ -2305,6 +2305,13 @@ modrm;
 static unsigned char need_modrm;
 static struct
   {
+    int scale;
+    int index;
+    int base;
+  }
+sib;
+static struct
+  {
     int register_specifier;
     int length;
     int prefix;
@@ -11243,6 +11250,22 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
     return get_valid_dis386 (dp, info);
 }
 
+static void
+get_sib (disassemble_info *info)
+{
+  /* If modrm.mod == 3, operand must be register.  */
+  if (need_modrm
+      && address_mode != mode_16bit
+      && modrm.mod != 3
+      && modrm.rm == 4)
+    {
+      FETCH_DATA (info, codep + 2);
+      sib.index = (codep [1] >> 3) & 7;
+      sib.scale = (codep [1] >> 6) & 3;
+      sib.base = codep [1] & 7;
+    }
+}
+
 static int
 print_insn (bfd_vma pc, disassemble_info *info)
 {
@@ -11528,6 +11551,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
     {
+      get_sib (info);
       dofloat (sizeflag);
     }
   else
@@ -11535,6 +11559,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
       dp = get_valid_dis386 (dp, info);
       if (dp != NULL && putop (dp->name, sizeflag) == 0)
         {
+	  get_sib (info);
 	  for (i = 0; i < MAX_OPERANDS; ++i)
 	    {
 	      obufp = op_out[i];
@@ -12935,10 +12960,9 @@ OP_E_memory (int bytemode, int sizeflag)
       if (base == 4)
 	{
 	  havesib = 1;
-	  FETCH_DATA (the_info, codep + 1);
-	  vindex = (*codep >> 3) & 7;
-	  scale = (*codep >> 6) & 3;
-	  base = *codep & 7;
+	  vindex = sib.index;
+	  scale = sib.scale;
+	  base = sib.base;
 	  USED_REX (REX_X);
 	  if (rex & REX_X)
 	    vindex += 8;

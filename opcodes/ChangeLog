@@ -1,3 +1,10 @@
+2010-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (sib): New.
+	(get_sib): Likewise.
+	(print_insn): Call get_sib.
+	OP_E_memory): Use sib.
+
 2010-05-26  Catherine Moore  <clm@codesoourcery.com>
 
 	* mips-dis.c (mips_arch): Remove INSN_MIPS16.
