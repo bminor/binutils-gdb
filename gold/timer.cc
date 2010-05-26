@@ -1,6 +1,6 @@
 // timer.cc -- helper class for time accounting
 
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2010 Free Software Foundation, Inc.
 // Written by Rafael Avila de Espindola <espindola@google.com>.
 
 // This file is part of gold.
@@ -22,7 +22,9 @@
 
 #include "gold.h"
 
+#ifdef HAVE_TIMES
 #include <sys/times.h>
+#endif
 
 #include "libiberty.h"
 

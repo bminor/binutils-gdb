@@ -1,3 +1,7 @@
+2010-05-25  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* timer.cc: Only #include <sys/times.h> if HAVE_TIMES is defined.
+
 2010-05-23  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_input_section::do_output_offset): Use convert_types
