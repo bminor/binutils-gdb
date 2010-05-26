@@ -1,3 +1,8 @@
+2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* main.c (setup_tcp_console): Check error return from socket() call
+	by its equality to -1 not by it being negative.
+
 2010-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* gdb-if.c (sim_write): Add const to buf arg.

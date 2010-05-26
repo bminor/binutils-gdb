@@ -98,7 +98,7 @@ setup_tcp_console (char *portname)
   address.sin_port = htons (port);
 
   isocket = socket (AF_INET, SOCK_STREAM, 0);
-  if (isocket < 0)
+  if (isocket == -1)
     {
       perror ("socket");
       exit (1);

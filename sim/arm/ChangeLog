@@ -1,3 +1,10 @@
+2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* communicate.c (MYread_char): Check error return from accept() call
+	by its equality to -1 not by it being negative.
+	(MYread_charwait): Likewise.
+	* main.c (main): Likewise for both socket() and accept() calls.
+
 2010-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* wrapper.c (sim_write): Add const to buffer arg.

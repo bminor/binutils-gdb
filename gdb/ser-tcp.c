@@ -209,7 +209,7 @@ net_open (struct serial *scb, const char *name)
   else
     scb->fd = socket (PF_INET, SOCK_STREAM, 0);
 
-  if (scb->fd < 0)
+  if (scb->fd == -1)
     return -1;
   
   /* set socket nonblocking */
@@ -325,7 +325,7 @@ net_open (struct serial *scb, const char *name)
 void
 net_close (struct serial *scb)
 {
-  if (scb->fd < 0)
+  if (scb->fd == -1)
     return;
 
   close (scb->fd);

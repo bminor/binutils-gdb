@@ -1,3 +1,9 @@
+2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* ser-tcp.c (net_open): Check error return from socket() call by its
+	equality to -1 not by it being negative.
+	(net_close): Likewise.
+
 2010-05-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention the `qRelocInsn' feature.

@@ -118,7 +118,7 @@ int setupsocket (void)
   memset (&sa_in, 0, sizeof (sa_in));
 
   s = socket (AF_INET, SOCK_STREAM, 0);
-  if (s < 0)
+  if (s == -1)
     return -1;
 
   if (setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) != 0)
@@ -517,7 +517,7 @@ main (int argc, char *argv[])
       }
 
   fd = setupsocket ();
-  if (fd < 0)
+  if (fd == -1)
     {
       fprintf (stderr, "%s: problem setting up the connection: %s\n",
 	       progname, strerror (errno));

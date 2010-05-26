@@ -83,7 +83,7 @@ retry:
 	  return -1;
 	  fprintf (stderr, "Waiting for connection from debugger...");
 	  debugsock = accept (sockethandle, &isa, &i);
-	  if (debugsock < 0)
+	  if (debugsock == -1)
 	    {			/* Now we are in serious trouble... */
 	      perror ("accept");
 	      return -1;
@@ -138,7 +138,7 @@ retry:
 	  return -1;
 	  fprintf (stderr, "Waiting for connection from debugger...");
 	  debugsock = accept (sockethandle, &isa, &i);
-	  if (debugsock < 0)
+	  if (debugsock == -1)
 	    {			/* Now we are in serious trouble... */
 	      perror ("accept");
 	      return -1;

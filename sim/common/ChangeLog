@@ -1,3 +1,9 @@
+2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* dv-sockser.c (dv_sockser_init): Check error return from socket()
+	call by its equality to -1 not by it being negative.
+	(connected_p): Likewise for accept() call.
+
 2010-04-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-fpu.c (sim_fpu_zero, sim_fpu_qnan): Add 0 initializers.

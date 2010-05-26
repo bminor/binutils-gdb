@@ -404,7 +404,7 @@ hw_rv_write (struct hw *me,
 
   /* If we don't have a valid fd here, it's because we got an error
      initially, and we suppressed that error.  */
-  if (rv->fd < 0)
+  if (rv->fd == -1)
     hw_abort (me, "couldn't open a connection to %s:%d because: %s",
 	      rv->host, rv->port, strerror (rv->saved_errno));
 
@@ -637,7 +637,7 @@ hw_rv_handle_incoming (struct hw *me,
     {
       hw_rv_read (me, cbuf, 3);
 
-      if (rv->fd < 0)
+      if (rv->fd == -1)
 	return;
 
       len = cbuf[0] + cbuf[1] * 256 - 3;
@@ -723,7 +723,7 @@ hw_rv_poll_once (struct hw *me)
   int ret;
   struct timeval tv;
 
-  if (rv->fd < 0)
+  if (rv->fd == -1)
     /* Connection has died or was never initiated.  */
     return;
 
@@ -887,7 +887,7 @@ hw_rv_init_socket (struct hw *me)
   server.sin_port = htons (rv->port);
   sock = socket (AF_INET, SOCK_STREAM, 0);
 
-  if (sock < 0)
+  if (sock == -1)
     hw_abort (me, "can't get a socket for %s:%d connection",
 	      rv->host, rv->port);
 

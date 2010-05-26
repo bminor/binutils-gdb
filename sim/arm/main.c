@@ -117,7 +117,7 @@ main (int argc, char *argv[])
 
   /* Open a socket */
   sockethandle = socket (hp->h_addrtype, SOCK_STREAM, 0);
-  if (sockethandle < 0)
+  if (sockethandle == -1)
     {
       perror ("socket");
       return 1;
@@ -147,7 +147,7 @@ main (int argc, char *argv[])
   fprintf (stderr, "Waiting for connection from debugger...");
 
   debugsock = accept (sockethandle, &isa, &i);
-  if (debugsock < 0)
+  if (debugsock == -1)
     {
       perror ("accept");
       return 1;

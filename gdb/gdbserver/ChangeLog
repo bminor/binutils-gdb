@@ -1,3 +1,9 @@
+2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* gdbreplay.c (remote_open): Check error return from socket() call by
+	its equality to -1 not by it being negative.
+	* remote-utils.c (remote_open): Likewise.
+
 2010-05-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* config.h: Regenerate.

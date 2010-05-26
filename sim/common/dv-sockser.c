@@ -166,7 +166,7 @@ dv_sockser_init (SIM_DESC sd)
     }
 
   sockser_listen_fd = socket (PF_INET, SOCK_STREAM, 0);
-  if (sockser_listen_fd < 0)
+  if (sockser_listen_fd == -1)
     {
       sim_io_eprintf (sd, "sockser init: unable to get socket: %s\n",
 		      strerror (errno));
@@ -274,7 +274,7 @@ connected_p (SIM_DESC sd)
 
   addrlen = sizeof (sockaddr);
   sockser_fd = accept (sockser_listen_fd, &sockaddr, &addrlen);
-  if (sockser_fd < 0)
+  if (sockser_fd == -1)
     return 0;
 
   /* Set non-blocking i/o.  */
