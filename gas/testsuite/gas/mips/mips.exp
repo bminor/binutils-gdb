@@ -526,6 +526,7 @@ if { [istarget mips*-*-vxworks*] } {
 	# Check jalx handling
 	run_dump_test "mips16-jalx"
 	run_dump_test "mips-jalx"
+	run_dump_test "mips-jalx-2"
 	# Check MIPS16 HI16/LO16 relocations
 	run_dump_test "mips16-hilo"
 	if $has_newabi {
@@ -533,7 +534,6 @@ if { [istarget mips*-*-vxworks*] } {
 	}
 	run_dump_test "mips16-hilo-match"
     }
-    run_list_test "mips-no-jalx" "-32"
     run_dump_test "delay"
     run_dump_test "nodelay"
     run_dump_test "mips4010"

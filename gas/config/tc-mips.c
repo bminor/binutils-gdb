@@ -1817,11 +1817,10 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
 }
 
 /* Return TRUE if opcode MO is valid on the currently selected ISA and
-   architecture.  If EXPANSIONP is TRUE then this check is done while
-   expanding a macro.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
+   architecture.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
 
 static bfd_boolean
-is_opcode_valid (const struct mips_opcode *mo, bfd_boolean expansionp)
+is_opcode_valid (const struct mips_opcode *mo)
 {
   int isa = mips_opts.isa;
   int fp_s, fp_d;
@@ -1840,11 +1839,6 @@ is_opcode_valid (const struct mips_opcode *mo, bfd_boolean expansionp)
     isa |= INSN_MIPS3D;
   if (mips_opts.ase_smartmips)
     isa |= INSN_SMARTMIPS;
-
-  /* For user code we don't check for mips_opts.mips16 since we want
-     to allow jalx if -mips16 was specified on the command line.  */
-  if (expansionp ? mips_opts.mips16 : file_ase_mips16)
-    isa |= INSN_MIPS16;
 
   /* Don't accept instructions based on the ISA if the CPU does not implement
      all the coprocessor insns. */
@@ -3638,7 +3632,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	 macros will never generate MDMX, MIPS-3D, or MT instructions.  */
       if (strcmp (fmt, mo->args) == 0
 	  && mo->pinfo != INSN_MACRO
-	  && is_opcode_valid (mo, TRUE))
+	  && is_opcode_valid (mo))
 	break;
 
       ++mo;
@@ -8776,7 +8770,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
       gas_assert (strcmp (insn->name, str) == 0);
 
-      ok = is_opcode_valid (insn, FALSE);
+      ok = is_opcode_valid (insn);
       if (! ok)
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]

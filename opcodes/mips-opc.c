@@ -96,9 +96,6 @@
 #define I4_33   INSN_ISA4_32R2
 #define I5_33   INSN_ISA5_32R2
 
-/* MIPS16 ASE support.  */
-#define I16     INSN_MIPS16
-
 /* MIPS64 MIPS-3D ASE support.  */
 #define M3D     INSN_MIPS3D
 
@@ -739,7 +736,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
    assembler, but will never match user input (because the line above
    will match first).  */
 {"jal",     "a",	0x0c000000, 0xfc000000,	UBD|WR_31,		0,		I1	},
-{"jalx",    "a",	0x74000000, 0xfc000000, UBD|WR_31,		0,		I16     },
+{"jalx",    "a",	0x74000000, 0xfc000000, UBD|WR_31,		0,		I1	},
 {"la",      "t,A(b)",	0,    (int) M_LA_AB,	INSN_MACRO,		0,		I1	},
 {"lb",      "t,o(b)",	0x80000000, 0xfc000000,	LDD|RD_b|WR_t,		0,		I1	},
 {"lb",      "t,A(b)",	0,    (int) M_LB_AB,	INSN_MACRO,		0,		I1	},

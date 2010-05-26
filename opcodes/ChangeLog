@@ -1,3 +1,9 @@
+2010-05-26  Catherine Moore  <clm@codesoourcery.com>
+
+	* mips-dis.c (mips_arch): Remove INSN_MIPS16.
+	* mips-opc.c (I16): Remove.
+	(mips_builtin_op): Reclassify jalx.
+
 2010-05-19  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes): Enable divdeu, devweu, divde,

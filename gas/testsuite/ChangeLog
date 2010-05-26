@@ -1,3 +1,12 @@
+2010-05-26  Catherine Moore  <clm@codesoucery.com>
+
+	* gas/mips/mips-no-jalx.l: Delete.
+	* gas/mips/mips-no-jalx.s: Delete.
+	* gas/mips/mips-jalx-2.d: New.
+	* gas/mips/mips-jalx-2.s: New.
+	* gas/mips/mips.exp (mips-jalx-2): Run new test.
+	(mips-no-jalx): Remove deleted test.
+
 2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Joseph Myers  <joseph@codesourcery.com>
 	    Andrew Stubbs  <ams@codesourcery.com>

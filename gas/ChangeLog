@@ -1,3 +1,9 @@
+2010-05-26  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (is_opcode_valid): Remove expansionp.
+	(macro_build): Change invocation of is_opcode_valid.
+	(mips_ip): Likewise.
+
 2010-05-25  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (MOSTLYCLEANFILES): Fix typo.
