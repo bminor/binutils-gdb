@@ -41,11 +41,7 @@ proc set_lang_java {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
 
-    send_gdb "set language java\n"
-    gdb_expect {
-	-re ".*$gdb_prompt $" {}
-	timeout { fail "set language java (timeout)" ; return 0 }
-    }
+    gdb_test_no_output "set language java"
 
     return [gdb_test "show language" ".* source language is \"java\".*" \
 	"set language to \"java\""]

@@ -1,5 +1,8 @@
 2010-05-26  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
+	* gdb.java/jmisc.exp: Replace send_gdb with gdb_test.
+	* gdb.java/jprint.exp: Replace send_gdb with gdb_test.
+
 	* gdb.gdb/complaints.exp: Replace send_gdb with gdb_test.
 	* gdb.gdb/selftest.exp: Replace send_gdb with gdb_test.
 	* gdb.gdb/xfullpath.exp: Replace send_gdb with gdb_test.
