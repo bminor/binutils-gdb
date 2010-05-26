@@ -297,24 +297,16 @@ gdb_test "s" "$line_foo2\[ 	\]*.*" "step into foo2"
 
 # Test 'info target', and incidentally capture the entry point address.
 set entry_point 0
-send_gdb "info target\n"
-gdb_expect {
+gdb_test_multiple "info target" "info target" {
     -re "Symbols from .*asm-source.*Entry point: 0x(\[01232456789abcdefABCDEF\]+).*$gdb_prompt $" {
 	set entry_point $expect_out(1,string)
 	pass "info target"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "info target"
-    }
-    timeout {
-	fail "info target (timeout)"
     }
 }
 
 # Capture the start symbol (may be '_start' or 'start')
 set entry_symbol ""
-send_gdb "info symbol 0x$entry_point\n"
-gdb_expect {
+gdb_test_multiple "info symbol 0x$entry_point" "info symbol" {
     -re "info symbol 0x$entry_point\[\r\n\]+(\[^\r\n\]*) in section .*$gdb_prompt $" {
         # We match the echoed `info symbol' command here, to help us
         # reliably identify the beginning of the start symbol in the
@@ -329,12 +321,6 @@ gdb_expect {
         # they leave you depends on inter-process timing.  :(
 	set entry_symbol $expect_out(1,string)
 	pass "info symbol"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "info symbol"
-    }
-    timeout {
-	fail "info symbol (timeout)"
     }
 }
 
@@ -388,10 +374,9 @@ gdb_test "info source" \
 # with dynamic linking, where the system's shared libc was compiled
 # with debugging info; for example, on Linux, this produces 47kb of
 # output.  So we consume it as we go.
-send_gdb "info sources\n"
 set seen_asmsrc_1 0
 set seen_asmsrc_2 0
-gdb_expect {
+gdb_test_multiple "info sources" "info sources" {
     -re "^\[^,\]*asmsrc1.s(, |\[\r\n\]+)" {
         set seen_asmsrc_1 1
         exp_continue
@@ -409,9 +394,6 @@ gdb_expect {
         } else {
             fail "info sources"
         }
-    }
-    timeout {
-            fail "info sources (timeout)"
     }
 }
         
@@ -431,8 +413,7 @@ gdb_test "return" "\#0  main .*$line_main_exit\[ \t\]+gdbasm_exit0" "return from
 # Disassemble something, check the output
 proc test_dis { command var } {
     global gdb_prompt
-    send_gdb "${command}\n"
-    gdb_expect {
+    gdb_test_multiple "${command}" "${command}" {
 	-re "${var}.*:.*(Cannot access|Bad address)" {
 	    # The "disassembler" was only accessing the local
 	    # executable and that would cause attempts to disassemble
@@ -441,9 +422,6 @@ proc test_dis { command var } {
 	}
 	-re "${var}.*:.*${gdb_prompt}" {
 	    pass "${command}"
-	}
-	timeout {
-	    fail "${command} (timeout)"
 	}
     }
 }

@@ -61,404 +61,125 @@ if ![runto_main] then {
 
 gdb_test "next" "return 0;" "continuing after dummy()"
 
-send_gdb "print v_int+v_char\n"
-gdb_expect {
-    -re ".*71.*$gdb_prompt $" {
-        pass "print value of v_int+v_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_char" }
-    timeout           { fail "(timeout) print value of v_int+v_char" }    
-  }
+gdb_test "print v_int+v_char" " = 71" "print value of v_int+v_char"
 
-send_gdb "print v_int+v_short\n"
-gdb_expect {
-    -re ".*9.*$gdb_prompt $" {
-        pass "print value of v_int+v_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_short" }
-    timeout           { fail "(timeout) print value of v_int+v_short" }    
-  }
+gdb_test "print v_int+v_short" " = 9" "print value of v_int+v_short"
 
+gdb_test "print v_int+v_signed_char" " = 72" \
+    "print value of v_int+v_signed_char"
 
-send_gdb "print v_int+v_signed_char\n"
-gdb_expect {
-    -re ".*72.*$gdb_prompt $" {
-        pass "print value of v_int+v_signed_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_signed_char" }
-    timeout           { fail "(timeout) print value of v_int+v_signed_char" }    
-  }
+gdb_test "print v_int+v_unsigned_char" " = 73" \
+    "print value of v_int+v_unsigned_char"
 
+gdb_test "print v_int+v_signed_short" " = 10" \
+    "print value of v_int+v_signed_short"
 
-send_gdb "print v_int+v_unsigned_char\n"
-gdb_expect {
-    -re ".*73.*$gdb_prompt $" {
-        pass "print value of v_int+v_unsigned_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_unsigned_char" }
-    timeout           { fail "(timeout) print value of v_int+v_unsigned_char" }    
-  }
+gdb_test "print v_int+v_unsigned_short" " = 11" \
+    "print value of v_int+v_unsigned_short"
 
+gdb_test "print v_int+v_signed_int" " = 13" \
+    "print value of v_int+v_signed_int"
 
-send_gdb "print v_int+v_signed_short\n"
-gdb_expect {
-    -re ".*10.*$gdb_prompt $" {
-        pass "print value of v_int+v_signed_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_signed_short" }
-    timeout           { fail "(timeout) print value of v_int+v_signed_short" }    
-  }
+gdb_test "print v_int+v_unsigned_int" " = 14" \
+    "print value of v_int+v_unsigned_int"
 
+gdb_test "print v_int+v_long" " = 15" "print value of v_int+v_long"
 
-send_gdb "print v_int+v_unsigned_short\n"
-gdb_expect {
-    -re ".*11.*$gdb_prompt $" {
-        pass "print value of v_int+v_unsigned_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_unsigned_short" }
-    timeout           { fail "(timeout) print value of v_int+v_unsigned_short" }    
-  }
+gdb_test "print v_int+v_signed_long" " = 16" \
+    "print value of v_int+v_signed_long"
 
+gdb_test "print v_int+v_unsigned_long" " = 17" \
+    "print value of v_int+v_unsigned_long"
 
-send_gdb "print v_int+v_signed_int\n"
-gdb_expect {
-    -re ".*13.*$gdb_prompt $" {
-        pass "print value of v_int+v_signed_int"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_signed_int" }
-    timeout           { fail "(timeout) print value of v_int+v_signed_int" }    
-  }
+gdb_test "print v_int+v_float" " = 106.34343.*" \
+    "print value of v_int+v_float"
 
-
-send_gdb "print v_int+v_unsigned_int\n"
-gdb_expect {
-    -re ".*14.*$gdb_prompt $" {
-        pass "print value of v_int+v_unsigned_int"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_unsigned_int" }
-    timeout           { fail "(timeout) print value of v_int+v_unsigned_int" }    
-  }
-
-
-send_gdb "print v_int+v_long\n"
-gdb_expect {
-    -re ".*15.*$gdb_prompt $" {
-        pass "print value of v_int+v_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_long" }
-    timeout           { fail "(timeout) print value of v_int+v_long" }    
-  }
-
-
-send_gdb "print v_int+v_signed_long\n"
-gdb_expect {
-    -re ".*16.*$gdb_prompt $" {
-        pass "print value of v_int+v_signed_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_signed_long" }
-    timeout           { fail "(timeout) print value of v_int+v_signed_long" }    
-  }
-
-
-send_gdb "print v_int+v_unsigned_long\n"
-gdb_expect {
-    -re ".*17.*$gdb_prompt $" {
-        pass "print value of v_int+v_unsigned_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_unsigned_long" }
-    timeout           { fail "(timeout) print value of v_int+v_unsigned_long" }    
-  }
-
-
-send_gdb "print v_int+v_float\n"
-gdb_expect {
-    -re ".*106.34343.*$gdb_prompt $" {
-        pass "print value of v_int+v_float"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_float" }
-    timeout           { fail "(timeout) print value of v_int+v_float" }    
-  }
-
-
-send_gdb "print v_int+v_double\n"
-gdb_expect {
-    -re ".*206.565.*$gdb_prompt $" {
-        pass "print value of v_int+v_double"
-    }
-    -re ".*$gdb_prompt $" { fail "print value of v_int+v_double" }
-    timeout     { fail "(timeout) print value of v_int+v_double" }
-}
+gdb_test "print v_int+v_double" " = 206.565.*" \
+    "print value of v_int+v_double"
 
 
 #
 # test the relational operators with mixed types
 #
 
-send_gdb "print v_int <= v_char\n"
-gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
-        pass "print value of v_int<=v_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_char" }
-    timeout           { fail "(timeout) print value of v_int<=v_char" }    
-  }
+gdb_test "print v_int <= v_char" " = 1" "print value of v_int<=v_char"
 
-send_gdb "print v_int <= v_short\n"
-gdb_expect {
-    -re ".*$false.*$gdb_prompt $" {
-        pass "print value of v_int<=v_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_short" }
-    timeout           { fail "(timeout) print value of v_int<=v_short" }    
-  }
+gdb_test "print v_int <= v_short" " = $false" \
+    "print value of v_int<=v_short"
 
+gdb_test "print v_int <= v_signed_char" " = 1" \
+    "print value of v_int<=v_signed_char"
 
-send_gdb "print v_int <= v_signed_char\n"
-gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
-        pass "print value of v_int<=v_signed_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_signed_char" }
-    timeout           { fail "(timeout) print value of v_int<=v_signed_char" }    
-  }
+gdb_test "print v_int <= v_unsigned_char" " = 1" \
+    "print value of v_int<=v_unsigned_char"
 
+gdb_test "print v_int <= v_signed_short" " = $false" \
+    "print value of v_int<=v_signed_short"
 
-send_gdb "print v_int <= v_unsigned_char\n"
-gdb_expect {
-    -re ".*1.*$gdb_prompt $" {
-        pass "print value of v_int<=v_unsigned_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_unsigned_char" }
-    timeout           { fail "(timeout) print value of v_int<=v_unsigned_char" }    
-  }
+gdb_test "print v_int <= v_unsigned_short" " = $false" \
+    "print value of v_int<=v_unsigned_short"
 
+gdb_test "print v_int <= v_signed_int" " = $true" \
+    "print value of v_int<=v_signed_int"
 
-send_gdb "print v_int <= v_signed_short\n"
-gdb_expect {
-    -re ".*$false.*$gdb_prompt $" {
-        pass "print value of v_int<=v_signed_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_signed_short" }
-    timeout           { fail "(timeout) print value of v_int<=v_signed_short" }    
-  }
+gdb_test "print v_int <= v_unsigned_int" " = $true" \
+    "print value of v_int<=v_unsigned_int"
 
+gdb_test "print v_int <= v_long" " = $true" "print value of v_int<=v_long"
 
-send_gdb "print v_int <= v_unsigned_short\n"
-gdb_expect {
-    -re ".*$false.*$gdb_prompt $" {
-        pass "print value of v_int<=v_unsigned_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_unsigned_short" }
-    timeout           { fail "(timeout) print value of v_int<=v_unsigned_short" }    
-  }
+gdb_test "print v_int <= v_signed_long" " = $true" \
+    "print value of v_int<=v_signed_long"
 
+gdb_test "print v_int <= v_unsigned_long" " = $true" \
+    "print value of v_int<=v_unsigned_long"
 
-send_gdb "print v_int <= v_signed_int\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int<=v_signed_int"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_signed_int" }
-    timeout           { fail "(timeout) print value of v_int<=v_signed_int" }    
-  }
+gdb_test "print v_int <= v_float" " = $true" "print value of v_int<=v_float"
 
-
-send_gdb "print v_int <= v_unsigned_int\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int<=v_unsigned_int"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_unsigned_int" }
-    timeout           { fail "(timeout) print value of v_int<=v_unsigned_int" }    
-  }
-
-
-send_gdb "print v_int <= v_long\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int<=v_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_long" }
-    timeout           { fail "(timeout) print value of v_int<=v_long" }    
-  }
-
-
-send_gdb "print v_int <= v_signed_long\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int<=v_signed_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_signed_long" }
-    timeout           { fail "(timeout) print value of v_int<=v_signed_long" }    
-  }
-
-
-send_gdb "print v_int <= v_unsigned_long\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int<=v_unsigned_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_unsigned_long" }
-    timeout           { fail "(timeout) print value of v_int<=v_unsigned_long" }    
-  }
-
-
-send_gdb "print v_int <= v_float\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int<=v_float"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_float" }
-    timeout           { fail "(timeout) print value of v_int<=v_float" }    
-  }
-
-
-send_gdb "print v_int <= v_double\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int<=v_double"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int<=v_double" }
-    timeout           { fail "(timeout) print value of v_int<=v_double" }    
-  }
-
-
+gdb_test "print v_int <= v_double" " = $true" \
+    "print value of v_int<=v_double"
 
 #
 # test the logical operators with mixed types
 #
 
-gdb_test "set variable v_char=0" "" "set v_char=0"
-gdb_test "set variable v_double=0.0" "" "set v_double=0"
-gdb_test "set variable v_unsigned_long=0" "" "set v_unsigned_long=0"
+gdb_test_no_output "set variable v_char=0" "set v_char=0"
+gdb_test_no_output "set variable v_double=0.0" "set v_double=0"
+gdb_test_no_output "set variable v_unsigned_long=0" "set v_unsigned_long=0"
 
-send_gdb "print v_int && v_char\n"
-gdb_expect {
-    -re ".*$false.*$gdb_prompt $" {
-        pass "print value of v_int&&v_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_char" }
-    timeout           { fail "(timeout) print value of v_int&&v_char" }    
-  }
+gdb_test "print v_int && v_char" " = $false" "print value of v_int&&v_char"
 
-send_gdb "print v_int && v_short\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_short" }
-    timeout           { fail "(timeout) print value of v_int&&v_short" }    
-  }
+gdb_test "print v_int && v_short" " = $true" "print value of v_int&&v_short"
 
+gdb_test "print v_int && v_signed_char" " = $true" \
+    "print value of v_int&&v_signed_char"
 
-send_gdb "print v_int && v_signed_char\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_signed_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_signed_char" }
-    timeout           { fail "(timeout) print value of v_int&&v_signed_char" }    
-  }
+gdb_test "print v_int && v_unsigned_char" " = $true" \
+    "print value of v_int&&v_unsigned_char"
 
+gdb_test "print v_int && v_signed_short" " = $true" \
+    "print value of v_int&&v_signed_short"
 
-send_gdb "print v_int && v_unsigned_char\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_unsigned_char"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_unsigned_char" }
-    timeout           { fail "(timeout) print value of v_int&&v_unsigned_char" }    
-  }
+gdb_test "print v_int && v_unsigned_short" " = $true" \
+    "print value of v_int&&v_unsigned_short"
 
+gdb_test "print v_int && v_signed_int" " = $true" \
+    "print value of v_int&&v_signed_int"
 
-send_gdb "print v_int && v_signed_short\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_signed_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_signed_short" }
-    timeout           { fail "(timeout) print value of v_int&&v_signed_short" }    
-  }
+gdb_test "print v_int && v_unsigned_int" " = $true" \
+    "print value of v_int&&v_unsigned_int"
 
+gdb_test "print v_int && v_long" " = $true" "print value of v_int&&v_long"
 
-send_gdb "print v_int && v_unsigned_short\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_unsigned_short"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_unsigned_short" }
-    timeout           { fail "(timeout) print value of v_int&&v_unsigned_short" }    
-  }
+gdb_test "print v_int && v_signed_long" " = $true" \
+    "print value of v_int&&v_signed_long"
 
+gdb_test "print v_int && v_unsigned_long" " = $false" \
+    "print value of v_int&&v_unsigned_long"
 
-send_gdb "print v_int && v_signed_int\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_signed_int"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_signed_int" }
-    timeout           { fail "(timeout) print value of v_int&&v_signed_int" }    
-  }
+gdb_test "print v_int && v_float" " = $true" "print value of v_int&&v_float"
 
-
-send_gdb "print v_int && v_unsigned_int\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_unsigned_int"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_unsigned_int" }
-    timeout           { fail "(timeout) print value of v_int&&v_unsigned_int" }    
-  }
-
-
-send_gdb "print v_int && v_long\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_long" }
-    timeout           { fail "(timeout) print value of v_int&&v_long" }    
-  }
-
-
-send_gdb "print v_int && v_signed_long\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_signed_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_signed_long" }
-    timeout           { fail "(timeout) print value of v_int&&v_signed_long" }    
-  }
-
-
-send_gdb "print v_int && v_unsigned_long\n"
-gdb_expect {
-    -re ".*$false.*$gdb_prompt $" {
-        pass "print value of v_int&&v_unsigned_long"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_unsigned_long" }
-    timeout           { fail "(timeout) print value of v_int&&v_unsigned_long" }    
-  }
-
-
-send_gdb "print v_int && v_float\n"
-gdb_expect {
-    -re ".*$true.*$gdb_prompt $" {
-        pass "print value of v_int&&v_float"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_float" }
-    timeout           { fail "(timeout) print value of v_int&&v_float" }    
-  }
-
-
-send_gdb "print v_int && v_double\n"
-gdb_expect {
-    -re ".*$false.*$gdb_prompt $" {
-        pass "print value of v_int&&v_double"
-      }
-    -re ".*$gdb_prompt $" { fail "print value of v_int&&v_double" }
-    timeout           { fail "(timeout) print value of v_int&&v_double" }    
-  }
+gdb_test "print v_int && v_double" " = $false" \
+    "print value of v_int&&v_double"
 
 
 

@@ -288,7 +288,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set print sevenbit-strings"
 runto_main
 
 bitfield_uniqueness

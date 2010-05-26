@@ -1,3 +1,19 @@
+2010-05-25  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.ada/formatted_ref.exp: Replace send_gdb with gdb_test.
+
+	* gdb.asm/asm-source.exp: Replace send_gdb with gdb_test.
+
+	* gdb.base/a2-run.exp: Replace send_gdb with gdb_test.
+	* gdb.base/all-bin.exp: Replace send_gdb with gdb_test.
+	* gdb.base/annota1.exp: Replace send_gdb with gdb_test.
+	* gdb.base/annota3.exp: Replace send_gdb with gdb_test.
+	* gdb.base/assign.exp: Replace send_gdb with gdb_test.
+	* gdb.base/attach.exp: Replace send_gdb with gdb_test.
+	* gdb.base/bitfields.exp: Replace send_gdb with gdb_test.
+	* gdb.base/bitfields2.exp: Replace send_gdb with gdb_test.
+	* gdb.base/bitops.exp: Replace send_gdb with gdb_test.
+
 2010-05-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/macscp.exp: Add missing space after setup_kfail.
@@ -36,6 +52,38 @@
 
 2010-05-25  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.ada/formatted_ref.exp: Replace send_gdb with gdb_test.
+
+	* gdb.asm/asm-source.exp: Replace send_gdb with gdb_test.
+
+	* gdb.cp/annota2.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/annota3.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/anon-union.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/cplusfuncs.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/demangle.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/formatted-ref.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/local.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/method.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/misc.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/namespace.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/ovldbreak.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/pr-1023.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/ref-types.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/templates.exp: Replace send_gdb with gdb_test.
+	* gdb.cp/userdef.exp: Replace send_gdb with gdb_test.
+
+2010-05-25  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/a2-run.exp: Replace send_gdb with gdb_test.
+	* gdb.base/all-bin.exp: Replace send_gdb with gdb_test.
+	* gdb.base/annota1.exp: Replace send_gdb with gdb_test.
+	* gdb.base/annota3.exp: Replace send_gdb with gdb_test.
+	* gdb.base/assign.exp: Replace send_gdb with gdb_test.
+	* gdb.base/attach.exp: Replace send_gdb with gdb_test.
+	* gdb.base/bitfields.exp: Replace send_gdb with gdb_test.
+	* gdb.base/bitfields2.exp: Replace send_gdb with gdb_test.
+	* gdb.base/bitops.exp: Replace send_gdb with gdb_test.
+	* gdb.base/break.exp: Replace send_gdb with gdb_test.
 	* gdb.base/call-ar-st.exp: Replace send_gdb with gdb_test.
 	* gdb.base/callfuncs.exp: Replace send_gdb with gdb_test.
 	* gdb.base/call-rt-st.exp: Replace send_gdb with gdb_test.
@@ -74,6 +122,23 @@
 	* gdb.base/nodebug.exp: Replace send_gdb with gdb_test.
 	* gdb.base/pointers.exp: Replace send_gdb with gdb_test.
 	* gdb.base/ptype.exp: Replace send_gdb with gdb_test.
+	* gdb.base/relational.exp: Replace send_gdb with gdb_test.
+	* gdb.base/relocate.exp: Replace send_gdb with gdb_test.
+	* gdb.base/return.exp: Replace send_gdb with gdb_test.
+	* gdb.base/return2.exp: Replace send_gdb with gdb_test.
+	* gdb.base/sepdebug.exp: Replace send_gdb with gdb_test.
+	* gdb.base/setvar.exp: Replace send_gdb with gdb_test.
+	* gdb.base/shlib-call.exp: Replace send_gdb with gdb_test.
+	* gdb.base/shreloc.exp: Replace send_gdb with gdb_test.
+	* gdb.base/sigall.exp: Replace send_gdb with gdb_test.
+	* gdb.base/sigbpt.exp: Replace send_gdb with gdb_test.
+	* gdb.base/signull.exp: Replace send_gdb with gdb_test.
+	* gdb.base/so-impl-ld.exp:Replace send_gdb with gdb_test.
+	* gdb.base/varargs.exp: Replace send_gdb with gdb_test.
+	* gdb.base/volatile.exp: Replace send_gdb with gdb_test.
+	* gdb.base/watch_thread_num.exp: Replace send_gdb with gdb_test.
+	* gdb.base/watchpoint.exp: Replace send_gdb with gdb_test.
+	* gdb.base/whatis.exp: Replace send_gdb with gdb_test.
 
 2010-05-25  Doug Evans  <dje@google.com>
 

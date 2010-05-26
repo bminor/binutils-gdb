@@ -197,8 +197,7 @@ proc bitfield_signedness {} {
 
     # Determine if the target has signed bitfields so we can xfail the
     # the signed bitfield tests if it doesn't.
-    send_gdb "print i\n"
-    gdb_expect {
+    gdb_test_multiple "print i" "determining signed-ness of bitfields" {
 	-re ".* = -256.*$gdb_prompt $" {
 	    pass "determining signed-ness of bitfields"
 	}
@@ -255,7 +254,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set print sevenbit-strings"
 
 bitfield_uniqueness
 if [istarget "mips-idt-*"] then {

@@ -46,16 +46,13 @@ proc get_address { var } {
     global expect_out
     global gdb_prompt
 
-    send_gdb "print $var'access\n"
-    gdb_expect {
+    gdb_test_multiple "print $var'access" "address of $var" {
 	-re "\\$\[0-9\]+ = \\(.*\\) (0x\[0-9a-f\]+).*$gdb_prompt $" {
             return $expect_out(1,string)
- 	}
-        timeout { 
-	    perror "couldn't find address of $var"
-	    return ""
         }
     }
+    perror "couldn't find address of $var"
+    return ""
 }
 
 proc test_p_x { var val addr } {

@@ -250,30 +250,11 @@ proc do_attach_tests {} {
 
     # Verify that the modification really happened.
 
-    send_gdb "tbreak 19\n"
-    gdb_expect {
-	-re "Temporary breakpoint .*at.*$srcfile, line 19.*$gdb_prompt $" {
-	    pass "after attach2, set tbreak postloop"
-	}
-	-re "$gdb_prompt $" {
-	    fail "after attach2, set tbreak postloop"
-	}
-	timeout {
-	    fail "(timeout) after attach2, set tbreak postloop"
-	}
-    }
-    send_gdb "continue\n"
-    gdb_expect {
-	-re "main.*at.*$srcfile:19.*$gdb_prompt $" {
-	    pass "after attach2, reach tbreak postloop"
-	}
-	-re "$gdb_prompt $" {
-	    fail "after attach2, reach tbreak postloop"
-	}
-	timeout {
-	    fail "(timeout) after attach2, reach tbreak postloop"
-	}
-    }
+    gdb_test "tbreak 19" "Temporary breakpoint .*at.*$srcfile, line 19.*" \
+	"after attach2, set tbreak postloop"
+
+    gdb_test "continue" "main.*at.*$srcfile:19.*" \
+	"after attach2, reach tbreak postloop"
 
     # Allow the test process to exit, to cleanup after ourselves.
 

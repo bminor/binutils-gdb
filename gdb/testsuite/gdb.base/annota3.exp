@@ -61,8 +61,7 @@ set main_line 32
 
 # The commands we test here produce many lines of output; disable "press 
 # <return> to continue" prompts.
-send_gdb "set height 0\n"
-gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set height 0"
 
 #
 # break at main
@@ -100,26 +99,18 @@ gdb_expect_list "annotation set at level 3" "\r\n$gdb_prompt$" {
 #
 # if construct:
 #
-send_gdb "if 1\n"
-gdb_expect {
+gdb_test_multiple "if 1" "start if construct" {
     -re "^if 1\r\n\r\n\032\032post-prompt\r\n\r\n\032\032pre-commands\r\n >\r\n\032\032commands\r\n$" {
 	pass "start if construct"
     }
-    -re ".*\032\032commands\r\n" {
-	fail "start if construct"
-    }
-    timeout { fail "start if construct (timeout)" }
 }
-send_gdb "end\n"
-gdb_expect {
+
+gdb_test_multiple "end" "end if construct" {
     -re "^end\r\n\r\n\032\032post-commands\r\n$gdb_prompt$" {
  	pass "end if construct"
     }
-    -re ".*$gdb_prompt$" {
-	fail "end if construct"
-    }
-    timeout { fail "end if construct (timeout)" }
 }
+
 #
 # info break:
 #

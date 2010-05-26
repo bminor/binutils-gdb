@@ -150,11 +150,10 @@ if [istarget "*-*-vxworks*"] then {
 
 # Use "set args" command to specify no arguments as default and run again.
 if [istarget "*-*-vxworks*"] then {
-    send_gdb "set args main\n"
+    gdb_test_no_output "set args main"
 } else {
-    send_gdb "set args\n"
+    gdb_test_no_output "set args"
 }
-gdb_expect -re "$gdb_prompt $"
 
 gdb_run_cmd
 
@@ -192,11 +191,11 @@ if [istarget "*-*-vxworks*"] then {
 # Use "set args" command to specify an argument and run again.
 setup_xfail "mips-idt-*"
 if [istarget "*-*-vxworks*"] then {
-   send_gdb "set args vxmain \"6\"\n"
+    gdb_test_no_output "set args vxmain \"6\""
 } else {
-	send_gdb "set args 6\n"
+    gdb_test_no_output "set args 6"
 }
-gdb_expect -re "$gdb_prompt $"
+
 gdb_run_cmd
 
 if [istarget "*-*-vxworks*"] then {
@@ -234,22 +233,12 @@ if [istarget "*-*-vxworks*"] then {
 # GOAL: Test that shell is being used with "run".  For remote debugging
 # targets, there is no guarantee that a "shell" (whatever that is) is used.
 if ![is_remote target] then {
-    send_gdb "run `echo 8`\n"
-    gdb_expect {
-	-re "Starting program.*40320.*$gdb_prompt $" {
-	    pass "run \"$testfile\" with shell"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "run \"$testfile\" with shell"
-	}
-	timeout	{
-	    fail "(timeout) run \"$testfile\" with shell"
-	}
-    }
+    gdb_test "run `echo 8`" \
+	"Starting program.*40320.*" \
+	"run \"$testfile\" with shell"
 }
 
 # Reset the default arguments for VxWorks
 if [istarget "*-*-vxworks*"] then {
-    send_gdb "set args main\n"
-    gdb_expect -re ".*$gdb_prompt $" {}
+    gdb_test_no_output "set args main"
 }
