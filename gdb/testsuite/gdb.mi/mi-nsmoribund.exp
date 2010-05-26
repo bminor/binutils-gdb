@@ -37,14 +37,13 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load $binfile
 
 set supported 0
-send_gdb "-gdb-show non-stop\n"
-gdb_expect {
+gdb_test_multiple "-gdb-show non-stop" "" {
     -re ".*\\^done,value=\"off\",supported=\"(\[^\"\]+)\"\r\n$mi_gdb_prompt$" {
 	if { $expect_out(1,string) == "1" } {
 	    set supported 1
 	}
     }
-    -re ".$mi_gdb_prompt$" {
+    -re ".*$mi_gdb_prompt$" {
     }
 }
 
@@ -99,13 +98,9 @@ for {set i $nthreads} {$i > 0} {incr i -1} {
     set running_re "$running_re\\*running,thread-id=\"$decimal\"\r\n"
 }
 
-send_gdb "-exec-continue --all\n"
-gdb_expect {
+gdb_test_multiple "-exec-continue --all" "resume all, thread specific breakpoint" {
     -re ".*$running_re$mi_gdb_prompt" {
 	pass "resume all, thread specific breakpoint"
-    }
-    timeout {
-	fail "resume all, thread specific breakpoint (timeout)"
     }
 }
 
@@ -128,20 +123,14 @@ mi_check_thread_states \
 # a target bug if it can step over breakpoints itself), a spurious
 # SIGTRAP/SIGSEGV can come at any time after deleting the breakpoint.
 
-send_gdb "102-break-delete\n"
-send_gdb "print done = 1\n"
-send_gdb "103-exec-continue --all\n"
-
-gdb_expect {
-    -re "\\*stopped,reason=\"exited-normally\"" {
-	pass "resume all, program exited normally"
+gdb_test_multiple "102-break-delete\nprint done = 1\n103-exec-continue --all" \
+    "resume all, program exited normally" {
+	-re "\\*stopped,reason=\"exited-normally\"" {
+	    pass "resume all, program exited normally"
+	}
+	-re "\\*stopped" {
+	    fail "unexpected stop"
+	}
     }
-    -re "\\*stopped" {
-	fail "unexpected stop"
-    }
-    timeout {
-	fail "resume all, waiting for program exit (timeout)"
-    }
-}
 
 mi_gdb_exit

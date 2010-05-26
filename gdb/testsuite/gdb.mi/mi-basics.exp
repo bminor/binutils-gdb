@@ -60,23 +60,19 @@ proc test_mi_interpreter_selection {} {
 
     # All this test expects is to get the prompt back
     # with no syntax error message
-    send_gdb "-gdb-version\n"
-    gdb_expect {
-           -re "GNU gdb .*\r\n$mi_gdb_prompt$" \
-               { pass "acceptance of MI operations" 
-                 return 1}
-           -re ".*\r\n$mi_gdb_prompt$" \
-               { fail "acceptance of MI operations"
-                 note "Skipping all other MI tests." }
-           -re "Undefined command.*$gdb_prompt $" \
-               { fail "acceptance of MI operations"
-                 note "Skipping all other MI tests." }
-           -re ".*$gdb_prompt $" \
-               { fail "acceptance of MI operations"
-                 note "Skipping all other MI tests." }
-           timeout { fail "acceptance of MI operations (timeout)"
-                     note "Skipping all other MI tests." }
+    gdb_test_multiple "-gdb-version" "acceptance of MI operations" {
+	-re "GNU gdb .*\r\n$mi_gdb_prompt$" {
+	    pass "acceptance of MI operations"
+	    return 1
+	}
+	-re ".*\r\n$mi_gdb_prompt$" {
+	    fail "acceptance of MI operations"
+	}
+	-re "Undefined command.*$gdb_prompt $" {
+	    fail "acceptance of MI operations"
+	}
     }
+    note "Skipping all other MI tests."
     return 0
 }
 
@@ -90,14 +86,17 @@ proc test_exec_and_symbol_mi_operatons {} {
 
     # Can't use mi_gdb_test as if this doesn't work,
     #  we must give up on the whole test file
-    send_gdb "-file-exec-and-symbols ${binfile}\n"
-    gdb_expect {
-           -re "\[\r\n\]*\\\^done\r\n$mi_gdb_prompt$" \
-               { pass "file-exec-and-symbols operation" }
-           timeout { fail "file-exec-and-symbols operation (timeout)"
-                     note "Skipping all other MI tests."
-                     return 0}
-    }
+    gdb_test_multiple "-file-exec-and-symbols ${binfile}" \
+	"-file-exec-and-symbols ${binfile}" {
+	    -re "\[\r\n\]*\\\^done\r\n$mi_gdb_prompt$" {
+		pass "file-exec-and-symbols operation"
+	    }
+	    timeout {
+		fail "file-exec-and-symbols operation (timeout)"
+		note "Skipping all other MI tests."
+		return 0
+	    }
+	}
 
     # The following is not used by mi-support.exp, but we test here so
     # we get done with loading a program basics.
@@ -208,14 +207,13 @@ proc test_path_specification {} {
     # -environment-path -r dir
     # -environment-path -r
 
-    send_gdb "-environment-path\n"
-    gdb_expect 20 {
+    gdb_test_multiple "-environment-path" "-environment-path" {
 	-re "\\\^done,path=\"\(.*\)\"\r\n$mi_gdb_prompt" { 
-	  set orig_path $expect_out(1,string); 
+	    set orig_path $expect_out(1,string); 
 	}
 	timeout { 
-	  perror "-environment-path (timeout)" ; 
-	  return 
+	    perror "-environment-path (timeout)" ; 
+	    return 
 	}
     }
 

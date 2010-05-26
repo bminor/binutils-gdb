@@ -47,14 +47,13 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load $binfile
 
 set supported 0
-send_gdb "-gdb-show non-stop\n"
-gdb_expect {
+gdb_test_multiple "-gdb-show non-stop" "" {
     -re ".*\\^done,value=\"off\",supported=\"(\[^\"\]+)\"\r\n$mi_gdb_prompt$" {
 	if { $expect_out(1,string) == "1" } {
 	    set supported 1
 	}
     }
-    -re ".$mi_gdb_prompt$" {
+    -re ".*$mi_gdb_prompt$" {
     }
 }
 
@@ -94,13 +93,9 @@ mi_varobj_update * {I_W1 I_W0} "update varobj, 1"
 mi_check_varobj_value I_W0 1 "check varobj, w0, 1"
 mi_check_varobj_value I_W1 1 "check varobj, w1, 1"
 
-send_gdb "-exec-interrupt --thread 1\n"
-gdb_expect {
+gdb_test_multiple "-exec-interrupt --thread 1" "interrupted" {
     -re "\\^done\r\n$mi_gdb_prompt\\*stopped\[^\r\n\]+\r\n$" {
 	pass "interrupted"
-    }
-    timeout {
-	fail "interrupted (timeout)"
     }
 }
 # The interrupt command sends SIGINT to the target, and therefore the
@@ -109,13 +104,9 @@ gdb_expect {
 sleep 1
 mi_check_thread_states {"stopped" "stopped" "stopped"} "thread state, stop 4"
 
-send_gdb "-exec-continue --all\n"
-gdb_expect {
+gdb_test_multiple "-exec-continue --all" "resume all" {
     -re ".*\\*running,thread-id=\"3\"\r\n\\*running,thread-id=\"2\"\r\n\\*running,thread-id=\"1\"\r\n$mi_gdb_prompt" {
 	pass "resume all"
-    }
-    timeout {
-	fail "resume all (timeout)"
     }
 }
 
