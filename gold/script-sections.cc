@@ -1939,14 +1939,23 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
   uint64_t old_dot_value = *dot_value;
   uint64_t old_load_address = *load_address;
 
-  if (this->address_ == NULL)
-    address = *dot_value;
-  else
+  // Check for --section-start.
+  bool is_address_set = false;
+  if (this->output_section_ != NULL)
+    is_address_set =
+      parameters->options().section_start(this->output_section_->name(),
+                                          &address);
+  if (!is_address_set)
     {
-      Output_section* dummy;
-      address = this->address_->eval_with_dot(symtab, layout, true,
-					      *dot_value, NULL, &dummy,
-					      dot_alignment);
+      if (this->address_ == NULL)
+        address = *dot_value;
+      else
+        {
+          Output_section* dummy;
+          address = this->address_->eval_with_dot(symtab, layout, true,
+                                                  *dot_value, NULL, &dummy,
+                                                  dot_alignment);
+        }
     }
 
   uint64_t align;
