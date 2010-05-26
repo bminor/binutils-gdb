@@ -1,3 +1,9 @@
+2010-05-27  Doug Kwan  <dougkwan@google.com>
+
+	* object.cc (Sized_relobj::do_finalize_local_symbols): Use offset
+	from start of output section instead of address for a local symbol
+	in a merged or relaxed section when doing a relocatable link.
+
 2010-05-26  Rafael Espindola  <espindola@google.com>
 
        PR 11604
