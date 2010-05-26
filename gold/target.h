@@ -687,7 +687,37 @@ class Sized_target : public Target
 			   section_size_type view_size,
 			   unsigned char* reloc_view,
 			   section_size_type reloc_view_size) = 0;
+ 
+  // Perform target-specific processing in a relocatable link.  This is
+  // only used if we use the relocation strategy RELOC_SPECIAL.
+  // RELINFO points to a Relocation_info structure. SH_TYPE is the relocation
+  // section type. PRELOC_IN points to the original relocation.  RELNUM is
+  // the index number of the relocation in the relocation section.
+  // OUTPUT_SECTION is the output section to which the relocation is applied.
+  // OFFSET_IN_OUTPUT_SECTION is the offset of the relocation input section
+  // within the output section.  VIEW points to the output view of the
+  // output section.  VIEW_ADDRESS is output address of the view.  VIEW_SIZE
+  // is the size of the output view and PRELOC_OUT points to the new
+  // relocation in the output object.
+  //
+  // A target only needs to override this if the generic code in
+  // target-reloc.h cannot handle some relocation types.
 
+  virtual void
+  relocate_special_relocatable(const Relocate_info<size, big_endian>*
+				/*relinfo */,
+			       unsigned int /* sh_type */,
+			       const unsigned char* /* preloc_in */,
+			       size_t /* relnum */,
+			       Output_section* /* output_section */,
+			       off_t /* offset_in_output_section */,
+			       unsigned char* /* view */,
+			       typename elfcpp::Elf_types<size>::Elf_Addr
+				 /* view_address */,
+			       section_size_type /* view_size */,
+			       unsigned char* /* preloc_out*/)
+  { gold_unreachable(); }
+ 
  protected:
   Sized_target(const Target::Target_info* pti)
     : Target(pti)
