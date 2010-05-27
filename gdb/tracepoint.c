@@ -46,6 +46,7 @@
 #include "gdbthread.h"
 #include "stack.h"
 #include "gdbcore.h"
+#include "remote.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -3306,8 +3307,6 @@ tfile_interp_line (char *line,
 
 /* Parse the part of trace status syntax that is shared between
    the remote protocol and the trace file reader.  */
-
-extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
 void
 parse_trace_status (char *line, struct trace_status *ts)

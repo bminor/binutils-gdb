@@ -242,7 +242,7 @@ static void remote_terminal_ours (void);
 
 static int remote_read_description_p (struct target_ops *target);
 
-char *unpack_varlen_hex (char *buff, ULONGEST *result);
+static void remote_console_output (char *msg);
 
 /* The non-stop remote protocol provisions for one pending stop reply.
    This is where we keep it until it is acknowledged.  */
@@ -4668,7 +4668,7 @@ remote_terminal_ours (void)
   remote_async_terminal_ours_p = 1;
 }
 
-void
+static void
 remote_console_output (char *msg)
 {
   char *p;

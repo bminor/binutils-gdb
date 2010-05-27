@@ -1,3 +1,15 @@
+2010-05-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (unpack_varlen_hex): Remove forward declaration.
+	(remote_console_output): Make static, and add forward declaration.
+	* remote.h: Drop FIXME comment.
+	(unpack_varlen_hex): Declare.
+	(remote_console_output, remote_cisco_objfile_relocate)
+	(deprecated_target_resume_hook, deprecated_target_wait_loop_hook):
+	Delete declarations.
+	* tracepoint.c: Include "remote.h".
+	(unpack_varlen_hex): Delete declaration.
+
 2010-05-27  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (struct piece_closure) <refc>: New field.
