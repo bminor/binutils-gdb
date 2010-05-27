@@ -1,3 +1,7 @@
+2010-05-27  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* MAINTAINERS: Add myself for write after approval privileges.
+
 2010-05-26  Doug Evans  <dje@google.com>
 
 	Allow python to find its files if moved from original location.
