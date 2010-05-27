@@ -1,5 +1,12 @@
 2010-05-27  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2loc.c (struct piece_closure) <refc>: New field.
+	(allocate_piece_closure): Initialize refc.
+	(copy_pieced_value_closure): Use refc.
+	(free_pieced_value_closure): Likewise.
+
+2010-05-27  Tom Tromey  <tromey@redhat.com>
+
 	* arm-tdep.c (push_stack_item): 'contents' now const.
 	(arm_push_dummy_call): Make 'val' const.  Use value_contents, not
 	value_contents_writeable.  Introduce new temporary.

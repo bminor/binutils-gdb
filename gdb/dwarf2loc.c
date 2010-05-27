@@ -231,6 +231,9 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
 
 struct piece_closure
 {
+  /* Reference count.  */
+  int refc;
+
   /* The number of pieces used to describe this variable.  */
   int n_pieces;
 
@@ -250,6 +253,7 @@ allocate_piece_closure (int n_pieces, struct dwarf_expr_piece *pieces,
 {
   struct piece_closure *c = XZALLOC (struct piece_closure);
 
+  c->refc = 1;
   c->n_pieces = n_pieces;
   c->addr_size = addr_size;
   c->pieces = XCALLOC (n_pieces, struct dwarf_expr_piece);
@@ -747,7 +751,8 @@ copy_pieced_value_closure (struct value *v)
 {
   struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
   
-  return allocate_piece_closure (c->n_pieces, c->pieces, c->addr_size);
+  ++c->refc;
+  return c;
 }
 
 static void
@@ -755,8 +760,12 @@ free_pieced_value_closure (struct value *v)
 {
   struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
 
-  xfree (c->pieces);
-  xfree (c);
+  --c->refc;
+  if (c->refc == 0)
+    {
+      xfree (c->pieces);
+      xfree (c);
+    }
 }
 
 /* Functions for accessing a variable described by DW_OP_piece.  */
