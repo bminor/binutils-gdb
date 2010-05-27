@@ -1697,7 +1697,7 @@ struct stack_item
 };
 
 static struct stack_item *
-push_stack_item (struct stack_item *prev, void *contents, int len)
+push_stack_item (struct stack_item *prev, const void *contents, int len)
 {
   struct stack_item *si;
   si = xmalloc (sizeof (struct stack_item));
@@ -2038,7 +2038,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type;
       struct type *target_type;
       enum type_code typecode;
-      bfd_byte *val;
+      const bfd_byte *val;
       int align;
       enum arm_vfp_cprc_base_type vfp_base_type;
       int vfp_base_count;
@@ -2048,7 +2048,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       len = TYPE_LENGTH (arg_type);
       target_type = TYPE_TARGET_TYPE (arg_type);
       typecode = TYPE_CODE (arg_type);
-      val = value_contents_writeable (args[argnum]);
+      val = value_contents (args[argnum]);
 
       align = arm_type_align (arg_type);
       /* Round alignment up to a whole number of words.  */
@@ -2149,9 +2149,10 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  CORE_ADDR regval = extract_unsigned_integer (val, len, byte_order);
 	  if (arm_pc_is_thumb (regval))
 	    {
-	      val = alloca (len);
-	      store_unsigned_integer (val, len, byte_order,
+	      bfd_byte *copy = alloca (len);
+	      store_unsigned_integer (copy, len, byte_order,
 				      MAKE_THUMB_ADDR (regval));
+	      val = copy;
 	    }
 	}
 

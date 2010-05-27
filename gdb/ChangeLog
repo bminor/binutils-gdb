@@ -1,5 +1,11 @@
 2010-05-27  Tom Tromey  <tromey@redhat.com>
 
+	* arm-tdep.c (push_stack_item): 'contents' now const.
+	(arm_push_dummy_call): Make 'val' const.  Use value_contents, not
+	value_contents_writeable.  Introduce new temporary.
+
+2010-05-27  Tom Tromey  <tromey@redhat.com>
+
 	* findcmd.c (parse_find_args): Use value_contents, not
 	value_contents_raw.
 
