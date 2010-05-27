@@ -1,4 +1,4 @@
-2010-05-27  jason Duerstock  <jason.duerstock+binutils@gmail.com>
+2010-05-27  Jason Duerstock  <jason.duerstock+binutils@gmail.com>
 
 	* m68k-dis.c (print_insn_m68k): Emit undefined instructions as
 	.short directives so that they can be reassembled.
