@@ -9760,6 +9760,12 @@ encode_thumb2_ldmstm (int base, unsigned mask, bfd_boolean writeback)
 
   if (mask & (1 << 13))
     inst.error =  _("SP not allowed in register list");
+
+  if ((mask & (1 << base)) != 0
+      && writeback)
+    inst.error = _("having the base register in the register list when "
+		   "using write back is UNPREDICTABLE");
+
   if (load)
     {
       if (mask & (1 << 15))
@@ -9769,19 +9775,11 @@ encode_thumb2_ldmstm (int base, unsigned mask, bfd_boolean writeback)
           else
             set_it_insn_type_last ();
         }
-
-      if ((mask & (1 << base)) != 0
-	  && writeback)
-	as_warn (_("base register should not be in register list "
-		   "when written back"));
     }
   else
     {
       if (mask & (1 << 15))
 	inst.error = _("PC not allowed in register list");
-
-      if (mask & (1 << base))
-	as_warn (_("value stored for r%d is UNPREDICTABLE"), base);
     }
 
   if ((mask & (mask - 1)) == 0)
@@ -9847,7 +9845,7 @@ do_t_ldmstm (void)
 	      if (inst.instruction == T_MNEM_stmia
 		  && (inst.operands[1].imm & mask)
 		  && (inst.operands[1].imm & (mask - 1)))
-		as_warn (_("value stored for r%d is UNPREDICTABLE"),
+		as_warn (_("value stored for r%d is UNKNOWN"),
 			 inst.operands[0].reg);
 
 	      inst.instruction = THUMB_OP16 (inst.instruction);
@@ -9887,7 +9885,7 @@ do_t_ldmstm (void)
 	    as_warn (_("this instruction will write back the base register"));
 	  if ((inst.operands[1].imm & (1 << inst.operands[0].reg))
 	      && (inst.operands[1].imm & ((1 << inst.operands[0].reg) - 1)))
-	    as_warn (_("value stored for r%d is UNPREDICTABLE"),
+	    as_warn (_("value stored for r%d is UNKNOWN"),
 		     inst.operands[0].reg);
 	}
       else

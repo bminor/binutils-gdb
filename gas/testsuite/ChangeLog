@@ -1,3 +1,12 @@
+2010-05-27  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
+
+	* gas/arm/thumb2_ldmstm.d: Add new testcases.
+	* gas/arm/thumb2_ldmstm.s: Likeiwse.
+	* gas/arm/thumb2_ldmstm_bad.d: Add testcases to check for
+	UNPREDICTABLE ldm/stm.
+	* gas/arm/thumb2_ldmstm_bad.l: Likewise.
+	* gas/arm/thumb2_ldmstm_bad.s: Likewise.
+
 2010-05-26  Catherine Moore  <clm@codesoucery.com>
 	    Maxim Kuvyrkov  <maxim@codesourcery.com>
 
