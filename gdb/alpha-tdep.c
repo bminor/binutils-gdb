@@ -295,7 +295,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int accumulate_size = struct_return ? 8 : 0;
   struct alpha_arg
     {
-      gdb_byte *contents;
+      const gdb_byte *contents;
       int len;
       int offset;
     };
@@ -393,7 +393,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       m_arg->len = TYPE_LENGTH (arg_type);
       m_arg->offset = accumulate_size;
       accumulate_size = (accumulate_size + m_arg->len + 7) & ~7;
-      m_arg->contents = value_contents_writeable (arg);
+      m_arg->contents = value_contents (arg);
     }
 
   /* Determine required argument register loads, loading an argument register
@@ -415,7 +415,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* `Push' arguments on the stack.  */
   for (i = nargs; m_arg--, --i >= 0;)
     {
-      gdb_byte *contents = m_arg->contents;
+      const gdb_byte *contents = m_arg->contents;
       int offset = m_arg->offset;
       int len = m_arg->len;
 

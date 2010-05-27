@@ -1,3 +1,8 @@
+2010-05-27  Tom Tromey  <tromey@redhat.com>
+
+	* alpha-tdep.c (alpha_push_dummy_call): Make alpha_arg.contents
+	const.  Use value_contents, not value_contents_writeable.
+
 2010-05-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ensure_lval): Replace call to value_contents_raw
