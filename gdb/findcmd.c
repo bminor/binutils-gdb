@@ -211,7 +211,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 	}
       else
 	{
-	  memcpy (pattern_buf_end, value_contents_raw (v), val_bytes);
+	  memcpy (pattern_buf_end, value_contents (v), val_bytes);
 	  pattern_buf_end += val_bytes;
 	}
 
