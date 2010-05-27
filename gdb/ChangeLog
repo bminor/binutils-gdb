@@ -1,5 +1,19 @@
 2010-05-26  Doug Evans  <dje@google.com>
 
+	Allow python to find its files if moved from original location.
+	* acinclude.m4 (GDB_AC_DEFINE_RELOCATABLE): New function.
+	(GDB_AC_WITH_DIR): Call it.
+	* configure.ac: Define WITH_PYTHON_PATH if we can find the
+	python installation directory.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* defs.h (python_libdir): Declare.
+	* main.c (python_libdir): Define.
+	(captured_main): Initialize python_libdir.
+	* python/python.c (_initialize_python): #ifdef WITH_PYTHON_PATH,
+	call Py_SetProgramName to make sure python can find its libraries
+	and modules.
+
 	* configure.ac: Try to use python's distutils to fetch compilation
 	parameters.
 	* configure: Regenerate.

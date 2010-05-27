@@ -1658,7 +1658,8 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libexpat-prefix[=DIR]  search for libexpat in DIR/include and DIR/lib
   --without-libexpat-prefix     don't search for libexpat in includedir and libdir
-  --with-python           include python support (auto/yes/no/<path>)
+  --with-python[=PYTHON]  include python support
+                          (auto/yes/no/<python-program>)
   --without-included-regex
                           don't use included regex; this is the default on
                           systems with version 2 of the GNU C library (use
@@ -7777,6 +7778,7 @@ _ACEOF
 
 
 
+
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
      	test_prefix=/usr/local
@@ -7797,6 +7799,7 @@ _ACEOF
 cat >>confdefs.h <<_ACEOF
 #define DEBUGDIR_RELOCATABLE $value
 _ACEOF
+
 
 
 
@@ -7824,6 +7827,7 @@ _ACEOF
 
 
 
+
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
      	test_prefix=/usr/local
@@ -7844,6 +7848,7 @@ _ACEOF
 cat >>confdefs.h <<_ACEOF
 #define GDB_DATADIR_RELOCATABLE $value
 _ACEOF
+
 
 
 
@@ -10433,6 +10438,7 @@ fi
 
 
 
+
 # Check whether --with-python was given.
 if test "${with_python+set}" = set; then :
   withval=$with_python;
@@ -10450,23 +10456,23 @@ if test "${with_python}" = no; then
 $as_echo "$as_me: WARNING: python support disabled; some features may be unavailable." >&2;}
   have_libpython=no
 else
-  have_python_config=no
   case "${with_python}" in
   /*)
     if test -d ${with_python}; then
       # Assume the python binary is ${with_python}/bin/python.
-      python_prefix=${with_python}
       python_prog="${with_python}/bin/python"
+      python_prefix=
       if test ! -x ${python_prog}; then
         # Fall back to gdb 7.0/7.1 behaviour.
         python_prog=missing
+        python_prefix=${with_python}
       fi
     elif test -x ${with_python}; then
       # While we can't run python compiled for $host (unless host == build),
       # the user could write a script that provides the needed information,
       # so we support that.
-      python_prefix=
       python_prog=${with_python}
+      python_prefix=
     else
       as_fn_error "invalid value for --with-python" "$LINENO" 5
     fi
@@ -10596,6 +10602,10 @@ fi
     if test $? != 0; then
       as_fn_error "failure running python-config --ldflags" "$LINENO" 5
     fi
+    python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
+    if test $? != 0; then
+      as_fn_error "failure running python-config --exec-prefix" "$LINENO" 5
+    fi
     have_python_config=yes
   else
     # Fall back to gdb 7.0/7.1 behaviour.
@@ -10606,6 +10616,7 @@ fi
       python_includes="-I${python_prefix}/include"
       python_libs="-L${python_prefix}/lib"
     fi
+    have_python_config=no
   fi
 
   # Having "/pythonX.Y" in the include path is awkward.
@@ -10615,7 +10626,7 @@ fi
   # path of the, umm, include file.  So strip away this part of the
   # output of python-config --includes.
   python_includes=`echo "${python_includes} " \
-  			| sed -e 's,/python[0-9]*[.][0-9]* , ,g'`
+                        | sed -e 's,/python[0-9]*[.][0-9]* , ,g'`
 
   # If we have python-config, only try the configuration it provides.
   # Otherwise fallback on the old way of trying different versions of
@@ -10624,8 +10635,9 @@ fi
   have_libpython=no
   if test "${have_python_config}" = yes; then
     python_version=`echo " ${python_libs} " \
-    			 | sed -e 's,^.* -l\(python[0-9]*[.][0-9]*\) .*$,\1,'`
-    if test "${python_version}" != ""; then
+                         | sed -e 's,^.* -l\(python[0-9]*[.][0-9]*\) .*$,\1,'`
+    case "${python_version}" in
+    python*)
 
   version=${python_version}
 
@@ -10661,9 +10673,11 @@ rm -f core conftest.err conftest.$ac_objext \
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
 $as_echo "${found_usable_python}" >&6; }
 
-    else
+      ;;
+    *)
       as_fn_error "unable to determine python version from ${python_libs}" "$LINENO" 5
-    fi
+      ;;
+    esac
   else
     if test "${have_libpython}" = no; then
 
@@ -10804,6 +10818,37 @@ $as_echo "$as_me: WARNING: python is missing or unusable; some features may be u
       as_fn_error "no usable python found at ${with_python}" "$LINENO" 5
       ;;
     esac
+  else
+    if test -n "${python_prefix}"; then
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_PYTHON_PATH "${python_prefix}"
+_ACEOF
+
+
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case ${python_prefix} in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+
+cat >>confdefs.h <<_ACEOF
+#define PYTHON_PATH_RELOCATABLE $value
+_ACEOF
+
+
+    fi
   fi
 fi
 
@@ -14596,6 +14641,7 @@ _ACEOF
 
 
 
+
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
      	test_prefix=/usr/local
@@ -14616,6 +14662,7 @@ _ACEOF
 cat >>confdefs.h <<_ACEOF
 #define SYSTEM_GDBINIT_RELOCATABLE $value
 _ACEOF
+
 
 
 

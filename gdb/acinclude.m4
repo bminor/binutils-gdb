@@ -403,6 +403,31 @@ AC_DEFUN([CY_AC_TK_PRIVATE_HEADERS], [
   fi
 ])
 
+dnl GDB_AC_DEFINE_RELOCATABLE([VARIABLE], [ARG-NAME], [SHELL-VARIABLE])
+dnl For use in processing directory values for --with-foo.
+dnl If the path in SHELL_VARIABLE is relative to the prefix, then the
+dnl result is relocatable, then this will define the C macro
+dnl VARIABLE_RELOCATABLE to 1; otherwise it is defined as 0.
+AC_DEFUN([GDB_AC_DEFINE_RELOCATABLE], [
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case [$3] in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+  AC_DEFINE_UNQUOTED([$1]_RELOCATABLE, $value, [Define if the $2 directory should be relocated when GDB is moved.])
+])
+
 dnl GDB_AC_WITH_DIR([VARIABLE], [ARG-NAME], [HELP], [DEFAULT])
 dnl Add a new --with option that defines a directory.
 dnl The result is stored in VARIABLE.  AC_DEFINE_DIR is called
@@ -419,21 +444,5 @@ AC_DEFUN([GDB_AC_WITH_DIR], [
     [$1]=$withval], [[$1]=[$4]])
   AC_DEFINE_DIR([$1], [$1], [$3])
   AC_SUBST([$1])
-  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
-     if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
-     else
-	test_prefix=$prefix
-     fi
-  else
-     test_prefix=$exec_prefix
-  fi
-  value=0
-  case ${ac_define_dir} in
-     "${test_prefix}"|"${test_prefix}/"*|\
-	'${exec_prefix}'|'${exec_prefix}/'*)
-     value=1
-     ;;
-  esac
-  AC_DEFINE_UNQUOTED([$1]_RELOCATABLE, $value, [Define if the $2 directory should be relocated when GDB is moved.])
+  GDB_AC_DEFINE_RELOCATABLE([$1], [$2], ${ac_define_dir})
   ])

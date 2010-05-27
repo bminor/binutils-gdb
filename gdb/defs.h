@@ -157,6 +157,10 @@ extern char *gdb_sysroot;
 /* GDB datadir, used to store data files.  */
 extern char *gdb_datadir;
 
+/* If non-NULL, the possibly relocated path to python's "lib" directory
+   specified with --with-python.  */
+extern char *python_libdir;
+
 /* Search path for separate debug files.  */
 extern char *debug_file_directory;
 

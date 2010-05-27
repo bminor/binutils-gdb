@@ -766,6 +766,9 @@
    'ptrdiff_t'. */
 #undef PTRDIFF_T_SUFFIX
 
+/* Define if the python directory should be relocated when GDB is moved. */
+#undef PYTHON_PATH_RELOCATABLE
+
 /* Relocated directory for source files. */
 #undef RELOC_SRCDIR
 
@@ -837,6 +840,10 @@
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'wint_t'. */
 #undef WINT_T_SUFFIX
+
+/* Define if --with-python provides a path, either directly or via
+   python-config.py --exec-prefix. */
+#undef WITH_PYTHON_PATH
 
 /* Define if the simulator is being linked in. */
 #undef WITH_SIM

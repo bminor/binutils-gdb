@@ -68,6 +68,10 @@ char *gdb_sysroot = 0;
 /* GDB datadir, used to store data files.  */
 char *gdb_datadir = 0;
 
+/* If gdb was configured with --with-python=/path,
+   the possibly relocated path to python's lib directory.  */
+char *python_libdir = 0;
+
 struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
@@ -350,6 +354,14 @@ captured_main (void *data)
 
   gdb_datadir = relocate_directory (argv[0], GDB_DATADIR,
 				    GDB_DATADIR_RELOCATABLE);
+
+#ifdef WITH_PYTHON_PATH
+  /* For later use in helping Python find itself.  */
+  python_libdir = relocate_directory (argv[0],
+				      concat (WITH_PYTHON_PATH,
+					      SLASH_STRING, "lib", NULL),
+				      PYTHON_PATH_RELOCATABLE);
+#endif
 
 #ifdef RELOC_SRCDIR
   add_substitute_path_rule (RELOC_SRCDIR,

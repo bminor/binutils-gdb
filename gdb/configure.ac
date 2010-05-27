@@ -616,8 +616,40 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   AC_MSG_RESULT([${found_usable_python}])
 ])
 
+dnl There are several different values for --with-python:
+dnl
+dnl no -   Don't include python support.
+dnl yes -  Include python support, error if it's missing.
+dnl        If we find python in $PATH, use it to fetch configure options,
+dnl        otherwise assume the compiler can find it with no help from us.
+dnl        Python 2.6, 2.5, and then 2.4 are tried in turn.
+dnl auto - Same as "yes", but if python is missing from the system,
+dnl        fall back to "no".
+dnl /path/to/python/exec-prefix -
+dnl        Use the python located in this directory.
+dnl        If /path/to/python/exec-prefix/bin/python exists, use it to find
+dnl        the compilation parameters.  Otherwise use
+dnl        -I/path/to/python/exec-prefix/include,
+dnl        -L/path/to/python/exec-prefix/lib.
+dnl        Python 2.6, 2.5, and then 2.4 are tried in turn.
+dnl        NOTE: This case is historical.  It is what was done for 7.0/7.1
+dnl        but is deprecated.
+dnl /path/to/python/executable -
+dnl        Run python-config.py with this version of python to fetch the
+dnl        compilation parameters.
+dnl        NOTE: This needn't be the real python executable.
+dnl        In a cross-compilation scenario (build != host), this could be
+dnl        a shell script that provides what python-config.py provides for
+dnl        --ldflags, --includes, --exec-prefix.
+dnl python-executable -
+dnl        Find python-executable in $PATH, and then handle the same as
+dnl        /path/to/python/executable.
+dnl
+dnl If a python program is specified, it is used to run python-config.py and
+dnl is passed --ldflags, --includes, --exec-prefix.
+
 AC_ARG_WITH(python,
-  AS_HELP_STRING([--with-python], [include python support (auto/yes/no/<path>)]),
+  AS_HELP_STRING([--with-python@<:@=PYTHON@:>@], [include python support (auto/yes/no/<python-program>)]),
   [], [with_python=auto])
 AC_MSG_CHECKING([whether to use python])
 AC_MSG_RESULT([$with_python])
@@ -626,23 +658,23 @@ if test "${with_python}" = no; then
   AC_MSG_WARN([python support disabled; some features may be unavailable.])
   have_libpython=no
 else
-  have_python_config=no
   case "${with_python}" in
   /*)
     if test -d ${with_python}; then
       # Assume the python binary is ${with_python}/bin/python.
-      python_prefix=${with_python}
       python_prog="${with_python}/bin/python"
+      python_prefix=
       if test ! -x ${python_prog}; then
         # Fall back to gdb 7.0/7.1 behaviour.
         python_prog=missing
+        python_prefix=${with_python}
       fi
     elif test -x ${with_python}; then
       # While we can't run python compiled for $host (unless host == build),
       # the user could write a script that provides the needed information,
       # so we support that.
-      python_prefix=
       python_prog=${with_python}
+      python_prefix=
     else
       AC_ERROR(invalid value for --with-python)
     fi
@@ -692,6 +724,10 @@ else
     if test $? != 0; then
       AC_ERROR(failure running python-config --ldflags)
     fi
+    python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
+    if test $? != 0; then
+      AC_ERROR(failure running python-config --exec-prefix)
+    fi
     have_python_config=yes
   else
     # Fall back to gdb 7.0/7.1 behaviour.
@@ -702,6 +738,7 @@ else
       python_includes="-I${python_prefix}/include"
       python_libs="-L${python_prefix}/lib"
     fi
+    have_python_config=no
   fi
 
   # Having "/pythonX.Y" in the include path is awkward.
@@ -711,7 +748,7 @@ else
   # path of the, umm, include file.  So strip away this part of the
   # output of python-config --includes.
   python_includes=`echo "${python_includes} " \
-  			| sed -e 's,/python[[0-9]]*[[.]][[0-9]]* , ,g'`
+                        | sed -e 's,/python[[0-9]]*[[.]][[0-9]]* , ,g'`
 
   # If we have python-config, only try the configuration it provides.
   # Otherwise fallback on the old way of trying different versions of
@@ -720,13 +757,16 @@ else
   have_libpython=no
   if test "${have_python_config}" = yes; then
     python_version=`echo " ${python_libs} " \
-    			 | sed -e 's,^.* -l\(python[[0-9]]*[[.]][[0-9]]*\) .*$,\1,'`
-    if test "${python_version}" != ""; then
+                         | sed -e 's,^.* -l\(python[[0-9]]*[[.]][[0-9]]*\) .*$,\1,'`
+    case "${python_version}" in
+    python*)
       AC_TRY_LIBPYTHON(${python_version}, have_libpython,
                        ${python_includes}, ${python_libs})
-    else
+      ;;
+    *)
       AC_MSG_ERROR([unable to determine python version from ${python_libs}])
-    fi
+      ;;
+    esac
   else
     if test "${have_libpython}" = no; then
       AC_TRY_LIBPYTHON(python2.6, have_libpython,
@@ -761,6 +801,12 @@ else
       AC_MSG_ERROR([no usable python found at ${with_python}])
       ;;
     esac
+  else
+    if test -n "${python_prefix}"; then
+      AC_DEFINE_UNQUOTED(WITH_PYTHON_PATH, "${python_prefix}",
+                         [Define if --with-python provides a path, either directly or via python-config.py --exec-prefix.])
+      GDB_AC_DEFINE_RELOCATABLE(PYTHON_PATH, python, ${python_prefix})
+    fi
   fi
 fi
 

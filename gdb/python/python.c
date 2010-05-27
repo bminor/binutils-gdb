@@ -647,6 +647,17 @@ Enables or disables printing of Python stack traces."),
 			   &show_python_list);
 
 #ifdef HAVE_PYTHON
+#ifdef WITH_PYTHON_PATH
+  /* Work around problem where python gets confused about where it is,
+     and then can't find its libraries, etc.
+     NOTE: Python assumes the following layout:
+     /foo/bin/python
+     /foo/lib/pythonX.Y/...
+     This must be done before calling Py_Initialize.  */
+  Py_SetProgramName (concat (ldirname (python_libdir), SLASH_STRING, "bin",
+			     SLASH_STRING, "python", NULL));
+#endif
+
   Py_Initialize ();
   PyEval_InitThreads ();
 
