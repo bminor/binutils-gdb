@@ -3884,7 +3884,7 @@ ensure_lval (struct value *val, struct gdbarch *gdbarch, CORE_ADDR *sp)
 	}
       VALUE_LVAL (val) = lval_memory;
 
-      write_memory (value_address (val), value_contents_raw (val), len);
+      write_memory (value_address (val), value_contents (val), len);
     }
 
   return val;

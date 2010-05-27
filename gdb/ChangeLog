@@ -1,3 +1,8 @@
+2010-05-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ensure_lval): Replace call to value_contents_raw
+	by call to value_contents.
+
 2010-05-27  Ozkan Sezer  <sezeroz@gmail.com>
 
 	* MAINTAINERS: Add myself for write after approval privileges.
