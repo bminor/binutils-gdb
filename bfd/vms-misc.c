@@ -33,11 +33,10 @@
 #include "safe-ctype.h"
 
 #ifdef VMS
-#if defined(__GNUC__) && !defined(globalref)
-#define globalref extern
-#endif
+#define __NEW_STARLET
 #include <rms.h>
 #include <unixlib.h>
+#include <gen64def.h>
 #include <starlet.h>
 #define RME$C_SETRFM 0x00000001
 #include <unistd.h>
@@ -497,19 +496,19 @@ vms_get_module_name (const char *filename, bfd_boolean upcase)
     fout++;
   else
     fout = filename;
-      
+
   /* Strip UNIX path.  */
   fptr = strrchr (fout, '/');
   if (fptr != NULL)
     fout = fptr + 1;
-  
+
   fname = strdup (fout);
 
   /* Strip suffix.  */
   fptr = strrchr (fname, '.');
   if (fptr != 0)
     *fptr = 0;
-  
+
   /* Convert to upper case and truncate at 31 characters.
      (VMS object file format restricts module name length to 31).  */
   fptr = fname;
@@ -526,36 +525,109 @@ vms_get_module_name (const char *filename, bfd_boolean upcase)
   return fname;
 }
 
-/* Convert a raw VMS time to a unix time.  */
+/* Compared to usual UNIX time_t, VMS time has less limits:
+   -  64 bit (63 bits in fact as the MSB must be 0)
+   -  100ns granularity
+   -  epoch is Nov 17, 1858.
+   Here has the constants and the routines used to convert VMS from/to UNIX time.
+   The conversion routines don't assume 64 bits arithmetic.  */
+
+/* UNIX time granularity for VMS, ie 1s / 100ns.  */
+#define VMS_TIME_FACTOR 10000000
+
+/* Number of seconds since VMS epoch of the UNIX epoch.  */
+#define VMS_TIME_OFFSET 3506716800U
+
+/* Convert a VMS time to a unix time.  */
 
 time_t
 vms_time_to_time_t (unsigned int hi, unsigned int lo)
 {
-  const unsigned int off = 3506716800U;
-  const unsigned int factor = 10000000;
   unsigned int tmp;
   unsigned int rlo;
   int i;
 
   /* First convert to seconds.  */
-  tmp = hi % factor;
-  hi = hi / factor;
+  tmp = hi % VMS_TIME_FACTOR;
+  hi = hi / VMS_TIME_FACTOR;
   rlo = 0;
   for (i = 0; i < 4; i++)
     {
       tmp = (tmp << 8) | (lo >> 24);
       lo <<= 8;
 
-      rlo = (rlo << 8) | (tmp / factor);
-      tmp %= factor;
+      rlo = (rlo << 8) | (tmp / VMS_TIME_FACTOR);
+      tmp %= VMS_TIME_FACTOR;
     }
   lo = rlo;
 
   /* Return 0 in case of overflow.  */
-  if (lo > off && hi > 1)
+  if (lo > VMS_TIME_OFFSET && hi > 1)
     return 0;
 
-  return lo - off;
+  /* Return 0 in case of underflow.  */
+  if (lo < VMS_TIME_OFFSET)
+    return 0;
+
+  return lo - VMS_TIME_OFFSET;
+}
+
+/* Convert a time_t to a VMS time.  */
+
+void
+vms_time_t_to_vms_time (time_t ut, unsigned int *hi, unsigned int *lo)
+{
+  unsigned short val[4];
+  unsigned short tmp[4];
+  unsigned int carry;
+  int i;
+
+  /* Put into val.  */
+  val[0] = ut & 0xffff;
+  val[1] = (ut >> 16) & 0xffff;
+  if (sizeof (ut) > 4)
+    {
+      val[2] = (ut >> 32) & 0xffff;
+      val[3] = (ut >> 48) & 0xffff;
+    }
+  else
+    {
+      val[2] = 0;
+      val[3] = 0;
+    }
+
+  /* Add offset.  */
+  tmp[0] = VMS_TIME_OFFSET & 0xffff;
+  tmp[1] = VMS_TIME_OFFSET >> 16;
+  tmp[2] = 0;
+  tmp[3] = 0;
+  carry = 0;
+  for (i = 0; i < 4; i++)
+    {
+      carry += tmp[i] + val[i];
+      val[i] = carry & 0xffff;
+      carry = carry >> 16;
+    }
+
+  /* Multiply by factor, well first by 10000 and then by 1000.  */
+  carry = 0;
+  for (i = 0; i < 4; i++)
+    {
+      carry += val[i] * 10000;
+      val[i] = carry & 0xffff;
+      carry = carry >> 16;
+    }
+  carry = 0;
+  for (i = 0; i < 4; i++)
+    {
+      carry += val[i] * 1000;
+      val[i] = carry & 0xffff;
+      carry = carry >> 16;
+    }
+
+  /* Write the result.  */
+  *lo = val[0] | (val[1] << 16);
+  *hi = val[2] | (val[3] << 16);
 }
 
 /* Convert a raw (stored in a buffer) VMS time to a unix time.  */
@@ -567,4 +639,33 @@ vms_rawtime_to_time_t (unsigned char *buf)
   unsigned int lo = bfd_getl32 (buf + 0);
 
   return vms_time_to_time_t (hi, lo);
+}
+
+void
+vms_get_time (unsigned int *hi, unsigned int *lo)
+{
+#ifdef VMS
+  struct _generic_64 t;
+
+  sys$gettim (&t);
+  *lo = t.gen64$q_quadword;
+  *hi = t.gen64$q_quadword >> 32;
+#else
+  time_t t;
+
+  time (&t);
+  vms_time_t_to_vms_time (t, hi, lo);
+#endif
+}
+
+/* Get the current time into a raw buffer BUF.  */
+
+void
+vms_raw_get_time (unsigned char *buf)
+{
+  unsigned int hi, lo;
+
+  vms_get_time (&hi, &lo);
+  bfd_putl32 (lo, buf + 0);
+  bfd_putl32 (hi, buf + 4);
 }

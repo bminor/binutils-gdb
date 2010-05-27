@@ -1,3 +1,15 @@
+2010-05-27  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-misc.c: Define __NEW_STARLET.  Remove trailing spaces.
+	(VMS_TIME_FACTOR, VMS_TIME_OFFSET): New macros.
+	(vms_time_to_time_t): Use them instead of local const.
+	(vms_time_t_to_vms_time): New function.
+	(vms_get_time): Likewise.
+	(vms_raw_get_time): Likewise.
+	* vms.h	(vms_time_t_to_vms_time): New declaration.
+	(vms_get_time): Likewise.
+	(vms_raw_get_time): Likewise.
+
 2010-05-26  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c: Update comments.

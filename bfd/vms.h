@@ -115,6 +115,9 @@ extern char * vms_get_module_name (const char *, bfd_boolean);
 extern unsigned char *get_vms_time_string (void);
 extern time_t vms_time_to_time_t (unsigned int hi, unsigned int lo);
 extern time_t vms_rawtime_to_time_t (unsigned char *);
+extern void vms_time_t_to_vms_time (time_t ut, unsigned int *hi, unsigned int *lo);
+extern void vms_get_time (unsigned int *hi, unsigned int *lo);
+extern void vms_raw_get_time (unsigned char *buf);
 
 extern char * _bfd_vms_save_sized_string (unsigned char *, int);
 extern char * _bfd_vms_save_counted_string (unsigned char *);
