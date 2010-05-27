@@ -1,3 +1,10 @@
+2010-05-26  Doug Evans  <dje@google.com>
+
+	* configure.ac: Try to use python's distutils to fetch compilation
+	parameters.
+	* configure: Regenerate.
+	* python/python-config.py: New file.
+
 2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
 
 	* ser-tcp.c (net_open): Check error return from socket() call by its

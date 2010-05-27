@@ -659,6 +659,7 @@ TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
 ALLOCA
 PYTHON_CFLAGS
+python_prog_path
 LTLIBEXPAT
 LIBEXPAT
 HAVE_LIBEXPAT
@@ -10431,6 +10432,7 @@ fi
 
 
 
+
 # Check whether --with-python was given.
 if test "${with_python+set}" = set; then :
   withval=$with_python;
@@ -10448,36 +10450,234 @@ if test "${with_python}" = no; then
 $as_echo "$as_me: WARNING: python support disabled; some features may be unavailable." >&2;}
   have_libpython=no
 else
+  have_python_config=no
   case "${with_python}" in
-  yes | auto)
-    # Leave as empty, use defaults.
-    python_includes=
-    python_libs=
-    ;;
   /*)
-    python_includes="-I${with_python}/include"
-    python_libs="-L${with_python}/lib"
+    if test -d ${with_python}; then
+      # Assume the python binary is ${with_python}/bin/python.
+      python_prefix=${with_python}
+      python_prog="${with_python}/bin/python"
+      if test ! -x ${python_prog}; then
+        # Fall back to gdb 7.0/7.1 behaviour.
+        python_prog=missing
+      fi
+    elif test -x ${with_python}; then
+      # While we can't run python compiled for $host (unless host == build),
+      # the user could write a script that provides the needed information,
+      # so we support that.
+      python_prefix=
+      python_prog=${with_python}
+    else
+      as_fn_error "invalid value for --with-python" "$LINENO" 5
+    fi
     ;;
-  *)
+  */*)
+    # Disallow --with-python=foo/bar.
     as_fn_error "invalid value for --with-python" "$LINENO" 5
     ;;
+  *)
+    # The user has either specified auto, yes, or the name of the python
+    # program assumed to be in $PATH.
+    python_prefix=
+    case "${with_python}" in
+    yes | auto)
+      if test ${build} = ${host}; then
+        # Extract the first word of "python", so it can be a program name with args.
+set dummy python; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_python_prog_path+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $python_prog_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_python_prog_path="$python_prog_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_python_prog_path="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_python_prog_path" && ac_cv_path_python_prog_path="missing"
+  ;;
+esac
+fi
+python_prog_path=$ac_cv_path_python_prog_path
+if test -n "$python_prog_path"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $python_prog_path" >&5
+$as_echo "$python_prog_path" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+        if test "${python_prog_path}" = missing; then
+          python_prog=missing
+        else
+          python_prog=${python_prog_path}
+        fi
+      else
+        # Not much we can do except assume the cross-compiler will find the
+        # right files.
+        python_prog=missing
+      fi
+      ;;
+    *)
+      # While we can't run python compiled for $host (unless host == build),
+      # the user could write a script that provides the needed information,
+      # so we support that.
+      python_prog="${with_python}"
+      # Extract the first word of "${python_prog}", so it can be a program name with args.
+set dummy ${python_prog}; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_python_prog_path+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $python_prog_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_python_prog_path="$python_prog_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_python_prog_path="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_python_prog_path" && ac_cv_path_python_prog_path="missing"
+  ;;
+esac
+fi
+python_prog_path=$ac_cv_path_python_prog_path
+if test -n "$python_prog_path"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $python_prog_path" >&5
+$as_echo "$python_prog_path" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+      if test "${python_prog_path}" = missing; then
+        as_fn_error "unable to find python program ${python_prog}" "$LINENO" 5
+      fi
+      ;;
+    esac
   esac
 
-  save_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="$CPPFLAGS ${python_includes}"
-  save_LIBS=$LIBS
-  LIBS="$LIBS ${python_libs}"
+  if test "${python_prog}" != missing; then
+    python_includes=`${python_prog} ${srcdir}/python/python-config.py --includes`
+    if test $? != 0; then
+      as_fn_error "failure running python-config --includes" "$LINENO" 5
+    fi
+    python_libs=`${python_prog} ${srcdir}/python/python-config.py --ldflags`
+    if test $? != 0; then
+      as_fn_error "failure running python-config --ldflags" "$LINENO" 5
+    fi
+    have_python_config=yes
+  else
+    # Fall back to gdb 7.0/7.1 behaviour.
+    if test -z ${python_prefix}; then
+      python_includes=
+      python_libs=
+    else
+      python_includes="-I${python_prefix}/include"
+      python_libs="-L${python_prefix}/lib"
+    fi
+  fi
+
+  # Having "/pythonX.Y" in the include path is awkward.
+  # All those python headers get bubbled up to the top inviting lots
+  # of random collisions.  GDB originally didn't use python-config to
+  # find the compilation parameters and includes "pythonX.Y/" in the
+  # path of the, umm, include file.  So strip away this part of the
+  # output of python-config --includes.
+  python_includes=`echo "${python_includes} " \
+  			| sed -e 's,/python[0-9]*[.][0-9]* , ,g'`
+
+  # If we have python-config, only try the configuration it provides.
+  # Otherwise fallback on the old way of trying different versions of
+  # python in turn.
+
   have_libpython=no
-  if test "${have_libpython}" = no; then
+  if test "${have_python_config}" = yes; then
+    python_version=`echo " ${python_libs} " \
+    			 | sed -e 's,^.* -l\(python[0-9]*[.][0-9]*\) .*$,\1,'`
+    if test "${python_version}" != ""; then
+
+  version=${python_version}
+
+  new_CPPFLAGS=${python_includes}
+  new_LIBS=${python_libs}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
+$as_echo_n "checking for ${version}... " >&6; }
+  save_CPPFLAGS=$CPPFLAGS
+  save_LIBS=$LIBS
+  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
+  LIBS="$LIBS $new_LIBS"
+  found_usable_python=no
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include "${version}/Python.h"
+int
+main ()
+{
+Py_Initialize ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  have_libpython=${version}
+                  found_usable_python=yes
+else
+  CPPFLAGS=$save_CPPFLAGS
+                  LIBS=$save_LIBS
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
+$as_echo "${found_usable_python}" >&6; }
+
+    else
+      as_fn_error "unable to determine python version from ${python_libs}" "$LINENO" 5
+    fi
+  else
+    if test "${have_libpython}" = no; then
 
   version=python2.6
 
-
-  HAVE_LIBPYTHON2_6=no
+  new_CPPFLAGS=${python_includes}
+  new_LIBS="${python_libs} -lpython2.6"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
 $as_echo_n "checking for ${version}... " >&6; }
+  save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
-  LIBS="$LIBS -l${version}"
+  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
+  LIBS="$LIBS $new_LIBS"
+  found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include "${version}/Python.h"
@@ -10490,32 +10690,31 @@ Py_Initialize ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  HAVE_LIBPYTHON2_6=yes
-                  have_libpython=yes
+  have_libpython=${version}
+                  found_usable_python=yes
 else
-  LIBS=$save_LIBS
+  CPPFLAGS=$save_CPPFLAGS
+                  LIBS=$save_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_LIBPYTHON2_6" >&5
-$as_echo "$HAVE_LIBPYTHON2_6" >&6; }
-
-    if test "${HAVE_LIBPYTHON2_6}" = yes; then
-
-$as_echo "#define HAVE_LIBPYTHON2_6 1" >>confdefs.h
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
+$as_echo "${found_usable_python}" >&6; }
 
     fi
-  fi
-  if test ${have_libpython} = no; then
+    if test ${have_libpython} = no; then
 
   version=python2.5
 
-
-  HAVE_LIBPYTHON2_5=no
+  new_CPPFLAGS=${python_includes}
+  new_LIBS="${python_libs} -lpython2.5"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
 $as_echo_n "checking for ${version}... " >&6; }
+  save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
-  LIBS="$LIBS -l${version}"
+  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
+  LIBS="$LIBS $new_LIBS"
+  found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include "${version}/Python.h"
@@ -10528,32 +10727,31 @@ Py_Initialize ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  HAVE_LIBPYTHON2_5=yes
-                  have_libpython=yes
+  have_libpython=${version}
+                  found_usable_python=yes
 else
-  LIBS=$save_LIBS
+  CPPFLAGS=$save_CPPFLAGS
+                  LIBS=$save_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_LIBPYTHON2_5" >&5
-$as_echo "$HAVE_LIBPYTHON2_5" >&6; }
-
-    if test "${HAVE_LIBPYTHON2_5}" = yes; then
-
-$as_echo "#define HAVE_LIBPYTHON2_5 1" >>confdefs.h
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
+$as_echo "${found_usable_python}" >&6; }
 
     fi
-  fi
-  if test ${have_libpython} = no; then
+    if test ${have_libpython} = no; then
 
   version=python2.4
 
-
-  HAVE_LIBPYTHON2_4=no
+  new_CPPFLAGS=${python_includes}
+  new_LIBS="${python_libs} -lpython2.4"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
 $as_echo_n "checking for ${version}... " >&6; }
+  save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
-  LIBS="$LIBS -l${version}"
+  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
+  LIBS="$LIBS $new_LIBS"
+  found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include "${version}/Python.h"
@@ -10566,23 +10764,34 @@ Py_Initialize ();
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  HAVE_LIBPYTHON2_4=yes
-                  have_libpython=yes
+  have_libpython=${version}
+                  found_usable_python=yes
 else
-  LIBS=$save_LIBS
+  CPPFLAGS=$save_CPPFLAGS
+                  LIBS=$save_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_LIBPYTHON2_4" >&5
-$as_echo "$HAVE_LIBPYTHON2_4" >&6; }
-
-    if test "${HAVE_LIBPYTHON2_4}" = yes; then
-
-$as_echo "#define HAVE_LIBPYTHON2_4 1" >>confdefs.h
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
+$as_echo "${found_usable_python}" >&6; }
 
     fi
   fi
-  if test ${have_libpython} = no; then
+  if test "${have_libpython}" = python2.6; then
+
+$as_echo "#define HAVE_LIBPYTHON2_6 1" >>confdefs.h
+
+  elif test "${have_libpython}" = python2.5; then
+
+$as_echo "#define HAVE_LIBPYTHON2_5 1" >>confdefs.h
+
+  elif test "${have_libpython}" = python2.4; then
+
+$as_echo "#define HAVE_LIBPYTHON2_4 1" >>confdefs.h
+
+  fi
+
+  if test "${have_libpython}" = no; then
     case "${with_python}" in
     yes)
       as_fn_error "python is missing or unusable" "$LINENO" 5
@@ -10595,12 +10804,10 @@ $as_echo "$as_me: WARNING: python is missing or unusable; some features may be u
       as_fn_error "no usable python found at ${with_python}" "$LINENO" 5
       ;;
     esac
-    CPPFLAGS=$save_CPPFLAGS
-    LIBS=$save_LIBS
   fi
 fi
 
-if test "${have_libpython}" = yes; then
+if test "${have_libpython}" != no; then
 
 $as_echo "#define HAVE_PYTHON 1" >>confdefs.h
 

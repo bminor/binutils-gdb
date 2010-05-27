@@ -589,22 +589,31 @@ else
 fi
 
 dnl Utility to simplify finding libpython.
+dnl $1 = pythonX.Y
+dnl $2 = the shell variable to assign the result to
+dnl      If libpython is found we store $version here.
+dnl $3 = additional flags to add to CPPFLAGS
+dnl $4 = additional flags to add to LIBS
+
 AC_DEFUN([AC_TRY_LIBPYTHON],
 [
   version=$1
   define([have_libpython_var],$2)
-  define([VERSION],[translit([$1],[abcdefghijklmnopqrstuvwxyz./-],
-                                  [ABCDEFGHIJKLMNOPQRSTUVWXYZ___])])
-  [HAVE_LIB]VERSION=no
+  new_CPPFLAGS=$3
+  new_LIBS=$4
   AC_MSG_CHECKING([for ${version}])
+  save_CPPFLAGS=$CPPFLAGS
   save_LIBS=$LIBS
-  LIBS="$LIBS -l${version}"
+  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
+  LIBS="$LIBS $new_LIBS"
+  found_usable_python=no
   AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "${version}/Python.h"]],
                                  [[Py_Initialize ();]]),
-                 [[HAVE_LIB]VERSION=yes
-                  have_libpython_var=yes],
-                 [LIBS=$save_LIBS])
-  AC_MSG_RESULT([$[HAVE_LIB]VERSION])
+                 [have_libpython_var=${version}
+                  found_usable_python=yes],
+                 [CPPFLAGS=$save_CPPFLAGS
+                  LIBS=$save_LIBS])
+  AC_MSG_RESULT([${found_usable_python}])
 ])
 
 AC_ARG_WITH(python,
@@ -617,45 +626,130 @@ if test "${with_python}" = no; then
   AC_MSG_WARN([python support disabled; some features may be unavailable.])
   have_libpython=no
 else
+  have_python_config=no
   case "${with_python}" in
-  yes | auto)
-    # Leave as empty, use defaults.
-    python_includes=
-    python_libs=
-    ;;
   /*)
-    python_includes="-I${with_python}/include"
-    python_libs="-L${with_python}/lib"
+    if test -d ${with_python}; then
+      # Assume the python binary is ${with_python}/bin/python.
+      python_prefix=${with_python}
+      python_prog="${with_python}/bin/python"
+      if test ! -x ${python_prog}; then
+        # Fall back to gdb 7.0/7.1 behaviour.
+        python_prog=missing
+      fi
+    elif test -x ${with_python}; then
+      # While we can't run python compiled for $host (unless host == build),
+      # the user could write a script that provides the needed information,
+      # so we support that.
+      python_prefix=
+      python_prog=${with_python}
+    else
+      AC_ERROR(invalid value for --with-python)
+    fi
     ;;
-  *)
+  */*)
+    # Disallow --with-python=foo/bar.
     AC_ERROR(invalid value for --with-python)
     ;;
+  *)
+    # The user has either specified auto, yes, or the name of the python
+    # program assumed to be in $PATH.
+    python_prefix=
+    case "${with_python}" in
+    yes | auto)
+      if test ${build} = ${host}; then
+        AC_PATH_PROG(python_prog_path, python, missing)
+        if test "${python_prog_path}" = missing; then
+          python_prog=missing
+        else
+          python_prog=${python_prog_path}
+        fi
+      else
+        # Not much we can do except assume the cross-compiler will find the
+        # right files.
+        python_prog=missing
+      fi
+      ;;
+    *)
+      # While we can't run python compiled for $host (unless host == build),
+      # the user could write a script that provides the needed information,
+      # so we support that.
+      python_prog="${with_python}"
+      AC_PATH_PROG(python_prog_path, ${python_prog}, missing)
+      if test "${python_prog_path}" = missing; then
+        AC_ERROR(unable to find python program ${python_prog})
+      fi
+      ;;
+    esac
   esac
 
-  save_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="$CPPFLAGS ${python_includes}"
-  save_LIBS=$LIBS
-  LIBS="$LIBS ${python_libs}"
+  if test "${python_prog}" != missing; then
+    python_includes=`${python_prog} ${srcdir}/python/python-config.py --includes`
+    if test $? != 0; then
+      AC_ERROR(failure running python-config --includes)
+    fi
+    python_libs=`${python_prog} ${srcdir}/python/python-config.py --ldflags`
+    if test $? != 0; then
+      AC_ERROR(failure running python-config --ldflags)
+    fi
+    have_python_config=yes
+  else
+    # Fall back to gdb 7.0/7.1 behaviour.
+    if test -z ${python_prefix}; then
+      python_includes=
+      python_libs=
+    else
+      python_includes="-I${python_prefix}/include"
+      python_libs="-L${python_prefix}/lib"
+    fi
+  fi
+
+  # Having "/pythonX.Y" in the include path is awkward.
+  # All those python headers get bubbled up to the top inviting lots
+  # of random collisions.  GDB originally didn't use python-config to
+  # find the compilation parameters and includes "pythonX.Y/" in the
+  # path of the, umm, include file.  So strip away this part of the
+  # output of python-config --includes.
+  python_includes=`echo "${python_includes} " \
+  			| sed -e 's,/python[[0-9]]*[[.]][[0-9]]* , ,g'`
+
+  # If we have python-config, only try the configuration it provides.
+  # Otherwise fallback on the old way of trying different versions of
+  # python in turn.
+
   have_libpython=no
+  if test "${have_python_config}" = yes; then
+    python_version=`echo " ${python_libs} " \
+    			 | sed -e 's,^.* -l\(python[[0-9]]*[[.]][[0-9]]*\) .*$,\1,'`
+    if test "${python_version}" != ""; then
+      AC_TRY_LIBPYTHON(${python_version}, have_libpython,
+                       ${python_includes}, ${python_libs})
+    else
+      AC_MSG_ERROR([unable to determine python version from ${python_libs}])
+    fi
+  else
+    if test "${have_libpython}" = no; then
+      AC_TRY_LIBPYTHON(python2.6, have_libpython,
+                       ${python_includes}, "${python_libs} -lpython2.6")
+    fi
+    if test ${have_libpython} = no; then
+      AC_TRY_LIBPYTHON(python2.5, have_libpython,
+                       ${python_includes}, "${python_libs} -lpython2.5")
+    fi
+    if test ${have_libpython} = no; then
+      AC_TRY_LIBPYTHON(python2.4, have_libpython,
+                       ${python_includes}, "${python_libs} -lpython2.4")
+    fi
+  fi
+  if test "${have_libpython}" = python2.6; then
+    AC_DEFINE(HAVE_LIBPYTHON2_6, 1, [Define if Python 2.6 is being used.])
+  elif test "${have_libpython}" = python2.5; then
+    AC_DEFINE(HAVE_LIBPYTHON2_5, 1, [Define if Python 2.5 is being used.])
+  elif test "${have_libpython}" = python2.4; then
+    AC_DEFINE(HAVE_LIBPYTHON2_4, 1, [Define if Python 2.4 is being used.])
+  fi
+
   if test "${have_libpython}" = no; then
-    AC_TRY_LIBPYTHON(python2.6, have_libpython)
-    if test "${HAVE_LIBPYTHON2_6}" = yes; then
-      AC_DEFINE(HAVE_LIBPYTHON2_6, 1, [Define if Python 2.6 is being used.])
-    fi
-  fi
-  if test ${have_libpython} = no; then
-    AC_TRY_LIBPYTHON(python2.5, have_libpython)
-    if test "${HAVE_LIBPYTHON2_5}" = yes; then
-      AC_DEFINE(HAVE_LIBPYTHON2_5, 1, [Define if Python 2.5 is being used.])
-    fi
-  fi
-  if test ${have_libpython} = no; then
-    AC_TRY_LIBPYTHON(python2.4, have_libpython)
-    if test "${HAVE_LIBPYTHON2_4}" = yes; then
-      AC_DEFINE(HAVE_LIBPYTHON2_4, 1, [Define if Python 2.4 is being used.])
-    fi
-  fi
-  if test ${have_libpython} = no; then
     case "${with_python}" in
     yes)
       AC_MSG_ERROR([python is missing or unusable])
@@ -667,12 +761,10 @@ else
       AC_MSG_ERROR([no usable python found at ${with_python}])
       ;;
     esac
-    CPPFLAGS=$save_CPPFLAGS
-    LIBS=$save_LIBS
   fi
 fi
 
-if test "${have_libpython}" = yes; then
+if test "${have_libpython}" != no; then
   AC_DEFINE(HAVE_PYTHON, 1, [Define if Python interpreter is being linked in.])
   CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_PYTHON_OBS)"
   CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_PYTHON_DEPS)"
