@@ -69,15 +69,12 @@ proc restore_tests { } {
 	    
             # Do a forced return from the callee.
 	    set test "caller$c calls callee$e; return callee now"
-	    gdb_test_multiple "return 0" "$test" {
-		-re "Make .* return now.*y or n. $" {
-		    send_gdb "y\n"
-		    exp_continue
-		}
-		-re " caller$c .*$gdb_prompt $" {
-		    pass "$test"
-		}
-            }
+
+	    gdb_test "return 0" \
+		" caller$c .*" \
+		"$test" \
+		"Make .* return now.*y or n. $" \
+		"y"
 
             # Check that the values of the local variables are what
 	    # they should be.

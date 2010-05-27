@@ -65,59 +65,30 @@ if ![runto_main] then { fail "implicit solibs tests suppressed" }
 
 # Verify that we can step over the first shlib call.
 #
-send_gdb "next\n"
-gdb_expect {
-  -re "21\[ \t\]*result = solib_main .result.*$gdb_prompt $"\
-          {pass "step over solib call"}
-  -re "$gdb_prompt $"\
-          {fail "step over solib call"}
-  timeout {fail "(timeout) step over solib call"}
-}
+gdb_test "next" "21\[ \t\]*result = solib_main .result.;" \
+    "step over solib call"
 
 # Verify that we can step into the second shlib call.
 #
-send_gdb "step\n"
-gdb_expect {
-  -re "solib_main .arg=10000. at.*${libfile}.c:17.*$gdb_prompt $"\
-          {pass "step into solib call"}
-  -re "$gdb_prompt $"\
-          {fail "step into solib call"}
-  timeout {fail "(timeout) step into solib call"}
-}
+gdb_test "step" "solib_main .arg=10000. at.*${libfile}.c:17.*" \
+    "step into solib call"
 
 # Verify that we can step within the shlib call.
 #
-send_gdb "next\n"
-gdb_expect {
-  -re "18\[ \t\]*\}.*$gdb_prompt $"\
-          {pass "step in solib call"}
-  -re "$gdb_prompt $"\
-          {fail "step in solib call"}
-  timeout {fail "(timeout) step in solib call"}
-}
+gdb_test "next" "18\[ \t\]*\}" "step in solib call"
 
 # Verify that we can step out of the shlib call, and back out into
 # the caller.
 #
-send_gdb "next\n"
-gdb_expect {
+gdb_test_multiple "next" "step out of solib call" {
     -re "0x\[0-9a-f\]*\[ \t\]*9\[ \t\]*.*$gdb_prompt $" {
-	# we haven't left the callee yet, so do another next
-	send_gdb "next\n"
-	gdb_expect {
-	    -re "main .. at.*so-impl-ld.c:22.*$gdb_prompt $"\
-		{pass "step out of solib call"}
-	    -re "$gdb_prompt $"\
-		{fail "step out of solib call"}
-	    timeout {fail "(timeout) step out of solib call"}
-	}
+	gdb_test "next" \
+	    "main .. at.*so-impl-ld.c:22.*" \
+	    "step out of solib call"
     }
-
-    -re "main .. at.*so-impl-ld.c:22.*$gdb_prompt $"\
-	{pass "step out of solib call"}
-    -re "$gdb_prompt $"\
-	{fail "step out of solib call"}
-    timeout {fail "(timeout) step out of solib call"}
+    -re "main .. at.*so-impl-ld.c:22.*$gdb_prompt $" {
+	pass "step out of solib call"
+    }
 }
 
 gdb_exit

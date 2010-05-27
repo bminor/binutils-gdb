@@ -87,28 +87,17 @@ proc local_compiler_xfail_check_2 { } {
     }
 }
 
-send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
+gdb_test "break marker1" "" ""
 
-    send_gdb "cont\n"
-    gdb_expect {
-        -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
-            send_gdb "up\n"
-            gdb_expect {
-                -re ".*$gdb_prompt $" {}
-                timeout { fail "up from marker1" }
-            }
-        }
-        -re "Break.* marker1__.* \\(\\) at .*:$decimal.*$gdb_prompt $" {
-	    fail "continue to marker1 (demangling)"
-            send_gdb "up\n"
-            gdb_expect {
-                -re ".*$gdb_prompt $" {}
-                timeout { fail "up from marker1" }
-            }
-        }
-        -re "$gdb_prompt $" { fail "continue to marker1"  }
-        timeout { fail "(timeout) continue to marker1"  }
+gdb_test_multiple "cont" "continue to marker1" {
+    -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
+	pass "continue to marker1"
     }
+    -re "Break.* marker1__.* \\(\\) at .*:$decimal.*$gdb_prompt $" {
+	fail "continue to marker1 (demangling)"
+    }
+}
+gdb_test "up" " in main .*" "up from marker1"
 
 # As of Feb 1999, GCC does not issue info about volatility of vars, so
 # these tests are all expected to fail if GCC is the compiler. -sts
@@ -248,11 +237,7 @@ gdb_test "ptype vendor" "type = const volatile unsigned char \\* const volatile.
 # test function parameters
 local_compiler_xfail_check
 local_compiler_xfail_check_2
-send_gdb "ptype qux2\n"
-gdb_expect {
-    -re "type = int \\(volatile unsigned char, const volatile int, volatile short( int)?, volatile long( int)? \\*, float \\* volatile, const volatile signed char \\* const volatile\\).*$gdb_prompt $" {
-        pass "ptype qux2"
-    }
-    -re ".*$gdb_prompt $" { fail "ptype qux2" }
-    timeout           { fail "(timeout) ptype qux2" }
-  }   
+
+gdb_test "ptype qux2" \
+    "type = int \\(volatile unsigned char, const volatile int, volatile short( int)?, volatile long( int)? \\*, float \\* volatile, const volatile signed char \\* const volatile\\)" \
+    "ptype qux2"

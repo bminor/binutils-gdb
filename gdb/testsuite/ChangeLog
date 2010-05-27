@@ -1,6 +1,24 @@
 2010-05-27  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* gdb.base/break.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/relational.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/relocate.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/restore.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/return.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/return2.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/sepdebug.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/setshow.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/setvar.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/shlib-call.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/shreloc.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/sigall.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/sigbpt.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/signull.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/so-impl-ld.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/varargs.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/volatile.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/watch_thread_num.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.base/watchpoint.exp: Replace uses of send_gdb / gdb_expect.
 
 2010-05-26  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 

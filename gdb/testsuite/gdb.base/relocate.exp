@@ -32,29 +32,24 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] 
 }
 
 proc get_var_address { var } {
-  global gdb_prompt hex
+    global gdb_prompt hex
 
-  send_gdb "print &${var}\n"
-  # Match output like:
-  # $1 = (int *) 0x0
-  # $5 = (int (*)()) 0
-  # $6 = (int (*)()) 0x24 <function_bar>
-  gdb_expect {
-    -re "\\\$\[0-9\]+ = \\(.*\\) (0|$hex)( <${var}>)?\[\r\n\]+${gdb_prompt} $"
-	{
-	  pass "get address of ${var}"
-	  if { $expect_out(1,string) == "0" } {
-	    return "0x0"
-	  } else {
-	    return $expect_out(1,string)
-	  }
+    # Match output like:
+    # $1 = (int *) 0x0
+    # $5 = (int (*)()) 0
+    # $6 = (int (*)()) 0x24 <function_bar>
+
+    gdb_test_multiple "print &${var}" "get address of ${var}" {
+	-re "\\\$\[0-9\]+ = \\(.*\\) (0|$hex)( <${var}>)?\[\r\n\]+${gdb_prompt} $" {
+	    pass "get address of ${var}"
+	    if { $expect_out(1,string) == "0" } {
+		return "0x0"
+	    } else {
+		return $expect_out(1,string)
+	    }
 	}
-    -re "${gdb_prompt} $"
-	{ fail "get address of ${var} (unknown output)" }
-    timeout
-	{ fail "get address of ${var} (timeout)" }
-  }
-  return ""
+    }
+    return ""
 }
 
 

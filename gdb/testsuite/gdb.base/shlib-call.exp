@@ -70,9 +70,9 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_load_shlibs $lib1 $lib2
 
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 
 if ![runto_main] then {
@@ -82,74 +82,38 @@ if ![runto_main] then {
 
 #step -over
 
-    send_gdb "next\n"
-    gdb_expect {
-        -re ".*g = shr1\\(g\\).*$gdb_prompt $" {pass "next to shr1"}
-        -re ".*$gdb_prompt $" { fail "next to shr1" }
-        timeout { fail "next to shr1 (timeout)" }
-    }
-
-
+gdb_test "next" "g = shr1\\(g\\);" "next to shr1"
 
 #print g
 
-send_gdb "print g\n"
-gdb_expect {
-    -re ".*\[0-9\]* = 1.*$gdb_prompt $" {
-        pass "print g"
-      }
-    -re ".*$gdb_prompt $" { fail "print  g" }
-    timeout           { fail "(timeout) print g" }
-  }
-
+gdb_test "print g" "\[0-9\]* = 1" "print g"
 
 #step -over
-  if ![gdb_skip_stdio_test "next over shr1"] {
-      send_gdb "next\n"
-      gdb_expect {
-	  -re ".*address of sgs is $hex.*g = shr2\\(g\\).*$gdb_prompt $" {
-	      pass "next over shr1" 
-	  }
-	  -re ".*$gdb_prompt $" { fail "next over shr1" }
-	  timeout { fail "next over shr1 (timeout)" }
-      }
-  } else {
-      gdb_test "next" "" ""
-  }
+if ![gdb_skip_stdio_test "next over shr1"] {
+    gdb_test "next" \
+	"address of sgs is $hex.*g = shr2\\(g\\);" \
+	"next over shr1"
+} else {
+    gdb_test "next" "" ""
+}
 
 
 #print g
-send_gdb "print g\n"
-gdb_expect {
-    -re ".*\[0-9\]* = 2.*$gdb_prompt $" {
-        pass "print g" }
-    -re ".*$gdb_prompt $" { fail "print  g" }
-    timeout           { fail "(timeout) print g" }
-  }
+gdb_test "print g" "\[0-9\]* = 2" "print g"
 
 #print shr1(1)
-  if ![gdb_skip_stdio_test "print shr1(1)"] {
-      send_gdb "print shr1(1)\n"
-      gdb_expect {
-	  -re ".*address of sgs is $hex.*\[0-9\]* = 2.*$gdb_prompt $" {
-	      pass "print shr1(1)" 
-	  }
-	  -re ".*$gdb_prompt $" { fail "print shr1(1)" }
-	  timeout               { fail "(timeout) print shr1(1)" }
-      }
-  }
+if ![gdb_skip_stdio_test "print shr1(1)"] {
+    gdb_test "print shr1(1)" \
+	"address of sgs is $hex.*\[0-9\]* = 2" \
+	"print shr1(1)"
+}
 
 #print shr1(g)
-  if ![gdb_skip_stdio_test "print shr1(g)"] {
-      send_gdb "print shr1(g)\n"
-      gdb_expect {
-	  -re ".*address of sgs is $hex.*\[0-9\]* = 4.*$gdb_prompt $" {
-	      pass "print shr1(g)" 
-	  }
-	  -re ".*$gdb_prompt $" { fail "print shr1(g)" }
-	  timeout               { fail "(timeout) print shr1(g)" }
-      }
-  }
+if ![gdb_skip_stdio_test "print shr1(g)"] {
+    gdb_test "print shr1(g)" \
+	"address of sgs is $hex.*\[0-9\]* = 4" \
+	"print shr1(g)"
+}
 
 #break shr2
 #go
@@ -164,67 +128,38 @@ gdb_test "continue" \
 
 #print shr1(1)
 if ![gdb_skip_stdio_test "print shr1(1) 2nd time"] {
-    send_gdb "print shr1(1)\n"
-    gdb_expect {
-	-re ".*address of sgs is $hex.*\[0-9\]* = 2.*$gdb_prompt $" {
-	    pass "print shr1(1) 2nd time"
-	}
-	-re ".*$gdb_prompt $" { fail "print shr1(1) 2nd time" }
-	timeout               { fail "(timeout) print shr1(1) 2nd time" }
-    }
+    gdb_test "print shr1(1)" \
+	"address of sgs is $hex.*\[0-9\]* = 2" \
+	"print shr1(1) 2nd time"
 }
 
 #print mainshr1(1)
-send_gdb "print mainshr1(1)\n"
-gdb_expect {
-    -re ".*\[0-9\]* = 2.*$gdb_prompt $" {
-        pass "print mainshr1(1) from shlib func"
-      }
-    -re ".*$gdb_prompt $" { fail "print  mainshr1(1) from shlib func" }
-    timeout           { fail "(timeout) print mainshr1(1) from shlib func" }
-  }
+gdb_test "print mainshr1(1)" "\[0-9\]* = 2" \
+    "print mainshr1(1) from shlib func"
 
 #step -return
-    send_gdb "step\n"
-    # A step at this point will either take us entirely out of
-    # the function or into the function's epilogue.  The exact
-    # behavior will differ depending upon upon whether or not
-    # the compiler emits line number information for the epilogue.
-    gdb_expect {
-        -re "main \\(\\) at.*g = mainshr1\\(g\\);.*$gdb_prompt $" { 
-	    pass "step out of shr2 to main"
-	}
-        -re ".*\\\}.*$gdb_prompt $" {
-	    pass "step out of shr2 to main (stopped in shr2 epilogue)"
-	    send_gdb "step\n"
-	    gdb_expect {
-		-re "main \\(\\) at.*g = mainshr1\\(g\\);.*$gdb_prompt $" { pass "step out of shr2 epilogue to main"}
-		-re ".*$gdb_prompt $" { fail "step out of shr2 epilogue to main" }
-		timeout { fail "step out of shr2 epilogue to main (timeout)" }
-	    }
-	}
-        -re ".*$gdb_prompt $" { fail "step out of shr2" }
-        timeout { fail "step out of shr2 to main (timeout)" }
+# A step at this point will either take us entirely out of
+# the function or into the function's epilogue.  The exact
+# behavior will differ depending upon upon whether or not
+# the compiler emits line number information for the epilogue.
+gdb_test_multiple "step" "step out of shr2 to main" {
+    -re "main \\(\\) at.*g = mainshr1\\(g\\);.*$gdb_prompt $" { 
+	pass "step out of shr2 to main"
     }
+    -re ".*\\\}.*$gdb_prompt $" {
+	pass "step out of shr2 to main (stopped in shr2 epilogue)"
+	gdb_test "step" \
+	    "main \\(\\) at.*g = mainshr1\\(g\\);" \
+	    "step out of shr2 epilogue to main"
+    }
+}
     
-
 #print mainshr1(1)
-send_gdb "print mainshr1(1)\n"
-gdb_expect {
-    -re ".*\[0-9\]* = 2.*$gdb_prompt $" {
-        pass "print mainshr1(1)"
-      }
-    -re ".*$gdb_prompt $" { fail "print  mainshr1(1) from main" }
-    timeout           { fail "(timeout) print mainshr1(1) from main" }
-  }
+gdb_test "print mainshr1(1)" "\[0-9\]* = 2" "print mainshr1(1)"
 
 #step
-    send_gdb "step\n"
-    gdb_expect {
-        -re ".*mainshr1 \\(g=4\\) at.*return 2.g;.*$gdb_prompt $" { pass "step into mainshr1"}
-        -re ".*$gdb_prompt $" { fail "step into mainshr1" }
-        timeout { fail "step into mainshr1 (timeout)" }
-    }
+gdb_test "step" "mainshr1 \\(g=4\\) at.*return 2.g;" \
+    "step into mainshr1"
 
 # Start with a fresh gdb.
 
@@ -232,9 +167,10 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
-send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
+
 
 # PR's 16495, 18213
 # test that we can re-set breakpoints in shared libraries

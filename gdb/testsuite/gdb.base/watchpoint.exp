@@ -161,40 +161,21 @@ proc test_simple_watchpoint {} {
 	# watches without a running inferior.  The following testpoints used
 	# to be in [initialize].
 	#
-	send_gdb "watch ival3\n"
-	gdb_expect {
-	    -re ".*\[Ww\]atchpoint 3: ival3\r\n$gdb_prompt $" { 
-	        pass "set watchpoint on ival3"
-	    }
-	    -re ".*$gdb_prompt $" { fail "set watchpoint on ival3"  }
-	    timeout { fail "set watchpoint on ival3 (timeout)"  }
-	}
+	gdb_test "watch ival3" \
+	    "\[Ww\]atchpoint 3: ival3" \
+	    "set watchpoint on ival3"
 
         set wp_set 1
 
-	send_gdb "info watch\n"
-	gdb_expect {
-	    -re "3\[ \]*.*watchpoint.*ival3\r\n$gdb_prompt $" {
-	        pass "watchpoint found in watchpoint/breakpoint table"
-	    }
-	    -re ".*$gdb_prompt $" {
-	        fail "watchpoint found in watchpoint/breakpoint table"
-	    }
-	    timeout {
-	       fail "watchpoint found in watchpoint/breakpoint table"
-	    }
-	}
+	gdb_test "info watch" \
+	    "3\[ \]*.*watchpoint.*ival3" \
+	    "watchpoint found in watchpoint/breakpoint table"
 
 	# After installing the watchpoint, we disable it until we are ready
 	# to use it.  This allows the test program to run at full speed until
 	# we get to the first marker function.
 
-	send_gdb "disable 3\n"
-	gdb_expect {
-	    -re "disable 3\[\r\n\]+$gdb_prompt $" { pass "disable watchpoint" }
-	    -re ".*$gdb_prompt $" { fail "disable watchpoint"  }
-	    timeout { fail "disable watchpoint (timeout)"  }
-	}
+	gdb_test "disable 3" "disable 3" "disable watchpoint"
     }
 
     # After reaching the marker function, enable the watchpoint.
@@ -455,6 +436,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 	# If we send_gdb "123\n" before gdb has switched the tty, then it goes
 	# to gdb, not the inferior, and we lose.  So that is why we have
 	# watchpoint.c prompt us, so we can wait for that prompt.
+
 	send_gdb "continue\n";
 	gdb_expect {
 	    -re "Continuing\\.\r\ntype stuff for buf now:" {

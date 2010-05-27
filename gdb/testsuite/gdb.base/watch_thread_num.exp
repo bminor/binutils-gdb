@@ -62,11 +62,10 @@ gdb_test "break thread_function" "Breakpoint \[0-9\].*" \
 
 gdb_test "continue" ".*Breakpoint 2.*" "Stopped in thread_function"
 
-send_gdb "thread\n"
-gdb_expect {
-  -re ".*Current thread is (\[0-9\]*).*$gdb_prompt $" { pass "Thread command" }
-  -re ".*$gdb_prompt $" { fail "Thread command" }
-  timeout { fail "(timeout) Thread command" }
+gdb_test_multiple "thread" "Thread command" {
+    -re ".*Current thread is (\[0-9\]*).*$gdb_prompt $" {
+	pass "Thread command" 
+    }
 }
 
 set thread_num "$expect_out(1,string)"

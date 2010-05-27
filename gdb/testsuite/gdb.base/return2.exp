@@ -36,26 +36,21 @@ proc return_1 { type } {
 	    "set break on ${type}_func"
     gdb_test "continue" "Breakpoint.* ${type}_func.*" \
 	    "continue to ${type}_func"
-    send_gdb "return testval.${type}_testval\n"
-    gdb_expect {
-	-re "Make ${type}_func return now.*y or n. $" {
-	    send_gdb "y\n"
-	    exp_continue
+
+    gdb_test_multiple "return testval.${type}_testval" \
+	"return from ${type}_func" {
+	    -re "Make ${type}_func return now.*y or n. $" {
+		send_gdb "y\n"
+		exp_continue
+	    }
+	    -re ".*${type}_resultval *= ${type}_func.*$gdb_prompt $" {
+		send_gdb "step\n"
+		exp_continue
+	    }
+	    -re ".*${type}_checkpoint.*$gdb_prompt $" {
+		pass "return from ${type}_func"
+	    }
 	}
-	-re ".*${type}_resultval *= ${type}_func.*$gdb_prompt $" {
-	    send_gdb "step\n"
-	    exp_continue
-	}
-	-re ".*${type}_checkpoint.*$gdb_prompt $" {
-	    pass "return from ${type}_func"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "return from ${type}_func"
-	}
-	timeout {
-	    fail "return from ${type}_func (timeout)"
-	}
-    }
     gdb_test "print ${type}_resultval == testval.${type}_testval" ".* = 1" \
 	    "${type} value returned successfully"
     gdb_test "print ${type}_resultval != ${type}_returnval" ".* = 1" \
@@ -69,8 +64,8 @@ proc return_void { } {
 	    "set break on void_func"
     gdb_test "continue" "Breakpoint.* void_func.*" \
 	    "continue to void_func"
-    send_gdb "return \n"
-    gdb_expect {
+
+    gdb_test_multiple "return" "return from void_func" {
 	-re "Make void_func return now.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
@@ -81,12 +76,6 @@ proc return_void { } {
 	}
 	-re ".*void_checkpoint.*$gdb_prompt $" {
 	    pass "return from void_func"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "return from void_func"
-	}
-	timeout {
-	    fail "return from void_func (timeout)"
 	}
     }
     gdb_test "print void_test == 0" ".* = 1" \

@@ -25,8 +25,8 @@ proc return_tests { } {
 
 
     if { ! [ runto func1 ] } then { return 0 }
-    send_gdb "return\n"
-    gdb_expect {
+
+    gdb_test_multiple "return" "simple return" {
 	-re "Make .* return now.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
@@ -35,9 +35,9 @@ proc return_tests { } {
 	    send_gdb "step\n"
 	    exp_continue
 	}
-    -re ".*in main after func1.*$gdb_prompt $" { pass "simple return" }
-    -re "$gdb_prompt $" { fail "simple return" }
-    timeout { fail "(timeout) simple return" }
+	-re ".*in main after func1.*$gdb_prompt $" { 
+	    pass "simple return" 
+	}
     }
 
     # Set breakpoints in other interesting functions.
@@ -45,16 +45,17 @@ proc return_tests { } {
     gdb_test "break func3" "" "break func3"
 
     gdb_test "continue" "return -5;" "continue to return of -5"
-    send_gdb "return 5\n"
-    gdb_expect {
+
+    gdb_test_multiple "return 5" "return value 5" {
 	-re "Make .* return now.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-    -re ".*tmp2 = func2.*$gdb_prompt $" { }
-    -re "$gdb_prompt $" { fail "did not return (integer test)" }
-    timeout { fail "(timeout) did not return (integer test)" }
+	-re ".*tmp2 = func2.*$gdb_prompt $" {
+	    # pass without comment
+	}
     }
+
     gdb_test "next" "tmp3 = func3.*" "next over call to func2"
 
     gdb_test "p tmp2" ".* = 5" "correct value returned (integer test)"
@@ -64,15 +65,15 @@ proc return_tests { } {
     # Return of a double does not work for 68hc11 (need struct return
     # in memory).
     setup_xfail "m6811-*-*"
-    send_gdb "return 5.0\n"
-    gdb_expect {
+
+    gdb_test_multiple "return 5.0" "return value 5.0" {
 	-re "Make .* return now.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-re ".*tmp3 = func3.*$gdb_prompt $" { }
-	-re "$gdb_prompt $" { fail "did not return (double test)" }
-	timeout { fail "(timeout) did not return (double test)" }
+	-re ".*tmp3 = func3.*$gdb_prompt $" {
+	    # pass without comment
+	}
     }
 
     setup_xfail "m6811-*-*"

@@ -54,27 +54,25 @@ if { ![runto_main] } {
 gdb_test "show annotate" "Annotation_level is 0..*"  "default annotation_level is zero"
 
 #test set annotate 2
-send_gdb "set annotate 2\n"
-gdb_expect {
-	-re ".*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
-				{ pass "set annotate 2" }
-	timeout			{ fail "(timeout) set annotate 2" }
-    }
 
-send_gdb "show annotate\n"
-gdb_expect {
-	-re ".*\032\032post-prompt.*Annotation_level is 2..*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
-				{ pass "show annotate (2)" }
-	timeout			{ fail "(timeout) show annotate (2)" }
+gdb_test_multiple "set annotate 2" "set annotate 2" {
+    -re ".*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" {
+    pass "set annotate 2"
     }
+}
+
+gdb_test_multiple "show annotate" "show annotate 2" {
+    -re ".*\032\032post-prompt.*Annotation_level is 2..*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" {
+	pass "show annotate 2"
+    }
+}
 
 #test annotation_level 2
-send_gdb "info line 1\n"
-gdb_expect {
-	-re ".*\032\032post-prompt.*Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
-				{ pass "annotation_level 2" }
-	timeout			{ fail "(timeout) annotation_level 2" }
+gdb_test_multiple "info line 1" "annotation_level 2" {
+    -re ".*\032\032post-prompt.*Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" {
+	pass "annotation_level 2" 
     }
+}
 
 #test set annotate 1
 gdb_test "set annotate 1" ".*post-prompt.*"  "set annotate 1" 
@@ -195,25 +193,27 @@ gdb_test "show listsize" "Number of source lines gdb will list by default is 100
 if ![board_info target exists gdb_prompt] {
     #test set prompt (FooBarBaz) 
     set newprompt "\\(FooBarBaz\\)"
-    send_gdb "set prompt (FooBarBaz) \n"
-    gdb_expect {
-	-re "$newprompt $"	{ pass "set prompt (FooBarBaz) " }
-	timeout			{ fail "(timeout) set prompt (FooBarBaz) " }
+
+    gdb_test_multiple "set prompt (FooBarBaz) " "set prompt FooBarBaz" {
+	-re "$newprompt $" {
+	    pass "set prompt FooBarBaz"
+	}
     }
 
     #test show prompt (FooBarBaz) 
-    send_gdb "show prompt\n"
-    gdb_expect {
-	-re "Gdb's prompt is \"$newprompt \"..* $" \
-		{ pass "show prompt (FooBarBaz) " }
-	timeout			{ fail "(timeout) show prompt (FooBarBaz) " }
+
+    gdb_test_multiple "show prompt" "show prompt FooBarBaz" {
+	-re "Gdb's prompt is \"$newprompt \"..* $" {
+	    pass "show prompt FooBarBaz"
+	}
     }
 
     #test set prompt (gdb) 
-    send_gdb "set prompt (gdb) \n"
-    gdb_expect {
-	-re "$gdb_prompt $"		{ pass "set prompt (gdb) " }
-	timeout			{ fail "(timeout) set prompt (gdb) " }
+
+    gdb_test_multiple "set prompt (gdb) " "set prompt gdb" {
+	-re "$gdb_prompt $" {
+	    pass "set prompt gdb"
+	}
     }
 }
 
