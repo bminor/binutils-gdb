@@ -142,8 +142,7 @@ gdb_test "info trace" "$c_test_addr.*in gdb_recursion_test.*:$baseline" \
 gdb_test "trace" "No default breakpoint address now." \
 	"1.9: trace <no arguments>"
 
-# 1.10 set large number of tracepoints
-# deferred to limits test module
+# 1.10 there's no 1.10.
 
 # 1.11 tracepoint conditions
 gdb_delete_tracepoints

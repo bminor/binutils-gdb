@@ -1,3 +1,9 @@
+2010-05-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* limits.c, limits.exp: Delete files.
+	* Makefile.in (clean mostlyclean): Adjust.
+	* tracecmd.exp: Adjust.
+
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/tui-layout.exp: New.
