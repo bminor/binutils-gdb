@@ -1,3 +1,8 @@
+2010-05-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (do_t_mov_cmp): In unified syntax encode movs as
+	lsls and not adds.
+
 2010-05-27  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (encode_thumb2_ldmstm): Make warning about

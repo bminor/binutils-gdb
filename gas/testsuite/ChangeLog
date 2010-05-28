@@ -1,3 +1,9 @@
+2010-05-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/thumb2_it_auto.d: Update for change in movs encoding.
+	gas/arm/thumb2_it.d: Likewise.
+	gas/arm/thumb32.d: Likewise.
+
 2010-05-27  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
 
 	* gas/arm/thumb2_ldmstm.d: Add new testcases.

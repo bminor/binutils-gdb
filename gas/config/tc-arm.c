@@ -10369,8 +10369,8 @@ do_t_mov_cmp (void)
 
 	  case T_MNEM_movs:
 	    /* We know we have low registers at this point.
-	       Generate ADD Rd, Rs, #0.  */
-	    inst.instruction = T_OPCODE_ADD_I3;
+	       Generate LSLS Rd, Rs, #0.  */
+	    inst.instruction = T_OPCODE_LSL_I;
 	    inst.instruction |= Rn;
 	    inst.instruction |= Rm << 3;
 	    break;
