@@ -1,3 +1,9 @@
+2010-05-28  Sterling Augustine  <sterling@tensilica.com>
+
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Add a large amount 
+	of code to change the bits in the instructions to match the changes
+	in the relocations.  Declare dest_addr and sym_sec to help.
+
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Workaround GCC PR middle-end/4210.
