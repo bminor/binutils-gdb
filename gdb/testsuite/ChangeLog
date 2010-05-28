@@ -1,3 +1,7 @@
+2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/tui-layout.exp: New.
+
 2010-05-28  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* gdb.reverse/break-precsave.exp: 
