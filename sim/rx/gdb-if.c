@@ -36,7 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "load.h"
 #include "syscalls.h"
 #include "err.h"
-#include "trace.h"
 
 /* Ideally, we'd wrap up all the minisim's data structures in an
    object and pass that around.  However, neither GDB nor run needs
@@ -404,9 +403,6 @@ reg_size (enum sim_rx_regnum regno)
     case sim_rx_fpsw_regnum:
       size = sizeof (regs.r_fpsw);
       break;
-    case sim_rx_acc_regnum:
-      size = sizeof (regs.r_acc);
-      break;
     default:
       size = 0;
       break;
@@ -506,9 +502,6 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
       break;
     case sim_rx_fpsw_regnum:
       val = get_reg (fpsw);
-      break;
-    case sim_rx_acc_regnum:
-      val = ((DI) get_reg (acchi) << 32) | get_reg (acclo);
       break;
     default:
       fprintf (stderr, "rx minisim: unrecognized register number: %d\n",
