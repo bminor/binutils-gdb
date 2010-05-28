@@ -4349,8 +4349,13 @@ USE_THREAD_DB=
 if test "$srv_linux_thread_db" = "yes"; then
   if test "$ac_cv_lib_dl_dlopen" = "yes"; then
     srv_libs="-ldl"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the dynamic export flag" >&5
+$as_echo_n "checking for the dynamic export flag... " >&6; }
     old_LDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS -rdynamic"
+    # Older GNU ld supports --export-dynamic but --dynamic-list may not be
+    # supported there.
+    RDYNAMIC="-Wl,--dynamic-list=${srcdir}/proc-service.list"
+    LDFLAGS="$LDFLAGS $RDYNAMIC"
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -4363,14 +4368,37 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  RDYNAMIC=-rdynamic
+  found="-Wl,--dynamic-list"
+		 RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'
 else
-  RDYNAMIC=
+  RDYNAMIC="-rdynamic"
+		 LDFLAGS="$old_LDFLAGS $RDYNAMIC"
+		 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  found="-rdynamic"
+else
+  found="no"
+			      RDYNAMIC=""
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
     LDFLAGS="$old_LDFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
+$as_echo "$found" >&6; }
   else
     srv_libs="-lthread_db"
   fi

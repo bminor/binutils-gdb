@@ -188,11 +188,24 @@ USE_THREAD_DB=
 if test "$srv_linux_thread_db" = "yes"; then
   if test "$ac_cv_lib_dl_dlopen" = "yes"; then
     srv_libs="-ldl"
+    AC_MSG_CHECKING(for the dynamic export flag)
     old_LDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS -rdynamic"
-    AC_TRY_LINK([], [], [RDYNAMIC=-rdynamic], [RDYNAMIC=])
+    # Older GNU ld supports --export-dynamic but --dynamic-list may not be
+    # supported there.
+    RDYNAMIC="-Wl,--dynamic-list=${srcdir}/proc-service.list"
+    LDFLAGS="$LDFLAGS $RDYNAMIC"
+    AC_TRY_LINK([], [],
+		[found="-Wl,--dynamic-list"
+		 RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'],
+		[RDYNAMIC="-rdynamic"
+		 LDFLAGS="$old_LDFLAGS $RDYNAMIC"
+		 AC_TRY_LINK([], [],
+			     [found="-rdynamic"],
+			     [found="no"
+			      RDYNAMIC=""])])
     AC_SUBST(RDYNAMIC)
     LDFLAGS="$old_LDFLAGS"
+    AC_MSG_RESULT($found)
   else
     srv_libs="-lthread_db"
   fi

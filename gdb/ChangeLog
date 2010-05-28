@@ -1,5 +1,30 @@
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* Makefile.in (RDYNAMIC): New.
+	(SFILES): Add proc-service.list.
+	* config/alpha/alpha-linux.mh (NAT_CDEPS): New.
+	(LOADLIBES): Replace -rdynamic by $(RDYNAMIC).
+	* config/arm/linux.mh: Likewise.
+	* config/i386/linux.mh: Likewise.
+	* config/i386/linux64.mh: Likewise.
+	* config/ia64/linux.mh: Likewise.
+	* config/m32r/linux.mh: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/mips/linux.mh: Likewise.
+	* config/pa/linux.mh: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/powerpc/ppc64-linux.mh: Likewise.
+	* config/s390/s390.mh: Likewise.
+	* config/sparc/linux.mh: Likewise.
+	* config/sparc/linux64.mh: Likewise.
+	* config/xtensa/linux.mh: Likewise.
+	* configure.ac: New RDYNAMIC on native host and GCC.
+	(solaris*): Replace -Wl,-export-dynamic by $RDYNAMIC.
+	* configure: Regenerate.
+	* proc-service.list: New.
+
+2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-nat.c (linux_nat_core_of_thread_1): Fix crash on invalid
 	CONTENT.
 

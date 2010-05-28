@@ -100,7 +100,8 @@ INTERNAL_LDFLAGS = $(LDFLAGS) @RDYNAMIC@
 # All source files that go into linking GDB remote server.
 
 SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
-	$(srcdir)/mem-break.c $(srcdir)/proc-service.c $(srcdir)/regcache.c \
+	$(srcdir)/mem-break.c $(srcdir)/proc-service.c \
+	$(srcdir)/proc-service.list $(srcdir)/regcache.c \
 	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
 	$(srcdir)/thread-db.c $(srcdir)/utils.c \
 	$(srcdir)/linux-arm-low.c $(srcdir)/linux-cris-low.c \
@@ -133,6 +134,7 @@ OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
+CDEPS = $(srcdir)/proc-service.list
 
 # XML files to compile in to gdbserver, if any.
 XML_DIR = $(srcdir)/../features

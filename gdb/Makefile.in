@@ -157,6 +157,8 @@ GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
 GDB_WARN_CFLAGS_NO_FORMAT = `echo " $(GDB_WARN_CFLAGS) " | sed "s/ -Wformat-nonliteral / /g"`
 
+RDYNAMIC = @RDYNAMIC@
+
 # Where is the INTL library?  Typically in ../intl.
 INTL = @LIBINTL@
 INTL_DEPS = @LIBINTL_DEP@
@@ -683,7 +685,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c osdata.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
-	progspace.c \
+	proc-service.list progspace.c \
 	prologue-value.c psymtab.c \
 	regcache.c reggroups.c remote.c remote-fileio.c reverse.c \
 	scm-exp.c scm-lang.c scm-valprint.c \

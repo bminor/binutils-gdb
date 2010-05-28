@@ -1,5 +1,14 @@
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* Makefile.in (SFILES): Add $(srcdir)/proc-service.list.
+	(CDEPS): New.
+	* configure.ac (RDYNAMIC): New AC_MSG_CHECKING wrapping.  Test also
+	-Wl,--dynamic-list.
+	* configure: Regenerate.
+	* proc-service.list: New.
+
+2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-low.c (linux_core_of_thread): Fix crash on invalid CONTENT.
 	New comment.
 

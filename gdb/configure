@@ -657,6 +657,7 @@ SYSTEM_GDBINIT
 TARGET_SYSTEM_ROOT_DEFINE
 TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
+RDYNAMIC
 ALLOCA
 PYTHON_CFLAGS
 python_prog_path
@@ -14171,6 +14172,62 @@ esac
 
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
+   if test "$GCC" = "yes" ; then
+      # The dynamically loaded libthread_db needs access to symbols in the gdb
+      # executable.  Older GNU ld supports --export-dynamic but --dynamic-list
+      # may not be supported there.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the dynamic export flag" >&5
+$as_echo_n "checking for the dynamic export flag... " >&6; }
+      old_LDFLAGS="$LDFLAGS"
+      # Older GNU ld supports --export-dynamic but --dynamic-list it does not.
+      RDYNAMIC="-Wl,--dynamic-list=${srcdir}/proc-service.list"
+      LDFLAGS="$LDFLAGS $RDYNAMIC"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  found="-Wl,--dynamic-list"
+		   RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'
+else
+  RDYNAMIC="-rdynamic"
+		   LDFLAGS="$old_LDFLAGS $RDYNAMIC"
+		   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  found="-rdynamic"
+else
+  found="no"
+				# Error on its usage by .mh file.
+				RDYNAMIC="no-rdynamic-available"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+      LDFLAGS="$old_LDFLAGS"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
+$as_echo "$found" >&6; }
+   fi
+
    case ${host_os} in
    hpux*)
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HPUX/OSF thread support" >&5
@@ -14253,38 +14310,7 @@ _ACEOF
 
 fi
 
-         if test "$GCC" = "yes" ; then
-            # The GNU linker requires the -export-dynamic option to make
-            # all symbols visible in the dynamic symbol table.
-            hold_ldflags=$LDFLAGS
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the ld -export-dynamic flag" >&5
-$as_echo_n "checking for the ld -export-dynamic flag... " >&6; }
-            LDFLAGS="${LDFLAGS} -Wl,-export-dynamic"
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-int i;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  found=yes
-else
-  found=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-            LDFLAGS=$hold_ldflags
-            { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
-$as_echo "$found" >&6; }
-            if test $found = yes; then
-               CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Wl,-export-dynamic"
-            fi
-         fi
+	 CONFIG_LDFLAGS="${CONFIG_LDFLAGS} $RDYNAMIC"
 	 # Sun randomly tweaked the prototypes in <proc_service.h>
 	 # at one point.
 	 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if <proc_service.h> is old" >&5

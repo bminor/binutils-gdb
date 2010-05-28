@@ -1450,6 +1450,30 @@ dnl Note that we only want this if we are both native (host == target),
 dnl and not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
+   if test "$GCC" = "yes" ; then
+      # The dynamically loaded libthread_db needs access to symbols in the gdb
+      # executable.  Older GNU ld supports --export-dynamic but --dynamic-list
+      # may not be supported there.
+      AC_MSG_CHECKING(for the dynamic export flag)
+      old_LDFLAGS="$LDFLAGS"
+      # Older GNU ld supports --export-dynamic but --dynamic-list it does not.
+      RDYNAMIC="-Wl,--dynamic-list=${srcdir}/proc-service.list"
+      LDFLAGS="$LDFLAGS $RDYNAMIC"
+      AC_TRY_LINK([], [],
+		  [found="-Wl,--dynamic-list"
+		   RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'],
+		  [RDYNAMIC="-rdynamic"
+		   LDFLAGS="$old_LDFLAGS $RDYNAMIC"
+		   AC_TRY_LINK([], [],
+			       [found="-rdynamic"],
+			       [found="no"
+				# Error on its usage by .mh file.
+				RDYNAMIC="no-rdynamic-available"])])
+      AC_SUBST(RDYNAMIC)
+      LDFLAGS="$old_LDFLAGS"
+      AC_MSG_RESULT($found)
+   fi
+
    case ${host_os} in
    hpux*)
       AC_MSG_CHECKING(for HPUX/OSF thread support)
@@ -1480,19 +1504,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
          AC_CHECK_LIB(dl, dlopen)
-         if test "$GCC" = "yes" ; then
-            # The GNU linker requires the -export-dynamic option to make
-            # all symbols visible in the dynamic symbol table.
-            hold_ldflags=$LDFLAGS
-            AC_MSG_CHECKING(for the ld -export-dynamic flag)
-            LDFLAGS="${LDFLAGS} -Wl,-export-dynamic"
-            AC_TRY_LINK(, [int i;], found=yes, found=no)
-            LDFLAGS=$hold_ldflags
-            AC_MSG_RESULT($found)
-            if test $found = yes; then
-               CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Wl,-export-dynamic"
-            fi
-         fi
+	 CONFIG_LDFLAGS="${CONFIG_LDFLAGS} $RDYNAMIC"
 	 # Sun randomly tweaked the prototypes in <proc_service.h>
 	 # at one point.
 	 AC_MSG_CHECKING(if <proc_service.h> is old)
