@@ -1,3 +1,14 @@
+2010-05-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_inferior_data): New struct.
+	(ada_inferior_data): New static global.
+	(ada_inferior_data_cleanup, get_ada_inferior_data, ada_inferior_exit)
+	(ada_get_tsd_type): New functions.
+	(ada_tag_name_2): Use ada_get_tsd_type instead of ada_find_any_type
+	to look the tsd type up.
+	(_initialize_ada_language): Attach ada_inferior_exit to inferior_exit
+	event.  Set ada_inferior_data.
+
 2010-05-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (unpack_varlen_hex): Remove forward declaration.

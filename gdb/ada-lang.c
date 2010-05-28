@@ -305,6 +305,66 @@ static const char *known_auxiliary_function_name_patterns[] = {
 /* Space for allocating results of ada_lookup_symbol_list.  */
 static struct obstack symbol_list_obstack;
 
+			/* Inferior-specific data.  */
+
+/* Per-inferior data for this module.  */
+
+struct ada_inferior_data
+{
+  /* The ada__tags__type_specific_data type, which is used when decoding
+     tagged types.  With older versions of GNAT, this type was directly
+     accessible through a component ("tsd") in the object tag.  But this
+     is no longer the case, so we cache it for each inferior.  */
+  struct type *tsd_type;
+};
+
+/* Our key to this module's inferior data.  */
+static const struct inferior_data *ada_inferior_data;
+
+/* A cleanup routine for our inferior data.  */
+static void
+ada_inferior_data_cleanup (struct inferior *inf, void *arg)
+{
+  struct ada_inferior_data *data;
+
+  data = inferior_data (inf, ada_inferior_data);
+  if (data != NULL)
+    xfree (data);
+}
+
+/* Return our inferior data for the given inferior (INF).
+
+   This function always returns a valid pointer to an allocated
+   ada_inferior_data structure.  If INF's inferior data has not
+   been previously set, this functions creates a new one with all
+   fields set to zero, sets INF's inferior to it, and then returns
+   a pointer to that newly allocated ada_inferior_data.  */
+
+static struct ada_inferior_data *
+get_ada_inferior_data (struct inferior *inf)
+{
+  struct ada_inferior_data *data;
+
+  data = inferior_data (inf, ada_inferior_data);
+  if (data == NULL)
+    {
+      data = XZALLOC (struct ada_inferior_data);
+      set_inferior_data (inf, ada_inferior_data, data);
+    }
+
+  return data;
+}
+
+/* Perform all necessary cleanups regarding our module's inferior data
+   that is required after the inferior INF just exited.  */
+
+static void
+ada_inferior_exit (struct inferior *inf)
+{
+  ada_inferior_data_cleanup (inf, NULL);
+  set_inferior_data (inf, ada_inferior_data, NULL);
+}
+
                         /* Utilities */
 
 /* Given DECODED_NAME a string holding a symbol name in its
@@ -5567,6 +5627,18 @@ ada_tag_name_1 (void *args0)
   return 0;
 }
 
+/* Return the "ada__tags__type_specific_data" type.  */
+
+static struct type *
+ada_get_tsd_type (struct inferior *inf)
+{
+  struct ada_inferior_data *data = get_ada_inferior_data (inf);
+
+  if (data->tsd_type == 0)
+    data->tsd_type = ada_find_any_type ("ada__tags__type_specific_data");
+  return data->tsd_type;
+}
+
 /* Utility function for ada_tag_name_1 that tries the second
    representation for the dispatch table (in which there is no
    explicit 'tsd' field in the referent of the tag pointer, and instead
@@ -5581,7 +5653,7 @@ ada_tag_name_2 (struct tag_args *args)
   struct value *val, *valp;
 
   args->name = NULL;
-  info_type = ada_find_any_type ("ada__tags__type_specific_data");
+  info_type = ada_get_tsd_type (current_inferior());
   if (info_type == NULL)
     return 0;
   info_type = lookup_pointer_type (lookup_pointer_type (info_type));
@@ -5603,7 +5675,7 @@ ada_tag_name_2 (struct tag_args *args)
 }
 
 /* The type name of the dynamic type denoted by the 'tag value TAG, as
- * a C string.  */
+   a C string.  */
 
 const char *
 ada_tag_name (struct value *tag)
@@ -11564,4 +11636,9 @@ this option to \"off\" unless necessary."),
      NULL, xcalloc, xfree);
 
   observer_attach_executable_changed (ada_executable_changed_observer);
+
+  /* Setup per-inferior data.  */
+  observer_attach_inferior_exit (ada_inferior_exit);
+  ada_inferior_data
+    = register_inferior_data_with_cleanup (ada_inferior_data_cleanup);
 }
