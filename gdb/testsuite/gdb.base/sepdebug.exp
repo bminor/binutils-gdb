@@ -388,7 +388,7 @@ gdb_expect {
   timeout {fail "(timeout) set silent break bp_location1"}
 }
 
-gdb_test "info break $expect_out(1,string)\n" \
+gdb_test "info break $expect_out(1,string)" \
     "\[0-9\]*\[ \t\]*breakpoint.*:$bp_location1\r\n\[ \t\]*silent.*" \
     "info silent break bp_location1"
 

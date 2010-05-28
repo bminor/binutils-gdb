@@ -1,3 +1,8 @@
+2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/sepdebug.exp (info silent break bp_location1): Fix racy
+	excessive newline.
+
 2010-05-27  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* gdb.base/break.exp: Replace uses of send_gdb / gdb_expect.
