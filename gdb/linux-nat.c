@@ -5509,15 +5509,21 @@ linux_nat_core_of_thread_1 (ptid_t ptid)
   make_cleanup (xfree, content);
 
   p = strchr (content, '(');
-  p = strchr (p, ')') + 2; /* skip ")" and a whitespace. */
+
+  /* Skip ")".  */
+  if (p != NULL)
+    p = strchr (p, ')');
+  if (p != NULL)
+    p++;
 
   /* If the first field after program name has index 0, then core number is
      the field with index 36.  There's no constant for that anywhere.  */
-  p = strtok_r (p, " ", &ts);
-  for (i = 0; i != 36; ++i)
+  if (p != NULL)
+    p = strtok_r (p, " ", &ts);
+  for (i = 0; p != NULL && i != 36; ++i)
     p = strtok_r (NULL, " ", &ts);
 
-  if (sscanf (p, "%d", &core) == 0)
+  if (p == NULL || sscanf (p, "%d", &core) == 0)
     core = -1;
 
   do_cleanups (back_to);

@@ -4346,13 +4346,21 @@ linux_core_of_thread (ptid_t ptid)
     }
 
   p = strchr (content, '(');
-  p = strchr (p, ')') + 2; /* skip ")" and a whitespace. */
 
-  p = strtok_r (p, " ", &ts);
-  for (i = 0; i != 36; ++i)
+  /* Skip ")".  */
+  if (p != NULL)
+    p = strchr (p, ')');
+  if (p != NULL)
+    p++;
+
+  /* If the first field after program name has index 0, then core number is
+     the field with index 36.  There's no constant for that anywhere.  */
+  if (p != NULL)
+    p = strtok_r (p, " ", &ts);
+  for (i = 0; p != NULL && i != 36; ++i)
     p = strtok_r (NULL, " ", &ts);
 
-  if (sscanf (p, "%d", &core) == 0)
+  if (p == NULL || sscanf (p, "%d", &core) == 0)
     core = -1;
 
   free (content);

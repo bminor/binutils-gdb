@@ -1,5 +1,10 @@
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-nat.c (linux_nat_core_of_thread_1): Fix crash on invalid
+	CONTENT.
+
+2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-nat.c (linux_nat_wait_1): Do not call
 	linux_nat_core_of_thread_1 on TARGET_WAITKIND_EXITED or
 	TARGET_WAITKIND_SIGNALLED.
