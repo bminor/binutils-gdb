@@ -3626,7 +3626,13 @@ retry:
     fprintf_unfiltered (gdb_stdlog, "LLW: exit\n");
 
   restore_child_signals_mask (&prev_mask);
-  lp->core = linux_nat_core_of_thread_1 (lp->ptid);
+
+  if (ourstatus->kind == TARGET_WAITKIND_EXITED
+      || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+    lp->core = -1;
+  else
+    lp->core = linux_nat_core_of_thread_1 (lp->ptid);
+
   return lp->ptid;
 }
 
