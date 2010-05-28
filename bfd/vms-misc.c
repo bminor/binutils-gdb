@@ -585,16 +585,8 @@ vms_time_t_to_vms_time (time_t ut, unsigned int *hi, unsigned int *lo)
   /* Put into val.  */
   val[0] = ut & 0xffff;
   val[1] = (ut >> 16) & 0xffff;
-  if (sizeof (ut) > 4)
-    {
-      val[2] = (ut >> 32) & 0xffff;
-      val[3] = (ut >> 48) & 0xffff;
-    }
-  else
-    {
-      val[2] = 0;
-      val[3] = 0;
-    }
+  val[2] = sizeof (ut) > 4 ? (ut >> 32) & 0xffff : 0;
+  val[3] = sizeof (ut) > 4 ? (ut >> 48) & 0xffff : 0;
 
   /* Add offset.  */
   tmp[0] = VMS_TIME_OFFSET & 0xffff;

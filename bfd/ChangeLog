@@ -1,3 +1,9 @@
+2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Workaround GCC PR middle-end/4210.
+	* vms-misc.c (vms_time_t_to_vms_time): Use ternary operator for val[2]
+	and val[3].
+
 2010-05-27  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-misc.c: Define __NEW_STARLET.  Remove trailing spaces.
