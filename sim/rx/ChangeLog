@@ -1,3 +1,7 @@
+2010-05-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb-if.c (sim_do_command): Add a "sim verbose noisy" command.
+
 2010-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* gdb-if.c (sim_write): Add const to buf arg.
