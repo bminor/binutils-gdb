@@ -2720,7 +2720,8 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                               }
                             else
                               func (stream, "#%ld\t; 0x%.8lx",
-				    (long) (NEGATIVE_BIT_SET ? value | ~0xffffffffL : value),
+				    (long) (((value & 0x80000000L) != 0) 
+					    ? value | ~0xffffffffL : value),
 				    value);
                             break;
 

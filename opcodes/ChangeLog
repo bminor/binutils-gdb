@@ -1,3 +1,8 @@
+2010-05-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-dis.c (print_insn_neon):  Ensure disassembly of Neon 
+	constants is the same on 32-bit and 64-bit hosts.
+
 2010-05-27  Jason Duerstock  <jason.duerstock+binutils@gmail.com>
 
 	* m68k-dis.c (print_insn_m68k): Emit undefined instructions as
