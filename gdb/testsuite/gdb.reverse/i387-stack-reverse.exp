@@ -52,17 +52,17 @@ runto main
 # Record to end of main
 
 set location [gdb_get_line_number "END I387-FLOAT-REVERSE"]
-gdb_test "record" "" "Turn on process record"
+gdb_test_no_output "record" "Turn on process record"
 gdb_test "until $location" ".*/$srcfile:$location.*" \
     "record to end of main"
 
 # Now rewind to beginning so we can begin testing.
 
 set location [gdb_get_line_number "BEGIN I387-FLOAT-REVERSE"]
-gdb_test "set exec-dir reverse" "" "set reverse direction"
+gdb_test_no_output "set exec-dir reverse" "set reverse direction"
 gdb_test "until $location" ".*/$srcfile:$location.*" \
     "rewind to beginning of main"
-gdb_test "set exec-dir forward" "" "set forward direction"
+gdb_test_no_output "set exec-dir forward" "set forward direction"
 
 # Test FPU stack. FPU stack includes st0, st1, st2, st3, st4, 
 # st5, st6, st7. We push 8 values to FPU stack in record mode

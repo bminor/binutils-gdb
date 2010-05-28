@@ -1,3 +1,52 @@
+2010-05-28  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* gdb.reverse/break-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/break-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/consecutive-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/consecutive-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/finish-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/finish-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/i386-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/i386-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/i386-sse-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/i387-env-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/i387-stack-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/machinestate-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/machinestate.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/sigall-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/sigall-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/solib-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/solib-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/step-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/step-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/until-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/until-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/watch-precsave.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.reverse/watch-reverse.exp: 
+	Replace uses of send_gdb / gdb_expect.
+
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/sepdebug.exp (info silent break bp_location1): Fix racy

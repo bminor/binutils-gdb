@@ -37,8 +37,7 @@ runto main
 
 if [target_info exists gdb,use_precord] {
     # Activate process record/replay
-    gdb_test "record" "" "Turn on process record"
-    # FIXME: command ought to acknowledge, so we can test if it succeeded.
+    gdb_test_no_output "record" "Turn on process record"
 }
 
 gdb_test "break $end_location" \
@@ -77,8 +76,7 @@ gdb_test_multiple "continue" "go to end of main forward" {
     }
 }
 
-# FIXME 'set exec-dir' command should give some output so we can test.
-gdb_test "set exec-direction reverse" "" "set reverse"
+gdb_test_no_output "set exec-direction reverse" "set reverse"
 
 gdb_continue_to_breakpoint "bar backward"  ".*/$srcfile:$bar_location.*"
 gdb_continue_to_breakpoint "foo backward"  ".*/$srcfile:$foo_location.*"
@@ -92,7 +90,7 @@ gdb_test_multiple "continue" "main backward" {
     }
 }
 
-gdb_test "set exec-direction forward" "" "set forward"
+gdb_test_no_output "set exec-direction forward" "set forward"
 
 gdb_continue_to_breakpoint "foo" ".*/$srcfile:$foo_location.*"
 gdb_continue_to_breakpoint "bar" ".*/$srcfile:$bar_location.*"

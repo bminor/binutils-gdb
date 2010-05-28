@@ -39,8 +39,7 @@ runto main
 
 if [target_info exists gdb,use_precord] {
     # Activate process record/replay
-    gdb_test "record" "" "Turn on process record"
-    # FIXME: command ought to acknowledge, so we can test if it succeeded.
+    gdb_test_no_output "record" "Turn on process record"
 }
 
 # Verify that plain vanilla "until <location>" works.
@@ -94,9 +93,8 @@ gdb_test_multiple "until marker3" "$test_msg" {
 ###
 
 # Set reverse execution direction
-# FIXME: command needs to acknowledge, so we can test if it succeeded.
 
-gdb_test "set exec-dir reverse" "" "set reverse execution"
+gdb_test_no_output "set exec-dir reverse" "set reverse execution"
 
 #
 # We should now be at main, after the return from marker2.

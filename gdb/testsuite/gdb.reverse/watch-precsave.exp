@@ -34,8 +34,7 @@ runto main
 
 if [target_info exists gdb,use_precord] {
     # Activate process record/replay
-    gdb_test "record" "" "Turn on process record"
-    # FIXME: command ought to acknowledge, so we can test if it succeeded.
+    gdb_test_no_output "record" "Turn on process record"
 }
 
 set end_location  [gdb_get_line_number "end of main"  ]
@@ -110,8 +109,7 @@ gdb_continue_to_breakpoint "marker2" ".*/$srcfile:.*"
 ###
 ###
 
-# FIXME 'set exec-dir' command should give some output so we can test.
-gdb_test "set exec-direction reverse" "" "set reverse"
+gdb_test_no_output "set exec-direction reverse" "set reverse"
 
 # Reverse until the previous change, from 4 to 3
 # Note that this one is outside the loop
@@ -147,8 +145,7 @@ gdb_test "set can-use-hw-watchpoints 1" "" "enable hw watchpoints"
 ###
 ###
 
-# FIXME 'set exec-dir' command should give some output so we can test.
-gdb_test "set exec-direction forward" "" "set forward"
+gdb_test_no_output "set exec-direction forward" "set forward"
 
 # Continue until first change, from -1 to 0
 
@@ -187,8 +184,7 @@ gdb_test "continue" "marker2 .*" "replay forward to marker2"
 ###
 ###
 
-# FIXME 'set exec-dir' command should give some output so we can test.
-gdb_test "set exec-direction reverse" "" "set reverse"
+gdb_test_no_output "set exec-direction reverse" "set reverse"
 
 # Reverse until the previous change, from 4 to 3
 # Note that this one is outside the loop

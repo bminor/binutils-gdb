@@ -35,8 +35,7 @@ runto main
 
 if [target_info exists gdb,use_precord] {
     # Activate process record/replay
-    gdb_test "record" "" "Turn on process record"
-    # FIXME: command ought to acknowledge, so we can test if it succeeded.
+    gdb_test_no_output "record" "Turn on process record"
 }
 
 # plain vanilla step/next (no count)
@@ -139,9 +138,8 @@ gdb_test_multiple "stepi" "$test_message" {
 ###
 
 # Set reverse execution direction
-# FIXME: command needs to acknowledge, so we can test if it succeeded.
 
-gdb_test "set exec-dir reverse" "" "set reverse execution"
+gdb_test_no_output "set exec-dir reverse" "set reverse execution"
 
 # stepi backward thru return and into a function
 
@@ -249,6 +247,6 @@ gdb_test "next" ".*NEXT TEST 1.*" "reverse next test 2"
 
 # Finish test by running forward to the end.
 # FIXME return to this later...
-# gdb_test "set exec-dir forward" "" "set forward execution"
+# gdb_test_no_output "set exec-dir forward" "set forward execution"
 # gdb_continue_to_end "step-reverse.exp"
 
