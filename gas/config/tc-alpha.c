@@ -86,7 +86,11 @@ struct alpha_fixup
   /* bfd_reloc_code_real_type reloc; */
   extended_bfd_reloc_code_real_type reloc;
 #ifdef OBJ_EVAX
-  symbolS *xtrasym, *procsym;
+  /* The symbol of the item in the linkage section.  */
+  symbolS *xtrasym;
+
+  /* The symbol of the procedure descriptor.  */
+  symbolS *procsym;
 #endif
 };
 
@@ -419,9 +423,11 @@ struct alpha_evax_procs
   int handler_data;
 };
 
+/* Linked list of .linkage fixups.  */
 struct alpha_linkage_fixups *alpha_linkage_fixup_root;
 static struct alpha_linkage_fixups *alpha_linkage_fixup_tail;
 
+/* Current procedure descriptor.  */
 static struct alpha_evax_procs *alpha_evax_proc;
 
 static int alpha_flag_hash_long_names = 0;		/* -+ */
@@ -495,8 +501,8 @@ struct alpha_reloc_tag
 {
   fixS *master;			/* The literal reloc.  */
 #ifdef OBJ_EVAX
-  struct symbol *sym;
-  struct symbol *psym;
+  struct symbol *sym;		/* Linkage section item symbol.  */
+  struct symbol *psym;		/* Pdesc symbol.  */
 #endif
   fixS *slaves;			/* Head of linked list of lituses.  */
   segT segment;			/* Segment relocs are in or undefined_section.  */
@@ -1333,21 +1339,20 @@ load_expression (int targreg,
 
 	if (exp->X_add_symbol == alpha_evax_proc->symbol)
 	  {
+            /* Linkage-relative expression.  */
+            set_tok_reg (newtok[0], targreg);
+
 	    if (range_signed_16 (addend))
 	      {
-		set_tok_reg (newtok[0], targreg);
 		set_tok_const (newtok[1], addend);
-		set_tok_preg (newtok[2], basereg);
-		assemble_tokens_to_insn ("lda", newtok, 3, &insn);
 		addend = 0;
 	      }
 	    else
 	      {
-		set_tok_reg (newtok[0], targreg);
 		set_tok_const (newtok[1], 0);
-		set_tok_preg (newtok[2], basereg);
-		assemble_tokens_to_insn ("lda", newtok, 3, &insn);
 	      }
+            set_tok_preg (newtok[2], basereg);
+            assemble_tokens_to_insn ("lda", newtok, 3, &insn);
 	  }
 	else
 	  {
@@ -1358,6 +1363,8 @@ load_expression (int targreg,
 	    if ((symlen > 4 &&
 		 strcmp (ptr2 = &symname [symlen - 4], "..lk") == 0))
 	      {
+                /* Access to an item whose address is stored in the linkage
+                   section.  Just read the address.  */
 		set_tok_reg (newtok[0], targreg);
 
 		newtok[1] = *exp;
@@ -1373,10 +1380,12 @@ load_expression (int targreg,
 
 		if (alpha_flag_replace && targreg == 26)
 		  {
+                    /* Add a NOP fixup for 'ldX $26,YYY..NAME..lk'.  */
 		    char *ensymname;
 		    symbolS *ensym;
 		    volatile asymbol *dummy;
 
+                    /* Build the entry name as 'NAME..en'.  */
 		    ptr1 = strstr (symname, "..") + 2;
 		    if (ptr1 > ptr2)
 		      ptr1 = symname;
@@ -1404,15 +1413,18 @@ load_expression (int targreg,
 		  }
 		else if (alpha_flag_replace && targreg == 27)
 		  {
+                    /* Add a lda fixup for 'ldX $27,YYY.NAME..lk+8'.  */
 		    char *psymname;
 		    symbolS *psym;
 
+                    /* Extract NAME.  */
 		    ptr1 = strstr (symname, "..") + 2;
 		    if (ptr1 > ptr2)
 		      ptr1 = symname;
 		    psymname = (char *) xmalloc (ptr2 - ptr1 + 1);
 		    memcpy (psymname, ptr1, ptr2 - ptr1);
 		    psymname [ptr2 - ptr1] = 0;
+
 		    gas_assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
 		    insn.fixups[insn.nfixups].reloc = BFD_RELOC_ALPHA_LDA;
 		    psym = symbol_find_or_make (psymname);
@@ -1426,11 +1438,13 @@ load_expression (int targreg,
 		    insn.nfixups++;
 		  }
 
-		emit_insn(&insn);
+		emit_insn (&insn);
 		return 0;
 	      }
 	    else
 	      {
+                /* Not in the linkage section.  Put the value into the linkage
+                   section.  */
 		symbolS *linkexp;
 
 		if (!range_signed_32 (addend))
@@ -2868,10 +2882,12 @@ emit_jsrjmp (const expressionS *tok,
       && tok[tokidx].X_add_symbol
       && alpha_linkage_symbol)
     {
+      /* Create a BOH reloc for 'jsr $27,NAME'.  */
       const char *symname = S_GET_NAME (tok[tokidx].X_add_symbol);
       int symlen = strlen (symname);
       char *ensymname;
 
+      /* Build the entry name as 'NAME..en'.  */
       ensymname = (char *) xmalloc (symlen + 5);
       memcpy (ensymname, symname, symlen);
       memcpy (ensymname + symlen, "..en", 5);
@@ -4457,6 +4473,8 @@ s_alpha_frame (int ignore ATTRIBUTE_UNUSED)
   alpha_evax_proc->rsa_offset = get_absolute_expression ();
 }
 
+/* Parse .prologue.  */
+
 static void
 s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
 {
@@ -4467,6 +4485,9 @@ s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
   alpha_prologue_label = symbol_new
     (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
 }
+
+/* Parse .pdesc <entry_name>.
+   Insert a procedure descriptor.  */
 
 static void
 s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
@@ -4686,6 +4707,9 @@ s_alpha_name (int ignore ATTRIBUTE_UNUSED)
   fix_new_exp (frag_now, p - frag_now->fr_literal, 8, &exp, 0, BFD_RELOC_64);
 }
 
+/* Parse .linkage <symbol>.
+   Create a linkage pair relocation.  */
+
 static void
 s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
 {
@@ -4737,6 +4761,9 @@ s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
     }
   demand_empty_rest_of_line ();
 }
+
+/* Parse .code_address <symbol>.
+   Create a code address relocation.  */
 
 static void
 s_alpha_code_address (int ignore ATTRIBUTE_UNUSED)
@@ -6281,6 +6308,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
       int pname_len;
 
     case BFD_RELOC_ALPHA_LINKAGE:
+      /* Copy the linkage index.  */
       reloc->addend = fixp->fx_addnumber;
       break;
 

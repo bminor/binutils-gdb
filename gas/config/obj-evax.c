@@ -145,6 +145,7 @@ evax_frob_file_before_adjust (void)
   subseg_set (alpha_link_section, 0);
   seginfo = seg_info (alpha_link_section);
 
+  /* Handle .linkage fixups.  */
   for (l = alpha_linkage_fixup_root; l != NULL; l = l->next)
     {
       if (S_GET_SEGMENT (l->fixp->fx_addsy) == alpha_link_section)
