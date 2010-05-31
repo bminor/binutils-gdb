@@ -1,3 +1,11 @@
+2010-05-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Accept the new Linux kernel "t (tracing stop)" string.
+	* gdb.threads/watchthreads-reorder.c (thread1_func, thread2_func):
+	Update comment.
+	(state_wait) <T (tracing stop)>: New.
+	(main): Update the state_wait expect string.
+
 2010-05-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* limits.c, limits.exp: Delete files.

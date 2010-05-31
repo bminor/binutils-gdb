@@ -99,7 +99,7 @@ thread1_func (void *unused)
 
   rwatch_store = thread1_rwatch;
 
-  /* Be sure the "T (tracing stop)" test can proceed for both threads.  */
+  /* Be sure the "t (tracing stop)" test can proceed for both threads.  */
   timed_mutex_lock (&terminate_mutex);
   i = pthread_mutex_unlock (&terminate_mutex);
   assert (i == 0);
@@ -125,7 +125,7 @@ thread2_func (void *unused)
 
   rwatch_store = thread2_rwatch;
 
-  /* Be sure the "T (tracing stop)" test can proceed for both threads.  */
+  /* Be sure the "t (tracing stop)" test can proceed for both threads.  */
   timed_mutex_lock (&terminate_mutex);
   i = pthread_mutex_unlock (&terminate_mutex);
   assert (i == 0);
@@ -211,6 +211,13 @@ state_wait (pid_t process, const char *wanted)
   do
     {
       state = proc_string (filename, "State:\t");
+
+      /* torvalds/linux-2.6.git 464763cf1c6df632dccc8f2f4c7e50163154a2c0
+	 has changed "T (tracing stop)" to "t (tracing stop)".  Make the GDB
+	 testcase backward compatible with older Linux kernels.  */
+      if (strcmp (state, "T (tracing stop)") == 0)
+	state = "t (tracing stop)";
+
       if (strcmp (state, wanted) == 0)
 	{
 	  free (filename);
@@ -336,9 +343,9 @@ main (int argc, char **argv)
     {
       /* s390x-unknown-linux-gnu will fail with "R (running)".  */
 
-      state_wait (thread1_tid, "T (tracing stop)");
+      state_wait (thread1_tid, "t (tracing stop)");
 
-      state_wait (thread2_tid, "T (tracing stop)");
+      state_wait (thread2_tid, "t (tracing stop)");
     }
 
   cleanup ();
