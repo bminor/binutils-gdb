@@ -9231,7 +9231,7 @@ const bfd_target vms_alpha_vec =
   {_bfd_dummy_target, alpha_vms_object_p,	/* bfd_check_format.  */
    _bfd_vms_lib_alpha_archive_p, _bfd_dummy_target},
   {bfd_false, alpha_vms_mkobject,		/* bfd_set_format.  */
-   _bfd_vms_lib_mkarchive, bfd_false},
+   _bfd_vms_lib_alpha_mkarchive, bfd_false},
   {bfd_false, alpha_vms_write_object_contents,	/* bfd_write_contents.  */
    _bfd_vms_lib_write_archive_contents, bfd_false},
 

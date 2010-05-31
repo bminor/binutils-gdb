@@ -1,6 +1,29 @@
+2010-05-31  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (credat_lo, credat_hi): New fields.
+	(vms_read_block): Adjust comments.
+	(vms_write_block): New function.
+	(_bfd_vms_lib_archive_p): Decode majorid once.  Replace some
+	hard-coded values with constants.  Set credat_lo and credat_hi.
+	(_bfd_vms_lib_mkarchive): Add argument kind.
+	Set ver, mhd_size and type according to kind.
+	(_bfd_vms_lib_alpha_mkarchive): New function.
+	(struct lib_index): Renamed from struct vms_index
+	(lib_index_cmp): Renamed from vms_index_cmp.  Adjusted.
+	(get_idxlen): Type of idx argument adjusted.  Add is_elfidx
+	argument and handle it.
+	(vms_write_index): Adjust argument idx.  Handle elf indexes.
+	(_bfd_vms_lib_build_map): Adjust type of arguments modules and res.
+	(_bfd_vms_lib_write_archive_contents): Add is_elfidx variable and
+	use it.  Handle elf indexes.  Set credat.
+	* libbfd-in.h (_bfd_vms_lib_mkarchive): Renamed to ...
+	(_bfd_vms_lib_alpha_mkarchive): ... this.
+	* libbfd.h: Regenerated.
+	* vms-alpha.c (vms_alpha_vec): Adjust after previous renaming.
+
 2010-05-28  Sterling Augustine  <sterling@tensilica.com>
 
-	* elf32-xtensa.c (elf_xtensa_relocate_section): Add a large amount 
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Add a large amount
 	of code to change the bits in the instructions to match the changes
 	in the relocations.  Declare dest_addr and sym_sec to help.
 

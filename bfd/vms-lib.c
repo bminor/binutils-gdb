@@ -77,6 +77,10 @@ struct lib_tdata
   /* Total size of the mhd (element header).  */
   unsigned int mhd_size;
 
+  /* Creation date.  */
+  unsigned int credat_lo;
+  unsigned int credat_hi;
+
   /* Vector of modules (archive elements), already sorted.  */
   unsigned int nbr_modules;
   struct carsym *modules;
@@ -186,17 +190,31 @@ vms_add_indexes_from_list (bfd *abfd, struct carsym_mem *cs, char *name,
     }
 }
 
-/* Read block VBN from ABFD and store it into BLK.  */
+/* Read block VBN from ABFD and store it into BLK.  Return FALSE in case of error.  */
 
 static bfd_boolean
 vms_read_block (bfd *abfd, unsigned int vbn, void *blk)
 {
   file_ptr off;
 
-  /* Read the index block.  */
   off = (vbn - 1) * VMS_BLOCK_SIZE;
   if (bfd_seek (abfd, off, SEEK_SET) != 0
       || bfd_bread (blk, VMS_BLOCK_SIZE, abfd) != VMS_BLOCK_SIZE)
+    return FALSE;
+
+  return TRUE;
+}
+
+/* Write the content of BLK to block VBN of ABFD.  Return FALSE in case of error.  */
+
+static bfd_boolean
+vms_write_block (bfd *abfd, unsigned int vbn, void *blk)
+{
+  file_ptr off;
+
+  off = (vbn - 1) * VMS_BLOCK_SIZE;
+  if (bfd_seek (abfd, off, SEEK_SET) != 0
+      || bfd_bwrite (blk, VMS_BLOCK_SIZE, abfd) != VMS_BLOCK_SIZE)
     return FALSE;
 
   return TRUE;
@@ -423,6 +441,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 {
   struct vms_lhd lhd;
   unsigned int sanity;
+  unsigned int majorid;
   struct lib_tdata *tdata_hold;
   struct lib_tdata *tdata;
   unsigned int dcxvbn;
@@ -445,13 +464,14 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
       bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
+  majorid = bfd_getl32 (lhd.majorid);
 
   /* Check archive kind.  */
   switch (kind)
     {
     case vms_lib_alpha:
       if ((lhd.type != LBR__C_TYP_EOBJ && lhd.type != LBR__C_TYP_ESHSTB)
-          || bfd_getl32 (lhd.majorid) != 3
+          || majorid != LBR_MAJORID
           || lhd.nindex != 2)
         {
           bfd_set_error (bfd_error_wrong_format);
@@ -460,7 +480,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
       break;
     case vms_lib_ia64:
       if ((lhd.type != LBR__C_TYP_IOBJ && lhd.type != LBR__C_TYP_ISHSTB)
-          || bfd_getl32 (lhd.majorid) != 6
+          || majorid != LBR_ELFMAJORID
           || lhd.nindex != 2)
         {
           bfd_set_error (bfd_error_wrong_format);
@@ -471,7 +491,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
       if ((lhd.type != LBR__C_TYP_TXT
            && lhd.type != LBR__C_TYP_MLB
            && lhd.type != LBR__C_TYP_HLP)
-          || bfd_getl32 (lhd.majorid) != 3
+          || majorid != LBR_MAJORID
           || lhd.nindex != 1)
         {
           bfd_set_error (bfd_error_wrong_format);
@@ -488,10 +508,12 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
   if (tdata == NULL)
     return NULL;
   abfd->tdata.any = (void *)tdata;
-  tdata->ver = bfd_getl32 (lhd.majorid);
+  tdata->ver = majorid;
   tdata->mhd_size = MHD__C_USRDAT + lhd.mhdusz;
   tdata->type = lhd.type;
   tdata->kind = kind;
+  tdata->credat_lo = bfd_getl32 (lhd.credat + 0);
+  tdata->credat_hi = bfd_getl32 (lhd.credat + 4);
 
   /* Read indexes.  */
   tdata->nbr_modules = bfd_getl32 (lhd.modcnt);
@@ -637,8 +659,8 @@ _bfd_vms_lib_txt_archive_p (bfd *abfd)
 
 /* Standard bfd function.  */
 
-bfd_boolean
-_bfd_vms_lib_mkarchive (bfd *abfd)
+static bfd_boolean
+_bfd_vms_lib_mkarchive (bfd *abfd, enum vms_lib_kind kind)
 {
   struct lib_tdata *tdata;
 
@@ -647,9 +669,24 @@ _bfd_vms_lib_mkarchive (bfd *abfd)
     return FALSE;
 
   abfd->tdata.any = (void *)tdata;
-  tdata->ver = 3;
-  tdata->mhd_size = sizeof (struct vms_mhd);
-  tdata->type = LBR__C_TYP_EOBJ;
+  vms_get_time (&tdata->credat_hi, &tdata->credat_lo);
+
+  tdata->kind = kind;
+  switch (kind)
+    {
+    case vms_lib_alpha:
+      tdata->ver = LBR_MAJORID;
+      tdata->mhd_size = offsetof (struct vms_mhd, pad1);
+      tdata->type = LBR__C_TYP_EOBJ;
+      break;
+    case vms_lib_ia64:
+      tdata->ver = LBR_ELFMAJORID;
+      tdata->mhd_size = sizeof (struct vms_mhd);
+      tdata->type = LBR__C_TYP_IOBJ;
+      break;
+    default:
+      abort ();
+    }
 
   tdata->nbr_modules = 0;
   tdata->artdata.symdef_count = 0;
@@ -658,6 +695,12 @@ _bfd_vms_lib_mkarchive (bfd *abfd)
   tdata->cache = NULL;
 
   return TRUE;
+}
+
+bfd_boolean
+_bfd_vms_lib_alpha_mkarchive (bfd *abfd)
+{
+  return _bfd_vms_lib_mkarchive (abfd, vms_lib_alpha);
 }
 
 /* Find NAME in the symbol index.  Return the index.  */
@@ -1453,7 +1496,7 @@ _bfd_vms_lib_generic_stat_arch_elt (bfd *abfd, struct stat *st)
 
 /* Internal representation of an index entry.  */
 
-struct vms_index
+struct lib_index
 {
   /* Corresponding archive member.  */
   bfd *abfd;
@@ -1471,10 +1514,10 @@ struct vms_index
 /* Used to sort index entries.  */
 
 static int
-vms_index_cmp (const void *lv, const void *rv)
+lib_index_cmp (const void *lv, const void *rv)
 {
-  const struct vms_index *l = lv;
-  const struct vms_index *r = rv;
+  const struct lib_index *l = lv;
+  const struct lib_index *r = rv;
 
   return strcmp (l->name, r->name);
 }
@@ -1486,9 +1529,17 @@ vms_index_cmp (const void *lv, const void *rv)
 /* Get the size of an index entry.  */
 
 static unsigned int
-get_idxlen (struct vms_index *idx)
+get_idxlen (struct lib_index *idx, bfd_boolean is_elfidx)
 {
-  return 7 + idx->namlen;
+  if (is_elfidx)
+    {
+      if (idx->namlen > MAX_KEYLEN)
+        return 9 + sizeof (struct vms_rfa);
+      else
+        return 9 + idx->namlen;
+    }
+  else
+    return 7 + idx->namlen;
 }
 
 /* Write the index.  VBN is the first vbn to be used, and will contain
@@ -1497,8 +1548,8 @@ get_idxlen (struct vms_index *idx)
 
 static bfd_boolean
 vms_write_index (bfd *abfd,
-                 struct vms_index *idx, unsigned int nbr, unsigned int *vbn,
-                 unsigned int *topvbn)
+                 struct lib_index *idx, unsigned int nbr, unsigned int *vbn,
+                 unsigned int *topvbn, bfd_boolean is_elfidx)
 {
   unsigned int i;
   int j;
@@ -1511,8 +1562,14 @@ vms_write_index (bfd *abfd,
     unsigned short lastlen;
   } blk[MAX_LEVEL];
 
+  /* The kbn blocks are used to store long symbol names.  */
+  unsigned int kbn_sz = 0;	 /* Number of bytes availble in the kbn block.  */
+  unsigned int kbn_vbn = 0;	 /* VBN of the kbn block.  */
+  unsigned char *kbn_blk = NULL; /* Contents of the kbn block.  */
+
   if (nbr == 0)
     {
+      /* No entries.  Very easy to handle.  */
       if (topvbn != NULL)
         *topvbn = 0;
       return TRUE;
@@ -1521,7 +1578,7 @@ vms_write_index (bfd *abfd,
   if (abfd == NULL)
     {
       /* Sort the index the first time this function is called.  */
-      qsort (idx, nbr, sizeof (struct vms_index), vms_index_cmp);
+      qsort (idx, nbr, sizeof (struct lib_index), lib_index_cmp);
     }
 
   /* Allocate first index block.  */
@@ -1534,9 +1591,85 @@ vms_write_index (bfd *abfd,
 
   for (i = 0; i < nbr; i++, idx++)
     {
-      unsigned int idxlen = get_idxlen (idx);
-      struct vms_idx *en;
+      unsigned int idxlen;
       int flush = 0;
+      unsigned int key_vbn = 0;
+      unsigned int key_off = 0;
+
+      idxlen = get_idxlen (idx, is_elfidx);
+
+      if (is_elfidx && idx->namlen >= MAX_KEYLEN)
+        {
+          /* If the name is too long, write it in the kbn block.  */
+          unsigned int kl = idx->namlen;
+          unsigned int kl_chunk;
+          const char *key = idx->name;
+
+          /* Write the name in the kbn, chunk after chunk.  */
+          do
+            {
+              if (kbn_sz < sizeof (struct vms_kbn))
+                {
+                  /* Not enough room in the kbn block.  */
+                  if (abfd != NULL)
+                    {
+                      /* Write it to the disk (if there is one).  */
+                      if (kbn_vbn != 0)
+                        {
+                          if (vms_write_block (abfd, kbn_vbn, kbn_blk) != TRUE)
+                            return FALSE;
+                        }
+                      else
+                        {
+                          kbn_blk = bfd_malloc (VMS_BLOCK_SIZE);
+                          if (kbn_blk == NULL)
+                            return FALSE;
+                        }
+                      *(unsigned short *)kbn_blk = 0;
+                    }
+                  kbn_vbn = (*vbn)++;
+                  kbn_sz = VMS_BLOCK_SIZE - 2;
+                }
+              if (kl + sizeof (struct vms_kbn) > kbn_sz)
+                kl_chunk = kbn_sz - sizeof (struct vms_kbn);
+              else
+                kl_chunk = kl;
+
+              if (kbn_blk != NULL)
+                {
+                  struct vms_kbn *kbn;
+
+                  kbn = (struct vms_kbn *)(kbn_blk + VMS_BLOCK_SIZE - kbn_sz);
+
+                  if (key_vbn == 0)
+                    {
+                      /* Save the rfa of the first chunk.  */
+                      key_vbn = kbn_vbn;
+                      key_off = VMS_BLOCK_SIZE - kbn_sz;
+                    }
+
+                  bfd_putl16 (kl_chunk, kbn->keylen);
+                  if (kl_chunk == kl)
+                    {
+                      /* No next chunk.  */
+                      bfd_putl32 (0, kbn->rfa.vbn);
+                      bfd_putl16 (0, kbn->rfa.offset);
+                    }
+                  else
+                    {
+                      /* Next chunk will be at the start of the next block.  */
+                      bfd_putl32 (*vbn, kbn->rfa.vbn);
+                      bfd_putl16 (2, kbn->rfa.offset);
+                    }
+                  memcpy ((char *)(kbn + 1), key, kl_chunk);
+                  key += kl_chunk;
+                }
+              kl -= kl_chunk;
+              kl_chunk = (kl_chunk + 1) & ~1;	  /* Always align.  */
+              kbn_sz -= kl_chunk + sizeof (struct vms_kbn);
+            }
+          while (kl > 0);
+        }
 
       /* Check if a block might overflow.  In this case we will flush this
          block and all the blocks below it.  */
@@ -1571,12 +1704,16 @@ vms_write_index (bfd *abfd,
               /* Update parent block: write the new entry.  */
               if (abfd != NULL)
                 {
-                  en = (struct vms_idx *)(rblk[j]->keys + blk[j].len);
-                  memcpy (rblk[j + 1]->keys + blk[j + 1].len, en,
+                  struct vms_rfa *rfa;
+
+                  /* Copy the whole entry.  */
+                  memcpy (rblk[j + 1]->keys + blk[j + 1].len,
+                          rblk[j]->keys + blk[j].len,
                           blk[j].lastlen);
-                  en = (struct vms_idx *)(rblk[j + 1]->keys + blk[j + 1].len);
-                  bfd_putl32 (blk[j].vbn, en->rfa.vbn);
-                  bfd_putl16 (RFADEF__C_INDEX, en->rfa.offset);
+                  /* Fix the entry (which in always the first field of an entry.  */
+                  rfa = (struct vms_rfa *)(rblk[j + 1]->keys + blk[j + 1].len);
+                  bfd_putl32 (blk[j].vbn, rfa->vbn);
+                  bfd_putl16 (RFADEF__C_INDEX, rfa->offset);
                 }
 
               if (j + 1 == flush)
@@ -1592,11 +1729,7 @@ vms_write_index (bfd *abfd,
               if (abfd != NULL)
                 {
                   bfd_putl16 (blk[j].len + blk[j].lastlen, rblk[j]->used);
-                  if (bfd_seek (abfd, (blk[j].vbn - 1) * VMS_BLOCK_SIZE,
-                                SEEK_SET) != 0)
-                    return FALSE;
-                  if (bfd_bwrite (rblk[j], sizeof (struct vms_indexdef), abfd)
-                      != sizeof (struct vms_indexdef))
+                  if (vms_write_block (abfd, blk[j].vbn, rblk[j]) != TRUE)
                     return FALSE;
                 }
 
@@ -1613,14 +1746,45 @@ vms_write_index (bfd *abfd,
 
               if (abfd != NULL)
                 {
-                  en = (struct vms_idx *)(rblk[j]->keys + blk[j].len);
+                  struct vms_rfa *rfa;
+
+                  rfa = (struct vms_rfa *)(rblk[j]->keys + blk[j].len);
                   bfd_putl32 ((idx->abfd->proxy_origin / VMS_BLOCK_SIZE) + 1,
-                              en->rfa.vbn);
+                              rfa->vbn);
                   bfd_putl16
-                    ((idx->abfd->proxy_origin % VMS_BLOCK_SIZE) + DATA__DATA,
-                     en->rfa.offset);
-                  en->keylen = idx->namlen;
-                  memcpy (en->keyname, idx->name, idx->namlen);
+                    ((idx->abfd->proxy_origin % VMS_BLOCK_SIZE)
+                     + (is_elfidx ? 0 : DATA__DATA),
+                     rfa->offset);
+
+                  if (is_elfidx)
+                    {
+                      /* Use elfidx format.  */
+                      struct vms_elfidx *en = (struct vms_elfidx *)rfa;
+
+                      en->flags = 0;
+                      if (key_vbn != 0)
+                        {
+                          /* Long symbol name.  */
+                          struct vms_kbn *k = (struct vms_kbn *)(en->keyname);
+                          bfd_putl16 (sizeof (struct vms_kbn), en->keylen);
+                          bfd_putl16 (idx->namlen, k->keylen);
+                          bfd_putl32 (key_vbn, k->rfa.vbn);
+                          bfd_putl16 (key_off, k->rfa.offset);
+                          en->flags |= ELFIDX__SYMESC;
+                        }
+                      else
+                        {
+                          bfd_putl16 (idx->namlen, en->keylen);
+                          memcpy (en->keyname, idx->name, idx->namlen);
+                        }
+                    }
+                  else
+                    {
+                      /* Use idx format.  */
+                      struct vms_idx *en = (struct vms_idx *)rfa;
+                      en->keylen = idx->namlen;
+                      memcpy (en->keyname, idx->name, idx->namlen);
+                    }
                 }
             }
 
@@ -1640,26 +1804,30 @@ vms_write_index (bfd *abfd,
       if (j > 0)
         {
           /* Update parent block: write the new entry.  */
-          struct vms_idx *en;
-          struct vms_idx *par;
+          unsigned char *en;
+          unsigned char *par;
+          struct vms_rfa *rfa;
 
-          en = (struct vms_idx *)(rblk[j - 1]->keys + blk[j - 1].len);
-          par = (struct vms_idx *)(rblk[j]->keys + blk[j].len);
+          en = rblk[j - 1]->keys + blk[j - 1].len;
+          par = rblk[j]->keys + blk[j].len;
           memcpy (par, en, blk[j - 1].lastlen);
-          bfd_putl32 (blk[j - 1].vbn, par->rfa.vbn);
-          bfd_putl16 (RFADEF__C_INDEX, par->rfa.offset);
+          rfa = (struct vms_rfa *)par;
+          bfd_putl32 (blk[j - 1].vbn, rfa->vbn);
+          bfd_putl16 (RFADEF__C_INDEX, rfa->offset);
         }
 
       /* Write this block on the disk.  */
       bfd_putl16 (blk[j].len + blk[j].lastlen, rblk[j]->used);
-      if (bfd_seek (abfd, (blk[j].vbn - 1) * VMS_BLOCK_SIZE,
-                    SEEK_SET) != 0)
-        return FALSE;
-      if (bfd_bwrite (rblk[j], sizeof (struct vms_indexdef), abfd)
-          != sizeof (struct vms_indexdef))
+      if (vms_write_block (abfd, blk[j].vbn, rblk[j]) != TRUE)
         return FALSE;
 
       free (rblk[j]);
+    }
+
+  if (kbn_vbn != 0)
+    {
+      if (vms_write_block (abfd, kbn_vbn, kbn_blk) != TRUE)
+        return FALSE;
     }
 
   return TRUE;
@@ -1706,18 +1874,18 @@ vms_write_data_block (bfd *arch, struct vms_datadef *data, file_ptr *off,
 
 static bfd_boolean
 _bfd_vms_lib_build_map (unsigned int nbr_modules,
-                        struct vms_index *modules,
+                        struct lib_index *modules,
                         unsigned int *res_cnt,
-                        struct vms_index **res)
+                        struct lib_index **res)
 {
   unsigned int i;
   asymbol **syms = NULL;
   long syms_max = 0;
-  struct vms_index *map = NULL;
+  struct lib_index *map = NULL;
   unsigned int map_max = 1024;		/* Fine initial default.  */
   unsigned int map_count = 0;
 
-  map = (struct vms_index *) bfd_malloc (map_max * sizeof (struct vms_index));
+  map = (struct lib_index *) bfd_malloc (map_max * sizeof (struct lib_index));
   if (map == NULL)
     goto error_return;
 
@@ -1764,21 +1932,20 @@ _bfd_vms_lib_build_map (unsigned int nbr_modules,
                    || bfd_is_com_section (sec))
                   && ! bfd_is_und_section (sec))
                 {
-                  struct vms_index *new_map;
+                  struct lib_index *new_map;
 
                   /* This symbol will go into the archive header.  */
                   if (map_count == map_max)
                     {
                       map_max *= 2;
-                      new_map = (struct vms_index *)
-                        bfd_realloc (map, map_max * sizeof (struct vms_index));
+                      new_map = (struct lib_index *)
+                        bfd_realloc (map, map_max * sizeof (struct lib_index));
                       if (new_map == NULL)
                         goto error_return;
                       map = new_map;
                     }
 
                   map[map_count].abfd = current;
-                  /* FIXME: check length.  */
                   map[map_count].namlen = strlen (syms[src_count]->name);
                   map[map_count].name = syms[src_count]->name;
                   map_count++;
@@ -1807,9 +1974,9 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
 {
   bfd *current;
   unsigned int nbr_modules;
-  struct vms_index *modules;
+  struct lib_index *modules;
   unsigned int nbr_symbols;
-  struct vms_index *symbols;
+  struct lib_index *symbols;
   struct lib_tdata *tdata = bfd_libdata (arch);
   unsigned int i;
   file_ptr off;
@@ -1818,6 +1985,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
   unsigned int vbn;
   unsigned int mod_idx_vbn;
   unsigned int sym_idx_vbn;
+  bfd_boolean is_elfidx = tdata->kind == vms_lib_ia64;
 
   /* Count the number of modules (and do a first sanity check).  */
   nbr_modules = 0;
@@ -1841,7 +2009,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
 
   /* Build the modules list.  */
   BFD_ASSERT (tdata->modules == NULL);
-  modules = bfd_alloc (arch, nbr_modules * sizeof (struct vms_index));
+  modules = bfd_alloc (arch, nbr_modules * sizeof (struct lib_index));
   if (modules == NULL)
     return FALSE;
 
@@ -1862,7 +2030,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
 
   /* Create the module index.  */
   vbn = 0;
-  if (!vms_write_index (NULL, modules, nbr_modules, &vbn, NULL))
+  if (!vms_write_index (NULL, modules, nbr_modules, &vbn, NULL, is_elfidx))
     return FALSE;
   nbr_mod_iblk = vbn;
 
@@ -1871,7 +2039,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     return FALSE;
 
   vbn = 0;
-  if (!vms_write_index (NULL, symbols, nbr_symbols, &vbn, NULL))
+  if (!vms_write_index (NULL, symbols, nbr_symbols, &vbn, NULL, is_elfidx))
     return FALSE;
   nbr_sym_iblk = vbn;
 
@@ -1891,8 +2059,15 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
       current = modules[i].abfd;
       current->proxy_origin = off;
 
-      bfd_putl16 (sizeof (struct vms_mhd), blk);
-      mhd = (struct vms_mhd *)(blk + 2);
+      if (is_elfidx)
+        sz = 0;
+      else
+        {
+          /* Write the MHD as a record (ie, size first).  */
+          sz = 2;
+          bfd_putl16 (tdata->mhd_size, blk);
+        }
+      mhd = (struct vms_mhd *)(blk + sz);
       memset (mhd, 0, sizeof (struct vms_mhd));
       mhd->lbrflag = 0;
       mhd->id = MHD__C_MHDID;
@@ -1901,31 +2076,99 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
       bfd_putl32 (modules[i].ref, mhd->refcnt);
       /* FIXME: datim.  */
 
-      sz = (2 + sizeof (struct vms_mhd) + 1) & ~1;
-      if (vms_write_data_block (arch, &data, &off, blk, sz, 0) < 0)
-        goto input_err;
+      sz += tdata->mhd_size;
+      sz = (sz + 1) & ~1;
 
+      /* Rewind the member to be put into the archive.  */
       if (bfd_seek (current, 0, SEEK_SET) != 0)
         goto input_err;
 
-      while (1)
-	{
-          sz = bfd_bread (blk, sizeof (blk), current);
-          if (sz == 0)
-            break;
+      /* Copy the member into the archive.  */
+      if (is_elfidx)
+        {
+          unsigned int modsize = 0;
+          bfd_size_type amt;
+          file_ptr off_hdr = off;
+
+          /* Read to complete the first block.  */
+          amt = bfd_bread (blk + sz, VMS_BLOCK_SIZE - sz, current);
+          if (amt == (bfd_size_type)-1)
+            goto input_err;
+          modsize = amt;
+          if (amt < VMS_BLOCK_SIZE - sz)
+            {
+              /* The member size is less than a block.  Pad the block.  */
+              memset (blk + sz + amt, 0, VMS_BLOCK_SIZE - sz - amt);
+            }
+          bfd_putl32 (modsize, mhd->modsize);
+
+          /* Write the first block (which contains an mhd).  */
+          if (bfd_bwrite (blk, VMS_BLOCK_SIZE, arch) != VMS_BLOCK_SIZE)
+            goto input_err;
+
+          if (amt == VMS_BLOCK_SIZE - sz)
+            {
+              /* Copy the remaining.  */
+              char buffer[DEFAULT_BUFFERSIZE];
+
+              while (1)
+                {
+                  amt = bfd_bread (buffer, sizeof (buffer), current);
+                  if (amt == (bfd_size_type)-1)
+                    goto input_err;
+                  if (amt == 0)
+                    break;
+                  modsize += amt;
+                  if (amt != sizeof (buffer))
+                    {
+                      /* Clear the padding.  */
+                      memset (buffer + amt, 0, sizeof (buffer) - amt);
+                      amt = (amt + VMS_BLOCK_SIZE) & ~(VMS_BLOCK_SIZE - 1);
+                    }
+                  if (bfd_bwrite (buffer, amt, arch) != amt)
+                    goto input_err;
+                  off += amt;
+                }
+
+              /* Now that the size is known, write the first block (again).  */
+              bfd_putl32 (modsize, mhd->modsize);
+              if (bfd_seek (arch, off_hdr, SEEK_SET) != 0
+                  || bfd_bwrite (blk, VMS_BLOCK_SIZE, arch) != VMS_BLOCK_SIZE)
+                goto input_err;
+              if (bfd_seek (arch, off, SEEK_SET) != 0)
+                goto input_err;
+            }
+        }
+      else
+        {
+          /* Write the MHD.  */
           if (vms_write_data_block (arch, &data, &off, blk, sz, 0) < 0)
             goto input_err;
+
+          /* Write the member.  */
+          while (1)
+            {
+              sz = bfd_bread (blk, sizeof (blk), current);
+              if (sz == 0)
+                break;
+              if (vms_write_data_block (arch, &data, &off, blk, sz, 0) < 0)
+                goto input_err;
+            }
+
+          /* Write the end of module marker.  */
+          if (vms_write_data_block (arch, &data, &off,
+                                    eotdesc, sizeof (eotdesc), 1) < 0)
+            goto input_err;
         }
-      if (vms_write_data_block (arch, &data, &off,
-                                eotdesc, sizeof (eotdesc), 1) < 0)
-        goto input_err;
     }
 
   /* Write the indexes.  */
   vbn = 2;
-  if (vms_write_index (arch, modules, nbr_modules, &vbn, &mod_idx_vbn) != TRUE)
+  if (vms_write_index (arch, modules, nbr_modules, &vbn, &mod_idx_vbn,
+                       is_elfidx) != TRUE)
     return FALSE;
-  if (vms_write_index (arch, symbols, nbr_symbols, &vbn, &sym_idx_vbn) != TRUE)
+  if (vms_write_index (arch, symbols, nbr_symbols, &vbn, &sym_idx_vbn,
+                       is_elfidx) != TRUE)
     return FALSE;
 
   /* Write libary header.  */
@@ -1934,13 +2177,25 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     struct vms_lhd *lhd = (struct vms_lhd *)blk;
     struct vms_idd *idd = (struct vms_idd *)(blk + sizeof (*lhd));
     unsigned int idd_flags;
+    unsigned int saneid;
 
     memset (blk, 0, sizeof (blk));
 
-    lhd->type = LBR__C_TYP_EOBJ;
+    lhd->type = tdata->type;
     lhd->nindex = 2;
-    bfd_putl32 (LHD_SANEID3, lhd->sanity);
-    bfd_putl16 (3, lhd->majorid);
+    switch (tdata->kind)
+      {
+      case vms_lib_alpha:
+        saneid = LHD_SANEID3;
+        break;
+      case vms_lib_ia64:
+        saneid = LHD_SANEID6;
+        break;
+      default:
+        abort ();
+      }
+    bfd_putl32 (saneid, lhd->sanity);
+    bfd_putl16 (tdata->ver, lhd->majorid);
     bfd_putl16 (0, lhd->minorid);
     snprintf ((char *)lhd->lbrver + 1, sizeof (lhd->lbrver) - 1,
               "GNU ar %u.%u.%u",
@@ -1950,11 +2205,11 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     lhd->lbrver[sizeof (lhd->lbrver) - 1] = 0;
     lhd->lbrver[0] = strlen ((char *)lhd->lbrver + 1);
 
-    /* FIXME.  */
-    bfd_putl64 (0, lhd->credat);
-    bfd_putl64 (0, lhd->updtim);
+    bfd_putl32 (tdata->credat_lo, lhd->credat + 0);
+    bfd_putl32 (tdata->credat_hi, lhd->credat + 4);
+    vms_raw_get_time (lhd->updtim);
 
-    lhd->mhdusz = sizeof (struct vms_mhd) - MHD__C_USRDAT;
+    lhd->mhdusz = tdata->mhd_size - MHD__C_USRDAT;
 
     bfd_putl32 (nbr_modules + nbr_symbols, lhd->idxcnt);
     bfd_putl32 (nbr_modules, lhd->modcnt);
@@ -1977,9 +2232,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     bfd_putl16 (sym_idx_vbn, idd->vbn);
     idd++;
 
-    if (bfd_seek (arch, 0, SEEK_SET) != 0)
-      return FALSE;
-    if (bfd_bwrite (blk, sizeof (blk), arch) != sizeof (blk))
+    if (vms_write_block (arch, 1, blk) != TRUE)
       return FALSE;
   }
 
