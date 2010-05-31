@@ -1,3 +1,7 @@
+2010-05-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/subst.exp: Fix call to gdb_test with empty message.
+
 2010-05-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Accept the new Linux kernel "t (tracing stop)" string.
