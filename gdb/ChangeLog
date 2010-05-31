@@ -1,3 +1,14 @@
+2010-05-31  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* windows-nat.c (GetConsoleFontSize, GetCurrentConsoleFont):
+	New macros.
+	(windows_set_console_info): New function.
+	(windows_create_inferior): Call windows_set_console_info
+	if NEW_CONSOLE is true.
+	(bad_GetCurrentConsoleFont, bad_GetConsoleFontSize): New functions.
+	(_initialize_loadable): Initialize GetConsoleFontSize and
+	GetCurrentConsoleFont.
+
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (RDYNAMIC): New.

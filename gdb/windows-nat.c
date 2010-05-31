@@ -75,6 +75,8 @@
 #define GetModuleInformation		dyn_GetModuleInformation
 #define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
 #define OpenProcessToken		dyn_OpenProcessToken
+#define GetConsoleFontSize		dyn_GetConsoleFontSize
+#define GetCurrentConsoleFont		dyn_GetCurrentConsoleFont
 
 static BOOL WINAPI (*AdjustTokenPrivileges)(HANDLE, BOOL, PTOKEN_PRIVILEGES,
 					    DWORD, PTOKEN_PRIVILEGES, PDWORD);
@@ -87,6 +89,8 @@ static BOOL WINAPI (*GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO,
 					    DWORD);
 static BOOL WINAPI (*LookupPrivilegeValueA)(LPCSTR, LPCSTR, PLUID);
 static BOOL WINAPI (*OpenProcessToken)(HANDLE, DWORD, PHANDLE);
+static BOOL WINAPI (*GetCurrentConsoleFont) (HANDLE, BOOL, CONSOLE_FONT_INFO *);
+static COORD WINAPI (*GetConsoleFontSize) (HANDLE, DWORD);
 
 static struct target_ops windows_ops;
 
@@ -1895,6 +1899,51 @@ windows_open (char *arg, int from_tty)
   error (_("Use the \"run\" command to start a Unix child process."));
 }
 
+/* Modify CreateProcess parameters for use of a new separate console.
+   Parameters are:
+   *FLAGS: DWORD parameter for general process creation flags.
+   *SI: STARTUPINFO structure, for which the console window size and
+   console buffer size is filled in if GDB is running in a console.
+   to create the new console.
+   The size of the used font is not available on all versions of
+   Windows OS.  Furthermore, the current font might not be the default
+   font, but this is still better than before.
+   If the windows and buffer sizes are computed,
+   SI->DWFLAGS is changed so that this information is used
+   by CreateProcess function.  */
+
+static void
+windows_set_console_info (STARTUPINFO *si, DWORD *flags)
+{
+  HANDLE hconsole = CreateFile ("CONOUT$", GENERIC_READ | GENERIC_WRITE,
+				FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+
+  if (hconsole != INVALID_HANDLE_VALUE)
+    {
+      CONSOLE_SCREEN_BUFFER_INFO sbinfo;
+      COORD font_size;
+      CONSOLE_FONT_INFO cfi;
+
+      GetCurrentConsoleFont (hconsole, FALSE, &cfi);
+      font_size = GetConsoleFontSize (hconsole, cfi.nFont);
+      GetConsoleScreenBufferInfo(hconsole, &sbinfo);
+      si->dwXSize = sbinfo.srWindow.Right - sbinfo.srWindow.Left + 1;
+      si->dwYSize = sbinfo.srWindow.Bottom - sbinfo.srWindow.Top + 1;
+      if (font_size.X)
+	si->dwXSize *= font_size.X;
+      else
+	si->dwXSize *= 8;
+      if (font_size.Y)
+	si->dwYSize *= font_size.Y;
+      else
+	si->dwYSize *= 12;
+      si->dwXCountChars = sbinfo.dwSize.X;
+      si->dwYCountChars = sbinfo.dwSize.Y;
+      si->dwFlags |= STARTF_USESIZE | STARTF_USECOUNTCHARS;
+    }
+  *flags |= CREATE_NEW_CONSOLE;
+}
+
 /* Start an inferior windows child process and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
@@ -1937,7 +1986,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
     flags |= CREATE_NEW_PROCESS_GROUP;
 
   if (new_console)
-    flags |= CREATE_NEW_CONSOLE;
+    windows_set_console_info (&si, &flags);
 
 #ifdef __CYGWIN__
   if (!useshell)
@@ -2574,6 +2623,21 @@ bad_OpenProcessToken (HANDLE w, DWORD x, PHANDLE y)
   return FALSE;
 }
 
+static BOOL WINAPI
+bad_GetCurrentConsoleFont (HANDLE w, BOOL bMaxWindow, CONSOLE_FONT_INFO *f)
+{
+  f->nFont = 0;
+  return 1;
+}
+static COORD WINAPI
+bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
+{
+  COORD size;
+  size.X = 8;
+  size.Y = 12;
+  return size;
+}
+ 
 /* Load any functions which may not be available in ancient versions
    of Windows. */
 void
@@ -2590,6 +2654,10 @@ _initialize_loadable (void)
 	GetProcAddress (hm, "DebugBreakProcess");
       DebugSetProcessKillOnExit = (void *)
 	GetProcAddress (hm, "DebugSetProcessKillOnExit");
+      GetConsoleFontSize = (void *) 
+	GetProcAddress (hm, "GetConsoleFontSize");
+      GetCurrentConsoleFont = (void *) 
+	GetProcAddress (hm, "GetCurrentConsoleFont");
     }
 
   /* Set variables to dummy versions of these processes if the function
@@ -2601,6 +2669,10 @@ _initialize_loadable (void)
       DebugActiveProcessStop = bad_DebugActiveProcessStop;
       DebugSetProcessKillOnExit = bad_DebugSetProcessKillOnExit;
     }
+  if (!GetConsoleFontSize)
+    GetConsoleFontSize = bad_GetConsoleFontSize;
+  if (!GetCurrentConsoleFont)
+    GetCurrentConsoleFont = bad_GetCurrentConsoleFont;
 
   /* Load optional functions used for retrieving filename information
      associated with the currently debugged process or its dlls. */
