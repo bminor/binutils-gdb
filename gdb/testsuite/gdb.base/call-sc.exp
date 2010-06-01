@@ -78,12 +78,9 @@ proc start_scalars_test { type } {
     gdb_load ${binfile}
 
     # Make certain that the output is consistent
-    gdb_test "set print sevenbit-strings" "" \
-	    "set print sevenbit-strings; ${testfile}"
-    gdb_test "set print address off" "" \
-	    "set print address off; ${testfile}"
-    gdb_test "set width 0" "" \
-	    "set width 0; ${testfile}"
+    gdb_test_no_output "set print sevenbit-strings"
+    gdb_test_no_output "set print address off"
+    gdb_test_no_output "set width 0"
 
     # Advance to main
     if { ![runto_main] } then {
@@ -151,7 +148,7 @@ proc test_scalar_calls { } {
     # stores its parameter in the global variable "L".  GDB then
     # examining that global to confirm that the value is as expected.
 
-    gdb_test "call Fun(foo)" "" "call Fun(foo); ${tests}"
+    gdb_test_no_output "call Fun(foo)" "call Fun(foo); ${tests}"
     gdb_test "p/c L" " = 49 '1'" "p/c L; ${tests}"
 }
 

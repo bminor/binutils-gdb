@@ -195,7 +195,8 @@ proc catch_fork_unpatch_child {} {
 	"Breakpoint .*file .*$srcfile, line .*" \
 	"unpatch child, breakpoint at exit call"
 
-    gdb_test "set follow-fork child" "" "unpatch child, set follow-fork child"
+    gdb_test_no_output "set follow-fork child" \
+	"unpatch child, set follow-fork child"
 
     set test "unpatch child, unpatched parent breakpoints from child"
     gdb_test_multiple "continue" $test {
@@ -342,7 +343,7 @@ gdb_load ${binfile}
 
 # The "Detaching..." and "Attaching..." messages may be hidden by
 # default.
-gdb_test "set verbose" ""
+gdb_test_no_output "set verbose"
 
 # This is a test of gdb's ability to follow the parent, child or both
 # parent and child of a Unix fork() system call.

@@ -51,9 +51,8 @@ gdb_test_multiple "help gcore" "help gcore" {
     }
 }
 
-gdb_test "set args ${pattern}"	\
-         ""			\
-         "Set buffer exceeding arguments"
+gdb_test_no_output "set args ${pattern}"	\
+    "Set buffer exceeding arguments"
 
 if { ! [ runto_main ] } then {
     untested gcore-buffer-overflow.exp

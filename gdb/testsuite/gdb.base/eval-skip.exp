@@ -60,10 +60,10 @@ if ![runto_main] then {
     continue
 }
 
-gdb_test "set variable x=14" "" "set variable x=14"
-gdb_test "set variable y=2" "" "set variable y=2"
-gdb_test "set variable z=2" "" "set variable z=2"
-gdb_test "set variable w=3" "" "set variable w=3"
+gdb_test_no_output "set variable x=14" "set variable x=14"
+gdb_test_no_output "set variable y=2" "set variable y=2"
+gdb_test_no_output "set variable z=2" "set variable z=2"
+gdb_test_no_output "set variable w=3" "set variable w=3"
 
 gdb_test "print (0 && (x+y))" ".$decimal = $false" \
     "print value of (0 && (x+y))"

@@ -361,7 +361,7 @@ if {$wchar_size == 2} {
     set wchar_ok 1
 }
 
-gdb_test "set host-charset ASCII" ""
+gdb_test_no_output "set host-charset ASCII"
 foreach target_charset $charset_subset {
     if {![valid_target_charset $target_charset]} {
 	continue
@@ -513,7 +513,7 @@ foreach target_charset $charset_subset {
 }
 
 # Reset the target charset.
-gdb_test "set target-charset UTF-8" ""
+gdb_test_no_output "set target-charset UTF-8"
 
 # \242 is not a valid UTF-8 character.
 gdb_test "print \"\\242\"" " = \"\\\\242\"" \
@@ -608,7 +608,7 @@ gdb_test "print 'a' == 'a' || 'b' == 'b'" \
 
 
 proc string_display { var_name set_prefix x_size x_type} {
-  gdb_test "set ${var_name} = ${set_prefix}\"Test String\\0with zeroes\"" "" "Assign ${var_name} with prefix ${set_prefix}"
+  gdb_test_no_output "set ${var_name} = ${set_prefix}\"Test String\\0with zeroes\"" "Assign ${var_name} with prefix ${set_prefix}"
   gdb_test "x /2${x_size}s ${var_name}" ".* ${x_type}\"Test String\"\[\r\n\]+.* ${x_type}\"with zeroes\"" "Display String ${var_name} with x/${x_size}s"
 }
 

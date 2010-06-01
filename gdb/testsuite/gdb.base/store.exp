@@ -63,7 +63,7 @@ proc check_set { t l r new add } {
 	"${prefix}; print old l, expecting ${l}"
     gdb_test "print r" " = ${r}" \
 	"${prefix}; print old r, expecting ${r}"
-    gdb_test "set variable l = 4" "" \
+    gdb_test_no_output "set variable l = 4" \
 	"${prefix}; setting l to 4"
     gdb_test "print l" " = ${new}" \
 	"${prefix}; print new l, expecting ${new}"
@@ -95,7 +95,7 @@ proc up_set { t l r new } {
 	"${prefix}; print old l, expecting ${l}"
     gdb_test "print r" " = ${r}" \
 	"${prefix}; print old r, expecting ${r}"
-    gdb_test "set variable l = 4" "" \
+    gdb_test_no_output "set variable l = 4" \
 	"${prefix}; set l to 4"
     gdb_test "print l" " = ${new}" \
 	"${prefix}; print new l, expecting ${new}"
@@ -121,7 +121,7 @@ proc check_struct { t old new } {
 	"${prefix}; next to add_struct_${t} call"
     gdb_test "print u" " = ${old}" \
 	"${prefix}; print old u, expecting ${old}"
-    gdb_test "set variable u = s_${t}" "" \
+    gdb_test_no_output "set variable u = s_${t}" \
 	"${prefix}; set u to s_${t}"
     gdb_test "print u" " = ${new}" \
 	"${prefix}; print new u, expecting ${new}"
@@ -141,7 +141,7 @@ proc up_struct { t old new } {
 	"${prefix}; up"
     gdb_test "print u" " = ${old}" \
 	"${prefix}; print old u, expecting ${old}"
-    gdb_test "set variable u = s_${t}" "" \
+    gdb_test_no_output "set variable u = s_${t}" \
 	"${prefix}; set u to s_${t}"
     gdb_test "print u" " = ${new}" \
 	"${prefix}; print new u, expecting ${new}"
@@ -166,25 +166,25 @@ proc check_field { t } {
     gdb_test "next" "(return u;|\})" "next field ${t}"
 
     gdb_test "print u" " = {i = 1, j = 1, k = 1}" "old field ${t}"
-    gdb_test "set variable u = F_${t}"
+    gdb_test_no_output "set variable u = F_${t}"
     gdb_test "print u" " = {i = 0, j = 0, k = 0}" "new field ${t}"
 
-    gdb_test "set variable u = F_${t}, u.i = f_${t}.i"
+    gdb_test_no_output "set variable u = F_${t}, u.i = f_${t}.i"
     gdb_test "print u" " = {i = 1, j = 0, k = 0}" "f_${t}.i"
 
-    gdb_test "set variable u = F_${t}, u.j = f_${t}.j"
+    gdb_test_no_output "set variable u = F_${t}, u.j = f_${t}.j"
     gdb_test "print u" " = {i = 0, j = 1, k = 0}" "f_${t}.j"
 
-    gdb_test "set variable u = F_${t}, u.k = f_${t}.k"
+    gdb_test_no_output "set variable u = F_${t}, u.k = f_${t}.k"
     gdb_test "print u" " = {i = 0, j = 0, k = 1}" "f_${t}.k"
 
-    gdb_test "set variable u = f_${t}, u.i = F_${t}.i"
+    gdb_test_no_output "set variable u = f_${t}, u.i = F_${t}.i"
     gdb_test "print u" " = {i = 0, j = 1, k = 1}" "F_${t}.i"
 
-    gdb_test "set variable u = f_${t}, u.j = F_${t}.j"
+    gdb_test_no_output "set variable u = f_${t}, u.j = F_${t}.j"
     gdb_test "print u" " = {i = 1, j = 0, k = 1}" "F_${t}.j"
 
-    gdb_test "set variable u = f_${t}, u.k = F_${t}.k"
+    gdb_test_no_output "set variable u = f_${t}, u.k = F_${t}.k"
     gdb_test "print u" " = {i = 1, j = 1, k = 0}" "F_${t}.k"
 
 }

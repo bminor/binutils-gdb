@@ -44,9 +44,9 @@ if [target_info exists gdb_stub] {
     gdb_step_for_stub;
 }
 
-gdb_test "set print sevenbit-strings" "" ""
-gdb_test "set print address off" "" ""
-gdb_test "set width 0" "" ""
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 set ws  "\[ \t\]*"
 

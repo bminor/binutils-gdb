@@ -444,7 +444,7 @@ gdb_test "clear marker3" {Deleted breakpoints [0-9]+ [0-9]+.*}
 # Verify that a breakpoint can be set via a convenience variable.
 #
 
-gdb_test "set \$foo=$bp_location11" "" \
+gdb_test_no_output "set \$foo=$bp_location11" \
     "set convenience variable \$foo to bp_location11"
 
 gdb_test "break \$foo" \
@@ -668,7 +668,8 @@ proc test_different_dir {type test_different_dir xfail} {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_test "set debug-file-directory ${test_different_dir}" ".*" "set separate debug location"
+    gdb_test_no_output "set debug-file-directory ${test_different_dir}" \
+	"set separate debug location"
     gdb_load ${binfile}
 
     if [target_info exists gdb_stub] {

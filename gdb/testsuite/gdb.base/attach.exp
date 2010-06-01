@@ -246,7 +246,7 @@ proc do_attach_tests {} {
     # Verify that we can modify the variable "should_exit" in the
     # program.
 
-    gdb_test "set should_exit=1" "" "after attach2, set should_exit"
+    gdb_test_no_output "set should_exit=1" "after attach2, set should_exit"
 
     # Verify that the modification really happened.
 

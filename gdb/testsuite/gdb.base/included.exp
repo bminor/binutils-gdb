@@ -27,7 +27,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "set listsize 1" ""
+gdb_test_no_output "set listsize 1"
 
 gdb_test "list main" ".*"
 get_debug_format

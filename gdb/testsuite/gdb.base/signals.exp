@@ -80,7 +80,7 @@ if [runto_main] then {
     # Since count is a static variable outside main, runto_main is no
     # guarantee that count will be 0 at this point.
 
-    gdb_test "set variable count = 0" ""
+    gdb_test_no_output "set variable count = 0"
 
     # Test an inferior function call that takes a signal that hits a
     # breakpoint (with a false condition).  When GDB tries to run the
@@ -91,7 +91,7 @@ if [runto_main] then {
     # ...setup an always false conditional breakpoint
 
     gdb_test "break handler if 0" "Breakpoint \[0-9\]+ .*"
-    gdb_test "set \$handler_breakpoint_number = \$bpnum" ""
+    gdb_test_no_output "set \$handler_breakpoint_number = \$bpnum"
 
     # ...setup the signal
 

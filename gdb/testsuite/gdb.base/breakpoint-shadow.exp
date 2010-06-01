@@ -34,7 +34,7 @@ if ![runto_main] {
 
 # The default "auto" mode removes all the breakpoints when we stop (and not
 # running the nonstop mode).  We would not be able to test the shadow.
-gdb_test "set breakpoint always-inserted on"
+gdb_test_no_output "set breakpoint always-inserted on"
 gdb_test "show breakpoint always-inserted" "Always inserted breakpoint mode is on."
 
 set match "\nDump of assembler code for function main:\r\n(.*)End of assembler dump.\r\n$gdb_prompt $"

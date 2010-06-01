@@ -89,14 +89,10 @@ proc start_structs_test { types } {
     gdb_load ${binfile}
 
     # Make certain that the output is consistent
-    gdb_test "set print sevenbit-strings" "" \
-	    "set print sevenbit-strings; ${testfile}"
-    gdb_test "set print address off" "" \
-	    "set print address off; ${testfile}"
-    gdb_test "set width 0" "" \
-	    "set width 0; ${testfile}"
-    gdb_test "set print elements 300" "" \
-	    "set print elements 300; ${testfile}"
+    gdb_test_no_output "set print sevenbit-strings"
+    gdb_test_no_output "set print address off"
+    gdb_test_no_output "set width 0"
+    gdb_test_no_output "set print elements 300"
 
     # Advance to main
     if { ![runto_main] } then {
@@ -261,7 +257,7 @@ proc test_struct_calls { n } {
     # stores its parameter in the global variable "L$N".  GDB then
     # examining that global to confirm that the value is as expected.
 
-    gdb_test "call Fun${n}(foo${n})" "" "call Fun<n>(foo<n>); ${tests}"
+    gdb_test_no_output "call Fun${n}(foo${n})" "call Fun<n>(foo<n>); ${tests}"
     setup_compiler_kfails structs-tc-tll gcc-3-3-* "DWARF 2" i*86-*-* gdb/1455
     setup_compiler_kfails structs-tc-td gcc-3-3-* "DWARF 2" i*86-*-* gdb/1455
     gdb_test "p/c L${n}" [foo ${n}] "p/c L<n>; ${tests}"

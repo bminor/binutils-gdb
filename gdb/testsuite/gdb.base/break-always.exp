@@ -21,7 +21,7 @@ if { [prepare_for_testing break-always.exp break-always break-always.c] } {
 
 set bar_location [gdb_get_line_number "break in bar" break-always.c]
 
-gdb_test "set breakpoint always-inserted on" ""
+gdb_test_no_output "set breakpoint always-inserted on"
 
 gdb_test "show breakpoint always-inserted" "mode is on\." \
     "confirm breakpoint always-inserted"

@@ -119,7 +119,7 @@ check_valueof "(int) (unsigned char) -1" ${signof_unsigned_char}
 
 proc check_padding { fmt type val } {
     global gdb_prompt
-    gdb_test "set padding_${type}.v = ${val}"
+    gdb_test_no_output "set padding_${type}.v = ${val}"
     gdb_test "print padding_${type}.p1" "= \"The quick brown \""
     gdb_test "print${fmt} padding_${type}.v" "= ${val}"
     gdb_test "print padding_${type}.p2" "\"The quick brown \".*"

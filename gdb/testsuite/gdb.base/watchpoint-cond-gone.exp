@@ -32,7 +32,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfilestripped}" "${objfilestripped}"
 clean_restart ${testfile}
 
 # Problem does not occur otherwise.
-gdb_test "set can-use-hw-watchpoints 0"
+gdb_test_no_output "set can-use-hw-watchpoints 0"
 
 if ![runto_main] {
     return -1
@@ -42,7 +42,7 @@ gdb_breakpoint [gdb_get_line_number "watchpoint-here"]
 gdb_continue_to_breakpoint "Place to set the watchpoint"
 
 # The condition `c == 30' is the subject being tested.
-gdb_test "watch c if c == 30" "" "Place the watchpoint"
+gdb_test "watch c if c == 30" "atchpoint \[0-9\]*.*" "Place the watchpoint"
 
 # We may stay either in the function itself or only at the first instruction of
 # its caller depending on the epilogue unwinder (or valid epilogue CFI) presence.

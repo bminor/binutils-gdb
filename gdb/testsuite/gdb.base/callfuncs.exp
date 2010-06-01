@@ -297,9 +297,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "set print sevenbit-strings" ""
-gdb_test "set print address off" ""
-gdb_test "set width 0" ""
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 if { $hp_aCC_compiler } {
     # Do not set language explicitly to 'C'.  This will cause aCC
@@ -313,7 +313,7 @@ if { $hp_aCC_compiler } {
     # However, turn off overload-resolution for aCC.  Having it on causes
     # a lot of failures.
 
-    gdb_test "set overload-resolution 0" ".*"
+    gdb_test_no_output "set overload-resolution 0"
 } else {
     if { ![set_lang_c] } {
 	gdb_suppress_tests;

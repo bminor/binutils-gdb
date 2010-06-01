@@ -52,6 +52,6 @@ gdb_test "continue" ".*break here.*" "breakpoint hit"
 gdb_test "continue" ".*Hardware watchpoint.*Old value = 0.*New value = 42.*" \
     "watchpoint hit"
 gdb_test "continue" ".*break here.*" "breakpoint hit 2"
-gdb_test "set var x = 1"
+gdb_test_no_output "set var x = 1"
 gdb_test "continue" ".*Hardware watchpoint.*Old value = 1.*New value = 42.*" \
     "watchpoint hit 2"

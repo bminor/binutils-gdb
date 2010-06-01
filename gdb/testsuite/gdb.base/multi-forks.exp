@@ -120,7 +120,7 @@ proc continue_to_exit_bp_loc {} {
 # The result should be that each of the 4 forks returns zero.
 
 runto_main
-gdb_test "set follow-fork child"
+gdb_test_no_output "set follow-fork child"
 continue_to_exit_bp_loc
 
 gdb_test "print pids" "\\$.* = \\{0, 0, 0, 0\\}.*" "follow child, print pids"
@@ -160,7 +160,7 @@ gdb_test "help set detach-on-fork" "whether gdb will detach the child.*" \
 
 gdb_test "show detach-on-fork" "on." "show detach default on"
 
-gdb_test "set detach off" "" "set detach off"
+gdb_test_no_output "set detach off" "set detach off"
 
 #
 # We will now run every fork up to the exit bp, 
@@ -196,27 +196,27 @@ gdb_test "detach inferior 5" "Detaching .*" "Detach 5"
 # Test kill inferior
 #
 
-gdb_test "kill inferior 6" "" "Kill 6"
+gdb_test_no_output "kill inferior 6" "Kill 6"
 gdb_test "info inferior 6" "<null>.*" "Did kill 6"
-gdb_test "kill inferior 7" "" "Kill 7"
+gdb_test_no_output "kill inferior 7" "Kill 7"
 gdb_test "info inferior 7" "<null>.*" "Did kill 7"
-gdb_test "kill inferior 8" "" "Kill 8"
+gdb_test_no_output "kill inferior 8" "Kill 8"
 gdb_test "info inferior 8" "<null>.*" "Did kill 8"
-gdb_test "kill inferior 9" "" "Kill 9"
+gdb_test_no_output "kill inferior 9" "Kill 9"
 gdb_test "info inferior 9" "<null>.*" "Did kill 9"
-gdb_test "kill inferior 10" "" "Kill 10"
+gdb_test_no_output "kill inferior 10" "Kill 10"
 gdb_test "info inferior 10" "<null>.*" "Did kill 10"
-gdb_test "kill inferior 11" "" "Kill 11"
+gdb_test_no_output "kill inferior 11" "Kill 11"
 gdb_test "info inferior 11" "<null>.*" "Did kill 11"
-gdb_test "kill inferior 12" "" "Kill 12"
+gdb_test_no_output "kill inferior 12" "Kill 12"
 gdb_test "info inferior 12" "<null>.*" "Did kill 12"
-gdb_test "kill inferior 13" "" "Kill 13"
+gdb_test_no_output "kill inferior 13" "Kill 13"
 gdb_test "info inferior 13" "<null>.*" "Did kill 13"
-gdb_test "kill inferior 14" "" "Kill 14"
+gdb_test_no_output "kill inferior 14" "Kill 14"
 gdb_test "info inferior 14" "<null>.*" "Did kill 14"
-gdb_test "kill inferior 15" "" "Kill 15"
+gdb_test_no_output "kill inferior 15" "Kill 15"
 gdb_test "info inferior 15" "<null>.*" "Did kill 15"
-gdb_test "kill inferior 16" "" "Kill 16"
+gdb_test_no_output "kill inferior 16" "Kill 16"
 gdb_test "info inferior 16" "<null>.*" "Did kill 16"
 
 return 0

@@ -77,7 +77,8 @@ gdb_test_multiple "x 0" "memory at address 0" {
 # then function pointers are descriptors, probe this and remember the
 # result.
 
-gdb_test "set test = code_entry_point" "" "set for function pointer probe"
+gdb_test_no_output "set test = code_entry_point" \
+    "set for function pointer probe"
 set test "probe function pointer"
 set function_pointer code_entry_point
 set signame "SIGSEGV"
@@ -112,7 +113,7 @@ proc test_segv { name tag bt_from_segv bt_from_keeper } {
     global signame
     gdb_test continue "Breakpoint.* bowler.*" "${name}; start with the bowler"
     # NB: Don't use $tag in the testname - changes across systems.
-    gdb_test "set test = $tag" "" "${name}; select the pointer type"
+    gdb_test_no_output "set test = $tag" "${name}; select the pointer type"
     gdb_test continue "Program received signal ${signame}.*" \
 	"${name}; take the ${signame}"
     gdb_test backtrace $bt_from_segv "${name}; backtrace from ${signame}"

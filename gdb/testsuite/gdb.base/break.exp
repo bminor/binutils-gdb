@@ -738,7 +738,7 @@ clean_restart breako2
 # breakpoint on a symbol causes 'break' to choke.
 #
 
-gdb_test "set breakpoint pending on" "" "rbreak junk pending setup"
+gdb_test_no_output "set breakpoint pending on" "rbreak junk pending setup"
 
 # We expect at least one breakpoint to be set when we "rbreak main".
 gdb_test "rbreak main" \

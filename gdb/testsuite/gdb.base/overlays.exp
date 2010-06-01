@@ -98,7 +98,7 @@ set fptrcast [string_to_regexp "{int (int)}"]
 set iptrcast [string_to_regexp "(int *)"]
 set hexx "0x\[0-9abcdefABCDEF\]+"
 
-gdb_test "overlay manual" "" 
+gdb_test_no_output "overlay manual"
 gdb_test "overlay list" "No sections are mapped." "List with none mapped"
 
 # capture the LMA addresses of [foo bar baz grbx foox barx bazx grbxx]
@@ -247,7 +247,7 @@ if $data_overlays then {
 
 # test automatic mode
 
-gdb_test "overlay auto" ""
+gdb_test_no_output "overlay auto"
 gdb_test "overlay list" "No sections are mapped." "List none mapped (auto)"
 gdb_test "break foo"  "Breakpoint .*at .*file .*foo.c.*"  "break foo"
 gdb_test "break bar"  "Breakpoint .*at .*file .*bar.c.*"  "break bar"

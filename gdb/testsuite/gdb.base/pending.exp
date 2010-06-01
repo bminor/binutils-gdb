@@ -133,7 +133,7 @@ gdb_test_multiple "break pendfunc2" "Don't set pending breakpoint" {
 # Add condition to pending breakpoint 
 #
 
-gdb_test "condition 1 k == 1" ""
+gdb_test_no_output "condition 1 k == 1"
 
 gdb_test "info break" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
@@ -146,7 +146,7 @@ gdb_test "info break" \
 # Disable pending breakpoint
 #
 
-gdb_test "disable 1" ""
+gdb_test_no_output "disable 1"
 
 gdb_test "info break" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
@@ -159,7 +159,7 @@ gdb_test "info break" \
 # Add commands to pending breakpoint
 #
 gdb_test "commands 1\nprint k\nend" "" \
-        "Set commands for pending breakpoint"
+    "Set commands for pending breakpoint"
 
 gdb_test "info break" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
@@ -229,8 +229,7 @@ gdb_test "" \
 # Re-enable the first pending breakpoint which should resolve
 #
 
-gdb_test "enable 1" \
-"" \
+gdb_test_no_output "enable 1" \
 "re-enabling pending breakpoint that can resolve instantly"
 
 #

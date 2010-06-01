@@ -59,10 +59,10 @@ if ![runto_main] then {
 # test expressions with "int" types
 #
 
-gdb_test "set variable x=14" ""
-gdb_test "set variable y=2"  ""
-gdb_test "set variable z=2"  ""
-gdb_test "set variable w=3"  ""
+gdb_test_no_output "set variable x=14"
+gdb_test_no_output "set variable y=2"
+gdb_test_no_output "set variable z=2"
+gdb_test_no_output "set variable w=3"
 
 gdb_test "print x" "14"
 gdb_test "print y"  "2"
@@ -88,8 +88,8 @@ gdb_test "print x%y%z"  "0"
 
 # test precedence rules on pairs of arithmetic operators
 
-gdb_test "set variable x=10" ""
-gdb_test "set variable y=4"  ""
+gdb_test_no_output "set variable x=10"
+gdb_test_no_output "set variable y=4"
 
 #  x  y  z  w
 # 10  4  2  3

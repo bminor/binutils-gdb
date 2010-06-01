@@ -456,16 +456,14 @@ gdb_test "print MACRO_TO_EXPAND" \
     " = 0" \
     "print expression with macro in scope."
 
-gdb_test "macro define MACRO_TO_EXPAND 72" \
-  "" \
+gdb_test_no_output "macro define MACRO_TO_EXPAND 72" \
   "user macro override"
 
 gdb_test "print MACRO_TO_EXPAND" \
   " = 72" \
   "choose user macro"
 
-gdb_test "macro undef MACRO_TO_EXPAND" \
-  "" \
+gdb_test_no_output "macro undef MACRO_TO_EXPAND" \
   "remove user override"
 
 gdb_test "print MACRO_TO_EXPAND" \
@@ -478,8 +476,7 @@ gdb_test "print MACRO_TO_EXPAND" \
     "No symbol \"MACRO_TO_EXPAND\" in current context\." \
     "print expression with macro after undef."
 
-gdb_test "macro define MACRO_TO_EXPAND 5" \
-  "" \
+gdb_test_no_output "macro define MACRO_TO_EXPAND 5" \
   "basic macro define"
 
 gdb_test "print MACRO_TO_EXPAND" \
@@ -490,16 +487,14 @@ gdb_test "macro list" \
   "macro define MACRO_TO_EXPAND 5" \
   "basic macro list"
 
-gdb_test "macro define MACRO_TO_EXPAND(x) x" \
-  "" \
+gdb_test_no_output "macro define MACRO_TO_EXPAND(x) x" \
   "basic redefine, macro with args"
 
 gdb_test "print MACRO_TO_EXPAND (7)" \
   " = 7" \
   "expansion of macro with arguments"
 
-gdb_test "macro undef MACRO_TO_EXPAND" \
-  "" \
+gdb_test_no_output "macro undef MACRO_TO_EXPAND" \
   "basic macro undef"
 
 gdb_test "print MACRO_TO_EXPAND" \
@@ -566,8 +561,7 @@ gdb_expect  {
         timeout         { fail "(timeout) complete 'p FORTY_' 2" }
         }
 
-gdb_test "macro define TWENTY_THREE 25" \
-  "" \
+gdb_test_no_output "macro define TWENTY_THREE 25" \
   "defining TWENTY_THREE"
 
 # User-defined macros are always in scope.
@@ -592,8 +586,7 @@ gdb_test "macro expand SPLICE(x, y)" \
   "expands to: xy" \
   "basic macro splicing"
 
-gdb_test "macro define robotinvasion 2010" \
-  "" \
+gdb_test_no_output "macro define robotinvasion 2010" \
   "define splice helper"
 
 gdb_test "macro expand SPLICE(robot, invasion)" \
@@ -602,20 +595,16 @@ gdb_test "macro expand SPLICE(robot, invasion)" \
 
 # Varargs tests.
 
-gdb_test "macro define va_c99(...) varfunc (fixedarg, __VA_ARGS__)" \
-  "" \
+gdb_test_no_output "macro define va_c99(...) varfunc (fixedarg, __VA_ARGS__)" \
   "define first varargs helper"
 
-gdb_test "macro define va2_c99(x, y, ...) varfunc (fixedarg, x, y, __VA_ARGS__)" \
-  "" \
+gdb_test_no_output "macro define va2_c99(x, y, ...) varfunc (fixedarg, x, y, __VA_ARGS__)" \
   "define second varargs helper"
 
-gdb_test "macro define va_gnu(args...) varfunc (fixedarg, args)" \
-  "" \
+gdb_test_no_output "macro define va_gnu(args...) varfunc (fixedarg, args)" \
   "define third varargs helper"
 
-gdb_test "macro define va2_gnu(args...) varfunc (fixedarg, ## args)" \
-  "" \
+gdb_test_no_output "macro define va2_gnu(args...) varfunc (fixedarg, ## args)" \
   "define fourth varargs helper"
 
 gdb_test "macro expand va_c99(one, two, three)" \
@@ -644,16 +633,13 @@ gdb_test "macro expand va2_gnu()" \
 
 # Stringification tests.
 
-gdb_test "macro define str(x) #x" \
-  "" \
+gdb_test_no_output "macro define str(x) #x" \
   "define stringification macro"
 
-gdb_test "macro define maude 5" \
-  "" \
+gdb_test_no_output "macro define maude 5" \
   "define first stringification helper"
 
-gdb_test "macro define xstr(x) str(x)" \
-  "" \
+gdb_test_no_output "macro define xstr(x) str(x)" \
   "define second stringification helper"
 
 gdb_test "print str(5)" \
@@ -685,9 +671,9 @@ gdb_test "print xstr(maude)" \
   "stringify with substitution"
 
 # Regression test for pp-number bug.
-gdb_test "macro define si_addr fields.fault.si_addr" \
-  "" \
+gdb_test_no_output "macro define si_addr fields.fault.si_addr" \
   "define si_addr macro"
+
 gdb_test "macro expand siginfo.si_addr" \
   "expands to: siginfo.fields.fault.si_addr" \
   "macro expand siginfo.si_addr"

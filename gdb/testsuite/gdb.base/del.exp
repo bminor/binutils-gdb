@@ -44,9 +44,9 @@ proc test_delete_alias { alias } {
 
     # First of all, remove all previous breakpoints if there were any,
     # and then verify that we do not have any breakpoint lying around.
-    gdb_test "delete" \
-             "" \
+    gdb_test_no_output "delete" \
              "Remove all breakpoints ($alias)"
+
     gdb_test "info break" \
              "No breakpoints or watchpoints." \
              "info break after removing break on main"
@@ -59,8 +59,7 @@ proc test_delete_alias { alias } {
              "Breakpoint.*at.* file .*$srcfile, line.*" \
              "breakpoint insertion ($alias)"
     
-    gdb_test "$alias \$bpnum" \
-             "" \
+    gdb_test_no_output "$alias \$bpnum" \
              "Remove last breakpoint ($alias)"
     
     gdb_test "info break" \

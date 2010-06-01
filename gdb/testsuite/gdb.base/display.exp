@@ -103,11 +103,11 @@ gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f f = 
 gdb_test "cont" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f f = 4.1415\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0.*\[1-9\]*: i = 0.*" "second disp"
 
 gdb_test "enab  disp 6" ".*No display number 6..*" "catch err"
-gdb_test "disab disp 1" ".*" "disab disp 1"
-gdb_test "disab disp 2" ".*" "disab disp 2"
-gdb_test "enab disp 1"  ".*" "re-enab"
-gdb_test "enab disp 1"  ".*" "re-enab of enab"
-gdb_test "undisp 5"     ".*" "undisp"
+gdb_test_no_output "disab disp 1" "disab disp 1"
+gdb_test_no_output "disab disp 2" "disab disp 2"
+gdb_test_no_output "enab disp 1"  "re-enab"
+gdb_test_no_output "enab disp 1"  "re-enab of enab"
+gdb_test_no_output "undisp 5"     "undisp"
 gdb_test "info disp"    ".*Auto-display expressions now in effect.*y  /f f.*y  /1bi &k.*n  /x j.*y  i.*" "info disp"
 
 gdb_test "cont" ".*\[Ww\]atch.*5.1415.*.*i = 0.*" "next hit"
@@ -150,7 +150,7 @@ gdb_test "printf %d" ".*Bad format string, missing.*"
 gdb_test "printf \"%d" ".*Bad format string, non-terminated.*"
 gdb_test "printf \"%d%d\",i" ".*Wrong number of arguments.*"
 gdb_test "printf \"\\\\!\\a\\f\\r\\t\\v\\b\\n\"" ".*!.*"
-gdb_test "printf \"\"" ".*" "re-set term"
+gdb_test_no_output "printf \"\"" "re-set term"
 gdb_test "printf \"\\w\"" ".*Unrecognized escape character.*"
 gdb_test "printf \"%d\" j" ".*Invalid argument syntax.*"
 gdb_test "printf \"%p\\n\", 0" "\\(nil\\)"
@@ -169,7 +169,7 @@ gdb_test "print j"   " = 0\[\\r\\n\]+"   "debug test output 3"
 if [istarget "hppa2.0w-hp-hpux11*"] {
     xfail "'x/0 j' terminates PA64 process - skipped test point"
 } else {
-    gdb_test "x/0 j" ".*"
+    gdb_test_no_output "x/0 j"
 }
 if [istarget "hppa*-hp-hpux*"] {
     # on HP-UX you could access the first page without getting an error

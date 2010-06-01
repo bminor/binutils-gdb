@@ -33,19 +33,19 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 proc test_convenience_variables {} {
     global gdb_prompt
 
-    gdb_test "set \$foo = 101"	"" \
+    gdb_test_no_output "set \$foo = 101" \
 	"Set a new convenience variable"
 
     gdb_test "print \$foo"		" = 101" \
 	"Print contents of new convenience variable"
 
-    gdb_test "set \$foo = 301"	"" \
+    gdb_test_no_output "set \$foo = 301" \
 	"Set convenience variable to a new value"
 
     gdb_test "print \$foo"		" = 301" \
 	"Print new contents of convenience variable"
 
-    gdb_test "set \$_ = 11"		"" \
+    gdb_test_no_output "set \$_ = 11" \
 	"Set convenience variable \$_"
 
     gdb_test "print \$_"		" = 11" \
@@ -111,7 +111,7 @@ proc test_value_history {} {
 
 proc test_with_program {} {
     global hex
-    gdb_test "set \$prog_var = p" "" \
+    gdb_test_no_output "set \$prog_var = p" \
 	"Set a new convenience variable to a program variable"
     gdb_test "print /x \$prog_var" " = $hex" \
 	"Print contents of new convenience variable of program variable"

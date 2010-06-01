@@ -279,12 +279,13 @@ proc test_core {file displacement} {
     gdb_exit
     gdb_start
     # Clear it to never find any separate debug infos in $debug_root.
-    gdb_test "set debug-file-directory" "" "set debug-file-directory for core"
+    gdb_test_no_output "set debug-file-directory" \
+	"set debug-file-directory for core"
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $file
 
     # Print the "PIE (Position Independent Executable) displacement" message.
-    gdb_test "set verbose on"
+    gdb_test_no_output "set verbose on"
 
     set test "core loaded"
     set test_displacement "seen displacement message as $displacement"
@@ -356,7 +357,7 @@ proc test_attach {file displacement} {
     gdb_start
 
     # Print the "PIE (Position Independent Executable) displacement" message.
-    gdb_test "set verbose on"
+    gdb_test_no_output "set verbose on"
 
     set test "attach"
     gdb_test_multiple "attach $pid" $test {
@@ -409,12 +410,12 @@ proc test_ld {file ifmain trynosym displacement} {
     gdb_exit
     gdb_start
     # Clear it to never find any separate debug infos in $debug_root.
-    gdb_test "set debug-file-directory"
+    gdb_test_no_output "set debug-file-directory"
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $file
 
     # Print the "PIE (Position Independent Executable) displacement" message.
-    gdb_test "set verbose on"
+    gdb_test_no_output "set verbose on"
 
     reach "dl_main" "run segv" $displacement
 
@@ -454,11 +455,11 @@ proc test_ld {file ifmain trynosym displacement} {
     gdb_exit
     gdb_start
     # Clear it to never find any separate debug infos in $debug_root.
-    gdb_test "set debug-file-directory"
+    gdb_test_no_output "set debug-file-directory"
     gdb_reinitialize_dir $srcdir/$subdir
 
     # Print the "PIE (Position Independent Executable) displacement" message.
-    gdb_test "set verbose on"
+    gdb_test_no_output "set verbose on"
 
     # Test no (error) message has been printed by `exec-file'.
     set escapedfile [string_to_regexp $file]

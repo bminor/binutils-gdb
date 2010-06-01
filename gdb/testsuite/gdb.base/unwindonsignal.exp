@@ -62,9 +62,9 @@ gdb_test "continue" "Continuing.*Breakpoint \[0-9\]*, stop_here.*" \
     "continue to breakpoint at stop_here"
 
 # Turn on unwindonsignal.
-gdb_test "set unwindonsignal on" \
-	"" \
+gdb_test_no_output "set unwindonsignal on" \
 	"setting unwindonsignal"
+
 gdb_test "show unwindonsignal" \
 	"Unwinding of stack .* is on." \
 	"showing unwindonsignal"

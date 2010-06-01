@@ -50,10 +50,10 @@ if ![runto_main] then {
 # test expressions with "int" types
 #
 
-gdb_test "set variable x=14" "" "set variable x=14"
-gdb_test "set variable y=2" "" "set variable y=2"
-gdb_test "set variable z=2" "" "set variable z=2"
-gdb_test "set variable w=3" "" "set variable w=3"
+gdb_test_no_output "set variable x=14" "set variable x=14"
+gdb_test_no_output "set variable y=2" "set variable y=2"
+gdb_test_no_output "set variable z=2" "set variable z=2"
+gdb_test_no_output "set variable w=3" "set variable w=3"
 
 gdb_test "print x" " = 14" "print value of x"
 
@@ -78,9 +78,9 @@ gdb_test "print x != y" "$true" "print value of x!=y"
 
 # Test associativity of <, >, <=, >=, ==, !=
 
-gdb_test "set variable x=3" "" "set variable x"
-gdb_test "set variable y=5" ""  "set variable y"
-gdb_test "set variable z=2" ""  "set variable z"
+gdb_test_no_output "set variable x=3" "set variable x"
+gdb_test_no_output "set variable y=5" "set variable y"
+gdb_test_no_output "set variable z=2" "set variable z"
 
 gdb_test "print x < y < z" "$true" "print value of x<y<z"
 
@@ -90,30 +90,30 @@ gdb_test "print x > y > z" "$false" "print value of x>y>z"
 
 gdb_test "print x >= y >= z" "$false" "print value of x>=y>=z"
 
-gdb_test "set variable x=2" "" "set variable x"
-gdb_test "set variable y=2" ""  "set variable y"
-gdb_test "set variable z=1" ""  "set variable z"
+gdb_test_no_output "set variable x=2" "set variable x"
+gdb_test_no_output "set variable y=2" "set variable y"
+gdb_test_no_output "set variable z=1" "set variable z"
 
 gdb_test "print x == y == z" "$true" "print value of x==y==z"
 
-gdb_test "set variable z=0" ""  "set variable z"
+gdb_test_no_output "set variable z=0" "set variable z"
 
 gdb_test "print x != y != z" "$false" "print value of x!=y!=z"
 
 # test precedence rules on pairs of relational operators
 
-gdb_test "set variable x=0" "" "set variable x"
-gdb_test "set variable y=2" ""  "set variable y"
-gdb_test "set variable z=2" ""  "set variable z"
+gdb_test_no_output "set variable x=0" "set variable x"
+gdb_test_no_output "set variable y=2" "set variable y"
+gdb_test_no_output "set variable z=2" "set variable z"
 
 gdb_test "print x < y == z" "$false" "print value of x<y==z"
 
 # 0  2  2
 gdb_test "print x < y != z" "$true" "print value of x<y!=z"
 
-gdb_test "set variable x=2" "" "set variable x"
-gdb_test "set variable y=3" ""  "set variable y"
-gdb_test "set variable z=1" ""  "set variable z"
+gdb_test_no_output "set variable x=2" "set variable x"
+gdb_test_no_output "set variable y=3" "set variable y"
+gdb_test_no_output "set variable z=1" "set variable z"
 
 
 # 2 3 1
@@ -122,28 +122,28 @@ gdb_test "print x < y <= z" "$true" "print value of x<y<=z"
 # 2 3 1
 gdb_test "print x < y >= z" "$true" "print value of x<y>=z"
 
-gdb_test "set variable z=0" "" " set variable z"
+gdb_test_no_output "set variable z=0" " set variable z"
 
 # 2 3 0
 gdb_test "print x < y > z" "$true" "print value of x<y>z"
 
-gdb_test "set variable x=1" "" " set variable x"
+gdb_test_no_output "set variable x=1" " set variable x"
 
 # 1 3 0
 gdb_test "print x > y >= z" "$true" "print value of x>y>=z"
 
-gdb_test "set variable z=2" "" " set variable z"
+gdb_test_no_output "set variable z=2" " set variable z"
 
 # 1 3 2
 gdb_test "print x > y == z" "$false" "print value of x>y==z"
 
-gdb_test "set variable x=2" "" " set variable x"
-gdb_test "set variable z=0" "" " set variable z"
+gdb_test_no_output "set variable x=2" " set variable x"
+gdb_test_no_output "set variable z=0" " set variable z"
 
 # 2 3 0
 gdb_test "print x > y != z" "$false" "print value of x>y!=z"
 
-gdb_test "set variable x=4" "" "set x to 4"
+gdb_test_no_output "set variable x=4" "set x to 4"
 
 # 4 3 0
 gdb_test "print x > y <= z" "$false" "print value of x>y<=z"
@@ -151,13 +151,13 @@ gdb_test "print x > y <= z" "$false" "print value of x>y<=z"
 # 4 3 0
 gdb_test "print x >= y == z" "$false" "print value of x>=y==z"
 
-gdb_test "set variable x=2" "" " set variable x"
+gdb_test_no_output "set variable x=2" " set variable x"
 
 # 2 3 0
 gdb_test "print x >= y != z" "$false" "print value of x>=y!=z"
 
-gdb_test "set variable x=0" "" " set variable x"
-gdb_test "set variable z=4" "" " set variable z"
+gdb_test_no_output "set variable x=0" " set variable x"
+gdb_test_no_output "set variable z=4" " set variable z"
 
 # 0 3 4 
 gdb_test "print x >= y <= z" "$true" "print value of x>=y<=z"
@@ -165,7 +165,7 @@ gdb_test "print x >= y <= z" "$true" "print value of x>=y<=z"
 # 0 3 4
 gdb_test "print x <= y == z" "$false" "print value of x<=y==z"
 
-gdb_test "set variable x=2" "" " set variable x"
+gdb_test_no_output "set variable x=2" " set variable x"
 
 # 2 3 4
 gdb_test "print x <= y != z" "$true" "print value of x<=y!=z"
@@ -177,7 +177,7 @@ gdb_test "print x == y != z" "$true" "print value of x==y!=z"
 
 # test use of parenthesis to enforce different order of evaluation
 
-gdb_test "set variable z=0" "" " set variable z"
+gdb_test_no_output "set variable z=0" " set variable z"
 
 # 2 3 0
 gdb_test "print x >= (y < z)" "$true" "print value of x>=(y<z)"
@@ -188,8 +188,8 @@ gdb_test "print x >= (y != z)" "$true" "print value of x>=(y!=z)"
 # 2 3 0
 gdb_test "print x == (y == z)" "$false" "print value of x==(y==z)" 
 
-gdb_test "set variable x=1" "" " set variable x"
-gdb_test "set variable z=4" "" " set variable z"
+gdb_test_no_output "set variable x=1" " set variable x"
+gdb_test_no_output "set variable z=4" " set variable z"
 
 # 1 3 4
 gdb_test "print (x == y) < z" "$true" "print value of (x==y)<z"

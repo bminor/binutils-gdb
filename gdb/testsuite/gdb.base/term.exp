@@ -40,9 +40,10 @@ if { [prepare_for_testing term.exp term run.c] } {
     return -1
 }
 
-gdb_test "set print sevenbit-strings" "" "test set print sevenbit-strings"
-gdb_test "set print address off" "" "test set print address off"
-gdb_test "set width 0" "" "test set width 0"
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
+
 gdb_test "info terminal" "No saved terminal information.*" "test info terminal"
 gdb_run_cmd 5
 gdb_expect {

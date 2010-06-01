@@ -33,7 +33,9 @@ if {[build_executable ${testfile}.exp ${binmainfile} ${srcmainfile} {debug}] == 
 }
 clean_restart ${binlibfile}
 
-gdb_test "add-symbol-file ${objdir}/${subdir}/${binmainfile} 0" "" "add-symbol-file" \
-	 "add symbol table from file \".*\" at.*\\(y or n\\) " "y"
+gdb_test "add-symbol-file ${objdir}/${subdir}/${binmainfile} 0" \
+    "Reading symbols from .*" \
+    "add-symbol-file" \
+    "add symbol table from file \".*\" at.*\\(y or n\\) " "y"
 gdb_test "list main"
 gdb_test "print symbol_without_target_section"

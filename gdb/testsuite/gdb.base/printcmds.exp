@@ -42,7 +42,7 @@ get_compiler_info ${binfile}
 proc set_lang_c {} {
     global gdb_prompt
 
-    if [gdb_test "set language c" "" "set language c"] {
+    if [gdb_test_no_output "set language c" "set language c"] {
 	return 0
     }
 
@@ -414,7 +414,7 @@ proc test_print_repeats_10 {} {
     global gdb_prompt
 
     for { set x 1; } { $x <= 16 } { incr x; } {
-	gdb_test "set print elements $x" ""
+	gdb_test_no_output "set print elements $x"
 	for { set e 1; } { $e <= 16 } {incr e; } {
 	    set v [expr $e - 1];
 	    set command "p &ctable2\[${v}*16\]"
@@ -467,23 +467,23 @@ proc test_print_strings {} {
 
     # Test that setting print elements unlimited doesn't completely suppress
     # printing; this was a bug in older gdb's.
-    gdb_test "set print elements 0" ""
+    gdb_test_no_output "set print elements 0"
     gdb_test "p teststring" \
 	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 0"
-    gdb_test "set print elements 1" ""
+    gdb_test_no_output "set print elements 1"
     gdb_test "p teststring" \
 	" = (.unsigned char .. )?\"t\"\\.\\.\\." "p teststring with elements set to 1"
-    gdb_test "set print elements 5" ""
+    gdb_test_no_output "set print elements 5"
     gdb_test "p teststring" \
 	" = (.unsigned char .. )?\"tests\"\\.\\.\\." "p teststring with elements set to 5"
-    gdb_test "set print elements 19" ""
+    gdb_test_no_output "set print elements 19"
     gdb_test "p teststring" \
 	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 19"
-    gdb_test "set print elements 20" ""
+    gdb_test_no_output "set print elements 20"
     gdb_test "p teststring" \
 	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 20"
 
-    gdb_test "set print elements 8" ""
+    gdb_test_no_output "set print elements 8"
 
     gdb_test "p &ctable1\[0\]" \
 	" = \\(unsigned char \\*\\) \"\""
@@ -556,7 +556,7 @@ proc test_print_strings {} {
 proc test_print_int_arrays {} {
     global gdb_prompt
 
-    gdb_test "set print elements 24" ""
+    gdb_test_no_output "set print elements 24"
 
     gdb_test_escape_braces "p int1dim" \
 	" = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}"
@@ -571,7 +571,7 @@ proc test_print_int_arrays {} {
 proc test_print_typedef_arrays {} {
     global gdb_prompt
 
-    gdb_test "set print elements 24" ""
+    gdb_test_no_output "set print elements 24"
 
     gdb_test_escape_braces "p a1" \
 	" = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20}"
@@ -584,9 +584,9 @@ proc test_print_typedef_arrays {} {
     gdb_test "p a2\[3\]" " = 100 'd'"
 
     # Regression test of null-stop; PR 11049.
-    gdb_test "set print null-stop on" ""
+    gdb_test_no_output "set print null-stop on"
     gdb_test "p a2" " = \"abcd\"" "print a2 with null-stop on"
-    gdb_test "set print null-stop off" ""
+    gdb_test_no_output "set print null-stop off"
 }
 
 proc test_artificial_arrays {} {
@@ -603,8 +603,8 @@ proc test_print_char_arrays {} {
     global gdb_prompt
     global hex
 
-    gdb_test "set print elements 24" ""
-    gdb_test "set print address on" ""
+    gdb_test_no_output "set print elements 24"
+    gdb_test_no_output "set print address on"
 
     gdb_test "p arrays" \
 	" = {array1 = \"abc\", array2 = \"d\", array3 = \"e\", array4 = \"fg\", array5 = \"hij\"}"
@@ -621,13 +621,13 @@ proc test_print_char_arrays {} {
     gdb_test "p parrays->array5"	" = \"hij\""
     gdb_test "p &parrays->array5"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex"
 
-    gdb_test "set print address off" ""
+    gdb_test_no_output "set print address off"
 }
 
 proc test_print_string_constants {} {
     global gdb_prompt
 
-    gdb_test "set print elements 50" ""
+    gdb_test_no_output "set print elements 50"
 
     if [target_info exists gdb,cannot_call_functions] {
 	setup_xfail "*-*-*" 2416
@@ -772,9 +772,9 @@ gdb_file_cmd ${binfile}
 
 gdb_test "print \$pc" "No registers\\." "print \$pc (with file)"
 
-gdb_test "set print sevenbit-strings" ""
-gdb_test "set print address off" ""
-gdb_test "set width 0" ""
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 if [set_lang_c] then {
     if { [test_compiler_info "armcc-*"] } {

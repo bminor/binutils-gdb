@@ -50,12 +50,12 @@ gdb_test "set remote memory-write-packet-size" \
 	"Argument required .integer, `fixed' or `limited'.\." \
 	"set write-packet - NULL"
 
-gdb_test "set remote memory-write-packet-size 20" ""
+gdb_test_no_output "set remote memory-write-packet-size 20"
 gdb_test "show remote memory-write-packet-size" \
 	"The memory-write-packet-size is 20. Packets are limited to 20 bytes." \
 	"set write-packet - small"
 
-gdb_test "set remote memory-write-packet-size 1" ""
+gdb_test_no_output "set remote memory-write-packet-size 1"
 gdb_test "show remote memory-write-packet-size" \
 	"The memory-write-packet-size is 1. Packets are limited to 20 bytes." \
 	"set write-packet - very-small"
@@ -69,8 +69,8 @@ proc gdb_load_timed {executable class writesize} {
     set test "timed download `[file tail $executable]' - $class, $writesize"
 
     if {$writesize != ""} then {
-	gdb_test "set remote memory-write-packet-size $writesize" \
-		"" "$test - set packet size"
+	gdb_test_no_output "set remote memory-write-packet-size $writesize" \
+	    "$test - set packet size"
 
 	send_gdb "set remote memory-write-packet-size $class\n"
 	gdb_expect 5 {
@@ -153,8 +153,8 @@ if {$sizeof_random_data > 16380 } then {
 
 # Read a chunk just larger than the packet size (reduce the packet
 # size to make life easier)
-gdb_test "set remote memory-read-packet-size 16" \
-	""
+gdb_test_no_output "set remote memory-read-packet-size 16"
+
 gdb_test "show remote memory-read-packet-size" \
 	"The memory-read-packet-size is 16. Packets are limited to 20 bytes."
 gdb_test "x/17ub random_data" \

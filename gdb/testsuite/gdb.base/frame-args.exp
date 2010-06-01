@@ -37,8 +37,7 @@ if ![runto break_me] then {
 
 # Test with "print frame-arguments" set to "all"
 
-gdb_test "set print frame-arguments all" \
-         "" \
+gdb_test_no_output "set print frame-arguments all" \
          "set print frame-arguments all"
 gdb_test "frame 1" \
          ".*in call_me \\(i=3, f=5, s=({a = 3, b = 5}|<value optimized out>), ss=0x\[0-9a-f\]\+, u=({.*}|<value optimized out>), e=green\\) at .*frame-args\\.c:.*" \
@@ -46,8 +45,7 @@ gdb_test "frame 1" \
 
 # Test with "print frame-arguments" set to "scalars"
 
-gdb_test "set print frame-arguments scalars" \
-         "" \
+gdb_test_no_output "set print frame-arguments scalars" \
          "set print frame-arguments scalars"
 gdb_test "frame 1" \
          ".*in call_me \\(i=3, f=5, s=\\.\\.\\., ss=0x\[0-9a-f\]\+, u=\\.\\.\\., e=green\\) at .*frame-args\\.c:.*" \
@@ -55,8 +53,7 @@ gdb_test "frame 1" \
 
 # Test with "print frame-arguments" set to "none"
 
-gdb_test "set print frame-arguments none" \
-         "" \
+gdb_test_no_output "set print frame-arguments none" \
          "set print frame-arguments none"
 gdb_test "frame 1" \
          ".*in call_me \\(i=\\.\\.\\., f=\\.\\.\\., s=\\.\\.\\., ss=\\.\\.\\., u=\\.\\.\\., e=\\.\\.\\.\\) at .*frame-args\\.c:.*" \

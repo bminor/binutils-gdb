@@ -87,7 +87,7 @@ if { $hp_aCC_compiler } {
     # even though the overload resolution mechanism says that the types
     # don't match. 
     # - guo
-    gdb_test "set overload-resolution 0" ""
+    gdb_test_no_output "set overload-resolution 0"
 }
 
 gdb_test "print find_max1(5,1,2,3,4,5)" \

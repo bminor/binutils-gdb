@@ -108,6 +108,6 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # Print the "adjusting expectations" message.
-gdb_test "set verbose on"
+gdb_test_no_output "set verbose on"
 
 gdb_test "core-file $objdir/$subdir/prelink.core" {Using PIC \(Position Independent Code\) prelink displacement.*} "prelink"

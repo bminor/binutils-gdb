@@ -69,8 +69,7 @@ gdb_test "continue" \
     "Old value = 0.*New value = 1.*" \
     "watchpoint on global2 variable triggers"
 
-gdb_test "condition 2 *foo > 10" \
-    "" \
+gdb_test_no_output "condition 2 *foo > 10" \
     "condition of watchpoint 2 changes"
 
 gdb_test "continue" \

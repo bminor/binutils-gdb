@@ -62,7 +62,7 @@ gdb_expect_list "source -v" ".*$gdb_prompt $" {
 }
 
 # Turn on command tracing.
-gdb_test "set trace-commands" "" "set trace-commands"
+gdb_test_no_output "set trace-commands" "set trace-commands"
 
 # Make sure show trace-commands now gives 'on'.
 gdb_test "show trace-commands" \

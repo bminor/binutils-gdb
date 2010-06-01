@@ -41,8 +41,7 @@ if ![runto_main] then {
 
 # First, print the array without the indexes
 
-gdb_test "set print array-indexes off" \
-         "" \
+gdb_test_no_output "set print array-indexes off" \
          "Set print array-indexes to off"
 
 gdb_test "print array" \
@@ -51,8 +50,7 @@ gdb_test "print array" \
 
 # Second, print the same array with the indexes
 
-gdb_test "set print array-indexes on" \
-         "" \
+gdb_test_no_output "set print array-indexes on" \
          "Set print array-indexes to on"
 
 gdb_test "print array" \

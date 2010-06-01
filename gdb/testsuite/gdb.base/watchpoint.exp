@@ -186,7 +186,7 @@ proc test_simple_watchpoint {} {
 
 
     gdb_test "break func1" "Breakpoint.*at.*"
-    gdb_test "set \$func1_breakpoint_number = \$bpnum" ""
+    gdb_test_no_output "set \$func1_breakpoint_number = \$bpnum"
 
     gdb_test "continue" "Continuing.*Breakpoint \[0-9\]*, func1.*" \
 	"continue to breakpoint at func1"
@@ -201,7 +201,7 @@ proc test_simple_watchpoint {} {
 	-re "Continuing.*Breakpoint.*func1.*$gdb_prompt $" {
 	    setup_xfail "m68*-*-*" 2597
 	    fail "thought it hit breakpoint at func1 twice"
-	    gdb_test "delete \$func1_breakpoint_number" ""
+	    gdb_test_no_output "delete \$func1_breakpoint_number"
 	    gdb_test "continue" "\
 Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count;" \
 		"watchpoint hit, first time"
@@ -214,7 +214,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
     # Check that the hit count is reported correctly
     gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 1 time.*" "Watchpoint hit count is 1"
 
-    gdb_test "delete \$func1_breakpoint_number" ""
+    gdb_test_no_output "delete \$func1_breakpoint_number"
 
     # Continue until the next change, from 0 to 1.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 0.*New value = 1.*ival3 = count; ival4 = count;.*" "watchpoint hit, second time"
@@ -431,7 +431,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 	gdb_test "watch buf\[4\]" ".*\[Ww\]atchpoint \[0-9\]*: buf\\\[4\\\]"
 	gdb_test "break marker4" ".*Breakpoint.*"
 
-	gdb_test "set doread = 1" ""
+	gdb_test_no_output "set doread = 1"
 
 	# If we send_gdb "123\n" before gdb has switched the tty, then it goes
 	# to gdb, not the inferior, and we lose.  So that is why we have
@@ -498,7 +498,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 	    "continue to marker4"
 
 	# Disable everything so we can finish the program at full speed
-	gdb_test "disable" "" "disable in test_watchpoint_triggered_in_syscall"
+	gdb_test_no_output "disable" "disable in test_watchpoint_triggered_in_syscall"
 
 	if [target_info exists gdb,noresults] { return }
 
@@ -528,7 +528,7 @@ proc test_complex_watchpoint {} {
         # In particular, test that a watch of stack-based things
         # is deleted when the stack-based things go out of scope.
         #
-	gdb_test "disable" "" "disable in test_complex_watchpoint"
+	gdb_test_no_output "disable" "disable in test_complex_watchpoint"
         gdb_test "break marker6" ".*Breakpoint.*"
         gdb_test "cont" "Continuing.*Breakpoint.*marker6 \\(\\).*" \
             "continue to marker6"
@@ -589,7 +589,7 @@ proc test_complex_watchpoint {} {
                  "self-delete local watch in recursive call"
 
 	# Disable everything so we can finish the program at full speed
-	gdb_test "disable" "" "disable in test_complex_watchpoint"
+	gdb_test_no_output "disable" "disable in test_complex_watchpoint"
 
 	if [target_info exists gdb,noresults] { return }
 

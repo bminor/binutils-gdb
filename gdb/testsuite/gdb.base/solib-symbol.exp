@@ -60,7 +60,7 @@ delete_breakpoints
 
 # Break in the library.
 gdb_test "br foo" \
-	 "" \
+	 "Breakpoint.*file.*${srcfile_lib}.*" \
 	 "foo in libmd"
 
 gdb_test "continue" \

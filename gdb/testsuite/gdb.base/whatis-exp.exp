@@ -50,10 +50,10 @@ if ![runto_main] then {
 # test expressions with "int" types
 #
 
-gdb_test "set variable x=14" "" "set variable x=14"
-gdb_test "set variable y=2" "" "set variable y=2"
-gdb_test "set variable z=2" "" "set variable z=2"
-gdb_test "set variable w=3" "" "set variable w=3"
+gdb_test_no_output "set variable x=14" "set variable x=14"
+gdb_test_no_output "set variable y=2" "set variable y=2"
+gdb_test_no_output "set variable z=2" "set variable z=2"
+gdb_test_no_output "set variable w=3" "set variable w=3"
 
 gdb_test "print x" " = 14" "print value of x"
 gdb_test "print y" " = 2" "print value of y"

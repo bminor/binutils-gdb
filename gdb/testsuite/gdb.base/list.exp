@@ -496,7 +496,7 @@ proc test_list_filename_and_function {} {
 proc test_forward_search {} {
 	global timeout
 
-	gdb_test "set listsize 4" ""
+	gdb_test_no_output "set listsize 4"
 	# On SunOS4, this gives us lines 19-22.  On AIX, it gives us
 	# lines 20-23.  This depends on whether the line number of a function
 	# is considered to be the openbrace or the first statement--either one
@@ -528,7 +528,7 @@ if [target_info exists gdb_stub] {
     gdb_step_for_stub;
 }
 
-gdb_test "set width 0" "" "set width 0"
+gdb_test_no_output "set width 0"
 
 test_listsize
 get_debug_format

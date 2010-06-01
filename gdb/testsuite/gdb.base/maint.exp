@@ -160,7 +160,7 @@ gdb_test_multiple "maint print statistics" "maint print statistics" {
 }
 
 # There aren't any ...
-gdb_test "maint print dummy-frames" ""
+gdb_test_no_output "maint print dummy-frames"
 
 send_gdb "maint print objfiles\n"
 

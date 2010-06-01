@@ -84,7 +84,7 @@ proc break_at { breakpoint where } {
 
 set bp [break_at "marker1" " line ($bp_location15|$bp_location16)"]
 
-gdb_test "enable $bp" "" "enable break marker1"
+gdb_test_no_output "enable $bp" "enable break marker1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y.*" \
@@ -102,13 +102,13 @@ gdb_test_multiple "continue" "$test" {
     }
 }
 
-gdb_test "delete $bp" "" "delete break marker1"
+gdb_test_no_output "delete $bp" "delete break marker1"
 
 # Verify that we can set a breakpoint to be self-disabling after the
 # first time it triggers.
 set bp [break_at "marker2" " line ($bp_location8|$bp_location9)"]
 
-gdb_test "enable once $bp" "" "enable once break marker2"
+gdb_test_no_output "enable once $bp" "enable once break marker2"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+dis\[ \t\]+y.*" \
@@ -143,7 +143,7 @@ if ![runto_main] then {
 
 set bp [break_at "marker3" " line ($bp_location17|$bp_location18)"]
 
-gdb_test "enable del $bp" "" "enable del break marker3"
+gdb_test_no_output "enable del $bp" "enable del break marker3"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+del\[ \t\]+y.*" \
@@ -162,7 +162,7 @@ gdb_test "info break $bp" \
 
 set bp [break_at "marker4" " line ($bp_location14|$bp_location13).*"]
 
-gdb_test "disable $bp" "" "disable break marker4"
+gdb_test_no_output "disable $bp" "disable break marker4"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+n.*" \
@@ -237,7 +237,7 @@ gdb_test "ignore $bp 1" \
     "Will ignore next crossing of breakpoint \[0-9\]*.*" \
     "ignore break marker1"
 
-gdb_test "enable del $bp" "" "enable del break marker1"
+gdb_test_no_output "enable del $bp" "enable del break marker1"
 
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+del\[ \t\]+y.*ignore next 1 hits.*" \
@@ -263,7 +263,7 @@ gdb_test "ignore $bp 10" \
     "Will ignore next 10 crossings of breakpoint \[0-9\]*.*" \
     "ignore break marker1"
 
-gdb_test "disable $bp" "" "disable break marker1"
+gdb_test_no_output "disable $bp" "disable break marker1"
 
 gdb_continue_to_end "no stop at ignored & disabled break marker1"
 rerun_to_main

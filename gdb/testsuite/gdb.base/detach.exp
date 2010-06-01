@@ -49,7 +49,7 @@ proc do_detach_tests {} {
   global pass
 
   runto_main
-  gdb_test "set should_exit = 1" "" "set should_exit, $pass"
+  gdb_test_no_output "set should_exit = 1" "set should_exit, $pass"
   gdb_test "detach" "Detaching from program: .*$escapedbinfile, .*" "detach, $pass"
 }
 

@@ -396,7 +396,7 @@ gdb_load ${binfile}
 
 # The "Detaching..." and "Attaching..." messages may be hidden by
 # default.
-gdb_test "set verbose" ""
+gdb_test_no_output "set verbose"
 
 # This is a test of gdb's ability to follow the parent or child
 # of a Unix vfork() system call.  (The child will subsequently

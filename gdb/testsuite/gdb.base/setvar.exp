@@ -133,11 +133,11 @@ test_set "set variable v_signed_char=65" "print v_signed_char" ".\[0-9\]* = 65 \
 test_set "set variable v_signed_char=97" "print v_signed_char" ".\[0-9\]* = 97 \'a\'"        "set variable signed char=97 ('a')" 
 test_set "set variable v_signed_char=126" "print v_signed_char" ".\[0-9\]* = 126 \'~\'"        "set variable signed char=126 ('~')" 
 test_set "set variable v_signed_char=127" "print v_signed_char" ".\[0-9\]* = 127 \'.177\'"        "set variable signed char=127 (8-bit)" 
-gdb_test "set variable v_signed_char=-1" ""
+gdb_test_no_output "set variable v_signed_char=-1"
 if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix4*" }
 gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
     "set variable signed char=-1 (-1)"
-gdb_test "set variable v_signed_char=0xFF" ""
+gdb_test_no_output "set variable v_signed_char=0xFF"
 if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix4*" }
 gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
     "set variable signed char=0xFF (0xFF)"
@@ -294,18 +294,18 @@ test_set "set v_short_pointer=v_short_array" "set variable *(v_short_pointer)=12
 #
 # test "set variable" for type "signed short *"
 #
-gdb_test "set v_signed_short_pointer=v_signed_short_array" ""
-gdb_test "set variable *(v_signed_short_pointer)=123" ""
-gdb_test "set variable *(v_signed_short_pointer+1)=-456" ""
+gdb_test_no_output "set v_signed_short_pointer=v_signed_short_array"
+gdb_test_no_output "set variable *(v_signed_short_pointer)=123"
+gdb_test_no_output "set variable *(v_signed_short_pointer+1)=-456"
 gdb_test "print v_signed_short_array" ".\[0-9\]* =.*\\{123,.*-456\\}" \
     "set variable signed short pointer"
 gdb_test "print *(v_signed_short_pointer+1)" ".\[0-9\]*.*=.*-456"
 #
 # test "set variable" for type "unsigned short *"
 #
-gdb_test "set v_unsigned_short_pointer=v_unsigned_short_array" ""
-gdb_test "set variable *(v_unsigned_short_pointer)=123" ""
-gdb_test "set variable *(v_unsigned_short_pointer+1)=-456" ""
+gdb_test_no_output "set v_unsigned_short_pointer=v_unsigned_short_array"
+gdb_test_no_output "set variable *(v_unsigned_short_pointer)=123"
+gdb_test_no_output "set variable *(v_unsigned_short_pointer+1)=-456"
 gdb_test "print v_unsigned_short_array" ".\[0-9\]* =.*\\{123,.*65080\\}" \
     "set variable unsigned short pointer"
 gdb_test "print *(v_unsigned_short_pointer+1)" ".\[0-9\]* = 65080"

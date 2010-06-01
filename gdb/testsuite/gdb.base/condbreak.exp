@@ -86,7 +86,7 @@ gdb_test "break main" \
 gdb_test "break marker1 if 1==1" \
     "Breakpoint.*at.* file .*$srcfile1, line.*"
 
-gdb_test "delete 2" ""
+gdb_test_no_output "delete 2"
 
 #
 # test conditional break at line number
@@ -94,7 +94,7 @@ gdb_test "delete 2" ""
 gdb_test "break $srcfile:$bp_location1 if 1==1" \
     "Breakpoint.*at.* file .*$srcfile, line $bp_location1\\."
 
-gdb_test "delete 3" ""
+gdb_test_no_output "delete 3"
 
 # 
 # test conditional break at function

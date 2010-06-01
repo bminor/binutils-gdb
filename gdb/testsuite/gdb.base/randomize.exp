@@ -76,7 +76,7 @@ if [string equal $addr1 $addr2] {
     pass $test
 }
 
-gdb_test "set disable-randomization on"
+gdb_test_no_output "set disable-randomization on"
 gdb_test "show disable-randomization"	      \
          "Disabling randomization .* is on." \
          "show disable-randomization on"

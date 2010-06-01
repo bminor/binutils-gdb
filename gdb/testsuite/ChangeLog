@@ -1,5 +1,83 @@
 2010-06-01  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.base/arithmet.exp: Use gdb_test_no_output.
+	* gdb.base/arrayidx.exp: Ditto.
+	* gdb.base/attach.exp: Ditto.
+	* gdb.base/auxv.exp: Ditto.
+	* gdb.base/bigcre.exp: Ditto.
+	* gdb.base/break-always.exp: Ditto.
+	* gdb.base/break-interp.exp: Ditto.
+	* gdb.base/break.exp: Ditto.
+	* gdb.base/breakpoint-shadow.exp: Ditto.
+	* gdb.base/call-ar-st.exp: Ditto.
+	* gdb.base/call-sc.exp: Ditto.
+	* gdb.base/call-signal-resume.exp: Ditto.
+	* gdb.base/callfuncs.exp: Ditto.
+	* gdb.base/catch-syscall.exp: Ditto.
+	* gdb.base/charset.exp: Ditto.
+	* gdb.base/code-expr.exp: Ditto.
+	* gdb.base/commands.exp: Ditto.
+	* gdb.base/cond-expr.exp: Ditto.
+	* gdb.base/condbreak.exp: Ditto.
+	* gdb.base/cursal.exp: Ditto.
+	* gdb.base/cvexpr.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/del.exp: Ditto.
+	* gdb.base/detach.exp: Ditto.
+	* gdb.base/display.exp: Ditto.
+	* gdb.base/ena-dis-br.exp: Ditto.
+	* gdb.base/eval-skip.exp: Ditto.
+	* gdb.base/foll-fork.exp: Ditto.
+	* gdb.base/foll-vfork.exp: Ditto.
+	* gdb.base/frame-args.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.
+	* gdb.base/gcore-buffer-overflow.exp: Ditto.
+	* gdb.base/gdbvars.exp: Ditto.
+	* gdb.base/help.exp: Ditto.
+	* gdb.base/ifelse.exp: Ditto.
+	* gdb.base/included.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/macscp.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/multi-fork.exp: Ditto.
+	* gdb.base/overlays.exp: Ditto.
+	* gdb.base/page.exp: Ditto.
+	* gdb.base/pending.exp: Ditto.
+	* gdb.base/pointers.exp: Ditto.
+	* gdb.base/pr11022.exp: Ditto.
+	* gdb.base/prelink.exp: Ditto.
+	* gdb.base/printcmds.exp: Ditto.
+	* gdb.base/psymtab.exp: Ditto.
+	* gdb.base/randomize.exp: Ditto.
+	* gdb.base/relational.exp: Ditto.
+	* gdb.base/relocate.exp: Ditto.
+	* gdb.base/remote.exp: Ditto.
+	* gdb.base/sepdebug.exp: Ditto.
+	* gdb.base/set-lang-auto.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/setvar.exp: Ditto.
+	* gdb.base/signals.exp: Ditto.
+	* gdb.base/signull.exp: Ditto.
+	* gdb.base/sigstep.exp: Ditto.
+	* gdb.base/sizeof.exp: Ditto.
+	* gdb.base/solib-disc.exp: Ditto.
+	* gdb.base/store.exp: Ditto.
+	* gdb.base/structs.exp: Ditto.
+	* gdb.base/structs2.exp: Ditto.
+	* gdb.base/subst.exp: Ditto.
+	* gdb.base/term.exp: Ditto.
+	* gdb.base/trace-commands.exp: Ditto.
+	* gdb.base/unwindonsignal.exp: Ditto.
+	* gdb.base/valgrind-db-attach.exp: Ditto.
+	* gdb.base/varargs.exp: Ditto.
+	* gdb.base/watch-cond.exp: Ditto.
+	* gdb.base/watch_thread_num.exp: Ditto.
+	* gdb.base/watchpoint-cond-gone.exp: Ditto.
+	* gdb.base/watchpoint.exp: Ditto.
+	* gdb.base/whatis-exp.exp: Ditto.
+
+2010-06-01  Michael Snyder  <msnyder@vmware.com>
+
 	* gdb.cp/annota2.exp: Replace uses of send_gdb / gdb_expect.
 	* gdb.cp/annota3.exp: Replace uses of send_gdb / gdb_expect.
 	* gdb.cp/anon-union.exp: Replace uses of send_gdb / gdb_expect.
@@ -46,7 +124,7 @@
 
 	* gdb.base/tui-layout.exp: New.
 
-2010-05-28  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+2010-05-28  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.reverse/break-precsave.exp: 
 	Replace uses of send_gdb / gdb_expect.
@@ -100,7 +178,7 @@
 	* gdb.base/sepdebug.exp (info silent break bp_location1): Fix racy
 	excessive newline.
 
-2010-05-27  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+2010-05-27  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/break.exp: Replace uses of send_gdb / gdb_expect.
 	* gdb.base/relational.exp: Replace uses of send_gdb / gdb_expect.
@@ -122,7 +200,7 @@
 	* gdb.base/watch_thread_num.exp: Replace uses of send_gdb / gdb_expect.
 	* gdb.base/watchpoint.exp: Replace uses of send_gdb / gdb_expect.
 
-2010-05-26  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+2010-05-26  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.java/jmisc.exp: Replace uses of send_gdb / gdb_expect.
 	* gdb.java/jprint.exp: Replace uses of send_gdb / gdb_expect.

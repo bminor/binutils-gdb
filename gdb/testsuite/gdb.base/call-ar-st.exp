@@ -290,7 +290,7 @@ gdb_test "continue" \
 gdb_test "break sum_array_print" \
 	".*Breakpoint ${decimal}: file .*call-ar-st.c, line.*" \
 	"set breakpoint in sum_array_print"
-gdb_test "set print frame-arguments all" ""
+gdb_test_no_output "set print frame-arguments all"
 gdb_test "continue" \
 	".*Breakpoint ${decimal}, sum_array_print \\(seed=10, linked_list1=.next_index = .1, 2, 3, 4, 5, 6, 7, 8, 9, 10., values = .4, 6, 8, 10, 12, 14, 16, 18, 20, 22., head = 0., linked_list2=.next_index = .1, 2, 3, 4, 5, 6, 7, 8, 9, 10., values = .8, 10, 12, 14, 16, 18, 20, 22, 24, 26., head = 0., linked_list3=.next_index = .1, 2, 3, 4, 5, 6, 7, 8, 9, 10., values = .10, 12, 14, 16, 18, 20, 22, 24, 26, 28., head = 0., linked_list4=.next_index = .1, 2, 3, 4, 5, 6, 7, 8, 9, 10., values = .20, 22, 24, 26, 28, 30, 32, 34, 36, 38., head = 0.\\) at .*call-ar-st.c:1105\[ \t\n\r\]+1105.*printf\\(.Sum of 4 arrays, by element \\(add in seed as well\\).*\\);.*" \
 	"check args of sum_array_print"

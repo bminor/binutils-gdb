@@ -55,7 +55,7 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 gdb_test "watch shared_var thread 0" "Unknown thread 0\." "Watchpoint on invalid thread"
 gdb_test "watch shared_var thread" "A syntax error in expression, near `thread'\." "Invalid watch syntax"
 
-gdb_test "Next 5" ""
+gdb_test "Next 5" ".*"
 
 gdb_test "break thread_function" "Breakpoint \[0-9\].*" \
   "Set breakpoint at thread_function"
@@ -70,7 +70,7 @@ gdb_test_multiple "thread" "Thread command" {
 
 set thread_num "$expect_out(1,string)"
 
-gdb_test "disable 2" "" "Disable breakpoint 2"
+gdb_test_no_output "disable 2" "Disable breakpoint 2"
 gdb_test "watch shared_var thread $thread_num" "atchpoint 3: shared_var" "Watchpoint on shared variable"
 gdb_test "info breakpoint 3" "stop only in thread $thread_num"
 

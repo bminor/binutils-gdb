@@ -127,8 +127,10 @@ gdb_test "next " "more_code.*;" "continuing after dummy()"
 #    timeout           { fail "(timeout) illegal pointer assignment rejected" }    
 #  }
 
-gdb_test "set variable v_int_pointer=&v_int_array\[0\]" "" "set pointer to beginning of array"
-gdb_test "set variable v_int_pointer2=&v_int_array\[1\]" "" "set pointer to end of array"
+gdb_test_no_output "set variable v_int_pointer=&v_int_array\[0\]" \
+    "set pointer to beginning of array"
+gdb_test_no_output "set variable v_int_pointer2=&v_int_array\[1\]" \
+    "set pointer to end of array"
 
 
 gdb_test "print *v_int_pointer" " = 6" "print object pointed to"
@@ -153,24 +155,26 @@ gdb_test "print v_int_pointer < v_int_pointer2" " = $true" \
 gdb_test "print v_int_pointer > v_int_pointer2" " = $false" \
     "pointer1>pointer2"
 
-gdb_test "set variable y = *v_int_pointer++" "" "set y = *v_int_pointer++"
+gdb_test_no_output "set variable y = *v_int_pointer++" \
+    "set y = *v_int_pointer++"
 gdb_test "print y" " = 6" "pointer assignment"
 gdb_test "print *v_int_pointer" " = 18" "and post-increment"
 
 
 
-gdb_test "set variable y = *--v_int_pointer2" "" "set y = *--v_int_pointer2"
+gdb_test_no_output "set variable y = *--v_int_pointer2" \
+    "set y = *--v_int_pointer2"
 gdb_test "print y" " = 6" "pointer assignment"
 gdb_test "print *v_int_pointer2" " = 6" "and pre-decrement"
 
 
 
-gdb_test "set variable y =v_int_pointer-v_int_pointer2" "" \
+gdb_test_no_output "set variable y =v_int_pointer-v_int_pointer2" \
     "set y =v_int_pointer-v_int_pointer2"
 gdb_test "print y" " = 1" "pointer1-pointer2"
 
 
-gdb_test "set variable v_int_pointer=v_int_array" "" \
+gdb_test_no_output "set variable v_int_pointer=v_int_array" \
     "set v_int_pointer=v_int_array"
 gdb_test "print *v_int_pointer" " = 6" \
     "print array element through pointer"
@@ -190,7 +194,7 @@ gdb_test "print (*rptr)\[1\]" " = 1" \
 gdb_test "print (*rptr)\[2\]" " = 2" \
     "print array element through pointer \#5"
 
-gdb_test "set variable rptr = rptr+1" "" "increment rptr"
+gdb_test_no_output "set variable rptr = rptr+1" "increment rptr"
 
 gdb_test "print (*rptr)\[0\]" " = 3" \
     "print array element through pointer \#6"
