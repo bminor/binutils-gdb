@@ -647,13 +647,13 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       switch (isym->visibility)
         {
         case LDPV_PROTECTED:
-          vis = elfcpp::STV_DEFAULT;
+          vis = elfcpp::STV_PROTECTED;
           break;
         case LDPV_INTERNAL:
-          vis = elfcpp::STV_DEFAULT;
+          vis = elfcpp::STV_INTERNAL;
           break;
         case LDPV_HIDDEN:
-          vis = elfcpp::STV_DEFAULT;
+          vis = elfcpp::STV_HIDDEN;
           break;
         case LDPV_DEFAULT:
         default:

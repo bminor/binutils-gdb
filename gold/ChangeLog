@@ -1,3 +1,8 @@
+2010-06-01  Rafael Espindola  <espindola@google.com>
+
+	* plugin.cc (Sized_pluginobj::::do_add_symbols): Correctly set the
+	visibility of symbols.
+
 2010-05-27  Doug Kwan  <dougkwan@google.com>
 
 	* object.cc (Sized_relobj::do_finalize_local_symbols): Use offset
