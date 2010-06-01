@@ -1,3 +1,10 @@
+2010-06-01  Tristan Gingold  <gingold@adacore.com>
+
+	* scripttempl/alphavms.sc: Add comments. Move $LINK$ to the
+	readonly output-section. Handle LIB$INITIALIZE and sections
+	created by gcc.
+	* emultempl/vms.em (vms_place_orphan): Add comments.
+
 2010-05-28  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (eshlelf_fd.c): Fix typo in rule.

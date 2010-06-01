@@ -94,10 +94,13 @@ vms_place_orphan (asection *s,
       0, 0, 0, 0
     };
 
-  /* We have nothing to say for anything other than a final link.  */
+  /* We have nothing to say for anything other than a final link or an excluded
+     section.  */
   if (link_info.relocatable
       || (s->flags & (SEC_EXCLUDE | SEC_LOAD)) != SEC_LOAD)
     return NULL;
+
+  /* FIXME: we should place sections by VMS program section flags.  */
 
   /* Only handle data sections.  */
   if ((s->flags & SEC_DATA) == 0)

@@ -273,6 +273,9 @@ struct vms_private_data_struct
   struct hdr_struct hdr_data;		/* data from HDR/EMH record  */
   struct eom_struct eom_data;		/* data from EOM/EEOM record  */
 
+  /* Transfer addresses (entry points).  */
+  bfd_vma transfer_address[4];
+
   /* Array of GSD sections to get the correspond BFD one.  */
   unsigned int section_max; 		/* Size of the sections array.  */
   unsigned int section_count;		/* Number of GSD sections.  */
@@ -301,7 +304,6 @@ struct vms_private_data_struct
 
   struct module *modules;		/* list of all compilation units */
 
-  struct dst_info *dst_info;
   asection *dst_section;
 
   unsigned int dst_ptr_offsets_count;	/* # of offsets in following array  */
@@ -2983,11 +2985,10 @@ alpha_vms_write_exec (bfd *abfd)
 
   bfd_putl32 (sizeof (struct vms_eiha), eiha->size);
   bfd_putl32 (0, eiha->spare);
-  bfd_putl32 (0x00000340, eiha->tfradr1);	/* SYS$IMGACT */
-  bfd_putl32 (0xffffffff, eiha->tfradr1_h);
-  bfd_putl64 (bfd_get_start_address (abfd), eiha->tfradr2);
-  bfd_putl64 (0, eiha->tfradr3);
-  bfd_putl64 (0, eiha->tfradr4);
+  bfd_putl64 (PRIV (transfer_address[0]), eiha->tfradr1);
+  bfd_putl64 (PRIV (transfer_address[1]), eiha->tfradr2);
+  bfd_putl64 (PRIV (transfer_address[2]), eiha->tfradr3);
+  bfd_putl64 (PRIV (transfer_address[3]), eiha->tfradr4);
   bfd_putl64 (0, eiha->inishr);
 
   /* Alloc EIHI.  */
@@ -3389,21 +3390,28 @@ done:
       char *hash;
 
       symbol = abfd->outsymbols[symnum];
+      old_flags = symbol->flags;
+
+      /* Work-around a missing feature:  consider __main as the main entry point.  */
       if (*(symbol->name) == '_')
 	{
 	  if (strcmp (symbol->name, "__main") == 0)
 	    bfd_set_start_address (abfd, (bfd_vma)symbol->value);
 	}
-      old_flags = symbol->flags;
 
+      /* Only put in the GSD the global and the undefined symbols.  */
       if (old_flags & BSF_FILE)
 	continue;
 
-      if ((old_flags & BSF_GLOBAL) == 0		   /* Not xdef...  */
-	  && !bfd_is_und_section (symbol->section) /* and not xref... */
-	  && !((old_flags & BSF_SECTION_SYM) != 0  /* and not LIB$INITIALIZE.  */
-	       && strcmp (symbol->section->name, "LIB$INITIALIZE") == 0))
-	continue;
+      if ((old_flags & BSF_GLOBAL) == 0 && !bfd_is_und_section (symbol->section))
+        {
+          /* If the LIB$INITIIALIZE section is present, add a reference to
+             LIB$INITIALIZE symbol.  FIXME: this should be done explicitely
+             in the assembly file.  */
+          if (!((old_flags & BSF_SECTION_SYM) != 0
+                && strcmp (symbol->section->name, "LIB$INITIALIZE") == 0))
+            continue;
+        }
 
       /* 13 bytes egsd, max 64 chars name -> should be 77 bytes.  */
       if (_bfd_vms_output_check (recwr, 80) < 0)
@@ -8667,6 +8675,22 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
             (abfd, sec->output_section->vma + sec->output_offset + tfradr);
         }
     }
+
+  /* Set transfer addresses.  */
+  {
+    int i;
+    struct bfd_link_hash_entry *h;
+
+    i = 0;
+    PRIV (transfer_address[i++]) = 0xffffffff00000340;	/* SYS$IMGACT */
+    h = bfd_link_hash_lookup (info->hash, "LIB$INITIALIZE", FALSE, FALSE, TRUE);
+    if (h != NULL && h->type == bfd_link_hash_defined)
+      PRIV (transfer_address[i++]) =
+        alpha_vms_get_sym_value (h->u.def.section, h->u.def.value);
+    PRIV (transfer_address[i++]) = bfd_get_start_address (abfd);
+    while (i < 4)
+      PRIV (transfer_address[i++]) = 0;
+  }
 
   /* Allocate contents.  */
   base_addr = (bfd_vma)-1;
