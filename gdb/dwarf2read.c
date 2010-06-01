@@ -3904,9 +3904,11 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Ignore functions with missing or invalid low and high pc attributes.  */
   if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, NULL))
     {
-      complaint (&symfile_complaints,
-                 _("cannot get low and high bounds for subprogram DIE at %d"),
-                 die->offset);
+      attr = dwarf2_attr (die, DW_AT_external, cu);
+      if (!attr || !DW_UNSND (attr))
+	complaint (&symfile_complaints,
+		   _("cannot get low and high bounds for subprogram DIE at %d"),
+		   die->offset);
       return;
     }
 
