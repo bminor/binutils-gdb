@@ -30,6 +30,8 @@ static int num_registers;
 
 const char **gdbserver_expedite_regs;
 
+#ifndef IN_PROCESS_AGENT
+
 struct regcache *
 get_thread_regcache (struct thread_info *thread, int fetch)
 {
@@ -82,9 +84,12 @@ regcache_invalidate (void)
   for_each_inferior (&all_threads, regcache_invalidate_one);
 }
 
+#endif
+
 struct regcache *
 init_register_cache (struct regcache *regcache, unsigned char *regbuf)
 {
+#ifndef IN_PROCESS_AGENT
   if (regbuf == NULL)
     {
       /* Make sure to zero-initialize the register cache when it is
@@ -95,6 +100,11 @@ init_register_cache (struct regcache *regcache, unsigned char *regbuf)
       regcache->registers_owned = 1;
     }
   else
+#else
+  if (regbuf == NULL)
+    fatal ("init_register_cache: can't allocate memory from the heap");
+  else
+#endif
     {
       regcache->registers = regbuf;
       regcache->registers_owned = 0;
@@ -104,6 +114,8 @@ init_register_cache (struct regcache *regcache, unsigned char *regbuf)
 
   return regcache;
 }
+
+#ifndef IN_PROCESS_AGENT
 
 struct regcache *
 new_register_cache (void)
@@ -122,10 +134,13 @@ free_register_cache (struct regcache *regcache)
 {
   if (regcache)
     {
-      free (regcache->registers);
+      if (regcache->registers_owned)
+	free (regcache->registers);
       free (regcache);
     }
 }
+
+#endif
 
 void
 regcache_cpy (struct regcache *dst, struct regcache *src)
@@ -134,6 +149,7 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
   dst->registers_valid = src->registers_valid;
 }
 
+#ifndef IN_PROCESS_AGENT
 static void
 realloc_register_cache (struct inferior_list_entry *thread_p)
 {
@@ -146,15 +162,18 @@ realloc_register_cache (struct inferior_list_entry *thread_p)
   free_register_cache (regcache);
   set_inferior_regcache_data (thread, new_register_cache ());
 }
+#endif
 
 void
 set_register_cache (struct reg *regs, int n)
 {
   int offset, i;
 
+#ifndef IN_PROCESS_AGENT
   /* Before changing the register cache internal layout, flush the
      contents of valid caches back to the threads.  */
   regcache_invalidate ();
+#endif
 
   reg_defs = regs;
   num_registers = n;
@@ -172,8 +191,10 @@ set_register_cache (struct reg *regs, int n)
   if (2 * register_bytes + 32 > PBUFSIZ)
     fatal ("Register packet size exceeds PBUFSIZ.");
 
+#ifndef IN_PROCESS_AGENT
   /* Re-allocate all pre-existing register caches.  */
   for_each_inferior (&all_threads, realloc_register_cache);
+#endif
 }
 
 int
@@ -181,6 +202,8 @@ register_cache_size (void)
 {
   return register_bytes;
 }
+
+#ifndef IN_PROCESS_AGENT
 
 void
 registers_to_string (struct regcache *regcache, char *buf)
@@ -236,6 +259,8 @@ find_register_by_number (int n)
   return &reg_defs[n];
 }
 
+#endif
+
 int
 register_size (int n)
 {
@@ -266,6 +291,8 @@ supply_regblock (struct regcache *regcache, const void *buf)
     memset (regcache->registers, 0, register_bytes);
 }
 
+#ifndef IN_PROCESS_AGENT
+
 void
 supply_register_by_name (struct regcache *regcache,
 			 const char *name, const void *buf)
@@ -273,11 +300,15 @@ supply_register_by_name (struct regcache *regcache,
   supply_register (regcache, find_regno (name), buf);
 }
 
+#endif
+
 void
 collect_register (struct regcache *regcache, int n, void *buf)
 {
   memcpy (buf, register_data (regcache, n, 1), register_size (n));
 }
+
+#ifndef IN_PROCESS_AGENT
 
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
@@ -318,3 +349,5 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
     internal_error (__FILE__, __LINE__,
 		    "regcache_write_pc: Unable to update PC");
 }
+
+#endif

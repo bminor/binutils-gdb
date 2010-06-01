@@ -33,8 +33,10 @@ qRelocInsn
 
 * New features in the GDB remote stub, GDBserver
 
-  - GDBserver now support tracepoints.  The feature is currently
-    supported by the i386-linux and amd64-linux builds.
+  - GDBserver now support tracepoints (including fast tracepoints).
+    The feature is currently supported by the i386-linux and
+    amd64-linux builds.  See the "Tracepoints support in gdbserver"
+    section in the manual for more information.
 
   - GDBserver now supports x86_64 Windows 64-bit debugging.
 

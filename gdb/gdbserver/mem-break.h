@@ -24,6 +24,7 @@
 
 /* Breakpoints are opaque.  */
 struct breakpoint;
+struct fast_tracepoint_jump;
 
 /* Create a new GDB breakpoint at WHERE.  Returns -1 if breakpoints
    are not supported on this target, 0 otherwise.  */
@@ -115,5 +116,31 @@ void free_all_breakpoints (struct process_info *proc);
 /* Check if breakpoints still seem to be inserted in the inferior.  */
 
 void validate_breakpoints (void);
+
+/* Insert a fast tracepoint jump at WHERE, using instruction INSN, of
+   LENGTH bytes.  */
+
+struct fast_tracepoint_jump *set_fast_tracepoint_jump (CORE_ADDR where,
+						       unsigned char *insn,
+						       ULONGEST length);
+
+/* Delete fast tracepoint jump TODEL from our tables, and uninsert if
+   from memory.  */
+
+int delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel);
+
+/* Returns true if there's fast tracepoint jump set at WHERE.  */
+
+int fast_tracepoint_jump_here (CORE_ADDR);
+
+/* Uninsert fast tracepoint jumps at WHERE (and change their status to
+   uninserted).  This still leaves the tracepoints in the table.  */
+
+void uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc);
+
+/* Reinsert fast tracepoint jumps at WHERE (and change their status to
+   inserted).  */
+
+void reinsert_fast_tracepoint_jumps_at (CORE_ADDR where);
 
 #endif /* MEM_BREAK_H */

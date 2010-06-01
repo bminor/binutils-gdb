@@ -28,6 +28,14 @@
 #include <malloc.h>
 #endif
 
+#ifdef IN_PROCESS_AGENT
+#  define PREFIX "ipa: "
+#  define TOOLNAME "GDBserver in-process agent"
+#else
+#  define PREFIX "gdbserver: "
+#  define TOOLNAME "GDBserver"
+#endif
+
 /* Generally useful subroutines used throughout the program.  */
 
 static void malloc_failure (size_t size) ATTR_NORETURN;
@@ -35,7 +43,7 @@ static void malloc_failure (size_t size) ATTR_NORETURN;
 static void
 malloc_failure (size_t size)
 {
-  fprintf (stderr, "gdbserver: ran out of memory while trying to allocate %lu bytes\n",
+  fprintf (stderr, PREFIX "ran out of memory while trying to allocate %lu bytes\n",
 	   (unsigned long) size);
   exit (1);
 }
@@ -107,6 +115,8 @@ xstrdup (const char *s)
   return ret;
 }
 
+#ifndef IN_PROCESS_AGENT
+
 /* Free a standard argv vector.  */
 
 void
@@ -123,6 +133,8 @@ freeargv (char **vector)
       free (vector);
     }
 }
+
+#endif
 
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
@@ -153,13 +165,19 @@ perror_with_name (const char *string)
 void
 error (const char *string,...)
 {
+#ifndef IN_PROCESS_AGENT
   extern jmp_buf toplevel;
+#endif
   va_list args;
   va_start (args, string);
   fflush (stdout);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
+#ifndef IN_PROCESS_AGENT
   longjmp (toplevel, 1);
+#else
+  exit (1);
+#endif
 }
 
 /* Print an error message and exit reporting failure.
@@ -172,7 +190,7 @@ fatal (const char *string,...)
 {
   va_list args;
   va_start (args, string);
-  fprintf (stderr, "gdbserver: ");
+  fprintf (stderr, PREFIX);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
   va_end (args);
@@ -185,7 +203,7 @@ warning (const char *string,...)
 {
   va_list args;
   va_start (args, string);
-  fprintf (stderr, "gdbserver: ");
+  fprintf (stderr, PREFIX);
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
   va_end (args);
@@ -200,7 +218,7 @@ internal_error (const char *file, int line, const char *fmt, ...)
   va_start (args, fmt);
 
   fprintf (stderr,  "\
-%s:%d: A problem internal to GDBserver has been detected.\n", file, line);
+%s:%d: A problem internal to " TOOLNAME " has been detected.\n", file, line);
   vfprintf (stderr, fmt, args);
   fprintf (stderr, "\n");
   va_end (args);
@@ -208,7 +226,7 @@ internal_error (const char *file, int line, const char *fmt, ...)
 }
 
 /* Temporary storage using circular buffer.  */
-#define NUMCELLS 4
+#define NUMCELLS 10
 #define CELLSIZE 50
 
 /* Return the next entry in the circular buffer.  */

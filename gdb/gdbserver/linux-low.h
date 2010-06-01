@@ -120,6 +120,22 @@ struct linux_target_ops
 
   /* Returns true if the low target supports tracepoints.  */
   int (*supports_tracepoints) (void);
+
+  /* Fill ADDRP with the thread area address of LWPID.  Returns 0 on
+     success, -1 on failure.  */
+  int (*get_thread_area) (int lwpid, CORE_ADDR *addrp);
+
+  /* Install a fast tracepoint jump pad.  See target.h for
+     comments.  */
+  int (*install_fast_tracepoint_jump_pad) (CORE_ADDR tpoint, CORE_ADDR tpaddr,
+					   CORE_ADDR collector,
+					   CORE_ADDR lockaddr,
+					   ULONGEST orig_size,
+					   CORE_ADDR *jump_entry,
+					   unsigned char *jjump_pad_insn,
+					   ULONGEST *jjump_pad_insn_size,
+					   CORE_ADDR *adjusted_insn_addr,
+					   CORE_ADDR *adjusted_insn_addr_end);
 };
 
 extern struct linux_target_ops the_low_target;
@@ -201,6 +217,22 @@ struct lwp_info
      and then processed and cleared in linux_resume_one_lwp.  */
   struct thread_resume *resume;
 
+  /* True if it is known that this lwp is presently collecting a fast
+     tracepoint (it is in the jump pad or in some code that will
+     return to the jump pad.  Normally, we won't care about this, but
+     we will if a signal arrives to this lwp while it is
+     collecting.  */
+  int collecting_fast_tracepoint;
+
+  /* If this is non-zero, it points to a chain of signals which need
+     to be reported to GDB.  These were deferred because the thread
+     was doing a fast tracepoint collect when they arrived.  */
+  struct pending_signals *pending_signals_to_report;
+
+  /* When collecting_fast_tracepoint is first found to be 1, we insert
+     a exit-jump-pad-quickly breakpoint.  This is it.  */
+  struct breakpoint *exit_jump_pad_bkpt;
+
   /* True if the LWP was seen stop at an internal breakpoint and needs
      stepping over later when it is resumed.  */
   int need_step_over;
@@ -223,6 +255,7 @@ int elf_64_file_p (const char *file);
 
 void linux_attach_lwp (unsigned long pid);
 struct lwp_info *find_lwp_pid (ptid_t ptid);
+int linux_get_thread_area (int lwpid, CORE_ADDR *area);
 
 /* From thread-db.c  */
 int thread_db_init (int use_events);

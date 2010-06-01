@@ -9440,6 +9440,9 @@ Some targets may support @dfn{fast tracepoints}, which are inserted in
 a different way (such as with a jump instead of a trap), that is
 faster but possibly restricted in where they may be installed.
 
+@code{gdbserver} supports tracepoints on some target systems.
+@xref{Server,,Tracepoints support in @code{gdbserver}}.
+
 This section describes commands to set tracepoints and associated
 conditions and actions.
 
@@ -15691,6 +15694,82 @@ Use @code{monitor exit} to terminate @code{gdbserver} at the end
 of a multi-process mode debug session.
 
 @end table
+
+@subsection Tracepoints support in @code{gdbserver}
+@cindex tracepoints support in @code{gdbserver}
+
+On some targets, @code{gdbserver} supports tracepoints and fast
+tracepoints.
+
+For fast tracepoints to work, a special library called the
+@dfn{in-process agent} (IPA), must be loaded in the inferior process.
+This library is built and distributed as an integral part of
+@code{gdbserver}.
+
+There are several ways to load the in-process agent in your program:
+
+@table @code
+@item Specifying it as dependency at link time
+
+You can link your program dynamically with the in-process agent
+library.  On most systems, this is accomplished by adding
+@code{-linproctrace} to the link command.
+
+@item Using the system's preloading mechanisms
+
+You can force loading the in-process agent at startup time by using
+your system's support for preloading shared libraries.  Many Unixes
+support the concept of preloading user defined libraries.  In most
+cases, you do that by specifying @code{LD_PRELOAD=libinproctrace.so}
+in the environment.  See also the description of @code{gdbserver}'s
+@option{--wrapper} command line option.
+
+@item Using @value{GDBN} to force loading the agent at run time
+
+On some systems, you can force the inferior to load a shared library,
+by calling a dynamic loader function in the inferior that takes care
+of dynamically looking up and loading a shared library.  On most Unix
+systems, the function is @code{dlopen}.  You'll use the @code{call}
+command for that.  For example:
+
+@smallexample
+(@value{GDBP}) call dlopen ("libinproctrace.so", ...)
+@end smallexample
+
+Note that on most Unix systems, for the @code{dlopen} function to be
+available, the program needs to be linked with @code{-ldl}.
+@end table
+
+On systems that have a userspace dynamic loader, like most Unix
+systems, when you connect to @code{gdbserver} using @code{target
+remote}, you'll find that the program is stopped at the dynamic
+loader's entry point, and no shared library has been loaded in the
+program's address space yet, including the in-process agent.  In that
+case, before being able to use any of the fast tracepoints features,
+you need to let the loader run and load the shared libraries.  The
+most simple way to do that is to run the program to the main
+procedure.  E.g., if debugging a C or C@t{++} program, start
+@code{gdbserver} like so:
+
+@smallexample
+$ gdbserver :9999 myprogram
+@end smallexample
+
+Start GDB and connect to @code{gdbserver} like so, and run to main:
+
+@smallexample
+$ gdb myprogram
+(@value{GDBP}) target remote myhost:9999
+0x00007f215893ba60 in ?? () from /lib64/ld-linux-x86-64.so.2
+(@value{GDBP}) b main
+(@value{GDBP}) continue
+@end smallexample
+
+The in-process tracing agent library should now be loaded into the
+process; you can confirm it with the @code{info sharedlibrary}
+command, which will list @file{libinproctrace.so} as loaded in the
+process.  You are now ready to install fast tracepoints and start
+tracing.
 
 @node Remote Configuration
 @section Remote Configuration

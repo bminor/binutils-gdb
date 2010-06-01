@@ -10,6 +10,8 @@
 #			target method.
 #   srv_xmlfiles	All XML files which should be available for
 #			gdbserver in this configuration.
+#   ipa_obj		Any other target-specific modules appropriate
+#			for this target's in-process agent.
 #
 # In addition, on GNU/Linux the following shell variables will be set:
 #   srv_linux_regsets	Set to "yes" if ptrace(PTRACE_GETREGS) and friends
@@ -26,6 +28,9 @@ srv_i386_regobj="i386.o i386-avx.o i386-mmx.o"
 srv_i386_linux_regobj="i386-linux.o i386-avx-linux.o i386-mmx-linux.o"
 srv_amd64_regobj="amd64.o amd64-avx.o"
 srv_amd64_linux_regobj="amd64-linux.o amd64-avx-linux.o"
+
+ipa_i386_linux_regobj=i386-linux-ipa.o
+ipa_amd64_linux_regobj=amd64-linux-ipa.o
 
 srv_i386_32bit_xmlfiles="i386/32bit-core.xml i386/32bit-sse.xml i386/32bit-avx.xml"
 srv_i386_64bit_xmlfiles="i386/64bit-core.xml i386/64bit-sse.xml i386/64bit-avx.xml"
@@ -86,6 +91,7 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			ipa_obj="${ipa_i386_linux_regobj} linux-i386-ipa.o"
 			;;
   i[34567]86-*-mingw32ce*)
 			srv_regobj="$srv_i386_regobj"
@@ -230,6 +236,7 @@ case "${target}" in
 			srv_linux_usrregs=yes # This is for i386 progs.
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			ipa_obj="${ipa_amd64_linux_regobj} linux-amd64-ipa.o"
 			;;
   x86_64-*-mingw*)	srv_regobj="$srv_amd64_regobj"
 			srv_tgtobj="i386-low.o i387-fp.o win32-low.o win32-i386-low.o"

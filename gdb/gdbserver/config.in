@@ -112,6 +112,9 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
+/* Define to 1 if the target supports __sync_*_compare_and_swap */
+#undef HAVE_SYNC_BUILTINS
+
 /* Define to 1 if you have the <sys/file.h> header file. */
 #undef HAVE_SYS_FILE_H
 

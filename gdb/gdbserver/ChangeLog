@@ -1,4 +1,260 @@
 2010-06-01  Pedro Alves  <pedro@codesourcery.com>
+	    Stan Shebs  <stan@codesourcery.com>
+
+	* Makefile.in (IPA_DEPFILES, extra_libraries): New.
+	(all): Depend on $(extra_libraries).
+	(install-only): Install the IPA.
+	(IPA_OBJS, IPA_LIB): New.
+	(clean): Remove the IPA lib.
+	(IPAGENT_CFLAGS): New.
+	(tracepoint-ipa.o, utils-ipa.o, remote-utils-ipa.o)
+	(regcache-ipa.o, i386-linux-ipa.o, linux-i386-ipa.o)
+	(linux-amd64-ipa.o, amd64-linux-ipa.o): New rules.
+	* linux-amd64-ipa.c, linux-i386-ipa.c: New files.
+	* configure.ac: Check for atomic builtins support in the compiler.
+	(IPA_DEPFILES, extra_libraries): Define.
+	* configure.srv (ipa_obj): Add description.
+	(ipa_i386_linux_regobj, ipa_amd64_linux_regobj): Define.
+	(i[34567]86-*-linux*): Set ipa_obj.
+	(x86_64-*-linux*): Set ipa_obj.
+	* linux-low.c (stabilizing_threads): New.
+	(supports_fast_tracepoints): New.
+	(linux_detach): Stabilize threads before detaching.
+	(handle_tracepoints): Handle internal tracing breakpoints.  Assert
+	the lwp is either not stabilizing, or is moving out of a jump pad.
+	(linux_fast_tracepoint_collecting): New.
+	(maybe_move_out_of_jump_pad): New.
+	(enqueue_one_deferred_signal): New.
+	(dequeue_one_deferred_signal): New.
+	(linux_wait_for_event_1): If moving out of a jump pad, defer
+	pending signals to later.
+	(linux_stabilize_threads): New.
+	(linux_wait_1): Check if threads need moving out of jump pads, and
+	do it if so.
+	(stuck_in_jump_pad_callback): New.
+	(move_out_of_jump_pad_callback): New.
+	(lwp_running): New.
+	(linux_resume_one_lwp): Handle moving out of jump pads.
+	(linux_set_resume_request): Dequeue deferred signals.
+	(need_step_over_p): Also step over fast tracepoint jumps.
+	(start_step_over): Also uninsert fast tracepoint jumps.
+	(finish_step_over): Also reinsert fast tracepoint jumps.
+	(linux_install_fast_tracepoint_jump): New.
+	(linux_target_ops): Install linux_stabilize_threads and
+	linux_install_fast_tracepoint_jump_pad.
+	* linux-low.h (linux_target_ops) <get_thread_area,
+	install_fast_tracepoint_jump_pad>: New fields.
+	(struct lwp_info) <collecting_fast_tracepoint,
+	pending_signals_to_report, exit_jump_pad_bkpt>: New fields.
+	(linux_get_thread_area): Declare.
+	* linux-x86-low.c (jump_insn): New.
+	(x86_get_thread_area): New.
+	(append_insns): New.
+	(push_opcode): New.
+	(amd64_install_fast_tracepoint_jump_pad): New.
+	(i386_install_fast_tracepoint_jump_pad): New.
+	(x86_install_fast_tracepoint_jump_pad): New.
+	(the_low_target): Install x86_get_thread_area and
+	x86_install_fast_tracepoint_jump_pad.
+	* mem-break.c (set_raw_breakpoint_at): Use read_inferior_memory.
+	(struct fast_tracepoint_jump): New.
+	(fast_tracepoint_jump_insn): New.
+	(fast_tracepoint_jump_shadow): New.
+	(find_fast_tracepoint_jump_at): New.
+	(fast_tracepoint_jump_here): New.
+	(delete_fast_tracepoint_jump): New.
+	(set_fast_tracepoint_jump): New.
+	(uninsert_fast_tracepoint_jumps_at): New.
+	(reinsert_fast_tracepoint_jumps_at): New.
+	(set_breakpoint_at): Use write_inferior_memory.
+	(uninsert_raw_breakpoint): Use write_inferior_memory.
+	(check_mem_read): Mask out fast tracepoint jumps.
+	(check_mem_write): Mask out fast tracepoint jumps.
+	* mem-break.h (struct fast_tracepoint_jump): Forward declare.
+	(set_fast_tracepoint_jump): Declare.
+	(delete_fast_tracepoint_jump)
+	(fast_tracepoint_jump_here, uninsert_fast_tracepoint_jumps_at)
+	(reinsert_fast_tracepoint_jumps_at): Declare.
+	* regcache.c: Don't compile many functions when building the
+	in-process agent library.
+	(init_register_cache) [IN_PROCESS_AGENT]: Don't allow allocating
+	the register buffer in the heap.
+	(free_register_cache): If the register buffer isn't owned by the
+	regcache, don't free it.
+	(set_register_cache) [IN_PROCESS_AGENT]: Don't re-alocate
+	pre-existing register caches.
+	* remote-utils.c (convert_int_to_ascii): Constify `from' parameter
+	type.
+	(convert_ascii_to_int): : Constify `from' parameter type.
+	(decode_M_packet, decode_X_packet): Replace the `to' parameter by
+	a `to_p' pointer to pointer parameter.  If TO_P is NULL, malloc
+	the needed buffer in-place.
+	(relocate_instruction): New.
+	* server.c (handle_query) <qSymbols>: If the target supports
+	tracepoints, give it a chance of looking up symbols.  Report
+	support for fast tracepoints.
+	(handle_status): Stabilize threads.
+	(process_serial_event): Adjust.
+	* server.h (struct fast_tracepoint_jump): Forward declare.
+	(struct process_info) <fast_tracepoint_jumps>: New field.
+	(convert_ascii_to_int, convert_int_to_ascii): Adjust.
+	(decode_X_packet, decode_M_packet): Adjust.
+	(relocate_instruction): Declare.
+	(in_process_agent_loaded): Declare.
+	(tracepoint_look_up_symbols): Declare.
+	(struct fast_tpoint_collect_status): Declare.
+	(fast_tracepoint_collecting): Declare.
+	(force_unlock_trace_buffer): Declare.
+	(handle_tracepoint_bkpts): Declare.
+	(initialize_low_tracepoint)
+	(supply_fast_tracepoint_registers) [IN_PROCESS_AGENT]: Declare.
+	* target.h (struct target_ops) <stabilize_threads,
+	install_fast_tracepoint_jump_pad>: New fields.
+	(stabilize_threads, install_fast_tracepoint_jump_pad): New.
+	* tracepoint.c [HAVE_MALLOC_H]: Include malloc.h.
+	[HAVE_STDINT_H]: Include stdint.h.
+	(trace_debug_1): Rename to ...
+	(trace_vdebug): ... this.
+	(trace_debug): Rename to ...
+	(trace_debug_1): ... this.  Add `level' parameter.
+	(trace_debug): New.
+	(ATTR_USED, ATTR_NOINLINE): New.
+	(IP_AGENT_EXPORT): New.
+	(gdb_tp_heap_buffer, gdb_jump_pad_buffer, gdb_jump_pad_buffer_end)
+	(collecting, gdb_collect, stop_tracing, flush_trace_buffer)
+	(about_to_request_buffer_space, trace_buffer_is_full)
+	(stopping_tracepoint, expr_eval_result, error_tracepoint)
+	(tracepoints, tracing, trace_buffer_ctrl, trace_buffer_ctrl_curr)
+	(trace_buffer_lo, trace_buffer_hi, traceframe_read_count)
+	(traceframe_write_count, traceframes_created)
+	(trace_state_variables)
+	New renaming defines.
+	(struct ipa_sym_addresses): New.
+	(STRINGIZE_1, STRINGIZE, IPA_SYM): New.
+	(symbol_list): New.
+	(ipa_sym_addrs): New.
+	(all_tracepoint_symbols_looked_up): New.
+	(in_process_agent_loaded): New.
+	(write_e_ipa_not_loaded): New.
+	(maybe_write_ipa_not_loaded): New.
+	(tracepoint_look_up_symbols): New.
+	(debug_threads) [IN_PROCESS_AGENT]: New.
+	(read_inferior_memory) [IN_PROCESS_AGENT]: New.
+	(UNKNOWN_SIDE_EFFECTS): New.
+	(stop_tracing): New.
+	(flush_trace_buffer): New.
+	(stop_tracing_bkpt): New.
+	(flush_trace_buffer_bkpt): New.
+	(read_inferior_integer): New.
+	(read_inferior_uinteger): New.
+	(read_inferior_data_pointer): New.
+	(write_inferior_data_pointer): New.
+	(write_inferior_integer): New.
+	(write_inferior_uinteger): New.
+	(struct collect_static_trace_data_action): Delete.
+	(enum tracepoint_type): New.
+	(struct tracepoint) <type>: New field `type'.
+	<actions_str, step_actions, step_actions_str>: Only include in GDBserver.
+	<orig_size, obj_addr_on_target, adjusted_insn_addr>
+	<adjusted_insn_addr_end, jump_pad, jump_pad_end>: New fields.
+	(tracepoints): Use IP_AGENT_EXPORT.
+	(last_tracepoint): Don't include in the IPA.
+	(stopping_tracepoint): Use IP_AGENT_EXPORT.
+	(trace_buffer_is_full): Use IP_AGENT_EXPORT.
+	(alloced_trace_state_variables): New.
+	(trace_state_variables): Use IP_AGENT_EXPORT.
+	(traceframe_t): Delete unused variable.
+	(circular_trace_buffer): Don't include in the IPA.
+	(trace_buffer_start): Delete.
+	(struct trace_buffer_control): New.
+	(trace_buffer_free): Delete.
+	(struct ipa_trace_buffer_control): New.
+	(GDBSERVER_FLUSH_COUNT_MASK, GDBSERVER_FLUSH_COUNT_MASK_PREV)
+	(GDBSERVER_FLUSH_COUNT_MASK_CURR, GDBSERVER_UPDATED_FLUSH_COUNT_BIT):
+	New.
+	(trace_buffer_ctrl): New.
+	(TRACE_BUFFER_CTRL_CURR): New.
+	(trace_buffer_start, trace_buffer_free, trace_buffer_end_free):
+	Reimplement as macros.
+	(trace_buffer_wrap): Delete.
+	(traceframe_write_count, traceframe_read_count)
+	(traceframes_created, tracing): Use IP_AGENT_EXPORT.
+	(struct tracepoint_hit_ctx) <type>: New field.
+	(struct fast_tracepoint_ctx): New.
+	(memory_barrier): New.
+	(cmpxchg): New.
+	(record_tracepoint_error): Update atomically in the IPA.
+	(clear_inferior_trace_buffer): New.
+	(about_to_request_buffer_space): New.
+	(trace_buffer_alloc): Handle GDBserver and inferior simulatenous
+	updating the same buffer.
+	(add_tracepoint): Default the tracepoint's type to trap
+	tracepoint, and orig_size to -1.
+	(get_trace_state_variable) [IN_PROCESS_AGENT]: Handle allocated
+	internal variables.
+	(create_trace_state_variable): New parameter `gdb'.  Handle it.
+	(clear_installed_tracepoints): Clear fast tracepoint jumps.
+	(cmd_qtdp): Handle fast tracepoints.
+	(cmd_qtdv): Adjust.
+	(max_jump_pad_size): New.
+	(gdb_jump_pad_head): New.
+	(get_jump_space_head): New.
+	(claim_jump_space): New.
+	(sort_tracepoints): New.
+	(MAX_JUMP_SIZE): New.
+	(cmd_qtstart): Handle fast tracepoints.  Sync tracepoints with the
+	IPA.
+	(stop_tracing) [IN_PROCESS_AGENT]: Don't include the tdisconnected
+	support.  Upload fast traceframes, and delete internal IPA
+	breakpoints.
+	(stop_tracing_handler): New.
+	(flush_trace_buffer_handler): New.
+	(cmd_qtstop): Upload fast tracepoints.
+	(response_tracepoint): Handle fast tracepoints.
+	(tracepoint_finished_step): Upload fast traceframes.  Set the
+	tracepoint hit context's tracepoint type.
+	(handle_tracepoint_bkpts): New.
+	(tracepoint_was_hit): Set the tracepoint hit context's tracepoint
+	type.  Add comment about fast tracepoints.
+	(collect_data_at_tracepoint) [IN_PROCESS_AGENT]: Don't access the
+	non-existing action_str field.
+	(get_context_regcache): Handle fast tracepoints.
+	(do_action_at_tracepoint) [!IN_PROCESS_AGENT]: Don't write the PC
+	to the regcache.
+	(fast_tracepoint_from_jump_pad_address): New.
+	(fast_tracepoint_from_ipa_tpoint_address): New.
+	(collecting_t): New.
+	(force_unlock_trace_buffer): New.
+	(fast_tracepoint_collecting): New.
+	(collecting): New.
+	(gdb_collect): New.
+	(write_inferior_data_ptr): New.
+	(target_tp_heap): New.
+	(target_malloc): New.
+	(download_agent_expr): New.
+	(UALIGN): New.
+	(download_tracepoints): New.
+	(download_trace_state_variables): New.
+	(upload_fast_traceframes): New.
+	(IPA_FIRST_TRACEFRAME): New.
+	(IPA_NEXT_TRACEFRAME_1): New.
+	(IPA_NEXT_TRACEFRAME): New.
+	[IN_PROCESS_AGENT]: Include sys/mman.h and fcntl.h.
+	[IN_PROCESS_AGENT] (gdb_tp_heap_buffer, gdb_jump_pad_buffer)
+	(gdb_jump_pad_buffer_end): New.
+	[IN_PROCESS_AGENT] (initialize_tracepoint_ftlib): New.
+	(initialize_tracepoint): Adjust.
+	[IN_PROCESS_AGENT]: Allocate the IPA heap, and jump pad scratch
+	buffer.  Initialize the low module.
+	* utils.c (PREFIX, TOOLNAME): New.
+	(malloc_failure): Use PREFIX.
+	(error): In the IPA, an error causes an exit.
+	(fatal, warning): Use PREFIX.
+	(internal_error): Use TOOLNAME.
+	(NUMCELLS): Increase to 10.
+	* configure, config.in: Regenerate.
+
+2010-06-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (handle_query) <qSupported>: Do two passes over the
 	qSupported string to avoid nesting strtok.

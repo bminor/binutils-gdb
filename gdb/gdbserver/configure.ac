@@ -245,11 +245,43 @@ fi
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
 
+dnl Check whether the target supports __sync_*_compare_and_swap.
+AC_CACHE_CHECK([whether the target supports __sync_*_compare_and_swap],
+		gdbsrv_cv_have_sync_builtins, [
+AC_TRY_LINK([], [int foo, bar; bar = __sync_val_compare_and_swap(&foo, 0, 1);],
+		gdbsrv_cv_have_sync_builtins=yes,
+		gdbsrv_cv_have_sync_builtins=no)])
+if test $gdbsrv_cv_have_sync_builtins = yes; then
+  AC_DEFINE(HAVE_SYNC_BUILTINS, 1,
+    [Define to 1 if the target supports __sync_*_compare_and_swap])
+fi
+
+dnl Check for -fvisibility=hidden support in the compiler.
+saved_cflags="$CFLAGS"
+CFLAGS="$CFLAGS -fvisibility=hidden"
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([]),
+		        [gdbsrv_cv_have_visibility_hidden=yes],
+	        	[gdbsrv_cv_have_visibility_hidden=no])
+CFLAGS="$saved_cflags"
+
+IPA_DEPFILES=""
+
+# Rather than allowing to build a broken IPA, we simply disable it if
+# we don't find a compiler supporting all the features we need.
+if test "$ipa_obj" != "" \
+   -a "$gdbsrv_cv_have_sync_builtins" = yes \
+   -a "$gdbsrv_cv_have_visibility_hidden" = yes; then
+   IPA_DEPFILES="$ipa_obj"
+   extra_libraries="libinproctrace.so"
+fi
+
 AC_SUBST(GDBSERVER_DEPFILES)
 AC_SUBST(GDBSERVER_LIBS)
 AC_SUBST(USE_THREAD_DB)
 AC_SUBST(srv_xmlbuiltin)
 AC_SUBST(srv_xmlfiles)
+AC_SUBST(IPA_DEPFILES)
+AC_SUBST(extra_libraries)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in

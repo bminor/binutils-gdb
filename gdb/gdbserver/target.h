@@ -324,6 +324,31 @@ struct target_ops
 
   /* Cancel all pending breakpoints hits in all threads.  */
   void (*cancel_breakpoints) (void);
+
+  /* Stabilize all threads.  That is, force them out of jump pads.  */
+  void (*stabilize_threads) (void);
+
+  /* Install a fast tracepoint jump pad.  TPOINT is the address of the
+     tracepoint internal object as used by the IPA agent.  TPADDR is
+     the address of tracepoint.  COLLECTOR is address of the function
+     the jump pad redirects to.  LOCKADDR is the address of the jump
+     pad lock object.  ORIG_SIZE is the size in bytes of the
+     instruction at TPADDR.  JUMP_ENTRY points to the address of the
+     jump pad entry, and on return holds the address past the end of
+     the created jump pad. JJUMP_PAD_INSN is a buffer containing a
+     copy of the instruction at TPADDR.  ADJUST_INSN_ADDR and
+     ADJUST_INSN_ADDR_END are output parameters that return the
+     address range where the instruction at TPADDR was relocated
+     to.  */
+  int (*install_fast_tracepoint_jump_pad) (CORE_ADDR tpoint, CORE_ADDR tpaddr,
+					   CORE_ADDR collector,
+					   CORE_ADDR lockaddr,
+					   ULONGEST orig_size,
+					   CORE_ADDR *jump_entry,
+					   unsigned char *jjump_pad_insn,
+					   ULONGEST *jjump_pad_insn_size,
+					   CORE_ADDR *adjusted_insn_addr,
+					   CORE_ADDR *adjusted_insn_addr_end);
 };
 
 extern struct target_ops *the_target;
@@ -378,6 +403,9 @@ void set_target_ops (struct target_ops *);
   (the_target->supports_tracepoints			\
    ? (*the_target->supports_tracepoints) () : 0)
 
+#define target_supports_fast_tracepoints()		\
+  (the_target->install_fast_tracepoint_jump_pad != NULL)
+
 #define thread_stopped(thread) \
   (*the_target->thread_stopped) (thread)
 
@@ -401,6 +429,28 @@ void set_target_ops (struct target_ops *);
       if (the_target->cancel_breakpoints)     	\
 	(*the_target->cancel_breakpoints) ();  	\
     } while (0)
+
+#define stabilize_threads()			\
+  do						\
+    {						\
+      if (the_target->stabilize_threads)     	\
+	(*the_target->stabilize_threads) ();  	\
+    } while (0)
+
+#define install_fast_tracepoint_jump_pad(tpoint, tpaddr,		\
+					 collector, lockaddr,		\
+					 orig_size,			\
+					 jump_entry, jjump_pad_insn,	\
+					 jjump_pad_insn_size,		\
+					 adjusted_insn_addr,		\
+					 adjusted_insn_addr_end)	\
+  (*the_target->install_fast_tracepoint_jump_pad) (tpoint, tpaddr,	\
+						   collector,lockaddr,	\
+						   orig_size, jump_entry, \
+						   jjump_pad_insn,	\
+						   jjump_pad_insn_size, \
+						   adjusted_insn_addr,	\
+						   adjusted_insn_addr_end)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

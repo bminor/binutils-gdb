@@ -141,12 +141,15 @@ XML_DIR = $(srcdir)/../features
 XML_FILES = @srv_xmlfiles@
 XML_BUILTIN = @srv_xmlbuiltin@
 
+IPA_DEPFILES = @IPA_DEPFILES@
+extra_libraries = @extra_libraries@
+
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
 .c.o:
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
-all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT)
+all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
@@ -157,6 +160,10 @@ install: all install-only
 install-only:
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
+	if [ x$IPA_DEPFILES != x ]; then \
+		$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(libdir); \
+		$(INSTALL_PROGRAM) $(IPA_LIB) $(DESTDIR)$(libdir)/$(IPA_LIB); \
+	fi; \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir); \
 	$(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT); \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir); \
@@ -186,6 +193,15 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS)
 
+IPA_OBJS=tracepoint-ipa.o utils-ipa.o regcache-ipa.o ${IPA_DEPFILES}
+
+IPA_LIB=libinproctrace.so
+
+$(IPA_LIB): $(IPA_OBJS) ${ADD_DEPS} ${CDEPS}
+	rm -f $(IPA_LIB)
+	${CC-LD} -shared -fPIC -Wl,--no-undefined $(INTERNAL_CFLAGS) \
+	$(INTERNAL_LDFLAGS) -o $(IPA_LIB) ${IPA_OBJS}
+
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.
 # The xyzzy stuff below deals with empty DEPFILES
@@ -205,6 +221,7 @@ clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
+	rm -f $(IPA_LIB)
 	rm -f reg-arm.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
@@ -277,6 +294,30 @@ server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 linux_low_h = $(srcdir)/linux-low.h
 
 nto_low_h = $(srcdir)/nto-low.h
+
+# Note, we only build the IPA if -fvisibility=hidden is supported in
+# the first place.
+IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) \
+	-fPIC -DGDBSERVER -DIN_PROCESS_AGENT \
+	-fvisibility=hidden
+
+# In-process agent object rules
+tracepoint-ipa.o: tracepoint.c $(server_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o tracepoint-ipa.o
+utils-ipa.o: utils.c $(server_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o utils-ipa.o
+remote-utils-ipa.o: remote-utils.c $(server_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o remote-utils-ipa.o
+regcache-ipa.o: regcache.c $(server_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o regcache-ipa.o
+i386-linux-ipa.o : i386-linux.c $(regdef_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o i386-linux-ipa.o
+linux-i386-ipa.o: linux-i386-ipa.c $(server_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o linux-i386-ipa.o
+linux-amd64-ipa.o: linux-amd64-ipa.c $(server_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o linux-amd64-ipa.o
+amd64-linux-ipa.o : amd64-linux.c $(regdef_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o amd64-linux-ipa.o
 
 event-loop.o: event-loop.c $(server_h)
 hostio.o: hostio.c $(server_h)

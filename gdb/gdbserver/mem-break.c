@@ -137,8 +137,10 @@ set_raw_breakpoint_at (CORE_ADDR where)
   bp->pc = where;
   bp->refcount = 1;
 
-  err = (*the_target->read_memory) (where, bp->old_data,
-				    breakpoint_len);
+  /* Note that there can be fast tracepoint jumps installed in the
+     same memory range, so to get at the original memory, we need to
+     use read_inferior_memory, which masks those out.  */
+  err = read_inferior_memory (where, bp->old_data, breakpoint_len);
   if (err != 0)
     {
       if (debug_threads)
@@ -167,6 +169,302 @@ set_raw_breakpoint_at (CORE_ADDR where)
   bp->next = proc->raw_breakpoints;
   proc->raw_breakpoints = bp;
   return bp;
+}
+
+/* Notice that breakpoint traps are always installed on top of fast
+   tracepoint jumps.  This is even if the fast tracepoint is installed
+   at a later time compared to when the breakpoint was installed.
+   This means that a stopping breakpoint or tracepoint has higher
+   "priority".  In turn, this allows having fast and slow tracepoints
+   (and breakpoints) at the same address behave correctly.  */
+
+
+/* A fast tracepoint jump.  */
+
+struct fast_tracepoint_jump
+{
+  struct fast_tracepoint_jump *next;
+
+  /* A reference count.  GDB can install more than one fast tracepoint
+     at the same address (each with its own action list, for
+     example).  */
+  int refcount;
+
+  /* The fast tracepoint's insertion address.  There can only be one
+     of these for a given PC.  */
+  CORE_ADDR pc;
+
+  /* Non-zero if this fast tracepoint jump is currently inserted in
+     the inferior.  */
+  int inserted;
+
+  /* The length of the jump instruction.  */
+  int length;
+
+  /* A poor-man's flexible array member, holding both the jump
+     instruction to insert, and a copy of the instruction that would
+     be in memory had not been a jump there (the shadow memory of the
+     tracepoint jump).  */
+  unsigned char insn_and_shadow[0];
+};
+
+/* Fast tracepoint FP's jump instruction to insert.  */
+#define fast_tracepoint_jump_insn(fp) \
+  ((fp)->insn_and_shadow + 0)
+
+/* The shadow memory of fast tracepoint jump FP.  */
+#define fast_tracepoint_jump_shadow(fp) \
+  ((fp)->insn_and_shadow + (fp)->length)
+
+
+/* Return the fast tracepoint jump set at WHERE.  */
+
+static struct fast_tracepoint_jump *
+find_fast_tracepoint_jump_at (CORE_ADDR where)
+{
+  struct process_info *proc = current_process ();
+  struct fast_tracepoint_jump *jp;
+
+  for (jp = proc->fast_tracepoint_jumps; jp != NULL; jp = jp->next)
+    if (jp->pc == where)
+      return jp;
+
+  return NULL;
+}
+
+int
+fast_tracepoint_jump_here (CORE_ADDR where)
+{
+  struct fast_tracepoint_jump *jp = find_fast_tracepoint_jump_at (where);
+
+  return (jp != NULL);
+}
+
+int
+delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
+{
+  struct fast_tracepoint_jump *bp, **bp_link;
+  int ret;
+  struct process_info *proc = current_process ();
+
+  bp = proc->fast_tracepoint_jumps;
+  bp_link = &proc->fast_tracepoint_jumps;
+
+  while (bp)
+    {
+      if (bp == todel)
+	{
+	  if (--bp->refcount == 0)
+	    {
+	      struct fast_tracepoint_jump *prev_bp_link = *bp_link;
+
+	      /* Unlink it.  */
+	      *bp_link = bp->next;
+
+	      /* Since there can be breakpoints inserted in the same
+		 address range, we use `write_inferior_memory', which
+		 takes care of layering breakpoints on top of fast
+		 tracepoints, and on top of the buffer we pass it.
+		 This works because we've already unlinked the fast
+		 tracepoint jump above.  Also note that we need to
+		 pass the current shadow contents, because
+		 write_inferior_memory updates any shadow memory with
+		 what we pass here, and we want that to be a nop.  */
+	      ret = write_inferior_memory (bp->pc,
+					   fast_tracepoint_jump_shadow (bp),
+					   bp->length);
+	      if (ret != 0)
+		{
+		  /* Something went wrong, relink the jump.  */
+		  *bp_link = prev_bp_link;
+
+		  if (debug_threads)
+		    fprintf (stderr,
+			     "Failed to uninsert fast tracepoint jump "
+			     "at 0x%s (%s) while deleting it.\n",
+			     paddress (bp->pc), strerror (ret));
+		  return ret;
+		}
+
+	      free (bp);
+	    }
+
+	  return 0;
+	}
+      else
+	{
+	  bp_link = &bp->next;
+	  bp = *bp_link;
+	}
+    }
+
+  warning ("Could not find fast tracepoint jump in list.");
+  return ENOENT;
+}
+
+struct fast_tracepoint_jump *
+set_fast_tracepoint_jump (CORE_ADDR where,
+			  unsigned char *insn, ULONGEST length)
+{
+  struct process_info *proc = current_process ();
+  struct fast_tracepoint_jump *jp;
+  int err;
+
+  /* We refcount fast tracepoint jumps.  Check if we already know
+     about a jump at this address.  */
+  jp = find_fast_tracepoint_jump_at (where);
+  if (jp != NULL)
+    {
+      jp->refcount++;
+      return jp;
+    }
+
+  /* We don't, so create a new object.  Double the length, because the
+     flexible array member holds both the jump insn, and the
+     shadow.  */
+  jp = xcalloc (1, sizeof (*jp) + (length * 2));
+  jp->pc = where;
+  jp->length = length;
+  memcpy (fast_tracepoint_jump_insn (jp), insn, length);
+  jp->refcount = 1;
+
+  /* Note that there can be trap breakpoints inserted in the same
+     address range.  To access the original memory contents, we use
+     `read_inferior_memory', which masks out breakpoints.  */
+  err = read_inferior_memory (where,
+			      fast_tracepoint_jump_shadow (jp), jp->length);
+  if (err != 0)
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "Failed to read shadow memory of"
+		 " fast tracepoint at 0x%s (%s).\n",
+		 paddress (where), strerror (err));
+      free (jp);
+      return NULL;
+    }
+
+  /* Link the jump in.  */
+  jp->inserted = 1;
+  jp->next = proc->fast_tracepoint_jumps;
+  proc->fast_tracepoint_jumps = jp;
+
+  /* Since there can be trap breakpoints inserted in the same address
+     range, we use use `write_inferior_memory', which takes care of
+     layering breakpoints on top of fast tracepoints, on top of the
+     buffer we pass it.  This works because we've already linked in
+     the fast tracepoint jump above.  Also note that we need to pass
+     the current shadow contents, because write_inferior_memory
+     updates any shadow memory with what we pass here, and we want
+     that to be a nop.  */
+  err = write_inferior_memory (where, fast_tracepoint_jump_shadow (jp), length);
+  if (err != 0)
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "Failed to insert fast tracepoint jump at 0x%s (%s).\n",
+		 paddress (where), strerror (err));
+
+      /* Unlink it.  */
+      proc->fast_tracepoint_jumps = jp->next;
+      free (jp);
+
+      return NULL;
+    }
+
+  return jp;
+}
+
+void
+uninsert_fast_tracepoint_jumps_at (CORE_ADDR pc)
+{
+  struct fast_tracepoint_jump *jp;
+  int err;
+
+  jp = find_fast_tracepoint_jump_at (pc);
+  if (jp == NULL)
+    {
+      /* This can happen when we remove all breakpoints while handling
+	 a step-over.  */
+      if (debug_threads)
+	fprintf (stderr,
+		 "Could not find fast tracepoint jump at 0x%s "
+		 "in list (uninserting).\n",
+		 paddress (pc));
+      return;
+    }
+
+  if (jp->inserted)
+    {
+      jp->inserted = 0;
+
+      /* Since there can be trap breakpoints inserted in the same
+	 address range, we use use `write_inferior_memory', which
+	 takes care of layering breakpoints on top of fast
+	 tracepoints, and on top of the buffer we pass it.  This works
+	 because we've already marked the fast tracepoint fast
+	 tracepoint jump uninserted above.  Also note that we need to
+	 pass the current shadow contents, because
+	 write_inferior_memory updates any shadow memory with what we
+	 pass here, and we want that to be a nop.  */
+      err = write_inferior_memory (jp->pc,
+				   fast_tracepoint_jump_shadow (jp),
+				   jp->length);
+      if (err != 0)
+	{
+	  jp->inserted = 1;
+
+	  if (debug_threads)
+	    fprintf (stderr,
+		     "Failed to uninsert fast tracepoint jump at 0x%s (%s).\n",
+		     paddress (pc), strerror (err));
+	}
+    }
+}
+
+void
+reinsert_fast_tracepoint_jumps_at (CORE_ADDR where)
+{
+  struct fast_tracepoint_jump *jp;
+  int err;
+
+  jp = find_fast_tracepoint_jump_at (where);
+  if (jp == NULL)
+    {
+      /* This can happen when we remove breakpoints when a tracepoint
+	 hit causes a tracing stop, while handling a step-over.  */
+      if (debug_threads)
+	fprintf (stderr,
+		 "Could not find fast tracepoint jump at 0x%s "
+		 "in list (reinserting).\n",
+		 paddress (where));
+      return;
+    }
+
+  if (jp->inserted)
+    error ("Jump already inserted at reinsert time.");
+
+  jp->inserted = 1;
+
+  /* Since there can be trap breakpoints inserted in the same address
+     range, we use `write_inferior_memory', which takes care of
+     layering breakpoints on top of fast tracepoints, and on top of
+     the buffer we pass it.  This works because we've already marked
+     the fast tracepoint jump inserted above.  Also note that we need
+     to pass the current shadow contents, because
+     write_inferior_memory updates any shadow memory with what we pass
+     here, and we want that to be a nop.  */
+  err = write_inferior_memory (where,
+			       fast_tracepoint_jump_shadow (jp), jp->length);
+  if (err != 0)
+    {
+      jp->inserted = 0;
+
+      if (debug_threads)
+	fprintf (stderr,
+		 "Failed to reinsert fast tracepoint jump at 0x%s (%s).\n",
+		 paddress (where), strerror (err));
+    }
 }
 
 struct breakpoint *
@@ -215,8 +513,17 @@ delete_raw_breakpoint (struct process_info *proc, struct raw_breakpoint *todel)
 
 	      *bp_link = bp->next;
 
-	      ret = (*the_target->write_memory) (bp->pc, bp->old_data,
-						 breakpoint_len);
+	      /* Since there can be trap breakpoints inserted in the
+		 same address range, we use `write_inferior_memory',
+		 which takes care of layering breakpoints on top of
+		 fast tracepoints, and on top of the buffer we pass
+		 it.  This works because we've already unlinked the
+		 fast tracepoint jump above.  Also note that we need
+		 to pass the current shadow contents, because
+		 write_inferior_memory updates any shadow memory with
+		 what we pass here, and we want that to be a nop.  */
+	      ret = write_inferior_memory (bp->pc, bp->old_data,
+					   breakpoint_len);
 	      if (ret != 0)
 		{
 		  /* Something went wrong, relink the breakpoint.  */
@@ -426,8 +733,16 @@ uninsert_raw_breakpoint (struct raw_breakpoint *bp)
       int err;
 
       bp->inserted = 0;
-      err = (*the_target->write_memory) (bp->pc, bp->old_data,
-					 breakpoint_len);
+      /* Since there can be fast tracepoint jumps inserted in the same
+	 address range, we use `write_inferior_memory', which takes
+	 care of layering breakpoints on top of fast tracepoints, and
+	 on top of the buffer we pass it.  This works because we've
+	 already unlinked the fast tracepoint jump above.  Also note
+	 that we need to pass the current shadow contents, because
+	 write_inferior_memory updates any shadow memory with what we
+	 pass here, and we want that to be a nop.  */
+      err = write_inferior_memory (bp->pc, bp->old_data,
+				   breakpoint_len);
       if (err != 0)
 	{
 	  bp->inserted = 1;
@@ -621,8 +936,38 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp = proc->raw_breakpoints;
+  struct fast_tracepoint_jump *jp = proc->fast_tracepoint_jumps;
   CORE_ADDR mem_end = mem_addr + mem_len;
   int disabled_one = 0;
+
+  for (; jp != NULL; jp = jp->next)
+    {
+      CORE_ADDR bp_end = jp->pc + jp->length;
+      CORE_ADDR start, end;
+      int copy_offset, copy_len, buf_offset;
+
+      if (mem_addr >= bp_end)
+	continue;
+      if (jp->pc >= mem_end)
+	continue;
+
+      start = jp->pc;
+      if (mem_addr > start)
+	start = mem_addr;
+
+      end = bp_end;
+      if (end > mem_end)
+	end = mem_end;
+
+      copy_len = end - start;
+      copy_offset = start - jp->pc;
+      buf_offset = start - mem_addr;
+
+      if (jp->inserted)
+	memcpy (buf + buf_offset,
+		fast_tracepoint_jump_shadow (jp) + copy_offset,
+		copy_len);
+    }
 
   for (; bp != NULL; bp = bp->next)
     {
@@ -665,8 +1010,41 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp = proc->raw_breakpoints;
+  struct fast_tracepoint_jump *jp = proc->fast_tracepoint_jumps;
   CORE_ADDR mem_end = mem_addr + mem_len;
   int disabled_one = 0;
+
+  /* First fast tracepoint jumps, then breakpoint traps on top.  */
+
+  for (; jp != NULL; jp = jp->next)
+    {
+      CORE_ADDR jp_end = jp->pc + jp->length;
+      CORE_ADDR start, end;
+      int copy_offset, copy_len, buf_offset;
+
+      if (mem_addr >= jp_end)
+	continue;
+      if (jp->pc >= mem_end)
+	continue;
+
+      start = jp->pc;
+      if (mem_addr > start)
+	start = mem_addr;
+
+      end = jp_end;
+      if (end > mem_end)
+	end = mem_end;
+
+      copy_len = end - start;
+      copy_offset = start - jp->pc;
+      buf_offset = start - mem_addr;
+
+      memcpy (fast_tracepoint_jump_shadow (jp) + copy_offset,
+	      buf + buf_offset, copy_len);
+      if (jp->inserted)
+	memcpy (buf + buf_offset,
+		fast_tracepoint_jump_insn (jp) + copy_offset, copy_len);
+    }
 
   for (; bp != NULL; bp = bp->next)
     {

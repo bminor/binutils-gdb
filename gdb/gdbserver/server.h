@@ -221,6 +221,7 @@ struct dll_info
 struct sym_cache;
 struct breakpoint;
 struct raw_breakpoint;
+struct fast_tracepoint_jump;
 struct process_info_private;
 
 struct process_info
@@ -243,6 +244,9 @@ struct process_info
 
   /* The list of raw memory breakpoints.  */
   struct raw_breakpoint *raw_breakpoints;
+
+  /* The list of installed fast tracepoints.  */
+  struct fast_tracepoint_jump *fast_tracepoint_jumps;
 
   /* Private target data.  */
   struct process_info_private *private;
@@ -379,8 +383,8 @@ void initialize_async_io (void);
 void enable_async_io (void);
 void disable_async_io (void);
 void check_remote_input_interrupt_request (void);
-void convert_ascii_to_int (char *from, unsigned char *to, int n);
-void convert_int_to_ascii (unsigned char *from, char *to, int n);
+void convert_ascii_to_int (const char *from, unsigned char *to, int n);
+void convert_int_to_ascii (const unsigned char *from, char *to, int n);
 void new_thread_notify (int id);
 void dead_thread_notify (int id);
 void prepare_resume_reply (char *buf, ptid_t ptid,
@@ -391,9 +395,9 @@ void decode_address (CORE_ADDR *addrp, const char *start, int len);
 void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr);
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
-		      unsigned int *len_ptr, unsigned char *to);
+		      unsigned int *len_ptr, unsigned char **to_p);
 int decode_X_packet (char *from, int packet_len, CORE_ADDR * mem_addr_ptr,
-		     unsigned int *len_ptr, unsigned char *to);
+		     unsigned int *len_ptr, unsigned char **to_p);
 int decode_xfer_write (char *buf, int packet_len, char **annex,
 		       CORE_ADDR *offset, unsigned int *len,
 		       unsigned char *data);
@@ -411,6 +415,8 @@ char *unpack_varlen_hex (char *buff,  ULONGEST *result);
 
 void clear_symbol_cache (struct sym_cache **symcache_p);
 int look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb);
+
+int relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc);
 
 void monitor_output (const char *msg);
 
@@ -507,10 +513,14 @@ char *phex_nz (ULONGEST l, int sizeof_l);
 
 /* Functions from tracepoint.c */
 
+int in_process_agent_loaded (void);
+
 void initialize_tracepoint (void);
 
 extern int tracing;
 extern int disconnected_tracing;
+
+void tracepoint_look_up_symbols (void);
 
 void stop_tracing (void);
 
@@ -531,6 +541,37 @@ int traceframe_read_mem (int tfnum, CORE_ADDR addr,
 int fetch_traceframe_registers (int tfnum,
 				struct regcache *regcache,
 				int regnum);
+
+/* If a thread is determined to be collecting a fast tracepoint, this
+   structure holds the collect status.  */
+
+struct fast_tpoint_collect_status
+{
+  /* The tracepoint that is presently being collected.  */
+  int tpoint_num;
+  CORE_ADDR tpoint_addr;
+
+  /* The address range in the jump pad of where the original
+     instruction the tracepoint jump was inserted was relocated
+     to.  */
+  CORE_ADDR adjusted_insn_addr;
+  CORE_ADDR adjusted_insn_addr_end;
+};
+
+int fast_tracepoint_collecting (CORE_ADDR thread_area,
+				CORE_ADDR stop_pc,
+				struct fast_tpoint_collect_status *status);
+void force_unlock_trace_buffer (void);
+
+int handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc);
+
+#ifdef IN_PROCESS_AGENT
+void initialize_low_tracepoint (void);
+void supply_fast_tracepoint_registers (struct regcache *regcache,
+				       const unsigned char *regs);
+#else
+void stop_tracing (void);
+#endif
 
 /* Version information, from version.c.  */
 extern const char version[];
