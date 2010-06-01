@@ -52,20 +52,14 @@ if ![runto_main] then {
     continue
 }
 
-send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
-    send_gdb "cont\n"
-    gdb_expect {
-        -re "Break.* marker1(\\(\\)|) \\(\\) at .*:$decimal.*$gdb_prompt $" {
-            send_gdb "up\n"
-            gdb_expect {
-                -re ".*$gdb_prompt $" { pass "up from marker1" }
-                timeout { fail "up from marker1" }
-            }
-        }
-        -re "$gdb_prompt $" { fail "continue to marker1"  }
-        timeout { fail "(timeout) continue to marker1"  }
-    }
+gdb_test "break marker1" \
+    "Breakpoint .*${srcfile}.*" 
 
+gdb_test "cont" \
+    "Break.* marker1(\\(\\)|) \\(\\) at .*:$decimal.*" \
+    "continue to marker1"
+
+gdb_test "up" " in main .*" "up from marker1"
 
 gdb_test "print one + two" "\\\$\[0-9\]* = {x = 6, y = 8}"
 

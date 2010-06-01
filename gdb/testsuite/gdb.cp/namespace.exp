@@ -87,77 +87,48 @@ gdb_test "up" ".*main.*" "up from marker1"
 # I'm including versions both with and without quotes; for tests that
 # shouldn't work with quotes, I'm only including one version.
 
-send_gdb "print 'AAA::c'\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 0 '\\\\(0|000)'\r\n$gdb_prompt $" { pass "print 'AAA::c'" }
-   -re ".*$gdb_prompt $" { fail "print 'AAA::c'" }
-   timeout { fail "(timeout) print 'AAA::c'" }
-}
+gdb_test "print 'AAA::c'" \
+    "\\$\[0-9\]* = 0 '\\\\(0|000)'" \
+    "print 'AAA::c'"
 
-send_gdb "print AAA::c\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 0 '\\\\(0|000)'\r\n$gdb_prompt $" { pass "print AAA::c" }
-   -re ".*$gdb_prompt $" { fail "print AAA::c" }
-   timeout { fail "(timeout) print AAA::c" }
-}
+gdb_test "print AAA::c" \
+    "\\$\[0-9\]* = 0 '\\\\(0|000)'" \
+    "print AAA::c"
 
 # An object declared using "using".
 
-send_gdb "print ina\n"
-gdb_expect {
-   -re "\\$\[0-9\]+ = {xx = 33}.*$gdb_prompt $" {
-      pass "print ina"
-   }
-   -re ".*$gdb_prompt $" { fail "print ina" }
-   timeout { fail "(timeout) print ina" }
-}
+gdb_test "print ina" "\\$\[0-9\]+ = {xx = 33}"
 
-send_gdb "ptype ina\n"
-gdb_expect {
-   -re "type = class (AAA::|)inA \{\r\n\[ \]*public:\r\n\[ \]*int xx;\r\n\[ \]*\r\n\[ \]*.*int fum\\(int\\);\r\n\}\r\n$gdb_prompt $" {
-       pass "ptype ina"
-   }
-   -re "type = class (AAA::|)inA \{\r\n\[ \]*public:\r\n\[ \]*int xx;\r\n\[ \]*\r\n\[ \]*int fum\\(int\\);\r\n.*\}\r\n$gdb_prompt $" {
-       pass "ptype ina"
-   }
-   -re ".*$gdb_prompt $" { fail "ptype ina" }
-   timeout { fail "(timeout) ptype ina" }
+gdb_test_multiple "ptype ina" "ptype ina" {
+    -re "type = class (AAA::|)inA \{\r\n\[ \]*public:\r\n\[ \]*int xx;\r\n\[ \]*\r\n\[ \]*.*int fum\\(int\\);\r\n\}\r\n$gdb_prompt $" {
+	pass "ptype ina"
+    }
+    -re "type = class (AAA::|)inA \{\r\n\[ \]*public:\r\n\[ \]*int xx;\r\n\[ \]*\r\n\[ \]*int fum\\(int\\);\r\n.*\}\r\n$gdb_prompt $" {
+	pass "ptype ina"
+    }
 }
 
 # Check all functions are known to GDB
 
 setup_xfail hppa*-*-*11* CLLbs14869
-send_gdb "info func xyzq\n"
-gdb_expect {
-   -re "All functions.*File.*namespace.cc:\r\nint AAA::A_xyzq\\(int\\);\r\nint BBB::B_xyzq\\(int\\);\r\nchar AAA::xyzq\\(char\\);\r\nchar BBB::xyzq\\(char\\);\r\nchar BBB::CCC::xyzq\\(char\\);\r\nchar BBB::Class::xyzq\\(char\\);\r\n$gdb_prompt $" {
-       pass "info func xyzq"
-   }    
-   -re "All functions.*File.*namespace.cc:\r\nint AAA::A_xyzq\\(int\\);\r\nchar AAA::xyzq\\(char\\);\r\nint BBB::B_xyzq\\(int\\);\r\nchar BBB::CCC::xyzq\\(char\\);\r\nchar BBB::Class::xyzq\\(char\\);\r\nchar BBB::xyzq\\(char\\);\r\n$gdb_prompt $" {
-       pass "info func xyzq"
-   }    
-   -re ".*$gdb_prompt $" { fail "info func xyzq" }
-   timeout { fail "(timeout) info func xyzq" }
+gdb_test_multiple "info func xyzq" "info func xyzq" {
+    -re "All functions.*File.*namespace.cc:\r\nint AAA::A_xyzq\\(int\\);\r\nint BBB::B_xyzq\\(int\\);\r\nchar AAA::xyzq\\(char\\);\r\nchar BBB::xyzq\\(char\\);\r\nchar BBB::CCC::xyzq\\(char\\);\r\nchar BBB::Class::xyzq\\(char\\);\r\n$gdb_prompt $" {
+	pass "info func xyzq"
+    }    
+    -re "All functions.*File.*namespace.cc:\r\nint AAA::A_xyzq\\(int\\);\r\nchar AAA::xyzq\\(char\\);\r\nint BBB::B_xyzq\\(int\\);\r\nchar BBB::CCC::xyzq\\(char\\);\r\nchar BBB::Class::xyzq\\(char\\);\r\nchar BBB::xyzq\\(char\\);\r\n$gdb_prompt $" {
+	pass "info func xyzq"
+    }    
 }
 
 # Call a function in a namespace
 
-send_gdb "print 'AAA::xyzq'('x')\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 97 'a'\r\n$gdb_prompt $" {
-       pass "print 'AAA::xyzq'('x')"
-   }
-   -re ".*$gdb_prompt $" { fail "print 'AAA::xyzq'('x')" }
-   timeout { fail "(timeout) print 'AAA::xyzq'('x')" }
-}
-       
-send_gdb "print AAA::xyzq('x')\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 97 'a'\r\n$gdb_prompt $" {
-       pass "print AAA::xyzq('x')"
-   }
-   -re ".*$gdb_prompt $" { fail "print AAA::xyzq('x')" }
-   timeout { fail "(timeout) print AAA::xyzq('x')" }
-}
+gdb_test "print 'AAA::xyzq'('x')" \
+    "\\$\[0-9\]* = 97 'a'" \
+    "print 'AAA::xyzq'('x')"
+
+gdb_test "print AAA::xyzq('x')" \
+    "\\$\[0-9\]* = 97 'a'" \
+    "print AAA::xyzq('x')"
        
 # Break on a function in a namespace
 
@@ -166,23 +137,13 @@ gdb_test "break AAA::xyzq" \
 
 # Call a function in a nested namespace
 
-send_gdb "print 'BBB::CCC::xyzq'('x')\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 122 'z'\r\n$gdb_prompt $" {
-       pass "print 'BBB::CCC::xyzq'('x')"
-   }
-   -re ".*$gdb_prompt $" { fail "print 'BBB::CCC::xyzq'('x')" }
-   timeout { fail "(timeout) print 'BBB::CCC::xyzq'('x')" }
-}
-       
-send_gdb "print BBB::CCC::xyzq('x')\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = 122 'z'\r\n$gdb_prompt $" {
-       pass "print BBB::CCC::xyzq('x')"
-   }
-   -re ".*$gdb_prompt $" { fail "print BBB::CCC::xyzq('x')" }
-   timeout { fail "(timeout) print BBB::CCC::xyzq('x')" }
-}
+gdb_test "print 'BBB::CCC::xyzq'('x')" \
+    "\\$\[0-9\]* = 122 'z'" \
+    "print 'BBB::CCC::xyzq'('x')"
+
+gdb_test "print BBB::CCC::xyzq('x')" \
+    "\\$\[0-9\]* = 122 'z'" \
+    "print BBB::CCC::xyzq('x')"
        
 # Break on a function in a nested namespace
 
@@ -191,23 +152,13 @@ gdb_test "break BBB::CCC::xyzq" \
 
 # Print address of a function in a class in a namespace
 
-send_gdb "print 'BBB::Class::xyzq'\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = \{char \\((BBB::|)Class \\*( const|), (char|int)\\)\} $hex <BBB::Class::xyzq\\(char\\)>\r\n$gdb_prompt $" {
-       pass "print 'BBB::Class::xyzq'"
-   }
-   -re ".*$gdb_prompt $" { fail "print 'BBB::Class::xyzq'" }
-   timeout { fail "(timeout) print 'BBB::Class::xyzq'" }
-}
+gdb_test "print 'BBB::Class::xyzq'" \
+    "\\$\[0-9\]* = \{char \\((BBB::|)Class \\*( const|), (char|int)\\)\} $hex <BBB::Class::xyzq\\(char\\)>" \
+    "print 'BBB::Class::xyzq'"
 
-send_gdb "print BBB::Class::xyzq\n"
-gdb_expect {
-   -re "\\$\[0-9\]* = \{char \\((BBB::|)Class \\*( const|), (char|int)\\)\} $hex <BBB::Class::xyzq\\(char\\)>\r\n$gdb_prompt $" {
-       pass "print BBB::Class::xyzq"
-   }
-   -re ".*$gdb_prompt $" { fail "print BBB::Class::xyzq" }
-   timeout { fail "(timeout) print BBB::Class::xyzq" }
-}
+gdb_test "print BBB::Class::xyzq" \
+    "\\$\[0-9\]* = \{char \\((BBB::|)Class \\*( const|), (char|int)\\)\} $hex <BBB::Class::xyzq\\(char\\)>" \
+    "print BBB::Class::xyzq"
 
 # Break on a function in a class in a namespace
 

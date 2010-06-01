@@ -32,35 +32,35 @@ proc set_demangling_style {style} {
     global gdb_prompt
     global current_demangling_style
 
-    send_gdb "set demangle-style $style\n"
-    gdb_expect {
-	-re "set demangle-style $style\[\r\n\]+$gdb_prompt $" {
-	    pass "$style: set demangle-style"
+    gdb_test_multiple "set demangle-style $style" \
+	"$style: set demangle-style" {
+	    -re "set demangle-style $style\[\r\n\]+$gdb_prompt $" {
+		pass "$style: set demangle-style"
+	    }
+	    -re ".*$gdb_prompt $" {
+		fail "$style: set demangle-style"
+		error "set_demangling_style: set style"
+	    }
+	    timeout { 
+		fail "$style: set demangle-style (timeout)"
+		error "set_demangling_style: set style"
+	    }
 	}
-	-re ".*$gdb_prompt $" {
-	    fail "$style: set demangle-style"
-	    error "set_demangling_style: set style"
-	}
-	timeout { 
-	    fail "$style: set demangle-style (timeout)"
-	    error "set_demangling_style: set style"
-	}
-    }
 
-    send_gdb "show demangle-style\n"
-    gdb_expect {
-	-re "The current C\[+\]+ demangling style is \"$style\".\r\n$gdb_prompt $" { 
-	    pass "$style: check demangling style"
+    gdb_test_multiple "show demangle-style" \
+	"$style: check demangling style" {
+	    -re "The current C\[+\]+ demangling style is \"$style\".\r\n$gdb_prompt $" { 
+		pass "$style: check demangling style"
+	    }
+	    -re ".*$gdb_prompt $" {
+		fail "$style: check demangling style"
+		error "set_demangling_style: check style"
+	    }
+	    timeout { 
+		fail "$style: check demangling style (timeout)" 
+		error "set_demangling_style: check style"
+	    }
 	}
-	-re ".*$gdb_prompt $" {
-	    fail "$style: check demangling style"
-	    error "set_demangling_style: check style"
-	}
-	timeout { 
-	    fail "$style: check demangling style (timeout)" 
-	    error "set_demangling_style: check style"
-	}
-    }
 
     set current_demangling_style $style
 }
@@ -531,19 +531,13 @@ proc test_gnu_style_demangling {} {
 
     ## 1999-04-19: "Fix from Dale Hawkins".  Shouldn't segfault.
     # Accept even a dubious demangling; the string is ambiguous.
-    send_gdb "maintenance demangle __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator\n"
-    gdb_expect {
+
+    gdb_test_multiple "maintenance demangle __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator" "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator" {
 	-re "virtual function thunk \\(delta:-64\\) for CosNaming::_proxy_NamingContext::_0RL__list\\(unsigned long, _CORBA_Unbounded_Sequence<CosNaming::Binding> \\*\\&, CosNaming::BindingIterator \\*\\&\\)\r\n$gdb_prompt $" {
-		pass "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
+	    pass "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
 	}
 	-re ".*Can't demangle \"__thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator\"\r\n$gdb_prompt $" {
-		pass "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
-	}
-	-re ".*$gdb_prompt $" {
-		fail "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
-	}
-	timeout {
-		fail "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator (timeout)"
+	    pass "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
 	}
     }
 }
@@ -1558,10 +1552,8 @@ proc do_tests {} {
     gdb_exit
     gdb_start
 
-    send_gdb "set language c++\n"
-    gdb_expect -re "$gdb_prompt $"
-    send_gdb "set width 0\n"
-    gdb_expect -re "$gdb_prompt $"
+    gdb_test_no_output "set language c++"
+    gdb_test_no_output "set width 0"
 
     # Using catch_demangling_errors this way ensures that, if one of
     # the functions raises a Tcl error, then it'll get reported, and

@@ -39,39 +39,17 @@ proc deduce_language_of_main {} {
 
     # See what language gdb thinks main() is, prior to reading full symbols.
     # I think this fails for COFF targets.
-    send_gdb "show language\n"
-    gdb_expect {
-	-re ".* source language is \"auto; currently c\[+\]+\".*$gdb_prompt $" {
-	    pass "deduced language is C++, before full symbols"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "source language not correct for C++ (psymtabs only)"
-	    return
-	}
-	timeout {
-	    fail "can't show language (timeout)"
-	    return
-	}
-    }
+    gdb_test "show language" \
+	"source language is \"auto; currently c\[+\]+\".*" \
+	"deduced language is C++, before full symbols"
 
     runto_main
 
     # See if our idea of the language has changed.
 
-    send_gdb "show language\n"
-    gdb_expect {
-	-re ".* source language is \"auto; currently c\[+\]+\".*$gdb_prompt $" {
-	    pass "deduced language is C++, after full symbols"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "source language not correct for C++ (full symbols)"
-	    return
-	}
-	timeout {
-	    fail "can't show language (timeout)"
-	    return
-	}
-    }
+    gdb_test "show language" \
+	"source language is \"auto; currently c\[+\]+\".*" \
+	"deduced language is C++, after full symbols"
 }
 
 proc test_expr { args } {

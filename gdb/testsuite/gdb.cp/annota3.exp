@@ -61,8 +61,7 @@ set main_line 25
 
 # The commands we test here produce many lines of output; disable "press 
 # <return> to continue" prompts.
-send_gdb "set height 0\n"
-gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set height 0"
 
 #
 # break at main
@@ -184,19 +183,12 @@ gdb_expect_list "set watch on a.x" "$gdb_prompt$" {
 # do a next, so that the watchpoint triggers. This will test:
 # annotate-watchpoint
 #
-send_gdb "next\n"
-gdb_expect {
+gdb_test_multiple "next" "watch triggered on a.x" {
     -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\r\n\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\n\r\n(\032\032frame-begin 0 0x\[0-9a-z\]+\r\n|)main \\(\\) at .*$srcfile:$decimal\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n.*$gdb_prompt$" { 
 	pass "watch triggered on a.x"
     }
     -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
 	kfail "gdb/38" "watch triggered on a.x"
-    }
-    -re ".*$gdb_prompt$" {
-	fail "watch triggered on a.x"
-    }
-    timeout {
-	fail "watch triggered on a.x (timeout)"
     }
 }
 

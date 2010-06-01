@@ -70,8 +70,7 @@ if ![runto_main] then {
 
 proc take_gdb_out_of_choice_menu {} {
     global gdb_prompt
-    send_gdb " \n"
-    gdb_expect {
+    gdb_test_multiple " " " " {
         -re ".*$gdb_prompt $" {
         }
         timeout {

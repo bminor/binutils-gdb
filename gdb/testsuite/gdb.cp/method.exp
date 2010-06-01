@@ -105,26 +105,24 @@ gdb_test "print x" \
 
 get_debug_format
 
-send_gdb "print this\n"
-gdb_expect {
-  -re "\\$\[0-9\]* = \\(const (class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
-    pass "print this in A::bar"
-  }
-  -re "\\$\[0-9\]* = \\((class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
-    # gcc versions up to 3.0.4 with -gstabs+ do not emit "const" indicators,
-    # so the output is "A *".  It should be "const A *" or "const A * const".
-    setup_xfail_format "stabs"
-    fail "print this in A::bar (missing const)"
-  }
-  -re "\\$\[0-9\]* = \\(const (class |)\{\\.\\.\\.\} *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
-    # gcc versions gcc-3_1-branch%20020404 and HEAD%20020404 with -gstabs+
-    # produce good stabs, but gdb prints "const class {...} *" const.
-    # This is PR gdb/277.
-    # setup_kfail "gdb/277"
-    fail "print this in A::bar (gdb/277)"
-  }
-  -re ".*$gdb_prompt $" { fail "print this in A::bar" }
-  timeout { fail "(timeout) print this in A::bar" }
+gdb_test_multiple "print this" "print this in A::bar" {
+    -re "\\$\[0-9\]* = \\(const (class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
+	pass "print this in A::bar"
+    }
+    -re "\\$\[0-9\]* = \\((class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
+	# gcc versions up to 3.0.4 with -gstabs+ do not emit "const"
+	# indicators, so the output is "A *".  It should be "const A
+	# *" or "const A * const".
+	setup_xfail_format "stabs"
+	fail "print this in A::bar (missing const)"
+    }
+    -re "\\$\[0-9\]* = \\(const (class |)\{\\.\\.\\.\} *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
+	# gcc versions gcc-3_1-branch%20020404 and HEAD%20020404 with -gstabs+
+	# produce good stabs, but gdb prints "const class {...} *" const.
+	# This is PR gdb/277.
+	# setup_kfail "gdb/277"
+	fail "print this in A::bar (gdb/277)"
+    }
 }
 
 # Check again with funk::getFunky (this is the original test case
@@ -158,36 +156,30 @@ gdb_test "print res" \
 
 # Check ptype of class -- should show const/volatile methods
 
-send_gdb "ptype A\n"
-gdb_expect {
-   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\}\r\n$gdb_prompt $" {
-      pass "ptype A"
-   }
-   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*A & operator=\\(A const ?&\\);\r\n\[ \]*A\\(A const ?&\\);\r\n\[ \]*A\\((void|)\\);\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\}\r\n$gdb_prompt $" {
-      pass "ptype A"
-   }
-   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\[ \]*A & operator=\\(A const ?&\\);\r\n\[ \]*A\\(A const ?&\\);\r\n\[ \]*A\\((void|)\\);\r\n\}\r\n$gdb_prompt $" {
-      pass "ptype A"
-   }
-   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\);\r\n\[ \]*int qux\\(int, float\\) const;\r\n\}\r\n$gdb_prompt $" {
-      pass "ptype A (HP aCC bug -- volatile not indicated)"
-   }
-   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) const volatile;\r\n\}\r\n$gdb_prompt $" {
-      pass "ptype A"
-   }
-   -re ".*$gdb_prompt $" { fail "ptype A" }
-   timeout { fail "(timeout) ptype A" }
+gdb_test_multiple "ptype A" "ptype A" {
+    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\}\r\n$gdb_prompt $" {
+	pass "ptype A"
+    }
+    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*A & operator=\\(A const ?&\\);\r\n\[ \]*A\\(A const ?&\\);\r\n\[ \]*A\\((void|)\\);\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\}\r\n$gdb_prompt $" {
+	pass "ptype A"
+    }
+    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\[ \]*A & operator=\\(A const ?&\\);\r\n\[ \]*A\\(A const ?&\\);\r\n\[ \]*A\\((void|)\\);\r\n\}\r\n$gdb_prompt $" {
+	pass "ptype A"
+    }
+    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\);\r\n\[ \]*int qux\\(int, float\\) const;\r\n\}\r\n$gdb_prompt $" {
+	pass "ptype A (HP aCC bug -- volatile not indicated)"
+    }
+    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) const volatile;\r\n\}\r\n$gdb_prompt $" {
+	pass "ptype A"
+    }
 }
 
-send_gdb "cont\n"
-gdb_expect {
+gdb_test_multiple "cont" "finish program" {
     -re "Continuing.\r\n\r\nProgram exited normally.*$gdb_prompt $" {
 	pass "finish program"
     }
     -re "Continuing.* EXIT code 0.*Program exited normally.*$gdb_prompt $" {
 	pass "finish program (exit wrapper)" 
     }
-    -re ".*$gdb_prompt $" { fail "finish program" }
-    default:{               fail "finish program (timeout)" }
 }
 

@@ -51,8 +51,7 @@ if ![runto_main] then {
     continue
 }
 
-send_gdb "break myClass::performBlocking\n"
-gdb_expect {
+gdb_test_multiple "break myClass::performBlocking" "break myClass::performBlocking" {
     -re "Breakpoint $decimal at $hex: file .*$srcfile, line 12.*$gdb_prompt $" {
 	pass "break myClass::performBlocking"
     }
@@ -60,12 +59,6 @@ gdb_expect {
 	# fails with gcc 2.95.3 -gstabs+, native i686-pc-linux-gnu
 	# -- chastain 2003-02-03
 	kfail "gdb/1023" "break myClass::performBlocking"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "break myClass::performBlocking"
-    }
-    timeout {
-	fail "break myClass::performBlocking (timeout)"
     }
 }
 

@@ -176,9 +176,9 @@ gdb_test "up" ".*main.*" "up from marker2"
 
 # Make sure that `Local' isn't in scope here; it's local to foobar.
 # setup_kfail "gdb/825"
-send_gdb "ptype Local\n"
+
 set eol "\[\t \]*\[\r\n\]+\[\t \]*"
-gdb_expect {
+gdb_test_multiple "ptype Local" "Local out of scope" {
     -re "No symbol \"Local\" in current context.*${gdb_prompt} $" {
         pass "Local out of scope"
     }
@@ -192,12 +192,6 @@ gdb_expect {
     -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}    char loc_foo\\(char\\);${eol}.*${eol}}${eol}${gdb_prompt} " {
 	# gcc 3.X abi-2 -gstabs+
         kfail gdb/825 "Local out of scope"
-    }
-    -re ".*${gdb_prompt} $" {
-        fail "Local out of scope"
-    }
-    timeout {
-        fail "Local out of scope (timeout)"
     }
 }
         
@@ -237,15 +231,22 @@ gdb_expect {
 #
 # chastain 2004-01-02
 
-send_gdb "ptype InnerLocal\n"
-gdb_expect {
-  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*int il_foo\\((unsigned char const|const unsigned char) *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 1)" }
-  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 2)" }
-  -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
-  -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal4::NestedInnerLocal nest1;\r\n\r\n\[\t \]*int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\\(Local at.*local\.cc:\[0-9\]+\\)\r\n\}.*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
-  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]* int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal (pattern 5)" }
-  -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal" }
-  timeout             { fail "(timeout) ptype InnerLocal" }
+gdb_test_multiple "ptype InnerLocal" "ptype InnerLocal" {
+    -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*int il_foo\\((unsigned char const|const unsigned char) *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" {
+	pass "ptype InnerLocal (pattern 1)"
+    }
+    -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" {
+	pass "ptype InnerLocal (pattern 2)"
+    }
+    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" {
+	pass "ptype InnerLocal (old HP aCC)"
+    }
+    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal4::NestedInnerLocal nest1;\r\n\r\n\[\t \]*int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\\(Local at.*local\.cc:\[0-9\]+\\)\r\n\}.*$gdb_prompt $" {
+	pass "ptype InnerLocal (old HP aCC)"
+    }
+    -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*(InnerLocal::|)NestedInnerLocal nest1;\[\r\n\t \]* int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*\}.*$gdb_prompt $" {
+	pass "ptype InnerLocal (pattern 5)"
+    }
 }
 
 #---
@@ -268,15 +269,16 @@ gdb_expect {
 # class support, but once we fix PR gdb/482, we should delete this
 # test.
 
-send_gdb "ptype NestedInnerLocal\n"
-gdb_expect {
-  -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
-  -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
-  -re "No symbol \"NestedInnerLocal\" in current context\.\r\n$gdb_prompt $" {
-    pass "ptype NestedInnerLocal"
-  }
-  -re ".*$gdb_prompt $"   {  fail "ptype NestedInnerLocal" }
-  timeout             { fail "(timeout) ptype NestedInnerLocal" }
+gdb_test_multiple "ptype NestedInnerLocal" "ptype NestedInnerLocal" {
+    -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" {
+	pass "ptype NestedInnerLocal"
+    }
+    -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" {
+	pass "ptype NestedInnerLocal"
+    }
+    -re "No symbol \"NestedInnerLocal\" in current context\.\r\n$gdb_prompt $" {
+	pass "ptype NestedInnerLocal"
+    }
 }
 
 set re_class		"((struct|class) InnerLocal::NestedInnerLocal \{${ws}public:|struct InnerLocal::NestedInnerLocal \{)"
