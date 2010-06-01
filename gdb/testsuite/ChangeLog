@@ -1,3 +1,11 @@
+2010-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/commands.exp (begin commands on watch): Remove excessive
+	trailing newline.
+	* gdb.mi/mi-nsintrall.exp (-gdb-show non-stop): Likewise.
+	* gdb.java/jmisc.exp (p *args\n): Rename to ...
+	(p *args): ... here and remove excessive trailing newline.
+
 2010-05-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/subst.exp: Fix call to gdb_test with empty message.

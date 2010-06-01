@@ -37,7 +37,7 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load $binfile
 
 set supported 0
-gdb_test_multiple "-gdb-show non-stop\n" "" {
+gdb_test_multiple "-gdb-show non-stop" "" {
     -re ".*\\^done,value=\"off\",supported=\"(\[^\"\]+)\"\r\n$mi_gdb_prompt$" {
 	if { $expect_out(1,string) == "1" } {
 	    set supported 1

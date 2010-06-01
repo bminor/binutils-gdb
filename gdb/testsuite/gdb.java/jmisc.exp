@@ -81,7 +81,7 @@ if ![set_lang_java] then {
     gdb_test "p args" \
 	"\\\$1 = java\.lang\.String\\\[]@\[a-f0-9]+"
 
-    gdb_test_multiple "p *args\n" "p *args\n" {
+    gdb_test_multiple "p *args" "p *args" {
 	-re "\\\$2 = \{length: 0\}\[\r\n\ \t]+$gdb_prompt $" {
 	    pass "p *args"
 	}
