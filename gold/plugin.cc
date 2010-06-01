@@ -127,7 +127,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 14;
+  const int tv_fixed_size = 15;
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv *tv = new ld_plugin_tv[tv_size];
 
@@ -153,6 +153,10 @@ Plugin::load()
     tv[i].tv_u.tv_val = LDPO_DYN;
   else
     tv[i].tv_u.tv_val = LDPO_EXEC;
+
+  ++i;
+  tv[i].tv_tag = LDPT_OUTPUT_NAME;
+  tv[i].tv_u.tv_string = parameters->options().output();
 
   for (unsigned int j = 0; j < this->args_.size(); ++j)
     {
