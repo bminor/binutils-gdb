@@ -1,3 +1,7 @@
+2010-06-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2010-06-01  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (struct vms_private_data_struct): Add
