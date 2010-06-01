@@ -1346,20 +1346,40 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	 feature will follow a ':', and latter features will follow
 	 ';'.  */
       if (*p == ':')
-	for (p = strtok (p + 1, ";");
-	     p != NULL;
-	     p = strtok (NULL, ";"))
-	  {
-	    if (strcmp (p, "multiprocess+") == 0)
-	      {
-		/* GDB supports and wants multi-process support if
-		   possible.  */
-		if (target_supports_multi_process ())
-		  multi_process = 1;
-	      }
-	    else
-	      target_process_qsupported (p);
-	  }
+	{
+	  char **qsupported = NULL;
+	  int count = 0;
+	  int i;
+
+	  /* Two passes, to avoid nested strtok calls in
+	     target_process_qsupported.  */
+	  for (p = strtok (p + 1, ";");
+	       p != NULL;
+	       p = strtok (NULL, ";"))
+	    {
+	      count++;
+	      qsupported = xrealloc (qsupported, count * sizeof (char *));
+	      qsupported[count - 1] = xstrdup (p);
+	    }
+
+	  for (i = 0; i < count; i++)
+	    {
+	      p = qsupported[i];
+	      if (strcmp (p, "multiprocess+") == 0)
+		{
+		  /* GDB supports and wants multi-process support if
+		     possible.  */
+		  if (target_supports_multi_process ())
+		    multi_process = 1;
+		}
+	      else
+		target_process_qsupported (p);
+
+	      free (p);
+	    }
+
+	  free (qsupported);
+	}
 
       sprintf (own_buf, "PacketSize=%x;QPassSignals+", PBUFSIZ - 1);
 

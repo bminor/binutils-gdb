@@ -1,3 +1,8 @@
+2010-06-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_query) <qSupported>: Do two passes over the
+	qSupported string to avoid nesting strtok.
+
 2010-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (SFILES): Add $(srcdir)/proc-service.list.
