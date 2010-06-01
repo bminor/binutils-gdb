@@ -1,3 +1,62 @@
+2010-06-01  Sriraman Tallam  <tmsriram@google.com>
+
+	* gold.h (is_wildcard_string): New function.
+	* layout.cc (Layout::layout): Pass this pointer to add_input_section.
+	(Layout::layout_eh_frame): Ditto.
+	(Layout::find_section_order_index): New method.
+	(Layout::read_layout_from_file): New method.
+	* layout.h (Layout::find_section_order_index): New method.
+	(Layout::read_layout_from_file): New method.
+	(Layout::input_section_position_): New private member.
+	(Layout::input_section_glob_): New private member.
+	* main.cc (main): Call read_layout_from_file here.
+	* options.h (--section-ordering-file): New option.
+	* output.cc (Output_section::input_section_order_specified_): New
+	member.
+	(Output_section::Output_section): Initialize new member.
+	(Output_section::add_input_section): Add new parameter.
+	Keep input sections when --section-ordering-file is used.
+	(Output_section::set_final_data_size): Sort input sections when
+	section ordering file is specified.
+	(Output_section::Input_section_sort_entry): Add new parameter.
+	Check sorting type.
+	(Output_section::Input_section_sort_entry::compare_section_ordering):
+	New method.
+	(Output_section::Input_section_sort_compare::operator()): Change to
+	consider section_order_index.
+	(Output_section::Input_section_sort_init_fini_compare::operator()):
+	Change to consider section_order_index.
+	(Output_section::Input_section_sort_section_order_index_compare
+	::operator()): New method.
+	(Output_section::sort_attached_input_sections): Change to sort
+	according to section order when specified.
+	(Output_section::add_input_section<32, true>): Add new parameter. 
+	(Output_section::add_input_section<64, true>): Add new parameter. 
+	(Output_section::add_input_section<32, false>): Add new parameter. 
+	(Output_section::add_input_section<64, false>): Add new parameter. 
+	* output.h (Output_section::add_input_section): Add new parameter.
+	(Output_section::input_section_order_specified): New
+	method.
+	(Output_section::set_input_section_order_specified): New method.
+	(Input_section::Input_section): Initialize section_order_index_.
+	(Input_section::section_order_index): New method.
+	(Input_section::set_section_order_index): New method.
+	(Input_section::section_order_index_): New member.
+	(Input_section::Input_section_sort_section_order_index_compare): New
+	struct.
+	(Output_section::input_section_order_specified_): New member.
+	* script-sections.cc (is_wildcard_string): Delete and move modified
+	method to gold.h.
+	(Output_section_element_input::Output_section_element_input): Modify
+	call to is_wildcard_string.
+	(Output_section_element_input::Input_section_pattern
+	::Input_section_pattern): Ditto.
+	(Output_section_element_input::Output_section_element_input): Ditto.
+	* testsuite/Makefile.am (final_layout): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/final_layout.cc: New file.
+	* testsuite/final_layout.sh: New file.
+
 2010-06-01  Rafael Espindola  <espindola@google.com>
 
 	* plugin.cc (Plugin::load): Pass the output name to the plugin.

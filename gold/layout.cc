@@ -26,8 +26,10 @@
 #include <cstring>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <utility>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <unistd.h>
 #include "libiberty.h"
 #include "md5.h"
@@ -668,7 +670,7 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 
   // FIXME: Handle SHF_LINK_ORDER somewhere.
 
-  *off = os->add_input_section(object, shndx, name, shdr, reloc_shndx,
+  *off = os->add_input_section(this, object, shndx, name, shdr, reloc_shndx,
 			       this->script_options_->saw_sections_clause());
   this->have_added_input_section_ = true;
 
@@ -886,7 +888,7 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
       // We couldn't handle this .eh_frame section for some reason.
       // Add it as a normal section.
       bool saw_sections_clause = this->script_options_->saw_sections_clause();
-      *off = os->add_input_section(object, shndx, name, shdr, reloc_shndx,
+      *off = os->add_input_section(this, object, shndx, name, shdr, reloc_shndx,
 				   saw_sections_clause);
       this->have_added_input_section_ = true;
     }
@@ -1640,6 +1642,72 @@ Layout::relaxation_loop_body(
 
   *pload_seg = load_seg;
   return off;
+}
+
+// Search the list of patterns and find the postion of the given section
+// name in the output section.  If the section name matches a glob
+// pattern and a non-glob name, then the non-glob position takes
+// precedence.  Return 0 if no match is found.
+
+unsigned int
+Layout::find_section_order_index(const std::string& section_name)
+{
+  Unordered_map<std::string, unsigned int>::iterator map_it;
+  map_it = this->input_section_position_.find(section_name);
+  if (map_it != this->input_section_position_.end())
+    return map_it->second;
+
+  // Absolute match failed.  Linear search the glob patterns.
+  std::vector<std::string>::iterator it;
+  for (it = this->input_section_glob_.begin();
+       it != this->input_section_glob_.end();
+       ++it)
+    {
+       if (fnmatch((*it).c_str(), section_name.c_str(), FNM_NOESCAPE) == 0)
+         {
+           map_it = this->input_section_position_.find(*it);
+           gold_assert(map_it != this->input_section_position_.end());
+           return map_it->second;
+         }
+    }
+  return 0;
+}
+
+// Read the sequence of input sections from the file specified with
+// --section-ordering-file.
+
+void
+Layout::read_layout_from_file()
+{
+  const char* filename = parameters->options().section_ordering_file();
+  std::ifstream in;
+  std::string line;
+
+  in.open(filename);
+  if (!in)
+    gold_fatal(_("unable to open --section-ordering-file file %s: %s"),
+               filename, strerror(errno));
+
+  std::getline(in, line);   // this chops off the trailing \n, if any
+  unsigned int position = 1;
+
+  while (in)
+    {
+      if (!line.empty() && line[line.length() - 1] == '\r')   // Windows
+        line.resize(line.length() - 1);
+      // Ignore comments, beginning with '#'
+      if (line[0] == '#')
+        {
+          std::getline(in, line);
+          continue;
+        }
+      this->input_section_position_[line] = position;
+      // Store all glob patterns in a vector.
+      if (is_wildcard_string(line.c_str()))
+        this->input_section_glob_.push_back(line);
+      position++;
+      std::getline(in, line);
+    }
 }
 
 // Finalize the layout.  When this is called, we have created all the

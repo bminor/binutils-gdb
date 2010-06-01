@@ -193,6 +193,18 @@ icf_safe_so_test_1.stdout: icf_safe_so_test
 icf_safe_so_test_2.stdout: icf_safe_so_test
 	$(TEST_READELF) -h icf_safe_so_test > icf_safe_so_test_2.stdout
 
+check_SCRIPTS += final_layout.sh
+check_DATA += final_layout.stdout
+MOSTLYCLEANFILES += final_layout
+final_layout.o: final_layout.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
+final_layout_sequence.txt:
+	(echo "*_Z3barv*" && echo ".text._Z3bazv" && echo "*_Z3foov*" && echo "*global_varb*" && echo "*global_vara*" && echo "*global_varc*") > final_layout_sequence.txt
+final_layout: final_layout.o final_layout_sequence.txt gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--section-ordering-file,final_layout_sequence.txt final_layout.o
+final_layout.stdout: final_layout
+	$(TEST_NM) final_layout > final_layout.stdout
+
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc

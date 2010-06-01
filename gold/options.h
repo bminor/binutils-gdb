@@ -892,6 +892,10 @@ class General_options
                  N_("Add DIR to link time shared library search path"),
                  N_("DIR"));
 
+  DEFINE_string(section_ordering_file, options::TWO_DASHES, '\0', NULL,
+		N_("Layout sections in the order specified."),
+		N_("FILENAME"));
+
   DEFINE_special(section_start, options::TWO_DASHES, '\0',
 		 N_("Set address of section"), N_("SECTION=ADDRESS"));
 

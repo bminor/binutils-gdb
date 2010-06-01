@@ -1933,6 +1933,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     found_in_sections_clause_(false),
     has_load_address_(false),
     info_uses_section_index_(false),
+    input_section_order_specified_(false),
     may_sort_attached_input_sections_(false),
     must_sort_attached_input_sections_(false),
     attached_input_sections_are_sorted_(false),
@@ -1994,7 +1995,8 @@ Output_section::set_entsize(uint64_t v)
 
 template<int size, bool big_endian>
 off_t
-Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
+Output_section::add_input_section(Layout* layout,
+				  Sized_relobj<size, big_endian>* object,
 				  unsigned int shndx,
 				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr,
@@ -2090,16 +2092,30 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
   // We need to keep track of this section if we are already keeping
   // track of sections, or if we are relaxing.  Also, if this is a
   // section which requires sorting, or which may require sorting in
-  // the future, we keep track of the sections.
+  // the future, we keep track of the sections.  If the
+  // --section-ordering-file option is used to specify the order of
+  // sections, we need to keep track of sections.
   if (have_sections_script
       || !this->input_sections_.empty()
       || this->may_sort_attached_input_sections()
       || this->must_sort_attached_input_sections()
       || parameters->options().user_set_Map()
-      || parameters->target().may_relax())
-    this->input_sections_.push_back(Input_section(object, shndx,
-						  shdr.get_sh_size(),
-						  addralign));
+      || parameters->target().may_relax()
+      || parameters->options().section_ordering_file())
+    {
+      Input_section isecn(object, shndx, shdr.get_sh_size(), addralign);
+      if (parameters->options().section_ordering_file())
+        {
+          unsigned int section_order_index =
+            layout->find_section_order_index(std::string(secname));
+	  if (section_order_index != 0)
+            {
+              isecn.set_section_order_index(section_order_index);
+              this->set_input_section_order_specified();
+            }
+        }
+      this->input_sections_.push_back(isecn);
+    }
 
   return aligned_offset_in_section;
 }
@@ -2623,7 +2639,8 @@ Output_section::set_final_data_size()
       return;
     }
 
-  if (this->must_sort_attached_input_sections())
+  if (this->must_sort_attached_input_sections()
+      || this->input_section_order_specified())
     this->sort_attached_input_sections();
 
   uint64_t address = this->address();
@@ -2700,12 +2717,14 @@ class Output_section::Input_section_sort_entry
   { }
 
   Input_section_sort_entry(const Input_section& input_section,
-			   unsigned int index)
+			   unsigned int index,
+			   bool must_sort_attached_input_sections)
     : input_section_(input_section), index_(index),
       section_has_name_(input_section.is_input_section()
 			|| input_section.is_relaxed_input_section())
   {
-    if (this->section_has_name_)
+    if (this->section_has_name_
+        && must_sort_attached_input_sections)
       {
 	// This is only called single-threaded from Layout::finalize,
 	// so it is OK to lock.  Unfortunately we have no way to pass
@@ -2782,6 +2801,22 @@ class Output_section::Input_section_sort_entry
     return memcmp(base_name + base_len - 2, ".o", 2) == 0;
   }
 
+  // Returns 0 if sections are not comparable. Returns 1 if THIS is the
+  // first section in order, returns -1 for S.
+  int
+  compare_section_ordering(const Input_section_sort_entry& s) const
+  {
+    gold_assert(this->index_ != -1U);
+    if (this->input_section_.section_order_index() == 0
+        || s.input_section().section_order_index() == 0)
+      return 0;
+    if (this->input_section_.section_order_index()
+        < s.input_section().section_order_index())
+      return 1;
+    else
+      return -1;
+  }
+
  private:
   // The Input_section we are sorting.
   Input_section input_section_;
@@ -2843,6 +2878,12 @@ Output_section::Input_section_sort_compare::operator()(
   if (!s1_has_priority && s2_has_priority)
     return true;
 
+  // Check if a section order exists for these sections through a section
+  // ordering file.  If sequence_num is 0, an order does not exist.
+  int sequence_num = s1.compare_section_ordering(s2);
+  if (sequence_num != 0)
+    return sequence_num == 1;
+
   // Otherwise we sort by name.
   int compare = s1.section_name().compare(s2.section_name());
   if (compare != 0)
@@ -2879,10 +2920,32 @@ Output_section::Input_section_sort_init_fini_compare::operator()(
   if (!s1_has_priority && s2_has_priority)
     return false;
 
+  // Check if a section order exists for these sections through a section
+  // ordering file.  If sequence_num is 0, an order does not exist.
+  int sequence_num = s1.compare_section_ordering(s2);
+  if (sequence_num != 0)
+    return sequence_num == 1;
+
   // Otherwise we sort by name.
   int compare = s1.section_name().compare(s2.section_name());
   if (compare != 0)
     return compare < 0;
+
+  // Otherwise we keep the input order.
+  return s1.index() < s2.index();
+}
+
+// Return true if S1 should come before S2.
+bool
+Output_section::Input_section_sort_section_order_index_compare::operator()(
+    const Output_section::Input_section_sort_entry& s1,
+    const Output_section::Input_section_sort_entry& s2) const
+{
+  // Check if a section order exists for these sections through a section
+  // ordering file.  If sequence_num is 0, an order does not exist.
+  int sequence_num = s1.compare_section_ordering(s2);
+  if (sequence_num != 0)
+    return sequence_num == 1;
 
   // Otherwise we keep the input order.
   return s1.index() < s2.index();
@@ -2913,17 +2976,27 @@ Output_section::sort_attached_input_sections()
   for (Input_section_list::iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();
        ++p, ++i)
-    sort_list.push_back(Input_section_sort_entry(*p, i));
+      sort_list.push_back(Input_section_sort_entry(*p, i,
+                            this->must_sort_attached_input_sections()));
 
   // Sort the input sections.
-  if (this->type() == elfcpp::SHT_PREINIT_ARRAY
-      || this->type() == elfcpp::SHT_INIT_ARRAY
-      || this->type() == elfcpp::SHT_FINI_ARRAY)
-    std::sort(sort_list.begin(), sort_list.end(),
-	      Input_section_sort_init_fini_compare());
+  if (this->must_sort_attached_input_sections())
+    {
+      if (this->type() == elfcpp::SHT_PREINIT_ARRAY
+          || this->type() == elfcpp::SHT_INIT_ARRAY
+          || this->type() == elfcpp::SHT_FINI_ARRAY)
+        std::sort(sort_list.begin(), sort_list.end(),
+	          Input_section_sort_init_fini_compare());
+      else
+        std::sort(sort_list.begin(), sort_list.end(),
+	          Input_section_sort_compare());
+    }
   else
-    std::sort(sort_list.begin(), sort_list.end(),
-	      Input_section_sort_compare());
+    {
+      gold_assert(parameters->options().section_ordering_file());
+      std::sort(sort_list.begin(), sort_list.end(),
+	        Input_section_sort_section_order_index_compare());
+    }
 
   // Copy the sorted input sections back to our list.
   this->input_sections_.clear();
@@ -2931,6 +3004,7 @@ Output_section::sort_attached_input_sections()
        p != sort_list.end();
        ++p)
     this->input_sections_.push_back(p->input_section());
+  sort_list.clear();
 
   // Remember that we sorted the input sections, since we might get
   // called again.
@@ -4466,6 +4540,7 @@ Output_file::close()
 template
 off_t
 Output_section::add_input_section<32, false>(
+    Layout* layout,
     Sized_relobj<32, false>* object,
     unsigned int shndx,
     const char* secname,
@@ -4478,6 +4553,7 @@ Output_section::add_input_section<32, false>(
 template
 off_t
 Output_section::add_input_section<32, true>(
+    Layout* layout,
     Sized_relobj<32, true>* object,
     unsigned int shndx,
     const char* secname,
@@ -4490,6 +4566,7 @@ Output_section::add_input_section<32, true>(
 template
 off_t
 Output_section::add_input_section<64, false>(
+    Layout* layout,
     Sized_relobj<64, false>* object,
     unsigned int shndx,
     const char* secname,
@@ -4502,6 +4579,7 @@ Output_section::add_input_section<64, false>(
 template
 off_t
 Output_section::add_input_section<64, true>(
+    Layout* layout,
     Sized_relobj<64, true>* object,
     unsigned int shndx,
     const char* secname,

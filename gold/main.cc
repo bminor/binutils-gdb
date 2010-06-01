@@ -234,6 +234,9 @@ main(int argc, char** argv)
       layout.incremental_inputs()->report_inputs(command_line.inputs());
     }
 
+  if (parameters->options().section_ordering_file())
+    layout.read_layout_from_file();
+
   // Get the search path from the -L options.
   Dirsearch search_path;
   search_path.initialize(&workqueue, &command_line.options().library_path());

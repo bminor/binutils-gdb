@@ -983,15 +983,6 @@ class Output_section_element_fill : public Output_section_element
   Expression* val_;
 };
 
-// Return whether STRING contains a wildcard character.  This is used
-// to speed up matching.
-
-static inline bool
-is_wildcard_string(const std::string& s)
-{
-  return strpbrk(s.c_str(), "?*[") != NULL;
-}
-
 // An input section specification in an output section
 
 class Output_section_element_input : public Output_section_element
@@ -1035,7 +1026,7 @@ class Output_section_element_input : public Output_section_element
     Input_section_pattern(const char* patterna, size_t patternlena,
 			  Sort_wildcard sorta)
       : pattern(patterna, patternlena),
-	pattern_is_wildcard(is_wildcard_string(this->pattern)),
+	pattern_is_wildcard(is_wildcard_string(this->pattern.c_str())),
 	sort(sorta)
     { }
   };
@@ -1102,7 +1093,7 @@ Output_section_element_input::Output_section_element_input(
   if (spec->file.name.length != 1 || spec->file.name.value[0] != '*')
     this->filename_pattern_.assign(spec->file.name.value,
 				   spec->file.name.length);
-  this->filename_is_wildcard_ = is_wildcard_string(this->filename_pattern_);
+  this->filename_is_wildcard_ = is_wildcard_string(this->filename_pattern_.c_str());
 
   if (spec->input_sections.exclude != NULL)
     {
@@ -1111,7 +1102,7 @@ Output_section_element_input::Output_section_element_input(
 	   p != spec->input_sections.exclude->end();
 	   ++p)
 	{
-	  bool is_wildcard = is_wildcard_string(*p);
+	  bool is_wildcard = is_wildcard_string((*p).c_str());
 	  this->filename_exclusions_.push_back(std::make_pair(*p,
 							      is_wildcard));
 	}

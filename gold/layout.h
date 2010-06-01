@@ -308,6 +308,12 @@ class Layout
 	 const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
 	 unsigned int reloc_shndx, unsigned int reloc_type, off_t* offset);
 
+  unsigned int
+  find_section_order_index(const std::string&);
+
+  void
+  read_layout_from_file();
+
   // Layout an input reloc section when doing a relocatable link.  The
   // section is RELOC_SHNDX in OBJECT, with data in SHDR.
   // DATA_SECTION is the reloc section to which it refers.  RR is the
@@ -1037,6 +1043,10 @@ class Layout
   Segment_states* segment_states_;
   // A relaxation debug checker.  We only create one when in debugging mode.
   Relaxation_debug_check* relaxation_debug_check_;
+  // Hash a pattern to its position in the section ordering file.
+  Unordered_map<std::string, unsigned int> input_section_position_;
+  // Vector of glob only patterns in the section_ordering file.
+  std::vector<std::string> input_section_glob_;
 };
 
 // This task handles writing out data in output sections which is not

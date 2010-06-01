@@ -2515,8 +2515,8 @@ class Output_section : public Output_data
   // within the output section.
   template<int size, bool big_endian>
   off_t
-  add_input_section(Sized_relobj<size, big_endian>* object, unsigned int shndx,
-		    const char *name,
+  add_input_section(Layout* layout, Sized_relobj<size, big_endian>* object,
+                    unsigned int shndx, const char *name,
 		    const elfcpp::Shdr<size, big_endian>& shdr,
 		    unsigned int reloc_shndx, bool have_sections_script);
 
@@ -2735,6 +2735,18 @@ class Output_section : public Output_data
   void
   set_may_sort_attached_input_sections()
   { this->may_sort_attached_input_sections_ = true; }
+
+   // Returns true if input sections must be sorted according to the
+  // order in which their name appear in the --section-ordering-file.
+  bool
+  input_section_order_specified()
+  { return this->input_section_order_specified_; }
+
+  // Record that input sections must be sorted as some of their names
+  // match the patterns specified through --section-ordering-file.
+  void
+  set_input_section_order_specified()
+  { this->input_section_order_specified_ = true; }
 
   // Return whether the input sections attached to this output section
   // require sorting.  This is used to handle constructor priorities
@@ -2972,7 +2984,8 @@ class Output_section : public Output_data
     Input_section(Relobj* object, unsigned int shndx, off_t data_size,
 		  uint64_t addralign)
       : shndx_(shndx),
-	p2align_(ffsll(static_cast<long long>(addralign)))
+	p2align_(ffsll(static_cast<long long>(addralign))),
+	section_order_index_(0)
     {
       gold_assert(shndx != OUTPUT_SECTION_CODE
 		  && shndx != MERGE_DATA_SECTION_CODE
@@ -2984,7 +2997,8 @@ class Output_section : public Output_data
 
     // For a non-merge output section.
     Input_section(Output_section_data* posd)
-      : shndx_(OUTPUT_SECTION_CODE), p2align_(0)
+      : shndx_(OUTPUT_SECTION_CODE), p2align_(0),
+	section_order_index_(0)
     {
       this->u1_.data_size = 0;
       this->u2_.posd = posd;
@@ -2995,7 +3009,8 @@ class Output_section : public Output_data
       : shndx_(is_string
 	       ? MERGE_STRING_SECTION_CODE
 	       : MERGE_DATA_SECTION_CODE),
-	p2align_(0)
+	p2align_(0),
+	section_order_index_(0)
     {
       this->u1_.entsize = entsize;
       this->u2_.posd = posd;
@@ -3003,10 +3018,23 @@ class Output_section : public Output_data
 
     // For a relaxed input section.
     Input_section(Output_relaxed_input_section *psection)
-      : shndx_(RELAXED_INPUT_SECTION_CODE), p2align_(0)
+      : shndx_(RELAXED_INPUT_SECTION_CODE), p2align_(0),
+	section_order_index_(0)
     {
       this->u1_.data_size = 0;
       this->u2_.poris = psection;
+    }
+
+    unsigned int
+    section_order_index() const
+    {
+      return this->section_order_index_;
+    }
+
+    void
+    set_section_order_index(unsigned int number)
+    {
+      this->section_order_index_ = number;
     }
 
     // The required alignment.
@@ -3234,6 +3262,9 @@ class Output_section : public Output_data
       // For RELAXED_INPUT_SECTION_CODE, the data.
       Output_relaxed_input_section* poris;
     } u2_;
+    // The line number of the pattern it matches in the --section-ordering-file
+    // file.  It is 0 if does not match any pattern.
+    unsigned int section_order_index_;
   };
 
   // Store the list of input sections for this Output_section into the
@@ -3540,6 +3571,15 @@ class Output_section : public Output_data
 	       const Input_section_sort_entry&) const;
   };
 
+  // This is the sort comparison function when a section order is specified
+  // from an input file.
+  struct Input_section_sort_section_order_index_compare
+  {
+    bool
+    operator()(const Input_section_sort_entry&,
+	       const Input_section_sort_entry&) const;
+  };
+
   // Fill data.  This is used to fill in data between input sections.
   // It is also used for data statements (BYTE, WORD, etc.) in linker
   // scripts.  When we have to keep track of the input sections, we
@@ -3707,6 +3747,9 @@ class Output_section : public Output_data
   // section, false if it means the symbol index of the corresponding
   // section symbol.
   bool info_uses_section_index_ : 1;
+  // True if input sections attached to this output section have to be
+  // sorted according to a specified order.
+  bool input_section_order_specified_ : 1;
   // True if the input sections attached to this output section may
   // need sorting.
   bool may_sort_attached_input_sections_ : 1;

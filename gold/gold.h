@@ -401,6 +401,15 @@ string_hash(const Char_type* s)
   return h;
 }
 
+// Return whether STRING contains a wildcard character.  This is used
+// to speed up matching.
+
+inline bool
+is_wildcard_string(const char* s)
+{
+  return strpbrk(s, "?*[") != NULL;
+}
+
 } // End namespace gold.
 
 #endif // !defined(GOLD_GOLD_H)
