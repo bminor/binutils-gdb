@@ -43,7 +43,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 set target_exec [gdbserver_download_current_prog]
 gdbserver_start_extended
 
-gdb_test "set remote exec-file $target_exec" "" "set remote exec-file"
+gdb_test_no_output "set remote exec-file $target_exec" "set remote exec-file"
 
 gdb_breakpoint main
 gdb_test "run" "Breakpoint.* main .*" "continue to main"

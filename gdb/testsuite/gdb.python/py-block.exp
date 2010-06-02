@@ -66,9 +66,9 @@ gdb_test "python print block.start" "${decimal}" "Check start not None"
 gdb_test "python print block.end" "${decimal}" "Check end not None"
 
 # Move up superblock(s) until we reach function block_func.
-gdb_test "python block = block.superblock" "" "Get superblock"
+gdb_test_no_output "python block = block.superblock" "Get superblock"
 gdb_test "python print block.function" "None" "Second anonymous block"
-gdb_test "python block = block.superblock" "" "Get superblock"
+gdb_test_no_output "python block = block.superblock" "Get superblock 2"
 gdb_test "python print block.function" "block_func"
 
 # Switch frames, then test for main block.

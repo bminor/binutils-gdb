@@ -53,7 +53,7 @@ proc test_template_arg {type} {
     }
     # There is no executable code in main(), so we are where we want to be
     gdb_test "print foo" ""
-    gdb_test "python foo = gdb.history(0)" ""
+    gdb_test_no_output "python foo = gdb.history(0)"
 
     # Replace '*' with '\*' in regex.
     regsub -all {\*} $type {\*} t

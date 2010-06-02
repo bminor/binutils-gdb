@@ -45,7 +45,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 set target_exec [gdbserver_download_current_prog]
 gdbserver_start_extended
 
-gdb_test "set remote exec-file $target_exec" "" "set remote exec-file"
+gdb_test_no_output "set remote exec-file $target_exec" "set remote exec-file"
 
 # Start the program running and then wait for a bit, to be sure
 # that it can be attached to.

@@ -116,7 +116,7 @@ proc test_value_numeric_ops {} {
 
   # Conversion test.
   gdb_test "print evalue" " = TWO"
-  gdb_test "python evalue = gdb.history (0)" ""
+  gdb_test_no_output "python evalue = gdb.history (0)"
   gdb_test "python print int (evalue)" "2"
 
   # Test pointer arithmethic

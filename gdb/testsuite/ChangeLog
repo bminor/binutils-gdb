@@ -1,5 +1,16 @@
 2010-06-02  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.python/py-block.exp: Use gdb_test_no_output.
+	* gdb.python/py-prettyprint.exp: Ditto.
+	* gdb.python/py-template.exp: Ditto.
+	* gdb.python/py-value.exp: Ditto.
+
+	* gdb.reverse/watch-precsave.exp: Use gdb_test_no_output.
+	* gdb.reverse/watch-reverse.exp: Ditto.
+
+	* gdb.server/ext-attach.exp: Use gdb_test_no_output.
+	* gdb.server/ext-run.exp: Ditto.
+
 	* gdb.dwarf2/dw2-basic.exp: Use gdb_test_no_output.
 	* gdb.dwarf2/dw2-compressed.exp: Ditto.
 	* gdb.dwarf2/dw2-intercu.exp: Ditto.
