@@ -6131,16 +6131,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   LONGEST high = -1;
   char *name;
   LONGEST negative_mask;
-  
+
   base_type = die_type (die, cu);
-  if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
-    {
-      complaint (&symfile_complaints,
-                _("DW_AT_type missing from DW_TAG_subrange_type"));
-      base_type
-	= init_type (TYPE_CODE_INT, gdbarch_addr_bit (gdbarch) / 8,
-		     0, NULL, cu->objfile);
-    }
 
   if (cu->language == language_fortran)
     { 
@@ -6158,10 +6150,10 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
   if (attr)
     {       
-      if (attr->form == DW_FORM_block1)
+      if (attr->form == DW_FORM_block1 || is_ref_attr (attr))
         {
           /* GCC encodes arrays with unspecified or dynamic length
-             with a DW_FORM_block1 attribute.
+             with a DW_FORM_block1 attribute or a reference attribute.
              FIXME: GDB does not yet know how to handle dynamic
              arrays properly, treat them as arrays with unspecified
              length for now.
@@ -6175,6 +6167,54 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
         }
       else
         high = dwarf2_get_attr_constant_value (attr, 1);
+    }
+  else
+    {
+      attr = dwarf2_attr (die, DW_AT_count, cu);
+      if (attr)
+	{
+	  int count = dwarf2_get_attr_constant_value (attr, 1);
+	  high = low + count - 1;
+	}
+    }
+
+  /* Dwarf-2 specifications explicitly allows to create subrange types
+     without specifying a base type.
+     In that case, the base type must be set to the type of
+     the lower bound, upper bound or count, in that order, if any of these
+     three attributes references an object that has a type.
+     If no base type is found, the Dwarf-2 specifications say that
+     a signed integer type of size equal to the size of an address should
+     be used.
+     For the following C code: `extern char gdb_int [];'
+     GCC produces an empty range DIE.
+     FIXME: muller/2010-05-28: Possible references to object for low bound,
+     high bound or count are not yet handled by this code.
+  */
+  if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
+    {
+      struct objfile *objfile = cu->objfile;
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      int addr_size = gdbarch_addr_bit (gdbarch) /8;
+      struct type *int_type = objfile_type (objfile)->builtin_int;
+
+      /* Test "int", "long int", and "long long int" objfile types,
+	 and select the first one having a size above or equal to the
+	 architecture address size.  */
+      if (int_type && TYPE_LENGTH (int_type) >= addr_size)
+	base_type = int_type;
+      else
+	{
+	  int_type = objfile_type (objfile)->builtin_long;
+	  if (int_type && TYPE_LENGTH (int_type) >= addr_size)
+	    base_type = int_type;
+	  else
+	    {
+	      int_type = objfile_type (objfile)->builtin_long_long;
+	      if (int_type && TYPE_LENGTH (int_type) >= addr_size)
+		base_type = int_type;
+	    }
+	}
     }
 
   negative_mask = 
