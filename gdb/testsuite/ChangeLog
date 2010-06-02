@@ -1,3 +1,7 @@
+2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/re-set-overloaded.exp, gdb.cp/re-set-overloaded.cc: New.
+
 2010-06-02  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/koenig.exp: Added new test case.
