@@ -1,5 +1,11 @@
 2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symfile.c (init_filename_language_table): New extensions .for, .FOR,
+	.ftn, .FTN, .fpp, .FPP, .f90, .F90, .f95, .F95, .f03, .F03, .f08 and
+	.F08.
+
+2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support DW_TAG_module as separate namespaces.
 	* dwarf2read.c (typename_concat): New parameter physname.
 	(read_module_type): New function and declaration.

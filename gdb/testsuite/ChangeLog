@@ -1,5 +1,9 @@
 2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.fortran/module.exp (stopped language detection): New test.
+
+2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support DW_TAG_module as separate namespaces.
 	* gdb.fortran/library-module.exp, gdb.fortran/library-module-main.f90,
 	gdb.fortran/library-module-lib.f90: New.

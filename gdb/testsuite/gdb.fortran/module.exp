@@ -20,6 +20,12 @@ if { [prepare_for_testing $testfile.exp $testfile $srcfile {debug f77}] } {
     return -1
 }
 
+# Test automatic language detection before the inferior starts.  It tests the
+# effect of expected:
+# (gdb) show language 
+# The current source language is "auto; currently fortran".
+gdb_test "p modmany::var_i" " = 14" "stopped language detection"
+
 if ![runto MAIN__] then {
     perror "couldn't run to breakpoint MAIN__"
     continue
