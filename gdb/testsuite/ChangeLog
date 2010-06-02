@@ -1,3 +1,19 @@
+2010-06-02  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.dwarf2/dw2-basic.exp: Use gdb_test_no_output.
+	* gdb.dwarf2/dw2-compressed.exp: Ditto.
+	* gdb.dwarf2/dw2-intercu.exp: Ditto.
+	* gdb.dwarf2/dw2-intermix.exp: Ditto.
+	* gdb.dwarf2/dw2-producer.exp: Ditto.
+	* gdb.dwarf2/mac-fileno.exp: Ditto.
+
+	* gdb.gdb/observer.exp: Use gdb_test_no_output.
+	* gdb.gdb/selftest.exp: Ditto.
+
+	* gdb.multi/base.exp: Use gdb_test_no_output.
+
+	* gdb.opt/inline-cmds.exp: Use gdb_test_no_output.
+
 2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/ref-types.exp (print value of UI): Remove excessive newline.

@@ -299,7 +299,7 @@ proc test_with_self { executable } {
     # FIXME: If we put this after the run to main, the first list
     # command doesn't print the same line as the current line where
     # gdb is stopped.
-    gdb_test "set listsize 1" "" "set listsize to 1"
+    gdb_test_no_output "set listsize 1" "set listsize to 1"
 
     # run yourself
     # It may take a very long time for the inferior gdb to start (lynx),

@@ -99,33 +99,33 @@ proc setup_test { executable } {
 }
 
 proc attach_first_observer { message } {
-    gdb_test "set \$first_obs = observer_attach_test_notification (&observer_test_first_notification_function)" \
-	"" "$message; attach first observer"
+    gdb_test_no_output "set \$first_obs = observer_attach_test_notification (&observer_test_first_notification_function)" \
+	"$message; attach first observer"
 }
 
 proc attach_second_observer { message } {
-    gdb_test "set \$second_obs = observer_attach_test_notification (&observer_test_second_notification_function)" \
-	"" "$message; attach second observer"
+    gdb_test_no_output "set \$second_obs = observer_attach_test_notification (&observer_test_second_notification_function)" \
+	"$message; attach second observer"
 }
 
 proc attach_third_observer { message } {
-    gdb_test "set \$third_obs = observer_attach_test_notification (&observer_test_third_notification_function)" \
-	"" "$message; attach third observer"
+    gdb_test_no_output "set \$third_obs = observer_attach_test_notification (&observer_test_third_notification_function)" \
+	"$message; attach third observer"
 }
 
 proc detach_first_observer { message } {
-    gdb_test "call observer_detach_test_notification (\$first_obs)" \
-	"" "$message; detach first observer"
+    gdb_test_no_output "call observer_detach_test_notification (\$first_obs)" \
+	"$message; detach first observer"
 }
 
 proc detach_second_observer { message } {
-    gdb_test "call observer_detach_test_notification (\$second_obs)" \
-	"" "$message; detach second observer"
+    gdb_test_no_output "call observer_detach_test_notification (\$second_obs)" \
+	"$message; detach second observer"
 }
 
 proc detach_third_observer { message } {
-    gdb_test "call observer_detach_test_notification (\$third_obs)" \
-	"" "$message; detach third observer"
+    gdb_test_no_output "call observer_detach_test_notification (\$third_obs)" \
+	"$message; detach third observer"
 }
 
 proc check_counters { first second third message } {
@@ -141,11 +141,11 @@ proc check_counters { first second third message } {
 }
 
 proc reset_counters { message } {
-    gdb_test "set variable observer_test_first_observer = 0" "" \
+    gdb_test_no_output "set variable observer_test_first_observer = 0" \
 	"$message; reset first observer counter"
-    gdb_test "set variable observer_test_second_observer = 0" "" \
+    gdb_test_no_output "set variable observer_test_second_observer = 0" \
 	"$message; reset second observer counter"
-    gdb_test "set variable observer_test_third_observer = 0" "" \
+    gdb_test_no_output "set variable observer_test_third_observer = 0" \
 	"$message; reset third observer counter"
 }
 
@@ -158,7 +158,7 @@ proc test_notifications { first second third message args } {
     # Call observer_notify_test_notification.  Note that this procedure
     # takes one argument, but this argument is ignored by the observer
     # callbacks we have installed.  So we just pass an arbitrary value.
-    gdb_test "call observer_notify_test_notification (0)" "" \
+    gdb_test_no_output "call observer_notify_test_notification (0)" \
 	"$message; sending notification"
     check_counters $first $second $third $message
 }
