@@ -254,7 +254,7 @@ gdb_test_multiple "print rUS" "print value of rUS" {
 gdb_test "print rI" ".\[0-9\]* = \\(int &\\) @$hex: 102" \
         pass "print value of rI"
 
-gdb_test "print rUI\n" \
+gdb_test "print rUI" \
     ".\[0-9\]* = \\(unsigned int &\\) @$hex: 1002" \
         pass "print value of UI"
 
