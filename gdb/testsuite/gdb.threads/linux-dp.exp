@@ -54,7 +54,7 @@ if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executab
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
+gdb_test_no_output "set print sevenbit-strings"
 runto_main
 
 # There should be no threads initially.
@@ -65,9 +65,8 @@ gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: create philosopher"]
 set expect_manager -1
 for {set i 0} {$i < 5} {incr i} {
     gdb_continue_to_breakpoint "about to create philosopher: $i"
-    send_gdb "info threads\n"
     set threads_before {}
-    gdb_expect {
+    gdb_test_multiple "info threads" "info threads before: $i" {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
@@ -82,13 +81,9 @@ for {set i 0} {$i < 5} {incr i} {
 	}
 	-re "^$gdb_prompt $" {
 	}
-	timeout {
-	    fail "(timeout) info threads before: $i"
-	}
     }
-    send_gdb "next\n"
     set threads_created 0
-    gdb_expect {
+    gdb_test_multiple "next" "create philosopher: $i" {
 	-re "^next\r\n" {
 	    exp_continue
 	}
@@ -114,9 +109,6 @@ for {set i 0} {$i < 5} {incr i} {
 	}
 	-re "$gdb_prompt $" {
 	}
-	timeout {
-	    fail "(timeout) create philosopher: $i"
-	}
     }
     if { $threads_created == 0 } {
 	# Not all targets announce new threads as they are created.
@@ -139,9 +131,8 @@ for {set i 0} {$i < 5} {incr i} {
 	fail "create philosopher: $i"
     }
     
-    send_gdb "info threads\n"
     set threads_after {}
-    gdb_expect {
+    gdb_test_multiple "info threads" "info threads after: $i" {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
@@ -178,11 +169,7 @@ for {set i 0} {$i < 5} {incr i} {
 		fail "info threads after: $i"
 	    }
 	}
-	timeout {
-	    fail "(timeout) info threads after: $i"
-	}
     }
-    
 }
 
 set nthreads 6
@@ -257,8 +244,7 @@ gdb_test "where" "print_philosopher.*philosopher.* \(from .*libpthread\|at pthre
 set only_five 1
 for {set i 0} {$only_five > 0 && $i < 10} {incr i} {
     gdb_continue_to_breakpoint "thread 5's print, pass: $i"
-    send_gdb "info threads\n"
-    gdb_expect {
+    gdb_test_multiple "info threads" "" {
 	-re "\\* 5 Thread .*  print_philosopher .*\r\n$gdb_prompt $" {
 	    # Okay this time.
 	}
@@ -281,18 +267,9 @@ if {$only_five == -1} { fail "$name (timeout)" }
 proc select_thread {thread} {
     global gdb_prompt
 
-    send_gdb "thread $thread\n"
-    gdb_expect {
-	-re "\\\[Switching to thread .*\\\].*\r\n$gdb_prompt $" {
-	    pass "selected thread: $thread"
-	}
-	-re "$gdb_prompt $" {
-	    fail "selected thread: $thread"
-	}
-	timeout {
-	    fail "selected thread: $thread (timeout)"
-	}
-    }
+    gdb_test "thread $thread" \
+	"\\\[Switching to thread .*\\\].*" \
+	"selected thread: $thread"
 }
 
 ### Select THREAD, check for a plausible backtrace, and make sure
@@ -314,8 +291,7 @@ proc check_philosopher_stack {thread seen_name} {
     set interesting 0
 
     select_thread $thread
-    send_gdb "where\n"
-    gdb_expect {
+    gdb_test_multiple "where" "$name" {
 	-re ".* in philosopher \\(data=(0x\[0-9a-f\]+).*\r\n$gdb_prompt $" {
 	    set data $expect_out(1,string)
 	    if {[info exists seen($data)]} {
@@ -355,12 +331,6 @@ proc check_philosopher_stack {thread seen_name} {
 	    ## test suite totals.  But in my heart, I think it should
 	    ## be an xfail.
 	    pass $name
-	}
-	-re "$gdb_prompt $" {
-	    fail $name
-	}
-	timeout {
-	    fail "$name (timeout)" 
 	}
     }
 

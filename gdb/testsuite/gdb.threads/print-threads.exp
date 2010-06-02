@@ -63,8 +63,7 @@ proc test_all_threads { name kill } {
 
     set i 0
     set j 0
-    send_gdb "continue\n"
-    gdb_expect {
+    gdb_test_multiple "continue" "all threads ran once" {
 	-re "Breakpoint \[0-9\]+, thread_function \\(arg=.*\\) at .*print-threads.c:\[0-9\]+.*$gdb_prompt" {
 	    set i [expr $i + 1]
 	    pass "Hit thread_function breakpoint, $i ($name)"
@@ -95,12 +94,6 @@ proc test_all_threads { name kill } {
 	    } else {
 		fail "Running threads ($name) (unknown output)"
 	    }
-	}
-	-re "$gdb_prompt" {
-	    fail "Running threads ($name) (unknown output)"
-	}
-	timeout {
-	    fail "Running threads ($name) (timeout)"
 	}
     }
 }

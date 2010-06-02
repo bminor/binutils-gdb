@@ -80,12 +80,10 @@ proc corefunc { threadtype } {
     # This breakpoint is there for old/non-x86 kernels not restarting syscalls.
     gdb_breakpoint [gdb_get_line_number "Second sleep"]
     set test "$threadtype: attach2 continue"
-    send_gdb "continue\n"
-    gdb_expect {
-      -re "Continuing"
-	{ pass "continue ($test)" }
-      timeout
-	{ fail "continue ($test) (timeout)" }
+    gdb_test_multiple "continue" "continue ($test)" {
+	-re "Continuing" {
+	    pass "continue ($test)"
+	}
     }
 
     # For this to work we must be sure to consume the "Continuing."

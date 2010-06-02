@@ -88,17 +88,16 @@ proc all_threads_running {} {
     # to stop.  Since no other breakpoints are set at this time
     # we should stop only when we have been previously called 15 times.
 
-    send_gdb "continue\n"
-    gdb_expect {
-	-re "Continuing.*common_routine.*at.*$srcfile.*$gdb_prompt $" {}
-	default {
-	    fail "continue until common routine run 15 times"
-	    return 0
+    set return_me 1
+
+    gdb_test_multiple "continue" "continue until common routine run 15 times" {
+	-re "Continuing.*common_routine.*at.*$srcfile.*$gdb_prompt $" {
+	    set return_me 0
 	}
-	timeout {
-	    fail "continue until common routine run 15 times (timeout)"
-	    return 0
-	}
+    }
+
+    if { $return_me == 1 } then {
+	return 0;
     }
 
     # Check that we stopped when we actually expected to stop, by
@@ -109,53 +108,35 @@ proc all_threads_running {} {
     # trap and the next.  So stopping after 16 or 17 hits should be
     # considered acceptable.
 
-    send_gdb "p common_routine::hits\n"
-    gdb_expect {
-	-re ".*= 15\r\n$gdb_prompt $" {
-	    pass "stopped before calling common_routine 15 times"
+    gdb_test_multiple "p common_routine::hits" \
+	"stopped before calling common_routine 15 times" {
+	    -re ".*= 15\r\n$gdb_prompt $" {
+		pass "stopped before calling common_routine 15 times"
+	    }
+	    -re ".*= 16\r\n$gdb_prompt $" {
+		pass "stopped before calling common_routine 15 times (16 times)"
+	    }
+	    -re ".*= 17\r\n$gdb_prompt $" {
+		pass "stopped before calling common_routine 15 times (17 times)"
+	    }
 	}
-	-re ".*= 16\r\n$gdb_prompt $" {
-	    pass "stopped before calling common_routine 15 times (16 times)"
-	}
-	-re ".*= 17\r\n$gdb_prompt $" {
-	    pass "stopped before calling common_routine 15 times (17 times)"
-	}
-	default {
-	    fail "stopped before calling common_routine 15 times"
-	    return 0
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "stopped before calling common_routine 15 times"
-	    return 0
-	}
-	timeout {
-	    fail "stopped before calling common_routine 15 times (timeout)"
-	    return 0
-	}
-    }
 
     # Also check that all of the threads have run, which will only be true
     # if the full_coverage variable is set.
 
-    send_gdb "p common_routine::full_coverage\n"
-    gdb_expect {
-	-re ".* = 1.*$gdb_prompt $" {}
-	-re ".* = 0.*$gdb_prompt $" {
-	    fail "some threads didn't run"
-	    return 0
+    set return_me 1
+    gdb_test_multiple "p common_routine::full_coverage" \
+	"some threads didn't run" {
+	    -re ".* = 1.*$gdb_prompt $" {
+	    }
+	    -re ".* = 0.*$gdb_prompt $" {
+		fail "some threads didn't run"
+		set return_me 0
+	    }
 	}
-	default {
-	    fail "some threads didn't run"
-	    return 0
-	}
-	timeout {
-	    fail "some threads didn't run (timeout)"
-	    return 0
-	}
-    }
 
     # Looks fine, return success.
-    return 1
+    return $return_me
 }
 
 proc test_startup {} {
@@ -164,20 +145,27 @@ proc test_startup {} {
     global main_id thread1_id thread2_id
 
     # We should be able to do an info threads before starting any others.
-    send_gdb "info threads\n"
-    gdb_expect {
+    set return_me 1
+    gdb_test_multiple "info threads" "info threads" {
 	-re ".*Thread.*main.*$gdb_prompt $" {
 	    pass "info threads"
+	    set return_me 0
 	}
 	-re "\r\n$gdb_prompt $" {
 	    unsupported "gdb does not support pthreads for this machine"
-	    return 0
 	}
     }
 
+    if { $return_me == 1 } then {
+	return 0;
+    }
+
     # Extract the thread id number of main thread from "info threads" output.
-    send_gdb "info threads\n"
-    gdb_expect -re "(\[0-9\]+)(${horiz}Thread${horiz}main.*)($gdb_prompt $)"
+    gdb_test_multiple "info threads" "get main thread id" {
+	-re "(\[0-9\]+)(${horiz}Thread${horiz}main.*)($gdb_prompt $)" {
+	}
+    }
+
     set main_id $expect_out(1,string)
 
     # Check that we can continue and create the first thread.
@@ -188,8 +176,11 @@ proc test_startup {} {
     gdb_test "disable" ""
 
     # Extract the thread id number of thread 1 from "info threads" output.
-    send_gdb "info threads\n"
-    gdb_expect -re "(\[0-9\]+)(${horiz}Thread${horiz}thread1.*)($gdb_prompt $)"
+    gdb_test_multiple "info threads" "get thread 1 id" {
+	-re "(\[0-9\]+)(${horiz}Thread${horiz}thread1.*)($gdb_prompt $)" {
+	}
+    }
+
     set thread1_id $expect_out(1,string)
 
     # Check that we can continue and create the second thread,
@@ -200,8 +191,11 @@ proc test_startup {} {
 	    "Continue to creation of second thread"
 
     # Extract the thread id number of thread 2 from "info threads" output.
-    send_gdb "info threads\n"
-    gdb_expect -re "(\[0-9\]+)(${horiz}Thread${horiz}thread2.*)($gdb_prompt $)"
+    gdb_test_multiple "info threads" "get thread 2 id" {
+	-re "(\[0-9\]+)(${horiz}Thread${horiz}thread2.*)($gdb_prompt $)" {
+	}
+    }
+
     set thread2_id $expect_out(1,string)
 
     return 1
@@ -216,13 +210,9 @@ proc check_control_c {} {
     }
 
     # Send a continue followed by ^C to the process to stop it.
-    send_gdb "continue\n"
-    gdb_expect {
+    gdb_test_multiple "continue" "continue with all threads running" {
 	-re "Continuing." {
 	    pass "Continue with all threads running"
-	}
-	timeout {
-	    fail "Continue with all threads running (timeout)"
 	}
     }
     after 2000
@@ -278,37 +268,18 @@ proc check_backtraces {} {
 	    "Breakpoint .* at 0x.* file .* line .*" \
 	    "set break at common_routine in thread 2"
 
-    send_gdb "continue\n"
-    gdb_expect {
+    gdb_test_multiple "continue" "continue to bkpt at common_routine in thread 2" {
 	-re "Breakpoint .* common_routine \\(arg=2\\).*" {
 	    pass "continue to bkpt at common_routine in thread 2"
-	    send_gdb "backtrace\n"
-	    gdb_expect {
-		-re "#0.*common_routine \\(arg=2\\).*#1.*thread2.*" {
-		    pass "backtrace from thread 2 bkpt in common_routine"
-		}
-		default {
-		    fail "backtrace from thread 2 bkpt in common_routine"
-		}
-		timeout {
-		    fail "backtrace from thread 2 bkpt in common_routine (timeout)"
-		}
-	    }
+	    gdb_test "backtrace" \
+		"#0.*common_routine \\(arg=2\\).*#1.*thread2.*" \
+		"backtrace from thread 2 bkpt in common_routine"
 	}
 	-re "Breakpoint .* common_routine \\(arg=0\\).*" {
 	    fail "continue to bkpt at common_routine in thread 2 (arg=0)"
 	}
 	-re "Breakpoint .* common_routine \\(arg=1\\).*" {
 	    fail "continue to bkpt at common_routine in thread 2 (arg=1)"
-	}
-	-re ".*$gdb_prompt" {
-	    fail "continue to bkpt at common_routine in thread 2"
-	}
-	default {
-	    fail "continue to bkpt at common_routine in thread 2 (default)"
-	}
-	timeout {
-	    fail "continue to bkpt at common_routine in thread 2 (timeout)"
 	}
     }
 }

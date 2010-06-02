@@ -1,3 +1,32 @@
+2010-06-02  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* gdb.threads/attach-stopped.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/attachstop-mt.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/gcore-thread.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/hand-call-in-threads.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/linux-dp.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/print-threads.exp: 
+	Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/pthreads.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/schedlock.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.threads/sigthread.exp: Replace uses of send_gdb / gdb_expect.
+
+	* gdb.trace/actions.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/backtrace.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/collection.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/deltrace.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/infotrace.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/limits.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/report.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/save-trace.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/tfind.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/tracecmd.exp: Replace uses of send_gdb / gdb_expect.
+	* gdb.trace/tsv.exp: Replace uses of send_gdb / gdb_expect.
+
 2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/re-set-overloaded.exp, gdb.cp/re-set-overloaded.cc: New.

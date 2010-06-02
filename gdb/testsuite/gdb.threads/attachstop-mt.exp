@@ -211,12 +211,10 @@ gdb_test "bt" ".*sleep.*(func|main).*" "attach4 to stopped bt"
 gdb_breakpoint [gdb_get_line_number "Ridiculous time"]
 gdb_breakpoint [gdb_get_line_number "cut the sleep time"]
 set test "attach4 continue"
-send_gdb "continue\n"
-gdb_expect {
-  -re "Continuing"
-    { pass "continue ($test)" }
-  timeout
-    { fail "continue ($test) (timeout)" }
+gdb_test_multiple "continue" "continue ($test)" {
+    -re "Continuing" {
+	pass "continue ($test)"
+    }
 }
 
 # For this to work we must be sure to consume the "Continuing."

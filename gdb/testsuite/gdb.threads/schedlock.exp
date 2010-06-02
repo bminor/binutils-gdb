@@ -38,37 +38,27 @@ if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executab
 # Now we can proceed with the real testing.
 
 proc get_args { } {
-  global list_count
-  global gdb_prompt
-  global NUM
+    global list_count
+    global gdb_prompt
+    global NUM
 
-  set pattern "(\[0-9\]+)"
-  for {set i 1} {[expr $i < $NUM]} {incr i} {
-    append pattern ", (\[0-9\]+)"
-  }
+    set pattern "(\[0-9\]+)"
+    for {set i 1} {[expr $i < $NUM]} {incr i} {
+	append pattern ", (\[0-9\]+)"
+    }
 
-  send_gdb "print args\n"
-  gdb_expect {
-    -re "\\\$\[0-9\]+ = {$pattern}.*$gdb_prompt"
-      {
-	set list_count [expr $list_count + 1]
-	pass "listed args ($list_count)"
+    gdb_test_multiple "print args" "listed args ($list_count)" {
+	-re "\\\$\[0-9\]+ = {$pattern}.*$gdb_prompt $" {
+	    set list_count [expr $list_count + 1]
+	    pass "listed args ($list_count)"
 
-	set result ""
-	for {set i 1} {[expr $i <= $NUM]} {incr i} {
-	  lappend result $expect_out($i,string)
+	    set result ""
+	    for {set i 1} {[expr $i <= $NUM]} {incr i} {
+		lappend result $expect_out($i,string)
+	    }
+	    return $result
 	}
-	return $result
-      }
-    -re "$gdb_prompt"
-      {
-	fail "listed args ($list_count) (unknown output)"
-      }
-    timeout
-      {
-	fail "listed args ($list_count) (timeout)"
-      }
-  }
+    }
 }
 
 proc stop_process { description } {
@@ -90,50 +80,38 @@ proc stop_process { description } {
 }
 
 proc get_current_thread { description } {
-  global gdb_prompt
+    global gdb_prompt
 
-  send_gdb "bt\n"
-  gdb_expect {
-    -re "thread_function \\(arg=0x(\[0-9\])\\).*$gdb_prompt $"
-      {
-	pass $description
-	return $expect_out(1,string)
-      }
-    -re "$gdb_prompt $"
-      {
-	fail "$description (unknown output)"
-      }
-    timeout
-      {
-	fail "$description (timeout)"
-      }
-  }
+    gdb_test_multiple "bt" "$description" {
+	-re "thread_function \\(arg=0x(\[0-9\])\\).*$gdb_prompt $" {
+	    pass $description
+	    return $expect_out(1,string)
+	}
+    }
+    return ""
 }
 
 proc my_continue { msg } {
-  send_gdb "continue\n"
-  gdb_expect {
-    -re "Continuing"
-      { pass "continue ($msg)" }
-    timeout
-      { fail "continue ($msg) (timeout)" }
-  }
+    gdb_test_multiple "continue" "continuing ($msg)" {
+	-re "Continuing" {
+	    pass "continue ($msg)"
+	}
+    }
 
-  stop_process "stop all threads ($msg)"
+    stop_process "stop all threads ($msg)"
 
-  # Make sure we're in one of the non-main looping threads.
-  gdb_breakpoint [concat [gdb_get_line_number "schedlock.exp: main loop"] " if arg != 0"]
-  gdb_continue_to_breakpoint "return to loop ($msg)"
-  delete_breakpoints
+    # Make sure we're in one of the non-main looping threads.
+    gdb_breakpoint [concat [gdb_get_line_number "schedlock.exp: main loop"] " if arg != 0"]
+    gdb_continue_to_breakpoint "return to loop ($msg)"
+    delete_breakpoints
 }
 
 proc step_ten_loops { msg } {
     global gdb_prompt
 
     for {set i 0} {[expr $i < 10]} {set i [expr $i + 1]} {
-	send_gdb "step\n"
 	set other_step 0
-	gdb_expect {
+	gdb_test_multiple "step" "step to increment ($msg $i)" {
 	    -re ".*myp\\) \\+\\+;\[\r\n\]+$gdb_prompt $" {
 		pass "step to increment ($msg $i)"
 	    }
@@ -146,9 +124,6 @@ proc step_ten_loops { msg } {
 		    fail "step to increment ($msg $i)"
 		    # FIXME cascade?
 		}
-	    }
-	    timeout {
-		fail "step to increment ($msg $i) (timeout)"
 	    }
 	}
     }
@@ -176,22 +151,18 @@ gdb_test "set width 0" ""
 runto_main
 
 # See if scheduler locking is available on this target.
-send_gdb "set scheduler-locking off\n"
 global gdb_prompt
-gdb_expect {
-  -re "Target .* cannot support this command"
-    {
-      unsupported "target does not support scheduler locking"
-      return
+gdb_test_multiple "set scheduler-locking off" "scheduler locking set to none" {
+    -re "Target .* cannot support this command" {
+	unsupported "target does not support scheduler locking"
+	return
     }
-  -re "$gdb_prompt $"
-    {
-      pass "scheduler locking set to none"
+    -re "$gdb_prompt $" {
+	pass "scheduler locking set to none"
     }
-  timeout
-    {
-      unsupported "target does not support scheduler locking (timeout)"
-      return
+    timeout {
+	unsupported "target does not support scheduler locking (timeout)"
+	return
     }
 }
 

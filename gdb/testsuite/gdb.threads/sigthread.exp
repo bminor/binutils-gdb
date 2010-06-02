@@ -36,13 +36,9 @@ if ![runto_main] then {
 gdb_test "handle SIGUSR1 nostop noprint pass"
 gdb_test "handle SIGUSR2 nostop noprint pass"
 
-send_gdb "continue\n"
-gdb_expect {
+gdb_test_multiple "continue" "continue" {
     -re "Continuing" {
 	pass "continue"
-    }
-    timeout {
-	fail "continue (timeout)"
     }
 }
 
