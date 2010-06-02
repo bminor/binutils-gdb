@@ -81,7 +81,7 @@ gdb_test "continue" \
 
 # Before we start making hand function calls, turn on scheduler locking.
 
-gdb_test "set scheduler-locking on" "" "enable scheduler locking"
+gdb_test_no_output "set scheduler-locking on" "enable scheduler locking"
 gdb_test "show scheduler-locking" ".* locking scheduler .* is \"on\"." "show scheduler locking on"
 
 # Now hand-call a function in each thread, having the function
@@ -100,7 +100,7 @@ for { set i 1 } { $i <= $total_nr_threads } { incr i } {
 # Now have each hand-called function return.
 
 # Turn confirmation off for the "return" command.
-gdb_test "set confirm off" ""
+gdb_test_no_output "set confirm off"
 
 clear_xfail "*-*-*"
 
@@ -133,8 +133,8 @@ gdb_test_multiple "maint print dummy-frames" "all dummies popped" {
     }
 }
 
-# Before we resume the full program, turn of scheduler locking.
-gdb_test "set scheduler-locking off" "" "disable scheduler locking"
+# Before we resume the full program, turn off scheduler locking.
+gdb_test_no_output "set scheduler-locking off" "disable scheduler locking"
 gdb_test "show scheduler-locking" ".* locking scheduler .* is \"off\"." "show scheduler locking off"
 
 # Continue one last time, the program should exit normally.

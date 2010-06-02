@@ -87,10 +87,10 @@ if { $nr_started == $NR_THREADS } {
 gdb_test "watch x" "Hardware watchpoint 3: x"
 
 # Now that the watchpoint is set, we can let the threads increment X.
-gdb_test "set var test_ready = 1" ""
+gdb_test_no_output "set var test_ready = 1"
 
 # While debugging.
-#gdb_test "set debug infrun 1" ""
+#gdb_test_no_output "set debug infrun 1"
 
 set x_inc_line [gdb_get_line_number "X increment"]
 set x_thread_loc "thread_function \\\(arg=.*\\\) at .*watchthreads.c:$x_inc_line"

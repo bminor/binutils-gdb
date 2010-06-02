@@ -43,7 +43,7 @@ if ![runto_main] then {
    return 0
 }
 
-gdb_test "set follow-fork-mode child" "" "1, set follow-fork-mode child"
+gdb_test_no_output "set follow-fork-mode child" "1, set follow-fork-mode child"
 gdb_test "catch fork" "Catchpoint \[0-9\]* \\(fork\\)" "1, insert fork catchpoint"
 gdb_breakpoint "start" "" "1, set breakpoint at start"
 
@@ -101,7 +101,7 @@ if ![runto_main] then {
    return 0
 }
 
-gdb_test "set follow-fork-mode child" "" "2, set follow-fork-mode child"
+gdb_test_no_output "set follow-fork-mode child" "2, set follow-fork-mode child"
 gdb_test "catch fork" "Catchpoint \[0-9\]* \\(fork\\)" "2, insert fork catchpoint"
 gdb_breakpoint "start"
 

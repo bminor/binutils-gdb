@@ -63,7 +63,7 @@ gdb_test_multiple "define backthread" "defining macro" {
 # Cause backtraces to fail by setting a limit.  This allows us to
 # verify that the macro can get past the backtrace error and perform
 # subsequent commands.
-gdb_test "set backtrace limit 3" ""
+gdb_test_no_output "set backtrace limit 3"
 gdb_test "thread apply all backthread" "Thread ..*\\\$\[0-9]+ = 0x14.*Thread ..*\\\$\[0-9]+ = 0x14.*Thread ..*\\\$\[0-9]+ = 0x14.*Thread ..*\\\$\[0-9]+ = 0x14.*Thread ..*\\\$\[0-9]+ = 0x14.*Thread ..*\\\$\[0-9]+ = 0x14"
 
 # Go into the thread_function to check that a simple "thread apply"

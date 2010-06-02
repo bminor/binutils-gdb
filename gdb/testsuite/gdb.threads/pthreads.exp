@@ -52,9 +52,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "set print sevenbit-strings" ""
-#gdb_test "set print address off" ""
-gdb_test "set width 0" ""
+gdb_test_no_output "set print sevenbit-strings"
+#gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 # We'll need this when we send_gdb a ^C to GDB.  Need to do it before we
 # run the program and gdb starts saving and restoring tty states.
@@ -69,14 +69,14 @@ proc all_threads_running {} {
     global srcfile
 
     # Reset all the counters to zero.
-    gdb_test "set var common_routine::hits=0" ""
-    gdb_test "set var common_routine::from_thread1=0" ""
-    gdb_test "set var common_routine::from_thread2=0" ""
-    gdb_test "set var common_routine::from_main=0" ""
-    gdb_test "set var common_routine::full_coverage=0" ""
+    gdb_test_no_output "set var common_routine::hits=0"
+    gdb_test_no_output "set var common_routine::from_thread1=0"
+    gdb_test_no_output "set var common_routine::from_thread2=0"
+    gdb_test_no_output "set var common_routine::from_main=0"
+    gdb_test_no_output "set var common_routine::full_coverage=0"
 
     # Disable all breakpoints.
-    gdb_test "disable" ""
+    gdb_test_no_output "disable"
 
     # Set up a breakpoint that will cause us to stop when we have
     # been called 15 times.  This should be plenty of time to allow
@@ -173,7 +173,7 @@ proc test_startup {} {
     gdb_test "continue" \
 	    "Continuing.*Breakpoint .*, thread1 \\(arg=0xfeedface\\).*at.*$srcfile.*" \
 	    "Continue to creation of first thread"
-    gdb_test "disable" ""
+    gdb_test_no_output "disable"
 
     # Extract the thread id number of thread 1 from "info threads" output.
     gdb_test_multiple "info threads" "get thread 1 id" {

@@ -1,5 +1,19 @@
 2010-06-02  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.threads/fork-thread-pending.exp: Use gdb_test_no_output.
+	* gdb.threads/hand-call-in-thraeds.exp: Ditto.
+	* gdb.threads/local-watch-wrong-thread.exp: Ditto.
+	* gdb.threads/manythreads.exp: Ditto.
+	* gdb.threads/print-threads.exp: Ditto.
+	* gdb.threads/pthreads.exp: Ditto.
+	* gdb.threads/schedlock.exp: Ditto.
+	* gdb.threads/staticthreads.exp: Ditto.
+	* gdb.threads/thread-specific.exp: Ditto.
+	* gdb.threads/thread-unwindonsignal.exp: Ditto.
+	* gdb.threads/threadapply.exp: Ditto.
+	* gdb.threads/watchthreads.exp: Ditto.
+	* gdb.threads/watchthreads2.exp: Ditto.
+
 	* gdb.python/py-block.exp: Use gdb_test_no_output.
 	* gdb.python/py-prettyprint.exp: Ditto.
 	* gdb.python/py-template.exp: Ditto.

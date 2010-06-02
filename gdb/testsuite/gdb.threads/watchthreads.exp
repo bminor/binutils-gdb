@@ -128,10 +128,10 @@ for {set i 0} {$i < 30} {incr i} {
 	# 10 is chosen so we're guaranteed to come through here.
 	if { $hwwp_2_enabled && $hwwp_3_enabled } {
 	    if { $args_0 >= 10 && $hwwp_2_enabled } {
-		gdb_test "disable 2" "" "disable first watchpoint at 10"
+		gdb_test_no_output "disable 2" "disable first watchpoint at 10"
 		set hwwp_2_enabled 0
 	    } elseif { $args_1 >= 10 && $hwwp_3_enabled } {
-		gdb_test "disable 3" "" "disable first watchpoint at 10"
+		gdb_test_no_output "disable 3" "disable first watchpoint at 10"
 		set hwwp_3_enabled 0
 	    }
 	}

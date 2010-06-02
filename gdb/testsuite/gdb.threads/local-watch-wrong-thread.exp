@@ -103,7 +103,7 @@ gdb_test "info breakpoints" \
     "local watchpoint is still in breakpoint list"
 
 # Make the watchpoint condition eval true.
-gdb_test "set trigger=1" "" "let local watchpoint trigger"
+gdb_test_no_output "set trigger=1" "let local watchpoint trigger"
 
 gdb_test "continue" \
     "Hardware watchpoint.*Old value.*New value.*thread_function0.*" \
@@ -111,7 +111,7 @@ gdb_test "continue" \
 
 # Confirm that the local watchpoint is indeed deleted when
 # thread_function0 returns.
-gdb_test "set *myp=0" "" "let thread_function0 return"
+gdb_test_no_output "set *myp=0" "let thread_function0 return"
 
 gdb_test "break ${srcfile}:${bkpt_here}" \
     "Breakpoint 6 at .*: file .*${srcfile}, line .*" \

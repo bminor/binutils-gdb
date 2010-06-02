@@ -145,8 +145,8 @@ if ![istarget "*-*-ultrix*"] then {
 
 gdb_load ${binfile}
 
-gdb_test "set print sevenbit-strings" ""
-gdb_test "set width 0" ""
+gdb_test_no_output "set print sevenbit-strings"
+gdb_test_no_output "set width 0"
 
 runto_main
 
@@ -199,7 +199,7 @@ set curthread [get_current_thread "find current thread (1)"]
 
 
 # Test stepping without scheduler locking.
-gdb_test "set scheduler-locking off"  ""
+gdb_test_no_output "set scheduler-locking off"
 
 step_ten_loops "unlocked"
 
@@ -239,7 +239,7 @@ if {$num_other_threads > 0} {
 }
 
 # Test continue with scheduler locking
-gdb_test "set scheduler-locking on"  ""
+gdb_test "set scheduler-locking on" ""
 
 my_continue "with lock"
 

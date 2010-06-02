@@ -46,9 +46,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "set print sevenbit-strings" ""
-#gdb_test "set print address off" ""
-gdb_test "set width 0" ""
+gdb_test_no_output "set print sevenbit-strings"
+#gdb_test_no_output "set print address off"
+gdb_test_no_output "set width 0"
 
 # We'll need this when we send_gdb a ^C to GDB.  Need to do it before we
 # run the program and gdb starts saving and restoring tty states.
@@ -100,17 +100,17 @@ proc test_all_threads { name kill } {
 
 runto_main
 gdb_test "break thread_function" "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*print-threads.c, line \[0-9\]*\\."
-gdb_test "set var slow = 0" ""
+gdb_test_no_output "set var slow = 0"
 test_all_threads "fast" 0
 
 runto_main
 gdb_test "break thread_function" "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*print-threads.c, line \[0-9\]*\\." "break thread_function (2)"
-gdb_test "set var slow = 1" ""
+gdb_test_no_output "set var slow = 1"
 test_all_threads "slow" 0
 
 runto_main
 gdb_test "break thread_function" "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*print-threads.c, line \[0-9\]*\\." "break thread_function (3)"
-gdb_test "set var slow = 1" "" "set var slow = 1 (2)"
+gdb_test_no_output "set var slow = 1" "set var slow = 1 (2)"
 gdb_breakpoint "kill"
 test_all_threads "slow with kill breakpoint" 1
 

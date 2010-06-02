@@ -66,8 +66,7 @@ gdb_test "continue" \
 # Do turn on unwindonsignal.
 # We want to test gdb handling of the current thread changing when
 # unwindonsignal is in effect.
-gdb_test "set unwindonsignal on" \
-	"" \
+gdb_test_no_output "set unwindonsignal on" \
 	"setting unwindonsignal"
 gdb_test "show unwindonsignal" \
 	"Unwinding of stack .* is on." \
