@@ -9236,7 +9236,7 @@ static char *
 typename_concat (struct obstack *obs, const char *prefix, const char *suffix, 
 		 struct dwarf2_cu *cu)
 {
-  char *sep;
+  const char *sep;
 
   if (suffix == NULL || suffix[0] == '\0' || prefix == NULL || prefix[0] == '\0')
     sep = "";

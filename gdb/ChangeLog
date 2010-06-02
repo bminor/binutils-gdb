@@ -1,3 +1,7 @@
+2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (typename_concat): Add const to the variable sep.
+
 2010-06-02  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.h (dwarf2_per_cu_data): Declare.
