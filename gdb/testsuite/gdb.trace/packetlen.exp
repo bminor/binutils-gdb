@@ -60,11 +60,11 @@ gdb_trace_setactions "setup collect actions" \
 	"collect gdb_structp_test, gdb_structpp_test, gdb_union1_test" "^$" \
 	"end" ""
 
-gdb_test "tstart" "" "survive the long packet send"
+gdb_test_no_output "tstart" "survive the long packet send"
 gdb_test "break end" "" ""
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"
 
-gdb_test "tstop" "" "confirm: survived the long packet send"
+gdb_test_no_output "tstop" "confirm: survived the long packet send"
 

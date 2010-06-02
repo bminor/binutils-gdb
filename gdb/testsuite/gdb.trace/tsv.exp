@@ -72,8 +72,7 @@ gdb_test "info tvariables" \
 \\\$tvar3\[\t \]+1234567000000\[\t \]+.*<undefined>.*" \
   "List tvariables"
 
-gdb_test "delete tvariable \$tvar2" \
-  "" \
+gdb_test_no_output "delete tvariable \$tvar2" \
   "delete trace state variable"
 
 gdb_test "info tvariables" \

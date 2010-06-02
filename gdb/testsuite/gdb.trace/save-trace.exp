@@ -71,8 +71,7 @@ foreach x { 1 2 3 4 5 6 } {
 	     "Setting tracepoint $trcpt.* to $x" \
 	     "10.x: set passcount for tracepoint $trcpt"
 
-    gdb_test "condition $trcpt $x - 1 == $x / 2" \
-	     "" \
+    gdb_test_no_output "condition $trcpt $x - 1 == $x / 2" \
 	     "10.x: set condition for tracepoint $trcpt"
 
     gdb_trace_setactions "10.x: set actions for tracepoint $x" \
@@ -83,8 +82,7 @@ foreach x { 1 2 3 4 5 6 } {
 	    "end" "^$"
 }
 
-gdb_test "set default-collect gdb_char_test, gdb_long_test - 100" \
-    "" \
+gdb_test_no_output "set default-collect gdb_char_test, gdb_long_test - 100" \
     "10: set default-collect"
 
 proc gdb_verify_tracepoints { testname } {
@@ -132,7 +130,7 @@ gdb_test "save-tracepoints savetrace.tr" \
 # 10.2 Read back tracepoint definitions
 
 gdb_delete_tracepoints
-gdb_test "set default-collect" "" "10.2: clear default-collect"
+gdb_test_no_output "set default-collect" "10.2: clear default-collect"
 gdb_test "info tracepoints" "No tracepoints." "10.2: delete tracepoints"
 gdb_test "source savetrace.tr" \
 	"Tracepoint \[0-9\]+ at .*" \
@@ -149,7 +147,7 @@ gdb_test "save-tracepoints $objdir/savetrace.tr" \
 	"10.3: save tracepoint definitions, full path"
 
 gdb_delete_tracepoints
-gdb_test "set default-collect" "" "10.3: clear default-collect"
+gdb_test_no_output "set default-collect" "10.3: clear default-collect"
 gdb_test "info tracepoints" "No tracepoints." "10.3: delete tracepoints"
 gdb_test "source $objdir/savetrace.tr" \
 	"Tracepoint \[0-9\]+ at .*" \

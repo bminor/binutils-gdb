@@ -80,7 +80,7 @@ gdb_test "info trace" "No tracepoints.*" \
 
 # 1.3 trace line in invalid source file
 gdb_delete_tracepoints
-gdb_test "set breakpoint pending off" ""
+gdb_test_no_output "set breakpoint pending off"
 gdb_test "trace NoSuChFiLe.c:1" "No source file named NoSuChFiLe.c." \
 	"1.3a: trace invalid source file"
 gdb_test "info trace" "No tracepoints.*" \

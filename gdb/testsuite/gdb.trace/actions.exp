@@ -192,16 +192,14 @@ gdb_test "help end" "Ends a list of commands or actions.*" \
 
 # 5.9 default-collect
 
-gdb_test "set default-collect gdb_char_test, gdb_long_test - 100" \
-    "" \
+gdb_test_no_output "set default-collect gdb_char_test, gdb_long_test - 100" \
     "5.9a: set default-collect"
 
 gdb_test "show default-collect" \
     "The list of expressions to collect by default is \"gdb_char_test, gdb_long_test - 100\"..*" \
     "5.9b: show default-collect"
 
-gdb_test "set default-collect" \
-    "" \
+gdb_test_no_output "set default-collect" \
     "5.9c: set default-collect"
 
 # 5.10 teval
