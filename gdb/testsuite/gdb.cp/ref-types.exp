@@ -231,7 +231,7 @@ gdb_test "print rC" ".\[0-9\]* = \\(char &\\) @$hex: 65 \'A\'" \
 
 gdb_test "print rUC" \
     ".\[0-9\]* = \\(unsigned char &\\) @$hex: 21 \'.025\'" \
-    pass "print value of rUC"
+    "print value of rUC"
 
 gdb_test_multiple "print rS" "print value of rS" {
     -re ".\[0-9\]* = \\(short &\\) @$hex: -14.*$gdb_prompt $" {
@@ -252,11 +252,11 @@ gdb_test_multiple "print rUS" "print value of rUS" {
 }
 
 gdb_test "print rI" ".\[0-9\]* = \\(int &\\) @$hex: 102" \
-        pass "print value of rI"
+	"print value of rI"
 
 gdb_test "print rUI" \
     ".\[0-9\]* = \\(unsigned int &\\) @$hex: 1002" \
-        pass "print value of UI"
+        "print value of UI"
 
 gdb_test_multiple "print rL" "print value of rL" {
     -re ".\[0-9\]* = \\(long &\\) @$hex: -234.*$gdb_prompt $" {
