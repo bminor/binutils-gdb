@@ -8682,7 +8682,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     struct bfd_link_hash_entry *h;
 
     i = 0;
-    PRIV (transfer_address[i++]) = 0xffffffff00000340;	/* SYS$IMGACT */
+    PRIV (transfer_address[i++]) = 0xffffffff00000340ULL;	/* SYS$IMGACT */
     h = bfd_link_hash_lookup (info->hash, "LIB$INITIALIZE", FALSE, FALSE, TRUE);
     if (h != NULL && h->type == bfd_link_hash_defined)
       PRIV (transfer_address[i++]) =
