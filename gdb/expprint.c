@@ -532,10 +532,6 @@ print_subexp_standard (struct expression *exp, int *pos,
       fprintf_unfiltered (stream, ")");
       return;
 
-    case BINOP_INCL:
-    case BINOP_EXCL:
-      error (_("print_subexp:  Not implemented."));
-
       /* Default ops */
 
     default:
@@ -714,10 +710,6 @@ op_name_standard (enum exp_opcode opcode)
       return "BINOP_ASSIGN_MODIFY";
     case BINOP_VAL:
       return "BINOP_VAL";
-    case BINOP_INCL:
-      return "BINOP_INCL";
-    case BINOP_EXCL:
-      return "BINOP_EXCL";
     case BINOP_CONCAT:
       return "BINOP_CONCAT";
     case BINOP_RANGE:
@@ -780,12 +772,6 @@ op_name_standard (enum exp_opcode opcode)
       return "UNOP_POSTDECREMENT";
     case UNOP_SIZEOF:
       return "UNOP_SIZEOF";
-    case UNOP_LOWER:
-      return "UNOP_LOWER";
-    case UNOP_UPPER:
-      return "UNOP_UPPER";
-    case UNOP_LENGTH:
-      return "UNOP_LENGTH";
     case UNOP_PLUS:
       return "UNOP_PLUS";
     case UNOP_CAP:
@@ -952,8 +938,6 @@ dump_subexp_body_standard (struct expression *exp,
     case BINOP_INTDIV:
     case BINOP_ASSIGN_MODIFY:
     case BINOP_VAL:
-    case BINOP_INCL:
-    case BINOP_EXCL:
     case BINOP_CONCAT:
     case BINOP_IN:
     case BINOP_RANGE:
@@ -982,12 +966,6 @@ dump_subexp_body_standard (struct expression *exp,
     case UNOP_MIN:
     case UNOP_ODD:
     case UNOP_TRUNC:
-    case UNOP_LOWER:
-    case UNOP_UPPER:
-    case UNOP_LENGTH:
-    case UNOP_CARD:
-    case UNOP_CHMAX:
-    case UNOP_CHMIN:
       elt = dump_subexp (exp, stream, elt);
       break;
     case OP_LONG:

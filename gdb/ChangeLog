@@ -1,3 +1,16 @@
+2010-06-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* expprint.c (print_subexp_standard): Remove exp_opcodes BINOP_INCL,
+	BINOP_EXCL.
+	(op_name_standard): Remove exp_opcodes BINOP_INCL, BINOP_EXCL,
+	UNOP_LOWER, UNOP_UPPER, UNOP_LENGTH.
+	(dump_subexp_body_standard): Remove exp_opcodes BINOP_INCL,
+	BINOP_EXCL, UNOP_LOWER, UNOP_UPPER, UNOP_LENGTH, UNOP_CARD,
+	UNOP_CHMAX, UNOP_CHMIN.
+	* expression.h (enum exp_opcode) <BINOP_INCL, BINOP_EXCL,
+	UNOP_LOWER, UNOP_UPPER, UNOP_LENGTH, UNOP_CARD, UNOP_CHMAX,
+	UNOP_CHMIN>: Remove opcodes.
+
 2010-06-01  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* dwarf2read.c (read_func_scope): Do not complain for
