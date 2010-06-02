@@ -15,21 +15,54 @@
 
 set testfile "module"
 set srcfile ${testfile}.f90
-set binfile ${objdir}/${subdir}/${testfile}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug f77 quiet}] != "" } {
-    untested "Couldn't compile ${srcfile}"
+if { [prepare_for_testing $testfile.exp $testfile $srcfile {debug f77}] } {
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 if ![runto MAIN__] then {
     perror "couldn't run to breakpoint MAIN__"
     continue
 }
 
-gdb_test "print i" " = 42"
+# Do not use simple single-letter names as GDB would pick up for expectedly
+# nonexisting symbols some static variables from system libraries debuginfos.
+
+gdb_breakpoint [gdb_get_line_number "i-is-1"]
+gdb_continue_to_breakpoint "i-is-1" ".*i-is-1.*"
+gdb_test "print var_i" " = 1" "print var_i value 1"
+
+gdb_breakpoint [gdb_get_line_number "i-is-2"]
+gdb_continue_to_breakpoint "i-is-2" ".*i-is-2.*"
+gdb_test "print var_i" " = 2" "print var_i value 2"
+
+gdb_breakpoint [gdb_get_line_number "a-b-c-d"]
+gdb_continue_to_breakpoint "a-b-c-d" ".*a-b-c-d.*"
+gdb_test "print var_a" "No symbol \"var_a\" in current context\\."
+gdb_test "print var_b" " = 11"
+gdb_test "print var_c" "No symbol \"var_c\" in current context\\."
+gdb_test "print var_d" " = 12"
+gdb_test "print var_i" " = 14" "print var_i value 14"
+
+gdb_test "ptype modmany" {No symbol "modmany" in current context.}
+
+proc complete {expr list} {
+    set cmd "complete p $expr"
+    set expect [join [concat [list $cmd] $list] "\r\np "]
+    gdb_test $cmd $expect "complete $expr"
+}
+set modmany_list {modmany::var_a modmany::var_b modmany::var_c modmany::var_i}
+complete "modm" $modmany_list
+complete "modmany" $modmany_list
+complete "modmany::" $modmany_list
+complete "modmany::var" $modmany_list
+
+# Breakpoint would work in language "c".
+gdb_test "show language" {The current source language is "(auto; currently )?fortran".}
+
+# gcc-4.4.2: The main program is always MAIN__ in .symtab so "runto" above
+# works.  But DWARF DW_TAG_subprogram contains the name specified by
+# the "program" Fortran statement.
+if [gdb_breakpoint "module"] {
+    pass "setting breakpoint at module"
+}

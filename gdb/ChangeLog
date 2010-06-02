@@ -1,3 +1,51 @@
+2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support DW_TAG_module as separate namespaces.
+	* dwarf2read.c (typename_concat): New parameter physname.
+	(read_module_type): New function and declaration.
+	(scan_partial_symbols): Scan also DW_TAG_module children.
+	(partial_die_parent_scope): Accept scope even from DW_TAG_module. Pass
+	to typename_concat backward compatible physname value 0.
+	(partial_die_full_name, read_namespace_type): Pass to typename_concat
+	backward compatible physname value 0.
+	(add_partial_module, read_module): Remove FIXME comment.
+	(process_die) <DW_TAG_module>: Set PROCESSING_HAS_NAMESPACE_INFO.
+	(die_needs_namespace) <DW_TAG_variable>: Allow returning true even for
+	DIEs under DW_TAG_module.
+	(dwarf2_compute_name): Move the ada block for DW_AT_linkage_name and
+	DW_AT_MIPS_linkage_name first, extend it for language_fortran
+	&& physname and return there instead of just setting NAME.  Extend
+	the main block for language_fortran.  Pass physname parameter to the
+	typename_concat call.
+	(read_import_statement, read_func_scope, get_scope_pc_bounds)
+	(load_partial_dies, determine_prefix): Support also DW_TAG_module.
+	(new_symbol): Fill in cplus_specific.demangled_name if it is still
+	missing from SYMBOL_SET_NAMES in the language_fortran case.
+	(new_symbol) <DW_TAG_variable>: Force LOC_UNRESOLVED for gfortran module
+	variables.
+	(read_type_die) <DW_TAG_module>: New.
+	(MAX_SEP_LEN): Increase to 7.
+	(typename_concat): New parameter physname.  New variable lead.  Support
+	also language_fortran.
+	* f-exp.y (yylex): Consider : also as a symbol name character class.
+	* f-lang.c: Include cp-support.h.
+	(f_word_break_characters, f_make_symbol_completion_list): New functions.
+	(f_language_defn): Use cp_lookup_symbol_nonlocal,
+	f_word_break_characters and f_make_symbol_completion_list.
+	* f-typeprint.c (f_type_print_base) <TYPE_CODE_MODULE>: New.
+	* gdbtypes.h (enum type_code) <TYPE_CODE_MODULE>: New.
+	* symtab.c (symbol_init_language_specific): Support language_fortran.
+	(symbol_find_demangled_name): New comment on language_fortran.
+	(symbol_natural_name, symbol_demangled_name): Use demangled_name even
+	for language_fortran.
+	(lookup_symbol_aux_local): Check imports also for language_fortran.
+	(default_make_symbol_completion_list): Rename to ...
+	(default_make_symbol_completion_list_break_on): ... this name.  New
+	parameter break_on, use it.
+	(default_make_symbol_completion_list): New stub.
+	* symtab.h (default_make_symbol_completion_list_break_on): New
+	prototype.
+
 2010-06-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* remote.c (remote_get_noisy_reply): Remove trailing "\n" in call

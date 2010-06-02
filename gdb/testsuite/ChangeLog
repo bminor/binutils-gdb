@@ -1,5 +1,22 @@
 2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support DW_TAG_module as separate namespaces.
+	* gdb.fortran/library-module.exp, gdb.fortran/library-module-main.f90,
+	gdb.fortran/library-module-lib.f90: New.
+	* gdb.fortran/module.exp: Replace startup by a prepare_for_testing call.
+	(print i): Remove.
+	(continue to breakpoint: i-is-1, print var_i value 1)
+	(continue to breakpoint: i-is-2, print var_i value 2)
+	(continue to breakpoint: a-b-c-d, print var_a, print var_b, print var_c)
+	(print var_d, print var_i value 14, ptype modmany, complete `modm)
+	(complete `modmany, complete `modmany`, complete `modmany`var)
+	(show language, setting breakpoint at module): New tests.
+	* gdb.fortran/module.f90 (module mod): Remove.
+	(module mod1, module mod2, module modmany, subroutine sub1)
+	(subroutine sub2, program module): New.
+
+2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/ref-types.exp (pass, pass, pass): Rename to ...
 	(print value of rUC, print value of rI, print value of UI): ... here.
 	* gdb.cp/anon-union.exp (pass): Rename to ...

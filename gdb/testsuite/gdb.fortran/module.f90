@@ -13,10 +13,39 @@
 ! You should have received a copy of the GNU General Public License
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module mod
-        integer :: i = 42
-end module mod
+module mod1
+        integer :: var_i = 1
+end module mod1
 
-        use mod
-        print *, i
+module mod2
+        integer :: var_i = 2
+end module mod2
+
+module modmany
+        integer :: var_a = 10, var_b = 11, var_c = 12, var_i = 14
+end module modmany
+
+        subroutine sub1
+        use mod1
+        if (var_i .ne. 1) call abort
+        var_i = var_i                         ! i-is-1
+        end
+
+        subroutine sub2
+        use mod2
+        if (var_i .ne. 2) call abort
+        var_i = var_i                         ! i-is-2
+        end
+
+        program module
+
+        use modmany, only: var_b, var_d => var_c, var_i
+
+        call sub1
+        call sub2
+
+        if (var_b .ne. 11) call abort
+        if (var_d .ne. 12) call abort
+        if (var_i .ne. 14) call abort
+        var_b = var_b                         ! a-b-c-d
 end

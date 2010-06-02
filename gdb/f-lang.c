@@ -31,6 +31,7 @@
 #include "f-lang.h"
 #include "valprint.h"
 #include "value.h"
+#include "cp-support.h"
 
 
 /* Following is dubious stuff that had been in the xcoff reader. */
@@ -308,6 +309,38 @@ f_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_logical_s2;
 }
 
+/* Remove the modules separator :: from the default break list.  */
+
+static char *
+f_word_break_characters (void)
+{
+  static char *retval;
+
+  if (!retval)
+    {
+      char *s;
+
+      retval = xstrdup (default_word_break_characters ());
+      s = strchr (retval, ':');
+      if (s)
+	{
+	  char *last_char = &s[strlen (s) - 1];
+
+	  *s = *last_char;
+	  *last_char = 0;
+	}
+    }
+  return retval;
+}
+
+/* Consider the modules separator :: as a valid symbol name character class.  */
+
+static char **
+f_make_symbol_completion_list (char *text, char *word)
+{
+  return default_make_symbol_completion_list_break_on (text, word, ":");
+}
+
 /* This is declared in c-lang.h but it is silly to import that file for what
    is already just a hack. */
 extern int c_value_print (struct value *, struct ui_file *,
@@ -335,15 +368,15 @@ const struct language_defn f_language_defn =
   c_value_print,		/* FIXME */
   NULL,				/* Language specific skip_trampoline */
   NULL,                    	/* name_of_this */
-  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   NULL,				/* Language specific class_name_from_physname */
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
-  default_word_break_characters,
-  default_make_symbol_completion_list,
+  f_word_break_characters,
+  f_make_symbol_completion_list,
   f_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,

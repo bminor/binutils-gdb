@@ -370,6 +370,10 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       fputs_filtered (TYPE_TAG_NAME (type), stream);
       break;
 
+    case TYPE_CODE_MODULE:
+      fprintfi_filtered (level, stream, "module %s", TYPE_TAG_NAME (type));
+      break;
+
     default_case:
     default:
       /* Handle types not explicitly handled by the other cases,

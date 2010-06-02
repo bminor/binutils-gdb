@@ -351,7 +351,8 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
   if (gsymbol->language == language_cplus
       || gsymbol->language == language_d
       || gsymbol->language == language_java
-      || gsymbol->language == language_objc)
+      || gsymbol->language == language_objc
+      || gsymbol->language == language_fortran)
     {
       gsymbol->language_specific.cplus_specific.demangled_name = NULL;
     }
@@ -465,6 +466,11 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 	  return demangled;
 	}
     }
+  /* We could support `gsymbol->language == language_fortran' here to provide
+     module namespaces also for inferiors with only minimal symbol table (ELF
+     symbols).  Just the mangling standard is not standardized across compilers
+     and there is no DW_AT_producer available for inferiors with only the ELF
+     symbols to check the mangling kind.  */
   return NULL;
 }
 
@@ -645,6 +651,7 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
     case language_d:
     case language_java:
     case language_objc:
+    case language_fortran:
       if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
 	return gsymbol->language_specific.cplus_specific.demangled_name;
       break;
@@ -671,6 +678,7 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
     case language_d:
     case language_java:
     case language_objc:
+    case language_fortran:
       if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
 	return gsymbol->language_specific.cplus_specific.demangled_name;
       break;
@@ -1156,7 +1164,7 @@ lookup_symbol_aux_local (const char *name, const struct block *block,
       if (sym != NULL)
 	return sym;
 
-      if (language == language_cplus)
+      if (language == language_cplus || language == language_fortran)
         {
           sym = cp_lookup_symbol_imports (scope,
                                           name,
@@ -3582,7 +3590,8 @@ add_partial_symbol_name (const char *name, void *user_data)
 }
 
 char **
-default_make_symbol_completion_list (char *text, char *word)
+default_make_symbol_completion_list_break_on (char *text, char *word,
+					      const char *break_on)
 {
   /* Problem: All of the symbols have to be copied because readline
      frees them.  I'm not going to worry about this; hopefully there
@@ -3645,7 +3654,7 @@ default_make_symbol_completion_list (char *text, char *word)
 	while (p > text)
 	  {
 	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0'
-		|| p[-1] == ':')
+		|| p[-1] == ':' || strchr (break_on, p[-1]) != NULL)
 	      --p;
 	    else
 	      break;
@@ -3769,6 +3778,12 @@ default_make_symbol_completion_list (char *text, char *word)
     }
 
   return (return_val);
+}
+
+char **
+default_make_symbol_completion_list (char *text, char *word)
+{
+  return default_make_symbol_completion_list_break_on (text, word, "");
 }
 
 /* Return a NULL terminated array of all symbols (regardless of class)

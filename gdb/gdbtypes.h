@@ -136,6 +136,8 @@ enum type_code
 
     TYPE_CODE_DECFLOAT,		/* Decimal floating point.  */
 
+    TYPE_CODE_MODULE,		/* Fortran module.  */
+
     /* Internal function type.  */
     TYPE_CODE_INTERNAL_FUNCTION
   };
