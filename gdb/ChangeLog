@@ -1,3 +1,8 @@
+2010-06-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* remote.c (remote_get_noisy_reply): Remove trailing "\n" in call
+	to error.
+
 2010-06-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (typename_concat): Add const to the variable sep.

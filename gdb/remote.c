@@ -446,7 +446,7 @@ remote_get_noisy_reply (char **buf_p,
 	  p = buf + strlen ("qRelocInsn:");
 	  pp = unpack_varlen_hex (p, &ul);
 	  if (*pp != ';')
-	    error (_("invalid qRelocInsn packet: %s\n"), buf);
+	    error (_("invalid qRelocInsn packet: %s"), buf);
 	  from = ul;
 
 	  p = pp + 1;
