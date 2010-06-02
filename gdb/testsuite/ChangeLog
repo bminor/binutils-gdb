@@ -1,3 +1,8 @@
+2010-06-02  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/koenig.exp: Added new test case.
+	* gdb.cp/koenig.cc: Ditto.
+
 2010-06-01  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/arithmet.exp: Use gdb_test_no_output.

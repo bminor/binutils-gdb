@@ -175,6 +175,13 @@ typedef O::A TOA;
 typedef TOA  TTOA;
 
 //------------
+static union {
+    int  a;
+    char b;
+}p_union;
+
+//------------
+
 int
 main ()
 {

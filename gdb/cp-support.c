@@ -752,6 +752,9 @@ make_symbol_overload_list_adl_namespace (struct type *type,
 
   type_name = TYPE_NAME (type);
 
+  if (type_name == NULL)
+    return;
+
   prefix_len = cp_entire_prefix_len (type_name);
 
   if (prefix_len != 0)

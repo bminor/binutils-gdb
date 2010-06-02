@@ -64,6 +64,7 @@ gdb_test "p foo(go, fo, eo)" "= 6"
 
 #test that gdb fails gracefully
 gdb_test "p fake(eo)" "No symbol \"fake\" in current context."
+gdb_test "p foo (fake)" "No symbol \"fake\" in current context."
 
 #test that namespaces of base classes are searched
 gdb_test "p foo(io)" "= 7"
@@ -104,3 +105,7 @@ gdb_test "p M::N::bar('a')" "= 22"
 
 #test that lookup supports typedef
 gdb_test "p foo(ttoa, 'a')" "= 23"
+
+#test that lookup is not thwarted by anonymous types
+gdb_test "p foo (p_union)" \
+  "Cannot resolve function foo to any overloaded instance"
