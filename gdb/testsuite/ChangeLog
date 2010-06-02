@@ -2,6 +2,8 @@
 
 	* gdb.cp/ref-types.exp (pass, pass, pass): Rename to ...
 	(print value of rUC, print value of rI, print value of UI): ... here.
+	* gdb.cp/anon-union.exp (pass): Rename to ...
+	(print z 2): ... here.
 
 2010-06-02  Michael Snyder  <msnyder@vmware.com>
 

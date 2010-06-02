@@ -164,7 +164,7 @@ gdb_test "next" "55\[ \t\]*int j = 0;" "next 5"
 gdb_test "print w" "\\$\[0-9\]* = 45" "print w 2"
 
 # See if z shows the same value
-gdb_test "print z" "\\$\[0-9\]* = 45" pass "print z 2"
+gdb_test "print z" "\\$\[0-9\]* = 45" "print z 2"
 
 # Set the anon union member 
 gdb_test_no_output "set var z = 27" "set var z"
