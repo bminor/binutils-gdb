@@ -62,7 +62,7 @@ proc test_first_component {} {
     # The function in question might complain; make sure that we see
     # all complaints.
 
-    gdb_test "set complaints 1000" ""
+    gdb_test_no_output "set complaints 1000"
 
     test_single_component "foo"
     test_single_component "operator<<"

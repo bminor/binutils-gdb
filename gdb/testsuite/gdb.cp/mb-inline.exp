@@ -86,7 +86,7 @@ gdb_test "continue" \
 # that at least in simple cases, the enable/disable
 # state of locations survive "run".
 # Early bug would disable 1.1 and enable 1.2 when program is run.
-gdb_test "disable 1.2" "" "disabling location: disable"
+gdb_test_no_output "disable 1.2" "disabling location: disable"
 
 gdb_run_cmd
 gdb_expect {

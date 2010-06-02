@@ -146,7 +146,7 @@ append menu_overload1arg "> $"
 
 # Set multiple-symbols to "ask", to allow us to test the use
 # of the multiple-choice menu when breaking on an overloaded method.
-gdb_test "set multiple-symbols ask" ""
+gdb_test_no_output "set multiple-symbols ask"
 
 # Set breakpoints on foo::overload1arg, one by one.
 
@@ -367,13 +367,13 @@ continue_to_bp_overloaded 1 14 "double" "arg=200"
 
 # Test breaking on an overloaded function when multiple-symbols
 # is set to "cancel"
-gdb_test "set multiple-symbols cancel" ""
+gdb_test_no_output "set multiple-symbols cancel"
 gdb_test "break foo::foofunc" \
          "canceled.*"
 
 # Test breaking on an overloaded function when multiple-symbols
 # is set to "all"
-gdb_test "set multiple-symbols all" ""
+gdb_test_no_output "set multiple-symbols all"
 gdb_test "break foo::foofunc" \
          "Breakpoint \[0-9\]+ at ${hex}: file .*ovldbreak\\.cc, line \[0-9\]+\\.\r\nBreakpoint \[0-9\]+ at ${hex}: file .*ovldbreak\\.cc, line \[0-9\]+\\.\r\nwarning: Multiple breakpoints were set\\.\r\nUse the \"delete\" command to delete unwanted breakpoints\\."
 

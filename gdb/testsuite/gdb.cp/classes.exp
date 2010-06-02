@@ -528,7 +528,7 @@ proc test_static_members {} {
     gdb_test "print &Bar::st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex"
     gdb_test "print *\$" "\\$\[0-9\]+ = 200"
 
-    gdb_test "set print static-members off" ""
+    gdb_test_no_output "set print static-members off"
     gdb_test "print csi" \
 	"{x = 10, y = 20}" \
 	"print csi without static members"
@@ -536,7 +536,7 @@ proc test_static_members {} {
 	"{x = 30, y = 40}" \
 	"print cnsi without static members"
 
-    gdb_test "set print static-members on" ""
+    gdb_test_no_output "set print static-members on"
     gdb_test "print csi" \
 	"{x = 10, y = 20, static null = {x = 0, y = 0, static null = <same as static member of an already seen type>}}" \
 	"print csi with static members"

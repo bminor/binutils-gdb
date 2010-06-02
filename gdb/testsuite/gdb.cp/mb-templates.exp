@@ -83,7 +83,7 @@ gdb_test "break $srcfile:$bp_location" \
     "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
     "separate condition: set breakpoint"
 
-gdb_test "condition 1 i==1" "" \
+gdb_test_no_output "condition 1 i==1" \
     "separate condition: set condition"
     
 gdb_run_cmd
@@ -106,7 +106,7 @@ gdb_test "continue" \
 # Try disabling a single location. We also test
 # that at least in simple cases, the enable/disable
 # state of locations surive "run".
-gdb_test "disable 1.1" "" "disabling location: disable"
+gdb_test_no_output "disable 1.1" "disabling location: disable"
 
 gdb_run_cmd
 gdb_expect {
@@ -122,10 +122,10 @@ gdb_expect {
 }
 
 # Try disabling entire breakpoint
-gdb_test "enable 1.1" "" "disabling location: enable"
+gdb_test_no_output "enable 1.1" "disabling location: enable"
 
 
-gdb_test "disable 1" "" "disable breakpoint: disable"
+gdb_test_no_output "disable 1" "disable breakpoint: disable"
 
 gdb_run_cmd
 gdb_expect {

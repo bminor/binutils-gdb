@@ -40,7 +40,7 @@ if { [gdb_breakpoint "c_func"] == 1 } {
 }
 gdb_continue_to_breakpoint "c_func" ".*c_func.*"
 
-gdb_test "set \$counter = 0" "" "initialize counter"
+gdb_test_no_output "set \$counter = 0" "initialize counter"
 
 gdb_test "rbreak c_funcs" \
     "Breakpoint.* at .*c_funcs_1.*Breakpoint.* at .*c_funcs_2.*"

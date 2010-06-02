@@ -213,7 +213,7 @@ proc do_tests {} {
 
     # Change multiple-symbols to "ask" in order to get the multiple-choice
     # menu when breaking on overloaded methods.
-    gdb_test "set multiple-symbols ask" ""
+    gdb_test_no_output "set multiple-symbols ask"
 
     runto_main
 

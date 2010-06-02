@@ -58,7 +58,7 @@ proc test_expr { args } {
     }
     set last_ent [expr [llength $args] - 1];
     set testname [lindex $args $last_ent];
-    if [gdb_test [lindex $args 0] "" "$testname (setup)"] {
+    if [gdb_test_no_output [lindex $args 0] "$testname (setup)"] {
 	gdb_suppress_tests;
     }
     for {set x 1} {$x < $last_ent} {set x [expr $x + 2]} {
