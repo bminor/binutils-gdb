@@ -66,8 +66,7 @@ if { $trcpt1 <= 0 || $trcpt2 <= 0 || $trcpt3 <= 0 } then {
 
 # 5.1 actions of specified tracepoint
 
-send_gdb "info tracepoints\n"
-gdb_expect {
+gdb_test_multiple "info tracepoints" "5.1a: set three tracepoints, no actions" {
     -re "Actions for tracepoint \[0-9\]+:.*$gdb_prompt $" {
 	fail "5.1a: testsuite failure (tracepoint already has action)!"
     }
@@ -148,8 +147,7 @@ gdb_test "end" "This command cannot be used at the top level." \
 gdb_trace_setactions "5.5a: set empty actions for first tracepoint" \
 	"$trcpt1"
 
-send_gdb "info tracepoints\n"
-gdb_expect {
+gdb_test_multiple "info tracepoints" "5.5c: verify NO actions for first tracepoint" {
     -re "No tracepoints.*$gdb_prompt $" {
 	fail "5.5c: verify NO actions for first tracepoint"
     }

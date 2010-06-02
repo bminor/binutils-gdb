@@ -71,8 +71,9 @@ if { $baseline == -1 } {
     return;
 }
 
-send_gdb "list $baseline, +12\n"
-gdb_expect {
+set return_me 0
+
+gdb_test_multiple "list $baseline, +12" "all tests in this module will fail" {
     -re "\[\r\n\](\[0-9\]+).*gdbtestline 1 " {
 	set testline1 $expect_out(1,string)
 	exp_continue
@@ -100,15 +101,19 @@ gdb_expect {
     -re ".*$gdb_prompt $" {
 	if { ($testline1 == 0) || ($testline2 == 0) || ($testline3 == 0) || ($testline4 == 0) || ($testline5 == 0) || ($testline6 == 0) } {
 	    untested backtrace.exp
-	    return -1
+	    set return_me 1
 all tests in this module will fail."
 	}
     }
     default {
 	    untested backtrace.exp
-	    return -1
+	    set return_me 1
 all tests in this module will fail."
-    } 
+    }
+}
+
+if { $return_me == 1 } then {
+    return -1;
 }
 
 #
@@ -177,16 +182,9 @@ proc gdb_backtrace_tdp_1 { msg } {
     # to be able to display the function's arguments or locals, and we
     # do not expect to be able to identify the caller of this function.
     
-    send_gdb "backtrace\n"
-    gdb_expect {
-	-re "#0\[\t \]+gdb_recursion_test.*depth=.*$gdb_prompt $" {
-	    pass "$msg"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "$msg"
-	}
-	timeout { fail "$msg (timeout)" }
-    }
+    gdb_test "backtrace" \
+	"#0\[\t \]+gdb_recursion_test.*depth=.*" \
+	"$msg"
 }
 
 proc gdb_backtrace_tdp_2 { msg } {
@@ -198,16 +196,9 @@ proc gdb_backtrace_tdp_2 { msg } {
     # passed in registers (which isn't the case for m68k), and we
     # don't expect to be able to identify the caller's stack frame.
 
-    send_gdb "backtrace\n"
-    gdb_expect {
-	-re "#0\[\t \]+gdb_recursion_test.*depth=.*$gdb_prompt $" {
-	    pass "$msg"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "$msg"
-	}
-	timeout { fail "$msg (timeout)" }
-    }
+    gdb_test "backtrace" \
+	"#0\[\t \]+gdb_recursion_test.*depth=.*" \
+	"$msg"
 }
 
 proc gdb_backtrace_tdp_3 { msg } {
@@ -217,18 +208,13 @@ proc gdb_backtrace_tdp_3 { msg } {
     # arguments and all locals.  This means that the display of
     # stack frame #0 should be complete (including argument values).
 
-    send_gdb "backtrace\n"
-    gdb_expect {
+    gdb_test_multiple "backtrace" "$msg" {
 	-re "#0\[\t \]+gdb_recursion_test.*depth=\[0-9\]+.*q1=\[0-9\]+.*q2=\[0-9\]+.*q3=\[0-9\]+.*q4=\[0-9\]+.*q5=\[0-9\]+.*q6=\[0-9\]+.*$gdb_prompt $" {
 	    pass "$msg"
 	}
 	-re "#0\[\t \]+gdb_recursion_test.*depth=Cannot access.*$gdb_prompt $" {
 	    fail "$msg (failed to collect arguments)"
 	}
-	-re ".*$gdb_prompt $" {
-	    fail "$msg"
-	}
-	timeout { fail "$msg (timeout)" }
     }
 }
 
@@ -241,8 +227,7 @@ proc gdb_backtrace_tdp_4 { msg depth } {
     # assume that if we can't display at least "depth" levels (with
     # args), it counts as an error.
 
-    send_gdb "backtrace\n"
-    gdb_expect {
+    gdb_test_multiple "backtrace" "$msg" {
 	-re "#$depth\[\t \].*gdb_recursion_test.*depth=\[0-9\]+.*q1=\[0-9\]+.*q2=\[0-9\]+.*q3=\[0-9\]+.*q4=\[0-9\]+.*q5=\[0-9\]+.*q6=\[0-9\]+.*$gdb_prompt $" {
 	    pass "$msg"
 	}
@@ -252,10 +237,6 @@ proc gdb_backtrace_tdp_4 { msg depth } {
 	-re "#\[0-9\]+\[\t \].*gdb_recursion_test.*depth=.*$gdb_prompt $" {
 	    fail "$msg (fewer than $depth stack frames found)"
 	}
-	-re ".*$gdb_prompt $" {
-	    fail "$msg"
-	}
-	timeout { fail "$msg (timeout)" }
     }
 }
 

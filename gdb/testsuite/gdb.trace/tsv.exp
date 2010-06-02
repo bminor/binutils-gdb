@@ -82,21 +82,11 @@ gdb_test "info tvariables" \
 \\\$tvar3\[\t \]+1234567000000\[\t \]+.*<undefined>.*" \
   "List tvariables after deletion"
 
-send_gdb "delete tvariable\n"
-gdb_expect 30 {
-    -re "Delete all trace state variables.*y or n.*$" {
-	send_gdb "y\n"
-	gdb_expect 30 {
-	    -re "$gdb_prompt $" {
-		pass "Delete all trace state variables"
-	    }
-	    timeout { fail "Delete all trace state variables (timeout)" }
-	}
-    }
-    -re "$gdb_prompt $" { # This happens if there were no variables
-    }
-    timeout { perror "Delete all trace state variables (timeout)" ; return }
-}
+gdb_test "delete tvariable" \
+    "" \
+    "Delete all trace state variables" \
+    "Delete all trace state variables.*y or n.*$" \
+    "y"
 
 gdb_test "info tvariables" \
   "No trace state variables.*" \

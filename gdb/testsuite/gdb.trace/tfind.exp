@@ -83,27 +83,26 @@ if { $tdp1 <= 0 || $tdp2 <= 0 || $tdp3 <= 0 || \
 }
 
 # 6.1 test tstart command
-send_gdb "tstart\n"
-gdb_expect {
+
+set return_me 1
+gdb_test_multiple "tstart" "6.1: tstart" {
     -re "Trace can only be run on remote targets.*$gdb_prompt $" {
 	fail "6.1: tstart (not connected to remote?)"
-	return;
     }
     -re "Target does not support this command.*$gdb_prompt $" {
 	fail "6.1: tstart (connected to wrong target?)"
-	return;
     }
     -re "Target returns error code.*$gdb_prompt $" {
 	fail "6.1: tstart (connected to wrong target?)"
-	return;
     }
     -re "$gdb_prompt $" {
 	pass "6.1: tstart"
+	set return_me 0
     }
-    default {
-	fail "6.1: tstart (default)"
-	return;
-    }
+}
+
+if { $return_me == 1 } then {
+    return -1;
 }
 
 # test tstatus (when trace on)
@@ -118,27 +117,26 @@ gdb_test "continue" \
     "run trace experiment"
 
 # 7.1 test tstop command
-send_gdb "tstop\n"
-gdb_expect {
+
+set return_me 1
+gdb_test_multiple "tstop" "7.1: tstop" {
     -re "Trace can only be run on remote targets.*$gdb_prompt $" {
 	fail "7.1: tstop (not connected to remote?)"
-	return;
     }
     -re "Target does not support this command.*$gdb_prompt $" {
 	fail "7.1: tstop (connected to wrong target?)"
-	return;
     }
     -re "Target returns error code.*$gdb_prompt $" {
 	fail "7.1: tstop (connected to wrong target?)"
-	return;
     }
     -re "$gdb_prompt $" {
 	pass "7.1: tstop"
+	set return_me 0
     }
-    default {
-	fail "7.1: tstop (default)"
-	return;
-    }
+}
+
+if { $return_me == 1 } then {
+    return -1;
 }
 
 # 7.2 test help tstop
@@ -329,13 +327,10 @@ gdb_tfind_test "8.17: tfind line <no arg>" "line" "\$trace_line != $testline3" "
 # 8.36 tfind and disassembly
 gdb_tfind_test "8.36: tfind start" "start" "0"
 set timeout 60
-send_gdb "disassemble gdb_c_test\n"
 # look for disassembly of function label
-gdb_expect {
-    -re "<(\.\[0-9\]+|)>:.*End of assembler dump.*$gdb_prompt $"      { pass "8.36: trace disassembly" }
-    -re ".*$gdb_prompt $"                   { fail "8.36: trace disassembly" }
-    timeout                       { fail "8.36: trace disassembly (timeout)" }
-}
+gdb_test "disassemble gdb_c_test" \
+    "<(\.\[0-9\]+|)>:.*End of assembler dump.*" \
+    "8.36: trace disassembly"
 
 gdb_test "tfind line 0" \
 	"out of range.*|failed to find.*" \

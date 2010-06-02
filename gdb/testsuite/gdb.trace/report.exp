@@ -76,8 +76,9 @@ if { $gdb_recursion_test_baseline == -1 } {
     return;
 }
 
-send_gdb "list $gdb_recursion_test_baseline, +12\n"
-gdb_expect {
+set return_me 0
+
+gdb_test_multiple "list $gdb_recursion_test_baseline, +12" "" {
     -re "\[\r\n\](\[0-9\]+)\[^\r\n\]+gdbtestline 1 " {
 	set testline1 $expect_out(1,string)
 	exp_continue
@@ -105,15 +106,19 @@ gdb_expect {
     -re ".*$gdb_prompt $" {
 	if { ($testline1 == 0) || ($testline2 == 0) || ($testline3 == 0) || ($testline4 == 0) || ($testline5 == 0) || ($testline6 == 0) } {
 	    untested report.exp
-	    return -1
+	    set return_me 1
 all tests in this module will fail."
 	}
     }
     default {
 	    untested report.exp
-	    return -1
+	    set return_me 1
 all tests in this module will fail."
     } 
+}
+
+if { $return_me == 1 } then {
+    return -1;
 }
 
 #
@@ -273,19 +278,12 @@ gdb_test "printf \"x %d x\\n\", \$tracepoint" "x $tdp1 x" \
 gdb_test "printf \"x %d x\\n\", \$trace_line" "x $testline1 x" \
 	"11.3: test \$trace_line"
 
-send_gdb "print \$trace_file\n"
-gdb_expect {
+gdb_test_multiple "print \$trace_file" "11.4: test \$trace_file" {
     -re "\\$\[0-9\]+ = \"$srcfile\"\[\r\n\]+$gdb_prompt $" {
 	pass "11.4: test \$trace_file"
     }
     -re "\\$\[0-9\]+ = \"$srcdir/$subdir/$srcfile\"\[\r\n\]+$gdb_prompt $" {
 	pass "11.4: test \$trace_file"
-    }
-    -re "$gdb_prompt $" {
-	fail "11.4: test \$trace_file"
-    }
-    timeout {
-	fail "11.4: test \$trace_file (timeout)"
     }
 }
 
@@ -296,8 +294,7 @@ gdb_expect {
 # 12.x test report generation using arbitrary GDB commands, loops etc.
 #
 
-send_gdb "while \$trace_frame != -1\n  output \$trace_file\n  printf \", line \%d \(tracepoint #\%d\)\\n\", \$trace_line, \$tracepoint\n  tfind\n  end\n"
-gdb_expect {
+gdb_test_multiple "while \$trace_frame != -1\n  output \$trace_file\n  printf \", line \%d \(tracepoint #\%d\)\\n\", \$trace_line, \$tracepoint\n  tfind\n  end" "12.1: trace report #1" {
     -re " line $testline1 .tracepoint .$tdp1" {
 	set linecount1 [expr $linecount1 + 1]
 	exp_continue
@@ -329,9 +326,6 @@ gdb_expect {
 	    pass "12.1: trace report #1"
 	}
     }
-    timeout {
-	fail "12.1: trace report #1 (timeout)"
-    }
 }
 
 gdb_tfind_test "12.2: tfind end, selects no frame" "end" "-1"
@@ -340,8 +334,7 @@ gdb_tfind_test "12.2: find first TDP #2 frame" "tracepoint $tdp2" \
 
 set linecount2 0
 
-send_gdb "while \$trace_frame != -1\n printf \"tracepoint #\%d, FP 0x\%08x, SP 0x\%08x, PC 0x%08x\\n\", \$tracepoint, \$fp, \$sp, \$pc\n tfind tracepoint\n end\n"
-gdb_expect {
+gdb_test_multiple "while \$trace_frame != -1\n printf \"tracepoint #\%d, FP 0x\%08x, SP 0x\%08x, PC 0x%08x\\n\", \$tracepoint, \$fp, \$sp, \$pc\n tfind tracepoint\n end" "12.2: trace report #2" {
     -re "tracepoint #$tdp2, FP $hex, SP $hex, PC $hex" {
 	set linecount2 [expr $linecount2 + 1]
 	exp_continue
@@ -353,9 +346,6 @@ gdb_expect {
 	    pass "12.2: trace report #2"
 	}
     }
-    timeout {
-	fail "12.2: trace report #2 (timeout)"
-    }
 }
 
 gdb_tfind_test "12.3: tfind end, selects no frame" "end" "-1"
@@ -364,8 +354,7 @@ gdb_tfind_test "12.3: find first TDP #3 frame" "tracepoint $tdp3" \
 
 set linecount3 0
 
-send_gdb "while \$trace_frame != -1\n printf \"TDP #\%d, frame \%d: depth = \%d, q1 = \%d\\n\", \$tracepoint, \$trace_frame, depth, q1\n tfind tracepoint\n end\n"
-gdb_expect {
+gdb_test_multiple "while \$trace_frame != -1\n printf \"TDP #\%d, frame \%d: depth = \%d, q1 = \%d\\n\", \$tracepoint, \$trace_frame, depth, q1\n tfind tracepoint\n end" "12.3: trace report #3" {
     -re "TDP #$tdp3, frame $decimal: depth = $decimal, q1 = $decimal" {
 	set linecount3 [expr $linecount3 + 1]
 	exp_continue
@@ -377,9 +366,6 @@ gdb_expect {
 	    pass "12.3: trace report #3"
 	}
     }
-    timeout {
-	fail "12.3: trace report #3 (timeout)"
-    }
 }
 
 gdb_tfind_test "12.4: tfind end, selects no frame" "end" "-1"
@@ -388,8 +374,7 @@ gdb_tfind_test "12.4: find first TDP #6 frame" "tracepoint $tdp6" \
 
 set linecount6 0
 
-send_gdb "while \$trace_frame != -1\n printf \"TDP #\%d, frame %d: char_test = \%d, long_test = \%d\\n\", \$tracepoint, \$trace_frame, gdb_char_test, gdb_long_test\n tfind tracepoint\n end\n"
-gdb_expect {
+gdb_test_multiple "while \$trace_frame != -1\n printf \"TDP #\%d, frame %d: char_test = \%d, long_test = \%d\\n\", \$tracepoint, \$trace_frame, gdb_char_test, gdb_long_test\n tfind tracepoint\n end" "12.4: trace report #4" {
     -re "TDP #$tdp6, frame $decimal: char_test = $arg1, long_test = $arg3" {
 	set linecount6 [expr $linecount6 + 1]
 	exp_continue
@@ -400,9 +385,6 @@ gdb_expect {
 	} else {
 	    pass "12.4: trace report #4"
 	}
-    }
-    timeout {
-	fail "12.4: trace report #4 (timeout)"
     }
 }
 

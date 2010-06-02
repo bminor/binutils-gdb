@@ -67,22 +67,12 @@ gdb_test "info tracepoints" \
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
 			"3.1a: set three tracepoints"
 
-send_gdb "delete tracepoints\n"
-gdb_expect 30 {
-    -re "Delete all tracepoints.*y or n.*$" {
-	send_gdb "y\n"
-	gdb_expect 30 {
-	    -re "$gdb_prompt $" {
-		pass "3.1b: delete all tracepoints"
-	    }
-	    timeout { fail "3.1b: delete all tracepoints (timeout)" }
-	}
-    }
-    -re "$gdb_prompt $" { # This should only happen if there are no tracepoints
-	fail "3.1b: delete all tracepoints (no tracepoints?)"
-    }
-    timeout { fail "3.1b: delete all tracepoints (timeout)" }
-}
+gdb_test "delete tracepoints" \
+    "" \
+    "3.1b: delete all tracepoints" \
+    "Delete all tracepoints.*y or n.*$" \
+    "y"
+
 
 # 3.2 delete tracepoint <n>
 gdb_delete_tracepoints
@@ -102,8 +92,7 @@ gdb_test "info tracepoints" \
 			"3.2a: set three tracepoints"
 
 #gdb_test "delete tracepoint $trcpt1" "" ""
-send_gdb "delete tracepoint $trcpt1\n"
-gdb_expect {
+gdb_test_multiple "delete tracepoint $trcpt1" "3.2b: delete first tracepoint" {
     -re "No tracepoint number.*$gdb_prompt $" {
 	fail "3.2b: delete first tracepoint"
     }
@@ -112,9 +101,6 @@ gdb_expect {
     }
     -re "$gdb_prompt $" {
 	pass "3.2b: delete first tracepoint"
-    }
-    timeout {
-	fail "3.2b: delete first tracepoint (timeout)"
     }
 }
 
@@ -125,8 +111,7 @@ gdb_test "info tracepoints" \
 			"3.2c: verify delete first tracepoint"
 
 #gdb_test "delete tracepoint $trcpt2" "" ""
-send_gdb "delete tracepoint $trcpt2\n"
-gdb_expect {
+gdb_test_multiple "delete tracepoint $trcpt2" "3.2d: delete second tracepoint" {
     -re "No tracepoint number.*$gdb_prompt $" {
 	fail "3.2d: delete second tracepoint"
     }
@@ -136,9 +121,6 @@ gdb_expect {
     -re "$gdb_prompt $" {
 	pass "3.2d: delete second tracepoint"
     }
-    timeout {
-	fail "3.2d: delete second tracepoint (timeout)"
-    }
 }
 
 gdb_test "info tracepoints" \
@@ -147,8 +129,7 @@ gdb_test "info tracepoints" \
 			"3.2e: verify delete second tracepoint"
 
 #gdb_test "delete tracepoint $trcpt3" "" ""
-send_gdb "delete tracepoint $trcpt3\n"
-gdb_expect {
+gdb_test_multiple "delete tracepoint $trcpt3" "3.2f: delete third tracepoint" {
     -re "No tracepoint number.*$gdb_prompt $" {
 	fail "3.2f: delete third tracepoint"
     }
@@ -157,9 +138,6 @@ gdb_expect {
     }
     -re "$gdb_prompt $" {
 	pass "3.2f: delete third tracepoint"
-    }
-    timeout {
-	fail "3.2f: delete third tracepoint (timeout)"
     }
 }
 
@@ -186,21 +164,18 @@ gdb_test "info tracepoints" \
 			"3.3a: set three tracepoints"
 
 #gdb_test "delete tracepoint $trcpt1 $trcpt2 $trcpt3" "" ""
-send_gdb "delete tracepoint $trcpt1 $trcpt2 $trcpt3\n"
-gdb_expect {
-    -re "No tracepoint number.*$gdb_prompt $" {
-	fail "3.3b: delete three tracepoints"
+gdb_test_multiple "delete tracepoint $trcpt1 $trcpt2 $trcpt3" \
+    "3.3b: delete three tracepoints" {
+	-re "No tracepoint number.*$gdb_prompt $" {
+	    fail "3.3b: delete three tracepoints"
+	}
+	-re ".*\[Ee\]rror.*$gdb_prompt $" {
+	    fail "3.3b: delete three tracepoints"
+	}
+	-re "$gdb_prompt $" {
+	    pass "3.3b: delete three tracepoints"
+	}
     }
-    -re ".*\[Ee\]rror.*$gdb_prompt $" {
-	fail "3.3b: delete three tracepoints"
-    }
-    -re "$gdb_prompt $" {
-	pass "3.3b: delete three tracepoints"
-    }
-    timeout {
-	fail "3.3b: delete three tracepoint (timeout)"
-    }
-}
 
 gdb_test "info tracepoints" \
     "No tracepoints." \

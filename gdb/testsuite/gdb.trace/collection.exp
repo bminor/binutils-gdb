@@ -292,8 +292,7 @@ proc gdb_collect_locals_test { func mylocs msg } {
 
     # Find the comment-identified line for setting this tracepoint.
     set testline 0
-    send_gdb "list $func, +30\n"
-    gdb_expect {
+    gdb_test_multiple "list $func, +30" "collect $msg: find tracepoint line" {
 	-re "\[\r\n\](\[0-9\]+)\[^\r\n\]+ Set_Tracepoint_Here .*$gdb_prompt" {
 	    set testline $expect_out(1,string)
 	    pass "collect $msg: find tracepoint line"
@@ -400,8 +399,7 @@ proc gdb_collect_expression_test { func expr val msg } {
 
     # Find the comment-identified line for setting this tracepoint.
     set testline 0
-    send_gdb "list $func, +30\n"
-    gdb_expect {
+    gdb_test_multiple "list $func, +30" "collect $msg: find tracepoint line" {
 	-re "\[\r\n\](\[0-9\]+)\[^\r\n\]+ Set_Tracepoint_Here .*$gdb_prompt" {
 	    set testline $expect_out(1,string)
 	    pass "collect $msg: find tracepoint line"
@@ -443,8 +441,7 @@ proc gdb_collect_globals_test { } {
 
     # Find the comment-identified line for setting this tracepoint.
     set testline 0
-    send_gdb "list globals_test_func, +30\n"
-    gdb_expect {
+    gdb_test_multiple "list globals_test_func, +30" "collect globals: find tracepoint line" {
 	-re "\[\r\n\](\[0-9\]+)\[^\r\n\]+ Set_Tracepoint_Here .*$gdb_prompt" {
 	    set testline $expect_out(1,string)
 	    pass "collect globals: find tracepoint line"

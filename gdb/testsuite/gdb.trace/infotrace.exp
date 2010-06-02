@@ -76,15 +76,15 @@ gdb_test "info tracepoint [expr $c_test_num + $asm_test_num]" \
     "2.3: info tracepoint (invalid tracepoint number)"
 
 # 2.4 info tracepoints (list of numbers)
-send_gdb "info tracepoints $c_test_num $asm_test_num \n"
-gdb_expect {
-    -re "Num Enb .*$gdb_prompt $" {
-	fail "2.4: info trace rejects multiple tracepoint numbers"
+gdb_test_multiple "info tracepoints $c_test_num $asm_test_num " \
+    "2.4: info trace rejects multiple tracepoint numbers" {
+	-re "Num Enb .*$gdb_prompt $" {
+	    fail "2.4: info trace rejects multiple tracepoint numbers"
+	}
+	-re ".*$gdb_prompt $" {
+	    pass "2.4: info trace rejects multiple tracepoint numbers"
+	}
     }
-    -re ".*$gdb_prompt $" {
-	pass "2.4: info trace rejects multiple tracepoint numbers"
-    }
-}
 
 # 2.5 help info trace
 gdb_test "help info tracepoints" \
