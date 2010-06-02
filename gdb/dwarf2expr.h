@@ -208,4 +208,6 @@ const gdb_byte *read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
 CORE_ADDR dwarf2_read_address (struct gdbarch *gdbarch, const gdb_byte *buf,
 			       const gdb_byte *buf_end, int addr_size);
 
+const char *dwarf_stack_op_name (unsigned int, int);
+
 #endif /* dwarf2expr.h */

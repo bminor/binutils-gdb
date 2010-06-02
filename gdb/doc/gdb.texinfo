@@ -29979,6 +29979,31 @@ that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
 
+@kindex maint set dwarf2 always-disassemble
+@kindex maint show dwarf2 always-disassemble
+@item maint set dwarf2 always-disassemble
+@item maint show dwarf2 always-disassemble
+Control the behavior of @code{info address} when using DWARF debugging
+information.
+
+The default is @code{off}, which means that @value{GDBN} should try to
+describe a variable's location in an easily readable format.  When
+@code{on}, @value{GDBN} will instead display the DWARF location
+expression in an assembly-like format.  Note that some locations are
+too complex for @value{GDBN} to describe simply; in this case you will
+always see the disassembly form.
+
+Here is an example of the resulting disassembly:
+
+@smallexample
+(gdb) info addr argc
+Symbol "argc" is a complex DWARF expression:
+     1: DW_OP_fbreg 0
+@end smallexample
+
+For more information on these expressions, see
+@uref{http://www.dwarfstd.org/, the DWARF standard}.
+
 @kindex maint set dwarf2 max-cache-age
 @kindex maint show dwarf2 max-cache-age
 @item maint set dwarf2 max-cache-age

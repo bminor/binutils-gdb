@@ -1,3 +1,25 @@
+2010-06-02  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.h (dwarf2_per_cu_data): Declare.
+	* dwarf2read.c (dwarf_stack_op_name): No longer static.  Return
+	type is const.  Add 'def' argument.  Add missing operators, remove
+	unhandled ones.
+	(decode_locdesc): Update.
+	(dwarf2_always_disassemble): New global.
+	(show_dwarf2_always_disassemble): New function.
+	(_initialize_dwarf2_read): Add always-disassemble.
+	(dwarf2_per_cu_offset_size): New function.
+	* dwarf2loc.c (dwarf2_always_disassemble): Declare.
+	(piece_end_p): New function.
+	(locexpr_describe_location_piece): Replace 'size' argument with
+	'end'.  Use piece_end_p.  Rewrite recognition of TLS.  Recognize
+	some constants.  Remove errors.
+	(disassemble_dwarf_expression): New function.
+	(locexpr_describe_location_1): Use disassemble_dwarf_expression.
+	Add 'offset_size' argument.
+	(loclist_describe_location): Change output formatting.
+	* dwarf2expr.h (dwarf_stack_op_name): Declare.
+
 2010-06-02  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* cp-support.c (make_symbol_overload_list_adl_namespace): Handle

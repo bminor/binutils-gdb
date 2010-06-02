@@ -1002,8 +1002,6 @@ static char *dwarf_attr_name (unsigned int);
 
 static char *dwarf_form_name (unsigned int);
 
-static char *dwarf_stack_op_name (unsigned int);
-
 static char *dwarf_bool_name (unsigned int);
 
 static char *dwarf_type_encoding_name (unsigned int);
@@ -9890,8 +9888,8 @@ dwarf_form_name (unsigned form)
 
 /* Convert a DWARF stack opcode into its string name.  */
 
-static char *
-dwarf_stack_op_name (unsigned op)
+const char *
+dwarf_stack_op_name (unsigned op, int def)
 {
   switch (op)
     {
@@ -10194,32 +10192,24 @@ dwarf_stack_op_name (unsigned op)
       return "DW_OP_call4";
     case DW_OP_call_ref:
       return "DW_OP_call_ref";
-    /* GNU extensions.  */
     case DW_OP_form_tls_address:
       return "DW_OP_form_tls_address";
     case DW_OP_call_frame_cfa:
       return "DW_OP_call_frame_cfa";
     case DW_OP_bit_piece:
       return "DW_OP_bit_piece";
+    /* DWARF 4 extensions.  */
+    case DW_OP_implicit_value:
+      return "DW_OP_implicit_value";
+    case DW_OP_stack_value:
+      return "DW_OP_stack_value";
+    /* GNU extensions.  */
     case DW_OP_GNU_push_tls_address:
       return "DW_OP_GNU_push_tls_address";
     case DW_OP_GNU_uninit:
       return "DW_OP_GNU_uninit";
-    /* HP extensions. */ 
-    case DW_OP_HP_is_value:
-      return "DW_OP_HP_is_value";
-    case DW_OP_HP_fltconst4:
-      return "DW_OP_HP_fltconst4";
-    case DW_OP_HP_fltconst8:
-      return "DW_OP_HP_fltconst8";
-    case DW_OP_HP_mod_range:
-      return "DW_OP_HP_mod_range";
-    case DW_OP_HP_unmod_range:
-      return "DW_OP_HP_unmod_range";
-    case DW_OP_HP_tls:
-      return "DW_OP_HP_tls";
     default:
-      return "OP_<unknown>";
+      return def ? "OP_<unknown>" : NULL;
     }
 }
 
@@ -11060,7 +11050,7 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 
 	default:
 	  complaint (&symfile_complaints, _("unsupported stack op: '%s'"),
-		     dwarf_stack_op_name (op));
+		     dwarf_stack_op_name (op, 1));
 	  return (stack[stacki]);
 	}
     }
@@ -11787,6 +11777,28 @@ dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *per_cu)
     }
 }
 
+/* Return the offset size given in the compilation unit header for CU.  */
+
+int
+dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *per_cu)
+{
+  if (per_cu->cu)
+    return per_cu->cu->header.offset_size;
+  else
+    {
+      /* If the CU is not currently read in, we re-read its header.  */
+      struct objfile *objfile = per_cu->psymtab->objfile;
+      struct dwarf2_per_objfile *per_objfile
+	= objfile_data (objfile, dwarf2_objfile_data_key);
+      gdb_byte *info_ptr = per_objfile->info.buffer + per_cu->offset;
+      struct comp_unit_head cu_header;
+
+      memset (&cu_header, 0, sizeof cu_header);
+      read_comp_unit_head (&cu_header, info_ptr, objfile->obfd);
+      return cu_header.offset_size;
+    }
+}
+
 /* Locate the .debug_info compilation unit from CU's objfile which contains
    the DIE at OFFSET.  Raises an error on failure.  */
 
@@ -12241,6 +12253,17 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
   munmap_section_buffer (&data->eh_frame);
 }
 
+int dwarf2_always_disassemble;
+
+static void
+show_dwarf2_always_disassemble (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Whether to always disassemble DWARF expressions is %s.\n"),
+		    value);
+}
+
 void _initialize_dwarf2_read (void);
 
 void
@@ -12272,6 +12295,18 @@ caching, which can slow down startup."),
 			    show_dwarf2_max_cache_age,
 			    &set_dwarf2_cmdlist,
 			    &show_dwarf2_cmdlist);
+
+  add_setshow_boolean_cmd ("always-disassemble", class_obscure,
+			   &dwarf2_always_disassemble, _("\
+Set whether `info address' always disassembles DWARF expressions."), _("\
+Show whether `info address' always disassembles DWARF expressions."), _("\
+When enabled, DWARF expressions are always printed in an assembly-like\n\
+syntax.  When disabled, expressions will be printed in a more\n\
+conversational style, when possible."),
+			   NULL,
+			   show_dwarf2_always_disassemble,
+			   &set_dwarf2_cmdlist,
+			   &show_dwarf2_cmdlist);
 
   add_setshow_zinteger_cmd ("dwarf2-die", no_class, &dwarf2_die_debug, _("\
 Set debugging of the dwarf2 DIE reader."), _("\
