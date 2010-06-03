@@ -85,8 +85,8 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 			  const struct value_print_options *options)
 {
   struct type *index_type;
-  long low_bound;
-  long high_bound;
+  LONGEST low_bound;
+  LONGEST high_bound;
 
   if (options->print_array_indexes)
     return 0;
@@ -131,7 +131,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
       break;
     }
 
-  ada_print_scalar (index_type, (LONGEST) low_bound, stream);
+  ada_print_scalar (index_type, low_bound, stream);
   fprintf_filtered (stream, " => ");
   return 1;
 }

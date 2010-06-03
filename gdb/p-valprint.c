@@ -60,7 +60,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
-  long low_bound, high_bound;
+  LONGEST low_bound, high_bound;
   struct type *elttype;
   unsigned eltlen;
   int length_pos, length_size, string_pos;

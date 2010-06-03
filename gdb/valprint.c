@@ -1034,44 +1034,27 @@ print_char_chars (struct ui_file *stream, struct type *type,
 
    Return 1 if the operation was successful. Return zero otherwise,
    in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.
-   
-   Computing the array upper and lower bounds is pretty easy, but this
-   function does some additional verifications before returning them.
-   If something incorrect is detected, it is better to return a status
-   rather than throwing an error, making it easier for the caller to
-   implement an error-recovery plan.  For instance, it may decide to
-   warn the user that the bounds were not found and then use some
-   default values instead.  */
+  
+   We now simply use get_discrete_bounds call to get the values
+   of the low and high bounds. 
+   get_discrete_bounds can return three values:
+   1, meaning that index is a range,
+   0, meaning that index is a discrete type,
+   or -1 for failure.  */
 
 int
-get_array_bounds (struct type *type, long *low_bound, long *high_bound)
+get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
 {
   struct type *index = TYPE_INDEX_TYPE (type);
-  long low = 0;
-  long high = 0;
-                                  
+  LONGEST low = 0;
+  LONGEST high = 0;
+  int res;
+                                
   if (index == NULL)
     return 0;
 
-  if (TYPE_CODE (index) == TYPE_CODE_RANGE)
-    {
-      low = TYPE_LOW_BOUND (index);
-      high = TYPE_HIGH_BOUND (index);
-    }
-  else if (TYPE_CODE (index) == TYPE_CODE_ENUM)
-    {
-      const int n_enums = TYPE_NFIELDS (index);
-
-      low = TYPE_FIELD_BITPOS (index, 0);
-      high = TYPE_FIELD_BITPOS (index, n_enums - 1);
-    }
-  else
-    return 0;
-
-  /* Abort if the lower bound is greater than the higher bound, except
-     when low = high + 1.  This is a very common idiom used in Ada when
-     defining empty ranges (for instance "range 1 .. 0").  */
-  if (low > high + 1)
+  res = get_discrete_bounds (index, &low, &high);
+  if (res == -1)
     return 0;
 
   if (low_bound)
@@ -1126,7 +1109,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
   unsigned int rep1;
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
-  long low_bound_index = 0;
+  LONGEST low_bound_index = 0;
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
@@ -1141,7 +1124,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
     len = TYPE_LENGTH (type) / eltlen;
   else
     {
-      long low, hi;
+      LONGEST low, hi;
 
       if (get_array_bounds (type, &low, &hi))
         len = hi - low + 1;
