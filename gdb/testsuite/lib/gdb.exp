@@ -883,7 +883,8 @@ proc gdb_test { args } {
 #
 # See gdb_test_multiple for a description of the COMMAND and MESSAGE
 # parameters.  If MESSAGE is ommitted, then COMMAND will be used as
-# the message.
+# the message.  (If MESSAGE is the empty string, then sometimes we do not
+# call pass or fail at all; I don't understand this at all.)
 
 proc gdb_test_no_output { args } {
     global gdb_prompt
@@ -897,7 +898,9 @@ proc gdb_test_no_output { args } {
     set command_regex [string_to_regexp $command]
     gdb_test_multiple $command $message {
         -re "^$command_regex\r\n$gdb_prompt $" {
-            pass $message
+	    if ![string match "" $message] then {
+		pass "$message"
+            }
         }
     }
 }
