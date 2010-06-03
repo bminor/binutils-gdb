@@ -78,9 +78,6 @@
 /* Define to 1 if you have the `sbrk' function. */
 #undef HAVE_SBRK
 
-/* Define to 1 if you have the <stdarg.h> header file. */
-#undef HAVE_STDARG_H
-
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
@@ -116,9 +113,6 @@
 
 /* Define to 1 if you have the `unlink' function. */
 #undef HAVE_UNLINK
-
-/* Define to 1 if you have the <varargs.h> header file. */
-#undef HAVE_VARARGS_H
 
 /* Using i386 COFF? */
 #undef I386COFF
