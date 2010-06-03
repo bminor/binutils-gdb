@@ -2801,20 +2801,21 @@ class Output_section::Input_section_sort_entry
     return memcmp(base_name + base_len - 2, ".o", 2) == 0;
   }
 
-  // Returns 0 if sections are not comparable. Returns 1 if THIS is the
-  // first section in order, returns -1 for S.
+  // Returns 1 if THIS should appear before S in section order, -1 if S
+  // appears before THIS and 0 if they are not comparable.
   int
   compare_section_ordering(const Input_section_sort_entry& s) const
   {
-    gold_assert(this->index_ != -1U);
-    if (this->input_section_.section_order_index() == 0
-        || s.input_section().section_order_index() == 0)
-      return 0;
-    if (this->input_section_.section_order_index()
-        < s.input_section().section_order_index())
-      return 1;
-    else
-      return -1;
+    unsigned int this_secn_index = this->input_section_.section_order_index();
+    unsigned int s_secn_index = s.input_section().section_order_index();
+    if (this_secn_index > 0 && s_secn_index > 0)
+      {
+        if (this_secn_index < s_secn_index)
+          return 1;
+        else if (this_secn_index > s_secn_index)
+          return -1;
+      }
+    return 0;
   }
 
  private:
@@ -2935,20 +2936,23 @@ Output_section::Input_section_sort_init_fini_compare::operator()(
   return s1.index() < s2.index();
 }
 
-// Return true if S1 should come before S2.
+// Return true if S1 should come before S2.  Sections that do not match
+// any pattern in the section ordering file are placed ahead of the sections
+// that match some pattern.
+
 bool
 Output_section::Input_section_sort_section_order_index_compare::operator()(
     const Output_section::Input_section_sort_entry& s1,
     const Output_section::Input_section_sort_entry& s2) const
 {
-  // Check if a section order exists for these sections through a section
-  // ordering file.  If sequence_num is 0, an order does not exist.
-  int sequence_num = s1.compare_section_ordering(s2);
-  if (sequence_num != 0)
-    return sequence_num == 1;
+  unsigned int s1_secn_index = s1.input_section().section_order_index();
+  unsigned int s2_secn_index = s2.input_section().section_order_index();
 
-  // Otherwise we keep the input order.
-  return s1.index() < s2.index();
+  // Keep input order if section ordering cannot determine order.
+  if (s1_secn_index == s2_secn_index)
+    return s1.index() < s2.index();
+  
+  return s1_secn_index < s2_secn_index;
 }
 
 // Sort the input sections attached to an output section.

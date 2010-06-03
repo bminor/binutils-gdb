@@ -1,3 +1,12 @@
+2010-06-03  Sriraman Tallam  <tmsriram@google.com>
+
+	PR gold/11658
+	* output.cc
+	(Output_section::Input_section_sort_entry::compare_section_ordering):
+	Change to return non-zero correctly.
+	(Output_section::Input_section_sort_section_order_index_compare
+	::operator()): Change to fix ambiguity in comparisons.
+
 2010-06-01  Sriraman Tallam  <tmsriram@google.com>
 
 	* gold.h (is_wildcard_string): New function.
