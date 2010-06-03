@@ -2122,8 +2122,10 @@ $as_echo "$ac_res" >&6; }
 ac_fn_c_check_decl ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $2 is declared" >&5
-$as_echo_n "checking whether $2 is declared... " >&6; }
+  as_decl_name=`echo $2|sed 's/ *(.*//'`
+  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
+$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
 if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
   $as_echo_n "(cached) " >&6
 else
@@ -2133,8 +2135,12 @@ $4
 int
 main ()
 {
-#ifndef $2
-  (void) $2;
+#ifndef $as_decl_name
+#ifdef __cplusplus
+  (void) $as_decl_use;
+#else
+  (void) $as_decl_name;
+#endif
 #endif
 
   ;
@@ -10463,12 +10469,12 @@ else
       # Assume the python binary is ${with_python}/bin/python.
       python_prog="${with_python}/bin/python"
       python_prefix=
-      if test ! -x ${python_prog}; then
+      if test ! -x "${python_prog}"; then
         # Fall back to gdb 7.0/7.1 behaviour.
         python_prog=missing
         python_prefix=${with_python}
       fi
-    elif test -x ${with_python}; then
+    elif test -x "${with_python}"; then
       # While we can't run python compiled for $host (unless host == build),
       # the user could write a script that provides the needed information,
       # so we support that.
@@ -10595,19 +10601,30 @@ fi
   esac
 
   if test "${python_prog}" != missing; then
+    # We have a python program to use, but it may be too old.
+    # Don't flag an error for --with-python=auto (the default).
+    have_python_config=yes
     python_includes=`${python_prog} ${srcdir}/python/python-config.py --includes`
     if test $? != 0; then
-      as_fn_error "failure running python-config --includes" "$LINENO" 5
+      have_python_config=failed
+      if test "${with_python}" != auto; then
+        as_fn_error "failure running python-config --includes" "$LINENO" 5
+      fi
     fi
     python_libs=`${python_prog} ${srcdir}/python/python-config.py --ldflags`
     if test $? != 0; then
-      as_fn_error "failure running python-config --ldflags" "$LINENO" 5
+      have_python_config=failed
+      if test "${with_python}" != auto; then
+        as_fn_error "failure running python-config --ldflags" "$LINENO" 5
+      fi
     fi
     python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
     if test $? != 0; then
-      as_fn_error "failure running python-config --exec-prefix" "$LINENO" 5
+      have_python_config=failed
+      if test "${with_python}" != auto; then
+        as_fn_error "failure running python-config --exec-prefix" "$LINENO" 5
+      fi
     fi
-    have_python_config=yes
   else
     # Fall back to gdb 7.0/7.1 behaviour.
     if test -z ${python_prefix}; then
@@ -10679,7 +10696,7 @@ $as_echo "${found_usable_python}" >&6; }
       as_fn_error "unable to determine python version from ${python_libs}" "$LINENO" 5
       ;;
     esac
-  else
+  elif test "${have_python_config}" != failed; then
     if test "${have_libpython}" = no; then
 
   version=python2.6

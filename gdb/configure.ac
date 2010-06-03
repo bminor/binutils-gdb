@@ -664,12 +664,12 @@ else
       # Assume the python binary is ${with_python}/bin/python.
       python_prog="${with_python}/bin/python"
       python_prefix=
-      if test ! -x ${python_prog}; then
+      if test ! -x "${python_prog}"; then
         # Fall back to gdb 7.0/7.1 behaviour.
         python_prog=missing
         python_prefix=${with_python}
       fi
-    elif test -x ${with_python}; then
+    elif test -x "${with_python}"; then
       # While we can't run python compiled for $host (unless host == build),
       # the user could write a script that provides the needed information,
       # so we support that.
@@ -716,19 +716,30 @@ else
   esac
 
   if test "${python_prog}" != missing; then
+    # We have a python program to use, but it may be too old.
+    # Don't flag an error for --with-python=auto (the default).
+    have_python_config=yes
     python_includes=`${python_prog} ${srcdir}/python/python-config.py --includes`
     if test $? != 0; then
-      AC_ERROR(failure running python-config --includes)
+      have_python_config=failed
+      if test "${with_python}" != auto; then
+        AC_ERROR(failure running python-config --includes)
+      fi
     fi
     python_libs=`${python_prog} ${srcdir}/python/python-config.py --ldflags`
     if test $? != 0; then
-      AC_ERROR(failure running python-config --ldflags)
+      have_python_config=failed
+      if test "${with_python}" != auto; then
+        AC_ERROR(failure running python-config --ldflags)
+      fi
     fi
     python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
     if test $? != 0; then
-      AC_ERROR(failure running python-config --exec-prefix)
+      have_python_config=failed
+      if test "${with_python}" != auto; then
+        AC_ERROR(failure running python-config --exec-prefix)
+      fi
     fi
-    have_python_config=yes
   else
     # Fall back to gdb 7.0/7.1 behaviour.
     if test -z ${python_prefix}; then
@@ -767,7 +778,7 @@ else
       AC_MSG_ERROR([unable to determine python version from ${python_libs}])
       ;;
     esac
-  else
+  elif test "${have_python_config}" != failed; then
     if test "${have_libpython}" = no; then
       AC_TRY_LIBPYTHON(python2.6, have_libpython,
                        ${python_includes}, "${python_libs} -lpython2.6")
