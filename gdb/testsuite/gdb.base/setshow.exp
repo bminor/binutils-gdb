@@ -154,7 +154,7 @@ gdb_test_no_output "set height 100" "set height 100"
 #test show height 100
 gdb_test "show height" "Number of lines gdb thinks are in a page is 100..*" "show height" 
 # back to infinite height to avoid pagers
-gdb_test "set height 0" "" "" 
+gdb_test_no_output "set height 0" ""
 #test set history expansion on
 gdb_test_no_output "set history expansion on" "set history expansion on" 
 #test show history expansion on

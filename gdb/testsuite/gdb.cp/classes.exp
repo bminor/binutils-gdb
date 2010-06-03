@@ -522,7 +522,7 @@ proc test_static_members {} {
     global hex
 
     gdb_test "print Foo::st" "\\$\[0-9\]+ = 100"
-    gdb_test "set foo.st = 200" "" ""
+    gdb_test_no_output "set foo.st = 200" ""
     gdb_test "print bar.st" "\\$\[0-9\]+ = 200"
     gdb_test "print &foo.st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex"
     gdb_test "print &Bar::st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex"
@@ -561,8 +561,8 @@ proc do_tests {} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
 
-    gdb_test "set language c++" "" ""
-    gdb_test "set width 0" "" ""
+    gdb_test_no_output "set language c++" ""
+    gdb_test_no_output "set width 0" ""
 
     if ![runto_main ] then {
 	perror "couldn't run to breakpoint"

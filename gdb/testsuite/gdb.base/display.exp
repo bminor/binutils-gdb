@@ -75,7 +75,7 @@ if ![runto_main] then {
 
 # Disable hardware watchpoints if necessary.
 if [target_info exists gdb,no_hardware_watchpoints] {
-    gdb_test "set can-use-hw-watchpoints 0" "" ""
+    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]

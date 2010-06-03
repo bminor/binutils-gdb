@@ -1,3 +1,37 @@
+2010-06-03  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/commands.exp: Replace gdb_test with gdb_test_no_output.
+	* gdb.base/display.exp: Ditto.
+	* gdb.base/find.exp: Ditto.
+	* gdb.base/ifelse.exp: Ditto.
+	* gdb.base/multi-forks.exp: Ditto.
+	* gdb.base/recurse.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/value-double-free.exp: Ditto.
+	* gdb.base/watch-vfork.exp: Ditto.
+	* gdb.base/watch_thread_num.exp: Ditto.
+	* gdb.base/watchpoint-solib.exp: Ditto.
+	* gdb.base/watchpoint.exp: Ditto.
+	* gdb.base/watchpoints.exp: Ditto.
+
+	* gdb.cp/classes.exp: Replace gdb_test with gdb_test_no_output.
+	* gdb.cp/overload.exp: Ditto.
+	* gdb.cp/virtfunc.exp: Ditto.
+
+	* gdb.python/py-value.exp: Replace gdb_test with gdb_test_no_output.
+
+	* gdb.reverse/watch-precsave.exp: 
+	Replace gdb_test with gdb_test_no_output.
+
+	* gdb.threads/attach-into-signal.exp: 
+	Replace gdb_test with gdb_test_no_output.
+	* gdb.threads/local-watch-wrong-thread.exp: Ditto.
+	* gdb.threads/watchthreads.exp: Ditto.
+	* gdb.threads/watchthreads2.exp: Ditto.
+
+	* gdb.trace/deltrace.exp: Replace gdb_test with gdb_test_no_output.
+	* gdb.trace/tfind.exp: Ditto.
+
 2010-06-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* lib/gdb.exp (gdb_test_no_output): Do not emit pass for

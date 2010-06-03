@@ -37,7 +37,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "set can-use-hw-watchpoints 1" "" ""
+gdb_test_no_output "set can-use-hw-watchpoints 1" ""
 
 if ![runto_main] then {
     fail "Can't run to main"
@@ -93,7 +93,7 @@ gdb_test "continue" \
     "the other thread stopped on breakpoint"
 
 # Delete the new breakpoint, we don't need it anymore.
-gdb_test "delete 5" "" ""
+gdb_test_no_output "delete 5" ""
 
 # Check if the local watchpoint hasn't been deleted (is still listed).
 # This is simpler to check than expecting 'the program has left ...',

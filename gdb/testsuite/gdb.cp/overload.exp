@@ -263,7 +263,7 @@ gdb_test "print foo_instance1.overload1arg((double)arg12)" \
 # The void case is tricky because some compilers say "(void)"
 # and some compilers say "()".
 
-gdb_test "set listsize 1" "" ""
+gdb_test_no_output "set listsize 1" ""
 gdb_test_multiple "info func overloadfnarg" "list overloaded function with no args" {
     -re ".*overloadfnarg\\(void\\).*$gdb_prompt $" {
 	# gcc 2

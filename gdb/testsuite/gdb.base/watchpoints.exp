@@ -44,7 +44,7 @@ gdb_load $binfile
 
     # Disable hardware watchpoints if necessary.
     if [target_info exists gdb,no_hardware_watchpoints] {
-        gdb_test "set can-use-hw-watchpoints 0" "" ""
+        gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
     runto_main
@@ -79,7 +79,7 @@ gdb_load $binfile
     # Check that the hit count is reported correctly
     gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival1\r\n\[ \t]+breakpoint already hit 3 times.*" "Watchpoint ival1 hit count is 3"
     # Disable ival1 watchpoint
-    gdb_test "disable 2" "" ""
+    gdb_test_no_output "disable 2" ""
  
     # Continue until the next change, from 1 to 2.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 1.*New value = 2.*ival3 = count; ival4 = count;.*" "watchpoint hit, third time"

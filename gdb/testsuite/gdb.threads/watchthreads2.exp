@@ -44,7 +44,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "set can-use-hw-watchpoints 1" "" ""
+gdb_test_no_output "set can-use-hw-watchpoints 1" ""
 
 #
 # Run to `main' where we begin our tests.

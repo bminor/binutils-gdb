@@ -33,7 +33,7 @@ proc test_watchpoint_across_vfork { hw teststr } {
     }
 
     if { ! $hw } {
-	gdb_test "set can-use-hw-watchpoints 0" "" ""
+	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
     gdb_test "watch global" \

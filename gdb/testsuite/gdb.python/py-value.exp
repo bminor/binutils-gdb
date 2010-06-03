@@ -123,9 +123,9 @@ proc test_value_numeric_ops {} {
 
   # First, obtain the pointers
   gdb_test "print (void *) 2" "" ""
-  gdb_test "python a = gdb.history (0)" "" ""
+  gdb_test_no_output "python a = gdb.history (0)" ""
   gdb_test "print (void *) 5" "" ""
-  gdb_test "python b = gdb.history (0)" "" ""
+  gdb_test_no_output "python b = gdb.history (0)" ""
 
   gdb_test "python print 'result = ' + str(a+5)" " = 0x7" "add pointer value with python integer"
   gdb_test "python print 'result = ' + str(b-2)" " = 0x3" "subtract python integer from pointer value"

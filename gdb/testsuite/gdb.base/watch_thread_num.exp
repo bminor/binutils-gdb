@@ -49,7 +49,7 @@ if { ![runto main] } then {
 
 # Disable hardware watchpoints if necessary.
 if [target_info exists gdb,no_hardware_watchpoints] {
-    gdb_test "set can-use-hw-watchpoints 0" "" ""
+    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
 gdb_test "watch shared_var thread 0" "Unknown thread 0\." "Watchpoint on invalid thread"

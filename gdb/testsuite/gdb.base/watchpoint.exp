@@ -61,7 +61,7 @@ proc initialize {} {
 
     # Disable hardware watchpoints if necessary.
     if [target_info exists gdb,no_hardware_watchpoints] {
-	gdb_test "set can-use-hw-watchpoints 0" "" ""
+	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
     if [gdb_test "break marker1" "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker1" ] { 

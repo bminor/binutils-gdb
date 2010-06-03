@@ -84,7 +84,7 @@ gdb_test_multiple "if 0\nelse\nend" $message {
     }
 }
 
-gdb_test "set confirm off" "" ""
+gdb_test_no_output "set confirm off" ""
 
 # Test that a define with an empty else can be replaced.
 # If there is memory corruption then free will fail.

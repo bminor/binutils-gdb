@@ -129,7 +129,7 @@ gdb_test "print pids" "\\$.* = \\{0, 0, 0, 0\\}.*" "follow child, print pids"
 # Result should be that none of the 4 forks returns zero.
 
 runto_main
-gdb_test "set follow-fork parent" "" ""
+gdb_test_no_output "set follow-fork parent" ""
 continue_to_exit_bp_loc
 
 gdb_test "print pids\[0\]==0 || pids\[1\]==0 || pids\[2\]==0 || pids\[3\]==0" \

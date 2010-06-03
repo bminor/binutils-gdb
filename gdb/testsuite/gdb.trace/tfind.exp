@@ -245,7 +245,7 @@ gdb_test "tfind tracepoint -1" "failed to find.*" \
 	"8.25: tfind tracepoint rejects nonexistant tracepoint (-1)"
 
 # 8.37 tfind tracepoint n where n no longer exists (but used to)
-gdb_test "delete trace $tdp2" "" ""
+gdb_test_no_output "delete trace $tdp2" ""
 gdb_tfind_test "8.37: tfind none" "none" "-1";
 gdb_tfind_test "8.37: tfind deleted tracepoint" \
 	"tracepoint $tdp2" \
@@ -261,7 +261,7 @@ gdb_tfind_test "8.13: tracepoint $tdp1" "tracepoint $tdp1" \
 	"\$tracepoint" "$tdp1";
 gdb_test "print \$trace_line" "$baseline" \
 	"8.13: tfind tracepoint $tdp1 (line $baseline)"
-gdb_test "set \$save_frame = \$trace_frame" "" ""
+gdb_test_no_output "set \$save_frame = \$trace_frame" ""
 gdb_tfind_test "8.13: tracepoint <no arg>" "tracepoint" \
 	"\$tracepoint" "$tdp1";
 gdb_test "printf \"x \%d x\\n\", \$trace_frame == \$save_frame" \
@@ -284,7 +284,7 @@ gdb_tfind_test "8.14: tfind 3" "3" "3"
 gdb_test "print \$trace_line" "$testline4" \
 	"8.14: tfind 3 (line $testline4)"
 
-gdb_test "set \$test_pc = \$pc" "" ""
+gdb_test_no_output "set \$test_pc = \$pc" ""
 gdb_tfind_test "8.14: tfind none" "none" "-1"
 gdb_tfind_test "8.14: tfind pc" "pc \$test_pc" "\$trace_frame != -1" "1";
 gdb_test "print \$trace_line" "$testline4" \
@@ -298,7 +298,7 @@ gdb_test "printf \"x \%d x\\n\", \$pc == \$test_pc" \
 gdb_tfind_test "8.15: tfind 3" "3" "3"
 gdb_test "print \$trace_line" "$testline4" \
 	"8.15: tfind 3 (line $testline4)"
-gdb_test "set \$test_pc = \$pc" "" ""
+gdb_test_no_output "set \$test_pc = \$pc" ""
 gdb_tfind_test "8.15: tfind pc" "pc" "\$pc == \$test_pc" "1"
 gdb_test "print \$trace_line" "$testline4" \
 	"8.15: tfind pc (line $testline4)"

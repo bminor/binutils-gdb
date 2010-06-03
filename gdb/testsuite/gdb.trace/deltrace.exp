@@ -91,7 +91,7 @@ gdb_test "info tracepoints" \
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
 			"3.2a: set three tracepoints"
 
-#gdb_test "delete tracepoint $trcpt1" "" ""
+#gdb_test_no_output "delete tracepoint $trcpt1" ""
 gdb_test_multiple "delete tracepoint $trcpt1" "3.2b: delete first tracepoint" {
     -re "No tracepoint number.*$gdb_prompt $" {
 	fail "3.2b: delete first tracepoint"
@@ -110,7 +110,7 @@ gdb_test "info tracepoints" \
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
 			"3.2c: verify delete first tracepoint"
 
-#gdb_test "delete tracepoint $trcpt2" "" ""
+#gdb_test_no_output "delete tracepoint $trcpt2" ""
 gdb_test_multiple "delete tracepoint $trcpt2" "3.2d: delete second tracepoint" {
     -re "No tracepoint number.*$gdb_prompt $" {
 	fail "3.2d: delete second tracepoint"
@@ -128,7 +128,7 @@ gdb_test "info tracepoints" \
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
 			"3.2e: verify delete second tracepoint"
 
-#gdb_test "delete tracepoint $trcpt3" "" ""
+#gdb_test_no_output "delete tracepoint $trcpt3" ""
 gdb_test_multiple "delete tracepoint $trcpt3" "3.2f: delete third tracepoint" {
     -re "No tracepoint number.*$gdb_prompt $" {
 	fail "3.2f: delete third tracepoint"
@@ -163,7 +163,7 @@ gdb_test "info tracepoints" \
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
 			"3.3a: set three tracepoints"
 
-#gdb_test "delete tracepoint $trcpt1 $trcpt2 $trcpt3" "" ""
+#gdb_test_no_output "delete tracepoint $trcpt1 $trcpt2 $trcpt3" ""
 gdb_test_multiple "delete tracepoint $trcpt1 $trcpt2 $trcpt3" \
     "3.3b: delete three tracepoints" {
 	-re "No tracepoint number.*$gdb_prompt $" {
