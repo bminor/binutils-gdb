@@ -1,3 +1,7 @@
+2010-06-03  Sami Wagiaalla  <swagiaal@redhat.com>
+
+    	* dwarf2read.c (new_symbol): Remove redundant naming of symbol.
+
 2010-06-03  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* valprint.h (get_array_bounds): Change low and high parameter types

@@ -8784,28 +8784,6 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
-	  /* Make sure that the symbol includes appropriate enclosing
-	     classes/namespaces in its name.  These are calculated in
-	     read_structure_type, and the correct name is saved in
-	     the type.  */
-
-	  if (cu->language == language_cplus
-	      || cu->language == language_java)
-	    {
-	      struct type *type = SYMBOL_TYPE (sym);
-	      
-	      if (TYPE_TAG_NAME (type) != NULL)
-		{
-		  /* FIXME: carlton/2003-11-10: Should this use
-		     SYMBOL_SET_NAMES instead?  (The same problem also
-		     arises further down in this function.)  */
-		  /* The type's name is already allocated along with
-		     this objfile, so we don't need to duplicate it
-		     for the symbol.  */
-		  SYMBOL_LINKAGE_NAME (sym) = TYPE_TAG_NAME (type);
-		}
-	    }
-
 	  {
 	    /* NOTE: carlton/2003-11-10: C++ and Java class symbols shouldn't
 	       really ever be static objects: otherwise, if you try
@@ -8840,8 +8818,6 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  }
 	  break;
 	case DW_TAG_typedef:
-	  SYMBOL_LINKAGE_NAME (sym)
-	    = (char *) dwarf2_full_name (name, die, cu);
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  add_symbol_to_list (sym, cu->list_in_scope);
@@ -8855,8 +8831,6 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_enumerator:
-	  SYMBOL_LINKAGE_NAME (sym)
-	    = (char *) dwarf2_full_name (name, die, cu);
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)
 	    {
