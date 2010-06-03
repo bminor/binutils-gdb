@@ -1,3 +1,7 @@
+2010-06-03  Doug Evans  <dje@google.com>
+
+	* gdbint.texinfo (Coding): Add subsection on command names.
+
 2010-06-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Maintenance Commands): Document maint set dwarf2

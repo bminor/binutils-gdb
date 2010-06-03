@@ -6245,6 +6245,10 @@ the code detected a user error, recovered from it and issued a
 @code{warning} or the code failed to correctly recover from the user
 error and issued an @code{internal_error}.}
 
+@subsection Command Names
+
+GDB U/I commands are written @samp{foo-bar}, not @samp{foo_bar}.
+
 @subsection File Names
 
 Any file used when building the core of @value{GDBN} must be in lower
