@@ -8048,7 +8048,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MOLD_GCC (OPTION_MD_BASE + 9)
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
 #define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
-#define OPTION_MAVXSCALAR (OPTION_MSSE_CHECK + 11)
+#define OPTION_MAVXSCALAR (OPTION_MD_BASE + 12)
 
 struct option md_longopts[] =
 {
