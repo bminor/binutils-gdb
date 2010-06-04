@@ -1,3 +1,7 @@
+2010-06-04  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.cp/pr-1210.exp: Add message string to gdb_test_multiple.
+
 2010-06-04  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-prettyprint.exp: Add new test for enabled and

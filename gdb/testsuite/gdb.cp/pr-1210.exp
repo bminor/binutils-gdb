@@ -52,7 +52,7 @@ if ![runto_main] then {
 
 gdb_test "next" ".*return 0;" "step past initialization"
 
-gdb_test_multiple "print *obj" "" {
+gdb_test_multiple "print *obj" "print *obj" {
   -re "Cannot access memory.*$gdb_prompt $" {
     fail "print *obj"
   }
@@ -61,7 +61,7 @@ gdb_test_multiple "print *obj" "" {
   }
 }
 
-gdb_test_multiple "print obj->myB" "" {
+gdb_test_multiple "print obj->myB" "print obj->myB" {
   -re "Cannot access memory.*$gdb_prompt $" {
     fail "print obj->myB"
   }
