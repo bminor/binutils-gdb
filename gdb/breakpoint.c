@@ -9096,7 +9096,7 @@ update_global_location_list (int should_insert)
 		 soon, we'll fail to do the PC adjustment, and report
 		 a random SIGTRAP to the user.  When the user resumes
 		 the inferior, it will most likely immediately crash
-		 with SIGILL/SIGBUS/SEGSEGV, or worse, get silently
+		 with SIGILL/SIGBUS/SIGSEGV, or worse, get silently
 		 corrupted, because of being resumed e.g., in the
 		 middle of a multi-byte instruction, or skipped a
 		 one-byte instruction.  This was actually seen happen
