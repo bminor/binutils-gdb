@@ -309,11 +309,11 @@ proc do_attach_tests {} {
 	"attach when process' a.out not in cwd"
 
     set test "after attach3, exit"
-    gdb_test_multiple "kill" "$test" {
-	-re "Kill the program being debugged.*y or n. $" {
-	    gdb_test "y" "" "$test"
-	}
-    }
+    gdb_test "kill" \
+	"" \
+	"$test" \
+	"Kill the program being debugged.*y or n. $" \
+	"y"
     
     # Another "don't leave a process around"
     remote_exec build "kill -9 ${testpid}"

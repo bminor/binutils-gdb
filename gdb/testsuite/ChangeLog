@@ -1,6 +1,7 @@
 2010-06-04  Michael Snyder  <msnyder@vmware.com>
 
-	* gdb.base/pending.exp: Replace gdb_test_multiple with gdb_test.
+	* gdb.base/attach.exp: Replace gdb_test_multiple with gdb_test.
+	* gdb.base/pending.exp: Ditto.
 
 	* gdb.cp/pr-1210.exp: Add message string to gdb_test_multiple.
 
