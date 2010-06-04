@@ -207,13 +207,13 @@ proc test_empty_complaint { cmd msg } {
 
 proc test_empty_complaints { } {
 
-    test_empty_complaint "call clear_complaints(&symfile_complaints,0,0)\n" \
+    test_empty_complaint "call clear_complaints(&symfile_complaints,0,0)" \
 	    "empty non-verbose non-noisy clear"
-    test_empty_complaint "call clear_complaints(&symfile_complaints,1,0)\n" \
+    test_empty_complaint "call clear_complaints(&symfile_complaints,1,0)" \
 	    "empty verbose non-noisy clear"
-    test_empty_complaint "call clear_complaints(&symfile_complaints,1,1)\n" \
+    test_empty_complaint "call clear_complaints(&symfile_complaints,1,1)" \
 	    "empty verbose noisy clear"
-    test_empty_complaint "call clear_complaints(&symfile_complaints,0,1)\n" \
+    test_empty_complaint "call clear_complaints(&symfile_complaints,0,1)" \
 	    "empty non-verbose noisy clear"
 
     return 0

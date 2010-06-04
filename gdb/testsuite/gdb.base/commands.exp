@@ -503,7 +503,7 @@ proc temporary_breakpoint_commands {} {
 	    pass "add silent tbreak command"
 	}
     }
-    gdb_test_multiple "printf \"factorial tbreak commands executed\\n\"\n" \
+    gdb_test_multiple "printf \"factorial tbreak commands executed\\n\"" \
 	"add printf tbreak command" {
 	    -re ">$" {
 		pass "add printf tbreak command"

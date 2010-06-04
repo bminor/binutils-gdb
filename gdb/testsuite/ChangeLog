@@ -1,3 +1,11 @@
+2010-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/commands.exp (add printf tbreak command): Remove trailing
+	newline.
+	* gdb.gdb/complaints.exp (empty non-verbose non-noisy clear)
+	(empty verbose non-noisy clear, empty verbose noisy clear)
+	(empty non-verbose noisy clear): Likewise.
+
 2010-06-03  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/commands.exp: Replace gdb_test with gdb_test_no_output.
