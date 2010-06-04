@@ -1,3 +1,12 @@
+2010-06-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* ada-lang.c (ada_operator_length): Constify `struct expression'.
+	* parse.c (operator_length): Likewise.
+	(operator_length_standard): Likewise.
+	* parser-defs.h (operator_length): Likewise.
+	(operator_length_standard): Likewise.
+	(struct exp_descriptor <operator_length>): Likewise.
+
 2010-06-04  Doug Evans  <dje@google.com>
 
 	Add support for enabling/disabling individual pretty-printers.

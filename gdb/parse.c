@@ -791,7 +791,8 @@ length_of_subexp (struct expression *expr, int endpos)
    operator takes.  */
 
 void
-operator_length (struct expression *expr, int endpos, int *oplenp, int *argsp)
+operator_length (const struct expression *expr, int endpos, int *oplenp,
+		 int *argsp)
 {
   expr->language_defn->la_exp_desc->operator_length (expr, endpos,
 						     oplenp, argsp);
@@ -800,7 +801,7 @@ operator_length (struct expression *expr, int endpos, int *oplenp, int *argsp)
 /* Default value for operator_length in exp_descriptor vectors.  */
 
 void
-operator_length_standard (struct expression *expr, int endpos,
+operator_length_standard (const struct expression *expr, int endpos,
 			  int *oplenp, int *argsp)
 {
   int oplen = 1;

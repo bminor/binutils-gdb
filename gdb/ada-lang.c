@@ -11084,7 +11084,8 @@ ada_decode_assert_location (char *args, char **addr_string,
     OP_DEFN (OP_DISCRETE_RANGE, 1, 2, 0)
 
 static void
-ada_operator_length (struct expression *exp, int pc, int *oplenp, int *argsp)
+ada_operator_length (const struct expression *exp, int pc, int *oplenp,
+		     int *argsp)
 {
   switch (exp->elts[pc - 1].opcode)
     {
