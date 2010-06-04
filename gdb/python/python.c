@@ -56,6 +56,7 @@ PyObject *gdbpy_to_string_cst;
 PyObject *gdbpy_children_cst;
 PyObject *gdbpy_display_hint_cst;
 PyObject *gdbpy_doc_cst;
+PyObject *gdbpy_enabled_cst;
 
 /* The GdbError exception.  */
 PyObject *gdbpy_gdberror_exc;
@@ -693,6 +694,7 @@ Enables or disables printing of Python stack traces."),
   gdbpy_children_cst = PyString_FromString ("children");
   gdbpy_display_hint_cst = PyString_FromString ("display_hint");
   gdbpy_doc_cst = PyString_FromString ("__doc__");
+  gdbpy_enabled_cst = PyString_FromString ("enabled");
 
   /* Create a couple objects which are used for Python's stdout and
      stderr.  */

@@ -104,6 +104,8 @@ is now deprecated.
 
 ** Pretty-printers are now also looked up in the current program space.
 
+** Pretty-printers can now be individually enabled and disabled.
+
 ** GDB now looks for names of Python scripts to auto-load in a
    special section named `.debug_gdb_scripts', in addition to looking
    for a OBJFILE-gdb.py script when OBJFILE is read by the debugger.

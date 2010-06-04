@@ -200,6 +200,7 @@ extern PyObject *gdbpy_doc_cst;
 extern PyObject *gdbpy_children_cst;
 extern PyObject *gdbpy_to_string_cst;
 extern PyObject *gdbpy_display_hint_cst;
+extern PyObject *gdbpy_enabled_cst;
 
 extern PyObject *gdbpy_gdberror_exc;
 

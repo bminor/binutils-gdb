@@ -57,7 +57,6 @@ proc run_lang_tests {lang} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${binfile}
 
-
     if ![runto_main ] then {
 	perror "couldn't run to breakpoint"
 	return
@@ -109,3 +108,44 @@ proc run_lang_tests {lang} {
 
 run_lang_tests "c"
 run_lang_tests "c++"
+
+# Run various other tests.
+
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug"] != "" } {
+    untested "Couldn't compile ${srcfile}"
+    return -1
+}
+
+# Start with a fresh gdb.
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if ![runto_main ] then {
+    perror "couldn't run to breakpoint"
+    return
+}
+
+gdb_test "b [gdb_get_line_number {break to inspect} ${testfile}.c ]" \
+    ".*Breakpoint.*"
+gdb_test "continue" ".*Breakpoint.*"
+
+set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
+
+gdb_test "python execfile ('${remote_python_file}')" ""
+
+gdb_test "print ss" " = a=< a=<1> b=<$hex>> b=< a=<2> b=<$hex>>" \
+    "print ss enabled #1"
+
+gdb_test "python disable_lookup_function ()" ""
+
+gdb_test "print ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}" \
+    "print ss disabled"
+
+gdb_test "python enable_lookup_function ()" ""
+
+gdb_test "print ss" " = a=< a=<1> b=<$hex>> b=< a=<2> b=<$hex>>" \
+    "print ss enabled #2"
+
+remote_file host delete ${remote_python_file}

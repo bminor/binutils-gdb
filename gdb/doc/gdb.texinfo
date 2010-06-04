@@ -20019,6 +20019,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Types In Python::             Python representation of types.
 * Pretty Printing API::         Pretty-printing values.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
+* Disabling Pretty-Printers::   Disabling broken printers.
 * Commands In Python::          Implementing new commands in Python.
 * Parameters In Python::        Adding new @value{GDBN} parameters.
 * Functions In Python::         Writing new convenience functions.
@@ -20710,7 +20711,8 @@ If the result is not one of these types, an exception is raised.
 @subsubsection Selecting Pretty-Printers
 
 The Python list @code{gdb.pretty_printers} contains an array of
-functions that have been registered via addition as a pretty-printer.
+functions or callable objects that have been registered via addition
+as a pretty-printer.
 Each @code{gdb.Progspace} contains a @code{pretty_printers} attribute.
 Each @code{gdb.Objfile} also contains a @code{pretty_printers}
 attribute.
@@ -20723,13 +20725,14 @@ cannot create a pretty-printer for the value, it should return
 
 @value{GDBN} first checks the @code{pretty_printers} attribute of each
 @code{gdb.Objfile} in the current program space and iteratively calls
-each function in the list for that @code{gdb.Objfile} until it receives
+each enabled function (@pxref{Disabling Pretty-Printers})
+in the list for that @code{gdb.Objfile} until it receives
 a pretty-printer object.
 If no pretty-printer is found in the objfile lists, @value{GDBN} then
 searches the pretty-printer list of the current program space,
-calling each function until an object is returned.
+calling each enabled function until an object is returned.
 After these lists have been exhausted, it tries the global
-@code{gdb.pretty-printers} list, again calling each function until an
+@code{gdb.pretty_printers} list, again calling each enabled function until an
 object is returned.
 
 The order in which the objfiles are searched is not specified.  For a
@@ -20813,6 +20816,25 @@ And then the corresponding contents of the auto-load file would be:
 import gdb.libstdcxx.v6
 gdb.libstdcxx.v6.register_printers (gdb.current_objfile ())
 @end smallexample
+
+@node Disabling Pretty-Printers
+@subsubsection Disabling Pretty-Printers
+@cindex disabling pretty-printers
+
+For various reasons a pretty-printer may not work.
+For example, the underlying data structure may have changed and
+the pretty-printer is out of date.
+
+The consequences of a broken pretty-printer are severe enough that
+@value{GDBN} provides support for enabling and disabling individual
+printers.  For example, if @code{print frame-arguments} is on,
+a backtrace can become highly illegible if any argument is printed
+with a broken printer.
+
+Pretty-printers are enabled and disabled by attaching an @code{enabled}
+attribute to the registered function or callable object.  If this attribute
+is present and its value is @code{False}, the printer is disabled, otherwise
+the printer is enabled.
 
 @node Commands In Python
 @subsubsection Commands In Python

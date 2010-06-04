@@ -1,3 +1,12 @@
+2010-06-04  Doug Evans  <dje@google.com>
+
+	Add support for enabling/disabling individual pretty-printers.	
+	* python/py-prettyprint.c (search_pp_list): Skip disabled printers.
+	* python/python-internal.h (gdbpy_enabled_cst): Declare.
+	* python/python.c (gdbpy_enabled_cst): Define.
+	(_initialize_python): Initialize gdbpy_enabled_cst.
+	* NEWS: Add entry.
+
 2010-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (update_global_location_list): Fix comment typo.

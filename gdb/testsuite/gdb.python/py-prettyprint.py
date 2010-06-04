@@ -194,6 +194,11 @@ def lookup_function (val):
 
     return None
 
+def disable_lookup_function ():
+    lookup_function.enabled = False
+
+def enable_lookup_function ():
+    lookup_function.enabled = True
 
 def register_pretty_printers ():
     pretty_printers_dict[re.compile ('^struct s$')]   = pp_s
