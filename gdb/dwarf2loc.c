@@ -1536,7 +1536,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
 	case DW_OP_consts:
-	  data = read_sleb128 (data, end, &ul);
+	  data = read_sleb128 (data, end, &l);
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
 

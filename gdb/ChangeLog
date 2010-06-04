@@ -1,3 +1,7 @@
+2010-06-04  Hui Zhu  <teawater@gmail.com>
+
+	* dwarf2loc.c (disassemble_dwarf_expression): Change ul to l.
+
 2010-06-03  Doug Evans  <dje@google.com>
 
 	* configure.ac: Don't fail if python is unusable when
