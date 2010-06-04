@@ -406,7 +406,6 @@ proc test_value_hash {} {
     gdb_test "python print vdict\[two\]" "two str" "Test dictionary hash"
     gdb_test "python print vdict\[three\]" "three str" "Test dictionary hash"
     gdb_test "python print one.__hash__() == hash(one)" "True" "Test inbuilt hash"
-    gdb_test "python print one.__hash__() == id(one)" "True" "Test inbuilt id"
 }
 
 
