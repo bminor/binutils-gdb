@@ -1,3 +1,8 @@
+2010-06-05  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-main.c (mi_cmd_list_thread_groups): Adjust
+	for current naming of thread groups (iN, not N).
+
 2010-06-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* ada-lang.c (ada_operator_length): Constify `struct expression'.

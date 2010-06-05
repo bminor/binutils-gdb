@@ -817,10 +817,15 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
   for (; optind < argc; ++optind)
     {
       char *end;
-      int inf = strtoul (argv[optind], &end, 0);
+      int inf;
+
+      if (*(argv[optind]) != 'i')
+	error ("invalid syntax of group id '%s'", argv[optind]);
+
+      inf = strtoul (argv[optind] + 1, &end, 0);
 
       if (*end != '\0')
-	error ("invalid group id '%s'", argv[optind]);
+	error ("invalid syntax of group id '%s'", argv[optind]);
       VEC_safe_push (int, ids, inf);
     }
   if (VEC_length (int, ids) > 1)
@@ -837,11 +842,13 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
   else if (VEC_length (int, ids) == 1)
     {
       /* Local thread groups, single id. */
-      int pid = *VEC_address (int, ids);
+      int id = *VEC_address (int, ids);
+      struct inferior *inf = find_inferior_id (id);
 
-      if (!in_inferior_list (pid))
-	error ("Invalid thread group id '%d'", pid);
-      print_thread_info (uiout, -1, pid);
+      if (!inf)
+	error ("Non-existent thread group id '%d'", id);
+      
+      print_thread_info (uiout, -1, inf->pid);
     }
   else
     {
