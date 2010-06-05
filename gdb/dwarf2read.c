@@ -5138,12 +5138,13 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
        on incomplete types.  */
     TYPE_STUB (type) = 1;
 
-  set_descriptive_type (type, die, cu);
-
   /* We need to add the type field to the die immediately so we don't
      infinitely recurse when dealing with pointers to the structure
      type within the structure itself. */
   set_die_type (die, type, cu);
+
+  /* set_die_type should be already done.  */
+  set_descriptive_type (type, die, cu);
 
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
@@ -5433,7 +5434,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   struct die_info *child_die;
-  struct type *type = NULL;
+  struct type *type;
   struct type *element_type, *range_type, *index_type;
   struct type **range_types = NULL;
   struct attribute *attr;
@@ -5442,6 +5443,11 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   char *name;
 
   element_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  type = get_die_type (die, cu);
+  if (type)
+    return type;
 
   /* Irix 6.2 native cc creates array types without children for
      arrays with unspecified length.  */
@@ -5511,12 +5517,15 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name)
     TYPE_NAME (type) = name;
   
+  /* Install the type in the die. */
+  set_die_type (die, type, cu);
+
+  /* set_die_type should be already done.  */
   set_descriptive_type (type, die, cu);
 
   do_cleanups (back_to);
 
-  /* Install the type in the die. */
-  return set_die_type (die, type, cu);
+  return type;
 }
 
 static enum dwarf_array_dim_ordering
@@ -5559,11 +5568,22 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
 static struct type *
 read_set_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct type *set_type = create_set_type (NULL, die_type (die, cu));
-  struct attribute *attr = dwarf2_attr (die, DW_AT_byte_size, cu);
+  struct type *domain_type, *set_type;
+  struct attribute *attr;
 
+  domain_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  set_type = get_die_type (die, cu);
+  if (set_type)
+    return set_type;
+
+  set_type = create_set_type (NULL, domain_type);
+
+  attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     TYPE_LENGTH (set_type) = DW_UNSND (attr);
+
   return set_die_type (die, set_type, cu);
 }
 
@@ -5783,8 +5803,16 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr_byte_size;
   struct attribute *attr_address_class;
   int byte_size, addr_class;
+  struct type *target_type;
 
-  type = lookup_pointer_type (die_type (die, cu));
+  target_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  type = get_die_type (die, cu);
+  if (type)
+    return type;
+
+  type = lookup_pointer_type (target_type);
 
   attr_byte_size = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr_byte_size)
@@ -5840,6 +5868,11 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
   to_type = die_type (die, cu);
   domain = die_containing_type (die, cu);
 
+  /* The calls above may have already set the type for this DIE.  */
+  type = get_die_type (die, cu);
+  if (type)
+    return type;
+
   if (TYPE_CODE (check_typedef (to_type)) == TYPE_CODE_METHOD)
     type = lookup_methodptr_type (to_type);
   else
@@ -5855,10 +5888,17 @@ static struct type *
 read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct comp_unit_head *cu_header = &cu->header;
-  struct type *type;
+  struct type *type, *target_type;
   struct attribute *attr;
 
-  type = lookup_reference_type (die_type (die, cu));
+  target_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  type = get_die_type (die, cu);
+  if (type)
+    return type;
+
+  type = lookup_reference_type (target_type);
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     {
@@ -5877,6 +5917,12 @@ read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *base_type, *cv_type;
 
   base_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  cv_type = get_die_type (die, cu);
+  if (cv_type)
+    return cv_type;
+
   cv_type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
   return set_die_type (die, cv_type, cu);
 }
@@ -5887,6 +5933,12 @@ read_tag_volatile_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *base_type, *cv_type;
 
   base_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  cv_type = get_die_type (die, cu);
+  if (cv_type)
+    return cv_type;
+
   cv_type = make_cv_type (TYPE_CONST (base_type), 1, base_type, 0);
   return set_die_type (die, cv_type, cu);
 }
@@ -5951,6 +6003,12 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
 
   type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  ftype = get_die_type (die, cu);
+  if (ftype)
+    return ftype;
+
   ftype = lookup_function_type (type);
 
   /* All functions in C++, Pascal and Java have prototypes.  */
@@ -6164,6 +6222,11 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   base_type = die_type (die, cu);
 
+  /* The die_type call above may have already set the type for this DIE.  */
+  range_type = get_die_type (die, cu);
+  if (range_type)
+    return range_type;
+
   if (cu->language == language_fortran)
     { 
       /* FORTRAN implies a lower bound of 1, if not given.  */
@@ -6270,9 +6333,12 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     TYPE_LENGTH (range_type) = DW_UNSND (attr);
 
+  set_die_type (die, range_type, cu);
+
+  /* set_die_type should be already done.  */
   set_descriptive_type (range_type, die, cu);
 
-  return set_die_type (die, range_type, cu);
+  return range_type;
 }
   
 static struct type *
@@ -12094,7 +12160,22 @@ offset_and_type_eq (const void *item_lhs, const void *item_rhs)
 }
 
 /* Set the type associated with DIE to TYPE.  Save it in CU's hash
-   table if necessary.  For convenience, return TYPE.  */
+   table if necessary.  For convenience, return TYPE.
+
+   The DIEs reading must have careful ordering to:
+    * Not cause infite loops trying to read in DIEs as a prerequisite for
+      reading current DIE.
+    * Not trying to dereference contents of still incompletely read in types
+      while reading in other DIEs.
+    * Enable referencing still incompletely read in types just by a pointer to
+      the type without accessing its fields.
+
+   Therefore caller should follow these rules:
+     * Try to fetch any prerequisite types we may need to build this DIE type
+       before building the type and calling set_die_type.
+     * After building typer call set_die_type for current DIE as soon as
+       possible before fetching more types to complete the current type.
+     * Make the type as complete as possible before fetching more types.  */
 
 static struct type *
 set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
@@ -12132,6 +12213,10 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   ofs.type = type;
   slot = (struct dwarf2_offset_and_type **)
     htab_find_slot_with_hash (cu->type_hash, &ofs, ofs.offset, INSERT);
+  if (*slot)
+    complaint (&symfile_complaints,
+	       _("A problem internal to GDB: DIE 0x%x has type already set"),
+	       die->offset);
   *slot = obstack_alloc (&cu->objfile->objfile_obstack, sizeof (**slot));
   **slot = ofs;
   return type;

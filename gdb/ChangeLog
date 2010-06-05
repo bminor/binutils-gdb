@@ -1,3 +1,23 @@
+2010-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix duplicate types for single DIE.
+	* dwarf2read.c (read_structure_type): Move set_descriptive_type after
+	set_die_type.
+	(read_array_type): Remove type initialization.  Recheck get_die_type
+	after initial die_type.  Move set_die_type before set_descriptive_type.
+	(read_set_type): New variable domain_type.  Recheck get_die_type after
+	initial die_type.  Move attr initialization later.
+	(read_tag_pointer_type, read_tag_reference_type): New variable
+	target_type.  Recheck get_die_type after initial die_type.
+	(read_tag_ptr_to_member_type): Recheck get_die_type after initial
+	die_type and die_containing_type.
+	(read_tag_const_type, read_tag_volatile_type, read_subroutine_type):
+	Recheck get_die_type after initial die_type.
+	(read_subrange_type): Recheck get_die_type after initial die_type.
+	Move set_die_type before set_descriptive_type.
+	(set_die_type): Extend the function comment.  Call complaint if DIE has
+	some type already set.
+
 2010-06-05  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_list_thread_groups): Adjust
