@@ -1,3 +1,18 @@
+2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Clear stale specific bp_location from former whole breakpoint.
+	* breakpoint.c (delete_breakpoint): Move the stale referencing clear
+	code ...
+	(free_bp_location): ... here.  Rename there the called function to
+	bpstat_remove_bp_location_callback.
+	(bpstat_remove_breakpoint_callback): Rename to ...
+	(bpstat_remove_bp_location_callback): ... here, change DATA resolution
+	to struct bp_location.  Change the called function to
+	bpstat_remove_bp_location.  Create new declaration for the function.
+	(bpstat_remove_breakpoint): Rename to ...
+	(bpstat_remove_bp_location): ..., change the parameter to loc, adjust
+	code for the new parameter type.
+
 2010-06-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* README: Make version-agnostic.
