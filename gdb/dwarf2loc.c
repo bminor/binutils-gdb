@@ -122,7 +122,7 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
 struct dwarf_expr_baton
 {
   struct frame_info *frame;
-  struct objfile *objfile;
+  struct dwarf2_per_cu_data *per_cu;
 };
 
 /* Helper functions for dwarf2_evaluate_loc_desc.  */
@@ -227,8 +227,9 @@ static CORE_ADDR
 dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
+  struct objfile *objfile = dwarf2_per_cu_objfile (debaton->per_cu);
 
-  return target_translate_tls_address (debaton->objfile, offset);
+  return target_translate_tls_address (objfile, offset);
 }
 
 struct piece_closure
@@ -801,12 +802,12 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
     }
 
   baton.frame = frame;
-  baton.objfile = dwarf2_per_cu_objfile (per_cu);
+  baton.per_cu = per_cu;
 
   ctx = new_dwarf_expr_context ();
   old_chain = make_cleanup_free_dwarf_expr_context (ctx);
 
-  ctx->gdbarch = get_objfile_arch (baton.objfile);
+  ctx->gdbarch = get_objfile_arch (dwarf2_per_cu_objfile (per_cu));
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
   ctx->baton = &baton;
   ctx->read_reg = dwarf_expr_read_reg;
@@ -907,6 +908,7 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 struct needs_frame_baton
 {
   int needs_frame;
+  struct dwarf2_per_cu_data *per_cu;
 };
 
 /* Reads from registers do require a frame.  */
@@ -973,6 +975,7 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
   struct cleanup *old_chain;
 
   baton.needs_frame = 0;
+  baton.per_cu = per_cu;
 
   ctx = new_dwarf_expr_context ();
   old_chain = make_cleanup_free_dwarf_expr_context (ctx);

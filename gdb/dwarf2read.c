@@ -337,7 +337,8 @@ struct dwarf2_per_cu_data
      Otherwise it's from .debug_info.  */
   unsigned int from_debug_types : 1;
 
-  /* Set iff currently read in.  */
+  /* Set to non-NULL iff this CU is currently loaded.  When it gets freed out
+     of the CU cache it gets reset to NULL again.  */
   struct dwarf2_cu *cu;
 
   /* If full symbols for this CU have been read in, then this field
