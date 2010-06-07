@@ -1,3 +1,11 @@
+2010-06-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/thumb-eabi.d: Add case for divided syntax encoding of movs.
+	* gas/arm/thumb.d: Likewise.
+	* gas/arm/thumb.s: Likewise.
+	* gas/arm/thumb2_it.d: Update for change in lsls/movs disassembly.
+	* gas/arm/thumb2_it_auto.d: Liekwise.
+	* gas/arm/thumb32.d: Likewise.
+
 2010-05-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/thumb2_it_auto.d: Update for change in movs encoding.

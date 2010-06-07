@@ -1,3 +1,18 @@
+2010-06-07  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
+
+	* ld-arm/arm-call.d: Handle change in lsls/movs disassembly.
+	* ld-arm/farcall-thumb-arm-short.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-blx-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-blx.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-m-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-m.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-thumb.d: Likewise.
+	* ld-arm/thumb2-bl-as-thumb1-bad-noeabi.d: Likewise.
+	* ld-arm/thumb2-bl-as-thumb1-bad.d: Likewise.
+	* ld-arm/thumb2-bl-bad-noeabi.d: Likewise.
+	* ld-arm/thumb2-bl-bad.d: Likewise.
+
 2010-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11628

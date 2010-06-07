@@ -46,7 +46,7 @@ Disassembly of section .text:
     8050:	f7ff fff1 	bl	8036 <t3>
     8054:	f7ff efd4 	blx	8000 <_start>
     8058:	f7ff efd2 	blx	8000 <_start>
-    805c:	0000      	lsls	r0, r0, #0
+    805c:	0000      	movs	r0, r0
 	...
 
 00008060 <__t1_from_arm>:

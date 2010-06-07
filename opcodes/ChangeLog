@@ -1,3 +1,7 @@
+2010-06-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-dis.c (thumb-opcodes): Add disassembly for movs.
+
 2010-05-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm-dis.c (print_insn_neon):  Ensure disassembly of Neon 
