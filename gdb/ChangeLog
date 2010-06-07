@@ -1,5 +1,15 @@
 2010-06-07  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* cp-support.c (make_symbol_overload_list_namespace): Only search
+	static and global blocks.
+	(make_symbol_overload_list_block): New function.
+	(make_symbol_overload_list): Separate namespace search from block
+	search.
+	(make_symbol_overload_list_qualified): Use
+	make_symbol_overload_list_block.
+
+2010-06-07  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	* value.h: Created oload_search_type enum.
 	(find_overload_match): Use oload_search_type enum.
 	* valops.c (find_overload_match): Support combined member and

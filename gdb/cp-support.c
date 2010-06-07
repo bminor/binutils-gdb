@@ -693,6 +693,7 @@ make_symbol_overload_list (const char *func_name,
 			   const char *namespace)
 {
   struct cleanup *old_cleanups;
+  const char *name;
 
   sym_return_val_size = 100;
   sym_return_val_index = 0;
@@ -704,9 +705,41 @@ make_symbol_overload_list (const char *func_name,
 
   make_symbol_overload_list_using (func_name, namespace);
 
+  if (namespace[0] == '\0')
+    name = func_name;
+  else
+    {
+      char *concatenated_name
+	= alloca (strlen (namespace) + 2 + strlen (func_name) + 1);
+      strcpy (concatenated_name, namespace);
+      strcat (concatenated_name, "::");
+      strcat (concatenated_name, func_name);
+      name = concatenated_name;
+    }
+
+  make_symbol_overload_list_qualified (name);
+
   discard_cleanups (old_cleanups);
 
   return sym_return_val;
+}
+
+/* Add all symbols with a name matching NAME in BLOCK to the overload
+   list.  */
+
+static void
+make_symbol_overload_list_block (const char *name,
+                                 const struct block *block)
+{
+  struct dict_iterator iter;
+  struct symbol *sym;
+
+  const struct dictionary *dict = BLOCK_DICT (block);
+
+  for (sym = dict_iter_name_first (dict, name, &iter);
+       sym != NULL;
+       sym = dict_iter_name_next (name, &iter))
+    overload_list_add_symbol (sym, name);
 }
 
 /* Adds the function FUNC_NAME from NAMESPACE to the overload set.  */
@@ -715,8 +748,11 @@ static void
 make_symbol_overload_list_namespace (const char *func_name,
                                      const char *namespace)
 {
+  const char *name;
+  const struct block *block = NULL;
+
   if (namespace[0] == '\0')
-    make_symbol_overload_list_qualified (func_name);
+    name = func_name;
   else
     {
       char *concatenated_name
@@ -725,8 +761,17 @@ make_symbol_overload_list_namespace (const char *func_name,
       strcpy (concatenated_name, namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, func_name);
-      make_symbol_overload_list_qualified (concatenated_name);
+      name = concatenated_name;
     }
+
+  /* Look in the static block.  */
+  block = block_static_block (get_selected_block (0));
+  make_symbol_overload_list_block (name, block);
+
+  /* Look in the global block.  */
+  block = block_global_block (block);
+  make_symbol_overload_list_block (name, block);
+
 }
 
 /* Search the namespace of the given type and namespace of and public base
@@ -855,16 +900,7 @@ make_symbol_overload_list_qualified (const char *func_name)
      complete on local vars.  */
 
   for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
-    {
-      dict = BLOCK_DICT (b);
-
-      for (sym = dict_iter_name_first (dict, func_name, &iter);
-	   sym;
-	   sym = dict_iter_name_next (func_name, &iter))
-	{
-	  overload_list_add_symbol (sym, func_name);
-	}
-    }
+    make_symbol_overload_list_block (func_name, b);
 
   surrounding_static_block = block_static_block (get_selected_block (0));
 
@@ -875,14 +911,7 @@ make_symbol_overload_list_qualified (const char *func_name)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    dict = BLOCK_DICT (b);
-
-    for (sym = dict_iter_name_first (dict, func_name, &iter);
-	 sym;
-	 sym = dict_iter_name_next (func_name, &iter))
-    {
-      overload_list_add_symbol (sym, func_name);
-    }
+    make_symbol_overload_list_block (func_name, b);
   }
 
   ALL_PRIMARY_SYMTABS (objfile, s)
@@ -892,14 +921,7 @@ make_symbol_overload_list_qualified (const char *func_name)
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
-    dict = BLOCK_DICT (b);
-
-    for (sym = dict_iter_name_first (dict, func_name, &iter);
-	 sym;
-	 sym = dict_iter_name_next (func_name, &iter))
-    {
-      overload_list_add_symbol (sym, func_name);
-    }
+    make_symbol_overload_list_block (func_name, b);
   }
 }
 
