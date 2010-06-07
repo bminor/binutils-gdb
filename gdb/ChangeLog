@@ -1,3 +1,7 @@
+2010-06-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* README: Make version-agnostic.
+
 2010-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix duplicate types for single DIE.
