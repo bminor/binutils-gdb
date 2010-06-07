@@ -232,6 +232,33 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
   return target_translate_tls_address (objfile, offset);
 }
 
+/* Call DWARF subroutine from DW_AT_location of DIE at DIE_OFFSET in current CU
+   (as is PER_CU).  State of the CTX is not affected by the call and return.  */
+
+static void
+per_cu_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset,
+		   struct dwarf2_per_cu_data *per_cu)
+{
+  struct dwarf2_locexpr_baton block;
+
+  block = dwarf2_fetch_die_location_block (die_offset, per_cu);
+
+  /* DW_OP_call_ref is currently not supported.  */
+  gdb_assert (block.per_cu == per_cu);
+
+  dwarf_expr_eval (ctx, block.data, block.size);
+}
+
+/* Helper interface of per_cu_dwarf_call for dwarf2_evaluate_loc_desc.  */
+
+static void
+dwarf_expr_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
+{
+  struct dwarf_expr_baton *debaton = ctx->baton;
+
+  return per_cu_dwarf_call (ctx, die_offset, debaton->per_cu);
+}
+
 struct piece_closure
 {
   /* Reference count.  */
@@ -815,6 +842,7 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
   ctx->get_frame_base = dwarf_expr_frame_base;
   ctx->get_frame_cfa = dwarf_expr_frame_cfa;
   ctx->get_tls_address = dwarf_expr_tls_address;
+  ctx->dwarf_call = dwarf_expr_dwarf_call;
 
   dwarf_expr_eval (ctx, data, size);
   if (ctx->num_pieces > 0)
@@ -962,6 +990,16 @@ needs_frame_tls_address (void *baton, CORE_ADDR offset)
   return 1;
 }
 
+/* Helper interface of per_cu_dwarf_call for dwarf2_loc_desc_needs_frame.  */
+
+static void
+needs_frame_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
+{
+  struct needs_frame_baton *nf_baton = ctx->baton;
+
+  return per_cu_dwarf_call (ctx, die_offset, nf_baton->per_cu);
+}
+
 /* Return non-zero iff the location expression at DATA (length SIZE)
    requires a frame to evaluate.  */
 
@@ -988,6 +1026,7 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
   ctx->get_frame_base = needs_frame_frame_base;
   ctx->get_frame_cfa = needs_frame_frame_cfa;
   ctx->get_tls_address = needs_frame_tls_address;
+  ctx->dwarf_call = needs_frame_dwarf_call;
 
   dwarf_expr_eval (ctx, data, size);
 

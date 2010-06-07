@@ -328,6 +328,15 @@ no_get_tls_address (void *baton, CORE_ADDR offset)
 		  _("Support for DW_OP_GNU_push_tls_address is unimplemented"));
 }
 
+/* Helper function for execute_stack_op.  */
+
+static void
+no_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
+{
+  internal_error (__FILE__, __LINE__,
+		  _("Support for DW_OP_call* is invalid in CFI"));
+}
+
 /* Execute the required actions for both the DW_CFA_restore and
 DW_CFA_restore_extended instructions.  */
 static void
@@ -378,6 +387,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   ctx->get_frame_base = no_get_frame_base;
   ctx->get_frame_cfa = no_get_frame_cfa;
   ctx->get_tls_address = no_get_tls_address;
+  ctx->dwarf_call = no_dwarf_call;
 
   dwarf_expr_push (ctx, initial, initial_in_stack_memory);
   dwarf_expr_eval (ctx, exp, len);

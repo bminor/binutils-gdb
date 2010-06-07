@@ -37,6 +37,9 @@ CORE_ADDR dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *cu);
 /* Return the offset size given in the compilation unit header for CU.  */
 int dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *cu);
 
+struct dwarf2_locexpr_baton dwarf2_fetch_die_location_block
+  (unsigned int offset, struct dwarf2_per_cu_data *per_cu);
+
 /* The symbol location baton types used by the DWARF-2 reader (i.e.
    SYMBOL_LOCATION_BATON for a LOC_COMPUTED symbol).  "struct
    dwarf2_locexpr_baton" is for a symbol with a single location

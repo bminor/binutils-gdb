@@ -1,3 +1,8 @@
+2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Test PR 10640.
+	* gdb.dwarf2/dw2-op-call.exp, gdb.dwarf2/dw2-op-call.S: New.
+
 2010-06-07  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/koenig.exp: Test for ADL operators.

@@ -1,5 +1,23 @@
 2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix PR 10640.
+	* dwarf2-frame.c (no_dwarf_call): New function.
+	(execute_stack_op): Set CTX->DWARF_CALL.
+	* dwarf2expr.c (execute_stack_op) <DW_OP_call2, DW_OP_call4>: New.
+	* dwarf2expr.h (struct dwarf_expr_context) <dwarf_call>: New.
+	(struct dwarf_expr_context) <get_subr>: Remove the #if0-ed field.
+	* dwarf2loc.c (per_cu_dwarf_call, dwarf_expr_dwarf_call): New functions.
+	(dwarf2_evaluate_loc_desc): Initialize CTX->DWARF_CALL.
+	(needs_frame_dwarf_call): New function.
+	(dwarf2_loc_desc_needs_frame): Initialize CTX->DWARF_CALL.
+	* dwarf2read.c (follow_die_offset): Based on former follow_die_ref.
+	Update the comment.  Move variables die, offset and error call to ...
+	(follow_die_ref): ... a new function.
+	(dwarf2_fetch_die_location_block): New function.
+	* dwarf2loc.h (dwarf2_fetch_die_location_block): New prototype.
+
+2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2loc.c (struct dwarf_expr_baton) Replace objfile by per_cu.
 	(dwarf_expr_tls_address): Use per_cu instead of objfile.
 	(dwarf2_evaluate_loc_desc): Drop initialization of BATON.OBJFILE.

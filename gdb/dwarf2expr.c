@@ -911,6 +911,18 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  ctx->initialized = 0;
 	  goto no_push;
 
+	case DW_OP_call2:
+	  result = extract_unsigned_integer (op_ptr, 2, byte_order);
+	  op_ptr += 2;
+	  ctx->dwarf_call (ctx, result);
+	  goto no_push;
+
+	case DW_OP_call4:
+	  result = extract_unsigned_integer (op_ptr, 4, byte_order);
+	  op_ptr += 4;
+	  ctx->dwarf_call (ctx, result);
+	  goto no_push;
+
 	default:
 	  error (_("Unhandled dwarf expression opcode 0x%x"), op);
 	}

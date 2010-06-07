@@ -97,14 +97,13 @@ struct dwarf_expr_context
      DW_OP_GNU_push_tls_address.  */
   CORE_ADDR (*get_tls_address) (void *baton, CORE_ADDR offset);
 
+  /* Execute DW_AT_location expression for the DWARF expression subroutine in
+     the DIE at DIE_OFFSET in the CU from CTX.  Do not touch STACK while it
+     being passed to and returned from the called DWARF subroutine.  */
+  void (*dwarf_call) (struct dwarf_expr_context *ctx, size_t die_offset);
+
 #if 0
   /* Not yet implemented.  */
-
-  /* Return the location expression for the dwarf expression
-     subroutine in the die at OFFSET in the current compilation unit.
-     The result must be live until the current expression evaluation
-     is complete.  */
-  unsigned char *(*get_subr) (void *baton, off_t offset, size_t *length);
 
   /* Return the `object address' for DW_OP_push_object_address.  */
   CORE_ADDR (*get_object_address) (void *baton);

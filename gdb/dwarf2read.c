@@ -10736,22 +10736,17 @@ follow_die_ref_or_sig (struct die_info *src_die, struct attribute *attr,
   return die;
 }
 
-/* Follow reference attribute ATTR of SRC_DIE.
-   On entry *REF_CU is the CU of SRC_DIE.
+/* Follow reference OFFSET.
+   On entry *REF_CU is the CU of source DIE referencing OFFSET.
    On exit *REF_CU is the CU of the result.  */
 
 static struct die_info *
-follow_die_ref (struct die_info *src_die, struct attribute *attr,
-		struct dwarf2_cu **ref_cu)
+follow_die_offset (unsigned int offset, struct dwarf2_cu **ref_cu)
 {
-  struct die_info *die;
-  unsigned int offset;
   struct die_info temp_die;
   struct dwarf2_cu *target_cu, *cu = *ref_cu;
 
   gdb_assert (cu->per_cu != NULL);
-
-  offset = dwarf2_get_ref_die_offset (attr);
 
   if (cu->per_cu->from_debug_types)
     {
@@ -10759,7 +10754,7 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 	 If they need to, they have to reference a signatured type via
 	 DW_FORM_sig8.  */
       if (! offset_in_cu_p (&cu->header, offset))
-	goto not_found;
+	return NULL;
       target_cu = cu;
     }
   else if (! offset_in_cu_p (&cu->header, offset))
@@ -10779,15 +10774,67 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 
   *ref_cu = target_cu;
   temp_die.offset = offset;
-  die = htab_find_with_hash (target_cu->die_hash, &temp_die, offset);
-  if (die)
-    return die;
+  return htab_find_with_hash (target_cu->die_hash, &temp_die, offset);
+}
 
- not_found:
+/* Follow reference attribute ATTR of SRC_DIE.
+   On entry *REF_CU is the CU of SRC_DIE.
+   On exit *REF_CU is the CU of the result.  */
 
-  error (_("Dwarf Error: Cannot find DIE at 0x%x referenced from DIE "
-	 "at 0x%x [in module %s]"),
-	 offset, src_die->offset, cu->objfile->name);
+static struct die_info *
+follow_die_ref (struct die_info *src_die, struct attribute *attr,
+		struct dwarf2_cu **ref_cu)
+{
+  unsigned int offset = dwarf2_get_ref_die_offset (attr);
+  struct dwarf2_cu *cu = *ref_cu;
+  struct die_info *die;
+
+  die = follow_die_offset (offset, ref_cu);
+  if (!die)
+    error (_("Dwarf Error: Cannot find DIE at 0x%x referenced from DIE "
+	   "at 0x%x [in module %s]"),
+	   offset, src_die->offset, cu->objfile->name);
+
+  return die;
+}
+
+/* Return DWARF block and its CU referenced by OFFSET at PER_CU.  Returned
+   value is intended for DW_OP_call*.  */
+
+struct dwarf2_locexpr_baton
+dwarf2_fetch_die_location_block (unsigned int offset,
+				 struct dwarf2_per_cu_data *per_cu)
+{
+  struct dwarf2_cu *cu = per_cu->cu;
+  struct die_info *die;
+  struct attribute *attr;
+  struct dwarf2_locexpr_baton retval;
+
+  die = follow_die_offset (offset, &cu);
+  if (!die)
+    error (_("Dwarf Error: Cannot find DIE at 0x%x referenced in module %s"),
+	   offset, per_cu->cu->objfile->name);
+
+  attr = dwarf2_attr (die, DW_AT_location, cu);
+  if (!attr)
+    {
+      /* DWARF: "If there is no such attribute, then there is no effect.".  */
+
+      retval.data = NULL;
+      retval.size = 0;
+    }
+  else
+    {
+      if (!attr_form_is_block (attr))
+	error (_("Dwarf Error: DIE at 0x%x referenced in module %s "
+		 "is neither DW_FORM_block* nor DW_FORM_exprloc"),
+	       offset, per_cu->cu->objfile->name);
+
+      retval.data = DW_BLOCK (attr)->data;
+      retval.size = DW_BLOCK (attr)->size;
+    }
+  retval.per_cu = cu->per_cu;
+  return retval;
 }
 
 /* Follow the signature attribute ATTR in SRC_DIE.
