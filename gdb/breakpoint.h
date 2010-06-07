@@ -244,7 +244,8 @@ struct bp_location
 
   /* Each breakpoint location must belong to exactly one higher-level
      breakpoint.  This and the DUPLICATE flag are more straightforward
-     than reference counting.  */
+     than reference counting.  This pointer is NULL iff this bp_location is in
+     (and therefore only in) moribund_locations.  */
   struct breakpoint *owner;
 
   /* Conditional.  Break only if this expression's value is nonzero.

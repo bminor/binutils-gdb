@@ -1,5 +1,9 @@
 2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* breakpoint.h (owner): Extend the comment.
+
+2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Clear stale specific bp_location from former whole breakpoint.
 	* breakpoint.c (delete_breakpoint): Move the stale referencing clear
 	code ...
