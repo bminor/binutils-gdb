@@ -1,3 +1,8 @@
+2010-06-07  Damien Diederen  <dd@crosstwine.com>
+
+	* gold-threads.cc (Lock_impl_threads::Lock_impl_threads): Correct
+	#ifdef typo.
+
 2010-06-03  Sriraman Tallam  <tmsriram@google.com>
 
 	PR gold/11658

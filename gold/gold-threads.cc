@@ -101,7 +101,7 @@ Lock_impl_threads::Lock_impl_threads()
   int err = pthread_mutexattr_init(&attr);
   if (err != 0)
     gold_fatal(_("pthead_mutextattr_init failed: %s"), strerror(err));
-#ifdef PTHREAD_MUTEXT_ADAPTIVE_NP
+#ifdef PTHREAD_MUTEX_ADAPTIVE_NP
   err = pthread_mutextattr_settype(&attr, PTHREAD_MUTEX_ADAPTIVE_NP);
   if (err != 0)
     gold_fatal(_("pthread_mutextattr_settype failed: %s"), strerror(err));
