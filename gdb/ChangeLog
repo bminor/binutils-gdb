@@ -1,3 +1,22 @@
+2010-06-07  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* value.h: Created oload_search_type enum.
+	(find_overload_match): Use oload_search_type enum.
+	* valops.c (find_overload_match): Support combined member and
+	non-member search.
+	* eval.c (evaluate_subexp_standard): Calls to
+	find_overload_match now use oload_search_type enum.
+	(oload_method_static): Verify index is a proper value.
+	* valarith.c (value_user_defined_cpp_op): Search for and handle
+	both member and non-member operators.
+	(value_user_defined_cpp_op): New function.
+	(value_user_defined_op): New function.
+	(value_x_unop): Use value_user_defined_op.
+	(value_x_binop): Ditto.
+	* cp-support.c (make_symbol_overload_list_using): Added block
+	iteration.
+	Add check for namespace aliases and imported declarations.
+
 2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.h (owner): Extend the comment.

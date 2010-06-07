@@ -2315,6 +2315,16 @@ value_find_oload_method_list (struct value **argp, const char *method,
    matches on the argument types according to the overload resolution
    rules.
 
+   METHOD can be one of three values:
+     NON_METHOD for non-member functions.
+     METHOD: for member functions.
+     BOTH: used for overload resolution of operators where the
+       candidates are expected to be either member or non member
+       functions. In this case the first argument ARGTYPES
+       (representing 'this') is expected to be a reference to the
+       target object, and will be dereferenced when attempting the
+       non-member search.
+
    In the case of class methods, the parameter OBJ is an object value
    in which to search for overloaded methods.
 
@@ -2342,16 +2352,20 @@ value_find_oload_method_list (struct value **argp, const char *method,
 
 int
 find_overload_match (struct type **arg_types, int nargs, 
-		     const char *name, int method, int lax, 
-		     struct value **objp, struct symbol *fsym,
+		     const char *name, enum oload_search_type method,
+		     int lax, struct value **objp, struct symbol *fsym,
 		     struct value **valp, struct symbol **symp, 
 		     int *staticp, const int no_adl)
 {
   struct value *obj = (objp ? *objp : NULL);
   /* Index of best overloaded function.  */
-  int oload_champ;
+  int func_oload_champ = -1;
+  int method_oload_champ = -1;
+
   /* The measure for the current best match.  */
-  struct badness_vector *oload_champ_bv = NULL;
+  struct badness_vector *method_badness = NULL;
+  struct badness_vector *func_badness = NULL;
+
   struct value *temp = obj;
   /* For methods, the list of overloaded methods.  */
   struct fn_field *fns_ptr = NULL;
@@ -2367,9 +2381,11 @@ find_overload_match (struct type **arg_types, int nargs,
   const char *obj_type_name = NULL;
   const char *func_name = NULL;
   enum oload_classification match_quality;
+  enum oload_classification method_match_quality = INCOMPATIBLE;
+  enum oload_classification func_match_quality = INCOMPATIBLE;
 
   /* Get the list of overloaded methods or functions.  */
-  if (method)
+  if (method == METHOD || method == BOTH)
     {
       gdb_assert (obj);
 
@@ -2392,10 +2408,13 @@ find_overload_match (struct type **arg_types, int nargs,
 	    }
 	}
 
+      /* Retrieve the list of methods with the name NAME.  */
       fns_ptr = value_find_oload_method_list (&temp, name, 
 					      0, &num_fns, 
 					      &basetype, &boffset);
-      if (!fns_ptr || !num_fns)
+      /* If this is a method only search, and no methods were found
+         the search has faild.  */
+      if (method == METHOD && (!fns_ptr || !num_fns))
 	error (_("Couldn't find method %s%s%s"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
@@ -2403,14 +2422,32 @@ find_overload_match (struct type **arg_types, int nargs,
       /* If we are dealing with stub method types, they should have
 	 been resolved by find_method_list via
 	 value_find_oload_method_list above.  */
-      gdb_assert (TYPE_DOMAIN_TYPE (fns_ptr[0].type) != NULL);
-      oload_champ = find_oload_champ (arg_types, nargs, method, 
-				      num_fns, fns_ptr, 
-				      oload_syms, &oload_champ_bv);
+      if (fns_ptr)
+	{
+	  gdb_assert (TYPE_DOMAIN_TYPE (fns_ptr[0].type) != NULL);
+	  method_oload_champ = find_oload_champ (arg_types, nargs, method,
+	                                         num_fns, fns_ptr,
+	                                         oload_syms, &method_badness);
+
+	  method_match_quality =
+	      classify_oload_match (method_badness, nargs,
+	                            oload_method_static (method, fns_ptr,
+	                                                 method_oload_champ));
+
+	  make_cleanup (xfree, method_badness);
+	}
+
     }
-  else
+
+  if (method == NON_METHOD || method == BOTH)
     {
       const char *qualified_name = NULL;
+
+      /* If the the overload match is being search for both
+         as a method and non member function, the first argument
+         must now be dereferenced.  */
+      if (method == BOTH)
+	arg_types[0] = TYPE_TARGET_TYPE (arg_types[0]);
 
       if (fsym)
         {
@@ -2454,30 +2491,67 @@ find_overload_match (struct type **arg_types, int nargs,
           return 0;
         }
 
-      make_cleanup (xfree, oload_syms);
-      make_cleanup (xfree, oload_champ_bv);
+      func_oload_champ = find_oload_champ_namespace (arg_types, nargs,
+                                                     func_name,
+                                                     qualified_name,
+                                                     &oload_syms,
+                                                     &func_badness,
+                                                     no_adl);
 
-      oload_champ = find_oload_champ_namespace (arg_types, nargs,
-						func_name,
-						qualified_name,
-						&oload_syms,
-						&oload_champ_bv,
-						no_adl);
+      if (func_oload_champ >= 0)
+	func_match_quality = classify_oload_match (func_badness, nargs, 0);
+
+      make_cleanup (xfree, oload_syms);
+      make_cleanup (xfree, func_badness);
     }
 
   /* Did we find a match ?  */
-  if (oload_champ == -1)
+  if (method_oload_champ == -1 && func_oload_champ == -1)
     error (_("No symbol \"%s\" in current context."), name);
 
-  /* Check how bad the best match is.  */
-  match_quality =
-    classify_oload_match (oload_champ_bv, nargs,
-			  oload_method_static (method, fns_ptr,
-					       oload_champ));
+  /* If we have found both a method match and a function
+     match, find out which one is better, and calculate match
+     quality.  */
+  if (method_oload_champ >= 0 && func_oload_champ >= 0)
+    {
+      switch (compare_badness (func_badness, method_badness))
+        {
+	  case 0: /* Top two contenders are equally good.  */
+	    /* FIXME: GDB does not support the general ambiguous
+	     case.  All candidates should be collected and presented
+	     the the user.  */
+	    error (_("Ambiguous overload resolution"));
+	    break;
+	  case 1: /* Incomparable top contenders.  */
+	    /* This is an error incompatible candidates
+	       should not have been proposed.  */
+	    error (_("Internal error: incompatible overload candidates proposed"));
+	    break;
+	  case 2: /* Function champion.  */
+	    method_oload_champ = -1;
+	    match_quality = func_match_quality;
+	    break;
+	  case 3: /* Method champion.  */
+	    func_oload_champ = -1;
+	    match_quality = method_match_quality;
+	    break;
+	  default:
+	    error (_("Internal error: unexpected overload comparison result"));
+	    break;
+        }
+    }
+  else
+    {
+      /* We have either a method match or a function match.  */
+      if (method_oload_champ >= 0)
+	match_quality = method_match_quality;
+      else
+	match_quality = func_match_quality;
+    }
 
   if (match_quality == INCOMPATIBLE)
     {
-      if (method)
+      if (method == METHOD)
 	error (_("Cannot resolve method %s%s%s to any overloaded instance"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
@@ -2488,7 +2562,7 @@ find_overload_match (struct type **arg_types, int nargs,
     }
   else if (match_quality == NON_STANDARD)
     {
-      if (method)
+      if (method == METHOD)
 	warning (_("Using non-standard conversion to match method %s%s%s to supplied arguments"),
 		 obj_type_name,
 		 (obj_type_name && *obj_type_name) ? "::" : "",
@@ -2498,21 +2572,20 @@ find_overload_match (struct type **arg_types, int nargs,
 		 func_name);
     }
 
-  if (method)
+  if (staticp != NULL)
+    *staticp = oload_method_static (method, fns_ptr, method_oload_champ);
+
+  if (method_oload_champ >= 0)
     {
-      if (staticp != NULL)
-	*staticp = oload_method_static (method, fns_ptr, oload_champ);
-      if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, oload_champ))
-	*valp = value_virtual_fn_field (&temp, fns_ptr, oload_champ, 
+      if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, method_oload_champ))
+	*valp = value_virtual_fn_field (&temp, fns_ptr, method_oload_champ,
 					basetype, boffset);
       else
-	*valp = value_fn_field (&temp, fns_ptr, oload_champ, 
+	*valp = value_fn_field (&temp, fns_ptr, method_oload_champ,
 				basetype, boffset);
     }
   else
-    {
-      *symp = oload_syms[oload_champ];
-    }
+    *symp = oload_syms[func_oload_champ];
 
   if (objp)
     {
@@ -2801,7 +2874,8 @@ find_oload_champ (struct type **arg_types, int nargs, int method,
 static int
 oload_method_static (int method, struct fn_field *fns_ptr, int index)
 {
-  if (method && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
+  if (method && fns_ptr && index >= 0
+      && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
     return 1;
   else
     return 0;

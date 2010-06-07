@@ -175,10 +175,54 @@ typedef O::A TOA;
 typedef TOA  TTOA;
 
 //------------
+
 static union {
     int  a;
     char b;
 }p_union;
+
+//------------
+
+namespace P {
+  class Q{
+  public:
+    int operator== (int)
+      {
+        return 24;
+      }
+
+    int operator== (float)
+      {
+        return 25;
+      }
+
+    int operator+ (float)
+      {
+        return 26;
+      }
+
+  };
+
+  int operator!= (Q, int)
+    {
+      return 27;
+    }
+
+  int operator!= (Q, double)
+    {
+      return 28;
+    }
+
+  int operator+ (Q, int)
+    {
+      return 29;
+    }
+
+  int operator++ (Q)
+    {
+      return 30;
+    }
+}
 
 //------------
 
@@ -244,6 +288,16 @@ main ()
 
   TTOA ttoa;
   foo (ttoa, 'a');
+
+  P::Q q;
+  q == 5;
+  q == 5.0f;
+  q != 5;
+  q != 5.0f;
+  q + 5;
+  q + 5.0f;
+
+  ++q;
 
   return first (0, c) + foo (eo) +
          foo (eo, eo) + foo (eo, eo, 1)  +

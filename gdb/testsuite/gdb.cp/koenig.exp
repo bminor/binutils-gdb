@@ -13,24 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile koenig
 set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-    untested "Couldn't compile test program"
-    return -1
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } {
+     return -1
 }
-
-# Get things started.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 ############################################
 
@@ -109,3 +96,22 @@ gdb_test "p foo(ttoa, 'a')" "= 23"
 #test that lookup is not thwarted by anonymous types
 gdb_test "p foo (p_union)" \
   "Cannot resolve function foo to any overloaded instance"
+
+# test lookup of namespace user-defined operators
+# and overload resolution:
+
+# within class
+gdb_test "p q == 5" "= 24"
+gdb_test "p q == 5.0f" "= 25"
+
+# within namespace
+gdb_test "p q != 5" "= 27"
+gdb_test "p q != 5.0f" "= 28"
+
+# across namespace and class
+gdb_test "p q + 5.0f" "= 26"
+gdb_test "p q + 5" "= 29"
+
+# some unary operators for good measure
+# Cannot resolve function operator++ to any overloaded instance
+gdb_test "p ++q" "= 30"

@@ -1535,7 +1535,7 @@ evaluate_subexp_standard (struct type *expect_type,
             arg_types[ix - 1] = value_type (argvec[ix]);
 
           find_overload_match (arg_types, nargs, func_name,
-                               0 /* not method */ , 0 /* strict match */ ,
+                               NON_METHOD /* not method */ , 0 /* strict match */ ,
                                NULL, NULL /* pass NULL symbol since symbol is unknown */ ,
                                NULL, &symp, NULL, 0);
 
@@ -1572,7 +1572,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		arg_types[ix - 1] = value_type (argvec[ix]);
 
 	      (void) find_overload_match (arg_types, nargs, tstr,
-				     1 /* method */ , 0 /* strict match */ ,
+	                                  METHOD /* method */ , 0 /* strict match */ ,
 					  &arg2 /* the object */ , NULL,
 					  &valp, NULL, &static_memfuncp, 0);
 
@@ -1642,8 +1642,8 @@ evaluate_subexp_standard (struct type *expect_type,
 		arg_types[ix - 1] = value_type (argvec[ix]);
 
 	      (void) find_overload_match (arg_types, nargs, NULL /* no need for name */ ,
-				 0 /* not method */ , 0 /* strict match */ ,
-		      NULL, function /* the function */ ,
+	                                  NON_METHOD /* not method */ , 0 /* strict match */ ,
+	                                  NULL, function /* the function */ ,
 					  NULL, &symp, NULL, no_adl);
 
 	      if (op == OP_VAR_VALUE)

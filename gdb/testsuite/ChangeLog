@@ -1,3 +1,10 @@
+2010-06-07  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/koenig.exp: Test for ADL operators.
+	* gdb.cp/koenig.cc: Added ADL operators.
+	* gdb.cp/operator.exp: New test.
+	* gdb.cp/operator.cc: New test.
+
 2010-06-04  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/attach.exp: Replace gdb_test_multiple with gdb_test.

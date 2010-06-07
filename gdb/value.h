@@ -447,8 +447,11 @@ extern struct fn_field *value_find_oload_method_list (struct value **,
 						      int, int *,
 						      struct type **, int *);
 
+enum oload_search_type { NON_METHOD, METHOD, BOTH };
+
 extern int find_overload_match (struct type **arg_types, int nargs,
-				const char *name, int method, int lax,
+				const char *name,
+				enum oload_search_type method, int lax,
 				struct value **objp, struct symbol *fsym,
 				struct value **valp, struct symbol **symp,
 				int *staticp, const int no_adl);

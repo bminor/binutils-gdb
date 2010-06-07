@@ -803,21 +803,26 @@ make_symbol_overload_list_using (const char *func_name,
 				 const char *namespace)
 {
   const struct using_direct *current;
+  const struct block *block;
 
   /* First, go through the using directives.  If any of them apply,
      look in the appropriate namespaces for new functions to match
      on.  */
 
-  for (current = block_using (get_selected_block (0));
-       current != NULL;
-       current = current->next)
-    {
-      if (strcmp (namespace, current->import_dest) == 0)
-	{
-	  make_symbol_overload_list_using (func_name,
-					   current->import_src);
-	}
-    }
+  for (block = get_selected_block (0);
+       block != NULL;
+       block = BLOCK_SUPERBLOCK (block))
+    for (current = block_using (block);
+	current != NULL;
+	current = current->next)
+      {
+        /* If this is a namespace alias or imported declaration ignore it.  */
+        if (current->alias != NULL || current->declaration != NULL)
+          continue;
+
+        if (strcmp (namespace, current->import_dest) == 0)
+          make_symbol_overload_list_using (func_name, current->import_src);
+      }
 
   /* Now, add names for this namespace.  */
   make_symbol_overload_list_namespace (func_name, namespace);
