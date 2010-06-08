@@ -1,3 +1,11 @@
+2010-06-08  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (_bfd_vms_lib_ia64_mkarchive): New function.
+	* libbfd-in.h (_bfd_vms_lib_ia64_mkarchive): Declare.
+	* libbfd.h: Regenerate.
+	* elfxx-ia64.c (bfd_elfNN_write_archive_contents): Redefine for VMS.
+	(bfd_elfNN_mkarchive): Ditto.
+
 2010-06-02  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (alpha_vms_bfd_final_link): Fix 64bit constant.

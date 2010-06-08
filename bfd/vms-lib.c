@@ -703,6 +703,12 @@ _bfd_vms_lib_alpha_mkarchive (bfd *abfd)
   return _bfd_vms_lib_mkarchive (abfd, vms_lib_alpha);
 }
 
+bfd_boolean
+_bfd_vms_lib_ia64_mkarchive (bfd *abfd)
+{
+  return _bfd_vms_lib_mkarchive (abfd, vms_lib_ia64);
+}
+
 /* Find NAME in the symbol index.  Return the index.  */
 
 symindex

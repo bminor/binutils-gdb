@@ -6179,6 +6179,10 @@ elfNN_vms_close_and_cleanup (bfd *abfd)
 
 #undef bfd_elfNN_archive_p
 #define bfd_elfNN_archive_p _bfd_vms_lib_ia64_archive_p
+#undef bfd_elfNN_write_archive_contents
+#define bfd_elfNN_write_archive_contents _bfd_vms_lib_write_archive_contents
+#undef bfd_elfNN_mkarchive
+#define bfd_elfNN_mkarchive _bfd_vms_lib_ia64_mkarchive
 
 #define bfd_elfNN_archive_slurp_armap \
   _bfd_vms_lib_slurp_armap
