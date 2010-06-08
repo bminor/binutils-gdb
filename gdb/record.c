@@ -1069,6 +1069,9 @@ record_wait (struct target_ops *ops,
 			"record_resume_step = %d\n",
 			record_resume_step);
 
+  record_get_sig = 0;
+  signal (SIGINT, record_sig_handler);
+
   if (!RECORD_IS_REPLAY && ops != &record_core_ops)
     {
       if (record_resume_step)
@@ -1087,6 +1090,9 @@ record_wait (struct target_ops *ops,
 	    {
 	      ret = record_beneath_to_wait (record_beneath_to_wait_ops,
 					    ptid, status, options);
+
+	      if (record_resume_step)
+	        return ret;
 
 	      /* Is this a SIGTRAP?  */
 	      if (status->kind == TARGET_WAITKIND_STOPPED
@@ -1183,8 +1189,6 @@ record_wait (struct target_ops *ops,
 	    }
 	}
 
-      record_get_sig = 0;
-      signal (SIGINT, record_sig_handler);
       /* If GDB is in terminal_inferior mode, it will not get the signal.
          And in GDB replay mode, GDB doesn't need to be in terminal_inferior
          mode, because inferior will not executed.
@@ -1298,8 +1302,6 @@ Process record: hit hw watchpoint.\n");
 	}
       while (continue_flag);
 
-      signal (SIGINT, handle_sigint);
-
 replay_out:
       if (record_get_sig)
 	status->value.sig = TARGET_SIGNAL_INT;
@@ -1311,6 +1313,8 @@ replay_out:
 
       discard_cleanups (old_cleanups);
     }
+
+  signal (SIGINT, handle_sigint);
 
   do_cleanups (set_cleanups);
   return inferior_ptid;

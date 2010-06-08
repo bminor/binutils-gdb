@@ -1,3 +1,7 @@
+2010-06-08  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_wait): Move signal out of replay code.
+
 2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix PR 10640.
