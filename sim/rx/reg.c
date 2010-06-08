@@ -377,7 +377,7 @@ set_flags (int mask, int newbits)
 void
 set_oszc (long long value, int b, int c)
 {
-  int mask = b2mask[b];
+  unsigned int mask = b2mask[b];
   int f = 0;
 
   if (c)
@@ -394,7 +394,7 @@ set_oszc (long long value, int b, int c)
 void
 set_szc (long long value, int b, int c)
 {
-  int mask = b2mask[b];
+  unsigned int mask = b2mask[b];
   int f = 0;
 
   if (c)
@@ -409,7 +409,7 @@ set_szc (long long value, int b, int c)
 void
 set_osz (long long value, int b)
 {
-  int mask = b2mask[b];
+  unsigned int mask = b2mask[b];
   int f = 0;
 
   if ((value & mask) == 0)
@@ -424,7 +424,7 @@ set_osz (long long value, int b)
 void
 set_sz (long long value, int b)
 {
-  int mask = b2mask[b];
+  unsigned int mask = b2mask[b];
   int f = 0;
 
   if ((value & mask) == 0)

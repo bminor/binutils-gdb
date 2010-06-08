@@ -1,3 +1,8 @@
+2010-06-08  Nick Clifton  <nickc@redhat.com>
+
+	* reg.c (set_oszc): Use unsigned int for the mask.
+	(set_szc, set_osz, set_sz): Likewise.
+
 2010-04-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Target logic moved out to and included from ...
