@@ -80,3 +80,6 @@ gdb_test "source $srcdir/$subdir/source2.py" "yes"
 
 gdb_test "python print gdb.current_objfile()" "None"
 gdb_test "python print gdb.objfiles()" "\\\[\\\]"
+
+# Test http://bugs.python.org/issue4434 workaround in configure.ac
+gdb_test "python import itertools; print 'IMPOR'+'TED'" "IMPORTED" "pythonX.Y/lib-dynload/*.so"

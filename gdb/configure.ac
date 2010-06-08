@@ -1470,16 +1470,39 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
       # Older GNU ld supports --export-dynamic but --dynamic-list it does not.
       RDYNAMIC="-Wl,--dynamic-list=${srcdir}/proc-service.list"
       LDFLAGS="$LDFLAGS $RDYNAMIC"
-      AC_TRY_LINK([], [],
-		  [found="-Wl,--dynamic-list"
-		   RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'],
-		  [RDYNAMIC="-rdynamic"
-		   LDFLAGS="$old_LDFLAGS $RDYNAMIC"
-		   AC_TRY_LINK([], [],
-			       [found="-rdynamic"],
-			       [found="no"
-				# Error on its usage by .mh file.
-				RDYNAMIC="no-rdynamic-available"])])
+      dynamic_list=false
+      if test "${have_libpython}" = no; then
+	AC_TRY_LINK([], [], [dynamic_list=true])
+      else
+	# Workaround http://bugs.python.org/issue4434 where static
+	# libpythonX.Y.a would get its symbols required for
+	# pythonX.Y/lib-dynload/*.so modules hidden by -Wl,--dynamic-list.
+	# Problem does not happen for the recommended libpythonX.Y.so linkage.
+	old_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS $PYTHON_CFLAGS"
+	AC_RUN_IFELSE(
+	  AC_LANG_PROGRAM(
+	    [#include "]${have_libpython}[/Python.h"],
+	    [int err;
+	     Py_Initialize ();
+	     err = PyRun_SimpleString ("import itertools\n");
+	     Py_Finalize ();
+	     return err == 0 ? 0 : 1;]),
+	  [dynamic_list=true], [], [true])
+	CFLAGS="$old_CFLAGS"
+      fi
+      if $dynamic_list;then
+	found="-Wl,--dynamic-list"
+	RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'
+      else
+	RDYNAMIC="-rdynamic"
+	LDFLAGS="$old_LDFLAGS $RDYNAMIC"
+	AC_TRY_LINK([], [],
+		    [found="-rdynamic"],
+		    [found="no"
+		     # Error on its usage by .mh file.
+		     RDYNAMIC="no-rdynamic-available"])
+      fi
       AC_SUBST(RDYNAMIC)
       LDFLAGS="$old_LDFLAGS"
       AC_MSG_RESULT($found)

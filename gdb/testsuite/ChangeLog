@@ -1,3 +1,7 @@
+2010-06-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/python.exp (pythonX.Y/lib-dynload/*.so): New.
+
 2010-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Test PR 10640.

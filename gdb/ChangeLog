@@ -1,3 +1,9 @@
+2010-06-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac <"${have_libpython}" != no>: New workaround of
+	python#4434.
+	* configure: Regenerate.
+
 2010-06-08  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_wait): Move signal out of replay code.
