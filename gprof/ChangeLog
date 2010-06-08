@@ -1,5 +1,11 @@
 2010-06-08  Nick Clifton  <nickc@redhat.com>
 
+	* gprof.texi (Sampling Error): Note that call counts and basic
+	block counts are only reliable for multi-threaded applications if
+	the counting function itself is thread safe.
+
+2010-06-08  Nick Clifton  <nickc@redhat.com>
+
 	* gprof.texi: Replace abbreviated 20th century year numbers with
 	full versions.
 

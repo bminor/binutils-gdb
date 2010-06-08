@@ -1615,10 +1615,14 @@ only a small amount of time, so that on the average the sampling process
 ought to catch that function in the act only once, there is a pretty good
 chance it will actually find that function zero times, or twice.
 
-By contrast, the number-of-calls and basic-block figures
-are derived by counting, not
-sampling.  They are completely accurate and will not vary from run to run
-if your program is deterministic.
+By contrast, the number-of-calls and basic-block figures are derived
+by counting, not sampling.  They are completely accurate and will not
+vary from run to run if your program is deterministic and single
+threaded.  In multi-threaded applications, or single threaded
+applications that link with multi-threaded libraries, the counts are
+only deterministic if the counting function is thread-safe.  (Note:
+beware that the mcount counting function in glibc is @emph{not}
+thread-safe).  @xref{Implementation, ,Implementation of Profiling}.
 
 The @dfn{sampling period} that is printed at the beginning of the flat
 profile says how often samples are taken.  The rule of thumb is that a
