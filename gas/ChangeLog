@@ -1,3 +1,8 @@
+2010-06-08  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo: Replace abbreviated 20th century year numbers
+	with full versions.
+
 2010-06-02  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (OPTION_MAVXSCALAR): Fix define.

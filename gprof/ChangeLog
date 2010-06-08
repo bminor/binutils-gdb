@@ -1,3 +1,8 @@
+2010-06-08  Nick Clifton  <nickc@redhat.com>
+
+	* gprof.texi: Replace abbreviated 20th century year numbers with
+	full versions.
+
 2010-05-07  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.in: Regenerate with automake 1.11.1.
