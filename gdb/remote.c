@@ -2811,6 +2811,7 @@ remote_close (int quitting)
   /* We don't have a connection to the remote stub anymore.  Get rid
      of all the inferiors and their threads we were controlling.  */
   discard_all_inferiors ();
+  inferior_ptid = null_ptid;
 
   /* We're no longer interested in any of these events.  */
   discard_pending_stop_replies (-1);

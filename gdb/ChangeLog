@@ -1,3 +1,7 @@
+2010-06-08  Michael Snyder  <msnyder@vmware.com>
+
+	* remote.c (remote_close): Set inferior_ptid to null_ptid.
+
 2010-06-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.ac <"${have_libpython}" != no>: New workaround of
