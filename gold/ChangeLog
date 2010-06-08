@@ -1,3 +1,9 @@
+2010-06-07  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::do_relax): Reserve more space for stubs.
+	Restrict stub-group size to be within long conditional branch
+	range when working around cortex-A8 erratum.
+
 2010-06-07  Damien Diederen  <dd@crosstwine.com>
 
 	* gold-threads.cc (Lock_impl_threads::Lock_impl_threads): Correct

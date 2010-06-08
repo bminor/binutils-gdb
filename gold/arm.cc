@@ -10844,12 +10844,6 @@ Target_arm<big_endian>::do_relax(
       bool stubs_always_after_branch = stub_group_size_param < 0;
       section_size_type stub_group_size = abs(stub_group_size_param);
 
-      // The Cortex-A8 erratum fix depends on stubs not being in the same 4K
-      // page as the first half of a 32-bit branch straddling two 4K pages.
-      // This is a crude way of enforcing that.
-      if (this->fix_cortex_a8_)
-	stubs_always_after_branch = true;
-
       if (stub_group_size == 1)
 	{
 	  // Default value.
@@ -10859,14 +10853,24 @@ Target_arm<big_endian>::do_relax(
 	  // fixing cortex-a8 errata, the branch range has to be even smaller,
 	  // since wide conditional branch has a range of +-1MB only.
 	  //
-	  // This value is 24K less than that, which allows for 2025
+	  // This value is 48K less than that, which allows for 4096
 	  // 12-byte stubs.  If we exceed that, then we will fail to link.
 	  // The user will have to relink with an explicit group size
 	  // option.
-	  if (this->fix_cortex_a8_)
-	    stub_group_size = 1024276;
-	  else
-	    stub_group_size = 4170000;
+	    stub_group_size = 4145152;
+	}
+
+      // The Cortex-A8 erratum fix depends on stubs not being in the same 4K
+      // page as the first half of a 32-bit branch straddling two 4K pages.
+      // This is a crude way of enforcing that.  In addition, long conditional
+      // branches of THUMB-2 have a range of +-1M.  If we are fixing cortex-A8
+      // erratum, limit the group size to  (1M - 12k) to avoid unreachable
+      // cortex-A8 stubs from long conditional branches.
+      if (this->fix_cortex_a8_)
+	{
+	  stubs_always_after_branch = true;
+	  const section_size_type cortex_a8_group_size = 1024 * (1024 - 12);
+	  stub_group_size = std::max(stub_group_size, cortex_a8_group_size);
 	}
 
       group_sections(layout, stub_group_size, stubs_always_after_branch);
