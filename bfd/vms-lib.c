@@ -2111,6 +2111,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
           /* Write the first block (which contains an mhd).  */
           if (bfd_bwrite (blk, VMS_BLOCK_SIZE, arch) != VMS_BLOCK_SIZE)
             goto input_err;
+          off += VMS_BLOCK_SIZE;
 
           if (amt == VMS_BLOCK_SIZE - sz)
             {

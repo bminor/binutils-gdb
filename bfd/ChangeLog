@@ -1,5 +1,10 @@
 2010-06-08  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-lib.c (_bfd_vms_lib_write_archive_contents): Increment
+	for the first block.
+
+2010-06-08  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-lib.c (_bfd_vms_lib_ia64_mkarchive): New function.
 	* libbfd-in.h (_bfd_vms_lib_ia64_mkarchive): Declare.
 	* libbfd.h: Regenerate.
