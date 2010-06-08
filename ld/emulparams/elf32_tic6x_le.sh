@@ -24,3 +24,16 @@ OTHER_READWRITE_SECTIONS=".fardata ${RELOCATING-0} : { *(.fardata${RELOCATING+ .
 OTHER_READWRITE_RELOC_SECTIONS="
   .rel.fardata     ${RELOCATING-0} : { *(.rel.fardata${RELOCATING+ .rel.fardata.*}) }
   .rela.fardata    ${RELOCATING-0} : { *(.rela.fardata${RELOCATING+ .rela.fardata.*}) }"
+OTHER_BSS_SECTIONS="
+  .heap : 
+  { 
+    . = ALIGN(4); 
+    _HEAP_START = .; 
+    . += 0x2000000; 
+    _HEAP_MAX = .; 
+  }
+  .stack :
+  {
+    . +=  0x100000;
+    _STACK_START = .;
+  }"

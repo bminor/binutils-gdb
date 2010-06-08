@@ -1,3 +1,7 @@
+2010-06-08  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* emulparams/elf32_tic6x_le.sh (OTHER_BSS_SECTIONS): New.
+
 2010-06-08  Nick Clifton  <nickc@redhat.com>
 
 	* fdl.texi: Replace with v1.3 text.
