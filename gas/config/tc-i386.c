@@ -2341,7 +2341,7 @@ static void ps (symbolS *);
 static void
 pi (char *line, i386_insn *x)
 {
-  unsigned int i;
+  unsigned int j;
 
   fprintf (stdout, "%s: template ", line);
   pte (&x->tm);
@@ -2358,35 +2358,35 @@ pi (char *line, i386_insn *x)
 	   (x->rex & REX_R) != 0,
 	   (x->rex & REX_X) != 0,
 	   (x->rex & REX_B) != 0);
-  for (i = 0; i < x->operands; i++)
+  for (j = 0; j < x->operands; j++)
     {
-      fprintf (stdout, "    #%d:  ", i + 1);
-      pt (x->types[i]);
+      fprintf (stdout, "    #%d:  ", j + 1);
+      pt (x->types[j]);
       fprintf (stdout, "\n");
-      if (x->types[i].bitfield.reg8
-	  || x->types[i].bitfield.reg16
-	  || x->types[i].bitfield.reg32
-	  || x->types[i].bitfield.reg64
-	  || x->types[i].bitfield.regmmx
-	  || x->types[i].bitfield.regxmm
-	  || x->types[i].bitfield.regymm
-	  || x->types[i].bitfield.sreg2
-	  || x->types[i].bitfield.sreg3
-	  || x->types[i].bitfield.control
-	  || x->types[i].bitfield.debug
-	  || x->types[i].bitfield.test)
-	fprintf (stdout, "%s\n", x->op[i].regs->reg_name);
-      if (operand_type_check (x->types[i], imm))
-	pe (x->op[i].imms);
-      if (operand_type_check (x->types[i], disp))
-	pe (x->op[i].disps);
+      if (x->types[j].bitfield.reg8
+	  || x->types[j].bitfield.reg16
+	  || x->types[j].bitfield.reg32
+	  || x->types[j].bitfield.reg64
+	  || x->types[j].bitfield.regmmx
+	  || x->types[j].bitfield.regxmm
+	  || x->types[j].bitfield.regymm
+	  || x->types[j].bitfield.sreg2
+	  || x->types[j].bitfield.sreg3
+	  || x->types[j].bitfield.control
+	  || x->types[j].bitfield.debug
+	  || x->types[j].bitfield.test)
+	fprintf (stdout, "%s\n", x->op[j].regs->reg_name);
+      if (operand_type_check (x->types[j], imm))
+	pe (x->op[j].imms);
+      if (operand_type_check (x->types[j], disp))
+	pe (x->op[j].disps);
     }
 }
 
 static void
 pte (insn_template *t)
 {
-  unsigned int i;
+  unsigned int j;
   fprintf (stdout, " %d operands ", t->operands);
   fprintf (stdout, "opcode %x ", t->base_opcode);
   if (t->extension_opcode != None)
@@ -2396,10 +2396,10 @@ pte (insn_template *t)
   if (t->opcode_modifier.w)
     fprintf (stdout, "W");
   fprintf (stdout, "\n");
-  for (i = 0; i < t->operands; i++)
+  for (j = 0; j < t->operands; j++)
     {
-      fprintf (stdout, "    #%d type ", i + 1);
-      pt (t->operand_types[i]);
+      fprintf (stdout, "    #%d type ", j + 1);
+      pt (t->operand_types[j]);
       fprintf (stdout, "\n");
     }
 }
