@@ -1,5 +1,10 @@
 2010-06-08  Tristan Gingold  <gingold@adacore.com>
 
+	* som.c (som_bfd_free_cached_info): Do not free relocations as
+	they were allocated with bfd_zalloc.
+
+2010-06-08  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-lib.c (_bfd_vms_lib_write_archive_contents): Increment
 	for the first block.
 

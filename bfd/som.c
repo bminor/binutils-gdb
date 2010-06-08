@@ -6304,8 +6304,7 @@ som_bfd_free_cached_info (bfd *abfd)
       /* Free the native relocations.  */
       o->reloc_count = (unsigned) -1;
       FREE (som_section_data (o)->reloc_stream);
-      /* Free the generic relocations.  */
-      FREE (o->relocation);
+      /* Do not free the generic relocations as they are objalloc'ed.  */
     }
 #undef FREE
 
