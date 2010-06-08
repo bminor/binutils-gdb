@@ -52,7 +52,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 # Load the first executable.
 
-gdb_test "shell mv ${binfile1} ${binfile}" "" ""
+gdb_test "shell mv ${binfile1} ${binfile}" ".*" ""
 gdb_load ${binfile}
 
 # Start the program, we should land in the program main procedure
@@ -69,10 +69,10 @@ gdb_test "" \
 # second executable into its place.  Ensure that the new
 # executable is at least a second newer than the old.
 
-gdb_test "shell mv ${binfile} ${binfile1}" "" ""
-gdb_test "shell mv ${binfile2} ${binfile}" "" ""
-gdb_test "shell sleep 1" "" ""
-gdb_test "shell touch ${binfile}" "" ""
+gdb_test "shell mv ${binfile} ${binfile1}" ".*" ""
+gdb_test "shell mv ${binfile2} ${binfile}" ".*" ""
+gdb_test "shell sleep 1" ".*" ""
+gdb_test "shell touch ${binfile}" ".*" ""
 
 # Start the program a second time, GDB should land in procedure Second
 # this time.

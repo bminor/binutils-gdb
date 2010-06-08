@@ -392,12 +392,12 @@ gdb_test "pwd" "Working directory .*" "pwd"
 
 #test run "r" abbreviation
 if [istarget "*-*-vxworks*"] then {
-    gdb_test "set args" "" "" 
+    gdb_test "set args" ".*" "" 
 
     gdb_test "r" "Starting program: .*
 You must specify a function name to run, and arguments if any"\
 		"run \"r\" abbreviation"
-    gdb_test "set args main" "" "" 
+    gdb_test "set args main" ".*" "" 
 
 } else {
     gdb_test_multiple "r" "run \"r\" abbreviation" {
@@ -418,11 +418,11 @@ You must specify a function name to run, and arguments if any"\
 
 #test run
 if [istarget "*-*-vxworks*"] then {
-    gdb_test "set args" "" "" 
+    gdb_test "set args" ".*" "" 
 
     gdb_test "run" "Starting program: .*
 You must specify a function name to run, and arguments if any"
-    gdb_test "set args main" "" "" 
+    gdb_test "set args main" ".*" "" 
 
 } else {
     gdb_test_multiple "run" "run" {

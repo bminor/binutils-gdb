@@ -36,8 +36,8 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" "$binfile" \
     return -1
 }
 gdb_load $binfile
-gdb_test "tstop"       "" ""
-gdb_test "tfind none"  "" ""
+gdb_test "tstop"       ".*" ""
+gdb_test "tfind none"  ".*" ""
 runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
@@ -111,7 +111,7 @@ gdb_test "tstatus" "\[Tt\]race is running.*" "test tstatus on"
 # 6.2 test help tstart
 gdb_test "help tstart" "Start trace data collection." "6.2: help tstart"
 
-gdb_test "break end" "" ""
+gdb_test "break end" ".*" ""
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"

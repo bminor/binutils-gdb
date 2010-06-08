@@ -69,7 +69,7 @@ if ![runto_main] then {
     continue
 }
 
-gdb_test "break marker1" "" ""
+gdb_test "break marker1" ".*" ""
 
 gdb_test "cont" \
     "Break.* marker1 \\(\\) at .*:$decimal.*" \

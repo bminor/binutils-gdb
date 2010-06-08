@@ -117,10 +117,10 @@ proc gdb_trace_circular_tests { } {
 
     if [trace_buffer_normal] then { return 1; }
 
-    gdb_test "break begin" "" ""
-    gdb_test "break end"   "" ""
-    gdb_test "tstop"       "" ""
-    gdb_test "tfind none"  "" ""
+    gdb_test "break begin" ".*" ""
+    gdb_test "break end"   ".*" ""
+    gdb_test "tstop"       ".*" ""
+    gdb_test "tfind none"  ".*" ""
 
     if [setup_tracepoints] then { return 1; }
 
@@ -213,4 +213,4 @@ if { ![gdb_trace_circular_tests] } then {
 }
 
 # Finished!
-gdb_test "tfind none" "" ""
+gdb_test "tfind none" ".*" ""

@@ -155,7 +155,7 @@ if ![gdb_skip_stdio_test "continue to 1216"] {
 	"\[ \t\r\n\]+1216.*print_double_array\\(double_array\\)"
     }
 } else {
-    gdb_test "continue" "" ""
+    gdb_test "continue" ".*" ""
 }
 
 # I am disabling this test, because it takes too long. I verified by
@@ -192,7 +192,7 @@ if {![gdb_skip_float_test "continuing to breakpoint 1220"] && \
 	".*main \\(\\) at .*call-ar-st.c:1220\[ \t\r\n\]+.*print_all_arrays\\(integer_array, char_array, float_array, double_array\\)."
     }
 } else {
-    gdb_test "continue" "" ""
+    gdb_test "continue" ".*" ""
 }
 
 #step
@@ -206,7 +206,7 @@ if ![gdb_skip_stdio_test "next over print_int_array in print_all_arrays"] {
 	"array_i :.*307.*print_char_array.*" \
 	"next over print_int_array in print-all_arrays"
 } else {
-    gdb_test "next" "" ""
+    gdb_test "next" ".*" ""
 }
 
 #call print_double_array(array_d)
@@ -240,7 +240,7 @@ if {![gdb_skip_float_test "continuing to 1236"] && \
 	"\[ \t\r\n\]+.*HELLO WORLD.*main \\(\\) at .*call-ar-st.c:1236.*printf\\(.BYE BYE FOR NOW.n.\\)."
     }
 } else {
-    gdb_test "continue" "" ""
+    gdb_test "continue" ".*" ""
 }
 
 
@@ -258,7 +258,7 @@ if ![gdb_skip_stdio_test "next to 1237"] {
 	"BYE BYE FOR NOW.*1237.*printf\\(.VERY GREEN GRASS.n.\\);.*" \
 	"next to 1237"
 } else {
-    gdb_test "next" "" ""
+    gdb_test "next" ".*" ""
 }
 
 #call print_array_rep(\*list1, \*list2, \*list3)
@@ -319,7 +319,7 @@ if ![gdb_skip_stdio_test "continuing to 1281"] {
 	"Continuing\\..*Sum of 4 arrays.*Contents of linked list1.*Contents of two_floats_t.*main \\(\\) at .*call-ar-st.c:1281.*c = 0.*" \
 	"continue to 1281"
 } else {
-    gdb_test "continue" "" ""
+    gdb_test "continue" ".*" ""
 }
 
 #call print_small_structs(*struct1, *struct2, *struct3, *struct4, 
@@ -500,7 +500,7 @@ if ![gdb_skip_stdio_test "continuing to 1300"] {
     gdb_test "continue" "Continuing\\..*Contents of two_floats_t:.*main \\(\\) at.*call-ar-st.c:1300.*1300.*init_bit_flags_combo\\(flags_combo, \\(unsigned\\)1, \\(unsigned\\)0, .y.,.*" \
 	    "continue to 1300"
 } else {
-    gdb_test "continue" "" ""
+    gdb_test "continue" ".*" ""
 }
 
 #step

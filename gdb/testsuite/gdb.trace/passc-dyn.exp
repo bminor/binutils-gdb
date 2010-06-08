@@ -34,8 +34,8 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
     return -1
 }
 gdb_load $binfile
-gdb_test "tstop"       "" ""
-gdb_test "tfind none"  "" ""
+gdb_test "tstop"       ".*" ""
+gdb_test "tfind none"  ".*" ""
 runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
@@ -93,45 +93,45 @@ gdb_test "passcount 2 $tdp3" "Setting tracepoint $tdp3's passcount to 2" \
 gdb_test "passcount 3 $tdp4" "Setting tracepoint $tdp4's passcount to 3" \
 	"4.5: set passcount for tracepoint $tdp4"
 
-gdb_test "tstart" "" ""
+gdb_test "tstart" ".*" ""
 
-gdb_test "break end" "" ""
+gdb_test "break end" ".*" ""
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"
-gdb_test "tstop" "" ""
+gdb_test "tstop" ".*" ""
 
-gdb_test "tfind none" "" ""
+gdb_test "tfind none" ".*" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x -1 x" ""] {
     untested passc-dyn.exp
     return -1
 }
 
-gdb_test "tfind tracepoint $tdp2" "" ""
+gdb_test "tfind tracepoint $tdp2" ".*" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 0 x" ""] {
     untested passc-dyn.exp
     return -1
 }
 
-gdb_test "tfind tracepoint $tdp3" "" ""
+gdb_test "tfind tracepoint $tdp3" ".*" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 1 x" ""] {
     untested passc-dyn.exp
     return -1
 }
 
-gdb_test "tfind tracepoint $tdp4" "" ""
+gdb_test "tfind tracepoint $tdp4" ".*" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 2 x" ""] {
     untested passc-dyn.exp
     return -1
 }
 
-gdb_test "tfind tracepoint $tdp2" "" ""
+gdb_test "tfind tracepoint $tdp2" ".*" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 3 x" ""] {
     untested passc-dyn.exp
     return -1
 }
 
-gdb_test "tfind tracepoint $tdp3" "" ""
+gdb_test "tfind tracepoint $tdp3" ".*" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 4 x" ""] {
     untested passc-dyn.exp
     return -1
@@ -144,5 +144,5 @@ if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x 4 x" ""] {
 gdb_test "tfind" "failed to find.*" "4.5: dynamic passcount test"
 
 # Finished!
-gdb_test "tfind none" "" ""
+gdb_test "tfind none" ".*" ""
 

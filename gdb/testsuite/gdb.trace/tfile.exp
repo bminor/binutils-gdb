@@ -52,13 +52,13 @@ gdb_load $binfile
 
 runto_main
 
-gdb_test "break done_making_trace_files" "" ""
+gdb_test "break done_making_trace_files" ".*" ""
 
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 
 # tsave command would be tested here...
 
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 
 # Program has presumably exited, now target a trace file it created.
 

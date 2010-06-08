@@ -1,3 +1,40 @@
+2010-06-08  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.ada/exec_changed.exp: 
+	Use ".*" instead of "" as wildcard regexp.
+
+	* gdb.base/async.exp: Use ".*" instead of "" as wildcard regexp.
+	* gdb.base/call-ar-st.exp: Ditto.
+	* gdb.base/checkpoint.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/dump.exp: Ditto.
+	* gdb.base/ending-run.exp: Ditto.
+	* gdb.base/fileio.exp: Ditto.
+	* gdb.base/miscexprs.exp: Ditto.
+	* gdb.base/pointers.exp: Ditto.
+	* gdb.base/readline.exp: Ditto.
+	* gdb.base/reread.exp: Ditto.
+	* gdb.base/restore.exp: Ditto.
+	* gdb.base/shlib-call.exp: Ditto.
+	* gdb.base/valgrind-db-attach.exp: Ditto.
+	* gdb.base/volatile.exp: Ditto.
+	* gdb.base/watchpoints.exp: Ditto.
+
+	* gdb.cp/classes.exp: Use ".*" instead of "" as wildcard regexp.
+
+	* gdb.python/py-frame.exp: Use ".*" instead of "" as wildcard regexp.
+	* gdb.python/py-value.exp: Ditto.
+
+	* gdb.trace/backtrace.exp: Use ".*" instead of "" as wildcard regexp.
+	* gdb.trace/circ.exp: Ditto.
+	* gdb.trace/collection.exp: Ditto.
+	* gdb.trace/packetlen.exp: Ditto.
+	* gdb.trace/passc-dyn.exp: Ditto.
+	* gdb.trace/report.exp: Ditto.
+	* gdb.trace/tfile.exp: Ditto.
+	* gdb.trace/tfind.exp: Ditto.
+	* gdb.trace/while-dyn.exp: Ditto.
+
 2010-06-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/python.exp (pythonX.Y/lib-dynload/*.so): New.

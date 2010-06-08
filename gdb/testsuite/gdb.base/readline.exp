@@ -136,7 +136,7 @@ proc operate_and_get_next {name args} {
   }
 
   # Match the prompt so the next test starts at the right place.
-  gdb_test "" "" "$name - final prompt"
+  gdb_test "" ".*" "$name - final prompt"
 
   return 1
 }

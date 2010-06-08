@@ -62,34 +62,34 @@ set break4_loc [gdb_get_line_number "breakpoint 4"]
 gdb_breakpoint $break1_loc
 gdb_test "continue" "breakpoint 1.*" "break1 start"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 two"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 three"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 four" 
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 five"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 six"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 seven"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 eight"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 nine"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 gdb_test "continue 10" "breakpoint 1.*" "break1 ten"
 
-gdb_test "checkpoint" "" ""
+gdb_test "checkpoint" ".*" ""
 
 gdb_test "info checkpoints" \
     " 10 .* 9 .* 8 .* 7 .* 6 .* 5 .* 4 .* 3 .* 2 .* 1 .*" \
@@ -169,43 +169,43 @@ gdb_test "shell diff -s pi.txt copy1.txt" \
 gdb_breakpoint $break1_loc
 
 gdb_test "restart 1" "Switching to .*c == EOF.*" "restart 1 two"
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 gdb_test "continue 100" "breakpoint 1.*" "breakpoint 1 1 one"
 gdb_test "step" "if .c == EOF.*" "step in 1 two"
 gdb_test "print lines" " = 102.*" "verify lines 1 two"
 
 gdb_test "restart 2" "Switching to .*c == EOF.*" "restart 2 two"
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 gdb_test "continue 100" "breakpoint 1.*" "breakpoint 1 2 one"
 gdb_test "step" "if .c == EOF.*" "step in 2 two"
 gdb_test "print lines" " = 112.*" "verify lines 2 two"
 
 gdb_test "restart 3" "Switching to .*c == EOF.*" "restart 3 two"
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 gdb_test "continue 500" "breakpoint 1.*" "breakpoint 1 3 one"
 gdb_test "step" "if .c == EOF.*" "step in 3 two"
 gdb_test "print lines" " = 522.*" "verify lines 3 two"
 
 gdb_test "restart 4" "Switching to .*c == EOF.*" "restart 4 two"
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 gdb_test "continue 500" "breakpoint 1.*" "breakpoint 1 4 one"
 gdb_test "step" "if .c == EOF.*" "step in 4 two"
 gdb_test "print lines" " = 532.*" "verify lines 4 two"
 
 gdb_test "restart 5" "Switching to .*c == EOF.*" "restart 5 two"
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 gdb_test "continue 1000" "breakpoint 1.*" "breakpoint 1 5 one"
 gdb_test "step" "if .c == EOF.*" "step in 5 two"
 gdb_test "print lines" " = 1042.*" "verify lines 5 two"
 
 gdb_test "restart 6" "Switching to .*c == EOF.*" "restart 6 two"
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 gdb_test "continue 1000" "breakpoint 1.*" "breakpoint 1 6 one"
 gdb_test "step" "if .c == EOF.*" "step in 6 two"
 gdb_test "print lines" " = 1052.*" "verify lines 5 two"
 
 gdb_test "restart 7" "Switching to .*c == EOF.*" "restart 7 two"
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 gdb_test "continue 1100" "breakpoint 1.*" "breakpoint 1 7 one"
 gdb_test "step" "if .c == EOF.*" "step in 7 two"
 gdb_test "print lines" " = 1162.*" "verify lines 7 two"

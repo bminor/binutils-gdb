@@ -215,7 +215,7 @@ gdb_test "print **ptr_to_ptr_to_float" " = 100" \
 # with elementary type variables and pointers.
 # 
 
-gdb_test "break marker1" "" ""
+gdb_test "break marker1" ".*" ""
 gdb_test "cont" "Break.* marker1 \\(\\) at .*:$decimal.*" \
     continue to marker1"
 gdb_test "up" "more_code.*" "up from marker1"

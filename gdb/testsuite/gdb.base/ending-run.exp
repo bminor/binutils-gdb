@@ -105,7 +105,7 @@ if ![gdb_skip_stdio_test "Step to return"] {
     gdb_test "next" ".*Goodbye!.*32.*" \
 	    "Step to return"
 } else {
-    gdb_test "next" "" ""
+    gdb_test "next" ".*" ""
 }
 
 set old_timeout $timeout

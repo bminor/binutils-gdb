@@ -34,8 +34,8 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
     return -1
 }
 gdb_load $binfile
-gdb_test "tstop"       "" ""
-gdb_test "tfind none"  "" ""
+gdb_test "tstop"       ".*" ""
+gdb_test "tfind none"  ".*" ""
 runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
@@ -164,14 +164,14 @@ gdb_trace_setactions "8.6: setup TP to collect stack mem cast expr" \
        "$tdp6" \
        "collect $fpreg, \(\*\(void \*\*\) \($spreg\)\) @ 64" "^$"
 
-gdb_test "tstart" "" ""
+gdb_test "tstart" ".*" ""
 
-gdb_test "break end" "" ""
+gdb_test "break end" ".*" ""
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"
 
-gdb_test "tstop" "" ""
+gdb_test "tstop" ".*" ""
 
 proc gdb_backtrace_tdp_1 { msg } {
     global gdb_prompt
@@ -337,4 +337,4 @@ gdb_test "printf \"x \%d x\\n\", depth == 3" \
 	"1.13: trace in recursion: depth not equal to 3"
 
 # Finished!
-gdb_test "tfind none" "" ""
+gdb_test "tfind none" ".*" ""

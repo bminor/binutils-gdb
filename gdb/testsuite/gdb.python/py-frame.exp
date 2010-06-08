@@ -82,7 +82,7 @@ gdb_test "python print bf1.read_var(\"i\", sb).type" "int" "test int i"
 
 gdb_breakpoint "f2"
 gdb_continue_to_breakpoint "breakpoint at f2"
-gdb_test "up" "" ""
+gdb_test "up" ".*" ""
 
 gdb_py_test_silent_cmd "python f1 = gdb.selected_frame ()" "get second frame" 0
 gdb_py_test_silent_cmd "python f0 = f1.newer ()" "get first frame" 0

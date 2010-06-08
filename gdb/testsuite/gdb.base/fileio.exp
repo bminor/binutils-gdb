@@ -83,7 +83,7 @@ gdb_test continue \
 "Continuing\\..*open 4:.*ENOENT$stop_msg" \
 "Opening nonexistant file returns ENOENT"
 
-gdb_test "continue" "" ""
+gdb_test "continue" ".*" ""
 
 catch "system \"chmod -f -w nowrt.fileio.test\""
 

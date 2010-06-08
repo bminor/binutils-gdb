@@ -98,7 +98,7 @@ proc restore_tests { } {
 	    }
 	}
     } else {
-	gdb_test "continue" "" ""
+	gdb_test "continue" ".*" ""
     }
 }
 

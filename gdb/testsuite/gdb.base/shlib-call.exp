@@ -94,7 +94,7 @@ if ![gdb_skip_stdio_test "next over shr1"] {
 	"address of sgs is $hex.*g = shr2\\(g\\);" \
 	"next over shr1"
 } else {
-    gdb_test "next" "" ""
+    gdb_test "next" ".*" ""
 }
 
 

@@ -48,8 +48,8 @@ gdb_load $binfile
     }
 
     runto_main
-    gdb_test "watch ival1" "" ""
-    gdb_test "watch ival3" "" ""
+    gdb_test "watch ival1" ".*" ""
+    gdb_test "watch ival3" ".*" ""
 
     set prev_timeout $timeout
     set timeout 600

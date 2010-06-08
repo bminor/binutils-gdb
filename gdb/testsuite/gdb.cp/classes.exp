@@ -584,13 +584,13 @@ proc do_tests {} {
     # are any more instructions to finish the function call.
     gdb_test_multiple "finish" "" {
 	-re "enums2 \\(\\);.*$gdb_prompt $" {
-	    gdb_test "next" "" ""
+	    gdb_test "next" ".*" ""
 	}
 	-re "$gdb_prompt $" { }
     }
     test_enums
 
-    gdb_test "finish" "" ""
+    gdb_test "finish" ".*" ""
     test_pointers_to_class_members
     test_static_members
 

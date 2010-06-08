@@ -488,7 +488,7 @@ gdb_test "print intarray\[2\] == 0" " = 1" "element 2 not changed - 4"
 gdb_test "print intarray\[4\] == 0" " = 1" "element 4 not changed - 4"
 
 if ![string compare $is64bitonly "no"] then {
-  gdb_test "print zero_all ()" "" ""
+  gdb_test "print zero_all ()" ".*" ""
 
   # restore with expressions 
   test_restore_saved_value \

@@ -53,7 +53,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 # Load the first executable.
 
-gdb_test "shell mv ${binfile1} ${binfile}" "" ""
+gdb_test "shell mv ${binfile1} ${binfile}" ".*" ""
 gdb_load ${binfile}
 
 # Set a breakpoint at foo
@@ -82,10 +82,10 @@ gdb_expect {
 # second executable into its place.  Ensure that the new
 # executable is at least a second newer than the old.
 
-gdb_test "shell mv ${binfile} ${binfile1}" "" ""
-gdb_test "shell mv ${binfile2} ${binfile}" "" ""
-gdb_test "shell sleep 1" "" ""
-gdb_test "shell touch ${binfile}" "" ""
+gdb_test "shell mv ${binfile} ${binfile1}" ".*" ""
+gdb_test "shell mv ${binfile2} ${binfile}" ".*" ""
+gdb_test "shell sleep 1" ".*" ""
+gdb_test "shell touch ${binfile}" ".*" ""
 
 # Run a second time; GDB should detect that the executable has changed
 # and reset the breakpoints correctly.
@@ -120,8 +120,8 @@ if [is_remote target] {
 } else {
 
     # Put the older executable back in place.
-    gdb_test "shell mv ${binfile} ${binfile2}" "" ""
-    gdb_test "shell mv ${binfile1} ${binfile}" "" ""
+    gdb_test "shell mv ${binfile} ${binfile2}" ".*" ""
+    gdb_test "shell mv ${binfile1} ${binfile}" ".*" ""
 
     # Restart GDB entirely.
     gdb_start
@@ -155,8 +155,8 @@ if [is_remote target] {
     # Now move the newer executable into place, and re-run.  GDB
     # should still notice that the executable file has changed,
     # and still re-set the breakpoint appropriately.
-    gdb_test "shell mv ${binfile} ${binfile1}" "" ""
-    gdb_test "shell mv ${binfile2} ${binfile}" "" ""
+    gdb_test "shell mv ${binfile} ${binfile1}" ".*" ""
+    gdb_test "shell mv ${binfile2} ${binfile}" ".*" ""
     gdb_run_cmd
     gdb_expect {
 	-re ".*Breakpoint.* foo .* at .*:9.*$gdb_prompt $" {

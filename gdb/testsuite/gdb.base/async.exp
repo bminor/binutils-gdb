@@ -67,12 +67,12 @@ if ![runto_main] then {
     continue
 }
 
-gdb_test "break baz" "" ""
+gdb_test "break baz" ".*" ""
 
 #
 # Make sure we get a 'completed' message when the target is done.
 #
-gdb_test "set display-exec-done on" "" ""
+gdb_test "set display-exec-done on" ".*" ""
 
 
 send_gdb "next&\n" 
@@ -135,7 +135,7 @@ gdb_expect {
     timeout  { fail "(timeout) until &" }
 }
 
-gdb_test "set display-exec-done off" "" ""
+gdb_test "set display-exec-done off" ".*" ""
 
 unset_board_info "gdb_protocol"
 set_board_info "gdb_protocol" "remote"

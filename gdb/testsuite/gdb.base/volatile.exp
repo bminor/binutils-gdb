@@ -87,7 +87,7 @@ proc local_compiler_xfail_check_2 { } {
     }
 }
 
-gdb_test "break marker1" "" ""
+gdb_test "break marker1" ".*" ""
 
 gdb_test_multiple "cont" "continue to marker1" {
     -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
