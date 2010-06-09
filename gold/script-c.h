@@ -236,6 +236,11 @@ script_add_extern(void* closure, const char*, size_t);
 extern void
 script_add_file(void* closure, const char*, size_t);
 
+/* Called by the bison parser to add a library to the link.  */
+
+extern void
+script_add_library(void* closure, const char*, size_t);
+
 /* Called by the bison parser to start and stop a group.  */
 
 extern void

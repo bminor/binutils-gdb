@@ -2593,6 +2593,24 @@ script_add_file(void* closurev, const char* name, size_t length)
   closure->inputs()->add_file(file);
 }
 
+// Called by the bison parser to add a library to the link.
+
+extern "C" void
+script_add_library(void* closurev, const char* name, size_t length)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  std::string name_string(name, length);
+
+  if (name_string[0] != 'l')
+    gold_error(_("library name must be prefixed with -l"));
+    
+  Input_file_argument file(name_string.c_str() + 1,
+			   Input_file_argument::INPUT_FILE_TYPE_LIBRARY,
+			   "", false,
+			   closure->position_dependent_options());
+  closure->inputs()->add_file(file);
+}
+
 // Called by the bison parser to start a group.  If we are already in
 // a group, that means that this script was invoked within a
 // --start-group --end-group sequence on the command line, or that
