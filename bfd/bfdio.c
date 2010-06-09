@@ -180,8 +180,12 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
   if (abfd->arelt_data != NULL)
     {
       size_t maxbytes = ((struct areltdata *) abfd->arelt_data)->parsed_size;
-      if (size > maxbytes)
-	size = maxbytes;
+      if (abfd->where + size > maxbytes)
+        {
+          if (abfd->where >= maxbytes)
+            return 0;
+          size = maxbytes - abfd->where;
+        }
     }
 
   if (abfd->iovec)

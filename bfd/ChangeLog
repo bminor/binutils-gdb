@@ -1,3 +1,8 @@
+2010-06-09 Tristan Gingold  <gingold@adacore.com>
+
+	* bfdio.c (bfd_bread): Fix the code to prevent reading past the
+	end of archive members.
+
 2010-06-08  Tristan Gingold  <gingold@adacore.com>
 
 	* som.c (som_bfd_free_cached_info): Do not free relocations as
