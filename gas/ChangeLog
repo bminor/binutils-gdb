@@ -1,3 +1,11 @@
+2010-06-08  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (operand_parse_code): Add OP_RRnpctw enum 
+	value.
+	(parse_operands): Add support for OP_RRnpctw.
+	(insns): Update floating-point load/store multiples so the 
+	first register is of type OP_RRnpctw.
+
 2010-06-08  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (pi): Rename local loop counter

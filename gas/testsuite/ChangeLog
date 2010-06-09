@@ -1,3 +1,14 @@
+2010-06-09 Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/vldm-arm.d: New test.
+	* gas/arm/vldm-thumb-bad.d: Likewise.
+	* gas/arm/vldm-thumb-bad.l: Likewise.
+	* gas/arm/vldm.s: Likewise.
+	* gas/arm/vldmw-arm-bad.d: Likewise.
+	* gas/arm/vldmw-bad.l: Likewise.
+	* gad/arm-vldmw-bad.s: Likewise.
+	* gas/arm/vldmw-thumb-bad.d: Likewise.
+
 2010-06-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 	* gas/arm/thumb-eabi.d: Add case for divided syntax encoding of movs.
 	* gas/arm/thumb.d: Likewise.

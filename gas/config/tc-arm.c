@@ -5759,6 +5759,8 @@ enum operand_parse_code
   OP_RRnpc,	/* ARM register, not r15 */
   OP_RRnpcsp,	/* ARM register, neither r15 nor r13 (a.k.a. 'BadReg') */
   OP_RRnpcb,	/* ARM register, not r15, in square brackets */
+  OP_RRnpctw,	/* ARM register, not r15 in Thumb-state or with writeback, 
+		   optional trailing ! */
   OP_RRw,	/* ARM register, not r15, optional trailing ! */
   OP_RCP,	/* Coprocessor number */
   OP_RCN,	/* Coprocessor register */
@@ -6128,6 +6130,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  po_char_or_fail (']');
 	  break;
 
+	case OP_RRnpctw:
 	case OP_RRw:
 	case OP_oRRw:
 	  po_reg_or_fail (REG_TYPE_RN);
@@ -6434,6 +6437,13 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	      else if (inst.operands[i].reg == REG_SP)
 		inst.error = BAD_SP;
 	    }
+	  break;
+
+	case OP_RRnpctw:
+	  if (inst.operands[i].isreg 
+	      && inst.operands[i].reg == REG_PC 
+	      && (inst.operands[i].writeback || thumb))
+	    inst.error = BAD_PC;
 	  break;
 
 	case OP_CPSF:
@@ -17426,22 +17436,22 @@ static const struct asm_opcode insns[] =
   /* Memory operations.	 */
  cCE("flds",	d100a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
  cCE("fsts",	d000a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
- cCE("fldmias",	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE("fldmfds",	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE("fldmdbs",	d300a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE("fldmeas",	d300a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE("fldmiax",	c900b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE("fldmfdx",	c900b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE("fldmdbx",	d300b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
- cCE("fldmeax",	d300b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
- cCE("fstmias",	c800a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE("fstmeas",	c800a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE("fstmdbs",	d200a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE("fstmfds",	d200a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE("fstmiax",	c800b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE("fstmeax",	c800b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE("fstmdbx",	d200b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
- cCE("fstmfdx",	d200b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("fldmias",	c900a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fldmfds",	c900a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fldmdbs",	d300a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fldmeas",	d300a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fldmiax",	c900b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fldmfdx",	c900b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fldmdbx",	d300b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("fldmeax",	d300b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("fstmias",	c800a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fstmeas",	c800a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fstmdbs",	d200a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fstmfds",	d200a00, 2, (RRnpctw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fstmiax",	c800b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fstmeax",	c800b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fstmdbx",	d200b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("fstmfdx",	d200b00, 2, (RRnpctw, VRDLST),    vfp_xp_ldstmdb),
 
   /* Monadic operations.  */
  cCE("fabss",	eb00ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
@@ -17469,14 +17479,14 @@ static const struct asm_opcode insns[] =
     implementations.  */
  cCE("fldd",	d100b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
  cCE("fstd",	d000b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
- cCE("fldmiad",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fldmfdd",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fldmdbd",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE("fldmead",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE("fstmiad",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fstmead",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fstmdbd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE("fstmfdd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fldmiad",	c900b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fldmfdd",	c900b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fldmdbd",	d300b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fldmead",	d300b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fstmiad",	c800b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fstmead",	c800b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fstmdbd",	d200b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fstmfdd",	d200b00, 2, (RRnpctw, VRDLST),    vfp_dp_ldstmdb),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1 /* VFP V1 (Double precision).  */
@@ -17556,12 +17566,12 @@ static const struct asm_opcode insns[] =
  NCEF(vabs,     1b10300, 2, (RNSDQ, RNSDQ), neon_abs_neg),
  NCEF(vneg,     1b10380, 2, (RNSDQ, RNSDQ), neon_abs_neg),
 
- NCE(vldm,      c900b00, 2, (RRw, VRSDLST), neon_ldm_stm),
- NCE(vldmia,    c900b00, 2, (RRw, VRSDLST), neon_ldm_stm),
- NCE(vldmdb,    d100b00, 2, (RRw, VRSDLST), neon_ldm_stm),
- NCE(vstm,      c800b00, 2, (RRw, VRSDLST), neon_ldm_stm),
- NCE(vstmia,    c800b00, 2, (RRw, VRSDLST), neon_ldm_stm),
- NCE(vstmdb,    d000b00, 2, (RRw, VRSDLST), neon_ldm_stm),
+ NCE(vldm,      c900b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
+ NCE(vldmia,    c900b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
+ NCE(vldmdb,    d100b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
+ NCE(vstm,      c800b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
+ NCE(vstmia,    c800b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
+ NCE(vstmdb,    d000b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
  NCE(vldr,      d100b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
  NCE(vstr,      d000b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
 
