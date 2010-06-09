@@ -612,7 +612,7 @@ update_current_target (void)
       INHERIT (to_remove_exec_catchpoint, t);
       INHERIT (to_set_syscall_catchpoint, t);
       INHERIT (to_has_exited, t);
-      /* Do not inherit to_mourn_inferiour.  */
+      /* Do not inherit to_mourn_inferior.  */
       INHERIT (to_can_run, t);
       INHERIT (to_notice_signals, t);
       /* Do not inherit to_thread_alive.  */
@@ -2257,7 +2257,7 @@ target_mourn_inferior (void)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "could not find a target to follow mourn inferiour");
+		  "could not find a target to follow mourn inferior");
 }
 
 /* Look for a target which can describe architectural features, starting

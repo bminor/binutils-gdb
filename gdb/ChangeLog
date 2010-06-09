@@ -1,3 +1,8 @@
+2010-06-09  Michael Snyder  <msnyder@vmware.com>
+
+	* target.c (update_current_target): Fix spelling error in comment.
+	(target_mourn_inferior): Fix spelling error in error message.
+
 2010-06-08  Paul Hilfinger  <hilfingr@adacore.com>
 
       * dictionary.h (dict_iter_name_first, dict_iter_name_next): Refer to
