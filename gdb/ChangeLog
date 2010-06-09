@@ -1,3 +1,8 @@
+2010-06-08  Paul Hilfinger  <hilfingr@adacore.com>
+
+      * dictionary.h (dict_iter_name_first, dict_iter_name_next): Refer to
+      SYMBOL_SEARCH_NAME, not SYMBOL_BEST_NAME, in comments.
+
 2010-06-08  Michael Snyder  <msnyder@vmware.com>
 
 	* remote.c (remote_close): Set inferior_ptid to null_ptid.
