@@ -871,28 +871,6 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
   for (i = 0; i < NE; i++)
     {
       char *name;
-
-      /* Check for forward exports */
-      if (strchr (pe_def_file->exports[i].internal_name, '.'))
-	{
-	  count_exported++;
-	  if (!pe_def_file->exports[i].flag_noname)
-	    count_exported_byname++;
-
-	  pe_def_file->exports[i].flag_forward = 1;
-
-	  if (pe_def_file->exports[i].ordinal != -1)
-	    {
-	      if (max_ordinal < pe_def_file->exports[i].ordinal)
-		max_ordinal = pe_def_file->exports[i].ordinal;
-	      if (min_ordinal > pe_def_file->exports[i].ordinal)
-		min_ordinal = pe_def_file->exports[i].ordinal;
-	      count_with_ordinals++;
-	    }
-
-	  continue;
-	}
-
       name = xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
       if (pe_details->underscored
  	  && (*pe_def_file->exports[i].internal_name != '@'))
@@ -922,6 +900,28 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	    exported_symbol_sections[i] = blhe->u.def.section;
 	  else
 	    exported_symbol_sections[i] = blhe->u.c.p->section;
+
+	  if (pe_def_file->exports[i].ordinal != -1)
+	    {
+	      if (max_ordinal < pe_def_file->exports[i].ordinal)
+		max_ordinal = pe_def_file->exports[i].ordinal;
+	      if (min_ordinal > pe_def_file->exports[i].ordinal)
+		min_ordinal = pe_def_file->exports[i].ordinal;
+	      count_with_ordinals++;
+	    }
+	}
+      /* Check for forward exports.  These are indicated in DEF files by an
+         export directive of the form NAME1 = MODULE-NAME.EXTERNAL-NAME
+	 but we must take care not to be fooled when the user wants to export
+	 a symbol that actually really has a dot in it, so we only check
+	 for them here, after real defined symbols have already been matched.  */
+      else if (strchr (pe_def_file->exports[i].internal_name, '.'))
+	{
+	  count_exported++;
+	  if (!pe_def_file->exports[i].flag_noname)
+	    count_exported_byname++;
+
+	  pe_def_file->exports[i].flag_forward = 1;
 
 	  if (pe_def_file->exports[i].ordinal != -1)
 	    {

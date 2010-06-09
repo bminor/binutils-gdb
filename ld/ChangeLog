@@ -1,3 +1,9 @@
+2010-06-09  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR ld/11603
+	* pe-dll.c (process_def_file_and_drectve): Reorder check for
+	forwarded export name after check for ordinary export.
+
 2010-06-08  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* emulparams/elf32_tic6x_le.sh (OTHER_BSS_SECTIONS): New.
