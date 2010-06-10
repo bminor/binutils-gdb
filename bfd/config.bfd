@@ -470,7 +470,6 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_hppa_linux_vec
     ;;
 
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) || defined (HOST_HPPAMPEIX)
   hppa*-*-bsd*)
     targ_defvec=som_vec
     targ_selvecs=bfd_elf32_hppa_vec
@@ -482,7 +481,6 @@ case "${targ}" in
     targ_defvec=som_vec
     targ_selvecs=bfd_elf32_hppa_vec
     ;;
-#endif /* defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) */
 
   i370-*-*)
     targ_defvec=bfd_elf32_i370_vec

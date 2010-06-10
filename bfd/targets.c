@@ -1204,9 +1204,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&shlcoff_vec,
 	&shlpe_vec,
 	&shlpei_vec,
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF)
 	&som_vec,
-#endif
 	&sparccoff_vec,
 	&sparcle_aout_vec,
 	&sparclinux_vec,

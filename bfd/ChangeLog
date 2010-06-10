@@ -1,5 +1,12 @@
 2010-06-10  Tristan Gingold  <gingold@adacore.com>
 
+	* config.bfd: Remove #if/#endif so that som can be compiled on any
+	host.
+	* targets.c (_bfd_target_vector): Remove #if/#endif so that som
+	can be used on any host.
+
+2010-06-10  Tristan Gingold  <gingold@adacore.com>
+
 	* som.c: Can now be compiled on any host.
 	Include bfd headers instead of system one.
 	(som_compute_checksum): Parameter is now a pointer to a
