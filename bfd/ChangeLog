@@ -1,3 +1,8 @@
+2010-06-10  Tristan Gingold  <gingold@adacore.com>
+
+	* targets.c (bfd_target_list): Remove hp/ux compiler work-around
+	as bfd requires an ANSI-C compiler.
+
 2010-06-09 Tristan Gingold  <gingold@adacore.com>
 
 	* bfdio.c (bfd_bread): Fix the code to prevent reading past the
