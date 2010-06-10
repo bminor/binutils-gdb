@@ -1,5 +1,57 @@
 2010-06-10  Tristan Gingold  <gingold@adacore.com>
 
+	* som.c: Can now be compiled on any host.
+	Include bfd headers instead of system one.
+	(som_compute_checksum): Parameter is now a pointer to a
+	som_external_header structure.  Adjust.
+	(struct section_to_type): Field section is now const.
+	(R_DLT_REL, R_AUX_UNWIND, R_SEC_STMT): Removed conditional
+	definition.
+	(R_LONG_PCREL_MODE, R_N0SEL, R_N1SEL, R_LINETAB): Ditto.
+	(R_LINETAB_ESC, R_LTP_OVERRIDE, R_COMMENT): Ditto.
+	(som_swap_clock_in, som_swap_clock_out): New functions.
+	(som_swap_header_in, som_swap_header_out): Likewise.
+	(som_swap_space_dictionary_in): Likewise.
+	(som_swap_space_dictionary_out): Likewise.
+	(som_swap_subspace_dictionary_in): Likewise.
+	(som_swap_subspace_dictionary_record_out): Likewise.
+	(som_swap_aux_id_in, som_swap_aux_id_out): Likewise.
+	(som_swap_string_auxhdr_out): Likewise.
+	(som_swap_compilation_unit_out): Likewise.
+	(som_swap_exec_auxhdr_in): Likewise.
+	(som_swap_exec_auxhdr_out): Likewise.
+	(som_swap_lst_header_in): Likewise.
+	(som_object_setup): Adjust parameter type using bfd types.
+	(setup_sections): Likewise.  Ditto for object file types.
+	Use intermediate variables for external representation and use the
+	swap functions to convert.
+	(som_object_p): Ditto.  Remove #ifdef/#endif on always defined
+	macros.
+	(som_prep_headers): Likewise.
+	(som_write_symbol_strings): Likewise.
+	(som_begin_writing): Likewise.
+	(som_finish_writing): Likewise.
+	(som_build_and_write_symbol_table): Likewise.
+	(bfd_section_from_som_symbol): Likewise.
+	(som_slurp_symbol_table): Likewise.
+	(som_bfd_print_private_bfd_data): Likewise.
+	(bfd_som_attach_aux_hdr): Likewise.  Clear the padding.
+	(bfd_som_attach_compilation_unit): Likewise.
+	(som_bfd_count_ar_symbols): Likewise.
+	(som_bfd_fill_in_ar_symbols): Likewise.
+	(som_slurp_armap): Likewise.
+	(som_bfd_ar_write_symbol_stuff): Likewise.
+	(som_write_armap): Likewise.  Use _bfd_ar_spacepad instead of
+	sprintf to write header fields.
+	* som.h: Include bfd headers instead of system one.
+	(FILE_HDR_SIZE, AUX_HDR_SIZE): Removed.
+	(struct somdata): Use bfd structures instead of system ones.
+	(struct som_section_data_struct): Likewise.
+	(struct som_subspace_dictionary_record): Removed (now in
+	include/som/internal.h)
+
+2010-06-10  Tristan Gingold  <gingold@adacore.com>
+
 	* targets.c (bfd_target_list): Remove hp/ux compiler work-around
 	as bfd requires an ANSI-C compiler.
 
