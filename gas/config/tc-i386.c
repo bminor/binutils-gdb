@@ -562,6 +562,8 @@ const relax_typeS md_relax_table[] =
 
 static const arch_entry cpu_arch[] =
 {
+  /* Do not replace the first two entries - i386_target_format()
+     relies on them being there in this order.  */
   { STRING_COMMA_LEN ("generic32"), PROCESSOR_GENERIC32,
     CPU_GENERIC32_FLAGS, 0 },
   { STRING_COMMA_LEN ("generic64"), PROCESSOR_GENERIC64,
@@ -8435,54 +8437,17 @@ const char *
 i386_target_format (void)
 {
   if (!strcmp (default_arch, "x86_64"))
-    {
-      set_code_flag (CODE_64BIT);
-      if (cpu_flags_all_zero (&cpu_arch_isa_flags))
-	{
-	  cpu_arch_isa_flags.bitfield.cpui186 = 1;
-	  cpu_arch_isa_flags.bitfield.cpui286 = 1;
-	  cpu_arch_isa_flags.bitfield.cpui386 = 1;
-	  cpu_arch_isa_flags.bitfield.cpui486 = 1;
-	  cpu_arch_isa_flags.bitfield.cpui586 = 1;
-	  cpu_arch_isa_flags.bitfield.cpui686 = 1;
-	  cpu_arch_isa_flags.bitfield.cpuclflush = 1;
-	  cpu_arch_isa_flags.bitfield.cpummx= 1;
-	  cpu_arch_isa_flags.bitfield.cpusse = 1;
-	  cpu_arch_isa_flags.bitfield.cpusse2 = 1;
-	  cpu_arch_isa_flags.bitfield.cpulm = 1;
-	}
-      if (cpu_flags_all_zero (&cpu_arch_tune_flags))
-	{
-	  cpu_arch_tune_flags.bitfield.cpui186 = 1;
-	  cpu_arch_tune_flags.bitfield.cpui286 = 1;
-	  cpu_arch_tune_flags.bitfield.cpui386 = 1;
-	  cpu_arch_tune_flags.bitfield.cpui486 = 1;
-	  cpu_arch_tune_flags.bitfield.cpui586 = 1;
-	  cpu_arch_tune_flags.bitfield.cpui686 = 1;
-	  cpu_arch_tune_flags.bitfield.cpuclflush = 1;
-	  cpu_arch_tune_flags.bitfield.cpummx= 1;
-	  cpu_arch_tune_flags.bitfield.cpusse = 1;
-	  cpu_arch_tune_flags.bitfield.cpusse2 = 1;
-	}
-    }
+    set_code_flag (CODE_64BIT);
   else if (!strcmp (default_arch, "i386"))
-    {
-      set_code_flag (CODE_32BIT);
-      if (cpu_flags_all_zero (&cpu_arch_isa_flags))
-	{
-	  cpu_arch_isa_flags.bitfield.cpui186 = 1;
-	  cpu_arch_isa_flags.bitfield.cpui286 = 1;
-	  cpu_arch_isa_flags.bitfield.cpui386 = 1;
-	}
-      if (cpu_flags_all_zero (&cpu_arch_tune_flags))
-	{
-	  cpu_arch_tune_flags.bitfield.cpui186 = 1;
-	  cpu_arch_tune_flags.bitfield.cpui286 = 1;
-	  cpu_arch_tune_flags.bitfield.cpui386 = 1;
-	}
-    }
+    set_code_flag (CODE_32BIT);
   else
     as_fatal (_("Unknown architecture"));
+
+  if (cpu_flags_all_zero (&cpu_arch_isa_flags))
+    cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].flags;
+  if (cpu_flags_all_zero (&cpu_arch_tune_flags))
+    cpu_arch_tune_flags = cpu_arch[flag_code == CODE_64BIT].flags;
+
   switch (OUTPUT_FLAVOR)
     {
 #if defined (OBJ_MAYBE_AOUT) || defined (OBJ_AOUT)

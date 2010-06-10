@@ -1,3 +1,9 @@
+2010-06-10  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (cpu_arch): Add comment.
+	(i386_target_format): Set cpu_arch_isa_flags and cpu_arch_tune_flags
+	from the generic entries of cpu_arch[].
+
 2010-06-08  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (operand_parse_code): Add OP_RRnpctw enum 
