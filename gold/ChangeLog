@@ -1,3 +1,18 @@
+2010-06-10  Cary Coutant  <ccoutant@google.com>
+
+	* object.cc (Sized_relobj::do_layout): Defer layout for reloc sections.
+	(Sized_relobj::do_layout_deferred_sections): Do layout for deferred
+	reloc sections.
+	* object.h (Sized_relobj::deferred_layout_relocs_): New data member.
+
+	PR 11683
+	* symtab.h (Symbol::is_placeholder): New member function.
+	* target-reloc.h (relocate_section): Check for placeholder symbols.
+
+	* testsuite/Makefile.am (plugin_test_8): New test.
+	(plugin_test_9): New test.
+	* testsuite/Makefile.in: Regenerate.
+
 2010-06-09  Nick Clifton  <nickc@redhat.com>
 
 	* yyscript.y (input_list_element): Allow strings prefixed with

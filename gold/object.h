@@ -2022,6 +2022,8 @@ class Sized_relobj : public Relobj
   unsigned int discarded_eh_frame_shndx_;
   // The list of sections whose layout was deferred.
   std::vector<Deferred_layout> deferred_layout_;
+  // The list of relocation sections whose layout was deferred.
+  std::vector<Deferred_layout> deferred_layout_relocs_;
 };
 
 // A class to manage the list of all objects.

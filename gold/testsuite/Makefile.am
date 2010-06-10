@@ -1314,6 +1314,34 @@ plugin_test_7_2.o: plugin_test_7_2.c
 	$(COMPILE) -O0 -c -ffunction-sections -fdata-sections -o $@ $<
 plugin_test_7.err: plugin_test_7
 
+# Test plugins with -r.
+check_PROGRAMS += plugin_test_8
+plugin_test_8.o: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o ../ld-new plugin_test.so
+	../ld-new -r -o $@ --no-demangle --plugin "./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.o
+plugin_test_8: plugin_test_8.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle plugin_test_8.o
+
+# Test that symbols known in the IR file but not in the replacement file
+# produce an unresolved symbol error.
+check_DATA += plugin_test_9.err
+MOSTLYCLEANFILES += plugin_test_9.err
+plugin_test_9.err: two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
+	@echo $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o plugin_test_9 -Wl,--no-demangle,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1c.syms two_file_test_2.syms 2>$@; then \
+	  echo 1>&2 "Link of plugin_test_9 should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+# Make a .syms file that claims to define the symbol _Z4t16av.
+two_file_test_1c.syms: two_file_test_1.syms two_file_test_1c.o
+	cp two_file_test_1.syms $@.tmp
+	grep "_Z4t16av" two_file_test_1b.syms >> $@.tmp
+	mv -f $@.tmp $@
+# Make a copy of two_file_test_1.o, which does not define the symbol _Z4t16av.
+MOSTLYCLEANFILES += two_file_test_1c.o
+two_file_test_1c.o: two_file_test_1.o
+	cp two_file_test_1.o $@
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c

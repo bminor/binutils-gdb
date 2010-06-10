@@ -1371,6 +1371,17 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	}
 
       Output_section* data_section = out_sections[data_shndx];
+      if (data_section == reinterpret_cast<Output_section*>(2))
+        {
+          // The layout for the data section was deferred, so we need
+          // to defer the relocation section, too.
+	  const char* name = pnames + shdr.get_sh_name();
+          this->deferred_layout_relocs_.push_back(
+              Deferred_layout(i, name, pshdr, 0, elfcpp::SHT_NULL));
+	  out_sections[i] = reinterpret_cast<Output_section*>(2);
+          out_section_offsets[i] = invalid_address;
+          continue;
+        }
       if (data_section == NULL)
 	{
 	  out_sections[i] = NULL;
@@ -1471,6 +1482,36 @@ Sized_relobj<size, big_endian>::do_layout_deferred_sections(Layout* layout)
     }
 
   this->deferred_layout_.clear();
+
+  // Now handle the deferred relocation sections.
+
+  Output_sections& out_sections(this->output_sections());
+  std::vector<Address>& out_section_offsets(this->section_offsets_);
+
+  for (deferred = this->deferred_layout_relocs_.begin();
+       deferred != this->deferred_layout_relocs_.end();
+       ++deferred)
+    {
+      unsigned int shndx = deferred->shndx_;
+      typename This::Shdr shdr(deferred->shdr_data_);
+      unsigned int data_shndx = this->adjust_shndx(shdr.get_sh_info());
+
+      Output_section* data_section = out_sections[data_shndx];
+      if (data_section == NULL)
+	{
+	  out_sections[shndx] = NULL;
+          out_section_offsets[shndx] = invalid_address;
+	  continue;
+	}
+
+      Relocatable_relocs* rr = new Relocatable_relocs();
+      this->set_relocatable_relocs(shndx, rr);
+
+      Output_section* os = layout->layout_reloc(this, shndx, shdr,
+						data_section, rr);
+      out_sections[shndx] = os;
+      out_section_offsets[shndx] = invalid_address;
+    }
 }
 
 // Add the symbols to the symbol table.

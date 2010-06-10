@@ -459,6 +459,13 @@ class Symbol
     return this->source_ == FROM_OBJECT && this->object()->is_dynamic();
   }
 
+  // Return whether this is a placeholder symbol from a plugin object.
+  bool
+  is_placeholder() const
+  {
+    return this->source_ == FROM_OBJECT && this->object()->pluginobj() != NULL;
+  }
+
   // Return whether this is an undefined symbol.
   bool
   is_undefined() const

@@ -341,7 +341,7 @@ relocate_section(
 	}
 
       if (sym != NULL
-	  && sym->is_undefined()
+	  && (sym->is_undefined() || sym->is_placeholder())
 	  && sym->binding() != elfcpp::STB_WEAK
 	  && !is_defined_in_discarded_section
           && !target->is_defined_by_abi(sym)
