@@ -135,6 +135,7 @@ typedef struct
 }
 arch_entry;
 
+static void update_code_flag (int, int);
 static void set_code_flag (int);
 static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
@@ -1922,8 +1923,10 @@ add_prefix (unsigned int prefix)
 }
 
 static void
-set_code_flag (int value)
+update_code_flag (int value, int check)
 {
+  PRINTF_LIKE ((*as_error));
+
   flag_code = (enum flag_code) value;
   if (flag_code == CODE_64BIT)
     {
@@ -1937,13 +1940,29 @@ set_code_flag (int value)
     }
   if (value == CODE_64BIT && !cpu_arch_flags.bitfield.cpulm )
     {
-      as_bad (_("64bit mode not supported on this CPU."));
+      if (check)
+	as_error = as_fatal;
+      else
+	as_error = as_bad;
+      (*as_error) (_("64bit mode not supported on `%s'."),
+		   cpu_arch_name ? cpu_arch_name : default_arch);
     }
   if (value == CODE_32BIT && !cpu_arch_flags.bitfield.cpui386)
     {
-      as_bad (_("32bit mode not supported on this CPU."));
+      if (check)
+	as_error = as_fatal;
+      else
+	as_error = as_bad;
+      (*as_error) (_("32bit mode not supported on `%s'."),
+		   cpu_arch_name ? cpu_arch_name : default_arch);
     }
   stackop_size = '\0';
+}
+
+static void
+set_code_flag (int value)
+{
+  update_code_flag (value, 0);
 }
 
 static void
@@ -8437,9 +8456,9 @@ const char *
 i386_target_format (void)
 {
   if (!strcmp (default_arch, "x86_64"))
-    set_code_flag (CODE_64BIT);
+    update_code_flag (CODE_64BIT, 1);
   else if (!strcmp (default_arch, "i386"))
-    set_code_flag (CODE_32BIT);
+    update_code_flag (CODE_32BIT, 1);
   else
     as_fatal (_("Unknown architecture"));
 

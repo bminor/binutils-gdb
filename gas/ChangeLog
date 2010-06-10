@@ -1,3 +1,9 @@
+2010-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (update_code_flag): New.
+	(set_code_flag): Use it.
+	(i386_target_format): Replace set_code_flag with update_code_flag.
+
 2010-06-10  Tristan Gingold  <gingold@adacore.com>
 
 	* config/obj-som.h: Includes som/reloc.h
