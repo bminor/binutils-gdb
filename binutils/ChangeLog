@@ -1,3 +1,8 @@
+2010-06-10  Tristan Gingold  <gingold@adacore.com>
+
+	* readelf.c (slurp_ia64_unwind_table): IA64 rela relocations are
+	not inplace.
+
 2010-05-25  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Joseph Myers  <joseph@codesourcery.com>
 	    Andrew Stubbs  <ams@codesourcery.com>
