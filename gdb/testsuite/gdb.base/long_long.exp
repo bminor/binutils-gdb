@@ -154,7 +154,7 @@ gdb_test "p/d val.dec" "-6101065172474983726" "decimal print p/d"
 #
 gdb_test "p/d val.oct" "-6399925985474168457"
 gdb_test "p/u val.oct" "12046818088235383159"
-gdb_test "p/o val.oct" ""
+gdb_test "p/o val.oct" ".*"
 gdb_test "p/t val.oct" "1010011100101110111001010011100101110111000001010011100101110111"
 gdb_test_ptr "p/a val.oct" "" "" "0x77053977" "0xa72ee53977053977"
 gdb_test "p/c val.oct" "'w'"
@@ -230,7 +230,7 @@ gdb_test_long_long "p/c *(long long *)ll" "" "" "" "-17 '.*'"
 
 # Implict Word size (except for a, c, and f)
 
-gdb_test "x/w w" "" "set examine size to w"
+gdb_test "x/w w" ".*" "set examine size to w"
 gdb_test "x/x w" "0x01234567"
 gdb_test "x/d w" "19088743"
 gdb_test "x/u w" "19088743"
@@ -246,7 +246,7 @@ if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
 
 # Implict Giant size (except for a, c, and f)
 
-gdb_test "x/g g" "" "set examine size to g"
+gdb_test "x/g g" ".*" "set examine size to g"
 gdb_test "x/2x g" "0x0123456789abcdef.*0xa72ee53977053977"
 gdb_test "x/2d g" "81985529216486895.*-6399925985474168457"
 gdb_test "x/2u g" "81985529216486895.*12046818088235383159"

@@ -470,10 +470,10 @@ if {![target_info exists gdb,nosignals] && ![istarget "*-*-uclinux*"]} {
     gdb_test {set $old_sp = $sp}
 
     gdb_test {set $sp = 0}
-    gdb_test "call doubleit (1)" "" "sp == 0: call doubleit (1)"
+    gdb_test "call doubleit (1)" ".*" "sp == 0: call doubleit (1)"
 
     gdb_test {set $sp = -1}
-    gdb_test "call doubleit (1)" "" "sp == -1: call doubleit (1)"
+    gdb_test "call doubleit (1)" ".*" "sp == -1: call doubleit (1)"
 
     gdb_test {set $sp = $old_sp}
 }

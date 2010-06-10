@@ -33,5 +33,5 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "run" ""
+gdb_test "run" ".*"
 gdb_test "where" ".*$hex in foo ().+$hex in _start ().*"

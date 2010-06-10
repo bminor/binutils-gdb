@@ -69,4 +69,4 @@ gdb_test "attach $testpid" "Attached to.*" \
 gdb_test "backtrace" ".*main.*" "backtrace 2"
 
 gdb_test "kill" "" "kill" "Kill the program being debugged.*" "y"
-gdb_test "monitor exit" ""
+gdb_test_no_output "monitor exit"

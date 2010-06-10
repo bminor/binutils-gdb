@@ -58,7 +58,7 @@ gdb_test_no_output "set print sevenbit-strings"
 runto_main
 
 # There should be no threads initially.
-gdb_test "info threads" "" "info threads 1"
+gdb_test "info threads" ".*" "info threads 1"
 
 # Try stepping over the thread creation function.
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: create philosopher"]

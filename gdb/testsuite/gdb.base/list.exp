@@ -63,7 +63,7 @@ proc set_listsize { arg } {
     global set_listsize_count;
 
     incr set_listsize_count;
-    if [gdb_test "set listsize $arg" "" "setting listsize to $arg #$set_listsize_count"] {
+    if [gdb_test "set listsize $arg" ".*" "setting listsize to $arg #$set_listsize_count"] {
 	return 0;
     }
     if { $arg <= 0 } {

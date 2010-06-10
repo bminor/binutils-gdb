@@ -123,7 +123,7 @@ gdb_test "delete display" \
 
 
 #test detach
-gdb_test "detach" "" "detach"
+gdb_test "detach" ".*" "detach"
 
 if [istarget "h8300-*-hms"] then {
     gdb_exit
@@ -474,9 +474,9 @@ gdb_test "set ch" "\"set check\" must be followed by the name of a check subcomm
 #test set check
 gdb_test "set check" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set check"
 #test set check range
-gdb_test "set check range" "" "set check range"
+gdb_test "set check range" ".*" "set check range"
 #test set check type
-gdb_test "set check type" "" "set check type"
+gdb_test "set check type" ".*" "set check type"
 #test set complaints
 gdb_test "set complaints" "Argument required .integer to set it to.*" "set complaints"
 #test set confirm
@@ -562,7 +562,7 @@ gdb_test "show check range" "Range checking is \"auto; currently off\"." "show c
 #test show check type
 gdb_test "show check type" "Type checking is \"auto; currently off\"." "show check type"
 #test show commands
-gdb_test "show commands" "" "show commands"
+gdb_test "show commands" ".*" "show commands"
 #test show complaints
 gdb_test "show complaints" "Max number of complaints about incorrect symbols is 0." "show complaints"
 #test show confirm
@@ -594,7 +594,7 @@ gdb_test "show p" ".*" "show p"
 #test show print "pr" abbreviation
 gdb_test "show pr" ".*" "show pr"
 #test show print
-gdb_test "show print" "" "show print"
+gdb_test "show print" ".*" "show print"
 #test show paths
 gdb_test "show paths" "Executable and object file path:.*" "show paths"
 #test show print address
@@ -654,7 +654,7 @@ gdb_test "s" "The program is not being run." "step \"s\" abbreviation #2"
 #test step
 gdb_test "step" "The program is not being run." "step #2"
 #test symbol-file
-gdb_test "symbol-file" "" "symbol-file"
+gdb_test "symbol-file" ".*" "symbol-file"
 
 #test target child
 gdb_test "target child" "Use the \"run\" command to start a Unix child process.*|Undefined target command: \"child\".  *Try \"help target\".*" "target child"

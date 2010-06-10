@@ -292,7 +292,7 @@ proc test_with_self { executable } {
     # On Ultrix, we don't need it and it is really slow (because shell_escape
     # doesn't use vfork).
     if ![istarget "*-*-ultrix*"] then {
-	gdb_test "shell stty intr '^C'" "" \
+	gdb_test "shell stty intr '^C'" ".*" \
 	    "set interrupt character in test_with_self"
     }
 

@@ -46,8 +46,7 @@ if ![runto break_me] then {
 
 # First, print all the arrays without indexes
 
-gdb_test "set print frame-arguments scalars" \
-         ""  \
+gdb_test_no_output "set print frame-arguments scalars" \
          "set print frame-arguments scalars"
 
 gdb_test "frame 1" \

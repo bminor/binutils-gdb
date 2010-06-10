@@ -56,7 +56,7 @@ proc test_expr { args } {
     }
     set last_ent [expr [llength $args] - 1];
     set testname [lindex $args $last_ent];
-    if [gdb_test [lindex $args 0] "" "$testname (setup)"] {
+    if [gdb_test [lindex $args 0] ".*" "$testname (setup)"] {
 	gdb_suppress_tests;
     }
     for {set x 1} {$x < $last_ent} {set x [expr $x + 2]} {
@@ -249,7 +249,7 @@ test_expr "print \"x\" \"y\" \"z\"" "\\$\[0-9\]* = \"xyz\""
 
 # Enum formatting tests.
 test_expr "print red" "\\$\[0-9\]* = red"
-gdb_test "set output-radix 8" ""
+gdb_test "set output-radix 8" ".*"
 test_expr "print red" "\\$\[0-9\]* = red"
 test_expr "print/d red" "\\$\[0-9\]* = 0"
-gdb_test "set output-radix 10" ""
+gdb_test "set output-radix 10" ".*"

@@ -226,7 +226,7 @@ gdb_expect  {
 		    -re ".*$gdb_prompt $" { fail "maint print psymbols" }
 		    timeout     { fail "(timeout) maint print psymbols" }
 		}
-		gdb_test "shell rm -f psymbols_output" ""
+		gdb_test "shell rm -f psymbols_output" ".*"
 	    }
 	    -re ".*$gdb_prompt $"       { fail "maint print psymbols" }
 	    timeout           { fail "(timeout) maint print psymbols" }
@@ -255,7 +255,7 @@ gdb_expect  {
 		    -re ".*$gdb_prompt $"     { fail "maint print msymbols" }
 		    timeout         { fail "(timeout) maint print msymbols" }
 		}
-		gdb_test "shell rm -f msymbols_output" ""
+		gdb_test "shell rm -f msymbols_output" ".*"
 	    }
 	    -re ".*$gdb_prompt $"     { fail "maint print msymbols" }
 	    timeout         { fail "(timeout) maint print msymbols" }
@@ -286,7 +286,7 @@ gdb_test_multiple "maint print msymbols msymbols_output2 ${subdir}/${testfile}" 
 		        fail "(timeout) maint print msymbols"
 		    }
 		}
-		gdb_test "shell rm -f msymbols_output2" ""
+		gdb_test "shell rm -f msymbols_output2" ".*"
 	    }
 	    -re ".*$gdb_prompt $" {
 		fail "maint print msymbols"
@@ -331,7 +331,7 @@ gdb_expect  {
 		    -re ".*$gdb_prompt $"     { fail "maint print symbols" }
 		    timeout         { fail "(timeout) maint print symbols" }
 		}
-		gdb_test "shell rm -f symbols_output" ""
+		gdb_test "shell rm -f symbols_output" ".*"
 	    }
 	    -re ".*$gdb_prompt $"     { fail "maint print symbols" }
 	    timeout         { fail "(timeout) maint print symbols" }

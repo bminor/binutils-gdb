@@ -348,10 +348,10 @@ gdb_test "bt 10" \
 gdb_test "bt 2" "\#0.*foo2.*asmsrc2\[.\]s:$line_call_foo3.*\#1.*main.*asmsrc1\[.\]s:$line_call_foo2.*" "bt 2 in foo2"
 
 # Step into another subroutine which lives back in the first source file.
-gdb_test "s" "" "s 2"
+gdb_test "s" ".*" "s 2"
 
 # Next over insns to set up the stack frame.
-gdb_test "n" "" "n 2"
+gdb_test "n" ".*" "n 2"
 
 # Now see if a capped `bt' is correct.
 gdb_test "bt 3" "\#0.*foo3.*asmsrc1\[.\]s:$line_foo3.*\#1.*foo2.*asmsrc2\[.\]s:$line_call_foo3.*\#2.*main.*asmsrc1\[.\]s:$line_call_foo2.*" "bt 3 in foo3"

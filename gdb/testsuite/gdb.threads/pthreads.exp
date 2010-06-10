@@ -61,7 +61,7 @@ gdb_test_no_output "set width 0"
 # On Ultrix, we don't need it and it is really slow (because shell_escape
 # doesn't use vfork).
 if ![istarget "*-*-ultrix*"] then {
-    gdb_test "shell stty intr '^C'" ""
+    gdb_test "shell stty intr '^C'" ".*"
 }
 
 proc all_threads_running {} {
@@ -82,7 +82,7 @@ proc all_threads_running {} {
     # been called 15 times.  This should be plenty of time to allow
     # every thread to run at least once, since each thread sleeps for
     # one second between calls to common_routine.
-    gdb_test "tbreak common_routine if hits >= 15" ""
+    gdb_test "tbreak common_routine if hits >= 15" ".*"
 
     # Start all the threads running again and wait for the inferior
     # to stop.  Since no other breakpoints are set at this time
@@ -230,7 +230,7 @@ proc check_control_c {} {
 	    return 1;
 	}
     }
-    gdb_test "bt" ""
+    gdb_test "bt" ".*"
 
     # Verify that all threads can be run again after a ^C stop.
     if [all_threads_running] then {

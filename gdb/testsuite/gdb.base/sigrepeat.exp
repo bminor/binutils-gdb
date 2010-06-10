@@ -50,7 +50,7 @@ if { ![runto_main] } then {
 
 # Run to the signal handler wait loop.
 set infinite_loop [gdb_get_line_number {infinite loop}]
-gdb_test "advance $infinite_loop" "" "advance to infinite loop"
+gdb_test "advance $infinite_loop" ".*" "advance to infinite loop"
 
 # Make the first of many signals come pending
 sleep 1

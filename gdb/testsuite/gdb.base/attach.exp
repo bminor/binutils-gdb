@@ -336,7 +336,7 @@ proc do_call_attach_tests {} {
 
     # Attach
    
-    gdb_test "file $binfile2" "" "force switch to gdb64, if necessary"
+    gdb_test "file $binfile2" ".*" "force switch to gdb64, if necessary"
     set test "attach call"
     gdb_test_multiple "attach $testpid" "$test" {
 	-re "warning: reading register.*I.*O error.*$gdb_prompt $" {

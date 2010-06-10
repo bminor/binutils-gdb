@@ -97,7 +97,7 @@ if { ![target_info exists use_gdb_stub] && ![target_info exists noargs] } {
     gdb_test "run" "Starting program:.*foo bar blup baz bubble.*" "passing args"
 }
 #test set check range on
-gdb_test "set check range on" "" "set check range on" 
+gdb_test "set check range on" ".*" "set check range on" 
 #test show check range on
 gdb_test "show check range" "Range checking is \"on\"\..*" "show check range (on)" 
 #test set check range off with trailing space
@@ -109,7 +109,7 @@ gdb_test_no_output "set check range auto" "set check range auto"
 #test show check range auto
 gdb_test "show check range" "Range checking is \"auto; currently .*" "show check range (auto)" 
 #test set check type on
-gdb_test "set check type on" "" "set check type on" 
+gdb_test "set check type on" ".*" "set check type on" 
 #test show check type on
 gdb_test "show check type" "Type checking is \"on\"..*" "show check type (on)" 
 #test set check type off with trailing space

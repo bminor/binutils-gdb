@@ -153,9 +153,9 @@ proc stepi_out { name args } {
     # inferior.  Stops a SIGSEGV infinite loop when a broke system
     # keeps re-executing the faulting instruction.
     rerun_to_main
-    gdb_test "handle ${signame} nostop print pass" "" "${name}; pass ${signame}"
+    gdb_test "handle ${signame} nostop print pass" ".*" "${name}; pass ${signame}"
     gdb_test "continue" "keeper.*" "${name}; continue to keeper"
-    gdb_test "handle ${signame} stop print nopass" "" "${name}; nopass ${signame}"
+    gdb_test "handle ${signame} stop print nopass" ".*" "${name}; nopass ${signame}"
 
     # Insert all the breakpoints.  To avoid the need to step over
     # these instructions, this is delayed until after the keeper has
@@ -223,9 +223,9 @@ proc cont_out { name args } {
     # inferior.  Stops a SIGSEGV infinite loop when a broke system
     # keeps re-executing the faulting instruction.
     rerun_to_main
-    gdb_test "handle ${signame} nostop print pass" "" "${name}; pass ${signame}"
+    gdb_test "handle ${signame} nostop print pass" ".*" "${name}; pass ${signame}"
     gdb_test "continue" "keeper.*" "${name}; continue to keeper"
-    gdb_test "handle ${signame} stop print nopass" "" "${name}; nopass ${signame}"
+    gdb_test "handle ${signame} stop print nopass" ".*" "${name}; nopass ${signame}"
 
     # Insert all the breakpoints.  To avoid the need to step over
     # these instructions, this is delayed until after the keeper has

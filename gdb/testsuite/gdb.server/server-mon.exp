@@ -38,7 +38,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 gdbserver_run ""
 
-gdb_test_multiple "monitor help" "" {
+gdb_test_multiple "monitor help" "monitor help" {
     -re "Unknown monitor command.*$gdb_prompt $" {
 	fail "monitor help"
     }

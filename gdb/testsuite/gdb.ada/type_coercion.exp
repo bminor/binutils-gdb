@@ -41,8 +41,7 @@ gdb_test "p q" \
          "= \\(2, 3, 5, 7, 11\\)" \
          "p q"
 
-gdb_test "set \$addr := q'address" \
-         "" \
+gdb_test_no_output "set \$addr := q'address" \
          "save q'address in convenience variable"
 
 gdb_test "p {Integer} \$addr" \
@@ -51,8 +50,7 @@ gdb_test "p {Integer} \$addr" \
 
 # Now change the value at $addr using the same "{TYPE}" syntax.
 
-gdb_test "set {Integer} \$addr := 19" \
-         "" \
+gdb_test_no_output "set {Integer} \$addr := 19" \
          "set {Integer} \$addr := 19"
 
 gdb_test "p q" \

@@ -1,5 +1,65 @@
 2010-06-08  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.ada/assign_1.exp: Use ".*" instead of "" as wildcard regexp.
+	* gdb.ada/boolean_expr.exp: 
+	* gdb.ada/frame_args.exp: Ditto.
+	* gdb.ada/lang_switch.exp: Ditto.
+	* gdb.ada/ptype_arith_binop.exp: Ditto.
+	* gdb.ada/ref_param.exp: Ditto.
+	* gdb.ada/type_coercion.exp:Ditto.
+
+	* gdb.asm/asm-source.exp: Ditto.
+
+	* gdb.base/attach.exp: Ditto.
+	* gdb.base/bitfields2.exp: Ditto.
+	* gdb.base/call-signal-resume.exp: Ditto.
+	* gdb.base/callfuncs.exp: Ditto.
+	* gdb.base/commands.exp: Ditto.
+	* gdb.base/dbx.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/dump.exp: Ditto.
+	* gdb.base/exprs.exp: Ditto.
+	* gdb.base/freebpcmd.exp: Ditto.
+	* gdb.base/interrupt.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/long_long.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/ptype.exp: Ditto.
+	* gdb.base/return.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/sigbpt.exp: Ditto.
+	* gdb.base/sigrepeat.exp: Ditto.
+
+	* gdb.cp/classes.exp: Ditto.
+
+	* gdb.dwarf2/dw2-restore.exp: Ditto.
+
+	* gdb.gdb/selftest.exp: Ditto.
+
+	* gdb.multi/base.exp: Ditto.
+	* gdb.multi/bkpt-multi-exec.exp: Ditto.
+
+	* gdb.python/py-block.exp: Ditto.
+	* gdb.python/py-prettyprint.exp: Ditto.
+	* gdb.python/py-template.exp: Ditto.
+
+	* gdb.server/ext-attach.exp: Ditto.
+	* gdb.server/ext-run.exp: Ditto.
+	* gdb.server/server-mon.exp: Ditto.
+
+	* gdb.threads/fork-thread-pending.exp: Ditto.
+	* gdb.threads/hand-call-in-threads.exp: Ditto.
+	* gdb.threads/interrupted-hand-call.exp: Ditto.
+	* gdb.threads/linux-dp.exp: Ditto.
+	* gdb.threads/manythreads.exp: Ditto.
+	* gdb.threads/print-threads.exp: Ditto.
+	* gdb.threads/pthreads.exp: Ditto.
+	* gdb.threads/schedlock.exp: Ditto.
+	* gdb.threads/thread-unwindonsignal.exp: Ditto.
+	* gdb.threads/threadapply.exp: Ditto.
+
+2010-06-08  Michael Snyder  <msnyder@vmware.com>
+
 	* gdb.ada/exec_changed.exp: 
 	Use ".*" instead of "" as wildcard regexp.
 

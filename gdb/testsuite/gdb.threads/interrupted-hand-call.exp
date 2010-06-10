@@ -73,7 +73,7 @@ gdb_test "maint print dummy-frames" ".*stack=.*" "dummy stack frame present"
 
 # Continuing now should exit the hand-call and pop the dummy frame.
 
-gdb_test "continue" "" "finish hand-call"
+gdb_test "continue" ".*" "finish hand-call"
 
 gdb_test_multiple "maint print dummy-frames" "dummy frame popped" {
     -re ".*stack=.*$gdb_prompt $" {

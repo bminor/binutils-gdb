@@ -101,7 +101,7 @@ if { "$frame_number" == "" } {
 }
 
 # Pop the dummy frame.
-gdb_test "frame $frame_number" ""
+gdb_test "frame $frame_number" ".*"
 gdb_test_no_output "set confirm off"
 gdb_test_no_output "return"
 
@@ -134,7 +134,7 @@ if { "$frame_number" == "" } {
 }
 
 # Pop the dummy frame.
-gdb_test "frame $frame_number" ""
+gdb_test "frame $frame_number" ".*"
 gdb_test_no_output "set confirm off"
 gdb_test_no_output "return"
 

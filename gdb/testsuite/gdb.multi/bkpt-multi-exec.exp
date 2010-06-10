@@ -71,7 +71,7 @@ gdb_test "add-inferior -exec ${binfile2}"
 set bp_location [gdb_get_line_number "set breakpoint here" ${srcfile2}]
 
 gdb_test "inferior 2"
-gdb_test "break ${srcfile2}:${bp_location}" ""
+gdb_test "break ${srcfile2}:${bp_location}" ".*"
 
 # Start the program running, and stop at main.
 #

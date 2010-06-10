@@ -53,7 +53,7 @@ if ![file exists $binfile] then {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
     # Hope this is unix :-)
-    gdb_test "shell stty intr '^C'" "" \
+    gdb_test "shell stty intr '^C'" ".*" \
 	"set interrupt character in interrupt.exp"
     if [runto_main] then {
 	send_gdb "continue\n"

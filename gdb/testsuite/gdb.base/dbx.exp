@@ -305,13 +305,13 @@ proc test_whereis { } {
 #test_func
 #
 proc test_func { } {
-    gdb_test "cont" "" "cont 1"
-    gdb_test "step" ""
+    gdb_test "cont" ".*" "cont 1"
+    gdb_test "step" ".*"
     # This always fails, but it's not clear why. -sts 1999-08-17
     setup_xfail "*-*-*"
     gdb_test "func sum" "'sum' not within current stack frame\."
     gdb_test "stop in sum" "Breakpoint.*at.*: file.*sum\.c, line 11\."
-    gdb_test "cont" "" "cont 2"
+    gdb_test "cont" ".*" "cont 2"
     # This always fails, but it's not clear why. -sts 1999-08-17
     setup_xfail "*-*-*"
     gdb_test "func print_average" ".*in print_average.*\\(list=.*, low=0, high=6\\).*at.*average\.c:24\r\n24\[ \t\]+total = sum\\(list, low, high\\);"

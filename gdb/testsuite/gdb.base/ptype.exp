@@ -137,7 +137,7 @@ if {!$gcc_compiled && !$hp_aCC_compiler} {
 }
 
 # For get_debug_format to do its job, we need to have a current source file.
-gdb_test "list main" ""
+gdb_test "list main" ".*"
 get_debug_format
 gdb_test "whatis v_boolean" "type = (enum |)boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
@@ -604,13 +604,13 @@ ptype_maybe_prototyped "fffptr" "int (*(*(*)(char))(short int))(long int)" \
 # Test printing type of typedefs in different scopes, with same name
 # but different type.
 
-gdb_test "list intfoo" ""
+gdb_test "list intfoo" ".*"
 gdb_test "ptype foo" "type = int" "ptype foo typedef after first list of intfoo"
-gdb_test "list charfoo" ""
+gdb_test "list charfoo" ".*"
 gdb_test "ptype foo" "type = char" "ptype foo typedef after first list of charfoo"
-gdb_test "list intfoo" ""
+gdb_test "list intfoo" ".*"
 gdb_test "ptype foo" "type = int" "ptype foo typedef after second list of intfoo"
-gdb_test "list charfoo" ""
+gdb_test "list charfoo" ".*"
 gdb_test "ptype foo" "type = char" "ptype foo typedef after second list of charfoo"
 
 # Test printing type of string constants and array constants, but

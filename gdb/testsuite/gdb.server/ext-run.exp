@@ -57,4 +57,4 @@ if { [istarget *-*-linux*] } {
 }
 
 gdb_test "kill" "" "kill" "Kill the program being debugged.*" "y"
-gdb_test "monitor exit" ""
+gdb_test_no_output "monitor exit"

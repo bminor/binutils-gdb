@@ -72,7 +72,7 @@ gdb_test_no_output "python block = block.superblock" "Get superblock 2"
 gdb_test "python print block.function" "block_func"
 
 # Switch frames, then test for main block.
-gdb_test "up" ""
+gdb_test "up" ".*"
 gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
 gdb_py_test_silent_cmd "python block = frame.block()" "Get block" 0
 gdb_test "python print block" "<gdb.Block object at $hex>" "Check block not None"

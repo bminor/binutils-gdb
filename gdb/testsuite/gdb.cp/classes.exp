@@ -403,7 +403,7 @@ proc test_enums {} {
 
     # advance one line
 
-    gdb_test "next" ""
+    gdb_test "next" ".*"
 
     # print the object again
 

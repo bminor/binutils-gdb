@@ -28,8 +28,7 @@ set any_addr "0x\[0-9a-zA-Z\]+"
 
 # Force the language to Ada, as this will not happen automatically
 # in this case (no test program).
-gdb_test "set lang ada" \
-         "" \
+gdb_test_no_output "set lang ada" \
          "Changing the language to ada"
 
 gdb_test "print 1 = 2" \

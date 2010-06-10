@@ -57,7 +57,7 @@ proc continue_test { function tag } {
 #
 proc start_test { function } {
     delete_breakpoints
-    if [gdb_test "break tester" "" "break tester prior to $function"] {
+    if [gdb_test "break tester" ".*" "break tester prior to $function"] {
 	gdb_suppress_tests
     }
     continue_test "tester" "prior to $function"

@@ -39,7 +39,7 @@ if ![runto call_me] then {
   return
 } 
 
-gdb_test "set print frame-arguments all" ""
+gdb_test_no_output "set print frame-arguments all"
 
 set expected_d "\\(one => 1, two => 2, three => 3, four => 4, five => 5, six => 6\\)"
 gdb_test "frame" \

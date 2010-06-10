@@ -71,7 +71,7 @@ proc progvar_simple_if_test {} {
     if { ![runto factorial] } then { gdb_suppress_tests; }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=5" "" "set value to 5 in progvar_simple_if_test #1"
+    gdb_test "p value=5" ".*" "set value to 5 in progvar_simple_if_test #1"
     # All this test should do is print 0xdeadbeef once.
     gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
 	    "\\\$\[0-9\]* = 0xdeadbeef" \
@@ -95,7 +95,7 @@ proc progvar_simple_while_test {} {
     if { ![runto factorial] } then { gdb_suppress_tests }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=5" "" "set value to 5 in progvar_simple_if_test #2"
+    gdb_test "p value=5" ".*" "set value to 5 in progvar_simple_if_test #2"
     # This test should print 0xfeedface five times.
     gdb_test "while value > 0\np/x 0xfeedface\nset value -= 1\nend" \
 	    "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
@@ -116,7 +116,7 @@ proc progvar_complex_if_while_test {} {
     if { ![runto factorial] } then { gdb_suppress_tests }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=4" "" "set value to 4 in progvar_simple_if_test"
+    gdb_test "p value=4" ".*" "set value to 4 in progvar_simple_if_test"
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
     gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" \
 	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
@@ -135,7 +135,7 @@ proc if_while_breakpoint_command_test {} {
     if { ![runto factorial] } then { gdb_suppress_tests }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=5" "" "set value to 5 in progvar_simple_if_test"
+    gdb_test "p value=5" ".*" "set value to 5 in progvar_simple_if_test"
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #1"
 
@@ -176,7 +176,7 @@ proc infrun_breakpoint_command_test {} {
     if { ![runto factorial] } then { gdb_suppress_tests }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=6" "" "set value to 6 in progvar_simple_if_test #1"
+    gdb_test "p value=6" ".*" "set value to 6 in progvar_simple_if_test #1"
     delete_breakpoints
     gdb_test "break factorial if value == 5" "Breakpoint.*at.*"
 
@@ -210,7 +210,7 @@ proc breakpoint_command_test {} {
     if { ![runto factorial] } then { gdb_suppress_tests; }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
-    gdb_test "p value=6" "" "set value to 6 in progvar_simple_if_test #2"
+    gdb_test "p value=6" ".*" "set value to 6 in progvar_simple_if_test #2"
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #2"
     gdb_test "commands\nprintf \"Now the value is %d\\n\", value\nend" \
@@ -326,7 +326,7 @@ proc test_command_prompt_position {} {
     # currently support it.  Bash value variable to be what we want.
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #3"
-    gdb_test "p value=5" "" "set value to 5 in test_command_prompt_position"
+    gdb_test "p value=5" ".*" "set value to 5 in test_command_prompt_position"
     # All this test should do is print 0xdeadbeef once.
     gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
 	    "\\\$\[0-9\]* = 0xdeadbeef" \

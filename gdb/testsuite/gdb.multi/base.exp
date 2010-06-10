@@ -51,7 +51,7 @@ gdb_load ${binfile1}
 # executable into it.
 gdb_test "add-inferior" "Added inferior 2.*"
 gdb_test "inferior 2" "Switching to inferior 2.*"
-gdb_test "file ${binfile2}" ""
+gdb_test "file ${binfile2}" ".*"
 
 # Add a new inferior space and load a main executable into it in one
 # command.
@@ -98,5 +98,5 @@ if { ![runto_main] } then {
     return -1
 }
 
-gdb_test "break hello" ""
+gdb_test "break hello" ".*"
 gdb_test "continue" "Breakpoint \[0-9\].*, hello.*"

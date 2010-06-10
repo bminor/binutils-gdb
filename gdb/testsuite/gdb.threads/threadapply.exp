@@ -46,7 +46,7 @@ if ![runto_main] then {
 
 # Break after all threads have been started.
 set break_line [gdb_get_line_number "Break here"]
-gdb_test "b $break_line" ""
+gdb_test "b $break_line" ".*"
 gdb_test "continue"
 
 gdb_test_multiple "define backthread" "defining macro" {
