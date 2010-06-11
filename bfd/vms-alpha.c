@@ -1154,12 +1154,18 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    if (!bfd_set_section_flags (abfd, section, new_flags))
 	      return FALSE;
 	    section->alignment_power = egps->align;
-	    align_addr = (1 << section->alignment_power);
-	    if ((base_addr % align_addr) != 0)
-	      base_addr += (align_addr - (base_addr % align_addr));
-	    section->vma = (bfd_vma)base_addr;
-	    base_addr += section->size;
-	    section->filepos = (unsigned int)-1;
+            if ((old_flags & EGPS__V_REL) != 0)
+              {
+                /* Give a non-overlapping vma to non absolute sections.  */
+                align_addr = (1 << section->alignment_power);
+                if ((base_addr % align_addr) != 0)
+                  base_addr += (align_addr - (base_addr % align_addr));
+                section->vma = (bfd_vma)base_addr;
+                base_addr += section->size;
+              }
+            else
+              section->vma = 0;
+	    section->filepos = 0;
 
             /* Append it to the section array.  */
             if (PRIV (section_count) >= PRIV (section_max))

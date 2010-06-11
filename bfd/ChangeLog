@@ -1,5 +1,10 @@
 2010-06-11  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Always set vma of absolute
+	sections to 0.
+
+2010-06-11  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (evax_bfd_print_etir): Handle ETIR__C_STO_GBL_LW.
 
 2010-06-11  Tristan Gingold  <gingold@adacore.com>
