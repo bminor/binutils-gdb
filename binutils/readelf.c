@@ -5112,7 +5112,7 @@ dump_ia64_vms_dynamic_fixups (FILE *file, struct ia64_vms_dynfixup *fixup,
   else
     {
       warn ("corrupt library name index of 0x%lx found in dynamic entry",
-            fixup->needed);
+            (unsigned long) fixup->needed);
       lib_name = "???";
     }
   printf (_("\nImage fixups for needed library #%d: %s - ident: %lx\n"),
