@@ -120,6 +120,11 @@ int main ()
   set_debug_traps();
   breakpoint();
 #endif
+
+  /* charset.exp wants to allocate memory for constants.  So make sure malloc
+     gets linked into the program.  */
+  malloc (1);
+
   /* Initialize ascii_string.  */
   init_string (ascii_string,
                120,
