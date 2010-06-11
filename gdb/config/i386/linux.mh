@@ -1,6 +1,6 @@
 # Host: Intel 386 running GNU/Linux.
 
-NAT_FILE= nm-linux.h
+NAT_FILE= config/nm-linux.h
 NATDEPFILES= inf-ptrace.o fork-child.o \
 	i386-nat.o i386-linux-nat.o \
 	proc-service.o linux-thread-db.o \

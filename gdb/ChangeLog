@@ -1,3 +1,17 @@
+2010-06-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gregset.h (GDB_FPXREGSET_T): Remove.
+	(gdb_fpxregset_t): Likewise.
+	(supply_fpxregset): Remove prototype.
+	(fill_fpxregset): Likewise.
+	* i386-linux-nat.c (supply_fpxregset): Remove.
+	(fill_fpxregset): Likewise.
+	(fetch_fpxregs): Inline supply_fpxregset call.
+	(store_fpxregs): Inline fill_fpxregset call.
+
+	* config/i386/linux.mh: Set NAT_FILE to config/nm-linux.h.
+	* config/i386/nm-linux.h: Remove file.
+
 2010-06-09  Michael Snyder  <msnyder@vmware.com>
 
 	* target.c (update_current_target): Fix spelling error in comment.

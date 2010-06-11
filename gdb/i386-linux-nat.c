@@ -413,27 +413,6 @@ store_xstateregs (const struct regcache *regcache, int tid, int regno)
 
 #ifdef HAVE_PTRACE_GETFPXREGS
 
-/* Fill GDB's register array with the floating-point and SSE register
-   values in *FPXREGSETP.  */
-
-void
-supply_fpxregset (struct regcache *regcache,
-		  const elf_fpxregset_t *fpxregsetp)
-{
-  i387_supply_fxsave (regcache, -1, fpxregsetp);
-}
-
-/* Fill register REGNO (if it is a floating-point or SSE register) in
-   *FPXREGSETP with the value in GDB's register array.  If REGNO is
-   -1, do this for all registers.  */
-
-void
-fill_fpxregset (const struct regcache *regcache,
-		elf_fpxregset_t *fpxregsetp, int regno)
-{
-  i387_collect_fxsave (regcache, regno, fpxregsetp);
-}
-
 /* Fetch all registers covered by the PTRACE_GETFPXREGS request from
    process/thread TID and store their values in GDB's register array.
    Return non-zero if successful, zero otherwise.  */
@@ -457,7 +436,7 @@ fetch_fpxregs (struct regcache *regcache, int tid)
       perror_with_name (_("Couldn't read floating-point and SSE registers"));
     }
 
-  supply_fpxregset (regcache, (const elf_fpxregset_t *) &fpxregs);
+  i387_supply_fxsave (regcache, -1, (const elf_fpxregset_t *) &fpxregs);
   return 1;
 }
 
@@ -484,7 +463,7 @@ store_fpxregs (const struct regcache *regcache, int tid, int regno)
       perror_with_name (_("Couldn't read floating-point and SSE registers"));
     }
 
-  fill_fpxregset (regcache, &fpxregs, regno);
+  i387_collect_fxsave (regcache, regno, &fpxregs);
 
   if (ptrace (PTRACE_SETFPXREGS, tid, 0, &fpxregs) == -1)
     perror_with_name (_("Couldn't write floating-point and SSE registers"));
