@@ -1,5 +1,10 @@
 2010-06-11  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dwarf2_add_member_fn): Handle correct form of
+	DW_AT_vtable_elem_location even when GCC extension is seen.
+
+2010-06-11  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/9977, PR exp/11636:
 	* value.h (value_offset): Update.
 	(struct lval_funcs) <check_validity>: New field.

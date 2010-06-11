@@ -4879,19 +4879,46 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
     fnp->is_artificial = 1;
 
   /* Get index in virtual function table if it is a virtual member
-     function.  For GCC, this is an offset in the appropriate
-     virtual table, as specified by DW_AT_containing_type.  For
-     everyone else, it is an expression to be evaluated relative
+     function.  For older versions of GCC, this is an offset in the
+     appropriate virtual table, as specified by DW_AT_containing_type.
+     For everyone else, it is an expression to be evaluated relative
      to the object address.  */
 
   attr = dwarf2_attr (die, DW_AT_vtable_elem_location, cu);
-  if (attr && fnp->fcontext)
+  if (attr)
     {
-      /* Support the .debug_loc offsets */
-      if (attr_form_is_block (attr))
+      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0)
         {
-          fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu) + 2;
-        }
+	  if (DW_BLOCK (attr)->data[0] == DW_OP_constu)
+	    {
+	      /* Old-style GCC.  */
+	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu) + 2;
+	    }
+	  else if (DW_BLOCK (attr)->data[0] == DW_OP_deref
+		   || (DW_BLOCK (attr)->size > 1
+		       && DW_BLOCK (attr)->data[0] == DW_OP_deref_size
+		       && DW_BLOCK (attr)->data[1] == cu->header.addr_size))
+	    {
+	      struct dwarf_block blk;
+	      int offset;
+
+	      offset = (DW_BLOCK (attr)->data[0] == DW_OP_deref
+			? 1 : 2);
+	      blk.size = DW_BLOCK (attr)->size - offset;
+	      blk.data = DW_BLOCK (attr)->data + offset;
+	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu);
+	      if ((fnp->voffset % cu->header.addr_size) != 0)
+		dwarf2_complex_location_expr_complaint ();
+	      else
+		fnp->voffset /= cu->header.addr_size;
+	      fnp->voffset += 2;
+	    }
+	  else
+	    dwarf2_complex_location_expr_complaint ();
+
+	  if (!fnp->fcontext)
+	    fnp->fcontext = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
+	}
       else if (attr_form_is_section_offset (attr))
         {
 	  dwarf2_complex_location_expr_complaint ();
@@ -4901,28 +4928,6 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
 						 fieldname);
         }
-    }
-  else if (attr)
-    {
-      /* We only support trivial expressions here.  This hack will work
-	 for v3 classes, which always start with the vtable pointer.  */
-      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0
-	  && DW_BLOCK (attr)->data[0] == DW_OP_deref)
-	{
-	  struct dwarf_block blk;
-
-	  blk.size = DW_BLOCK (attr)->size - 1;
-	  blk.data = DW_BLOCK (attr)->data + 1;
-	  fnp->voffset = decode_locdesc (&blk, cu);
-	  if ((fnp->voffset % cu->header.addr_size) != 0)
-	    dwarf2_complex_location_expr_complaint ();
-	  else
-	    fnp->voffset /= cu->header.addr_size;
-	  fnp->voffset += 2;
-	  fnp->fcontext = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
-	}
-      else
-	dwarf2_complex_location_expr_complaint ();
     }
   else
     {
