@@ -1,5 +1,9 @@
 2010-06-11  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (evax_bfd_print_etir): Handle ETIR__C_STO_GBL_LW.
+
+2010-06-11  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-misc.c (_bfd_vms_output_counted): Make VALUE argument const.
 	Adjust cast.
 	(_bfd_vms_output_dump): Make DATA argument const, adjust cast.

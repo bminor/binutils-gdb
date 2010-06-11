@@ -6088,6 +6088,10 @@ evax_bfd_print_etir (FILE *file, const char *name,
             sec_len += len;
           }
           break;
+        case ETIR__C_STO_GBL_LW:
+          fprintf (file, _("STO_GBL_LW (store global longword) %.*s\n"),
+                   buf[0], buf + 1);
+          break;
         case ETIR__C_STO_LP_PSB:
           fprintf (file, _("STO_OFF (store LP with procedure signature)\n"));
           break;
