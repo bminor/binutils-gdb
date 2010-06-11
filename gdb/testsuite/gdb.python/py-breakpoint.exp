@@ -136,7 +136,7 @@ if ![runto_main] then {
 }
 
 gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE )" "Set watchpoint" 0
-gdb_test "continue" ".*watchpoint.*result.*Old value = 0.*New value = 25.*main.*" "Test watchpoint write"
+gdb_test "continue" ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*main.*" "Test watchpoint write"
 
 
 

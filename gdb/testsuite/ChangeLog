@@ -1,5 +1,9 @@
 2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.python/py-breakpoint.exp: Handle software watchpoints as well.
+
+2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.base/solib-corrupted.exp: Respect skip_shlib_tests.
 
 2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
