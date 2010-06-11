@@ -1,3 +1,8 @@
+:010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/valgrind-db-attach.exp: Fail gracefully if valgrind
+	does not support ELF executable class.
+
 2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.trace/packetlen.exp: Respect gdb_target_supports_trace.

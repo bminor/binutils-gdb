@@ -51,6 +51,10 @@ gdb_test_multiple "" $test {
 	unsupported $test
 	return -1
     }
+    -re "valgrind: wrong ELF executable class" {
+	unsupported $test
+	return -1
+    }
     -re "command not found" {
 	# The spawn succeeded, but then valgrind was not found - e.g. if
 	# we spawned SSH to a remote system.
