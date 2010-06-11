@@ -577,6 +577,17 @@ read_uleb128 (unsigned char *data, unsigned int *length_return)
   return read_leb128 (data, length_return, 0);
 }
 
+/* Return true if the current file is for IA-64 machine and OpenVMS ABI.
+   This OS has so many departures from the ELF standard that we test it at
+   many places.  */
+
+static inline int
+is_ia64_vms (void)
+{
+  return elf_header.e_machine == EM_IA_64
+    && elf_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS;
+}
+
 /* Guess the relocation size commonly used by the specific machines.  */
 
 static int
@@ -1372,9 +1383,7 @@ dump_relocations (FILE * file,
 			       && elf_header.e_ident[EI_OSABI] == ELFOSABI_HPUX
 			       && psym->st_shndx == SHN_IA_64_ANSI_COMMON)
 			sec_name = "ANSI_COM";
-		      else if (elf_header.e_machine == EM_IA_64
-			       && (elf_header.e_ident[EI_OSABI]
-				   == ELFOSABI_OPENVMS)
+		      else if (is_ia64_vms ()
 			       && psym->st_shndx == SHN_IA_64_VMS_SYMVEC)
 			sec_name = "VMS_SYMVEC";
 		      else
@@ -2553,6 +2562,27 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", constant gp");
 	  if ((e_flags & EF_IA_64_ABSOLUTE))
 	    strcat (buf, ", absolute");
+          if (elf_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS)
+            {
+              if ((e_flags & EF_IA_64_VMS_LINKAGES))
+                strcat (buf, ", vms_linkages");
+              switch ((e_flags & EF_IA_64_VMS_COMCOD))
+                {
+                case EF_IA_64_VMS_COMCOD_SUCCESS:
+                  break;
+                case EF_IA_64_VMS_COMCOD_WARNING:
+                  strcat (buf, ", warning");
+                  break;
+                case EF_IA_64_VMS_COMCOD_ERROR:
+                  strcat (buf, ", error");
+                  break;
+                case EF_IA_64_VMS_COMCOD_ABORT:
+                  strcat (buf, ", abort");
+                  break;
+                default:
+                  abort ();
+                }
+            }
 	  break;
 
 	case EM_VAX:
@@ -3789,7 +3819,10 @@ process_program_headers (FILE * file)
 	      sec = find_section (".dynamic");
 	      if (sec == NULL || sec->sh_size == 0)
 		{
-		  error (_("no .dynamic section in the dynamic segment\n"));
+                  /* A corresponding .dynamic section is expected, but on
+                     IA-64/OpenVMS it is OK for it to be missing.  */
+                  if (!is_ia64_vms ())
+                    error (_("no .dynamic section in the dynamic segment\n"));
 		  break;
 		}
 
@@ -5038,6 +5071,187 @@ process_section_groups (FILE * file)
   return 1;
 }
 
+/* Data used to display dynamic fixups.  */
+
+struct ia64_vms_dynfixup
+{
+  bfd_vma needed_ident;		/* Library ident number.  */
+  bfd_vma needed;		/* Index in the dstrtab of the library name.  */
+  bfd_vma fixup_needed;		/* Index of the library.  */
+  bfd_vma fixup_rela_cnt;	/* Number of fixups.  */
+  bfd_vma fixup_rela_off;	/* Fixups offset in the dynamic segment.  */
+};
+
+/* Data used to display dynamic relocations.  */
+
+struct ia64_vms_dynimgrela
+{
+  bfd_vma img_rela_cnt;		/* Number of relocations.  */
+  bfd_vma img_rela_off;		/* Reloc offset in the dynamic segment.  */
+};
+
+/* Display IA-64 OpenVMS dynamic fixups (used to dynamically link a shared
+   library).  */
+
+static void
+dump_ia64_vms_dynamic_fixups (FILE *file, struct ia64_vms_dynfixup *fixup,
+                              const char *strtab, unsigned int strtab_sz)
+{
+  Elf64_External_VMS_IMAGE_FIXUP *imfs;
+  long i;
+  const char *lib_name;
+
+  imfs = get_data (NULL, file, dynamic_addr + fixup->fixup_rela_off,
+		   1, fixup->fixup_rela_cnt * sizeof (*imfs),
+		   _("dynamic section image fixups"));
+  if (!imfs)
+    return;
+
+  if (fixup->needed < strtab_sz)
+    lib_name = strtab + fixup->needed;
+  else
+    {
+      warn ("corrupt library name index of 0x%lx found in dynamic entry",
+            fixup->needed);
+      lib_name = "???";
+    }
+  printf (_("\nImage fixups for needed library #%d: %s - ident: %lx\n"),
+	  (int) fixup->fixup_needed, lib_name, (long) fixup->needed_ident);
+  printf
+    (_("Seg Offset           Type                             SymVec DataType\n"));
+
+  for (i = 0; i < (long) fixup->fixup_rela_cnt; i++)
+    {
+      unsigned int type;
+      const char *rtype;
+
+      printf ("%3u ", (unsigned) BYTE_GET (imfs [i].fixup_seg));
+      printf_vma ((bfd_vma) BYTE_GET (imfs [i].fixup_offset));
+      type = BYTE_GET (imfs [i].type);
+      rtype = elf_ia64_reloc_type (type);
+      if (rtype == NULL)
+        printf (" 0x%08x                       ", type);
+      else
+        printf (" %-32s ", rtype);
+      printf ("%6u ", (unsigned) BYTE_GET (imfs [i].symvec_index));
+      printf ("0x%08x\n", (unsigned) BYTE_GET (imfs [i].data_type));
+    }
+
+  free (imfs);
+}
+
+/* Display IA-64 OpenVMS dynamic relocations (used to relocate an image).  */
+
+static void
+dump_ia64_vms_dynamic_relocs (FILE *file, struct ia64_vms_dynimgrela *imgrela)
+{
+  Elf64_External_VMS_IMAGE_RELA *imrs;
+  long i;
+
+  imrs = get_data (NULL, file, dynamic_addr + imgrela->img_rela_off,
+		   1, imgrela->img_rela_cnt * sizeof (*imrs),
+		   _("dynamic section image relas"));
+  if (!imrs)
+    return;
+
+  printf (_("\nImage relocs\n"));
+  printf
+    (_("Seg Offset   Type                            Addend            Seg Sym Off\n"));
+
+  for (i = 0; i < (long) imgrela->img_rela_cnt; i++)
+    {
+      unsigned int type;
+      const char *rtype;
+
+      printf ("%3u ", (unsigned) BYTE_GET (imrs [i].rela_seg));
+      printf ("%08" BFD_VMA_FMT "x ",
+              (bfd_vma) BYTE_GET (imrs [i].rela_offset));
+      type = BYTE_GET (imrs [i].type);
+      rtype = elf_ia64_reloc_type (type);
+      if (rtype == NULL)
+        printf ("0x%08x                      ", type);
+      else
+        printf ("%-31s ", rtype);
+      print_vma (BYTE_GET (imrs [i].addend), FULL_HEX);
+      printf ("%3u ", (unsigned) BYTE_GET (imrs [i].sym_seg));
+      printf ("%08" BFD_VMA_FMT "x\n",
+              (bfd_vma) BYTE_GET (imrs [i].sym_offset));
+    }
+
+  free (imrs);
+}
+
+/* Display IA-64 OpenVMS dynamic relocations and fixups.  */
+
+static int
+process_ia64_vms_dynamic_relocs (FILE *file)
+{
+  struct ia64_vms_dynfixup fixup;
+  struct ia64_vms_dynimgrela imgrela;
+  Elf_Internal_Dyn *entry;
+  int res = 0;
+  bfd_vma strtab_off = 0;
+  bfd_vma strtab_sz = 0;
+  char *strtab = NULL;
+
+  memset (&fixup, 0, sizeof (fixup));
+  memset (&imgrela, 0, sizeof (imgrela));
+
+  /* Note: the order of the entries is specified by the OpenVMS specs.  */
+  for (entry = dynamic_section;
+       entry < dynamic_section + dynamic_nent;
+       entry++)
+    {
+      switch (entry->d_tag)
+        {
+        case DT_IA_64_VMS_STRTAB_OFFSET:
+          strtab_off = entry->d_un.d_val;
+          break;
+        case DT_STRSZ:
+          strtab_sz = entry->d_un.d_val;
+          if (strtab == NULL)
+            strtab = get_data (NULL, file, dynamic_addr + strtab_off,
+                               1, strtab_sz, _("dynamic string section"));
+          break;
+
+        case DT_IA_64_VMS_NEEDED_IDENT:
+          fixup.needed_ident = entry->d_un.d_val;
+          break;
+        case DT_NEEDED:
+          fixup.needed = entry->d_un.d_val;
+          break;
+        case DT_IA_64_VMS_FIXUP_NEEDED:
+          fixup.fixup_needed = entry->d_un.d_val;
+          break;
+        case DT_IA_64_VMS_FIXUP_RELA_CNT:
+          fixup.fixup_rela_cnt = entry->d_un.d_val;
+          break;
+        case DT_IA_64_VMS_FIXUP_RELA_OFF:
+          fixup.fixup_rela_off = entry->d_un.d_val;
+          res++;
+          dump_ia64_vms_dynamic_fixups (file, &fixup, strtab, strtab_sz);
+          break;
+
+        case DT_IA_64_VMS_IMG_RELA_CNT:
+	  imgrela.img_rela_cnt = entry->d_un.d_val;
+          break;
+        case DT_IA_64_VMS_IMG_RELA_OFF:
+	  imgrela.img_rela_off = entry->d_un.d_val;
+          res++;
+          dump_ia64_vms_dynamic_relocs (file, &imgrela);
+          break;
+
+        default:
+          break;
+	}
+    }
+
+  if (strtab != NULL)
+    free (strtab);
+
+  return res;
+}
+
 static struct
 {
   const char * name;
@@ -5108,6 +5322,9 @@ process_relocs (FILE * file)
 				dynamic_strings, dynamic_strings_length, is_rela);
 	    }
 	}
+
+      if (is_ia64_vms ())
+        has_dynamic_reloc |= process_ia64_vms_dynamic_relocs (file);
 
       if (! has_dynamic_reloc)
 	printf (_("\nThere are no dynamic relocations in this file.\n"));
@@ -6667,6 +6884,29 @@ dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
   putchar ('\n');
 }
 
+#ifdef BFD64
+
+/* VMS vs Unix time offset and factor.  */
+
+#define VMS_EPOCH_OFFSET 35067168000000000LL
+#define VMS_GRANULARITY_FACTOR 10000000
+
+/* Display a VMS time in a human readable format.  */
+
+static void
+print_vms_time (bfd_int64_t vmstime)
+{
+  struct tm *tm;
+  time_t unxtime;
+
+  unxtime = (vmstime - VMS_EPOCH_OFFSET) / VMS_GRANULARITY_FACTOR;
+  tm = gmtime (&unxtime);
+  printf ("%04u-%02u-%02uT%02u:%02u:%02u",
+          tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+          tm->tm_hour, tm->tm_min, tm->tm_sec);
+}
+#endif /* BFD64 */
+
 static void
 dynamic_section_ia64_val (Elf_Internal_Dyn * entry)
 {
@@ -6677,6 +6917,46 @@ dynamic_section_ia64_val (Elf_Internal_Dyn * entry)
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
       printf (" -- ");
       print_vma (entry->d_un.d_ptr + (3 * 8), PREFIX_HEX);
+      break;
+
+    case DT_IA_64_VMS_LINKTIME:
+#ifdef BFD64
+      print_vms_time (entry->d_un.d_val);
+#endif
+      break;
+
+    case DT_IA_64_VMS_LNKFLAGS:
+      print_vma (entry->d_un.d_ptr, PREFIX_HEX);
+      if (entry->d_un.d_val & VMS_LF_CALL_DEBUG)
+        printf (" CALL_DEBUG");
+      if (entry->d_un.d_val & VMS_LF_NOP0BUFS)
+        printf (" NOP0BUFS");
+      if (entry->d_un.d_val & VMS_LF_P0IMAGE)
+        printf (" P0IMAGE");
+      if (entry->d_un.d_val & VMS_LF_MKTHREADS)
+        printf (" MKTHREADS");
+      if (entry->d_un.d_val & VMS_LF_UPCALLS)
+        printf (" UPCALLS");
+      if (entry->d_un.d_val & VMS_LF_IMGSTA)
+        printf (" IMGSTA");
+      if (entry->d_un.d_val & VMS_LF_INITIALIZE)
+        printf (" INITIALIZE");
+      if (entry->d_un.d_val & VMS_LF_MAIN)
+        printf (" MAIN");
+      if (entry->d_un.d_val & VMS_LF_EXE_INIT)
+        printf (" EXE_INIT");
+      if (entry->d_un.d_val & VMS_LF_TBK_IN_IMG)
+        printf (" TBK_IN_IMG");
+      if (entry->d_un.d_val & VMS_LF_DBG_IN_IMG)
+        printf (" DBG_IN_IMG");
+      if (entry->d_un.d_val & VMS_LF_TBK_IN_DSF)
+        printf (" TBK_IN_DSF");
+      if (entry->d_un.d_val & VMS_LF_DBG_IN_DSF)
+        printf (" DBG_IN_DSF");
+      if (entry->d_un.d_val & VMS_LF_SIGNATURES)
+        printf (" SIGNATURES");
+      if (entry->d_un.d_val & VMS_LF_REL_SEG_OFF)
+        printf (" REL_SEG_OFF");
       break;
 
     default:
@@ -7973,6 +8253,67 @@ get_mips_symbol_other (unsigned int other)
 }
 
 static const char *
+get_ia64_symbol_other (unsigned int other)
+{
+  if (is_ia64_vms ())
+    {
+      static char res[32];
+
+      res[0] = 0;
+
+      /* Function types is for images and .STB files only.  */
+      switch (elf_header.e_type)
+        {
+        case ET_DYN:
+        case ET_EXEC:
+          switch (VMS_ST_FUNC_TYPE (other))
+            {
+            case VMS_SFT_CODE_ADDR:
+              strcat (res, " CA");
+              break;
+            case VMS_SFT_SYMV_IDX:
+              strcat (res, " VEC");
+              break;
+            case VMS_SFT_FD:
+              strcat (res, " FD");
+              break;
+            case VMS_SFT_RESERVE:
+              strcat (res, " RSV");
+              break;
+            default:
+              abort ();
+            }
+          break;
+        default:
+          break;
+        }
+      switch (VMS_ST_LINKAGE (other))
+        {
+        case VMS_STL_IGNORE:
+          strcat (res, " IGN");
+          break;
+        case VMS_STL_RESERVE:
+          strcat (res, " RSV");
+          break;
+        case VMS_STL_STD:
+          strcat (res, " STD");
+          break;
+        case VMS_STL_LNK:
+          strcat (res, " LNK");
+          break;
+        default:
+          abort ();
+        }
+
+      if (res[0] != 0)
+        return res + 1;
+      else
+        return res;
+    }
+  return NULL;
+}
+
+static const char *
 get_symbol_other (unsigned int other)
 {
   const char * result = NULL;
@@ -7985,6 +8326,10 @@ get_symbol_other (unsigned int other)
     {
     case EM_MIPS:
       result = get_mips_symbol_other (other);
+      break;
+    case EM_IA_64:
+      result = get_ia64_symbol_other (other);
+      break;
     default:
       break;
     }
