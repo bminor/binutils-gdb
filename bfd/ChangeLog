@@ -1,3 +1,7 @@
+2010-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* vms-alpha.c (_bfd_vms_write_egsd): Make sname const.
+
 2010-06-11  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Always set vma of absolute

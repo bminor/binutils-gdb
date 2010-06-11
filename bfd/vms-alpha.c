@@ -3273,7 +3273,7 @@ _bfd_vms_write_egsd (bfd *abfd)
   unsigned int symnum;
   int last_index = -1;
   char dummy_name[10];
-  char *sname;
+  const char *sname;
   flagword new_flags, old_flags;
   int abs_section_index = 0;
   struct vms_rec_wr *recwr = &PRIV (recwr);
