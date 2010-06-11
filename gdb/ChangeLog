@@ -1,3 +1,26 @@
+2010-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (breakpoint_restore_shadows): New OWNER comment.
+	(should_be_inserted): Return zero also on NULL OWNER.
+	(breakpoint_program_space_exit): New OWNER comment.
+	(insert_breakpoint_locations): Extend comment for OWNER.
+	(remove_breakpoint_1, remove_breakpoint): Assert on OWNER.
+	(breakpoint_init_inferior, breakpoint_here_p, breakpoint_thread_match):
+	New OWNER comment.
+	(print_it_typical): Return PRINT_UNKNOWN on NULL OWNER.
+	(watchpoint_check): New assert on BREAKPOINT_AT and OWNER.
+	(bpstat_check_location): New assert on OWNER.
+	(bpstat_check_watchpoint, bpstat_check_breakpoint_conditions): Move BL
+	and B initializations to the code block.  New assert on them.
+	(print_one_breakpoint_location): New OWNER comment.
+	(watchpoint_locations_match): Assert on OWNER.
+	(breakpoint_locations_match): Move HW_POINT1 and HW_POINT2
+	initializations to the code block.  New assert on OWNER.
+	(set_breakpoint_location_function): New assert on OWNER.
+	(disable_breakpoints_in_shlibs, disable_breakpoints_in_unloaded_shlib)
+	(bp_location_compare, update_global_location_list)
+	(update_global_location_list): New OWNER comment.
+
 2010-06-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove config/i386/nm-linux.h

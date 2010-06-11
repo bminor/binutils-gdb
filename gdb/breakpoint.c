@@ -1112,6 +1112,7 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
     int bp_size = 0;
     int bptoffset = 0;
 
+    /* bp_location array has B->OWNER always non-NULL.  */
     if (b->owner->type == bp_none)
       warning (_("reading through apparently deleted breakpoint #%d?"),
               b->owner->number);
@@ -1571,7 +1572,7 @@ in which its expression is valid.\n"),
 static int
 should_be_inserted (struct bp_location *bpt)
 {
-  if (!breakpoint_enabled (bpt->owner))
+  if (bpt->owner == NULL || !breakpoint_enabled (bpt->owner))
     return 0;
 
   if (bpt->owner->disposition == disp_del_at_next_stop)
@@ -1874,6 +1875,7 @@ breakpoint_program_space_exit (struct program_space *pspace)
 
       if (loc->pspace == pspace)
 	{
+	  /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
 	  if (loc->owner->loc == loc)
 	    loc->owner->loc = loc->next;
 	  else
@@ -1943,7 +1945,8 @@ insert_breakpoint_locations (void)
 	continue;
 
       /* There is no point inserting thread-specific breakpoints if the
-	 thread no longer exists.  */
+	 thread no longer exists.  ALL_BP_LOCATIONS bp_location has B->OWNER
+	 always non-NULL.  */
       if (b->owner->thread != -1
 	  && !valid_thread_id (b->owner->thread))
 	continue;
@@ -2394,6 +2397,9 @@ remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
 {
   int val;
 
+  /* B is never in moribund_locations by our callers.  */
+  gdb_assert (b->owner != NULL);
+
   if (b->owner->enable_state == bp_permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
@@ -2509,6 +2515,9 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
   int ret;
   struct cleanup *old_chain;
 
+  /* B is never in moribund_locations by our callers.  */
+  gdb_assert (b->owner != NULL);
+
   if (b->owner->enable_state == bp_permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
@@ -2566,6 +2575,7 @@ breakpoint_init_inferior (enum inf_context context)
 
   ALL_BP_LOCATIONS (bpt, bptp_tmp)
   {
+    /* ALL_BP_LOCATIONS bp_location has BPT->OWNER always non-NULL.  */
     if (bpt->pspace == pspace
 	&& bpt->owner->enable_state != bp_permanent)
       bpt->inserted = 0;
@@ -2663,6 +2673,7 @@ breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
+      /* ALL_BP_LOCATIONS bp_location has BPT->OWNER always non-NULL.  */
       if ((breakpoint_enabled (bpt->owner)
 	   || bpt->owner->enable_state == bp_permanent)
 	  && breakpoint_address_match (bpt->pspace->aspace, bpt->address,
@@ -2827,6 +2838,7 @@ breakpoint_thread_match (struct address_space *aspace, CORE_ADDR pc,
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
+      /* ALL_BP_LOCATIONS bp_location has BPT->OWNER always non-NULL.  */
       if (!breakpoint_enabled (bpt->owner)
 	  && bpt->owner->enable_state != bp_permanent)
 	continue;
@@ -3193,6 +3205,11 @@ print_it_typical (bpstat bs)
   if (bs->breakpoint_at == NULL)
     return PRINT_UNKNOWN;
   bl = bs->breakpoint_at;
+
+  /* bl->owner can be NULL if it was a momentary breakpoint
+     which has since been placed into moribund_locations.  */
+  if (bl->owner == NULL)
+    return PRINT_UNKNOWN;
   b = bl->owner;
 
   stb = ui_out_stream_new (uiout);
@@ -3563,6 +3580,9 @@ watchpoint_check (void *p)
   struct frame_info *fr;
   int within_current_scope;
 
+  /* BS is built for existing struct breakpoint.  */
+  gdb_assert (bs->breakpoint_at != NULL);
+  gdb_assert (bs->breakpoint_at->owner != NULL);
   b = bs->breakpoint_at->owner;
 
   /* If this is a local watchpoint, we only want to check if the
@@ -3691,6 +3711,9 @@ bpstat_check_location (const struct bp_location *bl,
 {
   struct breakpoint *b = bl->owner;
 
+  /* BL is from existing struct breakpoint.  */
+  gdb_assert (b != NULL);
+
   /* By definition, the inferior does not report stops at
      tracepoints.  */
   if (is_tracepoint (b))
@@ -3746,8 +3769,14 @@ bpstat_check_location (const struct bp_location *bl,
 static void
 bpstat_check_watchpoint (bpstat bs)
 {
-  const struct bp_location *bl = bs->breakpoint_at;
-  struct breakpoint *b = bl->owner;
+  const struct bp_location *bl;
+  struct breakpoint *b;
+
+  /* BS is built for existing struct breakpoint.  */
+  bl = bs->breakpoint_at;
+  gdb_assert (bl != NULL);
+  b = bl->owner;
+  gdb_assert (b != NULL);
 
   if (is_watchpoint (b))
     {
@@ -3899,8 +3928,14 @@ static void
 bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 {
   int thread_id = pid_to_thread_id (ptid);
-  const struct bp_location *bl = bs->breakpoint_at;
-  struct breakpoint *b = bl->owner;
+  const struct bp_location *bl;
+  struct breakpoint *b;
+
+  /* BS is built for existing struct breakpoint.  */
+  bl = bs->breakpoint_at;
+  gdb_assert (bl != NULL);
+  b = bl->owner;
+  gdb_assert (b != NULL);
 
   if (frame_id_p (b->frame_id)
       && !frame_id_eq (b->frame_id, get_stack_frame_id (get_current_frame ())))
@@ -4678,6 +4713,8 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  || (!gdbarch_has_global_breakpoints (target_gdbarch)
 	      && (number_of_program_spaces () > 1
 		  || number_of_inferiors () > 1)
+	      /* LOC is for existing B, it cannot be in moribund_locations and
+		 thus having NULL OWNER.  */
 	      && loc->owner->type != bp_catchpoint)))
     {
       struct inferior *inf;
@@ -5214,6 +5251,10 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
 static int
 watchpoint_locations_match (struct bp_location *loc1, struct bp_location *loc2)
 {
+  /* Both of them must not be in moribund_locations.  */
+  gdb_assert (loc1->owner != NULL);
+  gdb_assert (loc2->owner != NULL);
+
   /* Note that this checks the owner's type, not the location's.  In
      case the target does not support read watchpoints, but does
      support access watchpoints, we'll have bp_read_watchpoint
@@ -5247,8 +5288,14 @@ breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
 static int
 breakpoint_locations_match (struct bp_location *loc1, struct bp_location *loc2)
 {
-  int hw_point1 = is_hardware_watchpoint (loc1->owner);
-  int hw_point2 = is_hardware_watchpoint (loc2->owner);
+  int hw_point1, hw_point2;
+
+  /* Both of them must not be in moribund_locations.  */
+  gdb_assert (loc1->owner != NULL);
+  gdb_assert (loc2->owner != NULL);
+
+  hw_point1 = is_hardware_watchpoint (loc1->owner);
+  hw_point2 = is_hardware_watchpoint (loc2->owner);
 
   if (hw_point1 != hw_point2)
     return 0;
@@ -5445,6 +5492,8 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
 static void
 set_breakpoint_location_function (struct bp_location *loc)
 {
+  gdb_assert (loc->owner != NULL);
+
   if (loc->owner->type == bp_breakpoint
       || loc->owner->type == bp_hardware_breakpoint
       || is_tracepoint (loc->owner))
@@ -5727,7 +5776,9 @@ disable_breakpoints_in_shlibs (void)
 
   ALL_BP_LOCATIONS (loc, locp_tmp)
   {
+    /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
     struct breakpoint *b = loc->owner;
+
     /* We apply the check to all breakpoints, including disabled
        for those with loc->duplicate set.  This is so that when breakpoint
        becomes enabled, or the duplicate is removed, gdb will try to insert
@@ -5770,6 +5821,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 
   ALL_BP_LOCATIONS (loc, locp_tmp)
   {
+    /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
     struct breakpoint *b = loc->owner;
 
     if ((loc->loc_type == bp_loc_hardware_breakpoint
@@ -8848,6 +8900,7 @@ bp_location_compare (const void *ap, const void *bp)
 {
   struct bp_location *a = *(void **) ap;
   struct bp_location *b = *(void **) bp;
+  /* A and B come from existing breakpoints having non-NULL OWNER.  */
   int a_perm = a->owner->enable_state == bp_permanent;
   int b_perm = b->owner->enable_state == bp_permanent;
 
@@ -9025,6 +9078,7 @@ update_global_location_list (int should_insert)
 		 See if there's another location at the same address, in which 
 		 case we don't need to remove this one from the target.  */
 
+	      /* OLD_LOC comes from existing struct breakpoint.  */
 	      if (breakpoint_address_is_meaningful (old_loc->owner))
 		{
 		  for (loc2p = locp;
@@ -9157,6 +9211,7 @@ update_global_location_list (int should_insert)
   rwp_loc_first = NULL;
   ALL_BP_LOCATIONS (loc, locp)
     {
+      /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
       struct breakpoint *b = loc->owner;
       struct bp_location **loc_first_p;
 
