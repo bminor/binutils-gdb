@@ -76,8 +76,6 @@ proc pieces_test_f3 {} {
     gdb_continue_to_breakpoint "continue to f3 breakpoint for pieces"
     gdb_test "print a.i" " = 4" "print a.i in pieces:f3"
     gdb_test "print a.j" " = 14" "print a.j in pieces:f3"
-    # Right now gdb says "value optimized out" here, but that is wrong.
-    setup_kfail "exp/11636" *-*-*
     gdb_test "print a.i = 7" " = 7" "set a.i in pieces:f3"
     gdb_test "print a.i" " = 7" "print new a.i in pieces:f3"
 }
@@ -90,7 +88,7 @@ proc pieces_test_f6 {} {
        "set f6 breakpoint for pieces"
     gdb_continue_to_breakpoint "continue to f6 breakpoint for pieces"
     gdb_test "print a" \
-	"warning: bits .* in computed object were.* = {i = 7, j = 8, q = 0}" \
+	" = {i = 7, j = 8, q = .value optimized out.}" \
 	"print a with optimized out piece"
     # Note: no warning for this case.
     gdb_test_multiple "print a.i" \

@@ -50,6 +50,7 @@ extern int scm_value_print (struct value *, struct ui_file *,
 
 extern int scm_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			  struct ui_file *, int,
+			  const struct value *,
 			  const struct value_print_options *);
 
 extern LONGEST scm_get_field (LONGEST, int, int, enum bfd_endian);

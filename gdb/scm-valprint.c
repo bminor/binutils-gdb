@@ -422,9 +422,12 @@ int
 scm_val_print (struct type *type, const gdb_byte *valaddr,
 	       int embedded_offset, CORE_ADDR address,
 	       struct ui_file *stream, int recurse,
+	       const struct value *val,
 	       const struct value_print_options *options)
 {
-  if (is_scmvalue_type (type))
+  if (is_scmvalue_type (type)
+      && value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
+			   TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     {
       enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
       LONGEST svalue
@@ -443,7 +446,8 @@ scm_val_print (struct type *type, const gdb_byte *valaddr,
     }
   else
     {
-      return c_val_print (type, valaddr, 0, address, stream, recurse, options);
+      return c_val_print (type, valaddr, 0, address, stream, recurse,
+			  val, options);
     }
 }
 

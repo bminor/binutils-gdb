@@ -245,6 +245,39 @@ scalar_type_p (struct type *type)
     }
 }
 
+/* Helper function to check the validity of some bits of a value.
+
+   If TYPE represents some aggregate type (e.g., a structure), return 1.
+   
+   Otherwise, any of the bytes starting at OFFSET and extending for
+   TYPE_LENGTH(TYPE) bytes are invalid, print a message to STREAM and
+   return 0.  The checking is done using FUNCS.
+   
+   Otherwise, return 1.  */
+
+static int
+valprint_check_validity (struct ui_file *stream,
+			 struct type *type,
+			 int offset,
+			 const struct value *val)
+{
+  CHECK_TYPEDEF (type);
+
+  if (TYPE_CODE (type) != TYPE_CODE_UNION
+      && TYPE_CODE (type) != TYPE_CODE_STRUCT
+      && TYPE_CODE (type) != TYPE_CODE_ARRAY)
+    {
+      if (! value_bits_valid (val, TARGET_CHAR_BIT * offset,
+			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+	{
+	  fprintf_filtered (stream, _("<value optimized out>"));
+	  return 0;
+	}
+    }
+
+  return 1;
+}
+
 /* Print using the given LANGUAGE the data of type TYPE located at VALADDR
    (within GDB), which came from the inferior at address ADDRESS, onto
    stdio stream STREAM according to OPTIONS.
@@ -263,6 +296,7 @@ scalar_type_p (struct type *type)
 int
 val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	   CORE_ADDR address, struct ui_file *stream, int recurse,
+	   const struct value *val,
 	   const struct value_print_options *options,
 	   const struct language_defn *language)
 {
@@ -283,16 +317,19 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
   if (TYPE_STUB (real_type))
     {
-      fprintf_filtered (stream, "<incomplete type>");
+      fprintf_filtered (stream, _("<incomplete type>"));
       gdb_flush (stream);
       return (0);
     }
 
+  if (!valprint_check_validity (stream, real_type, embedded_offset, val))
+    return 0;
+
   if (!options->raw)
     {
       ret = apply_val_pretty_printer (type, valaddr, embedded_offset,
-				      address, stream, recurse, options,
-				      language);
+				      address, stream, recurse,
+				      val, options, language);
       if (ret)
 	return ret;
     }
@@ -308,7 +345,8 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       ret = language->la_val_print (type, valaddr, embedded_offset, address,
-				    stream, recurse, &local_opts);
+				    stream, recurse, val,
+				    &local_opts);
     }
   if (except.reason < 0)
     fprintf_filtered (stream, _("<error reading variable>"));
@@ -329,7 +367,7 @@ value_check_printable (struct value *val, struct ui_file *stream)
       return 0;
     }
 
-  if (value_optimized_out (val))
+  if (value_entirely_optimized_out (val))
     {
       fprintf_filtered (stream, _("<value optimized out>"));
       return 0;
@@ -369,9 +407,10 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
        get a fixed representation of our value.  */
     val = ada_to_fixed_value (val);
 
-  return val_print (value_type (val), value_contents_all (val),
+  return val_print (value_type (val), value_contents_for_printing (val),
 		    value_embedded_offset (val), value_address (val),
-		    stream, recurse, options, language);
+		    stream, recurse,
+		    val, options, language);
 }
 
 /* Print on stream STREAM the value VAL according to OPTIONS.  The value
@@ -390,11 +429,11 @@ value_print (struct value *val, struct ui_file *stream,
   if (!options->raw)
     {
       int r = apply_val_pretty_printer (value_type (val),
-					value_contents_all (val),
+					value_contents_for_printing (val),
 					value_embedded_offset (val),
 					value_address (val),
-					stream, 0, options,
-					current_language);
+					stream, 0,
+					val, options, current_language);
 
       if (r)
 	return r;
@@ -1097,6 +1136,7 @@ void
 val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 			  CORE_ADDR address, struct ui_file *stream,
 			  int recurse,
+			  const struct value *val,
 			  const struct value_print_options *options,
 			  unsigned int i)
 {
@@ -1175,7 +1215,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
       if (reps > options->repeat_count_threshold)
 	{
 	  val_print (elttype, valaddr + i * eltlen, 0, address + i * eltlen,
-		     stream, recurse + 1, options, current_language);
+		     stream, recurse + 1, val, options, current_language);
 	  annotate_elt_rep (reps);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  annotate_elt_rep_end ();
@@ -1186,7 +1226,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
       else
 	{
 	  val_print (elttype, valaddr + i * eltlen, 0, address + i * eltlen,
-		     stream, recurse + 1, options, current_language);
+		     stream, recurse + 1, val, options, current_language);
 	  annotate_elt ();
 	  things_printed++;
 	}

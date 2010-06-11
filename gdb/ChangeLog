@@ -1,5 +1,107 @@
 2010-06-11  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/9977, PR exp/11636:
+	* value.h (value_offset): Update.
+	(struct lval_funcs) <check_validity>: New field.
+	<copy_closure>: Make argument const.
+	(value_computed_closure): Update.
+	(value_contents_for_printing): Declare.
+	(value_bits_valid): Likewise.
+	(val_print): Likewise.
+	(set_value_component_location): Update.
+	(value_entirely_optimized_out): Declare.
+	* value.c (value_offset): Argument now const.
+	(require_not_optimized_out): New function.
+	(value_contents_for_printing): New function.
+	(value_contents_all): Call require_not_optimized_out.
+	(value_contents): Likewise.
+	(value_bits_valid): New function.
+	(value_computed_closure): Argument now const.
+	(set_value_component_location): Make 'whole' argument const.
+	(value_entirely_optimized_out): New function.
+	(value_bitsize): Argument now 'const'.
+	(value_bitpos): Likewise.
+	(value_type): Likewise.
+	* valprint.h (val_print_array_elements): Update.
+	* valprint.c (val_print): Add 'val' argument.  Use
+	valprint_check_validity.
+	(valprint_check_validity): New function.
+	(value_check_printable): Use value_entirely_optimized_out.
+	(common_val_print): Update.
+	(value_print): Likewise.
+	(val_print_array_elements): Add 'val' argument.
+	* valops.c (value_fetch_lazy): Use value_contents_for_printing,
+	value_bits_valid.  Reinit frame cache for lval_computed.
+	* sh64-tdep.c (sh64_do_register): Update.
+	* scm-valprint.c (scm_val_print): Add 'val' argument.
+	* scm-lang.h (scm_val_print): Update.
+	* python/python.h (apply_val_pretty_printer): Update.
+	* python/py-prettyprint.c (apply_val_pretty_printer): Add 'val'
+	argument.  Call set_value_component_location.
+	* printcmd.c (print_scalar_formatted): Update.
+	* p-valprint.c (pascal_val_print): Add 'val' argument.
+	(pascal_object_print_value_fields): Likewise.
+	(pascal_object_print_value): Likewise.
+	(pascal_object_print_static_field): Update.
+	* p-lang.h (pascal_val_print): Update.
+	(pascal_object_print_value_fields): Update.
+	* mt-tdep.c (mt_registers_info): Update.
+	* mi/mi-main.c (get_register): Update.
+	(mi_cmd_data_evaluate_expression): Use common_val_print.
+	* m2-valprint.c (m2_print_array_contents): Add 'val' argument.
+	(m2_print_unbounded_array): Likewise.
+	(m2_val_print): Likewise.
+	* m2-lang.h (m2_val_print): Update.
+	* language.h (struct language_defn) <la_val_print>: Add 'val'
+	argument.
+	(LA_VAL_PRINT): Likewise.
+	* language.c (unk_lang_val_print): Add 'val' argument.
+	* jv-valprint.c (java_print_value_fields): Add 'val' argument.
+	(java_val_print): Likewise.
+	* jv-lang.h (java_val_print): Add 'val' argument.
+	* infcmd.c (default_print_registers_info): Update.
+	* f-valprint.c (f77_print_array_1): Add 'val' argument.
+	(f77_print_array): Likewise.
+	(f_val_print): Likewise.
+	* f-lang.h (f_val_print): Add 'val' argument.
+	* dwarf2loc.c (read_pieced_value): Use value_bitsize and
+	value_bitpos.
+	<DWARF_VALUE_OPTIMIZED_OUT>: Don't print warning.  Call
+	set_value_optimized_out.
+	(write_pieced_value): Use value_bitsize and value_bitpos.
+	<default>: Don't exit loop.
+	(check_pieced_value_validity): New function.
+	(pieced_value_funcs): Reference check_pieced_value_validity,
+	check_pieced_value_invalid.
+	(copy_pieced_value_closure): Update.
+	(check_pieced_value_bits): New function.
+	(check_pieced_value_invalid): New function.
+	* d-valprint.c (dynamic_array_type): Add 'val' argument.
+	(d_val_print): Likewise.
+	* d-lang.h (d_val_print): Update.
+	* cp-valprint.c (cp_print_value_fields): Add 'val' argument.
+	(cp_print_value_fields_rtti): Likewise.
+	(cp_print_value): Likewise.
+	(cp_print_static_field): Update.
+	* c-valprint.c (c_val_print): Add 'val' argument.
+	(c_value_print): Update.
+	* c-lang.h (c_val_print): Update.
+	(cp_print_value_fields): Likewise.
+	(cp_print_value_fields_rtti): Likewise.
+	* ada-valprint.c (struct ada_val_print_args): Remove.
+	(val_print_packed_array_elements): Add 'val' argument.
+	(ada_val_print): Likewise.  Rewrite.
+	(ada_val_print_stub): Remove.
+	(ada_val_print_array): Add 'val' argument.
+	(ada_val_print_1): Likewise.
+	(print_variant_part): Likewise.
+	(ada_value_print): Update.
+	(print_record): Add 'val' argument.
+	(print_field_values): Likewise.
+	* ada-lang.h (ada_val_print): Update.
+
+2010-06-11  Tom Tromey  <tromey@redhat.com>
+
 	* vec.h (VEC_cleanup): New macro.
 	(DEF_VEC_ALLOC_FUNC_I): Update.
 	(DEF_VEC_ALLOC_FUNC_P): Likewise.

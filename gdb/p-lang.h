@@ -37,6 +37,7 @@ extern void pascal_print_typedef (struct type *, struct symbol *,
 
 extern int pascal_val_print (struct type *, const gdb_byte *, int,
 			     CORE_ADDR, struct ui_file *, int,
+			     const struct value *,
 			     const struct value_print_options *);
 
 extern int pascal_value_print (struct value *, struct ui_file *,
@@ -70,6 +71,7 @@ extern void
 extern void pascal_object_print_value_fields (struct type *, const gdb_byte *,
 					      CORE_ADDR, struct ui_file *,
 					      int,
+					      const struct value *,
 					      const struct value_print_options *,
 					      struct type **, int);
 

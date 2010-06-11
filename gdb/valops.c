@@ -941,10 +941,16 @@ value_fetch_lazy (struct value *val)
       struct value *parent = value_parent (val);
       LONGEST offset = value_offset (val);
       LONGEST num = unpack_bits_as_long (value_type (val),
-					 value_contents (parent) + offset,
+					 (value_contents_for_printing (parent)
+					  + offset),
 					 value_bitpos (val),
 					 value_bitsize (val));
       int length = TYPE_LENGTH (type);
+
+      if (!value_bits_valid (val,
+			     TARGET_CHAR_BIT * offset + value_bitpos (val),
+			     value_bitsize (val)))
+	error (_("value has been optimized out"));
 
       store_signed_integer (value_contents_raw (val), length, byte_order, num);
     }
@@ -1246,6 +1252,7 @@ value_assign (struct value *toval, struct value *fromval)
     {
     case lval_memory:
     case lval_register:
+    case lval_computed:
 
       reinit_frame_cache ();
 

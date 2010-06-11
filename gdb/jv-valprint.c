@@ -259,6 +259,7 @@ static void
 java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 			 CORE_ADDR address, struct ui_file *stream,
 			 int recurse,
+			 const struct value *val,
 			 const struct value_print_options *options)
 {
   int i, len, n_baseclasses;
@@ -302,7 +303,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  base_valaddr = valaddr;
 
 	  java_print_value_fields (baseclass, base_valaddr, address + boffset,
-				   stream, recurse + 1, options);
+				   stream, recurse + 1, val, options);
 	  fputs_filtered (", ", stream);
 	}
 
@@ -392,6 +393,11 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		{
 		  fputs_filtered ("<optimized out or zero length>", stream);
 		}
+	      else if (!value_bits_valid (val, TYPE_FIELD_BITPOS (type, i),
+					  TYPE_FIELD_BITSIZE (type, i)))
+		{
+		  fputs_filtered (_("<value optimized out>"), stream);
+		}
 	      else
 		{
 		  struct value_print_options opts;
@@ -440,7 +446,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
 			     address + TYPE_FIELD_BITPOS (type, i) / 8,
-			     stream, recurse + 1, &opts,
+			     stream, recurse + 1, val, &opts,
 			     current_language);
 		}
 	    }
@@ -467,6 +473,7 @@ int
 java_val_print (struct type *type, const gdb_byte *valaddr,
 		int embedded_offset, CORE_ADDR address,
 		struct ui_file *stream, int recurse,
+		const struct value *val,
 		const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
@@ -543,12 +550,12 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 
     case TYPE_CODE_STRUCT:
       java_print_value_fields (type, valaddr, address, stream, recurse,
-			       options);
+			       val, options);
       break;
 
     default:
       return c_val_print (type, valaddr, embedded_offset, address, stream,
-			  recurse, options);
+			  recurse, val, options);
     }
 
   return 0;

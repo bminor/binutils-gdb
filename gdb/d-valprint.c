@@ -31,12 +31,15 @@ static int
 dynamic_array_type (struct type *type, const gdb_byte *valaddr,
 		    int embedded_offset, CORE_ADDR address,
 		    struct ui_file *stream, int recurse,
+		    const struct value *val,
 		    const struct value_print_options *options)
 {
   if (TYPE_NFIELDS (type) == 2
       && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_INT
       && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
-      && strcmp (TYPE_FIELD_NAME (type, 1), "ptr") == 0)
+      && strcmp (TYPE_FIELD_NAME (type, 1), "ptr") == 0
+      && value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
+			   TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     {
       CORE_ADDR addr;
       struct type *elttype;
@@ -60,7 +63,7 @@ dynamic_array_type (struct type *type, const gdb_byte *valaddr,
       ptraddr = value_contents (val);
 
       return d_val_print (true_type, ptraddr, 0, addr, stream, recurse + 1,
-			  options);
+			  NULL, options);
     }
   return -1;
 }
@@ -69,6 +72,7 @@ dynamic_array_type (struct type *type, const gdb_byte *valaddr,
 int
 d_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
              CORE_ADDR address, struct ui_file *stream, int recurse,
+	     const struct value *val,
              const struct value_print_options *options)
 {
   int ret;
@@ -78,12 +82,12 @@ d_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     {
       case TYPE_CODE_STRUCT:
         ret = dynamic_array_type (type, valaddr, embedded_offset, address,
-				  stream, recurse, options);
+				  stream, recurse, val, options);
 	if (ret != -1)
 	   break;
       default:
 	ret = c_val_print (type, valaddr, embedded_offset, address, stream,
-			   recurse, options);
+			   recurse, val, options);
     }
 
   return ret;

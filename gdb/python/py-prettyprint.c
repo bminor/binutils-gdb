@@ -603,6 +603,7 @@ int
 apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
 			  int embedded_offset, CORE_ADDR address,
 			  struct ui_file *stream, int recurse,
+			  const struct value *val,
 			  const struct value_print_options *options,
 			  const struct language_defn *language)
 {
@@ -621,6 +622,16 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
     valaddr += embedded_offset;
   value = value_from_contents_and_address (type, valaddr,
 					   address + embedded_offset);
+  if (val != NULL)
+    {
+      set_value_component_location (value, val);
+      /* set_value_component_location resets the address, so we may
+	 need to set it again.  */
+      if (VALUE_LVAL (value) != lval_internalvar
+	  && VALUE_LVAL (value) != lval_internalvar_component
+	  && VALUE_LVAL (value) != lval_computed)
+	set_value_address (value, address + embedded_offset);
+    }
 
   val_obj = value_to_value_object (value);
   if (! val_obj)
@@ -735,6 +746,7 @@ int
 apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
 			  int embedded_offset, CORE_ADDR address,
 			  struct ui_file *stream, int recurse,
+			  const struct value *val,
 			  const struct value_print_options *options,
 			  const struct language_defn *language)
 {

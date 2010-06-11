@@ -38,6 +38,7 @@ static void
 m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 			 int embedded_offset, CORE_ADDR address,
 			 struct ui_file *stream, int recurse,
+			 const struct value *val,
 			 const struct value_print_options *options,
 			 int len);
 
@@ -202,7 +203,7 @@ m2_print_unbounded_array (struct type *type, const gdb_byte *valaddr,
   fprintf_filtered (stream, "{");  
   m2_print_array_contents (value_type (val), value_contents(val),
 			   value_embedded_offset (val), addr, stream,
-			   recurse, options, len);
+			   recurse, NULL, options, len);
   fprintf_filtered (stream, ", HIGH = %d}", (int) len);
 }
 
@@ -277,6 +278,7 @@ static void
 m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 			 int embedded_offset, CORE_ADDR address,
 			 struct ui_file *stream, int recurse,
+			 const struct value *val,
 			 const struct value_print_options *options,
 			 int len)
 {
@@ -299,7 +301,8 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 	{
 	  fprintf_filtered (stream, "{");
 	  val_print_array_elements (type, valaddr + embedded_offset,
-				    address, stream, recurse, options, 0);
+				    address, stream, recurse, val,
+				    options, 0);
 	  fprintf_filtered (stream, "}");
 	}
     }
@@ -316,6 +319,7 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 int
 m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      CORE_ADDR address, struct ui_file *stream, int recurse,
+	      const struct value *original_value,
 	      const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
@@ -367,7 +371,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      fprintf_filtered (stream, "{");
 	      val_print_array_elements (type, valaddr + embedded_offset,
-					address, stream, recurse, options, 0);
+					address, stream, recurse, original_value,
+					options, 0);
 	      fprintf_filtered (stream, "}");
 	    }
 	  break;
@@ -436,7 +441,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 				  address, stream, recurse, options);
       else
 	cp_print_value_fields (type, type, valaddr, embedded_offset,
-			       address, stream, recurse, options, NULL, 0);
+			       address, stream, recurse, original_value,
+			       options, NULL, 0);
       break;
 
     case TYPE_CODE_ENUM:
@@ -508,7 +514,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (TYPE_LENGTH (type) == TYPE_LENGTH (TYPE_TARGET_TYPE (type)))
 	{
 	  m2_val_print (TYPE_TARGET_TYPE (type), valaddr, embedded_offset,
-			address, stream, recurse, options);
+			address, stream, recurse, original_value, options);
 	  break;
 	}
       /* FIXME: create_range_type does not set the unsigned bit in a

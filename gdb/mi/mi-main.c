@@ -1131,7 +1131,7 @@ get_register (struct frame_info *frame, int regnum, int format)
       get_formatted_print_options (&opts, format);
       opts.deref_ref = 1;
       val_print (register_type (gdbarch, regnum), buffer, 0, 0,
-		 stb->stream, 0, &opts, current_language);
+		 stb->stream, 0, NULL, &opts, current_language);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);
     }
@@ -1222,9 +1222,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   /* Print the result of the expression evaluation.  */
   get_user_print_options (&opts);
   opts.deref_ref = 0;
-  val_print (value_type (val), value_contents (val),
-	     value_embedded_offset (val), value_address (val),
-	     stb->stream, 0, &opts, current_language);
+  common_val_print (val, stb->stream, 0, &opts, current_language);
 
   ui_out_field_stream (uiout, "value", stb);
   ui_out_stream_delete (stb);

@@ -374,7 +374,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       struct value_print_options opts = *options;
       opts.format = 0;
       opts.deref_ref = 0;
-      val_print (type, valaddr, 0, 0, stream, 0, &opts,
+      val_print (type, valaddr, 0, 0, stream, 0, NULL, &opts,
 		 current_language);
       return;
     }

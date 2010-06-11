@@ -1107,6 +1107,7 @@ static int
 unk_lang_val_print (struct type *type, const gdb_byte *valaddr,
 		    int embedded_offset, CORE_ADDR address,
 		    struct ui_file *stream, int recurse,
+		    const struct value *val,
 		    const struct value_print_options *options)
 {
   error (_("internal error - unimplemented function unk_lang_val_print called."));

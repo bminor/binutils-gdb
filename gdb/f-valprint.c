@@ -164,6 +164,7 @@ static void
 f77_print_array_1 (int nss, int ndimensions, struct type *type,
 		   const gdb_byte *valaddr, CORE_ADDR address,
 		   struct ui_file *stream, int recurse,
+		   const struct value *val,
 		   const struct value_print_options *options,
 		   int *elts)
 {
@@ -177,7 +178,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 	  f77_print_array_1 (nss + 1, ndimensions, TYPE_TARGET_TYPE (type),
 			     valaddr + i * F77_DIM_OFFSET (nss),
 			     address + i * F77_DIM_OFFSET (nss),
-			     stream, recurse, options, elts);
+			     stream, recurse, val, options, elts);
 	  fprintf_filtered (stream, ") ");
 	}
       if (*elts >= options->print_max && i < F77_DIM_SIZE (nss)) 
@@ -192,7 +193,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 		     valaddr + i * F77_DIM_OFFSET (ndimensions),
 		     0,
 		     address + i * F77_DIM_OFFSET (ndimensions),
-		     stream, recurse, options, current_language);
+		     stream, recurse, val, options, current_language);
 
 	  if (i != (F77_DIM_SIZE (nss) - 1))
 	    fprintf_filtered (stream, ", ");
@@ -210,7 +211,9 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 static void
 f77_print_array (struct type *type, const gdb_byte *valaddr,
 		 CORE_ADDR address, struct ui_file *stream,
-		 int recurse, const struct value_print_options *options)
+		 int recurse,
+		 const struct value *val,
+		 const struct value_print_options *options)
 {
   int ndimensions;
   int elts = 0;
@@ -228,7 +231,7 @@ f77_print_array (struct type *type, const gdb_byte *valaddr,
   f77_create_arrayprint_offset_tbl (type, stream);
 
   f77_print_array_1 (1, ndimensions, type, valaddr, address, stream,
-		     recurse, options, &elts);
+		     recurse, val, options, &elts);
 }
 
 
@@ -242,6 +245,7 @@ f77_print_array (struct type *type, const gdb_byte *valaddr,
 int
 f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int recurse,
+	     const struct value *original_value,
 	     const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
@@ -263,7 +267,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
     case TYPE_CODE_ARRAY:
       fprintf_filtered (stream, "(");
-      f77_print_array (type, valaddr, address, stream, recurse, options);
+      f77_print_array (type, valaddr, address, stream, recurse, original_value, options);
       fprintf_filtered (stream, ")");
       break;
 
@@ -424,7 +428,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      /* Bash the type code temporarily.  */
 	      TYPE_CODE (type) = TYPE_CODE_INT;
-	      f_val_print (type, valaddr, 0, address, stream, recurse, options);
+	      val_print (type, valaddr, 0, address, stream, recurse,
+			 original_value, options, current_language);
 	      /* Restore the type code so later uses work as intended. */
 	      TYPE_CODE (type) = TYPE_CODE_BOOL;
 	    }
@@ -456,8 +461,9 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
         {
           int offset = TYPE_FIELD_BITPOS (type, index) / 8;
 
-          f_val_print (TYPE_FIELD_TYPE (type, index), valaddr + offset,
-                       embedded_offset, address, stream, recurse, options);
+          val_print (TYPE_FIELD_TYPE (type, index), valaddr + offset,
+		     embedded_offset, address, stream, recurse + 1,
+		     original_value, options, current_language);
           if (index != TYPE_NFIELDS (type) - 1)
             fputs_filtered (", ", stream);
         }

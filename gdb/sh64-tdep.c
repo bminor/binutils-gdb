@@ -2121,12 +2121,12 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
   get_formatted_print_options (&opts, 'x');
   opts.deref_ref = 1;
   val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
-	     file, 0, &opts, current_language);
+	     file, 0, NULL, &opts, current_language);
   fprintf_filtered (file, "\t");
   get_formatted_print_options (&opts, 0);
   opts.deref_ref = 1;
   val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
-	     file, 0, &opts, current_language);
+	     file, 0, NULL, &opts, current_language);
   fprintf_filtered (file, "\n");
 }
 

@@ -490,7 +490,13 @@ read_pieced_value (struct value *v)
 
   contents = value_contents_raw (v);
   bits_to_skip = 8 * value_offset (v);
-  type_len = 8 * TYPE_LENGTH (value_type (v));
+  if (value_bitsize (v))
+    {
+      bits_to_skip += value_bitpos (v);
+      type_len = value_bitsize (v);
+    }
+  else
+    type_len = 8 * TYPE_LENGTH (value_type (v));
 
   for (i = 0; i < c->n_pieces && offset < type_len; i++)
     {
@@ -614,13 +620,7 @@ read_pieced_value (struct value *v)
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
-	  /* We just leave the bits empty for now.  This is not ideal
-	     but gdb currently does not have a nice way to represent
-	     optimized-out pieces.  */
-	  warning (_("bits %ld-%ld in computed object were optimized out; "
-		     "replacing with zeroes"),
-		   offset,
-		   offset + (long) this_size_bits);
+	  set_value_optimized_out (v, 1);
 	  break;
 
 	default:
@@ -664,7 +664,14 @@ write_pieced_value (struct value *to, struct value *from)
 
   contents = value_contents (from);
   bits_to_skip = 8 * value_offset (to);
-  type_len = 8 * TYPE_LENGTH (value_type (to));
+  if (value_bitsize (to))
+    {
+      bits_to_skip += value_bitpos (to);
+      type_len = value_bitsize (to);
+    }
+  else
+    type_len = 8 * TYPE_LENGTH (value_type (to));
+
   for (i = 0; i < c->n_pieces && offset < type_len; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
@@ -767,17 +774,76 @@ write_pieced_value (struct value *to, struct value *from)
 	  break;
 	default:
 	  set_value_optimized_out (to, 1);
-	  goto done;
+	  break;
 	}
       offset += this_size_bits;
     }
 
- done:
   do_cleanups (cleanup);
 }
 
+static int
+check_pieced_value_bits (const struct value *value, int bit_offset,
+			 int bit_length, int validity)
+{
+  struct piece_closure *c
+    = (struct piece_closure *) value_computed_closure (value);
+  int i;
+
+  bit_offset += 8 * value_offset (value);
+  if (value_bitsize (value))
+    bit_offset += value_bitpos (value);
+
+  for (i = 0; i < c->n_pieces && bit_length > 0; i++)
+    {
+      struct dwarf_expr_piece *p = &c->pieces[i];
+      size_t this_size_bits = p->size;
+
+      if (bit_offset > 0)
+	{
+	  if (bit_offset >= this_size_bits)
+	    {
+	      bit_offset -= this_size_bits;
+	      continue;
+	    }
+
+	  bit_length -= this_size_bits - bit_offset;
+	  bit_offset = 0;
+	}
+      else
+	bit_length -= this_size_bits;
+
+      if (p->location == DWARF_VALUE_OPTIMIZED_OUT)
+	{
+	  if (validity)
+	    return 0;
+	}
+      else
+	{
+	  if (!validity)
+	    return 1;
+	}
+    }
+
+  return validity;
+}
+
+static int
+check_pieced_value_validity (const struct value *value, int bit_offset,
+			     int bit_length)
+{
+  return check_pieced_value_bits (value, bit_offset, bit_length, 1);
+}
+
+static int
+check_pieced_value_invalid (const struct value *value)
+{
+  return check_pieced_value_bits (value, 0,
+				  8 * TYPE_LENGTH (value_type (value)), 0);
+}
+
 static void *
-copy_pieced_value_closure (struct value *v)
+copy_pieced_value_closure (const struct value *v)
 {
   struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
   
@@ -802,6 +868,8 @@ free_pieced_value_closure (struct value *v)
 static struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
+  check_pieced_value_validity,
+  check_pieced_value_invalid,
   copy_pieced_value_closure,
   free_pieced_value_closure
 };

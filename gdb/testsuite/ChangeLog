@@ -1,3 +1,9 @@
+2010-06-11  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/9977, PR exp/11636::
+	* gdb.dwarf2/pieces.exp (pieces_test_f3): Remove kfail.
+	(pieces_test_f6): Update expected output.
+
 2010-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/moribund-step.exp: New.

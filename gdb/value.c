@@ -349,7 +349,7 @@ value_next (struct value *value)
 }
 
 struct type *
-value_type (struct value *value)
+value_type (const struct value *value)
 {
   return value->type;
 }
@@ -360,7 +360,7 @@ deprecated_set_value_type (struct value *value, struct type *type)
 }
 
 int
-value_offset (struct value *value)
+value_offset (const struct value *value)
 {
   return value->offset;
 }
@@ -371,7 +371,7 @@ set_value_offset (struct value *value, int offset)
 }
 
 int
-value_bitpos (struct value *value)
+value_bitpos (const struct value *value)
 {
   return value->bitpos;
 }
@@ -382,7 +382,7 @@ set_value_bitpos (struct value *value, int bit)
 }
 
 int
-value_bitsize (struct value *value)
+value_bitsize (const struct value *value)
 {
   return value->bitsize;
 }
@@ -418,12 +418,27 @@ value_enclosing_type (struct value *value)
   return value->enclosing_type;
 }
 
+static void
+require_not_optimized_out (struct value *value)
+{
+  if (value->optimized_out)
+    error (_("value has been optimized out"));
+}
+
 const gdb_byte *
-value_contents_all (struct value *value)
+value_contents_for_printing (struct value *value)
 {
   if (value->lazy)
     value_fetch_lazy (value);
   return value->contents;
+}
+
+const gdb_byte *
+value_contents_all (struct value *value)
+{
+  const gdb_byte *result = value_contents_for_printing (value);
+  require_not_optimized_out (value);
+  return result;
 }
 
 int
@@ -453,7 +468,9 @@ set_value_stack (struct value *value, int val)
 const gdb_byte *
 value_contents (struct value *value)
 {
-  return value_contents_writeable (value);
+  const gdb_byte *result = value_contents_writeable (value);
+  require_not_optimized_out (value);
+  return result;
 }
 
 gdb_byte *
@@ -497,6 +514,29 @@ set_value_optimized_out (struct value *value, int val)
 }
 
 int
+value_entirely_optimized_out (const struct value *value)
+{
+  if (!value->optimized_out)
+    return 0;
+  if (value->lval != lval_computed
+      || !value->location.computed.funcs->check_validity)
+    return 1;
+  return value->location.computed.funcs->check_all_valid (value);
+}
+
+int
+value_bits_valid (const struct value *value, int offset, int length)
+{
+  if (value == NULL || !value->optimized_out)
+    return 1;
+  if (value->lval != lval_computed
+      || !value->location.computed.funcs->check_validity)
+    return 0;
+  return value->location.computed.funcs->check_validity (value, offset,
+							 length);
+}
+
+int
 value_embedded_offset (struct value *value)
 {
   return value->embedded_offset;
@@ -529,9 +569,9 @@ value_computed_funcs (struct value *v)
 }
 
 void *
-value_computed_closure (struct value *v)
+value_computed_closure (const struct value *v)
 {
-  gdb_assert (VALUE_LVAL (v) == lval_computed);
+  gdb_assert (v->lval == lval_computed);
 
   return v->location.computed.closure;
 }
@@ -771,15 +811,16 @@ value_copy (struct value *arg)
 }
 
 void
-set_value_component_location (struct value *component, struct value *whole)
+set_value_component_location (struct value *component,
+			      const struct value *whole)
 {
-  if (VALUE_LVAL (whole) == lval_internalvar)
+  if (whole->lval == lval_internalvar)
     VALUE_LVAL (component) = lval_internalvar_component;
   else
-    VALUE_LVAL (component) = VALUE_LVAL (whole);
+    VALUE_LVAL (component) = whole->lval;
 
   component->location = whole->location;
-  if (VALUE_LVAL (whole) == lval_computed)
+  if (whole->lval == lval_computed)
     {
       struct lval_funcs *funcs = whole->location.computed.funcs;
 

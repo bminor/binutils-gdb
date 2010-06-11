@@ -710,8 +710,8 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  get_raw_print_options (&opts);
 	  opts.deref_ref = 1;
 	  val_print (register_type (gdbarch, regnum), buf,
-		     0, 0, file, 0, &opts,
-		     current_language);
+		     0, 0, file, 0, NULL,
+		     &opts, current_language);
 	  fputs_filtered ("\n", file);
 	}
       else if (regnum == MT_MAC_REGNUM || regnum == MT_MAC_PSEUDOREG_REGNUM)
