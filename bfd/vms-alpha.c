@@ -936,7 +936,7 @@ struct sec_flags_struct
 
 /* These flags are deccrtl/vaxcrtl (openVMS 6.2 Alpha) compatible.  */
 
-static struct sec_flags_struct evax_section_flags[] =
+static const struct sec_flags_struct evax_section_flags[] =
   {
     { EVAX_ABS_NAME,
       (EGPS__V_SHR),
@@ -995,12 +995,11 @@ static struct sec_flags_struct evax_section_flags[] =
       (SEC_IN_MEMORY | SEC_DATA | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD) }
   };
 
-/* Retrieve bfd section flags by name and size.  */
+/* Retrieve BFD section flags by name and size.  */
 
 static flagword
-vms_secflag_by_name (bfd *abfd ATTRIBUTE_UNUSED,
-		     struct sec_flags_struct *section_flags,
-		     char *name,
+vms_secflag_by_name (const struct sec_flags_struct *section_flags,
+		     const char *name,
 		     int hassize)
 {
   int i = 0;
@@ -1021,12 +1020,12 @@ vms_secflag_by_name (bfd *abfd ATTRIBUTE_UNUSED,
   return section_flags[i].flags_always;
 }
 
-/* Retrieve vms section flags by name and size.  */
+/* Retrieve VMS section flags by name and size.  */
 
 static flagword
-vms_esecflag_by_name (struct sec_flags_struct *section_flags,
-		      char *name,
-		      int hassize)
+vms_esecflag_by_name (const struct sec_flags_struct *section_flags,
+		      const char *name,
+                      int hassize)
 {
   int i = 0;
 
@@ -1144,7 +1143,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
             vms_section_data (section)->flags = old_flags;
             vms_section_data (section)->no_flags = 0;
 	    section->size = bfd_getl32 (egps->alloc);
-	    new_flags = vms_secflag_by_name (abfd, evax_section_flags, name,
+	    new_flags = vms_secflag_by_name (evax_section_flags, name,
 					     section->size > 0);
             if (!(old_flags & EGPS__V_NOMOD))
               {
@@ -3319,7 +3318,7 @@ _bfd_vms_write_egsd (bfd *abfd)
 
       /* Don't know if this is necessary for the linker but for now it keeps
 	 vms_slurp_gsd happy.  */
-      sname = (char *)section->name;
+      sname = section->name;
       if (*sname == '.')
 	{
           /* Remove leading dot.  */

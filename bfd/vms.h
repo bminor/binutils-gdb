@@ -131,8 +131,8 @@ extern void   _bfd_vms_output_byte (struct vms_rec_wr *, unsigned);
 extern void   _bfd_vms_output_short (struct vms_rec_wr *, unsigned);
 extern void   _bfd_vms_output_long (struct vms_rec_wr *, unsigned long);
 extern void   _bfd_vms_output_quad (struct vms_rec_wr *, bfd_vma);
-extern void   _bfd_vms_output_counted (struct vms_rec_wr *, char *);
-extern void   _bfd_vms_output_dump (struct vms_rec_wr *, unsigned char *, int);
+extern void   _bfd_vms_output_counted (struct vms_rec_wr *, const char *);
+extern void   _bfd_vms_output_dump (struct vms_rec_wr *, const unsigned char *, int);
 extern void   _bfd_vms_output_fill (struct vms_rec_wr *, int, int);
 extern int    _bfd_vms_convert_to_var_unix_filename (const char *);
 
