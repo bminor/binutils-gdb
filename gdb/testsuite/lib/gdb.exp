@@ -290,6 +290,9 @@ proc gdb_run_cmd {args} {
 	    exp_continue
 	}
 	-notransfer -re "Starting program: \[^\r\n\]*" {}
+	-notransfer -re "$gdb_prompt $" {
+	    # There is no more input expected.
+	}
     }
 }
 
@@ -415,6 +418,10 @@ proc runto { function args } {
 	}
 	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in .*$gdb_prompt $" { 
 	    return 1
+	}
+	-re "The target does not support running in non-stop mode.\r\n$gdb_prompt $" {
+	    unsupported "Non-stop mode not supported"
+	    return 0
 	}
 	-re "$gdb_prompt $" { 
 	    fail "running to $function in runto"
