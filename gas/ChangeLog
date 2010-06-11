@@ -1,3 +1,10 @@
+2010-06-11  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (md_parse_option): Ignore impossible processor
+	types.
+	(show_arch): New parameter 'check'.
+	(md_show_usage): Adjust calls to show_arch().
+
 2010-06-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (update_code_flag): New.

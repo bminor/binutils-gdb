@@ -8187,6 +8187,9 @@ md_parse_option (int c, char *arg)
 	      if (strcmp (arch, cpu_arch [j].name) == 0)
 		{
 		  /* Processor.  */
+		  if (! cpu_arch[j].flags.bitfield.cpui386)
+		    continue;
+
 		  cpu_arch_name = cpu_arch[j].name;
 		  cpu_sub_arch_name = NULL;
 		  cpu_arch_flags = cpu_arch[j].flags;
@@ -8318,7 +8321,7 @@ md_parse_option (int c, char *arg)
 "                                                                                "
 
 static void
-show_arch (FILE *stream, int ext)
+show_arch (FILE *stream, int ext, int check)
 {
   static char message[] = MESSAGE_TEMPLATE;
   char *start = message + 27;
@@ -8353,6 +8356,11 @@ show_arch (FILE *stream, int ext)
       else if (ext)
 	{
 	  /* It is an processor.  Skip if we show only extension.  */
+	  continue;
+	}
+      else if (check && ! cpu_arch[j].flags.bitfield.cpui386)
+	{
+	  /* It is an impossible processor - skip.  */
 	  continue;
 	}
 
@@ -8419,13 +8427,13 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -march=CPU[,+EXTENSION...]\n\
                           generate code for CPU and EXTENSION, CPU is one of:\n"));
-  show_arch (stream, 0);
+  show_arch (stream, 0, 1);
   fprintf (stream, _("\
                           EXTENSION is combination of:\n"));
-  show_arch (stream, 1);
+  show_arch (stream, 1, 0);
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n"));
-  show_arch (stream, 0);
+  show_arch (stream, 0, 0);
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
   fprintf (stream, _("\
