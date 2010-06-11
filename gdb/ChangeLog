@@ -1,3 +1,25 @@
+2010-06-11  Tom Tromey  <tromey@redhat.com>
+
+	* vec.h (VEC_cleanup): New macro.
+	(DEF_VEC_ALLOC_FUNC_I): Update.
+	(DEF_VEC_ALLOC_FUNC_P): Likewise.
+	(DEF_VEC_ALLOC_FUNC_O): Likewise.
+	* dwarf2loc.c (struct axs_var_loc): Remove.
+	(unimplemented): New function.
+	(translate_register): Likewise.
+	(access_memory): Likewise.
+	(compile_dwarf_to_ax): Likewise.
+	(dwarf2_tracepoint_var_loc): Remove.
+	(dwarf2_tracepoint_var_access): Likewise.
+	(dwarf2_tracepoint_var_ref): Likewise.
+	(locexpr_tracepoint_var_ref): Use compile_dwarf_to_ax.
+	(loclist_tracepoint_var_ref): Likewise.
+	* dwarf2expr.h (dwarf_expr_require_composition): Declare.
+	* dwarf2expr.c (dwarf_expr_require_composition): Rename from
+	require_composition.  No longer static.
+	(execute_stack_op): Update.
+	* ax-gdb.h (trace_kludge): Declare.
+
 2010-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (breakpoint_restore_shadows): New OWNER comment.

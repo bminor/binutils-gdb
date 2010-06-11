@@ -1048,266 +1048,746 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
   return baton.needs_frame || in_reg;
 }
 
-/* This struct keeps track of the pieces that make up a multi-location
-   object, for use in agent expression generation.  It is
-   superficially similar to struct dwarf_expr_piece, but
-   dwarf_expr_piece is designed for use in immediate evaluation, and
-   does not, for example, have a way to record both base register and
-   offset.  */
+/* A helper function that throws an unimplemented error mentioning a
+   given DWARF operator.  */
 
-struct axs_var_loc
+static void
+unimplemented (unsigned int op)
 {
-  /* Memory vs register, etc */
-  enum axs_lvalue_kind kind;
+  error (_("DWARF operator %s cannot be translated to an agent expression"),
+	 dwarf_stack_op_name (op, 1));
+}
 
-  /* If non-zero, number of bytes in this fragment */
-  unsigned bytes;
+/* A helper function to convert a DWARF register to an arch register.
+   ARCH is the architecture.
+   DWARF_REG is the register.
+   This will throw an exception if the DWARF register cannot be
+   translated to an architecture register.  */
 
-  /* (GDB-numbered) reg, or base reg if >= 0 */
-  int reg;
-
-  /* offset from reg */
-  LONGEST offset;
-};
-
-static const gdb_byte *
-dwarf2_tracepoint_var_loc (struct symbol *symbol,
-			   struct agent_expr *ax,
-			   struct axs_var_loc *loc,
-			   struct gdbarch *gdbarch,
-			   const gdb_byte *data, const gdb_byte *end)
+static int
+translate_register (struct gdbarch *arch, int dwarf_reg)
 {
-  if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
+  int reg = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_reg);
+  if (reg == -1)
+    error (_("Unable to access DWARF register number %d"), dwarf_reg);
+  return reg;
+}
+
+/* A helper function that emits an access to memory.  ARCH is the
+   target architecture.  EXPR is the expression which we are building.
+   NBITS is the number of bits we want to read.  This emits the
+   opcodes needed to read the memory and then extract the desired
+   bits.  */
+
+static void
+access_memory (struct gdbarch *arch, struct agent_expr *expr, ULONGEST nbits)
+{
+  ULONGEST nbytes = (nbits + 7) / 8;
+
+  gdb_assert (nbits > 0 && nbits <= sizeof (LONGEST));
+
+  if (trace_kludge)
+    ax_trace_quick (expr, nbytes);
+
+  if (nbits <= 8)
+    ax_simple (expr, aop_ref8);
+  else if (nbits <= 16)
+    ax_simple (expr, aop_ref16);
+  else if (nbits <= 32)
+    ax_simple (expr, aop_ref32);
+  else
+    ax_simple (expr, aop_ref64);
+
+  /* If we read exactly the number of bytes we wanted, we're done.  */
+  if (8 * nbytes == nbits)
+    return;
+
+  if (gdbarch_bits_big_endian (arch))
     {
-      loc->kind = axs_lvalue_register;
-      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, data[0] - DW_OP_reg0);
-      data += 1;
-    }
-  else if (data[0] == DW_OP_regx)
-    {
-      ULONGEST reg;
-
-      data = read_uleb128 (data + 1, end, &reg);
-      loc->kind = axs_lvalue_register;
-      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
-    }
-  else if (data[0] == DW_OP_fbreg)
-    {
-      struct block *b;
-      struct symbol *framefunc;
-      int frame_reg = 0;
-      LONGEST frame_offset;
-      const gdb_byte *base_data;
-      size_t base_size;
-      LONGEST base_offset = 0;
-
-      b = block_for_pc (ax->scope);
-
-      if (!b)
-	error (_("No block found for address"));
-
-      framefunc = block_linkage_function (b);
-
-      if (!framefunc)
-	error (_("No function found for block"));
-
-      dwarf_expr_frame_base_1 (framefunc, ax->scope,
-			       &base_data, &base_size);
-
-      if (base_data[0] >= DW_OP_breg0 && base_data[0] <= DW_OP_breg31)
-	{
-	  const gdb_byte *buf_end;
-
-	  frame_reg = base_data[0] - DW_OP_breg0;
-	  buf_end = read_sleb128 (base_data + 1,
-				  base_data + base_size, &base_offset);
-	  if (buf_end != base_data + base_size)
-	    error (_("Unexpected opcode after DW_OP_breg%u for symbol \"%s\"."),
-		   frame_reg, SYMBOL_PRINT_NAME (symbol));
-	}
-      else if (base_data[0] >= DW_OP_reg0 && base_data[0] <= DW_OP_reg31)
-	{
-	  /* The frame base is just the register, with no offset.  */
-	  frame_reg = base_data[0] - DW_OP_reg0;
-	  base_offset = 0;
-	}
-      else
-	{
-	  /* We don't know what to do with the frame base expression,
-	     so we can't trace this variable; give up.  */
-	  error (_("Cannot generate expression to collect symbol \"%s\"; DWARF 2 encoding not handled, first opcode in base data is 0x%x."),
-		 SYMBOL_PRINT_NAME (symbol), base_data[0]);
-	}
-
-      data = read_sleb128 (data + 1, end, &frame_offset);
-
-      loc->kind = axs_lvalue_memory;
-      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, frame_reg);
-      loc->offset = base_offset + frame_offset;
-    }
-  else if (data[0] >= DW_OP_breg0 && data[0] <= DW_OP_breg31)
-    {
-      unsigned int reg;
-      LONGEST offset;
-
-      reg = data[0] - DW_OP_breg0;
-      data = read_sleb128 (data + 1, end, &offset);
-
-      loc->kind = axs_lvalue_memory;
-      loc->reg = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
-      loc->offset = offset;
+      /* On a bits-big-endian machine, we want the high-order
+	 NBITS.  */
+      ax_const_l (expr, 8 * nbytes - nbits);
+      ax_simple (expr, aop_rsh_unsigned);
     }
   else
-    error (_("Unsupported DWARF opcode 0x%x in the location of \"%s\"."),
-	   data[0], SYMBOL_PRINT_NAME (symbol));
-  
-  return data;
-}
-
-/* Given the location of a piece, issue bytecodes that will access it.  */
-
-static void
-dwarf2_tracepoint_var_access (struct agent_expr *ax,
-			      struct axs_value *value,
-			      struct axs_var_loc *loc)
-{
-  value->kind = loc->kind;
-  
-  switch (loc->kind)
     {
-    case axs_lvalue_register:
-      value->u.reg = loc->reg;
-      break;
-      
-    case axs_lvalue_memory:
-      ax_reg (ax, loc->reg);
-      if (loc->offset)
-	{
-	  ax_const_l (ax, loc->offset);
-	  ax_simple (ax, aop_add);
-	}
-      break;
-      
-    default:
-      internal_error (__FILE__, __LINE__, _("Unhandled value kind in dwarf2_tracepoint_var_access"));
+      /* On a bits-little-endian box, we want the low-order NBITS.  */
+      ax_zero_ext (expr, nbits);
     }
 }
 
+/* Compile a DWARF location expression to an agent expression.
+   
+   EXPR is the agent expression we are building.
+   LOC is the agent value we modify.
+   ARCH is the architecture.
+   ADDR_SIZE is the size of addresses, in bytes.
+   OP_PTR is the start of the location expression.
+   OP_END is one past the last byte of the location expression.
+   
+   This will throw an exception for various kinds of errors -- for
+   example, if the expression cannot be compiled, or if the expression
+   is invalid.  */
+
 static void
-dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
-			   struct agent_expr *ax, struct axs_value *value,
-			   const gdb_byte *data, int size)
+compile_dwarf_to_ax (struct agent_expr *expr, struct axs_value *loc,
+		     struct gdbarch *arch, unsigned int addr_size,
+		     const gdb_byte *op_ptr, const gdb_byte *op_end,
+		     struct dwarf2_per_cu_data *per_cu)
 {
-  const gdb_byte *end = data + size;
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  /* In practice, a variable is not going to be spread across
-     dozens of registers or memory locations.  If someone comes up
-     with a real-world example, revisit this.  */
-#define MAX_FRAGS 16
-  struct axs_var_loc fragments[MAX_FRAGS];
-  int nfrags = 0, frag;
-  int length = 0;
-  int piece_ok = 0;
-  int bad = 0;
-  int first = 1;
-      
-  if (!data || size == 0)
+  struct cleanup *cleanups;
+  int i, *offsets;
+  VEC(int) *dw_labels = NULL, *patches = NULL;
+  const gdb_byte * const base = op_ptr;
+  const gdb_byte *previous_piece = op_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (arch);
+  ULONGEST bits_collected = 0;
+  unsigned int addr_size_bits = 8 * addr_size;
+  int bits_big_endian = gdbarch_bits_big_endian (arch);
+
+  offsets = xmalloc ((op_end - op_ptr) * sizeof (int));
+  cleanups = make_cleanup (xfree, offsets);
+
+  for (i = 0; i < op_end - op_ptr; ++i)
+    offsets[i] = -1;
+
+  make_cleanup (VEC_cleanup (int), &dw_labels);
+  make_cleanup (VEC_cleanup (int), &patches);
+
+  /* By default we are making an address.  */
+  loc->kind = axs_lvalue_memory;
+
+  while (op_ptr < op_end)
     {
-      value->optimized_out = 1;
-      return;
-    }
+      enum dwarf_location_atom op = *op_ptr;
+      CORE_ADDR result;
+      ULONGEST uoffset, reg;
+      LONGEST offset;
+      int i;
 
-  while (data < end)
-    {
-      if (!piece_ok)
+      offsets[op_ptr - base] = expr->len;
+      ++op_ptr;
+
+      /* Our basic approach to code generation is to map DWARF
+	 operations directly to AX operations.  However, there are
+	 some differences.
+
+	 First, DWARF works on address-sized units, but AX always uses
+	 LONGEST.  For most operations we simply ignore this
+	 difference; instead we generate sign extensions as needed
+	 before division and comparison operations.  It would be nice
+	 to omit the sign extensions, but there is no way to determine
+	 the size of the target's LONGEST.  (This code uses the size
+	 of the host LONGEST in some cases -- that is a bug but it is
+	 difficult to fix.)
+
+	 Second, some DWARF operations cannot be translated to AX.
+	 For these we simply fail.  See
+	 http://sourceware.org/bugzilla/show_bug.cgi?id=11662.  */
+      switch (op)
 	{
-	  if (nfrags == MAX_FRAGS)
-	    error (_("Too many pieces in location for \"%s\"."),
-		   SYMBOL_PRINT_NAME (symbol));
-
-	  fragments[nfrags].bytes = 0;
-	  data = dwarf2_tracepoint_var_loc (symbol, ax, &fragments[nfrags],
-					    gdbarch, data, end);
-	  nfrags++;
-	  piece_ok = 1;
-	}
-      else if (data[0] == DW_OP_piece)
-	{
-	  ULONGEST bytes;
-	      
-	  data = read_uleb128 (data + 1, end, &bytes);
-	  /* Only deal with 4 byte fragments for now.  */
-	  if (bytes != 4)
-	    error (_("DW_OP_piece %s not supported in location for \"%s\"."),
-		   pulongest (bytes), SYMBOL_PRINT_NAME (symbol));
-	  fragments[nfrags - 1].bytes = bytes;
-	  length += bytes;
-	  piece_ok = 0;
-	}
-      else
-	{
-	  bad = 1;
-	  break;
-	}
-    }
-
-  if (bad || data > end)
-    error (_("Corrupted DWARF expression for \"%s\"."),
-	   SYMBOL_PRINT_NAME (symbol));
-
-  /* If single expression, no pieces, convert to external format.  */
-  if (length == 0)
-    {
-      dwarf2_tracepoint_var_access (ax, value, &fragments[0]);
-      return;
-    }
-
-  if (length != TYPE_LENGTH (value->type))
-    error (_("Inconsistent piece information for \"%s\"."),
-	   SYMBOL_PRINT_NAME (symbol));
-
-  /* Emit bytecodes to assemble the pieces into a single stack entry.  */
-
-  for ((frag = (byte_order == BFD_ENDIAN_BIG ? 0 : nfrags - 1));
-       nfrags--;
-       (frag += (byte_order == BFD_ENDIAN_BIG ? 1 : -1)))
-    {
-      if (!first)
-	{
-	  /* shift the previous fragment up 32 bits */
-	  ax_const_l (ax, 32);
-	  ax_simple (ax, aop_lsh);
-	}
-
-      dwarf2_tracepoint_var_access (ax, value, &fragments[frag]);
-
-      switch (value->kind)
-	{
-	case axs_lvalue_register:
-	  ax_reg (ax, value->u.reg);
+	case DW_OP_lit0:
+	case DW_OP_lit1:
+	case DW_OP_lit2:
+	case DW_OP_lit3:
+	case DW_OP_lit4:
+	case DW_OP_lit5:
+	case DW_OP_lit6:
+	case DW_OP_lit7:
+	case DW_OP_lit8:
+	case DW_OP_lit9:
+	case DW_OP_lit10:
+	case DW_OP_lit11:
+	case DW_OP_lit12:
+	case DW_OP_lit13:
+	case DW_OP_lit14:
+	case DW_OP_lit15:
+	case DW_OP_lit16:
+	case DW_OP_lit17:
+	case DW_OP_lit18:
+	case DW_OP_lit19:
+	case DW_OP_lit20:
+	case DW_OP_lit21:
+	case DW_OP_lit22:
+	case DW_OP_lit23:
+	case DW_OP_lit24:
+	case DW_OP_lit25:
+	case DW_OP_lit26:
+	case DW_OP_lit27:
+	case DW_OP_lit28:
+	case DW_OP_lit29:
+	case DW_OP_lit30:
+	case DW_OP_lit31:
+	  ax_const_l (expr, op - DW_OP_lit0);
 	  break;
 
-	case axs_lvalue_memory:
+	case DW_OP_addr:
+	  result = dwarf2_read_address (arch, op_ptr, op_end, addr_size);
+	  ax_const_l (expr, result);
+	  op_ptr += addr_size;
+	  break;
+
+	case DW_OP_const1u:
+	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 1, byte_order));
+	  op_ptr += 1;
+	  break;
+	case DW_OP_const1s:
+	  ax_const_l (expr, extract_signed_integer (op_ptr, 1, byte_order));
+	  op_ptr += 1;
+	  break;
+	case DW_OP_const2u:
+	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 2, byte_order));
+	  op_ptr += 2;
+	  break;
+	case DW_OP_const2s:
+	  ax_const_l (expr, extract_signed_integer (op_ptr, 2, byte_order));
+	  op_ptr += 2;
+	  break;
+	case DW_OP_const4u:
+	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 4, byte_order));
+	  op_ptr += 4;
+	  break;
+	case DW_OP_const4s:
+	  ax_const_l (expr, extract_signed_integer (op_ptr, 4, byte_order));
+	  op_ptr += 4;
+	  break;
+	case DW_OP_const8u:
+	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 8, byte_order));
+	  op_ptr += 8;
+	  break;
+	case DW_OP_const8s:
+	  ax_const_l (expr, extract_signed_integer (op_ptr, 8, byte_order));
+	  op_ptr += 8;
+	  break;
+	case DW_OP_constu:
+	  op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	  ax_const_l (expr, uoffset);
+	  break;
+	case DW_OP_consts:
+	  op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	  ax_const_l (expr, offset);
+	  break;
+
+	case DW_OP_reg0:
+	case DW_OP_reg1:
+	case DW_OP_reg2:
+	case DW_OP_reg3:
+	case DW_OP_reg4:
+	case DW_OP_reg5:
+	case DW_OP_reg6:
+	case DW_OP_reg7:
+	case DW_OP_reg8:
+	case DW_OP_reg9:
+	case DW_OP_reg10:
+	case DW_OP_reg11:
+	case DW_OP_reg12:
+	case DW_OP_reg13:
+	case DW_OP_reg14:
+	case DW_OP_reg15:
+	case DW_OP_reg16:
+	case DW_OP_reg17:
+	case DW_OP_reg18:
+	case DW_OP_reg19:
+	case DW_OP_reg20:
+	case DW_OP_reg21:
+	case DW_OP_reg22:
+	case DW_OP_reg23:
+	case DW_OP_reg24:
+	case DW_OP_reg25:
+	case DW_OP_reg26:
+	case DW_OP_reg27:
+	case DW_OP_reg28:
+	case DW_OP_reg29:
+	case DW_OP_reg30:
+	case DW_OP_reg31:
+	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
+	  loc->u.reg = translate_register (arch, op - DW_OP_reg0);
+	  loc->kind = axs_lvalue_register;
+	  break;
+
+	case DW_OP_regx:
+	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
+	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
+	  loc->u.reg = translate_register (arch, reg);
+	  loc->kind = axs_lvalue_register;
+	  break;
+
+	case DW_OP_implicit_value:
 	  {
-	    extern int trace_kludge;  /* Ugh. */
+	    ULONGEST len;
 
-	    gdb_assert (fragments[frag].bytes == 4);
-	    if (trace_kludge)
-	      ax_trace_quick (ax, 4);
-	    ax_simple (ax, aop_ref32);
+	    op_ptr = read_uleb128 (op_ptr, op_end, &len);
+	    if (op_ptr + len > op_end)
+	      error (_("DW_OP_implicit_value: too few bytes available."));
+	    if (len > sizeof (ULONGEST))
+	      error (_("Cannot translate DW_OP_implicit_value of %d bytes"),
+		     (int) len);
+
+	    ax_const_l (expr, extract_unsigned_integer (op_ptr, len,
+							byte_order));
+	    op_ptr += len;
+	    dwarf_expr_require_composition (op_ptr, op_end,
+					    "DW_OP_implicit_value");
+
+	    loc->kind = axs_rvalue;
 	  }
 	  break;
-	}
 
-      if (!first)
-	{
-	  /* or the new fragment into the previous */
-	  ax_zero_ext (ax, 32);
-	  ax_simple (ax, aop_bit_or);
+	case DW_OP_stack_value:
+	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_stack_value");
+	  loc->kind = axs_rvalue;
+	  break;
+
+	case DW_OP_breg0:
+	case DW_OP_breg1:
+	case DW_OP_breg2:
+	case DW_OP_breg3:
+	case DW_OP_breg4:
+	case DW_OP_breg5:
+	case DW_OP_breg6:
+	case DW_OP_breg7:
+	case DW_OP_breg8:
+	case DW_OP_breg9:
+	case DW_OP_breg10:
+	case DW_OP_breg11:
+	case DW_OP_breg12:
+	case DW_OP_breg13:
+	case DW_OP_breg14:
+	case DW_OP_breg15:
+	case DW_OP_breg16:
+	case DW_OP_breg17:
+	case DW_OP_breg18:
+	case DW_OP_breg19:
+	case DW_OP_breg20:
+	case DW_OP_breg21:
+	case DW_OP_breg22:
+	case DW_OP_breg23:
+	case DW_OP_breg24:
+	case DW_OP_breg25:
+	case DW_OP_breg26:
+	case DW_OP_breg27:
+	case DW_OP_breg28:
+	case DW_OP_breg29:
+	case DW_OP_breg30:
+	case DW_OP_breg31:
+	  op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	  i = translate_register (arch, op - DW_OP_breg0);
+	  ax_reg (expr, i);
+	  if (offset != 0)
+	    {
+	      ax_const_l (expr, offset);
+	      ax_simple (expr, aop_add);
+	    }
+	  break;
+	case DW_OP_bregx:
+	  {
+	    op_ptr = read_uleb128 (op_ptr, op_end, &reg);
+	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	    i = translate_register (arch, reg);
+	    ax_reg (expr, i);
+	    if (offset != 0)
+	      {
+		ax_const_l (expr, offset);
+		ax_simple (expr, aop_add);
+	      }
+	  }
+	  break;
+	case DW_OP_fbreg:
+	  {
+	    const gdb_byte *datastart;
+	    size_t datalen;
+	    unsigned int before_stack_len;
+	    struct block *b;
+	    struct symbol *framefunc;
+	    LONGEST base_offset = 0;
+
+	    b = block_for_pc (expr->scope);
+
+	    if (!b)
+	      error (_("No block found for address"));
+
+	    framefunc = block_linkage_function (b);
+
+	    if (!framefunc)
+	      error (_("No function found for block"));
+
+	    dwarf_expr_frame_base_1 (framefunc, expr->scope,
+				     &datastart, &datalen);
+
+	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	    compile_dwarf_to_ax (expr, loc, arch, addr_size, datastart,
+				 datastart + datalen, per_cu);
+
+	    if (offset != 0)
+	      {
+		ax_const_l (expr, offset);
+		ax_simple (expr, aop_add);
+	      }
+
+	    loc->kind = axs_lvalue_memory;
+	  }
+	  break;
+
+	case DW_OP_dup:
+	  ax_simple (expr, aop_dup);
+	  break;
+
+	case DW_OP_drop:
+	  ax_simple (expr, aop_pop);
+	  break;
+
+	case DW_OP_pick:
+	  offset = *op_ptr++;
+	  unimplemented (op);
+	  break;
+	  
+	case DW_OP_swap:
+	  ax_simple (expr, aop_swap);
+	  break;
+
+	case DW_OP_over:
+	  /* We can't directly support DW_OP_over, but GCC emits it as
+	     part of a sequence to implement signed modulus.  As a
+	     hack, we recognize this sequence.  Note that if GCC ever
+	     generates a branch to the middle of this sequence, then
+	     we will die somehow.  */
+	  if (op_end - op_ptr >= 4
+	      && op_ptr[0] == DW_OP_over
+	      && op_ptr[1] == DW_OP_div
+	      && op_ptr[2] == DW_OP_mul
+	      && op_ptr[3] == DW_OP_minus)
+	    {
+	      /* Sign extend the operands.  */
+	      ax_ext (expr, addr_size_bits);
+	      ax_simple (expr, aop_swap);
+	      ax_ext (expr, addr_size_bits);
+	      ax_simple (expr, aop_swap);
+	      ax_simple (expr, aop_rem_signed);
+	      op_ptr += 4;
+	    }
+	  else
+	    unimplemented (op);
+	  break;
+
+	case DW_OP_rot:
+	  unimplemented (op);
+	  break;
+
+	case DW_OP_deref:
+	case DW_OP_deref_size:
+	  {
+	    int size;
+
+	    if (op == DW_OP_deref_size)
+	      size = *op_ptr++;
+	    else
+	      size = addr_size;
+
+	    switch (size)
+	      {
+	      case 8:
+		ax_simple (expr, aop_ref8);
+		break;
+	      case 16:
+		ax_simple (expr, aop_ref16);
+		break;
+	      case 32:
+		ax_simple (expr, aop_ref32);
+		break;
+	      case 64:
+		ax_simple (expr, aop_ref64);
+		break;
+	      default:
+		error (_("Unsupported size %d in %s"),
+		       size, dwarf_stack_op_name (op, 1));
+	      }
+	  }
+	  break;
+
+	case DW_OP_abs:
+	  /* Sign extend the operand.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_dup);
+	  ax_const_l (expr, 0);
+	  ax_simple (expr, aop_less_signed);
+	  ax_simple (expr, aop_log_not);
+	  i = ax_goto (expr, aop_if_goto);
+	  /* We have to emit 0 - X.  */
+	  ax_const_l (expr, 0);
+	  ax_simple (expr, aop_swap);
+	  ax_simple (expr, aop_sub);
+	  ax_label (expr, i, expr->len);
+	  break;
+
+	case DW_OP_neg:
+	  /* No need to sign extend here.  */
+	  ax_const_l (expr, 0);
+	  ax_simple (expr, aop_swap);
+	  ax_simple (expr, aop_sub);
+	  break;
+
+	case DW_OP_not:
+	  /* Sign extend the operand.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_bit_not);
+	  break;
+
+	case DW_OP_plus_uconst:
+	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
+	  /* It would be really weird to emit `DW_OP_plus_uconst 0',
+	     but we micro-optimize anyhow.  */
+	  if (reg != 0)
+	    {
+	      ax_const_l (expr, reg);
+	      ax_simple (expr, aop_add);
+	    }
+	  break;
+
+	case DW_OP_and:
+	  ax_simple (expr, aop_bit_and);
+	  break;
+
+	case DW_OP_div:
+	  /* Sign extend the operands.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_simple (expr, aop_div_signed);
+	  break;
+
+	case DW_OP_minus:
+	  ax_simple (expr, aop_sub);
+	  break;
+
+	case DW_OP_mod:
+	  ax_simple (expr, aop_rem_unsigned);
+	  break;
+
+	case DW_OP_mul:
+	  ax_simple (expr, aop_mul);
+	  break;
+
+	case DW_OP_or:
+	  ax_simple (expr, aop_bit_or);
+	  break;
+
+	case DW_OP_plus:
+	  ax_simple (expr, aop_add);
+	  break;
+
+	case DW_OP_shl:
+	  ax_simple (expr, aop_lsh);
+	  break;
+
+	case DW_OP_shr:
+	  ax_simple (expr, aop_rsh_unsigned);
+	  break;
+
+	case DW_OP_shra:
+	  ax_simple (expr, aop_rsh_signed);
+	  break;
+
+	case DW_OP_xor:
+	  ax_simple (expr, aop_bit_xor);
+	  break;
+
+	case DW_OP_le:
+	  /* Sign extend the operands.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_ext (expr, addr_size_bits);
+	  /* Note no swap here: A <= B is !(B < A).  */
+	  ax_simple (expr, aop_less_signed);
+	  ax_simple (expr, aop_log_not);
+	  break;
+
+	case DW_OP_ge:
+	  /* Sign extend the operands.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  /* A >= B is !(A < B).  */
+	  ax_simple (expr, aop_less_signed);
+	  ax_simple (expr, aop_log_not);
+	  break;
+
+	case DW_OP_eq:
+	  /* Sign extend the operands.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_ext (expr, addr_size_bits);
+	  /* No need for a second swap here.  */
+	  ax_simple (expr, aop_equal);
+	  break;
+
+	case DW_OP_lt:
+	  /* Sign extend the operands.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_simple (expr, aop_less_signed);
+	  break;
+
+	case DW_OP_gt:
+	  /* Sign extend the operands.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_ext (expr, addr_size_bits);
+	  /* Note no swap here: A > B is B < A.  */
+	  ax_simple (expr, aop_less_signed);
+	  break;
+
+	case DW_OP_ne:
+	  /* Sign extend the operands.  */
+	  ax_ext (expr, addr_size_bits);
+	  ax_simple (expr, aop_swap);
+	  ax_ext (expr, addr_size_bits);
+	  /* No need for a swap here.  */
+	  ax_simple (expr, aop_equal);
+	  ax_simple (expr, aop_log_not);
+	  break;
+
+	case DW_OP_call_frame_cfa:
+	  unimplemented (op);
+	  break;
+
+	case DW_OP_GNU_push_tls_address:
+	  unimplemented (op);
+	  break;
+
+	case DW_OP_skip:
+	  offset = extract_signed_integer (op_ptr, 2, byte_order);
+	  op_ptr += 2;
+	  i = ax_goto (expr, aop_goto);
+	  VEC_safe_push (int, dw_labels, op_ptr + offset - base);
+	  VEC_safe_push (int, patches, i);
+	  break;
+
+	case DW_OP_bra:
+	  offset = extract_signed_integer (op_ptr, 2, byte_order);
+	  op_ptr += 2;
+	  /* Zero extend the operand.  */
+	  ax_zero_ext (expr, addr_size_bits);
+	  i = ax_goto (expr, aop_if_goto);
+	  VEC_safe_push (int, dw_labels, op_ptr + offset - base);
+	  VEC_safe_push (int, patches, i);
+	  break;
+
+	case DW_OP_nop:
+	  break;
+
+        case DW_OP_piece:
+	case DW_OP_bit_piece:
+	  {
+	    ULONGEST size, offset;
+
+	    if (op_ptr - 1 == previous_piece)
+	      error (_("Cannot translate empty pieces to agent expressions"));
+	    previous_piece = op_ptr - 1;
+
+            op_ptr = read_uleb128 (op_ptr, op_end, &size);
+	    if (op == DW_OP_piece)
+	      {
+		size *= 8;
+		offset = 0;
+	      }
+	    else
+	      op_ptr = read_uleb128 (op_ptr, op_end, &offset);
+
+	    if (bits_collected + size > 8 * sizeof (LONGEST))
+	      error (_("Expression pieces exceed word size"));
+
+	    /* Access the bits.  */
+	    switch (loc->kind)
+	      {
+	      case axs_lvalue_register:
+		ax_reg (expr, loc->u.reg);
+		break;
+
+	      case axs_lvalue_memory:
+		/* Offset the pointer, if needed.  */
+		if (offset > 8)
+		  {
+		    ax_const_l (expr, offset / 8);
+		    ax_simple (expr, aop_add);
+		    offset %= 8;
+		  }
+		access_memory (arch, expr, size);
+		break;
+	      }
+
+	    /* For a bits-big-endian target, shift up what we already
+	       have.  For a bits-little-endian target, shift up the
+	       new data.  Note that there is a potential bug here if
+	       the DWARF expression leaves multiple values on the
+	       stack.  */
+	    if (bits_collected > 0)
+	      {
+		if (bits_big_endian)
+		  {
+		    ax_simple (expr, aop_swap);
+		    ax_const_l (expr, size);
+		    ax_simple (expr, aop_lsh);
+		    /* We don't need a second swap here, because
+		       aop_bit_or is symmetric.  */
+		  }
+		else
+		  {
+		    ax_const_l (expr, size);
+		    ax_simple (expr, aop_lsh);
+		  }
+		ax_simple (expr, aop_bit_or);
+	      }
+
+	    bits_collected += size;
+	    loc->kind = axs_rvalue;
+	  }
+	  break;
+
+	case DW_OP_GNU_uninit:
+	  unimplemented (op);
+
+	case DW_OP_call2:
+	case DW_OP_call4:
+	  {
+	    struct dwarf2_locexpr_baton block;
+	    int size = (op == DW_OP_call2 ? 2 : 4);
+
+	    uoffset = extract_unsigned_integer (op_ptr, size, byte_order);
+	    op_ptr += size;
+
+	    block = dwarf2_fetch_die_location_block (uoffset, per_cu);
+
+	    /* DW_OP_call_ref is currently not supported.  */
+	    gdb_assert (block.per_cu == per_cu);
+
+	    compile_dwarf_to_ax (expr, loc, arch, addr_size,
+				 block.data, block.data + block.size,
+				 per_cu);
+	  }
+	  break;
+
+	case DW_OP_call_ref:
+	  unimplemented (op);
+
+	default:
+	  error (_("Unhandled dwarf expression opcode 0x%x"), op);
 	}
-      first = 0;
     }
-  value->kind = axs_rvalue;
+
+  /* Patch all the branches we emitted.  */
+  for (i = 0; i < VEC_length (int, patches); ++i)
+    {
+      int targ = offsets[VEC_index (int, dw_labels, i)];
+      if (targ == -1)
+	internal_error (__FILE__, __LINE__, _("invalid label"));
+      ax_label (expr, VEC_index (int, patches, i), targ);
+    }
+
+  do_cleanups (cleanups);
 }
 
 
@@ -1864,9 +2344,11 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 			    struct agent_expr *ax, struct axs_value *value)
 {
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
-  dwarf2_tracepoint_var_ref (symbol, gdbarch, ax, value,
-			     dlbaton->data, dlbaton->size);
+  compile_dwarf_to_ax (ax, value, gdbarch, addr_size,
+		       dlbaton->data, dlbaton->data + dlbaton->size,
+		       dlbaton->per_cu);
 }
 
 /* The set of location functions used with the DWARF-2 expression
@@ -2008,10 +2490,12 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   const gdb_byte *data;
   size_t size;
+  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
   data = find_location_expression (dlbaton, &size, ax->scope);
 
-  dwarf2_tracepoint_var_ref (symbol, gdbarch, ax, value, data, size);
+  compile_dwarf_to_ax (ax, value, gdbarch, addr_size, data, data + size,
+		       dlbaton->per_cu);
 }
 
 /* The set of location functions used with the DWARF-2 expression

@@ -334,9 +334,9 @@ signed_address_type (struct gdbarch *gdbarch, int addr_size)
 /* Check that the current operator is either at the end of an
    expression, or that it is followed by a composition operator.  */
 
-static void
-require_composition (const gdb_byte *op_ptr, const gdb_byte *op_end,
-		     const char *op_name)
+void
+dwarf_expr_require_composition (const gdb_byte *op_ptr, const gdb_byte *op_end,
+				const char *op_name)
 {
   /* It seems like DW_OP_GNU_uninit should be handled here.  However,
      it doesn't seem to make sense for DW_OP_*_value, and it was not
@@ -511,7 +511,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_regx:
 	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	  require_composition (op_ptr, op_end, "DW_OP_regx");
+	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
 
 	  result = reg;
 	  ctx->location = DWARF_VALUE_REGISTER;
@@ -528,13 +528,14 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    ctx->data = op_ptr;
 	    ctx->location = DWARF_VALUE_LITERAL;
 	    op_ptr += len;
-	    require_composition (op_ptr, op_end, "DW_OP_implicit_value");
+	    dwarf_expr_require_composition (op_ptr, op_end,
+					    "DW_OP_implicit_value");
 	  }
 	  goto no_push;
 
 	case DW_OP_stack_value:
 	  ctx->location = DWARF_VALUE_STACK;
-	  require_composition (op_ptr, op_end, "DW_OP_stack_value");
+	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_stack_value");
 	  goto no_push;
 
 	case DW_OP_breg0:

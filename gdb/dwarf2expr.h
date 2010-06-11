@@ -209,4 +209,7 @@ CORE_ADDR dwarf2_read_address (struct gdbarch *gdbarch, const gdb_byte *buf,
 
 const char *dwarf_stack_op_name (unsigned int, int);
 
+void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
+				     const char *);
+
 #endif /* dwarf2expr.h */
