@@ -1,3 +1,8 @@
+2010-06-11  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/setshow.exp (set language asm): Don't use
+	gdb_test_no_output, fails on some targets.
+
 2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.cp/cpexprs.exp: Skip test on spu*-*-*.
