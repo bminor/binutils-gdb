@@ -1,3 +1,7 @@
+2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.trace/packetlen.exp: Respect gdb_target_supports_trace.
+
 2010-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/gdb.exp (gdb_run_cmd): Return on $gdb_prompt.
