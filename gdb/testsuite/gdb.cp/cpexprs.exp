@@ -669,6 +669,11 @@ if {$tracelevel} {
 
 if {[skip_cplus_tests]} { continue }
 
+# On SPU this test fails because the executable exceeds local storage size.
+if { [istarget "spu*-*-*"] } {
+        return 0
+}
+
 #
 # test running programs
 #

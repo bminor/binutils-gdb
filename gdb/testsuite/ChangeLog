@@ -1,5 +1,10 @@
 2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.cp/cpexprs.exp: Skip test on spu*-*-*.
+	* gdb.cp/pr9167.exp: Likewise.
+
+2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.python/py-breakpoint.exp: Handle software watchpoints as well.
 
 2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
