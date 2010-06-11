@@ -1,3 +1,9 @@
+2010-06-11  Tristan Gingold  <gingold@adacore.com>
+
+	* unwind-ia64.c (unw_print_abreg): Add const to special_reg.
+	(UNW_DEC_ABI): Ditto for abiname.
+	(unw_decode_table): Make it const.
+
 2010-06-10  Tristan Gingold  <gingold@adacore.com>
 
 	* readelf.c (slurp_ia64_unwind_table): IA64 rela relocations are
