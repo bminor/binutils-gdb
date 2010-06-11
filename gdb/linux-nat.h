@@ -118,6 +118,9 @@ void check_for_thread_db (void);
 
 int thread_db_attach_lwp (ptid_t ptid);
 
+/* Return the set of signals used by the threads library.  */
+extern void lin_thread_get_thread_signals (sigset_t *mask);
+
 /* Find process PID's pending signal set from /proc/pid/status.  */
 void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored);
 

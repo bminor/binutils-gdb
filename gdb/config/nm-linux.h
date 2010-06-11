@@ -18,11 +18,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct target_ops;
-
-extern void lin_thread_get_thread_signals (sigset_t *mask);
-#define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
-
 /* Use elf_gregset_t and elf_fpregset_t, rather than
    gregset_t and fpregset_t.  */
 

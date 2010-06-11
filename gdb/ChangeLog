@@ -1,5 +1,14 @@
 2010-06-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/nm-linux.h (struct target_ops): Remove forward declaration.
+	(lin_thread_get_thread_signals): Remove prototype.
+	(GET_THREAD_SIGNALS): Remove.
+	* linux-nat.h (lin_thread_get_thread_signals): Add prototype.
+	* linux-thread-db.c (check_thread_signals): Directly call
+	lin_thread_get_thread_signals; do not check GET_THREAD_SIGNALS.
+
+2010-06-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gregset.h (GDB_FPXREGSET_T): Remove.
 	(gdb_fpxregset_t): Likewise.
 	(supply_fpxregset): Remove prototype.

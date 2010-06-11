@@ -928,13 +928,12 @@ disable_thread_event_reporting (struct thread_db_info *info)
 static void
 check_thread_signals (void)
 {
-#ifdef GET_THREAD_SIGNALS
   if (!thread_signals)
     {
       sigset_t mask;
       int i;
 
-      GET_THREAD_SIGNALS (&mask);
+      lin_thread_get_thread_signals (&mask);
       sigemptyset (&thread_stop_set);
       sigemptyset (&thread_print_set);
 
@@ -950,7 +949,6 @@ check_thread_signals (void)
 	    }
 	}
     }
-#endif
 }
 
 /* Check whether thread_db is usable.  This function is called when
