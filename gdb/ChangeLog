@@ -1,5 +1,9 @@
 2010-06-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Remove config/i386/nm-linux.h
+
+2010-06-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/nm-linux.h (struct target_ops): Remove forward declaration.
 	(lin_thread_get_thread_signals): Remove prototype.
 	(GET_THREAD_SIGNALS): Remove.
