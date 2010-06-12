@@ -4958,6 +4958,7 @@ you examine the stopped thread in the debugger.
 * Background Execution::	Running your program asynchronously
 * Thread-Specific Breakpoints::	Controlling breakpoints
 * Interrupted System Calls::	GDB may interfere with system calls
+* Observer Mode::               GDB does not alter program behavior
 @end menu
 
 @node All-Stop Mode
@@ -5318,6 +5319,103 @@ monitor certain events such as thread creation and thread destruction.
 When such an event happens, a system call in another thread may return
 prematurely, even though your program does not appear to stop.
 
+@node Observer Mode
+@subsection Observer Mode
+
+If you want to build on non-stop mode and observe program behavior
+without any chance of disruption by @value{GDBN}, you can set
+variables to disable all of the debugger's attempts to modify state,
+whether by writing memory, inserting breakpoints, etc.  These operate
+at a low level, intercepting operations from all commands.
+
+When all of these are set to @code{off}, then @value{GDBN} is said to
+be @dfn{observer mode}.  As a convenience, the variable
+@code{observer} can be set to disable these, plus enable non-stop
+mode.
+
+Note that @value{GDBN} will not prevent you from making nonsensical
+combinations of these settings. For instance, if you have enabled
+@code{may-insert-breakpoints} but disabled @code{may-write-memory},
+then breakpoints that work by writing trap instructions into the code
+stream will still not be able to be placed.
+
+@table @code
+
+@kindex observer
+@item set observer on
+@itemx set observer off
+When set to @code{on}, this disables all the permission variables
+below (except for @code{insert-fast-tracepoints}), plus enables
+non-stop debugging.  Setting this to @code{off} switches back to
+normal debugging, though remaining in non-stop mode.
+
+@item show observer
+Show whether observer mode is on or off.
+
+@kindex may-write-registers
+@item set may-write-registers on
+@itemx set may-write-registers off
+This controls whether @value{GDBN} will attempt to alter the values of
+registers, such as with assignment expressions in @code{print}, or the
+@code{jump} command.  It defaults to @code{on}.
+
+@item show may-write-registers
+Show the current permission to write registers.
+
+@kindex may-write-memory
+@item set may-write-memory on
+@itemx set may-write-memory off
+This controls whether @value{GDBN} will attempt to alter the contents
+of memory, such as with assignment expressions in @code{print}.  It
+defaults to @code{on}.
+
+@item show may-write-memory
+Show the current permission to write memory.
+
+@kindex may-insert-breakpoints
+@item set may-insert-breakpoints on
+@itemx set may-insert-breakpoints off
+This controls whether @value{GDBN} will attempt to insert breakpoints.
+This affects all breakpoints, including internal breakpoints defined
+by @value{GDBN}.  It defaults to @code{on}.
+
+@item show may-insert-breakpoints
+Show the current permission to insert breakpoints.
+
+@kindex may-insert-tracepoints
+@item set may-insert-tracepoints on
+@itemx set may-insert-tracepoints off
+This controls whether @value{GDBN} will attempt to insert (regular)
+tracepoints at the beginning of a tracing experiment.  It affects only
+non-fast tracepoints, fast tracepoints being under the control of
+@code{may-insert-fast-tracepoints}.  It defaults to @code{on}.
+
+@item show may-insert-tracepoints
+Show the current permission to insert tracepoints.
+
+@kindex may-insert-fast-tracepoints
+@item set may-insert-fast-tracepoints on
+@itemx set may-insert-fast-tracepoints off
+This controls whether @value{GDBN} will attempt to insert fast
+tracepoints at the beginning of a tracing experiment.  It affects only
+fast tracepoints, regular (non-fast) tracepoints being under the
+control of @code{may-insert-tracepoints}.  It defaults to @code{on}.
+
+@item show may-insert-fast-tracepoints
+Show the current permission to insert fast tracepoints.
+
+@kindex may-interrupt
+@item set may-interrupt on
+@itemx set may-interrupt off
+This controls whether @value{GDBN} will attempt to interrupt or stop
+program execution.  When this variable is @code{off}, the
+@code{interrupt} command will have no effect, nor will
+@kbd{Ctrl-c}. It defaults to @code{on}.
+
+@item show may-interrupt
+Show the current permission to interrupt or stop the program.
+
+@end table
 
 @node Reverse Execution
 @chapter Running programs backward
@@ -31190,6 +31288,18 @@ Here are the currently defined query and set packets:
 
 @table @samp
 
+@item QAllow:@var{op}:@var{val}@dots{}
+@cindex @samp{QAllow} packet
+Specify which operations @value{GDBN} expects to request of the
+target, as a semicolon-separated list of operation name and value
+pairs.  Possible values for @var{op} include @samp{WriteReg},
+@samp{WriteMem}, @samp{InsertBreak}, @samp{InsertTrace},
+@samp{InsertFastTrace}, and @samp{Stop}. @var{val} is either 0,
+indicating that @value{GDBN} will not request the operation, or 1,
+indicating that it may.  (The target can then use this to set up its
+own internals optimally, for instance if the debugger never expects to
+insert breakpoints, it may not need to install its own trap handler.)
+
 @item qC
 @cindex current thread, remote request
 @cindex @samp{qC} packet
@@ -31711,6 +31821,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{QAllow}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -31807,6 +31922,9 @@ The remote stub accepts and implements the reverse step packet
 @item TracepointSource
 The remote stub understands the @samp{QTDPsrc} packet that supplies
 the source form of tracepoint definitions.
+
+@item QAllow
+The remote stub understands the @samp{QAllow} packet.
 
 @end table
 

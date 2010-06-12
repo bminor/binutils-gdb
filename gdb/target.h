@@ -686,6 +686,9 @@ struct target_ops
        a Windows OS specific feature.  */
     int (*to_get_tib_address) (ptid_t ptid, CORE_ADDR *addr);
 
+    /* Send the new settings of write permission variables.  */
+    void (*to_set_permissions) (void);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -889,14 +892,14 @@ extern int inferior_has_called_syscall (ptid_t pid, int *syscall_number);
 /* Insert a breakpoint at address BP_TGT->placed_address in the target
    machine.  Result is 0 for success, or an errno value.  */
 
-#define	target_insert_breakpoint(gdbarch, bp_tgt)	\
-     (*current_target.to_insert_breakpoint) (gdbarch, bp_tgt)
+extern int target_insert_breakpoint (struct gdbarch *gdbarch,
+				     struct bp_target_info *bp_tgt);
 
 /* Remove a breakpoint at address BP_TGT->placed_address in the target
    machine.  Result is 0 for success, or an errno value.  */
 
-#define	target_remove_breakpoint(gdbarch, bp_tgt)	\
-     (*current_target.to_remove_breakpoint) (gdbarch, bp_tgt)
+extern int target_remove_breakpoint (struct gdbarch *gdbarch,
+				     struct bp_target_info *bp_tgt);
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
@@ -1091,7 +1094,7 @@ extern void target_find_new_threads (void);
    Unix, this should act like SIGSTOP).  This function is normally
    used by GUIs to implement a stop button.  */
 
-#define target_stop(ptid) (*current_target.to_stop) (ptid)
+extern void target_stop (ptid_t ptid);
 
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is
@@ -1378,6 +1381,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 #define target_get_tib_address(ptid, addr) \
   (*current_target.to_get_tib_address) ((ptid), (addr))
 
+#define target_set_permissions() \
+  (*current_target.to_set_permissions) ()
+
 /* Command logging facility.  */
 
 #define target_log_command(p)						\
@@ -1539,6 +1545,15 @@ extern enum target_signal target_signal_from_command (int);
 /* Set the show memory breakpoints mode to show, and installs a cleanup
    to restore it back to the current value.  */
 extern struct cleanup *make_show_memory_breakpoints_cleanup (int show);
+
+extern int may_write_registers;
+extern int may_write_memory;
+extern int may_insert_breakpoints;
+extern int may_insert_tracepoints;
+extern int may_insert_fast_tracepoints;
+extern int may_stop;
+
+extern void update_target_permissions (void);
 
 
 /* Imported from machine dependent code */

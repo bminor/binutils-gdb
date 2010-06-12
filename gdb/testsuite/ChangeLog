@@ -1,4 +1,8 @@
-:010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+2010-06-11  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.base/permissions.exp: New file.
+
+2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/valgrind-db-attach.exp: Fail gracefully if valgrind
 	does not support ELF executable class.

@@ -1,3 +1,50 @@
+2010-06-11  Stan Shebs  <stan@codesourcery.com>
+
+	Add per-operation permission flags.
+
+	* target.h (struct target_ops): New method to_set_permissions.
+	(target_set_permissions): New macro.
+	(target_insert_breakpoint): Change macro to function.
+	(target_remove_breakpoint): Ditto.
+	(target_stop): Ditto.
+	(may_write_registers): Declare.
+	(may_write_memory): Declare.
+	(may_insert_breakpoints): Declare.
+	(may_insert_tracepoints): Declare.
+	(may_insert_fast_tracepoints): Declare.
+	(may_stop): Declare.
+	* target.c (may_write_registers, may_write_registers_1): New globals.
+	(may_write_memory, may_write_memory_1): New globals.
+	(may_insert_breakpoints, may_insert_breakpoints_1): New globals.
+	(may_insert_tracepoints, may_insert_tracepoints_1): New globals.
+	(may_insert_fast_tracepoints, may_insert_fast_tracepoints_1): New
+	globals.
+	(may_stop, may_stop_1): New global.
+	(target_xfer_partial): Test for write permission.
+	(target_store_registers): Ditto.
+	(target_insert_breakpoint): New function.
+	(target_remove_breakpoint): New function.
+	(target_stop): New function.
+	(_initialize_targets): Add new set/show variables.
+	(set_write_memory_permission): New function.
+	(update_target_permissions): New function.
+	(set_target_permissions): New function.
+	(update_current_target): Default to_set_permissions.
+	(_initialize_targets): Use new globals and setter function.
+	* tracepoint.c (start_tracing): Test for permission.
+	* inferior.h (update_observer_mode): Declare.
+	* infrun.c (non_stop_1): Define earlier.
+	(observer_mode, observer_mode_1): New globals.
+	(set_observer_mode, show_observer_mode): New functions.
+	(update_observer_mode): New function.
+	(_initialize_infrun): Define "set observer" command.
+	* remote.c (PACKET_QAllow): New optional packet.
+	(remote_protocol_features): Add QAllow.
+	(remote_set_permissions): New function.
+	(remote_start_remote): Call it.
+	(init_remote_ops): Add it to target vector.
+	(_initialize_remote): Add config command for QAllow.
+
 2010-06-11  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_add_member_fn): Handle correct form of

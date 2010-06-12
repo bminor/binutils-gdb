@@ -628,4 +628,6 @@ extern int number_of_inferiors (void);
 
 extern struct inferior *add_inferior_with_spaces (void);
 
+extern void update_observer_mode (void);
+
 #endif /* !defined (INFERIOR_H) */

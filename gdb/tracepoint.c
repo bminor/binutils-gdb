@@ -1490,7 +1490,7 @@ start_tracing (void)
   int ix;
   struct breakpoint *t;
   struct trace_state_variable *tsv;
-  int any_enabled = 0;
+  int any_enabled = 0, num_to_download = 0;
   
   tp_vec = all_tracepoints ();
 
@@ -1504,10 +1504,15 @@ start_tracing (void)
   for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
     {
       if (t->enable_state == bp_enabled)
-	{
-	  any_enabled = 1;
-	  break;
-	}
+	any_enabled = 1;
+
+      if ((t->type == bp_fast_tracepoint
+	   ? may_insert_fast_tracepoints
+	   : may_insert_tracepoints))
+	++num_to_download;
+      else
+	warning (_("May not insert %stracepoints, skipping tracepoint %d"),
+		 (t->type == bp_fast_tracepoint ? "fast " : ""), t->number);
     }
 
   /* No point in tracing with only disabled tracepoints.  */
@@ -1517,10 +1522,21 @@ start_tracing (void)
       error (_("No tracepoints enabled, not starting trace"));
     }
 
+  if (num_to_download <= 0)
+    {
+      VEC_free (breakpoint_p, tp_vec);
+      error (_("No tracepoints that may be downloaded, not starting trace"));
+    }
+
   target_trace_init ();
 
   for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
     {
+      if ((t->type == bp_fast_tracepoint
+	   ? !may_insert_fast_tracepoints
+	   : !may_insert_tracepoints))
+	continue;
+
       t->number_on_target = 0;
       target_download_tracepoint (t);
       t->number_on_target = t->number;

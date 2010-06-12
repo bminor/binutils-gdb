@@ -212,6 +212,8 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 static char *write_ptid (char *buf, const char *endbuf, ptid_t ptid);
 static ptid_t read_ptid (char *buf, char **obuf);
 
+static void remote_set_permissions (void);
+
 struct remote_state;
 static int remote_get_trace_status (struct trace_status *ts);
 
@@ -1213,6 +1215,7 @@ enum {
   PACKET_bc,
   PACKET_bs,
   PACKET_TracepointSource,
+  PACKET_QAllow,
   PACKET_MAX
 };
 
@@ -3047,6 +3050,10 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
      which later probes to skip.  */
   remote_query_supported ();
 
+  /* If the stub wants to get a QAllow, compose one and send it.  */
+  if (remote_protocol_packets[PACKET_QAllow].support != PACKET_DISABLE)
+    remote_set_permissions ();
+
   /* Next, we possibly activate noack mode.
 
      If the QStartNoAckMode packet configuration is set to AUTO,
@@ -3393,6 +3400,36 @@ Some events may be lost, rendering further debugging impossible."));
   return serial_open (name);
 }
 
+/* Inform the target of our permission settings.  The permission flags
+   work without this, but if the target knows the settings, it can do
+   a couple things.  First, it can add its own check, to catch cases
+   that somehow manage to get by the permissions checks in target
+   methods.  Second, if the target is wired to disallow particular
+   settings (for instance, a system in the field that is not set up to
+   be able to stop at a breakpoint), it can object to any unavailable
+   permissions.  */
+
+void
+remote_set_permissions (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  sprintf (rs->buf, "QAllow:"
+	   "WriteReg:%x;WriteMem:%x;"
+	   "InsertBreak:%x;InsertTrace:%x;"
+	   "InsertFastTrace:%x;Stop:%x",
+	   may_write_registers, may_write_memory,
+	   may_insert_breakpoints, may_insert_tracepoints,
+	   may_insert_fast_tracepoints, may_stop);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  /* If the target didn't like the packet, warn the user.  Do not try
+     to undo the user's settings, that would just be maddening.  */
+  if (strcmp (rs->buf, "OK") != 0)
+    warning ("Remote refused setting permissions with: %s", rs->buf);
+}
+
 /* This type describes each known response to the qSupported
    packet.  */
 struct protocol_feature
@@ -3564,6 +3601,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_bs },
   { "TracepointSource", PACKET_DISABLE, remote_supported_packet,
     PACKET_TracepointSource },
+  { "QAllow", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QAllow },
 };
 
 static char *remote_support_xml;
@@ -10061,6 +10100,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_core_of_thread = remote_core_of_thread;
   remote_ops.to_verify_memory = remote_verify_memory;
   remote_ops.to_get_tib_address = remote_get_tib_address;
+  remote_ops.to_set_permissions = remote_set_permissions;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -10535,6 +10575,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_TracepointSource],
 			 "TracepointSource", "TracepointSource", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QAllow],
+			 "QAllow", "allow", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

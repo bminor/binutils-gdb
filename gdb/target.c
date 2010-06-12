@@ -195,6 +195,22 @@ static int trust_readonly = 0;
 
 static int show_memory_breakpoints = 0;
 
+/* These globals control whether GDB attempts to perform these
+   operations; they are useful for targets that need to prevent
+   inadvertant disruption, such as in non-stop mode.  */
+
+int may_write_registers = 1;
+
+int may_write_memory = 1;
+
+int may_insert_breakpoints = 1;
+
+int may_insert_tracepoints = 1;
+
+int may_insert_fast_tracepoints = 1;
+
+int may_stop = 1;
+
 /* Non-zero if we want to see trace of target level stuff.  */
 
 static int targetdebug = 0;
@@ -662,6 +678,7 @@ update_current_target (void)
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_set_circular_trace_buffer, t);
       INHERIT (to_get_tib_address, t);
+      INHERIT (to_set_permissions, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -858,6 +875,9 @@ update_current_target (void)
   de_fault (to_get_tib_address,
 	    (int (*) (ptid_t, CORE_ADDR *))
 	    tcomplain);
+  de_fault (to_set_permissions,
+	    (void (*) (void))
+	    target_ignore);
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed
@@ -1403,6 +1423,10 @@ target_xfer_partial (struct target_ops *ops,
   LONGEST retval;
 
   gdb_assert (ops->to_xfer_partial != NULL);
+
+  if (writebuf && !may_write_memory)
+    error (_("Writing to memory is not allowed (addr %s, len %s)"),
+	   core_addr_to_string_nz (offset), plongest (len));
 
   /* If this is a memory transfer, let the memory-specific code
      have a look at it instead.  Memory transfers are more
@@ -1965,6 +1989,36 @@ get_target_memory_unsigned (struct target_ops *ops, CORE_ADDR addr,
   gdb_assert (len <= sizeof (buf));
   get_target_memory (ops, addr, buf, len);
   return extract_unsigned_integer (buf, len, byte_order);
+}
+
+int
+target_insert_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
+{
+  if (!may_insert_breakpoints)
+    {
+      warning (_("May not insert breakpoints"));
+      return 1;
+    }
+
+  return (*current_target.to_insert_breakpoint) (gdbarch, bp_tgt);
+}
+
+int
+target_remove_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
+{
+  /* This is kind of a weird case to handle, but the permission might
+     have been changed after breakpoints were inserted - in which case
+     we should just take the user literally and assume that any
+     breakpoints should be left in place.  */
+  if (!may_insert_breakpoints)
+    {
+      warning (_("May not remove breakpoints"));
+      return 1;
+    }
+
+  return (*current_target.to_remove_breakpoint) (gdbarch, bp_tgt);
 }
 
 static void
@@ -2949,6 +3003,18 @@ target_find_new_threads (void)
     }
 }
 
+void
+target_stop (ptid_t ptid)
+{
+  if (!may_stop)
+    {
+      warning (_("May not interrupt or stop the target, ignoring attempt"));
+      return;
+    }
+
+  (*current_target.to_stop) (ptid);
+}
+
 static void
 debug_to_post_attach (int pid)
 {
@@ -3057,6 +3123,9 @@ void
 target_store_registers (struct regcache *regcache, int regno)
 {
   struct target_ops *t;
+
+  if (!may_write_registers)
+    error (_("Writing to registers is not allowed (regno %d)"), regno);
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
@@ -3675,6 +3744,62 @@ show_maintenance_target_async_permitted (struct ui_file *file, int from_tty,
 Controlling the inferior in asynchronous mode is %s.\n"), value);
 }
 
+/* Temporary copies of permission settings.  */
+
+static int may_write_registers_1 = 1;
+static int may_write_memory_1 = 1;
+static int may_insert_breakpoints_1 = 1;
+static int may_insert_tracepoints_1 = 1;
+static int may_insert_fast_tracepoints_1 = 1;
+static int may_stop_1 = 1;
+
+/* Make the user-set values match the real values again.  */
+
+void
+update_target_permissions (void)
+{
+  may_write_registers_1 = may_write_registers;
+  may_write_memory_1 = may_write_memory;
+  may_insert_breakpoints_1 = may_insert_breakpoints;
+  may_insert_tracepoints_1 = may_insert_tracepoints;
+  may_insert_fast_tracepoints_1 = may_insert_fast_tracepoints;
+  may_stop_1 = may_stop;
+}
+
+/* The one function handles (most of) the permission flags in the same
+   way.  */
+
+static void
+set_target_permissions (char *args, int from_tty,
+			struct cmd_list_element *c)
+{
+  if (target_has_execution)
+    {
+      update_target_permissions ();
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  /* Make the real values match the user-changed values.  */
+  may_write_registers = may_write_registers_1;
+  may_insert_breakpoints = may_insert_breakpoints_1;
+  may_insert_tracepoints = may_insert_tracepoints_1;
+  may_insert_fast_tracepoints = may_insert_fast_tracepoints_1;
+  may_stop = may_stop_1;
+  update_observer_mode ();
+}
+
+/* Set memory write permission independently of observer mode.  */
+
+static void
+set_write_memory_permission (char *args, int from_tty,
+			struct cmd_list_element *c)
+{
+  /* Make the real values match the user-changed values.  */
+  may_write_memory = may_write_memory_1;
+  update_observer_mode ();
+}
+
+
 void
 initialize_targets (void)
 {
@@ -3732,6 +3857,61 @@ By default, caching for stack access is on."),
 			   set_stack_cache_enabled_p,
 			   show_stack_cache_enabled_p,
 			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("may-write-registers", class_support,
+			   &may_write_registers_1, _("\
+Set permission to write into registers."), _("\
+Show permission to write into registers."), _("\
+When this permission is on, GDB may write into the target's registers.\n\
+Otherwise, any sort of write attempt will result in an error."),
+			   set_target_permissions, NULL,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("may-write-memory", class_support,
+			   &may_write_memory_1, _("\
+Set permission to write into target memory."), _("\
+Show permission to write into target memory."), _("\
+When this permission is on, GDB may write into the target's memory.\n\
+Otherwise, any sort of write attempt will result in an error."),
+			   set_write_memory_permission, NULL,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("may-insert-breakpoints", class_support,
+			   &may_insert_breakpoints_1, _("\
+Set permission to insert breakpoints in the target."), _("\
+Show permission to insert breakpoints in the target."), _("\
+When this permission is on, GDB may insert breakpoints in the program.\n\
+Otherwise, any sort of insertion attempt will result in an error."),
+			   set_target_permissions, NULL,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("may-insert-tracepoints", class_support,
+			   &may_insert_tracepoints_1, _("\
+Set permission to insert tracepoints in the target."), _("\
+Show permission to insert tracepoints in the target."), _("\
+When this permission is on, GDB may insert tracepoints in the program.\n\
+Otherwise, any sort of insertion attempt will result in an error."),
+			   set_target_permissions, NULL,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("may-insert-fast-tracepoints", class_support,
+			   &may_insert_fast_tracepoints_1, _("\
+Set permission to insert fast tracepoints in the target."), _("\
+Show permission to insert fast tracepoints in the target."), _("\
+When this permission is on, GDB may insert fast tracepoints.\n\
+Otherwise, any sort of insertion attempt will result in an error."),
+			   set_target_permissions, NULL,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("may-interrupt", class_support,
+			   &may_stop_1, _("\
+Set permission to interrupt or signal the target."), _("\
+Show permission to interrupt or signal the target."), _("\
+When this permission is on, GDB may interrupt/stop the target's execution.\n\
+Otherwise, any attempt to interrupt or stop will be ignored."),
+			   set_target_permissions, NULL,
+			   &setlist, &showlist);
+
 
   target_dcache = dcache_init ();
 }
