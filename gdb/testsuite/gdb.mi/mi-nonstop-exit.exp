@@ -52,7 +52,6 @@ mi_gdb_test "-gdb-set target-async 1" ".*"
 detect_async
 
 if { [mi_run_to_main] < 0 } {
-    perror "mi-nonstop-exit.exp tests suppressed"
     continue
 }
 
@@ -63,7 +62,6 @@ mi_expect_stop "exited-normally" "" "" "" "" "" "finished exec continue"
 # Run the program again.
 
 if { [mi_run_to_main] < 0 } {
-    fail "run (2)"
     continue
 }
 

@@ -62,7 +62,6 @@ mi_gdb_test "-gdb-set target-async 1" ".*"
 detect_async
 
 if { [mi_run_to_main] < 0 } {
-    perror "mi-nonstop.exp tests suppressed"
     continue
 }
 
