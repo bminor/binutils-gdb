@@ -20,6 +20,7 @@
 
 #include <stddef.h>
 #include <signal.h>
+#include <limits.h>
 #include "server.h"
 #include "linux-low.h"
 #include "i387-fp.h"
@@ -1470,6 +1471,1034 @@ x86_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 						adjusted_insn_addr_end);
 }
 
+static void
+add_insns (unsigned char *start, int len)
+{
+  CORE_ADDR buildaddr = current_insn_ptr;
+
+  if (debug_threads)
+    fprintf (stderr, "Adding %d bytes of insn at %s\n",
+	     len, paddress (buildaddr));
+
+  append_insns (&buildaddr, len, start);
+  current_insn_ptr = buildaddr;
+}
+
+/* A function used to trick optimizers.  */
+
+int
+always_true (void)
+{
+  return 1;
+}
+
+/* Our general strategy for emitting code is to avoid specifying raw
+   bytes whenever possible, and instead copy a block of inline asm
+   that is embedded in the function.  This is a little messy, because
+   we need to keep the compiler from discarding what looks like dead
+   code, plus suppress various warnings.  */
+
+#define EMIT_ASM(NAME,INSNS)						\
+  { extern unsigned char start_ ## NAME, end_ ## NAME;			\
+    add_insns (&start_ ## NAME, &end_ ## NAME - &start_ ## NAME);	\
+    if (always_true ())						\
+      goto skipover ## NAME;						\
+    __asm__ ("start_" #NAME ":\n\t" INSNS "\n\tend_" #NAME ":\n\t");	\
+    skipover ## NAME:							\
+    ; }
+
+
+#ifdef __x86_64__
+
+#define EMIT_ASM32(NAME,INSNS)						\
+  { extern unsigned char start_ ## NAME, end_ ## NAME;			\
+    add_insns (&start_ ## NAME, &end_ ## NAME - &start_ ## NAME);	\
+    if (always_true ())						\
+      goto skipover ## NAME;						\
+    __asm__ (".code32\n\tstart_" #NAME ":\n\t" INSNS "\n\tend_" #NAME ":\n" \
+	     "\t.code64\n\t");						\
+    skipover ## NAME:							\
+    ; }
+
+#else
+
+#define EMIT_ASM32(NAME,INSNS) EMIT_ASM(NAME,INSNS)
+
+#endif
+
+#ifdef __x86_64__
+
+static void
+amd64_emit_prologue (void)
+{
+  EMIT_ASM (amd64_prologue,
+	    "pushq %rbp\n\t"
+	    "movq %rsp,%rbp\n\t"
+	    "sub $0x20,%rsp\n\t"
+	    "movq %rdi,-8(%rbp)\n\t"
+	    "movq %rsi,-16(%rbp)");
+}
+
+
+static void
+amd64_emit_epilogue (void)
+{
+  EMIT_ASM (amd64_epilogue,
+	    "movq -16(%rbp),%rdi\n\t"
+	    "movq %rax,(%rdi)\n\t"
+	    "xor %rax,%rax\n\t"
+	    "leave\n\t"
+	    "ret");
+}
+
+static void
+amd64_emit_add (void)
+{
+  EMIT_ASM (amd64_add,
+	    "add (%rsp),%rax\n\t"
+	    "lea 0x8(%rsp),%rsp");
+}
+
+static void
+amd64_emit_sub (void)
+{
+  EMIT_ASM (amd64_sub,
+	    "sub %rax,(%rsp)\n\t"
+	    "pop %rax");
+}
+
+static void
+amd64_emit_mul (void)
+{
+  emit_error = 1;
+}
+
+static void
+amd64_emit_lsh (void)
+{
+  emit_error = 1;
+}
+
+static void
+amd64_emit_rsh_signed (void)
+{
+  emit_error = 1;
+}
+
+static void
+amd64_emit_rsh_unsigned (void)
+{
+  emit_error = 1;
+}
+
+static void
+amd64_emit_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM (amd64_ext_8,
+		"cbtw\n\t"
+		"cwtl\n\t"
+		"cltq");
+      break;
+    case 16:
+      EMIT_ASM (amd64_ext_16,
+		"cwtl\n\t"
+		"cltq");
+      break;
+    case 32:
+      EMIT_ASM (amd64_ext_32,
+		"cltq");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+static void
+amd64_emit_log_not (void)
+{
+  EMIT_ASM (amd64_log_not,
+	    "test %rax,%rax\n\t"
+	    "sete %cl\n\t"
+	    "movzbq %cl,%rax");
+}
+
+static void
+amd64_emit_bit_and (void)
+{
+  EMIT_ASM (amd64_and,
+	    "and (%rsp),%rax\n\t"
+	    "lea 0x8(%rsp),%rsp");
+}
+
+static void
+amd64_emit_bit_or (void)
+{
+  EMIT_ASM (amd64_or,
+	    "or (%rsp),%rax\n\t"
+	    "lea 0x8(%rsp),%rsp");
+}
+
+static void
+amd64_emit_bit_xor (void)
+{
+  EMIT_ASM (amd64_xor,
+	    "xor (%rsp),%rax\n\t"
+	    "lea 0x8(%rsp),%rsp");
+}
+
+static void
+amd64_emit_bit_not (void)
+{
+  EMIT_ASM (amd64_bit_not,
+	    "xorq $0xffffffffffffffff,%rax");
+}
+
+static void
+amd64_emit_equal (void)
+{
+  EMIT_ASM (amd64_equal,
+	    "cmp %rax,(%rsp)\n\t"
+	    "je .Lamd64_equal_true\n\t"
+	    "xor %rax,%rax\n\t"
+	    "jmp .Lamd64_equal_end\n\t"
+	    ".Lamd64_equal_true:\n\t"
+	    "mov $0x1,%rax\n\t"
+	    ".Lamd64_equal_end:\n\t"
+	    "lea 0x8(%rsp),%rsp");
+}
+
+static void
+amd64_emit_less_signed (void)
+{
+  EMIT_ASM (amd64_less_signed,
+	    "cmp %rax,(%rsp)\n\t"
+	    "jl .Lamd64_less_signed_true\n\t"
+	    "xor %rax,%rax\n\t"
+	    "jmp .Lamd64_less_signed_end\n\t"
+	    ".Lamd64_less_signed_true:\n\t"
+	    "mov $1,%rax\n\t"
+	    ".Lamd64_less_signed_end:\n\t"
+	    "lea 0x8(%rsp),%rsp");
+}
+
+static void
+amd64_emit_less_unsigned (void)
+{
+  EMIT_ASM (amd64_less_unsigned,
+	    "cmp %rax,(%rsp)\n\t"
+	    "jb .Lamd64_less_unsigned_true\n\t"
+	    "xor %rax,%rax\n\t"
+	    "jmp .Lamd64_less_unsigned_end\n\t"
+	    ".Lamd64_less_unsigned_true:\n\t"
+	    "mov $1,%rax\n\t"
+	    ".Lamd64_less_unsigned_end:\n\t"
+	    "lea 0x8(%rsp),%rsp");
+}
+
+static void
+amd64_emit_ref (int size)
+{
+  switch (size)
+    {
+    case 1:
+      EMIT_ASM (amd64_ref1,
+		"movb (%rax),%al");
+      break;
+    case 2:
+      EMIT_ASM (amd64_ref2,
+		"movw (%rax),%ax");
+      break;
+    case 4:
+      EMIT_ASM (amd64_ref4,
+		"movl (%rax),%eax");
+      break;
+    case 8:
+      EMIT_ASM (amd64_ref8,
+		"movq (%rax),%rax");
+      break;
+    }
+}
+
+static void
+amd64_emit_if_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_if_goto,
+	    "mov %rax,%rcx\n\t"
+	    "pop %rax\n\t"
+	    "cmp $0,%rcx\n\t"
+	    ".byte 0x0f, 0x85, 0x0, 0x0, 0x0, 0x0");
+  if (offset_p)
+    *offset_p = 10;
+  if (size_p)
+    *size_p = 4;
+}
+
+static void
+amd64_emit_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_goto,
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0");
+  if (offset_p)
+    *offset_p = 1;
+  if (size_p)
+    *size_p = 4;
+}
+
+static void
+amd64_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
+{
+  int diff = (to - (from + size));
+  unsigned char buf[sizeof (int)];
+
+  if (size != 4)
+    {
+      emit_error = 1;
+      return;
+    }
+
+  memcpy (buf, &diff, sizeof (int));
+  write_inferior_memory (from, buf, sizeof (int));
+}
+
+static void
+amd64_emit_const (int64_t num)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr = current_insn_ptr;
+
+  i = 0;
+  buf[i++] = 0x48;  buf[i++] = 0xb8; /* mov $<n>,%rax */
+  *((int64_t *) (&buf[i])) = num;
+  i += 8;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+}
+
+static void
+amd64_emit_call (CORE_ADDR fn)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr;
+  int64_t offset64;
+
+  /* The destination function being in the shared library, may be
+     >31-bits away off the compiled code pad.  */
+
+  buildaddr = current_insn_ptr;
+
+  offset64 = fn - (buildaddr + 1 /* call op */ + 4 /* 32-bit offset */);
+
+  i = 0;
+
+  if (offset64 > INT_MAX || offset64 < INT_MIN)
+    {
+      /* Offset is too large for a call.  Use callq, but that requires
+	 a register, so avoid it if possible.  Use r10, since it is
+	 call-clobbered, we don't have to push/pop it.  */
+      buf[i++] = 0x48; /* mov $fn,%r10 */
+      buf[i++] = 0xba;
+      memcpy (buf + i, &fn, 8);
+      i += 8;
+      buf[i++] = 0xff; /* callq *%r10 */
+      buf[i++] = 0xd2;
+    }
+  else
+    {
+      int offset32 = offset64; /* we know we can't overflow here.  */
+      memcpy (buf + i, &offset32, 4);
+      i += 4;
+    }
+
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+}
+
+static void
+amd64_emit_reg (int reg)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr;
+
+  /* Assume raw_regs is still in %rdi.  */
+  buildaddr = current_insn_ptr;
+  i = 0;
+  buf[i++] = 0xbe; /* mov $<n>,%esi */
+  *((int *) (&buf[i])) = reg;
+  i += 4;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+  amd64_emit_call (get_raw_reg_func_addr ());
+}
+
+static void
+amd64_emit_pop (void)
+{
+  EMIT_ASM (amd64_pop,
+	    "pop %rax");
+}
+
+static void
+amd64_emit_stack_flush (void)
+{
+  EMIT_ASM (amd64_stack_flush,
+	    "push %rax");
+}
+
+static void
+amd64_emit_zero_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM (amd64_zero_ext_8,
+		"and $0xff,%rax");
+      break;
+    case 16:
+      EMIT_ASM (amd64_zero_ext_16,
+		"and $0xffff,%rax");
+      break;
+    case 32:
+      EMIT_ASM (amd64_zero_ext_32,
+		"mov $0xffffffff,%rcx\n\t"
+		"and %rcx,%rax");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+static void
+amd64_emit_swap (void)
+{
+  EMIT_ASM (amd64_swap,
+	    "mov %rax,%rcx\n\t"
+	    "pop %rax\n\t"
+	    "push %rcx");
+}
+
+static void
+amd64_emit_stack_adjust (int n)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr = current_insn_ptr;
+
+  i = 0;
+  buf[i++] = 0x48; /* lea $<n>(%rsp),%rsp */
+  buf[i++] = 0x8d;
+  buf[i++] = 0x64;
+  buf[i++] = 0x24;
+  /* This only handles adjustments up to 16, but we don't expect any more.  */
+  buf[i++] = n * 8;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+}
+
+/* FN's prototype is `LONGEST(*fn)(int)'.  */
+
+static void
+amd64_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr;
+
+  buildaddr = current_insn_ptr;
+  i = 0;
+  buf[i++] = 0xbf; /* movl $<n>,%edi */
+  *((int *) (&buf[i])) = arg1;
+  i += 4;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+  amd64_emit_call (fn);
+}
+
+/* FN's prototype is `void(*fn)(int,int64_t)'.  */
+
+static void
+amd64_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr;
+
+  buildaddr = current_insn_ptr;
+  i = 0;
+  buf[i++] = 0xbf; /* movl $<n>,%edi */
+  *((int *) (&buf[i])) = arg1;
+  i += 4;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+  EMIT_ASM (amd64_void_call_2_a,
+	    /* Save away a copy of the stack top.  */
+	    "push %rax\n\t"
+	    /* Also pass top as the second argument.  */
+	    "mov %rax,%rsi");
+  amd64_emit_call (fn);
+  EMIT_ASM (amd64_void_call_2_b,
+	    /* Restore the stack top, %rax may have been trashed.  */
+	    "pop %rax");
+}
+
+struct emit_ops amd64_emit_ops =
+  {
+    amd64_emit_prologue,
+    amd64_emit_epilogue,
+    amd64_emit_add,
+    amd64_emit_sub,
+    amd64_emit_mul,
+    amd64_emit_lsh,
+    amd64_emit_rsh_signed,
+    amd64_emit_rsh_unsigned,
+    amd64_emit_ext,
+    amd64_emit_log_not,
+    amd64_emit_bit_and,
+    amd64_emit_bit_or,
+    amd64_emit_bit_xor,
+    amd64_emit_bit_not,
+    amd64_emit_equal,
+    amd64_emit_less_signed,
+    amd64_emit_less_unsigned,
+    amd64_emit_ref,
+    amd64_emit_if_goto,
+    amd64_emit_goto,
+    amd64_write_goto_address,
+    amd64_emit_const,
+    amd64_emit_call,
+    amd64_emit_reg,
+    amd64_emit_pop,
+    amd64_emit_stack_flush,
+    amd64_emit_zero_ext,
+    amd64_emit_swap,
+    amd64_emit_stack_adjust,
+    amd64_emit_int_call_1,
+    amd64_emit_void_call_2
+  };
+
+#endif /* __x86_64__ */
+
+static void
+i386_emit_prologue (void)
+{
+  EMIT_ASM32 (i386_prologue,
+	    "push %ebp\n\t"
+	    "mov %esp,%ebp");
+  /* At this point, the raw regs base address is at 8(%ebp), and the
+     value pointer is at 12(%ebp).  */
+}
+
+static void
+i386_emit_epilogue (void)
+{
+  EMIT_ASM32 (i386_epilogue,
+	    "mov 12(%ebp),%ecx\n\t"
+	    "mov %eax,(%ecx)\n\t"
+	    "mov %ebx,0x4(%ecx)\n\t"
+	    "xor %eax,%eax\n\t"
+	    "pop %ebp\n\t"
+	    "ret");
+}
+
+static void
+i386_emit_add (void)
+{
+  EMIT_ASM32 (i386_add,
+	    "add (%esp),%eax\n\t"
+	    "adc 0x4(%esp),%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_sub (void)
+{
+  EMIT_ASM32 (i386_sub,
+	    "subl %eax,(%esp)\n\t"
+	    "sbbl %ebx,4(%esp)\n\t"
+	    "pop %eax\n\t"
+	    "pop %ebx\n\t");
+}
+
+static void
+i386_emit_mul (void)
+{
+  emit_error = 1;
+}
+
+static void
+i386_emit_lsh (void)
+{
+  emit_error = 1;
+}
+
+static void
+i386_emit_rsh_signed (void)
+{
+  emit_error = 1;
+}
+
+static void
+i386_emit_rsh_unsigned (void)
+{
+  emit_error = 1;
+}
+
+static void
+i386_emit_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM32 (i386_ext_8,
+		"cbtw\n\t"
+		"cwtl\n\t"
+		"movl %eax,%ebx\n\t"
+		"sarl $31,%ebx");
+      break;
+    case 16:
+      EMIT_ASM32 (i386_ext_16,
+		"cwtl\n\t"
+		"movl %eax,%ebx\n\t"
+		"sarl $31,%ebx");
+      break;
+    case 32:
+      EMIT_ASM32 (i386_ext_32,
+		"movl %eax,%ebx\n\t"
+		"sarl $31,%ebx");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+static void
+i386_emit_log_not (void)
+{
+  EMIT_ASM32 (i386_log_not,
+	    "or %ebx,%eax\n\t"
+	    "test %eax,%eax\n\t"
+	    "sete %cl\n\t"
+	    "xor %ebx,%ebx\n\t"
+	    "movzbl %cl,%eax");
+}
+
+static void
+i386_emit_bit_and (void)
+{
+  EMIT_ASM32 (i386_and,
+	    "and (%esp),%eax\n\t"
+	    "and 0x4(%esp),%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_bit_or (void)
+{
+  EMIT_ASM32 (i386_or,
+	    "or (%esp),%eax\n\t"
+	    "or 0x4(%esp),%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_bit_xor (void)
+{
+  EMIT_ASM32 (i386_xor,
+	    "xor (%esp),%eax\n\t"
+	    "xor 0x4(%esp),%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_bit_not (void)
+{
+  EMIT_ASM32 (i386_bit_not,
+	    "xor $0xffffffff,%eax\n\t"
+	    "xor $0xffffffff,%ebx\n\t");
+}
+
+static void
+i386_emit_equal (void)
+{
+  EMIT_ASM32 (i386_equal,
+	    "cmpl %ebx,4(%esp)\n\t"
+	    "jne .Li386_equal_false\n\t"
+	    "cmpl %eax,(%esp)\n\t"
+	    "je .Li386_equal_true\n\t"
+	    ".Li386_equal_false:\n\t"
+	    "xor %eax,%eax\n\t"
+	    "jmp .Li386_equal_end\n\t"
+	    ".Li386_equal_true:\n\t"
+	    "mov $1,%eax\n\t"
+	    ".Li386_equal_end:\n\t"
+	    "xor %ebx,%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_less_signed (void)
+{
+  EMIT_ASM32 (i386_less_signed,
+	    "cmpl %ebx,4(%esp)\n\t"
+	    "jl .Li386_less_signed_true\n\t"
+	    "jne .Li386_less_signed_false\n\t"
+	    "cmpl %eax,(%esp)\n\t"
+	    "jl .Li386_less_signed_true\n\t"
+	    ".Li386_less_signed_false:\n\t"
+	    "xor %eax,%eax\n\t"
+	    "jmp .Li386_less_signed_end\n\t"
+	    ".Li386_less_signed_true:\n\t"
+	    "mov $1,%eax\n\t"
+	    ".Li386_less_signed_end:\n\t"
+	    "xor %ebx,%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_less_unsigned (void)
+{
+  EMIT_ASM32 (i386_less_unsigned,
+	    "cmpl %ebx,4(%esp)\n\t"
+	    "jb .Li386_less_unsigned_true\n\t"
+	    "jne .Li386_less_unsigned_false\n\t"
+	    "cmpl %eax,(%esp)\n\t"
+	    "jb .Li386_less_unsigned_true\n\t"
+	    ".Li386_less_unsigned_false:\n\t"
+	    "xor %eax,%eax\n\t"
+	    "jmp .Li386_less_unsigned_end\n\t"
+	    ".Li386_less_unsigned_true:\n\t"
+	    "mov $1,%eax\n\t"
+	    ".Li386_less_unsigned_end:\n\t"
+	    "xor %ebx,%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_ref (int size)
+{
+  switch (size)
+    {
+    case 1:
+      EMIT_ASM32 (i386_ref1,
+		"movb (%eax),%al");
+      break;
+    case 2:
+      EMIT_ASM32 (i386_ref2,
+		"movw (%eax),%ax");
+      break;
+    case 4:
+      EMIT_ASM32 (i386_ref4,
+		"movl (%eax),%eax");
+      break;
+    case 8:
+      EMIT_ASM32 (i386_ref8,
+		"movl 4(%eax),%ebx\n\t"
+		"movl (%eax),%eax");
+      break;
+    }
+}
+
+static void
+i386_emit_if_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (i386_if_goto,
+	    "mov %eax,%ecx\n\t"
+	    "or %ebx,%ecx\n\t"
+	    "pop %eax\n\t"
+	    "pop %ebx\n\t"
+	    "cmpl $0,%ecx\n\t"
+	    /* Don't trust the assembler to choose the right jump */
+	    ".byte 0x0f, 0x85, 0x0, 0x0, 0x0, 0x0");
+
+  if (offset_p)
+    *offset_p = 11; /* be sure that this matches the sequence above */
+  if (size_p)
+    *size_p = 4;
+}
+
+static void
+i386_emit_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (i386_goto,
+	    /* Don't trust the assembler to choose the right jump */
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0");
+  if (offset_p)
+    *offset_p = 1;
+  if (size_p)
+    *size_p = 4;
+}
+
+static void
+i386_write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
+{
+  int diff = (to - (from + size));
+  unsigned char buf[sizeof (int)];
+
+  /* We're only doing 4-byte sizes at the moment.  */
+  if (size != 4)
+    {
+      emit_error = 1;
+      return;
+    }
+
+  memcpy (buf, &diff, sizeof (int));
+  write_inferior_memory (from, buf, sizeof (int));
+}
+
+static void
+i386_emit_const (int64_t num)
+{
+  unsigned char buf[16];
+  int i, hi;
+  CORE_ADDR buildaddr = current_insn_ptr;
+
+  i = 0;
+  buf[i++] = 0xb8; /* mov $<n>,%eax */
+  *((int *) (&buf[i])) = (num & 0xffffffff);
+  i += 4;
+  hi = ((num >> 32) & 0xffffffff);
+  if (hi)
+    {
+      buf[i++] = 0xbb; /* mov $<n>,%ebx */
+      *((int *) (&buf[i])) = hi;
+      i += 4;
+    }
+  else
+    {
+      buf[i++] = 0x31; buf[i++] = 0xdb; /* xor %ebx,%ebx */
+    }
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+}
+
+static void
+i386_emit_call (CORE_ADDR fn)
+{
+  unsigned char buf[16];
+  int i, offset;
+  CORE_ADDR buildaddr;
+
+  buildaddr = current_insn_ptr;
+  i = 0;
+  buf[i++] = 0xe8; /* call <reladdr> */
+  offset = ((int) fn) - (buildaddr + 5);
+  memcpy (buf + 1, &offset, 4);
+  append_insns (&buildaddr, 5, buf);
+  current_insn_ptr = buildaddr;
+}
+
+static void
+i386_emit_reg (int reg)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr;
+
+  EMIT_ASM32 (i386_reg_a,
+	    "sub $0x8,%esp");
+  buildaddr = current_insn_ptr;
+  i = 0;
+  buf[i++] = 0xb8; /* mov $<n>,%eax */
+  *((int *) (&buf[i])) = reg;
+  i += 4;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+  EMIT_ASM32 (i386_reg_b,
+	    "mov %eax,4(%esp)\n\t"
+	    "mov 8(%ebp),%eax\n\t"
+	    "mov %eax,(%esp)");
+  i386_emit_call (get_raw_reg_func_addr ());
+  EMIT_ASM32 (i386_reg_c,
+	    "xor %ebx,%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+static void
+i386_emit_pop (void)
+{
+  EMIT_ASM32 (i386_pop,
+	    "pop %eax\n\t"
+	    "pop %ebx");
+}
+
+static void
+i386_emit_stack_flush (void)
+{
+  EMIT_ASM32 (i386_stack_flush,
+	    "push %ebx\n\t"
+	    "push %eax");
+}
+
+static void
+i386_emit_zero_ext (int arg)
+{
+  switch (arg)
+    {
+    case 8:
+      EMIT_ASM32 (i386_zero_ext_8,
+		"and $0xff,%eax\n\t"
+		"xor %ebx,%ebx");
+      break;
+    case 16:
+      EMIT_ASM32 (i386_zero_ext_16,
+		"and $0xffff,%eax\n\t"
+		"xor %ebx,%ebx");
+      break;
+    case 32:
+      EMIT_ASM32 (i386_zero_ext_32,
+		"xor %ebx,%ebx");
+      break;
+    default:
+      emit_error = 1;
+    }
+}
+
+static void
+i386_emit_swap (void)
+{
+  EMIT_ASM32 (i386_swap,
+	    "mov %eax,%ecx\n\t"
+	    "mov %ebx,%edx\n\t"
+	    "pop %eax\n\t"
+	    "pop %ebx\n\t"
+	    "push %edx\n\t"
+	    "push %ecx");
+}
+
+static void
+i386_emit_stack_adjust (int n)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr = current_insn_ptr;
+
+  i = 0;
+  buf[i++] = 0x8d; /* lea $<n>(%esp),%esp */
+  buf[i++] = 0x64;
+  buf[i++] = 0x24;
+  buf[i++] = n * 8;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+}
+
+/* FN's prototype is `LONGEST(*fn)(int)'.  */
+
+static void
+i386_emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr;
+
+  EMIT_ASM32 (i386_int_call_1_a,
+	    /* Reserve a bit of stack space.  */
+	    "sub $0x8,%esp");
+  /* Put the one argument on the stack.  */
+  buildaddr = current_insn_ptr;
+  i = 0;
+  buf[i++] = 0xc7;  /* movl $<arg1>,(%esp) */
+  buf[i++] = 0x04;
+  buf[i++] = 0x24;
+  *((int *) (&buf[i])) = arg1;
+  i += 4;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+  i386_emit_call (fn);
+  EMIT_ASM32 (i386_int_call_1_c,
+	    "mov %edx,%ebx\n\t"
+	    "lea 0x8(%esp),%esp");
+}
+
+/* FN's prototype is `void(*fn)(int,int64_t)'.  */
+
+static void
+i386_emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  unsigned char buf[16];
+  int i;
+  CORE_ADDR buildaddr;
+
+  EMIT_ASM32 (i386_void_call_2_a,
+	    /* Preserve %eax only; we don't have to worry about %ebx.  */
+	    "push %eax\n\t"
+	    /* Reserve a bit of stack space for arguments.  */
+	    "sub $0x10,%esp\n\t"
+	    /* Copy "top" to the second argument position.  (Note that
+	       we can't assume function won't scribble on its
+	       arguments, so don't try to restore from this.)  */
+	    "mov %eax,4(%esp)\n\t"
+	    "mov %ebx,8(%esp)");
+  /* Put the first argument on the stack.  */
+  buildaddr = current_insn_ptr;
+  i = 0;
+  buf[i++] = 0xc7;  /* movl $<arg1>,(%esp) */
+  buf[i++] = 0x04;
+  buf[i++] = 0x24;
+  *((int *) (&buf[i])) = arg1;
+  i += 4;
+  append_insns (&buildaddr, i, buf);
+  current_insn_ptr = buildaddr;
+  i386_emit_call (fn);
+  EMIT_ASM32 (i386_void_call_2_b,
+	    "lea 0x10(%esp),%esp\n\t"
+	    /* Restore original stack top.  */
+	    "pop %eax");
+}
+
+struct emit_ops i386_emit_ops =
+  {
+    i386_emit_prologue,
+    i386_emit_epilogue,
+    i386_emit_add,
+    i386_emit_sub,
+    i386_emit_mul,
+    i386_emit_lsh,
+    i386_emit_rsh_signed,
+    i386_emit_rsh_unsigned,
+    i386_emit_ext,
+    i386_emit_log_not,
+    i386_emit_bit_and,
+    i386_emit_bit_or,
+    i386_emit_bit_xor,
+    i386_emit_bit_not,
+    i386_emit_equal,
+    i386_emit_less_signed,
+    i386_emit_less_unsigned,
+    i386_emit_ref,
+    i386_emit_if_goto,
+    i386_emit_goto,
+    i386_write_goto_address,
+    i386_emit_const,
+    i386_emit_call,
+    i386_emit_reg,
+    i386_emit_pop,
+    i386_emit_stack_flush,
+    i386_emit_zero_ext,
+    i386_emit_swap,
+    i386_emit_stack_adjust,
+    i386_emit_int_call_1,
+    i386_emit_void_call_2
+  };
+
+
+static struct emit_ops *
+x86_emit_ops (void)
+{
+#ifdef __x86_64__
+  int use_64bit = register_size (0) == 8;
+
+  if (use_64bit)
+    return &amd64_emit_ops;
+  else
+#endif
+    return &i386_emit_ops;
+}
+
 /* This is initialized assuming an amd64 target.
    x86_arch_setup will correct it for i386 or amd64 targets.  */
 
@@ -1504,5 +2533,6 @@ struct linux_target_ops the_low_target =
   x86_linux_process_qsupported,
   x86_supports_tracepoints,
   x86_get_thread_area,
-  x86_install_fast_tracepoint_jump_pad
+  x86_install_fast_tracepoint_jump_pad,
+  x86_emit_ops
 };

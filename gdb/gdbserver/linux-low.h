@@ -136,6 +136,10 @@ struct linux_target_ops
 					   ULONGEST *jjump_pad_insn_size,
 					   CORE_ADDR *adjusted_insn_addr,
 					   CORE_ADDR *adjusted_insn_addr_end);
+
+  /* Return the bytecode operations vector for the current inferior.
+     Returns NULL if bytecode compilation is not supported.  */
+  struct emit_ops *(*emit_ops) (void);
 };
 
 extern struct linux_target_ops the_low_target;

@@ -5054,6 +5054,15 @@ linux_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
      adjusted_insn_addr, adjusted_insn_addr_end);
 }
 
+static struct emit_ops *
+linux_emit_ops (void)
+{
+  if (the_low_target.emit_ops != NULL)
+    return (*the_low_target.emit_ops) ();
+  else
+    return NULL;
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -5109,7 +5118,8 @@ static struct target_ops linux_target_ops = {
   linux_unpause_all,
   linux_cancel_breakpoints,
   linux_stabilize_threads,
-  linux_install_fast_tracepoint_jump_pad
+  linux_install_fast_tracepoint_jump_pad,
+  linux_emit_ops
 };
 
 static void

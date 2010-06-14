@@ -22,6 +22,8 @@
 #ifndef TARGET_H
 #define TARGET_H
 
+struct emit_ops;
+
 /* Ways to "resume" a thread.  */
 
 enum resume_kind
@@ -349,6 +351,10 @@ struct target_ops
 					   ULONGEST *jjump_pad_insn_size,
 					   CORE_ADDR *adjusted_insn_addr,
 					   CORE_ADDR *adjusted_insn_addr_end);
+
+  /* Return the bytecode operations vector for the current inferior.
+     Returns NULL if bytecode compilation is not supported.  */
+  struct emit_ops *(*emit_ops) (void);
 };
 
 extern struct target_ops *the_target;
@@ -451,6 +457,9 @@ void set_target_ops (struct target_ops *);
 						   jjump_pad_insn_size, \
 						   adjusted_insn_addr,	\
 						   adjusted_insn_addr_end)
+
+#define target_emit_ops() \
+  (the_target->emit_ops ? (*the_target->emit_ops) () : NULL)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

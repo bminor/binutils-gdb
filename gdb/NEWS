@@ -36,7 +36,14 @@ qRelocInsn
   - GDBserver now support tracepoints (including fast tracepoints).
     The feature is currently supported by the i386-linux and
     amd64-linux builds.  See the "Tracepoints support in gdbserver"
-    section in the manual for more information.
+    section in the manual for more information.  GDBserver JIT
+    compiles the tracepoint's conditional agent expression bytecode
+    into native code whenever possible for low overhead dynamic
+    tracepoints conditionals.  For such tracepoints, an expression
+    that examines program state is evaluated when the tracepoint is
+    reached, in order to determine whether to capture trace data.  If
+    the condition is simple and false, processing the tracepoint
+    finishes very quickly and no data is gathered.
 
   - GDBserver now supports x86_64 Windows 64-bit debugging.
 

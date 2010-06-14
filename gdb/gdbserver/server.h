@@ -573,6 +573,56 @@ void supply_fast_tracepoint_registers (struct regcache *regcache,
 void stop_tracing (void);
 #endif
 
+/* Bytecode compilation function vector.  */
+
+struct emit_ops
+{
+  void (*emit_prologue) (void);
+  void (*emit_epilogue) (void);
+  void (*emit_add) (void);
+  void (*emit_sub) (void);
+  void (*emit_mul) (void);
+  void (*emit_lsh) (void);
+  void (*emit_rsh_signed) (void);
+  void (*emit_rsh_unsigned) (void);
+  void (*emit_ext) (int arg);
+  void (*emit_log_not) (void);
+  void (*emit_bit_and) (void);
+  void (*emit_bit_or) (void);
+  void (*emit_bit_xor) (void);
+  void (*emit_bit_not) (void);
+  void (*emit_equal) (void);
+  void (*emit_less_signed) (void);
+  void (*emit_less_unsigned) (void);
+  void (*emit_ref) (int size);
+  void (*emit_if_goto) (int *offset_p, int *size_p);
+  void (*emit_goto) (int *offset_p, int *size_p);
+  void (*write_goto_address) (CORE_ADDR from, CORE_ADDR to, int size);
+  void (*emit_const) (int64_t num);
+  void (*emit_call) (CORE_ADDR fn);
+  void (*emit_reg) (int reg);
+  void (*emit_pop) (void);
+  void (*emit_stack_flush) (void);
+  void (*emit_zero_ext) (int arg);
+  void (*emit_swap) (void);
+  void (*emit_stack_adjust) (int n);
+
+  /* Emit code for a generic function that takes one fixed integer
+     argument and returns a 64-bit int (for instance, tsv getter).  */
+  void (*emit_int_call_1) (CORE_ADDR fn, int arg1);
+
+  /* Emit code for a generic function that takes one fixed integer
+     argument and a 64-bit int from the top of the stack, and returns
+     nothing (for instance, tsv setter).  */
+  void (*emit_void_call_2) (CORE_ADDR fn, int arg1);
+};
+
+/* Returns the address of the get_raw_reg function in the IPA.  */
+CORE_ADDR get_raw_reg_func_addr (void);
+
+CORE_ADDR current_insn_ptr;
+int emit_error;
+
 /* Version information, from version.c.  */
 extern const char version[];
 extern const char host_name[];

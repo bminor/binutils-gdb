@@ -95,6 +95,21 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
     }
 }
 
+ULONGEST __attribute__ ((visibility("default"), used))
+gdb_agent_get_raw_reg (unsigned char *raw_regs, int regnum)
+{
+  /* This should maybe be allowed to return an error code, or perhaps
+     better, have the emit_reg detect this, and emit a constant zero,
+     or something.  */
+
+  if (regnum > i386_num_regs)
+    return 0;
+  else if (regnum >= I386_CS_REGNUM && regnum <= I386_GS_REGNUM)
+    return *(short *) (raw_regs + i386_ft_collect_regmap[regnum]);
+  else
+    return *(int *) (raw_regs + i386_ft_collect_regmap[regnum]);
+}
+
 /* This is only needed because reg-i386-linux-lib.o references it.  We
    may use it proper at some point.  */
 const char *gdbserver_xmltarget;

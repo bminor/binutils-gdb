@@ -1,3 +1,76 @@
+2010-06-14  Stan Shebs  <stan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Bytecode compiler.
+
+	* linux-x86-low.c: Include limits.h.
+	(add_insns): New.
+	(always_true): New.
+	(EMIT_ASM): New.
+	(EMIT_ASM32): New.
+	(amd64_emit_prologue, amd64_emit_epilogue, amd64_emit_add)
+	(amd64_emit_sub, amd64_emit_mul, amd64_emit_lsh)
+	(amd64_emit_rsh_signed, amd64_emit_rsh_unsigned, amd64_emit_ext,
+	(amd64_emit_log_not, amd64_emit_bit_and, amd64_emit_bit_or)
+	(amd64_emit_bit_xor, amd64_emit_bit_not, amd64_emit_equal,
+	(amd64_emit_less_signed, amd64_emit_less_unsigned, amd64_emit_ref,
+	(amd64_emit_if_goto, amd64_emit_goto, amd64_write_goto_address)
+	(amd64_emit_const, amd64_emit_call, amd64_emit_reg)
+	(amd64_emit_pop, amd64_emit_stack_flush, amd64_emit_zero_ext)
+	(amd64_emit_swap, amd64_emit_stack_adjust, amd64_emit_int_call_1)
+	(amd64_emit_void_call_2): New.
+	(amd64_emit_ops): New.
+	(i386_emit_prologue, i386_emit_epilogue, i386_emit_add)
+	(i386_emit_sub,i386_emit_mul, i386_emit_lsh, i386_emit_rsh_signed)
+	(i386_emit_rsh_unsigned, i386_emit_ext, i386_emit_log_not)
+	(i386_emit_bit_and, i386_emit_bit_or, i386_emit_bit_xor)
+	(i386_emit_bit_not, i386_emit_equal, i386_emit_less_signed)
+	(i386_emit_less_unsigned, i386_emit_ref, i386_emit_if_goto)
+	(i386_emit_goto, i386_write_goto_address, i386_emit_const)
+	(i386_emit_call, i386_emit_reg, i386_emit_pop)
+	(i386_emit_stack_flush, i386_emit_zero_ext, i386_emit_swap)
+	(i386_emit_stack_adjust, i386_emit_int_call_1)
+	(i386_emit_void_call_2): New.
+	(i386_emit_ops): New.
+	(x86_emit_ops): New.
+	(the_low_target): Install x86_emit_ops.
+	* server.h (struct emit_ops): New.
+	(get_raw_reg_func_addr): Declare.
+	(current_insn_ptr, emit_error): Declare.
+	* tracepoint.c (get_raw_reg, get_trace_state_variable_value)
+	(set_trace_state_variable_value): New defines.
+	(struct ipa_sym_addresses): New fields addr_get_raw_reg,
+	addr_get_trace_state_variable_value and
+	addr_set_trace_state_variable_value.
+	(symbol_list): New fields for get_raw_reg,
+	get_trace_state_variable_value and set_trace_state_variable_value.
+	(condfn): New typedef.
+	(struct tracepoint): New field `compiled_cond'.
+	(do_action_at_tracepoint): Clear compiled_cond.
+	(get_trace_state_variable_value, set_trace_state_variable_value):
+	Export in the IPA.
+	(condition_true_at_tracepoint): If there's a compiled condition,
+	run that.
+	(current_insn_ptr, emit_error): New globals.
+	(struct bytecode_address): New.
+	(get_raw_reg_func_addr): New.
+	(emit_prologue, emit_epilogue, emit_add, emit_sub, emit_mul)
+	(emit_lsh, emit_rsh_signed, emit_rsh_unsigned, emit_ext)
+	(emit_log_not, emit_bit_and, emit_bit_or, emit_bit_xor)
+	(emit_bit_not, emit_equal, emit_less_signed, emit_less_unsigned)
+	(emit_ref, emit_if_goto, emit_goto, write_goto_address, emit_const)
+	(emit_reg, emit_pop, emit_stack_flush, emit_zero_ext, emit_swap)
+	(emit_stack_adjust, emit_int_call_1, emit_void_call_2): New.
+	(compile_tracepoint_condition, compile_bytecodes): New.
+	* target.h (emit_ops): Forward declare.
+	(struct target_ops): New field emit_ops.
+	(target_emit_ops): New.
+	* linux-amd64-ipa.c (gdb_agent_get_raw_reg): New.
+	* linux-i386-ipa.c (gdb_agent_get_raw_reg): New.
+	* linux-low.c (linux_emit_ops): New.
+	(linux_target_ops): Install it.
+	* linux-low.h (struct linux_target_ops): New field emit_ops.
+
 2010-06-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-ppc-low.c (ppc_arch_setup): Use private regcache to test MSR.

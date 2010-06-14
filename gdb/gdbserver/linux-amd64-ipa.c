@@ -66,6 +66,15 @@ supply_fast_tracepoint_registers (struct regcache *regcache,
 		     ((char *) buf) + x86_64_ft_collect_regmap[i]);
 }
 
+ULONGEST __attribute__ ((visibility("default"), used))
+gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
+{
+  if (regnum > X86_64_NUM_FT_COLLECT_GREGS)
+    return 0;
+
+  return *(ULONGEST *) (raw_regs + x86_64_ft_collect_regmap[regnum]);
+}
+
 /* This is only needed because reg-i386-linux-lib.o references it.  We
    may use it proper at some point.  */
 const char *gdbserver_xmltarget;

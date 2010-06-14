@@ -132,6 +132,9 @@ trace_vdebug (const char *fmt, ...)
 # define traceframe_write_count gdb_agent_traceframe_write_count
 # define traceframes_created gdb_agent_traceframes_created
 # define trace_state_variables gdb_agent_trace_state_variables
+# define get_raw_reg gdb_agent_get_raw_reg
+# define get_trace_state_variable_value gdb_agent_get_trace_state_variable_value
+# define set_trace_state_variable_value gdb_agent_set_trace_state_variable_value
 #endif
 
 #ifndef IN_PROCESS_AGENT
@@ -162,6 +165,9 @@ struct ipa_sym_addresses
   CORE_ADDR addr_traceframe_write_count;
   CORE_ADDR addr_traceframes_created;
   CORE_ADDR addr_trace_state_variables;
+  CORE_ADDR addr_get_raw_reg;
+  CORE_ADDR addr_get_trace_state_variable_value;
+  CORE_ADDR addr_set_trace_state_variable_value;
 };
 
 #define STRINGIZE_1(STR) #STR
@@ -200,6 +206,9 @@ static struct
   IPA_SYM(traceframe_write_count),
   IPA_SYM(traceframes_created),
   IPA_SYM(trace_state_variables),
+  IPA_SYM(get_raw_reg),
+  IPA_SYM(get_trace_state_variable_value),
+  IPA_SYM(set_trace_state_variable_value),
 };
 
 struct ipa_sym_addresses ipa_sym_addrs;
@@ -564,6 +573,9 @@ enum tracepoint_type
 
 struct tracepoint_hit_ctx;
 
+typedef enum eval_result_type (*condfn) (struct tracepoint_hit_ctx *,
+					 ULONGEST *);
+
 /* The definition of a tracepoint.  */
 
 /* Tracepoints may have multiple locations, each at a different
@@ -611,6 +623,8 @@ struct tracepoint
   /* Count of the times we've hit this tracepoint during the run.
      Note that while-stepping steps are not counted as "hits".  */
   long hit_count;
+
+  CORE_ADDR compiled_cond;
 
   /* Link to the next tracepoint in the list.  */
   struct tracepoint *next;
@@ -1189,6 +1203,8 @@ static void collect_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 static void collect_data_at_step (struct tracepoint_hit_ctx *ctx,
 				  CORE_ADDR stop_pc,
 				  struct tracepoint *tpoint, int current_step);
+static void compile_tracepoint_condition (struct tracepoint *tpoint,
+					  CORE_ADDR *jump_entry);
 #endif
 static void do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 				     CORE_ADDR stop_pc,
@@ -1610,6 +1626,7 @@ add_tracepoint (int num, CORE_ADDR addr)
   tpoint->type = trap_tracepoint;
   tpoint->orig_size = -1;
   tpoint->source_strings = NULL;
+  tpoint->compiled_cond = 0;
   tpoint->handle = NULL;
   tpoint->next = NULL;
 
@@ -1854,7 +1871,7 @@ create_trace_state_variable (int num, int gdb)
   return tsv;
 }
 
-static LONGEST
+IP_AGENT_EXPORT LONGEST
 get_trace_state_variable_value (int num)
 {
   struct trace_state_variable *tsv;
@@ -1880,7 +1897,7 @@ get_trace_state_variable_value (int num)
   return tsv->value;
 }
 
-static void
+IP_AGENT_EXPORT void
 set_trace_state_variable_value (int num, LONGEST val)
 {
   struct trace_state_variable *tsv;
@@ -3906,7 +3923,10 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   ULONGEST value = 0;
   enum eval_result_type err;
 
-  err = eval_agent_expr (ctx, NULL, tpoint->cond, &value);
+  if (tpoint->compiled_cond)
+    err = ((condfn) (uintptr_t) (tpoint->compiled_cond)) (ctx, &value);
+  else
+    err = eval_agent_expr (ctx, NULL, tpoint->cond, &value);
 
   if (err != expr_eval_no_error)
     {
@@ -4944,6 +4964,582 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
 
 #ifndef IN_PROCESS_AGENT
 
+/* Bytecode compilation.  */
+
+CORE_ADDR current_insn_ptr;
+
+int emit_error;
+
+struct bytecode_address
+{
+  int pc;
+  CORE_ADDR address;
+  int goto_pc;
+  /* Offset and size of field to be modified in the goto block.  */
+  int from_offset, from_size;
+  struct bytecode_address *next;
+} *bytecode_address_table;
+
+CORE_ADDR
+get_raw_reg_func_addr (void)
+{
+  return ipa_sym_addrs.addr_get_raw_reg;
+}
+
+static void
+emit_prologue (void)
+{
+  target_emit_ops ()->emit_prologue ();
+}
+
+static void
+emit_epilogue (void)
+{
+  target_emit_ops ()->emit_epilogue ();
+}
+
+static void
+emit_add (void)
+{
+  target_emit_ops ()->emit_add ();
+}
+
+static void
+emit_sub (void)
+{
+  target_emit_ops ()->emit_sub ();
+}
+
+static void
+emit_mul (void)
+{
+  target_emit_ops ()->emit_mul ();
+}
+
+static void
+emit_lsh (void)
+{
+  target_emit_ops ()->emit_lsh ();
+}
+
+static void
+emit_rsh_signed (void)
+{
+  target_emit_ops ()->emit_rsh_signed ();
+}
+
+static void
+emit_rsh_unsigned (void)
+{
+  target_emit_ops ()->emit_rsh_unsigned ();
+}
+
+static void
+emit_ext (int arg)
+{
+  target_emit_ops ()->emit_ext (arg);
+}
+
+static void
+emit_log_not (void)
+{
+  target_emit_ops ()->emit_log_not ();
+}
+
+static void
+emit_bit_and (void)
+{
+  target_emit_ops ()->emit_bit_and ();
+}
+
+static void
+emit_bit_or (void)
+{
+  target_emit_ops ()->emit_bit_or ();
+}
+
+static void
+emit_bit_xor (void)
+{
+  target_emit_ops ()->emit_bit_xor ();
+}
+
+static void
+emit_bit_not (void)
+{
+  target_emit_ops ()->emit_bit_not ();
+}
+
+static void
+emit_equal (void)
+{
+  target_emit_ops ()->emit_equal ();
+}
+
+static void
+emit_less_signed (void)
+{
+  target_emit_ops ()->emit_less_signed ();
+}
+
+static void
+emit_less_unsigned (void)
+{
+  target_emit_ops ()->emit_less_unsigned ();
+}
+
+static void
+emit_ref (int size)
+{
+  target_emit_ops ()->emit_ref (size);
+}
+
+static void
+emit_if_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_if_goto (offset_p, size_p);
+}
+
+static void
+emit_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_goto (offset_p, size_p);
+}
+
+static void
+write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
+{
+  target_emit_ops ()->write_goto_address (from, to, size);
+}
+
+static void
+emit_const (int64_t num)
+{
+  target_emit_ops ()->emit_const (num);
+}
+
+static void
+emit_reg (int reg)
+{
+  target_emit_ops ()->emit_reg (reg);
+}
+
+static void
+emit_pop (void)
+{
+  target_emit_ops ()->emit_pop ();
+}
+
+static void
+emit_stack_flush (void)
+{
+  target_emit_ops ()->emit_stack_flush ();
+}
+
+static void
+emit_zero_ext (int arg)
+{
+  target_emit_ops ()->emit_zero_ext (arg);
+}
+
+static void
+emit_swap (void)
+{
+  target_emit_ops ()->emit_swap ();
+}
+
+static void
+emit_stack_adjust (int n)
+{
+  target_emit_ops ()->emit_stack_adjust (n);
+}
+
+/* FN's prototype is `LONGEST(*fn)(int)'.  */
+
+static void
+emit_int_call_1 (CORE_ADDR fn, int arg1)
+{
+  target_emit_ops ()->emit_int_call_1 (fn, arg1);
+}
+
+/* FN's prototype is `void(*fn)(int,int64_t)'.  */
+
+static void
+emit_void_call_2 (CORE_ADDR fn, int arg1)
+{
+  target_emit_ops ()->emit_void_call_2 (fn, arg1);
+}
+
+static enum eval_result_type compile_bytecodes (struct agent_expr *aexpr);
+
+static void
+compile_tracepoint_condition (struct tracepoint *tpoint, CORE_ADDR *jump_entry)
+{
+  CORE_ADDR entry_point = *jump_entry;
+  enum eval_result_type err;
+
+  trace_debug ("Starting condition compilation for tracepoint %d\n",
+	       tpoint->number);
+
+  /* Initialize the global pointer to the code being built.  */
+  current_insn_ptr = *jump_entry;
+
+  emit_prologue ();
+
+  err = compile_bytecodes (tpoint->cond);
+
+  if (err == expr_eval_no_error)
+    {
+      emit_epilogue ();
+
+      /* Record the beginning of the compiled code.  */
+      tpoint->compiled_cond = entry_point;
+
+      trace_debug ("Condition compilation for tracepoint %d complete\n",
+		   tpoint->number);
+    }
+  else
+    {
+      /* Leave the unfinished code in situ, but don't point to it.  */
+
+      tpoint->compiled_cond = 0;
+
+      trace_debug ("Condition compilation for tracepoint %d failed, "
+		   "error code %d",
+		   tpoint->number, err);
+    }
+
+  /* Update the code pointer passed in.  Note that we do this even if
+     the compile fails, so that we can look at the partial results
+     instead of letting them be overwritten.  */
+  *jump_entry = current_insn_ptr;
+
+  /* Leave a gap, to aid dump decipherment.  */
+  *jump_entry += 16;
+}
+
+/* Given an agent expression, turn it into native code.  */
+
+static enum eval_result_type
+compile_bytecodes (struct agent_expr *aexpr)
+{
+  int pc = 0;
+  int done = 0;
+  unsigned char op;
+  int arg;
+  /* This is only used to build 64-bit value for constants.  */
+  ULONGEST top;
+  struct bytecode_address *aentry, *aentry2;
+
+#define UNHANDLED					\
+  do							\
+    {							\
+      trace_debug ("Cannot compile op 0x%x\n", op);	\
+      return expr_eval_unhandled_opcode;		\
+    } while (0)
+
+  if (aexpr->length == 0)
+    {
+      trace_debug ("empty agent expression\n");
+      return expr_eval_empty_expression;
+    }
+
+  bytecode_address_table = NULL;
+
+  while (!done)
+    {
+      op = aexpr->bytes[pc];
+
+      trace_debug ("About to compile op 0x%x, pc=%d\n", op, pc);
+
+      /* Record the compiled-code address of the bytecode, for use by
+	 jump instructions.  */
+      aentry = xmalloc (sizeof (struct bytecode_address));
+      aentry->pc = pc;
+      aentry->address = current_insn_ptr;
+      aentry->goto_pc = -1;
+      aentry->from_offset = aentry->from_size = 0;
+      aentry->next = bytecode_address_table;
+      bytecode_address_table = aentry;
+
+      ++pc;
+
+      emit_error = 0;
+
+      switch (op)
+	{
+	case gdb_agent_op_add:
+	  emit_add ();
+	  break;
+
+	case gdb_agent_op_sub:
+	  emit_sub ();
+	  break;
+
+	case gdb_agent_op_mul:
+	  emit_mul ();
+	  break;
+
+	case gdb_agent_op_div_signed:
+	  UNHANDLED;
+	  break;
+
+	case gdb_agent_op_div_unsigned:
+	  UNHANDLED;
+	  break;
+
+	case gdb_agent_op_rem_signed:
+	  UNHANDLED;
+	  break;
+
+	case gdb_agent_op_rem_unsigned:
+	  UNHANDLED;
+	  break;
+
+	case gdb_agent_op_lsh:
+	  emit_lsh ();
+	  break;
+
+	case gdb_agent_op_rsh_signed:
+	  emit_rsh_signed ();
+	  break;
+
+	case gdb_agent_op_rsh_unsigned:
+	  emit_rsh_unsigned ();
+	  break;
+
+	case gdb_agent_op_trace:
+	  UNHANDLED;
+	  break;
+
+	case gdb_agent_op_trace_quick:
+	  UNHANDLED;
+	  break;
+
+	case gdb_agent_op_log_not:
+	  emit_log_not ();
+	  break;
+
+	case gdb_agent_op_bit_and:
+	  emit_bit_and ();
+	  break;
+
+	case gdb_agent_op_bit_or:
+	  emit_bit_or ();
+	  break;
+
+	case gdb_agent_op_bit_xor:
+	  emit_bit_xor ();
+	  break;
+
+	case gdb_agent_op_bit_not:
+	  emit_bit_not ();
+	  break;
+
+	case gdb_agent_op_equal:
+	  emit_equal ();
+	  break;
+
+	case gdb_agent_op_less_signed:
+	  emit_less_signed ();
+	  break;
+
+	case gdb_agent_op_less_unsigned:
+	  emit_less_unsigned ();
+	  break;
+
+	case gdb_agent_op_ext:
+	  arg = aexpr->bytes[pc++];
+	  if (arg < (sizeof (LONGEST) * 8))
+	    emit_ext (arg);
+	  break;
+
+	case gdb_agent_op_ref8:
+	  emit_ref (1);
+	  break;
+
+	case gdb_agent_op_ref16:
+	  emit_ref (2);
+	  break;
+
+	case gdb_agent_op_ref32:
+	  emit_ref (4);
+	  break;
+
+	case gdb_agent_op_ref64:
+	  emit_ref (8);
+	  break;
+
+	case gdb_agent_op_if_goto:
+	  arg = aexpr->bytes[pc++];
+	  arg = (arg << 8) + aexpr->bytes[pc++];
+	  aentry->goto_pc = arg;
+	  emit_if_goto (&(aentry->from_offset), &(aentry->from_size));
+	  break;
+
+	case gdb_agent_op_goto:
+	  arg = aexpr->bytes[pc++];
+	  arg = (arg << 8) + aexpr->bytes[pc++];
+	  aentry->goto_pc = arg;
+	  emit_goto (&(aentry->from_offset), &(aentry->from_size));
+	  break;
+
+	case gdb_agent_op_const8:
+	  emit_stack_flush ();
+	  top = aexpr->bytes[pc++];
+	  emit_const (top);
+	  break;
+
+	case gdb_agent_op_const16:
+	  emit_stack_flush ();
+	  top = aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  emit_const (top);
+	  break;
+
+	case gdb_agent_op_const32:
+	  emit_stack_flush ();
+	  top = aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  emit_const (top);
+	  break;
+
+	case gdb_agent_op_const64:
+	  emit_stack_flush ();
+	  top = aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  top = (top << 8) + aexpr->bytes[pc++];
+	  emit_const (top);
+	  break;
+
+	case gdb_agent_op_reg:
+	  emit_stack_flush ();
+	  arg = aexpr->bytes[pc++];
+	  arg = (arg << 8) + aexpr->bytes[pc++];
+	  emit_reg (arg);
+	  break;
+
+	case gdb_agent_op_end:
+	  trace_debug ("At end of expression\n");
+
+	  /* Assume there is one stack element left, and that it is
+	     cached in "top" where emit_epilogue can get to it.  */
+	  emit_stack_adjust (1);
+
+	  done = 1;
+	  break;
+
+	case gdb_agent_op_dup:
+	  /* In our design, dup is equivalent to stack flushing.  */
+	  emit_stack_flush ();
+	  break;
+
+	case gdb_agent_op_pop:
+	  emit_pop ();
+	  break;
+
+	case gdb_agent_op_zero_ext:
+	  arg = aexpr->bytes[pc++];
+	  if (arg < (sizeof (LONGEST) * 8))
+	    emit_zero_ext (arg);
+	  break;
+
+	case gdb_agent_op_swap:
+	  emit_swap ();
+	  break;
+
+	case gdb_agent_op_getv:
+	  emit_stack_flush ();
+	  arg = aexpr->bytes[pc++];
+	  arg = (arg << 8) + aexpr->bytes[pc++];
+	  emit_int_call_1 (ipa_sym_addrs.addr_get_trace_state_variable_value,
+			   arg);
+	  break;
+
+	case gdb_agent_op_setv:
+	  arg = aexpr->bytes[pc++];
+	  arg = (arg << 8) + aexpr->bytes[pc++];
+	  emit_void_call_2 (ipa_sym_addrs.addr_set_trace_state_variable_value,
+			    arg);
+	  break;
+
+	case gdb_agent_op_tracev:
+	  UNHANDLED;
+	  break;
+
+	  /* GDB never (currently) generates any of these ops.  */
+	case gdb_agent_op_float:
+	case gdb_agent_op_ref_float:
+	case gdb_agent_op_ref_double:
+	case gdb_agent_op_ref_long_double:
+	case gdb_agent_op_l_to_d:
+	case gdb_agent_op_d_to_l:
+	case gdb_agent_op_trace16:
+	  UNHANDLED;
+	  break;
+
+	default:
+	  trace_debug ("Agent expression op 0x%x not recognized\n", op);
+	  /* Don't struggle on, things will just get worse.  */
+	  return expr_eval_unrecognized_opcode;
+	}
+
+      /* This catches errors that occur in target-specific code
+	 emission.  */
+      if (emit_error)
+	{
+	  trace_debug ("Error %d while emitting code for %s\n",
+		       emit_error, gdb_agent_op_names[op]);
+	  return expr_eval_unhandled_opcode;
+	}
+
+      trace_debug ("Op %s compiled\n", gdb_agent_op_names[op]);
+    }
+
+  /* Now fill in real addresses as goto destinations.  */
+  for (aentry = bytecode_address_table; aentry; aentry = aentry->next)
+    {
+      int written = 0;
+
+      if (aentry->goto_pc < 0)
+	continue;
+
+      /* Find the location that we are going to, and call back into
+	 target-specific code to write the actual address or
+	 displacement.  */
+      for (aentry2 = bytecode_address_table; aentry2; aentry2 = aentry2->next)
+	{
+	  if (aentry2->pc == aentry->goto_pc)
+	    {
+	      trace_debug ("Want to jump from %s to %s\n",
+			   paddress (aentry->address),
+			   paddress (aentry2->address));
+	      write_goto_address (aentry->address + aentry->from_offset,
+				  aentry2->address, aentry->from_size);
+	      written = 1;
+	      break;
+	    }
+	}
+
+      /* Error out if we didn't find a destination.  */
+      if (!written)
+	{
+	  trace_debug ("Destination of goto %d not found\n",
+		       aentry->goto_pc);
+	  return expr_eval_invalid_goto;
+	}
+    }
+
+  return expr_eval_no_error;
+}
+
 /* We'll need to adjust these when we consider bi-arch setups, and big
    endian machines.  */
 
@@ -5021,6 +5617,28 @@ download_tracepoints (void)
 
       if (tpoint->type != fast_tracepoint)
 	continue;
+
+      /* Maybe download a compiled condition.  */
+      if (tpoint->cond != NULL && target_emit_ops () != NULL)
+	{
+	  CORE_ADDR jentry, jump_entry;
+
+	  jentry = jump_entry = get_jump_space_head ();
+
+	  if (tpoint->cond != NULL)
+	    {
+	      /* Pad to 8-byte alignment. (needed?)  */
+	      /* Actually this should be left for the target to
+		 decide.  */
+	      jentry = UALIGN (jentry, 8);
+
+	      compile_tracepoint_condition (tpoint, &jentry);
+	    }
+
+	  /* Pad to 8-byte alignment.  */
+	  jentry = UALIGN (jentry, 8);
+	  claim_jump_space (jentry - jump_entry);
+	}
 
       target_tracepoint = *tpoint;
 

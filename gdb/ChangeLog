@@ -1,3 +1,8 @@
+2010-06-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* NEWS: Mention GDBserver's JIT compilation of tracepoint
+	bytecode.
+
 2010-06-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* cp-valprint.c (cp_print_static_field): Members of
