@@ -270,8 +270,11 @@ s390_arch_setup (void)
 #ifdef __s390x__
   {
     unsigned int pswm;
-    struct regcache *regcache = get_thread_regcache (current_inferior, 1);
+    struct regcache *regcache = new_register_cache ();
+    fetch_inferior_registers (regcache, find_regno ("pswm"));
     collect_register_by_name (regcache, "pswm", &pswm);
+    free_register_cache (regcache);
+
     if (pswm & 1)
       init_registers_s390x_linux64 ();
 
