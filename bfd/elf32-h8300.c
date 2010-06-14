@@ -1641,5 +1641,6 @@ elf32_h8_get_relocated_section_contents (bfd *output_bfd,
 #define bfd_elf32_bfd_get_relocated_section_contents \
                                 elf32_h8_get_relocated_section_contents
 
+#define elf_symbol_leading_char '_'
 
 #include "elf32-target.h"

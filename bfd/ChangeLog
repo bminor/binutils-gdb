@@ -1,3 +1,7 @@
+2010-06-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* elf32-h8300.c (elf_symbol_leading_char): Define.
+
 2010-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* vms-alpha.c (_bfd_vms_write_egsd): Make sname const.
