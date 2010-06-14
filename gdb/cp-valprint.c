@@ -615,7 +615,7 @@ cp_print_static_field (struct type *type,
       first_dont_print
 	= (struct type **) obstack_base (&dont_print_stat_array_obstack);
       i = obstack_object_size (&dont_print_stat_array_obstack)
-	/ sizeof (CORE_ADDR);
+	/ sizeof (struct type *);
 
       while (--i >= 0)
 	{
@@ -764,7 +764,7 @@ Show printing of object's derived type based on vtable info."), NULL,
 			   show_objectprint,
 			   &setprintlist, &showprintlist);
 
-  obstack_begin (&dont_print_stat_array_obstack, 32 * sizeof (CORE_ADDR));
+  obstack_begin (&dont_print_stat_array_obstack, 32 * sizeof (struct type *));
   obstack_begin (&dont_print_statmem_obstack, 32 * sizeof (CORE_ADDR));
   obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
 }

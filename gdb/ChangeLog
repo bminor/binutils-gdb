@@ -1,5 +1,11 @@
 2010-06-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* cp-valprint.c (cp_print_static_field): Members of
+	dont_print_stat_array_obstack are of type "struct type *".
+	(_initialize_cp_valprint): Likewise.
+
+2010-06-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* frame.c (frame_register_unwind): Do not access contents
 	of "optimized out" unwound register value.
 
