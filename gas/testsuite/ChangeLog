@@ -1,3 +1,8 @@
+2010-06-14  Sebastian Andrzej Siewior  <bigeasy@linutronix.de>
+
+	* gas/ppc/e500.s: Add eieio, mbar and lwsync
+	* gas/ppc/e500.d: Likewise.
+
 2010-06-09 Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/vldm-arm.d: New test.

@@ -1,3 +1,8 @@
+2010-06-14  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Emit APUinfo section for
+	PPC_OPCODE_E500.
+
 2010-06-11  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (md_parse_option): Ignore impossible processor

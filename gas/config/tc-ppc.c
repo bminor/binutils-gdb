@@ -2908,7 +2908,7 @@ md_assemble (char *str)
 
 #ifdef OBJ_ELF
   /* Do we need/want a APUinfo section? */
-  if ((ppc_cpu & PPC_OPCODE_E500MC) != 0)
+  if ((ppc_cpu & (PPC_OPCODE_E500 | PPC_OPCODE_E500MC)) != 0)
     {
       /* These are all version "1".  */
       if (opcode->flags & PPC_OPCODE_SPE)
