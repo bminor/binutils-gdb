@@ -771,7 +771,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   *addrp = value_address (value);
   *realnump = VALUE_REGNUM (value);
 
-  if (bufferp)
+  if (bufferp && !*optimizedp)
     memcpy (bufferp, value_contents_all (value),
 	    TYPE_LENGTH (value_type (value)));
 

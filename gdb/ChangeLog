@@ -1,3 +1,8 @@
+2010-06-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* frame.c (frame_register_unwind): Do not access contents
+	of "optimized out" unwound register value.
+
 2010-06-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ada-lang.h (ada_print_type): Make varstring const.
