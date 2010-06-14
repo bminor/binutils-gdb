@@ -156,7 +156,7 @@ extern int ada_parse (void);    /* Defined in ada-exp.y */
 extern void ada_error (char *); /* Defined in ada-exp.y */
 
                         /* Defined in ada-typeprint.c */
-extern void ada_print_type (struct type *, char *, struct ui_file *, int,
+extern void ada_print_type (struct type *, const char *, struct ui_file *, int,
                             int);
 
 extern void ada_print_typedef (struct type *type, struct symbol *new_symbol,

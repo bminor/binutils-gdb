@@ -67,7 +67,7 @@ int m2_is_unbounded_array (struct type *type);
 
 
 void
-m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
+m2_print_type (struct type *type, const char *varstring, struct ui_file *stream,
 	       int show, int level)
 {
   enum type_code code;

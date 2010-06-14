@@ -25,7 +25,7 @@ extern int f_parse (void);
 
 extern void f_error (char *);	/* Defined in f-exp.y */
 
-extern void f_print_type (struct type *, char *, struct ui_file *, int,
+extern void f_print_type (struct type *, const char *, struct ui_file *, int,
 			  int);
 
 extern int f_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,

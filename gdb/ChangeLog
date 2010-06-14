@@ -1,3 +1,21 @@
+2010-06-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ada-lang.h (ada_print_type): Make varstring const.
+	* ada-typeprint.c (print_func_type): Make name const.
+	(ada_print_type): Make varstring const.
+	* c-lang.h (c_print_type): Make varstring const.
+	* c-typeprint.c (c_print_type): Likewise.
+	* f-lang.h (f_print_type): Likewise.
+	* f-typeprint.c (f_print_type): Likewise.
+	* jv-lang.h (java_print_type): Likewise.
+	* jv-typeprint.c (java_print_type): Likewise.
+	* language.c (unk_lang_print_type): Likewise.
+	* language.h (struct language_defn) <la_print_type>: Likewise.
+	* m2-lang.h (m2_print_type): Likewise.
+	* m2-typeprint.c (m2_print_type): Likewise.
+	* p-lang.h (pascal_print_type): Likewise.
+	* p-typeprint.c (pascal_print_type): Likewise.
+
 2010-06-11  Stan Shebs  <stan@codesourcery.com>
 
 	Add per-operation permission flags.

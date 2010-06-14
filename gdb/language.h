@@ -198,7 +198,7 @@ struct language_defn
 
     /* Print a type using syntax appropriate for this language. */
 
-    void (*la_print_type) (struct type *, char *, struct ui_file *, int,
+    void (*la_print_type) (struct type *, const char *, struct ui_file *, int,
 			   int);
 
     /* Print a typedef using syntax appropriate for this language.

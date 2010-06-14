@@ -30,7 +30,8 @@ extern int pascal_parse (void);	/* Defined in p-exp.y */
 extern void pascal_error (char *);	/* Defined in p-exp.y */
 
 /* Defined in p-typeprint.c */
-extern void pascal_print_type (struct type *, char *, struct ui_file *, int, int);
+extern void pascal_print_type (struct type *, const char *, struct ui_file *,
+			       int, int);
 
 extern void pascal_print_typedef (struct type *, struct symbol *,
 				  struct ui_file *);

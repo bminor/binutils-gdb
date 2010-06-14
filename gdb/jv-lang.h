@@ -69,7 +69,7 @@ extern struct type *java_lookup_class (char *);
 extern int is_object_type (struct type *);
 
 /* Defined in jv-typeprint.c */
-extern void java_print_type (struct type *, char *, struct ui_file *, int,
+extern void java_print_type (struct type *, const char *, struct ui_file *, int,
 			     int);
 
 extern char *java_demangle_type_signature (char *);
