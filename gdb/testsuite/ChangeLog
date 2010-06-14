@@ -1,3 +1,14 @@
+2010-06-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.disasm/t01_mov.exp, gdb.disasm/t02_mova.exp,
+	gdb.disasm/t03_add.exp, gdb.disasm/t04_sub.exp,
+	gdb.disasm/t05_cmp.exp, gdb.disasm/t06_ari2.exp,
+	gdb.disasm/t07_ari3.exp, gdb.disasm/t08_or.exp,
+	gdb.disasm/t09_xor.exp, gdb.disasm/t10_and.exp,
+	gdb.disasm/t11_logs.exp, gdb.disasm/t12_bit.exp,
+	gdb.disasm/t13_otr.exp: Examine instruction at label `start' instead
+	of `_start'.
+
 2010-06-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.mi/mi-nonstop.exp: Do not call perror if non-stop mode is

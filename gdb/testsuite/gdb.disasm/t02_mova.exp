@@ -48,7 +48,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
-gdb_test "x /i _start" "mova/b.l\t@\\(0x1234(:16|),r3l.b\\),er1" \
+gdb_test "x /i start" "mova/b.l\t@\\(0x1234(:16|),r3l.b\\),er1" \
 	"mova/b.c @(0x1234:16,r3l.b),er1"
 gdb_test "x" "mova/b.l\t@\\(0x1234(:16|),r3.w\\),er1" \
 	"mova/b.c @(0x1234:16,r3.w),er1"

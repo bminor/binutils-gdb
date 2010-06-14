@@ -48,7 +48,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
-gdb_test "x /i _start" "bset\t#0x7,r1h" \
+gdb_test "x /i start" "bset\t#0x7,r1h" \
 	"bset #0x7,r1h"
 gdb_test "x" "bset\t#0x7,@er1" \
 	"bset #0x7,@er1"

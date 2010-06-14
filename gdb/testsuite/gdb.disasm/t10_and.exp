@@ -48,7 +48,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
-gdb_test "x /i _start" "and.b\t#0x12(:8|),r1h" \
+gdb_test "x /i start" "and.b\t#0x12(:8|),r1h" \
 	"and.b #0x12:8,r1h"
 gdb_test "x" "and.b\t#0x12(:8|),@er1" \
 	"and.b #0x12:8,@er1"

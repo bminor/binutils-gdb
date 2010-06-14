@@ -50,7 +50,7 @@ gdb_load $binfile
 
 global hex
 
-gdb_test "x /i _start" "bra\t.\\+18 \\($hex\\)" \
+gdb_test "x /i start" "bra\t.\\+18 \\($hex\\)" \
 	"bra .+18"
 gdb_test "x" "brn\t.\\+18 \\($hex\\)" \
 	"brn .+18"
