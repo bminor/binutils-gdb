@@ -5113,7 +5113,7 @@ write_goto_address (CORE_ADDR from, CORE_ADDR to, int size)
 }
 
 static void
-emit_const (int64_t num)
+emit_const (LONGEST num)
 {
   target_emit_ops ()->emit_const (num);
 }
@@ -5162,7 +5162,7 @@ emit_int_call_1 (CORE_ADDR fn, int arg1)
   target_emit_ops ()->emit_int_call_1 (fn, arg1);
 }
 
-/* FN's prototype is `void(*fn)(int,int64_t)'.  */
+/* FN's prototype is `void(*fn)(int,LONGEST)'.  */
 
 static void
 emit_void_call_2 (CORE_ADDR fn, int arg1)

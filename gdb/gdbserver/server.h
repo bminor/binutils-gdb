@@ -598,7 +598,7 @@ struct emit_ops
   void (*emit_if_goto) (int *offset_p, int *size_p);
   void (*emit_goto) (int *offset_p, int *size_p);
   void (*write_goto_address) (CORE_ADDR from, CORE_ADDR to, int size);
-  void (*emit_const) (int64_t num);
+  void (*emit_const) (LONGEST num);
   void (*emit_call) (CORE_ADDR fn);
   void (*emit_reg) (int reg);
   void (*emit_pop) (void);
