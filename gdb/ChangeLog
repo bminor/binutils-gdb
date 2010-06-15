@@ -1,3 +1,13 @@
+2010-06-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Remove solib-target.o.
+	(SFILES): Remove solib-null.c, add solib-target.c.
+	(COMMON_OBS): Remove solib-null.o, add solib-target.o.
+	(ALLDEPFILES): Remove solib-target.c.
+	* solib-target.c (_initialize_solib_target): Set
+	current_target_so_ops to solib_target_so_ops if not already set.
+	* solib-null.c: Delete.
+
 2010-06-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention GDBserver's JIT compilation of tracepoint

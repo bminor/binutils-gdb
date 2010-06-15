@@ -497,4 +497,9 @@ _initialize_solib_target (void)
   solib_target_so_ops.in_dynsym_resolve_code
     = solib_target_in_dynsym_resolve_code;
   solib_target_so_ops.bfd_open = solib_bfd_open;
+
+  /* Set current_target_so_ops to solib_target_so_ops if not already
+     set.  */
+  if (current_target_so_ops == 0)
+    current_target_so_ops = &solib_target_so_ops;
 }
