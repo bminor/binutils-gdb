@@ -1,3 +1,8 @@
+2010-06-15  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* fileread.cc: Only #include <sys/uio.h> if HAVE_READV.
+	(struct iovec): Correct !HAVE_READV definition.
+
 2010-06-10  Cary Coutant  <ccoutant@google.com>
 
 	* object.cc (Sized_relobj::do_layout): Defer layout for reloc sections.

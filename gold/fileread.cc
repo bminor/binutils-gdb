@@ -27,7 +27,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+
+#ifdef HAVE_READV
 #include <sys/uio.h>
+#endif
+
 #include <sys/stat.h>
 #include "filenames.h"
 
@@ -42,7 +46,7 @@
 #include "fileread.h"
 
 #ifndef HAVE_READV
-struct iovec { void* iov_base; size_t iov_len };
+struct iovec { void* iov_base; size_t iov_len; };
 ssize_t
 readv(int, const iovec*, int)
 {
