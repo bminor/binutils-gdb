@@ -1245,10 +1245,11 @@ struct elf_backend_data
   /* The section type to use for an attributes section.  */
   unsigned int obj_attrs_section_type;
 
-  /* This function determines the order in which any attributes are written.
-     It must be defined for input in the range 4..NUM_KNOWN_OBJ_ATTRIBUTES-1
-     (this range is used in order to make unity easy).  The returned value is
-     the actual tag number to place in the input position.  */
+  /* This function determines the order in which any attributes are
+     written.  It must be defined for input in the range
+     LEAST_KNOWN_OBJ_ATTRIBUTE..NUM_KNOWN_OBJ_ATTRIBUTES-1 (this range
+     is used in order to make unity easy).  The returned value is the
+     actual tag number to place in the input position.  */
   int (*obj_attrs_order) (int);
 
   /* This is TRUE if the linker should act like collect and gather
@@ -1411,6 +1412,12 @@ struct bfd_elf_section_data
 
 #define get_elf_backend_data(abfd) \
    xvec_get_elf_backend_data ((abfd)->xvec)
+
+/* The least object attributes (within an attributes subsection) known
+   for any target.  Some code assumes that the value 0 is not used and
+   the field for that attribute can instead be used as a marker to
+   indicate that attributes have been initialized.  */
+#define LEAST_KNOWN_OBJ_ATTRIBUTE 4
 
 /* The maximum number of known object attributes for any target.  */
 #define NUM_KNOWN_OBJ_ATTRIBUTES 71

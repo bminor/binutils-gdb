@@ -9624,9 +9624,9 @@ elf32_arm_obj_attrs_arg_type (int tag)
 static int
 elf32_arm_obj_attrs_order (int num)
 {
-  if (num == 4)
+  if (num == LEAST_KNOWN_OBJ_ATTRIBUTE)
     return Tag_conformance;
-  if (num == 5)
+  if (num == LEAST_KNOWN_OBJ_ATTRIBUTE + 1)
     return Tag_nodefaults;
   if ((num - 2) < Tag_nodefaults)
     return num - 2;
@@ -9932,7 +9932,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	}
     }
 
-  for (i = 4; i < NUM_KNOWN_OBJ_ATTRIBUTES; i++)
+  for (i = LEAST_KNOWN_OBJ_ATTRIBUTE; i < NUM_KNOWN_OBJ_ATTRIBUTES; i++)
     {
       /* Merge this attribute with existing attributes.  */
       switch (i)
