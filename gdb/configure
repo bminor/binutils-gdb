@@ -14186,9 +14186,7 @@ $as_echo "$gdb_cv_bigtoc" >&6; }
   ;;
 esac
 
-
-
-if test ${build} = ${host} -a ${host} = ${target} ; then
+if test "${gdb_native}" = yes; then
    if test "$GCC" = "yes" ; then
       # The dynamically loaded libthread_db needs access to symbols in the gdb
       # executable.  Older GNU ld supports --export-dynamic but --dynamic-list
@@ -14283,7 +14281,10 @@ rm -f core conftest.err conftest.$ac_objext \
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
 $as_echo "$found" >&6; }
    fi
+fi
 
+
+if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
    hpux*)
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HPUX/OSF thread support" >&5

@@ -1453,14 +1453,7 @@ aix*)
   ;;
 esac
 
-
-dnl For certain native configurations, we need to check whether thread
-dnl support can be built in or not.
-dnl
-dnl Note that we only want this if we are both native (host == target),
-dnl and not doing a canadian cross build (build == host).
-
-if test ${build} = ${host} -a ${host} = ${target} ; then
+if test "${gdb_native}" = yes; then
    if test "$GCC" = "yes" ; then
       # The dynamically loaded libthread_db needs access to symbols in the gdb
       # executable.  Older GNU ld supports --export-dynamic but --dynamic-list
@@ -1507,7 +1500,15 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
       LDFLAGS="$old_LDFLAGS"
       AC_MSG_RESULT($found)
    fi
+fi
 
+dnl For certain native configurations, we need to check whether thread
+dnl support can be built in or not.
+dnl
+dnl Note that we only want this if we are both native (host == target),
+dnl and not doing a canadian cross build (build == host).
+
+if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
    hpux*)
       AC_MSG_CHECKING(for HPUX/OSF thread support)

@@ -1,3 +1,8 @@
+2010-06-15  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* configure.ac: Check for RDYNAMIC also for cross builds.
+	* configure: Regenerate.
+
 2010-06-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Remove solib-target.o.
@@ -438,7 +443,7 @@
 
 	* valprint.h (get_array_bounds): Change low and high parameter types
 	to LONGEST *.
-	* valprint.c (get_array_bounds): Use get_discrete_bounds call to 
+	* valprint.c (get_array_bounds): Use get_discrete_bounds call to
 	compute bounds.
 	(val_print_array_elements): Adapt to change above.
 	* ada-valprint.c (print_optional_low_bound): Adapt to change above.
@@ -1187,7 +1192,7 @@
 	(value_object_type): Register valpy_hash.
 
 2010-05-14  Hui Zhu  <teawater@gmail.com>
-            Michael Snyder  <msnyder@vmware.com>
+	    Michael Snyder  <msnyder@vmware.com>
 
 	* linux-fork.c (gdbthread.h): New include.
 	(fork_info): Add parent_ptid.
@@ -1249,7 +1254,7 @@
 2010-05-11  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* procfs.c (proc_watchpoint_address): New function.
-	(procfs_stopped_by_watchpoint): Remove useless check after 
+	(procfs_stopped_by_watchpoint): Remove useless check after
 	find_procinfo_or_die call.
 	(procfs_stopped_data_address): New function.
 	(procfs_use_watchpoints): Register new watchpoint related function.
@@ -1306,7 +1311,7 @@
 
 	* python/python.c (execute_gdb_command): Remove unused variables.
 	* python/py-block.c (gdbpy_block_for_pc): Remove unused variable.
-	* python/py-breakpoint.c (gdbpy_breakpoint_created): 
+	* python/py-breakpoint.c (gdbpy_breakpoint_created):
 	Remove unused variable.
 	* python/py-cmd.c (cmdpy_function): Remove unused variable.
 	(cmdpy_completer): Remove unused variable.
@@ -1315,14 +1320,14 @@
 	* python/py-objfile.c (objfile_to_objfile_object):
 	Remove unused variable.
 	* python/py-param.c (parmpy_init): Remove unused variable.
-	* python/py-prettyprint.c (apply_varobj_pretty_printer): 
+	* python/py-prettyprint.c (apply_varobj_pretty_printer):
 	Remove unused variable.
 	(gdbpy_default_visualizer): Remove unused variable.
 	* python/py-progspace.c (pspace_to_pspace_object):
 	Remove unused variable.
-	* python/py-symtab.c (symtab_and_line_to_sal_object): 
+	* python/py-symtab.c (symtab_and_line_to_sal_object):
 	Remove unused variable.
-	* python/py-type.c (typy_template_argument): 
+	* python/py-type.c (typy_template_argument):
 	Remove unused variable.
 	* python/py-value.c (valpy_string): Remove unused variable.
 	(convert_value_from_python): Remove unused variables.
@@ -1410,17 +1415,17 @@
 	* jit.c (jit_inferior_init): Delete unused variable.
 	* progspace.c (clone_program_space): Delete unused variable.
 	(pspace_empty_p): Delete unused variable.
-	
-	* frame-unwind.c (frame_unwind_find_by_frame): 
+
+	* frame-unwind.c (frame_unwind_find_by_frame):
 	Delete unused variable.
 	* gnu-v2-abi.c (gnuv2_value_rtti_type): Delete unused variable.
 	* cp-support.c (mangled_name_to_comp): Delete unused variable.
 	(method_name_from_physname): Delete unused variable.
 	(cp_func_name): Delete unused variable.
 	(cp_validate_operator): Delete unused variable.
-	* cp-namespace.c (cp_scan_for_anonymous_namespaces): 
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces):
 	Delete unused variable.
-	* trad-frame.c (trad_frame_get_prev_register): 
+	* trad-frame.c (trad_frame_get_prev_register):
 	Delete unused variable.
 	* tramp-frame.c (tramp_frame_cache): Delete unused variable.
 
@@ -1444,7 +1449,7 @@
 	(m2_long_set): Delete unused variable.
 	* ada-valprint.c (ada_val_print_1): Delete unused variable.
 	* d-valprint.c (dynamic_array_type): Delete unused variable.
-	* f-valprint.c (f77_get_dynamic_length_of_aggregate): 
+	* f-valprint.c (f77_get_dynamic_length_of_aggregate):
 	Delete unused variable.
 	(f77_create_arrayprint_offset_tbl): Delete unused variable.
 	* m2-valprint.c (m2_val_print): Delete unused variable.
@@ -1499,7 +1504,7 @@
 	* gdbarch.sh (gdbarch_printable_names): Delete unused variable.
 	(_initialize_gdbarch): Delete unused variable.
 	* gdbarch.c, gdbarch.h: Regenerate.
-	* arch-utils.c (initialize_current_architecture): 
+	* arch-utils.c (initialize_current_architecture):
 	Delete unused variable.
 	(_initialize_gdbarch_utils): Delete unused variable.
 	* gdbtypes.c (make_cv_type): Delete unused variable.
@@ -1538,9 +1543,9 @@
 	* charset.c (wchar_iterate): Delete unused variable.
 	(find_charset_names): Delete unused variable.
 	(_initialize_charset): Delete unused variable.
-	* disasm.c (do_mixed_source_and_assembly): 
+	* disasm.c (do_mixed_source_and_assembly):
 	Delete unused variable.
-	* source.c (set_default_source_symtab_and_line): 
+	* source.c (set_default_source_symtab_and_line):
 	Delete unused variable.
 	(set_substitute_path_command): Delete unused variable.
 	* value.c (preserve_values): Delete unused variable.
@@ -1565,7 +1570,7 @@
 	(completion_list_add_name): Delete unused variable.
 	(expand_line_sal): Delete unused variable.
 
-	* breakpoint.c (validate_commands_for_breakpoint): 
+	* breakpoint.c (validate_commands_for_breakpoint):
 	Delete unused variables.
 	(insert_catchpoint): Delete unused variable.
 	(update_watchpoint): Delete unused variable.
@@ -1658,14 +1663,14 @@
 	(decode_locdesc): Delete unused variable.
 	(zeroed_partial_die): Delete unused global variable.
 
-	* tui/tui-interp.c (_initialize_tui_interp): 
+	* tui/tui-interp.c (_initialize_tui_interp):
 	Delete unused variable.
-	* tui/tui-regs.c tui_display_registers_from): 
+	* tui/tui-regs.c tui_display_registers_from):
 	Delete unused variable.
 	(tui_check_register_values): Delete unused variable.
 	(tui_register_format): Delete unused variable.
 	* tui/tui-win.c (_initialize_tui_win): Delete unused variable.
-	* tui/tui-windata.c (tui_display_data_from_line): 
+	* tui/tui-windata.c (tui_display_data_from_line):
 	Delete unused variables.
 	(tui_vertical_data_scroll): Delete unused variables.
 
@@ -1681,14 +1686,14 @@
 	(mi_cmd_var_list_children): Delete unused variable.
 	(varobj_update_one): Delete unused variable.
 	* mi/mi-cmd-break.c (mi_cmd_break_insert): Delete unused variables.
-	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): 
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals):
 	Delete unused variable.
 	(mi_cmd_stack_list_variables): Delete unused variable.
 	(list_args_or_locals): Delete unused variable.
-	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file): 
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file):
 	Delete unused variables.
 	(mi_cmd_file_list_exec_source_files): Delete unused variable.
-	* mi/mi-cmd-target.c (mi_cmd_target_file_delete): 
+	* mi/mi-cmd-target.c (mi_cmd_target_file_delete):
 	Delete unused variable.
 	* mi/mi-interp.c (mi_interpreter_exec): Delete unused variable.
 	(mi_cmd_interpreter_exec): Delete unused variable.
@@ -1709,7 +1714,7 @@
 	(disassemble_command): Delete unused variable.
 
 	* ax-gdb.c (gen_struct_elt_for_reference): Delete unused variables.
-	* tracepoint.c (delete_trace_variable_command): 
+	* tracepoint.c (delete_trace_variable_command):
 	Delete unused variables.
 	(encode_actions_1): Delete unused variables.
 	(start_tracing): Delete unused variable.
@@ -1734,7 +1739,7 @@
 	(enable_thread_event_reporting): Delete unused variable.
 	(check_for_thread_db): Delete unused variables.
 	(thread_db_find_new_threads_2): Delete unused variable.
-	
+
 	* linux-fork.c (info_checkpoints_command): Delete unused variables.
 	(checkpoint_command): Delete unused variable.
 	(linux_fork_context): Delete unused variables.
@@ -1754,13 +1759,13 @@
 
 	* ser-pipe.c (pipe_ops): Delete unused global variable.
 
-	* linux-record.c (record_linux_system_call): 
+	* linux-record.c (record_linux_system_call):
 	Delete unused variables.
 
 	* corelow.c (core_xfer_partial): Delete unused variables.
 
 	* solib-svr4.c (find_program_interpreter): Delete unused variable.
-	(svr4_solib_create_inferior_hook): Add ifdef around 
+	(svr4_solib_create_inferior_hook): Add ifdef around
 	conditionally-used variable declarations.
 
 	* solib.c (solib_find): Delete unused variable.
@@ -1791,7 +1796,7 @@
 2010-05-04  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: Remove ATTRIBUTE_UNUSED throughout.
-	* arm-linux-tdep.c (arm_linux_cleanup_svc): Remove 
+	* arm-linux-tdep.c (arm_linux_cleanup_svc): Remove
 	ATTRIBUTE_UNUSED.
 	(cleanup_kernel_helper_return): Likewise.
 	* arm-tdep.c (copy_unmodified): Likewise.
@@ -1831,7 +1836,7 @@
 
 2010-05-04  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
-	* exec.c (print_section_info): Display entry point without arch 
+	* exec.c (print_section_info): Display entry point without arch
 	specific parts.
 
 2010-05-04  Pierre Muller  <muller@ics.u-strasbg.fr>
@@ -1868,7 +1873,7 @@
 	PR pascal/11349.
 	* p-valprint.c (pascal_value_print): Always dereference a value with
 	type code TYPE_CODE_REF.
-	
+
 2010-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_notice_signals): New.
@@ -1993,9 +1998,9 @@
 
 	* arm-linux-tdep.c (ARM_LINUX_JB_PC): Remove.
 	(ARM_LINUX_JB_PC_FPA): Add, offset of PC in longjmp buffer for FPA.
-	(ARM_LINUX_JB_PC_EABI): Add, offset of PC in longjmp buffer for 
+	(ARM_LINUX_JB_PC_EABI): Add, offset of PC in longjmp buffer for
 	EABI.
-	(arm_linux_init_abi): Set up JB_PC field dependent on FP model in 
+	(arm_linux_init_abi): Set up JB_PC field dependent on FP model in
 	use.
 
 2010-04-29  Pedro Alves  <pedro@codesourcery.com>
@@ -2010,25 +2015,25 @@
 	* target.c (target_resume): Flush register caches.
 
 2010-04-29  Phil Muldoon  <pmuldoon@redhat.com>
-            Tom Tromey  <tromey@redhat.com>
-            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
-        * Makefile.in (SUBDIR_PYTHON_OBS): Add py-parameter.
-        (SUBDIR_PYTHON_SRCS): Likewise.
-        (py-parameter.o): New rule.
-        * python/py-parameter.c: New file.
-        * python/python-internal.h (gdbpy_initialize_parameter)
-        (gdbpy_parameter, gdbpy_parameter_value)
-        (gdbpy_parse_command_name): Declare.
-        * python/py-cmd.c (parse_command_name): Rename to
-        gdbpy_parse_command_name.
-        (gdbpy_parse_command_name): Accept a starting list parameter and
-        use over cmdlist.
-        (cmdpy_init): Use gdbpy_parse_command_name.
-        * python/python.c (parameter_to_python): Rename to
-        gdbpy_parameter_to_python.  Accept enum var_types and value.
-        (gdbpy_parameter): Use gdbpy_parameter_value.
-        (_initialize_python): Call gdbpy_initialize_parameters.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-parameter.
+	(SUBDIR_PYTHON_SRCS): Likewise.
+	(py-parameter.o): New rule.
+	* python/py-parameter.c: New file.
+	* python/python-internal.h (gdbpy_initialize_parameter)
+	(gdbpy_parameter, gdbpy_parameter_value)
+	(gdbpy_parse_command_name): Declare.
+	* python/py-cmd.c (parse_command_name): Rename to
+	gdbpy_parse_command_name.
+	(gdbpy_parse_command_name): Accept a starting list parameter and
+	use over cmdlist.
+	(cmdpy_init): Use gdbpy_parse_command_name.
+	* python/python.c (parameter_to_python): Rename to
+	gdbpy_parameter_to_python.  Accept enum var_types and value.
+	(gdbpy_parameter): Use gdbpy_parameter_value.
+	(_initialize_python): Call gdbpy_initialize_parameters.
 
 2010-04-29  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
@@ -2216,7 +2221,7 @@
 	and observer_attach_new_objfile to py-auto-load.c.
 
 2010-04-23  Jerome Guitton  <guitton@adacore.com>
-    
+
 	* alpha-tdep.c (INSN_OPCODE, MEM_RA, MEM_RB, MEM_DISP, BR_RA)
 	(OPR_FUNCTION, OPR_HAS_IMMEDIATE, OPR_RA, OPR_RC, OPR_LIT): New macros.
 	(lda_opcode, stq_opcode, bne_opcode, subq_opcode, subq_function):
@@ -2359,7 +2364,7 @@
 
 	* gdbtypes.h (builtin_type): Add builtin_char16 and builtin_char32
 	fields.
-	* gdbtypes.c (gdbtypes_post_init): Set builtin_char16 and 
+	* gdbtypes.c (gdbtypes_post_init): Set builtin_char16 and
 	builtin_char32 fields.
 	* printcmd.c (decode_format): Set char size to '\0'
 	for strings unless explicit size is given.
@@ -2367,7 +2372,7 @@
 	for 16 or 32 bit strings.
 	(do_examine): Do not force byte size for strings.
 	Use builtin_char16 and builtin_char32 types to display
-	16 or 32 bit-wide strings. 
+	16 or 32 bit-wide strings.
 	(x_command): Set LAST_SIZE to 'b' for string type.
 
 2010-04-21  H.J. Lu  <hongjiu.lu@intel.com>
@@ -2472,7 +2477,7 @@
 	(dwarf_attr_name): Likewise.
 
 2010-04-20  Chris Moller  <cmoller@redhat.com>
-	
+
 	PR 10867
 
 	* cp-valprint.c (global): Adding new static array recursion
@@ -2743,7 +2748,7 @@
 	(info_w32_command, info_w32_cmdlist): Removed from here...
 	to windows-tdep.c file.
 	* windows-tdep.h (info_w32_cmdlist): Declare.
-	(init_w32_command_list): New external function 
+	(init_w32_command_list): New external function
 	declaration.
 	* windows-tdep.c: Add several headers.
 	(info_w32_cmdlist): to here, made global.
