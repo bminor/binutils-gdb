@@ -9394,7 +9394,8 @@ Target_arm<big_endian>::are_eabi_versions_compatible(
 {
   // v4 and v5 are the same spec before and after it was released,
   // so allow mixing them.
-  if ((v1 == elfcpp::EF_ARM_EABI_VER4 && v2 == elfcpp::EF_ARM_EABI_VER5)
+  if ((v1 == elfcpp::EF_ARM_EABI_UNKNOWN || v2 == elfcpp::EF_ARM_EABI_UNKNOWN)
+      || (v1 == elfcpp::EF_ARM_EABI_VER4 && v2 == elfcpp::EF_ARM_EABI_VER5)
       || (v1 == elfcpp::EF_ARM_EABI_VER5 && v2 == elfcpp::EF_ARM_EABI_VER4))
     return true;
 

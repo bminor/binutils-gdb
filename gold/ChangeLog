@@ -1,3 +1,8 @@
+2010-06-15  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* arm.cc: Allow combining objects with no EABI version
+	information.
+
 2010-06-15  Rafael Espindola  <espindola@google.com>
 
 	* plugin.cc (Plugin_hook::run): Set in_real_elf for the start symbol.
