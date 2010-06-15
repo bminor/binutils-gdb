@@ -916,6 +916,14 @@ void
 Plugin_hook::run(Workqueue* workqueue)
 {
   gold_assert(this->options_.has_plugins());
+  Symbol* start_sym;
+  if (parameters->options().entry())
+    start_sym = this->symtab_->lookup(parameters->options().entry());
+  else
+    start_sym = this->symtab_->lookup("_start");
+  if (start_sym != NULL)
+    start_sym->set_in_real_elf();
+
   this->options_.plugins()->all_symbols_read(workqueue,
                                              this,
                                              this->input_objects_,
