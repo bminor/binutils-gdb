@@ -69,6 +69,8 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     run_dump_test ctrl-1
     run_dump_test ctrl-2
 
+    gas_test_error "p11673.s" "-march=isab" "movel immediate with offset unsupported on isab"
+
     if { [istarget *-*-netbsd] } then {
       run_dump_test p3041
       run_dump_test p3041data

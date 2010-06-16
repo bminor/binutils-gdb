@@ -1,5 +1,10 @@
 2010-06-16  Vincent Rivière  <vincent.riviere@freesbee.fr>
 
+	PR gas/11673
+	* m68k-opc.c (m68k_opcodes): Remove move.l for isab and later.
+
+2010-06-16  Vincent Rivière  <vincent.riviere@freesbee.fr>
+
 	PR binutils/11676
 	* m68k-dis.c (print_insn_arg): Prefix float constants with #0e.
 

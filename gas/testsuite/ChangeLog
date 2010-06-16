@@ -1,3 +1,9 @@
+2010-06-16  Vincent Rivière  <vincent.riviere@freesbee.fr>
+
+	PR gas/11673
+	* gas/m68k/p11673.s: New test.
+	* gas/m68k/all.exp: Run the new test.
+
 2010-06-16  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/11676

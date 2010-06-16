@@ -1604,7 +1604,6 @@ const struct m68k_opcode m68k_opcodes[] =
 {"movel", 2,	one(0020000),	one(0170000), "ms%d", mcfisa_a },
 {"movel", 2,	one(0020000),	one(0170000), "nspd", mcfisa_a },
 {"movel", 2,	one(0020000),	one(0170000), "olmd", mcfisa_a },
-{"movel", 2,	one(0020000),	one(0170000), "olnd", mcfisa_b | mcfisa_c },
 {"movel", 2,	one(0047140),	one(0177770), "AsUd", m68000up | mcfusp },
 {"movel", 2,	one(0047150),	one(0177770), "UdAs", m68000up | mcfusp },
 {"movel", 2,	one(0120600),	one(0177760), "EsRs", mcfmac },
