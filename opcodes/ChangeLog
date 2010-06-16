@@ -1,3 +1,8 @@
+2010-06-16  Vincent Rivière  <vincent.riviere@freesbee.fr>
+
+	PR binutils/11676
+	* m68k-dis.c (print_insn_arg): Prefix float constants with #0e.
+
 2010-06-14  Sebastian Andrzej Siewior  <bigeasy@linutronix.de>
 
 	* ppc-dis.c (ppc_opts):  Remove PPC_OPCODE_E500MC from e500 and

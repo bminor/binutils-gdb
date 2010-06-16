@@ -91,6 +91,8 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     if { [istarget m68k-*-linux*] } then {
       run_dump_test tls-gd-3
     }
+
+    run_dump_test pr11676
 }
 if [info exists errorInfo] then {
     unset errorInfo

@@ -1111,7 +1111,7 @@ print_insn_arg (const char *d,
 		  return -1;
 	      }
 	      if (flt_p)	/* Print a float? */
-		(*info->fprintf_func) (info->stream, "#%g", flval);
+		(*info->fprintf_func) (info->stream, "#0e%g", flval);
 	      else
 		(*info->fprintf_func) (info->stream, "#%d", val);
 	      break;

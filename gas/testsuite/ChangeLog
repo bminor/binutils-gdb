@@ -1,3 +1,10 @@
+2010-06-16  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/11676
+	* gas/m68k/pr11676.s: New test.
+	* gas/m68k/pr11676.d: Expected disassembly.
+	* gas/m68k/all.exp: Run the new test.
+
 2010-06-15  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/elf/elf.exp: Set target_machine for tic6x-*-*.
