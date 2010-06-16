@@ -3725,6 +3725,18 @@ This command prints a list of watchpoints, using the same format as
 @code{info break} (@pxref{Set Breaks}).
 @end table
 
+If you watch for a change in a numerically entered address you need to
+dereference it, as the address itself is just a constant number which will
+never change.  @value{GDBN} refuses to create a watchpoint that watches
+a never-changing value:
+
+@smallexample
+(@value{GDBP}) watch 0x600850
+Cannot watch constant value 0x600850.
+(@value{GDBP}) watch *(int *) 0x600850
+Watchpoint 1: *(int *) 6293584
+@end smallexample
+
 @value{GDBN} sets a @dfn{hardware watchpoint} if possible.  Hardware
 watchpoints execute very quickly, and the debugger reports a change in
 value at the exact instruction where the change occurs.  If @value{GDBN}

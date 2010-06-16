@@ -1,3 +1,11 @@
+2010-06-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c: Include parser-defs.h.
+	(watchpoint_exp_is_const): New function.
+	(watch_command_1): Call watchpoint_exp_is_const to check
+	if the expression is constant.
+
 2010-06-15  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* configure.ac: Check for RDYNAMIC also for cross builds.

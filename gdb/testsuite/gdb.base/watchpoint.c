@@ -40,6 +40,7 @@ struct foo struct1, struct2, *ptr1, *ptr2;
 int doread = 0;
 
 char *global_ptr;
+char **global_ptr_ptr;
 
 void marker1 ()
 {
@@ -119,6 +120,10 @@ func4 ()
   buf[0] = 3;
   global_ptr = buf;
   buf[0] = 7;
+  buf[1] = 5;
+  global_ptr_ptr = &global_ptr;
+  buf[0] = 9;
+  global_ptr++;
 }
 
 int main ()

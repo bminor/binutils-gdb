@@ -1,3 +1,18 @@
+2010-06-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/watch-notconst.c: New file.
+	* gdb.base/watch-notconst.S: New file.
+	* gdb.base/watch-notconst2.c: New file.
+	* gdb.base/watch-notconst2.S: New file.
+	* gdb.base/watch-notconst.exp: New file.
+	* gdb.base/watchpoint.c (global_ptr_ptr): New variable.
+	(func4): Add operations on `global_ptr_ptr'.
+	* gdb.base/watchpoint.exp (test_constant_watchpoint): New
+	routine to test watchpoints created with a constant expression.
+	(test_inaccessible_watchpoint): Include tests for watchpoints
+	created with a constant expression.
+
 2010-06-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.disasm/t01_mov.exp, gdb.disasm/t02_mova.exp,

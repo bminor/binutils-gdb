@@ -61,6 +61,7 @@
 #include "valprint.h"
 #include "jit.h"
 #include "xml-syscall.h"
+#include "parser-defs.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -7767,6 +7768,111 @@ stopat_command (char *arg, int from_tty)
     break_command_1 (arg, 0, from_tty);
 }
 
+/*  Return non-zero if EXP is verified as constant.  Returned zero means EXP is
+    variable.  Also the constant detection may fail for some constant
+    expressions and in such case still falsely return zero.  */
+static int
+watchpoint_exp_is_const (const struct expression *exp)
+{
+  int i = exp->nelts;
+
+  while (i > 0)
+    {
+      int oplenp, argsp;
+
+      /* We are only interested in the descriptor of each element.  */
+      operator_length (exp, i, &oplenp, &argsp);
+      i -= oplenp;
+
+      switch (exp->elts[i].opcode)
+	{
+	case BINOP_ADD:
+	case BINOP_SUB:
+	case BINOP_MUL:
+	case BINOP_DIV:
+	case BINOP_REM:
+	case BINOP_MOD:
+	case BINOP_LSH:
+	case BINOP_RSH:
+	case BINOP_LOGICAL_AND:
+	case BINOP_LOGICAL_OR:
+	case BINOP_BITWISE_AND:
+	case BINOP_BITWISE_IOR:
+	case BINOP_BITWISE_XOR:
+	case BINOP_EQUAL:
+	case BINOP_NOTEQUAL:
+	case BINOP_LESS:
+	case BINOP_GTR:
+	case BINOP_LEQ:
+	case BINOP_GEQ:
+	case BINOP_REPEAT:
+	case BINOP_COMMA:
+	case BINOP_EXP:
+	case BINOP_MIN:
+	case BINOP_MAX:
+	case BINOP_INTDIV:
+	case BINOP_CONCAT:
+	case BINOP_IN:
+	case BINOP_RANGE:
+	case TERNOP_COND:
+	case TERNOP_SLICE:
+	case TERNOP_SLICE_COUNT:
+
+	case OP_LONG:
+	case OP_DOUBLE:
+	case OP_DECFLOAT:
+	case OP_LAST:
+	case OP_COMPLEX:
+	case OP_STRING:
+	case OP_BITSTRING:
+	case OP_ARRAY:
+	case OP_TYPE:
+	case OP_NAME:
+	case OP_OBJC_NSSTRING:
+
+	case UNOP_NEG:
+	case UNOP_LOGICAL_NOT:
+	case UNOP_COMPLEMENT:
+	case UNOP_ADDR:
+	case UNOP_HIGH:
+	  /* Unary, binary and ternary operators: We have to check their
+	     operands.  If they are constant, then so is the result of
+	     that operation.  For instance, if A and B are determined to be
+	     constants, then so is "A + B".
+
+	     UNOP_IND is one exception to the rule above, because the value
+	     of *ADDR is not necessarily a constant, even when ADDR is.  */
+	  break;
+
+	case OP_VAR_VALUE:
+	  /* Check whether the associated symbol is a constant.
+	     We use SYMBOL_CLASS rather than TYPE_CONST because it's
+	     possible that a buggy compiler could mark a variable as constant
+	     even when it is not, and TYPE_CONST would return true in this
+	     case, while SYMBOL_CLASS wouldn't.
+	     We also have to check for function symbols because they are
+	     always constant.  */
+	  {
+	    struct symbol *s = exp->elts[i + 2].symbol;
+
+	    if (SYMBOL_CLASS (s) != LOC_BLOCK
+		&& SYMBOL_CLASS (s) != LOC_CONST
+		&& SYMBOL_CLASS (s) != LOC_CONST_BYTES)
+	      return 0;
+	    break;
+	  }
+
+	/* The default action is to return 0 because we are using
+	   the optimistic approach here: If we don't know something,
+	   then it is not a constant.  */
+	default:
+	  return 0;
+	}
+    }
+
+  return 1;
+}
+
 /* accessflag:  hw_write:  watch write, 
                 hw_read:   watch read, 
 		hw_access: watch access (read or write) */
@@ -7860,6 +7966,17 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
      prettier.  */
   while (exp_end > exp_start && (exp_end[-1] == ' ' || exp_end[-1] == '\t'))
     --exp_end;
+
+  /* Checking if the expression is not constant.  */
+  if (watchpoint_exp_is_const (exp))
+    {
+      int len;
+
+      len = exp_end - exp_start;
+      while (len > 0 && isspace (exp_start[len - 1]))
+	len--;
+      error (_("Cannot watch constant value `%.*s'."), len, exp_start);
+    }
 
   exp_valid_block = innermost_block;
   mark = value_mark ();

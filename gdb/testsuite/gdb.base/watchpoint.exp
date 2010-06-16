@@ -617,7 +617,17 @@ proc test_watchpoint_and_breakpoint {} {
 	}
     }
 }
-    
+
+proc test_constant_watchpoint {} {
+    gdb_test "watch 5" "Cannot watch constant value `5'." "number is constant"
+    gdb_test "watch marker1" "Cannot watch constant value `marker1'." \
+    "marker1 is constant"
+    gdb_test "watch count + 6" ".*atchpoint \[0-9\]+: count \\+ 6"
+    gdb_test_no_output "delete \$bpnum" "delete watchpoint `count + 6'"
+    gdb_test "watch 7 + count" ".*atchpoint \[0-9\]+: 7 \\+ count"
+    gdb_test_no_output "delete \$bpnum" "delete watchpoint `7 + count'"
+}
+
 proc test_inaccessible_watchpoint {} {
     global gdb_prompt
 
@@ -638,7 +648,8 @@ proc test_inaccessible_watchpoint {} {
 	}
 
 	gdb_test "watch *global_ptr" ".*atchpoint \[0-9\]+: \\*global_ptr"
-	gdb_test "next" ".*global_ptr = buf.*"
+	gdb_test "set \$global_ptr_breakpoint_number = \$bpnum" ""
+	gdb_test "next" ".*global_ptr = buf.*" "global_ptr next"
 	gdb_test_multiple "next" "next over ptr init" {
 	    -re ".*atchpoint \[0-9\]+: \\*global_ptr\r\n\r\nOld value = .*\r\nNew value = 3 .*\r\n.*$gdb_prompt $" {
 		# We can not test for <unknown> here because NULL may be readable.
@@ -651,6 +662,14 @@ proc test_inaccessible_watchpoint {} {
 		pass "next over buffer set"
 	    }
 	}
+	gdb_test "delete \$global_ptr_breakpoint_number" ""
+	gdb_test "watch **global_ptr_ptr" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr"
+	gdb_test "set \$global_ptr_ptr_breakpoint_number = \$bpnum" ""
+	gdb_test "next" ".*global_ptr_ptr = &global_ptr.*" "gloabl_ptr_ptr next"
+	gdb_test "next" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr\[\r\n\]+Old value = .*\r\nNew value = 7 .*" "next over global_ptr_ptr init"
+	gdb_test "next" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr\[\r\n\]+Old value = 7 .*\r\nNew value = 9 .*" "next over global_ptr_ptr buffer set"
+	gdb_test "next" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr\[\r\n\]+Old value = 9 .*\r\nNew value = 5 .*" "next over global_ptr_ptr pointer advance"
+	gdb_test_no_output "delete \$global_ptr_ptr_breakpoint_number"
     }
 }
     
@@ -827,6 +846,13 @@ if [initialize] then {
     test_watchpoint_and_breakpoint
 
     test_watchpoint_in_big_blob
+
+    # See above.
+    if [istarget "mips-idt-*"] then {
+	clean_restart
+    }
+
+    test_constant_watchpoint
 }
 
 # Restore old timeout
