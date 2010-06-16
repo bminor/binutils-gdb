@@ -1,3 +1,9 @@
+2010-06-16  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::do_finalize_sections): Do not emit an
+	.ARM.attributes section if we have not merged any input
+	attributes sections.
+
 2010-06-15  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc: Allow combining objects with no EABI version

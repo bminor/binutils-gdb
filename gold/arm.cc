@@ -8101,6 +8101,7 @@ Target_arm<big_endian>::do_finalize_sections(
     const Input_objects* input_objects,
     Symbol_table* symtab)
 {
+  bool merged_any_attributes = false;
   // Merge processor-specific flags.
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
@@ -8115,6 +8116,7 @@ Target_arm<big_endian>::do_finalize_sections(
 	      arm_relobj->processor_specific_flags());
 	  this->merge_object_attributes(arm_relobj->name().c_str(),
 					arm_relobj->attributes_section_data());
+	  merged_any_attributes = true;
 	}
     } 
 
@@ -8129,6 +8131,7 @@ Target_arm<big_endian>::do_finalize_sections(
 	  arm_dynobj->processor_specific_flags());
       this->merge_object_attributes(arm_dynobj->name().c_str(),
 				    arm_dynobj->attributes_section_data());
+      merged_any_attributes = true;
     }
 
   // Create an empty uninitialized attribute section if we still don't have it
@@ -8210,9 +8213,9 @@ Target_arm<big_endian>::do_finalize_sections(
 	}
     }
 
-  // Create an .ARM.attributes section unless we have no regular input
-  // object.  In that case the output will be empty.
-  if (input_objects->number_of_relobjs() != 0)
+  // Create an .ARM.attributes section if we have merged any attributes
+  // from inputs.
+  if (merged_any_attributes)
     {
       Output_attributes_section_data* attributes_section =
       new Output_attributes_section_data(*this->attributes_section_data_);
