@@ -551,8 +551,6 @@ gmon_out_read (const char *filename)
 	  cg_tally (from_pc, self_pc, count);
 	}
 
-      fclose (ifp);
-
       if (hz == HZ_WRONG)
 	{
 	  /* How many ticks per second?  If we can't tell, report
