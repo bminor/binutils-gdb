@@ -1,3 +1,29 @@
+2010-06-15  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-elf/orphan3.d: Allow section names starting '_'.
+	* ld-tic6x/attr-arch-c62x-c62x.d, ld-tic6x/attr-arch-c62x-c64x+.d,
+	ld-tic6x/attr-arch-c62x-c64x.d, ld-tic6x/attr-arch-c62x-c674x.d,
+	ld-tic6x/attr-arch-c62x-c67x+.d, ld-tic6x/attr-arch-c62x-c67x.d,
+	ld-tic6x/attr-arch-c62x.s, ld-tic6x/attr-arch-c64x+-c62x.d,
+	ld-tic6x/attr-arch-c64x+-c64x+.d, ld-tic6x/attr-arch-c64x+-c64x.d,
+	ld-tic6x/attr-arch-c64x+-c674x.d,
+	ld-tic6x/attr-arch-c64x+-c67x+.d, ld-tic6x/attr-arch-c64x+-c67x.d,
+	ld-tic6x/attr-arch-c64x+.s, ld-tic6x/attr-arch-c64x-c62x.d,
+	ld-tic6x/attr-arch-c64x-c64x+.d, ld-tic6x/attr-arch-c64x-c64x.d,
+	ld-tic6x/attr-arch-c64x-c674x.d, ld-tic6x/attr-arch-c64x-c67x+.d,
+	ld-tic6x/attr-arch-c64x-c67x.d, ld-tic6x/attr-arch-c64x.s,
+	ld-tic6x/attr-arch-c674x-c62x.d, ld-tic6x/attr-arch-c674x-c64x+.d,
+	ld-tic6x/attr-arch-c674x-c64x.d, ld-tic6x/attr-arch-c674x-c674x.d,
+	ld-tic6x/attr-arch-c674x-c67x+.d, ld-tic6x/attr-arch-c674x-c67x.d,
+	ld-tic6x/attr-arch-c674x.s, ld-tic6x/attr-arch-c67x+-c62x.d,
+	ld-tic6x/attr-arch-c67x+-c64x+.d, ld-tic6x/attr-arch-c67x+-c64x.d,
+	ld-tic6x/attr-arch-c67x+-c674x.d,
+	ld-tic6x/attr-arch-c67x+-c67x+.d, ld-tic6x/attr-arch-c67x+-c67x.d,
+	ld-tic6x/attr-arch-c67x+.s, ld-tic6x/attr-arch-c67x-c62x.d,
+	ld-tic6x/attr-arch-c67x-c64x+.d, ld-tic6x/attr-arch-c67x-c64x.d,
+	ld-tic6x/attr-arch-c67x-c674x.d, ld-tic6x/attr-arch-c67x-c67x+.d,
+	ld-tic6x/attr-arch-c67x-c67x.d, ld-tic6x/attr-arch-c67x.s: New.
+
 2010-06-07  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
 
 	* ld-arm/arm-call.d: Handle change in lsls/movs disassembly.

@@ -1,3 +1,7 @@
+2010-06-15  Joseph Myers  <joseph@codesourcery.com>
+
+	* emulparams/elf32_tic6x_le.sh (ATTRS_SECTIONS): Define.
+
 2010-06-09  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	PR ld/11603

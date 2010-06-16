@@ -19,6 +19,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+extern int elf32_tic6x_merge_arch_attributes (int, int);
+
 /* This function is provided for use from the assembler.  */
 
 extern void elf32_tic6x_set_use_rela_p (bfd *, bfd_boolean);

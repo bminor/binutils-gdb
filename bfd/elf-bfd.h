@@ -1417,7 +1417,7 @@ struct bfd_elf_section_data
    for any target.  Some code assumes that the value 0 is not used and
    the field for that attribute can instead be used as a marker to
    indicate that attributes have been initialized.  */
-#define LEAST_KNOWN_OBJ_ATTRIBUTE 4
+#define LEAST_KNOWN_OBJ_ATTRIBUTE 2
 
 /* The maximum number of known object attributes for any target.  */
 #define NUM_KNOWN_OBJ_ATTRIBUTES 71

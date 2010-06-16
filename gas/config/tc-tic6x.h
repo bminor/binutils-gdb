@@ -119,6 +119,10 @@ extern void tic6x_cons_align (int n);
   } while (0)
 extern bfd_boolean tic6x_do_align (int n, char *fill, int len, int max);
 
+#define CONVERT_SYMBOLIC_ATTRIBUTE(name)	\
+  tic6x_convert_symbolic_attribute (name)
+extern int tic6x_convert_symbolic_attribute (const char *);
+
 #define md_end() tic6x_end ();
 extern void tic6x_end (void);
 

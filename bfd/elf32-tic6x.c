@@ -1664,6 +1664,89 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
   return ok;
 }
 
+static int
+elf32_tic6x_obj_attrs_arg_type (int tag)
+{
+  if (tag == Tag_compatibility)
+    return ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL;
+  else
+    /* Correct for known attributes, arbitrary for others.  */
+    return ATTR_TYPE_FLAG_INT_VAL;
+}
+
+/* Merge the Tag_C6XABI_Tag_CPU_arch attribute values ARCH1 and ARCH2
+   and return the merged value.  At present, all merges succeed, so no
+   return value for errors is defined.  */
+
+int
+elf32_tic6x_merge_arch_attributes (int arch1, int arch2)
+{
+  int min_arch, max_arch;
+
+  min_arch = (arch1 < arch2 ? arch1 : arch2);
+  max_arch = (arch1 > arch2 ? arch1 : arch2);
+
+  /* In most cases, the numerically greatest value is the correct
+     merged value, but merging C64 and C67 results in C674X.  */
+  if ((min_arch == C6XABI_Tag_CPU_arch_C67X
+       || min_arch == C6XABI_Tag_CPU_arch_C67XP)
+      && (max_arch == C6XABI_Tag_CPU_arch_C64X
+	  || max_arch == C6XABI_Tag_CPU_arch_C64XP))
+    return C6XABI_Tag_CPU_arch_C674X;
+
+  return max_arch;
+}
+
+/* Merge attributes from IBFD and OBFD, returning TRUE if the merge
+   succeeded, FALSE otherwise.  */
+
+static bfd_boolean
+elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
+{
+  obj_attribute *in_attr;
+  obj_attribute *out_attr;
+
+  if (!elf_known_obj_attributes_proc (obfd)[0].i)
+    {
+      /* This is the first object.  Copy the attributes.  */
+      _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
+      out_attr = elf_known_obj_attributes_proc (obfd);
+
+      /* Use the Tag_null value to indicate the attributes have been
+	 initialized.  */
+      out_attr[0].i = 1;
+
+      return TRUE;
+    }
+
+  in_attr = elf_known_obj_attributes_proc (ibfd);
+  out_attr = elf_known_obj_attributes_proc (obfd);
+
+  /* No specification yet for handling of unknown attributes, so just
+     ignore them and handle known ones.  */
+  out_attr[Tag_C6XABI_Tag_CPU_arch].i
+    = elf32_tic6x_merge_arch_attributes (in_attr[Tag_C6XABI_Tag_CPU_arch].i,
+					 out_attr[Tag_C6XABI_Tag_CPU_arch].i);
+
+  /* Merge Tag_compatibility attributes and any common GNU ones.  */
+  _bfd_elf_merge_object_attributes (ibfd, obfd);
+
+  return TRUE;
+}
+
+static bfd_boolean
+elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+    return FALSE;
+
+  if (!elf32_tic6x_merge_attributes (ibfd, obfd))
+    return FALSE;
+
+  return TRUE;
+}
+
 
 #define TARGET_LITTLE_SYM	bfd_elf32_tic6x_le_vec
 #define TARGET_LITTLE_NAME	"elf32-tic6x-le"
@@ -1674,12 +1757,17 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 #define ELF_MAXPAGESIZE		1
 #define bfd_elf32_bfd_reloc_type_lookup elf32_tic6x_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup elf32_tic6x_reloc_name_lookup
+#define bfd_elf32_bfd_merge_private_bfd_data	elf32_tic6x_merge_private_bfd_data
 #define bfd_elf32_mkobject		elf32_tic6x_mkobject
 #define bfd_elf32_new_section_hook	elf32_tic6x_new_section_hook
 #define elf_backend_can_gc_sections	1
 #define elf_backend_default_use_rela_p	1
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1
+#define elf_backend_obj_attrs_arg_type	elf32_tic6x_obj_attrs_arg_type
+#define elf_backend_obj_attrs_section	"__TI_build_attributes"
+#define elf_backend_obj_attrs_section_type	SHT_C6000_ATTRIBUTES
+#define elf_backend_obj_attrs_vendor	"c6xabi"
 #define elf_backend_rela_normal		1
 #define elf_backend_relocate_section	elf32_tic6x_relocate_section
 #define elf_info_to_howto		elf32_tic6x_info_to_howto

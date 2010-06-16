@@ -59,6 +59,9 @@ if { ([istarget "*-*-*elf*"]
     if {[istarget "score-*-*"]} then {
 	set target_machine -score
     }
+    if {[istarget "tic6x-*-*"]} then {
+	set target_machine -tic6x
+    }
     if {[istarget "xtensa*-*-*"]} then {
 	set target_machine -xtensa
     }

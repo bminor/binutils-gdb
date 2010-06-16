@@ -1,5 +1,17 @@
 2010-06-15  Joseph Myers  <joseph@codesourcery.com>
 
+	* elf-bfd.h (LEAST_KNOWN_OBJ_ATTRIBUTE): Decrease to 2.
+	* elf32-tic6x.c (elf32_tic6x_obj_attrs_arg_type,
+	elf32_tic6x_merge_arch_attributes, elf32_tic6x_merge_attributes,
+	elf32_tic6x_merge_private_bfd_data): New.
+	(bfd_elf32_bfd_merge_private_bfd_data,
+	elf_backend_obj_attrs_arg_type, elf_backend_obj_attrs_section,
+	elf_backend_obj_attrs_section_type, elf_backend_obj_attrs_vendor):
+	Define.
+	* elf32-tic6x.h (elf32_tic6x_merge_arch_attributes): Declare.
+
+2010-06-15  Joseph Myers  <joseph@codesourcery.com>
+
 	* elf-bfd.h (LEAST_KNOWN_OBJ_ATTRIBUTE): Define.
 	(struct elf_backend_data): Update comment on obj_attrs_order.
 	* elf-attrs.c (vendor_obj_attr_size, vendor_set_obj_attr_contents,

@@ -1,3 +1,10 @@
+2010-06-15  Joseph Myers  <joseph@codesourcery.com>
+
+	* readelf.c (display_tic6x_attribute, process_tic6x_specific):
+	New.
+	(process_arch_specific): Call process_tic6x_specific for
+	EM_TI_C6000.
+
 2010-06-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (dump_ia64_vms_dynamic_fixups): Cast to unsigned long

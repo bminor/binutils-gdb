@@ -24,6 +24,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/tic6x.h"
+#include "elf/tic6x.h"
 #include "elf32-tic6x.h"
 
 /* Truncate and sign-extend at 32 bits, so that building on a 64-bit
@@ -81,6 +82,15 @@ static unsigned short tic6x_arch_enable = (TIC6X_INSN_C62X
    (architecture, as modified by other options).  */
 static unsigned short tic6x_features;
 
+/* The architecture attribute value, or C6XABI_Tag_CPU_arch_none if
+   not yet set.  */
+static int tic6x_arch_attribute = C6XABI_Tag_CPU_arch_none;
+
+/* Whether any instructions at all have been seen.  Once any
+   instructions have been seen, architecture attributes merge into the
+   previous attribute value rather than replacing it.  */
+static bfd_boolean tic6x_seen_insns = FALSE;
+
 /* The number of registers in each register file supported by the
    current architecture.  */
 static unsigned int tic6x_num_registers;
@@ -105,21 +115,26 @@ static bfd_boolean tic6x_generate_rela = TRUE;
 typedef struct
 {
   const char *arch;
+  int attr;
   unsigned short features;
 } tic6x_arch_table;
 static const tic6x_arch_table tic6x_arches[] =
   {
-    { "c62x", TIC6X_INSN_C62X },
-    { "c64x", TIC6X_INSN_C62X | TIC6X_INSN_C64X },
-    { "c64x+", TIC6X_INSN_C62X | TIC6X_INSN_C64X | TIC6X_INSN_C64XP },
-    { "c67x", TIC6X_INSN_C62X | TIC6X_INSN_C67X },
-    { "c67x+", TIC6X_INSN_C62X | TIC6X_INSN_C67X | TIC6X_INSN_C67XP },
-    { "c674x", (TIC6X_INSN_C62X
-		| TIC6X_INSN_C64X
-		| TIC6X_INSN_C64XP
-		| TIC6X_INSN_C67X
-		| TIC6X_INSN_C67XP
-		| TIC6X_INSN_C674X) }
+    { "c62x", C6XABI_Tag_CPU_arch_C62X, TIC6X_INSN_C62X },
+    { "c64x", C6XABI_Tag_CPU_arch_C64X, TIC6X_INSN_C62X | TIC6X_INSN_C64X },
+    { "c64x+", C6XABI_Tag_CPU_arch_C64XP, (TIC6X_INSN_C62X
+					   | TIC6X_INSN_C64X
+					   | TIC6X_INSN_C64XP) },
+    { "c67x", C6XABI_Tag_CPU_arch_C67X, TIC6X_INSN_C62X | TIC6X_INSN_C67X },
+    { "c67x+", C6XABI_Tag_CPU_arch_C67XP, (TIC6X_INSN_C62X
+					   | TIC6X_INSN_C67X
+					   | TIC6X_INSN_C67XP) },
+    { "c674x", C6XABI_Tag_CPU_arch_C674X, (TIC6X_INSN_C62X
+					   | TIC6X_INSN_C64X
+					   | TIC6X_INSN_C64XP
+					   | TIC6X_INSN_C67X
+					   | TIC6X_INSN_C67XP
+					   | TIC6X_INSN_C674X) }
   };
 
 /* Update the selected architecture based on ARCH, giving an error if
@@ -135,6 +150,12 @@ tic6x_use_arch (const char *arch)
     if (strcmp (arch, tic6x_arches[i].arch) == 0)
       {
 	tic6x_arch_enable = tic6x_arches[i].features;
+	if (tic6x_seen_insns)
+	  tic6x_arch_attribute
+	    = elf32_tic6x_merge_arch_attributes (tic6x_arch_attribute,
+						 tic6x_arches[i].attr);
+	else
+	  tic6x_arch_attribute = tic6x_arches[i].attr;
 	return;
       }
 
@@ -295,10 +316,53 @@ s_tic6x_nocmp (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Track for each attribute whether it has been set explicitly (and so
+   should not have a default value set by the assembler).  */
+static bfd_boolean tic6x_attributes_set_explicitly[NUM_KNOWN_OBJ_ATTRIBUTES];
+
+/* Parse a .c6xabi_attribute directive.  */
+
+static void
+s_tic6x_c6xabi_attribute (int ignored ATTRIBUTE_UNUSED)
+{
+  int tag = s_vendor_attribute (OBJ_ATTR_PROC);
+
+  if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
+    tic6x_attributes_set_explicitly[tag] = TRUE;
+}
+
+typedef struct
+{
+  const char *name;
+  int tag;
+} tic6x_attribute_table;
+
+static const tic6x_attribute_table tic6x_attributes[] =
+  {
+#define TAG(tag, value) { #tag, tag }
+#include "elf/tic6x-attrs.h"
+#undef TAG
+  };
+
+/* Convert an attribute name to a number.  */
+
+int
+tic6x_convert_symbolic_attribute (const char *name)
+{
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (tic6x_attributes); i++)
+    if (strcmp (name, tic6x_attributes[i].name) == 0)
+      return tic6x_attributes[i].tag;
+
+  return -1;
+}
+
 const pseudo_typeS md_pseudo_table[] =
   {
     { "arch", s_tic6x_arch, 0 },
     { "atomic", s_tic6x_atomic, 0 },
+    { "c6xabi_attribute", s_tic6x_c6xabi_attribute, 0 },
     { "noatomic", s_tic6x_noatomic, 0 },
     { "nocmp", s_tic6x_nocmp, 0 },
     { "word", cons, 4 },
@@ -2587,6 +2651,16 @@ md_assemble (char *str)
   if (p == str)
     abort ();
 
+  /* Now an instruction has been seen, architecture attributes from
+     .arch directives merge with rather than overriding the previous
+     value.  */
+  tic6x_seen_insns = TRUE;
+  /* If no .arch directives or -march options have been seen, we are
+     assessing instruction validity based on the C674X default, so set
+     the attribute accordingly.  */
+  if (tic6x_arch_attribute == C6XABI_Tag_CPU_arch_none)
+    tic6x_arch_attribute = C6XABI_Tag_CPU_arch_C674X;
+
   /* Reset global settings for parallel bars and predicates now to
      avoid extra errors if there are problems with this opcode.  */
   this_line_parallel = tic6x_line_parallel;
@@ -3760,6 +3834,29 @@ tic6x_frag_init (fragS *fragp)
   fragp->tc_frag_data.can_cross_fp_boundary = FALSE;
 }
 
+/* Set an attribute if it has not already been set by the user.  */
+
+static void
+tic6x_set_attribute_int (int tag, int value)
+{
+  if (tag < 1
+      || tag >= NUM_KNOWN_OBJ_ATTRIBUTES)
+    abort ();
+  if (!tic6x_attributes_set_explicitly[tag])
+    bfd_elf_add_proc_attr_int (stdoutput, tag, value);
+}
+
+/* Set object attributes deduced from the input file and command line
+   rather than given explicitly.  */
+static void
+tic6x_set_attributes (void)
+{
+  if (tic6x_arch_attribute == C6XABI_Tag_CPU_arch_none)
+    tic6x_arch_attribute = C6XABI_Tag_CPU_arch_C674X;
+
+  tic6x_set_attribute_int (Tag_C6XABI_Tag_CPU_arch, tic6x_arch_attribute);
+}
+
 /* Do machine-dependent manipulations of the frag chains after all
    input has been read and before the machine-independent sizing and
    relaxing.  */
@@ -3767,6 +3864,9 @@ tic6x_frag_init (fragS *fragp)
 void
 tic6x_end (void)
 {
+  /* Set object attributes at this point if not explicitly set.  */
+  tic6x_set_attributes ();
+
   /* Meeting alignment requirements may require inserting NOPs in
      parallel in execute packets earlier in the segment.  Future
      16-bit instruction generation involves whole-segment optimization

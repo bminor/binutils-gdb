@@ -10641,6 +10641,73 @@ display_mips_gnu_attribute (unsigned char * p, int tag)
   return p;
 }
 
+static unsigned char *
+display_tic6x_attribute (unsigned char * p)
+{
+  int tag;
+  unsigned int len;
+  int val;
+
+  tag = read_uleb128 (p, &len);
+  p += len;
+
+  switch (tag)
+    {
+    case Tag_C6XABI_Tag_CPU_arch:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_C6XABI_Tag_CPU_arch: ");
+
+      switch (val)
+	{
+	case C6XABI_Tag_CPU_arch_none:
+	  printf (_("None\n"));
+	  break;
+	case C6XABI_Tag_CPU_arch_C62X:
+	  printf ("C62x\n");
+	  break;
+	case C6XABI_Tag_CPU_arch_C67X:
+	  printf ("C67x\n");
+	  break;
+	case C6XABI_Tag_CPU_arch_C67XP:
+	  printf ("C67x+\n");
+	  break;
+	case C6XABI_Tag_CPU_arch_C64X:
+	  printf ("C64x\n");
+	  break;
+	case C6XABI_Tag_CPU_arch_C64XP:
+	  printf ("C64x+\n");
+	  break;
+	case C6XABI_Tag_CPU_arch_C674X:
+	  printf ("C674x\n");
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
+    case 32:
+      /* Tag_compatibility - treated as generic by binutils for now
+	 although not currently specified for C6X.  */
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf (_("flag = %d, vendor = %s\n"), val, p);
+      p += strlen ((char *) p) + 1;
+      return p;
+    }
+
+  printf ("  Tag_unknown_%d: ", tag);
+
+  /* No general documentation of handling unknown attributes, treat as
+     ULEB128 for now.  */
+  val = read_uleb128 (p, &len);
+  p += len;
+  printf ("%d (0x%x)\n", val, val);
+
+  return p;
+}
+
 static int
 process_attributes (FILE * file,
 		    const char * public_name,
@@ -10795,6 +10862,13 @@ process_power_specific (FILE * file)
 {
   return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
 			     display_power_gnu_attribute);
+}
+
+static int
+process_tic6x_specific (FILE * file)
+{
+  return process_attributes (file, "c6xabi", SHT_C6000_ATTRIBUTES,
+			     display_tic6x_attribute, NULL);
 }
 
 /* DATA points to the contents of a MIPS GOT that starts at VMA PLTGOT.
@@ -11866,6 +11940,9 @@ process_arch_specific (FILE * file)
       break;
     case EM_PPC:
       return process_power_specific (file);
+      break;
+    case EM_TI_C6000:
+      return process_tic6x_specific (file);
       break;
     default:
       break;

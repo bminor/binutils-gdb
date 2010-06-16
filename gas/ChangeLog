@@ -1,3 +1,19 @@
+2010-06-15  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-tic6x.c: Include elf/tic6x.h.
+	(tic6x_arch_attribute, tic6x_seen_insns): New.
+	(tic6x_arch_table, tic6x_arches): Add attribute values.
+	(tic6x_use_arch): Handle attribute settings.
+	(tic6x_attributes_set_explicitly, s_tic6x_c6xabi_attribute,
+	tic6x_attribute_table, tic6x_attributes,
+	tic6x_convert_symbolic_attribute): New.
+	(md_pseudo_table): Add c6xabi_attribute.
+	(md_assemble): Set tic6x_seen_insns and tic6x_arch_attribute.
+	(tic6x_set_attribute_int, tic6x_set_attributes): New.
+	(tic6x_end): Call tic6x_set_attributes.
+	* config/tc-tic6x.h (CONVERT_SYMBOLIC_ATTRIBUTE): Define.
+	(tic6x_convert_symbolic_attribute): Declare.
+
 2010-06-14  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_assemble): Emit APUinfo section for
