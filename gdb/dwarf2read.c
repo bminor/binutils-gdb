@@ -2001,6 +2001,7 @@ static void
 psymtabs_addrmap_cleanup (void *o)
 {
   struct objfile *objfile = o;
+
   objfile->psymtabs_addrmap = NULL;
 }
 

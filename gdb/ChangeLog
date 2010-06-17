@@ -1,3 +1,8 @@
+2010-06-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (psymtabs_addrmap_cleanup): Add empty line after
+	last local variable declaration.  No real code change.
+
 2010-06-17  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (psymtabs_addrmap_cleanup): New function.
