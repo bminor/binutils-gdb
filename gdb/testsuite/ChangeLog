@@ -1,3 +1,8 @@
+2010-06-17  Doug Evans  <dje@google.com>
+
+	* gdb.arch/i386-size.exp: Updated expected output for
+	DISASSEMBLY_OMIT_FNAME.
+
 2010-06-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Sergio Durigan Junior  <sergiodj@redhat.com>
 

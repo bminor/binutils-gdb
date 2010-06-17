@@ -82,7 +82,7 @@ gdb_test_multiple "disassemble main" $message {
     -re "call.*<trap>.*$gdb_prompt $" {
 	fail $message
     }
-    -re "<main\\+8>:\[ \t\]+ret\[ \t\r\n\]+End of.*$gdb_prompt $" {
+    -re "<\\+8>:\[ \t\]+ret\[ \t\r\n\]+End of.*$gdb_prompt $" {
 	pass $message
     }
 }
