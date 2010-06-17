@@ -45,6 +45,7 @@
 #include "safe-ctype.h"
 #include "obstack.h"
 #include "windres.h"
+#include <sys/stat.h>
 
 /* Used by resrc.c at least.  */
 
@@ -726,12 +727,15 @@ quot (const char *string)
 
 /* Long options.  */
 
-/* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
-
-#define OPTION_PREPROCESSOR	150
-#define OPTION_USE_TEMP_FILE	(OPTION_PREPROCESSOR + 1)
-#define OPTION_NO_USE_TEMP_FILE	(OPTION_USE_TEMP_FILE + 1)
-#define OPTION_YYDEBUG		(OPTION_NO_USE_TEMP_FILE + 1)
+enum option_values
+{
+  /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
+  OPTION_PREPROCESSOR	= 150,
+  OPTION_USE_TEMP_FILE,
+  OPTION_NO_USE_TEMP_FILE,
+  OPTION_YYDEBUG,
+  OPTION_INCLUDE_DIR
+};
 
 static const struct option long_options[] =
 {
@@ -741,7 +745,7 @@ static const struct option long_options[] =
   {"output-format", required_argument, 0, 'O'},
   {"target", required_argument, 0, 'F'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
-  {"include-dir", required_argument, 0, 'I'},
+  {"include-dir", required_argument, 0, OPTION_INCLUDE_DIR},
   {"define", required_argument, 0, 'D'},
   {"undefine", required_argument, 0, 'U'},
   {"verbose", no_argument, 0, 'v'},
@@ -918,12 +922,27 @@ main (int argc, char **argv)
 	  input_format_tmp = format_from_name (optarg, 0);
 	  if (input_format_tmp != RES_FORMAT_UNKNOWN)
 	    {
-	      fprintf (stderr,
-	      	       _("Option -I is deprecated for setting the input format, please use -J instead.\n"));
-	      input_format = input_format_tmp;
-	      break;
+	      struct stat statbuf;
+	      char modebuf[11];
+	      
+	      if (stat (optarg, & statbuf) == 0
+		  /* Coded this way to avoid importing knowledge of S_ISDIR into this file.  */
+		  && (mode_string (statbuf.st_mode, modebuf), modebuf[0] == 'd'))
+		/* We have a -I option with a directory name that just happens
+		   to match a format name as well.  eg: -I res  Assume that the
+		   user knows what they are doing and do not complain.  */
+		;
+	      else
+		{
+		  fprintf (stderr,
+			   _("Option -I is deprecated for setting the input format, please use -J instead.\n"));
+		  input_format = input_format_tmp;
+		  break;
+		}
 	    }
+	  /* Fall through.  */
 
+	case OPTION_INCLUDE_DIR:
 	  if (preprocargs == NULL)
 	    {
 	      quotedarg = quot (optarg);

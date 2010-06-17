@@ -1,3 +1,13 @@
+2010-06-17  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/11711
+	* windres.c (enum option_values): New enum.
+	(long_options): Use separate option number for --include-dir
+	option.
+	(main): Separate backwards compatibility check from code to
+	implement --include-dir.  Check to see if directory exists and do
+	not complain if it does.
+
 2010-06-15  Joseph Myers  <joseph@codesourcery.com>
 
 	* readelf.c (display_tic6x_attribute, process_tic6x_specific):
