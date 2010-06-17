@@ -1,3 +1,9 @@
+2010-06-17  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (psymtabs_addrmap_cleanup): New function.
+	(dwarf2_build_psymtabs_hard): Use it.  Create addrmap on a
+	temporary obstack.
+
 2010-06-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
