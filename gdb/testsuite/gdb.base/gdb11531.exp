@@ -30,6 +30,10 @@ if { [prepare_for_testing $testfile.exp $testfile $testfile.c {debug}] } {
     return -1;
 }
 
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+   gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+}
 
 if { ![runto main] } then {
     fail "run to main"

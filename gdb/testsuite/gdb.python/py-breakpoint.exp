@@ -130,6 +130,11 @@ gdb_test "python print blist\[len(blist)-1\].commands" "print \"Command for brea
 # Start with a fresh gdb.
 clean_restart ${testfile}
 
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+}
+
 if ![runto_main] then {
     fail "Cannot run to main."
     return 0

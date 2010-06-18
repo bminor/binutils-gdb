@@ -26,6 +26,11 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return -1
 }
 
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+}
+
 if ![runto_main] then {
     fail "Can't run to main"
     return
@@ -41,6 +46,11 @@ gdb_test "continue" \
 
 clean_restart ${testfile}
 
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+}
+
 if ![runto_main] then {
     fail "Can't run to main"
     return
@@ -55,6 +65,11 @@ gdb_test "continue" \
     "watchpoint with local expression, local condition evaluates in correct frame"
 
 clean_restart ${testfile}
+
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+}
 
 if ![runto_main] then {
     fail "Can't run to main"
