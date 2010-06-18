@@ -67,6 +67,11 @@ typedef struct
      ||^); otherwise NULL.  */
   char *spmask_addr;
 
+  /* The functional units used in the current execute packet, recorded
+     by setting the same bits as would be set in the 32-bit SPMASK
+     instruction.  */
+  unsigned int func_units_used;
+
   /* If an SPLOOP-family instruction has been seen, and a following
      SPKERNEL-family instruction has not yet been seen, the ii value
      from the SPLOOP instruction (in the range 1 to 14); otherwise

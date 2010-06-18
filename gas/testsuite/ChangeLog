@@ -1,3 +1,12 @@
+2010-06-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x/resource-func-unit-1.d,
+	gas/tic6x/resource-func-unit-1.l,
+	gas/tic6x/resource-func-unit-1.s,
+	gas/tic6x/resource-func-unit-2.d,
+	gas/tic6x/resource-func-unit-2.l,
+	gas/tic6x/resource-func-unit-2.s: New.
+
 2010-06-16  Vincent Rivière  <vincent.riviere@freesbee.fr>
 
 	PR gas/11673

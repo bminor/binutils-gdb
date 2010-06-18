@@ -633,6 +633,7 @@ tic6x_cons_align (int n ATTRIBUTE_UNUSED)
   seginfo->tc_segment_info_data.execute_packet_frag = NULL;
   seginfo->tc_segment_info_data.last_insn_lsb = NULL;
   seginfo->tc_segment_info_data.spmask_addr = NULL;
+  seginfo->tc_segment_info_data.func_units_used = 0;
 }
 
 /* Handle an alignment directive.  Return TRUE if the
@@ -3155,6 +3156,7 @@ md_assemble (char *str)
       tic6x_label_list *l;
 
       seginfo->tc_segment_info_data.spmask_addr = NULL;
+      seginfo->tc_segment_info_data.func_units_used = 0;
 
       /* Start a new frag for this execute packet.  */
       if (frag_now_fix () != 0)
@@ -3182,6 +3184,18 @@ md_assemble (char *str)
       insn_frag->tc_frag_data.is_insns = TRUE;
       insn_frag->tc_frag_data.can_cross_fp_boundary
 	= tic6x_can_cross_fp_boundary;
+    }
+
+  if (func_unit_base != tic6x_func_unit_nfu)
+    {
+      unsigned int func_unit_enc;
+
+      func_unit_enc = tic6x_encode_spmask (func_unit_base, func_unit_side);
+
+      if (seginfo->tc_segment_info_data.func_units_used & func_unit_enc)
+	as_bad (_("functional unit already used in this execute packet"));
+
+      seginfo->tc_segment_info_data.func_units_used |= func_unit_enc;
     }
 
   if (opct->flags & TIC6X_FLAG_SPLOOP)

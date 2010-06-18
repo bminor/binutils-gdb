@@ -1,3 +1,12 @@
+2010-06-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-tic6x.h (tic6x_segment_info_type): Add field
+	func_units_used.
+	* config/tc-tic6x.c (tic6x_cons_align: Clear func_units_used.
+	(md_assemble): Clear func_units_used for new execute packet.
+	Check for duplicate functional units and update func_units_used
+	for instructions using a functional unit.
+
 2010-06-15  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-tic6x.c: Include elf/tic6x.h.
