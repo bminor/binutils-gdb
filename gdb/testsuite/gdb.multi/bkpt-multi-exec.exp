@@ -42,10 +42,7 @@ if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
 
 # Start with a fresh gdb
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile1}
+clean_restart ${exec1}
 
 # Start the program running, and stop at main.
 #
@@ -61,12 +58,11 @@ gdb_test "continue" "SIGSEGV.*"
 
 # Start over, but this time, set a breakpoint before the app crashes.
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile1}
+clean_restart ${exec1}
 
-gdb_test "add-inferior -exec ${binfile2}"
+gdb_test "add-inferior -exec ${binfile2}" \
+    "Added inferior 2.*" \
+    "add inferior 2 with -exec ${exec2}"
 
 set bp_location [gdb_get_line_number "set breakpoint here" ${srcfile2}]
 

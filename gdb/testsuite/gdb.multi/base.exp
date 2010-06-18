@@ -42,20 +42,19 @@ if { [prepare_for_testing ${testfile}.exp ${exec3} "${srcfile3}" {debug nowarnin
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile1}
+clean_restart ${exec1}
 
 # Add an empty inferior space, switch to it, and load a main
 # executable into it.
-gdb_test "add-inferior" "Added inferior 2.*"
-gdb_test "inferior 2" "Switching to inferior 2.*"
-gdb_test "file ${binfile2}" ".*"
+gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
+gdb_test "inferior 2" "Switching to inferior 2.*" "switch to inferior 2"
+gdb_test "file ${binfile2}" ".*" "load ${exec2} file in inferior 2"
 
 # Add a new inferior space and load a main executable into it in one
 # command.
-gdb_test "add-inferior -exec ${binfile3}"
+gdb_test "add-inferior -exec ${binfile3}" \
+    "Added inferior 3.*" \
+    "add inferior 3 with -exec ${exec3}"
 
 # Check that we have multiple spaces.
 
@@ -64,35 +63,38 @@ gdb_test "info inferiors" \
 
 # Test that we have multiple symbol tables.
 
-gdb_test "inferior 1"
-gdb_test "info functions commonfun" "${srcfile1}.*"
+gdb_test "inferior 1" ".*" "switch to inferior 1"
+gdb_test "info functions commonfun" \
+    "${srcfile1}.*" \
+    "'info functions commonfun' in inferior 1"
 
-gdb_test "inferior 3"
-gdb_test "info functions commonfun" "${srcfile3}.*"
+gdb_test "inferior 3" ".*" "switch to inferior 3"
+gdb_test "info functions commonfun" \
+    "${srcfile3}.*" \
+    "'info functions commonfun' in inferior 3"
 
-
-gdb_test "inferior 1"
+gdb_test "inferior 1" ".*" "switch back to inferior 1"
 
 gdb_test_no_output "set listsize 1"
 
-gdb_test "list commonfun" "from hello.*"
+gdb_test "list commonfun" "from hello.*" "list commonfun in hello"
 
 gdb_test "print hglob" "1"
 
 gdb_test "print glob" "92" "print glob (${exec1})"
 
 
-gdb_test "inferior 3"
+gdb_test "inferior 3" ".*" "switch to inferior 3 to print globals"
 
 gdb_test "print gglob" "2"
 
 gdb_test "print glob" "45" "print glob (${exec3})"
 
-gdb_test "list commonfun" "from goodbye.*"
+gdb_test "list commonfun" "from goodbye.*" "list commonfun in goodbye"
 
 
 # Let's run the hello program.
-gdb_test "inferior 1"
+gdb_test "inferior 1" ".*" "switch to inferior 1 to run it"
 
 if { ![runto_main] } then {
     return -1

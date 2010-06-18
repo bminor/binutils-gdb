@@ -1,3 +1,9 @@
+2010-06-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.multi/base.exp, gdb.multi/bkpt-multi-exec.exp: Use
+	clean_restart, make sure every test has a distinct message, and
+	that messages don't include the executable' full path.
+
 2010-06-17  Doug Evans  <dje@google.com>
 
 	* gdb.arch/i386-size.exp: Updated expected output for
