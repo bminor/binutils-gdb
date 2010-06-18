@@ -1,3 +1,8 @@
+2010-06-18  Hui Zhu  <teawater@gmail.com>
+
+	* gdb.texinfo: (Process Record and Replay): Add documentation
+	for commands "record save" and "record restore".
+
 2010-06-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo: Include information about the correct use

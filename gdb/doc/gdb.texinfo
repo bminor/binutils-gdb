@@ -5639,6 +5639,17 @@ usual ``live'' debugging of the process from that state.
 When the inferior process exits, or @value{GDBN} detaches from it,
 process record and replay target will automatically stop itself.
 
+@kindex record save
+@item record save @var{filename}
+Save the execution log to a file @file{@var{filename}}.
+Default filename is @file{gdb_record.@var{process_id}}, where
+@var{process_id} is the process ID of the inferior.
+
+@kindex record restore
+@item record restore @var{filename}
+Restore the execution log from a file @file{@var{filename}}.
+File must have been created with @code{record save}.
+
 @kindex set record insn-number-max
 @item set record insn-number-max @var{limit}
 Set the limit of instructions to be recorded.  Default value is 200000.
