@@ -230,7 +230,7 @@ class Plugin_manager
 
   // Add a new input file.
   ld_plugin_status
-  add_input_file(char *pathname, bool is_lib);
+  add_input_file(const char *pathname, bool is_lib);
 
   // Return TRUE if we are in the replacement phase.
   bool

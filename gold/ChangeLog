@@ -1,3 +1,10 @@
+2010-06-18  Rafael Espindola  <espindola@google.com>
+
+	* plugin.cc (add_input_file,add_input_library)
+	(Plugin_manager::add_input_file): Make filename arguments const.
+	* plugin.h (Plugin_manager::add_input_file): Make filename arguments
+	const.
+
 2010-06-16  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_finalize_sections): Do not emit an
