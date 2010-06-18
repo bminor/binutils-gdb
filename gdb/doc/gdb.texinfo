@@ -2788,6 +2788,13 @@ As with the @samp{[New @dots{}]} message, the form of the text after
 @samp{Switching to} depends on your system's conventions for identifying
 threads.
 
+@vindex $_thread@r{, convenience variable}
+The debugger convenience variable @samp{$_thread} contains the number
+of the current thread.  You may find this useful in writing breakpoint
+conditional expressions, command scripts, and so forth.  See
+@xref{Convenience Vars,, Convenience Variables}, for general
+information on convenience variables.
+
 @kindex thread apply
 @cindex apply command to several threads
 @item thread apply [@var{threadno}] [@var{all}] @var{command}

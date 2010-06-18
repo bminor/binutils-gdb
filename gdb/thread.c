@@ -1262,6 +1262,18 @@ update_thread_list (void)
   target_find_new_threads ();
 }
 
+/* Return a new value for the selected thread's id.  Return a value of 0 if
+   no thread is selected, or no threads exist.  */
+
+static struct value *
+thread_id_make_value (struct gdbarch *gdbarch, struct internalvar *var)
+{
+  struct thread_info *tp = find_thread_ptid (inferior_ptid);
+
+  return value_from_longest (builtin_type (gdbarch)->builtin_int,
+			     (tp ? tp->num : 0));
+}
+
 /* Commands with a prefix of `thread'.  */
 struct cmd_list_element *thread_cmd_list = NULL;
 
@@ -1295,4 +1307,6 @@ Show printing of thread events (such as thread start and exit)."), NULL,
          NULL,
          show_print_thread_events,
          &setprintlist, &showprintlist);
+
+  create_internalvar_type_lazy ("_thread", thread_id_make_value);
 }

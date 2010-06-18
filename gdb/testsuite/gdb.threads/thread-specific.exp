@@ -75,6 +75,8 @@ gdb_load ${binfile}
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set width 0"
 
+gdb_test {print $_thread} ".* = 0" "thread var when not running"
+
 runto_main
 
 gdb_breakpoint [gdb_get_line_number "thread-specific.exp: last thread start"]
@@ -87,6 +89,8 @@ if {[llength $threads] == 0} {
   # We have already issued a FAIL above.
   return 1
 }
+
+gdb_test {print $_thread} ".* = [lindex $threads 0]" "thread var in main"
 
 gdb_test_multiple "break $line thread [lindex $threads 0]" \
   "breakpoint $line main thread" {
@@ -104,9 +108,19 @@ gdb_test_multiple "continue" "continue to thread-specific breakpoint" {
 	-re "Breakpoint $main_breakpoint, .* at .*\r\n$gdb_prompt $" {
 	    fail "continue to thread-specific breakpoint (wrong breakpoint)"
 	}
-	-re "Breakpoint .* at .*\r\n$gdb_prompt $" {
+	-re "Breakpoint (\[0-9\]*), .* at .*\r\n$gdb_prompt $" {
+	    set this_breakpoint $expect_out(1,string)
 	    pass "continue to thread-specific breakpoint"
 	}
 }
+
+gdb_test_multiple "info breakpoint $this_breakpoint" "info on bp" {
+    -re ".*stop only in thread (\[0-9\]*).*$gdb_prompt $" {
+	set this_thread $expect_out(1,string)
+	pass "found breakpoint for thread number"
+    }
+}
+
+gdb_test {print $_thread} ".* = $this_thread" "thread var at break"
 
 return 0

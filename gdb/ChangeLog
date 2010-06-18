@@ -1,3 +1,9 @@
+2010-06-18  Stan Shebs  <stan@codesourcery.com>
+
+	* thread.c (thread_id_make_value): Make a value representing the
+	current thread.
+	(_initialize_thread): Create $_thread.
+
 2010-06-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (psymtabs_addrmap_cleanup): Add empty line after
