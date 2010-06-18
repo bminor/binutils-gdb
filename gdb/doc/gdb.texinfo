@@ -8519,6 +8519,12 @@ this functionality depends on the remote stub's support of the
 @samp{qXfer:osdata:read} packet, see @ref{qXfer osdata read}.
 
 @table @code
+@kindex info os
+@item info os
+List the types of OS information available for the target.  If the
+target does not return a list of possible types, this command will
+report an error.
+
 @kindex info os processes
 @item info os processes
 Display the list of processes on the target.  For each process,

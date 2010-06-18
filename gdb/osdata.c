@@ -256,7 +256,12 @@ get_osdata (const char *type)
       struct cleanup *old_chain = make_cleanup (xfree, xml);
 
       if (xml[0] == '\0')
-	warning (_("Empty data returned by target.  Wrong osdata type?"));
+	{
+	  if (type)
+	    warning (_("Empty data returned by target.  Wrong osdata type?"));
+	  else
+	    warning (_("Empty type list returned by target.  No type data?"));
+	}
       else
 	osdata = osdata_parse (xml);
 
@@ -294,14 +299,13 @@ info_osdata_command (char *type, int from_tty)
   int ncols;
   int nprocs;
 
-  if (type == 0)
-    /* TODO: No type could mean "list availables types".  */
-    error (_("Argument required."));
-
   osdata = get_osdata (type);
   old_chain = make_cleanup_osdata_free (osdata);
 
   nprocs = VEC_length (osdata_item_s, osdata->items);
+
+  if (!type && nprocs == 0)
+    error (_("Available types of OS data not reported."));
 
   last = VEC_last (osdata_item_s, osdata->items);
   if (last && last->columns)

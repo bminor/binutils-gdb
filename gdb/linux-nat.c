@@ -4948,6 +4948,45 @@ linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
 
   gdb_assert (object == TARGET_OBJECT_OSDATA);
 
+  if (!annex)
+    {
+      if (offset == 0)
+	{
+	  if (len_avail != -1 && len_avail != 0)
+	    obstack_free (&obstack, NULL);
+	  len_avail = 0;
+	  buf = NULL;
+	  obstack_init (&obstack);
+	  obstack_grow_str (&obstack, "<osdata type=\"types\">\n");
+
+	  obstack_xml_printf (
+			      &obstack,
+			      "<item>"
+			      "<column name=\"Type\">processes</column>"
+			      "<column name=\"Description\">Listing of all processes</column>"
+			      "</item>");
+
+	  obstack_grow_str0 (&obstack, "</osdata>\n");
+	  buf = obstack_finish (&obstack);
+	  len_avail = strlen (buf);
+	}
+
+      if (offset >= len_avail)
+	{
+	  /* Done.  Get rid of the obstack.  */
+	  obstack_free (&obstack, NULL);
+	  buf = NULL;
+	  len_avail = 0;
+	  return 0;
+	}
+
+      if (len > len_avail - offset)
+	len = len_avail - offset;
+      memcpy (readbuf, buf + offset, len);
+
+      return len;
+    }
+
   if (strcmp (annex, "processes") != 0)
     return 0;
 

@@ -1,5 +1,8 @@
 2010-06-18  Stan Shebs  <stan@codesourcery.com>
 
+	* gdb.texinfo (Operating System Auxiliary Information): Describe
+	"info os" when no arguments given.
+
 	* gdb.texinfo (Debugging Programs with Multiple Threads): Describe
 	$_thread.
 

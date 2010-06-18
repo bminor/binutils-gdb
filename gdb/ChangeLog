@@ -1,5 +1,12 @@
 2010-06-18  Stan Shebs  <stan@codesourcery.com>
 
+	* osdata.c (get_osdata): Warn separately if target does not report
+	type list.
+	(info_osdata_command): Allow empty type, report error if target
+	does not return available types of OS data.
+	* linux-nat.c (linux_nat_xfer_osdata): Report list of OS data
+	types if no annex supplied.
+
 	* thread.c (thread_id_make_value): Make a value representing the
 	current thread.
 	(_initialize_thread): Create $_thread.
