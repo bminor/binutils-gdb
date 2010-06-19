@@ -1,3 +1,8 @@
+2010-06-19  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.arch/spu-ls.exp: New file.
+	* gdb.arch/spu-ls.c: Likewise.
+
 2010-06-18  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.threads/thread-specific.exp: Add tests of $_thread.

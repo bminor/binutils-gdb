@@ -259,14 +259,35 @@ spu_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       int fd = SPUADDR_SPU (offset);
       CORE_ADDR addr = SPUADDR_ADDR (offset);
-      char mem_annex[32];
+      char mem_annex[32], lslr_annex[32];
+      gdb_byte buf[32];
+      ULONGEST lslr;
+      LONGEST ret;
 
-      if (fd >= 0 && addr < SPU_LS_SIZE)
+      if (fd >= 0)
 	{
 	  xsnprintf (mem_annex, sizeof mem_annex, "%d/mem", fd);
+	  ret = ops_beneath->to_xfer_partial (ops_beneath, TARGET_OBJECT_SPU,
+					      mem_annex, readbuf, writebuf,
+					      addr, len);
+	  if (ret > 0)
+	    return ret;
+
+	  /* SPU local store access wraps the address around at the
+	     local store limit.  We emulate this here.  To avoid needing
+	     an extra access to retrieve the LSLR, we only do that after
+	     trying the original address first, and getting end-of-file.  */
+	  xsnprintf (lslr_annex, sizeof lslr_annex, "%d/lslr", fd);
+	  memset (buf, 0, sizeof buf);
+	  if (ops_beneath->to_xfer_partial (ops_beneath, TARGET_OBJECT_SPU,
+					    lslr_annex, buf, NULL,
+					    0, sizeof buf) <= 0)
+	    return ret;
+
+	  lslr = strtoulst (buf, NULL, 16);
 	  return ops_beneath->to_xfer_partial (ops_beneath, TARGET_OBJECT_SPU,
 					       mem_annex, readbuf, writebuf,
-					       addr, len);
+					       addr & lslr, len);
 	}
     }
 

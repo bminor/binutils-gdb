@@ -1,3 +1,16 @@
+2010-06-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-multiarch.c (spu_xfer_partial): Wrap around local store
+	limit on local store memory accesses.
+	* spu-linux-nat.c (spu_xfer_partial): Likewise.
+	* spu-tdep.c (spu_lslr): Remove.
+	(spu_pointer_to_address): Do not truncate addresses.
+	(spu_integer_to_address): Likewise.
+	(spu_overlay_new_objfile): Use SPU_OVERLAY_LMA.
+	* spu-tdep.h: Add comments.
+	(SPUADDR_SPU): Respect SPU_OVERLAY_LMA bit.
+	(SPU_OVERLAY_LMA): Define.
+
 2010-06-18  Stan Shebs  <stan@codesourcery.com>
 
 	* osdata.c (get_osdata): Warn separately if target does not report

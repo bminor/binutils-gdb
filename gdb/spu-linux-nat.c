@@ -562,7 +562,10 @@ spu_xfer_partial (struct target_ops *ops,
     {
       int fd;
       ULONGEST addr;
-      char mem_annex[32];
+      char mem_annex[32], lslr_annex[32];
+      gdb_byte buf[32];
+      ULONGEST lslr;
+      LONGEST ret;
 
       /* We must be stopped on a spu_run system call.  */
       if (!parse_spufs_run (&fd, &addr))
@@ -570,7 +573,22 @@ spu_xfer_partial (struct target_ops *ops,
 
       /* Use the "mem" spufs file to access SPU local store.  */
       xsnprintf (mem_annex, sizeof mem_annex, "%d/mem", fd);
-      return spu_proc_xfer_spu (mem_annex, readbuf, writebuf, offset, len);
+      ret = spu_proc_xfer_spu (mem_annex, readbuf, writebuf, offset, len);
+      if (ret > 0)
+	return ret;
+
+      /* SPU local store access wraps the address around at the
+	 local store limit.  We emulate this here.  To avoid needing
+	 an extra access to retrieve the LSLR, we only do that after
+	 trying the original address first, and getting end-of-file.  */
+      xsnprintf (lslr_annex, sizeof lslr_annex, "%d/lslr", fd);
+      memset (buf, 0, sizeof buf);
+      if (spu_proc_xfer_spu (lslr_annex, buf, NULL, 0, sizeof buf) <= 0)
+	return ret;
+
+      lslr = strtoulst (buf, NULL, 16);
+      return spu_proc_xfer_spu (mem_annex, readbuf, writebuf,
+				offset & lslr, len);
     }
 
   return -1;

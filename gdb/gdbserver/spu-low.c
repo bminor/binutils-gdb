@@ -561,7 +561,8 @@ spu_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int fd, ret;
   CORE_ADDR addr;
-  char annex[32];
+  char annex[32], lslr_annex[32], buf[32];
+  CORE_ADDR lslr;
 
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))
@@ -570,6 +571,22 @@ spu_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   /* Use the "mem" spufs file to access SPU local store.  */
   sprintf (annex, "%d/mem", fd);
   ret = spu_proc_xfer_spu (annex, myaddr, NULL, memaddr, len);
+  if (ret > 0)
+    return ret == len ? 0 : EIO;
+
+  /* SPU local store access wraps the address around at the
+     local store limit.  We emulate this here.  To avoid needing
+     an extra access to retrieve the LSLR, we only do that after
+     trying the original address first, and getting end-of-file.  */
+  sprintf (lslr_annex, "%d/lslr", fd);
+  memset (buf, 0, sizeof buf);
+  if (spu_proc_xfer_spu (lslr_annex, (unsigned char *)buf, NULL,
+			 0, sizeof buf) <= 0)
+    return ret;
+
+  lslr = strtoul (buf, NULL, 16);
+  ret = spu_proc_xfer_spu (annex, myaddr, NULL, memaddr & lslr, len);
+
   return ret == len ? 0 : EIO;
 }
 
@@ -582,7 +599,8 @@ spu_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 {
   int fd, ret;
   CORE_ADDR addr;
-  char annex[32];
+  char annex[32], lslr_annex[32], buf[32];
+  CORE_ADDR lslr;
 
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))
@@ -591,6 +609,22 @@ spu_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   /* Use the "mem" spufs file to access SPU local store.  */
   sprintf (annex, "%d/mem", fd);
   ret = spu_proc_xfer_spu (annex, NULL, myaddr, memaddr, len);
+  if (ret > 0)
+    return ret == len ? 0 : EIO;
+
+  /* SPU local store access wraps the address around at the
+     local store limit.  We emulate this here.  To avoid needing
+     an extra access to retrieve the LSLR, we only do that after
+     trying the original address first, and getting end-of-file.  */
+  sprintf (lslr_annex, "%d/lslr", fd);
+  memset (buf, 0, sizeof buf);
+  if (spu_proc_xfer_spu (lslr_annex, (unsigned char *)buf, NULL,
+			 0, sizeof buf) <= 0)
+    return ret;
+
+  lslr = strtoul (buf, NULL, 16);
+  ret = spu_proc_xfer_spu (annex, NULL, myaddr, memaddr & lslr, len);
+
   return ret == len ? 0 : EIO;
 }
 

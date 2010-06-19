@@ -50,14 +50,71 @@ enum spu_regnum
 /* Local store.  */
 #define SPU_LS_SIZE          0x40000
 
-/* Address conversions.  */
+/* Address conversions.
+
+   In a combined PPU/SPU debugging session, we have to consider multiple
+   address spaces: the PPU 32- or 64-bit address space, and the 32-bit
+   local store address space for each SPU context.  As it is currently
+   not yet possible to use the program_space / address_space mechanism
+   to represent this, we encode all those addresses into one single
+   64-bit address for the whole process.  For SPU programs using overlays,
+   this address space must also include separate ranges reserved for the
+   LMA of overlay sections.
+
+
+   The following combinations are supported for combined debugging:
+
+   PPU address (this relies on the fact that PPC 64-bit user space
+   addresses can never have the highest-most bit set):
+
+      +-+---------------------------------+
+      |0|              ADDR [63]          |
+      +-+---------------------------------+
+
+   SPU address for SPU context with id SPU (this assumes that SPU
+   IDs, which are file descriptors, are never larger than 2^30):
+
+      +-+-+--------------+----------------+
+      |1|0|    SPU [30]  |    ADDR [32]   |
+      +-+-+--------------+----------------+
+
+   SPU overlay section LMA for SPU context with id SPU:
+
+      +-+-+--------------+----------------+
+      |1|1|    SPU [30]  |    ADDR [32]   |
+      +-+-+--------------+----------------+
+
+
+   In SPU stand-alone debugging mode (using spu-linux-nat.c),
+   the following combinations are supported:
+
+   SPU address:
+
+      +-+-+--------------+----------------+
+      |0|0|     0        |    ADDR [32]   |
+      +-+-+--------------+----------------+
+
+   SPU overlay section LMA:
+
+      +-+-+--------------+----------------+
+      |0|1|     0        |    ADDR [32]   |
+      +-+-+--------------+----------------+
+
+
+   The following macros allow manipulation of addresses in the
+   above formats.  */
+
 #define SPUADDR(spu, addr) \
   ((spu) != -1? (ULONGEST)1 << 63 | (ULONGEST)(spu) << 32 | (addr) : (addr))
+
 #define SPUADDR_SPU(addr) \
   (((addr) & (ULONGEST)1 << 63) \
-   ? (int) ((ULONGEST)(addr) >> 32 & 0x7fffffff) \
+   ? (int) ((ULONGEST)(addr) >> 32 & 0x3fffffff) \
    : -1)
+
 #define SPUADDR_ADDR(addr) \
   (((addr) & (ULONGEST)1 << 63)? (ULONGEST)(addr) & 0xffffffff : (addr))
+
+#define SPU_OVERLAY_LMA ((ULONGEST)1 << 62)
 
 #endif
