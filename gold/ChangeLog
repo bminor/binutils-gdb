@@ -1,3 +1,8 @@
+2010-06-19  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (gdb_sections): Add .debug_types.
+	(lines_only_debug_sections): Likewise.
+
 2010-06-18  Rafael Espindola  <espindola@google.com>
 
 	* plugin.cc (add_input_file,add_input_library)

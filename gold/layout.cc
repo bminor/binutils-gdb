@@ -243,6 +243,7 @@ static const char* gdb_sections[] =
   // ".debug_aranges",   // not used by gdb as of 6.7.1
   ".debug_frame",
   ".debug_info",
+  ".debug_types",
   ".debug_line",
   ".debug_loc",
   ".debug_macinfo",
@@ -256,6 +257,7 @@ static const char* lines_only_debug_sections[] =
   // ".debug_aranges",   // not used by gdb as of 6.7.1
   // ".debug_frame",
   ".debug_info",
+  // ".debug_types",
   ".debug_line",
   // ".debug_loc",
   // ".debug_macinfo",
