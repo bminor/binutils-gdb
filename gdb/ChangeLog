@@ -1,5 +1,12 @@
 2010-06-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_frame_unwind_cache): Use LSLR register
+	value instead of hard-coded SPU_LS_SIZE.
+	(spu_software_single_step): Likewise.
+	* spu-tdep.h (SPU_LS_SIZE): Remove.
+
+2010-06-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-multiarch.c (spu_xfer_partial): Wrap around local store
 	limit on local store memory accesses.
 	* spu-linux-nat.c (spu_xfer_partial): Likewise.

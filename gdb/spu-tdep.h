@@ -47,9 +47,6 @@ enum spu_regnum
   SPU_DECR_STATUS_REGNUM = 135	/* Decrementer status.  */
 };
 
-/* Local store.  */
-#define SPU_LS_SIZE          0x40000
-
 /* Address conversions.
 
    In a combined PPU/SPU debugging session, we have to consider multiple

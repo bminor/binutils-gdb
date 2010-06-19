@@ -987,7 +987,13 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
     {
       CORE_ADDR reg;
       LONGEST backchain;
+      ULONGEST lslr;
       int status;
+
+      /* Get local store limit.  */
+      lslr = get_frame_register_unsigned (this_frame, SPU_LSLR_REGNUM);
+      if (!lslr)
+	lslr = (ULONGEST) -1;
 
       /* Get the backchain.  */
       reg = get_frame_register_unsigned (this_frame, SPU_SP_REGNUM);
@@ -996,10 +1002,10 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
 
       /* A zero backchain terminates the frame chain.  Also, sanity
          check against the local store size limit.  */
-      if (status && backchain > 0 && backchain < SPU_LS_SIZE)
+      if (status && backchain > 0 && backchain <= lslr)
 	{
 	  /* Assume the link register is saved into its slot.  */
-	  if (backchain + 16 < SPU_LS_SIZE)
+	  if (backchain + 16 <= lslr)
 	    info->saved_regs[SPU_LR_REGNUM].addr = SPUADDR (id, backchain + 16);
 
           /* Frame bases.  */
@@ -1501,6 +1507,7 @@ spu_software_single_step (struct frame_info *frame)
   unsigned int insn;
   int offset, reg;
   gdb_byte buf[4];
+  ULONGEST lslr;
 
   pc = get_frame_pc (frame);
 
@@ -1508,13 +1515,18 @@ spu_software_single_step (struct frame_info *frame)
     return 1;
   insn = extract_unsigned_integer (buf, 4, byte_order);
 
+  /* Get local store limit.  */
+  lslr = get_frame_register_unsigned (frame, SPU_LSLR_REGNUM);
+  if (!lslr)
+    lslr = (ULONGEST) -1;
+
   /* Next sequential instruction is at PC + 4, except if the current
      instruction is a PPE-assisted call, in which case it is at PC + 8.
      Wrap around LS limit to be on the safe side.  */
   if ((insn & 0xffffff00) == 0x00002100)
-    next_pc = (SPUADDR_ADDR (pc) + 8) & (SPU_LS_SIZE - 1);
+    next_pc = (SPUADDR_ADDR (pc) + 8) & lslr;
   else
-    next_pc = (SPUADDR_ADDR (pc) + 4) & (SPU_LS_SIZE - 1);
+    next_pc = (SPUADDR_ADDR (pc) + 4) & lslr;
 
   insert_single_step_breakpoint (gdbarch,
 				 aspace, SPUADDR (SPUADDR_SPU (pc), next_pc));
@@ -1531,7 +1543,7 @@ spu_software_single_step (struct frame_info *frame)
 	  target += extract_unsigned_integer (buf, 4, byte_order) & -4;
 	}
 
-      target = target & (SPU_LS_SIZE - 1);
+      target = target & lslr;
       if (target != next_pc)
 	insert_single_step_breakpoint (gdbarch, aspace,
 				       SPUADDR (SPUADDR_SPU (pc), target));
