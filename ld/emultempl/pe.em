@@ -174,7 +174,7 @@ case ${target} in
     default_auto_import=1
     default_merge_rdata=1
     ;;
-  *-w64-mingw*)
+  i[3-7]86-*-mingw* | x86_64-*-mingw*)
     default_auto_import=1
     default_merge_rdata=0
     ;;
