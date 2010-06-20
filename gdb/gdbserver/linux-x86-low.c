@@ -1484,41 +1484,37 @@ add_insns (unsigned char *start, int len)
   current_insn_ptr = buildaddr;
 }
 
-/* A function used to trick optimizers.  */
-
-int
-always_true (void)
-{
-  return 1;
-}
-
 /* Our general strategy for emitting code is to avoid specifying raw
    bytes whenever possible, and instead copy a block of inline asm
    that is embedded in the function.  This is a little messy, because
    we need to keep the compiler from discarding what looks like dead
    code, plus suppress various warnings.  */
 
-#define EMIT_ASM(NAME,INSNS)						\
-  { extern unsigned char start_ ## NAME, end_ ## NAME;			\
-    add_insns (&start_ ## NAME, &end_ ## NAME - &start_ ## NAME);	\
-    if (always_true ())						\
-      goto skipover ## NAME;						\
-    __asm__ ("start_" #NAME ":\n\t" INSNS "\n\tend_" #NAME ":\n\t");	\
-    skipover ## NAME:							\
-    ; }
-
+#define EMIT_ASM(NAME, INSNS)						\
+  do									\
+    {									\
+      extern unsigned char start_ ## NAME, end_ ## NAME;		\
+      add_insns (&start_ ## NAME, &end_ ## NAME - &start_ ## NAME);	\
+      __asm__ ("jmp end_" #NAME "\n"				\
+	       "\t" "start_" #NAME ":"					\
+	       "\t" INSNS "\n"						\
+	       "\t" "end_" #NAME ":");					\
+    } while (0)
 
 #ifdef __x86_64__
 
 #define EMIT_ASM32(NAME,INSNS)						\
-  { extern unsigned char start_ ## NAME, end_ ## NAME;			\
-    add_insns (&start_ ## NAME, &end_ ## NAME - &start_ ## NAME);	\
-    if (always_true ())						\
-      goto skipover ## NAME;						\
-    __asm__ (".code32\n\tstart_" #NAME ":\n\t" INSNS "\n\tend_" #NAME ":\n" \
-	     "\t.code64\n\t");						\
-    skipover ## NAME:							\
-    ; }
+  do									\
+    {									\
+      extern unsigned char start_ ## NAME, end_ ## NAME;		\
+      add_insns (&start_ ## NAME, &end_ ## NAME - &start_ ## NAME);	\
+      __asm__ (".code32\n"						\
+	       "\t" "jmp end_" #NAME "\n"				\
+	       "\t" "start_" #NAME ":\n"				\
+	       "\t" INSNS "\n"						\
+	       "\t" "end_" #NAME ":\n"					\
+	       ".code64\n");						\
+    } while (0)
 
 #else
 

@@ -1,3 +1,10 @@
+2010-06-20  Ian Lance Taylor  <iant@google.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-x86-low.c (always_true): Delete.
+	(EMIT_ASM, EMIT_ASM32): Use an uncondition asm jmp instead of
+	trying to fool the compiler with always_true.
+
 2010-06-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* tracepoint.c (condition_true_at_tracepoint): Don't run compiled
