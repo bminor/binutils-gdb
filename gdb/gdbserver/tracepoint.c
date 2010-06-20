@@ -3923,9 +3923,25 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   ULONGEST value = 0;
   enum eval_result_type err;
 
+  /* Presently, gdbserver doesn't run compiled conditions, only the
+     IPA does.  If the program stops at a fast tracepoint's address
+     (e.g., due to a breakpoint, trap tracepoint, or stepping),
+     gdbserver preemptively collect the fast tracepoint.  Later, on
+     resume, gdbserver steps over the fast tracepoint like it steps
+     over breakpoints, so that the IPA doesn't see that fast
+     tracepoint.  This avoids double collects of fast tracepoints in
+     that stopping scenario.  Having gdbserver itself handle the fast
+     tracepoint gives the user a consistent view of when fast or trap
+     tracepoints are collected, compared to an alternative where only
+     trap tracepoints are collected on stop, and fast tracepoints on
+     resume.  When a fast tracepoint is being processed by gdbserver,
+     it is always the non-compiled condition expression that is
+     used.  */
+#ifdef IN_PROCESS_AGENT
   if (tpoint->compiled_cond)
     err = ((condfn) (uintptr_t) (tpoint->compiled_cond)) (ctx, &value);
   else
+#endif
     err = eval_agent_expr (ctx, NULL, tpoint->cond, &value);
 
   if (err != expr_eval_no_error)
