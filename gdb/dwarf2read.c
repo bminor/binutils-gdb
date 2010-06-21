@@ -6212,6 +6212,11 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	  code = TYPE_CODE_CHAR;
 	type_flags |= TYPE_FLAG_UNSIGNED;
 	break;
+      case DW_ATE_UTF:
+	/* We just treat this as an integer and then recognize the
+	   type by name elsewhere.  */
+	break;
+
       default:
 	complaint (&symfile_complaints, _("unsupported DW_AT_encoding: '%s'"),
 		   dwarf_type_encoding_name (encoding));
@@ -10402,6 +10407,9 @@ dwarf_type_encoding_name (unsigned enc)
       return "DW_ATE_unsigned_fixed";
     case DW_ATE_decimal_float:
       return "DW_ATE_decimal_float";
+    /* DWARF 4.  */
+    case DW_ATE_UTF:
+      return "DW_ATE_UTF";
     /* HP extensions.  */
     case DW_ATE_HP_float80:
       return "DW_ATE_HP_float80";

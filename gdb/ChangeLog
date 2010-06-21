@@ -1,5 +1,10 @@
 2010-06-21  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (read_base_type): Handle DW_ATE_UTF.
+	(dwarf_type_encoding_name): Likewise.
+
+2010-06-21  Tom Tromey  <tromey@redhat.com>
+
 	* p-valprint.c (pascal_val_print): Use TYPE_ERROR_NAME.
 	* p-typeprint.c (pascal_type_print_base): Use TYPE_ERROR_NAME.
 	* m2-valprint.c (m2_val_print): Use TYPE_ERROR_NAME.
