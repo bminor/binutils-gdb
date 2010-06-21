@@ -98,6 +98,9 @@ int debug_memory = 0;
 /* Enable verbose mode.  */
 int verbose = 0;
 
+/* Keep the output file.  */
+int keep_it = 0;
+
 segT reg_section;
 segT expr_section;
 segT text_section;
@@ -953,6 +956,8 @@ static void
 close_output_file (void)
 {
   output_file_close (out_file_name);
+  if (!keep_it)
+    unlink_if_ordinary (out_file_name);
 }
 
 /* The interface between the macro code and gas expression handling.  */
@@ -1082,7 +1087,6 @@ main (int argc, char ** argv)
   char ** argv_orig = argv;
 
   int macro_strip_at;
-  int keep_it;
 
   start_time = get_run_time ();
 
@@ -1244,9 +1248,6 @@ main (int argc, char ** argv)
 
   if (had_errors () > 0 && ! flag_always_generate_output)
     keep_it = 0;
-
-  if (!keep_it)
-    unlink_if_ordinary (out_file_name);
 
   input_scrub_end ();
 

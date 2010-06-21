@@ -1,3 +1,10 @@
+2010-06-21  Sterling Augustine  <sterling@tensilica.com>
+
+	PR gas/11728
+	* as.c: Globalize keep_it.
+	(main): Remove keep_it. Move conditional from here...
+	(close_output_file): ...to here.
+
 2010-06-21  Andreas Schwab  <schwab@redhat.com>
 
 	* doc/as.texinfo (Overview): Use @itemx for grouped @table
