@@ -758,7 +758,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_ERROR:
-      fprintf_filtered (stream, "<unknown type>");
+      fprintf_filtered (stream, "%s", TYPE_ERROR_NAME (type));
       break;
 
       /* this probably does not work for enums */

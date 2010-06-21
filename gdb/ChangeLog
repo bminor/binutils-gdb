@@ -1,3 +1,16 @@
+2010-06-21  Tom Tromey  <tromey@redhat.com>
+
+	* p-valprint.c (pascal_val_print): Use TYPE_ERROR_NAME.
+	* p-typeprint.c (pascal_type_print_base): Use TYPE_ERROR_NAME.
+	* m2-valprint.c (m2_val_print): Use TYPE_ERROR_NAME.
+	* gdbtypes.h (TYPE_ERROR_NAME): New macro.
+	* f-valprint.c (f_val_print): Use TYPE_ERROR_NAME.
+	* f-typeprint.c (f_type_print_base): Use TYPE_ERROR_NAME.
+	* dwarf2read.c (tag_type_to_type): Create a new error type on
+	failure.
+	* c-valprint.c (c_val_print): Use TYPE_ERROR_NAME.
+	* c-typeprint.c (c_type_print_base): Use TYPE_ERROR_NAME.
+
 2010-06-21  Michael Snyder  <msnyder@vmware.com>
 
 	* breakpoint.c (_initialize_breakpoint): Use add_prefix_cmd, 

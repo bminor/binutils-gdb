@@ -652,7 +652,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_ERROR:
-      fprintf_filtered (stream, _("<error type>"));
+      fprintf_filtered (stream, "%s", TYPE_ERROR_NAME (type));
       break;
 
     case TYPE_CODE_UNDEF:

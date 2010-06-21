@@ -9173,9 +9173,18 @@ tag_type_to_type (struct die_info *die, struct dwarf2_cu *cu)
   this_type = read_type_die (die, cu);
   if (!this_type)
     {
-      dump_die_for_error (die);
-      error (_("Dwarf Error: Cannot find type of die [in module %s]"), 
-	     cu->objfile->name);
+      char *message, *saved;
+
+      /* read_type_die already issued a complaint.  */
+      message = xstrprintf (_("<unknown type in %s, CU 0x%x, DIE 0x%x>"),
+			    cu->objfile->name,
+			    cu->header.offset,
+			    die->offset);
+      saved = obstack_copy0 (&cu->objfile->objfile_obstack,
+			     message, strlen (message));
+      xfree (message);
+
+      this_type = init_type (TYPE_CODE_ERROR, 0, 0, saved, cu->objfile);
     }
   return this_type;
 }

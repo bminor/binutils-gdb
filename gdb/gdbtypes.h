@@ -1054,6 +1054,11 @@ extern void allocate_gnat_aux_type (struct type *);
 				   || TYPE_NFN_FIELDS (thistype) == 0) &&		\
                                   (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
 
+/* A helper macro that returns the name of an error type.  If the type
+   has a name, it is used; otherwise, a default is used.  */
+#define TYPE_ERROR_NAME(type) \
+  (TYPE_NAME (type) ? TYPE_NAME (type) : _("<error type>"))
+
 struct builtin_type
 {
   /* Integral types.  */
