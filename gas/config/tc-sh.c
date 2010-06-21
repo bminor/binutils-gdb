@@ -2545,7 +2545,7 @@ find_cooked_opcode (char **str_p)
   unsigned char *op_start;
   unsigned char *op_end;
   char name[20];
-  int nlen = 0;
+  unsigned int nlen = 0;
 
   /* Drop leading whitespace.  */
   while (*str == ' ')
@@ -2557,7 +2557,7 @@ find_cooked_opcode (char **str_p)
      assemble_ppi, so the opcode might be terminated by an '@'.  */
   for (op_start = op_end = (unsigned char *) str;
        *op_end
-       && nlen < 20
+       && nlen < sizeof (name) - 1
        && !is_end_of_line[*op_end] && *op_end != ' ' && *op_end != '@';
        op_end++)
     {

@@ -1,3 +1,8 @@
+2010-06-21  Alan Modra  <amodra@gmail.com>
+
+	PR gas/11733
+	* config/tc-sh.c (find_cooked_opcode): Correct array bounds check.
+
 2010-06-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-tic6x.h (tic6x_segment_info_type): Add field
