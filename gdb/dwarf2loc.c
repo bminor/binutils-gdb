@@ -67,6 +67,7 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dwarf2_per_cu_addr_size (baton->per_cu);
+  int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
   CORE_ADDR base_offset = ANOFFSET (objfile->section_offsets,
@@ -81,20 +82,24 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
       if (buf_end - loc_ptr < 2 * addr_size)
 	error (_("find_location_expression: Corrupted DWARF expression."));
 
-      low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      if (signed_addr_p)
+	low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      loc_ptr += addr_size;
+
+      if (signed_addr_p)
+	high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
       loc_ptr += addr_size;
 
       /* A base-address-selection entry.  */
-      if (low == base_mask)
+      if ((low & base_mask) == base_mask)
 	{
-	  base_address = dwarf2_read_address (gdbarch,
-					      loc_ptr, buf_end, addr_size);
-	  loc_ptr += addr_size;
+	  base_address = high + base_offset;
 	  continue;
 	}
-
-      high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
-      loc_ptr += addr_size;
 
       /* An end-of-list entry.  */
       if (low == 0 && high == 0)
@@ -2016,15 +2021,14 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	   && data[1 + addr_size] == DW_OP_GNU_push_tls_address
 	   && piece_end_p (data + 2 + addr_size, end))
     {
-      CORE_ADDR offset = dwarf2_read_address (gdbarch,
-					      data + 1,
-					      end,
-					      addr_size);
+      ULONGEST offset;
+      offset = extract_unsigned_integer (data + 1, addr_size,
+					 gdbarch_byte_order (gdbarch));
 
       fprintf_filtered (stream, 
-			_("a thread-local variable at offset %s "
+			_("a thread-local variable at offset 0x%s "
 			  "in the thread-local storage for `%s'"),
-			paddress (gdbarch, offset), objfile->name);
+			phex_nz (offset, addr_size), objfile->name);
 
       data += 1 + addr_size + 1;
     }
@@ -2061,7 +2065,6 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	     || (data[0] != DW_OP_piece && data[0] != DW_OP_bit_piece)))
     {
       enum dwarf_location_atom op = *data++;
-      CORE_ADDR addr;
       ULONGEST ul;
       LONGEST l;
       const char *name;
@@ -2076,9 +2079,10 @@ disassemble_dwarf_expression (struct ui_file *stream,
       switch (op)
 	{
 	case DW_OP_addr:
-	  addr = dwarf2_read_address (arch, data, end, addr_size);
+	  ul = extract_unsigned_integer (data, addr_size,
+					 gdbarch_byte_order (arch));
 	  data += addr_size;
-	  fprintf_filtered (stream, " %s", paddress (arch, addr));
+	  fprintf_filtered (stream, " 0x%s", phex_nz (ul, addr_size));
 	  break;
 
 	case DW_OP_const1u:
@@ -2488,6 +2492,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
   int offset_size = dwarf2_per_cu_offset_size (dlbaton->per_cu);
+  int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
   CORE_ADDR base_offset = ANOFFSET (objfile->section_offsets,
@@ -2506,22 +2511,26 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	error (_("Corrupted DWARF expression for symbol \"%s\"."),
 	       SYMBOL_PRINT_NAME (symbol));
 
-      low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      if (signed_addr_p)
+	low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+      loc_ptr += addr_size;
+
+      if (signed_addr_p)
+	high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
       loc_ptr += addr_size;
 
       /* A base-address-selection entry.  */
-      if (low == base_mask)
+      if ((low & base_mask) == base_mask)
 	{
-	  base_address = dwarf2_read_address (gdbarch,
-					      loc_ptr, buf_end, addr_size);
+	  base_address = high + base_offset;
 	  fprintf_filtered (stream, _("  Base address %s"),
 			    paddress (gdbarch, base_address));
-	  loc_ptr += addr_size;
 	  continue;
 	}
-
-      high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
-      loc_ptr += addr_size;
 
       /* An end-of-list entry.  */
       if (low == 0 && high == 0)

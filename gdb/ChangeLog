@@ -1,3 +1,14 @@
+2010-06-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2loc.c (find_location_expression): Add relocation offset
+	to base-address-selection entry base addresses.  Read addresses
+	(and offsets) as signed/unsigned integers, depending on the
+	BFD's sign_extend_vma flag.  Do not call dwarf2_read_address.
+	(loclist_describe_location): Likewise.
+	(disassemble_dwarf_expression): Read DW_OP_addr operand as
+	unsigned integer.  Do not call dwarf2_read_address.
+	(locexpr_describe_location): Likewise for DW_OP_GNU_push_tls_address.
+
 2010-06-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_frame_unwind_cache): Use LSLR register
