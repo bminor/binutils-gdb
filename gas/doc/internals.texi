@@ -252,8 +252,8 @@ Indicate that the symbol is a forward reference, that is its value must only
 be determined upon use.
 
 @item S_GET_TYPE
-@item S_GET_DESC
-@item S_GET_OTHER
+@itemx S_GET_DESC
+@itemx S_GET_OTHER
 @cindex S_GET_TYPE
 @cindex S_GET_DESC
 @cindex S_GET_OTHER
@@ -262,8 +262,8 @@ are only defined for object file formats for which they make sense (primarily
 a.out).
 
 @item S_SET_TYPE
-@item S_SET_DESC
-@item S_SET_OTHER
+@itemx S_SET_DESC
+@itemx S_SET_OTHER
 @cindex S_SET_TYPE
 @cindex S_SET_DESC
 @cindex S_SET_OTHER

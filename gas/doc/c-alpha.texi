@@ -93,7 +93,7 @@ can still be useful in specific applications.
 @cindex @code{-replace} command line option, Alpha
 @cindex @code{-noreplace} command line option, Alpha
 @item -replace
-@item -noreplace
+@itemx -noreplace
 Enables or disables the optimization of procedure calls, both at assemblage
 and at link time.  These options are only available for VMS targets and
 @code{-replace} is the default.  See section 1.4.1 of the OpenVMS Linker

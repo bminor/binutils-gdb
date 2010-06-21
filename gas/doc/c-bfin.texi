@@ -74,7 +74,8 @@ Assemble for the FDPIC ABI.
 
 @cindex @code{-mno-fdpic} command line option, Blackfin
 @cindex @code{-mnopic} command line option, Blackfin
-@item -mno-fdpic/-mnopic
+@item -mno-fdpic
+@itemx -mnopic
 Disable -mfdpic.
 @end table
 

@@ -1,3 +1,17 @@
+2010-06-21  Andreas Schwab  <schwab@redhat.com>
+
+	* doc/as.texinfo (Overview): Use @itemx for grouped @table
+	items.
+	* doc/c-alpha.texi (Alpha Options): Likewise.
+	* doc/c-arm.texi (ARM Directives): Likewise.
+	* doc/c-bfin.texi (Blackfin Options): Likewise.
+	* doc/c-d10v.texi (D10V-Opts): Likewise.
+	* doc/c-i386.texi (i386-Options): Likewise.
+	* doc/c-ia64.texi (IA-64 Options): Likewise.
+	* doc/c-m68k.texi (M68K-Opts): Likewise.
+	* doc/c-tic54x.texi (TIC54X-Directives): Likewise.
+	* doc/internals.texi (Symbols): Likewise.
+
 2010-06-21  Alan Modra  <amodra@gmail.com>
 
 	PR gas/11733

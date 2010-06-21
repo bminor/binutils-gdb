@@ -538,7 +538,7 @@ for the @option{-mcpu} commandline option.
 
 @cindex @code{.dn} and @code{.qn} directives, ARM
 @item @var{name} .dn @var{register name} [@var{.type}] [[@var{index}]]
-@item @var{name} .qn @var{register name} [@var{.type}] [[@var{index}]]
+@itemx @var{name} .qn @var{register name} [@var{.type}] [[@var{index}]]
 
 The @code{dn} and @code{qn} directives are used to create typed
 and/or indexed register aliases for use in Advanced SIMD Extension
@@ -655,8 +655,8 @@ directive.
 
 @cindex @code{.inst} directive, ARM
 @item .inst @var{opcode} [ , @dots{} ]
-@item .inst.n @var{opcode} [ , @dots{} ]
-@item .inst.w @var{opcode} [ , @dots{} ]
+@itemx .inst.n @var{opcode} [ , @dots{} ]
+@itemx .inst.w @var{opcode} [ , @dots{} ]
 Generates the instruction corresponding to the numerical value @var{opcode}.
 @code{.inst.n} and @code{.inst.w} allow the Thumb instruction size to be
 specified explicitly, overriding the normal encoding rules.

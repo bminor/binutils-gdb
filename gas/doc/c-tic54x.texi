@@ -531,7 +531,7 @@ only macro definitions.   The standard include search path is used.
 @cindex @code{mlist} directive, TIC54X
 @cindex @code{mnolist} directive, TIC54X
 @item .mlist
-@item .mnolist
+@itemx .mnolist
 Control whether to include macro and loop block expansions in the
 listing output.  Ignored.
 

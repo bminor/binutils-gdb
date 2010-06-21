@@ -53,25 +53,25 @@ affect the machine code emitted by the assembler.  All it does is
 turn on the EF_IA_64_NOFUNCDESC_CONS_GP flag in the ELF file header.
 
 @item -milp32
-@item -milp64
-@item -mlp64
-@item -mp64
+@itemx -milp64
+@itemx -mlp64
+@itemx -mp64
 These options select the data model.  The assembler defaults to @code{-mlp64}
 (LP64 data model).
 
 @item -mle
-@item -mbe
+@itemx -mbe
 These options select the byte order.  The @code{-mle} option selects little-endian
 byte order (default) and @code{-mbe} selects big-endian byte order.  Note that
 IA-64 machine code always uses little-endian byte order.
 
 @item -mtune=itanium1
-@item -mtune=itanium2
+@itemx -mtune=itanium2
 Tune for a particular IA-64 CPU, @var{itanium1} or @var{itanium2}. The
 default is @var{itanium2}.
 
 @item -munwind-check=warning
-@item -munwind-check=error
+@itemx -munwind-check=error
 These options control what the assembler will do when performing
 consistency checks on unwind directives.  @code{-munwind-check=warning}
 will make the assembler issue a warning when an unwind directive check
@@ -79,8 +79,8 @@ fails.  This is the default.  @code{-munwind-check=error} will make the
 assembler issue an error when an unwind directive check fails.
 
 @item -mhint.b=ok
-@item -mhint.b=warning
-@item -mhint.b=error
+@itemx -mhint.b=warning
+@itemx -mhint.b=error
 These options control what the assembler will do when the @samp{hint.b}
 instruction is used.  @code{-mhint.b=ok} will make the assembler accept
 @samp{hint.b}.  @code{-mint.b=warning} will make the assembler issue a
@@ -88,7 +88,7 @@ warning when @samp{hint.b} is used.  @code{-mhint.b=error} will make
 the assembler treat @samp{hint.b} as an error, which is the default.
 
 @item -x
-@item -xexplicit
+@itemx -xexplicit
 These options turn on dependency violation checking.
 
 @item -xauto

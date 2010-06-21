@@ -743,7 +743,8 @@ This option specifies the target processor.  The optional @var{sirevision}
 is not used in assembler.
 @item -mfdpic
 Assemble for the FDPIC ABI.
-@item -mno-fdpic/-mnopic
+@item -mno-fdpic
+@itemx -mnopic
 Disable -mfdpic.
 @end table
 @end ifset
