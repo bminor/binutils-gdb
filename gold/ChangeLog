@@ -1,3 +1,16 @@
+2010-06-21  Rafael Espindola  <espindola@google.com>
+
+	* fileread.cc (Input_file::find_fie): New
+	(Input_file::open): Use Input_file::find_fie.
+	* fileread.h (Input_file::find_fie): New
+	* plugin.cc (set_extra_library_path): New.
+	(Plugin::load): Add set_extra_library_path to the transfer vector.
+	(Plugin_manager::set_extra_library_path): New.
+	(Plugin_manager::add_input_file): Use the extra search path if set.
+	(set_extra_library_path(): New.
+	* plugin.h (Plugin_manager): Add set_extra_library_path and
+	extra_search_path_.
+
 2010-06-19  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (gdb_sections): Add .debug_types.

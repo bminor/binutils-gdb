@@ -127,7 +127,7 @@ class Plugin_manager
       plugin_input_file_(), in_replacement_phase_(false),
       options_(options), workqueue_(NULL), task_(NULL), input_objects_(NULL),
       symtab_(NULL), layout_(NULL), dirpath_(NULL), mapfile_(NULL),
-      this_blocker_(NULL)
+      this_blocker_(NULL), extra_search_path_()
   { this->current_ = plugins_.end(); }
 
   ~Plugin_manager();
@@ -232,6 +232,10 @@ class Plugin_manager
   ld_plugin_status
   add_input_file(const char *pathname, bool is_lib);
 
+  // Set the extra library path.
+  ld_plugin_status
+  set_extra_library_path(const char *path);
+
   // Return TRUE if we are in the replacement phase.
   bool
   in_replacement_phase() const
@@ -275,6 +279,10 @@ class Plugin_manager
   Dirsearch* dirpath_;
   Mapfile* mapfile_;
   Task_token* this_blocker_;
+
+  // An extra directory to seach for the libraries passed by
+  // add_input_library.
+  std::string extra_search_path_;
 };
 
 

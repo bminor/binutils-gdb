@@ -81,6 +81,9 @@ static enum ld_plugin_status
 add_input_library(const char *pathname);
 
 static enum ld_plugin_status
+set_extra_library_path(const char *path);
+
+static enum ld_plugin_status
 message(int level, const char *format, ...);
 
 };
@@ -127,7 +130,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 15;
+  const int tv_fixed_size = 16;
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv *tv = new ld_plugin_tv[tv_size];
 
@@ -200,6 +203,10 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_ADD_INPUT_LIBRARY;
   tv[i].tv_u.tv_add_input_library = add_input_library;
+
+  ++i;
+  tv[i].tv_tag = LDPT_SET_EXTRA_LIBRARY_PATH;
+  tv[i].tv_u.tv_set_extra_library_path = set_extra_library_path;
 
   ++i;
   tv[i].tv_tag = LDPT_NULL;
@@ -418,6 +425,15 @@ Plugin_manager::release_input_file(unsigned int handle)
   return LDPS_OK;
 }
 
+// Add a new library path.
+
+ld_plugin_status
+Plugin_manager::set_extra_library_path(const char *path)
+{
+  this->extra_search_path_ = std::string(path);
+  return LDPS_OK;
+}
+
 // Add a new input file.
 
 ld_plugin_status
@@ -427,7 +443,11 @@ Plugin_manager::add_input_file(const char *pathname, bool is_lib)
                            (is_lib
                             ? Input_file_argument::INPUT_FILE_TYPE_LIBRARY
                             : Input_file_argument::INPUT_FILE_TYPE_FILE),
-                           "", false, this->options_);
+                           (is_lib
+                            ? this->extra_search_path_.c_str()
+                            : ""),
+                           false,
+                           this->options_);
   Input_argument* input_argument = new Input_argument(file);
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
@@ -1036,6 +1056,16 @@ add_input_library(const char *pathname)
 {
   gold_assert(parameters->options().has_plugins());
   return parameters->options().plugins()->add_input_file(pathname, true);
+}
+
+// Set the extra library path to be used by libraries added via
+// add_input_library
+
+static enum ld_plugin_status
+set_extra_library_path(const char *path)
+{
+  gold_assert(parameters->options().has_plugins());
+  return parameters->options().plugins()->set_extra_library_path(path);
 }
 
 // Issue a diagnostic message from a plugin.
