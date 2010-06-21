@@ -1,3 +1,8 @@
+2010-06-21  Michael Snyder  <msnyder@vmware.com>
+
+	* breakpoint.c (_initialize_breakpoint): Use add_prefix_cmd, 
+	not add_abbrev_prefix_cmd, for "enable breakpoints".
+
 2010-06-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2loc.c (find_location_expression): Add relocation offset
