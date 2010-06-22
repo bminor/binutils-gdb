@@ -23,6 +23,7 @@
 #define RECORD_IS_USED	(current_target.to_stratum == record_stratum)
 
 extern int record_debug;
+extern int record_memory_query;
 
 extern int record_arch_list_add_reg (struct regcache *regcache, int num);
 extern int record_arch_list_add_mem (CORE_ADDR addr, int len);

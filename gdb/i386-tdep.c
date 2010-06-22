@@ -3503,10 +3503,21 @@ i386_record_lea_modrm (struct i386_record_s *irp)
 
   if (irp->override >= 0)
     {
-      warning (_("Process record ignores the memory change "
-                 "of instruction at address %s because it "
-                 "can't get the value of the segment register."),
-               paddress (gdbarch, irp->orig_addr));
+      if (record_memory_query)
+        {
+	  int q;
+
+          target_terminal_ours ();
+          q = yquery (_("\
+Process record ignores the memory change of instruction at address %s\n\
+because it can't get the value of the segment register.\n\
+Do you want to stop the program?"),
+                      paddress (gdbarch, irp->orig_addr));
+            target_terminal_inferior ();
+            if (q)
+              return -1;
+        }
+
       return 0;
     }
 
@@ -4397,11 +4408,20 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0xa3:
       if (ir.override >= 0)
         {
-	  warning (_("Process record ignores the memory change "
-                     "of instruction at address %s because "
-                     "it can't get the value of the segment "
-                     "register."),
-                   paddress (gdbarch, ir.orig_addr));
+          if (record_memory_query)
+            {
+	      int q;
+
+              target_terminal_ours ();
+              q = yquery (_("\
+Process record ignores the memory change of instruction at address %s\n\
+because it can't get the value of the segment register.\n\
+Do you want to stop the program?"),
+                          paddress (gdbarch, ir.orig_addr));
+              target_terminal_inferior ();
+              if (q)
+                return -1;
+            }
 	}
       else
 	{
@@ -5078,11 +5098,20 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
           if (ir.aflag && (es != ds))
             {
               /* addr += ((uint32_t) read_register (I386_ES_REGNUM)) << 4; */
-              warning (_("Process record ignores the memory "
-                         "change of instruction at address %s "
-                         "because it can't get the value of the "
-                         "ES segment register."),
-                       paddress (gdbarch, ir.orig_addr));
+              if (record_memory_query)
+                {
+	          int q;
+
+                  target_terminal_ours ();
+                  q = yquery (_("\
+Process record ignores the memory change of instruction at address %s\n\
+because it can't get the value of the segment register.\n\
+Do you want to stop the program?"),
+                              paddress (gdbarch, ir.orig_addr));
+                  target_terminal_inferior ();
+                  if (q)
+                    return -1;
+                }
             }
           else
             {
@@ -5635,12 +5664,20 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	      }
 	    if (ir.override >= 0)
 	      {
-		warning (_("Process record ignores the memory "
-                           "change of instruction at "
-                           "address %s because it can't get "
-                           "the value of the segment "
-                           "register."),
-                         paddress (gdbarch, ir.orig_addr));
+                if (record_memory_query)
+                  {
+	            int q;
+
+                    target_terminal_ours ();
+                    q = yquery (_("\
+Process record ignores the memory change of instruction at address %s\n\
+because it can't get the value of the segment register.\n\
+Do you want to stop the program?"),
+                                paddress (gdbarch, ir.orig_addr));
+                    target_terminal_inferior ();
+                    if (q)
+                      return -1;
+                  }
 	      }
 	    else
 	      {
@@ -5684,12 +5721,20 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	      /* sidt */
 	      if (ir.override >= 0)
 		{
-		  warning (_("Process record ignores the memory "
-                             "change of instruction at "
-                             "address %s because it can't get "
-                             "the value of the segment "
-                             "register."),
-                           paddress (gdbarch, ir.orig_addr));
+                  if (record_memory_query)
+                    {
+	              int q;
+
+                      target_terminal_ours ();
+                      q = yquery (_("\
+Process record ignores the memory change of instruction at address %s\n\
+because it can't get the value of the segment register.\n\
+Do you want to stop the program?"),
+                                  paddress (gdbarch, ir.orig_addr));
+                      target_terminal_inferior ();
+                      if (q)
+                        return -1;
+                    }
 		}
 	      else
 		{

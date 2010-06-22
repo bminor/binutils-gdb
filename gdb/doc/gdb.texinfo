@@ -5694,6 +5694,22 @@ oldest record to make room for each new one, without asking.
 @item show record stop-at-limit
 Show the current setting of @code{stop-at-limit}.
 
+@kindex set record memory-query
+@item set record memory-query
+Control the behavior when @value{GDBN} is unable to record memory
+changes caused by an instruction.  If ON, @value{GDBN} will query
+whether to stop the inferior in that case.
+
+If this option is OFF (the default), @value{GDBN} will automatically
+ignore the effect of such instructions on memory.  Later, when
+@value{GDBN} replays this execution log, it will mark the log of this
+instruction as not accessible, and it will not affect the replay
+results.
+
+@kindex show record memory-query
+@item show record memory-query
+Show the current setting of @code{memory-query}.
+
 @kindex info record
 @item info record
 Show various statistics about the state of process record and its

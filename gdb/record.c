@@ -152,6 +152,10 @@ struct record_entry
 /* This is the debug switch for process record.  */
 int record_debug = 0;
 
+/* If true, query if PREC cannot record memory
+   change of next instruction.  */
+int record_memory_query = 0;
+
 struct record_core_buf_entry
 {
   struct record_core_buf_entry *prev;
@@ -2730,4 +2734,15 @@ record/replay buffer.  Zero means unlimited.  Default is 200000."),
 Restore the program to its state at instruction number N.\n\
 Argument is instruction number, as shown by 'info record'."),
 	   &record_cmdlist);
+
+  add_setshow_boolean_cmd ("memory-query", no_class,
+			   &record_memory_query, _("\
+Set whether query if PREC cannot record memory change of next instruction."),
+                           _("\
+Show whether query if PREC cannot record memory change of next instruction."),
+                           _("\
+Default is OFF.\n\
+When ON, query if PREC cannot record memory change of next instruction."),
+			   NULL, NULL,
+			   &set_record_cmdlist, &show_record_cmdlist);
 }

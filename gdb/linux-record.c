@@ -695,21 +695,26 @@ record_linux_system_call (enum gdb_syscall syscall,
 
     case gdb_sys_munmap:
       {
-        int q;
         ULONGEST len;
 
         regcache_raw_read_unsigned (regcache, tdep->arg1,
                                     &tmpulongest);
         regcache_raw_read_unsigned (regcache, tdep->arg2, &len);
-        target_terminal_ours ();
-        q = yquery (_("The next instruction is syscall munmap.  "
-                      "It will free the memory addr = 0x%s len = %u.  "
-                      "It will make record target get error.  "
-                      "Do you want to stop the program?"),
-                    OUTPUT_REG (tmpulongest, tdep->arg1), (int) len);
-        target_terminal_inferior ();
-        if (q)
-          return 1;
+        if (record_memory_query)
+          {
+	    int q;
+
+            target_terminal_ours ();
+            q = yquery (_("\
+The next instruction is syscall munmap.\n\
+It will free the memory addr = 0x%s len = %u.\n\
+It will make record target cannot record some memory change.\n\
+Do you want to stop the program?"),
+                        OUTPUT_REG (tmpulongest, tdep->arg1), (int) len);
+            target_terminal_inferior ();
+            if (q)
+              return 1;
+          }
       }
       break;
 
