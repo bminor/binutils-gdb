@@ -191,6 +191,12 @@ static int i386_intel_parse_name (const char *name, expressionS *e)
 {
   unsigned int j;
 
+  if (! strcmp (name, "$"))
+    {
+      current_location (e);
+      return 1;
+    }
+
   for (j = 0; i386_types[j].name; ++j)
     if (strcasecmp(i386_types[j].name, name) == 0)
       {
@@ -504,11 +510,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
   saved_input_line_pointer = input_line_pointer;
   input_line_pointer = buf = xstrdup (operand_string);
-
-  /* A '$' followed by an identifier char is an identifier.  Otherwise,
-     it's operator '.' followed by an expression.  */
-  if (*buf == '$' && !is_identifier_char (buf[1]))
-    *buf = '.';
 
   intel_syntax = -1;
   memset (&exp, 0, sizeof(exp));

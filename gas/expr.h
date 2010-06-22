@@ -174,6 +174,7 @@ extern segT expr (int, expressionS *, enum expr_mode);
 extern unsigned int get_single_number (void);
 extern symbolS *make_expr_symbol (expressionS * expressionP);
 extern int expr_symbol_where (symbolS *, char **, unsigned int *);
+extern void current_location (expressionS *);
 
 extern symbolS *expr_build_uconstant (offsetT);
 extern symbolS *expr_build_dot (void);

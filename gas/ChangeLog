@@ -1,3 +1,14 @@
+2010-06-22  Jan Beulich  <jbeulich@novell.com>
+
+	PR gas/11732
+	* config/tc-i386-intel.c (i386_intel_parse_name): Handle pseudo
+	symbols named "$".
+	(i386_intel_operand): Remove bogus handling of pseudo symbols
+	named "$".
+	* expr.c (current_location): Remove 'static' and local
+	declaration.
+	* expr.h (current_location): Declare.
+
 2010-06-21  Sterling Augustine  <sterling@tensilica.com>
 
 	PR gas/11728

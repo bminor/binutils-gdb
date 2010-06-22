@@ -1,3 +1,9 @@
+2010-06-22  Jan Beulich  <jbeulich@novell.com>
+
+	PR gas/11732
+	* gas/i386/jump.d: Adjust.
+	* gas/i386/jump.s: Add check for branch to 2+$.
+
 2010-06-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/tic6x/resource-func-unit-1.d,

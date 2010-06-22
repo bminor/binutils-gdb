@@ -33,6 +33,8 @@
 	jmp	fword ptr [ebx]
 	jmp	$+2
 	nop
+	jecxz	2+$
+	nop
 	jmp	.+2
 	nop
 
