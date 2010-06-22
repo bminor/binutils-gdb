@@ -398,12 +398,6 @@ proc test_with_self { executable } {
 	-re "GNU gdb \[0-9\.\]*.*Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*License GPLv3\\+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.*This is free software: you are free to change and redistribute it.*There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\".*and \"show warranty\" for details.*This GDB was configured as .*$gdb_prompt $" {
 	    pass "xgdb is at prompt"
 	}
-	-re "GNU gdb \[0-9\.\]*.*Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*GDB is free software, covered by the GNU General Public License, and you are.*welcome to change it and/or distribute copies of it under certain conditions.*Type \"show copying\" to see the conditions.*There is absolutely no warranty for GDB.  Type \"show warranty\" for details.*This GDB was configured as .*$gdb_prompt $" {
-	    pass "xgdb is at prompt (obsolescent gdb 2)"
-	}
-	-re "GDB is free software and you are welcome to distribute copies of it.* under certain conditions; type \"show copying\" to see the conditions..*There is absolutely no warranty for GDB; type \"show warranty\" for details..*GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $" {
-	    pass "xgdb is at prompt (obsolescent gdb 1)"
-	}
     }
     
     # set xgdb prompt so we can tell which is which

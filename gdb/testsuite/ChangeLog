@@ -1,3 +1,7 @@
+2010-06-21  Doug Evans  <dje@google.com>
+
+	* gdb.gdb/selftest.exp: Remove support for gpl v1 and v2 gdb's.
+
 2010-06-19  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.arch/spu-ls.exp: New file.
