@@ -1,3 +1,10 @@
+2010-06-21  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo: Add explicit @node and @appendix for GFDL.
+	* annotate.texinfo: Ditto.
+	* gdbint.texinfo: Ditto.
+	* stabs.texinfo: Ditto.
+
 2010-06-22  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.texinfo: (Process Record and Replay): Add documentation

@@ -35132,9 +35132,9 @@ which @value{GDBN} currently ignores.
 
 @include gpl.texi
 
-@raisesections
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
 @include fdl.texi
-@lowersections
 
 @node Index
 @unnumbered Index

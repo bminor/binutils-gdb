@@ -839,9 +839,9 @@ e.g., another thread hits a breakpoint.
 
 @end table
 
-@raisesections
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
 @include fdl.texi
-@lowersections
 
 @ignore
 @node Index
