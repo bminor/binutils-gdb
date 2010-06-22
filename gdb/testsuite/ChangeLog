@@ -1,3 +1,10 @@
+2010-06-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* lib/gdb.exp (banned_variables_traced): New global variable.
+	(gdb_init, gdb_finish): Use new variable to avoid multiple tracing.
+	(gdb_init): Use `trace add variable' instead of obsolete
+	`trace variable'.
+
 2010-06-21  Doug Evans  <dje@google.com>
 
 	* gdb.gdb/selftest.exp: Remove support for gpl v1 and v2 gdb's.
