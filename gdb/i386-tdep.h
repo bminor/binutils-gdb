@@ -362,6 +362,9 @@ extern const struct regset *
 				 const char *sect_name, size_t sect_size);
 
 
+extern struct displaced_step_closure *i386_displaced_step_copy_insn
+  (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
+   struct regcache *regs);
 extern void i386_displaced_step_fixup (struct gdbarch *gdbarch,
 				       struct displaced_step_closure *closure,
 				       CORE_ADDR from, CORE_ADDR to,

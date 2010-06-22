@@ -1,3 +1,14 @@
+2010-06-21  Doug Evans  <dje@google.com>
+
+	* i386-tdep.h (i386_displaced_step_copy_insn): Declare.
+	* i386-tdep.c (i386_displaced_step_copy_insn): New function.
+	(i386_syscall_p): Change type of lengthp to int.
+	(i386_displaced_step_fixup): Handle kernels that run one past a
+	syscall insn.
+	* i386-linux-tdep.c (i386_linux_init_abi): Use
+	i386_displaced_step_copy_insn instead of
+	simple_displaced_step_copy_insn.
+
 2010-06-21  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (read_base_type): Handle DW_ATE_UTF.

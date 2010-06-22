@@ -518,7 +518,7 @@ i386_call_p (const gdb_byte *insn)
    length in bytes.  Otherwise, return zero.  */
 
 static int
-i386_syscall_p (const gdb_byte *insn, ULONGEST *lengthp)
+i386_syscall_p (const gdb_byte *insn, int *lengthp)
 {
   if (insn[0] == 0xcd)
     {
@@ -527,6 +527,43 @@ i386_syscall_p (const gdb_byte *insn, ULONGEST *lengthp)
     }
 
   return 0;
+}
+
+/* Some kernels may run one past a syscall insn, so we have to cope.
+   Otherwise this is just simple_displaced_step_copy_insn.  */
+
+struct displaced_step_closure *
+i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
+			       CORE_ADDR from, CORE_ADDR to,
+			       struct regcache *regs)
+{
+  size_t len = gdbarch_max_insn_length (gdbarch);
+  gdb_byte *buf = xmalloc (len);
+
+  read_memory (from, buf, len);
+
+  /* GDB may get control back after the insn after the syscall.
+     Presumably this is a kernel bug.
+     If this is a syscall, make sure there's a nop afterwards.  */
+  {
+    int syscall_length;
+    gdb_byte *insn;
+
+    insn = i386_skip_prefixes (buf, len);
+    if (insn != NULL && i386_syscall_p (insn, &syscall_length))
+      insn[syscall_length] = NOP_OPCODE;
+  }
+
+  write_memory (to, buf, len);
+
+  if (debug_displaced)
+    {
+      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
+                          paddress (gdbarch, from), paddress (gdbarch, to));
+      displaced_step_dump_bytes (gdb_stdlog, buf, len);
+    }
+
+  return (struct displaced_step_closure *) buf;
 }
 
 /* Fix up the state of registers and memory after having single-stepped
@@ -587,7 +624,7 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
       && ! i386_ret_p (insn))
     {
       ULONGEST orig_eip;
-      ULONGEST insn_len;
+      int insn_len;
 
       regcache_cooked_read_unsigned (regs, I386_EIP_REGNUM, &orig_eip);
 
@@ -606,7 +643,12 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
          it unrelocated.  Goodness help us if there are PC-relative
          system calls.  */
       if (i386_syscall_p (insn, &insn_len)
-          && orig_eip != to + (insn - insn_start) + insn_len)
+          && orig_eip != to + (insn - insn_start) + insn_len
+	  /* GDB can get control back after the insn after the syscall.
+	     Presumably this is a kernel bug.
+	     i386_displaced_step_copy_insn ensures its a nop,
+	     we add one to the length for it.  */
+          && orig_eip != to + (insn - insn_start) + insn_len + 1)
         {
           if (debug_displaced)
             fprintf_unfiltered (gdb_stdlog,
