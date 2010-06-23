@@ -1,3 +1,8 @@
+2010-06-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac: Always set RDYNAMIC at least as `-rdynamic'.
+	* configure: Regenerate.
+
 2010-06-22  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_record_lea_modrm): Change warning to query.
