@@ -3165,6 +3165,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       gdb_flush (gdb_stdout);
       target_mourn_inferior ();
       singlestep_breakpoints_inserted_p = 0;
+      cancel_single_step_breakpoints ();
       stop_print_frame = 0;
       stop_stepping (ecs);
       return;
@@ -3188,6 +3189,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       print_stop_reason (SIGNAL_EXITED, ecs->ws.value.sig);
       singlestep_breakpoints_inserted_p = 0;
+      cancel_single_step_breakpoints ();
       stop_stepping (ecs);
       return;
 
@@ -3223,6 +3225,13 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* This won't actually modify the breakpoint list, but will
 	     physically remove the breakpoints from the child.  */
 	  detach_breakpoints (child_pid);
+	}
+
+      if (singlestep_breakpoints_inserted_p)
+	{
+	  /* Pull the single step breakpoints out of the target. */
+	  remove_single_step_breakpoints ();
+	  singlestep_breakpoints_inserted_p = 0;
 	}
 
       /* In case the event is caught by a catchpoint, remember that
@@ -3313,6 +3322,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  context_switch (ecs->ptid);
 	  reinit_frame_cache ();
 	}
+
+      singlestep_breakpoints_inserted_p = 0;
+      cancel_single_step_breakpoints ();
 
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 

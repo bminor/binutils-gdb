@@ -985,6 +985,7 @@ extern int remove_hw_watchpoints (void);
 extern void insert_single_step_breakpoint (struct gdbarch *,
 					   struct address_space *, CORE_ADDR);
 extern void remove_single_step_breakpoints (void);
+extern void cancel_single_step_breakpoints (void);
 
 /* Manage manual breakpoints, separate from the normal chain of
    breakpoints.  These functions are used in murky target-specific

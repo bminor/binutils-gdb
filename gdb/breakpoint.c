@@ -196,6 +196,8 @@ static void tcatch_command (char *arg, int from_tty);
 
 static void ep_skip_leading_whitespace (char **s);
 
+static void detach_single_step_breakpoints (void);
+
 static int single_step_breakpoint_inserted_here_p (struct address_space *,
 						   CORE_ADDR pc);
 
@@ -2383,6 +2385,10 @@ detach_breakpoints (int pid)
     if (b->inserted)
       val |= remove_breakpoint_1 (b, mark_inserted);
   }
+
+  /* Detach single-step breakpoints as well.  */
+  detach_single_step_breakpoints ();
+
   do_cleanups (old_chain);
   return val;
 }
@@ -10489,6 +10495,39 @@ remove_single_step_breakpoints (void)
       single_step_gdbarch[1] = NULL;
       single_step_breakpoints[1] = NULL;
     }
+}
+
+/* Delete software single step breakpoints without removing them from
+   the inferior.  This is intended to be used if the inferior's address
+   space where they were inserted is already gone, e.g. after exit or
+   exec.  */
+
+void
+cancel_single_step_breakpoints (void)
+{
+  int i;
+
+  for (i = 0; i < 2; i++)
+    if (single_step_breakpoints[i])
+      {
+	xfree (single_step_breakpoints[i]);
+	single_step_breakpoints[i] = NULL;
+	single_step_gdbarch[i] = NULL;
+      }
+}
+
+/* Detach software single-step breakpoints from INFERIOR_PTID without
+   removing them.  */
+
+static void
+detach_single_step_breakpoints (void)
+{
+  int i;
+
+  for (i = 0; i < 2; i++)
+    if (single_step_breakpoints[i])
+      target_remove_breakpoint (single_step_gdbarch[i],
+				single_step_breakpoints[i]);
 }
 
 /* Check whether a software single-step breakpoint is inserted at PC.  */

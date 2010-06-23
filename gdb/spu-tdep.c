@@ -1494,6 +1494,39 @@ spu_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
   return breakpoint;
 }
 
+static int
+spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
+			      struct bp_target_info *bp_tgt)
+{
+  /* We work around a problem in combined Cell/B.E. debugging here.  Consider
+     that in a combined application, we have some breakpoints inserted in SPU
+     code, and now the application forks (on the PPU side).  GDB common code
+     will assume that the fork system call copied all breakpoints into the new
+     process' address space, and that all those copies now need to be removed
+     (see breakpoint.c:detach_breakpoints).
+
+     While this is certainly true for PPU side breakpoints, it is not true
+     for SPU side breakpoints.  fork will clone the SPU context file
+     descriptors, so that all the existing SPU contexts are in accessible
+     in the new process.  However, the contents of the SPU contexts themselves
+     are *not* cloned.  Therefore the effect of detach_breakpoints is to
+     remove SPU breakpoints from the *original* SPU context's local store
+     -- this is not the correct behaviour.
+
+     The workaround is to check whether the PID we are asked to remove this
+     breakpoint from (i.e. ptid_get_pid (inferior_ptid)) is different from the
+     PID of the current inferior (i.e. current_inferior ()->pid).  This is only
+     true in the context of detach_breakpoints.  If so, we simply do nothing.
+     [ Note that for the fork child process, it does not matter if breakpoints
+     remain inserted, because those SPU contexts are not runnable anyway --
+     the Linux kernel allows only the original process to invoke spu_run.  */
+
+  if (ptid_get_pid (inferior_ptid) != current_inferior ()->pid) 
+    return 0;
+
+  return default_memory_remove_breakpoint (gdbarch, bp_tgt);
+}
+
 
 /* Software single-stepping support.  */
 
@@ -2638,6 +2671,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Breakpoints.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
   set_gdbarch_breakpoint_from_pc (gdbarch, spu_breakpoint_from_pc);
+  set_gdbarch_memory_remove_breakpoint (gdbarch, spu_memory_remove_breakpoint);
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
   set_gdbarch_software_single_step (gdbarch, spu_software_single_step);
   set_gdbarch_get_longjmp_target (gdbarch, spu_get_longjmp_target);

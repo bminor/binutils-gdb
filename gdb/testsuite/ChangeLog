@@ -1,3 +1,9 @@
+2010-06-23  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.cell/fork.exp: New file.
+	* gdb.cell/fork.c: Likewise.
+	* gdb.cell/fork-spu.c: Likewise.
+
 2010-06-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* lib/gdb.exp (banned_variables_traced): New global variable.

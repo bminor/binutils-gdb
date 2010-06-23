@@ -1,3 +1,17 @@
+2010-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* infrun.c (handle_inferior_event): Handle presence of single-step
+	breakpoints for TARGET_WAITKIND_FORKED and TARGET_WAITKIND_VFORKED.
+	Cancel single-step breakpoints for TARGET_WAITKIND_EXITED,
+	TARGET_WAITKIND_SIGNALED, and TARGET_WAITKIND_EXECD.
+	* breakpoint.c (detach_single_step_breakpoints): New function.
+	(detach_breakpoints): Call it.
+	(cancel_single_step_breakpoints): New function.
+	* breakpoint.h (cancel_single_step_breakpoints): Add prototype.
+
+	* spu-tdep.c (spu_memory_remove_breakpoint): New function.
+	(spu_gdbarch_init): Install it.
+
 2010-06-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.ac: Always set RDYNAMIC at least as `-rdynamic'.
