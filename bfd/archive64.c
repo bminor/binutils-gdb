@@ -194,27 +194,27 @@ bfd_elf64_archive_write_armap (bfd *arch,
 
   /* Write out the file offset for the file associated with each
      symbol, and remember to keep the offsets padded out.  */
-
-  current = arch->archive_head;
   count = 0;
-  while (current != NULL && count < symbol_count)
+  for (current = arch->archive_head;
+       current != NULL && count < symbol_count;
+       current = current->archive_next)
     {
       /* For each symbol which is used defined in this object, write out
 	 the object file's address in the archive */
 
-      while (map[count].u.abfd == current)
+      for (;
+	   count < symbol_count && map[count].u.abfd == current;
+	   count++)
 	{
 	  bfd_putb64 ((bfd_vma) archive_member_file_ptr, buf);
 	  if (bfd_bwrite (buf, 8, arch) != 8)
 	    return FALSE;
-	  count++;
 	}
       /* Add size of this archive entry */
       archive_member_file_ptr += (arelt_size (current)
 				  + sizeof (struct ar_hdr));
       /* remember about the even alignment */
       archive_member_file_ptr += archive_member_file_ptr % 2;
-      current = current->archive_next;
     }
 
   /* now write the strings themselves */
