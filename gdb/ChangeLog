@@ -1,4 +1,10 @@
 2010-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	Fix GDB startup on readonly filesystem.
+	* charset.c (find_charset_names): Use PEX_USE_PIPES for pex_init.
+
+2010-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	Fix PR 9436.

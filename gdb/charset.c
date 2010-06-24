@@ -794,7 +794,7 @@ find_charset_names (void)
   set_in_environ (iconv_env, "LANGUAGE", "C");
   set_in_environ (iconv_env, "LC_ALL", "C");
 
-  child = pex_init (0, "iconv", NULL);
+  child = pex_init (PEX_USE_PIPES, "iconv", NULL);
 
   args[0] = "iconv";
   args[1] = "-l";
