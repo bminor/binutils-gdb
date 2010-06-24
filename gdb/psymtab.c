@@ -424,7 +424,7 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.
    Check the global symbols if GLOBAL, the static symbols if not. */
 
-struct partial_symbol *
+static struct partial_symbol *
 lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		       int global, domain_enum domain)
 {
