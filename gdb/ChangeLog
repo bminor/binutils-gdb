@@ -1,3 +1,12 @@
+2010-06-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (RX_ACC_REGNUM): Define.
+	(RX_NUM_REGS): Redefine to 26.
+	(rx_register_name): Add register "acc".  Change order of several
+	registers.  Change name of "vct" register to "fintv" to match RX
+	documentation.
+	(rx_register_type): Add case for RX_ACC_REGNUM.
+
 2010-06-24  Tom Tromey  <tromey@redhat.com>
 
 	* psymtab.c (lookup_partial_symbol): Mark definition as static.

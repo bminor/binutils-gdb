@@ -46,7 +46,8 @@ enum
   RX_FP_REGNUM = 6,
   RX_R15_REGNUM = 15,
   RX_PC_REGNUM = 19,
-  RX_NUM_REGS = 25
+  RX_ACC_REGNUM = 25,
+  RX_NUM_REGS = 26
 };
 
 /* Architecture specific data.  */
@@ -111,15 +112,16 @@ rx_register_name (struct gdbarch *gdbarch, int regnr)
     "r13",
     "r14",
     "r15",
-    "isp",
     "usp",
-    "intb",
-    "pc",
+    "isp",
     "psw",
-    "bpc",
+    "pc",
+    "intb",
     "bpsw",
-    "vct",
-    "fpsw"
+    "bpc",
+    "fintv",
+    "fpsw",
+    "acc"
   };
 
   return reg_names[regnr];
@@ -131,6 +133,8 @@ rx_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == RX_PC_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
+  else if (reg_nr == RX_ACC_REGNUM)
+    return builtin_type (gdbarch)->builtin_unsigned_long_long;
   else
     return builtin_type (gdbarch)->builtin_unsigned_long;
 }
