@@ -1,3 +1,9 @@
+2010-06-24  Hui Zhu  <teawater@gmail.com>
+
+       * printcmd.c (ui_printf): New function.
+       (printf_command): Call ui_printf.
+       (_initialize_printcmd): New command "eval".
+
 2010-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* infrun.c (handle_inferior_event): Handle presence of single-step

@@ -84,6 +84,10 @@ qRelocInsn
 
 * New commands
 
+eval template, expressions...
+  Convert the values of one or more expressions under the control
+  of the string template to a command line, and call it.
+
 set target-file-system-kind unix|dos-based|auto
 show target-file-system-kind
   Set or show the assumed file system kind for target reported file

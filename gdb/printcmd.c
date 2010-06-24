@@ -1956,8 +1956,10 @@ print_variable_and_value (const char *name, struct symbol *var,
   fprintf_filtered (stream, "\n");
 }
 
+/* printf "printf format string" ARG to STREAM.  */
+
 static void
-printf_command (char *arg, int from_tty)
+ui_printf (char *arg, struct ui_file *stream)
 {
   char *f = NULL;
   char *s = arg;
@@ -2340,7 +2342,7 @@ printf_command (char *arg, int from_tty)
 		read_memory (tem, str, j);
 	      str[j] = 0;
 
-	      printf_filtered (current_substring, (char *) str);
+              fprintf_filtered (stream, current_substring, (char *) str);
 	    }
 	    break;
 	  case wide_string_arg:
@@ -2384,7 +2386,8 @@ printf_command (char *arg, int from_tty)
 					 &output, translit_char);
 	      obstack_grow_str0 (&output, "");
 
-	      printf_filtered (current_substring, obstack_base (&output));
+	      fprintf_filtered (stream, current_substring,
+                                obstack_base (&output));
 	      do_cleanups (inner_cleanup);
 	    }
 	    break;
@@ -2416,7 +2419,8 @@ printf_command (char *arg, int from_tty)
 					 &output, translit_char);
 	      obstack_grow_str0 (&output, "");
 
-	      printf_filtered (current_substring, obstack_base (&output));
+	      fprintf_filtered (stream, current_substring,
+                                obstack_base (&output));
 	      do_cleanups (inner_cleanup);
 	    }
 	    break;
@@ -2433,7 +2437,7 @@ printf_command (char *arg, int from_tty)
 	      if (inv)
 		error (_("Invalid floating value found in program."));
 
-	      printf_filtered (current_substring, (double) val);
+              fprintf_filtered (stream, current_substring, (double) val);
 	      break;
 	    }
 	  case long_double_arg:
@@ -2450,7 +2454,8 @@ printf_command (char *arg, int from_tty)
 	      if (inv)
 		error (_("Invalid floating value found in program."));
 
-	      printf_filtered (current_substring, (long double) val);
+	      fprintf_filtered (stream, current_substring,
+                                (long double) val);
 	      break;
 	    }
 #else
@@ -2461,7 +2466,7 @@ printf_command (char *arg, int from_tty)
 	    {
 	      long long val = value_as_long (val_args[i]);
 
-	      printf_filtered (current_substring, val);
+              fprintf_filtered (stream, current_substring, val);
 	      break;
 	    }
 #else
@@ -2471,14 +2476,14 @@ printf_command (char *arg, int from_tty)
 	    {
 	      int val = value_as_long (val_args[i]);
 
-	      printf_filtered (current_substring, val);
+              fprintf_filtered (stream, current_substring, val);
 	      break;
 	    }
 	  case long_arg:
 	    {
 	      long val = value_as_long (val_args[i]);
 
-	      printf_filtered (current_substring, val);
+              fprintf_filtered (stream, current_substring, val);
 	      break;
 	    }
 
@@ -2490,7 +2495,7 @@ printf_command (char *arg, int from_tty)
 #if defined (PRINTF_HAS_DECFLOAT)
 	      /* If we have native support for Decimal floating
 		 printing, handle it here.  */
-	      printf_filtered (current_substring, param_ptr);
+              fprintf_filtered (stream, current_substring, param_ptr);
 #else
 
 	      /* As a workaround until vasprintf has native support for DFP
@@ -2579,7 +2584,7 @@ printf_command (char *arg, int from_tty)
 	      decimal_to_string (dfp_ptr, dfp_len, byte_order, decstr);
 
 	      /* Print the DFP value.  */
-	      printf_filtered (current_substring, decstr);
+              fprintf_filtered (stream, current_substring, decstr);
 
 	      break;
 #endif
@@ -2634,13 +2639,13 @@ printf_command (char *arg, int from_tty)
 		  *fmt_p++ = 'l';
 		  *fmt_p++ = 'x';
 		  *fmt_p++ = '\0';
-		  printf_filtered (fmt, val);
+                  fprintf_filtered (stream, fmt, val);
 		}
 	      else
 		{
 		  *fmt_p++ = 's';
 		  *fmt_p++ = '\0';
-		  printf_filtered (fmt, "(nil)");
+                  fprintf_filtered (stream, fmt, "(nil)");
 		}
 
 	      break;
@@ -2658,9 +2663,36 @@ printf_command (char *arg, int from_tty)
        puts_filtered here.  Also, we pass a dummy argument because
        some platforms have modified GCC to include -Wformat-security
        by default, which will warn here if there is no argument.  */
-    printf_filtered (last_arg, 0);
+    fprintf_filtered (stream, last_arg, 0);
   }
   do_cleanups (old_cleanups);
+}
+
+/* Implement the "printf" command.  */
+
+static void
+printf_command (char *arg, int from_tty)
+{
+  ui_printf (arg, gdb_stdout);
+}
+
+/* Implement the "eval" command.  */
+
+static void
+eval_command (char *arg, int from_tty)
+{
+  struct ui_file *ui_out = mem_fileopen ();
+  struct cleanup *cleanups = make_cleanup_ui_file_delete (ui_out);
+  char *expanded;
+
+  ui_printf (arg, ui_out);
+
+  expanded = ui_file_xstrdup (ui_out, NULL);
+  make_cleanup (xfree, expanded);
+
+  execute_command (expanded, from_tty);
+
+  do_cleanups (cleanups);
 }
 
 void
@@ -2826,4 +2858,8 @@ Show printing of source filename and line number with <symbol>."), NULL,
 			   NULL,
 			   show_print_symbol_filename,
 			   &setprintlist, &showprintlist);
+
+  add_com ("eval", no_class, eval_command, _("\
+Convert \"printf format string\", arg1, arg2, arg3, ..., argn to\n\
+a command line, and call it."));
 }

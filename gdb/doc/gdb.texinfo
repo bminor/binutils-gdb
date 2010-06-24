@@ -20073,6 +20073,11 @@ Here's an example of printing DFP types using the above conversion letters:
 printf "D32: %Hf - D64: %Df - D128: %DDf\n",1.2345df,1.2E10dd,1.2E1dl
 @end smallexample
 
+@kindex eval
+@item eval @var{template}, @var{expressions}@dots{}
+Convert the values of one or more @var{expressions} under the control of
+the string @var{template} to a command line, and call it.
+
 @end table
 
 @node Python
