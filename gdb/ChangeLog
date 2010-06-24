@@ -1,3 +1,10 @@
+2010-06-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/python.c (_initialize_python): Add new "constant"
+	PYTHONDIR in gdb module.  Insert this path at the head of
+	sys.path. Set gdb.__path__ to gdb.PYTHONDIR + '/gdb' and
+	exec its __init__.py script if it exists in that directory.
+
 2010-06-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* rx-tdep.c (RX_ACC_REGNUM): Define.

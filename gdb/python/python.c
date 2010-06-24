@@ -668,6 +668,13 @@ Enables or disables printing of Python stack traces."),
   PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version);
   PyModule_AddStringConstant (gdb_module, "HOST_CONFIG", (char*) host_name);
   PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG", (char*) target_name);
+  {
+    char *gdb_pythondir;
+
+    gdb_pythondir = concat (gdb_datadir, SLASH_STRING, "python", NULL);
+    PyModule_AddStringConstant (gdb_module, "PYTHONDIR", gdb_pythondir);
+    xfree (gdb_pythondir);
+  }
 
   gdbpy_gdberror_exc = PyErr_NewException ("gdb.GdbError", NULL, NULL);
   PyModule_AddObject (gdb_module, "GdbError", gdbpy_gdberror_exc);
@@ -720,6 +727,20 @@ class GdbOutputFile:\n\
 \n\
 sys.stderr = GdbOutputFile()\n\
 sys.stdout = GdbOutputFile()\n\
+\n\
+# GDB's python scripts are stored inside gdb.PYTHONDIR.  So insert\n\
+# that directory name at the start of sys.path to allow the Python\n\
+# interpreter to find them.\n\
+sys.path.insert(0, gdb.PYTHONDIR)\n\
+\n\
+# The gdb module is implemented in C rather than in Python.  As a result,\n\
+# the associated __init.py__ script is not not executed by default when\n\
+# the gdb module gets imported.  Execute that script manually if it exists.\n\
+gdb.__path__ = [gdb.PYTHONDIR + '/gdb']\n\
+from os.path import exists\n\
+ipy = gdb.PYTHONDIR + '/gdb/__init__.py'\n\
+if exists (ipy):\n\
+  execfile (ipy)\n\
 ");
 
   /* Release the GIL while gdb runs.  */
