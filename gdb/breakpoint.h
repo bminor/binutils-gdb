@@ -563,7 +563,20 @@ extern bpstat bpstat_stop_status (struct address_space *aspace,
 				  CORE_ADDR pc, ptid_t ptid);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
-   breakpoint (a challenging task).  */
+   breakpoint (a challenging task).
+
+   The enum values order defines priority-like order of the actions.
+   Once you've decided that some action is appropriate, you'll never
+   go back and decide something of a lower priority is better.  Each
+   of these actions is mutually exclusive with the others.  That
+   means, that if you find yourself adding a new action class here and
+   wanting to tell GDB that you have two simultaneous actions to
+   handle, something is wrong, and you probably don't actually need a
+   new action type.
+
+   Note that a step resume breakpoint overrides another breakpoint of
+   signal handling (see comment in wait_for_inferior at where we set
+   the step_resume breakpoint).  */
 
 enum bpstat_what_main_action
   {
@@ -571,18 +584,6 @@ enum bpstat_what_main_action
        say to perform any action (e.g. failed watchpoint and nothing
        else).  */
     BPSTAT_WHAT_KEEP_CHECKING,
-
-    /* Rather than distinguish between noisy and silent stops here, it
-       might be cleaner to have bpstat_print make that decision (also
-       taking into account stop_print_frame and source_only).  But the
-       implications are a bit scary (interaction with auto-displays, etc.),
-       so I won't try it.  */
-
-    /* Stop silently.  */
-    BPSTAT_WHAT_STOP_SILENT,
-
-    /* Stop and print.  */
-    BPSTAT_WHAT_STOP_NOISY,
 
     /* Remove breakpoints, single step once, then put them back in and
        go back to what we were doing.  It's possible that this should be
@@ -600,18 +601,20 @@ enum bpstat_what_main_action
        BPSTAT_WHAT_KEEP_CHECKING.  */
     BPSTAT_WHAT_CLEAR_LONGJMP_RESUME,
 
+    /* Rather than distinguish between noisy and silent stops here, it
+       might be cleaner to have bpstat_print make that decision (also
+       taking into account stop_print_frame and source_only).  But the
+       implications are a bit scary (interaction with auto-displays, etc.),
+       so I won't try it.  */
+
+    /* Stop silently.  */
+    BPSTAT_WHAT_STOP_SILENT,
+
+    /* Stop and print.  */
+    BPSTAT_WHAT_STOP_NOISY,
+
     /* Clear step resume breakpoint, and keep checking.  */
     BPSTAT_WHAT_STEP_RESUME,
-
-    /* Check the dynamic linker's data structures for new libraries, then
-       keep checking.  */
-    BPSTAT_WHAT_CHECK_SHLIBS,
-
-    /* Check for new JITed code.  */
-    BPSTAT_WHAT_CHECK_JIT,
-
-    /* This is just used to keep track of how many enums there are.  */
-    BPSTAT_WHAT_LAST
   };
 
 /* An enum indicating the kind of "stack dummy" stop.  This is a bit

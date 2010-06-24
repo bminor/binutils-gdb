@@ -1,3 +1,8 @@
+2010-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Test PR 9436.
+	* gdb.base/nostdlib.exp, gdb.base/nostdlib.c: New.
+
 2010-06-24  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.base/eval.exp: New file.

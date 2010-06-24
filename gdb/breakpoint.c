@@ -4194,151 +4194,64 @@ bpstat_stop_status (struct address_space *aspace,
 
   return root_bs->next;
 }
-
-/* Tell what to do about this bpstat.  */
+
+static void
+handle_jit_event (void)
+{
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
+
+  /* Switch terminal for any messages produced by
+     breakpoint_re_set.  */
+  target_terminal_ours_for_output ();
+
+  frame = get_current_frame ();
+  gdbarch = get_frame_arch (frame);
+
+  jit_event_handler (gdbarch);
+
+  target_terminal_inferior ();
+}
+
+/* Prepare WHAT final decision for infrun.  */
+
+/* Decide what infrun needs to do with this bpstat.  */
+
 struct bpstat_what
 bpstat_what (bpstat bs)
 {
-  /* Classify each bpstat as one of the following.  */
-  enum class
-    {
-      /* This bpstat element has no effect on the main_action.  */
-      no_effect = 0,
-
-      /* There was a watchpoint, stop but don't print.  */
-      wp_silent,
-
-      /* There was a watchpoint, stop and print.  */
-      wp_noisy,
-
-      /* There was a breakpoint but we're not stopping.  */
-      bp_nostop,
-
-      /* There was a breakpoint, stop but don't print.  */
-      bp_silent,
-
-      /* There was a breakpoint, stop and print.  */
-      bp_noisy,
-
-      /* We hit the longjmp breakpoint.  */
-      long_jump,
-
-      /* We hit the longjmp_resume breakpoint.  */
-      long_resume,
-
-      /* We hit the step_resume breakpoint.  */
-      step_resume,
-
-      /* We hit the shared library event breakpoint.  */
-      shlib_event,
-
-      /* We hit the jit event breakpoint.  */
-      jit_event,
-
-      /* This is just used to count how many enums there are.  */
-      class_last
-    };
-
-  /* Here is the table which drives this routine.  So that we can
-     format it pretty, we define some abbreviations for the
-     enum bpstat_what codes.  */
-#define kc BPSTAT_WHAT_KEEP_CHECKING
-#define ss BPSTAT_WHAT_STOP_SILENT
-#define sn BPSTAT_WHAT_STOP_NOISY
-#define sgl BPSTAT_WHAT_SINGLE
-#define slr BPSTAT_WHAT_SET_LONGJMP_RESUME
-#define clr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
-#define sr BPSTAT_WHAT_STEP_RESUME
-#define shl BPSTAT_WHAT_CHECK_SHLIBS
-#define jit BPSTAT_WHAT_CHECK_JIT
-
-/* "Can't happen."  Might want to print an error message.
-   abort() is not out of the question, but chances are GDB is just
-   a bit confused, not unusable.  */
-#define err BPSTAT_WHAT_STOP_NOISY
-
-  /* Given an old action and a class, come up with a new action.  */
-  /* One interesting property of this table is that wp_silent is the same
-     as bp_silent and wp_noisy is the same as bp_noisy.  That is because
-     after stopping, the check for whether to step over a breakpoint
-     (BPSTAT_WHAT_SINGLE type stuff) is handled in proceed() without
-     reference to how we stopped.  We retain separate wp_silent and
-     bp_silent codes in case we want to change that someday. 
-
-     Another possibly interesting property of this table is that
-     there's a partial ordering, priority-like, of the actions.  Once
-     you've decided that some action is appropriate, you'll never go
-     back and decide something of a lower priority is better.  The
-     ordering is:
-
-     kc   < jit clr sgl shl slr sn sr ss
-     sgl  < jit shl slr sn sr ss
-     slr  < jit err shl sn sr ss
-     clr  < jit err shl sn sr ss
-     ss   < jit shl sn sr
-     sn   < jit shl sr
-     jit  < shl sr
-     shl  < sr
-     sr   <
-
-     What I think this means is that we don't need a damned table
-     here.  If you just put the rows and columns in the right order,
-     it'd look awfully regular.  We could simply walk the bpstat list
-     and choose the highest priority action we find, with a little
-     logic to handle the 'err' cases.  */
-
-  /* step_resume entries: a step resume breakpoint overrides another
-     breakpoint of signal handling (see comment in wait_for_inferior
-     at where we set the step_resume breakpoint).  */
-
-  static const enum bpstat_what_main_action
-    table[(int) class_last][(int) BPSTAT_WHAT_LAST] =
-  {
-  /*                              old action */
-  /*               kc   ss   sn   sgl  slr  clr  sr  shl  jit */
-/* no_effect */   {kc,  ss,  sn,  sgl, slr, clr, sr, shl, jit},
-/* wp_silent */   {ss,  ss,  sn,  ss,  ss,  ss,  sr, shl, jit},
-/* wp_noisy */    {sn,  sn,  sn,  sn,  sn,  sn,  sr, shl, jit},
-/* bp_nostop */   {sgl, ss,  sn,  sgl, slr, slr, sr, shl, jit},
-/* bp_silent */   {ss,  ss,  sn,  ss,  ss,  ss,  sr, shl, jit},
-/* bp_noisy */    {sn,  sn,  sn,  sn,  sn,  sn,  sr, shl, jit},
-/* long_jump */   {slr, ss,  sn,  slr, slr, err, sr, shl, jit},
-/* long_resume */ {clr, ss,  sn,  err, err, err, sr, shl, jit},
-/* step_resume */ {sr,  sr,  sr,  sr,  sr,  sr,  sr, sr,  sr },
-/* shlib */       {shl, shl, shl, shl, shl, shl, sr, shl, shl},
-/* jit_event */   {jit, jit, jit, jit, jit, jit, sr, jit, jit}
-  };
-
-#undef kc
-#undef ss
-#undef sn
-#undef sgl
-#undef slr
-#undef clr
-#undef err
-#undef sr
-#undef ts
-#undef shl
-#undef jit
-  enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
   struct bpstat_what retval;
+  /* We need to defer calling `solib_add', as adding new symbols
+     resets breakpoints, which in turn deletes breakpoint locations,
+     and hence may clear unprocessed entries in the BS chain.  */
+  int shlib_event = 0;
+  int jit_event = 0;
 
+  retval.main_action = BPSTAT_WHAT_KEEP_CHECKING;
   retval.call_dummy = STOP_NONE;
+
   for (; bs != NULL; bs = bs->next)
     {
-      enum class bs_class = no_effect;
+      /* Extract this BS's action.  After processing each BS, we check
+	 if its action overrides all we've seem so far.  */
+      enum bpstat_what_main_action this_action = BPSTAT_WHAT_KEEP_CHECKING;
+      enum bptype bptype;
+
       if (bs->breakpoint_at == NULL)
-	/* I suspect this can happen if it was a momentary breakpoint
-	   which has since been deleted.  */
-	continue;
-      if (bs->breakpoint_at->owner == NULL)
-	bs_class = bp_nostop;
+	{
+	  /* I suspect this can happen if it was a momentary
+	     breakpoint which has since been deleted.  */
+	  bptype = bp_none;
+	}
+      else if (bs->breakpoint_at->owner == NULL)
+	bptype = bp_none;
       else
-      switch (bs->breakpoint_at->owner->type)
+	bptype = bs->breakpoint_at->owner->type;
+
+      switch (bptype)
 	{
 	case bp_none:
-	  continue;
-
+	  break;
 	case bp_breakpoint:
 	case bp_hardware_breakpoint:
 	case bp_until:
@@ -4346,12 +4259,12 @@ bpstat_what (bpstat bs)
 	  if (bs->stop)
 	    {
 	      if (bs->print)
-		bs_class = bp_noisy;
+		this_action = BPSTAT_WHAT_STOP_NOISY;
 	      else
-		bs_class = bp_silent;
+		this_action = BPSTAT_WHAT_STOP_SILENT;
 	    }
 	  else
-	    bs_class = bp_nostop;
+	    this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 	case bp_watchpoint:
 	case bp_hardware_watchpoint:
@@ -4360,69 +4273,79 @@ bpstat_what (bpstat bs)
 	  if (bs->stop)
 	    {
 	      if (bs->print)
-		bs_class = wp_noisy;
+		this_action = BPSTAT_WHAT_STOP_NOISY;
 	      else
-		bs_class = wp_silent;
+		this_action = BPSTAT_WHAT_STOP_SILENT;
 	    }
 	  else
-	    /* There was a watchpoint, but we're not stopping. 
-	       This requires no further action.  */
-	    bs_class = no_effect;
+	    {
+	      /* There was a watchpoint, but we're not stopping.
+		 This requires no further action.  */
+	    }
 	  break;
 	case bp_longjmp:
-	  bs_class = long_jump;
+	  this_action = BPSTAT_WHAT_SET_LONGJMP_RESUME;
 	  break;
 	case bp_longjmp_resume:
-	  bs_class = long_resume;
+	  this_action = BPSTAT_WHAT_CLEAR_LONGJMP_RESUME;
 	  break;
 	case bp_step_resume:
 	  if (bs->stop)
-	    {
-	      bs_class = step_resume;
-	    }
+	    this_action = BPSTAT_WHAT_STEP_RESUME;
 	  else
-	    /* It is for the wrong frame.  */
-	    bs_class = bp_nostop;
+	    {
+	      /* It is for the wrong frame.  */
+	      this_action = BPSTAT_WHAT_SINGLE;
+	    }
 	  break;
 	case bp_watchpoint_scope:
-	  bs_class = bp_nostop;
-	  break;
-	case bp_shlib_event:
-	  bs_class = shlib_event;
-	  break;
-	case bp_jit_event:
-	  bs_class = jit_event;
-	  break;
 	case bp_thread_event:
 	case bp_overlay_event:
 	case bp_longjmp_master:
 	case bp_std_terminate_master:
-	  bs_class = bp_nostop;
+	  this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 	case bp_catchpoint:
 	  if (bs->stop)
 	    {
 	      if (bs->print)
-		bs_class = bp_noisy;
+		this_action = BPSTAT_WHAT_STOP_NOISY;
 	      else
-		bs_class = bp_silent;
+		this_action = BPSTAT_WHAT_STOP_SILENT;
 	    }
 	  else
-	    /* There was a catchpoint, but we're not stopping.  
-	       This requires no further action.  */
-	    bs_class = no_effect;
+	    {
+	      /* There was a catchpoint, but we're not stopping.
+		 This requires no further action.  */
+	    }
+	  break;
+	case bp_shlib_event:
+	  shlib_event = 1;
+
+	  /* If requested, stop when the dynamic linker notifies GDB
+	     of events.  This allows the user to get control and place
+	     breakpoints in initializer routines for dynamically
+	     loaded objects (among other things).  */
+	  if (stop_on_solib_events)
+	    this_action = BPSTAT_WHAT_STOP_NOISY;
+	  else
+	    this_action = BPSTAT_WHAT_SINGLE;
+	  break;
+	case bp_jit_event:
+	  jit_event = 1;
+	  this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 	case bp_call_dummy:
 	  /* Make sure the action is stop (silent or noisy),
 	     so infrun.c pops the dummy frame.  */
-	  bs_class = bp_silent;
 	  retval.call_dummy = STOP_STACK_DUMMY;
+	  this_action = BPSTAT_WHAT_STOP_SILENT;
 	  break;
 	case bp_std_terminate:
 	  /* Make sure the action is stop (silent or noisy),
 	     so infrun.c pops the dummy frame.  */
-	  bs_class = bp_silent;
 	  retval.call_dummy = STOP_STD_TERMINATE;
+	  this_action = BPSTAT_WHAT_STOP_SILENT;
 	  break;
 	case bp_tracepoint:
 	case bp_fast_tracepoint:
@@ -4431,11 +4354,43 @@ bpstat_what (bpstat bs)
 	     out already.  */
 	  internal_error (__FILE__, __LINE__,
 			  _("bpstat_what: tracepoint encountered"));
-	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  _("bpstat_what: unhandled bptype %d"), (int) bptype);
 	}
-      current_action = table[(int) bs_class][(int) current_action];
+
+      retval.main_action = max (retval.main_action, this_action);
     }
-  retval.main_action = current_action;
+
+  if (shlib_event)
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "bpstat_what: bp_shlib_event\n");
+
+      /* Check for any newly added shared libraries if we're supposed
+	 to be adding them automatically.  */
+
+      /* Switch terminal for any messages produced by
+	 breakpoint_re_set.  */
+      target_terminal_ours_for_output ();
+
+#ifdef SOLIB_ADD
+      SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
+#else
+      solib_add (NULL, 0, &current_target, auto_solib_add);
+#endif
+
+      target_terminal_inferior ();
+    }
+
+  if (jit_event)
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "bpstat_what: bp_jit_event\n");
+
+      handle_jit_event ();
+    }
+
   return retval;
 }
 

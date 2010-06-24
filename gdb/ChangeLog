@@ -1,3 +1,23 @@
+2010-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Fix PR 9436.
+	* breakpoint.c (handle_jit_event): New function.
+	(bpstat_what): Remove enum class, kc, ss, sn, sgl, slr, clr, sr, shl,
+	jit, err, table and bs_class.  New variables shlib_event, jit_event,
+	this_action and bptype.  Change bs_class assignments to this_action
+	assignments.  new unhandled bptype internal error.  Move here
+	shlib_event and jit_event handling from handle_inferior_event.
+	* breakpoint.h (enum bpstat_what_main_action): Extend the comment.
+	Reorder items.  Remove BPSTAT_WHAT_CHECK_SHLIBS and
+	BPSTAT_WHAT_CHECK_JIT.
+	* inferior.h (debug_infrun, stop_on_solib_events): New declarations.
+	* infrun.c (debug_infrun, stop_on_solib_events): Remove static.
+	(handle_inferior_event): Reinitialize frame and gdbarch after
+	bpstat_what call.  Move BPSTAT_WHAT_CHECK_SHLIBS and
+	BPSTAT_WHAT_CHECK_JIT handling to bpstat_what.  Reinitialize even
+	gdbarch when frame gets reinitialized.
+
 2010-06-24  Hui Zhu  <teawater@gmail.com>
 
        * printcmd.c (ui_printf): New function.
