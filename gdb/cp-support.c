@@ -838,6 +838,15 @@ make_symbol_overload_list_adl (struct type **arg_types, int nargs,
   return sym_return_val;
 }
 
+/* Used for cleanups to reset the "searched" flag in case of an error.  */
+
+static void
+reset_directive_searched (void *data)
+{
+  struct using_direct *direct = data;
+  direct->searched = 0;
+}
+
 /* This applies the using directives to add namespaces to search in,
    and then searches for overloads in all of those namespaces.  It
    adds the symbols found to sym_return_val.  Arguments are as in
@@ -847,7 +856,7 @@ static void
 make_symbol_overload_list_using (const char *func_name,
 				 const char *namespace)
 {
-  const struct using_direct *current;
+  struct using_direct *current;
   const struct block *block;
 
   /* First, go through the using directives.  If any of them apply,
@@ -861,12 +870,27 @@ make_symbol_overload_list_using (const char *func_name,
 	current != NULL;
 	current = current->next)
       {
+	/* Prevent recursive calls.  */
+	if (current->searched)
+	  continue;
+
         /* If this is a namespace alias or imported declaration ignore it.  */
         if (current->alias != NULL || current->declaration != NULL)
           continue;
 
         if (strcmp (namespace, current->import_dest) == 0)
-          make_symbol_overload_list_using (func_name, current->import_src);
+	  {
+	    /* Mark this import as searched so that the recursive call does
+	       not search it again.  */
+	    struct cleanup *old_chain;
+	    current->searched = 1;
+	    old_chain = make_cleanup (reset_directive_searched, current);
+
+	    make_symbol_overload_list_using (func_name, current->import_src);
+
+	    current->searched = 0;
+	    discard_cleanups (old_chain);
+	  }
       }
 
   /* Now, add names for this namespace.  */
