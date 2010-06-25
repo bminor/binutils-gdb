@@ -121,14 +121,13 @@ class Icf
   // corresponding to taken function pointers.  Ignores eh_frame
   // and vtable sections.
   inline bool
-  check_section_for_function_pointers(std::string section_name,
+  check_section_for_function_pointers(const std::string& section_name,
                                       Target* target)
   {
     return (parameters->options().icf_safe_folding()
 	    && target->can_check_for_function_pointers()
-            && !is_prefix_of(".rodata._ZTV", section_name.c_str())
-            && !is_prefix_of(".data.rel.ro._ZTV", section_name.c_str())
-            && !is_prefix_of(".eh_frame", section_name.c_str()));
+	    && target->section_may_have_icf_unsafe_pointers(
+	        section_name.c_str()));
   }
 
   // Returns a map of a section to info (Reloc_info) about its relocations.

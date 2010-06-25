@@ -1,3 +1,18 @@
+2010-06-25  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::can_check_for_functions_pointers): Return true.
+	(Target_arm::section_may_have_icf_unsafe_pointers): New method
+	definition.
+	(Target_arm::Scan::local_reloc_may_be_function_pointer,
+	Target_arm::Scan::global_reloc_may_be_function_pointer): Implement
+	target hook to detect function points.
+	(Target_arm::Scan::possible_function_pointer_reloc): New method.
+	* icf.h (Icf::check_section_for_function_pointers): Change type of
+	parameter SECTION_NAME to const reference to std::string.  Use
+	target hook to determine if section may have unsafe pointers.
+	* target.h (Target::section_may_have_icf_unsafe_pointers): New
+	method definition.
+
 2010-06-21  Rafael Espindola  <espindola@google.com>
 
 	* fileread.cc (Input_file::find_fie): New

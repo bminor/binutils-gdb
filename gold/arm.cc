@@ -2109,6 +2109,23 @@ class Target_arm : public Sized_target<32, big_endian>
       fix_cortex_a8_(false), cortex_a8_relocs_info_()
   { }
 
+  // Virtual function which is set to return true by a target if
+  // it can use relocation types to determine if a function's
+  // pointer is taken.
+  virtual bool
+  can_check_for_function_pointers() const
+  { return true; }
+
+  // Whether a section called SECTION_NAME may have function pointers to
+  // sections not eligible for safe ICF folding.
+  virtual bool
+  section_may_have_icf_unsafe_pointers(const char* section_name) const
+  {
+    return (!is_prefix_of(".ARM.exidx", section_name)
+	    && !is_prefix_of(".ARM.extab", section_name)
+	    && Target::section_may_have_icf_unsafe_pointers(section_name));
+  }
+  
   // Whether we can use BLX.
   bool
   may_use_blx() const
@@ -2474,8 +2491,7 @@ class Target_arm : public Sized_target<32, big_endian>
   	          			Output_section* ,
 	          			const elfcpp::Rel<32, big_endian>& ,
 					unsigned int ,
- 	          			const elfcpp::Sym<32, big_endian>&)
-    { return false; }
+ 	          			const elfcpp::Sym<32, big_endian>&);
 
     inline bool
     global_reloc_may_be_function_pointer(Symbol_table* , Layout* , Target_arm* ,
@@ -2483,8 +2499,7 @@ class Target_arm : public Sized_target<32, big_endian>
 	           			 unsigned int ,
 	           			 Output_section* ,
 	           			 const elfcpp::Rel<32, big_endian>& ,
-					 unsigned int , Symbol*)
-    { return false; }
+					 unsigned int , Symbol*);
 
    private:
     static void
@@ -2514,6 +2529,9 @@ class Target_arm : public Sized_target<32, big_endian>
 		  || sym->is_undefined()
 		  || sym->is_preemptible()));
     }
+
+    inline bool
+    possible_function_pointer_reloc(unsigned int r_type);
 
     // Whether we have issued an error about a non-PIC compilation.
     bool issued_non_pic_error_;
@@ -7686,6 +7704,72 @@ Target_arm<big_endian>::Scan::unsupported_reloc_global(
 {
   gold_error(_("%s: unsupported reloc %u against global symbol %s"),
 	     object->name().c_str(), r_type, gsym->demangled_name().c_str());
+}
+
+template<bool big_endian>
+inline bool
+Target_arm<big_endian>::Scan::possible_function_pointer_reloc(
+    unsigned int r_type)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_ARM_PC24:
+    case elfcpp::R_ARM_THM_CALL:
+    case elfcpp::R_ARM_PLT32:
+    case elfcpp::R_ARM_CALL:
+    case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_THM_JUMP24:
+    case elfcpp::R_ARM_SBREL31:
+    case elfcpp::R_ARM_PREL31:
+    case elfcpp::R_ARM_THM_JUMP19:
+    case elfcpp::R_ARM_THM_JUMP6:
+    case elfcpp::R_ARM_THM_JUMP11:
+    case elfcpp::R_ARM_THM_JUMP8:
+      // All the relocations above are branches except SBREL31 and PREL31.
+      return false;
+
+    default:
+      // Be conservative and assume this is a function pointer.
+      return true;
+    }
+}
+
+template<bool big_endian>
+inline bool
+Target_arm<big_endian>::Scan::local_reloc_may_be_function_pointer(
+  Symbol_table*,
+  Layout*,
+  Target_arm<big_endian>* target,
+  Sized_relobj<32, big_endian>*,
+  unsigned int,
+  Output_section*,
+  const elfcpp::Rel<32, big_endian>&,
+  unsigned int r_type,
+  const elfcpp::Sym<32, big_endian>&)
+{
+  r_type = target->get_real_reloc_type(r_type);
+  return possible_function_pointer_reloc(r_type);
+}
+
+template<bool big_endian>
+inline bool
+Target_arm<big_endian>::Scan::global_reloc_may_be_function_pointer(
+  Symbol_table*,
+  Layout*,
+  Target_arm<big_endian>* target,
+  Sized_relobj<32, big_endian>*,
+  unsigned int,
+  Output_section*,
+  const elfcpp::Rel<32, big_endian>&,
+  unsigned int r_type,
+  Symbol* gsym)
+{
+  // GOT is not a function.
+  if (strcmp(gsym->name(), "_GLOBAL_OFFSET_TABLE_") == 0)
+    return false;
+
+  r_type = target->get_real_reloc_type(r_type);
+  return possible_function_pointer_reloc(r_type);
 }
 
 // Scan a relocation for a global symbol.

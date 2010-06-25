@@ -71,6 +71,20 @@ class Target
   can_check_for_function_pointers() const
   { return false; }
 
+  // Whether a section called SECTION_NAME may have function pointers to
+  // sections not eligible for safe ICF folding.
+  virtual bool
+  section_may_have_icf_unsafe_pointers(const char* section_name) const
+  {
+    // We recognize sections for normal vtables, construction vtables and
+    // EH frames.
+    return (!is_prefix_of(".rodata._ZTV", section_name)
+	    && !is_prefix_of(".data.rel.ro._ZTV", section_name)
+	    && !is_prefix_of(".rodata._ZTC", section_name)
+	    && !is_prefix_of(".data.rel.ro._ZTC", section_name)
+	    && !is_prefix_of(".eh_frame", section_name));
+  }
+
   // Return the bit size that this target implements.  This should
   // return 32 or 64.
   int
