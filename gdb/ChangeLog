@@ -1,3 +1,7 @@
+2010-06-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* c-typeprint.c (c_print_typedef): Append new type name for typedefs.
+
 2010-06-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/python.c (_initialize_python): Add new "constant"

@@ -107,7 +107,8 @@ c_print_typedef (struct type *type, struct symbol *new_symbol,
   type_print (type, "", stream, 0);
   if (TYPE_NAME ((SYMBOL_TYPE (new_symbol))) == 0
       || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
-		 SYMBOL_LINKAGE_NAME (new_symbol)) != 0)
+		 SYMBOL_LINKAGE_NAME (new_symbol)) != 0
+      || TYPE_CODE (SYMBOL_TYPE (new_symbol)) == TYPE_CODE_TYPEDEF)
     fprintf_filtered (stream, " %s", SYMBOL_PRINT_NAME (new_symbol));
   fprintf_filtered (stream, ";\n");
 }
