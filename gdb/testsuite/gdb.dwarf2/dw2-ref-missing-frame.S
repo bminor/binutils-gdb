@@ -1,301 +1,128 @@
-	.file	"ref-missing-frame.c"
-	.section	.debug_abbrev,"",@progbits
-.Ldebug_abbrev0:
-	.section	.debug_info,"",@progbits
-.Ldebug_info0:
-	.section	.debug_line,"",@progbits
-.Ldebug_line0:
-	.text
-.Ltext0:
-.globl main
-	.type	main, @function
-main:
-.LFB2:
-	.file 1 "ref-missing-frame.c"
-	.loc 1 3 0
-	leal	4(%esp), %ecx
-.LCFI0:
-	andl	$-16, %esp
-	pushl	-4(%ecx)
-.LCFI1:
-	pushl	%ebp
-.LCFI2:
-	movl	%esp, %ebp
-.LCFI3:
-	pushl	%ecx
-.LCFI4:
-	subl	$16, %esp
-.LCFI5:
-	.loc 1 6 0
-	movl	$0, %eax
-	.loc 1 7 0
-	addl	$16, %esp
-	popl	%ecx
-	popl	%ebp
-	leal	-4(%ecx), %esp
-	ret
-.LFE2:
-	.size	main, .-main
-	.section	.debug_frame,"",@progbits
-.Lframe0:
-	.long	.LECIE0-.LSCIE0
-.LSCIE0:
-	.long	0xffffffff
-	.byte	0x1
-	.string	""
-	.uleb128 0x1
-	.sleb128 -4
-	.byte	0x8
-	.byte	0xc
-	.uleb128 0x4
-	.uleb128 0x4
-	.byte	0x88
-	.uleb128 0x1
-	.align 4
-.LECIE0:
-.LSFDE0:
-	.long	.LEFDE0-.LASFDE0
-.LASFDE0:
-	.long	.Lframe0
-	.long	.LFB2
-	.long	.LFE2-.LFB2
-	.byte	0x4
-	.long	.LCFI0-.LFB2
-	.byte	0xc
-	.uleb128 0x1
-	.uleb128 0x0
-	.byte	0x9
-	.uleb128 0x4
-	.uleb128 0x1
-	.byte	0x4
-	.long	.LCFI1-.LCFI0
-	.byte	0xc
-	.uleb128 0x4
-	.uleb128 0x4
-	.byte	0x4
-	.long	.LCFI2-.LCFI1
-	.byte	0xe
-	.uleb128 0x8
-	.byte	0x85
-	.uleb128 0x2
-	.byte	0x4
-	.long	.LCFI3-.LCFI2
-	.byte	0xd
-	.uleb128 0x5
-	.byte	0x4
-	.long	.LCFI4-.LCFI3
-	.byte	0x84
-	.uleb128 0x3
-	.align 4
-.LEFDE0:
-	.text
-.Letext0:
-	.section	.debug_loc,"",@progbits
-.Ldebug_loc0:
-.LLST0:
-	.long	.LFB2-.Ltext0
-	.long	.LCFI0-.Ltext0
-	.value	0x2
-#if 0
-	.byte	0x74
-#else
-	/* DW_OP_fbreg.  */
-	.byte	0x91
-#endif
-	.sleb128 4
-	.long	.LCFI0-.Ltext0
-	.long	.LCFI1-.Ltext0
-	.value	0x2
-#if 0
-	.byte	0x74
-#else
-	/* DW_OP_fbreg.  */
-	.byte	0x91
-#endif
-	.sleb128 4
-	.long	.LCFI1-.Ltext0
-	.long	.LCFI2-.Ltext0
-	.value	0x2
-#if 0
-	.byte	0x74
-#else
-	/* DW_OP_fbreg.  */
-	.byte	0x91
-#endif
-	.sleb128 4
-	.long	.LCFI2-.Ltext0
-	.long	.LCFI3-.Ltext0
-	.value	0x2
-#if 0
-	.byte	0x74
-#else
-	/* DW_OP_fbreg.  */
-	.byte	0x91
-#endif
-	.sleb128 8
-	.long	.LCFI3-.Ltext0
-	.long	.LFE2-.Ltext0
-	.value	0x2
-#if 0
-	.byte	0x74
-#else
-	/* DW_OP_fbreg.  */
-	.byte	0x91
-#endif
-	.sleb128 8
-	.long	0x0
-	.long	0x0
-	.section	.debug_info
-	.long	0x5a
-	.value	0x2
-	.long	.Ldebug_abbrev0
-	.byte	0x4
-	.uleb128 0x1
-	.long	.LASF0
-	.byte	0x1
-	.long	.LASF1
-	.long	.LASF2
-	.long	.Ltext0
-	.long	.Letext0
-	.long	.Ldebug_line0
-	.uleb128 0x2
-	.byte	0x1
-	.long	.LASF3
-	.byte	0x1
-	.byte	0x3
-	.byte	0x1
-	.long	0x51
-	.long	.LFB2
-	.long	.LFE2
-	.long	.LLST0	/* DW_AT_frame_base */
-	.long	0x51
-	.uleb128 0x3
-	.string	"var"
-	.byte	0x1
-	.byte	0x4
-	.long	0x58
-	.byte	0x2
-	.byte	0x91
-	.sleb128 -16
-	.byte	0x0
-	.uleb128 0x4
-	.byte	0x4
-	.byte	0x5
-	.string	"int"
-	.uleb128 0x5
-	.long	0x51
-	.byte	0x0
-	.section	.debug_abbrev
-	.uleb128 0x1
-	.uleb128 0x11
-	.byte	0x1
-	.uleb128 0x25
-	.uleb128 0xe
-	.uleb128 0x13
-	.uleb128 0xb
-	.uleb128 0x3
-	.uleb128 0xe
-	.uleb128 0x1b
-	.uleb128 0xe
-	.uleb128 0x11
-	.uleb128 0x1
-	.uleb128 0x12
-	.uleb128 0x1
-	.uleb128 0x10
-	.uleb128 0x6
-	.byte	0x0
-	.byte	0x0
-	.uleb128 0x2
-	.uleb128 0x2e
-	.byte	0x1
-	.uleb128 0x3f
-	.uleb128 0xc
-	.uleb128 0x3
-	.uleb128 0xe
-	.uleb128 0x3a
-	.uleb128 0xb
-	.uleb128 0x3b
-	.uleb128 0xb
-	.uleb128 0x27
-	.uleb128 0xc
-	.uleb128 0x49
-	.uleb128 0x13
-	.uleb128 0x11
-	.uleb128 0x1
-	.uleb128 0x12
-	.uleb128 0x1
+/* This testcase is part of GDB, the GNU debugger.
+
+   Copyright 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+/* Debug information */
+
+	.section .debug_info
+.Lcu1_begin:
+	/* CU header */
+	.4byte	.Lcu1_end - .Lcu1_start		/* Length of Compilation Unit */
+.Lcu1_start:
+	.2byte	2				/* DWARF Version */
+	.4byte	.Labbrev1_begin			/* Offset into abbrev section */
+	.byte	4				/* Pointer size */
+
+	/* CU die */
+	.uleb128 1				/* Abbrev: DW_TAG_compile_unit */
+	.4byte	main_end			/* DW_AT_high_pc */
+	.4byte	main_start			/* DW_AT_low_pc */
+	.ascii	"file1.txt\0"			/* DW_AT_name */
+	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
+	.byte	1				/* DW_AT_language (C) */
+
+.Ltype_int:
+	.uleb128	3			/* Abbrev: DW_TAG_base_type */
+	.ascii		"int\0"			/* DW_AT_name */
+	.byte		4			/* DW_AT_byte_size */
+	.byte		5			/* DW_AT_encoding */
+
+	/* func */
+	.uleb128	6			/* Abbrev: DW_TAG_subprogram */
+	.ascii		"main\0"		/* DW_AT_name */
+	.4byte		main_start		/* DW_AT_low_pc */
+	.4byte		main_end		/* DW_AT_high_pc */
 #ifndef NO_FRAME_BASE
-	.uleb128 0x40 /* DW_AT_frame_base */
-#else
-	.uleb128 0x38 /* DW_AT_data_member_location */
+	.byte		2f - 1f			/* DW_AT_frame_base */
+1:	.byte		0x91			/*   DW_OP_fbreg */
+	.sleb128	0			/*   0 */
+2:
 #endif
-	.uleb128 0x6
-	.uleb128 0x1
-	.uleb128 0x13
-	.byte	0x0
-	.byte	0x0
-	.uleb128 0x3
-	.uleb128 0x34
-	.byte	0x0
-	.uleb128 0x3
-	.uleb128 0x8
-	.uleb128 0x3a
-	.uleb128 0xb
-	.uleb128 0x3b
-	.uleb128 0xb
-	.uleb128 0x49
-	.uleb128 0x13
-	.uleb128 0x2
-	.uleb128 0xa
-	.byte	0x0
-	.byte	0x0
-	.uleb128 0x4
-	.uleb128 0x24
-	.byte	0x0
-	.uleb128 0xb
-	.uleb128 0xb
-	.uleb128 0x3e
-	.uleb128 0xb
-	.uleb128 0x3
-	.uleb128 0x8
-	.byte	0x0
-	.byte	0x0
-	.uleb128 0x5
-	.uleb128 0x35
-	.byte	0x0
-	.uleb128 0x49
-	.uleb128 0x13
-	.byte	0x0
-	.byte	0x0
-	.byte	0x0
-	.section	.debug_pubnames,"",@progbits
-	.long	0x17
-	.value	0x2
-	.long	.Ldebug_info0
-	.long	0x5e
-	.long	0x25
-	.string	"main"
-	.long	0x0
-	.section	.debug_aranges,"",@progbits
-	.long	0x1c
-	.value	0x2
-	.long	.Ldebug_info0
-	.byte	0x4
-	.byte	0x0
-	.value	0x0
-	.value	0x0
-	.long	.Ltext0
-	.long	.Letext0-.Ltext0
-	.long	0x0
-	.long	0x0
-	.section	.debug_str,"MS",@progbits,1
-.LASF0:
-	.string	"GNU C 4.3.0 20080416 (Red Hat 4.3.0-7)"
-.LASF2:
-	.string	"/tmp"
-.LASF1:
-	.string	"ref-missing-frame.c"
-.LASF3:
-	.string	"main"
-	.ident	"GCC: (GNU) 4.3.0 20080416 (Red Hat 4.3.0-7)"
-	.section	.note.GNU-stack,"",@progbits
+
+	.uleb128	7			/* Abbrev: DW_TAG_variable (location) */
+	.ascii		"main_var\0"		/* DW_AT_name */
+	.byte		2f - 1f			/* DW_AT_location */
+1:	.byte		0x91			/*   DW_OP_fbreg */
+	.sleb128	0			/*   0 */
+2:	.4byte		.Ltype_int-.Lcu1_begin	/* DW_AT_type */
+
+	.byte		0			/* End of children of func */
+
+	.byte		0			/* End of children of CU */
+
+.Lcu1_end:
+
+/* Abbrev table */
+	.section .debug_abbrev
+.Labbrev1_begin:
+	.uleb128	1			/* Abbrev code */
+	.uleb128	0x11			/* DW_TAG_compile_unit */
+	.byte		1			/* has_children */
+	.uleb128	0x12			/* DW_AT_high_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x11			/* DW_AT_low_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x25			/* DW_AT_producer */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x13			/* DW_AT_language */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.uleb128	3			/* Abbrev code */
+	.uleb128	0x24			/* DW_TAG_base_type */
+	.byte		0			/* has_children */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0xb			/* DW_AT_byte_size */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.uleb128	0x3e			/* DW_AT_encoding */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.uleb128	6			/* Abbrev code */
+	.uleb128	0x2e			/* DW_TAG_subprogram */
+	.byte		1			/* has_children */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x11			/* DW_AT_low_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x12			/* DW_AT_high_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+#ifndef NO_FRAME_BASE
+	.uleb128	0x40			/* DW_AT_frame_base */
+	.uleb128	0xa			/* DW_FORM_block1 */
+#endif
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.uleb128	7			/* Abbrev code (location) */
+	.uleb128	0x34			/* DW_TAG_variable */
+	.byte		0			/* has_children */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x2			/* DW_AT_location */
+	.uleb128	0xa			/* DW_FORM_block1 */
+	.uleb128	0x49			/* DW_AT_type */
+	.uleb128	0x13			/* DW_FORM_ref4 */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */

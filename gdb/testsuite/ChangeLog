@@ -1,3 +1,12 @@
+2010-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-ref-missing-frame-main.c: New.
+	* gdb.dwarf2/dw2-ref-missing-frame.S: Replace compiler generated output
+	by a hand made one.
+	* gdb.dwarf2/dw2-ref-missing-frame.exp: Remove invalid comment.  Remove
+	i?86 requirement.  Remove variables srcfile and binfile.  New variable
+	sources, executable_nofb and executable_fb.  Call prepare_for_testing.
+
 2010-06-25  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.cell/dwarfaddr.exp: New file.
