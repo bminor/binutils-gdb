@@ -126,8 +126,9 @@ append_ocl_sos (struct so_list **link_ptr)
 		  new = XZALLOC (struct so_list);
 
 		  /* Encode FD and object ID in path name.  */
-		  xsnprintf (new->so_name, sizeof new->so_name, "@0x%lx <%d>",
-			     data, SPUADDR_SPU (*ocl_program_addr_base));
+		  xsnprintf (new->so_name, sizeof new->so_name, "@%s <%d>",
+			     hex_string (data),
+			     SPUADDR_SPU (*ocl_program_addr_base));
 		  strcpy (new->so_original_name, new->so_name);
 
 		  *link_ptr = new;

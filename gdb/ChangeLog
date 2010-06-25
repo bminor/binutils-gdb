@@ -1,3 +1,8 @@
+2010-06-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* solib-spu.c (append_ocl_sos): Fix xsnprintf statement for
+	hosts where CORE_ADDR is long long.
+
 2010-06-25  Tom Tromey  <tromey@redhat.com>
 
 	PR python/10808:
