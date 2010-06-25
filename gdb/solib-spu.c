@@ -34,6 +34,7 @@
 #include "observer.h"
 #include "breakpoint.h"
 #include "gdbthread.h"
+#include "exceptions.h"
 
 #include "spu-tdep.h"
 
@@ -91,6 +92,61 @@ spu_skip_standalone_loader (void)
       set_executing (minus_one_ptid, 0);
 
       inferior_thread ()->in_infcall = 0;
+    }
+}
+
+static const struct objfile_data *ocl_program_data_key;
+
+/* Appends OpenCL programs to the list of `struct so_list' objects.  */
+static void
+append_ocl_sos (struct so_list **link_ptr)
+{
+  CORE_ADDR *ocl_program_addr_base;
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+    {
+      ocl_program_addr_base = objfile_data (objfile, ocl_program_data_key);
+      if (ocl_program_addr_base != NULL)
+        {
+	  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd)?
+					 BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
+	  volatile struct gdb_exception ex;
+	  TRY_CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      CORE_ADDR data =
+		read_memory_unsigned_integer (*ocl_program_addr_base,
+					      sizeof (CORE_ADDR),
+					      byte_order);
+	      if (data != 0x0)
+		{
+		  struct so_list *new;
+
+		  /* Allocate so_list structure.  */
+		  new = XZALLOC (struct so_list);
+
+		  /* Encode FD and object ID in path name.  */
+		  xsnprintf (new->so_name, sizeof new->so_name, "@0x%lx <%d>",
+			     data, SPUADDR_SPU (*ocl_program_addr_base));
+		  strcpy (new->so_original_name, new->so_name);
+
+		  *link_ptr = new;
+		  link_ptr = &new->next;
+		}
+	    }
+	  if (ex.reason < 0)
+	    {
+	      /* Ignore memory errors.  */
+	      switch (ex.error)
+		{
+		case MEMORY_ERROR:
+		  break;
+		default:
+		  throw_exception (ex);
+		  break;
+		}
+	    }
+	}
     }
 }
 
@@ -169,6 +225,9 @@ spu_current_sos (void)
       *link_ptr = new;
       link_ptr = &new->next;
     }
+
+  /* Append OpenCL sos. */
+  append_ocl_sos (link_ptr);
 
   return head;
 }
@@ -365,6 +424,43 @@ spu_enable_break (struct objfile *objfile)
   return 0;
 }
 
+/* Enable shared library breakpoint for the
+   OpenCL runtime running on the SPU.  */
+static void
+ocl_enable_break (struct objfile *objfile)
+{
+  struct minimal_symbol *event_sym = NULL;
+  struct minimal_symbol *addr_sym = NULL;
+
+  /* The OpenCL runtime on the SPU will call __opencl_program_update_event
+     whenever an OpenCL program is loaded.  */
+  event_sym = lookup_minimal_symbol ("__opencl_program_update_event", NULL,
+				     objfile);
+  /* The PPU address of the OpenCL program can be found
+     at opencl_elf_image_address.  */
+  addr_sym = lookup_minimal_symbol ("opencl_elf_image_address", NULL, objfile);
+
+  if (event_sym && addr_sym)
+    {
+      /* Place a solib_event breakpoint on the symbol.  */
+      CORE_ADDR event_addr = SYMBOL_VALUE_ADDRESS (event_sym);
+      create_solib_event_breakpoint (get_objfile_arch (objfile), event_addr);
+
+      /* Store the address of the symbol that will point to OpenCL program
+         using the per-objfile private data mechanism.  */
+      if (objfile_data (objfile, ocl_program_data_key) == NULL)
+        {
+          CORE_ADDR *ocl_program_addr_base = OBSTACK_CALLOC (
+		  &objfile->objfile_obstack,
+		  objfile->sections_end - objfile->sections,
+		  CORE_ADDR);
+	  *ocl_program_addr_base = SYMBOL_VALUE_ADDRESS (addr_sym);
+	  set_objfile_data (objfile, ocl_program_data_key,
+			    ocl_program_addr_base);
+        }
+    }
+}
+
 /* Create inferior hook.  */
 static void
 spu_solib_create_inferior_hook (int from_tty)
@@ -435,11 +531,19 @@ spu_solib_loaded (struct so_list *so)
       solib_read_symbols (so, 0);
       spu_enable_break (so->objfile);
     }
+  /* In case the OpenCL runtime is loaded we install a breakpoint
+     to get notified whenever an OpenCL program gets loaded.  */
+  if (strstr (so->so_name, "CLRuntimeAccelCellSPU@") != NULL)
+    {
+      solib_read_symbols (so, 0);
+      ocl_enable_break (so->objfile);
+    }
 }
 
 void
 _initialize_spu_solib (void)
 {
   observer_attach_solib_loaded (spu_solib_loaded);
+  ocl_program_data_key = register_objfile_data ();
 }
 
