@@ -3,6 +3,35 @@
 
 *** Changes since GDB 7.1
 
+* C++ Improvements:
+
+  ** Argument Dependent Lookup (ADL)
+
+  In C++ ADL lookup directs function search to the namespaces of its
+  arguments even if the namespace has not been imported.
+  For example:
+    namespace A
+      { 
+        class B { }; 
+        void foo (B) { }
+      }
+    ...
+    A::B b
+    foo(b)
+  Here the compiler will search for `foo' in the namespace of 'b'
+  and find A::foo.  GDB now supports this.  This construct is commonly
+  used in the Standard Template Library for operators.
+
+  ** Improved User Defined Operator Support
+
+  In addition to member operators, GDB now supports lookup of operators
+  defined in a namespace and imported with a `using' directive, operators
+  defined in the global scope, operators imported implicitly from an
+  anonymous namespace, and the ADL operators mentioned in the previous
+  entry.
+  GDB now also supports proper overload resolution for all the previously
+  mentioned flavors of operators.
+
 * Windows Thread Information Block access.
 
   On Windows targets, GDB now supports displaying the Windows Thread
