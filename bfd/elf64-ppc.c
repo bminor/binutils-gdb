@@ -5566,6 +5566,17 @@ opd_entry_value (asection *opd_sec,
   return val;
 }
 
+/* Return true if symbol is defined in a regular object file.  */
+
+static bfd_boolean
+is_static_defined (struct elf_link_hash_entry *h)
+{
+  return ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && h->root.u.def.section != NULL
+	  && h->root.u.def.section->output_section != NULL);
+}
+
 /* If FDH is a function descriptor symbol, return the associated code
    entry symbol if it is defined.  Return NULL otherwise.  */
 
@@ -6704,10 +6715,7 @@ get_tls_mask (unsigned char **tls_maskp,
     *toc_addend = ppc64_elf_section_data (sec)->u.toc.add[off / 8];
   if (!get_sym_h (&h, &sym, &sec, tls_maskp, locsymsp, r_symndx, ibfd))
     return 0;
-  if ((h == NULL
-       || ((h->root.type == bfd_link_hash_defined
-	    || h->root.type == bfd_link_hash_defweak)
-	   && !h->def_dynamic))
+  if ((h == NULL || is_static_defined (h))
       && (next_r == -1 || next_r == -2))
     return 1 - next_r;
   return 1;
@@ -6923,6 +6931,9 @@ ppc64_elf_edit_opd (struct bfd_link_info *info, bfd_boolean non_overlapping)
       struct _opd_sec_data *opd;
       bfd_boolean need_edit, add_aux_fields;
       bfd_size_type cnt_16b = 0;
+
+      if (!is_ppc64_elf (ibfd))
+	continue;
 
       sec = bfd_get_section_by_name (ibfd, ".opd");
       if (sec == NULL || sec->size == 0)
@@ -7375,7 +7386,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info,
 		      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 					      opt_fd->dynstr_index);
 		      if (!bfd_elf_link_record_dynamic_symbol (info, opt_fd))
-			return FALSE;
+			return NULL;
 		    }
 		  htab->tls_get_addr_fd = (struct ppc_link_hash_entry *) opt_fd;
 		  tga = &htab->tls_get_addr->elf;
@@ -7840,6 +7851,7 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
 {
   struct ppc_link_hash_entry *eh;
   struct adjust_toc_info *toc_inf = (struct adjust_toc_info *) inf;
+  unsigned long i;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -7857,16 +7869,22 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
 
   if (eh->elf.root.u.def.section == toc_inf->toc)
     {
-      unsigned long skip = toc_inf->skip[eh->elf.root.u.def.value >> 3];
-      if (skip != (unsigned long) -1)
-	eh->elf.root.u.def.value -= skip;
+      if (eh->elf.root.u.def.value > toc_inf->toc->rawsize)
+	i = toc_inf->toc->rawsize >> 3;
       else
+	i = eh->elf.root.u.def.value >> 3;
+
+      if (toc_inf->skip[i] == (unsigned long) -1)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s defined in removed toc entry"), eh->elf.root.root.string);
-	  eh->elf.root.u.def.section = &bfd_abs_section;
-	  eh->elf.root.u.def.value = 0;
+	    (_("%s defined on removed toc entry"), eh->elf.root.root.string);
+	  do
+	    ++i;
+	  while (toc_inf->skip[i] == (unsigned long) -1);
+	  eh->elf.root.u.def.value = (bfd_vma) i << 3;
 	}
+
+      eh->elf.root.u.def.value -= toc_inf->skip[i];
       eh->adjust_done = 1;
     }
   else if (strcmp (eh->elf.root.u.def.section->name, ".toc") == 0)
@@ -7897,6 +7915,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       unsigned long *skip, *drop;
       unsigned char *used;
       unsigned char *keep, last, some_unused;
+
+      if (!is_ppc64_elf (ibfd))
+	continue;
 
       toc = bfd_get_section_by_name (ibfd, ".toc");
       if (toc == NULL
@@ -7975,7 +7996,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 
 	      if (skip == NULL)
 		{
-		  skip = bfd_zmalloc (sizeof (*skip) * (toc->size + 7) / 8);
+		  skip = bfd_zmalloc (sizeof (*skip) * (toc->size + 15) / 8);
 		  if (skip == NULL)
 		    goto error_ret;
 		}
@@ -8025,7 +8046,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      || (sec->flags & SEC_DEBUGGING) != 0)
 	    continue;
 
-	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL, TRUE);
+	  relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
+						info->keep_memory);
 	  if (relstart == NULL)
 	    goto error_ret;
 
@@ -8091,6 +8113,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		used[val >> 3] = 1;
 	      }
 	  while (repeat);
+
+	  if (elf_section_data (sec)->relocs != relstart)
+	    free (relstart);
 	}
 
       /* Merge the used and skip arrays.  Assume that TOC
@@ -8143,8 +8168,112 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  memcpy (src - off, src, 8);
 		}
 	    }
+	  *drop = off;
 	  toc->rawsize = toc->size;
 	  toc->size = src - contents - off;
+
+	  /* Adjust addends for relocs against the toc section sym.  */
+	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	    {
+	      if (sec->reloc_count == 0
+		  || elf_discarded_section (sec))
+		continue;
+
+	      relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
+						    info->keep_memory);
+	      if (relstart == NULL)
+		goto error_ret;
+
+	      for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
+		{
+		  enum elf_ppc64_reloc_type r_type;
+		  unsigned long r_symndx;
+		  asection *sym_sec;
+		  struct elf_link_hash_entry *h;
+		  Elf_Internal_Sym *sym;
+		  bfd_vma val;
+
+		  r_type = ELF64_R_TYPE (rel->r_info);
+		  switch (r_type)
+		    {
+		    default:
+		      continue;
+
+		    case R_PPC64_TOC16:
+		    case R_PPC64_TOC16_LO:
+		    case R_PPC64_TOC16_HI:
+		    case R_PPC64_TOC16_HA:
+		    case R_PPC64_TOC16_DS:
+		    case R_PPC64_TOC16_LO_DS:
+		    case R_PPC64_ADDR64:
+		      break;
+		    }
+
+		  r_symndx = ELF64_R_SYM (rel->r_info);
+		  if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
+				  r_symndx, ibfd))
+		    goto error_ret;
+
+		  if (sym_sec != toc || h != NULL || sym->st_value != 0)
+		    continue;
+
+		  val = rel->r_addend;
+
+		  if (val > toc->rawsize)
+		    val = toc->rawsize;
+
+		  rel->r_addend -= skip[val >> 3];
+		  elf_section_data (sec)->relocs = relstart;
+		}
+
+	      if (elf_section_data (sec)->relocs != relstart)
+		free (relstart);
+	    }
+
+	  /* We shouldn't have local or global symbols defined in the TOC,
+	     but handle them anyway.  */
+	  if (local_syms != NULL)
+	    {
+	      Elf_Internal_Sym *sym;
+
+	      for (sym = local_syms;
+		   sym < local_syms + symtab_hdr->sh_info;
+		   ++sym)
+		if (sym->st_value != 0
+		    && bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
+		  {
+		    unsigned long i;
+
+		    if (sym->st_value > toc->rawsize)
+		      i = toc->rawsize >> 3;
+		    else
+		      i = sym->st_value >> 3;
+
+		    if (skip[sym->st_value >> 3] == (unsigned long) -1)
+		      {
+			(*_bfd_error_handler)
+			  (_("%s defined on removed toc entry"),
+			   bfd_elf_sym_name (ibfd, symtab_hdr, sym, NULL));
+			do
+			  ++i;
+			while (skip[i] == (unsigned long) -1);
+			sym->st_value = (bfd_vma) i << 3;
+		      }
+
+		    sym->st_value -= skip[i];
+		    symtab_hdr->contents = (unsigned char *) local_syms;
+		  }
+	    }
+
+	  /* Adjust any global syms defined in this toc input section.  */
+	  if (toc_inf.global_toc_syms)
+	    {
+	      toc_inf.toc = toc;
+	      toc_inf.skip = skip;
+	      toc_inf.global_toc_syms = FALSE;
+	      elf_link_hash_traverse (elf_hash_table (info), adjust_toc_syms,
+				      &toc_inf);
+	    }
 
 	  if (toc->reloc_count != 0)
 	    {
@@ -8175,91 +8304,6 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      sz = elf_section_data (toc)->rel_hdr.sh_entsize;
 	      elf_section_data (toc)->rel_hdr.sh_size = toc->reloc_count * sz;
 	      BFD_ASSERT (elf_section_data (toc)->rel_hdr2 == NULL);
-	    }
-
-	  /* Adjust addends for relocs against the toc section sym.  */
-	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	    {
-	      if (sec->reloc_count == 0
-		  || elf_discarded_section (sec))
-		continue;
-
-	      relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
-						    TRUE);
-	      if (relstart == NULL)
-		goto error_ret;
-
-	      for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
-		{
-		  enum elf_ppc64_reloc_type r_type;
-		  unsigned long r_symndx;
-		  asection *sym_sec;
-		  struct elf_link_hash_entry *h;
-		  Elf_Internal_Sym *sym;
-
-		  r_type = ELF64_R_TYPE (rel->r_info);
-		  switch (r_type)
-		    {
-		    default:
-		      continue;
-
-		    case R_PPC64_TOC16:
-		    case R_PPC64_TOC16_LO:
-		    case R_PPC64_TOC16_HI:
-		    case R_PPC64_TOC16_HA:
-		    case R_PPC64_TOC16_DS:
-		    case R_PPC64_TOC16_LO_DS:
-		    case R_PPC64_ADDR64:
-		      break;
-		    }
-
-		  r_symndx = ELF64_R_SYM (rel->r_info);
-		  if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
-				  r_symndx, ibfd))
-		    goto error_ret;
-
-		  if (sym_sec != toc || h != NULL || sym->st_value != 0)
-		    continue;
-
-		  rel->r_addend -= skip[rel->r_addend >> 3];
-		}
-	    }
-
-	  /* We shouldn't have local or global symbols defined in the TOC,
-	     but handle them anyway.  */
-	  if (local_syms != NULL)
-	    {
-	      Elf_Internal_Sym *sym;
-
-	      for (sym = local_syms;
-		   sym < local_syms + symtab_hdr->sh_info;
-		   ++sym)
-		if (sym->st_value != 0
-		    && bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
-		  {
-		    if (skip[sym->st_value >> 3] != (unsigned long) -1)
-		      sym->st_value -= skip[sym->st_value >> 3];
-		    else
-		      {
-			(*_bfd_error_handler)
-			  (_("%s defined in removed toc entry"),
-			   bfd_elf_sym_name (ibfd, symtab_hdr, sym,
-					     NULL));
-			sym->st_value = 0;
-			sym->st_shndx = SHN_ABS;
-		      }
-		    symtab_hdr->contents = (unsigned char *) local_syms;
-		  }
-	    }
-
-	  /* Finally, adjust any global syms defined in the toc.  */
-	  if (toc_inf.global_toc_syms)
-	    {
-	      toc_inf.toc = toc;
-	      toc_inf.skip = skip;
-	      toc_inf.global_toc_syms = FALSE;
-	      elf_link_hash_traverse (elf_hash_table (info), adjust_toc_syms,
-				      &toc_inf);
 	    }
 	}
 
@@ -9007,12 +9051,8 @@ ppc_type_of_stub (asection *input_sec,
 	 either a defined function descriptor or a defined entry symbol
 	 in a regular object file, then it is pointless trying to make
 	 any other type of stub.  */
-      if (!((fdh->elf.root.type == bfd_link_hash_defined
-	    || fdh->elf.root.type == bfd_link_hash_defweak)
-	    && fdh->elf.root.u.def.section->output_section != NULL)
-	  && !((h->elf.root.type == bfd_link_hash_defined
-		|| h->elf.root.type == bfd_link_hash_defweak)
-	       && h->elf.root.u.def.section->output_section != NULL))
+      if (!is_static_defined (&fdh->elf)
+	  && !is_static_defined (&h->elf))
 	return ppc_stub_none;
     }
   else if (elf_local_got_ents (input_sec->owner) != NULL)

@@ -1,3 +1,17 @@
+2010-06-25  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (is_static_defined): New function.
+	(get_tls_mask, ppc_type_of_stub): Use it here.
+	(ppc64_elf_edit_opd): Ensure we only attempt to edit ppc64 input.
+	(ppc64_elf_tls_setup): Typo fix.
+	(adjust_toc_syms): Correctly handle symbols defined past the end
+	of the toc.  Move syms on removed entries to next entry rather
+	than to start of toc.
+	(ppc64_elf_edit_toc): Likewise.  Ensure we only attempt to
+	edit ppc64 input.  Allocate one extra word in skip array.
+	Honour info->keep_memory when reading relocs if we can.
+	Adjust toc relocs after adjusting symbols.
+
 2010-06-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* archive64.c (bfd_elf64_archive_write_armap): Fix buffer overrun
@@ -559,7 +573,7 @@
 
 	* pe-x86_64.c (TARGET_UNDERSCORE): Set value dependent
 	to USE_MINGW64_LEADING_UNDERSCORES.
-        * pei-x86_64.c (TARGET_UNDERSCORE): Likewise.
+	* pei-x86_64.c (TARGET_UNDERSCORE): Likewise.
 	* config.bfd: Change underscoring default for x64 mingw
 	to false.
 	* coffcode.h (coff_write_relocs): Add check that dereferenced
