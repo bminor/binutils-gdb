@@ -1,5 +1,18 @@
 2010-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Test PR python/11407.
+	* gdb.dwarf2/dw2-ref-missing-frame-func.c: New file.
+	* gdb.dwarf2/dw2-ref-missing-frame.S: Use cu_text_start and cu_text_end.
+	Split main into func_nofb and func_loopfb dropping NO_FRAME_BASE.
+	* gdb.dwarf2/dw2-ref-missing-frame.exp: Remove variables sources,
+	executable_nofb and executable_fb.  New variables srcsfile, objsfile,
+	srcfuncfile, objfuncfile, srcmainfile, objmainfile, executable and
+	binfile.  Call gdb_compile with clean_restart twice.
+	(func_nofb print, func_nofb backtrace, func_loopfb print)
+	(func_loopfb backtrace): New.
+
+2010-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.dwarf2/dw2-ref-missing-frame-main.c: New.
 	* gdb.dwarf2/dw2-ref-missing-frame.S: Replace compiler generated output
 	by a hand made one.

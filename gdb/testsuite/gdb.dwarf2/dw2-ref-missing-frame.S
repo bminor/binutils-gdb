@@ -28,8 +28,8 @@
 
 	/* CU die */
 	.uleb128 1				/* Abbrev: DW_TAG_compile_unit */
-	.4byte	main_end			/* DW_AT_high_pc */
-	.4byte	main_start			/* DW_AT_low_pc */
+	.4byte	cu_text_end			/* DW_AT_high_pc */
+	.4byte	cu_text_start			/* DW_AT_low_pc */
 	.ascii	"file1.txt\0"			/* DW_AT_name */
 	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
 	.byte	1				/* DW_AT_language (C) */
@@ -40,20 +40,33 @@
 	.byte		4			/* DW_AT_byte_size */
 	.byte		5			/* DW_AT_encoding */
 
-	/* func */
-	.uleb128	6			/* Abbrev: DW_TAG_subprogram */
-	.ascii		"main\0"		/* DW_AT_name */
-	.4byte		main_start		/* DW_AT_low_pc */
-	.4byte		main_end		/* DW_AT_high_pc */
-#ifndef NO_FRAME_BASE
+	/* func_nofb */
+	.uleb128	5			/* Abbrev: DW_TAG_subprogram (no fb) */
+	.ascii		"func_nofb\0"		/* DW_AT_name */
+	.4byte		func_nofb_start		/* DW_AT_low_pc */
+	.4byte		func_nofb_end		/* DW_AT_high_pc */
+
+	.uleb128	7			/* Abbrev: DW_TAG_variable (location) */
+	.ascii		"func_nofb_var\0"	/* DW_AT_name */
+	.byte		2f - 1f			/* DW_AT_location */
+1:	.byte		0x91			/*   DW_OP_fbreg */
+	.sleb128	0			/*   0 */
+2:	.4byte		.Ltype_int-.Lcu1_begin	/* DW_AT_type */
+
+	.byte		0			/* End of children of func */
+
+	/* func_loopfb */
+	.uleb128	6			/* Abbrev: DW_TAG_subprogram (loop fb) */
+	.ascii		"func_loopfb\0"		/* DW_AT_name */
+	.4byte		func_loopfb_start	/* DW_AT_low_pc */
+	.4byte		func_loopfb_end		/* DW_AT_high_pc */
 	.byte		2f - 1f			/* DW_AT_frame_base */
 1:	.byte		0x91			/*   DW_OP_fbreg */
 	.sleb128	0			/*   0 */
 2:
-#endif
 
 	.uleb128	7			/* Abbrev: DW_TAG_variable (location) */
-	.ascii		"main_var\0"		/* DW_AT_name */
+	.ascii		"func_loopfb_var\0"	/* DW_AT_name */
 	.byte		2f - 1f			/* DW_AT_location */
 1:	.byte		0x91			/*   DW_OP_fbreg */
 	.sleb128	0			/*   0 */
@@ -96,8 +109,8 @@
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
 
-	.uleb128	6			/* Abbrev code */
-	.uleb128	0x2e			/* DW_TAG_subprogram */
+	.uleb128	5			/* Abbrev code */
+	.uleb128	0x2e			/* DW_TAG_subprogram (no fb) */
 	.byte		1			/* has_children */
 	.uleb128	0x3			/* DW_AT_name */
 	.uleb128	0x8			/* DW_FORM_string */
@@ -105,10 +118,20 @@
 	.uleb128	0x1			/* DW_FORM_addr */
 	.uleb128	0x12			/* DW_AT_high_pc */
 	.uleb128	0x1			/* DW_FORM_addr */
-#ifndef NO_FRAME_BASE
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.uleb128	6			/* Abbrev code */
+	.uleb128	0x2e			/* DW_TAG_subprogram (loop fb) */
+	.byte		1			/* has_children */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x11			/* DW_AT_low_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x12			/* DW_AT_high_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
 	.uleb128	0x40			/* DW_AT_frame_base */
 	.uleb128	0xa			/* DW_FORM_block1 */
-#endif
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
 
