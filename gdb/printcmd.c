@@ -1942,17 +1942,24 @@ print_variable_and_value (const char *name, struct symbol *var,
 			  struct frame_info *frame,
 			  struct ui_file *stream, int indent)
 {
-  struct value *val;
-  struct value_print_options opts;
+  volatile struct gdb_exception except;
 
   if (!name)
     name = SYMBOL_PRINT_NAME (var);
 
   fprintf_filtered (stream, "%s%s = ", n_spaces (2 * indent), name);
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      struct value *val;
+      struct value_print_options opts;
 
-  val = read_var_value (var, frame);
-  get_user_print_options (&opts);
-  common_val_print (val, stream, indent, &opts, current_language);
+      val = read_var_value (var, frame);
+      get_user_print_options (&opts);
+      common_val_print (val, stream, indent, &opts, current_language);
+    }
+  if (except.reason < 0)
+    fprintf_filtered(stream, "<error reading variable %s (%s)>", name,
+		     except.message);
   fprintf_filtered (stream, "\n");
 }
 

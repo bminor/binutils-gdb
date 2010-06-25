@@ -1,3 +1,8 @@
+2010-06-25  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* printcmd.c (print_variable_and_value): Print error message on
+	caught exception.
+
 2010-06-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2expr.h (struct dwarf_value_location): Use ULONGEST as type
