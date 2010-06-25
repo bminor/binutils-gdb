@@ -391,11 +391,12 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 
   dwarf_expr_push (ctx, initial, initial_in_stack_memory);
   dwarf_expr_eval (ctx, exp, len);
-  result = dwarf_expr_fetch (ctx, 0);
 
-  if (ctx->location == DWARF_VALUE_REGISTER)
-    result = read_reg (this_frame, result);
-  else if (ctx->location != DWARF_VALUE_MEMORY)
+  if (ctx->location == DWARF_VALUE_MEMORY)
+    result = dwarf_expr_fetch_address (ctx, 0);
+  else if (ctx->location == DWARF_VALUE_REGISTER)
+    result = read_reg (this_frame, dwarf_expr_fetch (ctx, 0));
+  else
     {
       /* This is actually invalid DWARF, but if we ever do run across
 	 it somehow, we might as well support it.  So, instead, report

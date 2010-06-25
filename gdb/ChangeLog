@@ -1,3 +1,36 @@
+2010-06-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2expr.h (struct dwarf_value_location): Use ULONGEST as type
+	of stack values.
+	(struct dwarf_expr_piece): Rename "expr" member to "mem".  Add new
+	"value" member.
+	(dwarf_expr_push): Change input type to ULONGEST.
+	(dwarf_expr_fetch): Change return type to ULONGEST.
+	(dwarf_expr_fetch_address): Add prototype.
+	(dwarf2_read_address): Remove prototype.
+	* dwarf2expr.c (dwarf_expr_push): Use ULONGEST as type of stack values.
+	Truncate stack values to ctx->addr_size bytes.
+	(dwarf_expr_fetch): Change return value to ULONGEST.
+	(dwarf_expr_fetch_address): New function.
+	(add_piece): Use dwarf_expr_fetch_address instead of dwarf_expr_fetch
+	when appropriate.  Update for struct dwarf_expr_piece changes.
+	(dwarf2_read_address): Remove.
+	(unsigned_address_type): Remove.
+	(signed_address_type): Remove.
+	(execute_stack_op): Use dwarf_expr_fetch_address instead of
+	dwarf_expr_fetch when appropriate.  Use ULONGEST as type of stack
+	values.  Perform operations on ULONGEST instead of on GDB values,
+	sign-extending from ctx->addr_size bytes as needed.  Read DW_OP_addr
+	values and DW_OP_deref results as unsigned integers.
+	* dwarf2loc.c (read_pieced_value): Update for struct dwarf_expr_piece
+	changes.
+	(write_pieced_value): Likewise.
+	(dwarf2_evaluate_loc_desc): Use dwarf_expr_fetch_address instead of
+	dwarf_expr_fetch when appropriate.
+	(compile_dwarf_to_ax): Read DW_OP_addr values as unsigned integers.
+	* dwarf2-frame.c (execute_stack_op): Use dwarf_expr_fetch_address
+	instead of dwarf_expr_fetch when appropriate.
+
 2010-06-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* c-typeprint.c (c_print_typedef): Append new type name for typedefs.

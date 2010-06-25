@@ -1,3 +1,8 @@
+2010-06-25  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.cell/dwarfaddr.exp: New file.
+	* gdb.cell/dwarfaddr.S: New file.
+
 2010-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Test PR 9436.

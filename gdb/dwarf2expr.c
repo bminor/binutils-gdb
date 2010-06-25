@@ -33,7 +33,6 @@
 
 static void execute_stack_op (struct dwarf_expr_context *,
 			      const gdb_byte *, const gdb_byte *);
-static struct type *unsigned_address_type (struct gdbarch *, int);
 
 /* Create a new context for the expression evaluator.  */
 
@@ -98,10 +97,15 @@ dwarf_expr_grow_stack (struct dwarf_expr_context *ctx, size_t need)
 /* Push VALUE onto CTX's stack.  */
 
 void
-dwarf_expr_push (struct dwarf_expr_context *ctx, CORE_ADDR value,
+dwarf_expr_push (struct dwarf_expr_context *ctx, ULONGEST value,
 		 int in_stack_memory)
 {
   struct dwarf_stack_value *v;
+
+  /* We keep all stack elements within the range defined by the
+     DWARF address size.  */
+  if (ctx->addr_size < sizeof (ULONGEST))
+    value &= ((ULONGEST) 1 << (ctx->addr_size * HOST_CHAR_BIT)) - 1;
 
   dwarf_expr_grow_stack (ctx, 1);
   v = &ctx->stack[ctx->stack_len++];
@@ -121,7 +125,7 @@ dwarf_expr_pop (struct dwarf_expr_context *ctx)
 
 /* Retrieve the N'th item on CTX's stack.  */
 
-CORE_ADDR
+ULONGEST
 dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n)
 {
   if (ctx->stack_len <= n)
@@ -129,6 +133,48 @@ dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n)
 	    n, ctx->stack_len);
   return ctx->stack[ctx->stack_len - (1 + n)].value;
 
+}
+
+/* Retrieve the N'th item on CTX's stack, converted to an address.  */
+
+CORE_ADDR
+dwarf_expr_fetch_address (struct dwarf_expr_context *ctx, int n)
+{
+  ULONGEST result = dwarf_expr_fetch (ctx, n);
+
+  /* For most architectures, calling extract_unsigned_integer() alone
+     is sufficient for extracting an address.  However, some
+     architectures (e.g. MIPS) use signed addresses and using
+     extract_unsigned_integer() will not produce a correct
+     result.  Make sure we invoke gdbarch_integer_to_address()
+     for those architectures which require it.  */
+  if (gdbarch_integer_to_address_p (ctx->gdbarch))
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (ctx->gdbarch);
+      gdb_byte *buf = alloca (ctx->addr_size);
+      struct type *int_type;
+
+      switch (ctx->addr_size)
+	{
+	case 2:
+	  int_type = builtin_type (ctx->gdbarch)->builtin_uint16;
+	  break;
+	case 4:
+	  int_type = builtin_type (ctx->gdbarch)->builtin_uint32;
+	  break;
+	case 8:
+	  int_type = builtin_type (ctx->gdbarch)->builtin_uint64;
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  _("Unsupported address size.\n"));
+	}
+
+      store_unsigned_integer (buf, ctx->addr_size, byte_order, result);
+      return gdbarch_integer_to_address (ctx->gdbarch, int_type, buf);
+    }
+
+  return (CORE_ADDR) result;
 }
 
 /* Retrieve the in_stack_memory flag of the N'th item on CTX's stack.  */
@@ -182,10 +228,14 @@ add_piece (struct dwarf_expr_context *ctx, ULONGEST size, ULONGEST offset)
 	 cases in the evaluator.  */
       ctx->location = DWARF_VALUE_OPTIMIZED_OUT;
     }
+  else if (p->location == DWARF_VALUE_MEMORY)
+    {
+      p->v.mem.addr = dwarf_expr_fetch_address (ctx, 0);
+      p->v.mem.in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
+    }
   else
     {
-      p->v.expr.value = dwarf_expr_fetch (ctx, 0);
-      p->v.expr.in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
+      p->v.value = dwarf_expr_fetch (ctx, 0);
     }
 }
 
@@ -259,76 +309,6 @@ read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, LONGEST * r)
   *r = result;
   return buf;
 }
-
-/* Read an address of size ADDR_SIZE from BUF, and verify that it
-   doesn't extend past BUF_END.  */
-
-CORE_ADDR
-dwarf2_read_address (struct gdbarch *gdbarch, const gdb_byte *buf,
-		     const gdb_byte *buf_end, int addr_size)
-{
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-
-  if (buf_end - buf < addr_size)
-    error (_("dwarf2_read_address: Corrupted DWARF expression."));
-
-  /* For most architectures, calling extract_unsigned_integer() alone
-     is sufficient for extracting an address.  However, some
-     architectures (e.g. MIPS) use signed addresses and using
-     extract_unsigned_integer() will not produce a correct
-     result.  Make sure we invoke gdbarch_integer_to_address()
-     for those architectures which require it.
-
-     The use of `unsigned_address_type' in the code below refers to
-     the type of buf and has no bearing on the signedness of the
-     address being returned.  */
-
-  if (gdbarch_integer_to_address_p (gdbarch))
-    return gdbarch_integer_to_address
-	     (gdbarch, unsigned_address_type (gdbarch, addr_size), buf);
-
-  return extract_unsigned_integer (buf, addr_size, byte_order);
-}
-
-/* Return the type of an address of size ADDR_SIZE,
-   for unsigned arithmetic.  */
-
-static struct type *
-unsigned_address_type (struct gdbarch *gdbarch, int addr_size)
-{
-  switch (addr_size)
-    {
-    case 2:
-      return builtin_type (gdbarch)->builtin_uint16;
-    case 4:
-      return builtin_type (gdbarch)->builtin_uint32;
-    case 8:
-      return builtin_type (gdbarch)->builtin_uint64;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("Unsupported address size.\n"));
-    }
-}
-
-/* Return the type of an address of size ADDR_SIZE,
-   for signed arithmetic.  */
-
-static struct type *
-signed_address_type (struct gdbarch *gdbarch, int addr_size)
-{
-  switch (addr_size)
-    {
-    case 2:
-      return builtin_type (gdbarch)->builtin_int16;
-    case 4:
-      return builtin_type (gdbarch)->builtin_int32;
-    case 8:
-      return builtin_type (gdbarch)->builtin_int64;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("Unsupported address size.\n"));
-    }
-}
 
 
 /* Check that the current operator is either at the end of an
@@ -355,6 +335,9 @@ static void
 execute_stack_op (struct dwarf_expr_context *ctx,
 		  const gdb_byte *op_ptr, const gdb_byte *op_end)
 {
+  #define sign_ext(x) ((LONGEST) (((x) ^ sign_bit) - sign_bit))
+  ULONGEST sign_bit = (ctx->addr_size >= sizeof (ULONGEST) ? 0
+		       : ((ULONGEST) 1) << (ctx->addr_size * 8 - 1));
   enum bfd_endian byte_order = gdbarch_byte_order (ctx->gdbarch);
 
   ctx->location = DWARF_VALUE_MEMORY;
@@ -368,7 +351,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
   while (op_ptr < op_end)
     {
       enum dwarf_location_atom op = *op_ptr++;
-      CORE_ADDR result;
+      ULONGEST result;
       /* Assume the value is not in stack memory.
 	 Code that knows otherwise sets this to 1.
 	 Some arithmetic on stack addresses can probably be assumed to still
@@ -417,8 +400,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 
 	case DW_OP_addr:
-	  result = dwarf2_read_address (ctx->gdbarch,
-					op_ptr, op_end, ctx->addr_size);
+	  result = extract_unsigned_integer (op_ptr,
+					     ctx->addr_size, byte_order);
 	  op_ptr += ctx->addr_size;
 	  break;
 
@@ -601,12 +584,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
                specific this_base method.  */
 	    (ctx->get_frame_base) (ctx->baton, &datastart, &datalen);
 	    dwarf_expr_eval (ctx, datastart, datalen);
-	    if (ctx->location == DWARF_VALUE_LITERAL
-		|| ctx->location == DWARF_VALUE_STACK)
+	    if (ctx->location == DWARF_VALUE_MEMORY)
+	      result = dwarf_expr_fetch_address (ctx, 0);
+	    else if (ctx->location == DWARF_VALUE_REGISTER)
+	      result = (ctx->read_reg) (ctx->baton, dwarf_expr_fetch (ctx, 0));
+	    else
 	      error (_("Not implemented: computing frame base using explicit value operator"));
-	    result = dwarf_expr_fetch (ctx, 0);
-	    if (ctx->location == DWARF_VALUE_REGISTER)
-	      result = (ctx->read_reg) (ctx->baton, result);
 	    result = result + offset;
 	    in_stack_memory = 1;
 	    ctx->stack_len = before_stack_len;
@@ -666,6 +649,17 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_deref:
 	case DW_OP_deref_size:
+	  {
+	    int addr_size = (op == DW_OP_deref ? ctx->addr_size : *op_ptr++);
+	    gdb_byte *buf = alloca (addr_size);
+	    CORE_ADDR addr = dwarf_expr_fetch_address (ctx, 0);
+	    dwarf_expr_pop (ctx);
+
+	    (ctx->read_mem) (ctx->baton, buf, addr, addr_size);
+	    result = extract_unsigned_integer (buf, addr_size, byte_order);
+	    break;
+	  }
+
 	case DW_OP_abs:
 	case DW_OP_neg:
 	case DW_OP_not:
@@ -676,31 +670,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	  switch (op)
 	    {
-	    case DW_OP_deref:
-	      {
-		gdb_byte *buf = alloca (ctx->addr_size);
-
-		(ctx->read_mem) (ctx->baton, buf, result, ctx->addr_size);
-		result = dwarf2_read_address (ctx->gdbarch,
-					      buf, buf + ctx->addr_size,
-					      ctx->addr_size);
-	      }
-	      break;
-
-	    case DW_OP_deref_size:
-	      {
-		int addr_size = *op_ptr++;
-		gdb_byte *buf = alloca (addr_size);
-
-		(ctx->read_mem) (ctx->baton, buf, result, addr_size);
-		result = dwarf2_read_address (ctx->gdbarch,
-					      buf, buf + addr_size,
-					      addr_size);
-	      }
-	      break;
-
 	    case DW_OP_abs:
-	      if ((signed int) result < 0)
+	      if (sign_ext (result) < 0)
 		result = -result;
 	      break;
 	    case DW_OP_neg:
@@ -734,12 +705,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_gt:
 	case DW_OP_ne:
 	  {
-	    /* Binary operations.  Use the value engine to do computations in
-	       the right width.  */
-	    CORE_ADDR first, second;
-	    enum exp_opcode binop;
-	    struct value *val1 = NULL, *val2 = NULL;
-	    struct type *stype, *utype;
+	    /* Binary operations.  */
+	    ULONGEST first, second;
 
 	    second = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);
@@ -747,89 +714,67 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    first = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);
 
-	    utype = unsigned_address_type (ctx->gdbarch, ctx->addr_size);
-	    stype = signed_address_type (ctx->gdbarch, ctx->addr_size);
-
 	    switch (op)
 	      {
 	      case DW_OP_and:
-		binop = BINOP_BITWISE_AND;
+		result = first & second;
 		break;
 	      case DW_OP_div:
-		binop = BINOP_DIV;
-		val1 = value_from_longest (stype, first);
-		val2 = value_from_longest (stype, second);
+		if (!second)
+		  error (_("Division by zero"));
+		result = sign_ext (first) / sign_ext (second);
                 break;
 	      case DW_OP_minus:
-		binop = BINOP_SUB;
+		result = first - second;
 		break;
 	      case DW_OP_mod:
-		binop = BINOP_MOD;
+		if (!second)
+		  error (_("Division by zero"));
+		result = first % second;
 		break;
 	      case DW_OP_mul:
-		binop = BINOP_MUL;
+		result = first * second;
 		break;
 	      case DW_OP_or:
-		binop = BINOP_BITWISE_IOR;
+		result = first | second;
 		break;
 	      case DW_OP_plus:
-		binop = BINOP_ADD;
+		result = first + second;
 		break;
 	      case DW_OP_shl:
-		binop = BINOP_LSH;
+		result = first << second;
 		break;
 	      case DW_OP_shr:
-		binop = BINOP_RSH;
+		result = first >> second;
                 break;
 	      case DW_OP_shra:
-		binop = BINOP_RSH;
-		val1 = value_from_longest (stype, first);
+		result = sign_ext (first) >> second;
 		break;
 	      case DW_OP_xor:
-		binop = BINOP_BITWISE_XOR;
+		result = first ^ second;
 		break;
 	      case DW_OP_le:
-		binop = BINOP_LEQ;
-		val1 = value_from_longest (stype, first);
-		val2 = value_from_longest (stype, second);
+		result = sign_ext (first) <= sign_ext (second);
 		break;
 	      case DW_OP_ge:
-		binop = BINOP_GEQ;
-		val1 = value_from_longest (stype, first);
-		val2 = value_from_longest (stype, second);
+		result = sign_ext (first) >= sign_ext (second);
 		break;
 	      case DW_OP_eq:
-		binop = BINOP_EQUAL;
-		val1 = value_from_longest (stype, first);
-		val2 = value_from_longest (stype, second);
+		result = sign_ext (first) == sign_ext (second);
 		break;
 	      case DW_OP_lt:
-		binop = BINOP_LESS;
-		val1 = value_from_longest (stype, first);
-		val2 = value_from_longest (stype, second);
+		result = sign_ext (first) < sign_ext (second);
 		break;
 	      case DW_OP_gt:
-		binop = BINOP_GTR;
-		val1 = value_from_longest (stype, first);
-		val2 = value_from_longest (stype, second);
+		result = sign_ext (first) > sign_ext (second);
 		break;
 	      case DW_OP_ne:
-		binop = BINOP_NOTEQUAL;
-		val1 = value_from_longest (stype, first);
-		val2 = value_from_longest (stype, second);
+		result = sign_ext (first) != sign_ext (second);
 		break;
 	      default:
 		internal_error (__FILE__, __LINE__,
 				_("Can't be reached."));
 	      }
-
-	    /* We use unsigned operands by default.  */
-	    if (val1 == NULL)
-	      val1 = value_from_longest (utype, first);
-	    if (val2 == NULL)
-	      val2 = value_from_longest (utype, second);
-
-	    result = value_as_long (value_binop (val1, val2, binop));
 	  }
 	  break;
 
@@ -935,4 +880,5 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
   ctx->recursion_depth--;
   gdb_assert (ctx->recursion_depth >= 0);
+  #undef sign_ext
 }
