@@ -1340,6 +1340,7 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
   switch (exp->type.node_class)
     {
     case etree_provide:
+    case etree_provided:
       provide = TRUE;
       /* Fall thru */
     case etree_assign:

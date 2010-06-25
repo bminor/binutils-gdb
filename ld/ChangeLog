@@ -1,9 +1,13 @@
+2010-06-25  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (find_exp_assignment): Handle etree_provided.
+
 2010-06-20  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse): Make
-	auto-import and merge-rdata defaults same for i[3-7]86 and  
-	and x86_64 mingw.
-	
+	auto-import and merge-rdata defaults same for i[3-7]86 and
+	x86_64 mingw.
+
 2010-06-15  Joseph Myers  <joseph@codesourcery.com>
 
 	* emulparams/elf32_tic6x_le.sh (ATTRS_SECTIONS): Define.
