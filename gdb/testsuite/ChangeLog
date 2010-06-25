@@ -1,3 +1,8 @@
+2010-06-25  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/operator.cc: Created an import loop.
+	* gdb.cp/operator.exp: Added testcase for import loop.
+
 2010-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Test PR python/11407.

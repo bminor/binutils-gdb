@@ -157,6 +157,22 @@ using namespace N;
 
 //------------------
 
+namespace O
+{
+  namespace P
+    {
+      using namespace ::O;
+    }
+  using namespace P;
+}
+
+using namespace O;
+
+class test { };
+test x;
+
+//------------------
+
 int main ()
 {
   A a;

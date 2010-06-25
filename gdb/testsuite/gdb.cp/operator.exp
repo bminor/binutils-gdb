@@ -56,3 +56,6 @@ gdb_test "p j == 1" "Cannot resolve function operator== to any overloaded instan
 
 # Test that indirectly imported operators work
 gdb_test "p l == 1" "= 88"
+
+# Test that we don't fall into an import loop
+gdb_test {p x[0]} {No symbol "operator\[\]" in current context.}
