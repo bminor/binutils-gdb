@@ -1,3 +1,8 @@
+2010-06-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_push_dummy_call): Error on stack overflow
+	during inferior call stack frame setup.
+
 2010-06-25  Ken Werner  <ken.werner@de.ibm.com>
 
 	* solib-spu.c: Include "exception.h".
