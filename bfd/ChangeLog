@@ -1,5 +1,15 @@
 2010-06-25  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (_bfd_vms_write_egsd): Set target_index field of
+	sections.  Mark .vmsdebug section as SEC_DEBUGGING.  Do not create
+	dummy psect anymore.  Adjust.
+	(_bfd_vms_write_eeom): Adjust (use target_index instead of index)
+	(_bfd_vms_write_etir): Ditto.
+	(start_etir_or_etbt_record): Test for SEC_DEBUGGING instead of
+	section name.  Adjust.
+
+2010-06-25  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (alpha_vms_write_exec): Set linktime field.
 
 2010-06-25  Alan Modra  <amodra@gmail.com>
