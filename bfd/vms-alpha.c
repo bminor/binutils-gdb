@@ -3281,7 +3281,7 @@ _bfd_vms_write_egsd (bfd *abfd)
   unsigned int symnum;
   const char *sname;
   flagword new_flags, old_flags;
-  int abs_section_index = 0;
+  int abs_section_index = -1;
   unsigned int target_index = 0;
   struct vms_rec_wr *recwr = &PRIV (recwr);
 
@@ -3344,10 +3344,7 @@ _bfd_vms_write_egsd (bfd *abfd)
 	  else if ((*sname == 'l') && (strcmp (sname, "literal") == 0))
 	    sname = EVAX_LITERAL_NAME;
 	  else if ((*sname == 'l') && (strcmp (sname, "literals") == 0))
-	    {
-	      sname = EVAX_LITERALS_NAME;
-	      abs_section_index = section->target_index;
-	    }
+            sname = EVAX_LITERALS_NAME;
 	  else if ((*sname == 'c') && (strcmp (sname, "comm") == 0))
 	    sname = EVAX_COMMON_NAME;
 	  else if ((*sname == 'l') && (strcmp (sname, "lcomm") == 0))
@@ -3355,9 +3352,6 @@ _bfd_vms_write_egsd (bfd *abfd)
 	}
       else
 	sname = _bfd_vms_length_hash_symbol (abfd, sname, EOBJ__C_SECSIZ);
-
-      _bfd_vms_output_begin_subrec (recwr, EGSD__C_PSC);
-      _bfd_vms_output_short (recwr, section->alignment_power & 0xff);
 
       if (bfd_is_com_section (section))
 	new_flags = (EGPS__V_OVR | EGPS__V_REL | EGPS__V_GBL | EGPS__V_RD
@@ -3377,10 +3371,17 @@ _bfd_vms_write_egsd (bfd *abfd)
       vms_debug2 ((3, "new_flags %x, _raw_size %lu\n",
                    new_flags, (unsigned long)section->size));
 
+      _bfd_vms_output_begin_subrec (recwr, EGSD__C_PSC);
+      _bfd_vms_output_short (recwr, section->alignment_power & 0xff);
       _bfd_vms_output_short (recwr, new_flags);
       _bfd_vms_output_long (recwr, (unsigned long) section->size);
       _bfd_vms_output_counted (recwr, sname);
       _bfd_vms_output_end_subrec (recwr);
+
+      /* If the section is an obsolute one, remind its index as it will be
+         used later for absolute symbols.  */
+      if ((new_flags & EGPS__V_REL) == 0 && abs_section_index < 0)
+        abs_section_index = section->target_index;
     }
 
   /* Output symbols.  */
@@ -3395,7 +3396,8 @@ _bfd_vms_write_egsd (bfd *abfd)
       symbol = abfd->outsymbols[symnum];
       old_flags = symbol->flags;
 
-      /* Work-around a missing feature:  consider __main as the main entry point.  */
+      /* Work-around a missing feature:  consider __main as the main entry
+         point.  */
       if (*(symbol->name) == '_')
 	{
 	  if (strcmp (symbol->name, "__main") == 0)
@@ -3416,13 +3418,31 @@ _bfd_vms_write_egsd (bfd *abfd)
             continue;
         }
 
-      /* 13 bytes egsd, max 64 chars name -> should be 77 bytes.  */
-      if (_bfd_vms_output_check (recwr, 80) < 0)
+      /* 13 bytes egsd, max 64 chars name -> should be 77 bytes.  Add 16 more
+         bytes for a possible ABS section.  */
+      if (_bfd_vms_output_check (recwr, 80 + 16) < 0)
 	{
 	  _bfd_vms_output_end (abfd, recwr);
 	  _bfd_vms_output_begin (recwr, EOBJ__C_EGSD);
 	  _bfd_vms_output_long (recwr, 0);
 	}
+
+      if ((old_flags & BSF_GLOBAL) != 0
+          && bfd_is_abs_section (symbol->section)
+          && abs_section_index <= 0)
+        {
+          /* Create an absolute section if none was defined.  It is highly
+             unlikely that the name $ABS$ clashes with a user defined
+             non-absolute section name.  */
+          _bfd_vms_output_begin_subrec (recwr, EGSD__C_PSC);
+          _bfd_vms_output_short (recwr, 4);
+          _bfd_vms_output_short (recwr, EGPS__V_SHR);
+          _bfd_vms_output_long (recwr, 0);
+          _bfd_vms_output_counted (recwr, "$ABS$");
+          _bfd_vms_output_end_subrec (recwr);
+
+          abs_section_index = target_index++;
+        }
 
       _bfd_vms_output_begin_subrec (recwr, EGSD__C_SYM);
 

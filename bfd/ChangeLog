@@ -1,5 +1,10 @@
 2010-06-25  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (_bfd_vms_write_egsd): Check absolute section with
+	its flags.  Create an absolute section if needed.
+
+2010-06-25  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (_bfd_vms_write_egsd): Set target_index field of
 	sections.  Mark .vmsdebug section as SEC_DEBUGGING.  Do not create
 	dummy psect anymore.  Adjust.
