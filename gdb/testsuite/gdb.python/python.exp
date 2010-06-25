@@ -83,3 +83,7 @@ gdb_test "python print gdb.objfiles()" "\\\[\\\]"
 
 # Test http://bugs.python.org/issue4434 workaround in configure.ac
 gdb_test "python import itertools; print 'IMPOR'+'TED'" "IMPORTED" "pythonX.Y/lib-dynload/*.so"
+
+gdb_test_no_output \
+    "python x = gdb.execute('printf \"%d\", 23', to_string = True)"
+gdb_test "python print x" "23"

@@ -1,3 +1,13 @@
+2010-06-25  Tom Tromey  <tromey@redhat.com>
+
+	PR python/10808:
+	* python/python.c (execute_gdb_command): Add keywords.  Accept
+	"to_string" argument.
+	(struct restore_ui_file_closure): New.
+	(restore_ui_file): New function.
+	(make_cleanup_restore_ui_file): Likewise.
+	(GdbMethods) <execute>: Update.
+
 2010-06-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (s390_push_dummy_call): Error on stack overflow

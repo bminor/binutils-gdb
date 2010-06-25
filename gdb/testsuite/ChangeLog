@@ -1,3 +1,8 @@
+2010-06-25  Tom Tromey  <tromey@redhat.com>
+
+	PR python/10808:
+	* gdb.python/python.exp: Add new tests.
+
 2010-06-25  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/operator.cc: Created an import loop.

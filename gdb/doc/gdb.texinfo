@@ -20200,15 +20200,20 @@ methods and classes added by @value{GDBN} are placed in this module.
 use in all scripts evaluated by the @code{python} command.
 
 @findex gdb.execute
-@defun execute command [from_tty]
+@defun execute command [from_tty] [to_string]
 Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
 If a GDB exception happens while @var{command} runs, it is
 translated as described in @ref{Exception Handling,,Exception Handling}.
-If no exceptions occur, this function returns @code{None}.
 
 @var{from_tty} specifies whether @value{GDBN} ought to consider this
 command as having originated from the user invoking it interactively.
 It must be a boolean value.  If omitted, it defaults to @code{False}.
+
+By default, any output produced by @var{command} is sent to
+@value{GDBN}'s standard output.  If the @var{to_string} parameter is
+@code{True}, then output will be collected by @code{gdb.execute} and
+returned as a string.  The default is @code{False}, in which case the
+return value is @code{None}.
 @end defun
 
 @findex gdb.breakpoints

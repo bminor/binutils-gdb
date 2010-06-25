@@ -1,3 +1,8 @@
+2010-06-25  Tom Tromey  <tromey@redhat.com>
+
+	PR python/10808:
+	* gdb.texinfo (Basic Python): Document new gdb.execute argument.
+
 2010-06-24  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.texinfo: (Commands for Controlled Output): Add
