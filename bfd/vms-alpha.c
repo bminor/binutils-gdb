@@ -3007,6 +3007,7 @@ alpha_vms_write_exec (bfd *abfd)
     char *module;
     unsigned int len;
 
+    /* Set module name.  */
     module = vms_get_module_name (bfd_get_filename (abfd), TRUE);
     len = strlen (module);
     if (len > sizeof (eihi->imgnam) - 1)
@@ -3015,8 +3016,15 @@ alpha_vms_write_exec (bfd *abfd)
     memcpy (eihi->imgnam + 1, module, len);
     free (module);
   }
-  bfd_putl32 (0, eihi->linktime + 0);
-  bfd_putl32 (0, eihi->linktime + 4);
+  {
+    unsigned int lo;
+    unsigned int hi;
+
+    /* Set time.  */
+    vms_get_time (&hi, &lo);
+    bfd_putl32 (lo, eihi->linktime + 0);
+    bfd_putl32 (hi, eihi->linktime + 4);
+  }
   eihi->imgid[0] = 0;
   eihi->linkid[0] = 0;
   eihi->imgbid[0] = 0;
