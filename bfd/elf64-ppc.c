@@ -7846,6 +7846,8 @@ struct adjust_toc_info
   bfd_boolean global_toc_syms;
 };
 
+enum toc_skip_enum { ref_from_discarded = 1, can_optimize = 2 };
+
 static bfd_boolean
 adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
 {
@@ -7874,13 +7876,13 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
       else
 	i = eh->elf.root.u.def.value >> 3;
 
-      if (toc_inf->skip[i] == (unsigned long) -1)
+      if ((toc_inf->skip[i] & (ref_from_discarded | can_optimize)) != 0)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s defined on removed toc entry"), eh->elf.root.root.string);
 	  do
 	    ++i;
-	  while (toc_inf->skip[i] == (unsigned long) -1);
+	  while ((toc_inf->skip[i] & (ref_from_discarded | can_optimize)) != 0);
 	  eh->elf.root.u.def.value = (bfd_vma) i << 3;
 	}
 
@@ -8001,10 +8003,84 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		    goto error_ret;
 		}
 
-	      skip[val >> 3] = 1;
+	      skip[val >> 3] = ref_from_discarded;
 	    }
 
 	  if (elf_section_data (sec)->relocs != relstart)
+	    free (relstart);
+	}
+
+      /* For largetoc loads of address constants, we can convert
+	 .  addis rx,2,addr@got@ha
+	 .  ld ry,addr@got@l(rx)
+	 to
+	 .  addis rx,2,addr@toc@ha
+	 .  addi ry,rx,addr@toc@l
+	 when addr is within 2G of the toc pointer.  This then means
+	 that the word storing "addr" in the toc is no longer needed.  */
+	 
+      if (!ppc64_elf_tdata (ibfd)->has_small_toc_reloc
+	  && toc->output_section->rawsize < (bfd_vma) 1 << 31
+	  && toc->reloc_count != 0)
+	{
+	  /* Read toc relocs.  */
+	  relstart = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL,
+						info->keep_memory);
+	  if (relstart == NULL)
+	    goto error_ret;
+
+	  for (rel = relstart; rel < relstart + toc->reloc_count; ++rel)
+	    {
+	      enum elf_ppc64_reloc_type r_type;
+	      unsigned long r_symndx;
+	      asection *sym_sec;
+	      struct elf_link_hash_entry *h;
+	      Elf_Internal_Sym *sym;
+	      bfd_vma val, addr;
+
+	      r_type = ELF64_R_TYPE (rel->r_info);
+	      if (r_type != R_PPC64_ADDR64)
+		continue;
+
+	      r_symndx = ELF64_R_SYM (rel->r_info);
+	      if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
+			      r_symndx, ibfd))
+		goto error_ret;
+
+	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
+		continue;
+
+	      if (h != NULL)
+		val = h->root.u.def.value;
+	      else
+		val = sym->st_value;
+	      val += rel->r_addend;
+	      val += sym_sec->output_section->vma + sym_sec->output_offset;
+
+	      /* We don't yet know the exact toc pointer value, but we
+		 know it will be somewhere in the toc section.  Don't
+		 optimize if the difference from any possible toc
+		 pointer is outside [ff..f80008000, 7fff7fff].  */
+	      addr = toc->output_section->vma + TOC_BASE_OFF;
+	      if (val - addr + (bfd_vma) 0x80008000 >= (bfd_vma) 1 << 32)
+		continue;
+
+	      addr = toc->output_section->vma + toc->output_section->rawsize;
+	      if (val - addr + (bfd_vma) 0x80008000 >= (bfd_vma) 1 << 32)
+		continue;
+
+	      if (skip == NULL)
+		{
+		  skip = bfd_zmalloc (sizeof (*skip) * (toc->size + 15) / 8);
+		  if (skip == NULL)
+		    goto error_ret;
+		}
+
+	      skip[rel->r_offset >> 3]
+		|= can_optimize | ((rel - relstart) << 2);
+	    }
+
+	  if (elf_section_data (toc)->relocs != relstart)
 	    free (relstart);
 	}
 
@@ -8100,12 +8176,37 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		if (val >= toc->size)
 		  continue;
 
+		if ((skip[val >> 3] & can_optimize) != 0)
+		  {
+		    bfd_vma off;
+		    unsigned char opc;
+
+		    switch (r_type)
+		      {
+		      case R_PPC64_TOC16_HA:
+			break;
+
+		      case R_PPC64_TOC16_LO_DS:
+			off = rel->r_offset + (bfd_big_endian (ibfd) ? -2 : 3);
+			if (!bfd_get_section_contents (ibfd, sec, &opc, off, 1))
+			  return FALSE;
+			if ((opc & (0x3f << 2)) == (58u << 2))
+			  break;
+			/* Fall thru */
+
+		      default:
+			/* Wrong sort of reloc, or not a ld.  We may
+			   as well clear ref_from_discarded too.  */
+			skip[val >> 3] = 0;
+		      }
+		  }
+
 		/* For the toc section, we only mark as used if
 		   this entry itself isn't unused.  */
 		if (sec == toc
 		    && !used[val >> 3]
 		    && (used[rel->r_offset >> 3]
-			|| !skip[rel->r_offset >> 3]))
+			|| !(skip[rel->r_offset >> 3] & ref_from_discarded)))
 		  /* Do all the relocs again, to catch reference
 		     chains.  */
 		  repeat = 1;
@@ -8127,13 +8228,15 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	{
 	  if (*keep)
 	    {
-	      *drop = 0;
+	      *drop &= ~ref_from_discarded;
+	      if ((*drop & can_optimize) != 0)
+		some_unused = 1;
 	      last = 0;
 	    }
 	  else if (*drop)
 	    {
 	      some_unused = 1;
-	      last = 1;
+	      last = ref_from_discarded;
 	    }
 	  else
 	    *drop = last;
@@ -8145,6 +8248,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	{
 	  bfd_byte *contents, *src;
 	  unsigned long off;
+	  bfd_boolean local_toc_syms = FALSE;
 
 	  /* Shuffle the toc contents, and at the same time convert the
 	     skip array from booleans into offsets.  */
@@ -8157,11 +8261,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	       src < contents + toc->size;
 	       src += 8, ++drop)
 	    {
-	      if (*drop)
-		{
-		  *drop = (unsigned long) -1;
-		  off += 8;
-		}
+	      if ((*drop & (can_optimize | ref_from_discarded)) != 0)
+		off += 8;
 	      else if (off != 0)
 		{
 		  *drop = off;
@@ -8172,7 +8273,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  toc->rawsize = toc->size;
 	  toc->size = src - contents - off;
 
-	  /* Adjust addends for relocs against the toc section sym.  */
+	  /* Adjust addends for relocs against the toc section sym,
+	     and optimize any accesses we can.  */
 	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	    {
 	      if (sec->reloc_count == 0
@@ -8214,13 +8316,50 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 				  r_symndx, ibfd))
 		    goto error_ret;
 
-		  if (sym_sec != toc || h != NULL || sym->st_value != 0)
+		  if (sym_sec != toc)
 		    continue;
 
-		  val = rel->r_addend;
+		  if (h != NULL)
+		    val = h->root.u.def.value;
+		  else
+		    {
+		      val = sym->st_value;
+		      if (val != 0)
+			local_toc_syms = TRUE;
+		    }
+
+		  val += rel->r_addend;
 
 		  if (val > toc->rawsize)
 		    val = toc->rawsize;
+		  else if ((skip[val >> 3] & ref_from_discarded) != 0)
+		    continue;
+		  else if ((skip[val >> 3] & can_optimize) != 0)
+		    {
+		      Elf_Internal_Rela *tocrel
+			= elf_section_data (toc)->relocs + (skip[val >> 3] >> 2);
+		      unsigned long tsym = ELF64_R_SYM (tocrel->r_info);
+
+		      switch (r_type)
+			{
+			case R_PPC64_TOC16_HA:
+			  rel->r_info = ELF64_R_INFO (tsym, R_PPC64_TOC16_HA);
+			  break;
+
+			case R_PPC64_TOC16_LO_DS:
+			  rel->r_info = ELF64_R_INFO (tsym, R_PPC64_LO_DS_OPT);
+			  break;
+
+			default:
+			  abort ();
+			}
+		      rel->r_addend = tocrel->r_addend;
+		      elf_section_data (sec)->relocs = relstart;
+		      continue;
+		    }
+
+		  if (h != NULL || sym->st_value != 0)
+		    continue;
 
 		  rel->r_addend -= skip[val >> 3];
 		  elf_section_data (sec)->relocs = relstart;
@@ -8232,7 +8371,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 
 	  /* We shouldn't have local or global symbols defined in the TOC,
 	     but handle them anyway.  */
-	  if (local_syms != NULL)
+	  if (local_toc_syms)
 	    {
 	      Elf_Internal_Sym *sym;
 
@@ -8249,14 +8388,14 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		    else
 		      i = sym->st_value >> 3;
 
-		    if (skip[sym->st_value >> 3] == (unsigned long) -1)
+		    if ((skip[i] & (ref_from_discarded | can_optimize)) != 0)
 		      {
 			(*_bfd_error_handler)
 			  (_("%s defined on removed toc entry"),
 			   bfd_elf_sym_name (ibfd, symtab_hdr, sym, NULL));
 			do
 			  ++i;
-			while (skip[i] == (unsigned long) -1);
+			while ((skip[i] & (ref_from_discarded | can_optimize)));
 			sym->st_value = (bfd_vma) i << 3;
 		      }
 
@@ -8289,7 +8428,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      /* Remove unused toc relocs, and adjust those we keep.  */
 	      wrel = relstart;
 	      for (rel = relstart; rel < relstart + toc->reloc_count; ++rel)
-		if (skip[rel->r_offset >> 3] != (unsigned long) -1)
+		if ((skip[rel->r_offset >> 3]
+		     & (ref_from_discarded | can_optimize)) == 0)
 		  {
 		    wrel->r_offset = rel->r_offset - skip[rel->r_offset >> 3];
 		    wrel->r_info = rel->r_info;
@@ -11256,7 +11396,7 @@ ppc64_elf_action_discarded (asection *sec)
   return _bfd_elf_default_action_discarded (sec);
 }
 
-/* REL points to a low-part reloc on a bigtoc instruction sequence.
+/* REL points to a low-part reloc on a largetoc instruction sequence.
    Find the matching high-part reloc instruction and verify that it
    is addis REG,r2,x.  If so, return a pointer to the high-part reloc.  */
 
@@ -11563,6 +11703,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	default:
+	  break;
+
+	case R_PPC64_LO_DS_OPT:
+	  insn = bfd_get_32 (output_bfd, contents + rel->r_offset - d_offset);
+	  if ((insn & (0x3f << 26)) != 58u << 26)
+	    abort ();
+	  insn += (14u << 26) - (58u << 26);
+	  bfd_put_32 (output_bfd, insn, contents + rel->r_offset - d_offset);
+	  r_type = R_PPC64_TOC16_LO;
+	  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 	  break;
 
 	case R_PPC64_TOC16:

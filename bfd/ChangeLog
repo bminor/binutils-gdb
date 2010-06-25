@@ -1,5 +1,13 @@
 2010-06-25  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (toc_skip_enum): Define.
+	(ppc64_elf_edit_toc): Use two low bits of skip array as markers.
+	Optimize largetoc sequences.
+	(adjust_toc_syms): Update for skip array change.
+	(ppc64_elf_relocate_section): Handle R_PPC64_LO_DS_OPT.
+
+2010-06-25  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (is_static_defined): New function.
 	(get_tls_mask, ppc_type_of_stub): Use it here.
 	(ppc64_elf_edit_opd): Ensure we only attempt to edit ppc64 input.

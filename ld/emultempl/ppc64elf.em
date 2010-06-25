@@ -227,6 +227,19 @@ sort_toc_sections (lang_statement_list_type *list,
 }
 
 static void
+prelim_size_sections (void)
+{
+  if (expld.phase != lang_mark_phase_enum)
+    {
+      expld.phase = lang_mark_phase_enum;
+      expld.dataseg.phase = exp_dataseg_none;
+      one_lang_size_sections_pass (NULL, FALSE);
+      /* We must not cache anything from the preliminary sizing.  */
+      lang_reset_memory_regions ();
+    }
+}
+
+static void
 ppc_before_allocation (void)
 {
   if (stub_file != NULL)
@@ -240,21 +253,20 @@ ppc_before_allocation (void)
 	{
 	  /* Size the sections.  This is premature, but we want to know the
 	     TLS segment layout so that certain optimizations can be done.  */
-	  expld.phase = lang_mark_phase_enum;
-	  expld.dataseg.phase = exp_dataseg_none;
-	  one_lang_size_sections_pass (NULL, TRUE);
+	  prelim_size_sections ();
 
 	  if (!ppc64_elf_tls_optimize (&link_info))
 	    einfo ("%X%P: TLS problem %E\n");
-
-	  /* We must not cache anything from the preliminary sizing.  */
-	  lang_reset_memory_regions ();
 	}
 
       if (!no_toc_opt
-	  && !link_info.relocatable
-	  && !ppc64_elf_edit_toc (&link_info))
-	einfo ("%X%P: can not edit %s %E\n", "toc");
+	  && !link_info.relocatable)
+	{
+	  prelim_size_sections ();
+
+	  if (!ppc64_elf_edit_toc (&link_info))
+	    einfo ("%X%P: can not edit %s %E\n", "toc");
+	}
 
       if (!no_toc_sort)
 	{

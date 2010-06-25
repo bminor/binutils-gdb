@@ -1,5 +1,10 @@
 2010-06-25  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/ppc64elf.em (prelim_size_sections): New function.
+	(ppc_before_allocation): Use it.  Size sections before toc edit too.
+
+2010-06-25  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (find_exp_assignment): Handle etree_provided.
 
 2010-06-20  Danny Smith  <dannysmith@users.sourceforge.net>
