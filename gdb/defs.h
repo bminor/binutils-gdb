@@ -307,6 +307,10 @@ extern int subset_compare (char *, char *);
 
 extern char *safe_strerror (int);
 
+extern void set_display_time (int);
+
+extern void set_display_space (int);
+
 #define	ALL_CLEANUPS	((struct cleanup *)0)
 
 extern void do_cleanups (struct cleanup *);
@@ -368,6 +372,8 @@ extern void restore_my_cleanups (struct cleanup **, struct cleanup *);
 extern void free_current_contents (void *);
 
 extern void null_cleanup (void *);
+
+extern struct cleanup *make_command_stats_cleanup (int);
 
 extern int myread (int, char *, int);
 

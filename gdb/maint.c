@@ -171,23 +171,19 @@ maintenance_demangle (char *args, int from_tty)
 static void
 maintenance_time_display (char *args, int from_tty)
 {
-  extern int display_time;
-
   if (args == NULL || *args == '\0')
     printf_unfiltered (_("\"maintenance time\" takes a numeric argument.\n"));
   else
-    display_time = strtol (args, NULL, 10);
+    set_display_time (strtol (args, NULL, 10));
 }
 
 static void
 maintenance_space_display (char *args, int from_tty)
 {
-  extern int display_space;
-
   if (args == NULL || *args == '\0')
     printf_unfiltered ("\"maintenance space\" takes a numeric argument.\n");
   else
-    display_space = strtol (args, NULL, 10);
+    set_display_space (strtol (args, NULL, 10));
 }
 
 /* The "maintenance info" command is defined as a prefix, with

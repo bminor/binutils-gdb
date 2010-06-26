@@ -476,12 +476,7 @@ static void
 command_handler (char *command)
 {
   int stdin_is_tty = ISATTY (stdin);
-  long time_at_cmd_start;
-#ifdef HAVE_SBRK
-  long space_at_cmd_start = 0;
-#endif
-  extern int display_time;
-  extern int display_space;
+  struct cleanup *stat_chain;
 
   quit_flag = 0;
   if (instream == stdin && stdin_is_tty)
@@ -498,43 +493,14 @@ command_handler (char *command)
       execute_command ("quit", stdin == instream);
     }
 
-  time_at_cmd_start = get_run_time ();
-
-  if (display_space)
-    {
-#ifdef HAVE_SBRK
-      char *lim = (char *) sbrk (0);
-
-      space_at_cmd_start = lim - lim_at_start;
-#endif
-    }
+  stat_chain = make_command_stats_cleanup (1);
 
   execute_command (command, instream == stdin);
 
   /* Do any commands attached to breakpoint we stopped at.  */
   bpstat_do_actions ();
 
-  if (display_time)
-    {
-      long cmd_time = get_run_time () - time_at_cmd_start;
-
-      printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
-			 cmd_time / 1000000, cmd_time % 1000000);
-    }
-
-  if (display_space)
-    {
-#ifdef HAVE_SBRK
-      char *lim = (char *) sbrk (0);
-      long space_now = lim - lim_at_start;
-      long space_diff = space_now - space_at_cmd_start;
-
-      printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
-			 space_now,
-			 (space_diff >= 0 ? '+' : '-'),
-			 space_diff);
-#endif
-    }
+  do_cleanups (stat_chain);
 }
 
 /* Handle a complete line of input. This is called by the callback

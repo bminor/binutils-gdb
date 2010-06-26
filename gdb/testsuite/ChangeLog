@@ -1,3 +1,8 @@
+2010-06-25  Paul Hilfinger  <hilfinger@adacore.com>
+
+        * gdb.gdb/selftest.exp: Adjust expected message for
+        capturing start-up runtime.
+
 2010-06-25  Tom Tromey  <tromey@redhat.com>
 
 	PR python/10808:

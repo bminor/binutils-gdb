@@ -513,6 +513,100 @@ null_cleanup (void *arg)
 {
 }
 
+/* If nonzero, display time usage both at startup and for each command.  */
+
+static int display_time;
+
+/* If nonzero, display space usage both at startup and for each command.  */
+
+static int display_space;
+
+/* Records a run time and space usage to be used as a base for
+   reporting elapsed time or change in space.  In addition,
+   the msg_type field indicates whether the saved time is from the
+   beginning of GDB execution (0) or the beginning of an individual 
+   command execution (1).  */
+struct cmd_stats 
+{
+  int msg_type;
+  long start_time;
+  long start_space;
+};
+
+/* Set whether to display time statistics to NEW_VALUE (non-zero 
+   means true).  */
+void
+set_display_time (int new_value)
+{
+  display_time = new_value;
+}
+
+/* Set whether to display space statistics to NEW_VALUE (non-zero
+   means true).  */
+void
+set_display_space (int new_value)
+{
+  display_space = new_value;
+}
+
+/* As indicated by display_time and display_space, report GDB's elapsed time
+   and space usage from the base time and space provided in ARG, which
+   must be a pointer to a struct cmd_stat. This function is intended
+   to be called as a cleanup. */
+static void
+report_command_stats (void *arg)
+{
+  struct cmd_stats *start_stats = (struct cmd_stats *) arg;
+  int msg_type = start_stats->msg_type;
+
+  if (display_time)
+    {
+      long cmd_time = get_run_time () - start_stats->start_time;
+
+      printf_unfiltered (msg_type == 0
+			 ? _("Startup time: %ld.%06ld\n")
+			 : _("Command execution time: %ld.%06ld\n"),
+			 cmd_time / 1000000, cmd_time % 1000000);
+    }
+
+  if (display_space)
+    {
+#ifdef HAVE_SBRK
+      char *lim = (char *) sbrk (0);
+
+      long space_now = lim - lim_at_start;
+      long space_diff = space_now - start_stats->start_space;
+
+      printf_unfiltered (msg_type == 0
+			 ? _("Space used: %ld (%c%ld during startup)\n")
+			 : _("Space used: %ld (%c%ld for this command)\n"),
+			 space_now,
+			 (space_diff >= 0 ? '+' : '-'),
+			 space_diff);
+#endif
+    }
+}
+
+/* Create a cleanup that reports time and space used since its
+   creation.  Precise messages depend on MSG_TYPE:
+      0:  Initial time/space
+      1:  Individual command time/space.  */
+struct cleanup *
+make_command_stats_cleanup (int msg_type)
+{
+  struct cmd_stats *new_stat = XMALLOC (struct cmd_stats);
+  
+#ifdef HAVE_SBRK
+  char *lim = (char *) sbrk (0);
+  new_stat->start_space = lim - lim_at_start;
+#endif
+
+  new_stat->msg_type = msg_type;
+  new_stat->start_time = get_run_time ();
+
+  return make_cleanup_dtor (report_command_stats, new_stat, xfree);
+}
+
 /* Continuations are implemented as cleanups internally.  Inherit from
    cleanups.  */
 struct continuation
