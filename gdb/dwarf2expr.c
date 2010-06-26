@@ -335,7 +335,7 @@ static void
 execute_stack_op (struct dwarf_expr_context *ctx,
 		  const gdb_byte *op_ptr, const gdb_byte *op_end)
 {
-  #define sign_ext(x) ((LONGEST) (((x) ^ sign_bit) - sign_bit))
+#define sign_ext(x) ((LONGEST) (((x) ^ sign_bit) - sign_bit))
   ULONGEST sign_bit = (ctx->addr_size >= sizeof (ULONGEST) ? 0
 		       : ((ULONGEST) 1) << (ctx->addr_size * 8 - 1));
   enum bfd_endian byte_order = gdbarch_byte_order (ctx->gdbarch);
@@ -880,5 +880,5 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
   ctx->recursion_depth--;
   gdb_assert (ctx->recursion_depth >= 0);
-  #undef sign_ext
+#undef sign_ext
 }

@@ -1,3 +1,8 @@
+2010-06-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2expr.c (execute_stack_op): Place preprocessor
+	directives at the start of the source line.
+
 2010-06-25  Paul Hilfinger  <hilfinger@adacore.com>
 
         * defs.h (make_command_stats_cleanup): Declare.
