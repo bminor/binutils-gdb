@@ -1,3 +1,7 @@
+2010-06-27  Doug Evans  <dje@google.com>
+
+	* valops.c (search_struct_field): Fix typo in error message.
+
 2010-06-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2expr.c (execute_stack_op): Place preprocessor

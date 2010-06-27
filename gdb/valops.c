@@ -1852,7 +1852,7 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 	      {
 		v = value_static_field (type, i);
 		if (v == 0)
-		  error (_("field %s is nonexistent or has been optimised out"),
+		  error (_("field %s is nonexistent or has been optimized out"),
 			 name);
 	      }
 	    else
