@@ -123,7 +123,7 @@ gdb_test "print test3.data.value_derived" "\\$\[0-9\].* = etruscan" "template ob
 gdb_test "print test4.elsewhere" "\\$\[0-9\].* = 221" "static const int initialized elsewhere"
 
 # static const int that nobody initializes.  From PR gdb/635.
-gdb_test "print test4.nowhere" "field nowhere is nonexistent or has been optimised out" "static const int initialized nowhere"
+gdb_test "print test4.nowhere" "field nowhere is nonexistent or has been optimized out" "static const int initialized nowhere"
 
 # Perhaps at some point test4 should also include a test for a static
 # const int that was initialized in the header file.  But I'm not sure
