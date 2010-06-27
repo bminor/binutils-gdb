@@ -6689,6 +6689,7 @@ get_tls_mask (unsigned char **tls_maskp,
 
   if ((*tls_maskp != NULL && **tls_maskp != 0)
       || sec == NULL
+      || ppc64_elf_section_data (sec) == NULL
       || ppc64_elf_section_data (sec)->sec_type != sec_toc)
     return 1;
 
@@ -10666,7 +10667,8 @@ group_sections (struct ppc_link_hash_table *htab,
 
 	  curr = tail;
 	  total = tail->size;
-	  big_sec = total > (ppc64_elf_section_data (tail)->has_14bit_branch
+	  big_sec = total > (ppc64_elf_section_data (tail) != NULL
+			     && ppc64_elf_section_data (tail)->has_14bit_branch
 			     ? stub14_group_size : stub_group_size);
 	  if (big_sec && !suppress_size_errors)
 	    (*_bfd_error_handler) (_("%B section %A exceeds stub group size"),
@@ -10675,7 +10677,8 @@ group_sections (struct ppc_link_hash_table *htab,
 
 	  while ((prev = PREV_SEC (curr)) != NULL
 		 && ((total += curr->output_offset - prev->output_offset)
-		     < (ppc64_elf_section_data (prev)->has_14bit_branch
+		     < (ppc64_elf_section_data (prev) != NULL
+			&& ppc64_elf_section_data (prev)->has_14bit_branch
 			? stub14_group_size : stub_group_size))
 		 && htab->stub_group[prev->id].toc_off == curr_toc)
 	    curr = prev;
@@ -10708,7 +10711,8 @@ group_sections (struct ppc_link_hash_table *htab,
 	      total = 0;
 	      while (prev != NULL
 		     && ((total += tail->output_offset - prev->output_offset)
-			 < (ppc64_elf_section_data (prev)->has_14bit_branch
+			 < (ppc64_elf_section_data (prev) != NULL
+			    && ppc64_elf_section_data (prev)->has_14bit_branch
 			    ? stub14_group_size : stub_group_size))
 		     && htab->stub_group[prev->id].toc_off == curr_toc)
 		{

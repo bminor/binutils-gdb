@@ -1,5 +1,10 @@
 2010-06-27  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (get_tls_mask): Don't segfault on NULL elf_section_data.
+	(group_sections): Likewise.
+
+2010-06-27  Alan Modra  <amodra@gmail.com>
+
 	* bout.c (aligncode): Delete set but unused variables.
 	* coff-mcore.c (coff_mcore_relocate_section): Likewise.
 	* coff-ppc.c (ppc_record_toc_entry): Likewise.
