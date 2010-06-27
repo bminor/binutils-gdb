@@ -1850,7 +1850,7 @@ unpack_pointer (struct type *type, const gdb_byte *valaddr)
 }
 
 
-/* Get the value of the FIELDN'th field (which must be static) of
+/* Get the value of the FIELDNO'th field (which must be static) of
    TYPE.  Return NULL if the field doesn't exist or has been
    optimized out. */
 
@@ -1859,12 +1859,13 @@ value_static_field (struct type *type, int fieldno)
 {
   struct value *retval;
 
-  if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
+  switch (TYPE_FIELD_LOC_KIND (type, fieldno))
     {
+    case FIELD_LOC_KIND_PHYSADDR:
       retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
 			      TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
-    }
-  else
+      break;
+    case FIELD_LOC_KIND_PHYSNAME:
     {
       char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
       /*TYPE_FIELD_NAME (type, fieldno);*/
@@ -1897,7 +1898,12 @@ value_static_field (struct type *type, int fieldno)
       if (retval && VALUE_LVAL (retval) == lval_memory)
 	SET_FIELD_PHYSADDR (TYPE_FIELD (type, fieldno),
 			    value_address (retval));
+      break;
     }
+    default:
+      gdb_assert (0);
+    }
+
   return retval;
 }
 
