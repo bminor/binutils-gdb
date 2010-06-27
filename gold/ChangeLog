@@ -1,3 +1,8 @@
+2010-06-26  Jeffrey Yaskin  <jyasskin@google.com>
+
+	* symtab.cc (detect_odr_violations): When reporting an ODR
+	violation, report an object where the symbol is defined.
+
 2010-06-25  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::can_check_for_functions_pointers): Return true.

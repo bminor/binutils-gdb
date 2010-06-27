@@ -3014,8 +3014,11 @@ Symbol_table::detect_odr_violations(const Task* task,
        ++it)
     {
       const char* symbol_name = it->first;
-      // We use a sorted set so the output is deterministic.
-      std::set<std::string, Odr_violation_compare> line_nums;
+      // Maps from symbol location to a sample object file we found
+      // that location in.  We use a sorted map so the location order
+      // is deterministic, but we only store an arbitrary object file
+      // to avoid copying lots of names.
+      std::map<std::string, std::string, Odr_violation_compare> line_nums;
 
       for (Unordered_set<Symbol_location, Symbol_location_hash>::const_iterator
                locs = it->second.begin();
@@ -3034,7 +3037,11 @@ Symbol_table::detect_odr_violations(const Task* task,
           std::string lineno = Dwarf_line_info::one_addr2line(
               locs->object, locs->shndx, locs->offset, 16);
           if (!lineno.empty())
-            line_nums.insert(lineno);
+            {
+              std::string& sample_object = line_nums[lineno];
+              if (sample_object.empty())
+                sample_object = locs->object->name();
+            }
         }
 
       if (line_nums.size() > 1)
@@ -3042,10 +3049,12 @@ Symbol_table::detect_odr_violations(const Task* task,
           gold_warning(_("while linking %s: symbol '%s' defined in multiple "
                          "places (possible ODR violation):"),
                        output_file_name, demangle(symbol_name).c_str());
-          for (std::set<std::string>::const_iterator it2 = line_nums.begin();
-               it2 != line_nums.end();
-               ++it2)
-            fprintf(stderr, "  %s\n", it2->c_str());
+          for (std::map<std::string, std::string>::const_iterator it2 =
+		 line_nums.begin();
+	       it2 != line_nums.end();
+	       ++it2)
+            fprintf(stderr, _("  %s from %s\n"),
+                    it2->first.c_str(), it2->second.c_str());
         }
     }
   // We only call one_addr2line() in this function, so we can clear its cache.
