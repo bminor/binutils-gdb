@@ -1,5 +1,5 @@
 /*  MSP430-specific support for 32-bit ELF
-    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007
+    Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2010
     Free Software Foundation, Inc.
     Contributed by Dmitry Diky <diwil@mail.ru>
 
@@ -429,7 +429,7 @@ elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
 
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
-      howto = elf_msp430_howto_table + ELF32_R_TYPE (rel->r_info);
+      howto = elf_msp430_howto_table + r_type;
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -841,7 +841,6 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   bfd_byte *contents;
   Elf_Internal_Rela *irel;
   Elf_Internal_Rela *irelend;
-  Elf_Internal_Rela *irelalign;
   bfd_vma toaddr;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
@@ -854,10 +853,6 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-
-  irelalign = NULL;
   toaddr = sec->size;
 
   irel = elf_section_data (sec)->relocs;

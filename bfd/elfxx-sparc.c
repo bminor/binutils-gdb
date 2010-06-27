@@ -1326,7 +1326,6 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   struct _bfd_sparc_elf_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
-  bfd_vma *local_got_offsets;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
@@ -1340,7 +1339,6 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   BFD_ASSERT (htab != NULL);
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
-  local_got_offsets = elf_local_got_offsets (abfd);
 
   sreloc = NULL;
 
@@ -3642,7 +3640,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  if (info->shared)
 	    {
 	      Elf_Internal_Rela outrel;
-	      bfd_boolean skip, relocate = FALSE;
+	      bfd_boolean skip;
 
 	      BFD_ASSERT (sreloc != NULL);
 	      skip = FALSE;
@@ -3652,7 +3650,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      if (outrel.r_offset == (bfd_vma) -1)
 		skip = TRUE;
 	      else if (outrel.r_offset == (bfd_vma) -2)
-		skip = TRUE, relocate = TRUE;
+		skip = TRUE;
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
 	      if (skip)

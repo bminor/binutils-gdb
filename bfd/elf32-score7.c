@@ -1638,9 +1638,8 @@ score_elf_got_offset_from_index (bfd *dynobj,
 {
   asection *sgot;
   bfd_vma gp;
-  struct score_got_info *g;
 
-  g = score_elf_got_info (dynobj, &sgot);
+  score_elf_got_info (dynobj, &sgot);
   gp = _bfd_get_gp_value (output_bfd);
 
   return sgot->output_section->vma + sgot->output_offset + got_index - gp;
@@ -2243,7 +2242,6 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
                                    asection **local_sections)
 {
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   const char *name;
@@ -2274,7 +2272,6 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   extsymoff = (elf_bad_symtab (input_bfd)) ? 0 : symtab_hdr->sh_info;
-  sym_hashes = elf_sym_hashes (input_bfd);
   rel = relocs;
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)

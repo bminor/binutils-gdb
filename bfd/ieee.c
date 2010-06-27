@@ -533,6 +533,7 @@ parse_expression (ieee_data_type *ieee,
 	    next_byte (&(ieee->h));
 	    *pcrel = TRUE;
 	    section_n = must_parse_int (&(ieee->h));
+	    (void) section_n;
 	    PUSH (NOSYMBOL, bfd_abs_section_ptr, 0);
 	    break;
 	  }
@@ -637,6 +638,8 @@ parse_expression (ieee_data_type *ieee,
       ieee_symbol_index_type sy1;
 
       POP (sy1, section1, *extra);
+      (void) section1;
+      (void) sy1;
     }
 
   POP (*symbol, dummy, *value);
@@ -776,6 +779,7 @@ ieee_slurp_external_symbols (bfd *abfd)
 	      case ieee_attribute_record_enum:
 		symbol_name_index = must_parse_int (&(ieee->h));
 		symbol_type_index = must_parse_int (&(ieee->h));
+		(void) symbol_type_index;
 		symbol_attribute_def = must_parse_int (&(ieee->h));
 		switch (symbol_attribute_def)
 		  {
@@ -850,6 +854,7 @@ ieee_slurp_external_symbols (bfd *abfd)
 	    next_byte (&(ieee->h));
 
 	    symbol_name_index = must_parse_int (&(ieee->h));
+	    (void) symbol_name_index;
 	    parse_expression (ieee,
 			      &symbol->symbol.value,
 			      &symbol_ignore,
@@ -2669,6 +2674,7 @@ drop_int (struct output_buffer_struct *buf)
 	  break;
 	}
     }
+  (void) ch;
   OUT (0x84);
   buf->ptrp = output_ptr;
   buf->buffer = output_buffer;

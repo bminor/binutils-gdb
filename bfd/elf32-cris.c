@@ -2157,7 +2157,6 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
     {
       asection *splt;
       asection *sgotplt;
-      asection *sgot;
       asection *srela;
       bfd_vma got_base;
 
@@ -2197,7 +2196,6 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
       BFD_ASSERT (h->dynindx != -1);
 
       splt = bfd_get_section_by_name (dynobj, ".plt");
-      sgot = bfd_get_section_by_name (dynobj, ".got");
       sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
       srela = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (splt != NULL && sgotplt != NULL

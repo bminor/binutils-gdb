@@ -1,3 +1,7 @@
+2010-06-27  Alan Modra  <amodra@gmail.com>
+
+	* resbin.c (res_to_bin_accelerator): Delete set but unused variables.
+
 2010-06-17  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/11711

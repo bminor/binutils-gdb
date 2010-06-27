@@ -862,10 +862,8 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
   bfd_byte *hit_data = contents + offset;
   bfd_vma reloc_bits, check, Rvalue1;
   bfd *      dynobj;
-  bfd_vma *  local_got_offsets;
 
   dynobj = elf_hash_table (info)->dynobj;
-  local_got_offsets = elf_local_got_offsets (input_bfd);
 
   switch (r_type)
     {
@@ -1262,7 +1260,6 @@ elf32_cr16_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
   unsigned int sec_shndx;
   bfd_byte *contents;
   Elf_Internal_Rela *irel, *irelend;
-  Elf_Internal_Rela *irelalign;
   bfd_vma toaddr;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
@@ -1275,9 +1272,6 @@ elf32_cr16_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-  irelalign = NULL;
   toaddr = sec->size;
 
   irel = elf_section_data (sec)->relocs;

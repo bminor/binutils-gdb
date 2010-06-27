@@ -3071,7 +3071,7 @@ xcoff_complain_overflow_bitfield_func (input_bfd, val, relocation, howto)
      bfd_vma relocation;
      struct reloc_howto_struct *howto;
 {
-  bfd_vma addrmask, fieldmask, signmask, ss;
+  bfd_vma fieldmask, signmask, ss;
   bfd_vma a, b, sum;
 
   /* Get the values to be added together.  For signed and unsigned
@@ -3079,7 +3079,6 @@ xcoff_complain_overflow_bitfield_func (input_bfd, val, relocation, howto)
      the size of an address.  For bitfields, all the bits matter.
      See also bfd_check_overflow.  */
   fieldmask = N_ONES (howto->bitsize);
-  addrmask = N_ONES (bfd_arch_bits_per_address (input_bfd)) | fieldmask;
   a = relocation;
   b = val & howto->src_mask;
 

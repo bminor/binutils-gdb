@@ -557,9 +557,11 @@ parse_insn_normal (CGEN_CPU_DESC cd,
 	  continue;
 	}
 
+#ifdef CGEN_MNEMONIC_OPERANDS
+      (void) past_opcode_p;
+#endif
       /* We have an operand of some sort.  */
-      errmsg = cd->parse_operand (cd, CGEN_SYNTAX_FIELD (*syn),
-					  &str, fields);
+      errmsg = cd->parse_operand (cd, CGEN_SYNTAX_FIELD (*syn), &str, fields);
       if (errmsg)
 	return errmsg;
 
@@ -676,31 +678,39 @@ fr30_cgen_assemble_insn (CGEN_CPU_DESC cd,
 
   {
     static char errbuf[150];
-#ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
     const char *tmp_errmsg;
-
-    /* If requesting verbose error messages, use insert_errmsg.
-       Failing that, use parse_errmsg.  */
-    tmp_errmsg = (insert_errmsg ? insert_errmsg :
-		  parse_errmsg ? parse_errmsg :
-		  recognized_mnemonic ?
-		  _("unrecognized form of instruction") :
-		  _("unrecognized instruction"));
-
-    if (strlen (start) > 50)
-      /* xgettext:c-format */
-      sprintf (errbuf, "%s `%.50s...'", tmp_errmsg, start);
-    else 
-      /* xgettext:c-format */
-      sprintf (errbuf, "%s `%.50s'", tmp_errmsg, start);
+#ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
+#define be_verbose 1
 #else
-    if (strlen (start) > 50)
-      /* xgettext:c-format */
-      sprintf (errbuf, _("bad instruction `%.50s...'"), start);
-    else 
-      /* xgettext:c-format */
-      sprintf (errbuf, _("bad instruction `%.50s'"), start);
+#define be_verbose 0
 #endif
+
+    if (be_verbose)
+      {
+	/* If requesting verbose error messages, use insert_errmsg.
+	   Failing that, use parse_errmsg.  */
+	tmp_errmsg = (insert_errmsg ? insert_errmsg :
+		      parse_errmsg ? parse_errmsg :
+		      recognized_mnemonic ?
+		      _("unrecognized form of instruction") :
+		      _("unrecognized instruction"));
+
+	if (strlen (start) > 50)
+	  /* xgettext:c-format */
+	  sprintf (errbuf, "%s `%.50s...'", tmp_errmsg, start);
+	else 
+	  /* xgettext:c-format */
+	  sprintf (errbuf, "%s `%.50s'", tmp_errmsg, start);
+      }
+    else
+      {
+	if (strlen (start) > 50)
+	  /* xgettext:c-format */
+	  sprintf (errbuf, _("bad instruction `%.50s...'"), start);
+	else 
+	  /* xgettext:c-format */
+	  sprintf (errbuf, _("bad instruction `%.50s'"), start);
+      }
       
     *errmsg = errbuf;
     return NULL;

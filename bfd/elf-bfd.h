@@ -2332,6 +2332,8 @@ extern asection _bfd_elf_large_com_section;
 	    return FALSE;						\
 	  warned = TRUE;						\
 	}								\
+      (void) unresolved_reloc;						\
+      (void) warned;							\
     }									\
   while (0)
 

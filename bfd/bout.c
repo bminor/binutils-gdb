@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 960 b.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1094,7 +1094,6 @@ aligncode (bfd *abfd,
 	   unsigned int shrink)
 {
   bfd_vma dot = output_addr (input_section) + r->address;
-  bfd_vma gap;
   bfd_vma old_end;
   bfd_vma new_end;
   unsigned int shrink_delta;
@@ -1109,9 +1108,6 @@ aligncode (bfd *abfd,
   /* Work out where the new end will be - remember that we're smaller
      than we used to be.  */
   new_end = ((dot - shrink + size) & ~size);
-
-  /* This is the new end.  */
-  gap = old_end - ((dot + size) & ~size);
 
   shrink_delta = (old_end - new_end) - shrink;
 

@@ -1,6 +1,6 @@
 /* BFD back-end for VERSAdos-E objects.
    Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009 Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -277,7 +277,9 @@ process_esd (bfd *abfd, struct ext_esd *esd, int pass)
 
 	case ESD_ABS:
 	  size = get_4 (&ptr);
+	  (void) size;
 	  start = get_4 (&ptr);
+	  (void) start;
 	  break;
 	case ESD_STD_REL_SEC:
 	case ESD_SHRT_REL_SEC:

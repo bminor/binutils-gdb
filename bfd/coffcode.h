@@ -3090,11 +3090,11 @@ static bfd_boolean
 coff_compute_section_file_positions (bfd * abfd)
 {
   asection *current;
-  asection *previous = NULL;
   file_ptr sofar = bfd_coff_filhsz (abfd);
   bfd_boolean align_adjust;
   int target_index;
 #ifdef ALIGN_SECTIONS_IN_FILE
+  asection *previous = NULL;
   file_ptr old_sofar;
 #endif
 
@@ -3408,7 +3408,9 @@ coff_compute_section_file_positions (bfd * abfd)
 	bfd_set_section_vma (abfd, current, 0);
 #endif
 
+#ifdef ALIGN_SECTIONS_IN_FILE
       previous = current;
+#endif
     }
 
   /* It is now safe to write to the output file.  If we needed an
@@ -5179,6 +5181,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 
       /* Calculate any reloc addend by looking at the symbol.  */
       CALC_ADDEND (abfd, ptr, dst, cache_ptr);
+      (void) ptr;
 
       cache_ptr->address -= asect->vma;
       /* !! cache_ptr->section = NULL;*/

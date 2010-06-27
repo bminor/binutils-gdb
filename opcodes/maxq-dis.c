@@ -1,6 +1,6 @@
 /* Instruction printing code for the MAXQ
 
-   Copyright 2004, 2005, 2007, 2009 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2007, 2009, 2010 Free Software Foundation, Inc.
 
    Written by Vineet Sharma(vineets@noida.hcltech.com) Inderpreet
    S.(inderpreetb@noida.hcltech.com)
@@ -205,8 +205,6 @@ check_move (unsigned char insn0, unsigned char insn8)
 {
   bfd_boolean first = FALSE;
   bfd_boolean second = FALSE;
-  char *first_reg;
-  char *second_reg;
   reg_entry const *reg_x;
   const unsigned char module1 = insn0 & MASK_LOW_BYTE;
   const unsigned char index1 = ((insn0 & 0x70) >> 4);
@@ -241,7 +239,6 @@ check_move (unsigned char insn0, unsigned char insn8)
 	      /* A[AP] not allowed.  */
 	      if ((reg_x->Mod_name == 0x0A) && (reg_x->Mod_index == 0x01))
 		continue;
-	      first_reg = reg_x->reg_name;
 	      first = TRUE;
 	      break;
 	    }
@@ -277,7 +274,6 @@ check_move (unsigned char insn0, unsigned char insn8)
 		  && (reg_x->Mod_index == (((insn8 & 0xf0) >> 4))))
 		{
 		  second = TRUE;
-		  second_reg = reg_x->reg_name;
 		  break;
 		}
 	    }
@@ -552,7 +548,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info,
 	    enum bfd_endian endianess)
 {
   /* The raw instruction.  */
-  unsigned char insn[2], insn0, insn8, derived_code;
+  unsigned char insn[2], derived_code;
   unsigned int format;
   unsigned int actual_operands;
   unsigned int i;
@@ -571,9 +567,6 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info,
       return -1;
     }
 
-  insn8 = insn[1];
-  insn0 = insn[0];
-
   /* FIXME: Endianness always little.  */
   if (endianess == BFD_ENDIAN_BIG)
     get_insn_opcode (((insn[0] << 8) | (insn[1])), &grp);
@@ -588,7 +581,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info,
       return 2;
     }
 
-  /* The opcode is always in insn0.  */
+  /* The opcode is always in insn[0].  */
   for (opcode = &op_table[0]; opcode->name != NULL; ++opcode)
     {
       if (opcode->instr_id == derived_code)

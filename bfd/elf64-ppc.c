@@ -4844,7 +4844,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 {
   struct ppc_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
@@ -4874,12 +4874,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   dottga = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
 				 FALSE, FALSE, TRUE);
   symtab_hdr = &elf_symtab_hdr (abfd);
-
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = (sym_hashes
-		    + symtab_hdr->sh_size / sizeof (Elf64_External_Sym)
-		    - symtab_hdr->sh_info);
-
   sreloc = NULL;
   opd_sym_map = NULL;
   if (strcmp (sec->name, ".opd") == 0)
@@ -6926,7 +6921,6 @@ ppc64_elf_edit_opd (struct bfd_link_info *info, bfd_boolean non_overlapping)
       Elf_Internal_Rela *relstart, *rel, *relend;
       Elf_Internal_Shdr *symtab_hdr;
       Elf_Internal_Sym *local_syms;
-      struct elf_link_hash_entry **sym_hashes;
       bfd_vma offset;
       struct _opd_sec_data *opd;
       bfd_boolean need_edit, add_aux_fields;
@@ -6951,7 +6945,6 @@ ppc64_elf_edit_opd (struct bfd_link_info *info, bfd_boolean non_overlapping)
 
       local_syms = NULL;
       symtab_hdr = &elf_symtab_hdr (ibfd);
-      sym_hashes = elf_sym_hashes (ibfd);
 
       /* Read the relocations.  */
       relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
@@ -7912,7 +7905,6 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       asection *toc, *sec;
       Elf_Internal_Shdr *symtab_hdr;
       Elf_Internal_Sym *local_syms;
-      struct elf_link_hash_entry **sym_hashes;
       Elf_Internal_Rela *relstart, *rel;
       unsigned long *skip, *drop;
       unsigned char *used;
@@ -7930,7 +7922,6 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 
       local_syms = NULL;
       symtab_hdr = &elf_symtab_hdr (ibfd);
-      sym_hashes = elf_sym_hashes (ibfd);
 
       /* Look at sections dropped from the final link.  */
       skip = NULL;

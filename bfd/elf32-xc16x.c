@@ -1,5 +1,5 @@
 /* Infineon XC16X-specific support for 16-bit ELF.
-   Copyright 2006, 2007, 2009  Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2009, 2010  Free Software Foundation, Inc.
    Contributed by KPIT Cummins Infosystems 
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -358,7 +358,6 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
       asection *sec;
       struct elf_link_hash_entry *h;
       bfd_vma relocation;
-      bfd_reloc_status_type r;
 
       /* This is a final link.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -398,11 +397,11 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
       if (info->relocatable)
 	continue;
 
-      r = elf32_xc16x_final_link_relocate (r_type, input_bfd, output_bfd,
-					   input_section,
-					   contents, rel->r_offset,
-					   relocation, rel->r_addend,
-					   info, sec, h == NULL);
+      elf32_xc16x_final_link_relocate (r_type, input_bfd, output_bfd,
+				       input_section,
+				       contents, rel->r_offset,
+				       relocation, rel->r_addend,
+				       info, sec, h == NULL);
     }
 
   return TRUE;

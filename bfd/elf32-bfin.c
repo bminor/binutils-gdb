@@ -3379,7 +3379,6 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
   struct elf_link_hash_entry *h;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign;
-  int offset;
 
   /* This function may be called more than once.  */
   s = bfd_get_section_by_name (abfd, ".got");
@@ -3457,12 +3456,10 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
 
       bfinfdpic_gotfixup_section (info) = s;
-      offset = -2048;
       flags = BSF_GLOBAL;
     }
   else
     {
-      offset = 2048;
       flags = BSF_GLOBAL | BSF_WEAK;
     }
 
@@ -5107,11 +5104,12 @@ elf32_bfin_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (new_flags & EF_BFIN_FDPIC)
     new_flags &= ~EF_BFIN_PIC;
 
-#ifdef DEBUG
+#ifndef DEBUG
+  if (0)
+#endif
   (*_bfd_error_handler) ("old_flags = 0x%.8lx, new_flags = 0x%.8lx, init = %s, filename = %s",
 			 old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no",
 			 bfd_get_filename (ibfd));
-#endif
 
   if (!elf_flags_init (obfd))			/* First call, no flags set.  */
     {

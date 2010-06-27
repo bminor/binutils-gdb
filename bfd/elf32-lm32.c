@@ -829,7 +829,7 @@ lm32_elf_relocate_section (bfd *output_bfd,
   struct elf_lm32_link_hash_table *htab = lm32_elf_hash_table (info);
   bfd *dynobj;
   bfd_vma *local_got_offsets;
-  asection *sgot, *splt, *sreloc;
+  asection *sgot;
 
   if (htab == NULL)
     return FALSE;
@@ -838,8 +838,6 @@ lm32_elf_relocate_section (bfd *output_bfd,
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
   sgot = htab->sgot;
-  splt = htab->splt;
-  sreloc = NULL;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -858,7 +856,6 @@ lm32_elf_relocate_section (bfd *output_bfd,
       bfd_vma gp;
       bfd_reloc_status_type r;
       const char *name = NULL;
-      asection *osec;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -877,7 +874,7 @@ lm32_elf_relocate_section (bfd *output_bfd,
         {
           /* It's a local symbol.  */
           sym = local_syms + r_symndx;
-          osec = sec = local_sections[r_symndx];
+          sec = local_sections[r_symndx];
           relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
           name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
@@ -893,7 +890,6 @@ lm32_elf_relocate_section (bfd *output_bfd,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
-	  osec = sec;
 	  name = h->root.root.string;
         }
 
@@ -1291,13 +1287,9 @@ lm32_elf_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   struct elf_lm32_link_hash_table *htab;
   bfd *dynobj;
-  bfd_vma *local_got_offsets;
-  asection *sgot, *srelgot, *sreloc;
 
   if (info->relocatable)
     return TRUE;
-
-  sgot = srelgot = sreloc = NULL;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -1310,7 +1302,6 @@ lm32_elf_check_relocs (bfd *abfd,
     return FALSE;
 
   dynobj = htab->root.dynobj;
-  local_got_offsets = elf_local_got_offsets (abfd);
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -1458,7 +1449,6 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
       for (; dyncon < dynconend; dyncon++)
         {
           Elf_Internal_Dyn dyn;
-          const char *name;
           asection *s;
 
           bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
@@ -1469,11 +1459,9 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
               break;
 
             case DT_PLTGOT:
-              name = ".got";
               s = htab->sgot->output_section;
               goto get_vma;
             case DT_JMPREL:
-              name = ".rela.plt";
               s = htab->srelplt->output_section;
             get_vma:
               BFD_ASSERT (s != NULL);
@@ -1615,14 +1603,11 @@ lm32_elf_finish_dynamic_symbol (bfd *output_bfd,
 				Elf_Internal_Sym *sym)
 {
   struct elf_lm32_link_hash_table *htab;
-  bfd *dynobj;
   bfd_byte *loc;
 
   htab = lm32_elf_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  dynobj = htab->root.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {

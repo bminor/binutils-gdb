@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009
+#   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -98,7 +98,6 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
   bfd_byte *insn_contents = NULL;
   unsigned entry_count;
   unsigned entry;
-  Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs = NULL;
   unsigned reloc_count;
 
@@ -206,7 +205,6 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
   if (internal_relocs)
     {
       unsigned i;
-      symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
       for (i = 0; i < reloc_count; i++)
 	{
@@ -1669,7 +1667,6 @@ xtensa_layout_wild (const reloc_deps_graph *deps, lang_wild_statement_type *w)
 static void
 xtensa_colocate_output_literals_callback (lang_statement_union_type *statement)
 {
-  lang_output_section_statement_type *os;
   reloc_deps_graph *deps;
   if (statement->header.type == lang_output_section_statement_enum)
     {
@@ -1690,8 +1687,6 @@ xtensa_colocate_output_literals_callback (lang_statement_union_type *statement)
       size_t new_child_count;
 #endif
       bfd_boolean no_reorder = FALSE;
-
-      os = &statement->output_section_statement;
 
 #if EXTRA_VALIDATION
       old_child_count = ld_count_children (statement);

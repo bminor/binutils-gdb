@@ -1,5 +1,5 @@
 /* moxie-specific support for 32-bit ELF.
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2009, 2010 Free Software Foundation, Inc.
 
    Copied from elf32-fr30.c which is..
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
@@ -222,10 +222,8 @@ moxie_elf_relocate_section (bfd *output_bfd,
       int r_type;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-
       r_symndx = ELF32_R_SYM (rel->r_info);
-
-      howto  = moxie_elf_howto_table + ELF32_R_TYPE (rel->r_info);
+      howto  = moxie_elf_howto_table + r_type;
       h      = NULL;
       sym    = NULL;
       sec    = NULL;

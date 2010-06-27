@@ -1,6 +1,6 @@
 /* i370-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008  Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2010  Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
 
@@ -804,7 +804,6 @@ i370_elf_check_relocs (bfd *abfd,
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
-  bfd_vma *local_got_offsets;
   asection *sreloc;
 
   if (info->relocatable)
@@ -818,7 +817,6 @@ i370_elf_check_relocs (bfd *abfd,
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  local_got_offsets = elf_local_got_offsets (abfd);
 
   sreloc = NULL;
 
@@ -1042,7 +1040,6 @@ i370_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel = relocs;
   Elf_Internal_Rela *relend = relocs + input_section->reloc_count;
   asection *sreloc = NULL;
-  bfd_vma *local_got_offsets;
   bfd_boolean ret = TRUE;
 
 #ifdef DEBUG
@@ -1055,8 +1052,6 @@ i370_elf_relocate_section (bfd *output_bfd,
   if (!i370_elf_howto_table[ R_I370_ADDR31 ])
     /* Initialize howto table if needed.  */
     i370_elf_howto_init ();
-
-  local_got_offsets = elf_local_got_offsets (input_bfd);
 
   for (; rel < relend; rel++)
     {

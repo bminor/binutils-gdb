@@ -1,6 +1,6 @@
 /* xSYM symbol-file support for BFD.
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009 Free Software Foundation, Inc.
+   2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1082,10 +1082,8 @@ bfd_sym_fetch_type_information_table_entry (bfd *abfd,
 					    unsigned long offset)
 {
   unsigned char buf[4];
-  bfd_sym_data_struct *sdata = NULL;
 
   BFD_ASSERT (bfd_sym_valid (abfd));
-  sdata = abfd->tdata.sym_data;
 
   if (offset == 0)
     return -1;

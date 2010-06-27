@@ -494,7 +494,6 @@ elf32_vax_set_private_flags (bfd *abfd, flagword flags)
 static bfd_boolean
 elf32_vax_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  flagword out_flags;
   flagword in_flags;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
@@ -502,7 +501,6 @@ elf32_vax_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
     return TRUE;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
-  out_flags = elf_elfheader (obfd)->e_flags;
 
   if (!elf_flags_init (obfd))
     {
@@ -1362,7 +1360,6 @@ elf_vax_relocate_section (bfd *output_bfd,
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
-  bfd_vma *local_got_offsets;
   bfd_vma plt_index;
   bfd_vma got_offset;
   asection *sgot;
@@ -1375,7 +1372,6 @@ elf_vax_relocate_section (bfd *output_bfd,
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
-  local_got_offsets = elf_local_got_offsets (input_bfd);
 
   sgot = NULL;
   splt = NULL;

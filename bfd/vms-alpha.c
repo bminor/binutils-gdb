@@ -1241,15 +1241,10 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
 	case EGSD__C_SYMG:
 	  {
-            int nameoff;
             struct vms_symbol_entry *entry;
             struct vms_egst *egst = (struct vms_egst *)vms_rec;
 
 	    old_flags = bfd_getl16 (egst->header.flags);
-	    if (old_flags & EGSY__V_DEF)
-              nameoff = ESDF__B_NAMLNG;
-            else
-              nameoff = ESRF__B_NAMLNG;
 
             entry = add_symbol (abfd, &egst->namlng);
 

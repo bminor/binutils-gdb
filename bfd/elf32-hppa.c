@@ -1160,7 +1160,6 @@ elf32_hppa_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rela_end;
   struct elf32_hppa_link_hash_table *htab;
   asection *sreloc;
-  asection *stubreloc;
   int tls_type = GOT_UNKNOWN, old_tls_type = GOT_UNKNOWN;
 
   if (info->relocatable)
@@ -1172,7 +1171,6 @@ elf32_hppa_check_relocs (bfd *abfd,
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   eh_syms = elf_sym_hashes (abfd);
   sreloc = NULL;
-  stubreloc = NULL;
 
   rela_end = relocs + sec->reloc_count;
   for (rela = relocs; rela < rela_end; rela++)

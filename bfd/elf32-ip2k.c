@@ -1,5 +1,5 @@
 /* Ubicom IP2xxx specific support for 32-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -577,7 +577,6 @@ adjust_all_relocations (bfd *abfd,
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Sym *isymbuf, *isym, *isymend;
   unsigned int shndx;
-  bfd_byte *contents;
   Elf_Internal_Rela *irel, *irelend, *irelbase;
   struct elf_link_hash_entry **sym_hashes;
   struct elf_link_hash_entry **end_hashes;
@@ -588,8 +587,6 @@ adjust_all_relocations (bfd *abfd,
   isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
 
   shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
-
-  contents = elf_section_data (sec)->this_hdr.contents;
 
   irelbase = elf_section_data (sec)->relocs;
   irelend = irelbase + sec->reloc_count;
@@ -669,9 +666,7 @@ adjust_all_relocations (bfd *abfd,
 		  if (sym_sec == sec)
 		    {
 		      const char *name;
-		      unsigned long strx;
-		      unsigned char type, other;
-		      unsigned short desc;
+		      unsigned char type;
 		      bfd_vma value;
 		      bfd_vma baseaddr = BASEADDR (sec);
 		      bfd_vma symval = BASEADDR (sym_sec) + isym->st_value
@@ -685,10 +680,7 @@ adjust_all_relocations (bfd *abfd,
 		      stabp = stabcontents + irel->r_offset - 8; 
 
 		      /* Go pullout the stab entry.  */
-		      strx  = bfd_h_get_32 (abfd, stabp + STRDXOFF);
 		      type  = bfd_h_get_8 (abfd, stabp + TYPEOFF);
-		      other = bfd_h_get_8 (abfd, stabp + OTHEROFF);
-		      desc  = bfd_h_get_16 (abfd, stabp + DESCOFF);
 		      value = bfd_h_get_32 (abfd, stabp + VALOFF);
 		      
 		      name = bfd_get_stab_name (type);
@@ -706,10 +698,7 @@ adjust_all_relocations (bfd *abfd,
 			  for (;stabp < stabend; stabp += STABSIZE)
 			    {
 			      /* Go pullout the stab entry.  */
-			      strx  = bfd_h_get_32 (abfd, stabp + STRDXOFF);
 			      type  = bfd_h_get_8 (abfd, stabp + TYPEOFF);
-			      other = bfd_h_get_8 (abfd, stabp + OTHEROFF);
-			      desc  = bfd_h_get_16 (abfd, stabp + DESCOFF);
 			      value = bfd_h_get_32 (abfd, stabp + VALOFF);
 
 			      name = bfd_get_stab_name (type);
@@ -1089,7 +1078,6 @@ ip2k_elf_relax_section (bfd *abfd,
   static bfd_boolean new_pass = FALSE;
   static bfd_boolean changed = FALSE;
   struct misc misc;
-  asection *stab;
 
   /* Assume nothing changes.  */
   *again = FALSE;
@@ -1121,18 +1109,6 @@ ip2k_elf_relax_section (bfd *abfd,
 					       link_info->keep_memory);
   if (internal_relocs == NULL)
     goto error_return;
-
-  /* Make sure the stac.rela stuff gets read in.  */
-  stab = bfd_get_section_by_name (abfd, ".stab");
-
-  if (stab)
-    {
-      /* So stab does exits.  */
-      Elf_Internal_Rela * irelbase;
-
-      irelbase = _bfd_elf_link_read_relocs (abfd, stab, NULL, NULL,
-					    link_info->keep_memory);
-    }
 
   /* Get section contents cached copy if it exists.  */
   if (contents == NULL)
@@ -1432,7 +1408,7 @@ ip2k_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
-      howto  = ip2k_elf_howto_table + ELF32_R_TYPE (rel->r_info);
+      howto  = ip2k_elf_howto_table + r_type;
       h      = NULL;
       sym    = NULL;
       sec    = NULL;

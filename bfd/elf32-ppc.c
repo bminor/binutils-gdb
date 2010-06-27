@@ -4788,7 +4788,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		    }
 		  else
 		    {
-		      Elf_Internal_Sym *sym;
 		      bfd_signed_vma *lgot_refs;
 		      struct plt_entry **local_plt;
 		      char *lgot_masks;
@@ -4807,7 +4806,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 			      return FALSE;
 			    }
 			}
-		      sym = locsyms + r_symndx;
 		      lgot_refs = elf_local_got_refcounts (ibfd);
 		      if (lgot_refs == NULL)
 			abort ();

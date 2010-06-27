@@ -3153,7 +3153,6 @@ m32r_elf_finish_dynamic_symbol (bfd *output_bfd,
 				Elf_Internal_Sym *sym)
 {
   struct elf_m32r_link_hash_table *htab;
-  bfd *dynobj;
   bfd_byte *loc;
 
 #ifdef DEBUG_PIC
@@ -3163,8 +3162,6 @@ m32r_elf_finish_dynamic_symbol (bfd *output_bfd,
   htab = m32r_elf_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  dynobj = htab->root.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -3387,7 +3384,6 @@ m32r_elf_finish_dynamic_sections (bfd *output_bfd,
       for (; dyncon < dynconend; dyncon++)
         {
           Elf_Internal_Dyn dyn;
-          const char *name;
           asection *s;
 
           bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
@@ -3398,11 +3394,9 @@ m32r_elf_finish_dynamic_sections (bfd *output_bfd,
               break;
 
             case DT_PLTGOT:
-              name = ".got";
               s = htab->sgot->output_section;
               goto get_vma;
             case DT_JMPREL:
-              name = ".rela.plt";
               s = htab->srelplt->output_section;
             get_vma:
               BFD_ASSERT (s != NULL);
@@ -3774,14 +3768,12 @@ m32r_elf_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   struct elf_m32r_link_hash_table *htab;
   bfd *dynobj;
-  bfd_vma *local_got_offsets;
-  asection *sgot, *srelgot, *sreloc;
+  asection *sreloc;
 
   if (info->relocatable)
     return TRUE;
 
-  sgot = srelgot = sreloc = NULL;
-
+  sreloc = NULL;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -3790,7 +3782,6 @@ m32r_elf_check_relocs (bfd *abfd,
     return FALSE;
 
   dynobj = htab->root.dynobj;
-  local_got_offsets = elf_local_got_offsets (abfd);
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -4048,10 +4039,6 @@ m32r_elf_fake_sections (bfd *abfd,
 			Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED,
 			asection *sec)
 {
-  const char *name;
-
-  name = bfd_get_section_name (abfd, sec);
-
   /* The generic elf_fake_sections will set up REL_HDR using the
      default kind of relocations.  But, we may actually need both
      kinds of relocations, so we set up the second header here.

@@ -1,5 +1,6 @@
 /* Matsushita 10200 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2007, 2010
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1193,7 +1194,6 @@ mn10200_elf_relax_delete_bytes (abfd, sec, addr, count)
   unsigned int sec_shndx;
   bfd_byte *contents;
   Elf_Internal_Rela *irel, *irelend;
-  Elf_Internal_Rela *irelalign;
   bfd_vma toaddr;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
@@ -1205,10 +1205,6 @@ mn10200_elf_relax_delete_bytes (abfd, sec, addr, count)
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-
-  irelalign = NULL;
   toaddr = sec->size;
 
   irel = elf_section_data (sec)->relocs;

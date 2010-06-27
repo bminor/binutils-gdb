@@ -1,3 +1,108 @@
+2010-06-27  Alan Modra  <amodra@gmail.com>
+
+	* bout.c (aligncode): Delete set but unused variables.
+	* coff-mcore.c (coff_mcore_relocate_section): Likewise.
+	* coff-ppc.c (ppc_record_toc_entry): Likewise.
+	(coff_ppc_relocate_section): Likewise.
+	* coff-rs6000.c (xcoff_complain_overflow_bitfield_func): Likewise.
+	* elf-m10200.c (mn10200_elf_relax_delete_bytes): Likewise.
+	* elf-m10300.c (mn10300_elf_final_link_relocate): Likewise.
+	(mn10300_elf_relax_section): Likewise.
+	* elf32-arm.c (arm_build_one_stub, arm_size_one_stub): Likewise.
+	(record_vfp11_erratum_veneer): Likewise.
+	(bfd_elf32_arm_vfp11_erratum_scan): Likewise.
+	(elf32_arm_final_link_relocate): Likewise.
+	(elf32_arm_check_relocs, arm_map_one_stub): Likewise.
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Likewise.
+	(elf32_avr_relax_section): Likewise.
+	(avr_mark_stub_not_to_be_necessary): Likewise.
+	* elf32-bfin.c (_bfin_create_got_section): Likewise.
+	* elf32-cr16.c (cr16_elf_final_link_relocate): Likewise.
+	(elf32_cr16_relax_delete_bytes): Likewise.
+	* elf32-cr16c.c (cr16c_elf_final_link_relocate): Likewise.
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Likewise.
+	* elf32-crx.c (elf32_crx_relax_delete_bytes): Likewise.
+	* elf32-h8300.c (elf32_h8_relax_section): Likewise.
+	(elf32_h8_relax_delete_bytes): Likewise.
+	* elf32-hppa.c (elf32_hppa_check_relocs): Likewise.
+	* elf32-i370.c (i370_elf_check_relocs): Likewise.
+	(elf_relocate_section): Likewise.
+	* elf32-ip2k.c (adjust_all_relocations): Likewise.
+	(ip2k_elf_relax_section): Likewise.
+	* elf32-lm32.c (lm32_elf_relocate_section): Likewise.
+	(lm32_elf_check_relocs): Likewise.
+	(lm32_elf_finish_dynamic_sections): Likewise.
+	(lm32_elf_finish_dynamic_symbol): Likewise.
+	* elf32-m32c.c (m32c_offset_for_reloc): Likewise.
+	(m32c_elf_relax_delete_bytes): Likewise.
+	* elf32-m32r.c (m32r_elf_finish_dynamic_symbol): Likewise.
+	(m32r_elf_finish_dynamic_sections): Likewise.
+	(m32r_elf_check_relocs, m32r_elf_fake_sections): Likewise.
+	* elf32-m68hc11.c (m68hc11_elf_relax_section): Likewise.
+	* elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_gc_sweep_hook): Likewise.
+	* elf32-microblaze.c (microblaze_elf_relocate_section): Likewise.
+	(microblaze_elf_check_relocs): Likewise.
+	(microblaze_elf_finish_dynamic_symbol): Likewise.
+	* elf32-msp430.c (msp430_elf_relax_delete_bytes): Likewise.
+	* elf32-ppc.c (ppc_elf_tls_optimize): Likewise.
+	* elf32-rx.c (rx_elf_relocate_section): Likewise.
+	(elf32_rx_relax_delete_bytes, rx_offset_for_reloc): Likewise.
+	(elf32_rx_relax_section): Likewise.
+	* elf32-score.c (score_elf_got_offset_from_index): Likewise.
+	(score_elf_final_link_relocate): Likewise.
+	(s3_bfd_score_elf_relocate_section): Likewise.
+	* elf32-score7.c (score_elf_got_offset_from_index): Likewise.
+	(s7_bfd_score_elf_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_check_relocs): Likewise.
+	* elf32-spu.c (spu_elf_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_check_relocs): Likewise.
+	(find_remembered_hi16s_reloc): Likewise.
+	* elf32-vax.c (elf32_vax_merge_private_bfd_data): Likewise.
+	(elf_vax_relocate_section): Likewise.
+	* elf32-xc16x.c (elf32_xc16x_relocate_section): Likewise.
+	* elf32-xtensa.c (xlate_offset_with_removed_text): Likewise.
+	(move_literal): Likewise.
+	* elf64-hppa.c (elf64_hppa_section_from_shdr): Likewise.
+	(elf64_hppa_check_relocs): Likewise.
+	(elf64_hppa_finish_dynamic_symbol): Likewise.
+	(elf64_hppa_relocate_section): Likewise.
+	* elf64-mmix.c (mmix_elf_reloc, mmix_elf_relax_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_check_relocs): Likewise.
+	(ppc64_elf_edit_opd, ppc64_elf_edit_toc): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_section_from_shdr): Likewise.
+	(elfNN_vms_section_from_shdr): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+	* hp300hpux.c (slurp_symbol_table): Likewise.
+	* i386lynx.c (swap_std_reloc_out, swap_std_reloc_in): Likewise.
+	* mach-o.c (bfd_mach_o_write_thread): Likewise.
+	* mmo.c (mmo_scan, mmo_write_symbols_and_terminator): Likewise.
+	* nlm32-sparc.c (nlm_sparc_read_reloc): Likewise.
+	* pdp11.c (pdp11_aout_link_input_section): Likewise.
+	(aout_link_input_section, aout_link_input_bfd): Likewise.
+	* pe-mips.c (mips_swap_reloc_out): Likewise.
+	(coff_pe_mips_relocate_section): Likewise.
+	* som.c (som_bfd_ar_write_symbol_stuff): Likewise.
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Likewise.
+	* xsym.c (bfd_sym_fetch_type_information_table_ent): Likewise.
+
+	* coff-i860.c (i860_reloc_processing): Avoid set but unused warning.
+	* coffcode.h (coff_compute_section_file_positions): Likewise.
+	(coff_slurp_reloc_table): Likewise.
+	* cpu-arm.c (arm_check_note): Likewise.
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Likewise.
+	* elf32-avr.c (elf32_avr_relocate_section): Likewise.
+	* elf32-bfin.c (elf32_bfin_merge_private_bfd_data): Likewise.
+	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
+	* elf32-moxie.c (moxie_elf_relocate_section): Likewise.
+	* elf32-msp430.c (elf32_msp430_relocate_section): Likewise.
+	* elf32-sh64.c (_bfd_sh_align_load_span): Likewise.
+	* ieee.c (parse_expression): Likewise.
+	(ieee_slurp_external_symbols, drop_int): Likewise.
+	* peXXigen.c (pe_print_pdata): Likewise.
+	* versados.c (process_esd): Likewise.
+
 2010-06-25  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_write_egsd): Check absolute section with

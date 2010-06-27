@@ -2968,8 +2968,6 @@ elf_m68k_gc_sweep_hook (bfd *abfd,
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel, *relend;
   bfd *dynobj;
-  asection *sgot;
-  asection *srelgot;
   struct elf_m68k_got *got;
 
   if (info->relocatable)
@@ -2981,9 +2979,6 @@ elf_m68k_gc_sweep_hook (bfd *abfd,
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-
-  sgot = bfd_get_section_by_name (dynobj, ".got");
-  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
   got = NULL;
 
   relend = relocs + sec->reloc_count;

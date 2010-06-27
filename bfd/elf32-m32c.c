@@ -1,5 +1,5 @@
 /* M16C/M32C specific support for 32-bit ELF.
-   Copyright (C) 2005, 2006, 2007, 2008, 2009
+   Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1188,7 +1188,7 @@ static bfd_vma
 m32c_offset_for_reloc (bfd *abfd,
 		       Elf_Internal_Rela *rel,
 		       Elf_Internal_Shdr *symtab_hdr,
-		       Elf_External_Sym_Shndx *shndx_buf,
+		       Elf_External_Sym_Shndx *shndx_buf ATTRIBUTE_UNUSED,
 		       Elf_Internal_Sym *intsyms)
 {
   bfd_vma symval;
@@ -1198,14 +1198,10 @@ m32c_offset_for_reloc (bfd *abfd,
     {
       /* A local symbol.  */
       Elf_Internal_Sym *isym;
-      Elf_External_Sym_Shndx *shndx;
       asection *ssec;
-
 
       isym = intsyms + ELF32_R_SYM (rel->r_info);
       ssec = bfd_section_from_elf_index (abfd, isym->st_shndx);
-      shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (rel->r_info) : 0);
-
       symval = isym->st_value;
       if (ssec)
 	symval += ssec->output_section->vma
@@ -1870,7 +1866,6 @@ m32c_elf_relax_delete_bytes
   bfd_byte *contents;
   Elf_Internal_Rela *irel;
   Elf_Internal_Rela *irelend;
-  Elf_Internal_Rela *irelalign;
   bfd_vma toaddr;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
@@ -1883,9 +1878,6 @@ m32c_elf_relax_delete_bytes
 
   contents   = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-  irelalign = NULL;
   toaddr = sec->size;
 
   irel = elf_section_data (sec)->relocs;

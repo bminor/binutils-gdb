@@ -1,6 +1,6 @@
 /* V850-specific support for 32-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -47,7 +47,6 @@ v850_elf_check_relocs (bfd *abfd,
 		       const Elf_Internal_Rela *relocs)
 {
   bfd_boolean ret = TRUE;
-  bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
@@ -64,7 +63,6 @@ v850_elf_check_relocs (bfd *abfd,
 		      sec, abfd);
 #endif
 
-  dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -273,8 +271,6 @@ find_remembered_hi16s_reloc (bfd_vma addend, bfd_boolean *already_found)
 {
   hi16s_location *match = NULL;
   hi16s_location *entry;
-  hi16s_location *previous = NULL;
-  hi16s_location *prev;
   bfd_byte *addr;
 
   /* Search the table.  Record the most recent entry that matches.  */
@@ -283,11 +279,8 @@ find_remembered_hi16s_reloc (bfd_vma addend, bfd_boolean *already_found)
       if (entry->addend == addend
 	  && (match == NULL || match->counter < entry->counter))
 	{
-	  previous = prev;
 	  match    = entry;
 	}
-
-      prev = entry;
     }
 
   if (match == NULL)

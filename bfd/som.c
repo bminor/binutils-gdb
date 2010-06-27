@@ -1,6 +1,6 @@
 /* bfd back-end for HP PA-RISC SOM objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -6294,7 +6294,6 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
 			       struct som_external_lst_header lst,
 			       unsigned elength)
 {
-  file_ptr lst_filepos;
   char *strings = NULL, *p;
   struct som_external_lst_symbol_record *lst_syms = NULL, *curr_lst_sym;
   bfd *curr_bfd;
@@ -6322,10 +6321,6 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
   last_hash_entry = bfd_zmalloc (amt);
   if (last_hash_entry == NULL && hash_size != 0)
     goto error_return;
-
-  /* Lots of fields are file positions relative to the start
-     of the lst record.  So save its location.  */
-  lst_filepos = bfd_tell (abfd) - sizeof (struct som_external_lst_header);
 
   /* Symbols have som_index fields, so we have to keep track of the
      index of each SOM in the archive.

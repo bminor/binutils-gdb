@@ -371,8 +371,6 @@ elf64_hppa_section_from_shdr (bfd *abfd,
 			      const char *name,
 			      int shindex)
 {
-  asection *newsect;
-
   switch (hdr->sh_type)
     {
     case SHT_PARISC_EXT:
@@ -391,7 +389,6 @@ elf64_hppa_section_from_shdr (bfd *abfd,
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
-  newsect = hdr->bfd_section;
 
   return TRUE;
 }
@@ -515,9 +512,6 @@ elf64_hppa_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *relend;
   Elf_Internal_Shdr *symtab_hdr;
   const Elf_Internal_Rela *rel;
-  asection *dlt, *plt, *stubs;
-  char *buf;
-  size_t buf_len;
   unsigned int sec_symndx;
 
   if (info->relocatable)
@@ -629,10 +623,6 @@ elf64_hppa_check_relocs (bfd *abfd,
     }
   else
     sec_symndx = 0;
-
-  dlt = plt = stubs = NULL;
-  buf = NULL;
-  buf_len = 0;
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; ++rel)
@@ -907,13 +897,9 @@ elf64_hppa_check_relocs (bfd *abfd,
 	}
     }
 
-  if (buf)
-    free (buf);
   return TRUE;
 
  err_out:
-  if (buf)
-    free (buf);
   return FALSE;
 }
 
@@ -1979,7 +1965,7 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
 				  Elf_Internal_Sym *sym)
 {
   struct elf64_hppa_link_hash_entry *hh = hppa_elf_hash_entry (eh);
-  asection *stub, *splt, *sdlt, *sopd, *spltrel, *sdltrel;
+  asection *stub, *splt, *sopd, *spltrel;
   struct elf64_hppa_link_hash_table *hppa_info;
 
   hppa_info = hppa_link_hash_table (info);
@@ -1988,10 +1974,8 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
 
   stub = hppa_info->stub_sec;
   splt = hppa_info->plt_sec;
-  sdlt = hppa_info->dlt_sec;
   sopd = hppa_info->opd_sec;
   spltrel = hppa_info->plt_rel_sec;
-  sdltrel = hppa_info->dlt_rel_sec;
 
   /* Incredible.  It is actually necessary to NOT use the symbol's real
      value when building the dynamic symbol table for a shared library.
@@ -3870,7 +3854,6 @@ elf64_hppa_relocate_section (bfd *output_bfd,
       asection *sym_sec;
       bfd_vma relocation;
       bfd_reloc_status_type r;
-      bfd_boolean warned_undef;
 
       r_type = ELF_R_TYPE (rel->r_info);
       if (r_type < 0 || r_type >= (int) R_PARISC_UNIMPLEMENTED)
@@ -3887,7 +3870,6 @@ elf64_hppa_relocate_section (bfd *output_bfd,
       eh = NULL;
       sym = NULL;
       sym_sec = NULL;
-      warned_undef = FALSE;
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* This is a local symbol, hh defaults to NULL.  */
@@ -3898,7 +3880,6 @@ elf64_hppa_relocate_section (bfd *output_bfd,
       else
 	{
 	  /* This is not a local symbol.  */
-	  bfd_boolean unresolved_reloc;
 	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
 
 	  /* It seems this can happen with erroneous or unsupported 
@@ -3912,21 +3893,13 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 		 || eh->root.type == bfd_link_hash_warning)
 	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
 
-	  warned_undef = FALSE;
-	  unresolved_reloc = FALSE;
 	  relocation = 0;
 	  if (eh->root.type == bfd_link_hash_defined
 	      || eh->root.type == bfd_link_hash_defweak)
 	    {
 	      sym_sec = eh->root.u.def.section;
-	      if (sym_sec == NULL
-		  || sym_sec->output_section == NULL)
-		/* Set a flag that will be cleared later if we find a
-		   relocation value for this symbol.  output_section
-		   is typically NULL for symbols satisfied by a shared
-		   library.  */
-		unresolved_reloc = TRUE;
-	      else
+	      if (sym_sec != NULL
+		  && sym_sec->output_section != NULL)
 		relocation = (eh->root.u.def.value
 			      + sym_sec->output_section->vma
 			      + sym_sec->output_offset);
@@ -3950,7 +3923,6 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 						      input_section,
 						      rel->r_offset, err))
 		return FALSE;
-	      warned_undef = TRUE;
 	    }
 
           if (!info->relocatable
@@ -3967,7 +3939,6 @@ elf64_hppa_relocate_section (bfd *output_bfd,
                       (info, eh_name (eh), input_bfd,
                        input_section, rel->r_offset, FALSE))
                     return FALSE;
-                  warned_undef = TRUE;
                 }
             }
 	}

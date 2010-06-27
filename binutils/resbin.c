@@ -1,5 +1,5 @@
 /* resbin.c -- manipulate the Windows binary resource format.
-   Copyright 1997, 1998, 1999, 2002, 2003, 2005, 2006, 2007, 2009
+   Copyright 1997, 1998, 1999, 2002, 2003, 2005, 2006, 2007, 2009, 2010
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
@@ -1357,11 +1357,7 @@ static rc_uint_type
 res_to_bin_accelerator (windres_bfd *wrbfd, rc_uint_type off,
 			const rc_accelerator *accelerators)
 {
-  bindata *first, **pp;
   const rc_accelerator *a;
-
-  first = NULL;
-  pp = &first;
 
   for (a = accelerators; a != NULL; a = a->next)
     {

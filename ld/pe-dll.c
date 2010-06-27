@@ -1154,7 +1154,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 
   /* Note use of array pointer math here.  */
   edirectory = edata_d;
-  eaddresses = edata_d + 40;
+  eaddresses = edirectory + 40;
   enameptrs = eaddresses + 4 * export_table_size;
   eordinals = enameptrs + 4 * count_exported_byname;
   enamestr = (char *) eordinals + 2 * count_exported_byname;
@@ -1247,7 +1247,6 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
   for (b = info->input_bfds; b; b = b->link_next)
     {
       asymbol **symbols;
-      int nsyms;
 
       if (!bfd_generic_link_read_symbols (b))
 	{
@@ -1256,7 +1255,6 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
 	}
 
       symbols = bfd_get_outsymbols (b);
-      nsyms = bfd_get_symcount (b);
 
       for (s = b->sections; s; s = s->next)
 	{
@@ -1326,7 +1324,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	{
 	  bfd_vma sec_vma = s->output_section->vma + s->output_offset;
 	  asymbol **symbols;
-	  int nsyms;
 
 	  /* If it's not loaded, we don't need to relocate it this way.  */
 	  if (!(s->output_section->flags & SEC_LOAD))
@@ -1353,7 +1350,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  symbols = bfd_get_outsymbols (b);
-	  nsyms = bfd_get_symcount (b);
 	  relsize = bfd_get_reloc_upper_bound (b, s);
 	  relocs = xmalloc (relsize);
 	  nrelocs = bfd_canonicalize_reloc (b, s, relocs, symbols);
@@ -1368,7 +1364,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	      if (!relocs[i]->howto->pc_relative
 		  && relocs[i]->howto->type != pe_details->imagebase_reloc)
 		{
-		  bfd_vma sym_vma;
 		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 
 		  /* Don't create relocs for undefined weak symbols.  */
@@ -1400,11 +1395,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 			continue;
 		    }
 
-		  sym_vma = (relocs[i]->addend
-			     + sym->value
-			     + sym->section->vma
-			     + sym->section->output_offset
-			     + sym->section->output_section->vma);
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
 
 #define BITS_AND_SHIFT(bits, shift) (bits * 1000 | shift)
@@ -2992,7 +2982,7 @@ pe_implied_import_dll (const char *filename)
   bfd_vma exp_funcbase;
   unsigned char *expdata;
   char *erva;
-  bfd_vma name_rvas, ordinals, nexp, ordbase;
+  bfd_vma name_rvas, nexp;
   const char *dllname;
   /* Initialization with start > end guarantees that is_data
      will not be set by mistake, and avoids compiler warning.  */
@@ -3126,8 +3116,6 @@ pe_implied_import_dll (const char *filename)
 
   nexp = pe_as32 (expdata + 24);
   name_rvas = pe_as32 (expdata + 32);
-  ordinals = pe_as32 (expdata + 36);
-  ordbase = pe_as32 (expdata + 16);
   exp_funcbase = pe_as32 (expdata + 28);
 
   /* Use internal dll name instead of filename

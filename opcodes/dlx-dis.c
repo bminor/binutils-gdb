@@ -1,5 +1,5 @@
 /* Instruction printing code for the DLX Microprocessor
-   Copyright 2002, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2002, 2005, 2007, 2010 Free Software Foundation, Inc.
    Contributed by Kuang Hwa Lin.  Written by Kuang Hwa Lin, 03/2002.
 
    This file is part of the GNU opcodes library.
@@ -437,7 +437,6 @@ print_insn_dlx (bfd_vma memaddr, struct disassemble_info* info)
   bfd_byte buffer[4];
   int insn_idx;
   unsigned long insn_word;
-  unsigned char rtn_code;
   unsigned long dlx_insn_type[] =
   {
     (unsigned long) dlx_r_type,
@@ -481,7 +480,6 @@ print_insn_dlx (bfd_vma memaddr, struct disassemble_info* info)
 #endif
 
   /* Scan through all the insn type and print the insn out.  */
-  rtn_code = 0;
   current_insn_addr = (unsigned long) memaddr;
 
   for (insn_idx = 0; dlx_insn_type[insn_idx] != 0x0; insn_idx++)

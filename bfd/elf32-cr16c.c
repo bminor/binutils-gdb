@@ -1,5 +1,6 @@
 /* BFD back-end for National Semiconductor's CR16C ELF
-   Copyright 2004, 2005, 2006, 2007, 2009 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006, 2007, 2009, 2010
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -204,7 +205,6 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
   unsigned long format, addr_type, code_factor;
   unsigned short size;
   unsigned short r_type;
-  asymbol *symbol = NULL;
 
   unsigned long disp20_opcod;
   char neg = 0;
@@ -223,9 +223,6 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
   size = r_type & R_SIZESP;
   addr_type = r_type & R_ADDRTYPE;
   code_factor = ((addr_type == R_CODE_ADDR) ? 1 : 0);
-
-  if (sym_sec)
-    symbol = sym_sec->symbol;
 
   switch (format)
     {

@@ -6092,15 +6092,10 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
   struct elf_sh_link_hash_table *htab;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
-  bfd_vma *local_got_offsets;
-  asection *sgot;
-  asection *srelgot;
   asection *sreloc;
   unsigned int r_type;
   int got_type, old_got_type;
 
-  sgot = NULL;
-  srelgot = NULL;
   sreloc = NULL;
 
   if (info->relocatable)
@@ -6114,8 +6109,6 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
   htab = sh_elf_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  local_got_offsets = elf_local_got_offsets (abfd);
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)

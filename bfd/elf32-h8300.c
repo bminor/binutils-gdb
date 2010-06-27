@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas H8/300 ELF binaries.
    Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2003, 2004, 2005, 2006,
-   2007, 2009 Free Software Foundation, Inc.
+   2007, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -724,10 +724,8 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 
       {
 	arelent bfd_reloc;
-	reloc_howto_type *h;
 
 	elf32_h8_info_to_howto (abfd, &bfd_reloc, irel);
-	h = bfd_reloc.howto;
       }
       /* Keep track of the previous reloc so that we can delete
 	 some long jumps created by the compiler.  */
@@ -1386,7 +1384,6 @@ elf32_h8_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count)
   unsigned int sec_shndx;
   bfd_byte *contents;
   Elf_Internal_Rela *irel, *irelend;
-  Elf_Internal_Rela *irelalign;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
   bfd_vma toaddr;
@@ -1398,10 +1395,6 @@ elf32_h8_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count)
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-
-  irelalign = NULL;
   toaddr = sec->size;
 
   irel = elf_section_data (sec)->relocs;

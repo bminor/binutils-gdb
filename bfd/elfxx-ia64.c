@@ -1409,8 +1409,6 @@ elfNN_ia64_section_from_shdr (bfd *abfd,
 			      const char *name,
 			      int shindex)
 {
-  asection *newsect;
-
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the
      sections by their name, instead.  Fortunately, the ABI gives
@@ -1433,7 +1431,6 @@ elfNN_ia64_section_from_shdr (bfd *abfd,
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
-  newsect = hdr->bfd_section;
 
   return TRUE;
 }
@@ -5740,8 +5737,6 @@ elfNN_vms_section_from_shdr (bfd *abfd,
 			     const char *name,
 			     int shindex)
 {
-  asection *newsect;
-
   switch (hdr->sh_type)
     {
     case SHT_IA_64_VMS_TRACE:
@@ -5755,7 +5750,6 @@ elfNN_vms_section_from_shdr (bfd *abfd,
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
-  newsect = hdr->bfd_section;
 
   return TRUE;
 }

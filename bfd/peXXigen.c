@@ -1650,7 +1650,9 @@ pe_print_pdata (bfd * abfd, void * vfile)
       bfd_vma eh_handler;
       bfd_vma eh_data;
       bfd_vma prolog_end_addr;
+#if !defined(COFF_WITH_pep) || defined(COFF_WITH_pex64)
       int em_data;
+#endif
 
       if (i + PDATA_ROW_SIZE > stop)
 	break;
@@ -1666,7 +1668,9 @@ pe_print_pdata (bfd * abfd, void * vfile)
 	/* We are probably into the padding of the section now.  */
 	break;
 
+#if !defined(COFF_WITH_pep) || defined(COFF_WITH_pex64)
       em_data = ((eh_handler & 0x1) << 2) | (prolog_end_addr & 0x3);
+#endif
       eh_handler &= ~(bfd_vma) 0x3;
       prolog_end_addr &= ~(bfd_vma) 0x3;
 

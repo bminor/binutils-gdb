@@ -1,6 +1,6 @@
 /* BFD support for the ARM processor
-   Copyright 1994, 1997, 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2009
-   Free Software Foundation, Inc.
+   Copyright 1994, 1997, 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007,
+   2009, 2010 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -262,6 +262,7 @@ arm_check_note (bfd *abfd,
     }
 
   /* FIXME: We should probably check the type as well.  */
+  (void) type;
 
   if (description_return != NULL)
     * description_return = descr;

@@ -1,3 +1,13 @@
+2010-06-27  Alan Modra  <amodra@gmail.com>
+
+	* pe-dll.c (fill_edata): Avoid set but unused warning.
+	(pe_walk_relocs_of_symbol): Delete set but unused variables.
+	(generate_reloc, pe_implied_import_dll): Likewise.
+	* emultempl/aix.em (open_dynamic_archive): Likewise.
+	* emultempl/xtensaelf.em (replace_insn_sec_with_prop_sec): Likewise.
+	(xtensa_layout_wild): Likewise.
+	(xtensa_colocate_output_literals_callback): Likewise.
+
 2010-06-25  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (prelim_size_sections): New function.

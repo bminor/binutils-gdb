@@ -1,5 +1,6 @@
 /* BFD back-end for National Semiconductor's CRX ELF
-   Copyright 2004, 2005, 2006, 2007, 2009 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006, 2007, 2009, 2010
+   Free Software Foundation, Inc.
    Written by Tomer Levi, NSC, Israel.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -591,7 +592,6 @@ elf32_crx_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
   unsigned int sec_shndx;
   bfd_byte *contents;
   Elf_Internal_Rela *irel, *irelend;
-  Elf_Internal_Rela *irelalign;
   bfd_vma toaddr;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
@@ -604,10 +604,6 @@ elf32_crx_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-
-  irelalign = NULL;
   toaddr = sec->size;
 
   irel = elf_section_data (sec)->relocs;

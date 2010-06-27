@@ -935,7 +935,6 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       bfd_vma insn_page;
       bfd_boolean is_far = FALSE;
       struct elf_link_hash_entry *h;
-      const char* stub_name = 0;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -958,10 +957,6 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			+ sec->output_offset
 			+ sym->st_value);
 	  is_far = (sym && (sym->st_other & STO_M68HC12_FAR));
-	  if (is_far)
-	    stub_name = (bfd_elf_string_from_elf_section
-			 (input_bfd, symtab_hdr->sh_link,
-			  sym->st_name));
 	}
       else
 	{
@@ -973,7 +968,6 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 				   warned);
 
 	  is_far = (h && (h->other & STO_M68HC12_FAR));
-	  stub_name = h->root.root.string;
 	}
 
       if (sec != NULL && elf_discarded_section (sec))

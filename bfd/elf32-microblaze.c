@@ -1109,7 +1109,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		  {
 		    Elf_Internal_Rela outrel;
 		    bfd_byte *loc;
-		    bfd_boolean skip, relocate = FALSE;
+		    bfd_boolean skip;
 
 		    /* When generating a shared object, these relocations
 		       are copied into the output file to be resolved at run
@@ -1125,7 +1125,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		    if (outrel.r_offset == (bfd_vma) -1)
 		      skip = TRUE;
 		    else if (outrel.r_offset == (bfd_vma) -2)
-		      skip = TRUE, relocate = TRUE;
+		      skip = TRUE;
 		    outrel.r_offset += (input_section->output_section->vma
 					+ input_section->output_offset);
 
@@ -1907,7 +1907,6 @@ microblaze_elf_check_relocs (bfd * abfd,
   const Elf_Internal_Rela *     rel;
   const Elf_Internal_Rela *     rel_end;
   struct elf32_mb_link_hash_table *htab;
-  bfd_vma *local_got_offsets;
   asection *sreloc = NULL;
 
   if (info->relocatable)
@@ -1917,7 +1916,6 @@ microblaze_elf_check_relocs (bfd * abfd,
   if (htab == NULL)
     return FALSE;
 
-  local_got_offsets = elf_local_got_offsets (abfd);
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   sym_hashes_end = sym_hashes + symtab_hdr->sh_size / sizeof (Elf32_External_Sym);
@@ -2747,14 +2745,11 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
 				      struct elf_link_hash_entry *h,
 				      Elf_Internal_Sym *sym)
 {
-  bfd *dynobj;
   struct elf32_mb_link_hash_table *htab;
 
   htab = elf32_mb_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  dynobj = htab->elf.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {

@@ -1,5 +1,5 @@
 /* MMIX-specific support for 64-bit ELF.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010
    Free Software Foundation, Inc.
    Contributed by Hans-Peter Nilsson <hp@bitrange.com>
 
@@ -1267,7 +1267,6 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
   asection *reloc_target_output_section;
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_vma output_base = 0;
-  bfd_vma addr;
 
   r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 			     input_section, output_bfd, error_message);
@@ -1306,9 +1305,6 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   relocation += output_base + symbol->section->output_offset;
 
-  /* Get position of relocation.  */
-  addr = (reloc_entry->address + input_section->output_section->vma
-	  + input_section->output_offset);
   if (output_bfd != (bfd *) NULL)
     {
       /* Add in supplied addend.  */
@@ -2581,7 +2577,6 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
      spot a missing actual initialization.  */
   size_t bpono = (size_t) -1;
   size_t pjsno = 0;
-  bfd *bpo_greg_owner;
   Elf_Internal_Sym *isymbuf = NULL;
   bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;
 
@@ -2603,8 +2598,6 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-
-  bpo_greg_owner = (bfd *) link_info->base_file;
 
   if (bpodata != NULL)
     {
