@@ -1,3 +1,7 @@
+2010-06-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-disc.c (parse_insn_neon):  Fix Neon alignment syntax.
+
 2010-06-27  Alan Modra  <amodra@gmail.com>
 
 	* arc-dis.c (arc_sprintf): Delete set but unused variables.

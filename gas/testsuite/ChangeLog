@@ -1,3 +1,10 @@
+2010-06-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/neon-ldst-align-bad.l: Update for Neon alignment syntax fix.
+	* gas/arm/neon-ldst-align-bad.s: Likewise.
+	* gas/arm/neon-ldst-es.d: Likewise.
+	* gas/arm/neon-ldst-es.s: Likewise.
+
 2010-06-22  Jan Beulich  <jbeulich@novell.com>
 
 	PR gas/11732

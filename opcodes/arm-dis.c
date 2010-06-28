@@ -2470,7 +2470,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  func (stream, "d%d-d%d", rd, rd + n - 1);
 			func (stream, "}, [%s", arm_regnames[rn]);
 			if (align)
-			  func (stream, ", :%d", 32 << align);
+			  func (stream, " :%d", 32 << align);
 			func (stream, "]");
 			if (rm == 0xd)
 			  func (stream, "!");
@@ -2545,7 +2545,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                             rd + i * stride, idx);
                         func (stream, "}, [%s", arm_regnames[rn]);
 			if (align)
-			  func (stream, ", :%d", align);
+			  func (stream, " :%d", align);
 			func (stream, "]");
 			if (rm == 0xd)
 			  func (stream, "!");
@@ -2586,9 +2586,9 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
                             if (type == 3)
                               align = (size > 1) ? align >> 1 : align;
 			    if (type == 2 || (type == 0 && !size))
-			      func (stream, ", :<bad align %d>", align);
+			      func (stream, " :<bad align %d>", align);
 			    else
-			      func (stream, ", :%d", align);
+			      func (stream, " :%d", align);
 			  }
 			func (stream, "]");
 			if (rm == 0xd)

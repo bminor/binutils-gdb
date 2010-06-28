@@ -4948,6 +4948,33 @@ parse_shifter_operand_group_reloc (char **str, int i)
   /* Never reached.  */
 }
 
+/* Parse a Neon alignment expression.  Information is written to
+   inst.operands[i].  We assume the initial ':' has been skipped.
+   
+   align	.imm = align << 8, .immisalign=1, .preind=0  */
+static parse_operand_result
+parse_neon_alignment (char **str, int i)
+{
+  char *p = *str;
+  expressionS exp;
+
+  my_get_expression (&exp, &p, GE_NO_PREFIX);
+
+  if (exp.X_op != O_constant)
+    {
+      inst.error = _("alignment must be constant");
+      return PARSE_OPERAND_FAIL;
+    }
+
+  inst.operands[i].imm = exp.X_add_number << 8;
+  inst.operands[i].immisalign = 1;
+  /* Alignments are not pre-indexes.  */
+  inst.operands[i].preind = 0;
+
+  *str = p;
+  return PARSE_OPERAND_SUCCESS;
+}
+
 /* Parse all forms of an ARM address expression.  Information is written
    to inst.operands[i] and/or inst.reloc.
 
@@ -5031,22 +5058,15 @@ parse_address_main (char **str, int i, int group_relocations,
 	      return PARSE_OPERAND_FAIL;
 	}
       else if (skip_past_char (&p, ':') == SUCCESS)
-        {
-          /* FIXME: '@' should be used here, but it's filtered out by generic
-             code before we get to see it here. This may be subject to
-             change.  */
-          expressionS exp;
-          my_get_expression (&exp, &p, GE_NO_PREFIX);
-          if (exp.X_op != O_constant)
-            {
-              inst.error = _("alignment must be constant");
-              return PARSE_OPERAND_FAIL;
-            }
-          inst.operands[i].imm = exp.X_add_number << 8;
-          inst.operands[i].immisalign = 1;
-          /* Alignments are not pre-indexes.  */
-          inst.operands[i].preind = 0;
-        }
+	{
+	  /* FIXME: '@' should be used here, but it's filtered out by generic
+	     code before we get to see it here. This may be subject to
+	     change.  */
+	  parse_operand_result result = parse_neon_alignment (&p, i);
+	  
+	  if (result != PARSE_OPERAND_SUCCESS)
+	    return result;
+	}
       else
 	{
 	  if (inst.operands[i].negative)
@@ -5109,6 +5129,15 @@ parse_address_main (char **str, int i, int group_relocations,
 	    if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
 	      return PARSE_OPERAND_FAIL;
 	}
+    }
+  else if (skip_past_char (&p, ':') == SUCCESS)
+    {
+      /* FIXME: '@' should be used here, but it's filtered out by generic code
+	 before we get to see it here. This may be subject to change.  */
+      parse_operand_result result = parse_neon_alignment (&p, i);
+      
+      if (result != PARSE_OPERAND_SUCCESS)
+	return result;
     }
 
   if (skip_past_char (&p, ']') == FAIL)
