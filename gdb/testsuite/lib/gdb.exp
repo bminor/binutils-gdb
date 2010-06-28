@@ -580,6 +580,10 @@ proc gdb_test_multiple { command message user_code } {
 	set message $command
     }
 
+    if [string match "*\[\r\n\]" $command] {
+	error "Invalid trailing newline in \"$message\" test"
+    }
+
     # TCL/EXPECT WART ALERT
     # Expect does something very strange when it receives a single braced
     # argument.  It splits it along word separators and performs substitutions.

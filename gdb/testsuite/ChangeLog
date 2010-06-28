@@ -1,4 +1,9 @@
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Error on trailing newlines.
+
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/static-print-quit.exp, gdb.cp/static-print-quit.cc: New.
 
