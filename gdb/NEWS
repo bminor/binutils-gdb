@@ -139,9 +139,9 @@ is now deprecated.
    GDB using Python' in the manual.
 
 ** The GDB Python API now has access to breakpoints, symbols, symbol
-   tables, program spaces, and frame's code blocks.  Additionally, GDB
-   Parameters can now be created from the API, and manipulated via
-   set/show in the CLI.
+   tables, program spaces, inferiors, threads and frame's code blocks.
+   Additionally, GDB Parameters can now be created from the API, and
+   manipulated via set/show in the CLI.
 
 ** New functions gdb.target_charset, gdb.target_wide_charset,
    gdb.progspaces, gdb.current_progspace, and gdb.string_to_argv.

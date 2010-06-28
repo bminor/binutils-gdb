@@ -1,3 +1,12 @@
+2010-06-28  Phil Muldoon  <pmuldoon@redhat.com>
+            Tom Tromey  <tromey@redhat.com>
+            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/py-inferior.c: New File.
+	* gdb.python/py-infthread.c: New File.
+	* gdb.python/py-inferior.exp: New File.
+	* gdb.python/py-infthread.exp: New File.
+
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/namespace.exp (ptype OtherFileClass typedefs)

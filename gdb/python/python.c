@@ -757,6 +757,8 @@ Enables or disables printing of Python stack traces."),
   gdbpy_initialize_objfile ();
   gdbpy_initialize_breakpoints ();
   gdbpy_initialize_lazy_string ();
+  gdbpy_initialize_thread ();
+  gdbpy_initialize_inferior ();
 
   PyRun_SimpleString ("import gdb");
   PyRun_SimpleString ("gdb.pretty_printers = []");
@@ -884,7 +886,12 @@ Arguments are separate by spaces and may be quoted."
     "Write a string using gdb's filtered stream." },
   { "flush", gdbpy_flush, METH_NOARGS,
     "Flush gdb's filtered stdout stream." },
-
+  { "selected_thread", gdbpy_selected_thread, METH_NOARGS,
+    "selected_thread () -> gdb.InferiorThread.\n\
+Return the selected thread object." },
+  { "inferiors", gdbpy_inferiors, METH_NOARGS,
+    "inferiors () -> (gdb.Inferior, ...).\n\
+Return a tuple containing all inferiors." },
   {NULL, NULL, 0, NULL}
 };
 

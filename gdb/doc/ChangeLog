@@ -1,3 +1,10 @@
+2010-06-28  Phil Muldoon  <pmuldoon@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (Inferiors In Python): New node.
+	* gdb.texinfo (Threads In Python): New node.
+
 2010-06-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Python): Document what the python directory is

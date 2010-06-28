@@ -275,6 +275,8 @@ SUBDIR_PYTHON_OBS = \
 	py-cmd.o \
 	py-frame.o \
 	py-function.o \
+	py-inferior.o \
+	py-infthread.o \
 	py-lazy-string.o \
 	py-objfile.o \
 	py-param.o \
@@ -293,6 +295,8 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-cmd.c \
 	python/py-frame.c \
 	python/py-function.c \
+	python/py-inferior.c \
+	python/py-infthread.c \
 	python/py-lazy-string.c \
 	python/py-objfile.c \
 	python/py-param.c \
@@ -2016,6 +2020,14 @@ py-frame.o: $(srcdir)/python/py-frame.c
 
 py-function.o: $(srcdir)/python/py-function.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-function.c
+	$(POSTCOMPILE)
+
+py-inferior.o: $(srcdir)/python/py-inferior.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-inferior.c
+	$(POSTCOMPILE)
+
+py-infthread.o: $(srcdir)/python/py-infthread.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-infthread.c
 	$(POSTCOMPILE)
 
 py-lazy-string.o: $(srcdir)/python/py-lazy-string.c

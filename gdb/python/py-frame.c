@@ -265,7 +265,7 @@ frapy_function (PyObject *self, PyObject *args)
 /* Convert a frame_info struct to a Python Frame object.
    Sets a Python exception and returns NULL on error.  */
 
-static frame_object *
+PyObject *
 frame_info_to_frame_object (struct frame_info *frame)
 {
   frame_object *frame_obj;
@@ -296,7 +296,7 @@ frame_info_to_frame_object (struct frame_info *frame)
 
   frame_obj->gdbarch = get_frame_arch (frame);
 
-  return frame_obj;
+  return (PyObject *) frame_obj;
 }
 
 /* Implementation of gdb.Frame.older (self) -> gdb.Frame.
@@ -497,7 +497,7 @@ PyObject *
 gdbpy_selected_frame (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  frame_object *frame_obj = NULL;   /* Initialize to appease gcc warning.  */
+  PyObject *frame_obj = NULL;   /* Initialize to appease gcc warning.  */
   volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
@@ -507,7 +507,7 @@ gdbpy_selected_frame (PyObject *self, PyObject *args)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  return (PyObject *) frame_obj;
+  return frame_obj;
 }
 
 /* Implementation of gdb.stop_reason_string (Integer) -> String.

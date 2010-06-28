@@ -1,3 +1,34 @@
+2010-06-28  Phil Muldoon  <pmuldoon@redhat.com>
+            Tom Tromey  <tromey@redhat.com>
+            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* value.c (pack_unsigned_long): New function.
+	(value_from_ulongest): New function.
+	* value.h (value_from_ulongest): Declare.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_thread and gdbpy_initialize_inferior.
+	* python/python-internal.h: Define thread_object.
+	(gdbpy_inferiors, gdbpy_selected_thread)
+	(frame_info_to_frame_object, create_thread_object)
+	(find_thread_object, find_inferior_object)
+	(gdbpy_initialize_thread, gdbpy_initialize_inferiors)
+	(gdbpy_is_value_object, get_addr_from_python): Declare.
+	* python/py-value.c (builtin_type_upylong): Define.
+	(convert_value_from_python): Add logic for ulongest.
+	(gdbpy_is_value_object): New function.
+	* python/py-utils.c (get_addr_from_python): New function.
+	* python/py-frame.c (frame_info_to_frame_object): Return a PyObject.
+	(gdbpy_selected_frame): Use PyObject over frame_info.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-inferior and
+	py-infthread.
+	(SUBDIR_PYTHON_SRCS): Likewise.
+	(py-inferior.o): New Rule.
+	(py-infthread.o): New Rule.
+	* python/py-inferior.c: New File.
+	* python/py-infthread.c: New File.
+
+
+
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* c-typeprint.c (c_type_print_base): For no fields check include also
@@ -7755,7 +7786,7 @@
 
 	* top.c (print_gdb_version): Update copyright year.
 
-2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+2010-01-01, 10  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix break *FUN'address thread NUM.
 	* ada-lex.l (task): Expand rule to also match the thread keyword.

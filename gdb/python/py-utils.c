@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "charset.h"
+#include "value.h"
 #include "python-internal.h"
 
 
@@ -271,4 +272,52 @@ gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue)
     str = gdbpy_obj_to_string (ptype);
 
   return str;
+}
+
+/* Converts OBJ to a CORE_ADDR value.
+
+   Returns 1 on success or 0 on failure, with a Python exception set.  This
+   function can also throw GDB exceptions.
+*/
+
+int
+get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
+{
+  if (gdbpy_is_value_object (obj))
+    *addr = value_as_address (value_object_to_value (obj));
+  else if (PyLong_Check (obj))
+    {
+      /* Assume CORE_ADDR corresponds to unsigned long.  */
+      *addr = PyLong_AsUnsignedLong (obj);
+      if (PyErr_Occurred () != NULL)
+	return 0;
+    }
+  else if (PyInt_Check (obj))
+    {
+      long val;
+
+      /* Assume CORE_ADDR corresponds to unsigned long.  */
+      val = PyInt_AsLong (obj);
+
+      if (val >= 0)
+	*addr = val;
+      else
+      {
+	/* If no error ocurred, VAL is indeed negative.  */
+	if (PyErr_Occurred () != NULL)
+	  return 0;
+
+	PyErr_SetString (PyExc_ValueError,
+			 _("Supplied address is negative."));
+	return 0;
+      }
+    }
+  else
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Invalid type for address."));
+      return 0;
+    }
+
+  return 1;
 }

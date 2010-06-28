@@ -43,6 +43,10 @@
 /* Python's long type corresponds to C's long long type.  */
 #define builtin_type_pylong builtin_type (python_gdbarch)->builtin_long_long
 
+/* Python's long type corresponds to C's long long type.  Unsigned version.  */
+#define builtin_type_upylong builtin_type \
+  (python_gdbarch)->builtin_unsigned_long_long
+
 #define builtin_type_pybool \
   language_bool_type (python_language, python_gdbarch)
 
@@ -961,7 +965,34 @@ convert_value_from_python (PyObject *obj)
 	{
 	  LONGEST l = PyLong_AsLongLong (obj);
 
-	  if (! PyErr_Occurred ())
+	  if (PyErr_Occurred ())
+	    {
+	      /* If the error was an overflow, we can try converting to
+	         ULONGEST instead.  */
+	      if (PyErr_ExceptionMatches (PyExc_OverflowError))
+		{
+		  PyObject *etype, *evalue, *etraceback, *zero;
+
+		  PyErr_Fetch (&etype, &evalue, &etraceback);
+		  zero = PyInt_FromLong (0);
+
+		  /* Check whether obj is positive.  */
+		  if (PyObject_RichCompareBool (obj, zero, Py_GT) > 0)
+		    {
+		      ULONGEST ul;
+
+		      ul = PyLong_AsUnsignedLongLong (obj);
+		      if (! PyErr_Occurred ())
+			value = value_from_ulongest (builtin_type_upylong, ul);
+		    }
+		  else
+		    /* There's nothing we can do.  */
+		    PyErr_Restore (etype, evalue, etraceback);
+
+		  Py_DECREF (zero);
+		}
+	    }
+	  else
 	    value = value_from_longest (builtin_type_pylong, l);
 	}
       else if (PyFloat_Check (obj))
@@ -1026,6 +1057,14 @@ gdbpy_history (PyObject *self, PyObject *args)
   GDB_PY_HANDLE_EXCEPTION (except);
 
   return value_to_value_object (res_val);
+}
+
+/* Returns 1 in OBJ is a gdb.Value object, 0 otherwise.  */
+
+int
+gdbpy_is_value_object (PyObject *obj)
+{
+  return PyObject_TypeCheck (obj, &value_object_type);
 }
 
 void

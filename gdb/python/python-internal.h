@@ -80,6 +80,17 @@ extern PyTypeObject value_object_type;
 extern PyTypeObject block_object_type;
 extern PyTypeObject symbol_object_type;
 
+typedef struct
+{
+  PyObject_HEAD
+
+  /* The thread we represent.  */
+  struct thread_info *thread;
+
+  /* The Inferior object to which this thread belongs.  */
+  PyObject *inf_obj;
+} thread_object;
+
 extern struct cmd_list_element *set_python_list;
 extern struct cmd_list_element *show_python_list;
 
@@ -92,6 +103,8 @@ PyObject *gdbpy_block_for_pc (PyObject *self, PyObject *args);
 PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 					   const char *encoding, struct type *type);
+PyObject *gdbpy_inferiors (PyObject *unused, PyObject *unused2);
+PyObject *gdbpy_selected_thread (PyObject *self, PyObject *args);
 PyObject *gdbpy_string_to_argv (PyObject *self, PyObject *args);
 PyObject *gdbpy_get_hook_function (const char *);
 PyObject *gdbpy_parameter (PyObject *self, PyObject *args);
@@ -106,12 +119,17 @@ PyObject *symbol_to_symbol_object (struct symbol *sym);
 PyObject *block_to_block_object (struct block *block, struct objfile *objfile);
 PyObject *value_to_value_object (struct value *v);
 PyObject *type_to_type_object (struct type *);
+PyObject *frame_info_to_frame_object (struct frame_info *frame);
 
 PyObject *pspace_to_pspace_object (struct program_space *);
 PyObject *pspy_get_printers (PyObject *, void *);
 
 PyObject *objfile_to_objfile_object (struct objfile *);
 PyObject *objfpy_get_printers (PyObject *, void *);
+
+thread_object *create_thread_object (struct thread_info *tp);
+thread_object *find_thread_object (ptid_t ptid);
+PyObject *find_inferior_object (int pid);
 
 struct block *block_object_to_block (PyObject *obj);
 struct symbol *symbol_object_to_symbol (PyObject *obj);
@@ -136,6 +154,8 @@ void gdbpy_initialize_objfile (void);
 void gdbpy_initialize_breakpoints (void);
 void gdbpy_initialize_lazy_string (void);
 void gdbpy_initialize_parameters (void);
+void gdbpy_initialize_thread (void);
+void gdbpy_initialize_inferior (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 
@@ -188,6 +208,8 @@ gdb_byte *gdbpy_extract_lazy_string (PyObject *string,
 				     struct type **str_type, 
 				     long *length, char **encoding);
 
+int gdbpy_is_value_object (PyObject *obj);
+
 /* Note that these are declared here, and not in python.h with the
    other pretty-printer functions, because they refer to PyObject.  */
 PyObject *apply_varobj_pretty_printer (PyObject *print_obj,
@@ -203,5 +225,7 @@ extern PyObject *gdbpy_display_hint_cst;
 extern PyObject *gdbpy_enabled_cst;
 
 extern PyObject *gdbpy_gdberror_exc;
+
+int get_addr_from_python (PyObject *obj, CORE_ADDR *addr);
 
 #endif /* GDB_PYTHON_INTERNAL_H */
