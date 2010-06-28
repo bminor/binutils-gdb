@@ -106,8 +106,8 @@ Plugin::load()
   this->handle_ = dlopen(this->filename_.c_str(), RTLD_NOW);
   if (this->handle_ == NULL)
     {
-      gold_error(_("%s: could not load plugin library"),
-                 this->filename_.c_str());
+      gold_error(_("%s: could not load plugin library: %s"),
+                 this->filename_.c_str(), dlerror());
       return;
     }
 

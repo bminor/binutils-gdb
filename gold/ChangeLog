@@ -1,3 +1,7 @@
+2010-06-28  Rafael Espindola  <espindola@google.com>
+
+	* plugin.cc (Plugin::load): Use dlerror.
+
 2010-06-26  Jeffrey Yaskin  <jyasskin@google.com>
 
 	* symtab.cc (detect_odr_violations): When reporting an ODR
