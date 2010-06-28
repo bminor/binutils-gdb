@@ -1,3 +1,9 @@
+2010-06-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Python): Document what the python directory is
+	and what its location is.
+	(Basic Python): Document the gdb.PYTHONDIR constant.
+
 2010-06-25  Tom Tromey  <tromey@redhat.com>
 
 	PR python/10808:

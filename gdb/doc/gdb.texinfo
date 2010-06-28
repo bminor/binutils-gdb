@@ -20089,6 +20089,13 @@ You can script @value{GDBN} using the @uref{http://www.python.org/,
 Python programming language}.  This feature is available only if
 @value{GDBN} was configured using @option{--with-python}.
 
+@cindex python directory
+Python scripts used by @value{GDBN} should be installed in
+@file{@var{data-directory}/python}, where @var{data-directory} is
+the data directory as determined at @value{GDBN} startup (@pxref{Data Files}).  This directory, known as the @dfn{python directory},
+is automatically added to the Python Search Path in order to allow
+the Python interpreter to locate all scripts installed at this location.
+
 @menu
 * Python Commands::             Accessing Python from @value{GDBN}.
 * Python API::                  Accessing @value{GDBN} from Python.
@@ -20198,6 +20205,11 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 methods and classes added by @value{GDBN} are placed in this module.
 @value{GDBN} automatically @code{import}s the @code{gdb} module for
 use in all scripts evaluated by the @code{python} command.
+
+@findex gdb.PYTHONDIR
+@defvar PYTHONDIR
+A string containing the python directory (@pxref{Python}).
+@end defvar
 
 @findex gdb.execute
 @defun execute command [from_tty] [to_string]

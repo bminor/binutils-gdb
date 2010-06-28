@@ -1,3 +1,7 @@
+2010-06-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Add entry announcing the python directory.
+
 2010-06-28  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (read_structure_type): Allocate null cleanup later.

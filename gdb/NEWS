@@ -132,6 +132,12 @@ is now deprecated.
 
 * Python scripting
 
+** GDB now provides a new directory location, called the python directory,
+   where Python scripts written for GDB can be installed.  The location
+   of that directory is <data-directory>/python, where <data-directory>
+   is the GDB data directory.  For more details, see section `Scripting
+   GDB using Python' in the manual.
+
 ** The GDB Python API now has access to breakpoints, symbols, symbol
    tables, program spaces, and frame's code blocks.  Additionally, GDB
    Parameters can now be created from the API, and manipulated via
