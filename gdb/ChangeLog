@@ -1,3 +1,8 @@
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cp-valprint.c (cp_print_value_fields) <recurse == 0>: Call
+	obstack_begin after each obstack_free.
+
 2010-06-27  Doug Evans  <dje@google.com>
 
 	* value.c (value_static_field): Use `switch' instead of `if'.
@@ -12,27 +17,27 @@
 
 2010-06-25  Paul Hilfinger  <hilfinger@adacore.com>
 
-        * defs.h (make_command_stats_cleanup): Declare.
-        (set_display_time): Declare.
-        (set_display_space): Declare.
-        * event-top.c (command_handler): Use make_command_stats_cleanup.
-        * main.c (display_time, display_space): Move definitions to utils.c.
-        (captured_main): Use make_command_stats_cleanup to get start-up
-        statistics.
-        Use set_display_time and set_display_space for processing OPT_STATISTICS
-        case.
-        * maint.c (maintenance_time_display): Use set_display_time.
-        (maintenance_space_display): Use set_display_space.
-        * top.c (execute_command): Remove obsolete 'maint time' code.
-        (command_loop): Use make_command_stats_cleanup.
-        * utils.c (struct cmd_stats): Structure for storing initial time
-        and space usage.
-        (display_time, display_space): Move definitions here from utils.c.
-        (set_display_time): New function.
-        (set_display_space): New function.
-        (make_command_stats_cleanup): New function.
-        (report_command_stats): New auxiliary function for
-        make_command_stats_cleanup.
+	* defs.h (make_command_stats_cleanup): Declare.
+	(set_display_time): Declare.
+	(set_display_space): Declare.
+	* event-top.c (command_handler): Use make_command_stats_cleanup.
+	* main.c (display_time, display_space): Move definitions to utils.c.
+	(captured_main): Use make_command_stats_cleanup to get start-up
+	statistics.
+	Use set_display_time and set_display_space for processing OPT_STATISTICS
+	case.
+	* maint.c (maintenance_time_display): Use set_display_time.
+	(maintenance_space_display): Use set_display_space.
+	* top.c (execute_command): Remove obsolete 'maint time' code.
+	(command_loop): Use make_command_stats_cleanup.
+	* utils.c (struct cmd_stats): Structure for storing initial time
+	and space usage.
+	(display_time, display_space): Move definitions here from utils.c.
+	(set_display_time): New function.
+	(set_display_space): New function.
+	(make_command_stats_cleanup): New function.
+	(report_command_stats): New auxiliary function for
+	make_command_stats_cleanup.
 
 2010-06-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
@@ -6103,7 +6108,7 @@
 
 	PR gdb/9067
 	* cp-valprint.c (cp_print_value_fields) Fix use of obstacks.
-	cp_print_static_field)  Fix use of obstacks.
+	(cp_print_static_field)  Fix use of obstacks.
 
 2010-02-08  Pedro Alves  <pedro@codesourcery.com>
 

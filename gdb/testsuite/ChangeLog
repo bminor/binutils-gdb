@@ -1,3 +1,7 @@
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/static-print-quit.exp, gdb.cp/static-print-quit.cc: New.
+
 2010-06-28  Doug Evans  <dje@google.com>
 
 	* gdb.base/break-interp.exp (reach): Relax expected output a bit.

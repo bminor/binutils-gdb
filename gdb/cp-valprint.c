@@ -164,10 +164,19 @@ cp_print_value_fields (struct type *type, struct type *real_type,
   
   if (recurse == 0)
     {
+      /* Any object can be left on obstacks only during an unexpected error.  */
+
       if (obstack_object_size (&dont_print_statmem_obstack) > 0)
-	obstack_free (&dont_print_statmem_obstack, NULL);
+	{
+	  obstack_free (&dont_print_statmem_obstack, NULL);
+	  obstack_begin (&dont_print_statmem_obstack, 32 * sizeof (CORE_ADDR));
+	}
       if (obstack_object_size (&dont_print_stat_array_obstack) > 0)
-	obstack_free (&dont_print_stat_array_obstack, NULL);
+	{
+	  obstack_free (&dont_print_stat_array_obstack, NULL);
+	  obstack_begin (&dont_print_stat_array_obstack,
+			 32 * sizeof (struct type *));
+	}
     }
 
   fprintf_filtered (stream, "{");
