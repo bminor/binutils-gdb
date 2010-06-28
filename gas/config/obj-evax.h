@@ -1,5 +1,6 @@
 /* This file is obj-evax.h
-   Copyright 1996, 2000, 2005, 2007, 2009 Free Software Foundation, Inc.
+   Copyright 1996, 2000, 2005, 2007, 2009, 2010
+   Free Software Foundation, Inc.
    Contributed by Klaus Kämpf (kkaempf@progis.de) of
      proGIS Software, Aachen, Germany.
 
@@ -78,9 +79,6 @@ typedef void *object_headers;
 #define obj_frob_file_before_adjust  evax_frob_file_before_adjust
 #define obj_frob_file_before_fix     evax_frob_file_before_fix
 
-#define S_SET_OTHER(S,V)
-#define S_SET_TYPE(S,T)
-#define S_SET_DESC(S,D)
 #define S_GET_OTHER(S)	0
 #define S_GET_TYPE(S)	0
 #define S_GET_DESC(S)	0

@@ -1,5 +1,5 @@
 /* tc-mmix.c -- Assembler for Don Knuth's MMIX.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
@@ -4008,7 +4008,6 @@ static void
 mmix_byte (void)
 {
   unsigned int c;
-  char *start;
 
   if (now_seg == text_section)
     text_has_contents = 1;
@@ -4022,7 +4021,6 @@ mmix_byte (void)
 	{
 	case '\"':
 	  ++input_line_pointer;
-	  start = input_line_pointer;
 	  while (is_a_char (c = next_char_of_string ()))
 	    {
 	      FRAG_APPEND_1_CHAR (c);
@@ -4098,7 +4096,6 @@ static void
 mmix_cons (int nbytes)
 {
   expressionS exp;
-  char *start;
 
   /* If we don't have any contents, then it's ok to have a specified start
      address that is not a multiple of the max data size.  We will then
@@ -4179,7 +4176,6 @@ mmix_cons (int nbytes)
 	       bytes.  */
 	  case '\"':
 	    ++input_line_pointer;
-	    start = input_line_pointer;
 	    while (is_a_char (c = next_char_of_string ()))
 	      {
 		exp.X_op = O_constant;

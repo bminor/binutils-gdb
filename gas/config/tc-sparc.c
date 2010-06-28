@@ -1,6 +1,6 @@
 /* tc-sparc.c -- Assemble for the SPARC
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -4181,7 +4181,6 @@ void
 sparc_cons_align (int nbytes)
 {
   int nalign;
-  char *p;
 
   /* Only do this if we are enforcing aligned data.  */
   if (! enforce_aligned_data)
@@ -4204,8 +4203,8 @@ sparc_cons_align (int nbytes)
       return;
     }
 
-  p = frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
-		(symbolS *) NULL, (offsetT) nalign, (char *) NULL);
+  frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
+	    (symbolS *) NULL, (offsetT) nalign, (char *) NULL);
 
   record_alignment (now_seg, nalign);
 }

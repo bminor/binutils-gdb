@@ -942,6 +942,8 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
       input_line_pointer = save_in;
       return 1;
     }
+#else
+  (void) seg;
 #endif
 
   /* Get rid of any bignums now, so that we don't generate an error for which
@@ -1881,7 +1883,6 @@ parse_neon_el_struct_list (char **str, unsigned *pbase,
   int lane = -1;
   int leading_brace = 0;
   enum arm_reg_type rtype = REG_TYPE_NDQ;
-  int addregs = 1;
   const char *const incr_error = _("register stride must be 1 or 2");
   const char *const type_error = _("mismatched element/structure types in list");
   struct neon_typed_alias firsttype;
@@ -1906,7 +1907,6 @@ parse_neon_el_struct_list (char **str, unsigned *pbase,
           if (rtype == REG_TYPE_NQ)
             {
               reg_incr = 1;
-              addregs = 2;
             }
           firsttype = atype;
         }

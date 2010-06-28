@@ -1,6 +1,6 @@
 /* tc-s390.c -- Assemble for the S390
    Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009  Free Software Foundation, Inc.
+   2009, 2010  Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -1145,14 +1145,12 @@ md_gather_operands (char *str,
   elf_suffix_type suffix;
   bfd_reloc_code_real_type reloc;
   int skip_optional;
-  int parentheses;
   char *f;
   int fc, i;
 
   while (ISSPACE (*str))
     str++;
 
-  parentheses = 0;
   skip_optional = 0;
 
   /* Gather the operands.  */

@@ -1,3 +1,68 @@
+2010-06-28  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-evax.h (S_SET_OTHER, S_SET_TYPE, S_SET_DESC): Don't define.
+	* config/tc-crx.c (gettrap): Constify arg.
+	(handle_LoadStor, get_cinv_parameters): Likewise.
+	(getreg_image): Fix enum warning
+	(md_assemble): Restore input line char.
+	* config/tc-hppa.c (tc_gen_reloc): Fix enum warning.
+	* config/tc-i960.c (mem_fmt): Rename var to fix shadow warning.
+	* config/tc-sh.c (sh_fdpic): Only define when OBJ_ELF.
+	(build_Mytes): Fix build failure for non-elf targets.
+	* config/tc-tic4x.c (tic4x_eval): Restore terminator char.
+	* config/tc-xtensa.c (xtensa_end_directive): Fix switch enum warning.
+
+	* cgen.c (gas_cgen_md_apply_fix): Avoid set but unused warning.
+	* ecoff.c (add_ecoff_symbol): Likewise.
+	* itbl-ops.c (append_insns_as_macros): Likewise.
+	* listing.c (debugging_pseudo): Likewise.
+	* read.c (s_mri_common, stringer): Likewise.
+	* config/obj-coff.c (coff_frob_section): Likewise.
+	* config/tc-alpha.c (emit_ldgp, s_alpha_proc): Likewise.
+	* config/tc-arm.c (my_get_expression): Likewise.
+	* config/tc-hppa.c (process_exit, pa_type_args): Likewise.
+	* config/tc-m32c.c (md_assemble): Likewise.
+	* config/tc-microblaze.c (md_convert_frag): Likewise.
+	* config/tc-mips.c (s_change_section): Likewise.
+	* config/tc-mt.c (mt_fix_adjustable): Likewise.
+	* config/tc-xtensa.c (xtensa_literal_pseudo): Likewise.
+
+	* config/obj-aout.c (obj_aout_frob_symbol): Delete set but otherwise
+	unused vars.
+	* config/tc-alpha.c (load_expression): Likewise.
+	(s_alpha_rdata, s_alpha_section, s_alpha_prologue): Likewise.
+	* config/tc-arm.c (parse_neon_el_struct_list): Likewise.
+	* config/tc-avr.c (extract_word): Likewise.
+	* config/tc-cris.c (cris_get_expression): Likewise.
+	* config/tc-d30v.c (build_insn, find_format): Likewise.
+	* config/tc-dlx.c (machine_ip): Likewise.
+	* config/tc-hppa.c (pa_get_absolute_expression): Likewise.
+	* config/tc-i370.c (md_assemble): Likewise.
+	* config/tc-i960.c (brtab_emit): Likewise.
+	* config/tc-iq2000.c (s_iq2000_ent): Likewise.
+	* config/tc-m32c.c (md_convert_frag): Likewise.
+	* config/tc-m68hc11.c (fixup24, build_jump_insn): Likewise.
+	(md_estimate_size_before_relax, md_apply_fix): Likewise.
+	* config/tc-m68k.c (md_show_usage): Likewise.
+	* config/tc-microblaze.c (microblaze_s_lcomm): Likewise.
+	* config/tc-mips.c (s_mips_end): Likewise.
+	* config/tc-mmix.c (mmix_byte, mmix_cons): Likewise.
+	* config/tc-mn10300.c (md_assemble): Likewise.
+	* config/tc-msp430.c (extract_word): Likewise.
+	* config/tc-mt.c (md_assemble): Likewise.
+	* config/tc-or32.c (machine_ip): Likewise.
+	* config/tc-pj.c (md_apply_fix): Likewise.
+	* config/tc-s390.c (md_gather_operands): Likewise.
+	* config/tc-sh.c (sh_cons_align): Likewise.
+	* config/tc-sparc.c (sparc_cons_align): Likewise.
+	* config/tc-tic4x.c (tic4x_sect): Likewise.
+	* config/tc-tic54x.c (tic54x_stringer): Likewise.
+	* config/tc-vax.c (vip_op): Likewise.
+	* config/tc-xstormy16.c (xstormy16_cons_fix_new): Likewise.
+	* config/tc-xtensa.c (md_assemble): Likewise.
+	(xtensa_fix_short_loop_frags, convert_frag_immed): Likewise.
+	(xtensa_move_literals): Likewise.
+
 2010-06-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (parse_neon_alignment): New function.

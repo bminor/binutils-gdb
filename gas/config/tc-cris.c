@@ -1,5 +1,5 @@
 /* tc-cris.c -- Assembler code for the CRIS CPU core.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB, Lund, Sweden.
@@ -3085,7 +3085,6 @@ static int
 cris_get_expression (char **cPP, expressionS *exprP)
 {
   char *saved_input_line_pointer;
-  segT exp;
 
   /* The "expression" function expects to find an expression at the
      global variable input_line_pointer, so we have to save it to give
@@ -3104,7 +3103,7 @@ cris_get_expression (char **cPP, expressionS *exprP)
       return 0;
     }
 
-  exp = expression (exprP);
+  expression (exprP);
   if (exprP->X_op == O_illegal || exprP->X_op == O_absent)
     {
       input_line_pointer = saved_input_line_pointer;

@@ -1,6 +1,6 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
    Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
+   2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
@@ -1383,7 +1383,6 @@ load_expression (int targreg,
                     /* Add a NOP fixup for 'ldX $26,YYY..NAME..lk'.  */
 		    char *ensymname;
 		    symbolS *ensym;
-		    volatile asymbol *dummy;
 
                     /* Build the entry name as 'NAME..en'.  */
 		    ptr1 = strstr (symname, "..") + 2;
@@ -1409,7 +1408,7 @@ load_expression (int targreg,
 
 		    /* ??? Force bsym to be instantiated now, as it will be
 		       too late to do so in tc_gen_reloc.  */
-		    dummy = symbol_get_bfdsym (exp->X_add_symbol);
+		    symbol_get_bfdsym (exp->X_add_symbol);
 		  }
 		else if (alpha_flag_replace && targreg == 27)
 		  {
@@ -2954,7 +2953,7 @@ emit_retjcr (const expressionS *tok,
 /* Implement the ldgp macro.  */
 
 static void
-emit_ldgp (const expressionS *tok,
+emit_ldgp (const expressionS *tok ATTRIBUTE_UNUSED,
 	   int ntok ATTRIBUTE_UNUSED,
 	   const void * unused ATTRIBUTE_UNUSED)
 {
@@ -3009,10 +3008,7 @@ FIXME
   insn.sequence = next_sequence_num--;
 
   emit_insn (&insn);
-#else /* OBJ_ECOFF || OBJ_ELF */
-  /* Avoid warning.  */
-  tok = NULL;
-#endif
+#endif /* OBJ_ECOFF || OBJ_ELF */
 }
 
 /* The macro table.  */
@@ -3657,9 +3653,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
 static void
 s_alpha_rdata (int ignore ATTRIBUTE_UNUSED)
 {
-  int temp;
-
-  temp = get_absolute_expression ();
+  get_absolute_expression ();
   subseg_new (".rdata", 0);
   demand_empty_rest_of_line ();
   alpha_insn_label = NULL;
@@ -3677,9 +3671,7 @@ s_alpha_rdata (int ignore ATTRIBUTE_UNUSED)
 static void
 s_alpha_sdata (int ignore ATTRIBUTE_UNUSED)
 {
-  int temp;
-
-  temp = get_absolute_expression ();
+  get_absolute_expression ();
   subseg_new (".sdata", 0);
   demand_empty_rest_of_line ();
   alpha_insn_label = NULL;
@@ -4302,7 +4294,6 @@ static char *section_name[EVAX_SECTION_COUNT + 1] =
 static void
 s_alpha_section (int secid)
 {
-  int temp;
   char *name, *beg;
   segT sec;
   flagword vms_flags = 0;
@@ -4347,7 +4338,7 @@ s_alpha_section (int secid)
     }
   else
     {
-      temp = get_absolute_expression ();
+      get_absolute_expression ();
       subseg_new (section_name[secid], 0);
     }
 
@@ -4478,9 +4469,7 @@ s_alpha_frame (int ignore ATTRIBUTE_UNUSED)
 static void
 s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
 {
-  int arg;
-
-  arg = get_absolute_expression ();
+  get_absolute_expression ();
   demand_empty_rest_of_line ();
   alpha_prologue_label = symbol_new
     (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
@@ -4990,6 +4979,7 @@ s_alpha_proc (int is_static ATTRIBUTE_UNUSED)
       temp = get_absolute_expression ();
     }
   /*  *symbol_get_obj (symbolP) = (signed char) temp; */
+  (void) symbolP;
   as_warn (_("unhandled: .proc %s,%d"), name, temp);
   demand_empty_rest_of_line ();
 }

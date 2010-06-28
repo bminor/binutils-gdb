@@ -12695,6 +12695,8 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
     section_alignment = get_absolute_expression ();
   else
     section_alignment = 0;
+  /* FIXME: really ignore?  */
+  (void) section_alignment;
 
   section_name = xstrdup (section_name);
 
@@ -15077,11 +15079,8 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
     {
       segT saved_seg = now_seg;
       subsegT saved_subseg = now_subseg;
-      valueT dot;
       expressionS exp;
       char *fragp;
-
-      dot = frag_now_fix ();
 
 #ifdef md_flush_pending_output
       md_flush_pending_output ();

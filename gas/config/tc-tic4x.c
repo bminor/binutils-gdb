@@ -1,5 +1,5 @@
 /* tc-tic4x.c -- Assemble for the Texas Instruments TMS320C[34]x.
-   Copyright (C) 1997,1998, 2002, 2003, 2005, 2006, 2007, 2008, 2009
+   Copyright (C) 1997,1998, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation. Inc.
 
    Contributed by Michael P. Hayes (m.hayes@elec.canterbury.ac.nz)
@@ -949,8 +949,9 @@ tic4x_eval (int x ATTRIBUTE_UNUSED)
     }
   name = input_line_pointer;
   c = get_symbol_end ();	/* Get terminator.  */
-  demand_empty_rest_of_line ();
   tic4x_insert_sym (name, value);
+  *input_line_pointer++ = c;
+  demand_empty_rest_of_line ();
 }
 
 /* Reset local labels.  */
@@ -967,7 +968,6 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
 {
   char c;
   char *section_name;
-  char *subsection_name;
   char *name;
   segT seg;
   offsetT num;
@@ -988,7 +988,6 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
      Volker Kuhlmann  <v.kuhlmann@elec.canterbury.ac.nz>.  */
   if (c == ':')
     {
-      subsection_name = input_line_pointer;
       c = get_symbol_end ();	/* Get terminator.  */
       input_line_pointer++;	/* Skip null symbol terminator.  */
       as_warn (_(".sect: subsection name ignored"));

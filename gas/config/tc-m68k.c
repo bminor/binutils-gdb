@@ -1,6 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -7713,7 +7713,6 @@ md_show_usage (FILE *stream)
 {
   const char *default_cpu = TARGET_CPU;
   int i;
-  unsigned int default_arch;
 
   /* Get the canonical name for the default target CPU.  */
   if (*default_cpu == 'm')
@@ -7722,7 +7721,6 @@ md_show_usage (FILE *stream)
     {
       if (strcasecmp (default_cpu, m68k_cpus[i].name) == 0)
 	{
-	  default_arch = m68k_cpus[i].arch;
 	  while (m68k_cpus[i].alias > 0)
 	    i--;
 	  while (m68k_cpus[i].alias < 0)

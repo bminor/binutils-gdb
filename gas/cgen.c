@@ -1,6 +1,6 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009 Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -893,6 +893,7 @@ gas_cgen_md_apply_fix (fixP, valP, seg)
       bfd_reloc_code_real_type reloc_type;
       CGEN_FIELDS *fields = alloca (CGEN_CPU_SIZEOF_FIELDS (cd));
       const CGEN_INSN *insn = fixP->fx_cgen.insn;
+#ifdef OBJ_COMPLEX_RELC
       int start;
       int length;
       int signed_p = 0;
@@ -917,6 +918,7 @@ gas_cgen_md_apply_fix (fixP, valP, seg)
          values will be signed relocs, but it's possible. */
       if (operand && (operand->hw_type == HW_H_SINT))
         signed_p = 1;
+#endif
 
       /* If the reloc has been fully resolved finish the operand here.  */
       /* FIXME: This duplicates the capabilities of code in BFD.  */

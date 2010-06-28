@@ -1,5 +1,5 @@
 /* tc-ldx.c -- Assemble for the DLX
-   Copyright 2002, 2003, 2004, 2005, 2007, 2009
+   Copyright 2002, 2003, 2004, 2005, 2007, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -657,7 +657,6 @@ machine_ip (char *str)
   char *s;
   const char *args;
   struct machine_opcode *insn;
-  char *argsStart;
   unsigned long opcode;
   expressionS the_operand;
   expressionS *operand = &the_operand;
@@ -706,7 +705,6 @@ machine_ip (char *str)
       return;
     }
 
-  argsStart = s;
   opcode = insn->opcode;
   memset (&the_insn, '\0', sizeof (the_insn));
   the_insn.reloc = NO_RELOC;

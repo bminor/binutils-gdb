@@ -1,5 +1,5 @@
 /* tc-xtensa.c -- Assemble Xtensa instructions.
-   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1321,18 +1321,18 @@ xtensa_end_directive (int ignore ATTRIBUTE_UNUSED)
 
   md_flush_pending_output ();
 
-  switch (end_directive)
+  switch ((int) end_directive)
     {
-    case (directiveE) XTENSA_UNDEFINED:
+    case XTENSA_UNDEFINED:
       discard_rest_of_line ();
       return;
 
-    case directive_density:
+    case (int) directive_density:
       as_warn (_(".end [no-]density is ignored"));
       demand_empty_rest_of_line ();
       break;
 
-    case directive_absolute_literals:
+    case (int) directive_absolute_literals:
       if (!absolute_literals_supported && !end_negated)
 	{
 	  as_warn (_("Xtensa absolute literals option not supported; ignored"));
@@ -1451,6 +1451,9 @@ xtensa_literal_pseudo (int ignored ATTRIBUTE_UNUSED)
      need to put them in the section we just switched to.  */
   if (use_literal_section || directive_state[directive_absolute_literals])
     dest_seg = now_seg;
+
+  /* FIXME, despite the previous comments, dest_seg is unused...  */
+  (void) dest_seg;
 
   /* All literals are aligned to four-byte boundaries.  */
   frag_align (2, 0, 0);
@@ -5437,12 +5440,11 @@ md_assemble (char *str)
 	      bfd_reloc_code_real_type reloc;
 	      char *old_input_line_pointer;
 	      expressionS *tok = &orig_insn.extra_arg;
-	      segT t;
 
 	      old_input_line_pointer = input_line_pointer;
 	      input_line_pointer = arg_strings[num_args - 1];
 
-	      t = expression (tok);
+	      expression (tok);
 	      if (tok->X_op == O_symbol
 		  && ((reloc = xtensa_elf_suffix (&input_line_pointer, tok))
 		      == BFD_RELOC_XTENSA_TLS_CALL))
@@ -7893,7 +7895,6 @@ xtensa_fix_short_loop_frags (void)
     for (frchP = seg_info (s)->frchainP; frchP; frchP = frchP->frch_next)
       {
 	fragS *fragP;
-	fragS *current_target = NULL;
 	xtensa_opcode current_opcode = XTENSA_UNDEFINED;
 
 	/* Walk over all of the fragments in a subsection.  */
@@ -7906,7 +7907,6 @@ xtensa_fix_short_loop_frags (void)
 		TInsn t_insn;
 		fragS *loop_frag = next_non_empty_frag (fragP);
 		tinsn_from_chars (&t_insn, loop_frag->fr_opcode, 0);
-		current_target = symbol_get_frag (fragP->fr_symbol);
 		current_opcode = t_insn.opcode;
 		gas_assert (xtensa_opcode_is_loop (xtensa_default_isa,
 					       current_opcode) == 1);
@@ -9598,7 +9598,6 @@ convert_frag_immed (segT segP,
       symbolS *gen_label = NULL;
       offsetT frag_offset;
       bfd_boolean first = TRUE;
-      bfd_boolean last_is_jump;
 
       /* It does not fit.  Find something that does and
          convert immediately.  */
@@ -9673,7 +9672,6 @@ convert_frag_immed (segT segP,
 
       total_size = 0;
       first = TRUE;
-      last_is_jump = FALSE;
       for (i = 0; i < istack.ninsn; i++)
 	{
 	  TInsn *tinsn = &istack.insn[i];
@@ -10064,7 +10062,7 @@ xtensa_move_literals (void)
 {
   seg_list *segment;
   frchainS *frchain_from, *frchain_to;
-  fragS *search_frag, *next_frag, *last_frag, *literal_pool, *insert_after;
+  fragS *search_frag, *next_frag, *literal_pool, *insert_after;
   fragS **frag_splice;
   emit_state state;
   segT dest_seg;
@@ -10106,7 +10104,6 @@ xtensa_move_literals (void)
 	 frags in it.  */
       frag_variant (rs_fill, 0, 0, 0, NULL, 0, NULL);
       xtensa_set_frag_assembly_state (frag_now);
-      last_frag = frag_now;
       frag_variant (rs_fill, 0, 0, 0, NULL, 0, NULL);
       xtensa_set_frag_assembly_state (frag_now);
 

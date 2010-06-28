@@ -1,6 +1,6 @@
 /* coff object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -1730,17 +1730,18 @@ coff_frob_section (segT sec)
   segT strsec;
   char *p;
   fragS *fragp;
-  bfd_vma size, n_entries, mask;
-  bfd_vma align_power = (bfd_vma)sec->alignment_power + OCTETS_PER_BYTE_POWER;
+  bfd_vma n_entries;
 
   /* The COFF back end in BFD requires that all section sizes be
      rounded up to multiples of the corresponding section alignments,
      supposedly because standard COFF has no other way of encoding alignment
      for sections.  If your COFF flavor has a different way of encoding
      section alignment, then skip this step, as TICOFF does.  */
-  size = bfd_get_section_size (sec);
-  mask = ((bfd_vma) 1 << align_power) - 1;
+  bfd_vma size = bfd_get_section_size (sec);
 #if !defined(TICOFF)
+  bfd_vma align_power = (bfd_vma) sec->alignment_power + OCTETS_PER_BYTE_POWER;
+  bfd_vma mask = ((bfd_vma) 1 << align_power) - 1;
+
   if (size & mask)
     {
       bfd_vma new_size;

@@ -1075,17 +1075,22 @@ print_source (file_info_type *  current_file,
 static int
 debugging_pseudo (list_info_type *list, const char *line)
 {
+#ifdef OBJ_ELF
   static int in_debug;
   int was_debug;
+#endif
 
   if (list->debugging)
     {
+#ifdef OBJ_ELF
       in_debug = 1;
+#endif
       return 1;
     }
-
+#ifdef OBJ_ELF
   was_debug = in_debug;
   in_debug = 0;
+#endif
 
   while (ISSPACE (*line))
     line++;

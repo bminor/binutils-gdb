@@ -1,6 +1,6 @@
 /* tc-microblaze.c -- Assemble code for Xilinx MicroBlaze
 
-   Copyright 2009 Free Software Foundation.
+   Copyright 2009, 2010 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -160,8 +160,6 @@ microblaze_s_lcomm (int xxx ATTRIBUTE_UNUSED)
   offsetT size;
   symbolS *symbolP;
   offsetT align;
-  segT old_sec;
-  int old_subsec;
   char *pfrag;
   int align2;
   segT current_seg = now_seg;
@@ -227,8 +225,6 @@ microblaze_s_lcomm (int xxx ATTRIBUTE_UNUSED)
     }
 
   /* Allocate_bss.  */
-  old_sec = now_seg;
-  old_subsec = now_subseg;
   if (align)
     {
       /* Convert to a power of 2 alignment.  */
@@ -1800,6 +1796,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
       fixP = fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
 	              fragP->fr_offset, TRUE, BFD_RELOC_MICROBLAZE_64_PLT);
       /* fixP->fx_plt = 1; */
+      (void) fixP;
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;

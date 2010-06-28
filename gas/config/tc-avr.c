@@ -367,7 +367,6 @@ skip_space (char *s)
 static char *
 extract_word (char *from, char *to, int limit)
 {
-  char *op_start;
   char *op_end;
   int size = 0;
 
@@ -376,7 +375,7 @@ extract_word (char *from, char *to, int limit)
   *to = 0;
 
   /* Find the op code end.  */
-  for (op_start = op_end = from; *op_end != 0 && is_part_of_name (*op_end);)
+  for (op_end = from; *op_end != 0 && is_part_of_name (*op_end);)
     {
       to[size++] = *op_end++;
       if (size + 1 >= limit)

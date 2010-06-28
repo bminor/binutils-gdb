@@ -145,8 +145,10 @@ static unsigned int preset_target_arch;
    accommodate the insns seen so far.  */
 static unsigned int valid_arch;
 
+#ifdef OBJ_ELF
 /* Whether --fdpic was given.  */
 static int sh_fdpic;
+#endif
 
 const char EXP_CHARS[] = "eE";
 
@@ -2347,7 +2349,9 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
   int low_byte = target_big_endian ? 1 : 0;
   int max_index = 4;
   bfd_reloc_code_real_type r_type;
+#ifdef OBJ_ELF
   int unhandled_pic = 0;
+#endif
 
   nbuf[0] = 0;
   nbuf[1] = 0;
@@ -2358,6 +2362,7 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
   nbuf[6] = 0;
   nbuf[7] = 0;
 
+#ifdef OBJ_ELF
   for (indx = 0; indx < 3; indx++)
     if (opcode->arg[indx] == A_IMM
 	&& operand[indx].type == A_IMM
@@ -2365,6 +2370,7 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	    || sh_PIC_related_p (operand[indx].immediate.X_add_symbol)
 	    || sh_PIC_related_p (operand[indx].immediate.X_op_symbol)))
       unhandled_pic = 1;
+#endif
 
   if (SH_MERGE_ARCH_SET (opcode->arch, arch_op32))
     {
@@ -2445,9 +2451,11 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	      break;
 	    case IMM0_20:
 	      r_type = BFD_RELOC_SH_DISP20;
+#ifdef OBJ_ELF
 	      if (sh_check_fixup (&operand->immediate, &r_type))
 		as_bad (_("Invalid PIC expression."));
 	      unhandled_pic = 0;
+#endif
 	      insert4 (output, r_type, 0, operand);
 	      break;
 	    case IMM0_20BY8:
@@ -2507,8 +2515,10 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	    }
 	}
     }
+#ifdef OBJ_ELF
   if (unhandled_pic)
     as_bad (_("misplaced PIC operand"));
+#endif
   if (!target_big_endian)
     {
       output[1] = (nbuf[0] << 4) | (nbuf[1]);
@@ -3715,7 +3725,6 @@ void
 sh_cons_align (int nbytes)
 {
   int nalign;
-  char *p;
 
   if (sh_no_align_cons)
     {
@@ -3741,8 +3750,8 @@ sh_cons_align (int nbytes)
       return;
     }
 
-  p = frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
-		(symbolS *) NULL, (offsetT) nalign, (char *) NULL);
+  frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
+	    (symbolS *) NULL, (offsetT) nalign, (char *) NULL);
 
   record_alignment (now_seg, nalign);
 }

@@ -1,6 +1,6 @@
 /* ECOFF debugging support.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    This file was put together by Ian Lance Taylor <ian@cygnus.com>.  A
@@ -1755,7 +1755,7 @@ add_ecoff_symbol (const char *str,	/* symbol name */
 	      ty = add_aux_sym_tir (&last_func_type_info,
 				    hash_no,
 				    &cur_file_ptr->thash_head[0]);
-
+	      (void) ty;
 /* This seems to be unnecessary.  I'm not even sure what it is
  * intended to do.  It's from mips-tfile.
  *	      if (last_func_sym_value != (symbolS *) NULL)

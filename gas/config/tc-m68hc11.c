@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010
    Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
@@ -1463,11 +1463,9 @@ fixup24 (expressionS *oper, int mode, int opmode ATTRIBUTE_UNUSED)
     }
   else if (oper->X_op != O_register)
     {
-      fixS *fixp;
-
       /* Now create a 24-bit fixup.  */
-      fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 3,
-			  oper, FALSE, BFD_RELOC_M68HC11_24);
+      fix_new_exp (frag_now, f - frag_now->fr_literal, 3,
+		   oper, FALSE, BFD_RELOC_M68HC11_24);
       number_to_chars_bigendian (f, 0, 3);
     }
   else
@@ -1517,8 +1515,6 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
   unsigned char code;
   char *f;
   unsigned long n;
-  fragS *frag;
-  int where;
 
   /* The relative branch conversion is not supported for
      brclr and brset.  */
@@ -1539,9 +1535,6 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
 	  && (!check_range (n, opcode->format) &&
 	      (jmp_mode == 1 || flag_fixed_branches == 0))))
     {
-      frag = frag_now;
-      where = frag_now_fix ();
-
       fix_new (frag_now, frag_now_fix (), 0,
                &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
@@ -1599,9 +1592,6 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
     }
   else if (opcode->format & M6812_OP_JUMP_REL16)
     {
-      frag = frag_now;
-      where = frag_now_fix ();
-
       fix_new (frag_now, frag_now_fix (), 0,
                &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
@@ -1614,9 +1604,6 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
     {
       char *op;
 
-      frag = frag_now;
-      where = frag_now_fix ();
-      
       fix_new (frag_now, frag_now_fix (), 0,
                &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
@@ -3034,12 +3021,10 @@ md_estimate_size_before_relax (fragS *fragP, asection *segment)
                 }
               else
                 {
-                   fixS* fixp;
-
                    fragP->fr_opcode[0] = fragP->fr_opcode[0] << 3;
                    fragP->fr_opcode[0] |= 0xe2;
-                   fixp = fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-                                   fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
+                   fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+			    fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
                    fragP->fr_fix += 2;
                 }
 	      break;
@@ -3182,7 +3167,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *where;
   long value = * valP;
-  int op_type;
 
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
@@ -3190,8 +3174,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   /* We don't actually support subtracting a symbol.  */
   if (fixP->fx_subsy != (symbolS *) NULL)
     as_bad_where (fixP->fx_file, fixP->fx_line, _("Expression too complex."));
-
-  op_type = fixP->fx_r_type;
 
   /* Patch the instruction with the resolved operand.  Elf relocation
      info will also be generated to take care of linker/loader fixups.

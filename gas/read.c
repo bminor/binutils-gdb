@@ -1610,6 +1610,8 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
 #ifdef S_SET_ALIGN
   if (align != 0)
     S_SET_ALIGN (sym, align);
+#else
+  (void) align;
 #endif
 
   if (line_label != NULL)
@@ -5155,7 +5157,9 @@ stringer (int bits_appendzero)
   const int bitsize = bits_appendzero & ~7;
   const int append_zero = bits_appendzero & 1;
   unsigned int c;
+#if !defined(NO_LISTING) && defined (OBJ_ELF)
   char *start;
+#endif
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -5195,7 +5199,9 @@ stringer (int bits_appendzero)
 	{
 	case '\"':
 	  ++input_line_pointer;	/*->1st char of string.  */
+#if !defined(NO_LISTING) && defined (OBJ_ELF)
 	  start = input_line_pointer;
+#endif
 
 	  while (is_a_char (c = next_char_of_string ()))
 	    stringer_append_char (c, bitsize);
@@ -5205,8 +5211,7 @@ stringer (int bits_appendzero)
 
 	  know (input_line_pointer[-1] == '\"');
 
-#ifndef NO_LISTING
-#ifdef OBJ_ELF
+#if !defined(NO_LISTING) && defined (OBJ_ELF)
 	  /* In ELF, when gcc is emitting DWARF 1 debugging output, it
 	     will emit .string with a filename in the .debug section
 	     after a sequence of constants.  See the comment in
@@ -5222,7 +5227,6 @@ stringer (int bits_appendzero)
 	      listing_source_file (start);
 	      input_line_pointer[-1] = c;
 	    }
-#endif
 #endif
 
 	  break;
