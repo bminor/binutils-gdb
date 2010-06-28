@@ -4954,6 +4954,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	  complaint (&symfile_complaints,
 		     _("Member function \"%s\" (offset %d) is virtual but the vtable offset is not specified"),
 		     fieldname, die->offset);
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_CPLUS_DYNAMIC (type) = 1;
 	}
     }

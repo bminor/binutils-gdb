@@ -1,3 +1,10 @@
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix modification of cplus_struct_default.
+	* dwarf2read.c (dwarf2_add_member_fn) <no DW_AT_vtable_elem_location>:
+	Call ALLOCATE_CPLUS_STRUCT_TYPE.
+	* gdbtypes.c (cplus_struct_default): New empty initializer, comment it.
+
 2010-06-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry announcing the python directory.

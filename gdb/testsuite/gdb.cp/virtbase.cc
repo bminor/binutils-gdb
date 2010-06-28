@@ -74,8 +74,19 @@ public:
   virtual void b() {}
 };
 
+class RTTI_base
+{
+public:
+  virtual ~RTTI_base() {}
+};
 
-
+class RTTI_data
+{
+public:
+  RTTI_base base;
+  int data;
+  RTTI_data() : data(1) {}
+};
 
 int main() {
   ph::Derived tst;
@@ -84,6 +95,7 @@ int main() {
 
   E *e = new E;
   RHB *b = new RHC();
+  RTTI_data rtti_data;
 
   return 0;			// breakpoint 3
 }

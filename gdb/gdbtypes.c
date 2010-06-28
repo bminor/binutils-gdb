@@ -1733,7 +1733,8 @@ check_stub_method_group (struct type *type, int method_id)
     }
 }
 
-const struct cplus_struct_type cplus_struct_default;
+/* Ensure it is in .rodata (if available) by workarounding GCC PR 44690.  */
+const struct cplus_struct_type cplus_struct_default = { };
 
 void
 allocate_cplus_struct_type (struct type *type)
