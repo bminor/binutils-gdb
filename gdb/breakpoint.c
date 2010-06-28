@@ -7223,8 +7223,7 @@ parse_breakpoint_sals (char **address,
    inserted as a breakpoint.  If it can't throw an error. */
 
 static void
-breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
-		       char *address)
+breakpoint_sals_to_pc (struct symtabs_and_lines *sals)
 {    
   int i;
 
@@ -7462,7 +7461,7 @@ create_breakpoint (struct gdbarch *gdbarch,
   /* Resolve all line numbers to PC's and verify that the addresses
      are ok for the target.  */
   if (!pending)
-    breakpoint_sals_to_pc (&sals, addr_start);
+    breakpoint_sals_to_pc (&sals);
 
   type_wanted = (traceflag
 		 ? (hardwareflag ? bp_fast_tracepoint : bp_tracepoint)
