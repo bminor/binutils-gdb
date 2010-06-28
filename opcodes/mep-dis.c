@@ -538,9 +538,6 @@ mep_examine_ivc2_insns (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, bfd_vma pc ATTRIBUTE_
   bfd_byte insn[8];
   int e;
 
-  /* At this time we're not supporting internally parallel
-     coprocessors, so cop2buflength will always be 0.  */
-
   /* Read in 64 bits.  */
   buflength = 8; /* VLIW insn spans 8 bytes.  */
   status = (*info->read_memory_func) (pc, buf, buflength, info);

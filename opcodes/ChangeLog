@@ -1,3 +1,7 @@
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
+	* mep-dis.c: Regenerate.
+
 2010-06-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm-disc.c (parse_insn_neon):  Fix Neon alignment syntax.
