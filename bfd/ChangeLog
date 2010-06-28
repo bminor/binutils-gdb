@@ -1,3 +1,8 @@
+2010-06-28  Alan Modra  <amodra@gmail.com>
+
+	* compress.c (bfd_uncompress_section_contents): Use ATTRIBUTE_UNUSED
+	to silence gcc warning.
+
 2010-06-27  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (get_tls_mask): Don't segfault on NULL elf_section_data.
