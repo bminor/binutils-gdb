@@ -23,12 +23,14 @@ namespace C
     int z;
 
     typedef short cOtherFileClassType;
+    typedef long cOtherFileClassType2;
     static const cOtherFileClassType cOtherFileClassVar = 318;
+    static const cOtherFileClassType2 cOtherFileClassVar2 = 320;
     cOtherFileClassType cOtherFileClassVar_use ();
   };
   OtherFileClass::cOtherFileClassType OtherFileClass::cOtherFileClassVar_use ()
   {
-    return cOtherFileClassVar;
+    return cOtherFileClassVar + cOtherFileClassVar2;
   }
 
   namespace {
@@ -45,10 +47,12 @@ namespace C
   }
 
   typedef short cOtherFileType;
+  typedef long cOtherFileType2;
   static const cOtherFileType cOtherFileVar = 319;
+  static const cOtherFileType2 cOtherFileVar2 = 321;
   cOtherFileType cOtherFileVar_use ()
   {
-    return cOtherFileVar;
+    return cOtherFileVar + cOtherFileVar2;
   }
 }
 

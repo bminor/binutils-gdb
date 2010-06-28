@@ -768,7 +768,8 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  cp_type_print_derivation_info (stream, type);
 
 	  fprintf_filtered (stream, "{\n");
-	  if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
+	  if (TYPE_NFIELDS (type) == 0 && TYPE_NFN_FIELDS (type) == 0
+	      && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	    {
 	      if (TYPE_STUB (type))
 		fprintfi_filtered (level + 4, stream, _("<incomplete type>\n"));
@@ -1054,6 +1055,29 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		  if (TYPE_FN_FIELD_STUB (f, j))
 		    xfree (mangled_name);
 
+		  fprintf_filtered (stream, ";\n");
+		}
+	    }
+
+	  /* Print typedefs defined in this class.  */
+
+	  if (TYPE_TYPEDEF_FIELD_COUNT (type) != 0)
+	    {
+	      if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0)
+		fprintf_filtered (stream, "\n");
+
+	      for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); i++)
+		{
+		  struct type *target = TYPE_TYPEDEF_FIELD_TYPE (type, i);
+
+		  /* Dereference the typedef declaration itself.  */
+		  gdb_assert (TYPE_CODE (target) == TYPE_CODE_TYPEDEF);
+		  target = TYPE_TARGET_TYPE (target);
+
+		  print_spaces_filtered (level + 4, stream);
+		  fprintf_filtered (stream, "typedef ");
+		  c_print_type (target, TYPE_TYPEDEF_FIELD_NAME (type, i),
+				stream, show - 1, level + 4);
 		  fprintf_filtered (stream, ";\n");
 		}
 	    }

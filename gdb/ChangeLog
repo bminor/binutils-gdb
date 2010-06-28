@@ -1,5 +1,19 @@
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* c-typeprint.c (c_type_print_base): For no fields check include also
+	TYPE_TYPEDEF_FIELD_COUNT.  Print new typedefs section.
+	* dwarf2read.c (struct typedef_field_list)
+	(struct field_info) <typedef_field_list, typedef_field_list_count>: New.
+	(dwarf2_add_typedef): New.
+	(read_structure_type): Call dwarf2_add_typedef for DW_TAG_typedef.
+	Copy also FI.TYPEDEF_FIELD_LIST.
+	* gdbtypes.h (struct typedef_field)
+	(struct cplus_struct_type) <typedef_field, typedef_field_count>
+	(TYPE_TYPEDEF_FIELD_ARRAY, TYPE_TYPEDEF_FIELD, TYPE_TYPEDEF_FIELD_NAME)
+	(TYPE_TYPEDEF_FIELD_TYPE, TYPE_TYPEDEF_FIELD_COUNT): New.
+
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* cp-namespace.c (cp_lookup_nested_type): New variable
 	concatenated_name.  Turn the current return condition into a reverse
 	one.  Call also lookup_static_symbol_aux on the constructed qualified

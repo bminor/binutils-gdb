@@ -645,6 +645,16 @@ struct field_info
 
     /* Number of entries in the fnfieldlists array.  */
     int nfnfields;
+
+    /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
+       a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
+    struct typedef_field_list
+      {
+	struct typedef_field field;
+	struct typedef_field_list *next;
+      }
+    *typedef_field_list;
+    unsigned typedef_field_list_count;
   };
 
 /* One item on the queue of compilation units to read in full symbols
@@ -4668,6 +4678,39 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     }
 }
 
+/* Add a typedef defined in the scope of the FIP's class.  */
+
+static void
+dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
+		    struct dwarf2_cu *cu)
+{ 
+  struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct typedef_field_list *new_field;
+  struct attribute *attr;
+  struct typedef_field *fp;
+  char *fieldname = "";
+
+  /* Allocate a new field list entry and link it in.  */
+  new_field = xzalloc (sizeof (*new_field));
+  make_cleanup (xfree, new_field);
+
+  gdb_assert (die->tag == DW_TAG_typedef);
+
+  fp = &new_field->field;
+
+  /* Get name of field.  */
+  fp->name = dwarf2_name (die, cu);
+  if (fp->name == NULL)
+    return;
+
+  fp->type = read_type_die (die, cu);
+
+  new_field->next = fip->typedef_field_list;
+  fip->typedef_field_list = new_field;
+  fip->typedef_field_list_count++;
+}
+
 /* Create the vector of fields, and attach it to the type.  */
 
 static void
@@ -5202,6 +5245,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	      /* C++ base class field.  */
 	      dwarf2_add_field (&fi, child_die, cu);
 	    }
+	  else if (child_die->tag == DW_TAG_typedef)
+	    dwarf2_add_typedef (&fi, child_die, cu);
 	  child_die = sibling_die (child_die);
 	}
 
@@ -5273,6 +5318,28 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 		      break;
 		    }
 		}
+	    }
+	}
+
+      /* Copy fi.typedef_field_list linked list elements content into the
+	 allocated array TYPE_TYPEDEF_FIELD_ARRAY (type).  */
+      if (fi.typedef_field_list)
+	{
+	  int i = fi.typedef_field_list_count;
+
+	  TYPE_TYPEDEF_FIELD_ARRAY (type)
+	    = TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i);
+	  TYPE_TYPEDEF_FIELD_COUNT (type) = i;
+
+	  /* Reverse the list order to keep the debug info elements order.  */
+	  while (--i >= 0)
+	    {
+	      struct typedef_field *dest, *src;
+	      
+	      dest = &TYPE_TYPEDEF_FIELD (type, i);
+	      src = &fi.typedef_field_list->field;
+	      fi.typedef_field_list = fi.typedef_field_list->next;
+	      *dest = *src;
 	    }
 	}
     }

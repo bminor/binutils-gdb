@@ -1,5 +1,17 @@
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/namespace.exp (ptype OtherFileClass typedefs)
+	(ptype ::C::OtherFileClass typedefs): New.
+	* gdb.cp/namespace1.cc (C::OtherFileClass::cOtherFileClassType2)
+	(C::OtherFileClass::cOtherFileClassVar2): New.
+	(C::OtherFileClass::cOtherFileClassVar_use): Use also
+	cOtherFileClassVar2.
+	(C::cOtherFileType2, C::cOtherFileVar2): New.
+	(C::cOtherFileVar_use): use also cOtherFileVar2.
+	* gdb.cp/userdef.exp (ptype &*c): Permit arbitrary trailing text.
+
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/namespace.exp (whatis C::cOtherFileType)
 	(whatis ::C::cOtherFileType, whatis C::cOtherFileVar)
 	(whatis ::C::cOtherFileVar, print C::cOtherFileVar)

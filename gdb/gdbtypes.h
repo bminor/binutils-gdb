@@ -820,6 +820,19 @@ struct cplus_struct_type
 	int line;
       }
      *localtype_ptr;
+
+    /* typedefs defined inside this class.  TYPEDEF_FIELD points to an array of
+       TYPEDEF_FIELD_COUNT elements.  */
+    struct typedef_field
+      {
+	/* Unqualified name to be prefixed by owning class qualified name.  */
+	const char *name;
+
+	/* Type this typedef named NAME represents.  */
+	struct type *type;
+      }
+    *typedef_field;
+    unsigned typedef_field_count;
   };
 
 /* Struct used in computing virtual base list */
@@ -1046,6 +1059,17 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_LOCALTYPE_PTR(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr)
 #define TYPE_LOCALTYPE_FILE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->file)
 #define TYPE_LOCALTYPE_LINE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->line)
+
+#define TYPE_TYPEDEF_FIELD_ARRAY(thistype) \
+  TYPE_CPLUS_SPECIFIC (thistype)->typedef_field
+#define TYPE_TYPEDEF_FIELD(thistype, n) \
+  TYPE_CPLUS_SPECIFIC (thistype)->typedef_field[n]
+#define TYPE_TYPEDEF_FIELD_NAME(thistype, n) \
+  TYPE_TYPEDEF_FIELD (thistype, n).name
+#define TYPE_TYPEDEF_FIELD_TYPE(thistype, n) \
+  TYPE_TYPEDEF_FIELD (thistype, n).type
+#define TYPE_TYPEDEF_FIELD_COUNT(thistype) \
+  TYPE_CPLUS_SPECIFIC (thistype)->typedef_field_count
 
 #define TYPE_IS_OPAQUE(thistype) (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) ||        \
                                    (TYPE_CODE (thistype) == TYPE_CODE_UNION))        && \

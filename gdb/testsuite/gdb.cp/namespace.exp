@@ -268,6 +268,21 @@ gdb_test "ptype OtherFileClass" "type = (class C::OtherFileClass \{\r\n  public:
 gdb_test "ptype ::C::OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n.*\}"
 gdb_test "ptype C::OtherFileClass" "No symbol \"OtherFileClass\" in namespace \"C::C\"."
 
+# Test class typedefs printing.
+set expect "type = class C::OtherFileClass \{\r\n.*\r\n *typedef short cOtherFileClassType;\r\n *typedef long cOtherFileClassType2;\r\n\}"
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    # The type in class is missing in older GCCs.
+    setup_xfail *-*-* 
+}
+gdb_test "ptype OtherFileClass" $expect "ptype OtherFileClass typedefs"
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    # The type in class is missing in older GCCs.
+    setup_xfail *-*-* 
+}
+gdb_test "ptype ::C::OtherFileClass" $expect "ptype ::C::OtherFileClass typedefs"
+
 # Some anonymous namespace tests.
 
 gdb_test "print cX" "\\$\[0-9\].* = 6"
