@@ -3284,8 +3284,16 @@ value_maybe_namespace_elt (const struct type *curtype,
   struct value *result;
 
   sym = cp_lookup_symbol_namespace (namespace_name, name,
-				    get_selected_block (0), 
-				    VAR_DOMAIN);
+				    get_selected_block (0), VAR_DOMAIN);
+
+  if (sym == NULL)
+    {
+      char *concatenated_name = alloca (strlen (namespace_name) + 2
+					+ strlen (name) + 1);
+
+      sprintf (concatenated_name, "%s::%s", namespace_name, name);
+      sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
+    }
 
   if (sym == NULL)
     return NULL;

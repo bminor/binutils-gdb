@@ -165,6 +165,70 @@ gdb_test "print BBB::Class::xyzq" \
 gdb_test "break BBB::Class::xyzq" \
     "Breakpoint.*at $hex: file.*namespace.cc, line 68\\."
 
+# Tests accessing static elements in namespace of other file.
+
+gdb_test "whatis C::cOtherFileType" "type = short"
+gdb_test "whatis ::C::cOtherFileType" "type = short"
+gdb_test "whatis C::cOtherFileVar" "type = const C::cOtherFileType"
+gdb_test "whatis ::C::cOtherFileVar" "type = const C::cOtherFileType"
+gdb_test "print C::cOtherFileVar" "\\$\[0-9\].* = 319"
+gdb_test "print ::C::cOtherFileVar" "\\$\[0-9\].* = 319"
+
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    # The type in class is missing in older GCCs.
+    setup_xfail *-*-* 
+}
+gdb_test "whatis C::OtherFileClass::cOtherFileClassType" "type = short"
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    # The type in class is missing in older GCCs.
+    setup_xfail *-*-* 
+}
+gdb_test "whatis ::C::OtherFileClass::cOtherFileClassType" "type = short"
+
+set test "print C::OtherFileClass::cOtherFileClassVar"
+gdb_test_multiple $test $test {
+    -re "\\$\[0-9\].* = 318\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re "static field cOtherFileClassVar has been optimized out\r\n$gdb_prompt $" {
+	setup_kfail "c++/11702" "*-*-*"
+	fail $test
+    }
+}
+
+# FSF GCC <=4.4 creates unqualified DIE "cOtherFileClassVar" ignoring the
+# namespace the same way older GDB did.
+set test "print ::cOtherFileClassVar"
+set test2 "print ::C::OtherFileClass::cOtherFileClassVar"
+gdb_test_multiple $test $test {
+    -re "No symbol \"cOtherFileClassVar\" in current context\\.\r\n$gdb_prompt $" {
+	pass $test
+
+	gdb_test_multiple $test2 $test2 {
+	    -re "\\$\[0-9\].* = 318\r\n$gdb_prompt $" {
+		pass $test2
+	    }
+	    -re "static field cOtherFileClassVar has been optimized out\r\n$gdb_prompt $" {
+		setup_kfail "c++/11702" "*-*-*"
+		fail $test2
+	    }
+	}
+
+    }
+    -re "\\$\[0-9\].* = 318\r\n$gdb_prompt $" {
+	if {[test_compiler_info {gcc-[0-3]-*}]
+	    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+	    # Do not permit to XFAIL on recent GCCs.
+	    setup_xfail *-*-* 
+	}
+	fail $test
+
+	unresolved $test2
+    }
+}
+
 # Test to see if the appropriate namespaces are in scope when trying
 # to print out stuff from within a function defined within a
 # namespace.
@@ -200,8 +264,8 @@ gdb_test "ptype C::NestedClass" "No symbol \"NestedClass\" in namespace \"C::C\"
 # Tests involving multiple files
 
 gdb_test "print cOtherFile" "\\$\[0-9\].* = 316"
-gdb_test "ptype OtherFileClass" "type = (class C::OtherFileClass \{\r\n  public:|struct C::OtherFileClass \{)\r\n    int z;\r\n\}"
-gdb_test "ptype ::C::OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n\}"
+gdb_test "ptype OtherFileClass" "type = (class C::OtherFileClass \{\r\n  public:|struct C::OtherFileClass \{)\r\n    int z;\r\n.*\}"
+gdb_test "ptype ::C::OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n.*\}"
 gdb_test "ptype C::OtherFileClass" "No symbol \"OtherFileClass\" in namespace \"C::C\"."
 
 # Some anonymous namespace tests.

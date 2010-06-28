@@ -1,5 +1,18 @@
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* cp-namespace.c (cp_lookup_nested_type): New variable
+	concatenated_name.  Turn the current return condition into a reverse
+	one.  Call also lookup_static_symbol_aux on the constructed qualified
+	name.
+	* symtab.c (lookup_symbol_aux): Move variable objfile and searching in
+	other files into a called ...
+	(lookup_static_symbol_aux): ... new function here.
+	* symtab.h (lookup_static_symbol_aux): New prototype.
+	* valops.c (value_maybe_namespace_elt): Call also
+	lookup_static_symbol_aux if we failed otherwise.
+
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix PR c++/11703 and PR gdb/1448.
 	* c-exp.y (yylex) <last_was_coloncolon && first_was_coloncolon>: Add
 	FIRST_ITER check.

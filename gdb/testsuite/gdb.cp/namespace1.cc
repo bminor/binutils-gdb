@@ -21,7 +21,15 @@ namespace C
   class OtherFileClass {
   public:
     int z;
+
+    typedef short cOtherFileClassType;
+    static const cOtherFileClassType cOtherFileClassVar = 318;
+    cOtherFileClassType cOtherFileClassVar_use ();
   };
+  OtherFileClass::cOtherFileClassType OtherFileClass::cOtherFileClassVar_use ()
+  {
+    return cOtherFileClassVar;
+  }
 
   namespace {
     int cXOtherFile = 29;
@@ -34,6 +42,13 @@ namespace C
     // sure that GCC 3.4 outputs debug info for this class.
     static OtherFileClass *c = new OtherFileClass();
     c->z = cOtherFile + cXOtherFile;
+  }
+
+  typedef short cOtherFileType;
+  static const cOtherFileType cOtherFileVar = 319;
+  cOtherFileType cOtherFileVar_use ()
+  {
+    return cOtherFileVar;
   }
 }
 

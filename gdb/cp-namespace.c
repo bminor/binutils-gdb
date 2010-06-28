@@ -578,11 +578,24 @@ cp_lookup_nested_type (struct type *parent_type,
 	                                                    nested_name,
 	                                                    block,
 	                                                    VAR_DOMAIN);
+	char *concatenated_name;
 
-	if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
-	  return NULL;
-	else
+	if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	  return SYMBOL_TYPE (sym);
+
+	/* Now search all static file-level symbols.  Not strictly correct,
+	   but more useful than an error.  We do not try to guess any imported
+	   namespace as even the fully specified namespace seach is is already
+	   not C++ compliant and more assumptions could make it too magic.  */
+
+	concatenated_name = alloca (strlen (parent_name) + 2
+				    + strlen (nested_name) + 1);
+	sprintf (concatenated_name, "%s::%s", parent_name, nested_name);
+	sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
+	if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+	  return SYMBOL_TYPE (sym);
+
+	return NULL;
       }
     default:
       internal_error (__FILE__, __LINE__,

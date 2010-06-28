@@ -1054,7 +1054,6 @@ lookup_symbol_aux (const char *name, const struct block *block,
 {
   struct symbol *sym;
   const struct language_defn *langdef;
-  struct objfile *objfile;
 
   /* Make sure we do something sensible with is_a_field_of_this, since
      the callers that set this parameter to some non-null value will
@@ -1122,10 +1121,21 @@ lookup_symbol_aux (const char *name, const struct block *block,
     return sym;
 
   /* Now search all static file-level symbols.  Not strictly correct,
-     but more useful than an error.  Do the symtabs first, then check
-     the psymtabs.  If a psymtab indicates the existence of the
-     desired name as a file-level static, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
+     but more useful than an error.  */
+
+  return lookup_static_symbol_aux (name, domain);
+}
+
+/* Search all static file-level symbols for NAME from DOMAIN.  Do the symtabs
+   first, then check the psymtabs.  If a psymtab indicates the existence of the
+   desired name as a file-level static, then do psymtab-to-symtab conversion on
+   the fly and return the found symbol. */
+
+struct symbol *
+lookup_static_symbol_aux (const char *name, const domain_enum domain)
+{
+  struct objfile *objfile;
+  struct symbol *sym;
 
   sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, domain);
   if (sym != NULL)

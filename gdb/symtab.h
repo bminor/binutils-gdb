@@ -886,6 +886,12 @@ extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const struct block *block,
 					       const domain_enum domain);
 
+/* Lookup a symbol only in the file static scope of all the objfiles.  */
+
+struct symbol *lookup_static_symbol_aux (const char *name,
+					 const domain_enum domain);
+
+
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
