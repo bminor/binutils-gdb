@@ -5327,6 +5327,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  int i = fi.typedef_field_list_count;
 
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_TYPEDEF_FIELD_ARRAY (type)
 	    = TYPE_ALLOC (type, sizeof (TYPE_TYPEDEF_FIELD (type, 0)) * i);
 	  TYPE_TYPEDEF_FIELD_COUNT (type) = i;

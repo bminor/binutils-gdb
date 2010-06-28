@@ -1,3 +1,8 @@
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (read_structure_type) <fi.typedef_field_list>: Call
+	ALLOCATE_CPLUS_STRUCT_TYPE.
+
 2010-06-28  Phil Muldoon  <pmuldoon@redhat.com>
             Tom Tromey  <tromey@redhat.com>
             Thiago Jung Bauermann  <bauerman@br.ibm.com>
@@ -26,8 +31,6 @@
 	(py-infthread.o): New Rule.
 	* python/py-inferior.c: New File.
 	* python/py-infthread.c: New File.
-
-
 
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
