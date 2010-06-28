@@ -5082,7 +5082,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *attr;
   char *name;
-  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
+  struct cleanup *back_to;
 
   /* If the definition of this type lives in .debug_types, read that type.
      Don't follow DW_AT_specification though, that will take us back up
@@ -5100,6 +5100,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       type = read_type_die (type_die, type_cu);
       return set_die_type (die, type, cu);
     }
+
+  back_to = make_cleanup (null_cleanup, 0);
 
   type = alloc_type (objfile);
   INIT_CPLUS_SPECIFIC (type);

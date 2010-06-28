@@ -1,3 +1,7 @@
+2010-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (read_structure_type): Allocate null cleanup later.
+
 2010-06-28  Doug Evans  <dje@google.com>
 
 	* breakpoint.c (breakpoint_sals_to_pc): Delete arg address, unused.
