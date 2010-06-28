@@ -2553,7 +2553,7 @@ yylex (void)
     {
       token_and_value cc;
       memset (&cc, 0, sizeof (token_and_value));
-      if (first_was_coloncolon)
+      if (first_was_coloncolon && first_iter)
 	{
 	  yylval = cc.value;
 	  return COLONCOLON;

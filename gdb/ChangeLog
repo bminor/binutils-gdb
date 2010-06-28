@@ -1,5 +1,11 @@
 2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix PR c++/11703 and PR gdb/1448.
+	* c-exp.y (yylex) <last_was_coloncolon && first_was_coloncolon>: Add
+	FIRST_ITER check.
+
+2010-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix modification of cplus_struct_default.
 	* dwarf2read.c (dwarf2_add_member_fn) <no DW_AT_vtable_elem_location>:
 	Call ALLOCATE_CPLUS_STRUCT_TYPE.
