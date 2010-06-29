@@ -1,3 +1,8 @@
+2010-06-29  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/xstormy16.sc (.gcc_except_table): Include sections
+	with the .gcc_except_table. prefix.
+
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/maxqcoff.sh: Delete file.
