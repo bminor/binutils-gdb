@@ -1,3 +1,7 @@
+2010-06-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Threads In Python): Fix unmatched @end table.
+
 2010-06-28  Phil Muldoon  <pmuldoon@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>

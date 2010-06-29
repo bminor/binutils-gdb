@@ -21118,6 +21118,7 @@ does not  use that identifier.
 
 A @code{gdb.InferiorThread} object has the following methods:
 
+@table @code
 @defmethod InferiorThread switch
 This changes @value{GDBN}'s currently selected thread to the one represented
 by this object.
