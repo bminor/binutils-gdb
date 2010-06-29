@@ -163,6 +163,11 @@ proc prelinkYES {arg {name ""}} {
     if {$result == 0 && $output == ""} {
 	pass $test
 	return 1
+    } elseif {$result == 1 \
+	      && [string match -nocase "*: Not enough room to add .dynamic entry" $output]} {
+	# Linker should have reserved some entries for prelink.
+	xfail $test
+	return 0
     } else {
 	fail $test
 	return 0

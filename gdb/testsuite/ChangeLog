@@ -1,3 +1,9 @@
+2010-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	* gdb.base/break-interp.exp (prelinkYES): XFAIL on `Not enough room to
+	add .dynamic entry'.
+
 2010-06-29  Doug Evans  <dje@google.com>
 
 	Test PR c++/11702.
