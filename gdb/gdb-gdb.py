@@ -158,8 +158,6 @@ class StructMainTypePrettyPrinter:
             return 'physaddr = 0x%x' % loc_val['physaddr']
         elif loc_kind == "FIELD_LOC_KIND_PHYSNAME":
             return 'physname = %s' % loc_val['physname']
-        elif loc_kind == "FIELD_LOC_KIND_DWARF_BLOCK":
-            return 'dwarf_block = %s' % loc_val['dwarf_block']
         else:
             return 'loc = ??? (unsupported loc_kind value)'
     def struct_field_img(self, fieldno):

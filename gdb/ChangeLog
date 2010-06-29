@@ -1,3 +1,14 @@
+2010-06-29  Doug Evans  <dje@google.com>
+
+	Delete FIELD_LOC_KIND_DWARF_BLOCK, unused.
+	* gdbtypes.h (enum field_loc_kind): Delete FIELD_LOC_KIND_DWARF_BLOCK.
+	(struct main_type, field loc): Delete dwarf_block.
+	(FIELD_DWARF_BLOCK): Delete.
+	(SET_FIELD_DWARF_BLOCK): Delete.
+	(TYPE_FIELD_DWARF_BLOCK): Delete.
+	* gdb-gdb.py (StructMainTypePrettyPrinter.struct_field_location_img):
+	Update.
+
 2010-06-29  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (set_record_pic_cmdlist,
