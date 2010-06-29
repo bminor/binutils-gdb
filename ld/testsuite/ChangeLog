@@ -1,3 +1,10 @@
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
+	* ld-maxq/maxq.exp: Delete file.
+	* ld-maxq/addend.dd, * ld-maxq/addend.s, * ld-maxq/paddr.dd,
+	* ld-maxq/paddr.s, * ld-maxq/paddr1.dd, * ld-maxq/paddr1.s,
+	* ld-maxq/r32-1.s, * ld-maxq/r32-2.s, * ld-maxq/r32.dd: Likewise.
+
 2010-06-15  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-elf/orphan3.d: Allow section names starting '_'.

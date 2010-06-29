@@ -1,3 +1,14 @@
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-maxq.h: Delete file.
+	* config/tc-maxq.c: Delete file.
+	* Makefile.am: Remove references to maxq.
+	* configure.tgt: Likewise.
+	* config/obj-coff.h: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2010-06-28  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-evax.h (S_SET_OTHER, S_SET_TYPE, S_SET_DESC): Don't define.

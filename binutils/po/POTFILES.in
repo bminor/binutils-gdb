@@ -20,6 +20,7 @@ dlltool.h
 dllwrap.c
 dwarf.c
 dwarf.h
+elfedit.c
 emul_aix.c
 emul_vanilla.c
 filemode.c

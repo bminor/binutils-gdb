@@ -53,7 +53,6 @@ case ${cpu} in
   m680[012346]0)	cpu_type=m68k ;;
   m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
   m683??)		cpu_type=m68k ;;
-  maxq)			cpu_type=maxq ;;
   mep)			cpu_type=mep endian=little ;;
   microblaze*)		cpu_type=microblaze ;;
   mips*el)		cpu_type=mips endian=little ;;
@@ -270,8 +269,6 @@ case ${generic_target} in
   m68k-*-netbsd*)			fmt=aout em=nbsd bfd_gas=yes ;;
   m68k-*-openbsd*)			fmt=aout em=nbsd bfd_gas=yes ;;
   m68k-*-psos*)				fmt=elf em=psos;;
-
-  maxq-*-coff)				fmt=coff bfd_gas=yes ;;
 
   mep-*-elf)				fmt=elf ;;
 

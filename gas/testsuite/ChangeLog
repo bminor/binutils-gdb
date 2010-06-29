@@ -1,3 +1,25 @@
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
+	* gas/maxq10/maxq10.exp: Delete file.
+	* gas/maxq10/bits.d, * gas/maxq10/bits.s, * gas/maxq10/call.d,
+	* gas/maxq10/call.s, * gas/maxq10/data.s, * gas/maxq10/data2.d,
+	* gas/maxq10/data2.s, * gas/maxq10/data3.d, * gas/maxq10/data3.s,
+	* gas/maxq10/err.s, * gas/maxq10/jump.d, * gas/maxq10/jump.s,
+	* gas/maxq10/logical.d, * gas/maxq10/logical.s, * gas/maxq10/math.d,
+	* gas/maxq10/math.s, * gas/maxq10/pmtest.d, * gas/maxq10/pmtest.s,
+	* gas/maxq10/range.d, * gas/maxq10/range.s: Likewise.
+	* gas/maxq20/maxq20.exp: Delete file.
+	* gas/maxq20/bits.d, * gas/maxq20/bits.s, * gas/maxq20/call.d,
+	* gas/maxq20/call.s, * gas/maxq20/data1.d, * gas/maxq20/data1.s,
+	* gas/maxq20/data2.d, * gas/maxq20/data2.s, * gas/maxq20/data3.d,
+	* gas/maxq20/data3.s, * gas/maxq20/jump.d, * gas/maxq20/jump.s,
+	* gas/maxq20/jzimm.d, * gas/maxq20/jzimm.s, * gas/maxq20/logical.d,
+	* gas/maxq20/logical.s, * gas/maxq20/math.d, * gas/maxq20/math.s,
+	* gas/maxq20/pfx2.s, * gas/maxq20/pmtest.d, * gas/maxq20/pmtest.s,
+	* gas/maxq20/pxf0.s, * gas/maxq20/range.d,
+	* gas/maxq20/range.s: Likewise.
+	* gas/all/gas.exp: Remove references to maxq.
+
 2010-06-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/neon-ldst-align-bad.l: Update for Neon alignment syntax fix.

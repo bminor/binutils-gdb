@@ -1,3 +1,13 @@
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/maxqcoff.sh: Delete file.
+	* scripttempl/maxqcoff.sc: Delete file.
+	* Makefile.am: Remove references to maxq.
+	* configure.tgt: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2010-06-27  Alan Modra  <amodra@gmail.com>
 
 	* pe-dll.c (fill_edata): Avoid set but unused warning.

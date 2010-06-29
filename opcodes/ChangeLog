@@ -1,5 +1,15 @@
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
+	* maxq-dis.c: Delete file.
+	* Makefile.am: Remove references to maxq.
+	* configure.in: Likewise.
+	* disassemble.c: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
 	* mep-dis.c: Regenerate.
 
 2010-06-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>

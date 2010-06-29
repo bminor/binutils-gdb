@@ -2083,9 +2083,6 @@ enum bfd_architecture
 #define bfd_mach_xc16xs         3
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
-   bfd_arch_maxq,     /* Dallas MAXQ 10/20 */
-#define bfd_mach_maxq10    10
-#define bfd_mach_maxq20    20
   bfd_arch_z80,
 #define bfd_mach_z80strict      1 /* No undocumented opcodes.  */
 #define bfd_mach_z80            3 /* With ixl, ixh, iyl, and iyh.  */

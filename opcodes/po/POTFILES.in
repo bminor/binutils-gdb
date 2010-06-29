@@ -10,8 +10,6 @@ cgen-asm.c
 cgen-bitset.c
 cgen-dis.c
 cgen-opc.c
-cgen-ops.h
-cgen-types.h
 cr16-dis.c
 cr16-opc.c
 cris-dis.c
@@ -112,7 +110,6 @@ m68hc11-opc.c
 m68k-dis.c
 m68k-opc.c
 m88k-dis.c
-maxq-dis.c
 mcore-dis.c
 mcore-opc.h
 mep-asm.c
@@ -155,6 +152,8 @@ pj-dis.c
 pj-opc.c
 ppc-dis.c
 ppc-opc.c
+rx-decode.c
+rx-dis.c
 s390-dis.c
 s390-mkopc.c
 s390-opc.c
@@ -175,6 +174,7 @@ tic30-dis.c
 tic4x-dis.c
 tic54x-dis.c
 tic54x-opc.c
+tic6x-dis.c
 tic80-dis.c
 tic80-opc.c
 v850-dis.c

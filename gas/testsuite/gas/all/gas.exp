@@ -111,12 +111,12 @@ case $target_triplet in {
 	# This is usually revealed by the error message:
 	#  symbol `sym' required but not present
 	setup_xfail "*arm*-*-*aout*" "*arm*-*-*coff" \
-	    "*arm*-*-pe" "m68hc*-*-*" "maxq-*-*" \
+	    "*arm*-*-pe" "m68hc*-*-*" \
 	    "rx-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "*-*-aix*" "*-*-coff" "*-*-cygwin" "*-*-mingw*" "*-*-pe*" \
 	    "bfin-*-*" "hppa*-*-hpux*" \
-	    "m68hc*-*-*" "maxq-*-*" "or32-*-*" \
+	    "m68hc*-*-*" "or32-*-*" \
 	    "rx-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef3
 	gas_test_error "redef4.s" "" ".set for symbol already used as label"

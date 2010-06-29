@@ -37,7 +37,6 @@ coff-i860.c
 coff-i960.c
 coff-m68k.c
 coff-m88k.c
-coff-maxq.c
 coff-mips.c
 coff-or32.c
 coff-rs6000.c
@@ -96,7 +95,6 @@ cpu-m68hc11.c
 cpu-m68hc12.c
 cpu-m68k.c
 cpu-m88k.c
-cpu-maxq.c
 cpu-mcore.c
 cpu-mep.c
 cpu-microblaze.c
@@ -113,6 +111,7 @@ cpu-pj.c
 cpu-plugin.c
 cpu-powerpc.c
 cpu-rs6000.c
+cpu-rx.c
 cpu-s390.c
 cpu-score.c
 cpu-sh.c
@@ -121,6 +120,7 @@ cpu-spu.c
 cpu-tic30.c
 cpu-tic4x.c
 cpu-tic54x.c
+cpu-tic6x.c
 cpu-tic80.c
 cpu-v850.c
 cpu-vax.c
@@ -190,6 +190,7 @@ elf32-openrisc.c
 elf32-or32.c
 elf32-pj.c
 elf32-ppc.c
+elf32-rx.c
 elf32-s390.c
 elf32-score.c
 elf32-score7.c
@@ -199,6 +200,7 @@ elf32-sh64-com.c
 elf32-sh64.c
 elf32-sparc.c
 elf32-spu.c
+elf32-tic6x.c
 elf32-v850.c
 elf32-vax.c
 elf32-xc16x.c
@@ -266,6 +268,7 @@ m68knetbsd.c
 m88kmach3.c
 m88kopenbsd.c
 mach-o-i386.c
+mach-o-x86-64.c
 mach-o.c
 mach-o.h
 merge.c
@@ -338,11 +341,9 @@ vaxnetbsd.c
 verilog.c
 versados.c
 version.h
-vms-gsd.c
-vms-hdr.c
+vms-alpha.c
+vms-lib.c
 vms-misc.c
-vms-tir.c
-vms.c
 vms.h
 xcoff-target.h
 xcofflink.c

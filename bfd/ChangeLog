@@ -1,3 +1,19 @@
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
+	* cpu-maxq.c: Delete file.
+	* coff-maxq.c: Delete file.
+	* Makefile.am: Remove references to maxq.
+	* archures.c: Likewise.
+	* coffcode.h: Likewise.
+	* configure.in: Likewise.
+	* targets.c: Likewise.
+	* config.bfd: Move maxq from obsolete to removed.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2010-06-28  Alan Modra  <amodra@gmail.com>
 
 	* compress.c (bfd_uncompress_section_contents): Use ATTRIBUTE_UNUSED

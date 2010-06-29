@@ -417,9 +417,6 @@ DESCRIPTION
 .#define bfd_mach_xc16xs         3
 .  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
 .#define bfd_mach_xtensa	1
-.   bfd_arch_maxq,     {* Dallas MAXQ 10/20 *}
-.#define bfd_mach_maxq10    10
-.#define bfd_mach_maxq20    20
 .  bfd_arch_z80,
 .#define bfd_mach_z80strict      1 {* No undocumented opcodes.  *}
 .#define bfd_mach_z80            3 {* With ixl, ixh, iyl, and iyh.  *}
@@ -498,7 +495,6 @@ extern const bfd_arch_info_type bfd_m68hc11_arch;
 extern const bfd_arch_info_type bfd_m68hc12_arch;
 extern const bfd_arch_info_type bfd_m68k_arch;
 extern const bfd_arch_info_type bfd_m88k_arch;
-extern const bfd_arch_info_type bfd_maxq_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_mep_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
@@ -576,7 +572,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_m68hc12_arch,
     &bfd_m68k_arch,
     &bfd_m88k_arch,
-    &bfd_maxq_arch,
     &bfd_mcore_arch,
     &bfd_mep_arch,
     &bfd_microblaze_arch,

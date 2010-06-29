@@ -355,8 +355,6 @@ m68*-*-rtems*)		targ_emul=m68kelf
 			;;
 m8*-*-*)		targ_emul=m88kbcs
 			;;
-maxq-*-coff)            targ_emul=maxqcoff
-			;;
 mcore-*-pe)		targ_emul=mcorepe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 mcore-*-elf)		targ_emul=elf32mcore

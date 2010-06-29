@@ -107,11 +107,6 @@
 #define TARGET_FORMAT "coff-h8500"
 #endif
 
-#ifdef TC_MAXQ20
-#include "coff/maxq.h"
-#define TARGET_FORMAT "coff-maxq"
-#endif
-
 #ifdef TC_SH
 
 #ifdef TE_PE
