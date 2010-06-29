@@ -1,5 +1,11 @@
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
+   	PR binutils/3166
+	* objcopy.c (is_strip_section): Revert 2006-09-05.
+	(setup_section): Make SHT_GROUP section nobits.
+
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
 	* configure: Regenerate.
 	* po/POTFILES.in: Regenerate.
 

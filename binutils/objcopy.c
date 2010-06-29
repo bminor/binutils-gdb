@@ -942,12 +942,6 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       asymbol *gsym;
       const char *gname;
 
-      /* PR binutils/3166
-	 Group sections look like debugging sections but they are not.
-	 (They have a non-zero size but they are not ALLOCated).  */
-      if (strip_symbols == STRIP_NONDEBUG)
-	return TRUE;
-
       /* PR binutils/3181
 	 If we are going to strip the group signature symbol, then
 	 strip the group section too.  */
@@ -2419,11 +2413,11 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (p != NULL && p->set_flags)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
   else if (strip_symbols == STRIP_NONDEBUG
-	   && (flags & SEC_ALLOC) != 0
-	   && (ibfd->xvec->flavour != bfd_target_elf_flavour
-	       || elf_section_type (isection) != SHT_NOTE))
+	   && (flags & (SEC_ALLOC | SEC_GROUP)) != 0
+	   && !(ibfd->xvec->flavour == bfd_target_elf_flavour
+		&& elf_section_type (isection) == SHT_NOTE))
     {
-      flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
+      flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP);
       if (obfd->xvec->flavour == bfd_target_elf_flavour)
 	{
 	  make_nobits = TRUE;
@@ -2432,7 +2426,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	     elf.c:copy_private_bfd_data that section flags have not
 	     changed between input and output sections.  This hack
 	     prevents wholesale rewriting of the program headers.  */
-	  isection->flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
+	  isection->flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP);
 	}
     }
 
