@@ -1,5 +1,14 @@
 2010-06-29  Doug Evans  <dje@google.com>
 
+	PR gdb/11702
+	* NEWS: Add entry.
+	* dwarf2read.c (dwarf2_add_field): If DW_AT_const_value is present,
+	create a symbol for the field and record the value.
+	(new_symbol): Handle DW_TAG_member.
+	* gdbtypes.c (field_is_static): Remove FIXME.
+	* symtab.c (search_symbols): When searching for VARIABLES_DOMAIN,
+	only ignore LOC_CONST symbols that are enums.
+
 	* dwarf2read.c: Remove trailing whitespace.
 
 	Delete FIELD_LOC_KIND_DWARF_BLOCK, unused.

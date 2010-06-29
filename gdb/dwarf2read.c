@@ -4528,6 +4528,11 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
   fp = &new_field->field;
 
+  /* NOTE: According to the dwarf standard, static data members are
+     indicated by having DW_AT_external.
+     The check here for ! die_is_declaration is historical.
+     This test is replicated in new_symbol.  */
+
   if (die->tag == DW_TAG_member && ! die_is_declaration (die, cu))
     {
       /* Data member other than a C++ static data member.  */
@@ -4642,6 +4647,14 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       fieldname = dwarf2_name (die, cu);
       if (fieldname == NULL)
 	return;
+
+      attr = dwarf2_attr (die, DW_AT_const_value, cu);
+      if (attr)
+	{
+	  /* A static const member, not much different than an enum as far as
+	     we're concerned, except that we can support more types.  */
+	  new_symbol (die, NULL, cu);
+	}
 
       /* Get physical name.  */
       physname = (char *) dwarf2_physname (fieldname, die, cu);
@@ -8824,6 +8837,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     BLOCK_FUNCTION from the blockvector.  */
 	  break;
 	case DW_TAG_variable:
+	case DW_TAG_member:
 	  /* Compilation with minimal debug info may result in variables
 	     with missing type entries. Change the misleading `void' type
 	     to something sensible.  */
@@ -8832,6 +8846,17 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	      = objfile_type (objfile)->nodebug_data_symbol;
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
+	  /* In the case of DW_TAG_member, we should only be called for
+	     static const members.  */
+	  if (die->tag == DW_TAG_member)
+	    {
+	      /* NOTE: This test seems wrong according to the dwarf standard.
+		 static data members are represented by DW_AT_external.
+		 However, dwarf2_add_field is currently calling
+		 die_is_declaration to check, so we do the same.  */
+	      gdb_assert (die_is_declaration (die, cu));
+	      gdb_assert (attr);
+	    }
 	  if (attr)
 	    {
 	      dwarf2_const_value (attr, sym, cu);

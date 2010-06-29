@@ -2512,9 +2512,7 @@ field_is_static (struct field *f)
      to the address of the enclosing struct.  It would be nice to
      have a dedicated flag that would be set for static fields when
      the type is being created.  But in practice, checking the field
-     loc_kind should give us an accurate answer (at least as long as
-     we assume that DWARF block locations are not going to be used
-     for static fields).  FIXME?  */
+     loc_kind should give us an accurate answer.  */
   return (FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSNAME
 	  || FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSADDR);
 }

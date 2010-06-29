@@ -32,6 +32,11 @@
   GDB now also supports proper overload resolution for all the previously
   mentioned flavors of operators.
 
+  ** static const class members
+
+  Printing of static const class members that are initialized in the
+  class definition has been fixed.
+
 * Windows Thread Information Block access.
 
   On Windows targets, GDB now supports displaying the Windows Thread

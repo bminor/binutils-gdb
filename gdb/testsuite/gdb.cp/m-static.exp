@@ -56,11 +56,13 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
     continue
 }
+
+get_debug_format
+set non_dwarf [expr ! [test_debug_format "DWARF 2"]]
 
 # First, run to after we've constructed all the objects:
 
@@ -124,6 +126,16 @@ gdb_test "print test4.elsewhere" "\\$\[0-9\].* = 221" "static const int initiali
 
 # static const int that nobody initializes.  From PR gdb/635.
 gdb_test "print test4.nowhere" "field nowhere is nonexistent or has been optimized out" "static const int initialized nowhere"
+
+# static const initialized in the class definition, PR gdb/11702.
+if { $non_dwarf } { setup_xfail *-*-* }
+gdb_test "print test4.everywhere" "\\$\[0-9\].* = 317" "static const int initialized in class definition"
+if { $non_dwarf } { setup_xfail *-*-* }
+gdb_test "print test4.somewhere" "\\$\[0-9\].* = 3.14\[0-9\]*" "static const float initialized in class definition"
+
+# Also make sure static const members can be found via "info var".
+if { $non_dwarf } { setup_xfail *-*-* }
+gdb_test "info variable everywhere" "File .*/m-static\[.\]h.*const int gnu_obj_4::everywhere;" "info variable everywhere"
 
 # Perhaps at some point test4 should also include a test for a static
 # const int that was initialized in the header file.  But I'm not sure

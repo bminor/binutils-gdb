@@ -1,3 +1,9 @@
+2010-06-29  Doug Evans  <dje@google.com>
+
+	Test PR c++/11702.
+	* gdb.cp/m-static.exp: Add testcase.
+	* gdb.cp/m-static.h (gnu_obj_4): Add initialized static const member.
+
 2010-06-28  Phil Muldoon  <pmuldoon@redhat.com>
             Tom Tromey  <tromey@redhat.com>
             Thiago Jung Bauermann  <bauerman@br.ibm.com>

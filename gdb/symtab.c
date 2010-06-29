@@ -3057,10 +3057,15 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 	      if (file_matches (real_symtab->filename, files, nfiles)
 		  && ((regexp == NULL
 		       || re_exec (SYMBOL_NATURAL_NAME (sym)) != 0)
-		      && ((kind == VARIABLES_DOMAIN && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+		      && ((kind == VARIABLES_DOMAIN
+			   && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			   && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
 			   && SYMBOL_CLASS (sym) != LOC_BLOCK
-			   && SYMBOL_CLASS (sym) != LOC_CONST)
+			   /* LOC_CONST can be used for more than just enums,
+			      e.g., c++ static const members.
+			      We only want to skip enums here.  */
+			   && !(SYMBOL_CLASS (sym) == LOC_CONST
+				&& TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_ENUM))
 			  || (kind == FUNCTIONS_DOMAIN && SYMBOL_CLASS (sym) == LOC_BLOCK)
 			  || (kind == TYPES_DOMAIN && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
 		{
