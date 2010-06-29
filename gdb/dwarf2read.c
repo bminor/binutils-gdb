@@ -916,7 +916,7 @@ static struct type *read_type_die (struct die_info *, struct dwarf2_cu *);
 
 static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
-static char *typename_concat (struct obstack *obs, const char *prefix, 
+static char *typename_concat (struct obstack *obs, const char *prefix,
 			      const char *suffix, int physname,
 			      struct dwarf2_cu *cu);
 
@@ -975,7 +975,7 @@ static void process_enumeration_scope (struct die_info *, struct dwarf2_cu *);
 
 static CORE_ADDR decode_locdesc (struct dwarf_block *, struct dwarf2_cu *);
 
-static enum dwarf_array_dim_ordering read_array_order (struct die_info *, 
+static enum dwarf_array_dim_ordering read_array_order (struct die_info *,
 						       struct dwarf2_cu *);
 
 static struct die_info *read_comp_unit (gdb_byte *, struct dwarf2_cu *);
@@ -1533,7 +1533,7 @@ read_type_comp_unit_head (struct comp_unit_head *cu_header,
 {
   gdb_byte *initial_types_ptr = types_ptr;
 
-  dwarf2_read_section (dwarf2_per_objfile->objfile, 
+  dwarf2_read_section (dwarf2_per_objfile->objfile,
 		       &dwarf2_per_objfile->types);
   cu_header->offset = types_ptr - dwarf2_per_objfile->types.buffer;
 
@@ -2162,7 +2162,7 @@ create_all_comp_units (struct objfile *objfile)
   n_allocated = 10;
   all_comp_units = xmalloc (n_allocated
 			    * sizeof (struct dwarf2_per_cu_data *));
-  
+
   while (info_ptr < dwarf2_per_objfile->info.buffer + dwarf2_per_objfile->info.size)
     {
       unsigned int length, initial_length_size;
@@ -2335,7 +2335,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
      DW_TAG_namespace DIEs with a name of "::" for the global namespace.
      Work around this problem here.  */
   if (cu->language == language_cplus
-      && parent->tag == DW_TAG_namespace 
+      && parent->tag == DW_TAG_namespace
       && strcmp (parent->name, "::") == 0
       && grandparent_scope == NULL)
     {
@@ -2584,7 +2584,7 @@ add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
    symbol for that subprogram.  When the CU language allows it, this
    routine also defines a partial symbol for each nested subprogram
    that this subprogram contains.
-   
+
    DIE my also be a lexical block, in which case we simply search
    recursively for suprograms defined inside that lexical block.
    Again, this is only performed when the CU language allows this
@@ -2623,7 +2623,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	      add_partial_symbol (pdi, cu);
         }
     }
-  
+
   if (! pdi->has_children)
     return;
 
@@ -3371,7 +3371,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 
 	  /* For Java and C++ methods, append formal parameter type
 	     information, if PHYSNAME.  */
-	  
+
 	  if (physname && die->tag == DW_TAG_subprogram
 	      && (cu->language == language_cplus
 		  || cu->language == language_java))
@@ -3572,7 +3572,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   bfd *abfd = objfile->obfd;
   struct line_header *line_header = 0;
   CORE_ADDR baseaddr;
-  
+
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   get_scope_pc_bounds (die, &lowpc, &highpc, cu);
@@ -3621,7 +3621,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   attr = dwarf2_attr (die, DW_AT_producer, cu);
-  if (attr) 
+  if (attr)
     cu->producer = DW_STRING (attr);
 
   /* We assume that we're processing GCC output. */
@@ -3723,7 +3723,7 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* This isn't technically needed today.  It is done for symmetry
      with read_file_scope.  */
   attr = dwarf2_attr (die, DW_AT_producer, cu);
-  if (attr) 
+  if (attr)
     cu->producer = DW_STRING (attr);
 
   /* We assume that we're processing GCC output. */
@@ -4023,7 +4023,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);
-  
+
   /* In C++, we can have functions nested inside functions (e.g., when
      a function declares a class that has methods).  This means that
      when we finish processing a function scope, we may need to go
@@ -4055,7 +4055,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Ignore blocks with missing or invalid low and high pc attributes.  */
   /* ??? Perhaps consider discontiguous blocks defined by DW_AT_ranges
      as multiple lexical blocks?  Handling children in a sane way would
-     be nasty.  Might be easier to properly extend generic blocks to 
+     be nasty.  Might be easier to properly extend generic blocks to
      describe ranges.  */
   if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, NULL))
     return;
@@ -4308,7 +4308,7 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
      subprograms or lexical blocks), we're done.  */
   if (cu->language != language_ada)
     return;
-     
+
   /* Check all the children of the given DIE.  If it contains nested
      subprograms, then check their pc bounds.  Likewise, we need to
      check lexical blocks as well, as they may also contain subprogram
@@ -4470,8 +4470,8 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
                   return;
                 }
 
-              record_block_range (block, 
-                                  baseaddr + base + start, 
+              record_block_range (block,
+                                  baseaddr + base + start,
                                   baseaddr + base + end - 1);
             }
         }
@@ -4483,7 +4483,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 static void
 dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		  struct dwarf2_cu *cu)
-{ 
+{
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct nextfield *new_field;
@@ -4531,7 +4531,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   if (die->tag == DW_TAG_member && ! die_is_declaration (die, cu))
     {
       /* Data member other than a C++ static data member.  */
-      
+
       /* Get type of field.  */
       fp->type = die_type (die, cu);
 
@@ -4635,7 +4635,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	 is a declaration, but all versions of G++ as of this writing
 	 (so through at least 3.2.1) incorrectly generate
 	 DW_TAG_variable tags.  */
-      
+
       char *physname;
 
       /* Get name of field.  */
@@ -4683,7 +4683,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 static void
 dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
 		    struct dwarf2_cu *cu)
-{ 
+{
   struct objfile *objfile = cu->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct typedef_field_list *new_field;
@@ -5336,7 +5336,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	  while (--i >= 0)
 	    {
 	      struct typedef_field *dest, *src;
-	      
+
 	      dest = &TYPE_TYPEDEF_FIELD (type, i);
 	      src = &fi.typedef_field_list->field;
 	      fi.typedef_field_list = fi.typedef_field_list->next;
@@ -5609,7 +5609,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   name = dwarf2_name (die, cu);
   if (name)
     TYPE_NAME (type) = name;
-  
+
   /* Install the type in the die. */
   set_die_type (die, type, cu);
 
@@ -5622,7 +5622,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 static enum dwarf_array_dim_ordering
-read_array_order (struct die_info *die, struct dwarf2_cu *cu) 
+read_array_order (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *attr;
 
@@ -5632,10 +5632,10 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
 
   /*
     GNU F77 is a special case, as at 08/2004 array type info is the
-    opposite order to the dwarf2 specification, but data is still 
+    opposite order to the dwarf2 specification, but data is still
     laid out as per normal fortran.
 
-    FIXME: dsl/2004-8-20: If G77 is ever fixed, this will also need 
+    FIXME: dsl/2004-8-20: If G77 is ever fixed, this will also need
     version checking.
   */
 
@@ -5645,7 +5645,7 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
       return DW_ORD_row_major;
     }
 
-  switch (cu->language_defn->la_array_ordering) 
+  switch (cu->language_defn->la_array_ordering)
     {
     case array_column_major:
       return DW_ORD_col_major;
@@ -5808,7 +5808,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
   if (die->child != NULL)
     {
       struct die_info *child_die = die->child;
-      
+
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, cu);
@@ -5938,7 +5938,7 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  complaint (&symfile_complaints, _("invalid pointer size %d"), byte_size);
 	}
-      else 
+      else
 	{
 	  /* Should we also complain about unhandled address classes?  */
 	}
@@ -6128,7 +6128,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
      we don't infinitely recurse when dealing with parameters
      declared as the same subroutine type. */
   set_die_type (die, ftype, cu);
-  
+
   if (die->child != NULL)
     {
       struct type *void_type = objfile_type (cu->objfile)->builtin_void;
@@ -6273,7 +6273,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type_flags |= TYPE_FLAG_UNSIGNED;
 	break;
       case DW_ATE_signed_char:
-	if (cu->language == language_ada || cu->language == language_m2 
+	if (cu->language == language_ada || cu->language == language_m2
 	    || cu->language == language_pascal)
 	  code = TYPE_CODE_CHAR;
 	break;
@@ -6326,7 +6326,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     return range_type;
 
   if (cu->language == language_fortran)
-    { 
+    {
       /* FORTRAN implies a lower bound of 1, if not given.  */
       low = 1;
     }
@@ -6340,7 +6340,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
   if (attr)
-    {       
+    {
       if (attr->form == DW_FORM_block1 || is_ref_attr (attr))
         {
           /* GCC encodes arrays with unspecified or dynamic length
@@ -6408,7 +6408,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  negative_mask = 
+  negative_mask =
     (LONGEST) -1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1);
   if (!TYPE_UNSIGNED (base_type) && (low & negative_mask))
     low |= negative_mask;
@@ -6426,7 +6426,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   name = dwarf2_name (die, cu);
   if (name)
     TYPE_NAME (range_type) = name;
-  
+
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     TYPE_LENGTH (range_type) = DW_UNSND (attr);
@@ -6438,7 +6438,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   return range_type;
 }
-  
+
 static struct type *
 read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -6679,7 +6679,7 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 
   allocated_attrs = ATTR_ALLOC_CHUNK;
   cur_attrs = xmalloc (allocated_attrs * sizeof (struct attr_abbrev));
-  
+
   /* loop until we reach an abbrev number of 0 */
   while (abbrev_number)
     {
@@ -7628,7 +7628,7 @@ read_address (bfd *abfd, gdb_byte *buf, struct dwarf2_cu *cu,
      from:
 
 	http://reality.sgiweb.org/davea/dwarf3-draft8-011125.pdf
-     
+
      This document is only a draft and is subject to change.  (So beware.)
 
      Details regarding the older, non-standard 64-bit format were
@@ -8035,7 +8035,7 @@ add_include_dir (struct line_header *lh, char *include_dir)
 
   lh->include_dirs[lh->num_include_dirs++] = include_dir;
 }
- 
+
 
 /* Add an entry to LH's file name table.  */
 static void
@@ -8070,7 +8070,7 @@ add_file_name (struct line_header *lh,
   fe->included_p = 0;
   fe->symtab = NULL;
 }
- 
+
 
 /* Read the statement program header starting at OFFSET in
    .debug_line, according to the endianness of ABFD.  Return a pointer
@@ -8113,7 +8113,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   line_ptr = dwarf2_per_objfile->line.buffer + offset;
 
   /* Read in the header.  */
-  lh->total_length = 
+  lh->total_length =
     read_checked_initial_length_and_offset (abfd, line_ptr, &cu->header,
 					    &bytes_read, &offset_size);
   line_ptr += bytes_read;
@@ -8187,7 +8187,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
       add_file_name (lh, cur_file, dir_index, mod_time, length);
     }
   line_ptr += bytes_read;
-  lh->statement_program_start = line_ptr; 
+  lh->statement_program_start = line_ptr;
 
   if (line_ptr > (dwarf2_per_objfile->line.buffer
 		  + dwarf2_per_objfile->line.size))
@@ -8252,7 +8252,7 @@ check_cu_functions (CORE_ADDR address, struct dwarf2_cu *cu)
       to create all necessary symbol tables, and their linetables.
       The compilation directory of the file is passed in COMP_DIR,
       and must not be NULL.
-   
+
    2. If PST is not NULL, this procedure reads the program to determine
       the list of files included by the unit represented by PST, and
       builds all the associated partial symbol tables.  In this case,
@@ -8322,7 +8322,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
             }
 
 	  if (op_code >= lh->opcode_base)
-	    {		
+	    {
 	      /* Special operand.  */
 	      adj_opcode = op_code - lh->opcode_base;
 	      address += (((op_index + (adj_opcode / lh->line_range))
@@ -8378,7 +8378,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                   {
                     char *cur_file;
                     unsigned int dir_index, mod_time, length;
-                    
+
                     cur_file = read_string (abfd, line_ptr, &bytes_read);
                     line_ptr += bytes_read;
                     dir_index =
@@ -8963,7 +8963,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 			   && (cu->language == language_cplus
 			       || cu->language == language_java)
 			   ? &global_symbols : cu->list_in_scope);
-	  
+
 	    add_symbol_to_list (sym, list_to_add);
 
 	    /* The semantics of C++ state that "struct foo { ... }" also
@@ -9010,7 +9010,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 			   && (cu->language == language_cplus
 			       || cu->language == language_java)
 			   ? &global_symbols : cu->list_in_scope);
-	  
+
 	    add_symbol_to_list (sym, list_to_add);
 	  }
 	  break;
@@ -9057,7 +9057,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 						      cu_header->addr_size,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
-      SYMBOL_VALUE_BYTES (sym) = 
+      SYMBOL_VALUE_BYTES (sym) =
 	obstack_alloc (&objfile->objfile_obstack, cu_header->addr_size);
       /* NOTE: cagney/2003-05-09: In-lined store_address call with
          it's body - store_unsigned_integer.  */
@@ -11376,7 +11376,7 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
   if (1 <= file && file <= lh->num_file_names)
     {
       struct file_entry *fe = &lh->file_names[file - 1];
-  
+
       if (IS_ABSOLUTE_PATH (fe->name))
         return xstrdup (fe->name);
       else
@@ -11412,7 +11412,7 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
 
       sprintf (fake_name, "<bad macro file number %d>", file);
 
-      complaint (&symfile_complaints, 
+      complaint (&symfile_complaints,
                  _("bad file number in macro information (%d)"),
                  file);
 
@@ -11444,7 +11444,7 @@ macro_start_file (int file, int line,
     current_file = macro_include (current_file, line, full_name);
 
   xfree (full_name);
-              
+
   return current_file;
 }
 
@@ -11501,7 +11501,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
 
      The Dwarf 2 spec says that an object-like macro's name is always
      followed by a space, but versions of GCC around March 2002 omit
-     the space when the macro's definition is the empty string. 
+     the space when the macro's definition is the empty string.
 
      The Dwarf 2 spec says that there should be no spaces between the
      formal arguments in a function-like macro's formal argument list,
@@ -11530,7 +11530,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
 	  dwarf2_macro_malformed_definition_complaint (body);
           replacement = body + name_len;
         }
-      
+
       macro_define_object (file, line, name, replacement);
 
       xfree (name);
@@ -11588,14 +11588,14 @@ parse_macro_definition (struct macro_source_file *file, int line,
           if (*p == ' ')
             /* Perfectly formed definition, no complaints.  */
             macro_define_function (file, line, name,
-                                   argc, (const char **) argv, 
+                                   argc, (const char **) argv,
                                    p + 1);
           else if (*p == '\0')
             {
               /* Complain, but do define it.  */
 	      dwarf2_macro_malformed_definition_complaint (body);
               macro_define_function (file, line, name,
-                                     argc, (const char **) argv, 
+                                     argc, (const char **) argv,
                                      p);
             }
           else
@@ -11776,8 +11776,8 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 		complaint (&symfile_complaints,
 			   _("debug info with no main source gives macro %s "
 			     "on line %d: %s"),
-			   macinfo_type == DW_MACINFO_define ? 
-			     _("definition") : 
+			   macinfo_type == DW_MACINFO_define ?
+			     _("definition") :
 			       macinfo_type == DW_MACINFO_undef ?
 				 _("undefinition") :
 				 _("something-or-other"), line, body);
@@ -11788,7 +11788,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 			 _("debug info gives %s macro %s with %s line %d: %s"),
 			 at_commandline ? _("command-line") : _("in-file"),
 			 macinfo_type == DW_MACINFO_define ?
-			   _("definition") : 
+			   _("definition") :
 			     macinfo_type == DW_MACINFO_undef ?
 			       _("undefinition") :
 			       _("something-or-other"),
@@ -12000,7 +12000,7 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 	  baton->size = 0;
 	  baton->data = NULL;
 	}
-      
+
       SYMBOL_COMPUTED_OPS (sym) = &dwarf2_locexpr_funcs;
       SYMBOL_LOCATION_BATON (sym) = baton;
     }
@@ -12496,7 +12496,7 @@ set_dwarf2_cmd (char *args, int from_tty)
 
 static void
 show_dwarf2_cmd (char *args, int from_tty)
-{ 
+{
   cmd_show_list (show_dwarf2_cmdlist, from_tty, "");
 }
 

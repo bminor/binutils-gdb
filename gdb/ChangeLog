@@ -1,5 +1,7 @@
 2010-06-29  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c: Remove trailing whitespace.
+
 	Delete FIELD_LOC_KIND_DWARF_BLOCK, unused.
 	* gdbtypes.h (enum field_loc_kind): Delete FIELD_LOC_KIND_DWARF_BLOCK.
 	(struct main_type, field loc): Delete dwarf_block.
