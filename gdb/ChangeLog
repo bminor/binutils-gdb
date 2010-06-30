@@ -1,6 +1,10 @@
 2010-06-29  Doug Evans  <dje@google.com>
 
 	PR gdb/11702
+	* dwarf2read.c (dwarf2_add_field): Only create a symbol if
+	DW_AT_external is present.
+
+	PR gdb/11702
 	* NEWS: Add entry.
 	* dwarf2read.c (dwarf2_add_field): If DW_AT_const_value is present,
 	create a symbol for the field and record the value.

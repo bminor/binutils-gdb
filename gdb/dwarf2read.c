@@ -4528,11 +4528,6 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
   fp = &new_field->field;
 
-  /* NOTE: According to the dwarf standard, static data members are
-     indicated by having DW_AT_external.
-     The check here for ! die_is_declaration is historical.
-     This test is replicated in new_symbol.  */
-
   if (die->tag == DW_TAG_member && ! die_is_declaration (die, cu))
     {
       /* Data member other than a C++ static data member.  */
@@ -4649,7 +4644,12 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	return;
 
       attr = dwarf2_attr (die, DW_AT_const_value, cu);
-      if (attr)
+      if (attr
+	  /* Only create a symbol if this is an external value.
+	     new_symbol checks this and puts the value in the global symbol
+	     table, which we want.  If it is not external, new_symbol
+	     will try to put the value in cu->list_in_scope which is wrong.  */
+	  && dwarf2_flag_true_p (die, DW_AT_external, cu))
 	{
 	  /* A static const member, not much different than an enum as far as
 	     we're concerned, except that we can support more types.  */
@@ -8850,10 +8850,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     static const members.  */
 	  if (die->tag == DW_TAG_member)
 	    {
-	      /* NOTE: This test seems wrong according to the dwarf standard.
-		 static data members are represented by DW_AT_external.
-		 However, dwarf2_add_field is currently calling
-		 die_is_declaration to check, so we do the same.  */
+	      /* dwarf2_add_field uses die_is_declaration,
+		 so we do the same.  */
 	      gdb_assert (die_is_declaration (die, cu));
 	      gdb_assert (attr);
 	    }
