@@ -30,8 +30,11 @@
    if it sees _GNU_SOURCE (which config.h will define).
    pyconfig.h defines _POSIX_C_SOURCE to a different value than
    /usr/include/features.h does causing compilation to fail.
-   To work around this, undef _POSIX_C_SOURCE before we include Python.h.  */
+   To work around this, undef _POSIX_C_SOURCE before we include Python.h.
+
+   Same problem with _XOPEN_SOURCE.  */
 #undef _POSIX_C_SOURCE
+#undef _XOPEN_SOURCE
 
 #if HAVE_LIBPYTHON2_4
 #include "python2.4/Python.h"
