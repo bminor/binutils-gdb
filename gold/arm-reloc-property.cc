@@ -104,7 +104,8 @@ Arm_reloc_property::Arm_reloc_property(
     relative_address_base_(RAB_NONE), is_deprecated_(is_deprecated),
     is_implemented_(is_implemented), checks_overflow_(checks_overflow),
     uses_got_entry_(false), uses_got_origin_(false), uses_plt_entry_(false),
-    uses_thumb_bit_(false), uses_symbol_base_(false), uses_addend_(false)
+    uses_thumb_bit_(false), uses_symbol_base_(false), uses_addend_(false),
+    uses_symbol_(false)
 {
   // Set size and alignment of static and dynamic relocations.
   if (rtype == RT_STATIC)
@@ -246,6 +247,7 @@ Arm_reloc_property::Arm_reloc_property(
     }
 
   gold_assert(node->is_leaf() && node->name() == "S");
+  this->uses_symbol_ = true;
 
   delete root_node;
 }

@@ -1,3 +1,13 @@
+2010-06-29  Doug Kwan  <dougkwan@google.com>
+
+	* arm-reloc-property.cc (Arm_reloc_property::Arm_reloc_property):
+	Initialize USE_SYMBOL_.
+	* arm-reloc-property.h (Arm_reloc_property::uses_symbol): New method
+	definition.
+	(Arm_reloc_property::uses_symbol_): New data member declaration.
+	* arm.cc (Target_arm::Relocate::relocate): Exit early if relocation
+	uses symbol value and symbol is undefined but not weakly undefined.
+
 2010-06-28  Rafael Espindola  <espindola@google.com>
 
 	* plugin.cc (Plugin::load): Use dlerror.

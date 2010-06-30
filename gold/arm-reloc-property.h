@@ -132,6 +132,11 @@ class Arm_reloc_property
   uses_symbol_base() const
   { return this->uses_symbol_base_; }
 
+  // Whether relocation uses the symbol.
+  bool
+  uses_symbol() const
+  { return this->uses_symbol_; }
+
   // Return the type of relative address base or RAB_NONE if this
   // is not a relative addressing relocation.
   Relative_address_base
@@ -273,6 +278,8 @@ class Arm_reloc_property
   bool uses_symbol_base_ : 1;
   // Whether this uses an addend.
   bool uses_addend_ : 1;
+  // Whether this uses the symbol.
+  bool uses_symbol_ : 1;
 };
 
 // Arm_reloc_property_table.  This table is used for looking up propeties

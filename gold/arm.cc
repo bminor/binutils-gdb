@@ -8410,6 +8410,13 @@ Target_arm<big_endian>::Relocate::relocate(
 	      // be converted into an NOP.
 	      is_weakly_undefined_without_plt = true;
 	    }
+	  else if (gsym->is_undefined() && reloc_property->uses_symbol())
+	    {
+	      // This relocation uses the symbol value but the symbol is
+	      // undefined.  Exit early and have the caller reporting an
+	      // error.
+	      return true;
+	    }
 	  else
 	    {
 	      // Set thumb bit if symbol:
