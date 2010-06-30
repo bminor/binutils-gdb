@@ -1,3 +1,9 @@
+2010-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/namespace.exp (print C::OtherFileClass::cOtherFileClassVar)
+	(print ::C::OtherFileClass::cOtherFileClassVar): Remove KFAIL for
+	c++/11702.
+
 2010-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>
 
