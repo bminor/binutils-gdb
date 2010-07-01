@@ -183,6 +183,12 @@ int ppc_cie_data_alignment;
 /* The type of processor we are assembling for.  This is one or more
    of the PPC_OPCODE flags defined in opcode/ppc.h.  */
 ppc_cpu_t ppc_cpu = 0;
+
+/* Flags set on encountering toc relocs.  */
+enum {
+  has_large_toc_reloc = 1,
+  has_small_toc_reloc = 2
+} toc_reloc_types;
 
 /* The target specific pseudo-ops which we support.  */
 
@@ -2168,6 +2174,7 @@ ppc_frob_file_before_adjust (void)
 
   toc = bfd_get_section_by_name (stdoutput, ".toc");
   if (toc != NULL
+      && toc_reloc_types != has_large_toc_reloc
       && bfd_section_size (stdoutput, toc) > 0x10000)
     as_warn (_("TOC section size exceeds 64k"));
 
@@ -2781,6 +2788,20 @@ md_assemble (char *str)
 		    default:
 		      break;
 		    }
+		}
+
+	      switch (reloc)
+		{
+		case BFD_RELOC_PPC_TOC16:
+		  toc_reloc_types |= has_small_toc_reloc;
+		  break;
+		case BFD_RELOC_PPC64_TOC16_LO:
+		case BFD_RELOC_PPC64_TOC16_HI:
+		case BFD_RELOC_PPC64_TOC16_HA:
+		  toc_reloc_types |= has_large_toc_reloc;
+		  break;
+		default:
+		  break;
 		}
 
 	      if (ppc_obj64

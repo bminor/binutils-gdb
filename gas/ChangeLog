@@ -1,3 +1,15 @@
+2010-07-01  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (toc_reloc_types): New variable.
+	(md_assemble): Set it.
+	(ppc_frob_file_before_adjust): Don't warn about toc section size
+	if we have large toc relocs and no small toc relocs.
+
+2010-06-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-moxie.c (md_apply_fix): Delete set but otherwise
+	unused variable.
+
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-maxq.h: Delete file.
