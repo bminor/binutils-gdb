@@ -8043,9 +8043,17 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		continue;
 
 	      if (h != NULL)
-		val = h->root.u.def.value;
+		{
+		  if (h->type == STT_GNU_IFUNC)
+		    continue;
+		  val = h->root.u.def.value;
+		}
 	      else
-		val = sym->st_value;
+		{
+		  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+		    continue;
+		  val = sym->st_value;
+		}
 	      val += rel->r_addend;
 	      val += sym_sec->output_section->vma + sym_sec->output_offset;
 
