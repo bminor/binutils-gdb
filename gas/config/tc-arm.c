@@ -10273,9 +10273,24 @@ do_t_mov_cmp (void)
 		  reject_bad_reg (Rn);
 		  reject_bad_reg (Rm);
 		}
-	      else if ((Rn == REG_SP || Rn == REG_PC)
-		       && (Rm == REG_SP || Rm == REG_PC))
-		reject_bad_reg (Rm);
+	      else if (narrow)
+		{
+		  /* This is mov.n.  */
+		  if ((Rn == REG_SP || Rn == REG_PC)
+		      && (Rm == REG_SP || Rm == REG_PC))
+		    {
+		      as_warn (_("Use of r%u as a source register is "
+				 "deprecated when r%u is the destination "
+				 "register."), Rm, Rn);
+		    }
+		}
+	      else
+		{
+		  /* This is mov.w.  */
+		  constraint (Rn == REG_PC, BAD_PC);
+		  constraint (Rm == REG_PC, BAD_PC);
+		  constraint (Rn == REG_SP && Rm == REG_SP, BAD_SP);
+		}
 	    }
 	  else
 	    reject_bad_reg (Rn);

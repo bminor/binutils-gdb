@@ -1,3 +1,8 @@
+2010-07-01  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/thumb2_bad_reg.s: Update mov register tests.
+	* gas/arm/thumb2_bad_reg.l: Likewise.
+
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
 	* gas/maxq10/maxq10.exp: Delete file.
