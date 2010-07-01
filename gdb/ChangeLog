@@ -1,5 +1,9 @@
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (BREAK_ARGS_HELP): Add missing `the'.
+
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* dwarf2loc.c (locexpr_tracepoint_var_ref)
 	(loclist_tracepoint_var_ref): Handle optimized out values.
 

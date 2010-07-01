@@ -11496,8 +11496,8 @@ LOCATION may be a line number, function name, or \"*\" and an address.\n\
 If a line number is specified, break at start of code for that line.\n\
 If a function is specified, break at start of code for that function.\n\
 If an address is specified, break at that exact address.\n\
-With no LOCATION, uses current execution address of selected stack frame.\n\
-This is useful for breaking on return to a stack frame.\n\
+With no LOCATION, uses current execution address of the selected\n\
+stack frame.  This is useful for breaking on return to a stack frame.\n\
 \n\
 THREADNUM is the number from \"info threads\".\n\
 CONDITION is a boolean expression.\n\
