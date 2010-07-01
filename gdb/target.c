@@ -679,6 +679,8 @@ update_current_target (void)
       INHERIT (to_set_circular_trace_buffer, t);
       INHERIT (to_get_tib_address, t);
       INHERIT (to_set_permissions, t);
+      INHERIT (to_static_tracepoint_marker_at, t);
+      INHERIT (to_static_tracepoint_markers_by_strid, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -878,6 +880,12 @@ update_current_target (void)
   de_fault (to_set_permissions,
 	    (void (*) (void))
 	    target_ignore);
+  de_fault (to_static_tracepoint_marker_at,
+	    (int (*) (CORE_ADDR, struct static_tracepoint_marker *))
+	    return_zero);
+  de_fault (to_static_tracepoint_markers_by_strid,
+	    (VEC(static_tracepoint_marker_p) * (*) (const char *))
+	    tcomplain);
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed

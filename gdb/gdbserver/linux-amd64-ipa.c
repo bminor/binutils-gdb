@@ -75,6 +75,95 @@ gdb_agent_get_raw_reg (const unsigned char *raw_regs, int regnum)
   return *(ULONGEST *) (raw_regs + x86_64_ft_collect_regmap[regnum]);
 }
 
+#ifdef HAVE_UST
+
+#include <ust/processor.h>
+
+/* "struct registers" is the UST object type holding the registers at
+   the time of the static tracepoint marker call.  This doesn't
+   contain RIP, but we know what it must have been (the marker
+   address).  */
+
+#define ST_REGENTRY(REG)			\
+  {						\
+    offsetof (struct registers, REG),		\
+    sizeof (((struct registers *) NULL)->REG)	\
+  }
+
+static struct
+{
+  int offset;
+  int size;
+} x86_64_st_collect_regmap[] =
+  {
+    ST_REGENTRY(rax),
+    ST_REGENTRY(rbx),
+    ST_REGENTRY(rcx),
+    ST_REGENTRY(rdx),
+    ST_REGENTRY(rsi),
+    ST_REGENTRY(rdi),
+    ST_REGENTRY(rbp),
+    ST_REGENTRY(rsp),
+    ST_REGENTRY(r8),
+    ST_REGENTRY(r9),
+    ST_REGENTRY(r10),
+    ST_REGENTRY(r11),
+    ST_REGENTRY(r12),
+    ST_REGENTRY(r13),
+    ST_REGENTRY(r14),
+    ST_REGENTRY(r15),
+    { -1, 0 },
+    ST_REGENTRY(rflags),
+    ST_REGENTRY(cs),
+    ST_REGENTRY(ss),
+  };
+
+#define X86_64_NUM_ST_COLLECT_GREGS \
+  (sizeof (x86_64_st_collect_regmap) / sizeof (x86_64_st_collect_regmap[0]))
+
+/* GDB's RIP register number.  */
+#define AMD64_RIP_REGNUM 16
+
+void
+supply_static_tracepoint_registers (struct regcache *regcache,
+				    const unsigned char *buf,
+				    CORE_ADDR pc)
+{
+  int i;
+  unsigned long newpc = pc;
+
+  supply_register (regcache, AMD64_RIP_REGNUM, &newpc);
+
+  for (i = 0; i < X86_64_NUM_ST_COLLECT_GREGS; i++)
+    if (x86_64_st_collect_regmap[i].offset != -1)
+      {
+	switch (x86_64_st_collect_regmap[i].size)
+	  {
+	  case 8:
+	    supply_register (regcache, i,
+			     ((char *) buf)
+			     + x86_64_st_collect_regmap[i].offset);
+	    break;
+	  case 2:
+	    {
+	      unsigned long reg
+		= * (short *) (((char *) buf)
+			       + x86_64_st_collect_regmap[i].offset);
+	      reg &= 0xffff;
+	      supply_register (regcache, i, &reg);
+	    }
+	    break;
+	  default:
+	    internal_error (__FILE__, __LINE__,
+			    "unhandled register size: %d",
+			    x86_64_st_collect_regmap[i].size);
+	    break;
+	  }
+      }
+}
+
+#endif /* HAVE_UST */
+
 /* This is only needed because reg-i386-linux-lib.o references it.  We
    may use it proper at some point.  */
 const char *gdbserver_xmltarget;

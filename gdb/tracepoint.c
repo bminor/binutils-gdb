@@ -47,7 +47,7 @@
 #include "stack.h"
 #include "gdbcore.h"
 #include "remote.h"
-
+#include "source.h"
 #include "ax.h"
 #include "ax-gdb.h"
 
@@ -622,9 +622,10 @@ validate_actionline (char **line, struct breakpoint *t)
 
 	  if (*p == '$')	/* look for special pseudo-symbols */
 	    {
-	      if ((0 == strncasecmp ("reg", p + 1, 3)) ||
-		  (0 == strncasecmp ("arg", p + 1, 3)) ||
-		  (0 == strncasecmp ("loc", p + 1, 3)))
+	      if (0 == strncasecmp ("reg", p + 1, 3)
+		  || 0 == strncasecmp ("arg", p + 1, 3)
+		  || 0 == strncasecmp ("loc", p + 1, 3)
+		  || 0 == strncasecmp ("_sdata", p + 1, 6))
 		{
 		  p = strchr (p, ',');
 		  continue;
@@ -747,6 +748,9 @@ struct collection_list
     long next_aexpr_elt;
     struct agent_expr **aexpr_list;
 
+    /* True is the user requested a collection of "$_sdata", "static
+       tracepoint data".  */
+    int strace_data;
   }
 tracepoint_list, stepping_list;
 
@@ -1086,6 +1090,14 @@ add_local_symbols (struct collection_list *collect,
     }
 }
 
+static void
+add_static_trace_data (struct collection_list *collection)
+{
+  if (info_verbose)
+    printf_filtered ("collect static trace data\n");
+  collection->strace_data = 1;
+}
+
 /* worker function */
 static void
 clear_collection_list (struct collection_list *list)
@@ -1100,6 +1112,7 @@ clear_collection_list (struct collection_list *list)
     }
   list->next_aexpr_elt = 0;
   memset (list->regs_mask, 0, sizeof (list->regs_mask));
+  list->strace_data = 0;
 }
 
 /* reduce a collection list to string form (for gdb protocol) */
@@ -1114,8 +1127,18 @@ stringify_collection_list (struct collection_list *list, char *string)
   char *end;
   long i;
 
-  count = 1 + list->next_memrange + list->next_aexpr_elt + 1;
+  count = 1 + 1 + list->next_memrange + list->next_aexpr_elt + 1;
   str_list = (char *(*)[]) xmalloc (count * sizeof (char *));
+
+  if (list->strace_data)
+    {
+      if (info_verbose)
+	printf_filtered ("\nCollecting static trace data\n");
+      end = temp_buf;
+      *end++ = 'L';
+      (*str_list)[ndx] = savestring (temp_buf, end - temp_buf);
+      ndx++;
+    }
 
   for (i = sizeof (list->regs_mask) - 1; i > 0; i--)
     if (list->regs_mask[i] != 0)	/* skip leading zeroes in regs_mask */
@@ -1274,6 +1297,11 @@ encode_actions_1 (struct command_line *action,
 				     frame_reg,
 				     frame_offset,
 				     'L');
+		  action_exp = strchr (action_exp, ',');	/* more? */
+		}
+	      else if (0 == strncasecmp ("$_sdata", action_exp, 7))
+		{
+		  add_static_trace_data (collect);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else
@@ -3476,6 +3504,11 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
 	      p++;
 	      p = unpack_varlen_hex (p, &orig_size);
 	    }
+	  else if (*p == 'S')
+	    {
+	      type = bp_static_tracepoint;
+	      p++;
+	    }
 	  else if (*p == 'X')
 	    {
 	      p++;
@@ -4075,11 +4108,265 @@ init_tfile_ops (void)
   tfile_ops.to_magic = OPS_MAGIC;
 }
 
+/* Given a line of text defining a static tracepoint marker, parse it
+   into a "static tracepoint marker" object.  Throws an error is
+   parsing fails.  If PP is non-null, it points to one past the end of
+   the parsed marker definition.  */
+
+void
+parse_static_tracepoint_marker_definition (char *line, char **pp,
+					   struct static_tracepoint_marker *marker)
+{
+  char *p, *endp;
+  ULONGEST addr;
+  int end;
+
+  p = line;
+  p = unpack_varlen_hex (p, &addr);
+  p++;  /* skip a colon */
+
+  marker->gdbarch = target_gdbarch;
+  marker->address = (CORE_ADDR) addr;
+
+  endp = strchr (p, ':');
+  if (endp == NULL)
+    error ("bad marker definition: %s", line);
+
+  marker->str_id = xmalloc (endp - p + 1);
+  end = hex2bin (p, (gdb_byte *) marker->str_id, (endp - p + 1) / 2);
+  marker->str_id[end] = '\0';
+
+  p += 2 * end;
+  p++;  /* skip a colon */
+
+  marker->extra = xmalloc (strlen (p) + 1);
+  end = hex2bin (p, (gdb_byte *) marker->extra, strlen (p) / 2);
+  marker->extra[end] = '\0';
+
+  if (pp)
+    *pp = p;
+}
+
+/* Release a static tracepoint marker's contents.  Note that the
+   object itself isn't released here.  There objects are usually on
+   the stack.  */
+
+void
+release_static_tracepoint_marker (struct static_tracepoint_marker *marker)
+{
+  xfree (marker->str_id);
+  marker->str_id = NULL;
+}
+
+/* Print MARKER to gdb_stdout.  */
+
+static void
+print_one_static_tracepoint_marker (int count,
+				    struct static_tracepoint_marker *marker)
+{
+  struct command_line *l;
+  struct symbol *sym;
+
+  char wrap_indent[80];
+  char extra_field_indent[80];
+  struct ui_stream *stb = ui_out_stream_new (uiout);
+  struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
+  struct cleanup *bkpt_chain;
+  VEC(breakpoint_p) *tracepoints;
+
+  struct symtab_and_line sal;
+
+  init_sal (&sal);
+
+  sal.pc = marker->address;
+
+  tracepoints = static_tracepoints_here (marker->address);
+
+  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "marker");
+
+  /* A counter field to help readability.  This is not a stable
+     identifier!  */
+  ui_out_field_int (uiout, "count", count);
+
+  ui_out_field_string (uiout, "marker-id", marker->str_id);
+
+  ui_out_field_fmt (uiout, "enabled", "%c",
+		    !VEC_empty (breakpoint_p, tracepoints) ? 'y' : 'n');
+  ui_out_spaces (uiout, 2);
+
+  strcpy (wrap_indent, "                                   ");
+
+  if (gdbarch_addr_bit (marker->gdbarch) <= 32)
+    strcat (wrap_indent, "           ");
+  else
+    strcat (wrap_indent, "                   ");
+
+  strcpy (extra_field_indent, "         ");
+
+  ui_out_field_core_addr (uiout, "addr", marker->gdbarch, marker->address);
+
+  sal = find_pc_line (marker->address, 0);
+  sym = find_pc_sect_function (marker->address, NULL);
+  if (sym)
+    {
+      ui_out_text (uiout, "in ");
+      ui_out_field_string (uiout, "func",
+			   SYMBOL_PRINT_NAME (sym));
+      ui_out_wrap_hint (uiout, wrap_indent);
+      ui_out_text (uiout, " at ");
+    }
+  else
+    ui_out_field_skip (uiout, "func");
+
+  if (sal.symtab != NULL)
+    {
+      ui_out_field_string (uiout, "file", sal.symtab->filename);
+      ui_out_text (uiout, ":");
+
+      if (ui_out_is_mi_like_p (uiout))
+	{
+	  char *fullname = symtab_to_fullname (sal.symtab);
+
+	  if (fullname)
+	    ui_out_field_string (uiout, "fullname", fullname);
+	}
+      else
+	ui_out_field_skip (uiout, "fullname");
+
+      ui_out_field_int (uiout, "line", sal.line);
+    }
+  else
+    {
+      ui_out_field_skip (uiout, "fullname");
+      ui_out_field_skip (uiout, "line");
+    }
+
+  ui_out_text (uiout, "\n");
+  ui_out_text (uiout, extra_field_indent);
+  ui_out_text (uiout, _("Data: \""));
+  ui_out_field_string (uiout, "extra-data", marker->extra);
+  ui_out_text (uiout, "\"\n");
+
+  if (!VEC_empty (breakpoint_p, tracepoints))
+    {
+      struct cleanup *cleanup_chain;
+      int ix;
+      struct breakpoint *b;
+
+      cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout,
+							   "tracepoints-at");
+
+      ui_out_text (uiout, extra_field_indent);
+      ui_out_text (uiout, _("Probed by static tracepoints: "));
+      for (ix = 0; VEC_iterate(breakpoint_p, tracepoints, ix, b); ix++)
+	{
+	  if (ix > 0)
+	    ui_out_text (uiout, ", ");
+	  ui_out_text (uiout, "#");
+	  ui_out_field_int (uiout, "tracepoint-id", b->number);
+	}
+
+      do_cleanups (cleanup_chain);
+
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_int (uiout, "number-of-tracepoints",
+			  VEC_length(breakpoint_p, tracepoints));
+      else
+	ui_out_text (uiout, "\n");
+    }
+  VEC_free (breakpoint_p, tracepoints);
+
+  do_cleanups (bkpt_chain);
+  do_cleanups (old_chain);
+}
+
+static void
+info_static_tracepoint_markers_command (char *arg, int from_tty)
+{
+  VEC(static_tracepoint_marker_p) *markers;
+  struct cleanup *old_chain;
+  struct static_tracepoint_marker *marker;
+  int i;
+
+  old_chain
+    = make_cleanup_ui_out_table_begin_end (uiout, 5, -1,
+					   "StaticTracepointMarkersTable");
+
+  ui_out_table_header (uiout, 7, ui_left, "counter", "Cnt");
+
+  ui_out_table_header (uiout, 40, ui_left, "marker-id", "ID");
+
+  ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");
+  if (gdbarch_addr_bit (target_gdbarch) <= 32)
+    ui_out_table_header (uiout, 10, ui_left, "addr", "Address");
+  else
+    ui_out_table_header (uiout, 18, ui_left, "addr", "Address");
+  ui_out_table_header (uiout, 40, ui_noalign, "what", "What");
+
+  ui_out_table_body (uiout);
+
+  markers = target_static_tracepoint_markers_by_strid (NULL);
+  make_cleanup (VEC_cleanup (static_tracepoint_marker_p), &markers);
+
+  for (i = 0;
+       VEC_iterate (static_tracepoint_marker_p,
+		    markers, i, marker);
+       i++)
+    {
+      print_one_static_tracepoint_marker (i + 1, marker);
+      release_static_tracepoint_marker (marker);
+    }
+
+  do_cleanups (old_chain);
+}
+
+/* The $_sdata convenience variable is a bit special.  We don't know
+   for sure type of the value until we actually have a chance to fetch
+   the data --- the size of the object depends on what has been
+   collected.  We solve this by making $_sdata be an internalvar that
+   creates a new value on access.  */
+
+/* Return a new value with the correct type for the sdata object of
+   the current trace frame.  Return a void value if there's no object
+   available.  */
+
+static struct value *
+sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var)
+{
+  LONGEST size;
+  gdb_byte *buf;
+
+  /* We need to read the whole object before we know its size.  */
+  size = target_read_alloc (&current_target,
+			    TARGET_OBJECT_STATIC_TRACE_DATA,
+			    NULL, &buf);
+  if (size >= 0)
+    {
+      struct value *v;
+      struct type *type;
+
+      type = init_vector_type (builtin_type (gdbarch)->builtin_true_char,
+			       size);
+      v = allocate_value (type);
+      memcpy (value_contents_raw (v), buf, size);
+      xfree (buf);
+      return v;
+    }
+  else
+    return allocate_value (builtin_type (gdbarch)->builtin_void);
+}
+
 /* module initialization */
 void
 _initialize_tracepoint (void)
 {
   struct cmd_list_element *c;
+
+  /* Explicitly create without lookup, since that tries to create a
+     value with a void typed value, and when we get here, gdbarch
+     isn't initialized yet.  At this point, we're quite sure there
+     isn't another convenience variable of the same name.  */
+  create_internalvar_type_lazy ("_sdata", sdata_make_value);
 
   traceframe_number = -1;
   tracepoint_number = -1;
@@ -4141,6 +4428,11 @@ If no arguments are supplied, delete all variables."), &deletelist);
 
   add_info ("tvariables", tvariables_info, _("\
 Status of trace state variables and their values.\n\
+"));
+
+  add_info ("static-tracepoint-markers",
+	    info_static_tracepoint_markers_command, _("\
+List target static tracepoints markers.\n\
 "));
 
   add_prefix_cmd ("tfind", class_trace, trace_find_command, _("\
@@ -4223,6 +4515,7 @@ Also accepts the following special arguments:\n\
     $regs   -- all registers.\n\
     $args   -- all function arguments.\n\
     $locals -- all variables local to the block/function scope.\n\
+    $_sdata -- static tracepoint data (ignored for non-static tracepoints).\n\
 Note: this command can only be used in a tracepoint \"actions\" list."));
 
   add_com ("teval", class_trace, teval_pseudocommand, _("\

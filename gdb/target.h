@@ -35,6 +35,7 @@ struct trace_state_variable;
 struct trace_status;
 struct uploaded_tsv;
 struct uploaded_tp;
+struct static_tracepoint_marker;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -261,6 +262,8 @@ enum target_object
   TARGET_OBJECT_SIGNAL_INFO,
   /* The list of threads that are being debugged.  */
   TARGET_OBJECT_THREADS,
+  /* Collected static trace data.  */
+  TARGET_OBJECT_STATIC_TRACE_DATA,
   /* Possible future objects: TARGET_OBJECT_FILE, ... */
 };
 
@@ -275,6 +278,9 @@ enum trace_find_type
     tfind_range,
     tfind_outside,
   };
+
+typedef struct static_tracepoint_marker *static_tracepoint_marker_p;
+DEF_VEC_P(static_tracepoint_marker_p);
 
 /* Request that OPS transfer up to LEN 8-bit bytes of the target's
    OBJECT.  The OFFSET, for a seekable object, specifies the
@@ -688,6 +694,16 @@ struct target_ops
 
     /* Send the new settings of write permission variables.  */
     void (*to_set_permissions) (void);
+
+    /* Look for a static tracepoint marker at ADDR, and fill in MARKER
+       with its details.  Return 1 on success, 0 on failure.  */
+    int (*to_static_tracepoint_marker_at) (CORE_ADDR,
+					   struct static_tracepoint_marker *marker);
+
+    /* Return a vector of all tracepoints markers string id ID, or all
+       markers if ID is NULL.  */
+    VEC(static_tracepoint_marker_p) *(*to_static_tracepoint_markers_by_strid)
+      (const char *id);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1383,6 +1399,12 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define target_set_permissions() \
   (*current_target.to_set_permissions) ()
+
+#define target_static_tracepoint_marker_at(addr, marker) \
+  (*current_target.to_static_tracepoint_marker_at) (addr, marker)
+
+#define target_static_tracepoint_markers_by_strid(marker_id) \
+  (*current_target.to_static_tracepoint_markers_by_strid) (marker_id)
 
 /* Command logging facility.  */
 

@@ -78,6 +78,17 @@ void reinsert_breakpoints_at (CORE_ADDR where);
 
 void uninsert_breakpoints_at (CORE_ADDR where);
 
+/* Reinsert all breakpoints of the current process (and change their
+   status to inserted).  */
+
+void reinsert_all_breakpoints (void);
+
+/* Uninsert all breakpoints of the current process (and change their
+   status to uninserted).  This still leaves the breakpoints in the
+   table.  */
+
+void uninsert_all_breakpoints (void);
+
 /* See if any breakpoint claims ownership of STOP_PC.  Call the handler for
    the breakpoint, if found.  */
 

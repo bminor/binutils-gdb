@@ -8279,6 +8279,13 @@ to match the format in which the data was printed.
 The variable @code{$_exitcode} is automatically set to the exit code when
 the program being debugged terminates.
 
+@item $_sdata
+@vindex $_sdata@r{, inspect, convenience variable}
+The variable @code{$_sdata} contains extra collected static tracepoint
+data.  @xref{Tracepoint Actions,,Tracepoint Action Lists}.  Note that
+@code{$_sdata} could be empty, if not inspecting a trace buffer, or
+if extra static tracepoint data has not been collected.
+
 @item $_siginfo
 @vindex $_siginfo@r{, convenience variable}
 The variable @code{$_siginfo} contains extra signal information
@@ -9590,6 +9597,27 @@ Some targets may support @dfn{fast tracepoints}, which are inserted in
 a different way (such as with a jump instead of a trap), that is
 faster but possibly restricted in where they may be installed.
 
+@cindex static tracepoints
+@cindex markers, static tracepoints
+@cindex probing markers, static tracepoints
+Regular and fast tracepoints are dynamic tracing facilities, meaning
+that they can be used to insert tracepoints at (almost) any location
+in the target.  Some targets may also support controlling @dfn{static
+tracepoints} from @value{GDBN}.  With static tracing, a set of
+instrumentation points, also known as @dfn{markers}, are embedded in
+the target program, and can be activated or deactivated by name or
+address.  These are usually placed at locations which facilitate
+investigating what the target is actually doing.  @value{GDBN}'s
+support for static tracing includes being able to list instrumentation
+points, and attach them with @value{GDBN} defined high level
+tracepoints that expose the whole range of convenience of
+@value{GDBN}'s tracepoints support.  Namelly, support for collecting
+registers values and values of global or local (to the instrumentation
+point) variables; tracepoint conditions and trace state variables.
+The act of installing a @value{GDBN} static tracepoint on an
+instrumentation point, or marker, is referred to as @dfn{probing} a
+static tracepoint marker.
+
 @code{gdbserver} supports tracepoints on some target systems.
 @xref{Server,,Tracepoints support in @code{gdbserver}}.
 
@@ -9604,6 +9632,7 @@ conditions and actions.
 * Trace State Variables::
 * Tracepoint Actions::
 * Listing Tracepoints::
+* Listing Static Tracepoint Markers::
 * Starting and Stopping Trace Experiments::
 * Tracepoint Restrictions::
 @end menu
@@ -9662,6 +9691,65 @@ message.
 
 @value{GDBN} handles arguments to @code{ftrace} exactly as for
 @code{trace}.
+
+@item strace @var{location} [ if @var{cond} ]
+@cindex static tracepoint, setting
+@kindex strace
+The @code{strace} command sets a static tracepoint.  For targets that
+support it, setting a static tracepoint probes a static
+instrumentation point, or marker, found at @var{location}.  It may not
+be possible to set a static tracepoint at the desired location, in
+which case the command will exit with an explanatory message.
+
+@value{GDBN} handles arguments to @code{strace} exactly as for
+@code{trace}, with the addition that the user can also specify
+@code{-m @var{marker}} as @var{location}.  This probes the marker
+identified by the @var{marker} string identifier.  This identifier
+depends on the static tracepoint backend library your program is
+using.  You can find all the marker identifiers in the @samp{ID} field
+of the @code{info static-tracepoint-markers} command output.
+@xref{Listing Static Tracepoint Markers,,Listing Static Tracepoint
+Markers}.  For example, in the following small program using the UST
+tracing engine:
+
+@smallexample
+main ()
+@{
+  trace_mark(ust, bar33, "str %s", "FOOBAZ");
+@}
+@end smallexample
+
+@noindent
+the marker id is composed of joining the first two arguments to the
+@code{trace_mark} call with a slash, which translates to:
+
+@smallexample
+(@value{GDBP}) info static-tracepoint-markers
+Cnt Enb ID         Address            What
+1   n   ust/bar33  0x0000000000400ddc in main at stexample.c:22
+         Data: "str %s"
+[etc...]
+@end smallexample
+
+@noindent
+so you may probe the marker above with:
+
+@smallexample
+(@value{GDBP}) strace -m ust/bar33
+@end smallexample
+
+Static tracepoints accept an extra collect action --- @code{collect
+$_sdata}.  This collects arbitrary user data passed in the probe point
+call to the tracing library.  In the UST example above, you'll see
+that the third argument to @code{trace_mark} is a printf-like format
+string.  The user data is then the result of running that formating
+string against the following arguments.  Note that @code{info
+static-tracepoint-markers} command output lists that format string in
+the @samp{Data:} field.
+
+You can inspect this data when analyzing the trace buffer, by printing
+the $_sdata variable like any other variable available to
+@value{GDBN}.  @xref{Tracepoint Actions,,Tracepoint Action Lists}.
 
 @vindex $tpnum
 @cindex last tracepoint number
@@ -9899,13 +9987,34 @@ special arguments are supported:
 
 @table @code
 @item $regs
-collect all registers
+Collect all registers.
 
 @item $args
-collect all function arguments
+Collect all function arguments.
 
 @item $locals
-collect all local variables.
+Collect all local variables.
+
+@item $_sdata
+@vindex $_sdata@r{, collect}
+Collect static tracepoint marker specific data.  Only available for
+static tracepoints.  @xref{Tracepoint Actions,,Tracepoint Action
+Lists}.  On the UST static tracepoints library backend, an
+instrumentation point resembles a @code{printf} function call.  The
+tracing library is able to collect user specified data formatted to a
+character string using the format provided by the programmer that
+instrumented the program.  Other backends have similar mechanisms.
+Here's an example of a UST marker call:
+
+@smallexample
+ const char master_name[] = "$your_name";
+ trace_mark(channel1, marker1, "hello %s", master_name)
+@end smallexample
+
+In this case, collecting @code{$_sdata} collects the string
+@samp{hello $yourname}.  When analyzing the trace buffer, you can
+inspect @samp{$_sdata} like any other variable available to
+@value{GDBN}.
 @end table
 
 You can give several consecutive @code{collect} commands, each one
@@ -9998,6 +10107,60 @@ Num     Type           Disp Enb Address    What
 
 @noindent
 This command can be abbreviated @code{info tp}.
+@end table
+
+@node Listing Static Tracepoint Markers
+@subsection Listing Static Tracepoint Markers
+
+@table @code
+@kindex info static-tracepoint-markers
+@cindex information about static tracepoint markers
+@item info static-tracepoint-markers
+Display information about all static tracepoint markers defined in the
+program.
+
+For each marker, the following columns are printed:
+
+@table @emph
+@item Count
+An incrementing counter, output to help readability.  This is not a
+stable identifier.
+@item ID
+The marker ID, as reported by the target.
+@item Enabled or Disabled
+Probed markers are tagged with @samp{y}.  @samp{n} identifies marks
+that are not enabled.
+@item Address
+Where the marker is in your program, as a memory address.
+@item What
+Where the marker is in the source for your program, as a file and line
+number.  If the debug information included in the program does not
+allow @value{GDBN} to locate the source of the marker, this column
+will be left blank.
+@end table
+
+@noindent
+In addition, the following information may be printed for each marker:
+
+@table @emph
+@item Data
+User data passed to the tracing library by the marker call.  In the
+UST backend, this is the format string passed as argument to the
+marker call.
+@item Static tracepoints probing the marker
+The list of static tracepoints attached to the marker.
+@end table
+
+@smallexample
+(@value{GDBP}) info static-tracepoint-markers
+Cnt ID         Enb Address            What
+1   ust/bar2   y   0x0000000000400e1a in main at stexample.c:25
+     Data: number1 %d number2 %d
+     Probed by static tracepoints: #2
+2   ust/bar33  n   0x0000000000400c87 in main at stexample.c:24
+     Data: str %s
+(@value{GDBP})
+@end smallexample
 @end table
 
 @node Starting and Stopping Trace Experiments
@@ -15848,13 +16011,21 @@ of a multi-process mode debug session.
 @subsection Tracepoints support in @code{gdbserver}
 @cindex tracepoints support in @code{gdbserver}
 
-On some targets, @code{gdbserver} supports tracepoints and fast
-tracepoints.
+On some targets, @code{gdbserver} supports tracepoints, fast
+tracepoints and static tracepoints.
 
-For fast tracepoints to work, a special library called the
+For fast or static tracepoints to work, a special library called the
 @dfn{in-process agent} (IPA), must be loaded in the inferior process.
 This library is built and distributed as an integral part of
-@code{gdbserver}.
+@code{gdbserver}.  In addition, support for static tracepoints
+requires building the in-process agent library with static tracepoints
+support.  At present, the UST (LTTng Userspace Tracer,
+@url{http://lttng.org/ust}) tracing engine is supported.  This support
+is automatically available if UST development headers are found in the
+standard include path when @code{gdbserver} is built, or if
+@code{gdbserver} was explicitly configured using @option{--with-ust}
+to point at such headers.  You can explicitly disable the support
+using @option{--with-ust=no}.
 
 There are several ways to load the in-process agent in your program:
 
@@ -15895,10 +16066,10 @@ systems, when you connect to @code{gdbserver} using @code{target
 remote}, you'll find that the program is stopped at the dynamic
 loader's entry point, and no shared library has been loaded in the
 program's address space yet, including the in-process agent.  In that
-case, before being able to use any of the fast tracepoints features,
-you need to let the loader run and load the shared libraries.  The
-most simple way to do that is to run the program to the main
-procedure.  E.g., if debugging a C or C@t{++} program, start
+case, before being able to use any of the fast or static tracepoints
+features, you need to let the loader run and load the shared
+libraries.  The simplest way to do that is to run the program to the
+main procedure.  E.g., if debugging a C or C@t{++} program, start
 @code{gdbserver} like so:
 
 @smallexample
@@ -15918,7 +16089,8 @@ $ gdb myprogram
 The in-process tracing agent library should now be loaded into the
 process; you can confirm it with the @code{info sharedlibrary}
 command, which will list @file{libinproctrace.so} as loaded in the
-process.  You are now ready to install fast tracepoints and start
+process.  You are now ready to install fast tracepoints, list static
+tracepoint markers, probe static tracepoints markers, and start
 tracing.
 
 @node Remote Configuration
@@ -16169,6 +16341,10 @@ are:
 @item @code{memory-map}
 @tab @code{qXfer:memory-map:read}
 @tab @code{info mem}
+
+@item @code{read-sdata-object}
+@tab @code{qXfer:sdata:read}
+@tab @code{print $_sdata}
 
 @item @code{read-spu-object}
 @tab @code{qXfer:spu:read}
@@ -31958,6 +32134,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:sdata:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:spu:read}
 @tab No
 @tab @samp{-}
@@ -32061,6 +32242,10 @@ The remote stub understands the @samp{qXfer:libraries:read} packet
 The remote stub understands the @samp{qXfer:memory-map:read} packet
 (@pxref{qXfer memory map read}).
 
+@item qXfer:sdata:read
+The remote stub understands the @samp{qXfer:sdata:read} packet
+(@pxref{qXfer sdata read}).
+
 @item qXfer:spu:read
 The remote stub understands the @samp{qXfer:spu:read} packet
 (@pxref{qXfer spu read}).
@@ -32128,6 +32313,10 @@ the source form of tracepoint definitions.
 
 @item QAllow
 The remote stub understands the @samp{QAllow} packet.
+
+@item StaticTracepoint
+@cindex static tracepoints, in remote protocol
+The remote stub supports static tracepoints.
 
 @end table
 
@@ -32213,6 +32402,9 @@ packets.)
 @itemx QTro       
 @itemx qTStatus   
 @itemx qTV
+@itemx qTfSTM
+@itemx qTsSTM
+@itemx qTSTMat
 @xref{Tracepoint Packets}.
 
 @item qXfer:@var{object}:read:@var{annex}:@var{offset},@var{length}
@@ -32268,6 +32460,18 @@ annex part of the generic @samp{qXfer} packet must be empty
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:sdata:read::@var{offset},@var{length}
+@anchor{qXfer sdata read}
+
+Read contents of the extra collected static tracepoint marker
+information.  The annex part of the generic @samp{qXfer} packet must
+be empty (@pxref{qXfer read}).  @xref{Tracepoint Actions,,Tracepoint
+Action Lists}.
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).
 
 @item qXfer:siginfo:read::@var{offset},@var{length}
 @anchor{qXfer siginfo read}
@@ -32807,6 +33011,43 @@ target.  @value{GDBN} sends @code{qTfV} to get the first vari of data,
 and multiple @code{qTsV} to get additional variables.  Replies to
 these packets follow the syntax of the @code{QTDV} packets that define
 trace state variables.
+
+@item qTfSTM
+@itemx qTsSTM
+These packets request data about static tracepoint markers that exist
+in the target program.  @value{GDBN} sends @code{qTfSTM} to get the
+first piece of data, and multiple @code{qTsSTM} to get additional
+pieces.  Replies to these packets take the following form:
+
+Reply:
+@table @samp
+@item m @var{address}:@var{id}:@var{extra}
+A single marker
+@item m @var{address}:@var{id}:@var{extra},@var{address}:@var{id}:@var{extra}@dots{}
+a comma-separated list of markers
+@item l
+(lower case letter @samp{L}) denotes end of list.
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
+@item
+An empty reply indicates that the request is not supported by the
+stub.
+@end table
+
+@var{address} is encoded in hex.
+@var{id} and @var{extra} are strings encoded in hex.
+
+In response to each query, the target will reply with a list of one or
+more markers, separated by commas.  @value{GDBN} will respond to each
+reply with a request for more markers (using the @samp{qs} form of the
+query), until the target responds with @samp{l} (lower-case ell, for
+@dfn{last}).
+
+@item qTSTMat:@var{address}
+This packets requests data about static tracepoint markers in the
+target program at @var{address}.  Replies to this packet follow the
+syntax of the @samp{qTfSTM} and @code{qTsSTM} packets that list static
+tracepoint markers.
 
 @item QTSave:@var{filename}
 This packet directs the target to save trace data to the file name

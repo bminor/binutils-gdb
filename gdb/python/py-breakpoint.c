@@ -592,7 +592,7 @@ bppy_new (PyTypeObject *subtype, PyObject *args, PyObject *kwargs)
 	    create_breakpoint (python_gdbarch,
 			       spec, NULL, -1,
 			       0,
-			       0, 0, 0,
+			       0, bp_breakpoint,
 			       0,
 			       AUTO_BOOLEAN_TRUE,
 			       NULL, 0, 1);

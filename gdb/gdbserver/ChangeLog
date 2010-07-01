@@ -1,3 +1,89 @@
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
+	Static tracepoints, and integration with UST.
+
+	* configure.ac: Handle --with-ust.  substitute ustlibs and ustinc.
+	* mem-break.c (uninsert_all_breakpoints)
+	(reinsert_all_breakpoints): New.
+	* mem-break.h (reinsert_all_breakpoints, uninsert_all_breakpoints):
+	* tracepoint.c (ust_loaded, helper_thread_id, cmd_buf): New.
+	(gdb_agent_ust_loaded, helper_thread_id)
+	(gdb_agent_helper_thread_id): New macros.
+	(struct ipa_sym_addresses): Add addr_ust_loaded,
+	addr_helper_thread_id, addr_cmd_buf.
+	(symbol_list): Add ust_loaded, helper_thread_id, cmd_buf.
+	(in_process_agent_loaded_ust): New.
+	(write_e_ust_not_loaded): New.
+	(maybe_write_ipa_ust_not_loaded): New.
+	(struct collect_static_trace_data_action): New.
+	(enum tracepoint_type) <static_tracepoint>: New.
+	(struct tracepoint) <handle>: Mention static tracepoints.
+	(struct static_tracepoint_ctx): New.
+	(CMD_BUF_SIZE): New.
+	(add_tracepoint_action): Handle static tracepoint actions.
+	(unprobe_marker_at): New.
+	(clear_installed_tracepoints): Handle static tracepoints.
+	(cmd_qtdp): Handle static tracepoints.
+	(probe_marker_at): New.
+	(cmd_qtstart): Handle static tracepoints.
+	(response_tracepoint): Handle static tracepoints.
+	(cmd_qtfstm, cmd_qtsstm, cmd_qtstmat): New.
+	(handle_tracepoint_query): Handle qTfSTM, qTsSTM and qTSTMat.
+	(get_context_regcache): Handle static tracepoints.
+	(do_action_at_tracepoint): Handle static tracepoint actions.
+	(traceframe_find_block_type): Handle static trace data blocks.
+	(traceframe_read_sdata): New.
+	(download_tracepoints): Download static tracepoint actions.
+	[HAVE_UST] Include ust/ust.h, dlfcn.h, sys/socket.h, and sys/un.h.
+	(GDB_PROBE_NAME): New.
+	(ust_ops): New.
+	(GET_UST_SYM): New.
+	(USTF): New.
+	(dlsym_ust): New.
+	(ust_marker_to_static_tracepoint): New.
+	(gdb_probe): New.
+	(collect_ust_data_at_tracepoint): New.
+	(gdb_ust_probe): New.
+	(UNIX_PATH_MAX, SOCK_DIR): New.
+	(gdb_ust_connect_sync_socket): New.
+	(resume_thread, stop_thread): New.
+	(run_inferior_command): New.
+	(init_named_socket): New.
+	(gdb_ust_socket_init): New.
+	(cstr_to_hexstr): New.
+	(next_st): New.
+	(first_marker, next_marker): New.
+	(response_ust_marker): New.
+	(cmd_qtfstm, cmd_qtsstm): New.
+	(unprobe_marker_at, probe_marker_at): New.
+	(cmd_qtstmat, gdb_ust_thread): New.
+	(gdb_ust_init): New.
+	(initialize_tracepoint_ftlib): Call gdb_ust_init.
+	* linux-amd64-ipa.c [HAVE_UST]: Include ust/processor.h
+	(ST_REGENTRY): New.
+	(x86_64_st_collect_regmap): New.
+	(X86_64_NUM_ST_COLLECT_GREGS): New.
+	(AMD64_RIP_REGNUM): New.
+	(supply_static_tracepoint_registers): New.
+	* linux-i386-ipa.c [HAVE_UST]: Include ust/processor.h
+	(ST_REGENTRY): New.
+	(i386_st_collect_regmap): New.
+	(i386_NUM_ST_COLLECT_GREGS): New.
+	(supply_static_tracepoint_registers): New.
+	* server.c (handle_query): Handle qXfer:statictrace:read.
+	<qSupported>: Report support for StaticTracepoints, and
+	qXfer:statictrace:read features.
+	* server.h (traceframe_read_sdata)
+	(supply_static_tracepoint_registers): Declare.
+	* remote-utils.c (convert_int_to_ascii, hexchars, ishex, tohex)
+	(unpack_varlen_hex): Include in IPA build.
+	* Makefile.in (ustlibs, ustinc): New.
+	(IPA_OBJS): Add remote-utils-ipa.o.
+	($(IPA_LIB)): Link -ldl and -lpthread.
+	(UST_CFLAGS): New.
+	(IPAGENT_CFLAGS): Add UST_CFLAGS.
+	* config.in, configure: Regenerate.
+
 2010-06-20  Ian Lance Taylor  <iant@google.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

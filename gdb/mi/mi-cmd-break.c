@@ -75,6 +75,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   int enabled = 1;
   int tracepoint = 0;
   struct cleanup *back_to;
+  enum bptype type_wanted;
 
   enum opt
     {
@@ -151,9 +152,21 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 
   back_to = make_cleanup_restore_integer (&mi_can_breakpoint_notify);
   mi_can_breakpoint_notify = 1;
+
+  /* Note that to request a fast tracepoint, the client uses the
+     "hardware" flag, although there's nothing of hardware related to
+     fast tracepoints -- one can implement slow tracepoints with
+     hardware breakpoints, but fast tracepoints are always software.
+     "fast" is a misnomer, actually, "jump" would be more appropriate.
+     A simulator or an emulator could conceivably implement fast
+     regular non-jump based tracepoints.  */
+  type_wanted = (tracepoint
+		 ? (hardware ? bp_fast_tracepoint : bp_tracepoint)
+		 : (hardware ? bp_hardware_breakpoint : bp_breakpoint));
+
   create_breakpoint (get_current_arch (), address, condition, thread,
 		     0 /* condition and thread are valid.  */,
-		     temp_p, hardware, tracepoint,
+		     temp_p, type_wanted,
 		     ignore_count,
 		     pending ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
 		     NULL, 0, enabled);

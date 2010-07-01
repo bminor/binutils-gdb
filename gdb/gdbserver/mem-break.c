@@ -777,6 +777,17 @@ uninsert_breakpoints_at (CORE_ADDR pc)
     uninsert_raw_breakpoint (bp);
 }
 
+void
+uninsert_all_breakpoints (void)
+{
+  struct process_info *proc = current_process ();
+  struct raw_breakpoint *bp;
+
+  for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
+    if (bp->inserted)
+      uninsert_raw_breakpoint (bp);
+}
+
 static void
 reinsert_raw_breakpoint (struct raw_breakpoint *bp)
 {
@@ -814,6 +825,17 @@ reinsert_breakpoints_at (CORE_ADDR pc)
     }
 
   reinsert_raw_breakpoint (bp);
+}
+
+void
+reinsert_all_breakpoints (void)
+{
+  struct process_info *proc = current_process ();
+  struct raw_breakpoint *bp;
+
+  for (bp = proc->raw_breakpoints; bp != NULL; bp = bp->next)
+    if (!bp->inserted)
+      reinsert_raw_breakpoint (bp);
 }
 
 void

@@ -322,6 +322,9 @@ struct remote_state
   /* True if the stub reports support for fast tracepoints.  */
   int fast_tracepoints;
 
+  /* True if the stub reports support for static tracepoints.  */
+  int static_tracepoints;
+
   /* True if the stub can continue running a trace while GDB is
      disconnected.  */
   int disconnected_tracing;
@@ -1198,6 +1201,7 @@ enum {
   PACKET_qXfer_spu_write,
   PACKET_qXfer_osdata,
   PACKET_qXfer_threads,
+  PACKET_qXfer_statictrace_read,
   PACKET_qGetTIBAddr,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
@@ -1212,6 +1216,7 @@ enum {
   PACKET_qAttached,
   PACKET_ConditionalTracepoints,
   PACKET_FastTracepoints,
+  PACKET_StaticTracepoints,
   PACKET_bc,
   PACKET_bs,
   PACKET_TracepointSource,
@@ -2772,6 +2777,98 @@ remote_threads_extra_info (struct thread_info *tp)
 }
 
 
+static int
+remote_static_tracepoint_marker_at (CORE_ADDR addr,
+				    struct static_tracepoint_marker *marker)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+
+  sprintf (p, "qTSTMat:");
+  p += strlen (p);
+  p += hexnumstr (p, addr);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  p = rs->buf;
+
+  if (*p == 'E')
+    error (_("Remote failure reply: %s"), p);
+
+  if (*p++ == 'm')
+    {
+      parse_static_tracepoint_marker_definition (p, &p, marker);
+      return 1;
+    }
+
+  return 0;
+}
+
+static void
+free_current_marker (void *arg)
+{
+  struct static_tracepoint_marker **marker_p = arg;
+
+  if (*marker_p != NULL)
+    {
+      release_static_tracepoint_marker (*marker_p);
+      xfree (*marker_p);
+    }
+  else
+    *marker_p = NULL;
+}
+
+static VEC(static_tracepoint_marker_p) *
+remote_static_tracepoint_markers_by_strid (const char *strid)
+{
+  struct remote_state *rs = get_remote_state ();
+  VEC(static_tracepoint_marker_p) *markers = NULL;
+  struct static_tracepoint_marker *marker = NULL;
+  struct cleanup *old_chain;
+  char *p;
+
+  /* Ask for a first packet of static tracepoint marker
+     definition.  */
+  putpkt ("qTfSTM");
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  p = rs->buf;
+  if (*p == 'E')
+    error (_("Remote failure reply: %s"), p);
+
+  old_chain = make_cleanup (free_current_marker, &marker);
+
+  while (*p++ == 'm')
+    {
+      if (marker == NULL)
+	marker = XCNEW (struct static_tracepoint_marker);
+
+      do
+	{
+	  parse_static_tracepoint_marker_definition (p, &p, marker);
+
+	  if (strid == NULL || strcmp (strid, marker->str_id) == 0)
+	    {
+	      VEC_safe_push (static_tracepoint_marker_p,
+			     markers, marker);
+	      marker = NULL;
+	    }
+	  else
+	    {
+	      release_static_tracepoint_marker (marker);
+	      memset (marker, 0, sizeof (*marker));
+	    }
+	}
+      while (*p++ == ',');	/* comma-separated list */
+      /* Ask for another packet of static tracepoint definition.  */
+      putpkt ("qTsSTM");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      p = rs->buf;
+    }
+
+  do_cleanups (old_chain);
+  return markers;
+}
+
+
 /* Implement the to_get_ada_task_ptid function for the remote targets.  */
 
 static ptid_t
@@ -3552,6 +3649,16 @@ remote_fast_tracepoint_feature (const struct protocol_feature *feature,
 }
 
 static void
+remote_static_tracepoint_feature (const struct protocol_feature *feature,
+				  enum packet_support support,
+				  const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  rs->static_tracepoints = (support == PACKET_ENABLE);
+}
+
+static void
 remote_disconnected_tracing_feature (const struct protocol_feature *feature,
 				     enum packet_support support,
 				     const char *value)
@@ -3593,6 +3700,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_ConditionalTracepoints },
   { "FastTracepoints", PACKET_DISABLE, remote_fast_tracepoint_feature,
     PACKET_FastTracepoints },
+  { "StaticTracepoints", PACKET_DISABLE, remote_static_tracepoint_feature,
+    PACKET_StaticTracepoints },
   { "DisconnectedTracing", PACKET_DISABLE, remote_disconnected_tracing_feature,
     -1 },
   { "ReverseContinue", PACKET_DISABLE, remote_supported_packet,
@@ -8046,6 +8155,16 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 				   [PACKET_qXfer_siginfo_write]);
     }
 
+  if (object == TARGET_OBJECT_STATIC_TRACE_DATA)
+    {
+      if (readbuf)
+	return remote_read_qxfer (ops, "statictrace", annex, readbuf, offset, len,
+				  &remote_protocol_packets
+				  [PACKET_qXfer_statictrace_read]);
+      else
+	return -1;
+    }
+
   /* Only handle flash writes.  */
   if (writebuf != NULL)
     {
@@ -9478,6 +9597,14 @@ remote_supports_fast_tracepoints (void)
   return rs->fast_tracepoints;
 }
 
+static int
+remote_supports_static_tracepoints (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->static_tracepoints;
+}
+
 static void
 remote_trace_init (void)
 {
@@ -9605,6 +9732,25 @@ remote_download_tracepoint (struct breakpoint *t)
 	       tracepoints, so don't take lack of support as a reason to
 	       give up on the trace run.  */
 	    warning (_("Target does not support fast tracepoints, downloading %d as regular tracepoint"), t->number);
+	}
+      else if (t->type == bp_static_tracepoint)
+	{
+	  /* Only test for support at download time; we may not know
+	     target capabilities at definition time.  */
+	  if (remote_supports_static_tracepoints ())
+	    {
+	      struct static_tracepoint_marker marker;
+
+	      if (target_static_tracepoint_marker_at (tpaddr, &marker))
+		strcat (buf, ":S");
+	      else
+		error ("Static tracepoint not valid during download");
+	    }
+	  else
+	    /* Fast tracepoints are functionally identical to regular
+	       tracepoints, so don't take lack of support as a reason
+	       to give up on the trace run.  */
+	    error (_("Target does not support static tracepoints"));
 	}
       /* If the tracepoint has a conditional, make it into an agent
 	 expression and append to the definition.  */
@@ -10101,6 +10247,10 @@ Specify the serial device it is connected to\n\
   remote_ops.to_verify_memory = remote_verify_memory;
   remote_ops.to_get_tib_address = remote_get_tib_address;
   remote_ops.to_set_permissions = remote_set_permissions;
+  remote_ops.to_static_tracepoint_marker_at
+    = remote_static_tracepoint_marker_at;
+  remote_ops.to_static_tracepoint_markers_by_strid
+    = remote_static_tracepoint_markers_by_strid;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -10578,6 +10728,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QAllow],
 			 "QAllow", "allow", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_StaticTracepoints],
+			 "StaticTracepoints", "static-tracepoints", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_statictrace_read],
+                         "qXfer:statictrace:read", "read-sdata-object", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

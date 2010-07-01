@@ -46,6 +46,27 @@
   thread-specific pointer to the TIB.  This feature is also supported
   when remote debugging using GDBserver.
 
+* Static tracepoints
+
+  Static tracepoints are calls in the user program into a tracing
+  library.  One such library is a port of the LTTng kernel tracer to
+  userspace --- UST (LTTng Userspace Tracer, http://lttng.org/ust).
+  When debugging with GDBserver, GDB now supports combining the GDB
+  tracepoint machinery with such libraries.  For example: the user can
+  use GDB to probe a static tracepoint marker (a call from the user
+  program into the tracing library) with the new "strace" command (see
+  "New commands" below).  This creates a "static tracepoint" in the
+  breakpoint list, that can be manipulated with the same feature set
+  as fast and regular tracepoints.  E.g., collect registers, local and
+  global variables, collect trace state variables, and define
+  tracepoint conditions.  In addition, the user can collect extra
+  static tracepoint marker specific data, by collecting the new
+  $_sdata internal variable.  When analyzing the trace buffer, you can
+  inspect $_sdata like any other variable available to GDB.  For more
+  information, see the "Tracepoints" chapter in GDB user manual.  New
+  remote packets have been defined to support static tracepoints, see
+  the "New remote packets" section below.
+
 * New remote packets
 
 qGetTIBAddr
@@ -61,23 +82,42 @@ qRelocInsn
   is particularly useful for stubs that support fast tracepoints.  GDB
   reports support for this feature in the qSupported packet.
 
+qTfSTM, qTsSTM
+
+  List static tracepoint markers in the target program.
+
+qTSTMat
+
+  List static tracepoint markers at a given address in the target
+  program.
+
+qXfer:statictrace:read
+
+  Read the static trace data collected (by a `collect $_sdata'
+  tracepoint action).  The remote stub reports support for this packet
+  to gdb's qSupported query.
+
 * The source command now accepts a -s option to force searching for the
   script in the source search path even if the script name specifies
   a directory.
 
 * New features in the GDB remote stub, GDBserver
 
-  - GDBserver now support tracepoints (including fast tracepoints).
-    The feature is currently supported by the i386-linux and
-    amd64-linux builds.  See the "Tracepoints support in gdbserver"
-    section in the manual for more information.  GDBserver JIT
-    compiles the tracepoint's conditional agent expression bytecode
-    into native code whenever possible for low overhead dynamic
-    tracepoints conditionals.  For such tracepoints, an expression
-    that examines program state is evaluated when the tracepoint is
-    reached, in order to determine whether to capture trace data.  If
-    the condition is simple and false, processing the tracepoint
-    finishes very quickly and no data is gathered.
+  - GDBserver now support tracepoints (including fast tracepoints, and
+    static tracepoints).  The feature is currently supported by the
+    i386-linux and amd64-linux builds.  See the "Tracepoints support
+    in gdbserver" section in the manual for more information.
+
+    GDBserver JIT compiles the tracepoint's conditional agent
+    expression bytecode into native code whenever possible for low
+    overhead dynamic tracepoints conditionals.  For such tracepoints,
+    an expression that examines program state is evaluated when the
+    tracepoint is reached, in order to determine whether to capture
+    trace data.  If the condition is simple and false, processing the
+    tracepoint finishes very quickly and no data is gathered.
+
+    GDBserver interfaces with the UST (LTTng Userspace Tracer) library
+    for static tracepoints support.
 
   - GDBserver now supports x86_64 Windows 64-bit debugging.
 
@@ -134,6 +174,13 @@ save breakpoints <filename>
 
 `save tracepoints' is a new alias for `save-tracepoints'.  The latter
 is now deprecated.
+
+info static-tracepoint-markers
+  Display information about static tracepoint markers in the target.
+
+strace FN | FILE:LINE | *ADDR | -m MARKER_ID
+  Define a static tracepoint by probing a marker at the given
+  function, line, address, or marker ID.
 
 * Python scripting
 

@@ -230,6 +230,11 @@ static void disable_trace_command (char *, int);
 
 static void trace_pass_command (char *, int);
 
+/* Assuming we're creating a static tracepoint, does S look like a
+   static tracepoint marker spec ("-m MARKER_ID")?  */
+#define is_marker_spec(s)						\
+  (strncmp (s, "-m", 2) == 0 && ((s)[2] == ' ' || (s)[2] == '\t'))
+
 /* A reference-counted struct command_line.  This lets multiple
    breakpoints share a single command list.  */
 struct counted_command_line
@@ -839,7 +844,9 @@ check_no_tracepoint_commands (struct command_line *commands)
 int
 is_tracepoint (const struct breakpoint *b)
 {
-  return (b->type == bp_tracepoint || b->type == bp_fast_tracepoint);
+  return (b->type == bp_tracepoint
+	  || b->type == bp_fast_tracepoint
+	  || b->type == bp_static_tracepoint);
 }
   
 /* A helper function that validsates that COMMANDS are valid for a
@@ -863,7 +870,11 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 	  if (c->control_type == while_stepping_control)
 	    {
 	      if (b->type == bp_fast_tracepoint)
-		error (_("The 'while-stepping' command cannot be used for fast tracepoint"));
+		error (_("\
+The 'while-stepping' command cannot be used for fast tracepoint"));
+	      else if (b->type == bp_static_tracepoint)
+		error (_("\
+The 'while-stepping' command cannot be used for static tracepoint"));
 
 	      if (while_stepping)
 		error (_("The 'while-stepping' command can be used only once"));
@@ -888,6 +899,27 @@ validate_commands_for_breakpoint (struct breakpoint *b,
     {
       check_no_tracepoint_commands (commands);
     }
+}
+
+/* Return a vector of all the static tracepoints set at ADDR.  The
+   caller is responsible for releasing the vector.  */
+
+VEC(breakpoint_p) *
+static_tracepoints_here (CORE_ADDR addr)
+{
+  struct breakpoint *b;
+  VEC(breakpoint_p) *found = 0;
+  struct bp_location *loc;
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_static_tracepoint)
+      {
+	for (loc = b->loc; loc; loc = loc->next)
+	  if (loc->address == addr)
+	    VEC_safe_push(breakpoint_p, found, b);
+      }
+
+  return found;
 }
 
 /* Set the command list of B to COMMANDS.  If breakpoint is tracepoint,
@@ -4349,6 +4381,7 @@ bpstat_what (bpstat bs)
 	  break;
 	case bp_tracepoint:
 	case bp_fast_tracepoint:
+	case bp_static_tracepoint:
 	  /* Tracepoint hits should not be reported back to GDB, and
 	     if one got through somehow, it should have been filtered
 	     out already.  */
@@ -4514,6 +4547,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_catchpoint, "catchpoint"},
     {bp_tracepoint, "tracepoint"},
     {bp_fast_tracepoint, "fast tracepoint"},
+    {bp_static_tracepoint, "static tracepoint"},
     {bp_jit_event, "jit events"},
   };
   
@@ -4646,6 +4680,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_std_terminate_master:
       case bp_tracepoint:
       case bp_fast_tracepoint:
+      case bp_static_tracepoint:
       case bp_jit_event:
 	if (opts.addressprint)
 	  {
@@ -4716,6 +4751,16 @@ print_one_breakpoint_location (struct breakpoint *b,
   
   ui_out_text (uiout, "\n");
   
+  if (!part_of_multiple && b->static_trace_marker_id)
+    {
+      gdb_assert (b->type == bp_static_tracepoint);
+
+      ui_out_text (uiout, "\tmarker id is ");
+      ui_out_field_string (uiout, "static-tracepoint-marker-string-id",
+			   b->static_trace_marker_id);
+      ui_out_text (uiout, "\n");
+    }
+
   if (part_of_multiple && frame_id_p (b->frame_id))
     {
       annotate_field (6);
@@ -5372,6 +5417,7 @@ allocate_bp_location (struct breakpoint *bpt)
     case bp_catchpoint:
     case bp_tracepoint:
     case bp_fast_tracepoint:
+    case bp_static_tracepoint:
       loc->loc_type = bp_loc_other;
       break;
     default:
@@ -6748,6 +6794,16 @@ mention (struct breakpoint *b)
 	printf_filtered (_(" %d"), b->number);
 	say_where = 1;
 	break;
+      case bp_static_tracepoint:
+	if (ui_out_is_mi_like_p (uiout))
+	  {
+	    say_where = 0;
+	    break;
+	  }
+	printf_filtered (_("Static tracepoint"));
+	printf_filtered (_(" %d"), b->number);
+	say_where = 1;
+	break;
 
       case bp_until:
       case bp_finish:
@@ -6927,8 +6983,46 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 	  b->ignore_count = ignore_count;
 	  b->enable_state = enabled ? bp_enabled : bp_disabled;
 	  b->disposition = disposition;
-
 	  b->pspace = sals.sals[0].pspace;
+
+	  if (type == bp_static_tracepoint)
+	    {
+	      struct static_tracepoint_marker marker;
+
+	      if (is_marker_spec (addr_string))
+		{
+		  /* We already know the marker exists, otherwise, we
+		     wouldn't see a sal for it.  */
+		  char *p = &addr_string[3];
+		  char *endp;
+		  char *marker_str;
+		  int i;
+
+		  while (*p == ' ' || *p == '\t')
+		    p++;
+
+		  endp = p;
+		  while (*endp != ' ' && *endp != '\t' && *endp != '\0')
+		    endp++;
+
+		  marker_str = savestring (p, endp - p);
+		  b->static_trace_marker_id = marker_str;
+
+		  printf_filtered (_("Probed static tracepoint marker \"%s\"\n"),
+				   b->static_trace_marker_id);
+		}
+	      else if (target_static_tracepoint_marker_at (sal.pc, &marker))
+		{
+		  b->static_trace_marker_id = xstrdup (marker.str_id);
+		  release_static_tracepoint_marker (&marker);
+
+		  printf_filtered (_("Probed static tracepoint marker \"%s\"\n"),
+				   b->static_trace_marker_id);
+		}
+	      else
+		warning (_("\
+Couldn't determine the static tracepoint marker to probe"));
+	    }
 
 	  if (enabled && b->pspace->executing_startup
 	      && (b->type == bp_breakpoint
@@ -7341,6 +7435,58 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
     }
 }
 
+/* Decode a static tracepoint marker spec.  */
+
+static struct symtabs_and_lines
+decode_static_tracepoint_spec (char **arg_p)
+{
+  VEC(static_tracepoint_marker_p) *markers = NULL;
+  struct symtabs_and_lines sals;
+  struct symtab_and_line sal;
+  struct symbol *sym;
+  struct cleanup *old_chain;
+  char *p = &(*arg_p)[3];
+  char *endp;
+  char *marker_str;
+  int i;
+
+  while (*p == ' ' || *p == '\t')
+    p++;
+
+  endp = p;
+  while (*endp != ' ' && *endp != '\t' && *endp != '\0')
+    endp++;
+
+  marker_str = savestring (p, endp - p);
+  old_chain = make_cleanup (xfree, marker_str);
+
+  markers = target_static_tracepoint_markers_by_strid (marker_str);
+  if (VEC_empty(static_tracepoint_marker_p, markers))
+    error (_("No known static tracepoint marker named %s"), marker_str);
+
+  sals.nelts = VEC_length(static_tracepoint_marker_p, markers);
+  sals.sals = xmalloc (sizeof *sals.sals * sals.nelts);
+
+  for (i = 0; i < sals.nelts; i++)
+    {
+      struct static_tracepoint_marker *marker;
+
+      marker = VEC_index (static_tracepoint_marker_p, markers, i);
+
+      init_sal (&sals.sals[i]);
+
+      sals.sals[i] = find_pc_line (marker->address, 0);
+      sals.sals[i].pc = marker->address;
+
+      release_static_tracepoint_marker (marker);
+    }
+
+  do_cleanups (old_chain);
+
+  *arg_p = endp;
+  return sals;
+}
+
 /* Set a breakpoint.  This function is shared between CLI and MI
    functions for setting a breakpoint.  This function has two major
    modes of operations, selected by the PARSE_CONDITION_AND_THREAD
@@ -7354,7 +7500,7 @@ int
 create_breakpoint (struct gdbarch *gdbarch,
 		   char *arg, char *cond_string, int thread,
 		   int parse_condition_and_thread,
-		   int tempflag, int hardwareflag, int traceflag,
+		   int tempflag, enum bptype type_wanted,
 		   int ignore_count,
 		   enum auto_boolean pending_break_support,
 		   struct breakpoint_ops *ops,
@@ -7373,7 +7519,6 @@ create_breakpoint (struct gdbarch *gdbarch,
   int i;
   int pending = 0;
   int not_found = 0;
-  enum bptype type_wanted;
   int task = 0;
   int prev_bkpt_count = breakpoint_count;
 
@@ -7385,6 +7530,19 @@ create_breakpoint (struct gdbarch *gdbarch,
   parse_args.sals_p = &sals;
   parse_args.addr_string_p = &addr_string;
   parse_args.not_found_ptr = &not_found;
+
+  if (type_wanted == bp_static_tracepoint && is_marker_spec (arg))
+    {
+      int i;
+
+      sals = decode_static_tracepoint_spec (&arg);
+
+      copy_arg = savestring (addr_start, arg - addr_start);
+      addr_string = xcalloc (sals.nelts, sizeof (char **));
+      for (i = 0; i < sals.nelts; i++)
+	addr_string[i] = xstrdup (copy_arg);
+      goto done;
+    }
 
   e = catch_exception (uiout, do_captured_parse_breakpoint, 
 		       &parse_args, RETURN_MASK_ALL);
@@ -7432,6 +7590,8 @@ create_breakpoint (struct gdbarch *gdbarch,
 	return 0;
     }
 
+  done:
+
   /* Create a chain of things that always need to be cleaned up. */
   old_chain = make_cleanup (null_cleanup, 0);
 
@@ -7462,10 +7622,6 @@ create_breakpoint (struct gdbarch *gdbarch,
      are ok for the target.  */
   if (!pending)
     breakpoint_sals_to_pc (&sals);
-
-  type_wanted = (traceflag
-		 ? (hardwareflag ? bp_fast_tracepoint : bp_tracepoint)
-		 : (hardwareflag ? bp_hardware_breakpoint : bp_breakpoint));
 
   /* Fast tracepoints may have additional restrictions on location.  */
   if (type_wanted == bp_fast_tracepoint)
@@ -7498,10 +7654,55 @@ create_breakpoint (struct gdbarch *gdbarch,
                 make_cleanup (xfree, cond_string);
             }
         }
-      create_breakpoints_sal (gdbarch, sals, addr_string, cond_string,
-			      type_wanted, tempflag ? disp_del : disp_donttouch,
-			      thread, task, ignore_count, ops, from_tty,
-			      enabled);
+
+      /* If the user is creating a static tracepoint by marker id
+	 (strace -m MARKER_ID), then store the sals index, so that
+	 breakpoint_re_set can try to match up which of the newly
+	 found markers corresponds to this one, and, don't try to
+	 expand multiple locations for each sal, given than SALS
+	 already should contain all sals for MARKER_ID.  */
+      if (type_wanted == bp_static_tracepoint
+	  && is_marker_spec (addr_string[0]))
+	{
+	  int i;
+
+	  for (i = 0; i < sals.nelts; ++i)
+	    {
+	      struct symtabs_and_lines expanded;
+	      struct breakpoint *tp;
+	      struct cleanup *old_chain;
+
+	      expanded.nelts = 1;
+	      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
+	      expanded.sals[0] = sals.sals[i];
+	      old_chain = make_cleanup (xfree, expanded.sals);
+
+	      create_breakpoint_sal (gdbarch, expanded, addr_string[i],
+				     cond_string, type_wanted,
+				     tempflag ? disp_del : disp_donttouch,
+				     thread, task, ignore_count, ops,
+				     from_tty, enabled);
+
+	      do_cleanups (old_chain);
+
+	      /* Get the tracepoint we just created.  */
+	      tp = get_breakpoint (breakpoint_count);
+	      gdb_assert (tp != NULL);
+
+	      /* Given that its possible to have multiple markers with
+		 the same string id, if the user is creating a static
+		 tracepoint by marker id ("strace -m MARKER_ID"), then
+		 store the sals index, so that breakpoint_re_set can
+		 try to match up which of the newly found markers
+		 corresponds to this one  */
+	      tp->static_trace_marker_id_idx = i;
+	    }
+	}
+      else
+	create_breakpoints_sal (gdbarch, sals, addr_string, cond_string,
+				type_wanted, tempflag ? disp_del : disp_donttouch,
+				thread, task, ignore_count, ops, from_tty,
+				enabled);
     }
   else
     {
@@ -7559,13 +7760,15 @@ create_breakpoint (struct gdbarch *gdbarch,
 static void
 break_command_1 (char *arg, int flag, int from_tty)
 {
-  int hardwareflag = flag & BP_HARDWAREFLAG;
   int tempflag = flag & BP_TEMPFLAG;
+  enum bptype type_wanted = (flag & BP_HARDWAREFLAG
+			     ? bp_hardware_breakpoint
+			     : bp_breakpoint);
 
   create_breakpoint (get_current_arch (),
 		     arg,
 		     NULL, 0, 1 /* parse arg */,
-		     tempflag, hardwareflag, 0 /* traceflag */,
+		     tempflag, type_wanted,
 		     0 /* Ignore count */,
 		     pending_break_support,
 		     NULL /* breakpoint_ops */,
@@ -8538,7 +8741,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
   create_breakpoint (get_current_arch (),
 		     trigger_func_name, cond_string, -1,
 		     0 /* condition and thread are valid.  */,
-		     tempflag, 0, 0,
+		     tempflag, bp_breakpoint,
 		     0,
 		     AUTO_BOOLEAN_TRUE /* pending */,
 		     &gnu_v3_exception_catchpoint_ops, from_tty,
@@ -9590,6 +9793,139 @@ ambiguous_names_p (struct bp_location *loc)
   return 0;
 }
 
+/* When symbols change, it probably means the sources changed as well,
+   and it might mean the static tracepoint markers are no longer at
+   the same address or line numbers they used to be at last we
+   checked.  Losing your static tracepoints whenever you rebuild is
+   undesirable.  This function tries to resync/rematch gdb static
+   tracepoints with the markers on the target, for static tracepoints
+   that have not been set by marker id.  Static tracepoint that have
+   been set by marker id are reset by marker id in breakpoint_re_set.
+   The heuristic is:
+
+   1) For a tracepoint set at a specific address, look for a marker at
+   the old PC.  If one is found there, assume to be the same marker.
+   If the name / string id of the marker found is different from the
+   previous known name, assume that means the user renamed the marker
+   in the sources, and output a warning.
+
+   2) For a tracepoint set at a given line number, look for a marker
+   at the new address of the old line number.  If one is found there,
+   assume to be the same marker.  If the name / string id of the
+   marker found is different from the previous known name, assume that
+   means the user renamed the marker in the sources, and output a
+   warning.
+
+   3) If a marker is no longer found at the same address or line, it
+   may mean the marker no longer exists.  But it may also just mean
+   the code changed a bit.  Maybe the user added a few lines of code
+   that made the marker move up or down (in line number terms).  Ask
+   the target for info about the marker with the string id as we knew
+   it.  If found, update line number and address in the matching
+   static tracepoint.  This will get confused if there's more than one
+   marker with the same ID (possible in UST, although unadvised
+   precisely because it confuses tools).  */
+
+static struct symtab_and_line
+update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
+{
+  struct static_tracepoint_marker marker;
+  CORE_ADDR pc;
+  int i;
+
+  pc = sal.pc;
+  if (sal.line)
+    find_line_pc (sal.symtab, sal.line, &pc);
+
+  if (target_static_tracepoint_marker_at (pc, &marker))
+    {
+      if (strcmp (b->static_trace_marker_id, marker.str_id) != 0)
+	warning (_("static tracepoint %d changed probed marker from %s to %s"),
+		 b->number,
+		 b->static_trace_marker_id, marker.str_id);
+
+      xfree (b->static_trace_marker_id);
+      b->static_trace_marker_id = xstrdup (marker.str_id);
+      release_static_tracepoint_marker (&marker);
+
+      return sal;
+    }
+
+  /* Old marker wasn't found on target at lineno.  Try looking it up
+     by string ID.  */
+  if (!sal.explicit_pc
+      && sal.line != 0
+      && sal.symtab != NULL
+      && b->static_trace_marker_id != NULL)
+    {
+      VEC(static_tracepoint_marker_p) *markers;
+
+      markers
+	= target_static_tracepoint_markers_by_strid (b->static_trace_marker_id);
+
+      if (!VEC_empty(static_tracepoint_marker_p, markers))
+	{
+	  struct symtab_and_line sal;
+	  struct symbol *sym;
+	  struct static_tracepoint_marker *marker;
+
+	  marker = VEC_index (static_tracepoint_marker_p, markers, 0);
+
+	  xfree (b->static_trace_marker_id);
+	  b->static_trace_marker_id = xstrdup (marker->str_id);
+
+	  warning (_("marker for static tracepoint %d (%s) not "
+		     "found at previous line number"),
+		   b->number, b->static_trace_marker_id);
+
+	  init_sal (&sal);
+
+	  sal.pc = marker->address;
+
+	  sal = find_pc_line (marker->address, 0);
+	  sym = find_pc_sect_function (marker->address, NULL);
+	  ui_out_text (uiout, "Now in ");
+	  if (sym)
+	    {
+	      ui_out_field_string (uiout, "func",
+				   SYMBOL_PRINT_NAME (sym));
+	      ui_out_text (uiout, " at ");
+	    }
+	  ui_out_field_string (uiout, "file", sal.symtab->filename);
+	  ui_out_text (uiout, ":");
+
+	  if (ui_out_is_mi_like_p (uiout))
+	    {
+	      char *fullname = symtab_to_fullname (sal.symtab);
+
+	      if (fullname)
+		ui_out_field_string (uiout, "fullname", fullname);
+	    }
+
+	  ui_out_field_int (uiout, "line", sal.line);
+	  ui_out_text (uiout, "\n");
+
+	  b->line_number = sal.line;
+
+	  xfree (b->source_file);
+	  if (sym)
+	    b->source_file = xstrdup (sal.symtab->filename);
+	  else
+	    b->source_file = NULL;
+
+	  xfree (b->addr_string);
+	  b->addr_string = xstrprintf ("%s:%d",
+				       sal.symtab->filename, b->line_number);
+
+	  /* Might be nice to check if function changed, and warn if
+	     so.  */
+
+	  release_static_tracepoint_marker (marker);
+	}
+    }
+  return sal;
+}
+
 static void
 update_breakpoint_locations (struct breakpoint *b,
 			     struct symtabs_and_lines sals)
@@ -9692,7 +10028,6 @@ update_breakpoint_locations (struct breakpoint *b,
   update_global_location_list (1);
 }
 
-
 /* Reset a breakpoint given it's struct breakpoint * BINT.
    The value we return ends up being the return value from catch_errors.
    Unused in this case.  */
@@ -9709,6 +10044,7 @@ breakpoint_re_set_one (void *bint)
   char *s;
   struct gdb_exception e;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  int marker_spec = 0;
 
   switch (b->type)
     {
@@ -9720,6 +10056,7 @@ breakpoint_re_set_one (void *bint)
     case bp_hardware_breakpoint:
     case bp_tracepoint:
     case bp_fast_tracepoint:
+    case bp_static_tracepoint:
       /* Do not attempt to re-set breakpoints disabled during startup.  */
       if (b->enable_state == bp_startup_disabled)
 	return 0;
@@ -9738,10 +10075,24 @@ breakpoint_re_set_one (void *bint)
       save_current_space_and_thread ();
       switch_to_program_space_and_thread (b->pspace);
 
+      marker_spec = b->type == bp_static_tracepoint && is_marker_spec (s);
+
       TRY_CATCH (e, RETURN_MASK_ERROR)
 	{
-	  sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL,
-				not_found_ptr);
+	  if (marker_spec)
+	    {
+	      sals = decode_static_tracepoint_spec (&s);
+	      if (sals.nelts > b->static_trace_marker_id_idx)
+		{
+		  sals.sals[0] = sals.sals[b->static_trace_marker_id_idx];
+		  sals.nelts = 1;
+		}
+	      else
+		error (_("marker %s not found"), b->static_trace_marker_id);
+	    }
+	  else
+	    sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL,
+				  not_found_ptr);
 	}
       if (e.reason < 0)
 	{
@@ -9790,6 +10141,9 @@ breakpoint_re_set_one (void *bint)
 	      b->task = task;
 	      b->condition_not_parsed = 0;
 	    }
+
+	  if (b->type == bp_static_tracepoint && !marker_spec)
+	    sals.sals[0] = update_static_tracepoint (b, sals.sals[0]);
 
 	  expanded = expand_line_sal_maybe (sals.sals[0]);
 	}
@@ -10143,6 +10497,7 @@ disable_command (char *args, int from_tty)
       case bp_breakpoint:
       case bp_tracepoint:
       case bp_fast_tracepoint:
+      case bp_static_tracepoint:
       case bp_catchpoint:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
@@ -10243,6 +10598,7 @@ enable_command (char *args, int from_tty)
       case bp_breakpoint:
       case bp_tracepoint:
       case bp_fast_tracepoint:
+      case bp_static_tracepoint:
       case bp_catchpoint:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
@@ -10576,8 +10932,8 @@ trace_command (char *arg, int from_tty)
   if (create_breakpoint (get_current_arch (),
 			 arg,
 			 NULL, 0, 1 /* parse arg */,
-			 0 /* tempflag */, 0 /* hardwareflag */,
-			 1 /* traceflag */,
+			 0 /* tempflag */,
+			 bp_tracepoint /* type_wanted */,
 			 0 /* Ignore count */,
 			 pending_break_support,
 			 NULL,
@@ -10592,8 +10948,26 @@ ftrace_command (char *arg, int from_tty)
   if (create_breakpoint (get_current_arch (),
 			 arg,
 			 NULL, 0, 1 /* parse arg */,
-			 0 /* tempflag */, 1 /* hardwareflag */,
-			 1 /* traceflag */,
+			 0 /* tempflag */,
+			 bp_fast_tracepoint /* type_wanted */,
+			 0 /* Ignore count */,
+			 pending_break_support,
+			 NULL,
+			 from_tty,
+			 1 /* enabled */))
+    set_tracepoint_count (breakpoint_count);
+}
+
+/* strace command implementation.  Creates a static tracepoint.  */
+
+void
+strace_command (char *arg, int from_tty)
+{
+  if (create_breakpoint (get_current_arch (),
+			 arg,
+			 NULL, 0, 1 /* parse arg */,
+			 0 /* tempflag */,
+			 bp_static_tracepoint /* type_wanted */,
 			 0 /* Ignore count */,
 			 pending_break_support,
 			 NULL,
@@ -10655,8 +11029,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 			  addr_str,
 			  utp->cond_string, -1, 0 /* parse cond/thread */,
 			  0 /* tempflag */,
-			  (utp->type == bp_fast_tracepoint) /* hardwareflag */,
-			  1 /* traceflag */,
+			  utp->type /* type_wanted */,
 			  0 /* Ignore count */,
 			  pending_break_support,
 			  NULL,
@@ -10978,6 +11351,8 @@ save_breakpoints (char *filename, int from_tty,
       {
 	if (tp->type == bp_fast_tracepoint)
 	  fprintf_unfiltered (fp, "ftrace");
+	if (tp->type == bp_static_tracepoint)
+	  fprintf_unfiltered (fp, "strace");
 	else if (tp->type == bp_tracepoint)
 	  fprintf_unfiltered (fp, "trace");
 	else if (tp->type == bp_breakpoint && tp->disposition == disp_del)
@@ -11559,6 +11934,31 @@ Do \"help tracepoints\" for info on other tracepoint commands."));
 Set a fast tracepoint at specified line or function.\n\
 \n"
 BREAK_ARGS_HELP ("ftrace") "\n\
+Do \"help tracepoints\" for info on other tracepoint commands."));
+  set_cmd_completer (c, location_completer);
+
+  c = add_com ("strace", class_breakpoint, strace_command, _("\
+Set a static tracepoint at specified line, function or marker.\n\
+\n\
+strace [LOCATION] [if CONDITION]\n\
+LOCATION may be a line number, function name, \"*\" and an address,\n\
+or -m MARKER_ID.\n\
+If a line number is specified, probe the marker at start of code\n\
+for that line.  If a function is specified, probe the marker at start\n\
+of code for that function.  If an address is specified, probe the marker\n\
+at that exact address.  If a marker id is specified, probe the marker\n\
+with that name.  With no LOCATION, uses current execution address of\n\
+the selected stack frame.\n\
+Static tracepoints accept an extra collect action -- ``collect $_sdata''.\n\
+This collects arbitrary user data passed in the probe point call to the\n\
+tracing library.  You can inspect it when analyzing the trace buffer,\n\
+by printing the $_sdata variable like any other convenience variable.\n\
+\n\
+CONDITION is a boolean expression.\n\
+\n\
+Multiple tracepoints at one place are permitted, and useful if conditional.\n\
+\n\
+Do \"help breakpoints\" for info on other commands dealing with breakpoints.\n\
 Do \"help tracepoints\" for info on other tracepoint commands."));
   set_cmd_completer (c, location_completer);
 

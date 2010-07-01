@@ -70,6 +70,10 @@ CC-LD=${CC}
 INCLUDE_DIR =  ${srcdir}/../../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
+# Where is ust?  These will be empty if ust was not available.
+ustlibs = @ustlibs@
+ustinc = @ustinc@
+
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} for our headers.
@@ -193,14 +197,14 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS)
 
-IPA_OBJS=tracepoint-ipa.o utils-ipa.o regcache-ipa.o ${IPA_DEPFILES}
+IPA_OBJS=tracepoint-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o ${IPA_DEPFILES}
 
 IPA_LIB=libinproctrace.so
 
 $(IPA_LIB): $(IPA_OBJS) ${ADD_DEPS} ${CDEPS}
 	rm -f $(IPA_LIB)
 	${CC-LD} -shared -fPIC -Wl,--no-undefined $(INTERNAL_CFLAGS) \
-	$(INTERNAL_LDFLAGS) -o $(IPA_LIB) ${IPA_OBJS}
+	$(INTERNAL_LDFLAGS) -o $(IPA_LIB) ${IPA_OBJS} -ldl -pthread
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.
@@ -295,9 +299,11 @@ linux_low_h = $(srcdir)/linux-low.h
 
 nto_low_h = $(srcdir)/nto-low.h
 
+UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
+
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.
-IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) \
+IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 	-fPIC -DGDBSERVER -DIN_PROCESS_AGENT \
 	-fvisibility=hidden
 

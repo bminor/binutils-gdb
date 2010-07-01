@@ -166,6 +166,25 @@ struct uploaded_tsv
   struct uploaded_tsv *next;
 };
 
+/* Struct recording info about a target static tracepoint marker.  */
+
+struct static_tracepoint_marker
+{
+  struct gdbarch *gdbarch;
+  CORE_ADDR address;
+
+  /* The string ID of the marker.  */
+  char *str_id;
+
+  /* Extra target reported info associated with the marker.  */
+  char *extra;
+};
+
+extern void parse_static_tracepoint_marker_definition
+  (char *line, char **pp,
+   struct static_tracepoint_marker *marker);
+extern void release_static_tracepoint_marker (struct static_tracepoint_marker *);
+
 /* A hook used to notify the UI of tracepoint operations.  */
 
 extern void (*deprecated_trace_find_hook) (char *arg, int from_tty);

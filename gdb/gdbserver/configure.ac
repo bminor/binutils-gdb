@@ -45,6 +45,54 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 AC_CHECK_FUNCS(pread pwrite pread64)
 AC_REPLACE_FUNCS(memmem)
 
+# Check for UST
+ustlibs=""
+ustinc=""
+
+AC_ARG_WITH(ust, [  --with-ust=PATH       Specify prefix directory for the installed UST package
+                          Equivalent to --with-ust-include=PATH/include
+                          plus --with-ust-lib=PATH/lib])
+AC_ARG_WITH(ust_include, [  --with-ust-include=PATH Specify directory for installed UST include files])
+AC_ARG_WITH(ust_lib, [  --with-ust-lib=PATH   Specify the directory for the installed UST library])
+
+case $with_ust in
+  no)
+    ustlibs=
+    ustinc=
+    ;;
+  "" | yes)
+    ustlibs=" -lust "
+    ustinc=""
+    ;;
+  *)
+    ustlibs="-L$with_ust/lib -lust"
+    ustinc="-I$with_ust/include "
+    ;;
+esac
+if test "x$with_ust_include" != x; then
+  ustinc="-I$with_ust_include "
+fi
+if test "x$with_ust_lib" != x; then
+  ustlibs="-L$with_ust_lib -lust"
+fi
+
+if test "x$with_ust" != "xno"; then
+  saved_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS $ustinc"
+  AC_MSG_CHECKING([for ust])
+  AC_TRY_COMPILE([
+#define CONFIG_UST_GDB_INTEGRATION
+#include <ust/ust.h>
+  ],[],
+  [AC_MSG_RESULT([yes]); AC_DEFINE(HAVE_UST, 1, [Define if UST is available])],
+  [AC_MSG_RESULT([no]); ustlibs= ; ustinc= ])
+  CFLAGS="$saved_CFLAGS"
+fi
+
+# Flags needed for UST
+AC_SUBST(ustlibs)
+AC_SUBST(ustinc)
+
 dnl dladdr is glibc-specific.  It is used by thread-db.c but only for
 dnl debugging messages.  It lives in -ldl which is handled below so we don't
 dnl use AC_CHECK_LIB (or AC_SEARCH_LIBS) here.  Instead we just temporarily

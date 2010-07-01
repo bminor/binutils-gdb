@@ -542,6 +542,10 @@ int fetch_traceframe_registers (int tfnum,
 				struct regcache *regcache,
 				int regnum);
 
+int traceframe_read_sdata (int tfnum, ULONGEST offset,
+			   unsigned char *buf, ULONGEST length,
+			   ULONGEST *nbytes);
+
 /* If a thread is determined to be collecting a fast tracepoint, this
    structure holds the collect status.  */
 
@@ -569,6 +573,9 @@ int handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc);
 void initialize_low_tracepoint (void);
 void supply_fast_tracepoint_registers (struct regcache *regcache,
 				       const unsigned char *regs);
+void supply_static_tracepoint_registers (struct regcache *regcache,
+					 const unsigned char *regs,
+					 CORE_ADDR pc);
 #else
 void stop_tracing (void);
 #endif

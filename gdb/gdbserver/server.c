@@ -1336,6 +1336,52 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
+  if (strncmp ("qXfer:statictrace:read:", own_buf,
+	       sizeof ("qXfer:statictrace:read:") -1) == 0)
+    {
+      unsigned char *data;
+      CORE_ADDR ofs;
+      unsigned int len;
+      char *annex;
+      ULONGEST nbytes;
+
+      require_running (own_buf);
+
+      if (current_traceframe == -1)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+
+      /* Reject any annex; grab the offset and length.  */
+      if (decode_xfer_read (own_buf + sizeof ("qXfer:statictrace:read:") -1,
+			    &annex, &ofs, &len) < 0
+	  || annex[0] != '\0')
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      /* Read one extra byte, as an indicator of whether there is
+	 more.  */
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+      data = malloc (len + 1);
+      if (!data)
+	return;
+
+      if (traceframe_read_sdata (current_traceframe, ofs,
+				 data, len + 1, &nbytes))
+	write_enn (own_buf);
+      else if (nbytes > len)
+	*new_packet_len_p = write_qxfer_response (own_buf, data, len, 1);
+      else
+	*new_packet_len_p = write_qxfer_response (own_buf, data, nbytes, 0);
+
+      free (data);
+      return;
+    }
+
   /* Protocol features query.  */
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
@@ -1433,6 +1479,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";DisconnectedTracing+");
 	  if (gdb_supports_qRelocInsn && target_supports_fast_tracepoints ())
 	    strcat (own_buf, ";FastTracepoints+");
+	  strcat (own_buf, ";StaticTracepoints+");
+	  strcat (own_buf, ";qXfer:statictrace:read+");
 	}
 
       return;

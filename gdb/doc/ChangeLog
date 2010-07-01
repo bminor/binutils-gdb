@@ -1,3 +1,20 @@
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Convenience Variables): Document $_sdata.
+	(Commands to Set Tracepoints): Describe static tracepoints.  Add
+	`Listing Static Tracepoint Markers' menu entry.  Document
+	"strace".
+	(Tracepoint Action Lists): Document collecting $_sdata.
+	(Listing Static Tracepoint Markers): New subsection.
+	(Tracepoints support in gdbserver): Mention static tracepoints.
+	(remote packets, enabling and disabling): Mention
+	read-sdata-object.
+	(General Query Packets) <qSupported>: Document qXfer:sdata:read
+	and StaticTracepoint.
+	Mention qTfSTM, qTsSTM and qTSTMat as tracepoint packets.
+	Document qXfer:sdata:read.
+	(Tracepoint packets): Document qTfSTM, qTsSTM and qTSTMat.
+
 2010-06-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Threads In Python): Fix unmatched @end table.

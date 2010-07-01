@@ -129,6 +129,7 @@ enum bptype
 
     bp_tracepoint,
     bp_fast_tracepoint,
+    bp_static_tracepoint,
 
     /* Event for JIT compiled code generation or deletion.  */
     bp_jit_event,
@@ -536,6 +537,18 @@ struct breakpoint
 
     /* The number of the tracepoint on the target.  */
     int number_on_target;
+
+    /* The static tracepoint marker id, if known.  */
+    char *static_trace_marker_id;
+
+    /* LTTng/UST allow more than one marker with the same ID string,
+       although it unadvised because it confuses tools.  When setting
+       static tracepoints by marker ID, this will record the index in
+       the array of markers we found for the given marker ID for which
+       this static tracepoint corresponds.  When resetting
+       breakpoints, we will use this index to try to find the same
+       marker again.  */
+    int static_trace_marker_id_idx;
   };
 
 typedef struct breakpoint *breakpoint_p;
@@ -821,7 +834,7 @@ extern void tbreak_command (char *, int);
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,
 			      int parse_condition_and_thread,
-			      int tempflag, int hardwareflag, int traceflag,
+			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,
 			      enum auto_boolean pending_break_support,
 			      struct breakpoint_ops *ops,
@@ -1043,6 +1056,11 @@ extern struct breakpoint *get_tracepoint_by_number (char **arg, int multi_p,
 extern VEC(breakpoint_p) *all_tracepoints (void);
 
 extern int is_tracepoint (const struct breakpoint *b);
+
+/* Return a vector of all static tracepoints defined at ADDR.  The
+   vector is newly allocated; the caller should free when done with
+   it.  */
+extern VEC(breakpoint_p) *static_tracepoints_here (CORE_ADDR addr);
 
 /* Function that can be passed to read_command_line to validate
    that each command is suitable for tracepoint command list.  */

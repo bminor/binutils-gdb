@@ -1,3 +1,91 @@
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
+	Static tracepoints support.
+
+	* NEWS: Mention new support for static tracepoints.
+	(New packets): Mention qTfSTM, qTsSTM, qTSTMat and
+	qXfer:statictrace:read.
+	(New features in the GDB remote stub, GDBserver): Mention static
+	tracepoints support using an UST based backend.
+	(New commands): Mention "info static-tracepoint-markers" and
+	"strace".
+	* breakpoint.c (is_marker_spec): New.
+	(is_tracepoint): Handle static tracepoints.
+	(validate_commands_for_breakpoint): Static tracepoints can't do
+	while-stepping.
+	(static_tracepoints_here): New.
+	(bpstat_what): Handle static tracepoints.
+	(print_one_breakpoint_location, allocate_bp_location, mention):
+	Ditto.
+	(create_breakpoint_sal): Ditto.
+	(decode_static_tracepoint_spec): New.
+	(create_breakpoint): Replace `hardwareflag', and `traceflag' with
+	`type_wanted'.  Adjust.  Handle static tracepoint marker
+	locations.
+	(break_command_1): Adjust.
+	(update_static_tracepoint): New.
+	(update_breakpoint_locations): Handle static tracepoints.
+	(breakpoint_re_set_one): Handle static tracepoint marker
+	locations.
+	(disable_command, enable_command): Handle static tracepoints.
+	(trace_command, ftrace_command): Adjust.
+	(strace_command): New.
+	(create_tracepoint_from_upload): Adjust.
+	(save_breakpoints): Handle static tracepoints.
+	(_initialize_breakpoint): Install the "strace" command.
+	* breakpoint.h (enum bptype): New bp_static_tracepoint type.
+	(struct breakpoint): New fields static_trace_marker_id and
+	static_trace_marker_id_idx.
+	(breakpoints_here_p): Declare.
+	(create_breakpoint): Adjust.
+	(static_tracepoints_here): Declare.
+	* remote.c (struct remote_state) <static_tracepoints>: New field.
+	(PACKET_qXfer_statictrace_read, PACKET_StaticTracepoints): New.
+	(remote_static_tracepoint_marker_at): New.
+	(remote_static_tracepoint_markers_by_strid): New.
+	(remote_static_tracepoint_feature): New.
+	(remote_disconnected_tracing_feature): Handle "StaticTracepoints".
+	(remote_xfer_partial): Handle TARGET_OBJECT_STATIC_TRACE_DATA.
+	(remote_supports_static_tracepoints): New.
+	(remote_download_tracepoint): Download static tracepoints.
+	(init_remote_ops): Install remote_static_tracepoint_marker_at and
+	remote_static_tracepoint_markers_by_strid.
+	(_initialize_remote): Install set|show remote static-tracepoints,
+	and set|show remote read-sdata-object commands.
+	* target.c (update_current_target): Inherit and default
+	to_static_tracepoint_marker_at, and
+	to_static_tracepoint_markers_by_strid.
+	* target.h (static_tracepoint_marker): Forward declare.
+	(enum target_object): New object TARGET_OBJECT_STATIC_TRACE_DATA.
+	(static_tracepoint_marker_p): New typedef. 
+	(DEF_VEC_P(static_tracepoint_marker_p)): New VEC type.
+	(struct target_ops): New fields to_static_tracepoint_marker_at and
+	to_static_tracepoint_markers_by_strid.
+	(target_static_tracepoint_marker_at)
+	(target_static_tracepoint_markers_by_strid): New.
+	* tracepoint.c: Include source.h.
+	(validate_actionline): Handle $_sdata.
+	(struct collection_list): New field strace_data.
+	(add_static_trace_data): New.
+	(clear_collection_list): Clear strace_data.
+	(stringify_collection_list): Account for a possible static trace
+	data collection.
+	(encode_actions_1): Encode an $_sdata collection.
+	(parse_tracepoint_definition): Handle static tracepoints.
+	(parse_static_tracepoint_marker_definition): New.
+	(release_static_tracepoint_marker): New.
+	(print_one_static_tracepoint_marker): New.
+	(info_static_tracepoint_markers_command): New.
+	(sdata_make_value): New.
+	(_initialize_tracepoint): Create the $_sdata convenience variable.
+	Add the "info static-tracepoint-markers" command.
+	Mention $_sdata in the "collect" command's help output.
+	* tracepoint.h (struct static_tracepoint_marker): New.
+	(parse_static_tracepoint_marker_definition)
+	(release_static_tracepoint_marker): Declare.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Adjust.
+	* python/py-breakpoint.c (bppy_new): Adjust.
+
 2010-06-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/python-internal.h (_XOPEN_SOURCE): Undefine before

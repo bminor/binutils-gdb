@@ -74,6 +74,8 @@
 typedef int socklen_t;
 #endif
 
+#ifndef IN_PROCESS_AGENT
+
 #if USE_WIN32API
 # define INVALID_DESCRIPTOR INVALID_SOCKET
 #else
@@ -371,6 +373,8 @@ fromhex (int a)
   return 0;
 }
 
+#endif
+
 static const char hexchars[] = "0123456789abcdef";
 
 static int
@@ -393,6 +397,8 @@ ishex (int ch, int *val)
     }
   return 0;
 }
+
+#ifndef IN_PROCESS_AGENT
 
 int
 unhexify (char *bin, const char *hex, int count)
@@ -446,6 +452,8 @@ decode_address_to_semicolon (CORE_ADDR *addrp, const char *start)
   return end;
 }
 
+#endif
+
 /* Convert number NIB to a hex digit.  */
 
 static int
@@ -456,6 +464,8 @@ tohex (int nib)
   else
     return 'a' + nib - 10;
 }
+
+#ifndef IN_PROCESS_AGENT
 
 int
 hexify (char *hex, const char *bin, int count)
@@ -600,6 +610,8 @@ try_rle (char *buf, int remaining, unsigned char *csum, char **p)
   return n + 1;
 }
 
+#endif
+
 char *
 unpack_varlen_hex (char *buff,	/* packet to parse */
 		   ULONGEST *result)
@@ -616,6 +628,8 @@ unpack_varlen_hex (char *buff,	/* packet to parse */
   *result = retval;
   return buff;
 }
+
+#ifndef IN_PROCESS_AGENT
 
 /* Write a PTID to BUF.  Returns BUF+CHARACTERS_WRITTEN.  */
 
@@ -1126,6 +1140,8 @@ write_enn (char *buf)
   buf[3] = '\0';
 }
 
+#endif
+
 void
 convert_int_to_ascii (const unsigned char *from, char *to, int n)
 {
@@ -1142,6 +1158,7 @@ convert_int_to_ascii (const unsigned char *from, char *to, int n)
   *to++ = 0;
 }
 
+#ifndef IN_PROCESS_AGENT
 
 void
 convert_ascii_to_int (const char *from, unsigned char *to, int n)
@@ -1841,3 +1858,5 @@ buffer_xml_printf (struct buffer *buffer, const char *format, ...)
   buffer_grow_str (buffer, prev);
   va_end (ap);
 }
+
+#endif
