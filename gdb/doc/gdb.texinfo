@@ -9680,6 +9680,7 @@ information on tracepoint conditions.
 
 @item ftrace @var{location} [ if @var{cond} ]
 @cindex set fast tracepoint
+@cindex fast tracepoints, setting
 @kindex ftrace
 The @code{ftrace} command sets a fast tracepoint.  For targets that
 support them, fast tracepoints will use a more efficient but possibly
@@ -9693,7 +9694,9 @@ message.
 @code{trace}.
 
 @item strace @var{location} [ if @var{cond} ]
-@cindex static tracepoint, setting
+@cindex set static tracepoint
+@cindex static tracepoints, setting
+@cindex probe static tracepoint marker
 @kindex strace
 The @code{strace} command sets a static tracepoint.  For targets that
 support it, setting a static tracepoint probes a static
