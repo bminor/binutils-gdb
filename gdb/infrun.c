@@ -6531,7 +6531,7 @@ from 1-15 are allowed for compatibility with old versions of GDB.\n\
 Numeric ranges may be specified with the form LOW-HIGH (e.g. 1-5).\n\
 The special arg \"all\" is recognized to mean all signals except those\n\
 used by the debugger, typically SIGTRAP and SIGINT.\n\
-Recognized actions include \"s\" (toggles between stop and nostop), \n\
+Recognized actions include \"s\" (toggles between stop and nostop),\n\
 \"r\" (toggles between print and noprint), \"i\" (toggles between pass and \
 nopass), \"Q\" (noprint)\n\
 Stop means reenter debugger if this signal happens (implies print).\n\
@@ -6665,7 +6665,7 @@ An exec call replaces the program image of a process.\n\
 \n\
 follow-exec-mode can be:\n\
 \n\
-  new - the debugger creates a new inferior and rebinds the process \n\
+  new - the debugger creates a new inferior and rebinds the process\n\
 to this new inferior.  The program the process was running before\n\
 the exec call can be restarted afterwards by restarting the original\n\
 inferior.\n\

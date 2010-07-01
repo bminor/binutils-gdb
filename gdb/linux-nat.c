@@ -679,7 +679,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	 in the foreground, the user will not be able to ctrl-c to get
 	 back the terminal, effectively hanging the debug session.  */
       fprintf_filtered (gdb_stderr, _("\
-Can not resume the parent process over vfork in the foreground while \n\
+Can not resume the parent process over vfork in the foreground while\n\
 holding the child stopped.  Try \"set detach-on-fork\" or \
 \"set schedule-multiple\".\n"));
       return 1;

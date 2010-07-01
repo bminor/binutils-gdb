@@ -4280,15 +4280,15 @@ procfs_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int dowrite,
       if (dowrite)
 	{
 #ifdef NEW_PROC_API
-	  PROCFS_NOTE ("write memory: ");
+	  PROCFS_NOTE ("write memory:\n");
 #else
-	  PROCFS_NOTE ("write memory: \n");
+	  PROCFS_NOTE ("write memory:\n");
 #endif
 	  nbytes = write (pi->as_fd, myaddr, len);
 	}
       else
 	{
-	  PROCFS_NOTE ("read  memory: \n");
+	  PROCFS_NOTE ("read  memory:\n");
 	  nbytes = read (pi->as_fd, myaddr, len);
 	}
       if (nbytes < 0)

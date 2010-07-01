@@ -306,7 +306,7 @@ bookmarks_info (char *args, int from_tty)
 
   gdbarch = get_regcache_arch (get_current_regcache ());
   printf_filtered (_("Bookmark    Address     Opaque\n"));
-  printf_filtered (_("   ID                    Data \n"));
+  printf_filtered (_("   ID                    Data\n"));
 
   ALL_BOOKMARKS (b)
     printf_filtered ("   %d       %s    '%s'\n",

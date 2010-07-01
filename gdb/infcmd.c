@@ -1009,7 +1009,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 
 	      target_terminal_ours ();
 	      printf_filtered (_("\
-Single stepping until exit from function %s, \n\
+Single stepping until exit from function %s,\n\
 which has no line number information.\n"), name);
 	    }
 	}

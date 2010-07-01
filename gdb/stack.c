@@ -2210,7 +2210,7 @@ Use of the 'full' qualifier also prints the values of the local variables.\n"));
     {
       add_com_alias ("t", "backtrace", class_stack, 0);
       add_com ("T", class_stack, backtrace_full_command, _("\
-Print backtrace of all stack frames, or innermost COUNT frames \n\
+Print backtrace of all stack frames, or innermost COUNT frames\n\
 and the values of the local variables.\n\
 With a negative argument, print outermost -COUNT frames.\n\
 Usage: T <count>\n"));

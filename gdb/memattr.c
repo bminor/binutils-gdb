@@ -730,9 +730,9 @@ _initialize_mem (void)
 Define attributes for memory region or reset memory region handling to\n\
 target-based.\n\
 Usage: mem auto\n\
-       mem <lo addr> <hi addr> [<mode> <width> <cache>], \n\
-where <mode>  may be rw (read/write), ro (read-only) or wo (write-only), \n\
-      <width> may be 8, 16, 32, or 64, and \n\
+       mem <lo addr> <hi addr> [<mode> <width> <cache>],\n\
+where <mode>  may be rw (read/write), ro (read-only) or wo (write-only),\n\
+      <width> may be 8, 16, 32, or 64, and\n\
       <cache> may be cache or nocache"));
 
   add_cmd ("mem", class_vars, mem_enable_command, _("\

@@ -1584,7 +1584,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
   else if (!within_current_scope)
     {
       printf_filtered (_("\
-Watchpoint %d deleted because the program has left the block \n\
+Watchpoint %d deleted because the program has left the block\n\
 in which its expression is valid.\n"),
 		       b->number);
       if (b->related_breakpoint)
@@ -12002,7 +12002,7 @@ if TPNUM is omitted, passcount refers to the last tracepoint defined."));
 
   c = add_cmd ("breakpoints", class_breakpoint, save_breakpoints_command, _("\
 Save current breakpoint definitions as a script.\n\
-This includes all types of breakpoints (breakpoints, watchpoints, \n\
+This includes all types of breakpoints (breakpoints, watchpoints,\n\
 catchpoints, tracepoints).  Use the 'source' command in another debug\n\
 session to restore them."),
 	       &save_cmdlist);

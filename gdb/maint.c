@@ -536,8 +536,8 @@ maintenance_deprecate (char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
     {
-      printf_unfiltered (_("\"maintenance deprecate\" takes an argument, \n\
-the command you want to deprecate, and optionally the replacement command \n\
+      printf_unfiltered (_("\"maintenance deprecate\" takes an argument,\n\
+the command you want to deprecate, and optionally the replacement command\n\
 enclosed in quotes.\n"));
     }
 

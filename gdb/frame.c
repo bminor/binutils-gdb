@@ -2252,7 +2252,7 @@ Set whether backtraces should continue past the entry point of a program."),
 Show whether backtraces should continue past the entry point of a program."),
 			   _("\
 Normally there are no callers beyond the entry point of a program, so GDB\n\
-will terminate the backtrace there.  Set this variable if you need to see \n\
+will terminate the backtrace there.  Set this variable if you need to see\n\
 the rest of the stack trace."),
 			   NULL,
 			   show_backtrace_past_entry,

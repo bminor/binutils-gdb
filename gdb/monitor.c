@@ -721,7 +721,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
   name = targ_ops->to_shortname;
 
   if (!args)
-    error (_("Use `target %s DEVICE-NAME' to use a serial port, or \n\
+    error (_("Use `target %s DEVICE-NAME' to use a serial port, or\n\
 `target %s HOST-NAME:PORT-NUMBER' to use a network connection."), name, name);
 
   target_preopen (from_tty);

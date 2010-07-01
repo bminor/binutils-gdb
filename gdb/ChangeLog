@@ -1,3 +1,24 @@
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (update_watchpoint, _initialize_breakpoint): Remove
+	unnecessary space in string.
+	* filesystem.c (_initialize_filesystem): Ditto.
+	* frame.c (_initialize_frame): Ditto.
+	* infcmd.c (step_once): Ditto.
+	* infrun.c (_initialize_infrun): Ditto.
+	* linux-nat.c (linux_child_follow_fork): Ditto.
+	* maint.c (maintenance_deprecate): Ditto.
+	* memattr.c (_initialize_mem): Ditto.
+	* mips-tdep.c (_initialize_mips_tdep): Ditto.
+	* monitor.c (monitor_open): Ditto.
+	* procfs.c (procfs_xfer_memory): Ditto.
+	* reverse.c (bookmarks_info): Ditto.
+	* sh64-tdep.c (sh64_show_media_regs, sh64_show_compact_regs): Ditto.
+	* stack.c (_initialize_stack): Ditto.
+	* tracepoint.c (_initialize_tracepoint): Ditto.
+	* xtensa-tdep.c (xtensa_supply_gregset,
+	xtensa_regset_from_core_section): Ditto.
+
 2010-07-01  Tom Tromey  <tromey@redhat.com>
 
 	* value.h (struct lval_funcs) <check_any_valid>: Rename from

@@ -6319,7 +6319,7 @@ search.  The only need to set it is when debugging a stripped executable."),
 				&mask_address_var, _("\
 Set zeroing of upper 32 bits of 64-bit addresses."), _("\
 Show zeroing of upper 32 bits of 64-bit addresses."), _("\
-Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to \n\
+Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to\n\
 allow GDB to determine the correct value."),
 				NULL, show_mask_address,
 				&setmipscmdlist, &showmipscmdlist);

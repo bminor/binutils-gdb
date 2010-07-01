@@ -811,7 +811,7 @@ xtensa_supply_gregset (const struct regset *regset,
   struct gdbarch *gdbarch = get_regcache_arch (rc);
   int i;
 
-  DEBUGTRACE ("xtensa_supply_gregset (..., regnum==%d, ...) \n", regnum);
+  DEBUGTRACE ("xtensa_supply_gregset (..., regnum==%d, ...)\n", regnum);
 
   if (regnum == gdbarch_pc_regnum (gdbarch) || regnum == -1)
     regcache_raw_supply (rc, gdbarch_pc_regnum (gdbarch), (char *) &regs->pc);
@@ -869,7 +869,7 @@ xtensa_regset_from_core_section (struct gdbarch *core_arch,
 				 size_t sect_size)
 {
   DEBUGTRACE ("xtensa_regset_from_core_section "
-	      "(..., sect_name==\"%s\", sect_size==%x) \n",
+	      "(..., sect_name==\"%s\", sect_size==%x)\n",
 	      sect_name, (unsigned int) sect_size);
 
   if (strcmp (sect_name, ".reg") == 0

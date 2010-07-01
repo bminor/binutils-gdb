@@ -1330,13 +1330,13 @@ sh64_show_media_regs (struct frame_info *frame)
   int i;
 
   printf_filtered
-    ("PC=%s SR=%s \n",
+    ("PC=%s SR=%s\n",
      phex (get_frame_register_unsigned (frame,
 					gdbarch_pc_regnum (gdbarch)), 8),
      phex (get_frame_register_unsigned (frame, SR_REGNUM), 8));
 
   printf_filtered
-    ("SSR=%s SPC=%s \n",
+    ("SSR=%s SPC=%s\n",
      phex (get_frame_register_unsigned (frame, SSR_REGNUM), 8),
      phex (get_frame_register_unsigned (frame, SPC_REGNUM), 8));
   printf_filtered
@@ -1383,7 +1383,7 @@ sh64_show_compact_regs (struct frame_info *frame)
   int i;
 
   printf_filtered
-    ("PC=%s \n",
+    ("PC=%s\n",
      phex (get_frame_register_unsigned (frame, PC_C_REGNUM), 8));
 
   printf_filtered

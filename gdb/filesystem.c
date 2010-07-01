@@ -89,13 +89,13 @@ _initialize_filesystem (void)
 Set assumed file system kind for target reported file names"), _("\
 Show assumed file system kind for target reported file names"),
 			_("\
-If `unix', target file names (e.g., loaded shared library file names) \n\
-starting the forward slash (`/') character are considered absolute, \n\
-and the directory separator character is the forward slash (`/').  If \n\
-`dos-based', target file names starting with a drive letter followed \n\
-by a colon (e.g., `c:'), are also considered absolute, and the \n\
-backslash (`\\') is also considered a directory separator.  Set to \n\
-`auto' (which is the default), to let GDB decide, based on its \n\
+If `unix', target file names (e.g., loaded shared library file names)\n\
+starting the forward slash (`/') character are considered absolute,\n\
+and the directory separator character is the forward slash (`/').  If\n\
+`dos-based', target file names starting with a drive letter followed\n\
+by a colon (e.g., `c:'), are also considered absolute, and the\n\
+backslash (`\\') is also considered a directory separator.  Set to\n\
+`auto' (which is the default), to let GDB decide, based on its\n\
 knowledge of the target operating system."),
 			NULL, /* setfunc */
 			show_target_file_system_kind_command,

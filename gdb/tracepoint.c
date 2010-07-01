@@ -4452,7 +4452,7 @@ Usage: tfind range addr1,addr2"),
 
   add_cmd ("line", class_trace, trace_find_line_command, _("\
 Select a trace frame by source line.\n\
-Argument can be a line number (with optional source file), \n\
+Argument can be a line number (with optional source file),\n\
 a function name, or '*' followed by an address.\n\
 Default argument is 'the next source line that was traced'."),
 	   &tfindlist);
@@ -4526,8 +4526,8 @@ Note: this command can only be used in a tracepoint \"actions\" list."));
 
   add_com ("actions", class_trace, trace_actions_command, _("\
 Specify the actions to be taken at a tracepoint.\n\
-Tracepoint actions may include collecting of specified data, \n\
-single-stepping, or enabling/disabling other tracepoints, \n\
+Tracepoint actions may include collecting of specified data,\n\
+single-stepping, or enabling/disabling other tracepoints,\n\
 depending on target's capabilities."));
 
   default_collect = xstrdup ("");
