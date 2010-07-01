@@ -1,6 +1,6 @@
 # Support routines for LD testsuite.
 #   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#    2004, 2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+#    2004, 2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -179,17 +179,20 @@ proc default_ld_simple_link { ld target objects } {
     # based on the name of the compiler.
     set ldexe $ld
     set ldparm [string first " " $ld]
+    set ldflags ""
     if { $ldparm > 0 } then {
+	set ldflags [string range $ld $ldparm end]
 	set ldexe [string range $ld 0 $ldparm]
+	set ld $ldexe
     }
     set ldexe [string replace $ldexe 0 [string last "/" $ldexe] ""]
     if {[string match "*gcc*" $ldexe] || [string match "*++*" $ldexe]} then {
-	set flags "$gcc_ld_flag $flags"
+	set ldflags "$gcc_ld_flag $ldflags"
     }
 
     remote_file host delete $target
 
-    set exec_output [run_host_cmd "$ld" "$flags -o $target $objects"]
+    set exec_output [run_host_cmd "$ld" "$ldflags $flags -o $target $objects"]
     set exec_output [prune_warnings $exec_output]
 
     # We don't care if we get a warning about a non-existent start

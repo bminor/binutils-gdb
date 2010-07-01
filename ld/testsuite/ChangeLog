@@ -1,3 +1,8 @@
+2010-07-01  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (default_ld_simple_link): Add $gcc_ld_flag before
+	any other options in $ld.
+
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
 	* ld-maxq/maxq.exp: Delete file.
