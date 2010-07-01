@@ -1754,6 +1754,10 @@ xrstor64, 1, 0xfae, 0x5, 2, CpuXsave|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSu
 xgetbv, 0, 0xf01, 0xd0, 2, CpuXsave, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 xsetbv, 0, 0xf01, 0xd1, 2, CpuXsave, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 
+// xsaveopt 
+xsaveopt, 1, 0xfae, 0x6, 2, CpuXsaveopt, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xsaveopt64, 1, 0xfae, 0x6, 2, CpuXsaveopt|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+
 // AES instructions.
 
 aesdec, 2, 0x66de, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -2385,6 +2389,18 @@ vpclmullqlqdq, 3, 0x6644, 0x0, 1, CpuAVX|CpuPCLMUL, Modrm|Vex|VexOpcode=2|VexVVV
 vpclmulhqlqdq, 3, 0x6644, 0x1, 1, CpuAVX|CpuPCLMUL, Modrm|Vex|VexOpcode=2|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM }
 vpclmullqhqdq, 3, 0x6644, 0x10, 1, CpuAVX|CpuPCLMUL, Modrm|Vex|VexOpcode=2|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM }
 vpclmulhqhqdq, 3, 0x6644, 0x11, 1, CpuAVX|CpuPCLMUL, Modrm|Vex|VexOpcode=2|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM }
+
+// FSGSBASE, RDRND and F16C
+
+rdfsbase, 1, 0xf30fae, 0x0, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
+rdgsbase, 1, 0xf30fae, 0x1, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
+rdrnd, 1, 0xfc7, 0x6, 2, CpuRdRnd, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64 }
+wrfsbase, 1, 0xf30fae, 0x2, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
+wrgsbase, 1, 0xf30fae, 0x3, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
+vcvtph2ps, 2, 0x6613, None, 1, CpuF16C, Modrm|Vex|VexOpcode=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+vcvtph2ps, 2, 0x6613, None, 1, CpuF16C, Modrm|Vex=2|VexOpcode=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegYMM }
+vcvtps2ph, 3, 0x661d, None, 1, CpuF16C, Modrm|Vex|VexOpcode=2|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM, Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM }
+vcvtps2ph, 3, 0x661d, None, 1, CpuF16C, Modrm|Vex=2|VexOpcode=2|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegYMM, Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM }
 
 // FMA instructions
 

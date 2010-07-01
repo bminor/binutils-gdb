@@ -1,3 +1,44 @@
+2010-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2010)
+	* gas/i386/arch-10.s: Add xsaveopt.
+	* gas/i386/x86-64-arch-2.s: Likwise.
+
+	* gas/i386/arch-10.d: Updated.
+	* gas/i386/arch-10-1.l: Likewise.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+	* gas/i386/x86-64-arch-2.d: Likewise.
+
+	* gas/i386/f16c-intel.d: New.
+	* gas/i386/f16c.d: Likewise.
+	* gas/i386/f16c.s: Likewise.
+	* gas/i386/fsgs-intel.d: Likewise.
+	* gas/i386/fsgs.d: Likewise.
+	* gas/i386/fsgs.s: Likewise.
+	* gas/i386/rdrnd-intel.d: Likewise.
+	* gas/i386/rdrnd.d: Likewise.
+	* gas/i386/rdrnd.s: Likewise.
+	* gas/i386/x86-64-f16c-intel.d: Likewise.
+	* gas/i386/x86-64-f16c.d: Likewise.
+	* gas/i386/x86-64-f16c.s: Likewise.
+	* gas/i386/x86-64-fsgs-intel.d: Likewise.
+	* gas/i386/x86-64-fsgs.d: Likewise.
+	* gas/i386/x86-64-fsgs.s: Likewise.
+	* gas/i386/x86-64-rdrnd-intel.d: Likewise.
+	* gas/i386/x86-64-rdrnd.d: Likewise.
+	* gas/i386/x86-64-rdrnd.s: Likewise.
+
+	* gas/i386/i386.exp: Run f16c, f16c-intel, fsgs, fsgs-intel,
+	rdrnd, rdrnd-intel, x86-64-f16c, x86-64-f16c-intel, x86-64-fsgs,
+	x86-64-fsgs-intel, x86-64-rdrnd, x86-64-rdrnd-intel.
+
+	* gas/i386/x86-64-xsave.s: Add tests for xsaveopt64.
+
+	* gas/i386/x86-64-xsave-intel.d: Updated.
+	* gas/i386/x86-64-xsave.d: Likewise.
+
 2010-07-01  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/thumb2_bad_reg.s: Update mov register tests.

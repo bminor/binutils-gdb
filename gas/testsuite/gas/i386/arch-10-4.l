@@ -17,6 +17,7 @@
 .*:54: Error: .*
 .*:56: Error: .*
 .*:58: Error: .*
+.*:60: Error: .*
 GAS LISTING .*
 
 
@@ -54,34 +55,36 @@ GAS LISTING .*
 [ 	]*28[ 	]+\?\?\?\? 0F37     	getsec
 [ 	]*29[ 	]+\# Xsave
 [ 	]*30[ 	]+xgetbv
-[ 	]*31[ 	]+\# AES
-[ 	]*32[ 	]+aesenc  \(%ecx\),%xmm0
-[ 	]*33[ 	]+\# PCLMUL
-[ 	]*34[ 	]+pclmulqdq \$8,%xmm1,%xmm0
-[ 	]*35[ 	]+\# AES \+ AVX
-[ 	]*36[ 	]+vaesenc  \(%ecx\),%xmm0,%xmm2
-[ 	]*37[ 	]+\# PCLMUL \+ AVX
-[ 	]*38[ 	]+vpclmulqdq \$8,%xmm4,%xmm6,%xmm2
-[ 	]*39[ 	]+\# FMA
-[ 	]*40[ 	]+vfmadd132pd %xmm4,%xmm6,%xmm2
-[ 	]*41[ 	]+\# MOVBE
-[ 	]*42[ 	]+movbe   \(%ecx\),%ebx
-[ 	]*43[ 	]+\# EPT
-[ 	]*44[ 	]+invept  \(%ecx\),%ebx
-[ 	]*45[ 	]+\# RDTSCP
-[ 	]*46[ 	]+rdtscp
-[ 	]*47[ 	]+\# 3DNow
-[ 	]*48[ 	]+pmulhrw %mm4,%mm3
-[ 	]*49[ 	]+\# 3DNow Extensions
-[ 	]*50[ 	]+pswapd %mm4,%mm3
-[ 	]*51[ 	]+\# SSE4a
-[ 	]*52[ 	]+insertq %xmm2,%xmm1
-[ 	]*53[ 	]+\# SVME
+[ 	]*31[ 	]+\# Xsaveopt
+[ 	]*32[ 	]+xsaveopt \(%ecx\)
+[ 	]*33[ 	]+\# AES
+[ 	]*34[ 	]+aesenc  \(%ecx\),%xmm0
+[ 	]*35[ 	]+\# PCLMUL
+[ 	]*36[ 	]+pclmulqdq \$8,%xmm1,%xmm0
+[ 	]*37[ 	]+\# AES \+ AVX
+[ 	]*38[ 	]+vaesenc  \(%ecx\),%xmm0,%xmm2
+[ 	]*39[ 	]+\# PCLMUL \+ AVX
+[ 	]*40[ 	]+vpclmulqdq \$8,%xmm4,%xmm6,%xmm2
+[ 	]*41[ 	]+\# FMA
+[ 	]*42[ 	]+vfmadd132pd %xmm4,%xmm6,%xmm2
+[ 	]*43[ 	]+\# MOVBE
+[ 	]*44[ 	]+movbe   \(%ecx\),%ebx
+[ 	]*45[ 	]+\# EPT
+[ 	]*46[ 	]+invept  \(%ecx\),%ebx
+[ 	]*47[ 	]+\# RDTSCP
+[ 	]*48[ 	]+rdtscp
+[ 	]*49[ 	]+\# 3DNow
+[ 	]*50[ 	]+pmulhrw %mm4,%mm3
+[ 	]*51[ 	]+\# 3DNow Extensions
+[ 	]*52[ 	]+pswapd %mm4,%mm3
+[ 	]*53[ 	]+\# SSE4a
 GAS LISTING .*
 
 
-[ 	]*54[ 	]+vmload
-[ 	]*55[ 	]+\# ABM
-[ 	]*56[ 	]+lzcnt %ecx,%ebx
-[ 	]*57[ 	]+\# PadLock
-[ 	]*58[ 	]+xstorerng
+[ 	]*54[ 	]+insertq %xmm2,%xmm1
+[ 	]*55[ 	]+\# SVME
+[ 	]*56[ 	]+vmload
+[ 	]*57[ 	]+\# ABM
+[ 	]*58[ 	]+lzcnt %ecx,%ebx
+[ 	]*59[ 	]+\# PadLock
+[ 	]*60[ 	]+xstorerng

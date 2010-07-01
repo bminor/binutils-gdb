@@ -1,3 +1,11 @@
+2010-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2010)
+	* config/tc-i386.c (cpu_arch): Add .xsaveopt, .fsgsbase, .rdrnd
+	and .f16c.
+
+	* doc/c-i386.texi: Document xsaveopt, fsgsbase, rdrnd and f16c.
+
 2010-07-01  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (do_t_mov_cmp): Fix reporting of unpredictable and

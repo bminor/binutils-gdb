@@ -94,6 +94,8 @@ enum
   CpuL1OM,
   /* Xsave/xrstor New Instuctions support required */
   CpuXsave,
+  /* Xsaveopt New Instuctions support required */
+  CpuXsaveopt,
   /* AES support required */
   CpuAES,
   /* PCLMUL support required */
@@ -112,6 +114,12 @@ enum
   CpuEPT,
   /* RDTSCP Instuction support required */
   CpuRdtscp,
+  /* FSBSBASE Instructions required */
+  CpuFSGSBase,
+  /* RDRND Instructions required */
+  CpuRdRnd,
+  /* F16C Instructions required */
+  CpuF16C,
   /* 64bit support available, used by -march= in assembler.  */
   CpuLM,
   /* 64bit support required  */
@@ -168,6 +176,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx:1;
       unsigned int cpul1om:1;
       unsigned int cpuxsave:1;
+      unsigned int cpuxsaveopt:1;
       unsigned int cpuaes:1;
       unsigned int cpupclmul:1;
       unsigned int cpufma:1;
@@ -177,6 +186,9 @@ typedef union i386_cpu_flags
       unsigned int cpumovbe:1;
       unsigned int cpuept:1;
       unsigned int cpurdtscp:1;
+      unsigned int cpufsgsbase:1;
+      unsigned int cpurdrnd:1;
+      unsigned int cpuf16c:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;

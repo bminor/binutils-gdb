@@ -28,6 +28,8 @@ vmxoff
 getsec
 # Xsave
 xgetbv
+# Xsaveopt
+xsaveopt (%ecx)
 # AES
 aesenc  (%ecx),%xmm0
 # PCLMUL

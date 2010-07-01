@@ -1,3 +1,33 @@
+2010-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2010)
+	* i386-dis.c (PREFIX_0FAE_REG_0): New.
+	(PREFIX_0FAE_REG_1): Likewise.
+	(PREFIX_0FAE_REG_2): Likewise.
+	(PREFIX_0FAE_REG_3): Likewise.
+	(PREFIX_VEX_3813): Likewise.
+	(PREFIX_VEX_3A1D): Likewise.
+	(prefix_table): Add PREFIX_0FAE_REG_0, PREFIX_0FAE_REG_1,
+	PREFIX_0FAE_REG_2, PREFIX_0FAE_REG_3, PREFIX_VEX_3813 and
+	PREFIX_VEX_3A1D.
+	(vex_table): Add PREFIX_VEX_3813 and PREFIX_VEX_3A1D.
+	(mod_table): Add PREFIX_0FAE_REG_0, PREFIX_0FAE_REG_1,
+	PREFIX_0FAE_REG_2, PREFIX_0FAE_REG_3 xsaveopt and rdrnd.
+
+	* i386-gen.c (cpu_flag_init): Add CPU_XSAVEOPT_FLAGS,
+	CPU_FSGSBASE_FLAGS, CPU_RDRND_FLAGS and CPU_F16C_FLAGS.
+	(cpu_flags): Add CpuXsaveopt, CpuFSGSBase, CpuRdRnd and CpuF16C.
+
+	* i386-opc.h (CpuXsaveopt): New.
+	(CpuFSGSBase):Likewise.
+	(CpuRdRnd): Likewise.
+	(CpuF16C): Likewise.
+	(i386_cpu_flags): Add cpuxsaveopt, cpufsgsbase, cpurdrnd and
+	cpuf16c.
+
+	* i386-opc.tbl: Add xsaveopt, rdfsbase, rdgsbase, rdrnd,
+	wrfsbase, wrgsbase, vcvtph2ps and vcvtps2ph.
+
 2010-07-01  Sebastian Andrzej Siewior  <bigeasy@linutronix.de>
 
 	* ppc-opc.c (powerpc_opcodes): Revert deprecation of mfocrf, mtcrf

@@ -24,6 +24,16 @@ _start:
 	xrstor64 (%rax, %r8)
 	xrstor64 (%r8, %r15)
 
+	xsaveopt (%rax)
+	xsaveopt (%r8)
+	xsaveopt (%r8, %rax)
+	xsaveopt (%rax, %r8)
+	xsaveopt (%r8, %r15)
+	xsaveopt64 (%rax)
+	xsaveopt64 (%r8)
+	xsaveopt64 (%r8, %rax)
+	xsaveopt64 (%rax, %r8)
+
 	.intel_syntax noprefix
 	xsave [rax]
 	xsave [r8]
@@ -44,3 +54,13 @@ _start:
 	xrstor64 [r8+rax*1]
 	xrstor64 [rax+r8*1]
 	xrstor64 [r8+r15*1]
+
+	xsaveopt [rax]
+	xsaveopt [r8]
+	xsaveopt [r8+rax*1]
+	xsaveopt [rax+r8*1]
+	xsaveopt [r8+r15*1]
+	xsaveopt64 [rax]
+	xsaveopt64 [r8]
+	xsaveopt64 [r8+rax*1]
+	xsaveopt64 [rax+r8*1]

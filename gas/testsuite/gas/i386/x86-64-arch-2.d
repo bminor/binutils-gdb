@@ -1,4 +1,4 @@
-#as: -march=generic64+avx+vmx+smx+xsave+aes+pclmul+fma+movbe+ept+clflush+syscall+rdtscp+3dnowa+sse4a+svme+abm+padlock
+#as: -march=generic64+avx+vmx+smx+xsave+xsaveopt+aes+pclmul+fma+movbe+ept+clflush+syscall+rdtscp+3dnowa+sse4a+svme+abm+padlock
 #objdump: -dw
 #name: x86-64 arch 2
 
@@ -21,6 +21,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 01 c4             	vmxoff 
 [ 	]*[a-f0-9]+:	0f 37                	getsec 
 [ 	]*[a-f0-9]+:	0f 01 d0             	xgetbv 
+[ 	]*[a-f0-9]+:	0f ae 31             	xsaveopt \(%rcx\)
 [ 	]*[a-f0-9]+:	66 0f 38 dc 01       	aesenc \(%rcx\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 44 c1 08    	pclmulqdq \$0x8,%xmm1,%xmm0
 [ 	]*[a-f0-9]+:	c4 e2 79 dc 11       	vaesenc \(%rcx\),%xmm0,%xmm2
