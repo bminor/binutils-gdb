@@ -27,6 +27,8 @@
 
 	* i386-opc.tbl: Add xsaveopt, rdfsbase, rdgsbase, rdrnd,
 	wrfsbase, wrgsbase, vcvtph2ps and vcvtps2ph.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
 
 2010-07-01  Sebastian Andrzej Siewior  <bigeasy@linutronix.de>
 
