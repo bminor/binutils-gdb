@@ -31744,7 +31744,7 @@ In response to each query, the target will reply with a list of one or
 more thread IDs, separated by commas.
 @value{GDBN} will respond to each reply with a request for more thread
 ids (using the @samp{qs} form of the query), until the target responds
-with @samp{l} (lower-case el, for @dfn{last}).  
+with @samp{l} (lower-case ell, for @dfn{last}).
 Refer to @ref{thread-id syntax}, for the format of the @var{thread-id}
 fields.
 

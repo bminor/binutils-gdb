@@ -1,5 +1,10 @@
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.texinfo (General Query Packets) <qfThreadInfo,
+	qsThreadInfo>: Spell out `l' as ell.
+
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.texinfo (Convenience Variables): Document $_sdata.
 	(Commands to Set Tracepoints): Describe static tracepoints.  Add
 	`Listing Static Tracepoint Markers' menu entry.  Document
