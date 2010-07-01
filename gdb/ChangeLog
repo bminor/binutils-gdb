@@ -1,5 +1,10 @@
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (BREAK_ARGS_HELP, _initialize_breakpoint): Clarify
+	usefulness suggestion of multiple breakpoints at same location.
+
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (BREAK_ARGS_HELP): Add missing `the'.
 
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>

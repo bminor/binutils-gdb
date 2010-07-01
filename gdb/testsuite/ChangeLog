@@ -1,6 +1,10 @@
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>
 
-	* gdb.base/help: Adjust expected output.
+	* gdb.base/help.exp: Adjust expected output.
+
+2010-07-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/help.exp: Adjust expected output.
 
 2010-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 

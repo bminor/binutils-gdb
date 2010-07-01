@@ -11502,7 +11502,8 @@ stack frame.  This is useful for breaking on return to a stack frame.\n\
 THREADNUM is the number from \"info threads\".\n\
 CONDITION is a boolean expression.\n\
 \n\
-Multiple breakpoints at one place are permitted, and useful if conditional.\n\
+Multiple breakpoints at one place are permitted, and useful if their\n\
+conditions are different.\n\
 \n\
 Do \"help breakpoints\" for info on other commands dealing with breakpoints."
 
@@ -11956,7 +11957,8 @@ by printing the $_sdata variable like any other convenience variable.\n\
 \n\
 CONDITION is a boolean expression.\n\
 \n\
-Multiple tracepoints at one place are permitted, and useful if conditional.\n\
+Multiple tracepoints at one place are permitted, and useful if their\n\
+conditions are different.\n\
 \n\
 Do \"help breakpoints\" for info on other commands dealing with breakpoints.\n\
 Do \"help tracepoints\" for info on other tracepoint commands."));
