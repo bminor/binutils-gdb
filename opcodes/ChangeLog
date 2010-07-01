@@ -1,3 +1,8 @@
+2010-07-01  Sebastian Andrzej Siewior  <bigeasy@linutronix.de>
+
+	* ppc-opc.c (powerpc_opcodes): Revert deprecation of mfocrf, mtcrf
+	and mtocrf on EFS.
+
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
 	* maxq-dis.c: Delete file.

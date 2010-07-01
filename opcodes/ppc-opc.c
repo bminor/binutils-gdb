@@ -3493,7 +3493,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mfcr",	XFXM(31,19,0,0), XFXFXM_MASK, POWER4,	PPCNONE,	{RT, FXM4}},
 {"mfcr",	XFXM(31,19,0,0), XRARB_MASK, COM,	POWER4,		{RT}},
-{"mfocrf",	XFXM(31,19,0,1), XFXFXM_MASK, COM,	PPCEFS,		{RT, FXM}},
+{"mfocrf",	XFXM(31,19,0,1), XFXFXM_MASK, COM,	PPCNONE,	{RT, FXM}},
 
 {"lwarx",	X(31,20),	XEH_MASK,    PPC,	PPCNONE,	{RT, RA0, RB, EH}},
 
@@ -3658,8 +3658,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"dcbtstlse",	X(31,142),	X_MASK,      PPCCHLK,	PPCNONE,	{CT, RA, RB}},
 
 {"mtcr",	XFXM(31,144,0xff,0), XRARB_MASK, COM,	PPCNONE,	{RS}},
-{"mtcrf",	XFXM(31,144,0,0), XFXFXM_MASK, COM,	PPCEFS,		{FXM, RS}},
-{"mtocrf",	XFXM(31,144,0,1), XFXFXM_MASK, COM,	PPCEFS,		{FXM, RS}},
+{"mtcrf",	XFXM(31,144,0,0), XFXFXM_MASK, COM,	PPCNONE,	{FXM, RS}},
+{"mtocrf",	XFXM(31,144,0,1), XFXFXM_MASK, COM,	PPCNONE,	{FXM, RS}},
 
 {"mtmsr",	X(31,146),	XRLARB_MASK, COM,	PPCNONE,	{RS, A_L}},
 
