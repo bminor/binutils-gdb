@@ -2416,9 +2416,12 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
-  compile_dwarf_to_ax (ax, value, gdbarch, addr_size,
-		       dlbaton->data, dlbaton->data + dlbaton->size,
-		       dlbaton->per_cu);
+  if (dlbaton->data == NULL || dlbaton->size == 0)
+    value->optimized_out = 1;
+  else
+    compile_dwarf_to_ax (ax, value, gdbarch, addr_size,
+			 dlbaton->data, dlbaton->data + dlbaton->size,
+			 dlbaton->per_cu);
 }
 
 /* The set of location functions used with the DWARF-2 expression
@@ -2568,9 +2571,11 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
   data = find_location_expression (dlbaton, &size, ax->scope);
-
-  compile_dwarf_to_ax (ax, value, gdbarch, addr_size, data, data + size,
-		       dlbaton->per_cu);
+  if (data == NULL || size == 0)
+    value->optimized_out = 1;
+  else
+    compile_dwarf_to_ax (ax, value, gdbarch, addr_size, data, data + size,
+			 dlbaton->per_cu);
 }
 
 /* The set of location functions used with the DWARF-2 expression
