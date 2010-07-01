@@ -170,7 +170,7 @@ struct lval_funcs
   int (*check_validity) (const struct value *value, int offset, int length);
 
   /* Return 1 if any bit in VALUE is valid, 0 if they are all invalid.  */
-  int (*check_all_valid) (const struct value *value);
+  int (*check_any_valid) (const struct value *value);
 
   /* Return a duplicate of VALUE's closure, for use in a new value.
      This may simply return the same closure, if VALUE's is

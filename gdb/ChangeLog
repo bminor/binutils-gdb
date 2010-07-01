@@ -1,3 +1,10 @@
+2010-07-01  Tom Tromey  <tromey@redhat.com>
+
+	* value.h (struct lval_funcs) <check_any_valid>: Rename from
+	check_all_valid.
+	* value.c (value_entirely_optimized_out): Invert result.  Update
+	for new function name.
+
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>
 
 	Static tracepoints support.
