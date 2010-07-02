@@ -82,7 +82,7 @@ proc altivec_abi_tests { extra_flags force_abi } {
 
     # now all the arguments of vec_fun are initialized
 
-    set pattern "vec_func .vshort_f=.111, 222, 333, 444, 555, 666, 777, 888., vushort_f=.100, 200, 300, 400, 500, 600, 700, 800., vint_f=.-10, -20, -30, -40., vuint_f=.1111, 2222, 3333, 4444., vchar_f=.abcdefghilmnopqr., vuchar_f=.ABCDEFGHILMNOPQR., vfloat_f=.1.25, 3.75, 5.5, 1.25., x_f=.1, 2, 3, 4, 5, 6, 7, 8., y_f=.12, 22, 32, 42., a_f=.vector of chars.., b_f=.5.5, 4.5, 3.75, 2.25., c_f=.1.25, 3.5, 5.5, 7.75., intv_on_stack_f=.12, 34, 56, 78.."
+    set pattern "vec_func .vshort_f=.111, 222, 333, 444, 555, 666, 777, 888., vushort_f=.100, 200, 300, 400, 500, 600, 700, 800., vint_f=.-10, -20, -30, -40., vuint_f=.1111, 2222, 3333, 4444., vchar_f=.97 'a', 98 'b', 99 'c', 100 'd', 101 'e', 102 'f', 103 'g', 104 'h', 105 'i', 108 'l', 109 'm', 110 'n', 111 'o', 112 'p', 113 'q', 114 'r'., vuchar_f=.65 'A', 66 'B', 67 'C', 68 'D', 69 'E', 70 'F', 71 'G', 72 'H', 73 'I', 76 'L', 77 'M', 78 'N', 79 'O', 80 'P', 81 'Q', 82 'R'., vfloat_f=.1.25, 3.75, 5.5, 1.25., x_f=.1, 2, 3, 4, 5, 6, 7, 8., y_f=.12, 22, 32, 42., a_f=.118 'v', 101 'e', 99 'c', 116 't', 111 'o', 114 'r', 32 ' ', 111 'o', 102 'f', 32 ' ', 99 'c', 104 'h', 97 'a', 114 'r', 115 's', 46 '.'., b_f=.5.5, 4.5, 3.75, 2.25., c_f=.1.25, 3.5, 5.5, 7.75., intv_on_stack_f=.12, 34, 56, 78.."
 
     set pattern1 $pattern
     append pattern1 " at.*altivec-abi.c.*vint_res  = vec_add.*vint_f, intv_on_stack_f.;"
