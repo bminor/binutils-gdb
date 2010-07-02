@@ -1,3 +1,9 @@
+2010-07-02  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rx.c (rx_bytesT): Add grown/shrank counters for
+	relaxation.
+	(rx_relax_frag): Prevent infinite loops of grow/shrink/grow/etc.
+
 2010-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (June, 2010)

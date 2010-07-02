@@ -624,6 +624,8 @@ typedef struct rx_bytesT
   int n_relax;
   int link_relax;
   fixS *link_relax_fixP;
+  char times_grown;
+  char times_shrank;
 } rx_bytesT;
 
 static rx_bytesT rx_bytes;
@@ -1484,6 +1486,21 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
       case OT_other:
 	break;
       }
+
+  /* This prevents infinite loops in align-heavy sources.  */
+  if (newsize < oldsize)
+    {
+      if (fragP->tc_frag_data->times_shrank > 10
+         && fragP->tc_frag_data->times_grown > 10)
+       newsize = oldsize;
+      if (fragP->tc_frag_data->times_shrank < 20)
+       fragP->tc_frag_data->times_shrank ++;
+    }
+  else if (newsize > oldsize)
+    {
+      if (fragP->tc_frag_data->times_grown < 20)
+       fragP->tc_frag_data->times_grown ++;
+    }
 
   fragP->fr_subtype = newsize;
   tprintf (" -> new %d old %d delta %d\n", newsize, oldsize, newsize-oldsize);
