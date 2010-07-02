@@ -1,3 +1,8 @@
+2010-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* spu-tdep.c (spu_catch_start): Adjust the caller of changed
+	create_breakpoint prototype.
+
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (BREAK_ARGS_HELP, _initialize_breakpoint): Clarify
