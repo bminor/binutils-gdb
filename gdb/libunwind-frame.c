@@ -348,7 +348,6 @@ libunwind_frame_prev_register (struct frame_info *this_frame,
               return frame_unwind_got_constant (this_frame, regnum, 0);
             val = frame_unwind_got_constant (this_frame, regnum, intval);
           }
-        set_value_optimized_out (val, 1);
         break;
       }
     }
