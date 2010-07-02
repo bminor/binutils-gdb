@@ -75,6 +75,18 @@ extern void rx_cons_fix_new (fragS *, int, int, expressionS *);
 
 #define tc_fix_adjustable(x) 0
 
+#define md_do_align(n, fill, len, max, around)				\
+  if ((n)								\
+      && !need_pass_2							\
+      && (!(fill)							\
+	  || ((char)*(fill) == (char)0x03 && (len) == 1))		\
+      && subseg_text_p (now_seg))					\
+    {									\
+      frag_align_code ((n), (max));					\
+      goto around;							\
+    }
+
+#define MAX_MEM_FOR_RS_ALIGN_CODE 8
 #define HANDLE_ALIGN(FRAG) rx_handle_align (FRAG)
 extern void rx_handle_align (fragS *);
 

@@ -1,5 +1,10 @@
 2010-07-02  DJ Delorie  <dj@redhat.com>
 
+	* config/tc-rx.h (md_do_align): New.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): New.
+	* config/tc-rx.c (nops): New.
+	(rx_handle_align): Use various sized nops to align code.
+
 	* config/tc-rx.c (rx_bytesT): Add grown/shrank counters for
 	relaxation.
 	(rx_relax_frag): Prevent infinite loops of grow/shrink/grow/etc.
