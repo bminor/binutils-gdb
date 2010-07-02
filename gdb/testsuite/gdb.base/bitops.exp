@@ -100,7 +100,7 @@ gdb_test "print 0 || 1 && 0 | 0 ^ 0 == 8 > 128 >>1 +2 *2" \
     "print value of 0 || 1 && 0 | 0 ^ 0 == 8 > 128 >>1 +2 *2"
 
 gdb_test "print 1.0 || 0" ".\[0-9\]* = 1" \
-        pass "print value of 1.0 || 0"
+    "print value of 1.0 || 0"
 
 gdb_test "print 0.0 || 1.0" ".\[0-9\]* = 1" \
     "print value of 0.0 || 1.0"

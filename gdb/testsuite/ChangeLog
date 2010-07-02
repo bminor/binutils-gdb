@@ -1,3 +1,7 @@
+2010-07-02  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/bitops.exp: Remove extraneous "pass".
+
 2010-07-02  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.arch/altivec-abi.exp: Fix expect pattern of character vectors.
