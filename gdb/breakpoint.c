@@ -8350,9 +8350,9 @@ can_use_hardware_watchpoint (struct value *v)
 	}
       else if (VALUE_LVAL (v) != not_lval
 	       && deprecated_value_modifiable (v) == 0)
-	return 0;	/* ??? What does this represent? */
+	return 0;	/* These are values from the history (e.g., $1).  */
       else if (VALUE_LVAL (v) == lval_register)
-	return 0;	/* cannot watch a register with a HW watchpoint */
+	return 0;	/* Cannot watch a register with a HW watchpoint.  */
     }
 
   /* The expression itself looks suitable for using a hardware

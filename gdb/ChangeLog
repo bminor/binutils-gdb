@@ -1,3 +1,9 @@
+2010-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (can_use_hardware_watchpoint): Answer "what does this
+	represent?" question in comment.  Change comment to a proper sentence.
+
 2010-07-02  Ken Werner  <ken.werner@de.ibm.com>
 
 	* c-valprint.c (c_val_print): Fix printing of character vectors.
