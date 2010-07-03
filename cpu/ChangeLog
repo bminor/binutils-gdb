@@ -1,3 +1,7 @@
+2010-07-03  DJ Delorie  <dj@delorie.com>
+
+	* m32c.cpu (f-dsp-8-s24): Mask high byte after shifting it.
+
 2010-02-11  Doug Evans  <dje@sebabeach.org>
 
 	* m32r.cpu (HASH-PREFIX): Delete.

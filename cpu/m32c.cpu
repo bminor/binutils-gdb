@@ -572,10 +572,10 @@
 )
 (df  f-dsp-8-s24 "24 bit signed" (all-isas) 8 24 INT
      ((value pc) (or SI
-		     (or (srl value 16) (and value #xff00))
+		     (or (and (srl value 16) #xff) (and value #xff00))
 		     (sll (ext INT (trunc QI (and value #xff))) 16)))
      ((value pc) (or SI
-		     (or (srl value 16) (and value #xff00))
+		     (or (and (srl value 16) #xff) (and value #xff00))
 		     (sll (ext INT (trunc QI (and value #xff))) 16)))
  )
 

@@ -1,3 +1,7 @@
+2010-07-03  DJ Delorie  <dj@delorie.com>
+
+	* m32c-ibld.c: Regenerate.
+
 2010-07-03  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (PWR2COM): Define.
