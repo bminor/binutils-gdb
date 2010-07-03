@@ -1,3 +1,8 @@
+2010-07-03  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ppc-dis.c (powerpc_init_dialect): Cast PPC_OPCODE_xxx to
+	ppc_cpu_t before inverting.
+
 2010-07-03  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (ppc_opts, powerpc_init_dialect): Remove old opcode flags.

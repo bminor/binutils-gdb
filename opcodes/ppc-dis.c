@@ -189,8 +189,8 @@ ppc_parse_cpu (ppc_cpu_t ppc_cpu, const char *arg)
 	if (ppc_opts[i].sticky)
 	  {
 	    retain_flags |= ppc_opts[i].sticky;
-	    if ((ppc_cpu & ~(PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX
-			     | PPC_OPCODE_SPE | PPC_OPCODE_ANY)) != 0)
+	    if ((ppc_cpu & ~(ppc_cpu_t) (PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX
+					 | PPC_OPCODE_SPE | PPC_OPCODE_ANY)) != 0)
 	      break;
 	  }
 	ppc_cpu = ppc_opts[i].cpu;
@@ -227,7 +227,7 @@ powerpc_init_dialect (struct disassemble_info *info)
       if ((new_cpu = ppc_parse_cpu (dialect, arg)) != 0)
 	dialect = new_cpu;
       else if (strcmp (arg, "32") == 0)
-	dialect &= ~PPC_OPCODE_64;
+	dialect &= ~(ppc_cpu_t) PPC_OPCODE_64;
       else if (strcmp (arg, "64") == 0)
 	dialect |= PPC_OPCODE_64;
       else
@@ -238,12 +238,12 @@ powerpc_init_dialect (struct disassemble_info *info)
       arg = end;
     }
 
-  if ((dialect & ~PPC_OPCODE_64) == 0)
+  if ((dialect & ~(ppc_cpu_t) PPC_OPCODE_64) == 0)
     {
       if (info->mach == bfd_mach_ppc64)
 	dialect |= PPC_OPCODE_64;
       else
-	dialect &= ~PPC_OPCODE_64;
+	dialect &= ~(ppc_cpu_t) PPC_OPCODE_64;
       /* Choose a reasonable default.  */
       dialect |= (PPC_OPCODE_PPC | PPC_OPCODE_COMMON | PPC_OPCODE_601
 		  | PPC_OPCODE_ALTIVEC);
@@ -505,7 +505,7 @@ print_insn_powerpc (bfd_vma memaddr,
 
   if ((dialect & PPC_OPCODE_ANY) != 0)
     {
-      dialect = ~PPC_OPCODE_ANY;
+      dialect = ~(ppc_cpu_t) PPC_OPCODE_ANY;
       goto again;
     }
 

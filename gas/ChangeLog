@@ -1,3 +1,8 @@
+2010-07-03  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* config/tc-ppc.c (ppc_set_cpu): Cast PPC_OPCODE_xxx to ppc_cpu_t
+	before inverting.
+
 2010-07-03  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_set_cpu): Remove old opcode flags.

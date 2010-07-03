@@ -1248,7 +1248,7 @@ ppc_set_cpu (void)
   const char *default_os  = TARGET_OS;
   const char *default_cpu = TARGET_CPU;
 
-  if ((ppc_cpu & ~PPC_OPCODE_ANY) == 0)
+  if ((ppc_cpu & ~(ppc_cpu_t) PPC_OPCODE_ANY) == 0)
     {
       if (ppc_obj64)
 	ppc_cpu |= PPC_OPCODE_PPC | PPC_OPCODE_64;
