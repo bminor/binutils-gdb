@@ -1,3 +1,9 @@
+2010-07-03  Jan Beulich  <jbeulich@novell.com>
+
+	PR gas/11732
+	* config/tc-i386.c (i386_finalize_displacement): Don't call
+	section_symbol() with expr_section.
+
 2010-07-03  Cary Coutant  <ccoutant@google.com>
 
 	* Makefile.am: Add compress-debug.c and compress-debug.h.

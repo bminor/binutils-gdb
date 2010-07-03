@@ -1,3 +1,9 @@
+2010-07-03  Jan Beulich  <jbeulich@novell.com>
+
+	PR gas/11732
+	* gas/i386/i386.exp: Run new tests.
+	* gas/i386/intel-got{32,64}.{s,d}: New.
+
 2010-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (June, 2010)

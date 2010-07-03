@@ -6878,7 +6878,8 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 	goto inv_disp;
 
       if (S_IS_LOCAL (exp->X_add_symbol)
-	  && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
+	  && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section
+	  && S_GET_SEGMENT (exp->X_add_symbol) != expr_section)
 	section_symbol (S_GET_SEGMENT (exp->X_add_symbol));
       exp->X_op = O_subtract;
       exp->X_op_symbol = GOT_symbol;
