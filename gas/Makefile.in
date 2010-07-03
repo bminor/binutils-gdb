@@ -73,14 +73,14 @@ CONFIG_CLEAN_FILES = gdb.ini .gdbinit po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
-	cond.$(OBJEXT) depend.$(OBJEXT) dwarf2dbg.$(OBJEXT) \
-	dw2gencfi.$(OBJEXT) ecoff.$(OBJEXT) ehopt.$(OBJEXT) \
-	expr.$(OBJEXT) flonum-copy.$(OBJEXT) flonum-konst.$(OBJEXT) \
-	flonum-mult.$(OBJEXT) frags.$(OBJEXT) hash.$(OBJEXT) \
-	input-file.$(OBJEXT) input-scrub.$(OBJEXT) listing.$(OBJEXT) \
-	literal.$(OBJEXT) macro.$(OBJEXT) messages.$(OBJEXT) \
-	output-file.$(OBJEXT) read.$(OBJEXT) remap.$(OBJEXT) \
-	sb.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
+	compress-debug.$(OBJEXT) cond.$(OBJEXT) depend.$(OBJEXT) \
+	dwarf2dbg.$(OBJEXT) dw2gencfi.$(OBJEXT) ecoff.$(OBJEXT) \
+	ehopt.$(OBJEXT) expr.$(OBJEXT) flonum-copy.$(OBJEXT) \
+	flonum-konst.$(OBJEXT) flonum-mult.$(OBJEXT) frags.$(OBJEXT) \
+	hash.$(OBJEXT) input-file.$(OBJEXT) input-scrub.$(OBJEXT) \
+	listing.$(OBJEXT) literal.$(OBJEXT) macro.$(OBJEXT) \
+	messages.$(OBJEXT) output-file.$(OBJEXT) read.$(OBJEXT) \
+	remap.$(OBJEXT) sb.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
 	symbols.$(OBJEXT) write.$(OBJEXT)
 am_as_new_OBJECTS = $(am__objects_1)
 as_new_OBJECTS = $(am_as_new_OBJECTS)
@@ -311,6 +311,7 @@ GAS_CFILES = \
 	app.c \
 	as.c \
 	atof-generic.c \
+	compress-debug.c \
 	cond.c \
 	depend.c \
 	dwarf2dbg.c \
@@ -345,6 +346,7 @@ HFILES = \
 	bignum.h \
 	bit_fix.h \
 	cgen.h \
+	compress-debug.h \
 	dwarf2dbg.h \
 	dw2gencfi.h \
 	ecoff.h \
@@ -771,6 +773,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atof-vax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bfin-parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compress-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cond.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/depend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dw2gencfi.Po@am__quote@

@@ -43,6 +43,7 @@ GAS_CFILES = \
 	app.c \
 	as.c \
 	atof-generic.c \
+	compress-debug.c \
 	cond.c \
 	depend.c \
 	dwarf2dbg.c \
@@ -78,6 +79,7 @@ HFILES = \
 	bignum.h \
 	bit_fix.h \
 	cgen.h \
+	compress-debug.h \
 	dwarf2dbg.h \
 	dw2gencfi.h \
 	ecoff.h \

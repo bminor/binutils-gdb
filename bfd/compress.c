@@ -1,4 +1,4 @@
-/* ELF attributes support (based on ARM EABI attributes).
+/* Compressed section support (intended for debug sections).
    Copyright 2008, 2010
    Free Software Foundation, Inc.
 

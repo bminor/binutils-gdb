@@ -1,3 +1,21 @@
+2010-07-03  Cary Coutant  <ccoutant@google.com>
+
+	* Makefile.am: Add compress-debug.c and compress-debug.h.
+	* Makefile.in: Regenerate.
+	* config.in: Add HAVE_ZLIB_H.
+	* configure.in: Check for zlib.h.
+	* configure: Regenerate.
+
+	* as.c (parse_args): Add --compress-debug-sections and
+	--nocompress-debug-sections.
+	* as.h (flag_compress_debug): New variable.
+	* compress-debug.c: New file.
+	* compress-debug.h: New file.
+	* write.c: Include compress-debug.h.
+	(compress_frag): New function.
+	(compress_debug): New function.
+	(write_object_file): Compress debug sections if requested.
+
 2010-07-03  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* config/tc-ppc.c (ppc_set_cpu): Cast PPC_OPCODE_xxx to ppc_cpu_t

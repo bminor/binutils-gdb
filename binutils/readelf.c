@@ -9962,8 +9962,11 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     return 0;
 
   if (section_is_compressed)
-    if (! uncompress_section_contents (&section->start, &section->size))
-      return 0;
+    {
+      if (! uncompress_section_contents (&section->start, &section->size))
+        return 0;
+      sec->sh_size = section->size;
+    }
 
   if (debug_displays [debug].relocate)
     apply_relocations ((FILE *) file, sec, section->start);

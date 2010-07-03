@@ -709,6 +709,9 @@ AC_CHECK_DECLS([vsnprintf])
 
 BFD_BINARY_FOPEN
 
+# Link in zlib if we can.  This allows us to write compressed debug sections.
+AM_ZLIB
+
 # Support for VMS timestamps via cross compile
 
 if test "$ac_cv_header_time_h" = yes; then

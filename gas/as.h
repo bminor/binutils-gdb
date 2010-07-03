@@ -365,6 +365,9 @@ COMMON int flag_strip_local_absolute;
 /* True if we should generate a traditional format object file.  */
 COMMON int flag_traditional_format;
 
+/* TRUE if debug sections should be compressed.  */
+COMMON int flag_compress_debug;
+
 /* TRUE if .note.GNU-stack section with SEC_CODE should be created */
 COMMON int flag_execstack;
 

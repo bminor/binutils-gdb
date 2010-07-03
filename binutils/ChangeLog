@@ -1,3 +1,10 @@
+2010-07-03  Cary Coutant  <ccoutant@google.com>
+
+	* objdump.c (load_specific_debug_section): Decompress section contents
+	before applying relocations.
+	* readelf.c (load_specific_debug_section): Update section size after
+	decompression.
+
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
    	PR binutils/3166

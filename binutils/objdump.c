@@ -2205,14 +2205,8 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->size = bfd_get_section_size (sec);
   section->start = (unsigned char *) xmalloc (section->size);
 
-  if (is_relocatable && debug_displays [debug].relocate)
-    ret = bfd_simple_get_relocated_section_contents (abfd,
-						     sec,
-						     section->start,
-						     syms) != NULL;
-  else
-    ret = bfd_get_section_contents (abfd, sec, section->start, 0,
-				    section->size);
+  ret = bfd_get_section_contents (abfd, sec, section->start, 0,
+				  section->size);
 
   if (! ret)
     {
@@ -2232,6 +2226,30 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
           return 0;
         }
       section->size = size;
+    }
+
+  if (is_relocatable && debug_displays [debug].relocate)
+    {
+      /* We want to relocate the data we've already read (and
+         decompressed), so we store a pointer to the data in
+         the bfd_section, and tell it that the contents are
+         already in memory.  */
+      sec->contents = section->start;
+      sec->flags |= SEC_IN_MEMORY;
+      sec->size = section->size;
+
+      ret = bfd_simple_get_relocated_section_contents (abfd,
+						       sec,
+						       section->start,
+						       syms) != NULL;
+
+      if (! ret)
+        {
+          free_debug_section (debug);
+          printf (_("\nCan't get contents for section '%s'.\n"),
+	          section->name);
+          return 0;
+        }
     }
 
   return 1;

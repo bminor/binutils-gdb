@@ -437,7 +437,9 @@ parse_args (int * pargc, char *** pargv)
       OPTION_AL,
       OPTION_HASH_TABLE_SIZE,
       OPTION_REDUCE_MEMORY_OVERHEADS,
-      OPTION_WARN_FATAL
+      OPTION_WARN_FATAL,
+      OPTION_COMPRESS_DEBUG,
+      OPTION_NOCOMPRESS_DEBUG
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -455,6 +457,8 @@ parse_args (int * pargc, char *** pargv)
     ,{"a", optional_argument, NULL, 'a'}
     /* Handle -al=<FILE>.  */
     ,{"al", optional_argument, NULL, OPTION_AL}
+    ,{"compress-debug-sections", no_argument, NULL, OPTION_COMPRESS_DEBUG}
+    ,{"nocompress-debug-sections", no_argument, NULL, OPTION_NOCOMPRESS_DEBUG}
     ,{"debug-prefix-map", required_argument, NULL, OPTION_DEBUG_PREFIX_MAP}
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
@@ -633,6 +637,14 @@ This program has absolutely no warranty.\n"));
 	  fprintf (stderr, _("bfd-target = %s\n"), TARGET_FORMAT);
 #endif
 	  exit (EXIT_SUCCESS);
+
+	case OPTION_COMPRESS_DEBUG:
+	  flag_compress_debug = 1;
+	  break;
+
+	case OPTION_NOCOMPRESS_DEBUG:
+	  flag_compress_debug = 0;
+	  break;
 
 	case OPTION_DEBUG_PREFIX_MAP:
 	  add_debug_prefix_map (optarg);
