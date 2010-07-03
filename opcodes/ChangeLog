@@ -1,3 +1,11 @@
+2010-07-03  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (PWR2COM): Define.
+	(PPCPWR2): Add PPC_OPCODE_COMMON.
+	(powerpc_opcodes): Add "subc", "subco", "subco.", "fcir", "fcir.",
+	"fcirz", "fcirz." to -mcom opcodes.  Remove "mfsri", "dclst",
+	"rac" from -mcom.
+
 2010-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (June, 2010)
