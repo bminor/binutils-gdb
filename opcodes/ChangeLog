@@ -2,6 +2,8 @@
 
 	* ppc-dis.c (powerpc_init_dialect): Cast PPC_OPCODE_xxx to
 	ppc_cpu_t before inverting.
+	(ppc_parse_cpu): Likewise.
+	(print_insn_powerpc): Likewise.
 
 2010-07-03  Alan Modra  <amodra@gmail.com>
 
