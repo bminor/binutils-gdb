@@ -1,3 +1,8 @@
+2010-07-03  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_set_cpu): Remove old opcode flags.
+	(ppc_setup_opcodes): Likewise.  Simplify opcode selection.
+
 2010-07-02  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-rx.h (md_do_align): New.
