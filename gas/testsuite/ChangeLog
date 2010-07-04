@@ -1,3 +1,10 @@
+2010-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/dw2-compress-1.d: New.
+	* gas/i386/dw2-compress-1.s: Likewise.
+
+	* gas/i386/i386.exp: Run dw2-compress-1 for Linux.
+
 2010-07-03  Jan Beulich  <jbeulich@novell.com>
 
 	PR gas/11732
