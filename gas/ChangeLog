@@ -1,3 +1,10 @@
+2010-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (CONFIG_OBJS): Removed.
+	(GENERIC_OBJS): Likewise.
+	(OBJS): Likewise.
+	* Makefile.in: Regenerated.
+
 2010-07-03  Jan Beulich  <jbeulich@novell.com>
 
 	PR gas/11732

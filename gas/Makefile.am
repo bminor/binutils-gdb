@@ -310,48 +310,9 @@ MULTI_CFILES = \
 	config/e-mipsecoff.c \
 	config/e-mipself.c
 
-CONFIG_OBJS = \
-	$(TARG_CPU_O) \
-	$(OBJ_FORMAT_O) \
-	$(ATOF_TARG_O) \
-	$(extra_objects)
-
-GENERIC_OBJS = \
-	app.@OBJEXT@ \
-	as.@OBJEXT@ \
-	atof-generic.@OBJEXT@ \
-	cond.@OBJEXT@ \
-	depend.@OBJEXT@ \
-	dwarf2dbg.@OBJEXT@ \
-	dw2gencfi.@OBJEXT@ \
-	ehopt.@OBJEXT@ \
-	expr.@OBJEXT@ \
-	flonum-konst.@OBJEXT@ \
-	flonum-copy.@OBJEXT@ \
-	flonum-mult.@OBJEXT@ \
-	frags.@OBJEXT@ \
-	hash.@OBJEXT@ \
-	input-file.@OBJEXT@ \
-	input-scrub.@OBJEXT@ \
-	literal.@OBJEXT@ \
-	messages.@OBJEXT@ \
-	output-file.@OBJEXT@ \
-	read.@OBJEXT@ \
-	remap.@OBJEXT@ \
-	subsegs.@OBJEXT@ \
-	symbols.@OBJEXT@ \
-	write.@OBJEXT@ \
-	listing.@OBJEXT@ \
-	ecoff.@OBJEXT@ \
-	stabs.@OBJEXT@ \
-	sb.@OBJEXT@ \
-	macro.@OBJEXT@
-
 CONFIG_ATOF_CFILES = \
 	config/atof-ieee.c \
 	config/atof-vax.c
-
-OBJS = $(CONFIG_OBJS) $(GENERIC_OBJS)
 
 POTFILES = $(MULTI_CFILES) $(CONFIG_ATOF_CFILES) \
 	$(TARG_ENV_HFILES) $(TARG_ENV_CFILES) $(OBJ_FORMAT_HFILES) \
