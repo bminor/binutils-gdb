@@ -1,3 +1,14 @@
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/break-interp.exp: Run $binpie with new value "ATTACH", new
+	code for it.  New variable relink_args.
+	(prelinkYES): Call prelinkNO.
+	(test_attach): Accept new parameter relink_args.  Re-prelink the binary
+	in such case.  Move the core code to ...
+	(test_attach_gdb): ... a new function.  Send GDB command "file".
+	Extend expected "Attaching to " string.
+
 2010-07-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/bitops.exp: Remove extraneous "pass".

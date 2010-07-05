@@ -154,6 +154,12 @@ proc prelinkYES {arg {name ""}} {
     if {$name == ""} {
 	set name [file tail $arg]
     }
+
+    # Try to unprelink it first so that if it has been already prelinked before
+    # we get different address now and the result is not affected by the
+    # previous $arg state..
+    prelinkNO $arg "$name pre-unprelink"
+
     set test "prelink $name"
     set command "exec /usr/sbin/prelink -qNR --no-exec-shield $arg"
     verbose -log "command is $command"
@@ -325,38 +331,12 @@ proc test_core {file displacement} {
     set pf_prefix $old_ldprefix
 }
 
-proc test_attach {file displacement} {
-    global board_info gdb_prompt expect_out
-
-    gdb_exit
-
-    set test "sleep function started"
-
-    set command "${file} sleep"
-    set res [remote_spawn host $command];
-    if { $res < 0 || $res == "" } {
-	perror "Spawning $command failed."
-	fail $test
-	return
-    }
-    set pid [exp_pid -i $res]
-    gdb_expect {
-	-re "sleeping\r\n" {
-	    pass $test
-	}
-	eof {
-	    fail "$test (eof)"
-	    return
-	}
-	timeout {
-	    fail "$test (timeout)"
-	    return
-	}
-    }
+proc test_attach_gdb {file pid displacement prefix} {
+    global gdb_prompt expect_out
 
     global pf_prefix
     set old_ldprefix $pf_prefix
-    lappend pf_prefix "attach:"
+    lappend pf_prefix "$prefix:"
 
     gdb_exit
     gdb_start
@@ -364,9 +344,13 @@ proc test_attach {file displacement} {
     # Print the "PIE (Position Independent Executable) displacement" message.
     gdb_test_no_output "set verbose on"
 
+    if {$file != ""} {
+	gdb_test "file $file" "Reading symbols from .*done\\." "file"
+    }
+
     set test "attach"
     gdb_test_multiple "attach $pid" $test {
-	-re "Attaching to process $pid\r\n" {
+	-re "Attaching to (program: .*, )?process $pid\r\n" {
 	    # Missing "$gdb_prompt $" is intentional.
 	    pass $test
 	}
@@ -402,9 +386,54 @@ proc test_attach {file displacement} {
     gdb_test "bt" "#\[0-9\]+ +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#\[0-9\]+ +\[^\r\n\]*\\mmain\\M.*" "attach main bt"
     gdb_exit
 
-    remote_exec host "kill -9 $pid"
-
     set pf_prefix $old_ldprefix
+}
+
+proc test_attach {file displacement {relink_args ""}} {
+    global board_info
+
+    gdb_exit
+
+    set test "sleep function started"
+
+    set command "${file} sleep"
+    set res [remote_spawn host $command];
+    if { $res < 0 || $res == "" } {
+	perror "Spawning $command failed."
+	fail $test
+	return
+    }
+    set pid [exp_pid -i $res]
+    gdb_expect {
+	-re "sleeping\r\n" {
+	    pass $test
+	}
+	eof {
+	    fail "$test (eof)"
+	    return
+	}
+	timeout {
+	    fail "$test (timeout)"
+	    return
+	}
+    }
+
+    if {$relink_args == ""} {
+	test_attach_gdb "" $pid $displacement "attach"
+    } else {
+	# These could be rather passed as arguments.
+	global exec interp_saved interp
+
+	foreach relink {YES NO} {
+	    if {[prelink$relink $relink_args [file tail $exec]]
+	        && [copy $interp_saved $interp]} {
+		# /proc/PID/exe cannot be loaded as it is "EXECNAME (deleted)".
+		test_attach_gdb $exec $pid $displacement "attach-relink$relink"
+	    }
+	}
+    }
+
+    remote_exec host "kill -9 $pid"
 }
 
 proc test_ld {file ifmain trynosym displacement} {
@@ -615,7 +644,10 @@ foreach ldprelink {NO YES} {
 	set old_binprefix $pf_prefix
 	foreach binprelink {NO YES} {
 	    foreach binsepdebug {NO IN SEP} {
-		foreach binpie {NO YES} {
+		# "ATTACH" is like "YES" but it is modified during run.
+		# It cannot be used for problem reproducibility after the
+		# testcase ends.
+		foreach binpie {NO YES ATTACH} {
 		    # This combination is not possible, non-PIE (fixed address)
 		    # binary cannot be prelinked to any (other) address.
 		    if {$binprelink == "YES" && $binpie == "NO"} {
@@ -634,7 +666,7 @@ foreach ldprelink {NO YES} {
 		    if {$binsepdebug != "NO"} {
 			lappend opts {debug}
 		    }
-		    if {$binpie == "YES"} {
+		    if {$binpie != "NO"} {
 			lappend opts {additional_flags=-fPIE -pie}
 		    }
 		    if {[build_executable ${test}.exp [file tail $exec] $srcfile $opts] == -1} {
@@ -682,16 +714,48 @@ foreach ldprelink {NO YES} {
 			lappend dests $dest
 		    }
 
-		    if {[prelink$binprelink "--dynamic-linker=$interp --ld-library-path=$dir $exec $interp [concat $dests]" [file tail $exec]]
+		    if {$binpie == "NO"} {
+			set displacement "NONE"
+		    } elseif {$binprelink == "NO"} {
+			set displacement "NONZERO"
+		    } else {
+			set displacement "ZERO"
+		    }
+
+		    set relink_args "--dynamic-linker=$interp --ld-library-path=$dir $exec $interp [concat $dests]"
+		    if {[prelink$binprelink $relink_args [file tail $exec]]
 		        && [copy $interp_saved $interp]} {
-			if {$binpie == "NO"} {
-			    set displacement "NONE"
-			} elseif {$binprelink == "NO"} {
-			    set displacement "NONZERO"
+			if {$binpie != "ATTACH"} {
+			    test_ld $exec 1 [expr {$binsepdebug == "NO"}] $displacement
 			} else {
-			    set displacement "ZERO"
+			    # If the file has been randomly prelinked it must
+			    # be "NONZERO".  We could see "ZERO" only if it was
+			    # unprelinked and it is now running at the same
+			    # address - which is 0 but executable can never run
+			    # at address 0.
+
+			    set displacement "NONZERO"
+			    test_attach $exec $displacement $relink_args
+
+			    # ATTACH means that executables and libraries have
+			    # been modified after they have been run.  They
+			    # cannot be reused for problem reproducibility after
+			    # the testcase ends in the ATTACH case.  Therefore
+			    # they are rather deleted not to confuse after the
+			    # run finishes.
+			    set exec_debug [system_debug_get $exec]
+			    if {$exec_debug != ""} {
+				# `file delete [glob "${exec_debug}*"]' does not work.
+				foreach f [glob "${exec_debug}*"] {
+				    file delete $f
+				}
+			    }
+			    file delete -force $dir
+			    # `file delete [glob "${exec}*"]' does not work.
+			    foreach f [glob "${exec}*"] {
+				file delete $f
+			    }
 			}
-			test_ld $exec 1 [expr {$binsepdebug == "NO"}] $displacement
 		    }
 		}
 	    }

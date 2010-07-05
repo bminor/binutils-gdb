@@ -1775,13 +1775,187 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	 really do not match.  */
       int phdrs_size, phdrs2_size, ok = 1;
       gdb_byte *buf, *buf2;
+      int arch_size;
 
-      buf = read_program_header (-1, &phdrs_size, NULL);
+      buf = read_program_header (-1, &phdrs_size, &arch_size);
       buf2 = read_program_headers_from_bfd (exec_bfd, &phdrs2_size);
-      if (buf != NULL && buf2 != NULL
-	  && (phdrs_size != phdrs2_size
-	      || memcmp (buf, buf2, phdrs_size) != 0))
-	ok = 0;
+      if (buf != NULL && buf2 != NULL)
+	{
+	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+
+	  /* We are dealing with three different addresses.  EXEC_BFD
+	     represents current address in on-disk file.  target memory content
+	     may be different from EXEC_BFD as the file may have been prelinked
+	     to a different address after the executable has been loaded.
+	     Moreover the address of placement in target memory can be
+	     different from what the program headers in target memory say - this
+	     is the goal of PIE.
+
+	     Detected DISPLACEMENT covers both the offsets of PIE placement and
+	     possible new prelink performed after start of the program.  Here
+	     relocate BUF and BUF2 just by the EXEC_BFD vs. target memory
+	     content offset for the verification purpose.  */
+
+	  if (phdrs_size != phdrs2_size
+	      || bfd_get_arch_size (exec_bfd) != arch_size)
+	    ok = 0;
+	  else if (arch_size == 32 && phdrs_size >= sizeof (Elf32_External_Phdr)
+	           && phdrs_size % sizeof (Elf32_External_Phdr) == 0)
+	    {
+	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
+	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
+	      CORE_ADDR displacement = 0;
+	      int i;
+
+	      /* DISPLACEMENT could be found more easily by the difference of
+		 ehdr2->e_entry.  But we haven't read the ehdr yet, and we
+		 already have enough information to compute that displacement
+		 with what we've read.  */
+
+	      for (i = 0; i < ehdr2->e_phnum; i++)
+		if (phdr2[i].p_type == PT_LOAD)
+		  {
+		    Elf32_External_Phdr *phdrp;
+		    gdb_byte *buf_vaddr_p, *buf_paddr_p;
+		    CORE_ADDR vaddr, paddr;
+		    CORE_ADDR displacement_vaddr = 0;
+		    CORE_ADDR displacement_paddr = 0;
+
+		    phdrp = &((Elf32_External_Phdr *) buf)[i];
+		    buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
+		    buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
+
+		    vaddr = extract_unsigned_integer (buf_vaddr_p, 4,
+						      byte_order);
+		    displacement_vaddr = vaddr - phdr2[i].p_vaddr;
+
+		    paddr = extract_unsigned_integer (buf_paddr_p, 4,
+						      byte_order);
+		    displacement_paddr = paddr - phdr2[i].p_paddr;
+
+		    if (displacement_vaddr == displacement_paddr)
+		      displacement = displacement_vaddr;
+
+		    break;
+		  }
+
+	      /* Now compare BUF and BUF2 with optional DISPLACEMENT.  */
+
+	      for (i = 0; i < phdrs_size / sizeof (Elf32_External_Phdr); i++)
+		{
+		  Elf32_External_Phdr *phdrp;
+		  Elf32_External_Phdr *phdr2p;
+		  gdb_byte *buf_vaddr_p, *buf_paddr_p;
+		  CORE_ADDR vaddr, paddr;
+
+		  phdrp = &((Elf32_External_Phdr *) buf)[i];
+		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
+		  buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
+		  phdr2p = &((Elf32_External_Phdr *) buf2)[i];
+
+		  /* PT_GNU_STACK is an exception by being never relocated by
+		     prelink as its addresses are always zero.  */
+
+		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
+		    continue;
+
+		  /* Check also other adjustment combinations - PR 11786.  */
+
+		  vaddr = extract_unsigned_integer (buf_vaddr_p, 4, byte_order);
+		  vaddr -= displacement;
+		  store_unsigned_integer (buf_vaddr_p, 4, byte_order, vaddr);
+
+		  paddr = extract_unsigned_integer (buf_paddr_p, 4, byte_order);
+		  paddr -= displacement;
+		  store_unsigned_integer (buf_paddr_p, 4, byte_order, paddr);
+
+		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
+		    continue;
+
+		  ok = 0;
+		  break;
+		}
+	    }
+	  else if (arch_size == 64 && phdrs_size >= sizeof (Elf64_External_Phdr)
+	           && phdrs_size % sizeof (Elf64_External_Phdr) == 0)
+	    {
+	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
+	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
+	      CORE_ADDR displacement = 0;
+	      int i;
+
+	      /* DISPLACEMENT could be found more easily by the difference of
+		 ehdr2->e_entry.  But we haven't read the ehdr yet, and we
+		 already have enough information to compute that displacement
+		 with what we've read.  */
+
+	      for (i = 0; i < ehdr2->e_phnum; i++)
+		if (phdr2[i].p_type == PT_LOAD)
+		  {
+		    Elf64_External_Phdr *phdrp;
+		    gdb_byte *buf_vaddr_p, *buf_paddr_p;
+		    CORE_ADDR vaddr, paddr;
+		    CORE_ADDR displacement_vaddr = 0;
+		    CORE_ADDR displacement_paddr = 0;
+
+		    phdrp = &((Elf64_External_Phdr *) buf)[i];
+		    buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
+		    buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
+
+		    vaddr = extract_unsigned_integer (buf_vaddr_p, 8,
+						      byte_order);
+		    displacement_vaddr = vaddr - phdr2[i].p_vaddr;
+
+		    paddr = extract_unsigned_integer (buf_paddr_p, 8,
+						      byte_order);
+		    displacement_paddr = paddr - phdr2[i].p_paddr;
+
+		    if (displacement_vaddr == displacement_paddr)
+		      displacement = displacement_vaddr;
+
+		    break;
+		  }
+
+	      /* Now compare BUF and BUF2 with optional DISPLACEMENT.  */
+
+	      for (i = 0; i < phdrs_size / sizeof (Elf64_External_Phdr); i++)
+		{
+		  Elf64_External_Phdr *phdrp;
+		  Elf64_External_Phdr *phdr2p;
+		  gdb_byte *buf_vaddr_p, *buf_paddr_p;
+		  CORE_ADDR vaddr, paddr;
+
+		  phdrp = &((Elf64_External_Phdr *) buf)[i];
+		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
+		  buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
+		  phdr2p = &((Elf64_External_Phdr *) buf2)[i];
+
+		  /* PT_GNU_STACK is an exception by being never relocated by
+		     prelink as its addresses are always zero.  */
+
+		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
+		    continue;
+
+		  /* Check also other adjustment combinations - PR 11786.  */
+
+		  vaddr = extract_unsigned_integer (buf_vaddr_p, 8, byte_order);
+		  vaddr -= displacement;
+		  store_unsigned_integer (buf_vaddr_p, 8, byte_order, vaddr);
+
+		  paddr = extract_unsigned_integer (buf_paddr_p, 8, byte_order);
+		  paddr -= displacement;
+		  store_unsigned_integer (buf_paddr_p, 8, byte_order, paddr);
+
+		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
+		    continue;
+
+		  ok = 0;
+		  break;
+		}
+	    }
+	  else
+	    ok = 0;
+	}
 
       xfree (buf);
       xfree (buf2);

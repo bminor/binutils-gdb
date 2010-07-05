@@ -1,3 +1,12 @@
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	Fix attaching to PIEs prelinked on the disk after the process was
+	started.
+	* solib-svr4.c (svr4_exec_displacement): New variable arch_size.
+	Verify it against bfd_get_arch_size.  Try to match arbitrary
+	displacement for the phdrs comparison.
+
 2010-07-02  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/11780:
