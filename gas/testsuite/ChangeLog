@@ -1,5 +1,11 @@
 2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/beq.d: Reformat.
+	* gas/mips/bge.d, gas/mips/bgeu.d: Likewise.
+	* gas/mips/blt.d, gas/mips/bltu.d: Likewise.
+
+2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/beq.d: Remove leftover symbols/relocs from the
 	change on 2009-02-06.
 
