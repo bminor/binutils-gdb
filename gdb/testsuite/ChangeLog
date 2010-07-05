@@ -1,6 +1,14 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
+	Cope with missing /usr/sbin/prelink.
+	* lib/prelink-support.exp (prelink_no):
+	<result == 1 && $output is "no such file or directory">: New.
+	(prelink_yes): Likewise.  Return on failed prelink_no.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/attach-pie-misread.exp: Load prelink-support.exp.  Replace
 	build_executable by build_executable_own_libs.  Replace "prelink -R"
 	execution by a call of prelink_yes.  Comment why "prelink -r" needs no

@@ -187,6 +187,30 @@ proc prelink_no {arg {name {}}} {
     set result [catch $command output]
     verbose -log "result is $result"
     verbose -log "output is $output"
+    if {$result == 1 && [regexp {^(couldn't execute "/usr/sbin/prelink[^\r\n]*": no such file or directory\n?)*$} $output]} {
+	# Without prelink, at least verify that all the binaries do not
+	# contain the  ".gnu.prelink_undo" section (which would mean that they
+	# have already been prelinked).
+	set test "$test (missing /usr/sbin/prelink)"
+	foreach bin [split $arg] {
+	    if [string match "-*" $bin] {
+		# Skip prelink options.
+		continue
+	    }
+	    set readelf_program [transform readelf]
+	    set command "exec $readelf_program -WS $bin"
+	    verbose -log "command is $command"
+	    set result [catch $command output]
+	    verbose -log "result is $result"
+	    verbose -log "output is $output"
+	    if {$result != 0 || [string match {* .gnu.prelink_undo *} $output]} {
+		fail "$test ($bin is already prelinked)"
+		return 0
+	    }
+	}
+	pass $test
+	return 1
+    }
     if {$result == 0 && $output == ""} {
 	verbose -log "$name has been now unprelinked"
 	set command "exec /usr/sbin/prelink -uN $arg"
@@ -217,7 +241,9 @@ proc prelink_yes {arg {name ""}} {
     # Try to unprelink it first so that, if it has been already prelinked
     # before, we get a different address now, making the new result unaffected
     # by any previous prelinking.
-    prelink_no $arg "$name pre-unprelink"
+    if ![prelink_no $arg "$name pre-unprelink"] {
+	return 0
+    }
 
     set test "prelink $name"
 
@@ -239,6 +265,19 @@ proc prelink_yes {arg {name ""}} {
     set result [catch $command output]
     verbose -log "result is $result"
     verbose -log "output is $output"
+    if {$result == 1 && [regexp {^(couldn't execute "/usr/sbin/prelink[^\r\n]*": no such file or directory\n?)*$} $output]} {
+	set test "$test (missing /usr/sbin/prelink)"
+
+	# We could not find prelink.  We could check whether $args is already
+	# prelinked but we don't, because:
+	#   - It is unlikely that someone uninstalls prelink after having
+	#     prelinked the system ld.so;
+	#   - We still cannot change its prelinked address.
+	# Therefore, we just skip the test.
+
+	xfail $test
+	return 0
+    }
     if {$result == 0 && $output == ""} {
 	pass $test
 	return 1
