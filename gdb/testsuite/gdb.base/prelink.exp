@@ -23,8 +23,7 @@ if $tracelevel then {
 	}
 
 
-# are we on a target board
-if ![isnative] then {
+if { ![isnative] || [is_remote host] || [skip_shlib_tests]} {
     return
 }
 
@@ -36,32 +35,31 @@ if {$gcc_compiled == 0} {
     return -1
 }
 
+load_lib prelink-support.exp
+
 set testfile "prelink"
 
 set libsrcfile ${testfile}-lib.c
 set libfile ${objdir}/${subdir}/${testfile}.so
-if { [gdb_compile "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" executable [list debug "additional_flags=-fpic -shared -nodefaultlibs"]] != ""} {
+
+# Use -soname so that the new library gets copied by build_executable_own_libs.
+
+if { [gdb_compile_shlib "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" [list debug "additional_flags=-Wl,-soname,[file tail ${libfile}]"]] != ""} {
     # If creating the shared library fails, maybe we don't have the right tools
     return -1
 }
 
-# `--no-exec-shield' is for i386 where prelink in the exec-shield mode is
-# forced to push all the libraries tight together to fit into the first two
-# memory areas (either the ASCII Shield area or at least below the executable).
-# In this case its -R option cannot be applied and we falsely FAIL here as if
-# the system is already prelinked prelink has no choice how to randomize the
-# single new unprelinked library address without wasting the first one/two
-# memory areas.  We do not care of the efficiency of loading such resulting
-# exec-shield unfriendly prelinked library.
-if {[catch "system \"prelink -qNR --no-exec-shield ${libfile}\""] != 0} {
-    # Maybe we don't have prelink.
+set srcfile ${testfile}.c
+set executable ${testfile}t
+set binfile ${objdir}/${subdir}/${executable}
+set prelink_args [build_executable_own_libs ${testfile}.exp $executable $srcfile [list debug "additional_flags=-Wl,${libfile},-rpath,[file dirname ${libfile}]"]]
+if {$prelink_args == ""} {
     return -1
 }
 
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}t
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${libfile}" "${binfile}" executable [list debug "additional_flags=-Wl,-rpath,${objdir}/${subdir}"]] != ""} {
-    return -1;
+if ![prelink_yes $prelink_args] {
+    # Maybe we don't have prelink.
+    return -1
 }
 
 set found 0
@@ -94,20 +92,16 @@ if { $found == 0  } {
     return 0
 }
 
-if {[catch "system \"prelink -uN ${libfile}\""] != 0} {
-    untested "${testfile}.so was not prelinked, maybe system libraries are not prelinked?"
-    return 0
+# Relink $libfile to a different address.
+if ![prelink_yes $prelink_args] {
+    return -1
 }
-catch "system \"prelink -qNR --no-exec-shield ${libfile}\""
 
 # Start with a fresh gdb
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $executable
 
 # Print the "adjusting expectations" message.
 gdb_test_no_output "set verbose on"
 
-gdb_test "core-file $objdir/$subdir/prelink.core" {Using PIC \(Position Independent Code\) prelink displacement.*} "prelink"
+gdb_test "core-file $objdir/$subdir/prelink.core" "Using PIC \\(Position Independent Code\\) prelink displacement 0x\[^0\]\[0-9a-f\]* for \[^\r\n\]*[file tail ${libfile}].*" "seen displacement message"

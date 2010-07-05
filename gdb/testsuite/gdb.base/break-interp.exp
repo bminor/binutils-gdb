@@ -18,6 +18,8 @@ if { ![isnative] || [is_remote host] || ![istarget *-linux*] || [skip_shlib_test
     continue
 }
 
+load_lib prelink-support.exp
+
 set test "break-interp"
 set binprefix ${objdir}/${subdir}/${test}
 # Only to get the $interp_system name.
@@ -31,8 +33,7 @@ if [get_compiler_info ${binfile_lib}] {
     return -1
 }
 
-# Use -soname so that it is listed with " => " by ldd and this testcase makes
-# a copy of ${binfile_lib} for each prelink variant.
+# Use -soname so that the new library gets copied by build_executable_own_libs.
 
 if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list debug additional_flags=-Wl,-soname,${test}.so]] != ""} {
     return -1
@@ -40,38 +41,6 @@ if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list d
 
 if {[build_executable ${test}.exp $binfile_test ${srcfile_test} {}] == -1} {
     return -1
-}
-
-# Return the interpreter filename string.
-# Return "" if no interpreter was found.
-proc section_get {exec section} {
-    global objdir
-    global subdir
-    set tmp "${objdir}/${subdir}/break-interp.interp"
-    set objcopy_program [transform objcopy]
-
-    set command "exec $objcopy_program -O binary --set-section-flags $section=A --change-section-address $section=0 -j $section $exec $tmp"
-    verbose -log "command is $command"
-    set result [catch $command output]
-    verbose -log "result is $result"
-    verbose -log "output is $output"
-    if {$result == 1} {
-	return ""
-    }
-    set fi [open $tmp]
-    fconfigure $fi -translation binary
-    set data [read $fi]
-    close $fi
-    #file delete $tmp
-    # .interp has size $len + 1 but .gnu_debuglink contains garbage after \000.
-    set len [string first \000 $data]
-    if {$len < 0} {
-	verbose -log "section $section not found"
-	return ""
-    }
-    set retval [string range $data 0 [expr $len - 1]]
-    verbose -log "section $section is <$retval>"
-    return $retval
 }
 
 # Note: The separate debug info file content build-id/crc32 are not verified
@@ -117,104 +86,12 @@ set interp_system [section_get ${objdir}/${subdir}/$binfile_test .interp]
 set interp_system_debug [system_debug_get $interp_system]
 verbose -log "$interp_system has debug $interp_system_debug"
 
-proc prelinkNO_run {arg} {
-    set command "exec /usr/sbin/prelink -uN $arg"
-    verbose -log "command is $command"
-    set result [catch $command output]
-    verbose -log "result is $result"
-    verbose -log "output is $output"
-    return [list $result $output]
-}
-
-proc prelinkNO {arg {name {}}} {
-    if {$name == ""} {
-	set name [file tail $arg]
-    }
-    set test "unprelink $name"
-    set run [prelinkNO_run $arg]
-    set result [lindex $run 0]
-    set output [lindex $run 1]
-    if {$result == 0 && $output == ""} {
-	verbose -log "$name has been now unprelinked"
-	set run [prelinkNO_run $arg]
-	set result [lindex $run 0]
-	set output [lindex $run 1]
-    }
-    # Last line does miss the trailing \n.
-    if {$result == 1 && [regexp {^(/usr/sbin/prelink[^\r\n]*: [^ ]* does not have .gnu.prelink_undo section\n?)*$} $output]} {
-	pass $test
-	return 1
-    } else {
-	fail $test
-	return 0
-    }
+proc prelinkNO {arg {name ""}} {
+    return [prelink_no $arg $name]
 }
 
 proc prelinkYES {arg {name ""}} {
-    if {$name == ""} {
-	set name [file tail $arg]
-    }
-
-    # Try to unprelink it first so that if it has been already prelinked before
-    # we get different address now and the result is not affected by the
-    # previous $arg state..
-    prelinkNO $arg "$name pre-unprelink"
-
-    set test "prelink $name"
-    set command "exec /usr/sbin/prelink -qNR --no-exec-shield $arg"
-    verbose -log "command is $command"
-    set result [catch $command output]
-    verbose -log "result is $result"
-    verbose -log "output is $output"
-    if {$result == 0 && $output == ""} {
-	pass $test
-	return 1
-    } elseif {$result == 1 \
-	      && [string match -nocase "*: Not enough room to add .dynamic entry" $output]} {
-	# Linker should have reserved some entries for prelink.
-	xfail $test
-	return 0
-    } else {
-	fail $test
-	return 0
-    }
-}
-
-# Resolve symlinks.
-proc symlink_resolve {file} {
-    set loop 0
-    while {[file type $file] == "link"} {
-	set target [file readlink $file]
-	if {[file pathtype $target] == "relative"} {
-	    set src2 [file dirname $file]/$target
-	} else {
-	    set src2 $target
-	}
-	verbose -log "Resolved symlink $file targetting $target as $src2"
-	set file $src2
-
-	set loop [expr $loop + 1]
-	if {$loop > 30} {
-	    fail "Looping symlink resolution for $file"
-	    return ""
-	}
-    }
-    return $file
-}
-
-proc copy {src dest} {
-    set src [symlink_resolve $src]
-    # Test name would contain build-id hash for symlink-unresolved $src.
-    set test "copy [file tail $src] to [file tail $dest]"
-    set command "file copy -force $src $dest"
-    verbose -log "command is $command"
-    if [catch $command] {
-	fail $test
-	return 0
-    } else {
-    	pass $test
-	return 1
-    }
+    return [prelink_yes $arg $name]
 }
 
 proc strip_debug {dest} {
@@ -425,8 +302,8 @@ proc test_attach {file displacement {relink_args ""}} {
 	    # Formerly this test was testing only prelinking of $EXEC.  As the
 	    # prelink command automatically prelinks all of $EXEC's libraries,
 	    # even $INTERP got prelinked.  Therefore, we formerly had to
-	    # `[copy $interp_saved $interp]' to make $INTERP not affected by
-	    # this prelinking of $EXEC.
+	    # `[file_copy $interp_saved $interp]' to make $INTERP not affected
+	    # by this prelinking of $EXEC.
 	    #
 	    # But now we need to test even prelinking of $INTERP.  We could
 	    # create a separate test to test just the $INTERP prelinking.  For
@@ -439,7 +316,7 @@ proc test_attach {file displacement {relink_args ""}} {
 		test_attach_gdb $exec $pid $displacement "attach-relink$relink"
 	    }
 	}
-	copy $interp_saved $interp
+	file_copy $interp_saved $interp
     }
 
     remote_exec host "kill -9 $pid"
@@ -582,7 +459,7 @@ foreach ldprelink {NO YES} {
 	lappend pf_prefix "$ldname:"
 
 	if {$ldsepdebug == "NO"} {
-	    copy $interp_system $interp
+	    file_copy $interp_system $interp
 	    # Never call strip-debug before unprelink:
 	    # prelink: ...: Section .note.gnu.build-id created after prelinking
 	    if ![prelinkNO $interp] {
@@ -590,10 +467,10 @@ foreach ldprelink {NO YES} {
 	    }
 	    strip_debug $interp
 	} elseif {$ldsepdebug == "IN" && $interp_system_debug == ""} {
-	    copy $interp_system $interp
+	    file_copy $interp_system $interp
 	} elseif {$ldsepdebug == "IN" && $interp_system_debug != ""} {
-	    copy $interp_system $interp
-	    copy $interp_system_debug "${interp}.debug"
+	    file_copy $interp_system $interp
+	    file_copy $interp_system_debug "${interp}.debug"
 	    # eu-unstrip: DWARF data in '...' not adjusted for prelinking bias; consider prelink -u
 	    if {![prelinkNO $interp] || ![prelinkNO "${interp}.debug"]} {
 		continue
@@ -609,15 +486,15 @@ foreach ldprelink {NO YES} {
 		pass $test
 	    }
 	} elseif {$ldsepdebug == "SEP" && $interp_system_debug == ""} {
-	    copy $interp_system $interp
+	    file_copy $interp_system $interp
 	    # eu-unstrip: DWARF data in '...' not adjusted for prelinking bias; consider prelink -u
 	    if ![prelinkNO $interp] {
 		continue
 	    }
 	    gdb_gnu_strip_debug $interp
 	} elseif {$ldsepdebug == "SEP" && $interp_system_debug != ""} {
-	    copy $interp_system $interp
-	    copy $interp_system_debug "${interp}.debug"
+	    file_copy $interp_system $interp
+	    file_copy $interp_system_debug "${interp}.debug"
 	}
 
 	if {$ldsepdebug == "SEP"} {
@@ -638,7 +515,7 @@ foreach ldprelink {NO YES} {
 	}
 	test_ld $interp 0 [expr {$ldsepdebug == "NO"}] $displacement
 
-	if ![copy $interp $interp_saved] {
+	if ![file_copy $interp $interp_saved] {
 	    continue
 	}
 	set old_binprefix $pf_prefix
@@ -656,62 +533,26 @@ foreach ldprelink {NO YES} {
 
 		    set binname "BINprelink${binprelink}debug${binsepdebug}pie${binpie}"
 		    set exec $binprefix-$binname
-		    set dir ${exec}.d
 
 		    set pf_prefix $old_binprefix
 		    lappend pf_prefix "$binname:"
 
-		    set opts "additional_flags=-Wl,--dynamic-linker,$interp,-rpath,$dir"
-		    lappend opts "additional_flags=-Wl,$binfile_lib,-rpath,[file dirname $binfile_lib]"
+		    set opts "additional_flags=-Wl,$binfile_lib,-rpath,[file dirname $binfile_lib]"
 		    if {$binsepdebug != "NO"} {
 			lappend opts {debug}
 		    }
 		    if {$binpie != "NO"} {
 			lappend opts {additional_flags=-fPIE -pie}
 		    }
-		    if {[build_executable ${test}.exp [file tail $exec] $srcfile $opts] == -1} {
+
+		    set dir ${exec}.d
+		    set relink_args [build_executable_own_libs ${test}.exp [file tail $exec] $srcfile $opts $interp $dir]
+		    if {$relink_args == ""} {
 			continue;
 		    }
+
 		    if {$binsepdebug == "SEP"} {
 			gdb_gnu_strip_debug $exec
-		    }
-
-		    # Supply a self-sufficent directory $dir with the required
-		    # libraries.  To make an executable properly prelinked all
-		    # its dependencies on libraries must be also prelinked.  If
-		    # some of the system libraries is currently not prelinked
-		    # we have no right to prelink (modify it) at its current
-		    # system place.
-
-		    file delete -force $dir
-		    file mkdir $dir
-
-		    set command "ldd $exec"
-		    set test "ldd [file tail $exec]"
-		    set result [catch "exec $command" output]
-		    verbose -log "result of $command is $result"
-		    verbose -log "output of $command is $output"
-		    if {$result != 0 || $output == ""} {
-			fail $test
-		    } else {
-			pass $test
-		    }
-
-		    # gdb testsuite will put there also needless -lm.
-		    set test "$test output contains libc"
-		    set libc [regexp -all -inline -line {^.* => (/[^ ]+).*$} $output]
-		    if {[llength $libc] == 0} {
-			fail $test
-		    } else {
-			pass $test
-		    }
-
-		    set dests {}
-		    for {set i 1} {$i < [llength $libc]} {incr i 2} {
-			set abspath [lindex $libc $i]
-			set dest "$dir/[file tail $abspath]"
-			copy $abspath $dest
-			lappend dests $dest
 		    }
 
 		    if {$binpie == "NO"} {
@@ -722,9 +563,8 @@ foreach ldprelink {NO YES} {
 			set displacement "ZERO"
 		    }
 
-		    set relink_args "--dynamic-linker=$interp --ld-library-path=$dir $exec $interp [concat $dests]"
 		    if {[prelink$binprelink $relink_args [file tail $exec]]
-		        && [copy $interp_saved $interp]} {
+		        && [file_copy $interp_saved $interp]} {
 			if {$binpie != "ATTACH"} {
 			    test_ld $exec 1 [expr {$binsepdebug == "NO"}] $displacement
 			} else {

@@ -1,4 +1,34 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/attach-pie-misread.exp: Load prelink-support.exp.  Replace
+	build_executable by build_executable_own_libs.  Replace "prelink -R"
+	execution by a call of prelink_yes.  Comment why "prelink -r" needs no
+	change.
+	* gdb.base/break-interp.exp: Load prelink-support.exp.  Rename calls of
+	copy to file_copy.  Move setting opts --dynamic-linker and -rpath,
+	mkdir $dir and ldd its parsing and copying to lib/prelink-support.exp.
+	Replace build_executable by build_executable_own_libs's function
+	build_executable_own_libs.
+	(prelinkNO): Create new stub to call prelink_no.
+	(prelinkYES): Create new stub to call prelink_yes.
+	(test_attach): Rename calls of copy to file_copy.
+	(section_get, prelinkNO_run, prelinkNO, prelinkYES, symlink_resolve)
+	(copy): Move to ...
+	* lib/prelink-support.exp: ... a new file.  Rename prelinkNO to
+	prelink_no, prelinkYES to prelink_yes, copy to file_copy.
+	* gdb.base/prelink.exp: Disable testcase also for is_remote and
+	skip_shlib_tests.  Load prelink-support.exp.  Replace gdb_compile with
+	special flags by gdb_compile_shlib.  Replace second gdb_compile by
+	build_executable_own_libs.  Replace "prelink -R" execution by a call of
+	prelink_yes.  Replace "prelink -u" and second "prelink -R" execution by
+	a second call of prelink_yes.  Replace restart commands by
+	clean_restart.
+	(prelink): Rename to ...
+	(seen displacement message): ... this test.  Extend its expectation
+	strictness.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/attach-pie-misread.exp, gdb.base/attach-pie-misread.c: New.
 	* gdb.base/break-interp.exp (reach, test_core, test_ld): Require each
