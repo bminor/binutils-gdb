@@ -1,6 +1,13 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
+	Fix re-run of PIE executable, PR shlibs/11776.
+	* solib-svr4.c (svr4_relocate_main_executable) <symfile_objfile>: Remove
+	the part of pre-set SYMFILE_OBJFILE->SECTION_OFFSETS.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
 	* auxv.c (memory_xfer_auxv): Update attach comment.
 	* solib-svr4.c (svr4_special_symbol_handling): Remove the call to
 	svr4_relocate_main_executable.

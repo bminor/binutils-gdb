@@ -1989,17 +1989,32 @@ svr4_relocate_main_executable (void)
 {
   CORE_ADDR displacement;
 
-  if (symfile_objfile)
-    {
-      int i;
+  /* If we are re-running this executable, SYMFILE_OBJFILE->SECTION_OFFSETS
+     probably contains the offsets computed using the PIE displacement
+     from the previous run, which of course are irrelevant for this run.
+     So we need to determine the new PIE displacement and recompute the
+     section offsets accordingly, even if SYMFILE_OBJFILE->SECTION_OFFSETS
+     already contains pre-computed offsets.
 
-      /* Remote target may have already set specific offsets by `qOffsets'
-	 which should be preferred.  */
+     If we cannot compute the PIE displacement, either:
 
-      for (i = 0; i < symfile_objfile->num_sections; i++)
-	if (ANOFFSET (symfile_objfile->section_offsets, i) != 0)
-	  return;
-    }
+       - The executable is not PIE.
+
+       - SYMFILE_OBJFILE does not match the executable started in the target.
+	 This can happen for main executable symbols loaded at the host while
+	 `ld.so --ld-args main-executable' is loaded in the target.
+
+     Then we leave the section offsets untouched and use them as is for
+     this run.  Either:
+
+       - These section offsets were properly reset earlier, and thus
+	 already contain the correct values.  This can happen for instance
+	 when reconnecting via the remote protocol to a target that supports
+	 the `qOffsets' packet.
+
+       - The section offsets were not reset earlier, and the best we can
+	 hope is that the old offsets are still applicable to the new run.
+   */
 
   if (! svr4_exec_displacement (&displacement))
     return;

@@ -337,6 +337,11 @@ proc test_ld {file ifmain trynosym displacement} {
     # Print the "PIE (Position Independent Executable) displacement" message.
     gdb_test_no_output "set verbose on"
 
+    # We want to test the re-run of a PIE in the case where the executable
+    # is loaded with a different displacement, but disable-randomization
+    # prevents that from happening.  So turn it off.
+    gdb_test "set disable-randomization off"
+
     reach "dl_main" "run segv" $displacement
 
     gdb_test "bt" "#0 +\[^\r\n\]*\\mdl_main\\M.*" "dl bt"
@@ -347,7 +352,13 @@ proc test_ld {file ifmain trynosym displacement} {
 	reach "libfunc" continue "NONE"
 
 	gdb_test "bt" "#0 +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#1 +\[^\r\n\]*\\mmain\\M.*" "main bt"
+    }
 
+    # Try re-run if the new PIE displacement takes effect.
+    gdb_test "kill" "" "kill" {Kill the program being debugged\? \(y or n\) } "y"
+    reach "dl_main" "run segv" $displacement
+
+    if $ifmain {
 	test_core $file $displacement
 
 	test_attach $file $displacement

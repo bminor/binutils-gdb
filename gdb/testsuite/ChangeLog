@@ -1,6 +1,14 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
+	Fix re-run of PIE executable, PR shlibs/11776.
+	* gdb.base/break-interp.exp (test_ld): Turn off "disable-randomization".
+	Remove $displacement_main to match the solib-svr4.c change.  New "kill"
+	and re-"run" of the inferior.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
 	Cope with missing /usr/sbin/prelink.
 	* lib/prelink-support.exp (prelink_no):
 	<result == 1 && $output is "no such file or directory">: New.
