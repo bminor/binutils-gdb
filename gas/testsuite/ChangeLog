@@ -1,5 +1,19 @@
 2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/beq.d, gas/mips/beq.s: Remove checks for
+	branch-likely instructions.
+	* gas/mips/bge.d, gas/mips/bge.s: Likewise.
+	* gas/mips/bgeu.d, gas/mips/bgeu.s: Likewise.
+	* gas/mips/blt.d, gas/mips/blt.s: Likewise.
+	* gas/mips/bltu.d, gas/mips/bltu.s: Likewise.
+	* gas/mips/branch-likely.d, gas/mips/branch-likely.s: New test,
+	collecting checks for branch-likely instructions removed from
+	the above.
+	* gas/mips/mips.exp: Run the new test and update the
+	constraints for the updated tests to include MIPS I.
+
+2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/mips4-fp.d: Reformat.
 
 2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>

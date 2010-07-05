@@ -29,21 +29,17 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> bnez	a0,0+0000 <.*>
 [0-9a-f]+ <[^>]*> nop
-[0-9a-f]+ <[^>]*> beqzl	a0,0+0000 <.*>
-[0-9a-f]+ <[^>]*> nop
-[0-9a-f]+ <[^>]*> bnezl	a0,0+0000 <.*>
-[0-9a-f]+ <[^>]*> nop
 	\.\.\.
 [0-9a-f]+ <[^>]*> j	0+0000 <.*>
-[ 	]*20068: (MIPS_JMP|JMPADDR|R_MIPS_26)	\.text
+[ 	]*20058: (MIPS_JMP|JMPADDR|R_MIPS_26)	\.text
 [0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> jal	0+0000 <.*>
-[ 	]*20070: (MIPS_JMP|JMPADDR|R_MIPS_26)	\.text
+[ 	]*20060: (MIPS_JMP|JMPADDR|R_MIPS_26)	\.text
 [0-9a-f]+ <[^>]*> nop
-#[0-9a-f]+ <[^>]*> b	0+20078 <.*\+0x20078>
-#[ 	]*20078: .*16	external_label
+#[0-9a-f]+ <[^>]*> b	0+20068 <.*\+0x20068>
+#[ 	]*20068: .*16	external_label
 #[0-9a-f]+ <[^>]*> nop
-#[0-9a-f]+ <[^>]*> bal	0+20080 <.*\+0x20080>
-#[ 	]*20080: .*16	external_label
+#[0-9a-f]+ <[^>]*> bal	0+20070 <.*\+0x20070>
+#[ 	]*20070: .*16	external_label
 #[0-9a-f]+ <[^>]*> nop
 	\.\.\.

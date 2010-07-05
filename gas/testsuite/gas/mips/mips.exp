@@ -412,13 +412,12 @@ if { [istarget mips*-*-vxworks*] } {
     # See http://sources.redhat.com/ml/binutils/2001-10/msg00418.html for
     # more information.  Not sure if the fixes there are correct; should
     # branches to external labels be allowed for ECOFF?
-    # XXX FIXME: the following tests require -mips2 disasm for
-    # branch-likely instructions.  They should be split.
-    run_dump_test_arches "beq"		[mips_arch_list_matching mips2]
-    run_dump_test_arches "bge"		[mips_arch_list_matching mips2]
-    run_dump_test_arches "bgeu"		[mips_arch_list_matching mips2]
-    run_dump_test_arches "blt"		[mips_arch_list_matching mips2]
-    run_dump_test_arches "bltu"		[mips_arch_list_matching mips2]
+    run_dump_test_arches "beq"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "bge"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "bgeu"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "blt"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "bltu"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "branch-likely" [mips_arch_list_matching mips2]
     run_dump_test_arches "branch-misc-1" [mips_arch_list_matching mips1]
     run_dump_test_arches "branch-misc-2" [mips_arch_list_matching mips1]
     run_dump_test_arches "branch-misc-2pic" [mips_arch_list_matching mips1]
