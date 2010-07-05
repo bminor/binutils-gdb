@@ -114,7 +114,7 @@ enum
   CpuEPT,
   /* RDTSCP Instuction support required */
   CpuRdtscp,
-  /* FSBSBASE Instructions required */
+  /* FSGSBASE Instructions required */
   CpuFSGSBase,
   /* RDRND Instructions required */
   CpuRdRnd,

@@ -1,3 +1,7 @@
+2010-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.h (CpuFSGSBase): Fix a typo in comments.
+
 2010-07-03  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ppc-dis.c (powerpc_init_dialect): Cast PPC_OPCODE_xxx to
@@ -47,7 +51,7 @@
 	(cpu_flags): Add CpuXsaveopt, CpuFSGSBase, CpuRdRnd and CpuF16C.
 
 	* i386-opc.h (CpuXsaveopt): New.
-	(CpuFSGSBase):Likewise.
+	(CpuFSGSBase): Likewise.
 	(CpuRdRnd): Likewise.
 	(CpuF16C): Likewise.
 	(i386_cpu_flags): Add cpuxsaveopt, cpufsgsbase, cpurdrnd and
