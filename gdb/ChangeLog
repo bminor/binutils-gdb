@@ -1,6 +1,15 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
+	* auxv.c (memory_xfer_auxv): Update attach comment.
+	* solib-svr4.c (svr4_special_symbol_handling): Remove the call to
+	svr4_relocate_main_executable.
+	(svr4_solib_create_inferior_hook): Make the call to
+	svr4_relocate_main_executable unconditional.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
 	* auxv.c (ld_so_xfer_auxv): Do not error on failed read of data_address.
 
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>

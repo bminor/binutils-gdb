@@ -208,8 +208,10 @@ memory_xfer_auxv (struct target_ops *ops,
   gdb_assert (readbuf || writebuf);
 
    /* ld_so_xfer_auxv is the only function safe for virtual executables being
-      executed by valgrind's memcheck.  As using ld_so_xfer_auxv is problematic
-      during inferior startup GDB does call it only for attached processes.  */
+      executed by valgrind's memcheck.  Using ld_so_xfer_auxv during inferior
+      startup is problematic, because ld.so symbol tables have not yet been
+      relocated.  So GDB uses this function only when attaching to a process.
+      */
 
   if (current_inferior ()->attach_flag != 0)
     {

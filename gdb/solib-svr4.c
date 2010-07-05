@@ -1653,7 +1653,6 @@ enable_break (struct svr4_info *info, int from_tty)
 static void
 svr4_special_symbol_handling (void)
 {
-  svr4_relocate_main_executable ();
 }
 
 /* Read the ELF program headers from ABFD.  Return the contents and
@@ -2096,8 +2095,7 @@ svr4_solib_create_inferior_hook (int from_tty)
   info = get_svr4_info ();
 
   /* Relocate the main executable if necessary.  */
-  if (current_inferior ()->attach_flag == 0)
-    svr4_relocate_main_executable ();
+  svr4_relocate_main_executable ();
 
   if (!svr4_have_link_map_offsets ())
     return;

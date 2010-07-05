@@ -1,4 +1,10 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/attach-pie-misread.exp, gdb.base/attach-pie-misread.c: New.
+	* gdb.base/break-interp.exp (reach, test_core, test_ld): Require each
+	displacement message exactly once.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/break-interp.exp (test_attach): Keep $interp changed.  Move

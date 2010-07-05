@@ -253,9 +253,8 @@ proc reach {func command displacement} {
 		}
 		if {$displacement == $case} {
 		    pass $test_displacement
-		    # Permit multiple such messages.
 		    set displacement "FOUND-$displacement"
-		} elseif {$displacement != "FOUND-$case"} {
+		} else {
 		    fail $test_displacement
 		}
 		exp_continue
@@ -310,9 +309,8 @@ proc test_core {file displacement} {
 	    }
 	    if {$displacement == $case} {
 		pass $test_displacement
-		# Permit multiple such messages.
 		set displacement "FOUND-$displacement"
-	    } elseif {$displacement != "FOUND-$case"} {
+	    } else {
 		fail $test_displacement
 	    }
 	    exp_continue
@@ -368,9 +366,8 @@ proc test_attach_gdb {file pid displacement prefix} {
 	    }
 	    if {$displacement == $case} {
 		pass $test_displacement
-		# Permit multiple such messages.
 		set displacement "FOUND-$displacement"
-	    } elseif {$displacement != "FOUND-$case"} {
+	    } else {
 		fail $test_displacement
 	    }
 	    exp_continue
@@ -468,15 +465,7 @@ proc test_ld {file ifmain trynosym displacement} {
     gdb_test "bt" "#0 +\[^\r\n\]*\\mdl_main\\M.*" "dl bt"
 
     if $ifmain {
-	# Displacement message will be printed the second time on initializing
-	# the linker from svr4_special_symbol_handling.  If any ANOFFSET has
-	# been already set as non-zero the detection will no longer be run.
-	if {$displacement == "NONZERO"} {
-	    set displacement_main "NONE"
-	} else {
-	    set displacement_main $displacement
-	}
-	reach "main" continue $displacement_main
+	reach "main" continue "NONE"
 
 	reach "libfunc" continue "NONE"
 
@@ -542,9 +531,8 @@ proc test_ld {file ifmain trynosym displacement} {
 		}
 		if {$displacement == $case} {
 		    pass $test_displacement
-		    # Permit multiple such messages.
 		    set displacement "FOUND-$displacement"
-		} elseif {$displacement != "FOUND-$case"} {
+		} else {
 		    fail $test_displacement
 		}
 		exp_continue
