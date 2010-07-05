@@ -1718,11 +1718,12 @@ dwarf2_init (void)
 
 /* Finish the dwarf2 debug sections.  We emit .debug.line if there
    were any .file/.loc directives, or --gdwarf2 was given, or if the
-   file has a non-empty .debug_info section.  If we emit .debug_line,
-   and the .debug_info section is empty, we also emit .debug_info,
-   .debug_aranges and .debug_abbrev.  ALL_SEGS will be non-null if
-   there were any .file/.loc directives, or --gdwarf2 was given and
-   there were any located instructions emitted.  */
+   file has a non-empty .debug_info section and an empty .debug_line
+   section.  If we emit .debug_line, and the .debug_info section is
+   empty, we also emit .debug_info, .debug_aranges and .debug_abbrev.
+   ALL_SEGS will be non-null if there were any .file/.loc directives,
+   or --gdwarf2 was given and there were any located instructions
+   emitted.  */
 
 void
 dwarf2_finish (void)
@@ -1731,13 +1732,24 @@ dwarf2_finish (void)
   struct line_seg *s;
   segT info_seg;
   int emit_other_sections = 0;
+  int empty_debug_line = 0;
 
   info_seg = bfd_get_section_by_name (stdoutput, ".debug_info");
   emit_other_sections = info_seg == NULL || !seg_not_empty_p (info_seg);
 
-  if (!all_segs && emit_other_sections)
-    /* There is no line information and no non-empty .debug_info
-       section.  */
+  line_seg = bfd_get_section_by_name (stdoutput, ".debug_line");
+  empty_debug_line = line_seg == NULL || !seg_not_empty_p (line_seg);
+
+  /* We can't construct a new debug_line section if we already have one.
+     Give an error.  */
+  if (all_segs && !empty_debug_line)
+    as_fatal ("duplicate .debug_line sections");
+
+  if ((!all_segs && emit_other_sections)
+      || (!emit_other_sections && !empty_debug_line))
+    /* If there is no line information and no non-empty .debug_info
+       section, or if there is both a non-empty .debug_info and a non-empty
+       .debug_line, then we do nothing.  */
     return;
 
   /* Calculate the size of an address for the target machine.  */

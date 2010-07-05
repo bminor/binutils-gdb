@@ -1,3 +1,10 @@
+2010-07-05  Jim Wilson  <wilson@codesourcery.com>
+
+	PR gas/10531
+	PR gas/11789
+	* dwarf2dbg.c (dwarf2_finish): Don't generate .debug_line section
+	if it isn't empty.
+
 2010-07-05  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-moxie.c (md_apply_fix): Delete set but otherwise

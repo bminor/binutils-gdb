@@ -1,3 +1,22 @@
+2010-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10531
+	PR gas/11789
+	* gas/i386/dw2-compress-1.d: Remove bogus line debug info.
+
+	* gas/elf/dwarf2-1.d: New.
+	* gas/elf/dwarf2-1.s: Likewise.
+	* gas/elf/dwarf2-2.d: Likewise.
+	* gas/elf/dwarf2-2.s: Likewise.
+	* gas/elf/dwarf2-3.d: Likewise.
+	* gas/elf/dwarf2-3.s: Likewise.
+	* gas/i386/debug1.d: Likewise.
+	* gas/i386/debug1.s: Likewise.
+
+	* gas/elf/elf.exp: Run dwarf2-1, dwarf2-2 and dwarf2-3.
+
+	* gas/i386/i386.exp: Run debug1 for both 32bit and 64bit.
+
 2010-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/dw2-compress-1.d: New.
