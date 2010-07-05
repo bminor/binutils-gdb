@@ -621,10 +621,8 @@ md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED,
   long val = *valP;
   long newval;
   long max, min;
-  int shift;
 
   max = min = 0;
-  shift = 0;
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_32:
