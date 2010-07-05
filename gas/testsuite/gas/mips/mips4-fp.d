@@ -10,11 +10,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> bc1f	\$fcc1,0+0000 <text_label>
 [0-9a-f]+ <[^>]*> nop
-[0-9a-f]+ <[^>]*> bc1fl	\$fcc1,0+0000 <text_label>
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> bc1t	\$fcc1,0+0000 <text_label>
-[0-9a-f]+ <[^>]*> nop
-[0-9a-f]+ <[^>]*> bc1tl	\$fcc2,0+0000 <text_label>
 [0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> c.f.d	\$f4,\$f6
 [0-9a-f]+ <[^>]*> c.f.d	\$fcc1,\$f4,\$f6
