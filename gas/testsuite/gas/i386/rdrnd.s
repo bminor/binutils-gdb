@@ -2,9 +2,9 @@
 
 	.text
 foo:
-	rdrnd %bx
-	rdrnd %ebx
+	rdrand %bx
+	rdrand %ebx
 
 	.intel_syntax noprefix
-	rdrnd bx
-	rdrnd ebx
+	rdrand bx
+	rdrand ebx

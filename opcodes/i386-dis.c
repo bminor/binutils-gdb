@@ -10450,7 +10450,7 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0FC7_REG_6 */
     { PREFIX_TABLE (PREFIX_0FC7_REG_6) },
-    { "rdrnd",		{ Ev } },
+    { "rdrand",		{ Ev } },
   },
   {
     /* MOD_0FC7_REG_7 */

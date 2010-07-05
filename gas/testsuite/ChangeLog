@@ -1,5 +1,15 @@
 2010-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	AVX Programming Reference (June, 2010)
+	* gas/i386/rdrnd.s: Replace rdrnd with rdrand.
+	* gas/i386/rdrnd-intel.d: Likewise.
+	* gas/i386/rdrnd.d: Likewise.
+	* gas/i386/x86-64-rdrnd-intel.d: Likewise.
+	* gas/i386/x86-64-rdrnd.d: Likewise.
+	* gas/i386/x86-64-rdrnd.s: Likewise.
+
+2010-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/10531
 	PR gas/11789
 	* gas/i386/dw2-compress-1.d: Remove bogus line debug info.

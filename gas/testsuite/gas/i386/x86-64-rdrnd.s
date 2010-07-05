@@ -2,17 +2,17 @@
 
 	.text
 foo:
-	rdrnd %bx
-	rdrnd %ebx
-	rdrnd %rbx
-	rdrnd %r8w
-	rdrnd %r8d
-	rdrnd %r8
+	rdrand %bx
+	rdrand %ebx
+	rdrand %rbx
+	rdrand %r8w
+	rdrand %r8d
+	rdrand %r8
 
 	.intel_syntax noprefix
-	rdrnd bx
-	rdrnd ebx
-	rdrnd rbx
-	rdrnd r8w
-	rdrnd r8d
-	rdrnd r8
+	rdrand bx
+	rdrand ebx
+	rdrand rbx
+	rdrand r8w
+	rdrand r8d
+	rdrand r8

@@ -2394,7 +2394,7 @@ vpclmulhqhqdq, 3, 0x6644, 0x11, 1, CpuAVX|CpuPCLMUL, Modrm|Vex|VexOpcode=2|VexVV
 
 rdfsbase, 1, 0xf30fae, 0x0, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
 rdgsbase, 1, 0xf30fae, 0x1, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
-rdrnd, 1, 0xfc7, 0x6, 2, CpuRdRnd, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64 }
+rdrand, 1, 0xfc7, 0x6, 2, CpuRdRnd, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64 }
 wrfsbase, 1, 0xf30fae, 0x2, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
 wrgsbase, 1, 0xf30fae, 0x3, 2, CpuFSGSBase, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64 }
 vcvtph2ps, 2, 0x6613, None, 1, CpuF16C, Modrm|Vex|VexOpcode=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
