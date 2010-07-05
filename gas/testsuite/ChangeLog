@@ -88,7 +88,6 @@
 
 2010-06-22  Jan Beulich  <jbeulich@novell.com>
 
-	PR gas/11732
 	* gas/i386/jump.d: Adjust.
 	* gas/i386/jump.s: Add check for branch to 2+$.
 
