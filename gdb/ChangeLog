@@ -1,6 +1,11 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
+	* auxv.c (ld_so_xfer_auxv): Do not error on failed read of data_address.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
 	Fix attaching to PIEs prelinked on the disk after the process was
 	started.
 	* solib-svr4.c (svr4_exec_displacement): New variable arch_size.

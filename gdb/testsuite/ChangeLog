@@ -1,6 +1,12 @@
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/break-interp.exp (test_attach): Keep $interp changed.  Move
+	its restore after the <$relink_args != ""> loop.  new comment.
+
+2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/break-interp.exp: Run $binpie with new value "ATTACH", new
 	code for it.  New variable relink_args.
 	(prelinkYES): Call prelinkNO.

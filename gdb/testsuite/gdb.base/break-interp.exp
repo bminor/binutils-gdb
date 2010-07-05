@@ -425,12 +425,24 @@ proc test_attach {file displacement {relink_args ""}} {
 	global exec interp_saved interp
 
 	foreach relink {YES NO} {
-	    if {[prelink$relink $relink_args [file tail $exec]]
-	        && [copy $interp_saved $interp]} {
+	    # Formerly this test was testing only prelinking of $EXEC.  As the
+	    # prelink command automatically prelinks all of $EXEC's libraries,
+	    # even $INTERP got prelinked.  Therefore, we formerly had to
+	    # `[copy $interp_saved $interp]' to make $INTERP not affected by
+	    # this prelinking of $EXEC.
+	    #
+	    # But now we need to test even prelinking of $INTERP.  We could
+	    # create a separate test to test just the $INTERP prelinking.  For
+	    # test simplicity, we merged this test and the test above by not
+	    # restoring $INTERP after $EXEC prelink.  $INTERP gets restored
+	    # later below.
+
+	    if [prelink$relink $relink_args [file tail $exec]] {
 		# /proc/PID/exe cannot be loaded as it is "EXECNAME (deleted)".
 		test_attach_gdb $exec $pid $displacement "attach-relink$relink"
 	    }
 	}
+	copy $interp_saved $interp
     }
 
     remote_exec host "kill -9 $pid"
