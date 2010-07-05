@@ -1,3 +1,8 @@
+2010-07-05  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c: Formatting.
+	(ppc_elf_finish_dynamic_sections): Don't make plt_entry var static.
+
 2010-07-03  Cary Coutant  <ccoutant@google.com>
 
 	* compress.c (bfd_uncompress_section_contents): Add ATTRIBUTE_UNUSED.
