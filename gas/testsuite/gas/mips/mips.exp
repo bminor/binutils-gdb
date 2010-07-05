@@ -271,7 +271,12 @@ proc mips_arch_list_matching {args} {
 # Invoke "run_dump_test" for test NAME, with extra assembler and
 # disassembler flags to test architecture ARCH.
 proc run_dump_test_arch { name arch } {
-    global subdir
+    global subdir srcdir
+
+    set archname "${arch}@${name}"
+    if { [file exists "$srcdir/$subdir/${archname}.d"] } {
+	set name $archname
+    }
 
     if [catch {run_dump_test $name \
 			     "{name    {([mips_arch_displayname $arch])}}

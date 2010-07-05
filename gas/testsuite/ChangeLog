@@ -1,5 +1,11 @@
 2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/mips.exp (run_dump_test_arch): Check for the presence
+	of an architecture-specific test first and use it if found,
+	before falling back to the generic one.
+
+2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/mips4-fp.d, gas/mips/mips4-fp.s: Remove checks for
 	branch-likely instructions and place them...
 	* gas/mips/mips4-branch-likely.d, gas/mips/mips4-branch-likely.s:
