@@ -229,6 +229,9 @@
 /* Define if Python 2.6 is being used. */
 #undef HAVE_LIBPYTHON2_6
 
+/* Define if Python 2.7 is being used. */
+#undef HAVE_LIBPYTHON2_7
+
 /* Define if libunwind library is being used. */
 #undef HAVE_LIBUNWIND
 

@@ -10809,7 +10809,11 @@ $as_echo "${found_usable_python}" >&6; }
 
     fi
   fi
-  if test "${have_libpython}" = python2.6; then
+  if test "${have_libpython}" = python2.7; then
+
+$as_echo "#define HAVE_LIBPYTHON2_7 1" >>confdefs.h
+
+  elif test "${have_libpython}" = python2.6; then
 
 $as_echo "#define HAVE_LIBPYTHON2_6 1" >>confdefs.h
 

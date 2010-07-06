@@ -50,6 +50,9 @@ typedef int Py_ssize_t;
 #elif HAVE_LIBPYTHON2_6
 #include "python2.6/Python.h"
 #include "python2.6/frameobject.h"
+#elif HAVE_LIBPYTHON2_7
+#include "python2.7/Python.h"
+#include "python2.7/frameobject.h"
 #else
 #error "Unable to find usable Python.h"
 #endif

@@ -792,7 +792,9 @@ else
                        ${python_includes}, "${python_libs} -lpython2.4")
     fi
   fi
-  if test "${have_libpython}" = python2.6; then
+  if test "${have_libpython}" = python2.7; then
+    AC_DEFINE(HAVE_LIBPYTHON2_7, 1, [Define if Python 2.7 is being used.])
+  elif test "${have_libpython}" = python2.6; then
     AC_DEFINE(HAVE_LIBPYTHON2_6, 1, [Define if Python 2.6 is being used.])
   elif test "${have_libpython}" = python2.5; then
     AC_DEFINE(HAVE_LIBPYTHON2_5, 1, [Define if Python 2.5 is being used.])

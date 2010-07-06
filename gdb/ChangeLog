@@ -1,3 +1,9 @@
+2010-07-06  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuild.
+	* configure.ac (HAVE_LIBPYTHON2_7): New define.
+	* python/python-internal.h: Handle HAVE_LIBPYTHON2_7.
+
 2010-07-06  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* breakpoint.c (_initialize_breakpoint): Add "cl" as alias for
