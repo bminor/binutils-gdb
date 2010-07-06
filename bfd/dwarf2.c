@@ -1058,6 +1058,7 @@ add_line_info (struct line_info_table *table,
     return FALSE;
 
   /* Set member data of 'info'.  */
+  info->prev_line = NULL;
   info->address = address;
   info->op_index = op_index;
   info->line = line;
