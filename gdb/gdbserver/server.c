@@ -2035,7 +2035,7 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 /* Resume inferior and wait for another event.  In non-stop mode,
    don't really wait here, but return immediatelly to the event
    loop.  */
-void
+static void
 myresume (char *own_buf, int step, int sig)
 {
   struct thread_resume resume_info[2];

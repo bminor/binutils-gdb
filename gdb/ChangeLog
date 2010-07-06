@@ -1,3 +1,7 @@
+2010-07-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* server.c (myresume): Make static.
+
 2010-07-06  Tom Tromey  <tromey@redhat.com>
 
 	* configure, config.in: Rebuild.
