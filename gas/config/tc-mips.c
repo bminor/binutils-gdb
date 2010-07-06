@@ -12234,7 +12234,7 @@ mips_frob_file (void)
 	    hi_pos = pos;
 
 	  if ((*pos)->fx_r_type == looking_for_rtype
-	      && (*pos)->fx_addsy == l->fixp->fx_addsy
+	      && symbol_same_p ((*pos)->fx_addsy, l->fixp->fx_addsy)
 	      && (*pos)->fx_offset >= l->fixp->fx_offset
 	      && (lo_pos == NULL
 		  || (*pos)->fx_offset < (*lo_pos)->fx_offset

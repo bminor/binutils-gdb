@@ -146,6 +146,19 @@ proc mips_arch_create {arch gprsize extends props as_flags objdump_flags
     }
 }
 
+# mips_arch_destroy ARCH
+#
+# The opposite of the above.  This function removes an entry from
+# the architecture data array, for the architecture or CPU named ARCH.
+
+proc mips_arch_destroy {arch} {
+    global mips_arches
+
+    if { [info exists mips_arches($arch)] } {
+	unset mips_arches($arch)
+    }
+}
+
 # mips_arch_list_all
 #
 # This function returns the list of all names of entries in the
@@ -354,6 +367,8 @@ mips_arch_create mips64r2 64	mips64	{ mips32r2 ror } \
 			{ -march=mips64r2 -mtune=mips64r2 } \
 			{ -mmips:isa64r2 } \
 			{ mipsisa64r2-*-* mipsisa64r2el-*-* }
+mips_arch_create mips16	32	{}	{} \
+			{ -march=mips1 -mips16 } { -mmips:16 }
 mips_arch_create r3000 	32	mips1	{} \
 			{ -march=r3000 -mtune=r3000 } { -mmips:3000 }
 mips_arch_create r3900 	32	mips1	{ gpr_ilocks } \
@@ -402,6 +417,9 @@ if { [istarget mips*-*-vxworks*] } {
     }
     if { $ecoff } {
 	set no_mips16 1
+    }
+    if { $no_mips16 } {
+	mips_arch_destroy mips16
     }
     
     run_dump_test_arches "abs"		[mips_arch_list_matching mips1]
@@ -456,10 +474,11 @@ if { [istarget mips*-*-vxworks*] } {
     if !$aout {
 	# XXX FIXME: Has mips2 and later insns with mips1 disassemblies.
 	# (Should split and then use appropriate arch lists.)
-	run_dump_test_arches "lb"	[mips_arch_list_matching !mips2]
+	run_dump_test_arches "lb"	[mips_arch_list_matching mips1 !mips2]
     }
     if $elf {
-	run_dump_test_arches "lb-svr4pic" [mips_arch_list_matching !gpr_ilocks]
+	run_dump_test_arches "lb-svr4pic" \
+				[mips_arch_list_matching mips1 !gpr_ilocks]
 	run_dump_test_arches "lb-svr4pic-ilocks" [mips_arch_list_matching gpr_ilocks]
     }
     if $elf {
@@ -496,7 +515,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "mips5"	[mips_arch_list_matching mips5]
     run_dump_test "mul"
 
-    run_dump_test_arches "rol"		[mips_arch_list_matching !ror]
+    run_dump_test_arches "rol"		[mips_arch_list_matching mips1 !ror]
     run_dump_test_arches "rol-hw" 	[mips_arch_list_matching ror]
 
     run_dump_test_arches "rol64"	[mips_arch_list_matching gpr64 !ror]
@@ -516,9 +535,11 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "usw"
 	run_dump_test "usd"
     }
-    run_dump_test_arches "ulw2-eb"	[mips_arch_list_matching !gpr_ilocks]
+    run_dump_test_arches "ulw2-eb" \
+				[mips_arch_list_matching mips1 !gpr_ilocks]
     run_dump_test_arches "ulw2-eb-ilocks" [mips_arch_list_matching gpr_ilocks]
-    run_dump_test_arches "ulw2-el"	[mips_arch_list_matching !gpr_ilocks]
+    run_dump_test_arches "ulw2-el" \
+				[mips_arch_list_matching mips1 !gpr_ilocks]
     run_dump_test_arches "ulw2-el-ilocks" [mips_arch_list_matching gpr_ilocks]
 
     run_dump_test_arches "uld2-eb" [mips_arch_list_matching mips3]
@@ -704,6 +725,8 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "elf-rel25"
 	run_dump_test "elf-rel25a"
 	run_dump_test "elf-rel26"
+
+	run_dump_test_arches "elf-rel27" [mips_arch_list_all]
 
 	if { !$no_mips16 } {
 	    run_dump_test "${tmips}mips${el}16-e"

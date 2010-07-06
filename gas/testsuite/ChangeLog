@@ -1,3 +1,13 @@
+2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/elf-rel27.d: New test for HI16/LO16 relocation
+	pairing.
+	* gas/mips/elf-rel27.s: Source for the new test.
+	* gas/mips/mips.exp: Create "mips16" architecture.  Adjust
+	conditions involving negated properties throughout to require
+	"mips1" as appropriate.  Run the new test.
+	(mips_arch_destroy): New procedure.
+
 2010-07-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/mips.exp (run_dump_test_arch): Check for the presence
