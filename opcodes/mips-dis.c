@@ -1404,7 +1404,8 @@ print_insn_mips (bfd_vma memaddr,
 	      /* Figure out instruction type and branch delay information.  */
 	      if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
 	        {
-		  if ((info->insn_type & INSN_WRITE_GPR_31) != 0)
+		  if ((op->pinfo & (INSN_WRITE_GPR_31
+				    | INSN_WRITE_GPR_D)) != 0)
 		    info->insn_type = dis_jsr;
 		  else
 		    info->insn_type = dis_branch;
@@ -1413,7 +1414,7 @@ print_insn_mips (bfd_vma memaddr,
 	      else if ((op->pinfo & (INSN_COND_BRANCH_DELAY
 				     | INSN_COND_BRANCH_LIKELY)) != 0)
 		{
-		  if ((info->insn_type & INSN_WRITE_GPR_31) != 0)
+		  if ((op->pinfo & INSN_WRITE_GPR_31) != 0)
 		    info->insn_type = dis_condjsr;
 		  else
 		    info->insn_type = dis_condbranch;

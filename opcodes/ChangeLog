@@ -1,5 +1,10 @@
 2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-dis.c (print_insn_mips): Correct branch instruction type
+	determination.
+
+2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-dis.c (print_mips16_insn_arg): Remove branch instruction
 	type and delay slot determination.
 	(print_insn_mips16): Extend branch instruction type and delay
