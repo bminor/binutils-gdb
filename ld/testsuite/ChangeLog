@@ -1,3 +1,9 @@
+2010-07-06  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/relax.s: Add branch back to _start.
+	* ld-powerpc/relax.d: Update.
+	* ld-powerpc/relaxr.d: Update.
+
 2010-07-01  Alan Modra  <amodra@gmail.com>
 
 	* lib/ld-lib.exp (default_ld_simple_link): Add $gcc_ld_flag before

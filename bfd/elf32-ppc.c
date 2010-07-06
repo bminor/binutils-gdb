@@ -5967,6 +5967,7 @@ ppc_elf_relax_section (bfd *abfd,
   struct ppc_elf_link_hash_table *htab;
   bfd_size_type trampoff;
   asection *got2;
+  bfd_boolean maybe_pasted;
 
   *again = FALSE;
 
@@ -5985,8 +5986,11 @@ ppc_elf_relax_section (bfd *abfd,
      return TRUE;
 
   trampoff = (isec->size + 3) & (bfd_vma) -4;
+  maybe_pasted = (strcmp (isec->output_section->name, ".init") == 0
+		  || strcmp (isec->output_section->name, ".fini") == 0);
   /* Space for a branch around any trampolines.  */
-  trampoff += 4;
+  if (maybe_pasted)
+    trampoff += 4;
 
   symtab_hdr = &elf_symtab_hdr (abfd);
 
@@ -6311,7 +6315,6 @@ ppc_elf_relax_section (bfd *abfd,
     {
       const int *stub;
       bfd_byte *dest;
-      bfd_vma val;
       int i, size;
 
       do
@@ -6327,12 +6330,15 @@ ppc_elf_relax_section (bfd *abfd,
 	goto error_return;
 
       isec->size = (isec->size + 3) & (bfd_vma) -4;
-      /* Branch around the trampolines.  */
-      val = B + trampoff - isec->size;
       dest = contents + isec->size;
+      /* Branch around the trampolines.  */
+      if (maybe_pasted)
+	{
+	  bfd_vma val = B + trampoff - isec->size;
+	  bfd_put_32 (abfd, val, dest);
+	  dest += 4;
+	}
       isec->size = trampoff;
-      bfd_put_32 (abfd, val, dest);
-      dest += 4;
 
       if (link_info->shared)
 	{

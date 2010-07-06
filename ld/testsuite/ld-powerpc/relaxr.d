@@ -10,7 +10,8 @@ Disassembly of section .text:
 			8: R_PPC_NONE	\*ABS\*
    c:	48 00 00 19 	bl      24 <_start\+0x24>
 			c: R_PPC_NONE	\*ABS\*
-  10:	48 00 00 24 	b       34 <_start\+0x34>
+  10:	48 00 00 00 	b       10 <_start\+0x10>
+			10: R_PPC_REL24	_start
   14:	3d 80 00 00 	lis     r12,0
 			16: R_PPC_ADDR16_HA	near
   18:	39 8c 00 00 	addi    r12,r12,0
