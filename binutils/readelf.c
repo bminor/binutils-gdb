@@ -9869,12 +9869,10 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
    This is a copy of bfd_uncompress_section_contents, in bfd/compress.c  */
 
 static int
-uncompress_section_contents (unsigned char ** buffer, dwarf_size_type * size)
+uncompress_section_contents (unsigned char **buffer ATTRIBUTE_UNUSED,
+			     dwarf_size_type *size ATTRIBUTE_UNUSED)
 {
 #ifndef HAVE_ZLIB_H
-  /* These are just to quiet gcc.  */
-  buffer = 0;
-  size = 0;
   return FALSE;
 #else
   dwarf_size_type compressed_size = *size;
