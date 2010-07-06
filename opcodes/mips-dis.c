@@ -1660,7 +1660,6 @@ print_mips16_insn_arg (char type,
 	    signedp = 1;
 	    pcrel = 1;
 	    branch = 1;
-	    info->insn_type = dis_condbranch;
 	    break;
 	  case 'q':
 	    nbits = 11;
@@ -1668,7 +1667,6 @@ print_mips16_insn_arg (char type,
 	    signedp = 1;
 	    pcrel = 1;
 	    branch = 1;
-	    info->insn_type = dis_branch;
 	    break;
 	  case 'A':
 	    nbits = 8;
@@ -1789,8 +1787,6 @@ print_mips16_insn_arg (char type,
       }
       info->target = ((memaddr + 4) & ~(bfd_vma) 0x0fffffff) | l;
       (*info->print_address_func) (info->target, info);
-      info->insn_type = dis_jsr;
-      info->branch_delay_insns = 1;
       break;
 
     case 'l':
@@ -2082,12 +2078,19 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 				     info);
 	    }
 
+	  /* Figure out branch instruction type and delay slot information.  */
 	  if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
+	    info->branch_delay_insns = 1;
+	  if ((op->pinfo & (INSN_UNCOND_BRANCH_DELAY
+			    | MIPS16_INSN_UNCOND_BRANCH)) != 0)
 	    {
-	      info->branch_delay_insns = 1;
-	      if (info->insn_type != dis_jsr)
+	      if ((op->pinfo & INSN_WRITE_GPR_31) != 0)
+		info->insn_type = dis_jsr;
+	      else
 		info->insn_type = dis_branch;
 	    }
+	  else if ((op->pinfo & MIPS16_INSN_COND_BRANCH) != 0)
+	    info->insn_type = dis_condbranch;
 
 	  return length;
 	}

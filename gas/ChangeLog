@@ -1,3 +1,9 @@
+2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (nops_for_insn_or_target): Replace
+	MIPS16_INSN_BRANCH with MIPS16_INSN_UNCOND_BRANCH and
+	MIPS16_INSN_COND_BRANCH.
+
 2010-07-05  Jim Wilson  <wilson@codesourcery.com>
 
 	PR gas/10531

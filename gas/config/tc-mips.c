@@ -2730,7 +2730,9 @@ nops_for_insn_or_target (const struct mips_cl_insn *hist,
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
-  else if (mips_opts.mips16 && (insn->insn_mo->pinfo & MIPS16_INSN_BRANCH))
+  else if (mips_opts.mips16
+	   && (insn->insn_mo->pinfo & (MIPS16_INSN_UNCOND_BRANCH
+				       | MIPS16_INSN_COND_BRANCH)))
     {
       tmp_nops = nops_for_sequence (1, hist, insn);
       if (tmp_nops > nops)

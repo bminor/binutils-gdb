@@ -1,3 +1,15 @@
+2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-dis.c (print_mips16_insn_arg): Remove branch instruction
+	type and delay slot determination.
+	(print_insn_mips16): Extend branch instruction type and delay
+	slot determination to cover all instructions.
+	* mips16-opc.c (BR): Remove macro.
+	(UBR, CBR): New macros.
+	(mips16_opcodes): Update branch annotation for "b", "beqz",
+	"bnez", "bteqz" and "btnez".  Add branch annotation for "jalrc"
+	and "jrc".
+
 2010-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (June, 2010)
