@@ -1,3 +1,14 @@
+2010-07-06  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdbtypes.h (floatformats_ieee_half): Add declaration.
+	* gdbtypes.c (floatformats_ieee_half): New variable.
+	* doublest.c (floatformat_from_length): Set format to
+	gdbarch_half_format if length matches.
+	* gdbarch.sh (half_bit): New architecture method.
+	(half_format): Likewise.
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Likewise.
+
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

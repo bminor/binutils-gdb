@@ -145,6 +145,8 @@ struct gdbarch
   int int_bit;
   int long_bit;
   int long_long_bit;
+  int half_bit;
+  const struct floatformat ** half_format;
   int float_bit;
   const struct floatformat ** float_format;
   int double_bit;
@@ -293,6 +295,8 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (int),  /* int_bit */
   8 * sizeof (long),  /* long_bit */
   8 * sizeof (LONGEST),  /* long_long_bit */
+  16,  /* half_bit */
+  0,  /* half_format */
   8 * sizeof (float),  /* float_bit */
   0,  /* float_format */
   8 * sizeof (double),  /* double_bit */
@@ -451,6 +455,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->int_bit = 4*TARGET_CHAR_BIT;
   gdbarch->long_bit = 4*TARGET_CHAR_BIT;
   gdbarch->long_long_bit = 2*gdbarch->long_bit;
+  gdbarch->half_bit = 2*TARGET_CHAR_BIT;
   gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   gdbarch->double_bit = 8*TARGET_CHAR_BIT;
   gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
@@ -562,6 +567,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of int_bit, invalid_p == 0 */
   /* Skip verify of long_bit, invalid_p == 0 */
   /* Skip verify of long_long_bit, invalid_p == 0 */
+  /* Skip verify of half_bit, invalid_p == 0 */
+  if (gdbarch->half_format == 0)
+    gdbarch->half_format = floatformats_ieee_half;
   /* Skip verify of float_bit, invalid_p == 0 */
   if (gdbarch->float_format == 0)
     gdbarch->float_format = floatformats_ieee_single;
@@ -934,6 +942,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_syscall_number = <%s>\n",
                       host_address_to_string (gdbarch->get_syscall_number));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: half_bit = %s\n",
+                      plongest (gdbarch->half_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: half_format = %s\n",
+                      pformat (gdbarch->half_format));
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_dos_based_file_system = %s\n",
                       plongest (gdbarch->has_dos_based_file_system));
@@ -1372,6 +1386,39 @@ set_gdbarch_long_long_bit (struct gdbarch *gdbarch,
                            int long_long_bit)
 {
   gdbarch->long_long_bit = long_long_bit;
+}
+
+int
+gdbarch_half_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of half_bit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_half_bit called\n");
+  return gdbarch->half_bit;
+}
+
+void
+set_gdbarch_half_bit (struct gdbarch *gdbarch,
+                      int half_bit)
+{
+  gdbarch->half_bit = half_bit;
+}
+
+const struct floatformat **
+gdbarch_half_format (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_half_format called\n");
+  return gdbarch->half_format;
+}
+
+void
+set_gdbarch_half_format (struct gdbarch *gdbarch,
+                         const struct floatformat ** half_format)
+{
+  gdbarch->half_format = half_format;
 }
 
 int

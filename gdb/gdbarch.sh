@@ -363,12 +363,14 @@ v:int:long_bit:::8 * sizeof (long):4*TARGET_CHAR_BIT::0
 # machine.
 v:int:long_long_bit:::8 * sizeof (LONGEST):2*gdbarch->long_bit::0
 
-# The ABI default bit-size and format for "float", "double", and "long
-# double".  These bit/format pairs should eventually be combined into
-# a single object.  For the moment, just initialize them as a pair.
+# The ABI default bit-size and format for "half", "float", "double", and
+# "long double".  These bit/format pairs should eventually be combined
+# into a single object.  For the moment, just initialize them as a pair.
 # Each format describes both the big and little endian layouts (if
 # useful).
 
+v:int:half_bit:::16:2*TARGET_CHAR_BIT::0
+v:const struct floatformat **:half_format:::::floatformats_ieee_half::pformat (gdbarch->half_format)
 v:int:float_bit:::8 * sizeof (float):4*TARGET_CHAR_BIT::0
 v:const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (gdbarch->float_format)
 v:int:double_bit:::8 * sizeof (double):8*TARGET_CHAR_BIT::0

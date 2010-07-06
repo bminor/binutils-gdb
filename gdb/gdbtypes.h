@@ -1191,6 +1191,7 @@ extern const struct objfile_type *objfile_type (struct objfile *objfile);
 
  
 /* Explicit floating-point formats.  See "floatformat.h".  */
+extern const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ieee_double[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ieee_double_littlebyte_bigword[BFD_ENDIAN_UNKNOWN];

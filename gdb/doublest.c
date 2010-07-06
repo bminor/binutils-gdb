@@ -777,7 +777,10 @@ floatformat_from_length (struct gdbarch *gdbarch, int len)
 {
   const struct floatformat *format;
 
-  if (len * TARGET_CHAR_BIT == gdbarch_float_bit (gdbarch))
+  if (len * TARGET_CHAR_BIT == gdbarch_half_bit (gdbarch))
+    format = gdbarch_half_format (gdbarch)
+	       [gdbarch_byte_order (gdbarch)];
+  else if (len * TARGET_CHAR_BIT == gdbarch_float_bit (gdbarch))
     format = gdbarch_float_format (gdbarch)
 	       [gdbarch_byte_order (gdbarch)];
   else if (len * TARGET_CHAR_BIT == gdbarch_double_bit (gdbarch))

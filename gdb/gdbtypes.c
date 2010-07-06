@@ -42,6 +42,10 @@
 
 
 /* Floatformat pairs.  */
+const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_ieee_half_big,
+  &floatformat_ieee_half_little
+};
 const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ieee_single_big,
   &floatformat_ieee_single_little
