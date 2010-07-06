@@ -11717,6 +11717,7 @@ With no argument, clears all breakpoints in the line that the selected frame\n\
 is executing in.\n\
 \n\
 See also the \"delete\" command which clears breakpoints by number."));
+  add_com_alias ("cl", "clear", class_breakpoint, 1);
 
   c = add_com ("break", class_breakpoint, break_command, _("\
 Set breakpoint at specified line or function.\n"

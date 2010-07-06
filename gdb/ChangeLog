@@ -1,3 +1,8 @@
+2010-07-06  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* breakpoint.c (_initialize_breakpoint): Add "cl" as alias for
+	"clear".
+
 2010-07-06  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdbtypes.h (floatformats_ieee_half): Add declaration.
