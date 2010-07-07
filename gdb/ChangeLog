@@ -1,5 +1,11 @@
 2010-07-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
+2010-07-07  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.2 branch created (branch timestamp: 2010-07-07 17:00 UTC)
 	* version.in: Bump version to 7.2.50.20100707-cvs.
 
