@@ -1,24 +1,3 @@
-2010-07-06  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* dwarf2.c (add_line_info): Initialize prev_line.
-
-2010-07-06  Alan Modra  <amodra@gmail.com>
-
-	* elf32-ppc.c (ppc_elf_relax_section): Insert branch around
-	trampolines only for .init and .fini sections.
-
-2010-07-05  Alan Modra  <amodra@gmail.com>
-
-	* elf32-ppc.c: Formatting.
-	(ppc_elf_finish_dynamic_sections): Don't make plt_entry var static.
-
-2010-07-03  Cary Coutant  <ccoutant@google.com>
-
-	* compress.c (bfd_uncompress_section_contents): Add ATTRIBUTE_UNUSED.
-	* dwarf2.c (read_and_uncompress_section): New function.
-	(read_section): Call it.
-	(find_line): Likewise.
-
 2010-07-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_edit_toc): Use SYMBOL_CALLS_LOCAL rather
