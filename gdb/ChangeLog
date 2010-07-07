@@ -1,5 +1,9 @@
 2010-07-07  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.1.90 released.
+
+2010-07-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Update GDB version number to 7.1.90.
 
 2010-07-07  Tom Tromey  <tromey@redhat.com>
