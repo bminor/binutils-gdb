@@ -37,6 +37,8 @@ struct uploaded_tsv;
 struct uploaded_tp;
 struct static_tracepoint_marker;
 
+struct expression;
+
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
    specific to the communications interface between us and the
@@ -426,8 +428,12 @@ struct target_ops
     int (*to_can_use_hw_breakpoint) (int, int, int);
     int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
     int (*to_remove_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
-    int (*to_remove_watchpoint) (CORE_ADDR, int, int);
-    int (*to_insert_watchpoint) (CORE_ADDR, int, int);
+
+    /* Documentation of what the two routines below are expected to do is
+       provided with the corresponding target_* macros.  */
+    int (*to_remove_watchpoint) (CORE_ADDR, int, int, struct expression *);
+    int (*to_insert_watchpoint) (CORE_ADDR, int, int, struct expression *);
+
     int (*to_stopped_by_watchpoint) (void);
     int to_have_steppable_watchpoint;
     int to_have_continuable_watchpoint;
@@ -435,6 +441,8 @@ struct target_ops
     int (*to_watchpoint_addr_within_range) (struct target_ops *,
 					    CORE_ADDR, CORE_ADDR, int);
     int (*to_region_ok_for_hw_watchpoint) (CORE_ADDR, int);
+    int (*to_can_accel_watchpoint_condition) (CORE_ADDR, int, int,
+					      struct expression *);
     void (*to_terminal_init) (void);
     void (*to_terminal_inferior) (void);
     void (*to_terminal_ours_for_output) (void);
@@ -1298,14 +1306,15 @@ extern char *normal_pid_to_str (ptid_t ptid);
 
 /* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.
    TYPE is 0 for write, 1 for read, and 2 for read/write accesses.
+   COND is the expression for its condition, or NULL if there's none.
    Returns 0 for success, 1 if the watchpoint type is not supported,
    -1 for failure.  */
 
-#define	target_insert_watchpoint(addr, len, type)	\
-     (*current_target.to_insert_watchpoint) (addr, len, type)
+#define	target_insert_watchpoint(addr, len, type, cond) \
+     (*current_target.to_insert_watchpoint) (addr, len, type, cond)
 
-#define	target_remove_watchpoint(addr, len, type)	\
-     (*current_target.to_remove_watchpoint) (addr, len, type)
+#define	target_remove_watchpoint(addr, len, type, cond) \
+     (*current_target.to_remove_watchpoint) (addr, len, type, cond)
 
 #define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
      (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt)
@@ -1321,6 +1330,19 @@ extern char *normal_pid_to_str (ptid_t ptid);
 
 #define target_watchpoint_addr_within_range(target, addr, start, length) \
   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
+
+/* Return non-zero if the target is capable of using hardware to evaluate
+   the condition expression.  In this case, if the condition is false when
+   the watched memory location changes, execution may continue without the
+   debugger being notified.
+
+   Due to limitations in the hardware implementation, it may be capable of
+   avoiding triggering the watchpoint in some cases where the condition
+   expression is false, but may report some false positives as well.
+   For this reason, GDB will still evaluate the condition expression when
+   the watchpoint triggers.  */
+#define target_can_accel_watchpoint_condition(addr, len, type, cond) \
+  (*current_target.to_can_accel_watchpoint_condition) (addr, len, type, cond)
 
 /* Target can execute in reverse?  */
 #define target_can_execute_reverse \

@@ -1,3 +1,46 @@
+2010-07-07  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Support for hw accelerated condition watchpoints in booke powerpc.
+
+	* breakpoint.c (fetch_watchpoint_value): Rename to fetch_subexp_value
+	and move to eval.c.  Change callers.
+	(insert_bp_location): Pass watchpoint condition in
+	target_insert_watchpoint.
+	(remove_breakpoint_1) Pass watchpoint condition in
+	target_remove_watchpoint.
+	(watchpoint_locations_match): Call
+	target_can_accel_watchpoint_condition.
+	* eval.c: Include wrapper.h.
+	(fetch_subexp_value): Moved from breakpoint.c.
+	* ppc-linux-nat.c (ppc_linux_region_ok_for_hw_watchpoint):
+	Formatting fix.
+	(can_use_watchpoint_cond_accel): New function.
+	(calculate_dvc): Likewise.
+	(num_memory_accesses): Likewise.
+	(check_condition): Likewise.
+	(ppc_linux_can_accel_watchpoint_condition): Likewise
+	(ppc_linux_insert_watchpoint): Call can_use_watchpoint_cond_accel,
+	check_condition and calculate_dvc.
+	(ppc_linux_remove_watchpoint): Likewise.
+	(_initialize_ppc_linux_nat): Set to_can_accel_watchpoint_condition to
+	ppc_linux_can_accel_watchpoint_condition
+	* target.c (debug_to_insert_watchpoint): Add argument for watchpoint
+	condition.
+	(debug_to_remove_watchpoint): Likewise.
+	(debug_to_can_accel_watchpoint_condition): New function.
+	(update_current_target): Set to_can_accel_watchpoint_condition.
+	(setup_target_debug): Set to_can_accel_watchpoint_condition.
+	* target.h: Add opaque declaration for struct expression.
+	(struct target_ops) <to_insert_watchpoint>,
+	<to_remove_watchpoint>: Add new arguments to pass the watchpoint
+	<to_can_accel_watchpoint_condition>: New member.
+	condition.  Update all callers and implementations.
+	(target_can_accel_watchpoint_condition): New macro.
+	* value.c (free_value_chain): New function.
+	* value.h (fetch_subexp_value): New prototype.
+	(free_value_chain): Likewise.
+
 2010-07-07  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-nat.c (linux_nat_do_thread_registers): Use section size

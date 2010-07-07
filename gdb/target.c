@@ -117,9 +117,11 @@ static int debug_to_insert_hw_breakpoint (struct gdbarch *,
 static int debug_to_remove_hw_breakpoint (struct gdbarch *,
 					  struct bp_target_info *);
 
-static int debug_to_insert_watchpoint (CORE_ADDR, int, int);
+static int debug_to_insert_watchpoint (CORE_ADDR, int, int,
+				       struct expression *);
 
-static int debug_to_remove_watchpoint (CORE_ADDR, int, int);
+static int debug_to_remove_watchpoint (CORE_ADDR, int, int,
+				       struct expression *);
 
 static int debug_to_stopped_by_watchpoint (void);
 
@@ -129,6 +131,9 @@ static int debug_to_watchpoint_addr_within_range (struct target_ops *,
 						  CORE_ADDR, CORE_ADDR, int);
 
 static int debug_to_region_ok_for_hw_watchpoint (CORE_ADDR, int);
+
+static int debug_to_can_accel_watchpoint_condition (CORE_ADDR, int, int,
+						    struct expression *);
 
 static void debug_to_terminal_init (void);
 
@@ -607,6 +612,7 @@ update_current_target (void)
       INHERIT (to_stopped_by_watchpoint, t);
       INHERIT (to_watchpoint_addr_within_range, t);
       INHERIT (to_region_ok_for_hw_watchpoint, t);
+      INHERIT (to_can_accel_watchpoint_condition, t);
       INHERIT (to_terminal_init, t);
       INHERIT (to_terminal_inferior, t);
       INHERIT (to_terminal_ours_for_output, t);
@@ -728,10 +734,10 @@ update_current_target (void)
 	    (int (*) (struct gdbarch *, struct bp_target_info *))
 	    return_minus_one);
   de_fault (to_insert_watchpoint,
-	    (int (*) (CORE_ADDR, int, int))
+	    (int (*) (CORE_ADDR, int, int, struct expression *))
 	    return_minus_one);
   de_fault (to_remove_watchpoint,
-	    (int (*) (CORE_ADDR, int, int))
+	    (int (*) (CORE_ADDR, int, int, struct expression *))
 	    return_minus_one);
   de_fault (to_stopped_by_watchpoint,
 	    (int (*) (void))
@@ -743,6 +749,9 @@ update_current_target (void)
 	    default_watchpoint_addr_within_range);
   de_fault (to_region_ok_for_hw_watchpoint,
 	    default_region_ok_for_hw_watchpoint);
+  de_fault (to_can_accel_watchpoint_condition,
+            (int (*) (CORE_ADDR, int, int, struct expression *))
+            return_zero);
   de_fault (to_terminal_init,
 	    (void (*) (void))
 	    target_ignore);
@@ -3314,6 +3323,21 @@ debug_to_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 }
 
 static int
+debug_to_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
+					 struct expression *cond)
+{
+  int retval;
+
+  retval = debug_target.to_can_accel_watchpoint_condition (addr, len, rw, cond);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_can_accel_watchpoint_condition (0x%lx, %d, %d, 0x%lx) = %ld\n",
+		      (unsigned long) addr, len, rw, (unsigned long) cond,
+		      (unsigned long) retval);
+  return retval;
+}
+
+static int
 debug_to_stopped_by_watchpoint (void)
 {
   int retval;
@@ -3388,28 +3412,32 @@ debug_to_remove_hw_breakpoint (struct gdbarch *gdbarch,
 }
 
 static int
-debug_to_insert_watchpoint (CORE_ADDR addr, int len, int type)
+debug_to_insert_watchpoint (CORE_ADDR addr, int len, int type,
+			    struct expression *cond)
 {
   int retval;
 
-  retval = debug_target.to_insert_watchpoint (addr, len, type);
+  retval = debug_target.to_insert_watchpoint (addr, len, type, cond);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_insert_watchpoint (0x%lx, %d, %d) = %ld\n",
-		      (unsigned long) addr, len, type, (unsigned long) retval);
+		      "target_insert_watchpoint (0x%lx, %d, %d, 0x%ld) = %ld\n",
+		      (unsigned long) addr, len, type, (unsigned long) cond,
+		      (unsigned long) retval);
   return retval;
 }
 
 static int
-debug_to_remove_watchpoint (CORE_ADDR addr, int len, int type)
+debug_to_remove_watchpoint (CORE_ADDR addr, int len, int type,
+			    struct expression *cond)
 {
   int retval;
 
-  retval = debug_target.to_remove_watchpoint (addr, len, type);
+  retval = debug_target.to_remove_watchpoint (addr, len, type, cond);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_remove_watchpoint (0x%lx, %d, %d) = %ld\n",
-		      (unsigned long) addr, len, type, (unsigned long) retval);
+		      "target_remove_watchpoint (0x%lx, %d, %d, 0x%ld) = %ld\n",
+		      (unsigned long) addr, len, type, (unsigned long) cond,
+		      (unsigned long) retval);
   return retval;
 }
 
@@ -3664,6 +3692,7 @@ setup_target_debug (void)
   current_target.to_stopped_data_address = debug_to_stopped_data_address;
   current_target.to_watchpoint_addr_within_range = debug_to_watchpoint_addr_within_range;
   current_target.to_region_ok_for_hw_watchpoint = debug_to_region_ok_for_hw_watchpoint;
+  current_target.to_can_accel_watchpoint_condition = debug_to_can_accel_watchpoint_condition;
   current_target.to_terminal_init = debug_to_terminal_init;
   current_target.to_terminal_inferior = debug_to_terminal_inferior;
   current_target.to_terminal_ours_for_output = debug_to_terminal_ours_for_output;

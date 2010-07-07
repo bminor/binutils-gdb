@@ -722,6 +722,20 @@ free_all_values (void)
   all_values = 0;
 }
 
+/* Frees all the elements in a chain of values.  */
+
+void
+free_value_chain (struct value *v)
+{
+  struct value *next;
+
+  for (; v; v = next)
+    {
+      next = value_next (v);
+      value_free (v);
+    }
+}
+
 /* Remove VAL from the chain all_values
    so it will not be freed automatically.  */
 

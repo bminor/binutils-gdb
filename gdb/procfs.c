@@ -5161,7 +5161,8 @@ procfs_stopped_data_address (struct target_ops *targ, CORE_ADDR *addr)
 }
 
 static int
-procfs_insert_watchpoint (CORE_ADDR addr, int len, int type)
+procfs_insert_watchpoint (CORE_ADDR addr, int len, int type,
+			  struct expression *cond)
 {
   if (!target_have_steppable_watchpoint
       && !gdbarch_have_nonsteppable_watchpoint (target_gdbarch))
@@ -5182,7 +5183,8 @@ procfs_insert_watchpoint (CORE_ADDR addr, int len, int type)
 }
 
 static int
-procfs_remove_watchpoint (CORE_ADDR addr, int len, int type)
+procfs_remove_watchpoint (CORE_ADDR addr, int len, int type,
+			  struct expression *cond)
 {
   return procfs_set_watchpoint (inferior_ptid, addr, 0, 0, 0);
 }

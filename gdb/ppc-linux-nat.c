@@ -1492,7 +1492,7 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
       if (booke_debug_info.data_bp_alignment
 	  && (addr + len > (addr & ~(booke_debug_info.data_bp_alignment - 1))
 	      + booke_debug_info.data_bp_alignment))
-	  return 0;
+	return 0;
     }
   /* addr+len must fall in the 8 byte watchable region for DABR-based
      processors (i.e., server processors).  Without the new BookE ptrace
@@ -1685,8 +1685,202 @@ get_trigger_type (int rw)
   return t;
 }
 
+/* Check whether we have at least one free DVC register.  */
 static int
-ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
+can_use_watchpoint_cond_accel (void)
+{
+  struct thread_points *p;
+  int tid = TIDGET (inferior_ptid);
+  int cnt = booke_debug_info.num_condition_regs, i;
+  CORE_ADDR tmp_value;
+
+  if (!have_ptrace_booke_interface () || cnt == 0)
+    return 0;
+
+  p = booke_find_thread_points_by_tid (tid, 0);
+
+  if (p)
+    {
+      for (i = 0; i < max_slots_number; i++)
+	if (p->hw_breaks[i].hw_break != NULL
+	    && (p->hw_breaks[i].hw_break->condition_mode
+		!= PPC_BREAKPOINT_CONDITION_NONE))
+	  cnt--;
+
+      /* There are no available slots now.  */
+      if (cnt <= 0)
+	return 0;
+    }
+
+  return 1;
+}
+
+/* Calculate the enable bits and the contents of the Data Value Compare
+   debug register present in BookE processors.
+
+   ADDR is the address to be watched, LEN is the length of watched data
+   and DATA_VALUE is the value which will trigger the watchpoint.
+   On exit, CONDITION_MODE will hold the enable bits for the DVC, and
+   CONDITION_VALUE will hold the value which should be put in the
+   DVC register.  */
+static void
+calculate_dvc (CORE_ADDR addr, int len, CORE_ADDR data_value,
+	       uint32_t *condition_mode, uint64_t *condition_value)
+{
+  int i, num_byte_enable, align_offset, num_bytes_off_dvc,
+      rightmost_enabled_byte;
+  CORE_ADDR addr_end_data, addr_end_dvc;
+
+  /* The DVC register compares bytes within fixed-length windows which
+     are word-aligned, with length equal to that of the DVC register.
+     We need to calculate where our watch region is relative to that
+     window and enable comparison of the bytes which fall within it.  */
+
+  align_offset = addr % booke_debug_info.sizeof_condition;
+  addr_end_data = addr + len;
+  addr_end_dvc = (addr - align_offset
+		  + booke_debug_info.sizeof_condition);
+  num_bytes_off_dvc = (addr_end_data > addr_end_dvc)?
+			 addr_end_data - addr_end_dvc : 0;
+  num_byte_enable = len - num_bytes_off_dvc;
+  /* Here, bytes are numbered from right to left.  */
+  rightmost_enabled_byte = (addr_end_data < addr_end_dvc)?
+			      addr_end_dvc - addr_end_data : 0;
+
+  *condition_mode = PPC_BREAKPOINT_CONDITION_AND;
+  for (i = 0; i < num_byte_enable; i++)
+    *condition_mode |= PPC_BREAKPOINT_CONDITION_BE (i + rightmost_enabled_byte);
+
+  /* Now we need to match the position within the DVC of the comparison
+     value with where the watch region is relative to the window
+     (i.e., the ALIGN_OFFSET).  */
+
+  *condition_value = ((uint64_t) data_value >> num_bytes_off_dvc * 8
+		      << rightmost_enabled_byte * 8);
+}
+
+/* Return the number of memory locations that need to be accessed to
+   evaluate the expression which generated the given value chain.
+   Returns -1 if there's any register access involved, or if there are
+   other kinds of values which are not acceptable in a condition
+   expression (e.g., lval_computed or lval_internalvar).  */
+static int
+num_memory_accesses (struct value *v)
+{
+  int found_memory_cnt = 0;
+  struct value *head = v;
+
+  /* The idea here is that evaluating an expression generates a series
+     of values, one holding the value of every subexpression.  (The
+     expression a*b+c has five subexpressions: a, b, a*b, c, and
+     a*b+c.)  GDB's values hold almost enough information to establish
+     the criteria given above --- they identify memory lvalues,
+     register lvalues, computed values, etcetera.  So we can evaluate
+     the expression, and then scan the chain of values that leaves
+     behind to determine the memory locations involved in the evaluation
+     of an expression.
+
+     However, I don't think that the values returned by inferior
+     function calls are special in any way.  So this function may not
+     notice that an expression contains an inferior function call.
+     FIXME.  */
+
+  for (; v; v = value_next (v))
+    {
+      /* Constants and values from the history are fine.  */
+      if (VALUE_LVAL (v) == not_lval || deprecated_value_modifiable (v) == 0)
+	continue;
+      else if (VALUE_LVAL (v) == lval_memory)
+	{
+	  /* A lazy memory lvalue is one that GDB never needed to fetch;
+	     we either just used its address (e.g., `a' in `a.b') or
+	     we never needed it at all (e.g., `a' in `a,b').  */
+	  if (!value_lazy (v))
+	    found_memory_cnt++;
+	}
+      /* Other kinds of values are not fine. */
+      else
+	return -1;
+    }
+
+  return found_memory_cnt;
+}
+
+/* Verifies whether the expression COND can be implemented using the
+   DVC (Data Value Compare) register in BookE processors.  The expression
+   must test the watch value for equality with a constant expression.
+   If the function returns 1, DATA_VALUE will contain the constant against
+   which the watch value should be compared.  */
+static int
+check_condition (CORE_ADDR watch_addr, struct expression *cond,
+		 CORE_ADDR *data_value)
+{
+  int pc = 1, num_accesses_left, num_accesses_right;
+  struct value *left_val, *right_val, *left_chain, *right_chain;
+
+  if (cond->elts[0].opcode != BINOP_EQUAL)
+    return 0;
+
+  fetch_subexp_value (cond, &pc, &left_val, NULL, &left_chain);
+  num_accesses_left = num_memory_accesses (left_chain);
+
+  if (left_val == NULL || num_accesses_left < 0)
+    {
+      free_value_chain (left_chain);
+
+      return 0;
+    }
+
+  fetch_subexp_value (cond, &pc, &right_val, NULL, &right_chain);
+  num_accesses_right = num_memory_accesses (right_chain);
+
+  if (right_val == NULL || num_accesses_right < 0)
+    {
+      free_value_chain (left_chain);
+      free_value_chain (right_chain);
+
+      return 0;
+    }
+
+  if (num_accesses_left == 1 && num_accesses_right == 0
+      && VALUE_LVAL (left_val) == lval_memory
+      && value_address (left_val) == watch_addr)
+    *data_value = value_as_long (right_val);
+  else if (num_accesses_left == 0 && num_accesses_right == 1
+	   && VALUE_LVAL (right_val) == lval_memory
+	   && value_address (right_val) == watch_addr)
+    *data_value = value_as_long (left_val);
+  else
+    {
+      free_value_chain (left_chain);
+      free_value_chain (right_chain);
+
+      return 0;
+    }
+
+  free_value_chain (left_chain);
+  free_value_chain (right_chain);
+
+  return 1;
+}
+
+/* Return non-zero if the target is capable of using hardware to evaluate
+   the condition expression, thus only triggering the watchpoint when it is
+   true.  */
+static int
+ppc_linux_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
+					  struct expression *cond)
+{
+  CORE_ADDR data_value;
+
+  return (have_ptrace_booke_interface ()
+	  && booke_debug_info.num_condition_regs > 0
+	  && check_condition (addr, cond, &data_value));
+}
+
+static int
+ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
+			     struct expression *cond)
 {
   struct lwp_info *lp;
   ptid_t ptid;
@@ -1695,14 +1889,23 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
   if (have_ptrace_booke_interface ())
     {
       struct ppc_hw_breakpoint p;
+      CORE_ADDR data_value;
+
+      if (cond && can_use_watchpoint_cond_accel ()
+	  && check_condition (addr, cond, &data_value))
+	calculate_dvc (addr, len, data_value, &p.condition_mode,
+		       &p.condition_value);
+      else
+	{
+	  p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
+	  p.condition_value = 0;
+	}
 
       p.version         = PPC_DEBUG_CURRENT_VERSION;
       p.trigger_type    = get_trigger_type (rw);
       p.addr_mode       = PPC_BREAKPOINT_MODE_EXACT;
-      p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
       p.addr            = (uint64_t) addr;
       p.addr2           = 0;
-      p.condition_value = 0;
 
       ALL_LWPS (lp, ptid)
 	booke_insert_point (&p, TIDGET (ptid));
@@ -1749,7 +1952,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
       saved_dabr_value = dabr_value;
 
       ALL_LWPS (lp, ptid)
-	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0, saved_dabr_value) < 0)
+	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0,
+		    saved_dabr_value) < 0)
 	  return -1;
 
       ret = 0;
@@ -1759,7 +1963,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
 }
 
 static int
-ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw)
+ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
+			     struct expression *cond)
 {
   struct lwp_info *lp;
   ptid_t ptid;
@@ -1768,14 +1973,23 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw)
   if (have_ptrace_booke_interface ())
     {
       struct ppc_hw_breakpoint p;
+      CORE_ADDR data_value;
+
+      if (cond && booke_debug_info.num_condition_regs > 0
+	  && check_condition (addr, cond, &data_value))
+	calculate_dvc (addr, len, data_value, &p.condition_mode,
+		       &p.condition_value);
+      else
+	{
+	  p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
+	  p.condition_value = 0;
+	}
 
       p.version         = PPC_DEBUG_CURRENT_VERSION;
       p.trigger_type    = get_trigger_type (rw);
       p.addr_mode       = PPC_BREAKPOINT_MODE_EXACT;
-      p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
       p.addr            = (uint64_t) addr;
       p.addr2           = 0;
-      p.condition_value = 0;
 
       ALL_LWPS (lp, ptid)
 	booke_remove_point (&p, TIDGET (ptid));
@@ -1786,7 +2000,8 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw)
     {
       saved_dabr_value = 0;
       ALL_LWPS (lp, ptid)
-	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0, saved_dabr_value) < 0)
+	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0,
+		    saved_dabr_value) < 0)
 	  return -1;
 
       ret = 0;
@@ -2137,6 +2352,7 @@ _initialize_ppc_linux_nat (void)
   t->to_stopped_by_watchpoint = ppc_linux_stopped_by_watchpoint;
   t->to_stopped_data_address = ppc_linux_stopped_data_address;
   t->to_watchpoint_addr_within_range = ppc_linux_watchpoint_addr_within_range;
+  t->to_can_accel_watchpoint_condition = ppc_linux_can_accel_watchpoint_condition;
 
   t->to_read_description = ppc_linux_read_description;
   t->to_auxv_parse = ppc_linux_auxv_parse;

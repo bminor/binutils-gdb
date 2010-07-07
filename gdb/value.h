@@ -538,6 +538,10 @@ extern struct value *evaluate_subexp (struct type *expect_type,
 extern struct value *evaluate_subexpression_type (struct expression *exp,
 						  int subexp);
 
+extern void fetch_subexp_value (struct expression *exp, int *pc,
+				struct value **valp, struct value **resultp,
+				struct value **val_chain);
+
 extern char *extract_field_op (struct expression *exp, int *subexp);
 
 extern struct value *evaluate_subexp_with_coercion (struct expression *,
@@ -634,6 +638,8 @@ extern void value_incref (struct value *val);
 extern void value_free (struct value *val);
 
 extern void free_all_values (void);
+
+extern void free_value_chain (struct value *v);
 
 extern void release_value (struct value *val);
 

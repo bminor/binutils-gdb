@@ -335,7 +335,8 @@ s390_fix_watch_points (ptid_t ptid)
 }
 
 static int
-s390_insert_watchpoint (CORE_ADDR addr, int len, int type)
+s390_insert_watchpoint (CORE_ADDR addr, int len, int type,
+			struct expression *cond)
 {
   struct lwp_info *lp;
   ptid_t ptid;
@@ -356,7 +357,8 @@ s390_insert_watchpoint (CORE_ADDR addr, int len, int type)
 }
 
 static int
-s390_remove_watchpoint (CORE_ADDR addr, int len, int type)
+s390_remove_watchpoint (CORE_ADDR addr, int len, int type,
+			struct expression *cond)
 {
   struct lwp_info *lp;
   ptid_t ptid;

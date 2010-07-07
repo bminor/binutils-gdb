@@ -1234,84 +1234,6 @@ is_watchpoint (const struct breakpoint *bpt)
 	  || bpt->type == bp_watchpoint);
 }
 
-/* Find the current value of a watchpoint on EXP.  Return the value in
-   *VALP and *RESULTP and the chain of intermediate and final values
-   in *VAL_CHAIN.  RESULTP and VAL_CHAIN may be NULL if the caller does
-   not need them.
-
-   If a memory error occurs while evaluating the expression, *RESULTP will
-   be set to NULL.  *RESULTP may be a lazy value, if the result could
-   not be read from memory.  It is used to determine whether a value
-   is user-specified (we should watch the whole value) or intermediate
-   (we should watch only the bit used to locate the final value).
-
-   If the final value, or any intermediate value, could not be read
-   from memory, *VALP will be set to NULL.  *VAL_CHAIN will still be
-   set to any referenced values.  *VALP will never be a lazy value.
-   This is the value which we store in struct breakpoint.
-
-   If VAL_CHAIN is non-NULL, *VAL_CHAIN will be released from the
-   value chain.  The caller must free the values individually.  If
-   VAL_CHAIN is NULL, all generated values will be left on the value
-   chain.  */
-
-static void
-fetch_watchpoint_value (struct expression *exp, struct value **valp,
-			struct value **resultp, struct value **val_chain)
-{
-  struct value *mark, *new_mark, *result;
-  volatile struct gdb_exception ex;
-
-  *valp = NULL;
-  if (resultp)
-    *resultp = NULL;
-  if (val_chain)
-    *val_chain = NULL;
-
-  /* Evaluate the expression.  */
-  mark = value_mark ();
-  result = NULL;
-
-  TRY_CATCH (ex, RETURN_MASK_ALL)
-    {
-      result = evaluate_expression (exp);
-    }
-  if (ex.reason < 0)
-    {
-      /* Ignore memory errors, we want watchpoints pointing at
-	 inaccessible memory to still be created; otherwise, throw the
-	 error to some higher catcher.  */
-      switch (ex.error)
-	{
-	case MEMORY_ERROR:
-	  break;
-	default:
-	  throw_exception (ex);
-	  break;
-	}
-    }
-
-  new_mark = value_mark ();
-  if (mark == new_mark)
-    return;
-  if (resultp)
-    *resultp = result;
-
-  /* Make sure it's not lazy, so that after the target stops again we
-     have a non-lazy previous value to compare with.  */
-  if (result != NULL
-      && (!value_lazy (result) || gdb_value_fetch_lazy (result)))
-    *valp = result;
-
-  if (val_chain)
-    {
-      /* Return the chain of intermediate values.  We use this to
-	 decide which addresses to watch.  */
-      *val_chain = new_mark;
-      value_release_to_mark (mark);
-    }
-}
-
 /* Assuming that B is a watchpoint: returns true if the current thread
    and its running state are safe to evaluate or update watchpoint B.
    Watchpoints on local expressions need to be evaluated in the
@@ -1469,10 +1391,11 @@ update_watchpoint (struct breakpoint *b, int reparse)
     }
   else if (within_current_scope && b->exp)
     {
+      int pc = 0;
       struct value *val_chain, *v, *result, *next;
       struct program_space *frame_pspace;
 
-      fetch_watchpoint_value (b->exp, &v, &result, &val_chain);
+      fetch_subexp_value (b->exp, &pc, &v, &result, &val_chain);
 
       /* Avoid setting b->val if it's already set.  The meaning of
 	 b->val is 'the last value' user saw, and we should update
@@ -1828,7 +1751,8 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
     {
       val = target_insert_watchpoint (bpt->address,
 				      bpt->length,
-				      bpt->watchpoint_type);
+				      bpt->watchpoint_type,
+				      bpt->owner->cond_exp);
 
       /* If trying to set a read-watchpoint, and it turns out it's not
 	 supported, try emulating one with an access watchpoint.  */
@@ -1856,7 +1780,8 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	    {
 	      val = target_insert_watchpoint (bpt->address,
 					      bpt->length,
-					      hw_access);
+					      hw_access,
+					      bpt->owner->cond_exp);
 	      if (val == 0)
 		bpt->watchpoint_type = hw_access;
 	    }
@@ -2525,8 +2450,8 @@ remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
   else if (b->loc_type == bp_loc_hardware_watchpoint)
     {
       b->inserted = (is == mark_inserted);
-      val = target_remove_watchpoint (b->address, b->length, 
-				      b->watchpoint_type);
+      val = target_remove_watchpoint (b->address, b->length,
+				      b->watchpoint_type, b->owner->cond_exp);
 
       /* Failure to remove any of the hardware watchpoints comes here.  */
       if ((is == mark_uninserted) && (b->inserted))
@@ -3679,10 +3604,11 @@ watchpoint_check (void *p)
          call free_all_values.  We can't call free_all_values because
          we might be in the middle of evaluating a function call.  */
 
+      int pc = 0;
       struct value *mark = value_mark ();
       struct value *new_val;
 
-      fetch_watchpoint_value (b->exp, &new_val, NULL, NULL);
+      fetch_subexp_value (b->exp, &pc, &new_val, NULL, NULL);
 
       /* We use value_equal_contents instead of value_equal because the latter
 	 coerces an array to a pointer, thus comparing just the address of the
@@ -5261,6 +5187,21 @@ watchpoint_locations_match (struct bp_location *loc1, struct bp_location *loc2)
   /* Both of them must not be in moribund_locations.  */
   gdb_assert (loc1->owner != NULL);
   gdb_assert (loc2->owner != NULL);
+
+  /* If the target can evaluate the condition expression in hardware, then we
+     we need to insert both watchpoints even if they are at the same place.
+     Otherwise the watchpoint will only trigger when the condition of whichever
+     watchpoint was inserted evaluates to true, not giving a chance for GDB to
+     check the condition of the other watchpoint.  */
+  if ((loc1->owner->cond_exp
+       && target_can_accel_watchpoint_condition (loc1->address, loc1->length,
+						 loc1->watchpoint_type,
+						 loc1->owner->cond_exp))
+      || (loc2->owner->cond_exp
+	  && target_can_accel_watchpoint_condition (loc2->address, loc2->length,
+						    loc2->watchpoint_type,
+						    loc2->owner->cond_exp)))
+    return 0;
 
   /* Note that this checks the owner's type, not the location's.  In
      case the target does not support read watchpoints, but does
@@ -8057,6 +7998,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   enum bptype bp_type;
   int mem_cnt = 0;
   int thread = -1;
+  int pc = 0;
 
   /* Make sure that we actually have parameters to parse.  */
   if (arg != NULL && arg[0] != '\0')
@@ -8143,7 +8085,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 
   exp_valid_block = innermost_block;
   mark = value_mark ();
-  fetch_watchpoint_value (exp, &val, NULL, NULL);
+  fetch_subexp_value (exp, &pc, &val, NULL, NULL);
   if (val != NULL)
     release_value (val);
 
