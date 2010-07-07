@@ -1,3 +1,21 @@
+2010-07-07  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_const_value) <DW_form_addr>: Create a
+	LOC_COMPUTED symbol.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Set new field.
+	(dwarf2_loc_desc_needs_frame): Likewise.
+	(compile_dwarf_to_ax) <DW_OP_addr>: Use offset.
+	* dwarf2expr.h (struct dwarf_expr_context) <offset>: New field.
+	* dwarf2expr.c (execute_stack_op) <DW_OP_addr>: Use offset.
+	* dwarf2-frame.c (execute_stack_op): Set 'offset' field.  Add
+	'offset' argument.
+	(struct dwarf2_frame_cache) <text_offset>: New field.
+	(dwarf2_frame_cache): Set new field.
+	(dwarf2_frame_prev_register): Update.
+	(dwarf2_frame_sniffer): Update.
+	(dwarf2_frame_base_sniffer): Update.
+	(dwarf2_frame_find_fde): Add 'out_offset' argument.
+
 2010-07-07  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

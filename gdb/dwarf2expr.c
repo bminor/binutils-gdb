@@ -403,6 +403,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  result = extract_unsigned_integer (op_ptr,
 					     ctx->addr_size, byte_order);
 	  op_ptr += ctx->addr_size;
+	  /* Some versions of GCC emit DW_OP_addr before
+	     DW_OP_GNU_push_tls_address.  In this case the value is an
+	     index, not an address.  We don't support things like
+	     branching between the address and the TLS op.  */
+	  if (op_ptr >= op_end || *op_ptr != DW_OP_GNU_push_tls_address)
+	    result += ctx->offset;
 	  break;
 
 	case DW_OP_const1u:

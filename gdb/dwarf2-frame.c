@@ -150,7 +150,8 @@ struct comp_unit
   bfd_vma tbase;
 };
 
-static struct dwarf2_fde *dwarf2_frame_find_fde (CORE_ADDR *pc);
+static struct dwarf2_fde *dwarf2_frame_find_fde (CORE_ADDR *pc,
+						 CORE_ADDR *out_offset);
 
 static int dwarf2_frame_adjust_regnum (struct gdbarch *gdbarch, int regnum,
 				       int eh_frame_p);
@@ -369,8 +370,8 @@ register %s (#%d) at %s"),
 
 static CORE_ADDR
 execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
-		  struct frame_info *this_frame, CORE_ADDR initial,
-		  int initial_in_stack_memory)
+		  CORE_ADDR offset, struct frame_info *this_frame,
+		  CORE_ADDR initial, int initial_in_stack_memory)
 {
   struct dwarf_expr_context *ctx;
   CORE_ADDR result;
@@ -381,6 +382,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 
   ctx->gdbarch = get_frame_arch (this_frame);
   ctx->addr_size = addr_size;
+  ctx->offset = offset;
   ctx->baton = this_frame;
   ctx->read_reg = read_reg;
   ctx->read_mem = read_mem;
@@ -901,6 +903,9 @@ struct dwarf2_frame_cache
 
   /* Target address size in bytes.  */
   int addr_size;
+
+  /* The .text offset.  */
+  CORE_ADDR text_offset;
 };
 
 static struct dwarf2_frame_cache *
@@ -944,7 +949,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   fs->pc = get_frame_address_in_block (this_frame);
 
   /* Find the correct FDE.  */
-  fde = dwarf2_frame_find_fde (&fs->pc);
+  fde = dwarf2_frame_find_fde (&fs->pc, &cache->text_offset);
   gdb_assert (fde != NULL);
 
   /* Extract any interesting information from the CIE.  */
@@ -981,7 +986,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
     case CFA_EXP:
       cache->cfa =
 	execute_stack_op (fs->regs.cfa_exp, fs->regs.cfa_exp_len,
-			  cache->addr_size, this_frame, 0, 0);
+			  cache->addr_size, cache->text_offset,
+			  this_frame, 0, 0);
       break;
 
     default:
@@ -1137,7 +1143,8 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     case DWARF2_FRAME_REG_SAVED_EXP:
       addr = execute_stack_op (cache->reg[regnum].loc.exp,
 			       cache->reg[regnum].exp_len,
-			       cache->addr_size, this_frame, cache->cfa, 1);
+			       cache->addr_size, cache->text_offset,
+			       this_frame, cache->cfa, 1);
       return frame_unwind_got_memory (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_SAVED_VAL_OFFSET:
@@ -1147,7 +1154,8 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     case DWARF2_FRAME_REG_SAVED_VAL_EXP:
       addr = execute_stack_op (cache->reg[regnum].loc.exp,
 			       cache->reg[regnum].exp_len,
-			       cache->addr_size, this_frame, cache->cfa, 1);
+			       cache->addr_size, cache->text_offset,
+			       this_frame, cache->cfa, 1);
       return frame_unwind_got_constant (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_UNSPECIFIED:
@@ -1197,7 +1205,7 @@ dwarf2_frame_sniffer (const struct frame_unwind *self,
      extend one byte before its start address or we could potentially
      select the FDE of the previous function.  */
   CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
-  struct dwarf2_fde *fde = dwarf2_frame_find_fde (&block_addr);
+  struct dwarf2_fde *fde = dwarf2_frame_find_fde (&block_addr, NULL);
 
   if (!fde)
     return 0;
@@ -1270,7 +1278,7 @@ dwarf2_frame_base_sniffer (struct frame_info *this_frame)
 {
   CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
 
-  if (dwarf2_frame_find_fde (&block_addr))
+  if (dwarf2_frame_find_fde (&block_addr, NULL))
     return &dwarf2_frame_base;
 
   return NULL;
@@ -1582,7 +1590,7 @@ bsearch_fde_cmp (const void *key, const void *element)
    inital location associated with it into *PC.  */
 
 static struct dwarf2_fde *
-dwarf2_frame_find_fde (CORE_ADDR *pc)
+dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
 {
   struct objfile *objfile;
 
@@ -1617,6 +1625,8 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
       if (p_fde != NULL)
         {
           *pc = (*p_fde)->initial_location + offset;
+	  if (out_offset)
+	    *out_offset = offset;
           return *p_fde;
         }
     }
