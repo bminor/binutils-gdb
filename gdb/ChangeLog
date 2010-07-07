@@ -1,3 +1,8 @@
+2010-07-07  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.2 branch created (branch timestamp: 2010-07-07 17:00 UTC)
+	* version.in: Bump version to 7.2.50.20100707-cvs.
+
 2010-07-07  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_value) <DW_form_addr>: Create a
