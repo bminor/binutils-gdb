@@ -1,3 +1,7 @@
+2010-07-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Update GDB version number to 7.1.90.
+
 2010-07-07  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_value) <DW_form_addr>: Create a
