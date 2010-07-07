@@ -9075,18 +9075,36 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
   switch (attr->form)
     {
     case DW_FORM_addr:
-      if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != cu_header->addr_size)
-	dwarf2_const_value_length_mismatch_complaint (SYMBOL_PRINT_NAME (sym),
-						      cu_header->addr_size,
-						      TYPE_LENGTH (SYMBOL_TYPE
-								   (sym)));
-      SYMBOL_VALUE_BYTES (sym) =
-	obstack_alloc (&objfile->objfile_obstack, cu_header->addr_size);
-      /* NOTE: cagney/2003-05-09: In-lined store_address call with
-         it's body - store_unsigned_integer.  */
-      store_unsigned_integer (SYMBOL_VALUE_BYTES (sym), cu_header->addr_size,
-			      byte_order, DW_ADDR (attr));
-      SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
+      {
+	struct dwarf2_locexpr_baton *baton;
+	gdb_byte *data;
+
+	if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != cu_header->addr_size)
+	  dwarf2_const_value_length_mismatch_complaint (SYMBOL_PRINT_NAME (sym),
+							cu_header->addr_size,
+							TYPE_LENGTH (SYMBOL_TYPE
+								     (sym)));
+	/* Symbols of this form are reasonably rare, so we just
+	   piggyback on the existing location code rather than writing
+	   a new implementation of symbol_computed_ops.  */
+	baton = obstack_alloc (&objfile->objfile_obstack,
+			       sizeof (struct dwarf2_locexpr_baton));
+	baton->per_cu = cu->per_cu;
+	gdb_assert (baton->per_cu);
+
+	baton->size = 2 + cu_header->addr_size;
+	data = obstack_alloc (&objfile->objfile_obstack, baton->size);
+	baton->data = data;
+
+	data[0] = DW_OP_addr;
+	store_unsigned_integer (&data[1], cu_header->addr_size,
+				byte_order, DW_ADDR (attr));
+	data[cu_header->addr_size + 1] = DW_OP_stack_value;
+
+	SYMBOL_COMPUTED_OPS (sym) = &dwarf2_locexpr_funcs;
+	SYMBOL_LOCATION_BATON (sym) = baton;
+	SYMBOL_CLASS (sym) = LOC_COMPUTED;
+      }
       break;
     case DW_FORM_string:
     case DW_FORM_strp:

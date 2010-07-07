@@ -75,6 +75,9 @@ struct dwarf_expr_context
   /* Target address size in bytes.  */
   int addr_size;
 
+  /* Offset used to relocate DW_OP_addr argument.  */
+  CORE_ADDR offset;
+
   /* An opaque argument provided by the caller, which will be passed
      to all of the callback functions.  */
   void *baton;
