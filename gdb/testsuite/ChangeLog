@@ -1,3 +1,9 @@
+2010-07-07  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_test_list_exact): New function.
+	* gdb.base/default.exp (show convenience): Call it, add tests for
+	$_sdata = void, $_thread = 0.
+
 2010-07-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

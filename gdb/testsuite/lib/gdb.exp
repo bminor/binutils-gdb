@@ -1036,6 +1036,59 @@ proc gdb_test_exact { args } {
 
     return [gdb_test $command $pattern $message]
 }
+
+# Wrapper around gdb_test_multiple that looks for a list of expected
+# output elements, but which can appear in any order.
+# CMD is the gdb command.
+# NAME is the name of the test.
+# ELM_FIND_REGEXP specifies how to partition the output into elements to
+# compare.
+# ELM_EXTRACT_REGEXP specifies the part of ELM_FIND_REGEXP to compare.
+# RESULT_MATCH_LIST is a list of exact matches for each expected element.
+# All elements of RESULT_MATCH_LIST must appear for the test to pass.
+#
+# A typical use of ELM_FIND_REGEXP/ELM_EXTRACT_REGEXP is to extract one line
+# of text per element and then strip trailing \r\n's.
+# Example:
+# gdb_test_list_exact "foo" "bar" \
+#     {[^\r\n]+[\r\n]+} \
+#     {[^\r\n]+} \
+#     { \
+#	{expected result 1} \
+#	{expected result 2} \
+#     }
+
+proc gdb_test_list_exact { cmd name elm_find_regexp elm_extract_regexp result_match_list } {
+    global gdb_prompt
+
+    set matches [lsort $result_match_list]
+    set seen {}
+    gdb_test_multiple $cmd $name {
+	"$cmd\[\r\n\]" { exp_continue }
+	-re $elm_find_regexp {
+	    set str $expect_out(0,string)
+	    verbose -log "seen: $str" 3
+	    regexp -- $elm_extract_regexp $str elm_seen
+	    verbose -log "extracted: $elm_seen" 3
+	    lappend seen $elm_seen
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	    set failed ""
+	    foreach got [lsort $seen] have $matches {
+		if {![string equal $got $have]} {
+		    set failed $have
+		    break
+		}
+	    }
+	    if {[string length $failed] != 0} {
+		fail "$name ($failed not found)"
+	    } else {
+		pass $name
+	    }
+	}
+    }
+}
 
 proc gdb_reinitialize_dir { subdir } {
     global gdb_prompt
