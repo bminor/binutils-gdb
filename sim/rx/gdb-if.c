@@ -622,6 +622,10 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
     case sim_rx_fpsw_regnum:
       put_reg (fpsw, val);
       break;
+    case sim_rx_acc_regnum:
+      put_reg (acclo, val & 0xffffffff);
+      put_reg (acchi, (val >> 32) & 0xffffffff);
+      break;
     default:
       fprintf (stderr, "rx minisim: unrecognized register number: %d\n",
 	       regno);
