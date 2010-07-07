@@ -52,7 +52,7 @@
 /* Supported register note sections.  */
 static struct core_regset_section amd64_linux_regset_sections[] =
 {
-  { ".reg", 144, "general-purpose" },
+  { ".reg", 27 * 8, "general-purpose" },
   { ".reg2", 512, "floating-point" },
   { ".reg-xstate", I386_XSTATE_MAX_SIZE, "XSAVE extended state" },
   { NULL, 0 }

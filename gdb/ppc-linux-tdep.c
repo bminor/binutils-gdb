@@ -516,7 +516,7 @@ ppc64_standard_linkage1_target (struct frame_info *frame,
 
 static struct core_regset_section ppc_linux_vsx_regset_sections[] =
 {
-  { ".reg", 268, "general-purpose" },
+  { ".reg", 48 * 4, "general-purpose" },
   { ".reg2", 264, "floating-point" },
   { ".reg-ppc-vmx", 544, "ppc Altivec" },
   { ".reg-ppc-vsx", 256, "POWER7 VSX" },
@@ -525,7 +525,7 @@ static struct core_regset_section ppc_linux_vsx_regset_sections[] =
 
 static struct core_regset_section ppc_linux_vmx_regset_sections[] =
 {
-  { ".reg", 268, "general-purpose" },
+  { ".reg", 48 * 4, "general-purpose" },
   { ".reg2", 264, "floating-point" },
   { ".reg-ppc-vmx", 544, "ppc Altivec" },
   { NULL, 0}
@@ -533,7 +533,31 @@ static struct core_regset_section ppc_linux_vmx_regset_sections[] =
 
 static struct core_regset_section ppc_linux_fp_regset_sections[] =
 {
-  { ".reg", 268, "general-purpose" },
+  { ".reg", 48 * 4, "general-purpose" },
+  { ".reg2", 264, "floating-point" },
+  { NULL, 0}
+};
+
+static struct core_regset_section ppc64_linux_vsx_regset_sections[] =
+{
+  { ".reg", 48 * 8, "general-purpose" },
+  { ".reg2", 264, "floating-point" },
+  { ".reg-ppc-vmx", 544, "ppc Altivec" },
+  { ".reg-ppc-vsx", 256, "POWER7 VSX" },
+  { NULL, 0}
+};
+
+static struct core_regset_section ppc64_linux_vmx_regset_sections[] =
+{
+  { ".reg", 48 * 8, "general-purpose" },
+  { ".reg2", 264, "floating-point" },
+  { ".reg-ppc-vmx", 544, "ppc Altivec" },
+  { NULL, 0}
+};
+
+static struct core_regset_section ppc64_linux_fp_regset_sections[] =
+{
+  { ".reg", 48 * 8, "general-purpose" },
   { ".reg2", 264, "floating-point" },
   { NULL, 0}
 };
@@ -1507,6 +1531,19 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf32-powerpcle");
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf32-powerpc");
+
+      /* Supported register sections.  */
+      if (tdesc_find_feature (info.target_desc,
+			      "org.gnu.gdb.power.vsx"))
+	set_gdbarch_core_regset_sections (gdbarch,
+					  ppc_linux_vsx_regset_sections);
+      else if (tdesc_find_feature (info.target_desc,
+			       "org.gnu.gdb.power.altivec"))
+	set_gdbarch_core_regset_sections (gdbarch,
+					  ppc_linux_vmx_regset_sections);
+      else
+	set_gdbarch_core_regset_sections (gdbarch,
+					  ppc_linux_fp_regset_sections);
     }
   
   if (tdep->wordsize == 8)
@@ -1533,19 +1570,22 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpcle");
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
+
+      /* Supported register sections.  */
+      if (tdesc_find_feature (info.target_desc,
+			      "org.gnu.gdb.power.vsx"))
+	set_gdbarch_core_regset_sections (gdbarch,
+					  ppc64_linux_vsx_regset_sections);
+      else if (tdesc_find_feature (info.target_desc,
+			       "org.gnu.gdb.power.altivec"))
+	set_gdbarch_core_regset_sections (gdbarch,
+					  ppc64_linux_vmx_regset_sections);
+      else
+	set_gdbarch_core_regset_sections (gdbarch,
+					  ppc64_linux_fp_regset_sections);
     }
   set_gdbarch_regset_from_core_section (gdbarch, ppc_linux_regset_from_core_section);
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
-
-  /* Supported register sections.  */
-  if (tdesc_find_feature (info.target_desc,
-			  "org.gnu.gdb.power.vsx"))
-    set_gdbarch_core_regset_sections (gdbarch, ppc_linux_vsx_regset_sections);
-  else if (tdesc_find_feature (info.target_desc,
-			       "org.gnu.gdb.power.altivec"))
-    set_gdbarch_core_regset_sections (gdbarch, ppc_linux_vmx_regset_sections);
-  else
-    set_gdbarch_core_regset_sections (gdbarch, ppc_linux_fp_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

@@ -1,3 +1,19 @@
+2010-07-07  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-nat.c (linux_nat_do_thread_registers): Use section size
+	from gdbarch_core_regset_sections also for .reg if present.
+
+	* amd64-linux-tdep.c (amd64_linux_regset_sections): Fix incorrect
+	section size for .reg.
+	* ppc-linux-tdep.c (ppc_linux_vsx_regset_sections): Likewise.
+	(ppc_linux_vmx_regset_sections): Likewise.
+	(ppc_linux_fp_regset_sections): Likewise.
+	(ppc64_linux_vsx_regset_sections): New variable.
+	(ppc64_linux_vmx_regset_sections): Likewise.
+	(ppc64_linux_fp_regset_sections): Likewise.
+	(ppc_linux_init_abi): Install core_regset_section lists appropriate
+	for current word size.
+
 2010-07-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* server.c (myresume): Make static.

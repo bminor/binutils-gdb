@@ -4134,8 +4134,6 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
 			       char *note_data, int *note_size,
 			       enum target_signal stop_signal)
 {
-  gdb_gregset_t gregs;
-  gdb_fpregset_t fpregs;
   unsigned long lwp = ptid_get_lwp (ptid);
   struct gdbarch *gdbarch = target_gdbarch;
   struct regcache *regcache = get_thread_arch_regcache (ptid, gdbarch);
@@ -4153,21 +4151,6 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
   core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
   sect_list = gdbarch_core_regset_sections (gdbarch);
 
-  if (core_regset_p
-      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
-						     sizeof (gregs))) != NULL
-      && regset->collect_regset != NULL)
-    regset->collect_regset (regset, regcache, -1,
-			    &gregs, sizeof (gregs));
-  else
-    fill_gregset (regcache, &gregs, -1);
-
-  note_data = (char *) elfcore_write_prstatus (obfd,
-					       note_data,
-					       note_size,
-					       lwp,
-					       stop_signal, &gregs);
-
   /* The loop below uses the new struct core_regset_section, which stores
      the supported section names and sizes for the core file.  Note that
      note PRSTATUS needs to be treated specially.  But the other notes are
@@ -4175,12 +4158,6 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
   if (core_regset_p && sect_list != NULL)
     while (sect_list->sect_name != NULL)
       {
-	/* .reg was already handled above.  */
-	if (strcmp (sect_list->sect_name, ".reg") == 0)
-	  {
-	    sect_list++;
-	    continue;
-	  }
 	regset = gdbarch_regset_from_core_section (gdbarch,
 						   sect_list->sect_name,
 						   sect_list->size);
@@ -4188,12 +4165,16 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
 	gdb_regset = xmalloc (sect_list->size);
 	regset->collect_regset (regset, regcache, -1,
 				gdb_regset, sect_list->size);
-	note_data = (char *) elfcore_write_register_note (obfd,
-							  note_data,
-							  note_size,
-							  sect_list->sect_name,
-							  gdb_regset,
-							  sect_list->size);
+
+	if (strcmp (sect_list->sect_name, ".reg") == 0)
+	  note_data = (char *) elfcore_write_prstatus
+				(obfd, note_data, note_size,
+				 lwp, stop_signal, gdb_regset);
+	else
+	  note_data = (char *) elfcore_write_register_note
+				(obfd, note_data, note_size,
+				 sect_list->sect_name, gdb_regset,
+				 sect_list->size);
 	xfree (gdb_regset);
 	sect_list++;
       }
@@ -4203,6 +4184,24 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
      the new support, the code below should be deleted.  */
   else
     {
+      gdb_gregset_t gregs;
+      gdb_fpregset_t fpregs;
+
+      if (core_regset_p
+	  && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
+							 sizeof (gregs))) != NULL
+	  && regset->collect_regset != NULL)
+	regset->collect_regset (regset, regcache, -1,
+				&gregs, sizeof (gregs));
+      else
+	fill_gregset (regcache, &gregs, -1);
+
+      note_data = (char *) elfcore_write_prstatus (obfd,
+						   note_data,
+						   note_size,
+						   lwp,
+						   stop_signal, &gregs);
+
       if (core_regset_p
           && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
 							 sizeof (fpregs))) != NULL
