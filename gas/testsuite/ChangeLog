@@ -1,3 +1,16 @@
+2010-07-08 Tejas Belagod <tejas.belagod@arm.com>
+
+	* gas/arm/barrier.s: New file.
+	* gas/arm/barrier.d: New file.
+	* gas/arm/barrier-thumb.s: New file.
+	* gas/arm/barrier-thumb.d: New file.
+	* gas/arm/barrier-bad.s: New file.
+	* gas/arm/barrier-bad.d: New file.
+	* gas/arm/barrier-bad.l: New file.
+	* gas/arm/barrier-bad-thumb.s: New file.
+	* gas/arm/barrier-bad-thumb.d: New file.
+	* gas/arm/barrier-bad-thumb.l: New file.
+
 2010-07-08  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* gas/arm/reloc-bad.d: New.

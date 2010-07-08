@@ -5898,7 +5898,7 @@ enum operand_parse_code
   OP_oSHar,	 /* ASR immediate */
   OP_oSHllar,	 /* LSL or ASR immediate */
   OP_oROR,	 /* ROR 0/8/16/24 */
-  OP_oBARRIER,	 /* Option argument for a barrier instruction.  */
+  OP_oBARRIER_I15, /* Option argument for a barrier instruction.  */
 
   /* Some pre-defined mixed (ARM/THUMB) operands.  */
   OP_RR_npcsp		= MIX_ARM_THUMB_OPERANDS (OP_RR, OP_RRnpcsp),
@@ -6006,6 +6006,30 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
       if (result != PARSE_OPERAND_SUCCESS)		\
 	goto failure;					\
     }							\
+  while (0)
+
+#define po_barrier_or_imm(str)				   \
+  do							   \
+    {						 	   \
+      val = parse_barrier (&str);			   \
+      if (val == FAIL)					   \
+	{						   \
+	  if (ISALPHA (*str))				   \
+	      goto failure;				   \
+	  else						   \
+	      goto immediate;				   \
+	}						   \
+      else						   \
+	{						   \
+	  if ((inst.instruction & 0xf0) == 0x60		   \
+	      && val != 0xf)				   \
+	    {						   \
+	       /* ISB can only take SY as an option.  */   \
+	       inst.error = _("invalid barrier type");	   \
+	       goto failure;				   \
+	    }						   \
+	}						   \
+    }							   \
   while (0)
 
   skip_whitespace (str);
@@ -6313,7 +6337,12 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_oROR:	 val = parse_ror (&str);		break;
 	case OP_PSR:	 val = parse_psr (&str);		break;
 	case OP_COND:	 val = parse_cond (&str);		break;
-	case OP_oBARRIER:val = parse_barrier (&str);		break;
+	case OP_oBARRIER_I15:
+	  po_barrier_or_imm (str); break;
+	  immediate:
+	  if (parse_immediate (&str, &val, 0, 15, TRUE) == FAIL)
+            goto failure;
+	  break;
 
         case OP_RVC_PSR:
           po_reg_or_goto (REG_TYPE_VFC, try_psr);
@@ -6481,7 +6510,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_PSR:
         case OP_RVC_PSR:
 	case OP_COND:
-	case OP_oBARRIER:
+	case OP_oBARRIER_I15:
 	case OP_REGLST:
 	case OP_VRSLST:
 	case OP_VRDLST:
@@ -6546,6 +6575,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 #undef po_reg_or_goto
 #undef po_imm_or_fail
 #undef po_scalar_or_fail
+#undef po_barrier_or_imm
 
 /* Shorthand macro for instruction encoding functions issuing errors.  */
 #define constraint(expr, err)			\
@@ -7124,7 +7154,8 @@ do_barrier (void)
   if (inst.operands[0].present)
     {
       constraint ((inst.instruction & 0xf0) != 0x40
-		  && inst.operands[0].imm != 0xf,
+		  && inst.operands[0].imm > 0xf
+		  && inst.operands[0].imm < 0x0,
 		  _("bad barrier type"));
       inst.instruction |= inst.operands[0].imm;
     }
@@ -9431,7 +9462,8 @@ do_t_barrier (void)
   if (inst.operands[0].present)
     {
       constraint ((inst.instruction & 0xf0) != 0x40
-		  && inst.operands[0].imm != 0xf,
+		  && inst.operands[0].imm > 0xf
+		  && inst.operands[0].imm < 0x0,
 		  _("bad barrier type"));
       inst.instruction |= inst.operands[0].imm;
     }
@@ -16283,10 +16315,18 @@ static const struct asm_cond conds[] =
 
 static struct asm_barrier_opt barrier_opt_names[] =
 {
-  { "sy",   0xf },
-  { "un",   0x7 },
-  { "st",   0xe },
-  { "unst", 0x6 }
+  { "sy",    0xf }, { "SY",    0xf },
+  { "un",    0x7 }, { "UN",    0x7 },
+  { "st",    0xe }, { "ST",    0xe },
+  { "unst",  0x6 }, { "UNST",  0x6 },
+  { "ish",   0xb }, { "ISH",   0xb },
+  { "sh",    0xb }, { "SH",    0xb },
+  { "ishst", 0xa }, { "ISHST", 0xa },
+  { "shst",  0xa }, { "SHST",  0xa },
+  { "nsh",   0x7 }, { "NSH",   0x7 },
+  { "nshst", 0x6 }, { "NSHST", 0x6 },
+  { "osh",   0x3 }, { "OSH",   0x3 },
+  { "oshst", 0x2 }, { "OSHST", 0x2 }
 };
 
 /* Table of ARM-format instructions.	*/
@@ -17002,9 +17042,9 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_barrier
 
- TUF("dmb",	57ff050, f3bf8f50, 1, (oBARRIER), barrier,  t_barrier),
- TUF("dsb",	57ff040, f3bf8f40, 1, (oBARRIER), barrier,  t_barrier),
- TUF("isb",	57ff060, f3bf8f60, 1, (oBARRIER), barrier,  t_barrier),
+ TUF("dmb",	57ff050, f3bf8f50, 1, (oBARRIER_I15), barrier,  t_barrier),
+ TUF("dsb",	57ff040, f3bf8f40, 1, (oBARRIER_I15), barrier,  t_barrier),
+ TUF("isb",	57ff060, f3bf8f60, 1, (oBARRIER_I15), barrier,  t_barrier),
 
  /* ARM V7 instructions.  */
 #undef  ARM_VARIANT

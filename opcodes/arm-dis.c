@@ -3155,15 +3155,32 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      break;
 
 		    case 'U':
-		      switch (given & 0xf)
+		      if ((given & 0xf0) == 0x60) 
 			{
-			case 0xf: func (stream, "sy"); break;
-			case 0x7: func (stream, "un"); break;
-			case 0xe: func (stream, "st"); break;
-			case 0x6: func (stream, "unst"); break;
-			default:
-			  func (stream, "#%d", (int) given & 0xf);
-			  break;
+			  switch (given & 0xf)
+			    {
+			    case 0xf: func (stream, "sy"); break;
+			    default:
+			      func (stream, "#%d", (int) given & 0xf);
+			      break;
+			    }
+			} 
+		      else 
+			{
+			  switch (given & 0xf)
+			    {
+			    case 0xf: func (stream, "sy"); break;
+			    case 0x7: func (stream, "un"); break;
+			    case 0xe: func (stream, "st"); break;
+			    case 0x6: func (stream, "unst"); break;
+			    case 0xb: func (stream, "ish"); break;
+			    case 0xa: func (stream, "ishst"); break;
+			    case 0x3: func (stream, "osh"); break;
+			    case 0x2: func (stream, "oshst"); break;
+			    default:
+			      func (stream, "#%d", (int) given & 0xf);
+			      break;
+			    }
 			}
 		      break;
 
@@ -3998,16 +4015,33 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		break;
 
 	      case 'U':
-		switch (given & 0xf)
+		if ((given & 0xf0) == 0x60) 
 		  {
-		  case 0xf: func (stream, "sy"); break;
-		  case 0x7: func (stream, "un"); break;
-		  case 0xe: func (stream, "st"); break;
-		  case 0x6: func (stream, "unst"); break;
-		  default:
-		    func (stream, "#%d", (int) given & 0xf);
-		    break;
+		    switch (given & 0xf)
+		      {
+			case 0xf: func (stream, "sy"); break;
+			default:
+			  func (stream, "#%d", (int) given & 0xf);
+			      break;
+		      }
 		  }
+		else 
+		  {
+		    switch (given & 0xf)
+		      {
+			case 0xf: func (stream, "sy"); break;
+			case 0x7: func (stream, "un"); break;
+			case 0xe: func (stream, "st"); break;
+			case 0x6: func (stream, "unst"); break;
+			case 0xb: func (stream, "ish"); break;
+			case 0xa: func (stream, "ishst"); break;
+			case 0x3: func (stream, "osh"); break;
+			case 0x2: func (stream, "oshst"); break;
+			default:
+			  func (stream, "#%d", (int) given & 0xf);
+			  break;
+		      }
+		   }
 		break;
 
 	      case 'C':

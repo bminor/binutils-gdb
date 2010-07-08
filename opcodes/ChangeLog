@@ -1,3 +1,9 @@
+2010-07-08 Tejas Belagod <tejas.belagod@arm.com>
+
+	* arm-dis.c (print_insn_arm): Add cases for printing more
+	symbolic operands.
+	(print_insn_thumb32): Likewise.
+
 2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-dis.c (print_insn_mips): Correct branch instruction type

@@ -1,3 +1,14 @@
+2010-07-08 Tejas Belagod <tejas.belagod@arm.com>
+
+	* tc-arm.c (OP_oBARRIER): Remove.
+	(OP_oBARRIER_I15): Add.
+	(po_barrier_or_imm): Add macro.
+	(parse_operands): Improve OP_oBARRIER_I15 operand parsing.
+	(do_barrier): Check correct immediate range.
+	(do_t_barrier): Likewise.
+	(barrier_opt_names): Add entries for more symbolic operands.
+	(insns): Replace OP_oBARRIER with OP_oBARRIER_I15 for barriers.
+
 2010-07-08  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (tc_gen_reloc): Add BFD_RELOC_ARM_T32_OFFSET_IMM
