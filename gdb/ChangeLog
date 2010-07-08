@@ -1,3 +1,7 @@
+2010-07-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Fix typo in section name (s/GDB 7.1/GDB 7.2).
+
 2010-07-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.
