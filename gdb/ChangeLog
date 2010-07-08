@@ -1,5 +1,10 @@
 2010-07-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* python/python-config.py: Resync with Python 2.7 version of this
+	script.
+
+2010-07-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Fix typo in section name (s/GDB 7.1/GDB 7.2).
 
 2010-07-07  Joel Brobecker  <brobecker@adacore.com>
