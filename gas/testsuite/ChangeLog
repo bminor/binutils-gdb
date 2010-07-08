@@ -1,3 +1,9 @@
+2010-07-08  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* gas/arm/reloc-bad.d: New.
+	* gas/arm/reloc-bad.s: New.
+	* gas/arm/reloc-bad.l: New.
+
 2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/elf-rel27.d: New test for HI16/LO16 relocation

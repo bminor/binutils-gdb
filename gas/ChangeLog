@@ -1,3 +1,8 @@
+2010-07-08  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* config/tc-arm.c (tc_gen_reloc): Add BFD_RELOC_ARM_T32_OFFSET_IMM
+	error message.
+
 2010-07-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips_frob_file): Use symbol_same_p to match
