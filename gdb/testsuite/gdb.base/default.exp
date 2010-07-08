@@ -567,8 +567,19 @@ gdb_test "show commands" ".*" "show commands"
 gdb_test "show complaints" "Max number of complaints about incorrect symbols is 0." "show complaints"
 #test show confirm
 gdb_test "show confirm" "Whether to confirm potentially dangerous operations is o\[a-z\]*." "show confirm"
+
 #test show convenience
-gdb_test "show convenience" "\\\$_siginfo = void" "show convenience"
+# This is tricker as there are multiple internal convenience vars and we
+# can't assume any particular order.
+gdb_test_list_exact "show convenience" "show convenience" \
+    {[^\r\n]+[\r\n]+} \
+    {[^\r\n]+} \
+    { \
+	{$_sdata = void} \
+	{$_siginfo = void} \
+	{$_thread = 0} \
+    }
+
 #test show directories
 gdb_test "show directories" "Source directories searched: .cdir\[:;\].cwd" "show directories"
 #test show editing
