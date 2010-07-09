@@ -1,3 +1,8 @@
+2010-07-09  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-prettyprint.c (gdbpy_get_display_hint): Don't use
+	'hint' if it is NULL.
+
 2010-07-09  Hui Zhu  <teawater@gmail.com>
 
 	* source.c (print_source_lines_base): Add check for noprint.

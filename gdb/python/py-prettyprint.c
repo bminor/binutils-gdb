@@ -229,10 +229,12 @@ gdbpy_get_display_hint (PyObject *printer)
     return NULL;
 
   hint = PyObject_CallMethodObjArgs (printer, gdbpy_display_hint_cst, NULL);
-  if (gdbpy_is_string (hint))
-    result = python_string_to_host_string (hint);
   if (hint)
-    Py_DECREF (hint);
+    {
+      if (gdbpy_is_string (hint))
+	result = python_string_to_host_string (hint);
+      Py_DECREF (hint);
+    }
   else
     gdbpy_print_stack ();
 
