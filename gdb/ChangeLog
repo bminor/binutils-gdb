@@ -1,3 +1,7 @@
+2010-07-09  Hui Zhu  <teawater@gmail.com>
+
+	* source.c (print_source_lines_base): Add check for noprint.
+
 2010-07-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/python-config.py: Resync with Python 2.7 version of this
