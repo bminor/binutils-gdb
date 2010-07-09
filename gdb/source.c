@@ -1293,6 +1293,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 {
   int c;
   int desc;
+  int noprint = 0;
   FILE *stream;
   int nlines = stopline - line;
   struct cleanup *cleanup;
@@ -1319,11 +1320,12 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
     }
   else
     {
-      desc = -1;
+      desc = last_source_error;
       noerror = 1;
+      noprint = 1;
     }
 
-  if (desc < 0)
+  if (desc < 0 || noprint)
     {
       last_source_error = desc;
 
