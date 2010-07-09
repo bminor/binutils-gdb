@@ -1,3 +1,23 @@
+2010-07-08  Cary Coutant  <ccoutant@google.com>
+
+	* resolve.cc (Symbol_table::resolve): Remember whether undef was
+	weak when resolving to a dynamic def.
+	(Symbol_table::should_override): Add adjust_dyndef flag; set it
+	for weak undef/dynamic def cases. Adjust callers.
+	* symtab.cc (Symbol::init_fields): Initialize undef_binding_set_ and
+	undef_binding_weak_.
+	(Symbol_table::sized_write_globals): Adjust symbol binding.
+	(Symbol_table::sized_write_symbol): Add binding parameter.
+	* symtab.h (Symbol::set_undef_binding): New method.
+	(Symbol::is_undef_binding_weak): New method.
+	(Symbol::undef_binding_set_, Symbol::undef_binding_weak_): New members.
+	(Symbol_table::should_override): Add new parameter.
+	(Symbol_table::sized_write_symbol): Add new parameter.
+
+	* testsuite/weak_undef_file1.cc: Add new test case.
+	* testsuite/weak_undef_file2.cc: Fix header comment.
+	* testsuite/weak_undef_test.cc: Add new test case.
+
 2010-06-29  Doug Kwan  <dougkwan@google.com>
 
 	* arm-reloc-property.cc (Arm_reloc_property::Arm_reloc_property):

@@ -76,6 +76,8 @@ Symbol::init_fields(const char* name, const char* version,
   this->is_ordinary_shndx_ = false;
   this->in_real_elf_ = false;
   this->is_defined_in_discarded_section_ = false;
+  this->undef_binding_set_ = false;
+  this->undef_binding_weak_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -2697,6 +2699,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
       unsigned int shndx;
       typename elfcpp::Elf_types<size>::Elf_Addr sym_value = sym->value();
       typename elfcpp::Elf_types<size>::Elf_Addr dynsym_value = sym_value;
+      elfcpp::STB binding = sym->binding();
       switch (sym->source())
 	{
 	case Symbol::FROM_OBJECT:
@@ -2720,6 +2723,8 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 		    if (sym->needs_dynsym_value())
 		      dynsym_value = target.dynsym_value(sym);
 		    shndx = elfcpp::SHN_UNDEF;
+		    if (sym->is_undef_binding_weak())
+		      binding = elfcpp::STB_WEAK;
 		  }
 		else if (symobj->pluginobj() != NULL)
 		  shndx = elfcpp::SHN_UNDEF;
@@ -2800,7 +2805,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  gold_assert(sym_index < output_count);
 	  unsigned char* ps = psyms + (sym_index * sym_size);
 	  this->sized_write_symbol<size, big_endian>(sym, sym_value, shndx,
-						     sympool, ps);
+						     binding, sympool, ps);
 	}
 
       if (dynsym_index != -1U)
@@ -2809,7 +2814,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  gold_assert(dynsym_index < dynamic_count);
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
 	  this->sized_write_symbol<size, big_endian>(sym, dynsym_value, shndx,
-						     dynpool, pd);
+						     binding, dynpool, pd);
 	}
     }
 
@@ -2827,6 +2832,7 @@ Symbol_table::sized_write_symbol(
     Sized_symbol<size>* sym,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     unsigned int shndx,
+    elfcpp::STB binding,
     const Stringpool* pool,
     unsigned char* p) const
 {
@@ -2847,7 +2853,7 @@ Symbol_table::sized_write_symbol(
   if (sym->is_forced_local())
     osym.put_st_info(elfcpp::elf_st_info(elfcpp::STB_LOCAL, type));
   else
-    osym.put_st_info(elfcpp::elf_st_info(sym->binding(), type));
+    osym.put_st_info(elfcpp::elf_st_info(binding, type));
   osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->nonvis()));
   osym.put_st_shndx(shndx);
 }

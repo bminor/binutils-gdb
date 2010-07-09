@@ -227,6 +227,23 @@ class Symbol
   void
   override_visibility(elfcpp::STV);
 
+  // Set whether the symbol was originally a weak undef or a regular undef
+  // when resolved by a dynamic def.
+  inline void
+  set_undef_binding(elfcpp::STB bind)
+  {
+    if (!this->undef_binding_set_ || this->undef_binding_weak_)
+      {
+        this->undef_binding_weak_ = bind == elfcpp::STB_WEAK;
+        this->undef_binding_set_ = true;
+      }
+  }
+
+  // Return TRUE if a weak undef was resolved by a dynamic def.
+  inline bool
+  is_undef_binding_weak() const
+  { return this->undef_binding_weak_; }
+
   // Return the non-visibility part of the st_other field.
   unsigned char
   nonvis() const
@@ -949,6 +966,11 @@ class Symbol
   // True if this symbol is defined in a section which was discarded
   // (bit 31).
   bool is_defined_in_discarded_section_ : 1;
+  // True if UNDEF_BINDING_WEAK_ has been set (bit 32).
+  bool undef_binding_set_ : 1;
+  // True if this symbol was a weak undef resolved by a dynamic def
+  // (bit 33).
+  bool undef_binding_weak_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -1536,7 +1558,7 @@ class Symbol_table
   // Whether we should override a symbol, based on flags in
   // resolve.cc.
   static bool
-  should_override(const Symbol*, unsigned int, Defined, Object*, bool*);
+  should_override(const Symbol*, unsigned int, Defined, Object*, bool*, bool*);
 
   // Report a problem in symbol resolution.
   static void
@@ -1667,7 +1689,7 @@ class Symbol_table
   void
   sized_write_symbol(Sized_symbol<size>*,
 		     typename elfcpp::Elf_types<size>::Elf_Addr value,
-		     unsigned int shndx,
+		     unsigned int shndx, elfcpp::STB,
 		     const Stringpool*, unsigned char* p) const;
 
   // Possibly warn about an undefined symbol from a dynamic object.
