@@ -218,10 +218,10 @@ obj_coff_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP, addressT s
 	}
 
       /* Emit a string.  Note no NUL-termination.  */
-      pfxlen = strlen (" -aligncomm:") + strlen (S_GET_NAME (symbolP)) + 1;
+      pfxlen = strlen (" -aligncomm:") + 2 + strlen (S_GET_NAME (symbolP)) + 1;
       numlen = snprintf (numbuff, sizeof (numbuff), "%d", (int) align);
       frag = frag_more (pfxlen + numlen);
-      (void) sprintf (frag, " -aligncomm:%s,", S_GET_NAME (symbolP));
+      (void) sprintf (frag, " -aligncomm:\"%s\",", S_GET_NAME (symbolP));
       memcpy (frag + pfxlen, numbuff, numlen);
       /* Restore original subseg. */
       subseg_set (current_seg, current_subseg);
