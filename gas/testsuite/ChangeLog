@@ -1,7 +1,7 @@
 2010-07-11  Kai Tietz  <kai.tietz@onevision.com>
 
 	* gas/pe/aligncomm-b.d: Regenerated content dump.
-	* gas/pe/aligncomm-d,d: Regenerated content dump.
+	* gas/pe/aligncomm-d.d: Regenerated content dump.
 	* gas/i386/i386.exp: Disable for mingw 64-bit the intel-got64 test.
 
 2010-07-08 Tejas Belagod <tejas.belagod@arm.com>
