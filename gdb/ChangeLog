@@ -1,3 +1,8 @@
+2010-07-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (read_subrange_type): Call read_subrange_type.
+	* p-lang.c (pascal_printstr): Likewise.
+
 2010-07-09  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-prettyprint.c (gdbpy_get_display_hint): Don't use

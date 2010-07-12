@@ -6332,6 +6332,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   LONGEST negative_mask;
 
   base_type = die_type (die, cu);
+  /* Preserve BASE_TYPE's original type, just set its LENGTH.  */
+  check_typedef (base_type);
 
   /* The die_type call above may have already set the type for this DIE.  */
   range_type = get_die_type (die, cu);
