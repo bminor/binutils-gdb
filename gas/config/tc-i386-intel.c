@@ -434,6 +434,7 @@ static int i386_intel_simplify (expressionS *e)
 
 	  break;
 	}
+      goto fallthrough;
 
     case O_register:
       ret = i386_intel_simplify_register (e);
@@ -452,6 +453,7 @@ static int i386_intel_simplify (expressionS *e)
 
       /* FALLTHROUGH */
     default:
+fallthrough:
       if (e->X_add_symbol && !i386_intel_simplify_symbol (e->X_add_symbol))
 	return 0;
       if (e->X_op == O_add || e->X_op == O_subtract)
