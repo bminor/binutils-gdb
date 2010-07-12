@@ -26,7 +26,7 @@ if $tracelevel {
 # Test i386 prologue analyzer.
 
 
-if ![istarget "i?86-*-*"] then {
+if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } then {
     verbose "Skipping i386 prologue tests."
     return
 }

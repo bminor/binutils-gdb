@@ -23,7 +23,7 @@ if $tracelevel {
 }
 
 
-if { ![istarget x86_64-*-* ] } {
+if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
     verbose "Skipping amd64 word register tests."
     return
 }

@@ -1454,6 +1454,83 @@ proc skip_shlib_tests {} {
     return 1
 }
 
+# Return 1 if target is ILP32.
+# This cannot be decided simply from looking at the target string,
+# as it might depend on externally passed compiler options like -m64.
+proc is_ilp32_target {} {
+    global is_ilp32_target_saved
+
+    # Use the cached value, if it exists.  Cache value per "board" to handle
+    # runs with multiple options (e.g. unix/{-m32,-64}) correctly.
+    set me "is_ilp32_target"
+    set board [target_info name]
+    if [info exists is_ilp32_target_saved($board)] {
+        verbose "$me:  returning saved $is_ilp32_target_saved($board)" 2
+        return $is_ilp32_target_saved($board)
+    }
+
+
+    set src ilp32[pid].c
+    set obj ilp32[pid].o
+
+    set f [open $src "w"]
+    puts $f "int dummy\[sizeof (int) == 4"
+    puts $f "           && sizeof (void *) == 4"
+    puts $f "           && sizeof (long) == 4 ? 1 : -1\];"
+    close $f
+
+    verbose "$me:  compiling testfile $src" 2
+    set lines [gdb_compile $src $obj object {quiet}]
+    file delete $src
+    file delete $obj
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed, returning 0" 2
+        return [set is_ilp32_target_saved($board) 0]
+    }
+
+    verbose "$me:  returning 1" 2
+    return [set is_ilp32_target_saved($board) 1]
+}
+
+# Return 1 if target is LP64.
+# This cannot be decided simply from looking at the target string,
+# as it might depend on externally passed compiler options like -m64.
+proc is_lp64_target {} {
+    global is_lp64_target_saved
+
+    # Use the cached value, if it exists.  Cache value per "board" to handle
+    # runs with multiple options (e.g. unix/{-m32,-64}) correctly.
+    set me "is_lp64_target"
+    set board [target_info name]
+    if [info exists is_lp64_target_saved($board)] {
+        verbose "$me:  returning saved $is_lp64_target_saved($board)" 2
+        return $is_lp64_target_saved($board)
+    }
+
+    set src lp64[pid].c
+    set obj lp64[pid].o
+
+    set f [open $src "w"]
+    puts $f "int dummy\[sizeof (int) == 4"
+    puts $f "           && sizeof (void *) == 8"
+    puts $f "           && sizeof (long) == 8 ? 1 : -1\];"
+    close $f
+
+    verbose "$me:  compiling testfile $src" 2
+    set lines [gdb_compile $src $obj object {quiet}]
+    file delete $src
+    file delete $obj
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed, returning 0" 2
+        return [set is_lp64_target_saved($board) 0]
+    }
+
+    verbose "$me:  returning 1" 2
+    return [set is_lp64_target_saved($board) 1]
+}
+
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so, 
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 

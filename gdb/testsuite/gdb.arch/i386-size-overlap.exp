@@ -21,7 +21,7 @@ if $tracelevel {
 
 # Test that GDB can handle overlapping sizes of symbols.
 
-if ![istarget "i?86-*-*"] then {
+if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } then {
     verbose "Skipping i386 unwinder tests."
     return
 }

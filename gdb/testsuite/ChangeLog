@@ -1,3 +1,33 @@
+2010-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/gdb.exp (is_ilp32_target): New.
+	(is_lp64_target): Likewise.
+
+	* gdb.arch/amd64-byte.exp: Use is_lp64_target to check 64bit
+	target.
+	* gdb.arch/amd64-disp-step.exp: Likewise.
+	* gdb.arch/amd64-dword.exp: Likewise.
+	* gdb.arch/amd64-i386-address.exp: Likewise.
+	* gdb.arch/amd64-word.exp: Likewise.
+	
+	* gdb.arch/i386-avx.exp: Use is_ilp32_target to check for 32bit
+	target.
+	* gdb.arch/i386-bp_permanent.exp: Likewise.
+	* gdb.arch/i386-byte.exp: Likewise.
+	* gdb.arch/i386-disp-step.exp: Likewise.
+	* gdb.arch/i386-gnu-cfi.exp: Likewise.
+	* gdb.arch/i386-prologue.exp: Likewise.
+	* gdb.arch/i386-size-overlap.exp: Likewise.
+	* gdb.arch/i386-size.exp: Likewise.
+	* gdb.arch/i386-sse.exp: Likewise.
+	* gdb.arch/i386-unwind.exp: Likewise.
+	* gdb.arch/i386-word.exp: Likewise.
+
+	* gdb.arch/ppc64-atomic-inst.exp: Use is_lp64_target to execute
+	test only when building 64-bit executables.  Do not hard-code
+	-m64 option.
+
 2010-07-07  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_test_list_exact): New function.

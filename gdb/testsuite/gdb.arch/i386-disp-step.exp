@@ -22,7 +22,7 @@ if $tracelevel {
 }
 
 
-if ![istarget "i?86-*-linux*"] then {
+if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } then {
     verbose "Skipping x86 displaced stepping tests."
     return
 }

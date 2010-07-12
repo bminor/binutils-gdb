@@ -77,7 +77,7 @@ gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
          "set first breakpoint in main"
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
-if [istarget i?86-*-*] {
+if [is_ilp32_target] {
     set nr_regs 8
 } else {
     set nr_regs 16
