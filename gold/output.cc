@@ -2086,8 +2086,13 @@ Output_section::add_input_section(Layout* layout,
         }
     }
 
+  section_size_type input_section_size = shdr.get_sh_size();
+  section_size_type uncompressed_size;
+  if (object->section_is_compressed(shndx, &uncompressed_size))
+    input_section_size = uncompressed_size;
+
   this->set_current_data_size_for_child(aligned_offset_in_section
-					+ shdr.get_sh_size());
+					+ input_section_size);
 
   // We need to keep track of this section if we are already keeping
   // track of sections, or if we are relaxing.  Also, if this is a

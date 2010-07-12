@@ -39,6 +39,7 @@
 #include "object.h"
 #include "dynobj.h"
 #include "plugin.h"
+#include "compressed_output.h"
 
 namespace gold
 {
@@ -367,7 +368,10 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     local_got_offsets_(),
     kept_comdat_sections_(),
     has_eh_frame_(false),
-    discarded_eh_frame_shndx_(-1U)
+    discarded_eh_frame_shndx_(-1U),
+    deferred_layout_(),
+    deferred_layout_relocs_(),
+    compressed_sections_()
 {
 }
 
@@ -495,6 +499,50 @@ Sized_relobj<size, big_endian>::find_eh_frame(
   return false;
 }
 
+// Build a table for any compressed debug sections, mapping each section index
+// to the uncompressed size.
+
+template<int size, bool big_endian>
+Compressed_section_map*
+build_compressed_section_map(
+    const unsigned char* pshdrs,
+    unsigned int shnum,
+    const char* names,
+    section_size_type names_size,
+    Sized_relobj<size, big_endian>* obj)
+{
+  Compressed_section_map* uncompressed_sizes = new Compressed_section_map();
+  const unsigned int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+  const unsigned char* p = pshdrs + shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, p += shdr_size)
+    {
+      typename elfcpp::Shdr<size, big_endian> shdr(p);
+      if (shdr.get_sh_type() == elfcpp::SHT_PROGBITS
+	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	{
+	  if (shdr.get_sh_name() >= names_size)
+	    {
+	      obj->error(_("bad section name offset for section %u: %lu"),
+			 i, static_cast<unsigned long>(shdr.get_sh_name()));
+	      continue;
+	    }
+
+	  const char* name = names + shdr.get_sh_name();
+	  if (is_compressed_debug_section(name))
+	    {
+	      section_size_type len;
+	      const unsigned char* contents =
+		  obj->section_contents(i, &len, false);
+	      uint64_t uncompressed_size = get_uncompressed_size(contents, len);
+	      if (uncompressed_size != -1ULL)
+		(*uncompressed_sizes)[i] =
+		    convert_to_section_size_type(uncompressed_size);
+	    }
+	}
+    }
+  return uncompressed_sizes;
+}
+
 // Read the sections and symbols from an object file.
 
 template<int size, bool big_endian>
@@ -514,6 +562,10 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
       if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
         this->has_eh_frame_ = true;
     }
+  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL)
+    this->compressed_sections_ =
+        build_compressed_section_map(pshdrs, this->shnum(), names,
+				     sd->section_names_size, this);
 
   sd->symbols = NULL;
   sd->symbols_size = 0;

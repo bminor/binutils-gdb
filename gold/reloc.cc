@@ -32,6 +32,7 @@
 #include "target-reloc.h"
 #include "reloc.h"
 #include "icf.h"
+#include "compressed_output.h"
 
 namespace gold
 {
@@ -732,10 +733,17 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       off_t view_start;
       section_size_type view_size;
+      bool must_decompress = false;
       if (output_offset != invalid_address)
 	{
 	  view_start = output_section_offset + output_offset;
 	  view_size = convert_to_section_size_type(shdr.get_sh_size());
+	  section_size_type uncompressed_size;
+	  if (this->section_is_compressed(i, &uncompressed_size))
+	    {
+	      view_size = uncompressed_size;
+	      must_decompress = true;
+	    }
 	}
       else
 	{
@@ -754,7 +762,7 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 	{
 	  unsigned char* buffer = os->postprocessing_buffer();
 	  view = buffer + view_start;
-	  if (output_offset != invalid_address)
+	  if (output_offset != invalid_address && !must_decompress)
 	    {
 	      off_t sh_offset = shdr.get_sh_offset();
 	      if (!rm.empty() && rm.back().file_offset > sh_offset)
@@ -770,13 +778,26 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 	  else
 	    {
 	      view = of->get_output_view(view_start, view_size);
-	      off_t sh_offset = shdr.get_sh_offset();
-	      if (!rm.empty() && rm.back().file_offset > sh_offset)
-		is_sorted = false;
-	      rm.push_back(File_read::Read_multiple_entry(sh_offset,
-							  view_size, view));
+	      if (!must_decompress)
+		{
+		  off_t sh_offset = shdr.get_sh_offset();
+		  if (!rm.empty() && rm.back().file_offset > sh_offset)
+		    is_sorted = false;
+		  rm.push_back(File_read::Read_multiple_entry(sh_offset,
+							      view_size, view));
+		}
 	    }
 	}
+
+      if (must_decompress)
+        {
+	  // Read and decompress the section.
+          section_size_type len;
+	  const unsigned char* p = this->section_contents(i, &len, false);
+	  if (!decompress_input_section(p, len, view, view_size))
+	    this->error(_("could not decompress section %s"),
+			this->section_name(i).c_str());
+        }
 
       pvs->view = view;
       pvs->address = os->address();

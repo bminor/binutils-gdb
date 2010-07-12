@@ -944,7 +944,16 @@ Layout::section_flags_to_segment(elfcpp::Elf_Xword flags)
 static bool
 is_compressible_debug_section(const char* secname)
 {
-  return (strncmp(secname, ".debug", sizeof(".debug") - 1) == 0);
+  return (is_prefix_of(".debug", secname));
+}
+
+// We may see compressed debug sections in input files.  Return TRUE
+// if this is the name of a compressed debug section.
+
+bool
+is_compressed_debug_section(const char* secname)
+{
+  return (is_prefix_of(".zdebug", secname));
 }
 
 // Make a new Output_section, and attach it to segments as
@@ -3770,6 +3779,20 @@ Layout::output_section_name(const char* name, size_t* plen)
 	  *plen = psnm->tolen;
 	  return psnm->to;
 	}
+    }
+
+  // Compressed debug sections should be mapped to the corresponding
+  // uncompressed section.
+  if (is_compressed_debug_section(name))
+    {
+      size_t len = strlen(name);
+      char *uncompressed_name = new char[len];
+      uncompressed_name[0] = '.';
+      gold_assert(name[0] == '.' && name[1] == 'z');
+      strncpy(&uncompressed_name[1], &name[2], len - 2);
+      uncompressed_name[len - 1] = '\0';
+      *plen = len - 1;
+      return uncompressed_name;
     }
 
   return name;

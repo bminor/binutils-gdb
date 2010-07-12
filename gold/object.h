@@ -518,6 +518,13 @@ class Object
   set_no_export(bool value)
   { this->no_export_ = value; }
 
+  // Return TRUE if the section is a compressed debug section, and set
+  // *UNCOMPRESSED_SIZE to the size of the uncompressed data.
+  bool
+  section_is_compressed(unsigned int shndx,
+			section_size_type* uncompressed_size) const
+  { return this->do_section_is_compressed(shndx, uncompressed_size); }
+
  protected:
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
@@ -627,6 +634,12 @@ class Object
   // and return true.  Otherwise return false.
   bool
   handle_split_stack_section(const char* name);
+
+  // Return TRUE if the section is a compressed debug section, and set
+  // *UNCOMPRESSED_SIZE to the size of the uncompressed data.
+  virtual bool
+  do_section_is_compressed(unsigned int, section_size_type*) const
+  { return false; }
 
  private:
   // This class may not be copied.
@@ -1406,6 +1419,10 @@ class Reloc_symbol_changes
   std::vector<Symbol*> vec_;
 };
 
+// Type for mapping section index to uncompressed size.
+
+typedef std::map<unsigned int, section_size_type> Compressed_section_map;
+
 // A regular object file.  This is size and endian specific.
 
 template<int size, bool big_endian>
@@ -1781,7 +1798,26 @@ class Sized_relobj : public Relobj
   void
   set_output_local_symbol_count(unsigned int value)
   { this->output_local_symbol_count_ = value; }
-   
+
+  // Return TRUE if the section is a compressed debug section, and set
+  // *UNCOMPRESSED_SIZE to the size of the uncompressed data.
+  bool
+  do_section_is_compressed(unsigned int shndx,
+			   section_size_type* uncompressed_size) const
+  {
+    if (this->compressed_sections_ == NULL)
+      return false;
+    Compressed_section_map::const_iterator p =
+        this->compressed_sections_->find(shndx);
+    if (p != this->compressed_sections_->end())
+      {
+	if (uncompressed_size != NULL)
+	  *uncompressed_size = p->second;
+	return true;
+      }
+    return false;
+  }
+
  private:
   // For convenience.
   typedef Sized_relobj<size, big_endian> This;
@@ -2024,6 +2060,8 @@ class Sized_relobj : public Relobj
   std::vector<Deferred_layout> deferred_layout_;
   // The list of relocation sections whose layout was deferred.
   std::vector<Deferred_layout> deferred_layout_relocs_;
+  // For compressed debug sections, map section index to uncompressed size.
+  Compressed_section_map* compressed_sections_;
 };
 
 // A class to manage the list of all objects.

@@ -1,3 +1,36 @@
+2010-07-12  Cary Coutant  <ccoutant@google.com>
+
+	* compressed_output.cc (zlib_decompress): New function.
+	(get_uncompressed_size): New function.
+	(decompress_input_section): New function.
+	* compressed_output.h (get_uncompressed_size): New function.
+	(decompress_input_section): New function.
+	* dwarf_reader.cc (Sized_dwarf_line_info::Sized_dwarf_line_info)
+	Handle compressed debug sections.
+	* layout.cc (is_compressed_debug_section): New function.
+	(Layout::output_section_name): Map compressed section names to
+	canonical names.
+	* layout.h (is_compressed_debug_section): New function.
+	(is_debug_info_section): Recognize compressed debug sections.
+	* merge.cc: Include compressed_output.h.
+	(Output_merge_data::do_add_input_section): Handle compressed
+	debug sections.
+	(Output_merge_string::do_add_input_section): Handle compressed
+	debug sections.
+	* object.cc: Include compressed_output.h.
+	(Sized_relobj::Sized_relobj): Initialize new data members.
+	(build_compressed_section_map): New function.
+	(Sized_relobj::do_read_symbols): Handle compressed debug sections.
+	* object.h (Object::section_is_compressed): New method.
+	(Object::do_section_is_compressed): New method.
+	(Sized_relobj::Compressed_section_map): New type.
+	(Sized_relobj::do_section_is_compressed): New method.
+	(Sized_relobj::compressed_sections_): New data member.
+	* output.cc (Output_section::add_input_section): Handle compressed
+	debug sections.
+	* reloc.cc: Include compressed_output.h.
+	(Sized_relobj::write_sections): Handle compressed debug sections.
+
 2010-07-08  Cary Coutant  <ccoutant@google.com>
 
 	* resolve.cc (Symbol_table::resolve): Remember whether undef was

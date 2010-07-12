@@ -59,6 +59,10 @@ class Output_reduced_debug_info_section;
 class Eh_frame;
 class Target;
 
+// Return TRUE if SECNAME is the name of a compressed debug section.
+extern bool
+is_compressed_debug_section(const char* secname);
+
 // This task function handles mapping the input sections to output
 // sections and laying them out in memory.
 
@@ -451,6 +455,7 @@ class Layout
   {
     // Debugging sections can only be recognized by name.
     return (strncmp(name, ".debug", sizeof(".debug") - 1) == 0
+            || strncmp(name, ".zdebug", sizeof(".zdebug") - 1) == 0
             || strncmp(name, ".gnu.linkonce.wi.",
                        sizeof(".gnu.linkonce.wi.") - 1) == 0
             || strncmp(name, ".line", sizeof(".line") - 1) == 0
