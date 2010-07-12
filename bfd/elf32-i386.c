@@ -1330,8 +1330,7 @@ elf_i386_check_relocs (bfd *abfd,
 	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
 	  if (ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
-	      h = elf_i386_get_local_sym_hash (htab, abfd, rel,
-						   TRUE);
+	      h = elf_i386_get_local_sym_hash (htab, abfd, rel, TRUE);
 	      if (h == NULL)
 		return FALSE;
 
@@ -2934,8 +2933,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 		   && ELF32_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    {
 	      /* Relocate against local STT_GNU_IFUNC symbol.  */
-	      h = elf_i386_get_local_sym_hash (htab, input_bfd,
-						   rel, FALSE);
+	      h = elf_i386_get_local_sym_hash (htab, input_bfd, rel,
+					       FALSE);
 	      if (h == NULL)
 		abort ();
 
