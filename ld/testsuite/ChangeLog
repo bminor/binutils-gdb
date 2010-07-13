@@ -1,5 +1,12 @@
 2010-07-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-i386/hidden2.d: Don't hard code expected output.
+	* ld-i386/protected3.d: Likewise.
+	* ld-x86-64/hidden2.d: Likewise.
+	* ld-x86-64/protected3.d: Likewise.
+
+2010-07-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/11791
 	* ld-ifunc/ifunc-10-i386.d: New.
 	* ld-ifunc/ifunc-10-i386.s: Likewise.
