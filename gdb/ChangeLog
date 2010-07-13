@@ -1,5 +1,14 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.c (lookup_symbol_aux_symtabs): Call pre-expand hook.
+	(basic_lookup_transparent_type): Likewise.
+	* symfile.h (struct quick_symbol_functions)
+	<pre_expand_symtabs_matching>: New field.
+	* psymtab.c (pre_expand_symtabs_matching_psymtabs): New function.
+	(psym_functions): Update.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	PR breakpoints/8357:
 	* symtab.h (domain_enum_tag) <LABEL_DOMAIN>: Update comment.
 	* linespec.c (decode_line_1): Update comment.  Call decode_label.

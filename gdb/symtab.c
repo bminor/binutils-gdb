@@ -1295,16 +1295,25 @@ lookup_symbol_aux_symtabs (int block_index, const char *name,
   const struct block *block;
   struct symtab *s;
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_OBJFILES (objfile)
   {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, block_index);
-    sym = lookup_block_symbol (block, name, domain);
-    if (sym)
-      {
-	block_found = block;
-	return fixup_symbol_section (sym, objfile);
-      }
+    if (objfile->sf)
+      objfile->sf->qf->pre_expand_symtabs_matching (objfile,
+						    block_index,
+						    name, domain);
+
+    ALL_OBJFILE_SYMTABS (objfile, s)
+      if (s->primary)
+	{
+	  bv = BLOCKVECTOR (s);
+	  block = BLOCKVECTOR_BLOCK (bv, block_index);
+	  sym = lookup_block_symbol (block, name, domain);
+	  if (sym)
+	    {
+	      block_found = block;
+	      return fixup_symbol_section (sym, objfile);
+	    }
+	}
   }
 
   return NULL;
@@ -1547,15 +1556,24 @@ basic_lookup_transparent_type (const char *name)
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol.  */
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_OBJFILES (objfile)
   {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
-    if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-      {
-	return SYMBOL_TYPE (sym);
-      }
+    if (objfile->sf)
+      objfile->sf->qf->pre_expand_symtabs_matching (objfile,
+						    GLOBAL_BLOCK,
+						    name, STRUCT_DOMAIN);
+
+    ALL_OBJFILE_SYMTABS (objfile, s)
+      if (s->primary)
+	{
+	  bv = BLOCKVECTOR (s);
+	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	  sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
+	  if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
+	    {
+	      return SYMBOL_TYPE (sym);
+	    }
+	}
   }
 
   ALL_OBJFILES (objfile)
