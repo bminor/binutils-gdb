@@ -1,3 +1,41 @@
+2010-07-13  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_input_section::Arm_input_section): For a
+	SHT_ARM_EXIDX section, always keeps the input sections.
+	(Arm_input_section::set_exidx_section_link): New method.
+	(Arm_exidx_input_section::Arm_exidx_input_section): Initialize
+	has_errors_ to false.
+	(Arm_exidx_input_section::has_errors,
+	Arm_exidx_input_section::set_has_errors): New methods.
+	(Arm_exidx_input_section::has_errors_): New data member.
+	(Arm_relobj::get_exidx_shndx_list): New method.
+	(Arm_output_section::append_text_sections_to_list): Do not skip
+	section without SHF_EXECINSTR.
+	(Arm_output_section::fix_exidx_coverage): Skip input sections with
+	errors.
+ 	(Arm_relobj::make_exidx_input_section): Add new parameter for text
+	section header.  Make error messages more verbose.  Check for
+	a non-executable section linked to an EXIDX section.
+	(Arm_relobj::do_read_symbols): Remove error checking, which has been
+	moved to Arm_relobj::make_exidx_input_section.  Add an assertion to
+	check that there is no deferred EXIDX section if we exit early.
+	Instead of not making an EXIDX section in case of an error, make one
+	and set the has_errors flag of it.
+	(Target_arm::do_finalize_sections): Fix up links of EXIDX sections
+	in a relocatable link.
+	(Target_arm::do_relax): Look for the EXIDX output section instead of
+	assuming that it is called .ARM.exidx.
+ 	(Target_arm::fix_exidx_coverage): Add a new parameter for input
+	section list.  Do not check for SHF_EXECINSTR section flags but
+	skip any input section with errors.
+	* output.cc (Output_section::Output_section): Initialize
+	always_keeps_input_sections_ to false.
+	(Output_section::add_input_section): Check for
+	always_keeps_input_sections_.
+	*  output.h (Output_section::always_keeps_input_sections,
+	Output_section::set_always_keeps_input_sections): New methods.
+	(Output_section::always_keeps_input_sections): New data member.
+
 2010-07-13  Rafael Espindola  <espindola@google.com>
 
 	* fileread.cc (try_extra_search_path, find_file): Move to Input_file.

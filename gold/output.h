@@ -3468,6 +3468,19 @@ class Output_section : public Output_data
   input_sections() const
   { return this->input_sections_; }
 
+  // Whether this always keeps an input section list
+  bool
+  always_keeps_input_sections() const
+  { return this->always_keeps_input_sections_; }
+
+  // Always keep an input section list.
+  void
+  set_always_keeps_input_sections()
+  {
+    gold_assert(this->current_data_size_for_child() == 0);
+    this->always_keeps_input_sections_ = true;
+  }
+
  private:
   // We only save enough information to undo the effects of section layout.
   class Checkpoint_output_section
@@ -3784,6 +3797,8 @@ class Output_section : public Output_data
   bool section_offsets_need_adjustment_ : 1;
   // Whether this is a NOLOAD section.
   bool is_noload_ : 1;
+  // Whether this always keeps input section.
+  bool always_keeps_input_sections_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;

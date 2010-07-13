@@ -1324,7 +1324,10 @@ class Arm_output_section : public Output_section
   Arm_output_section(const char* name, elfcpp::Elf_Word type,
 		     elfcpp::Elf_Xword flags)
     : Output_section(name, type, flags)
-  { }
+  {
+    if (type == elfcpp::SHT_ARM_EXIDX)
+      this->set_always_keeps_input_sections();
+  }
 
   ~Arm_output_section()
   { }
@@ -1352,6 +1355,10 @@ class Arm_output_section : public Output_section
 		     Symbol_table* symtab,
 		     bool merge_exidx_entries);
 
+  // Link an EXIDX section into its corresponding text section.
+  void
+  set_exidx_section_link();
+
  private:
   // For convenience.
   typedef Output_section::Input_section Input_section;
@@ -1376,7 +1383,7 @@ class Arm_exidx_input_section
   Arm_exidx_input_section(Relobj* relobj, unsigned int shndx,
 			  unsigned int link, uint32_t size, uint32_t addralign)
     : relobj_(relobj), shndx_(shndx), link_(link), size_(size),
-      addralign_(addralign)
+      addralign_(addralign), has_errors_(false)
   { }
 
   ~Arm_exidx_input_section()
@@ -1409,6 +1416,16 @@ class Arm_exidx_input_section
   addralign() const
   { return this->addralign_; }
 
+  // Whether there are any errors in the EXIDX input section.
+  bool
+  has_errors() const
+  { return this->has_errors_; }
+
+  // Set has-errors flag.
+  void
+  set_has_errors()
+  { this->has_errors_ = true; }
+
  private:
   // Object containing this.
   Relobj* relobj_;
@@ -1420,6 +1437,8 @@ class Arm_exidx_input_section
   uint32_t size_;
   // Address alignment of this.  For ARM 32-bit is sufficient.
   uint32_t addralign_;
+  // Whether this has any errors.
+  bool has_errors_;
 };
 
 // Arm_relobj class.
@@ -1581,6 +1600,22 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   merge_flags_and_attributes() const
   { return this->merge_flags_and_attributes_; }
   
+  // Export list of EXIDX section indices.
+  void
+  get_exidx_shndx_list(std::vector<unsigned int>* list) const
+  {
+    list->clear();
+    for (Exidx_section_map::const_iterator p = this->exidx_section_map_.begin();
+	 p != this->exidx_section_map_.end();
+	 ++p)
+      {
+	if (p->second->shndx() == p->first)
+	  list->push_back(p->first);
+      }
+    // Sort list to make result independent of implementation of map. 
+    std::sort(list->begin(), list->end());
+  }
+
  protected:
   // Post constructor setup.
   void
@@ -1653,7 +1688,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   void
   make_exidx_input_section(unsigned int shndx,
 			   const elfcpp::Shdr<32, big_endian>& shdr,
-			   unsigned int text_shndx);
+			   unsigned int text_shndx,
+			   const elfcpp::Shdr<32, big_endian>& text_shdr);
 
   // Return the output address of either a plain input section or a
   // relaxed input section.  SHNDX is the section index.
@@ -2764,7 +2800,8 @@ class Target_arm : public Sized_target<32, big_endian>
 
   // Fix .ARM.exidx section coverage.
   void
-  fix_exidx_coverage(Layout*, Arm_output_section<big_endian>*, Symbol_table*);
+  fix_exidx_coverage(Layout*, const Input_objects*,
+		     Arm_output_section<big_endian>*, Symbol_table*);
 
   // Functors for STL set.
   struct output_section_address_less_than
@@ -5655,10 +5692,6 @@ void
 Arm_output_section<big_endian>::append_text_sections_to_list(
     Text_section_list* list)
 {
-  // We only care about text sections.
-  if ((this->flags() & elfcpp::SHF_EXECINSTR) == 0)
-    return;
-
   gold_assert((this->flags() & elfcpp::SHF_ALLOC) != 0);
 
   for (Input_section_list::const_iterator p = this->input_sections().begin();
@@ -5731,9 +5764,10 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
       const Arm_exidx_input_section* exidx_input_section =
 	 arm_relobj->exidx_input_section_by_link(shndx);
 
-      // If this text section has no EXIDX section, force an EXIDX_CANTUNWIND
-      // entry pointing to the end of the last seen EXIDX section.
-      if (exidx_input_section == NULL)
+      // If this text section has no EXIDX section or if the EXIDX section
+      // has errors, force an EXIDX_CANTUNWIND entry pointing to the end
+      // of the last seen EXIDX section.
+      if (exidx_input_section == NULL || exidx_input_section->has_errors())
 	{
 	  exidx_fixup.add_exidx_cantunwind_as_needed();
 	  continue;
@@ -5817,15 +5851,20 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
       if (processed_input_sections.find(Section_id(p->relobj(), p->shndx()))
 	  == processed_input_sections.end())
 	{
-	  // We only discard a known EXIDX section because its linked
-	  // text section has been folded by ICF.
+	  // We discard a known EXIDX section because its linked
+	  // text section has been folded by ICF.  We also discard an
+	  // EXIDX section with error, the output does not matter in this
+	  // case.  We do this to avoid triggering asserts.
 	  Arm_relobj<big_endian>* arm_relobj =
 	    Arm_relobj<big_endian>::as_arm_relobj(p->relobj());
 	  const Arm_exidx_input_section* exidx_input_section =
 	    arm_relobj->exidx_input_section_by_shndx(p->shndx());
 	  gold_assert(exidx_input_section != NULL);
-	  unsigned int text_shndx = exidx_input_section->link();
-	  gold_assert(symtab->is_section_folded(p->relobj(), text_shndx));
+	  if (!exidx_input_section->has_errors())
+	    {
+	      unsigned int text_shndx = exidx_input_section->link();
+	      gold_assert(symtab->is_section_folded(p->relobj(), text_shndx));
+	    }
 
 	  // Remove this from link.  We also need to recount the
 	  // local symbols.
@@ -5842,6 +5881,28 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
   // Make changes permanent.
   this->save_states();
   this->set_section_offsets_need_adjustment();
+}
+
+// Link EXIDX output sections to text output sections.
+
+template<bool big_endian>
+void
+Arm_output_section<big_endian>::set_exidx_section_link()
+{
+  gold_assert(this->type() == elfcpp::SHT_ARM_EXIDX);
+  if (!this->input_sections().empty())
+    {
+      Input_section_list::const_iterator p = this->input_sections().begin();
+      Arm_relobj<big_endian>* arm_relobj =
+	Arm_relobj<big_endian>::as_arm_relobj(p->relobj());
+      unsigned exidx_shndx = p->shndx();
+      const Arm_exidx_input_section* exidx_input_section =
+	arm_relobj->exidx_input_section_by_shndx(exidx_shndx);
+      gold_assert(exidx_input_section != NULL);
+      unsigned int text_shndx = exidx_input_section->link();
+      Output_section* os = arm_relobj->output_section(text_shndx);
+      this->set_link_section(os);
+    }
 }
 
 // Arm_relobj methods.
@@ -6445,28 +6506,57 @@ void
 Arm_relobj<big_endian>::make_exidx_input_section(
     unsigned int shndx,
     const elfcpp::Shdr<32, big_endian>& shdr,
-    unsigned int text_shndx)
+    unsigned int text_shndx,
+    const elfcpp::Shdr<32, big_endian>& text_shdr)
 {
-  // Issue an error and ignore this EXIDX section if it points to a text
-  // section already has an EXIDX section.
-  if (this->exidx_section_map_[text_shndx] != NULL)
-    {
-      gold_error(_("EXIDX sections %u and %u both link to text section %u "
-		   "in %s"),
-		 shndx, this->exidx_section_map_[text_shndx]->shndx(),
-		 text_shndx, this->name().c_str());
-      return;
-    }
-
   // Create an Arm_exidx_input_section object for this EXIDX section.
   Arm_exidx_input_section* exidx_input_section =
     new Arm_exidx_input_section(this, shndx, text_shndx, shdr.get_sh_size(),
 				shdr.get_sh_addralign());
-  this->exidx_section_map_[text_shndx] = exidx_input_section;
 
-  // Also map the EXIDX section index to this.
   gold_assert(this->exidx_section_map_[shndx] == NULL);
   this->exidx_section_map_[shndx] = exidx_input_section;
+
+  if (text_shndx == elfcpp::SHN_UNDEF || text_shndx >= this->shnum())
+    {
+      gold_error(_("EXIDX section %s(%u) links to invalid section %u in %s"),
+		 this->section_name(shndx).c_str(), shndx, text_shndx,
+		 this->name().c_str());
+      exidx_input_section->set_has_errors();
+    } 
+  else if (this->exidx_section_map_[text_shndx] != NULL)
+    {
+      unsigned other_exidx_shndx =
+	this->exidx_section_map_[text_shndx]->shndx();
+      gold_error(_("EXIDX sections %s(%u) and %s(%u) both link to text section"
+		   "%s(%u) in %s"),
+		 this->section_name(shndx).c_str(), shndx,
+		 this->section_name(other_exidx_shndx).c_str(),
+		 other_exidx_shndx, this->section_name(text_shndx).c_str(),
+		 text_shndx, this->name().c_str());
+      exidx_input_section->set_has_errors();
+    }
+  else
+     this->exidx_section_map_[text_shndx] = exidx_input_section;
+
+  // Check section flags of text section.
+  if ((text_shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+    {
+      gold_error(_("EXIDX section %s(%u) links to non-allocated section %s(%u) "
+		   " in %s"),
+		 this->section_name(shndx).c_str(), shndx,
+		 this->section_name(text_shndx).c_str(), text_shndx,
+		 this->name().c_str());
+      exidx_input_section->set_has_errors();
+    }
+  else if ((text_shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) == 0)
+    // I would like to make this an error but currenlty ld just ignores
+    // this.
+    gold_warning(_("EXIDX section %s(%u) links to non-executable section "
+		   "%s(%u) in %s"),
+		 this->section_name(shndx).c_str(), shndx,
+		 this->section_name(text_shndx).c_str(), text_shndx,
+		 this->name().c_str());
 }
 
 // Read the symbol information.
@@ -6536,19 +6626,21 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
       else if (shdr.get_sh_type() == elfcpp::SHT_ARM_EXIDX)
 	{
 	  unsigned int text_shndx = this->adjust_shndx(shdr.get_sh_link());
-	  if (text_shndx >= this->shnum())
-	    gold_error(_("EXIDX section %u linked to invalid section %u"),
-		       i, text_shndx);
-	  else if (text_shndx == elfcpp::SHN_UNDEF)
+	  if (text_shndx == elfcpp::SHN_UNDEF)
 	    deferred_exidx_sections.push_back(i);
 	  else
-	    this->make_exidx_input_section(i, shdr, text_shndx);
+	    {
+	      elfcpp::Shdr<32, big_endian> text_shdr(pshdrs
+						     + text_shndx * shdr_size);
+	      this->make_exidx_input_section(i, shdr, text_shndx, text_shdr);
+	    }
 	}
     }
 
   // This is rare.
   if (!must_merge_flags_and_attributes)
     {
+      gold_assert(deferred_exidx_sections.empty());
       this->merge_flags_and_attributes_ = false;
       return;
     }
@@ -6604,15 +6696,14 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 	{
 	  unsigned int shndx = deferred_exidx_sections[i];
 	  elfcpp::Shdr<32, big_endian> shdr(pshdrs + shndx * shdr_size);
-	  unsigned int text_shndx;
+	  unsigned int text_shndx = elfcpp::SHN_UNDEF;
 	  Reloc_map::const_iterator it = reloc_map.find(shndx);
-	  if (it != reloc_map.end()
-	      && find_linked_text_section(pshdrs + it->second * shdr_size,
-					  psyms, &text_shndx))
-	    this->make_exidx_input_section(shndx, shdr, text_shndx);
-	  else
-	    gold_error(_("EXIDX section %u has no linked text section."),
-		       shndx);
+	  if (it != reloc_map.end())
+	    find_linked_text_section(pshdrs + it->second * shdr_size,
+				     psyms, &text_shndx);
+	  elfcpp::Shdr<32, big_endian> text_shdr(pshdrs
+						 + text_shndx * shdr_size);
+	  this->make_exidx_input_section(shndx, shdr, text_shndx, text_shdr);
 	}
     }
 }
@@ -8306,6 +8397,17 @@ Target_arm<big_endian>::do_finalize_sections(
 				      attributes_section, false, false, false,
 				      false);
     }
+
+  // Fix up links in section EXIDX headers.
+  for (Layout::Section_list::const_iterator p = layout->section_list().begin();
+       p != layout->section_list().end();
+       ++p)
+    if ((*p)->type() == elfcpp::SHT_ARM_EXIDX)
+      {
+	Arm_output_section<big_endian>* os =
+	  Arm_output_section<big_endian>::as_arm_output_section(*p);
+	os->set_exidx_section_link();
+      }
 }
 
 // Return whether a direct absolute static relocation needs to be applied.
@@ -10969,12 +11071,28 @@ Target_arm<big_endian>::do_relax(
       group_sections(layout, stub_group_size, stubs_always_after_branch);
      
       // Also fix .ARM.exidx section coverage.
-      Output_section* os = layout->find_output_section(".ARM.exidx");
-      if (os != NULL && os->type() == elfcpp::SHT_ARM_EXIDX)
+      Arm_output_section<big_endian>* exidx_output_section = NULL;
+      for (Layout::Section_list::const_iterator p =
+	     layout->section_list().begin();
+	   p != layout->section_list().end();
+	   ++p)
+	if ((*p)->type() == elfcpp::SHT_ARM_EXIDX)
+	  {
+	    if (exidx_output_section == NULL)
+	      exidx_output_section =
+		Arm_output_section<big_endian>::as_arm_output_section(*p);
+	    else
+	      // We cannot handle this now.
+	      gold_error(_("multiple SHT_ARM_EXIDX sections %s and %s in a "
+			   "non-relocatable link"),
+			  exidx_output_section->name(),
+			  (*p)->name());
+	  }
+
+      if (exidx_output_section != NULL)
 	{
-	  Arm_output_section<big_endian>* exidx_output_section =
-	    Arm_output_section<big_endian>::as_arm_output_section(os);
-	  this->fix_exidx_coverage(layout, exidx_output_section, symtab);
+	  this->fix_exidx_coverage(layout, input_objects, exidx_output_section,
+				   symtab);
 	  done_exidx_fixup = true;
 	}
     }
@@ -11425,6 +11543,7 @@ template<bool big_endian>
 void
 Target_arm<big_endian>::fix_exidx_coverage(
     Layout* layout,
+    const Input_objects* input_objects,
     Arm_output_section<big_endian>* exidx_section,
     Symbol_table* symtab)
 {
@@ -11437,15 +11556,30 @@ Target_arm<big_endian>::fix_exidx_coverage(
   typedef std::set<Output_section*, output_section_address_less_than>
       Sorted_output_section_list;
   Sorted_output_section_list sorted_output_sections;
-  Layout::Section_list section_list;
-  layout->get_allocated_sections(&section_list);
-  for (Layout::Section_list::const_iterator p = section_list.begin();
-       p != section_list.end();
+
+  // Find out all the output sections of input sections pointed by
+  // EXIDX input sections.
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
        ++p)
     {
-      // We only care about output sections that contain executable code.
-      if (((*p)->flags() & elfcpp::SHF_EXECINSTR) != 0)
-	sorted_output_sections.insert(*p);
+      Arm_relobj<big_endian>* arm_relobj =
+	Arm_relobj<big_endian>::as_arm_relobj(*p);
+      std::vector<unsigned int> shndx_list;
+      arm_relobj->get_exidx_shndx_list(&shndx_list);
+      for (size_t i = 0; i < shndx_list.size(); ++i)
+	{
+	  const Arm_exidx_input_section* exidx_input_section =
+	    arm_relobj->exidx_input_section_by_shndx(shndx_list[i]);
+	  gold_assert(exidx_input_section != NULL);
+	  if (!exidx_input_section->has_errors())
+	    {
+	      unsigned int text_shndx = exidx_input_section->link();
+	      Output_section *os = arm_relobj->output_section(text_shndx);
+	      if (os != NULL && (os->flags() & elfcpp::SHF_ALLOC) != 0)
+		sorted_output_sections.insert(os);
+	    }
+	}
     }
 
   // Go over the output sections in ascending order of output addresses.

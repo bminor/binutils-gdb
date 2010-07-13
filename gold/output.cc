@@ -1949,6 +1949,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     is_entsize_zero_(false),
     section_offsets_need_adjustment_(false),
     is_noload_(false),
+    always_keeps_input_sections_(false),
     tls_offset_(0),
     checkpoint_(NULL),
     lookup_maps_(new Output_section_lookup_maps)
@@ -2038,8 +2039,10 @@ Output_section::add_input_section(Layout* layout,
     {
       // Keep information about merged input sections for rebuilding fast
       // lookup maps if we have sections-script or we do relaxation.
-      bool keeps_input_sections =
-	have_sections_script || parameters->target().may_relax();
+      bool keeps_input_sections = (this->always_keeps_input_sections_
+				   || have_sections_script
+				   || parameters->target().may_relax());
+
       if (this->add_merge_input_section(object, shndx, sh_flags, entsize,
 					addralign, keeps_input_sections))
 	{
@@ -2100,7 +2103,8 @@ Output_section::add_input_section(Layout* layout,
   // the future, we keep track of the sections.  If the
   // --section-ordering-file option is used to specify the order of
   // sections, we need to keep track of sections.
-  if (have_sections_script
+  if (this->always_keeps_input_sections_
+      || have_sections_script
       || !this->input_sections_.empty()
       || this->may_sort_attached_input_sections()
       || this->must_sort_attached_input_sections()
