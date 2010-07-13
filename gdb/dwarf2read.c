@@ -1761,12 +1761,9 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 static int
 dwarf2_read_index (struct objfile *objfile)
 {
-  struct stat st, obstat;
-  int fd;
   char *addr;
   struct mapped_index *map;
-  offset_type val, *metadata;
-  char buf1[8], buf2[8];
+  offset_type *metadata;
   const gdb_byte *cu_list;
   offset_type cu_list_elements;
 
@@ -1781,7 +1778,7 @@ dwarf2_read_index (struct objfile *objfile)
     return 0;
 
   map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
-  map->total_size = st.st_size;
+  map->total_size = dwarf2_per_objfile->gdb_index.size;
 
   metadata = (offset_type *) (addr + sizeof (offset_type));
   cu_list = addr + MAYBE_SWAP (metadata[0]);

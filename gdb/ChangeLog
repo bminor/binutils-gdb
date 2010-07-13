@@ -1,5 +1,9 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dwarf2_read_index): Correctly set 'total_size'.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf2_per_cu_text_offset): Fix reference to
 	objfile.
 
