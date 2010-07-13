@@ -1,3 +1,9 @@
+2010-07-13  Ian Lance Taylor  <iant@google.com>
+
+	* archive.cc (Archive::include_member): Unlock an external member
+	of a thin archive.  Don't bother to delete an object we know is
+	NULL.
+
 2010-07-12  Cary Coutant  <ccoutant@google.com>
 
 	* compressed_output.cc (zlib_decompress): New function.

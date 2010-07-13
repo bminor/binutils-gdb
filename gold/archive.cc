@@ -853,11 +853,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       && this->searched_for()
       && obj == NULL
       && unconfigured)
-    {
-      if (obj != NULL)
-	delete obj;
-      return false;
-    }
+    return false;
 
   if (obj == NULL)
     return true;
@@ -874,7 +870,13 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
     }
 
   if (!input_objects->add_object(obj))
-    delete obj;
+    {
+      // If this is an external member of a thin archive, unlock the
+      // file.
+      if (obj->offset() == 0)
+	obj->unlock(this->task_);
+      delete obj;
+    }
   else
     {
       {
