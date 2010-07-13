@@ -1,3 +1,8 @@
+2010-07-13  Rafael Espindola  <espindola@google.com>
+
+	* fileread.cc (try_extra_search_path, find_file): Move to Input_file.
+	* fileread.h (Input_file): Add try_extra_search_path and find_file.
+
 2010-07-13  Philip Herron  <herron.philip@googlemail.com>
 	    Ian Lance Taylor  <iant@google.com>
 

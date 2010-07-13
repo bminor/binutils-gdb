@@ -841,17 +841,19 @@ File_read::get_mtime()
 #endif
 }
 
-// Try to find a file in the extra search dirs. Returns true on success.
+// Try to find a file in the extra search dirs.  Returns true on success.
 
-static bool
-try_extra_search_path(int* pindex, const Input_file_argument* input_argument,
-                      std::string filename, std::string* found_name,
-                      std::string* namep) {
+bool
+Input_file::try_extra_search_path(int* pindex,
+				  const Input_file_argument* input_argument,
+				  std::string filename, std::string* found_name,
+				  std::string* namep)
+{
   if (input_argument->extra_search_path() == NULL)
     return false;
 
   std::string name = input_argument->extra_search_path();
-  if (!IS_DIR_SEPARATOR (name[name.length() - 1]))
+  if (!IS_DIR_SEPARATOR(name[name.length() - 1]))
     name += '/';
   name += filename;
 
@@ -873,10 +875,11 @@ try_extra_search_path(int* pindex, const Input_file_argument* input_argument,
 // In each, we look in extra_search_path + library_path to find
 // the file location, rather than the current directory.
 
-static bool
-find_file(const Dirsearch& dirpath, int* pindex,
-          const Input_file_argument* input_argument, bool* is_in_sysroot,
-          std::string* found_name, std::string* namep)
+bool
+Input_file::find_file(const Dirsearch& dirpath, int* pindex,
+		      const Input_file_argument* input_argument,
+		      bool* is_in_sysroot,
+		      std::string* found_name, std::string* namep)
 {
   std::string name;
 
@@ -914,11 +917,13 @@ find_file(const Dirsearch& dirpath, int* pindex,
       else
 	n1 = input_argument->name();
 
-      if (try_extra_search_path(pindex, input_argument, n1, found_name, namep))
+      if (Input_file::try_extra_search_path(pindex, input_argument, n1,
+					    found_name, namep))
         return true;
 
-      if (!n2.empty() && try_extra_search_path(pindex, input_argument, n2,
-                                               found_name, namep))
+      if (!n2.empty() && Input_file::try_extra_search_path(pindex,
+							   input_argument, n2,
+							   found_name, namep))
         return true;
 
       // It is not in the extra_search_path.
@@ -969,8 +974,8 @@ bool
 Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
 {
   std::string name;
-  if (!find_file(dirpath, pindex, this->input_argument_, &this->is_in_sysroot_,
-                 &this->found_name_, &name))
+  if (!Input_file::find_file(dirpath, pindex, this->input_argument_,
+			     &this->is_in_sysroot_, &this->found_name_, &name))
     return false;
 
   // Now that we've figured out where the file lives, try to open it.

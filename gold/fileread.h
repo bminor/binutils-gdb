@@ -565,6 +565,20 @@ class Input_file
   format() const
   { return this->format_; }
 
+  // Try to find a file in the extra search dirs.  Returns true on success.
+  static bool
+  try_extra_search_path(int* pindex,
+			const Input_file_argument* input_argument,
+			std::string filename, std::string* found_name,
+			std::string* namep);
+
+  // Find the actual file.
+  static bool
+  find_file(const Dirsearch& dirpath, int* pindex,
+	    const Input_file_argument* input_argument,
+	    bool* is_in_sysroot,
+	    std::string* found_name, std::string* namep);
+
  private:
   Input_file(const Input_file&);
   Input_file& operator=(const Input_file&);
