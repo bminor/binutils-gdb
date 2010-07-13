@@ -12049,7 +12049,9 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
     }
 }
 
-/* Return the OBJFILE associated with the compilation unit CU.  */
+/* Return the OBJFILE associated with the compilation unit CU.  If CU
+   came from a separate debuginfo file, then the master objfile is
+   returned.  */
 
 struct objfile *
 dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *per_cu)
@@ -12106,6 +12108,19 @@ dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *per_cu)
       read_comp_unit_head (&cu_header, info_ptr, objfile->obfd);
       return cu_header.offset_size;
     }
+}
+
+/* Return the text offset of the CU.  The returned offset comes from
+   this CU's objfile.  If this objfile came from a separate debuginfo
+   file, then the offset may be different from the corresponding
+   offset in the parent objfile.  */
+
+CORE_ADDR
+dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *per_cu)
+{
+  struct objfile *objfile = per_cu->psymtab->objfile;
+
+  return ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 }
 
 /* Locate the .debug_info compilation unit from CU's objfile which contains

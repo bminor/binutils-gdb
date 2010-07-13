@@ -1,3 +1,15 @@
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.h (dwarf2_per_cu_text_offset): Declare.
+	* dwarf2loc.c (find_location_expression): Use
+	dwarf2_per_cu_text_offset.
+	(dwarf2_evaluate_loc_desc): Likewise.
+	(dwarf2_loc_desc_needs_frame): Likewise.
+	(compile_dwarf_to_ax): Likewise.
+	(loclist_describe_location): Likewise.
+	* dwarf2read.c (dwarf2_per_cu_text_offset): New function.
+	(dwarf2_per_cu_objfile): Update comment.
+
 2010-07-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (read_subrange_type): Call read_subrange_type.

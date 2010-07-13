@@ -28,7 +28,9 @@ struct dwarf2_per_cu_data;
 /* This header is private to the DWARF-2 reader.  It is shared between
    dwarf2read.c and dwarf2loc.c.  */
 
-/* Return the OBJFILE associated with the compilation unit CU.  */
+/* Return the OBJFILE associated with the compilation unit CU.  If CU
+   came from a separate debuginfo file, then the master objfile is
+   returned.  */
 struct objfile *dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *cu);
 
 /* Return the address size given in the compilation unit header for CU.  */
@@ -36,6 +38,12 @@ CORE_ADDR dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *cu);
 
 /* Return the offset size given in the compilation unit header for CU.  */
 int dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *cu);
+
+/* Return the text offset of the CU.  The returned offset comes from
+   this CU's objfile.  If this objfile came from a separate debuginfo
+   file, then the offset may be different from the corresponding
+   offset in the parent objfile.  */
+CORE_ADDR dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *cu);
 
 struct dwarf2_locexpr_baton dwarf2_fetch_die_location_block
   (unsigned int offset, struct dwarf2_per_cu_data *per_cu);
