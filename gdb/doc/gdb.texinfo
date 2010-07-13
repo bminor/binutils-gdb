@@ -26393,7 +26393,7 @@ be available.
 
 Return a list of the children of the specified variable object and
 create variable objects for them, if they do not already exist.  With
-a single argument or if @var{print-values} has a value for of 0 or
+a single argument or if @var{print-values} has a value of 0 or
 @code{--no-values}, print only the names of the variables; if
 @var{print-values} is 1 or @code{--all-values}, also print their
 values; and if it is 2 or @code{--simple-values} print the name and

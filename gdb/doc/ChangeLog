@@ -1,5 +1,9 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (GDB/MI Variable Objects): Remove extra 'for'.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Specify Location): Document labels.
 
 2010-07-01  Pedro Alves  <pedro@codesourcery.com>
