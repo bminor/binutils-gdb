@@ -13108,7 +13108,7 @@ dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *per_cu)
 CORE_ADDR
 dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *per_cu)
 {
-  struct objfile *objfile = per_cu->psymtab->objfile;
+  struct objfile *objfile = per_cu->objfile;
 
   return ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 }

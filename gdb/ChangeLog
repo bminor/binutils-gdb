@@ -1,5 +1,10 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dwarf2_per_cu_text_offset): Fix reference to
+	objfile.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (set_initial_language): Update.
 	(deduce_language_from_filename): Argument type now const.
 	* symtab.h (find_main_filename): Update.
