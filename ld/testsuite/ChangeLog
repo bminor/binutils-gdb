@@ -1,3 +1,15 @@
+2010-07-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11791
+	* ld-ifunc/ifunc-10-i386.d: New.
+	* ld-ifunc/ifunc-10-i386.s: Likewise.
+	* ld-ifunc/ifunc-10-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-10-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-11-i386.d: Likewise.
+	* ld-ifunc/ifunc-11-i386.s: Likewise.
+	* ld-ifunc/ifunc-11-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-11-x86-64.s: Likewise.
+
 2010-07-06  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/relax.s: Add branch back to _start.

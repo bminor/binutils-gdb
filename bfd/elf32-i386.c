@@ -789,8 +789,6 @@ elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
       ret->elf.indx = sec->id;
       ret->elf.dynstr_index = ELF32_R_SYM (rel->r_info);
       ret->elf.dynindx = -1;
-      ret->elf.plt.offset = (bfd_vma) -1;
-      ret->elf.got.offset = (bfd_vma) -1;
       *slot = ret;
     }
   return &ret->elf;
@@ -1161,6 +1159,12 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
   unsigned int from_type = *r_type;
   unsigned int to_type = from_type;
   bfd_boolean check = TRUE;
+
+  /* Skip TLS transition for functions.  */
+  if (h != NULL
+      && (h->type == STT_FUNC
+	  || h->type == STT_GNU_IFUNC))
+    return TRUE;
 
   switch (from_type)
     {
@@ -1819,6 +1823,23 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 		break;
 	      }
 	}
+      else
+	{
+	  /* A local symbol.  */
+	  Elf_Internal_Sym *isym;
+
+	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					abfd, r_symndx);
+
+	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
+	  if (isym != NULL
+	      && ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+	    {
+	      h = elf_i386_get_local_sym_hash (htab, abfd, rel, FALSE);
+	      if (h == NULL)
+		abort ();
+	    }
+	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (! elf_i386_tls_transition (info, abfd, sec, NULL,
@@ -1845,6 +1866,11 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	    {
 	      if (h->got.refcount > 0)
 		h->got.refcount -= 1;
+	      if (h->type == STT_GNU_IFUNC)
+		{
+		  if (h->plt.refcount > 0)
+		    h->plt.refcount -= 1;
+		}
 	    }
 	  else if (local_got_refcounts != NULL)
 	    {
@@ -1862,6 +1888,16 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	case R_386_PLT32:
 	  if (h != NULL)
 	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
+
+	case R_386_GOTOFF:
+	  if (h != NULL && h->type == STT_GNU_IFUNC)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
 	      if (h->plt.refcount > 0)
 		h->plt.refcount -= 1;
 	    }

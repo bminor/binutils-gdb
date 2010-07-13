@@ -1,3 +1,19 @@
+2010-07-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11791
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Support
+	garbage collection against STT_GNU_IFUNC symbols.
+
+	* elf32-i386.c (elf_i386_get_local_sym_hash): Don't set
+	elf.plt.offset/elf.got.offset to -1.
+	(elf_i386_tls_transition): Skip TLS transition for functions.
+	(elf_i386_gc_sweep_hook): Support STT_GNU_IFUNC symbols.
+
+	* elf64-x86-64.c (elf64_x86_64_get_local_sym_hash): Don't set
+	elf.plt.offset/elf.got.offset to -1.
+	(elf64_x86_64_tls_transition): Skip TLS transition for functions.
+	(elf64_x86_64_gc_sweep_hook): Support STT_GNU_IFUNC symbols.
+
 2010-07-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Re-indent.

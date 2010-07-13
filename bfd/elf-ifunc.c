@@ -187,6 +187,15 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
 
   htab = elf_hash_table (info);
 
+  /* Support garbage collection against STT_GNU_IFUNC symbols.  */
+  if (h->plt.refcount <= 0 && h->got.refcount <= 0)
+    {
+      h->got = htab->init_got_offset;
+      h->plt = htab->init_plt_offset;
+      *head = NULL;
+      return TRUE;
+    }
+
   /* Return and discard space for dynamic relocations against it if
      it is never referenced in a non-shared object.  */
   if (!h->ref_regular)
