@@ -6330,6 +6330,13 @@ in the file @var{filename}.  You only need the file name with a
 function name to avoid ambiguity when there are identically named
 functions in different source files.
 
+@item @var{label}
+Specifies the line at which the label named @var{label} appears.
+@value{GDBN} searches for the label in the function corresponding to
+the currently selected stack frame.  If there is no current selected
+stack frame (for instance, if the inferior is not running), then
+@value{GDBN} will not search for a label.
+
 @item *@var{address}
 Specifies the program address @var{address}.  For line-oriented
 commands, such as @code{list} and @code{edit}, this specifies a source

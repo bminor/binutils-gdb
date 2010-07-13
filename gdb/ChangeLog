@@ -1,5 +1,15 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	PR breakpoints/8357:
+	* symtab.h (domain_enum_tag) <LABEL_DOMAIN>: Update comment.
+	* linespec.c (decode_line_1): Update comment.  Call decode_label.
+	(decode_label): New function.
+	(symbol_found): Handle LOC_LABEL.
+	* dwarf2read.c (new_symbol) <DW_TAG_label>: Set symbol's type and
+	domain.  Call add_symbol_to_list.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2loc.h (dwarf2_per_cu_text_offset): Declare.
 	* dwarf2loc.c (find_location_expression): Use
 	dwarf2_per_cu_text_offset.

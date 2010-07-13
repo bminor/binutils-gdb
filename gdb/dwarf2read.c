@@ -8807,7 +8807,10 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    {
 	      SYMBOL_VALUE_ADDRESS (sym) = DW_ADDR (attr) + baseaddr;
 	    }
+	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
+	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
 	  SYMBOL_CLASS (sym) = LOC_LABEL;
+	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_subprogram:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by

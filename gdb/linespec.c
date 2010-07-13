@@ -122,6 +122,9 @@ static struct symtabs_and_lines decode_dollar (char *copy,
 					       char ***canonical,
 					       struct symtab *file_symtab);
 
+static int decode_label (char *copy, char ***canonical,
+			 struct symtabs_and_lines *result);
+
 static struct symtabs_and_lines decode_variable (char *copy,
 						 int funfirstline,
 						 char ***canonical,
@@ -672,6 +675,7 @@ find_method_overload_end (char *p)
    FILE:LINENUM -- that line in that file.  PC returned is 0.
    FUNCTION -- line number of openbrace of that function.
    PC returned is the start of the function.
+   LABEL -- a label in the current scope
    VARIABLE -- line number of definition of that variable.
    PC returned is 0.
    FILE:FUNCTION -- likewise, but prefer functions in that file.
@@ -902,6 +906,16 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (*copy == '$')
     return decode_dollar (copy, funfirstline, default_symtab,
 			  canonical, file_symtab);
+
+  /* Try the token as a label, but only if no file was specified,
+     because we can only really find labels in the current scope.  */
+
+  if (!file_symtab)
+    {
+      struct symtabs_and_lines label_result;
+      if (decode_label (copy, canonical, &label_result))
+	return label_result;
+    }
 
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
@@ -1838,6 +1852,27 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
 
 
+/* A helper for decode_line_1 that tries to find a label.  The label
+   is searched for in the current block.
+   COPY is the name of the label to find.
+   CANONICAL is the same as the "canonical" argument to decode_line_1.
+   RESULT is a pointer to a symtabs_and_lines structure which will be
+   filled in on success.
+   This function returns 1 if a label was found, 0 otherwise.  */
+
+static int
+decode_label (char *copy, char ***canonical, struct symtabs_and_lines *result)
+{
+  struct symbol *sym;
+
+  sym = lookup_symbol (copy, get_selected_block (0), LABEL_DOMAIN, 0);
+
+  if (sym != NULL)
+    *result = symbol_found (0, canonical, copy, sym, NULL);
+
+  return sym != NULL;
+}
+
 /* Decode a linespec that's a variable.  If FILE_SYMTAB is non-NULL,
    look in that symtab's static variables first.  If NOT_FOUND_PTR is not NULL and
    the function cannot be found, store boolean true in the location pointed to
@@ -1917,7 +1952,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
     }
   else
     {
-      if (funfirstline)
+      if (funfirstline && SYMBOL_CLASS (sym) != LOC_LABEL)
 	error (_("\"%s\" is not a function"), copy);
       else if (SYMBOL_LINE (sym) != 0)
 	{
@@ -1928,6 +1963,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
 	  values.sals[0].symtab = SYMBOL_SYMTAB (sym);
 	  values.sals[0].line = SYMBOL_LINE (sym);
+	  values.sals[0].pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
 	  return values;
 	}
       else

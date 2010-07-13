@@ -377,8 +377,7 @@ typedef enum domain_enum_tag
 
   STRUCT_DOMAIN,
 
-  /* LABEL_DOMAIN may be used for names of labels (for gotos);
-     currently it is not used and labels are not recorded at all.  */
+  /* LABEL_DOMAIN may be used for names of labels (for gotos).  */
 
   LABEL_DOMAIN,
 

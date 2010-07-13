@@ -1,3 +1,8 @@
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/label.exp: New file.
+	* gdb.base/label.c: New file.
+
 2010-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
