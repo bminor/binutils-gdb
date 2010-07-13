@@ -135,7 +135,7 @@ zlib_compress(const unsigned char*, unsigned long,
 
 static bool
 zlib_decompress(const unsigned char*, unsigned long,
-		unsigned char**, unsigned long*)
+		unsigned char*, unsigned long)
 {
   return false;
 }
