@@ -70,8 +70,7 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = ANOFFSET (objfile->section_offsets,
-				    SECT_OFF_TEXT (objfile));
+  CORE_ADDR base_offset = dwarf2_per_cu_text_offset (baton->per_cu);
   CORE_ADDR base_address = baton->base_address + base_offset;
 
   loc_ptr = baton->data;
@@ -909,7 +908,7 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 
   ctx->gdbarch = get_objfile_arch (objfile);
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
-  ctx->offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+  ctx->offset = dwarf2_per_cu_text_offset (per_cu);
   ctx->baton = &baton;
   ctx->read_reg = dwarf_expr_read_reg;
   ctx->read_mem = dwarf_expr_read_mem;
@@ -1095,7 +1094,7 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
 
   ctx->gdbarch = get_objfile_arch (objfile);
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
-  ctx->offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+  ctx->offset = dwarf2_per_cu_text_offset (per_cu);
   ctx->baton = &baton;
   ctx->read_reg = needs_frame_read_reg;
   ctx->read_mem = needs_frame_read_mem;
@@ -1304,12 +1303,7 @@ compile_dwarf_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	     index, not an address.  We don't support things like
 	     branching between the address and the TLS op.  */
 	  if (op_ptr >= op_end || *op_ptr != DW_OP_GNU_push_tls_address)
-	    {
-	      struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
-
-	      uoffset += ANOFFSET (objfile->section_offsets,
-				   SECT_OFF_TEXT (objfile));
-	    }
+	    uoffset += dwarf2_per_cu_text_offset (per_cu);
 	  ax_const_l (expr, uoffset);
 	  break;
 
@@ -2511,8 +2505,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = ANOFFSET (objfile->section_offsets,
-				    SECT_OFF_TEXT (objfile));
+  CORE_ADDR base_offset = dwarf2_per_cu_text_offset (dlbaton->per_cu);
   CORE_ADDR base_address = dlbaton->base_address + base_offset;
 
   loc_ptr = dlbaton->data;
