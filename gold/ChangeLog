@@ -1,3 +1,18 @@
+2010-07-13  Philip Herron  <herron.philip@googlemail.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	* output.h (Output_section_lookup_maps::add_merge_section):
+	Correct check of whether value was inserted.
+	(Output_section_lookup_maps::add_merge_input_section): Likewise.
+	(Output_section_lookup_maps::add_relaxed_input_section):
+	Likewise.
+	* arm.cc (Target_arm::got_section): Remove used local os.
+	* i386.cc (Target_i386::got_section): Likewise.
+	* x86_64.cc (Target_x86_64::got_section): Likewise.
+	* sparc.cc (Target_sparc::got_section): Likewise.
+	(Target_sparc::relocate): Remove unused local have_got_offset.
+	* powerpc.cc (Target_powerpc::relocate): Likewise.
+
 2010-07-13  Ian Lance Taylor  <iant@google.com>
 
 	* compressed_output.cc (zlib_decompress): Fix signature in

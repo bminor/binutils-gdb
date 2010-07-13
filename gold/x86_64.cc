@@ -547,19 +547,17 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
 
       this->got_ = new Output_data_got<64, false>();
 
-      Output_section* os;
-      os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-					   (elfcpp::SHF_ALLOC
-					    | elfcpp::SHF_WRITE),
-					   this->got_, false, true, true,
-					   false);
+      layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_WRITE),
+				      this->got_, false, true, true, false);
 
       this->got_plt_ = new Output_data_space(8, "** GOT PLT");
-      os = layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
-					   (elfcpp::SHF_ALLOC
-					    | elfcpp::SHF_WRITE),
-					   this->got_plt_, false, false,
-					   false, true);
+      layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_WRITE),
+				      this->got_plt_, false, false, false,
+				      true);
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * 8);

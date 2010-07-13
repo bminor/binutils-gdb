@@ -1636,7 +1636,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   // Get the GOT offset if needed.  Unlike i386 and x86_64, our GOT
   // pointer points to the beginning, not the end, of the table.
   // So we just use the plain offset.
-  bool have_got_offset = false;
   unsigned int got_offset = 0;
   unsigned int got2_offset = 0;
   switch (r_type)
@@ -1668,7 +1667,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
           gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
           got_offset = object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
         }
-      have_got_offset = true;
       break;
 
       // R_PPC_PLTREL24 is rather special.  If non-zero,
@@ -1681,7 +1679,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  got2_offset = got2->offset();
 	  addend += got2_offset;
 	}
-      have_got_offset = true;
       break;
 
     default:

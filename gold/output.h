@@ -2432,7 +2432,7 @@ class Output_section_lookup_maps
     std::pair<Merge_section_properties, Output_merge_base*> value(msp, pomb);
     std::pair<Merge_sections_by_properties::iterator, bool> result =
       this->merge_sections_by_properties_.insert(value);
-    gold_assert(value.second);
+    gold_assert(result.second);
   }
   
   // Add a mapping from a merged input section in OBJECT with index SHNDX
@@ -2445,7 +2445,7 @@ class Output_section_lookup_maps
     std::pair<Const_section_id, Output_merge_base*> value(csid, pomb);
     std::pair<Merge_sections_by_id::iterator, bool> result =
       this->merge_sections_by_id_.insert(value);
-    gold_assert(value.second);
+    gold_assert(result.second);
   }
 
   // Find a relaxed input section of OBJECT with index SHNDX.
@@ -2469,7 +2469,7 @@ class Output_section_lookup_maps
       value(csid, poris);
     std::pair<Relaxed_input_sections_by_id::iterator, bool> result =
       this->relaxed_input_sections_by_id_.insert(value);
-    gold_assert(value.second);
+    gold_assert(result.second);
   }
 
  private:
