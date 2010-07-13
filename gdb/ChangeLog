@@ -1,5 +1,17 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (set_initial_language): Update.
+	(deduce_language_from_filename): Argument type now const.
+	* symtab.h (find_main_filename): Update.
+	(deduce_language_from_filename): Update.
+	* symtab.c (find_main_filename): Make result const.
+	* dwarf2read.c (dw2_find_symbol_file): Change return type.
+	* psymtab.c (find_symbol_file_from_partial): Change return type.
+	* symfile.h (struct quick_symbol_functions) <find_symbol_file>:
+	Make result const.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.c (save_cmdlist): No longer static.
 	* gdbcmd.h (save_cmdlist): Declare.
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Set

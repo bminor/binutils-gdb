@@ -2150,7 +2150,7 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
     }
 }
 
-static char *
+static const char *
 dw2_find_symbol_file (struct objfile *objfile, const char *name)
 {
   struct dwarf2_per_cu_data *cu;
@@ -2176,8 +2176,7 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
   if (!cu->v.quick->lines)
     return NULL;
 
-  return (char *) cu->v.quick->file_names[cu->v.quick->lines->num_file_names
-					  - 1];
+  return cu->v.quick->file_names[cu->v.quick->lines->num_file_names - 1];
 }
 
 static void

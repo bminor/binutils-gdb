@@ -210,7 +210,7 @@ struct quick_symbol_functions
 
   /* Return the file name of the file holding the symbol in OBJFILE
      named NAME.  If no such symbol exists in OBJFILE, return NULL.  */
-  char *(*find_symbol_file) (struct objfile *objfile, const char *name);
+  const char *(*find_symbol_file) (struct objfile *objfile, const char *name);
 
   /* This method is specific to Ada.  It walks the partial symbol
      tables of OBJFILE looking for a name match.  WILD_MATCH and

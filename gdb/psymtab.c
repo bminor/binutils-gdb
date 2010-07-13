@@ -949,7 +949,7 @@ psymtab_to_fullname (struct partial_symtab *ps)
   return NULL;
 }
 
-static char *
+static const char *
 find_symbol_file_from_partial (struct objfile *objfile, const char *name)
 {
   struct partial_symtab *pst;

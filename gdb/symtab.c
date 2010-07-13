@@ -1617,14 +1617,16 @@ basic_lookup_transparent_type (const char *name)
 /* FIXME:  What about languages without main() or specially linked
    executables that have no main() ? */
 
-char *
+const char *
 find_main_filename (void)
 {
   struct objfile *objfile;
-  char *result, *name = main_name ();
+  char *name = main_name ();
 
   ALL_OBJFILES (objfile)
   {
+    const char *result;
+
     if (!objfile->sf)
       continue;
     result = objfile->sf->qf->find_symbol_file (objfile, name);
