@@ -14289,6 +14289,7 @@ program.  To debug a core dump of a previous run, you must also tell
 @menu
 * Files::                       Commands to specify files
 * Separate Debug Files::        Debugging information in separate files
+* Index Files::                 Index files speed up GDB
 * Symbol Errors::               Errors reading symbol files
 * Data Files::                  GDB data files
 @end menu
@@ -15176,6 +15177,46 @@ gnu_debuglink_crc32 (unsigned long crc,
 
 @noindent
 This computation does not apply to the ``build ID'' method.
+
+
+@node Index Files
+@section Index Files Speed Up @value{GDBN}
+@cindex index files
+@cindex @samp{.gdb_index} section
+
+When @value{GDBN} finds a symbol file, it scans the symbols in the
+file in order to construct an internal symbol table.  This lets most
+@value{GDBN} operations work quickly---at the cost of a delay early
+on.  For large programs, this delay can be quite lengthy, so
+@value{GDBN} provides a way to build an index, which speeds up
+startup.
+
+The index is stored as a section in the symbol file.  @value{GDBN} can
+write the index to a file, then you can put it into the symbol file
+using @command{objcopy}.
+
+To create an index file, use the @code{save gdb-index} command:
+
+@table @code
+@item save gdb-index @var{directory}
+@kindex save gdb-index
+Create an index file for each symbol file currently known by
+@value{GDBN}.  Each file is named after its corresponding symbol file,
+with @samp{.gdb-index} appended, and is written into the given
+@var{directory}.
+@end table
+
+Once you have created an index file you can merge it into your symbol
+file, here named @file{symfile}, using @command{objcopy}:
+
+@smallexample
+$ objcopy --add-section .gdb_index=symfile.gdb-index \
+    --set-section-flags .gdb_index=readonly symfile symfile
+@end smallexample
+
+There are currently some limitation on indices.  They only work when
+for DWARF debugging information, not stabs.  And, they do not
+currently work for programs using Ada.
 
 
 @node Symbol Errors

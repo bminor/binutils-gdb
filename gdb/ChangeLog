@@ -1,5 +1,101 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (save_cmdlist): No longer static.
+	* gdbcmd.h (save_cmdlist): Declare.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Set
+	OBJF_READNOW on objfile if readnow_symbol_files.
+	* elfread.c (elf_symfile_read): Use dwarf2_initialize_objfile.
+	(elf_sym_fns_gdb_index): New global.
+	* dwarf2read.c: Include exceptions.h.
+	(offset_type): New.
+	(struct mapped_index): New.
+	(dwarf2_per_cu_data_ptr): New typedef.
+	(struct dwarf2_per_objfile) <using_index, index_table, gdb_index>:
+	New fields.
+	(GDB_INDEX_SECTION): New define.
+	(struct dwarf2_per_cu_quick_data): New.
+	(struct dwarf2_per_cu_data) <objfile>: New field.
+	<psymtab>: Removed.
+	<v>: New field.
+	(byte_swap): New function.
+	(MAYBE_SWAP): New macro.
+	(INDEX_SUFFIX): New macro.
+	(dw2_do_instantiate_symtab): New function.
+	(dw2_instantiate_symtab): Likewise.
+	(create_cus_from_index): Likewise.
+	(create_addrmap_from_index): Likewise.
+	(mapped_index_string_hash): Likewise.
+	(find_slot_in_mapped_hash): Likewise.
+	(dwarf2_read_index): Likewise.
+	(dw2_setup): Likewise.
+	(dw2_require_line_header): Likewise.
+	(dw2_require_full_path): Likewise.
+	(dw2_find_last_source_symtab): Likewise.
+	(dw2_forget_cached_source_info): Likewise.
+	(dw2_lookup_symtab): Likewise.
+	(dw2_lookup_symbol): Likewise.
+	(dw2_do_expand_symtabs_matching): Likewise.
+	(dw2_pre_expand_symtabs_matching): Likewise.
+	(dw2_print_stats): Likewise.
+	(dw2_dump): Likewise.
+	(dw2_relocate): Likewise.
+	(dw2_expand_symtabs_for_function): Likewise.
+	(dw2_expand_all_symtabs): Likewise.
+	(dw2_expand_symtabs_with_filename): Likewise.
+	(dw2_find_symbol_file): Likewise.
+	(dw2_map_ada_symtabs): Likewise.
+	(dw2_expand_symtabs_matching): Likewise.
+	(dw2_find_pc_sect_symtab): Likewise.
+	(dw2_map_symbol_names): Likewise.
+	(dw2_map_symbol_filenames): Likewise.
+	(dw2_has_symbols): Likewise.
+	(dwarf2_gdb_index_functions): New global.
+	(dwarf2_initialize_objfile): New function.
+	(process_psymtab_comp_unit): Update.
+	(add_partial_subprogram): Likewise.
+	(dwarf2_psymtab_to_symtab): Likewise.
+	(psymtab_to_symtab_1): Use dw2_do_instantiate_symtab.
+	(process_full_comp_unit): Update.
+	(find_file_and_directory): New function.
+	(read_file_scope): Use find_file_and_directory.
+	(dwarf2_per_cu_objfile): Update.
+	(dwarf2_per_cu_addr_size): Update.
+	(dwarf2_per_cu_offset_size): Update.
+	(dwarf2_free_objfile): Free the index, if needed.
+	(dwarf2_per_objfile_free): Unmap the index, if needed.
+	(struct strtab_entry): New.
+	(hash_strtab_entry): New function.
+	(eq_strtab_entry): Likewise.
+	(create_strtab): Likewise.
+	(add_string): Likewise.
+	(struct symtab_index_entry): New.
+	(struct mapped_symtab): New.
+	(hash_symtab_entry): New function.
+	(eq_symtab_entry): Likewise.
+	(delete_symtab_entry): Likewise.
+	(create_index_table): Likewise.
+	(create_mapped_symtab): Likewise.
+	(cleanup_mapped_symtab): Likewise.
+	(find_slot): Likewise.
+	(hash_expand): Likewise.
+	(add_index_entry): Likewise.
+	(add_indices_to_cpool): Likewise.
+	(write_hash_table): Likewise.
+	(add_address_entry): Likewise.
+	(write_psymbols): Likewise.
+	(write_obstack): Likewise.
+	(unlink_if_set): Likewise.
+	(write_psymtabs_to_index): Likewise.
+	(save_gdb_index_command): Likewise.
+	(_initialize_dwarf2_read): Install "save gdb-index"
+	command.
+	(create_all_comp_units): Initialize 'objfile' field of CU.
+	(dwarf2_locate_sections): Check for .gdb_index.
+	* psymtab.h (dwarf2_gdb_index_functions): Declare.
+	* symfile.h (dwarf2_initialize_objfile): Declare.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (lookup_symbol_aux_symtabs): Call pre-expand hook.
 	(basic_lookup_transparent_type): Likewise.
 	* symfile.h (struct quick_symbol_functions)

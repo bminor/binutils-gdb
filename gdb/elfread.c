@@ -40,6 +40,9 @@
 
 extern void _initialize_elfread (void);
 
+/* Forward declaration.  */
+static struct sym_fns elf_sym_fns_gdb_index;
+
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
    It's local to elf_symfile_read.  */
@@ -869,11 +872,9 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }
-  if (dwarf2_has_info (objfile))
-    {
-      /* DWARF 2 sections */
-      dwarf2_build_psymtabs (objfile);
-    }
+
+  if (dwarf2_has_info (objfile) && dwarf2_initialize_objfile (objfile))
+    objfile->sf = &elf_sym_fns_gdb_index;
 
   /* If the file has its own symbol tables it has no separate debug info.
      `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to SYMTABS/PSYMTABS.
@@ -1046,6 +1047,24 @@ static struct sym_fns elf_sym_fns =
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
   &psym_functions,
+  NULL				/* next: pointer to next struct sym_fns */
+};
+
+/* The same as elf_sym_fns, but not registered and uses the
+   DWARF-specific GNU index rather than psymtab.  */
+static struct sym_fns elf_sym_fns_gdb_index =
+{
+  bfd_target_elf_flavour,
+  elf_new_init,			/* sym_new_init: init anything gbl to entire symab */
+  elf_symfile_init,		/* sym_init: read initial info, setup for sym_red() */
+  elf_symfile_read,		/* sym_read: read a symbol file into symtab */
+  elf_symfile_finish,		/* sym_finish: finished with file, cleanup */
+  default_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocatin */
+  elf_symfile_segments,		/* sym_segments: Get segment information from
+				   a file.  */
+  NULL,                         /* sym_read_linetable */
+  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  &dwarf2_gdb_index_functions,
   NULL				/* next: pointer to next struct sym_fns */
 };
 

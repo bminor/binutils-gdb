@@ -1059,6 +1059,9 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
   const char *name = bfd_get_filename (abfd);
   const int from_tty = add_flags & SYMFILE_VERBOSE;
 
+  if (readnow_symbol_files)
+    flags |= OBJF_READNOW;
+
   my_cleanups = make_cleanup_bfd_close (abfd);
 
   /* Give user a chance to burp if we'd be
@@ -1095,7 +1098,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
      the gdb startup command line or on a per symbol file basis.  Expand
      all partial symbol tables for this objfile if so. */
 
-  if ((flags & OBJF_READNOW) || readnow_symbol_files)
+  if ((flags & OBJF_READNOW))
     {
       if (from_tty || info_verbose)
 	{

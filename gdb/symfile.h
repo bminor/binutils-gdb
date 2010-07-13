@@ -575,6 +575,7 @@ extern struct cleanup *increment_reading_symtab (void);
 
 extern int dwarf2_has_info (struct objfile *);
 
+extern int dwarf2_initialize_objfile (struct objfile *);
 extern void dwarf2_build_psymtabs (struct objfile *);
 extern void dwarf2_build_frame_info (struct objfile *);
 

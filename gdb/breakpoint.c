@@ -430,7 +430,7 @@ static int tracepoint_count;
 
 static struct cmd_list_element *breakpoint_set_cmdlist;
 static struct cmd_list_element *breakpoint_show_cmdlist;
-static struct cmd_list_element *save_cmdlist;
+struct cmd_list_element *save_cmdlist;
 
 /* Return whether a breakpoint is an active enabled breakpoint.  */
 static int

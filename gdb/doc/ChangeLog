@@ -1,5 +1,9 @@
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Index Files): New node.
+
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (GDB/MI Variable Objects): Remove extra 'for'.
 
 2010-07-13  Tom Tromey  <tromey@redhat.com>

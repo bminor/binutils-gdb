@@ -1,6 +1,6 @@
 /* Public partial symbol table definitions.
 
-   Copyright (C) 2009 Free Software Foundation, Inc.
+   Copyright (C) 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,5 +27,7 @@ void map_partial_symbol_filenames (void (*) (const char *, const char *,
 				   void *);
 
 extern const struct quick_symbol_functions psym_functions;
+
+extern const struct quick_symbol_functions dwarf2_gdb_index_functions;
 
 #endif /* PSYMTAB_H */
