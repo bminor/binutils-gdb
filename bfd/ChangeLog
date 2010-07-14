@@ -1,3 +1,10 @@
+2010-07-14  Cary Coutant  <ccoutant@google.com>
+
+	PR ld/11817
+	* dwarf2.c (read_section): Revert patch for compressed debug sections.
+	(find_line): Likewise.
+	(read_and_uncompress_section): Remove.
+
 2010-07-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11812

@@ -405,54 +405,6 @@ lookup_info_hash_table (struct info_hash_table *hash_table, const char *key)
   return entry ? entry->head : NULL;
 }
 
-/* Read a section, uncompress it if necessary, and relocate it.  */
-
-static bfd_boolean
-read_and_uncompress_section (bfd *           abfd,
-			     asection *      msec,
-			     bfd_boolean     section_is_compressed,
-			     asymbol **      syms,
-			     bfd_byte **     section_buffer,
-			     bfd_size_type * section_size)
-{
-  /* Get the unrelocated contents of the section.  */
-  *section_buffer = (bfd_byte *) bfd_malloc (*section_size);
-  if (! *section_buffer)
-    return FALSE;
-  if (! bfd_get_section_contents (abfd, msec, *section_buffer,
-				  0, *section_size))
-    return FALSE;
-
-  if (section_is_compressed)
-    {
-      if (! bfd_uncompress_section_contents (section_buffer, section_size))
-	{
-	  (*_bfd_error_handler) (_("Dwarf Error: unable to decompress %s section."),
-				 bfd_get_section_name (abfd, msec));
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-    }
-
-  if (syms)
-    {
-      /* We want to relocate the data we've already read (and
-	 decompressed), so we store a pointer to the data in
-	 the bfd_section, and tell it that the contents are
-	 already in memory.  */
-      BFD_ASSERT (msec->contents == NULL && (msec->flags & SEC_IN_MEMORY) == 0);
-      msec->contents = *section_buffer;
-      msec->flags |= SEC_IN_MEMORY;
-      msec->size = *section_size;
-      *section_buffer
-	  = bfd_simple_get_relocated_section_contents (abfd, msec, NULL, syms);
-      if (! *section_buffer)
-	return FALSE;
-    }
-
-  return TRUE;
-}
-
 /* Read a section into its appropriate place in the dwarf2_debug
    struct (indicated by SECTION_BUFFER and SECTION_SIZE).  If SYMS is
    not NULL, use bfd_simple_get_relocated_section_contents to read the
@@ -488,10 +440,32 @@ read_section (bfd *           abfd,
 	}
 
       *section_size = msec->rawsize ? msec->rawsize : msec->size;
+      if (syms)
+	{
+	  *section_buffer
+	      = bfd_simple_get_relocated_section_contents (abfd, msec, NULL, syms);
+	  if (! *section_buffer)
+	    return FALSE;
+	}
+      else
+	{
+	  *section_buffer = (bfd_byte *) bfd_malloc (*section_size);
+	  if (! *section_buffer)
+	    return FALSE;
+	  if (! bfd_get_section_contents (abfd, msec, *section_buffer,
+					  0, *section_size))
+	    return FALSE;
+	}
 
-      if (! read_and_uncompress_section (abfd, msec, section_is_compressed,
-					 syms, section_buffer, section_size))
-	return FALSE;
+      if (section_is_compressed)
+	{
+	  if (! bfd_uncompress_section_contents (section_buffer, section_size))
+	    {
+	      (*_bfd_error_handler) (_("Dwarf Error: unable to decompress %s section."), compressed_section_name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	}
     }
 
   /* It is possible to get a bad value for the offset into the section
@@ -3269,17 +3243,23 @@ find_line (bfd *abfd,
 		{
 		  bfd_size_type size = msec->size;
 		  bfd_byte *buffer, *tmp;
-		  bfd_boolean is_compressed =
-		      strcmp (msec->name, DWARF2_COMPRESSED_DEBUG_INFO) == 0;
 
 		  if (size == 0)
 		    continue;
 
-		  if (! read_and_uncompress_section (debug_bfd, msec,
-		  				     is_compressed, symbols,
-		  				     &buffer, &size))
+		  buffer = (bfd_simple_get_relocated_section_contents
+			    (debug_bfd, msec, NULL, symbols));
+		  if (! buffer)
 		    goto done;
 
+		  if (strcmp (msec->name, DWARF2_COMPRESSED_DEBUG_INFO) == 0)
+		    {
+		      if (! bfd_uncompress_section_contents (&buffer, &size))
+			{
+			  free (buffer);
+			  goto done;
+			}
+		    }
 		  tmp = (bfd_byte *) bfd_realloc (stash->info_ptr_memory,
 						  total_size + size);
 		  if (tmp == NULL)
