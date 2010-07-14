@@ -1,3 +1,8 @@
+2010-07-14  Ian Lance Taylor  <iant@google.com>
+
+	* descriptors.cc (Descriptors::open): Report correct name in error
+	message.
+
 2010-07-13  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_input_section::Arm_input_section): For a

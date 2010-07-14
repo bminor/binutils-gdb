@@ -113,8 +113,7 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
 	      {
 		Hold_lock hl(*this->lock_);
 
-		gold_error(_("file %s was removed during the link"),
-			   this->open_descriptors_[descriptor].name);
+		gold_error(_("file %s was removed during the link"), name);
 	      }
 
 	      errno = ENOENT;
