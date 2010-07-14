@@ -1079,10 +1079,7 @@ value_assign (struct value *toval, struct value *fromval)
 
   type = value_type (toval);
   if (VALUE_LVAL (toval) != lval_internalvar)
-    {
-      toval = value_coerce_to_target (toval);
-      fromval = value_cast (type, fromval);
-    }
+    fromval = value_cast (type, fromval);
   else
     {
       /* Coerce arrays and functions to pointers, except for arrays
@@ -1427,6 +1424,7 @@ value_must_coerce_to_target (struct value *val)
   switch (TYPE_CODE (valtype))
     {
     case TYPE_CODE_ARRAY:
+      return TYPE_VECTOR (valtype) ? 0 : 1;
     case TYPE_CODE_STRING:
       return 1;
     default:

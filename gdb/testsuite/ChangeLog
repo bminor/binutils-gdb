@@ -1,3 +1,7 @@
+2010-07-14  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.arch/altivec-abi.exp: New tests.
+
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-prettyprint.c (struct arraystruct): New struct.
