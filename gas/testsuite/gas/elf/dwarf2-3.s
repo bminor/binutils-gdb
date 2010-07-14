@@ -22,68 +22,68 @@ _evoke_link_warning_foo:
 	.text
 .Letext0:
 	.section	.debug_info
-	.long	0x8a
-	.short  0x2
-	.long	.Ldebug_abbrev0
+	.4byte	0x8a
+	.2byte  0x2
+	.4byte	.Ldebug_abbrev0
 	.byte	0x4
 	.uleb128 0x1
-	.long	.Ldebug_line0
-	.long	.Letext0
-	.long	.Ltext0
-	.long	.LASF4
+	.4byte	.Ldebug_line0
+	.4byte	.Letext0
+	.4byte	.Ltext0
+	.4byte	.LASF4
 	.byte	0x1
-	.long	.LASF5
+	.4byte	.LASF5
 	.uleb128 0x2
-	.long	0x31
-	.long	0x38
+	.4byte	0x31
+	.4byte	0x38
 	.uleb128 0x3
-	.long	0x31
+	.4byte	0x31
 	.byte	0x1a
 	.byte	0x0
 	.uleb128 0x4
-	.long	.LASF0
+	.4byte	.LASF0
 	.byte	0x4
 	.byte	0x7
 	.uleb128 0x5
-	.long	0x3d
+	.4byte	0x3d
 	.uleb128 0x4
-	.long	.LASF1
+	.4byte	.LASF1
 	.byte	0x1
 	.byte	0x6
 	.uleb128 0x6
-	.long	.LASF2
+	.4byte	.LASF2
 	.byte	0x1
 	.byte	0x3
-	.long	0x55
+	.4byte	0x55
 	.byte	0x5
 	.byte	0x3
-	.long	_evoke_link_warning_foo
+	.4byte	_evoke_link_warning_foo
 	.uleb128 0x5
-	.long	0x21
+	.4byte	0x21
 	.uleb128 0x2
-	.long	0x6a
-	.long	0x6c
+	.4byte	0x6a
+	.4byte	0x6c
 	.uleb128 0x3
-	.long	0x31
+	.4byte	0x31
 	.byte	0x0
 	.byte	0x0
 	.uleb128 0x7
 	.byte	0x1
 	.uleb128 0x5
-	.long	0x71
+	.4byte	0x71
 	.uleb128 0x8
 	.byte	0x4
-	.long	0x6a
+	.4byte	0x6a
 	.uleb128 0x6
-	.long	.LASF3
+	.4byte	.LASF3
 	.byte	0x1
 	.byte	0x9
-	.long	0x88
+	.4byte	0x88
 	.byte	0x5
 	.byte	0x3
-	.long	init_array
+	.4byte	init_array
 	.uleb128 0x5
-	.long	0x5a
+	.4byte	0x5a
 	.byte	0x0
 	.section	.debug_abbrev
 	.uleb128 0x1

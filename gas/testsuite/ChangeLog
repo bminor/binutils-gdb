@@ -1,3 +1,8 @@
+2010-07-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/elf/dwarf2-3.s: Replace .short and .long directives in
+	.debug_info section with .2byte and .4byte respectively.
+
 2010-07-11  Kai Tietz  <kai.tietz@onevision.com>
 
 	* gas/pe/aligncomm-b.d: Regenerated content dump.
