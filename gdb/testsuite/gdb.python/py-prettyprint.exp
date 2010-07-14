@@ -76,6 +76,8 @@ proc run_lang_tests {lang} {
     gdb_test "print ssa\[1\]" " = a=< a=<5> b=<$hex>> b=< a=<6> b=<$hex>>"
     gdb_test "print ssa" " = {a=< a=<3> b=<$hex>> b=< a=<4> b=<$hex>>, a=< a=<5> b=<$hex>> b=< a=<6> b=<$hex>>}"
     
+    gdb_test "print arraystruct" " = {$nl *y = 7, *$nl *x = { a=<23> b=<$hex>,  a=<24> b=<$hex>} *$nl *}"
+
     if {$lang == "c++"} {
 	gdb_test "print cps" "=  a=<8> b=<$hex>"
 	gdb_test "print cpss" " = {$nl *zss = 9, *$nl *s =  a=<10> b=<$hex>$nl}"

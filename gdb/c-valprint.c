@@ -222,7 +222,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		{
 		  i = 0;
 		}
-	      val_print_array_elements (type, valaddr + embedded_offset, address, stream,
+	      val_print_array_elements (type, valaddr + embedded_offset,
+					address + embedded_offset, stream,
 					recurse, original_value, options, i);
 	      fprintf_filtered (stream, "}");
 	    }

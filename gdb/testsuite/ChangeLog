@@ -1,3 +1,9 @@
+2010-07-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-prettyprint.c (struct arraystruct): New struct.
+	(main): Use it.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add test.
+
 2010-07-08  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_test_list_exact): New function.
