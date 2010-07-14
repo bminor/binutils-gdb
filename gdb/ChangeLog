@@ -1,3 +1,8 @@
+2010-07-13  Emmanuel Thomé  <Emmanuel.Thome@gmail.com>
+
+	* c-valprint.c (c_val_print): Add embedded_offset to address in
+	call to val_print_array_elements.
+
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_read_index): Correctly set 'total_size'.
