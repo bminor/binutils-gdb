@@ -1,3 +1,7 @@
+2010-07-14  Ken Werner  <ken.werner@de.ibm.com>
+
+	* MAINTAINERS: Add myself for write after approval privileges.
+
 2010-07-13  Emmanuel Thomé  <Emmanuel.Thome@gmail.com>
 
 	* c-valprint.c (c_val_print): Add embedded_offset to address in
