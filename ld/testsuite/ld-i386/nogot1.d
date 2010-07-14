@@ -1,7 +1,6 @@
-#source: exclude3.s
-#ld: --shared
+#ld: --shared -melf_i386
 #readelf: -S --wide
-#target: x86_64-*-* i?86-*-*
+#as: --32
 
 #...
 [ 	]*\[.*\][ 	]+\.dynamic[ 	]+DYNAMIC.*

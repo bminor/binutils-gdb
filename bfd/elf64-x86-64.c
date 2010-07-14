@@ -2374,6 +2374,23 @@ elf64_x86_64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
 
+  if (htab->elf.sgotplt)
+    {
+      /* Don't allocate .got.plt section if there are no GOT nor PLT
+         entries.  */
+      if ((htab->elf.sgotplt->size
+	   == get_elf_backend_data (output_bfd)->got_header_size)
+	  && (htab->elf.splt == NULL
+	      || htab->elf.splt->size == 0)
+	  && (htab->elf.sgot == NULL
+	      || htab->elf.sgot->size == 0)
+	  && (htab->elf.iplt == NULL
+	      || htab->elf.iplt->size == 0)
+	  && (htab->elf.igotplt == NULL
+	      || htab->elf.igotplt->size == 0))
+	htab->elf.sgotplt->size = 0;
+    }
+
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
   relocs = FALSE;

@@ -1,5 +1,20 @@
 2010-07-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/11812
+	* ld-elf/exclude3b.d: Don't run on ia64-*-*.  Replace .got with
+	.dynamic.
+
+	* ld-elf/exclude3d.d: New.
+	* ld-i386/nogot1.d: Likewise.
+	* ld-i386/nogot1.s: Likewise.
+	* ld-x86-64/nogot1.d: Likewise.
+	* ld-x86-64/nogot1.s: Likewise.
+
+	* ld-i386/i386.exp: Run nogot1.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+2010-07-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-i386/hidden2.d: Don't hard code expected output.
 	* ld-i386/protected3.d: Likewise.
 	* ld-x86-64/hidden2.d: Likewise.
