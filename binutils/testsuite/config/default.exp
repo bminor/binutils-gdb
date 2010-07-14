@@ -123,5 +123,13 @@ proc binutils_run { prog progargs } {
 #	assemble a file
 #
 proc binutils_assemble { source object } {
-    default_binutils_assemble $source $object
+    default_binutils_assemble_flags $source $object ""
+}
+
+#
+# binutils_assemble_flags
+#	assemble a file
+#
+proc binutils_assemble_flags { source object asflags } {
+    default_binutils_assemble_flags $source $object $asflags
 }

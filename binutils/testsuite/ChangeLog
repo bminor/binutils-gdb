@@ -1,3 +1,25 @@
+2010-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/default.exp (binutils_assemble): Use
+	default_binutils_assemble_flags.
+	(binutils_assemble_flags): New.
+
+	* lib/utils-lib.exp (default_binutils_assemble): Renamed to ...
+	(default_binutils_assemble_flags): This.  Add asflags and
+	pass it to target_assemble.
+	(run_dump_test): Support assembler flags.
+
+	* binutils-all/i386/compressed-1.s: New.
+	* binutils-all/i386/compressed-1a.d: Likewise.
+	* binutils-all/i386/compressed-1b.d: Likewise.
+	* binutils-all/i386/compressed-1c.d: Likewise.
+	* binutils-all/i386/i386.exp: Likewise.
+	* binutils-all/x86-64/compressed-1.s: Likewise.
+	* binutils-all/x86-64/compressed-1a.d: Likewise.
+	* binutils-all/x86-64/compressed-1b.d: Likewise.
+	* binutils-all/x86-64/compressed-1c.d: Likewise.
+	* binutils-all/x86-64/x86-64.exp: Likewise.
+
 2010-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10531

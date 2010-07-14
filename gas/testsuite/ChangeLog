@@ -1,3 +1,19 @@
+2010-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/default.exp (ADDR2LINE): New.
+	(ADDR2LINEFLAGS): Likewise.
+
+	* gas/i386/i386.exp: Run dw2-compress-2 and x86-64-dw2-compress-2.
+
+	* gas/i386/dw2-compress-2.d: New.
+	* gas/i386/dw2-compress-2.s: Likewise.
+	* gas/i386/x86-64-dw2-compress-2.d: Likewise.
+	* gas/i386/x86-64-dw2-compress-2.s: Likewise.
+
+	* lib/gas-defs.exp (run_dump_test): Support addr2line as dump
+	program.
+	(slurp_options): Allow numbers in options.
+
 2010-07-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/elf/dwarf2-3.s: Replace .short and .long directives in

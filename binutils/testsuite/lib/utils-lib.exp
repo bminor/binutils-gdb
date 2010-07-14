@@ -84,10 +84,10 @@ proc default_binutils_run { prog progargs } {
 }
 
 #
-# default_binutils_assemble
+# default_binutils_assemble_flags
 #	assemble a file
 #
-proc default_binutils_assemble { source object } {
+proc default_binutils_assemble_flags { source object asflags } {
     global srcdir
     global host_triplet
 
@@ -105,7 +105,7 @@ proc default_binutils_assemble { source object } {
 	set source asm.s
     }
 
-    set exec_output [target_assemble $source $object ""]
+    set exec_output [target_assemble $source $object $asflags]
     set exec_output [prune_warnings $exec_output]
 
     if [string match "" $exec_output] {
@@ -301,6 +301,7 @@ proc run_dump_test { name {extra_options {}} } {
     }
     set opts(addr2line) {}
     set opts(ar) {}
+    set opts(as) {}
     set opts(nm) {}
     set opts(objcopy) {}
     set opts(objdump) {}
@@ -475,7 +476,7 @@ proc run_dump_test { name {extra_options {}} } {
 	set srcfile $srcdir/$subdir/$opts(source)
     }
 
-    set exec_output [binutils_assemble ${srcfile} $tempfile]
+    set exec_output [binutils_assemble_flags ${srcfile} $tempfile $opts(as)]
     if [string match "" $exec_output] then {
 	send_log "$exec_output\n"
 	verbose "$exec_output"

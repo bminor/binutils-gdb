@@ -402,6 +402,7 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #   as: FLAGS
 #	When assembling FILE.s, pass FLAGS to the assembler.
 #
+#   addr2line: FLAGS
 #   nm: FLAGS
 #   objcopy: FLAGS
 #   objdump: FLAGS
@@ -410,7 +411,7 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #	FLAGS, in addition to the .o file name.  Note that they are run
 #	with LC_ALL=C in the environment to give consistent sorting
 #	of symbols.  If no FLAGS are needed then use:
-#        PROG: [nm objcopy objdump readelf]
+#        PROG: [nm objcopy objdump readelf addr2line]
 #       instead.
 #
 #   source: SOURCE
@@ -468,6 +469,7 @@ proc run_dump_test { name {extra_options {}} } {
     global subdir srcdir
     global OBJDUMP NM AS OBJCOPY READELF
     global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS READELFFLAGS
+    global ADDR2LINE ADDR2LINEFLAGS
     global host_triplet
     global env
 
@@ -483,6 +485,7 @@ proc run_dump_test { name {extra_options {}} } {
 	unresolved $subdir/$name
 	return
     }
+    set opts(addr2line) {}
     set opts(as) {}
     set opts(objdump) {}
     set opts(nm) {}
@@ -561,6 +564,7 @@ proc run_dump_test { name {extra_options {}} } {
     if { $opts(error) == "" && $opts(error-output) == "" } {
 	if {$opts(PROG) != ""} {
 	    switch -- $opts(PROG) {
+		addr2line { set program addr2line }
 		objdump	{ set program objdump }
 		nm	{ set program nm }
 		objcopy	{ set program objcopy }
@@ -572,7 +576,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	} else {
 	    # Guess which program to run, by seeing which option was specified.
-	    foreach p {objdump objcopy nm readelf} {
+	    foreach p {objdump objcopy nm readelf addr2line} {
 		if {$opts($p) != ""} {
 		    if {$program != ""} {
 			perror "ambiguous dump program in $file.d"
@@ -790,7 +794,7 @@ proc slurp_options { file } {
     set nws {[^ 	]*}
     # whitespace is ignored anywhere except within the options list;
     # option names are alphabetic plus dash
-    set pat "^#${ws}(\[a-zA-Z-\]*)$ws:${ws}(.*)$ws\$"
+    set pat "^#${ws}(\[a-zA-Z0-9-\]*)$ws:${ws}(.*)$ws\$"
     while { [gets $f line] != -1 } {
 	set line [string trim $line]
 	# Whitespace here is space-tab.
