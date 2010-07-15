@@ -190,3 +190,10 @@ run_dump_test "protected2"
 run_dump_test "protected3"
 run_dump_test "tlspie1"
 run_dump_test "nogot1"
+
+if { !([istarget "i?86-*-linux*"]
+       || [istarget "x86_64-*-linux*"]) } {
+    return
+}
+
+run_dump_test "compressed1"

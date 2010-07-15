@@ -99,3 +99,9 @@ run_dump_test "tlsle1"
 run_dump_test "tlspie1"
 run_dump_test "unique1"
 run_dump_test "nogot1"
+
+if { ![istarget "x86_64-*-linux*"] } {
+    return
+}
+
+run_dump_test "compressed1"
