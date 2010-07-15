@@ -3,7 +3,7 @@
 #as: --64 --compress-debug-sections
 #objcopy:
 #readelf: -w
-#name: objcopy on compressed debug setions
+#name: objcopy on compressed debug sections
 
 Contents of the .[z]?debug_abbrev section:
 

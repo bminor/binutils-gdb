@@ -3,7 +3,7 @@
 #as: --32
 #strip:
 #readelf: -S --wide
-#name: strip on uncompressed debug setions
+#name: strip on uncompressed debug sections
 
 There are 6 section headers, starting at offset 0x7c:
 

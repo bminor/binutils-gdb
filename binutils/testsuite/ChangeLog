@@ -1,5 +1,14 @@
 2010-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* binutils-all/i386/compressed-1a.d: Fix a typo.
+	* binutils-all/i386/compressed-1b.d: Likewise.
+	* binutils-all/i386/compressed-1c.d: Likewise.
+	* binutils-all/x86-64/compressed-1a.d: Likewise.
+	* binutils-all/x86-64/compressed-1b.d: Likewise.
+	* binutils-all/x86-64/compressed-1c.d: Likewise.
+
+2010-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/default.exp (binutils_assemble): Use
 	default_binutils_assemble_flags.
 	(binutils_assemble_flags): New.
