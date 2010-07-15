@@ -246,9 +246,16 @@ Options:\n\
   fprintf (stream, _("\
   --alternate             initially turn on alternate macro syntax\n"));
   fprintf (stream, _("\
+  --compress-debug-sections\n\
+                          compress DWARF debug sections using zlib\n"));
+  fprintf (stream, _("\
+  --nocompress-debug-sections\n\
+                          don't compress DWARF debug sections\n"));
+  fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
   fprintf (stream, _("\
-  --debug-prefix-map OLD=NEW  Map OLD to NEW in debug information\n"));
+  --debug-prefix-map OLD=NEW\n\
+                          map OLD to NEW in debug information\n"));
   fprintf (stream, _("\
   --defsym SYM=VAL        define symbol SYM to given value\n"));
 #ifdef USE_EMULATIONS
