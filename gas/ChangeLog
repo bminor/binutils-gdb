@@ -1,3 +1,14 @@
+2010-07-15  Kai Tietz  <kai.tietz@onevision.com>
+
+	* config/obj-coff-seh.c
+	(seh_getelm_data_size): New.
+	(seh_read_offset): Handle negative values.
+	(obj_coff_seh_push): Handle offset for save-register store.
+	(obj_coff_seh_setframe): Add unwind-information for frame.
+	(seh_store_elm_data): New.
+	(seh_getelm_data_size): Return additionally unaligned element count.
+	(seh_make_unwind_entry): Correct tweak about element count.
+
 2010-07-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11806

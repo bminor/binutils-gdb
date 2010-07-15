@@ -40,7 +40,9 @@ static void seh_write_text_eh_data (const char *hnd, const char *hnd_data);
 static void seh_emit_rva (const char *name);
 static int seh_needed_unwind_info (seh_context *);
 static void seh_fill_pcsyms (const seh_context *c, char **, int *);
-static size_t seh_getelm_data_size (const seh_context *, int, int);
+static size_t seh_getelm_data_size (const seh_context *, int, int, size_t *);
+static void seh_store_elm_data (const seh_context *, int, int, unsigned char *, valueT base_off);
+
 static size_t seh_getsize_of_unwind_entry (seh_context *, int, int, int);
 static void seh_make_unwind_entry (const seh_context *, char *, int, int, int, unsigned char *, size_t *, int);
 static size_t seh_getsize_unwind_data (seh_context *);
@@ -119,6 +121,7 @@ make_function_entry_pdata (seh_context *c)
   subseg_set (current_seg, current_subseg);
 }
 
+/* Create and write xdata section.  */
 static void
 seh_x64_write_xdata (void)
 {
@@ -168,6 +171,8 @@ seh_x64_write_xdata (void)
   bfd_set_section_contents (abfd, seg_xdata, data, 0, xdata_size);
 }
 
+/* Create pdata section data for arm.  */
+
 static void
 seh_arm_create_pdata (seh_context *c, unsigned char *data, size_t pdata_offs)
 {
@@ -200,6 +205,7 @@ seh_arm_create_pdata (seh_context *c, unsigned char *data, size_t pdata_offs)
   bfd_put_32 (c->abfd, (bfd_vma) val, data + pdata_offs + 4);
 }
 
+/* Write pdata section for arm.  */
 static void
 seh_arm_write_pdata (void)
 {
@@ -248,6 +254,8 @@ seh_arm_write_pdata (void)
   bfd_set_section_contents (abfd, seg_pdata, data, 0, pdata_size);
 }
 
+/* Do object finalization to generate and write pdata/xdata
+   for arm and x64 target.  */
 void
 obj_coff_seh_do_final (void)
 {
@@ -265,6 +273,7 @@ obj_coff_seh_do_final (void)
     }
 }
 
+/* Enter a prologue element into current context.  */
 static void
 seh_x64_make_prologue_element (int kind, int reg, bfd_vma off)
 {
@@ -288,6 +297,7 @@ seh_x64_make_prologue_element (int kind, int reg, bfd_vma off)
   seh_ctx_cur->elems_count += 1;
 }
 
+/* Helper to read a register name from input stream.  */
 static int
 seh_x64_read_reg (const char *tok, int kind, int *regno)
 {
@@ -357,14 +367,26 @@ seh_x64_read_reg (const char *tok, int kind, int *regno)
   return i != 16;
 }
 
+/* Read an numeric value from input stream.  */
 static int
 seh_read_offset (const char *tok, bfd_vma *off)
 {
   bfd_vma r, v = 0, base = 10;
   int had_one = 0;
-
+  int neg = 0;
   while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
     input_line_pointer++;
+  if (*input_line_pointer == '$')
+    ++input_line_pointer;
+  if (*input_line_pointer == '-')
+    {
+      neg = 1;
+      ++input_line_pointer;
+    }
+  else if (*input_line_pointer == '+')
+    {
+      ++input_line_pointer;
+    }
   if (*input_line_pointer == '0')
     {
       ++input_line_pointer;
@@ -404,6 +426,9 @@ seh_read_offset (const char *tok, bfd_vma *off)
       v += r;
       had_one = 1;
     }
+
+  if (neg)
+    v = (bfd_vma) (v ^ ((bfd_vma) -1LL)) + (bfd_vma) 1ULL;
   *off = v;
   if (had_one == 0)
     {
@@ -419,6 +444,7 @@ seh_read_offset (const char *tok, bfd_vma *off)
   return had_one != 0;
 }
 
+/* Mark current context to use 32-bit instruction (arm).  */
 static void
 obj_coff_seh_32 (int what)
 {
@@ -434,6 +460,7 @@ obj_coff_seh_32 (int what)
   demand_empty_rest_of_line ();
 }
 
+/* Set for current context the handler and optional data (arm).  */
 static void
 obj_coff_seh_eh (int what ATTRIBUTE_UNUSED)
 {
@@ -452,6 +479,7 @@ obj_coff_seh_eh (int what ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Set for current context the default handler (x64).  */
 static void
 obj_coff_seh_handler (int what ATTRIBUTE_UNUSED)
 {
@@ -506,6 +534,7 @@ obj_coff_seh_handler (int what ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Add a scope-element for exception region (x64).  */
 static void
 obj_coff_seh_scope (int what ATTRIBUTE_UNUSED)
 {
@@ -595,6 +624,7 @@ obj_coff_seh_scope (int what ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Mark begin of new context.  */
 static void
 obj_coff_seh_proc (int what ATTRIBUTE_UNUSED)
 {
@@ -637,6 +667,7 @@ obj_coff_seh_proc (int what ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Mark end of current context.  */
 static void
 obj_coff_seh_endproc  (int what ATTRIBUTE_UNUSED)
 {
@@ -653,11 +684,14 @@ obj_coff_seh_endproc  (int what ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Add a push-unwind-information to current context.
+   what:0 push volatile reg, 1: push machine frame, 2: set fp register.  */
 static void
 obj_coff_seh_push  (int what)
 {
   int reg = 0;
   int kind = -1;
+  bfd_vma off = 0;
 
   if (seh_ctx_cur == NULL)
     {
@@ -669,7 +703,7 @@ obj_coff_seh_push  (int what)
   switch (what)
     {
     case 0:
-      if (seh_x64_read_reg (".seh_push", 1, &reg))
+      if (seh_x64_read_reg (".seh_pushreg", 1, &reg))
 	kind = UWOP_PUSH_NONVOL;
       else
 	as_warn (_(".seh_pushreg expects register argument."));
@@ -680,13 +714,15 @@ obj_coff_seh_push  (int what)
     default:
       abort ();
     }
+
   if (seh_get_target_kind () != seh_kind_x64)
     as_warn (_(".seh_save... is ignored for this target.\n"));
   else if (kind != -1)
-    seh_x64_make_prologue_element (kind, reg, 0);
+    seh_x64_make_prologue_element (kind, reg, off);
   demand_empty_rest_of_line ();
 }
 
+/* Add a register save-unwind-information to current context.  */
 static void
 obj_coff_seh_save  (int what)
 {
@@ -727,6 +763,7 @@ obj_coff_seh_save  (int what)
   demand_empty_rest_of_line ();
 }
 
+/* Mark end of prologue for current context.  */
 static void
 obj_coff_seh_endprologue (int what ATTRIBUTE_UNUSED)
 {
@@ -742,6 +779,7 @@ obj_coff_seh_endprologue (int what ATTRIBUTE_UNUSED)
     seh_ctx_cur->endprologue_symbol = make_seh_text_label (seh_ctx_cur, &seh_ctx_cur->endprologue_addr);
 }
 
+/* Add a stack-allocation-unwind-information for current context.  */
 static void
 obj_coff_seh_stack_alloc (int what ATTRIBUTE_UNUSED)
 {
@@ -762,9 +800,11 @@ obj_coff_seh_stack_alloc (int what ATTRIBUTE_UNUSED)
     }
 }
 
+/* Add frame-pointer-unwind-information to current context.  */
 static void
 obj_coff_seh_setframe (int what ATTRIBUTE_UNUSED)
 {
+  int kind = -1;
   int reg;
   int ok = 1;
   bfd_vma off;
@@ -781,9 +821,12 @@ obj_coff_seh_setframe (int what ATTRIBUTE_UNUSED)
     {
       seh_ctx_cur->framereg = reg;
       seh_ctx_cur->frameoff = off;
+      kind = UWOP_SET_FPREG;
     }
   if (seh_get_target_kind () != seh_kind_x64)
     as_warn (_(".seh_setframe is ignored for this target.\n"));
+  else if (kind != -1)
+    seh_x64_make_prologue_element (kind, reg, off);
   demand_empty_rest_of_line ();
 }
 
@@ -1053,10 +1096,108 @@ seh_needed_unwind_info (seh_context *c)
   return count;
 }
 
-static size_t
-seh_getelm_data_size (const seh_context *c, int elm_start, int elm_end)
+static void
+seh_store_elm_data (const seh_context *c, int elm_start,int elm_end, unsigned char *puwop, valueT base)
 {
-  size_t ret = PEX64_UWI_SIZEOF_UWCODE_ARRAY (elm_end - elm_start);
+  int i = elm_end;
+  valueT off;
+
+  /* We have to store in reverse order.  */
+  while (i > elm_start)
+    {
+      --i;
+      /* First comes byte offset in code.  */
+      off = resolve_symbol_value (c->elems[i].pc_addr) - base;
+      *puwop++ = (unsigned char) off;
+      switch (c->elems[i].kind)
+	{
+        case UWOP_PUSH_NONVOL:
+	  *puwop = UWOP_PUSH_NONVOL | (c->elems[i].reg << 4);
+	  puwop++;
+	  break;
+	case UWOP_SET_FPREG:
+	  *puwop++ = UWOP_SET_FPREG;
+	  break;
+	case UWOP_PUSH_MACHFRAME:
+	  *puwop = UWOP_PUSH_MACHFRAME | (c->elems[i].reg << 4);
+	  puwop++;
+	  break;
+	case UWOP_SAVE_NONVOL:
+	  if ((c->elems[i].offset & 7) != 0 ||
+	    ((c->elems[i].offset / 8) > 0xffff))
+	  {
+	    *puwop++ = UWOP_SAVE_NONVOL_FAR | (c->elems[i].reg << 4);
+	    bfd_putl32 ((bfd_vma) c->elems[i].offset, puwop);
+	    puwop += 4;
+	  }
+	  else
+	  {
+	    *puwop++ = UWOP_SAVE_NONVOL | (c->elems[i].reg << 4);
+	    bfd_putl16 ((bfd_vma) (c->elems[i].offset / 8), puwop);
+	    puwop += 2;
+	  }
+	  break;
+	case UWOP_SAVE_XMM:
+	  if ((c->elems[i].offset & 7) != 0 ||
+	    ((c->elems[i].offset / 8) > 0xffff))
+	  {
+	    *puwop++ = UWOP_SAVE_XMM_FAR | (c->elems[i].reg << 4);
+	    bfd_putl32 ((bfd_vma) c->elems[i].offset, puwop);
+	    puwop += 4;
+	  }
+	  else
+	  {
+	    *puwop++ = UWOP_SAVE_XMM | (c->elems[i].reg << 4);
+	    bfd_putl16 ((bfd_vma) (c->elems[i].offset / 8), puwop);
+	    puwop += 2;
+	  }
+	  break;
+	case UWOP_SAVE_XMM128:
+	  if ((c->elems[i].offset & 7) != 0 ||
+	    ((c->elems[i].offset / 8) > 0xffff))
+	  {
+	    *puwop++ = UWOP_SAVE_XMM128_FAR | (c->elems[i].reg << 4);
+	    bfd_putl32 ((bfd_vma) c->elems[i].offset, puwop);
+	    puwop += 4;
+	  }
+	  else
+	  {
+	    *puwop++ = UWOP_SAVE_XMM128 | (c->elems[i].reg << 4);
+	    bfd_putl16 ((bfd_vma) (c->elems[i].offset / 8), puwop);
+	    puwop += 2;
+	  }
+	  break;
+	case UWOP_ALLOC_LARGE:
+	  if ((c->elems[i].offset & 7) != 0 ||
+	    ((c->elems[i].offset / 8) > 0xffff))
+	  {
+	    *puwop++ = UWOP_ALLOC_LARGE | (1 << 4);
+	    bfd_putl32 ((bfd_vma) c->elems[i].offset, puwop);
+	    puwop += 4;
+	  }
+	  else if ((c->elems[i].offset / 8) <= 0x10)
+	  {
+	    *puwop++ = UWOP_ALLOC_SMALL | (((c->elems[i].offset / 8) - 1) << 4);
+	  }
+	  else
+	  {
+	    *puwop++ = UWOP_ALLOC_LARGE;
+	    bfd_putl16 ((bfd_vma) (c->elems[i].offset / 8), puwop);
+	    puwop += 2;
+	  }
+	  break;
+        default:
+	  puwop++;
+	  abort ();
+	  break;
+	}
+    }
+}
+
+static size_t
+seh_getelm_data_size (const seh_context *c, int elm_start, int elm_end, size_t *unaligned_uwcodes)
+{
+  size_t ret = 0;
 
   while (elm_start < elm_end)
     {
@@ -1076,20 +1217,33 @@ seh_getelm_data_size (const seh_context *c, int elm_start, int elm_end)
 	    ret += 4;
 	  break;
 	case UWOP_ALLOC_LARGE:
-	  ret += 4;
+	  if ((c->elems[elm_start].offset & 7) != 0 ||
+	      ((c->elems[elm_start].offset / 8) > 0xffff))
+	    ret += 6;
+	  else if ((c->elems[elm_start].offset / 8) <= 0x10)
+	    ret += 2;
+	  else
+	    ret += 4;
+	  break;
+	case UWOP_SET_FPREG:
+	  ret += 2;
 	  break;
         default:
+	  ret += 2;
 	  break;
 	}
       elm_start++;
     }
+  if (unaligned_uwcodes)
+    *unaligned_uwcodes = ret;
+  ret = PEX64_UWI_SIZEOF_UWCODE_ARRAY ((ret / 2));
   return ret;
 }
 
 static size_t
 seh_getsize_of_unwind_entry (seh_context *c, int elm_start, int elm_end, int bechain)
 {
-  size_t ret = seh_getelm_data_size(c, elm_start, elm_end);
+  size_t ret = seh_getelm_data_size(c, elm_start, elm_end, NULL);
 
   c->count_syms += 1;
   if (bechain)
@@ -1129,7 +1283,8 @@ seh_make_unwind_entry (const seh_context *c, char *name, int elm_start, int elm_
   size_t it;
   valueT start_off = resolve_symbol_value (c->start_addr);
   valueT end_prologue;
-  size_t uwcodes = seh_getelm_data_size(c, elm_start, elm_end);
+  size_t unaligned_uwcodes = 0;
+  size_t uwcodes = seh_getelm_data_size(c, elm_start, elm_end, &unaligned_uwcodes);
   unsigned int flag = UNW_FLAG_NHANDLER;
   int idx;
 
@@ -1154,9 +1309,10 @@ seh_make_unwind_entry (const seh_context *c, char *name, int elm_start, int elm_
   if (end_prologue > 255)
     end_prologue = 255;
   data[off++] = (unsigned char) end_prologue;
-  data[off++] = (unsigned char) (uwcodes / 2);
+  data[off++] = (unsigned char) (unaligned_uwcodes / 2);
   data[off] = (unsigned char) c->framereg;
   data[off++] |= (unsigned char) ((c->frameoff / 16) << 4);
+  seh_store_elm_data (c, elm_start, elm_end, &data[off], start_off);
   off += uwcodes;
   if (bechain)
     {
