@@ -127,6 +127,7 @@ if { ([istarget "*-*-*elf*"]
 	    run_dump_test equ-reloc
 	}
     }
+    run_dump_test "pseudo"
     run_dump_test "section0" 
     run_dump_test "section1" 
     if {! [istarget "h8300-*-*"]} then {

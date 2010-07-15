@@ -1,3 +1,10 @@
+2010-07-14  Rhonda Wittels  <rhonda@codesourcery.com>
+
+	* gas/elf/pseudo.s: New.
+	* gas/elf/pseudo.l: New.
+	* gas/elf/pseudo.d: New.
+	* gas/elf/elf.exp: Run the new test.
+
 2010-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/default.exp (ADDR2LINE): New.

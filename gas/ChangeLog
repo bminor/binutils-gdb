@@ -1,3 +1,13 @@
+2010-07-15  Rhonda Wittels  <rhonda@codesourcery.com>
+
+	* config/obj-elf.c (get_sym_from_input_line_and_check): New
+	function to catch missing pseudo-op arguments.
+	(obj_elf_local): Call new function.
+	(obj_elf_weak): Likewise.
+	(obj_elf_visibility): Likewise.
+	(obj_elf_vtable_entry): Likewise.
+	(obj_elf_type): Likewise.
+
 2010-07-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* config/obj-coff-seh.c
