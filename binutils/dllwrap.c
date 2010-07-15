@@ -855,6 +855,9 @@ Creating one, but that may not be what you want"));
   else
     which_cpu = UNKNOWN_CPU;
 
+  if (is_leading_underscore == -1)
+    is_leading_underscore = (which_cpu != X64_CPU && which_cpu != ARM_CPU);
+
   /* Re-create the command lines as a string, taking care to quote stuff.  */
   dlltool_cmdline = dyn_string_new (cmdline_len);
   if (verbose)

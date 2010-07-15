@@ -1,3 +1,8 @@
+2010-07-15  Kai Tietz <kai.tietz@onevision.com>
+
+	* dllwrap.c (main): Make sure is_leading_underscore
+	gets initialized with correct default.
+
 2010-07-05  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (uncompress_section_contents): Avoid gcc-4.6 warning.
