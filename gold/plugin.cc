@@ -862,7 +862,10 @@ Sized_pluginobj<size, big_endian>::do_get_global_symbols() const
 }
 
 // Class Plugin_finish.  This task runs after all replacement files have
-// been added.  It calls each plugin's cleanup handler.
+// been added.  For now, it's a placeholder for a possible plugin API
+// to allow the plugin to release most of its resources.  The cleanup
+// handlers must be called later, because they can remove the temporary
+// object files that are needed until the end of the link.
 
 class Plugin_finish : public Task
 {
@@ -892,9 +895,7 @@ class Plugin_finish : public Task
   void
   run(Workqueue*)
   {
-    Plugin_manager* plugins = parameters->options().plugins();
-    gold_assert(plugins != NULL);
-    plugins->cleanup();
+    // We could call early cleanup handlers here.
   }
 
   std::string

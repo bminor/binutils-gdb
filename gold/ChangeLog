@@ -1,3 +1,8 @@
+2010-07-15  Cary Coutant  <ccoutant@google.com>
+
+	* plugin.cc (Plugin_finish::run): Don't call cleanup handlers from
+	here.
+
 2010-07-14  Ian Lance Taylor  <iant@google.com>
 
 	* descriptors.cc (Descriptors::open): Report correct name in error
