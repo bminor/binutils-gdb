@@ -1,3 +1,8 @@
+2010-07-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* NEWS: Mention support for the new ptrace interface and hardware
+	accelerated watchpoint conditions on powerpc-linux.
+
 2010-07-16  Ozkan Sezer  <sezeroz@gmail.com>
 
 	* target.c (debug_to_insert_breakpoint): Instead of casting to unsigned

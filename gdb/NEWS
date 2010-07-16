@@ -223,6 +223,21 @@ ARM Symbian			arm*-*-symbianelf*
   GDB now supports debugging programs written in the D programming
   language.
 
+* GDB now supports the extended ptrace interface for PowerPC which is
+  available since Linux kernel version 2.6.34.  This automatically enables
+  any hardware breakpoints and additional hardware watchpoints available in
+  the processor.  The old ptrace interface exposes just one hardware
+  watchpoint and no hardware breakpoints.
+
+* GDB is now able to use the Data Value Compare (DVC) register available on
+  embedded PowerPC processors to implement in hardware simple watchpoint
+  conditions of the form:
+
+  watch ADDRESS|VARIABLE if ADDRESS|VARIABLE == CONSTANT EXPRESSION
+
+  This works in native GDB running on Linux kernels with the extended ptrace
+  interface mentioned above.
+
 *** Changes in GDB 7.1
 
 * C++ Improvements
