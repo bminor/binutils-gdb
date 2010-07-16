@@ -1,5 +1,18 @@
 2010-07-16  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* symtab.h (symbol_set_demangled_name): Now takes an optional objfile*
+	argument.
+	(cplus_specific): New struct.
+	* symtab.c (symbol_set_demangled_name): Updated.
+	Use cplus_specific for cplus symbols.
+	(symbol_get_demangled_name): Retrive the name from the cplus_specific
+	struct for cplus symbols.
+	(symbol_init_language_specific): Set cplus_specific for cplus symbols.
+	(symbol_set_names): Pass objfile to symbol_set_demangled_name.
+	* symtab.c (symbol_init_cplus_specific): New function.
+
+2010-07-16  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	* symtab.h (symbol_set_demangled_name): New function.
 	(symbol_get_demangled_name): New function.
 	* symtab.c (symbol_set_demangled_name): New function.
