@@ -1,5 +1,5 @@
 /* tc-rx.c -- Assembler for the Renesas RX
-   Copyright 2008, 2009
+   Copyright 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1344,8 +1344,9 @@ md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED, segT segment ATTR
   int delta;
 
   tprintf ("\033[32m  est frag: addr %08lx fix %ld var %ld ofs %ld lit %p opc %p type %d sub %d\033[0m\n",
-	   fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal),
-	   fragP->fr_fix, fragP->fr_var, fragP->fr_offset,
+	   (unsigned long) (fragP->fr_address
+			    + (fragP->fr_opcode - fragP->fr_literal)),
+	   (long) fragP->fr_fix, (long) fragP->fr_var, (long) fragP->fr_offset,
 	   fragP->fr_literal, fragP->fr_opcode, fragP->fr_type, fragP->fr_subtype);
 
   /* This is the size of the opcode that's accounted for in fr_fix.  */
@@ -1376,8 +1377,9 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
   int ri;
 
   tprintf ("\033[36mrelax frag: addr %08lx fix %ld var %ld ofs %ld lit %p opc %p type %d sub %d str %ld\033[0m\n",
-	   fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal),
-	   fragP->fr_fix, fragP->fr_var, fragP->fr_offset,
+	   (unsigned long) (fragP->fr_address
+			    + (fragP->fr_opcode - fragP->fr_literal)),
+	   (long) fragP->fr_fix, (long) fragP->fr_var, (long) fragP->fr_offset,
 	   fragP->fr_literal, fragP->fr_opcode, fragP->fr_type, fragP->fr_subtype, stretch);
 
   optype = rx_opcode_type (fragP->fr_opcode);
@@ -1435,7 +1437,9 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
   switch (fragP->tc_frag_data->relax[ri].type)
     {
     case  RX_RELAX_BRANCH:
-      tprintf ("branch, addr %08lx pc %08lx disp %ld\n", addr0, mypc, addr0-mypc);
+      tprintf ("branch, addr %08lx pc %08lx disp %ld\n",
+	       (unsigned long) addr0, (unsigned long) mypc,
+	       (long) (addr0 - mypc));
       disp = (int) addr0 - (int) mypc;
 
       switch (optype)
@@ -1491,7 +1495,8 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
       break;
 
     case RX_RELAX_IMM:
-      tprintf ("other, addr %08lx pc %08lx LI %d OF %d\n", addr0, mypc,
+      tprintf ("other, addr %08lx pc %08lx LI %d OF %d\n",
+	       (unsigned long) addr0, (unsigned long) mypc,
 	       fragP->tc_frag_data->relax[ri].field_pos,
 	       fragP->tc_frag_data->relax[ri].val_ofs);
 
@@ -1574,9 +1579,11 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
   fixS * fix = rxb->fixups[fi].fixP;
 
   tprintf ("\033[31mconvrt frag: addr %08lx fix %ld var %ld ofs %ld lit %p opc %p type %d sub %d\033[0m\n",
-	   fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal),
-	   fragP->fr_fix, fragP->fr_var, fragP->fr_offset,
-	   fragP->fr_literal, fragP->fr_opcode, fragP->fr_type, fragP->fr_subtype);
+	   (unsigned long) (fragP->fr_address
+			    + (fragP->fr_opcode - fragP->fr_literal)),
+	   (long) fragP->fr_fix, (long) fragP->fr_var, (long) fragP->fr_offset,
+	   fragP->fr_literal, fragP->fr_opcode, fragP->fr_type,
+	   fragP->fr_subtype);
 
 #if TRACE_RELAX
   {
@@ -1613,7 +1620,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
   reloc_type = BFD_RELOC_NONE;
   reloc_adjust = 0;
 
-  tprintf ("convert, op is %d, disp %d (%lx-%lx)\n", rx_opcode_type (fragP->fr_opcode), disp, addr0, mypc);
+  tprintf ("convert, op is %d, disp %d (%lx-%lx)\n",
+	   rx_opcode_type (fragP->fr_opcode), disp,
+	   (unsigned long) addr0, (unsigned long) mypc);
   switch (fragP->tc_frag_data->relax[ri].type)
     {
     case RX_RELAX_BRANCH:
@@ -1917,7 +1926,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
     }
 
   fragP->fr_fix = fragP->fr_subtype + (fragP->fr_opcode - fragP->fr_literal);
-  tprintf ("fragP->fr_fix now %ld (%d + (%p - %p)\n", fragP->fr_fix,
+  tprintf ("fragP->fr_fix now %ld (%d + (%p - %p)\n", (long) fragP->fr_fix,
 	  fragP->fr_subtype, fragP->fr_opcode, fragP->fr_literal);
   fragP->fr_var = 0;
 
@@ -1925,7 +1934,8 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 	  && ((offsetT) (fragP->fr_next->fr_address - fragP->fr_address)
 	      != fragP->fr_fix))
     as_bad (_("bad frag at %p : fix %ld addr %ld %ld \n"), fragP,
-	    fragP->fr_fix, fragP->fr_address, fragP->fr_next->fr_address);
+	    (long) fragP->fr_fix,
+	    (long) fragP->fr_address, (long) fragP->fr_next->fr_address);
 }
 
 #undef OPCODE

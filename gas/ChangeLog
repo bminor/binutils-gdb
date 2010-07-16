@@ -1,3 +1,9 @@
+2010-07-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-rx.c (md_estimate_size_before_relax): Fix format
+	specifier warnings for 32-bit host when --enable-64-bit-bfd.
+	(rx_relax_frag, md_convert_frag): Likewise.
+
 2010-07-15  Rhonda Wittels  <rhonda@codesourcery.com>
 
 	* config/obj-elf.c (get_sym_from_input_line_and_check): New
