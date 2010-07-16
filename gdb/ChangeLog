@@ -1,5 +1,17 @@
 2010-07-16  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* symtab.h (symbol_set_demangled_name): New function.
+	(symbol_get_demangled_name): New function.
+	* symtab.c (symbol_set_demangled_name): New function.
+	(symbol_get_demangled_name): New function.
+	(symbol_init_language_specific): Use demangled_name setter and getter.
+	(symbol_set_names): Ditto.
+	(symbol_natural_name): Ditto.
+	(symbol_demangled_name): Ditto.
+	* dwarf2read.c (new_symbol): Ditto.
+
+2010-07-16  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	* symtab.h: Renamed cplus_specific to mangled_lang.
 	* symtab.c (symbol_init_language_specific): Updated.
 	(symbol_set_names): Updated.

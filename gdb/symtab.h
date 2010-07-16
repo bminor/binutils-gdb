@@ -154,6 +154,10 @@ struct general_symbol_info
   struct obj_section *obj_section;
 };
 
+extern void symbol_set_demangled_name (struct general_symbol_info *, char *);
+
+extern char *symbol_get_demangled_name (const struct general_symbol_info *);
+
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Note that all the following SYMBOL_* macros are used with the
