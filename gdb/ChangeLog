@@ -1,3 +1,18 @@
+2010-07-16  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* target.c (debug_to_insert_breakpoint): Instead of casting to unsigned
+	long and %ld, use core_addr_to_string() and %s to print CORE_ADDR vars
+	and host_address_to_string() and %s for pointers.
+	(debug_to_remove_breakpoint): Likewise.
+	(debug_to_region_ok_for_hw_watchpoint): Likewise.
+	(debug_to_can_accel_watchpoint_condition): Likewise.
+	(debug_to_stopped_data_address): Likewise.
+	(debug_to_watchpoint_addr_within_range): Likewise.
+	(debug_to_insert_hw_breakpoint): Likewise.
+	(debug_to_remove_hw_breakpoint): Likewise.
+	(debug_to_insert_watchpoint): Likewise.
+	(debug_to_remove_watchpoint): Likewise.
+
 2010-07-16  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* symtab.h (symbol_set_demangled_name): Now takes an optional objfile*

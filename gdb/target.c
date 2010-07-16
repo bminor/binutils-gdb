@@ -3270,8 +3270,8 @@ debug_to_insert_breakpoint (struct gdbarch *gdbarch,
   retval = debug_target.to_insert_breakpoint (gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_insert_breakpoint (0x%lx, xxx) = %ld\n",
-		      (unsigned long) bp_tgt->placed_address,
+		      "target_insert_breakpoint (%s, xxx) = %ld\n",
+		      core_addr_to_string (bp_tgt->placed_address),
 		      (unsigned long) retval);
   return retval;
 }
@@ -3285,8 +3285,8 @@ debug_to_remove_breakpoint (struct gdbarch *gdbarch,
   retval = debug_target.to_remove_breakpoint (gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_remove_breakpoint (0x%lx, xxx) = %ld\n",
-		      (unsigned long) bp_tgt->placed_address,
+		      "target_remove_breakpoint (%s, xxx) = %ld\n",
+		      core_addr_to_string (bp_tgt->placed_address),
 		      (unsigned long) retval);
   return retval;
 }
@@ -3315,10 +3315,9 @@ debug_to_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   retval = debug_target.to_region_ok_for_hw_watchpoint (addr, len);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_region_ok_for_hw_watchpoint (%ld, %ld) = 0x%lx\n",
-		      (unsigned long) addr,
-		      (unsigned long) len,
-		      (unsigned long) retval);
+		      "target_region_ok_for_hw_watchpoint (%s, %ld) = %s\n",
+		      core_addr_to_string (addr), (unsigned long) len,
+		      core_addr_to_string (retval));
   return retval;
 }
 
@@ -3331,9 +3330,9 @@ debug_to_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
   retval = debug_target.to_can_accel_watchpoint_condition (addr, len, rw, cond);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_can_accel_watchpoint_condition (0x%lx, %d, %d, 0x%lx) = %ld\n",
-		      (unsigned long) addr, len, rw, (unsigned long) cond,
-		      (unsigned long) retval);
+		      "target_can_accel_watchpoint_condition (%s, %d, %d, %s) = %ld\n",
+		      core_addr_to_string (addr), len, rw,
+		      host_address_to_string (cond), (unsigned long) retval);
   return retval;
 }
 
@@ -3358,8 +3357,8 @@ debug_to_stopped_data_address (struct target_ops *target, CORE_ADDR *addr)
   retval = debug_target.to_stopped_data_address (target, addr);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_stopped_data_address ([0x%lx]) = %ld\n",
-		      (unsigned long)*addr,
+		      "target_stopped_data_address ([%s]) = %ld\n",
+		      core_addr_to_string (*addr),
 		      (unsigned long)retval);
   return retval;
 }
@@ -3375,9 +3374,9 @@ debug_to_watchpoint_addr_within_range (struct target_ops *target,
 							 start, length);
 
   fprintf_filtered (gdb_stdlog,
-		    "target_watchpoint_addr_within_range (0x%lx, 0x%lx, %d) = %d\n",
-		    (unsigned long) addr, (unsigned long) start, length,
-		    retval);
+		    "target_watchpoint_addr_within_range (%s, %s, %d) = %d\n",
+		    core_addr_to_string (addr), core_addr_to_string (start),
+		    length, retval);
   return retval;
 }
 
@@ -3390,8 +3389,8 @@ debug_to_insert_hw_breakpoint (struct gdbarch *gdbarch,
   retval = debug_target.to_insert_hw_breakpoint (gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_insert_hw_breakpoint (0x%lx, xxx) = %ld\n",
-		      (unsigned long) bp_tgt->placed_address,
+		      "target_insert_hw_breakpoint (%s, xxx) = %ld\n",
+		      core_addr_to_string (bp_tgt->placed_address),
 		      (unsigned long) retval);
   return retval;
 }
@@ -3405,8 +3404,8 @@ debug_to_remove_hw_breakpoint (struct gdbarch *gdbarch,
   retval = debug_target.to_remove_hw_breakpoint (gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_remove_hw_breakpoint (0x%lx, xxx) = %ld\n",
-		      (unsigned long) bp_tgt->placed_address,
+		      "target_remove_hw_breakpoint (%s, xxx) = %ld\n",
+		      core_addr_to_string (bp_tgt->placed_address),
 		      (unsigned long) retval);
   return retval;
 }
@@ -3420,9 +3419,9 @@ debug_to_insert_watchpoint (CORE_ADDR addr, int len, int type,
   retval = debug_target.to_insert_watchpoint (addr, len, type, cond);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_insert_watchpoint (0x%lx, %d, %d, 0x%ld) = %ld\n",
-		      (unsigned long) addr, len, type, (unsigned long) cond,
-		      (unsigned long) retval);
+		      "target_insert_watchpoint (%s, %d, %d, %s) = %ld\n",
+		      core_addr_to_string (addr), len, type,
+		      host_address_to_string (cond), (unsigned long) retval);
   return retval;
 }
 
@@ -3435,9 +3434,9 @@ debug_to_remove_watchpoint (CORE_ADDR addr, int len, int type,
   retval = debug_target.to_remove_watchpoint (addr, len, type, cond);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_remove_watchpoint (0x%lx, %d, %d, 0x%ld) = %ld\n",
-		      (unsigned long) addr, len, type, (unsigned long) cond,
-		      (unsigned long) retval);
+		      "target_remove_watchpoint (%s, %d, %d, %s) = %ld\n",
+		      core_addr_to_string (addr), len, type,
+		      host_address_to_string (cond), (unsigned long) retval);
   return retval;
 }
 
