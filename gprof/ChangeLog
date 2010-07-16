@@ -1,3 +1,8 @@
+2010-07-16  James Blackburn  <james.blackburn@broadcom.com>
+
+	* corefile.c (core_sym_class): Fix handling of subprogram names
+	and add support for cloned function names.
+
 2010-06-15  Doug Semler  <dougsemler@gmail.com>
 
 	* gmon_io.c (gmon_out_read): Remove double fclose of input file.

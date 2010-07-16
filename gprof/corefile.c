@@ -385,12 +385,20 @@ core_sym_class (asymbol *sym)
       if (*name == '$')
         return 0;
 
-      /* Do not discard nested subprograms (those
-	 which end with .NNN, where N are digits).  */
       if (*name == '.')
-	for (name++; *name; name++)
-	  if (! ISDIGIT (*name))
-	    return 0;
+	{
+	  /* Allow GCC cloned functions.  */
+	  if (strlen (name) > 7 && strncmp (name, ".clone.", 7) == 0)
+	    name += 6;
+
+	  /* Do not discard nested subprograms (those
+	     which end with .NNN, where N are digits).  */
+	  for (name++; *name; name++)
+	    if (! ISDIGIT (*name))
+	      return 0;
+
+	  break;
+	}
     }
 
   /* On systems where the C compiler adds an underscore to all
