@@ -354,7 +354,7 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
       || gsymbol->language == language_objc
       || gsymbol->language == language_fortran)
     {
-      gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+      gsymbol->language_specific.mangled_lang.demangled_name = NULL;
     }
   else
     {
@@ -537,7 +537,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  memcpy (gsymbol->name, linkage_name, len);
 	  gsymbol->name[len] = '\0';
 	}
-      gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+      gsymbol->language_specific.mangled_lang.demangled_name = NULL;
 
       return;
     }
@@ -633,10 +633,10 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 
   gsymbol->name = (*slot)->mangled + lookup_len - len;
   if ((*slot)->demangled[0] != '\0')
-    gsymbol->language_specific.cplus_specific.demangled_name
+    gsymbol->language_specific.mangled_lang.demangled_name
       = (*slot)->demangled;
   else
-    gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+    gsymbol->language_specific.mangled_lang.demangled_name = NULL;
 }
 
 /* Return the source code name of a symbol.  In languages where
@@ -652,12 +652,12 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
     case language_java:
     case language_objc:
     case language_fortran:
-      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
-	return gsymbol->language_specific.cplus_specific.demangled_name;
+      if (gsymbol->language_specific.mangled_lang.demangled_name != NULL)
+	return gsymbol->language_specific.mangled_lang.demangled_name;
       break;
     case language_ada:
-      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
-	return gsymbol->language_specific.cplus_specific.demangled_name;
+      if (gsymbol->language_specific.mangled_lang.demangled_name != NULL)
+	return gsymbol->language_specific.mangled_lang.demangled_name;
       else
 	return ada_decode_symbol (gsymbol);
       break;
@@ -679,12 +679,12 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
     case language_java:
     case language_objc:
     case language_fortran:
-      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
-	return gsymbol->language_specific.cplus_specific.demangled_name;
+      if (gsymbol->language_specific.mangled_lang.demangled_name != NULL)
+	return gsymbol->language_specific.mangled_lang.demangled_name;
       break;
     case language_ada:
-      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
-	return gsymbol->language_specific.cplus_specific.demangled_name;
+      if (gsymbol->language_specific.mangled_lang.demangled_name != NULL)
+	return gsymbol->language_specific.mangled_lang.demangled_name;
       else
 	return ada_decode_symbol (gsymbol);
       break;

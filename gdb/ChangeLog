@@ -1,3 +1,13 @@
+2010-07-16  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* symtab.h: Renamed cplus_specific to mangled_lang.
+	* symtab.c (symbol_init_language_specific): Updated.
+	(symbol_set_names): Updated.
+	(symbol_natural_name): Updated.
+	(symbol_demangled_name): Updated.
+	* ada-lang.c (ada_decode_symbol): Updated.
+	* dwarf2read.c (new_symbol): Updated.
+
 2010-07-14  Ken Werner  <ken.werner@de.ibm.com>
 
 	* valops.c (value_assign): Do not call to value_coerce_to_target.

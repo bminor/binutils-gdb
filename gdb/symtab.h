@@ -124,12 +124,13 @@ struct general_symbol_info
 
   union
   {
-    struct cplus_specific
+    /* This is used by languages which wish to store a demangled name.
+       currently used by Ada, Java, and Objective C.*/
+    struct mangled_lang
     {
-      /* This is in fact used for C++, Java, and Objective C.  */
       char *demangled_name;
     }
-    cplus_specific;
+    mangled_lang;
   }
   language_specific;
 

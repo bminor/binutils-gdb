@@ -9743,8 +9743,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       /* Fortran does not have mangling standard and the mangling does differ
 	 between gfortran, iFort etc.  */
       if (cu->language == language_fortran
-          && sym->ginfo.language_specific.cplus_specific.demangled_name == NULL)
-	sym->ginfo.language_specific.cplus_specific.demangled_name
+          && sym->ginfo.language_specific.mangled_lang.demangled_name == NULL)
+	sym->ginfo.language_specific.mangled_lang.demangled_name
 	  = (char *) dwarf2_full_name (name, die, cu);
 
       /* Default assumptions.

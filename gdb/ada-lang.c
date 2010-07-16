@@ -1210,7 +1210,7 @@ char *
 ada_decode_symbol (const struct general_symbol_info *gsymbol)
 {
   char **resultp =
-    (char **) &gsymbol->language_specific.cplus_specific.demangled_name;
+    (char **) &gsymbol->language_specific.mangled_lang.demangled_name;
 
   if (*resultp == NULL)
     {
