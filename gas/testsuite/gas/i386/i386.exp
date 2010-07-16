@@ -213,6 +213,10 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_list_test "l1om-inval" "-march=l1om --32"
 	run_dump_test "localpic"
 	run_dump_test "debug1"
+
+	if [expr [istarget "*-*-linux*"]] then {
+	    run_dump_test "dw2-compress-2"
+	}
     }
 
     # This is a PE specific test.
@@ -238,7 +242,6 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
     }
     if [expr [istarget "*-*-linux*"]] then {
 	run_dump_test "dw2-compress-1"
-	run_dump_test "dw2-compress-2"
     }
 }
 
