@@ -1,3 +1,8 @@
+2010-07-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* NEWS: Mention support for the new ptrace interface and hardware
+	accelerated watchpoint conditions on powerpc-linux.
+
 2010-07-13  Emmanuel Thomé  <Emmanuel.Thome@gmail.com>
 
 	* c-valprint.c (c_val_print): Add embedded_offset to address in
