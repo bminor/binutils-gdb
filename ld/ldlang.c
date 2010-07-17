@@ -4561,13 +4561,13 @@ sort_sections_by_lma (const void *arg1, const void *arg2)
 static void
 lang_check_section_addresses (void)
 {
-  asection *s, *os;
+  asection *s, *p;
   asection **sections, **spp;
   unsigned int count;
   bfd_vma s_start;
   bfd_vma s_end;
-  bfd_vma os_start;
-  bfd_vma os_end;
+  bfd_vma p_start;
+  bfd_vma p_end;
   bfd_size_type amt;
   lang_memory_region_type *m;
 
@@ -4600,24 +4600,29 @@ lang_check_section_addresses (void)
 
   spp = sections;
   s = *spp++;
-  s_start = bfd_section_lma (link_info.output_bfd, s);
+  s_start = s->lma;
   s_end = s_start + TO_ADDR (s->size) - 1;
   for (count--; count; count--)
     {
       /* We must check the sections' LMA addresses not their VMA
 	 addresses because overlay sections can have overlapping VMAs
 	 but they must have distinct LMAs.  */
-      os = s;
-      os_start = s_start;
-      os_end = s_end;
+      p = s;
+      p_start = s_start;
+      p_end = s_end;
       s = *spp++;
-      s_start = bfd_section_lma (link_info.output_bfd, s);
+      s_start = s->lma;
       s_end = s_start + TO_ADDR (s->size) - 1;
 
-      /* Look for an overlap.  */
-      if (s_end >= os_start && s_start <= os_end)
+      /* Look for an overlap.  We have sorted sections by lma, so we
+	 know that s_start >= p_start.  Besides the obvious case of
+	 overlap when the current section starts before the previous
+	 one ends, we also must have overlap if the previous section
+	 wraps around the address space.  */
+      if (s_start <= p_end
+	  || p_end < p_start)
 	einfo (_("%X%P: section %s loaded at [%V,%V] overlaps section %s loaded at [%V,%V]\n"),
-	       s->name, s_start, s_end, os->name, os_start, os_end);
+	       s->name, s_start, s_end, p->name, p_start, p_end);
     }
 
   free (sections);

@@ -1,3 +1,8 @@
+2010-07-17  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_check_section_addresses): Catch overlap for
+	sections that wrap around the address space.
+
 2010-06-29  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/xstormy16.sc (.gcc_except_table): Include sections
