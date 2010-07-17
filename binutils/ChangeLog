@@ -1,3 +1,7 @@
+2010-07-17  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* objcopy.c (copy_usage): Tweak previous typofix.
+
 2010-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (copy_usage): Fix a typo.

@@ -546,7 +546,7 @@ copy_usage (FILE *stream, int exit_status)
      --stack <reserve>[,<commit>]  Set PE reserve/commit stack to <reserve>/\n\
                                    <commit>\n\
      --subsystem <name>[:<version>]\n\
-                                   Set PE subsystem to <name> [& <version>]]\n\
+                                   Set PE subsystem to <name> [& <version>]\n\
   -v --verbose                     List all object files modified\n\
   @<file>                          Read options from <file>\n\
   -V --version                     Display this program's version number\n\
