@@ -1,3 +1,7 @@
+2010-07-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (copy_usage): Fix a typo.
+
 2010-07-15  Kai Tietz <kai.tietz@onevision.com>
 
 	* dllwrap.c (main): Make sure is_leading_underscore
