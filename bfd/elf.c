@@ -3736,6 +3736,13 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		 segment.  */
 	      new_segment = TRUE;
 	    }
+	  else if (hdr->lma < last_hdr->lma + last_size
+		   || last_hdr->lma + last_size < last_hdr->lma)
+	    {
+	      /* If this section has a load address that makes it overlap
+		 the previous section, then we need a new segment.  */
+	      new_segment = TRUE;
+	    }
 	  /* In the next test we have to be careful when last_hdr->lma is close
 	     to the end of the address space.  If the aligned address wraps
 	     around to the start of the address space, then there are no more
@@ -4457,15 +4464,19 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		      && ((this_hdr->sh_flags & SHF_TLS) == 0
 			  || p->p_type == PT_TLS))))
 	    {
-	      bfd_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
+	      bfd_vma p_start = p->p_paddr;
+	      bfd_vma p_end = p_start + p->p_memsz;
+	      bfd_vma s_start = sec->lma;
+	      bfd_vma adjust = s_start - p_end;
 
-	      if (sec->lma < p->p_paddr + p->p_memsz)
+	      if (s_start < p_end
+		  || p_end < p_start)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B: section %A lma 0x%lx overlaps previous sections"),
-		     abfd, sec, (unsigned long) sec->lma);
+		    (_("%B: section %A lma %#lx adjusted to %#lx"), abfd, sec,
+		     (unsigned long) s_start, (unsigned long) p_end);
 		  adjust = 0;
-		  sec->lma = p->p_paddr + p->p_memsz;
+		  sec->lma = p_end;
 		}
 	      p->p_memsz += adjust;
 

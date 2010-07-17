@@ -1,3 +1,12 @@
+2010-07-17  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Force new segment
+	for sections with overlapping LMAs.
+	(assign_file_positions_for_load_sections): Catch overlap for
+	sections that wrap around the address space.  Replace a
+	warning that duplicates ld's --check-sections error with a
+	warning that lma has been adjusted for overlapping sections.
+
 2010-07-14  Cary Coutant  <ccoutant@google.com>
 
 	PR ld/11817
