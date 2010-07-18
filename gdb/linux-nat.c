@@ -2149,7 +2149,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 {
   int pid = GET_LWP (lp->ptid);
   struct target_waitstatus *ourstatus = &lp->waitstatus;
-  struct lwp_info *new_lp = NULL;
   int event = status >> 16;
 
   if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
@@ -2213,7 +2212,10 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	ourstatus->kind = TARGET_WAITKIND_VFORKED;
       else
 	{
+	  struct lwp_info *new_lp;
+
 	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
 	  new_lp = add_lwp (BUILD_LWP (new_pid, GET_PID (lp->ptid)));
 	  new_lp->cloned = 1;
 	  new_lp->stopped = 1;

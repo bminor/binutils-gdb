@@ -1,3 +1,8 @@
+2010-07-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c (linux_handle_extended_wait): Move variable new_lp into
+	a more inner block.  Remove its unused declaration initializer.
+
 2010-07-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* NEWS: Mention support for the new ptrace interface and hardware
