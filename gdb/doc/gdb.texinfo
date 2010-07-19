@@ -15391,7 +15391,7 @@ and @code{show architecture}.
 @cindex active targets
 @cindex multiple targets
 
-There are multiple classes of targets such, as: processes, executable files or
+There are multiple classes of targets such as: processes, executable files or
 recording sessions.  Core files belong to the process class, making core file
 and process mutually exclusive.  Otherwise, @value{GDBN} can work concurrently
 on multiple active targets, one in each class.  This allows you to (for

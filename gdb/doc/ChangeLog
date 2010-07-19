@@ -1,4 +1,8 @@
 2010-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Active Targets): Fix wrong comma placement.
+
+2010-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
 	Make core files the process_stratum.
