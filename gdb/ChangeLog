@@ -1,3 +1,12 @@
+2010-07-19  Hui Zhu  <teawater@gmail.com>
+
+	* breakpoint.c (single_step_breakpoints_inserted): New
+	function.
+	* breakpoint.h (single_step_breakpoints_inserted): Extern.
+	* infrun.c (maybe_software_singlestep): Add check code.
+	* record.c (record_resume): Add code for software single step.
+	(record_wait): Ditto.
+
 2010-07-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-nat.c (linux_handle_extended_wait): Move variable new_lp into

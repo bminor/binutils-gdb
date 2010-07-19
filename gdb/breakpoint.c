@@ -10726,6 +10726,16 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
 	     paddress (gdbarch, next_pc));
 }
 
+/* Check if the breakpoints used for software single stepping
+   were inserted or not.  */
+
+int
+single_step_breakpoints_inserted (void)
+{
+  return (single_step_breakpoints[0] != NULL
+          || single_step_breakpoints[1] != NULL);
+}
+
 /* Remove and delete any breakpoints used for software single step.  */
 
 void

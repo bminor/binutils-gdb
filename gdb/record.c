@@ -1011,9 +1011,43 @@ record_resume (struct target_ops *ops, ptid_t ptid, int step,
 
   if (!RECORD_IS_REPLAY)
     {
+      struct gdbarch *gdbarch = target_thread_architecture (ptid);
+
       record_message (get_current_regcache (), signal);
-      record_beneath_to_resume (record_beneath_to_resume_ops, ptid, 1,
-                                signal);
+
+      if (!step)
+        {
+          /* This is not hard single step.  */
+          if (!gdbarch_software_single_step_p (gdbarch))
+            {
+              /* This is a normal continue.  */
+              step = 1;
+            }
+          else
+            {
+              /* This arch support soft sigle step.  */
+              if (single_step_breakpoints_inserted ())
+                {
+                  /* This is a soft single step.  */
+                  record_resume_step = 1;
+                }
+              else
+                {
+                  /* This is a continue.
+                     Try to insert a soft single step breakpoint.  */
+                  if (!gdbarch_software_single_step (gdbarch,
+                                                     get_current_frame ()))
+                    {
+                      /* This system don't want use soft single step.
+                         Use hard sigle step.  */
+                      step = 1;
+                    }
+                }
+            }
+        }
+
+      record_beneath_to_resume (record_beneath_to_resume_ops,
+                                ptid, step, signal);
     }
 }
 
@@ -1089,11 +1123,15 @@ record_wait (struct target_ops *ops,
 	  /* This is not a single step.  */
 	  ptid_t ret;
 	  CORE_ADDR tmp_pc;
+	  struct gdbarch *gdbarch = target_thread_architecture (inferior_ptid);
 
 	  while (1)
 	    {
 	      ret = record_beneath_to_wait (record_beneath_to_wait_ops,
 					    ptid, status, options);
+
+              if (single_step_breakpoints_inserted ())
+                remove_single_step_breakpoints ();
 
 	      if (record_resume_step)
 	        return ret;
@@ -1134,8 +1172,12 @@ record_wait (struct target_ops *ops,
 		    }
 		  else
 		    {
-		      /* This must be a single-step trap.  Record the
-		         insn and issue another step.  */
+		      /* This is a single-step trap.  Record the
+		         insn and issue another step.
+                         FIXME: this part can be a random SIGTRAP too.
+                         But GDB cannot handle it.  */
+                      int step = 1;
+
 		      if (!record_message_wrapper_safe (regcache,
                                                         TARGET_SIGNAL_0))
   			{
@@ -1144,8 +1186,20 @@ record_wait (struct target_ops *ops,
                            break;
   			}
 
+                      if (gdbarch_software_single_step_p (gdbarch))
+			{
+			  /* Try to insert the software single step breakpoint.
+			     If insert success, set step to 0.  */
+			  set_executing (inferior_ptid, 0);
+			  reinit_frame_cache ();
+			  if (gdbarch_software_single_step (gdbarch,
+                                                            get_current_frame ()))
+			    step = 0;
+			  set_executing (inferior_ptid, 1);
+			}
+
 		      record_beneath_to_resume (record_beneath_to_resume_ops,
-						ptid, 1,
+						ptid, step,
 						TARGET_SIGNAL_0);
 		      continue;
 		    }

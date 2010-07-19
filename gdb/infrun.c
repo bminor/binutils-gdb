@@ -1515,7 +1515,8 @@ maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   int hw_step = 1;
 
-  if (gdbarch_software_single_step_p (gdbarch)
+  if (execution_direction == EXEC_FORWARD
+      && gdbarch_software_single_step_p (gdbarch)
       && gdbarch_software_single_step (gdbarch, get_current_frame ()))
     {
       hw_step = 0;

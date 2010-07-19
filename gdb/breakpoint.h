@@ -1000,6 +1000,7 @@ extern int remove_hw_watchpoints (void);
    twice before remove is called.  */
 extern void insert_single_step_breakpoint (struct gdbarch *,
 					   struct address_space *, CORE_ADDR);
+extern int single_step_breakpoints_inserted (void);
 extern void remove_single_step_breakpoints (void);
 extern void cancel_single_step_breakpoints (void);
 
