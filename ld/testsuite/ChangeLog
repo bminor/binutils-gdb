@@ -1,3 +1,20 @@
+2010-07-19  Andreas Schwab  <schwab@redhat.com>
+
+	* ld-mmix/bspec1.d: Ignore "Key to Flags" contents.
+	* ld-mmix/bspec2.d: Likewise.
+	* ld-mmix/local1.d: Likewise.
+	* ld-mmix/local3.d: Likewise.
+	* ld-mmix/local5.d: Likewise.
+	* ld-mmix/local7.d: Likewise.
+	* ld-mmix/undef-3.d: Likewise.
+	* ld-sh/sh64/crange1.rd: Likewise.
+	* ld-sh/sh64/crange2.rd: Likewise.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/crangerel1.rd: Likewise.
+	* ld-sh/sh64/crangerel2.rd: Likewise.
+
 2010-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11817

@@ -1,3 +1,21 @@
+2010-07-19  Andreas Schwab  <schwab@redhat.com>
+
+	* gas/i386/x86-64-unwind.d: Ignore "Key to Flags" contents.
+	* gas/ia64/alias-ilp32.d: Likewise.
+	* gas/ia64/alias.d: Likewise.
+	* gas/ia64/group-1.d: Likewise.
+	* gas/ia64/group-2.d: Likewise.
+	* gas/ia64/secname-ilp32.d: Likewise.
+	* gas/ia64/secname.d: Likewise.
+	* gas/ia64/unwind-ilp32.d: Likewise.
+	* gas/ia64/unwind.d: Likewise.
+	* gas/mmix/byte-1.d: Likewise.
+	* gas/mmix/loc-1.d: Likewise.
+	* gas/mmix/loc-2.d: Likewise.
+	* gas/mmix/loc-3.d: Likewise.
+	* gas/mmix/loc-4.d: Likewise.
+	* gas/mmix/loc-5.d: Likewise.
+
 2010-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run dw2-compress-2 only for 32bit.

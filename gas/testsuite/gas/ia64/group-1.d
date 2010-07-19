@@ -25,9 +25,7 @@ Section Headers:
   \[ 8\] \.strtab           STRTAB           0000000000000000  00000380
        0000000000000006  0000000000000000           0     0     1
 Key to Flags:
-  W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\)
-  I \(info\), L \(link order\), G \(group\), x \(unknown\)
-  O \(extra OS processing required\) o \(OS specific\), p \(processor specific\)
+#...
 
 COMDAT group section \[    1\] `\._foo' \[\._foo\] contains 1 sections:
    \[Index\]    Name

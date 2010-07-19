@@ -1,3 +1,12 @@
+2010-07-19  Andreas Schwab  <schwab@redhat.com>
+
+	* binutils-all/readelf.s: Ignore "Key to Flags" contents.
+	* binutils-all/readelf.s-64: Likewise.
+	* binutils-all/i386/compressed-1b.d: Likewise.
+	* binutils-all/i386/compressed-1c.d: Likewise.
+	* binutils-all/x86-64/compressed-1b.d: Likewise.
+	* binutils-all/x86-64/compressed-1c.d: Likewise.
+
 2010-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/i386/compressed-1a.d: Fix a typo.
