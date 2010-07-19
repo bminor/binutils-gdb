@@ -672,8 +672,7 @@ typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdba
 extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries);
 
-/* How the core_stratum layer converts a PTID from a core file to a
-   string. */
+/* How the core target converts a PTID from a core file to a string. */
 
 extern int gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch);
 

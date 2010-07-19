@@ -352,6 +352,9 @@ extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);
 
 extern struct cleanup *make_cleanup_restore_integer (int *variable);
 
+struct target_ops;
+extern struct cleanup *make_cleanup_unpush_target (struct target_ops *ops);
+
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,

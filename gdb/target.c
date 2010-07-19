@@ -1037,6 +1037,30 @@ pop_all_targets (int quitting)
   pop_all_targets_above (dummy_stratum, quitting);
 }
 
+/* Return 1 if T is now pushed in the target stack.  Return 0 otherwise.  */
+
+int
+target_is_pushed (struct target_ops *t)
+{
+  struct target_ops **cur;
+
+  /* Check magic number.  If wrong, it probably means someone changed
+     the struct definition, but not all the places that initialize one.  */
+  if (t->to_magic != OPS_MAGIC)
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  "Magic number of %s target struct wrong\n",
+			  t->to_shortname);
+      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+    }
+
+  for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
+    if (*cur == t)
+      return 1;
+
+  return 0;
+}
+
 /* Using the objfile specified in OBJFILE, find the address for the
    current thread's thread-local storage with offset OFFSET.  */
 CORE_ADDR
@@ -2761,31 +2785,6 @@ find_run_target (void)
   for (t = target_structs; t < target_structs + target_struct_size; ++t)
     {
       if ((*t)->to_can_run && target_can_run (*t))
-	{
-	  runable = *t;
-	  ++count;
-	}
-    }
-
-  return (count == 1 ? runable : NULL);
-}
-
-/* Find a single core_stratum target in the list of targets and return it.
-   If for some reason there is more than one, return NULL.  */
-
-struct target_ops *
-find_core_target (void)
-{
-  struct target_ops **t;
-  struct target_ops *runable = NULL;
-  int count;
-
-  count = 0;
-
-  for (t = target_structs; t < target_structs + target_struct_size;
-       ++t)
-    {
-      if ((*t)->to_stratum == core_stratum)
 	{
 	  runable = *t;
 	  ++count;

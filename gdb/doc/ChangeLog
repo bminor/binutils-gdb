@@ -1,3 +1,10 @@
+2010-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	Make core files the process_stratum.
+	* gdb.texinfo (Active Targets): Remove core_stratum.  Include
+	record_stratum example.
+
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Index Files): New node.

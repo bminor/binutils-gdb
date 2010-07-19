@@ -1,3 +1,26 @@
+2010-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Make core files the process_stratum.
+	* corefile.c (core_target): New variable.
+	(core_file_command): Remove variable t, use core_target.
+	* corelow.c (core_ops): Make it static.
+	(init_core_ops): Change to process_stratum.  Initialize CORE_TARGET.
+	* defs.h (make_cleanup_unpush_target): New prototype.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (core_pid_to_str): Remove core_stratum from its comment.
+	* gdbcore.h (core_target): New declaration.
+	* inf-ptrace.c (inf_ptrace_create_inferior, inf_ptrace_attach): New
+	variables ops_already_pushed and back_to.  Use push_target,
+	make_cleanup_unpush_target and discard_cleanups calls.
+	* record.c (record_open): Replace core_stratum by a core_bfd check.
+	* target.c (target_is_pushed): New function.
+	(find_core_target): Remove.
+	* target.h (enum strata) <core_stratum>: Remove.
+	(target_is_pushed): New declaration.
+	(find_core_target): Remove declaration.
+	* tracepoint.c (init_tfile_ops) <to_stratum>: Remove comment.
+	* utils.c (do_unpush_target, make_cleanup_unpush_target): New functions.
+
 2010-07-19  Hui Zhu  <teawater@gmail.com>
 
 	* breakpoint.c (single_step_breakpoints_inserted): New

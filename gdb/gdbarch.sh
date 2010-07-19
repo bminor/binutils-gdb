@@ -611,8 +611,7 @@ v:struct core_regset_section *:core_regset_sections:const char *name, int len:::
 # core file into buffer READBUF with length LEN.
 M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
 
-# How the core_stratum layer converts a PTID from a core file to a
-# string.
+# How the core target converts a PTID from a core file to a string.
 M:char *:core_pid_to_str:ptid_t ptid:ptid
 
 # BFD target to use when generating a core file.

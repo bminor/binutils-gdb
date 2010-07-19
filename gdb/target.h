@@ -68,8 +68,7 @@ enum strata
   {
     dummy_stratum,		/* The lowest of the low */
     file_stratum,		/* Executable files, etc */
-    core_stratum,		/* Core dump files */
-    process_stratum,		/* Executing processes */
+    process_stratum,		/* Executing processes or core dump files */
     thread_stratum,		/* Executing threads */
     record_stratum,		/* Support record debugging */
     arch_stratum		/* Architecture overrides */
@@ -1485,6 +1484,8 @@ extern void pop_all_targets (int quitting);
    strictly above ABOVE_STRATUM.  */
 extern void pop_all_targets_above (enum strata above_stratum, int quitting);
 
+extern int target_is_pushed (struct target_ops *t);
+
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);
 
@@ -1545,8 +1546,6 @@ extern void find_default_create_inferior (struct target_ops *,
 					  char *, char *, char **, int);
 
 extern struct target_ops *find_run_target (void);
-
-extern struct target_ops *find_core_target (void);
 
 extern struct target_ops *find_target_beneath (struct target_ops *);
 

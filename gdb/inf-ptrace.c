@@ -121,10 +121,23 @@ inf_ptrace_create_inferior (struct target_ops *ops,
 {
   int pid;
 
+  /* Do not change either targets above or the same target if already present.
+     The reason is the target stack is shared across multiple inferiors.  */
+  int ops_already_pushed = target_is_pushed (ops);
+  struct cleanup *back_to;
+
+  if (! ops_already_pushed)
+    {
+      /* Clear possible core file with its process_stratum.  */
+      push_target (ops);
+      back_to = make_cleanup_unpush_target (ops);
+    }
+
   pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
 		       NULL, NULL);
 
-  push_target (ops);
+  if (! ops_already_pushed)
+    discard_cleanups (back_to);
 
   /* On some targets, there must be some explicit synchronization
      between the parent and child processes after the debugger
@@ -189,10 +202,23 @@ inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
   pid_t pid;
   struct inferior *inf;
 
+  /* Do not change either targets above or the same target if already present.
+     The reason is the target stack is shared across multiple inferiors.  */
+  int ops_already_pushed = target_is_pushed (ops);
+  struct cleanup *back_to;
+
   pid = parse_pid_to_attach (args);
 
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
+
+  if (! ops_already_pushed)
+    {
+      /* target_pid_to_str already uses the target.  Also clear possible core
+	 file with its process_stratum.  */
+      push_target (ops);
+      back_to = make_cleanup_unpush_target (ops);
+    }
 
   if (from_tty)
     {
@@ -226,7 +252,8 @@ inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
      target, it should decorate the ptid later with more info.  */
   add_thread_silent (inferior_ptid);
 
-  push_target(ops);
+  if (! ops_already_pushed)
+    discard_cleanups (back_to);
 }
 
 #ifdef PT_GET_PROCESS_STATE

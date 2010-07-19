@@ -59,6 +59,10 @@ static int exec_file_hook_count = 0;	/* size of array */
 /* Binary file diddling handle for the core file.  */
 
 bfd *core_bfd = NULL;
+
+/* corelow.c target (if included for this gdb target).  */
+
+struct target_ops *core_target;
 
 
 /* Backward compatability with old way of specifying core files.  */
@@ -66,18 +70,15 @@ bfd *core_bfd = NULL;
 void
 core_file_command (char *filename, int from_tty)
 {
-  struct target_ops *t;
-
   dont_repeat ();		/* Either way, seems bogus. */
 
-  t = find_core_target ();
-  if (t == NULL)
+  if (core_target == NULL)
     error (_("GDB can't read core files on this machine."));
 
   if (!filename)
-    (t->to_detach) (t, filename, from_tty);
+    (core_target->to_detach) (core_target, filename, from_tty);
   else
-    (t->to_open) (filename, from_tty);
+    (core_target->to_open) (filename, from_tty);
 }
 
 

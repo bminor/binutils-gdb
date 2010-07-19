@@ -1,3 +1,13 @@
+2010-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Make core files the process_stratum.
+	* gdb.base/corefile.exp (run: load core again)
+	(run: sanity check we see the core file, run: with core)
+	(run: core file is cleared, attach: load core again)
+	(attach: sanity check we see the core file, attach: with core)
+	(attach: core file is cleared): New tests.
+	* gdb.base/coremaker.c (main): New parameters.  Implement "sleep" argv.
+
 2010-07-14  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.arch/altivec-abi.exp: New tests.

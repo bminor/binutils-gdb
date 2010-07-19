@@ -15391,33 +15391,20 @@ and @code{show architecture}.
 @cindex active targets
 @cindex multiple targets
 
-There are three classes of targets: processes, core files, and
-executable files.  @value{GDBN} can work concurrently on up to three
-active targets, one in each class.  This allows you to (for example)
-start a process and inspect its activity without abandoning your work on
-a core file.
+There are multiple classes of targets such, as: processes, executable files or
+recording sessions.  Core files belong to the process class, making core file
+and process mutually exclusive.  Otherwise, @value{GDBN} can work concurrently
+on multiple active targets, one in each class.  This allows you to (for
+example) start a process and inspect its activity, while still having access to
+the executable file after the process finishes.  Or if you start process
+recording (@pxref{Reverse Execution}) and @code{reverse-step} there, you are
+presented a virtual layer of the recording target, while the process target
+remains stopped at the chronologically last point of the process execution.
 
-For example, if you execute @samp{gdb a.out}, then the executable file
-@code{a.out} is the only active target.  If you designate a core file as
-well---presumably from a prior run that crashed and coredumped---then
-@value{GDBN} has two active targets and uses them in tandem, looking
-first in the corefile target, then in the executable file, to satisfy
-requests for memory addresses.  (Typically, these two classes of target
-are complementary, since core files contain only a program's
-read-write memory---variables and so on---plus machine status, while
-executable files contain only the program text and initialized data.)
-
-When you type @code{run}, your executable file becomes an active process
-target as well.  When a process target is active, all @value{GDBN}
-commands requesting memory addresses refer to that target; addresses in
-an active core file or executable file target are obscured while the
-process target is active.
-
-Use the @code{core-file} and @code{exec-file} commands to select a new
-core file or executable target (@pxref{Files, ,Commands to Specify
-Files}).  To specify as a target a process that is already running, use
-the @code{attach} command (@pxref{Attach, ,Debugging an Already-running
-Process}).
+Use the @code{core-file} and @code{exec-file} commands to select a new core
+file or executable target (@pxref{Files, ,Commands to Specify Files}).  To
+specify as a target a process that is already running, use the @code{attach}
+command (@pxref{Attach, ,Debugging an Already-running Process}).
 
 @node Target Commands
 @section Commands for Managing Targets

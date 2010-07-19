@@ -962,7 +962,7 @@ record_open (char *name, int from_tty)
   record_beneath_to_stopped_by_watchpoint = tmp_to_stopped_by_watchpoint;
   record_beneath_to_stopped_data_address = tmp_to_stopped_data_address;
 
-  if (current_target.to_stratum == core_stratum)
+  if (core_bfd)
     record_core_open_1 (name, from_tty);
   else
     record_open_1 (name, from_tty);

@@ -100,7 +100,7 @@ static void init_core_ops (void);
 
 void _initialize_corelow (void);
 
-struct target_ops core_ops;
+static struct target_ops core_ops;
 
 /* An arbitrary identifier for the core inferior.  */
 #define CORELOW_PID 1
@@ -911,11 +911,17 @@ init_core_ops (void)
   core_ops.to_thread_alive = core_thread_alive;
   core_ops.to_read_description = core_read_description;
   core_ops.to_pid_to_str = core_pid_to_str;
-  core_ops.to_stratum = core_stratum;
+  core_ops.to_stratum = process_stratum;
   core_ops.to_has_memory = core_has_memory;
   core_ops.to_has_stack = core_has_stack;
   core_ops.to_has_registers = core_has_registers;
   core_ops.to_magic = OPS_MAGIC;
+
+  if (core_target)
+    internal_error (__FILE__, __LINE__, 
+		    _("init_core_ops: core target already exists (\"%s\")."),
+		    core_target->to_longname);
+  core_target = &core_ops;
 }
 
 void

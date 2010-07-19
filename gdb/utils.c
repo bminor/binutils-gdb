@@ -352,6 +352,24 @@ make_cleanup_restore_integer (int *variable)
 			   xfree);
 }
 
+/* Helper for make_cleanup_unpush_target.  */
+
+static void
+do_unpush_target (void *arg)
+{
+  struct target_ops *ops = arg;
+
+  unpush_target (ops);
+}
+
+/* Return a new cleanup that unpushes OPS.  */
+
+struct cleanup *
+make_cleanup_unpush_target (struct target_ops *ops)
+{
+  return make_my_cleanup (&cleanup_chain, do_unpush_target, ops);
+}
+
 struct cleanup *
 make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		  void *arg,  void (*free_arg) (void *))
