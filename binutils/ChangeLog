@@ -1,3 +1,7 @@
+2010-07-19  Andreas Schwab  <schwab@redhat.com>
+
+	* readelf.c (process_section_headers): Update key to flags.
+
 2010-07-17  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* objcopy.c (copy_usage): Tweak previous typofix.
