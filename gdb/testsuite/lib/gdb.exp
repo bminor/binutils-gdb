@@ -423,6 +423,11 @@ proc runto { function args } {
 	    unsupported "Non-stop mode not supported"
 	    return 0
 	}
+	-re ".*A problem internal to GDB has been detected" {
+	    fail "running to $function in runto (GDB internal error)"
+	    gdb_internal_error_resync
+	    return 0
+	}
 	-re "$gdb_prompt $" { 
 	    fail "running to $function in runto"
 	    return 0

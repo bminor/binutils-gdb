@@ -1,3 +1,8 @@
+2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (find_separate_debug_file_by_debuglink): Remove
+	a gdb_assert call, new comment.
+
 2010-07-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* NEWS: Mention support for the new ptrace interface and hardware

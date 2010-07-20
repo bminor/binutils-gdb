@@ -1,4 +1,9 @@
 2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/solib-nodir.exp: New file.
+	* lib/gdb.exp (runto): New case for a GDB internal error.
+
+2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 	    Tom Tromey  <tromey@redhat.com>
 
