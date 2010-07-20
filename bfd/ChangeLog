@@ -1,3 +1,13 @@
+2010-07-20  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Check that
+	zero size sections are allocated in segments too.
+	(assign_file_positions_for_non_load_sections): Warn if zero
+	size alloc sections are found here.
+	(copy_elf_program_header): Don't drop zero size sections from
+	segment map.
+	(copy_private_bfd_data): Check for changes in zero size sections.
+
 2010-07-17  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): Force new segment

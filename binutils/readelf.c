@@ -3889,8 +3889,8 @@ process_program_headers (FILE * file)
 
 	  for (j = 1; j < elf_header.e_shnum; j++, section++)
 	    {
-	      if (ELF_SECTION_SIZE (section, segment) != 0
-		  && ELF_SECTION_IN_SEGMENT (section, segment))
+	      if (!ELF_TBSS_SPECIAL (section, segment)
+		  && ELF_SECTION_IN_SEGMENT_STRICT (section, segment))
 		printf ("%s ", SECTION_NAME (section));
 	    }
 

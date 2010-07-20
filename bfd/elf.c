@@ -4589,8 +4589,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	      sec = m->sections[i];
 	      this_hdr = &(elf_section_data(sec)->this_hdr);
-	      if (this_hdr->sh_size != 0
-		  && !ELF_SECTION_IN_SEGMENT_1 (this_hdr, p, check_vma))
+	      if (!ELF_SECTION_IN_SEGMENT_1 (this_hdr, p, check_vma, 0))
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: section `%A' can't be allocated in segment %d"),
@@ -4640,13 +4639,12 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	BFD_ASSERT (hdr->sh_offset == hdr->bfd_section->filepos);
       else if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	{
-	  if (hdr->sh_size != 0)
-	    ((*_bfd_error_handler)
-	     (_("%B: warning: allocated section `%s' not in segment"),
-	      abfd,
-	      (hdr->bfd_section == NULL
-	       ? "*unknown*"
-	       : hdr->bfd_section->name)));
+	  (*_bfd_error_handler)
+	    (_("%B: warning: allocated section `%s' not in segment"),
+	     abfd,
+	     (hdr->bfd_section == NULL
+	      ? "*unknown*"
+	      : hdr->bfd_section->name));
 	  /* We don't need to page align empty sections.  */
 	  if ((abfd->flags & D_PAGED) != 0 && hdr->sh_size != 0)
 	    off += vma_page_aligned_bias (hdr->sh_addr, off,
@@ -5868,8 +5866,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	   section = section->next)
 	{
 	  this_hdr = &(elf_section_data(section)->this_hdr);
-	  if (this_hdr->sh_size != 0
-	      && ELF_SECTION_IN_SEGMENT (this_hdr, segment))
+	  if (ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 	    {
 	      if (!first_section)
 		first_section = lowest_section = section;
@@ -5948,8 +5945,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	       section = section->next)
 	    {
 	      this_hdr = &(elf_section_data(section)->this_hdr);
-	      if (this_hdr->sh_size != 0
-		  && ELF_SECTION_IN_SEGMENT (this_hdr, segment))
+	      if (ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 		{
 		  map->sections[isec++] = section->output_section;
 		  if (isec == section_count)
@@ -6026,8 +6022,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 	      /* Check if this section is covered by the segment.  */
 	      this_hdr = &(elf_section_data(section)->this_hdr);
-	      if (this_hdr->sh_size != 0
-		  && ELF_SECTION_IN_SEGMENT (this_hdr, segment))
+	      if (ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 		{
 		  /* FIXME: Check if its output section is changed or
 		     removed.  What else do we need to check?  */

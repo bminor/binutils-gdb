@@ -1,3 +1,8 @@
+2010-07-20  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_program_headers): Don't ignore all zero size
+	sections.
+
 2010-07-19  Andreas Schwab  <schwab@redhat.com>
 
 	* readelf.c (process_section_headers): Update key to flags.

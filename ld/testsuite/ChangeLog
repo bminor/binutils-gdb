@@ -1,5 +1,12 @@
 2010-07-20  Alan Modra  <amodra@gmail.com>
 
+	* ld-powerpc/tlsexe.r: Update.
+	* ld-powerpc/tlsexetoc.r: Update.
+	* ld-powerpc/tlsso.r: Update.
+	* ld-powerpc/tlstocso.r: Update.
+
+2010-07-20  Alan Modra  <amodra@gmail.com>
+
 	* ld-powerpc/vxworks-relax.s: Add branches to match expected output.
 	* ld-powerpc/vxworks-relax-2.s: Likewise.
 	* ld-powerpc/vxworks1-lib.rd: Reorder reloc sections.
