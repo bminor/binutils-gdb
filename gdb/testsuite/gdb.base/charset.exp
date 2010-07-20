@@ -27,17 +27,10 @@ if $tracelevel then {
 
 set testfile "charset"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "couldn't compile ${srcdir}/${subdir}/${srcfile}"
+set srcmallocfile ${testfile}-malloc.c
+if { [prepare_for_testing ${testfile}.exp ${testfile} [list $srcfile $srcmallocfile]] } {
     return -1
 }
-
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 # Parse the output from a `show charset' command.  Return the host
 # and target charset as a two-element list.
