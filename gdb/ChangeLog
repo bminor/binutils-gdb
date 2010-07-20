@@ -1,3 +1,9 @@
+2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* linux-nat.c (linux_nat_wait_1): Reset STATUS after calling
+	linux_nat_wait_1.  Use always LP->STATUS afterwards.
+
 2010-07-20  Hui Zhu  <teawater@gmail.com>
 
 	* inf-ptrace.c (inf_ptrace_create_inferior): Initialize back_to.

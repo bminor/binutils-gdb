@@ -3367,6 +3367,9 @@ retry:
 
 	  lp = linux_nat_filter_event (lwpid, status, options);
 
+	  /* STATUS is now no longer valid, use LP->STATUS instead.  */
+	  status = 0;
+
 	  if (lp
 	      && ptid_is_pid (ptid)
 	      && ptid_get_pid (lp->ptid) != ptid_get_pid (ptid))
@@ -3375,7 +3378,7 @@ retry:
 
 	      if (debug_linux_nat)
 		fprintf (stderr, "LWP %ld got an event %06x, leaving pending.\n",
-			 ptid_get_lwp (lp->ptid), status);
+			 ptid_get_lwp (lp->ptid), lp->status);
 
 	      if (WIFSTOPPED (lp->status))
 		{
@@ -3412,7 +3415,7 @@ retry:
 		      lp->signalled = 0;
 		    }
 		}
-	      else if (WIFEXITED (status) || WIFSIGNALED (status))
+	      else if (WIFEXITED (lp->status) || WIFSIGNALED (lp->status))
 		{
 		  if (debug_linux_nat)
 		    fprintf (stderr, "Process %ld exited while stopping LWPs\n",
