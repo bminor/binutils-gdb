@@ -1,3 +1,7 @@
+2010-07-20  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* utils.c (paddress): Return phex_nz().
+
 2010-07-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* server.c (handle_v_cont): Call mourn_inferior if process
