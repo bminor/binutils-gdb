@@ -1,3 +1,8 @@
+2010-07-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* ld.texinfo (VERSION): Remove "int" from example script and add ";".
+	Declare the default language as C.
+
 2010-07-17  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_check_section_addresses): Catch overlap for

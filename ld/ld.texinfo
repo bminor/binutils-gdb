@@ -4910,8 +4910,8 @@ VERS_2.0 @{
 		 bar1; bar2;
 	 extern "C++" @{
 		 ns::*;
-		 "int f(int, double)";
-         @}
+		 "f(int, double)";
+	 @};
 @} VERS_1.2;
 @end smallexample
 
@@ -5036,7 +5036,8 @@ VERSION extern "lang" @{ version-script-commands @}
 The supported @samp{lang}s are @samp{C}, @samp{C++}, and @samp{Java}.
 The linker will iterate over the list of symbols at the link time and
 demangle them according to @samp{lang} before matching them to the
-patterns specified in @samp{version-script-commands}.
+patterns specified in @samp{version-script-commands}.  The default
+@samp{lang} is @samp{C}.
 
 Demangled names may contains spaces and other special characters.  As
 described above, you can use a glob pattern to match demangled names,
