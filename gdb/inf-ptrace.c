@@ -124,7 +124,7 @@ inf_ptrace_create_inferior (struct target_ops *ops,
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
   int ops_already_pushed = target_is_pushed (ops);
-  struct cleanup *back_to;
+  struct cleanup *back_to = NULL;
 
   if (! ops_already_pushed)
     {
@@ -205,7 +205,7 @@ inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
   int ops_already_pushed = target_is_pushed (ops);
-  struct cleanup *back_to;
+  struct cleanup *back_to = NULL;
 
   pid = parse_pid_to_attach (args);
 

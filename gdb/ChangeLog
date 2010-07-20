@@ -1,3 +1,8 @@
+2010-07-20  Hui Zhu  <teawater@gmail.com>
+
+	* inf-ptrace.c (inf_ptrace_create_inferior): Initialize back_to.
+	(inf_ptrace_attach): Ditto.
+
 2010-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Make core files the process_stratum.
