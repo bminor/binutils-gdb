@@ -1,3 +1,9 @@
+2010-07-20  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/vxworks-relax.s: Add branches to match expected output.
+	* ld-powerpc/vxworks-relax-2.s: Likewise.
+	* ld-powerpc/vxworks1-lib.rd: Reorder reloc sections.
+
 2010-07-19  Andreas Schwab  <schwab@redhat.com>
 
 	* ld-mmix/bspec1.d: Ignore "Key to Flags" contents.
