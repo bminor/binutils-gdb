@@ -1,5 +1,10 @@
 2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symfile.c (find_separate_debug_file_by_debuglink): Remove
+	a gdb_assert call, new comment.
+
+2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-nat.c (linux_handle_extended_wait): Handle case when
 	event == PTRACE_EVENT_CLONE && stopping && WSTOPSIG (status) != SIGSTOP.
 

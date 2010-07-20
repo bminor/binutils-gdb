@@ -1374,15 +1374,13 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
   dir = xstrdup (objfile->name);
 
   /* Strip off the final filename part, leaving the directory name,
-     followed by a slash.  Objfile names should always be absolute and
-     tilde-expanded, so there should always be a slash in there
-     somewhere.  */
+     followed by a slash.  The directory can be relative or absolute.  */
   for (i = strlen(dir) - 1; i >= 0; i--)
     {
       if (IS_DIR_SEPARATOR (dir[i]))
 	break;
     }
-  gdb_assert (i >= 0 && IS_DIR_SEPARATOR (dir[i]));
+  /* If I is -1 then no directory is present there and DIR will be "".  */
   dir[i+1] = '\0';
 
   /* Set I to max (strlen (canon_name), strlen (dir)). */
