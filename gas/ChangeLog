@@ -8,6 +8,12 @@
 	specifier warnings for 32-bit host when --enable-64-bit-bfd.
 	(rx_relax_frag, md_convert_frag): Likewise.
 
+2010-07-15  Cary Coutant  <ccoutant@google.com>
+
+	* gas/NEWS: Add note about --compress-debug-sections.
+	* gas/as.c (show_usage): Add --compress-debug-sections and
+	--nocompress-debug-sections.
+
 2010-07-15  Rhonda Wittels  <rhonda@codesourcery.com>
 
 	* config/obj-elf.c (get_sym_from_input_line_and_check): New
