@@ -1498,7 +1498,7 @@ ppc_setup_opcodes (void)
   macro_end = powerpc_macros + powerpc_num_macros;
   for (macro = powerpc_macros; macro < macro_end; macro++)
     {
-      if ((macro->flags & ppc_cpu) != 0)
+      if ((macro->flags & ppc_cpu) != 0 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
 	{
 	  const char *retval;
 
