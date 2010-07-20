@@ -1,3 +1,13 @@
+2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/charset-malloc.c: New file.
+	* gdb.base/charset.c (malloc_stub): New prototype.
+	(main): Call it instead of malloc itself.
+	* gdb.base/charset.exp: Use only prepare_for_testing.
+	(binfile): Remove the variable.
+
 2010-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Make core files the process_stratum.

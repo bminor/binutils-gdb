@@ -114,6 +114,8 @@ init_utf32 ()
     utf_32_string[i] = iso_8859_1_string[i] & 0xff;
 }
 
+extern void malloc_stub (void);
+
 int main ()
 {
 #ifdef usestubs
@@ -121,9 +123,7 @@ int main ()
   breakpoint();
 #endif
 
-  /* charset.exp wants to allocate memory for constants.  So make sure malloc
-     gets linked into the program.  */
-  malloc (1);
+  malloc_stub ();
 
   /* Initialize ascii_string.  */
   init_string (ascii_string,
