@@ -1,5 +1,10 @@
 2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-nat.c (linux_handle_extended_wait): Handle case when
+	event == PTRACE_EVENT_CLONE && stopping && WSTOPSIG (status) != SIGSTOP.
+
+2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* linux-nat.c (linux_nat_wait_1): Reset STATUS after calling
 	linux_nat_wait_1.  Use always LP->STATUS afterwards.

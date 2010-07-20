@@ -2279,6 +2279,23 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	      linux_ops->to_resume (linux_ops, pid_to_ptid (new_pid),
 				    0, signo);
 	    }
+	  else
+	    {
+	      if (status != 0)
+		{
+		  /* We created NEW_LP so it cannot yet contain STATUS.  */
+		  gdb_assert (new_lp->status == 0);
+
+		  /* Save the wait status to report later.  */
+		  if (debug_linux_nat)
+		    fprintf_unfiltered (gdb_stdlog,
+					"LHEW: waitpid of new LWP %ld, "
+					"saving status %s\n",
+					(long) GET_LWP (new_lp->ptid),
+					status_to_str (status));
+		  new_lp->status = status;
+		}
+	    }
 
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
