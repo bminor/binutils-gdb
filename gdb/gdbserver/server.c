@@ -1539,7 +1539,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (err == 0)
 	{
-	  sprintf (own_buf, "%llx", address);
+	  strcpy (own_buf, paddress(address));
 	  return;
 	}
       else if (err > 0)
@@ -1563,7 +1563,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       n = (*the_target->get_tib_address) (ptid, &tlb);
       if (n == 1)
 	{
-	  sprintf (own_buf, "%llx", tlb);
+	  strcpy (own_buf, paddress(tlb));
 	  return;
 	}
       else if (n == 0)

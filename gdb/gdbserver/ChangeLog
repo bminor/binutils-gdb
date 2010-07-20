@@ -1,5 +1,7 @@
 2010-07-20  Ozkan Sezer  <sezeroz@gmail.com>
 
+	* server.c (handle_query): strcpy() the returned string from paddress()
+	instead of sprintf().
 	* utils.c (paddress): Return phex_nz().
 
 2010-07-07  Joel Brobecker  <brobecker@adacore.com>
