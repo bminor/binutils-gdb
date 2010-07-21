@@ -1,3 +1,17 @@
+2010-07-21  Cary Coutant  <ccoutant@google.com>
+
+	* merge.h (Output_merge_string::Merged_string): Remove object, shndx,
+	string, and length fields.
+	(Output_merge_string::Merged_strings_list): New type.
+	(Output_merge_string::Merged_strings_lists): New typedef.
+	(Output_merge_string): Replace merged_strings_ with
+	merged_strings_lists_.
+	* merge.cc (Output_merge_string::do_add_input_section): Allocate new
+	Merged_strings_list per input object and section.  Don't store pointer
+	to the string.  Don't store length with each merged string entry.
+	(Output_merge_string::finalize_merged_data): Loop over list of merged
+	strings lists.  Recompute length of each merged string.
+
 2010-07-15  Cary Coutant  <ccoutant@google.com>
 
 	* plugin.cc (Plugin_finish::run): Don't call cleanup handlers from

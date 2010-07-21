@@ -545,6 +545,11 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
   size_t count = 0;
 
+  Merged_strings_list* merged_strings_list =
+      new Merged_strings_list(object, shndx);
+  this->merged_strings_lists_.push_back(merged_strings_list);
+  Merged_strings& merged_strings = merged_strings_list->merged_strings;
+
   // The index I is in bytes, not characters.
   section_size_type i = 0;
   while (i < len)
@@ -563,17 +568,19 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 	}
 
       Stringpool::Key key;
-      const Char_type* str = this->stringpool_.add_with_length(p, pl - p, true,
-							       &key);
+      this->stringpool_.add_with_length(p, pl - p, true, &key);
 
       section_size_type bytelen_with_null = ((pl - p) + 1) * sizeof(Char_type);
-      this->merged_strings_.push_back(Merged_string(object, shndx, i, str,
-						    bytelen_with_null, key));
+      merged_strings.push_back(Merged_string(i, key));
 
       p = pl + 1;
       i += bytelen_with_null;
       ++count;
     }
+
+  // Record the last offset in the input section so that we can
+  // compute the length of the last string.
+  merged_strings.push_back(Merged_string(i, 0));
 
   this->input_count_ += count;
 
@@ -596,20 +603,34 @@ Output_merge_string<Char_type>::finalize_merged_data()
 {
   this->stringpool_.set_string_offsets();
 
-  for (typename Merged_strings::const_iterator p =
-	 this->merged_strings_.begin();
-       p != this->merged_strings_.end();
-       ++p)
+  for (typename Merged_strings_lists::const_iterator l =
+	 this->merged_strings_lists_.begin();
+       l != this->merged_strings_lists_.end();
+       ++l)
     {
-      section_offset_type offset =
-	this->stringpool_.get_offset_from_key(p->stringpool_key);
-      this->add_mapping(p->object, p->shndx, p->offset, p->length, offset);
+      section_offset_type last_input_offset = 0;
+      section_offset_type last_output_offset = 0;
+      for (typename Merged_strings::const_iterator p =
+	     (*l)->merged_strings.begin();
+	   p != (*l)->merged_strings.end();
+	   ++p)
+	{
+	  section_size_type length = p->offset - last_input_offset;
+	  if (length > 0)
+	    this->add_mapping((*l)->object, (*l)->shndx, last_input_offset,
+	    		      length, last_output_offset);
+	  last_input_offset = p->offset;
+	  if (p->stringpool_key != 0)
+	    last_output_offset =
+	        this->stringpool_.get_offset_from_key(p->stringpool_key);
+	}
+      delete *l;
     }
 
   // Save some memory.  This also ensures that this function will work
   // if called twice, as may happen if Layout::set_segment_offsets
   // finds a better alignment.
-  this->merged_strings_.clear();
+  this->merged_strings_lists_.clear();
 
   return this->stringpool_.get_strtab_size();
 }

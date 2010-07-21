@@ -462,7 +462,7 @@ class Output_merge_string : public Output_merge_base
  public:
   Output_merge_string(uint64_t addralign)
     : Output_merge_base(sizeof(Char_type), addralign), stringpool_(),
-      merged_strings_(), input_count_(0)
+      merged_strings_lists_(), input_count_(0)
   {
     gold_assert(addralign <= sizeof(Char_type));
     this->stringpool_.set_no_zero_null();
@@ -531,34 +531,39 @@ class Output_merge_string : public Output_merge_base
   // index and offset to strings.
   struct Merged_string
   {
-    // The input object where the string was found.
-    Relobj* object;
-    // The input section in the input object.
-    unsigned int shndx;
     // The offset in the input section.
     section_offset_type offset;
-    // The string itself, a pointer into a Stringpool.
-    const Char_type* string;
-    // The length of the string in bytes, including the null terminator.
-    size_t length;
     // The key in the Stringpool.
     Stringpool::Key stringpool_key;
 
-    Merged_string(Relobj *objecta, unsigned int shndxa,
-		  section_offset_type offseta, const Char_type* stringa,
-		  size_t lengtha, Stringpool::Key stringpool_keya)
-      : object(objecta), shndx(shndxa), offset(offseta), string(stringa),
-	length(lengtha), stringpool_key(stringpool_keya)
+    Merged_string(section_offset_type offseta, Stringpool::Key stringpool_keya)
+      : offset(offseta), stringpool_key(stringpool_keya)
     { }
   };
 
   typedef std::vector<Merged_string> Merged_strings;
 
+  struct Merged_strings_list
+  {
+    // The input object where the strings were found.
+    Relobj* object;
+    // The input section in the input object.
+    unsigned int shndx;
+    // The list of merged strings.
+    Merged_strings merged_strings;
+
+    Merged_strings_list(Relobj* objecta, unsigned int shndxa)
+      : object(objecta), shndx(shndxa), merged_strings()
+    { }
+  };
+
+  typedef std::vector<Merged_strings_list*> Merged_strings_lists;
+
   // As we see the strings, we add them to a Stringpool.
   Stringpool_template<Char_type> stringpool_;
   // Map from a location in an input object to an entry in the
   // Stringpool.
-  Merged_strings merged_strings_;
+  Merged_strings_lists merged_strings_lists_;
   // The number of entries seen in input files.
   size_t input_count_;
 };
