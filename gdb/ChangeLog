@@ -1,3 +1,8 @@
+2010-07-21  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* eval.c (evaluate_subexp_standard): Disabled evaluation of C++
+	function symbols before overload resolution.
+
 2010-07-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (bptype_string): New, abstracted out from

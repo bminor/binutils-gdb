@@ -1,3 +1,8 @@
+2010-07-21  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/fpointer.cc: New test.
+	* gdb.cp/fpointer.exp: New test.
+
 2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/solib-nodir.exp: New file.

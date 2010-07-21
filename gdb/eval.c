@@ -1570,19 +1570,29 @@ evaluate_subexp_standard (struct type *expect_type,
 	{
 	  /* Non-method function call */
 	  save_pos1 = *pos;
-	  argvec[0] = evaluate_subexp_with_coercion (exp, pos, noside);
 	  tem = 1;
-	  type = value_type (argvec[0]);
-	  if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
-	    type = TYPE_TARGET_TYPE (type);
-	  if (type && TYPE_CODE (type) == TYPE_CODE_FUNC)
+
+	  /* If this is a C++ function wait until overload resolution.  */
+	  if (op == OP_VAR_VALUE
+	      && overload_resolution
+	      && (exp->language_defn->la_language == language_cplus))
 	    {
-	      for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
+	      (*pos) += 4; /* Skip the evaluation of the symbol.  */
+	      argvec[0] = NULL;
+	    }
+	  else
+	    {
+	      argvec[0] = evaluate_subexp_with_coercion (exp, pos, noside);
+	      type = value_type (argvec[0]);
+	      if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
+		type = TYPE_TARGET_TYPE (type);
+	      if (type && TYPE_CODE (type) == TYPE_CODE_FUNC)
 		{
-		  /* pai: FIXME This seems to be coercing arguments before
-		   * overload resolution has been done! */
-		  argvec[tem] = evaluate_subexp (TYPE_FIELD_TYPE (type, tem - 1),
-						 exp, pos, noside);
+		  for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
+		    {
+		      argvec[tem] = evaluate_subexp (TYPE_FIELD_TYPE (type, tem - 1),
+						     exp, pos, noside);
+		    }
 		}
 	    }
 	}
