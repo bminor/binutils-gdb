@@ -4192,8 +4192,6 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
     case DW_TAG_typedef:
-    case DW_TAG_const_type:
-    case DW_TAG_volatile_type:
       /* Add a typedef symbol for the type definition, if it has a
          DW_AT_name.  */
       new_symbol (die, read_type_die (die, cu), cu);
@@ -10001,8 +9999,6 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  break;
 	case DW_TAG_base_type:
         case DW_TAG_subrange_type:
-        case DW_TAG_const_type:
-        case DW_TAG_volatile_type:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  add_symbol_to_list (sym, cu->list_in_scope);

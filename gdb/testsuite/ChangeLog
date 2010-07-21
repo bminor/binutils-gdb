@@ -1,3 +1,12 @@
+2010-07-21  Pedro Alves  <pedro@codesourcery.com>
+
+	PR symtab/11827
+
+	* gdb.base/printcmds.c (enum some_volatile_enum): New enum.
+	(some_volatile_enum): New variable.
+	* gdb.base/printcmds.exp (test_print_enums): New.
+	<top level>: Call it.
+
 2010-07-21  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/fpointer.cc: New test.

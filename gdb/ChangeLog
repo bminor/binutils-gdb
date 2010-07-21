@@ -1,3 +1,13 @@
+2010-07-21  Pedro Alves  <pedro@codesourcery.com>
+
+	PR symtab/11827
+
+	Revert:
+	2010-05-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+	* dwarf2read.c (process_die): Also allow DW_TAG_const_type
+	and DW_TAG_volatile_type.
+	(new_symbol): Likewise.
+
 2010-07-21  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* eval.c (evaluate_subexp_standard): Disabled evaluation of C++

@@ -671,6 +671,11 @@ proc test_print_array_constants {} {
     gdb_test "print *&{4,5,6}\[1\]"	"Attempt to take address of value not located in memory."
 }
 
+proc test_print_enums {} {
+    # Regression test for PR11827.
+    gdb_test "print some_volatile_enum" "enumvolval1"
+}
+
 proc test_printf {} {
     gdb_test "printf \"x=%d,y=%d,z=%d\\n\", 5, 6, 7" "x=5,y=6,z=7"
     gdb_test "printf \"string=%.4sxx\\n\", teststring" "string=testxx"
@@ -800,6 +805,7 @@ if [set_lang_c] then {
 # We used to do the runto main here.
 	test_print_string_constants
 	test_print_array_constants
+	test_print_enums
 	test_printf
 	test_printf_with_dfp
     }

@@ -90,6 +90,12 @@ struct some_arrays {
 
 struct some_arrays *parrays = &arrays;
 
+enum some_volatile_enum { enumvolval1, enumvolval2 };
+
+/* A volatile enum variable whose name is the same as the enumeration
+   name.  See PR11827.  */
+volatile enum some_volatile_enum some_volatile_enum = enumvolval1;
+
 /* -- */
 
 int main ()
