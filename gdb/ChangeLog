@@ -1,3 +1,10 @@
+2010-07-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (bptype_string): New, abstracted out from
+	print_one_breakpoint_location.
+	(print_one_breakpoint_location): Adjust.
+	(breakpoint_1): Adjust the type column width dynamically.
+
 2010-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (find_separate_debug_file_by_debuglink): Remove
