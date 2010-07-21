@@ -257,17 +257,6 @@ xsnprintf (char *str, size_t size, const char *format, ...)
   return ret;
 }
 
-/* Convert a CORE_ADDR into a HEX string, like %lx.
-   The result is stored in a circular static buffer, NUMCELLS deep.  */
-
-char *
-paddress (CORE_ADDR addr)
-{
-  char *str = get_cell ();
-  xsnprintf (str, CELLSIZE, "%lx", (long) addr);
-  return str;
-}
-
 static char *
 decimal2str (char *sign, ULONGEST addr, int width)
 {
@@ -371,4 +360,13 @@ phex_nz (ULONGEST l, int sizeof_l)
     }
 
   return str;
+}
+
+/* Convert a CORE_ADDR into a HEX string, like %lx.
+   The result is stored in a circular static buffer, NUMCELLS deep.  */
+
+char *
+paddress (CORE_ADDR addr)
+{
+  return phex_nz (addr, sizeof (CORE_ADDR));
 }
