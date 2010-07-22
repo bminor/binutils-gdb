@@ -2678,6 +2678,7 @@ create_debug_types_hash_table (struct objfile *objfile)
       type_sig->signature = signature;
       type_sig->offset = offset;
       type_sig->type_offset = type_offset;
+      type_sig->per_cu.objfile = objfile;
 
       slot = htab_find_slot (types_htab, type_sig, INSERT);
       gdb_assert (slot != NULL);

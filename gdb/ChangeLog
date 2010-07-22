@@ -1,3 +1,8 @@
+2010-07-22  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (create_debug_types_hash_table): Set objfile on
+	type signature's per-CU data.
+
 2010-07-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention target reported shared libraries support by
