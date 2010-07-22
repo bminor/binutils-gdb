@@ -5,6 +5,14 @@
 
 *** Changes in GDB 7.2
 
+* Shared library support for remote targets by default
+
+  When GDB is configured for a generic, non-OS specific target, like
+  for example, --target=arm-eabi or one of the many *-*-elf targets,
+  GDB now queries remote stubs for loaded shared libraries using the
+  `qXfer:libraries:read' packet.  Previously, shared library support
+  was always disabled for such configurations.
+
 * C++ Improvements:
 
   ** Argument Dependent Lookup (ADL)
