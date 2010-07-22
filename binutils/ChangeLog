@@ -1,3 +1,7 @@
+2010-07-22  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c: Add Moxie support.
+
 2010-07-20  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_program_headers): Don't ignore all zero size
