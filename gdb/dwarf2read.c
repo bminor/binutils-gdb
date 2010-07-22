@@ -53,6 +53,7 @@
 #include "psympriv.h"
 #include "exceptions.h"
 #include "gdb_stat.h"
+#include "completer.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -14135,7 +14136,7 @@ save_gdb_index_command (char *arg, int from_tty)
   struct objfile *objfile;
 
   if (!arg || !*arg)
-    error (_("usage: maintenance save-gdb-index DIRECTORY"));
+    error (_("usage: save gdb-index DIRECTORY"));
 
   ALL_OBJFILES (objfile)
   {
@@ -14180,6 +14181,8 @@ void _initialize_dwarf2_read (void);
 void
 _initialize_dwarf2_read (void)
 {
+  struct cmd_list_element *c;
+
   dwarf2_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, dwarf2_per_objfile_free);
 
@@ -14228,7 +14231,8 @@ The value is the maximum depth to print."),
 			    NULL,
 			    &setdebuglist, &showdebuglist);
 
-  add_cmd ("gdb-index", class_files, save_gdb_index_command,
-	   _("Save a .gdb-index file"),
-	   &save_cmdlist);
+  c = add_cmd ("gdb-index", class_files, save_gdb_index_command,
+	       _("Save a .gdb-index file"),
+	       &save_cmdlist);
+  set_cmd_completer (c, filename_completer);
 }

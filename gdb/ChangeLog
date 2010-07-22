@@ -1,3 +1,10 @@
+2010-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c: Include completer.h.
+	(save_gdb_index_command): Use matching usage command name.
+	(_initialize_dwarf2_read): New variable c, initialize it by add_cmd.
+	Set filename_completer for it.
+
 2010-07-22  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (create_debug_types_hash_table): Set objfile on
