@@ -1,3 +1,9 @@
+2010-07-22  Alan Modra  <amodra@gmail.com>
+
+	* gas/arm/mapdir.s: Don't specify attr/type for .fini_array.
+	* gas/elf/dwarf2-3.s: Don't specify attr for .init_array.
+	* gas/elf/dwarf2-3.d: Don't run on h8300.
+
 2010-07-19  Andreas Schwab  <schwab@redhat.com>
 
 	* gas/i386/x86-64-unwind.d: Ignore "Key to Flags" contents.

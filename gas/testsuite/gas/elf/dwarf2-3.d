@@ -1,6 +1,6 @@
 #readelf: -wl
 #name: DWARF2 3
-#not-target: ia64-*-*
+#not-target: ia64-*-* h8300-*-*
 
 Raw dump of debug contents of section .debug_line:
 

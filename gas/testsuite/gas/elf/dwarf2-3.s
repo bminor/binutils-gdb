@@ -7,7 +7,7 @@
 .Ldebug_line0:
 	.text
 .Ltext0:
-	.section	.init_array,"aw"
+	.section	.init_array
 	.align 4
 	.type	init_array, %object
 	.size	init_array, 4
