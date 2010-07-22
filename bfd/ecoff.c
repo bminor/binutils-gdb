@@ -27,7 +27,6 @@
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "aout/ar.h"
-#include "aout/ranlib.h"
 #include "aout/stab_gnu.h"
 
 /* FIXME: We need the definitions of N_SET[ADTB], but aout64.h defines
@@ -2855,7 +2854,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   struct artdata *ardata;
   unsigned int count;
   char *raw_ptr;
-  struct symdef *symdef_ptr;
+  carsym *symdef_ptr;
   char *stringbase;
   bfd_size_type amt;
 
@@ -2975,12 +2974,12 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
       ++ardata->symdef_count;
 
   amt = ardata->symdef_count;
-  amt *= sizeof (struct symdef);
-  symdef_ptr = (struct symdef *) bfd_alloc (abfd, amt);
+  amt *= sizeof (carsym);
+  symdef_ptr = (carsym *) bfd_alloc (abfd, amt);
   if (!symdef_ptr)
     return FALSE;
 
-  ardata->symdefs = (carsym *) symdef_ptr;
+  ardata->symdefs = symdef_ptr;
 
   raw_ptr = raw_armap + 4;
   for (i = 0; i < count; i++, raw_ptr += 8)
@@ -2991,7 +2990,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
       if (file_offset == 0)
 	continue;
       name_offset = H_GET_32 (abfd, raw_ptr);
-      symdef_ptr->s.name = stringbase + name_offset;
+      symdef_ptr->name = stringbase + name_offset;
       symdef_ptr->file_offset = file_offset;
       ++symdef_ptr;
     }
@@ -3063,7 +3062,8 @@ _bfd_ecoff_write_armap (bfd *abfd,
      linker just checks the archive name; the GNU linker may check the
      date.  */
   stat (abfd->filename, &statbuf);
-  sprintf (hdr.ar_date, "%ld", (long) (statbuf.st_mtime + 60));
+  _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
+		    (long) (statbuf.st_mtime + 60));
 
   /* The DECstation uses zeroes for the uid, gid and mode of the
      armap.  */
@@ -3074,7 +3074,7 @@ _bfd_ecoff_write_armap (bfd *abfd,
   hdr.ar_mode[1] = '4';
   hdr.ar_mode[2] = '4';
 
-  sprintf (hdr.ar_size, "%-10d", (int) mapsize);
+  _bfd_ar_spacepad (hdr.ar_size, sizeof (hdr.ar_size), "%-10ld", mapsize);
 
   hdr.ar_fmag[0] = '`';
   hdr.ar_fmag[1] = '\012';

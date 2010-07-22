@@ -1,5 +1,12 @@
 2010-07-22  Alan Modra  <amodra@gmail.com>
 
+	* ecoff.c: Don't include aout/ranlib.h.
+	(_bfd_ecoff_slurp_armap): Use correct struct for ardata->symdefs.
+	(_bfd_ecoff_write_armap): Output ar_date and ar_size using
+	_bfd_ar_spacepad.
+
+2010-07-22  Alan Modra  <amodra@gmail.com>
+
 	* aoutx.h (some_aout_object_p): Don't set EXEC_P for files with
 	relocs.
 
