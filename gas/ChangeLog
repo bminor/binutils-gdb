@@ -1,3 +1,9 @@
+2010-07-22  Thomas Schwinge  <thomas@codesourcery.com>
+
+	Switch MIPS to 32-bit DWARF format.
+	* config/tc-mips.h (DWARF2_FORMAT): Only define for [TE_IRIX].
+	* config/tc-mips.c (mips_dwarf2_format): Likewise.
+
 2010-07-20  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_setup_opcodes): Add all macros for -many.
