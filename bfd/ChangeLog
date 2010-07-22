@@ -1,3 +1,8 @@
+2010-07-23  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (_bfd_archive_bsd44_construct_extended_name_table):
+	Correct format specifier.
+
 2010-07-22  Alan Modra  <amodra@gmail.com>
 
 	* ecoff.c: Don't include aout/ranlib.h.

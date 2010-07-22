@@ -1649,7 +1649,7 @@ _bfd_archive_bsd44_construct_extended_name_table (bfd *abfd,
 
           len = (len + 3) & ~3;
           arch_eltdata (current)->extra_size = len;
-          _bfd_ar_spacepad (hdr->ar_name, maxname, "#1/%u", len);
+          _bfd_ar_spacepad (hdr->ar_name, maxname, "#1/%lu", len);
 	}
     }
 
