@@ -1642,14 +1642,21 @@ basic_lookup_transparent_type (const char *name)
      conversion on the fly and return the found symbol.
    */
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_OBJFILES (objfile)
   {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
-    if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
+    if (objfile->sf)
+      objfile->sf->qf->pre_expand_symtabs_matching (objfile, STATIC_BLOCK,
+						    name, STRUCT_DOMAIN);
+
+    ALL_OBJFILE_SYMTABS (objfile, s)
       {
-	return SYMBOL_TYPE (sym);
+	bv = BLOCKVECTOR (s);
+	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
+	if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
+	  {
+	    return SYMBOL_TYPE (sym);
+	  }
       }
   }
 

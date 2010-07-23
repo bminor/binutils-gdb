@@ -1,5 +1,10 @@
 2010-07-23  Keith Seitz  <keiths@redhat.com>
 
+	* symtab.c (basic_lookup_transparent_type): Call pre-expand
+	hook for STATIC_BLOCK types, too.
+
+2010-07-23  Keith Seitz  <keiths@redhat.com>
+
 	* dwarf2read.c: Remove unused typedef dwarf2_cu_per_cu_data_ptr
 	and vector definition.
 
