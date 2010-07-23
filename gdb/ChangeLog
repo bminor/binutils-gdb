@@ -1,3 +1,8 @@
+2010-07-23  Keith Seitz  <keiths@redhat.com>
+
+	* dwarf2read.c: Remove unused typedef dwarf2_cu_per_cu_data_ptr
+	and vector definition.
+
 2010-07-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-nat.c (cancel_breakpoint): Remove unused forward declaration.

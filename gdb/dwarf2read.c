@@ -156,9 +156,6 @@ struct mapped_index
   const char *constant_pool;
 };
 
-typedef struct dwarf2_per_cu_data *dwarf2_per_cu_data_ptr;
-DEF_VEC_P (dwarf2_per_cu_data_ptr);
-
 struct dwarf2_per_objfile
 {
   struct dwarf2_section_info info;
