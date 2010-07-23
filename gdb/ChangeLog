@@ -1,3 +1,31 @@
+2010-07-23  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (struct dwarf2_per_objfile) <n_type_comp_units,
+	type_comp_units>: New fields.
+	(dw2_get_cu): New function.
+	(create_cus_from_index): Remove unused argument.
+	(create_signatured_type_hash_from_index): New function.
+	(create_addrmap_from_index): Update.
+	(dwarf2_read_index): Handle version 2.
+	(dw2_find_last_source_symtab, dw2_forget_cached_source_info)
+	(dw2_lookup_symtab, dw2_do_expand_symtabs_matching)
+	(dw2_print_stats, dw2_expand_all_symtabs)
+	(dw2_expand_symtabs_with_filename, dw2_find_symbol_file)
+	(dw2_expand_symtabs_matching, dw2_map_symbol_filenames): Update.
+	(dwarf2_initialize_objfile): Call create_debug_types_hash_table.
+	(allocate_signatured_type_hash_table): New function.
+	(add_signatured_type_cu_to_list): Likewise.
+	(create_debug_types_hash_table): Use them.  Set type_comp_units.
+	(read_signatured_type): Ensure section data is available.
+	(add_address_entry): Don't record empty ranges.
+	(struct signatured_type_index_data): New.
+	(write_one_signatured_type): New function.
+	(write_psymtabs_to_index): Write type CUs.
+	(save_gdb_index_command): Update comment.
+	(process_type_comp_unit): Move inititalization of
+	from_debug_types...
+	(create_debug_types_hash_table): ... here.
+
 2010-07-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb_gcore.sh (tmpfile): Remove the variable, its initialization,
