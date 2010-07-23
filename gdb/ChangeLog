@@ -1,3 +1,10 @@
+2010-07-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb_gcore.sh (tmpfile): Remove the variable, its initialization,
+	cleanup and generating of gdb script to it.
+	(gdb): Use redirection from /dev/null.  Use --nx.  Turn off pagination
+	and terminal size.  Convert $tmpfile to a series of -ex-es.
+
 2010-07-23  Keith Seitz  <keiths@redhat.com>
 
 	* symtab.c (basic_lookup_transparent_type): Call pre-expand
