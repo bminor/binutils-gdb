@@ -1468,13 +1468,7 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  v850-*-*)
-    targ_defvec=bfd_elf32_v850_vec
-    ;;
-  v850e-*-*)
-    targ_defvec=bfd_elf32_v850_vec
-    ;;
-  v850ea-*-*)
+  v850*-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
 

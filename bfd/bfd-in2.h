@@ -1977,6 +1977,8 @@ enum bfd_architecture
 #define bfd_mach_v850          1
 #define bfd_mach_v850e         'E'
 #define bfd_mach_v850e1        '1'
+#define bfd_mach_v850e2        0x4532   /* ('E'<<8|'2') */
+#define bfd_mach_v850e2v3      0x45325633 /* ('E'<<24|'2'<<16|'V'<<8|'3') */
   bfd_arch_arc,       /* ARC Cores */
 #define bfd_mach_arc_5         5
 #define bfd_mach_arc_6         6
@@ -3604,6 +3606,72 @@ bits placed non-contiguously in the instruction.  */
 /* This is a variation of BFD_RELOC_LO16 that can be used in v850e ld.bu
 instructions.  */
   BFD_RELOC_V850_LO16_SPLIT_OFFSET,
+
+/* This is a 16-bit reloc.  */
+  BFD_RELOC_V850_16_PCREL,
+
+/* This is a 17-bit reloc.  */
+  BFD_RELOC_V850_17_PCREL,
+
+/* This is a 23-bit reloc.  */
+  BFD_RELOC_V850_23,
+
+/* This is a 32-bit reloc.  */
+  BFD_RELOC_V850_32_PCREL,
+
+/* This is a 32-bit reloc.  */
+  BFD_RELOC_V850_32_ABS,
+
+/* This is a 16-bit reloc.  */
+  BFD_RELOC_V850_16_SPLIT_OFFSET,
+
+/* This is a 16-bit reloc.  */
+  BFD_RELOC_V850_16_S1,
+
+/* Low 16 bits. 16 bit shifted by 1.  */
+  BFD_RELOC_V850_LO16_S1,
+
+/* This is a 16 bit offset from the call table base pointer.  */
+  BFD_RELOC_V850_CALLT_15_16_OFFSET,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_32_GOTPCREL,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_16_GOT,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_32_GOT,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_22_PLT_PCREL,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_32_PLT_PCREL,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_COPY,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_GLOB_DAT,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_JMP_SLOT,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_RELATIVE,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_16_GOTOFF,
+
+/* DSO relocations.  */
+  BFD_RELOC_V850_32_GOTOFF,
+
+/* start code.  */
+  BFD_RELOC_V850_CODE,
+
+/* start data in text.  */
+  BFD_RELOC_V850_DATA,
 
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction.  */

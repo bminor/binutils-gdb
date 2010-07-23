@@ -1,3 +1,26 @@
+2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
+	    Ina Pandit  <ina.pandit@kpitcummins.com>
+
+	* v850-dis.c (v850_sreg_names): Updated structure for system
+	registers.
+	(float_cc_names): new structure for condition codes.
+	(print_value): Update the function that prints value.
+	(get_operand_value): New function to get the operand value.
+	(disassemble): Updated to handle the disassembly of instructions.
+	(print_insn_v850): Updated function to print instruction for different
+	families.
+	* opcodes/v850-opc.c (v850_msg_is_out_of_range, insert_i5div1,
+	extract_i5div1, insert_i5div2, extract_i5div2, insert_i5div3,
+	extract_i5div3, insert_d5_4, extract_d5_4, extract_d8_6,
+	insert_d8_7, extract_d8_7, insert_v8, extract_v8, insert_u16_loop,
+	extract_u16_loop, insert_d16_15, extract_d16_15, insert_d16_16,
+	extract_d16_16, nsert_d17_16, extract_d17_16, insert_d22,
+	extract_d22, insert_d23, extract_d23, insert_i9, extract_i9,
+	insert_u9, extract_u9, extract_spe, insert_r4, extract_r4): New.
+	(insert_d8_7, insert_d5_4, insert_i5div): Remove.
+	(v850_operands): Update with the relocation name. Also update
+	the instructions with specific set of processors.
+
 2010-07-08 Tejas Belagod <tejas.belagod@arm.com>
 
 	* arm-dis.c (print_insn_arm): Add cases for printing more

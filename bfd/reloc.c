@@ -3723,6 +3723,94 @@ ENUMDOC
   This is a variation of BFD_RELOC_LO16 that can be used in v850e ld.bu
   instructions.
 ENUM
+  BFD_RELOC_V850_16_PCREL
+ENUMDOC
+  This is a 16-bit reloc.
+ENUM     
+  BFD_RELOC_V850_17_PCREL
+ENUMDOC
+  This is a 17-bit reloc.
+ENUM     
+  BFD_RELOC_V850_23
+ENUMDOC
+  This is a 23-bit reloc.
+ENUM     
+  BFD_RELOC_V850_32_PCREL
+ENUMDOC
+  This is a 32-bit reloc.
+ENUM     
+  BFD_RELOC_V850_32_ABS
+ENUMDOC
+  This is a 32-bit reloc.
+ENUM     
+  BFD_RELOC_V850_16_SPLIT_OFFSET
+ENUMDOC
+  This is a 16-bit reloc.
+ENUM     
+  BFD_RELOC_V850_16_S1
+ENUMDOC
+  This is a 16-bit reloc.
+ENUM     
+  BFD_RELOC_V850_LO16_S1
+ENUMDOC
+  Low 16 bits. 16 bit shifted by 1.
+ENUM     
+  BFD_RELOC_V850_CALLT_15_16_OFFSET
+ENUMDOC
+  This is a 16 bit offset from the call table base pointer.
+ENUM     
+  BFD_RELOC_V850_32_GOTPCREL
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_16_GOT
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_32_GOT
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_22_PLT_PCREL
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_32_PLT_PCREL
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_COPY
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_GLOB_DAT
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_JMP_SLOT
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_RELATIVE
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_16_GOTOFF
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_32_GOTOFF
+ENUMDOC
+  DSO relocations.
+ENUM     
+  BFD_RELOC_V850_CODE
+ENUMDOC
+  start code.
+ENUM     
+  BFD_RELOC_V850_DATA
+ENUMDOC
+  start data in text.
+ENUM
   BFD_RELOC_MN10300_32_PCREL
 ENUMDOC
   This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the

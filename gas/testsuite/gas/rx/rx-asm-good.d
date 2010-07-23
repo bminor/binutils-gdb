@@ -10,8 +10,8 @@ Disassembly of section .text:
 0+0108 <mem\+0x8> 66 20[ 	]+mov.l[ 	]+#2, r0
 0+010a <mem\+0xa> 66 10[ 	]+mov.l[ 	]+#1, r0
 0+010c <mem\+0xc> 66 00[ 	]+mov.l[ 	]+#0, r0
-0+010e <mem\+0xe> 05 f2 fe ff[ 	]+bsr.a[ 	]+0+0000 <mem-0x100>
-0+0112 <mem\+0x12> 05 ee fe ff[ 	  ]+bsr.a[ 	]+0+0000 <mem-0x100>
+0+010e <mem\+0xe> 05 .. .. ..[ 	]+bsr.a[ 	]+[0-9a-f]+ <mem.0x[0-9a-f]+>
+0+0112 <mem\+0x12> 05 .. .. ..[ 	  ]+bsr.a[ 	]+[0-9a-f]+ <mem.0x[0-9a-f]+>
 0+0116 <mem\+0x16> 62 65[ 	]+add[ 	]+#6, r5
 0+0118 <mem\+0x18> 72 74 0b 2e[ 	]+add[ 	]+#0x2e0b, r7, r4
 0+011c <mem\+0x1c> ff 2e 00[ 	]+add[ 	]+r0, r0, r14

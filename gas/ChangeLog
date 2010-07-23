@@ -1,3 +1,50 @@
+2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
+	    Ina Pandit  <ina.pandit@kpitcummins.com>
+
+	* config/tc-v850.c: Update processor_mask.
+	(reg_name): Update the structure to use processors field.
+	(md_relax_table): Define SUBYPTE_COND_9_22, SUBYPTE_SA_9_22,
+	SUBYPTE_UNCOND_9_22, SUBYPTE_COND_9_22_32, SUBYPTE_SA_9_22_32,
+	SUBYPTE_UNCOND_9_22_32, SUBYPTE_COND_9_17_22,
+	SUBYPTE_SA_9_17_22, SUBYPTE_COND_9_17_22_32 and
+	SUBYPTE_SA_9_17_22_32.
+	(set_machine): Add support for V850E2 and V850E2V3.
+	(md_pseudo_table): Likewise.
+	(pre_defined_registers): Update pre defined registers suitable
+	for each family of registers.
+	(system_registers): Likewise.
+	(cc_names): Update the condition code.
+	(float_cc_names): Update the condition code for float.
+	(reg_name_search): Update based on current modifications.
+	(register_name): Likewise.
+	(system_register_name): Update to support new system registers
+	and supported families.
+	(cc_name): Update to support new condition codes.
+	(float_cc_name): New function to support float condition codes.
+	(parse_register_list): Update to support newly added registers.
+	(md_show_usage): Define support for V850E2 and V850E2V3 targets.
+	Also support added for disp-size-default-22, disp-size-default-32,
+	mextension, mno-bcond17 and mno-stld23.
+	(md_parse_option): Implement the support for above options defined
+	in md_show-usage.
+	(md_convert_frag): Implement support for subtypes defined in
+	md_relax_table to support branch operations.
+	(md_begin): Add support for V850E2 and V850E2V3.
+	(handle_hi016, handle_hi16): new relocation handling functions
+	(handle_lo16, handle_ctoff, handle_sdaoff, handle_zdaoff,
+	handle_tdaoff): Updated relocation handling functions for newly
+	added relocations.
+	(v850_reloc_prefix): Update the relocation handling functions.
+	(v850_insert_operand): Updated the functions with error message
+	parameter and modified the function to use it.
+	(md_assemble): Update according to the latest modifications.
+	(md_apply_fix): Updated the functions with error message parameter
+	and modified the function to use it.
+	(v850_force_relocation): Update with newly added relocations.
+	* configure.tgt: Match all v850 targets.
+	* doc/c-v850.texi: Document the newly added targets.
+	* NEWS: Likewise.
+
 2010-07-23  Alan Modra  <amodra@gmail.com>
 
 	PR gas/11834

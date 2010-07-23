@@ -400,9 +400,7 @@ case ${generic_target} in
   tic54x-*-* | c54x*-*-*)		fmt=coff bfd_gas=yes need_libm=yes;;
   tic6x-*-*)				fmt=elf ;;
 
-  v850-*-*)				fmt=elf ;;
-  v850e-*-*)				fmt=elf ;;
-  v850ea-*-*)				fmt=elf ;;
+  v850*-*-*)				fmt=elf ;;
 
   vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
   vax-*-linux-*)			fmt=elf em=linux ;;

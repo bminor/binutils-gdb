@@ -1,3 +1,8 @@
+2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
+	    Ina Pandit  <ina.pandit@kpitcummins.com>
+
+	* configure.tgt: Match all v850 targets.
+
 2010-07-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* ld.texinfo (VERSION): Remove "int" from example script and add ";".

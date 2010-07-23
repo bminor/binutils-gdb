@@ -1,3 +1,8 @@
+2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
+	    Ina Pandit  <ina.pandit@kpitcummins.com>
+
+	* binutils/readelf.c: Add support for V850E2 and V850E2V3.
+
 2010-07-22  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c: Add Moxie support.

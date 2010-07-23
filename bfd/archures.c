@@ -310,7 +310,9 @@ DESCRIPTION
 .  bfd_arch_v850,      {* NEC V850 *}
 .#define bfd_mach_v850          1
 .#define bfd_mach_v850e 	'E'
-.#define bfd_mach_v850e1	'1'
+.#define bfd_mach_v850e1        '1'
+.#define bfd_mach_v850e2        0x4532
+.#define bfd_mach_v850e2v3      0x45325633
 .  bfd_arch_arc,       {* ARC Cores *}
 .#define bfd_mach_arc_5         5
 .#define bfd_mach_arc_6         6

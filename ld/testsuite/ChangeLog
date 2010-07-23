@@ -1,3 +1,9 @@
+2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
+	    Ina Pandit  <ina.pandit@kpitcummins.com>
+
+	* ld-v850/split-lo16.d: Update the "ld" instructions with a space
+	for second operand.
+
 2010-07-20  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tlsexe.r: Update.
