@@ -1073,7 +1073,6 @@ restore_child_signals_mask (sigset_t *prev_mask)
 static int stop_wait_callback (struct lwp_info *lp, void *data);
 static int linux_thread_alive (ptid_t ptid);
 static char *linux_child_pid_to_exec_file (int pid);
-static int cancel_breakpoint (struct lwp_info *lp);
 
 
 /* Convert wait status STATUS to a string.  Used for printing debug

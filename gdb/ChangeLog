@@ -1,3 +1,7 @@
+2010-07-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c (cancel_breakpoint): Remove unused forward declaration.
+
 2010-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c: Include completer.h.
