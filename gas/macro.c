@@ -1072,9 +1072,13 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	  /* Lookup the formal in the macro's list.  */
 	  ptr = (formal_entry *) hash_find (m->formal_hash, sb_terminate (&t));
 	  if (!ptr)
-	    as_bad (_("Parameter named `%s' does not exist for macro `%s'"),
-		    t.ptr,
-		    m->name);
+	    {
+	      as_bad (_("Parameter named `%s' does not exist for macro `%s'"),
+		      t.ptr,
+		      m->name);
+	      sb_reset (&t);
+	      idx = get_any_string (idx + 1, in, &t);
+	    }
 	  else
 	    {
 	      /* Insert this value into the right place.  */

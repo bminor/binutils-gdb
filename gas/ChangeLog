@@ -1,3 +1,9 @@
+2010-07-23  Alan Modra  <amodra@gmail.com>
+
+	PR gas/11834
+	* macro.c (macro_expand): Recover gracefully from named args that
+	don't match params.
+
 2010-07-22  Thomas Schwinge  <thomas@codesourcery.com>
 
 	Switch MIPS to 32-bit DWARF format.
