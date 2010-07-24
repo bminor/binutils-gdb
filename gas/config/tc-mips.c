@@ -6219,6 +6219,8 @@ macro (struct mips_cl_insn *ip)
 		      /* Quiet this warning.  */
 		      mips_cprestore_valid = 1;
 		    }
+		  if (mips_opts.noreorder)
+		    macro_build (NULL, "nop", "");
 		  expr1.X_add_number = mips_cprestore_offset;
   		  macro_build_ldst_constoffset (&expr1, ADDRESS_LOAD_INSN,
 						mips_gp_register,

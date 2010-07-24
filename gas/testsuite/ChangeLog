@@ -1,5 +1,15 @@
 2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/jal-svr4pic-noreorder.d: New test case.
+	* gas/mips/mips1@jal-svr4pic-noreorder.d: New test
+	subarchitecture.
+	* gas/mips/r3000@jal-svr4pic-noreorder.d: Likewise.
+	* gas/mips/jal-svr4pic-noreorder.s: Source for the new test
+	case.
+	* gas/mips/mips.exp: Run the new test case.
+
+2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/jal-svr4pic.d: Rename to...
 	* gas/mips/mips1@jal-svr4pic.d: ... this.
 	* gas/mips/r3000@jal-svr4pic.d: New test subarchitecture.

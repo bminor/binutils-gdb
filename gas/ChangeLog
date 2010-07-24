@@ -1,3 +1,8 @@
+2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (macro)[M_JAL_1, M_JAL_2]: Handle the JALR
+	delay slot in the noreorder mode with the o32 ABI.
+
 2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
 	    Ina Pandit  <ina.pandit@kpitcummins.com>
 
