@@ -418,6 +418,11 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #	Assemble the file SOURCE.s.  If omitted, this defaults to FILE.s.
 #       This is useful if several .d files want to share a .s file.
 #
+#   dump: DUMP
+#	Match against DUMP.d.  If omitted, this defaults to FILE.d.  This
+#	is useful if several .d files differ by options only.  Options are
+#	always read from FILE.d.
+#
 #   target: GLOBS...
 #       Run this test only on a specified list of targets.  More precisely,
 #       each glob in the space-separated list is passed to "istarget"; if
@@ -494,6 +499,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(name) {}
     set opts(PROG) {}
     set opts(source) {}
+    set opts(dump) {}
     set opts(stderr) {}
     set opts(error) {}
     set opts(error-output) {}
@@ -652,6 +658,12 @@ proc run_dump_test { name {extra_options {}} } {
 	set sourcefile $srcdir/$subdir/$opts(source)
     }
 
+    if { $opts(dump) == "" } {
+	set dumpfile ${file}.d
+    } else {
+	set dumpfile $srcdir/$subdir/$opts(dump)
+    }
+
     set cmd "$AS $ASFLAGS $opts(as) -o dump.o $sourcefile"
     send_log "$cmd\n"
     set status [gas_host_run $cmd ""]
@@ -773,7 +785,7 @@ proc run_dump_test { name {extra_options {}} } {
     }
 
     verbose_eval {[file_contents "dump.out"]} 3
-    if { [regexp_diff "dump.out" "${file}.d"] } then {
+    if { [regexp_diff "dump.out" "${dumpfile}"] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
