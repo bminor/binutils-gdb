@@ -1,5 +1,14 @@
 2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/jal-svr4pic.d: Rename to...
+	* gas/mips/mips1@jal-svr4pic.d: ... this.
+	* gas/mips/r3000@jal-svr4pic.d: New test subarchitecture.
+	* gas/mips/jal-svr4pic.d: New default subarchitecture patterns.
+	* gas/mips/mips.exp: Run jal-svr4pic with run_dump_test_arches
+	rather than run_dump_test.
+
+2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/jal-svr4pic.d: Reformat.  Use --show-raw-insn with
 	`objdump'.
 	* gas/mips/jal-svr4pic.s: Reformat.  Fix up trailing zeroes.
