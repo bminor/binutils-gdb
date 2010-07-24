@@ -1,5 +1,11 @@
 2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/jal-svr4pic.d: Reformat.  Use --show-raw-insn with
+	`objdump'.
+	* gas/mips/jal-svr4pic.s: Reformat.  Fix up trailing zeroes.
+
+2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* lib/gas-defs.exp (run_dump_test): Handle the "dump" option.
 
 2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
