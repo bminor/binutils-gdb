@@ -1,3 +1,8 @@
+2010-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c (linux_nat_do_thread_registers): Convert STOP_SIGNAL to
+	the host signal first.
+
 2010-07-23  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (struct dwarf2_per_objfile) <n_type_comp_units,

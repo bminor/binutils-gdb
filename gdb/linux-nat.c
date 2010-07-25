@@ -4190,7 +4190,8 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
 	if (strcmp (sect_list->sect_name, ".reg") == 0)
 	  note_data = (char *) elfcore_write_prstatus
 				(obfd, note_data, note_size,
-				 lwp, stop_signal, gdb_regset);
+				 lwp, target_signal_to_host (stop_signal),
+				 gdb_regset);
 	else
 	  note_data = (char *) elfcore_write_register_note
 				(obfd, note_data, note_size,
@@ -4217,11 +4218,9 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
       else
 	fill_gregset (regcache, &gregs, -1);
 
-      note_data = (char *) elfcore_write_prstatus (obfd,
-						   note_data,
-						   note_size,
-						   lwp,
-						   stop_signal, &gregs);
+      note_data = (char *) elfcore_write_prstatus
+	(obfd, note_data, note_size, lwp, target_signal_to_host (stop_signal),
+	 &gregs);
 
       if (core_regset_p
           && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
