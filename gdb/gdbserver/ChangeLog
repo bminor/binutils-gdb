@@ -1,3 +1,9 @@
+2010-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* server.c (handle_target_event): Use target_signal_to_host for
+	resume_info.sig initialization.
+	* target.h (struct thread_resume) <sig>: New comment.
+
 2010-07-20  Ozkan Sezer  <sezeroz@gmail.com>
 
 	* server.c (handle_query): strcpy() the returned string from paddress()

@@ -53,7 +53,8 @@ struct thread_resume
   /* If non-zero, send this signal when we resume, or to stop the
      thread.  If stopping a thread, and this is 0, the target should
      stop the thread however it best decides to (e.g., SIGSTOP on
-     linux; SuspendThread on win32).  */
+     linux; SuspendThread on win32).  This is a host signal value (not
+     enum target_signal).  */
   int sig;
 };
 

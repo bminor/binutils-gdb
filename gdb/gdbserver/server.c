@@ -3147,7 +3147,7 @@ handle_target_event (int err, gdb_client_data client_data)
 
 	      resume_info.thread = last_ptid;
 	      resume_info.kind = resume_continue;
-	      resume_info.sig = last_status.value.sig;
+	      resume_info.sig = target_signal_to_host (last_status.value.sig);
 	      (*the_target->resume) (&resume_info, 1);
 	    }
 	  else if (debug_threads)
