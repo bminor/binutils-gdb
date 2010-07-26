@@ -3569,7 +3569,19 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	}
       break;
     case DW_TAG_variable:
-      if (pdi->is_external)
+      if (pdi->locdesc)
+	addr = decode_locdesc (pdi->locdesc, cu);
+
+      if (pdi->locdesc
+	  && addr == 0
+	  && !dwarf2_per_objfile->has_section_at_zero)
+	{
+	  /* A global or static variable may also have been stripped
+	     out by the linker if unused, in which case its address
+	     will be nullified; do not add such variables into partial
+	     symbol table then.  */
+	}
+      else if (pdi->is_external)
 	{
 	  /* Global Variable.
 	     Don't enter into the minimal symbol tables as there is
@@ -3584,8 +3596,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	     used by GDB, but it comes in handy for debugging partial symbol
 	     table building.  */
 
-	  if (pdi->locdesc)
-	    addr = decode_locdesc (pdi->locdesc, cu);
 	  if (pdi->locdesc || pdi->has_type)
 	    psym = add_psymbol_to_list (actual_name, strlen (actual_name),
 					built_actual_name,
@@ -3603,7 +3613,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 		xfree (actual_name);
 	      return;
 	    }
-	  addr = decode_locdesc (pdi->locdesc, cu);
 	  /*prim_record_minimal_symbol (actual_name, addr + baseaddr,
 	     mst_file_data, objfile); */
 	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
@@ -10006,7 +10015,16 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    {
 	      var_decode_location (attr, sym, cu);
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
-	      if (attr2 && (DW_UNSND (attr2) != 0))
+	      if (SYMBOL_CLASS (sym) == LOC_STATIC
+		  && SYMBOL_VALUE_ADDRESS (sym) == 0
+		  && !dwarf2_per_objfile->has_section_at_zero)
+		{
+		  /* When a static variable is eliminated by the linker,
+		     the corresponding debug information is not stripped
+		     out, but the variable address is set to null;
+		     do not add such variables into symbol table.  */
+		}
+	      else if (attr2 && (DW_UNSND (attr2) != 0))
 		{
 		  struct pending **list_to_add;
 

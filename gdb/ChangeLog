@@ -1,3 +1,9 @@
+2010-07-26  Jerome Guitton  <guitton@adacore.com>
+
+	* dwarf2read.c (add_partial_symbol): Do not add a global variable if
+	its adress is null. Add comment to explain why.
+	(new_symbol): Ditto.
+
 2010-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-nat.c (linux_nat_do_thread_registers): Convert STOP_SIGNAL to
