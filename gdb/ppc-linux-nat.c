@@ -877,7 +877,7 @@ store_vsx_register (const struct regcache *regcache, int tid, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int vsxregsize = register_size (gdbarch, tdep->ppc_vsr0_upper_regnum);
 
-  ret = ptrace (PTRACE_SETVSXREGS, tid, 0, &regs);
+  ret = ptrace (PTRACE_GETVSXREGS, tid, 0, &regs);
   if (ret < 0)
     {
       if (errno == EIO)

@@ -1,3 +1,8 @@
+2010-07-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-linux-nat.c (store_vsx_register): Use PTRACE_GETVSXREGS to get
+	VSX registers contents.
+
 2010-07-26  Jerome Guitton  <guitton@adacore.com>
 
 	* dwarf2read.c (add_partial_symbol): Do not add a global variable if
