@@ -1,3 +1,8 @@
+2010-07-26  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/xstormy16.inc (gdbasm_startup): Fix beginning of stack so
+	as not to clash with .data section.
+
 2010-07-26  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.base/code_elim.exp: New file.

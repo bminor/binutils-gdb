@@ -29,6 +29,6 @@
 
 	comment "crt0 startup"
 	.macro gdbasm_startup
-	mov r15,#2
+	mov r15,#8
 	.endm
 
