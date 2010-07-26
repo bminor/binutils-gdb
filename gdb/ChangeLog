@@ -1,3 +1,8 @@
+2010-07-26  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (locexpr_describe_location_piece): Also recognize
+	TLS with DW_OP_const4u or DW_OP_const8u.
+
 2010-07-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-linux-nat.c (store_vsx_register): Use PTRACE_GETVSXREGS to get
