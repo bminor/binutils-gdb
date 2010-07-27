@@ -1,3 +1,8 @@
+2010-07-28  CHENG Renquan  <rqcheng@smu.edu.sg>
+
+	* gdb.texinfo (Machine Code): Update description of two forms of
+	arguments, and add new example to demonstrate the new form.
+
 2010-07-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Remove extra 'for'.
