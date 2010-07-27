@@ -9953,9 +9953,7 @@ do_msbd:
 		    /* Set the argument to the current address in the
 		       section.  */
 		    offset_expr.X_op = O_symbol;
-		    offset_expr.X_add_symbol =
-		      symbol_new ("L0\001", now_seg,
-				  (valueT) frag_now_fix (), frag_now);
+		    offset_expr.X_add_symbol = symbol_temp_new_now ();
 		    offset_expr.X_add_number = 0;
 
 		    /* Put the floating point number into the section.  */

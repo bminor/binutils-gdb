@@ -1,3 +1,8 @@
+2010-07-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (mips_ip): Use symbol_temp_new_now to create
+	a fake label.
+
 2010-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (macro)[M_JAL_1, M_JAL_2]: Handle the JALR
