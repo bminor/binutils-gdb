@@ -21,6 +21,7 @@
 
 #include "elf/common.h"
 #include "elf/internal.h"
+#include "elf/mips.h"
 
 extern bfd_boolean _bfd_mips_elf_new_section_hook
   (bfd *, asection *);
@@ -152,6 +153,12 @@ extern void _bfd_mips_post_process_headers
 extern const struct bfd_elf_special_section _bfd_mips_elf_special_sections [];
 
 extern bfd_boolean _bfd_mips_elf_common_definition (Elf_Internal_Sym *);
+
+static inline bfd_boolean
+gprel16_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_GPREL16 || r_type == R_MIPS16_GPREL;
+}
 
 #define elf_backend_common_definition   _bfd_mips_elf_common_definition
 #define elf_backend_name_local_section_symbols \

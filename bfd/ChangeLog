@@ -1,5 +1,17 @@
 2010-07-27  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elfxx-mips.h: Include "elf/mips.h".
+	(gprel16_reloc_p): New static inline function.
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs)
+	[R_MIPS16_GOT16, R_MIPS_GOT16, R_MIPS_GOT_HI16, R_MIPS_GOT_LO16]:
+	Use got16_reloc_p.
+	(_bfd_mips_elf_relocate_section)[bfd_reloc_overflow]: Use
+	gprel16_reloc_p.
+	* elf32-mips.c (mips_info_to_howto_rel): Likewise.
+	* elfn32-mips.c (mips_info_to_howto_rel): Likewise.
+
+2010-07-27  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elf64-mips.c (mips_elf64_howto_table_rela)
 	[R_MIPS_TLS_DTPMOD64]: Clear partial_inplace.
 	[R_MIPS_TLS_DTPREL64, R_MIPS_TLS_GD, R_MIPS_TLS_LDM]: Likewise.

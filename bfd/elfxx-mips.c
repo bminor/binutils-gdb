@@ -7727,7 +7727,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, r_type, FALSE);
 		  addend = mips_elf_read_rel_addend (abfd, rel,
 						     howto, contents);
-		  if (r_type == R_MIPS_GOT16)
+		  if (got16_reloc_p (r_type))
 		    mips_elf_add_lo16_rel_addend (abfd, rel, rel_end,
 						  contents, &addend);
 		  else
@@ -9196,7 +9196,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      BFD_ASSERT (htab != NULL);
 	      BFD_ASSERT (name != NULL);
 	      if (!htab->small_data_overflow_reported
-		  && (howto->type == R_MIPS_GPREL16
+		  && (gprel16_reloc_p (howto->type)
 		      || howto->type == R_MIPS_LITERAL))
 		{
 		  msg = _("small-data section exceeds 64KB;"

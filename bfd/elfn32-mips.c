@@ -2259,8 +2259,7 @@ mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
      when we do the relocation, because the symbol manipulations done
      by the linker may cause us to lose track of the input BFD.  */
   if (((*cache_ptr->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0
-      && (r_type == (unsigned int) R_MIPS_GPREL16
-	  || r_type == (unsigned int) R_MIPS_LITERAL))
+      && (gprel16_reloc_p (r_type) || r_type == (unsigned int) R_MIPS_LITERAL))
     cache_ptr->addend = elf_gp (abfd);
 }
 
