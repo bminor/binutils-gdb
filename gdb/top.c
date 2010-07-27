@@ -1242,6 +1242,9 @@ input_from_terminal_p (void)
   if (interactive_mode != AUTO_BOOLEAN_AUTO)
     return interactive_mode == AUTO_BOOLEAN_TRUE;
 
+  if (batch_flag)
+    return 0;
+
   if (gdb_has_a_terminal () && instream == stdin)
     return 1;
 
