@@ -2394,7 +2394,7 @@ dw2_find_pc_sect_symtab (struct objfile *objfile,
     return NULL;
 
   if (warn_if_readin && data->v.quick->symtab)
-    warning (_("(Internal error: pc %s in read in CU, but not in symtab.)\n"),
+    warning (_("(Internal error: pc %s in read in CU, but not in symtab.)"),
 	     paddress (get_objfile_arch (objfile), pc));
 
   return dw2_instantiate_symtab (objfile, data);
