@@ -13,13 +13,22 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This is only ever run if it is compiled with a new-enough GCC, but
+   we don't want the compilation to fail if compiled by some other
+   compiler.  */
+#ifdef __GNUC__
+#define ATTR __attribute__((always_inline))
+#else
+#define ATTR
+#endif
+
 int x, y;
 volatile int result;
 volatile int *array_p;
 
 void bar(void);
 
-inline int func1(int arg1)
+inline ATTR int func1(int arg1)
 {
   int array[64];
   array_p = array;
@@ -29,7 +38,7 @@ inline int func1(int arg1)
   return x * y + array_p[0] * arg1;
 }
 
-inline int func2(int arg2)
+inline ATTR int func2(int arg2)
 {
   return x * func1 (arg2);
 }

@@ -1,5 +1,20 @@
 2010-07-27  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.opt/inline-cmds.c (ATTR): New define.
+	(func1): Use it.
+	(func2): Likewise.
+	(func3): Likewise.
+	(outer_inline1): Likewise.
+	(outer_inline2): Likewise.
+	* gdb.opt/inline-bt.c (ATTR): New define.
+	(func1): Use it.
+	(func2): Likewise.
+	* gdb.opt/inline-locals.c (ATTR): New define.
+	(func1): Use it.
+	(func2): Likewise.
+
+2010-07-27  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.stabs/gdb11479.c (hack): New function.
 	(test): Use it.
 	(test2): Use it.

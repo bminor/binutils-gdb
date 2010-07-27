@@ -13,6 +13,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This is only ever run if it is compiled with a new-enough GCC, but
+   we don't want the compilation to fail if compiled by some other
+   compiler.  */
+#ifdef __GNUC__
+#define ATTR __attribute__((always_inline))
+#else
+#define ATTR
+#endif
+
 int x, y;
 volatile int result;
 
@@ -20,28 +29,28 @@ void bar(void);
 void marker(void);
 void noinline(void);
 
-inline int func1(void)
+inline ATTR int func1(void)
 {
   bar ();
   return x * y;
 }
 
-inline int func2(void)
+inline ATTR int func2(void)
 {
   return x * func1 ();
 }
 
-inline void func3(void)
+inline ATTR void func3(void)
 {
   bar ();
 }
 
-inline void outer_inline1(void)
+inline ATTR void outer_inline1(void)
 {
   noinline ();
 }
 
-inline void outer_inline2(void)
+inline ATTR void outer_inline2(void)
 {
   outer_inline1 ();
 }
