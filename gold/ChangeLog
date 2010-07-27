@@ -1,3 +1,10 @@
+2010-07-27  Jeffrey Yasskin  <jyasskin@google.com>
+
+	* testsuite/debug_msg.sh: Test mixed weak/strong symbol behavior.
+	* gold/testsuite/debug_msg.cc: Likewise.
+	* gold/testsuite/odr_violation1.cc
+	* gold/testsuite/odr_violation2.cc
+
 2010-07-21  Cary Coutant  <ccoutant@google.com>
 
 	* merge.h (Output_merge_string::Merged_string): Remove object, shndx,

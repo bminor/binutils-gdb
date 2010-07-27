@@ -75,6 +75,16 @@ check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debu
 check debug_msg.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
 check debug_msg.err "odr_violation1.cc:5"
 check debug_msg.err "odr_violation2.cc:5"
+# We block ODR detection for combinations of C weak and strong
+# symbols, to allow people to use the linker to override things.  We
+# still flag it for C++ symbols since those are more likely to be
+# unintentional.
+check_missing debug_msg.err ": symbol 'OverriddenCFunction' defined in multiple places (possible ODR violation):"
+check_missing debug_msg.err "odr_violation1.cc:15"
+check_missing debug_msg.err "odr_violation2.cc:17"
+check debug_msg.err ": symbol 'SometimesInlineFunction(int)' defined in multiple places (possible ODR violation):"
+check debug_msg.err "debug_msg.cc:64"
+check debug_msg.err "odr_violation2.cc:21"
 
 # When linking together .so's, we don't catch the line numbers, but we
 # still find all the undefined variables, and the ODR violation.
@@ -84,6 +94,12 @@ check debug_msg_so.err "debug_msg.so: error: undefined reference to 'undef_int'"
 check debug_msg_so.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
 check debug_msg_so.err "odr_violation1.cc:5"
 check debug_msg_so.err "odr_violation2.cc:5"
+check_missing debug_msg.err ": symbol 'OverriddenCFunction' defined in multiple places (possible ODR violation):"
+check_missing debug_msg.err "odr_violation1.cc:15"
+check_missing debug_msg.err "odr_violation2.cc:17"
+check debug_msg.err ": symbol 'SometimesInlineFunction(int)' defined in multiple places (possible ODR violation):"
+check debug_msg.err "debug_msg.cc:64"
+check debug_msg.err "odr_violation2.cc:21"
 
 # These messages shouldn't need any debug info to detect:
 check debug_msg_ndebug.err "debug_msg_ndebug.so: error: undefined reference to 'undef_fn1()'"
