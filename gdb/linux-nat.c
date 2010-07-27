@@ -2617,6 +2617,20 @@ sigtrap_is_event (int status)
 
 static int (*linux_nat_status_is_event) (int status) = sigtrap_is_event;
 
+/* Check for SIGTRAP-like events in LP.  */
+
+static int
+linux_nat_lp_status_is_event (struct lwp_info *lp)
+{
+  /* We check for lp->waitstatus in addition to lp->status, because we can
+     have pending process exits recorded in lp->status
+     and W_EXITCODE(0,0) == 0.  We should probably have an additional
+     lp->status_p flag.  */
+
+  return (lp->waitstatus.kind == TARGET_WAITKIND_IGNORE
+	  && linux_nat_status_is_event (lp->status));
+}
+
 /* Set alternative SIGTRAP-like events recognizer.  If
    breakpoint_inserted_here_p there then gdbarch_decr_pc_after_break will be
    applied.  */
@@ -2823,8 +2837,7 @@ count_events_callback (struct lwp_info *lp, void *data)
   gdb_assert (count != NULL);
 
   /* Count only resumed LWPs that have a SIGTRAP event pending.  */
-  if (lp->status != 0 && lp->resumed
-      && linux_nat_status_is_event (lp->status))
+  if (lp->resumed && linux_nat_lp_status_is_event (lp))
     (*count)++;
 
   return 0;
@@ -2851,8 +2864,7 @@ select_event_lwp_callback (struct lwp_info *lp, void *data)
   gdb_assert (selector != NULL);
 
   /* Select only resumed LWPs that have a SIGTRAP event pending. */
-  if (lp->status != 0 && lp->resumed
-      && linux_nat_status_is_event (lp->status))
+  if (lp->resumed && linux_nat_lp_status_is_event (lp))
     if ((*selector)-- == 0)
       return 1;
 
@@ -2912,9 +2924,7 @@ cancel_breakpoints_callback (struct lwp_info *lp, void *data)
      delete or disable the breakpoint, but the LWP will have already
      tripped on it.  */
 
-  if (lp->waitstatus.kind == TARGET_WAITKIND_IGNORE
-      && lp->status != 0
-      && linux_nat_status_is_event (lp->status)
+  if (linux_nat_lp_status_is_event (lp)
       && cancel_breakpoint (lp))
     /* Throw away the SIGTRAP.  */
     lp->status = 0;
@@ -3433,8 +3443,7 @@ retry:
 			 always cancels breakpoint hits in all
 			 threads.  */
 		      if (non_stop
-			  && lp->waitstatus.kind == TARGET_WAITKIND_IGNORE
-			  && linux_nat_status_is_event (lp->status)
+			  && linux_nat_lp_status_is_event (lp)
 			  && cancel_breakpoint (lp))
 			{
 			  /* Throw away the SIGTRAP.  */
