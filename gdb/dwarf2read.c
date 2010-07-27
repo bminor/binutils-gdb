@@ -1835,8 +1835,10 @@ dwarf2_read_index (struct objfile *objfile)
   char *addr;
   struct mapped_index *map;
   offset_type *metadata;
-  const gdb_byte *cu_list, *types_list;
-  offset_type version, cu_list_elements, types_list_elements;
+  const gdb_byte *cu_list;
+  const gdb_byte *types_list = NULL;
+  offset_type version, cu_list_elements;
+  offset_type types_list_elements = 0;
   int i;
 
   if (dwarf2_per_objfile->gdb_index.asection == NULL

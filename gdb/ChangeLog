@@ -1,3 +1,8 @@
+2010-07-27  Ken Werner  <ken.werner@de.ibm.com>
+
+	* valops.c (dwarf2_read_index): Initialize the types_list and 
+	types_list_elements variables.
+
 2010-07-26  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (locexpr_describe_location_piece): Also recognize
