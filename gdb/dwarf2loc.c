@@ -2016,15 +2016,19 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
      DW_AT_location    : 10 byte block: 3 4 0 0 0 0 0 0 0 e0
                         (DW_OP_addr: 4; DW_OP_GNU_push_tls_address)
-     
+
      0x3 is the encoding for DW_OP_addr, which has an operand as long
      as the size of an address on the target machine (here is 8
-     bytes).  0xe0 is the encoding for DW_OP_GNU_push_tls_address.
-     The operand represents the offset at which the variable is within
-     the thread local storage.  */
+     bytes).  Note that more recent version of GCC emit DW_OP_const4u
+     or DW_OP_const8u, depending on address size, rather than
+     DW_OP_addr.  0xe0 is the encoding for
+     DW_OP_GNU_push_tls_address. The operand represents the offset at
+     which the variable is within the thread local storage.  */
 
   else if (data + 1 + addr_size < end
-	   && data[0] == DW_OP_addr
+	   && (data[0] == DW_OP_addr
+	       || (addr_size == 4 && data[0] == DW_OP_const4u)
+	       || (addr_size == 8 && data[0] == DW_OP_const8u))
 	   && data[1 + addr_size] == DW_OP_GNU_push_tls_address
 	   && piece_end_p (data + 2 + addr_size, end))
     {
