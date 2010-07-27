@@ -1,5 +1,9 @@
 2010-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/help.exp (help disassemble): Update the content.
+
+2010-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.threads/ia64-sigill.exp: New file.
 	* gdb.threads/ia64-sigill.c: New file.
 
