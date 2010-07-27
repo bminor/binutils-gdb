@@ -15,6 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <stdio.h>
+
 struct s
 {
   int a;
@@ -44,6 +46,16 @@ void ptr_ref(int*& rptr_int)
 }
 #endif
 
+void func1 ()
+{
+  printf ("void function called\n");
+}
+
+int func2 (int arg1, int arg2)
+{
+  return arg1 + arg2;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -53,6 +65,8 @@ main (int argc, char *argv[])
   PTR x = &s;
   char st[17] = "divide et impera";
   char nullst[17] = "divide\0et\0impera";
+  void (*fp1) (void)  = &func1;
+  int  (*fp2) (int, int) = &func2;
   const char *sptr = "pointer";
   const char *embed = "embedded x\201\202\203\204";
   int a[3] = {1,2,3};
@@ -63,6 +77,8 @@ main (int argc, char *argv[])
   s.a = 3;
   s.b = 5;
   u.a = 7;
+  (*fp1) ();
+  (*fp2) (10,20);
 
 #ifdef __cplusplus
   ptr_ref(ptr_i);

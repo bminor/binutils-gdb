@@ -25,6 +25,7 @@
 #include "language.h"
 #include "dfp.h"
 #include "valprint.h"
+#include "infcall.h"
 
 #ifdef HAVE_PYTHON
 
@@ -391,6 +392,53 @@ valpy_setitem (PyObject *self, PyObject *key, PyObject *value)
   PyErr_Format (PyExc_NotImplementedError,
 		_("Setting of struct elements is not currently supported."));
   return -1;
+}
+
+/* Called by the Python interpreter to perform an inferior function
+   call on the value.  */
+static PyObject *
+valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
+{
+  struct value *return_value = NULL;
+  Py_ssize_t args_count;
+  volatile struct gdb_exception except;
+  struct value *function = ((value_object *) self)->value;
+  struct value **vargs = NULL;
+  struct type *ftype = check_typedef (value_type (function));
+
+  if (TYPE_CODE (ftype) != TYPE_CODE_FUNC)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Value is not callable (not TYPE_CODE_FUNC)."));
+      return NULL;
+    }
+
+  args_count = PyTuple_Size (args);
+  if (args_count > 0)
+    {
+      int i;
+
+      vargs = alloca (sizeof (struct value *) * args_count);
+      for (i = 0; i < args_count; i++)
+	{
+	  PyObject *item = PyTuple_GetItem (args, i);
+
+	  if (item == NULL)
+	    return NULL;
+
+	  vargs[i] = convert_value_from_python (item);
+	  if (vargs[i] == NULL)
+	    return NULL;
+	}
+    }
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      return_value = call_function_by_hand (function, args_count, vargs);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return value_to_value_object (return_value);
 }
 
 /* Called by the Python interpreter to obtain string representation
@@ -1151,7 +1199,7 @@ PyTypeObject value_object_type = {
   0,				  /*tp_as_sequence*/
   &value_object_as_mapping,	  /*tp_as_mapping*/
   valpy_hash,		          /*tp_hash*/
-  0,				  /*tp_call*/
+  valpy_call,	                  /*tp_call*/
   valpy_str,			  /*tp_str*/
   0,				  /*tp_getattro*/
   0,				  /*tp_setattro*/

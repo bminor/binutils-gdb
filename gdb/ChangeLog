@@ -1,3 +1,7 @@
+2010-07-27  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-value.c (valpy_call): New Function.
+
 2010-07-27  Ken Werner  <ken.werner@de.ibm.com>
 
 	* valops.c (dwarf2_read_index): Initialize the types_list and 

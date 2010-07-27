@@ -1,3 +1,9 @@
+2010-07-27  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-value.exp (test_inferior_function_call): New function.
+	* gdb.python/py-value.c (func1): New function.
+	(func2): Likewise.
+
 2010-07-26  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/xstormy16.inc (gdbasm_startup): Fix beginning of stack so

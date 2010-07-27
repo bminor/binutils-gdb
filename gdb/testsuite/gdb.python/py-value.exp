@@ -276,6 +276,35 @@ proc test_lazy_strings {} {
 }
 
 
+proc test_inferior_function_call {} {
+    global gdb_prompt hex decimal
+
+    # Correct inferior call without arguments.
+    gdb_test "p/x fp1" " = $hex.*"
+    gdb_py_test_silent_cmd "python fp1 = gdb.history (0)" "get value from history" 1
+    gdb_test "python fp1 = fp1.dereference()" ""
+    gdb_test "python result = fp1()" ""
+    gdb_test "python print result" "void"
+
+    # Correct inferior call with arguments.
+    gdb_test "p/x fp2" " = $hex.*"
+    gdb_py_test_silent_cmd "python fp2 = gdb.history (0)" "get value from history" 1
+    gdb_test "python fp2 = fp2.dereference()" ""
+    gdb_test "python result2 = fp2(10,20)" ""
+    gdb_test "python print result2" "30"
+
+    # Incorrect to call an int value.
+    gdb_test "p i" " = $decimal.*"
+    gdb_py_test_silent_cmd "python i = gdb.history (0)" "get value from history" 1
+    gdb_test "python result3 = i()" ".*Value is not callable.*"
+
+    # Incorrect number of arguments.
+    gdb_test "p/x fp2" " = $hex.*"
+    gdb_py_test_silent_cmd "python fp3 = gdb.history (0)" "get value from history" 1
+    gdb_test "python fp3 = fp3.dereference()" ""
+    gdb_test "python result2 = fp3(10)" ".*Too few arguments in function call.*"
+}
+
 # A few objfile tests.
 proc test_objfiles {} {
     gdb_test "python\nok=False\nfor file in gdb.objfiles():\n  if 'py-value' in file.filename:\n    ok=True\nprint ok\nend" "True"
@@ -435,6 +464,7 @@ if ![runto_main] then {
 }
 
 test_value_in_inferior
+test_inferior_function_call
 test_lazy_strings
 test_value_after_death
 

@@ -20608,6 +20608,22 @@ bar = some_val['foo']
 
 Again, @code{bar} will also be a @code{gdb.Value} object.
 
+A @code{gdb.Value} that represents a function can be executed via
+inferior function call.  Any arguments provided to the call must match
+the function's prototype, and must be provided in the order specified
+by that prototype.
+
+For example, @code{some_val} is a @code{gdb.Value} instance
+representing a function that takes two integers as arguments.  To
+execute this function, call it like so:
+
+@smallexample
+result = some_val (10,20)
+@end smallexample
+
+Any values returned from a function call will be stored as a
+@code{gdb.Value}.
+
 The following attributes are provided:
 
 @table @code
