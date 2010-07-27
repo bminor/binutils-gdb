@@ -1,3 +1,18 @@
+2010-07-27  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elf64-mips.c (mips_elf64_howto_table_rela)
+	[R_MIPS_TLS_DTPMOD64]: Clear partial_inplace.
+	[R_MIPS_TLS_DTPREL64, R_MIPS_TLS_GD, R_MIPS_TLS_LDM]: Likewise.
+	[R_MIPS_TLS_DTPREL_HI16, R_MIPS_TLS_DTPREL_LO16]: Likewise.
+	[R_MIPS_TLS_GOTTPREL, R_MIPS_TLS_TPREL64]: Likewise.
+	[R_MIPS_TLS_TPREL_HI16, R_MIPS_TLS_TPREL_LO16]: Likewise.
+	* elfn32-mips.c (elf_mips_howto_table_rela)
+	[R_MIPS_TLS_DTPMOD32]: Likewise.
+	[R_MIPS_TLS_DTPREL32, R_MIPS_TLS_GD, R_MIPS_TLS_LDM]: Likewise.
+	[R_MIPS_TLS_DTPREL_HI16, R_MIPS_TLS_DTPREL_LO16]: Likewise.
+	[R_MIPS_TLS_GOTTPREL, R_MIPS_TLS_TPREL32]: Likewise.
+	[R_MIPS_TLS_TPREL_HI16, R_MIPS_TLS_TPREL_LO16]: Likewise.
+
 2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
 	    Ina Pandit  <ina.pandit@kpitcummins.com>
 
