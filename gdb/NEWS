@@ -3,6 +3,15 @@
 
 *** Changes since GDB 7.2
 
+* GDB now has some support for using labels in the program's source in
+  linespecs.  For instance, you can use "advance label" to continue
+  execution to a label.
+
+* GDB now has support for reading and writing a new .gdb_index
+  section.  This section holds a fast index of DWARF debugging
+  information and can be used to greatly speed up GDB startup and
+  operation.  See the documentation for `save gdb-index' for details.
+
 *** Changes in GDB 7.2
 
 * Shared library support for remote targets by default
