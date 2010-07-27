@@ -1,3 +1,13 @@
+2010-07-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.stabs/gdb11479.c (hack): New function.
+	(test): Use it.
+	(test2): Use it.
+	* gdb.python/py-inferior.c (int8_search_buf, int16_search_buf)
+	(int32_search_buf, int64_search_buf): No longer static.
+	(x): Remove.
+	* gdb.base/relocate.c (hack): New function.
+
 2010-07-27  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-value.exp (test_inferior_function_call): New function.
