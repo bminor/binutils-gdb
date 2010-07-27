@@ -22,7 +22,7 @@ set sources [list ${fullsrcfile} ${fullsrcfile2}]
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile ${sources} ${binfile} \
-	   executable {debug optimize=-O2}] != "" } {
+	   executable {debug optimize=-O2 additional_flags=-Winline}] != "" } {
     untested inline-bt.exp
     return -1
 }
