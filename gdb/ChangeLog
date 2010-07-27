@@ -1,3 +1,10 @@
+2010-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (read_string): Rename to ...
+	(read_direct_string): ... this.
+	(skip_one_die, read_attribute_value, dwarf_decode_line_header)
+	(dwarf_decode_lines, dwarf_decode_macros): Adjust.
+
 2010-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-nat.c (linux_nat_lp_status_is_event): New function.

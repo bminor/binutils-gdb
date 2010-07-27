@@ -923,7 +923,7 @@ static LONGEST read_offset_1 (bfd *, gdb_byte *, unsigned int);
 
 static gdb_byte *read_n_bytes (bfd *, gdb_byte *, unsigned int);
 
-static char *read_string (bfd *, gdb_byte *, unsigned int *);
+static char *read_direct_string (bfd *, gdb_byte *, unsigned int *);
 
 static char *read_indirect_string (bfd *, gdb_byte *,
                                    const struct comp_unit_head *,
@@ -3949,7 +3949,7 @@ skip_one_die (gdb_byte *buffer, gdb_byte *info_ptr,
 	  info_ptr += 8;
 	  break;
 	case DW_FORM_string:
-	  read_string (abfd, info_ptr, &bytes_read);
+	  read_direct_string (abfd, info_ptr, &bytes_read);
 	  info_ptr += bytes_read;
 	  break;
 	case DW_FORM_sec_offset:
@@ -8546,7 +8546,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       info_ptr += bytes_read;
       break;
     case DW_FORM_string:
-      DW_STRING (attr) = read_string (abfd, info_ptr, &bytes_read);
+      DW_STRING (attr) = read_direct_string (abfd, info_ptr, &bytes_read);
       DW_STRING_IS_CANONICAL (attr) = 0;
       info_ptr += bytes_read;
       break;
@@ -8894,7 +8894,7 @@ read_n_bytes (bfd *abfd, gdb_byte *buf, unsigned int size)
 }
 
 static char *
-read_string (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
+read_direct_string (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
 {
   /* If the size of a host char is 8 bits, we can return a pointer
      to the string, otherwise we have to copy the string to a buffer
@@ -9320,7 +9320,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
     }
 
   /* Read directory table.  */
-  while ((cur_dir = read_string (abfd, line_ptr, &bytes_read)) != NULL)
+  while ((cur_dir = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
       line_ptr += bytes_read;
       add_include_dir (lh, cur_dir);
@@ -9328,7 +9328,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   line_ptr += bytes_read;
 
   /* Read file name table.  */
-  while ((cur_file = read_string (abfd, line_ptr, &bytes_read)) != NULL)
+  while ((cur_file = read_direct_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
       unsigned int dir_index, mod_time, length;
 
@@ -9535,7 +9535,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                     char *cur_file;
                     unsigned int dir_index, mod_time, length;
 
-                    cur_file = read_string (abfd, line_ptr, &bytes_read);
+                    cur_file = read_direct_string (abfd, line_ptr, &bytes_read);
                     line_ptr += bytes_read;
                     dir_index =
                       read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
@@ -12879,7 +12879,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
 	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
 	    mac_ptr += bytes_read;
-	    read_string (abfd, mac_ptr, &bytes_read);
+	    read_direct_string (abfd, mac_ptr, &bytes_read);
 	    mac_ptr += bytes_read;
 	  }
 	  break;
@@ -12910,7 +12910,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
 	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
 	    mac_ptr += bytes_read;
-	    read_string (abfd, mac_ptr, &bytes_read);
+	    read_direct_string (abfd, mac_ptr, &bytes_read);
 	    mac_ptr += bytes_read;
 	  }
 	  break;
@@ -12965,7 +12965,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
             line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
             mac_ptr += bytes_read;
-            body = read_string (abfd, mac_ptr, &bytes_read);
+            body = read_direct_string (abfd, mac_ptr, &bytes_read);
             mac_ptr += bytes_read;
 
             if (! current_file)
@@ -13071,7 +13071,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
             constant = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
             mac_ptr += bytes_read;
-            string = read_string (abfd, mac_ptr, &bytes_read);
+            string = read_direct_string (abfd, mac_ptr, &bytes_read);
             mac_ptr += bytes_read;
 
             /* We don't recognize any vendor extensions.  */
