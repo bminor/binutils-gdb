@@ -33,3 +33,10 @@ function_bar ()
 {
   return 6;
 }
+
+/* Make sure the statics are not optimized away.  */
+int *
+hack (int arg)
+{
+  return arg ? &static_foo : &static_bar;
+}

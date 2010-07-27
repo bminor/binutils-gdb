@@ -23,13 +23,17 @@ struct dummy;
 
 enum dummy_enum;
 
+/* This function prevents the compiler from dropping local variables
+   we need for the test.  */
+void *hack (const struct dummy *t, const enum dummy_enum *e);
+
 const void *
 test (const struct dummy *t)
 {
   const struct dummy *tt;
   enum dummy_enum *e;
   tt = t;
-  return t;
+  return hack (t, e);
 }
 
 void *
@@ -38,7 +42,7 @@ test2 (struct dummy *t)
   struct dummy *tt;
   const enum dummy_enum *e;
   tt = t;
-  return t;
+  return hack (t, e);
 }
 
 
@@ -52,6 +56,12 @@ enum dummy_enum {
   enum1,
   enum2
 };
+
+void *
+hack (const struct dummy *t, const enum dummy_enum *e)
+{
+  return (void *) t;
+}
 
 int
 main ()
