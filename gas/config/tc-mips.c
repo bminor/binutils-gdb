@@ -1063,7 +1063,7 @@ static void append_insn
 static void mips_no_prev_insn (void);
 static void macro_build (expressionS *, const char *, const char *, ...);
 static void mips16_macro_build
-  (expressionS *, const char *, const char *, va_list);
+  (expressionS *, const char *, const char *, va_list *);
 static void load_register (int, expressionS *, int);
 static void macro_start (void);
 static void macro_end (void);
@@ -3616,7 +3616,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
   if (mips_opts.mips16)
     {
-      mips16_macro_build (ep, name, fmt, args);
+      mips16_macro_build (ep, name, fmt, &args);
       va_end (args);
       return;
     }
@@ -3842,7 +3842,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
 static void
 mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
-		    va_list args)
+		    va_list *args)
 {
   struct mips_opcode *mo;
   struct mips_cl_insn insn;
@@ -3878,20 +3878,20 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 
 	case 'y':
 	case 'w':
-	  MIPS16_INSERT_OPERAND (RY, insn, va_arg (args, int));
+	  MIPS16_INSERT_OPERAND (RY, insn, va_arg (*args, int));
 	  continue;
 
 	case 'x':
 	case 'v':
-	  MIPS16_INSERT_OPERAND (RX, insn, va_arg (args, int));
+	  MIPS16_INSERT_OPERAND (RX, insn, va_arg (*args, int));
 	  continue;
 
 	case 'z':
-	  MIPS16_INSERT_OPERAND (RZ, insn, va_arg (args, int));
+	  MIPS16_INSERT_OPERAND (RZ, insn, va_arg (*args, int));
 	  continue;
 
 	case 'Z':
-	  MIPS16_INSERT_OPERAND (MOVE32Z, insn, va_arg (args, int));
+	  MIPS16_INSERT_OPERAND (MOVE32Z, insn, va_arg (*args, int));
 	  continue;
 
 	case '0':
@@ -3901,14 +3901,14 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	  continue;
 
 	case 'X':
-	  MIPS16_INSERT_OPERAND (REGR32, insn, va_arg (args, int));
+	  MIPS16_INSERT_OPERAND (REGR32, insn, va_arg (*args, int));
 	  continue;
 
 	case 'Y':
 	  {
 	    int regno;
 
-	    regno = va_arg (args, int);
+	    regno = va_arg (*args, int);
 	    regno = ((regno & 7) << 2) | ((regno & 0x18) >> 3);
 	    MIPS16_INSERT_OPERAND (REG32R, insn, regno);
 	  }
@@ -3947,7 +3947,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	  continue;
 
 	case '6':
-	  MIPS16_INSERT_OPERAND (IMM6, insn, va_arg (args, int));
+	  MIPS16_INSERT_OPERAND (IMM6, insn, va_arg (*args, int));
 	  continue;
 	}
 

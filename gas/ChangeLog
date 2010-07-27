@@ -1,4 +1,10 @@
-2010-07-26  Maciej W. Rozycki  <macro@codesourcery.com>
+2010-07-27  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (mips16_macro_build): Pass "args" by
+	reference rather than value.
+	(macro_build): Update accordingly.
+
+2010-07-27  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips_ip): Use symbol_temp_new_now to create
 	a fake label.
