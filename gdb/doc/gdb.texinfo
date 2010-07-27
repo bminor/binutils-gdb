@@ -6742,9 +6742,19 @@ program counter of the selected frame.  A single argument to this
 command is a program counter value; @value{GDBN} dumps the function
 surrounding this value.  When two arguments are given, they should
 be separated by a comma, possibly surrounded by whitespace.  The
-arguments specify a range of addresses (first inclusive, second exclusive)
-to dump.  In that case, the name of the function is also printed (since
-there could be several functions in the given range).
+arguments specify a range of addresses to dump, in one of two forms:
+
+@table @code
+@item @var{start},@var{end}
+the addresses from @var{start} (inclusive) to @var{end} (exclusive)
+@item @var{start},+@var{length}
+the addresses from @var{start} (inclusive) to
+@code{@var{start}+@var{length}} (exclusive).
+@end table
+
+@noindent
+When 2 arguments are specified, the name of the function is also
+printed (since there could be several functions in the given range).
 
 The argument(s) can be any expression yielding a numeric value, such as
 @samp{0x32c4}, @samp{&main+10} or @samp{$pc - 8}.
@@ -6793,6 +6803,18 @@ Dump of assembler code for function main:
    0x0804834d <+29>:   leave
    0x0804834e <+30>:   ret
 
+End of assembler dump.
+@end smallexample
+
+Here is another example showing raw instructions in hex for AMD x86-64,
+
+@smallexample
+(gdb) disas /r 0x400281,+10
+Dump of assembler code from 0x400281 to 0x40028b:
+   0x0000000000400281:  38 36  cmp    %dh,(%rsi)
+   0x0000000000400283:  2d 36 34 2e 73 sub    $0x732e3436,%eax
+   0x0000000000400288:  6f     outsl  %ds:(%rsi),(%dx)
+   0x0000000000400289:  2e 32 00       xor    %cs:(%rax),%al
 End of assembler dump.
 @end smallexample
 

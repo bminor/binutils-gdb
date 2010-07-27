@@ -192,6 +192,11 @@ strace FN | FILE:LINE | *ADDR | -m MARKER_ID
   Define a static tracepoint by probing a marker at the given
   function, line, address, or marker ID.
 
+* Changed commands
+
+disassemble
+  The disassemble command now supports "start,+length" form of two arguments.
+
 * Python scripting
 
 ** GDB now provides a new directory location, called the python directory,
@@ -541,8 +546,9 @@ or the "condition" command is available.  GDB sends the condition to
 the target for evaluation using the same bytecode format as is used
 for tracepoint actions.
 
-* "disassemble" command with a /r modifier, print the raw instructions
-in hex as well as in symbolic form.
+* The disassemble command now supports: an optional /r modifier, print the
+raw instructions in hex as well as in symbolic form, and an optional /m
+modifier to print mixed source+assembly.
 
 * Process record and replay
 
@@ -633,9 +639,6 @@ qXfer:siginfo:write
   An undocumented extension to the remote protocol's `S' stop reply
   packet that permited the stub to pass a process id was removed.
   Remote servers should use the `T' stop reply packet instead.
-
-* The "disassemble" command now supports an optional /m modifier to print mixed
-source+assembly.
 
 * GDB now supports multiple function calling conventions according to the
 DWARF-2 DW_AT_calling_convention function attribute.

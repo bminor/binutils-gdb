@@ -1,3 +1,11 @@
+2010-07-28  CHENG Renquan  <rqcheng@smu.edu.sg>
+
+	* cli/cli-cmds.c (disassemble_command): Add support of disassemble
+  	"start,+length" form of arguments.
+	* NEWS: Add "Changed commands" (disassemble) section for "Changes
+	since GDB 7.1"; and merge two separated paragraphs of disassemble
+	description in "Changes in GDB 7.0".
+
 2010-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* top.c (input_from_terminal_p): Return 0 on BATCH_FLAG.

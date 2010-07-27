@@ -1,3 +1,8 @@
+2010-07-28  CHENG Renquan  <rqcheng@smu.edu.sg>
+
+	* gdb.texinfo (Machine Code): Update description of two forms of
+	arguments, and add new example to demonstrate the new form.
+
 2010-07-27  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Values From Inferior): Add value inferior function

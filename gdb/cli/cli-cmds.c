@@ -1108,8 +1108,9 @@ disassemble_current_function (int flags)
        - dump the assembly code for the function of the current pc
      disassemble [/mr] addr
        - dump the assembly code for the function at ADDR
-     disassemble [/mr] low high
-       - dump the assembly code in the range [LOW,HIGH)
+     disassemble [/mr] low,high
+     disassemble [/mr] low,+length
+       - dump the assembly code in the range [LOW,HIGH), or [LOW,LOW+length)
 
    A /m modifier will include source code with the assembly.
    A /r modifier will include raw instructions in hex with the assembly.  */
@@ -1180,8 +1181,18 @@ disassemble_command (char *arg, int from_tty)
   else
     {
       /* Two arguments.  */
+      int incl_flag = 0;
       low = pc;
+      while (isspace (*arg))
+	arg++;
+      if (arg[0] == '+')
+	{
+	  ++arg;
+	  incl_flag = 1;
+	}
       high = parse_and_eval_address (arg);
+      if (incl_flag)
+	high += low;
     }
 
   print_disassembly (gdbarch, name, low, high, flags);
@@ -1615,7 +1626,8 @@ Default is the function surrounding the pc of the selected frame.\n\
 With a /m modifier, source lines are included (if available).\n\
 With a /r modifier, raw instructions in hex are included.\n\
 With a single argument, the function surrounding that address is dumped.\n\
-Two arguments (separated by a comma) are taken as a range of memory to dump."));
+Two arguments (separated by a comma) are taken as a range of memory to dump,\n\
+  in the form of \"start,end\", or \"start,+length\"."));
   set_cmd_completer (c, location_completer);
   if (xdb_commands)
     add_com_alias ("va", "disassemble", class_xdb, 0);
