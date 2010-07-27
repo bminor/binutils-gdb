@@ -1634,7 +1634,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
      question we're asking, and then answer the default automatically.  This
      way, important error messages don't get lost when talking to GDB
      over a pipe.  */
-  if (batch_flag || ! input_from_terminal_p ())
+  if (! input_from_terminal_p ())
     {
       wrap_here ("");
       vfprintf_filtered (gdb_stdout, ctlstr, args);
@@ -2352,7 +2352,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 
   /* Don't do any filtering if it is disabled.  */
   if (stream != gdb_stdout
-      || !pagination_enabled
+      || ! pagination_enabled
+      || ! input_from_terminal_p ()
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
       || top_level_interpreter () == NULL
       || ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
