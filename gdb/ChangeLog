@@ -1,3 +1,14 @@
+2010-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ia64-linux-nat.c (ia64_linux_status_is_event): New function.
+	(_initialize_ia64_linux_nat): Install it.
+	* linux-nat.c (sigtrap_is_event, linux_nat_status_is_event)
+	(linux_nat_set_status_is_event): New.
+	(stop_wait_callback, count_events_callback, select_event_lwp_callback)
+	cancel_breakpoints_callback, linux_nat_filter_event)
+	(linux_nat_wait_1): Use linux_nat_status_is_event.
+	* linux-nat.h (linux_nat_set_status_is_event): New prototype.
+
 2010-07-27  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Mention labels, .gdb_index.

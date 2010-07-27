@@ -809,6 +809,18 @@ ia64_linux_xfer_partial (struct target_ops *ops,
 			     offset, len);
 }
 
+/* For break.b instruction ia64 CPU forgets the immediate value and generates
+   SIGILL with ILL_ILLOPC instead of more common SIGTRAP with TRAP_BRKPT.
+   ia64 does not use gdbarch_decr_pc_after_break so we do not have to make any
+   difference for the signals here.  */
+
+static int
+ia64_linux_status_is_event (int status)
+{
+  return WIFSTOPPED (status) && (WSTOPSIG (status) == SIGTRAP
+				 || WSTOPSIG (status) == SIGILL);
+}
+
 void _initialize_ia64_linux_nat (void);
 
 void
@@ -848,4 +860,5 @@ _initialize_ia64_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, ia64_linux_new_thread);
+  linux_nat_set_status_is_event (t, ia64_linux_status_is_event);
 }

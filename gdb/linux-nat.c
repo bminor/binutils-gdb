@@ -2605,6 +2605,29 @@ linux_nat_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
   return lp->stopped_data_address_p;
 }
 
+/* Commonly any breakpoint / watchpoint generate only SIGTRAP.  */
+
+static int
+sigtrap_is_event (int status)
+{
+  return WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP;
+}
+
+/* SIGTRAP-like events recognizer.  */
+
+static int (*linux_nat_status_is_event) (int status) = sigtrap_is_event;
+
+/* Set alternative SIGTRAP-like events recognizer.  If
+   breakpoint_inserted_here_p there then gdbarch_decr_pc_after_break will be
+   applied.  */
+
+void
+linux_nat_set_status_is_event (struct target_ops *t,
+			       int (*status_is_event) (int status))
+{
+  linux_nat_status_is_event = status_is_event;
+}
+
 /* Wait until LP is stopped.  */
 
 static int
@@ -2645,7 +2668,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
       if (WSTOPSIG (status) != SIGSTOP)
 	{
-	  if (WSTOPSIG (status) == SIGTRAP)
+	  if (linux_nat_status_is_event (status))
 	    {
 	      /* If a LWP other than the LWP that we're reporting an
 	         event for has hit a GDB breakpoint (as opposed to
@@ -2801,7 +2824,7 @@ count_events_callback (struct lwp_info *lp, void *data)
 
   /* Count only resumed LWPs that have a SIGTRAP event pending.  */
   if (lp->status != 0 && lp->resumed
-      && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP)
+      && linux_nat_status_is_event (lp->status))
     (*count)++;
 
   return 0;
@@ -2829,7 +2852,7 @@ select_event_lwp_callback (struct lwp_info *lp, void *data)
 
   /* Select only resumed LWPs that have a SIGTRAP event pending. */
   if (lp->status != 0 && lp->resumed
-      && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP)
+      && linux_nat_status_is_event (lp->status))
     if ((*selector)-- == 0)
       return 1;
 
@@ -2891,7 +2914,7 @@ cancel_breakpoints_callback (struct lwp_info *lp, void *data)
 
   if (lp->waitstatus.kind == TARGET_WAITKIND_IGNORE
       && lp->status != 0
-      && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP
+      && linux_nat_status_is_event (lp->status)
       && cancel_breakpoint (lp))
     /* Throw away the SIGTRAP.  */
     lp->status = 0;
@@ -3064,7 +3087,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
 	return NULL;
     }
 
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
+  if (linux_nat_status_is_event (status))
     {
       /* Save the trap's siginfo in case we need it later.  */
       save_siginfo (lp);
@@ -3411,7 +3434,7 @@ retry:
 			 threads.  */
 		      if (non_stop
 			  && lp->waitstatus.kind == TARGET_WAITKIND_IGNORE
-			  && WSTOPSIG (lp->status) == SIGTRAP
+			  && linux_nat_status_is_event (lp->status)
 			  && cancel_breakpoint (lp))
 			{
 			  /* Throw away the SIGTRAP.  */
@@ -3627,7 +3650,7 @@ retry:
   else
     lp->resumed = 0;
 
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
+  if (linux_nat_status_is_event (status))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,

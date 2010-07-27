@@ -1,3 +1,8 @@
+2010-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/ia64-sigill.exp: New file.
+	* gdb.threads/ia64-sigill.c: New file.
+
 2010-07-27  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.opt/inline-cmds.c (ATTR): New define.
