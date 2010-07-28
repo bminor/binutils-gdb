@@ -1,3 +1,10 @@
+2010-07-28  Balazs Kezes  <rlblaster@gmail.com>
+
+        * tui/tui-io.c (tui_handle_resize_during_io): Call tui_resize_all
+	after a detecting a resize.
+        * tui/tui-win.c (tui_resize_all): Remove tui_set_win_resized_to
+	call.
+
 2010-07-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* configure.ac: Check for resize_term.

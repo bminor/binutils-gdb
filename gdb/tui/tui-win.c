@@ -799,7 +799,6 @@ tui_resize_all (void)
 	      tui_win_list[win_type] = (struct tui_win_info *) NULL;
 	    }
 	}
-      tui_set_win_resized_to (TRUE);
       /* Turn keypad back on, unless focus is in the command
 	 window.  */
       if (win_with_focus != TUI_CMD_WIN)

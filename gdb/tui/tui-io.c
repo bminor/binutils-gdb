@@ -711,6 +711,7 @@ tui_handle_resize_during_io (unsigned int original_ch)
 {
   if (tui_win_resized ())
     {
+      tui_resize_all ();
       tui_refresh_all_win ();
       dont_repeat ();
       tui_set_win_resized_to (FALSE);
