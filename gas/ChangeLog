@@ -1,3 +1,8 @@
+2010-07-28  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Don't attempt to print NUL in
+	syntax error message.
+
 2010-07-27  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips16_macro_build): Pass "args" by

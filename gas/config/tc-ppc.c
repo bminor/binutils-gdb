@@ -2904,7 +2904,10 @@ md_assemble (char *str)
       if (*str != endc
 	  && (endc != ',' || *str != '\0'))
 	{
-	  as_bad (_("syntax error; found `%c' but expected `%c'"), *str, endc);
+	  if (*str == '\0')
+	    as_bad (_("syntax error; end of line, expected `%c'"), endc);
+	  else
+	    as_bad (_("syntax error; found `%c', expected `%c'"), *str, endc);
 	  break;
 	}
 
