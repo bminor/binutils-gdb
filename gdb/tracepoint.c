@@ -4128,7 +4128,7 @@ parse_static_tracepoint_marker_definition (char *line, char **pp,
 
   endp = strchr (p, ':');
   if (endp == NULL)
-    error ("bad marker definition: %s", line);
+    error (_("bad marker definition: %s"), line);
 
   marker->str_id = xmalloc (endp - p + 1);
   end = hex2bin (p, (gdb_byte *) marker->str_id, (endp - p + 1) / 2);

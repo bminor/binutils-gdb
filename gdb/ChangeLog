@@ -1,5 +1,10 @@
 2010-07-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* remote.c (remote_download_tracepoint): Add missing gettext markup.
+	* tracepoint.c (parse_static_tracepoint_marker_definition): Likewise.
+
+2010-07-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* breakpoint.c (breakpoint_re_set_one): Move call to set_language
 	down, just before the block that parse the breakpoint addr_string.
 
