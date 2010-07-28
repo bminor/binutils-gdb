@@ -712,6 +712,7 @@ tui_resize_all (void)
 	  else
 	    new_height = first_win->generic.height + split_diff;
 
+	  locator->origin.y = new_height + 1;
 	  make_invisible_and_set_new_height (first_win, new_height);
 	  TUI_CMD_WIN->generic.origin.y = locator->origin.y + 1;
 	  TUI_CMD_WIN->generic.width += width_diff;
