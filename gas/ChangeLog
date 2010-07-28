@@ -1,6 +1,11 @@
 2010-07-28  Alan Modra  <amodra@gmail.com>
 
 	PR gas/11841
+	* symbols.c (symbol_clone): Correct typo in previous patch.
+
+2010-07-28  Alan Modra  <amodra@gmail.com>
+
+	PR gas/11841
 	* symbols.c (symbol_clone): Clear BSF_SECTION_SYM flag.
 
 2010-07-28  Alan Modra  <amodra@gmail.com>
