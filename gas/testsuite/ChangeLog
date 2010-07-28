@@ -1,4 +1,4 @@
-2010-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+2010-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Xfail dw2-compress-2 and
 	x86-64-dw2-compress-2.
