@@ -7395,11 +7395,17 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  if (child_die->tag == DW_TAG_formal_parameter)
 	    {
-	      /* Dwarf2 has no clean way to discern C++ static and non-static
-	         member functions. G++ helps GDB by marking the first
-	         parameter for non-static member functions (which is the
-	         this pointer) as artificial. We pass this information
-	         to dwarf2_add_member_fn via TYPE_FIELD_ARTIFICIAL.  */
+	      struct type *arg_type;
+
+	      /* DWARF version 2 has no clean way to discern C++
+		 static and non-static member functions.  G++ helps
+		 GDB by marking the first parameter for non-static
+		 member functions (which is the this pointer) as
+		 artificial.  We pass this information to
+		 dwarf2_add_member_fn via TYPE_FIELD_ARTIFICIAL.
+
+		 DWARF version 3 added DW_AT_object_pointer, which GCC
+		 4.5 does not yet generate.  */
 	      attr = dwarf2_attr (child_die, DW_AT_artificial, cu);
 	      if (attr)
 		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = DW_UNSND (attr);
@@ -7417,7 +7423,40 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 			TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 1;
 		    }
 		}
-	      TYPE_FIELD_TYPE (ftype, iparams) = die_type (child_die, cu);
+	      arg_type = die_type (child_die, cu);
+
+	      /* RealView does not mark THIS as const, which the testsuite
+		 expects.  GCC marks THIS as const in method definitions,
+		 but not in the class specifications (GCC PR 43053).  */
+	      if (cu->language == language_cplus && !TYPE_CONST (arg_type)
+		  && TYPE_FIELD_ARTIFICIAL (ftype, iparams))
+		{
+		  int is_this = 0;
+		  struct dwarf2_cu *arg_cu = cu;
+		  const char *name = dwarf2_name (child_die, cu);
+
+		  attr = dwarf2_attr (die, DW_AT_object_pointer, cu);
+		  if (attr)
+		    {
+		      /* If the compiler emits this, use it.  */
+		      if (follow_die_ref (die, attr, &arg_cu) == child_die)
+			is_this = 1;
+		    }
+		  else if (name && strcmp (name, "this") == 0)
+		    /* Function definitions will have the argument names.  */
+		    is_this = 1;
+		  else if (name == NULL && iparams == 0)
+		    /* Declarations may not have the names, so like
+		       elsewhere in GDB, assume an artificial first
+		       argument is "this".  */
+		    is_this = 1;
+
+		  if (is_this)
+		    arg_type = make_cv_type (1, TYPE_VOLATILE (arg_type),
+					     arg_type, 0);
+		}
+
+	      TYPE_FIELD_TYPE (ftype, iparams) = arg_type;
 	      iparams++;
 	    }
 	  child_die = sibling_die (child_die);

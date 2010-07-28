@@ -1,3 +1,8 @@
+2010-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (read_subroutine_type): Improve THIS detection,
+	handling DW_AT_object_pointer, and workaround GCC PR 43053.
+
 2010-07-28  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove link-warning.h.

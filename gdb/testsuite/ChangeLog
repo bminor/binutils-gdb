@@ -1,3 +1,8 @@
+2010-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/member-ptr.exp, gdb.cp/printmethod.exp,
+	gdb.dwarf2/member-ptr-forwardref.exp: Adjust.
+
 2010-07-28  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/9946:

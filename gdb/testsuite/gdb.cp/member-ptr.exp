@@ -396,7 +396,7 @@ gdb_test_multiple "print ((int) pmi) == ((char *) &a.j - (char *) & a)" $name {
 
 set name "ptype pmf"
 gdb_test_multiple "ptype pmf" $name {
-    -re "type = int \\( ?A::\\*\\)\\(A \\*, int\\)\r\n$gdb_prompt $" {
+    -re "type = int \\( ?A::\\*\\)\\(A \\*( const)?, int\\)\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "type = int \\( ?A::\\*\\)\\(void\\)\r\n$gdb_prompt $" {
@@ -418,7 +418,7 @@ gdb_test_multiple "ptype pmf" $name {
 
 set name "print pmf"
 gdb_test_multiple "print pmf" $name {
-    -re "$vhn = \\(int \\(A::\\*\\)\\(A \\*, int\\)\\) $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
+    -re "$vhn = \\(int \\(A::\\*\\)\\(A \\*( const)?, int\\)\\) $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "$vhn = .*not supported with HP aCC.*\r\n$gdb_prompt $" {
@@ -440,7 +440,7 @@ gdb_test_multiple "print pmf" $name {
 
 set name "ptype pmf_p"
 gdb_test_multiple "ptype pmf_p" $name {
-    -re "type = int \\( ?A::\\*\\*\\)\\(A \\*, int\\)\r\n$gdb_prompt $" {
+    -re "type = int \\( ?A::\\*\\*\\)\\(A \\*( const)?, int\\)\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "type = int \\( ?A::\\*\\*\\)\\(void\\)\r\n$gdb_prompt $" {
@@ -482,7 +482,7 @@ gdb_test_multiple "print pmf_p" $name {
 
 set name "print a.*pmf"
 gdb_test_multiple "print a.*pmf" $name {
-    -re "$vhn = {int \\(A \\*, int\\)} $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
+    -re "$vhn = {int \\(A \\*( const)?, int\\)} $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "Pointers to methods not supported with HP aCC\r\n$gdb_prompt $" {
@@ -504,7 +504,7 @@ gdb_test_multiple "print a.*pmf" $name {
 
 set name "print a_p->*pmf"
 gdb_test_multiple "print a_p->*pmf" $name {
-    -re "$vhn = {int \\(A \\*, int\\)} $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
+    -re "$vhn = {int \\(A \\*( const)?, int\\)} $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "Pointers to methods not supported with HP aCC\r\n$gdb_prompt $" {
@@ -606,7 +606,7 @@ gdb_test_multiple "print (a.*pmf)(3)" $name {
     }
 }
 
-gdb_test "ptype a.*pmf" "type = int \\(A \\*, int\\)"
+gdb_test "ptype a.*pmf" "type = int \\(A \\*( const)?, int\\)"
 
 # Print out a pointer to data member which requires looking into
 # a base class.
@@ -618,9 +618,9 @@ gdb_test "print diamond.*diamond_pmi" "$vhn = 77"
 
 # These two have a different object adjustment, but call the same method.
 gdb_test "print diamond.*left_pmf" \
-    "$vhn = {int \\(Diamond \\*\\)} $hex <Base::get_x\\((void|)\\)>"
+    "$vhn = {int \\(Diamond \\*( const)?\\)} $hex <Base::get_x\\((void|)\\)>"
 gdb_test "print diamond.*right_pmf" \
-    "$vhn = {int \\(Diamond \\*\\)} $hex <Base::get_x\\((void|)\\)>"
+    "$vhn = {int \\(Diamond \\*( const)?\\)} $hex <Base::get_x\\((void|)\\)>"
 
 gdb_test "print (diamond.*left_pmf) ()" "$vhn = 77"
 gdb_test "print (diamond.*right_pmf) ()" "$vhn = 88"
@@ -628,9 +628,9 @@ gdb_test "print (diamond.*right_pmf) ()" "$vhn = 88"
 # These two point to different methods, although they have the same
 # virtual table offsets.
 gdb_test "print diamond.*left_vpmf" \
-    "$vhn = {int \\(Diamond \\*\\)} $hex <Left::vget\\((void|)\\)>"
+    "$vhn = {int \\(Diamond \\*( const)?\\)} $hex <Left::vget\\((void|)\\)>"
 gdb_test "print diamond.*right_vpmf" \
-    "$vhn = {int \\(Diamond \\*\\)} $hex <Right::vget\\((void|)\\)>"
+    "$vhn = {int \\(Diamond \\*( const)?\\)} $hex <Right::vget\\((void|)\\)>"
 
 gdb_test "print (diamond.*left_vpmf) ()" "$vhn = 177"
 gdb_test "print (diamond.*left_base_vpmf) ()" "$vhn = 2077"
@@ -658,5 +658,5 @@ gdb_test "print null_pmi = &A::j" "$vhn = &A::j"
 gdb_test "print null_pmi = 0" "$vhn = NULL"
 
 gdb_test "print null_pmf" "$vhn = NULL"
-gdb_test "print null_pmf = &A::foo" "$vhn = \\(int \\(A::\\*\\)\\(A \\*, int\\)\\) $hex <A::foo ?\\(int\\)>"
+gdb_test "print null_pmf = &A::foo" "$vhn = \\(int \\(A::\\*\\)\\(A \\*( const)?, int\\)\\) $hex <A::foo ?\\(int\\)>"
 gdb_test "print null_pmf = 0" "$vhn = NULL"

@@ -62,10 +62,10 @@ gdb_continue_to_breakpoint "end of constructors"
 # The first of these is for PR gdb/653.
 
 gdb_test "print theA->virt" \
-    "\\$\[0-9\]* = {void \\(A \\*\\)} $hex <A::virt\\((void|)\\)>" \
+    "\\$\[0-9\]* = {void \\(A \\* const\\)} $hex <A::virt\\((void|)\\)>" \
     "print virtual method."
 gdb_test "print theA->nonvirt" \
-    "\\$\[0-9\]* = {void \\(A \\*\\)} $hex <A::nonvirt\\((void|)\\)>" \
+    "\\$\[0-9\]* = {void \\(A \\* const\\)} $hex <A::nonvirt\\((void|)\\)>" \
     "print nonvirtual method."
 
 gdb_exit
