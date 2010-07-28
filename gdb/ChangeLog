@@ -1,5 +1,10 @@
 2010-07-28  Balazs Kezes  <rlblaster@gmail.com>
 
+	* tui/tui-win.c (make_visible_with_new_height): Resize and move
+	the command window to the new size and position.
+
+2010-07-28  Balazs Kezes  <rlblaster@gmail.com>
+
 	* tui/tui-win.c (tui_resize_all): Update the locator's origin's
 	coordinates.
 

@@ -1403,6 +1403,12 @@ make_visible_with_new_height (struct tui_win_info *win_info)
     case CMD_WIN:
       win_info->detail.command_info.cur_line = 0;
       win_info->detail.command_info.curch = 0;
+      wresize (TUI_CMD_WIN->generic.handle,
+	       TUI_CMD_WIN->generic.height,
+	       TUI_CMD_WIN->generic.width);
+      mvwin (TUI_CMD_WIN->generic.handle,
+	     TUI_CMD_WIN->generic.origin.y,
+	     TUI_CMD_WIN->generic.origin.x);
       wmove (win_info->generic.handle,
 	     win_info->detail.command_info.cur_line,
 	     win_info->detail.command_info.curch);
