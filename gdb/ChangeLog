@@ -1,3 +1,7 @@
+2010-07-28  Oleg Nesterov  <oleg@redhat.com>
+
+	* remote.c (readchar): Call pop_target in case of SERIAL_ERROR.
+
 2010-07-28  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove link-warning.h.
