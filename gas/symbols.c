@@ -572,8 +572,8 @@ symbol_clone (symbolS *orgsymP, int replace)
     as_fatal ("bfd_make_empty_symbol: %s", bfd_errmsg (bfd_get_error ()));
   newsymP->bsym = bsymnew;
   bsymnew->name = bsymorg->name;
-  bsymnew->flags =  bsymorg->flags;
-  bsymnew->section =  bsymorg->section;
+  bsymnew->flags = bsymorg->flags & !BSF_SECTION_SYM;
+  bsymnew->section = bsymorg->section;
   bfd_copy_private_symbol_data (bfd_asymbol_bfd (bsymorg), bsymorg,
 				bfd_asymbol_bfd (bsymnew), bsymnew);
 
