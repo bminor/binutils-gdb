@@ -495,6 +495,7 @@ Dhananjay Deshpande				dhananjayd@kpitcummins.com
 Markus Deuling					deuling@de.ibm.com
 Klee Dienes					kdienes@apple.com
 Gabriel Dos Reis                                gdr@integrable-solutions.net
+Sergio Durigan Junior				sergiodj@linux.vnet.ibm.com
 Michael Eager					eager@eagercon.com
 Richard Earnshaw				rearnsha@arm.com
 Steve Ellcey					sje@cup.hp.com
@@ -558,6 +559,7 @@ Chris Moller					cmoller@redhat.com
 Phil Muldoon					pmuldoon@redhat.com
 Pierre Muller					muller@sourceware.org
 Gaius Mulley                                    gaius@glam.ac.uk
+Masaki Muranaka					monaka@monami-software.com
 Joseph Myers					joseph@codesourcery.com
 Fernando Nasser					fnasser@redhat.com
 Adam Nemet					anemet@caviumnetworks.com
@@ -624,8 +626,6 @@ Jie Zhang					jie@codesourcery.com
 Wu Zhou						woodzltc@cn.ibm.com
 Yoshinori Sato					ysato@users.sourceforge.jp
 Hui Zhu						teawater@gmail.com
-Sergio Durigan Junior				sergiodj@linux.vnet.ibm.com
-Masaki Muranaka					monaka@monami-software.com
 
 
 			Past Maintainers
