@@ -20,9 +20,9 @@ m68hc11		Stephane Carrez <stcarrez@nerim.fr>
 microblaze	Michael Eager <eager@eagercon.com>
 mips		Thiemo Seufer <ths@networkno.de>
 moxie		Anthony Green <green@moxielogic.com>
+rx		DJ Delorie <dj@redhat.com>
 sh		(global maintainers)
 sh64		Dave Brolley <brolley@redhat.com>
-rx		DJ Delorie <dj@redhat.com>
 common		Frank Ch. Eigler <fche@redhat.com>
 *		(target, then global maintainers)
 
