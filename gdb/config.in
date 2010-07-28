@@ -697,6 +697,9 @@
 /* Define to 1 if `vfork' works. */
 #undef HAVE_WORKING_VFORK
 
+/* Define to 1 if you have the `wresize' function. */
+#undef HAVE_WRESIZE
+
 /* Define to 1 if you have the `XML_StopParser' function. */
 #undef HAVE_XML_STOPPARSER
 

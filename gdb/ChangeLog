@@ -1,3 +1,11 @@
+2010-07-28  Pedro Alves  <pedro@codesourcery.com>
+
+	PR build/11848
+	* configure.ac: Check for wresize.
+	* configure, config.in: Regenerate.
+	* tui/tui-win.c (make_visible_with_new_height): Wrap wresize call
+	with HAVE_WRESIZE.
+
 2010-07-28  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11060:
