@@ -1,3 +1,7 @@
+2010-07-28  DJ Delorie  <dj@redhat.com>
+
+	* MAINTAINERS: Add self as RX maintainer.  Sort list.
+
 2010-06-08  Nick Clifton  <nickc@redhat.com>
 
 	* reg.c (set_oszc): Use unsigned int for the mask.
