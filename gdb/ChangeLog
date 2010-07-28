@@ -1,3 +1,7 @@
+2010-07-28  Oleg Nesterov  <oleg@redhat.com>
+
+	* remote.c (readchar): Call pop_target in case of SERIAL_ERROR.
+
 2010-07-27  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_value_data): Never sign extend.

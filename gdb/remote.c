@@ -6667,7 +6667,8 @@ readchar (int timeout)
       error (_("Remote connection closed"));
       /* no return */
     case SERIAL_ERROR:
-      perror_with_name (_("Remote communication error"));
+      pop_target ();
+      perror_with_name (_("Remote communication error.  Target disconnected."));
       /* no return */
     case SERIAL_TIMEOUT:
       break;
