@@ -1,3 +1,9 @@
+2010-07-28  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure.ac (AM_INIT_AUTOMAKE): Use parallel-tests option.
+	* Makefile.in: Regenerate.
+	* testsuite/Makefile.in: Regenerate.
+
 2010-07-27  Jeffrey Yasskin  <jyasskin@google.com>
 
 	* testsuite/debug_msg.sh: Test mixed weak/strong symbol behavior.

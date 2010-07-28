@@ -1177,6 +1177,76 @@ ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+# Restructured Text title and section.
+am__rst_title = sed 's/.*/   &   /;h;s/./=/g;p;x;p;g;p;s/.*//'
+am__rst_section = sed 'p;s/./=/g;p;g'
+# Put stdin (possibly several lines separated by ".  ") in a box.
+am__text_box = $(AWK) '{				\
+  n = split($$0, lines, "\\.  "); max = 0;		\
+  for (i = 1; i <= n; ++i)				\
+    if (max < length(lines[i]))				\
+      max = length(lines[i]);				\
+  for (i = 0; i < max; ++i) line = line "=";		\
+  print line;						\
+  for (i = 1; i <= n; ++i) if (lines[i]) print lines[i];\
+  print line;						\
+}'
+# Solaris 10 'make', and several other traditional 'make' implementations,
+# pass "-e" to $(SHELL).  This contradicts POSIX.  Work around the problem
+# by disabling -e (using the XSI extension "set +e") if it's set.
+am__sh_e_setup = case $$- in *e*) set +e;; esac
+# To be inserted before the command running the test.  Creates the
+# directory for the log if needed.  Stores in $dir the directory
+# containing $f, in $tst the test, in $log the log, and passes
+# TESTS_ENVIRONMENT.  Save and restore TERM around use of
+# TESTS_ENVIRONMENT, in case that unsets it.
+am__check_pre = \
+$(am__sh_e_setup);					\
+$(am__vpath_adj_setup) $(am__vpath_adj)			\
+srcdir=$(srcdir); export srcdir;			\
+rm -f $@-t;						\
+trap 'st=$$?; rm -f '\''$(abs_builddir)/$@-t'\''; (exit $$st); exit $$st' \
+  1 2 13 15;						\
+am__odir=`echo "./$@" | sed 's|/[^/]*$$||'`;		\
+test "x$$am__odir" = x. || $(MKDIR_P) "$$am__odir" || exit $$?;	\
+if test -f "./$$f"; then dir=./;			\
+elif test -f "$$f"; then dir=;				\
+else dir="$(srcdir)/"; fi;				\
+tst=$$dir$$f; log='$@'; __SAVED_TERM=$$TERM;		\
+$(TESTS_ENVIRONMENT)
+RECHECK_LOGS = $(TEST_LOGS)
+AM_RECURSIVE_TARGETS = check check-html recheck recheck-html
+TEST_SUITE_LOG = test-suite.log
+TEST_SUITE_HTML = $(TEST_SUITE_LOG:.log=.html)
+TEST_EXTENSIONS = @EXEEXT@ .test
+LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.test.log=.log)
+TEST_LOG_COMPILE = $(TEST_LOG_COMPILER) $(AM_TEST_LOG_FLAGS) \
+	$(TEST_LOG_FLAGS)
+TEST_LOGS_TMP = $(TEST_LOGS:.log=.log-t)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AUTOCONF = @AUTOCONF@
@@ -1730,7 +1800,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cc .o .obj
+.SUFFIXES: .c .cc .html .log .o .obj .test .test$(EXEEXT)
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -2346,97 +2416,449 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
-check-TESTS: $(TESTS)
-	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
-	srcdir=$(srcdir); export srcdir; \
-	list=' $(TESTS) '; \
-	$(am__tty_colors); \
-	if test -n "$$list"; then \
-	  for tst in $$list; do \
-	    if test -f ./$$tst; then dir=./; \
-	    elif test -f $$tst; then dir=; \
-	    else dir="$(srcdir)/"; fi; \
-	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *[\ \	]$$tst[\ \	]*) \
-		xpass=`expr $$xpass + 1`; \
-		failed=`expr $$failed + 1`; \
-		col=$$red; res=XPASS; \
-	      ;; \
-	      *) \
-		col=$$grn; res=PASS; \
-	      ;; \
-	      esac; \
-	    elif test $$? -ne 77; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *[\ \	]$$tst[\ \	]*) \
-		xfail=`expr $$xfail + 1`; \
-		col=$$lgn; res=XFAIL; \
-	      ;; \
-	      *) \
-		failed=`expr $$failed + 1`; \
-		col=$$red; res=FAIL; \
-	      ;; \
-	      esac; \
-	    else \
-	      skip=`expr $$skip + 1`; \
-	      col=$$blu; res=SKIP; \
-	    fi; \
-	    echo "$${col}$$res$${std}: $$tst"; \
-	  done; \
-	  if test "$$all" -eq 1; then \
-	    tests="test"; \
-	    All=""; \
-	  else \
-	    tests="tests"; \
-	    All="All "; \
-	  fi; \
-	  if test "$$failed" -eq 0; then \
-	    if test "$$xfail" -eq 0; then \
-	      banner="$$All$$all $$tests passed"; \
-	    else \
-	      if test "$$xfail" -eq 1; then failures=failure; else failures=failures; fi; \
-	      banner="$$All$$all $$tests behaved as expected ($$xfail expected $$failures)"; \
-	    fi; \
-	  else \
-	    if test "$$xpass" -eq 0; then \
-	      banner="$$failed of $$all $$tests failed"; \
-	    else \
-	      if test "$$xpass" -eq 1; then passes=pass; else passes=passes; fi; \
-	      banner="$$failed of $$all $$tests did not behave as expected ($$xpass unexpected $$passes)"; \
-	    fi; \
-	  fi; \
-	  dashes="$$banner"; \
-	  skipped=""; \
-	  if test "$$skip" -ne 0; then \
-	    if test "$$skip" -eq 1; then \
-	      skipped="($$skip test was not run)"; \
-	    else \
-	      skipped="($$skip tests were not run)"; \
-	    fi; \
-	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$skipped"; \
-	  fi; \
-	  report=""; \
-	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
-	    report="Please report to $(PACKAGE_BUGREPORT)"; \
-	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$report"; \
-	  fi; \
-	  dashes=`echo "$$dashes" | sed s/./=/g`; \
-	  if test "$$failed" -eq 0; then \
-	    echo "$$grn$$dashes"; \
-	  else \
-	    echo "$$red$$dashes"; \
-	  fi; \
-	  echo "$$banner"; \
-	  test -z "$$skipped" || echo "$$skipped"; \
-	  test -z "$$report" || echo "$$report"; \
-	  echo "$$dashes$$std"; \
-	  test "$$failed" -eq 0; \
-	else :; fi
+# To be appended to the command running the test.  Handle the stdout
+# and stderr redirection, and catch the exit status.
+am__check_post =					\
+>$@-t 2>&1;						\
+estatus=$$?;						\
+if test -n '$(DISABLE_HARD_ERRORS)'			\
+   && test $$estatus -eq 99; then			\
+  estatus=1;						\
+fi;							\
+TERM=$$__SAVED_TERM; export TERM;			\
+$(am__tty_colors);					\
+xfailed=PASS;						\
+case " $(XFAIL_TESTS) " in				\
+  *[\ \	]$$f[\ \	]* | *[\ \	]$$dir$$f[\ \	]*) \
+    xfailed=XFAIL;;					\
+esac;							\
+case $$estatus:$$xfailed in				\
+    0:XFAIL) col=$$red; res=XPASS;;			\
+    0:*)     col=$$grn; res=PASS ;;			\
+    77:*)    col=$$blu; res=SKIP ;;			\
+    99:*)    col=$$red; res=FAIL ;;			\
+    *:XFAIL) col=$$lgn; res=XFAIL;;			\
+    *:*)     col=$$red; res=FAIL ;;			\
+esac;							\
+echo "$${col}$$res$${std}: $$f";			\
+echo "$$res: $$f (exit: $$estatus)" |			\
+  $(am__rst_section) >$@;				\
+cat $@-t >>$@;						\
+rm -f $@-t
+
+$(TEST_SUITE_LOG): $(TEST_LOGS)
+	@$(am__sh_e_setup);						\
+	list='$(TEST_LOGS)';						\
+	results=`for f in $$list; do					\
+		   read line < $$f && echo "$$line" || echo FAIL;	\
+		 done`;							\
+	all=`echo "$$results" | sed '/^$$/d' | wc -l | sed -e 's/^[	 ]*//'`; \
+	fail=`echo "$$results" | grep -c '^FAIL'`;			\
+	pass=`echo "$$results" | grep -c '^PASS'`;			\
+	skip=`echo "$$results" | grep -c '^SKIP'`;			\
+	xfail=`echo "$$results" | grep -c '^XFAIL'`;			\
+	xpass=`echo "$$results" | grep -c '^XPASS'`;			\
+	failures=`expr $$fail + $$xpass`;				\
+	all=`expr $$all - $$skip`;					\
+	if test "$$all" -eq 1; then tests=test; All=;			\
+	else tests=tests; All="All "; fi;				\
+	case fail=$$fail:xpass=$$xpass:xfail=$$xfail in			\
+	  fail=0:xpass=0:xfail=0)					\
+	    msg="$$All$$all $$tests passed.  ";				\
+	    exit=true;;							\
+	  fail=0:xpass=0:xfail=*)					\
+	    msg="$$All$$all $$tests behaved as expected";		\
+	    if test "$$xfail" -eq 1; then xfailures=failure;		\
+	    else xfailures=failures; fi;				\
+	    msg="$$msg ($$xfail expected $$xfailures).  ";		\
+	    exit=true;;							\
+	  fail=*:xpass=0:xfail=*)					\
+	    msg="$$fail of $$all $$tests failed.  ";			\
+	    exit=false;;						\
+	  fail=*:xpass=*:xfail=*)					\
+	    msg="$$failures of $$all $$tests did not behave as expected"; \
+	    if test "$$xpass" -eq 1; then xpasses=pass;			\
+	    else xpasses=passes; fi;					\
+	    msg="$$msg ($$xpass unexpected $$xpasses).  ";		\
+	    exit=false;;						\
+	  *)								\
+	    echo >&2 "incorrect case"; exit 4;;				\
+	esac;								\
+	if test "$$skip" -ne 0; then					\
+	  if test "$$skip" -eq 1; then					\
+	    msg="$$msg($$skip test was not run).  ";			\
+	  else								\
+	    msg="$$msg($$skip tests were not run).  ";			\
+	  fi;								\
+	fi;								\
+	{								\
+	  echo "$(PACKAGE_STRING): $(subdir)/$(TEST_SUITE_LOG)" |	\
+	    $(am__rst_title);						\
+	  echo "$$msg";							\
+	  echo;								\
+	  echo ".. contents:: :depth: 2";				\
+	  echo;								\
+	  for f in $$list; do						\
+	    read line < $$f;						\
+	    case $$line in						\
+	      PASS:*|XFAIL:*);;						\
+	      *) echo; cat $$f;;					\
+	    esac;							\
+	  done;								\
+	} >$(TEST_SUITE_LOG).tmp;					\
+	mv $(TEST_SUITE_LOG).tmp $(TEST_SUITE_LOG);			\
+	if test "$$failures" -ne 0; then				\
+	  msg="$${msg}See $(subdir)/$(TEST_SUITE_LOG).  ";		\
+	  if test -n "$(PACKAGE_BUGREPORT)"; then			\
+	    msg="$${msg}Please report to $(PACKAGE_BUGREPORT).  ";	\
+	  fi;								\
+	fi;								\
+	test x"$$VERBOSE" = x || $$exit || cat $(TEST_SUITE_LOG);	\
+	$(am__tty_colors);						\
+	if $$exit; then							\
+	  echo $(ECHO_N) "$$grn$(ECHO_C)";				\
+	 else								\
+	  echo $(ECHO_N) "$$red$(ECHO_C)";				\
+	fi;								\
+	echo "$$msg" | $(am__text_box);					\
+	echo $(ECHO_N) "$$std$(ECHO_C)";				\
+	$$exit
+
+# Run all the tests.
+check-TESTS:
+	@list='$(RECHECK_LOGS)'; test -z "$$list" || rm -f $$list
+	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
+	@set_logs=; if test "X$(TEST_LOGS)" = X.log; then		\
+	  set_logs=TEST_LOGS=;						\
+	fi;								\
+	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_LOG) $$set_logs
+
+.log.html:
+	@list='$(RST2HTML) $$RST2HTML rst2html rst2html.py';		\
+	for r2h in $$list; do						\
+	  if ($$r2h --version) >/dev/null 2>&1; then			\
+	    R2H=$$r2h;							\
+	  fi;								\
+	done;								\
+	if test -z "$$R2H"; then					\
+	  echo >&2 "cannot find rst2html, cannot create $@";		\
+	  exit 2;							\
+	fi;								\
+	$$R2H $< >$@.tmp
+	@mv $@.tmp $@
+
+# Be sure to run check first, and then to convert the result.
+# Beware of concurrent executions.  Run "check" not "check-TESTS", as
+# check-SCRIPTS and other dependencies are rebuilt by the former only.
+# And expect check to fail.
+check-html:
+	@if $(MAKE) $(AM_MAKEFLAGS) check; then			\
+	  rv=0; else rv=$$?;					\
+	fi;							\
+	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_HTML) || exit 4;	\
+	exit $$rv
+recheck recheck-html:
+	@target=`echo $@ | sed 's,^re,,'`;				\
+	list='$(TEST_LOGS)';						\
+	list=`for f in $$list; do					\
+	        test -f $$f || continue;				\
+	        if read line < $$f; then				\
+	          case $$line in FAIL*|XPASS*) echo $$f;; esac;		\
+	        else echo $$f; fi;					\
+	      done | tr '\012\015' '  '`;				\
+	$(MAKE) $(AM_MAKEFLAGS) $$target AM_MAKEFLAGS='$(AM_MAKEFLAGS) TEST_LOGS="'"$$list"'"'
+incremental_test.sh.log: incremental_test.sh
+	@p='incremental_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+gc_comdat_test.sh.log: gc_comdat_test.sh
+	@p='gc_comdat_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+gc_tls_test.sh.log: gc_tls_test.sh
+	@p='gc_tls_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+gc_orphan_section_test.sh.log: gc_orphan_section_test.sh
+	@p='gc_orphan_section_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_test.sh.log: icf_test.sh
+	@p='icf_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_keep_unique_test.sh.log: icf_keep_unique_test.sh
+	@p='icf_keep_unique_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_safe_test.sh.log: icf_safe_test.sh
+	@p='icf_safe_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_safe_so_test.sh.log: icf_safe_so_test.sh
+	@p='icf_safe_so_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+final_layout.sh.log: final_layout.sh
+	@p='final_layout.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_preemptible_functions_test.sh.log: icf_preemptible_functions_test.sh
+	@p='icf_preemptible_functions_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_string_merge_test.sh.log: icf_string_merge_test.sh
+	@p='icf_string_merge_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_shared.sh.log: two_file_shared.sh
+	@p='two_file_shared.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_plt.sh.log: weak_plt.sh
+	@p='weak_plt.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+debug_msg.sh.log: debug_msg.sh
+	@p='debug_msg.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+undef_symbol.sh.log: undef_symbol.sh
+	@p='undef_symbol.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_1.sh.log: ver_test_1.sh
+	@p='ver_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_2.sh.log: ver_test_2.sh
+	@p='ver_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_4.sh.log: ver_test_4.sh
+	@p='ver_test_4.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_5.sh.log: ver_test_5.sh
+	@p='ver_test_5.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_7.sh.log: ver_test_7.sh
+	@p='ver_test_7.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_10.sh.log: ver_test_10.sh
+	@p='ver_test_10.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_matching_test.sh.log: ver_matching_test.sh
+	@p='ver_matching_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_3.sh.log: script_test_3.sh
+	@p='script_test_3.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_4.sh.log: script_test_4.sh
+	@p='script_test_4.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_5.sh.log: script_test_5.sh
+	@p='script_test_5.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_6.sh.log: script_test_6.sh
+	@p='script_test_6.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_7.sh.log: script_test_7.sh
+	@p='script_test_7.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_8.sh.log: script_test_8.sh
+	@p='script_test_8.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_9.sh.log: script_test_9.sh
+	@p='script_test_9.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+dynamic_list.sh.log: dynamic_list.sh
+	@p='dynamic_list.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_1.sh.log: plugin_test_1.sh
+	@p='plugin_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_2.sh.log: plugin_test_2.sh
+	@p='plugin_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_3.sh.log: plugin_test_3.sh
+	@p='plugin_test_3.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_4.sh.log: plugin_test_4.sh
+	@p='plugin_test_4.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_6.sh.log: plugin_test_6.sh
+	@p='plugin_test_6.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_7.sh.log: plugin_test_7.sh
+	@p='plugin_test_7.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exclude_libs_test.sh.log: exclude_libs_test.sh
+	@p='exclude_libs_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+discard_locals_test.sh.log: discard_locals_test.sh
+	@p='discard_locals_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+hidden_test.sh.log: hidden_test.sh
+	@p='hidden_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+retain_symbols_file_test.sh.log: retain_symbols_file_test.sh
+	@p='retain_symbols_file_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+no_version_test.sh.log: no_version_test.sh
+	@p='no_version_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+split_i386.sh.log: split_i386.sh
+	@p='split_i386.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+split_x86_64.sh.log: split_x86_64.sh
+	@p='split_x86_64.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_abs_global.sh.log: arm_abs_global.sh
+	@p='arm_abs_global.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_branch_in_range.sh.log: arm_branch_in_range.sh
+	@p='arm_branch_in_range.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_fix_v4bx.sh.log: arm_fix_v4bx.sh
+	@p='arm_fix_v4bx.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_attr_merge.sh.log: arm_attr_merge.sh
+	@p='arm_attr_merge.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+object_unittest.log: object_unittest$(EXEEXT)
+	@p='object_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+binary_unittest.log: binary_unittest$(EXEEXT)
+	@p='binary_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_virtual_function_folding_test.log: icf_virtual_function_folding_test$(EXEEXT)
+	@p='icf_virtual_function_folding_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+basic_test.log: basic_test$(EXEEXT)
+	@p='basic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+basic_static_test.log: basic_static_test$(EXEEXT)
+	@p='basic_static_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+basic_pic_test.log: basic_pic_test$(EXEEXT)
+	@p='basic_pic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+basic_static_pic_test.log: basic_static_pic_test$(EXEEXT)
+	@p='basic_static_pic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+basic_pie_test.log: basic_pie_test$(EXEEXT)
+	@p='basic_pie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+constructor_test.log: constructor_test$(EXEEXT)
+	@p='constructor_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+constructor_static_test.log: constructor_static_test$(EXEEXT)
+	@p='constructor_static_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_test.log: two_file_test$(EXEEXT)
+	@p='two_file_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_static_test.log: two_file_static_test$(EXEEXT)
+	@p='two_file_static_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_pic_test.log: two_file_pic_test$(EXEEXT)
+	@p='two_file_pic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_shared_1_test.log: two_file_shared_1_test$(EXEEXT)
+	@p='two_file_shared_1_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_shared_2_test.log: two_file_shared_2_test$(EXEEXT)
+	@p='two_file_shared_2_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_shared_1_pic_2_test.log: two_file_shared_1_pic_2_test$(EXEEXT)
+	@p='two_file_shared_1_pic_2_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_shared_2_pic_1_test.log: two_file_shared_2_pic_1_test$(EXEEXT)
+	@p='two_file_shared_2_pic_1_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_same_shared_test.log: two_file_same_shared_test$(EXEEXT)
+	@p='two_file_same_shared_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_separate_shared_12_test.log: two_file_separate_shared_12_test$(EXEEXT)
+	@p='two_file_separate_shared_12_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_separate_shared_21_test.log: two_file_separate_shared_21_test$(EXEEXT)
+	@p='two_file_separate_shared_21_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_relocatable_test.log: two_file_relocatable_test$(EXEEXT)
+	@p='two_file_relocatable_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_pie_test.log: two_file_pie_test$(EXEEXT)
+	@p='two_file_pie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_shared_1_nonpic_test.log: two_file_shared_1_nonpic_test$(EXEEXT)
+	@p='two_file_shared_1_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_shared_2_nonpic_test.log: two_file_shared_2_nonpic_test$(EXEEXT)
+	@p='two_file_shared_2_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_same_shared_nonpic_test.log: two_file_same_shared_nonpic_test$(EXEEXT)
+	@p='two_file_same_shared_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_separate_shared_12_nonpic_test.log: two_file_separate_shared_12_nonpic_test$(EXEEXT)
+	@p='two_file_separate_shared_12_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_separate_shared_21_nonpic_test.log: two_file_separate_shared_21_nonpic_test$(EXEEXT)
+	@p='two_file_separate_shared_21_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_mixed_shared_test.log: two_file_mixed_shared_test$(EXEEXT)
+	@p='two_file_mixed_shared_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_mixed_2_shared_test.log: two_file_mixed_2_shared_test$(EXEEXT)
+	@p='two_file_mixed_2_shared_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_strip_test.log: two_file_strip_test$(EXEEXT)
+	@p='two_file_strip_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_same_shared_strip_test.log: two_file_same_shared_strip_test$(EXEEXT)
+	@p='two_file_same_shared_strip_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+common_test_1.log: common_test_1$(EXEEXT)
+	@p='common_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+common_test_2.log: common_test_2$(EXEEXT)
+	@p='common_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exception_test.log: exception_test$(EXEEXT)
+	@p='exception_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exception_static_test.log: exception_static_test$(EXEEXT)
+	@p='exception_static_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exception_shared_1_test.log: exception_shared_1_test$(EXEEXT)
+	@p='exception_shared_1_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exception_shared_2_test.log: exception_shared_2_test$(EXEEXT)
+	@p='exception_shared_2_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exception_same_shared_test.log: exception_same_shared_test$(EXEEXT)
+	@p='exception_same_shared_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exception_separate_shared_12_test.log: exception_separate_shared_12_test$(EXEEXT)
+	@p='exception_separate_shared_12_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exception_separate_shared_21_test.log: exception_separate_shared_21_test$(EXEEXT)
+	@p='exception_separate_shared_21_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_test.log: weak_test$(EXEEXT)
+	@p='weak_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_undef_test.log: weak_undef_test$(EXEEXT)
+	@p='weak_undef_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_undef_nonpic_test.log: weak_undef_nonpic_test$(EXEEXT)
+	@p='weak_undef_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_alias_test.log: weak_alias_test$(EXEEXT)
+	@p='weak_alias_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+weak_plt.log: weak_plt$(EXEEXT)
+	@p='weak_plt$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+copy_test.log: copy_test$(EXEEXT)
+	@p='copy_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_test.log: tls_test$(EXEEXT)
+	@p='tls_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_pic_test.log: tls_pic_test$(EXEEXT)
+	@p='tls_pic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_pie_test.log: tls_pie_test$(EXEEXT)
+	@p='tls_pie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_pie_pic_test.log: tls_pie_pic_test$(EXEEXT)
+	@p='tls_pie_pic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_shared_test.log: tls_shared_test$(EXEEXT)
+	@p='tls_shared_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_shared_ie_test.log: tls_shared_ie_test$(EXEEXT)
+	@p='tls_shared_ie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_shared_gd_to_ie_test.log: tls_shared_gd_to_ie_test$(EXEEXT)
+	@p='tls_shared_gd_to_ie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_shared_gnu2_gd_to_ie_test.log: tls_shared_gnu2_gd_to_ie_test$(EXEEXT)
+	@p='tls_shared_gnu2_gd_to_ie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_shared_gnu2_test.log: tls_shared_gnu2_test$(EXEEXT)
+	@p='tls_shared_gnu2_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_static_test.log: tls_static_test$(EXEEXT)
+	@p='tls_static_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_static_pic_test.log: tls_static_pic_test$(EXEEXT)
+	@p='tls_static_pic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_shared_nonpic_test.log: tls_shared_nonpic_test$(EXEEXT)
+	@p='tls_shared_nonpic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+many_sections_test.log: many_sections_test$(EXEEXT)
+	@p='many_sections_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+many_sections_r_test.log: many_sections_r_test$(EXEEXT)
+	@p='many_sections_r_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+initpri1.log: initpri1$(EXEEXT)
+	@p='initpri1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+flagstest_o_specialfile.log: flagstest_o_specialfile$(EXEEXT)
+	@p='flagstest_o_specialfile$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+flagstest_compress_debug_sections.log: flagstest_compress_debug_sections$(EXEEXT)
+	@p='flagstest_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+flagstest_o_specialfile_and_compress_debug_sections.log: flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
+	@p='flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test.log: ver_test$(EXEEXT)
+	@p='ver_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_2.log: ver_test_2$(EXEEXT)
+	@p='ver_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_6.log: ver_test_6$(EXEEXT)
+	@p='ver_test_6$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_8.log: ver_test_8$(EXEEXT)
+	@p='ver_test_8$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_9.log: ver_test_9$(EXEEXT)
+	@p='ver_test_9$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ver_test_11.log: ver_test_11$(EXEEXT)
+	@p='ver_test_11$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+protected_1.log: protected_1$(EXEEXT)
+	@p='protected_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+protected_2.log: protected_2$(EXEEXT)
+	@p='protected_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+relro_test.log: relro_test$(EXEEXT)
+	@p='relro_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+relro_script_test.log: relro_script_test$(EXEEXT)
+	@p='relro_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_1.log: script_test_1$(EXEEXT)
+	@p='script_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_2.log: script_test_2$(EXEEXT)
+	@p='script_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+justsyms.log: justsyms$(EXEEXT)
+	@p='justsyms$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+binary_test.log: binary_test$(EXEEXT)
+	@p='binary_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_3.log: script_test_3$(EXEEXT)
+	@p='script_test_3$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_phdrs_script_test.log: tls_phdrs_script_test$(EXEEXT)
+	@p='tls_phdrs_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+tls_script_test.log: tls_script_test$(EXEEXT)
+	@p='tls_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+thin_archive_test_1.log: thin_archive_test_1$(EXEEXT)
+	@p='thin_archive_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+thin_archive_test_2.log: thin_archive_test_2$(EXEEXT)
+	@p='thin_archive_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_1.log: plugin_test_1$(EXEEXT)
+	@p='plugin_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_2.log: plugin_test_2$(EXEEXT)
+	@p='plugin_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_3.log: plugin_test_3$(EXEEXT)
+	@p='plugin_test_3$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_4.log: plugin_test_4$(EXEEXT)
+	@p='plugin_test_4$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_5.log: plugin_test_5$(EXEEXT)
+	@p='plugin_test_5$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_6.log: plugin_test_6$(EXEEXT)
+	@p='plugin_test_6$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_7.log: plugin_test_7$(EXEEXT)
+	@p='plugin_test_7$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+plugin_test_8.log: plugin_test_8$(EXEEXT)
+	@p='plugin_test_8$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+exclude_libs_test.log: exclude_libs_test$(EXEEXT)
+	@p='exclude_libs_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+local_labels_test.log: local_labels_test$(EXEEXT)
+	@p='local_labels_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+discard_locals_test.log: discard_locals_test$(EXEEXT)
+	@p='discard_locals_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+large.log: large$(EXEEXT)
+	@p='large$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+permission_test.log: permission_test$(EXEEXT)
+	@p='permission_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+searched_file_test.log: searched_file_test$(EXEEXT)
+	@p='searched_file_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+.test.log:
+	@p='$<'; $(am__check_pre) $(TEST_LOG_COMPILE) "$$tst" $(am__check_post)
+@am__EXEEXT_TRUE@.test$(EXEEXT).log:
+@am__EXEEXT_TRUE@	@p='$<'; $(am__check_pre) $(TEST_LOG_COMPILE) "$$tst" $(am__check_post)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_LIBRARIES) $(check_PROGRAMS) \
 	  $(check_SCRIPTS) $(check_DATA)
@@ -2462,6 +2884,10 @@ install-strip:
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
 	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+	-test -z "$(TEST_LOGS)" || rm -f $(TEST_LOGS)
+	-test -z "$(TEST_LOGS_TMP)" || rm -f $(TEST_LOGS_TMP)
+	-test -z "$(TEST_SUITE_HTML)" || rm -f $(TEST_SUITE_HTML)
+	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 
 clean-generic:
 
@@ -2543,20 +2969,21 @@ ps-am:
 
 uninstall-am:
 
-.MAKE: all check check-am install install-am install-strip
+.MAKE: all check check-am check-html install install-am install-strip \
+	recheck recheck-html
 
-.PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-checkLIBRARIES clean-checkPROGRAMS clean-generic ctags \
-	distclean distclean-compile distclean-generic distclean-tags \
-	dvi dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am
+.PHONY: CTAGS GTAGS all all-am check check-TESTS check-am check-html \
+	clean clean-checkLIBRARIES clean-checkPROGRAMS clean-generic \
+	ctags distclean distclean-compile distclean-generic \
+	distclean-tags dvi dvi-am html html-am info info-am install \
+	install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
+	recheck recheck-html tags uninstall uninstall-am
 
 
 # ---------------------------------------------------------------------
