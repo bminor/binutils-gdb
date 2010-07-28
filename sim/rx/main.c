@@ -82,6 +82,8 @@ done (int exit_code)
 	printf ("insns: %14s\n", comma (rx_cycles));
       else
 	printf ("insns: %u\n", rx_cycles);
+
+      pipeline_stats ();
     }
   exit (exit_code);
 }

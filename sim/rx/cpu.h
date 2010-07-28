@@ -76,7 +76,23 @@ typedef struct
   SI r_temp;
 
   DI r_acc;
+
+#ifdef CYCLE_ACCURATE
+  /* If set, RTS/RTSD take 2 fewer cycles.  */
+  char fast_return;
+  SI link_register;
+
+  unsigned long long cycle_count;
+  /* Bits saying what kind of memory operands the previous insn had.  */
+  int m2m;
+  /* Target register for load. */
+  int rt;
+#endif
 } regs_type;
+
+#define M2M_SRC		0x01
+#define M2M_DST		0x02
+#define M2M_BOTH	0x03
 
 #define sp	0
 #define psw	16
@@ -219,6 +235,9 @@ extern unsigned int heaptop;
 extern unsigned int heapbottom;
 
 extern int decode_opcode (void);
+extern void reset_pipeline_stats (void);
+extern void halt_pipeline_stats (void);
+extern void pipeline_stats (void);
 
 extern void trace_register_changes ();
 extern void generate_access_exception (void);

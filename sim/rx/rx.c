@@ -18,6 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,11 +30,252 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "syscalls.h"
 #include "fpu.h"
 #include "err.h"
+#include "misc.h"
 
-#define tprintf if (trace) printf
+#ifdef CYCLE_STATS
+static const char * id_names[] = {
+  "RXO_unknown",
+  "RXO_mov",	/* d = s (signed) */
+  "RXO_movbi",	/* d = [s,s2] (signed) */
+  "RXO_movbir",	/* [s,s2] = d (signed) */
+  "RXO_pushm",	/* s..s2 */
+  "RXO_popm",	/* s..s2 */
+  "RXO_xchg",	/* s <-> d */
+  "RXO_stcc",	/* d = s if cond(s2) */
+  "RXO_rtsd",	/* rtsd, 1=imm, 2-0 = reg if reg type */
+
+  /* These are all either d OP= s or, if s2 is set, d = s OP s2.  Note
+     that d may be "None".  */
+  "RXO_and",
+  "RXO_or",
+  "RXO_xor",
+  "RXO_add",
+  "RXO_sub",
+  "RXO_mul",
+  "RXO_div",
+  "RXO_divu",
+  "RXO_shll",
+  "RXO_shar",
+  "RXO_shlr",
+
+  "RXO_adc",	/* d = d + s + carry */
+  "RXO_sbb",	/* d = d - s - ~carry */
+  "RXO_abs",	/* d = |s| */
+  "RXO_max",	/* d = max(d,s) */
+  "RXO_min",	/* d = min(d,s) */
+  "RXO_emul",	/* d:64 = d:32 * s */
+  "RXO_emulu",	/* d:64 = d:32 * s (unsigned) */
+  "RXO_ediv",	/* d:64 / s; d = quot, d+1 = rem */
+  "RXO_edivu",	/* d:64 / s; d = quot, d+1 = rem */
+
+  "RXO_rolc",	/* d <<= 1 through carry */
+  "RXO_rorc",	/* d >>= 1 through carry*/
+  "RXO_rotl",	/* d <<= #s without carry */
+  "RXO_rotr",	/* d >>= #s without carry*/
+  "RXO_revw",	/* d = revw(s) */
+  "RXO_revl",	/* d = revl(s) */
+  "RXO_branch",	/* pc = d if cond(s) */
+  "RXO_branchrel",/* pc += d if cond(s) */
+  "RXO_jsr",	/* pc = d */
+  "RXO_jsrrel",	/* pc += d */
+  "RXO_rts",
+  "RXO_nop",
+  "RXO_nop2",
+  "RXO_nop3",
+
+  "RXO_scmpu",
+  "RXO_smovu",
+  "RXO_smovb",
+  "RXO_suntil",
+  "RXO_swhile",
+  "RXO_smovf",
+  "RXO_sstr",
+
+  "RXO_rmpa",
+  "RXO_mulhi",
+  "RXO_mullo",
+  "RXO_machi",
+  "RXO_maclo",
+  "RXO_mvtachi",
+  "RXO_mvtaclo",
+  "RXO_mvfachi",
+  "RXO_mvfacmi",
+  "RXO_mvfaclo",
+  "RXO_racw",
+
+  "RXO_sat",	/* sat(d) */
+  "RXO_satr",
+
+  "RXO_fadd",	/* d op= s */
+  "RXO_fcmp",
+  "RXO_fsub",
+  "RXO_ftoi",
+  "RXO_fmul",
+  "RXO_fdiv",
+  "RXO_round",
+  "RXO_itof",
+
+  "RXO_bset",	/* d |= (1<<s) */
+  "RXO_bclr",	/* d &= ~(1<<s) */
+  "RXO_btst",	/* s & (1<<s2) */
+  "RXO_bnot",	/* d ^= (1<<s) */
+  "RXO_bmcc",	/* d<s> = cond(s2) */
+
+  "RXO_clrpsw",	/* flag index in d */
+  "RXO_setpsw",	/* flag index in d */
+  "RXO_mvtipl",	/* new IPL in s */
+
+  "RXO_rtfi",
+  "RXO_rte",
+  "RXO_rtd",	/* undocumented */
+  "RXO_brk",
+  "RXO_dbt",	/* undocumented */
+  "RXO_int",	/* vector id in s */
+  "RXO_stop",
+  "RXO_wait",
+
+  "RXO_sccnd",	/* d = cond(s) ? 1 : 0 */
+};
+
+static const char * optype_names[] = {
+  "    ",
+  "#Imm",	/* #addend */
+  " Rn ",	/* Rn */
+  "[Rn]",	/* [Rn + addend] */
+  "Ps++",	/* [Rn+] */
+  "--Pr",	/* [-Rn] */
+  " cc ",	/* eq, gtu, etc */
+  "Flag"	/* [UIOSZC] */
+};
+
+#define N_RXO (sizeof(id_names)/sizeof(id_names[0]))
+#define N_RXT (sizeof(optype_names)/sizeof(optype_names[0]))
+#define N_MAP 30
+
+static unsigned long long benchmark_start_cycle;
+static unsigned long long benchmark_end_cycle;
+
+static int op_cache[N_RXT][N_RXT][N_RXT];
+static int op_cache_rev[N_MAP];
+static int op_cache_idx = 0;
+
+static int
+op_lookup (int a, int b, int c)
+{
+  if (op_cache[a][b][c])
+    return op_cache[a][b][c];
+  op_cache_idx ++;
+  if (op_cache_idx >= N_MAP)
+    {
+      printf("op_cache_idx exceeds %d\n", N_MAP);
+      exit(1);
+    }
+  op_cache[a][b][c] = op_cache_idx;
+  op_cache_rev[op_cache_idx] = (a<<8) | (b<<4) | c;
+  return op_cache_idx;
+}
+
+static char *
+op_cache_string (int map)
+{
+  static int ci;
+  static char cb[5][20];
+  int a, b, c;
+
+  map = op_cache_rev[map];
+  a = (map >> 8) & 15;
+  b = (map >> 4) & 15;
+  c = (map >> 0) & 15;
+  ci = (ci + 1) % 5;
+  sprintf(cb[ci], "%s %s %s", optype_names[a], optype_names[b], optype_names[c]);
+  return cb[ci];
+}
+
+static unsigned long long cycles_per_id[N_RXO][N_MAP];
+static unsigned long long times_per_id[N_RXO][N_MAP];
+static unsigned long long memory_stalls;
+static unsigned long long register_stalls;
+static unsigned long long branch_stalls;
+static unsigned long long branch_alignment_stalls;
+static unsigned long long fast_returns;
+
+static unsigned long times_per_pair[N_RXO][N_MAP][N_RXO][N_MAP];
+static int prev_opcode_id = RXO_unknown;
+static int po0;
+
+#define STATS(x) x
+
+#else
+#define STATS(x)
+#endif /* CYCLE_STATS */
+
+
+#ifdef CYCLE_ACCURATE
+
+static int new_rt = -1;
+
+/* Number of cycles to add if an insn spans an 8-byte boundary.  */
+static int branch_alignment_penalty = 0;
+
+#endif
+
+static int running_benchmark = 1;
+
+#define tprintf if (trace && running_benchmark) printf
 
 jmp_buf decode_jmp_buf;
 unsigned int rx_cycles = 0;
+
+#ifdef CYCLE_ACCURATE
+/* If nonzero, memory was read at some point and cycle latency might
+   take effect.  */
+static int memory_source = 0;
+/* If nonzero, memory was written and extra cycles might be
+   needed.  */
+static int memory_dest = 0;
+
+static void
+cycles (int throughput)
+{
+  tprintf("%d cycles\n", throughput);
+  regs.cycle_count += throughput;
+}
+
+/* Number of execution (E) cycles the op uses.  For memory sources, we
+   include the load micro-op stall as two extra E cycles.  */
+#define E(c) cycles (memory_source ? c + 2 : c)
+#define E1 cycles (1)
+#define E2 cycles (2)
+#define EBIT cycles (memory_source ? 2 : 1)
+
+/* Check to see if a read latency must be applied for a given register.  */
+#define RL(r) \
+  if (regs.rt == r )							\
+    {									\
+      tprintf("register %d load stall\n", r);				\
+      regs.cycle_count ++;						\
+      STATS(register_stalls ++);					\
+      regs.rt = -1;							\
+    }
+
+#define RLD(r)					\
+  if (memory_source)				\
+    {						\
+      tprintf ("Rt now %d\n", r);		\
+      new_rt = r;				\
+    }
+
+#else /* !CYCLE_ACCURATE */
+
+#define cycles(t)
+#define E(c)
+#define E1
+#define E2
+#define EBIT
+#define RL(r)
+#define RLD(r)
+
+#endif /* else CYCLE_ACCURATE */
 
 static int size2bytes[] = {
   4, 1, 1, 1, 2, 2, 2, 3, 4
@@ -53,24 +295,28 @@ _rx_abort (const char *file, int line)
   abort();
 }
 
+static unsigned char *get_byte_base;
+static SI get_byte_page;
+
+/* This gets called a *lot* so optimize it.  */
 static int
 rx_get_byte (void *vdata)
 {
-  int saved_trace = trace;
-  unsigned char rv;
-
-  if (trace == 1)
-    trace = 0;
-
   RX_Data *rx_data = (RX_Data *)vdata;
+  SI tpc = rx_data->dpc;
+
+  /* See load.c for an explanation of this.  */
   if (rx_big_endian)
-    /* See load.c for an explanation of this.  */
-    rv = mem_get_pc (rx_data->dpc ^ 3);
-  else
-    rv = mem_get_pc (rx_data->dpc);
+    tpc ^= 3;
+
+  if (((tpc ^ get_byte_page) & NONPAGE_MASK) || enable_counting)
+    {
+      get_byte_page = tpc & NONPAGE_MASK;
+      get_byte_base = rx_mem_ptr (get_byte_page, MPA_READING) - get_byte_page;
+    }
+
   rx_data->dpc ++;
-  trace = saved_trace;
-  return rv;
+  return get_byte_base [tpc];
 }
 
 static int
@@ -88,6 +334,7 @@ get_op (RX_Opcode_Decoded *rd, int i)
       return o->addend;
 
     case RX_Operand_Register:	/* Rn */
+      RL (o->reg);
       rv = get_reg (o->reg);
       break;
 
@@ -96,6 +343,21 @@ get_op (RX_Opcode_Decoded *rd, int i)
       /* fall through */
     case RX_Operand_Postinc:	/* [Rn+] */
     case RX_Operand_Indirect:	/* [Rn + addend] */
+#ifdef CYCLE_ACCURATE
+      RL (o->reg);
+      regs.rt = -1;
+      if (regs.m2m == M2M_BOTH)
+	{
+	  tprintf("src memory stall\n");
+#ifdef CYCLE_STATS
+	  memory_stalls ++;
+#endif
+	  regs.cycle_count ++;
+	  regs.m2m = 0;
+	}
+
+      memory_source = 1;
+#endif
 
       addr = get_reg (o->reg) + o->addend;
       switch (o->size)
@@ -234,6 +496,7 @@ put_op (RX_Opcode_Decoded *rd, int i, int v)
 
     case RX_Operand_Register:	/* Rn */
       put_reg (o->reg, v);
+      RLD (o->reg);
       break;
 
     case RX_Operand_Predec:	/* [-Rn] */
@@ -241,6 +504,19 @@ put_op (RX_Opcode_Decoded *rd, int i, int v)
       /* fall through */
     case RX_Operand_Postinc:	/* [Rn+] */
     case RX_Operand_Indirect:	/* [Rn + addend] */
+
+#ifdef CYCLE_ACCURATE
+      if (regs.m2m == M2M_BOTH)
+	{
+	  tprintf("dst memory stall\n");
+	  regs.cycle_count ++;
+#ifdef CYCLE_STATS
+	  memory_stalls ++;
+#endif
+	  regs.m2m = 0;
+	}
+      memory_dest = 1;
+#endif
 
       addr = get_reg (o->reg) + o->addend;
       switch (o->size)
@@ -345,8 +621,8 @@ poppc()
 
 #define MATH_OP(vop,c)				\
 { \
-  uma = US1(); \
   umb = US2(); \
+  uma = US1(); \
   ll = (unsigned long long) uma vop (unsigned long long) umb vop c; \
   tprintf ("0x%x " #vop " 0x%x " #vop " 0x%x = 0x%llx\n", uma, umb, c, ll); \
   ma = sign_ext (uma, DSZ() * 8);					\
@@ -355,23 +631,25 @@ poppc()
   tprintf ("%d " #vop " %d " #vop " %d = %lld\n", ma, mb, c, sll); \
   set_oszc (sll, DSZ(), (long long) ll > ((1 vop 1) ? (long long) b2mask[DSZ()] : (long long) -1)); \
   PD (sll); \
+  E (1);    \
 }
 
 #define LOGIC_OP(vop) \
 { \
-  ma = US1(); \
   mb = US2(); \
+  ma = US1(); \
   v = ma vop mb; \
   tprintf("0x%x " #vop " 0x%x = 0x%x\n", ma, mb, v); \
   set_sz (v, DSZ()); \
   PD(v); \
+  E (1); \
 }
 
 #define SHIFT_OP(val, type, count, OP, carry_mask)	\
 { \
   int i, c=0; \
-  val = (type)US1();				\
   count = US2(); \
+  val = (type)US1();				\
   tprintf("%lld " #OP " %d\n", val, count); \
   for (i = 0; i < count; i ++) \
     { \
@@ -443,8 +721,8 @@ fop_fsub (fp_t s1, fp_t s2, fp_t *d)
   int do_store;   \
   fp_t fa, fb, fc; \
   FPCLEAR(); \
-  fa = GD (); \
   fb = GS (); \
+  fa = GD (); \
   do_store = fop_##func (fa, fb, &fc); \
   tprintf("%g " #func " %g = %g %08x\n", int2float(fa), int2float(fb), int2float(fc), fc); \
   FPCHECK(); \
@@ -549,6 +827,21 @@ do_fp_exception (unsigned long opcode_pc)
   return RX_MAKE_STEPPED ();
 }
 
+static int
+op_is_memory (RX_Opcode_Decoded *rd, int i)
+{
+  switch (rd->op[i].type)
+    {
+    case RX_Operand_Predec:
+    case RX_Operand_Postinc:
+    case RX_Operand_Indirect:
+      return 1;
+    default:
+      return 0;
+    }
+}
+#define OM(i) op_is_memory (&opcode, i)
+
 int
 decode_opcode ()
 {
@@ -561,14 +854,46 @@ decode_opcode ()
   RX_Data rx_data;
   RX_Opcode_Decoded opcode;
   int rv;
+#ifdef CYCLE_STATS
+  unsigned long long prev_cycle_count;
+#endif
+#ifdef CYCLE_ACCURATE
+  int tx;
+#endif
 
   if ((rv = setjmp (decode_jmp_buf)))
     return rv;
 
+#ifdef CYCLE_STATS
+  prev_cycle_count = regs.cycle_count;
+#endif
+
+#ifdef CYCLE_ACCURATE
+  memory_source = 0;
+  memory_dest = 0;
+#endif
+
   rx_cycles ++;
 
   rx_data.dpc = opcode_pc = regs.r_pc;
+  memset (&opcode, 0, sizeof(opcode));
   opcode_size = rx_decode_opcode (opcode_pc, &opcode, rx_get_byte, &rx_data);
+
+#ifdef CYCLE_ACCURATE
+  if (branch_alignment_penalty)
+    {
+      if ((regs.r_pc ^ (regs.r_pc + opcode_size - 1)) & ~7)
+	{
+	  tprintf("1 cycle branch alignment penalty\n");
+	  cycles (branch_alignment_penalty);
+#ifdef CYCLE_STATS
+	  branch_alignment_stalls ++;
+#endif
+	}
+      branch_alignment_penalty = 0;
+    }
+#endif
+
   regs.r_pc += opcode_size;
 
   rx_flagmask = opcode.flags_s;
@@ -585,6 +910,7 @@ decode_opcode ()
       tprintf("%lld\n", sll);
       PD (sll);
       set_osz (sll, 4);
+      E (1);
       break;
 
     case RXO_adc:
@@ -608,6 +934,7 @@ decode_opcode ()
 	mb &= 0x07;
       ma &= ~(1 << mb);
       PD (ma);
+      EBIT;
       break;
 
     case RXO_bmcc:
@@ -622,6 +949,7 @@ decode_opcode ()
       else
 	ma &= ~(1 << mb);
       PD (ma);
+      EBIT;
       break;
 
     case RXO_bnot:
@@ -633,16 +961,71 @@ decode_opcode ()
 	mb &= 0x07;
       ma ^= (1 << mb);
       PD (ma);
+      EBIT;
       break;
 
     case RXO_branch:
       if (GS())
-	regs.r_pc = GD();
+	{
+#ifdef CYCLE_ACCURATE
+	  SI old_pc = regs.r_pc;
+	  int delta;
+#endif
+	  regs.r_pc = GD();
+#ifdef CYCLE_ACCURATE
+	  delta = regs.r_pc - old_pc;
+	  if (delta >= 0 && delta < 16
+	      && opcode_size > 1)
+	    {
+	      tprintf("near forward branch bonus\n");
+	      cycles (2);
+	    }
+	  else
+	    {
+	      cycles (3);
+	      branch_alignment_penalty = 1;
+	    }
+#ifdef CYCLE_STATS
+	  branch_stalls ++;
+	  /* This is just for statistics */
+	  if (opcode.op[1].reg == 14)
+	    opcode.op[1].type = RX_Operand_None;
+#endif
+#endif
+	}
+#ifdef CYCLE_ACCURATE
+      else
+	cycles (1);
+#endif
       break;
 
     case RXO_branchrel:
       if (GS())
-	regs.r_pc += GD();
+	{
+	  int delta = GD();
+	  regs.r_pc += delta;
+#ifdef CYCLE_ACCURATE
+	  /* Note: specs say 3, chip says 2.  */
+	  if (delta >= 0 && delta < 16
+	      && opcode_size > 1)
+	    {
+	      tprintf("near forward branch bonus\n");
+	      cycles (2);
+	    }
+	  else
+	    {
+	      cycles (3);
+	      branch_alignment_penalty = 1;
+	    }
+#ifdef CYCLE_STATS
+	  branch_stalls ++;
+#endif
+#endif
+	}
+#ifdef CYCLE_ACCURATE
+      else
+	cycles (1);
+#endif
       break;
 
     case RXO_brk:
@@ -659,6 +1042,7 @@ decode_opcode ()
 	pushpc (old_psw);
 	pushpc (regs.r_pc);
 	regs.r_pc = mem_get_si (regs.r_intb);
+	cycles(6);
       }
       break;
 
@@ -671,6 +1055,7 @@ decode_opcode ()
 	mb &= 0x07;
       ma |= (1 << mb);
       PD (ma);
+      EBIT;
       break;
 
     case RXO_btst:
@@ -682,6 +1067,7 @@ decode_opcode ()
 	mb &= 0x07;
       umb = ma & (1 << mb);
       set_zc (! umb, umb);
+      EBIT;
       break;
 
     case RXO_clrpsw:
@@ -691,6 +1077,7 @@ decode_opcode ()
 	      || v == FLAGBIT_U))
 	break;
       regs.r_psw &= ~v;
+      cycles (1);
       break;
 
     case RXO_div: /* d = d / s */
@@ -709,6 +1096,8 @@ decode_opcode ()
 	  set_flags (FLAGBIT_O, 0);
 	  PD (v);
 	}
+      /* Note: spec says 3 to 22 cycles, we are pessimistic.  */
+      cycles (22);
       break;
 
     case RXO_divu: /* d = d / s */
@@ -727,6 +1116,8 @@ decode_opcode ()
 	  set_flags (FLAGBIT_O, 0);
 	  PD (v);
 	}
+      /* Note: spec says 2 to 20 cycles, we are pessimistic.  */
+      cycles (20);
       break;
 
     case RXO_ediv:
@@ -748,6 +1139,8 @@ decode_opcode ()
 	  opcode.op[0].reg ++;
 	  PD (mb);
 	}
+      /* Note: spec says 3 to 22 cycles, we are pessimistic.  */
+      cycles (22);
       break;
 
     case RXO_edivu:
@@ -769,6 +1162,8 @@ decode_opcode ()
 	  opcode.op[0].reg ++;
 	  PD (umb);
 	}
+      /* Note: spec says 2 to 20 cycles, we are pessimistic.  */
+      cycles (20);
       break;
 
     case RXO_emul:
@@ -779,6 +1174,7 @@ decode_opcode ()
       PD (sll);
       opcode.op[0].reg ++;
       PD (sll >> 32);
+      E2;
       break;
 
     case RXO_emulu:
@@ -789,10 +1185,12 @@ decode_opcode ()
       PD (ll);
       opcode.op[0].reg ++;
       PD (ll >> 32);
+      E2;
       break;
 
     case RXO_fadd:
       FLOAT_OP (fadd);
+      E (4);
       break;
 
     case RXO_fcmp:
@@ -801,24 +1199,32 @@ decode_opcode ()
       FPCLEAR ();
       rxfp_cmp (ma, mb);
       FPCHECK ();
+      E (1);
       break;
 
     case RXO_fdiv:
       FLOAT_OP (fdiv);
+      E (16);
       break;
 
     case RXO_fmul:
       FLOAT_OP (fmul);
+      E (3);
       break;
 
     case RXO_rtfi:
       PRIVILEDGED ();
       regs.r_psw = regs.r_bpsw;
       regs.r_pc = regs.r_bpc;
+#ifdef CYCLE_ACCURATE
+      regs.fast_return = 0;
+      cycles(3);
+#endif
       break;
 
     case RXO_fsub:
       FLOAT_OP (fsub);
+      E (4);
       break;
 
     case RXO_ftoi:
@@ -829,6 +1235,7 @@ decode_opcode ()
       PD (mb);
       tprintf("(int) %g = %d\n", int2float(ma), mb);
       set_sz (mb, 4);
+      E (2);
       break;
 
     case RXO_int:
@@ -845,6 +1252,7 @@ decode_opcode ()
 	  pushpc (regs.r_pc);
 	  regs.r_pc = mem_get_si (regs.r_intb + 4 * v);
 	}
+      cycles (6);
       break;
 
     case RXO_itof:
@@ -855,49 +1263,87 @@ decode_opcode ()
       tprintf("(float) %d = %x\n", ma, mb);
       PD (mb);
       set_sz (ma, 4);
+      E (2);
       break;
 
     case RXO_jsr:
     case RXO_jsrrel:
-      v = GD ();
-      pushpc (get_reg (pc));
-      if (opcode.id == RXO_jsrrel)
-	v += regs.r_pc;
-      put_reg (pc, v);
+      {
+#ifdef CYCLE_ACCURATE
+	int delta;
+	regs.m2m = 0;
+#endif
+	v = GD ();
+#ifdef CYCLE_ACCURATE
+	regs.link_register = regs.r_pc;
+#endif
+	pushpc (get_reg (pc));
+	if (opcode.id == RXO_jsrrel)
+	  v += regs.r_pc;
+#ifdef CYCLE_ACCURATE
+	delta = v - regs.r_pc;
+#endif
+	put_reg (pc, v);
+#ifdef CYCLE_ACCURATE
+	/* Note: docs say 3, chip says 2 */
+	if (delta >= 0 && delta < 16)
+	  {
+	    tprintf ("near forward jsr bonus\n");
+	    cycles (2);
+	  }
+	else
+	  {
+	    branch_alignment_penalty = 1;
+	    cycles (3);
+	  }
+	regs.fast_return = 1;
+#endif
+      }
       break;
 
     case RXO_machi:
       ll = (long long)(signed short)(GS() >> 16) * (long long)(signed short)(GS2 () >> 16);
       ll <<= 16;
       put_reg64 (acc64, ll + regs.r_acc);
+      E1;
       break;
 
     case RXO_maclo:
       ll = (long long)(signed short)(GS()) * (long long)(signed short)(GS2 ());
       ll <<= 16;
       put_reg64 (acc64, ll + regs.r_acc);
+      E1;
       break;
 
     case RXO_max:
-      ma = GD();
       mb = GS();
+      ma = GD();
       if (ma > mb)
 	PD (ma);
       else
 	PD (mb);
+      E (1);
+#ifdef CYCLE_STATS
+      if (opcode.op[0].type == RX_Operand_Register
+	  && opcode.op[1].type == RX_Operand_Register
+	  && opcode.op[0].reg == opcode.op[1].reg)
+	opcode.id = RXO_nop3;
+#endif
       break;
 
     case RXO_min:
-      ma = GD();
       mb = GS();
+      ma = GD();
       if (ma < mb)
 	PD (ma);
       else
 	PD (mb);
+      E (1);
       break;
 
     case RXO_mov:
       v = GS ();
+
       if (opcode.op[0].type == RX_Operand_Register
 	  && opcode.op[0].reg == 16 /* PSW */)
 	{
@@ -927,8 +1373,32 @@ decode_opcode ()
 	    /* These are ignored.  */
 	    break;
 	}
+      if (OM(0) && OM(1))
+	cycles (2);
+      else
+	cycles (1);
+
       PD (v);
+
+#ifdef CYCLE_ACCURATE
+      if ((opcode.op[0].type == RX_Operand_Predec
+	   && opcode.op[1].type == RX_Operand_Register)
+	  || (opcode.op[0].type == RX_Operand_Postinc
+	      && opcode.op[1].type == RX_Operand_Register))
+	{
+	  /* Special case: push reg doesn't cause a memory stall.  */
+	  memory_dest = 0;
+	  tprintf("push special case\n");
+	}
+#endif
+
       set_sz (v, DSZ());
+#ifdef CYCLE_STATS
+      if (opcode.op[0].type == RX_Operand_Register
+	  && opcode.op[1].type == RX_Operand_Register
+	  && opcode.op[0].reg == opcode.op[1].reg)
+	opcode.id = RXO_nop2;
+#endif
       break;
 
     case RXO_movbi:
@@ -939,6 +1409,7 @@ decode_opcode ()
       opcode.op[1].type = RX_Operand_Indirect;
       opcode.op[1].addend = 0;
       PD (GS ());
+      cycles (1);
       break;
 
     case RXO_movbir:
@@ -949,51 +1420,65 @@ decode_opcode ()
       opcode.op[1].type = RX_Operand_Indirect;
       opcode.op[1].addend = 0;
       PS (GD ());
+      cycles (1);
       break;
 
     case RXO_mul:
-      ll = (unsigned long long) US1() * (unsigned long long) US2();
+      v = US2 ();
+      ll = (unsigned long long) US1() * (unsigned long long) v;
       PD(ll);
+      E (1);
       break;
 
     case RXO_mulhi:
-      ll = (long long)(signed short)(GS() >> 16) * (long long)(signed short)(GS2 () >> 16);
+      v = GS2 ();
+      ll = (long long)(signed short)(GS() >> 16) * (long long)(signed short)(v >> 16);
       ll <<= 16;
       put_reg64 (acc64, ll);
+      E1;
       break;
 
     case RXO_mullo:
-      ll = (long long)(signed short)(GS()) * (long long)(signed short)(GS2 ());
+      v = GS2 ();
+      ll = (long long)(signed short)(GS()) * (long long)(signed short)(v);
       ll <<= 16;
       put_reg64 (acc64, ll);
+      E1;
       break;
 
     case RXO_mvfachi:
       PD (get_reg (acchi));
+      E1;
       break;
 
     case RXO_mvfaclo:
       PD (get_reg (acclo));
+      E1;
       break;
 
     case RXO_mvfacmi:
       PD (get_reg (accmi));
+      E1;
       break;
 
     case RXO_mvtachi:
       put_reg (acchi, GS ());
+      E1;
       break;
 
     case RXO_mvtaclo:
       put_reg (acclo, GS ());
+      E1;
       break;
 
     case RXO_mvtipl:
       regs.r_psw &= ~ FLAGBITS_IPL;
       regs.r_psw |= (GS () << FLAGSHIFT_IPL) & FLAGBITS_IPL;
+      E1;
       break;
 
     case RXO_nop:
+      E1;
       break;
 
     case RXO_or:
@@ -1010,11 +1495,11 @@ decode_opcode ()
 	  return RX_MAKE_STOPPED (SIGILL);
 	}
       for (v = opcode.op[1].reg; v <= opcode.op[2].reg; v++)
-	put_reg (v, pop ());
-      break;
-
-    case RXO_pusha:
-      push (get_reg (opcode.op[1].reg) + opcode.op[1].addend);
+	{
+	  cycles (1);
+	  RLD (v);
+	  put_reg (v, pop ());
+	}
       break;
 
     case RXO_pushm:
@@ -1027,7 +1512,11 @@ decode_opcode ()
 	  return RX_MAKE_STOPPED (SIGILL);
 	}
       for (v = opcode.op[2].reg; v >= opcode.op[1].reg; v--)
-	push (get_reg (v));
+	{
+	  RL (v);
+	  push (get_reg (v));
+	}
+      cycles (opcode.op[2].reg - opcode.op[1].reg + 1);
       break;
 
     case RXO_racw:
@@ -1040,6 +1529,7 @@ decode_opcode ()
       else
 	ll &= 0xffffffff00000000ULL;
       put_reg64 (acc64, ll);
+      E1;
       break;
 
     case RXO_rte:
@@ -1048,6 +1538,10 @@ decode_opcode ()
       regs.r_psw = poppc ();
       if (FLAG_PM)
 	regs.r_psw |= FLAGBIT_U;
+#ifdef CYCLE_ACCURATE
+      regs.fast_return = 0;
+      cycles (6);
+#endif
       break;
 
     case RXO_revl:
@@ -1057,6 +1551,7 @@ decode_opcode ()
 	     | ((uma << 8) & 0xff0000)
 	     | ((uma << 24) & 0xff000000UL));
       PD (umb);
+      E1;
       break;
 
     case RXO_revw:
@@ -1064,9 +1559,16 @@ decode_opcode ()
       umb = (((uma >> 8) & 0x00ff00ff)
 	     | ((uma << 8) & 0xff00ff00UL));
       PD (umb);
+      E1;
       break;
 
     case RXO_rmpa:
+      RL(4);
+      RL(5);
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
+
       while (regs.r[3] != 0)
 	{
 	  long long tmp;
@@ -1124,6 +1626,22 @@ decode_opcode ()
 	set_flags (FLAGBIT_O|FLAGBIT_S, ma | FLAGBIT_O);
       else
 	set_flags (FLAGBIT_O|FLAGBIT_S, ma);
+#ifdef CYCLE_ACCURATE
+      switch (opcode.size)
+	{
+	case RX_Long:
+	  cycles (6 + 4 * tx);
+	  break;
+	case RX_Word:
+	  cycles (6 + 5 * (tx / 2) + 4 * (tx % 2));
+	  break;
+	case RX_Byte:
+	  cycles (6 + 7 * (tx / 4) + 4 * (tx % 4));
+	  break;
+	default:
+	  abort ();
+	}
+#endif
       break;
 
     case RXO_rolc:
@@ -1133,6 +1651,7 @@ decode_opcode ()
       v |= carry;
       set_szc (v, 4, ma);
       PD (v);
+      E1;
       break;
 
     case RXO_rorc:
@@ -1142,6 +1661,7 @@ decode_opcode ()
       uma |= (carry ? 0x80000000UL : 0);
       set_szc (uma, 4, mb);
       PD (uma);
+      E1;
       break;
 
     case RXO_rotl:
@@ -1154,6 +1674,7 @@ decode_opcode ()
 	}
       set_szc (uma, 4, mb);
       PD (uma);
+      E1;
       break;
 
     case RXO_rotr:
@@ -1166,6 +1687,7 @@ decode_opcode ()
 	}
       set_szc (uma, 4, mb);
       PD (uma);
+      E1;
       break;
 
     case RXO_round:
@@ -1176,10 +1698,30 @@ decode_opcode ()
       PD (mb);
       tprintf("(int) %g = %d\n", int2float(ma), mb);
       set_sz (mb, 4);
+      E (2);
       break;
 
     case RXO_rts:
-      regs.r_pc = poppc ();
+      {
+#ifdef CYCLE_ACCURATE
+	int cyc = 5;
+#endif
+	regs.r_pc = poppc ();
+#ifdef CYCLE_ACCURATE
+	/* Note: specs say 5, chip says 3.  */
+	if (regs.fast_return && regs.link_register == regs.r_pc)
+	  {
+#ifdef CYCLE_STATS
+	    fast_returns ++;
+#endif
+	    tprintf("fast return bonus\n");
+	    cyc -= 2;
+	  }
+	cycles (cyc);
+	regs.fast_return = 0;
+	branch_alignment_penalty = 1;
+#endif
+      }
       break;
 
     case RXO_rtsd:
@@ -1190,12 +1732,39 @@ decode_opcode ()
 	  put_reg (0, get_reg (0) + GS() - (opcode.op[0].reg-opcode.op[2].reg+1)*4);
 	  if (opcode.op[2].reg == 0)
 	    EXCEPTION (EX_UNDEFINED);
+#ifdef CYCLE_ACCURATE
+	  tx = opcode.op[0].reg - opcode.op[2].reg + 1;
+#endif
 	  for (i = opcode.op[2].reg; i <= opcode.op[0].reg; i ++)
-	    put_reg (i, pop ());
+	    {
+	      RLD (i);
+	      put_reg (i, pop ());
+	    }
 	}
       else
-	put_reg (0, get_reg (0) + GS());
-      put_reg (pc, poppc ());
+	{
+#ifdef CYCLE_ACCURATE
+	  tx = 0;
+#endif
+	  put_reg (0, get_reg (0) + GS());
+	}
+      put_reg (pc, poppc());
+#ifdef CYCLE_ACCURATE
+      if (regs.fast_return && regs.link_register == regs.r_pc)
+	{
+	  tprintf("fast return bonus\n");
+#ifdef CYCLE_STATS
+	  fast_returns ++;
+#endif
+	  cycles (tx < 3 ? 3 : tx + 1);
+	}
+      else
+	{
+	  cycles (tx < 5 ? 5 : tx + 1);
+	}
+      regs.fast_return = 0;
+      branch_alignment_penalty = 1;
+#endif
       break;
 
     case RXO_sat:
@@ -1203,6 +1772,7 @@ decode_opcode ()
 	PD (0x7fffffffUL);
       else if (FLAG_O && ! FLAG_S)
 	PD (0x80000000UL);
+      E1;
       break;
 
     case RXO_sbb:
@@ -1214,9 +1784,13 @@ decode_opcode ()
 	PD (1);
       else
 	PD (0);
+      E1;
       break;
 
     case RXO_scmpu:
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
       while (regs.r[3] != 0)
 	{
 	  uma = mem_get_qi (regs.r[1] ++);
@@ -1229,6 +1803,7 @@ decode_opcode ()
 	set_zc (1, 1);
       else
 	set_zc (0, ((int)uma - (int)umb) >= 0);
+      cycles (2 + 4 * (tx / 4) + 4 * (tx % 4));
       break;
 
     case RXO_setpsw:
@@ -1238,24 +1813,40 @@ decode_opcode ()
 	      || v == FLAGBIT_U))
 	break;
       regs.r_psw |= v;
+      cycles (1);
       break;
 
     case RXO_smovb:
+      RL (3);
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
       while (regs.r[3])
 	{
 	  uma = mem_get_qi (regs.r[2] --);
 	  mem_put_qi (regs.r[1]--, uma);
 	  regs.r[3] --;
 	}
+#ifdef CYCLE_ACCURATE
+      if (tx > 3)
+	cycles (6 + 3 * (tx / 4) + 3 * (tx % 4));
+      else
+	cycles (2 + 3 * (tx % 4));
+#endif
       break;
 
     case RXO_smovf:
+      RL (3);
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
       while (regs.r[3])
 	{
 	  uma = mem_get_qi (regs.r[2] ++);
 	  mem_put_qi (regs.r[1]++, uma);
 	  regs.r[3] --;
 	}
+      cycles (2 + 3 * (int)(tx / 4) + 3 * (tx % 4));
       break;
 
     case RXO_smovu:
@@ -1271,17 +1862,24 @@ decode_opcode ()
 
     case RXO_shar: /* d = ma >> mb */
       SHIFT_OP (sll, int, mb, >>=, 1);
+      E (1);
       break;
 
     case RXO_shll: /* d = ma << mb */
       SHIFT_OP (ll, int, mb, <<=, 0x80000000UL);
+      E (1);
       break;
 
     case RXO_shlr: /* d = ma >> mb */
       SHIFT_OP (ll, unsigned int, mb, >>=, 1);
+      E (1);
       break;
 
     case RXO_sstr:
+      RL (3);
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
       switch (opcode.size)
 	{
 	case RX_Long:
@@ -1291,6 +1889,7 @@ decode_opcode ()
 	      regs.r[1] += 4;
 	      regs.r[3] --;
 	    }
+	  cycles (2 + tx);
 	  break;
 	case RX_Word:
 	  while (regs.r[3] != 0)
@@ -1299,6 +1898,7 @@ decode_opcode ()
 	      regs.r[1] += 2;
 	      regs.r[3] --;
 	    }
+	  cycles (2 + (int)(tx / 2) + tx % 2);
 	  break;
 	case RX_Byte:
 	  while (regs.r[3] != 0)
@@ -1307,6 +1907,7 @@ decode_opcode ()
 	      regs.r[1] ++;
 	      regs.r[3] --;
 	    }
+	  cycles (2 + (int)(tx / 4) + tx % 4);
 	  break;
 	default:
 	  abort ();
@@ -1316,6 +1917,7 @@ decode_opcode ()
     case RXO_stcc:
       if (GS2())
 	PD (GS ());
+      E1;
       break;
 
     case RXO_stop:
@@ -1328,8 +1930,15 @@ decode_opcode ()
       break;
 
     case RXO_suntil:
+      RL(3);
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
       if (regs.r[3] == 0)
-	break;
+	{
+	  cycles (3);
+	  break;
+	}
       switch (opcode.size)
 	{
 	case RX_Long:
@@ -1342,6 +1951,7 @@ decode_opcode ()
 	      if (umb == uma)
 		break;
 	    }
+	  cycles (3 + 3 * tx);
 	  break;
 	case RX_Word:
 	  uma = get_reg (2) & 0xffff;
@@ -1353,6 +1963,7 @@ decode_opcode ()
 	      if (umb == uma)
 		break;
 	    }
+	  cycles (3 + 3 * (tx / 2) + 3 * (tx % 2));
 	  break;
 	case RX_Byte:
 	  uma = get_reg (2) & 0xff;
@@ -1364,6 +1975,7 @@ decode_opcode ()
 	      if (umb == uma)
 		break;
 	    }
+	  cycles (3 + 3 * (tx / 4) + 3 * (tx % 4));
 	  break;
 	default:
 	  abort();
@@ -1375,6 +1987,10 @@ decode_opcode ()
       break;
 
     case RXO_swhile:
+      RL(3);
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
       if (regs.r[3] == 0)
 	break;
       switch (opcode.size)
@@ -1389,6 +2005,7 @@ decode_opcode ()
 	      if (umb != uma)
 		break;
 	    }
+	  cycles (3 + 3 * tx);
 	  break;
 	case RX_Word:
 	  uma = get_reg (2) & 0xffff;
@@ -1400,6 +2017,7 @@ decode_opcode ()
 	      if (umb != uma)
 		break;
 	    }
+	  cycles (3 + 3 * (tx / 2) + 3 * (tx % 2));
 	  break;
 	case RX_Byte:
 	  uma = get_reg (2) & 0xff;
@@ -1411,6 +2029,7 @@ decode_opcode ()
 	      if (umb != uma)
 		break;
 	    }
+	  cycles (3 + 3 * (tx / 4) + 3 * (tx % 4));
 	  break;
 	default:
 	  abort();
@@ -1427,9 +2046,18 @@ decode_opcode ()
       return RX_MAKE_STOPPED(0);
 
     case RXO_xchg:
+#ifdef CYCLE_ACCURATE
+      regs.m2m = 0;
+#endif
       v = GS (); /* This is the memory operand, if any.  */
       PS (GD ()); /* and this may change the address register.  */
       PD (v);
+      E2;
+#ifdef CYCLE_ACCURATE
+      /* all M cycles happen during xchg's cycles.  */
+      memory_dest = 0;
+      memory_source = 0;
+#endif
       break;
 
     case RXO_xor:
@@ -1440,5 +2068,122 @@ decode_opcode ()
       EXCEPTION (EX_UNDEFINED);
     }
 
+#ifdef CYCLE_ACCURATE
+  regs.m2m = 0;
+  if (memory_source)
+    regs.m2m |= M2M_SRC;
+  if (memory_dest)
+    regs.m2m |= M2M_DST;
+
+  regs.rt = new_rt;
+  new_rt = -1;
+#endif
+
+#ifdef CYCLE_STATS
+  if (prev_cycle_count == regs.cycle_count)
+    {
+      printf("Cycle count not updated! id %s\n", id_names[opcode.id]);
+      abort ();
+    }
+#endif
+
+#ifdef CYCLE_STATS
+  if (running_benchmark)
+    {
+      int omap = op_lookup (opcode.op[0].type, opcode.op[1].type, opcode.op[2].type);
+
+
+      cycles_per_id[opcode.id][omap] += regs.cycle_count - prev_cycle_count;
+      times_per_id[opcode.id][omap] ++;
+
+      times_per_pair[prev_opcode_id][po0][opcode.id][omap] ++;
+
+      prev_opcode_id = opcode.id;
+      po0 = omap;
+    }
+#endif
+
   return RX_MAKE_STEPPED ();
+}
+
+#ifdef CYCLE_STATS
+void
+reset_pipeline_stats (void)
+{
+  memset (cycles_per_id, 0, sizeof(cycles_per_id));
+  memset (times_per_id, 0, sizeof(times_per_id));
+  memory_stalls = 0;
+  register_stalls = 0;
+  branch_stalls = 0;
+  branch_alignment_stalls = 0;
+  fast_returns = 0;
+  memset (times_per_pair, 0, sizeof(times_per_pair));
+  running_benchmark = 1;
+
+  benchmark_start_cycle = regs.cycle_count;
+}
+
+void
+halt_pipeline_stats (void)
+{
+  running_benchmark = 0;
+  benchmark_end_cycle = regs.cycle_count;
+}
+#endif
+
+void
+pipeline_stats (void)
+{
+#ifdef CYCLE_STATS
+  int i, o1;
+  int p, p1;
+#endif
+
+#ifdef CYCLE_ACCURATE
+  if (verbose == 1)
+    {
+      printf ("cycles: %llu\n", regs.cycle_count);
+      return;
+    }
+
+  printf ("cycles: %13s\n", comma (regs.cycle_count));
+#endif
+
+#ifdef CYCLE_STATS
+  if (benchmark_start_cycle)
+    printf ("bmark:  %13s\n", comma (benchmark_end_cycle - benchmark_start_cycle));
+
+  printf("\n");
+  for (i = 0; i < N_RXO; i++)
+    for (o1 = 0; o1 < N_MAP; o1 ++)
+      if (times_per_id[i][o1])
+	printf("%13s %13s %7.2f  %s %s\n",
+	       comma (cycles_per_id[i][o1]),
+	       comma (times_per_id[i][o1]),
+	       (double)cycles_per_id[i][o1] / times_per_id[i][o1],
+	       op_cache_string(o1),
+	       id_names[i]+4);
+
+  printf("\n");
+  for (p = 0; p < N_RXO; p ++)
+    for (p1 = 0; p1 < N_MAP; p1 ++)
+      for (i = 0; i < N_RXO; i ++)
+	for (o1 = 0; o1 < N_MAP; o1 ++)
+	  if (times_per_pair[p][p1][i][o1])
+	    {
+	      printf("%13s   %s %-9s  ->  %s %s\n",
+		     comma (times_per_pair[p][p1][i][o1]),
+		     op_cache_string(p1),
+		     id_names[p]+4,
+		     op_cache_string(o1),
+		     id_names[i]+4);
+	    }
+
+  printf("\n");
+  printf("%13s memory stalls\n", comma (memory_stalls));
+  printf("%13s register stalls\n", comma (register_stalls));
+  printf("%13s branches taken (non-return)\n", comma (branch_stalls));
+  printf("%13s branch alignment stalls\n", comma (branch_alignment_stalls));
+  printf("%13s fast returns\n", comma (fast_returns));
+#endif
 }

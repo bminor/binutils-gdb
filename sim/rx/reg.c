@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,6 +68,11 @@ init_regs (void)
 {
   memset (&regs, 0, sizeof (regs));
   memset (&oldregs, 0, sizeof (oldregs));
+
+#ifdef CYCLE_ACCURATE
+  regs.rt = -1;
+  oldregs.rt = -1;
+#endif
 }
 
 static unsigned int

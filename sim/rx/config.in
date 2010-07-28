@@ -105,3 +105,9 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* --enable-cycle-accurate */
+#undef CYCLE_ACCURATE
+
+/* --enable-cycle-stats */
+#undef CYCLE_STATS

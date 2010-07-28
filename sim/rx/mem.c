@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    1.  */
 #define RDCHECK 0
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define L1_BITS  (10)
 #define L2_BITS  (10)
-#define OFF_BITS (12)
+#define OFF_BITS PAGE_BITS
 
 #define L1_LEN  (1 << L1_BITS)
 #define L2_LEN  (1 << L2_BITS)
@@ -70,15 +71,8 @@ init_mem (void)
   memset (mem_counters, 0, sizeof (mem_counters));
 }
 
-enum mem_ptr_action
-{
-  MPA_WRITING,
-  MPA_READING,
-  MPA_CONTENT_TYPE
-};
-
-static unsigned char *
-mem_ptr (unsigned long address, enum mem_ptr_action action)
+unsigned char *
+rx_mem_ptr (unsigned long address, enum mem_ptr_action action)
 {
   int pt1 = (address >> (L2_BITS + OFF_BITS)) & ((1 << L1_BITS) - 1);
   int pt2 = (address >> OFF_BITS) & ((1 << L2_BITS) - 1);
@@ -240,7 +234,7 @@ e ()
 static char
 mtypec (int address)
 {
-  unsigned char *cp = mem_ptr (address, MPA_CONTENT_TYPE);
+  unsigned char *cp = rx_mem_ptr (address, MPA_CONTENT_TYPE);
   return "udp"[*cp];
 }
 
@@ -254,48 +248,75 @@ mem_put_byte (unsigned int address, unsigned char value)
 
   if (trace)
     tc = mtypec (address);
-  m = mem_ptr (address, MPA_WRITING);
+  m = rx_mem_ptr (address, MPA_WRITING);
   if (trace)
     printf (" %02x%c", value, tc);
   *m = value;
   switch (address)
     {
-    case 0x00e1:
-      {
+    case 0x0008c02a: /* PA.DR */
+     {
 	static int old_led = -1;
-	static char *led_on[] =
-	  { "\033[31m O ", "\033[32m O ", "\033[34m O " };
-	static char *led_off[] = { "\033[0m · ", "\033[0m · ", "\033[0m · " };
+	int red_on = 0;
 	int i;
+
 	if (old_led != value)
 	  {
-	    fputs ("  ", stdout);
-	    for (i = 0; i < 3; i++)
+	    fputs (" ", stdout);
+	    for (i = 0; i < 8; i++)
 	      if (value & (1 << i))
-		fputs (led_off[i], stdout);
+		{
+		  if (! red_on)
+		    {
+		      fputs ("\033[31m", stdout);
+		      red_on = 1;
+		    }
+		  fputs (" @", stdout);
+		}
 	      else
-		fputs (led_on[i], stdout);
-	    fputs ("\033[0m\r", stdout);
+		{
+		  if (red_on)
+		    {
+		      fputs ("\033[0m", stdout);
+		      red_on = 0;
+		    }
+		  fputs (" *", stdout);
+		}
+
+	    if (red_on)
+	      fputs ("\033[0m", stdout);
+
+	    fputs ("\r", stdout);
 	    fflush (stdout);
 	    old_led = value;
 	  }
       }
       break;
 
-    case 0x3aa: /* uart1tx */
+#ifdef CYCLE_STATS
+    case 0x0008c02b: /* PB.DR */
+      {
+	if (value == 0)
+	  halt_pipeline_stats ();
+	else
+	  reset_pipeline_stats ();
+      }
+#endif
+
+    case 0x00088263: /* SCI4.TDR */
       {
 	static int pending_exit = 0;
-	if (value == 0)
+	if (pending_exit == 2)
 	  {
-	    if (pending_exit)
-	      {
-		step_result = RX_MAKE_EXITED(value);
-		return;
-	      }
-	    pending_exit = 1;
+	    step_result = RX_MAKE_EXITED(value);
+	    longjmp (decode_jmp_buf, 1);
 	  }
+	else if (value == 3)
+	  pending_exit ++;
 	else
-	  putchar(value);
+	  pending_exit = 0;
+
+	putchar(value);
       }
       break;
 
@@ -314,19 +335,33 @@ mem_put_qi (int address, unsigned char value)
   COUNT (1, 1);
 }
 
+static int tpu_base;
+
 void
 mem_put_hi (int address, unsigned short value)
 {
   S ("<=");
-  if (rx_big_endian)
+  switch (address)
     {
-      mem_put_byte (address, value >> 8);
-      mem_put_byte (address + 1, value & 0xff);
-    }
-  else
-    {
-      mem_put_byte (address, value & 0xff);
-      mem_put_byte (address + 1, value >> 8);
+#ifdef CYCLE_ACCURATE
+    case 0x00088126: /* TPU1.TCNT */
+      tpu_base = regs.cycle_count;
+      break;
+    case 0x00088136: /* TPU2.TCNT */
+      tpu_base = regs.cycle_count;
+      break;
+#endif
+    default:
+      if (rx_big_endian)
+	{
+	  mem_put_byte (address, value >> 8);
+	  mem_put_byte (address + 1, value & 0xff);
+	}
+      else
+	{
+	  mem_put_byte (address, value & 0xff);
+	  mem_put_byte (address + 1, value >> 8);
+	}
     }
   E ();
   COUNT (1, 2);
@@ -388,7 +423,7 @@ mem_put_blk (int address, void *bufptr, int nbytes)
 unsigned char
 mem_get_pc (int address)
 {
-  unsigned char *m = mem_ptr (address, MPA_READING);
+  unsigned char *m = rx_mem_ptr (address, MPA_READING);
   COUNT (0, 0);
   return *m;
 }
@@ -399,12 +434,12 @@ mem_get_byte (unsigned int address)
   unsigned char *m;
 
   S ("=>");
-  m = mem_ptr (address, MPA_READING);
+  m = rx_mem_ptr (address, MPA_READING);
   switch (address)
     {
-    case 0x3ad: /* uart1c1 */
+    case 0x00088264: /* SCI4.SSR */
       E();
-      return 2; /* transmitter empty */
+      return 0x04; /* transmitter empty */
       break;
     default: 
       if (trace)
@@ -433,15 +468,28 @@ mem_get_hi (int address)
 {
   unsigned short rv;
   S ("=>");
-  if (rx_big_endian)
+  switch (address)
     {
-      rv = mem_get_byte (address) << 8;
-      rv |= mem_get_byte (address + 1);
-    }
-  else
-    {
-      rv = mem_get_byte (address);
-      rv |= mem_get_byte (address + 1) << 8;
+#ifdef CYCLE_ACCURATE
+    case 0x00088126: /* TPU1.TCNT */
+      rv = (regs.cycle_count - tpu_base) >> 16;
+      break;
+    case 0x00088136: /* TPU2.TCNT */
+      rv = (regs.cycle_count - tpu_base) >> 0;
+      break;
+#endif
+
+    default:
+      if (rx_big_endian)
+	{
+	  rv = mem_get_byte (address) << 8;
+	  rv |= mem_get_byte (address + 1);
+	}
+      else
+	{
+	  rv = mem_get_byte (address);
+	  rv |= mem_get_byte (address + 1) << 8;
+	}
     }
   COUNT (0, 2);
   E ();
@@ -520,7 +568,7 @@ sign_ext (int v, int bits)
 void
 mem_set_content_type (int address, enum mem_content_type type)
 {
-  unsigned char *mt = mem_ptr (address, MPA_CONTENT_TYPE);
+  unsigned char *mt = rx_mem_ptr (address, MPA_CONTENT_TYPE);
   *mt = type;
 }
 
@@ -537,7 +585,7 @@ mem_set_content_range (int start_address, int end_address, enum mem_content_type
       if (sz + ofs > L1_LEN)
 	sz = L1_LEN - ofs;
 
-      mt = mem_ptr (start_address, MPA_CONTENT_TYPE);
+      mt = rx_mem_ptr (start_address, MPA_CONTENT_TYPE);
       memset (mt, type, sz);
 
       start_address += sz;
@@ -547,6 +595,6 @@ mem_set_content_range (int start_address, int end_address, enum mem_content_type
 enum mem_content_type
 mem_get_content_type (int address)
 {
-  unsigned char *mt = mem_ptr (address, MPA_CONTENT_TYPE);
+  unsigned char *mt = rx_mem_ptr (address, MPA_CONTENT_TYPE);
   return *mt;
 }

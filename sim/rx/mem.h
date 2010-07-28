@@ -25,9 +25,24 @@ enum mem_content_type {
      MC_NUM_TYPES
 };
 
+enum mem_ptr_action
+{
+  MPA_WRITING,
+  MPA_READING,
+  MPA_CONTENT_TYPE
+};
+
 void init_mem (void);
 void mem_usage_stats (void);
 unsigned long mem_usage_cycles (void);
+
+/* rx_mem_ptr returns a pointer which is valid as long as the address
+   requested remains within the same page.  */
+#define PAGE_BITS 12
+#define PAGE_SIZE (1 << PAGE_BITS)
+#define NONPAGE_MASK (~(PAGE_SIZE-1))
+
+unsigned char *rx_mem_ptr (unsigned long address, enum mem_ptr_action action);
 
 void mem_put_qi (int address, unsigned char value);
 void mem_put_hi (int address, unsigned short value);
