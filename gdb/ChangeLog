@@ -1,3 +1,7 @@
+2010-07-28  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove link-warning.h.
+
 2010-07-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (breakpoint_re_set_one): Move call to set_language
