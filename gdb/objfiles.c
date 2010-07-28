@@ -702,6 +702,27 @@ free_all_objfiles (void)
   clear_symtab_users ();
 }
 
+/* A helper function for objfile_relocate1 that relocates a single
+   symbol.  */
+
+static void
+relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
+		     struct section_offsets *delta)
+{
+  fixup_symbol_section (sym, objfile);
+
+  /* The RS6000 code from which this was taken skipped
+     any symbols in STRUCT_DOMAIN or UNDEF_DOMAIN.
+     But I'm leaving out that test, on the theory that
+     they can't possibly pass the tests below.  */
+  if ((SYMBOL_CLASS (sym) == LOC_LABEL
+       || SYMBOL_CLASS (sym) == LOC_STATIC)
+      && SYMBOL_SECTION (sym) >= 0)
+    {
+      SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (delta, SYMBOL_SECTION (sym));
+    }
+}
+
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
    entries in new_offsets.  SEPARATE_DEBUG_OBJFILE is not touched here.
    Return non-zero iff any change happened.  */
@@ -767,22 +788,18 @@ objfile_relocate1 (struct objfile *objfile,
 
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
-	      fixup_symbol_section (sym, objfile);
-
-	      /* The RS6000 code from which this was taken skipped
-	         any symbols in STRUCT_DOMAIN or UNDEF_DOMAIN.
-	         But I'm leaving out that test, on the theory that
-	         they can't possibly pass the tests below.  */
-	      if ((SYMBOL_CLASS (sym) == LOC_LABEL
-		   || SYMBOL_CLASS (sym) == LOC_STATIC)
-		  && SYMBOL_SECTION (sym) >= 0)
-		{
-		  SYMBOL_VALUE_ADDRESS (sym) +=
-		    ANOFFSET (delta, SYMBOL_SECTION (sym));
-		}
+	      relocate_one_symbol (sym, objfile, delta);
 	    }
 	}
     }
+  }
+
+  /* Relocate isolated symbols.  */
+  {
+    struct symbol *iter;
+
+    for (iter = objfile->template_symbols; iter; iter = iter->hash_next)
+      relocate_one_symbol (iter, objfile, delta);
   }
 
   if (objfile->psymtabs_addrmap)

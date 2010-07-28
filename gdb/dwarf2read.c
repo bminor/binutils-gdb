@@ -54,6 +54,7 @@
 #include "exceptions.h"
 #include "gdb_stat.h"
 #include "completer.h"
+#include "vec.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -68,6 +69,9 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 #endif
+
+typedef struct symbol *symbolp;
+DEF_VEC_P (symbolp);
 
 #if 0
 /* .debug_info header for a compilation unit
@@ -968,6 +972,9 @@ static void dwarf2_start_subfile (char *, char *, char *);
 
 static struct symbol *new_symbol (struct die_info *, struct type *,
 				  struct dwarf2_cu *);
+
+static struct symbol *new_symbol_full (struct die_info *, struct type *,
+				       struct dwarf2_cu *, struct symbol *);
 
 static void dwarf2_const_value (struct attribute *, struct symbol *,
 				struct dwarf2_cu *);
@@ -5049,6 +5056,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   CORE_ADDR baseaddr;
   struct block *block;
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
+  VEC (symbolp) *template_args = NULL;
+  struct template_symbol *templ_func = NULL;
 
   if (inlined_func)
     {
@@ -5094,8 +5103,23 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Record the function range for dwarf_decode_lines.  */
   add_to_cu_func_list (name, lowpc, highpc, cu);
 
+  /* If we have any template arguments, then we must allocate a
+     different sort of symbol.  */
+  for (child_die = die->child; child_die; child_die = sibling_die (child_die))
+    {
+      if (child_die->tag == DW_TAG_template_type_param
+	  || child_die->tag == DW_TAG_template_value_param)
+	{
+	  templ_func = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				       struct template_symbol);
+	  templ_func->base.is_cplus_template_function = 1;
+	  break;
+	}
+    }
+
   new = push_context (0, lowpc);
-  new->name = new_symbol (die, read_type_die (die, cu), cu);
+  new->name = new_symbol_full (die, read_type_die (die, cu), cu,
+			       (struct symbol *) templ_func);
 
   /* If there is a location expression for DW_AT_frame_base, record
      it.  */
@@ -5119,7 +5143,15 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       child_die = die->child;
       while (child_die && child_die->tag)
 	{
-	  process_die (child_die, cu);
+	  if (child_die->tag == DW_TAG_template_type_param
+	      || child_die->tag == DW_TAG_template_value_param)
+	    {
+	      struct symbol *arg = new_symbol (child_die, NULL, cu);
+
+	      VEC_safe_push (symbolp, template_args, arg);
+	    }
+	  else
+	    process_die (child_die, cu);
 	  child_die = sibling_die (child_die);
 	}
     }
@@ -5164,6 +5196,22 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);
+
+  /* Attach template arguments to function.  */
+  if (! VEC_empty (symbolp, template_args))
+    {
+      gdb_assert (templ_func != NULL);
+
+      templ_func->n_template_arguments = VEC_length (symbolp, template_args);
+      templ_func->template_arguments
+	= obstack_alloc (&objfile->objfile_obstack,
+			 (templ_func->n_template_arguments
+			  * sizeof (struct symbol *)));
+      memcpy (templ_func->template_arguments,
+	      VEC_address (symbolp, template_args),
+	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
+      VEC_free (symbolp, template_args);
+    }
 
   /* In C++, we can have functions nested inside functions (e.g., when
      a function declares a class that has methods).  This means that
@@ -6372,6 +6420,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct field_info fi;
       struct die_info *child_die;
+      VEC (symbolp) *template_args = NULL;
 
       memset (&fi, 0, sizeof (struct field_info));
 
@@ -6401,7 +6450,32 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  else if (child_die->tag == DW_TAG_typedef)
 	    dwarf2_add_typedef (&fi, child_die, cu);
+	  else if (child_die->tag == DW_TAG_template_type_param
+		   || child_die->tag == DW_TAG_template_value_param)
+	    {
+	      struct symbol *arg = new_symbol (child_die, NULL, cu);
+
+	      VEC_safe_push (symbolp, template_args, arg);
+	    }
+
 	  child_die = sibling_die (child_die);
+	}
+
+      /* Attach template arguments to type.  */
+      if (! VEC_empty (symbolp, template_args))
+	{
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  TYPE_N_TEMPLATE_ARGUMENTS (type)
+	    = VEC_length (symbolp, template_args);
+	  TYPE_TEMPLATE_ARGUMENTS (type)
+	    = obstack_alloc (&objfile->objfile_obstack,
+			     (TYPE_N_TEMPLATE_ARGUMENTS (type)
+			      * sizeof (struct symbol *)));
+	  memcpy (TYPE_TEMPLATE_ARGUMENTS (type),
+		  VEC_address (symbolp, template_args),
+		  (TYPE_N_TEMPLATE_ARGUMENTS (type)
+		   * sizeof (struct symbol *)));
+	  VEC_free (symbolp, template_args);
 	}
 
       /* Attach fields and member functions to the type.  */
@@ -6526,7 +6600,9 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (child_die->tag == DW_TAG_member
 	  || child_die->tag == DW_TAG_variable
-	  || child_die->tag == DW_TAG_inheritance)
+	  || child_die->tag == DW_TAG_inheritance
+	  || child_die->tag == DW_TAG_template_value_param
+	  || child_die->tag == DW_TAG_template_type_param)
 	{
 	  /* Do nothing.  */
 	}
@@ -9867,10 +9943,13 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
    to make a symbol table entry for it, and if so, create a new entry
    and return a pointer to it.
    If TYPE is NULL, determine symbol type from the die, otherwise
-   used the passed type.  */
+   used the passed type.
+   If SPACE is not NULL, use it to hold the new symbol.  If it is
+   NULL, allocate a new symbol on the objfile's obstack.  */
 
 static struct symbol *
-new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
+		 struct symbol *space)
 {
   struct objfile *objfile = cu->objfile;
   struct symbol *sym = NULL;
@@ -9886,11 +9965,13 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   if (name)
     {
       const char *linkagename;
+      int suppress_add = 0;
 
-      sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
-					     sizeof (struct symbol));
+      if (space)
+	sym = space;
+      else
+	sym = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
       OBJSTAT (objfile, n_syms++);
-      memset (sym, 0, sizeof (struct symbol));
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
       SYMBOL_LANGUAGE (sym) = cu->language;
@@ -9983,6 +10064,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  /* Do not add the symbol to any lists.  It will be found via
 	     BLOCK_FUNCTION from the blockvector.  */
 	  break;
+	case DW_TAG_template_value_param:
+	  suppress_add = 1;
+	  /* Fall through.  */
 	case DW_TAG_variable:
 	case DW_TAG_member:
 	  /* Compilation with minimal debug info may result in variables
@@ -10006,10 +10090,18 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    {
 	      dwarf2_const_value (attr, sym, cu);
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
-	      if (attr2 && (DW_UNSND (attr2) != 0))
-		add_symbol_to_list (sym, &global_symbols);
+	      if (suppress_add)
+		{
+		  sym->hash_next = objfile->template_symbols;
+		  objfile->template_symbols = sym;
+		}
 	      else
-		add_symbol_to_list (sym, cu->list_in_scope);
+		{
+		  if (attr2 && (DW_UNSND (attr2) != 0))
+		    add_symbol_to_list (sym, &global_symbols);
+		  else
+		    add_symbol_to_list (sym, cu->list_in_scope);
+		}
 	      break;
 	    }
 	  attr = dwarf2_attr (die, DW_AT_location, cu);
@@ -10073,13 +10165,25 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 				 ? &global_symbols : cu->list_in_scope);
 
 		  SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
-		  add_symbol_to_list (sym, list_to_add);
+		  if (suppress_add)
+		    {
+		      sym->hash_next = objfile->template_symbols;
+		      objfile->template_symbols = sym;
+		    }
+		  else
+		    add_symbol_to_list (sym, list_to_add);
 		}
 	      else if (!die_is_declaration (die, cu))
 		{
 		  /* Use the default LOC_OPTIMIZED_OUT class.  */
 		  gdb_assert (SYMBOL_CLASS (sym) == LOC_OPTIMIZED_OUT);
-		  add_symbol_to_list (sym, cu->list_in_scope);
+		  if (suppress_add)
+		    {
+		      sym->hash_next = objfile->template_symbols;
+		      objfile->template_symbols = sym;
+		    }
+		  else
+		    add_symbol_to_list (sym, cu->list_in_scope);
 		}
 	    }
 	  break;
@@ -10118,6 +10222,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     interest in this information, so just ignore it for now.
 	     (FIXME?) */
 	  break;
+	case DW_TAG_template_type_param:
+	  suppress_add = 1;
+	  /* Fall through.  */
 	case DW_TAG_class_type:
 	case DW_TAG_interface_type:
 	case DW_TAG_structure_type:
@@ -10136,14 +10243,22 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	       saves you.  See the OtherFileClass tests in
 	       gdb.c++/namespace.exp.  */
 
-	    struct pending **list_to_add;
+	    if (suppress_add)
+	      {
+		sym->hash_next = objfile->template_symbols;
+		objfile->template_symbols = sym;
+	      }
+	    else
+	      {
+		struct pending **list_to_add;
 
-	    list_to_add = (cu->list_in_scope == &file_symbols
-			   && (cu->language == language_cplus
-			       || cu->language == language_java)
-			   ? &global_symbols : cu->list_in_scope);
+		list_to_add = (cu->list_in_scope == &file_symbols
+			       && (cu->language == language_cplus
+				   || cu->language == language_java)
+			       ? &global_symbols : cu->list_in_scope);
 
-	    add_symbol_to_list (sym, list_to_add);
+		add_symbol_to_list (sym, list_to_add);
+	      }
 
 	    /* The semantics of C++ state that "struct foo { ... }" also
 	       defines a typedef for "foo".  A Java class declaration also
@@ -10212,6 +10327,14 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	cp_scan_for_anonymous_namespaces (sym);
     }
   return (sym);
+}
+
+/* A wrapper for new_symbol_full that always allocates a new symbol.  */
+
+static struct symbol *
+new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+{
+  return new_symbol_full (die, type, cu, NULL);
 }
 
 /* Copy constant value from an attribute to a symbol.  */

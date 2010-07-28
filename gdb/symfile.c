@@ -2420,6 +2420,7 @@ reread_symbols (void)
 	  objfile->psymtabs_addrmap = NULL;
 	  objfile->free_psymtabs = NULL;
 	  objfile->cp_namespace_symtab = NULL;
+	  objfile->template_symbols = NULL;
 	  objfile->msymbols = NULL;
 	  objfile->deprecated_sym_private = NULL;
 	  objfile->minimal_symbol_count = 0;

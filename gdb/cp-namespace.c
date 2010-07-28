@@ -32,6 +32,7 @@
 #include "command.h"
 #include "frame.h"
 #include "buildsym.h"
+#include "language.h"
 
 static struct symbol *lookup_namespace_scope (const char *name,
 					      const struct block *block,
@@ -410,6 +411,95 @@ cp_lookup_symbol_imports (const char *scope,
     }
 
   return NULL;
+}
+
+/* Helper function that searches an array of symbols for one named
+   NAME.  */
+
+static struct symbol *
+search_symbol_list (const char *name, int num, struct symbol **syms)
+{
+  int i;
+
+  /* Maybe we should store a dictionary in here instead.  */
+  for (i = 0; i < num; ++i)
+    {
+      if (strcmp (name, SYMBOL_NATURAL_NAME (syms[i])) == 0)
+	return syms[i];
+    }
+  return NULL;
+}
+
+/* Like cp_lookup_symbol_imports, but if BLOCK is a function, it
+   searches through the template parameters of the function and the
+   function's type.  */
+
+struct symbol *
+cp_lookup_symbol_imports_or_template (const char *scope,
+				      const char *name,
+				      const struct block *block,
+				      const domain_enum domain)
+{
+  struct symbol *function = BLOCK_FUNCTION (block);
+
+  if (function != NULL && SYMBOL_LANGUAGE (function) == language_cplus)
+    {
+      int i;
+      struct cplus_specific *cps
+	= function->ginfo.language_specific.cplus_specific;
+
+      /* Search the function's template parameters.  */
+      if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (function))
+	{
+	  struct template_symbol *templ = (struct template_symbol *) function;
+	  struct symbol *result;
+
+	  result = search_symbol_list (name,
+				       templ->n_template_arguments,
+				       templ->template_arguments);
+	  if (result != NULL)
+	    return result;
+	}
+
+      /* Search the template parameters of the function's defining
+	 context.  */
+      if (SYMBOL_NATURAL_NAME (function))
+	{
+	  struct type *context;
+	  char *name_copy = xstrdup (SYMBOL_NATURAL_NAME (function));
+	  struct cleanup *cleanups = make_cleanup (xfree, name_copy);
+	  const struct language_defn *lang = language_def (language_cplus);
+	  struct gdbarch *arch = SYMBOL_SYMTAB (function)->objfile->gdbarch;
+	  const struct block *parent = BLOCK_SUPERBLOCK (block);
+
+	  while (1)
+	    {
+	      struct symbol *result;
+	      unsigned int prefix_len = cp_entire_prefix_len (name_copy);
+
+	      if (prefix_len == 0)
+		context = NULL;
+	      else
+		{
+		  name_copy[prefix_len] = '\0';
+		  context = lookup_typename (lang, arch, name_copy, parent, 1);
+		}
+
+	      if (context == NULL)
+		break;
+
+	      result = search_symbol_list (name,
+					   TYPE_N_TEMPLATE_ARGUMENTS (context),
+					   TYPE_TEMPLATE_ARGUMENTS (context));
+	      if (result != NULL)
+		return result;
+	    }
+
+	  do_cleanups (cleanups);
+	}
+    }
+
+  return cp_lookup_symbol_imports (scope, name, block, domain, 1, 1);
 }
 
  /* Searches for NAME in the current namespace, and by applying relevant import

@@ -1,3 +1,36 @@
+2010-07-28  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9946:
+	* symfile.c (reread_symbols): Clear template_symbols.
+	* symtab.h (struct symbol) <is_cplus_template_function>: New
+	field.
+	(SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION): New macro.
+	(struct template_symbol): New.
+	* symtab.c (lookup_symbol_aux_local): Use
+	cp_lookup_symbol_imports_or_template.
+	* objfiles.h (struct objfile) <template_symbols>: New field.
+	* objfiles.c (relocate_one_symbol): New function.
+	(objfile_relocate1): Use it.  Relocate isolated symbols.
+	* gdbtypes.h (struct cplus_struct_type) <n_template_arguments,
+	template_arguments>: New fields.
+	(TYPE_N_TEMPLATE_ARGUMENTS): New macro.
+	(TYPE_TEMPLATE_ARGUMENTS): Likewise.
+	(TYPE_TEMPLATE_ARGUMENT): Likewise.
+	(lookup_typename): Update.
+	* gdbtypes.c (lookup_typename): Constify "block" argument.
+	* dwarf2read.c: Include vec.h.
+	(symbolp): New typedef.
+	(read_func_scope): Read template arguments.  Allocate a
+	template_symbol when needed.
+	(read_structure_type): Read template arguments.
+	(new_symbol_full): New function, from new_symbol.  Handle
+	DW_TAG_template_type_param and DW_TAG_template_value_param.
+	(new_symbol): Rewrite as wrapper.
+	* cp-support.h (cp_lookup_symbol_imports_or_template): Declare.
+	* cp-namespace.c: Include language.h.
+	(search_symbol_list): New function.
+	(cp_lookup_symbol_imports_or_template): Likewise.
+
 2010-07-28  Balazs Kezes  <rlblaster@gmail.com>
 
 	* tui/tui-win.c (make_visible_with_new_height): Resize and move

@@ -1046,7 +1046,7 @@ type_name_no_tag (const struct type *type)
 struct type *
 lookup_typename (const struct language_defn *language,
 		 struct gdbarch *gdbarch, char *name,
-		 struct block *block, int noerr)
+		 const struct block *block, int noerr)
 {
   struct symbol *sym;
   struct type *tmp;

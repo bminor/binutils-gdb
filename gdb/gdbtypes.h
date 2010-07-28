@@ -681,6 +681,9 @@ struct cplus_struct_type
 
     short nfn_fields_total;
 
+    /* Number of template arguments.  */
+    unsigned short n_template_arguments;
+
     /* One if this struct is a dynamic class, as defined by the
        Itanium C++ ABI: if it requires a virtual table pointer,
        because it or any of its base classes have one or more virtual
@@ -826,6 +829,11 @@ struct cplus_struct_type
       }
     *typedef_field;
     unsigned typedef_field_count;
+
+    /* The template arguments.  This is an array with
+       N_TEMPLATE_ARGUMENTS elements.  This is NULL for non-template
+       classes.  */
+    struct symbol **template_arguments;
   };
 
 /* Struct used in computing virtual base list */
@@ -1022,6 +1030,13 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_FN_FIELDLIST1(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].fn_fields
 #define TYPE_FN_FIELDLIST_NAME(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].name
 #define TYPE_FN_FIELDLIST_LENGTH(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].length
+
+#define TYPE_N_TEMPLATE_ARGUMENTS(thistype) \
+  TYPE_CPLUS_SPECIFIC (thistype)->n_template_arguments
+#define TYPE_TEMPLATE_ARGUMENTS(thistype) \
+  TYPE_CPLUS_SPECIFIC (thistype)->template_arguments
+#define TYPE_TEMPLATE_ARGUMENT(thistype, n) \
+  TYPE_CPLUS_SPECIFIC (thistype)->template_arguments[n]
 
 #define TYPE_FN_FIELD(thisfn, n) (thisfn)[n]
 #define TYPE_FN_FIELD_PHYSNAME(thisfn, n) (thisfn)[n].physname
@@ -1353,7 +1368,7 @@ extern char *gdb_mangle_name (struct type *, int, int);
 
 extern struct type *lookup_typename (const struct language_defn *,
 				     struct gdbarch *, char *,
-				     struct block *, int);
+				     const struct block *, int);
 
 extern struct type *lookup_template_type (char *, struct type *,
 					  struct block *);

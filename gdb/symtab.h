@@ -589,6 +589,10 @@ struct symbol
   /* Whether this is an inlined function (class LOC_BLOCK only).  */
   unsigned is_inlined : 1;
 
+  /* True if this is a C++ function symbol with template arguments.
+     In this case the symbol is really a "struct template_symbol".  */
+  unsigned is_cplus_template_function : 1;
+
   /* Line number of this symbol's definition, except for inlined
      functions.  For an inlined function (class LOC_BLOCK and
      SYMBOL_INLINED set) this is the line number of the function's call
@@ -636,12 +640,34 @@ struct symbol
 #define SYMBOL_CLASS(symbol)		(symbol)->aclass
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
+#define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \
+  (symbol)->is_cplus_template_function
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
 #define SYMBOL_COMPUTED_OPS(symbol)     (symbol)->ops.ops_computed
 #define SYMBOL_REGISTER_OPS(symbol)     (symbol)->ops.ops_register
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
+
+/* An instance of this type is used to represent a C++ template
+   function.  It includes a "struct symbol" as a kind of base class;
+   users downcast to "struct template_symbol *" when needed.  A symbol
+   is really of this type iff SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION is
+   true.  */
+
+struct template_symbol
+{
+  /* The base class.  */
+  struct symbol base;
+
+  /* The number of template arguments.  */
+  int n_template_arguments;
+
+  /* The template arguments.  This is an array with
+     N_TEMPLATE_ARGUMENTS elements.  */
+  struct symbol **template_arguments;
+};
+
 
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only

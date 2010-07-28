@@ -1,3 +1,9 @@
+2010-07-28  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9946:
+	* gdb.cp/temargs.exp: New file.
+	* gdb.cp/temargs.cc: New file.
+
 2010-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/help.exp (help disassemble): Update the content.

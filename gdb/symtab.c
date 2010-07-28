@@ -1227,12 +1227,8 @@ lookup_symbol_aux_local (const char *name, const struct block *block,
 
       if (language == language_cplus || language == language_fortran)
         {
-          sym = cp_lookup_symbol_imports (scope,
-                                          name,
-                                          block,
-                                          domain,
-                                          1,
-                                          1);
+          sym = cp_lookup_symbol_imports_or_template (scope, name, block,
+						      domain);
           if (sym != NULL)
             return sym;
         }
