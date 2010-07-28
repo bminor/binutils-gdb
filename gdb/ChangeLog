@@ -1,3 +1,7 @@
+2010-07-27  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_const_value_data): Never sign extend.
+
 2010-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (read_subroutine_type): Improve THIS detection,

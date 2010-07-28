@@ -10485,8 +10485,13 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 }
 
 
-/* Given an attr with a DW_FORM_dataN value in host byte order, sign-
-   or zero-extend it as appropriate for the symbol's type.  */
+/* Given an attr with a DW_FORM_dataN value in host byte order,
+   zero-extend it as appropriate for the symbol's type.  The DWARF
+   standard (v4) is not entirely clear about the meaning of using
+   DW_FORM_dataN for a constant with a signed type, where the type is
+   wider than the data.  The conclusion of a discussion on the DWARF
+   list was that this is unspecified.  We choose to always zero-extend
+   because that is the interpretation long in use by GCC.  */
 static void
 dwarf2_const_value_data (struct attribute *attr,
 			 struct symbol *sym,
@@ -10495,12 +10500,7 @@ dwarf2_const_value_data (struct attribute *attr,
   LONGEST l = DW_UNSND (attr);
 
   if (bits < sizeof (l) * 8)
-    {
-      if (TYPE_UNSIGNED (SYMBOL_TYPE (sym)))
-	l &= ((LONGEST) 1 << bits) - 1;
-      else
-	l = (l << (sizeof (l) * 8 - bits)) >> (sizeof (l) * 8 - bits);
-    }
+    l &= ((LONGEST) 1 << bits) - 1;
 
   SYMBOL_VALUE (sym) = l;
   SYMBOL_CLASS (sym) = LOC_CONST;
