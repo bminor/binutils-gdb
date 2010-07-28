@@ -220,45 +220,20 @@ rx_disp (int n, int type, int reg, int size, LocalData * ld)
     }
 }
 
-/* The syntax is "OSZC" where each character is one of the following:
-   - = flag unchanged
-   0 = flag cleared
-   1 = flag set
-   ? = flag undefined
-   x = flag set (any letter will do, use it for hints :).  */
+#define xO 8
+#define xS 4
+#define xZ 2
+#define xC 1
 
-static void
-store_flags (RX_Opcode_Decoded * rx, char * str)
-{
-  int i, mask;
-  rx->flags_0 = 0;
-  rx->flags_1 = 0;
-  rx->flags_s = 0;
-  
-  for (i = 0; i < 4; i++)
-    {
-      mask = 8 >> i;
-      switch (str[i])
-	{
-	case 0:
-	  abort ();
-	case '-':
-	  break;
-	case '0':
-	  rx->flags_0 |= mask;
-	  break;
-	case '1':
-	  rx->flags_1 |= mask;
-	  break;
-	case '?':
-	  break;
-	default:
-	  rx->flags_0 |= mask;
-	  rx->flags_s |= mask;
-	  break;
-	}
-    }
-}
+#define F_____ 
+#define F___ZC rx->flags_0 = rx->flags_s = xZ|xC;
+#define F__SZ_ rx->flags_0 = rx->flags_s = xS|xZ;
+#define F__SZC rx->flags_0 = rx->flags_s = xS|xZ|xC;
+#define F_0SZC rx->flags_0 = xO|xS|xZ|xC; rx->flags_s = xS|xZ|xC;
+#define F_O___ rx->flags_0 = rx->flags_s = xO;
+#define F_OS__ rx->flags_0 = rx->flags_s = xO|xS;
+#define F_OSZ_ rx->flags_0 = rx->flags_s = xO|xS|xZ;
+#define F_OSZC rx->flags_0 = rx->flags_s = xO|xS|xZ|xC;
 
 int
 rx_decode_opcode (unsigned long pc AU,
@@ -283,19 +258,19 @@ rx_decode_opcode (unsigned long pc AU,
 /* MOV									*/
 
 /** 0111 0101 0100 rdst		mov%s	#%1, %0 */
-  ID(mov); DR(rdst); SC(IMM (1)); F("----");
+  ID(mov); DR(rdst); SC(IMM (1)); F_____;
 
 /** 1111 10sd rdst im sz	mov%s	#%1, %0 */
-  ID(mov); sBWL (sz); DD(sd, rdst, sz); SC(IMMex(im)); F("----");
+  ID(mov); sBWL (sz); DD(sd, rdst, sz); SC(IMMex(im)); F_____;
 
 /** 0110 0110 immm rdst		mov%s	#%1, %0 */
-  ID(mov); DR(rdst); SC(immm); F("----");
+  ID(mov); DR(rdst); SC(immm); F_____;
 
 /** 0011 11sz d dst sppp		mov%s	#%1, %0 */
-  ID(mov); sBWL (sz); DIs(dst, d*16+sppp, sz); SC(IMM(1)); F("----");
+  ID(mov); sBWL (sz); DIs(dst, d*16+sppp, sz); SC(IMM(1)); F_____;
 
 /** 11sz sd ss rsrc rdst	mov%s	%1, %0 */
-  ID(mov); sBWL(sz); F("----");
+  ID(mov); sBWL(sz); F_____;
   if ((ss == 3) && (sd != 3))
     {
       SD(ss, rdst, sz); DD(sd, rsrc, sz);
@@ -306,55 +281,55 @@ rx_decode_opcode (unsigned long pc AU,
     }
 
 /** 10sz 1dsp a src b dst	mov%s	%1, %0 */
-  ID(mov); sBWL(sz); DR(dst); SIs(src, dsp*4+a*2+b, sz); F("----");
+  ID(mov); sBWL(sz); DR(dst); SIs(src, dsp*4+a*2+b, sz); F_____;
 
 /** 10sz 0dsp a dst b src	mov%s	%1, %0 */
-  ID(mov); sBWL(sz); DIs(dst, dsp*4+a*2+b, sz); SR(src); F("----");
+  ID(mov); sBWL(sz); DIs(dst, dsp*4+a*2+b, sz); SR(src); F_____;
 
 /** 1111 1110 01sz isrc bsrc rdst	mov%s	[%1, %2], %0 */
-  ID(movbi); sBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F("----");
+  ID(movbi); sBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F_____;
 
 /** 1111 1110 00sz isrc bsrc rdst	mov%s	%0, [%1, %2] */
-  ID(movbir); sBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F("----");
+  ID(movbir); sBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F_____;
 
 /** 1111 1110 11sz isrc bsrc rdst	movu%s	[%1, %2], %0 */
-  ID(movbi); uBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F("----");
+  ID(movbi); uBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F_____;
 
 /** 1111 1101 0010 0p sz rdst rsrc	mov%s	%1, %0 */
-  ID(mov); sBWL (sz); SR(rsrc); F("----");
+  ID(mov); sBWL (sz); SR(rsrc); F_____;
   OP(0, p ? RX_Operand_Predec : RX_Operand_Postinc, rdst, 0);
 
 /** 1111 1101 0010 1p sz rsrc rdst	mov%s	%1, %0 */
-  ID(mov); sBWL (sz); DR(rdst); F("----");
+  ID(mov); sBWL (sz); DR(rdst); F_____;
   OP(1, p ? RX_Operand_Predec : RX_Operand_Postinc, rsrc, 0);
 
 /** 1011 w dsp a src b dst	movu%s	%1, %0 */
-  ID(mov); uBWL(w); DR(dst); SIs(src, dsp*4+a*2+b, w); F("----");
+  ID(mov); uBWL(w); DR(dst); SIs(src, dsp*4+a*2+b, w); F_____;
 
 /** 0101 1 s ss rsrc rdst	movu%s	%1, %0 */
-  ID(mov); uBWL(s); SD(ss, rsrc, s); DR(rdst); F("----");
+  ID(mov); uBWL(s); SD(ss, rsrc, s); DR(rdst); F_____;
 
 /** 1111 1101 0011 1p sz rsrc rdst	movu%s	%1, %0 */
-  ID(mov); uBWL (sz); DR(rdst); F("----");
+  ID(mov); uBWL (sz); DR(rdst); F_____;
    OP(1, p ? RX_Operand_Predec : RX_Operand_Postinc, rsrc, 0);
 
 /*----------------------------------------------------------------------*/
 /* PUSH/POP								*/
 
 /** 0110 1111 dsta dstb		popm	%1-%2 */
-  ID(popm); SR(dsta); S2R(dstb); F("----");
+  ID(popm); SR(dsta); S2R(dstb); F_____;
 
 /** 0110 1110 dsta dstb		pushm	%1-%2 */
-  ID(pushm); SR(dsta); S2R(dstb); F("----");
+  ID(pushm); SR(dsta); S2R(dstb); F_____;
   
 /** 0111 1110 1011 rdst		pop	%0 */
-  ID(mov); OP(1, RX_Operand_Postinc, 0, 0); DR(rdst); F("----");
+  ID(mov); OP(1, RX_Operand_Postinc, 0, 0); DR(rdst); F_____;
   
 /** 0111 1110 10sz rsrc		push%s	%1 */
-  ID(mov); BWL(sz); OP(0, RX_Operand_Predec, 0, 0); SR(rsrc); F("----");
+  ID(mov); BWL(sz); OP(0, RX_Operand_Predec, 0, 0); SR(rsrc); F_____;
 
 /** 1111 01ss rsrc 10sz		push%s	%1 */
-  ID(mov); BWL(sz); OP(0, RX_Operand_Predec, 0, 0); SD(ss, rsrc, sz); F("----");
+  ID(mov); BWL(sz); OP(0, RX_Operand_Predec, 0, 0); SD(ss, rsrc, sz); F_____;
 
 /*----------------------------------------------------------------------*/
 /* XCHG									*/
@@ -387,161 +362,161 @@ rx_decode_opcode (unsigned long pc AU,
 /* AND									*/
 
 /** 0110 0100 immm rdst			and	#%1, %0 */
-  ID(and); SC(immm); DR(rdst); F("-SZ-");
+  ID(and); SC(immm); DR(rdst); F__SZ_;
 
 /** 0111 01im 0010 rdst			and	#%1, %0 */
-  ID(and); SC(IMMex(im)); DR(rdst); F("-SZ-");
+  ID(and); SC(IMMex(im)); DR(rdst); F__SZ_;
 
 /** 0101 00ss rsrc rdst			and	%1%S1, %0 */
-  ID(and); SP(ss, rsrc); DR(rdst); F("-SZ-");
+  ID(and); SP(ss, rsrc); DR(rdst); F__SZ_;
 
 /** 0000 0110 mx01 00ss rsrc rdst	and	%1%S1, %0 */
-  ID(and); SPm(ss, rsrc, mx); DR(rdst); F("-SZ-");
+  ID(and); SPm(ss, rsrc, mx); DR(rdst); F__SZ_;
 
 /** 1111 1111 0100 rdst srca srcb	and	%2, %1, %0 */
-  ID(and); DR(rdst); SR(srcb); S2R(srca); F("-SZ-");
+  ID(and); DR(rdst); SR(srcb); S2R(srca); F__SZ_;
 
 /*----------------------------------------------------------------------*/
 /* OR									*/
 
 /** 0110 0101 immm rdst			or	#%1, %0 */
-  ID(or); SC(immm); DR(rdst); F("-SZ-");
+  ID(or); SC(immm); DR(rdst); F__SZ_;
 
 /** 0111 01im 0011 rdst			or	#%1, %0 */
-  ID(or); SC(IMMex(im)); DR(rdst); F("-SZ-");
+  ID(or); SC(IMMex(im)); DR(rdst); F__SZ_;
 
 /** 0101 01ss rsrc rdst			or	%1%S1, %0 */
-  ID(or); SP(ss, rsrc); DR(rdst); F("-SZ-");
+  ID(or); SP(ss, rsrc); DR(rdst); F__SZ_;
 
 /** 0000 0110 mx01 01ss rsrc rdst			or	%1%S1, %0 */
-  ID(or); SPm(ss, rsrc, mx); DR(rdst); F("-SZ-");
+  ID(or); SPm(ss, rsrc, mx); DR(rdst); F__SZ_;
 
 /** 1111 1111 0101 rdst srca srcb	or	%2, %1, %0 */
-  ID(or); DR(rdst); SR(srcb); S2R(srca); F("-SZ-");
+  ID(or); DR(rdst); SR(srcb); S2R(srca); F__SZ_;
 
 /*----------------------------------------------------------------------*/
 /* XOR									*/
 
 /** 1111 1101 0111 im00 1101rdst	xor	#%1, %0 */
-  ID(xor); SC(IMMex(im)); DR(rdst); F("-SZ-");
+  ID(xor); SC(IMMex(im)); DR(rdst); F__SZ_;
 
 /** 1111 1100 0011 01ss rsrc rdst	xor	%1%S1, %0 */
-  ID(xor); SP(ss, rsrc); DR(rdst); F("-SZ-");
+  ID(xor); SP(ss, rsrc); DR(rdst); F__SZ_;
 
 /** 0000 0110 mx10 00ss 0000 1101 rsrc rdst	xor	%1%S1, %0 */
-  ID(xor); SPm(ss, rsrc, mx); DR(rdst); F("-SZ-");
+  ID(xor); SPm(ss, rsrc, mx); DR(rdst); F__SZ_;
 
 /*----------------------------------------------------------------------*/
 /* NOT									*/
 
 /** 0111 1110 0000 rdst			not	%0 */
-  ID(xor); DR(rdst); SR(rdst); S2C(~0); F("-SZ-");
+  ID(xor); DR(rdst); SR(rdst); S2C(~0); F__SZ_;
 
 /** 1111 1100 0011 1011 rsrc rdst	not	%1, %0 */
-  ID(xor); DR(rdst); SR(rsrc); S2C(~0); F("-SZ-");
+  ID(xor); DR(rdst); SR(rsrc); S2C(~0); F__SZ_;
 
 /*----------------------------------------------------------------------*/
 /* TST									*/
 
 /** 1111 1101 0111 im00 1100rdst	tst	#%1, %2 */
-  ID(and); SC(IMMex(im)); S2R(rdst); F("-SZ-");
+  ID(and); SC(IMMex(im)); S2R(rdst); F__SZ_;
 
 /** 1111 1100 0011 00ss rsrc rdst	tst	%1%S1, %2 */
-  ID(and); SP(ss, rsrc); S2R(rdst); F("-SZ-");
+  ID(and); SP(ss, rsrc); S2R(rdst); F__SZ_;
 
 /** 0000 0110 mx10 00ss 0000 1100 rsrc rdst	tst	%1%S1, %2 */
-  ID(and); SPm(ss, rsrc, mx); S2R(rdst); F("-SZ-");
+  ID(and); SPm(ss, rsrc, mx); S2R(rdst); F__SZ_;
 
 /*----------------------------------------------------------------------*/
 /* NEG									*/
 
 /** 0111 1110 0001 rdst			neg	%0 */
-  ID(sub); DR(rdst); SC(0); S2R(rdst); F("OSZC");
+  ID(sub); DR(rdst); SC(0); S2R(rdst); F_OSZC;
 
 /** 1111 1100 0000 0111 rsrc rdst	neg	%2, %0 */
-  ID(sub); DR(rdst); SC(0); S2R(rsrc); F("OSZC");
+  ID(sub); DR(rdst); SC(0); S2R(rsrc); F_OSZC;
 
 /*----------------------------------------------------------------------*/
 /* ADC									*/
 
 /** 1111 1101 0111 im00 0010rdst	adc	#%1, %0 */
-  ID(adc); SC(IMMex(im)); DR(rdst); F("OSZC");
+  ID(adc); SC(IMMex(im)); DR(rdst); F_OSZC;
 
 /** 1111 1100 0000 1011 rsrc rdst	adc	%1, %0 */
-  ID(adc); SR(rsrc); DR(rdst); F("OSZC");
+  ID(adc); SR(rsrc); DR(rdst); F_OSZC;
 
 /** 0000 0110 1010 00ss 0000 0010 rsrc rdst	adc	%1%S1, %0 */
-  ID(adc); SPm(ss, rsrc, 2); DR(rdst); F("OSZC");
+  ID(adc); SPm(ss, rsrc, 2); DR(rdst); F_OSZC;
 
 /*----------------------------------------------------------------------*/
 /* ADD									*/
 
 /** 0110 0010 immm rdst			add	#%1, %0 */
-  ID(add); SC(immm); DR(rdst); F("OSZC");
+  ID(add); SC(immm); DR(rdst); F_OSZC;
 
 /** 0100 10ss rsrc rdst			add	%1%S1, %0 */
-  ID(add); SP(ss, rsrc); DR(rdst); F("OSZC");
+  ID(add); SP(ss, rsrc); DR(rdst); F_OSZC;
 
 /** 0000 0110 mx00 10ss rsrc rdst	add	%1%S1, %0 */
-  ID(add); SPm(ss, rsrc, mx); DR(rdst); F("OSZC");
+  ID(add); SPm(ss, rsrc, mx); DR(rdst); F_OSZC;
 
 /** 0111 00im rsrc rdst			add	#%1, %2, %0 */
-  ID(add); SC(IMMex(im)); S2R(rsrc); DR(rdst); F("OSZC");
+  ID(add); SC(IMMex(im)); S2R(rsrc); DR(rdst); F_OSZC;
 
 /** 1111 1111 0010 rdst srca srcb	add	%2, %1, %0 */
-  ID(add); DR(rdst); SR(srcb); S2R(srca); F("OSZC");
+  ID(add); DR(rdst); SR(srcb); S2R(srca); F_OSZC;
 
 /*----------------------------------------------------------------------*/
 /* CMP									*/
 
 /** 0110 0001 immm rdst			cmp	#%2, %1 */
-  ID(sub); S2C(immm); SR(rdst); F("OSZC");
+  ID(sub); S2C(immm); SR(rdst); F_OSZC;
 
 /** 0111 01im 0000 rsrc		cmp	#%2, %1%S1 */
-  ID(sub); SR(rsrc); S2C(IMMex(im)); F("OSZC");
+  ID(sub); SR(rsrc); S2C(IMMex(im)); F_OSZC;
 
 /** 0111 0101 0101 rsrc			cmp	#%2, %1 */
-  ID(sub); SR(rsrc); S2C(IMM(1)); F("OSZC");
+  ID(sub); SR(rsrc); S2C(IMM(1)); F_OSZC;
 
 /** 0100 01ss rsrc rdst		cmp	%2%S2, %1 */
-  ID(sub); S2P(ss, rsrc); SR(rdst); F("OSZC");
+  ID(sub); S2P(ss, rsrc); SR(rdst); F_OSZC;
 
 /** 0000 0110 mx00 01ss rsrc rdst		cmp	%2%S2, %1 */
-  ID(sub); S2Pm(ss, rsrc, mx); SR(rdst); F("OSZC");
+  ID(sub); S2Pm(ss, rsrc, mx); SR(rdst); F_OSZC;
 
 /*----------------------------------------------------------------------*/
 /* SUB									*/
 
 /** 0110 0000 immm rdst			sub	#%2, %0 */
-  ID(sub); S2C(immm); SR(rdst); DR(rdst); F("OSZC");
+  ID(sub); S2C(immm); SR(rdst); DR(rdst); F_OSZC;
 
 /** 0100 00ss rsrc rdst			sub	%2%S2, %1 */
-  ID(sub); S2P(ss, rsrc); SR(rdst); DR(rdst); F("OSZC");
+  ID(sub); S2P(ss, rsrc); SR(rdst); DR(rdst); F_OSZC;
 
 /** 0000 0110 mx00 00ss rsrc rdst			sub	%2%S2, %1 */
-  ID(sub); S2Pm(ss, rsrc, mx); SR(rdst); DR(rdst); F("OSZC");
+  ID(sub); S2Pm(ss, rsrc, mx); SR(rdst); DR(rdst); F_OSZC;
 
 /** 1111 1111 0000 rdst srca srcb	sub	%2, %1, %0 */
-  ID(sub); DR(rdst); SR(srcb); S2R(srca); F("OSZC");
+  ID(sub); DR(rdst); SR(srcb); S2R(srca); F_OSZC;
 
 /*----------------------------------------------------------------------*/
 /* SBB									*/
 
 /** 1111 1100 0000 0011 rsrc rdst	sbb	%1, %0 */
-  ID(sbb); SR (rsrc); DR(rdst); F("OSZC");
+  ID(sbb); SR (rsrc); DR(rdst); F_OSZC;
 
   /* FIXME: only supports .L */
 /** 0000 0110 mx10 00sp 0000 0000 rsrc rdst	sbb	%1%S1, %0 */
-  ID(sbb); SPm(sp, rsrc, mx); DR(rdst); F("OSZC");
+  ID(sbb); SPm(sp, rsrc, mx); DR(rdst); F_OSZC;
 
 /*----------------------------------------------------------------------*/
 /* ABS									*/
 
 /** 0111 1110 0010 rdst			abs	%0 */
-  ID(abs); DR(rdst); SR(rdst); F("OSZ-");
+  ID(abs); DR(rdst); SR(rdst); F_OSZ_;
 
 /** 1111 1100 0000 1111 rsrc rdst	abs	%1, %0 */
-  ID(abs); DR(rdst); SR(rsrc); F("OSZ-");
+  ID(abs); DR(rdst); SR(rsrc); F_OSZ_;
 
 /*----------------------------------------------------------------------*/
 /* MAX									*/
@@ -571,19 +546,19 @@ rx_decode_opcode (unsigned long pc AU,
 /* MUL									*/
 
 /** 0110 0011 immm rdst			mul	#%1, %0 */
-  ID(mul); DR(rdst); SC(immm); F("----");
+  ID(mul); DR(rdst); SC(immm); F_____;
 
 /** 0111 01im 0001rdst			mul	#%1, %0 */
-  ID(mul); DR(rdst); SC(IMMex(im)); F("----");
+  ID(mul); DR(rdst); SC(IMMex(im)); F_____;
 
 /** 0100 11ss rsrc rdst			mul	%1%S1, %0 */
-  ID(mul); SP(ss, rsrc); DR(rdst); F("----");
+  ID(mul); SP(ss, rsrc); DR(rdst); F_____;
 
 /** 0000 0110 mx00 11ss rsrc rdst	mul	%1%S1, %0 */
-  ID(mul); SPm(ss, rsrc, mx); DR(rdst); F("----");
+  ID(mul); SPm(ss, rsrc, mx); DR(rdst); F_____;
 
 /** 1111 1111 0011 rdst srca srcb	mul 	%2, %1, %0 */
-  ID(mul); DR(rdst); SR(srcb); S2R(srca); F("----");
+  ID(mul); DR(rdst); SR(srcb); S2R(srca); F_____;
 
 /*----------------------------------------------------------------------*/
 /* EMUL									*/
@@ -613,78 +588,78 @@ rx_decode_opcode (unsigned long pc AU,
 /* DIV									*/
 
 /** 1111 1101 0111 im00 1000rdst	div	#%1, %0 */
-  ID(div); DR(rdst); SC(IMMex(im)); F("O---");
+  ID(div); DR(rdst); SC(IMMex(im)); F_O___;
 
 /** 1111 1100 0010 00ss rsrc rdst	div	%1%S1, %0 */
-  ID(div); SP(ss, rsrc); DR(rdst); F("O---");
+  ID(div); SP(ss, rsrc); DR(rdst); F_O___;
 
 /** 0000 0110 mx10 00ss 0000 1000 rsrc rdst	div	%1%S1, %0 */
-  ID(div); SPm(ss, rsrc, mx); DR(rdst); F("O---");
+  ID(div); SPm(ss, rsrc, mx); DR(rdst); F_O___;
 
 /*----------------------------------------------------------------------*/
 /* DIVU									*/
 
 /** 1111 1101 0111 im00 1001rdst	divu	#%1, %0 */
-  ID(divu); DR(rdst); SC(IMMex(im)); F("O---");
+  ID(divu); DR(rdst); SC(IMMex(im)); F_O___;
 
 /** 1111 1100 0010 01ss rsrc rdst	divu	%1%S1, %0 */
-  ID(divu); SP(ss, rsrc); DR(rdst); F("O---");
+  ID(divu); SP(ss, rsrc); DR(rdst); F_O___;
 
 /** 0000 0110 mx10 00ss 0000 1001 rsrc rdst	divu	%1%S1, %0 */
-  ID(divu); SPm(ss, rsrc, mx); DR(rdst); F("O---");
+  ID(divu); SPm(ss, rsrc, mx); DR(rdst); F_O___;
 
 /*----------------------------------------------------------------------*/
 /* SHIFT								*/
 
 /** 0110 110i mmmm rdst			shll	#%2, %0 */
-  ID(shll); S2C(i*16+mmmm); SR(rdst); DR(rdst); F("OSZC");
+  ID(shll); S2C(i*16+mmmm); SR(rdst); DR(rdst); F_OSZC;
 
 /** 1111 1101 0110 0010 rsrc rdst	shll	%2, %0 */
-  ID(shll); S2R(rsrc); SR(rdst); DR(rdst); F("OSZC");
+  ID(shll); S2R(rsrc); SR(rdst); DR(rdst); F_OSZC;
 
 /** 1111 1101 110immmm rsrc rdst	shll	#%2, %1, %0 */
-  ID(shll); S2C(immmm); SR(rsrc); DR(rdst); F("OSZC");
+  ID(shll); S2C(immmm); SR(rsrc); DR(rdst); F_OSZC;
 
 
 /** 0110 101i mmmm rdst			shar	#%2, %0 */
-  ID(shar); S2C(i*16+mmmm); SR(rdst); DR(rdst); F("0SZC");
+  ID(shar); S2C(i*16+mmmm); SR(rdst); DR(rdst); F_0SZC;
 
 /** 1111 1101 0110 0001 rsrc rdst	shar	%2, %0 */
-  ID(shar); S2R(rsrc); SR(rdst); DR(rdst); F("0SZC");
+  ID(shar); S2R(rsrc); SR(rdst); DR(rdst); F_0SZC;
 
 /** 1111 1101 101immmm rsrc rdst	shar	#%2, %1, %0 */
-  ID(shar); S2C(immmm); SR(rsrc); DR(rdst); F("0SZC");
+  ID(shar); S2C(immmm); SR(rsrc); DR(rdst); F_0SZC;
 
 
 /** 0110 100i mmmm rdst			shlr	#%2, %0 */
-  ID(shlr); S2C(i*16+mmmm); SR(rdst); DR(rdst); F("-SZC");
+  ID(shlr); S2C(i*16+mmmm); SR(rdst); DR(rdst); F__SZC;
 
 /** 1111 1101 0110 0000 rsrc rdst	shlr	%2, %0 */
-  ID(shlr); S2R(rsrc); SR(rdst); DR(rdst); F("-SZC");
+  ID(shlr); S2R(rsrc); SR(rdst); DR(rdst); F__SZC;
 
 /** 1111 1101 100immmm rsrc rdst	shlr	#%2, %1, %0 */
-  ID(shlr); S2C(immmm); SR(rsrc); DR(rdst); F("-SZC");
+  ID(shlr); S2C(immmm); SR(rsrc); DR(rdst); F__SZC;
 
 /*----------------------------------------------------------------------*/
 /* ROTATE								*/
 
 /** 0111 1110 0101 rdst			rolc	%0 */
-  ID(rolc); DR(rdst); F("-SZC");
+  ID(rolc); DR(rdst); F__SZC;
 
 /** 0111 1110 0100 rdst			rorc	%0 */
-  ID(rorc); DR(rdst); F("-SZC");
+  ID(rorc); DR(rdst); F__SZC;
 
 /** 1111 1101 0110 111i mmmm rdst	rotl	#%1, %0 */
-  ID(rotl); SC(i*16+mmmm); DR(rdst); F("-SZC");
+  ID(rotl); SC(i*16+mmmm); DR(rdst); F__SZC;
 
 /** 1111 1101 0110 0110 rsrc rdst	rotl	%1, %0 */
-  ID(rotl); SR(rsrc); DR(rdst); F("-SZC");
+  ID(rotl); SR(rsrc); DR(rdst); F__SZC;
 
 /** 1111 1101 0110 110i mmmm rdst	rotr	#%1, %0 */
-  ID(rotr); SC(i*16+mmmm); DR(rdst); F("-SZC");
+  ID(rotr); SC(i*16+mmmm); DR(rdst); F__SZC;
 
 /** 1111 1101 0110 0100 rsrc rdst	rotr	%1, %0 */
-  ID(rotr); SR(rsrc); DR(rdst); F("-SZC");
+  ID(rotr); SR(rsrc); DR(rdst); F__SZC;
 
 /** 1111 1101 0110 0101 rsrc rdst	revw	%1, %0 */
   ID(revw); SR(rsrc); DR(rdst);
@@ -749,7 +724,7 @@ rx_decode_opcode (unsigned long pc AU,
 /* STRING FUNCTIONS							*/
 
 /** 0111 1111 1000 0011		scmpu */
-  ID(scmpu); F("--ZC");
+  ID(scmpu); F___ZC;
 
 /** 0111 1111 1000 0111		smovu */
   ID(smovu);
@@ -758,10 +733,10 @@ rx_decode_opcode (unsigned long pc AU,
   ID(smovb);
 
 /** 0111 1111 1000 00sz		suntil%s */
-  ID(suntil); BWL(sz); F("--ZC");
+  ID(suntil); BWL(sz); F___ZC;
 
 /** 0111 1111 1000 01sz		swhile%s */
-  ID(swhile); BWL(sz); F("--ZC");
+  ID(swhile); BWL(sz); F___ZC;
 
 /** 0111 1111 1000 1111		smovf */
   ID(smovf);
@@ -773,40 +748,40 @@ rx_decode_opcode (unsigned long pc AU,
 /* RMPA									*/
 
 /** 0111 1111 1000 11sz		rmpa%s */
-  ID(rmpa); BWL(sz); F("OS--");
+  ID(rmpa); BWL(sz); F_OS__;
 
 /*----------------------------------------------------------------------*/
 /* HI/LO stuff								*/
 
 /** 1111 1101 0000 0000 srca srcb	mulhi	%1, %2 */
-  ID(mulhi); SR(srca); S2R(srcb); F("----");
+  ID(mulhi); SR(srca); S2R(srcb); F_____;
 
 /** 1111 1101 0000 0001 srca srcb	mullo	%1, %2 */
-  ID(mullo); SR(srca); S2R(srcb); F("----");
+  ID(mullo); SR(srca); S2R(srcb); F_____;
 
 /** 1111 1101 0000 0100 srca srcb	machi	%1, %2 */
-  ID(machi); SR(srca); S2R(srcb); F("----");
+  ID(machi); SR(srca); S2R(srcb); F_____;
 
 /** 1111 1101 0000 0101 srca srcb	maclo	%1, %2 */
-  ID(maclo); SR(srca); S2R(srcb); F("----");
+  ID(maclo); SR(srca); S2R(srcb); F_____;
 
 /** 1111 1101 0001 0111 0000 rsrc	mvtachi	%1 */
-  ID(mvtachi); SR(rsrc); F("----");
+  ID(mvtachi); SR(rsrc); F_____;
 
 /** 1111 1101 0001 0111 0001 rsrc	mvtaclo	%1 */
-  ID(mvtaclo); SR(rsrc); F("----");
+  ID(mvtaclo); SR(rsrc); F_____;
 
 /** 1111 1101 0001 1111 0000 rdst	mvfachi	%0 */
-  ID(mvfachi); DR(rdst); F("----");
+  ID(mvfachi); DR(rdst); F_____;
 
 /** 1111 1101 0001 1111 0010 rdst	mvfacmi	%0 */
-  ID(mvfacmi); DR(rdst); F("----");
+  ID(mvfacmi); DR(rdst); F_____;
 
 /** 1111 1101 0001 1111 0001 rdst	mvfaclo	%0 */
-  ID(mvfaclo); DR(rdst); F("----");
+  ID(mvfaclo); DR(rdst); F_____;
 
 /** 1111 1101 0001 1000 000i 0000	racw	#%1 */
-  ID(racw); SC(i+1); F("----");
+  ID(racw); SC(i+1); F_____;
 
 /*----------------------------------------------------------------------*/
 /* SAT									*/
@@ -821,78 +796,78 @@ rx_decode_opcode (unsigned long pc AU,
 /* FLOAT								*/
 
 /** 1111 1101 0111 0010 0010 rdst	fadd	#%1, %0 */
-  ID(fadd); DR(rdst); SC(IMM(0)); F("-SZ-");
+  ID(fadd); DR(rdst); SC(IMM(0)); F__SZ_;
 
 /** 1111 1100 1000 10sd rsrc rdst	fadd	%1%S1, %0 */
-  ID(fadd); DR(rdst); SD(sd, rsrc, LSIZE); F("-SZ-");
+  ID(fadd); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
 
 /** 1111 1101 0111 0010 0001 rdst	fcmp	#%1, %0 */
-  ID(fcmp); DR(rdst); SC(IMM(0)); F("OSZ-");
+  ID(fcmp); DR(rdst); SC(IMM(0)); F_OSZ_;
 
 /** 1111 1100 1000 01sd rsrc rdst	fcmp	%1%S1, %0 */
-  ID(fcmp); DR(rdst); SD(sd, rsrc, LSIZE); F("OSZ-");
+  ID(fcmp); DR(rdst); SD(sd, rsrc, LSIZE); F_OSZ_;
 
 /** 1111 1101 0111 0010 0000 rdst	fsub	#%1, %0 */
-  ID(fsub); DR(rdst); SC(IMM(0)); F("-SZ-");
+  ID(fsub); DR(rdst); SC(IMM(0)); F__SZ_;
 
 /** 1111 1100 1000 00sd rsrc rdst	fsub	%1%S1, %0 */
-  ID(fsub); DR(rdst); SD(sd, rsrc, LSIZE); F("-SZ-");
+  ID(fsub); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
 
 /** 1111 1100 1001 01sd rsrc rdst	ftoi	%1%S1, %0 */
-  ID(ftoi); DR(rdst); SD(sd, rsrc, LSIZE); F("-SZ-");
+  ID(ftoi); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
 
 /** 1111 1101 0111 0010 0011 rdst	fmul	#%1, %0 */
-  ID(fmul); DR(rdst); SC(IMM(0)); F("-SZ-");
+  ID(fmul); DR(rdst); SC(IMM(0)); F__SZ_;
 
 /** 1111 1100 1000 11sd rsrc rdst	fmul	%1%S1, %0 */
-  ID(fmul); DR(rdst); SD(sd, rsrc, LSIZE); F("-SZ-");
+  ID(fmul); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
 
 /** 1111 1101 0111 0010 0100 rdst	fdiv	#%1, %0 */
-  ID(fdiv); DR(rdst); SC(IMM(0)); F("-SZ-");
+  ID(fdiv); DR(rdst); SC(IMM(0)); F__SZ_;
 
 /** 1111 1100 1001 00sd rsrc rdst	fdiv	%1%S1, %0 */
-  ID(fdiv); DR(rdst); SD(sd, rsrc, LSIZE); F("-SZ-");
+  ID(fdiv); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
 
 /** 1111 1100 1001 10sd rsrc rdst	round	%1%S1, %0 */
-  ID(round); DR(rdst); SD(sd, rsrc, LSIZE); F("-SZ-");
+  ID(round); DR(rdst); SD(sd, rsrc, LSIZE); F__SZ_;
 
 /** 1111 1100 0100 01sd rsrc rdst	itof	%1%S1, %0 */
-  ID(itof); DR (rdst); SP(sd, rsrc); F("-SZ-");
+  ID(itof); DR (rdst); SP(sd, rsrc); F__SZ_;
 
 /** 0000 0110 mx10 00sd 0001 0001 rsrc rdst	itof	%1%S1, %0 */
-  ID(itof); DR (rdst); SPm(sd, rsrc, mx); F("-SZ-");
+  ID(itof); DR (rdst); SPm(sd, rsrc, mx); F__SZ_;
 
 /*----------------------------------------------------------------------*/
 /* BIT OPS								*/
 
 /** 1111 00sd rdst 0bit			bset	#%1, %0%S0 */
-  ID(bset); BWL(BSIZE); SC(bit); DD(sd, rdst, BSIZE); F("----");
+  ID(bset); BWL(BSIZE); SC(bit); DD(sd, rdst, BSIZE); F_____;
 
 /** 1111 1100 0110 00sd rdst rsrc	bset	%1, %0%S0 */
-  ID(bset); BWL(BSIZE); SR(rsrc); DD(sd, rdst, BSIZE); F("----");
+  ID(bset); BWL(BSIZE); SR(rsrc); DD(sd, rdst, BSIZE); F_____;
 
 /** 0111 100b ittt rdst			bset	#%1, %0 */
-  ID(bset); BWL(LSIZE); SC(b*16+ittt); DR(rdst); F("----");
+  ID(bset); BWL(LSIZE); SC(b*16+ittt); DR(rdst); F_____;
 
 
 /** 1111 00sd rdst 1bit			bclr	#%1, %0%S0 */
-  ID(bclr); BWL(BSIZE); SC(bit); DD(sd, rdst, BSIZE); F("----");
+  ID(bclr); BWL(BSIZE); SC(bit); DD(sd, rdst, BSIZE); F_____;
 
 /** 1111 1100 0110 01sd rdst rsrc	bclr	%1, %0%S0 */
-  ID(bclr); BWL(BSIZE); SR(rsrc); DD(sd, rdst, BSIZE); F("----");
+  ID(bclr); BWL(BSIZE); SR(rsrc); DD(sd, rdst, BSIZE); F_____;
 
 /** 0111 101b ittt rdst			bclr	#%1, %0 */
-  ID(bclr); BWL(LSIZE); SC(b*16+ittt); DR(rdst); F("----");
+  ID(bclr); BWL(LSIZE); SC(b*16+ittt); DR(rdst); F_____;
 
 
 /** 1111 01sd rdst 0bit			btst	#%2, %1%S1 */
-  ID(btst); BWL(BSIZE); S2C(bit); SD(sd, rdst, BSIZE); F("--ZC");
+  ID(btst); BWL(BSIZE); S2C(bit); SD(sd, rdst, BSIZE); F___ZC;
 
 /** 1111 1100 0110 10sd rdst rsrc	btst	%2, %1%S1 */
-  ID(btst); BWL(BSIZE); S2R(rsrc); SD(sd, rdst, BSIZE); F("--ZC");
+  ID(btst); BWL(BSIZE); S2R(rsrc); SD(sd, rdst, BSIZE); F___ZC;
 
 /** 0111 110b ittt rdst			btst	#%2, %1 */
-  ID(btst); BWL(LSIZE); S2C(b*16+ittt); SR(rdst); F("--ZC");
+  ID(btst); BWL(LSIZE); S2C(b*16+ittt); SR(rdst); F___ZC;
 
 
 /** 1111 1100 111bit sd rdst 1111	bnot	#%1, %0%S0 */
