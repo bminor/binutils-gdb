@@ -1,3 +1,10 @@
+2010-07-28  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11060:
+	* gdb.python/py-type.c (Temargs): New template.
+	(temvar): New variable.
+	* gdb.python/py-type.exp (test_template): New proc.
+
 2010-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/member-ptr.exp, gdb.cp/printmethod.exp,

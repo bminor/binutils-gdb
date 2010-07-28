@@ -33,6 +33,14 @@ struct D : C
   int e;
   int f;
 };
+
+template<typename T, int I, int C::*MP>
+struct Temargs
+{
+};
+
+Temargs<D, 23, &C::c> temvar;
+
 #endif
 
 int

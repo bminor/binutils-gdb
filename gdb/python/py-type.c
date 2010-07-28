@@ -509,34 +509,19 @@ typy_lookup_type (struct demangle_component *demangled,
   return type;
 }
 
+/* This is a helper function for typy_template_argument that is used
+   when the type does not have template symbols attached.  It works by
+   parsing the type name.  This happens with compilers, like older
+   versions of GCC, that do not emit DW_TAG_template_*.  */
+
 static PyObject *
-typy_template_argument (PyObject *self, PyObject *args)
+typy_legacy_template_argument (struct type *type, struct block *block,
+			       int argno)
 {
-  int i, argno;
-  struct type *type = ((type_object *) self)->type;
+  int i;
   struct demangle_component *demangled;
   const char *err;
   struct type *argtype;
-  struct block *block = NULL;
-  PyObject *block_obj = NULL;
-
-  if (! PyArg_ParseTuple (args, "i|O", &argno, &block_obj))
-    return NULL;
-
-  if (block_obj)
-    {
-      block = block_object_to_block (block_obj);
-      if (! block)
-	{
-	  PyErr_SetString (PyExc_RuntimeError,
-			   _("Second argument must be block."));
-	  return NULL;
-	}
-    }
-
-  type = check_typedef (type);
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
 
   if (TYPE_NAME (type) == NULL)
     {
@@ -581,6 +566,67 @@ typy_template_argument (PyObject *self, PyObject *args)
     return NULL;
 
   return type_to_type_object (argtype);
+}
+
+static PyObject *
+typy_template_argument (PyObject *self, PyObject *args)
+{
+  int argno;
+  struct type *type = ((type_object *) self)->type;
+  struct block *block = NULL;
+  PyObject *block_obj = NULL;
+  struct symbol *sym;
+  struct value *val = NULL;
+  volatile struct gdb_exception except;
+
+  if (! PyArg_ParseTuple (args, "i|O", &argno, &block_obj))
+    return NULL;
+
+  if (block_obj)
+    {
+      block = block_object_to_block (block_obj);
+      if (! block)
+	{
+	  PyErr_SetString (PyExc_RuntimeError,
+			   _("Second argument must be block."));
+	  return NULL;
+	}
+    }
+
+  type = check_typedef (type);
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = check_typedef (TYPE_TARGET_TYPE (type));
+
+  /* We might not have DW_TAG_template_*, so try to parse the type's
+     name.  This is inefficient if we do not have a template type --
+     but that is going to wind up as an error anyhow.  */
+  if (! TYPE_N_TEMPLATE_ARGUMENTS (type))
+    return typy_legacy_template_argument (type, block, argno);
+
+  if (argno >= TYPE_N_TEMPLATE_ARGUMENTS (type))
+    {
+      PyErr_Format (PyExc_RuntimeError, _("No argument %d in template."),
+		    argno);
+      return NULL;
+    }
+
+  sym = TYPE_TEMPLATE_ARGUMENT (type, argno);
+  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+    return type_to_type_object (SYMBOL_TYPE (sym));
+  else if (SYMBOL_CLASS (sym) == LOC_OPTIMIZED_OUT)
+    {
+      PyErr_Format (PyExc_RuntimeError,
+		    _("Template argument is optimized out"));
+      return NULL;
+    }
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      val = value_of_variable (sym, block);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return value_to_value_object (val);
 }
 
 static PyObject *

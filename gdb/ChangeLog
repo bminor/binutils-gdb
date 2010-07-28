@@ -1,3 +1,11 @@
+2010-07-28  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11060:
+	* python/py-type.c (typy_legacy_template_argument): New function,
+	extracted from typy_template_argument.
+	(typy_template_argument): Use TYPE_TEMPLATE_ARGUMENT.  Return a
+	value when needed.
+
 2010-07-28  Oleg Nesterov  <oleg@redhat.com>
 
 	* remote.c (readchar): Call pop_target in case of SERIAL_ERROR.

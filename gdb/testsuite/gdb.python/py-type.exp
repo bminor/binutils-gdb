@@ -126,6 +126,23 @@ proc test_range {} {
   gdb_test "python print st.type.range()" "RuntimeError: This type does not have a range.*" "Check range for non ranged type."
 }
 
+# Some tests of template arguments.
+proc test_template {} {
+    gdb_py_test_silent_cmd \
+	"python ttype = gdb.parse_and_eval('temvar').type" \
+	"get type of temvar" \
+	1
+
+    gdb_test "python print ttype.template_argument(0)" "D"
+    gdb_test "python print isinstance(ttype.template_argument(0), gdb.Type)" \
+	"True"
+    # The next two tests require a GCC that emits DW_TAG_template_*.
+    gdb_test "python print ttype.template_argument(1)" "23"
+    gdb_test "python print isinstance(ttype.template_argument(1), gdb.Value)" \
+	"True"
+    setup_kfail "gcc/41736" *-*-*
+    gdb_test "python print ttype.template_argument(2)" "&C::c"
+}
 
 # Perform C Tests.
 build_inferior "c"
@@ -144,3 +161,4 @@ runto_bp "break to inspect struct and array."
 test_fields "c++"
 test_base_class
 test_range
+test_template
