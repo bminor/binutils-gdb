@@ -1,3 +1,7 @@
+2010-07-28  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove link-warning.h.
+
 2010-07-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* remote.c (remote_download_tracepoint): Add missing gettext markup.
