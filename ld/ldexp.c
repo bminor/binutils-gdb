@@ -1002,6 +1002,8 @@ exp_assert (etree_type *exp, const char *message)
 void
 exp_print_tree (etree_type *tree)
 {
+  bfd_boolean function_like;
+
   if (config.map_file == NULL)
     config.map_file = stderr;
 
@@ -1022,7 +1024,7 @@ exp_print_tree (etree_type *tree)
       minfo ("%s+0x%v", tree->rel.section->name, tree->rel.value);
       return;
     case etree_assign:
-      fprintf (config.map_file, "%s", tree->assign.dst);
+      fputs (tree->assign.dst, config.map_file);
       exp_print_token (tree->type.node_code, TRUE);
       exp_print_tree (tree->assign.src);
       break;
@@ -1030,20 +1032,38 @@ exp_print_tree (etree_type *tree)
     case etree_provided:
       fprintf (config.map_file, "PROVIDE (%s, ", tree->assign.dst);
       exp_print_tree (tree->assign.src);
-      fprintf (config.map_file, ")");
+      fputc (')', config.map_file);
       break;
     case etree_binary:
-      fprintf (config.map_file, "(");
+      function_like = FALSE;
+      switch (tree->type.node_code)
+	{
+	case MAX_K:
+	case MIN_K:
+	case ALIGN_K:
+	case DATA_SEGMENT_ALIGN:
+	case DATA_SEGMENT_RELRO_END:
+	  function_like = TRUE;
+	}
+      if (function_like)
+	{
+	  exp_print_token (tree->type.node_code, FALSE);
+	  fputc (' ', config.map_file);
+	}
+      fputc ('(', config.map_file);
       exp_print_tree (tree->binary.lhs);
-      exp_print_token (tree->type.node_code, TRUE);
+      if (function_like)
+	fprintf (config.map_file, ", ");
+      else
+	exp_print_token (tree->type.node_code, TRUE);
       exp_print_tree (tree->binary.rhs);
-      fprintf (config.map_file, ")");
+      fputc (')', config.map_file);
       break;
     case etree_trinary:
       exp_print_tree (tree->trinary.cond);
-      fprintf (config.map_file, "?");
+      fputc ('?', config.map_file);
       exp_print_tree (tree->trinary.lhs);
-      fprintf (config.map_file, ":");
+      fputc (':', config.map_file);
       exp_print_tree (tree->trinary.rhs);
       break;
     case etree_unary:
@@ -1052,7 +1072,7 @@ exp_print_tree (etree_type *tree)
 	{
 	  fprintf (config.map_file, " (");
 	  exp_print_tree (tree->unary.child);
-	  fprintf (config.map_file, ")");
+	  fputc (')', config.map_file);
 	}
       break;
 
@@ -1064,9 +1084,7 @@ exp_print_tree (etree_type *tree)
 
     case etree_name:
       if (tree->type.node_code == NAME)
-	{
-	  fprintf (config.map_file, "%s", tree->name.name);
-	}
+	fputs (tree->name.name, config.map_file);
       else
 	{
 	  exp_print_token (tree->type.node_code, FALSE);
