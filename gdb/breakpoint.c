@@ -10024,7 +10024,6 @@ breakpoint_re_set_one (void *bint)
 	  return 0;
 	}
 
-      set_language (b->language);
       input_radix = b->input_radix;
       s = b->addr_string;
 
@@ -10033,6 +10032,7 @@ breakpoint_re_set_one (void *bint)
 
       marker_spec = b->type == bp_static_tracepoint && is_marker_spec (s);
 
+      set_language (b->language);
       TRY_CATCH (e, RETURN_MASK_ERROR)
 	{
 	  if (marker_spec)

@@ -1,3 +1,8 @@
+2010-07-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (breakpoint_re_set_one): Move call to set_language
+	down, just before the block that parse the breakpoint addr_string.
+
 2010-07-28  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/9946:
