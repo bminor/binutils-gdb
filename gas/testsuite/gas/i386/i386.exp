@@ -215,6 +215,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "debug1"
 
 	if [expr [istarget "*-*-linux*"]] then {
+	    setup_xfail "*-*-linux*"
 	    run_dump_test "dw2-compress-2"
 	}
     }
@@ -407,6 +408,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "debug1"
 
 	if [istarget "*-*-linux*"] then {
+	    setup_xfail "*-*-linux*"
 	    run_dump_test "x86-64-dw2-compress-2"
 	}
     }
