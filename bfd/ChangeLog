@@ -1,3 +1,8 @@
+2010-07-29  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_edit_toc): Always adjust local syms in
+	.toc section, even when none are used in relocs.
+
 2010-07-27  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.h: Include "elf/mips.h".

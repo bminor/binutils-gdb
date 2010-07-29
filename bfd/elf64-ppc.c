@@ -8248,6 +8248,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	{
 	  bfd_byte *contents, *src;
 	  unsigned long off;
+	  Elf_Internal_Sym *sym;
 	  bfd_boolean local_toc_syms = FALSE;
 
 	  /* Shuffle the toc contents, and at the same time convert the
@@ -8292,7 +8293,6 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  unsigned long r_symndx;
 		  asection *sym_sec;
 		  struct elf_link_hash_entry *h;
-		  Elf_Internal_Sym *sym;
 		  bfd_vma val;
 
 		  r_type = ELF64_R_TYPE (rel->r_info);
@@ -8371,38 +8371,34 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 
 	  /* We shouldn't have local or global symbols defined in the TOC,
 	     but handle them anyway.  */
-	  if (local_toc_syms)
-	    {
-	      Elf_Internal_Sym *sym;
+	  for (sym = local_syms;
+	       sym < local_syms + symtab_hdr->sh_info;
+	       ++sym)
+	    if (sym->st_value != 0
+		&& bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
+	      {
+		unsigned long i;
 
-	      for (sym = local_syms;
-		   sym < local_syms + symtab_hdr->sh_info;
-		   ++sym)
-		if (sym->st_value != 0
-		    && bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
+		if (sym->st_value > toc->rawsize)
+		  i = toc->rawsize >> 3;
+		else
+		  i = sym->st_value >> 3;
+
+		if ((skip[i] & (ref_from_discarded | can_optimize)) != 0)
 		  {
-		    unsigned long i;
-
-		    if (sym->st_value > toc->rawsize)
-		      i = toc->rawsize >> 3;
-		    else
-		      i = sym->st_value >> 3;
-
-		    if ((skip[i] & (ref_from_discarded | can_optimize)) != 0)
-		      {
-			(*_bfd_error_handler)
-			  (_("%s defined on removed toc entry"),
-			   bfd_elf_sym_name (ibfd, symtab_hdr, sym, NULL));
-			do
-			  ++i;
-			while ((skip[i] & (ref_from_discarded | can_optimize)));
-			sym->st_value = (bfd_vma) i << 3;
-		      }
-
-		    sym->st_value -= skip[i];
-		    symtab_hdr->contents = (unsigned char *) local_syms;
+		    if (local_toc_syms)
+		      (*_bfd_error_handler)
+			(_("%s defined on removed toc entry"),
+			 bfd_elf_sym_name (ibfd, symtab_hdr, sym, NULL));
+		    do
+		      ++i;
+		    while ((skip[i] & (ref_from_discarded | can_optimize)));
+		    sym->st_value = (bfd_vma) i << 3;
 		  }
-	    }
+
+		sym->st_value -= skip[i];
+		symtab_hdr->contents = (unsigned char *) local_syms;
+	      }
 
 	  /* Adjust any global syms defined in this toc input section.  */
 	  if (toc_inf.global_toc_syms)
