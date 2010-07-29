@@ -733,6 +733,8 @@ handle_step (int rc)
 void
 sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
 {
+  int rc;
+
   check_desc (sd);
 
   if (sig_to_deliver != 0)
@@ -745,7 +747,12 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
   execution_error_clear_last_error ();
 
   if (step)
-    handle_step (decode_opcode ());
+    {
+      rc = setjmp (decode_jmp_buf);
+      if (rc == 0)
+	rc = decode_opcode ();
+      handle_step (rc);
+    }
   else
     {
       /* We don't clear 'stop' here, because then we would miss
@@ -762,7 +769,9 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
 	      break;
 	    }
 
-	  int rc = decode_opcode ();
+	  rc = setjmp (decode_jmp_buf);
+	  if (rc == 0)
+	    rc = decode_opcode ();
 
 	  if (execution_error_get_last_error () != SIM_ERR_NONE)
 	    {

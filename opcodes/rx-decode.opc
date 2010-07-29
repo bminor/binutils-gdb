@@ -89,6 +89,7 @@ static int dsp3map[] = { 8, 9, 10, 3, 4, 5, 6, 7 };
 
 #define SC(i)       OP (1, RX_Operand_Immediate, 0, i)
 #define SR(r)       OP (1, RX_Operand_Register,  r, 0)
+#define SRR(r)      OP (1, RX_Operand_TwoReg,  r, 0)
 #define SI(r,a)     OP (1, RX_Operand_Indirect,  r, a)
 #define SIs(r,a,s)  OP (1, RX_Operand_Indirect,  r, (a) * SCALE[s])
 #define SD(t,r,s)   rx_disp (1, t, r, bwl[s], ld);
@@ -270,14 +271,21 @@ rx_decode_opcode (unsigned long pc AU,
   ID(mov); sBWL (sz); DIs(dst, d*16+sppp, sz); SC(IMM(1)); F_____;
 
 /** 11sz sd ss rsrc rdst	mov%s	%1, %0 */
-  ID(mov); sBWL(sz); F_____;
-  if ((ss == 3) && (sd != 3))
+  if (ss == 3 && sz == 2 && rsrc == 0 && rdst == 0)
     {
-      SD(ss, rdst, sz); DD(sd, rsrc, sz);
+      ID(nop2);
     }
   else
     {
-      SD(ss, rsrc, sz); DD(sd, rdst, sz);
+      ID(mov); sBWL(sz); F_____;
+      if ((ss == 3) && (sd != 3))
+	{
+	  SD(ss, rdst, sz); DD(sd, rsrc, sz);
+	}
+      else
+	{
+	  SD(ss, rsrc, sz); DD(sd, rdst, sz);
+	}
     }
 
 /** 10sz 1dsp a src b dst	mov%s	%1, %0 */
@@ -287,13 +295,13 @@ rx_decode_opcode (unsigned long pc AU,
   ID(mov); sBWL(sz); DIs(dst, dsp*4+a*2+b, sz); SR(src); F_____;
 
 /** 1111 1110 01sz isrc bsrc rdst	mov%s	[%1, %2], %0 */
-  ID(movbi); sBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F_____;
+  ID(movbi); sBWL(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
 
 /** 1111 1110 00sz isrc bsrc rdst	mov%s	%0, [%1, %2] */
-  ID(movbir); sBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F_____;
+  ID(movbir); sBWL(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
 
 /** 1111 1110 11sz isrc bsrc rdst	movu%s	[%1, %2], %0 */
-  ID(movbi); uBWL(sz); DR(rdst); SR(isrc); S2R(bsrc); F_____;
+  ID(movbi); uBWL(sz); DR(rdst); SRR(isrc); S2R(bsrc); F_____;
 
 /** 1111 1101 0010 0p sz rdst rsrc	mov%s	%1, %0 */
   ID(mov); sBWL (sz); SR(rsrc); F_____;
@@ -525,7 +533,14 @@ rx_decode_opcode (unsigned long pc AU,
   ID(max); DR(rdst); SC(IMMex(im));
 
 /** 1111 1100 0001 00ss rsrc rdst	max	%1%S1, %0 */
-  ID(max); SP(ss, rsrc); DR(rdst);
+  if (ss == 3 && rsrc == 0 && rdst == 0)
+    {
+      ID(nop3);
+    }
+  else
+    {
+      ID(max); SP(ss, rsrc); DR(rdst);
+    }
 
 /** 0000 0110 mx10 00ss 0000 0100 rsrc rdst	max	%1%S1, %0 */
   ID(max); SPm(ss, rsrc, mx); DR(rdst);
@@ -681,23 +696,23 @@ rx_decode_opcode (unsigned long pc AU,
 
 
 /** 0000 1dsp			bra.s	%a0 */
-  ID(branch); Scc(RXC_always); DC(pc + dsp3map[dsp]);
+  ID(branch); DC(pc + dsp3map[dsp]);
 
 /** 0010 1110			bra.b	%a0 */
-  ID(branch); Scc(RXC_always); DC(pc + IMMex(1));
+  ID(branch); DC(pc + IMMex(1));
 
 /** 0011 1000			bra.w	%a0 */
-  ID(branch); Scc(RXC_always); DC(pc + IMMex(2));
+  ID(branch); DC(pc + IMMex(2));
 
 /** 0000 0100			bra.a	%a0 */
-  ID(branch); Scc(RXC_always); DC(pc + IMMex(3));
+  ID(branch); DC(pc + IMMex(3));
 
 /** 0111 1111 0100 rsrc		bra.l	%0 */
-  ID(branchrel); Scc(RXC_always); DR(rsrc);
+  ID(branchrel); DR(rsrc);
 
 
 /** 0111 1111 0000 rsrc		jmp	%0 */
-  ID(branch); Scc(RXC_always); DR(rsrc);
+  ID(branch); DR(rsrc);
 
 /** 0111 1111 0001 rsrc		jsr	%0 */
   ID(jsr); DR(rsrc);

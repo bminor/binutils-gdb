@@ -211,16 +211,16 @@ int condition_true (int cond_id);
    - RX_MAKE_HIT_BREAK is the return code for hitting a breakpoint.
    - RX_MAKE_EXITED (C) is the return code for exiting with status C.
    - RX_MAKE_STOPPED (S) is the return code for stopping on signal S.  */
-#define RX_MAKE_STEPPED()   (0)
-#define RX_MAKE_HIT_BREAK() (1)
-#define RX_MAKE_EXITED(c)   (((int) (c) << 8) + 2)
-#define RX_MAKE_STOPPED(s)  (((int) (s) << 8) + 3)
+#define RX_MAKE_STEPPED()   (1)
+#define RX_MAKE_HIT_BREAK() (2)
+#define RX_MAKE_EXITED(c)   (((int) (c) << 8) + 3)
+#define RX_MAKE_STOPPED(s)  (((int) (s) << 8) + 4)
 
 #define RX_STEPPED(r)       ((r) == RX_MAKE_STEPPED ())
 #define RX_HIT_BREAK(r)     ((r) == RX_MAKE_HIT_BREAK ())
-#define RX_EXITED(r)        (((r) & 0xff) == 2)
+#define RX_EXITED(r)        (((r) & 0xff) == 3)
 #define RX_EXIT_STATUS(r)   ((r) >> 8)
-#define RX_STOPPED(r)       (((r) & 0xff) == 3)
+#define RX_STOPPED(r)       (((r) & 0xff) == 4)
 #define RX_STOP_SIG(r)      ((r) >> 8)
 
 /* The step result for the current step.  Global to allow

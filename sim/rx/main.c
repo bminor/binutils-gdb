@@ -94,6 +94,7 @@ main (int argc, char **argv)
   int o;
   int save_trace;
   bfd *prog;
+  int rc;
 
   /* By default, we exit when an execution error occurs.  */
   execution_error_init_standalone ();
@@ -178,33 +179,50 @@ main (int argc, char **argv)
 
   sim_disasm_init (prog);
 
-  while (1)
+  enable_counting = verbose;
+
+  rc = setjmp (decode_jmp_buf);
+
+  if (rc == 0)
     {
-      int rc;
-
-      if (trace)
-	printf ("\n");
-
-      if (disassemble)
-	sim_disasm_one ();
-
-      enable_counting = verbose;
-      rc = decode_opcode ();
-      enable_counting = 0;
-
-      if (RX_HIT_BREAK (rc))
-	done (1);
-      else if (RX_EXITED (rc))
-	done (RX_EXIT_STATUS (rc));
-      else if (RX_STOPPED (rc))
+      if (!trace && !disassemble)
 	{
-	  if (verbose)
-	    printf("Stopped on signal %d\n", RX_STOP_SIG (rc));
-	  exit(1);
+	  /* This will longjmp to the above if an exception
+	     happens.  */
+	  for (;;)
+	    decode_opcode ();
 	}
       else
-	assert (RX_STEPPED (rc));
+	while (1)
+	  {
 
-      trace_register_changes ();
+	    if (trace)
+	      printf ("\n");
+
+	    if (disassemble)
+	      {
+		enable_counting = 0;
+		sim_disasm_one ();
+		enable_counting = verbose;
+	      }
+
+	    rc = decode_opcode ();
+
+	    if (trace)
+	      trace_register_changes ();
+	  }
     }
+
+  if (RX_HIT_BREAK (rc))
+    done (1);
+  else if (RX_EXITED (rc))
+    done (RX_EXIT_STATUS (rc));
+  else if (RX_STOPPED (rc))
+    {
+      if (verbose)
+	printf("Stopped on signal %d\n", RX_STOP_SIG (rc));
+      exit(1);
+    }
+  done (0);
+  exit (0);
 }

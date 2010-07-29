@@ -1,3 +1,30 @@
+2010-07-29  DJ Delorie  <dj@redhat.com>
+
+	* rx.c (decode_cache_base): New.
+	(id_names): Remove ediv and edivu.
+	(optype_names): Add TwoReg.
+	(maybe_get_mem_page): New.
+	(rx_get_byte): Call it.
+	(get_op): Add TwoReg support.
+	(put_op): Likewise.
+	(PD, PS, PS2, GD, GS, GS2, DSZ, SSZ, S2SZ, US1, US2, OM): "opcode"
+	is a pointer now.
+	(DO_RETURN): New.  We use longjmp to return an exception result.
+	(decode_opcode): Make opcode a pointer to the decode cache.  Save
+	decoded opcode information and re-use.  Call DO_RETURN instead of
+	return throughout.  Remove ediv and edivu.
+	* mem.c (ptdc): New.  Adds decode cache.
+	(rx_mem_ptr): Support it.
+	(rx_mem_decode_cache): New.
+	* mem.h (enum mem_ptr_action): add MPA_DECODE_CACHE.
+	(rx_mem_decode_cache): Declare.
+	* gdb-if.c (sim_resume): Add decode_opcode's setjmp logic here...
+	* main.c (main): ...and here.  Use a fast loop if neither trace
+	nor disassemble is given.
+	* cpu.h (RX_MAKE_STEPPED, RX_MAKE_HIT_BREAK, RX_MAKE_EXITED,
+	RX_MAKE_STOPPED, RX_EXITED, RX_STOPPED): Adjust so that 0 is not a
+	valid code for anything.
+
 2010-07-27  DJ Delorie  <dj@redhat.com>
 
 	* README.txt: New.

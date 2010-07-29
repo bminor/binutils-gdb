@@ -29,7 +29,8 @@ enum mem_ptr_action
 {
   MPA_WRITING,
   MPA_READING,
-  MPA_CONTENT_TYPE
+  MPA_CONTENT_TYPE,
+  MPA_DECODE_CACHE
 };
 
 void init_mem (void);
@@ -43,6 +44,9 @@ unsigned long mem_usage_cycles (void);
 #define NONPAGE_MASK (~(PAGE_SIZE-1))
 
 unsigned char *rx_mem_ptr (unsigned long address, enum mem_ptr_action action);
+#ifdef RXC_never
+RX_Opcode_Decoded **rx_mem_decode_cache (unsigned long address);
+#endif
 
 void mem_put_qi (int address, unsigned char value);
 void mem_put_hi (int address, unsigned short value);

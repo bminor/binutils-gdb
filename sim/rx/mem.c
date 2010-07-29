@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #include <string.h>
 
+#include "opcode/rx.h"
 #include "mem.h"
 #include "cpu.h"
 #include "syscalls.h"
@@ -46,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 static unsigned char **pt[L1_LEN];
 static unsigned char **ptr[L1_LEN];
+static RX_Opcode_Decoded ***ptdc[L1_LEN];
 
 /* [ get=0/put=1 ][ byte size ] */
 static unsigned int mem_counters[2][5];
@@ -85,16 +87,16 @@ rx_mem_ptr (unsigned long address, enum mem_ptr_action action)
     {
       pt[pt1] = (unsigned char **) calloc (L2_LEN, sizeof (char **));
       ptr[pt1] = (unsigned char **) calloc (L2_LEN, sizeof (char **));
+      ptdc[pt1] = (RX_Opcode_Decoded ***) calloc (L2_LEN, sizeof (RX_Opcode_Decoded ***));
     }
   if (pt[pt1][pt2] == 0)
     {
       if (action == MPA_READING)
 	execution_error (SIM_ERR_READ_UNWRITTEN_PAGES, address);
 
-      pt[pt1][pt2] = (unsigned char *) malloc (OFF_LEN);
-      memset (pt[pt1][pt2], 0, OFF_LEN);
-      ptr[pt1][pt2] = (unsigned char *) malloc (OFF_LEN);
-      memset (ptr[pt1][pt2], MC_UNINIT, OFF_LEN);
+      pt[pt1][pt2] = (unsigned char *) calloc (OFF_LEN, 1);
+      ptr[pt1][pt2] = (unsigned char *) calloc (OFF_LEN, 1);
+      ptdc[pt1][pt2] = (RX_Opcode_Decoded **) calloc (OFF_LEN, sizeof(RX_Opcode_Decoded *));
     }
   else if (action == MPA_READING
 	   && ptr[pt1][pt2][pto] == MC_UNINIT)
@@ -105,12 +107,26 @@ rx_mem_ptr (unsigned long address, enum mem_ptr_action action)
       if (ptr[pt1][pt2][pto] == MC_PUSHED_PC)
 	execution_error (SIM_ERR_CORRUPT_STACK, address);
       ptr[pt1][pt2][pto] = MC_DATA;
+      if (ptdc[pt1][pt2][pto])
+	{
+	  free (ptdc[pt1][pt2][pto]);
+	  ptdc[pt1][pt2][pto] = NULL;
+	}
     }
 
   if (action == MPA_CONTENT_TYPE)
-    return ptr[pt1][pt2] + pto;
+    return (unsigned char *) (ptr[pt1][pt2] + pto);
+
+  if (action == MPA_DECODE_CACHE)
+    return (unsigned char *) (ptdc[pt1][pt2] + pto);
 
   return pt[pt1][pt2] + pto;
+}
+
+RX_Opcode_Decoded **
+rx_mem_decode_cache (unsigned long address)
+{
+  return (RX_Opcode_Decoded **) rx_mem_ptr (address, MPA_DECODE_CACHE);
 }
 
 static inline int
@@ -335,7 +351,9 @@ mem_put_qi (int address, unsigned char value)
   COUNT (1, 1);
 }
 
+#ifdef CYCLE_ACCURATE
 static int tpu_base;
+#endif
 
 void
 mem_put_hi (int address, unsigned short value)

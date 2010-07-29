@@ -65,8 +65,6 @@ static const char * id_names[] = {
   "RXO_min",	/* d = min(d,s) */
   "RXO_emul",	/* d:64 = d:32 * s */
   "RXO_emulu",	/* d:64 = d:32 * s (unsigned) */
-  "RXO_ediv",	/* d:64 / s; d = quot, d+1 = rem */
-  "RXO_edivu",	/* d:64 / s; d = quot, d+1 = rem */
 
   "RXO_rolc",	/* d <<= 1 through carry */
   "RXO_rorc",	/* d >>= 1 through carry*/
@@ -145,7 +143,8 @@ static const char * optype_names[] = {
   "Ps++",	/* [Rn+] */
   "--Pr",	/* [-Rn] */
   " cc ",	/* eq, gtu, etc */
-  "Flag"	/* [UIOSZC] */
+  "Flag",	/* [UIOSZC] */
+  "RbRi"	/* [Rb + scale * Ri] */
 };
 
 #define N_RXO (sizeof(id_names)/sizeof(id_names[0]))
@@ -296,7 +295,19 @@ _rx_abort (const char *file, int line)
 }
 
 static unsigned char *get_byte_base;
+static RX_Opcode_Decoded **decode_cache_base;
 static SI get_byte_page;
+
+static inline void
+maybe_get_mem_page (SI tpc)
+{
+  if (((tpc ^ get_byte_page) & NONPAGE_MASK) || enable_counting)
+    {
+      get_byte_page = tpc & NONPAGE_MASK;
+      get_byte_base = rx_mem_ptr (get_byte_page, MPA_READING) - get_byte_page;
+      decode_cache_base = rx_mem_decode_cache (get_byte_page) - get_byte_page;
+    }
+}
 
 /* This gets called a *lot* so optimize it.  */
 static int
@@ -309,20 +320,16 @@ rx_get_byte (void *vdata)
   if (rx_big_endian)
     tpc ^= 3;
 
-  if (((tpc ^ get_byte_page) & NONPAGE_MASK) || enable_counting)
-    {
-      get_byte_page = tpc & NONPAGE_MASK;
-      get_byte_base = rx_mem_ptr (get_byte_page, MPA_READING) - get_byte_page;
-    }
+  maybe_get_mem_page (tpc);
 
   rx_data->dpc ++;
   return get_byte_base [tpc];
 }
 
 static int
-get_op (RX_Opcode_Decoded *rd, int i)
+get_op (const RX_Opcode_Decoded *rd, int i)
 {
-  RX_Opcode_Operand *o = rd->op + i;
+  const RX_Opcode_Operand *o = rd->op + i;
   int addr, rv = 0;
 
   switch (o->type)
@@ -343,8 +350,11 @@ get_op (RX_Opcode_Decoded *rd, int i)
       /* fall through */
     case RX_Operand_Postinc:	/* [Rn+] */
     case RX_Operand_Indirect:	/* [Rn + addend] */
+    case RX_Operand_TwoReg:	/* [Rn + scale * R2] */
 #ifdef CYCLE_ACCURATE
       RL (o->reg);
+      if (o->type == RX_Operand_TwoReg)
+	RL (rd->op[2].reg);
       regs.rt = -1;
       if (regs.m2m == M2M_BOTH)
 	{
@@ -359,7 +369,11 @@ get_op (RX_Opcode_Decoded *rd, int i)
       memory_source = 1;
 #endif
 
-      addr = get_reg (o->reg) + o->addend;
+      if (o->type == RX_Operand_TwoReg)
+	addr = get_reg (o->reg) * size2bytes[rd->size] + get_reg (rd->op[2].reg);
+      else
+	addr = get_reg (o->reg) + o->addend;
+
       switch (o->size)
 	{
 	case RX_AnySize:
@@ -440,9 +454,9 @@ get_op (RX_Opcode_Decoded *rd, int i)
 }
 
 static void
-put_op (RX_Opcode_Decoded *rd, int i, int v)
+put_op (const RX_Opcode_Decoded *rd, int i, int v)
 {
-  RX_Opcode_Operand *o = rd->op + i;
+  const RX_Opcode_Operand *o = rd->op + i;
   int addr;
 
   switch (o->size)
@@ -504,6 +518,7 @@ put_op (RX_Opcode_Decoded *rd, int i, int v)
       /* fall through */
     case RX_Operand_Postinc:	/* [Rn+] */
     case RX_Operand_Indirect:	/* [Rn + addend] */
+    case RX_Operand_TwoReg:	/* [Rn + scale * R2] */
 
 #ifdef CYCLE_ACCURATE
       if (regs.m2m == M2M_BOTH)
@@ -518,7 +533,11 @@ put_op (RX_Opcode_Decoded *rd, int i, int v)
       memory_dest = 1;
 #endif
 
-      addr = get_reg (o->reg) + o->addend;
+      if (o->type == RX_Operand_TwoReg)
+	addr = get_reg (o->reg) * size2bytes[rd->size] + get_reg (rd->op[2].reg);
+      else
+	addr = get_reg (o->reg) + o->addend;
+
       switch (o->size)
 	{
 	case RX_AnySize:
@@ -559,19 +578,19 @@ put_op (RX_Opcode_Decoded *rd, int i, int v)
     }
 }
 
-#define PD(x) put_op (&opcode, 0, x)
-#define PS(x) put_op (&opcode, 1, x)
-#define PS2(x) put_op (&opcode, 2, x)
-#define GD() get_op (&opcode, 0)
-#define GS() get_op (&opcode, 1)
-#define GS2() get_op (&opcode, 2)
-#define DSZ() size2bytes[opcode.op[0].size]
-#define SSZ() size2bytes[opcode.op[0].size]
-#define S2SZ() size2bytes[opcode.op[0].size]
+#define PD(x) put_op (opcode, 0, x)
+#define PS(x) put_op (opcode, 1, x)
+#define PS2(x) put_op (opcode, 2, x)
+#define GD() get_op (opcode, 0)
+#define GS() get_op (opcode, 1)
+#define GS2() get_op (opcode, 2)
+#define DSZ() size2bytes[opcode->op[0].size]
+#define SSZ() size2bytes[opcode->op[0].size]
+#define S2SZ() size2bytes[opcode->op[0].size]
 
 /* "Universal" sources.  */
-#define US1() ((opcode.op[2].type == RX_Operand_None) ? GD() : GS())
-#define US2() ((opcode.op[2].type == RX_Operand_None) ? GS() : GS2())
+#define US1() ((opcode->op[2].type == RX_Operand_None) ? GD() : GS())
+#define US2() ((opcode->op[2].type == RX_Operand_None) ? GS() : GS2())
 
 static void
 push(int val)
@@ -828,7 +847,7 @@ do_fp_exception (unsigned long opcode_pc)
 }
 
 static int
-op_is_memory (RX_Opcode_Decoded *rd, int i)
+op_is_memory (const RX_Opcode_Decoded *rd, int i)
 {
   switch (rd->op[i].type)
     {
@@ -840,7 +859,9 @@ op_is_memory (RX_Opcode_Decoded *rd, int i)
       return 0;
     }
 }
-#define OM(i) op_is_memory (&opcode, i)
+#define OM(i) op_is_memory (opcode, i)
+
+#define DO_RETURN(x) { longjmp (decode_jmp_buf, x); }
 
 int
 decode_opcode ()
@@ -852,17 +873,13 @@ decode_opcode ()
   long long sll;
   unsigned long opcode_pc;
   RX_Data rx_data;
-  RX_Opcode_Decoded opcode;
-  int rv;
+  const RX_Opcode_Decoded *opcode;
 #ifdef CYCLE_STATS
   unsigned long long prev_cycle_count;
 #endif
 #ifdef CYCLE_ACCURATE
   int tx;
 #endif
-
-  if ((rv = setjmp (decode_jmp_buf)))
-    return rv;
 
 #ifdef CYCLE_STATS
   prev_cycle_count = regs.cycle_count;
@@ -875,9 +892,25 @@ decode_opcode ()
 
   rx_cycles ++;
 
-  rx_data.dpc = opcode_pc = regs.r_pc;
-  memset (&opcode, 0, sizeof(opcode));
-  opcode_size = rx_decode_opcode (opcode_pc, &opcode, rx_get_byte, &rx_data);
+  maybe_get_mem_page (regs.r_pc);
+
+  opcode_pc = regs.r_pc;
+
+  /* Note that we don't word-swap this point, there's no point.  */
+  if (decode_cache_base[opcode_pc] == NULL)
+    {
+      RX_Opcode_Decoded *opcode_w;
+      rx_data.dpc = opcode_pc;
+      opcode_w = decode_cache_base[opcode_pc] = calloc (1, sizeof (RX_Opcode_Decoded));
+      opcode_size = rx_decode_opcode (opcode_pc, opcode_w,
+				      rx_get_byte, &rx_data);
+      opcode = opcode_w;
+    }
+  else
+    {
+      opcode = decode_cache_base[opcode_pc];
+      opcode_size = opcode->n_bytes;
+    }
 
 #ifdef CYCLE_ACCURATE
   if (branch_alignment_penalty)
@@ -896,11 +929,11 @@ decode_opcode ()
 
   regs.r_pc += opcode_size;
 
-  rx_flagmask = opcode.flags_s;
-  rx_flagand = ~(int)opcode.flags_0;
-  rx_flagor = opcode.flags_1;
+  rx_flagmask = opcode->flags_s;
+  rx_flagand = ~(int)opcode->flags_0;
+  rx_flagor = opcode->flags_1;
 
-  switch (opcode.id)
+  switch (opcode->id)
     {
     case RXO_abs:
       sll = GS ();
@@ -928,7 +961,7 @@ decode_opcode ()
     case RXO_bclr:
       ma = GD ();
       mb = GS ();
-      if (opcode.op[0].type == RX_Operand_Register)
+      if (opcode->op[0].type == RX_Operand_Register)
 	mb &= 0x1f;
       else
 	mb &= 0x07;
@@ -940,7 +973,7 @@ decode_opcode ()
     case RXO_bmcc:
       ma = GD ();
       mb = GS ();
-      if (opcode.op[0].type == RX_Operand_Register)
+      if (opcode->op[0].type == RX_Operand_Register)
 	mb &= 0x1f;
       else
 	mb &= 0x07;
@@ -955,7 +988,7 @@ decode_opcode ()
     case RXO_bnot:
       ma = GD ();
       mb = GS ();
-      if (opcode.op[0].type == RX_Operand_Register)
+      if (opcode->op[0].type == RX_Operand_Register)
 	mb &= 0x1f;
       else
 	mb &= 0x07;
@@ -965,7 +998,7 @@ decode_opcode ()
       break;
 
     case RXO_branch:
-      if (GS())
+      if (opcode->op[1].type == RX_Operand_None || GS())
 	{
 #ifdef CYCLE_ACCURATE
 	  SI old_pc = regs.r_pc;
@@ -987,9 +1020,6 @@ decode_opcode ()
 	    }
 #ifdef CYCLE_STATS
 	  branch_stalls ++;
-	  /* This is just for statistics */
-	  if (opcode.op[1].reg == 14)
-	    opcode.op[1].type = RX_Operand_None;
 #endif
 #endif
 	}
@@ -1032,11 +1062,11 @@ decode_opcode ()
       {
 	int old_psw = regs.r_psw;
 	if (rx_in_gdb)
-	  return RX_MAKE_HIT_BREAK ();
+	  DO_RETURN (RX_MAKE_HIT_BREAK ());
 	if (regs.r_intb == 0)
 	  {
 	    tprintf("BREAK hit, no vector table.\n");
-	    return RX_MAKE_EXITED(1);
+	    DO_RETURN (RX_MAKE_EXITED(1));
 	  }
 	regs.r_psw &= ~(FLAGBIT_I | FLAGBIT_U | FLAGBIT_PM);
 	pushpc (old_psw);
@@ -1049,7 +1079,7 @@ decode_opcode ()
     case RXO_bset:
       ma = GD ();
       mb = GS ();
-      if (opcode.op[0].type == RX_Operand_Register)
+      if (opcode->op[0].type == RX_Operand_Register)
 	mb &= 0x1f;
       else
 	mb &= 0x07;
@@ -1061,7 +1091,7 @@ decode_opcode ()
     case RXO_btst:
       ma = GS ();
       mb = GS2 ();
-      if (opcode.op[1].type == RX_Operand_Register)
+      if (opcode->op[1].type == RX_Operand_Register)
 	mb &= 0x1f;
       else
 	mb &= 0x07;
@@ -1071,7 +1101,7 @@ decode_opcode ()
       break;
 
     case RXO_clrpsw:
-      v = 1 << opcode.op[0].reg;
+      v = 1 << opcode->op[0].reg;
       if (FLAG_PM
 	  && (v == FLAGBIT_I
 	      || v == FLAGBIT_U))
@@ -1120,60 +1150,13 @@ decode_opcode ()
       cycles (20);
       break;
 
-    case RXO_ediv:
-      ma = GS();
-      mb = GD();
-      tprintf("%d / %d = ", mb, ma);
-      if (ma == 0 || (ma == -1 && (unsigned int) mb == 0x80000000))
-	{
-	  tprintf("#NAN\n");
-	  set_flags (FLAGBIT_O, FLAGBIT_O);
-	}
-      else
-	{
-	  v = mb/ma;
-	  mb = mb%ma;
-	  tprintf("%d, rem %d\n", v, mb);
-	  set_flags (FLAGBIT_O, 0);
-	  PD (v);
-	  opcode.op[0].reg ++;
-	  PD (mb);
-	}
-      /* Note: spec says 3 to 22 cycles, we are pessimistic.  */
-      cycles (22);
-      break;
-
-    case RXO_edivu:
-      uma = GS();
-      umb = GD();
-      tprintf("%u / %u = ", umb, uma);
-      if (uma == 0)
-	{
-	  tprintf("#NAN\n");
-	  set_flags (FLAGBIT_O, FLAGBIT_O);
-	}
-      else
-	{
-	  v = umb/uma;
-	  umb = umb%uma;
-	  tprintf("%u, rem %u\n", v, umb);
-	  set_flags (FLAGBIT_O, 0);
-	  PD (v);
-	  opcode.op[0].reg ++;
-	  PD (umb);
-	}
-      /* Note: spec says 2 to 20 cycles, we are pessimistic.  */
-      cycles (20);
-      break;
-
     case RXO_emul:
       ma = GD ();
       mb = GS ();
       sll = (long long)ma * (long long)mb;
       tprintf("%d * %d = %lld\n", ma, mb, sll);
-      PD (sll);
-      opcode.op[0].reg ++;
-      PD (sll >> 32);
+      put_reg (opcode->op[0].reg, sll);
+      put_reg (opcode->op[0].reg + 1, sll >> 32);
       E2;
       break;
 
@@ -1182,9 +1165,8 @@ decode_opcode ()
       umb = GS ();
       ll = (long long)uma * (long long)umb;
       tprintf("%#x * %#x = %#llx\n", uma, umb, ll);
-      PD (ll);
-      opcode.op[0].reg ++;
-      PD (ll >> 32);
+      put_reg (opcode->op[0].reg, ll);
+      put_reg (opcode->op[0].reg + 1, ll >> 32);
       E2;
       break;
 
@@ -1242,7 +1224,7 @@ decode_opcode ()
       v = GS ();
       if (v == 255)
 	{
-	  return rx_syscall (regs.r[5]);
+	  DO_RETURN (rx_syscall (regs.r[5]));
 	}
       else
 	{
@@ -1278,7 +1260,7 @@ decode_opcode ()
 	regs.link_register = regs.r_pc;
 #endif
 	pushpc (get_reg (pc));
-	if (opcode.id == RXO_jsrrel)
+	if (opcode->id == RXO_jsrrel)
 	  v += regs.r_pc;
 #ifdef CYCLE_ACCURATE
 	delta = v - regs.r_pc;
@@ -1323,12 +1305,6 @@ decode_opcode ()
       else
 	PD (mb);
       E (1);
-#ifdef CYCLE_STATS
-      if (opcode.op[0].type == RX_Operand_Register
-	  && opcode.op[1].type == RX_Operand_Register
-	  && opcode.op[0].reg == opcode.op[1].reg)
-	opcode.id = RXO_nop3;
-#endif
       break;
 
     case RXO_min:
@@ -1344,8 +1320,8 @@ decode_opcode ()
     case RXO_mov:
       v = GS ();
 
-      if (opcode.op[0].type == RX_Operand_Register
-	  && opcode.op[0].reg == 16 /* PSW */)
+      if (opcode->op[0].type == RX_Operand_Register
+	  && opcode->op[0].reg == 16 /* PSW */)
 	{
 	  /* Special case, LDC and POPC can't ever modify PM.  */
 	  int pm = regs.r_psw & FLAGBIT_PM;
@@ -1360,16 +1336,16 @@ decode_opcode ()
       if (FLAG_PM)
 	{
 	  /* various things can't be changed in user mode.  */
-	  if (opcode.op[0].type == RX_Operand_Register)
-	    if (opcode.op[0].reg == 32)
+	  if (opcode->op[0].type == RX_Operand_Register)
+	    if (opcode->op[0].reg == 32)
 	      {
 		v &= ~ (FLAGBIT_I | FLAGBIT_U | FLAGBITS_IPL);
 		v |= regs.r_psw & (FLAGBIT_I | FLAGBIT_U | FLAGBITS_IPL);
 	      }
-	  if (opcode.op[0].reg == 34 /* ISP */
-	      || opcode.op[0].reg == 37 /* BPSW */
-	      || opcode.op[0].reg == 39 /* INTB */
-	      || opcode.op[0].reg == 38 /* VCT */)
+	  if (opcode->op[0].reg == 34 /* ISP */
+	      || opcode->op[0].reg == 37 /* BPSW */
+	      || opcode->op[0].reg == 39 /* INTB */
+	      || opcode->op[0].reg == 38 /* VCT */)
 	    /* These are ignored.  */
 	    break;
 	}
@@ -1381,10 +1357,10 @@ decode_opcode ()
       PD (v);
 
 #ifdef CYCLE_ACCURATE
-      if ((opcode.op[0].type == RX_Operand_Predec
-	   && opcode.op[1].type == RX_Operand_Register)
-	  || (opcode.op[0].type == RX_Operand_Postinc
-	      && opcode.op[1].type == RX_Operand_Register))
+      if ((opcode->op[0].type == RX_Operand_Predec
+	   && opcode->op[1].type == RX_Operand_Register)
+	  || (opcode->op[0].type == RX_Operand_Postinc
+	      && opcode->op[1].type == RX_Operand_Register))
 	{
 	  /* Special case: push reg doesn't cause a memory stall.  */
 	  memory_dest = 0;
@@ -1393,32 +1369,14 @@ decode_opcode ()
 #endif
 
       set_sz (v, DSZ());
-#ifdef CYCLE_STATS
-      if (opcode.op[0].type == RX_Operand_Register
-	  && opcode.op[1].type == RX_Operand_Register
-	  && opcode.op[0].reg == opcode.op[1].reg)
-	opcode.id = RXO_nop2;
-#endif
       break;
 
     case RXO_movbi:
-      /* We cheat to save on code duplication. */
-      regs.r_temp = (get_reg (opcode.op[1].reg) * size2bytes[opcode.size]
-		     + get_reg (opcode.op[2].reg));
-      opcode.op[1].reg = r_temp_idx;
-      opcode.op[1].type = RX_Operand_Indirect;
-      opcode.op[1].addend = 0;
       PD (GS ());
       cycles (1);
       break;
 
     case RXO_movbir:
-      /* We cheat to save on code duplication. */
-      regs.r_temp = (get_reg (opcode.op[1].reg) * size2bytes[opcode.size]
-		     + get_reg (opcode.op[2].reg));
-      opcode.op[1].reg = r_temp_idx;
-      opcode.op[1].type = RX_Operand_Indirect;
-      opcode.op[1].addend = 0;
       PS (GD ());
       cycles (1);
       break;
@@ -1478,6 +1436,8 @@ decode_opcode ()
       break;
 
     case RXO_nop:
+    case RXO_nop2:
+    case RXO_nop3:
       E1;
       break;
 
@@ -1487,14 +1447,14 @@ decode_opcode ()
 
     case RXO_popm:
       /* POPM cannot pop R0 (sp).  */
-      if (opcode.op[1].reg == 0 || opcode.op[2].reg == 0)
+      if (opcode->op[1].reg == 0 || opcode->op[2].reg == 0)
 	EXCEPTION (EX_UNDEFINED);
-      if (opcode.op[1].reg >= opcode.op[2].reg)
+      if (opcode->op[1].reg >= opcode->op[2].reg)
 	{
 	  regs.r_pc = opcode_pc;
-	  return RX_MAKE_STOPPED (SIGILL);
+	  DO_RETURN (RX_MAKE_STOPPED (SIGILL));
 	}
-      for (v = opcode.op[1].reg; v <= opcode.op[2].reg; v++)
+      for (v = opcode->op[1].reg; v <= opcode->op[2].reg; v++)
 	{
 	  cycles (1);
 	  RLD (v);
@@ -1504,19 +1464,19 @@ decode_opcode ()
 
     case RXO_pushm:
       /* PUSHM cannot push R0 (sp).  */
-      if (opcode.op[1].reg == 0 || opcode.op[2].reg == 0)
+      if (opcode->op[1].reg == 0 || opcode->op[2].reg == 0)
 	EXCEPTION (EX_UNDEFINED);
-      if (opcode.op[1].reg >= opcode.op[2].reg)
+      if (opcode->op[1].reg >= opcode->op[2].reg)
 	{
 	  regs.r_pc = opcode_pc;
 	  return RX_MAKE_STOPPED (SIGILL);
 	}
-      for (v = opcode.op[2].reg; v >= opcode.op[1].reg; v--)
+      for (v = opcode->op[2].reg; v >= opcode->op[1].reg; v--)
 	{
 	  RL (v);
 	  push (get_reg (v));
 	}
-      cycles (opcode.op[2].reg - opcode.op[1].reg + 1);
+      cycles (opcode->op[2].reg - opcode->op[1].reg + 1);
       break;
 
     case RXO_racw:
@@ -1573,7 +1533,7 @@ decode_opcode ()
 	{
 	  long long tmp;
 
-	  switch (opcode.size)
+	  switch (opcode->size)
 	    {
 	    case RX_Long:
 	      ma = mem_get_si (regs.r[1]);
@@ -1627,7 +1587,7 @@ decode_opcode ()
       else
 	set_flags (FLAGBIT_O|FLAGBIT_S, ma);
 #ifdef CYCLE_ACCURATE
-      switch (opcode.size)
+      switch (opcode->size)
 	{
 	case RX_Long:
 	  cycles (6 + 4 * tx);
@@ -1725,17 +1685,17 @@ decode_opcode ()
       break;
 
     case RXO_rtsd:
-      if (opcode.op[2].type == RX_Operand_Register)
+      if (opcode->op[2].type == RX_Operand_Register)
 	{
 	  int i;
 	  /* RTSD cannot pop R0 (sp).  */
-	  put_reg (0, get_reg (0) + GS() - (opcode.op[0].reg-opcode.op[2].reg+1)*4);
-	  if (opcode.op[2].reg == 0)
+	  put_reg (0, get_reg (0) + GS() - (opcode->op[0].reg-opcode->op[2].reg+1)*4);
+	  if (opcode->op[2].reg == 0)
 	    EXCEPTION (EX_UNDEFINED);
 #ifdef CYCLE_ACCURATE
-	  tx = opcode.op[0].reg - opcode.op[2].reg + 1;
+	  tx = opcode->op[0].reg - opcode->op[2].reg + 1;
 #endif
-	  for (i = opcode.op[2].reg; i <= opcode.op[0].reg; i ++)
+	  for (i = opcode->op[2].reg; i <= opcode->op[0].reg; i ++)
 	    {
 	      RLD (i);
 	      put_reg (i, pop ());
@@ -1807,7 +1767,7 @@ decode_opcode ()
       break;
 
     case RXO_setpsw:
-      v = 1 << opcode.op[0].reg;
+      v = 1 << opcode->op[0].reg;
       if (FLAG_PM
 	  && (v == FLAGBIT_I
 	      || v == FLAGBIT_U))
@@ -1880,7 +1840,7 @@ decode_opcode ()
 #ifdef CYCLE_ACCURATE
       tx = regs.r[3];
 #endif
-      switch (opcode.size)
+      switch (opcode->size)
 	{
 	case RX_Long:
 	  while (regs.r[3] != 0)
@@ -1923,7 +1883,7 @@ decode_opcode ()
     case RXO_stop:
       PRIVILEDGED ();
       regs.r_psw |= FLAGBIT_I;
-      return RX_MAKE_STOPPED(0);
+      DO_RETURN (RX_MAKE_STOPPED(0));
 
     case RXO_sub:
       MATH_OP (-, 0);
@@ -1939,7 +1899,7 @@ decode_opcode ()
 	  cycles (3);
 	  break;
 	}
-      switch (opcode.size)
+      switch (opcode->size)
 	{
 	case RX_Long:
 	  uma = get_reg (2);
@@ -1993,7 +1953,7 @@ decode_opcode ()
 #endif
       if (regs.r[3] == 0)
 	break;
-      switch (opcode.size)
+      switch (opcode->size)
 	{
 	case RX_Long:
 	  uma = get_reg (2);
@@ -2043,7 +2003,7 @@ decode_opcode ()
     case RXO_wait:
       PRIVILEDGED ();
       regs.r_psw |= FLAGBIT_I;
-      return RX_MAKE_STOPPED(0);
+      DO_RETURN (RX_MAKE_STOPPED(0));
 
     case RXO_xchg:
 #ifdef CYCLE_ACCURATE
@@ -2082,7 +2042,7 @@ decode_opcode ()
 #ifdef CYCLE_STATS
   if (prev_cycle_count == regs.cycle_count)
     {
-      printf("Cycle count not updated! id %s\n", id_names[opcode.id]);
+      printf("Cycle count not updated! id %s\n", id_names[opcode->id]);
       abort ();
     }
 #endif
@@ -2090,15 +2050,15 @@ decode_opcode ()
 #ifdef CYCLE_STATS
   if (running_benchmark)
     {
-      int omap = op_lookup (opcode.op[0].type, opcode.op[1].type, opcode.op[2].type);
+      int omap = op_lookup (opcode->op[0].type, opcode->op[1].type, opcode->op[2].type);
 
 
-      cycles_per_id[opcode.id][omap] += regs.cycle_count - prev_cycle_count;
-      times_per_id[opcode.id][omap] ++;
+      cycles_per_id[opcode->id][omap] += regs.cycle_count - prev_cycle_count;
+      times_per_id[opcode->id][omap] ++;
 
-      times_per_pair[prev_opcode_id][po0][opcode.id][omap] ++;
+      times_per_pair[prev_opcode_id][po0][opcode->id][omap] ++;
 
-      prev_opcode_id = opcode.id;
+      prev_opcode_id = opcode->id;
       po0 = omap;
     }
 #endif
