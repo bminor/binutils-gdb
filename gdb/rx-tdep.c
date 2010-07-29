@@ -296,7 +296,6 @@ rx_analyze_prologue (CORE_ADDR start_pc,
 	}
       else if (opc.id == RXO_branch
 	       && opc.op[0].type == RX_Operand_Immediate
-	       && opc.op[1].type == RX_Operand_Condition
 	       && next_pc < opc.op[0].addend)
 	{
 	  /* When a loop appears as the first statement of a function

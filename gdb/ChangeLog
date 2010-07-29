@@ -1,3 +1,8 @@
+2010-07-29  DJ Delorie  <dj@redhat.com>
+
+	* rx-tdep.c (rx_analyze_prologue): Don't require branches to have
+	conditions.
+
 2010-07-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* PROBLEMS: Remove mention of all problems.
