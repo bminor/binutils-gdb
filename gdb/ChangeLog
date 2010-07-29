@@ -1,3 +1,7 @@
+2010-07-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* PROBLEMS: Remove mention of all problems.
+
 2010-07-28  Oleg Nesterov  <oleg@redhat.com>
 
 	* remote.c (readchar): Call pop_target in case of SERIAL_ERROR.
