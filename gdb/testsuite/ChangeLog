@@ -1,3 +1,8 @@
+2010-07-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_init): Set LC_ALL and LANG to C in the
+	environment.
+
 2010-07-28  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11060:

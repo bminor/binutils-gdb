@@ -2687,6 +2687,11 @@ proc gdb_init { args } {
 	set banned_variables_traced 1
     }
 
+    # We set LC_ALL and LANG to C so that we get the same messages as
+    # expected.
+    setenv LC_ALL C
+    setenv LANG C
+
     return [eval default_gdb_init $args];
 }
 
