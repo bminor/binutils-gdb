@@ -269,16 +269,16 @@ proc check_backtraces {} {
 	    "set break at common_routine in thread 2"
 
     gdb_test_multiple "continue" "continue to bkpt at common_routine in thread 2" {
-	-re "Breakpoint .* common_routine \\(arg=2\\).*" {
+	-re "Breakpoint .* common_routine \\(arg=2\\).*$gdb_prompt $" {
 	    pass "continue to bkpt at common_routine in thread 2"
 	    gdb_test "backtrace" \
 		"#0.*common_routine \\(arg=2\\).*#1.*thread2.*" \
 		"backtrace from thread 2 bkpt in common_routine"
 	}
-	-re "Breakpoint .* common_routine \\(arg=0\\).*" {
+	-re "Breakpoint .* common_routine \\(arg=0\\).*$gdb_prompt $" {
 	    fail "continue to bkpt at common_routine in thread 2 (arg=0)"
 	}
-	-re "Breakpoint .* common_routine \\(arg=1\\).*" {
+	-re "Breakpoint .* common_routine \\(arg=1\\).*$gdb_prompt $" {
 	    fail "continue to bkpt at common_routine in thread 2 (arg=1)"
 	}
     }

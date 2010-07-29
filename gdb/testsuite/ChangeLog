@@ -1,5 +1,10 @@
 2010-07-29  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.threads/pthreads.exp (check_backtraces): Consume $gdb_prompt
+	in gdb_test_multiple.
+
+2010-07-29  Pedro Alves  <pedro@codesourcery.com>
+
 	* lib/gdb.exp (gdb_init): Set LC_ALL and LANG to C in the
 	environment.
 
