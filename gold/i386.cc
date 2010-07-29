@@ -1624,7 +1624,8 @@ Target_i386::gc_process_relocs(Symbol_table* symtab,
                                const unsigned char* plocal_symbols)
 {
   gold::gc_process_relocs<32, false, Target_i386, elfcpp::SHT_REL,
-		          Target_i386::Scan>(
+		          Target_i386::Scan,
+                          Target_i386::Relocatable_size_for_reloc>(
     symtab,
     layout,
     this,

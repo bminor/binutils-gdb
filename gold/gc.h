@@ -151,6 +151,20 @@ struct Symbols_data
   section_size_type symbol_names_size;
 };
 
+// Relocations of type SHT_REL store the addend value in their bytes.
+// This function returns the size of the embedded addend which is
+// nothing but the size of the relocation.
+
+template<typename Classify_reloc>
+inline unsigned int
+get_embedded_addend_size(int sh_type, int r_type, Relobj* obj)
+{
+  if (sh_type != elfcpp::SHT_REL)
+    return 0;
+  Classify_reloc classify_reloc;
+  return classify_reloc.get_size_for_reloc(r_type, obj);
+}
+
 // This function implements the generic part of reloc
 // processing to map a section to all the sections it
 // references through relocs.  It is called only during
@@ -158,7 +172,7 @@ struct Symbols_data
 // folding (--icf).
 
 template<int size, bool big_endian, typename Target_type, int sh_type,
-	 typename Scan>
+	 typename Scan, typename Classify_reloc>
 inline void
 gc_process_relocs(
     Symbol_table* symtab,
@@ -185,6 +199,7 @@ gc_process_relocs(
   Icf::Symbol_info* symvec = NULL;
   Icf::Addend_info* addendvec = NULL;
   Icf::Offset_info* offsetvec = NULL;
+  Icf::Reloc_addend_size_info* reloc_addend_size_vec = NULL;
   bool is_icf_tracked = false;
   const char* cident_section_name = NULL;
 
@@ -205,6 +220,7 @@ gc_process_relocs(
       symvec = &reloc_info->symbol_info;
       addendvec = &reloc_info->addend_info;
       offsetvec = &reloc_info->offset_info;
+      reloc_addend_size_vec = &reloc_info->reloc_addend_size_info;
     }
 
   check_section_for_function_pointers =
@@ -243,6 +259,9 @@ gc_process_relocs(
               uint64_t reloc_offset =
                 convert_to_section_size_type(reloc.get_r_offset());
 	      (*offsetvec).push_back(reloc_offset);
+              (*reloc_addend_size_vec).push_back(
+                get_embedded_addend_size<Classify_reloc>(sh_type, r_type,
+                                                         src_obj));
             }
 
 	  // When doing safe folding, check to see if this relocation is that
@@ -316,6 +335,9 @@ gc_process_relocs(
               uint64_t reloc_offset =
                 convert_to_section_size_type(reloc.get_r_offset());
 	      (*offsetvec).push_back(reloc_offset);
+              (*reloc_addend_size_vec).push_back(
+                get_embedded_addend_size<Classify_reloc>(sh_type, r_type,
+                                                         src_obj));
 	    }
 
           if (gsym->source() != Symbol::FROM_OBJECT)

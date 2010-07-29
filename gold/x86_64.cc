@@ -1781,7 +1781,8 @@ Target_x86_64::gc_process_relocs(Symbol_table* symtab,
     }
 
    gold::gc_process_relocs<64, false, Target_x86_64, elfcpp::SHT_RELA,
-                           Target_x86_64::Scan>(
+                           Target_x86_64::Scan,
+			   Target_x86_64::Relocatable_size_for_reloc>(
     symtab,
     layout,
     this,

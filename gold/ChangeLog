@@ -1,3 +1,27 @@
+2010-07-29  Sriraman Tallam  <tmsriram@google.com>
+
+	* arm.cc (Target_arm<big_endian>::gc_process_relocs): Add template
+	paramter to the call to gold::gc_process_relocs.
+	* i386.cc (Target_i386<big_endian>::gc_process_relocs): Add template
+	paramter to the call to gold::gc_process_relocs.
+	* x86_64.cc (Target_x86_64<big_endian>::gc_process_relocs): Add template
+	parameter to the call to gold::gc_process_relocs.
+	* powerpc.cc (Target_powerpc<big_endian>::gc_process_relocs): Add
+	template parameter to the call to gold::gc_process_relocs.
+	* sparc.cc (Target_sparc<big_endian>::gc_process_relocs): Add template
+	paramter to the call to gold::gc_process_relocs.
+	* gc.h (get_embedded_addend_size): New function.
+	(gc_process_relocs): Save the size of the reloc for use by ICF.
+	* icf.cc (get_section_contents): Get the addend from the text section
+	for SHT_REL relocation sections.
+	* icf.h (Icf::Reloc_addend_size_info): New typedef.
+	(Icf::Reloc_info): Add new member reloc_addend_size_info.
+	* int_encoding.h (read_from_pointer): New overloaded function.
+	* testsuite/Makefile.am (icf_sht_rel_addend_test): New test.
+	* testsuite/icf_sht_rel_addend_test.sh: New file.
+	* testsuite/icf_sht_rel_addend_test_1.cc: New file.
+	* testsuite/icf_sht_rel_addend_test_2.cc: New file.
+
 2010-07-28  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure.ac (AM_INIT_AUTOMAKE): Use parallel-tests option.

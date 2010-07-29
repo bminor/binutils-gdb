@@ -65,6 +65,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.sh weak_plt.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.sh undef_symbol.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.sh ver_test_2.sh \
@@ -98,6 +99,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
@@ -124,6 +126,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = icf_virtual_function_folding_test \
@@ -2589,6 +2592,8 @@ icf_preemptible_functions_test.sh.log: icf_preemptible_functions_test.sh
 	@p='icf_preemptible_functions_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_string_merge_test.sh.log: icf_string_merge_test.sh
 	@p='icf_string_merge_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+icf_sht_rel_addend_test.sh.log: icf_sht_rel_addend_test.sh
+	@p='icf_sht_rel_addend_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_shared.sh.log: two_file_shared.sh
 	@p='two_file_shared.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 weak_plt.sh.log: weak_plt.sh
@@ -3090,6 +3095,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all icf_string_merge_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_string_merge_test.stdout: icf_string_merge_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) icf_string_merge_test > icf_string_merge_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_sht_rel_addend_test_1.o: icf_sht_rel_addend_test_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_sht_rel_addend_test_2.o: icf_sht_rel_addend_test_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_sht_rel_addend_test: icf_sht_rel_addend_test_1.o icf_sht_rel_addend_test_2.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all icf_sht_rel_addend_test_1.o icf_sht_rel_addend_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_sht_rel_addend_test.stdout: icf_sht_rel_addend_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) icf_sht_rel_addend_test > icf_sht_rel_addend_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test.o: basic_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test: basic_test.o gcctestdir/ld

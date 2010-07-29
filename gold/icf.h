@@ -43,6 +43,7 @@ class Icf
   typedef std::vector<Symbol*> Symbol_info;
   typedef std::vector<std::pair<long long, long long> > Addend_info;
   typedef std::vector<uint64_t> Offset_info;
+  typedef std::vector<unsigned int> Reloc_addend_size_info;
   typedef Unordered_map<Section_id,
                         unsigned int,
                         Section_id_hash> Uniq_secn_id_map;
@@ -57,6 +58,7 @@ class Icf
     // This stores the symbol value and the addend for a reloc.
     Addend_info addend_info;
     Offset_info offset_info;
+    Reloc_addend_size_info reloc_addend_size_info;
   } Reloc_info;
 
   typedef Unordered_map<Section_id, Reloc_info,

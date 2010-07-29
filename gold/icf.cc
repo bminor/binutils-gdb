@@ -145,6 +145,8 @@
 #include "symtab.h"
 #include "libiberty.h"
 #include "demangle.h"
+#include "elfcpp.h"
+#include "int_encoding.h"
 
 namespace gold
 {
@@ -269,12 +271,16 @@ get_section_contents(bool first_iteration,
       Icf::Addend_info a = (it_reloc_info_list->second).addend_info;
       // Stores the offset of the reloc.
       Icf::Offset_info o = (it_reloc_info_list->second).offset_info;
+      Icf::Reloc_addend_size_info reloc_addend_size_info =
+        (it_reloc_info_list->second).reloc_addend_size_info;
       Icf::Sections_reachable_info::iterator it_v = v.begin();
       Icf::Symbol_info::iterator it_s = s.begin();
       Icf::Addend_info::iterator it_a = a.begin();
       Icf::Offset_info::iterator it_o = o.begin();
+      Icf::Reloc_addend_size_info::iterator it_addend_size =
+        reloc_addend_size_info.begin();
 
-      for (; it_v != v.end(); ++it_v, ++it_s, ++it_a, ++it_o)
+      for (; it_v != v.end(); ++it_v, ++it_s, ++it_a, ++it_o, ++it_addend_size)
         {
           // ADDEND_STR stores the symbol value and addend and offset,
           // each atmost 16 hex digits long.  it_a points to a pair
@@ -371,6 +377,46 @@ get_section_contents(bool first_iteration,
                   // comments in Merged_symbol_value::Value in object.h.
                   if (addend < 0xffffff00)
                     offset = offset + addend;
+
+		  // For SHT_REL relocation sections, the addend is stored in the
+		  // text section at the relocation offset.
+		  uint64_t reloc_addend_value = 0;
+                  const unsigned char* reloc_addend_ptr =
+		    contents + static_cast<unsigned long long>(*it_o);
+		  switch(*it_addend_size)
+		    {
+		      case 0:
+		        {
+                          break;
+                        }
+                      case 1:
+                        {
+                          reloc_addend_value =
+                            read_from_pointer<8>(reloc_addend_ptr);
+			  break;
+                        }
+                      case 2:
+                        {
+                          reloc_addend_value =
+                            read_from_pointer<16>(reloc_addend_ptr);
+			  break;
+                        }
+                      case 4:
+                        {
+                          reloc_addend_value =
+                            read_from_pointer<32>(reloc_addend_ptr);
+			  break;
+                        }
+                      case 8:
+                        {
+                          reloc_addend_value =
+                            read_from_pointer<64>(reloc_addend_ptr);
+			  break;
+                        }
+		      default:
+		        gold_unreachable();
+		    }
+		  offset = offset + reloc_addend_value;
 
                   section_size_type secn_len;
                   const unsigned char* str_contents =

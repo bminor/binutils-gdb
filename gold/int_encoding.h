@@ -77,6 +77,20 @@ void insert_into_vector(std::vector<unsigned char>* destination,
   destination->insert(destination->end(), buffer, buffer + valsize / 8);
 }
 
+// Read a possibly unaligned integer of SIZE from SOURCE.
+
+template <int valsize>
+typename elfcpp::Valtype_base<valsize>::Valtype
+read_from_pointer(const unsigned char* source)
+{
+  typename elfcpp::Valtype_base<valsize>::Valtype return_value;
+  if (parameters->target().is_big_endian())
+    return_value = elfcpp::Swap_unaligned<valsize, true>::readval(source);
+  else
+    return_value = elfcpp::Swap_unaligned<valsize, false>::readval(source);
+  return return_value;
+}
+
 // Read a possibly unaligned integer of SIZE.  Update SOURCE after read.
 
 template <int valsize>
