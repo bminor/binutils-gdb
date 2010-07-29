@@ -5724,6 +5724,8 @@ ppc_fix_adjustable (fixS *fix)
 	  && fix->fx_r_type != BFD_RELOC_LO16_GOTOFF
 	  && fix->fx_r_type != BFD_RELOC_HI16_GOTOFF
 	  && fix->fx_r_type != BFD_RELOC_HI16_S_GOTOFF
+	  && fix->fx_r_type != BFD_RELOC_PPC64_GOT16_DS
+	  && fix->fx_r_type != BFD_RELOC_PPC64_GOT16_LO_DS
 	  && fix->fx_r_type != BFD_RELOC_GPREL16
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_INHERIT
 	  && fix->fx_r_type != BFD_RELOC_VTABLE_ENTRY
