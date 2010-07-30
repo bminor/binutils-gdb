@@ -1,5 +1,8 @@
 2010-07-30  Doug Evans  <dje@google.com>
 
+	* lib/gdb.exp (build_executable): Forward "c++" option to
+	get_compiler_info.
+
 	* gdb.python/py-type.exp (test_template): Mark as xfail tests
 	"python print ttype.template_argument(1)" and
 	"python print isinstance(ttype.template_argument(1), gdb.Value)"

@@ -3257,7 +3257,11 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
         return -1
     }
 
-    if [get_compiler_info ${binfile}] {
+    set info_options ""
+    if { [lsearch -exact $options "c++"] >= 0 } {
+	set info_options "c++"
+    }
+    if [get_compiler_info ${binfile} ${info_options}] {
         return -1
     }
     return 0
