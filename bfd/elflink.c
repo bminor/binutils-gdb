@@ -5352,7 +5352,7 @@ static const size_t elf_buckets[] =
    Therefore the result is always a good payoff between few collisions
    (= short chain lengths) and table size.  */
 static size_t
-compute_bucket_count (struct bfd_link_info *info,
+compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		      unsigned long int *hashcodes ATTRIBUTE_UNUSED,
 		      unsigned long int nsyms,
 		      int gnu_hash)
