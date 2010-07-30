@@ -1,3 +1,7 @@
+2010-07-31  Renquan Cheng  <crq@gcc.gnu.org>
+
+	* MAINTAINERS: Add myself for write after approval privileges.
+
 2010-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (addr_section_name): New function.
