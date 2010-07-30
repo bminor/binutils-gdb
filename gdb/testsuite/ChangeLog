@@ -1,3 +1,8 @@
+2010-07-30  Doug Evans  <dje@google.com>
+
+	* gdb.base/valgrind-db-attach.exp: Use unique test name for
+	attach-to-debugger handling.
+
 2010-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/prelink-lib.c (copyreloc): New initialized variable.
