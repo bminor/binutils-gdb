@@ -1,3 +1,8 @@
+2010-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (install-only): Install gdb-add-index.
+	* gdb-add-index.sh: New file.
+
 2010-07-31  Renquan Cheng  <crq@gcc.gnu.org>
 
 	* MAINTAINERS: Add myself for write after approval privileges.

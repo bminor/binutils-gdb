@@ -1,3 +1,7 @@
+2010-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Index Files): Mention gdb-add-index.
+
 2010-07-30  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.texinfo (Inferiors and Programs): Update the introduce of

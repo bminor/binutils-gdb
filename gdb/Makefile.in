@@ -1018,7 +1018,16 @@ install-only: $(CONFIG_INSTALL) xml-syscall-install
 		$(SHELL) $(srcdir)/../mkinstalldirs \
 			$(DESTDIR)$(man1dir) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 \
-			$(DESTDIR)$(man1dir)/$$transformed_name.1
+			$(DESTDIR)$(man1dir)/$$transformed_name.1; \
+	transformed_name=`t='$(program_transform_name)'; \
+			  echo gdb-add-index | sed -e "$$t"` ; \
+		if test "x$$transformed_name" = x; then \
+		  transformed_name=gdb-add-index ; \
+		else \
+		  true ; \
+		fi ; \
+		$(INSTALL_PROGRAM) $(srcdir)/gdb-add-index.sh \
+			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT)
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 .PHONY: install-tui
 install-tui:

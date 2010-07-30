@@ -15244,6 +15244,15 @@ There are currently some limitation on indices.  They only work when
 for DWARF debugging information, not stabs.  And, they do not
 currently work for programs using Ada.
 
+@pindex gdb-add-index
+@value{GDBN} comes with a program, @command{gdb-add-index}, which can
+be used to add the index to a symbol file.  It takes the symbol file
+as its only argument:
+
+@smallexample
+$ gdb-add-index symfile
+@end smallexample
+
 
 @node Symbol Errors
 @section Errors Reading Symbol Files
