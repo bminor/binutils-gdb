@@ -36,15 +36,28 @@ if {![runto_main]} {
     return -1
 }
 
+# NOTE: prepare_for_testing calls get_compiler_info, which we need
+# for the test_compiler_info calls.
+# gcc 4.4 and earlier don't emit enough info for some of our template tests.
+verbose -log "compiler_info: $compiler_info"
+set have_older_template_gcc 0
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    set have_older_template_gcc 1
+}
+
 set line [gdb_get_line_number "Breakpoint 1" $srcfile]
 gdb_test "break $srcfile:$line" "Breakpoint 2.*" \
     "set first breakpoint for temargs"
+
 set line [gdb_get_line_number "Breakpoint 2" $srcfile]
 gdb_test "break $srcfile:$line" "Breakpoint 3.*" \
     "set second breakpoint for temargs"
+
 set line [gdb_get_line_number "Breakpoint 3" $srcfile]
 gdb_test "break $srcfile:$line" "Breakpoint 4.*" \
     "set third breakpoint for temargs"
+
 set line [gdb_get_line_number "Breakpoint 4" $srcfile]
 gdb_test "break $srcfile:$line" "Breakpoint 5.*" \
     "set fourth breakpoint for temargs"
@@ -55,9 +68,15 @@ gdb_test "break $srcfile:$line" "Breakpoint 5.*" \
 
 gdb_continue_to_breakpoint "continue to first breakpoint for temargs"
 
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "ptype T" "double" "test type of T in base_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "print I" " = 23" "test value of I in base_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "print P == &a_global" " = true" "test value of P in base_m"
+
 setup_kfail "gcc/41736" *-*-*
 gdb_test "print MP" "&S::f" "test value of MP in base_m"
 
@@ -69,11 +88,17 @@ gdb_continue_to_breakpoint "continue to second breakpoint for temargs"
 
 setup_kfail "gcc/45024" *-*-*
 gdb_test "ptype T" "long" "test type of T in inner_m"
+
 setup_kfail "gcc/45024" *-*-*
 gdb_test "print I" " = 47" "test value of I in inner_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "print P == &a_global" " = true" "test value of P in inner_m"
+
 setup_kfail "gcc/41736" *-*-*
 gdb_test "print MP" "&S::f" "test value of MP in inner_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "whatis Z" "float" "test type of Z in inner_m"
 
 #
@@ -82,9 +107,15 @@ gdb_test "whatis Z" "float" "test type of Z in inner_m"
 
 gdb_continue_to_breakpoint "continue to third breakpoint for temargs"
 
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "ptype T" "unsigned char" "test type of T in func"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "print I" " = 91" "test value of I in func"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "print P == &a_global" " = true" "test value of P in func"
+
 setup_kfail "gcc/41736" *-*-*
 gdb_test "print MP" "&S::f" "test value of MP in func"
 
@@ -94,9 +125,17 @@ gdb_test "print MP" "&S::f" "test value of MP in func"
 
 gdb_continue_to_breakpoint "continue to fourth breakpoint for temargs"
 
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "ptype T" "double" "test type of T in templ_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "print I" " = 23" "test value of I in templ_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "print P == &a_global" " = true" "test value of P in templ_m"
+
 setup_kfail "gcc/41736" *-*-*
 gdb_test "print MP" "&S::f" "test value of MP in templ_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "whatis Q" "short" "test type of Q in templ_m"

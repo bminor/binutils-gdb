@@ -1,5 +1,8 @@
 2010-07-30  Doug Evans  <dje@google.com>
 
+	* gdb.cp/temargs.exp: For new tests that require newer gccs,
+	xfail them when run with older gccs.
+
 	* lib/gdb.exp (build_executable): Forward "c++" option to
 	get_compiler_info.
 
