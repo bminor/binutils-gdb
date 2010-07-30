@@ -1,3 +1,8 @@
+2010-07-30  Hui Zhu  <teawater@gmail.com>
+
+	* gdb.texinfo (Inferiors and Programs): Update the introduce of
+	"detach inferior" and "kill inferior".
+
 2010-07-28  CHENG Renquan  <rqcheng@smu.edu.sg>
 
 	* gdb.texinfo (Machine Code): Update description of two forms of

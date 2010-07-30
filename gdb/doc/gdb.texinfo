@@ -2481,12 +2481,16 @@ using the @w{@code{kill inferior}} command:
 @kindex detach inferior @var{infno}
 @item detach inferior @var{infno}
 Detach from the inferior identified by @value{GDBN} inferior number
-@var{infno}, and remove it from the inferior list.
+@var{infno}.  Note that the inferior's entry still stays on the list
+of inferiors shown by @code{info inferiors}, but its Description will
+show @samp{<null>}.
 
 @kindex kill inferior @var{infno}
 @item kill inferior @var{infno}
 Kill the inferior identified by @value{GDBN} inferior number
-@var{infno}, and remove it from the inferior list.
+@var{infno}.  Note that the inferior's entry still stays on the list
+of inferiors shown by @code{info inferiors}, but its Description will
+show @samp{<null>}.
 @end table
 
 After the successful completion of a command such as @code{detach},
