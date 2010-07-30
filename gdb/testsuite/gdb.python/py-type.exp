@@ -24,6 +24,10 @@ set testfile "py-type"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
+if [get_compiler_info not-used c++] {
+    return -1;
+}
+
 # Build inferior to language specification.
 proc build_inferior {lang} {
   global srcdir subdir srcfile binfile testfile hex
@@ -136,10 +140,20 @@ proc test_template {} {
     gdb_test "python print ttype.template_argument(0)" "D"
     gdb_test "python print isinstance(ttype.template_argument(0), gdb.Type)" \
 	"True"
+
     # The next two tests require a GCC that emits DW_TAG_template_*.
+    # GCC 4.4 does not emit it, 4.5 and 6 do emit it.
+    set have_older_gcc 0
+    if {[test_compiler_info {gcc-[0-3]-*}]
+	|| [test_compiler_info {gcc-4-[0-4]-*}]} {
+	set have_older_gcc 1
+    }
+    if $have_older_gcc { setup_xfail *-*-* }
     gdb_test "python print ttype.template_argument(1)" "23"
+    if $have_older_gcc { setup_xfail *-*-* }
     gdb_test "python print isinstance(ttype.template_argument(1), gdb.Value)" \
 	"True"
+
     setup_kfail "gcc/41736" *-*-*
     gdb_test "python print ttype.template_argument(2)" "&C::c"
 }
