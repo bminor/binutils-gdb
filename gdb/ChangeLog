@@ -1,3 +1,10 @@
+2010-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (addr_section_name): New function.
+	(addrs_section_compar): Use it.
+	(addr_info_make_relative): Use it.  Move variable sect_name into a more
+	inner block.  Make ".dynbss" and ".sdynbss" checks more strict.
+
 2010-07-30  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.

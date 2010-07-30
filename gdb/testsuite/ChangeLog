@@ -1,3 +1,11 @@
+2010-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/prelink-lib.c (copyreloc): New initialized variable.
+	* gdb.base/prelink.c (copyreloc, bssvar, bssvarp): New variables.
+	(main): Use copyreloc.
+	* gdb.base/prelink.exp (split debug of executable)
+	(.dynbss vs. .bss address shift): New tests.
+
 2010-07-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/pthreads.exp (check_backtraces): Consume $gdb_prompt

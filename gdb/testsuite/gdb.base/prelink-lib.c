@@ -16,6 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+int copyreloc = 1;
+
 int
 g (void (*p)(void))
 {

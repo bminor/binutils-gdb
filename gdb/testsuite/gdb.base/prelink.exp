@@ -57,6 +57,13 @@ if {$prelink_args == ""} {
     return -1
 }
 
+set test "split debug of executable"
+if [gdb_gnu_strip_debug $binfile] {
+    fail $test
+} else {
+    pass $test
+}
+
 if ![prelink_yes $prelink_args] {
     # Maybe we don't have prelink.
     return -1
@@ -105,3 +112,5 @@ clean_restart $executable
 gdb_test_no_output "set verbose on"
 
 gdb_test "core-file $objdir/$subdir/prelink.core" "Using PIC \\(Position Independent Code\\) prelink displacement 0x\[^0\]\[0-9a-f\]* for \[^\r\n\]*[file tail ${libfile}].*" "seen displacement message"
+
+gdb_test "p &bssvar == bssvarp" " = 1" ".dynbss vs. .bss address shift"
