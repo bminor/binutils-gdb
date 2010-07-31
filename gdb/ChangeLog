@@ -1,3 +1,8 @@
+2010-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* common/signals.c (signals): Move the content to signals.def.
+	Include it.  Remove the INDENT comments.
+
 2010-07-30  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (install-only): Install gdb-add-index.

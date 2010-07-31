@@ -1,3 +1,9 @@
+2010-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (signals_def): New.
+	(server_h): Append include/gdb/signals.h and signals_def.
+	(server.o): Append signals_def.
+
 2010-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* server.c (handle_target_event): Use target_signal_to_host for
