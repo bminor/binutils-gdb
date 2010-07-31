@@ -1,3 +1,7 @@
+2010-07-31  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Threads): Document 'debug libthread-db'.
+
 2010-07-30  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Index Files): Mention gdb-add-index.

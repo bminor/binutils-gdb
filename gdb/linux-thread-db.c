@@ -75,6 +75,18 @@
 
 static char *libthread_db_search_path;
 
+/* If non-zero, print details of libthread_db processing.  */
+
+static int libthread_db_debug;
+
+static void
+show_libthread_db_debug (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("libthread-db debugging is %s.\n"), value);
+}
+
+
 /* If we're running on GNU/Linux, we must explicitly attach to any new
    threads.  */
 
@@ -601,7 +613,7 @@ thread_db_find_new_threads_silently (ptid_t ptid)
       thread_db_find_new_threads_2 (ptid, 1);
     }
 
-  if (except.reason < 0 && info_verbose)
+  if (except.reason < 0 && libthread_db_debug)
     {
       exception_fprintf (gdb_stderr, except,
 			 "Warning: thread_db_find_new_threads_silently: ");
@@ -658,7 +670,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
   err = info->td_ta_new_p (&info->proc_handle, &info->thread_agent);
   if (err != TD_OK)
     {
-      if (info_verbose)
+      if (libthread_db_debug)
 	printf_unfiltered (_("td_ta_new failed: %s\n"),
 			   thread_db_err_str (err));
       else
@@ -708,7 +720,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
 
-  if (info_verbose || *libthread_db_search_path)
+  if (libthread_db_debug || *libthread_db_search_path)
     {
       const char *library;
 
@@ -745,18 +757,18 @@ try_thread_db_load (const char *library)
   void *handle;
   struct thread_db_info *info;
 
-  if (info_verbose)
+  if (libthread_db_debug)
     printf_unfiltered (_("Trying host libthread_db library: %s.\n"),
                        library);
   handle = dlopen (library, RTLD_NOW);
   if (handle == NULL)
     {
-      if (info_verbose)
+      if (libthread_db_debug)
 	printf_unfiltered (_("dlopen failed: %s.\n"), dlerror ());
       return 0;
     }
 
-  if (info_verbose && strchr (library, '/') == NULL)
+  if (libthread_db_debug && strchr (library, '/') == NULL)
     {
       void *td_init;
 
@@ -1381,7 +1393,7 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
 				    TD_THR_ANY_USER_FLAGS);
     }
 
-  if (info_verbose)
+  if (libthread_db_debug)
     {
       if (except.reason < 0)
 	exception_fprintf (gdb_stderr, except,
@@ -1685,6 +1697,16 @@ gdb itself."),
 			    NULL,
 			    NULL,
 			    &setlist, &showlist);
+
+  add_setshow_zinteger_cmd ("libthread-db", class_maintenance,
+			    &libthread_db_debug, _("\
+Set libthread-db debugging."), _("\
+Show libthread-db debugging."), _("\
+When non-zero, libthread-db debugging is enabled."),
+			    NULL,
+			    show_libthread_db_debug,
+			    &setdebuglist, &showdebuglist);
+
   /* Add ourselves to objfile event chain.  */
   observer_attach_new_objfile (thread_db_new_objfile);
 }

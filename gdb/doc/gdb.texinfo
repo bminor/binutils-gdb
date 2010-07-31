@@ -2864,6 +2864,14 @@ only on some platforms.
 @kindex show libthread-db-search-path 
 @item show libthread-db-search-path 
 Display current libthread_db search path.
+
+@kindex set debug libthread-db
+@kindex show debug libthread-db
+@cindex debugging @code{libthread_db}
+@item set debug libthread-db
+@itemx show debug libthread-db
+Turns on or off display of @code{libthread_db}-related events.
+Use @code{1} to enable, @code{0} to disable.
 @end table
 
 @node Forks

@@ -1,3 +1,11 @@
+2010-07-31  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* linux-thread-db.c (libthread_db_debug): New variable.
+	(thread_db_find_new_threads_silently): Control verbosity with it.
+	(try_thread_db_load_1, try_thread_db_load): Likewise.
+	(find_new_threads_once): Likewise.
+	(_initialize_thread_db): Set/show it.
+
 2010-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* common/signals.c (signals): Move the content to signals.def.
