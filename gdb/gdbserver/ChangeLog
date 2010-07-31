@@ -1,3 +1,10 @@
+2010-07-31  Pedro Alves  <pedro@codesourcery.com>
+
+	* Makefile.in (signals_h): New.
+	(server_h): Depend on it.
+	(server.o): Don't depend on $(signals_def).
+	(signals.o): Depend on $(signals_def).
+
 2010-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (signals_def): New.

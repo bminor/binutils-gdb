@@ -293,9 +293,10 @@ regdat_sh = $(srcdir)/../regformats/regdat.sh
 regdef_h = $(srcdir)/../regformats/regdef.h
 regcache_h = $(srcdir)/regcache.h
 signals_def = $(srcdir)/../../include/gdb/signals.def
+signals_h = $(srcdir)/../../include/gdb/signals.h $(signals_def)
 server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h \
-		$(srcdir)/../../include/gdb/signals.h $(signals_def)
+		$(signals_h)
 
 linux_low_h = $(srcdir)/linux-low.h
 
@@ -335,14 +336,14 @@ mem-break.o: mem-break.c $(server_h)
 proc-service.o: proc-service.c $(server_h) $(gdb_proc_service_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)
-server.o: server.c $(server_h) $(signals_def)
+server.o: server.c $(server_h)
 target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h)
 tracepoint.o: tracepoint.c $(server_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
 
-signals.o: ../common/signals.c $(server_h)
+signals.o: ../common/signals.c $(server_h) $(signals_def)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 memmem.o: ../gnulib/memmem.c
