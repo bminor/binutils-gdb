@@ -2709,7 +2709,7 @@ md_assemble (char *str)
 	}
 
       if (warningmsg != NULL)
-	as_warn (warningmsg);
+	as_warn ("%s", warningmsg);
       break;
     }
 
@@ -3111,7 +3111,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       insn = v850_insert_operand (insn, operand, (offsetT) value,
 				  &errmsg);
       if (errmsg)
-	as_warn_where (fixP->fx_file, fixP->fx_line, errmsg);
+	as_warn_where (fixP->fx_file, fixP->fx_line, "%s", errmsg);
 
       if (fixP->fx_size > 2)
 	bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);

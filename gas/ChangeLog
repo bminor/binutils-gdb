@@ -1,3 +1,9 @@
+2010-08-02  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-v850.c (md_assemble): Always pass format string to
+	as_warn.
+	(md_apply_fix): Similarly for as_warn_where.
+
 2010-07-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386-intel.c: Reformat.
