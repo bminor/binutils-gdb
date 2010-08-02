@@ -1,3 +1,8 @@
+2010-08-02  Ian Lance Taylor  <iant@google.com>
+
+	* testsuite/final_layout.sh: Use dc to convert from hex to
+	decimal.
+
 2010-07-29  Sriraman Tallam  <tmsriram@google.com>
 
 	* arm.cc (Target_arm<big_endian>::gc_process_relocs): Add template

@@ -27,8 +27,10 @@
 
 check()
 {
-    func_addr_1=$((16#`grep $2 $1 | awk '{print $1}'`))
-    func_addr_2=$((16#`grep $3 $1 | awk '{print $1}'`))
+    func_addr_1=`grep $2 $1 | awk '{print $1}' | tr 'abcdef' 'ABCDEF'`
+    func_addr_1=`echo 16i${func_addr_1}p | dc`
+    func_addr_2=`grep $3 $1 | awk '{print $1}' | tr 'abcdef' 'ABCDEF'`
+    func_addr_2=`echo 16i${func_addr_2}p | dc`
     if [ $func_addr_1 -gt $func_addr_2 ]
     then
         echo "final layout of" $2 "and" $3 "is not right."
