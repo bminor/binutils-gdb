@@ -1,3 +1,9 @@
+2010-07-30  Kazu Hirata  <kazu@codesourcery.com>
+
+	* gdb.base/break-always.exp: Do not expect full paths to file
+	names.
+	* gdb.base/commands.exp: Likewise.
+
 2010-07-30  Doug Evans  <dje@google.com>
 
 	* gdb.cp/temargs.exp: For new tests that require newer gccs,

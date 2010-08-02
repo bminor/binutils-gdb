@@ -427,7 +427,7 @@ proc bp_deleted_in_command_test {} {
     # Create a breakpoint, and associate a command-list to it, with
     # one command that deletes this breakpoint.
     gdb_test "break factorial" \
-             "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
+             "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\." \
              "breakpoint in bp_deleted_in_command_test"
     
     gdb_test_multiple "commands" "begin commands in bp_deleted_in_command_test" {
@@ -489,7 +489,7 @@ proc temporary_breakpoint_commands {} {
     # This test will verify that this commands list is executed when the
     # breakpoint is hit.
     gdb_test "tbreak factorial" \
-	    "Temporary breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
+	    "Temporary breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\." \
 	    "breakpoint in temporary_breakpoint_commands"
     
     gdb_test_multiple "commands" \
@@ -634,7 +634,7 @@ proc if_commands_test {} {
 	}
     }
     gdb_test_multiple "end" "second end - $test" {
-	-re "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\.\r\n$gdb_prompt $" {
+	-re "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\.\r\n$gdb_prompt $" {
 	    pass "second end - $test"
 	}
 	-re "Undefined command: \"silent\".*$gdb_prompt $" {
@@ -660,7 +660,7 @@ proc if_commands_test {} {
 	}
     }
     gdb_test_multiple "end" "second end - $test" {
-	-re "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\.\r\n$gdb_prompt $" {
+	-re "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\.\r\n$gdb_prompt $" {
 	    pass "second end - $test"
 	}
     }

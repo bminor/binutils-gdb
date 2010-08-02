@@ -29,7 +29,7 @@ gdb_test "show breakpoint always-inserted" "mode is on\." \
 runto foo
 
 gdb_test "break bar" "Breakpoint 2.*" "set breakpoint on bar"
-gdb_continue_to_breakpoint "bar" ".*/break-always.c:$bar_location.*"
+gdb_continue_to_breakpoint "bar" ".*break-always.c:$bar_location.*"
 
 
 
