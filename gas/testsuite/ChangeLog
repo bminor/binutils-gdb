@@ -1,5 +1,11 @@
 2010-08-02  Alan Modra  <amodra@gmail.com>
 
+	* gas/i386/i386.exp (dw2-compress-1): Only run on ELF targets.
+	(dw2-compress-2, x86-64-dw2-compress-2): Remove unnecessary linux
+	target test.
+
+2010-08-02  Alan Modra  <amodra@gmail.com>
+
 	* gas/ppc/power4.d: Update for ppc_fix_adjustable change.
 
 2010-07-28  H.J. Lu  <hongjiu.lu@intel.com>

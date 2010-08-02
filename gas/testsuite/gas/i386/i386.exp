@@ -214,10 +214,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "localpic"
 	run_dump_test "debug1"
 
-	if [expr [istarget "*-*-linux*"]] then {
-	    setup_xfail "*-*-linux*"
-	    run_dump_test "dw2-compress-2"
-	}
+	setup_xfail "*-*-*"
+	run_dump_test "dw2-compress-2"
     }
 
     # This is a PE specific test.
@@ -240,8 +238,6 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
 	run_list_test_stdin "list-1" "-al"
 	run_list_test_stdin "list-2" "-al"
 	run_list_test_stdin "list-3" "-al"
-    }
-    if [expr [istarget "*-*-linux*"]] then {
 	run_dump_test "dw2-compress-1"
     }
 }
@@ -407,10 +403,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "x86-64-localpic"
 	run_dump_test "debug1"
 
-	if [istarget "*-*-linux*"] then {
-	    setup_xfail "*-*-linux*"
-	    run_dump_test "x86-64-dw2-compress-2"
-	}
+	setup_xfail "*-*-*"
+	run_dump_test "x86-64-dw2-compress-2"
     }
 
     set ASFLAGS "$old_ASFLAGS"
