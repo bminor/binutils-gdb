@@ -127,6 +127,7 @@ if { ([istarget "*-*-*elf*"]
 	    run_dump_test equ-reloc
 	}
     }
+    run_dump_test "data-1"
     run_dump_test "pseudo"
     run_dump_test "section0" 
     run_dump_test "section1" 
