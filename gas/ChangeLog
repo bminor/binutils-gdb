@@ -1,5 +1,13 @@
 2010-08-02  Alan Modra  <amodra@gmail.com>
 
+	PR gas/11867
+	* expr.c (operand <'-' and '~'>): Widen bignums.
+	(operand <'!'>): Correct bignum result and convert to O_constant.
+	* read.c (emit_expr): Don't assert on .byte bignum.  Don't display
+	bignum truncated warning for sign extended bignums.
+
+2010-08-02  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-v850.c (md_assemble): Always pass format string to
 	as_warn.
 	(md_apply_fix): Similarly for as_warn_where.
