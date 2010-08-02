@@ -1494,7 +1494,7 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
   typedef typename Target_powerpc<size, big_endian>::Scan Scan;
 
   gold::gc_process_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan,
-			  Target_powerpc::Relocatable_size_for_reloc>(
+			  typename Target_powerpc::Relocatable_size_for_reloc>(
     symtab,
     layout,
     this,

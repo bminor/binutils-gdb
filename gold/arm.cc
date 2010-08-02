@@ -8214,7 +8214,7 @@ Target_arm<big_endian>::gc_process_relocs(Symbol_table* symtab,
   typedef typename Target_arm<big_endian>::Scan Scan;
 
   gold::gc_process_relocs<32, big_endian, Arm, elfcpp::SHT_REL, Scan,
-			  Target_arm::Relocatable_size_for_reloc>(
+			  typename Target_arm::Relocatable_size_for_reloc>(
     symtab,
     layout,
     this,

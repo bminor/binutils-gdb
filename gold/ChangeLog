@@ -1,5 +1,11 @@
 2010-08-02  Ian Lance Taylor  <iant@google.com>
 
+	* arm.cc (Target_arm::gc_process_relocs): Use typename.
+	* powerpc.cc (Target_powerpc::gc_process_relocs): Likewise.
+	* sparc.cc (Target_sparc::gc_process_relocs): Likewise.
+
+2010-08-02  Ian Lance Taylor  <iant@google.com>
+
 	PR 11855
 	* script.cc (Script_options::Script_options): Initialize
 	symbol_definitions_ and symbol_references_.

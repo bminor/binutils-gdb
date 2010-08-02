@@ -2331,7 +2331,7 @@ Target_sparc<size, big_endian>::gc_process_relocs(
   typedef typename Target_sparc<size, big_endian>::Scan Scan;
 
   gold::gc_process_relocs<size, big_endian, Sparc, elfcpp::SHT_RELA, Scan,
-			  Target_sparc::Relocatable_size_for_reloc>(
+			  typename Target_sparc::Relocatable_size_for_reloc>(
     symtab,
     layout,
     this,
