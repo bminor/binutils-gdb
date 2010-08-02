@@ -1884,6 +1884,10 @@ d30v_cons_align (int size)
 {
   int log_size;
 
+  /* Don't specially align anything in debug sections.  */
+  if ((now_seg->flags & SEC_ALLOC) == 0)
+    return;
+
   log_size = 0;
   while ((size >>= 1) != 0)
     ++log_size;

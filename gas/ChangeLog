@@ -1,5 +1,10 @@
 2010-08-02  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-d30v.c (d30v_cons_align): Don't align constants
+	in debug sections.
+
+2010-08-02  Alan Modra  <amodra@gmail.com>
+
 	PR gas/11867
 	* expr.c (operand <'-' and '~'>): Widen bignums.
 	(operand <'!'>): Correct bignum result and convert to O_constant.
