@@ -4337,7 +4337,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		break;
 	      }
 
-	  off_adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
+	  off_adjust = vma_page_aligned_bias (p->p_vaddr, off, align);
 	  off += off_adjust;
 	  if (no_contents)
 	    {

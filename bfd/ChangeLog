@@ -1,3 +1,9 @@
+2010-08-02  Alan Modra  <amodra@gmail.com>
+
+	PR 11866
+	* elf.c (assign_file_positions_for_load_sections): Use p_vaddr to
+	calculate off_adjust rather than first section vma.
+
 2010-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (compute_bucket_count): Add ATTRIBUTE_UNUSED to info.
