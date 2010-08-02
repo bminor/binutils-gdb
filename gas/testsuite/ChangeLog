@@ -1,5 +1,9 @@
 2010-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf/elf.exp: Run data-1 only for i*86, x86_64 and ia64.
+
+2010-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/11867
 	* gas/elf/data-1.d: New.
 	* gas/elf/data-1.s: Likewise.
