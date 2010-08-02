@@ -199,14 +199,20 @@ gdb_test_multiple $test $test {
 	gdb_test $test2 " = 318"
     }
     -re "\\$\[0-9\].* = 318\r\n$gdb_prompt $" {
+	# Do not permit to XFAIL on recent GCCs.
 	if {[test_compiler_info {gcc-[0-3]-*}]
 	    || [test_compiler_info {gcc-4-[0-4]-*}]} {
-	    # Do not permit to XFAIL on recent GCCs.
 	    setup_xfail *-*-* 
+	    fail $test
+	    # Unresolved means human intervention is required to determine
+	    # whether the test passed or failed.  Since the previous test
+	    # xfailed (not failed) human intervention isn't going to help here.
+	    # Thus test2 is marked as unsupported instead of unresolved.
+	    unsupported $test2
+	} else {
+	    fail $test
+	    unresolved $test2
 	}
-	fail $test
-
-	unresolved $test2
     }
 }
 

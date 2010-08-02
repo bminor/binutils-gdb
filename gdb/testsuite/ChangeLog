@@ -1,3 +1,10 @@
+2010-08-02  Doug Evans  <dje@google.com>
+
+	* gdb.cp/namespace.exp: When "print ::cOtherFileClassVar" fails
+	because of an older gcc, change test2
+	"print ::C::OtherFileClass::cOtherFileClassVar" from unresolved
+	to unsupported.
+
 2010-07-30  Kazu Hirata  <kazu@codesourcery.com>
 
 	* gdb.base/break-always.exp: Do not expect full paths to file
