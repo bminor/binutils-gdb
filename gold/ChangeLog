@@ -1,5 +1,19 @@
 2010-08-02  Ian Lance Taylor  <iant@google.com>
 
+	PR 11866
+	* output.cc (Output_segment::set_offset): Search for the first and
+	last sections rather than assuming that the list is in order.
+	(Output_segment::find_first_and_last_list): New function.
+	* output.h (class Output_segment): Update declarations.
+	* testsuite/Makefile.am (check_PROGRAMS): Add relro_strip_test.
+	(relro_strip_test_SOURCES): New variable.
+	(relro_strip_test_DEPENDENCIES): New variable.
+	(relro_strip_test_LDFLAGS): New variable.
+	(relro_strip_test_LDADD): New variable.
+	(relro_strip_test.so): New target.
+
+2010-08-02  Ian Lance Taylor  <iant@google.com>
+
 	* i386.cc (class Target_i386): Add got_tlsdesc_ field.
 	(Target_i386::Target_i386):: Initialize got_tlsdesc_.
 	(Target_i386::got_tlsdesc_section): New function.

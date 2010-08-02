@@ -236,6 +236,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 ver_test_8 ver_test_9 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11 protected_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2 relro_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_script_test script_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3 \
@@ -496,6 +497,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_strip_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_script_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
@@ -795,6 +797,11 @@ protected_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 relro_script_test_OBJECTS = $(am_relro_script_test_OBJECTS)
 relro_script_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(relro_script_test_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_relro_strip_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test_main.$(OBJEXT)
+relro_strip_test_OBJECTS = $(am_relro_strip_test_OBJECTS)
+relro_strip_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(relro_strip_test_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_relro_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test_main.$(OBJEXT)
 relro_test_OBJECTS = $(am_relro_test_OBJECTS)
@@ -1141,10 +1148,11 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
 	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
 	plugin_test_8.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
-	$(relro_script_test_SOURCES) $(relro_test_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(searched_file_test_SOURCES) \
-	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
+	$(relro_script_test_SOURCES) $(relro_strip_test_SOURCES) \
+	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(searched_file_test_SOURCES) $(thin_archive_test_1_SOURCES) \
+	$(thin_archive_test_2_SOURCES) \
 	$(tls_phdrs_script_test_SOURCES) $(tls_pic_test_SOURCES) \
 	tls_pie_pic_test.c tls_pie_test.c $(tls_script_test_SOURCES) \
 	$(tls_shared_gd_to_ie_test_SOURCES) \
@@ -1739,6 +1747,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_DEPENDENCIES = gcctestdir/ld relro_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_LDADD = relro_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_strip_test_SOURCES = relro_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_strip_test_DEPENDENCIES = gcctestdir/ld relro_strip_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_strip_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_strip_test_LDADD = relro_strip_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_SOURCES = relro_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_DEPENDENCIES = gcctestdir/ld relro_script_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -2066,6 +2078,9 @@ protected_2$(EXEEXT): $(protected_2_OBJECTS) $(protected_2_DEPENDENCIES)
 relro_script_test$(EXEEXT): $(relro_script_test_OBJECTS) $(relro_script_test_DEPENDENCIES) 
 	@rm -f relro_script_test$(EXEEXT)
 	$(relro_script_test_LINK) $(relro_script_test_OBJECTS) $(relro_script_test_LDADD) $(LIBS)
+relro_strip_test$(EXEEXT): $(relro_strip_test_OBJECTS) $(relro_strip_test_DEPENDENCIES) 
+	@rm -f relro_strip_test$(EXEEXT)
+	$(relro_strip_test_LINK) $(relro_strip_test_OBJECTS) $(relro_strip_test_LDADD) $(LIBS)
 relro_test$(EXEEXT): $(relro_test_OBJECTS) $(relro_test_DEPENDENCIES) 
 	@rm -f relro_test$(EXEEXT)
 	$(relro_test_LINK) $(relro_test_OBJECTS) $(relro_test_LDADD) $(LIBS)
@@ -2812,6 +2827,8 @@ protected_2.log: protected_2$(EXEEXT)
 	@p='protected_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 relro_test.log: relro_test$(EXEEXT)
 	@p='relro_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+relro_strip_test.log: relro_strip_test$(EXEEXT)
+	@p='relro_strip_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 relro_script_test.log: relro_script_test$(EXEEXT)
 	@p='relro_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_1.log: script_test_1$(EXEEXT)
@@ -3428,6 +3445,8 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro relro_test_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_pic.o: relro_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_strip_test.so: relro_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_script_test.so: gcctestdir/ld relro_script_test.t relro_test_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro -T $(srcdir)/relro_script_test.t relro_test_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2.o: justsyms_2.cc

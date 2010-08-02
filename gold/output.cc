@@ -4042,11 +4042,14 @@ Output_segment::set_offset(unsigned int increase)
       return;
     }
 
-  const Output_data* first;
-  if (this->output_data_.empty())
-    first = this->output_bss_.front();
-  else
-    first = this->output_data_.front();
+  // Find the first and last section by address.  The sections may
+  // have been sorted for the PT_LOAD segment.
+  const Output_data* first = NULL;
+  const Output_data* last_data = NULL;
+  const Output_data* last_bss = NULL;
+  this->find_first_and_last_list(&this->output_data_, &first, &last_data);
+  this->find_first_and_last_list(&this->output_bss_, &first, &last_bss);
+
   this->vaddr_ = first->address();
   this->paddr_ = (first->has_load_address()
 		  ? first->load_address()
@@ -4057,18 +4060,11 @@ Output_segment::set_offset(unsigned int increase)
   if (this->output_data_.empty())
     this->filesz_ = 0;
   else
-    {
-      const Output_data* last_data = this->output_data_.back();
-      this->filesz_ = (last_data->address()
-		       + last_data->data_size()
-		       - this->vaddr_);
-    }
+    this->filesz_ = (last_data->address()
+		     + last_data->data_size()
+		     - this->vaddr_);
 
-  const Output_data* last;
-  if (this->output_bss_.empty())
-    last = this->output_data_.back();
-  else
-    last = this->output_bss_.back();
+  const Output_data* last = last_bss != NULL ? last_bss : last_data;
   this->memsz_ = (last->address()
 		  + last->data_size()
 		  - this->vaddr_);
@@ -4084,6 +4080,37 @@ Output_segment::set_offset(unsigned int increase)
       uint64_t segment_align = this->maximum_alignment();
       gold_assert(this->vaddr_ == align_address(this->vaddr_, segment_align));
       this->memsz_ = align_address(this->memsz_, segment_align);
+    }
+}
+
+// Look through a list of Output_data objects and find the first and
+// last by address.
+
+void
+Output_segment::find_first_and_last_list(const Output_data_list* pdl,
+					 const Output_data** pfirst,
+					 const Output_data** plast) const
+{
+  const Output_data* first = *pfirst;
+  const Output_data* last = *plast;
+  for (Output_data_list::const_iterator p = pdl->begin(); p != pdl->end(); ++p)
+    {
+      if (first == NULL
+	  || (*p)->address() < first->address()
+	  || ((*p)->address() == first->address()
+	      && (*p)->data_size() < first->data_size()))
+	{
+	  first = *p;
+	  *pfirst = first;
+	}
+      if (last == NULL
+	  || (*p)->address() > last->address()
+	  || ((*p)->address() == last->address()
+	      && (*p)->data_size() > last->data_size()))
+	{
+	  last = *p;
+	  *plast = last;
+	}
     }
 }
 

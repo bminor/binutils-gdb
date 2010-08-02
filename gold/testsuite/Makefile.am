@@ -1078,6 +1078,14 @@ relro_test.so: gcctestdir/ld relro_test_pic.o
 relro_test_pic.o: relro_test.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
+check_PROGRAMS += relro_strip_test
+relro_strip_test_SOURCES = relro_test_main.cc
+relro_strip_test_DEPENDENCIES = gcctestdir/ld relro_strip_test.so
+relro_strip_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+relro_strip_test_LDADD = relro_strip_test.so
+relro_strip_test.so: relro_test.so
+	$(TEST_STRIP) -o $@ $<
+
 check_PROGRAMS += relro_script_test
 relro_script_test_SOURCES = relro_test_main.cc
 relro_script_test_DEPENDENCIES = gcctestdir/ld relro_script_test.so

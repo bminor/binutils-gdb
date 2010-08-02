@@ -4023,6 +4023,12 @@ class Output_segment
 			      Output_section** found,
 			      uint64_t* found_lma) const;
 
+  // Find the first and last entries by address.
+  void
+  find_first_and_last_list(const Output_data_list* pdl,
+			   const Output_data** pfirst,
+			   const Output_data** plast) const;
+
   // Write the section headers in the list into V.
   template<int size, bool big_endian>
   unsigned char*
