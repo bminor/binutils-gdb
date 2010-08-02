@@ -1,6 +1,6 @@
 // i386.cc -- i386 target support for gold.
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -59,8 +59,9 @@ class Target_i386 : public Target_freebsd<32, false>
 
   Target_i386()
     : Target_freebsd<32, false>(&i386_info),
-      got_(NULL), plt_(NULL), got_plt_(NULL), global_offset_table_(NULL),
-      rel_dyn_(NULL), copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
+      got_(NULL), plt_(NULL), got_plt_(NULL), got_tlsdesc_(NULL),
+      global_offset_table_(NULL), rel_dyn_(NULL),
+      copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
@@ -385,6 +386,14 @@ class Target_i386 : public Target_freebsd<32, false>
     return this->got_plt_;
   }
 
+  // Get the GOT section for TLSDESC entries.
+  Output_data_got<32, false>*
+  got_tlsdesc_section() const
+  {
+    gold_assert(this->got_tlsdesc_ != NULL);
+    return this->got_tlsdesc_;
+  }
+
   // Create a PLT entry for a global symbol.
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
@@ -447,6 +456,8 @@ class Target_i386 : public Target_freebsd<32, false>
   Output_data_plt_i386* plt_;
   // The GOT PLT section.
   Output_data_space* got_plt_;
+  // The GOT section for TLSDESC relocations.
+  Output_data_got<32, false>* got_tlsdesc_;
   // The _GLOBAL_OFFSET_TABLE_ symbol.
   Symbol* global_offset_table_;
   // The dynamic reloc section.
@@ -521,6 +532,15 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
 				      elfcpp::STB_LOCAL,
 				      elfcpp::STV_HIDDEN, 0,
 				      false, false);
+
+      // If there are any TLSDESC relocations, they get GOT entries in
+      // .got.plt after the jump slot entries.
+      this->got_tlsdesc_ = new Output_data_got<32, false>();
+      layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_WRITE),
+				      this->got_tlsdesc_, false, false, false,
+				      true);
     }
 
   return this->got_;
@@ -1117,9 +1137,13 @@ Target_i386::Scan::local(Symbol_table* symtab,
 	    target->define_tls_base_symbol(symtab, layout);
             if (optimized_type == tls::TLSOPT_NONE)
               {
-                // Create a double GOT entry with an R_386_TLS_DESC reloc.
-                Output_data_got<32, false>* got
-                    = target->got_section(symtab, layout);
+                // Create a double GOT entry with an R_386_TLS_DESC
+                // reloc.  The R_386_TLS_DESC reloc is resolved
+                // lazily, so the GOT entry needs to be in an area in
+                // .got.plt, not .got.  Call got_section to make sure
+                // the section has been created.
+		target->got_section(symtab, layout);
+                Output_data_got<32, false>* got = target->got_tlsdesc_section();
                 unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
 		if (!object->local_has_got_offset(r_sym, GOT_TYPE_TLS_DESC))
 		  {
@@ -1501,9 +1525,13 @@ Target_i386::Scan::global(Symbol_table* symtab,
 	    target->define_tls_base_symbol(symtab, layout);
             if (optimized_type == tls::TLSOPT_NONE)
               {
-                // Create a double GOT entry with an R_386_TLS_DESC reloc.
-                Output_data_got<32, false>* got
-                    = target->got_section(symtab, layout);
+                // Create a double GOT entry with an R_386_TLS_DESC
+                // reloc.  The R_386_TLS_DESC reloc is resolved
+                // lazily, so the GOT entry needs to be in an area in
+                // .got.plt, not .got.  Call got_section to make sure
+                // the section has been created.
+		target->got_section(symtab, layout);
+                Output_data_got<32, false>* got = target->got_tlsdesc_section();
 		Reloc_section* rt = target->rel_tls_desc_section(layout);
                 got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_DESC, rt,
                                              elfcpp::R_386_TLS_DESC, 0);
@@ -2046,18 +2074,27 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
           unsigned int got_type = (optimized_type == tls::TLSOPT_TO_IE
                                    ? GOT_TYPE_TLS_NOFFSET
                                    : GOT_TYPE_TLS_DESC);
-          unsigned int got_offset;
+          unsigned int got_offset = 0;
+	  if (r_type == elfcpp::R_386_TLS_GOTDESC
+	      && optimized_type == tls::TLSOPT_NONE)
+	    {
+	      // We created GOT entries in the .got.tlsdesc portion of
+	      // the .got.plt section, but the offset stored in the
+	      // symbol is the offset within .got.tlsdesc.
+	      got_offset = (target->got_size()
+			    + target->got_plt_section()->data_size());
+	    }
           if (gsym != NULL)
             {
               gold_assert(gsym->has_got_offset(got_type));
-              got_offset = gsym->got_offset(got_type) - target->got_size();
+              got_offset += gsym->got_offset(got_type) - target->got_size();
             }
           else
             {
               unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
               gold_assert(object->local_has_got_offset(r_sym, got_type));
-              got_offset = (object->local_got_offset(r_sym, got_type)
-			    - target->got_size());
+              got_offset += (object->local_got_offset(r_sym, got_type)
+			     - target->got_size());
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
 	    {

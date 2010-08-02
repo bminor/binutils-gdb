@@ -1,5 +1,28 @@
 2010-08-02  Ian Lance Taylor  <iant@google.com>
 
+	* i386.cc (class Target_i386): Add got_tlsdesc_ field.
+	(Target_i386::Target_i386):: Initialize got_tlsdesc_.
+	(Target_i386::got_tlsdesc_section): New function.
+	(Target_i386::got_section): Create space for GOT entries for
+	TLSDESC relocations.
+	(Target_i386::Scan::local): Use TLSDESC GOT for unoptimized
+	R_386_TLS_GOTDESC.
+	(Target_i386::Scan::global): Likewise.
+	(Target_i386::Relocate::relocate_tls): Adjust GOT offset when
+	using TLSDESC GOT.
+	* x86_64.cc (class Target_x86_64): Add got_tlsdesc_ field.
+	(Target_x86_64::Target_x86_64):: Initialize got_tlsdesc_.
+	(Target_x86_64::got_tlsdesc_section): New function.
+	(Target_x86_64::got_section): Create space for GOT entries for
+	TLSDESC relocations.
+	(Target_x86_64::Scan::local): Use TLSDESC GOT for unoptimized
+	R_386_TLS_GOTDESC.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::Relocate::relocate_tls): Adjust GOT offset when
+	using TLSDESC GOT.
+
+2010-08-02  Ian Lance Taylor  <iant@google.com>
+
 	* testsuite/final_layout.sh: Use dc to convert from hex to
 	decimal.
 
