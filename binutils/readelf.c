@@ -9657,13 +9657,17 @@ apply_relocations (void * file,
 	  addend = 0;
 	  if (is_rela)
 	    addend += rp->r_addend;
-	  /* R_XTENSA_32 and R_PJ_DATA_DIR32 are partial_inplace.  */
+	  /* R_XTENSA_32, R_PJ_DATA_DIR32 and R_D30V_32_NORMAL are
+	     partial_inplace.  */
 	  if (!is_rela
 	      || (elf_header.e_machine == EM_XTENSA
 		  && reloc_type == 1)
 	      || ((elf_header.e_machine == EM_PJ
 		   || elf_header.e_machine == EM_PJ_OLD)
-		  && reloc_type == 1))
+		  && reloc_type == 1)
+	      || ((elf_header.e_machine == EM_D30V
+		   || elf_header.e_machine == EM_CYGNUS_D30V)
+		  && reloc_type == 12))
 	    addend += byte_get (rloc, reloc_size);
 
 	  if (is_32bit_pcrel_reloc (reloc_type)
