@@ -36,6 +36,7 @@
 #include "readsyms.h"
 #include "symtab.h"
 #include "object.h"
+#include "layout.h"
 #include "archive.h"
 #include "plugin.h"
 
@@ -603,8 +604,9 @@ Archive::read_symbols(off_t off)
 }
 
 Archive::Should_include
-Archive::should_include_member(Symbol_table* symtab, const char* sym_name,
-                               Symbol** symp, std::string* why, char** tmpbufp,
+Archive::should_include_member(Symbol_table* symtab, Layout* layout,
+			       const char* sym_name, Symbol** symp,
+			       std::string* why, char** tmpbufp,
                                size_t* tmpbuflen)
 {
   // In an object file, and therefore in an archive map, an
@@ -648,13 +650,22 @@ Archive::should_include_member(Symbol_table* symtab, const char* sym_name,
   if (sym == NULL)
     {
       // Check whether the symbol was named in a -u option.
-      if (!parameters->options().is_undefined(sym_name))
-	return Archive::SHOULD_INCLUDE_UNKNOWN;
-      else
+      if (parameters->options().is_undefined(sym_name))
         {
           *why = "-u ";
           *why += sym_name;
         }
+      else if (layout->script_options()->is_referenced(sym_name))
+	{
+	  size_t alc = 100 + strlen(sym_name);
+	  char* buf = new char[alc];
+	  snprintf(buf, alc, _("script or expression reference to %s"),
+		   sym_name);
+	  *why = buf;
+	  delete[] buf;
+	}
+      else
+	return Archive::SHOULD_INCLUDE_UNKNOWN;
     }
   else if (!sym->is_undefined())
     return Archive::SHOULD_INCLUDE_NO;
@@ -726,8 +737,8 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
           Symbol* sym;
           std::string why;
           Archive::Should_include t =
-              Archive::should_include_member(symtab, sym_name, &sym, &why,
-                                             &tmpbuf, &tmpbuflen);
+	    Archive::should_include_member(symtab, layout, sym_name, &sym,
+					   &why, &tmpbuf, &tmpbuflen);
 
 	  if (t == Archive::SHOULD_INCLUDE_NO
               || t == Archive::SHOULD_INCLUDE_YES)
@@ -1015,6 +1026,7 @@ Lib_group::add_symbols(Symbol_table* symtab, Layout* layout,
 	      && (member.sd_ == NULL || member.sd_->symbol_names != NULL))
             {
 	      Archive::Should_include t = obj->should_include_member(symtab,
+								     layout,
 								     member.sd_,
 								     &why);
 

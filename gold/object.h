@@ -405,9 +405,9 @@ class Object
 
   // Add symbol information to the global symbol table.
   Archive::Should_include
-  should_include_member(Symbol_table* symtab, Read_symbols_data* sd,
-                        std::string* why)
-  { return this->do_should_include_member(symtab, sd, why); }
+  should_include_member(Symbol_table* symtab, Layout* layout,
+			Read_symbols_data* sd, std::string* why)
+  { return this->do_should_include_member(symtab, layout, sd, why); }
 
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
@@ -546,7 +546,7 @@ class Object
   do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*) = 0;
 
   virtual Archive::Should_include
-  do_should_include_member(Symbol_table* symtab, Read_symbols_data*,
+  do_should_include_member(Symbol_table* symtab, Layout*, Read_symbols_data*,
                            std::string* why) = 0;
 
   // Return the location of the contents of a section.  Implemented by
@@ -1623,7 +1623,7 @@ class Sized_relobj : public Relobj
   do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*);
 
   Archive::Should_include
-  do_should_include_member(Symbol_table* symtab, Read_symbols_data*,
+  do_should_include_member(Symbol_table* symtab, Layout*, Read_symbols_data*,
                            std::string* why);
 
   // Read the relocs.

@@ -178,7 +178,7 @@ class Sized_dynobj : public Dynobj
   do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*);
 
   Archive::Should_include
-  do_should_include_member(Symbol_table* symtab, Read_symbols_data*,
+  do_should_include_member(Symbol_table* symtab, Layout*, Read_symbols_data*,
                            std::string* why);
 
   // Get the size of a section.

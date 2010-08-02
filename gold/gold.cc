@@ -309,7 +309,7 @@ queue_middle_tasks(const General_options& options,
 		   Mapfile* mapfile)
 {
   // Add any symbols named with -u options to the symbol table.
-  symtab->add_undefined_symbols_from_command_line();
+  symtab->add_undefined_symbols_from_command_line(layout);
 
   // If garbage collection was chosen, relocs have been read and processed
   // at this point by pre_middle_tasks.  Layout can then be done for all 
@@ -333,7 +333,7 @@ queue_middle_tasks(const General_options& options,
             }
         }
       // Symbols named with -u should not be considered garbage.
-      symtab->gc_mark_undef_symbols();
+      symtab->gc_mark_undef_symbols(layout);
       gold_assert(symtab->gc() != NULL);
       // Do a transitive closure on all references to determine the worklist.
       symtab->gc()->do_transitive_closure();

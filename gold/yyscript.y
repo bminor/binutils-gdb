@@ -867,7 +867,7 @@ exp:
 	| INTEGER
 	    { $$ = script_exp_integer($1); }
 	| string
-	    { $$ = script_exp_string($1.value, $1.length); }
+	    { $$ = script_symbol(closure, $1.value, $1.length); }
 	| MAX_K '(' exp ',' exp ')'
 	    { $$ = script_exp_function_max($3, $5); }
 	| MIN_K '(' exp ',' exp ')'

@@ -1045,8 +1045,8 @@ Script_assertion::print(FILE* f) const
 // Class Script_options.
 
 Script_options::Script_options()
-  : entry_(), symbol_assignments_(), version_script_info_(),
-    script_sections_()
+  : entry_(), symbol_assignments_(), symbol_definitions_(),
+    symbol_references_(), version_script_info_(), script_sections_()
 {
 }
 
@@ -1071,6 +1071,13 @@ Script_options::add_symbol_assignment(const char* name, size_t length,
 						       value, provide, hidden);
 	  this->symbol_assignments_.push_back(p);
 	}
+
+      if (!provide)
+	{
+	  std::string n(name, length);
+	  this->symbol_definitions_.insert(n);
+	  this->symbol_references_.erase(n);
+	}
     }
   else
     {
@@ -1081,6 +1088,19 @@ Script_options::add_symbol_assignment(const char* name, size_t length,
       // clauses and treats them as occurring inside, so we don't
       // check in_sections_clause here.
       this->script_sections_.add_dot_assignment(value);
+    }
+}
+
+// Add a reference to a symbol.
+
+void
+Script_options::add_symbol_reference(const char* name, size_t length)
+{
+  if (length != 1 || name[0] != '.')
+    {
+      std::string n(name, length);
+      if (this->symbol_definitions_.find(n) == this->symbol_definitions_.end())
+	this->symbol_references_.insert(n);
     }
 }
 
@@ -2677,6 +2697,17 @@ script_set_common_allocation(void* closurev, int set)
 {
   const char* arg = set != 0 ? "--define-common" : "--no-define-common";
   script_parse_option(closurev, arg, strlen(arg));
+}
+
+// Called by the bison parser to refer to a symbol.
+
+extern "C" Expression*
+script_symbol(void *closurev, const char* name, size_t length)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (length != 1 || name[0] != '.')
+    closure->script_options()->add_symbol_reference(name, length);
+  return script_exp_string(name, length);
 }
 
 // Called by the bison parser to define a symbol.

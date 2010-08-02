@@ -38,7 +38,7 @@
 #include "target.h"
 #include "workqueue.h"
 #include "symtab.h"
-#include "demangle.h"   // needed for --dynamic-list-cpp-new
+#include "script.h"
 #include "plugin.h"
 
 namespace gold
@@ -530,7 +530,7 @@ Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
 // work list to avoid gc'ing them.
 
 void 
-Symbol_table::gc_mark_undef_symbols()
+Symbol_table::gc_mark_undef_symbols(Layout* layout)
 {
   for (options::String_set::const_iterator p =
 	 parameters->options().undefined_begin();
@@ -552,6 +552,27 @@ Symbol_table::gc_mark_undef_symbols()
               this->gc_->worklist().push(Section_id(obj, shndx));
             }
         }
+    }
+
+  for (Script_options::referenced_const_iterator p =
+	 layout->script_options()->referenced_begin();
+       p != layout->script_options()->referenced_end();
+       ++p)
+    {
+      Symbol* sym = this->lookup(p->c_str());
+      gold_assert(sym != NULL);
+      if (sym->source() == Symbol::FROM_OBJECT
+	  && !sym->object()->is_dynamic())
+	{
+	  Relobj* obj = static_cast<Relobj*>(sym->object());
+	  bool is_ordinary;
+	  unsigned int shndx = sym->shndx(&is_ordinary);
+	  if (is_ordinary)
+	    {
+	      gold_assert(this->gc_ != NULL);
+	      this->gc_->worklist().push(Section_id(obj, shndx));
+	    }
+	}
     }
 }
 
@@ -2163,14 +2184,15 @@ Symbol_table::get_copy_source(const Symbol* sym) const
 // Add any undefined symbols named on the command line.
 
 void
-Symbol_table::add_undefined_symbols_from_command_line()
+Symbol_table::add_undefined_symbols_from_command_line(Layout* layout)
 {
-  if (parameters->options().any_undefined())
+  if (parameters->options().any_undefined()
+      || layout->script_options()->any_unreferenced())
     {
       if (parameters->target().get_size() == 32)
 	{
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-	  this->do_add_undefined_symbols_from_command_line<32>();
+	  this->do_add_undefined_symbols_from_command_line<32>(layout);
 #else
 	  gold_unreachable();
 #endif
@@ -2178,7 +2200,7 @@ Symbol_table::add_undefined_symbols_from_command_line()
       else if (parameters->target().get_size() == 64)
 	{
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-	  this->do_add_undefined_symbols_from_command_line<64>();
+	  this->do_add_undefined_symbols_from_command_line<64>(layout);
 #else
 	  gold_unreachable();
 #endif
@@ -2190,50 +2212,59 @@ Symbol_table::add_undefined_symbols_from_command_line()
 
 template<int size>
 void
-Symbol_table::do_add_undefined_symbols_from_command_line()
+Symbol_table::do_add_undefined_symbols_from_command_line(Layout* layout)
 {
   for (options::String_set::const_iterator p =
 	 parameters->options().undefined_begin();
        p != parameters->options().undefined_end();
        ++p)
+    this->add_undefined_symbol_from_command_line<size>(p->c_str());
+
+  for (Script_options::referenced_const_iterator p =
+	 layout->script_options()->referenced_begin();
+       p != layout->script_options()->referenced_end();
+       ++p)
+    this->add_undefined_symbol_from_command_line<size>(p->c_str());
+}
+
+template<int size>
+void
+Symbol_table::add_undefined_symbol_from_command_line(const char* name)
+{
+  if (this->lookup(name) != NULL)
+    return;
+
+  const char* version = NULL;
+
+  Sized_symbol<size>* sym;
+  Sized_symbol<size>* oldsym;
+  bool resolve_oldsym;
+  if (parameters->target().is_big_endian())
     {
-      const char* name = p->c_str();
-
-      if (this->lookup(name) != NULL)
-	continue;
-
-      const char* version = NULL;
-
-      Sized_symbol<size>* sym;
-      Sized_symbol<size>* oldsym;
-      bool resolve_oldsym;
-      if (parameters->target().is_big_endian())
-	{
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-	  sym = this->define_special_symbol<size, true>(&name, &version,
-							false, &oldsym,
-							&resolve_oldsym);
+      sym = this->define_special_symbol<size, true>(&name, &version,
+						    false, &oldsym,
+						    &resolve_oldsym);
 #else
-	  gold_unreachable();
+      gold_unreachable();
 #endif
-	}
-      else
-	{
-#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-	  sym = this->define_special_symbol<size, false>(&name, &version,
-							 false, &oldsym,
-							 &resolve_oldsym);
-#else
-	  gold_unreachable();
-#endif
-	}
-
-      gold_assert(oldsym == NULL);
-
-      sym->init_undefined(name, version, elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
-			  elfcpp::STV_DEFAULT, 0);
-      ++this->saw_undefined_;
     }
+  else
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
+      sym = this->define_special_symbol<size, false>(&name, &version,
+						     false, &oldsym,
+						     &resolve_oldsym);
+#else
+      gold_unreachable();
+#endif
+    }
+
+  gold_assert(oldsym == NULL);
+
+  sym->init_undefined(name, version, elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
+		      elfcpp::STV_DEFAULT, 0);
+  ++this->saw_undefined_;
 }
 
 // Set the dynamic symbol indexes.  INDEX is the index of the first

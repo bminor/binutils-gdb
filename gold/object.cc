@@ -1614,6 +1614,7 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 template<int size, bool big_endian>
 Archive::Should_include
 Sized_relobj<size, big_endian>::do_should_include_member(Symbol_table* symtab,
+							 Layout* layout,
                                                          Read_symbols_data* sd,
                                                          std::string* why)
 {
@@ -1639,7 +1640,9 @@ Sized_relobj<size, big_endian>::do_should_include_member(Symbol_table* symtab,
       unsigned int st_name = sym.get_st_name();
       const char* name = sym_names + st_name;
       Symbol* symbol;
-      Archive::Should_include t = Archive::should_include_member(symtab, name,
+      Archive::Should_include t = Archive::should_include_member(symtab,
+								 layout,
+								 name,
 								 &symbol, why,
 								 &tmpbuf,
 								 &tmpbuflen);

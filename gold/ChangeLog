@@ -1,5 +1,52 @@
 2010-08-02  Ian Lance Taylor  <iant@google.com>
 
+	PR 11855
+	* script.cc (Script_options::Script_options): Initialize
+	symbol_definitions_ and symbol_references_.
+	(Script_options::add_symbol_assignment): Update
+	symbol_definitions_ and symbol_references_.
+	(Script_options::add_symbol_reference): New function.
+	(script_symbol): New function.
+	* script.h (class Script_options): Add symbol_definitions_ and
+	symbol_references_ fields.
+	(Script_options::referenced_const_iterator): New type.
+	(Script_options::referenced_begin): New function.
+	(Script_options::referenced_end): New function.
+	(Script_options::is_referenced): New function.
+	(Script_options::any_unreferenced): New function.
+	* script-c.h (script_symbol): Declare.
+	* yyscript.y (exp): Call script_symbol.
+	* symtab.cc: Include "script.h".
+	(Symbol_table::gc_mark_undef_symbols): Add layout parameter.
+	Change all callers.  Check symbols referenced by scripts.
+	(Symbol_table::add_undefined_symbols_from_command_line): Add
+	layout parameter.  Change all callers.
+	(Symbol_table::do_add_undefined_symbols_from_command_line):
+	Likewise.  Break out loop body.  Check symbols referenced by
+	scripts.
+	(Symbol_table::add_undefined_symbol_from_command_line): New
+	function broken out of
+	do_add_undefined_symbols_from_command_line.
+	* symtab.h (class Symbol_table): Update declarations.
+	* archive.cc: Include "layout.h".
+	(Archive::should_include_member): Add layout parameter.  Change
+	all callers.  Check for symbol mentioned in expression.
+	* archive.h (class Archive): Update declaration.
+	* object.cc (Sized_relobj::do_should_include_member): Add layout
+	parameter.
+	* object.h (Object::should_include_member): Add layout parameter.
+	Change all callers.
+	(Object::do_should_include_member): Add layout parameter.
+	(class Sized_relobj): Update declaration.
+	* dynobj.cc (Sized_dynobj::do_should_include_member): Add layout
+	parameter.
+	* dynobj.h (class Sized_dynobj): Update declaration.
+	* plugin.cc (Sized_pluginobj::do_should_include_member): Add
+	layout parameter.
+	* plugin.h (class Sized_pluginobj): Update declaration.
+
+2010-08-02  Ian Lance Taylor  <iant@google.com>
+
 	PR 11866
 	* output.cc (Output_segment::set_offset): Search for the first and
 	last sections rather than assuming that the list is in order.

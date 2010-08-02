@@ -1269,7 +1269,7 @@ class Symbol_table
 
   // During garbage collection, this keeps undefined symbols.
   void
-  gc_mark_undef_symbols(); 
+  gc_mark_undef_symbols(Layout*);
 
   // During garbage collection, this ensures externally visible symbols
   // are not treated as garbage while building shared objects.
@@ -1419,7 +1419,7 @@ class Symbol_table
   // Add any undefined symbols named on the command line to the symbol
   // table.
   void
-  add_undefined_symbols_from_command_line();
+  add_undefined_symbols_from_command_line(Layout*);
 
   // SYM is defined using a COPY reloc.  Return the dynamic object
   // where the original definition was found.
@@ -1633,7 +1633,12 @@ class Symbol_table
   // table, sized version.
   template<int size>
   void
-  do_add_undefined_symbols_from_command_line();
+  do_add_undefined_symbols_from_command_line(Layout*);
+
+  // Add one undefined symbol.
+  template<int size>
+  void
+  add_undefined_symbol_from_command_line(const char* name);
 
   // Types of common symbols.
 

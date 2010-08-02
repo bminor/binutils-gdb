@@ -176,7 +176,7 @@ class Archive
   };
 
   static Should_include
-  should_include_member(Symbol_table* symtab, const char* sym_name,
+  should_include_member(Symbol_table* symtab, Layout*, const char* sym_name,
                         Symbol** symp, std::string* why, char** tmpbufp,
                         size_t* tmpbuflen);
 
