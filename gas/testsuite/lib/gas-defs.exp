@@ -341,6 +341,15 @@ proc is_pecoff_format {} {
     return 1
 }
 
+# Internal procedure: return the names of the standard sections
+#
+proc get_standard_section_names {} {
+    if [istarget "rx-*-*"] {
+        return { "P" "D_1" "B_1" }
+    }
+    return
+}
+
 # run_dump_tests TESTCASES EXTRA_OPTIONS
 # Wrapper for run_dump_test, which is suitable for invoking as
 #   run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
@@ -413,6 +422,11 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #	of symbols.  If no FLAGS are needed then use:
 #        PROG: [nm objcopy objdump readelf addr2line]
 #       instead.
+#	Note: for objdump, we automatically replaces the standard section
+#	names (.text, .data and .bss) by target ones if any (eg. rx-elf
+#	uses "P" instead of .text).  The substition is done for both
+#	the objdump options (eg: "-j .text" is replaced by "-j P") and the
+#	reference file.
 #
 #   source: SOURCE
 #	Assemble the file SOURCE.s.  If omitted, this defaults to FILE.s.
@@ -463,6 +477,9 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #       is expected to exit unsuccessfully (therefore PROG, objdump, nm,
 #       and objcopy have no meaning and should not be supplied).
 #
+#   section-subst: no
+#       Means that the section substitution for objdump is disabled.
+#
 # Each option may occur at most once.
 #
 # After the option lines come regexp lines.  `run_dump_test' calls
@@ -508,6 +525,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(not-target) {}
     set opts(skip) {}
     set opts(not-skip) {}
+    set opts(section-subst) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -718,7 +736,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	    set stderrfile $srcdir/$subdir/$opts(stderr)
 	    verbose "wrote pruned stderr to dump.stderr" 3
-	    if { [regexp_diff "dump.stderr" "$stderrfile"] } then {
+	    if { [regexp_diff "dump.stderr" "$stderrfile" ""] } then {
 		if { $opts(error) != "" } {
 		    verbose -log "$exitstat with: <$comp_output>, expected: <$opts(error)>"
 		    if [regexp $opts(error) $comp_output] {
@@ -750,6 +768,15 @@ proc run_dump_test { name {extra_options {}} } {
     if { ![is_remote host] && [which $binary] == 0 } {
 	untested $testname
 	return
+    }
+
+    # For objdump, automatically translate standard section names to the targets one,
+    # if they are different.
+    set sect_names [get_standard_section_names]
+    if { $sect_names != "" && $program == "objdump" && $opts(section-subst) == ""} {
+        regsub -- "-j \\.text" $progopts1 "-j [lindex $sect_names 0]" progopts1
+        regsub -- "-j \\.data" $progopts1 "-j [lindex $sect_names 1]" progopts1
+        regsub -- "-j \\.bss"  $progopts1 "-j [lindex $sect_names 2]" progopts1
     }
 
     if { $progopts1 == "" } { set $progopts1 "-r" }
@@ -784,8 +811,18 @@ proc run_dump_test { name {extra_options {}} } {
 	return
     }
 
+    # Create the substition list only for objdump reference.
+    if { $sect_names != "" && $program == "objdump" } {
+        # Some testcases use ".text" while others use "\.text".
+        set regexp_subst [list "\\\\?\\.text" [lindex $sect_names 0] \
+                           "\\\\?\\.data" [lindex $sect_names 1] \
+                          "\\\\?\\.bss" [lindex $sect_names 2] ]
+    } else {
+        set regexp_subst ""
+    }
+
     verbose_eval {[file_contents "dump.out"]} 3
-    if { [regexp_diff "dump.out" "${dumpfile}"] } then {
+    if { [regexp_diff "dump.out" "${dumpfile}" $regexp_subst] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
@@ -859,13 +896,14 @@ expect_after -i {
     eof				{ perror "eof" }
 }
 
-# regexp_diff, based on simple_diff taken from ld test suite
-#	compares two files line-by-line
-#	file1 contains strings, file2 contains regexps and #-comments
-#	blank lines are ignored in either file
-#	returns non-zero if differences exist
+# regexp_diff, based on simple_diff taken from ld test suite.
+#	Compares two files line-by-line.
+#	FILE_1 contains strings, FILE_2 contains regexps and #-comments
+#	Blank lines are ignored in either file.
+#	Subsitutions in REF_SUBST are applied on FILE_2 lines.
+#	Returns non-zero if differences exist.
 #
-proc regexp_diff { file_1 file_2 } {
+proc regexp_diff { file_1 file_2 ref_subst} {
 
     set eof -1
     set end_1 0
@@ -894,6 +932,7 @@ proc regexp_diff { file_1 file_2 } {
 	set line_a ""
 	set line_b ""
 	while { [string length $line_a] == 0 } {
+            # Ignore blank line in FILE_1.
 	    if { [gets $file_a line_a] == $eof } {
 		set end_1 1
 		break
@@ -910,6 +949,10 @@ proc regexp_diff { file_1 file_2 } {
 		    set diff_pass 1
 		    break
 		}
+                # Substitute on the reference.
+                foreach {name value} $ref_subst {
+                    regsub -- $name $line_b $value line_b
+                }
 		verbose "looking for \"^$line_b$\"" 3
 		while { ![regexp "^$line_b$" "$line_a"] } {
 		    verbose "skipping    \"$line_a\"" 3
@@ -941,6 +984,10 @@ proc regexp_diff { file_1 file_2 } {
             set differences 1
             break
         } else {
+            # Substitute on the reference.
+            foreach {name value} $ref_subst {
+                regsub -- $name $line_b $value line_b
+            }
             verbose "regexp \"^$line_b$\"\nline   \"$line_a\"" 3
             if ![regexp "^$line_b$" "$line_a"] {
 		send_log "regexp_diff match failure\n"
@@ -1018,7 +1065,7 @@ proc run_list_test { name {opts {}} {testname {}} } {
     }
     set file $srcdir/$subdir/$name
     gas_run ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l"] } then {
+    if { [regexp_diff "dump.out" "${file}.l" ""] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
@@ -1037,7 +1084,7 @@ proc run_list_test_stdin { name {opts {}} {testname {}} } {
     }
     set file $srcdir/$subdir/$name
     gas_run_stdin ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l"] } then {
+    if { [regexp_diff "dump.out" "${file}.l" ""] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return

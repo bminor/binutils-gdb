@@ -1,3 +1,20 @@
+2010-08-02  Tristan Gingold  <gingold@adacore.com>
+
+	* lib/gas-defs.exp (get_standard_section_names): New function.
+	(run_dump_tests): Document the new behavior for objdump,
+	document to new section-subst option.  Automatically perform
+	substitutions for objdump.
+	(objdump_finish): Add REF_SUBST argument.
+	(run_list_test): Adjust call of regexp_diff.
+	(run_list_test_stdin): Ditto.
+	* gas/all/gas.exp (test_cond): Adjust call of regexp_diff.
+	* gas/symver/symver.exp (run_error_test): Ditto.
+	* gas/mt/relocs.exp (regexp_test): Ditto.
+	* gas/mep/complex-relocs.exp (regexp_test): Ditto.
+	* gas/m68k/all.exp: Ditto.
+	* gas/elf/elf.exp (run_elf_list_test): Ditto.
+	* gas/rx/rx-asm-good.d: Set section-subst to no.
+
 2010-08-02  Alan Modra  <amodra@gmail.com>
 
 	* gas/i386/i386.exp (dw2-compress-1): Only run on ELF targets.

@@ -15,7 +15,7 @@ proc objdump_test { exec flags dest test } {
 }
 
 proc regexp_test { file1 file2 test } {
-    if [regexp_diff $file1 $file2] then { fail $test } else { pass $test }
+    if [regexp_diff $file1 $file2 ""] then { fail $test } else { pass $test }
 }
 
 

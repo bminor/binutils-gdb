@@ -9,7 +9,7 @@ proc run_elf_list_test { name suffix opts readelf_opts readelf_pipe } {
     set file $srcdir/$subdir/$name
     gas_run ${name}.s "$opts -o dump.o" ">&dump.out"
     if { ![string match "" $opts]
-	  && [regexp_diff "dump.out" "${file}.l"] } then {
+	  && [regexp_diff "dump.out" "${file}.l" ""] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
@@ -28,7 +28,7 @@ proc run_elf_list_test { name suffix opts readelf_opts readelf_pipe } {
 	return
     }
     verbose_eval {[file_contents "dump.out"]} 3
-    if { [regexp_diff "dump.out" "${file}.e${suffix}"] } then {
+    if { [regexp_diff "dump.out" "${file}.e${suffix}" ""] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return

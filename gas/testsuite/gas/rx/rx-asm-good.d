@@ -1,5 +1,6 @@
 # name: Compatibility with Renesas's own assembler
 # objdump: -D --prefix-addresses --show-raw-insn 
+# section-subst: no
 
 .*: +file format elf32-rx-.*
 

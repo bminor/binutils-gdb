@@ -6,7 +6,7 @@ proc run_error_test { name opts } {
     set testname "symver $name"
     set file $srcdir/$subdir/$name
     gas_run ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l"] } then {
+    if { [regexp_diff "dump.out" "${file}.l" ""] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
