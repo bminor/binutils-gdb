@@ -339,6 +339,7 @@ if { ![istarget "i960-*-*"] } {
     run_dump_test quad
 }
 
+run_dump_test octa
 
 # .set works differently on some targets.
 case $target_triplet in {

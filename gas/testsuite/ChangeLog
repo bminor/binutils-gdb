@@ -1,3 +1,10 @@
+2010-08-03  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/octa.s, * gas/all/octa.d: New test.
+	* gas/all/gas.exp: Run octa.
+	* gas/elf/data-1.s, * gas/elf/data-1.d: Delete.
+	* gas/elf/elf.exp: Don't run data-1.
+
 2010-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf/elf.exp: Run data-1 only for i*86, x86_64 and ia64.
