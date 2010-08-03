@@ -1,3 +1,7 @@
+2010-08-02  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf_attr_name): Add DW_AT_GNU_odr_signature.
+
 2010-07-31  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* linux-thread-db.c (libthread_db_debug): New variable.

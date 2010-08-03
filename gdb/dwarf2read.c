@@ -11379,6 +11379,8 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_body_end";
     case DW_AT_GNU_vector:
       return "DW_AT_GNU_vector";
+    case DW_AT_GNU_odr_signature:
+      return "DW_AT_GNU_odr_signature";
     /* VMS extensions.  */
     case DW_AT_VMS_rtnbeg_pd_address:
       return "DW_AT_VMS_rtnbeg_pd_address";
