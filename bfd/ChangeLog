@@ -1,5 +1,10 @@
 2010-08-03  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (evax_section_flags): Fix flags for absolute
+	section.  Remove useless parenthesis.
+
+2010-08-03  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-lib.c (vms_lib_bread_raw): Change type of BUF argument.
 	(vms_lib_bread, vms_lib_bopen): Adjust.
 
