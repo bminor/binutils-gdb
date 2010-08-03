@@ -32,6 +32,28 @@ namespace gold
 
 class Output_file;
 
+// Return the length of a string in units of Char_type.
+
+template<typename Char_type>
+inline size_t
+string_length(const Char_type* p)
+{
+  size_t len = 0;
+  for (; *p != 0; ++p)
+    ++len;
+  return len;
+}
+
+// Specialize string_length for char.  Maybe we could just use
+// std::char_traits<>::length?
+
+template<>
+inline size_t
+string_length(const char* p)
+{
+  return strlen(p);
+}
+
 // A Stringpool is a pool of unique strings.  It provides the
 // following features:
 
@@ -265,10 +287,6 @@ class Stringpool_template
  private:
   Stringpool_template(const Stringpool_template&);
   Stringpool_template& operator=(const Stringpool_template&);
-
-  // Return the length of a string in units of Stringpool_char.
-  static size_t
-  string_length(const Stringpool_char*);
 
   // Return whether two strings are equal.
   static bool

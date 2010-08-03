@@ -462,7 +462,7 @@ class Output_merge_string : public Output_merge_base
  public:
   Output_merge_string(uint64_t addralign)
     : Output_merge_base(sizeof(Char_type), addralign), stringpool_(),
-      merged_strings_lists_(), input_count_(0)
+      merged_strings_lists_(), input_count_(0), input_size_(0)
   {
     gold_assert(addralign <= sizeof(Char_type));
     this->stringpool_.set_no_zero_null();
@@ -566,6 +566,8 @@ class Output_merge_string : public Output_merge_base
   Merged_strings_lists merged_strings_lists_;
   // The number of entries seen in input files.
   size_t input_count_;
+  // The total size of input sections.
+  size_t input_size_;
 };
 
 } // End namespace gold.

@@ -1,3 +1,15 @@
+2010-08-03  Cary Coutant  <ccoutant@google.com>
+
+	* merge.cc (Output_merge_string::do_add_input_section): Count strings
+	to reserve space in merged_strings vector. Keep total input size
+	for stats.
+	(Output_merge_string::do_print_merge_stats): Print total input size.
+	* merge.h (Output_merge_string): Add input_size_ field.
+	* stringpool.cc (Stringpool_template::string_length): Move
+	implementations out of Stringpool_template class and place in
+	stringpool.h.
+	* stringpool.h (string_length): Move out of Stringpool_template.
+
 2010-08-03  Ian Lance Taylor  <iant@google.com>
 
 	PR 11712

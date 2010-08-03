@@ -533,6 +533,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
   const Char_type* p = reinterpret_cast<const Char_type*>(pdata);
   const Char_type* pend = p + len / sizeof(Char_type);
+  const Char_type* pend0 = pend;
 
   if (len % sizeof(Char_type) != 0)
     {
@@ -543,39 +544,54 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
       return false;
     }
 
-  size_t count = 0;
+  if (pend[-1] != 0)
+    {
+      gold_warning(_("%s: last entry in mergeable string section '%s' "
+		     "not null terminated"),
+		   object->name().c_str(),
+		   object->section_name(shndx).c_str());
+      // Find the end of the last NULL-terminated string in the buffer.
+      while (pend0 > p && pend0[-1] != 0)
+	--pend0;
+    }
 
   Merged_strings_list* merged_strings_list =
       new Merged_strings_list(object, shndx);
   this->merged_strings_lists_.push_back(merged_strings_list);
   Merged_strings& merged_strings = merged_strings_list->merged_strings;
 
+  // Count the number of strings in the section and size the list.
+  size_t count = 0;
+  for (const Char_type* pt = p; pt < pend0; pt += string_length(pt) + 1)
+    ++count;
+  if (pend0 < pend)
+    ++count;
+  merged_strings.reserve(count + 1);
+
   // The index I is in bytes, not characters.
   section_size_type i = 0;
-  while (i < len)
+  while (p < pend0)
     {
-      const Char_type* pl;
-      for (pl = p; *pl != 0; ++pl)
-	{
-	  if (pl >= pend)
-	    {
-	      gold_warning(_("%s: last entry in mergeable string section '%s' "
-			     "not null terminated"),
-			   object->name().c_str(),
-			   object->section_name(shndx).c_str());
-	      break;
-	    }
-	}
+      size_t len = string_length(p);
 
       Stringpool::Key key;
-      this->stringpool_.add_with_length(p, pl - p, true, &key);
+      this->stringpool_.add_with_length(p, len, true, &key);
 
-      section_size_type bytelen_with_null = ((pl - p) + 1) * sizeof(Char_type);
       merged_strings.push_back(Merged_string(i, key));
 
-      p = pl + 1;
-      i += bytelen_with_null;
-      ++count;
+      p += len + 1;
+      i += (len + 1) * sizeof(Char_type);
+    }
+  if (p < pend)
+    {
+      size_t len = pend - p;
+
+      Stringpool::Key key;
+      this->stringpool_.add_with_length(p, len, true, &key);
+
+      merged_strings.push_back(Merged_string(i, key));
+
+      i += (len + 1) * sizeof(Char_type);
     }
 
   // Record the last offset in the input section so that we can
@@ -583,6 +599,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
   merged_strings.push_back(Merged_string(i, 0));
 
   this->input_count_ += count;
+  this->input_size_ += len;
 
   // For script processing, we keep the input sections.
   if (this->keeps_input_sections())
@@ -701,7 +718,9 @@ Output_merge_string<Char_type>::do_print_merge_stats(const char* section_name)
 {
   char buf[200];
   snprintf(buf, sizeof buf, "%s merged %s", section_name, this->string_name());
-  fprintf(stderr, _("%s: %s input: %zu\n"),
+  fprintf(stderr, _("%s: %s input bytes: %zu\n"),
+	  program_name, buf, this->input_size_);
+  fprintf(stderr, _("%s: %s input strings: %zu\n"),
 	  program_name, buf, this->input_count_);
   this->stringpool_.print_stats(buf);
 }
