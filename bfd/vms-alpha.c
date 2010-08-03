@@ -1145,7 +1145,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    section->size = bfd_getl32 (egps->alloc);
 	    new_flags = vms_secflag_by_name (evax_section_flags, name,
 					     section->size > 0);
-            if (!(old_flags & EGPS__V_NOMOD))
+            if (!(old_flags & EGPS__V_NOMOD) && section->size > 0)
               {
                 new_flags |= SEC_HAS_CONTENTS;
                 if (old_flags & EGPS__V_REL)
