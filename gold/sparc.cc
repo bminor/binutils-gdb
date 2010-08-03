@@ -1048,7 +1048,7 @@ Target_sparc<size, big_endian>::got_section(Symbol_table* symtab,
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
-				      this->got_, false, true, false, false);
+				      this->got_, ORDER_RELRO, true);
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the .got section.
       symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
@@ -1074,8 +1074,8 @@ Target_sparc<size, big_endian>::rela_dyn_section(Layout* layout)
       gold_assert(layout != NULL);
       this->rela_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rela.dyn", elfcpp::SHT_RELA,
-				      elfcpp::SHF_ALLOC, this->rela_dyn_, true,
-				      false, false, false);
+				      elfcpp::SHF_ALLOC, this->rela_dyn_,
+				      ORDER_DYNAMIC_RELOCS, false);
     }
   return this->rela_dyn_;
 }
@@ -1177,8 +1177,8 @@ Output_data_plt_sparc<size, big_endian>::Output_data_plt_sparc(Layout* layout)
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
-				  elfcpp::SHF_ALLOC, this->rel_, true,
-				  false, false, false);
+				  elfcpp::SHF_ALLOC, this->rel_,
+				  ORDER_DYNAMIC_PLT_RELOCS, false);
 }
 
 template<int size, bool big_endian>
@@ -1400,7 +1400,7 @@ Target_sparc<size, big_endian>::make_plt_entry(Symbol_table* symtab,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_EXECINSTR
 				       | elfcpp::SHF_WRITE),
-				      this->plt_, false, false, false, false);
+				      this->plt_, ORDER_PLT, false);
 
       // Define _PROCEDURE_LINKAGE_TABLE_ at the start of the .plt section.
       symtab->define_in_output_data("_PROCEDURE_LINKAGE_TABLE_", NULL,

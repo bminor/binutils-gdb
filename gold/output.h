@@ -56,7 +56,7 @@ class Output_data
     : address_(0), data_size_(0), offset_(-1),
       is_address_valid_(false), is_data_size_valid_(false),
       is_offset_valid_(false), is_data_size_fixed_(false),
-      dynamic_reloc_count_(0)
+      has_dynamic_reloc_(false)
   { }
 
   virtual
@@ -233,15 +233,15 @@ class Output_data
   is_layout_complete()
   { return Output_data::allocated_sizes_are_fixed; }
 
-  // Count the number of dynamic relocations applied to this section.
+  // Note that a dynamic reloc has been applied to this data.
   void
   add_dynamic_reloc()
-  { ++this->dynamic_reloc_count_; }
+  { this->has_dynamic_reloc_ = true; }
 
-  // Return the number of dynamic relocations applied to this section.
-  unsigned int
-  dynamic_reloc_count() const
-  { return this->dynamic_reloc_count_; }
+  // Return whether a dynamic reloc has been applied.
+  bool
+  has_dynamic_reloc() const
+  { return this->has_dynamic_reloc_; }
 
   // Whether the address is valid.
   bool
@@ -424,15 +424,15 @@ class Output_data
   // File offset of contents in output file.
   off_t offset_;
   // Whether address_ is valid.
-  bool is_address_valid_;
+  bool is_address_valid_ : 1;
   // Whether data_size_ is valid.
-  bool is_data_size_valid_;
+  bool is_data_size_valid_ : 1;
   // Whether offset_ is valid.
-  bool is_offset_valid_;
+  bool is_offset_valid_ : 1;
   // Whether data size is fixed.
-  bool is_data_size_fixed_;
-  // Count of dynamic relocations applied to this section.
-  unsigned int dynamic_reloc_count_;
+  bool is_data_size_fixed_ : 1;
+  // Whether any dynamic relocs have been applied to this section.
+  bool has_dynamic_reloc_ : 1;
 };
 
 // Output the section headers.
@@ -2761,6 +2761,17 @@ class Output_section : public Output_data
   set_must_sort_attached_input_sections()
   { this->must_sort_attached_input_sections_ = true; }
 
+  // Get the order in which this section appears in the PT_LOAD output
+  // segment.
+  Output_section_order
+  order() const
+  { return this->order_; }
+
+  // Set the order for this section.
+  void
+  set_order(Output_section_order order)
+  { this->order_ = order; }
+
   // Return whether this section holds relro data--data which has
   // dynamic relocations but which may be marked read-only after the
   // dynamic relocations have been completed.
@@ -2777,46 +2788,6 @@ class Output_section : public Output_data
   void
   clear_is_relro()
   { this->is_relro_ = false; }
-
-  // True if this section holds relro local data--relro data for which
-  // the dynamic relocations are all RELATIVE relocations.
-  bool
-  is_relro_local() const
-  { return this->is_relro_local_; }
-
-  // Record that this section holds relro local data.
-  void
-  set_is_relro_local()
-  { this->is_relro_local_ = true; }
-
-  // True if this must be the last relro section.
-  bool
-  is_last_relro() const
-  { return this->is_last_relro_; }
-
-  // Record that this must be the last relro section.
-  void
-  set_is_last_relro()
-  {
-    gold_assert(this->is_relro_);
-    this->is_last_relro_ = true;
-  }
-
-  // True if this must be the first section following the relro sections.
-  bool
-  is_first_non_relro() const
-  {
-    gold_assert(!this->is_relro_);
-    return this->is_first_non_relro_;
-  }
-
-  // Record that this must be the first non-relro section.
-  void
-  set_is_first_non_relro()
-  {
-    gold_assert(!this->is_relro_);
-    this->is_first_non_relro_ = true;
-  }
 
   // True if this is a small section: a section which holds small
   // variables.
@@ -2844,27 +2815,6 @@ class Output_section : public Output_data
   bool
   is_large_data_section()
   { return this->is_large_section_ && this->type_ != elfcpp::SHT_NOBITS; }
-
-  // True if this is the .interp section which goes into the PT_INTERP
-  // segment.
-  bool
-  is_interp() const
-  { return this->is_interp_; }
-
-  // Record that this is the interp section.
-  void
-  set_is_interp()
-  { this->is_interp_ = true; }
-
-  // True if this is a section used by the dynamic linker.
-  bool
-  is_dynamic_linker_section() const
-  { return this->is_dynamic_linker_section_; }
-
-  // Record that this is a section used by the dynamic linker.
-  void
-  set_is_dynamic_linker_section()
-  { this->is_dynamic_linker_section_ = true; }
 
   // Return whether this section should be written after all the input
   // sections are complete.
@@ -3707,6 +3657,8 @@ class Output_section : public Output_data
   const elfcpp::Elf_Word type_;
   // The section flags.
   elfcpp::Elf_Xword flags_;
+  // The order of this section in the output segment.
+  Output_section_order order_;
   // The section index.
   unsigned int out_shndx_;
   // If there is a STT_SECTION for this output section in the normal
@@ -3774,21 +3726,10 @@ class Output_section : public Output_data
   bool attached_input_sections_are_sorted_ : 1;
   // True if this section holds relro data.
   bool is_relro_ : 1;
-  // True if this section holds relro local data.
-  bool is_relro_local_ : 1;
-  // True if this must be the last relro section.
-  bool is_last_relro_ : 1;
-  // True if this must be the first section after the relro sections.
-  bool is_first_non_relro_ : 1;
   // True if this is a small section.
   bool is_small_section_ : 1;
   // True if this is a large section.
   bool is_large_section_ : 1;
-  // True if this is the .interp section going into the PT_INTERP
-  // segment.
-  bool is_interp_ : 1;
-  // True if this is section is read by the dynamic linker.
-  bool is_dynamic_linker_section_ : 1;
   // Whether code-fills are generated at write.
   bool generate_code_fills_at_write_ : 1;
   // Whether the entry size field should be zero.
@@ -3874,12 +3815,17 @@ class Output_segment
   uint64_t
   maximum_alignment();
 
-  // Add the Output_section OS to this segment.  SEG_FLAGS is the
-  // segment flags to use.  DO_SORT is true if we should sort the
-  // placement of the input section for more efficient generated code.
+  // Add the Output_section OS to this PT_LOAD segment.  SEG_FLAGS is
+  // the segment flags to use.
   void
-  add_output_section(Output_section* os, elfcpp::Elf_Word seg_flags,
-		     bool do_sort);
+  add_output_section_to_load(Layout* layout, Output_section* os,
+			     elfcpp::Elf_Word seg_flags);
+
+  // Add the Output_section OS to this non-PT_LOAD segment.  SEG_FLAGS
+  // is the segment flags to use.
+  void
+  add_output_section_to_nonload(Output_section* os,
+				elfcpp::Elf_Word seg_flags);
 
   // Remove an Output_section from this segment.  It is an error if it
   // is not present.
@@ -3894,12 +3840,11 @@ class Output_segment
   // Return true if this segment has any sections which hold actual
   // data, rather than being a BSS section.
   bool
-  has_any_data_sections() const
-  { return !this->output_data_.empty(); }
+  has_any_data_sections() const;
 
-  // Return the number of dynamic relocations applied to this segment.
-  unsigned int
-  dynamic_reloc_count() const;
+  // Whether this segment has a dynamic relocs.
+  bool
+  has_dynamic_reloc() const;
 
   // Return the address of the first section.
   uint64_t
@@ -3992,7 +3937,7 @@ class Output_segment
   print_sections_to_mapfile(Mapfile*) const;
 
  private:
-  typedef std::list<Output_data*> Output_data_list;
+  typedef std::vector<Output_data*> Output_data_list;
 
   // Find the maximum alignment in an Output_data_list.
   static uint64_t
@@ -4012,9 +3957,9 @@ class Output_segment
   unsigned int
   output_section_count_list(const Output_data_list*) const;
 
-  // Return the number of dynamic relocs in an Output_data_list.
-  unsigned int
-  dynamic_reloc_count_list(const Output_data_list*) const;
+  // Return whether an Output_data_list has a dynamic reloc.
+  bool
+  has_dynamic_reloc_list(const Output_data_list*) const;
 
   // Find the section with the lowest load address in an
   // Output_data_list.
@@ -4043,10 +3988,8 @@ class Output_segment
   // NOTE: We want to use the copy constructor.  Currently, shallow copy
   // works for us so we do not need to write our own copy constructor.
   
-  // The list of output data with contents attached to this segment.
-  Output_data_list output_data_;
-  // The list of output data without contents attached to this segment.
-  Output_data_list output_bss_;
+  // The list of output data attached to this segment.
+  Output_data_list output_lists_[ORDER_MAX];
   // The segment virtual address.
   uint64_t vaddr_;
   // The segment physical address.

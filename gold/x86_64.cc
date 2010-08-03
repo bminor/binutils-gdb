@@ -561,14 +561,15 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
-				      this->got_, false, true, true, false);
+				      this->got_, ORDER_RELRO_LAST,
+				      true);
 
       this->got_plt_ = new Output_data_space(8, "** GOT PLT");
       layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
-				      this->got_plt_, false, false, false,
-				      true);
+				      this->got_plt_, ORDER_NON_RELRO_FIRST,
+				      false);
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * 8);
@@ -592,8 +593,8 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
       layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
-				      this->got_tlsdesc_, false, false, false,
-				      true);
+				      this->got_tlsdesc_,
+				      ORDER_NON_RELRO_FIRST, false);
     }
 
   return this->got_;
@@ -609,8 +610,8 @@ Target_x86_64::rela_dyn_section(Layout* layout)
       gold_assert(layout != NULL);
       this->rela_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rela.dyn", elfcpp::SHT_RELA,
-				      elfcpp::SHF_ALLOC, this->rela_dyn_, true,
-				      false, false, false);
+				      elfcpp::SHF_ALLOC, this->rela_dyn_,
+				      ORDER_DYNAMIC_RELOCS, false);
     }
   return this->rela_dyn_;
 }
@@ -717,8 +718,8 @@ Output_data_plt_x86_64::Output_data_plt_x86_64(Layout* layout,
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
-				  elfcpp::SHF_ALLOC, this->rel_, true,
-				  false, false, false);
+				  elfcpp::SHF_ALLOC, this->rel_,
+				  ORDER_DYNAMIC_PLT_RELOCS, false);
 }
 
 void
@@ -768,7 +769,7 @@ Output_data_plt_x86_64::rela_tlsdesc(Layout* layout)
       this->tlsdesc_rel_ = new Reloc_section(false);
       layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
 				      elfcpp::SHF_ALLOC, this->tlsdesc_rel_,
-				      true, false, false, false);
+				      ORDER_DYNAMIC_PLT_RELOCS, false);
       gold_assert(this->tlsdesc_rel_->output_section() ==
 		  this->rel_->output_section());
     }
@@ -932,7 +933,7 @@ Target_x86_64::make_plt_section(Symbol_table* symtab, Layout* layout)
       layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_EXECINSTR),
-				      this->plt_, false, false, false, false);
+				      this->plt_, ORDER_PLT, false);
     }
 }
 

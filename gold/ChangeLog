@@ -1,3 +1,59 @@
+2010-08-03  Ian Lance Taylor  <iant@google.com>
+
+	PR 11805
+	* layout.h (enum Output_section_order): Define.
+	(class Layout): Update declarations.
+	* layout.cc (Layout::get_output_section): Add order parameter.
+	Remove is_interp, is_dynamic_linker_section, is_last_relro, and
+	is_first_non_relro parameters.  Change all callers.
+	(Layout::choose_output_section): Likewise.
+	(Layout::add_output_section_data): Likewise.
+	(Layout::make_output_section): Likewise.  Set order.
+	(Layout::default_section_order): New function.
+	(Layout::layout_eh_frame): Call add_output_section_to_nonload.
+	* output.cc (Output_section::Output_section): Initialize order_.
+	Don't initialize deleted fields.
+	(Output_segment::Output_segment): Don't initialize deleted
+	fields.
+	(Output_segment::add_output_section_to_load): New function
+	replacing add_output_section.  Change all callers to call this or
+	add_output_section_to_nonload.
+	(Output_segment::add_output_section_to_nonload): New function.
+	(Output_segment::remove_output_section): Rewrite.
+	(Output_segment::add_initial_output_data): Likewise.
+	(Output_segment::has_any_data_sections): Likewise.
+	(Output_segment::is_first_section_relro): Likewise.
+	(Output_segment::maximum_alignment): Likewise.
+	(Output_segment::has_dynamic_reloc): New function replacing
+	dynamic_reloc_count.  Change all callers.
+	(Output_segment::has_dynamic_reloc_list): New function replacing
+	dynamic_reloc_count_list.  Change all callers.
+	(Output_segment::set_section_addresses): Rewrite.
+	(Output_segment::set_offset): Rewrite.
+	(Output_segment::find_first_and_last_list): Remove.
+	(Output_segment::set_tls_offsets): Rewrite.
+	(Output_segment::first_section_load_address): Likewise.
+	(Output_segment::output_section_count): Likewise.
+	(Output_segment::section_with_lowest_load_address): Likewise.
+	(Output_segment::write_section_headers): Likewise.
+	(Output_segment::print_sections_to_map): Likewise.
+	* output.h (class Output_data): Remove dynamic_reloc_count_
+	field.  Add has_dynamic_reloc_ field.  Make bools into bitfields.
+	(Output_data::add_dynamic_reloc): Rewrite.
+	(Output_data::has_dynamic_reloc): New function.
+	(Output_data::dynamic_reloc_count): Remove.
+	(class Output_section): Add order_ field.  Remvoe is_relro_local_,
+	is_last_relro_, is_first_non_relro_, is_interp_,
+	is_dynamic_linker_section_ fields.  Add order and set_order
+	functions.  Remove is_relro_local, set_is_relro_local,
+	is_last_relro, set_is_last_relro, is_first_non_relro,
+	set_is_first_non_relro functions, is_interp, set_is_interp,
+	is_dynamic_linker_section, and set_is_dynamic_linker_section
+	functions.
+	(class Output_segment): Change Output_data_list from std::list to
+	std:;vector.  Add output_lists_ field.  Remove output_data_ and
+	output_bss_ fields.  Update declarations.
+
 2010-08-02  Ian Lance Taylor  <iant@google.com>
 
 	* arm.cc (Target_arm::gc_process_relocs): Use typename.

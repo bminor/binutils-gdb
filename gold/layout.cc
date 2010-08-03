@@ -409,9 +409,7 @@ Layout::find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
 Output_section*
 Layout::get_output_section(const char* name, Stringpool::Key name_key,
 			   elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
-			   bool is_interp, bool is_dynamic_linker_section,
-			   bool is_relro, bool is_last_relro,
-			   bool is_first_non_relro)
+			   Output_section_order order, bool is_relro)
 {
   elfcpp::Elf_Xword lookup_flags = flags;
 
@@ -460,9 +458,8 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
 	}
 
       if (os == NULL)
-	os = this->make_output_section(name, type, flags, is_interp,
-				       is_dynamic_linker_section, is_relro,
-				       is_last_relro, is_first_non_relro);
+	os = this->make_output_section(name, type, flags, order, is_relro);
+
       ins.first->second = os;
       return os;
     }
@@ -482,9 +479,8 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
 Output_section*
 Layout::choose_output_section(const Relobj* relobj, const char* name,
 			      elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
-			      bool is_input_section, bool is_interp,
-			      bool is_dynamic_linker_section, bool is_relro,
-			      bool is_last_relro, bool is_first_non_relro)
+			      bool is_input_section, Output_section_order order,
+			      bool is_relro)
 {
   // We should not see any input sections after we have attached
   // sections to segments.
@@ -546,10 +542,9 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
 
 	  name = this->namepool_.add(name, false, NULL);
 
-	  Output_section* os =
-	    this->make_output_section(name, type, flags, is_interp,
-				      is_dynamic_linker_section, is_relro,
-				      is_last_relro, is_first_non_relro);
+	  Output_section* os = this->make_output_section(name, type, flags,
+							 order, is_relro);
+
 	  os->set_found_in_sections_clause();
 
 	  // Special handling for NOLOAD sections.
@@ -591,9 +586,7 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
 
   // Find or make the output section.  The output section is selected
   // based on the section name, type, and flags.
-  return this->get_output_section(name, name_key, type, flags, is_interp,
-				  is_dynamic_linker_section, is_relro,
-				  is_last_relro, is_first_non_relro);
+  return this->get_output_section(name, name_key, type, flags, order, is_relro);
 }
 
 // Return the output section to use for input section SHNDX, with name
@@ -647,14 +640,14 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
       && (shdr.get_sh_flags() & elfcpp::SHF_GROUP) != 0)
     {
       name = this->namepool_.add(name, true, NULL);
-      os = this->make_output_section(name, sh_type, shdr.get_sh_flags(), false,
-				     false, false, false, false);
+      os = this->make_output_section(name, sh_type, shdr.get_sh_flags(),
+				     ORDER_INVALID, false);
     }
   else
     {
       os = this->choose_output_section(object, name, sh_type,
-				       shdr.get_sh_flags(), true, false,
-				       false, false, false, false);
+				       shdr.get_sh_flags(), true,
+				       ORDER_INVALID, false);
       if (os == NULL)
 	return NULL;
     }
@@ -709,13 +702,13 @@ Layout::layout_reloc(Sized_relobj<size, big_endian>* object,
   if (!parameters->options().relocatable()
       || (data_section->flags() & elfcpp::SHF_GROUP) == 0)
     os = this->choose_output_section(object, name.c_str(), sh_type,
-				     shdr.get_sh_flags(), false, false,
-				     false, false, false, false);
+				     shdr.get_sh_flags(), false,
+				     ORDER_INVALID, false);
   else
     {
       const char* n = this->namepool_.add(name.c_str(), true, NULL);
       os = this->make_output_section(n, sh_type, shdr.get_sh_flags(),
-				     false, false, false, false, false);
+				     ORDER_INVALID, false);
     }
 
   os->set_should_link_to_symtab();
@@ -764,8 +757,7 @@ Layout::layout_group(Symbol_table* symtab,
   Output_section* os = this->make_output_section(group_section_name,
 						 elfcpp::SHT_GROUP,
 						 shdr.get_sh_flags(),
-						 false, false, false,
-						 false, false);
+						 ORDER_INVALID, false);
 
   // We need to find a symbol with the signature in the symbol table.
   // If we don't find one now, we need to look again later.
@@ -815,12 +807,10 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
   gold_assert((shdr.get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 
   const char* const name = ".eh_frame";
-  Output_section* os = this->choose_output_section(object,
-						   name,
+  Output_section* os = this->choose_output_section(object, name,
 						   elfcpp::SHT_PROGBITS,
-						   elfcpp::SHF_ALLOC,
-						   false, false, false,
-						   false, false, false);
+						   elfcpp::SHF_ALLOC, false,
+						   ORDER_EHFRAME, false);
   if (os == NULL)
     return NULL;
 
@@ -832,12 +822,10 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
       if (parameters->options().eh_frame_hdr())
 	{
 	  Output_section* hdr_os =
-	    this->choose_output_section(NULL,
-					".eh_frame_hdr",
+	    this->choose_output_section(NULL, ".eh_frame_hdr",
 					elfcpp::SHT_PROGBITS,
-					elfcpp::SHF_ALLOC,
-					false, false, false,
-					false, false, false);
+					elfcpp::SHF_ALLOC, false,
+					ORDER_EHFRAME, false);
 
 	  if (hdr_os != NULL)
 	    {
@@ -852,7 +840,8 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 		  Output_segment* hdr_oseg;
 		  hdr_oseg = this->make_output_segment(elfcpp::PT_GNU_EH_FRAME,
 						       elfcpp::PF_R);
-		  hdr_oseg->add_output_section(hdr_os, elfcpp::PF_R, false);
+		  hdr_oseg->add_output_section_to_nonload(hdr_os,
+							  elfcpp::PF_R);
 		}
 
 	      this->eh_frame_data_->set_eh_frame_hdr(hdr_posd);
@@ -905,15 +894,10 @@ Output_section*
 Layout::add_output_section_data(const char* name, elfcpp::Elf_Word type,
 				elfcpp::Elf_Xword flags,
 				Output_section_data* posd,
-				bool is_dynamic_linker_section,
-				bool is_relro, bool is_last_relro,
-				bool is_first_non_relro)
+				Output_section_order order, bool is_relro)
 {
   Output_section* os = this->choose_output_section(NULL, name, type, flags,
-						   false, false,
-						   is_dynamic_linker_section,
-						   is_relro, is_last_relro,
-						   is_first_non_relro);
+						   false, order, is_relro);
   if (os != NULL)
     os->add_output_section_data(posd);
   return os;
@@ -957,17 +941,14 @@ is_compressed_debug_section(const char* secname)
 }
 
 // Make a new Output_section, and attach it to segments as
-// appropriate.  IS_INTERP is true if this is the .interp section.
-// IS_DYNAMIC_LINKER_SECTION is true if this section is used by the
-// dynamic linker.  IS_RELRO is true if this is a relro section.
-// IS_LAST_RELRO is true if this is the last relro section.
-// IS_FIRST_NON_RELRO is true if this is the first non relro section.
+// appropriate.  ORDER is the order in which this section should
+// appear in the output segment.  IS_RELRO is true if this is a relro
+// (read-only after relocations) section.
 
 Output_section*
 Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
-			    elfcpp::Elf_Xword flags, bool is_interp,
-			    bool is_dynamic_linker_section, bool is_relro,
-			    bool is_last_relro, bool is_first_non_relro)
+			    elfcpp::Elf_Xword flags,
+			    Output_section_order order, bool is_relro)
 {
   Output_section* os;
   if ((flags & elfcpp::SHF_ALLOC) == 0
@@ -1000,16 +981,39 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       os = target->make_output_section(name, type, flags);
     }
 
-  if (is_interp)
-    os->set_is_interp();
-  if (is_dynamic_linker_section)
-    os->set_is_dynamic_linker_section();
+  // With -z relro, we have to recognize the special sections by name.
+  // There is no other way.
+  bool is_relro_local = false;
+  if (!this->script_options_->saw_sections_clause()
+      && parameters->options().relro()
+      && type == elfcpp::SHT_PROGBITS
+      && (flags & elfcpp::SHF_ALLOC) != 0
+      && (flags & elfcpp::SHF_WRITE) != 0)
+    {
+      if (strcmp(name, ".data.rel.ro") == 0)
+	is_relro = true;
+      else if (strcmp(name, ".data.rel.ro.local") == 0)
+	{
+	  is_relro = true;
+	  is_relro_local = true;
+	}
+      else if (type == elfcpp::SHT_INIT_ARRAY
+	       || type == elfcpp::SHT_FINI_ARRAY
+	       || type == elfcpp::SHT_PREINIT_ARRAY)
+	is_relro = true;
+      else if (strcmp(name, ".ctors") == 0
+	       || strcmp(name, ".dtors") == 0
+	       || strcmp(name, ".jcr") == 0)
+	is_relro = true;
+    }
+
   if (is_relro)
     os->set_is_relro();
-  if (is_last_relro)
-    os->set_is_last_relro();
-  if (is_first_non_relro)
-    os->set_is_first_non_relro();
+
+  if (order == ORDER_INVALID && (flags & elfcpp::SHF_ALLOC) != 0)
+    order = this->default_section_order(os, is_relro_local);
+
+  os->set_order(order);
 
   parameters->target().new_output_section(os);
 
@@ -1024,23 +1028,6 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	  || strcmp(name, ".init_array") == 0
 	  || strcmp(name, ".fini_array") == 0))
     os->set_may_sort_attached_input_sections();
-
-  // With -z relro, we have to recognize the special sections by name.
-  // There is no other way.
-  if (!this->script_options_->saw_sections_clause()
-      && parameters->options().relro()
-      && type == elfcpp::SHT_PROGBITS
-      && (flags & elfcpp::SHF_ALLOC) != 0
-      && (flags & elfcpp::SHF_WRITE) != 0)
-    {
-      if (strcmp(name, ".data.rel.ro") == 0)
-	os->set_is_relro();
-      else if (strcmp(name, ".data.rel.ro.local") == 0)
-	{
-	  os->set_is_relro();
-	  os->set_is_relro_local();
-	}
-    }
 
   // Check for .stab*str sections, as .stab* sections need to link to
   // them.
@@ -1057,6 +1044,74 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
     this->attach_section_to_segment(os);
 
   return os;
+}
+
+// Return the default order in which a section should be placed in an
+// output segment.  This function captures a lot of the ideas in
+// ld/scripttempl/elf.sc in the GNU linker.  Note that the order of a
+// linker created section is normally set when the section is created;
+// this function is used for input sections.
+
+Output_section_order
+Layout::default_section_order(Output_section* os, bool is_relro_local)
+{
+  gold_assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
+  bool is_write = (os->flags() & elfcpp::SHF_WRITE) != 0;
+  bool is_execinstr = (os->flags() & elfcpp::SHF_EXECINSTR) != 0;
+  bool is_bss = false;
+
+  switch (os->type())
+    {
+    default:
+    case elfcpp::SHT_PROGBITS:
+      break;
+    case elfcpp::SHT_NOBITS:
+      is_bss = true;
+      break;
+    case elfcpp::SHT_RELA:
+    case elfcpp::SHT_REL:
+      if (!is_write)
+	return ORDER_DYNAMIC_RELOCS;
+      break;
+    case elfcpp::SHT_HASH:
+    case elfcpp::SHT_DYNAMIC:
+    case elfcpp::SHT_SHLIB:
+    case elfcpp::SHT_DYNSYM:
+    case elfcpp::SHT_GNU_HASH:
+    case elfcpp::SHT_GNU_verdef:
+    case elfcpp::SHT_GNU_verneed:
+    case elfcpp::SHT_GNU_versym:
+      if (!is_write)
+	return ORDER_DYNAMIC_LINKER;
+      break;
+    case elfcpp::SHT_NOTE:
+      return is_write ? ORDER_RW_NOTE : ORDER_RO_NOTE;
+    }
+
+  if ((os->flags() & elfcpp::SHF_TLS) != 0)
+    return is_bss ? ORDER_TLS_BSS : ORDER_TLS_DATA;
+
+  if (!is_bss && !is_write)
+    {
+      if (is_execinstr)
+	{
+	  if (strcmp(os->name(), ".init") == 0)
+	    return ORDER_INIT;
+	  else if (strcmp(os->name(), ".fini") == 0)
+	    return ORDER_FINI;
+	}
+      return is_execinstr ? ORDER_TEXT : ORDER_READONLY;
+    }
+
+  if (os->is_relro())
+    return is_relro_local ? ORDER_RELRO_LOCAL : ORDER_RELRO;
+
+  if (os->is_small_section())
+    return is_bss ? ORDER_SMALL_BSS : ORDER_SMALL_DATA;
+  if (os->is_large_section())
+    return is_bss ? ORDER_LARGE_BSS : ORDER_LARGE_DATA;
+
+  return is_bss ? ORDER_BSS : ORDER_DATA;
 }
 
 // Attach output sections to segments.  This is called after we have
@@ -1148,7 +1203,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
 	  break;
 	}
 
-      (*p)->add_output_section(os, seg_flags, true);
+      (*p)->add_output_section_to_load(this, os, seg_flags);
       break;
     }
 
@@ -1158,7 +1213,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
                                                        seg_flags);
       if (os->is_large_data_section())
 	oseg->set_is_large_data_segment();
-      oseg->add_output_section(os, seg_flags, true);
+      oseg->add_output_section_to_load(this, os, seg_flags);
       if (is_address_set)
 	oseg->set_addresses(addr, addr);
     }
@@ -1176,7 +1231,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
               && (((*p)->flags() & elfcpp::PF_W)
                   == (seg_flags & elfcpp::PF_W)))
             {
-              (*p)->add_output_section(os, seg_flags, false);
+              (*p)->add_output_section_to_nonload(os, seg_flags);
               break;
             }
         }
@@ -1185,7 +1240,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
         {
           Output_segment* oseg = this->make_output_segment(elfcpp::PT_NOTE,
                                                            seg_flags);
-          oseg->add_output_section(os, seg_flags, false);
+          oseg->add_output_section_to_nonload(os, seg_flags);
         }
     }
 
@@ -1195,7 +1250,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
     {
       if (this->tls_segment_ == NULL)
 	this->make_output_segment(elfcpp::PT_TLS, seg_flags);
-      this->tls_segment_->add_output_section(os, seg_flags, false);
+      this->tls_segment_->add_output_section_to_nonload(os, seg_flags);
     }
 
   // If -z relro is in effect, and we see a relro section, we create a
@@ -1205,7 +1260,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
       gold_assert(seg_flags == (elfcpp::PF_R | elfcpp::PF_W));
       if (this->relro_segment_ == NULL)
 	this->make_output_segment(elfcpp::PT_GNU_RELRO, seg_flags);
-      this->relro_segment_->add_output_section(os, seg_flags, false);
+      this->relro_segment_->add_output_section_to_nonload(os, seg_flags);
     }
 }
 
@@ -1221,8 +1276,8 @@ Layout::make_output_section_for_script(
   if (section_type == Script_sections::ST_NOLOAD)
     sh_flags = 0;
   Output_section* os = this->make_output_section(name, elfcpp::SHT_PROGBITS,
-						 sh_flags, false,
-						 false, false, false, false);
+						 sh_flags, ORDER_INVALID,
+						 false);
   os->set_found_in_sections_clause();
   if (section_type == Script_sections::ST_NOLOAD)
     os->set_is_noload();
@@ -1294,8 +1349,8 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 						       elfcpp::SHT_DYNAMIC,
 						       (elfcpp::SHF_ALLOC
 							| elfcpp::SHF_WRITE),
-						       false, false, true,
-						       true, false, false);
+						       false, ORDER_RELRO,
+						       true);
 
   this->dynamic_symbol_ =
     symtab->define_in_output_data("_DYNAMIC", NULL, Symbol_table::PREDEFINED,
@@ -1980,12 +2035,15 @@ Layout::create_note(const char* name, int note_type,
   memcpy(buffer + 3 * (size / 8), name, namesz);
 
   elfcpp::Elf_Xword flags = 0;
+  Output_section_order order = ORDER_INVALID;
   if (allocate)
-    flags = elfcpp::SHF_ALLOC;
+    {
+      flags = elfcpp::SHF_ALLOC;
+      order = ORDER_RO_NOTE;
+    }
   Output_section* os = this->choose_output_section(NULL, section_name,
 						   elfcpp::SHT_NOTE,
-						   flags, false, false,
-						   false, false, false, false);
+						   flags, false, order, false);
   if (os == NULL)
     return NULL;
 
@@ -2064,8 +2122,8 @@ Layout::create_executable_stack_info()
       elfcpp::Elf_Xword flags = 0;
       if (is_stack_executable)
 	flags |= elfcpp::SHF_EXECINSTR;
-      this->make_output_section(name, elfcpp::SHT_PROGBITS, flags, false,
-				false, false, false, false);
+      this->make_output_section(name, elfcpp::SHT_PROGBITS, flags,
+				ORDER_INVALID, false);
     }
   else
     {
@@ -2226,7 +2284,7 @@ Layout::create_incremental_info_sections()
   Output_section* inputs_os =
     this->make_output_section(incremental_inputs_name,
 			      elfcpp::SHT_GNU_INCREMENTAL_INPUTS, 0,
-			      false, false, false, false, false);
+			      ORDER_INVALID, false);
   Output_section_data* posd =
       this->incremental_inputs_->create_incremental_inputs_section_data();
   inputs_os->add_output_section_data(posd);
@@ -2236,8 +2294,8 @@ Layout::create_incremental_info_sections()
     this->namepool_.add(".gnu_incremental_strtab", false, NULL);
   Output_section* strtab_os = this->make_output_section(incremental_strtab_name,
                                                         elfcpp::SHT_STRTAB,
-                                                        0, false, false,
-							false, false, false);
+                                                        0, ORDER_INVALID,
+							false);
   Output_data_strtab* strtab_data =
     new Output_data_strtab(this->incremental_inputs_->get_stringpool());
   strtab_os->add_output_section_data(strtab_data);
@@ -2857,8 +2915,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
       const char* symtab_name = this->namepool_.add(".symtab", false, NULL);
       Output_section* osymtab = this->make_output_section(symtab_name,
 							  elfcpp::SHT_SYMTAB,
-							  0, false, false,
-							  false, false, false);
+							  0, ORDER_INVALID,
+							  false);
       this->symtab_section_ = osymtab;
 
       Output_section_data* pos = new Output_data_fixed_space(off - startoff,
@@ -2879,8 +2937,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 							       false, NULL);
 	  Output_section* osymtab_xindex =
 	    this->make_output_section(symtab_xindex_name,
-				      elfcpp::SHT_SYMTAB_SHNDX, 0, false,
-				      false, false, false, false);
+				      elfcpp::SHT_SYMTAB_SHNDX, 0,
+				      ORDER_INVALID, false);
 
 	  size_t symcount = (off - startoff) / symsize;
 	  this->symtab_xindex_ = new Output_symtab_xindex(symcount);
@@ -2902,8 +2960,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
       const char* strtab_name = this->namepool_.add(".strtab", false, NULL);
       Output_section* ostrtab = this->make_output_section(strtab_name,
 							  elfcpp::SHT_STRTAB,
-							  0, false, false,
-							  false, false, false);
+							  0, ORDER_INVALID,
+							  false);
 
       Output_section_data* pstr = new Output_data_strtab(&this->sympool_);
       ostrtab->add_output_section_data(pstr);
@@ -2931,8 +2989,7 @@ Layout::create_shstrtab()
   const char* name = this->namepool_.add(".shstrtab", false, NULL);
 
   Output_section* os = this->make_output_section(name, elfcpp::SHT_STRTAB, 0,
-						 false, false, false, false,
-						 false);
+						 ORDER_INVALID, false);
 
   if (strcmp(parameters->options().compress_debug_sections(), "none") != 0)
     {
@@ -3049,8 +3106,9 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
   Output_section* dynsym = this->choose_output_section(NULL, ".dynsym",
 						       elfcpp::SHT_DYNSYM,
 						       elfcpp::SHF_ALLOC,
-						       false, false, true,
-						       false, false, false);
+						       false,
+						       ORDER_DYNAMIC_LINKER,
+						       false);
 
   Output_section_data* odata = new Output_data_fixed_space(index * symsize,
 							   align,
@@ -3080,7 +3138,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	this->choose_output_section(NULL, ".dynsym_shndx",
 				    elfcpp::SHT_SYMTAB_SHNDX,
 				    elfcpp::SHF_ALLOC,
-				    false, false, true, false, false, false);
+				    false, ORDER_DYNAMIC_LINKER, false);
 
       this->dynsym_xindex_ = new Output_symtab_xindex(index);
 
@@ -3103,8 +3161,9 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
   Output_section* dynstr = this->choose_output_section(NULL, ".dynstr",
 						       elfcpp::SHT_STRTAB,
 						       elfcpp::SHF_ALLOC,
-						       false, false, true,
-						       false, false, false);
+						       false,
+						       ORDER_DYNAMIC_LINKER,
+						       false);
 
   Output_section_data* strdata = new Output_data_strtab(&this->dynpool_);
   dynstr->add_output_section_data(strdata);
@@ -3127,12 +3186,10 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
       Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
 				    &phash, &hashlen);
 
-      Output_section* hashsec = this->choose_output_section(NULL, ".hash",
-							    elfcpp::SHT_HASH,
-							    elfcpp::SHF_ALLOC,
-							    false, false, true,
-							    false, false,
-							    false);
+      Output_section* hashsec =
+	this->choose_output_section(NULL, ".hash", elfcpp::SHT_HASH,
+				    elfcpp::SHF_ALLOC, false,
+				    ORDER_DYNAMIC_LINKER, false);
 
       Output_section_data* hashdata = new Output_data_const_buffer(phash,
 								   hashlen,
@@ -3154,12 +3211,10 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
       Dynobj::create_gnu_hash_table(*pdynamic_symbols, local_symcount,
 				    &phash, &hashlen);
 
-      Output_section* hashsec = this->choose_output_section(NULL, ".gnu.hash",
-							    elfcpp::SHT_GNU_HASH,
-							    elfcpp::SHF_ALLOC,
-							    false, false, true,
-							    false, false,
-							    false);
+      Output_section* hashsec =
+	this->choose_output_section(NULL, ".gnu.hash", elfcpp::SHT_GNU_HASH,
+				    elfcpp::SHF_ALLOC, false,
+				    ORDER_DYNAMIC_LINKER, false);
 
       Output_section_data* hashdata = new Output_data_const_buffer(phash,
 								   hashlen,
@@ -3262,8 +3317,9 @@ Layout::sized_create_version_sections(
   Output_section* vsec = this->choose_output_section(NULL, ".gnu.version",
 						     elfcpp::SHT_GNU_versym,
 						     elfcpp::SHF_ALLOC,
-						     false, false, true,
-						     false, false, false);
+						     false,
+						     ORDER_DYNAMIC_LINKER,
+						     false);
 
   unsigned char* vbuf;
   unsigned int vsize;
@@ -3288,8 +3344,7 @@ Layout::sized_create_version_sections(
       vdsec= this->choose_output_section(NULL, ".gnu.version_d",
 					 elfcpp::SHT_GNU_verdef,
 					 elfcpp::SHF_ALLOC,
-					 false, false, true, false, false,
-					 false);
+					 false, ORDER_DYNAMIC_LINKER, false);
 
       unsigned char* vdbuf;
       unsigned int vdsize;
@@ -3314,8 +3369,7 @@ Layout::sized_create_version_sections(
       vnsec = this->choose_output_section(NULL, ".gnu.version_r",
 					  elfcpp::SHT_GNU_verneed,
 					  elfcpp::SHF_ALLOC,
-					  false, false, true, false, false,
-					  false);
+					  false, ORDER_DYNAMIC_LINKER, false);
 
       unsigned char* vnbuf;
       unsigned int vnsize;
@@ -3355,15 +3409,15 @@ Layout::create_interp(const Target* target)
   Output_section* osec = this->choose_output_section(NULL, ".interp",
 						     elfcpp::SHT_PROGBITS,
 						     elfcpp::SHF_ALLOC,
-						     false, true, true,
-						     false, false, false);
+						     false, ORDER_INTERP,
+						     false);
   osec->add_output_section_data(odata);
 
   if (!this->script_options_->saw_phdrs_clause())
     {
       Output_segment* oseg = this->make_output_segment(elfcpp::PT_INTERP,
 						       elfcpp::PF_R);
-      oseg->add_output_section(osec, elfcpp::PF_R, false);
+      oseg->add_output_section_to_nonload(osec, elfcpp::PF_R);
     }
 }
 
@@ -3471,9 +3525,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
       Output_segment* oseg = this->make_output_segment(elfcpp::PT_DYNAMIC,
 						       (elfcpp::PF_R
 							| elfcpp::PF_W));
-      oseg->add_output_section(this->dynamic_section_,
-			       elfcpp::PF_R | elfcpp::PF_W,
-			       false);
+      oseg->add_output_section_to_nonload(this->dynamic_section_,
+					  elfcpp::PF_R | elfcpp::PF_W);
     }
 
   Output_data_dynamic* const odyn = this->dynamic_data_;
@@ -3571,7 +3624,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
            ++p)
         {
           if (((*p)->flags() & elfcpp::PF_W) == 0
-              && (*p)->dynamic_reloc_count() > 0)
+              && (*p)->has_dynamic_reloc())
             {
               have_textrel = true;
               break;
@@ -3590,7 +3643,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
         {
           if (((*p)->flags() & elfcpp::SHF_ALLOC) != 0
               && ((*p)->flags() & elfcpp::SHF_WRITE) == 0
-              && ((*p)->dynamic_reloc_count() > 0))
+              && ((*p)->has_dynamic_reloc()))
             {
               have_textrel = true;
               break;
