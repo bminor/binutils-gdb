@@ -3,6 +3,15 @@
 
 *** Changes since GDB 7.2
 
+* Python scripting
+
+  ** GDB values in Python are now callable if the value represents a
+     function.  For example, if 'some_value' represents a function that
+     takes two integer parameters and returns a value, you can call
+     that function like so:
+
+     result = some_value (10,20)
+
 * GDB now has some support for using labels in the program's source in
   linespecs.  For instance, you can use "advance label" to continue
   execution to a label.
