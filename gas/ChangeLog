@@ -1,3 +1,9 @@
+2010-08-03  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-d10v.h (TARGET_BYTES_BIG_ENDIAN): Define as 1.
+	* config/tc-m32c.c (md_number_to_chars): Call bigendian
+	form of number_to_chars, not littleendian.
+
 2010-08-02  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-d30v.c (d30v_cons_align): Don't align constants

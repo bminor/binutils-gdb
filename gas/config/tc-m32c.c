@@ -1146,7 +1146,7 @@ m32c_force_relocation (fixS * fixp)
 void
 md_number_to_chars (char * buf, valueT val, int n)
 {
-  number_to_chars_littleendian (buf, val, n);
+  number_to_chars_bigendian (buf, val, n);
 }
 
 /* Turn a string in input_line_pointer into a floating point constant of type
