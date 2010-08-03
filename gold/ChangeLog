@@ -1,5 +1,11 @@
 2010-08-03  Ian Lance Taylor  <iant@google.com>
 
+	PR 11712
+	* layout.cc (relaxation_loop_body): If address of load segment is
+	set, adjust address to include headers if possible.
+
+2010-08-03  Ian Lance Taylor  <iant@google.com>
+
 	* version.cc (version_string): Bump to 1.10.
 
 2010-08-03  Ian Lance Taylor  <iant@google.com>

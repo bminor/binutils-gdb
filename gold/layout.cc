@@ -1655,17 +1655,41 @@ Layout::relaxation_loop_body(
 	      || this->script_options_->saw_sections_clause());
 
   // If the address of the load segment we found has been set by
-  // --section-start rather than by a script, then we don't want to
-  // use it for the file and segment headers.
+  // --section-start rather than by a script, then adjust the VMA and
+  // LMA downward if possible to include the file and section headers.
+  uint64_t header_gap = 0;
   if (load_seg != NULL
       && load_seg->are_addresses_set()
-      && !this->script_options_->saw_sections_clause())
-    load_seg = NULL;
+      && !this->script_options_->saw_sections_clause()
+      && !parameters->options().relocatable())
+    {
+      file_header->finalize_data_size();
+      segment_headers->finalize_data_size();
+      size_t sizeof_headers = (file_header->data_size()
+			       + segment_headers->data_size());
+      const uint64_t abi_pagesize = target->abi_pagesize();
+      uint64_t hdr_paddr = load_seg->paddr() - sizeof_headers;
+      hdr_paddr &= ~(abi_pagesize - 1);
+      uint64_t subtract = load_seg->paddr() - hdr_paddr;
+      if (load_seg->paddr() < subtract || load_seg->vaddr() < subtract)
+	load_seg = NULL;
+      else
+	{
+	  load_seg->set_addresses(load_seg->vaddr() - subtract,
+				  load_seg->paddr() - subtract);
+	  header_gap = subtract - sizeof_headers;
+	}
+    }
 
   // Lay out the segment headers.
   if (!parameters->options().relocatable())
     {
       gold_assert(segment_headers != NULL);
+      if (header_gap != 0 && load_seg != NULL)
+	{
+	  Output_data_zero_fill* z = new Output_data_zero_fill(header_gap, 1);
+	  load_seg->add_initial_output_data(z);
+	}
       if (load_seg != NULL)
         load_seg->add_initial_output_data(segment_headers);
       if (phdr_seg != NULL)
