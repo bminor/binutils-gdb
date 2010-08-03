@@ -1,5 +1,9 @@
 2010-08-03  Ian Lance Taylor  <iant@google.com>
 
+	* version.cc (version_string): Bump to 1.10.
+
+2010-08-03  Ian Lance Taylor  <iant@google.com>
+
 	PR 11805
 	* layout.h (enum Output_section_order): Define.
 	(class Layout): Update declarations.
