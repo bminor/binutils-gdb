@@ -2981,13 +2981,13 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
   struct minimal_symbol *msymbol;
   char *val;
   int found_misc = 0;
-  static enum minimal_symbol_type types[]
+  static const enum minimal_symbol_type types[]
     = {mst_data, mst_text, mst_abs, mst_unknown};
-  static enum minimal_symbol_type types2[]
+  static const enum minimal_symbol_type types2[]
     = {mst_bss, mst_file_text, mst_abs, mst_unknown};
-  static enum minimal_symbol_type types3[]
+  static const enum minimal_symbol_type types3[]
     = {mst_file_data, mst_solib_trampoline, mst_abs, mst_unknown};
-  static enum minimal_symbol_type types4[]
+  static const enum minimal_symbol_type types4[]
     = {mst_file_bss, mst_text, mst_abs, mst_unknown};
   enum minimal_symbol_type ourtype;
   enum minimal_symbol_type ourtype2;
@@ -3293,7 +3293,8 @@ print_msymbol_info (struct minimal_symbol *msymbol)
 static void
 symtab_symbol_info (char *regexp, domain_enum kind, int from_tty)
 {
-  static char *classnames[] = {"variable", "function", "type", "method"};
+  static const char * const classnames[] =
+    {"variable", "function", "type", "method"};
   struct symbol_search *symbols;
   struct symbol_search *p;
   struct cleanup *old_chain;

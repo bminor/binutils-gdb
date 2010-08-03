@@ -80,7 +80,7 @@ struct lm_info
    SVR4 systems will fall back to using a symbol as the "startup
    mapping complete" breakpoint address.  */
 
-static char *solib_break_names[] =
+static const char * const solib_break_names[] =
 {
   "r_debug_state",
   "_r_debug_state",
@@ -92,7 +92,7 @@ static char *solib_break_names[] =
   NULL
 };
 
-static char *bkpt_names[] =
+static const char * const bkpt_names[] =
 {
   "_start",
   "__start",
@@ -100,7 +100,7 @@ static char *bkpt_names[] =
   NULL
 };
 
-static char *main_name_list[] =
+static const  char * const main_name_list[] =
 {
   "main_$main",
   NULL
@@ -357,9 +357,7 @@ get_svr4_info (void)
 
 /* Local function prototypes */
 
-static int match_main (char *);
-
-static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
+static int match_main (const char *);
 
 /*
 
@@ -387,7 +385,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
  */
 
 static CORE_ADDR
-bfd_lookup_symbol (bfd *abfd, char *symname)
+bfd_lookup_symbol (bfd *abfd, const char *symname)
 {
   long storage_needed;
   asymbol *sym;
@@ -1253,9 +1251,9 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
    non-zero iff SONAME matches one of the known main executable names.  */
 
 static int
-match_main (char *soname)
+match_main (const char *soname)
 {
-  char **mainp;
+  const char * const *mainp;
 
   for (mainp = main_name_list; *mainp != NULL; mainp++)
     {
@@ -1347,7 +1345,7 @@ static int
 enable_break (struct svr4_info *info, int from_tty)
 {
   struct minimal_symbol *msymbol;
-  char **bkpt_namep;
+  const char * const *bkpt_namep;
   asection *interp_sect;
   gdb_byte *interp_name;
   CORE_ADDR sym_addr;

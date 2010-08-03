@@ -1,3 +1,14 @@
+2010-08-03  Doug Evans  <dje@google.com>
+
+	* breakpoint.c (bpdisp_text): Constify bpdisps.
+	* solib-svr4.c (solib_break_names): Constify.
+	(bkpt_names, main_name_list): Constify.
+	(match_main): Constify soname arg.
+	(bfd_lookup_symbol): Constify symname arg.
+	(enable_break): Constify bkpt_namep.
+	* symtab.c (search_symbols): Constify types, types2, types3, types4.
+	(symtab_symbol_info): Constify classnames.
+
 2010-08-03  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* NEWS: Document Python value inferior function calls.

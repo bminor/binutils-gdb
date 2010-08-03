@@ -262,7 +262,7 @@ bpdisp_text (enum bpdisp disp)
 {
   /* NOTE: the following values are a part of MI protocol and represent
      values of 'disp' field returned when inferior stops at a breakpoint.  */
-  static char *bpdisps[] = {"del", "dstp", "dis", "keep"};
+  static const char * const bpdisps[] = {"del", "dstp", "dis", "keep"};
 
   return bpdisps[(int) disp];
 }
