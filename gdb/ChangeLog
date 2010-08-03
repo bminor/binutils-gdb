@@ -4,7 +4,8 @@
 	* solib-svr4.c (solib_break_names): Constify.
 	(bkpt_names, main_name_list): Constify.
 	(match_main): Constify soname arg.
-	(bfd_lookup_symbol): Constify symname arg.
+	(bfd_lookup_symbol): Remove unnecessary forward decl.
+	Constify symname arg.
 	(enable_break): Constify bkpt_namep.
 	* symtab.c (search_symbols): Constify types, types2, types3, types4.
 	(symtab_symbol_info): Constify classnames.
