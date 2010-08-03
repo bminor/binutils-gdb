@@ -3056,19 +3056,12 @@ display_debug_lines_decoded (struct dwarf_section *section,
 }
 
 static int
-display_debug_lines (struct dwarf_section *section, void *file)
+display_debug_lines (struct dwarf_section *section, void *file ATTRIBUTE_UNUSED)
 {
   unsigned char *data = section->start;
   unsigned char *end = data + section->size;
   int retValRaw = 1;
   int retValDecoded = 1;
-
-  if (load_debug_info (file) == 0)
-    {
-      warn (_("Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"),
-            section->name);
-      return 0;
-    }
 
   if (do_debug_lines == 0)
     do_debug_lines |= FLAG_DEBUG_LINES_RAW;

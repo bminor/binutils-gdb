@@ -1,3 +1,8 @@
+2010-08-03  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf.c (display_debug_lines): Mark file argument unused.
+	Do not try to load .debug_info section.
+
 2010-08-02  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (apply_relocations): D30V is really REL.
