@@ -1,3 +1,7 @@
+2010-08-03  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms (OBJS): Add Add compress-debug.c.
+
 2010-08-03  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-d10v.h (TARGET_BYTES_BIG_ENDIAN): Define as 1.

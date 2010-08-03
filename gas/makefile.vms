@@ -21,8 +21,9 @@ CFLAGS=/names=(as_is,shortened)\
 endif
 
 OBJS:=targ-cpu.obj,obj-format.obj,atof-targ.obj,app.obj,as.obj,\
-  atof-generic.obj,cond.obj,depend.obj,expr.obj,flonum-konst.obj,\
-  flonum-copy.obj,flonum-mult.obj,frags.obj,hash.obj,input-file.obj,\
+  atof-generic.obj,cond.obj,compress-debug.obj,depend.obj,expr.obj,\
+  flonum-konst.obj,flonum-copy.obj,flonum-mult.obj,\
+  frags.obj,hash.obj,input-file.obj,\
   input-scrub.obj,literal.obj,messages.obj,output-file.obj,read.obj,\
   subsegs.obj,symbols.obj,write.obj,listing.obj,ecoff.obj,stabs.obj,sb.obj,\
   macro.obj,ehopt.obj,dw2gencfi.obj,dwarf2dbg.obj,remap.obj

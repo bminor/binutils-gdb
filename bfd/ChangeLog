@@ -1,5 +1,9 @@
 2010-08-03  Tristan Gingold  <gingold@adacore.com>
 
+	* makefile.vms (OBJS): Update list.
+
+2010-08-03  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Do not set SEC_HAS_CONTENTS
 	nor SEC_RELOC for empty sections.
 
