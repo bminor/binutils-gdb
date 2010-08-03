@@ -1,5 +1,10 @@
 2010-08-03  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-misc.c (vms_convert_to_var): Make it static.
+	(_bfd_vms_convert_to_var_unix_filename): Make it public.
+
+2010-08-03  Tristan Gingold  <gingold@adacore.com>
+
 	* makefile.vms (OBJS): Update list.
 
 2010-08-03  Tristan Gingold  <gingold@adacore.com>
