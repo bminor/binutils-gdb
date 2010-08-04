@@ -2010,7 +2010,7 @@ _bfd_m32c_elf_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
 #define ELF_ARCH		bfd_arch_m32c
 #define ELF_MACHINE_CODE	EM_M32C
 #define ELF_MACHINE_ALT1	EM_M32C_OLD
-#define ELF_MAXPAGESIZE		0x1000
+#define ELF_MAXPAGESIZE		0x100
 
 #if 0
 #define TARGET_BIG_SYM		bfd_elf32_m32c_vec
