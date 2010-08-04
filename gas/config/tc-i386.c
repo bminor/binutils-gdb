@@ -3848,12 +3848,13 @@ match_template (void)
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
     suffix_check.no_ldsuf = 1;
 
+  /* Must have right number of operands.  */
+  i.error = number_of_operands_mismatch;
+
   for (t = current_templates->start; t < current_templates->end; t++)
     {
       addr_prefix_disp = -1;
 
-      /* Must have right number of operands.  */
-      i.error = number_of_operands_mismatch;
       if (i.operands != t->operands)
 	continue;
 
