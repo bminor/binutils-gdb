@@ -2901,7 +2901,7 @@ alpha_vms_create_eisd_for_section (bfd *abfd, asection *sec)
 
   if (sec->flags & SEC_CODE)
     eisd->u.eisd.flags |= EISD__M_EXE;
-  if (!(sec->flags & SEC_READONLY))
+  else if (!(sec->flags & SEC_READONLY))
     eisd->u.eisd.flags |= EISD__M_WRT | EISD__M_CRF;
 
   if (!(sec->flags & SEC_LOAD))

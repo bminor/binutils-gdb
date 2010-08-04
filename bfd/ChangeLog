@@ -1,5 +1,10 @@
 2010-08-04  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (alpha_vms_create_eisd_for_section): Do not make
+	CODE sections writable.
+
+2010-08-04  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (alpha_vms_add_lw_fixup): Renamed to ...
 	(alpha_vms_add_fixup_lr): ... this for consistency.
 	(alpha_vms_add_qw_fixup): Removed.
