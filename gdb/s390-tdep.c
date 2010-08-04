@@ -43,7 +43,7 @@
 #include "dis-asm.h"
 #include "solib-svr4.h"
 #include "prologue-value.h"
-
+#include "linux-tdep.h"
 #include "s390-tdep.h"
 
 #include "features/s390-linux32.c"
@@ -2908,6 +2908,10 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_location (gdbarch,
                                        displaced_step_at_entry_point);
   set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
+
+  /* Note that GNU/Linux is the only OS supported on this
+     platform.  */
+  linux_init_abi (info, gdbarch);
 
   switch (tdep->abi)
     {

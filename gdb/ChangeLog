@@ -1,5 +1,10 @@
 2010-08-04  Pedro Alves  <pedro@codesourcery.com>
 
+	* s390-tdep.c: Include linux-tdep.h.
+	(s390_gdbarch_init): Call linux_init_abi.
+
+2010-08-04  Pedro Alves  <pedro@codesourcery.com>
+
 	* corelow.c (core_pid_to_str): Default to using normal_pid_to_str
 	instead of printing "Thread" here.
 	* linux-tdep.c: Include inferior.h.
