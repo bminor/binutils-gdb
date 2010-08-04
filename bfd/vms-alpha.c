@@ -8321,6 +8321,8 @@ alpha_vms_build_fixups (struct bfd_link_info *info)
   unsigned int ca_sz = 0;
   unsigned int qr_sz = 0;
   unsigned int shrimg_cnt = 0;
+  unsigned int chgprt_num = 0;
+  unsigned int chgprt_sz = 0;
   struct vms_eiaf *eiaf;
   unsigned int off;
   asection *sec;
@@ -8368,9 +8370,20 @@ alpha_vms_build_fixups (struct bfd_link_info *info)
   if (ca_sz + lp_sz + qr_sz == 0)
     return TRUE;
 
+  /* Add an eicp entry for the fixup itself.  */
+  chgprt_num = 1;
+  for (sec = info->output_bfd->sections; sec != NULL; sec = sec->next)
+    {
+      /* This isect could be made RO or EXE after relocations are applied.  */
+      if ((sec->flags & SEC_RELOC) != 0
+          && (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+        chgprt_num++;
+    }
+  chgprt_sz = 4 + chgprt_num * sizeof (struct vms_eicp);
+
   /* Allocate section content (round-up size)  */
   sz = sizeof (struct vms_eiaf) + shrimg_cnt * sizeof (struct vms_shl)
-    + ca_sz + lp_sz + qr_sz;
+    + ca_sz + lp_sz + qr_sz + chgprt_sz;
   sz = (sz + VMS_BLOCK_SIZE - 1) & ~(VMS_BLOCK_SIZE - 1);
   content = bfd_zalloc (info->output_bfd, sz);
   if (content == NULL)
@@ -8535,6 +8548,33 @@ alpha_vms_build_fixups (struct bfd_link_info *info)
         }
     }
 
+  /* Write the change protection table.  */
+  bfd_putl32 (off, eiaf->chgprtoff);
+  bfd_putl32 (chgprt_num, content + off);
+  off += 4;
+
+  for (sec = info->output_bfd->sections; sec != NULL; sec = sec->next)
+    {
+      struct vms_eicp *eicp;
+      unsigned int prot;
+
+      if ((sec->flags & SEC_LINKER_CREATED) != 0 &&
+          strcmp (sec->name, "$FIXUP$") == 0)
+        prot = PRT__C_UREW;
+      else if ((sec->flags & SEC_RELOC) != 0
+               && (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+        prot = PRT__C_UR;
+      else
+        continue;
+
+      eicp = (struct vms_eicp *)(content + off);
+      bfd_putl64 (sec->vma - t->base_addr, eicp->baseva);
+      bfd_putl32 ((sec->size + VMS_BLOCK_SIZE - 1) & ~(VMS_BLOCK_SIZE - 1),
+                  eicp->size);
+      bfd_putl32 (prot, eicp->newprt);
+      off += sizeof (struct vms_eicp);
+    }
+
   return TRUE;
 }
 
@@ -8623,6 +8663,14 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   bfd_vma last_addr;
   asection *dst;
   asection *dmt;
+
+  if (info->relocatable)
+    {
+      /* FIXME: we do not yet support relocatable link.  It is not obvious
+         how to do it for debug infos.  */
+      (*info->callbacks->einfo)(_("%P: relocatable link is not supported\n"));
+      return FALSE;
+    }
 
   bfd_get_outsymbols (abfd) = NULL;
   bfd_get_symcount (abfd) = 0;
@@ -8726,7 +8774,8 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
       PRIV (transfer_address[i++]) = 0;
   }
 
-  /* Allocate contents.  */
+  /* Allocate contents.
+     Also compute the virtual base address.  */
   base_addr = (bfd_vma)-1;
   last_addr = 0;
   for (o = abfd->sections; o != NULL; o = o->next)
@@ -8744,6 +8793,9 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
           if (o->vma + o->size > last_addr)
             last_addr = o->vma + o->size;
         }
+      /* Clear the RELOC flags.  Currently we don't support incremental
+         linking.  We use the RELOC flag for computing the eicp entries.  */
+      o->flags &= ~SEC_RELOC;
     }
 
   /* Create the fixup section.  */

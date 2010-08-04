@@ -1,5 +1,9 @@
 2010-08-04  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (alpha_vms_build_fixups): Write the EICP.
+
+2010-08-04  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-alpha.c (alpha_vms_create_eisd_for_section): Make writable
 	sections with relocs.
 	(alpha_vms_add_fixup_lp): Set SEC_RELOC flag.
