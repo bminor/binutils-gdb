@@ -1,3 +1,8 @@
+2010-08-04  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_egsd): Use the canonical absolute
+	section for any absolute section.  Remove some debugging code.
+
 2010-08-03  DJ Delorie  <dj@redhat.com>
 
 	* elf32-m32c.c (ELF_MAXPAGESIZE): Change page size to 256 bytes.

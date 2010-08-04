@@ -1103,12 +1103,8 @@ static bfd_boolean
 _bfd_vms_slurp_egsd (bfd *abfd)
 {
   int gsd_type, gsd_size;
-  asection *section;
   unsigned char *vms_rec;
-  flagword new_flags, old_flags;
-  char *name;
   unsigned long base_addr;
-  unsigned long align_addr;
 
   vms_debug2 ((2, "EGSD\n"));
 
@@ -1130,32 +1126,48 @@ _bfd_vms_slurp_egsd (bfd *abfd)
       switch (gsd_type)
 	{
 	case EGSD__C_PSC:
+          /* Program section definition.  */
 	  {
-	    /* Program section definition.  */
             struct vms_egps *egps = (struct vms_egps *)vms_rec;
-
-	    name = _bfd_vms_save_counted_string (&egps->namlng);
-	    section = bfd_make_section (abfd, name);
-	    if (!section)
-	      return FALSE;
+            flagword new_flags, old_flags;
+            asection *section;
 
 	    old_flags = bfd_getl16 (egps->flags);
-            vms_section_data (section)->flags = old_flags;
-            vms_section_data (section)->no_flags = 0;
-	    section->size = bfd_getl32 (egps->alloc);
-	    new_flags = vms_secflag_by_name (evax_section_flags, name,
-					     section->size > 0);
-            if (!(old_flags & EGPS__V_NOMOD) && section->size > 0)
+
+            if ((old_flags & EGPS__V_REL) == 0)
               {
-                new_flags |= SEC_HAS_CONTENTS;
-                if (old_flags & EGPS__V_REL)
-                  new_flags |= SEC_RELOC;
+                /* Use the global absolute section for all absolute sections.  */
+                section = bfd_abs_section_ptr;
               }
-	    if (!bfd_set_section_flags (abfd, section, new_flags))
-	      return FALSE;
-	    section->alignment_power = egps->align;
-            if ((old_flags & EGPS__V_REL) != 0)
+            else
               {
+                char *name;
+                unsigned long align_addr;
+
+                name = _bfd_vms_save_counted_string (&egps->namlng);
+
+                section = bfd_make_section (abfd, name);
+                if (!section)
+                  return FALSE;
+
+                section->filepos = 0;
+                section->size = bfd_getl32 (egps->alloc);
+                section->alignment_power = egps->align;
+
+                vms_section_data (section)->flags = old_flags;
+                vms_section_data (section)->no_flags = 0;
+
+                new_flags = vms_secflag_by_name (evax_section_flags, name,
+                                                 section->size > 0);
+                if (!(old_flags & EGPS__V_NOMOD) && section->size > 0)
+                  {
+                    new_flags |= SEC_HAS_CONTENTS;
+                    if (old_flags & EGPS__V_REL)
+                      new_flags |= SEC_RELOC;
+                  }
+                if (!bfd_set_section_flags (abfd, section, new_flags))
+                  return FALSE;
+
                 /* Give a non-overlapping vma to non absolute sections.  */
                 align_addr = (1 << section->alignment_power);
                 if ((base_addr % align_addr) != 0)
@@ -1163,9 +1175,6 @@ _bfd_vms_slurp_egsd (bfd *abfd)
                 section->vma = (bfd_vma)base_addr;
                 base_addr += section->size;
               }
-            else
-              section->vma = 0;
-	    section->filepos = 0;
 
             /* Append it to the section array.  */
             if (PRIV (section_count) >= PRIV (section_max))
@@ -1182,14 +1191,6 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 
             PRIV (sections)[PRIV (section_count)] = section;
             PRIV (section_count)++;
-
-#if VMS_DEBUG
-	    vms_debug (4, "EGSD P-section %d (%s, flags %04x) ",
-		       section->index, name, old_flags);
-	    vms_debug (4, "%lu bytes at 0x%08lx (mem %p)\n",
-		       (unsigned long)section->size,
-                       (unsigned long)section->vma, section->contents);
-#endif
 	  }
 	  break;
 
@@ -1198,6 +1199,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
             int nameoff;
             struct vms_symbol_entry *entry;
             struct vms_egsy *egsy = (struct vms_egsy *) vms_rec;
+            flagword old_flags;
 
 	    old_flags = bfd_getl16 (egsy->flags);
 	    if (old_flags & EGSY__V_DEF)
@@ -1243,6 +1245,7 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	  {
             struct vms_symbol_entry *entry;
             struct vms_egst *egst = (struct vms_egst *)vms_rec;
+            flagword old_flags;
 
 	    old_flags = bfd_getl16 (egst->header.flags);
 
