@@ -1,3 +1,13 @@
+2010-08-04  Ian Lance Taylor  <iant@google.com>
+
+	* x86_64.cc (Target_x86_64::Scan::local): Use
+	R_X86_64_GNU_VTINHERIT instead of R_386_GNU_VTINHERIT and
+	R_X86_64_GNU_VTENTRY instead of R_386_GNU_VTENTRY.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::Relocate::relocate): Likewise.
+	(Target_x86_64::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
 2010-08-03  Cary Coutant  <ccoutant@google.com>
 
 	* merge.cc (Output_merge_string::do_add_input_section): Count strings

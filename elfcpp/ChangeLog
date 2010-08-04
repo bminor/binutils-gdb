@@ -1,3 +1,14 @@
+2010-08-04  Ian Lance Taylor  <iant@google.com>
+
+	* i386.h (R_386_IRELATIVE): Define.
+	* powerpc.h (R_POWERPC_IRELATIVE): Define.
+	(R_PPC_RELAX32, R_PPC_RELAX32PC): Don't define.
+	(R_PPC_RELAX32_PLT, R_PPC_RELAX32PC_PLT): Don't define.
+	* sparc.h (R_SPARC_IRELATIVE): Define.
+	* x86_64.h (R_X86_64_IRELATIVE): Define.
+	(R_X86_64_GNU_VTINHERIT): Rename from R_386_GNU_VTINHERIT.
+	(R_X86_64_GNU_VTENTRY): Rename from R_386_GNU_VTENTRY.
+
 2010-05-12  Doug Kwan  <dougkwan@google.com>
 
 	* arm.h (Tag_FP_arch, Tag_ABI_align_needed, Tag_ABI_align_preserved,
@@ -7,7 +18,7 @@
 	Tag_undefined43): New tags.
 	(Targ_VFP_arch, Tag_ABI_align8_needed, TAG_ABI_align8_preserved,
 	Tag_VFP_HP_extension): Define aliases for backward compatiblity.
- 
+
 2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* elfcpp.h (VER_FLG_INFO): Define.

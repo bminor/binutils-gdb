@@ -1150,8 +1150,8 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
   switch (r_type)
     {
     case elfcpp::R_X86_64_NONE:
-    case elfcpp::R_386_GNU_VTINHERIT:
-    case elfcpp::R_386_GNU_VTENTRY:
+    case elfcpp::R_X86_64_GNU_VTINHERIT:
+    case elfcpp::R_X86_64_GNU_VTENTRY:
       break;
 
     case elfcpp::R_X86_64_64:
@@ -1508,8 +1508,8 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
   switch (r_type)
     {
     case elfcpp::R_X86_64_NONE:
-    case elfcpp::R_386_GNU_VTINHERIT:
-    case elfcpp::R_386_GNU_VTENTRY:
+    case elfcpp::R_X86_64_GNU_VTINHERIT:
+    case elfcpp::R_X86_64_GNU_VTENTRY:
       break;
 
     case elfcpp::R_X86_64_64:
@@ -1992,8 +1992,8 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
   switch (r_type)
     {
     case elfcpp::R_X86_64_NONE:
-    case elfcpp::R_386_GNU_VTINHERIT:
-    case elfcpp::R_386_GNU_VTENTRY:
+    case elfcpp::R_X86_64_GNU_VTINHERIT:
+    case elfcpp::R_X86_64_GNU_VTENTRY:
       break;
 
     case elfcpp::R_X86_64_64:
@@ -2680,8 +2680,8 @@ Target_x86_64::Relocatable_size_for_reloc::get_size_for_reloc(
   switch (r_type)
     {
     case elfcpp::R_X86_64_NONE:
-    case elfcpp::R_386_GNU_VTINHERIT:
-    case elfcpp::R_386_GNU_VTENTRY:
+    case elfcpp::R_X86_64_GNU_VTINHERIT:
+    case elfcpp::R_X86_64_GNU_VTENTRY:
     case elfcpp::R_X86_64_TLSGD:            // Global-dynamic
     case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // Global-dynamic (from ~oliva url)
     case elfcpp::R_X86_64_TLSDESC_CALL:
