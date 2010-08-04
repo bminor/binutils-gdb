@@ -1,6 +1,8 @@
 2010-08-04  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (alpha_vms_build_fixups): Write the EICP.
+	(alpha_vms_bfd_final_link): Explicitly forbid relocatable links.
+	Clear the SEC_RELOC flag.
 
 2010-08-04  Tristan Gingold  <gingold@adacore.com>
 
