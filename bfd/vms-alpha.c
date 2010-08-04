@@ -2904,6 +2904,10 @@ alpha_vms_create_eisd_for_section (bfd *abfd, asection *sec)
   else if (!(sec->flags & SEC_READONLY))
     eisd->u.eisd.flags |= EISD__M_WRT | EISD__M_CRF;
 
+  /* If relocations or fixup will be applied, make this isect writeable.  */
+  if (sec->flags & SEC_RELOC)
+    eisd->u.eisd.flags |= EISD__M_WRT | EISD__M_CRF;
+
   if (!(sec->flags & SEC_LOAD))
     {
       eisd->u.eisd.flags |= EISD__M_DZRO;
@@ -8017,7 +8021,10 @@ alpha_vms_add_fixup_lp (struct bfd_link_info *info, bfd *src, bfd *shlib)
   sl->has_fixups = TRUE;
   VEC_APPEND_EL (sl->lp, bfd_vma,
                  sect->output_section->vma + sect->output_offset + offset);
+  sect->output_section->flags |= SEC_RELOC;
 }
+
+/* Add a code address fixup at address SECT + OFFSET to SHLIB. */
 
 static void
 alpha_vms_add_fixup_ca (struct bfd_link_info *info, bfd *src, bfd *shlib)
@@ -8031,7 +8038,10 @@ alpha_vms_add_fixup_ca (struct bfd_link_info *info, bfd *src, bfd *shlib)
   sl->has_fixups = TRUE;
   VEC_APPEND_EL (sl->ca, bfd_vma,
                  sect->output_section->vma + sect->output_offset + offset);
+  sect->output_section->flags |= SEC_RELOC;
 }
+
+/* Add a quad word relocation fixup at address SECT + OFFSET to SHLIB. */
 
 static void
 alpha_vms_add_fixup_qr (struct bfd_link_info *info, bfd *src,
@@ -8048,6 +8058,7 @@ alpha_vms_add_fixup_qr (struct bfd_link_info *info, bfd *src,
   r = VEC_APPEND (sl->qr, struct alpha_vms_vma_ref);
   r->vma = sect->output_section->vma + sect->output_offset + offset;
   r->ref = vec;
+  sect->output_section->flags |= SEC_RELOC;
 }
 
 static void
@@ -8055,6 +8066,7 @@ alpha_vms_add_fixup_lr (struct bfd_link_info *info ATTRIBUTE_UNUSED,
                         unsigned int shr ATTRIBUTE_UNUSED,
                         bfd_vma vec ATTRIBUTE_UNUSED)
 {
+  /* Not yet supported.  */
   abort ();
 }
 
