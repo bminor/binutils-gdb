@@ -313,7 +313,7 @@ enum Output_section_order
   ORDER_DYNAMIC_RELOCS,
 
   // Put the PLT reloc section after the other dynamic relocs;
-  // otherwise, prelink gets foncused.
+  // otherwise, prelink gets confused.
   ORDER_DYNAMIC_PLT_RELOCS,
 
   // The .init section.
