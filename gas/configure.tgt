@@ -45,7 +45,7 @@ case ${cpu} in
   ip2k)			cpu_type=ip2k endian=big ;; 
   iq2000)		cpu_type=iq2000 endian=big ;; 
   lm32)			cpu_type=lm32 ;;
-  m32c)			cpu_type=m32c endian=big ;;
+  m32c)			cpu_type=m32c endian=little ;;
   m32r)			cpu_type=m32r endian=big ;;
   m32rle)		cpu_type=m32r endian=little ;;
   m5200)		cpu_type=m68k ;;

@@ -1,3 +1,9 @@
+2010-08-04  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt (m32c): Set endian=little.
+	* config/tc-m32c.h (TARGET_BYTES_BIG_ENDIAN): Define as 0.
+	* config/tc-m32c.c (md_number_to_chars): Revert last change.
+
 2010-08-03  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms (OBJS): Add Add compress-debug.c.
