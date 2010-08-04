@@ -853,21 +853,29 @@ static char *
 core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
+  int pid;
 
+  /* The preferred way is to have a gdbarch/OS specific
+     implementation.  */
   if (core_gdbarch
       && gdbarch_core_pid_to_str_p (core_gdbarch))
-    {
-      char *ret = gdbarch_core_pid_to_str (core_gdbarch, ptid);
+    return gdbarch_core_pid_to_str (core_gdbarch, ptid);
 
-      if (ret != NULL)
-	return ret;
-    }
+  /* Otherwise, if we don't have one, we'll just fallback to
+     "process", with normal_pid_to_str.  */
 
-  if (ptid_get_lwp (ptid) == 0)
-    xsnprintf (buf, sizeof buf, "<main task>");
-  else
-    xsnprintf (buf, sizeof buf, "Thread %ld", ptid_get_lwp (ptid));
+  /* Try the LWPID field first.  */
+  pid = ptid_get_lwp (ptid);
+  if (pid != 0)
+    return normal_pid_to_str (pid_to_ptid (pid));
 
+  /* Otherwise, this isn't a "threaded" core -- use the PID field, but
+     only if it isn't a fake PID.  */
+  if (!core_has_fake_pid)
+    return normal_pid_to_str (ptid);
+
+  /* No luck.  We simply don't have a valid PID to print.  */
+  xsnprintf (buf, sizeof buf, "<main task>");
   return buf;
 }
 

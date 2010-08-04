@@ -32,6 +32,7 @@
 #include "frame.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "linux-tdep.h"
 
 #include <stdlib.h>
 
@@ -709,8 +710,10 @@ am33_linux_sigframe_cache_init (const struct tramp_frame *self,
    Now's our chance to register our corefile handling.  */
 
 static void
-am33_linux_init_osabi (struct gdbarch_info gdbinfo, struct gdbarch *gdbarch)
+am33_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  linux_init_abi (info, gdbarch);
+
   set_gdbarch_regset_from_core_section (gdbarch, 
 					am33_regset_from_core_section);
   set_solib_svr4_fetch_link_map_offsets

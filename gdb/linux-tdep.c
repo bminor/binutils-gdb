@@ -23,6 +23,7 @@
 #include "auxv.h"
 #include "target.h"
 #include "elf/common.h"
+#include "inferior.h"
 
 /* This function is suitable for architectures that don't
    extend/override the standard siginfo structure.  */
@@ -151,4 +152,29 @@ linux_has_shared_address_space (void)
        && target_auxv_search (&current_target, AT_PAGESZ, &dummy) == 0);
 
   return target_is_uclinux;
+}
+
+/* This is how we want PTIDs from core files to be printed.  */
+
+static char *
+linux_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
+{
+  static char buf[80];
+
+  if (ptid_get_lwp (ptid) != 0)
+    {
+      snprintf (buf, sizeof (buf), "LWP %ld", ptid_get_lwp (ptid));
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
+
+/* To be called from the various GDB_OSABI_LINUX handlers for the
+   various GNU/Linux architectures and machine types.  */
+
+void
+linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
 }

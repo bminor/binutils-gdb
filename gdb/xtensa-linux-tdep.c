@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "osabi.h"
-
+#include "linux-tdep.h"
 #include "solib-svr4.h"
 #include "symtab.h"
 
@@ -28,6 +28,8 @@
 static void
 xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  linux_init_abi (info, gdbarch);
+
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }

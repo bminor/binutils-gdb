@@ -32,6 +32,7 @@
 #include "frame-unwind.h"
 #include "regset.h"
 #include "gdb_string.h"
+#include "linux-tdep.h"
 
 /* Define the size (in bytes) of an FR-V instruction.  */
 static const int frv_instr_size = 4;
@@ -490,8 +491,11 @@ frv_linux_regset_from_core_section (struct gdbarch *gdbarch,
 static void
 frv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  linux_init_abi (info, gdbarch);
+
   /* Set the sigtramp frame sniffer.  */
   frame_unwind_append_unwinder (gdbarch, &frv_linux_sigtramp_frame_unwind); 
+
   set_gdbarch_regset_from_core_section (gdbarch,
                                         frv_linux_regset_from_core_section);
 }

@@ -28,6 +28,7 @@
 #include "gdbcore.h"
 #include "solib.h"
 #include "solib-target.h"
+#include "inferior.h"
 
 /* Core file support.  */
 
@@ -199,6 +200,22 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
   return len;
 }
 
+/* This is how we want PTIDs from core files to be printed.  */
+
+static char *
+i386_windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
+{
+  static char buf[80];
+
+  if (ptid_get_lwp (ptid) != 0)
+    {
+      snprintf (buf, sizeof (buf), "Thread 0x%lx", ptid_get_lwp (ptid));
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
+
 static CORE_ADDR
 i386_cygwin_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
@@ -233,6 +250,7 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, i386_windows_regset_from_core_section);
   set_gdbarch_core_xfer_shared_libraries
     (gdbarch, windows_core_xfer_shared_libraries);
+  set_gdbarch_core_pid_to_str (gdbarch, i386_windows_core_pid_to_str);
 
   set_gdbarch_auto_wide_charset (gdbarch, i386_cygwin_auto_wide_charset);
 

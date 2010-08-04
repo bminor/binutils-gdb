@@ -37,6 +37,8 @@
 #include "frame-unwind.h"
 
 #include "m32r-tdep.h"
+#include "linux-tdep.h"
+
 
 
 /* Recognizing signal handler frames.  */
@@ -403,6 +405,8 @@ static void
 m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  linux_init_abi (info, gdbarch);
 
   /* Since EVB register is not available for native debug, we reduce
      the number of registers.  */

@@ -22,4 +22,6 @@
 
 struct type *linux_get_siginfo_type (struct gdbarch *);
 
+extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
+
 #endif /* linux-tdep.h */

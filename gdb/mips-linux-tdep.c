@@ -38,6 +38,7 @@
 #include "target-descriptions.h"
 #include "mips-linux-tdep.h"
 #include "glibc-tdep.h"
+#include "linux-tdep.h"
 
 static struct target_so_ops mips_svr4_so_ops;
 
@@ -1139,6 +1140,8 @@ mips_linux_init_abi (struct gdbarch_info info,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum mips_abi abi = mips_abi (gdbarch);
   struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
+
+  linux_init_abi (info, gdbarch);
 
   switch (abi)
     {

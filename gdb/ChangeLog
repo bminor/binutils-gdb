@@ -1,3 +1,47 @@
+2010-08-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* corelow.c (core_pid_to_str): Default to using normal_pid_to_str
+	instead of printing "Thread" here.
+	* linux-tdep.c: Include inferior.h.
+	(linux_core_pid_to_str): New.
+	(linux_init_abi): New.
+	* linux-tdep.h (linux_init_abi): Declare.
+	* alpha-linux-tdep.c: Include linux-tdep.h.
+	(alpha_linux_init_abi): Call linux_init_abi.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Call linux_init_abi.
+	* arm-linux-tdep.c (arm_linux_init_abi): Call linux_init_abi.
+	* frv-linux-tdep.c: Include linux-tdep.h
+	(frv_linux_init_abi): Call linux_init_abi.
+	* hppa-linux-tdep.c: Include linux-tdep.h
+	(hppa_linux_init_abi): Call linux_init_abi.
+	* i386-linux-tdep.c (i386_linux_init_abi): Call linux_init_abi.
+	* ia64-linux-tdep.c: Include linux-tdep.h.
+	(ia64_linux_init_abi): Call linux_init_abi.
+	* m32r-linux-tdep.c: Include linux-tdep.h.
+	(m32r_linux_init_abi): Call linux_init_abi.
+	* m68klinux-tdep.c: Include linux-tdep.h.
+	(m68k_linux_init_abi): Call linux_init_abi.
+	* microblaze-linux-tdep.c: Include linux-tdep.h.
+	(microblaze_linux_init_abi): Call linux_init_abi.
+	* mips-linux-tdep.c: Include linux-tdep.h.
+	(mips_linux_init_abi): Call linux_init_abi.
+	* mn10300-linux-tdep.c: Include linux-tdep.h.
+	(am33_linux_init_osabi): Call linux_init_abi.  Rename the
+	'gdbinfo' parameter to 'info'.
+	* ppc-linux-tdep.c: Include linux-tdep.h.
+	(ppc_linux_init_abi): Call linux_init_abi.
+	* sh-linux-tdep.c: Include linux-tdep.h.
+	(sh_linux_init_abi): Call linux_init_abi.
+	* sparc-linux-tdep.c: Include linux-tdep.h.
+	(sparc32_linux_init_abi): Call linux_init_abi.
+	* sparc64-linux-tdep.c: Include linux-tdep.h.
+	(sparc64_linux_init_abi): Call linux_init_abi.
+	* xtensa-linux-tdep.c: Include linux-tdep.h.
+	(xtensa_linux_init_abi): Call linux_init_abi.
+	* i386-cygwin-tdep.c (i386_windows_core_pid_to_str): New.
+	(i386_cygwin_init_abi): Install it as gdbarch_core_pid_to_str
+	callback.
+
 2010-08-03  Doug Evans  <dje@google.com>
 
 	* breakpoint.c (bpdisp_text): Constify bpdisps.

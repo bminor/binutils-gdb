@@ -654,6 +654,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   gdb_assert (tdesc_data);
 
+  linux_init_abi (info, gdbarch);
+
   /* GNU/Linux uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
 

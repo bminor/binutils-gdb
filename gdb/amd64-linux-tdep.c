@@ -1291,6 +1291,8 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   gdb_assert (tdesc_data);
 
+  linux_init_abi (info, gdbarch);
+
   tdep->gregset_reg_offset = amd64_linux_gregset_reg_offset;
   tdep->gregset_num_regs = ARRAY_SIZE (amd64_linux_gregset_reg_offset);
   tdep->sizeof_gregset = 27 * 8;

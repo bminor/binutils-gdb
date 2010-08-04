@@ -33,6 +33,7 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 #include "xml-syscall.h"
+#include "linux-tdep.h"
 
 /* The syscall's XML filename for sparc 32-bit.  */
 #define XML_SYSCALL_FILENAME_SPARC32 "syscalls/sparc-linux.xml"
@@ -272,6 +273,8 @@ static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  linux_init_abi (info, gdbarch);
 
   tdep->gregset = regset_alloc (gdbarch, sparc32_linux_supply_core_gregset,
 				sparc32_linux_collect_core_gregset);

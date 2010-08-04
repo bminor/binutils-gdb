@@ -32,7 +32,7 @@
 #include "regset.h"
 #include "regcache.h"
 #include "hppa-tdep.h"
-
+#include "linux-tdep.h"
 #include "elf/common.h"
 
 /* Map DWARF DBX register numbers to GDB register numbers.  */
@@ -522,6 +522,8 @@ static void
 hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  linux_init_abi (info, gdbarch);
 
   /* GNU/Linux is always ELF.  */
   tdep->is_elf = 1;

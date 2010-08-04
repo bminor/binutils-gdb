@@ -38,6 +38,7 @@
 #include "auxv.h"
 #include "observer.h"
 #include "elf/common.h"
+#include "linux-tdep.h"
 
 /* Offsets (in target ints) into jmp_buf.  */
 
@@ -337,6 +338,8 @@ static void
 m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  linux_init_abi (info, gdbarch);
 
   tdep->jb_pc = M68K_LINUX_JB_PC;
   tdep->jb_elt_size = M68K_LINUX_JB_ELEMENT_SIZE;

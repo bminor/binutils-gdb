@@ -48,6 +48,7 @@
 #include "arch-utils.h"
 #include "spu-tdep.h"
 #include "xml-syscall.h"
+#include "linux-tdep.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
@@ -1485,6 +1486,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
+
+  linux_init_abi (info, gdbarch);
 
   /* PPC GNU/Linux uses either 64-bit or 128-bit long doubles; where
      128-bit, they are IBM long double, not IEEE quad long double as
