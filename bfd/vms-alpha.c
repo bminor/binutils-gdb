@@ -376,10 +376,10 @@ static void alpha_vms_add_fixup_lp (struct bfd_link_info *, bfd *, bfd *);
 static void alpha_vms_add_fixup_ca (struct bfd_link_info *, bfd *, bfd *);
 static void alpha_vms_add_fixup_qr (struct bfd_link_info *, bfd *, bfd *,
                                     bfd_vma);
+static void alpha_vms_add_fixup_lr (struct bfd_link_info *, unsigned int,
+                                    bfd_vma);
 static void alpha_vms_add_lw_reloc (struct bfd_link_info *info);
 static void alpha_vms_add_qw_reloc (struct bfd_link_info *info);
-static void alpha_vms_add_lw_fixup (struct bfd_link_info *, unsigned int,
-                                    bfd_vma);
 
 struct vector_type
 {
@@ -1799,7 +1799,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
             }
           else if (rel1 & RELC_SHR_BASE)
             {
-              alpha_vms_add_lw_fixup (info, rel1 & RELC_MASK, op1);
+              alpha_vms_add_fixup_lr (info, rel1 & RELC_MASK, op1);
               rel1 = RELC_NONE;
             }
           if (rel1 != RELC_NONE)
@@ -8051,22 +8051,14 @@ alpha_vms_add_fixup_qr (struct bfd_link_info *info, bfd *src,
 }
 
 static void
-alpha_vms_add_lw_fixup (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+alpha_vms_add_fixup_lr (struct bfd_link_info *info ATTRIBUTE_UNUSED,
                         unsigned int shr ATTRIBUTE_UNUSED,
                         bfd_vma vec ATTRIBUTE_UNUSED)
 {
   abort ();
 }
 
-#if 0
-static void
-alpha_vms_add_qw_fixup (struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                        unsigned int shr ATTRIBUTE_UNUSED,
-                        bfd_vma vec ATTRIBUTE_UNUSED)
-{
-  abort ();
-}
-#endif
+/* Add relocation.  FIXME: Not yet emitted.  */
 
 static void
 alpha_vms_add_lw_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED)
@@ -8529,8 +8521,6 @@ alpha_vms_build_fixups (struct bfd_link_info *info)
           bfd_putl32 (0, content + off + 4);
           off += 8;
         }
-
-      /* CA fixups.  */
     }
 
   return TRUE;
@@ -9115,7 +9105,7 @@ vms_get_symbol_info (bfd * abfd ATTRIBUTE_UNUSED,
   else if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
     ret->type = 'B';
   else
-    ret->type = '-';
+    ret->type = '?';
 
   if (ret->type != 'U')
     ret->value = symbol->value + symbol->section->vma;
