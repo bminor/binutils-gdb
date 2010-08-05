@@ -1,3 +1,11 @@
+2010-08-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* configure.tgt (alpha*-*-linux*, am33_2.0*-*-linux*, frv-*-*)
+	(hppa*-*-linux*, ia64-*-linux*, m32r*-*-linux*, m68*-*-linux*)
+	(microblaze*-linux-*, mips*-*-linux*, sh*-*-linux*)
+	(sparc-*-linux*, sparc64-*-linux*, xtensa*-*-linux*): Add
+	linux-tdep.o to gdb_target_obs.
+
 2010-08-05  Marc Khouzam  <marc.khouzam@ericsson.com>
  
 	* mi/mi-main.c (mi_cmd_remove_inferior): Properly access first 
