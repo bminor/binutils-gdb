@@ -178,6 +178,8 @@ set ppc64elftests {
       "tlsmark"}
     {"sym@tocbase" "-shared -melf64ppc" "-a64" {symtocbase-1.s symtocbase-2.s}
 	{{objdump -dj.data symtocbase.d}} "symtocbase.so"}
+    {"TOC opt" "-melf64ppc" "-a64"  {tocopt.s}
+     {{objdump -s tocopt.d}} "tocopt"}
 }
 
 

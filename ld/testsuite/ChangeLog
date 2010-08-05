@@ -1,3 +1,8 @@
+2010-08-06  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tocopt.s, * ld-powerpc/tocopt.d: New test.
+	* ld-powerpc/powerpc.exp: Run it.
+
 2010-07-23  Naveen.H.S  <naveen.S@kpitcummins.com>
 	    Ina Pandit  <ina.pandit@kpitcummins.com>
 
