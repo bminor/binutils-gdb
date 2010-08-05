@@ -11397,12 +11397,14 @@ ppc64_elf_action_discarded (asection *sec)
 
 /* REL points to a low-part reloc on a largetoc instruction sequence.
    Find the matching high-part reloc instruction and verify that it
-   is addis REG,r2,x.  If so, return a pointer to the high-part reloc.  */
+   is addis REG,x,imm.  If so, set *REG to x and return a pointer to
+   the high-part reloc.  */
 
 static const Elf_Internal_Rela *
 ha_reloc_match (const Elf_Internal_Rela *relocs,
 		const Elf_Internal_Rela *rel,
-		unsigned int reg,
+		unsigned int *reg,
+		bfd_boolean match_addend,
 		const bfd *input_bfd,
 		const bfd_byte *contents)
 {
@@ -11434,14 +11436,17 @@ ha_reloc_match (const Elf_Internal_Rela *relocs,
 
   while (--rel >= relocs)
     if (rel->r_info == r_info_ha
-	&& rel->r_addend == r_addend)
+	&& (!match_addend
+	    || rel->r_addend == r_addend))
       {
 	const bfd_byte *p = contents + (rel->r_offset & ~3);
 	unsigned int insn = bfd_get_32 (input_bfd, p);
-	if ((insn & ((0x3f << 26) | (0x1f << 16)))
-	    == ((15u << 26) | (2 << 16)) /* addis rt,r2,x */
-	    && (insn & (0x1f << 21)) == (reg << 21))
-	  return rel;
+	if ((insn & (0x3f << 26)) == (15u << 26) /* addis rt,x,imm */
+	    && (insn & (0x1f << 21)) == (*reg << 21))
+	  {
+	    *reg = (insn >> 16) & 0x1f;
+	    return rel;
+	  }
 	break;
       }
   return NULL;
@@ -11494,7 +11499,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela outrel;
   bfd_byte *loc;
   struct got_entry **local_got_ents;
+  unsigned char *ha_opt;
   bfd_vma TOCstart;
+  bfd_boolean no_ha_opt;
   bfd_boolean ret = TRUE;
   bfd_boolean is_opd;
   /* Disabled until we sort out how ld should choose 'y' vs 'at'.  */
@@ -11520,6 +11527,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   is_opd = ppc64_elf_section_data (input_section)->sec_type == sec_opd;
+  ha_opt = NULL;
+  no_ha_opt = FALSE;
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -12945,7 +12954,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT_DTPREL16_HA:
 	case R_PPC64_GOT16_HA:
 	case R_PPC64_TOC16_HA:
-	  /* For now we don't nop out the first instruction.  */
+	  /* nop is done later.  */
 	  break;
 
 	case R_PPC64_GOT_TLSLD16_LO:
@@ -12980,12 +12989,31 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      && ((insn & 3) == 0 || (insn & 3) == 3)))
 		{
 		  unsigned int reg = (insn >> 16) & 0x1f;
-		  if (ha_reloc_match (relocs, rel, reg, input_bfd, contents))
+		  const Elf_Internal_Rela *ha;
+		  bfd_boolean match_addend;
+
+		  match_addend = (sym != NULL
+				  && ELF_ST_TYPE (sym->st_info) == STT_SECTION);
+		  ha = ha_reloc_match (relocs, rel, &reg, match_addend,
+				       input_bfd, contents);
+		  if (ha != NULL)
 		    {
 		      insn &= ~(0x1f << 16);
-		      insn |= 2 << 16;
+		      insn |= reg << 16;
 		      bfd_put_32 (input_bfd, insn, p);
+		      if (ha_opt == NULL)
+			{
+			  ha_opt = bfd_zmalloc (input_section->reloc_count);
+			  if (ha_opt == NULL)
+			    return FALSE;
+			}
+		      ha_opt[ha - relocs] = 1;
 		    }
+		  else
+		    /* If we don't find a matching high part insn,
+		       something is fishy.  Refuse to nop any high
+		       part insn in this section.  */
+		    no_ha_opt = TRUE;
 		}
 	    }
 	  break;
@@ -13141,6 +13169,23 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      ret = FALSE;
 	    }
 	}
+    }
+
+  if (ha_opt != NULL)
+    {
+      if (!no_ha_opt)
+	{
+	  unsigned char *opt = ha_opt;
+	  rel = relocs;
+	  relend = relocs + input_section->reloc_count;
+	  for (; rel < relend; opt++, rel++)
+	    if (*opt != 0)
+	      {
+		bfd_byte *p = contents + (rel->r_offset & ~3);
+		bfd_put_32 (input_bfd, NOP, p);
+	      }
+	}
+      free (ha_opt);
     }
 
   /* If we're emitting relocations, then shortly after this function

@@ -1,3 +1,9 @@
+2010-08-06  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ha_reloc_match): Allow matches to other than r2.
+	(ppc64_elf_relocate_section): Nop out high part insn of large toc
+	code sequence when the high part of offset is zero.
+
 2010-08-04  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (alpha_vms_build_fixups): Write the EICP.
