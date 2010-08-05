@@ -97,6 +97,14 @@ struct gdbarch_tdep
   int register_size_valid_p;
   int register_size;
 
+  /* General-purpose registers.  */
+  struct regset *gregset;
+  struct regset *gregset64;
+
+  /* Floating-point registers.  */
+  struct regset *fpregset;
+  struct regset *fpregset64;
+
   /* Return the expected next PC if FRAME is stopped at a syscall
      instruction.  */
   CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);

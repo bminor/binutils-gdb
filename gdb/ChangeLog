@@ -1,3 +1,19 @@
+2010-08-05  Hui Zhu  <teawater@gmail.com>
+
+	* mips-linux-tdep.c(regset.h): New include.
+	(mips_supply_gregset_wrapper, mips_fill_gregset_wrapper,
+	mips_supply_fpregset_wrapper, mips_fill_fpregset_wrapper,
+	mips64_supply_gregset_wrapper, mips64_fill_gregset_wrapper,
+	mips64_supply_fpregset_wrapper, mips64_fill_fpregset_wrapper,
+	mips_linux_regset_from_core_section): New functions.
+	(fetch_core_registers, regset_core_fns): Deleted.
+	(mips_linux_init_abi): Add mips_linux_regset_from_core_section.
+	Deleted regset_core_fns.
+	* mips-tdep.c(mips_gdbarch_init): Initialize tdep->gregset,
+	tdep->gregset64, tdep->fpregset and tdep->fpregset64.
+	* mips-tdep.h(gdbarch_tdep): Add gregset, gregset64, fpregset
+	and fpregset64.
+
 2010-08-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* s390-tdep.c: Include linux-tdep.h.
