@@ -1609,7 +1609,7 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
   if (argc != 1)
     error ("-remove-inferior should be passed a single argument");
 
-  if (sscanf (argv[1], "i%d", &id) != 1)
+  if (sscanf (argv[0], "i%d", &id) != 1)
     error ("the thread group id is syntactically invalid");
 
   inf = find_inferior_id (id);

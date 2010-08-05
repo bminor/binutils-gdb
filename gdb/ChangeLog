@@ -1,3 +1,8 @@
+2010-08-05  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* mi/mi-main.c (mi_cmd_remove_inferior): Properly access first 
+	argument.
+
 2010-07-31  Renquan Cheng  <crq@gcc.gnu.org>
 
 	* MAINTAINERS: Add myself for write after approval privileges.
