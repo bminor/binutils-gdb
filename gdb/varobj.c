@@ -528,9 +528,6 @@ varobj_create (char *objname,
 	       char *expression, CORE_ADDR frame, enum varobj_type type)
 {
   struct varobj *var;
-  struct frame_info *fi;
-  struct frame_info *old_fi = NULL;
-  struct block *block;
   struct cleanup *old_chain;
 
   /* Fill out a varobj structure for the (root) variable being constructed. */
@@ -539,6 +536,9 @@ varobj_create (char *objname,
 
   if (expression != NULL)
     {
+      struct frame_info *fi;
+      struct frame_info *old_fi = NULL;
+      struct block *block;
       char *p;
       enum varobj_languages lang;
       struct value *value = NULL;
