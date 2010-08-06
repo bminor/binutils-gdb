@@ -1,3 +1,9 @@
+2010-08-06  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11887
+	* ldlang.c (lang_add_vers_depend): Don't leave version_needed
+	uninitialised.
+
 2010-07-28  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (exp_print_tree): Print function-like binary nodes as

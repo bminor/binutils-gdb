@@ -1216,7 +1216,7 @@ lang_finish (void)
   already been created.  If we are not inside a MEMORY block it is
   dubious to use an undeclared region name (except DEFAULT_MEMORY_REGION)
   and so we issue a warning.
-  
+
   Each region has at least one name.  The first name is either
   DEFAULT_MEMORY_REGION or the name given in the MEMORY block.  You can add
   alias names to an existing region within a script with
@@ -4018,7 +4018,7 @@ print_all_symbols (asection *sec)
     return;
 
   *ud->map_symbol_def_tail = 0;
-  
+
   /* Sort the symbols by address.  */
   entries = (struct bfd_link_hash_entry **)
       obstack_alloc (&map_obstack, ud->map_symbol_def_count * sizeof (*entries));
@@ -6662,7 +6662,7 @@ lang_leave_output_section_statement (fill_type *fill, const char *memspec,
   if (!current_section->lma_region && !current_section->load_base
       && current_section->region == current_section->prev->region)
     current_section->lma_region = current_section->prev->lma_region;
-  
+
   current_section->fill = fill;
   current_section->phdrs = phdrs;
   pop_stat_ptr ();
@@ -6818,7 +6818,7 @@ lang_new_phdr (const char *name,
   n->phdrs = phdrs;
   n->at = at;
   n->flags = flags;
-  
+
   hdrs = n->type == 1 && (phdrs || filehdr);
 
   for (pp = &lang_phdr_list; *pp != NULL; pp = &(*pp)->next)
@@ -7611,6 +7611,7 @@ lang_add_vers_depend (struct bfd_elf_version_deps *list, const char *name)
 
   einfo (_("%X%P: unable to find version dependency `%s'\n"), name);
 
+  ret->version_needed = NULL;
   return ret;
 }
 
