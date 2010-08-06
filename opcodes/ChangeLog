@@ -1,5 +1,10 @@
 2010-08-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Add Cpu186 to ud1/ud2/ud2a/ud2b.
+	* i386-tbl.h: Regenerated.
+
+2010-08-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (dis386_twobyte): Replace ud2a/ud2b with ud2/ud1.
 
 	* i386-opc.tbl: Add ud1.  Remove Cpu686 from ud2/ud2a/ud2b.
