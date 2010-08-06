@@ -255,7 +255,7 @@ Disassembly of section .text:
  *[0-9a-f]+:	0f 06[ 	]+clts[ 	]*
  *[0-9a-f]+:	0f 08[ 	]+invd[ 	]*
  *[0-9a-f]+:	0f 09[ 	]+wbinvd[ 	]*
- *[0-9a-f]+:	0f 0b[ 	]+ud2a[ 	]*
+ *[0-9a-f]+:	0f 0b[ 	]+ud2[ 	]*
  *[0-9a-f]+:	0f 20 d0[ 	]+mov[ 	]+eax,cr2
  *[0-9a-f]+:	0f 21 d0[ 	]+mov[ 	]+eax,db2
  *[0-9a-f]+:	0f 22 d0[ 	]+mov[ 	]+cr2,eax
@@ -358,7 +358,7 @@ Disassembly of section .text:
  *[0-9a-f]+:	0f b5 90 90 90 90 90[ 	]+lgs[ 	]+edx,(FWORD PTR )?\[eax-0x6f6f6f70\]
  *[0-9a-f]+:	0f b6 90 90 90 90 90[ 	]+movzx[ 	]+edx,BYTE PTR \[eax-0x6f6f6f70\]
  *[0-9a-f]+:	0f b7 90 90 90 90 90[ 	]+movzx[ 	]+edx,WORD PTR \[eax-0x6f6f6f70\]
- *[0-9a-f]+:	0f b9[ 	]+ud2b[ 	]*
+ *[0-9a-f]+:	0f b9[ 	]+ud1[ 	]*
  *[0-9a-f]+:	0f bb 90 90 90 90 90[ 	]+btc[ 	]+(DWORD PTR )?\[eax-0x6f6f6f70\],edx
  *[0-9a-f]+:	0f bc 90 90 90 90 90[ 	]+bsf[ 	]+edx,(DWORD PTR )?\[eax-0x6f6f6f70\]
  *[0-9a-f]+:	0f bd 90 90 90 90 90[ 	]+bsr[ 	]+edx,(DWORD PTR )?\[eax-0x6f6f6f70\]

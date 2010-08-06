@@ -1959,7 +1959,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "invd",		{ XX } },
   { "wbinvd",		{ XX } },
   { Bad_Opcode },
-  { "ud2a",		{ XX } },
+  { "ud2",		{ XX } },
   { Bad_Opcode },
   { REG_TABLE (REG_0F0D) },
   { "femms",		{ XX } },
@@ -2155,7 +2155,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "movz{wR|x}",	{ Gv, Ew } }, /* yes, there really is movzww ! */
   /* b8 */
   { PREFIX_TABLE (PREFIX_0FB8) },
-  { "ud2b",		{ XX } },
+  { "ud1",		{ XX } },
   { REG_TABLE (REG_0FBA) },
   { "btcS",		{ Ev, Gv } },
   { "bsfS",		{ Gv, Ev } },

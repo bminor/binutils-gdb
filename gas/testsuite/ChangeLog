@@ -1,3 +1,15 @@
+2010-08-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run arch-4.
+
+	* gas/i386/arch-4.d: New.
+	* gas/i386/arch-4.s: Likewise.
+
+	* gas/i386/intel.d: Replace ud2a/ud2b with ud2/ud1.
+	* gas/i386/opcode-intel.d: Likewise.
+	* gas/i386/opcode-suffix.d: Likewise.
+	* gas/i386/opcode.d: Likewise.
+
 2010-08-03  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/octa.s, * gas/all/octa.d: New test.

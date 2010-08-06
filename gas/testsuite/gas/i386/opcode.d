@@ -254,7 +254,7 @@ Disassembly of section .text:
  327:	0f 06 [ 	]*clts   
  329:	0f 08 [ 	]*invd   
  32b:	0f 09 [ 	]*wbinvd 
- 32d:	0f 0b [ 	]*ud2a   
+ 32d:	0f 0b [ 	]*ud2    
  32f:	0f 20 d0 [ 	]*mov    %cr2,%eax
  332:	0f 21 d0 [ 	]*mov    %db2,%eax
  335:	0f 22 d0 [ 	]*mov    %eax,%cr2
@@ -357,7 +357,7 @@ Disassembly of section .text:
  57e:	0f b5 90 90 90 90 90 [ 	]*lgs    -0x6f6f6f70\(%eax\),%edx
  585:	0f b6 90 90 90 90 90 [ 	]*movzbl -0x6f6f6f70\(%eax\),%edx
  58c:	0f b7 90 90 90 90 90 [ 	]*movzwl -0x6f6f6f70\(%eax\),%edx
- 593:	0f b9 [ 	]*ud2b   
+ 593:	0f b9 [ 	]*ud1    
  595:	0f bb 90 90 90 90 90 [ 	]*btc    %edx,-0x6f6f6f70\(%eax\)
  59c:	0f bc 90 90 90 90 90 [ 	]*bsf    -0x6f6f6f70\(%eax\),%edx
  5a3:	0f bd 90 90 90 90 90 [ 	]*bsr    -0x6f6f6f70\(%eax\),%edx
