@@ -1,3 +1,18 @@
+2010-08-06  Corinna Vinschen  <vinschen@redhat.com>
+
+	* dwarf2-frame.c (struct dwarf2_cie): Add ptr_size member.
+	Throughout, call read_encoded_value with ptr_size rather than addr_size.
+	(decode_frame_entry_1): Remove redundant setting of
+	addr_size.  Call gdbarch_dwarf2_addr_size rather than gdbarch_ptr_bit
+	to determine addr_size in Dwarf versions < 4.  Set ptr_size dependent
+	on examined frame section.  Add comment to explain why.
+	* gdbarch.sh (dwarf2_addr_size): Define as variable.  Add lengthy
+	comment to explain usage.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Set dwarf2_addr_size to 4.
+
 2010-08-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

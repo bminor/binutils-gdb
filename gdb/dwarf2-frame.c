@@ -77,6 +77,9 @@ struct dwarf2_cie
   /* Target address size in bytes.  */
   int addr_size;
 
+  /* Target pointer size in bytes. */
+  int ptr_size;
+
   /* True if a 'z' augmentation existed.  */
   unsigned char saw_z_augmentation;
 
@@ -452,7 +455,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	    {
 	    case DW_CFA_set_loc:
 	      fs->pc = read_encoded_value (fde->cie->unit, fde->cie->encoding,
-					   fde->cie->addr_size, insn_ptr,
+					   fde->cie->ptr_size, insn_ptr,
 					   &bytes_read, fde->initial_location);
 	      /* Apply the objfile offset for relocatable objects.  */
 	      fs->pc += ANOFFSET (fde->cie->unit->objfile->section_offsets,
@@ -1732,13 +1735,6 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
          depends on the target address size.  */
       cie->encoding = DW_EH_PE_absptr;
 
-      /* The target address size.  For .eh_frame FDEs this is considered
-	 equal to the size of a target pointer.  For .dwarf_frame FDEs, 
-	 this is supposed to be the target address size from the associated
-	 CU header.  FIXME: We do not have a good way to determine the 
-	 latter.  Always use the target pointer size for now.  */
-      cie->addr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
-
       /* We'll determine the final value later, but we need to
 	 initialize it conservatively.  */
       cie->signal_frame = 0;
@@ -1779,9 +1775,17 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
 	}
       else
 	{
-	  cie->addr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+	  cie->addr_size = gdbarch_dwarf2_addr_size (gdbarch);
 	  cie->segment_size = 0;
 	}
+      /* Address values in .eh_frame sections are defined to have the
+	 target's pointer size.  Watchout: This breaks frame info for
+	 targets with pointer size < address size, unless a .debug_frame
+	 section exists as well. */
+      if (eh_frame_p)
+	cie->ptr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+      else
+	cie->ptr_size = cie->addr_size;
 
       cie->code_alignment_factor =
 	read_unsigned_leb128 (unit->abfd, buf, &bytes_read);
@@ -1841,7 +1845,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
 	    {
 	      /* Skip.  Avoid indirection since we throw away the result.  */
 	      gdb_byte encoding = (*buf++) & ~DW_EH_PE_indirect;
-	      read_encoded_value (unit, encoding, cie->addr_size,
+	      read_encoded_value (unit, encoding, cie->ptr_size,
 				  buf, &bytes_read, 0);
 	      buf += bytes_read;
 	      augmentation++;
@@ -1907,13 +1911,13 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
       gdb_assert (fde->cie != NULL);
 
       fde->initial_location =
-	read_encoded_value (unit, fde->cie->encoding, fde->cie->addr_size,
+	read_encoded_value (unit, fde->cie->encoding, fde->cie->ptr_size,
 			    buf, &bytes_read, 0);
       buf += bytes_read;
 
       fde->address_range =
 	read_encoded_value (unit, fde->cie->encoding & 0x0f,
-			    fde->cie->addr_size, buf, &bytes_read, 0);
+			    fde->cie->ptr_size, buf, &bytes_read, 0);
       buf += bytes_read;
 
       /* A 'z' augmentation in the CIE implies the presence of an

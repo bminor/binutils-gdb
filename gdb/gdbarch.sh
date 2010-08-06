@@ -384,13 +384,28 @@ v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::p
 # / addr_bit will be set from it.
 #
 # If gdbarch_ptr_bit and gdbarch_addr_bit are different, you'll probably
-# also need to set gdbarch_pointer_to_address and gdbarch_address_to_pointer
-# as well.
+# also need to set gdbarch_dwarf2_addr_size, gdbarch_pointer_to_address and
+# gdbarch_address_to_pointer as well.
 #
 # ptr_bit is the size of a pointer on the target
 v:int:ptr_bit:::8 * sizeof (void*):gdbarch->int_bit::0
 # addr_bit is the size of a target address as represented in gdb
 v:int:addr_bit:::8 * sizeof (void*):0:gdbarch_ptr_bit (gdbarch):
+#
+# dwarf2_addr_size is the target address size as used in the Dwarf debug
+# info.  For .debug_frame FDEs, this is supposed to be the target address
+# size from the associated CU header, and which is equivalent to the
+# DWARF2_ADDR_SIZE as defined by the target specific GCC back-end.
+# Unfortunately there is no good way to determine this value.  Therefore
+# dwarf2_addr_size simply defaults to the target pointer size.
+#
+# dwarf2_addr_size is not used for .eh_frame FDEs, which are generally
+# defined using the target's pointer size so far.
+#
+# Note that dwarf2_addr_size only needs to be redefined by a target if the
+# GCC back-end defines a DWARF2_ADDR_SIZE other than the target pointer size,
+# and if Dwarf versions < 4 need to be supported.
+v:int:dwarf2_addr_size:::sizeof (void*):0:gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT:
 #
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v:int:char_signed:::1:-1:1
