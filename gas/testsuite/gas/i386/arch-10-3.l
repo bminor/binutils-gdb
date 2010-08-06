@@ -20,6 +20,7 @@
 .*:56: Error: .*
 .*:58: Error: .*
 .*:60: Error: .*
+.*:62: Error: .*
 GAS LISTING .*
 
 
@@ -90,3 +91,5 @@ GAS LISTING .*
 [ 	]*58[ 	]+lzcnt %ecx,%ebx
 [ 	]*59[ 	]+\# PadLock
 [ 	]*60[ 	]+xstorerng
+[ 	]*61[ 	]+\# nop
+[ 	]*62[ 	]+nopl \(%eax\)

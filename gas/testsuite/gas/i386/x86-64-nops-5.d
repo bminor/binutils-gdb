@@ -24,7 +24,8 @@ Disassembly of section .text:
 
 0+30 <i686>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi
-[ 	]*[a-f0-9]+:	66 66 66 66 2e 0f 1f 84 00 00 00 00 00 	data32 data32 data32 nopw %cs:0x0\(%rax,%rax,1\)
+[ 	]*[a-f0-9]+:	8d b6 00 00 00 00    	lea    0x0\(%rsi\),%esi
+[ 	]*[a-f0-9]+:	8d bc 27 00 00 00 00 	lea    0x0\(%rdi,%riz,1\),%edi
 
 0+40 <pentium4>:
 [ 	]*[a-f0-9]+:	0f be f0             	movsbl %al,%esi

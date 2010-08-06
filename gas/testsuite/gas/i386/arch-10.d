@@ -1,4 +1,4 @@
-#as: -march=i686+avx+vmx+smx+xsave+xsaveopt+aes+pclmul+fma+movbe+ept+clflush+syscall+rdtscp+3dnowa+sse4a+svme+abm+padlock
+#as: -march=i686+avx+vmx+smx+xsave+xsaveopt+aes+pclmul+fma+movbe+ept+clflush+nop+syscall+rdtscp+3dnowa+sse4a+svme+abm+padlock
 #objdump: -dw
 #name: i386 arch 10
 
@@ -36,4 +36,5 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 01 da             	vmload 
 [ 	]*[a-f0-9]+:	f3 0f bd d9          	lzcnt  %ecx,%ebx
 [ 	]*[a-f0-9]+:	0f a7 c0             	xstore-rng 
+[ 	]*[a-f0-9]+:	0f 1f 00             	nopl   \(%eax\)
 #pass

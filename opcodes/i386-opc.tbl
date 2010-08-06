@@ -500,7 +500,7 @@ bound, 2, 0x62, None, 1, Cpu186|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf,
 
 hlt, 0, 0xf4, None, 1, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
-nop, 1, 0xf1f, 0x0, 2, Cpu686, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+nop, 1, 0xf1f, 0x0, 2, CpuNop, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // nop is actually "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
 // 32bit mode and "xchg %rax,%rax" in 64bit mode.

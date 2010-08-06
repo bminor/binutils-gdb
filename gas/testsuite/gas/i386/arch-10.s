@@ -58,3 +58,5 @@ vmload
 lzcnt %ecx,%ebx
 # PadLock
 xstorerng
+# nop
+nopl (%eax)

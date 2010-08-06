@@ -1,3 +1,19 @@
+2010-08-06  Quentin Neill <quentin.neill@amd.com>
+
+	* gas/i386/arch-10-1.l: Add nopl instruction.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+	* gas/i386/arch-10.s: Likewise.
+	* gas/i386/arch-10.d: Add nopl instruction, and +nopl extension
+	flag to as flags.
+	* gas/i386/nops-5-i686.d: Change alignment code generated for
+	-mtune=i686.
+	* gas/i386/nops-5.d: Change alignment code generated for
+	.arch i686.
+	* gas/i386/x86-64-nops-5-k8.d: Likewise.
+	* gas/i386/x86-64-nops-5.d: Likewise.
+
 2010-08-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run arch-4.

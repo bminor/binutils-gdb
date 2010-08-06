@@ -46,6 +46,8 @@ enum
   Cpu686,
   /* CLFLUSH Instruction support required */
   CpuClflush,
+  /* NOP Instruction support required */
+  CpuNop,
   /* SYSCALL Instructions support required */
   CpuSYSCALL,
   /* Floating point support required */
@@ -152,6 +154,7 @@ typedef union i386_cpu_flags
       unsigned int cpui586:1;
       unsigned int cpui686:1;
       unsigned int cpuclflush:1;
+      unsigned int cpunop:1;
       unsigned int cpusyscall:1;
       unsigned int cpu8087:1;
       unsigned int cpu287:1;

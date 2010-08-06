@@ -1,3 +1,15 @@
+2010-08-06  Quentin Neill <quentin.neill@amd.com>
+
+	* config/tc-i386.c (arch_entry): Add negated bit to
+	  disambiguate flag names starting with "no".
+	  (cpu_arch): Add negated bit definitions.  Add
+	  ".nop" CPU extension.
+	  (i386_align_code): Use new .cpunop bit to decide
+	  when to generate alignment using nops.
+	  (set_cpu_arch): Use negated bit instead to decide
+	  when to use cpu_flags or vs. cpu_flags_and_not.
+	  (md_parse_option): Likewise.
+
 2010-08-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Move the first i.error

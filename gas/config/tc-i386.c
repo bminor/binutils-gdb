@@ -132,6 +132,7 @@ typedef struct
   enum processor_type type;	/* arch type */
   i386_cpu_flags flags;		/* cpu feature flags */
   unsigned int skip;		/* show_arch should skip this. */
+  unsigned int negated;		/* turn off indicated flags.  */
 }
 arch_entry;
 
@@ -566,149 +567,151 @@ static const arch_entry cpu_arch[] =
   /* Do not replace the first two entries - i386_target_format()
      relies on them being there in this order.  */
   { STRING_COMMA_LEN ("generic32"), PROCESSOR_GENERIC32,
-    CPU_GENERIC32_FLAGS, 0 },
+    CPU_GENERIC32_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("generic64"), PROCESSOR_GENERIC64,
-    CPU_GENERIC64_FLAGS, 0 },
+    CPU_GENERIC64_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("i8086"), PROCESSOR_UNKNOWN,
-    CPU_NONE_FLAGS, 0 },
+    CPU_NONE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("i186"), PROCESSOR_UNKNOWN,
-    CPU_I186_FLAGS, 0 },
+    CPU_I186_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("i286"), PROCESSOR_UNKNOWN,
-    CPU_I286_FLAGS, 0 },
+    CPU_I286_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("i386"), PROCESSOR_I386,
-    CPU_I386_FLAGS, 0 },
+    CPU_I386_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("i486"), PROCESSOR_I486,
-    CPU_I486_FLAGS, 0 },
+    CPU_I486_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("i586"), PROCESSOR_PENTIUM,
-    CPU_I586_FLAGS, 0 },
+    CPU_I586_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("i686"), PROCESSOR_PENTIUMPRO,
-    CPU_I686_FLAGS, 0 },
+    CPU_I686_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("pentium"), PROCESSOR_PENTIUM,
-    CPU_I586_FLAGS, 0 },
+    CPU_I586_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("pentiumpro"), PROCESSOR_PENTIUMPRO,
-    CPU_I686_FLAGS, 0 },
+    CPU_PENTIUMPRO_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("pentiumii"), PROCESSOR_PENTIUMPRO,
-    CPU_P2_FLAGS, 0 },
+    CPU_P2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("pentiumiii"),PROCESSOR_PENTIUMPRO,
-    CPU_P3_FLAGS, 0 },
+    CPU_P3_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("pentium4"), PROCESSOR_PENTIUM4,
-    CPU_P4_FLAGS, 0 },
+    CPU_P4_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("prescott"), PROCESSOR_NOCONA,
-    CPU_CORE_FLAGS, 0 },
+    CPU_CORE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("nocona"), PROCESSOR_NOCONA,
-    CPU_NOCONA_FLAGS, 0 },
+    CPU_NOCONA_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("yonah"), PROCESSOR_CORE,
-    CPU_CORE_FLAGS, 1 },
+    CPU_CORE_FLAGS, 1, 0 },
   { STRING_COMMA_LEN ("core"), PROCESSOR_CORE,
-    CPU_CORE_FLAGS, 0 },
+    CPU_CORE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("merom"), PROCESSOR_CORE2,
-    CPU_CORE2_FLAGS, 1 },
+    CPU_CORE2_FLAGS, 1, 0 },
   { STRING_COMMA_LEN ("core2"), PROCESSOR_CORE2,
-    CPU_CORE2_FLAGS, 0 },
+    CPU_CORE2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("corei7"), PROCESSOR_COREI7,
-    CPU_COREI7_FLAGS, 0 },
+    CPU_COREI7_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("l1om"), PROCESSOR_L1OM,
-    CPU_L1OM_FLAGS, 0 },
+    CPU_L1OM_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k6"), PROCESSOR_K6,
-    CPU_K6_FLAGS, 0 },
+    CPU_K6_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k6_2"), PROCESSOR_K6,
-    CPU_K6_2_FLAGS, 0 },
+    CPU_K6_2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("athlon"), PROCESSOR_ATHLON,
-    CPU_ATHLON_FLAGS, 0 },
+    CPU_ATHLON_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("sledgehammer"), PROCESSOR_K8,
-    CPU_K8_FLAGS, 1 },
+    CPU_K8_FLAGS, 1, 0 },
   { STRING_COMMA_LEN ("opteron"), PROCESSOR_K8,
-    CPU_K8_FLAGS, 0 },
+    CPU_K8_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k8"), PROCESSOR_K8,
-    CPU_K8_FLAGS, 0 },
+    CPU_K8_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("amdfam10"), PROCESSOR_AMDFAM10,
-    CPU_AMDFAM10_FLAGS, 0 },
+    CPU_AMDFAM10_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("bdver1"), PROCESSOR_BDVER1,
-    CPU_BDVER1_FLAGS, 0 },
+    CPU_BDVER1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".8087"), PROCESSOR_UNKNOWN,
-    CPU_8087_FLAGS, 0 },
+    CPU_8087_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".287"), PROCESSOR_UNKNOWN,
-    CPU_287_FLAGS, 0 },
+    CPU_287_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".387"), PROCESSOR_UNKNOWN,
-    CPU_387_FLAGS, 0 },
+    CPU_387_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".no87"), PROCESSOR_UNKNOWN,
-    CPU_ANY87_FLAGS, 0 },
+    CPU_ANY87_FLAGS, 0, 1 },
   { STRING_COMMA_LEN (".mmx"), PROCESSOR_UNKNOWN,
-    CPU_MMX_FLAGS, 0 },
+    CPU_MMX_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".nommx"), PROCESSOR_UNKNOWN,
-    CPU_3DNOWA_FLAGS, 0 },
+    CPU_3DNOWA_FLAGS, 0, 1 },
   { STRING_COMMA_LEN (".sse"), PROCESSOR_UNKNOWN,
-    CPU_SSE_FLAGS, 0 },
+    CPU_SSE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".sse2"), PROCESSOR_UNKNOWN,
-    CPU_SSE2_FLAGS, 0 },
+    CPU_SSE2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".sse3"), PROCESSOR_UNKNOWN,
-    CPU_SSE3_FLAGS, 0 },
+    CPU_SSE3_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".ssse3"), PROCESSOR_UNKNOWN,
-    CPU_SSSE3_FLAGS, 0 },
+    CPU_SSSE3_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".sse4.1"), PROCESSOR_UNKNOWN,
-    CPU_SSE4_1_FLAGS, 0 },
+    CPU_SSE4_1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".sse4.2"), PROCESSOR_UNKNOWN,
-    CPU_SSE4_2_FLAGS, 0 },
+    CPU_SSE4_2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".sse4"), PROCESSOR_UNKNOWN,
-    CPU_SSE4_2_FLAGS, 0 },
+    CPU_SSE4_2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".nosse"), PROCESSOR_UNKNOWN,
-    CPU_ANY_SSE_FLAGS, 0 },
+    CPU_ANY_SSE_FLAGS, 0, 1 },
   { STRING_COMMA_LEN (".avx"), PROCESSOR_UNKNOWN,
-    CPU_AVX_FLAGS, 0 },
+    CPU_AVX_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".noavx"), PROCESSOR_UNKNOWN,
-    CPU_ANY_AVX_FLAGS, 0 },
+    CPU_ANY_AVX_FLAGS, 0, 1 },
   { STRING_COMMA_LEN (".vmx"), PROCESSOR_UNKNOWN,
-    CPU_VMX_FLAGS, 0 },
+    CPU_VMX_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".smx"), PROCESSOR_UNKNOWN,
-    CPU_SMX_FLAGS, 0 },
+    CPU_SMX_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".xsave"), PROCESSOR_UNKNOWN,
-    CPU_XSAVE_FLAGS, 0 },
+    CPU_XSAVE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".xsaveopt"), PROCESSOR_UNKNOWN,
-    CPU_XSAVEOPT_FLAGS, 0 },
+    CPU_XSAVEOPT_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".aes"), PROCESSOR_UNKNOWN,
-    CPU_AES_FLAGS, 0 },
+    CPU_AES_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".pclmul"), PROCESSOR_UNKNOWN,
-    CPU_PCLMUL_FLAGS, 0 },
+    CPU_PCLMUL_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".clmul"), PROCESSOR_UNKNOWN,
-    CPU_PCLMUL_FLAGS, 1 },
+    CPU_PCLMUL_FLAGS, 1, 0 },
   { STRING_COMMA_LEN (".fsgsbase"), PROCESSOR_UNKNOWN,
-    CPU_FSGSBASE_FLAGS, 0 },
+    CPU_FSGSBASE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".rdrnd"), PROCESSOR_UNKNOWN,
-    CPU_RDRND_FLAGS, 0 },
+    CPU_RDRND_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".f16c"), PROCESSOR_UNKNOWN,
-    CPU_F16C_FLAGS, 0 },
+    CPU_F16C_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".fma"), PROCESSOR_UNKNOWN,
-    CPU_FMA_FLAGS, 0 },
+    CPU_FMA_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".fma4"), PROCESSOR_UNKNOWN,
-    CPU_FMA4_FLAGS, 0 },
+    CPU_FMA4_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".xop"), PROCESSOR_UNKNOWN,
-    CPU_XOP_FLAGS, 0 },
+    CPU_XOP_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".lwp"), PROCESSOR_UNKNOWN,
-    CPU_LWP_FLAGS, 0 },
+    CPU_LWP_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".movbe"), PROCESSOR_UNKNOWN,
-    CPU_MOVBE_FLAGS, 0 },
+    CPU_MOVBE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".ept"), PROCESSOR_UNKNOWN,
-    CPU_EPT_FLAGS, 0 },
+    CPU_EPT_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".clflush"), PROCESSOR_UNKNOWN,
-    CPU_CLFLUSH_FLAGS, 0 },
+    CPU_CLFLUSH_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".nop"), PROCESSOR_UNKNOWN,
+    CPU_NOP_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".syscall"), PROCESSOR_UNKNOWN,
-    CPU_SYSCALL_FLAGS, 0 },
+    CPU_SYSCALL_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".rdtscp"), PROCESSOR_UNKNOWN,
-    CPU_RDTSCP_FLAGS, 0 },
+    CPU_RDTSCP_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".3dnow"), PROCESSOR_UNKNOWN,
-    CPU_3DNOW_FLAGS, 0 },
+    CPU_3DNOW_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".3dnowa"), PROCESSOR_UNKNOWN,
-    CPU_3DNOWA_FLAGS, 0 },
+    CPU_3DNOWA_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".padlock"), PROCESSOR_UNKNOWN,
-    CPU_PADLOCK_FLAGS, 0 },
+    CPU_PADLOCK_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".pacifica"), PROCESSOR_UNKNOWN,
-    CPU_SVME_FLAGS, 1 },
+    CPU_SVME_FLAGS, 1, 0 },
   { STRING_COMMA_LEN (".svme"), PROCESSOR_UNKNOWN,
-    CPU_SVME_FLAGS, 0 },
+    CPU_SVME_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".sse4a"), PROCESSOR_UNKNOWN,
-    CPU_SSE4A_FLAGS, 0 },
+    CPU_SSE4A_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".abm"), PROCESSOR_UNKNOWN,
-    CPU_ABM_FLAGS, 0 },
+    CPU_ABM_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
@@ -998,7 +1001,7 @@ i386_align_code (fragS *fragP, int count)
      will be used.
 
      When -mtune= isn't used, alt_long_patt will be used if
-     cpu_arch_isa_flags has Cpu686. Otherwise, f32_patt will
+     cpu_arch_isa_flags has CpuNop.  Otherwise, f32_patt will
      be used.
 
      When -march= or .arch is used, we can't use anything beyond
@@ -1028,8 +1031,8 @@ i386_align_code (fragS *fragP, int count)
 	    {
 	    case PROCESSOR_UNKNOWN:
 	      /* We use cpu_arch_isa_flags to check if we SHOULD
-		 optimize for Cpu686.  */
-	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
+		 optimize with nops.  */
+	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_long_patt;
 	      else
 		patt = f32_patt;
@@ -1079,8 +1082,8 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_BDVER1:
 	    case PROCESSOR_GENERIC32:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize
-		 for Cpu686.  */
-	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
+		 with nops.  */
+	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_short_patt;
 	      else
 		patt = f32_patt;
@@ -1092,7 +1095,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_CORE2:
 	    case PROCESSOR_COREI7:
 	    case PROCESSOR_L1OM:
-	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
+	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_long_patt;
 	      else
 		patt = f32_patt;
@@ -2131,12 +2134,12 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  break;
 		}
 
-	      if (strncmp (string + 1, "no", 2))
+	      if (!cpu_arch[j].negated)
 		flags = cpu_flags_or (cpu_arch_flags,
 				      cpu_arch[j].flags);
 	      else
 		flags = cpu_flags_and_not (cpu_arch_flags,
-					   cpu_arch[j].flags);
+				      cpu_arch[j].flags);
 	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
 		  if (cpu_sub_arch_name)
@@ -8218,12 +8221,12 @@ md_parse_option (int c, char *arg)
 		  /* ISA entension.  */
 		  i386_cpu_flags flags;
 
-		  if (strncmp (arch, "no", 2))
+                  if (!cpu_arch[j].negated)
 		    flags = cpu_flags_or (cpu_arch_flags,
 					  cpu_arch[j].flags);
 		  else
 		    flags = cpu_flags_and_not (cpu_arch_flags,
-					       cpu_arch[j].flags);
+					  cpu_arch[j].flags);
 		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
 		      if (cpu_sub_arch_name)

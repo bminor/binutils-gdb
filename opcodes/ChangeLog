@@ -1,5 +1,15 @@
 2010-08-06  Quentin Neill <quentin.neill@amd.com>
 
+	* i386-gen.c (cpu_flag_init): Define CpuNop extension flag, add
+	to processor flags for PENTIUMPRO processors and later.
+	* i386-opc.h (enum): Add CpuNop.
+	(i386_cpu_flags): Add cpunop bit.
+	* i386-opc.tbl: Change nop cpu_flags.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2010-08-06  Quentin Neill <quentin.neill@amd.com>
+
 	* i386-opc.h (enum): Fix typos in comments.
 
 2010-08-06  Alan Modra  <amodra@gmail.com>
