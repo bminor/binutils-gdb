@@ -1,3 +1,8 @@
+2010-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* thread.c (add_thread_silent): Use null_ptid instead of
+	minus_one_ptid while getting rid of stale inferior_ptid.
+
 2010-08-06  Corinna Vinschen  <vinschen@redhat.com>
 
 	* dwarf2-frame.c (struct dwarf2_cie): Add ptr_size member.
