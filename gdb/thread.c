@@ -187,11 +187,11 @@ add_thread_silent (ptid_t ptid)
 
       if (ptid_equal (inferior_ptid, ptid))
 	{
-	  tp = new_thread (ptid);
+	  tp = new_thread (null_ptid);
 
 	  /* Make switch_to_thread not read from the thread.  */
 	  tp->state_ = THREAD_EXITED;
-	  switch_to_thread (minus_one_ptid);
+	  switch_to_thread (null_ptid);
 
 	  /* Now we can delete it.  */
 	  delete_thread (ptid);
