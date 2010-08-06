@@ -1,3 +1,8 @@
+2010-08-06  Alan Modra  <amodra@gmail.com>
+
+	* disassemble.c: Formatting.
+	(disassemble_init_for_target <ARCH_m32c>): Comment on endian.
+
 2010-08-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add Cpu186 to ud1/ud2/ud2a/ud2b.
@@ -16,7 +21,7 @@
 	(rx_decode_opcode): Use it for movbi and movbir.  Decode NOP2 (mov
 	r0,r0) and NOP3 (max r0,r0) special cases.
 	* rx-decode.c: Regenerate.
-	
+
 2010-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c: Add 0F to VEX opcode enums.
