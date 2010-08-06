@@ -2139,7 +2139,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 				      cpu_arch[j].flags);
 	      else
 		flags = cpu_flags_and_not (cpu_arch_flags,
-				      cpu_arch[j].flags);
+					   cpu_arch[j].flags);
 	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
 		  if (cpu_sub_arch_name)
@@ -8221,12 +8221,12 @@ md_parse_option (int c, char *arg)
 		  /* ISA entension.  */
 		  i386_cpu_flags flags;
 
-                  if (!cpu_arch[j].negated)
+		  if (!cpu_arch[j].negated)
 		    flags = cpu_flags_or (cpu_arch_flags,
 					  cpu_arch[j].flags);
 		  else
 		    flags = cpu_flags_and_not (cpu_arch_flags,
-					  cpu_arch[j].flags);
+					       cpu_arch[j].flags);
 		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
 		      if (cpu_sub_arch_name)
