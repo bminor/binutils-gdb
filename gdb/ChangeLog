@@ -1,3 +1,22 @@
+2010-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* defs.h (make_cleanup_restore_uinteger, make_cleanup_restore_ui_file)
+	(make_cleanup_restore_page_info)
+	(set_batch_flag_and_make_cleanup_restore_page_info): New declarations.
+	* gdbcmd.h (execute_command_to_string): New declaration.
+	* python/python.c (struct restore_ui_file_closure, restore_ui_file)
+	(make_cleanup_restore_ui_file): Move to utils.c
+	(execute_gdb_command) <to_string>: Move ...
+	* top.c (execute_command_to_string): ... here.  Call
+	set_batch_flag_and_make_cleanup_restore_page_info.
+	* utils.c (make_cleanup_restore_integer): New source file blank line.
+	(make_cleanup_restore_uinteger): New.
+	(struct restore_ui_file_closure, do_restore_ui_file)
+	(make_cleanup_restore_ui_file): Move here from python/python.c.
+	(init_page_info) <batch_flag>
+	(do_restore_page_info_cleanup, make_cleanup_restore_page_info)
+	(set_batch_flag_and_make_cleanup_restore_page_info): New.
+
 2010-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* thread.c (add_thread_silent): Use null_ptid instead of

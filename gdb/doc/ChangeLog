@@ -1,3 +1,9 @@
+2010-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii <eliz@gnu.org>
+
+	* gdb.texinfo (Mode Options) <-batch>
+	(Basic Python) <gdb.execute>: Describe setting width and height.
+
 2010-07-31  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Threads): Document 'debug libthread-db'.

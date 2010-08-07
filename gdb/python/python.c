@@ -309,33 +309,6 @@ gdbpy_target_wide_charset (PyObject *self, PyObject *args)
   return PyUnicode_Decode (cset, strlen (cset), host_charset (), NULL);
 }
 
-struct restore_ui_file_closure
-{
-  struct ui_file **variable;
-  struct ui_file *value;
-};
-
-static void
-restore_ui_file (void *p)
-{
-  struct restore_ui_file_closure *closure = p;
-
-  *(closure->variable) = closure->value;
-}
-
-/* Remember the current value of *VARIABLE and make it restored when
-   the cleanup is run.  */
-struct cleanup *
-make_cleanup_restore_ui_file (struct ui_file **variable)
-{
-  struct restore_ui_file_closure *c = XNEW (struct restore_ui_file_closure);
-
-  c->variable = variable;
-  c->value = *variable;
-
-  return make_cleanup_dtor (restore_ui_file, (void *) c, xfree);
-}
-
 /* A Python function which evaluates a string using the gdb CLI.  */
 
 static PyObject *
@@ -376,26 +349,14 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       /* Copy the argument text in case the command modifies it.  */
       char *copy = xstrdup (arg);
       struct cleanup *cleanup = make_cleanup (xfree, copy);
-      struct ui_file *str_file = NULL;
 
       if (to_string)
-	{
-	  str_file = mem_fileopen ();
-
-	  make_cleanup_restore_ui_file (&gdb_stdout);
-	  make_cleanup_restore_ui_file (&gdb_stderr);
-	  make_cleanup_ui_file_delete (str_file);
-
-	  gdb_stdout = str_file;
-	  gdb_stderr = str_file;
-	}
-
-      execute_command (copy, from_tty);
-
-      if (str_file)
-	result = ui_file_xstrdup (str_file, NULL);
+	result = execute_command_to_string (copy, from_tty);
       else
-	result = NULL;
+	{
+	  result = NULL;
+	  execute_command (copy, from_tty);
+	}
 
       do_cleanups (cleanup);
     }

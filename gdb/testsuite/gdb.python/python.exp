@@ -87,3 +87,26 @@ gdb_test "python import itertools; print 'IMPOR'+'TED'" "IMPORTED" "pythonX.Y/li
 gdb_test_no_output \
     "python x = gdb.execute('printf \"%d\", 23', to_string = True)"
 gdb_test "python print x" "23"
+
+# Test (no) pagination of the executed command.
+gdb_test "show height" {Number of lines gdb thinks are in a page is unlimited\.}
+set lines 10
+gdb_test_no_output "set height $lines"
+
+set test "verify pagination beforehand"
+gdb_test_multiple "python print \"\\n\" * $lines" $test {
+    -re "---Type <return> to continue, or q <return> to quit---$" {
+	pass $test
+    }
+}
+gdb_test "q" "Quit" "verify pagination beforehand: q"
+
+gdb_test "python if gdb.execute('python print \"\\\\n\" * $lines', to_string=True) == \"\\n\" * [expr $lines + 1]: print \"yes\"" "yes" "gdb.execute does not page"
+
+set test "verify pagination afterwards"
+gdb_test_multiple "python print \"\\n\" * $lines" $test {
+    -re "---Type <return> to continue, or q <return> to quit---$" {
+	pass $test
+    }
+}
+gdb_test "q" "Quit" "verify pagination afterwards: q"

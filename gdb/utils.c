@@ -339,6 +339,7 @@ restore_integer (void *p)
 
 /* Remember the current value of *VARIABLE and make it restored when the cleanup
    is run.  */
+
 struct cleanup *
 make_cleanup_restore_integer (int *variable)
 {
@@ -350,6 +351,15 @@ make_cleanup_restore_integer (int *variable)
 
   return make_my_cleanup2 (&cleanup_chain, restore_integer, (void *)c,
 			   xfree);
+}
+
+/* Remember the current value of *VARIABLE and make it restored when the cleanup
+   is run.  */
+
+struct cleanup *
+make_cleanup_restore_uinteger (unsigned int *variable)
+{
+  return make_cleanup_restore_integer ((int *) variable);
 }
 
 /* Helper for make_cleanup_unpush_target.  */
@@ -368,6 +378,34 @@ struct cleanup *
 make_cleanup_unpush_target (struct target_ops *ops)
 {
   return make_my_cleanup (&cleanup_chain, do_unpush_target, ops);
+}
+
+struct restore_ui_file_closure
+{
+  struct ui_file **variable;
+  struct ui_file *value;
+};
+
+static void
+do_restore_ui_file (void *p)
+{
+  struct restore_ui_file_closure *closure = p;
+
+  *(closure->variable) = closure->value;
+}
+
+/* Remember the current value of *VARIABLE and make it restored when
+   the cleanup is run.  */
+
+struct cleanup *
+make_cleanup_restore_ui_file (struct ui_file **variable)
+{
+  struct restore_ui_file_closure *c = XNEW (struct restore_ui_file_closure);
+
+  c->variable = variable;
+  c->value = *variable;
+
+  return make_cleanup_dtor (do_restore_ui_file, (void *) c, xfree);
 }
 
 struct cleanup *
@@ -2052,6 +2090,12 @@ static int wrap_column;
 void
 init_page_info (void)
 {
+  if (batch_flag)
+    {
+      lines_per_page = UINT_MAX;
+      chars_per_line = UINT_MAX;
+    }
+  else
 #if defined(TUI)
   if (!tui_get_command_dimension (&chars_per_line, &lines_per_page))
 #endif
@@ -2094,6 +2138,44 @@ init_page_info (void)
 
   set_screen_size ();
   set_width ();
+}
+
+/* Helper for make_cleanup_restore_page_info.  */
+
+static void
+do_restore_page_info_cleanup (void *arg)
+{
+  set_screen_size ();
+  set_width ();
+}
+
+/* Provide cleanup for restoring the terminal size.  */
+
+struct cleanup *
+make_cleanup_restore_page_info (void)
+{
+  struct cleanup *back_to;
+
+  back_to = make_cleanup (do_restore_page_info_cleanup, NULL);
+  make_cleanup_restore_uinteger (&lines_per_page);
+  make_cleanup_restore_uinteger (&chars_per_line);
+
+  return back_to;
+}
+
+/* Temporarily set BATCH_FLAG and the associated unlimited terminal size.
+   Provide cleanup for restoring the original state.  */
+
+struct cleanup *
+set_batch_flag_and_make_cleanup_restore_page_info (void)
+{
+  struct cleanup *back_to = make_cleanup_restore_page_info ();
+  
+  make_cleanup_restore_integer (&batch_flag);
+  batch_flag = 1;
+  init_page_info ();
+
+  return back_to;
 }
 
 /* Set the screen size based on LINES_PER_PAGE and CHARS_PER_LINE.  */

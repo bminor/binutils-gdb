@@ -1,3 +1,10 @@
+2010-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/python.exp (show height, set height 10)
+	(verify pagination beforehand, verify pagination beforehand: q)
+	(gdb.execute does not page, verify pagination afterwards)
+	(verify pagination afterwards: q): New.
+
 2010-08-02  Doug Evans  <dje@google.com>
 
 	* gdb.cp/namespace.exp: When "print ::cOtherFileClassVar" fails

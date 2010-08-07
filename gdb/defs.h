@@ -351,9 +351,13 @@ struct obstack;
 extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);
 
 extern struct cleanup *make_cleanup_restore_integer (int *variable);
+extern struct cleanup *make_cleanup_restore_uinteger (unsigned int *variable);
 
 struct target_ops;
 extern struct cleanup *make_cleanup_unpush_target (struct target_ops *ops);
+
+extern struct cleanup *
+  make_cleanup_restore_ui_file (struct ui_file **variable);
 
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
@@ -385,6 +389,10 @@ extern int nquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 extern int yquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void init_page_info (void);
+
+extern struct cleanup *make_cleanup_restore_page_info (void);
+extern struct cleanup *
+  set_batch_flag_and_make_cleanup_restore_page_info (void);
 
 extern char *gdb_realpath (const char *);
 extern char *xfullpath (const char *);

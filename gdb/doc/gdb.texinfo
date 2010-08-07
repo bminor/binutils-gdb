@@ -1031,9 +1031,9 @@ Run in batch mode.  Exit with status @code{0} after processing all the
 command files specified with @samp{-x} (and all commands from
 initialization files, if not inhibited with @samp{-n}).  Exit with
 nonzero status if an error occurs in executing the @value{GDBN} commands
-in the command files.  Batch mode also disables pagination;
-@pxref{Screen Size} and acts as if @kbd{set confirm off} were in
-effect (@pxref{Messages/Warnings}).
+in the command files.  Batch mode also disables pagination, sets unlimited
+terminal width and height @pxref{Screen Size}, and acts as if @kbd{set confirm
+off} were in effect (@pxref{Messages/Warnings}).
 
 Batch mode may be useful for running @value{GDBN} as a filter, for
 example to download and run a program on another computer; in order to
@@ -20484,7 +20484,9 @@ By default, any output produced by @var{command} is sent to
 @value{GDBN}'s standard output.  If the @var{to_string} parameter is
 @code{True}, then output will be collected by @code{gdb.execute} and
 returned as a string.  The default is @code{False}, in which case the
-return value is @code{None}.
+return value is @code{None}.  If @var{to_string} is @code{True}, the
+@value{GDBN} virtual terminal will be temporarily set to unlimited width
+and height, and its pagination will be disabled; @pxref{Screen Size}.
 @end defun
 
 @findex gdb.breakpoints
