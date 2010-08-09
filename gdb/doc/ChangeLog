@@ -1,3 +1,9 @@
+2010-08-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii <eliz@gnu.org>
+
+	* gdb.texinfo (Mode Options) <-batch>
+	(Basic Python) <gdb.execute>: Describe setting width and height.
+
 2010-07-30  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.texinfo (Inferiors and Programs): Update the introduce of

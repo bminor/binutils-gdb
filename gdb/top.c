@@ -458,6 +458,39 @@ execute_command (char *p, int from_tty)
     }
 }
 
+/* Run execute_command for P and FROM_TTY.  Capture its output into the
+   returned string, do not display it to the screen.  BATCH_FLAG will be
+   temporarily set to true.  */
+
+char *
+execute_command_to_string (char *p, int from_tty)
+{
+  struct ui_file *str_file;
+  struct cleanup *cleanup;
+  char *retval;
+
+  /* GDB_STDOUT should be better already restored during these
+     restoration callbacks.  */
+  cleanup = set_batch_flag_and_make_cleanup_restore_page_info ();
+
+  str_file = mem_fileopen ();
+
+  make_cleanup_restore_ui_file (&gdb_stdout);
+  make_cleanup_restore_ui_file (&gdb_stderr);
+  make_cleanup_ui_file_delete (str_file);
+
+  gdb_stdout = str_file;
+  gdb_stderr = str_file;
+
+  execute_command (p, from_tty);
+
+  retval = ui_file_xstrdup (str_file, NULL);
+
+  do_cleanups (cleanup);
+
+  return retval;
+}
+
 /* Read commands from `instream' and execute them
    until end of file or error reading instream.  */
 
