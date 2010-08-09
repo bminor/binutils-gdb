@@ -3382,9 +3382,9 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
 				Elf_Internal_Rela *irel, bfd_boolean is_gd)
 {
   bfd_byte *pos[5];
-  unsigned int insn;
+  unsigned int insn, tlsgd_reg;
   Elf_Internal_Rela *gpdisp, *hint;
-  bfd_boolean dynamic, use_gottprel, pos1_unusable;
+  bfd_boolean dynamic, use_gottprel;
   unsigned long new_symndx;
 
   dynamic = alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info);
@@ -3425,7 +3425,6 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
   pos[2] = info->contents + irel[2].r_offset;
   pos[3] = info->contents + gpdisp->r_offset;
   pos[4] = pos[3] + gpdisp->r_addend;
-  pos1_unusable = FALSE;
 
   /* Generally, the positions are not allowed to be out of order, lest the
      modified insn sequence have different register lifetimes.  We can make
@@ -3436,8 +3435,6 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
       pos[0] = pos[1];
       pos[1] = tmp;
     }
-  else if (pos[1] < pos[0])
-    pos1_unusable = TRUE;
   if (pos[1] >= pos[2] || pos[2] >= pos[3])
     return TRUE;
 
@@ -3495,6 +3492,14 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
 
   use_gottprel = FALSE;
   new_symndx = is_gd ? ELF64_R_SYM (irel->r_info) : 0;
+
+  /* Beware of the compiler hoisting part of the sequence out a loop
+     and adjusting the destination register for the TLSGD insn.  If this
+     happens, there will be a move into $16 before the JSR insn, so only
+     transformations of the first insn pair should use this register.  */
+  tlsgd_reg = bfd_get_32 (info->abfd, pos[0]);
+  tlsgd_reg = (tlsgd_reg >> 21) & 31;
+
   switch (!dynamic && !info->link_info->shared)
     {
     case 1:
@@ -3508,7 +3513,7 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
 
 	if (disp >= -0x8000 && disp < 0x8000)
 	  {
-	    insn = (OP_LDA << 26) | (16 << 21) | (31 << 16);
+	    insn = (OP_LDA << 26) | (tlsgd_reg << 21) | (31 << 16);
 	    bfd_put_32 (info->abfd, (bfd_vma) insn, pos[0]);
 	    bfd_put_32 (info->abfd, (bfd_vma) INSN_UNOP, pos[1]);
 
@@ -3519,11 +3524,11 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
 	  }
 	else if (disp >= -(bfd_signed_vma) 0x80000000
 		 && disp < (bfd_signed_vma) 0x7fff8000
-		 && !pos1_unusable)
+		 && pos[0] + 4 == pos[1])
 	  {
-	    insn = (OP_LDAH << 26) | (16 << 21) | (31 << 16);
+	    insn = (OP_LDAH << 26) | (tlsgd_reg << 21) | (31 << 16);
 	    bfd_put_32 (info->abfd, (bfd_vma) insn, pos[0]);
-	    insn = (OP_LDA << 26) | (16 << 21) | (16 << 16);
+	    insn = (OP_LDA << 26) | (tlsgd_reg << 21) | (tlsgd_reg << 16);
 	    bfd_put_32 (info->abfd, (bfd_vma) insn, pos[1]);
 
 	    irel[0].r_offset = pos[0] - info->contents;
@@ -3538,7 +3543,7 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
     default:
       use_gottprel = TRUE;
 
-      insn = (OP_LDQ << 26) | (16 << 21) | (29 << 16);
+      insn = (OP_LDQ << 26) | (tlsgd_reg << 21) | (29 << 16);
       bfd_put_32 (info->abfd, (bfd_vma) insn, pos[0]);
       bfd_put_32 (info->abfd, (bfd_vma) INSN_UNOP, pos[1]);
 
