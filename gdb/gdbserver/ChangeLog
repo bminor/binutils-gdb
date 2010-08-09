@@ -1,3 +1,12 @@
+2010-08-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (gdb_wants_lwp_stopped): Delete.
+	(gdb_wants_all_stopped): Delete.
+	(linux_wait_1): Don't call them.
+	* server.c (handle_v_cont): Tag all threads as want-stopped.
+	(gdb_wants_thread_stopped): Fix comments.  Tag the thread that
+	stopped as "client-wants-stopped".
+
 2010-07-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* Makefile.in (signals_h): New.

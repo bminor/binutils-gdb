@@ -1809,24 +1809,6 @@ select_event_lwp (struct lwp_info **orig_lp)
     }
 }
 
-/* Set this inferior LWP's state as "want-stopped".  We won't resume
-   this LWP until the client gives us another action for it.  */
-
-static void
-gdb_wants_lwp_stopped (struct inferior_list_entry *entry)
-{
-  struct lwp_info *lwp = (struct lwp_info *) entry;
-  struct thread_info *thread = get_lwp_thread (lwp);
-
-  /* Most threads are stopped implicitly (all-stop); tag that with
-     signal 0.  The thread being explicitly reported stopped to the
-     client, gets it's status fixed up afterwards.  */
-  thread->last_status.kind = TARGET_WAITKIND_STOPPED;
-  thread->last_status.value.sig = TARGET_SIGNAL_0;
-
-  thread->last_resume_kind = resume_stop;
-}
-
 /* Decrement the suspend count of an LWP.  */
 
 static int
@@ -1851,14 +1833,6 @@ static void
 unsuspend_all_lwps (struct lwp_info *except)
 {
   find_inferior (&all_lwps, unsuspend_one_lwp, except);
-}
-
-/* Set all LWP's states as "want-stopped".  */
-
-static void
-gdb_wants_all_stopped (void)
-{
-  for_each_inferior (&all_lwps, gdb_wants_lwp_stopped);
 }
 
 static void move_out_of_jump_pad_callback (struct inferior_list_entry *entry);
@@ -2389,8 +2363,6 @@ Check if we're already there.\n",
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
-  /* Do this before the gdb_wants_all_stopped calls below, since they
-     always set last_resume_kind to resume_stop.  */
   if (current_inferior->last_resume_kind == resume_stop
       && WSTOPSIG (w) == SIGSTOP)
     {
@@ -2413,30 +2385,14 @@ Check if we're already there.\n",
 
   gdb_assert (ptid_equal (step_over_bkpt, null_ptid));
 
-  if (stabilizing_threads)
-    return ptid_of (event_child);
-
-  if (!non_stop)
-    {
-      /* From GDB's perspective, all-stop mode always stops all
-	 threads implicitly.  Tag all threads as "want-stopped".  */
-      gdb_wants_all_stopped ();
-    }
-  else
-    {
-      /* We're reporting this LWP as stopped.  Update it's
-      	 "want-stopped" state to what the client wants, until it gets
-      	 a new resume action.  */
-      gdb_wants_lwp_stopped (&event_child->head);
-    }
-
   if (debug_threads)
     fprintf (stderr, "linux_wait ret = %s, %d, %d\n",
 	     target_pid_to_str (ptid_of (event_child)),
 	     ourstatus->kind,
 	     ourstatus->value.sig);
 
-  current_inferior->last_status = *ourstatus;
+  if (!stabilizing_threads)
+    current_inferior->last_status = *ourstatus;
 
   return ptid_of (event_child);
 }
