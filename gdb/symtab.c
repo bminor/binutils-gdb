@@ -382,8 +382,10 @@ symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
 {
   if (gsymbol->language == language_cplus)
     {
-      gdb_assert (gsymbol->language_specific.cplus_specific != NULL);
-      return gsymbol->language_specific.cplus_specific->demangled_name;
+      if (gsymbol->language_specific.cplus_specific != NULL)
+	return gsymbol->language_specific.cplus_specific->demangled_name;
+      else
+	return NULL;
     }
   else
     return gsymbol->language_specific.mangled_lang.demangled_name;

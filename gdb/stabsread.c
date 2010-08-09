@@ -712,7 +712,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  memcpy (name, string, p - string);
 	  name[p - string] = '\0';
 	  new_name = cp_canonicalize_string (name);
-	  cp_scan_for_anonymous_namespaces (sym);
 	}
       if (new_name != NULL)
 	{
@@ -721,6 +720,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	}
       else
 	SYMBOL_SET_NAMES (sym, string, p - string, 1, objfile);
+
+      if (SYMBOL_LANGUAGE (sym) == language_cplus)
+	cp_scan_for_anonymous_namespaces (sym);
+
     }
   p++;
 

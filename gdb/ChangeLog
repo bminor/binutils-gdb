@@ -1,5 +1,12 @@
 2010-08-09  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* symtab.c (symbol_get_demangled_name): Remove assertion and
+	return NULL when language_specific.cplus_specific is not initialized.
+	* stabsread.c (define_symbol): Set the name before calling
+	cp_scan_for_anonymous_namespaces.
+
+2010-08-09  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	* symtab.h: Renamed SYMBOL_INIT_LANGUAGE_SPECIFIC to
 	SYMBOL_SET_LANGUAGE.
 	(symbol_init_language_specific): Renamed to symbol_set_language.
