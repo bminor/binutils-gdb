@@ -9996,6 +9996,8 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
   struct attribute *attr = NULL;
   struct attribute *attr2 = NULL;
   CORE_ADDR baseaddr;
+  struct pending **list_to_add = NULL;
+
   int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -10088,11 +10090,11 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
                  access them globally.  For instance, we want to be able
                  to break on a nested subprogram without having to
                  specify the context.  */
-	      add_symbol_to_list (sym, &global_symbols);
+	      list_to_add = &global_symbols;
 	    }
 	  else
 	    {
-	      add_symbol_to_list (sym, cu->list_in_scope);
+	      list_to_add = cu->list_in_scope;
 	    }
 	  break;
 	case DW_TAG_inlined_subroutine:
@@ -10129,17 +10131,12 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    {
 	      dwarf2_const_value (attr, sym, cu);
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
-	      if (suppress_add)
-		{
-		  sym->hash_next = objfile->template_symbols;
-		  objfile->template_symbols = sym;
-		}
-	      else
+	      if (!suppress_add)
 		{
 		  if (attr2 && (DW_UNSND (attr2) != 0))
-		    add_symbol_to_list (sym, &global_symbols);
+		    list_to_add = &global_symbols;
 		  else
-		    add_symbol_to_list (sym, cu->list_in_scope);
+		    list_to_add = cu->list_in_scope;
 		}
 	      break;
 	    }
@@ -10159,8 +10156,6 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		}
 	      else if (attr2 && (DW_UNSND (attr2) != 0))
 		{
-		  struct pending **list_to_add;
-
 		  /* Workaround gfortran PR debug/40040 - it uses
 		     DW_AT_location for variables in -fPIC libraries which may
 		     get overriden by other libraries/executable and get
@@ -10179,10 +10174,9 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		     but it may be block-scoped.  */
 		  list_to_add = (cu->list_in_scope == &file_symbols
 				 ? &global_symbols : cu->list_in_scope);
-		  add_symbol_to_list (sym, list_to_add);
 		}
 	      else
-		add_symbol_to_list (sym, cu->list_in_scope);
+		list_to_add = cu->list_in_scope;
 	    }
 	  else
 	    {
@@ -10196,33 +10190,19 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      if (attr2 && (DW_UNSND (attr2) != 0)
 		  && dwarf2_attr (die, DW_AT_type, cu) != NULL)
 		{
-		  struct pending **list_to_add;
-
 		  /* A variable with DW_AT_external is never static, but it
 		     may be block-scoped.  */
 		  list_to_add = (cu->list_in_scope == &file_symbols
 				 ? &global_symbols : cu->list_in_scope);
 
 		  SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
-		  if (suppress_add)
-		    {
-		      sym->hash_next = objfile->template_symbols;
-		      objfile->template_symbols = sym;
-		    }
-		  else
-		    add_symbol_to_list (sym, list_to_add);
 		}
 	      else if (!die_is_declaration (die, cu))
 		{
 		  /* Use the default LOC_OPTIMIZED_OUT class.  */
 		  gdb_assert (SYMBOL_CLASS (sym) == LOC_OPTIMIZED_OUT);
-		  if (suppress_add)
-		    {
-		      sym->hash_next = objfile->template_symbols;
-		      objfile->template_symbols = sym;
-		    }
-		  else
-		    add_symbol_to_list (sym, cu->list_in_scope);
+		  if (!suppress_add)
+		    list_to_add = cu->list_in_scope;
 		}
 	    }
 	  break;
@@ -10254,7 +10234,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      SYMBOL_TYPE (sym) = ref_type;
 	    }
 
-	  add_symbol_to_list (sym, cu->list_in_scope);
+	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_unspecified_parameters:
 	  /* From varargs functions; gdb doesn't seem to have any
@@ -10282,21 +10262,12 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	       saves you.  See the OtherFileClass tests in
 	       gdb.c++/namespace.exp.  */
 
-	    if (suppress_add)
+	    if (!suppress_add)
 	      {
-		sym->hash_next = objfile->template_symbols;
-		objfile->template_symbols = sym;
-	      }
-	    else
-	      {
-		struct pending **list_to_add;
-
 		list_to_add = (cu->list_in_scope == &file_symbols
 			       && (cu->language == language_cplus
 				   || cu->language == language_java)
 			       ? &global_symbols : cu->list_in_scope);
-
-		add_symbol_to_list (sym, list_to_add);
 	      }
 
 	    /* The semantics of C++ state that "struct foo { ... }" also
@@ -10317,13 +10288,13 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_typedef:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-	  add_symbol_to_list (sym, cu->list_in_scope);
+	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_base_type:
         case DW_TAG_subrange_type:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-	  add_symbol_to_list (sym, cu->list_in_scope);
+	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_enumerator:
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
@@ -10335,19 +10306,15 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    /* NOTE: carlton/2003-11-10: See comment above in the
 	       DW_TAG_class_type, etc. block.  */
 
-	    struct pending **list_to_add;
-
 	    list_to_add = (cu->list_in_scope == &file_symbols
 			   && (cu->language == language_cplus
 			       || cu->language == language_java)
 			   ? &global_symbols : cu->list_in_scope);
-
-	    add_symbol_to_list (sym, list_to_add);
 	  }
 	  break;
 	case DW_TAG_namespace:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	  add_symbol_to_list (sym, &global_symbols);
+	  list_to_add = &global_symbols;
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing
@@ -10358,6 +10325,16 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		     dwarf_tag_name (die->tag));
 	  break;
 	}
+
+      if (suppress_add)
+	{
+	  sym->hash_next = objfile->template_symbols;
+	  objfile->template_symbols = sym;
+	  list_to_add = NULL;
+	}
+
+      if (list_to_add != NULL)
+	add_symbol_to_list (sym, list_to_add);
 
       /* For the benefit of old versions of GCC, check for anonymous
 	 namespaces based on the demangled name.  */

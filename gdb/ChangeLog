@@ -1,5 +1,11 @@
 2010-08-09  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* dwarf2read.c (new_symbol): Add symbol to variable list at end of
+	function after symbol construction is complete.
+	Do the same for template symbol addition to template_symbols list.
+
+2010-08-09  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	* symtab.c (symbol_get_demangled_name): Remove assertion and
 	return NULL when language_specific.cplus_specific is not initialized.
 	* stabsread.c (define_symbol): Set the name before calling
