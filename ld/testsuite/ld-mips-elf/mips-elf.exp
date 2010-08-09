@@ -322,6 +322,8 @@ if {$has_newabi} {
     run_dump_test "jalbal"
 }
 
+run_dump_test "mode-change-error-1"
+
 run_dump_test "mips16-hilo"
 if {$has_newabi} {
     run_dump_test "mips16-hilo-n32"

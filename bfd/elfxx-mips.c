@@ -5641,7 +5641,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       if (!ok)
 	{
 	  (*_bfd_error_handler)
-	    (_("%B: %A+0x%lx: jump to stub routine which is not jal"),
+	    (_("%B: %A+0x%lx: Direct jumps between ISA modes are not allowed; consider recompiling with interlinking enabled."),
 	     input_bfd,
 	     input_section,
 	     (unsigned long) relocation->r_offset);
