@@ -232,6 +232,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @smallexample
 @c man begin SYNOPSIS
 @value{AS} [@b{-a}[@b{cdghlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
+ [@b{--compress-debug-sections}]  [@b{--nocompress-debug-sections}]
  [@b{--debug-prefix-map} @var{old}=@var{new}]
  [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
  [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
@@ -551,6 +552,14 @@ Begin in alternate macro mode.
 @ifclear man
 @xref{Altmacro,,@code{.altmacro}}.
 @end ifclear
+
+@item --compress-debug-sections
+Compress DWARF debug sections using zlib.  The debug sections are renamed
+to begin with @samp{.zdebug}, and the resulting object file may not be
+compatible with older linkers and object file utilities.
+
+@item --nocompress-debug-sections
+Do not compress DWARF debug sections.  This is the default.
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
