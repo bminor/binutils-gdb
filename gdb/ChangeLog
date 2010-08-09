@@ -1,3 +1,23 @@
+2010-08-09  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* symtab.h: Renamed SYMBOL_INIT_LANGUAGE_SPECIFIC to
+	SYMBOL_SET_LANGUAGE.
+	(symbol_init_language_specific): Renamed to symbol_set_language.
+	* symtab.c (symbol_init_language_specific): Removed redundant check
+	for language_cplus.
+	Renamed to symbol_set_language.
+	* stabsread.c (define_symbol): Updated.
+	(read_enum_type): Updated
+	* psymtab.c (add_psymbol_to_bcache): Updated.
+	* minsyms.c (install_minimal_symbols): Updated.
+	* coffread.c (process_coff_symbol): SYMBOL_SET_LANGUAGE instead of
+	SYMBOL_LANGUAGE to set the language.
+	* minsyms.c (prim_record_minimal_symbol_full): Ditto.
+	* mdebugread.c (new_symbol): Ditto.
+	* cp-namespace.c (check_one_possible_namespace_symbol): Ditto.
+	* dwarf2read.c (new_symbol_full): Ditto.
+	* jv-lang.c (add_class_symbol): Ditto.
+
 2010-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* defs.h (make_cleanup_restore_uinteger, make_cleanup_restore_ui_file)

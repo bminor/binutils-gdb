@@ -1304,7 +1304,7 @@ add_psymbol_to_bcache (char *name, int namelength, int copy_name,
       SYMBOL_VALUE_ADDRESS (&psymbol) = coreaddr;
     }
   SYMBOL_SECTION (&psymbol) = 0;
-  SYMBOL_LANGUAGE (&psymbol) = language;
+  SYMBOL_SET_LANGUAGE (&psymbol, language);
   PSYMBOL_DOMAIN (&psymbol) = domain;
   PSYMBOL_CLASS (&psymbol) = class;
 

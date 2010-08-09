@@ -4794,7 +4794,7 @@ new_symbol (char *name)
 				     sizeof (struct symbol)));
 
   memset (s, 0, sizeof (*s));
-  SYMBOL_LANGUAGE (s) = psymtab_language;
+  SYMBOL_SET_LANGUAGE (s, psymtab_language);
   SYMBOL_SET_NAMES (s, name, strlen (name), 1, current_objfile);
   return s;
 }

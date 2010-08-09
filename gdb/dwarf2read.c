@@ -10013,7 +10013,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       OBJSTAT (objfile, n_syms++);
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
-      SYMBOL_LANGUAGE (sym) = cu->language;
+      SYMBOL_SET_LANGUAGE (sym, cu->language);
       linkagename = dwarf2_physname (name, die, cu);
       SYMBOL_SET_NAMES (sym, linkagename, strlen (linkagename), 0, objfile);
 

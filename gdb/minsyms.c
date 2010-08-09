@@ -833,8 +833,7 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
       msym_bunch = new;
     }
   msymbol = &msym_bunch->contents[msym_bunch_index];
-  SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
-  SYMBOL_LANGUAGE (msymbol) = language_auto;
+  SYMBOL_SET_LANGUAGE (msymbol, language_auto);
   SYMBOL_SET_NAMES (msymbol, name, name_len, copy_name, objfile);
 
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
@@ -1145,7 +1144,7 @@ install_minimal_symbols (struct objfile *objfile)
       MSYMBOL_TARGET_FLAG_2 (&msymbols[mcount]) = 0;
       MSYMBOL_SIZE (&msymbols[mcount]) = 0;
       MSYMBOL_TYPE (&msymbols[mcount]) = mst_unknown;
-      SYMBOL_INIT_LANGUAGE_SPECIFIC (&msymbols[mcount], language_unknown);
+      SYMBOL_SET_LANGUAGE (&msymbols[mcount], language_unknown);
 
       /* Attach the minimal symbol table to the specified objfile.
          The strings themselves are also located in the objfile_obstack

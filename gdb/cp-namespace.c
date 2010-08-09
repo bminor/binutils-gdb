@@ -938,7 +938,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
 
       sym = obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_LANGUAGE (sym) = language_cplus;
+      SYMBOL_SET_LANGUAGE (sym, language_cplus);
       /* Note that init_type copied the name to the objfile's
 	 obstack.  */
       SYMBOL_SET_NAMES (sym, TYPE_NAME (type), len, 0, objfile);

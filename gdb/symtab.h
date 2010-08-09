@@ -171,7 +171,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 /* Note that all the following SYMBOL_* macros are used with the
    SYMBOL argument being either a partial symbol, a minimal symbol or
    a full symbol.  All three types have a ginfo field.  In particular
-   the SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_DEMANGLED_NAME, etc.
+   the SYMBOL_SET_LANGUAGE, SYMBOL_DEMANGLED_NAME, etc.
    macros cannot be entirely substituted by
    functions, unless the callers are changed to pass in the ginfo
    field only, instead of the SYMBOL parameter.  */
@@ -187,10 +187,10 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Initializes the language dependent portion of a symbol
    depending upon the language for the symbol. */
-#define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language) \
-  (symbol_init_language_specific (&(symbol)->ginfo, (language)))
-extern void symbol_init_language_specific (struct general_symbol_info *symbol,
-					   enum language language);
+#define SYMBOL_SET_LANGUAGE(symbol,language) \
+  (symbol_set_language (&(symbol)->ginfo, (language)))
+extern void symbol_set_language (struct general_symbol_info *symbol,
+                                 enum language language);
 
 /* Set just the linkage name of a symbol; do not try to demangle
    it.  Used for constructs which do not have a mangled name,
