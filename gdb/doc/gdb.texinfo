@@ -21146,6 +21146,16 @@ are peformed in this method and nothing is printed.
 If the result is not one of these types, an exception is raised.
 @end defop
 
+@value{GDBN} provides a function which can be used to look up the
+default pretty-printer for a @code{gdb.Value}:
+
+@findex gdb.default_visualizer
+@defun default_visualizer value
+This function takes a @code{gdb.Value} object as an argument.  If a
+pretty-printer for this value exists, then it is returned.  If no such
+printer exists, then this returns @code{None}.
+@end defun
+
 @node Selecting Pretty-Printers
 @subsubsection Selecting Pretty-Printers
 
