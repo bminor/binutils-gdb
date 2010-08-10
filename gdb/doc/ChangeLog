@@ -1,3 +1,8 @@
+2010-08-10  Tom Tromey  <tromey@redhat.com>
+
+	Revert gdb-add-index addition:
+	* gdb.texinfo (Index Files): Don't document gdb-add-index.
+
 2010-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii <eliz@gnu.org>
 

@@ -1,3 +1,9 @@
+2010-08-10  Tom Tromey  <tromey@redhat.com>
+
+	Revert gdb-add-index addition:
+	* Makefile.in (install-only): Don't install gdb-add-index.
+	* gdb-add-index.sh: Remove.
+
 2010-08-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-sim.c (gdbsim_xfer_inferior_memory): Replace
