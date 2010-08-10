@@ -1063,10 +1063,10 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
 
-  /* If no program is running yet, then ignore the simulator for
-     memory.  Pass the request down to the next target, hopefully
-     an exec file.  */
-  if (!target_has_execution)
+  /* If this target doesn't have memory yet, return 0 causing the
+     request to be passed to a lower target, hopefully an exec
+     file.  */
+  if (!target->to_has_memory (target))
     return 0;
 
   if (!sim_data->program_loaded)
@@ -1210,6 +1210,32 @@ gdbsim_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
+/* Simulator memory may be accessed after the program has been loaded.  */
+
+int
+gdbsim_has_all_memory (struct target_ops *ops)
+{
+  struct sim_inferior_data *sim_data
+    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
+
+  if (!sim_data->program_loaded)
+    return 0;
+
+  return 1;
+}
+
+int
+gdbsim_has_memory (struct target_ops *ops)
+{
+  struct sim_inferior_data *sim_data
+    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
+
+  if (!sim_data->program_loaded)
+    return 0;
+
+  return 1;
+}
+
 /* Define the target subroutine names */
 
 struct target_ops gdbsim_ops;
@@ -1240,8 +1266,8 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_thread_alive = gdbsim_thread_alive;
   gdbsim_ops.to_pid_to_str = gdbsim_pid_to_str;
   gdbsim_ops.to_stratum = process_stratum;
-  gdbsim_ops.to_has_all_memory = default_child_has_all_memory;
-  gdbsim_ops.to_has_memory = default_child_has_memory;
+  gdbsim_ops.to_has_all_memory = gdbsim_has_all_memory;
+  gdbsim_ops.to_has_memory = gdbsim_has_memory;
   gdbsim_ops.to_has_stack = default_child_has_stack;
   gdbsim_ops.to_has_registers = default_child_has_registers;
   gdbsim_ops.to_has_execution = default_child_has_execution;

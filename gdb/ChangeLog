@@ -1,5 +1,13 @@
 2010-08-09  Kevin Buettner  <kevinb@redhat.com>
 
+	* remote-sim.c (gdbsim_xfer_inferior_memory): Replace
+	`target_has_execution' check with `to_has_memory' check.
+	(gdbsim_has_all_memory, gdbsim_has_memory): New functions.
+	(init_gdbsym_ops): Initialize relevant fields of `gdbsim_ops'
+	with `gdbsim_has_all_memory' and `gdbsim_has_memory'.
+
+2010-08-09  Kevin Buettner  <kevinb@redhat.com>
+
 	* remote-sim.c (program_loaded, gdbsim_desc, remote_sim_ptid)
 	(resume_siggnal, resume_step): Move these static globals...
 	(struct sim_inferior_data): ...into this new struct.
