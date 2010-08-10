@@ -1,3 +1,38 @@
+2010-08-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-sim.c (program_loaded, gdbsim_desc, remote_sim_ptid)
+	(resume_siggnal, resume_step): Move these static globals...
+	(struct sim_inferior_data): ...into this new struct.
+	(sim_inferior_data_key, next_pid, sim_argv, gdbsim_is_open):
+	New static globals.
+	(gdb_callback, callbacks_initialized): Move these globals to
+	a point earlier in the file.
+	(check_for_duplicate_sim_descriptor, get_sim_inferior_data)
+	(get_sim_inferior_data_by_ptid, sim_inferior_data_cleanup)
+	(gdbsim_close_inferior, gdbsim_resume_inferior)
+	(gdbsim_stop_inferior): New functions.
+	(SIM_INSTANCE_NOT_NEEDED, SIM_INSTANCE_NEEDED, INITIAL_PID):
+	New constants.
+	(gdbsim_fetch_register, gdbsim_store_register, gdbsim_load)
+	(gdbsim_create_inferior, gdbsim_open, gdbsim_close, gdbsim_resume)
+	(gdbsim_stop, gdbsim_cntrl_c, gdbsim_wait)
+	(gdbsim_xfer_inferior_memory, gdbsim_files_info)
+	(gdbsim_mourn_inferior, simulator_command, gdbsim_thread_alive,
+	(gdbsim_pid_to_str): Invoke `get_sim_inferior_data' to set
+	new local variable `sim_data' in each of these functions.  Use
+	`sim_data' to reference former globals `program_loaded',
+	`gdbsim_desc', `remote_sim_ptid', `resume_siggnal', and
+	`resume_step'.
+	(gdbsim_open): Remove local variable `argv'.  Put results of call
+	to `gdb_buildargv' in `sim_argv' rather than in `argv'.  Don't
+	make a cleanup for it.  Free it though when a sim instance cannot
+	be obtained.
+	(gdbsim_close): Free sim_argv and null it out as appropriate.
+	Close sim instances in all inferiors.
+	(gdbsim_cntrl_c): Stop all inferiors.
+	(gdbsim_wait): 
+	(_initialize_remote_sim): Initialize `sim_inferior_data_key'.
+
 2010-08-09  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* dwarf2read.c (new_symbol): Add symbol to variable list at end of
