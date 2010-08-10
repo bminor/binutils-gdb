@@ -1,3 +1,8 @@
+2010-08-10  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Pretty Printing API): Document
+	gdb.default_visualizer.
+
 2010-08-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii <eliz@gnu.org>
 
