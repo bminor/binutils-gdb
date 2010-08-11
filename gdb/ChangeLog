@@ -1,3 +1,7 @@
+2010-08-11  Brad Roberts  <braddr@puremagic.com>
+
+	* d-lang.c (extract_identifiers): Handle multiple digits.
+
 2010-08-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
