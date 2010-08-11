@@ -37,9 +37,11 @@ extract_identifiers (const char *mangled_str, struct obstack *tempbuf)
 
   while (isdigit (*mangled_str))
     {
-      i = strtol (mangled_str, NULL, 10);
-      mangled_str++;
-      if (i <= 0  && strlen (mangled_str) < i)
+      char *end_ptr;
+
+      i = strtol (mangled_str, &end_ptr, 10);
+      mangled_str = end_ptr;
+      if (i <= 0 || strlen (mangled_str) < i)
         return 0;
       obstack_grow (tempbuf, mangled_str, i);
       mangled_str += i;
