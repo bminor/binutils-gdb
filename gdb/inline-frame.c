@@ -256,15 +256,13 @@ inline_frame_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
-const struct frame_unwind inline_frame_unwinder = {
+const struct frame_unwind inline_frame_unwind = {
   INLINE_FRAME,
   inline_frame_this_id,
   inline_frame_prev_register,
   NULL,
   inline_frame_sniffer
 };
-
-const struct frame_unwind *const inline_frame_unwind = &inline_frame_unwinder;
 
 /* Return non-zero if BLOCK, an inlined function block containing PC,
    has a group of contiguous instructions starting at PC (but not

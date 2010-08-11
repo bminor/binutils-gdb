@@ -274,17 +274,13 @@ dummy_frame_this_id (struct frame_info *this_frame,
   (*this_id) = cache->this_id;
 }
 
-static const struct frame_unwind dummy_frame_unwinder =
+const struct frame_unwind dummy_frame_unwind =
 {
   DUMMY_FRAME,
   dummy_frame_this_id,
   dummy_frame_prev_register,
   NULL,
   dummy_frame_sniffer,
-};
-
-const struct frame_unwind *const dummy_frame_unwind = {
-  &dummy_frame_unwinder
 };
 
 static void

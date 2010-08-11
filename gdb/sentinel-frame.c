@@ -86,7 +86,7 @@ sentinel_frame_prev_arch (struct frame_info *this_frame,
   return get_regcache_arch (cache->regcache);
 }
 
-const struct frame_unwind sentinel_frame_unwinder =
+const struct frame_unwind sentinel_frame_unwind =
 {
   SENTINEL_FRAME,
   sentinel_frame_this_id,
@@ -96,5 +96,3 @@ const struct frame_unwind sentinel_frame_unwinder =
   NULL,
   sentinel_frame_prev_arch,
 };
-
-const struct frame_unwind *const sentinel_frame_unwind = &sentinel_frame_unwinder;

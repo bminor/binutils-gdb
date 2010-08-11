@@ -34,6 +34,6 @@ extern void *sentinel_frame_cache (struct regcache *regcache);
 
 /* At present there is only one type of sentinel frame.  */
 
-extern const struct frame_unwind *const sentinel_frame_unwind;
+extern const struct frame_unwind sentinel_frame_unwind;
 
 #endif /* !defined (SENTINEL_FRAME_H)  */

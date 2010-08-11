@@ -1100,7 +1100,7 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
      information, such as the frame's thread will be added.  */
   frame->prologue_cache = sentinel_frame_cache (regcache);
   /* For the moment there is only one sentinel frame implementation.  */
-  frame->unwind = sentinel_frame_unwind;
+  frame->unwind = &sentinel_frame_unwind;
   /* Link this frame back to itself.  The frame is self referential
      (the unwound PC is the same as the pc), so make it so.  */
   frame->next = frame;

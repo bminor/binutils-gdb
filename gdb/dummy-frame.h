@@ -56,6 +56,6 @@ extern void dummy_frame_pop (struct frame_id dummy_id);
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */
 
-extern const struct frame_unwind *const dummy_frame_unwind;
+extern const struct frame_unwind dummy_frame_unwind;
 
 #endif /* !defined (DUMMY_FRAME_H)  */

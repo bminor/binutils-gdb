@@ -1,6 +1,27 @@
 2010-08-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
+	* dummy-frame.c (dummy_frame_unwinder): Remove its static qualifier.
+	Rename to dummy_frame_unwind.
+	(dummy_frame_unwind): Remove.
+	* dummy-frame.h (dummy_frame_unwind): Reference directly the struct.
+	* frame-unwind.c (frame_unwind_init): Use address of
+	dummy_frame_unwind and inline_frame_unwind.
+	* frame.c (create_sentinel_frame): Use address of
+	sentinel_frame_unwind.
+	* inline-frame.c (inline_frame_unwinder): Rename to
+	inline_frame_unwind.
+	(inline_frame_unwind): Remove.
+	* inline-frame.h (inline_frame_unwind): Reference directly the struct.
+	* sentinel-frame.c (sentinel_frame_unwinder): Rename to
+	sentinel_frame_unwind.
+	(sentinel_frame_unwind): Remove.
+	* sentinel-frame.h (sentinel_frame_unwind): Reference directly the
+	struct.
+
+2010-08-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* frame-unwind.c (frame_unwind_find_by_frame): Remove the return type
 	and returned value.  New comment from frame-unwind.h.
 	* frame-unwind.h (frame_unwind_find_by_frame): Remove the return type.
