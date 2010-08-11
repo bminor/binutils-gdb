@@ -88,7 +88,11 @@ frame_unwind_append_unwinder (struct gdbarch *gdbarch,
   (*ip)->unwinder = unwinder;
 }
 
-const struct frame_unwind *
+/* Iterate through sniffers for THIS_FRAME frame until one returns with an
+   unwinder implementation.  THIS_FRAME->UNWIND must be NULL, it will get set
+   by this function.  Possibly initialize THIS_CACHE.  */
+
+void
 frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -104,7 +108,7 @@ frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
 				    this_cache))
 	{
 	  discard_cleanups (old_cleanup);
-	  return entry->unwinder;
+	  return;
 	}
       do_cleanups (old_cleanup);
     }

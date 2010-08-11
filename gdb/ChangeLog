@@ -1,3 +1,15 @@
+2010-08-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* frame-unwind.c (frame_unwind_find_by_frame): Remove the return type
+	and returned value.  New comment from frame-unwind.h.
+	* frame-unwind.h (frame_unwind_find_by_frame): Remove the return type.
+	Extend the comment.
+	* frame.c (get_frame_id, frame_unwind_register_value)
+	(create_new_frame, get_prev_frame_1, frame_unwinder_is)
+	(get_frame_type, frame_unwind_arch): Do not use the return value of
+	frame_unwind_find_by_frame.
+
 2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
             Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Tom Tromey  <tromey@redhat.com>

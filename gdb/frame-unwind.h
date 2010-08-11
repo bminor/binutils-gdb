@@ -160,11 +160,12 @@ extern void frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
 extern void frame_unwind_append_unwinder (struct gdbarch *gdbarch,
 					  const struct frame_unwind *unwinder);
 
-/* Iterate through sniffers for THIS frame until one returns with an
-   unwinder implementation.  Possibly initialize THIS_CACHE.  */
+/* Iterate through sniffers for THIS_FRAME frame until one returns with an
+   unwinder implementation.  THIS_FRAME->UNWIND must be NULL, it will get set
+   by this function.  Possibly initialize THIS_CACHE.  */
 
-extern const struct frame_unwind *frame_unwind_find_by_frame (struct frame_info *this_frame,
-							      void **this_cache);
+extern void frame_unwind_find_by_frame (struct frame_info *this_frame,
+					void **this_cache);
 
 /* Helper functions for value-based register unwinding.  These return
    a (possibly lazy) value of the appropriate type.  */

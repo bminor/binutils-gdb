@@ -329,7 +329,7 @@ get_frame_id (struct frame_info *fi)
 			    fi->level);
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
-	fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
+	frame_unwind_find_by_frame (fi, &fi->prologue_cache);
       /* Find THIS frame's ID.  */
       /* Default to outermost if no ID is found.  */
       fi->this_id.value = outer_frame_id;
@@ -839,7 +839,7 @@ frame_unwind_register_value (struct frame_info *frame, int regnum)
 
   /* Find the unwinder.  */
   if (frame->unwind == NULL)
-    frame->unwind = frame_unwind_find_by_frame (frame, &frame->prologue_cache);
+    frame_unwind_find_by_frame (frame, &frame->prologue_cache);
 
   /* Ask this frame to unwind its register.  */
   value = frame->unwind->prev_register (frame, &frame->prologue_cache, regnum);
@@ -1328,7 +1328,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
+  frame_unwind_find_by_frame (fi, &fi->prologue_cache);
 
   fi->this_id.p = 1;
   fi->this_id.value = frame_id_build (addr, pc);
@@ -1463,8 +1463,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
      sniffers will think that this frame's sniffer tried to unwind
      further (see frame_cleanup_after_sniffer).  */
   if (this_frame->unwind == NULL)
-    this_frame->unwind
-      = frame_unwind_find_by_frame (this_frame, &this_frame->prologue_cache);
+    frame_unwind_find_by_frame (this_frame, &this_frame->prologue_cache);
 
   this_frame->prev_p = 1;
   this_frame->stop_reason = UNWIND_NO_REASON;
@@ -1961,7 +1960,7 @@ int
 frame_unwinder_is (struct frame_info *fi, const struct frame_unwind *unwinder)
 {
   if (fi->unwind == NULL)
-    fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
+    frame_unwind_find_by_frame (fi, &fi->prologue_cache);
   return fi->unwind == unwinder;
 }
 
@@ -1983,7 +1982,7 @@ get_frame_type (struct frame_info *frame)
   if (frame->unwind == NULL)
     /* Initialize the frame's unwinder because that's what
        provides the frame's type.  */
-    frame->unwind = frame_unwind_find_by_frame (frame, &frame->prologue_cache);
+    frame_unwind_find_by_frame (frame, &frame->prologue_cache);
   return frame->unwind->type;
 }
 
@@ -2063,9 +2062,7 @@ frame_unwind_arch (struct frame_info *next_frame)
       struct gdbarch *arch;
 
       if (next_frame->unwind == NULL)
-	next_frame->unwind
-	  = frame_unwind_find_by_frame (next_frame,
-					&next_frame->prologue_cache);
+	frame_unwind_find_by_frame (next_frame, &next_frame->prologue_cache);
 
       if (next_frame->unwind->prev_arch != NULL)
 	arch = next_frame->unwind->prev_arch (next_frame,
