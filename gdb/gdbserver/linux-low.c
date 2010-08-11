@@ -2045,7 +2045,7 @@ retry:
 
 	    }
 
-	  return pid_to_ptid (pid);
+	  return ptid_of (event_child);
 	}
     }
   else
