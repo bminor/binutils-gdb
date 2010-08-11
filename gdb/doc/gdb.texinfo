@@ -20554,6 +20554,26 @@ Return the name of the current target wide character set
 never returned.
 @end defun
 
+@findex gdb.solib_name
+@defun solib_name address
+Return the name of the shared library holding the given @var{address}
+as a string, or @code{None}.
+@end defun
+
+@findex gdb.decode_line 
+@defun decode_line @r{[}expression@r{]}
+Return locations of the line specified by @var{expression}, or of the
+current line if no argument was given.  This function returns a Python
+tuple containing two elements.  The first element contains a string
+holding any unparsed section of @var{expression} (or @code{None} if
+the expression has been fully parsed).  The second element contains
+either @code{None} or another tuple that contains all the locations
+that match the expression represented as @code{gdb.Symtab_and_line}
+objects (@pxref{Symbol Tables In Python}).  If @var{expression} is
+provided, it is decoded the way that @value{GDBN}'s inbuilt
+@code{break} or @code{edit} commands do (@pxref{Specify Location}).
+@end defun
+
 @node Exception Handling
 @subsubsection Exception Handling
 @cindex python exceptions

@@ -1,3 +1,10 @@
+2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/python.c: New File.
+	* gdb.python/python-sl.c: New File.
+	* gdb.python/python.exp: Test solib_address and decode_line
+	* functions.
+
 2010-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/python.exp (show height, set height 10)

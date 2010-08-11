@@ -1,3 +1,10 @@
+2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
+            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* python/python.c (gdbpy_solib_address):  New function.
+	(gdbpy_decode_line): Likewise.
+
 2010-08-10  Tom Tromey  <tromey@redhat.com>
 
 	Revert gdb-add-index addition:

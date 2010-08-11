@@ -42,7 +42,10 @@ static int gdbpy_should_print_stack = 1;
 #include "cli/cli-decode.h"
 #include "charset.h"
 #include "top.h"
+#include "solib.h"
 #include "python-internal.h"
+#include "linespec.h"
+#include "source.h"
 #include "version.h"
 #include "target.h"
 #include "gdbthread.h"
@@ -372,6 +375,137 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       return r;
     }
   Py_RETURN_NONE;
+}
+
+/* Implementation of gdb.solib_name (Long) -> String.
+   Returns the name of the shared library holding a given address, or None.  */
+
+static PyObject *
+gdbpy_solib_name (PyObject *self, PyObject *args)
+{
+  char *soname;
+  PyObject *str_obj;
+#ifdef PY_LONG_LONG
+  unsigned PY_LONG_LONG pc;
+  const char *format = "K";
+#else
+  unsigned long pc;
+  const char *format = "k";
+#endif
+
+  if (!PyArg_ParseTuple (args, format, &pc))
+    return NULL;
+
+  soname = solib_name_from_address (current_program_space, pc);
+  if (soname)
+    str_obj = PyString_Decode (soname, strlen (soname), host_charset (), NULL);
+  else
+    {
+      str_obj = Py_None;
+      Py_INCREF (Py_None);
+    }
+
+  return str_obj;
+}
+
+/* A Python function which is a wrapper for decode_line_1.  */
+
+static PyObject *
+gdbpy_decode_line (PyObject *self, PyObject *args)
+{
+  struct symtabs_and_lines sals = { NULL, 0 }; /* Initialize to appease gcc.  */
+  struct symtab_and_line sal;
+  char *arg = NULL;
+  char *copy = NULL;
+  struct cleanup *cleanups;
+  PyObject *result = NULL;
+  PyObject *return_result = NULL;
+  PyObject *unparsed = NULL;
+  volatile struct gdb_exception except;
+
+  if (! PyArg_ParseTuple (args, "|s", &arg))
+    return NULL;
+
+  cleanups = ensure_python_env (get_current_arch (), current_language);
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (arg)
+	{
+	  arg = xstrdup (arg);
+	  make_cleanup (xfree, arg);
+	  copy = arg;
+	  sals = decode_line_1 (&copy, 0, 0, 0, 0, 0);
+	  make_cleanup (xfree, sals.sals);
+	}
+      else
+	{
+	  set_default_source_symtab_and_line ();
+	  sal = get_current_source_symtab_and_line ();
+	  sals.sals = &sal;
+	  sals.nelts = 1;
+	}
+    }
+  if (except.reason < 0)
+    {
+      do_cleanups (cleanups);
+      /* We know this will always throw.  */
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (sals.nelts)
+    {
+      int i;
+
+      result = PyTuple_New (sals.nelts);
+      if (! result)
+	goto error;
+      for (i = 0; i < sals.nelts; ++i)
+	{
+	  PyObject *obj;
+	  char *str;
+
+	  obj = symtab_and_line_to_sal_object (sals.sals[i]);
+	  if (! obj)
+	    {
+	      Py_DECREF (result);
+	      goto error;
+	    }
+
+	  PyTuple_SetItem (result, i, obj);
+	}
+    }
+  else
+    {
+      result = Py_None;
+      Py_INCREF (Py_None);
+    }
+
+  return_result = PyTuple_New (2);
+  if (! return_result)
+    {
+      Py_DECREF (result);
+      goto error;
+    }
+
+  if (copy && strlen (copy) > 0)
+    unparsed = PyString_FromString (copy);
+  else
+    {
+      unparsed = Py_None;
+      Py_INCREF (Py_None);
+    }
+
+  PyTuple_SetItem (return_result, 0, unparsed);
+  PyTuple_SetItem (return_result, 1, result);
+
+  do_cleanups (cleanups);
+
+  return return_result;
+
+ error:
+  do_cleanups (cleanups);
+  return NULL;
 }
 
 /* Parse a string and evaluate it as an expression.  */
@@ -825,6 +959,16 @@ a boolean indicating if name is a field of the current implied argument\n\
 `this' (when the current language is object-oriented)." },
   { "block_for_pc", gdbpy_block_for_pc, METH_VARARGS,
     "Return the block containing the given pc value, or None." },
+  { "solib_name", gdbpy_solib_name, METH_VARARGS,
+    "solib_name (Long) -> String.\n\
+Return the name of the shared library holding a given address, or None." },
+  { "decode_line", gdbpy_decode_line, METH_VARARGS,
+    "decode_line (String) -> Tuple.  Decode a string argument the way\n\
+that 'break' or 'edit' does.  Return a tuple containing two elements.\n\
+The first element contains any unparsed portion of the String parameter\n\
+(or None if the string was fully parsed).  The second element contains\n\
+a tuple that contains all the locations that match, represented as\n\
+gdb.Symtab_and_line objects (or None)."},
   { "parse_and_eval", gdbpy_parse_and_eval, METH_VARARGS,
     "parse_and_eval (String) -> Value.\n\
 Parse String as an expression, evaluate it, and return the result as a Value."

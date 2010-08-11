@@ -20,11 +20,43 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-# Start with a fresh gdb.
+set testfile "python"
+set srcfile  ${testfile}.c
+set libfile  "python-sl"
+set libsrc   ${libfile}.c
+set library  ${objdir}/${subdir}/${libfile}.sl
+set binfile  ${objdir}/${subdir}/${testfile}
 
+if { [gdb_compile_shlib ${srcdir}/${subdir}/${libsrc} ${library} "debug"] != "" } {
+    untested "Could not compile shared library."
+    return -1
+}
+
+set exec_opts [list debug shlib=${library}]
+
+if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
+    untested "Could not compile $binfile."
+    return -1
+}
+
+# Start with a fresh gdb.
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
+
+# Skip all tests if Python scripting is not enabled.
+if { [skip_python_tests] } { continue }
+
+# Run a command in GDB, and report a failure if a Python exception is thrown.
+# If report_pass is true, report a pass if no exception is thrown.
+proc gdb_py_test_silent_cmd {cmd name report_pass} {
+    global gdb_prompt
+
+  gdb_test_multiple $cmd $name {
+      -re "Traceback.*$gdb_prompt $"  { fail $name }
+      -re "$gdb_prompt $"	      { if $report_pass { pass $name } }
+  }
+}
 
 gdb_test_multiple "python print 23" "verify python support" {
     -re "not supported.*$gdb_prompt $"	{
@@ -110,3 +142,50 @@ gdb_test_multiple "python print \"\\n\" * $lines" $test {
     }
 }
 gdb_test "q" "Quit" "verify pagination afterwards: q"
+
+# Start with a fresh gdb.
+clean_restart ${testfile}
+
+# The following tests require execution.
+
+if ![runto_main] then {
+    fail "Can't run to main"
+    return 0
+}
+
+runto [gdb_get_line_number "Break to end."]
+
+# Test gdb.decode_line.
+gdb_test "python gdb.decode_line(\"main.c:43\")" \
+    "RuntimeError: No source file named main.c.*" "test decode_line no source named main"
+
+gdb_py_test_silent_cmd "python symtab = gdb.decode_line()" "test decode_line current location" 1
+gdb_test "python print len(symtab)" "2" "Test decode_line current location"
+gdb_test "python print symtab\[0\]" "None" "Test decode_line expression parse"
+gdb_test "python print len(symtab\[1\])" "1" "Test decode_line current location"
+gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python.c.*" "Test decode_line current locationn filename"
+gdb_test "python print symtab\[1\]\[0\].line" "22" "Test decode_line current location line number"
+
+gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"python.c:26 if foo\")" "test decode_line python.c:26" 1
+gdb_test "python print len(symtab)" "2" "Test decode_line python.c:26 length"
+gdb_test "python print symtab\[0\]" "if foo" "Test decode_line expression parse"
+gdb_test "python print len(symtab\[1\])" "1" "Test decode_line python.c:26 length"
+gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python.c.*" "Test decode_line python.c:26 filename"
+gdb_test "python print symtab\[1\]\[0\].line" "26" "Test decode_line python.c:26 line number"
+
+gdb_test "python gdb.decode_line(\"randomfunc\")" \
+    "RuntimeError: Function \"randomfunc\" not defined.*" "test decode_line randomfunc"
+gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"func1\")" "test decode_line func1()" 1
+gdb_test "python print len(symtab)" "2" "Test decode_line func1 length"
+gdb_test "python print len(symtab\[1\])" "1" "Test decode_line func1 length"
+gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python-sl.c.*" "Test decode_line func1 filename"
+gdb_test "python print symtab\[1\]\[0\].line" "19" "Test decode_line func1 line number"
+
+# Test gdb.solib_name
+gdb_test "p &func1" "" "func1 address"
+gdb_py_test_silent_cmd "python func1 = gdb.history(0)" "Aquire func1 address" 1
+gdb_test "python print gdb.solib_name(long(func1))" "gdb/testsuite/gdb.python/python-sl.sl" "test func1 solib location"
+
+gdb_test "p &main" "" "main address"
+gdb_py_test_silent_cmd "python main = gdb.history(0)" "Aquire main address" 1
+gdb_test "python print gdb.solib_name(long(main))" "None" "test main solib location"
