@@ -929,8 +929,8 @@ value_args_as_decimal (struct value *arg1, struct value *arg2,
    Does not support addition and subtraction on pointers;
    use value_ptradd, value_ptrsub or value_ptrdiff for those operations.  */
 
-struct value *
-value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
+static struct value *
+scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 {
   struct value *val;
   struct type *type1, *type2, *result_type;
@@ -1378,6 +1378,71 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
     }
 
   return val;
+}
+
+/* Performs a binary operation on two vector operands by calling scalar_binop
+   for each pair of vector components.  */
+
+static struct value *
+vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
+{
+  struct value *val, *tmp, *mark;
+  struct type *type1, *type2, *eltype1, *eltype2, *result_type;
+  int t1_is_vec, t2_is_vec, elsize, n, i;
+
+  type1 = check_typedef (value_type (val1));
+  type2 = check_typedef (value_type (val2));
+
+  t1_is_vec = (TYPE_CODE (type1) == TYPE_CODE_ARRAY
+	       && TYPE_VECTOR (type1)) ? 1 : 0;
+  t2_is_vec = (TYPE_CODE (type2) == TYPE_CODE_ARRAY
+	       && TYPE_VECTOR (type2)) ? 1 : 0;
+
+  if (!t1_is_vec || !t2_is_vec)
+    error (_("Vector operations are only supported among vectors"));
+
+  eltype1 = check_typedef (TYPE_TARGET_TYPE (type1));
+  eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
+
+  if (TYPE_CODE (eltype1) != TYPE_CODE (eltype2)
+      || TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2)
+      || TYPE_UNSIGNED (eltype1) != TYPE_UNSIGNED (eltype2))
+    error (_("Cannot perform operation on vectors with different types"));
+
+  elsize = TYPE_LENGTH (eltype1);
+  n = TYPE_LENGTH (type1) / elsize;
+
+  if (n != TYPE_LENGTH (type2) / TYPE_LENGTH (eltype2))
+    error (_("Cannot perform operation on vectors with different sizes"));
+
+  val = allocate_value (type1);
+  mark = value_mark ();
+  for (i = 0; i < n; i++)
+    {
+      tmp = value_binop (value_subscript (val1, i),
+			 value_subscript (val2, i), op);
+      memcpy (value_contents_writeable (val) + i * elsize,
+	      value_contents_all (tmp),
+	      elsize);
+     }
+  value_free_to_mark (mark);
+
+  return val;
+}
+
+/* Perform a binary operation on two operands.  */
+
+struct value *
+value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
+{
+  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type2 = check_typedef (value_type (arg2));
+
+  if ((TYPE_CODE (type1) == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
+	  || (TYPE_CODE (type2) == TYPE_CODE_ARRAY && TYPE_VECTOR (type2)))
+    return vector_binop (arg1, arg2, op);
+  else
+    return scalar_binop (arg1, arg2, op);
 }
 
 /* Simulate the C operator ! -- return 1 if ARG1 contains zero.  */

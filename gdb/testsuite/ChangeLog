@@ -1,3 +1,9 @@
+2010-08-11  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.base/Makefile.in (EXECUTABLES): Add gnu_vector.
+	* gdb.base/gnu_vector.c: New File.
+	* gdb.base/gnu_vector.exp: Likewise.
+
 2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/python.c: New File.

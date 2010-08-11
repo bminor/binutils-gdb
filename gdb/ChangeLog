@@ -1,3 +1,13 @@
+2010-08-11  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb/valarith.c (vector_binop): New function.
+	(scalar_binop): Likewise.
+	(value_binop): Call scalar_binop or vector_binop depending on the types.
+	* gdb/eval.c (ptrmath_type_p): Return 0 in case of TYPE_VECTOR.
+	(evaluate_subexp_with_coercion): Add vector check to not convert vectors
+	to pointers.
+	* gdb/value.c (coerce_array): Add vector check to not coerce vectors.
+
 2010-08-11  Brad Roberts  <braddr@puremagic.com>
 
 	* d-lang.c (extract_identifiers): Handle multiple digits.

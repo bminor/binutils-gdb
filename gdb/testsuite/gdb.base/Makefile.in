@@ -13,7 +13,7 @@ EXECUTABLES = all-types annota1 bitfields break \
 	solib solib_sl so-impl-ld so-indr-cl \
 	step-line step-test structs structs2 \
 	twice-tmp varargs vforked-prog watchpoint whatis catch-syscall \
-	pr10179
+	pr10179 gnu_vector
 
 MISCELLANEOUS = coremmap.data ../foobar.baz \
 	shr1.sl shr2.sl solib_sl.sl solib1.sl solib2.sl
