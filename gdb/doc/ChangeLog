@@ -1,3 +1,8 @@
+2010-08-11  Tom Tromey  <tromey@redhat.com>
+            Phil Muldoon <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Basic Python): Describe post_event API.
+
 2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Basic Python): Describe solib_address and

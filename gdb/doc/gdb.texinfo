@@ -20525,6 +20525,45 @@ compute values, for example, it is the only way to get the value of a
 convenience variable (@pxref{Convenience Vars}) as a @code{gdb.Value}.
 @end defun
 
+@findex gdb.post_event
+@defun post_event event
+Put @var{event}, a callable object taking no arguments, into
+@value{GDBN}'s internal event queue.  This callable will be invoked at
+some later point, during @value{GDBN}'s event processing.  Events
+posted using @code{post_event} will be run in the order in which they
+were posted; however, there is no way to know when they will be
+processed relative to other events inside @value{GDBN}.
+
+@value{GDBN} is not thread-safe.  If your Python program uses multiple
+threads, you must be careful to only call @value{GDBN}-specific
+functions in the main @value{GDBN} thread.  @code{post_event} ensures
+this.  For example:
+
+@smallexample
+(@value{GDBP}) python
+>import threading
+>
+>class Writer():
+> def __init__(self, message):
+>        self.message = message;
+> def __call__(self):
+>        gdb.write(self.message)
+>
+>class MyThread1 (threading.Thread):
+> def run (self):
+>        gdb.post_event(Writer("Hello "))
+>
+>class MyThread2 (threading.Thread):
+> def run (self):
+>        gdb.post_event(Writer("World\n"))
+>
+>MyThread1().start()
+>MyThread2().start()
+>end
+(@value{GDBP}) Hello World
+@end smallexample
+@end defun
+
 @findex gdb.write
 @defun write string
 Print a string to @value{GDBN}'s paginated standard output stream.

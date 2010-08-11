@@ -120,6 +120,20 @@ gdb_test_no_output \
     "python x = gdb.execute('printf \"%d\", 23', to_string = True)"
 gdb_test "python print x" "23"
 
+# Test post_event.
+gdb_py_test_multiple "post event insertion" \
+  "python" "" \
+  "someVal = 0" "" \
+  "class Foo():" "" \
+  "  def __call__(self):" "" \
+  "    global someVal" "" \
+  "    someVal += 1" "" \
+  "gdb.post_event(Foo())" "" \
+  "end" ""
+
+gdb_test "python print someVal" "1" "test post event execution"
+gdb_test "python gdb.post_event(str(1))" "RuntimeError: Posted event is not callable.*" "Test non callable class"
+
 # Test (no) pagination of the executed command.
 gdb_test "show height" {Number of lines gdb thinks are in a page is unlimited\.}
 set lines 10

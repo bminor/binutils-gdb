@@ -1,3 +1,8 @@
+2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/python.exp (gdb_py_test_multiple): Add gdb.post_event
+	tests.
+
 2010-08-11  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.base/Makefile.in (EXECUTABLES): Add gnu_vector.
