@@ -451,7 +451,7 @@ Plugin_manager::add_input_file(const char *pathname, bool is_lib)
   Input_argument* input_argument = new Input_argument(file);
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
-  if (this->layout_->incremental_inputs())
+  if (parameters->options().incremental())
     gold_error(_("input files added by plug-ins in --incremental mode not "
 		 "supported yet"));
   this->workqueue_->queue_soon(new Read_symbols(this->input_objects_,

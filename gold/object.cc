@@ -40,6 +40,7 @@
 #include "dynobj.h"
 #include "plugin.h"
 #include "compressed_output.h"
+#include "incremental.h"
 
 namespace gold
 {
@@ -344,6 +345,30 @@ Relobj::is_section_name_included(const char* name)
       return true; 
     }
   return false;
+}
+
+// Finalize the incremental relocation information.  Allocates a block
+// of relocation entries for each symbol, and sets the reloc_bases_
+// array to point to the first entry in each block.  Returns the next
+// available reloation index.
+
+void
+Relobj::finalize_incremental_relocs(Layout* layout)
+{
+  unsigned int nsyms = this->get_global_symbols()->size();
+  this->reloc_bases_ = new unsigned int[nsyms];
+
+  gold_assert(this->reloc_bases_ != NULL);
+  gold_assert(layout->incremental_inputs() != NULL);
+
+  unsigned int rindex = layout->incremental_inputs()->get_reloc_count();
+  for (unsigned int i = 0; i < nsyms; ++i)
+    {
+      this->reloc_bases_[i] = rindex;
+      rindex += this->reloc_counts_[i];
+      this->reloc_counts_[i] = 0;
+    }
+  layout->incremental_inputs()->set_reloc_count(rindex);
 }
 
 // Class Sized_relobj.
@@ -1236,6 +1261,13 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
    		    discard = true;
 	        }
 	    }
+
+	  // Add the section to the incremental inputs layout.
+	  Incremental_inputs* incremental_inputs = layout->incremental_inputs();
+	  if (incremental_inputs != NULL)
+	    incremental_inputs->report_input_section(this, i,
+						     discard ? NULL : name,
+						     shdr.get_sh_size());
 
           if (discard)
             {

@@ -39,6 +39,7 @@
 #include "layout.h"
 #include "archive.h"
 #include "plugin.h"
+#include "incremental.h"
 
 namespace gold
 {
@@ -89,7 +90,8 @@ Archive::Archive(const std::string& name, Input_file* input_file,
   : name_(name), input_file_(input_file), armap_(), armap_names_(),
     extended_names_(), armap_checked_(), seen_offsets_(), members_(),
     is_thin_archive_(is_thin_archive), included_member_(false),
-    nested_archives_(), dirpath_(dirpath), task_(task), num_members_(0)
+    nested_archives_(), dirpath_(dirpath), task_(task), num_members_(0),
+    incremental_info_(NULL)
 {
   this->no_export_ =
     parameters->options().check_excluded_libs(input_file->found_name());
@@ -891,6 +893,8 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
   else
     {
       {
+	if (layout->incremental_inputs() != NULL)
+	  layout->incremental_inputs()->report_object(obj, this);
 	Read_symbols_data sd;
 	obj->read_symbols(&sd);
 	obj->layout(symtab, layout, &sd);
@@ -952,6 +956,11 @@ Add_archive_symbols::locks(Task_locker* tl)
 void
 Add_archive_symbols::run(Workqueue* workqueue)
 {
+  // For an incremental link, begin recording layout information.
+  Incremental_inputs* incremental_inputs = this->layout_->incremental_inputs();
+  if (incremental_inputs != NULL)
+    incremental_inputs->report_archive_begin(this->archive_);
+
   bool added = this->archive_->add_symbols(this->symtab_, this->layout_,
 					   this->input_objects_,
 					   this->mapfile_);
@@ -978,6 +987,11 @@ Add_archive_symbols::run(Workqueue* workqueue)
     this->input_group_->add_archive(this->archive_);
   else
     {
+      // For an incremental link, finish recording the layout information.
+      Incremental_inputs* incremental_inputs = this->layout_->incremental_inputs();
+      if (incremental_inputs != NULL)
+	incremental_inputs->report_archive_end(this->archive_);
+
       // We no longer need to know about this archive.
       delete this->archive_;
       this->archive_ = NULL;
@@ -1077,6 +1091,9 @@ Lib_group::include_member(Symbol_table* symtab, Layout* layout,
   obj->lock(this->task_);
   if (input_objects->add_object(obj))
     {
+      // FIXME: Record incremental link info for --start-lib/--end-lib.
+      if (layout->incremental_inputs() != NULL)
+	layout->incremental_inputs()->report_object(obj, NULL);
       obj->layout(symtab, layout, sd);
       obj->add_symbols(symtab, sd, layout);
       // Unlock the file for the next task.
@@ -1116,6 +1133,8 @@ void
 Add_lib_group_symbols::run(Workqueue*)
 {
   this->lib_->add_symbols(this->symtab_, this->layout_, this->input_objects_);
+
+  // FIXME: Record incremental link info for --start_lib/--end_lib.
 }
 
 Add_lib_group_symbols::~Add_lib_group_symbols()

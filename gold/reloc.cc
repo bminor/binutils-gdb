@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include "workqueue.h"
+#include "layout.h"
 #include "symtab.h"
 #include "output.h"
 #include "merge.h"
@@ -33,6 +34,7 @@
 #include "reloc.h"
 #include "icf.h"
 #include "compressed_output.h"
+#include "incremental.h"
 
 namespace gold
 {
@@ -300,7 +302,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 				   != 0);
       if (!is_section_allocated
 	  && !parameters->options().relocatable()
-	  && !parameters->options().emit_relocs())
+	  && !parameters->options().emit_relocs()
+	  && !parameters->options().incremental())
 	continue;
 
       if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx_)
@@ -424,6 +427,10 @@ Sized_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
   else
     local_symbols = rd->local_symbols->data();
 
+  // For incremental links, allocate the counters for incremental relocations.
+  if (layout->incremental_inputs() != NULL)
+    this->allocate_incremental_reloc_counts();
+
   for (Read_relocs_data::Relocs_list::iterator p = rd->relocs.begin();
        p != rd->relocs.end();
        ++p)
@@ -451,6 +458,8 @@ Sized_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
 				local_symbols);
 	  if (parameters->options().emit_relocs())
 	    this->emit_relocs_scan(symtab, layout, local_symbols, p);
+	  if (layout->incremental_inputs() != NULL)
+	    this->incremental_relocs_scan(p);
 	}
       else
 	{
@@ -471,6 +480,10 @@ Sized_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
       delete p->contents;
       p->contents = NULL;
     }
+
+  // For incremental links, finalize the allocation of relocations.
+  if (layout->incremental_inputs() != NULL)
+    this->finalize_incremental_relocs(layout);
 
   if (rd->local_symbols != NULL)
     {
@@ -567,6 +580,54 @@ Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
     rr);
 }
 
+// Scan the input relocations for --incremental.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::incremental_relocs_scan(
+    const Read_relocs_data::Relocs_list::iterator& p)
+{
+  if (p->sh_type == elfcpp::SHT_REL)
+    this->incremental_relocs_scan_reltype<elfcpp::SHT_REL>(p);
+  else
+    {
+      gold_assert(p->sh_type == elfcpp::SHT_RELA);
+      this->incremental_relocs_scan_reltype<elfcpp::SHT_RELA>(p);
+    }
+}
+
+// Scan the input relocation for --emit-relocs, templatized on the
+// type of the relocation section.
+
+template<int size, bool big_endian>
+template<int sh_type>
+void
+Sized_relobj<size, big_endian>::incremental_relocs_scan_reltype(
+    const Read_relocs_data::Relocs_list::iterator& p)
+{
+  typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
+  const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
+  const unsigned char* prelocs = p->contents->data();
+  size_t reloc_count = p->reloc_count;
+
+  for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
+    {
+      Reltype reloc(prelocs);
+
+      if (p->needs_special_offset_handling
+	  && !p->output_section->is_input_address_mapped(this, p->data_shndx,
+						         reloc.get_r_offset()))
+	continue;
+
+      typename elfcpp::Elf_types<size>::Elf_WXword r_info =
+	  reloc.get_r_info();
+      const unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+
+      if (r_sym >= this->local_symbol_count_)
+	this->count_incremental_reloc(r_sym - this->local_symbol_count_);
+    }
+}
+
 // Relocate the input sections and write out the local symbols.
 
 template<int size, bool big_endian>
@@ -597,7 +658,7 @@ Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
 
   // Apply relocations.
 
-  this->relocate_sections(symtab, layout, pshdrs, &views);
+  this->relocate_sections(symtab, layout, pshdrs, of, &views);
 
   // After we've done the relocations, we release the hash tables,
   // since we no longer need them.
@@ -827,6 +888,7 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
+    Output_file* of,
     Views* pviews)
 {
   unsigned int shnum = this->shnum();
@@ -938,6 +1000,9 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
 	    this->emit_relocs(&relinfo, i, sh_type, prelocs, reloc_count,
 			      os, output_offset, view, address, view_size,
 			      (*pviews)[i].view, (*pviews)[i].view_size);
+	  if (parameters->options().incremental())
+	    this->incremental_relocs_write(&relinfo, sh_type, prelocs,
+					   reloc_count, os, output_offset, of);
 	}
       else
 	{
@@ -1018,6 +1083,126 @@ Sized_relobj<size, big_endian>::emit_relocs_reltype(
     view_size,
     reloc_view,
     reloc_view_size);
+}
+
+// Write the incremental relocs.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::incremental_relocs_write(
+    const Relocate_info<size, big_endian>* relinfo,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    Address output_offset,
+    Output_file* of)
+{
+  if (sh_type == elfcpp::SHT_REL)
+    this->incremental_relocs_write_reltype<elfcpp::SHT_REL>(
+	relinfo,
+	prelocs,
+	reloc_count,
+	output_section,
+	output_offset,
+	of);
+  else
+    {
+      gold_assert(sh_type == elfcpp::SHT_RELA);
+      this->incremental_relocs_write_reltype<elfcpp::SHT_RELA>(
+	  relinfo,
+	  prelocs,
+	  reloc_count,
+	  output_section,
+	  output_offset,
+	  of);
+    }
+}
+
+// Write the incremental relocs, templatized on the type of the
+// relocation section.
+
+template<int size, bool big_endian>
+template<int sh_type>
+void
+Sized_relobj<size, big_endian>::incremental_relocs_write_reltype(
+    const Relocate_info<size, big_endian>* relinfo,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    Address output_offset,
+    Output_file* of)
+{
+  typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reloc;
+  const unsigned int reloc_size =
+      Reloc_types<sh_type, size, big_endian>::reloc_size;
+  const unsigned int sizeof_addr = size / 8;
+  const unsigned int incr_reloc_size = 8 + 2 * sizeof_addr;
+
+  unsigned int out_shndx = output_section->out_shndx();
+
+  // Get a view for the .gnu_incremental_relocs section.
+
+  Incremental_inputs* inputs = relinfo->layout->incremental_inputs();
+  gold_assert(inputs != NULL);
+  const off_t relocs_off = inputs->relocs_section()->offset();
+  const off_t relocs_size = inputs->relocs_section()->data_size();
+  unsigned char* const view = of->get_output_view(relocs_off, relocs_size);
+
+  for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
+    {
+      Reloc reloc(prelocs);
+
+      typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
+      const unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+      const unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
+
+      if (r_sym < this->local_symbol_count_)
+        continue;
+
+      // Get the new offset--the location in the output section where
+      // this relocation should be applied.
+
+      Address offset = reloc.get_r_offset();
+      if (output_offset != invalid_address)
+	offset += output_offset;
+      else
+	{
+          section_offset_type sot_offset =
+              convert_types<section_offset_type, Address>(offset);
+	  section_offset_type new_sot_offset =
+	      output_section->output_offset(relinfo->object,
+					    relinfo->data_shndx,
+					    sot_offset);
+	  gold_assert(new_sot_offset != -1);
+	  offset += new_sot_offset;
+	}
+
+      // Get the addend.
+      typename elfcpp::Elf_types<size>::Elf_Swxword addend;
+      if (sh_type == elfcpp::SHT_RELA)
+	addend =
+	    Reloc_types<sh_type, size, big_endian>::get_reloc_addend(&reloc);
+      else
+        {
+          // FIXME: Get the addend for SHT_REL.
+          addend = 0;
+        }
+
+      // Get the index of the output relocation.
+
+      unsigned int reloc_index =
+          this->next_incremental_reloc_index(r_sym - this->local_symbol_count_);
+
+      // Write the relocation.
+
+      unsigned char* pov = view + reloc_index * incr_reloc_size;
+      elfcpp::Swap<32, big_endian>::writeval(pov, r_type);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 4, out_shndx);
+      elfcpp::Swap<size, big_endian>::writeval(pov + 8, offset);
+      elfcpp::Swap<size, big_endian>::writeval(pov + 8 + sizeof_addr, addend);
+      of->write_output_view(pov - view, incr_reloc_size, view);
+    }
 }
 
 // Create merge hash tables for the local symbols.  These are used to
@@ -1556,6 +1741,7 @@ Sized_relobj<32, false>::do_relocate_sections(
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
+    Output_file* of,
     Views* pviews);
 #endif
 
@@ -1566,6 +1752,7 @@ Sized_relobj<32, true>::do_relocate_sections(
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
+    Output_file* of,
     Views* pviews);
 #endif
 
@@ -1576,6 +1763,7 @@ Sized_relobj<64, false>::do_relocate_sections(
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
+    Output_file* of,
     Views* pviews);
 #endif
 
@@ -1586,6 +1774,7 @@ Sized_relobj<64, true>::do_relocate_sections(
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
+    Output_file* of,
     Views* pviews);
 #endif
 

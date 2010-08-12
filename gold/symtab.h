@@ -1468,6 +1468,16 @@ class Symbol_table
   compute_final_value(const Sized_symbol<size>* sym,
 		      Compute_final_value_status* pstatus) const;
 
+  // Return the index of the first global symbol.
+  unsigned int
+  first_global_index() const
+  { return this->first_global_index_; }
+
+  // Return the total number of symbols in the symbol table.
+  unsigned int
+  output_count() const
+  { return this->output_count_; }
+
   // Write out the global symbols.
   void
   write_globals(const Stringpool*, const Stringpool*,

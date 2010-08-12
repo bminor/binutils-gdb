@@ -1,3 +1,157 @@
+2010-08-12  Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc: Include incremental.h.
+	(Archive::Archive): Initialize incremental_info_.
+	(Archive::include_member): Record archive members in incremental info.
+	(Add_archive_symbols::run): Record begin and end of an archive in
+	incremental info.
+	(Lib_group::include_member): Record objects in incremental info.
+	* archive.h (Incremental_archive_entry): Forward declaration.
+	(Archive::set_incremental_info): New member function.
+	(Archive::incremental_info): New member function.
+	(Archive::Unused_symbol_iterator): New class.
+	(Archive::unused_symbols_begin): New member function.
+	(Archive::unused_symbols_end): New member function.
+	(Archive::incremental_info_): New data member.
+	* incremental-dump.cc (find_input_containing_global): New function.
+	(dump_incremental_inputs): Dump new incremental info sections.
+	* incremental.cc: Include symtab.h.
+	(Output_section_incremental_inputs): New class.
+	(Sized_incremental_binary::do_find_incremental_inputs_sections): Support
+	new incremental info sections.
+	(Sized_incremental_binary::do_check_inputs): Likewise.
+	(Incremental_inputs::report_archive): Remove.
+	(Incremental_inputs::report_archive_begin): New function.
+	(Incremental_inputs::report_archive_end): New function.
+	(Incremental_inputs::report_object): New function.
+	(Incremental_inputs::finalize_inputs): Remove.
+	(Incremental_inputs::report_input_section): New function.
+	(Incremental_inputs::report_script): Rewrite.
+	(Incremental_inputs::finalize): Do nothing but finalize string table.
+	(Incremental_inputs::create_incremental_inputs_section_data): Remove.
+	(Incremental_inputs::sized_create_inputs_section_data): Remove.
+	(Incremental_inputs::create_data_sections): New function.
+	(Incremental_inputs::relocs_entsize): New function.
+	(Output_section_incremental_inputs::set_final_data_size): New function.
+	(Output_section_incremental_inputs::do_write): New function.
+	(Output_section_incremental_inputs::write_header): New function.
+	(Output_section_incremental_inputs::write_input_files): New function.
+	(Output_section_incremental_inputs::write_info_blocks): New function.
+	(Output_section_incremental_inputs::write_symtab): New function.
+	* incremental.h (Incremental_script_entry): Forward declaration.
+	(Incremental_object_entry): Forward declaration.
+	(Incremental_archive_entry): Forward declaration.
+	(Incremental_inputs): Forward declaration.
+	(Incremental_inputs_header_data): Remove.
+	(Incremental_inputs_header): Remove.
+	(Incremental_inputs_header_write): Remove.
+	(Incremental_inputs_entry_data): Remove.
+	(Incremental_inputs_entry): Remove.
+	(Incremental_inputs_entry_write): Remove.
+	(enum Incremental_input_type): Add INCREMENTAL_INPUT_ARCHIVE_MEMBER.
+	(Incremental_binary::find_incremental_inputs_sections): Add parameters.
+	(Incremental_binary::do_find_incremental_inputs_sections): Likewise.
+	(Sized_ncremental_binary::do_find_incremental_inputs_sections):
+	Likewise.
+	(Incremental_input_entry): New class.
+	(Incremental_script_entry): New class.
+	(Incremental_object_entry): New class.
+	(Incremental_archive_entry): New class.
+	(Incremental_inputs::Incremental_inputs): Initialize new data members.
+	(Incremental_inputs::report_inputs): Remove.
+	(Incremental_inputs::report_archive): Remove.
+	(Incremental_inputs::report_archive_begin): New function.
+	(Incremental_inputs::report_archive_end): New function.
+	(Incremental_inputs::report_object): Change prototype.
+	(Incremental_inputs::report_input_section): New function.
+	(Incremental_inputs::report_script): Change prototype.
+	(Incremental_inputs::get_reloc_count): New function.
+	(Incremental_inputs::set_reloc_count): New function.
+	(Incremental_inputs::create_data_sections): New function.
+	(Incremental_inputs::create_incremental_inputs_section_data): Remove.
+	(Incremental_inputs::inputs_section): New function.
+	(Incremental_inputs::symtab_section): New function.
+	(Incremental_inputs::relocs_section): New function.
+	(Incremental_inputs::get_stringpool): Add const.
+	(Incremental_inputs::command_line): Add const.
+	(Incremental_inputs::inputs): Remove.
+	(Incremental_inputs::command_line_key): New function.
+	(Incremental_inputs::input_file_count): New function.
+	(Incremental_inputs::input_files): New function.
+	(Incremental_inputs::relocs_entsize): New function.
+	(Incremental_inputs::sized_create_inputs_section_data): Remove.
+	(Incremental_inputs::finalize_inputs): Remove.
+	(Incremental_inputs::Input_info): Remove.
+	(Incremental_inputs::lock_): Remove.
+	(Incremental_inputs::inputs_): Change type.
+	(Incremental_inputs::inputs_map_): Remove.
+	(Incremental_inputs::current_object_entry_): New data member.
+	(Incremental_inputs::inputs_section_): New data member.
+	(Incremental_inputs::symtab_section_): New data member.
+	(Incremental_inputs::relocs_section_): New data member.
+	(Incremental_inputs::reloc_count_): New data member.
+	(Incremental_inputs_reader): New class.
+	(Incremental_symtab_reader): New class.
+	(Incremental_relocs_reader): New class.
+	* layout.cc (Layout::finalize): Move finalization of incremental info
+	and creation of incremental info sections to follow finalization of
+	symbol table.  Set offsets for postprocessing sections.
+	(Layout::create_incremental_info_sections): Call
+	Incremental_inputs::create_data_sections.  Add incremental symtab
+	and relocs sections.  Set sh_entsize and sh_link fields.  Arrange for
+	sections to layout after input sections.
+	* layout.h (struct Timespec): Forward declaration.
+	(Layout::incremental_inputs): Add const.
+	(Layout::create_incremental_info_sections): Add parameter.
+	* main.cc (main): Remove call to Incremental_inputs::report_inputs.
+	* object.cc: Include incremental.h.
+	(Relobj::finalize_incremental_relocs): New function.
+	(Sized_relobj::do_layout): Record input sections in incremental info.
+	* object.h (Object::output_section): New function.
+	(Object::output_section_offset): Moved from Relobj.
+	(Object::get_incremental_reloc_base): New function.
+	(Object::get_incremental_reloc_count): New function.
+	(Object::do_output_section): New function.
+	(Object::do_output_section_offset): Moved from Relobj.
+	(Object::do_get_incremental_reloc_base): New function.
+	(Object::do_get_incremental_reloc_count): New function.
+	(Object::Object): Initialize new data members.
+	(Relobj::output_section): Renamed do_output_section and moved to
+	protected.
+	(Relobj::output_section_offset): Moved to Object.
+	(Relobj::do_get_incremental_reloc_base): New function.
+	(Relobj::do_get_incremental_reloc_count): New function.
+	(Relobj::allocate_incremental_reloc_counts): New function.
+	(Relobj::count_incremental_reloc): New function.
+	(Relobj::finalize_incremental_relocs): New function.
+	(Relobj::next_incremental_reloc_index): New function.
+	(Relobj::reloc_counts_): New data member.
+	(Relobj::reloc_bases_): New data member.
+	(Sized_relobj::do_relocate_sections): Add parameter.  Change caller.
+	(Sized_relobj::relocate_sections): Add parameter.  Change all callers.
+	(Sized_relobj::incremental_relocs_scan): New function.
+	(Sized_relobj::incremental_relocs_scan_reltype): New function.
+	(Sized_relobj::incremental_relocs_write): New function.
+	(Sized_relobj::incremental_relocs_write_reltype): New function.
+	* plugin.cc (Plugin_manager::add_input_file): Rewrite test for
+	incremental link.
+	* readsyms.cc (Read_symbols::do_read_symbols): Move reporting of
+	archives and object files elsewhere.
+	(Add_symbols::run): Report object files here.
+	(Finish_group::run): Report end of archive at end of group.
+	* reloc.cc: Include layout.h, incremental.h.
+	(Sized_relobj::do_read_relocs): Need relocations for incremental link.
+	(Sized_relobj::do_scan_relocs): Record relocations for incremental link.
+	(Sized_relobj::incremental_relocs_scan): New function.
+	(Sized_relobj::incremental_relocs_scan_reltype): New function.
+	(Sized_relobj::do_relocate_sections): Write incremental relocations.
+	(Sized_relobj::incremental_relocs_write): New function.
+	(Sized_relobj::incremental_relocs_write_reltype): New function.
+	* script.cc (read_input_script): Rewrite test for incremental link.
+	Change call to Incremental_inputs::report_script.
+	* symtab.h (Symbol_table::first_global_index): New function.
+	(Symbol_table::output_count): New function.
+
 2010-08-12  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::merge_object_attributes): Check command line

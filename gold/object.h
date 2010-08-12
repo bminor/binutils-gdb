@@ -387,6 +387,18 @@ class Object
   section_addralign(unsigned int shndx)
   { return this->do_section_addralign(shndx); }
 
+  // Return the output section given a section index.
+  Output_section*
+  output_section(unsigned int shndx) const
+  { return this->do_output_section(shndx); }
+
+  // Given a section index, return the offset in the Output_section.
+  // The return value will be -1U if the section is specially mapped,
+  // such as a merge section.
+  uint64_t
+  output_section_offset(unsigned int shndx) const
+  { return this->do_output_section_offset(shndx); }
+
   // Read the symbol information.
   void
   read_symbols(Read_symbols_data* sd)
@@ -525,6 +537,16 @@ class Object
 			section_size_type* uncompressed_size) const
   { return this->do_section_is_compressed(shndx, uncompressed_size); }
 
+  // Return the index of the first incremental relocation for symbol SYMNDX.
+  unsigned int
+  get_incremental_reloc_base(unsigned int symndx) const
+  { return this->do_get_incremental_reloc_base(symndx); }
+
+  // Return the number of incremental relocations for symbol SYMNDX.
+  unsigned int
+  get_incremental_reloc_count(unsigned int symndx) const
+  { return this->do_get_incremental_reloc_count(symndx); }
+
  protected:
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
@@ -590,6 +612,17 @@ class Object
   virtual uint64_t
   do_section_addralign(unsigned int shndx) = 0;
 
+  // Return the output section given a section index--implemented
+  // by child class.
+  virtual Output_section*
+  do_output_section(unsigned int) const
+  { gold_unreachable(); }
+
+  // Get the offset of a section--implemented by child class.
+  virtual uint64_t
+  do_output_section_offset(unsigned int) const
+  { gold_unreachable(); }
+
   // Return the Xindex structure to use.
   virtual Xindex*
   do_initialize_xindex() = 0;
@@ -641,6 +674,18 @@ class Object
   do_section_is_compressed(unsigned int, section_size_type*) const
   { return false; }
 
+  // Return the index of the first incremental relocation for symbol SYMNDX--
+  // implemented by child class.
+  virtual unsigned int
+  do_get_incremental_reloc_base(unsigned int) const
+  { gold_unreachable(); }
+
+  // Return the number of incremental relocations for symbol SYMNDX--
+  // implemented by child class.
+  virtual unsigned int
+  do_get_incremental_reloc_count(unsigned int) const
+  { gold_unreachable(); }
+
  private:
   // This class may not be copied.
   Object(const Object&);
@@ -685,7 +730,9 @@ class Relobj : public Object
       map_to_relocatable_relocs_(NULL),
       object_merge_map_(NULL),
       relocs_must_follow_section_writes_(false),
-      sd_(NULL)
+      sd_(NULL),
+      reloc_counts_(NULL),
+      reloc_bases_(NULL)
   { }
 
   // During garbage collection, the Read_symbols_data pass for 
@@ -781,16 +828,6 @@ class Relobj : public Object
     return this->output_sections_[shndx] != NULL;
   }
 
-  // Given a section index, return the corresponding Output_section.
-  // The return value will be NULL if the section is not included in
-  // the link.
-  Output_section*
-  output_section(unsigned int shndx) const
-  {
-    gold_assert(shndx < this->output_sections_.size());
-    return this->output_sections_[shndx];
-  }
-
   // The the output section of the input section with index SHNDX.
   // This is only used currently to remove a section from the link in
   // relaxation.
@@ -801,13 +838,6 @@ class Relobj : public Object
     this->output_sections_[shndx] = os;
   }
   
-  // Given a section index, return the offset in the Output_section.
-  // The return value will be -1U if the section is specially mapped,
-  // such as a merge section.
-  uint64_t
-  output_section_offset(unsigned int shndx) const
-  { return this->do_output_section_offset(shndx); }
-
   // Set the offset of an input section within its output section.
   void
   set_section_offset(unsigned int shndx, uint64_t off)
@@ -856,6 +886,16 @@ class Relobj : public Object
   layout_deferred_sections(Layout* layout)
   { this->do_layout_deferred_sections(layout); }
 
+  // Return the index of the first incremental relocation for symbol SYMNDX.
+  virtual unsigned int
+  do_get_incremental_reloc_base(unsigned int symndx) const
+  { return this->reloc_bases_[symndx]; }
+
+  // Return the number of incremental relocations for symbol SYMNDX.
+  virtual unsigned int
+  do_get_incremental_reloc_count(unsigned int symndx) const
+  { return this->reloc_counts_[symndx]; }
+
  protected:
   // The output section to be used for each input section, indexed by
   // the input section number.  The output section is NULL if the
@@ -902,10 +942,6 @@ class Relobj : public Object
   virtual void
   do_relocate(const Symbol_table* symtab, const Layout*, Output_file* of) = 0;
 
-  // Get the offset of a section--implemented by child class.
-  virtual uint64_t
-  do_output_section_offset(unsigned int shndx) const = 0;
-
   // Set the offset of a section--implemented by child class.
   virtual void
   do_set_section_offset(unsigned int shndx, uint64_t off) = 0;
@@ -914,6 +950,16 @@ class Relobj : public Object
   // input files from a plugin--implemented by child class.
   virtual void
   do_layout_deferred_sections(Layout*) = 0;
+
+  // Given a section index, return the corresponding Output_section.
+  // The return value will be NULL if the section is not included in
+  // the link.
+  Output_section*
+  do_output_section(unsigned int shndx) const
+  {
+    gold_assert(shndx < this->output_sections_.size());
+    return this->output_sections_[shndx];
+  }
 
   // Return the vector mapping input sections to output sections.
   Output_sections&
@@ -938,6 +984,46 @@ class Relobj : public Object
   set_relocs_must_follow_section_writes()
   { this->relocs_must_follow_section_writes_ = true; }
 
+  // Allocate the array for counting incremental relocations.
+  void
+  allocate_incremental_reloc_counts()
+  {
+    unsigned int nsyms = this->do_get_global_symbols()->size();
+    this->reloc_counts_ = new unsigned int[nsyms];
+    gold_assert(this->reloc_counts_ != NULL);
+    memset(this->reloc_counts_, 0, nsyms * sizeof(unsigned int));
+  }
+
+  // Record a relocation in this object referencing global symbol SYMNDX.
+  // Used for tracking incremental link information.
+  void
+  count_incremental_reloc(unsigned int symndx)
+  {
+    unsigned int nsyms = this->do_get_global_symbols()->size();
+    gold_assert(symndx < nsyms);
+    gold_assert(this->reloc_counts_ != NULL);
+    ++this->reloc_counts_[symndx];
+  }
+
+  // Finalize the incremental relocation information.
+  void
+  finalize_incremental_relocs(Layout* layout);
+
+  // Return the index of the next relocation to be written for global symbol
+  // SYMNDX.  Only valid after finalize_incremental_relocs() has been called.
+  unsigned int
+  next_incremental_reloc_index(unsigned int symndx)
+  {
+    unsigned int nsyms = this->do_get_global_symbols()->size();
+
+    gold_assert(this->reloc_counts_ != NULL);
+    gold_assert(this->reloc_bases_ != NULL);
+    gold_assert(symndx < nsyms);
+
+    unsigned int counter = this->reloc_counts_[symndx]++;
+    return this->reloc_bases_[symndx] + counter;
+  }
+
  private:
   // Mapping from input sections to output section.
   Output_sections output_sections_;
@@ -957,6 +1043,10 @@ class Relobj : public Object
   // Again used during garbage collection when laying out referenced
   // sections.
   gold::Symbols_data *sd_;
+  // Per-symbol counts of relocations, for incremental links.
+  unsigned int* reloc_counts_;
+  // Per-symbol base indexes of relocations, for incremental links.
+  unsigned int* reloc_bases_;
 };
 
 // This class is used to handle relocations against a section symbol
@@ -1792,7 +1882,8 @@ class Sized_relobj : public Relobj
   // This may be overriden by a child class.
   virtual void
   do_relocate_sections(const Symbol_table* symtab, const Layout* layout,
-		       const unsigned char* pshdrs, Views* pviews);
+		       const unsigned char* pshdrs, Output_file* of,
+		       Views* pviews);
 
   // Allow a child to set output local symbol count.
   void
@@ -1880,8 +1971,9 @@ class Sized_relobj : public Relobj
   // Relocate the sections in the output file.
   void
   relocate_sections(const Symbol_table* symtab, const Layout* layout,
-		    const unsigned char* pshdrs, Views* pviews)
-  { this->do_relocate_sections(symtab, layout, pshdrs, pviews); }
+		    const unsigned char* pshdrs, Output_file* of,
+		    Views* pviews)
+  { this->do_relocate_sections(symtab, layout, pshdrs, of, pviews); }
 
   // Scan the input relocations for --emit-relocs.
   void
@@ -1917,6 +2009,35 @@ class Sized_relobj : public Relobj
 		      section_size_type view_size,
 		      unsigned char* reloc_view,
 		      section_size_type reloc_view_size);
+
+  // Scan the input relocations for --incremental.
+  void
+  incremental_relocs_scan(const Read_relocs_data::Relocs_list::iterator&);
+
+  // Scan the input relocations for --incremental, templatized on the
+  // type of the relocation section.
+  template<int sh_type>
+  void
+  incremental_relocs_scan_reltype(
+      const Read_relocs_data::Relocs_list::iterator&);
+
+  void
+  incremental_relocs_write(const Relocate_info<size, big_endian>*,
+			   unsigned int sh_type,
+			   const unsigned char* prelocs,
+			   size_t reloc_count,
+			   Output_section*,
+			   Address output_offset,
+			   Output_file*);
+
+  template<int sh_type>
+  void
+  incremental_relocs_write_reltype(const Relocate_info<size, big_endian>*,
+				   const unsigned char* prelocs,
+				   size_t reloc_count,
+				   Output_section*,
+				   Address output_offset,
+				   Output_file*);
 
   // A type shared by split_stack_adjust_reltype and find_functions.
   typedef std::map<section_offset_type, section_size_type> Function_offsets;

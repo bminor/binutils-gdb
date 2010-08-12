@@ -974,7 +974,7 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       if (this->debug_abbrev_)
         this->debug_info_->set_abbreviations(this->debug_abbrev_);
     }
- else
+  else
     {
       // FIXME: const_cast is ugly.
       Target* target = const_cast<Target*>(&parameters->target());
@@ -1886,12 +1886,6 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       this->set_dynamic_symbol_size(symtab);
     }
   
-  if (this->incremental_inputs_)
-    {
-      this->incremental_inputs_->finalize();
-      this->create_incremental_info_sections();
-    }
-
   // Create segment headers.
   Output_segment_headers* segment_headers =
     (parameters->options().relocatable()
@@ -1951,6 +1945,13 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // be called after the symbol table has been finalized.
   this->script_options_->finalize_symbols(symtab, this);
 
+  // Create the incremental inputs sections.
+  if (this->incremental_inputs_)
+    {
+      this->incremental_inputs_->finalize();
+      this->create_incremental_info_sections(symtab);
+    }
+
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
 
@@ -1968,8 +1969,13 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // If there are no sections which require postprocessing, we can
   // handle the section names now, and avoid a resize later.
   if (!this->any_postprocessing_sections_)
-    off = this->set_section_offsets(off,
+    {
+      off = this->set_section_offsets(off,
+				      POSTPROCESSING_SECTIONS_PASS);
+      off =
+	  this->set_section_offsets(off,
 				    STRTAB_AFTER_POSTPROCESSING_SECTIONS_PASS);
+    }
 
   file_header->set_section_info(this->section_headers_, shstrtab_section);
 
@@ -2294,37 +2300,65 @@ Layout::link_stabs_sections()
     }
 }
 
-// Create .gnu_incremental_inputs and .gnu_incremental_strtab sections needed
+// Create .gnu_incremental_inputs and related sections needed
 // for the next run of incremental linking to check what has changed.
 
 void
-Layout::create_incremental_info_sections()
+Layout::create_incremental_info_sections(Symbol_table* symtab)
 {
-  gold_assert(this->incremental_inputs_ != NULL);
+  Incremental_inputs* incr = this->incremental_inputs_;
+
+  gold_assert(incr != NULL);
+
+  // Create the .gnu_incremental_inputs, _symtab, and _relocs input sections.
+  incr->create_data_sections(symtab);
 
   // Add the .gnu_incremental_inputs section.
   const char *incremental_inputs_name =
     this->namepool_.add(".gnu_incremental_inputs", false, NULL);
-  Output_section* inputs_os =
+  Output_section* incremental_inputs_os =
     this->make_output_section(incremental_inputs_name,
 			      elfcpp::SHT_GNU_INCREMENTAL_INPUTS, 0,
 			      ORDER_INVALID, false);
-  Output_section_data* posd =
-      this->incremental_inputs_->create_incremental_inputs_section_data();
-  inputs_os->add_output_section_data(posd);
-  
+  incremental_inputs_os->add_output_section_data(incr->inputs_section());
+
+  // Add the .gnu_incremental_symtab section.
+  const char *incremental_symtab_name =
+    this->namepool_.add(".gnu_incremental_symtab", false, NULL);
+  Output_section* incremental_symtab_os =
+    this->make_output_section(incremental_symtab_name,
+			      elfcpp::SHT_GNU_INCREMENTAL_SYMTAB, 0,
+			      ORDER_INVALID, false);
+  incremental_symtab_os->add_output_section_data(incr->symtab_section());
+  incremental_symtab_os->set_entsize(4);
+
+  // Add the .gnu_incremental_relocs section.
+  const char *incremental_relocs_name =
+    this->namepool_.add(".gnu_incremental_relocs", false, NULL);
+  Output_section* incremental_relocs_os =
+    this->make_output_section(incremental_relocs_name,
+			      elfcpp::SHT_GNU_INCREMENTAL_RELOCS, 0,
+			      ORDER_INVALID, false);
+  incremental_relocs_os->add_output_section_data(incr->relocs_section());
+  incremental_relocs_os->set_entsize(incr->relocs_entsize());
+
   // Add the .gnu_incremental_strtab section.
   const char *incremental_strtab_name =
     this->namepool_.add(".gnu_incremental_strtab", false, NULL);
-  Output_section* strtab_os = this->make_output_section(incremental_strtab_name,
-                                                        elfcpp::SHT_STRTAB,
-                                                        0, ORDER_INVALID,
-							false);
+  Output_section* incremental_strtab_os = this->make_output_section(incremental_strtab_name,
+                                                        elfcpp::SHT_STRTAB, 0,
+                                                        ORDER_INVALID, false);
   Output_data_strtab* strtab_data =
-    new Output_data_strtab(this->incremental_inputs_->get_stringpool());
-  strtab_os->add_output_section_data(strtab_data);
-  
-  inputs_os->set_link_section(strtab_data);
+      new Output_data_strtab(incr->get_stringpool());
+  incremental_strtab_os->add_output_section_data(strtab_data);
+
+  incremental_inputs_os->set_after_input_sections();
+  incremental_symtab_os->set_after_input_sections();
+  incremental_relocs_os->set_after_input_sections();
+
+  incremental_inputs_os->set_link_section(incremental_strtab_os);
+  incremental_symtab_os->set_link_section(incremental_inputs_os);
+  incremental_relocs_os->set_link_section(incremental_inputs_os);
 }
 
 // Return whether SEG1 should be before SEG2 in the output file.  This

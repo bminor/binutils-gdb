@@ -229,10 +229,7 @@ main(int argc, char** argv)
 		&command_line.script_options());
 
   if (layout.incremental_inputs() != NULL)
-    {
-      layout.incremental_inputs()->report_command_line(argc, argv);
-      layout.incremental_inputs()->report_inputs(command_line.inputs());
-    }
+    layout.incremental_inputs()->report_command_line(argc, argv);
 
   if (parameters->options().section_ordering_file())
     layout.read_layout_from_file();

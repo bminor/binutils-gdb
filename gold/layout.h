@@ -1,6 +1,6 @@
 // layout.h -- lay out output file sections for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -58,6 +58,7 @@ class Output_reduced_debug_abbrev_section;
 class Output_reduced_debug_info_section;
 class Eh_frame;
 class Target;
+struct Timespec;
 
 // Return TRUE if SECNAME is the name of a compressed debug section.
 extern bool
@@ -662,7 +663,7 @@ class Layout
   // Return the object managing inputs in incremental build. NULL in
   // non-incremental builds.
   Incremental_inputs*
-  incremental_inputs()
+  incremental_inputs() const
   { return this->incremental_inputs_; }
 
   // For the target-specific code to add dynamic tags which are common
@@ -800,7 +801,7 @@ class Layout
   // Create .gnu_incremental_inputs and .gnu_incremental_strtab sections needed
   // for the next run of incremental linking to check what has changed.
   void
-  create_incremental_info_sections();
+  create_incremental_info_sections(Symbol_table*);
 
   // Find the first read-only PT_LOAD segment, creating one if
   // necessary.

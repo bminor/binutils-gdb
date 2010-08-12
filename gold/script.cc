@@ -1462,16 +1462,16 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
       this_blocker = nb;
     }
 
-  if (layout->incremental_inputs())
+  if (layout->incremental_inputs() != NULL)
     {
-      // Like new Read_symbols(...) above, we rely on close.inputs()
+      // Like new Read_symbols(...) above, we rely on closure.inputs()
       // getting leaked by closure.
+      const std::string& filename = input_file->filename();
       Script_info* info = new Script_info(closure.inputs());
-      layout->incremental_inputs()->report_script(
-          input_argument,
-          input_file->file().get_mtime(),
-          info);
+      Timespec mtime = input_file->file().get_mtime();
+      layout->incremental_inputs()->report_script(filename, info, mtime);
     }
+
   *used_next_blocker = true;
 
   return true;

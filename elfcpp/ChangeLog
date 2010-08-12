@@ -1,3 +1,8 @@
+2010-08-12  Cary Coutant  <ccoutant@google.com>
+
+	* elfcpp.h (enum SHT): Add SHT_GNU_INCREMENTAL_SYMTAB,
+	SHT_GNU_INCREMENTAL_RELOCS.
+
 2010-08-04  Ian Lance Taylor  <iant@google.com>
 
 	* i386.h (R_386_IRELATIVE): Define.
