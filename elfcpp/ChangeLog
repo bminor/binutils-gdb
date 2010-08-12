@@ -1,5 +1,9 @@
 2010-08-12  Cary Coutant  <ccoutant@google.com>
 
+	* elfcpp.h (enum SHT): Add SHT_GNU_INCREMENTAL_GOT_PLT.
+
+2010-08-12  Cary Coutant  <ccoutant@google.com>
+
 	* elfcpp.h (enum SHT): Add SHT_GNU_INCREMENTAL_SYMTAB,
 	SHT_GNU_INCREMENTAL_RELOCS.
 

@@ -367,6 +367,7 @@ enum SHT
   SHT_GNU_INCREMENTAL_INPUTS = 0x6fff4700,
   SHT_GNU_INCREMENTAL_SYMTAB = 0x6fff4701,
   SHT_GNU_INCREMENTAL_RELOCS = 0x6fff4702,
+  SHT_GNU_INCREMENTAL_GOT_PLT = 0x6fff4703,
   // Object attributes.
   SHT_GNU_ATTRIBUTES = 0x6ffffff5,
   // GNU style dynamic hash table.
