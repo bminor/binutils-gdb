@@ -18,8 +18,12 @@
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
 
-int b;
+int b = 1;
+
+extern int t1(int);
 
 int main(void) {
+  if (t1(b) != 0)
+    return 1;
   return 0;
 }
