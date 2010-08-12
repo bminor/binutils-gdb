@@ -1,6 +1,6 @@
 // target.h -- target support for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -732,6 +732,38 @@ class Sized_target : public Target
 			       unsigned char* /* preloc_out*/)
   { gold_unreachable(); }
  
+  // Return the number of entries in the GOT.  This is only used for
+  // laying out the incremental link info sections.  A target needs
+  // to implement this to support incremental linking.
+
+  virtual unsigned int
+  got_entry_count() const
+  { gold_unreachable(); }
+
+  // Return the number of entries in the PLT.  This is only used for
+  // laying out the incremental link info sections.  A target needs
+  // to implement this to support incremental linking.
+
+  virtual unsigned int
+  plt_entry_count() const
+  { gold_unreachable(); }
+
+  // Return the offset of the first non-reserved PLT entry.  This is
+  // only used for laying out the incremental link info sections.
+  // A target needs to implement this to support incremental linking.
+
+  virtual unsigned int
+  first_plt_entry_offset() const
+  { gold_unreachable(); }
+
+  // Return the size of each PLT entry.  This is only used for
+  // laying out the incremental link info sections.  A target needs
+  // to implement this to support incremental linking.
+
+  virtual unsigned int
+  plt_entry_size() const
+  { gold_unreachable(); }
+
  protected:
   Sized_target(const Target::Target_info* pti)
     : Target(pti)

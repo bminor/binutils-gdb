@@ -197,11 +197,32 @@ class Target_x86_64 : public Target_freebsd<64, false>
 
   // Return the size of the GOT section.
   section_size_type
-  got_size()
+  got_size() const
   {
     gold_assert(this->got_ != NULL);
     return this->got_->data_size();
   }
+
+  // Return the number of entries in the GOT.
+  unsigned int
+  got_entry_count() const
+  {
+    if (this->got_ == NULL)
+      return 0;
+    return this->got_size() / 8;
+  }
+
+  // Return the number of entries in the PLT.
+  unsigned int
+  plt_entry_count() const;
+
+  // Return the offset of the first non-reserved PLT entry.
+  unsigned int
+  first_plt_entry_offset() const;
+
+  // Return the size of each PLT entry.
+  unsigned int
+  plt_entry_size() const;
 
   // Add a new reloc argument, returning the index in the vector.
   size_t
@@ -466,6 +487,10 @@ class Target_x86_64 : public Target_freebsd<64, false>
   // general Target structure.
   static const Target::Target_info x86_64_info;
 
+  // The types of GOT entries needed for this platform.
+  // These values are exposed to the ABI in an incremental link.
+  // Do not renumber existing values without changing the version
+  // number of the .gnu_incremental_inputs section.
   enum Got_type
   {
     GOT_TYPE_STANDARD = 0,      // GOT entry for a regular symbol
@@ -658,6 +683,21 @@ class Output_data_plt_x86_64 : public Output_section_data
   // Return where the TLSDESC relocations should go.
   Reloc_section*
   rela_tlsdesc(Layout*);
+
+  // Return the number of PLT entries.
+  unsigned int
+  entry_count() const
+  { return this->count_; }
+
+  // Return the offset of the first non-reserved PLT entry.
+  static unsigned int
+  first_plt_entry_offset()
+  { return plt_entry_size; }
+
+  // Return the size of a PLT entry.
+  static unsigned int
+  get_plt_entry_size()
+  { return plt_entry_size; }
 
  protected:
   void
@@ -958,6 +998,32 @@ Target_x86_64::make_plt_entry(Symbol_table* symtab, Layout* layout,
     this->make_plt_section(symtab, layout);
 
   this->plt_->add_entry(gsym);
+}
+
+// Return the number of entries in the PLT.
+
+unsigned int
+Target_x86_64::plt_entry_count() const
+{
+  if (this->plt_ == NULL)
+    return 0;
+  return this->plt_->entry_count();
+}
+
+// Return the offset of the first non-reserved PLT entry.
+
+unsigned int
+Target_x86_64::first_plt_entry_offset() const
+{
+  return Output_data_plt_x86_64::first_plt_entry_offset();
+}
+
+// Return the size of each PLT entry.
+
+unsigned int
+Target_x86_64::plt_entry_size() const
+{
+  return Output_data_plt_x86_64::get_plt_entry_size();
 }
 
 // Define the _TLS_MODULE_BASE_ symbol in the TLS segment.

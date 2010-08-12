@@ -1,5 +1,80 @@
 2010-08-12  Cary Coutant  <ccoutant@google.com>
 
+	* arm.cc (Target_arm::got_size): Add const.
+	(Target_arm::got_entry_count): New function.
+	(Target_arm::plt_entry_count): New function.
+	(Target_arm::first_plt_entry_offset): New function.
+	(Target_arm::plt_entry_size): New function.
+	(Output_data_plt_arm::entry_count): New function.
+	(Output_data_plt_arm::first_plt_entry_offset): New function.
+	(Output_data_plt_arm::get_plt_entry_size): New function.
+	* i386.cc (Target_i386::got_size): Add const.
+	(Target_i386::got_entry_count): New function.
+	(Target_i386::plt_entry_count): New function.
+	(Target_i386::first_plt_entry_offset): New function.
+	(Target_i386::plt_entry_size): New function.
+	(Output_data_plt_i386::entry_count): New function.
+	(Output_data_plt_i386::first_plt_entry_offset): New function.
+	(Output_data_plt_i386::get_plt_entry_size): New function.
+	* incremental-dump.cc (dump_incremental_inputs): Adjust call to
+	find_incremental_inputs_sections.  Dump incremental_got_plt section.
+	* incremental.cc: Include target.h.
+	(Sized_incremental_binary::do_find_incremental_inputs_sections): Add
+	parameter.  Adjust all callers.  Find incremental_got_plt section.
+	(Incremental_inputs::create_data_sections): Create incremental_got_plt
+	section.
+	(Output_section_incremental_inputs::set_final_data_size): Calculate
+	size of incremental_got_plt section.
+	(Output_section_incremental_inputs::do_write): Write the
+	incremental_got_plt section.
+	(Got_plt_view_info): New struct.
+	(Local_got_offset_visitor): New class.
+	(Global_got_offset_visitor): New class.
+	(Global_symbol_visitor_got_plt): New class.
+	(Output_section_incremental_inputs::write_got_plt): New function.
+	* incremental.h (Incremental_binary::find_incremental_inputs_sections):
+	Add parameter.  Adjust all callers.
+	(Incremental_binary::do_find_incremental_inputs_sections): Likewise.
+	(Incremental_inputs::got_plt_section): New function.
+	(Incremental_inputs::got_plt_section_): New data member.
+	(Incremental_got_plt_reader): New class.
+	* layout.cc (Layout::create_incremental_info_sections): Add the
+	incremental_got_plt section.
+	* object.h (Got_offset_list::get_list): New function.
+	(Got offset_list::for_all_got_offsets): New function.
+	(Sized_relobj::local_got_offset_list): New function.
+	* powerpc.cc (Target_powerpc::got_size): Add const.
+	(Target_powerpc::got_entry_count): New function.
+	(Target_powerpc::plt_entry_count): New function.
+	(Target_powerpc::first_plt_entry_offset): New function.
+	(Target_powerpc::plt_entry_size): New function.
+	(Output_data_plt_powerpc::entry_count): New function.
+	(Output_data_plt_powerpc::first_plt_entry_offset): New function.
+	(Output_data_plt_powerpc::get_plt_entry_size): New function.
+	* sparc.cc (Target_sparc::got_size): Add const.
+	(Target_sparc::got_entry_count): New function.
+	(Target_sparc::plt_entry_count): New function.
+	(Target_sparc::first_plt_entry_offset): New function.
+	(Target_sparc::plt_entry_size): New function.
+	(Output_data_plt_sparc::entry_count): New function.
+	(Output_data_plt_sparc::first_plt_entry_offset): New function.
+	(Output_data_plt_sparc::get_plt_entry_size): New function.
+	* symtab.h (Symbol::got_offset_list): New function.
+	(Symbol_table::for_all_symbols): New function.
+	* target.h (Sized_target::got_entry_count): New function.
+	(Sized_target::plt_entry_count): New function.
+	(Sized_target::plt_entry_size): New function.
+	* x86_64.cc (Target_x86_64::got_size): Add const.
+	(Target_x86_64::got_entry_count): New function.
+	(Target_x86_64::plt_entry_count): New function.
+	(Target_x86_64::first_plt_entry_offset): New function.
+	(Target_x86_64::plt_entry_size): New function.
+	(Output_data_plt_x86_64::entry_count): New function.
+	(Output_data_plt_x86_64::first_plt_entry_offset): New function.
+	(Output_data_plt_x86_64::get_plt_entry_size): New function.
+
+2010-08-12  Cary Coutant  <ccoutant@google.com>
+
 	* archive.cc: Include incremental.h.
 	(Archive::Archive): Initialize incremental_info_.
 	(Archive::include_member): Record archive members in incremental info.

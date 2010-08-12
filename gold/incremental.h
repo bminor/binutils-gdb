@@ -131,10 +131,12 @@ class Incremental_binary
   find_incremental_inputs_sections(unsigned int* p_inputs_shndx,
 				   unsigned int* p_symtab_shndx,
 				   unsigned int* p_relocs_shndx,
+				   unsigned int* p_got_plt_shndx,
 				   unsigned int* p_strtab_shndx)
   {
     return do_find_incremental_inputs_sections(p_inputs_shndx, p_symtab_shndx,
-					       p_relocs_shndx, p_strtab_shndx);
+					       p_relocs_shndx, p_got_plt_shndx,
+  					       p_strtab_shndx);
   }
 
   // Check the .gnu_incremental_inputs section to see whether an incremental
@@ -153,6 +155,7 @@ class Incremental_binary
   do_find_incremental_inputs_sections(unsigned int* p_inputs_shndx,
 				      unsigned int* p_symtab_shndx,
 				      unsigned int* p_relocs_shndx,
+				      unsigned int* p_got_plt_shndx,
 				      unsigned int* p_strtab_shndx) = 0;
 
   // Check the .gnu_incremental_inputs section to see whether an incremental
@@ -182,6 +185,7 @@ class Sized_incremental_binary : public Incremental_binary
   do_find_incremental_inputs_sections(unsigned int* p_inputs_shndx,
 				      unsigned int* p_symtab_shndx,
 				      unsigned int* p_relocs_shndx,
+				      unsigned int* p_got_plt_shndx,
 				      unsigned int* p_strtab_shndx);
 
   virtual bool
@@ -577,6 +581,11 @@ class Incremental_inputs
   relocs_section() const
   { return this->relocs_section_; }
 
+  // Return the .gnu_incremental_got_plt section.
+  Output_data_space*
+  got_plt_section() const
+  { return this->got_plt_section_; }
+
   // Return the .gnu_incremental_strtab stringpool.
   Stringpool*
   get_stringpool() const
@@ -634,6 +643,9 @@ class Incremental_inputs
 
   // The .gnu_incremental_relocs section.
   Output_data_space* relocs_section_;
+
+  // The .gnu_incremental_got_plt section.
+  Output_data_space* got_plt_section_;
 
   // Total count of incremental relocations.  Updated during Scan_relocs
   // phase at the completion of each object file.
@@ -889,7 +901,7 @@ class Incremental_symtab_reader
   { }
 
   // Return the list head for symbol table entry N.
-  unsigned int get_list_head(unsigned int n)
+  unsigned int get_list_head(unsigned int n) const
   { return elfcpp::Swap<32, big_endian>::readval(this->p_ + 4 * n); }
 
  private:
@@ -918,28 +930,28 @@ class Incremental_relocs_reader
 
   // Return the relocation type for relocation entry at offset OFF.
   unsigned int
-  get_r_type(unsigned int off)
+  get_r_type(unsigned int off) const
   {
     return elfcpp::Swap<32, big_endian>::readval(this->p_ + off);
   }
 
   // Return the output section index for relocation entry at offset OFF.
   unsigned int
-  get_r_shndx(unsigned int off)
+  get_r_shndx(unsigned int off) const
   {
     return elfcpp::Swap<32, big_endian>::readval(this->p_ + off + 4);
   }
 
   // Return the output section offset for relocation entry at offset OFF.
   Address
-  get_r_offset(unsigned int off)
+  get_r_offset(unsigned int off) const
   {
     return elfcpp::Swap<size, big_endian>::readval(this->p_ + off + 8);
   }
 
   // Return the addend for relocation entry at offset OFF.
   Addend
-  get_r_addend(unsigned int off)
+  get_r_addend(unsigned int off) const
   {
     return elfcpp::Swap<size, big_endian>::readval(this->p_ + off + 8
 						   + this->field_size);
@@ -948,6 +960,65 @@ class Incremental_relocs_reader
  private:
   // Base address of the .gnu_incremental_relocs section.
   const unsigned char* p_;
+};
+
+// Reader class for the .gnu_incremental_got_plt section.
+
+template<bool big_endian>
+class Incremental_got_plt_reader
+{
+ public:
+  Incremental_got_plt_reader(const unsigned char* p) : p_(p)
+  {
+    this->got_count_ = elfcpp::Swap<32, big_endian>::readval(p);
+    this->got_desc_p_ = p + 8 + ((this->got_count_ + 3) & ~3);
+    this->plt_desc_p_ = this->got_desc_p_ + this->got_count_ * 4;
+  }
+
+  // Return the GOT entry count.
+  unsigned int
+  get_got_entry_count() const
+  {
+    return this->got_count_;
+  }
+
+  // Return the PLT entry count.
+  unsigned int
+  get_plt_entry_count() const
+  {
+    return elfcpp::Swap<32, big_endian>::readval(this->p_ + 4);
+  }
+
+  // Return the GOT type for GOT entry N.
+  unsigned int
+  get_got_type(unsigned int n)
+  {
+    return this->p_[8 + n];
+  }
+
+  // Return the GOT descriptor for GOT entry N.
+  unsigned int
+  get_got_desc(unsigned int n)
+  {
+    return elfcpp::Swap<32, big_endian>::readval(this->got_desc_p_ + n * 4);
+  }
+
+  // Return the PLT descriptor for PLT entry N.
+  unsigned int
+  get_plt_desc(unsigned int n)
+  {
+    return elfcpp::Swap<32, big_endian>::readval(this->plt_desc_p_ + n * 4);
+  }
+
+ private:
+  // Base address of the .gnu_incremental_got_plt section.
+  const unsigned char* p_;
+  // GOT entry count.
+  unsigned int got_count_;
+  // Base address of the GOT descriptor array.
+  const unsigned char* got_desc_p_;
+  // Base address of the PLT descriptor array.
+  const unsigned char* plt_desc_p_;
 };
 
 } // End namespace gold.

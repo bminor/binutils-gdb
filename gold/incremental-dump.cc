@@ -79,6 +79,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   unsigned int inputs_shndx;
   unsigned int isymtab_shndx;
   unsigned int irelocs_shndx;
+  unsigned int igot_plt_shndx;
   unsigned int istrtab_shndx;
   typedef Incremental_binary::Location Location;
   typedef Incremental_binary::View View;
@@ -88,7 +89,8 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   // Find the .gnu_incremental_inputs, _symtab, _relocs, and _strtab sections.
 
   t = inc->find_incremental_inputs_sections(&inputs_shndx, &isymtab_shndx,
-					    &irelocs_shndx, &istrtab_shndx);
+					    &irelocs_shndx, &igot_plt_shndx,
+					    &istrtab_shndx);
   if (!t)
     {
       fprintf(stderr, "%s: %s: no .gnu_incremental_inputs section\n", argv0,
@@ -134,9 +136,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   printf("\nInput files:\n");
   for (unsigned int i = 0; i < incremental_inputs.input_file_count(); ++i)
     {
-      typedef Incremental_inputs_reader<size, big_endian> Inputs_reader;
-      typename Inputs_reader::Incremental_input_entry_reader input_file =
-	  incremental_inputs.input_file(i);
+      Entry_reader input_file = incremental_inputs.input_file(i);
 
       const char* objname = input_file.filename();
       if (objname == NULL)
@@ -203,10 +203,6 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   printf("\nInput sections:\n");
   for (unsigned int i = 0; i < incremental_inputs.input_file_count(); ++i)
     {
-      typedef Incremental_inputs_reader<size, big_endian> Inputs_reader;
-      typedef typename Inputs_reader::Incremental_input_entry_reader
-          Entry_reader;
-
       Entry_reader input_file(incremental_inputs.input_file(i));
 
       if (input_file.type() != INCREMENTAL_INPUT_OBJECT
@@ -241,10 +237,6 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   printf("\nGlobal symbols per input file:\n");
   for (unsigned int i = 0; i < incremental_inputs.input_file_count(); ++i)
     {
-      typedef Incremental_inputs_reader<size, big_endian> Inputs_reader;
-      typedef typename Inputs_reader::Incremental_input_entry_reader
-          Entry_reader;
-
       Entry_reader input_file(incremental_inputs.input_file(i));
 
       if (input_file.type() != INCREMENTAL_INPUT_OBJECT
@@ -372,6 +364,54 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 	}
       sym_p += sym_size;
       isym_p += 4;
+    }
+
+  // Get a view of the .gnu_incremental_got_plt section.
+
+  Location igot_plt_location(elf_file.section_contents(igot_plt_shndx));
+  View igot_plt_view(inc->view(igot_plt_location));
+
+  Incremental_got_plt_reader<big_endian> igot_plt(igot_plt_view.data());
+  unsigned int ngot = igot_plt.get_got_entry_count();
+  unsigned int nplt = igot_plt.get_plt_entry_count();
+  
+  printf("\nGOT entries:\n");
+  for (unsigned int i = 0; i < ngot; ++i)
+    {
+      unsigned int got_type = igot_plt.get_got_type(i);
+      unsigned int got_desc = igot_plt.get_got_desc(i);
+      printf("[%d] type %02x, ", i, got_type & 0x7f);
+      if (got_type == 0x7f)
+	printf("reserved");
+      else if (got_type & 0x80)
+	{
+	  Entry_reader input_file = incremental_inputs.input_file(got_desc);
+	  const char* objname = input_file.filename();
+	  printf("local: %s (%d)", objname, got_desc);
+	}
+      else
+	{
+	  sym_p = symtab_view.data() + got_desc * sym_size;
+	  elfcpp::Sym<size, big_endian> sym(sym_p);
+	  const char* symname;
+	  if (!strtab.get_c_string(sym.get_st_name(), &symname))
+	    symname = "<unknown>";
+	  printf("global %s (%d)", symname, got_desc);
+	}
+      printf("\n");
+    }
+
+  printf("\nPLT entries:\n");
+  for (unsigned int i = 0; i < nplt; ++i)
+    {
+      unsigned int plt_desc = igot_plt.get_plt_desc(i);
+      printf("[%d] ", i);
+      sym_p = symtab_view.data() + plt_desc * sym_size;
+      elfcpp::Sym<size, big_endian> sym(sym_p);
+      const char* symname;
+      if (!strtab.get_c_string(sym.get_st_name(), &symname))
+	symname = "<unknown>";
+      printf("%s (%d)\n", symname, plt_desc);
     }
 
   printf("\nUnused archive symbols:\n");

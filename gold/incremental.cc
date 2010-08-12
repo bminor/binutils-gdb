@@ -32,6 +32,7 @@
 #include "archive.h"
 #include "output.h"
 #include "target-select.h"
+#include "target.h"
 
 namespace gold {
 
@@ -87,6 +88,10 @@ class Output_section_incremental_inputs : public Output_section_data
   void
   write_symtab(unsigned char* pov, unsigned int* global_syms,
 	       unsigned int global_sym_count);
+
+  // Write the contents of the .gnu_incremental_got_plt section.
+  void
+  write_got_plt(unsigned char* pov, off_t view_size);
 
   // Typedefs for writing the data to the output sections.
   typedef elfcpp::Swap<size, big_endian> Swap;
@@ -153,6 +158,7 @@ Sized_incremental_binary<size, big_endian>::do_find_incremental_inputs_sections(
     unsigned int* p_inputs_shndx,
     unsigned int* p_symtab_shndx,
     unsigned int* p_relocs_shndx,
+    unsigned int* p_got_plt_shndx,
     unsigned int* p_strtab_shndx)
 {
   unsigned int inputs_shndx =
@@ -174,6 +180,13 @@ Sized_incremental_binary<size, big_endian>::do_find_incremental_inputs_sections(
   if (this->elf_file_.section_link(relocs_shndx) != inputs_shndx)
     return false;
 
+  unsigned int got_plt_shndx =
+      this->elf_file_.find_section_by_type(elfcpp::SHT_GNU_INCREMENTAL_GOT_PLT);
+  if (got_plt_shndx == elfcpp::SHN_UNDEF)  // Not found.
+    return false;
+  if (this->elf_file_.section_link(got_plt_shndx) != inputs_shndx)
+    return false;
+
   unsigned int strtab_shndx = this->elf_file_.section_link(inputs_shndx);
   if (strtab_shndx == elfcpp::SHN_UNDEF
       || strtab_shndx > this->elf_file_.shnum()
@@ -186,6 +199,8 @@ Sized_incremental_binary<size, big_endian>::do_find_incremental_inputs_sections(
     *p_symtab_shndx = symtab_shndx;
   if (p_relocs_shndx != NULL)
     *p_relocs_shndx = relocs_shndx;
+  if (p_got_plt_shndx != NULL)
+    *p_got_plt_shndx = got_plt_shndx;
   if (p_strtab_shndx != NULL)
     *p_strtab_shndx = strtab_shndx;
   return true;
@@ -202,10 +217,12 @@ Sized_incremental_binary<size, big_endian>::do_check_inputs(
   unsigned int inputs_shndx;
   unsigned int symtab_shndx;
   unsigned int relocs_shndx;
+  unsigned int plt_got_shndx;
   unsigned int strtab_shndx;
 
   if (!do_find_incremental_inputs_sections(&inputs_shndx, &symtab_shndx,
-					   &relocs_shndx, &strtab_shndx))
+					   &relocs_shndx, &plt_got_shndx,
+					   &strtab_shndx))
     {
       explain_no_incremental(_("no incremental data from previous build"));
       return false;
@@ -555,6 +572,7 @@ Incremental_inputs::create_data_sections(Symbol_table* symtab)
     }
   this->symtab_section_ = new Output_data_space(4, "** incremental_symtab");
   this->relocs_section_ = new Output_data_space(4, "** incremental_relocs");
+  this->got_plt_section_ = new Output_data_space(4, "** incremental_got_plt");
 }
 
 // Return the sh_entsize value for the .gnu_incremental_relocs section.
@@ -657,6 +675,16 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
   // Set the size of the .gnu_incremental_relocs section.
   inputs->relocs_section()->set_current_data_size(inputs->get_reloc_count()
 						  * rel_size);
+
+  // Set the size of the .gnu_incremental_got_plt section.
+  Sized_target<size, big_endian>* target =
+    parameters->sized_target<size, big_endian>();
+  unsigned int got_count = target->got_entry_count();
+  unsigned int plt_count = target->plt_entry_count();
+  unsigned int got_plt_size = 8;  // GOT entry count, PLT entry count.
+  got_plt_size = (got_plt_size + got_count + 3) & ~3;  // GOT type array.
+  got_plt_size += got_count * 4 + plt_count * 4;  // GOT array, PLT array.
+  inputs->got_plt_section()->set_current_data_size(got_plt_size);
 }
 
 // Write the contents of the .gnu_incremental_inputs and
@@ -711,8 +739,16 @@ Output_section_incremental_inputs<size, big_endian>::do_write(Output_file* of)
 
   delete[] global_syms;
 
+  // Write the .gnu_incremental_got_plt section.
+  const off_t got_plt_off = inputs->got_plt_section()->offset();
+  const off_t got_plt_size = inputs->got_plt_section()->data_size();
+  unsigned char* const got_plt_view = of->get_output_view(got_plt_off,
+							  got_plt_size);
+  this->write_got_plt(got_plt_view, got_plt_size);
+
   of->write_output_view(off, oview_size, oview);
   of->write_output_view(symtab_off, symtab_size, symtab_view);
+  of->write_output_view(got_plt_off, got_plt_size, got_plt_view);
 }
 
 // Write the section header: version, input file count, offset of command line
@@ -934,6 +970,195 @@ Output_section_incremental_inputs<size, big_endian>::write_symtab(
       Swap32::writeval(pov, global_syms[i]);
       pov += 4;
     }
+}
+
+// This struct holds the view information needed to write the
+// .gnu_incremental_got_plt section.
+
+struct Got_plt_view_info
+{
+  // Start of the GOT type array in the output view.
+  unsigned char* got_type_p;
+  // Start of the GOT descriptor array in the output view.
+  unsigned char* got_desc_p;
+  // Start of the PLT descriptor array in the output view.
+  unsigned char* plt_desc_p;
+  // Number of GOT entries.
+  unsigned int got_count;
+  // Number of PLT entries.
+  unsigned int plt_count;
+  // Offset of the first non-reserved PLT entry (this is a target-dependent value).
+  unsigned int first_plt_entry_offset;
+  // Size of a PLT entry (this is a target-dependent value).
+  unsigned int plt_entry_size;
+  // Value to write in the GOT descriptor array.  For global symbols,
+  // this is the global symbol table index; for local symbols, it is
+  // the offset of the input file entry in the .gnu_incremental_inputs
+  // section.
+  unsigned int got_descriptor;
+};
+
+// Functor class for processing a GOT offset list for local symbols.
+// Writes the GOT type and symbol index into the GOT type and descriptor
+// arrays in the output section.
+
+template<int size, bool big_endian>
+class Local_got_offset_visitor
+{
+ public:
+  Local_got_offset_visitor(struct Got_plt_view_info& info)
+    : info_(info)
+  { }
+
+  void
+  operator()(unsigned int got_type, unsigned int got_offset)
+  {
+    unsigned int got_index = got_offset / this->got_entry_size_;
+    gold_assert(got_index < this->info_.got_count);
+    // We can only handle GOT entry types in the range 0..0x7e
+    // because we use a byte array to store them, and we use the
+    // high bit to flag a local symbol.
+    gold_assert(got_type < 0x7f);
+    this->info_.got_type_p[got_index] = got_type | 0x80;
+    unsigned char* pov = this->info_.got_desc_p + got_index * 4;
+    elfcpp::Swap<32, big_endian>::writeval(pov, this->info_.got_descriptor);
+  }
+
+ private:
+  static const unsigned int got_entry_size_ = size / 8;
+  struct Got_plt_view_info& info_;
+};
+
+// Functor class for processing a GOT offset list.  Writes the GOT type
+// and symbol index into the GOT type and descriptor arrays in the output
+// section.
+
+template<int size, bool big_endian>
+class Global_got_offset_visitor
+{
+ public:
+  Global_got_offset_visitor(struct Got_plt_view_info& info)
+    : info_(info)
+  { }
+
+  void
+  operator()(unsigned int got_type, unsigned int got_offset)
+  {
+    unsigned int got_index = got_offset / this->got_entry_size_;
+    gold_assert(got_index < this->info_.got_count);
+    // We can only handle GOT entry types in the range 0..0x7e
+    // because we use a byte array to store them, and we use the
+    // high bit to flag a local symbol.
+    gold_assert(got_type < 0x7f);
+    this->info_.got_type_p[got_index] = got_type;
+    unsigned char* pov = this->info_.got_desc_p + got_index * 4;
+    elfcpp::Swap<32, big_endian>::writeval(pov, this->info_.got_descriptor);
+  }
+
+ private:
+  static const unsigned int got_entry_size_ = size / 8;
+  struct Got_plt_view_info& info_;
+};
+
+// Functor class for processing the global symbol table.  Processes the
+// GOT offset list for the symbol, and writes the symbol table index
+// into the PLT descriptor array in the output section.
+
+template<int size, bool big_endian>
+class Global_symbol_visitor_got_plt
+{
+ public:
+  Global_symbol_visitor_got_plt(struct Got_plt_view_info& info)
+    : info_(info)
+  { }
+
+  void
+  operator()(const Sized_symbol<size>* sym)
+  {
+    typedef Global_got_offset_visitor<size, big_endian> Got_visitor;
+    const Got_offset_list* got_offsets = sym->got_offset_list();
+    if (got_offsets != NULL)
+      {
+        info_.got_descriptor = sym->symtab_index();
+	got_offsets->for_all_got_offsets(Got_visitor(info_));
+      }
+    if (sym->has_plt_offset())
+      {
+	unsigned int plt_index =
+	    ((sym->plt_offset() - this->info_.first_plt_entry_offset)
+	     / this->info_.plt_entry_size);
+	gold_assert(plt_index < this->info_.plt_count);
+	unsigned char* pov = this->info_.plt_desc_p + plt_index * 4;
+	elfcpp::Swap<32, big_endian>::writeval(pov, sym->symtab_index());
+      }
+  }
+
+ private:
+  struct Got_plt_view_info& info_;
+};
+
+// Write the contents of the .gnu_incremental_got_plt section.
+
+template<int size, bool big_endian>
+void
+Output_section_incremental_inputs<size, big_endian>::write_got_plt(
+    unsigned char* pov,
+    off_t view_size)
+{
+  Sized_target<size, big_endian>* target =
+    parameters->sized_target<size, big_endian>();
+
+  // Set up the view information for the functors.
+  struct Got_plt_view_info view_info;
+  view_info.got_count = target->got_entry_count();
+  view_info.plt_count = target->plt_entry_count();
+  view_info.first_plt_entry_offset = target->first_plt_entry_offset();
+  view_info.plt_entry_size = target->plt_entry_size();
+  view_info.got_type_p = pov + 8;
+  view_info.got_desc_p = (view_info.got_type_p
+			  + ((view_info.got_count + 3) & ~3));
+  view_info.plt_desc_p = view_info.got_desc_p + view_info.got_count * 4;
+
+  gold_assert(pov + view_size ==
+	      view_info.plt_desc_p + view_info.plt_count * 4);
+
+  // Write the section header.
+  Swap32::writeval(pov, view_info.got_count);
+  Swap32::writeval(pov + 4, view_info.plt_count);
+
+  // Initialize the GOT type array to 0xff (reserved).
+  memset(view_info.got_type_p, 0xff, view_info.got_count);
+
+  // Write the incremental GOT descriptors for local symbols.
+  for (Incremental_inputs::Input_list::const_iterator p =
+	   this->inputs_->input_files().begin();
+       p != this->inputs_->input_files().end();
+       ++p)
+    {
+      if ((*p)->type() != INCREMENTAL_INPUT_OBJECT
+	  && (*p)->type() != INCREMENTAL_INPUT_ARCHIVE_MEMBER)
+	continue;
+      Incremental_object_entry* entry = (*p)->object_entry();
+      gold_assert(entry != NULL);
+      const Sized_relobj<size, big_endian>* obj =
+          static_cast<Sized_relobj<size, big_endian>*>(entry->object());
+      gold_assert(obj != NULL);
+      unsigned int nsyms = obj->local_symbol_count();
+      for (unsigned int i = 0; i < nsyms; i++)
+        {
+          const Got_offset_list* got_offsets = obj->local_got_offset_list(i);
+          if (got_offsets != NULL)
+            {
+	      typedef Local_got_offset_visitor<size, big_endian> Got_visitor;
+	      view_info.got_descriptor = (*p)->get_offset();
+	      got_offsets->for_all_got_offsets(Got_visitor(view_info));
+	    }
+	}
+    }
+
+  // Write the incremental GOT and PLT descriptors for global symbols.
+  typedef Global_symbol_visitor_got_plt<size, big_endian> Symbol_visitor;
+  symtab_->for_all_symbols<size, Symbol_visitor>(Symbol_visitor(view_info));
 }
 
 // Instantiate the templates we need.

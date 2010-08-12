@@ -2342,6 +2342,15 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
   incremental_relocs_os->add_output_section_data(incr->relocs_section());
   incremental_relocs_os->set_entsize(incr->relocs_entsize());
 
+  // Add the .gnu_incremental_got_plt section.
+  const char *incremental_got_plt_name =
+    this->namepool_.add(".gnu_incremental_got_plt", false, NULL);
+  Output_section* incremental_got_plt_os =
+    this->make_output_section(incremental_got_plt_name,
+			      elfcpp::SHT_GNU_INCREMENTAL_GOT_PLT, 0,
+			      ORDER_INVALID, false);
+  incremental_got_plt_os->add_output_section_data(incr->got_plt_section());
+
   // Add the .gnu_incremental_strtab section.
   const char *incremental_strtab_name =
     this->namepool_.add(".gnu_incremental_strtab", false, NULL);
@@ -2355,10 +2364,12 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
   incremental_inputs_os->set_after_input_sections();
   incremental_symtab_os->set_after_input_sections();
   incremental_relocs_os->set_after_input_sections();
+  incremental_got_plt_os->set_after_input_sections();
 
   incremental_inputs_os->set_link_section(incremental_strtab_os);
   incremental_symtab_os->set_link_section(incremental_inputs_os);
   incremental_relocs_os->set_link_section(incremental_inputs_os);
+  incremental_got_plt_os->set_link_section(incremental_inputs_os);
 }
 
 // Return whether SEG1 should be before SEG2 in the output file.  This

@@ -1479,6 +1479,26 @@ class Got_offset_list
     return -1U;
   }
 
+  // Return a pointer to the list, or NULL if the list is empty.
+  const Got_offset_list*
+  get_list() const
+  {
+    if (this->got_type_ == -1U)
+      return NULL;
+    return this;
+  }
+
+  // Loop over all GOT offset entries, applying the function F to each.
+  template<typename F>
+  void
+  for_all_got_offsets(F f) const
+  {
+    if (this->got_type_ == -1U)
+      return;
+    for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
+      f(g->got_type_, g->got_offset_);
+  }
+
  private:
   unsigned int got_type_;
   unsigned int got_offset_;
@@ -1659,6 +1679,17 @@ class Sized_relobj : public Relobj
             this->local_got_offsets_.insert(std::make_pair(symndx, g));
         gold_assert(ins.second);
       }
+  }
+
+  // Return the GOT offset list for the local symbol SYMNDX.
+  const Got_offset_list*
+  local_got_offset_list(unsigned int symndx) const
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    if (p == this->local_got_offsets_.end())
+      return NULL;
+    return p->second;
   }
 
   // Get the offset of input section SHNDX within its output section.
