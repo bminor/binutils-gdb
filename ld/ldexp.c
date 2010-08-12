@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -190,11 +190,11 @@ exp_relop (asection *section, bfd_vma value)
 }
 
 static void
-new_rel (bfd_vma value, char *str, asection *section)
+new_rel (bfd_vma value, asection *section)
 {
   expld.result.valid_p = TRUE;
   expld.result.value = value;
-  expld.result.str = str;
+  expld.result.str = NULL;
   expld.result.section = section;
 }
 
@@ -561,7 +561,7 @@ fold_name (etree_type *tree)
 		    }
 		  else
 		    new_rel (h->u.def.value + h->u.def.section->output_offset,
-			     NULL, output_section);
+			     output_section);
 		}
 	    }
 	  else if (expld.phase == lang_final_phase_enum
@@ -591,7 +591,7 @@ fold_name (etree_type *tree)
 		       tree->name.name);
 	    }
 	  else if (os->processed_vma)
-	    new_rel (0, NULL, os->bfd_section);
+	    new_rel (0, os->bfd_section);
 	}
       break;
 
@@ -704,7 +704,8 @@ exp_fold_tree_1 (etree_type *tree)
   switch (tree->type.node_class)
     {
     case etree_value:
-      new_rel (tree->value.value, tree->value.str, expld.section);
+      new_rel (tree->value.value, expld.section);
+      expld.result.str = tree->value.str;
       break;
 
     case etree_rel:
@@ -712,7 +713,7 @@ exp_fold_tree_1 (etree_type *tree)
 	{
 	  asection *output_section = tree->rel.section->output_section;
 	  new_rel (tree->rel.value + tree->rel.section->output_offset,
-		   NULL, output_section);
+		   output_section);
 	}
       else
 	memset (&expld.result, 0, sizeof (expld.result));
@@ -766,7 +767,7 @@ exp_fold_tree_1 (etree_type *tree)
 		{
 		  bfd_vma nextdot;
 
-		  nextdot = expld.result.value + expld.section->vma;
+		  nextdot = expld.result.value + expld.result.section->vma;
 		  if (nextdot < expld.dot
 		      && expld.section != bfd_abs_section_ptr)
 		    einfo (_("%F%S cannot move location counter backwards"
