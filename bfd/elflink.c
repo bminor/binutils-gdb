@@ -5374,6 +5374,7 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
       unsigned long int *counts;
       bfd_size_type amt;
+      unsigned int no_improvement_count = 0;
 
       /* Possible optimization parameters: if we have NSYMS symbols we say
 	 that the hashing table must at least have NSYMS/4 and at most
@@ -5458,7 +5459,12 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	    {
 	      best_chlen = max;
 	      best_size = i;
+              no_improvement_count = 0;
 	    }
+	  /* PR 11843: Avoid futile long searches for the best bucket size
+	     when there are a large number of symbols.  */
+	  else if (++no_improvement_count == 100)
+	    break;
 	}
 
       free (counts);
