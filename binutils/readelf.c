@@ -12556,7 +12556,8 @@ get_archive_member_name (struct archive_info *  arch,
 
   /* We have a normal (short) name.  */
   j = 0;
-  while ((arch->arhdr.ar_name[j] != '/') && (j < 16))
+  while ((arch->arhdr.ar_name[j] != '/')
+	 && (j < sizeof (arch->arhdr.ar_name) - 1))
     j++;
   arch->arhdr.ar_name[j] = '\0';
   return arch->arhdr.ar_name;

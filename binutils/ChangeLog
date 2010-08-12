@@ -1,3 +1,9 @@
+2010-08-12  Michael Haubenwallner  <haubi@gentoo.org>
+
+	PR binutils/11742
+	* readelf.c (get_archive_member_name): Do not read beyond the end
+	of the ar_name field.
+
 2010-08-03  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf.c (display_debug_lines): Mark file argument unused.
