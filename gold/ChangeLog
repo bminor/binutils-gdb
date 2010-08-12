@@ -1,3 +1,10 @@
+2010-08-12  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::merge_object_attributes): Check command line
+	options --no-wchar-size-warning and --no-enum-size-warning.
+	* options.h (General_options): Add ld-compatible options
+	--no-enum-size-warning and --no-wchar-size-warning.
+
 2010-08-04  Ian Lance Taylor  <iant@google.com>
 
 	* x86_64.cc (Target_x86_64::Scan::local): Use

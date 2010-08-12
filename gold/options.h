@@ -722,6 +722,10 @@ class General_options
   DEFINE_special(EL, options::ONE_DASH, '\0',
 		 N_("Link little-endian objects."), NULL);
 
+  DEFINE_bool(enum_size_warning, options::TWO_DASHES, '\0', true, NULL,
+	      N_("(ARM only) Do not warn about objects with incompatible "
+		 "enum sizes"));
+
   DEFINE_bool(fatal_warnings, options::TWO_DASHES, '\0', false,
 	      N_("Treat warnings as errors"),
 	      N_("Do not treat warnings as errors"));
@@ -1037,6 +1041,10 @@ class General_options
 		    options::TWO_DASHES, '\0',
 		    N_("Report unresolved symbols as errors"),
 		    NULL, true);
+
+  DEFINE_bool(wchar_size_warning, options::TWO_DASHES, '\0', true, NULL,
+	      N_("(ARM only) Do not warn about objects with incompatible "
+		 "wchar_t sizes"));
 
   DEFINE_bool(whole_archive, options::TWO_DASHES, '\0', false,
               N_("Include all archive contents"),

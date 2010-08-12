@@ -10290,11 +10290,11 @@ Target_arm<big_endian>::merge_object_attributes(
 	    out_attr[i].set_int_value(in_attr[i].int_value());
 	  break;
 	case elfcpp::Tag_ABI_PCS_wchar_t:
-	  // FIXME: Make it possible to turn off this warning.
 	  if (out_attr[i].int_value()
 	      && in_attr[i].int_value()
 	      && out_attr[i].int_value() != in_attr[i].int_value()
-	      && parameters->options().warn_mismatch())
+	      && parameters->options().warn_mismatch()
+	      && parameters->options().wchar_size_warning())
 	    {
 	      gold_warning(_("%s uses %u-byte wchar_t yet the output is to "
 			     "use %u-byte wchar_t; use of wchar_t values "
@@ -10315,10 +10315,10 @@ Target_arm<big_endian>::merge_object_attributes(
 		  // Use whatever requirements the new object has.
 		  out_attr[i].set_int_value(in_attr[i].int_value());
 		}
-	      // FIXME: Make it possible to turn off this warning.
 	      else if (in_attr[i].int_value() != elfcpp::AEABI_enum_forced_wide
 		       && out_attr[i].int_value() != in_attr[i].int_value()
-		       && parameters->options().warn_mismatch())
+		       && parameters->options().warn_mismatch()
+		       && parameters->options().enum_size_warning())
 		{
 		  unsigned int in_value = in_attr[i].int_value();
 		  unsigned int out_value = out_attr[i].int_value();
