@@ -48,6 +48,16 @@ CORE_ADDR dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *cu);
 struct dwarf2_locexpr_baton dwarf2_fetch_die_location_block
   (unsigned int offset, struct dwarf2_per_cu_data *per_cu);
 
+/* Evaluate a location description, starting at DATA and with length
+   SIZE, to find the current location of variable of TYPE in the context
+   of FRAME.  */
+
+struct value *dwarf2_evaluate_loc_desc (struct type *type,
+					struct frame_info *frame,
+					const gdb_byte *data,
+					unsigned short size,
+					struct dwarf2_per_cu_data *per_cu);
+
 /* The symbol location baton types used by the DWARF-2 reader (i.e.
    SYMBOL_LOCATION_BATON for a LOC_COMPUTED symbol).  "struct
    dwarf2_locexpr_baton" is for a symbol with a single location

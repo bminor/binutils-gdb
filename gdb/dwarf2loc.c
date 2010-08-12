@@ -881,7 +881,7 @@ static struct lval_funcs pieced_value_funcs = {
    SIZE, to find the current location of variable of TYPE in the context
    of FRAME.  */
 
-static struct value *
+struct value *
 dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 			  const gdb_byte *data, unsigned short size,
 			  struct dwarf2_per_cu_data *per_cu)

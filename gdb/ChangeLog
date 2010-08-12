@@ -1,3 +1,38 @@
+2010-08-12  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* dwarf2read.c: Include "c-lang.h" and "valprint.h".
+	(struct dwarf2_per_objfile) <reading_partial_symbols>: New field.
+	(struct partial_die_info) <has_template_arguments>: New field.
+	<num_attrs>: Change type to unsigned char.
+	<building_fullname>: New field.
+	(dwarf2_build_psymtabs_hard): Set reading_partial_symbols.  Only
+	allocate a CU if we don't have one already.  Add a cleanup for the
+	CU.
+	(partial_die_full_name): Handle template arguments not in
+	DW_AT_name.
+	(dwarf2_psymtab_to_symtab): Clear reading_partial_symbols.
+	(load_full_comp_unit): Only allocate a CU if we don't have one
+	already.
+	(do_ui_file_peek_last): New.
+	(dwarf2_compute_name): Handle template parameters not in
+	DW_AT_name.
+	(read_comp_unit): Read and free abbrevs if not read yet.
+	(load_partial_dies): Handle template arguments not in DW_AT_name.
+	(find_partial_die): If we have a CU, but no a partial dies yet,
+	also read in the CU.
+	(dwarf2_const_value_attr): New, abstracted out from
+	dwarf2_const_value.
+	(dwarf2_const_value, dwarf2_const_value_data): Adjust to use
+	dwarf2_const_value_attr.
+	(determine_prefix): Detect and break loops created by RCVT's debug
+	info.
+	(maybe_queue_comp_unit): Bail out early if reading partial
+	symbols.
+	(follow_die_offset): Load full CU if we have no dies.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Make public.
+	* dwarf2loc.h (dwarf2_evaluate_loc_desc): Declare.
+
 2010-08-11  Tom Tromey  <tromey@redhat.com>
             Phil Muldoon  <pmuldoon@redhat.com>
 
