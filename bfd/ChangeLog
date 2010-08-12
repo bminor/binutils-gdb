@@ -3,6 +3,7 @@
 	PR binutils/11909
 	* Makefile.am (coff-tic4x.lo): New.  Disable -Werror.
 	(coff-tic54x.lo): Likewise.
+	* Makefile.in: Regenerated.
 
 2010-08-12  Todd Veldhuizen  <todd.veldhuizen@logicblox.com>
 
