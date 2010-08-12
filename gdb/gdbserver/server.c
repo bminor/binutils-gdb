@@ -1674,6 +1674,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   own_buf[0] = 0;
 }
 
+static void gdb_wants_all_threads_stopped (void);
+
 /* Parse vCont packets.  */
 void
 handle_v_cont (char *own_buf)
@@ -1777,6 +1779,12 @@ handle_v_cont (char *own_buf)
   else
     {
       last_ptid = mywait (minus_one_ptid, &last_status, 0, 1);
+
+      /* From the client's perspective, all-stop mode always stops all
+	 threads implicitly (and the target backend has already done
+	 so by now).  Tag all threads as "want-stopped", so we don't
+	 resume them implicitly without the client telling us to.  */
+      gdb_wants_all_threads_stopped ();
       prepare_resume_reply (own_buf, last_ptid, &last_status);
       disable_async_io ();
 
@@ -2129,8 +2137,9 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
   return 0;
 }
 
-/* Set this inferior LWP's state as "want-stopped".  We won't resume
-   this LWP until the client gives us another action for it.  */
+/* Set this inferior threads's state as "want-stopped".  We won't
+   resume this thread until the client gives us another action for
+   it.  */
 
 static void
 gdb_wants_thread_stopped (struct inferior_list_entry *entry)
@@ -2141,6 +2150,8 @@ gdb_wants_thread_stopped (struct inferior_list_entry *entry)
 
   if (thread->last_status.kind == TARGET_WAITKIND_IGNORE)
     {
+      /* Most threads are stopped implicitly (all-stop); tag that with
+	 signal 0.  */
       thread->last_status.kind = TARGET_WAITKIND_STOPPED;
       thread->last_status.value.sig = TARGET_SIGNAL_0;
     }
@@ -3123,6 +3134,11 @@ handle_target_event (int err, gdb_client_data client_data)
 	  mark_breakpoints_out (process);
 	  mourn_inferior (process);
 	}
+      else
+	/* We're reporting this thread as stopped.  Update it's
+	   "want-stopped" state to what the client wants, until it gets
+	   a new resume action.  */
+	gdb_wants_thread_stopped (&current_inferior->entry);
 
       if (forward_event)
 	{
