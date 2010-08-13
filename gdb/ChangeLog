@@ -1,3 +1,8 @@
+2010-08-13  Hui Zhu  <teawater@gmail.com>
+
+	* dwarf2read.c (load_partial_comp_unit): Initialize free_cu_cleanup.
+	(read_comp_unit): Initialize back_to.
+
 2010-08-12  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

@@ -3247,7 +3247,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
   gdb_byte *info_ptr, *beg_of_comp_unit;
   struct die_info *comp_unit_die;
   struct dwarf2_cu *cu;
-  struct cleanup *free_abbrevs_cleanup, *free_cu_cleanup;
+  struct cleanup *free_abbrevs_cleanup, *free_cu_cleanup = NULL;
   struct attribute *attr;
   int has_children;
   struct die_reader_specs reader_specs;
@@ -7974,7 +7974,7 @@ read_comp_unit (gdb_byte *info_ptr, struct dwarf2_cu *cu)
 {
   struct die_reader_specs reader_specs;
   int read_abbrevs = 0;
-  struct cleanup *back_to;
+  struct cleanup *back_to = NULL;
   struct die_info *die;
 
   if (cu->dwarf2_abbrevs == NULL)
