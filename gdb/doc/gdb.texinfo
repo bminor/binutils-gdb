@@ -22713,7 +22713,7 @@ Entries can be placed in section @code{.debug_gdb_scripts} with,
 for example, this GCC macro:
 
 @example
-/* Note: The "MS" section flags are to remote duplicates.  */
+/* Note: The "MS" section flags are to remove duplicates.  */
 #define DEFINE_GDB_SCRIPT(script_name) \
   asm("\
 .pushsection \".debug_gdb_scripts\", \"MS\",@@progbits,1\n\

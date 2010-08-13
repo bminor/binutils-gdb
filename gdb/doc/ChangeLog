@@ -1,3 +1,7 @@
+2010-08-13  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (.debug_gdb_scripts section): Fix typo.
+
 2010-08-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Data Manipulation): Document
