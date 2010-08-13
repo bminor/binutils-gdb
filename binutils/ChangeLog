@@ -1,3 +1,14 @@
+2010-08-13  Dan Rosenberg  <dan.j.rosenberg@gmail.com>
+
+	PR binutils/11889
+	* readelf.c (get_32bit_elf_symbols): Check for a corrupt
+	sh_entsize.
+	(get_64bit_elf_symbols): Likewise.
+	(process_symbol_table): Likewise.
+	(process_section_groups): Check for corrupt headers.
+	(process_version_sections): Check for corrupt indicies.
+	(process_corefile_note_segment): Likewise.
+
 2010-08-13  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* readelf.c (get_machine_flags): Detect CF ISA C and EMAC_B

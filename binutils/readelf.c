@@ -1266,7 +1266,7 @@ dump_relocations (FILE * file,
 	case EM_CR16_OLD:
 	  rtype = elf_cr16_reloc_type (type);
 	  break;
-	
+
 	case EM_MICROBLAZE:
 	case EM_MICROBLAZE_OLD:
 	  rtype = elf_microblaze_reloc_type (type);
@@ -2621,7 +2621,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & E_FLAG_RX_64BIT_DOUBLES)
 	    strcat (buf, ", 64-bit doubles");
 	  if (e_flags & E_FLAG_RX_DSP)
-	    strcat (buf, ", dsp");	  
+	    strcat (buf, ", dsp");
 
 	case EM_S390:
 	  if (e_flags & EF_S390_HIGH_GPRS)
@@ -4046,15 +4046,30 @@ static Elf_Internal_Sym *
 get_32bit_elf_symbols (FILE * file, Elf_Internal_Shdr * section)
 {
   unsigned long number;
-  Elf32_External_Sym * esyms;
+  Elf32_External_Sym * esyms = NULL;
   Elf_External_Sym_Shndx * shndx;
-  Elf_Internal_Sym * isyms;
+  Elf_Internal_Sym * isyms = NULL;
   Elf_Internal_Sym * psym;
   unsigned int j;
 
+  /* Run some sanity checks first.  */
+  if (section->sh_entsize == 0)
+    {
+      error (_("sh_entsize is zero\n"));
+      return NULL;
+    }
+
+  number = section->sh_size / section->sh_entsize;
+
+  if (number * sizeof (Elf32_External_Sym) > section->sh_size + 1)
+    {
+      error (_("Invalid sh_entsize\n"));
+      return NULL;
+    }
+
   esyms = (Elf32_External_Sym *) get_data (NULL, file, section->sh_offset, 1,
                                            section->sh_size, _("symbols"));
-  if (!esyms)
+  if (esyms == NULL)
     return NULL;
 
   shndx = NULL;
@@ -4066,28 +4081,19 @@ get_32bit_elf_symbols (FILE * file, Elf_Internal_Shdr * section)
                                                    symtab_shndx_hdr->sh_offset,
                                                    1, symtab_shndx_hdr->sh_size,
                                                    _("symtab shndx"));
-      if (!shndx)
-	{
-	  free (esyms);
-	  return NULL;
-	}
+      if (shndx == NULL)
+	goto exit_point;
     }
 
-  number = section->sh_size / section->sh_entsize;
   isyms = (Elf_Internal_Sym *) cmalloc (number, sizeof (Elf_Internal_Sym));
 
   if (isyms == NULL)
     {
       error (_("Out of memory\n"));
-      if (shndx)
-	free (shndx);
-      free (esyms);
-      return NULL;
+      goto exit_point;
     }
 
-  for (j = 0, psym = isyms;
-       j < number;
-       j++, psym++)
+  for (j = 0, psym = isyms; j < number; j++, psym++)
     {
       psym->st_name  = BYTE_GET (esyms[j].st_name);
       psym->st_value = BYTE_GET (esyms[j].st_value);
@@ -4102,9 +4108,11 @@ get_32bit_elf_symbols (FILE * file, Elf_Internal_Shdr * section)
       psym->st_other = BYTE_GET (esyms[j].st_other);
     }
 
+ exit_point:
   if (shndx)
     free (shndx);
-  free (esyms);
+  if (esyms)
+    free (esyms);
 
   return isyms;
 }
@@ -4118,6 +4126,21 @@ get_64bit_elf_symbols (FILE * file, Elf_Internal_Shdr * section)
   Elf_Internal_Sym * isyms;
   Elf_Internal_Sym * psym;
   unsigned int j;
+
+  /* Run some sanity checks first.  */
+  if (section->sh_entsize == 0)
+    {
+      error (_("sh_entsize is zero\n"));
+      return NULL;
+    }
+
+  number = section->sh_size / section->sh_entsize;
+
+  if (number * sizeof (Elf64_External_Sym) > section->sh_size + 1)
+    {
+      error (_("Invalid sh_entsize\n"));
+      return NULL;
+    }
 
   esyms = (Elf64_External_Sym *) get_data (NULL, file, section->sh_offset, 1,
                                            section->sh_size, _("symbols"));
@@ -4140,7 +4163,6 @@ get_64bit_elf_symbols (FILE * file, Elf_Internal_Shdr * section)
 	}
     }
 
-  number = section->sh_size / section->sh_entsize;
   isyms = (Elf_Internal_Sym *) cmalloc (number, sizeof (Elf_Internal_Sym));
 
   if (isyms == NULL)
@@ -4963,6 +4985,12 @@ process_section_groups (FILE * file)
 	      if (symtab)
 		free (symtab);
 	      symtab = GET_ELF_SYMBOLS (file, symtab_sec);
+	    }
+
+	  if (symtab == NULL)
+	    {
+	      error (_("Corrupt header in group section `%s'\n"), name);
+	      continue;
 	    }
 
 	  sym = symtab + section->sh_info;
@@ -6440,7 +6468,6 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
     }
   else
     {
-      
       per_index = (word >> 24) & 0x7f;
       if (per_index != 0 && per_index != 1 && per_index != 2)
 	{
@@ -7773,6 +7800,10 @@ process_version_sections (FILE * file)
 		int j;
 		int isum;
 
+		/* Check for negative or very large indicies.  */
+		if ((unsigned char *) edefs + idx < (unsigned char *) edefs)
+		  break;
+
 		vstart = ((char *) edefs) + idx;
 		if (vstart + sizeof (*edef) > endbuf)
 		  break;
@@ -7793,6 +7824,11 @@ process_version_sections (FILE * file)
 		printf (_("  Index: %d  Cnt: %d  "),
 			ent.vd_ndx, ent.vd_cnt);
 
+		/* Check for overflow.  */
+		if ((unsigned char *)(vstart + ent.vd_aux) < (unsigned char *) vstart
+		    || (unsigned char *)(vstart + ent.vd_aux) > (unsigned char *) endbuf)
+		  break;
+
 		vstart += ent.vd_aux;
 
 		eaux = (Elf_External_Verdaux *) vstart;
@@ -7809,6 +7845,11 @@ process_version_sections (FILE * file)
 
 		for (j = 1; j < ent.vd_cnt; j++)
 		  {
+		    /* Check for overflow.  */
+		    if ((unsigned char *)(vstart + aux.vda_next) < (unsigned char *) vstart
+			|| (unsigned char *)(vstart + aux.vda_next) > (unsigned char *) endbuf)
+		      break;
+
 		    isum   += aux.vda_next;
 		    vstart += aux.vda_next;
 
@@ -7826,11 +7867,13 @@ process_version_sections (FILE * file)
 		      printf (_("  %#06x: Parent %d, name index: %ld\n"),
 			      isum, j, aux.vda_name);
 		  }
+
 		if (j < ent.vd_cnt)
 		  printf (_("  Version def aux past end of section\n"));
 
 		idx += ent.vd_next;
 	      }
+
 	    if (cnt < section->sh_info)
 	      printf (_("  Version definition past end of section\n"));
 
@@ -7874,6 +7917,9 @@ process_version_sections (FILE * file)
 		int isum;
 		char * vstart;
 
+		if ((unsigned char *) eneed + idx < (unsigned char *) eneed)
+		  break;
+
 		vstart = ((char *) eneed) + idx;
 		if (vstart + sizeof (*entry) > endbuf)
 		  break;
@@ -7894,6 +7940,11 @@ process_version_sections (FILE * file)
 		  printf (_("  File: %lx"), ent.vn_file);
 
 		printf (_("  Cnt: %d\n"), ent.vn_cnt);
+
+		/* Check for overflow.  */
+		if ((unsigned char *)(vstart + ent.vn_aux) < (unsigned char *) vstart
+		    || (unsigned char *)(vstart + ent.vn_aux) > (unsigned char *) endbuf)
+		  break;
 
 		vstart += ent.vn_aux;
 
@@ -7921,6 +7972,11 @@ process_version_sections (FILE * file)
 
 		    printf (_("  Flags: %s  Version: %d\n"),
 			    get_ver_flags (aux.vna_flags), aux.vna_other);
+
+		    /* Check for overflow.  */
+		    if ((unsigned char *)(vstart + aux.vna_next) < (unsigned char *) vstart
+			|| (unsigned char *)(vstart + aux.vna_next) > (unsigned char *) endbuf)
+		      break;
 
 		    isum   += aux.vna_next;
 		    vstart += aux.vna_next;
@@ -7961,6 +8017,8 @@ process_version_sections (FILE * file)
 	    found = 1;
 
 	    symbols = GET_ELF_SYMBOLS (file, link_section);
+	    if (symbols == NULL)
+	      break;
 
 	    string_sec = section_headers + link_section->sh_link;
 
@@ -8021,6 +8079,16 @@ process_version_sections (FILE * file)
 		    default:
 		      nn = printf ("%4x%c", data[cnt + j] & VERSYM_VERSION,
 				   data[cnt + j] & VERSYM_HIDDEN ? 'h' : ' ');
+
+		      /* If this index value is greater than the size of the symbols
+		         array, break to avoid an out-of-bounds read,  */
+		      if ((unsigned long)(cnt + j) >=
+		         ((unsigned long)link_section->sh_size /
+			  (unsigned long)link_section->sh_entsize))
+		        {
+		          warn (_("invalid index into symbol array\n"));
+		          break;
+			}
 
 		      check_def = 1;
 		      check_need = 1;
@@ -8729,9 +8797,17 @@ process_symbol_table (FILE * file)
 		  && section->sh_type == SHT_SYMTAB))
 	    continue;
 
+	  if (section->sh_entsize == 0)
+	    {
+	      printf (_("\nSymbol table '%s' has a sh_entsize of zero!\n"),
+		      SECTION_NAME (section));
+	      continue;
+	    }
+
 	  printf (_("\nSymbol table '%s' contains %lu entries:\n"),
 		  SECTION_NAME (section),
 		  (unsigned long) (section->sh_size / section->sh_entsize));
+
 	  if (is_32bit_elf)
 	    printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
 	  else
@@ -9733,7 +9809,7 @@ get_section_contents (Elf_Internal_Shdr * section, FILE * file)
                              _("section contents"));
 }
 
-		      
+
 static void
 dump_section_as_strings (Elf_Internal_Shdr * section, FILE * file)
 {
@@ -10206,7 +10282,7 @@ static const char * arm_attr_tag_THUMB_ISA_use[] =
 static const char * arm_attr_tag_FP_arch[] =
   {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16", "VFPv4", "VFPv4-D16"};
 static const char * arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
-static const char * arm_attr_tag_Advanced_SIMD_arch[] = 
+static const char * arm_attr_tag_Advanced_SIMD_arch[] =
   {"No", "NEONv1", "NEONv1 with Fused-MAC"};
 static const char * arm_attr_tag_PCS_config[] =
   {"None", "Bare platform", "Linux application", "Linux DSO", "PalmOS 2004",
@@ -10247,16 +10323,16 @@ static const char * arm_attr_tag_FP_HP_extension[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_ABI_FP_16bit_format[] =
   {"None", "IEEE 754", "Alternative Format"};
-static const char * arm_attr_tag_MPextension_use[] = 
+static const char * arm_attr_tag_MPextension_use[] =
   {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_DIV_use[] =
-  {"Allowed in Thumb-ISA, v7-R or v7-M", "Not allowed", 
+  {"Allowed in Thumb-ISA, v7-R or v7-M", "Not allowed",
     "Allowed in v7-A with integer division extension"};
 static const char * arm_attr_tag_T2EE_use[] = {"Not Allowed", "Allowed"};
 static const char * arm_attr_tag_Virtualization_use[] =
-  {"Not Allowed", "TrustZone", "Virtualization Extensions", 
+  {"Not Allowed", "TrustZone", "Virtualization Extensions",
     "TrustZone and Virtualization Extensions"};
-static const char * arm_attr_tag_MPextension_use_legacy[] = 
+static const char * arm_attr_tag_MPextension_use_legacy[] =
   {"Not Allowed", "Allowed"};
 
 #define LOOKUP(id, name) \
@@ -10361,7 +10437,7 @@ display_arm_attribute (unsigned char * p)
 		case 3: printf ("??? 3\n"); break;
 		default:
 		  if (val <= 12)
-		    printf (_("8-byte and up to %d-byte extended\n"), 
+		    printf (_("8-byte and up to %d-byte extended\n"),
 			    1 << val);
 		  else
 		    printf ("??? (%d)\n", val);
@@ -10380,7 +10456,7 @@ display_arm_attribute (unsigned char * p)
 		case 3: printf ("??? 3\n"); break;
 		default:
 		  if (val <= 12)
-		    printf (_("8-byte and up to %d-byte extended\n"), 
+		    printf (_("8-byte and up to %d-byte extended\n"),
 			    1 << val);
 		  else
 		    printf ("??? (%d)\n", val);
@@ -11825,7 +11901,7 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 
   pnotes = (Elf_External_Note *) get_data (NULL, file, offset, 1, length,
                                            _("notes"));
-  if (!pnotes)
+  if (pnotes == NULL)
     return 0;
 
   external = pnotes;
@@ -11849,7 +11925,8 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 
       next = (Elf_External_Note *) (inote.descdata + align_power (inote.descsz, 2));
 
-      if (((char *) next) > (((char *) pnotes) + length))
+      if (   ((char *) next > ((char *) pnotes) + length)
+	  || ((char *) next <  (char *) pnotes))
 	{
 	  warn (_("corrupt note found at offset %lx into core notes\n"),
 		(unsigned long) ((char *) external - (char *) pnotes));
@@ -11859,6 +11936,17 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 	}
 
       external = next;
+
+      /* Prevent out-of-bounds indexing.  */
+      if (inote.namedata + inote.namesz >= (char *) pnotes + length
+	  || inote.namedata + inote.namesz < inote.namedata)
+        {
+          warn (_("corrupt note found at offset %lx into core notes\n"),
+                (unsigned long) ((char *) external - (char *) pnotes));
+          warn (_(" type: %lx, namesize: %08lx, descsize: %08lx\n"),
+                inote.type, inote.namesz, inote.descsz);
+          break;
+        }
 
       /* Verify that name is null terminated.  It appears that at least
 	 one version of Linux (RedHat 6.0) generates corefiles that don't
