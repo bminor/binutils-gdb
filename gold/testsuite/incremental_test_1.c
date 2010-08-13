@@ -1,4 +1,4 @@
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2010 Free Software Foundation, Inc.
 // Written by Rafael Avila de Espindola <espindola@google.com>
 
 // This file is part of gold.
@@ -19,6 +19,8 @@
 // MA 02110-1301, USA.
 
 int a = -1;
+
+extern int t1(int);
 
 int t1(int b)
 {
