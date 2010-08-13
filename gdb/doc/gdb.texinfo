@@ -27375,6 +27375,8 @@ don't appear in the actual output):
 @subheading The @code{-data-read-memory} Command
 @findex -data-read-memory
 
+This command is deprecated, use @code{-data-read-memory-bytes} instead.
+
 @subsubheading Synopsis
 
 @smallexample
@@ -27485,6 +27487,128 @@ next-page="0x000013c0",prev-page="0x00001380",memory=[
 @{addr="0x000013bc",data=["0x2c","0x2d","0x2e","0x2f"],ascii=",-./"@}]
 (gdb)
 @end smallexample
+
+@subheading The @code{-data-read-memory-bytes} Command
+@findex -data-read-memory-bytes
+
+@subsubheading Synopsis
+
+@smallexample
+ -data-read-memory-bytes [ -o @var{byte-offset} ]
+   @var{address} @var{count}
+@end smallexample
+
+@noindent
+where:
+
+@table @samp
+@item @var{address}
+An expression specifying the address of the first memory word to be
+read.  Complex expressions containing embedded white space should be
+quoted using the C convention.
+
+@item @var{count}
+The number of bytes to read.  This should be an integer literal.
+
+@item @var{byte-offset}
+The offsets in bytes relative to @var{address} at which to start
+reading.  This should be an integer literal.  This option is provided
+so that a frontend is not required to first evaluate address and then
+perform address arithmetics itself.
+
+@end table
+
+This command attempts to read all accessible memory regions in the
+specified range.  First, all regions marked as unreadable in the memory
+map (if one is defined) will be skipped.  @xref{Memory Region
+Attributes}.  Second, @value{GDBN} will attempt to read the remaining
+regions.  For each one, if reading full region results in an errors,
+@value{GDBN} will try to read a subset of the region.
+
+In general, every single byte in the region may be readable or not,
+and the only way to read every readable byte is to try a read at
+every address, which is not practical.   Therefore, @value{GDBN} will
+attempt to read all accessible bytes at either beginning or the end
+of the region, using a binary division scheme.  This heuristic works
+well for reading accross a memory map boundary.  Note that if a region
+has a readable range that is neither at the beginning or the end,
+@value{GDBN} will not read it.
+
+The result record (@pxref{GDB/MI Result Records}) that is output of
+the command includes a field named @samp{memory} whose content is a
+list of tuples.  Each tuple represent a successfully read memory block
+and has the following fields:
+
+@table @code
+@item begin
+The start address of the memory block, as hexadecimal literal.
+
+@item end
+The end address of the memory block, as hexadecimal literal.
+
+@item offset
+The offset of the memory block, as hexadecimal literal, relative to
+the start address passed to @code{-data-read-memory-bytes}.
+
+@item contents
+The contents of the memory block, in hex.
+
+@end table
+
+
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{x}.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-data-read-memory-bytes &a 10
+^done,memory=[@{begin="0xbffff154",offset="0x00000000",
+              end="0xbffff15e",
+              contents="01000000020000000300"@}]
+(gdb)
+@end smallexample
+
+
+@subheading The @code{-data-write-memory-bytes} Command
+@findex -data-write-memory-bytes
+
+@subsubheading Synopsis
+
+@smallexample
+ -data-write-memory-bytes @var{address} @var{contents}
+@end smallexample
+
+@noindent
+where:
+
+@table @samp
+@item @var{address}
+An expression specifying the address of the first memory word to be
+read.  Complex expressions containing embedded white space should be
+quoted using the C convention.
+
+@item @var{contents}
+The hex-encoded bytes to write.
+
+@end table
+
+@subsubheading @value{GDBN} Command
+
+There's no corresponding @value{GDBN} command.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-data-write-memory-bytes &a "aabbccdd"
+^done
+(gdb)
+@end smallexample
+
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Tracepoint Commands
@@ -28824,6 +28948,9 @@ pretty-printing commands, and possible presence of the
 @samp{display_hint} field in the output of @code{-var-list-children}
 @item thread-info
 Indicates presence of the @code{-thread-info} command.
+@item data-read-memory-bytes
+Indicates presense of the @code{-data-read-memory-bytes} and the
+@code{-data-write-memory-bytes} commands.
 
 @end table
 

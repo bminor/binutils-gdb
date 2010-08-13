@@ -299,10 +299,23 @@ extern LONGEST target_read (struct target_ops *ops,
 			    const char *annex, gdb_byte *buf,
 			    ULONGEST offset, LONGEST len);
 
-extern LONGEST target_read_until_error (struct target_ops *ops,
-					enum target_object object,
-					const char *annex, gdb_byte *buf,
-					ULONGEST offset, LONGEST len);
+struct memory_read_result
+  {
+    /* First address that was read. */
+    ULONGEST begin;
+    /* Past-the-end address.  */
+    ULONGEST end;
+    /* The data.  */
+    gdb_byte *data;
+};
+typedef struct memory_read_result memory_read_result_s;
+DEF_VEC_O(memory_read_result_s);
+
+extern void free_memory_read_result_vector (void *);
+
+extern VEC(memory_read_result_s)* read_memory_robust (struct target_ops *ops,
+						      ULONGEST offset,
+						      LONGEST len);
   
 extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,

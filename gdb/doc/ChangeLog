@@ -1,3 +1,8 @@
+2010-08-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Document
+	-data-read-memory-raw and -data-write-memory-raw.
+
 2010-08-11  Tom Tromey  <tromey@redhat.com>
             Phil Muldoon <pmuldoon@redhat.com>
 

@@ -1792,72 +1792,203 @@ target_read (struct target_ops *ops,
   return len;
 }
 
-LONGEST
-target_read_until_error (struct target_ops *ops,
-			 enum target_object object,
-			 const char *annex, gdb_byte *buf,
-			 ULONGEST offset, LONGEST len)
-{
-  LONGEST xfered = 0;
+/** Assuming that the entire [begin, end) range of memory cannot be read,
+    try to read whatever subrange is possible to read.
 
+    The function results, in RESULT, either zero or one memory block.
+    If there's a readable subrange at the beginning, it is completely
+    read and returned. Any further readable subrange will not be read.
+    Otherwise, if there's a readable subrange at the end, it will be
+    completely read and returned.  Any readable subranges before it (obviously,
+    not starting at the beginning), will be ignored. In other cases --
+    either no readable subrange, or readable subrange (s) that is neither
+    at the beginning, or end, nothing is returned.
+
+    The purpose of this function is to handle a read across a boundary of
+    accessible memory in a case when memory map is not available. The above
+    restrictions are fine for this case, but will give incorrect results if
+    the memory is 'patchy'. However, supporting 'patchy' memory would require
+    trying to read every single byte, and it seems unacceptable solution.
+    Explicit memory map is recommended for this case -- and
+    target_read_memory_robust will take care of reading multiple ranges then.  */
+
+static void
+read_whatever_is_readable (struct target_ops *ops, ULONGEST begin, ULONGEST end,
+			   VEC(memory_read_result_s) **result)
+{
+  gdb_byte *buf = xmalloc (end-begin);
+  ULONGEST current_begin = begin;
+  ULONGEST current_end = end;
+  int forward;
+  memory_read_result_s r;
+
+  /* If we previously failed to read 1 byte, nothing can be done here.  */
+  if (end - begin <= 1)
+    return;
+
+  /* Check that either first or the last byte is readable, and give up
+     if not. This heuristic is meant to permit reading accessible memory
+     at the boundary of accessible region.  */
+  if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
+			   buf, begin, 1) == 1)
+    {
+      forward = 1;
+      ++current_begin;
+    }
+  else if (target_read_partial (ops, TARGET_OBJECT_MEMORY, NULL,
+				buf + (end-begin) - 1, end - 1, 1) == 1)
+    {
+      forward = 0;
+      --current_end;
+    }
+  else
+    {
+      return;
+    }
+
+  /* Loop invariant is that the [current_begin, current_end) was previously
+     found to be not readable as a whole.
+
+     Note loop condition -- if the range has 1 byte, we can't divide the range
+     so there's no point trying further.  */
+  while (current_end - current_begin > 1)
+    {
+      ULONGEST first_half_begin, first_half_end;
+      ULONGEST second_half_begin, second_half_end;
+      LONGEST xfer;
+
+      ULONGEST middle = current_begin + (current_end - current_begin)/2;
+      if (forward)
+	{
+	  first_half_begin = current_begin;
+	  first_half_end = middle;
+	  second_half_begin = middle;
+	  second_half_end = current_end;
+	}
+      else
+	{
+	  first_half_begin = middle;
+	  first_half_end = current_end;
+	  second_half_begin = current_begin;
+	  second_half_end = middle;
+	}
+
+      xfer = target_read (ops, TARGET_OBJECT_MEMORY, NULL,
+			  buf + (first_half_begin - begin),
+			  first_half_begin,
+			  first_half_end - first_half_begin);
+
+      if (xfer == first_half_end - first_half_begin)
+	{
+	  /* This half reads up fine. So, the error must be in the other half.  */
+	  current_begin = second_half_begin;
+	  current_end = second_half_end;
+	}
+      else
+	{
+	  /* This half is not readable. Because we've tried one byte, we
+	     know some part of this half if actually redable. Go to the next
+	     iteration to divide again and try to read.
+
+	     We don't handle the other half, because this function only tries
+	     to read a single readable subrange.  */
+	  current_begin = first_half_begin;
+	  current_end = first_half_end;
+	}
+    }
+
+  if (forward)
+    {
+      /* The [begin, current_begin) range has been read.  */
+      r.begin = begin;
+      r.end = current_begin;
+      r.data = buf;
+    }
+  else
+    {
+      /* The [current_end, end) range has been read.  */
+      LONGEST rlen = end - current_end;
+      r.data = xmalloc (rlen);
+      memcpy (r.data, buf + current_end - begin, rlen);
+      r.begin = current_end;
+      r.end = end;
+      xfree (buf);
+    }
+  VEC_safe_push(memory_read_result_s, (*result), &r);
+}
+
+void
+free_memory_read_result_vector (void *x)
+{
+  VEC(memory_read_result_s) *v = x;
+  memory_read_result_s *current;
+  int ix;
+
+  for (ix = 0; VEC_iterate (memory_read_result_s, v, ix, current); ++ix)
+    {
+      xfree (current->data);
+    }
+  VEC_free (memory_read_result_s, v);
+}
+
+VEC(memory_read_result_s) *
+read_memory_robust (struct target_ops *ops, ULONGEST offset, LONGEST len)
+{
+  VEC(memory_read_result_s) *result = 0;
+
+  LONGEST xfered = 0;
   while (xfered < len)
     {
-      LONGEST xfer = target_read_partial (ops, object, annex,
-					  (gdb_byte *) buf + xfered,
-					  offset + xfered, len - xfered);
+      struct mem_region *region = lookup_mem_region (offset + xfered);
+      LONGEST rlen;
 
-      /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer == 0)
-	return xfered;
-      if (xfer < 0)
+      /* If there is no explicit region, a fake one should be created.  */
+      gdb_assert (region);
+
+      if (region->hi == 0)
+	rlen = len - xfered;
+      else
+	rlen = region->hi - offset;
+
+      if (region->attrib.mode == MEM_NONE || region->attrib.mode == MEM_WO)
 	{
-	  /* We've got an error.  Try to read in smaller blocks.  */
-	  ULONGEST start = offset + xfered;
-	  ULONGEST remaining = len - xfered;
-	  ULONGEST half;
-
-	  /* If an attempt was made to read a random memory address,
-	     it's likely that the very first byte is not accessible.
-	     Try reading the first byte, to avoid doing log N tries
-	     below.  */
-	  xfer = target_read_partial (ops, object, annex, 
-				      (gdb_byte *) buf + xfered, start, 1);
-	  if (xfer <= 0)
-	    return xfered;
-	  start += 1;
-	  remaining -= 1;
-	  half = remaining/2;
-	  
-	  while (half > 0)
-	    {
-	      xfer = target_read_partial (ops, object, annex,
-					  (gdb_byte *) buf + xfered,
-					  start, half);
-	      if (xfer == 0)
-		return xfered;
-	      if (xfer < 0)
-		{
-		  remaining = half;		  
-		}
-	      else
-		{
-		  /* We have successfully read the first half.  So, the
-		     error must be in the second half.  Adjust start and
-		     remaining to point at the second half.  */
-		  xfered += xfer;
-		  start += xfer;
-		  remaining -= xfer;
-		}
-	      half = remaining/2;
-	    }
-
-	  return xfered;
+	  /* Cannot read this region. Note that we can end up here only
+	     if the region is explicitly marked inaccessible, or
+	     'inaccessible-by-default' is in effect.  */
+	  xfered += rlen;
 	}
-      xfered += xfer;
-      QUIT;
+      else
+	{
+	  LONGEST to_read = min (len - xfered, rlen);
+	  gdb_byte *buffer = (gdb_byte *)xmalloc (to_read);
+
+	  LONGEST xfer = target_read (ops, TARGET_OBJECT_MEMORY, NULL,
+				      (gdb_byte *) buffer,
+				      offset + xfered, to_read);
+	  /* Call an observer, notifying them of the xfer progress?  */
+	  if (xfer <= 0)
+	    {
+	      /* Got an error reading full chunk. See if maybe we can read
+		 some subrange.  */
+	      xfree (buffer);
+	      read_whatever_is_readable (ops, offset + xfered, offset + xfered + to_read, &result);
+	      xfered += to_read;
+	    }
+	  else
+	    {
+	      struct memory_read_result r;
+	      r.data = buffer;
+	      r.begin = offset + xfered;
+	      r.end = r.begin + xfer;
+	      VEC_safe_push (memory_read_result_s, result, &r);
+	      xfered += xfer;
+	    }
+	  QUIT;
+	}
     }
-  return len;
+  return result;
 }
+
 
 /* An alternative to target_write with progress callbacks.  */
 

@@ -1,3 +1,22 @@
+2010-08-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Easier and more stubborn MI memory read commands.
+
+	* mi/mi-cmds.c (mi_cmds): Register data-read-memory-bytes
+	and data-write-memory-bytes.
+	* mi/mi-cmds.h (mi_cmd_data_read_memory_bytes)
+	(mi_cmd_data_write_memory_bytes): New.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Use regular target_read.
+	(mi_cmd_data_read_memory_bytes, mi_cmd_data_write_memory_bytes):
+	New.
+	(mi_cmd_list_features): Add "data-read-memory-bytes" feature.
+	* target.c (target_read_until_error): Remove.
+	(read_whatever_is_readable, free_memory_read_result_vector)
+	(read_memory_robust): New.
+	* target.h (target_read_until_error): Remove.
+	(struct memory_read_result, free_memory_read_result_vector)
+	(read_memory_robust): New.
+
 2010-08-13  Hui Zhu  <teawater@gmail.com>
 
 	* dwarf2read.c (load_partial_comp_unit): Initialize free_cu_cleanup.
