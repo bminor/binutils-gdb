@@ -45,7 +45,7 @@ show_logging_filename (struct ui_file *file, int from_tty,
 		    value);
 }
 
-int logging_overwrite;
+static int logging_overwrite;
 static void
 show_logging_overwrite (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
@@ -55,7 +55,7 @@ Whether logging overwrites or appends to the log file is %s.\n"),
 		    value);
 }
 
-int logging_redirect;
+static int logging_redirect;
 static void
 show_logging_redirect (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)

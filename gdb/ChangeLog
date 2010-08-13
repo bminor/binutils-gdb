@@ -1,3 +1,8 @@
+2010-08-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cli-logging.c (logging_overwrite, logging_redirect): Make them
+	static.
+
 2010-08-13  Ken Werner  <ken.werner@de.ibm.com>
 
 	* python/python.c (gdbpy_solib_name): Remove the const qualifier of
