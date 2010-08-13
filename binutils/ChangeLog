@@ -1,3 +1,8 @@
+2010-08-13  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf.c (process_debug_info): Don't subtract section address
+	when calculating location of cu abbrev within section.
+
 2010-08-12  Michael Haubenwallner  <haubi@gentoo.org>
 
 	PR binutils/11742
@@ -57,7 +62,7 @@
 
 2010-06-29  Alan Modra  <amodra@gmail.com>
 
-   	PR binutils/3166
+	PR binutils/3166
 	* objcopy.c (is_strip_section): Revert 2006-09-05.
 	(setup_section): Make SHT_GROUP section nobits.
 
@@ -423,7 +428,7 @@
 2010-01-19  Daisuke Hatayama  <d.hatayama@jp.fujitsu.com>
 	    Alan Modra <amodra@gmail.com>
 
-        * readelf.c (process_file_header): Handle e_phnum extension.
+	* readelf.c (process_file_header): Handle e_phnum extension.
 
 2010-01-14  Tristan Gingold  <gingold@adacore.com>
 

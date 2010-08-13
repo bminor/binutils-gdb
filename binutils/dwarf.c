@@ -2077,8 +2077,7 @@ process_debug_info (struct dwarf_section *section,
       else
 	process_abbrev_section
 	  ((unsigned char *) debug_displays [abbrev_sec].section.start
-	   + compunit.cu_abbrev_offset
-           - debug_displays [abbrev_sec].section.address,
+	   + compunit.cu_abbrev_offset,
 	   (unsigned char *) debug_displays [abbrev_sec].section.start
 	   + debug_displays [abbrev_sec].section.size);
 
