@@ -1530,6 +1530,24 @@ no_version_test.o: no_version_test.c
 no_version_test.stdout: libno_version_test.so
 	$(TEST_OBJDUMP) -h $< > $@
 
+# Test that strong reference to a weak symbol in a DSO remains strong.
+check_SCRIPTS += strong_ref_weak_def.sh
+check_DATA += strong_ref_weak_def.stdout
+MOSTLYCLEANFILES += strong_ref_weak_def_1.so strong_ref_weak_def_2.so \
+	strong_ref_weak_def.stdout
+strong_ref_weak_def_2.o: strong_ref_weak_def_2.c
+	$(COMPILE) -o $@ -c -fPIC $<
+strong_ref_weak_def_2.so: strong_ref_weak_def_2.o gcctestdir/ld
+	gcctestdir/ld -shared -o $@ strong_ref_weak_def_2.o
+strong_ref_weak_def_1.o: strong_ref_weak_def_1.c
+	$(COMPILE) -o $@ -c -fPIC $<
+strong_ref_weak_def_1.so: strong_ref_weak_def_1.o strong_ref_weak_def_2.so \
+	gcctestdir/ld
+	gcctestdir/ld -shared -o $@ strong_ref_weak_def_1.o \
+		strong_ref_weak_def_2.so
+strong_ref_weak_def.stdout: strong_ref_weak_def_1.so
+	$(TEST_READELF) -sWD $< > $@
+
 endif GCC
 endif NATIVE_LINKER
 

@@ -1,4 +1,18 @@
 2010-08-12  Cary Coutant  <ccoutant@google.com>
+	    Doug Kwan  <dougkwan@google.com>
+
+	* resolve.cc (Symbol_table::should_override): When a weak dynamic
+	defintion overrides non-weak undef, remember that the original undef
+	is not weak.
+	* symtab.cc (Symbol_table::sized_write_global): For undef without
+	an original weak binding, set binding to global in output.
+	* testsuite/Makefile.am: Add new test strong_ref_weak_def.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/strong_ref_weak_def.sh: New file.
+	* testsuite/strong_ref_weak_def_1.c: Ditto.
+	* testsuite/strong_ref_weak_def_2.c: Ditto.
+
+2010-08-12  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/incremental_test.sh: Rewrite.
 	* testsuite/incremental_test_1.c: Rewrite.

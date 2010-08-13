@@ -2756,6 +2756,8 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 		    shndx = elfcpp::SHN_UNDEF;
 		    if (sym->is_undef_binding_weak())
 		      binding = elfcpp::STB_WEAK;
+		    else
+		      binding = elfcpp::STB_GLOBAL;
 		  }
 		else if (symobj->pluginobj() != NULL)
 		  shndx = elfcpp::SHN_UNDEF;

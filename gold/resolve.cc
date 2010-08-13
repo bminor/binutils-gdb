@@ -576,6 +576,11 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
       return false;
 
     case UNDEF * 16 + DYN_WEAK_DEF:
+      // When overriding an undef by a dynamic weak definition,
+      // we need to remember that the original undef was not weak.
+      *adjust_dyndef = true;
+      return true;
+
     case DYN_UNDEF * 16 + DYN_WEAK_DEF:
     case DYN_WEAK_UNDEF * 16 + DYN_WEAK_DEF:
       // Use a weak dynamic definition if we have a reference.
