@@ -388,10 +388,11 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
   PyObject *str_obj;
 #ifdef PY_LONG_LONG
   unsigned PY_LONG_LONG pc;
-  const char *format = "K";
+  /* To be compatible with Python 2.4 the format strings are not const.  */
+  char *format = "K";
 #else
   unsigned long pc;
-  const char *format = "k";
+  char *format = "k";
 #endif
 
   if (!PyArg_ParseTuple (args, format, &pc))

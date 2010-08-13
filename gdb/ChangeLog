@@ -1,3 +1,8 @@
+2010-08-13  Ken Werner  <ken.werner@de.ibm.com>
+
+	* python/python.c (gdbpy_solib_name): Remove the const qualifier of
+	the format strings to be compatible with Python 2.4.
+
 2010-08-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Easier and more stubborn MI memory read commands.
