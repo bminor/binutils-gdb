@@ -1293,6 +1293,9 @@ elf32_m68k_print_private_bfd_data (bfd *abfd, void * ptr)
 	    case EF_M68K_CF_EMAC:
 	      mac = "emac";
 	      break;
+	    case EF_M68K_CF_EMAC_B:
+	      mac = "emac_b";
+	      break;
 	    }
 	  if (mac)
 	    fprintf (file, " [%s]", mac);

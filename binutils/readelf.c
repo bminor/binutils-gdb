@@ -2310,6 +2310,13 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 		case EF_M68K_CF_ISA_B:
 		  isa = "B";
 		  break;
+		case EF_M68K_CF_ISA_C:
+		  isa = "C";
+		  break;
+		case EF_M68K_CF_ISA_C_NODIV:
+		  isa = "C";
+		  additional = ", nodiv";
+		  break;
 		}
 	      strcat (buf, ", cf, isa ");
 	      strcat (buf, isa);
@@ -2327,6 +2334,9 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 		  break;
 		case EF_M68K_CF_EMAC:
 		  mac = "emac";
+		  break;
+		case EF_M68K_CF_EMAC_B:
+		  mac = "emac_b";
 		  break;
 		}
 	      if (mac)

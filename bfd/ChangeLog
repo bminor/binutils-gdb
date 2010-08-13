@@ -1,3 +1,8 @@
+2010-08-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-m69k.c (elf32_m68k_print_private_bfd_data): Detect EMAC_B
+	variant.
+
 2010-08-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/11909
