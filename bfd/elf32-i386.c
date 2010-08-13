@@ -4613,6 +4613,13 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 
   if (htab->elf.sgotplt)
     {
+      if (bfd_is_abs_section (htab->elf.sgotplt->output_section))
+	{
+	  (*_bfd_error_handler)
+	    (_("discarded output section: `%A'"), htab->elf.sgotplt);
+	  return FALSE;
+	}
+
       /* Fill in the first three entries in the global offset table.  */
       if (htab->elf.sgotplt->size > 0)
 	{

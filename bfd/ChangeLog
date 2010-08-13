@@ -1,3 +1,10 @@
+2010-08-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11913
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Check if
+	 .got.plt section is discarded.
+	 * elf64-x86-64.c (elf64_x86_64_finish_dynamic_sections): Likewise.
+
 2010-08-13  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-m69k.c (elf32_m68k_print_private_bfd_data): Detect EMAC_B
