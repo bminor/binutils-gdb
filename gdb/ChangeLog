@@ -1,3 +1,8 @@
+2010-08-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* arm-tdep.c (arm_push_dummy_call): Handle pointers to
+	typedef'ed function types correctly.
+
 2010-08-11  Brad Roberts  <braddr@puremagic.com>
 
 	* d-lang.c (extract_identifiers): Handle multiple digits.
