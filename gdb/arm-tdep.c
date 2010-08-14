@@ -2144,7 +2144,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 the THUMB bit in it.  */
       if (TYPE_CODE_PTR == typecode
 	  && target_type != NULL
-	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
+	  && TYPE_CODE_FUNC == TYPE_CODE (check_typedef (target_type)))
 	{
 	  CORE_ADDR regval = extract_unsigned_integer (val, len, byte_order);
 	  if (arm_pc_is_thumb (regval))
