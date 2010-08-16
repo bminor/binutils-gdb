@@ -1,3 +1,7 @@
+2010-08-16  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Mention watch -location.
+
 2010-08-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (update_watchpoint): Add source empty line.  Prefer
