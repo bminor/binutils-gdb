@@ -22,7 +22,7 @@
   operation.  See the documentation for `save gdb-index' for details.
 
 * The "watch" command now accepts an optional "-location" argument.
-  When used, this causes gdb to watch the memory referred to by the
+  When used, this causes GDB to watch the memory referred to by the
   expression.  Such a watchpoint is never deleted due to it going out
   of scope.
 

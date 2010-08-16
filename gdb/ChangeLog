@@ -1,5 +1,9 @@
 2010-08-16  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Fix typo.
+
+2010-08-16  Tom Tromey  <tromey@redhat.com>
+
 	* NEWS: Mention watch -location.
 
 2010-08-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
