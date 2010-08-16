@@ -124,7 +124,7 @@ gdb_test "python print x" "23"
 gdb_py_test_multiple "post event insertion" \
   "python" "" \
   "someVal = 0" "" \
-  "class Foo():" "" \
+  "class Foo(object):" "" \
   "  def __call__(self):" "" \
   "    global someVal" "" \
   "    someVal += 1" "" \
