@@ -1,3 +1,12 @@
+2010-08-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (update_watchpoint): Add source empty line.  Prefer
+	EXP_STRING_REPARSE to EXP_STRING.
+	(watch_command_1): Set also EXP_STRING_REPARSE.
+	(delete_breakpoint): Free also EXP_STRING_REPARSE.
+	* breakpoint.h (struct breakpoint): New field exp_string_reparse.
+	Update comment for exp_string.
+
 2010-08-16  Tom Tromey  <tromey@redhat.com>
 
 	* value.c (release_value): Clear 'next' pointer.

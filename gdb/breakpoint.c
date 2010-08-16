@@ -1339,12 +1339,13 @@ update_watchpoint (struct breakpoint *b, int reparse)
   if (within_current_scope && reparse)
     {
       char *s;
+
       if (b->exp)
 	{
 	  xfree (b->exp);
 	  b->exp = NULL;
 	}
-      s = b->exp_string;
+      s = b->exp_string_reparse ? b->exp_string_reparse : b->exp_string;
       b->exp = parse_exp_1 (&s, b->exp_valid_block, 0);
       /* If the meaning of expression itself changed, the old value is
 	 no longer relevant.  We don't want to report a watchpoint hit
@@ -8211,9 +8212,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty, int just_location)
       t = check_typedef (TYPE_TARGET_TYPE (check_typedef (t)));
       name = type_to_string (t);
 
-      b->exp_string = xstrprintf ("* (%s *) %s", name,
-				  core_addr_to_string (addr));
+      b->exp_string_reparse = xstrprintf ("* (%s *) %s", name,
+					  core_addr_to_string (addr));
       xfree (name);
+
+      b->exp_string = xstrprintf ("-location: %.*s",
+				  (int) (exp_end - exp_start), exp_start);
 
       /* The above expression is in C.  */
       b->language = language_c;
@@ -9658,6 +9662,7 @@ delete_breakpoint (struct breakpoint *bpt)
   xfree (bpt->addr_string);
   xfree (bpt->exp);
   xfree (bpt->exp_string);
+  xfree (bpt->exp_string_reparse);
   value_free (bpt->val);
   xfree (bpt->source_file);
   xfree (bpt->exec_pathname);

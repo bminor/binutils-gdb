@@ -450,8 +450,11 @@ struct breakpoint
     /* String form of the breakpoint condition (malloc'd), or NULL if there
        is no condition.  */
     char *cond_string;
-    /* String form of exp (malloc'd), or NULL if none.  */
+    /* String form of exp to use for displaying to the user (malloc'd), or
+       NULL if none.  */
     char *exp_string;
+    /* String form to use for reparsing of EXP (malloc'd) or NULL.  */
+    char *exp_string_reparse;
 
     /* The expression we are watching, or NULL if not a watchpoint.  */
     struct expression *exp;
