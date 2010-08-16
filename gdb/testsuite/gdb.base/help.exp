@@ -669,7 +669,7 @@ test_class_help "user-defined" {
     "Use the \"define\" command to define a command\.\[\r\n\]+"
 }
 # test help watch
-gdb_test "help watch" "Set a watchpoint for an expression\.\[\r\n\]+A watchpoint stops execution of your program whenever the value of\[\r\n\]+an expression changes\." "help watch"
+gdb_test "help watch" "Set a watchpoint for an expression\.\[\r\n\]+Usage: watch .-l.-location. EXPRESSION\[\r\n\]+A watchpoint stops execution of your program whenever the value of\[\r\n\]+an expression changes\.\[\r\n\]+If -l or -location is given, this evaluates EXPRESSION and watches\[\r\n\]+the memory to which it refers\." "help watch"
 # test help whatis
 gdb_test "help whatis" "Print data type of expression EXP\." "help whatis"
 # test help where

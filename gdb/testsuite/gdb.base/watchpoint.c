@@ -126,6 +126,17 @@ func4 ()
   global_ptr++;
 }
 
+void
+func5 ()
+{
+  int val = 0, val2 = 23;
+  int *x = &val;
+
+  /* func5 breakpoint here */
+  x = &val2;
+  val = 27;
+}
+
 int main ()
 {
 #ifdef usestubs
@@ -202,6 +213,8 @@ int main ()
   func3 ();
 
   func4 ();
+
+  func5 ();
 
   return 0;
 }

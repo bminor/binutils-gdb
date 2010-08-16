@@ -98,8 +98,6 @@ static void clear_command (char *, int);
 
 static void catch_command (char *, int);
 
-static void watch_command (char *, int);
-
 static int can_use_hardware_watchpoint (struct value *);
 
 static void break_command_1 (char *, int, int);
@@ -172,12 +170,6 @@ static int hw_watchpoint_used_count (enum bptype, int *);
 static void hbreak_command (char *, int);
 
 static void thbreak_command (char *, int);
-
-static void watch_command_1 (char *, int, int);
-
-static void rwatch_command (char *, int);
-
-static void awatch_command (char *, int);
 
 static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
 
@@ -7995,7 +7987,7 @@ watchpoint_exp_is_const (const struct expression *exp)
                 hw_read:   watch read, 
 		hw_access: watch access (read or write) */
 static void
-watch_command_1 (char *arg, int accessflag, int from_tty)
+watch_command_1 (char *arg, int accessflag, int from_tty, int just_location)
 {
   struct breakpoint *b, *scope_breakpoint = NULL;
   struct expression *exp;
@@ -8100,7 +8092,15 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   exp_valid_block = innermost_block;
   mark = value_mark ();
   fetch_subexp_value (exp, &pc, &val, NULL, NULL);
-  if (val != NULL)
+
+  if (just_location)
+    {
+      exp_valid_block = NULL;
+      val = value_addr (val);
+      release_value (val);
+      value_free_to_mark (mark);
+    }
+  else if (val != NULL)
     release_value (val);
 
   tok = arg;
@@ -8202,7 +8202,24 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   b->exp = exp;
   b->exp_valid_block = exp_valid_block;
   b->cond_exp_valid_block = cond_exp_valid_block;
-  b->exp_string = savestring (exp_start, exp_end - exp_start);
+  if (just_location)
+    {
+      struct type *t = value_type (val);
+      CORE_ADDR addr = value_as_address (val);
+      char *name;
+
+      t = check_typedef (TYPE_TARGET_TYPE (check_typedef (t)));
+      name = type_to_string (t);
+
+      b->exp_string = xstrprintf ("* (%s *) %s", name,
+				  core_addr_to_string (addr));
+      xfree (name);
+
+      /* The above expression is in C.  */
+      b->language = language_c;
+    }
+  else
+    b->exp_string = savestring (exp_start, exp_end - exp_start);
   b->val = val;
   b->val_valid = 1;
   if (cond_start)
@@ -8229,7 +8246,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
       scope_breakpoint->related_breakpoint = b;
     }
 
-  value_free_to_mark (mark);
+  if (!just_location)
+    value_free_to_mark (mark);
 
   /* Finally update the new watchpoint.  This creates the locations
      that should be inserted.  */
@@ -8319,37 +8337,73 @@ can_use_hardware_watchpoint (struct value *v)
 void
 watch_command_wrapper (char *arg, int from_tty)
 {
-  watch_command (arg, from_tty);
+  watch_command_1 (arg, hw_write, from_tty, 0);
+}
+
+/* A helper function that looks for an argument at the start of a
+   string.  The argument must also either be at the end of the string,
+   or be followed by whitespace.  Returns 1 if it finds the argument,
+   0 otherwise.  If the argument is found, it updates *STR.  */
+
+static int
+check_for_argument (char **str, char *arg, int arg_len)
+{
+  if (strncmp (*str, arg, arg_len) == 0
+      && ((*str)[arg_len] == '\0' || isspace ((*str)[arg_len])))
+    {
+      *str += arg_len;
+      return 1;
+    }
+  return 0;
+}
+
+/* A helper function that looks for the "-location" argument and then
+   calls watch_command_1.  */
+
+static void
+watch_maybe_just_location (char *arg, int accessflag, int from_tty)
+{
+  int just_location = 0;
+
+  if (arg
+      && (check_for_argument (&arg, "-location", sizeof ("-location") - 1)
+	  || check_for_argument (&arg, "-l", sizeof ("-l") - 1)))
+    {
+      ep_skip_leading_whitespace (&arg);
+      just_location = 1;
+    }
+
+  watch_command_1 (arg, accessflag, from_tty, just_location);
 }
 
 static void
 watch_command (char *arg, int from_tty)
 {
-  watch_command_1 (arg, hw_write, from_tty);
+  watch_maybe_just_location (arg, hw_write, from_tty);
 }
 
 void
 rwatch_command_wrapper (char *arg, int from_tty)
 {
-  rwatch_command (arg, from_tty);
+  watch_command_1 (arg, hw_read, from_tty, 0);
 }
 
 static void
 rwatch_command (char *arg, int from_tty)
 {
-  watch_command_1 (arg, hw_read, from_tty);
+  watch_maybe_just_location (arg, hw_read, from_tty);
 }
 
 void
 awatch_command_wrapper (char *arg, int from_tty)
 {
-  awatch_command (arg, from_tty);
+  watch_command_1 (arg, hw_access, from_tty, 0);
 }
 
 static void
 awatch_command (char *arg, int from_tty)
 {
-  watch_command_1 (arg, hw_access, from_tty);
+  watch_maybe_just_location (arg, hw_access, from_tty);
 }
 
 
@@ -11847,20 +11901,29 @@ With an argument, catch only exceptions with the given name."),
 
   c = add_com ("watch", class_breakpoint, watch_command, _("\
 Set a watchpoint for an expression.\n\
+Usage: watch [-l|-location] EXPRESSION\n\
 A watchpoint stops execution of your program whenever the value of\n\
-an expression changes."));
+an expression changes.\n\
+If -l or -location is given, this evaluates EXPRESSION and watches\n\
+the memory to which it refers."));
   set_cmd_completer (c, expression_completer);
 
   c = add_com ("rwatch", class_breakpoint, rwatch_command, _("\
 Set a read watchpoint for an expression.\n\
+Usage: rwatch [-l|-location] EXPRESSION\n\
 A watchpoint stops execution of your program whenever the value of\n\
-an expression is read."));
+an expression is read.\n\
+If -l or -location is given, this evaluates EXPRESSION and watches\n\
+the memory to which it refers."));
   set_cmd_completer (c, expression_completer);
 
   c = add_com ("awatch", class_breakpoint, awatch_command, _("\
 Set a watchpoint for an expression.\n\
+Usage: awatch [-l|-location] EXPRESSION\n\
 A watchpoint stops execution of your program whenever the value of\n\
-an expression is either read or written."));
+an expression is either read or written.\n\
+If -l or -location is given, this evaluates EXPRESSION and watches\n\
+the memory to which it refers."));
   set_cmd_completer (c, expression_completer);
 
   add_info ("watchpoints", watchpoints_info, _("\

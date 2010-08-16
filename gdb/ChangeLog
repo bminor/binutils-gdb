@@ -1,3 +1,17 @@
+2010-08-16  Tom Tromey  <tromey@redhat.com>
+
+	* value.c (release_value): Clear 'next' pointer.
+	* breakpoint.c (watch_command_1): Add 'just_location' argument.
+	(watch_command_wrapper): Update.
+	(watch_maybe_just_location): New function.
+	(watch_command): Update.
+	(rwatch_command_wrapper): Update.
+	(rwatch_command): Update.
+	(awatch_command_wrapper): Update.
+	(awatch_command): Update.
+	(check_for_argument): New function.
+	(_initialize_breakpoint): Update help text.
+
 2010-08-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arm-tdep.c (arm_push_dummy_call): Handle pointers to

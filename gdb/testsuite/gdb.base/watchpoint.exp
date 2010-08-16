@@ -615,6 +615,8 @@ proc test_watchpoint_and_breakpoint {} {
 		kfail "gdb/38" "next after watch x"
 	    }
 	}
+
+	gdb_test_no_output "delete \$bpnum" "delete watch x"
     }
 }
 
@@ -626,6 +628,19 @@ proc test_constant_watchpoint {} {
     gdb_test_no_output "delete \$bpnum" "delete watchpoint `count + 6'"
     gdb_test "watch 7 + count" ".*atchpoint \[0-9\]+: 7 \\+ count"
     gdb_test_no_output "delete \$bpnum" "delete watchpoint `7 + count'"
+}
+
+proc test_watch_location {} {
+    gdb_breakpoint [gdb_get_line_number "func5 breakpoint here"]
+    gdb_continue_to_breakpoint "func5 breakpoint here"
+
+    gdb_test "watch -location *x" "atchpoint .*: .*" "watch -location .x"
+
+    gdb_test "continue" \
+	"Continuing.*\[Ww\]atchpoint .*: .*New value = 27.*" \
+	"continue with watch -location"
+
+    gdb_test_no_output "delete \$bpnum" "delete watch -location"
 }
 
 proc test_inaccessible_watchpoint {} {
@@ -678,6 +693,8 @@ proc test_watchpoint_in_big_blob {} {
 
     gdb_test "watch buf" ".*atchpoint \[0-9\]+: buf"
     gdb_test "cont" "Continuing.*atchpoint \[0-9\]+: buf\r\n\r\nOld value = .*testte\".*" "watchpoint on buf hit"
+
+    gdb_test_no_output "delete \$bpnum" "delete watch buf"
 }
 
 # Start with a fresh gdb.
@@ -853,6 +870,8 @@ if [initialize] then {
     }
 
     test_constant_watchpoint
+
+    test_watch_location
 }
 
 # Restore old timeout

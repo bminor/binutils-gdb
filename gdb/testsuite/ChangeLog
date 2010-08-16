@@ -1,3 +1,13 @@
+2010-08-16  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/help.exp: Update.
+	* gdb.base/watchpoint.exp (test_watchpoint_and_breakpoint): Delete
+	watchpoint.
+	(test_watch_location): New proc.
+	(test_watchpoint_in_big_blob): Delete watchpoint.
+	* gdb.base/watchpoint.c (func5): New function.
+	(main): Call it.
+
 2010-08-16  Doug Evans  <dje@google.com>
 
 	* gdb.python/python.exp: Fix syntax in "post event insertion" test.
