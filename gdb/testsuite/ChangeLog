@@ -1,4 +1,10 @@
 2010-08-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/infcall-dlopen.exp: New file.
+	* gdb.cp/infcall-dlopen.cc: New file.
+	* gdb.cp/infcall-dlopen-lib.cc: New file.
+
+2010-08-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	PR breakpoints/11371
