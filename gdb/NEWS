@@ -12,6 +12,17 @@
 
      result = some_value (10,20)
 
+* C++ Improvements:
+
+  ** GDB now puts template parameters in scope when debugging in an
+     instantiation.  For example, if you have:
+
+     template<int X> int func (void) { return X; }
+
+     then if you step into func<5>, "print X" will show "5".  This
+     feature requires proper debuginfo support from the compiler; it
+     was added to GCC 4.5.
+
 * GDB now has some support for using labels in the program's source in
   linespecs.  For instance, you can use "advance label" to continue
   execution to a label.
