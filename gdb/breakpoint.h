@@ -240,13 +240,18 @@ struct bp_location
      the same parent breakpoint.  */
   struct bp_location *next;
 
+  /* The reference count.  */
+  int refc;
+
   /* Type of this breakpoint location.  */
   enum bp_loc_type loc_type;
 
   /* Each breakpoint location must belong to exactly one higher-level
-     breakpoint.  This and the DUPLICATE flag are more straightforward
-     than reference counting.  This pointer is NULL iff this bp_location is in
-     (and therefore only in) moribund_locations.  */
+     breakpoint.  This pointer is NULL iff this bp_location is no
+     longer attached to a breakpoint.  For example, when a breakpoint
+     is deleted, its locations may still be found in the
+     moribund_locations list, or if we had stopped for it, in
+     bpstats.  */
   struct breakpoint *owner;
 
   /* Conditional.  Break only if this expression's value is nonzero.
@@ -563,10 +568,6 @@ DEF_VEC_P(breakpoint_p);
 
 typedef struct bpstats *bpstat;
 
-/* Frees any storage that is part of a bpstat.
-   Does not walk the 'next' chain.  */
-extern void bpstat_free (bpstat);
-
 /* Clears a chain of bpstat, freeing storage
    of each.  */
 extern void bpstat_clear (bpstat *);
@@ -731,16 +732,41 @@ enum bp_print_how
 
 struct bpstats
   {
-    /* Linked list because there can be two breakpoints at the same
-       place, and a bpstat reflects the fact that both have been hit.  */
+    /* Linked list because there can be more than one breakpoint at
+       the same place, and a bpstat reflects the fact that all have
+       been hit.  */
     bpstat next;
-    /* Breakpoint that we are at.  */
-    const struct bp_location *breakpoint_at;
+
+    /* Location that caused the stop.  Locations are refcounted, so
+       this will never be NULL.  Note that this location may end up
+       detached from a breakpoint, but that does not necessary mean
+       that the struct breakpoint is gone.  E.g., consider a
+       watchpoint with a condition that involves an inferior function
+       call.  Watchpoint locations are recreated often (on resumes,
+       hence on infcalls too).  Between creating the bpstat and after
+       evaluating the watchpoint condition, this location may hence
+       end up detached from its original owner watchpoint, even though
+       the watchpoint is still listed.  If it's condition evaluates as
+       true, we still want this location to cause a stop, and we will
+       still need to know which watchpoint it was originally attached.
+       What this means is that we should not (in most cases) follow
+       the `bpstat->bp_location->owner' link, but instead use the
+       `breakpoint_at' field below.  */
+    struct bp_location *bp_location_at;
+
+    /* Breakpoint that caused the stop.  This is nullified if the
+       breakpoint ends up being deleted.  See comments on
+       `bp_location_at' above for why do we need this field instead of
+       following the location's owner.  */
+    struct breakpoint *breakpoint_at;
+
     /* The associated command list.  */
     struct counted_command_line *commands;
+
     /* Commands left to be done.  This points somewhere in
        base_command.  */
     struct command_line *commands_left;
+
     /* Old value associated with a watchpoint.  */
     struct value *old_val;
 

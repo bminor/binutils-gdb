@@ -1,3 +1,53 @@
+2010-08-17  Pedro Alves  <pedro@codesourcery.com>
+
+	PR breakpoints/11371
+
+	* breakpoint.c (breakpoint_init_inferior): Decrement the
+	location's reference count instead of deleting right away.
+	(bpstat_free): Decrement the location's reference count.  Make
+	static.
+	(bpstat_copy): Increment the location's reference count.
+	(bpstat_find_breakpoint): Adjust.
+	(bpstat_num): Adjust.
+	(print_it_typical): Adjust.  Use the breakpoint pointer in the
+	bpstat instead of the location's owner.
+	(bpstat_alloc): Remove const qualifier from the 'bl' parameter.
+	Adjust to record the location's owner in the bpstat.
+	(watchpoint_check): Use the breakpoint pointer in the bpstat
+	instead of the location's owner.
+	(bpstat_check_breakpoint_conditions): Don't handle
+	bp_watchpoint_scope here.  Use the breakpoint pointer in the
+	bpstat instead of the location's owner.
+	(bpstat_stop_status): Defer inferior function calls to after
+	building the bpstat list.  Handle bp_watchpoint_scope here.  Use
+	the breakpoint pointer in the bpstat instead of the location's
+	owner.
+	(bpstat_what): Use the breakpoint pointer in the bpstat instead of
+	the location's owner.
+	(free_bp_location): Don't walk bpstats clearing locations.
+	(incref_bp_location): New.
+	(decref_bp_location): New.
+	(breakpoint_auto_delete): Use the breakpoint pointer in the bpstat
+	instead of the location's owner.
+	(update_global_location_list): Clear the location's owner, and
+	decrement the location's reference count instead of deleting it
+	right away.
+	(breakpoint_retire_moribund): Decrement the location's reference
+	count instead of deleting it right away.
+	(bpstat_remove_bp_location): Delete.
+	(bpstat_remove_breakpoint): New.
+	(bpstat_remove_bp_location_callback): Delete.
+	(bpstat_remove_breakpoint_callback): New.
+	(delete_breakpoint): Iterate over all threads' stop_bpstat's
+	clearing references to the breakpoint that is being deleted.
+
+	* breakpoint.h (struct bp_location) <refc>: New field.
+	<owner>: Update comments.
+	(bpstat_free): Delete declaration.
+	(struct bpstats): Change the type of the breakpoint_at field to
+	struct breakpoint point, from struct bp_location pointer.  Add new
+	field bp_location_at.
+
 2010-08-16  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Fix typo.
