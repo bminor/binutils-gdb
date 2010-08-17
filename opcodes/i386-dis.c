@@ -2622,8 +2622,8 @@ static const struct dis386 reg_table[][8] = {
   },
   /* REG_0F0D */
   {
-    { "prefetch",	{ Eb } },
-    { "prefetchw",	{ Eb } },
+    { "prefetch",	{ Mb } },
+    { "prefetchw",	{ Mb } },
   },
   /* REG_0F18 */
   {
