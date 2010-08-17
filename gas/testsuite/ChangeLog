@@ -1,3 +1,10 @@
+2010-08-17  Roland McGrath  <roland@redhat.com>
+
+	* gas/elf/groupauto.s: New file.
+	* gas/elf/groupautoa.d: New file.
+	* gas/elf/groupautob.d: New file.
+	* gas/elf/elf.exp (run_elf_list_test): Use them.
+
 2010-08-06  Quentin Neill <quentin.neill@amd.com>
 
 	* gas/i386/arch-10-1.l: Add nopl instruction.

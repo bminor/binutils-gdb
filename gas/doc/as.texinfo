@@ -8,7 +8,7 @@
 @c   (2)   for platform-specific directives, examine md_pseudo_op
 @c         in config/tc-*.c
 @c   (3)   for object-format specific directives, examine obj_pseudo_op
-@c         in config/obj-*.c       
+@c         in config/obj-*.c
 @c   (4)   portable directives in potable[] in read.c
 @c %**start of header
 @setfilename as.info
@@ -70,17 +70,17 @@
 @c instructions.  Except in multi-column format, these tables look silly.
 @c Unfortunately, Texinfo doesn't have a general-purpose multi-col format, so
 @c the multi-col format is faked within @example sections.
-@c 
+@c
 @c Again unfortunately, the natural size that fits on a page, for these tables,
 @c is different depending on whether or not smallbook is turned on.
 @c This matters, because of order: text flow switches columns at each page
 @c break.
-@c 
+@c
 @c The format faked in this source works reasonably well for smallbook,
 @c not well for the default large-page format.  This manual expects that if you
 @c turn on @smallbook, you will also uncomment the "@set SMALL" to enable the
 @c tables in question.  You can turn on one without the other at your
-@c discretion, of course. 
+@c discretion, of course.
 @ifinfo
 @set SMALL
 @c the insn tables look just as silly in info files regardless of smallbook,
@@ -246,7 +246,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--}|@var{files} @dots{}]
 @c
 @c Target dependent options are listed below.  Keep the list sorted.
-@c Add an empty line for separation. 
+@c Add an empty line for separation.
 @ifset ALPHA
 
 @emph{Target Alpha options:}
@@ -417,7 +417,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target PDP11 options:}
    [@b{-mpic}|@b{-mno-pic}] [@b{-mall}] [@b{-mno-extensions}]
    [@b{-m}@var{extension}|@b{-mno-}@var{extension}]
-   [@b{-m}@var{cpu}] [@b{-m}@var{machine}]  
+   [@b{-m}@var{cpu}] [@b{-m}@var{machine}]
 @end ifset
 @ifset PJ
 
@@ -469,7 +469,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset TIC54X
 
 @emph{Target TIC54X options:}
- [@b{-mcpu=54[123589]}|@b{-mcpu=54[56]lp}] [@b{-mfar-mode}|@b{-mf}] 
+ [@b{-mcpu=54[123589]}|@b{-mcpu=54[56]lp}] [@b{-mfar-mode}|@b{-mf}]
  [@b{-merrors-to-file} @var{<filename>}|@b{-me} @var{<filename>}]
 @end ifset
 
@@ -859,11 +859,11 @@ is normally the M32R, but this option changes it to the M32RX.
 
 @item --warn-explicit-parallel-conflicts or --Wp
 Produce warning messages when questionable parallel constructs are
-encountered. 
+encountered.
 
 @item --no-warn-explicit-parallel-conflicts or --Wnp
-Do not produce warning messages when questionable parallel constructs are 
-encountered. 
+Do not produce warning messages when questionable parallel constructs are
+encountered.
 
 @end table
 @end ifset
@@ -961,13 +961,13 @@ defined by the configuration option when building the assembler.
 Specify to use the 16-bit integer ABI.
 
 @item -mlong
-Specify to use the 32-bit integer ABI.  
+Specify to use the 32-bit integer ABI.
 
 @item -mshort-double
-Specify to use the 32-bit double ABI.  
+Specify to use the 32-bit double ABI.
 
 @item -mlong-double
-Specify to use the 64-bit double ABI.  
+Specify to use the 64-bit double ABI.
 
 @item --force-long-branches
 Relative branches are turned into absolute ones. This concerns
@@ -1021,7 +1021,7 @@ Warn when the assembler switches to another architecture.
 
 @ifset TIC54X
 The following options are available when @value{AS} is configured for the 'c54x
-architecture. 
+architecture.
 
 @table @gcctabopt
 @item -mfar-mode
@@ -1342,22 +1342,22 @@ a Z80 family processor.
 Assemble for Z80 processor.
 @item -r800
 Assemble for R800 processor.
-@item  -ignore-undocumented-instructions 
+@item  -ignore-undocumented-instructions
 @itemx -Wnud
 Assemble undocumented Z80 instructions that also work on R800 without warning.
-@item  -ignore-unportable-instructions 
+@item  -ignore-unportable-instructions
 @itemx -Wnup
 Assemble all undocumented Z80 instructions without warning.
-@item  -warn-undocumented-instructions 
+@item  -warn-undocumented-instructions
 @itemx -Wud
 Issue a warning for undocumented Z80 instructions that also work on R800.
-@item  -warn-unportable-instructions 
+@item  -warn-unportable-instructions
 @itemx -Wup
-Issue a warning for undocumented Z80 instructions that do not work on R800.  
-@item  -forbid-undocumented-instructions 
+Issue a warning for undocumented Z80 instructions that do not work on R800.
+@item  -forbid-undocumented-instructions
 @itemx -Fud
 Treat all undocumented instructions as errors.
-@item  -forbid-unportable-instructions 
+@item  -forbid-unportable-instructions
 @itemx -Fup
 Treat undocumented Z80 instructions that do not work on R800 as errors.
 @end table
@@ -1614,7 +1614,7 @@ is the object file.  Its default name is
 @end ifclear
 @ifset BOUT
 @ifset GENERIC
-@code{a.out}, or 
+@code{a.out}, or
 @end ifset
 @code{b.out} when @command{@value{AS}} is configured for the Intel 80960.
 @end ifset
@@ -2463,7 +2463,7 @@ constants are an exception: they do not end statements.
 @end ifclear
 @ifset abnormal-separator
 @ifset HPPA
-A @dfn{statement} ends at a newline character (@samp{\n}) or an exclamation 
+A @dfn{statement} ends at a newline character (@samp{\n}) or an exclamation
 point (@samp{!}).  The newline or exclamation point is considered part of the
 preceding statement.  Newlines and exclamation points within character
 constants are an exception: they do not end statements.
@@ -2519,7 +2519,7 @@ Whitespace before a label or after a colon is permitted, but you may not
 have whitespace between a label's symbol and its colon. @xref{Labels}.
 
 @ifset HPPA
-For HPPA targets, labels need not be immediately followed by a colon, but 
+For HPPA targets, labels need not be immediately followed by a colon, but
 the definition of a label must begin in column zero.  This also implies that
 only one label may be defined on each line.
 @end ifset
@@ -3474,7 +3474,7 @@ you may use them in debugging.
 
 @item @var{number}
 This is the number that was used in the local label definition.  So if the
-label is written @samp{55:} then the number is @samp{55}. 
+label is written @samp{55:} then the number is @samp{55}.
 
 @item @kbd{C-B}
 This unusual character is included so you do not accidentally invent a symbol
@@ -3482,7 +3482,7 @@ of the same name.  The character has ASCII value of @samp{\002} (control-B).
 
 @item @emph{ordinal number}
 This is a serial number to keep the labels distinct.  The first definition of
-@samp{0:} gets the number @samp{1}.  The 15th definition of @samp{0:} gets the 
+@samp{0:} gets the number @samp{1}.  The 15th definition of @samp{0:} gets the
 number @samp{15}, and so on.  Likewise the first definition of @samp{1:} gets
 the number @samp{1} and its 15th definition gets @samp{15} as well.
 @end table
@@ -3688,7 +3688,7 @@ table information for COFF.
 The SOM format for the HPPA supports a multitude of symbol attributes set with
 the @code{.EXPORT} and @code{.IMPORT} directives.
 
-The attributes are described in @cite{HP9000 Series 800 Assembly 
+The attributes are described in @cite{HP9000 Series 800 Assembly
 Language Reference Manual} (HP 92432-90001) under the @code{IMPORT} and
 @code{EXPORT} assembler directive documentation.
 @end ifset
@@ -3990,7 +3990,7 @@ Some machine configurations provide additional directives.
 * File::                        @code{.file}
 * Fill::                        @code{.fill @var{repeat} , @var{size} , @var{value}}
 * Float::                       @code{.float @var{flonums}}
-* Func::                        @code{.func}  
+* Func::                        @code{.func}
 * Global::                      @code{.global @var{symbol}}, @code{.globl @var{symbol}}
 @ifset ELF
 * Gnu_attribute::               @code{.gnu_attribute @var{tag},@var{value}}
@@ -4218,7 +4218,7 @@ write @samp{<4.3 !> 5.4!!>} to get the literal text @samp{4.3 > 5.4!}.
 
 @item Expression results as strings
 You can write @samp{%@var{expr}} to evaluate the expression @var{expr}
-and use the result as a string.  
+and use the result as a string.
 @end ftable
 
 @node Ascii
@@ -4300,9 +4300,9 @@ should have an entry in @code{.eh_frame}. It initializes some internal
 data structures. Don't forget to close the function by
 @code{.cfi_endproc}.
 
-Unless @code{.cfi_startproc} is used along with parameter @code{simple} 
+Unless @code{.cfi_startproc} is used along with parameter @code{simple}
 it also emits some architecture dependent initial CFI instructions.
- 
+
 @section @code{.cfi_endproc}
 @cindex @code{cfi_endproc} directive
 @code{.cfi_endproc} is used at the end of a function where it closes its
@@ -4329,7 +4329,7 @@ or a symbol name.  The default after @code{.cfi_startproc} is @code{.cfi_lsda 0x
 no LSDA.
 
 @section @code{.cfi_def_cfa @var{register}, @var{offset}}
-@code{.cfi_def_cfa} defines a rule for computing CFA as: @i{take 
+@code{.cfi_def_cfa} defines a rule for computing CFA as: @i{take
 address from @var{register} and add @var{offset} to it}.
 
 @section @code{.cfi_def_cfa_register @var{register}}
@@ -4349,7 +4349,7 @@ value that is added/substracted from the previous offset.
 
 @section @code{.cfi_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
-CFA. 
+CFA.
 
 @section @code{.cfi_rel_offset @var{register}, @var{offset}}
 Previous value of @var{register} is saved at offset @var{offset} from
@@ -4362,25 +4362,25 @@ code it's annotating.
 Previous value of @var{register1} is saved in register @var{register2}.
 
 @section @code{.cfi_restore @var{register}}
-@code{.cfi_restore} says that the rule for @var{register} is now the 
-same as it was at the beginning of the function, after all initial 
+@code{.cfi_restore} says that the rule for @var{register} is now the
+same as it was at the beginning of the function, after all initial
 instruction added by @code{.cfi_startproc} were executed.
 
 @section @code{.cfi_undefined @var{register}}
 From now on the previous value of @var{register} can't be restored anymore.
 
 @section @code{.cfi_same_value @var{register}}
-Current value of @var{register} is the same like in the previous frame, 
+Current value of @var{register} is the same like in the previous frame,
 i.e. no restoration needed.
 
-@section @code{.cfi_remember_state}, 
-First save all current rules for all registers by @code{.cfi_remember_state}, 
-then totally screw them up by subsequent @code{.cfi_*} directives and when 
-everything is hopelessly bad, use @code{.cfi_restore_state} to restore 
+@section @code{.cfi_remember_state},
+First save all current rules for all registers by @code{.cfi_remember_state},
+then totally screw them up by subsequent @code{.cfi_*} directives and when
+everything is hopelessly bad, use @code{.cfi_restore_state} to restore
 the previous saved state.
 
 @section @code{.cfi_return_column @var{register}}
-Change return column @var{register}, i.e. the return address is either 
+Change return column @var{register}, i.e. the return address is either
 directly in @var{register} or can be accessed by rules for @var{register}.
 
 @section @code{.cfi_signal_frame}
@@ -4421,13 +4421,13 @@ using the largest size.
 
 @ifset COFF-ELF
 When using ELF or (as a GNU extension) PE, the @code{.comm} directive takes
-an optional third argument.  This is the desired alignment of the symbol, 
+an optional third argument.  This is the desired alignment of the symbol,
 specified for ELF as a byte boundary (for example, an alignment of 16 means
 that the least significant 4 bits of the address should be zero), and for PE
 as a power of two (for example, an alignment of 5 means aligned to a 32-byte
-boundary).  The alignment must be an absolute expression, and it must be a 
+boundary).  The alignment must be an absolute expression, and it must be a
 power of two.  If @code{@value{LD}} allocates uninitialized memory for the
-common symbol, it will use the alignment when placing the symbol.  If no 
+common symbol, it will use the alignment when placing the symbol.  If no
 alignment is specified, @command{@value{AS}} will set the alignment to the
 largest power of two less than or equal to the size of the symbol, up to a
 maximum of 16 on ELF, or the default section alignment of 4 on PE@footnote{This
@@ -4594,15 +4594,15 @@ This directive sets the value of @var{symbol} to @var{expression}.
 It is synonymous with @samp{.set}; see @ref{Set,,@code{.set}}.
 
 @ifset HPPA
-The syntax for @code{equ} on the HPPA is 
+The syntax for @code{equ} on the HPPA is
 @samp{@var{symbol} .equ @var{expression}}.
 @end ifset
 
 @ifset Z80
-The syntax for @code{equ} on the Z80 is 
-@samp{@var{symbol} equ @var{expression}}. 
+The syntax for @code{equ} on the Z80 is
+@samp{@var{symbol} equ @var{expression}}.
 On the Z80 it is an eror if @var{symbol} is already defined,
-but the symbol is not protected from later redefinition. 
+but the symbol is not protected from later redefinition.
 Compare @ref{Equiv}.
 @end ifset
 
@@ -4614,7 +4614,7 @@ the assembler will signal an error if @var{symbol} is already defined.  Note a
 symbol which has been referenced but not actually defined is considered to be
 undefined.
 
-Except for the contents of the error message, this is roughly equivalent to 
+Except for the contents of the error message, this is roughly equivalent to
 @smallexample
 .ifdef SYM
 .err
@@ -4803,13 +4803,13 @@ Record a @sc{gnu} object attribute for this file.  @xref{Object Attributes}.
 @cindex @code{hidden} directive
 @cindex visibility
 This is one of the ELF visibility directives.  The other two are
-@code{.internal} (@pxref{Internal,,@code{.internal}}) and 
+@code{.internal} (@pxref{Internal,,@code{.internal}}) and
 @code{.protected} (@pxref{Protected,,@code{.protected}}).
 
 This directive overrides the named symbols default visibility (which is set by
 their binding: local, global or weak).  The directive sets the visibility to
 @code{hidden} which means that the symbols are not visible to other components.
-Such symbols are always considered to be @code{protected} as well. 
+Such symbols are always considered to be @code{protected} as well.
 @end ifset
 
 @node hword
@@ -4992,7 +4992,7 @@ integers.  On the H8/300H and the Renesas SH, however, @code{.int} emits
 @cindex @code{internal} directive
 @cindex visibility
 This is one of the ELF visibility directives.  The other two are
-@code{.hidden} (@pxref{Hidden,,@code{.hidden}}) and 
+@code{.hidden} (@pxref{Hidden,,@code{.hidden}}) and
 @code{.protected} (@pxref{Protected,,@code{.protected}}).
 
 This directive overrides the named symbols default visibility (which is set by
@@ -5219,7 +5219,7 @@ This option will set the @code{epilogue_begin} register in the
 
 @item is_stmt @var{value}
 This option will set the @code{is_stmt} register in the
-@code{.debug_line} state machine to @code{value}, which must be 
+@code{.debug_line} state machine to @code{value}, which must be
 either 0 or 1.
 
 @item isa @var{value}
@@ -5435,7 +5435,7 @@ l&:
 @end table
 
 Note: this problem of correctly identifying string parameters to pseudo ops
-also applies to the identifiers used in @code{.irp} (@pxref{Irp}) 
+also applies to the identifiers used in @code{.irp} (@pxref{Irp})
 and @code{.irpc} (@pxref{Irpc}) as well.
 
 @item .endm
@@ -5577,13 +5577,13 @@ undefined.
 @cindex @code{popsection} directive
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}), 
-@code{.pushsection} (@pxref{PushSection}), and @code{.previous} 
+@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}),
+@code{.pushsection} (@pxref{PushSection}), and @code{.previous}
 (@pxref{Previous}).
 
 This directive replaces the current section (and subsection) with the top
 section (and subsection) on the section stack.  This section is popped off the
-stack. 
+stack.
 @end ifset
 
 @ifset ELF
@@ -5660,7 +5660,7 @@ their binding: local, global or weak).  The directive sets the visibility to
 @code{protected} which means that any references to the symbols from within the
 components that defines them must be resolved to the definition in that
 component, even if a definition in another component would normally preempt
-this. 
+this.
 @end ifset
 
 @node Psize
@@ -5697,8 +5697,8 @@ expanded.  @xref{Macro}.
 @cindex @code{pushsection} directive
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}), 
-@code{.popsection} (@pxref{PopSection}), and @code{.previous} 
+@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}),
+@code{.popsection} (@pxref{PopSection}), and @code{.previous}
 (@pxref{Previous}).
 
 This directive pushes the current section (and subsection) onto the
@@ -5868,7 +5868,7 @@ taken as a subsection number (@pxref{Sub-Sections}).
 
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@code{.subsection} (@pxref{SubSection}), @code{.pushsection} 
+@code{.subsection} (@pxref{SubSection}), @code{.pushsection}
 (@pxref{PushSection}), @code{.popsection} (@pxref{PopSection}), and
 @code{.previous} (@pxref{Previous}).
 
@@ -5898,6 +5898,8 @@ section contains zero terminated strings
 section is a member of a section group
 @item T
 section is used for thread-local-storage
+@item ?
+section is a member of the previously-current section's group, if any
 @end table
 
 The optional @var{type} argument may contain one of the following constants:
@@ -5961,6 +5963,13 @@ the Merge flag should come first, like this:
 @smallexample
 .section @var{name} , "@var{flags}"MG, @@@var{type}, @var{entsize}, @var{GroupName}[, @var{linkage}]
 @end smallexample
+
+If @var{flags} contains the @code{?} symbol then it may not also contain the
+@code{G} symbol and the @var{GroupName} or @var{linkage} fields should not be
+present.  Instead, @code{?} says to consider the section that's current before
+this directive.  If that section used @code{G}, then the new section will use
+@code{G} with those same @var{GroupName} and @var{linkage} fields implicitly.
+If not, then the @code{?} symbol has no effect.
 
 If no flags are specified, the default flags depend upon the section name.  If
 the section name is not recognized, the default will be for the section to have
@@ -6118,7 +6127,7 @@ This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @section @code{.sleb128 @var{expressions}}
 
 @cindex @code{sleb128} directive
-@var{sleb128} stands for ``signed little endian base 128.''  This is a 
+@var{sleb128} stands for ``signed little endian base 128.''  This is a
 compact, variable length representation of numbers used by the DWARF
 symbolic debugging format.  @xref{Uleb128, ,@code{.uleb128}}.
 
@@ -6212,7 +6221,7 @@ All five fields are specified.
 
 @node String
 @section @code{.string} "@var{str}", @code{.string8} "@var{str}", @code{.string16}
-"@var{str}", @code{.string32} "@var{str}", @code{.string64} "@var{str}" 
+"@var{str}", @code{.string32} "@var{str}", @code{.string64} "@var{str}"
 
 @cindex string, copying to object file
 @cindex string8, copying to object file
@@ -6230,7 +6239,7 @@ one string to copy, separated by commas.  Unless otherwise specified for a
 particular machine, the assembler marks the end of each string with a 0 byte.
 You can use any of the escape sequences described in @ref{Strings,,Strings}.
 
-The variants @code{string16}, @code{string32} and @code{string64} differ from 
+The variants @code{string16}, @code{string32} and @code{string64} differ from
 the @code{string} pseudo opcode in that each 8-bit character from @var{str} is
 copied and expanded to 16, 32 or 64 bits respectively.  The expanded characters
 are stored in target endianness byte order.
@@ -6271,8 +6280,8 @@ before further assembly.
 @cindex @code{subsection} directive
 @cindex Section Stack
 This is one of the ELF section stack manipulation directives.  The others are
-@code{.section} (@pxref{Section}), @code{.pushsection} (@pxref{PushSection}), 
-@code{.popsection} (@pxref{PopSection}), and @code{.previous} 
+@code{.section} (@pxref{Section}), @code{.pushsection} (@pxref{PushSection}),
+@code{.popsection} (@pxref{PopSection}), and @code{.previous}
 (@pxref{Previous}).
 
 This directive replaces the current subsection with @code{name}.  The current
@@ -6488,7 +6497,7 @@ Note: Some targets support extra types in addition to those listed above.
 @section @code{.uleb128 @var{expressions}}
 
 @cindex @code{uleb128} directive
-@var{uleb128} stands for ``unsigned little endian base 128.''  This is a 
+@var{uleb128} stands for ``unsigned little endian base 128.''  This is a
 compact, variable length representation of numbers used by the DWARF
 symbolic debugging format.  @xref{Sleb128, ,@code{.sleb128}}.
 
@@ -6549,12 +6558,12 @@ Similar to the directive @code{.error}
 This directive sets the weak attribute on the comma separated list of symbol
 @code{names}.  If the symbols do not already exist, they will be created.
 
-On COFF targets other than PE, weak symbols are a GNU extension.  This 
+On COFF targets other than PE, weak symbols are a GNU extension.  This
 directive sets the weak attribute on the comma separated list of symbol
 @code{names}.  If the symbols do not already exist, they will be created.
 
 On the PE target, weak symbols are supported natively as weak aliases.
-When a weak symbol is created that is not an alias, GAS creates an 
+When a weak symbol is created that is not an alias, GAS creates an
 alternate symbol to hold the default value.
 
 @node Weakref
@@ -7055,7 +7064,7 @@ family.
 @include c-m68hc11.texi
 @end ifset
 
-@ifset MICROBLAZE 
+@ifset MICROBLAZE
 @include c-microblaze.texi
 @end ifset
 
@@ -7350,8 +7359,8 @@ things without first using the debugger to find the facts.
 
 If you have contributed to GAS and your name isn't listed here,
 it is not meant as a slight.  We just don't know about it.  Send mail to the
-maintainer, and we'll correct the situation.  Currently 
-@c (January 1994), 
+maintainer, and we'll correct the situation.  Currently
+@c (January 1994),
 the maintainer is Ken Raeburn (email address @code{raeburn@@cygnus.com}).
 
 Dean Elsner wrote the original @sc{gnu} assembler for the VAX.@footnote{Any

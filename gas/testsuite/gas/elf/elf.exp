@@ -37,7 +37,7 @@ proc run_elf_list_test { name suffix opts readelf_opts readelf_pipe } {
 }
 
 # We're testing bits in obj-elf -- don't run on anything else.
-if { ([istarget "*-*-*elf*"]		
+if { ([istarget "*-*-*elf*"]
       || [istarget "*-*-linux*"]
       || [istarget "m6811-*"]
       || [istarget "m6812-*"]
@@ -70,7 +70,7 @@ if { ([istarget "*-*-*elf*"]
     }
     if { ([istarget "*arm*-*-*"]
 	  || [istarget "xscale*-*-*"]) } {
-	
+
 	if { ([istarget "*-*-*eabi"]
 	      || [istarget "*-*-linux-*"]
 	      || [istarget "*-*-symbianelf"])} then {
@@ -85,7 +85,7 @@ if { ([istarget "*-*-*elf*"]
     # function prologues.
     if {![istarget "mn10300-*-*"]
 	&& ![istarget "xtensa*-*-*"]
-	&& ![istarget "am3*-*-*"]} then {    
+	&& ![istarget "am3*-*-*"]} then {
       run_dump_test "ehopt0"
     }
     case $target_triplet in {
@@ -102,10 +102,12 @@ if { ([istarget "*-*-*elf*"]
 	    run_dump_test "file"
 	}
     }
-    run_dump_test "group0a" 
-    run_dump_test "group0b" 
-    run_dump_test "group1a" 
-    run_dump_test "group1b" 
+    run_dump_test "group0a"
+    run_dump_test "group0b"
+    run_dump_test "group1a"
+    run_dump_test "group1b"
+    run_dump_test "groupautoa"
+    run_dump_test "groupautob"
     case $target_triplet in {
 	{ alpha*-*-* } { }
 	{ cr16*-*-* } { }
@@ -128,21 +130,21 @@ if { ([istarget "*-*-*elf*"]
 	}
     }
     run_dump_test "pseudo"
-    run_dump_test "section0" 
-    run_dump_test "section1" 
+    run_dump_test "section0"
+    run_dump_test "section1"
     if {! [istarget "h8300-*-*"]} then {
 	# The h8300 port issues a warning message for
 	# new sections created without atrributes.
 	run_elf_list_test "section2" "$target_machine" "-al" "-s" ""
     }
-    run_dump_test "section3" 
+    run_dump_test "section3"
     run_dump_test "section4"
     if {! [istarget "h8300-*-*"]} then {
 	# The h8300 port issues a warning message for
 	# new sections created without atrributes.
 	run_elf_list_test "section5" "" "-al" "-SW" "| grep \" \\\\.test\\\[0-9\\\]\""
     }
-    run_dump_test "struct" 
+    run_dump_test "struct"
     run_dump_test "symtab"
     run_dump_test "symver"
 
@@ -159,10 +161,10 @@ if { ([istarget "*-*-*elf*"]
 	    run_elf_list_test "type" "" "" "-s" "| grep \"1 *\\\[FIONTCU\\\]\""
     }
 
-    run_dump_test "section6" 
-    run_dump_test "section7" 
-    run_dump_test "section8" 
-    run_dump_test "dwarf2-1" 
-    run_dump_test "dwarf2-2" 
-    run_dump_test "dwarf2-3" 
+    run_dump_test "section6"
+    run_dump_test "section7"
+    run_dump_test "section8"
+    run_dump_test "dwarf2-1"
+    run_dump_test "dwarf2-2"
+    run_dump_test "dwarf2-3"
 }

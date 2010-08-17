@@ -420,7 +420,7 @@ obj_elf_local (int ignore ATTRIBUTE_UNUSED)
 
   do
     {
-      symbolP = get_sym_from_input_line_and_check (); 
+      symbolP = get_sym_from_input_line_and_check ();
       c = *input_line_pointer;
       S_CLEAR_EXTERNAL (symbolP);
       symbol_get_obj (symbolP)->local = 1;
@@ -444,7 +444,7 @@ obj_elf_weak (int ignore ATTRIBUTE_UNUSED)
 
   do
     {
-      symbolP = get_sym_from_input_line_and_check (); 
+      symbolP = get_sym_from_input_line_and_check ();
       c = *input_line_pointer;
       S_SET_WEAK (symbolP);
       symbol_get_obj (symbolP)->local = 1;
@@ -741,9 +741,10 @@ obj_elf_change_section (const char *name,
 }
 
 static bfd_vma
-obj_elf_parse_section_letters (char *str, size_t len)
+obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *clone)
 {
   bfd_vma attr = 0;
+  *clone = FALSE;
 
   while (len > 0)
     {
@@ -772,6 +773,9 @@ obj_elf_parse_section_letters (char *str, size_t len)
 	  break;
 	case 'T':
 	  attr |= SHF_TLS;
+	  break;
+	case '?':
+	  *clone = TRUE;
 	  break;
 	/* Compatibility.  */
 	case 'm':
@@ -974,13 +978,15 @@ obj_elf_section (int push)
 
       if (*input_line_pointer == '"')
 	{
+	  bfd_boolean clone;
+
 	  beg = demand_copy_C_string (&dummy);
 	  if (beg == NULL)
 	    {
 	      ignore_rest_of_line ();
 	      return;
 	    }
-	  attr |= obj_elf_parse_section_letters (beg, strlen (beg));
+	  attr |= obj_elf_parse_section_letters (beg, strlen (beg), &clone);
 
 	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer == ',')
@@ -1032,6 +1038,11 @@ obj_elf_section (int push)
 	      attr &= ~SHF_MERGE;
 	    }
 
+	  if ((attr & SHF_GROUP) != 0 && clone)
+	    {
+	      as_warn (_("? section flag ignored with G present"));
+	      clone = FALSE;
+	    }
 	  if ((attr & SHF_GROUP) != 0 && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
@@ -1050,6 +1061,16 @@ obj_elf_section (int push)
 	    {
 	      as_warn (_("group name for SHF_GROUP not specified"));
 	      attr &= ~SHF_GROUP;
+	    }
+
+	  if (clone)
+	    {
+	      const char *now_group = elf_group_name (now_seg);
+	      if (now_group != NULL)
+		{
+		  group_name = xstrdup (now_group);
+		  linkonce = (now_seg->flags & SEC_LINK_ONCE) != 0;
+		}
 	    }
 	}
       else

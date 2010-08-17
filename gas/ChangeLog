@@ -1,3 +1,11 @@
+2010-08-17  Roland McGrath  <roland@redhat.com>
+
+	* config/obj-elf.c (obj_elf_parse_section_letters): Take new
+	boolean result parameter CLONE; set it if '?' flag letter seen.
+	(obj_elf_section): Update caller.  Handle that flag by copying
+	the LINKONCE and GROUP_NAME state from NOW_SEG.
+	* doc/as.texinfo (Section): Document the ? flag.
+
 2010-08-09  Cary Coutant  <ccoutant@google.com>
 
 	* as.c (show_usage): Don't list --compress-debug-sections if zlib not
