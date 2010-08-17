@@ -2,6 +2,13 @@
 
 	PR breakpoints/11371
 
+	* breakpoint.c (decref_bp_location): Assert the reference count is
+	sane.
+
+2010-08-17  Pedro Alves  <pedro@codesourcery.com>
+
+	PR breakpoints/11371
+
 	* breakpoint.c (breakpoint_init_inferior): Decrement the
 	location's reference count instead of deleting right away.
 	(bpstat_free): Decrement the location's reference count.  Make

@@ -5423,6 +5423,8 @@ incref_bp_location (struct bp_location *bl)
 static void
 decref_bp_location (struct bp_location **blp)
 {
+  gdb_assert ((*blp)->refc > 0);
+
   if (--(*blp)->refc == 0)
     free_bp_location (*blp);
   *blp = NULL;
