@@ -1,3 +1,9 @@
+2010-08-18  Yao Qi  <yao@codesourcery.com
+
+	* gdb.dwarf2/dw2-ref-missing-frame-func.c: Add .p2align 4 for labels
+	func_nofb_start and func_loopfb_start, so that address of functions
+	is equal to these labels on Thumb.
+
 2010-08-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.gdb/selftest.exp (do_steps_and_nexts): Update test case
