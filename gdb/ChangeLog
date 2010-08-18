@@ -1,3 +1,10 @@
+2010-08-18  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11900:
+	* configure: Rebuild.
+	* configure.ac: Add install-python to CONFIG_INSTALL.
+	* Makefile.in (install-python): New.
+
 2010-08-18  Doug Evans  <dje@google.com>
 
 	* gdb_assert.h (gdb_assert_not_reached): New macro.
