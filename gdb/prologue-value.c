@@ -203,7 +203,7 @@ pv_is_identical (pv_t a, pv_t b)
     case pvk_register:
       return (a.reg == b.reg && a.k == b.k);
     default:
-      gdb_assert (0);
+      gdb_assert_not_reached ("unexpected prologue value kind");
     }
 }
 

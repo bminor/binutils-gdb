@@ -2057,7 +2057,7 @@ call0_track_op (struct gdbarch *gdbarch,
 	}
       break;
     default:
-	gdb_assert (0);
+	gdb_assert_not_reached ("unexpected instruction kind");
     }
 }
 

@@ -363,7 +363,7 @@ darwin_check_new_threads (struct inferior *inf)
 	  old_ix++;
 	  continue;
 	}
-      gdb_assert (0);
+      gdb_assert_not_reached ("unexpected thread case");
     }
 
   if (darwin_inf->threads)

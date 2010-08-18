@@ -1917,7 +1917,7 @@ value_static_field (struct type *type, int fieldno)
       break;
     }
     default:
-      gdb_assert (0);
+      gdb_assert_not_reached ("unexpected field location kind");
     }
 
   return retval;

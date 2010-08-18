@@ -187,7 +187,7 @@ make_types (struct gdbarch *arch)
       break;
 
     default:
-      gdb_assert (0);
+      gdb_assert_not_reached ("unexpected mach");
     }
 
   /* The builtin_type_mumble variables are sometimes uninitialized when
@@ -1242,7 +1242,7 @@ m32c_decode_srcdest4 (struct m32c_pv_state *st,
     case 0xf: sd.addr = pv_constant (m32c_udisp16 (st)); break;
 
     default:
-      gdb_assert (0);
+      gdb_assert_not_reached ("unexpected srcdest4");
     }
 
   return sd;
@@ -1301,7 +1301,7 @@ m32c_decode_sd23 (struct m32c_pv_state *st, int code, int size, int ind)
     case 0x0f: sd.addr = pv_constant (m32c_udisp16 (st)); break;
     case 0x0e: sd.addr = pv_constant (m32c_udisp24 (st)); break;
     default:
-      gdb_assert (0);
+      gdb_assert_not_reached ("unexpected sd23");
     }
 
   if (ind)
@@ -1886,7 +1886,7 @@ m32c_frame_base (struct frame_info *this_frame,
       return 0;
 
     default:
-      gdb_assert (0);
+      gdb_assert_not_reached ("unexpected prologue kind");
     }
 }
 

@@ -804,7 +804,7 @@ mep_pseudo_cr_size (int pseudo)
            || IS_FP_CR64_REGNUM (pseudo))
     return 64;
   else
-    gdb_assert (0);
+    gdb_assert_not_reached ("unexpected coprocessor pseudo register");
 }
 
 
@@ -833,7 +833,7 @@ mep_pseudo_cr_index (int pseudo)
   else if (IS_FP_CR64_REGNUM (pseudo))
       return pseudo - MEP_FIRST_FP_CR64_REGNUM;
   else
-    gdb_assert (0);
+    gdb_assert_not_reached ("unexpected coprocessor pseudo register");
 }
 
 
@@ -1109,7 +1109,7 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
             return builtin_type (gdbarch)->builtin_uint64;
         }
       else
-        gdb_assert (0);
+        gdb_assert_not_reached ("unexpected cr size");
     }
 
   /* All other registers are 32 bits long.  */
@@ -1180,7 +1180,7 @@ mep_pseudo_register_read (struct gdbarch *gdbarch,
            || IS_FP_CR64_REGNUM (cookednum))
     mep_pseudo_cr64_read (gdbarch, regcache, cookednum, buf);
   else
-    gdb_assert (0);
+    gdb_assert_not_reached ("unexpected pseudo register");
 }
 
 
@@ -1263,7 +1263,7 @@ mep_pseudo_register_write (struct gdbarch *gdbarch,
   else if (IS_CCR_REGNUM (cookednum))
     regcache_raw_write (regcache, mep_pseudo_to_raw[cookednum], buf);
   else
-    gdb_assert (0);
+    gdb_assert_not_reached ("unexpected pseudo register");
 }
 
 
@@ -1488,7 +1488,7 @@ mep_get_insn (struct gdbarch *gdbarch, CORE_ADDR pc, long *insn)
 
       /* We'd better be in either core, 32-bit VLIW, or 64-bit VLIW mode.  */
       else
-        gdb_assert (0);
+        gdb_assert_not_reached ("unexpected vliw mode");
     }
   
   /* Otherwise, the top two bits of the major opcode are (again) what
@@ -1792,8 +1792,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
           int disp = SWBH_32_OFFSET (insn);
           int size = (IS_SB (insn) ? 1
                       : IS_SH (insn) ? 2
-                      : IS_SW (insn) ? 4
-                      : (gdb_assert (0), 1));
+                      : (gdb_assert (IS_SW (insn)), 4));
           pv_t addr = pv_add_constant (reg[rm], disp);
 
           if (pv_area_store_would_trash (stack, addr))

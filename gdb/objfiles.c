@@ -1068,7 +1068,7 @@ qsort_cmp (const void *a, const void *b)
 	      return 1;
 
 	  /* We should have found one of the sections before getting here.  */
-	  gdb_assert (0);
+	  gdb_assert_not_reached ("section not found");
 	}
       else
 	{
@@ -1083,12 +1083,12 @@ qsort_cmp (const void *a, const void *b)
 	      return 1;
 
 	  /* We should have found one of the objfiles before getting here.  */
-	  gdb_assert (0);
+	  gdb_assert_not_reached ("objfile not found");
 	}
     }
 
   /* Unreachable.  */
-  gdb_assert (0);
+  gdb_assert_not_reached ("unexpected code path");
   return 0;
 }
 

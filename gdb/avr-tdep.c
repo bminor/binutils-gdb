@@ -922,7 +922,7 @@ avr_return_value (struct gdbarch *gdbarch, struct type *func_type,
   else if (TYPE_LENGTH (valtype) <= 8)
     lsb_reg = 18;
   else
-    gdb_assert (0);
+    gdb_assert_not_reached ("unexpected type length");
 
   if (writebuf != NULL)
     {

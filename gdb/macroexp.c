@@ -334,7 +334,7 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
       else if (*p == 'L' || *p == 'u' || *p == 'U')
         p += 2;
       else
-        gdb_assert (0);
+        gdb_assert_not_reached ("unexpected character constant");
 
       body_start = p;
       for (;;)
@@ -389,7 +389,7 @@ get_string_literal (struct macro_buffer *tok, char *p, char *end)
       else if (*p == 'L' || *p == 'u' || *p == 'U')
         p += 2;
       else
-        gdb_assert (0);
+        gdb_assert_not_reached ("unexpected string literal");
 
       for (;;)
         {

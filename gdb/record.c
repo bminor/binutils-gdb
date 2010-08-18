@@ -454,7 +454,7 @@ record_get_loc (struct record_entry *rec)
       return rec->u.reg.u.buf;
   case record_end:
   default:
-    gdb_assert (0);
+    gdb_assert_not_reached ("unexpected record_entry type");
     return NULL;
   }
 }

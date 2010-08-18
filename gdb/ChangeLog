@@ -1,3 +1,26 @@
+2010-08-18  Doug Evans  <dje@google.com>
+
+	* gdb_assert.h (gdb_assert_not_reached): New macro.
+	(gdb_assert_fail): Fix typo in comment.
+	* avr-tdep.c (avr_return_value): Use gdb_assert_not_reached instead of
+	gdb_assert (0).
+	* darwin-nat.c (darwin_check_new_threads): Ditto.
+	* dwarf2read.c (dwarf2_get_section_info): Ditto.
+	(munmap_section_buffer): Ditto.
+	* m32c-tdep.c (make_types): Ditto.
+	(m32c_decode_srcdest4, m32c_decode_sd23, m32c_frame_base): Ditto.
+	* macroexp.c (get_character_constant): Ditto.
+	(get_string_literal): Ditto.
+	* mep-tdep.c (mep_pseudo_cr_size): Ditto.
+	(mep_pseudo_cr_index, mep_register_type): Ditto.
+	(mep_pseudo_register_read, mep_pseudo_register_write): Ditto.
+	(mep_get_insn, mep_analyze_prologue): Ditto.
+	* objfiles.c (qsort_cmp): Ditto.
+	* prologue-value.c (pv_is_identical): Ditto.
+	* record.c (record_get_loc): Ditto.
+	* value.c (value_static_field): Ditto.
+	* xtensa-tdep.c (call0_track_op): Ditto.
+
 2010-08-18  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/11919:

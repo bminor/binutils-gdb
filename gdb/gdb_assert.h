@@ -42,7 +42,7 @@
 #endif
 #endif
 
-/* This prints an "Assertion failed" message, aksing the user if they
+/* This prints an "Assertion failed" message, asking the user if they
    want to continue, dump core, or just exit.  */
 #if defined (ASSERT_FUNCTION)
 #define gdb_assert_fail(assertion, file, line, function)                      \
@@ -52,6 +52,17 @@
 #define gdb_assert_fail(assertion, file, line, function)                      \
   internal_error (file, line, _("Assertion `%s' failed."),                       \
 		  assertion)
+#endif
+
+/* The canonical form of gdb_assert (0).
+   MESSAGE is a string to include in the error message.  */
+
+#if defined (ASSERT_FUNCTION)
+#define gdb_assert_not_reached(message) \
+  internal_error (__FILE__, __LINE__, "%s: %s", ASSERT_FUNCTION, _(message))
+#else
+#define gdb_assert_not_reached(message) \
+  internal_error (__FILE__, __LINE__, _(message))
 #endif
 
 #endif /* gdb_assert.h */

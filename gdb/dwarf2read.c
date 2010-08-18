@@ -1585,7 +1585,7 @@ dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
   else if (section_is_p (section_name, FRAME_SECTION))
     info = &data->frame;
   else
-    gdb_assert (0);
+    gdb_assert_not_reached ("unexpected section");
 
   if (info->asection != NULL && info->size != 0 && info->buffer == NULL)
     /* We haven't read this section in yet.  Do it now.  */
@@ -14263,7 +14263,7 @@ munmap_section_buffer (struct dwarf2_section_info *info)
       gdb_assert (munmap ((void *) map_begin, map_length) == 0);
 #else
       /* Without HAVE_MMAP, we should never be here to begin with.  */
-      gdb_assert (0);
+      gdb_assert_not_reached ("no mmap support");
 #endif
     }
 }
