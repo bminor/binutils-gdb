@@ -18472,6 +18472,19 @@ Set suspend trace mode.
 @node PowerPC Embedded
 @subsection PowerPC Embedded
 
+@cindex DVC register
+@value{GDBN} supports using the DVC (Data Value Compare) register to
+implement in hardware simple hardware watchpoint conditions of the form:
+
+@smallexample
+(@value{GDBP}) watch @var{ADDRESS|VARIABLE} \
+  if  @var{ADDRESS|VARIABLE} == @var{CONSTANT EXPRESSION}
+@end smallexample
+
+The DVC register will be automatically used whenever @value{GDBN} detects
+such pattern in a condition expression.  This feature is available in native
+@value{GDBN} running on a Linux kernel version 2.6.34 or newer.
+
 @value{GDBN} provides the following PowerPC-specific commands:
 
 @table @code

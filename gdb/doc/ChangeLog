@@ -1,3 +1,7 @@
+2010-08-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (PowerPC Embedded): Mention support for the DVC register.
+
 2010-08-16   Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Set Watchpoints): Document -location option.
