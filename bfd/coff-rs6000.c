@@ -112,6 +112,8 @@ extern int rs6000coff_core_file_failing_signal
   rs6000coff_core_file_failing_signal
 #define coff_core_file_matches_executable_p \
   rs6000coff_core_file_matches_executable_p
+#define coff_core_file_pid \
+  _bfd_nocore_core_file_pid
 #else
 #define CORE_FILE_P _bfd_dummy_target
 #define coff_core_file_failing_command \
@@ -120,6 +122,8 @@ extern int rs6000coff_core_file_failing_signal
   _bfd_nocore_core_file_failing_signal
 #define coff_core_file_matches_executable_p \
   _bfd_nocore_core_file_matches_executable_p
+#define coff_core_file_pid \
+  _bfd_nocore_core_file_pid
 #endif
 #define coff_SWAP_sym_in _bfd_xcoff_swap_sym_in
 #define coff_SWAP_sym_out _bfd_xcoff_swap_sym_out
@@ -4182,9 +4186,7 @@ const bfd_target rs6000coff_vec =
     _bfd_generic_bfd_print_private_bfd_data,
 
     /* Core */
-    coff_core_file_failing_command,
-    coff_core_file_failing_signal,
-    coff_core_file_matches_executable_p,
+    BFD_JUMP_TABLE_CORE (coff),
 
     /* Archive */
     _bfd_xcoff_slurp_armap,
@@ -4437,9 +4439,7 @@ const bfd_target pmac_xcoff_vec =
     _bfd_generic_bfd_print_private_bfd_data,
 
     /* Core */
-    coff_core_file_failing_command,
-    coff_core_file_failing_signal,
-    coff_core_file_matches_executable_p,
+    BFD_JUMP_TABLE_CORE (coff),
 
     /* Archive */
     _bfd_xcoff_slurp_armap,

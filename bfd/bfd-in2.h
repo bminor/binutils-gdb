@@ -1977,8 +1977,8 @@ enum bfd_architecture
 #define bfd_mach_v850          1
 #define bfd_mach_v850e         'E'
 #define bfd_mach_v850e1        '1'
-#define bfd_mach_v850e2        0x4532   /* ('E'<<8|'2') */
-#define bfd_mach_v850e2v3      0x45325633 /* ('E'<<24|'2'<<16|'V'<<8|'3') */
+#define bfd_mach_v850e2        0x4532
+#define bfd_mach_v850e2v3      0x45325633
   bfd_arch_arc,       /* ARC Cores */
 #define bfd_mach_arc_5         5
 #define bfd_mach_arc_6         6
@@ -5412,6 +5412,8 @@ const char *bfd_core_file_failing_command (bfd *abfd);
 
 int bfd_core_file_failing_signal (bfd *abfd);
 
+int bfd_core_file_pid (bfd *abfd);
+
 bfd_boolean core_file_matches_executable_p
    (bfd *core_bfd, bfd *exec_bfd);
 
@@ -5608,11 +5610,13 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_CORE(NAME) \
   NAME##_core_file_failing_command, \
   NAME##_core_file_failing_signal, \
-  NAME##_core_file_matches_executable_p
+  NAME##_core_file_matches_executable_p, \
+  NAME##_core_file_pid
 
   char *      (*_core_file_failing_command) (bfd *);
   int         (*_core_file_failing_signal) (bfd *);
   bfd_boolean (*_core_file_matches_executable_p) (bfd *, bfd *);
+  int         (*_core_file_pid) (bfd *);
 
   /* Archive entry points.  */
 #define BFD_JUMP_TABLE_ARCHIVE(NAME) \

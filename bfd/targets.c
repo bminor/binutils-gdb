@@ -314,11 +314,13 @@ BFD_JUMP_TABLE macros.
 .#define BFD_JUMP_TABLE_CORE(NAME) \
 .  NAME##_core_file_failing_command, \
 .  NAME##_core_file_failing_signal, \
-.  NAME##_core_file_matches_executable_p
+.  NAME##_core_file_matches_executable_p, \
+.  NAME##_core_file_pid
 .
 .  char *      (*_core_file_failing_command) (bfd *);
 .  int         (*_core_file_failing_signal) (bfd *);
 .  bfd_boolean (*_core_file_matches_executable_p) (bfd *, bfd *);
+.  int         (*_core_file_pid) (bfd *);
 .
 .  {* Archive entry points.  *}
 .#define BFD_JUMP_TABLE_ARCHIVE(NAME) \

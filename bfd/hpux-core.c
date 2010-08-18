@@ -103,6 +103,7 @@ struct hpux_core_struct
 #define core_kernel_thread_id(bfd) (core_hdr(bfd)->lwpid)
 #define core_user_thread_id(bfd) (core_hdr(bfd)->user_tid)
 #define hpux_core_core_file_matches_executable_p generic_core_file_matches_executable_p
+#define hpux_core_core_file_pid _bfd_nocore_core_file_pid
 
 static asection *make_bfd_asection (bfd *, const char *, flagword,
                                     bfd_size_type, bfd_vma, unsigned int);

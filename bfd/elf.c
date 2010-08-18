@@ -7519,13 +7519,19 @@ _bfd_elf_rel_vtable_reloc_fn
 # include <sys/procfs.h>
 #endif
 
-/* FIXME: this is kinda wrong, but it's what gdb wants.  */
+/* Return a PID that identifies a "thread" for threaded cores, or the
+   PID of the main process for non-threaded cores.  */
 
 static int
 elfcore_make_pid (bfd *abfd)
 {
-  return ((elf_tdata (abfd)->core_lwpid << 16)
-	  + (elf_tdata (abfd)->core_pid));
+  int pid;
+
+  pid = elf_tdata (abfd)->core_lwpid;
+  if (pid == 0)
+    pid = elf_tdata (abfd)->core_pid;
+
+  return pid;
 }
 
 /* If there isn't a section called NAME, make one, using
@@ -7615,7 +7621,8 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	 has already been set by another thread.  */
       if (elf_tdata (abfd)->core_signal == 0)
 	elf_tdata (abfd)->core_signal = prstat.pr_cursig;
-      elf_tdata (abfd)->core_pid = prstat.pr_pid;
+      if (elf_tdata (abfd)->core_pid == 0)
+	elf_tdata (abfd)->core_pid = prstat.pr_pid;
 
       /* pr_who exists on:
 	 solaris 2.5+
@@ -7625,6 +7632,8 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	 */
 #if defined (HAVE_PRSTATUS_T_PR_WHO)
       elf_tdata (abfd)->core_lwpid = prstat.pr_who;
+#else
+      elf_tdata (abfd)->core_lwpid = prstat.pr_pid;
 #endif
     }
 #if defined (HAVE_PRSTATUS32_T)
@@ -7641,7 +7650,8 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	 has already been set by another thread.  */
       if (elf_tdata (abfd)->core_signal == 0)
 	elf_tdata (abfd)->core_signal = prstat.pr_cursig;
-      elf_tdata (abfd)->core_pid = prstat.pr_pid;
+      if (elf_tdata (abfd)->core_pid == 0)
+	elf_tdata (abfd)->core_pid = prstat.pr_pid;
 
       /* pr_who exists on:
 	 solaris 2.5+
@@ -7651,6 +7661,8 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	 */
 #if defined (HAVE_PRSTATUS32_T_PR_WHO)
       elf_tdata (abfd)->core_lwpid = prstat.pr_who;
+#else
+      elf_tdata (abfd)->core_lwpid = prstat.pr_pid;
 #endif
     }
 #endif /* HAVE_PRSTATUS32_T */

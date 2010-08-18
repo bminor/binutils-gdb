@@ -252,28 +252,14 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 
   core_tid = atoi (bfd_section_name (abfd, asect) + 5);
 
-  if (core_gdbarch
-      && gdbarch_core_reg_section_encodes_pid (core_gdbarch))
-    {
-      uint32_t merged_pid = core_tid;
-      pid = merged_pid & 0xffff;
-      lwpid = merged_pid >> 16;
-
-      /* This can happen on solaris core, for example, if we don't
-	 find a NT_PSTATUS note in the core, but do find NT_LWPSTATUS
-	 notes.  */
-      if (pid == 0)
-	{
-	  core_has_fake_pid = 1;
-	  pid = CORELOW_PID;
-	}
-    }
-  else
+  pid = bfd_core_file_pid (core_bfd);
+  if (pid == 0)
     {
       core_has_fake_pid = 1;
       pid = CORELOW_PID;
-      lwpid = core_tid;
     }
+
+  lwpid = core_tid;
 
   if (current_inferior ()->pid == 0)
     inferior_appeared (current_inferior (), pid);
@@ -520,21 +506,7 @@ get_core_register_section (struct regcache *regcache,
 
   xfree (section_name);
 
-  if (core_gdbarch
-      && gdbarch_core_reg_section_encodes_pid (core_gdbarch))
-    {
-      uint32_t merged_pid;
-      int pid = ptid_get_pid (inferior_ptid);
-
-      if (core_has_fake_pid)
-	pid = 0;
-
-      merged_pid = ptid_get_lwp (inferior_ptid);
-      merged_pid = merged_pid << 16 | pid;
-
-      section_name = xstrprintf ("%s/%s", name, plongest (merged_pid));
-    }
-  else if (ptid_get_lwp (inferior_ptid))
+  if (ptid_get_lwp (inferior_ptid))
     section_name = xstrprintf ("%s/%ld", name, ptid_get_lwp (inferior_ptid));
   else
     section_name = xstrdup (name);

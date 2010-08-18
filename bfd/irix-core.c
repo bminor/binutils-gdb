@@ -44,6 +44,7 @@ struct sgi_core_struct
 #define core_command(bfd) (core_hdr(bfd)->cmd)
 
 #define irix_core_core_file_matches_executable_p generic_core_file_matches_executable_p
+#define irix_core_core_file_pid _bfd_nocore_core_file_pid
 
 static asection *make_bfd_asection
   (bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr);

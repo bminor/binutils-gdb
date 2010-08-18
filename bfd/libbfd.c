@@ -150,6 +150,16 @@ _bfd_nocore_core_file_failing_signal (bfd *ignore_abfd ATTRIBUTE_UNUSED)
   return 0;
 }
 
+/* Routine to handle the core_file_pid entry point for targets without
+   core file support.  */
+
+int
+_bfd_nocore_core_file_pid (bfd *ignore_abfd ATTRIBUTE_UNUSED)
+{
+  bfd_set_error (bfd_error_invalid_operation);
+  return 0;
+}
+
 const bfd_target *
 _bfd_dummy_target (bfd *ignore_abfd ATTRIBUTE_UNUSED)
 {

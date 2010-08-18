@@ -1,3 +1,20 @@
+2010-08-18  Pedro Alves  <pedro@codesourcery.com>
+
+	PR corefile/8210
+
+	* corelow.c (add_to_thread_list): Don't use
+	gdbarch_core_reg_section_encodes_pid.  Use bfd_core_file_pid.
+	(get_core_register_section): Don't use
+	gdbarch_core_reg_section_encodes_pid.
+
+	* gdbarch.sh (core_reg_section_encodes_pid): Delete.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* amd64-sol2-tdep.c (amd64_sol2_init_abi): Don't set
+	gdbarch_core_reg_section_encodes_pid.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Ditto.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Ditto.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Ditto.
+
 2010-08-18  Yao Qi  <yao@codesourcery.com>
 
 	* MAINTAINERS : Add myself under Write After Approval.

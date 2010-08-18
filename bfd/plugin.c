@@ -319,6 +319,13 @@ bfd_plugin_core_file_failing_signal (bfd *abfd ATTRIBUTE_UNUSED)
   return 0;
 }
 
+static int
+bfd_plugin_core_file_pid (bfd *abfd ATTRIBUTE_UNUSED)
+{
+  BFD_ASSERT (0);
+  return 0;
+}
+
 static long
 bfd_plugin_get_symtab_upper_bound (bfd *abfd)
 {

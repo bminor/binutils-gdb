@@ -1,3 +1,89 @@
+2010-08-18  Pedro Alves  <pedro@codesourcery.com>
+
+	PR corefile/8210
+
+	* bfd-in2.h: Regenerate.
+	* corefile.c (bfd_core_file_pid): New.
+
+	* targets.c (BFD_JUMP_TABLE_CORE): Add NAME##_core_file_pid.
+	(struct bfd_target) <_core_file_pid>: New.
+
+	* libbfd-in.h (_bfd_nocore_core_file_pid): Declare.
+	* libbfd.c (_bfd_nocore_core_file_pid): New.
+
+	* elf-bfd.h (bfd_elf32_core_file_pid, bfd_elf64_core_file_pid):
+	Declare.
+	* elfcode.h (elf_core_file_pid): New define.
+	* elfcore.h (elf_core_file_pid): New function.
+
+	* elf.c (elfcore_make_pid): Rewrite.
+	(elfcore_grok_prstatus): Only set core_pid if not set yet.
+	(elfcore_grok_prstatus) [!HAVE_PRSTATUS_T_PR_WHO]: Fallback to
+	getting the lwpid from prstat.pr_pid.
+
+	* elf64-x86-64.c (elf64_x86_64_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	(elf64_x86_64_grok_psinfo): Extract the the main process's PID,
+	and store it in elf_tdata's core_pid field.
+	* elf32-i386.c (elf_i386_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	(elf_i386_grok_psinfo): Extract the the main process's PID, and
+	store it in elf_tdata's core_pid field.
+
+	* elf32-am33lin.c (elf32_am33lin_grok_prstatus): Write the LWPID
+	to elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-arm.c (elf32_arm_nabi_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-cris.c (cris_elf_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-frv.c (elf32_frv_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-hppa.c (elf32_hppa_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-mips.c (elf32_mips_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-ppc.c (ppc_elf_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-s390.c (elf_s390_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-score.c (s3_bfd_score_elf_grok_prstatus): Write the LWPID
+	to elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-score7.c (s7_bfd_score_elf_grok_prstatus): Write the LWPID
+	to elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-sh.c (elf32_shlin_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf32-xtensa.c (elf_xtensa_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf64-hppa.c (elf64_hppa_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf64-mips.c (elf64_mips_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elf64-ppc.c (ppc64_elf_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	* elfn32-mips.c (elf32_mips_grok_prstatus): Write the LWPID to
+	elf_tdata's core_lwpid instead of to core_pid.
+	
+	* plugin.c (bfd_plugin_core_file_pid): New function.
+	* aout-target.h (MY_core_file_pid): Define.
+	* aout-tic30.c (MY_core_file_pid, MY_core_file_p): New defines.
+	* coff-rs6000.c (coff_core_file_pid): New define.
+	(rs6000coff_vec, pmac_xcoff_vec): Use BFD_JUMP_TABLE_CORE.
+	* coff64-rs6000.c (coff_core_file_pid): New define.
+	(rs6000coff64_vec): Use BFD_JUMP_TABLE_CORE.
+	(xcoff64_core_file_pid): New define.
+	(aix5coff64_vec): Use BFD_JUMP_TABLE_CORE.
+	* mach-o-target.c (bfd_mach_o_core_file_pid): New define.
+	* aix386-core.c (aix386_core_file_pid): New define.
+	* hppabsd-core.c (hppabsd_core_core_file_pid): New define.
+	* hpux-core.c (hpux_core_core_file_pid): New define.
+	* irix-core.c (irix_core_core_file_pid): New define.
+	* lynx-core.c (lynx_core_file_pid): New define.
+	* osf-core.c (osf_core_core_file_pid): New define.
+	* ptrace-core.c (ptrace_unix_core_file_pid): New define.
+	* sco5-core.c (sco5_core_file_pid): New define.
+	* xcoff-target.h (coff_core_file_pid): New define.
+	* netbsd-core.c (netbsd_core_core_file_pid): New define.
+
 2010-08-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11913

@@ -53,6 +53,7 @@ struct lynx_core_struct
 #define core_command(bfd) (core_hdr(bfd)->cmd)
 
 #define lynx_core_file_matches_executable_p generic_core_file_matches_executable_p
+#define lynx_core_file_pid _bfd_nocore_core_file_pid
 
 /* Handle Lynx core dump file.  */
 

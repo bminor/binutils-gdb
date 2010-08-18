@@ -87,6 +87,7 @@
 #define elf_core_file_failing_signal	NAME(bfd_elf,core_file_failing_signal)
 #define elf_core_file_matches_executable_p \
   NAME(bfd_elf,core_file_matches_executable_p)
+#define elf_core_file_pid		NAME(bfd_elf,core_file_pid)
 #define elf_object_p			NAME(bfd_elf,object_p)
 #define elf_core_file_p			NAME(bfd_elf,core_file_p)
 #define elf_get_symtab_upper_bound	NAME(bfd_elf,get_symtab_upper_bound)

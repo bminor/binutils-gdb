@@ -275,6 +275,8 @@ extern int _bfd_nocore_core_file_failing_signal
   (bfd *);
 extern bfd_boolean _bfd_nocore_core_file_matches_executable_p
   (bfd *, bfd *);
+extern int _bfd_nocore_core_file_pid
+  (bfd *);
 
 /* Routines to use for BFD_JUMP_TABLE_ARCHIVE when there is no archive
    file support.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive).  */

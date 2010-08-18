@@ -53,6 +53,7 @@ const bfd_target *ptrace_unix_core_file_p PARAMS ((bfd *abfd));
 char * ptrace_unix_core_file_failing_command PARAMS ((bfd *abfd));
 int ptrace_unix_core_file_failing_signal PARAMS ((bfd *abfd));
 #define ptrace_unix_core_file_matches_executable_p generic_core_file_matches_executable_p
+#define ptrace_unix_core_file_pid _bfd_nocore_core_file_pid
 static void swap_abort PARAMS ((void));
 
 const bfd_target *

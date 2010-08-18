@@ -43,6 +43,7 @@ static char *osf_core_core_file_failing_command
 static int osf_core_core_file_failing_signal
   PARAMS ((bfd *));
 #define osf_core_core_file_matches_executable_p generic_core_file_matches_executable_p
+#define osf_core_core_file_pid _bfd_nocore_core_file_pid
 static void swap_abort
   PARAMS ((void));
 

@@ -211,6 +211,8 @@ aix386_core_file_failing_signal (abfd)
 
 #define aix386_core_file_matches_executable_p generic_core_file_matches_executable_p
 
+#define aix386_core_file_pid _bfd_nocore_core_file_pid
+
 /* If somebody calls any byte-swapping routines, shoot them.  */
 
 static void

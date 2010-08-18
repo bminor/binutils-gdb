@@ -51,6 +51,7 @@
 #define coff_core_file_failing_command                 _bfd_nocore_core_file_failing_command
 #define coff_core_file_failing_signal                  _bfd_nocore_core_file_failing_signal
 #define coff_core_file_matches_executable_p            _bfd_nocore_core_file_matches_executable_p
+#define coff_core_file_pid                             _bfd_nocore_core_file_pid
 #define _bfd_xcoff_bfd_get_relocated_section_contents  coff_bfd_get_relocated_section_contents
 #define _bfd_xcoff_bfd_relax_section                   coff_bfd_relax_section
 #define _bfd_xcoff_bfd_gc_sections                     coff_bfd_gc_sections

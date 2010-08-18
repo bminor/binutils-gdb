@@ -419,7 +419,7 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
       elf_tdata (abfd)->core_signal = bfd_get_32 (abfd, note->descdata + 20);
 
       /* pr_pid */
-      elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+      elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, note->descdata + 24);
 
       /* pr_reg */
       offset = 28;
@@ -437,7 +437,7 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
 
 	  /* pr_pid */
-	  elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+	  elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, note->descdata + 24);
 
 	  /* pr_reg */
 	  offset = 72;
@@ -475,6 +475,8 @@ elf_i386_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 	  return FALSE;
 
 	case 124:		/* Linux/i386 elf_prpsinfo.  */
+	  elf_tdata (abfd)->core_pid
+	    = bfd_get_32 (abfd, note->descdata + 12);
 	  elf_tdata (abfd)->core_program
 	    = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
 	  elf_tdata (abfd)->core_command

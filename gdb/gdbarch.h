@@ -666,15 +666,6 @@ typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct g
 extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
 extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
 
-/* When creating core dumps, some systems encode the PID in addition
-   to the LWP id in core file register section names.  In those cases, the
-   "XXX" in ".reg/XXX" is encoded as [LWPID << 16 | PID].  This setting
-   is set to true for such architectures; false if "XXX" represents an LWP
-   or thread id with no special encoding. */
-
-extern int gdbarch_core_reg_section_encodes_pid (struct gdbarch *gdbarch);
-extern void set_gdbarch_core_reg_section_encodes_pid (struct gdbarch *gdbarch, int core_reg_section_encodes_pid);
-
 /* Supported register notes in a core file. */
 
 extern struct core_regset_section * gdbarch_core_regset_sections (struct gdbarch *gdbarch);
