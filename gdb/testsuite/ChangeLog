@@ -1,3 +1,8 @@
+2010-08-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Update test case
+	to reflect latest c source file.
+
 2010-08-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/infcall-dlopen.exp: New file.
