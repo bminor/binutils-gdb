@@ -827,23 +827,8 @@ gdb_expect  {
         timeout         { fail "(timeout) complete 'set follow-fork-mode'" }
         }
 
-send_gdb "p values\[0\].nonex.\t"
-gdb_expect  {
-        -re "Type struct some_struct has no component named nonex.\r\n$gdb_prompt $"\
-            { pass "Completing non-existing component" }
-        -re ".*$gdb_prompt $"       { fail "Completing non-existing component" }
-        timeout         { fail "(timeout) Completing non-existing component" }
-        eof             { fail "(eof) Completing non-existing component #2" }
-        }
-# Double memory freeing gets found only on the second run:
-send_gdb "p values\[0\].nonex.\t"
-gdb_expect  {
-        -re "Type struct some_struct has no component named nonex.\r\n$gdb_prompt $"\
-            { pass "Completing non-existing component #2" }
-        -re ".*$gdb_prompt $"       { fail "Completing non-existing component #2" }
-        timeout         { fail "(timeout) Completing non-existing component #2" }
-        eof             { fail "(eof) Completing non-existing component #2" }
-        }
+gdb_test_no_output "complete print values\[0\].x." \
+    "field completion with invalid field"
 
 # If there is a non-deprecated completion, it should be returned.
 gdb_test "complete sav" "save" "test non-deprecated completion"

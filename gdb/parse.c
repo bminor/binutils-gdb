@@ -1202,8 +1202,10 @@ parse_expression (char *string)
 /* Parse STRING as an expression.  If parsing ends in the middle of a
    field reference, return the type of the left-hand-side of the
    reference; furthermore, if the parsing ends in the field name,
-   return the field name in *NAME.  In all other cases, return NULL.
-   Returned non-NULL *NAME must be freed by the caller.  */
+   return the field name in *NAME.  If the parsing ends in the middle
+   of a field reference, but the reference is somehow invalid, throw
+   an exception.  In all other cases, return NULL.  Returned non-NULL
+   *NAME must be freed by the caller.  */
 
 struct type *
 parse_field_expression (char *string, char **name)
@@ -1213,7 +1215,7 @@ parse_field_expression (char *string, char **name)
   int subexp;
   volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       in_parse_field = 1;
       exp = parse_exp_in_context (&string, 0, 0, 0, &subexp);
@@ -1233,10 +1235,12 @@ parse_field_expression (char *string, char **name)
       xfree (exp);
       return NULL;
     }
+
+  /* This might throw an exception.  If so, we want to let it
+     propagate.  */
+  val = evaluate_subexpression_type (exp, subexp);
   /* (*NAME) is a part of the EXP memory block freed below.  */
   *name = xstrdup (*name);
-
-  val = evaluate_subexpression_type (exp, subexp);
   xfree (exp);
 
   return value_type (val);

@@ -1212,6 +1212,7 @@ struct type *
 lookup_struct_elt_type (struct type *type, char *name, int noerr)
 {
   int i;
+  char *typename;
 
   for (;;)
     {
@@ -1225,11 +1226,9 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT 
       && TYPE_CODE (type) != TYPE_CODE_UNION)
     {
-      target_terminal_ours ();
-      gdb_flush (gdb_stdout);
-      fprintf_unfiltered (gdb_stderr, "Type ");
-      type_print (type, "", gdb_stderr, -1);
-      error (_(" is not a structure or union type."));
+      typename = type_to_string (type);
+      make_cleanup (xfree, typename);
+      error (_("Type %s is not a structure or union type."), typename);
     }
 
 #if 0
@@ -1281,14 +1280,9 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
       return NULL;
     }
 
-  target_terminal_ours ();
-  gdb_flush (gdb_stdout);
-  fprintf_unfiltered (gdb_stderr, "Type ");
-  type_print (type, "", gdb_stderr, -1);
-  fprintf_unfiltered (gdb_stderr, " has no component named ");
-  fputs_filtered (name, gdb_stderr);
-  error (("."));
-  return (struct type *) -1;	/* For lint */
+  typename = type_to_string (type);
+  make_cleanup (xfree, typename);
+  error (_("Type %s has no component named %s."), typename, name);
 }
 
 /* Lookup the vptr basetype/fieldno values for TYPE.

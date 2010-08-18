@@ -1,3 +1,12 @@
+2010-08-18  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/11919:
+	* gdbtypes.c (lookup_struct_elt_type): Clean up error emission.
+	* parse.c (parse_field_expression): Use RETURN_MASK_ERROR.  Move
+	name-copying lower.  Document exception behavior.
+	* completer.c (expression_completer): Catch exceptions from
+	parse_field_expression.
+
 2010-08-18  Pedro Alves  <pedro@codesourcery.com>
 
 	PR corefile/8210

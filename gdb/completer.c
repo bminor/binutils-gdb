@@ -24,6 +24,7 @@
 #include "filenames.h"		/* For DOSish file names.  */
 #include "language.h"
 #include "gdb_assert.h"
+#include "exceptions.h"
 
 #include "cli/cli-decode.h"
 
@@ -414,13 +415,19 @@ add_struct_fields (struct type *type, int *nextp, char **output,
 char **
 expression_completer (struct cmd_list_element *ignore, char *text, char *word)
 {
-  struct type *type;
+  struct type *type = NULL;
   char *fieldname, *p;
+  volatile struct gdb_exception except;
 
   /* Perform a tentative parse of the expression, to see whether a
      field completion is required.  */
   fieldname = NULL;
-  type = parse_field_expression (text, &fieldname);
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      type = parse_field_expression (text, &fieldname);
+    }
+  if (except.reason < 0)
+    return NULL;
   if (fieldname && type)
     {
       for (;;)
