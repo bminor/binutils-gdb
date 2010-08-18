@@ -189,7 +189,11 @@ add_thread_db_info (void *handle)
   info = xcalloc (1, sizeof (*info));
   info->pid = ptid_get_pid (inferior_ptid);
   info->handle = handle;
-  info->need_stale_parent_threads_check = 1;
+
+  /* The workaround works by reading from /proc/pid/status, so it is
+     disabled for core files.  */
+  if (target_has_execution)
+    info->need_stale_parent_threads_check = 1;
 
   info->next = thread_db_list;
   thread_db_list = info;
@@ -737,7 +741,9 @@ try_thread_db_load_1 (struct thread_db_info *info)
   if (thread_db_list->next == NULL)
     push_target (&thread_db_ops);
 
-  enable_thread_event_reporting ();
+  /* Enable event reporting, but not when debugging a core file.  */
+  if (target_has_execution)
+    enable_thread_event_reporting ();
 
   /* There appears to be a bug in glibc-2.3.6: calls to td_thr_get_info fail
      with TD_ERR for statically linked executables if td_thr_get_info is
@@ -869,13 +875,13 @@ thread_db_load (void)
   if (info != NULL)
     return 1;
 
-  /* Don't attempt to use thread_db on targets which can not run
-     (executables not running yet, core files) for now.  */
-  if (!target_has_execution)
+  /* Don't attempt to use thread_db on executables not running
+     yet.  */
+  if (!target_has_registers)
     return 0;
 
   /* Don't attempt to use thread_db for remote targets.  */
-  if (!target_can_run (&current_target))
+  if (!(target_can_run (&current_target) || core_bfd))
     return 0;
 
   if (thread_db_load_search ())
@@ -1030,13 +1036,15 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 	}
     }
 
-  check_thread_signals ();
+  if (target_has_execution)
+    check_thread_signals ();
 
   if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie thread -- do not attach.  */
 
   /* Under GNU/Linux, we have to attach to each and every thread.  */
-  if (tp == NULL
+  if (target_has_execution
+      && tp == NULL
       && lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid))) < 0)
     return 0;
 
@@ -1061,11 +1069,16 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
   info = get_thread_db_info (GET_PID (ptid));
 
-  /* Enable thread event reporting for this thread.  */
-  err = info->td_thr_event_enable_p (th_p, 1);
-  if (err != TD_OK)
-    error (_("Cannot enable thread event reporting for %s: %s"),
-	   target_pid_to_str (ptid), thread_db_err_str (err));
+  /* Enable thread event reporting for this thread, except when
+     debugging a core file.  */
+  if (target_has_execution)
+    {
+      err = info->td_thr_event_enable_p (th_p, 1);
+      if (err != TD_OK)
+	error (_("Cannot enable thread event reporting for %s: %s"),
+	       target_pid_to_str (ptid), thread_db_err_str (err));
+    }
+
   return 1;
 }
 
@@ -1097,14 +1110,17 @@ thread_db_detach (struct target_ops *ops, char *args, int from_tty)
 
   if (info)
     {
-      disable_thread_event_reporting (info);
+      if (target_has_execution)
+	{
+	  disable_thread_event_reporting (info);
 
-      /* Delete the old thread event breakpoints.  Note that unlike
-	 when mourning, we can remove them here because there's still
-	 a live inferior to poke at.  In any case, GDB will not try to
-	 insert anything in the inferior when removing a
-	 breakpoint.  */
-      remove_thread_event_breakpoints ();
+	  /* Delete the old thread event breakpoints.  Note that
+	     unlike when mourning, we can remove them here because
+	     there's still a live inferior to poke at.  In any case,
+	     GDB will not try to insert anything in the inferior when
+	     removing a breakpoint.  */
+	  remove_thread_event_breakpoints ();
+	}
 
       delete_thread_db_info (GET_PID (inferior_ptid));
     }
@@ -1317,7 +1333,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
 
-  if (ti.ti_tid == 0)
+  if (ti.ti_tid == 0 && target_has_execution)
     {
       /* A thread ID of zero means that this is the main thread, but
 	 glibc has not yet initialized thread-local storage and the
@@ -1417,19 +1433,23 @@ static void
 thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new)
 {
   td_err_e err;
-  struct lwp_info *lp;
   struct thread_db_info *info;
   int pid = ptid_get_pid (ptid);
   int i, loop;
 
-  /* In linux, we can only read memory through a stopped lwp.  */
-  ALL_LWPS (lp, ptid)
-    if (lp->stopped && ptid_get_pid (lp->ptid) == pid)
-      break;
+  if (target_has_execution)
+    {
+      struct lwp_info *lp;
 
-  if (!lp)
-    /* There is no stopped thread.  Bail out.  */
-    return;
+      /* In linux, we can only read memory through a stopped lwp.  */
+      ALL_LWPS (lp, ptid)
+	if (lp->stopped && ptid_get_pid (lp->ptid) == pid)
+	  break;
+
+      if (!lp)
+	/* There is no stopped thread.  Bail out.  */
+	return;
+    }
 
   info = get_thread_db_info (GET_PID (ptid));
 
@@ -1480,8 +1500,9 @@ thread_db_find_new_threads (struct target_ops *ops)
 
   thread_db_find_new_threads_1 (inferior_ptid);
 
-  iterate_over_lwps (minus_one_ptid /* iterate over all */,
-		     update_thread_core, NULL);
+  if (target_has_execution)
+    iterate_over_lwps (minus_one_ptid /* iterate over all */,
+		       update_thread_core, NULL);
 }
 
 static char *

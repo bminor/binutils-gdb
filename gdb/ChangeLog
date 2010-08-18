@@ -2,6 +2,27 @@
 
 	PR corefile/8210
 
+	* linux-thread-db.c (add_thread_db_info): Skip glibc/BZ5983
+	workaround on core files.
+	(try_thread_db_load_1): Don't try enabling thread event reporting
+	on core files.
+	(thread_db_load): Allow thread_db on core files.
+	(attach_thread): Don't check thread signals on core files, nor try
+	really attaching to the thread, nor enabling thread event event
+	reporting.
+	(thread_db_detach): Don't try disabing thread event reporting or
+	removing thread event breakpoints when debugging a core file.
+	(find_new_threads_callback): Don't try enabling thread event
+	reporting on core files.
+	(thread_db_find_new_threads_2): Don't look for a stopped lwp when
+	debugging a core file.
+	(thread_db_find_new_threads): Don't update thread
+	cores (processors) when debugging a core (dump).
+
+2010-08-18  Pedro Alves  <pedro@codesourcery.com>
+
+	PR corefile/8210
+
 	* corelow.c (add_to_thread_list): Don't use
 	gdbarch_core_reg_section_encodes_pid.  Use bfd_core_file_pid.
 	(get_core_register_section): Don't use
