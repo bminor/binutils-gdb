@@ -1,3 +1,7 @@
+2010-08-18  Yao Qi  <yao@codesourcery.com>
+
+	* MAINTAINERS : Add myself under Write After Approval.
+
 2010-08-17  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Mention template parameter support.
