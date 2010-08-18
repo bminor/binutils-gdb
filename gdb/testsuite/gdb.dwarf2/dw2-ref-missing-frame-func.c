@@ -19,7 +19,6 @@ asm (".globl cu_text_start");
 asm ("cu_text_start:");
 
 asm (".globl func_nofb_start");
-asm (".align 2");
 asm ("func_nofb_start:");
 
 void
@@ -32,7 +31,6 @@ asm (".globl func_nofb_end");
 asm ("func_nofb_end:");
 
 asm (".globl func_loopfb_start");
-asm (".align 2");
 asm ("func_loopfb_start:");
 
 void
