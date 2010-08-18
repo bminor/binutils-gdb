@@ -748,6 +748,8 @@ sub_actual (int start, sb *in, sb *t, struct hash_control *formal_hash,
       /* Doing this permits people to use & in macro bodies.  */
       sb_add_char (out, '&');
       sb_add_sb (out, t);
+      if (src != start && in->ptr[src - 1] == '&')
+	sb_add_char (out, '&');
     }
   else if (copyifnotthere)
     {
@@ -788,9 +790,8 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	    }
 	  else
 	    {
-	      /* FIXME: Why do we do this?  */
-	      /* At least in alternate mode this seems correct; without this
-	         one can't append a literal to a parameter.  */
+	      /* Permit macro parameter substition delineated with
+		 an '&' prefix and optional '&' suffix.  */
 	      src = sub_actual (src + 1, in, &t, formal_hash, '&', out, 0);
 	    }
 	}
