@@ -31,32 +31,17 @@ if {[compile_java_from_source ${srcfile} ${binfile} "-g"] != ""} {
     continue
 }
 
-# Set the current language to java.  This counts as a test.  If it
-# fails, then we skip the other tests.
-
-proc set_lang_java {} {
-    global gdb_prompt
-    global binfile objdir subdir
-
-    verbose "loading file '$binfile'"
-    gdb_load $binfile
-
-    gdb_test_no_output "set language java"
-
-    return [gdb_test "show language" ".* source language is \"java\".*" \
-	"set language to \"java\""]
-}
-
 
 # Start with a fresh gdb.
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
+gdb_load $binfile
 
 gdb_test "set print sevenbit-strings" ".*"
 
-if ![set_lang_java] then {
+if [set_lang_java] then {
     # Ref PR gdb:java/1565.  Don't use the simpler "break jmisc.main".
     # As of 2004-02-24 it wasn't working and is being tested separatly.
     # Before GCJ 4.1 (approximately) the demangled name did not include

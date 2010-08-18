@@ -25,7 +25,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-
 set testfile "printcmds"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
@@ -35,22 +34,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 }
 
 get_compiler_info ${binfile}
-
-# Set the current language to C.  This counts as a test.  If it
-# fails, then we skip the other tests.
-
-proc set_lang_c {} {
-    global gdb_prompt
-
-    if [gdb_test_no_output "set language c" "set language c"] {
-	return 0
-    }
-
-    if [gdb_test "show language" ".* source language is \"c\".*"] {
-	return 0
-    }
-    return 1;
-}
 
 proc test_integer_literals_accepted {} {
     global gdb_prompt
@@ -781,34 +764,34 @@ gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"
 
-if [set_lang_c] then {
-    if { [test_compiler_info "armcc-*"] } {
-	# ARM RealView compresses large arrays in the data segment.
-	# Before the program starts, we can not read them.  There is
-	# nothing in the file to indicate that data is compressed.
-	setup_xfail "arm*-*-eabi"
-    }
-    gdb_test "p ctable1\[120\]" "120 'x'" "p ctable1\[120\] #1"
-
-    gdb_load ${binfile}
-    if [runto_main] then {
-	test_integer_literals_accepted
-	test_integer_literals_rejected
-	test_character_literals_accepted
-	test_print_all_chars
-	test_print_repeats_10
-	test_print_strings
-	test_print_int_arrays
-	test_print_typedef_arrays
-	test_artificial_arrays
-	test_print_char_arrays
-# We used to do the runto main here.
-	test_print_string_constants
-	test_print_array_constants
-	test_print_enums
-	test_printf
-	test_printf_with_dfp
-    }
-} else {
-    fail "C print command tests suppressed"
+if { [test_compiler_info "armcc-*"] } {
+    # ARM RealView compresses large arrays in the data segment.
+    # Before the program starts, we can not read them.  There is
+    # nothing in the file to indicate that data is compressed.
+    setup_xfail "arm*-*-eabi"
 }
+gdb_test "p ctable1\[120\]" "120 'x'" "p ctable1\[120\] #1"
+
+gdb_load ${binfile}
+
+if ![runto_main] then {
+    fail "Can't run to main"
+    return 0
+}
+
+test_integer_literals_accepted
+test_integer_literals_rejected
+test_character_literals_accepted
+test_print_all_chars
+test_print_repeats_10
+test_print_strings
+test_print_int_arrays
+test_print_typedef_arrays
+test_artificial_arrays
+test_print_char_arrays
+# We used to do the runto main here.
+test_print_string_constants
+test_print_array_constants
+test_print_enums
+test_printf
+test_printf_with_dfp

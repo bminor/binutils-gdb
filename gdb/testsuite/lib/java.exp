@@ -105,6 +105,20 @@ proc compile_java_from_source { srcfile binfile compile_args } {
     return $result
 }
 
+# Auxiliary function to set the language to java.
+# The result is 1 (true) for success, 0 (false) for failure.
+
+proc set_lang_java {} {
+    if [gdb_test_no_output "set language java"] {
+	return 0
+    }
+    if [gdb_test "show language" ".* source language is \"java\"." \
+	   "set language to \"java\""] {
+	return 0
+    }
+    return 1;
+}
+
 # Local Variables:
 # tcl-indent-level:4
 # End:

@@ -23,23 +23,7 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-
-# Set the current language to pascal.  This counts as a test.  If it
-# fails, then we skip the other tests.
-
-proc set_lang_pascal {} {
-    global gdb_prompt
-    
-    if [gdb_test "set language pascal" ""] {
-	return 0;
-    }
-
-    if ![gdb_test "show language" ".* source language is \"pascal\".*"] {
-	return 1;
-    } else {
-	return 0;
-    }
-}
+load_lib "pascal.exp"
 
 proc test_integer_literal_types_accepted {} {
     global gdb_prompt

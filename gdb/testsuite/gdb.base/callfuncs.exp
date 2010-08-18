@@ -21,7 +21,6 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
-
 set testfile "callfuncs"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
@@ -50,25 +49,6 @@ if [target_info exists gdb,cannot_call_functions] {
     setup_xfail "*-*-*" 2416
     fail "This target can not call functions"
     continue
-}
-
-# Set the current language to C.  This counts as a test.  If it
-# fails, then we skip the other tests.
-
-proc set_lang_c {} {
-    global gdb_prompt
-
-    gdb_test_no_output "set language c" 
-
-    set success 0
-
-    gdb_test_multiple "show language" "set language to \"c\"" {
-	-re ".* source language is \"c\".*$gdb_prompt $" {
-	    pass "set language to \"c\""
-	    set success 1
-	}
-    }
-    return $success
 }
 
 # FIXME:  Before calling this proc, we should probably verify that
@@ -315,12 +295,9 @@ if { $hp_aCC_compiler } {
 
     gdb_test_no_output "set overload-resolution 0"
 } else {
-    if { ![set_lang_c] } {
+    gdb_test_no_output "set language c"
+    if { ![runto_main] } {
 	gdb_suppress_tests;
-    } else {
-	if { ![runto_main] } {
-	    gdb_suppress_tests;
-	}
     }
 }
 

@@ -150,3 +150,16 @@ proc gdb_compile_pascal {source dest type options} {
     }
 }
 
+# Auxiliary function to set the language to pascal.
+# The result is 1 (true) for success, 0 (false) for failure.
+
+proc set_lang_pascal {} {
+    if [gdb_test_no_output "set language pascal"] {
+	return 0
+    }
+    if [gdb_test "show language" ".* source language is \"pascal\"." \
+	   "set language to \"pascal\""] {
+	return 0
+    }
+    return 1;
+}

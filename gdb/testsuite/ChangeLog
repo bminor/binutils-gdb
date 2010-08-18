@@ -1,3 +1,28 @@
+2010-08-18  Doug Evans  <dje@google.com>
+
+	* gdb.base/call-ar-st.exp (set_lang_c): Delete, unused.
+	* gdb.base/callfuncs.exp (set_lang_c): Delete, set c language directly.
+	* gdb.base/printcmds.exp (set_lang_c): Delete, set c language directly.
+	Simplify, early exit if runto_main fails.
+	* gdb.fortran/exprs.exp: load_lib fortran.exp.
+	(set_lang_fortran): Moved to lib/fortran.exp.
+	* gdb.fortran/types.exp: load_lib fortran.exp.
+	(set_lang_fortran): Moved to lib/fortran.exp.
+	* gdb.java/jmisc.exp (set_lang_java): Moved to lib/java.exp.
+	* gdb.java/jprint.exp (set_lang_java): Ditto.
+	* gdb.java/jv-exp.exp: load_lib java.exp.
+	If set_lang_java fails, issue a warning instead of failure to be
+	consistent with other set_lang_foo uses.
+	(set_lang_java): Moved to lib/java.exp.
+	* gdb.java/jv-print.exp (set_lang_java): Moved to lib/java.exp.
+	If set_lang_java fails, issue a warning instead of failure to be
+	consistent with other set_lang_foo uses.
+	* gdb.pascal/types.exp: load_lib pascal.exp.
+	(set_lang_pascal): Moved to lib/pascal.exp.
+	* lib/fortran.exp: New file.
+	* lib/java.exp (set_lang_java): New function.
+	* lib/pascal.exp (set_lang_pascal): New function.
+
 2010-08-18  Yao Qi  <yao@codesourcery.com
 
 	* gdb.dwarf2/dw2-ref-missing-frame-func.c: Add .p2align 4 for labels

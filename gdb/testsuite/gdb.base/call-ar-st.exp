@@ -55,30 +55,6 @@ if [target_info exists gdb,cannot_call_functions] {
 set oldtimeout $timeout
 set timeout [expr "$timeout + 60"]
 
-# Set the current language to C.  This counts as a test.  If it
-# fails, then we skip the other tests.
-
-proc set_lang_c {} {
-    global gdb_prompt
-
-    gdb_test_no_output "set language c"
-
-    gdb_test_multiple "show language" "set language to \"c\"" {
-	-re ".* source language is \"c\".*$gdb_prompt $" {
-	    pass "set language to \"c\""
-	    return 1
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "set language to \"c\""
-	    return 0
-	}
-	timeout {
-	    fail "(timeout) set language to \"c\""
-	    return 0
-	}
-    }
-}
-
 # Start with a fresh gdb.
 
 gdb_exit
