@@ -1,3 +1,7 @@
+2010-08-12  Cary Coutant  <ccoutant@google.com>
+
+	* common.cc (Sort_commons::operator()): Remove unnecessary code.
+
 2010-08-13  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/incremental_test_1.c: Add prototype to avoid warning.

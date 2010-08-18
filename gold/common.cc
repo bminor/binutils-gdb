@@ -88,16 +88,7 @@ bool
 Sort_commons<size>::operator()(const Symbol* pa, const Symbol* pb) const
 {
   if (pa == NULL)
-    {
-      if (pb == NULL)
-	{
-	  // Stabilize sort.  The order really doesn't matter, because
-	  // these entries will be discarded, but we want to return
-	  // the same result every time we compare pa and pb.
-	  return pa < pb;
-	}
-      return false;
-    }
+    return false;
   if (pb == NULL)
     return true;
 
