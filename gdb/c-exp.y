@@ -1371,6 +1371,12 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 		    &putithere->typed_val_float.dval, s);
       p[len] = saved_char;	/* restore the input stream */
 
+      if (num == 0)
+	{
+	  free (s);
+	  return ERROR;
+	}
+
       if (num == 1)
 	putithere->typed_val_float.type = 
 	  parse_type->builtin_double;

@@ -1,3 +1,8 @@
+2010-08-19  Doug Evans  <dje@google.com>
+
+	PR exp/11926
+	* c-exp.y (parse_number): Handle 0 return from sscanf.
+
 2010-08-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* psymtab.c (map_symbol_filenames_psymtab): Call FUN with

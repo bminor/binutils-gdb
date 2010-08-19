@@ -128,6 +128,7 @@ proc test_integer_literals_rejected {} {
     test_print_reject "p 123DEADBEEF"
     test_print_reject "p 123foobar.bazfoo3"
     test_print_reject "p 123EEEEEEEEEEEEEEEEE33333k333"
+    test_print_reject "p 0x1.1"
     gdb_test "p 123.4+56.7" "180.(099\[0-9]*|100\[0-9\]*)" "check for floating addition"
 
     # Test various octal values.
