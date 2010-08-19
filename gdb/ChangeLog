@@ -1,3 +1,7 @@
+2010-08-19  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (install-python): Add DESTDIR.
+
 2010-08-19  Doug Evans  <dje@google.com>
 
 	PR exp/11926

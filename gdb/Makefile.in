@@ -1038,7 +1038,7 @@ install-tui:
 			$(DESTDIR)$(man1dir)/$$transformed_name.1
 
 install-python:
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDB_DATADIR)/python/gdb
+	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(GDB_DATADIR)/python/gdb
 
 uninstall: force $(CONFIG_UNINSTALL)
 	transformed_name=`t='$(program_transform_name)'; \
