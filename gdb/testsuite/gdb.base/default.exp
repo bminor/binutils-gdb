@@ -316,10 +316,37 @@ gdb_test "info s" "No stack." "info stack \"s\" abbreviation"
 #test info stack
 gdb_test "info stack" "No stack." "info stack"
 #test info set
-# FIXME -- needs to match the entire output
-# FIXME -- on native solaris 2.8, this test fails due to this line:
+# Test improved to check three parts:
+# 1) confirm
+# 2) prompt
+# 3) write
+# And only succeed if all three are matched.
+# This should fix an old problem on native solaris 2.8,
+# where this test fails due to this line:
 #  prompt:  Gdb's prompt is "(gdb) ".^M
-gdb_test "info set" "confirm:  Whether to confirm potentially dangerous operations is o\[a-z\]*.(\[^\r\n\]*\[\r\n\])+history filename:  The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+listsize:  Number of source lines gdb will list by default is 10.*" "info set"
+set set_confirm_seen 0
+set set_prompt_seen 0
+gdb_test_multiple "info set" "info set" {
+    -re "confirm:  Whether to confirm potentially dangerous operations is o\[a-z\]*.(\[^\r\n\]*\[\r\n\])+history filename:  The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+listsize:  Number of source lines gdb will list by default is 10" {
+	verbose "Confirm dislayed"
+	set set_confirm_seen 1
+	exp_continue
+    }
+    -re "Gdb's prompt is \"$gdb_prompt \"" {
+	verbose "GDB prompt displayed"
+	set set_prompt_seen 1
+	exp_continue
+    }
+    -re "Writing into executable.*$gdb_prompt $" {
+	verbose "write displayed"
+	if { $set_prompt_seen && $set_confirm_seen } {
+	    pass "info set"
+	} else {
+	    verbose "prompt $set_prompt_seen confirm $set_confirm_seen"
+	    fail "info set (incomplete output)"
+	}
+    }
+}
 gdb_test "info symbol" "Argument required .address.."
 #test info source
 gdb_test  "info source" "No current source file..*" "info source"
@@ -651,7 +678,29 @@ gdb_test "show width" "Number of characters gdb thinks are in a line is.*" "show
 # This is only supported on targets which use exec.o.
 gdb_test "show write" "Writing into executable and core files is o.*" "show write"
 #test show
-gdb_test "show" "confirm:  *Whether to confirm potentially dangerous operations is on.(\[^\r\n\]*\[\r\n\])+history filename:  *The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+history save:  *Saving of the history record on exit is on.(\[^\r\n\]*\[\r\n\])+history size:  *The size of the command history is(\[^\r\n\]*\[\r\n\])+listsize:  *Number of source lines gdb will list by default is 10(\[^\r\n]*\[\r\n\])+print elements:  *Limit on string chars or array elements to print is 200..*" "show"
+set show_confirm_seen 0
+set show_prompt_seen 0
+gdb_test_multiple "show" "show" {
+    -re "confirm:  *Whether to confirm potentially dangerous operations is on.(\[^\r\n\]*\[\r\n\])+history filename:  *The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+history save:  *Saving of the history record on exit is on.(\[^\r\n\]*\[\r\n\])+history size:  *The size of the command history is(\[^\r\n\]*\[\r\n\])+listsize:  *Number of source lines gdb will list by default is 10(\[^\r\n]*\[\r\n\])+print elements:  *Limit on string chars or array elements to print is 200." {
+	verbose "Confirm dislayed"
+	set show_confirm_seen 1
+	exp_continue
+    }
+    -re "Gdb's prompt is \"$gdb_prompt \"" {
+	verbose "GDB prompt displayed"
+	set show_prompt_seen 1
+	exp_continue
+    }
+    -re "Writing into executable.*$gdb_prompt $" {
+	verbose "write displayed"
+	if { $show_prompt_seen && $show_confirm_seen } {
+	    pass "show"
+	} else {
+	    verbose "prompt $show_prompt_seen confirm $show_confirm_seen"
+	    fail "show (incomplete output)"
+	}
+    }
+}
 #test stepi "si" abbreviation
 gdb_test  "si" "The program is not being run." "stepi \"si\" abbreviation"
 #test stepi
