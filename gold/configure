@@ -602,6 +602,8 @@ LFS_CFLAGS
 WARN_CXXFLAGS
 NO_WERROR
 WARN_CFLAGS
+IFUNC_FALSE
+IFUNC_TRUE
 RANDOM_SEED_CFLAGS
 CONSTRUCTOR_PRIORITY_FALSE
 CONSTRUCTOR_PRIORITY_TRUE
@@ -1913,8 +1915,10 @@ $as_echo "$ac_res" >&6; }
 ac_fn_c_check_decl ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $2 is declared" >&5
-$as_echo_n "checking whether $2 is declared... " >&6; }
+  as_decl_name=`echo $2|sed 's/ *(.*//'`
+  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
+$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
 if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
   $as_echo_n "(cached) " >&6
 else
@@ -1924,8 +1928,12 @@ $4
 int
 main ()
 {
-#ifndef $2
-  (void) $2;
+#ifndef $as_decl_name
+#ifdef __cplusplus
+  (void) $as_decl_use;
+#else
+  (void) $as_decl_name;
+#endif
 #endif
 
   ;
@@ -2189,8 +2197,10 @@ $as_echo "$ac_res" >&6; }
 ac_fn_cxx_check_decl ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $2 is declared" >&5
-$as_echo_n "checking whether $2 is declared... " >&6; }
+  as_decl_name=`echo $2|sed 's/ *(.*//'`
+  as_decl_use=`echo $2|sed -e 's/(/((/' -e 's/)/) 0&/' -e 's/,/) 0& (/g'`
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $as_decl_name is declared" >&5
+$as_echo_n "checking whether $as_decl_name is declared... " >&6; }
 if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
   $as_echo_n "(cached) " >&6
 else
@@ -2200,8 +2210,12 @@ $4
 int
 main ()
 {
-#ifndef $2
-  (void) $2;
+#ifndef $as_decl_name
+#ifdef __cplusplus
+  (void) $as_decl_use;
+#else
+  (void) $as_decl_name;
+#endif
 #endif
 
   ;
@@ -6335,6 +6349,41 @@ if test "$gold_cv_c_random_seed" = "yes"; then
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for glibc >= 2.11" >&5
+$as_echo_n "checking for glibc >= 2.11... " >&6; }
+if test "${gold_cv_lib_glibc2_11+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <features.h>
+#if !defined __GLIBC__
+error
+#elif __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 11)
+error
+#endif
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gold_cv_lib_glibc2_11=yes
+else
+  gold_cv_lib_glibc2_11=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_lib_glibc2_11" >&5
+$as_echo "$gold_cv_lib_glibc2_11" >&6; }
+
+ if test "$gold_cv_lib_glibc2_11" = "yes"; then
+  IFUNC_TRUE=
+  IFUNC_FALSE='#'
+else
+  IFUNC_TRUE='#'
+  IFUNC_FALSE=
+fi
+
+
 
 GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -7204,6 +7253,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CONSTRUCTOR_PRIORITY_TRUE}" && test -z "${CONSTRUCTOR_PRIORITY_FALSE}"; then
   as_fn_error "conditional \"CONSTRUCTOR_PRIORITY\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${IFUNC_TRUE}" && test -z "${IFUNC_FALSE}"; then
+  as_fn_error "conditional \"IFUNC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_ZLIB_TRUE}" && test -z "${HAVE_ZLIB_FALSE}"; then

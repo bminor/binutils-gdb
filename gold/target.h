@@ -53,6 +53,7 @@ class Symbol;
 template<int size>
 class Sized_symbol;
 class Symbol_table;
+class Output_data;
 class Output_section;
 class Input_objects;
 
@@ -261,6 +262,18 @@ class Target
   reloc_addend(void* arg, unsigned int type, uint64_t addend) const
   { return this->do_reloc_addend(arg, type, addend); }
 
+  // Return the PLT section to use for a global symbol.  This is used
+  // for STT_GNU_IFUNC symbols.
+  Output_data*
+  plt_section_for_global(const Symbol* sym) const
+  { return this->do_plt_section_for_global(sym); }
+
+  // Return the PLT section to use for a local symbol.  This is used
+  // for STT_GNU_IFUNC symbols.
+  Output_data*
+  plt_section_for_local(const Relobj* object, unsigned int symndx) const
+  { return this->do_plt_section_for_local(object, symndx); }
+
   // Return true if a reference to SYM from a reloc of type R_TYPE
   // means that the current function may call an object compiled
   // without -fsplit-stack.  SYM is known to be defined in an object
@@ -460,6 +473,16 @@ class Target
   // target specific relocations.
   virtual uint64_t
   do_reloc_addend(void*, unsigned int, uint64_t) const
+  { gold_unreachable(); }
+
+  // Virtual functions that must be overridden by a target that uses
+  // STT_GNU_IFUNC symbols.
+  virtual Output_data*
+  do_plt_section_for_global(const Symbol*) const
+  { gold_unreachable(); }
+
+  virtual Output_data*
+  do_plt_section_for_local(const Relobj*, unsigned int) const
   { gold_unreachable(); }
 
   // Virtual function which may be overridden by the child class.  The

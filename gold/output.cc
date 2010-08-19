@@ -1,6 +1,6 @@
 // output.cc -- manage the output file for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1133,10 +1133,17 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>
     os->set_entsize(elfcpp::Elf_sizes<size>::rela_size);
   else
     gold_unreachable();
-  if (dynamic)
-    os->set_should_link_to_dynsym();
-  else
+
+  // A STT_GNU_IFUNC symbol may require a IRELATIVE reloc when doing a
+  // static link.  The backends will generate a dynamic reloc section
+  // to hold this.  In that case we don't want to link to the dynsym
+  // section, because there isn't one.
+  if (!dynamic)
     os->set_should_link_to_symtab();
+  else if (parameters->doing_static_link())
+    ;
+  else
+    os->set_should_link_to_dynsym();
 }
 
 // Write out relocation data.
@@ -1262,12 +1269,18 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 	// link-time value, which will be relocated dynamically by a
 	// RELATIVE relocation.
 	Symbol* gsym = this->u_.gsym;
-	Sized_symbol<size>* sgsym;
-	// This cast is a bit ugly.  We don't want to put a
-	// virtual method in Symbol, because we want Symbol to be
-	// as small as possible.
-	sgsym = static_cast<Sized_symbol<size>*>(gsym);
-	val = sgsym->value();
+	if (this->use_plt_offset_ && gsym->has_plt_offset())
+	  val = (parameters->target().plt_section_for_global(gsym)->address()
+		 + gsym->plt_offset());
+	else
+	  {
+	    Sized_symbol<size>* sgsym;
+	    // This cast is a bit ugly.  We don't want to put a
+	    // virtual method in Symbol, because we want Symbol to be
+	    // as small as possible.
+	    sgsym = static_cast<Sized_symbol<size>*>(gsym);
+	    val = sgsym->value();
+	  }
       }
       break;
 
@@ -1277,9 +1290,17 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 
     default:
       {
+	const Sized_relobj<size, big_endian>* object = this->u_.object;
         const unsigned int lsi = this->local_sym_index_;
-        const Symbol_value<size>* symval = this->u_.object->local_symbol(lsi);
-        val = symval->value(this->u_.object, 0);
+        const Symbol_value<size>* symval = object->local_symbol(lsi);
+	if (!this->use_plt_offset_)
+	  val = symval->value(this->u_.object, 0);
+	else
+	  {
+	    const Output_data* plt =
+	      parameters->target().plt_section_for_local(object, lsi);
+	    val = plt->address() + object->local_plt_offset(lsi);
+	  }
       }
       break;
     }
@@ -1302,7 +1323,23 @@ Output_data_got<size, big_endian>::add_global(
   if (gsym->has_got_offset(got_type))
     return false;
 
-  this->entries_.push_back(Got_entry(gsym));
+  this->entries_.push_back(Got_entry(gsym, false));
+  this->set_got_size();
+  gsym->set_got_offset(got_type, this->last_got_offset());
+  return true;
+}
+
+// Like add_global, but use the PLT offset.
+
+template<int size, bool big_endian>
+bool
+Output_data_got<size, big_endian>::add_global_plt(Symbol* gsym,
+						  unsigned int got_type)
+{
+  if (gsym->has_got_offset(got_type))
+    return false;
+
+  this->entries_.push_back(Got_entry(gsym, true));
   this->set_got_size();
   gsym->set_got_offset(got_type, this->last_got_offset());
   return true;
@@ -1310,6 +1347,7 @@ Output_data_got<size, big_endian>::add_global(
 
 // Add an entry for a global symbol to the GOT, and add a dynamic
 // relocation of type R_TYPE for the GOT entry.
+
 template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_global_with_rel(
@@ -1417,7 +1455,25 @@ Output_data_got<size, big_endian>::add_local(
   if (object->local_has_got_offset(symndx, got_type))
     return false;
 
-  this->entries_.push_back(Got_entry(object, symndx));
+  this->entries_.push_back(Got_entry(object, symndx, false));
+  this->set_got_size();
+  object->set_local_got_offset(symndx, got_type, this->last_got_offset());
+  return true;
+}
+
+// Like add_local, but use the PLT offset.
+
+template<int size, bool big_endian>
+bool
+Output_data_got<size, big_endian>::add_local_plt(
+    Sized_relobj<size, big_endian>* object,
+    unsigned int symndx,
+    unsigned int got_type)
+{
+  if (object->local_has_got_offset(symndx, got_type))
+    return false;
+
+  this->entries_.push_back(Got_entry(object, symndx, true));
   this->set_got_size();
   object->set_local_got_offset(symndx, got_type, this->last_got_offset());
   return true;
@@ -1425,6 +1481,7 @@ Output_data_got<size, big_endian>::add_local(
 
 // Add an entry for a local symbol to the GOT, and add a dynamic
 // relocation of type R_TYPE for the GOT entry.
+
 template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_local_with_rel(
@@ -1486,7 +1543,7 @@ Output_data_got<size, big_endian>::add_local_pair_with_rel(
   Output_section* os = object->output_section(shndx);
   rel_dyn->add_output_section(os, r_type_1, this, got_offset);
 
-  this->entries_.push_back(Got_entry(object, symndx));
+  this->entries_.push_back(Got_entry(object, symndx, false));
   if (r_type_2 != 0)
     {
       got_offset = this->last_got_offset();
@@ -1516,7 +1573,7 @@ Output_data_got<size, big_endian>::add_local_pair_with_rela(
   Output_section* os = object->output_section(shndx);
   rela_dyn->add_output_section(os, r_type_1, this, got_offset, 0);
 
-  this->entries_.push_back(Got_entry(object, symndx));
+  this->entries_.push_back(Got_entry(object, symndx, false));
   if (r_type_2 != 0)
     {
       got_offset = this->last_got_offset();

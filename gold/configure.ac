@@ -359,6 +359,20 @@ if test "$gold_cv_c_random_seed" = "yes"; then
 fi
 AC_SUBST(RANDOM_SEED_CFLAGS)
 
+dnl On GNU/Linux ifunc is supported by the dynamic linker in glibc
+dnl 2.11 or later.
+AC_CACHE_CHECK([for glibc >= 2.11], [gold_cv_lib_glibc2_11],
+[AC_COMPILE_IFELSE([
+#include <features.h>
+#if !defined __GLIBC__
+error
+#elif __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 11)
+error
+#endif
+], [gold_cv_lib_glibc2_11=yes], [gold_cv_lib_glibc2_11=no])])
+
+AM_CONDITIONAL(IFUNC, test "$gold_cv_lib_glibc2_11" = "yes")
+
 AM_BINUTILS_WARNINGS
 
 WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//' -e 's/-Wshadow//'`

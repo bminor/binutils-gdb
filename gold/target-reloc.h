@@ -284,6 +284,10 @@ relocate_section(
 	  else
 	    symval.set_no_output_symtab_entry();
 	  symval.set_output_value(sym->value());
+	  if (gsym->type() == elfcpp::STT_TLS)
+	    symval.set_is_tls_symbol();
+	  else if (gsym->type() == elfcpp::STT_GNU_IFUNC)
+	    symval.set_is_ifunc_symbol();
 	  psymval = &symval;
 
 	  is_defined_in_discarded_section =

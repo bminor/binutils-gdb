@@ -1530,6 +1530,208 @@ no_version_test.o: no_version_test.c
 no_version_test.stdout: libno_version_test.so
 	$(TEST_OBJDUMP) -h $< > $@
 
+# Test STT_GNU_IFUNC symbols.
+if IFUNC
+
+ifuncmod1.o: ifuncmod1.c
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncmod1.so: ifuncmod1.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared ifuncmod1.o
+
+ifuncdep1.o: ifuncmod1.c
+	$(COMPILE) -c -o $@ $<
+
+ifuncmain1pic.o: ifuncmain1.c
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncmain1pie.o: ifuncmain1.c
+	$(COMPILE) -c -fpie -o $@ $<
+
+check_PROGRAMS += ifuncmain1static
+ifuncmain1static_SOURCES = ifuncmain1.c
+ifuncmain1static_DEPENDENCIES = gcctestdir/ld ifuncdep1.o
+ifuncmain1static_LDFLAGS = -Bgcctestdir/ -static
+ifuncmain1static_LDADD = ifuncdep1.o
+
+check_PROGRAMS += ifuncmain1picstatic
+ifuncmain1picstatic: ifuncmain1pic.o ifuncmod1.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -static ifuncmain1pic.o ifuncmod1.o
+
+check_PROGRAMS += ifuncmain1
+ifuncmain1_SOURCES = ifuncmain1.c
+ifuncmain1_DEPENDENCIES = gcctestdir/ld ifuncmod1.so
+ifuncmain1_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ifuncmain1_LDADD = ifuncmod1.so
+
+check_PROGRAMS += ifuncmain1pic
+ifuncmain1pic: ifuncmain1pic.o ifuncmod1.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ ifuncmain1pic.o ifuncmod1.so -Wl,-R,.
+
+check_PROGRAMS += ifuncmain1vis
+ifuncmain1vis_SOURCES = ifuncmain1vis.c
+ifuncmain1vis_DEPENDENCIES = gcctestdir/ld ifuncmod1.so
+ifuncmain1vis_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ifuncmain1vis_LDADD = ifuncmod1.so
+
+check_PROGRAMS += ifuncmain1vispic
+ifuncmain1vispic.o: ifuncmain1vis.c
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncmain1vispic: ifuncmain1vispic.o ifuncmod1.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ ifuncmain1pic.o ifuncmod1.so -Wl,-R,.
+
+check_PROGRAMS += ifuncmain1staticpic
+ifuncmain1staticpic: ifuncmain1pic.o ifuncmod1.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ ifuncmain1pic.o ifuncmod1.o
+
+check_PROGRAMS += ifuncmain1pie
+ifuncmain1pie: ifuncmain1pie.o ifuncmod1.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -pie ifuncmain1pie.o ifuncmod1.so -Wl,-R,.
+
+check_PROGRAMS += ifuncmain1vispie
+ifuncmain1vispie.o: ifuncmain1vis.c
+	$(COMPILE) -c -fpie -o $@ $<
+ifuncmain1vispie: ifuncmain1vispie.o ifuncmod1.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -pie ifuncmain1vispie.o ifuncmod1.so -Wl,-R,.
+
+check_PROGRAMS += ifuncmain1staticpie
+ifuncmain1staticpie: ifuncmain1pie.o ifuncmod1.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -pie ifuncmain1pie.o ifuncmod1.o
+
+ifuncmain2pic.o: ifuncmain2.c
+	$(COMPILE) -c -fpic -o $@ $<
+
+ifuncdep2pic.o: ifuncdep2.c
+	$(COMPILE) -c -fpic -o $@ $<
+
+check_PROGRAMS += ifuncmain2static
+ifuncmain2static_SOURCES = ifuncmain2.c ifuncdep2.c
+ifuncmain2static_DEPENDENCIES = gcctestdir/ld
+ifuncmain2static_LDFLAGS = -Bgcctestdir/ -static
+
+check_PROGRAMS += ifuncmain2picstatic
+ifuncmain2picstatic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -static ifuncmain2pic.o ifuncdep2pic.o
+
+check_PROGRAMS += ifuncmain2
+ifuncmain2_SOURCES = ifuncmain2.c ifuncdep2.c
+ifuncmain2_DEPENDENCIES = gcctestdir/ld
+ifuncmain2_LDFLAGS = -Bgcctestdir/
+
+check_PROGRAMS += ifuncmain2pic
+ifuncmain2pic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ ifuncmain2pic.o ifuncdep2pic.o
+
+ifuncmod3.o: ifuncmod3.c
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncmod3.so: ifuncmod3.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared ifuncmod3.o
+
+check_PROGRAMS += ifuncmain3
+ifuncmain3_SOURCES = ifuncmain3.c
+ifuncmain3_DEPENDENCIES = gcctestdir/ld ifuncmod3.so
+ifuncmain3_LDFLAGS = -Bgcctestdir/ -Wl,--export-dynamic -Wl,-R,.
+ifuncmain3_LDADD = -ldl
+
+ifuncmain4pic.o: ifuncmain4.c
+	$(COMPILE) -c -fpic -o $@ $<
+
+check_PROGRAMS += ifuncmain4static
+ifuncmain4static_SOURCES = ifuncmain4.c
+ifuncmain4static_DEPENDENCIES = gcctestdir/ld
+ifuncmain4static_LDFLAGS = -Bgcctestdir/ -static
+
+check_PROGRAMS += ifuncmain4picstatic
+ifuncmain4picstatic: ifuncmain4pic.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -static ifuncmain4pic.o
+
+check_PROGRAMS += ifuncmain4
+ifuncmain4_SOURCES = ifuncmain4.c
+ifuncmain4_DEPENDENCIES = gcctestdir/ld
+ifuncmain4_LDFLAGS = -Bgcctestdir/
+
+ifuncmain5pic.o: ifuncmain5.c
+	$(COMPILE) -c -fpic -o $@ $<
+
+ifuncmain5pie.o: ifuncmain5.c
+	$(COMPILE) -c -fpie -o $@ $<
+
+ifuncmod5.o: ifuncmod5.c
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncmod5.so: ifuncmod5.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared ifuncmod5.o
+
+ifuncdep5.o: ifuncmod5.c
+	$(COMPILE) -c -o $@ $<
+
+check_PROGRAMS += ifuncmain5static
+ifuncmain5static_SOURCES = ifuncmain5.c
+ifuncmain5static_DEPENDENCIES = gcctestdir/ld ifuncdep5.o
+ifuncmain5static_LDFLAGS = -Bgcctestdir/ -static
+ifuncmain5static_LDADD = ifuncdep5.o
+
+check_PROGRAMS += ifuncmain5picstatic
+ifuncmain5picstatic: ifuncmain5pic.o ifuncmod5.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -static ifuncmain5pic.o ifuncmod5.o
+
+check_PROGRAMS += ifuncmain5
+ifuncmain5_SOURCES = ifuncmain5.c
+ifuncmain5_DEPENDENCIES = gcctestdir/ld ifuncmod5.so
+ifuncmain5_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ifuncmain5_LDADD = ifuncmod5.so
+
+check_PROGRAMS += ifuncmain5pic
+ifuncmain5pic: ifuncmain5pic.o ifuncmod5.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ ifuncmain5pic.o ifuncmod5.so -Wl,-R,.
+
+check_PROGRAMS += ifuncmain5staticpic
+ifuncmain5staticpic: ifuncmain5pic.o ifuncmod5.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ ifuncmain5pic.o ifuncmod5.o
+
+check_PROGRAMS += ifuncmain5pie
+ifuncmain5pie: ifuncmain5pie.o ifuncmod5.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -pie ifuncmain5pie.o ifuncmod5.so -Wl,-R,.
+
+ifuncmain6pie.o: ifuncmain6pie.c
+	$(COMPILE) -c -fpie -o $@ $<
+
+ifuncmod6.o: ifuncmod6.c
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncmod6.so: ifuncmod6.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared ifuncmod6.o
+
+check_PROGRAMS += ifuncmain6pie
+ifuncmain6pie: ifuncmain6pie.o ifuncmod6.so gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -pie ifuncmain6pie.o ifuncmod6.so -Wl,-R,.
+
+ifuncmain7pic.o: ifuncmain7.c
+	$(COMPILE) -c -fpic -o $@ $<
+
+ifuncmain7pie.o: ifuncmain7.c
+	$(COMPILE) -c -fpie -o $@ $<
+
+check_PROGRAMS += ifuncmain7static
+ifuncmain7static_SOURCES = ifuncmain7.c
+ifuncmain7static_DEPENDENCIES = gcctestdir/ld
+ifuncmain7static_LDFLAGS = -Bgcctestdir/ -static
+
+check_PROGRAMS += ifuncmain7picstatic
+ifuncmain7picstatic: ifuncmain7pic.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -static ifuncmain7pic.o
+
+check_PROGRAMS += ifuncmain7
+ifuncmain7_SOURCES = ifuncmain7.c
+ifuncmain7_DEPENDENCIES = gcctestdir/ld
+ifuncmain7_LDFLAGS = -Bgcctestdir/
+
+check_PROGRAMS += ifuncmain7pic
+ifuncmain7pic: ifuncmain7pic.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ ifuncmain7pic.o
+
+check_PROGRAMS += ifuncmain7pie
+ifuncmain7pie: ifuncmain7pie.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -pie ifuncmain7pie.o
+
+endif IFUNC
+
 # Test that strong reference to a weak symbol in a DSO remains strong.
 check_SCRIPTS += strong_ref_weak_def.sh
 check_DATA += strong_ref_weak_def.stdout

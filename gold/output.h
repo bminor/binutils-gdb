@@ -1,6 +1,6 @@
 // output.h -- manage the output file for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -605,6 +605,10 @@ class Output_section_data : public Output_data
   { }
 
   // Return the output section.
+  Output_section*
+  output_section()
+  { return this->output_section_; }
+
   const Output_section*
   output_section() const
   { return this->output_section_; }
@@ -1913,6 +1917,11 @@ class Output_data_got : public Output_section_data_build
   bool
   add_global(Symbol* gsym, unsigned int got_type);
 
+  // Like add_global, but use the PLT offset of the global symbol if
+  // it has one.
+  bool
+  add_global_plt(Symbol* gsym, unsigned int got_type);
+
   // Add an entry for a global symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
@@ -1941,6 +1950,12 @@ class Output_data_got : public Output_section_data_build
   bool
   add_local(Sized_relobj<size, big_endian>* object, unsigned int sym_index,
             unsigned int got_type);
+
+  // Like add_local, but use the PLT offset of the local symbol if it
+  // has one.
+  bool
+  add_local_plt(Sized_relobj<size, big_endian>* object, unsigned int sym_index,
+		unsigned int got_type);
 
   // Add an entry for a local symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
@@ -1995,28 +2010,29 @@ class Output_data_got : public Output_section_data_build
    public:
     // Create a zero entry.
     Got_entry()
-      : local_sym_index_(CONSTANT_CODE)
+      : local_sym_index_(CONSTANT_CODE), use_plt_offset_(false)
     { this->u_.constant = 0; }
 
     // Create a global symbol entry.
-    explicit Got_entry(Symbol* gsym)
-      : local_sym_index_(GSYM_CODE)
+    Got_entry(Symbol* gsym, bool use_plt_offset)
+      : local_sym_index_(GSYM_CODE), use_plt_offset_(use_plt_offset)
     { this->u_.gsym = gsym; }
 
     // Create a local symbol entry.
     Got_entry(Sized_relobj<size, big_endian>* object,
-              unsigned int local_sym_index)
-      : local_sym_index_(local_sym_index)
+              unsigned int local_sym_index, bool use_plt_offset)
+      : local_sym_index_(local_sym_index), use_plt_offset_(use_plt_offset)
     {
       gold_assert(local_sym_index != GSYM_CODE
-		  && local_sym_index != CONSTANT_CODE);
+		  && local_sym_index != CONSTANT_CODE
+		  && local_sym_index == this->local_sym_index_);
       this->u_.object = object;
     }
 
     // Create a constant entry.  The constant is a host value--it will
     // be swapped, if necessary, when it is written out.
     explicit Got_entry(Valtype constant)
-      : local_sym_index_(CONSTANT_CODE)
+      : local_sym_index_(CONSTANT_CODE), use_plt_offset_(false)
     { this->u_.constant = constant; }
 
     // Write the GOT entry to an output view.
@@ -2026,8 +2042,8 @@ class Output_data_got : public Output_section_data_build
    private:
     enum
     {
-      GSYM_CODE = -1U,
-      CONSTANT_CODE = -2U
+      GSYM_CODE = 0x7fffffff,
+      CONSTANT_CODE = 0x7ffffffe
     };
 
     union
@@ -2041,7 +2057,9 @@ class Output_data_got : public Output_section_data_build
     } u_;
     // For a local symbol, the local symbol index.  This is GSYM_CODE
     // for a global symbol, or CONSTANT_CODE for a constant.
-    unsigned int local_sym_index_;
+    unsigned int local_sym_index_ : 31;
+    // Whether to use the PLT offset of the symbol if it has one.
+    bool use_plt_offset_ : 1;
   };
 
   typedef std::vector<Got_entry> Got_entries;

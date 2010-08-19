@@ -391,6 +391,7 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     local_dynsym_offset_(0),
     local_values_(),
     local_got_offsets_(),
+    local_plt_offsets_(),
     kept_comdat_sections_(),
     has_eh_frame_(false),
     discarded_eh_frame_shndx_(-1U),
@@ -1690,6 +1691,41 @@ Sized_relobj<size, big_endian>::do_should_include_member(Symbol_table* symtab,
   return Archive::SHOULD_INCLUDE_UNKNOWN;
 }
 
+// Return whether the local symbol SYMNDX has a PLT offset.
+
+template<int size, bool big_endian>
+bool
+Sized_relobj<size, big_endian>::local_has_plt_offset(unsigned int symndx) const
+{
+  typename Local_plt_offsets::const_iterator p =
+    this->local_plt_offsets_.find(symndx);
+  return p != this->local_plt_offsets_.end();
+}
+
+// Get the PLT offset of a local symbol.
+
+template<int size, bool big_endian>
+unsigned int
+Sized_relobj<size, big_endian>::local_plt_offset(unsigned int symndx) const
+{
+  typename Local_plt_offsets::const_iterator p =
+    this->local_plt_offsets_.find(symndx);
+  gold_assert(p != this->local_plt_offsets_.end());
+  return p->second;
+}
+
+// Set the PLT offset of a local symbol.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::set_local_plt_offset(unsigned int symndx,
+						     unsigned int plt_offset)
+{
+  std::pair<typename Local_plt_offsets::iterator, bool> ins =
+    this->local_plt_offsets_.insert(std::make_pair(symndx, plt_offset));
+  gold_assert(ins.second);
+}
+
 // First pass over the local symbols.  Here we add their names to
 // *POOL and *DYNPOOL, and we store the symbol value in
 // THIS->LOCAL_VALUES_.  This function is always called from a
@@ -1756,6 +1792,8 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 	lv.set_is_section_symbol();
       else if (sym.get_st_type() == elfcpp::STT_TLS)
 	lv.set_is_tls_symbol();
+      else if (sym.get_st_type() == elfcpp::STT_GNU_IFUNC)
+	lv.set_is_ifunc_symbol();
 
       // Save the input symbol value for use in do_finalize_local_symbols().
       lv.set_input_value(sym.get_st_value());
@@ -2064,7 +2102,6 @@ Sized_relobj<size, big_endian>::do_section_entsize(unsigned int shndx)
   typename This::Shdr shdr(pshdrs);
   return shdr.get_sh_entsize(); 
 }
-
 
 // Write out the local symbols.
 

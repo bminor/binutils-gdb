@@ -39,6 +39,7 @@ class General_options;
 class Task;
 class Cref;
 class Layout;
+class Output_data;
 class Output_section;
 class Output_file;
 class Output_symtab_xindex;
@@ -1151,7 +1152,7 @@ class Symbol_value
   Symbol_value()
     : output_symtab_index_(0), output_dynsym_index_(-1U), input_shndx_(0),
       is_ordinary_shndx_(false), is_section_symbol_(false),
-      is_tls_symbol_(false), has_output_value_(true)
+      is_tls_symbol_(false), is_ifunc_symbol_(false), has_output_value_(true)
   { this->u_.value = 0; }
 
   // Get the value of this symbol.  OBJECT is the object in which this
@@ -1364,10 +1365,20 @@ class Symbol_value
   set_is_tls_symbol()
   { this->is_tls_symbol_ = true; }
 
-  // Return TRUE if this is a TLS symbol.
+  // Return true if this is a TLS symbol.
   bool
   is_tls_symbol() const
   { return this->is_tls_symbol_; }
+
+  // Record that this is an IFUNC symbol.
+  void
+  set_is_ifunc_symbol()
+  { this->is_ifunc_symbol_ = true; }
+
+  // Return true if this is an IFUNC symbol.
+  bool
+  is_ifunc_symbol() const
+  { return this->is_ifunc_symbol_; }
 
  private:
   // The index of this local symbol in the output symbol table.  This
@@ -1381,7 +1392,7 @@ class Symbol_value
   unsigned int output_dynsym_index_;
   // The section index in the input file in which this symbol is
   // defined.
-  unsigned int input_shndx_ : 28;
+  unsigned int input_shndx_ : 27;
   // Whether the section index is an ordinary index, not a special
   // value.
   bool is_ordinary_shndx_ : 1;
@@ -1389,6 +1400,8 @@ class Symbol_value
   bool is_section_symbol_ : 1;
   // Whether this is a STT_TLS symbol.
   bool is_tls_symbol_ : 1;
+  // Whether this is a STT_GNU_IFUNC symbol.
+  bool is_ifunc_symbol_ : 1;
   // Whether this symbol has a value for the output file.  This is
   // normally set to true during Layout::finalize, by
   // finalize_local_symbols.  It will be false for a section symbol in
@@ -1691,6 +1704,19 @@ class Sized_relobj : public Relobj
       return NULL;
     return p->second;
   }
+
+  // Return whether the local symbol SYMNDX has a PLT offset.
+  bool
+  local_has_plt_offset(unsigned int symndx) const;
+
+  // Return the PLT offset for a local symbol.  It is an error to call
+  // this if it doesn't have one.
+  unsigned int
+  local_plt_offset(unsigned int symndx) const;
+
+  // Set the PLT offset of the local symbol SYMNDX.
+  void
+  set_local_plt_offset(unsigned int symndx, unsigned int plt_offset);
 
   // Get the offset of input section SHNDX within its output section.
   // This is -1 if the input section requires a special mapping, such
@@ -2108,6 +2134,7 @@ class Sized_relobj : public Relobj
   {
     this->local_values_.clear();
     this->local_got_offsets_.clear();
+    this->local_plt_offsets_.clear();
   }
 
   // Record a mapping from discarded section SHNDX to the corresponding
@@ -2139,20 +2166,8 @@ class Sized_relobj : public Relobj
   // for tp-relative offsets for TLS symbols.
   typedef Unordered_map<unsigned int, Got_offset_list*> Local_got_offsets;
 
-  // The TLS GOT offsets of local symbols. The map stores the offsets
-  // for either a single GOT entry that holds the module index of a TLS
-  // symbol, or a pair of GOT entries containing the module index and
-  // dtv-relative offset.
-  struct Tls_got_entry
-  {
-    Tls_got_entry(int got_offset, bool have_pair)
-      : got_offset_(got_offset),
-        have_pair_(have_pair)
-    { }
-    int got_offset_;
-    bool have_pair_;
-  };
-  typedef Unordered_map<unsigned int, Tls_got_entry> Local_tls_got_offsets;
+  // The PLT offsets of local symbols.
+  typedef Unordered_map<unsigned int, unsigned int> Local_plt_offsets;
 
   // Saved information for sections whose layout was deferred.
   struct Deferred_layout
@@ -2197,6 +2212,8 @@ class Sized_relobj : public Relobj
   // GOT offsets for local non-TLS symbols, and tp-relative offsets
   // for TLS symbols, indexed by symbol number.
   Local_got_offsets local_got_offsets_;
+  // PLT offsets for local symbols.
+  Local_plt_offsets local_plt_offsets_;
   // For each input section, the offset of the input section in its
   // output section.  This is INVALID_ADDRESS if the input section requires a
   // special mapping.

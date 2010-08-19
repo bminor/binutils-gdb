@@ -47,7 +47,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
 	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
 	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18) \
-	$(am__EXEEXT_19)
+	$(am__EXEEXT_19) $(am__EXEEXT_20)
 
 # Test --detect-odr-violations
 
@@ -357,26 +357,129 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test
 @GCC_FALSE@searched_file_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@searched_file_test_DEPENDENCIES =
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am__append_32 =  \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1static \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1picstatic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1 \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1pic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1vis \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1vispic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1staticpic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1pie \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1vispie \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1staticpie \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2static \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2picstatic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2 \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2pic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain3 \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain4static \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain4picstatic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain4 \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5static \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5picstatic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5 \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5pic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5staticpic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5pie \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain6pie \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7static \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7picstatic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7 \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pic \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pie
+@GCC_FALSE@ifuncmain2static_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@IFUNC_FALSE@ifuncmain2static_DEPENDENCIES = libgoldtest.a \
+@IFUNC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@ifuncmain2static_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@ifuncmain2_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@IFUNC_FALSE@ifuncmain2_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@IFUNC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@ifuncmain2_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@ifuncmain3_DEPENDENCIES =
+@IFUNC_FALSE@ifuncmain3_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@ifuncmain3_DEPENDENCIES =
+@GCC_FALSE@ifuncmain4static_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@IFUNC_FALSE@ifuncmain4static_DEPENDENCIES = libgoldtest.a \
+@IFUNC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@ifuncmain4static_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@ifuncmain4_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@IFUNC_FALSE@ifuncmain4_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@IFUNC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@ifuncmain4_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@ifuncmain7static_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@IFUNC_FALSE@ifuncmain7static_DEPENDENCIES = libgoldtest.a \
+@IFUNC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@ifuncmain7static_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@ifuncmain7_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@IFUNC_FALSE@ifuncmain7_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@IFUNC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@ifuncmain7_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 
 # These tests work with cross linkers.
-@DEFAULT_TARGET_I386_TRUE@am__append_32 = split_i386.sh
-@DEFAULT_TARGET_I386_TRUE@am__append_33 = split_i386_1.stdout split_i386_2.stdout \
+@DEFAULT_TARGET_I386_TRUE@am__append_33 = split_i386.sh
+@DEFAULT_TARGET_I386_TRUE@am__append_34 = split_i386_1.stdout split_i386_2.stdout \
 @DEFAULT_TARGET_I386_TRUE@	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
 
-@DEFAULT_TARGET_I386_TRUE@am__append_34 = split_i386_1 split_i386_2 split_i386_3 \
+@DEFAULT_TARGET_I386_TRUE@am__append_35 = split_i386_1 split_i386_2 split_i386_3 \
 @DEFAULT_TARGET_I386_TRUE@	split_i386_4 split_i386_r
 
-@DEFAULT_TARGET_X86_64_TRUE@am__append_35 = split_x86_64.sh
-@DEFAULT_TARGET_X86_64_TRUE@am__append_36 = split_x86_64_1.stdout split_x86_64_2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_36 = split_x86_64.sh
+@DEFAULT_TARGET_X86_64_TRUE@am__append_37 = split_x86_64_1.stdout split_x86_64_2.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
 
-@DEFAULT_TARGET_X86_64_TRUE@am__append_37 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_38 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_4 split_x86_64_r
 
-@DEFAULT_TARGET_ARM_TRUE@am__append_38 = arm_abs_global.sh \
+@DEFAULT_TARGET_ARM_TRUE@am__append_39 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh arm_attr_merge.sh
-@DEFAULT_TARGET_ARM_TRUE@am__append_39 = arm_abs_global.stdout \
+@DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range.stdout \
@@ -393,7 +496,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_7.stdout
-@DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global \
+@DEFAULT_TARGET_ARM_TRUE@am__append_41 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range \
@@ -531,6 +634,36 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_19 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	permission_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test$(EXEEXT)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_20 = ifuncmain1static$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1picstatic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1pic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1vis$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1vispic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1staticpic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1pie$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1vispie$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1staticpie$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2static$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2picstatic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain2pic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain3$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain4static$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain4picstatic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain4$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5static$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5picstatic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5pic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5staticpic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain5pie$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain6pie$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7static$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7picstatic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pic$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pie$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -696,6 +829,170 @@ icf_virtual_function_folding_test_LDADD = $(LDADD)
 icf_virtual_function_folding_test_DEPENDENCIES = libgoldtest.a \
 	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain1_OBJECTS = ifuncmain1.$(OBJEXT)
+ifuncmain1_OBJECTS = $(am_ifuncmain1_OBJECTS)
+ifuncmain1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain1_LDFLAGS) \
+	$(LDFLAGS) -o $@
+ifuncmain1pic_SOURCES = ifuncmain1pic.c
+ifuncmain1pic_OBJECTS = ifuncmain1pic.$(OBJEXT)
+ifuncmain1pic_LDADD = $(LDADD)
+ifuncmain1pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain1picstatic_SOURCES = ifuncmain1picstatic.c
+ifuncmain1picstatic_OBJECTS = ifuncmain1picstatic.$(OBJEXT)
+ifuncmain1picstatic_LDADD = $(LDADD)
+ifuncmain1picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain1pie_SOURCES = ifuncmain1pie.c
+ifuncmain1pie_OBJECTS = ifuncmain1pie.$(OBJEXT)
+ifuncmain1pie_LDADD = $(LDADD)
+ifuncmain1pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain1static_OBJECTS = ifuncmain1.$(OBJEXT)
+ifuncmain1static_OBJECTS = $(am_ifuncmain1static_OBJECTS)
+ifuncmain1static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ifuncmain1static_LDFLAGS) $(LDFLAGS) -o $@
+ifuncmain1staticpic_SOURCES = ifuncmain1staticpic.c
+ifuncmain1staticpic_OBJECTS = ifuncmain1staticpic.$(OBJEXT)
+ifuncmain1staticpic_LDADD = $(LDADD)
+ifuncmain1staticpic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain1staticpie_SOURCES = ifuncmain1staticpie.c
+ifuncmain1staticpie_OBJECTS = ifuncmain1staticpie.$(OBJEXT)
+ifuncmain1staticpie_LDADD = $(LDADD)
+ifuncmain1staticpie_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain1vis_OBJECTS = ifuncmain1vis.$(OBJEXT)
+ifuncmain1vis_OBJECTS = $(am_ifuncmain1vis_OBJECTS)
+ifuncmain1vis_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ifuncmain1vis_LDFLAGS) $(LDFLAGS) -o $@
+ifuncmain1vispic_SOURCES = ifuncmain1vispic.c
+ifuncmain1vispic_OBJECTS = ifuncmain1vispic.$(OBJEXT)
+ifuncmain1vispic_LDADD = $(LDADD)
+ifuncmain1vispic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain1vispie_SOURCES = ifuncmain1vispie.c
+ifuncmain1vispie_OBJECTS = ifuncmain1vispie.$(OBJEXT)
+ifuncmain1vispie_LDADD = $(LDADD)
+ifuncmain1vispie_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain2_OBJECTS = ifuncmain2.$(OBJEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncdep2.$(OBJEXT)
+ifuncmain2_OBJECTS = $(am_ifuncmain2_OBJECTS)
+ifuncmain2_LDADD = $(LDADD)
+ifuncmain2_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain2_LDFLAGS) \
+	$(LDFLAGS) -o $@
+ifuncmain2pic_SOURCES = ifuncmain2pic.c
+ifuncmain2pic_OBJECTS = ifuncmain2pic.$(OBJEXT)
+ifuncmain2pic_LDADD = $(LDADD)
+ifuncmain2pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain2picstatic_SOURCES = ifuncmain2picstatic.c
+ifuncmain2picstatic_OBJECTS = ifuncmain2picstatic.$(OBJEXT)
+ifuncmain2picstatic_LDADD = $(LDADD)
+ifuncmain2picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain2static_OBJECTS = ifuncmain2.$(OBJEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncdep2.$(OBJEXT)
+ifuncmain2static_OBJECTS = $(am_ifuncmain2static_OBJECTS)
+ifuncmain2static_LDADD = $(LDADD)
+ifuncmain2static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ifuncmain2static_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain3_OBJECTS = ifuncmain3.$(OBJEXT)
+ifuncmain3_OBJECTS = $(am_ifuncmain3_OBJECTS)
+ifuncmain3_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain3_LDFLAGS) \
+	$(LDFLAGS) -o $@
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain4_OBJECTS = ifuncmain4.$(OBJEXT)
+ifuncmain4_OBJECTS = $(am_ifuncmain4_OBJECTS)
+ifuncmain4_LDADD = $(LDADD)
+ifuncmain4_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain4_LDFLAGS) \
+	$(LDFLAGS) -o $@
+ifuncmain4picstatic_SOURCES = ifuncmain4picstatic.c
+ifuncmain4picstatic_OBJECTS = ifuncmain4picstatic.$(OBJEXT)
+ifuncmain4picstatic_LDADD = $(LDADD)
+ifuncmain4picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain4static_OBJECTS = ifuncmain4.$(OBJEXT)
+ifuncmain4static_OBJECTS = $(am_ifuncmain4static_OBJECTS)
+ifuncmain4static_LDADD = $(LDADD)
+ifuncmain4static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ifuncmain4static_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain5_OBJECTS = ifuncmain5.$(OBJEXT)
+ifuncmain5_OBJECTS = $(am_ifuncmain5_OBJECTS)
+ifuncmain5_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain5_LDFLAGS) \
+	$(LDFLAGS) -o $@
+ifuncmain5pic_SOURCES = ifuncmain5pic.c
+ifuncmain5pic_OBJECTS = ifuncmain5pic.$(OBJEXT)
+ifuncmain5pic_LDADD = $(LDADD)
+ifuncmain5pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain5picstatic_SOURCES = ifuncmain5picstatic.c
+ifuncmain5picstatic_OBJECTS = ifuncmain5picstatic.$(OBJEXT)
+ifuncmain5picstatic_LDADD = $(LDADD)
+ifuncmain5picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain5pie_SOURCES = ifuncmain5pie.c
+ifuncmain5pie_OBJECTS = ifuncmain5pie.$(OBJEXT)
+ifuncmain5pie_LDADD = $(LDADD)
+ifuncmain5pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain5static_OBJECTS = ifuncmain5.$(OBJEXT)
+ifuncmain5static_OBJECTS = $(am_ifuncmain5static_OBJECTS)
+ifuncmain5static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ifuncmain5static_LDFLAGS) $(LDFLAGS) -o $@
+ifuncmain5staticpic_SOURCES = ifuncmain5staticpic.c
+ifuncmain5staticpic_OBJECTS = ifuncmain5staticpic.$(OBJEXT)
+ifuncmain5staticpic_LDADD = $(LDADD)
+ifuncmain5staticpic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain6pie_SOURCES = ifuncmain6pie.c
+ifuncmain6pie_OBJECTS = ifuncmain6pie.$(OBJEXT)
+ifuncmain6pie_LDADD = $(LDADD)
+ifuncmain6pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain7_OBJECTS = ifuncmain7.$(OBJEXT)
+ifuncmain7_OBJECTS = $(am_ifuncmain7_OBJECTS)
+ifuncmain7_LDADD = $(LDADD)
+ifuncmain7_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain7_LDFLAGS) \
+	$(LDFLAGS) -o $@
+ifuncmain7pic_SOURCES = ifuncmain7pic.c
+ifuncmain7pic_OBJECTS = ifuncmain7pic.$(OBJEXT)
+ifuncmain7pic_LDADD = $(LDADD)
+ifuncmain7pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain7picstatic_SOURCES = ifuncmain7picstatic.c
+ifuncmain7picstatic_OBJECTS = ifuncmain7picstatic.$(OBJEXT)
+ifuncmain7picstatic_LDADD = $(LDADD)
+ifuncmain7picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+ifuncmain7pie_SOURCES = ifuncmain7pie.c
+ifuncmain7pie_OBJECTS = ifuncmain7pie.$(OBJEXT)
+ifuncmain7pie_LDADD = $(LDADD)
+ifuncmain7pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain7static_OBJECTS = ifuncmain7.$(OBJEXT)
+ifuncmain7static_OBJECTS = $(am_ifuncmain7static_OBJECTS)
+ifuncmain7static_LDADD = $(LDADD)
+ifuncmain7static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ifuncmain7static_LDFLAGS) $(LDFLAGS) -o $@
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS = initpri1.$(OBJEXT)
 initpri1_OBJECTS = $(am_initpri1_OBJECTS)
 initpri1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri1_LDFLAGS) \
@@ -1148,7 +1445,20 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(exclude_libs_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	icf_virtual_function_folding_test.c $(initpri1_SOURCES) \
+	icf_virtual_function_folding_test.c $(ifuncmain1_SOURCES) \
+	ifuncmain1pic.c ifuncmain1picstatic.c ifuncmain1pie.c \
+	$(ifuncmain1static_SOURCES) ifuncmain1staticpic.c \
+	ifuncmain1staticpie.c $(ifuncmain1vis_SOURCES) \
+	ifuncmain1vispic.c ifuncmain1vispie.c $(ifuncmain2_SOURCES) \
+	ifuncmain2pic.c ifuncmain2picstatic.c \
+	$(ifuncmain2static_SOURCES) $(ifuncmain3_SOURCES) \
+	$(ifuncmain4_SOURCES) ifuncmain4picstatic.c \
+	$(ifuncmain4static_SOURCES) $(ifuncmain5_SOURCES) \
+	ifuncmain5pic.c ifuncmain5picstatic.c ifuncmain5pie.c \
+	$(ifuncmain5static_SOURCES) ifuncmain5staticpic.c \
+	ifuncmain6pie.c $(ifuncmain7_SOURCES) ifuncmain7pic.c \
+	ifuncmain7picstatic.c ifuncmain7pie.c \
+	$(ifuncmain7static_SOURCES) $(initpri1_SOURCES) \
 	$(justsyms_SOURCES) $(large_SOURCES) local_labels_test.c \
 	many_sections_r_test.c $(many_sections_test_SOURCES) \
 	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
@@ -1428,16 +1738,16 @@ TEST_AS = $(top_builddir)/../gas/as-new
 # the right choice for files 'make' builds that people rebuild.
 MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_3) \
 	$(am__append_8) $(am__append_17) $(am__append_25) \
-	$(am__append_29) $(am__append_34) $(am__append_37) \
-	$(am__append_40)
+	$(am__append_29) $(am__append_35) $(am__append_38) \
+	$(am__append_41)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
 check_SCRIPTS = $(am__append_1) $(am__append_23) $(am__append_27) \
-	$(am__append_32) $(am__append_35) $(am__append_38)
-check_DATA = $(am__append_2) $(am__append_24) $(am__append_28) \
 	$(am__append_33) $(am__append_36) $(am__append_39)
+check_DATA = $(am__append_2) $(am__append_24) $(am__append_28) \
+	$(am__append_34) $(am__append_37) $(am__append_40)
 BUILT_SOURCES = $(am__append_16)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -1816,6 +2126,48 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_DEPENDENCIES = alt/searched_file_test_lib.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_LDFLAGS = -Bgcctestdir/ -Lalt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_LDADD = -l:searched_file_test_lib.a
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1static_SOURCES = ifuncmain1.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1static_DEPENDENCIES = gcctestdir/ld ifuncdep1.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1static_LDADD = ifuncdep1.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1_SOURCES = ifuncmain1.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1_DEPENDENCIES = gcctestdir/ld ifuncmod1.so
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1_LDADD = ifuncmod1.so
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vis_SOURCES = ifuncmain1vis.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vis_DEPENDENCIES = gcctestdir/ld ifuncmod1.so
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vis_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vis_LDADD = ifuncmod1.so
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2static_SOURCES = ifuncmain2.c ifuncdep2.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2static_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2_SOURCES = ifuncmain2.c ifuncdep2.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain3_SOURCES = ifuncmain3.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain3_DEPENDENCIES = gcctestdir/ld ifuncmod3.so
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain3_LDFLAGS = -Bgcctestdir/ -Wl,--export-dynamic -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain3_LDADD = -ldl
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4static_SOURCES = ifuncmain4.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4static_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4_SOURCES = ifuncmain4.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5static_SOURCES = ifuncmain5.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5static_DEPENDENCIES = gcctestdir/ld ifuncdep5.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5static_LDADD = ifuncdep5.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5_SOURCES = ifuncmain5.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5_DEPENDENCIES = gcctestdir/ld ifuncmod5.so
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5_LDADD = ifuncmod5.so
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7static_SOURCES = ifuncmain7.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7static_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_SOURCES = ifuncmain7.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_LDFLAGS = -Bgcctestdir/
 @DEFAULT_TARGET_I386_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 @DEFAULT_TARGET_X86_64_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 all: $(BUILT_SOURCES)
@@ -1971,6 +2323,204 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
 @NATIVE_LINKER_FALSE@icf_virtual_function_folding_test$(EXEEXT): $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f icf_virtual_function_folding_test$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_LDADD) $(LIBS)
+ifuncmain1$(EXEEXT): $(ifuncmain1_OBJECTS) $(ifuncmain1_DEPENDENCIES) 
+	@rm -f ifuncmain1$(EXEEXT)
+	$(ifuncmain1_LINK) $(ifuncmain1_OBJECTS) $(ifuncmain1_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain1pic$(EXEEXT): $(ifuncmain1pic_OBJECTS) $(ifuncmain1pic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain1pic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain1pic_OBJECTS) $(ifuncmain1pic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain1pic$(EXEEXT): $(ifuncmain1pic_OBJECTS) $(ifuncmain1pic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain1pic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain1pic_OBJECTS) $(ifuncmain1pic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain1pic$(EXEEXT): $(ifuncmain1pic_OBJECTS) $(ifuncmain1pic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain1pic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain1pic_OBJECTS) $(ifuncmain1pic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain1picstatic$(EXEEXT): $(ifuncmain1picstatic_OBJECTS) $(ifuncmain1picstatic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain1picstatic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain1picstatic_OBJECTS) $(ifuncmain1picstatic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain1picstatic$(EXEEXT): $(ifuncmain1picstatic_OBJECTS) $(ifuncmain1picstatic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain1picstatic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain1picstatic_OBJECTS) $(ifuncmain1picstatic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain1picstatic$(EXEEXT): $(ifuncmain1picstatic_OBJECTS) $(ifuncmain1picstatic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain1picstatic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain1picstatic_OBJECTS) $(ifuncmain1picstatic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain1pie$(EXEEXT): $(ifuncmain1pie_OBJECTS) $(ifuncmain1pie_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain1pie$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain1pie_OBJECTS) $(ifuncmain1pie_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain1pie$(EXEEXT): $(ifuncmain1pie_OBJECTS) $(ifuncmain1pie_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain1pie$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain1pie_OBJECTS) $(ifuncmain1pie_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain1pie$(EXEEXT): $(ifuncmain1pie_OBJECTS) $(ifuncmain1pie_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain1pie$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain1pie_OBJECTS) $(ifuncmain1pie_LDADD) $(LIBS)
+ifuncmain1static$(EXEEXT): $(ifuncmain1static_OBJECTS) $(ifuncmain1static_DEPENDENCIES) 
+	@rm -f ifuncmain1static$(EXEEXT)
+	$(ifuncmain1static_LINK) $(ifuncmain1static_OBJECTS) $(ifuncmain1static_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain1staticpic$(EXEEXT): $(ifuncmain1staticpic_OBJECTS) $(ifuncmain1staticpic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain1staticpic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain1staticpic_OBJECTS) $(ifuncmain1staticpic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain1staticpic$(EXEEXT): $(ifuncmain1staticpic_OBJECTS) $(ifuncmain1staticpic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain1staticpic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain1staticpic_OBJECTS) $(ifuncmain1staticpic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain1staticpic$(EXEEXT): $(ifuncmain1staticpic_OBJECTS) $(ifuncmain1staticpic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain1staticpic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain1staticpic_OBJECTS) $(ifuncmain1staticpic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain1staticpie$(EXEEXT): $(ifuncmain1staticpie_OBJECTS) $(ifuncmain1staticpie_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain1staticpie$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain1staticpie_OBJECTS) $(ifuncmain1staticpie_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain1staticpie$(EXEEXT): $(ifuncmain1staticpie_OBJECTS) $(ifuncmain1staticpie_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain1staticpie$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain1staticpie_OBJECTS) $(ifuncmain1staticpie_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain1staticpie$(EXEEXT): $(ifuncmain1staticpie_OBJECTS) $(ifuncmain1staticpie_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain1staticpie$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain1staticpie_OBJECTS) $(ifuncmain1staticpie_LDADD) $(LIBS)
+ifuncmain1vis$(EXEEXT): $(ifuncmain1vis_OBJECTS) $(ifuncmain1vis_DEPENDENCIES) 
+	@rm -f ifuncmain1vis$(EXEEXT)
+	$(ifuncmain1vis_LINK) $(ifuncmain1vis_OBJECTS) $(ifuncmain1vis_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain1vispic$(EXEEXT): $(ifuncmain1vispic_OBJECTS) $(ifuncmain1vispic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain1vispic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain1vispic_OBJECTS) $(ifuncmain1vispic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain1vispic$(EXEEXT): $(ifuncmain1vispic_OBJECTS) $(ifuncmain1vispic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain1vispic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain1vispic_OBJECTS) $(ifuncmain1vispic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain1vispic$(EXEEXT): $(ifuncmain1vispic_OBJECTS) $(ifuncmain1vispic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain1vispic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain1vispic_OBJECTS) $(ifuncmain1vispic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain1vispie$(EXEEXT): $(ifuncmain1vispie_OBJECTS) $(ifuncmain1vispie_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain1vispie$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain1vispie_OBJECTS) $(ifuncmain1vispie_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain1vispie$(EXEEXT): $(ifuncmain1vispie_OBJECTS) $(ifuncmain1vispie_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain1vispie$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain1vispie_OBJECTS) $(ifuncmain1vispie_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain1vispie$(EXEEXT): $(ifuncmain1vispie_OBJECTS) $(ifuncmain1vispie_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain1vispie$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain1vispie_OBJECTS) $(ifuncmain1vispie_LDADD) $(LIBS)
+ifuncmain2$(EXEEXT): $(ifuncmain2_OBJECTS) $(ifuncmain2_DEPENDENCIES) 
+	@rm -f ifuncmain2$(EXEEXT)
+	$(ifuncmain2_LINK) $(ifuncmain2_OBJECTS) $(ifuncmain2_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain2pic$(EXEEXT): $(ifuncmain2pic_OBJECTS) $(ifuncmain2pic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain2pic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain2pic_OBJECTS) $(ifuncmain2pic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain2pic$(EXEEXT): $(ifuncmain2pic_OBJECTS) $(ifuncmain2pic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain2pic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain2pic_OBJECTS) $(ifuncmain2pic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain2pic$(EXEEXT): $(ifuncmain2pic_OBJECTS) $(ifuncmain2pic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain2pic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain2pic_OBJECTS) $(ifuncmain2pic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain2picstatic$(EXEEXT): $(ifuncmain2picstatic_OBJECTS) $(ifuncmain2picstatic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain2picstatic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain2picstatic_OBJECTS) $(ifuncmain2picstatic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain2picstatic$(EXEEXT): $(ifuncmain2picstatic_OBJECTS) $(ifuncmain2picstatic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain2picstatic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain2picstatic_OBJECTS) $(ifuncmain2picstatic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain2picstatic$(EXEEXT): $(ifuncmain2picstatic_OBJECTS) $(ifuncmain2picstatic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain2picstatic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain2picstatic_OBJECTS) $(ifuncmain2picstatic_LDADD) $(LIBS)
+ifuncmain2static$(EXEEXT): $(ifuncmain2static_OBJECTS) $(ifuncmain2static_DEPENDENCIES) 
+	@rm -f ifuncmain2static$(EXEEXT)
+	$(ifuncmain2static_LINK) $(ifuncmain2static_OBJECTS) $(ifuncmain2static_LDADD) $(LIBS)
+ifuncmain3$(EXEEXT): $(ifuncmain3_OBJECTS) $(ifuncmain3_DEPENDENCIES) 
+	@rm -f ifuncmain3$(EXEEXT)
+	$(ifuncmain3_LINK) $(ifuncmain3_OBJECTS) $(ifuncmain3_LDADD) $(LIBS)
+ifuncmain4$(EXEEXT): $(ifuncmain4_OBJECTS) $(ifuncmain4_DEPENDENCIES) 
+	@rm -f ifuncmain4$(EXEEXT)
+	$(ifuncmain4_LINK) $(ifuncmain4_OBJECTS) $(ifuncmain4_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain4picstatic$(EXEEXT): $(ifuncmain4picstatic_OBJECTS) $(ifuncmain4picstatic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain4picstatic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain4picstatic_OBJECTS) $(ifuncmain4picstatic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain4picstatic$(EXEEXT): $(ifuncmain4picstatic_OBJECTS) $(ifuncmain4picstatic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain4picstatic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain4picstatic_OBJECTS) $(ifuncmain4picstatic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain4picstatic$(EXEEXT): $(ifuncmain4picstatic_OBJECTS) $(ifuncmain4picstatic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain4picstatic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain4picstatic_OBJECTS) $(ifuncmain4picstatic_LDADD) $(LIBS)
+ifuncmain4static$(EXEEXT): $(ifuncmain4static_OBJECTS) $(ifuncmain4static_DEPENDENCIES) 
+	@rm -f ifuncmain4static$(EXEEXT)
+	$(ifuncmain4static_LINK) $(ifuncmain4static_OBJECTS) $(ifuncmain4static_LDADD) $(LIBS)
+ifuncmain5$(EXEEXT): $(ifuncmain5_OBJECTS) $(ifuncmain5_DEPENDENCIES) 
+	@rm -f ifuncmain5$(EXEEXT)
+	$(ifuncmain5_LINK) $(ifuncmain5_OBJECTS) $(ifuncmain5_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain5pic$(EXEEXT): $(ifuncmain5pic_OBJECTS) $(ifuncmain5pic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain5pic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain5pic_OBJECTS) $(ifuncmain5pic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain5pic$(EXEEXT): $(ifuncmain5pic_OBJECTS) $(ifuncmain5pic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain5pic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain5pic_OBJECTS) $(ifuncmain5pic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain5pic$(EXEEXT): $(ifuncmain5pic_OBJECTS) $(ifuncmain5pic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain5pic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain5pic_OBJECTS) $(ifuncmain5pic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain5picstatic$(EXEEXT): $(ifuncmain5picstatic_OBJECTS) $(ifuncmain5picstatic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain5picstatic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain5picstatic_OBJECTS) $(ifuncmain5picstatic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain5picstatic$(EXEEXT): $(ifuncmain5picstatic_OBJECTS) $(ifuncmain5picstatic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain5picstatic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain5picstatic_OBJECTS) $(ifuncmain5picstatic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain5picstatic$(EXEEXT): $(ifuncmain5picstatic_OBJECTS) $(ifuncmain5picstatic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain5picstatic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain5picstatic_OBJECTS) $(ifuncmain5picstatic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain5pie$(EXEEXT): $(ifuncmain5pie_OBJECTS) $(ifuncmain5pie_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain5pie$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain5pie_OBJECTS) $(ifuncmain5pie_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain5pie$(EXEEXT): $(ifuncmain5pie_OBJECTS) $(ifuncmain5pie_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain5pie$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain5pie_OBJECTS) $(ifuncmain5pie_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain5pie$(EXEEXT): $(ifuncmain5pie_OBJECTS) $(ifuncmain5pie_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain5pie$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain5pie_OBJECTS) $(ifuncmain5pie_LDADD) $(LIBS)
+ifuncmain5static$(EXEEXT): $(ifuncmain5static_OBJECTS) $(ifuncmain5static_DEPENDENCIES) 
+	@rm -f ifuncmain5static$(EXEEXT)
+	$(ifuncmain5static_LINK) $(ifuncmain5static_OBJECTS) $(ifuncmain5static_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain5staticpic$(EXEEXT): $(ifuncmain5staticpic_OBJECTS) $(ifuncmain5staticpic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain5staticpic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain5staticpic_OBJECTS) $(ifuncmain5staticpic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain5staticpic$(EXEEXT): $(ifuncmain5staticpic_OBJECTS) $(ifuncmain5staticpic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain5staticpic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain5staticpic_OBJECTS) $(ifuncmain5staticpic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain5staticpic$(EXEEXT): $(ifuncmain5staticpic_OBJECTS) $(ifuncmain5staticpic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain5staticpic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain5staticpic_OBJECTS) $(ifuncmain5staticpic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain6pie$(EXEEXT): $(ifuncmain6pie_OBJECTS) $(ifuncmain6pie_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain6pie$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain6pie_OBJECTS) $(ifuncmain6pie_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain6pie$(EXEEXT): $(ifuncmain6pie_OBJECTS) $(ifuncmain6pie_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain6pie$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain6pie_OBJECTS) $(ifuncmain6pie_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain6pie$(EXEEXT): $(ifuncmain6pie_OBJECTS) $(ifuncmain6pie_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain6pie$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain6pie_OBJECTS) $(ifuncmain6pie_LDADD) $(LIBS)
+ifuncmain7$(EXEEXT): $(ifuncmain7_OBJECTS) $(ifuncmain7_DEPENDENCIES) 
+	@rm -f ifuncmain7$(EXEEXT)
+	$(ifuncmain7_LINK) $(ifuncmain7_OBJECTS) $(ifuncmain7_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain7pic$(EXEEXT): $(ifuncmain7pic_OBJECTS) $(ifuncmain7pic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain7pic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain7pic_OBJECTS) $(ifuncmain7pic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain7pic$(EXEEXT): $(ifuncmain7pic_OBJECTS) $(ifuncmain7pic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain7pic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain7pic_OBJECTS) $(ifuncmain7pic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain7pic$(EXEEXT): $(ifuncmain7pic_OBJECTS) $(ifuncmain7pic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain7pic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain7pic_OBJECTS) $(ifuncmain7pic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain7picstatic$(EXEEXT): $(ifuncmain7picstatic_OBJECTS) $(ifuncmain7picstatic_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain7picstatic$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain7picstatic_OBJECTS) $(ifuncmain7picstatic_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain7picstatic$(EXEEXT): $(ifuncmain7picstatic_OBJECTS) $(ifuncmain7picstatic_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain7picstatic$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain7picstatic_OBJECTS) $(ifuncmain7picstatic_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain7picstatic$(EXEEXT): $(ifuncmain7picstatic_OBJECTS) $(ifuncmain7picstatic_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain7picstatic$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain7picstatic_OBJECTS) $(ifuncmain7picstatic_LDADD) $(LIBS)
+@GCC_FALSE@ifuncmain7pie$(EXEEXT): $(ifuncmain7pie_OBJECTS) $(ifuncmain7pie_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f ifuncmain7pie$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(ifuncmain7pie_OBJECTS) $(ifuncmain7pie_LDADD) $(LIBS)
+@IFUNC_FALSE@ifuncmain7pie$(EXEEXT): $(ifuncmain7pie_OBJECTS) $(ifuncmain7pie_DEPENDENCIES) 
+@IFUNC_FALSE@	@rm -f ifuncmain7pie$(EXEEXT)
+@IFUNC_FALSE@	$(LINK) $(ifuncmain7pie_OBJECTS) $(ifuncmain7pie_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@ifuncmain7pie$(EXEEXT): $(ifuncmain7pie_OBJECTS) $(ifuncmain7pie_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f ifuncmain7pie$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(ifuncmain7pie_OBJECTS) $(ifuncmain7pie_LDADD) $(LIBS)
+ifuncmain7static$(EXEEXT): $(ifuncmain7static_OBJECTS) $(ifuncmain7static_DEPENDENCIES) 
+	@rm -f ifuncmain7static$(EXEEXT)
+	$(ifuncmain7static_LINK) $(ifuncmain7static_OBJECTS) $(ifuncmain7static_LDADD) $(LIBS)
 initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES) 
 	@rm -f initpri1$(EXEEXT)
 	$(initpri1_LINK) $(initpri1_OBJECTS) $(initpri1_LDADD) $(LIBS)
@@ -2297,6 +2847,32 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icf_virtual_function_folding_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncdep2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1pic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1picstatic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1pie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1staticpic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1staticpie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1vis.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1vispic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1vispie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain2pic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain2picstatic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain4picstatic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain5.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain5pic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain5picstatic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain5pie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain5staticpic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain6pie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7pic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7picstatic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7pie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large-large.Po@am__quote@
@@ -2886,6 +3462,66 @@ permission_test.log: permission_test$(EXEEXT)
 	@p='permission_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 searched_file_test.log: searched_file_test$(EXEEXT)
 	@p='searched_file_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1static.log: ifuncmain1static$(EXEEXT)
+	@p='ifuncmain1static$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1picstatic.log: ifuncmain1picstatic$(EXEEXT)
+	@p='ifuncmain1picstatic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1.log: ifuncmain1$(EXEEXT)
+	@p='ifuncmain1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1pic.log: ifuncmain1pic$(EXEEXT)
+	@p='ifuncmain1pic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1vis.log: ifuncmain1vis$(EXEEXT)
+	@p='ifuncmain1vis$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1vispic.log: ifuncmain1vispic$(EXEEXT)
+	@p='ifuncmain1vispic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1staticpic.log: ifuncmain1staticpic$(EXEEXT)
+	@p='ifuncmain1staticpic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1pie.log: ifuncmain1pie$(EXEEXT)
+	@p='ifuncmain1pie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1vispie.log: ifuncmain1vispie$(EXEEXT)
+	@p='ifuncmain1vispie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain1staticpie.log: ifuncmain1staticpie$(EXEEXT)
+	@p='ifuncmain1staticpie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain2static.log: ifuncmain2static$(EXEEXT)
+	@p='ifuncmain2static$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain2picstatic.log: ifuncmain2picstatic$(EXEEXT)
+	@p='ifuncmain2picstatic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain2.log: ifuncmain2$(EXEEXT)
+	@p='ifuncmain2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain2pic.log: ifuncmain2pic$(EXEEXT)
+	@p='ifuncmain2pic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain3.log: ifuncmain3$(EXEEXT)
+	@p='ifuncmain3$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain4static.log: ifuncmain4static$(EXEEXT)
+	@p='ifuncmain4static$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain4picstatic.log: ifuncmain4picstatic$(EXEEXT)
+	@p='ifuncmain4picstatic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain4.log: ifuncmain4$(EXEEXT)
+	@p='ifuncmain4$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain5static.log: ifuncmain5static$(EXEEXT)
+	@p='ifuncmain5static$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain5picstatic.log: ifuncmain5picstatic$(EXEEXT)
+	@p='ifuncmain5picstatic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain5.log: ifuncmain5$(EXEEXT)
+	@p='ifuncmain5$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain5pic.log: ifuncmain5pic$(EXEEXT)
+	@p='ifuncmain5pic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain5staticpic.log: ifuncmain5staticpic$(EXEEXT)
+	@p='ifuncmain5staticpic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain5pie.log: ifuncmain5pie$(EXEEXT)
+	@p='ifuncmain5pie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain6pie.log: ifuncmain6pie$(EXEEXT)
+	@p='ifuncmain6pie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain7static.log: ifuncmain7static$(EXEEXT)
+	@p='ifuncmain7static$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain7picstatic.log: ifuncmain7picstatic$(EXEEXT)
+	@p='ifuncmain7picstatic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain7.log: ifuncmain7$(EXEEXT)
+	@p='ifuncmain7$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain7pic.log: ifuncmain7pic$(EXEEXT)
+	@p='ifuncmain7pic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ifuncmain7pie.log: ifuncmain7pie$(EXEEXT)
+	@p='ifuncmain7pie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 .test.log:
 	@p='$<'; $(am__check_pre) $(TEST_LOG_COMPILE) "$$tst" $(am__check_post)
 @am__EXEEXT_TRUE@.test$(EXEEXT).log:
@@ -3683,6 +4319,103 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -o $@ -c -fPIC $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@no_version_test.stdout: libno_version_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -h $< > $@
+
+# Test STT_GNU_IFUNC symbols.
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod1.o: ifuncmod1.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod1.so: ifuncmod1.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared ifuncmod1.o
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncdep1.o: ifuncmod1.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -o $@ $<
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1pic.o: ifuncmain1.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1pie.o: ifuncmain1.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpie -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1picstatic: ifuncmain1pic.o ifuncmod1.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -static ifuncmain1pic.o ifuncmod1.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1pic: ifuncmain1pic.o ifuncmod1.so gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ ifuncmain1pic.o ifuncmod1.so -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vispic.o: ifuncmain1vis.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vispic: ifuncmain1vispic.o ifuncmod1.so gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ ifuncmain1pic.o ifuncmod1.so -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1staticpic: ifuncmain1pic.o ifuncmod1.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ ifuncmain1pic.o ifuncmod1.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1pie: ifuncmain1pie.o ifuncmod1.so gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -pie ifuncmain1pie.o ifuncmod1.so -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vispie.o: ifuncmain1vis.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpie -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1vispie: ifuncmain1vispie.o ifuncmod1.so gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -pie ifuncmain1vispie.o ifuncmod1.so -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain1staticpie: ifuncmain1pie.o ifuncmod1.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -pie ifuncmain1pie.o ifuncmod1.o
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2pic.o: ifuncmain2.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncdep2pic.o: ifuncdep2.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2picstatic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -static ifuncmain2pic.o ifuncdep2pic.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2pic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ ifuncmain2pic.o ifuncdep2pic.o
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod3.o: ifuncmod3.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod3.so: ifuncmod3.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared ifuncmod3.o
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4pic.o: ifuncmain4.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4picstatic: ifuncmain4pic.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -static ifuncmain4pic.o
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5pic.o: ifuncmain5.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5pie.o: ifuncmain5.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpie -o $@ $<
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod5.o: ifuncmod5.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod5.so: ifuncmod5.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared ifuncmod5.o
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncdep5.o: ifuncmod5.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5picstatic: ifuncmain5pic.o ifuncmod5.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -static ifuncmain5pic.o ifuncmod5.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5pic: ifuncmain5pic.o ifuncmod5.so gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ ifuncmain5pic.o ifuncmod5.so -Wl,-R,.
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5staticpic: ifuncmain5pic.o ifuncmod5.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ ifuncmain5pic.o ifuncmod5.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5pie: ifuncmain5pie.o ifuncmod5.so gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -pie ifuncmain5pie.o ifuncmod5.so -Wl,-R,.
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain6pie.o: ifuncmain6pie.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpie -o $@ $<
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod6.o: ifuncmod6.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmod6.so: ifuncmod6.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared ifuncmod6.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain6pie: ifuncmain6pie.o ifuncmod6.so gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -pie ifuncmain6pie.o ifuncmod6.so -Wl,-R,.
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7pic.o: ifuncmain7.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7pie.o: ifuncmain7.c
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpie -o $@ $<
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7picstatic: ifuncmain7pic.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -static ifuncmain7pic.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7pic: ifuncmain7pic.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ ifuncmain7pic.o
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7pie: ifuncmain7pie.o gcctestdir/ld
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -pie ifuncmain7pie.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@strong_ref_weak_def_2.o: strong_ref_weak_def_2.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -o $@ -c -fPIC $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@strong_ref_weak_def_2.so: strong_ref_weak_def_2.o gcctestdir/ld

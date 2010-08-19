@@ -1,3 +1,104 @@
+2010-08-19  Ian Lance Taylor  <iant@google.com>
+
+	PR 10893
+	* i386.cc (class Output_data_plt_i386): Update declarations.
+	Define Global_ifunc and Local_ifunc types.  Add global_ifuncs_ and
+	local_ifuncs_ fields.
+	(Target_i386::do_plt_section_for_global): New function.
+	(Target_i386::do_plt_section_for_local): New function.
+	(Output_data_plt_i386::Output_data_plt_i386): Add symtab
+	parameter; change all callers.  Initialize global_ifuncs_ and
+	local_ifuncs_.  If doing a static link define __rel_iplt_start and
+	__rel_iplt_end.
+	(Output_data_plt_i386::add_entry): Handle IFUNC symbols.
+	(Output_data_plt_i386::add_local_ifunc_entry): New function.
+	(Output_data_plt_i386::do_write): Fix GOT entries for IFUNC
+	symbols.
+	(Target_i386::make_plt_section): New function, broken out of
+	make_plt_entry.  Set sh_info field of .rel.plt to point to .plt.
+	(Target_i386::make_plt_entry): Call make_plt_section.
+	(Target_i386::make_local_ifunc_plt_entry): New function.
+	(Target_i386::Scan::reloc_needs_iplt_for_ifunc): New function.
+	(Target_i386::Scan::local): Handle IFUNC symbols.  Add
+	R_386_IRELATIVE to switch.
+	(Target_i386::Scan::global): Likewise.
+	(Target_i386::Relocate::relocate): Likewise.
+	(Target_i386::Relocatable_size_for_reloc): Add R_386_IRELATIVE to
+	switch.
+	* x86_64.cc (class Output_data_plt_x86_64): Update declarations.
+	(Target_x86_64::do_plt_section_for_global): New function.
+	(Target_x86_64::do_plt_section_for_local): New function.
+	(Output_data_plt_x86_64::Output_data_plt_x86_64): Add symtab
+	parameter; change all callers.  If doing a static link define
+	__rela_iplt_start and __rela_iplt_end.
+	(Output_data_plt_x86_64::add_entry): Handle IFUNC symbols.
+	(Output_data_plt_x86_64::add_local_ifunc_entry): New function.
+	(Target_x86_64::make_plt_section): Set sh_info field of .rel.plt
+	to point to .plt.
+	(Target_x86_64::make_local_ifunc_plt_entry): New function.
+	(Target_x86_64::Scan::check_non_pic): Add R_X86_64_IRELATIVE to
+	switch.
+	(Target_x86_64::Scan::reloc_needs_iplt_for_ifunc): New function.
+	(Target_x86_64::Scan::local): Handle IFUNC symbols.  Add
+	R_X86_64_IRELATIVE to switch.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::Relocate::relocate): Likewise.
+	(Target_x86_64::Relocatable_size_for_reloc): Add R_X86_64_IRELATIVE to
+	switch.
+	* target.h (class Target): Add plt_section_for_global and
+	plt_section_for_local functions.  Add do_plt_section_for_global
+	and do_plt_section_for_local virtual functions.
+	* symtab.h (Symbol::needs_plt_entry): Handle IFUNC symbol.  Add
+	clarifying comments.
+	(Symbol::use_plt_offset): Handle IFUNC symbol.
+	* object.cc (Sized_relobj::Sized_relobj): Initialize
+	local_plt_offsets_.
+	(Sized_relobj::local_has_plt_offset): New function.
+	(Sized_relobj::local_plt_offset): New function.
+	(Sized_relobj::set_local_plt_offset): New function.
+	(Sized_relobj::do_count): Handle IFUNC symbol.
+	* object.h (class Symbol_value): Add is_ifunc_symbol_ field.  Take
+	a bit away from input_shndx_ field.  Add set_is_func_symbol and
+	is_ifunc_symbol functions.
+	(class Sized_relobj): Update declarations.  Remove Tls_got_entry
+	and Local_tls_got_offsets.  Define Local_plt_offsets.  Add
+	local_plt_offsets_ field.
+	(Sized_relobj::clear_local_symbols): Clear local_plt_offsets_.
+	* output.h (class Output_section_data): Add non-const
+	output_section function.
+	(class Output_data_got): Update declarations.
+	(class Output_data_got::Got_entry): Add use_plt_offset_ field.
+	Add use_plt_offset parameter to global and local constructors.
+	Change all callers.  Change local_sym_index_ field to 31 bits.
+	Change GSYM_CODE and CONSTANT_CODE accordingly.
+	* output.cc (Output_data_reloc_base::do_adjust_output_section): If
+	doing a static link don't set sh_link field.
+	(Output_data_got::Got_entry::write): Use PLT offset if
+	appropriate.
+	(Output_data_got::add_global_plt): New function.
+	(Output_data_got::add_local_plt): New function.
+	* target-reloc.h (relocate_section): Handle IFUNC symbol.
+	* defstd.cc (in_section): Remove entries for __rel_iplt_start,
+	__rel_iplt_end, __rela_iplt_start, and __rela_iplt_end.
+	* configure.ac: Set IFUNC automake conditional for glibc >= 2.11.
+	* testsuite/Makefile.am: Add a bunch of IFUNC tests, all within
+	IFUNC conditional.
+	* testsuite/ifunc-sel.h: New file.
+	* testsuite/ifuncmain1.c: New file.
+	* testsuite/ifuncmain1vis.c: New file.
+	* testsuite/ifuncmod1.c: New file.
+	* testsuite/ifuncdep2.c: New file.
+	* testsuite/ifuncmain2.c: New file.
+	* testsuite/ifuncmain3.c: New file.
+	* testsuite/ifuncmod3.c: New file.
+	* testsuite/ifuncmain4.c: New file.
+	* testsuite/ifuncmain5.c: New file.
+	* testsuite/ifuncmod5.c: New file.
+	* testsuite/ifuncmain6pie.c: New file.
+	* testsuite/ifuncmod6.c: New file.
+	* testsuite/ifuncmain7.c: New file.
+	* configure, testsuite/Makefile.in: Rebuild.
+
 2010-08-18  Ian Lance Taylor  <iant@google.com>
 
 	* incremental.cc

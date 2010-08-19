@@ -582,9 +582,6 @@ class Symbol
   }
 
   // Return true if this symbol is a function that needs a PLT entry.
-  // If the symbol is defined in a dynamic object or if it is subject
-  // to pre-emption, we need to make a PLT entry. If we're doing a
-  // static link or a -pie link, we don't create PLT entries.
   bool
   needs_plt_entry() const
   {
@@ -592,12 +589,27 @@ class Symbol
     if (this->is_undefined() && !parameters->options().shared())
       return false;
 
-    return (!parameters->doing_static_link()
-	    && !parameters->options().pie()
-            && this->is_func()
-            && (this->is_from_dynobj()
-                || this->is_undefined()
-                || this->is_preemptible()));
+    // An STT_GNU_IFUNC symbol always needs a PLT entry, even when
+    // doing a static link.
+    if (this->type() == elfcpp::STT_GNU_IFUNC)
+      return true;
+
+    // We only need a PLT entry for a function.
+    if (!this->is_func())
+      return false;
+
+    // If we're doing a static link or a -pie link, we don't create
+    // PLT entries.
+    if (parameters->doing_static_link()
+	|| parameters->options().pie())
+      return false;
+
+    // We need a PLT entry if the function is defined in a dynamic
+    // object, or is undefined when building a shared object, or if it
+    // is subject to pre-emption.
+    return (this->is_from_dynobj()
+	    || this->is_undefined()
+	    || this->is_preemptible());
   }
 
   // When determining whether a reference to a symbol needs a dynamic
@@ -677,6 +689,10 @@ class Symbol
     // don't want to use it.
     if (!this->has_plt_offset())
       return false;
+
+    // For a STT_GNU_IFUNC symbol we always have to use the PLT entry.
+    if (this->type() == elfcpp::STT_GNU_IFUNC)
+      return true;
 
     // If we are going to generate a dynamic relocation, then we will
     // wind up using that, so no need to use the PLT entry.
