@@ -111,6 +111,26 @@
   remote packets have been defined to support static tracepoints, see
   the "New remote packets" section below.
 
+* Better reconstruction of tracepoints after disconnected tracing
+
+  GDB will attempt to download the original source form of tracepoint
+  definitions when starting a trace run, and then will upload these
+  upon reconnection to the target, resulting in a more accurate
+  reconstruction of the tracepoints that are in use on the target.
+
+* Observer mode
+
+  You can now exercise direct control over the ways that GDB can
+  affect your program.  For instance, you can disallow the setting of
+  breakpoints, so that the program can run continuously (assuming
+  non-stop mode).  In addition, the "observer" variable is available
+  to switch all of the different controls; in observer mode, GDB
+  cannot affect the target's behavior at all, which is useful for
+  tasks like diagnosing live systems in the field.
+
+* The new convenience variable $_thread holds the number of the
+  current thread.
+
 * New remote packets
 
 qGetTIBAddr
@@ -140,6 +160,15 @@ qXfer:statictrace:read
   Read the static trace data collected (by a `collect $_sdata'
   tracepoint action).  The remote stub reports support for this packet
   to gdb's qSupported query.
+
+QAllow
+
+  Send the current settings of GDB's permission flags.
+
+QTDPsrc
+
+  Send part of the source (textual) form of a tracepoint definition,
+  which includes location, conditional, and action list.
 
 * The source command now accepts a -s option to force searching for the
   script in the source search path even if the script name specifies
@@ -225,6 +254,29 @@ info static-tracepoint-markers
 strace FN | FILE:LINE | *ADDR | -m MARKER_ID
   Define a static tracepoint by probing a marker at the given
   function, line, address, or marker ID.
+
+set observer on|off
+show observer
+  Enable and disable observer mode.
+
+set may-write-registers on|off
+set may-write-memory on|off
+set may-insert-breakpoints on|off
+set may-insert-tracepoints on|off
+set may-insert-fast-tracepoints on|off
+set may-interrupt on|off
+  Set individual permissions for GDB effects on the target.  Note that
+  some of these settings can have undesirable or surprising
+  consequences, particularly when changed in the middle of a session.
+  For instance, disabling the writing of memory can prevent
+  breakpoints from being inserted, cause single-stepping to fail, or
+  even crash your program, if you disable after breakpoints have been
+  inserted.  However, GDB should not crash.
+
+set record memory-query on|off
+show record memory-query
+  Control whether to stop the inferior if memory changes caused
+  by an instruction cannot be recorded.
 
 * Changed commands
 
