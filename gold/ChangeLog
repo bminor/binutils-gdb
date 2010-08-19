@@ -1,5 +1,11 @@
 2010-08-19  Ian Lance Taylor  <iant@google.com>
 
+	* Makefile.in: Rebuild with automake 1.11.1.
+	* aclocal.m4: Likewise.
+	* testsuite/Makefile.in: Likewise.
+
+2010-08-19  Ian Lance Taylor  <iant@google.com>
+
 	PR 10893
 	* i386.cc (class Output_data_plt_i386): Update declarations.
 	Define Global_ifunc and Local_ifunc types.  Add global_ifuncs_ and
