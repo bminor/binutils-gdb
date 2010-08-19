@@ -1,3 +1,10 @@
+2010-08-18  Ian Lance Taylor  <iant@google.com>
+
+	* incremental.cc
+	(Output_section_incremental_inputs::write_input_files): Add cast
+	to avoid signed/unsigned comparison warning.
+	(Output_section_incremental_inputs::write_info_blocks): Likewise.
+
 2010-08-12  Cary Coutant  <ccoutant@google.com>
 
 	* common.cc (Sort_commons::operator()): Remove unnecessary code.

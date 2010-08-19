@@ -784,7 +784,7 @@ Output_section_incremental_inputs<size, big_endian>::write_input_files(
        p != inputs->input_files().end();
        ++p)
     {
-      gold_assert(pov - oview == (*p)->get_offset());
+      gold_assert(static_cast<unsigned int>(pov - oview) == (*p)->get_offset());
       section_offset_type filename_offset =
           strtab->get_offset_from_key((*p)->get_filename_key());
       const Timespec& mtime = (*p)->get_mtime();
@@ -827,7 +827,8 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	case INCREMENTAL_INPUT_OBJECT:
 	case INCREMENTAL_INPUT_ARCHIVE_MEMBER:
 	  {
-	    gold_assert(pov - oview == (*p)->get_info_offset());
+	    gold_assert(static_cast<unsigned int>(pov - oview)
+			== (*p)->get_info_offset());
 	    Incremental_object_entry* entry = (*p)->object_entry();
 	    gold_assert(entry != NULL);
 	    const Object* obj = entry->object();
@@ -897,7 +898,8 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 
 	case INCREMENTAL_INPUT_SHARED_LIBRARY:
 	  {
-	    gold_assert(pov - oview == (*p)->get_info_offset());
+	    gold_assert(static_cast<unsigned int>(pov - oview)
+			== (*p)->get_info_offset());
 	    Incremental_object_entry* entry = (*p)->object_entry();
 	    gold_assert(entry != NULL);
 	    const Object* obj = entry->object();
@@ -920,7 +922,8 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 
 	case INCREMENTAL_INPUT_ARCHIVE:
 	  {
-	    gold_assert(pov - oview == (*p)->get_info_offset());
+	    gold_assert(static_cast<unsigned int>(pov - oview)
+			== (*p)->get_info_offset());
 	    Incremental_archive_entry* entry = (*p)->archive_entry();
 	    gold_assert(entry != NULL);
 
