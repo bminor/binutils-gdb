@@ -1,3 +1,10 @@
+2010-08-19  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.arch/vsx-regs.exp: Remove wrong comment about testing AltiVec
+	registers.  Update data sets with the new v2_double element in the
+	VSX register union.  Add vector_register3_vr data set for the AltiVec
+	registers.  Use gdb_test_no_output instead of send_gdb.
+
 2010-08-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.python/py-shared.exp: New file, factored out from
