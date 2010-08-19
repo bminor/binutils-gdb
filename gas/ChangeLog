@@ -1,3 +1,7 @@
+2010-08-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (VEX_check_operands): Fix a typo in comments.
+
 2010-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Check i.imm_operands

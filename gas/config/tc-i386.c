@@ -3789,7 +3789,7 @@ optimize_disp (void)
       }
 }
 
-/* Check if operands are valid for the instrucrtion.  Update VEX
+/* Check if operands are valid for the instruction.  Update VEX
    operand types.  */
 
 static int
