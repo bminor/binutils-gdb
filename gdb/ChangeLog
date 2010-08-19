@@ -1,3 +1,9 @@
+2010-08-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* varobj.c (varobj_create): Replace variable old_fi with old_id,
+	initialize it by null_frame_id, wrap its usage by get_frame_id,
+	frame_id_p and frame_find_by_id.
+
 2010-08-18  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11900:

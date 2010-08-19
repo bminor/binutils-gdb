@@ -537,7 +537,7 @@ varobj_create (char *objname,
   if (expression != NULL)
     {
       struct frame_info *fi;
-      struct frame_info *old_fi = NULL;
+      struct frame_id old_id = null_frame_id;
       struct block *block;
       char *p;
       enum varobj_languages lang;
@@ -611,7 +611,7 @@ varobj_create (char *objname,
 
 	  var->root->frame = get_frame_id (fi);
 	  var->root->thread_id = pid_to_thread_id (inferior_ptid);
-	  old_fi = get_selected_frame (NULL);
+	  old_id = get_frame_id (get_selected_frame (NULL));
 	  select_frame (fi);	 
 	}
 
@@ -639,8 +639,8 @@ varobj_create (char *objname,
       var->root->rootvar = var;
 
       /* Reset the selected frame */
-      if (old_fi != NULL)
-	select_frame (old_fi);
+      if (frame_id_p (old_id))
+	select_frame (frame_find_by_id (old_id));
     }
 
   /* If the variable object name is null, that means this
