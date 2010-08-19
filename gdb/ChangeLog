@@ -1,3 +1,10 @@
+2010-08-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* psymtab.c (map_symbol_filenames_psymtab): Call FUN with
+	the arguments in the correct order.
+	* symtab.c (maybe_add_partial_symtab_filename): Declare
+	the arguments in the correct order.
+
 2010-08-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* varobj.c (varobj_create): Replace variable old_fi with old_id,

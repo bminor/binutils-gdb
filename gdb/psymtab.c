@@ -913,7 +913,7 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
 	continue;
 
       fullname = psymtab_to_fullname (ps);
-      (*fun) (fullname, ps->filename, data);
+      (*fun) (ps->filename, fullname, data);
     }
 }
 

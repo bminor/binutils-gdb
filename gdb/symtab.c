@@ -4072,7 +4072,7 @@ struct add_partial_filename_data
 
 /* A callback for map_partial_symbol_filenames.  */
 static void
-maybe_add_partial_symtab_filename (const char *fullname, const char *filename,
+maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 				   void *user_data)
 {
   struct add_partial_filename_data *data = user_data;
