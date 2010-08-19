@@ -703,25 +703,28 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 
   if (parsed_float)
     {
-      /* It's a float since it contains a point or an exponent.  */
-      char c;
-      int num = 0;	/* number of tokens scanned by scanf */
-      char saved_char = p[len];
+      const char *suffix;
+      int suffix_len;
 
-      p[len] = 0;	/* null-terminate the token */
-      num = sscanf (p, "%" DOUBLEST_SCAN_FORMAT "%c",
-		    &putithere->typed_val_float.dval, &c);
-      p[len] = saved_char;	/* restore the input stream */
-      if (num != 1) 		/* check scanf found ONLY a float ... */
+      if (! parse_float (p, len, &putithere->typed_val_float.dval, &suffix))
 	return ERROR;
-      /* See if it has `f' or `d' suffix (float or double).  */
 
-      c = tolower (p[len - 1]);
+      suffix_len = p + len - suffix;
 
-      if (c == 'f' || c == 'F')
-	putithere->typed_val_float.type = parse_type->builtin_float;
-      else if (isdigit (c) || c == '.' || c == 'd' || c == 'D')
+      if (suffix_len == 0)
 	putithere->typed_val_float.type = parse_type->builtin_double;
+      else if (suffix_len == 1)
+	{
+	  /* See if it has `f' or `d' suffix (float or double).  */
+	  if (tolower (*suffix) == 'f')
+	    putithere->typed_val_float.type =
+	      parse_type->builtin_float;
+	  else if (tolower (*suffix) == 'd')
+	    putithere->typed_val_float.type =
+	      parse_type->builtin_double;
+	  else
+	    return ERROR;
+	}
       else
 	return ERROR;
 

@@ -204,6 +204,12 @@ extern struct type *follow_types (struct type *);
 
 extern void null_post_parser (struct expression **, int);
 
+extern int parse_float (const char *p, int len, DOUBLEST *d,
+			const char **suffix);
+
+extern int parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
+			  DOUBLEST *d, struct type **t);
+
 /* During parsing of a C expression, the pointer to the next character
    is in this variable.  */
 

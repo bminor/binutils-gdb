@@ -1323,10 +1323,8 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 
   if (parsed_float)
     {
-      /* It's a float since it contains a point or an exponent.  */
-      char *s;
-      int num;	/* number of tokens scanned by scanf */
-      char saved_char;
+      const char *suffix;
+      int suffix_len;
 
       /* If it ends at "df", "dd" or "dl", take it as type of decimal floating
          point.  Return DECFLOAT.  */
@@ -1364,35 +1362,10 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 	  return DECFLOAT;
 	}
 
-      s = malloc (len);
-      saved_char = p[len];
-      p[len] = 0;	/* null-terminate the token */
-      num = sscanf (p, "%" DOUBLEST_SCAN_FORMAT "%s",
-		    &putithere->typed_val_float.dval, s);
-      p[len] = saved_char;	/* restore the input stream */
-
-      if (num == 1)
-	putithere->typed_val_float.type = 
-	  parse_type->builtin_double;
-
-      if (num == 2 )
-	{
-	  /* See if it has any float suffix: 'f' for float, 'l' for long 
-	     double.  */
-	  if (!strcasecmp (s, "f"))
-	    putithere->typed_val_float.type = 
-	      parse_type->builtin_float;
-	  else if (!strcasecmp (s, "l"))
-	    putithere->typed_val_float.type = 
-	      parse_type->builtin_long_double;
-	  else
-	    {
-	      free (s);
-	      return ERROR;
-	    }
-	}
-
-      free (s);
+      if (! parse_c_float (parse_gdbarch, p, len,
+			   &putithere->typed_val_float.dval,
+			   &putithere->typed_val_float.type))
+	return ERROR;
       return FLOAT;
     }
 

@@ -1012,26 +1012,10 @@ parse_number (p, len, parsed_float, putithere)
 
   if (parsed_float)
     {
-      char c;
-
-      /* It's a float since it contains a point or an exponent.  */
-
-      sscanf (p, "%" DOUBLEST_SCAN_FORMAT "%c",
-	      &putithere->typed_val_float.dval, &c);
-
-      /* See if it has `f' or `l' suffix (float or long double).  */
-
-      c = tolower (p[len - 1]);
-
-      if (c == 'f')
-	putithere->typed_val_float.type = parse_type->builtin_float;
-      else if (c == 'l')
-	putithere->typed_val_float.type = parse_type->builtin_long_double;
-      else if (isdigit (c) || c == '.')
-	putithere->typed_val_float.type = parse_type->builtin_double;
-      else
+      if (! parse_c_float (parse_gdbarch, p, len,
+			   &putithere->typed_val_float.dval,
+			   &putithere->typed_val_float.type))
 	return ERROR;
-
       return FLOAT;
     }
 

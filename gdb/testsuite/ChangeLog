@@ -1,3 +1,15 @@
+2010-08-19  Doug Evans  <dje@google.com>
+
+	PR exp/11926
+	* gdb.base/printcmds.exp (test_float_accepted): New function.
+	Move existing float tests there.  Add tests for floats with suffixes.
+	(test_float_rejected): New function.
+	* gdb.java/jv-print.exp (test_float_accepted): New function.
+	(test_float_rejected): New function.
+	* gdb.objc/print.exp: New file.
+	* gdb.pascal/print.exp: New file.
+	* lib/objc.exp: New file.
+
 2010-08-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/default.exp (info set): Avoid full buffer error and force

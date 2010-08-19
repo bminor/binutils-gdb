@@ -97,6 +97,28 @@ proc test_integer_literals_rejected {} {
     test_print_reject "p 0xAG" 
 }
 
+proc test_float_accepted {} {
+    # Test parsing of fp value with legit text following.
+    gdb_test "p 1234.5+1" " = 1235.5" "check fp + text"
+
+    # Test all the suffixes (including no suffix).
+    gdb_test "p 1." " = 1"
+    gdb_test "p 1.5" " = 1.5"
+    gdb_test "p 1.f" " = 1"
+    gdb_test "p 1.5f" " = 1.5"
+    gdb_test "p 1.d" " = 1"
+    gdb_test "p 1.5d" " = 1.5"
+}
+
+proc test_float_rejected {} {
+    # Test invalid fp values.
+    test_print_reject "p 0x1.1"
+
+    # Test bad suffixes.
+    test_print_reject "p 1.1x"
+    test_print_reject "p 1.1ff"
+    test_print_reject "p 1.1dd"
+}
 
 
 # Start with a fresh gdb.
@@ -117,6 +139,8 @@ if [set_lang_java] then {
     test_integer_literals_accepted
     test_character_literals_accepted
     test_integer_literals_rejected
+    test_float_accepted
+    test_float_rejected
 } else {
     warning "Java print command tests suppressed"
 }

@@ -1,3 +1,13 @@
+2010-08-19  Doug Evans  <dje@google.com>
+
+	PR exp/11926
+	* parser-defs.h (parse_float, parse_c_float): Declare.
+	* parse.c (parse_float, parse_c_float): New function.
+	* c-exp.y (parse_number): Call parse_c_float.
+	* objc-exp.y (parse_number): Ditto.
+	* p-exp.y (parse_number): Ditto.  Use ANSI/ISO-style definition.
+	* jv-exp.y (parse_number): Call parse_float, fix suffix handling.
+
 2010-08-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* psymtab.c (map_symbol_filenames_psymtab): Call FUN with

@@ -1038,8 +1038,6 @@ prefixify_subexp (struct expression *inexpr,
   return result;
 }
 
-/* This page contains the two entry points to this file.  */
-
 /* Read an expression from the string *STRINGPTR points to,
    parse it, and return a pointer to a  struct expression  that we malloc.
    Use block BLOCK as the lexical context for variable names;
@@ -1251,6 +1249,73 @@ parse_field_expression (char *string, char **name)
 void
 null_post_parser (struct expression **exp, int void_context_p)
 {
+}
+
+/* Parse floating point value P of length LEN.
+   Return 0 (false) if invalid, 1 (true) if valid.
+   The successfully parsed number is stored in D.
+   *SUFFIX points to the suffix of the number in P.
+
+   NOTE: This accepts the floating point syntax that sscanf accepts.  */
+
+int
+parse_float (const char *p, int len, DOUBLEST *d, const char **suffix)
+{
+  char *copy;
+  char *s;
+  int n, num;
+
+  copy = xmalloc (len + 1);
+  memcpy (copy, p, len);
+  copy[len] = 0;
+
+  num = sscanf (copy, "%" DOUBLEST_SCAN_FORMAT "%n", d, &n);
+  xfree (copy);
+
+  /* The sscanf man page suggests not making any assumptions on the effect
+     of %n on the result, so we don't.
+     That is why we simply test num == 0.  */
+  if (num == 0)
+    return 0;
+
+  *suffix = p + n;
+  return 1;
+}
+
+/* Parse floating point value P of length LEN, using the C syntax for floats.
+   Return 0 (false) if invalid, 1 (true) if valid.
+   The successfully parsed number is stored in *D.
+   Its type is taken from builtin_type (gdbarch) and is stored in *T.  */
+
+int
+parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
+	       DOUBLEST *d, struct type **t)
+{
+  const char *suffix;
+  int suffix_len;
+  const struct builtin_type *builtin_types = builtin_type (gdbarch);
+
+  if (! parse_float (p, len, d, &suffix))
+    return 0;
+
+  suffix_len = p + len - suffix;
+
+  if (suffix_len == 0)
+    *t = builtin_types->builtin_double;
+  else if (suffix_len == 1)
+    {
+      /* Handle suffixes: 'f' for float, 'l' for long double.  */
+      if (tolower (*suffix) == 'f')
+	*t = builtin_types->builtin_float;
+      else if (tolower (*suffix) == 'l')
+	*t = builtin_types->builtin_long_double;
+      else
+	return 0;
+    }
+  else
+    return 0;
+
+  return 1;
 }
 
 /* Stuff for maintaining a stack of types.  Currently just used by C, but

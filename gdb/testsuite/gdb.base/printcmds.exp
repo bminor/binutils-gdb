@@ -102,17 +102,6 @@ proc test_integer_literals_rejected {} {
 
     test_print_reject "p DEADBEEF"
 
-    # Gdb currently fails this test for all configurations.  The C
-    # lexer thinks that 123DEADBEEF is a floating point number, but
-    # then fails to notice that atof() only eats the 123 part.
-    # FIXME:  This should be put into PRMS.
-    # Fixed, 4/25/97, by Bob Manson.
-
-    test_print_reject "p 123DEADBEEF"
-    test_print_reject "p 123foobar.bazfoo3"
-    test_print_reject "p 123EEEEEEEEEEEEEEEEE33333k333"
-    gdb_test "p 123.4+56.7" "180.(099\[0-9]*|100\[0-9\]*)" "check for floating addition"
-
     # Test various octal values.
 
     test_print_reject "p 09" 
@@ -127,6 +116,36 @@ proc test_integer_literals_rejected {} {
 
     test_print_reject "p 0b2" 
     test_print_reject "p 0b12" 
+}
+
+proc test_float_accepted {} {
+    # This test is useful to catch successful parsing of the first fp value.
+    gdb_test "p 123.4+56.7" " = 180.(099\[0-9]*|100\[0-9\]*)" "check for floating addition"
+
+    # Test all the suffixes (including no suffix).
+    gdb_test "p 1." " = 1"
+    gdb_test "p 1.5" " = 1.5"
+    gdb_test "p 1.f" " = 1"
+    gdb_test "p 1.5f" " = 1.5"
+    gdb_test "p 1.l" " = 1"
+    gdb_test "p 1.5l" " = 1.5"
+}
+
+proc test_float_rejected {} {
+    # Gdb use to fail this test for all configurations.  The C
+    # lexer thought that 123DEADBEEF was a floating point number, but
+    # then failed to notice that atof() only eats the 123 part.
+    # Fixed, 4/25/97, by Bob Manson.
+    test_print_reject "p 123DEADBEEF"
+
+    test_print_reject "p 123foobar.bazfoo3"
+    test_print_reject "p 123EEEEEEEEEEEEEEEEE33333k333"
+    test_print_reject "p 0x1.1"
+
+    # Test bad suffixes.
+    test_print_reject "p 1.1x"
+    test_print_reject "p 1.1ff"
+    test_print_reject "p 1.1ll"
 }
 
 proc test_print_all_chars {} {
@@ -781,6 +800,8 @@ if ![runto_main] then {
 
 test_integer_literals_accepted
 test_integer_literals_rejected
+test_float_accepted
+test_float_rejected
 test_character_literals_accepted
 test_print_all_chars
 test_print_repeats_10
