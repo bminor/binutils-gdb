@@ -1,3 +1,7 @@
+2010-08-19  Alan Modra  <amodra@gmail.com>
+
+	* NEWS: Mention change in linker script expression evaluation.
+
 2010-08-13  Dan Rosenberg  <dan.j.rosenberg@gmail.com>
 
 	PR binutils/11889

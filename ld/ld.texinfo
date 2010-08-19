@@ -5447,23 +5447,82 @@ address}.
 @cindex absolute and relocatable symbols
 @cindex relocatable and absolute symbols
 @cindex symbols, relocatable and absolute
-When the linker evaluates an expression, the result is either absolute
-or relative to some section.  A relative expression is expressed as a
-fixed offset from the base of a section.
+Addresses and symbols may be section relative, or absolute.  A section
+relative symbol is relocatable.  If you request relocatable output
+using the @samp{-r} option, a further link operation may change the
+value of a section relative symbol.  On the other hand, an absolute
+symbol will retain the same value throughout any further link
+operations.
 
-The position of the expression within the linker script determines
-whether it is absolute or relative.  An expression which appears within
-an output section definition is relative to the base of the output
-section.  An expression which appears elsewhere will be absolute.
+Some terms in linker expressions are addresses.  This is true of all
+symbols and for builtin functions that return an address, such as
+@code{ADDR}, @code{LOADADDR}, @code{ORIGIN} and @code{SEGMENT_START}.
+Other terms are simply numbers, or are builtin functions that return a
+non-address value, such as @code{LENGTH}.
 
-A symbol set to a relative expression will be relocatable if you request
-relocatable output using the @samp{-r} option.  That means that a
-further link operation may change the value of the symbol.  The symbol's
-section will be the section of the relative expression.
+When the linker evaluates an expression, the result depends on where
+the expression is located in a linker script.  Expressions appearing
+outside an output section definitions are evaluated with all terms
+first being converted to absolute addresses before applying operators,
+and evaluate to an absolute address result.  Expressions appearing
+inside an output section definition are evaluated with more complex
+rules, but the aim is to treat terms as relative addresses and produce
+a relative address result.  In particular, an assignment of a number
+to a symbol results in a symbol relative to the output section with an
+offset given by the number.  So, in the following simple example,
 
-A symbol set to an absolute expression will retain the same value
-through any further link operation.  The symbol will be absolute, and
-will not have any particular associated section.
+@smallexample
+@group
+SECTIONS
+  @{
+    . = 0x100;
+    __executable_start = 0x100;
+    .data :
+    @{
+      . = 0x10;
+      __data_start = 0x10;
+      *(.data)
+    @}
+    @dots{}
+  @}
+@end group
+@end smallexample
+
+both @code{.} and @code{__executable_start} are set to the absolute
+address 0x100 in the first two assignments, then both @code{.} and
+@code{__data_start} are set to 0x10 relative to the @code{.data}
+section in the second two assignments.
+
+For expressions appearing inside an output section definition
+involving numbers, relative addresses and absolute addresses, ld
+follows these rules to evaluate terms:
+
+@itemize @bullet
+@item
+Unary operations on a relative address, and binary operations on two
+relative addresses in the same section or between one relative address
+and a number, apply the operator to the offset part of the address(es).
+@item
+Unary operations on an absolute address, and binary operations on one
+or more absolute addresses or on two relative addresses not in the
+same section, first convert any non-absolute term to an absolute
+address before applying the operator.
+@end itemize
+
+The result section of each sub-expression is as follows:
+
+@itemize @bullet
+@item
+An operation involving only numbers results in a number.
+@item
+The result of comparisons, @samp{&&} and @samp{||} is also a number.
+@item
+The result of other operations on relative addresses (after above
+conversions) is a relative address in the same section as the operand(s).
+@item
+The result of other operations on absolute addresses (after above
+conversions) is an absolute address.
+@end itemize
 
 You can use the builtin function @code{ABSOLUTE} to force an expression
 to be absolute when it would otherwise be relative.  For example, to
@@ -5478,6 +5537,9 @@ SECTIONS
 @noindent
 If @samp{ABSOLUTE} were not used, @samp{_edata} would be relative to the
 @samp{.data} section.
+
+Using @code{LOADADDR} also forces an expression absolute, since this
+particular builtin function returns an absolute address.
 
 @node Builtin Functions
 @subsection Builtin Functions
@@ -5497,10 +5559,12 @@ normally section relative.  @xref{Expression Section}.
 @item ADDR(@var{section})
 @kindex ADDR(@var{section})
 @cindex section address in expression
-Return the absolute address (the VMA) of the named @var{section}.  Your
+Return the address (VMA) of the named @var{section}.  Your
 script must previously have defined the location of that section.  In
-the following example, @code{symbol_1} and @code{symbol_2} are assigned
-identical values:
+the following example, @code{start_of_output_1}, @code{symbol_1} and
+@code{symbol_2} are assigned equivalent values, except that
+@code{symbol_1} will be relative to the @code{.output1} section while
+the other two will be absolute:
 @smallexample
 @group
 SECTIONS @{ @dots{}
@@ -5664,9 +5728,7 @@ Return the length of the memory region named @var{memory}.
 @item LOADADDR(@var{section})
 @kindex LOADADDR(@var{section})
 @cindex section load address in expression
-Return the absolute LMA of the named @var{section}.  This is normally
-the same as @code{ADDR}, but it may be different if the @code{AT}
-attribute is used in the output section definition (@pxref{Output
+Return the absolute LMA of the named @var{section}.  (@pxref{Output
 Section LMA}).
 
 @kindex MAX
@@ -5696,7 +5758,7 @@ value has been given for this segment (with a command-line @samp{-T}
 option) that value will be returned; otherwise the value will be
 @var{default}.  At present, the @samp{-T} command-line option can only
 be used to set the base address for the ``text'', ``data'', and
-``bss'' sections, but you use @code{SEGMENT_START} with any segment
+``bss'' sections, but you can use @code{SEGMENT_START} with any segment
 name.
 
 @item SIZEOF(@var{section})

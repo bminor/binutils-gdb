@@ -3916,7 +3916,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 	{
 	  value = expld.result.value;
 
-	  if (expld.result.section)
+	  if (expld.result.section != NULL)
 	    value += expld.result.section->vma;
 
 	  minfo ("0x%V", value);
@@ -3933,7 +3933,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 	    {
 	      value = h->u.def.value;
 
-	      if (expld.result.section)
+	      if (expld.result.section != NULL)
 		value += expld.result.section->vma;
 
 	      minfo ("[0x%V]", value);
@@ -4718,7 +4718,11 @@ lang_size_sections_1
 		exp_fold_tree (os->addr_tree, bfd_abs_section_ptr, &dot);
 
 		if (expld.result.valid_p)
-		  dot = expld.result.value + expld.result.section->vma;
+		  {
+		    dot = expld.result.value;
+		    if (expld.result.section != NULL)
+		      dot += expld.result.section->vma;
+		  }
 		else if (expld.phase != lang_mark_phase_enum)
 		  einfo (_("%F%S: non constant or forward reference"
 			   " address expression for section %s\n"),
@@ -5397,8 +5401,11 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 	case lang_data_statement_enum:
 	  exp_fold_tree (s->data_statement.exp, bfd_abs_section_ptr, &dot);
 	  if (expld.result.valid_p)
-	    s->data_statement.value = (expld.result.value
-				       + expld.result.section->vma);
+	    {
+	      s->data_statement.value = expld.result.value;
+	      if (expld.result.section != NULL)
+		s->data_statement.value += expld.result.section->vma;
+	    }
 	  else
 	    einfo (_("%F%P: invalid data statement\n"));
 	  {

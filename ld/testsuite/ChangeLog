@@ -1,3 +1,7 @@
+2010-08-19  Alan Modra  <amodra@gmail.com>
+
+	* ld-scripts/memory.t: Remove ORIGIN fudge.
+
 2010-08-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11913

@@ -1,3 +1,31 @@
+2010-08-19  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Expression Section): Detail expression evaluation.
+	(Builtin Functions <ADDR>): Correct.
+	(Builtin Functions <LOADADDR>): Don't mention LOADADDR normally
+	the same as ADDR.
+	(Builtin Functions <SEGMENT_START>): Typo fix.
+	* ldexp.c (new_number): New function.
+	(make_abs, exp_get_abs_int): Cope with NULL expld.result.section.
+	(fold_unary <'~', '!', '-'>): Don't make_abs.
+	(fold_binary): Simplify result section logic.  Return NULL section
+	for logical ops.
+	(fold_binary <SEGMENT_START>): Use new_rel_from_abs to set value to
+	a consistent result.
+	(fold_name <SIZEOF_HEADERS>): Return new_number, not new_abs.
+	(fold_name <DEFINED, SIZEOF, ALIGNOF, LENGTH, CONSTANT>): Likewise.
+	(fold_name <NAME>): No need to handle absolute symbols differently
+	from relative ones.
+	(fold_name <ORIGIN>): Don't return valid result when
+	lang_first_phase_enum.  Return new_rel_from_abs, not new_abs.
+	(exp_fold_tree_1 <etree_value>): Return new_number, not new_rel.
+	(exp_fold_tree_1): Ajust for NULL expld.result.section.  When assigning
+	a plain number to dot, assume the value is relative to expld.section.
+	Make terms not in an output section, absolute.
+	* ldlang.c (print_assignment): Fix style nit.
+	(lang_size_sections_1): Cope with NULL expld.result.section.
+	(lang_do_assignments_1): Likewise.
+
 2010-08-12  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (new_rel): Remove "str".  Update all call sites.
