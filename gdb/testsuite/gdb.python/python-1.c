@@ -15,14 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* In python-1.c.  */
-extern void func1 (void);
-extern int func2 (void);
-
-int
-main (int argc, char *argv[])
+void func1 ()
 {
-  func1 ();
-  func2 ();
-  return 0;      /* Break to end.  */
+  return;
+}
+
+int func2 ()
+{
+  return 0;
 }

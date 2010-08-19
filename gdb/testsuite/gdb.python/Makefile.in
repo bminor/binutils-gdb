@@ -2,14 +2,17 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 
 EXECUTABLES = py-type py-value py-prettyprint py-template py-block \
-		py-symbol py-mi py-breakpoint py-inferior py-infthread
+		py-symbol py-mi py-breakpoint py-inferior py-infthread \
+		py-shared python
+
+MISCELLANEOUS = py-shared-sl.sl
 
 all info install-info dvi install uninstall installcheck check:
 	@echo "Nothing to be done for $@..."
 
 clean mostlyclean:
 	-rm -f *~ *.o *.ci
-	-rm -f core $(EXECUTABLES)
+	-rm -f core $(EXECUTABLES) $(MISCELLANEOUS)
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log

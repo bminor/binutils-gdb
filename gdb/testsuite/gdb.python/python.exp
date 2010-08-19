@@ -22,19 +22,11 @@ if $tracelevel then {
 
 set testfile "python"
 set srcfile  ${testfile}.c
-set libfile  "python-sl"
-set libsrc   ${libfile}.c
-set library  ${objdir}/${subdir}/${libfile}.sl
+set srcfile1  ${testfile}-1.c
 set binfile  ${objdir}/${subdir}/${testfile}
 
-if { [gdb_compile_shlib ${srcdir}/${subdir}/${libsrc} ${library} "debug"] != "" } {
-    untested "Could not compile shared library."
-    return -1
-}
-
-set exec_opts [list debug shlib=${library}]
-
-if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1}" \
+	  ${binfile} executable {debug}] != "" } {
     untested "Could not compile $binfile."
     return -1
 }
@@ -192,14 +184,5 @@ gdb_test "python gdb.decode_line(\"randomfunc\")" \
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"func1\")" "test decode_line func1()" 1
 gdb_test "python print len(symtab)" "2" "Test decode_line func1 length"
 gdb_test "python print len(symtab\[1\])" "1" "Test decode_line func1 length"
-gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python-sl.c.*" "Test decode_line func1 filename"
+gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python-1.c.*" "Test decode_line func1 filename"
 gdb_test "python print symtab\[1\]\[0\].line" "19" "Test decode_line func1 line number"
-
-# Test gdb.solib_name
-gdb_test "p &func1" "" "func1 address"
-gdb_py_test_silent_cmd "python func1 = gdb.history(0)" "Aquire func1 address" 1
-gdb_test "python print gdb.solib_name(long(func1))" "gdb/testsuite/gdb.python/python-sl.sl" "test func1 solib location"
-
-gdb_test "p &main" "" "main address"
-gdb_py_test_silent_cmd "python main = gdb.history(0)" "Aquire main address" 1
-gdb_test "python print gdb.solib_name(long(main))" "None" "test main solib location"
