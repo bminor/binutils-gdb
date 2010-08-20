@@ -1732,7 +1732,7 @@ eshelf_fd.c: $(srcdir)/emulparams/shelf_fd.sh \
 	${GENSCRIPTS} shelf_fd "$(tdir_shelf_fd)"
 eshlelf_fd.c: $(srcdir)/emulparams/shlelf_fd.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} shlelf_fd "$(tdir_shelf_fd)"
+	${GENSCRIPTS} shlelf_fd "$(tdir_shlelf_fd)"
 eshelf_linux.c: $(srcdir)/emulparams/shelf_linux.sh \
   $(srcdir)/emulparams/shlelf_linux.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
