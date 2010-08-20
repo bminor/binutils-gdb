@@ -1,5 +1,10 @@
 2010-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elf32-sh.c (sh_elf_relocate_section): Handle non-ELF output
+	BFD.
+
+2010-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elf32-m68k.c (bfd_elf_m68k_set_target_options): Don't set GOT
 	options unless an m68k hash table has been found.
 

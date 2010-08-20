@@ -3929,47 +3929,48 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
-  bfd *dynobj;
+  bfd *dynobj = NULL;
   bfd_vma *local_got_offsets;
-  asection *sgot;
-  asection *sgotplt;
-  asection *splt;
-  asection *sreloc;
-  asection *srelgot;
+  asection *sgot = NULL;
+  asection *sgotplt = NULL;
+  asection *splt = NULL;
+  asection *sreloc = NULL;
+  asection *srelgot = NULL;
   bfd_boolean is_vxworks_tls;
   unsigned isec_segment, got_segment, plt_segment, check_segment[2];
+  bfd_boolean fdpic_p = FALSE;
 
   BFD_ASSERT (is_sh_elf (input_bfd));
 
   htab = sh_elf_hash_table (info);
-  if (htab == NULL)
-    return FALSE;
+  if (htab != NULL)
+    {
+      dynobj = htab->root.dynobj;
+      sgot = htab->sgot;
+      sgotplt = htab->sgotplt;
+      splt = htab->splt;
+      fdpic_p = htab->fdpic_p;
+    }
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
-  dynobj = htab->root.dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
   isec_segment = sh_elf_osec_to_segment (output_bfd,
 					 input_section->output_section);
-  if (htab->fdpic_p && htab->sgot)
+  if (fdpic_p && sgot)
     got_segment = sh_elf_osec_to_segment (output_bfd,
-					  htab->sgot->output_section);
+					  sgot->output_section);
   else
     got_segment = -1;
-  if (htab->fdpic_p && htab->splt)
+  if (fdpic_p && splt)
     plt_segment = sh_elf_osec_to_segment (output_bfd,
-					  htab->splt->output_section);
+					  splt->output_section);
   else
     plt_segment = -1;
 
-  sgot = htab->sgot;
-  sgotplt = htab->sgotplt;
-  splt = htab->splt;
-  sreloc = NULL;
-  srelgot = NULL;
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = (htab->vxworks_p && info->shared
+  is_vxworks_tls = (htab && htab->vxworks_p && info->shared
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
 
@@ -4147,7 +4148,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      bfd_boolean dyn;
 
-	      dyn = htab->root.dynamic_sections_created;
+	      dyn = htab ? htab->root.dynamic_sections_created : FALSE;
 	      sec = h->root.u.def.section;
 	      /* In these cases, we don't need the relocation value.
 		 We check specially because in some obscure cases
@@ -4461,7 +4462,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  outrel.r_addend = addend;
 		}
 #endif
-	      else if (htab->fdpic_p
+	      else if (fdpic_p
 		       && (h == NULL
 			   || ((info->symbolic || h->dynindx == -1)
 			       && h->def_regular)))
@@ -4515,11 +4516,13 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (! relocate)
 		continue;
 	    }
-	  else if (htab->fdpic_p && !info->shared
+	  else if (fdpic_p && !info->shared
 		   && r_type == R_SH_DIR32
 		   && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      bfd_vma offset;
+
+	      BFD_ASSERT (htab);
 
 		if (sh_elf_osec_readonly_p (output_bfd,
 					    input_section->output_section))
@@ -4569,6 +4572,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table extension for the procedure linkage table.  */
 
+	  BFD_ASSERT (htab);
 	  BFD_ASSERT (sgotplt != NULL);
 	  relocation = (sgotplt->output_offset
 			+ (get_plt_index (htab->plt_info, h->plt.offset)
@@ -4594,6 +4598,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
 
+	  BFD_ASSERT (htab);
 	  BFD_ASSERT (sgot != NULL);
 	  check_segment[0] = check_segment[1] = -1;
 
@@ -4652,7 +4657,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 		      /* If we initialize the GOT entry here with a valid
 			 symbol address, also add a fixup.  */
-		      if (htab->fdpic_p && !info->shared
+		      if (fdpic_p && !info->shared
 			  && sh_elf_hash_entry (h)->got_type == GOT_NORMAL
 			  && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			      || h->root.type != bfd_link_hash_undefweak))
@@ -4713,7 +4718,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      outrel.r_offset = (sgot->output_section->vma
 					 + sgot->output_offset
 					 + off);
-		      if (htab->fdpic_p)
+		      if (fdpic_p)
 			{
 			  int dynindx
 			    = elf_section_data (sec->output_section)->dynindx;
@@ -4730,7 +4735,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
 		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
-		  else if (htab->fdpic_p
+		  else if (fdpic_p
 			   && (sh_elf_local_got_type (input_bfd) [r_symndx]
 			       == GOT_NORMAL))
 		    sh_elf_add_rofixup (output_bfd, htab->srofixup,
@@ -4775,6 +4780,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	     we place at the start of the .got.plt section.  This is the same
 	     as the start of the output .got section, unless there are function
 	     descriptors in front of it.  */
+	  BFD_ASSERT (htab);
 	  BFD_ASSERT (sgotplt != NULL);
 	  check_segment[0] = got_segment;
 	  relocation -= sgotplt->output_section->vma + sgotplt->output_offset
@@ -4875,6 +4881,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    bfd_vma reloc_offset;
 	    int reloc_type = R_SH_FUNCDESC;
 
+	    BFD_ASSERT (htab);
+
 	    check_segment[0] = check_segment[1] = -1;
 
 	    /* FIXME: See what FRV does for global symbols in the
@@ -4892,7 +4900,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      }
 	    else
 	      {
-		reloc_section = htab->sgot;
+		reloc_section = sgot;
 
 		if (h != NULL)
 		  reloc_offset = h->got.offset;
@@ -5087,6 +5095,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	     executable and --export-dynamic.  If such symbols get
 	     ld.so-allocated descriptors we can not use R_SH_GOTOFFFUNCDESC
 	     for them.  */
+	  BFD_ASSERT (htab);
 
 	  check_segment[0] = check_segment[1] = -1;
 	  relocation = 0;
@@ -5139,8 +5148,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      relocation = htab->sfuncdesc->output_offset + (offset & ~1);
 	    }
 
-	  relocation -= htab->root.hgot->root.u.def.value
-	    + htab->sgotplt->output_offset;
+	  relocation -= (htab->root.hgot->root.u.def.value
+			 + sgotplt->output_offset);
 #ifdef GOT_BIAS
 	  relocation -= GOT_BIAS;
 #endif
@@ -5175,6 +5184,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	case R_SH_TLS_GD_32:
 	case R_SH_TLS_IE_32:
+	  BFD_ASSERT (htab);
 	  check_segment[0] = check_segment[1] = -1;
 	  r_type = sh_elf_optimized_tls_reloc (info, r_type, h == NULL);
 	  got_type = GOT_UNKNOWN;
@@ -5425,6 +5435,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  goto final_link_relocate;
 
 	case R_SH_TLS_LD_32:
+	  BFD_ASSERT (htab);
 	  check_segment[0] = check_segment[1] = -1;
 	  if (! info->shared)
 	    {
@@ -5558,7 +5569,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
 
     relocation_done:
-      if (htab->fdpic_p && check_segment[0] != (unsigned) -1
+      if (fdpic_p && check_segment[0] != (unsigned) -1
 	  && check_segment[0] != check_segment[1])
 	{
 	  /* We don't want duplicate errors for undefined symbols.  */
