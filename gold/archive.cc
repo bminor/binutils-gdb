@@ -1118,6 +1118,8 @@ Lib_group::print_stats()
 Task_token*
 Add_lib_group_symbols::is_runnable()
 {
+  if (this->readsyms_blocker_ != NULL && this->readsyms_blocker_->is_blocked())
+    return this->readsyms_blocker_;
   if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
     return this->this_blocker_;
   return NULL;

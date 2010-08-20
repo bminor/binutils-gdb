@@ -1750,6 +1750,15 @@ strong_ref_weak_def_1.so: strong_ref_weak_def_1.o strong_ref_weak_def_2.so \
 strong_ref_weak_def.stdout: strong_ref_weak_def_1.so
 	$(TEST_READELF) -sWD $< > $@
 
+# Test that --start-lib and --end-lib function correctly.
+check_PROGRAMS += start_lib_test
+start_lib_test: start_lib_test_main.o libstart_lib_test.a start_lib_test_2.o start_lib_test_3.o \
+	gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -o $@ start_lib_test_main.o -L. -lstart_lib_test \
+		-Wl,--start-lib start_lib_test_2.o start_lib_test_3.o -Wl,--end-lib
+libstart_lib_test.a: start_lib_test_1.o
+	$(TEST_AR) rc $@ $^
+
 endif GCC
 endif NATIVE_LINKER
 

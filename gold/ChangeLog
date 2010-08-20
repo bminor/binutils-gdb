@@ -1,3 +1,19 @@
+2010-08-19  Neil Vachharajani  <nvachhar@google.com>
+	    Cary Coutant  <ccoutant@google.com>
+
+	* gold/archive.h (Add_lib_group_symbols): Add readsyms_blocker_, adjust
+	constructor, and set_blocker.
+	* gold/archive.cc (Add_lib_group_symbols::is_runnable): Also check
+	readsyms_blocker_.
+	* gold/readsyms.cc (Read_symbols::do_lib_group): Also pass
+	this->this_blocker_ to Add_lib_group_symbols::set_blocker.
+	* testsuite/Makefile.am (start_lib_test): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/start_lib_test_main.c: New file.
+	* testsuite/start_lib_test_1.c: New file.
+	* testsuite/start_lib_test_2.c: New file.
+	* testsuite/start_lib_test_3.c: New file.
+
 2010-08-19  Ian Lance Taylor  <iant@google.com>
 
 	* Makefile.in: Rebuild with automake 1.11.1.

@@ -495,7 +495,8 @@ class Add_lib_group_symbols : public Task
                         Input_objects* input_objects,
                         Lib_group* lib, Task_token* next_blocker)
       : symtab_(symtab), layout_(layout), input_objects_(input_objects),
-        lib_(lib), this_blocker_(NULL), next_blocker_(next_blocker)
+        lib_(lib), readsyms_blocker_(NULL), this_blocker_(NULL),
+        next_blocker_(next_blocker)
   { }
 
   ~Add_lib_group_symbols();
@@ -513,9 +514,10 @@ class Add_lib_group_symbols : public Task
 
   // Set the blocker to use for this task.
   void
-  set_blocker(Task_token* this_blocker)
+  set_blocker(Task_token* readsyms_blocker, Task_token* this_blocker)
   {
-    gold_assert(this->this_blocker_ == NULL);
+    gold_assert(this->readsyms_blocker_ == NULL && this->this_blocker_ == NULL);
+    this->readsyms_blocker_ = readsyms_blocker;
     this->this_blocker_ = this_blocker;
   }
 
@@ -530,6 +532,7 @@ class Add_lib_group_symbols : public Task
   Layout* layout_;
   Input_objects* input_objects_;
   Lib_group * lib_;
+  Task_token* readsyms_blocker_;
   Task_token* this_blocker_;
   Task_token* next_blocker_;
 };

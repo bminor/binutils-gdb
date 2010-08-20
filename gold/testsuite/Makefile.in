@@ -47,7 +47,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
 	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
 	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18) \
-	$(am__EXEEXT_19) $(am__EXEEXT_20)
+	$(am__EXEEXT_19) $(am__EXEEXT_20) $(am__EXEEXT_21)
 
 # Test --detect-odr-violations
 
@@ -461,25 +461,28 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 
+# Test that --start-lib and --end-lib function correctly.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_33 = start_lib_test
+
 # These tests work with cross linkers.
-@DEFAULT_TARGET_I386_TRUE@am__append_33 = split_i386.sh
-@DEFAULT_TARGET_I386_TRUE@am__append_34 = split_i386_1.stdout split_i386_2.stdout \
+@DEFAULT_TARGET_I386_TRUE@am__append_34 = split_i386.sh
+@DEFAULT_TARGET_I386_TRUE@am__append_35 = split_i386_1.stdout split_i386_2.stdout \
 @DEFAULT_TARGET_I386_TRUE@	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
 
-@DEFAULT_TARGET_I386_TRUE@am__append_35 = split_i386_1 split_i386_2 split_i386_3 \
+@DEFAULT_TARGET_I386_TRUE@am__append_36 = split_i386_1 split_i386_2 split_i386_3 \
 @DEFAULT_TARGET_I386_TRUE@	split_i386_4 split_i386_r
 
-@DEFAULT_TARGET_X86_64_TRUE@am__append_36 = split_x86_64.sh
-@DEFAULT_TARGET_X86_64_TRUE@am__append_37 = split_x86_64_1.stdout split_x86_64_2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_37 = split_x86_64.sh
+@DEFAULT_TARGET_X86_64_TRUE@am__append_38 = split_x86_64_1.stdout split_x86_64_2.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
 
-@DEFAULT_TARGET_X86_64_TRUE@am__append_38 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_39 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_4 split_x86_64_r
 
-@DEFAULT_TARGET_ARM_TRUE@am__append_39 = arm_abs_global.sh \
+@DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh arm_attr_merge.sh
-@DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global.stdout \
+@DEFAULT_TARGET_ARM_TRUE@am__append_41 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range.stdout \
@@ -496,7 +499,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_7.stdout
-@DEFAULT_TARGET_ARM_TRUE@am__append_41 = arm_abs_global \
+@DEFAULT_TARGET_ARM_TRUE@am__append_42 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range \
@@ -664,6 +667,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pic$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pie$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_21 = start_lib_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -1134,6 +1138,12 @@ script_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
 searched_file_test_OBJECTS = $(am_searched_file_test_OBJECTS)
 searched_file_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(searched_file_test_LDFLAGS) $(LDFLAGS) -o $@
+start_lib_test_SOURCES = start_lib_test.c
+start_lib_test_OBJECTS = start_lib_test.$(OBJEXT)
+start_lib_test_LDADD = $(LDADD)
+start_lib_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_thin_archive_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_main.$(OBJEXT)
 thin_archive_test_1_OBJECTS = $(am_thin_archive_test_1_OBJECTS)
@@ -1468,8 +1478,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(relro_script_test_SOURCES) $(relro_strip_test_SOURCES) \
 	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
 	$(script_test_2_SOURCES) script_test_3.c \
-	$(searched_file_test_SOURCES) $(thin_archive_test_1_SOURCES) \
-	$(thin_archive_test_2_SOURCES) \
+	$(searched_file_test_SOURCES) start_lib_test.c \
+	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
 	$(tls_phdrs_script_test_SOURCES) $(tls_pic_test_SOURCES) \
 	tls_pie_pic_test.c tls_pie_test.c $(tls_script_test_SOURCES) \
 	$(tls_shared_gd_to_ie_test_SOURCES) \
@@ -1738,16 +1748,16 @@ TEST_AS = $(top_builddir)/../gas/as-new
 # the right choice for files 'make' builds that people rebuild.
 MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_3) \
 	$(am__append_8) $(am__append_17) $(am__append_25) \
-	$(am__append_29) $(am__append_35) $(am__append_38) \
-	$(am__append_41)
+	$(am__append_29) $(am__append_36) $(am__append_39) \
+	$(am__append_42)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
 check_SCRIPTS = $(am__append_1) $(am__append_23) $(am__append_27) \
-	$(am__append_33) $(am__append_36) $(am__append_39)
-check_DATA = $(am__append_2) $(am__append_24) $(am__append_28) \
 	$(am__append_34) $(am__append_37) $(am__append_40)
+check_DATA = $(am__append_2) $(am__append_24) $(am__append_28) \
+	$(am__append_35) $(am__append_38) $(am__append_41)
 BUILT_SOURCES = $(am__append_16)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -2656,6 +2666,12 @@ script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES)
 searched_file_test$(EXEEXT): $(searched_file_test_OBJECTS) $(searched_file_test_DEPENDENCIES) 
 	@rm -f searched_file_test$(EXEEXT)
 	$(searched_file_test_LINK) $(searched_file_test_OBJECTS) $(searched_file_test_LDADD) $(LIBS)
+@GCC_FALSE@start_lib_test$(EXEEXT): $(start_lib_test_OBJECTS) $(start_lib_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f start_lib_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(start_lib_test_OBJECTS) $(start_lib_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@start_lib_test$(EXEEXT): $(start_lib_test_OBJECTS) $(start_lib_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f start_lib_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(start_lib_test_OBJECTS) $(start_lib_test_LDADD) $(LIBS)
 thin_archive_test_1$(EXEEXT): $(thin_archive_test_1_OBJECTS) $(thin_archive_test_1_DEPENDENCIES) 
 	@rm -f thin_archive_test_1$(EXEEXT)
 	$(thin_archive_test_1_LINK) $(thin_archive_test_1_OBJECTS) $(thin_archive_test_1_LDADD) $(LIBS)
@@ -2900,6 +2916,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2b.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/searched_file_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/start_lib_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmain.Po@am__quote@
@@ -3523,6 +3540,8 @@ ifuncmain7pic.log: ifuncmain7pic$(EXEEXT)
 	@p='ifuncmain7pic$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ifuncmain7pie.log: ifuncmain7pie$(EXEEXT)
 	@p='ifuncmain7pie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+start_lib_test.log: start_lib_test$(EXEEXT)
+	@p='start_lib_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 .test.log:
 	@p='$<'; $(am__check_pre) $(TEST_LOG_COMPILE) "$$tst" $(am__check_post)
 @am__EXEEXT_TRUE@.test$(EXEEXT).log:
@@ -4429,6 +4448,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@		strong_ref_weak_def_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@strong_ref_weak_def.stdout: strong_ref_weak_def_1.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sWD $< > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@start_lib_test: start_lib_test_main.o libstart_lib_test.a start_lib_test_2.o start_lib_test_3.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -o $@ start_lib_test_main.o -L. -lstart_lib_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--start-lib start_lib_test_2.o start_lib_test_3.o -Wl,--end-lib
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libstart_lib_test.a: start_lib_test_1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
 @DEFAULT_TARGET_I386_TRUE@split_i386_1.o: split_i386_1.s
 @DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
 @DEFAULT_TARGET_I386_TRUE@split_i386_2.o: split_i386_2.s

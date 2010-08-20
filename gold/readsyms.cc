@@ -248,7 +248,7 @@ Read_symbols::do_lib_group(Workqueue* workqueue)
 					     m, NULL, next_blocker));
     }
 
-  add_lib_group_symbols->set_blocker(next_blocker);
+  add_lib_group_symbols->set_blocker(next_blocker, this->this_blocker_);
   workqueue->queue_soon(add_lib_group_symbols);
 
   return true;
