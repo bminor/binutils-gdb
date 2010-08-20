@@ -210,6 +210,7 @@ The following format options are recognized:
 @code{vfpv3xd-d16},
 @code{vfpv4},
 @code{vfpv4-d16},
+@code{fpv4-sp-d16},
 @code{arm1020t},
 @code{arm1020e},
 @code{arm1136jf-s},
