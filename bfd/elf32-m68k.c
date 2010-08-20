@@ -4745,34 +4745,44 @@ void
 bfd_elf_m68k_set_target_options (struct bfd_link_info *info, int got_handling)
 {
   struct elf_m68k_link_hash_table *htab;
-
-  htab = elf_m68k_hash_table (info);
+  bfd_boolean use_neg_got_offsets_p;
+  bfd_boolean allow_multigot_p;
+  bfd_boolean local_gp_p;
 
   switch (got_handling)
     {
     case 0:
       /* --got=single.  */
-      htab->local_gp_p = FALSE;
-      htab->use_neg_got_offsets_p = FALSE;
-      htab->allow_multigot_p = FALSE;
+      local_gp_p = FALSE;
+      use_neg_got_offsets_p = FALSE;
+      allow_multigot_p = FALSE;
       break;
 
     case 1:
       /* --got=negative.  */
-      htab->local_gp_p = TRUE;
-      htab->use_neg_got_offsets_p = TRUE;
-      htab->allow_multigot_p = FALSE;
+      local_gp_p = TRUE;
+      use_neg_got_offsets_p = TRUE;
+      allow_multigot_p = FALSE;
       break;
 
     case 2:
       /* --got=multigot.  */
-      htab->local_gp_p = TRUE;
-      htab->use_neg_got_offsets_p = TRUE;
-      htab->allow_multigot_p = TRUE;
+      local_gp_p = TRUE;
+      use_neg_got_offsets_p = TRUE;
+      allow_multigot_p = TRUE;
       break;
 
     default:
       BFD_ASSERT (FALSE);
+      return;
+    }
+
+  htab = elf_m68k_hash_table (info);
+  if (htab != NULL)
+    {
+      htab->local_gp_p = local_gp_p;
+      htab->use_neg_got_offsets_p = use_neg_got_offsets_p;
+      htab->allow_multigot_p = allow_multigot_p;
     }
 }
 
