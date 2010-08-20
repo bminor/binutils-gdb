@@ -1,3 +1,8 @@
+2010-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* merge.c (sec_merge_emit): Do not zero pad sections that do not
+	have an alignment.
+
 2010-08-18  Pedro Alves  <pedro@codesourcery.com>
 
 	PR corefile/8210
