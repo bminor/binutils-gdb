@@ -29,6 +29,7 @@
 #include "language.h"
 #include "exceptions.h"
 #include "event-loop.h"
+#include "serial.h"
 
 #include <ctype.h>
 
@@ -568,23 +569,25 @@ static struct gdbpy_event **gdbpy_event_list_end;
 
 /* We use a file handler, and not an async handler, so that we can
    wake up the main thread even when it is blocked in poll().  */
-static int gdbpy_event_fds[2];
+static struct serial *gdbpy_event_fds[2];
 
 /* The file handler callback.  This reads from the internal pipe, and
    then processes the Python event queue.  This will always be run in
    the main gdb thread.  */
+
 static void
-gdbpy_run_events (int err, gdb_client_data ignore)
+gdbpy_run_events (struct serial *scb, void *context)
 {
   struct cleanup *cleanup;
-  char buffer[100];
   int r;
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
 
-  /* Just read whatever is available on the fd.  It is relatively
-     harmless if there are any bytes left over.  */
-  r = read (gdbpy_event_fds[0], buffer, sizeof (buffer));
+  /* Flush the fd.  Do this before flushing the events list, so that
+     any new event post afterwards is sure to re-awake the event
+     loop.  */
+  while (serial_readchar (gdbpy_event_fds[0], 0) >= 0)
+    ;
 
   while (gdbpy_event_list)
     {
@@ -640,7 +643,8 @@ gdbpy_post_event (PyObject *self, PyObject *args)
   if (wakeup)
     {
       char c = 'q';		/* Anything. */
-      if (write (gdbpy_event_fds[1], &c, 1) != 1)
+
+      if (serial_write (gdbpy_event_fds[1], &c, 1))
         return PyErr_SetFromErrno (PyExc_IOError);
     }
 
@@ -651,10 +655,10 @@ gdbpy_post_event (PyObject *self, PyObject *args)
 static void
 gdbpy_initialize_events (void)
 {
-  if (!pipe (gdbpy_event_fds))
+  if (serial_pipe (gdbpy_event_fds) == 0)
     {
       gdbpy_event_list_end = &gdbpy_event_list;
-      add_file_handler (gdbpy_event_fds[0], gdbpy_run_events, NULL);
+      serial_async (gdbpy_event_fds[0], gdbpy_run_events, NULL);
     }
 }
 

@@ -1,5 +1,16 @@
 2010-08-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* python/python.c: Include "serial.h".
+	(gdbpy_event_fds): Change type to `struct serial *' a array from
+	int array.
+	(gdbpy_run_events): Change parameters.  Use serial_readchar in
+	place of read.
+	(gdbpy_post_event): Use serial_write in place of write.
+	(gdbpy_initialize_events): Use serial_pipe instead of pipe, and
+	serial_async in place of add_file_handler.
+
+2010-08-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* serial.h (gdb_pipe, serial_pipe): Declare.
 	* serial.c (serial_interface_lookup): Take a const char pointer.
 	(serial_fdopen): Rename to ...
