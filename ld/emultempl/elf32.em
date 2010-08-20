@@ -1134,9 +1134,12 @@ gld${EMULATION_NAME}_after_open (void)
 	  const struct elf_backend_data *bed;
 
 	  bed = get_elf_backend_data (abfd);
-	  s = bfd_make_section_with_flags (abfd, ".eh_frame_hdr",
-					   bed->dynamic_sec_flags
-					   | SEC_READONLY);
+	  if (bed == NULL)
+	    s = NULL;
+	  else
+	    s = bfd_make_section_with_flags (abfd, ".eh_frame_hdr",
+					     bed->dynamic_sec_flags
+					     | SEC_READONLY);
 	  if (s != NULL
 	      && bfd_set_section_alignment (abfd, s, 2))
 	    htab->eh_info.hdr_sec = s;

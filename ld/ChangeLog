@@ -1,3 +1,8 @@
+2010-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (_after_open): Check for get_elf_backend_data
+	returning NULL.
+
 2010-08-19  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (Expression Section): Detail expression evaluation.
