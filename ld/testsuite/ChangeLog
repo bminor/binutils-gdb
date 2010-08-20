@@ -1,5 +1,9 @@
 2010-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* ld-sh/sh.exp: Add missing newline.
+
+2010-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-mips-elf/attr-gnu-4-01.d: Correct Tag_GNU_MIPS_ABI_FP.
 	* ld-mips-elf/attr-gnu-4-02.d: Likewise.
 	* ld-mips-elf/attr-gnu-4-10.d: Likewise.
