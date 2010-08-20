@@ -237,6 +237,9 @@
 	* readelf.c: Add _() macros to constant strings that are
 	translatable.
 
+	* readelf.c (display_mips_gnu_attribute): Replace GCC options
+	with a textual description of single and double precision float.
+
 2010-04-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* readelf.c (arm_attr_tag_FP_arch): Rename from arm_attr_tag_VFP_arch.
