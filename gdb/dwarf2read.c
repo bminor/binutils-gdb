@@ -266,6 +266,29 @@ struct comp_unit_head
   unsigned int first_die_offset;
 };
 
+/* Type used for delaying computation of method physnames.
+   See comments for compute_delayed_physnames.  */
+struct delayed_method_info
+{
+  /* The type to which the method is attached, i.e., its parent class.  */
+  struct type *type;
+
+  /* The index of the method in the type's function fieldlists.  */
+  int fnfield_index;
+
+  /* The index of the method in the fieldlist.  */
+  int index;
+
+  /* The name of the DIE.  */
+  const char *name;
+
+  /*  The DIE associated with this method.  */
+  struct die_info *die;
+};
+
+typedef struct delayed_method_info delayed_method_info;
+DEF_VEC_O (delayed_method_info);
+
 /* Internal state when decoding a particular compilation unit.  */
 struct dwarf2_cu
 {
@@ -343,6 +366,10 @@ struct dwarf2_cu
 
   /* Header data from the line table, during full symbol processing.  */
   struct line_header *line_header;
+
+  /* A list of methods which need to have physnames computed
+     after all type information has been read.  */
+  VEC (delayed_method_info) *method_list;
 
   /* Mark used when releasing cached dies.  */
   unsigned int mark : 1;
@@ -1288,6 +1315,9 @@ byte_swap (offset_type value)
 
 /* The suffix for an index file.  */
 #define INDEX_SUFFIX ".gdb-index"
+
+static const char *dwarf2_physname (char *name, struct die_info *die,
+				    struct dwarf2_cu *cu);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -4342,6 +4372,56 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
     }
 }
 
+/* Add a DIE to the delayed physname list.  */
+
+static void
+add_to_method_list (struct type *type, int fnfield_index, int index,
+		    const char *name, struct die_info *die,
+		    struct dwarf2_cu *cu)
+{
+  struct delayed_method_info mi;
+  mi.type = type;
+  mi.fnfield_index = fnfield_index;
+  mi.index = index;
+  mi.name = name;
+  mi.die = die;
+  VEC_safe_push (delayed_method_info, cu->method_list, &mi);
+}
+
+/* A cleanup for freeing the delayed method list.  */
+
+static void
+free_delayed_list (void *ptr)
+{
+  struct dwarf2_cu *cu = (struct dwarf2_cu *) ptr;
+  if (cu->method_list != NULL)
+    {
+      VEC_free (delayed_method_info, cu->method_list);
+      cu->method_list = NULL;
+    }
+}
+
+/* Compute the physnames of any methods on the CU's method list.
+
+   The computation of method physnames is delayed in order to avoid the
+   (bad) condition that one of the method's formal parameters is of an as yet
+   incomplete type.  */
+
+static void
+compute_delayed_physnames (struct dwarf2_cu *cu)
+{
+  int i;
+  struct delayed_method_info *mi;
+  for (i = 0; VEC_iterate (delayed_method_info, cu->method_list, i, mi) ; ++i)
+    {
+      char *physname;
+      struct fn_fieldlist *fn_flp
+	= &TYPE_FN_FIELDLIST (mi->type, mi->fnfield_index);
+      physname = (char *) dwarf2_physname ((char *) mi->name, mi->die, cu);
+      fn_flp->fn_fields[mi->index].physname = physname ? physname : "";
+    }
+}
+
 /* Generate full symbol information for PST and CU, whose DIEs have
    already been loaded into memory.  */
 
@@ -4352,13 +4432,14 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
   struct objfile *objfile = per_cu->objfile;
   CORE_ADDR lowpc, highpc;
   struct symtab *symtab;
-  struct cleanup *back_to;
+  struct cleanup *back_to, *delayed_list_cleanup;
   CORE_ADDR baseaddr;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   buildsym_init ();
   back_to = make_cleanup (really_free_pendings, NULL);
+  delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
 
   cu->list_in_scope = &file_symbols;
 
@@ -4366,6 +4447,12 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 
   /* Do line number decoding in read_file_scope () */
   process_die (cu->dies, cu);
+
+  /* Now that we have processed all the DIEs in the CU, all the types 
+     should be complete, and it should now be safe to compute all of the
+     physnames.  */
+  compute_delayed_physnames (cu);
+  do_cleanups (delayed_list_cleanup);
 
   /* Some compilers don't define a DW_AT_high_pc attribute for the
      compilation unit.  If the DW_AT_high_pc is missing, synthesize
@@ -6249,7 +6336,6 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   int i;
   struct fn_field *fnp;
   char *fieldname;
-  char *physname;
   struct nextfnfield *new_fnfield;
   struct type *this_type;
 
@@ -6260,9 +6346,6 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   fieldname = dwarf2_name (die, cu);
   if (fieldname == NULL)
     return;
-
-  /* Get the mangled name.  */
-  physname = (char *) dwarf2_physname (fieldname, die, cu);
 
   /* Look up member function name in fieldlist.  */
   for (i = 0; i < fip->nfnfields; i++)
@@ -6289,7 +6372,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
       flp->name = fieldname;
       flp->length = 0;
       flp->head = NULL;
-      fip->nfnfields++;
+      i = fip->nfnfields++;
     }
 
   /* Create a new member function field and chain it to the field list
@@ -6303,9 +6386,19 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Fill in the member function field info.  */
   fnp = &new_fnfield->fnfield;
-  /* The name is already allocated along with this objfile, so we don't
-     need to duplicate it for the type.  */
-  fnp->physname = physname ? physname : "";
+
+  /* Delay processing of the physname until later.  */
+  if (cu->language == language_cplus || cu->language == language_java)
+    {
+      add_to_method_list (type, i, flp->length - 1, fieldname,
+			  die, cu);
+    }
+  else
+    {
+      char *physname = (char *) dwarf2_physname (fieldname, die, cu);
+      fnp->physname = physname ? physname : "";
+    }
+
   fnp->type = alloc_type (objfile);
   this_type = read_type_die (die, cu);
   if (this_type && TYPE_CODE (this_type) == TYPE_CODE_FUNC)
@@ -6331,7 +6424,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
     }
   else
     complaint (&symfile_complaints, _("member function type missing for '%s'"),
-	       physname);
+	       dwarf2_full_name (fieldname, die, cu));
 
   /* Get fcontext from DW_AT_containing_type if present.  */
   if (dwarf2_attr (die, DW_AT_containing_type, cu) != NULL)
@@ -6579,7 +6672,14 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       if (cu->language == language_cplus
 	  || cu->language == language_java)
 	{
-	  TYPE_TAG_NAME (type) = (char *) dwarf2_full_name (name, die, cu);
+	  char *full_name = (char *) dwarf2_full_name (name, die, cu);
+
+	  /* dwarf2_full_name might have already finished building the DIE's
+	     type.  If so, there is no need to continue.  */
+	  if (get_die_type (die, cu) != NULL)
+	    return get_die_type (die, cu);
+
+	  TYPE_TAG_NAME (type) = full_name;
 	  if (die->tag == DW_TAG_structure_type
 	      || die->tag == DW_TAG_class_type)
 	    TYPE_NAME (type) = TYPE_TAG_NAME (type);

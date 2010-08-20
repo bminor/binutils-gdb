@@ -1,3 +1,22 @@
+2010-08-20  Keith Seitz  <keiths@redhat.com>
+
+	PR symtab/11465:
+ 	* dwarf2read.c (struct delayed_method_info): New struct.
+	(struct dwarf2_cu): Add vector method_list.
+	(scan_partial_symbols): Count methods for union, class, structure,
+	and interface types.
+	(add_to_method_list): New function.
+	(free_delayed_list): New function.
+	(compute_delayed_physnames): New function.
+	(process_full_comp_unit): Make a cleanup for the CU's delayed
+	physname list, compute the delayed physnames, and free the
+	the list.
+	(dwarf2_add_member_fn): For C++ and Java, delay the computation
+	of the physname until after the CU is read.
+
+	* dwarf2read.c (read_structure_type): Check if the current
+	DIE's type was already completed after dwarf2_full_name
+	was called.
 2010-08-19  Stan Shebs  <stan@codesourcery.com>
 
 	* NEWS: Mention some additional changes.
