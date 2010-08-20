@@ -802,8 +802,12 @@ free_pipe_state (struct pipe_state *ps)
   if (ps->input)
     fclose (ps->input);
   if (ps->pex)
-    pex_free (ps->pex);
-  /* pex_free closes ps->output.  */
+    {
+      pex_free (ps->pex);
+      /* pex_free closes ps->output.  */
+    }
+  else if (ps->output)
+    fclose (ps->output);
 
   xfree (ps);
 
@@ -888,6 +892,30 @@ pipe_windows_open (struct serial *scb, const char *name)
   return -1;
 }
 
+static int
+pipe_windows_fdopen (struct serial *scb, int fd)
+{
+  struct pipe_state *ps;
+
+  ps = make_pipe_state ();
+
+  ps->input = fdopen (fd, "r+");
+  if (! ps->input)
+    goto fail;
+
+  ps->output = fdopen (fd, "r+");
+  if (! ps->output)
+    goto fail;
+
+  scb->fd = fd;
+  scb->state = (void *) ps;
+
+  return 0;
+
+ fail:
+  free_pipe_state (ps);
+  return -1;
+}
 
 static void
 pipe_windows_close (struct serial *scb)
@@ -990,6 +1018,14 @@ pipe_avail (struct serial *scb, int fd)
   if (r == FALSE)
     numBytes = 0;
   return numBytes;
+}
+
+int
+gdb_pipe (int pdes[2])
+{
+  if (_pipe (pdes, 512, _O_BINARY | _O_NOINHERIT) == -1)
+    return -1;
+  return 0;
 }
 
 struct net_windows_state
@@ -1230,6 +1266,7 @@ _initialize_ser_windows (void)
   ops->next = 0;
   ops->open = pipe_windows_open;
   ops->close = pipe_windows_close;
+  ops->fdopen = pipe_windows_fdopen;
   ops->readchar = ser_base_readchar;
   ops->write = ser_base_write;
   ops->flush_output = ser_base_flush_output;

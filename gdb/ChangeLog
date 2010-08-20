@@ -1,3 +1,25 @@
+2010-08-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* serial.h (gdb_pipe, serial_pipe): Declare.
+	* serial.c (serial_interface_lookup): Take a const char pointer.
+	(serial_fdopen): Rename to ...
+	(serial_fdopen_ops): ... this.  Add an OPS parameter and use it.
+	Call the OPS' fdopen function if there is one.
+	(serial_fdopen): Rewrite as wrapper to serial_fdopen_ops.
+	(serial_pipe): New.
+	(struct serial_ops) <fdopen>: New field.
+
+	* ser-mingw.c (free_pipe_state):
+	(free_pipe_state): Close output on non-pex pipes.
+	(pipe_windows_fdopen): New.
+	(gdb_pipe): New.
+	(_initialize_ser_windows): Register pipe_windows_fdopen.
+	* ser-go32.c (gdb_pipe): New.
+	* ser-pipe.c (pipe_close): Close file descriptor even if there's
+	no state pointer.
+	(pipe_ops): Delete.
+	(gdb_pipe): New.
+
 2010-08-20  Keith Seitz  <keiths@redhat.com>
 
 	PR symtab/11465:

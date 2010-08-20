@@ -56,6 +56,19 @@ extern struct serial *serial_fdopen (const int fd);
 
 extern void serial_close (struct serial *scb);
 
+/* Create a pipe, and put the read end in files[0], and the write end
+   in filde[1].  Returns 0 for success, negative value for error (in
+   which case errno contains the error).  */
+
+extern int gdb_pipe (int fildes[2]);
+
+/* Create a pipe with each end wrapped in a `struct serial' interface.
+   Put the read end in scbs[0], and the write end in scbs[1].  Returns
+   0 for success, negative value for error (in which case errno
+   contains the error).  */
+
+extern int serial_pipe (struct serial *scbs[2]);
+
 /* Push out all buffers and destroy SCB without closing the device.  */
 
 extern void serial_un_fdopen (struct serial *scb);
@@ -222,6 +235,7 @@ struct serial_ops
     struct serial_ops *next;
     int (*open) (struct serial *, const char *name);
     void (*close) (struct serial *);
+    int (*fdopen) (struct serial *, int fd);
     int (*readchar) (struct serial *, int timeout);
     int (*write) (struct serial *, const char *str, int len);
     /* Discard pending output */

@@ -859,6 +859,13 @@ static struct serial_ops dos_ops =
   (void (*)(struct serial *, int))NULL	/* change into async mode */
 };
 
+int
+gdb_pipe (int pdes[2])
+{
+  /* No support for pipes.  */
+  errno = ENOSYS;
+  return -1;
+}
 
 static void
 dos_info (char *arg, int from_tty)
