@@ -1,3 +1,11 @@
+2010-08-20  Keith Seitz  <keiths@redhat.com>
+
+	PR symtab/11465:
+	* gdb.dwarf2/pr11465.exp: New test.
+	* gdb.dwarf2/pr11465.S: New file.
+	* gdb.dwarf2/dw2-double-set-die-type.S: New file.
+	* gdb.dwarf2/dw2-double-set-die-type.exp: New test.
+
 2010-08-19  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.arch/vsx-regs.exp: Remove wrong comment about testing AltiVec
