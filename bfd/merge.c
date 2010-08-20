@@ -307,9 +307,6 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry)
       len = -off & (entry->alignment - 1);
       if (len != 0)
 	{
-	  /* We should never have an entry with an alignment
-	     greater than the section's alignment.  */
-	  BFD_ASSERT (len <= (bfd_size_type) (1 << alignment_power));
 	  if (bfd_bwrite (pad, len, abfd) != len)
 	    goto err;
 	  off += len;
@@ -327,7 +324,6 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry)
   /* Trailing alignment needed?  */
   off = sec->size - off;
   if (off != 0
-      && alignment_power
       && bfd_bwrite (pad, off, abfd) != off)
     goto err;
 

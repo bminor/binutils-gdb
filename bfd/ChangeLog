@@ -1,3 +1,7 @@
+2010-08-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* merge.c (sec_merge_emit): Revert the last checkin.
+
 2010-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elf32-sh.c (sh_elf_relocate_section): Handle non-ELF output
