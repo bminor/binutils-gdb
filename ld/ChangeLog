@@ -1,6 +1,12 @@
 2010-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11937
+	* emultempl/elf32.em (_after_open): Find one .eh_frame section
+	for --eh-frame-hdr.
+
+2010-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11937
 	* emultempl/elf32.em (_after_open): Find an ELF input for
 	--build-id and --eh-frame-hdr.
 

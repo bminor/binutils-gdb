@@ -1132,11 +1132,16 @@ gld${EMULATION_NAME}_after_open (void)
 	{
 	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	    elfbfd = abfd;
-	  s = bfd_get_section_by_name (abfd, ".eh_frame");
-	   if (s && s->size > 8 && !bfd_is_abs_section (s->output_section))
-	     warn_eh_frame = TRUE;
-	   if (elfbfd && warn_eh_frame)
-	     break;
+	  if (!warn_eh_frame)
+	    {
+	      s = bfd_get_section_by_name (abfd, ".eh_frame");
+	      warn_eh_frame
+		= (s
+		   && s->size > 8
+		   && !bfd_is_abs_section (s->output_section));
+	    }
+	  if (elfbfd && warn_eh_frame)
+	    break;
 	}
       if (elfbfd)
 	{
