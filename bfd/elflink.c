@@ -4791,6 +4791,7 @@ error_free_dyn:
   if (! dynamic
       && is_elf_hash_table (htab)
       && bed->check_relocs != NULL
+      && elf_object_id (abfd) == elf_hash_table_id (htab)
       && (*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
     {
       asection *o;

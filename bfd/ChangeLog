@@ -1,3 +1,9 @@
+2010-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11933
+	* elflink.c (elf_link_add_object_symbols): Don't check relocation
+	if input ELF object ID doesn't match output.
+
 2010-08-21  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
