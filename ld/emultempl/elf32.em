@@ -1065,7 +1065,11 @@ gld${EMULATION_NAME}_after_open (void)
       asection *s;
       bfd_size_type size;
 
-      abfd = link_info.input_bfds;
+      /* Find an ELF input.  */
+      for (abfd = link_info.input_bfds;
+	   abfd != (bfd *) NULL; abfd = abfd->link_next)
+	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	  break;
 
       if (abfd == NULL)
 	{
@@ -1120,33 +1124,38 @@ gld${EMULATION_NAME}_after_open (void)
   if (link_info.eh_frame_hdr
       && !link_info.traditional_format)
     {
-      bfd *abfd;
+      bfd *abfd, *elfbfd = NULL;
+      bfd_boolean warn_eh_frame = FALSE;
       asection *s;
 
       for (abfd = link_info.input_bfds; abfd; abfd = abfd->link_next)
 	{
+	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	    elfbfd = abfd;
 	  s = bfd_get_section_by_name (abfd, ".eh_frame");
-	  if (s && s->size > 8 && !bfd_is_abs_section (s->output_section))
-	    break;
+	   if (s && s->size > 8 && !bfd_is_abs_section (s->output_section))
+	     warn_eh_frame = TRUE;
+	   if (elfbfd && warn_eh_frame)
+	     break;
 	}
-      if (abfd)
+      if (elfbfd)
 	{
 	  const struct elf_backend_data *bed;
 
-	  bed = get_elf_backend_data (abfd);
-	  if (bed == NULL)
-	    s = NULL;
-	  else
-	    s = bfd_make_section_with_flags (abfd, ".eh_frame_hdr",
-					     bed->dynamic_sec_flags
-					     | SEC_READONLY);
+	  bed = get_elf_backend_data (elfbfd);
+	  s = bfd_make_section_with_flags (elfbfd, ".eh_frame_hdr",
+					   bed->dynamic_sec_flags
+					   | SEC_READONLY);
 	  if (s != NULL
-	      && bfd_set_section_alignment (abfd, s, 2))
-	    htab->eh_info.hdr_sec = s;
-	  else
-	    einfo ("%P: warning: Cannot create .eh_frame_hdr section,"
-		   " --eh-frame-hdr ignored.\n");
+	      && bfd_set_section_alignment (elfbfd, s, 2))
+	    {
+	      htab->eh_info.hdr_sec = s;
+	      warn_eh_frame = FALSE;
+	    }
 	}
+      if (warn_eh_frame)
+	einfo ("%P: warning: Cannot create .eh_frame_hdr section,"
+	       " --eh-frame-hdr ignored.\n");
     }
 
   /* Get the list of files which appear in DT_NEEDED entries in
