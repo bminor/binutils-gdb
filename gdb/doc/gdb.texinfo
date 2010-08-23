@@ -20938,6 +20938,15 @@ but it can be @code{None} in some situations.
 @end table
 @end defmethod
 
+@defmethod Type array @var{n1} @r{[}@var{n2}@r{]}
+Return a new @code{gdb.Type} object which represents an array of this
+type.  If one argument is given, it is the inclusive upper bound of
+the array; in this case the lower bound is zero.  If two arguments are
+given, the first argument is the lower bound of the array, and the
+second argument is the upper bound of the array.  An array's length
+must not be negative, but the bounds can be.
+@end defmethod
+
 @defmethod Type const
 Return a new @code{gdb.Type} object which represents a
 @code{const}-qualified variant of this type.

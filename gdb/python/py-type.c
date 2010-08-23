@@ -262,6 +262,54 @@ typy_strip_typedefs (PyObject *self, PyObject *args)
   return type_to_type_object (check_typedef (type));
 }
 
+/* Return an array type.  */
+
+static PyObject *
+typy_array (PyObject *self, PyObject *args)
+{
+  int n1, n2;
+  PyObject *n2_obj = NULL;
+  struct type *array = NULL;
+  struct type *type = ((type_object *) self)->type;
+  volatile struct gdb_exception except;
+
+  if (! PyArg_ParseTuple (args, "i|O", &n1, &n2_obj))
+    return NULL;
+
+  if (n2_obj)
+    {
+      if (!PyInt_Check (n2_obj))
+	{
+	  PyErr_SetString (PyExc_RuntimeError,
+			   _("Array bound must be an integer"));
+	  return NULL;
+	}
+      n2 = (int) PyInt_AsLong (n2_obj);
+      if (PyErr_Occurred ())
+	return NULL;
+    }
+  else
+    {
+      n2 = n1;
+      n1 = 0;
+    }
+
+  if (n2 < n1)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("Array length must not be negative"));
+      return NULL;
+    }
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      array = lookup_array_range_type (type, n1, n2);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return type_to_type_object (array);
+}
+
 /* Return a Type object which represents a pointer to SELF.  */
 static PyObject *
 typy_pointer (PyObject *self, PyObject *args)
@@ -836,6 +884,9 @@ static PyGetSetDef type_object_getset[] =
 
 static PyMethodDef type_object_methods[] =
 {
+  { "array", typy_array, METH_VARARGS,
+    "array (N) -> Type\n\
+Return a type which represents an array of N objects of this type." },
   { "const", typy_const, METH_NOARGS,
     "const () -> Type\n\
 Return a const variant of this type." },

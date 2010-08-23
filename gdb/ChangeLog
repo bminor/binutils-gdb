@@ -1,3 +1,9 @@
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11915:
+	* python/py-type.c (typy_array): New function.
+	(type_object_methods): Add "array".
+
 2010-08-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* python/python.c: Include "serial.h".

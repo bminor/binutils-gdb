@@ -97,6 +97,11 @@ proc test_fields {lang} {
   gdb_test "python fields = ar.type.fields()"
   gdb_test "python print len(fields)" "1" "Check the number of fields"
   gdb_test "python print fields\[0\].type" "<range type>" "Check array field type"
+
+  gdb_test "python print ar\[0\].cast(ar\[0\].type.array(1))" \
+      ".1, 2." "cast to array with one argument"
+  gdb_test "python print ar\[0\].cast(ar\[0\].type.array(0, 1))" \
+      ".1, 2." "cast to array with two arguments"
 }
 
 proc test_base_class {} {

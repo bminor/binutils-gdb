@@ -1,3 +1,8 @@
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11915:
+	* gdb.python/py-type.exp (test_fields): Add tests for array.
+
 2010-08-23  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.dwarf2/dw2-double-set-die-type.S: DIE 0x51f does not
