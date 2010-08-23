@@ -1,5 +1,16 @@
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/10676:
+	* python/py-type.c: Include bcache.h, vec.h.
+	(struct type_equality_entry): New.
+	(compare_strings): New function.
+	(check_types_equal): Likewise.
+	(check_types_worklist): Likewise.
+	(typy_richcompare): Likewise.
+	(type_object_type): Set tp_richcompare field.
+
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/10953:
 	* python/py-type.c (typy_fields): Call check_typedef.
 	(typy_template_argument): Add TRY_CATCH.

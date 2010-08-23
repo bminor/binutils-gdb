@@ -81,6 +81,10 @@ proc test_fields {lang} {
       gdb_test "python print len(fields)" "2" "Check number of fields"
       gdb_test "python print fields\[0\].name" "c" "Check class field c name"
       gdb_test "python print fields\[1\].name" "d" "Check class field d name"
+
+      gdb_test "python print c.type == gdb.parse_and_eval('d').type" "False"
+      gdb_test "python print c.type == gdb.parse_and_eval('d').type.fields()\[0\].type" \
+	  "True"
   }
 
   # Test normal fields usage in structs.
@@ -102,6 +106,8 @@ proc test_fields {lang} {
       ".1, 2." "cast to array with one argument"
   gdb_test "python print ar\[0\].cast(ar\[0\].type.array(0, 1))" \
       ".1, 2." "cast to array with two arguments"
+
+  gdb_test "python print ar\[0\].type == ar\[0\].type" "True"
 }
 
 proc test_base_class {} {
