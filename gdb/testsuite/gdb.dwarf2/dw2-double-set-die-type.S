@@ -282,7 +282,7 @@
 	.byte	0x0	# end of children of DIE 0x505
 
 .Ldie_51f:
-	.uleb128 0x21	# (DIE (0x51f) DW_TAG_subprogram)
+	.uleb128 0x23	# (DIE (0x51f) DW_TAG_subprogram)
 	.byte	0x1	# DW_AT_external
 	.ascii	"_M_allocate\0"	# DW_AT_name
 	.long	OFFSET (277)	# DW_AT_type
@@ -630,3 +630,23 @@
 	.uleb128 0x13	# (DW_FORM_ref4)
 	.byte	0x0
 	.byte	0x0
+
+	.uleb128 0x23	# (abbrev code)
+	.uleb128 0x2e	# (TAG: DW_TAG_subprogram)
+	.byte	0x0	# DW_children_no
+	.uleb128 0x3f	# (DW_AT_external)
+	.uleb128 0xc	# (DW_FORM_flag)
+	.uleb128 0x3	# (DW_AT_name)
+	.uleb128 0x8	# (DW_FORM_string)
+	.uleb128 0x49	# (DW_AT_type)
+	.uleb128 0x13	# (DW_FORM_ref4)
+	.uleb128 0x3c	# (DW_AT_declaration)
+	.uleb128 0xc	# (DW_FORM_flag)
+	.uleb128 0x1	# (DW_AT_sibling)
+	.uleb128 0x13	# (DW_FORM_ref4)
+	.byte	0x0
+	.byte	0x0
+
+	.byte	0x0
+	.byte	0x0
+
