@@ -22,9 +22,4 @@
 
    This is a test of the --start-lib and --end-lib options.  */
 
-extern void t3 (void);
-
-void
-t3 (void)
-{
-}
+static char t3[] = "t3";

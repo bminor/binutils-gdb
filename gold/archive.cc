@@ -1057,7 +1057,14 @@ Lib_group::add_symbols(Symbol_table* symtab, Layout* layout,
           else
             {
               if (member.sd_ != NULL)
-                delete member.sd_;
+		{
+		  // The file must be locked in order to destroy the views
+		  // associated with it.
+		  gold_assert(obj != NULL);
+		  obj->lock(this->task_);
+		  delete member.sd_;
+		  obj->unlock(this->task_);
+		}
             }
 
 	  this->members_[i] = this->members_.back();
@@ -1096,10 +1103,10 @@ Lib_group::include_member(Symbol_table* symtab, Layout* layout,
 	layout->incremental_inputs()->report_object(obj, NULL);
       obj->layout(symtab, layout, sd);
       obj->add_symbols(symtab, sd, layout);
-      // Unlock the file for the next task.
-      obj->unlock(this->task_);
     }
   delete sd;
+  // Unlock the file for the next task.
+  obj->unlock(this->task_);
 }
 
 // Print statistical information to stderr.  This is used for --stats.

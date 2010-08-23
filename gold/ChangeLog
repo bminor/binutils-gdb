@@ -1,3 +1,12 @@
+2010-08-23  Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (Lib_group::add_symbols): Lock object before deleting its
+	symbols data.
+	(Lib_group::include_member): Unlock object after deleting its
+	symbols data.
+	* testsuite/start_lib_test_3.c: Remove all global symbols to trigger
+	the bug fixed here.
+
 2010-08-19  Neil Vachharajani  <nvachhar@google.com>
 	    Cary Coutant  <ccoutant@google.com>
 
