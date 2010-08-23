@@ -216,6 +216,13 @@ typy_fields (PyObject *self, PyObject *args)
   PyObject *result;
   int i;
   struct type *type = ((type_object *) self)->type;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      CHECK_TYPEDEF (type);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   /* We would like to make a tuple here, make fields immutable, and
      then memoize the result (and perhaps make Field.type() lazy).
@@ -641,9 +648,13 @@ typy_template_argument (PyObject *self, PyObject *args)
 	}
     }
 
-  type = check_typedef (type);
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      type = check_typedef (type);
+      if (TYPE_CODE (type) == TYPE_CODE_REF)
+	type = check_typedef (TYPE_TARGET_TYPE (type));
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   /* We might not have DW_TAG_template_*, so try to parse the type's
      name.  This is inefficient if we do not have a template type --

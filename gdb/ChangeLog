@@ -1,5 +1,11 @@
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/10953:
+	* python/py-type.c (typy_fields): Call check_typedef.
+	(typy_template_argument): Add TRY_CATCH.
+
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/11915:
 	* python/py-type.c (typy_array): New function.
 	(type_object_methods): Add "array".
