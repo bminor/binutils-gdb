@@ -1,5 +1,11 @@
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/11391:
+	* python/py-value.c (valpy_nonzero): Don't throw error for other
+	Value types.
+
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/10676:
 	* python/py-type.c: Include bcache.h, vec.h.
 	(struct type_equality_entry): New.

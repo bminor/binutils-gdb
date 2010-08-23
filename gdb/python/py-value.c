@@ -712,11 +712,8 @@ valpy_nonzero (PyObject *self)
 			     TYPE_LENGTH (type),
 			     gdbarch_byte_order (get_type_arch (type)));
   else
-    {
-      PyErr_SetString (PyExc_TypeError, _("Attempted truth testing on invalid "
-					  "gdb.Value type."));
-      return 0;
-    }
+    /* All other values are True.  */
+    return 1;
 }
 
 /* Implements ~ for value objects.  */
