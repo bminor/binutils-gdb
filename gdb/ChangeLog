@@ -1,3 +1,11 @@
+2010-08-23  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_structure_type): Add comment.
+	(read_enumeration_type): Add comment.
+	(process_enumeration_scope): Move definition of some locals
+	closer to their use.
+	(read_namespace_type): Add comment.
+
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11145:

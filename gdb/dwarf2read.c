@@ -6658,6 +6658,9 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	 This is important, for example, because for c++ classes we need
 	 TYPE_NAME set which is only done by new_symbol.  Blech.  */
       type = read_type_die (type_die, type_cu);
+
+      /* TYPE_CU may not be the same as CU.
+	 Ensure TYPE is recorded in CU's type_hash table.  */
       return set_die_type (die, type, cu);
     }
 
@@ -6962,6 +6965,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       struct die_info *type_die = follow_die_ref_or_sig (die, attr, &type_cu);
 
       type = read_type_die (type_die, type_cu);
+
+      /* TYPE_CU may not be the same as CU.
+	 Ensure TYPE is recorded in CU's type_hash table.  */
       return set_die_type (die, type, cu);
     }
 
@@ -7002,21 +7008,21 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 static void
 process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct die_info *child_die;
-  struct field *fields;
-  struct symbol *sym;
-  int num_fields;
-  int unsigned_enum = 1;
-  char *name;
   struct type *this_type;
 
-  num_fields = 0;
-  fields = NULL;
   this_type = get_die_type (die, cu);
   if (this_type == NULL)
     this_type = read_enumeration_type (die, cu);
+
   if (die->child != NULL)
     {
+      struct die_info *child_die;
+      struct symbol *sym;
+      struct field *fields = NULL;
+      int num_fields = 0;
+      int unsigned_enum = 1;
+      char *name;
+
       child_die = die->child;
       while (child_die && child_die->tag)
 	{
@@ -7305,6 +7311,9 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
 
       ext_die = dwarf2_extension (die, &ext_cu);
       type = read_type_die (ext_die, ext_cu);
+
+      /* EXT_CU may not be the same as CU.
+	 Ensure TYPE is recorded in CU's type_hash table.  */
       return set_die_type (die, type, cu);
     }
 
