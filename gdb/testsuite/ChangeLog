@@ -1,5 +1,13 @@
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/11145:
+	* gdb.python/py-value.c (Base, Derived): New types.
+	(base): New global.
+	* gdb.python/py-value.exp (test_subscript_regression): Add
+	dynamic_cast test.
+
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/10676:
 	* gdb.python/py-type.exp (test_fields): Add tests for type
 	equality.

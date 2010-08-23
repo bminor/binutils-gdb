@@ -26,6 +26,7 @@
 #include "dfp.h"
 #include "valprint.h"
 #include "infcall.h"
+#include "expression.h"
 
 #ifdef HAVE_PYTHON
 
@@ -295,9 +296,10 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   return unicode;
 }
 
-/* Cast a value to a given type.  */
+/* A helper function that implements the various cast operators.  */
+
 static PyObject *
-valpy_cast (PyObject *self, PyObject *args)
+valpy_do_cast (PyObject *self, PyObject *args, enum exp_opcode op)
 {
   PyObject *type_obj;
   struct type *type;
@@ -317,11 +319,45 @@ valpy_cast (PyObject *self, PyObject *args)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      res_val = value_cast (type, ((value_object *) self)->value);
+      struct value *val = ((value_object *) self)->value;
+
+      if (op == UNOP_DYNAMIC_CAST)
+	res_val = value_dynamic_cast (type, val);
+      else if (op == UNOP_REINTERPRET_CAST)
+	res_val = value_reinterpret_cast (type, val);
+      else
+	{
+	  gdb_assert (op == UNOP_CAST);
+	  res_val = value_cast (type, val);
+	}
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
   return value_to_value_object (res_val);
+}
+
+/* Implementation of the "cast" method.  */
+
+static PyObject *
+valpy_cast (PyObject *self, PyObject *args)
+{
+  return valpy_do_cast (self, args, UNOP_CAST);
+}
+
+/* Implementation of the "dynamic_cast" method.  */
+
+static PyObject *
+valpy_dynamic_cast (PyObject *self, PyObject *args)
+{
+  return valpy_do_cast (self, args, UNOP_DYNAMIC_CAST);
+}
+
+/* Implementation of the "reinterpret_cast" method.  */
+
+static PyObject *
+valpy_reinterpret_cast (PyObject *self, PyObject *args)
+{
+  return valpy_do_cast (self, args, UNOP_REINTERPRET_CAST);
 }
 
 static Py_ssize_t
@@ -1138,6 +1174,15 @@ static PyGetSetDef value_object_getset[] = {
 
 static PyMethodDef value_object_methods[] = {
   { "cast", valpy_cast, METH_VARARGS, "Cast the value to the supplied type." },
+  { "dynamic_cast", valpy_dynamic_cast, METH_VARARGS,
+    "dynamic_cast (gdb.Type) -> gdb.Value\n\
+Cast the value to the supplied type, as if by the C++ dynamic_cast operator."
+  },
+  { "reinterpret_cast", valpy_reinterpret_cast, METH_VARARGS,
+    "reinterpret_cast (gdb.Type) -> gdb.Value\n\
+Cast the value to the supplied type, as if by the C++\n\
+reinterpret_cast operator."
+  },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
   { "lazy_string", (PyCFunction) valpy_lazy_string, METH_VARARGS | METH_KEYWORDS,
     "lazy_string ([encoding]  [, length]) -> lazy_string\n\

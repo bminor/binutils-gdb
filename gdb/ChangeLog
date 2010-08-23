@@ -1,5 +1,15 @@
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/11145:
+	* python/py-value.c: Include expression.h.
+	(valpy_do_cast): New function.
+	(valpy_cast): Use it.
+	(valpy_dynamic_cast): New function.
+	(valpy_reinterpret_cast): Likewise.
+	(value_object_methods): Add dynamic_cast, reinterpret_cast.
+
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/11391:
 	* python/py-value.c (valpy_nonzero): Don't throw error for other
 	Value types.

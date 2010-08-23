@@ -40,6 +40,16 @@ typedef struct s *PTR;
 enum e evalue = TWO;
 
 #ifdef __cplusplus
+
+struct Base {
+  virtual int x() { return 5; }
+};
+
+struct Derived : public Base {
+};
+
+Base *base = new Derived ();
+
 void ptr_ref(int*& rptr_int)
 {
   return; /* break to inspect pointer by reference. */

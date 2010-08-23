@@ -20792,6 +20792,16 @@ The result @code{bar} will be a @code{gdb.Value} object holding the
 value pointed to by @code{foo}.
 @end defmethod
 
+@defmethod Value dynamic_cast type
+Like @code{Value.cast}, but works as if the C@t{++} @code{dynamic_cast}
+operator were used.  Consult a C@t{++} reference for details.
+@end defmethod
+
+@defmethod Value reinterpret_cast type
+Like @code{Value.cast}, but works as if the C@t{++} @code{reinterpret_cast}
+operator were used.  Consult a C@t{++} reference for details.
+@end defmethod
+
 @defmethod Value string @r{[}encoding@r{]} @r{[}errors@r{]} @r{[}length@r{]}
 If this @code{gdb.Value} represents a string, then this method
 converts the contents to a Python string.  Otherwise, this method will

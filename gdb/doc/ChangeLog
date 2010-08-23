@@ -1,5 +1,11 @@
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
+	PR python/11145:
+	* gdb.texinfo (Values From Inferior): Document dynamic_cast and
+	reinterpret_cast methods.
+
+2010-08-23  Tom Tromey  <tromey@redhat.com>
+
 	PR python/11915:
 	* gdb.texinfo (Types In Python): Document array method.
 

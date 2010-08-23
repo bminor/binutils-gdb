@@ -374,6 +374,11 @@ proc test_subscript_regression {lang} {
      gdb_py_test_silent_cmd "python rptr = gdb.history(0)" \
 	 "Obtains value from GDB" 1
      gdb_test "python print rptr\[0\]" "2" "Check pointer passed as reference"
+
+     # Just the most basic test of dynamic_cast -- it is checked in
+     # the C++ tests.
+     gdb_test "python print bool(gdb.parse_and_eval('base').dynamic_cast(gdb.lookup_type('Derived').pointer()))" \
+	 True
  }
 
  gdb_breakpoint [gdb_get_line_number "break to inspect struct and union"]
