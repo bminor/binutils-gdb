@@ -10718,7 +10718,7 @@ display_mips_gnu_attribute (unsigned char * p, int tag)
 	  printf (_("Soft float\n"));
 	  break;
 	case 4:
-	  printf (_("64-bit float (-mips32r2 -mfp64)\n"));
+	  printf (_("Hard float (MIPS32r2 64-bit FPU)\n"));
 	  break;
 	default:
 	  printf ("??? (%d)\n", val);

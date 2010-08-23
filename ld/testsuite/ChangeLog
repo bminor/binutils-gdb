@@ -1,3 +1,10 @@
+2010-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-mips-elf/attr-gnu-4-04.d: Adjust Tag_GNU_MIPS_ABI_FP for
+	the new MIPS32r2 64-bit FPU description.
+	* ld-mips-elf/attr-gnu-4-40.d: Likewise.
+	* ld-mips-elf/attr-gnu-4-44.d: Likewise.
+
 2010-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11933

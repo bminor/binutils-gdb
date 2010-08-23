@@ -1,3 +1,8 @@
+2010-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* readelf.c (display_mips_gnu_attribute): Replace GCC options
+	with a textual description of a MIPS32r2 64-bit FPU.
+
 2010-08-19  Alan Modra  <amodra@gmail.com>
 
 	* NEWS: Mention change in linker script expression evaluation.
