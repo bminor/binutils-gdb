@@ -57,6 +57,8 @@ static int input_elf_machine = -1;
 static int output_elf_machine = -1;
 static int input_elf_type = -1;
 static int output_elf_type = -1;
+static int input_elf_osabi = -1;
+static int output_elf_osabi = -1;
 static int input_elf_class = -1;
 
 #define streq(a,b)	  (strcmp ((a), (b)) == 0)
@@ -230,7 +232,7 @@ byte_put_big_endian (unsigned char * field, bfd_vma value, int size)
 static int
 update_elf_header (const char *file_name, FILE *file)
 {
-  int class, machine, type, status;
+  int class, machine, type, status, osabi;
 
   if (elf_header.e_ident[EI_MAG0] != ELFMAG0
       || elf_header.e_ident[EI_MAG1] != ELFMAG1
@@ -289,7 +291,18 @@ update_elf_header (const char *file_name, FILE *file)
       return 0;
     }
 
-  /* Update e_machine and e_type.  */
+  osabi = elf_header.e_ident[EI_OSABI];
+
+  /* Skip if OSABI doesn't match. */
+  if (input_elf_osabi != -1 && osabi != input_elf_osabi)
+    {
+      non_fatal
+	(_("%s: Unmatched EI_OSABI: %d is not %d\n"),
+	 file_name, osabi, input_elf_osabi);
+      return 0;
+    }
+
+  /* Update e_machine, e_type and EI_OSABI.  */
   switch (class)
     {
     default:
@@ -301,6 +314,8 @@ update_elf_header (const char *file_name, FILE *file)
 	BYTE_PUT (ehdr32.e_machine, output_elf_machine);
       if (output_elf_type != -1)
 	BYTE_PUT (ehdr32.e_type, output_elf_type);
+      if (output_elf_osabi != -1)
+	ehdr32.e_ident[EI_OSABI] = output_elf_osabi;
       status = fwrite (&ehdr32, sizeof (ehdr32), 1, file) == 1;
       break;
     case ELFCLASS64:
@@ -308,6 +323,8 @@ update_elf_header (const char *file_name, FILE *file)
 	BYTE_PUT (ehdr64.e_machine, output_elf_machine);
       if (output_elf_type != -1)
 	BYTE_PUT (ehdr64.e_type, output_elf_type);
+      if (output_elf_osabi != -1)
+	ehdr64.e_ident[EI_OSABI] = output_elf_osabi;
       status = fwrite (&ehdr64, sizeof (ehdr64), 1, file) == 1;
       break;
     }
@@ -761,7 +778,8 @@ make_qualified_name (struct archive_info * arch,
     }
 
   if (arch->is_thin_archive && arch->nested_member_origin != 0)
-    snprintf (name, len, "%s[%s(%s)]", arch->file_name, nested_arch->file_name, member_name);
+    snprintf (name, len, "%s[%s(%s)]", arch->file_name,
+	      nested_arch->file_name, member_name);
   else if (arch->is_thin_archive)
     snprintf (name, len, "%s[%s]", arch->file_name, member_name);
   else
@@ -995,6 +1013,47 @@ process_file (const char *file_name)
   return ret;
 }
 
+static const struct
+{
+  int osabi;
+  const char *name;
+}
+osabis[] =
+{
+  { ELFOSABI_NONE, "none" },
+  { ELFOSABI_HPUX, "HPUX" },
+  { ELFOSABI_NETBSD, "NetBSD" },
+  { ELFOSABI_LINUX, "Linux" },
+  { ELFOSABI_HURD, "Hurd" },
+  { ELFOSABI_SOLARIS, "Solaris" },
+  { ELFOSABI_AIX, "AIX" },
+  { ELFOSABI_IRIX, "Irix" },
+  { ELFOSABI_FREEBSD, "FreeBSD" },
+  { ELFOSABI_TRU64, "TRU64" },
+  { ELFOSABI_MODESTO, "Modesto" },
+  { ELFOSABI_OPENBSD, "OpenBSD" },
+  { ELFOSABI_OPENVMS, "OpenVMS" },
+  { ELFOSABI_NSK, "NSK" },
+  { ELFOSABI_AROS, "AROS" },
+  { ELFOSABI_FENIXOS, "FenixOS" }
+};
+
+/* Return ELFOSABI_XXX for an OSABI string, OSABI.  */
+
+static int
+elf_osabi (const char *osabi)
+{
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (osabis); i++)
+    if (strcasecmp (osabi, osabis[i].name) == 0)
+      return osabis[i].osabi;
+
+  non_fatal (_("Unknown OSABI: %s\n"), osabi);
+
+  return -1;
+}
+
 /* Return EM_XXX for a machine string, MACH.  */
 
 static int
@@ -1056,7 +1115,9 @@ enum command_line_switch
     OPTION_INPUT_MACH = 150,
     OPTION_OUTPUT_MACH,
     OPTION_INPUT_TYPE,
-    OPTION_OUTPUT_TYPE
+    OPTION_OUTPUT_TYPE,
+    OPTION_INPUT_OSABI,
+    OPTION_OUTPUT_OSABI
   };
 
 static struct option options[] =
@@ -1065,6 +1126,8 @@ static struct option options[] =
   {"output-mach",	required_argument, 0, OPTION_OUTPUT_MACH},
   {"input-type",	required_argument, 0, OPTION_INPUT_TYPE},
   {"output-type",	required_argument, 0, OPTION_OUTPUT_TYPE},
+  {"input-osabi",	required_argument, 0, OPTION_INPUT_OSABI},
+  {"output-osabi",	required_argument, 0, OPTION_OUTPUT_OSABI},
   {"version",		no_argument, 0, 'v'},
   {"help",		no_argument, 0, 'h'},
   {0,			no_argument, 0, 0}
@@ -1073,7 +1136,7 @@ static struct option options[] =
 static void
 usage (FILE *stream, int exit_status)
 {
-  fprintf (stream, _("Usage: %s [option(s)] {--output-mach <machine>|--output-type <type>} elffile(s)\n"),
+  fprintf (stream, _("Usage: %s <option(s)> elffile(s)\n"),
 	   program_name);
   fprintf (stream, _(" Update the ELF header of ELF files\n"));
   fprintf (stream, _(" The options are:\n"));
@@ -1082,6 +1145,8 @@ usage (FILE *stream, int exit_status)
   --output-mach <machine>     Set output machine type to <machine>\n\
   --input-type <type>         Set input file type to <type>\n\
   --output-type <type>        Set output file type to <type>\n\
+  --input-osabi <osabi>       Set input OSABI to <osabi>\n\
+  --output-osabi <osabi>      Set output OSABI to <osabi>\n\
   -h --help                   Display this information\n\
   -v --version                Display the version number of %s\n\
 "),
@@ -1139,6 +1204,18 @@ main (int argc, char ** argv)
 	    return 1;
 	  break;
 
+	case OPTION_INPUT_OSABI:
+	  input_elf_osabi = elf_osabi (optarg);
+	  if (input_elf_osabi < 0)
+	    return 1;
+	  break;
+
+	case OPTION_OUTPUT_OSABI:
+	  output_elf_osabi = elf_osabi (optarg);
+	  if (output_elf_osabi < 0)
+	    return 1;
+	  break;
+
 	case 'h':
 	  usage (stdout, 0);
 
@@ -1153,7 +1230,8 @@ main (int argc, char ** argv)
 
   if (optind == argc
       || (output_elf_machine == -1
-	  && output_elf_type == -1))
+	  && output_elf_type == -1
+	  && output_elf_osabi == -1))
     usage (stderr, 1);
 
   status = 0;

@@ -4121,8 +4121,10 @@ objdump(1), and the Info entries for @file{binutils}.
 @c man begin SYNOPSIS elfedit
 elfedit [@option{--input-mach=}@var{machine}]
         [@option{--input-type=}@var{type}]
+        [@option{--input-osabi=}@var{osbi}]
         @option{--output-mach=}@var{machine}
         @option{--output-type=}@var{type}
+        @option{--output-osabi=}@var{osbi}
         [@option{-v}|@option{--version}]
         [@option{-h}|@option{--help}]
         @var{elffile}@dots{}
@@ -4142,8 +4144,8 @@ which fields in the ELF header should be updated.
 @c man begin OPTIONS elfedit
 
 The long and short forms of options, shown here as alternatives, are
-equivalent. At least one of the @option{--output-mach} and
-@option{--output-type} options must be given.
+equivalent. At least one of the @option{--output-mach},
+@option{--output-type} and @option{--output-osabi} options must be given.
 
 @table @env
 
@@ -4167,6 +4169,19 @@ The supported ELF file types are, @var{rel}, @var{exec} and @var{dyn}.
 @itemx --output-type=@var{type}
 Change the ELF file type in the ELF header to @var{type}.  The
 supported ELF types are the same as @option{--input-type}.
+
+@itemx --input-osabi=@var{osabi}
+Set the matching input ELF file OSABI to @var{osbi}.  If
+@option{--input-osabi} isn't specified, it will match any ELF OSABIs.
+
+The supported ELF OSABIs are, @var{none}, @var{HPUX}, @var{NetBSD},
+@var{Linux}, @var{Hurd}, @var{Solaris}, @var{AIX}, @var{Irix},
+@var{FreeBSD}, @var{TRU64}, @var{Modesto}, @var{OpenBSD}, @var{OpenVMS},
+@var{NSK}, @var{AROS} and @var{FenixOS}.
+
+@itemx --output-osabi=@var{osabi}
+Change the ELF OSABI in the ELF header to @var{type}.  The
+supported ELF OSABI are the same as @option{--input-osabi}.
 
 @item -v
 @itemx --version

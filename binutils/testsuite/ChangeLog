@@ -1,3 +1,9 @@
+2010-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-3.d: New.
+
+	* binutils-all/elfedit.exp: Run elfedit-3.
+
 2010-07-19  Andreas Schwab  <schwab@redhat.com>
 
 	* binutils-all/readelf.s: Ignore "Key to Flags" contents.

@@ -30,3 +30,4 @@ if ![is_remote host] {
 
 run_dump_test "elfedit-1"
 run_dump_test "elfedit-2"
+run_dump_test "elfedit-3"

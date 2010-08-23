@@ -1,3 +1,20 @@
+2010-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfedit.c (input_elf_osabi): New.
+	(output_elf_osbi): Likewise.
+	(osabis): Likewise.
+	(elf_osabi): Likewise.
+	(update_elf_header): Support updating ELF OSABI.
+	(make_qualified_name): Break long line.
+	(command_line_switch): Add OPTION_INPUT_OSABI and
+	OPTION_OUTPUT_OSABI.
+	(options): Likewise.
+	(usage): Add --input-osabi and --output-osabi.
+	(main): Handle OPTION_INPUT_OSABI and OPTION_OUTPUT_OSABI.
+
+	* doc/binutils.texi: Document --input-osabi and --output-osabi
+	for elfedit.
+
 2010-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* readelf.c (display_mips_gnu_attribute): Replace GCC options
