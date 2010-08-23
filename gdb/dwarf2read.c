@@ -14187,7 +14187,7 @@ offset_and_type_eq (const void *item_lhs, const void *item_rhs)
    Therefore caller should follow these rules:
      * Try to fetch any prerequisite types we may need to build this DIE type
        before building the type and calling set_die_type.
-     * After building typer call set_die_type for current DIE as soon as
+     * After building type call set_die_type for current DIE as soon as
        possible before fetching more types to complete the current type.
      * Make the type as complete as possible before fetching more types.  */
 

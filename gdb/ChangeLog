@@ -5,6 +5,7 @@
 	(process_enumeration_scope): Move definition of some locals
 	closer to their use.
 	(read_namespace_type): Add comment.
+	(set_die_type): Fix typo in comment.
 
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
