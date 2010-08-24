@@ -90,7 +90,7 @@ run_ld_link_tests $x86_64tests
 global link_output
 global ld
 
-set test_namename "Mixed x86_64 and i386 input test 1"
+set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1
 if { ![ld_simple_link $ld tmpdir/$test "-melf_x86_64 tmpdir/${test}a.o tmpdir/${test}b.o"] } {
     if [string match "*i386 architecture of input file `tmpdir/${test}b.o' is incompatible with i386:x86-64 output*" $link_output] {
@@ -100,7 +100,7 @@ if { ![ld_simple_link $ld tmpdir/$test "-melf_x86_64 tmpdir/${test}a.o tmpdir/${
     }
 }
 
-set test_namename "Mixed x86_64 and i386 input test 2"
+set test_name "Mixed x86_64 and i386 input test 2"
 set test mixed2
 if { ![ld_simple_link $ld tmpdir/$test "-melf_x86_64 tmpdir/${test}a.o tmpdir/${test}b.o"] } {
     if [string match "*i386 architecture of input file `tmpdir/${test}b.o' is incompatible with i386:x86-64 output*" $link_output] {

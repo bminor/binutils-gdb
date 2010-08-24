@@ -1,3 +1,7 @@
+2010-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/x86-64.exp: Fix typos.
+
 2010-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-mips-elf/attr-gnu-4-04.d: Adjust Tag_GNU_MIPS_ABI_FP for
@@ -13,7 +17,7 @@
 	* ld-x86-64/mixed2a.s: Likewise.
 	* ld-x86-64/mixed2b.s: Likewise.
 
-	* ld-x86-64/x86-64.exp: Text mixed x86_64 and i386 inputs.
+	* ld-x86-64/x86-64.exp: Test mixed x86_64 and i386 inputs.
 
 2010-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
