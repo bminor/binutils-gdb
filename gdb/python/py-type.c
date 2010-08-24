@@ -892,7 +892,7 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
   else
     {
       struct bcache *cache;
-      VEC (type_equality_entry_d) *worklist;
+      VEC (type_equality_entry_d) *worklist = NULL;
       struct type_equality_entry entry;
 
       cache = bcache_xmalloc ();

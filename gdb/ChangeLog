@@ -1,3 +1,7 @@
+2010-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/py-type.c (typy_richcompare): Initialize worklist.
+
 2010-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Kazu Hirata  <kazu@codesourcery.com>
 	    Jonathan Larmour  <jifl@eCosCentric.com>
