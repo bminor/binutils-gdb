@@ -1,3 +1,7 @@
+2010-08-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.h (linux_thread_area): Delete declaration.
+
 2010-08-11  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* linux-low.c (linux_wait_1): Correctly return the ptid of the child
