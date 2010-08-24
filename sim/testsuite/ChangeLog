@@ -1,3 +1,7 @@
+2010-08-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/nonvcv32.ms: Neutralize changed &&-in-macro gas syntax.
+
 2010-04-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (arch): Set to @sim_arch@.

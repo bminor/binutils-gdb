@@ -51,7 +51,7 @@
  .endm
 
  .macro nonvc2q insn op min=-63 max=63
- .if \op >= \min &&&& \op <= \max
+ .if (\op >= \min) && (\op <= \max)
  nonvc2 \insn,\op
  .endif
  .endm
@@ -118,12 +118,12 @@
 ; Test all applicable constant, register and memory variants of a value.
  .macro tst op
 ; Constants
- .if (\op <= 31 &&&& \op >= -32)
+ .if (\op <= 31) && (\op >= -32)
  nonvciterq \op
- .elseif (\op <= 255 &&&& \op >= -128)
+ .elseif (\op <= 255) && (\op >= -128)
  nonvcitermcb \op
  nonvcbwd bound,\op
- .elseif (\op <= 65535 &&&& \op >= -32767)
+ .elseif (\op <= 65535) && (\op >= -32767)
  nonvcitermcw \op
  nonvc2 bound.w,\op
  nonvc2 bound.d,\op
