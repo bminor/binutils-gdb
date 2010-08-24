@@ -108,6 +108,8 @@ enum gdb_regnum {
 
 #define CPSR_T		0x20
 
+#define XPSR_T		0x01000000
+
 /* Type of floating-point code in use by inferior.  There are really 3 models
    that are traditionally supported (plus the endianness issue), but gcc can
    only generate 2 of those.  The third is APCS_FLOAT, where arguments to
@@ -163,6 +165,7 @@ struct gdbarch_tdep
 				   have_vfp_pseudos.  */
   int have_neon;		/* Do we have a NEON unit?  */
 
+  int is_m;			/* Does the target follow the "M" profile.  */
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */
 

@@ -1,3 +1,8 @@
+2010-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (ARM Features): Document
+	org.gnu.gdb.arm.m-profile.
+
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11145:

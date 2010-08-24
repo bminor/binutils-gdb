@@ -35647,9 +35647,15 @@ registers using the capitalization used in the description.
 @subsection ARM Features
 @cindex target descriptions, ARM features
 
-The @samp{org.gnu.gdb.arm.core} feature is required for ARM targets.
+The @samp{org.gnu.gdb.arm.core} feature is required for non-M-profile
+ARM targets.
 It should contain registers @samp{r0} through @samp{r13}, @samp{sp},
 @samp{lr}, @samp{pc}, and @samp{cpsr}.
+
+For M-profile targets (e.g. Cortex-M3), the @samp{org.gnu.gdb.arm.core}
+feature is replaced by @samp{org.gnu.gdb.arm.m-profile}.  It should contain
+registers @samp{r0} through @samp{r13}, @samp{sp}, @samp{lr}, @samp{pc},
+and @samp{xpsr}.
 
 The @samp{org.gnu.gdb.arm.fpa} feature is optional.  If present, it
 should contain registers @samp{f0} through @samp{f7} and @samp{fps}.

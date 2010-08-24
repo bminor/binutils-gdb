@@ -1,3 +1,22 @@
+2010-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Kazu Hirata  <kazu@codesourcery.com>
+	    Jonathan Larmour  <jifl@eCosCentric.com>
+
+	* arm-tdep.c: Include features/arm-with-m.c.
+	(arm_psr_thumb_bit): New.  Update all uses of CPSR_T to
+	call this function.
+	(arm_pc_is_thumb): Add a gdbarch argument.  Update all callers.
+	Check is_m after force-mode.
+	(arm_gdbarch_init): Check the binary before the target description.
+	Add check for M profile attribute.  If we have an M-profile device,
+	but no target register description, use arm-with-m.  Recognize the
+	new org.gnu.gdb.arm.m-profile feature and its xpsr register.
+	(_initialize_arm_tdep): Call initialize_tdesc_arm_with_m.
+	* arm-tdep.h (XPSR_T): Define.
+	(struct gdbarch_tdep): Add is_m member.
+	* features/arm-m-profile.xml, features/arm-with-m.c,
+	features/arm-with-m.xml: New files.
+
 2010-08-23  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_structure_type): Add comment.

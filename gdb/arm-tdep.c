@@ -53,6 +53,8 @@
 #include "gdb_assert.h"
 #include "vec.h"
 
+#include "features/arm-with-m.c"
+
 static int arm_debug;
 
 /* Macros for setting and testing a bit in a minimal symbol that marks
@@ -255,12 +257,24 @@ static CORE_ADDR arm_analyze_prologue (struct gdbarch *gdbarch,
 
 int arm_apcs_32 = 1;
 
+/* Return the bit mask in ARM_PS_REGNUM that indicates Thumb mode.  */
+
+static int
+arm_psr_thumb_bit (struct gdbarch *gdbarch)
+{
+  if (gdbarch_tdep (gdbarch)->is_m)
+    return XPSR_T;
+  else
+    return CPSR_T;
+}
+
 /* Determine if FRAME is executing in Thumb mode.  */
 
 static int
 arm_frame_is_thumb (struct frame_info *frame)
 {
   CORE_ADDR cpsr;
+  ULONGEST t_bit = arm_psr_thumb_bit (get_frame_arch (frame));
 
   /* Every ARM frame unwinder can unwind the T bit of the CPSR, either
      directly (from a signal frame or dummy frame) or by interpreting
@@ -268,7 +282,7 @@ arm_frame_is_thumb (struct frame_info *frame)
      trust the unwinders.  */
   cpsr = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
 
-  return (cpsr & CPSR_T) != 0;
+  return (cpsr & t_bit) != 0;
 }
 
 /* Callback for VEC_lower_bound.  */
@@ -347,7 +361,7 @@ static CORE_ADDR arm_get_next_pc_raw (struct frame_info *frame,
    any executing frame; otherwise, prefer arm_frame_is_thumb.  */
 
 static int
-arm_pc_is_thumb (CORE_ADDR memaddr)
+arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
   struct obj_section *sec;
   struct minimal_symbol *sym;
@@ -361,6 +375,10 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
   if (strcmp (arm_force_mode_string, "arm") == 0)
     return 0;
   if (strcmp (arm_force_mode_string, "thumb") == 0)
+    return 1;
+
+  /* ARM v6-M and v7-M are always in Thumb mode.  */
+  if (gdbarch_tdep (gdbarch)->is_m)
     return 1;
 
   /* If there are mapping symbols, consult them.  */
@@ -815,7 +833,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	     associate prologue code with the opening brace; so this
 	     lets us skip the first line if we think it is the opening
 	     brace.  */
-	  if (arm_pc_is_thumb (func_addr))
+	  if (arm_pc_is_thumb (gdbarch, func_addr))
 	    analyzed_limit = thumb_analyze_prologue (gdbarch, func_addr,
 						     post_prologue_pc, NULL);
 	  else
@@ -842,7 +860,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 
   /* Check if this is Thumb code.  */
-  if (arm_pc_is_thumb (pc))
+  if (arm_pc_is_thumb (gdbarch, pc))
     return thumb_analyze_prologue (gdbarch, pc, limit_pc, NULL);
 
   for (skip_pc = pc; skip_pc < limit_pc; skip_pc += 4)
@@ -1507,13 +1525,14 @@ arm_prologue_prev_register (struct frame_info *this_frame,
   if (prev_regnum == ARM_PS_REGNUM)
     {
       CORE_ADDR lr, cpsr;
+      ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
 
       cpsr = get_frame_register_unsigned (this_frame, prev_regnum);
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       if (IS_THUMB_ADDR (lr))
-	cpsr |= CPSR_T;
+	cpsr |= t_bit;
       else
-	cpsr &= ~CPSR_T;
+	cpsr &= ~t_bit;
       return frame_unwind_got_constant (this_frame, prev_regnum, cpsr);
     }
 
@@ -1640,6 +1659,7 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 {
   struct gdbarch * gdbarch = get_frame_arch (this_frame);
   CORE_ADDR lr, cpsr;
+  ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
 
   switch (regnum)
     {
@@ -1657,9 +1677,9 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
       cpsr = get_frame_register_unsigned (this_frame, regnum);
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       if (IS_THUMB_ADDR (lr))
-	cpsr |= CPSR_T;
+	cpsr |= t_bit;
       else
-	cpsr &= ~CPSR_T;
+	cpsr &= ~t_bit;
       return frame_unwind_got_constant (this_frame, regnum, cpsr);
 
     default:
@@ -2008,7 +2028,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Set the return address.  For the ARM, the return breakpoint is
      always at BP_ADDR.  */
-  if (arm_pc_is_thumb (bp_addr))
+  if (arm_pc_is_thumb (gdbarch, bp_addr))
     bp_addr |= 1;
   regcache_cooked_write_unsigned (regcache, ARM_LR_REGNUM, bp_addr);
 
@@ -2147,7 +2167,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  && TYPE_CODE_FUNC == TYPE_CODE (check_typedef (target_type)))
 	{
 	  CORE_ADDR regval = extract_unsigned_integer (val, len, byte_order);
-	  if (arm_pc_is_thumb (regval))
+	  if (arm_pc_is_thumb (gdbarch, regval))
 	    {
 	      bfd_byte *copy = alloca (len);
 	      store_unsigned_integer (copy, len, byte_order,
@@ -3352,7 +3372,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
     return bpaddr;
 
   /* ARM mode does not have this problem.  */
-  if (!arm_pc_is_thumb (bpaddr))
+  if (!arm_pc_is_thumb (gdbarch, bpaddr))
     return bpaddr;
 
   /* We are setting a breakpoint in Thumb code that could potentially
@@ -3543,10 +3563,11 @@ static int
 displaced_in_arm_mode (struct regcache *regs)
 {
   ULONGEST ps;
+  ULONGEST t_bit = arm_psr_thumb_bit (get_regcache_arch (regs));
 
   regcache_cooked_read_unsigned (regs, ARM_PS_REGNUM, &ps);
 
-  return (ps & CPSR_T) == 0;
+  return (ps & t_bit) == 0;
 }
 
 /* Write to the PC as from a branch instruction.  */
@@ -3568,18 +3589,18 @@ static void
 bx_write_pc (struct regcache *regs, ULONGEST val)
 {
   ULONGEST ps;
+  ULONGEST t_bit = arm_psr_thumb_bit (get_regcache_arch (regs));
 
   regcache_cooked_read_unsigned (regs, ARM_PS_REGNUM, &ps);
 
   if ((val & 1) == 1)
     {
-      regcache_cooked_write_unsigned (regs, ARM_PS_REGNUM, ps | CPSR_T);
+      regcache_cooked_write_unsigned (regs, ARM_PS_REGNUM, ps | t_bit);
       regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM, val & 0xfffffffe);
     }
   else if ((val & 2) == 0)
     {
-      regcache_cooked_write_unsigned (regs, ARM_PS_REGNUM,
-				      ps & ~(ULONGEST) CPSR_T);
+      regcache_cooked_write_unsigned (regs, ARM_PS_REGNUM, ps & ~t_bit);
       regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM, val);
     }
   else
@@ -3587,8 +3608,7 @@ bx_write_pc (struct regcache *regs, ULONGEST val)
       /* Unpredictable behaviour.  Try to do something sensible (switch to ARM
 	  mode, align dest to 4 bytes).  */
       warning (_("Single-stepping BX to non-word-aligned ARM instruction."));
-      regcache_cooked_write_unsigned (regs, ARM_PS_REGNUM,
-				      ps & ~(ULONGEST) CPSR_T);
+      regcache_cooked_write_unsigned (regs, ARM_PS_REGNUM, ps & ~t_bit);
       regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM, val & 0xfffffffc);
     }
 }
@@ -5345,7 +5365,9 @@ arm_displaced_step_fixup (struct gdbarch *gdbarch,
 static int
 gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
 {
-  if (arm_pc_is_thumb (memaddr))
+  struct gdbarch *gdbarch = info->application_data;
+
+  if (arm_pc_is_thumb (gdbarch, memaddr))
     {
       static asymbol *asym;
       static combined_entry_type ce;
@@ -5435,7 +5457,7 @@ arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
 
-  if (arm_pc_is_thumb (*pcptr))
+  if (arm_pc_is_thumb (gdbarch, *pcptr))
     {
       *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
 
@@ -5474,7 +5496,7 @@ arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 
   arm_breakpoint_from_pc (gdbarch, pcptr, kindptr);
 
-  if (arm_pc_is_thumb (*pcptr) && *kindptr == 4)
+  if (arm_pc_is_thumb (gdbarch, *pcptr) && *kindptr == 4)
     /* The documented magic value for a 32-bit Thumb-2 breakpoint, so
        that this is not confused with a 32-bit ARM breakpoint.  */
     *kindptr = 3;
@@ -6219,18 +6241,21 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 static void
 arm_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   regcache_cooked_write_unsigned (regcache, ARM_PC_REGNUM, pc);
 
   /* If necessary, set the T bit.  */
   if (arm_apcs_32)
     {
-      ULONGEST val;
+      ULONGEST val, t_bit;
       regcache_cooked_read_unsigned (regcache, ARM_PS_REGNUM, &val);
-      if (arm_pc_is_thumb (pc))
-	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM, val | CPSR_T);
+      t_bit = arm_psr_thumb_bit (gdbarch);
+      if (arm_pc_is_thumb (gdbarch, pc))
+	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM,
+					val | t_bit);
       else
 	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM,
-					val & ~(ULONGEST) CPSR_T);
+					val & ~t_bit);
     }
 }
 
@@ -6411,165 +6436,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_abi_kind arm_abi = arm_abi_global;
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
-  int i;
+  int i, is_m = 0;
   int have_vfp_registers = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
   int have_neon = 0;
   int have_fpa_registers = 1;
-
-  /* Check any target description for validity.  */
-  if (tdesc_has_registers (info.target_desc))
-    {
-      /* For most registers we require GDB's default names; but also allow
-	 the numeric names for sp / lr / pc, as a convenience.  */
-      static const char *const arm_sp_names[] = { "r13", "sp", NULL };
-      static const char *const arm_lr_names[] = { "r14", "lr", NULL };
-      static const char *const arm_pc_names[] = { "r15", "pc", NULL };
-
-      const struct tdesc_feature *feature;
-      int valid_p;
-
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.arm.core");
-      if (feature == NULL)
-	return NULL;
-
-      tdesc_data = tdesc_data_alloc ();
-
-      valid_p = 1;
-      for (i = 0; i < ARM_SP_REGNUM; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
-					    arm_register_names[i]);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
-						  ARM_SP_REGNUM,
-						  arm_sp_names);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
-						  ARM_LR_REGNUM,
-						  arm_lr_names);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
-						  ARM_PC_REGNUM,
-						  arm_pc_names);
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-					  ARM_PS_REGNUM, "cpsr");
-
-      if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
-
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.arm.fpa");
-      if (feature != NULL)
-	{
-	  valid_p = 1;
-	  for (i = ARM_F0_REGNUM; i <= ARM_FPS_REGNUM; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
-						arm_register_names[i]);
-	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
-	}
-      else
-	have_fpa_registers = 0;
-
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.xscale.iwmmxt");
-      if (feature != NULL)
-	{
-	  static const char *const iwmmxt_names[] = {
-	    "wR0", "wR1", "wR2", "wR3", "wR4", "wR5", "wR6", "wR7",
-	    "wR8", "wR9", "wR10", "wR11", "wR12", "wR13", "wR14", "wR15",
-	    "wCID", "wCon", "wCSSF", "wCASF", "", "", "", "",
-	    "wCGR0", "wCGR1", "wCGR2", "wCGR3", "", "", "", "",
-	  };
-
-	  valid_p = 1;
-	  for (i = ARM_WR0_REGNUM; i <= ARM_WR15_REGNUM; i++)
-	    valid_p
-	      &= tdesc_numbered_register (feature, tdesc_data, i,
-					  iwmmxt_names[i - ARM_WR0_REGNUM]);
-
-	  /* Check for the control registers, but do not fail if they
-	     are missing.  */
-	  for (i = ARM_WC0_REGNUM; i <= ARM_WCASF_REGNUM; i++)
-	    tdesc_numbered_register (feature, tdesc_data, i,
-				     iwmmxt_names[i - ARM_WR0_REGNUM]);
-
-	  for (i = ARM_WCGR0_REGNUM; i <= ARM_WCGR3_REGNUM; i++)
-	    valid_p
-	      &= tdesc_numbered_register (feature, tdesc_data, i,
-					  iwmmxt_names[i - ARM_WR0_REGNUM]);
-
-	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
-	}
-
-      /* If we have a VFP unit, check whether the single precision registers
-	 are present.  If not, then we will synthesize them as pseudo
-	 registers.  */
-      feature = tdesc_find_feature (info.target_desc,
-				    "org.gnu.gdb.arm.vfp");
-      if (feature != NULL)
-	{
-	  static const char *const vfp_double_names[] = {
-	    "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
-	    "d8", "d9", "d10", "d11", "d12", "d13", "d14", "d15",
-	    "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23",
-	    "d24", "d25", "d26", "d27", "d28", "d29", "d30", "d31",
-	  };
-
-	  /* Require the double precision registers.  There must be either
-	     16 or 32.  */
-	  valid_p = 1;
-	  for (i = 0; i < 32; i++)
-	    {
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
-						  ARM_D0_REGNUM + i,
-						  vfp_double_names[i]);
-	      if (!valid_p)
-		break;
-	    }
-
-	  if (!valid_p && i != 16)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
-
-	  if (tdesc_unnumbered_register (feature, "s0") == 0)
-	    have_vfp_pseudos = 1;
-
-	  have_vfp_registers = 1;
-
-	  /* If we have VFP, also check for NEON.  The architecture allows
-	     NEON without VFP (integer vector operations only), but GDB
-	     does not support that.  */
-	  feature = tdesc_find_feature (info.target_desc,
-					"org.gnu.gdb.arm.neon");
-	  if (feature != NULL)
-	    {
-	      /* NEON requires 32 double-precision registers.  */
-	      if (i != 32)
-		{
-		  tdesc_data_cleanup (tdesc_data);
-		  return NULL;
-		}
-
-	      /* If there are quad registers defined by the stub, use
-		 their type; otherwise (normally) provide them with
-		 the default type.  */
-	      if (tdesc_unnumbered_register (feature, "q0") == 0)
-		have_neon_pseudos = 1;
-
-	      have_neon = 1;
-	    }
-	}
-    }
+  const struct target_desc *tdesc = info.target_desc;
 
   /* If we have an object to base this architecture on, try to determine
      its ABI.  */
@@ -6605,6 +6476,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  else if (ei_osabi == ELFOSABI_NONE)
 	    {
 	      int eabi_ver = EF_ARM_EABI_VERSION (e_flags);
+	      int attr_arch, attr_profile;
 
 	      switch (eabi_ver)
 		{
@@ -6662,6 +6534,26 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  warning (_("unknown ARM EABI version 0x%x"), eabi_ver);
 		  break;
 		}
+
+#ifdef HAVE_ELF
+	      /* Detect M-profile programs.  This only works if the
+		 executable file includes build attributes; GCC does
+		 copy them to the executable, but e.g. RealView does
+		 not.  */
+	      attr_arch = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+						    Tag_CPU_arch);
+	      attr_profile = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+						       Tag_CPU_arch_profile);
+	      /* GCC specifies the profile for v6-M; RealView only
+		 specifies the profile for architectures starting with
+		 V7 (as opposed to architectures with a tag
+		 numerically greater than TAG_CPU_ARCH_V7).  */
+	      if (!tdesc_has_registers (tdesc)
+		  && (attr_arch == TAG_CPU_ARCH_V6_M
+		      || attr_arch == TAG_CPU_ARCH_V6S_M
+		      || attr_profile == 'M'))
+		tdesc = tdesc_arm_with_m;
+#endif
 	    }
 
 	  if (fp_model == ARM_FLOAT_AUTO)
@@ -6699,6 +6591,172 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 
+  /* Check any target description for validity.  */
+  if (tdesc_has_registers (tdesc))
+    {
+      /* For most registers we require GDB's default names; but also allow
+	 the numeric names for sp / lr / pc, as a convenience.  */
+      static const char *const arm_sp_names[] = { "r13", "sp", NULL };
+      static const char *const arm_lr_names[] = { "r14", "lr", NULL };
+      static const char *const arm_pc_names[] = { "r15", "pc", NULL };
+
+      const struct tdesc_feature *feature;
+      int valid_p;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.arm.core");
+      if (feature == NULL)
+	{
+	  feature = tdesc_find_feature (tdesc,
+					"org.gnu.gdb.arm.m-profile");
+	  if (feature == NULL)
+	    return NULL;
+	  else
+	    is_m = 1;
+	}
+
+      tdesc_data = tdesc_data_alloc ();
+
+      valid_p = 1;
+      for (i = 0; i < ARM_SP_REGNUM; i++)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+					    arm_register_names[i]);
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+						  ARM_SP_REGNUM,
+						  arm_sp_names);
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+						  ARM_LR_REGNUM,
+						  arm_lr_names);
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+						  ARM_PC_REGNUM,
+						  arm_pc_names);
+      if (is_m)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					    ARM_PS_REGNUM, "xpsr");
+      else
+	valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					    ARM_PS_REGNUM, "cpsr");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.arm.fpa");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+	  for (i = ARM_F0_REGNUM; i <= ARM_FPS_REGNUM; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+						arm_register_names[i]);
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	}
+      else
+	have_fpa_registers = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.xscale.iwmmxt");
+      if (feature != NULL)
+	{
+	  static const char *const iwmmxt_names[] = {
+	    "wR0", "wR1", "wR2", "wR3", "wR4", "wR5", "wR6", "wR7",
+	    "wR8", "wR9", "wR10", "wR11", "wR12", "wR13", "wR14", "wR15",
+	    "wCID", "wCon", "wCSSF", "wCASF", "", "", "", "",
+	    "wCGR0", "wCGR1", "wCGR2", "wCGR3", "", "", "", "",
+	  };
+
+	  valid_p = 1;
+	  for (i = ARM_WR0_REGNUM; i <= ARM_WR15_REGNUM; i++)
+	    valid_p
+	      &= tdesc_numbered_register (feature, tdesc_data, i,
+					  iwmmxt_names[i - ARM_WR0_REGNUM]);
+
+	  /* Check for the control registers, but do not fail if they
+	     are missing.  */
+	  for (i = ARM_WC0_REGNUM; i <= ARM_WCASF_REGNUM; i++)
+	    tdesc_numbered_register (feature, tdesc_data, i,
+				     iwmmxt_names[i - ARM_WR0_REGNUM]);
+
+	  for (i = ARM_WCGR0_REGNUM; i <= ARM_WCGR3_REGNUM; i++)
+	    valid_p
+	      &= tdesc_numbered_register (feature, tdesc_data, i,
+					  iwmmxt_names[i - ARM_WR0_REGNUM]);
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	}
+
+      /* If we have a VFP unit, check whether the single precision registers
+	 are present.  If not, then we will synthesize them as pseudo
+	 registers.  */
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.arm.vfp");
+      if (feature != NULL)
+	{
+	  static const char *const vfp_double_names[] = {
+	    "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
+	    "d8", "d9", "d10", "d11", "d12", "d13", "d14", "d15",
+	    "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23",
+	    "d24", "d25", "d26", "d27", "d28", "d29", "d30", "d31",
+	  };
+
+	  /* Require the double precision registers.  There must be either
+	     16 or 32.  */
+	  valid_p = 1;
+	  for (i = 0; i < 32; i++)
+	    {
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						  ARM_D0_REGNUM + i,
+						  vfp_double_names[i]);
+	      if (!valid_p)
+		break;
+	    }
+
+	  if (!valid_p && i != 16)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+
+	  if (tdesc_unnumbered_register (feature, "s0") == 0)
+	    have_vfp_pseudos = 1;
+
+	  have_vfp_registers = 1;
+
+	  /* If we have VFP, also check for NEON.  The architecture allows
+	     NEON without VFP (integer vector operations only), but GDB
+	     does not support that.  */
+	  feature = tdesc_find_feature (tdesc,
+					"org.gnu.gdb.arm.neon");
+	  if (feature != NULL)
+	    {
+	      /* NEON requires 32 double-precision registers.  */
+	      if (i != 32)
+		{
+		  tdesc_data_cleanup (tdesc_data);
+		  return NULL;
+		}
+
+	      /* If there are quad registers defined by the stub, use
+		 their type; otherwise (normally) provide them with
+		 the default type.  */
+	      if (tdesc_unnumbered_register (feature, "q0") == 0)
+		have_neon_pseudos = 1;
+
+	      have_neon = 1;
+	    }
+	}
+    }
+
   /* If there is already a candidate, use it.  */
   for (best_arch = gdbarch_list_lookup_by_info (arches, &info);
        best_arch != NULL;
@@ -6716,6 +6774,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	 need to check here: those derived from a target description,
 	 since gdbarches with a different target description are
 	 automatically disqualified.  */
+
+      /* Do check is_m, though, since it might come from the binary.  */
+      if (is_m != gdbarch_tdep (best_arch->gdbarch)->is_m)
+	continue;
 
       /* Found a match.  */
       break;
@@ -6735,6 +6797,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      These are gdbarch discriminators, like the OSABI.  */
   tdep->arm_abi = arm_abi;
   tdep->fp_model = fp_model;
+  tdep->is_m = is_m;
   tdep->have_fpa_registers = have_fpa_registers;
   tdep->have_vfp_registers = have_vfp_registers;
   tdep->have_vfp_pseudos = have_vfp_pseudos;
@@ -6908,7 +6971,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       set_tdesc_pseudo_register_name (gdbarch, arm_register_name);
 
-      tdesc_use_registers (gdbarch, info.target_desc, tdesc_data);
+      tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 
       /* Override tdesc_register_type to adjust the types of VFP
 	 registers for NEON.  */
@@ -6962,6 +7025,9 @@ _initialize_arm_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_arm,
 				  bfd_target_elf_flavour,
 				  arm_elf_osabi_sniffer);
+
+  /* Initialize the standard target descriptions.  */
+  initialize_tdesc_arm_with_m ();
 
   /* Get the number of possible sets of register names defined in opcodes.  */
   num_disassembly_options = get_arm_regname_num_options ();
