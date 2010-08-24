@@ -1,3 +1,9 @@
+2010-08-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 11899
+	* layout.cc (segment_precedes): Sort segments by their physical
+	addresses, if they have been set.
+
 2010-08-23  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Lib_group::add_symbols): Lock object before deleting its

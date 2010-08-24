@@ -2457,8 +2457,13 @@ Layout::segment_precedes(const Output_segment* seg1,
       if (section_count1 > 0 && section_count2 == 0)
 	return false;
 
-      uint64_t paddr1 = seg1->first_section_load_address();
-      uint64_t paddr2 = seg2->first_section_load_address();
+      uint64_t paddr1 =	(seg1->are_addresses_set()
+			 ? seg1->paddr()
+			 : seg1->first_section_load_address());
+      uint64_t paddr2 =	(seg2->are_addresses_set()
+			 ? seg2->paddr()
+			 : seg2->first_section_load_address());
+
       if (paddr1 != paddr2)
 	return paddr1 < paddr2;
     }
