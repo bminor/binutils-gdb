@@ -1,3 +1,10 @@
+2010-08-25  Julian Brown  <julian@codesourcery.com>
+
+	* elf32-arm.c (arm_stub_required_alignment): New.
+	(arm_build_one_stub): Use above to partition stubs.
+	(make_branch_to_a8_stub): Use arm_stub_a8_veneer_lwm not
+	arm_stub_a8_veneer_b_cond.
+
 2010-08-25  Alan Modra  <amodra@gmail.com>
 
 	* aout-arm.c (MY(bfd_reloc_type_lookup)): Use bfd_arch_bits_per_address.

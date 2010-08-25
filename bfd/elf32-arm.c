@@ -3475,6 +3475,36 @@ static bfd_reloc_status_type elf32_arm_final_link_relocate
    Elf_Internal_Rela *, bfd_vma, struct bfd_link_info *, asection *,
    const char *, int, struct elf_link_hash_entry *, bfd_boolean *, char **);
 
+static unsigned int
+arm_stub_required_alignment (enum elf32_arm_stub_type stub_type)
+{
+  switch (stub_type)
+    {
+    case arm_stub_a8_veneer_b_cond:
+    case arm_stub_a8_veneer_b:
+    case arm_stub_a8_veneer_bl:
+      return 2;
+
+    case arm_stub_long_branch_any_any:
+    case arm_stub_long_branch_v4t_arm_thumb:
+    case arm_stub_long_branch_thumb_only:
+    case arm_stub_long_branch_v4t_thumb_thumb:
+    case arm_stub_long_branch_v4t_thumb_arm:
+    case arm_stub_short_branch_v4t_thumb_arm:
+    case arm_stub_long_branch_any_arm_pic:
+    case arm_stub_long_branch_any_thumb_pic:
+    case arm_stub_long_branch_v4t_thumb_thumb_pic:
+    case arm_stub_long_branch_v4t_arm_thumb_pic:
+    case arm_stub_long_branch_v4t_thumb_arm_pic:
+    case arm_stub_long_branch_thumb_only_pic:
+    case arm_stub_a8_veneer_blx:
+      return 4;
+    
+    default:
+      abort ();  /* Should be unreachable.  */
+    }
+}
+
 static bfd_boolean
 arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 		    void * in_arg)
@@ -3506,9 +3536,8 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   stub_sec = stub_entry->stub_sec;
 
   if ((globals->fix_cortex_a8 < 0)
-      != (stub_entry->stub_type >= arm_stub_a8_veneer_lwm))
-    /* We have to do the a8 fixes last, as they are less aligned than
-       the other veneers.  */
+      != (arm_stub_required_alignment (stub_entry->stub_type) == 2))
+    /* We have to do less-strictly-aligned fixes last.  */
     return TRUE;
 
   /* Make a note of the offset within the stubs for this entry.  */
@@ -13356,7 +13385,7 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
   data = (struct a8_branch_to_stub_data *) in_arg;
 
   if (stub_entry->target_section != data->writing_section
-      || stub_entry->stub_type < arm_stub_a8_veneer_b_cond)
+      || stub_entry->stub_type < arm_stub_a8_veneer_lwm)
     return TRUE;
 
   contents = data->contents;

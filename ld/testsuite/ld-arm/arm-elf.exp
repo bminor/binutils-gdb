@@ -221,6 +221,10 @@ set armelftests {
      "-EL -mcpu=cortex-a8" {cortex-a8-fix-hdr.s}
      {{objdump -dr cortex-a8-fix-hdr.d}}
      "cortex-a8-fix-hdr"}
+    {"Cortex-A8 erratum fix, blx.w and b<cond>.w together"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-fix-blx-bcond.s}
+     {{objdump -dr cortex-a8-fix-blx-bcond.d}}
+     "cortex-a8-fix-blx-bcond"}
     {"Unwinding and -gc-sections" "-gc-sections" "" {gc-unwind.s}
      {{objdump -sj.data gc-unwind.d}}
      "gc-unwind"}
