@@ -807,11 +807,13 @@ md_assemble (char * str)
 
   /* Find the op code end.  */
   for (op_start = op_end = str;
-       * op_end && nlen < 20 && !is_end_of_line [(int)*op_end] && *op_end != ' ';
+       *op_end && !is_end_of_line[(unsigned char) *op_end] && *op_end != ' ';
        op_end++)
     {
       name[nlen] = op_start[nlen];
       nlen++;
+      if (nlen == sizeof (name) - 1)
+	break;
     }
 
   name [nlen] = 0;

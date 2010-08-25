@@ -2403,11 +2403,13 @@ md_assemble (char *str)
   /* Find the opcode end and get the opcode in 'name'.  The opcode is forced
      lower case (the opcode table only has lower case op-codes).  */
   for (op_start = op_end = (unsigned char *) str;
-       *op_end && nlen < 20 && !is_end_of_line[*op_end] && *op_end != ' ';
+       *op_end && !is_end_of_line[*op_end] && *op_end != ' ';
        op_end++)
     {
       name[nlen] = TOLOWER (op_start[nlen]);
       nlen++;
+      if (nlen == sizeof (name) - 1)
+	break;
     }
   name[nlen] = 0;
 

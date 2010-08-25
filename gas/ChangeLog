@@ -1,3 +1,11 @@
+2010-08-25  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-d10v.c (do_assemble): Correctly detect overflow of
+	"name" buffer.
+	* config/tc-m68hc11.c (md_assemble): Likewise.
+	* config/tc-microblaze.c (md_assemble): Likewise.  Correct cast
+	of is_end_of_line index.
+
 2010-08-25  Jie Zhang  <jie@codesourcery.com>
 
 	* config/tc-arm.c (encode_arm_addr_mode_2): Fix comment.
