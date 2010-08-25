@@ -59,7 +59,7 @@ class Dirsearch
   // and that value plus one may be used to find the next file with
   // the same name(s).
   std::string
-  find(const std::string&, const std::string& n2, bool *is_in_sysroot,
+  find(const std::string&, const std::string& n2, bool* is_in_sysroot,
        int* pindex) const;
 
   // Return the blocker token which controls access.

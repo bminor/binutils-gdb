@@ -187,7 +187,7 @@ gc_process_relocs(
     size_t local_count,
     const unsigned char* plocal_syms)
 {
-  Object *dst_obj;
+  Object* dst_obj;
   unsigned int dst_indx;
   Scan scan;
 

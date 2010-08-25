@@ -971,7 +971,7 @@ Input_file::find_file(const Dirsearch& dirpath, int* pindex,
 // Open the file.
 
 bool
-Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
+Input_file::open(const Dirsearch& dirpath, const Task* task, int* pindex)
 {
   std::string name;
   if (!Input_file::find_file(dirpath, pindex, this->input_argument_,

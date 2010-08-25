@@ -2140,7 +2140,7 @@ Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
 inline bool
 Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 				Target_i386* target,
-				Output_section *output_section,
+				Output_section* output_section,
 				size_t relnum,
 				const elfcpp::Rel<32, false>& rel,
 				unsigned int r_type,

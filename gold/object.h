@@ -746,7 +746,7 @@ class Relobj : public Object
   // Decides which section names have to be included in the worklist
   // as roots.
   bool
-  is_section_name_included(const char *name);
+  is_section_name_included(const char* name);
  
   void
   copy_symbols_data(Symbols_data* gc_sd, Read_symbols_data* sd,
@@ -1043,7 +1043,7 @@ class Relobj : public Object
   // Used to store the symbols data computed by the Read_symbols pass.
   // Again used during garbage collection when laying out referenced
   // sections.
-  gold::Symbols_data *sd_;
+  gold::Symbols_data* sd_;
   // Per-symbol counts of relocations, for incremental links.
   unsigned int* reloc_counts_;
   // Per-symbol base indexes of relocations, for incremental links.
@@ -2006,7 +2006,7 @@ class Sized_relobj : public Relobj
   // Whether to include a section group in the link.
   bool
   include_section_group(Symbol_table*, Layout*, unsigned int, const char*,
-			const unsigned char*, const char *, section_size_type,
+			const unsigned char*, const char*, section_size_type,
 			std::vector<bool>*);
 
   // Whether to include a linkonce section in the link.
@@ -2388,7 +2388,7 @@ struct Const_section_id_hash
 
 extern bool
 is_elf_object(Input_file* input_file, off_t offset,
-	      const unsigned char** start, int *read_size);
+	      const unsigned char** start, int* read_size);
 
 // Return an Object appropriate for the input file.  P is BYTES long,
 // and holds the ELF header.  If PUNCONFIGURED is not NULL, then if

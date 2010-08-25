@@ -59,7 +59,7 @@ class Timer
 
   // Write the current time infortamion.
   static void
-  get_time(TimeStats *now);
+  get_time(TimeStats* now);
 
   // The time of the last call to start.
   TimeStats start_time_;

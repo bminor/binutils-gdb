@@ -64,7 +64,7 @@ Read_relocs::locks(Task_locker* tl)
 void
 Read_relocs::run(Workqueue* workqueue)
 {
-  Read_relocs_data *rd = new Read_relocs_data;
+  Read_relocs_data* rd = new Read_relocs_data;
   this->object_->read_relocs(rd);
   this->object_->set_relocs_data(rd);
   this->object_->release();
@@ -265,11 +265,11 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets_);
 
-  const unsigned char *pshdrs = this->get_view(this->elf_file_.shoff(),
+  const unsigned char* pshdrs = this->get_view(this->elf_file_.shoff(),
 					       shnum * This::shdr_size,
 					       true, true);
   // Skip the first, dummy, section.
-  const unsigned char *ps = pshdrs + This::shdr_size;
+  const unsigned char* ps = pshdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, ps += This::shdr_size)
     {
       typename This::Shdr shdr(ps);

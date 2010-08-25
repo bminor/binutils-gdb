@@ -1,3 +1,55 @@
+2010-08-25  Nick Clifton  <nickc@redhat.com>
+
+	* archive.cc: Formatting fixes: Remove whitespace between
+	typename and following asterisk.  Remove whitespace between
+	function name and opening parenthesis.
+	* archive.h: Likewise.
+	* arm.cc: Likewise.
+	* attributes.cc: Likewise.
+	* attributes.h: Likewise.
+	* common.cc: Likewise.
+	* copy-relocs.cc: Likewise.
+	* dirsearch.h: Likewise.
+	* dynobj.cc: Likewise.
+	* ehframe.cc: Likewise.
+	* ehframe.h: Likewise.
+	* expression.cc: Likewise.
+	* fileread.cc: Likewise.
+	* fileread.h: Likewise.
+	* gc.h: Likewise.
+	* gold-threads.cc: Likewise.
+	* gold.cc: Likewise.
+	* i386.cc: Likewise.
+	* icf.h: Likewise.
+	* incremental-dump.cc: Likewise.
+	* incremental.cc: Likewise.
+	* layout.cc: Likewise.
+	* layout.h: Likewise.
+	* main.cc: Likewise.
+	* merge.cc: Likewise.
+	* merge.h: Likewise.
+	* object.cc: Likewise.
+	* object.h: Likewise.
+	* options.cc: Likewise.
+	* options.h: Likewise.
+	* output.cc: Likewise.
+	* output.h: Likewise.
+	* plugin.cc: Likewise.
+	* plugin.h: Likewise.
+	* powerpc.cc: Likewise.
+	* reloc.cc: Likewise.
+	* script-c.h: Likewise.
+	* script-sections.cc: Likewise.
+	* script.cc: Likewise.
+	* stringpool.cc: Likewise.
+	* symtab.cc: Likewise.
+	* symtab.h: Likewise.
+	* target.cc: Likewise.
+	* timer.cc: Likewise.
+	* timer.h: Likewise.
+	* version.cc: Likewise.
+	* x86_64.cc: Likewise.
+
 2010-08-24  Nick Clifton  <nickc@redhat.com>
 
 	PR 11899

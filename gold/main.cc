@@ -136,13 +136,13 @@ int
 main(int argc, char** argv)
 {
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
-  setlocale (LC_MESSAGES, "");
+  setlocale(LC_MESSAGES, "");
 #endif
 #if defined (HAVE_SETLOCALE)
-  setlocale (LC_CTYPE, "");
+  setlocale(LC_CTYPE, "");
 #endif
-  bindtextdomain (PACKAGE, LOCALEDIR);
-  textdomain (PACKAGE);
+  bindtextdomain(PACKAGE, LOCALEDIR);
+  textdomain(PACKAGE);
 
   program_name = argv[0];
 

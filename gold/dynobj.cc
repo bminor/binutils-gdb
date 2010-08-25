@@ -1731,8 +1731,8 @@ Versions::def_section_contents(const Stringpool* dynpool,
 template<int size, bool big_endian>
 void
 Versions::need_section_contents(const Stringpool* dynpool,
-				unsigned char** pp, unsigned int *psize,
-				unsigned int *pentries) const
+				unsigned char** pp, unsigned int* psize,
+				unsigned int* pentries) const
 {
   gold_assert(this->is_finalized_);
   gold_assert(!this->needs_.empty());

@@ -362,7 +362,7 @@ class Binary_expression : public Expression
   // This is a call to function FUNCTION_NAME.  Print it.  This is for
   // debugging.
   void
-  print_function(FILE* f, const char *function_name) const
+  print_function(FILE* f, const char* function_name) const
   {
     fprintf(f, "%s(", function_name);
     this->left_print(f);

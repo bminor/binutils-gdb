@@ -566,7 +566,7 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
       return NULL;
     }
 
-  Object *obj = make_elf_object((std::string(this->input_file_->filename())
+  Object* obj = make_elf_object((std::string(this->input_file_->filename())
 				 + "(" + member_name + ")"),
 				input_file, memoff, ehdr, read_size,
 				punconfigured);
@@ -844,9 +844,9 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
   std::map<off_t, Archive_member>::const_iterator p = this->members_.find(off);
   if (p != this->members_.end())
     {
-      Object *obj = p->second.obj_;
+      Object* obj = p->second.obj_;
 
-      Read_symbols_data *sd = p->second.sd_;
+      Read_symbols_data* sd = p->second.sd_;
       if (mapfile != NULL)
         mapfile->report_include_archive_member(obj->name(), sym, why);
       if (input_objects->add_object(obj))
@@ -1031,7 +1031,7 @@ Lib_group::add_symbols(Symbol_table* symtab, Layout* layout,
       while (i < this->members_.size())
 	{
 	  const Archive_member& member = this->members_[i];
-	  Object *obj = member.obj_;
+	  Object* obj = member.obj_;
 	  std::string why;
 
           // Skip files with no symbols. Plugin objects have

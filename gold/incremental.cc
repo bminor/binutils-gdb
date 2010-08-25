@@ -622,7 +622,7 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	case INCREMENTAL_INPUT_OBJECT:
 	case INCREMENTAL_INPUT_ARCHIVE_MEMBER:
 	  {
-	    Incremental_object_entry *entry = (*p)->object_entry();
+	    Incremental_object_entry* entry = (*p)->object_entry();
 	    gold_assert(entry != NULL);
 	    (*p)->set_info_offset(info_offset);
 	    // Input section count + global symbol count.
@@ -637,7 +637,7 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	  break;
 	case INCREMENTAL_INPUT_SHARED_LIBRARY:
 	  {
-	    Incremental_object_entry *entry = (*p)->object_entry();
+	    Incremental_object_entry* entry = (*p)->object_entry();
 	    gold_assert(entry != NULL);
 	    (*p)->set_info_offset(info_offset);
 	    // Global symbol count.
@@ -650,7 +650,7 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	  break;
 	case INCREMENTAL_INPUT_ARCHIVE:
 	  {
-	    Incremental_archive_entry *entry = (*p)->archive_entry();
+	    Incremental_archive_entry* entry = (*p)->archive_entry();
 	    gold_assert(entry != NULL);
 	    (*p)->set_info_offset(info_offset);
 	    // Member count + unused global symbol count.

@@ -145,7 +145,7 @@ bool
 Object_merge_map::get_output_offset(const Merge_map* merge_map,
 				    unsigned int shndx,
 				    section_offset_type input_offset,
-				    section_offset_type *output_offset)
+				    section_offset_type* output_offset)
 {
   Input_merge_map* map = this->get_input_merge_map(shndx);
   if (map == NULL

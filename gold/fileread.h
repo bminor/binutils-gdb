@@ -515,7 +515,7 @@ class Input_file
   // restarted to find the next file with a matching name by
   // incrementing the result and calling this again.
   bool
-  open(const Dirsearch&, const Task*, int *pindex);
+  open(const Dirsearch&, const Task*, int* pindex);
 
   // Return the name given by the user.  For -lc this will return "c".
   const char*

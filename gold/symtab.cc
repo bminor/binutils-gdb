@@ -539,7 +539,7 @@ Symbol_table::gc_mark_undef_symbols(Layout* layout)
     {
       const char* name = p->c_str();
       Symbol* sym = this->lookup(name);
-      gold_assert (sym != NULL);
+      gold_assert(sym != NULL);
       if (sym->source() == Symbol::FROM_OBJECT 
           && !sym->object()->is_dynamic())
         {
@@ -602,7 +602,7 @@ Symbol_table::gc_mark_dyn_syms(Symbol* sym)
   if (sym->in_dyn() && sym->source() == Symbol::FROM_OBJECT
       && !sym->object()->is_dynamic())
     {
-      Relobj *obj = static_cast<Relobj*>(sym->object()); 
+      Relobj* obj = static_cast<Relobj*>(sym->object()); 
       bool is_ordinary;
       unsigned int shndx = sym->shndx(&is_ordinary);
       if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
@@ -863,9 +863,9 @@ Symbol_table::define_default_version(Sized_symbol<size>* sym,
 template<int size, bool big_endian>
 Sized_symbol<size>*
 Symbol_table::add_from_object(Object* object,
-			      const char *name,
+			      const char* name,
 			      Stringpool::Key name_key,
-			      const char *version,
+			      const char* version,
 			      Stringpool::Key version_key,
 			      bool is_default_version,
 			      const elfcpp::Sym<size, big_endian>& sym,
@@ -1053,7 +1053,7 @@ Symbol_table::add_from_relobj(
     const char* sym_names,
     size_t sym_name_size,
     typename Sized_relobj<size, big_endian>::Symbols* sympointers,
-    size_t *defined)
+    size_t* defined)
 {
   *defined = 0;
 
@@ -1581,7 +1581,7 @@ Sized_symbol<size>*
 Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 				    bool only_if_ref,
                                     Sized_symbol<size>** poldsym,
-				    bool *resolve_oldsym)
+				    bool* resolve_oldsym)
 {
   *resolve_oldsym = false;
 
@@ -2324,7 +2324,7 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 off_t
 Symbol_table::finalize(off_t off, off_t dynoff, size_t dyn_global_index,
 		       size_t dyncount, Stringpool* pool,
-		       unsigned int *plocal_symcount)
+		       unsigned int* plocal_symcount)
 {
   off_t ret;
 
@@ -2927,7 +2927,7 @@ Symbol_table::warn_about_undefined_dynobj_symbol(Symbol* sym) const
 // Write out a section symbol.  Return the update offset.
 
 void
-Symbol_table::write_section_symbol(const Output_section *os,
+Symbol_table::write_section_symbol(const Output_section* os,
 				   Output_symtab_xindex* symtab_xindex,
 				   Output_file* of,
 				   off_t offset) const

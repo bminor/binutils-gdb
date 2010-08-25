@@ -95,7 +95,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
     {
       fprintf(stderr, "%s: %s: no .gnu_incremental_inputs section\n", argv0,
               filename);
-      exit (1);
+      exit(1);
     }
 
   elfcpp::Elf_file<size, big_endian, Incremental_binary> elf_file(inc);
@@ -276,7 +276,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   if (symtab_shndx == elfcpp::SHN_UNDEF)  // Not found.
     {
       fprintf(stderr, "%s: %s: no symbol table section\n", argv0, filename);
-      exit (1);
+      exit(1);
     }
   Location symtab_location(elf_file.section_contents(symtab_shndx));
   View symtab_view(inc->view(symtab_location));
@@ -289,7 +289,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
       || elf_file.section_type(strtab_shndx) != elfcpp::SHT_STRTAB)
     {
       fprintf(stderr, "%s: %s: no string table section\n", argv0, filename);
-      exit (1);
+      exit(1);
     }
   Location strtab_location(elf_file.section_contents(strtab_shndx));
   View strtab_view(inc->view(strtab_location));

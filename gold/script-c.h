@@ -512,27 +512,27 @@ extern void
 script_register_vers_node(void* closure,
 			  const char* tag,
 			  int taglen,
-			  struct Version_tree *,
-			  struct Version_dependency_list *);
+			  struct Version_tree*,
+			  struct Version_dependency_list*);
 
-extern struct Version_dependency_list *
+extern struct Version_dependency_list*
 script_add_vers_depend(void* closure,
-		       struct Version_dependency_list *existing_dependencies,
-		       const char *depend_to_add, int deplen);
+		       struct Version_dependency_list* existing_dependencies,
+		       const char* depend_to_add, int deplen);
 
-extern struct Version_expression_list *
+extern struct Version_expression_list*
 script_new_vers_pattern(void* closure,
-			struct Version_expression_list *,
-			const char *, int, int);
+			struct Version_expression_list*,
+			const char*, int, int);
 
-extern struct Version_expression_list *
-script_merge_expressions(struct Version_expression_list *a,
-                         struct Version_expression_list *b);
+extern struct Version_expression_list*
+script_merge_expressions(struct Version_expression_list* a,
+                         struct Version_expression_list* b);
 
-extern struct Version_tree *
+extern struct Version_tree*
 script_new_vers_node(void* closure,
-		     struct Version_expression_list *global,
-		     struct Version_expression_list *local);
+		     struct Version_expression_list* global,
+		     struct Version_expression_list* local);
 
 extern void
 version_script_push_lang(void* closure, const char* lang, int langlen);

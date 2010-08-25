@@ -169,7 +169,7 @@ Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
     alc = sizeof(Stringdata) + buffer_size;
   else
     {
-      Stringdata *psd = this->strings_.front();
+      Stringdata* psd = this->strings_.front();
       if (len > psd->alc - psd->len)
 	alc = sizeof(Stringdata) + buffer_size;
       else
@@ -185,7 +185,7 @@ Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
 	}
     }
 
-  Stringdata *psd = reinterpret_cast<Stringdata*>(new char[alc]);
+  Stringdata* psd = reinterpret_cast<Stringdata*>(new char[alc]);
   psd->alc = alc - sizeof(Stringdata);
   memcpy(psd->data, s, len - sizeof(Stringpool_char));
   memset(psd->data + len - sizeof(Stringpool_char), 0,

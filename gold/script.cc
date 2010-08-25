@@ -700,7 +700,7 @@ Lex::gather_token(Token::Classification classification,
 		  const char* (Lex::*can_continue_fn)(const char*),
 		  const char* start,
 		  const char* match,
-		  const char **pp)
+		  const char** pp)
 {
   const char* new_match = NULL;
   while ((new_match = (this->*can_continue_fn)(match)))
@@ -1883,12 +1883,12 @@ class Lazy_demangler
 
  private:
   // The symbol to demangle.
-  const char *symbol_;
+  const char* symbol_;
   // Option flags to pass to cplus_demagle.
   const int options_;
   // The cached demangled value, or NULL if demangling didn't happen yet or
   // failed.
-  char *demangled_;
+  char* demangled_;
   // Whether we already called cplus_demangle
   bool did_demangle_;
 };
@@ -2118,7 +2118,7 @@ void
 Version_script_info::add_exact_match(const std::string& match,
 				     const Version_tree* v, bool is_global,
 				     const Version_expression* ve,
-				     Exact *pe)
+				     Exact* pe)
 {
   std::pair<Exact::iterator, bool> ins =
     pe->insert(std::make_pair(match, Version_tree_match(v, is_global, ve)));
@@ -2597,7 +2597,7 @@ script_add_file(void* closurev, const char* name, size_t length)
     {
       // In addition to checking the normal library search path, we
       // also want to check in the script-directory.
-      const char *slash = strrchr(closure->filename(), '/');
+      const char* slash = strrchr(closure->filename(), '/');
       if (slash != NULL)
 	{
 	  script_directory.assign(closure->filename(),
@@ -2702,7 +2702,7 @@ script_set_common_allocation(void* closurev, int set)
 // Called by the bison parser to refer to a symbol.
 
 extern "C" Expression*
-script_symbol(void *closurev, const char* name, size_t length)
+script_symbol(void* closurev, const char* name, size_t length)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   if (length != 1 || name[0] != '.')
@@ -2869,8 +2869,8 @@ extern "C" void
 script_register_vers_node(void*,
 			  const char* tag,
 			  int taglen,
-			  struct Version_tree *tree,
-			  struct Version_dependency_list *deps)
+			  struct Version_tree* tree,
+			  struct Version_dependency_list* deps)
 {
   gold_assert(tree != NULL);
   tree->dependencies = deps;
@@ -2881,10 +2881,10 @@ script_register_vers_node(void*,
 // Add a dependencies to the list of existing dependencies, if any,
 // and return the expanded list.
 
-extern "C" struct Version_dependency_list *
+extern "C" struct Version_dependency_list*
 script_add_vers_depend(void* closurev,
-		       struct Version_dependency_list *all_deps,
-		       const char *depend_to_add, int deplen)
+		       struct Version_dependency_list* all_deps,
+		       const char* depend_to_add, int deplen)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   if (all_deps == NULL)
@@ -2895,10 +2895,10 @@ script_add_vers_depend(void* closurev,
 
 // Add a pattern expression to an existing list of expressions, if any.
 
-extern "C" struct Version_expression_list *
+extern "C" struct Version_expression_list*
 script_new_vers_pattern(void* closurev,
-			struct Version_expression_list *expressions,
-			const char *pattern, int patlen, int exact_match)
+			struct Version_expression_list* expressions,
+			const char* pattern, int patlen, int exact_match)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   if (expressions == NULL)
@@ -2913,8 +2913,8 @@ script_new_vers_pattern(void* closurev,
 // Attaches b to the end of a, and clears b.  So a = a + b and b = {}.
 
 extern "C" struct Version_expression_list*
-script_merge_expressions(struct Version_expression_list *a,
-                         struct Version_expression_list *b)
+script_merge_expressions(struct Version_expression_list* a,
+                         struct Version_expression_list* b)
 {
   a->expressions.insert(a->expressions.end(),
                         b->expressions.begin(), b->expressions.end());
@@ -2926,10 +2926,10 @@ script_merge_expressions(struct Version_expression_list *a,
 
 // Combine the global and local expressions into a a Version_tree.
 
-extern "C" struct Version_tree *
+extern "C" struct Version_tree*
 script_new_vers_node(void* closurev,
-		     struct Version_expression_list *global,
-		     struct Version_expression_list *local)
+		     struct Version_expression_list* global,
+		     struct Version_expression_list* local)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   Version_tree* tree = closure->version_script()->allocate_version_tree();

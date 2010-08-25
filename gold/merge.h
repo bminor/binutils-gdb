@@ -70,7 +70,7 @@ class Object_merge_map
   bool
   get_output_offset(const Merge_map*, unsigned int shndx,
 		    section_offset_type offset,
-		    section_offset_type *output_offset);
+		    section_offset_type* output_offset);
 
   // Return whether this is the merge map for section SHNDX.
   bool
@@ -200,7 +200,7 @@ class Merge_map
   bool
   get_output_offset(const Relobj* object, unsigned int shndx,
 		    section_offset_type offset,
-		    section_offset_type *output_offset) const;
+		    section_offset_type* output_offset) const;
 
   // Return whether this is the merge mapping for section SHNDX in
   // OBJECT.  This should return true when get_output_offset would

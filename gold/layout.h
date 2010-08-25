@@ -215,8 +215,8 @@ class Kept_section
   // Look for a section name in the group list, and return whether it
   // was found.  If found, returns the section index and size.
   bool
-  find_comdat_section(const std::string& name, unsigned int *pshndx,
-		      uint64_t *psize) const
+  find_comdat_section(const std::string& name, unsigned int* pshndx,
+		      uint64_t* psize) const
   {
     gold_assert(this->is_comdat_);
     Comdat_group::const_iterator p = this->u_.group_sections->find(name);
@@ -230,7 +230,7 @@ class Kept_section
   // If there is only one section in the group list, return true, and
   // return the section index and size.
   bool
-  find_single_comdat_section(unsigned int *pshndx, uint64_t *psize) const
+  find_single_comdat_section(unsigned int* pshndx, uint64_t* psize) const
   {
     gold_assert(this->is_comdat_);
     if (this->u_.group_sections->size() != 1)
@@ -779,7 +779,7 @@ class Layout
 
   // Create a note section, filling in the header.
   Output_section*
-  create_note(const char* name, int note_type, const char *section_name,
+  create_note(const char* name, int note_type, const char* section_name,
 	      size_t descsz, bool allocate, size_t* trailing_padding);
 
   // Create a note section for gold version.

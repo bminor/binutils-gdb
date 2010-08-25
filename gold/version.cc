@@ -63,8 +63,8 @@ print_version(bool print_short)
   if (!print_short)
     {
       // This output is intended to follow the GNU standards.
-      printf (_("Copyright 2010 Free Software Foundation, Inc.\n"));
-      printf (_("\
+      printf(_("Copyright 2010 Free Software Foundation, Inc.\n"));
+      printf(_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or (at your option) a later version.\n\
 This program has absolutely no warranty.\n"));

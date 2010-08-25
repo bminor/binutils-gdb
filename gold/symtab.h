@@ -821,7 +821,7 @@ class Symbol
   // index rather than a special code.
   template<int size, bool big_endian>
   void
-  init_base_object(const char *name, const char* version, Object* object,
+  init_base_object(const char* name, const char* version, Object* object,
 		   const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
 		   bool is_ordinary);
 
@@ -1012,7 +1012,7 @@ class Sized_symbol : public Symbol
   // index rather than a special code.
   template<bool big_endian>
   void
-  init_object(const char *name, const char* version, Object* object,
+  init_object(const char* name, const char* version, Object* object,
 	      const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
 	      bool is_ordinary);
 
@@ -1467,7 +1467,7 @@ class Symbol_table
   // local symbols.
   off_t
   finalize(off_t off, off_t dynoff, size_t dyn_global_index, size_t dyncount,
-	   Stringpool* pool, unsigned int *plocal_symcount);
+	   Stringpool* pool, unsigned int* plocal_symcount);
 
   // Status code of Symbol_table::compute_final_value.
   enum Compute_final_value_status
@@ -1566,8 +1566,8 @@ class Symbol_table
   // Add a symbol.
   template<int size, bool big_endian>
   Sized_symbol<size>*
-  add_from_object(Object*, const char *name, Stringpool::Key name_key,
-		  const char *version, Stringpool::Key version_key,
+  add_from_object(Object*, const char* name, Stringpool::Key name_key,
+		  const char* version, Stringpool::Key version_key,
 		  bool def, const elfcpp::Sym<size, big_endian>& sym,
 		  unsigned int st_shndx, bool is_ordinary,
 		  unsigned int orig_st_shndx);

@@ -105,7 +105,7 @@ class Icf
   // Given an object and a section index, this returns true if the
   // pointer of the function defined in this section is taken.
   bool
-  section_has_function_pointers(Object *obj, unsigned int shndx)
+  section_has_function_pointers(Object* obj, unsigned int shndx)
   {
     return (this->fptr_section_id_.find(Section_id(obj, shndx))
             != this->fptr_section_id_.end());
@@ -114,7 +114,7 @@ class Icf
   // Records that a pointer of the function defined in this section
   // is taken.
   void
-  set_section_has_function_pointers(Object *obj, unsigned int shndx)
+  set_section_has_function_pointers(Object* obj, unsigned int shndx)
   {
     this->fptr_section_id_.insert(Section_id(obj, shndx));
   }

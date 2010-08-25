@@ -632,7 +632,7 @@ class Output_section_data : public Output_data
   bool
   output_offset(const Relobj* object, unsigned int shndx,
 		section_offset_type offset,
-		section_offset_type *poutput) const
+		section_offset_type* poutput) const
   { return this->do_output_offset(object, shndx, offset, poutput); }
 
   // Return whether this is the merge section for the input section
@@ -1373,7 +1373,7 @@ class Output_data_reloc_base : public Output_data_reloc_generic
 
   // Set the entry size and the link.
   void
-  do_adjust_output_section(Output_section *os);
+  do_adjust_output_section(Output_section* os);
 
   // Write to a map file.
   void
@@ -1387,7 +1387,7 @@ class Output_data_reloc_base : public Output_data_reloc_generic
 
   // Add a relocation entry.
   void
-  add(Output_data *od, const Output_reloc_type& reloc)
+  add(Output_data* od, const Output_reloc_type& reloc)
   {
     this->relocs_.push_back(reloc);
     this->set_current_data_size(this->relocs_.size() * reloc_size);
@@ -2534,7 +2534,7 @@ class Output_section : public Output_data
   template<int size, bool big_endian>
   off_t
   add_input_section(Layout* layout, Sized_relobj<size, big_endian>* object,
-                    unsigned int shndx, const char *name,
+                    unsigned int shndx, const char* name,
 		    const elfcpp::Shdr<size, big_endian>& shdr,
 		    unsigned int reloc_shndx, bool have_sections_script);
 
@@ -2985,7 +2985,7 @@ class Output_section : public Output_data
     }
 
     // For a relaxed input section.
-    Input_section(Output_relaxed_input_section *psection)
+    Input_section(Output_relaxed_input_section* psection)
       : shndx_(RELAXED_INPUT_SECTION_CODE), p2align_(0),
 	section_order_index_(0)
     {
@@ -3117,7 +3117,7 @@ class Output_section : public Output_data
     set_output_section(Output_section* os)
     {
       gold_assert(!this->is_input_section());
-      Output_section_data *posd = 
+      Output_section_data* posd = 
         this->is_relaxed_input_section() ? this->u2_.poris : this->u2_.posd;
       posd->set_output_section(os);
     }
@@ -3156,7 +3156,7 @@ class Output_section : public Output_data
     bool
     output_offset(const Relobj* object, unsigned int shndx,
 		  section_offset_type offset,
-		  section_offset_type *poutput) const;
+		  section_offset_type* poutput) const;
 
     // Return whether this is the merge section for the input section
     // SHNDX in OBJECT.

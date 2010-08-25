@@ -1884,7 +1884,7 @@ Output_section::Input_section::output_offset(
     const Relobj* object,
     unsigned int shndx,
     section_offset_type offset,
-    section_offset_type *poutput) const
+    section_offset_type* poutput) const
 {
   if (!this->is_input_section())
     return this->u2_.posd->output_offset(object, shndx, offset, poutput);
@@ -4089,7 +4089,7 @@ unsigned char*
 Output_segment::write_section_headers(const Layout* layout,
 				      const Stringpool* secnamepool,
 				      unsigned char* v,
-				      unsigned int *pshndx) const
+				      unsigned int* pshndx) const
 {
   // Every section that is attached to a segment must be attached to a
   // PT_LOAD segment, so we only write out section headers for PT_LOAD

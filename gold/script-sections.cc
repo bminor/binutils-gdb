@@ -1894,7 +1894,7 @@ Output_section_definition::output_section_name(
     const char* file_name,
     const char* section_name,
     Output_section*** slot,
-    Script_sections::Section_type *psection_type)
+    Script_sections::Section_type* psection_type)
 {
   // Ask each element whether it matches NAME.
   for (Output_section_elements::const_iterator p = this->elements_.begin();
@@ -2309,7 +2309,7 @@ Output_section_definition::section_type() const
 // Return the name of a script section type.
 
 const char*
-Output_section_definition::script_section_type_name (
+Output_section_definition::script_section_type_name(
     Script_section_type script_section_type)
 {
   switch (script_section_type)
@@ -2681,7 +2681,7 @@ void
 Script_sections::start_output_section(
     const char* name,
     size_t namelen,
-    const Parser_output_section_header *header)
+    const Parser_output_section_header* header)
 {
   Output_section_definition* posd = new Output_section_definition(name,
 								  namelen,
@@ -2813,7 +2813,7 @@ Script_sections::output_section_name(
     const char* file_name,
     const char* section_name,
     Output_section*** output_section_slot,
-    Script_sections::Section_type *psection_type)
+    Script_sections::Section_type* psection_type)
 {
   for (Sections_elements::const_iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
@@ -2945,7 +2945,7 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
        p != this->sections_elements_->end();
        ++p)
     {
-      Output_section *os = (*p)->get_output_section();
+      Output_section* os = (*p)->get_output_section();
       if (os != NULL && (os->flags() & elfcpp::SHF_TLS) != 0)
 	{
 	  if (first_tls == NULL)

@@ -36,7 +36,7 @@ namespace gold
 // in _bfd_elf_is_local_label_name().
 
 bool
-Target::do_is_local_label_name (const char* name) const
+Target::do_is_local_label_name(const char* name) const
 {
   // Normal local symbols start with ``.L''.
   if (name[0] == '.' && name[1] == 'L')

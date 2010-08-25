@@ -692,7 +692,7 @@ const Target::Target_info Target_x86_64::x86_64_info =
 // we handle the SHF_X86_64_LARGE.
 
 void
-Target_x86_64::do_new_output_section(Output_section *os) const
+Target_x86_64::do_new_output_section(Output_section* os) const
 {
   if ((os->flags() & elfcpp::SHF_X86_64_LARGE) != 0)
     os->set_is_large_section();
@@ -2017,7 +2017,7 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
 	        // the section has been created.
 		target->got_section(symtab, layout);
                 Output_data_got<64, false>* got = target->got_tlsdesc_section();
-		Reloc_section *rt = target->rela_tlsdesc_section(layout);
+		Reloc_section* rt = target->rela_tlsdesc_section(layout);
                 got->add_global_pair_with_rela(gsym, GOT_TYPE_TLS_DESC, rt,
                                                elfcpp::R_X86_64_TLSDESC, 0);
 	      }

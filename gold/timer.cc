@@ -44,7 +44,7 @@ Timer::Timer()
 
 // Start couting the time.
 void
-Timer::start ()
+Timer::start()
 {
   this->get_time(&this->start_time_);
 }
@@ -79,7 +79,7 @@ Timer_init timer_init;
 
 // Write the current time infortamion.
 void
-Timer::get_time (TimeStats *now)
+Timer::get_time(TimeStats *now)
 {
 #ifdef HAVE_TIMES
   tms t;
@@ -95,7 +95,7 @@ Timer::get_time (TimeStats *now)
 
 // Return the stats since start was called.
 Timer::TimeStats
-Timer::get_elapsed_time ()
+Timer::get_elapsed_time()
 {
   TimeStats now;
   this->get_time(&now);

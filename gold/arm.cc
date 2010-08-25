@@ -126,7 +126,7 @@ const size_t ARM_TCB_SIZE = 8;
 // compilation time and generate a representation of it in PODs only.  That
 // way we can avoid initialization when the linker starts.
 
-Arm_reloc_property_table *arm_reloc_property_table = NULL;
+Arm_reloc_property_table* arm_reloc_property_table = NULL;
 
 // Instruction template class.  This class is similar to the insn_sequence
 // struct in bfd/elf32-arm.c.
@@ -1653,18 +1653,18 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   bool
   section_needs_reloc_stub_scanning(const elfcpp::Shdr<32, big_endian>&,
 				    const Relobj::Output_sections&,
-				    const Symbol_table *, const unsigned char*);
+				    const Symbol_table*, const unsigned char*);
 
   // Whether a section is a scannable text section.
   bool
   section_is_scannable(const elfcpp::Shdr<32, big_endian>&, unsigned int,
-		       const Output_section*, const Symbol_table *);
+		       const Output_section*, const Symbol_table*);
 
   // Whether a section needs to be scanned for the Cortex-A8 erratum.
   bool
   section_needs_cortex_a8_stub_scanning(const elfcpp::Shdr<32, big_endian>&,
 					unsigned int, Output_section*,
-					const Symbol_table *);
+					const Symbol_table*);
 
   // Scan a section for the Cortex-A8 erratum.
   void
@@ -2371,7 +2371,7 @@ class Target_arm : public Sized_target<32, big_endian>
 
   // Map platform-specific reloc types
   static unsigned int
-  get_real_reloc_type (unsigned int r_type);
+  get_real_reloc_type(unsigned int r_type);
 
   //
   // Methods to support stub-generations.
@@ -2626,7 +2626,7 @@ class Target_arm : public Sized_target<32, big_endian>
     // reloc.  This means the relocation type accesses a symbol not via
     // GOT or PLT.
     static inline bool
-    reloc_is_non_pic (unsigned int r_type)
+    reloc_is_non_pic(unsigned int r_type)
     {
       switch (r_type)
 	{
@@ -3073,14 +3073,14 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   // Handle ARM long branches.
   static typename This::Status
   arm_branch_common(unsigned int, const Relocate_info<32, big_endian>*,
-		    unsigned char *, const Sized_symbol<32>*,
+		    unsigned char*, const Sized_symbol<32>*,
 		    const Arm_relobj<big_endian>*, unsigned int,
 		    const Symbol_value<32>*, Arm_address, Arm_address, bool);
 
   // Handle THUMB long branches.
   static typename This::Status
   thumb_branch_common(unsigned int, const Relocate_info<32, big_endian>*,
-		      unsigned char *, const Sized_symbol<32>*,
+		      unsigned char*, const Sized_symbol<32>*,
 		      const Arm_relobj<big_endian>*, unsigned int,
 		      const Symbol_value<32>*, Arm_address, Arm_address, bool);
 
@@ -3168,7 +3168,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_ABS8: S + A
   static inline typename This::Status
-  abs8(unsigned char *view,
+  abs8(unsigned char* view,
        const Sized_relobj<32, big_endian>* object,
        const Symbol_value<32>* psymval)
   {
@@ -3190,7 +3190,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_THM_ABS5: S + A
   static inline typename This::Status
-  thm_abs5(unsigned char *view,
+  thm_abs5(unsigned char* view,
        const Sized_relobj<32, big_endian>* object,
        const Symbol_value<32>* psymval)
   {
@@ -3212,7 +3212,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_ABS12: S + A
   static inline typename This::Status
-  abs12(unsigned char *view,
+  abs12(unsigned char* view,
 	const Sized_relobj<32, big_endian>* object,
 	const Symbol_value<32>* psymval)
   {
@@ -3231,7 +3231,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_ABS16: S + A
   static inline typename This::Status
-  abs16(unsigned char *view,
+  abs16(unsigned char* view,
 	const Sized_relobj<32, big_endian>* object,
 	const Symbol_value<32>* psymval)
   {
@@ -3250,7 +3250,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_ABS32: (S + A) | T
   static inline typename This::Status
-  abs32(unsigned char *view,
+  abs32(unsigned char* view,
 	const Sized_relobj<32, big_endian>* object,
 	const Symbol_value<32>* psymval,
 	Arm_address thumb_bit)
@@ -3265,7 +3265,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_REL32: (S + A) | T - P
   static inline typename This::Status
-  rel32(unsigned char *view,
+  rel32(unsigned char* view,
 	const Sized_relobj<32, big_endian>* object,
 	const Symbol_value<32>* psymval,
 	Arm_address address,
@@ -3281,13 +3281,13 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_THM_JUMP24: (S + A) | T - P
   static typename This::Status
-  thm_jump19(unsigned char *view, const Arm_relobj<big_endian>* object,
+  thm_jump19(unsigned char* view, const Arm_relobj<big_endian>* object,
 	     const Symbol_value<32>* psymval, Arm_address address,
 	     Arm_address thumb_bit);
 
   // R_ARM_THM_JUMP6: S + A – P
   static inline typename This::Status
-  thm_jump6(unsigned char *view,
+  thm_jump6(unsigned char* view,
 	    const Sized_relobj<32, big_endian>* object,
 	    const Symbol_value<32>* psymval,
 	    Arm_address address)
@@ -3309,7 +3309,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_THM_JUMP8: S + A – P
   static inline typename This::Status
-  thm_jump8(unsigned char *view,
+  thm_jump8(unsigned char* view,
 	    const Sized_relobj<32, big_endian>* object,
 	    const Symbol_value<32>* psymval,
 	    Arm_address address)
@@ -3328,7 +3328,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_THM_JUMP11: S + A – P
   static inline typename This::Status
-  thm_jump11(unsigned char *view,
+  thm_jump11(unsigned char* view,
 	    const Sized_relobj<32, big_endian>* object,
 	    const Symbol_value<32>* psymval,
 	    Arm_address address)
@@ -3375,7 +3375,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_GOT_PREL: GOT(S) + A - P
   static inline typename This::Status
-  got_prel(unsigned char *view,
+  got_prel(unsigned char* view,
 	   Arm_address got_entry,
 	   Arm_address address)
   {
@@ -3385,7 +3385,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_PREL: (S + A) | T - P
   static inline typename This::Status
-  prel31(unsigned char *view,
+  prel31(unsigned char* view,
 	 const Sized_relobj<32, big_endian>* object,
 	 const Symbol_value<32>* psymval,
 	 Arm_address address,
@@ -3452,7 +3452,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   // R_ARM_THM_MOVW_BREL_NC: ((S + A) | T) - B(S)
   // R_ARM_THM_MOVW_BREL: ((S + A) | T) - B(S)
   static inline typename This::Status
-  thm_movw(unsigned char *view,
+  thm_movw(unsigned char* view,
 	   const Sized_relobj<32, big_endian>* object,
 	   const Symbol_value<32>* psymval,
 	   Arm_address relative_address_base,
@@ -3609,7 +3609,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   // R_ARM_V4BX
   static inline typename This::Status
   v4bx(const Relocate_info<32, big_endian>* relinfo,
-       unsigned char *view,
+       unsigned char* view,
        const Arm_relobj<big_endian>* object,
        const Arm_address address,
        const bool is_interworking)
@@ -3836,7 +3836,7 @@ typename Arm_relocate_functions<big_endian>::Status
 Arm_relocate_functions<big_endian>::arm_branch_common(
     unsigned int r_type,
     const Relocate_info<32, big_endian>* relinfo,
-    unsigned char *view,
+    unsigned char* view,
     const Sized_symbol<32>* gsym,
     const Arm_relobj<big_endian>* object,
     unsigned int r_sym,
@@ -3964,7 +3964,7 @@ typename Arm_relocate_functions<big_endian>::Status
 Arm_relocate_functions<big_endian>::thumb_branch_common(
     unsigned int r_type,
     const Relocate_info<32, big_endian>* relinfo,
-    unsigned char *view,
+    unsigned char* view,
     const Sized_symbol<32>* gsym,
     const Arm_relobj<big_endian>* object,
     unsigned int r_sym,
@@ -4128,7 +4128,7 @@ Arm_relocate_functions<big_endian>::thumb_branch_common(
 template<bool big_endian>
 typename Arm_relocate_functions<big_endian>::Status
 Arm_relocate_functions<big_endian>::thm_jump19(
-    unsigned char *view,
+    unsigned char* view,
     const Arm_relobj<big_endian>* object,
     const Symbol_value<32>* psymval,
     Arm_address address,
@@ -5942,7 +5942,7 @@ Arm_relobj<big_endian>::section_is_scannable(
     const elfcpp::Shdr<32, big_endian>& shdr,
     unsigned int shndx,
     const Output_section* os,
-    const Symbol_table *symtab)
+    const Symbol_table* symtab)
 {
   // Skip any empty sections, unallocated sections or sections whose
   // type are not SHT_PROGBITS.
@@ -5977,7 +5977,7 @@ bool
 Arm_relobj<big_endian>::section_needs_reloc_stub_scanning(
     const elfcpp::Shdr<32, big_endian>& shdr,
     const Relobj::Output_sections& out_sections,
-    const Symbol_table *symtab,
+    const Symbol_table* symtab,
     const unsigned char* pshdrs)
 {
   unsigned int sh_type = shdr.get_sh_type();
@@ -6614,7 +6614,7 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
   std::vector<unsigned int> deferred_exidx_sections;
   const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
   const unsigned char* pshdrs = sd->section_headers->data();
-  const unsigned char *ps = pshdrs + shdr_size;
+  const unsigned char* ps = pshdrs + shdr_size;
   bool must_merge_flags_and_attributes = false;
   for (unsigned int i = 1; i < this->shnum(); ++i, ps += shdr_size)
     {
@@ -6890,7 +6890,7 @@ Arm_dynobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
   // We read from the end because gas seems to put it near the end of
   // the section headers.
   const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
-  const unsigned char *ps =
+  const unsigned char* ps =
     sd->section_headers->data() + shdr_size * (this->shnum() - 1);
   for (unsigned int i = this->shnum(); i > 0; --i, ps -= shdr_size)
     {
@@ -8526,7 +8526,7 @@ inline bool
 Target_arm<big_endian>::Relocate::relocate(
     const Relocate_info<32, big_endian>* relinfo,
     Target_arm* target,
-    Output_section *output_section,
+    Output_section* output_section,
     size_t relnum,
     const elfcpp::Rel<32, big_endian>& rel,
     unsigned int r_type,
@@ -9630,7 +9630,7 @@ Target_arm<big_endian>::do_dynsym_value(const Symbol* gsym) const
 //
 template<bool big_endian>
 unsigned int
-Target_arm<big_endian>::get_real_reloc_type (unsigned int r_type)
+Target_arm<big_endian>::get_real_reloc_type(unsigned int r_type)
 {
   switch (r_type)
     {
@@ -9782,7 +9782,7 @@ int
 Target_arm<big_endian>::get_secondary_compatible_arch(
     const Attributes_section_data* pasd)
 {
-  const Object_attribute *known_attributes =
+  const Object_attribute* known_attributes =
     pasd->known_attributes(Object_attribute::OBJ_ATTR_PROC);
 
   // Note: the tag and its argument below are uleb128 values, though
@@ -9808,7 +9808,7 @@ Target_arm<big_endian>::set_secondary_compatible_arch(
     Attributes_section_data* pasd,
     int arch)
 {
-  Object_attribute *known_attributes =
+  Object_attribute* known_attributes =
     pasd->known_attributes(Object_attribute::OBJ_ATTR_PROC);
 
   if (arch == -1)
@@ -9947,7 +9947,7 @@ Target_arm<big_endian>::tag_cpu_arch_combine(
       T(V7E_M),		// V7E_M.
       T(V4T_PLUS_V6_M)	// V4T plus V6_M.
     };
-  static const int *comb[] =
+  static const int* comb[] =
     {
       v6t2,
       v6k,
@@ -10015,7 +10015,7 @@ template<bool big_endian>
 std::string
 Target_arm<big_endian>::aeabi_enum_name(unsigned int value)
 {
-  static const char *aeabi_enum_names[] =
+  static const char* aeabi_enum_names[] =
     { "", "variable-size", "32-bit", "" };
   const size_t aeabi_enum_names_size =
     sizeof(aeabi_enum_names) / sizeof(aeabi_enum_names[0]);
@@ -10036,7 +10036,7 @@ template<bool big_endian>
 std::string
 Target_arm<big_endian>::tag_cpu_name_value(unsigned int value)
 {
-  static const char *name_table[] = {
+  static const char* name_table[] = {
     // These aren't real CPU names, but we can't guess
     // that from the architecture version alone.
    "Pre v4",
@@ -11644,7 +11644,7 @@ Target_arm<big_endian>::fix_exidx_coverage(
 	  if (!exidx_input_section->has_errors())
 	    {
 	      unsigned int text_shndx = exidx_input_section->link();
-	      Output_section *os = arm_relobj->output_section(text_shndx);
+	      Output_section* os = arm_relobj->output_section(text_shndx);
 	      if (os != NULL && (os->flags() & elfcpp::SHF_ALLOC) != 0)
 		sorted_output_sections.insert(os);
 	    }

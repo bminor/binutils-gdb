@@ -2099,7 +2099,7 @@ Layout::create_gold_note()
   std::string desc = std::string("gold ") + gold::get_version_string();
 
   size_t trailing_padding;
-  Output_section *os = this->create_note("GNU", elfcpp::NT_GNU_GOLD_VERSION,
+  Output_section* os = this->create_note("GNU", elfcpp::NT_GNU_GOLD_VERSION,
 					 ".note.gnu.gold-version", desc.size(),
 					 false, &trailing_padding);
   if (os == NULL)
@@ -2314,7 +2314,7 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
   incr->create_data_sections(symtab);
 
   // Add the .gnu_incremental_inputs section.
-  const char *incremental_inputs_name =
+  const char* incremental_inputs_name =
     this->namepool_.add(".gnu_incremental_inputs", false, NULL);
   Output_section* incremental_inputs_os =
     this->make_output_section(incremental_inputs_name,
@@ -2323,7 +2323,7 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
   incremental_inputs_os->add_output_section_data(incr->inputs_section());
 
   // Add the .gnu_incremental_symtab section.
-  const char *incremental_symtab_name =
+  const char* incremental_symtab_name =
     this->namepool_.add(".gnu_incremental_symtab", false, NULL);
   Output_section* incremental_symtab_os =
     this->make_output_section(incremental_symtab_name,
@@ -2333,7 +2333,7 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
   incremental_symtab_os->set_entsize(4);
 
   // Add the .gnu_incremental_relocs section.
-  const char *incremental_relocs_name =
+  const char* incremental_relocs_name =
     this->namepool_.add(".gnu_incremental_relocs", false, NULL);
   Output_section* incremental_relocs_os =
     this->make_output_section(incremental_relocs_name,
@@ -2343,7 +2343,7 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
   incremental_relocs_os->set_entsize(incr->relocs_entsize());
 
   // Add the .gnu_incremental_got_plt section.
-  const char *incremental_got_plt_name =
+  const char* incremental_got_plt_name =
     this->namepool_.add(".gnu_incremental_got_plt", false, NULL);
   Output_section* incremental_got_plt_os =
     this->make_output_section(incremental_got_plt_name,
@@ -2352,7 +2352,7 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
   incremental_got_plt_os->add_output_section_data(incr->got_plt_section());
 
   // Add the .gnu_incremental_strtab section.
-  const char *incremental_strtab_name =
+  const char* incremental_strtab_name =
     this->namepool_.add(".gnu_incremental_strtab", false, NULL);
   Output_section* incremental_strtab_os = this->make_output_section(incremental_strtab_name,
                                                         elfcpp::SHT_STRTAB, 0,
@@ -2523,7 +2523,7 @@ align_file_offset(off_t off, uint64_t addr, uint64_t abi_pagesize)
 
 off_t
 Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
-			    unsigned int *pshndx)
+			    unsigned int* pshndx)
 {
   // Sort them into the final order.
   std::sort(this->segment_list_.begin(), this->segment_list_.end(),
@@ -2730,7 +2730,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 off_t
 Layout::set_relocatable_section_offsets(Output_data* file_header,
-					unsigned int *pshndx)
+					unsigned int* pshndx)
 {
   off_t off = 0;
 
@@ -3118,7 +3118,7 @@ Layout::allocated_output_section_count() const
 void
 Layout::create_dynamic_symtab(const Input_objects* input_objects,
                               Symbol_table* symtab,
-			      Output_section **pdynstr,
+			      Output_section** pdynstr,
 			      unsigned int* plocal_dynamic_count,
 			      std::vector<Symbol*>* pdynamic_symbols,
 			      Versions* pversions)
@@ -3913,7 +3913,7 @@ Layout::output_section_name(const char* name, size_t* plen)
   if (is_compressed_debug_section(name))
     {
       size_t len = strlen(name);
-      char *uncompressed_name = new char[len];
+      char* uncompressed_name = new char[len];
       uncompressed_name[0] = '.';
       gold_assert(name[0] == '.' && name[1] == 'z');
       strncpy(&uncompressed_name[1], &name[2], len - 2);

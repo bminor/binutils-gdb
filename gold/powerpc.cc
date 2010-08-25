@@ -291,7 +291,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   Output_data_space*
   got2_section() const
   {
-    gold_assert (this->got2_ != NULL);
+    gold_assert(this->got2_ != NULL);
     return this->got2_;
   }
 
@@ -299,7 +299,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   Output_data_space*
   toc_section() const
   {
-    gold_assert (this->toc_ != NULL);
+    gold_assert(this->toc_ != NULL);
     return this->toc_;
   }
 

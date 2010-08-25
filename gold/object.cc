@@ -1493,7 +1493,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       gold_assert(external_symbols_offset != 0);
 
       unsigned int i = *p;
-      const unsigned char *pshdr;
+      const unsigned char* pshdr;
       pshdr = section_headers_data + i * This::shdr_size;
       typename This::Shdr shdr(pshdr);
 
@@ -1932,7 +1932,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
           Address secoffset = out_offsets[shndx];
           if (symtab->is_section_folded(this, shndx))
             {
-              gold_assert (os == NULL && secoffset == invalid_address);
+              gold_assert(os == NULL && secoffset == invalid_address);
               // Get the os of the section it is folded onto.
               Section_id folded = symtab->icf()->get_folded_section(this,
                                                                     shndx);
@@ -2095,7 +2095,7 @@ uint64_t
 Sized_relobj<size, big_endian>::do_section_entsize(unsigned int shndx)
 {
   Symbols_data* sd = this->get_symbols_data();
-  gold_assert (sd != NULL);
+  gold_assert(sd != NULL);
 
   const unsigned char* pshdrs = sd->section_headers_data
                                 + This::shdr_size * shndx;
@@ -2597,7 +2597,7 @@ namespace gold
 
 bool
 is_elf_object(Input_file* input_file, off_t offset,
-	      const unsigned char** start, int *read_size)
+	      const unsigned char** start, int* read_size)
 {
   off_t filesize = input_file->file().filesize();
   int want = elfcpp::Elf_recognizer::max_header_size;

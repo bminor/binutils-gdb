@@ -1269,7 +1269,7 @@ class General_options
   // Return true if S is the name of a library excluded from automatic
   // symbol export.
   bool
-  check_excluded_libs (const std::string &s) const;
+  check_excluded_libs(const std::string &s) const;
 
   // If an explicit start address was given for section SECNAME with
   // the --section-start option, return true and set *PADDR to the
@@ -1355,7 +1355,7 @@ class General_options
 
   // Add a plugin and its arguments to the list of plugins.
   void
-  add_plugin(const char *filename);
+  add_plugin(const char* filename);
 
   // Add a plugin option.
   void

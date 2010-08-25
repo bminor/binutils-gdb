@@ -67,7 +67,7 @@ class Plugin
 
   // Call the claim-file handler.
   bool
-  claim_file(struct ld_plugin_input_file *plugin_input_file);
+  claim_file(struct ld_plugin_input_file* plugin_input_file);
 
   // Call the all-symbols-read handler.
   void
@@ -94,7 +94,7 @@ class Plugin
 
   // Add an argument
   void
-  add_option(const char *arg)
+  add_option(const char* arg)
   {
     this->args_.push_back(arg);
   }
@@ -151,7 +151,7 @@ class Plugin_manager
 
   // Call the plugin claim-file handlers in turn to see if any claim the file.
   Pluginobj*
-  claim_file(Input_file *input_file, off_t offset, off_t filesize);
+  claim_file(Input_file* input_file, off_t offset, off_t filesize);
 
   // Call the all-symbols-read handlers.
   void
@@ -222,7 +222,7 @@ class Plugin_manager
   // Get input file information with an open (possibly re-opened)
   // file descriptor.
   ld_plugin_status
-  get_input_file(unsigned int handle, struct ld_plugin_input_file *file);
+  get_input_file(unsigned int handle, struct ld_plugin_input_file* file);
 
   // Release an input file.
   ld_plugin_status
@@ -230,11 +230,11 @@ class Plugin_manager
 
   // Add a new input file.
   ld_plugin_status
-  add_input_file(const char *pathname, bool is_lib);
+  add_input_file(const char* pathname, bool is_lib);
 
   // Set the extra library path.
   ld_plugin_status
-  set_extra_library_path(const char *path);
+  set_extra_library_path(const char* path);
 
   // Return TRUE if we are in the replacement phase.
   bool

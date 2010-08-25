@@ -286,8 +286,8 @@ Symbol_table::do_allocate_commons_list(
       gold_unreachable();
     }
 
-  Output_data_space *poc = new Output_data_space(addralign, ds_name);
-  Output_section *os = layout->add_output_section_data(name,
+  Output_data_space* poc = new Output_data_space(addralign, ds_name);
+  Output_section* os = layout->add_output_section_data(name,
 						       elfcpp::SHT_NOBITS,
 						       flags, poc,
 						       ORDER_INVALID,

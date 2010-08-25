@@ -163,7 +163,7 @@ class Object_attribute
 
   // Determine what arguments an attribute tag takes.
   static int
-  arg_type (int vendor, int tag)
+  arg_type(int vendor, int tag)
   {
     switch (vendor)
       {
@@ -180,7 +180,7 @@ class Object_attribute
   // Determine whether a GNU object attribute tag takes an integer, a
   // string or both.  */
   static int
-  gnu_arg_type (int tag)
+  gnu_arg_type(int tag)
   {
     // Except for Tag_compatibility, for GNU attributes we follow the
     // same rule ARM ones > 32 follow: odd-numbered tags take strings
