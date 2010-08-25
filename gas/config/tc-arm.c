@@ -6826,7 +6826,7 @@ encode_arm_addr_mode_2 (int i, bfd_boolean is_t)
 	  constraint ((is_t || inst.operands[i].writeback),
 		      BAD_PC_ADDRESSING);
 
-	  /* Use of PC in str is deprecated for ARMv7-A.  */
+	  /* Use of PC in str is deprecated for ARMv7.  */
 	  if (warn_on_deprecated
 	      && !is_load
 	      && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7))

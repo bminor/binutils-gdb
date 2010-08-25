@@ -1,5 +1,9 @@
 2010-08-25  Jie Zhang  <jie@codesourcery.com>
 
+	* config/tc-arm.c (encode_arm_addr_mode_2): Fix comment.
+
+2010-08-25  Jie Zhang  <jie@codesourcery.com>
+
 	* config/tc-arm.c (encode_arm_addr_mode_2): Fix
 	BAD_PC_ADDRESSING condition.
 
