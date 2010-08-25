@@ -1,3 +1,40 @@
+2010-08-25  Pedro Alves  <pedro@codesourcery.com>
+
+	PR threads/10729
+
+	* linux-x86-low.c (update_debug_registers_callback): New.
+	(i386_dr_low_set_addr): Use it.
+	(i386_dr_low_get_addr): New.
+	(i386_dr_low_set_control): Use update_debug_registers_callback.
+	(i386_dr_low_get_control): New.
+	(i386_dr_low_get_status): Adjust.
+	* linux-low.c (linux_stop_lwp): New.
+	* linux-low.h (linux_stop_lwp): Declare.
+
+	* i386-low.c (I386_DR_GET_RW_LEN): Take the dr7 contents as
+	argument instead of a i386_debug_reg_state.
+	(I386_DR_WATCH_HIT): Take the dr6 contents as argument instead of
+	a i386_debug_reg_state.
+	(i386_insert_aligned_watchpoint): Adjust.
+	(i386_remove_aligned_watchpoint): Adjust.
+	(i386_low_stopped_data_address): Read the debug registers from the
+	inferior instead of from the mirrors.
+	* i386-low.h (struct i386_debug_reg_state): Extend comment.
+	(i386_dr_low_get_addr): Declare.
+	(i386_dr_low_get_control): Declare.
+	(i386_dr_low_get_status): Change prototype.
+
+	* win32-i386-low.c (dr_status_mirror, dr_control_mirror): New globals.
+	(i386_dr_low_get_addr): New.
+	(i386_dr_low_get_control): New.
+	(i386_dr_low_get_status): Adjust prototype.  Return
+	dr_status_mirror.
+	(i386_initial_stuff): Clear dr_status_mirror and
+	dr_control_mirror.
+	(i386_get_thread_context): Adjust.
+	(i386_set_thread_context): Adjust.
+	(i386_thread_added): Adjust.
+
 2010-08-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.h (linux_thread_area): Delete declaration.

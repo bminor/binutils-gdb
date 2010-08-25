@@ -2478,6 +2478,12 @@ kill_lwp (unsigned long lwpid, int signo)
   return kill (lwpid, signo);
 }
 
+void
+linux_stop_lwp (struct lwp_info *lwp)
+{
+  send_sigstop (lwp);
+}
+
 static void
 send_sigstop (struct lwp_info *lwp)
 {

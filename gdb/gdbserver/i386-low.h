@@ -42,7 +42,10 @@
 struct i386_debug_reg_state
 {
   /* Mirror the inferior's DRi registers.  We keep the status and
-     control registers separated because they don't hold addresses.  */
+     control registers separated because they don't hold addresses.
+     Note that since we can change these mirrors while threads are
+     running, we never trust them to explain a cause of a trap.
+     For that, we need to peek directly in the inferior registers.  */
   CORE_ADDR dr_mirror[DR_NADDR];
   unsigned dr_status_mirror, dr_control_mirror;
 
@@ -100,9 +103,14 @@ extern int i386_low_stopped_by_watchpoint (struct i386_debug_reg_state *state);
 extern void i386_dr_low_set_addr (const struct i386_debug_reg_state *state,
 				  int regnum);
 
+/* Return the inferior's debug register REGNUM.  */
+extern CORE_ADDR i386_dr_low_get_addr (int regnum);
+
 /* Update the inferior's DR7 debug control register from STATE.  */
 extern void i386_dr_low_set_control (const struct i386_debug_reg_state *state);
 
-/* Get the value of the inferior's DR6 debug status register
-   and record it in STATE.  */
-extern void i386_dr_low_get_status (struct i386_debug_reg_state *state);
+/* Return the value of the inferior's DR7 debug control register.  */
+extern unsigned i386_dr_low_get_control (void);
+
+/* Return the value of the inferior's DR6 debug status register.  */
+extern unsigned i386_dr_low_get_status (void);
