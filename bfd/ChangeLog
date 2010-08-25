@@ -1,3 +1,10 @@
+2010-08-25  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't load program
+	headers if any loaded section wraps the address space.  Simplify
+	~(m-1) to -m.  Use lma rather than vma when determining whether
+	note sections are adjacent.
+
 2010-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11933
