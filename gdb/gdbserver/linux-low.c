@@ -2391,9 +2391,6 @@ Check if we're already there.\n",
 	     ourstatus->kind,
 	     ourstatus->value.sig);
 
-  if (!stabilizing_threads)
-    current_inferior->last_status = *ourstatus;
-
   return ptid_of (event_child);
 }
 

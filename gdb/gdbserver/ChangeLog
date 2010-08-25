@@ -1,5 +1,14 @@
 2010-08-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-low.c (linux_wait_1): Don't set last_status here.
+	* server.c (push_event, queue_stop_reply_callback): Assert we're
+	not pushing a TARGET_WAITKIND_IGNORE event.
+	(start_inferior, start_inferior, attach_inferior, handle_v_cont)
+	(myresume, handle_target_event): Set the thread's last_resume_kind
+	and last_status from the target returned status.
+
+2010-08-25  Pedro Alves  <pedro@codesourcery.com>
+
 	PR threads/10729
 
 	* linux-x86-low.c (update_debug_registers_callback): New.
