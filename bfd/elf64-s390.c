@@ -3415,6 +3415,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define TARGET_BIG_SYM	bfd_elf64_s390_vec
 #define TARGET_BIG_NAME	"elf64-s390"
 #define ELF_ARCH	bfd_arch_s390
+#define ELF_TARGET_ID	S390_ELF_DATA
 #define ELF_MACHINE_CODE EM_S390
 #define ELF_MACHINE_ALT1 EM_S390_OLD
 #define ELF_MAXPAGESIZE 0x1000

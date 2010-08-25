@@ -2853,6 +2853,7 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 
 #define ELF_ARCH                bfd_arch_lm32
+#define ELF_TARGET_ID		LM32_ELF_DATA
 #define ELF_MACHINE_CODE        EM_LATTICEMICO32
 #define ELF_MAXPAGESIZE         0x1000
 

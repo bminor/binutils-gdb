@@ -1753,6 +1753,7 @@ elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define TARGET_BIG_SYM		bfd_elf32_tic6x_be_vec
 #define TARGET_BIG_NAME		"elf32-tic6x-be"
 #define ELF_ARCH		bfd_arch_tic6x
+#define ELF_TARGET_ID		TIC6X_ELF_DATA
 #define ELF_MACHINE_CODE	EM_TI_C6000
 #define ELF_MAXPAGESIZE		1
 #define bfd_elf32_bfd_reloc_type_lookup elf32_tic6x_reloc_type_lookup

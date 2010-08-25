@@ -5445,6 +5445,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 #define TARGET_BIG_SYM		bfd_elf32_spu_vec
 #define TARGET_BIG_NAME		"elf32-spu"
 #define ELF_ARCH		bfd_arch_spu
+#define ELF_TARGET_ID		SPU_ELF_DATA
 #define ELF_MACHINE_CODE	EM_SPU
 /* This matches the alignment need for DMA.  */
 #define ELF_MAXPAGESIZE		0x80

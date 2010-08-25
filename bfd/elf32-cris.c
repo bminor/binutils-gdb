@@ -4364,6 +4364,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 #define ELF_ARCH		bfd_arch_cris
+#define ELF_TARGET_ID		CRIS_ELF_DATA
 #define ELF_MACHINE_CODE	EM_CRIS
 #define ELF_MAXPAGESIZE		0x2000
 

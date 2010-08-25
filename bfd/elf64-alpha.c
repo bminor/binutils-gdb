@@ -5334,6 +5334,7 @@ static const struct elf_size_info alpha_elf_size_info =
 #define TARGET_LITTLE_SYM	bfd_elf64_alpha_vec
 #define TARGET_LITTLE_NAME	"elf64-alpha"
 #define ELF_ARCH		bfd_arch_alpha
+#define ELF_TARGET_ID		ALPHA_ELF_DATA
 #define ELF_MACHINE_CODE	EM_ALPHA
 #define ELF_MAXPAGESIZE	0x10000
 #define ELF_COMMONPAGESIZE	0x2000

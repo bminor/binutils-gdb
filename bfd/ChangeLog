@@ -1,3 +1,61 @@
+2010-08-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11944
+	* elf-bfd.h (elf_backend_data): Add target_id.
+	(bfd_elf_make_generic_object): Renamed to ...
+	(bfd_elf_make_object): This.
+
+	* elf.c (bfd_elf_make_generic_object): Removed.
+	(bfd_elf_make_object): New.
+	(bfd_elf_mkcorefile): Really treat it as an object file.
+
+	* elf-m10300.c (ELF_TARGET_ID): New.
+	* elf32-arm.c (ELF_TARGET_ID): Likewise.
+	* elf32-bfin.c (ELF_TARGET_ID): Likewise.
+	* elf32-cris.c (ELF_TARGET_ID): Likewise.
+	* elf32-frv.c (ELF_TARGET_ID): Likewise.
+	* elf32-i386.c (ELF_TARGET_ID): Likewise.
+	* elf32-lm32.c (ELF_TARGET_ID): Likewise.
+	* elf32-m32r.c (ELF_TARGET_ID): Likewise.
+	* elf32-m68hc11.c (ELF_TARGET_ID): Likewise.
+	* elf32-m68hc12.c (ELF_TARGET_ID): Likewise.
+	* elf32-m68k.c (ELF_TARGET_ID): Likewise.
+	* elf32-microblaze.c (ELF_TARGET_ID): Likewise.
+	* elf32-ppc.c (ELF_TARGET_ID): Likewise.
+	* elf32-s390.c (ELF_TARGET_ID): Likewise.
+	* elf32-sh.c (ELF_TARGET_ID): Likewise.
+	* elf32-sparc.c (ELF_TARGET_ID): Likewise.
+	* elf32-spu.c (ELF_TARGET_ID): Likewise.
+	* elf32-tic6x.c (ELF_TARGET_ID): Likewise.
+	* elf32-xtensa.c (ELF_TARGET_ID): Likewise.
+	* elf64-alpha.c (ELF_TARGET_ID): Likewise.
+	* elf64-hppa.c (ELF_TARGET_ID): Likewise.
+	* elf64-ppc.c (ELF_TARGET_ID): Likewise.
+	* elf64-s390.c (ELF_TARGET_ID): Likewise.
+	* elf64-x86-64.c (ELF_TARGET_ID): Likewise.
+	* elfxx-ia64.c (ELF_TARGET_ID): Likewise.
+
+	* elf32-hppa.c (elf32_hppa_mkobject): Removed.
+	(bfd_elf32_mkobject): Likewise.
+	(ELF_TARGET_ID): New.
+
+	* elf32-mips.c (ELF_TARGET_ID): New.
+	(bfd_elf32_mkobject): Removed.
+
+	* elf64-mips.c (ELF_TARGET_ID): New.
+	(bfd_elf64_mkobject): Removed.
+
+	* elfn32-mips.c (ELF_TARGET_ID): New.
+	(bfd_elf32_mkobject): Removed.
+
+	* elfxx-mips.c (_bfd_mips_elf_mkobject): Removed.
+	* elfxx-mips.h (_bfd_mips_elf_mkobject): Likewise.
+
+	* elfxx-target.h (bfd_elfNN_mkobject): Default to
+	bfd_elf_make_object.
+	(ELF_TARGET_ID): New.  Default to GENERIC_ELF_DATA.
+	(elfNN_bed): Initialize target_id.
+
 2010-08-25  Julian Brown  <julian@codesourcery.com>
 
 	* elf32-arm.c (arm_stub_required_alignment): New.

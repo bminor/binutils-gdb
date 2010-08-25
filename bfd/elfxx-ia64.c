@@ -5996,6 +5996,7 @@ elfNN_vms_close_and_cleanup (bfd *abfd)
 #define TARGET_BIG_SYM			bfd_elfNN_ia64_big_vec
 #define TARGET_BIG_NAME			"elfNN-ia64-big"
 #define ELF_ARCH			bfd_arch_ia64
+#define ELF_TARGET_ID			IA64_ELF_DATA
 #define ELF_MACHINE_CODE		EM_IA_64
 #define ELF_MACHINE_ALT1		1999	/* EAS2.3 */
 #define ELF_MACHINE_ALT2		1998	/* EAS2.2 */

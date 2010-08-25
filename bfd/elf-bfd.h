@@ -689,6 +689,10 @@ struct elf_backend_data
   /* The architecture for this backend.  */
   enum bfd_architecture arch;
 
+  /* An identifier used to distinguish different target specific
+     extensions to elf_obj_tdata and elf_link_hash_table structures.  */
+  enum elf_target_id target_id;
+
   /* The ELF machine code (EM_xxxx) for this backend.  */
   int elf_machine_code;
 
@@ -1739,7 +1743,7 @@ extern bfd_reloc_status_type bfd_elf_generic_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 extern bfd_boolean bfd_elf_allocate_object
   (bfd *, size_t, enum elf_target_id);
-extern bfd_boolean bfd_elf_make_generic_object
+extern bfd_boolean bfd_elf_make_object
   (bfd *);
 extern bfd_boolean bfd_elf_mkcorefile
   (bfd *);

@@ -13900,6 +13900,7 @@ const struct elf_size_info elf32_arm_size_info =
 };
 
 #define ELF_ARCH			bfd_arch_arm
+#define ELF_TARGET_ID			ARM_ELF_DATA
 #define ELF_MACHINE_CODE		EM_ARM
 #ifdef __QNXTARGET__
 #define ELF_MAXPAGESIZE			0x1000

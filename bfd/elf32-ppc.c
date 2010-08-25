@@ -8927,6 +8927,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define TARGET_BIG_SYM		bfd_elf32_powerpc_vec
 #define TARGET_BIG_NAME		"elf32-powerpc"
 #define ELF_ARCH		bfd_arch_powerpc
+#define ELF_TARGET_ID		PPC32_ELF_DATA
 #define ELF_MACHINE_CODE	EM_PPC
 #ifdef __QNXTARGET__
 #define ELF_MAXPAGESIZE		0x1000

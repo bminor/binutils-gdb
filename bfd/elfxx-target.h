@@ -278,7 +278,7 @@
 #endif
 
 #ifndef bfd_elfNN_mkobject
-#define bfd_elfNN_mkobject bfd_elf_make_generic_object
+#define bfd_elfNN_mkobject bfd_elf_make_object
 #endif
 
 #ifndef bfd_elfNN_mkcorefile
@@ -303,6 +303,10 @@
 
 #ifndef elf_info_to_howto_rel
 #define elf_info_to_howto_rel 0
+#endif
+
+#ifndef ELF_TARGET_ID
+#define ELF_TARGET_ID	GENERIC_ELF_DATA
 #endif
 
 #ifndef ELF_OSABI
@@ -638,6 +642,7 @@ extern const struct elf_size_info _bfd_elfNN_size_info;
 static struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
+  ELF_TARGET_ID,		/* target_id */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_OSABI,			/* elf_osabi  */
   ELF_MAXPAGESIZE,		/* maxpagesize */

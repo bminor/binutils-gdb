@@ -4692,6 +4692,7 @@ elf_i386_add_symbol_hook (bfd * abfd,
 #define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
+#define ELF_TARGET_ID			I386_ELF_DATA
 #define ELF_MACHINE_CODE		EM_386
 #define ELF_MAXPAGESIZE			0x1000
 

@@ -10766,6 +10766,7 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
   { NULL,                       0,      0, 0,            0 }
 };
 
+#define ELF_TARGET_ID			XTENSA_ELF_DATA
 #ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM		bfd_elf32_xtensa_le_vec
 #define TARGET_LITTLE_NAME		"elf32-xtensa-le"

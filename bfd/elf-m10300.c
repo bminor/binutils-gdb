@@ -4893,6 +4893,7 @@ _bfd_mn10300_elf_reloc_type_class (const Elf_Internal_Rela *rela)
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
 #define ELF_ARCH		bfd_arch_mn10300
+#define ELF_TARGET_ID		MN10300_ELF_DATA
 #define ELF_MACHINE_CODE	EM_MN10300
 #define ELF_MACHINE_ALT1	EM_CYGNUS_MN10300
 #define ELF_MAXPAGESIZE		0x1000

@@ -2991,6 +2991,7 @@ elf32_avr_build_stubs (struct bfd_link_info *info)
 }
 
 #define ELF_ARCH		bfd_arch_avr
+#define ELF_TARGET_ID		AVR_ELF_DATA
 #define ELF_MACHINE_CODE	EM_AVR
 #define ELF_MACHINE_ALT1	EM_AVR_OLD
 #define ELF_MAXPAGESIZE		1

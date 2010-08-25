@@ -250,17 +250,18 @@ bfd_elf_allocate_object (bfd *abfd,
 
 
 bfd_boolean
-bfd_elf_make_generic_object (bfd *abfd)
+bfd_elf_make_object (bfd *abfd)
 {
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
-				  GENERIC_ELF_DATA);
+				  bed->target_id);
 }
 
 bfd_boolean
 bfd_elf_mkcorefile (bfd *abfd)
 {
   /* I think this can be done just like an object file.  */
-  return bfd_elf_make_generic_object (abfd);
+  return abfd->xvec->_bfd_set_format[(int) bfd_object] (abfd);
 }
 
 static char *

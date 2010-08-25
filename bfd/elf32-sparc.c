@@ -188,6 +188,7 @@ elf32_sparc_add_symbol_hook (bfd * abfd,
 #define TARGET_BIG_SYM	bfd_elf32_sparc_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
+#define ELF_TARGET_ID	SPARC_ELF_DATA
 #define ELF_MACHINE_CODE EM_SPARC
 #define ELF_MACHINE_ALT1 EM_SPARC32PLUS
 #define ELF_MAXPAGESIZE 0x10000

@@ -4456,6 +4456,7 @@ static const struct bfd_elf_special_section
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
 #define ELF_ARCH			    bfd_arch_i386
+#define ELF_TARGET_ID			    X86_64_ELF_DATA
 #define ELF_MACHINE_CODE		    EM_X86_64
 #define ELF_MAXPAGESIZE			    0x200000
 #define ELF_MINPAGESIZE			    0x1000

@@ -336,15 +336,6 @@ struct elf32_hppa_link_hash_table
 #define eh_name(eh) \
   (eh ? eh->root.root.string : "<undef>")
 
-/* Override the generic function because we want to mark our BFDs.  */
-
-static bfd_boolean
-elf32_hppa_mkobject (bfd *abfd)
-{
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
-				  HPPA32_ELF_DATA);
-}
-
 /* Assorted hash table functions.  */
 
 /* Initialize an entry in the stub hash table.  */
@@ -4649,7 +4640,6 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_info_to_howto_rel		     elf_hppa_info_to_howto_rel
 
 /* Stuff for the BFD linker.  */
-#define bfd_elf32_mkobject		     elf32_hppa_mkobject
 #define bfd_elf32_bfd_final_link	     elf32_hppa_final_link
 #define bfd_elf32_bfd_link_hash_table_create elf32_hppa_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_free   elf32_hppa_link_hash_table_free
@@ -4687,6 +4677,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define TARGET_BIG_SYM		bfd_elf32_hppa_vec
 #define TARGET_BIG_NAME		"elf32-hppa"
 #define ELF_ARCH		bfd_arch_hppa
+#define ELF_TARGET_ID		HPPA32_ELF_DATA
 #define ELF_MACHINE_CODE	EM_PARISC
 #define ELF_MAXPAGESIZE		0x1000
 #define ELF_OSABI		ELFOSABI_HPUX

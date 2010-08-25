@@ -5764,6 +5764,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define TARGET_LITTLE_SYM		bfd_elf32_bfin_vec
 #define TARGET_LITTLE_NAME		"elf32-bfin"
 #define ELF_ARCH			bfd_arch_bfin
+#define ELF_TARGET_ID			BFIN_ELF_DATA
 #define ELF_MACHINE_CODE		EM_BLACKFIN
 #define ELF_MAXPAGESIZE			0x1000
 #define elf_symbol_leading_char		'_'

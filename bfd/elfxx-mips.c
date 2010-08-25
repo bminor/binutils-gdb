@@ -11520,15 +11520,6 @@ error_return:
   return NULL;
 }
 
-/* Allocate ABFD's target-dependent data.  */
-
-bfd_boolean
-_bfd_mips_elf_mkobject (bfd *abfd)
-{
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
-				  MIPS_ELF_DATA);
-}
-
 /* Create a MIPS ELF linker hash table.  */
 
 struct bfd_link_hash_table *

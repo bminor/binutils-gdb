@@ -6994,6 +6994,7 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   return TRUE;
 }
 #define ELF_ARCH		bfd_arch_frv
+#define ELF_TARGET_ID		FRV_ELF_DATA
 #define ELF_MACHINE_CODE	EM_CYGNUS_FRV
 #define ELF_MAXPAGESIZE		0x1000
 
