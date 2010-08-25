@@ -1,3 +1,24 @@
+2010-08-24  Doug Evans  <dje@google.com>
+
+	PR symtab/11942
+	* dwarf2read.c (dwarf2_per_objfile): New members debug_info_type_hash,
+	debug_types_type_hash.
+	(dwarf2_cu, dwarf2_per_cu_data): Delete member type_hash.
+	All uses updated.
+	(lookup_die_type): Renamed from tag_type_to_tag.  First look in
+	appropriate type_hash table.  All callers updated.
+	(allocate_signatured_type_table): Renamed from
+	allocate_signatured_type_hash_table.  All callers updated.
+	(create_signatured_type_table_from_index): Renamed from
+	create_signatured_type_hash_from_index.  All callers updated.
+	(read_die_type): Add comment.  Move actual reading to ...
+	(read_die_type_1): ... here.  New function.
+	(follow_die_ref_or_sig): Tweak comment.
+	(set_die_type): Rewrite to use appropriate choice of
+	debug_info_type_hash or debug_types_type_hash.
+	(get_die_type_at_offset): New function.
+	(get_die_type): Call it.
+
 2010-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* python/py-type.c (typy_richcompare): Initialize worklist.

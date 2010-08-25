@@ -213,6 +213,16 @@ struct dwarf2_per_objfile
   /* Set during partial symbol reading, to prevent queueing of full
      symbols.  */
   int reading_partial_symbols;
+
+  /* Table mapping type .debug_info DIE offsets to types.
+     This is NULL if not allocated yet.
+     It (currently) makes sense to allocate debug_types_type_hash lazily.
+     To keep things simple we allocate both lazily.  */
+  htab_t debug_info_type_hash;
+
+  /* Table mapping type .debug_types DIE offsets to types.
+     This is NULL if not allocated yet.  */
+  htab_t debug_types_type_hash;
 };
 
 static struct dwarf2_per_objfile *dwarf2_per_objfile;
@@ -345,11 +355,6 @@ struct dwarf2_cu
   /* Backchain to our per_cu entry if the tree has been built.  */
   struct dwarf2_per_cu_data *per_cu;
 
-  /* Pointer to the die -> type map.  Although it is stored
-     permanently in per_cu, we copy it here to avoid double
-     indirection.  */
-  htab_t type_hash;
-
   /* How many compilation units ago was this CU last referenced?  */
   int last_used;
 
@@ -444,12 +449,6 @@ struct dwarf2_per_cu_data
   /* Set to non-NULL iff this CU is currently loaded.  When it gets freed out
      of the CU cache it gets reset to NULL again.  */
   struct dwarf2_cu *cu;
-
-  /* If full symbols for this CU have been read in, then this field
-     holds a map of DIE offsets to types.  It isn't always possible
-     to reconstruct this information later, so we have to preserve
-     it.  */
-  htab_t type_hash;
 
   /* The corresponding objfile.  */
   struct objfile *objfile;
@@ -1039,9 +1038,12 @@ static void set_descriptive_type (struct type *, struct die_info *,
 static struct type *die_containing_type (struct die_info *,
 					 struct dwarf2_cu *);
 
-static struct type *tag_type_to_type (struct die_info *, struct dwarf2_cu *);
+static struct type *lookup_die_type (struct die_info *, struct attribute *,
+				     struct dwarf2_cu *);
 
 static struct type *read_type_die (struct die_info *, struct dwarf2_cu *);
+
+static struct type *read_type_die_1 (struct die_info *, struct dwarf2_cu *);
 
 static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
@@ -1265,6 +1267,9 @@ static void dwarf2_mark (struct dwarf2_cu *);
 
 static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
 
+static struct type *get_die_type_at_offset (unsigned int,
+					    struct dwarf2_per_cu_data *per_cu);
+
 static struct type *get_die_type (struct die_info *die, struct dwarf2_cu *cu);
 
 static void dwarf2_release_queue (void *dummy);
@@ -1290,7 +1295,7 @@ static gdb_byte *partial_read_comp_unit_head (struct comp_unit_head *header,
 static void init_cu_die_reader (struct die_reader_specs *reader,
 				struct dwarf2_cu *cu);
 
-static htab_t allocate_signatured_type_hash_table (struct objfile *objfile);
+static htab_t allocate_signatured_type_table (struct objfile *objfile);
 
 #if WORDS_BIGENDIAN
 
@@ -1744,13 +1749,14 @@ create_cus_from_index (struct objfile *objfile, const gdb_byte *cu_list,
 }
 
 /* Create the signatured type hash table from the index.  */
+
 static int
-create_signatured_type_hash_from_index (struct objfile *objfile,
-					const gdb_byte *bytes,
-					offset_type elements)
+create_signatured_type_table_from_index (struct objfile *objfile,
+					 const gdb_byte *bytes,
+					 offset_type elements)
 {
   offset_type i;
-  htab_t type_hash;
+  htab_t sig_types_hash;
 
   dwarf2_per_objfile->n_type_comp_units = elements / 3;
   dwarf2_per_objfile->type_comp_units
@@ -1758,7 +1764,7 @@ create_signatured_type_hash_from_index (struct objfile *objfile,
 		     dwarf2_per_objfile->n_type_comp_units
 		     * sizeof (struct dwarf2_per_cu_data *));
 
-  type_hash = allocate_signatured_type_hash_table (objfile);
+  sig_types_hash = allocate_signatured_type_table (objfile);
 
   for (i = 0; i < elements; i += 3)
     {
@@ -1784,13 +1790,13 @@ create_signatured_type_hash_from_index (struct objfile *objfile,
 	= OBSTACK_ZALLOC (&objfile->objfile_obstack,
 			  struct dwarf2_per_cu_quick_data);
 
-      slot = htab_find_slot (type_hash, type_sig, INSERT);
+      slot = htab_find_slot (sig_types_hash, type_sig, INSERT);
       *slot = type_sig;
 
       dwarf2_per_objfile->type_comp_units[i / 3] = &type_sig->per_cu;
     }
 
-  dwarf2_per_objfile->signatured_types = type_hash;
+  dwarf2_per_objfile->signatured_types = sig_types_hash;
 
   return 1;
 }
@@ -1956,8 +1962,8 @@ dwarf2_read_index (struct objfile *objfile)
 
   if (version == 2
       && types_list_elements
-      && !create_signatured_type_hash_from_index (objfile, types_list,
-						  types_list_elements))
+      && !create_signatured_type_table_from_index (objfile, types_list,
+						   types_list_elements))
     return 0;
 
   create_addrmap_from_index (objfile, map);
@@ -2783,7 +2789,7 @@ eq_type_signature (const void *item_lhs, const void *item_rhs)
 /* Allocate a hash table for signatured types.  */
 
 static htab_t
-allocate_signatured_type_hash_table (struct objfile *objfile)
+allocate_signatured_type_table (struct objfile *objfile)
 {
   return htab_create_alloc_ex (41,
 			       hash_type_signature,
@@ -2828,7 +2834,7 @@ create_debug_types_hash_table (struct objfile *objfile)
       return 0;
     }
 
-  types_htab = allocate_signatured_type_hash_table (objfile);
+  types_htab = allocate_signatured_type_table (objfile);
 
   if (dwarf2_die_debug)
     fprintf_unfiltered (gdb_stdlog, "Signatured types:\n");
@@ -3310,7 +3316,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
       /* Link this compilation unit into the compilation unit tree.  */
       this_cu->cu = cu;
       cu->per_cu = this_cu;
-      cu->type_hash = this_cu->type_hash;
 
       /* Link this CU into read_in_chain.  */
       this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
@@ -4332,7 +4337,6 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
       /* Link this compilation unit into the compilation unit tree.  */
       per_cu->cu = cu;
       cu->per_cu = per_cu;
-      cu->type_hash = per_cu->type_hash;
 
       /* Link this CU into read_in_chain.  */
       per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
@@ -5301,6 +5305,9 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  attr = dwarf2_attr (child_origin_die, DW_AT_abstract_origin, cu);
 	  if (attr == NULL)
 	    break;
+	  /* FIXME: cu becomes CU of child_origin_die.
+	     What about the next iteration of the outer loop?
+	     cu might then be bogus (won't be CU for child_die).  */
 	  child_origin_die = follow_die_ref (child_origin_die, attr, &cu);
 	}
 
@@ -10905,14 +10912,12 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     }
 }
 
-
 /* Return the type of the die in question using its DW_AT_type attribute.  */
 
 static struct type *
 die_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *type_attr;
-  struct die_info *type_die;
 
   type_attr = dwarf2_attr (die, DW_AT_type, cu);
   if (!type_attr)
@@ -10921,9 +10926,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
       return objfile_type (cu->objfile)->builtin_void;
     }
 
-  type_die = follow_die_ref_or_sig (die, type_attr, &cu);
-
-  return tag_type_to_type (type_die, cu);
+  return lookup_die_type (die, type_attr, cu);
 }
 
 /* True iff CU's producer generates GNAT Ada auxiliary information
@@ -10944,7 +10947,6 @@ need_gnat_info (struct dwarf2_cu *cu)
   return 0;
 }
 
-
 /* Return the auxiliary type of the die in question using its
    DW_AT_GNAT_descriptive_type attribute.  Returns NULL if the
    attribute is not present.  */
@@ -10953,14 +10955,12 @@ static struct type *
 die_descriptive_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *type_attr;
-  struct die_info *type_die;
 
   type_attr = dwarf2_attr (die, DW_AT_GNAT_descriptive_type, cu);
   if (!type_attr)
     return NULL;
 
-  type_die = follow_die_ref (die, type_attr, &cu);
-  return tag_type_to_type (type_die, cu);
+  return lookup_die_type (die, type_attr, cu);
 }
 
 /* If DIE has a descriptive_type attribute, then set the TYPE's
@@ -10986,24 +10986,72 @@ static struct type *
 die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *type_attr;
-  struct die_info *type_die;
 
   type_attr = dwarf2_attr (die, DW_AT_containing_type, cu);
   if (!type_attr)
     error (_("Dwarf Error: Problem turning containing type into gdb type "
 	     "[in module %s]"), cu->objfile->name);
 
-  type_die = follow_die_ref_or_sig (die, type_attr, &cu);
-  return tag_type_to_type (type_die, cu);
+  return lookup_die_type (die, type_attr, cu);
 }
 
+/* Look up the type of DIE in CU using its type attribute ATTR.
+   If there is no type substitute an error marker.  */
+
 static struct type *
-tag_type_to_type (struct die_info *die, struct dwarf2_cu *cu)
+lookup_die_type (struct die_info *die, struct attribute *attr,
+		 struct dwarf2_cu *cu)
 {
   struct type *this_type;
 
-  this_type = read_type_die (die, cu);
-  if (!this_type)
+  /* First see if we have it cached.  */
+
+  if (is_ref_attr (attr))
+    {
+      unsigned int offset = dwarf2_get_ref_die_offset (attr);
+
+      this_type = get_die_type_at_offset (offset, cu->per_cu);
+    }
+  else if (attr->form == DW_FORM_sig8)
+    {
+      struct signatured_type *sig_type = DW_SIGNATURED_TYPE (attr);
+      struct dwarf2_cu *sig_cu;
+      unsigned int offset;
+
+      /* sig_type will be NULL if the signatured type is missing from
+	 the debug info.  */
+      if (sig_type == NULL)
+	error (_("Dwarf Error: Cannot find signatured DIE referenced from DIE "
+		 "at 0x%x [in module %s]"),
+	       die->offset, cu->objfile->name);
+
+      gdb_assert (sig_type->per_cu.from_debug_types);
+      offset = sig_type->offset + sig_type->type_offset;
+      this_type = get_die_type_at_offset (offset, &sig_type->per_cu);
+    }
+  else
+    {
+      dump_die_for_error (die);
+      error (_("Dwarf Error: Bad type attribute %s [in module %s]"),
+	     dwarf_attr_name (attr->name), cu->objfile->name);
+    }
+
+  /* If not cached we need to read it in.  */
+
+  if (this_type == NULL)
+    {
+      struct die_info *type_die;
+      struct dwarf2_cu *type_cu = cu;
+
+      type_die = follow_die_ref_or_sig (die, attr, &type_cu);
+      /* If the type is cached, we should have found it above.  */
+      gdb_assert (get_die_type (type_die, type_cu) == NULL);
+      this_type = read_type_die_1 (type_die, type_cu);
+    }
+
+  /* If we still don't have a type use an error marker.  */
+
+  if (this_type == NULL)
     {
       char *message, *saved;
 
@@ -11018,8 +11066,17 @@ tag_type_to_type (struct die_info *die, struct dwarf2_cu *cu)
 
       this_type = init_type (TYPE_CODE_ERROR, 0, 0, saved, cu->objfile);
     }
+
   return this_type;
 }
+
+/* Return the type in DIE, CU.
+   Returns NULL for invalid types.
+
+   This first does a lookup in the appropriate type_hash table,
+   and only reads the die in if necessary.
+
+   NOTE: This can be called when reading in partial or full symbols.  */
 
 static struct type *
 read_type_die (struct die_info *die, struct dwarf2_cu *cu)
@@ -11029,6 +11086,17 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
   this_type = get_die_type (die, cu);
   if (this_type)
     return this_type;
+
+  return read_type_die_1 (die, cu);
+}
+
+/* Read the type in DIE, CU.
+   Returns NULL for invalid types.  */
+
+static struct type *
+read_type_die_1 (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *this_type = NULL;
 
   switch (die->tag)
     {
@@ -12656,8 +12724,9 @@ follow_die_ref_or_sig (struct die_info *src_die, struct attribute *attr,
 }
 
 /* Follow reference OFFSET.
-   On entry *REF_CU is the CU of source DIE referencing OFFSET.
-   On exit *REF_CU is the CU of the result.  */
+   On entry *REF_CU is the CU of the source die referencing OFFSET.
+   On exit *REF_CU is the CU of the result.
+   Returns NULL if OFFSET is invalid.  */
 
 static struct die_info *
 follow_die_offset (unsigned int offset, struct dwarf2_cu **ref_cu)
@@ -14195,6 +14264,8 @@ static struct type *
 set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 {
   struct dwarf2_offset_and_type **slot, ofs;
+  struct objfile *objfile = cu->objfile;
+  htab_t *type_hash_ptr;
 
   /* For Ada types, make sure that the gnat-specific data is always
      initialized (if not already set).  There are a few types where
@@ -14209,51 +14280,68 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
 
-  if (cu->type_hash == NULL)
+  if (cu->per_cu->from_debug_types)
+    type_hash_ptr = &dwarf2_per_objfile->debug_types_type_hash;
+  else
+    type_hash_ptr = &dwarf2_per_objfile->debug_info_type_hash;
+
+  if (*type_hash_ptr == NULL)
     {
-      gdb_assert (cu->per_cu != NULL);
-      cu->per_cu->type_hash
-	= htab_create_alloc_ex (cu->header.length / 24,
+      *type_hash_ptr
+	= htab_create_alloc_ex (127,
 				offset_and_type_hash,
 				offset_and_type_eq,
 				NULL,
-				&cu->objfile->objfile_obstack,
+				&objfile->objfile_obstack,
 				hashtab_obstack_allocate,
 				dummy_obstack_deallocate);
-      cu->type_hash = cu->per_cu->type_hash;
     }
 
   ofs.offset = die->offset;
   ofs.type = type;
   slot = (struct dwarf2_offset_and_type **)
-    htab_find_slot_with_hash (cu->type_hash, &ofs, ofs.offset, INSERT);
+    htab_find_slot_with_hash (*type_hash_ptr, &ofs, ofs.offset, INSERT);
   if (*slot)
     complaint (&symfile_complaints,
 	       _("A problem internal to GDB: DIE 0x%x has type already set"),
 	       die->offset);
-  *slot = obstack_alloc (&cu->objfile->objfile_obstack, sizeof (**slot));
+  *slot = obstack_alloc (&objfile->objfile_obstack, sizeof (**slot));
   **slot = ofs;
   return type;
 }
 
-/* Find the type for DIE in CU's type_hash, or return NULL if DIE does
-   not have a saved type.  */
+/* Look up the type for the die at DIE_OFFSET in the appropriate type_hash
+   table, or return NULL if the die does not have a saved type.  */
 
 static struct type *
-get_die_type (struct die_info *die, struct dwarf2_cu *cu)
+get_die_type_at_offset (unsigned int offset,
+			struct dwarf2_per_cu_data *per_cu)
 {
   struct dwarf2_offset_and_type *slot, ofs;
-  htab_t type_hash = cu->type_hash;
+  htab_t type_hash;
 
+  if (per_cu->from_debug_types)
+    type_hash = dwarf2_per_objfile->debug_types_type_hash;
+  else
+    type_hash = dwarf2_per_objfile->debug_info_type_hash;
   if (type_hash == NULL)
     return NULL;
 
-  ofs.offset = die->offset;
+  ofs.offset = offset;
   slot = htab_find_with_hash (type_hash, &ofs, ofs.offset);
   if (slot)
     return slot->type;
   else
     return NULL;
+}
+
+/* Look up the type for DIE in the appropriate type_hash table,
+   or return NULL if DIE does not have a saved type.  */
+
+static struct type *
+get_die_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  return get_die_type_at_offset (die->offset, cu->per_cu);
 }
 
 /* Add a dependence relationship from CU to REF_PER_CU.  */

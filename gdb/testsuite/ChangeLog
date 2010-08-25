@@ -1,3 +1,11 @@
+2010-08-24  Doug Evans  <dje@google.com>
+
+	PR symtab/11942
+	* gdb.dwarf2/dw4-sig-types.cc: New file.
+	* gdb.dwarf2/dw4-sig-types.h: New file.
+	* gdb.dwarf2/dw4-sig-types-b.cc: New file.
+	* gdb.dwarf2/dw4-sig-types.exp: New file.
+
 2010-08-23  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11145:
