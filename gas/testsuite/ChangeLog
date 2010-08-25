@@ -1,3 +1,10 @@
+2010-08-25  Jie Zhang  <jie@codesourcery.com>
+
+	* gas/arm/ldst-pc.d: New test.
+	* gas/arm/ldst-pc.s: New test.
+	* gas/arm/sp-pc-validations-bad.s: `str r0,[pc,#4]' is valid.
+	* gas/arm/sp-pc-validations-bad.l: Adjust accordingly.
+
 2010-08-17  Roland McGrath  <roland@redhat.com>
 
 	* gas/elf/groupauto.s: New file.

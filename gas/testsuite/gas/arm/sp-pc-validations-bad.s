@@ -159,11 +159,11 @@ ldrt pc,[r0],r1, LSL #4			@ ditto
 ldrt r0,[pc],r1, LSL #4			@ ditto
 ldrt r0,[r1],pc, LSL #4			@ ditto
 
+
 @ Stores, ARM ================================================================
 
 @ STR (immediate, ARM)
-str r0,[pc,#4]				@ Unpredictable
-str r0,[pc],#4				@ ditto
+str r0,[pc],#4				@ Unpredictable
 str r0,[pc,#4]!				@ ditto
 
 @ STR (register)

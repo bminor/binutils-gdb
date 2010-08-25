@@ -1,3 +1,8 @@
+2010-08-25  Jie Zhang  <jie@codesourcery.com>
+
+	* config/tc-arm.c (encode_arm_addr_mode_2): Fix
+	BAD_PC_ADDRESSING condition.
+
 2010-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* doc/c-arm.texi (ARM Options): Document -mfpu=fp4-sp-d16.

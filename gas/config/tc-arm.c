@@ -6819,11 +6819,18 @@ encode_arm_addr_mode_2 (int i, bfd_boolean is_t)
       if (is_pc && !inst.reloc.pc_rel)
 	{
 	  const bfd_boolean is_load = ((inst.instruction & LOAD_BIT) != 0);
-	  /* BAD_PC_ADDRESSING Condition =
-	       is_load => is_t
-	     which becomes !is_load || is_t.  */
-	  constraint ((!is_load || is_t),
+
+	  /* If is_t is TRUE, it's called from do_ldstt.  ldrt/strt
+	     cannot use PC in addressing.
+	     PC cannot be used in writeback addressing, either.  */
+	  constraint ((is_t || inst.operands[i].writeback),
 		      BAD_PC_ADDRESSING);
+
+	  /* Use of PC in str is deprecated for ARMv7-A.  */
+	  if (warn_on_deprecated
+	      && !is_load
+	      && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7))
+	    as_warn (_("use of PC in this instruction is deprecated"));
 	}
 
       if (inst.reloc.type == BFD_RELOC_UNUSED)

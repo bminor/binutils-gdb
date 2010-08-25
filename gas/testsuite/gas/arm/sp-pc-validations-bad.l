@@ -101,7 +101,6 @@
 [^:]*:158: Error: r15 not allowed here -- `ldrt pc,\[r0\],r1,LSL#4'
 [^:]*:159: Error: cannot use register index with PC-relative addressing -- `ldrt r0,\[pc\],r1,LSL#4'
 [^:]*:160: Error: cannot use register index with PC-relative addressing -- `ldrt r0,\[r1\],pc,LSL#4'
-[^:]*:165: Error: cannot use register index with PC-relative addressing -- `str r0,\[pc,#4\]'
 [^:]*:166: Error: cannot use register index with PC-relative addressing -- `str r0,\[pc\],#4'
 [^:]*:167: Error: cannot use register index with PC-relative addressing -- `str r0,\[pc,#4\]!'
 [^:]*:170: Error: cannot use register index with PC-relative addressing -- `str r0,\[r1,pc,LSL#4\]'
