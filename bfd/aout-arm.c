@@ -1,6 +1,6 @@
 /* BFD back-end for raw ARM a.out binaries.
    Copyright 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005,
-   2007, 2009 Free Software Foundation, Inc.
+   2007, 2009, 2010 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -296,7 +296,7 @@ MY (bfd_reloc_type_lookup) (bfd *abfd,
 #define ASTD(i,j)       case i: return & MY (howto_table)[j]
 
   if (code == BFD_RELOC_CTOR)
-    switch (bfd_get_arch_info (abfd)->bits_per_address)
+    switch (bfd_arch_bits_per_address (abfd))
       {
       case 32:
         code = BFD_RELOC_32;

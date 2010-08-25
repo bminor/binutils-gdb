@@ -1,5 +1,15 @@
 2010-08-25  Alan Modra  <amodra@gmail.com>
 
+	* aout-arm.c (MY(bfd_reloc_type_lookup)): Use bfd_arch_bits_per_address.
+	* aout-ns32k.c (MY(bfd_reloc_type_lookup)): Likewise.
+	* aoutx.h (NAME(aout,reloc_type_lookup)): Likewise.
+	* coff-arm.c (coff_arm_reloc_type_lookup): Likewise.
+	* elf-hppa.h (elf_hppa_reloc_final_type): Likewise.
+	* reloc.c (bfd_default_reloc_type_lookup): Likewise.
+	* riscix.c (riscix_reloc_type_lookup): Likewise.
+
+2010-08-25  Alan Modra  <amodra@gmail.com>
+
 	* elf.c (_bfd_elf_map_sections_to_segments): Don't load program
 	headers if any loaded section wraps the address space.  Simplify
 	~(m-1) to -m.  Use lma rather than vma when determining whether

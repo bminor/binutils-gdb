@@ -5572,7 +5572,7 @@ bfd_default_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
     case BFD_RELOC_CTOR:
       /* The type of reloc used in a ctor, which will be as wide as the
 	 address - so either a 64, 32, or 16 bitter.  */
-      switch (bfd_get_arch_info (abfd)->bits_per_address)
+      switch (bfd_arch_bits_per_address (abfd))
 	{
 	case 64:
 	  BFD_FAIL ();

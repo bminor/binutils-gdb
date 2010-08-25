@@ -1,6 +1,6 @@
 /* BFD back-end for ARM COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -817,7 +817,7 @@ coff_arm_reloc_type_lookup (bfd * abfd, bfd_reloc_code_real_type code)
 #define ASTD(i,j)       case i: return aoutarm_std_reloc_howto + j
 
   if (code == BFD_RELOC_CTOR)
-    switch (bfd_get_arch_info (abfd)->bits_per_address)
+    switch (bfd_arch_bits_per_address (abfd))
       {
       case 32:
         code = BFD_RELOC_32;
