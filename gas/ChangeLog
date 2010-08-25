@@ -1,3 +1,7 @@
+2010-08-25  Alan Modra  <amodra@gmail.com>
+
+	* NEWS: Mention ampersand in macro change.
+
 2010-08-25  Gunther Nikl  <gnikl@users.sourceforge.net>
 
 	* configure.tgt (m68k-*-aout): Change to bfd_gas=yes.

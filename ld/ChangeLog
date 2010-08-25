@@ -23,6 +23,10 @@
 
 2010-08-19  Alan Modra  <amodra@gmail.com>
 
+	* NEWS: Mention change in linker script expression evaluation.
+
+2010-08-19  Alan Modra  <amodra@gmail.com>
+
 	* ld.texinfo (Expression Section): Detail expression evaluation.
 	(Builtin Functions <ADDR>): Correct.
 	(Builtin Functions <LOADADDR>): Don't mention LOADADDR normally

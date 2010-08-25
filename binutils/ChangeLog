@@ -1,7 +1,3 @@
-2010-08-25  Alan Modra  <amodra@gmail.com>
-
-	* NEWS: Mention ampersand in macro change.
-
 2010-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfedit.c (input_elf_osabi): New.
@@ -23,10 +19,6 @@
 
 	* readelf.c (display_mips_gnu_attribute): Replace GCC options
 	with a textual description of a MIPS32r2 64-bit FPU.
-
-2010-08-19  Alan Modra  <amodra@gmail.com>
-
-	* NEWS: Mention change in linker script expression evaluation.
 
 2010-08-13  Dan Rosenberg  <dan.j.rosenberg@gmail.com>
 
