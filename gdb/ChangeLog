@@ -1,3 +1,8 @@
+2010-08-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* dwarf2read.c (inherit_abstract_dies): Handle origin die's
+	compilation unit being different from target die's.
+
 2010-08-24  Doug Evans  <dje@google.com>
 
 	PR symtab/11942

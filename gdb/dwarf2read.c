@@ -5266,12 +5266,24 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
   struct die_info *origin_child_die;
   struct cleanup *cleanups;
   struct attribute *attr;
+  struct dwarf2_cu *origin_cu;
+  struct pending **origin_previous_list_in_scope;
 
   attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
   if (!attr)
     return;
 
-  origin_die = follow_die_ref (die, attr, &cu);
+  /* Note that following die references may follow to a die in a
+     different cu.  */
+
+  origin_cu = cu;
+  origin_die = follow_die_ref (die, attr, &origin_cu);
+
+  /* We're inheriting ORIGIN's children into the scope we'd put DIE's
+     symbols in.  */
+  origin_previous_list_in_scope = origin_cu->list_in_scope;
+  origin_cu->list_in_scope = cu->list_in_scope;
+
   if (die->tag != origin_die->tag
       && !(die->tag == DW_TAG_inlined_subroutine
 	   && origin_die->tag == DW_TAG_subprogram))
@@ -5299,16 +5311,16 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	 but GCC versions at least through 4.4 generate this (GCC PR
 	 40573).  */
       struct die_info *child_origin_die = child_die;
+      struct dwarf2_cu *child_origin_cu = cu;
 
       while (1)
 	{
-	  attr = dwarf2_attr (child_origin_die, DW_AT_abstract_origin, cu);
+	  attr = dwarf2_attr (child_origin_die, DW_AT_abstract_origin,
+			      child_origin_cu);
 	  if (attr == NULL)
 	    break;
-	  /* FIXME: cu becomes CU of child_origin_die.
-	     What about the next iteration of the outer loop?
-	     cu might then be bogus (won't be CU for child_die).  */
-	  child_origin_die = follow_die_ref (child_origin_die, attr, &cu);
+	  child_origin_die = follow_die_ref (child_origin_die, attr,
+					     &child_origin_cu);
 	}
 
       /* According to DWARF3 3.3.8.2 #3 new entries without their abstract
@@ -5350,10 +5362,11 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
       if (offsetp >= offsets_end || *offsetp > origin_child_die->offset)
 	{
 	  /* Found that ORIGIN_CHILD_DIE is really not referenced.  */
-	  process_die (origin_child_die, cu);
+	  process_die (origin_child_die, origin_cu);
 	}
       origin_child_die = sibling_die (origin_child_die);
     }
+  origin_cu->list_in_scope = origin_previous_list_in_scope;
 
   do_cleanups (cleanups);
 }
