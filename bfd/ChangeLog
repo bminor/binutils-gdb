@@ -1,5 +1,11 @@
 2010-08-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/11939
+	* elflink.c (elf_link_add_object_symbols): Don't set
+	unique_global for non-ELF hash link table.
+
+2010-08-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/11944
 	* elf-bfd.h (elf_backend_data): Add target_id.
 	(bfd_elf_make_generic_object): Renamed to ...
