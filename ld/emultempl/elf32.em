@@ -1495,33 +1495,34 @@ gld${EMULATION_NAME}_before_allocation (void)
     rpath = (const char *) getenv ("LD_RUN_PATH");
 
   for (abfd = link_info.input_bfds; abfd; abfd = abfd->link_next)
-    {
-      const char *audit_libs = elf_dt_audit (abfd);
+    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+      {
+	const char *audit_libs = elf_dt_audit (abfd);
 
-      /* If the input bfd contains an audit entry, we need to add it as 
-         a dep audit entry.  */
-      if (audit_libs && *audit_libs != '\0')
-	{
-	  char *cp = xstrdup (audit_libs);
-	  do
-	    {
-	      int more = 0;
-	      char *cp2 = strchr (cp, config.rpath_separator);
+	/* If the input bfd contains an audit entry, we need to add it as 
+	   a dep audit entry.  */
+	if (audit_libs && *audit_libs != '\0')
+	  {
+	    char *cp = xstrdup (audit_libs);
+	    do
+	      {
+		int more = 0;
+		char *cp2 = strchr (cp, config.rpath_separator);
 
-	      if (cp2)
-		{
-	          *cp2 = '\0';
-		  more = 1;
-		}
-	      
-	      if (cp != NULL && *cp != '\0')
-	        gld${EMULATION_NAME}_append_to_separated_string (&depaudit, cp);
+		if (cp2)
+		  {
+		    *cp2 = '\0';
+		    more = 1;
+		  }
 
-	      cp = more ? ++cp2 : NULL;
-	    }
-	  while (cp != NULL);
-	}
-    }
+		if (cp != NULL && *cp != '\0')
+		  gld${EMULATION_NAME}_append_to_separated_string (&depaudit, cp);
+
+		cp = more ? ++cp2 : NULL;
+	      }
+	    while (cp != NULL);
+	  }
+      }
 
   if (! (bfd_elf_size_dynamic_sections
 	 (link_info.output_bfd, command_line.soname, rpath,
