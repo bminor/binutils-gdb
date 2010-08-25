@@ -2200,9 +2200,10 @@ Check if we're already there.\n",
 	      if (debug_threads)
 		fprintf (stderr, "dequeued one signal.\n");
 	    }
-	  else if (debug_threads)
+	  else
 	    {
-	      fprintf (stderr, "no deferred signals.\n");
+	      if (debug_threads)
+		fprintf (stderr, "no deferred signals.\n");
 
 	      if (stabilizing_threads)
 		{

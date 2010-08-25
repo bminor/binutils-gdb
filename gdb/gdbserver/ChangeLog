@@ -1,5 +1,10 @@
 2010-08-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-low.c (linux_wait_1): Move non-debugging code out of
+	`debug_threads' control.
+
+2010-08-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.c (linux_wait_1): Don't set last_status here.
 	* server.c (push_event, queue_stop_reply_callback): Assert we're
 	not pushing a TARGET_WAITKIND_IGNORE event.
