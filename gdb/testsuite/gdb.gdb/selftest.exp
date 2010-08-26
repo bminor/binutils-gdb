@@ -185,11 +185,15 @@ proc do_steps_and_nexts {} {
 		set description "step over instream initialization"
 		set command "step"
 	    }
-	    -re ".*getcwd .gdb_dirbuf, sizeof .gdb_dirbuf..;.*$gdb_prompt $" {
+	    -re ".*getcwd .gdb_dirbuf, sizeof .gdb_dirbuf.*$gdb_prompt $" {
 		set description "next over getcwd"
 		set command "next"
 	    }
-	    -re ".*quit_flag = 0.*$gdb_prompt $" {
+	    -re ".*gdb_program_name = xstrdup.*$gdb_prompt $" {
+                set description "next over xstrdup"
+                set command "next"
+            } 
+            -re ".*quit_flag = 0.*$gdb_prompt $" {
 		set description "step over quit_flag initialization"
 		set command "step"
 	    }

@@ -1,3 +1,8 @@
+2010-08-26  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Update test case
+	to reflect latest c source file.
+
 2010-08-19  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.arch/vsx-regs.exp: Remove wrong comment about testing AltiVec
