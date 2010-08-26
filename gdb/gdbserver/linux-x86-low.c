@@ -546,7 +546,7 @@ i386_dr_low_get_status (void)
   return x86_linux_dr_get (ptid, DR_STATUS);
 }
 
-/* Watchpoint support.  */
+/* Breakpoint/Watchpoint support.  */
 
 static int
 x86_insert_point (char type, CORE_ADDR addr, int len)
@@ -555,7 +555,16 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
   switch (type)
     {
     case '0':
-      return set_gdb_breakpoint_at (addr);
+      {
+	int ret;
+
+	ret = prepare_to_access_memory ();
+	if (ret)
+	  return -1;
+	ret = set_gdb_breakpoint_at (addr);
+	unprepare_to_access_memory ();
+	return ret;
+      }
     case '2':
     case '3':
     case '4':
@@ -574,7 +583,16 @@ x86_remove_point (char type, CORE_ADDR addr, int len)
   switch (type)
     {
     case '0':
-      return delete_gdb_breakpoint_at (addr);
+      {
+	int ret;
+
+	ret = prepare_to_access_memory ();
+	if (ret)
+	  return -1;
+	ret = delete_gdb_breakpoint_at (addr);
+	unprepare_to_access_memory ();
+	return ret;
+      }
     case '2':
     case '3':
     case '4':

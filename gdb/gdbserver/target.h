@@ -181,6 +181,23 @@ struct target_ops
 
   void (*store_registers) (struct regcache *regcache, int regno);
 
+  /* Prepare to read or write memory from the inferior process.
+     Targets use this to do what is necessary to get the state of the
+     inferior such that it is possible to access memory.
+
+     This should generally only be called from client facing routines,
+     such as gdb_read_memory/gdb_write_memory, or the insert_point
+     callbacks.
+
+     Like `read_memory' and `write_memory' below, returns 0 on success
+     and errno on failure.  */
+
+  int (*prepare_to_access_memory) (void);
+
+  /* Undo the effects of prepare_to_access_memory.  */
+
+  void (*unprepare_to_access_memory) (void);
+
   /* Read memory from the inferior process.  This should generally be
      called through read_inferior_memory, which handles breakpoint shadowing.
 
@@ -468,6 +485,18 @@ int start_non_stop (int nonstop);
 
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);
+
+#define prepare_to_access_memory()		\
+  (the_target->prepare_to_access_memory		\
+   ? (*the_target->prepare_to_access_memory) () \
+   : 0)
+
+#define unprepare_to_access_memory()			\
+  do							\
+    {							\
+      if (the_target->unprepare_to_access_memory)     	\
+	(*the_target->unprepare_to_access_memory) ();  	\
+    } while (0)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

@@ -5006,6 +5006,25 @@ linux_unpause_all (int unfreeze)
 }
 
 static int
+linux_prepare_to_access_memory (void)
+{
+  /* Neither ptrace nor /proc/PID/mem allow accessing memory through a
+     running LWP.  */
+  if (non_stop)
+    linux_pause_all (1);
+  return 0;
+}
+
+static void
+linux_unprepare_to_access_memory (void)
+{
+  /* Neither ptrace nor /proc/PID/mem allow accessing memory through a
+     running LWP.  */
+  if (non_stop)
+    linux_unpause_all (1);
+}
+
+static int
 linux_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 					CORE_ADDR collector,
 					CORE_ADDR lockaddr,
@@ -5043,6 +5062,8 @@ static struct target_ops linux_target_ops = {
   linux_wait,
   linux_fetch_registers,
   linux_store_registers,
+  linux_prepare_to_access_memory,
+  linux_unprepare_to_access_memory,
   linux_read_memory,
   linux_write_memory,
   linux_look_up_symbols,

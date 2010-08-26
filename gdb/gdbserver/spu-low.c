@@ -653,6 +653,8 @@ static struct target_ops spu_target_ops = {
   spu_wait,
   spu_fetch_registers,
   spu_store_registers,
+  NULL, /* prepare_to_access_memory */
+  NULL, /* unprepare_to_access_memory */
   spu_read_memory,
   spu_write_memory,
   spu_look_up_symbols,

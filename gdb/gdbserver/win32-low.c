@@ -1781,6 +1781,8 @@ static struct target_ops win32_target_ops = {
   win32_wait,
   win32_fetch_inferior_registers,
   win32_store_inferior_registers,
+  NULL, /* prepare_to_access_memory */
+  NULL, /* unprepare_to_access_memory */
   win32_read_inferior_memory,
   win32_write_inferior_memory,
   NULL, /* lookup_symbols */

@@ -539,8 +539,10 @@ monitor_show_help (void)
 /* Read trace frame or inferior memory.  */
 
 static int
-read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
+gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
+  int ret;
+
   if (current_traceframe >= 0)
     {
       ULONGEST nbytes;
@@ -558,19 +560,36 @@ read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
       /* (assume no half-trace half-real blocks for now) */
     }
 
-  return read_inferior_memory (memaddr, myaddr, len);
+  ret = prepare_to_access_memory ();
+  if (ret == 0)
+    {
+      ret = read_inferior_memory (memaddr, myaddr, len);
+      unprepare_to_access_memory ();
+    }
+
+  return ret;
 }
 
 /* Write trace frame or inferior memory.  Actually, writing to trace
    frames is forbidden.  */
 
 static int
-write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
+gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 {
   if (current_traceframe >= 0)
     return EIO;
   else
-    return write_inferior_memory (memaddr, myaddr, len);
+    {
+      int ret;
+
+      ret = prepare_to_access_memory ();
+      if (ret == 0)
+	{
+	  ret = write_inferior_memory (memaddr, myaddr, len);
+	  unprepare_to_access_memory ();
+	}
+      return ret;
+    }
 }
 
 /* Subroutine of handle_search_memory to simplify it.  */
@@ -584,7 +603,7 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 {
   /* Prime the search buffer.  */
 
-  if (read_memory (start_addr, search_buf, search_buf_size) != 0)
+  if (gdb_read_memory (start_addr, search_buf, search_buf_size) != 0)
     {
       warning ("Unable to access target memory at 0x%lx, halting search.",
 	       (long) start_addr);
@@ -635,8 +654,8 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 			? search_space_len - keep_len
 			: chunk_size);
 
-	  if (read_memory (read_addr, search_buf + keep_len,
-				    nr_to_read) != 0)
+	  if (gdb_read_memory (read_addr, search_buf + keep_len,
+			       nr_to_read) != 0)
 	    {
 	      warning ("Unable to access target memory at 0x%lx, halting search.",
 		       (long) read_addr);
@@ -2924,7 +2943,7 @@ process_serial_event (void)
     case 'm':
       require_running (own_buf);
       decode_m_packet (&own_buf[1], &mem_addr, &len);
-      if (read_memory (mem_addr, mem_buf, len) == 0)
+      if (gdb_read_memory (mem_addr, mem_buf, len) == 0)
 	convert_int_to_ascii (mem_buf, own_buf, len);
       else
 	write_enn (own_buf);
@@ -2932,7 +2951,7 @@ process_serial_event (void)
     case 'M':
       require_running (own_buf);
       decode_M_packet (&own_buf[1], &mem_addr, &len, &mem_buf);
-      if (write_memory (mem_addr, mem_buf, len) == 0)
+      if (gdb_write_memory (mem_addr, mem_buf, len) == 0)
 	write_ok (own_buf);
       else
 	write_enn (own_buf);
@@ -2941,7 +2960,7 @@ process_serial_event (void)
       require_running (own_buf);
       if (decode_X_packet (&own_buf[1], packet_len - 1,
 			   &mem_addr, &len, &mem_buf) < 0
-	  || write_memory (mem_addr, mem_buf, len) != 0)
+	  || gdb_write_memory (mem_addr, mem_buf, len) != 0)
 	write_enn (own_buf);
       else
 	write_ok (own_buf);
