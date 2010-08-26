@@ -4713,8 +4713,16 @@ sigchld_handler (int signo)
   int old_errno = errno;
 
   if (debug_threads)
-    /* fprintf is not async-signal-safe, so call write directly.  */
-    write (2, "sigchld_handler\n", sizeof ("sigchld_handler\n") - 1);
+    {
+      do
+	{
+	  /* fprintf is not async-signal-safe, so call write
+	     directly.  */
+	  if (write (2, "sigchld_handler\n",
+		     sizeof ("sigchld_handler\n") - 1) < 0)
+	    break; /* just ignore */
+	} while (0);
+    }
 
   if (target_is_async_p ())
     async_file_mark (); /* trigger a linux_wait */

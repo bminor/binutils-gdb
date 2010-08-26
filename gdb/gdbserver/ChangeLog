@@ -1,3 +1,14 @@
+2010-08-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbreplay.c (remote_error): New.
+	(gdbchar): New.
+	(expect): Use gdbchar.  Check for error reading from GDB.
+	Clarify sync error output.
+	(play): Check for errors writing to GDB.
+	* linux-low.c (sigchld_handler): Really ignore `write' errors.
+	* remote-utils.c (getpkt): Check for errors writing to the remote
+	descriptor.
+
 2010-08-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (linux_wait_1): Move non-debugging code out of
