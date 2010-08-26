@@ -9443,16 +9443,19 @@ elf32_arm_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Process stub sections (eg BE8 encoding, ...).  */
   struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
   int i;
-  for(i=0; i<htab->top_id; i++) {
-    sec = htab->stub_group[i].stub_sec;
-    if (sec) {
-      osec = sec->output_section;
-      elf32_arm_write_section (abfd, info, sec, sec->contents);
-      if (! bfd_set_section_contents (abfd, osec, sec->contents,
-				      sec->output_offset, sec->size))
-	return FALSE;
+  for (i=0; i<htab->top_id; i++)
+    {
+      sec = htab->stub_group[i].stub_sec;
+      /* Only process it once, in its link_sec slot.  */
+      if (sec && i == htab->stub_group[i].link_sec->id)
+	{
+	  osec = sec->output_section;
+	  elf32_arm_write_section (abfd, info, sec, sec->contents);
+	  if (! bfd_set_section_contents (abfd, osec, sec->contents,
+					  sec->output_offset, sec->size))
+	    return FALSE;
+	}
     }
-  }
 
   /* Write out any glue sections now that we have created all the
      stubs.  */
