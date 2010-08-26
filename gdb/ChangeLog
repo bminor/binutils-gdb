@@ -1,3 +1,7 @@
+2010-08-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* NEWS: Mention libthread_db debugging with core files.
+
 2010-08-26  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_build_include_psymtabs): Remove unnecessary

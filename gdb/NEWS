@@ -37,6 +37,31 @@
   expression.  Such a watchpoint is never deleted due to it going out
   of scope.
 
+* GDB now supports thread debugging of core dumps on GNU/Linux.
+
+  GDB now activates thread debugging using the libthread_db library
+  when debugging GNU/Linux core dumps, similarly to when debugging
+  live processes.  As a result, when debugging a core dump file, GDB
+  is now able to display pthread_t ids of threads.  For example, "info
+  threads" shows the same output as when debugging the process when it
+  was live.  In earlier releases, you'd see something like this:
+
+  (gdb) info threads
+   * 1 LWP 6780  main () at main.c:10
+
+  While now you see this:
+
+  (gdb) info threads
+   * 1 Thread 0x7f0f5712a700 (LWP 6780)  main () at main.c:10
+
+  It is also now possible to inspect TLS variables when debugging core
+  dumps.
+
+  When debugging a core dump generated on a machine other than the one
+  used to run GDB, you may need to point GDB at the correct
+  libthread_db library with the "set libthread-db-search-path"
+  command.  See the user manual for more details on this command.
+
 *** Changes in GDB 7.2
 
 * Shared library support for remote targets by default
