@@ -121,15 +121,21 @@ mi_check_thread_states \
 # goes wrong with moribund locations support or displaced stepping (or
 # a target bug if it can step over breakpoints itself), a spurious
 # SIGTRAP/SIGSEGV can come at any time after deleting the breakpoint.
+# Note that this causes multiple prompts to appear before the output
+# we are interested in, so we can't use mi_gdb_test or
+# gdb_test_multiple (or an MI equivalent)
 
-gdb_test_multiple "102-break-delete\nprint done = 1\n103-exec-continue --all" \
-    "resume all, program exited normally" {
-	-re "\\*stopped,reason=\"exited-normally\"" {
-	    pass "resume all, program exited normally"
-	}
-	-re "\\*stopped" {
-	    fail "unexpected stop"
-	}
+send_gdb "102-break-delete\n"
+send_gdb "print done = 1\n"
+send_gdb "103-exec-continue --all\n"
+
+gdb_expect {
+    -re "\\*stopped,reason=\"exited-normally\"" {
+       pass "resume all, program exited normally"
     }
+    timeout {
+       fail "resume all, waiting for program exit (timeout)"
+    }
+}
 
 mi_gdb_exit

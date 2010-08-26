@@ -1,3 +1,8 @@
+2010-08-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.mi/mi-nsmoribund.exp: Revert back to send_gdb/gdb_expect in
+	one test.
+
 2010-08-24  Doug Evans  <dje@google.com>
 
 	PR symtab/11942
