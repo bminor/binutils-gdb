@@ -1,5 +1,9 @@
 2010-08-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* mem-break.c [HAVE_MALLOC_H]: Include malloc.h.
+
+2010-08-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbreplay.c (remote_error): New.
 	(gdbchar): New.
 	(expect): Use gdbchar.  Check for error reading from GDB.

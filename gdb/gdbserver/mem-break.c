@@ -20,6 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 
 const unsigned char *breakpoint_data;
 int breakpoint_len;
