@@ -1,5 +1,16 @@
 2010-08-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* Makefile.in (WARN_CFLAGS): Get it from configure.
+	(WERROR_CFLAGS): New.
+	(INTERNAL_CFLAGS): Add WERROR_CFLAGS.
+	* configure.ac: Introduce --enable-werror, which adds -Werror to
+	the compiler command line.  Enabled by default.  Disable with
+	--disable-werror.  Add -Wdeclaration-after-statement
+	Wpointer-arith and -Wformat-nonliteral to warning flags.
+	* configure: Regenerate.
+
+2010-08-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* mem-break.c [HAVE_MALLOC_H]: Include malloc.h.
 
 2010-08-26  Pedro Alves  <pedro@codesourcery.com>
