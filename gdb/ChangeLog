@@ -1,3 +1,10 @@
+2010-08-26  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_build_include_psymtabs): Remove unnecessary
+	forward decl.  Pass pst->dirname to dwarf_decode_lines.
+	(psymtab_include_file_name): New function.
+	(dwarf_decode_lines): Call it.  Update comments.
+
 2010-08-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* dwarf2read.c (inherit_abstract_dies): Handle origin die's

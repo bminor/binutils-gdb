@@ -872,10 +872,6 @@ static void dwarf2_locate_sections (bfd *, asection *, void *);
 static void dwarf2_create_include_psymtab (char *, struct partial_symtab *,
                                            struct objfile *);
 
-static void dwarf2_build_include_psymtabs (struct dwarf2_cu *,
-                                           struct die_info *,
-                                           struct partial_symtab *);
-
 static void dwarf2_build_psymtabs_hard (struct objfile *);
 
 static void scan_partial_symbols (struct partial_die_info *,
@@ -2763,7 +2759,8 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
   if (lh == NULL)
     return;  /* No linetable, so no includes.  */
 
-  dwarf_decode_lines (lh, NULL, abfd, cu, pst);
+  /* NOTE: pst->dirname is DW_AT_comp_dir (if present).  */
+  dwarf_decode_lines (lh, pst->dirname, abfd, cu, pst);
 
   free_line_header (lh);
 }
@@ -9912,23 +9909,104 @@ check_cu_functions (CORE_ADDR address, struct dwarf2_cu *cu)
   return fn->lowpc;
 }
 
+/* Subroutine of dwarf_decode_lines to simplify it.
+   Return the file name of the psymtab for included file FILE_INDEX
+   in line header LH of PST.
+   COMP_DIR is the compilation directory (DW_AT_comp_dir) or NULL if unknown.
+   If space for the result is malloc'd, it will be freed by a cleanup.
+   Returns NULL if FILE_INDEX should be ignored, i.e., it is pst->filename.  */
+
+static char *
+psymtab_include_file_name (const struct line_header *lh, int file_index,
+			   const struct partial_symtab *pst,
+			   const char *comp_dir)
+{
+  const struct file_entry fe = lh->file_names [file_index];
+  char *include_name = fe.name;
+  char *include_name_to_compare = include_name;
+  char *dir_name = NULL;
+  char *pst_filename;
+  int file_is_pst;
+
+  if (fe.dir_index)
+    dir_name = lh->include_dirs[fe.dir_index - 1];
+
+  if (!IS_ABSOLUTE_PATH (include_name)
+      && (dir_name != NULL || comp_dir != NULL))
+    {
+      /* Avoid creating a duplicate psymtab for PST.
+	 We do this by comparing INCLUDE_NAME and PST_FILENAME.
+	 Before we do the comparison, however, we need to account
+	 for DIR_NAME and COMP_DIR.
+	 First prepend dir_name (if non-NULL).  If we still don't
+	 have an absolute path prepend comp_dir (if non-NULL).
+	 However, the directory we record in the include-file's
+	 psymtab does not contain COMP_DIR (to match the
+	 corresponding symtab(s)).
+
+	 Example:
+
+	 bash$ cd /tmp
+	 bash$ gcc -g ./hello.c
+	 include_name = "hello.c"
+	 dir_name = "."
+	 DW_AT_comp_dir = comp_dir = "/tmp"
+	 DW_AT_name = "./hello.c"  */
+
+      if (dir_name != NULL)
+	{
+	  include_name = concat (dir_name, SLASH_STRING,
+				 include_name, (char *)NULL);
+	  include_name_to_compare = include_name;
+	  make_cleanup (xfree, include_name);
+	}
+      if (!IS_ABSOLUTE_PATH (include_name) && comp_dir != NULL)
+	{
+	  include_name_to_compare = concat (comp_dir, SLASH_STRING,
+					    include_name, (char *)NULL);
+	}
+    }
+
+  pst_filename = pst->filename;
+  if (!IS_ABSOLUTE_PATH (pst_filename) && pst->dirname != NULL)
+    {
+      pst_filename = concat (pst->dirname, SLASH_STRING,
+			     pst_filename, (char *)NULL);
+    }
+
+  file_is_pst = strcmp (include_name_to_compare, pst_filename) == 0;
+
+  if (include_name_to_compare != include_name)
+    xfree (include_name_to_compare);
+  if (pst_filename != pst->filename)
+    xfree (pst_filename);
+
+  if (file_is_pst)
+    return NULL;
+  return include_name;
+}
+
 /* Decode the Line Number Program (LNP) for the given line_header
    structure and CU.  The actual information extracted and the type
    of structures created from the LNP depends on the value of PST.
 
    1. If PST is NULL, then this procedure uses the data from the program
       to create all necessary symbol tables, and their linetables.
-      The compilation directory of the file is passed in COMP_DIR,
-      and must not be NULL.
 
    2. If PST is not NULL, this procedure reads the program to determine
       the list of files included by the unit represented by PST, and
-      builds all the associated partial symbol tables.  In this case,
-      the value of COMP_DIR is ignored, and can thus be NULL (the COMP_DIR
-      is not used to compute the full name of the symtab, and therefore
-      omitting it when building the partial symtab does not introduce
-      the potential for inconsistency - a partial symtab and its associated
-      symbtab having a different fullname -).  */
+      builds all the associated partial symbol tables.
+
+   COMP_DIR is the compilation directory (DW_AT_comp_dir) or NULL if unknown.
+   It is used for relative paths in the line table.
+   NOTE: When processing partial symtabs (pst != NULL),
+   comp_dir == pst->dirname.
+
+   NOTE: It is important that psymtabs have the same file name (via strcmp)
+   as the corresponding symtab.  Since COMP_DIR is not used in the name of the
+   symtab we don't use it in the name of the psymtabs we create.
+   E.g. expand_line_sal requires this when finding psymtabs to expand.
+   A good testcase for this is mb-inline.exp.  */
 
 static void
 dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
@@ -10211,29 +10289,9 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
       for (file_index = 0; file_index < lh->num_file_names; file_index++)
         if (lh->file_names[file_index].included_p == 1)
           {
-            const struct file_entry fe = lh->file_names [file_index];
-            char *include_name = fe.name;
-            char *dir_name = NULL;
-            char *pst_filename = pst->filename;
-
-            if (fe.dir_index)
-              dir_name = lh->include_dirs[fe.dir_index - 1];
-
-            if (!IS_ABSOLUTE_PATH (include_name) && dir_name != NULL)
-              {
-                include_name = concat (dir_name, SLASH_STRING,
-				       include_name, (char *)NULL);
-                make_cleanup (xfree, include_name);
-              }
-
-            if (!IS_ABSOLUTE_PATH (pst_filename) && pst->dirname != NULL)
-              {
-                pst_filename = concat (pst->dirname, SLASH_STRING,
-				       pst_filename, (char *)NULL);
-                make_cleanup (xfree, pst_filename);
-              }
-
-            if (strcmp (include_name, pst_filename) != 0)
+	    char *include_name =
+	      psymtab_include_file_name (lh, file_index, pst, comp_dir);
+	    if (include_name != NULL)
               dwarf2_create_include_psymtab (include_name, pst, objfile);
           }
     }
