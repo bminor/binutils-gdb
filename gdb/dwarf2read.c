@@ -2064,20 +2064,20 @@ dw2_require_line_header (struct objfile *objfile,
    invoked.  */
 static const char *
 dw2_require_full_path (struct objfile *objfile,
-		       struct dwarf2_per_cu_data *cu,
+		       struct dwarf2_per_cu_data *per_cu,
 		       int index)
 {
-  if (!cu->v.quick->full_names)
-    cu->v.quick->full_names
+  if (!per_cu->v.quick->full_names)
+    per_cu->v.quick->full_names
       = OBSTACK_CALLOC (&objfile->objfile_obstack,
-			cu->v.quick->lines->num_file_names,
+			per_cu->v.quick->lines->num_file_names,
 			sizeof (char *));
 
-  if (!cu->v.quick->full_names[index])
-    cu->v.quick->full_names[index]
-      = gdb_realpath (cu->v.quick->file_names[index]);
+  if (!per_cu->v.quick->full_names[index])
+    per_cu->v.quick->full_names[index]
+      = gdb_realpath (per_cu->v.quick->file_names[index]);
 
-  return cu->v.quick->full_names[index];
+  return per_cu->v.quick->full_names[index];
 }
 
 static struct symtab *
@@ -2098,14 +2098,14 @@ dw2_forget_cached_source_info (struct objfile *objfile)
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
-      struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      if (cu->v.quick->full_names)
+      if (per_cu->v.quick->full_names)
 	{
 	  int j;
 
-	  for (j = 0; j < cu->v.quick->lines->num_file_names; ++j)
-	    xfree ((void *) cu->v.quick->full_names[j]);
+	  for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
+	    xfree ((void *) per_cu->v.quick->full_names[j]);
 	}
     }
 }
@@ -2124,38 +2124,38 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
       int j;
-      struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      if (cu->v.quick->symtab)
+      if (per_cu->v.quick->symtab)
 	continue;
 
-      dw2_require_line_header (objfile, cu);
-      if (!cu->v.quick->lines)
+      dw2_require_line_header (objfile, per_cu);
+      if (!per_cu->v.quick->lines)
 	continue;
 
-      for (j = 0; j < cu->v.quick->lines->num_file_names; ++j)
+      for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
 	{
-	  const char *this_name = cu->v.quick->file_names[j];
+	  const char *this_name = per_cu->v.quick->file_names[j];
 
 	  if (FILENAME_CMP (name, this_name) == 0)
 	    {
-	      *result = dw2_instantiate_symtab (objfile, cu);
+	      *result = dw2_instantiate_symtab (objfile, per_cu);
 	      return 1;
 	    }
 
 	  if (check_basename && ! base_cu
 	      && FILENAME_CMP (lbasename (this_name), name) == 0)
-	    base_cu = cu;
+	    base_cu = per_cu;
 
 	  if (full_path != NULL)
 	    {
 	      const char *this_full_name = dw2_require_full_path (objfile,
-								  cu, j);
+								  per_cu, j);
 
 	      if (this_full_name
 		  && FILENAME_CMP (full_path, this_full_name) == 0)
 		{
-		  *result = dw2_instantiate_symtab (objfile, cu);
+		  *result = dw2_instantiate_symtab (objfile, per_cu);
 		  return 1;
 		}
 	    }
@@ -2163,7 +2163,7 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 	  if (real_path != NULL)
 	    {
 	      const char *this_full_name = dw2_require_full_path (objfile,
-								  cu, j);
+								  per_cu, j);
 
 	      if (this_full_name != NULL)
 		{
@@ -2171,7 +2171,7 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 		  if (rp != NULL && FILENAME_CMP (real_path, rp) == 0)
 		    {
 		      xfree (rp);
-		      *result = dw2_instantiate_symtab (objfile, cu);
+		      *result = dw2_instantiate_symtab (objfile, per_cu);
 		      return 1;
 		    }
 		  xfree (rp);
@@ -2216,9 +2216,9 @@ dw2_do_expand_symtabs_matching (struct objfile *objfile, const char *name)
 	  for (i = 0; i < len; ++i)
 	    {
 	      offset_type cu_index = MAYBE_SWAP (vec[i + 1]);
-	      struct dwarf2_per_cu_data *cu = dw2_get_cu (cu_index);
+	      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (cu_index);
 
-	      dw2_instantiate_symtab (objfile, cu);
+	      dw2_instantiate_symtab (objfile, per_cu);
 	    }
 	}
     }
@@ -2242,9 +2242,9 @@ dw2_print_stats (struct objfile *objfile)
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
-      struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      if (!cu->v.quick->symtab)
+      if (!per_cu->v.quick->symtab)
 	++count;
     }
   printf_filtered (_("  Number of unread CUs: %d\n"), count);
@@ -2280,9 +2280,9 @@ dw2_expand_all_symtabs (struct objfile *objfile)
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
-      struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      dw2_instantiate_symtab (objfile, cu);
+      dw2_instantiate_symtab (objfile, per_cu);
     }
 }
 
@@ -2297,21 +2297,21 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
       int j;
-      struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      if (cu->v.quick->symtab)
+      if (per_cu->v.quick->symtab)
 	continue;
 
-      dw2_require_line_header (objfile, cu);
-      if (!cu->v.quick->lines)
+      dw2_require_line_header (objfile, per_cu);
+      if (!per_cu->v.quick->lines)
 	continue;
 
-      for (j = 0; j < cu->v.quick->lines->num_file_names; ++j)
+      for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
 	{
-	  const char *this_name = cu->v.quick->file_names[j];
+	  const char *this_name = per_cu->v.quick->file_names[j];
 	  if (strcmp (this_name, filename) == 0)
 	    {
-	      dw2_instantiate_symtab (objfile, cu);
+	      dw2_instantiate_symtab (objfile, per_cu);
 	      break;
 	    }
 	}
@@ -2321,7 +2321,7 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
 static const char *
 dw2_find_symbol_file (struct objfile *objfile, const char *name)
 {
-  struct dwarf2_per_cu_data *cu;
+  struct dwarf2_per_cu_data *per_cu;
   offset_type *vec;
 
   dw2_setup (objfile);
@@ -2338,13 +2338,13 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
      should be rewritten so that it doesn't require a custom hook.  It
      could just use the ordinary symbol tables.  */
   /* vec[0] is the length, which must always be >0.  */
-  cu = dw2_get_cu (MAYBE_SWAP (vec[1]));
+  per_cu = dw2_get_cu (MAYBE_SWAP (vec[1]));
 
-  dw2_require_line_header (objfile, cu);
-  if (!cu->v.quick->lines)
+  dw2_require_line_header (objfile, per_cu);
+  if (!per_cu->v.quick->lines)
     return NULL;
 
-  return cu->v.quick->file_names[cu->v.quick->lines->num_file_names - 1];
+  return per_cu->v.quick->file_names[per_cu->v.quick->lines->num_file_names - 1];
 }
 
 static void
@@ -2381,21 +2381,21 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
       int j;
-      struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      cu->v.quick->mark = 0;
-      if (cu->v.quick->symtab)
+      per_cu->v.quick->mark = 0;
+      if (per_cu->v.quick->symtab)
 	continue;
 
-      dw2_require_line_header (objfile, cu);
-      if (!cu->v.quick->lines)
+      dw2_require_line_header (objfile, per_cu);
+      if (!per_cu->v.quick->lines)
 	continue;
 
-      for (j = 0; j < cu->v.quick->lines->num_file_names; ++j)
+      for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
 	{
-	  if (file_matcher (cu->v.quick->file_names[j], data))
+	  if (file_matcher (per_cu->v.quick->file_names[j], data))
 	    {
-	      cu->v.quick->mark = 1;
+	      per_cu->v.quick->mark = 1;
 	      break;
 	    }
 	}
@@ -2426,11 +2426,11 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
       vec_len = MAYBE_SWAP (vec[0]);
       for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
 	{
-	  struct dwarf2_per_cu_data *cu;
+	  struct dwarf2_per_cu_data *per_cu;
 
-	  cu = dw2_get_cu (MAYBE_SWAP (vec[vec_idx + 1]));
-	  if (cu->v.quick->mark)
-	    dw2_instantiate_symtab (objfile, cu);
+	  per_cu = dw2_get_cu (MAYBE_SWAP (vec[vec_idx + 1]));
+	  if (per_cu->v.quick->mark)
+	    dw2_instantiate_symtab (objfile, per_cu);
 	}
     }
 }
@@ -2502,19 +2502,20 @@ dw2_map_symbol_filenames (struct objfile *objfile,
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
       int j;
-      struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      if (cu->v.quick->symtab)
+      if (per_cu->v.quick->symtab)
 	continue;
 
-      dw2_require_line_header (objfile, cu);
-      if (!cu->v.quick->lines)
+      dw2_require_line_header (objfile, per_cu);
+      if (!per_cu->v.quick->lines)
 	continue;
 
-      for (j = 0; j < cu->v.quick->lines->num_file_names; ++j)
+      for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
 	{
-	  const char *this_full_name = dw2_require_full_path (objfile, cu, j);
-	  (*fun) (cu->v.quick->file_names[j], this_full_name, data);
+	  const char *this_full_name = dw2_require_full_path (objfile, per_cu,
+							      j);
+	  (*fun) (per_cu->v.quick->file_names[j], this_full_name, data);
 	}
     }
 }
@@ -2568,10 +2569,10 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		       + dwarf2_per_objfile->n_type_comp_units); ++i)
 	{
-	  struct dwarf2_per_cu_data *cu = dw2_get_cu (i);
+	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-	  cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-					struct dwarf2_per_cu_quick_data);
+	  per_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+					    struct dwarf2_per_cu_quick_data);
 	}
 
       /* Return 1 so that gdb sees the "quick" functions.  However,
@@ -14262,20 +14263,21 @@ dwarf2_free_objfile (struct objfile *objfile)
       for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
 	{
 	  int j;
-	  struct dwarf2_per_cu_data *cu = dwarf2_per_objfile->all_comp_units[i];
+	  struct dwarf2_per_cu_data *per_cu =
+	    dwarf2_per_objfile->all_comp_units[i];
 
-	  if (!cu->v.quick->lines)
+	  if (!per_cu->v.quick->lines)
 	    continue;
 
-	  for (j = 0; j < cu->v.quick->lines->num_file_names; ++j)
+	  for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
 	    {
-	      if (cu->v.quick->file_names)
-		xfree ((void *) cu->v.quick->file_names[j]);
-	      if (cu->v.quick->full_names)
-		xfree ((void *) cu->v.quick->full_names[j]);
+	      if (per_cu->v.quick->file_names)
+		xfree ((void *) per_cu->v.quick->file_names[j]);
+	      if (per_cu->v.quick->full_names)
+		xfree ((void *) per_cu->v.quick->full_names[j]);
 	    }
 
-	  free_line_header (cu->v.quick->lines);
+	  free_line_header (per_cu->v.quick->lines);
 	}
     }
 
@@ -14928,8 +14930,8 @@ write_one_signatured_type (void **slot, void *d)
 {
   struct signatured_type_index_data *info = d;
   struct signatured_type *entry = (struct signatured_type *) *slot;
-  struct dwarf2_per_cu_data *cu = &entry->per_cu;
-  struct partial_symtab *psymtab = cu->v.psymtab;
+  struct dwarf2_per_cu_data *per_cu = &entry->per_cu;
+  struct partial_symtab *psymtab = per_cu->v.psymtab;
   gdb_byte val[8];
 
   write_psymbols (info->symtab,
@@ -15002,8 +15004,8 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
      all_comp_units, but only in their own hash table.  */
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
-      struct dwarf2_per_cu_data *cu = dwarf2_per_objfile->all_comp_units[i];
-      struct partial_symtab *psymtab = cu->v.psymtab;
+      struct dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->all_comp_units[i];
+      struct partial_symtab *psymtab = per_cu->v.psymtab;
       gdb_byte val[8];
 
       write_psymbols (symtab,
@@ -15015,9 +15017,9 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 
       add_address_entry (objfile, &addr_obstack, psymtab, i);
 
-      store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, cu->offset);
+      store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, per_cu->offset);
       obstack_grow (&cu_list, val, 8);
-      store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, cu->length);
+      store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, per_cu->length);
       obstack_grow (&cu_list, val, 8);
     }
 

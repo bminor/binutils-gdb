@@ -1,3 +1,15 @@
+2010-08-26  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_require_full_path): Rename parameter cu to per_cu.
+	(dw2_forget_cached_source_info): Rename local cu to per_cu.
+	(dw2_lookup_symtab, dw2_do_expand_symtabs_matching): Ditto.
+	(dw2_print_stats, dw2_expand_all_symtabs): Ditto.
+	(dw2_expand_symtabs_with_filename, dw2_find_symbol_file): Ditto.
+	(dw2_find_symbol_file, dw2_expand_symtabs_matching): Ditto.
+	(dw2_map_symbol_filenames, dwarf2_initialize_objfile): Ditto.
+	(dwarf2_free_objfile, write_one_signatured_type): Ditto.
+	(write_psymtabs_to_index): Ditto.
+
 2010-08-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention libthread_db debugging with core files.
