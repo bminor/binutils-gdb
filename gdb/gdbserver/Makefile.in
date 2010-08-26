@@ -86,14 +86,15 @@ INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../common \
 GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 #PROFILE_CFLAGS = -pg
 
-WARN_CFLAGS = -Wall
+WARN_CFLAGS = @WARN_CFLAGS@
+WERROR_CFLAGS = @WERROR_CFLAGS@
 
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS =  $(WARN_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
+INTERNAL_CFLAGS =  $(WARN_CFLAGS) $(WERROR_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS}
 
 # LDFLAGS is specifically reserved for setting from the command line

@@ -93,6 +93,48 @@ fi
 AC_SUBST(ustlibs)
 AC_SUBST(ustinc)
 
+AC_ARG_ENABLE(werror,
+  AS_HELP_STRING([--enable-werror], [treat compile warnings as errors]),
+  [case "${enableval}" in
+     yes | y) ERROR_ON_WARNING="yes" ;;
+     no | n)  ERROR_ON_WARNING="no" ;;
+     *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
+   esac])
+
+# Enable -Werror by default when using gcc
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+    ERROR_ON_WARNING=yes
+fi
+
+WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+    WERROR_CFLAGS="-Werror"
+fi
+
+build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
+-Wformat-nonliteral "
+
+WARN_CFLAGS=""
+if test "x$GCC" = xyes
+then
+    AC_MSG_CHECKING(compiler warning flags)
+    # Separate out the -Werror flag as some files just cannot be
+    # compiled with it enabled.
+    for w in ${build_warnings}; do
+	case $w in
+	-Werr*) WERROR_CFLAGS=-Werror ;;
+	*) # Check that GCC accepts it
+	    saved_CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS $w"
+	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
+	    CFLAGS="$saved_CFLAGS"
+	esac
+    done
+    AC_MSG_RESULT(${WARN_CFLAGS} ${WERROR_CFLAGS})
+fi
+AC_SUBST(WARN_CFLAGS)
+AC_SUBST(WERROR_CFLAGS)
+
 dnl dladdr is glibc-specific.  It is used by thread-db.c but only for
 dnl debugging messages.  It lives in -ldl which is handled below so we don't
 dnl use AC_CHECK_LIB (or AC_SEARCH_LIBS) here.  Instead we just temporarily
