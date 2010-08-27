@@ -1062,7 +1062,7 @@
 	(register_cache_size): New.
 	(supply_regblock): New.
 	(regcache_read_pc, regcache_write_pc): New.
-	
+
 	* tracepoint.c: New.
 
 	* Makefile.in (OBS): Add tracepoint.o.
@@ -1800,7 +1800,7 @@
 	* m68k-tdep.c (m68k_gdbarch_init): Reuse previous initialization.
 
 2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
-            Vladimir Prus  <vladimir@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
 
 	* Makefile.in (reg-cf.o, reg-cf.c): New targets.
 	* configure.ac: Check for __mcoldfire__ and set
@@ -1852,15 +1852,15 @@
 	(thread_db_free): Adjust.
 	* config.in: Regenerate.
 	* configure: Likewise.
-	
+
 2009-10-28  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10757
 	* thread-db.c (attach_thread): New function.
 	(maybe_attach_thread): Return success/failure.
 	(find_new_threads_callback): Adjust.
-	(thread_db_find_new_threads): Loop until no new threads.	
-	
+	(thread_db_find_new_threads): Loop until no new threads.
+
 2009-10-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* proc-service.c (ps_lgetregs): Formatting.
@@ -1889,7 +1889,7 @@
 	(thread_db_handle_monitor_command): Likewise.
 	* config.in: Regenerate.
 	* configure: Regenerate.
-	
+
 2009-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-low.c (spu_kill): Wait for inferior to terminate.
@@ -2799,19 +2799,19 @@
 
 2008-12-02  Pedro Alves  <pedro@codesourcery.com>
 
-        * target.h (struct target_ops): Add qxfer_osdata member.
-        * linux-low.c: Include ctype.h and pwd.h and sys/types.h
-        and dirent.h.
-        (linux_qxfer_osdata): New functions.
-        (linux_target_ops): Register linux_qxfer_osdata as qxfer_osdata
-        callback.
-        * server.c (handle_query): Handle "qXfer:osdata:read:".
-        * remote-utils.c (buffer_grow, buffer_free, buffer_init, buffer_finish)
-        (buffer_xml_printf): New functions.
-        * server.h (struct buffer): New.
-        (buffer_grow_str, buffer_grow_str0): New macros.
-        (buffer_grow, buffer_free, buffer_init, buffer_finish)
-        (buffer_xml_printf): Declare.
+	* target.h (struct target_ops): Add qxfer_osdata member.
+	* linux-low.c: Include ctype.h and pwd.h and sys/types.h
+	and dirent.h.
+	(linux_qxfer_osdata): New functions.
+	(linux_target_ops): Register linux_qxfer_osdata as qxfer_osdata
+	callback.
+	* server.c (handle_query): Handle "qXfer:osdata:read:".
+	* remote-utils.c (buffer_grow, buffer_free, buffer_init, buffer_finish)
+	(buffer_xml_printf): New functions.
+	* server.h (struct buffer): New.
+	(buffer_grow_str, buffer_grow_str0): New macros.
+	(buffer_grow, buffer_free, buffer_init, buffer_finish)
+	(buffer_xml_printf): Declare.
 
 2008-11-24  Doug Evans  <dje@google.com>
 
@@ -2822,10 +2822,10 @@
 	* server.c (handle_v_run): Always use the supplied argument list.
 
 2008-11-19  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* xtensa-xtregs.c (XTENSA_ELF_XTREG_SIZE): Change to 4.
 	(xtensa_regmap_table): Add entry for scompare1.
-	
+
 2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* Makefile.in (powerpc-isa205-32l.o, powerpc-isa205-32l.c,
@@ -2970,8 +2970,8 @@
 	message, not gdbserver.
 
 2008-06-05  Vladimir Prus  <vladimir@codesourcery.com>
-            Nathan Sidwell  <nathan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* acinclude.m4: Include ../../config/acx.m4.
 	* configure.ac: Use ACX_PKGVERSION and ACX_BUGURL.
@@ -3055,8 +3055,8 @@
 
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
-        * acinclude.m4: Add override.m4.
-        * configure: Regenerate.
+	* acinclude.m4: Add override.m4.
+	* configure: Regenerate.
 
 2008-04-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
@@ -3072,7 +3072,7 @@
 2008-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.srv [powerpc64-*-linux*]: Remove powerpc-e500.o from
-	srv_regobj.  Remove rs6000/powerpc-e500.xml and rs6000/power-spe.xml	
+	srv_regobj.  Remove rs6000/powerpc-e500.xml and rs6000/power-spe.xml
 	from reg_xmlfiles.
 	* linux-ppc-low.c: Include <elf.h>.
 	(PPC_FEATURE_HAS_ALTIVEC, PPC_FEATURE_HAS_SPE): Define.
@@ -3135,7 +3135,7 @@
 	(ppc_arch_setup): New function.
 	(ppc_fill_gregset): Call ppc_collect_ptrace_register instead
 	of collect_register.
-	(the_low_target): Use ppc_arch_setup as arch_setup initializer.	
+	(the_low_target): Use ppc_arch_setup as arch_setup initializer.
 
 2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
@@ -3155,7 +3155,7 @@
 	(ppc_breakpoint): Change type to "unsigned int".
 	(ppc_breakpoint_at): Change type of "insn" to "unsigned int".
 	(the_low_target): Conditionally provide initializers for the
-	arch_setup member depending on __powerpc64__.  Install 
+	arch_setup member depending on __powerpc64__.  Install
 	collect_ptrace_register and supply_ptrace_register members.
 
 2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
@@ -3341,7 +3341,7 @@
 	* target.h (target_ops): Add hostio_last_error member.
 	* linux-low.c (linux_target_op): Register hostio_last_error_from_errno
 	as hostio_last_error handler.
-	* spu-low.c (spu_target_ops): Likewise. 
+	* spu-low.c (spu_target_ops): Likewise.
 	* win32-low.c [_WIN32_WCE] (win32_error_to_fileio_error)
 	(wince_hostio_last_error): New functions.
 	(win32_target_ops) [_WIN32_WCE]: Register wince_hostio_last_error
@@ -3782,7 +3782,7 @@
 
 2007-05-16  Markus Deuling  <deuling@de.ibm.com>
 
-	* server.c (handle_query): Add reply for qC packet. 
+	* server.c (handle_query): Add reply for qC packet.
 
 2007-05-10  Pedro Alves  <pedro_alves@portugalmail.pt>
 	    Leo Zayas  <lerele@champenstudios@com>
@@ -3825,7 +3825,7 @@
 	(handle_exception): Change return type to void.  Don't record
 	context here.  Set status to TARGET_WAITKIND_SPURIOUS on a
 	first chance exception.
-	(get_child_debug_event): Change return type to void.  Remove 
+	(get_child_debug_event): Change return type to void.  Remove
 	goto loop.  Always return after waiting for debug event.
 	(win32_wait): Convert to switch statement.  Handle spurious
 	events.
@@ -3975,7 +3975,7 @@
 	(do_child_fetch_inferior_registers): Move to ...
 	* win32-i386-low.c: ... here, and rename to ...
 	(do_fetch_inferior_registers): ... this.
-	* win32-low.c (child_fetch_inferior_registers): 
+	* win32-low.c (child_fetch_inferior_registers):
 	Go through the low target.
 	(do_child_store_inferior_registers): Use regptr.
 	(strwinerror): New function.
@@ -4383,40 +4383,40 @@
 
 2005-12-23  Eli Zaretskii  <eliz@gnu.org>
 
-	* linux-arm-low.c: 
-	* linux-arm-low.c: 
-	* inferiors.c: 
-	* i387-fp.h: 
-	* i387-fp.c: 
-	* gdbreplay.c: 
-	* regcache.c: 
-	* proc-service.c: 
-	* mem-break.h: 
-	* mem-break.c: 
-	* linux-x86-64-low.c: 
-	* linux-sh-low.c: 
-	* linux-s390-low.c: 
-	* linux-ppc64-low.c: 
-	* linux-ppc-low.c: 
-	* linux-mips-low.c: 
-	* linux-m68k-low.c: 
-	* linux-m32r-low.c: 
-	* linux-low.h: 
-	* linux-low.c: 
-	* linux-ia64-low.c: 
-	* linux-i386-low.c: 
-	* linux-crisv32-low.c: 
-	* thread-db.c: 
-	* terminal.h: 
-	* target.h: 
-	* target.c: 
-	* server.h: 
-	* server.c: 
-	* remote-utils.c: 
-	* regcache.h: 
-	* utils.c: 
-	* Makefile.in: 
-	* configure.ac: 
+	* linux-arm-low.c:
+	* linux-arm-low.c:
+	* inferiors.c:
+	* i387-fp.h:
+	* i387-fp.c:
+	* gdbreplay.c:
+	* regcache.c:
+	* proc-service.c:
+	* mem-break.h:
+	* mem-break.c:
+	* linux-x86-64-low.c:
+	* linux-sh-low.c:
+	* linux-s390-low.c:
+	* linux-ppc64-low.c:
+	* linux-ppc-low.c:
+	* linux-mips-low.c:
+	* linux-m68k-low.c:
+	* linux-m32r-low.c:
+	* linux-low.h:
+	* linux-low.c:
+	* linux-ia64-low.c:
+	* linux-i386-low.c:
+	* linux-crisv32-low.c:
+	* thread-db.c:
+	* terminal.h:
+	* target.h:
+	* target.c:
+	* server.h:
+	* server.c:
+	* remote-utils.c:
+	* regcache.h:
+	* utils.c:
+	* Makefile.in:
+	* configure.ac:
 	* gdbserver.1: Add (C) after Copyright.  Update the FSF
 	address.
 
@@ -4563,7 +4563,7 @@
 	* linux-crisv32-low.c: Ditto for CRISv32.
 	* Makefile.in (SFILES): Add linux-cris-low.c, linux-crisv32-low.c.
 	(clean): Add reg-cris.c and reg-crisv32.c.
-	Add linux-cris-low.o, linux-crisv32-low.o, reg-cris.o, reg-cris.c, 
+	Add linux-cris-low.o, linux-crisv32-low.o, reg-cris.o, reg-cris.c,
 	reg-crisv32.o, and reg-crisv32.c to make rules.
 	* configure.srv: Add cris-*-linux* and crisv32-*-linux* to list of
 	recognized targets.
@@ -4576,7 +4576,7 @@
 
 2005-05-12  Orjan Friberg  <orjanf@axis.com>
 
-	* target.h (struct target_ops): Add insert_watchpoint, 
+	* target.h (struct target_ops): Add insert_watchpoint,
 	remove_watchpoint, stopped_by_watchpoint, stopped_data_address function
 	pointers for hardware watchpoint support.
 	* linux-low.h (struct linux_target_ops): Ditto.

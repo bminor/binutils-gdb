@@ -154,7 +154,7 @@
 2010-08-20  Keith Seitz  <keiths@redhat.com>
 
 	PR symtab/11465:
- 	* dwarf2read.c (struct delayed_method_info): New struct.
+	* dwarf2read.c (struct delayed_method_info): New struct.
 	(struct dwarf2_cu): Add vector method_list.
 	(scan_partial_symbols): Count methods for union, class, structure,
 	and interface types.
@@ -170,6 +170,7 @@
 	* dwarf2read.c (read_structure_type): Check if the current
 	DIE's type was already completed after dwarf2_full_name
 	was called.
+
 2010-08-19  Stan Shebs  <stan@codesourcery.com>
 
 	* NEWS: Mention some additional changes.
@@ -454,7 +455,7 @@
 	* dwarf2loc.h (dwarf2_evaluate_loc_desc): Declare.
 
 2010-08-11  Tom Tromey  <tromey@redhat.com>
-            Phil Muldoon  <pmuldoon@redhat.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/python.c (gdbpy_run_events): New function.
 	(gdbpy_post_event): Likewise.
@@ -509,7 +510,7 @@
 	frame_unwind_find_by_frame.
 
 2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
-            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (gdbpy_solib_address):  New function.
@@ -651,10 +652,10 @@
 	linux-tdep.o to gdb_target_obs.
 
 2010-08-05  Marc Khouzam  <marc.khouzam@ericsson.com>
- 
-	* mi/mi-main.c (mi_cmd_remove_inferior): Properly access first 
+
+	* mi/mi-main.c (mi_cmd_remove_inferior): Properly access first
 	argument.
-	
+
 2010-08-05  Hui Zhu  <teawater@gmail.com>
 
 	* mips-linux-tdep.c(regset.h): New include.
@@ -939,7 +940,7 @@
 
 2010-07-27  Ken Werner  <ken.werner@de.ibm.com>
 
-	* dwarf2read.c (dwarf2_read_index): Initialize the types_list and 
+	* dwarf2read.c (dwarf2_read_index): Initialize the types_list and
 	types_list_elements variables.
 
 2010-07-26  Tom Tromey  <tromey@redhat.com>
@@ -1615,7 +1616,7 @@
 	to_static_tracepoint_markers_by_strid.
 	* target.h (static_tracepoint_marker): Forward declare.
 	(enum target_object): New object TARGET_OBJECT_STATIC_TRACE_DATA.
-	(static_tracepoint_marker_p): New typedef. 
+	(static_tracepoint_marker_p): New typedef.
 	(DEF_VEC_P(static_tracepoint_marker_p)): New VEC type.
 	(struct target_ops): New fields to_static_tracepoint_marker_at and
 	to_static_tracepoint_markers_by_strid.
@@ -1697,8 +1698,8 @@
 	ALLOCATE_CPLUS_STRUCT_TYPE.
 
 2010-06-28  Phil Muldoon  <pmuldoon@redhat.com>
-            Tom Tromey  <tromey@redhat.com>
-            Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* value.c (pack_unsigned_long): New function.
 	(value_from_ulongest): New function.
@@ -2006,7 +2007,7 @@
 
 2010-06-21  Michael Snyder  <msnyder@vmware.com>
 
-	* breakpoint.c (_initialize_breakpoint): Use add_prefix_cmd, 
+	* breakpoint.c (_initialize_breakpoint): Use add_prefix_cmd,
 	not add_abbrev_prefix_cmd, for "enable breakpoints".
 
 2010-06-21  Ulrich Weigand  <uweigand@de.ibm.com>
@@ -2511,7 +2512,7 @@
 
 2010-06-03  Sami Wagiaalla  <swagiaal@redhat.com>
 
-    	* dwarf2read.c (new_symbol): Remove redundant naming of symbol.
+	* dwarf2read.c (new_symbol): Remove redundant naming of symbol.
 
 2010-06-03  Pierre Muller  <muller@ics.u-strasbg.fr>
 
@@ -3260,7 +3261,7 @@
 
 2010-05-14  Phil Muldoon  <pmuldoon@redhat.com>
 
- 	PR python/11482
+	PR python/11482
 
 	* python/py-value.c (valpy_hash): New function.
 	(value_object_type): Register valpy_hash.

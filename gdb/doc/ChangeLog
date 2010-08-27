@@ -32,14 +32,14 @@
 	-data-read-memory-raw and -data-write-memory-raw.
 
 2010-08-11  Tom Tromey  <tromey@redhat.com>
-            Phil Muldoon <pmuldoon@redhat.com>
+	    Phil Muldoon <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Basic Python): Describe post_event API.
 
 2010-08-11  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Basic Python): Describe solib_address and
-          decode_line Python APIs
+	decode_line Python APIs
 
 2010-08-10  Tom Tromey  <tromey@redhat.com>
 
@@ -199,7 +199,7 @@
 
 	* gdb.texinfo (Observer Mode): New section.
 	(General Query Packets): Document QAllow.
-	 
+
 2010-06-04  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Python API): New node `Disabling Pretty-Printers'.
@@ -290,9 +290,9 @@
 2010-04-21  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Tracepoint Actions): Mention synonymy of actions
- 	and commands.
+	and commands.
 	(Listing Tracepoints): Update to reflect current behavior.
-	
+
 2010-04-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.texinfo (Examining memory): Update for change in string
@@ -409,7 +409,7 @@
 	$pc.
 
 2010-03-29  Stan Shebs  <stan@codesourcery.com>
-	
+
 	* gdb.texinfo (Tracepoint Packets): Describe QTDPsrc.
 	(General Query Packets): Describe TracepointSource.
 
@@ -670,11 +670,11 @@
 2009-12-31  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Tracepoint Actions): Describe teval.
-	
+
 2009-12-29  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Tracepoint Actions): Describe default-collect.
-	
+
 2009-12-28  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Trace State Variables): New section.
@@ -736,7 +736,7 @@
 2009-11-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Machine Code): Adjust.
-	
+
 2009-11-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* agentexpr.texi (Tracing On Symmetrix): Delete section.
@@ -769,11 +769,11 @@
 
 	* gdb.texinfo (Machine Code): Mention function name in disasssembly
 	and adjust example.
-	
+
 2009-10-22  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo (Process Record and Replay): Document new form of
-	info record command.  Also document the new save and restore 
+	info record command.  Also document the new save and restore
 	commands.
 
 2009-10-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
@@ -805,7 +805,7 @@
 2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Server): Document libthread-db-search-path.
-	
+
 2009-10-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbint.texinfo (i386_stopped_by_hwbp): Remove.
@@ -916,7 +916,7 @@
 2009-08-07  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (Server Prefix): Explain that server prefix suppresses
-	confirmation request. 
+	confirmation request.
 
 2009-08-05  Jeremy Bennett  <jeremy.bennett@embecosm.com>
 
@@ -926,7 +926,7 @@
 2009-08-03  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Document
-    	-break-commands.
+	-break-commands.
 
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
@@ -1006,7 +1006,7 @@
 	Update example code extrated from breakpoint.c.
 
 2009-06-28  Paul Pluzhnikov  <ppluzhnikov@google.com>
-	
+
 	* gdb.texinfo (GDB/MI Program Context): @ignore unimplemented
 	MI commands.
 	(GDB/MI Symbol Query): Likewise.
@@ -1014,7 +1014,7 @@
 	(GDB/MI File Transfer Commands): Likewise.
 	(GDB/MI Target Manipulation): Likewise.
 	(GDB/MI Miscellaneous Commands): Likewise.
-	
+
 2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Debugging Optimized Code): New chapter.
@@ -1086,7 +1086,7 @@
 2009-05-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Threads): Document libthread-db-search-path.
-	
+
 2009-05-15  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (GDB/MI General Design): Break up into four nodes.
@@ -1542,7 +1542,7 @@
 	* gdb.texinfo (Symbols): Mention printing containing
 	image name in "info symbol".
 	(Maint translate-address): Likewise.
-	
+
 2008-11-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Set Catchpoints): Remove the documentation of
@@ -1552,7 +1552,7 @@
 
 	* gdb.texinfo (GDB/MI Async Records): Document
 	=thread-selected.
-	
+
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* observer.texi (new_inferior, inferior_exit): New observers.
@@ -2083,7 +2083,7 @@
 2008-01-29  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (Processes): Mention process command.
- 	detach-on-follow -> detach-on-fork.
+	detach-on-follow -> detach-on-fork.
 
 2008-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -4297,8 +4297,8 @@
 
 2003-10-14  Kevin Buettner  <kevinb@redhat.com>
 
- 	* gdb.texinfo (Breakpoint related warnings): New node.
- 	* gdbint.texinfo (ADJUST_BREAKPOINT_ADDRESS): Document.
+	* gdb.texinfo (Breakpoint related warnings): New node.
+	* gdbint.texinfo (ADJUST_BREAKPOINT_ADDRESS): Document.
 
 2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
 
@@ -5474,7 +5474,7 @@ Tue Jan 22 11:57:38 2002  Andrew Cagney  <cagney@redhat.com>
 
 2002-01-17  Andrew Cagney  <ac131313@redhat.com>
 
-	* gdb.texinfo 	(Maintenance Commands): Add appendix.
+	* gdb.texinfo (Maintenance Commands): Add appendix.
 	(Set Breaks): Copy ``maint info breakpoint'' doco to
 	``Maintenance Commands'' appendix.  Add reference.
 
@@ -5603,8 +5603,8 @@ Tue Jan 22 11:57:38 2002  Andrew Cagney  <cagney@redhat.com>
 2001-11-21  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo (TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT):
- 	Delete documentation; this macro has been removed from the
- 	sources.
+	Delete documentation; this macro has been removed from the
+	sources.
 
 2001-11-13  Jim Blandy  <jimb@redhat.com>
 
@@ -5875,12 +5875,12 @@ Wed Aug 15 10:47:28 2001  Christopher Faylor <cgf@cygnus.com>
 Thu Nov 30 16:57:19 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (ECOFF_REG_TO_REGNUM, DWARF_REG_TO_REGNUM,
- 	DWARF2_REG_TO_REGNUM): Document.
+	DWARF2_REG_TO_REGNUM): Document.
 
 Mon Nov 20 21:29:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (Coding): Update current value of
- 	--enable-build-warnings.  Mention --enable-gdb-build-warnings.
+	--enable-build-warnings.  Mention --enable-gdb-build-warnings.
 
 2000-11-19  Eli Zaretskii  <eliz@gnu.org>
 
@@ -5939,11 +5939,11 @@ Mon Nov 20 21:29:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri May 26 15:55:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (pdf, gdbint.pdf, gdb.pdf, stabs.pdf): New targets.
-  	Generate using pdftex.
+	Generate using pdftex.
 	(PDFTEX): Define.
- 	(STAGESTUFF, maintainer-clean realclean): Add *.pdf.
+	(STAGESTUFF, maintainer-clean realclean): Add *.pdf.
 	(gdb.texinfo, gdbint.texinfo, stabs.texinfo): When TeX insert the
- 	@contents at the start.
+	@contents at the start.
 
 2000-05-24  Eli Zaretskii  <eliz@gnu.org>
 
@@ -5958,7 +5958,7 @@ Wed May 24 21:27:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Tue May 23 22:57:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (refcard.dvi): Remove quotes around REFEDITS in for
- 	loop.
+	loop.
 
 2000-05-19  Jimmy Guo  <guo@cup.hp.com>
 
@@ -5972,7 +5972,7 @@ Tue May 23 22:57:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri May 12 20:18:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.texinfo: Add Stan Shebs, et.al. as authors.  Mention
- 	Andrew Cagney.
+	Andrew Cagney.
 
 2000-05-09  Eli Zaretskii  <eliz@gnu.org>
 
@@ -6014,7 +6014,7 @@ Sat Apr 29 17:01:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.texinfo (Files): Update description of add-symbol-file
- 	command.
+	command.
 
 2000-04-17  Eli Zaretskii  <eliz@gnu.org>
 
@@ -6058,18 +6058,18 @@ Sat Apr 29 17:01:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdbint.texinfo (Using Different Register and Memory Data
 	Representations): New section.
 	(REGISTER_CONVERTIBLE, REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE,
- 	REGISTER_VIRTUAL_TYPE, REGISTER_CONVERT_TO_VIRTUAL,
- 	REGISTER_CONVERT_TO_RAW): Document.
+	REGISTER_VIRTUAL_TYPE, REGISTER_CONVERT_TO_VIRTUAL,
+	REGISTER_CONVERT_TO_RAW): Document.
 
 Mon Apr  3 19:16:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.texinfo (Protocol): Deprecate the sequence-id.  Add cindex
- 	for acknowledgments.
+	for acknowledgments.
 
 Tue Mar 28 18:28:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.texinfo (Protocol): Replace ``qfThreadExtraInfo'' with
- 	qThreadExtraInfo.
+	qThreadExtraInfo.
 
 2000-03-28  J.T. Conklin  <jtc@redback.com>
 
@@ -6079,8 +6079,8 @@ Tue Mar 28 18:28:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Tue Mar 28 16:06:22 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.texinfo: Revert remainder of Fri Mar 24 18:06:34 2000 Andrew
- 	Cagney <cagney@b1.cygnus.com>.  Move @chapter and @node entries
- 	back to annotate.texi, rluser.texinfo and inc-hist.texinfo.
+	Cagney <cagney@b1.cygnus.com>.  Move @chapter and @node entries
+	back to annotate.texi, rluser.texinfo and inc-hist.texinfo.
 	* annotate.texi: Update.
 
 2000-03-28  Stan Shebs  <shebs@apple.com>
@@ -6103,18 +6103,18 @@ Tue Mar 28 16:06:22 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri Mar 24 18:06:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* annotate.texi (Annotations): When GDBN omit @chapter and @node
- 	entry.
+	entry.
 
 	* gdb.texinfo: Check for @ifinfo instead of @ifnottex.
 	(rluser.texinfo, inc-hist.texinfo, annotate.texi): Add local
- 	@chapter and @node entries.
+	@chapter and @node entries.
 
 	* gdb.texinfo: Link all top-level nodes.
 
 Fri Mar 24 17:56:48 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (install-info): Create $(infodir) before installing
- 	files.
+	files.
 
 2000-03-23  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
@@ -6180,7 +6180,7 @@ Fri Mar 24 17:56:48 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Wed Dec  8 19:53:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (FRAME_CHAIN_VALID): Add the generic frame-chain
- 	valid functions.
+	valid functions.
 
 1999-11-05  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -6194,7 +6194,7 @@ Wed Dec  8 19:53:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Oct 14 21:17:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.texinfo (remote): Document how GDB ignores the qOffsets BSS
- 	offset re-using the DATA offset instead.
+	offset re-using the DATA offset instead.
 
 1999-10-11  Jim Kingdon  <kingdon@redhat.com>
 
@@ -6231,7 +6231,7 @@ Thu Oct 14 21:17:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Eli Zaretskii  <eliz@gnu.org>:
 	* gdb.texinfo: Include details specific to DOS host, clarify
- 	some confusing language, fix @ref/@xref/@pxref usages, add
+	some confusing language, fix @ref/@xref/@pxref usages, add
 	comments about using with optimization, add more indexing,
 	fix info about disassembly-flavor.
 
@@ -6243,13 +6243,13 @@ Tue Sep  7 09:11:24 1999  Kevin Buettner  <kevinb@cygnus.com>
 Fri Sep  3 18:05:14 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.texinfo (Protocol): Review.  Add tables describing ``q'' and
- 	``g'' packets.
+	``g'' packets.
 
 1999-08-30  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo: Create a new "Configurations" chapter with
- 	platform-specific info, inline remote.texi and move sections of it
- 	into the new chapter, move bits about info proc, heuristic search,
+	platform-specific info, inline remote.texi and move sections of it
+	into the new chapter, move bits about info proc, heuristic search,
 	and register stack into the new chapter.
 	* remote.texi: Remove, now part of gdb.texinfo.
 	* Makefile.in (SFILES_INCLUDED): Remove ref to remote.texi.
@@ -6262,7 +6262,7 @@ Fri Sep  3 18:05:14 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Wed Aug 25 10:47:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Mention
- 	TDEPLIBS.
+	TDEPLIBS.
 
 1999-08-20  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -6276,7 +6276,7 @@ Wed Aug 25 10:47:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Dmitry Sivachenko <dima@Chg.RU>:
 	* gdb.texinfo: Use @value{GDBN} instead of plain GDB, fix grouping
- 	in description of `set environment'.
+	in description of `set environment'.
 
 1999-08-17  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -6289,15 +6289,15 @@ Wed Aug 25 10:47:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-08-10  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Set Watchpoints): Explain some subtleties about
- 	watch, awatch, and rwatch.  Explain why the latter two cannot be
- 	set as software watchpoints.  Document that watchpoints for local
- 	variables are deleted when the debuggee terminates.
+	watch, awatch, and rwatch.  Explain why the latter two cannot be
+	set as software watchpoints.  Document that watchpoints for local
+	variables are deleted when the debuggee terminates.
 
 Wed Aug 11 13:18:14 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* remote.texi (Protocol): Further clarification of the "qRcmd"
- 	packet.  Allow E.. response packet.  "qRcmd" packet is no longer
- 	reserved.
+	packet.  Allow E.. response packet.  "qRcmd" packet is no longer
+	reserved.
 
 1999-08-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
@@ -6315,7 +6315,7 @@ Fri Aug  6 17:05:48 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Aug  5 17:57:41 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.texi (protocol qRcmd): Allow ``OK'' and ``O...'' response
- 	packets.
+	packets.
 
 1999-07-14  Jim Blandy  <jimb@zwingli.cygnus.com>
 
@@ -6329,10 +6329,10 @@ Tue Jun 29 11:43:55 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri Jun 25 11:47:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.texi (Communication Protocol): ``v'' is in use. Fix
- 	numerous formatting errors.  Clarify ``i''.  Mark ``i'', ``Z'',
- 	``z'' and ``qRcmd'' as draft instead of reserved.  Identify
- 	packets that are not supported on all hosts. Expand examples.
-  	Spell check.
+	numerous formatting errors.  Clarify ``i''.  Mark ``i'', ``Z'',
+	``z'' and ``qRcmd'' as draft instead of reserved.  Identify
+	packets that are not supported on all hosts. Expand examples.
+	Spell check.
 
 1999-06-24  Jason Molenda  (jsm@bugshack.cygnus.com)
 
@@ -6342,7 +6342,7 @@ Fri Jun 25 11:47:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Jun 24 15:59:03 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbint.texinfo (Testsuite): New chapter, information about the
- 	testsuite.
+	testsuite.
 
 Fri Jun 25 02:40:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6365,14 +6365,14 @@ Mon Jun  7 15:49:40 1999  Stan Shebs  <shebs@andros.cygnus.com>
 Fri Jun  4 16:58:22 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (SP_REGNUM, FP_REGNUM, PC_REGNUM): Add reference
- 	to corresponding TARGET_READ_reg TARGET_WRITE_reg macros.
-  	Document that the value should be greater-than or equal-to zero.
-  	(NO_STD_REGS): Document. Deprecate.
+	to corresponding TARGET_READ_reg TARGET_WRITE_reg macros.
+	Document that the value should be greater-than or equal-to zero.
+	(NO_STD_REGS): Document. Deprecate.
 
 Tue Jun  1 15:04:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (TARGET_COMPLEX_BIT, TARGET_DOUBLE_COMPLEX_BIT):
- 	Document that these are not used.
+	Document that these are not used.
 
 Thu May 27 09:28:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6381,7 +6381,7 @@ Thu May 27 09:28:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Mon May 24 10:07:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (FRAME_NUM_ARGS): Update definition.  Parameter
- 	numargs was dropped.
+	numargs was dropped.
 
 Thu May 20 12:26:59 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6390,7 +6390,7 @@ Thu May 20 12:26:59 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Tue Apr 27 19:14:20 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (SKIP_PROLOGUE, SKIP_PROLOGUE_FRAMELESS_P):
- 	Update.
+	Update.
 
 Thu Apr 22 13:07:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6404,19 +6404,19 @@ Wed Apr 21 13:59:01 1999  Dave Brolley  <brolley@cygnus.com>
 Tue Apr 20 11:59:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (REGISTER_NAMES, BREAKPOINT, BIG_BREAKPOINT,
- 	LITTLE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT,
- 	BIG_REMOTE_BREAKPOINT): Deprecate in favor of REGISTER_NAME and
- 	BREAKPOINT_FROM_PC.
+	LITTLE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT,
+	BIG_REMOTE_BREAKPOINT): Deprecate in favor of REGISTER_NAME and
+	BREAKPOINT_FROM_PC.
 
 Mon Apr 12 16:00:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (CALL_DUMMY_STACK_ADJUST_P,
- 	CALL_DUMMY_STACK_ADJUST): Document.
+	CALL_DUMMY_STACK_ADJUST): Document.
 
 Thu Apr  8 17:23:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (CALL_DUMMY_P, CALL_DUMMY_WORDS,
- 	SIZEOF_CALL_DUMMY_WORDS, CALL_DUMMY): Define.
+	SIZEOF_CALL_DUMMY_WORDS, CALL_DUMMY): Define.
 
 1999-04-02  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -6426,8 +6426,8 @@ Thu Apr  8 17:23:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Tue Mar  9 19:25:11 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo, remote.texi, all-cfg.texi, HPPA-cfg.texi: Remove
- 	nearly all @ifset/@ifclear conditionals; nobody uses them, and
- 	they make the manual source incomprehensible.
+	nearly all @ifset/@ifclear conditionals; nobody uses them, and
+	they make the manual source incomprehensible.
 	* h8-cfg.texi: Remove, hasn't been used in years.
 
 Thu Feb 11 18:00:59 1999  Stan Shebs  <shebs@andros.cygnus.com>
@@ -6442,10 +6442,10 @@ Mon Feb  8 17:33:57 1999  Stan Shebs  <shebs@andros.cygnus.com>
 Fri Feb  5 17:20:00 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.texinfo, remote.texi: Many changes; update to Seventh
- 	Edition, merge some HP changes into mainline, describe some
- 	previously undocumented features, describe more of the target
- 	commands available, eliminate obsolete section on renamed
- 	commands.
+	Edition, merge some HP changes into mainline, describe some
+	previously undocumented features, describe more of the target
+	commands available, eliminate obsolete section on renamed
+	commands.
 	* all-cfg.texi, HPPA-cfg.texi: Remove some obsolete conditionals.
 
 Wed Jan 20 17:47:45 1999  Stan Shebs  <shebs@andros.cygnus.com>
@@ -6467,7 +6467,7 @@ Wed Jan 13 10:38:40 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
 	  changes made by HP. Documentation makes extensive use of
 	  @ifclear HPPA and @ifset HPPA. The HP manual omits doumentation
 	  on remote debugging. There are differences in documentation
- 	  (HP vs.  non-HP) on C++ support (aCC vs. gnu gcc++). Also,
+	  (HP vs.  non-HP) on C++ support (aCC vs. gnu gcc++). Also,
 	  the HP manual discusses catchpoints, hardware watchpoints, and
 	  some HPUX specific limitations for shared library support.
 
@@ -6481,8 +6481,8 @@ Wed Jan 13 10:38:40 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
 Wed Jan  6 11:55:34 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by Edith Epstein
- 	<eepstein@cygnus.com> as part of a project to merge in changes
- 	made by HP.
+	<eepstein@cygnus.com> as part of a project to merge in changes
+	made by HP.
 
 	* HPPA-cfg.texi: new file.
 
@@ -6503,7 +6503,7 @@ Mon Jan  4 18:29:18 1999  Stan Shebs  <shebs@andros.cygnus.com>
 Sun Dec 13 10:27:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo: Document TARGET_BYTE_ORDER_DEFAULT and
- 	TARGET_BYTE_ORDER_SELECTABLE_P.
+	TARGET_BYTE_ORDER_SELECTABLE_P.
 
 Thu Dec 10 16:07:09 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6541,7 +6541,7 @@ Sat Nov 28 13:45:53 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri Nov 27 12:39:45 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbint.texinfo (NO_SINGLE_STEP): Replace with
- 	SOFTWARE_SINGLE_STEP_P and SOFTWARE_SINGLE_STEP.
+	SOFTWARE_SINGLE_STEP_P and SOFTWARE_SINGLE_STEP.
 
 Wed Oct 14 10:02:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -6583,8 +6583,8 @@ Thu Apr  2 16:10:36 1998  Stan Shebs  <shebs@andros.cygnus.com>
 Mon Feb  2 17:13:03 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbint.texinfo: Remove obsolete mentions of pinsn.c and opcode.h
- 	files, finish sorting of host vs target vs native macros, describe
- 	some more of them.
+	files, finish sorting of host vs target vs native macros, describe
+	some more of them.
 
 Tue Jan 13 16:44:50 1998  Fred Fish  <fnf@cygnus.com>
 
@@ -6594,7 +6594,7 @@ Tue Jan 13 16:44:50 1998  Fred Fish  <fnf@cygnus.com>
 Mon Nov 24 13:55:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (Host Conditionals): Document
- 	PRINTF_HAS_LONG_DOUBLE, SCANF_HAS_LONG_DOUBLE, HAVE_LONG_DOUBLE.
+	PRINTF_HAS_LONG_DOUBLE, SCANF_HAS_LONG_DOUBLE, HAVE_LONG_DOUBLE.
 
 Fri Jul  4 14:52:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -6652,8 +6652,8 @@ Thu Jul 11 13:50:28 1996  Stan Shebs  <shebs@andros.cygnus.com>
 Fri Jul  5 15:38:54 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbint.texinfo (NO_MMCHECK): Renamed from NO_MMALLOC_CHECK.
-  	Also document that some systems can use mmalloc but must define
- 	this if their C runtime allocates memory that is later freed.
+	Also document that some systems can use mmalloc but must define
+	this if their C runtime allocates memory that is later freed.
 	(MMCHECK_FORCE): Document new macro.
 
 Fri Jun 28 22:17:10 1996  Dawn Perchik  <dawn@cygnus.com>
