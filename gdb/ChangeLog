@@ -1,3 +1,8 @@
+2010-08-27  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_attach_fields_to_type): Don't set
+	TYPE_FIELD_IGNORE_BITS.
+
 2010-08-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_per_objfile_free): Reorganize buffers to match

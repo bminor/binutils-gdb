@@ -6266,9 +6266,9 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
       B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
 
-      TYPE_FIELD_IGNORE_BITS (type) =
-	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
-      B_CLRALL (TYPE_FIELD_IGNORE_BITS (type), nfields);
+      /* We don't set TYPE_FIELD_IGNORE_BITS here.  The DWARF reader
+	 never sets any bits in that array, so leaving it NULL lets us
+	 save a little memory.  */
     }
 
   /* If the type has baseclasses, allocate and clear a bit vector for
