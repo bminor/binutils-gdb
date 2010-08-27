@@ -1356,7 +1356,7 @@ Command_line::version_script()
   this->options_.finalize_dynamic_list();
   Version_script_info* vsi = this->script_options_.version_script_info();
   vsi->finalize();
-  return* vsi;
+  return *vsi;
 }
 
 } // End namespace gold.

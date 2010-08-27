@@ -1,3 +1,8 @@
+2010-08-27  Nick Clifton  <nickc@redhat.com>
+
+	* options.cc (version_script): Fix small typo in previous
+	whitespace tidyup.
+
 2010-08-25  Nick Clifton  <nickc@redhat.com>
 
 	* archive.cc: Formatting fixes: Remove whitespace between
