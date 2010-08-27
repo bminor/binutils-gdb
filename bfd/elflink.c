@@ -1110,19 +1110,19 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
       if (tdef && ntdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
+	  (_("%B: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
 	   tbfd, tsec, ntbfd, ntsec, h->root.root.string);
       else if (!tdef && !ntdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS reference in %B"),
+	  (_("%B: TLS reference in %B mismatches non-TLS reference in %B"),
 	   tbfd, ntbfd, h->root.root.string);
       else if (tdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS reference in %B"),
+	  (_("%B: TLS definition in %B section %A mismatches non-TLS reference in %B"),
 	   tbfd, tsec, ntbfd, h->root.root.string);
       else
 	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS definition in %B section %A"),
+	  (_("%B: TLS reference in %B mismatches non-TLS definition in %B section %A"),
 	   tbfd, ntbfd, ntsec, h->root.root.string);
 
       bfd_set_error (bfd_error_bad_value);
@@ -3866,6 +3866,7 @@ error_free_dyn:
       bfd_boolean common;
       unsigned int old_alignment;
       bfd *old_bfd;
+      bfd * undef_bfd = NULL;
 
       override = FALSE;
 
@@ -3990,6 +3991,20 @@ error_free_dyn:
 	  unsigned int vernum = 0;
 	  bfd_boolean skip;
 
+	  /* If this is a definition of a symbol which was previously
+	     referenced in a non-weak manner then make a note of the bfd
+	     that contained the reference.  This is used if we need to
+	     refer to the source of the reference later on.  */
+	  if (! bfd_is_und_section (sec))
+	    {
+	      h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
+
+	      if (h != NULL
+		  && h->root.type == bfd_link_hash_undefined
+		  && h->root.u.undef.abfd)
+		undef_bfd = h->root.u.undef.abfd;
+	    }
+
 	  if (ever == NULL)
 	    {
 	      if (info->default_imported_symver)
@@ -4095,6 +4110,19 @@ error_free_dyn:
 	      memcpy (p, verstr, verlen + 1);
 
 	      name = newname;
+	    }
+
+	  /* If necessary, make a second attempt to locate the bfd
+	     containing an unresolved, non-weak reference to the
+	     current symbol.  */
+	  if (! bfd_is_und_section (sec) && undef_bfd == NULL)
+	    {
+	      h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
+
+	      if (h != NULL
+		  && h->root.type == bfd_link_hash_undefined
+		  && h->root.u.undef.abfd)
+		undef_bfd = h->root.u.undef.abfd;
 	    }
 
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec,
@@ -4433,13 +4461,18 @@ error_free_dyn:
 	      /* A symbol from a library loaded via DT_NEEDED of some
 		 other library is referenced by a regular object.
 		 Add a DT_NEEDED entry for it.  Issue an error if
-		 --no-add-needed is used.  */
-	      if ((elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
+		 --no-add-needed is used and the reference was not
+		 a weak one.  */
+	      if (undef_bfd != NULL
+		  && (elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: invalid DSO for symbol `%s' definition"),
+		    (_("%B: undefined reference to symbol '%s'"),
+		     undef_bfd, name);
+		  (*_bfd_error_handler)
+		    (_("note: '%s' is defined in DSO %B so try adding it to the linker command line"),
 		     abfd, name);
-		  bfd_set_error (bfd_error_bad_value);
+		  bfd_set_error (bfd_error_invalid_operation);
 		  goto error_free_vers;
 		}
 

@@ -1,3 +1,25 @@
+2010-08-27  Nick Clifton  <nickc@redhat.com>
+
+	Import these patches from the mainline:
+
+	2010-01-21  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_add_object_symbols): Look up name of
+	undefined symbol both before and after versioning has been
+	applied.  Do not bother with symbols that are weakly undefined.
+
+	2009-11-05  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_add_object_symbols): Improve error
+	message generated when a symbol is left unresolved because a
+	--no-add-needed command line option has prevented the
+	inclusion of the DSO defining it.
+
+	2009-10-12  Roland McGrath  <roland@frob.com>
+
+	* elflink.c (elf_link_add_object_symbols, _bfd_elf_merge_symbol):
+	Fix %s that should be %B in several message formats.
+
 2010-04-22  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
