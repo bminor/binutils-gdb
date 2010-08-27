@@ -39,7 +39,7 @@
 #endif
 
 typedef struct gdb_event gdb_event;
-typedef int (event_handler_func) (int);
+typedef int (event_handler_func) (gdb_fildes_t);
 
 /* Tell create_file_handler what events we are interested in.  */
 
@@ -64,7 +64,7 @@ struct gdb_event
     event_handler_func *proc;
 
     /* File descriptor that is ready.  */
-    int fd;
+    gdb_fildes_t fd;
 
     /* Next in list of events or NULL.  */
     struct gdb_event *next_event;
@@ -76,7 +76,7 @@ struct gdb_event
 typedef struct file_handler
   {
     /* File descriptor.  */
-    int fd;
+    gdb_fildes_t fd;
 
     /* Events we want to monitor.  */
     int mask;
@@ -202,7 +202,7 @@ process_event (void)
 {
   gdb_event *event_ptr, *prev_ptr;
   event_handler_func *proc;
-  int fd;
+  gdb_fildes_t fd;
 
   /* Look in the event queue to find an event that is ready
      to be processed.  */
@@ -332,7 +332,7 @@ process_callback (void)
    occurs for FD.  CLIENT_DATA is the argument to pass to PROC.  */
 
 static void
-create_file_handler (int fd, int mask, handler_func *proc,
+create_file_handler (gdb_fildes_t fd, int mask, handler_func *proc,
 		     gdb_client_data client_data)
 {
   file_handler *file_ptr;
@@ -382,7 +382,8 @@ create_file_handler (int fd, int mask, handler_func *proc,
 /* Wrapper function for create_file_handler.  */
 
 void
-add_file_handler (int fd, handler_func *proc, gdb_client_data client_data)
+add_file_handler (gdb_fildes_t fd,
+		  handler_func *proc, gdb_client_data client_data)
 {
   create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION, proc, client_data);
 }
@@ -391,7 +392,7 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data)
    i.e. we don't care anymore about events on the FD.  */
 
 void
-delete_file_handler (int fd)
+delete_file_handler (gdb_fildes_t fd)
 {
   file_handler *file_ptr, *prev_ptr = NULL;
   int i;
@@ -454,7 +455,7 @@ delete_file_handler (int fd)
    event in the front of the event queue.  */
 
 static int
-handle_file_event (int event_file_desc)
+handle_file_event (gdb_fildes_t event_file_desc)
 {
   file_handler *file_ptr;
   int mask;
@@ -471,8 +472,8 @@ handle_file_event (int event_file_desc)
 
 	  if (file_ptr->ready_mask & GDB_EXCEPTION)
 	    {
-	      fprintf (stderr, "Exception condition detected on fd %d\n",
-		       file_ptr->fd);
+	      fprintf (stderr, "Exception condition detected on fd %s\n",
+		       pfildes (file_ptr->fd));
 	      file_ptr->error = 1;
 	    }
 	  else
@@ -502,7 +503,7 @@ handle_file_event (int event_file_desc)
    associated to FD when it was registered with the event loop.  */
 
 static gdb_event *
-create_file_event (int fd)
+create_file_event (gdb_fildes_t fd)
 {
   gdb_event *file_event_ptr;
 

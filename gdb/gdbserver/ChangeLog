@@ -1,5 +1,23 @@
 2010-08-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* event-loop.c (event_handle_func): Adjust to use gdb_fildes_t.
+	(struct gdb_event) <fd>: Change type to gdb_fildes_t.
+	(struct file_handler) <fd>: Change type to gdb_fildes_t.
+	(process_event): Change local fd's type to gdb_fildes_t.
+	(create_file_handler): Adjust prototype.
+	(delete_file_handler): Adjust prototype.
+	(handle_file_event): Adjust prototype.  Use pfildes.
+	(create_file_event): Adjsut prototype.
+	* remote-utils.c (remote_desc, listen_desc): Change type to
+	gdb_fildes_t.
+	* server.h: New gdb_fildes_t typedef.
+	[USE_WIN32API]: Include winsock2.h.
+	(delete_file_handler, add_file_handler): Adjust prototypes.
+	(pfildes): Declare.
+	* utils.c (pfildes): New.
+
+2010-08-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* configure.ac (build_warnings): Add -Wno-char-subscripts.
 	* configure: Regenerate.
 
