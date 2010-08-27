@@ -196,7 +196,7 @@ struct target_ops
 
   /* Undo the effects of prepare_to_access_memory.  */
 
-  void (*unprepare_to_access_memory) (void);
+  void (*done_accessing_memory) (void);
 
   /* Read memory from the inferior process.  This should generally be
      called through read_inferior_memory, which handles breakpoint shadowing.
@@ -491,11 +491,11 @@ ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
    ? (*the_target->prepare_to_access_memory) () \
    : 0)
 
-#define unprepare_to_access_memory()			\
+#define done_accessing_memory()				\
   do							\
     {							\
-      if (the_target->unprepare_to_access_memory)     	\
-	(*the_target->unprepare_to_access_memory) ();  	\
+      if (the_target->done_accessing_memory)     	\
+	(*the_target->done_accessing_memory) ();  	\
     } while (0)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);

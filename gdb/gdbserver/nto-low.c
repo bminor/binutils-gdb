@@ -914,7 +914,7 @@ static struct target_ops nto_target_ops = {
   nto_fetch_registers,
   nto_store_registers,
   NULL, /* prepare_to_access_memory */
-  NULL, /* unprepare_to_access_memory */
+  NULL, /* done_accessing_memory */
   nto_read_memory,
   nto_write_memory,
   NULL, /* nto_look_up_symbols */

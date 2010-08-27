@@ -5016,7 +5016,7 @@ linux_prepare_to_access_memory (void)
 }
 
 static void
-linux_unprepare_to_access_memory (void)
+linux_done_accessing_memory (void)
 {
   /* Neither ptrace nor /proc/PID/mem allow accessing memory through a
      running LWP.  */
@@ -5063,7 +5063,7 @@ static struct target_ops linux_target_ops = {
   linux_fetch_registers,
   linux_store_registers,
   linux_prepare_to_access_memory,
-  linux_unprepare_to_access_memory,
+  linux_done_accessing_memory,
   linux_read_memory,
   linux_write_memory,
   linux_look_up_symbols,

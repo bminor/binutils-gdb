@@ -562,7 +562,7 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
 	if (ret)
 	  return -1;
 	ret = set_gdb_breakpoint_at (addr);
-	unprepare_to_access_memory ();
+	done_accessing_memory ();
 	return ret;
       }
     case '2':
@@ -590,7 +590,7 @@ x86_remove_point (char type, CORE_ADDR addr, int len)
 	if (ret)
 	  return -1;
 	ret = delete_gdb_breakpoint_at (addr);
-	unprepare_to_access_memory ();
+	done_accessing_memory ();
 	return ret;
       }
     case '2':

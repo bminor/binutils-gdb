@@ -564,7 +564,7 @@ gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   if (ret == 0)
     {
       ret = read_inferior_memory (memaddr, myaddr, len);
-      unprepare_to_access_memory ();
+      done_accessing_memory ();
     }
 
   return ret;
@@ -586,7 +586,7 @@ gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
       if (ret == 0)
 	{
 	  ret = write_inferior_memory (memaddr, myaddr, len);
-	  unprepare_to_access_memory ();
+	  done_accessing_memory ();
 	}
       return ret;
     }

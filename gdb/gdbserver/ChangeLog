@@ -1,3 +1,17 @@
+2010-08-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_unprepare_to_access_memory): Rename to ...
+	(linux_done_accessing_memory): ... this.
+	(linux_target_ops): Adjust.
+	* linux-x86-low.c (x86_insert_point, x86_remove_point): Adjust.
+	* nto-low.c (nto_target_ops): Adjust comment.
+	* server.c (gdb_read_memory, gdb_write_memory): Adjust.
+	* spu-low.c (spu_target_ops): Adjust comment.
+	* target.h (target_ops): Rename unprepare_to_access_memory field
+	to done_accessing_memory.
+	(unprepare_to_access_memory): Rename to ...
+	(done_accessing_memory): ... this.
+
 2010-08-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (linux_prepare_to_access_memory): New.
