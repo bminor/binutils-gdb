@@ -1990,6 +1990,7 @@ dw2_require_line_header (struct objfile *objfile,
   struct attribute *attr;
   struct cleanup *cleanups;
   struct die_info *comp_unit_die;
+  struct dwarf2_section_info* sec;
   gdb_byte *beg_of_comp_unit, *info_ptr, *buffer;
   int has_children, i;
   struct dwarf2_cu cu;
@@ -2007,9 +2008,13 @@ dw2_require_line_header (struct objfile *objfile,
 
   cleanups = make_cleanup (free_stack_comp_unit, &cu);
 
-  dwarf2_read_section (objfile, &dwarf2_per_objfile->info);
-  buffer_size = dwarf2_per_objfile->info.size;
-  buffer = dwarf2_per_objfile->info.buffer;
+  if (this_cu->from_debug_types)
+    sec = &dwarf2_per_objfile->types;
+  else
+    sec = &dwarf2_per_objfile->info;
+  dwarf2_read_section (objfile, sec);
+  buffer_size = sec->size;
+  buffer = sec->buffer;
   info_ptr = buffer + this_cu->offset;
   beg_of_comp_unit = info_ptr;
 

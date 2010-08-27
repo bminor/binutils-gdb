@@ -1,3 +1,8 @@
+2010-08-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_require_line_header): Read from .debug_types
+	as appropriate.
+
 2010-08-27  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_attach_fields_to_type): Don't set
