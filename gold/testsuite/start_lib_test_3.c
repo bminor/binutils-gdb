@@ -22,4 +22,4 @@
 
    This is a test of the --start-lib and --end-lib options.  */
 
-static char t3[] = "t3";
+static char t3[] __attribute__ ((used)) = "t3";
