@@ -3944,7 +3944,7 @@ if test "${ERROR_ON_WARNING}" = yes ; then
 fi
 
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
--Wformat-nonliteral "
+-Wformat-nonliteral -Wno-char-subscripts"
 
 WARN_CFLAGS=""
 if test "x$GCC" = xyes
