@@ -4420,7 +4420,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"ldbrx",	X(31,532),	X_MASK, CELL|POWER7|PPCA2, PPCNONE,	{RT, RA0, RB}},
 
-{"lswx",	X(31,533),	X_MASK,      PPCCOM,	PPCNONE,	{RT, RA0, RB}},
+{"lswx",	X(31,533),	X_MASK,      PPCCOM,	E500|E500MC,	{RT, RA0, RB}},
 {"lsx",		X(31,533),	X_MASK,      PWRCOM,	PPCNONE,	{RT, RA, RB}},
 
 {"lwbrx",	X(31,534),	X_MASK,      PPCCOM,	PPCNONE,	{RT, RA0, RB}},
@@ -4466,7 +4466,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mfsr",	X(31,595), XRB_MASK|(1<<20), COM,	NON32,  	{RT, SR}},
 
-{"lswi",	X(31,597),	X_MASK,      PPCCOM,	PPCNONE,	{RT, RA0, NB}},
+{"lswi",	X(31,597),	X_MASK,      PPCCOM,	E500|E500MC,	{RT, RA0, NB}},
 {"lsi",		X(31,597),	X_MASK,      PWRCOM,	PPCNONE,	{RT, RA0, NB}},
 
 {"lwsync",	XSYNC(31,598,1), 0xffffffff, PPC,	E500,		{0}},
@@ -4517,7 +4517,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"stdbrx",	X(31,660),	X_MASK, CELL|POWER7|PPCA2, PPCNONE,	{RS, RA0, RB}},
 
-{"stswx",	X(31,661),	X_MASK,      PPCCOM,	PPCNONE,	{RS, RA0, RB}},
+{"stswx",	X(31,661),	X_MASK,      PPCCOM,	E500|E500MC,	{RS, RA0, RB}},
 {"stsx",	X(31,661),	X_MASK,      PWRCOM,	PPCNONE,	{RS, RA0, RB}},
 
 {"stwbrx",	X(31,662),	X_MASK,      PPCCOM,	PPCNONE,	{RS, RA0, RB}},
@@ -4559,7 +4559,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"addzeo.",	XO(31,202,1,1),	XORB_MASK,   PPCCOM,	PPCNONE,	{RT, RA}},
 {"azeo.",	XO(31,202,1,1),	XORB_MASK,   PWRCOM,	PPCNONE,	{RT, RA}},
 
-{"stswi",	X(31,725),	X_MASK,      PPCCOM,	PPCNONE,	{RS, RA0, NB}},
+{"stswi",	X(31,725),	X_MASK,      PPCCOM,	E500|E500MC,	{RS, RA0, NB}},
 {"stsi",	X(31,725),	X_MASK,      PWRCOM,	PPCNONE,	{RS, RA0, NB}},
 
 {"sthcx.",	XRC(31,726,1),	X_MASK,      POWER7,	PPCNONE,	{RS, RA0, RB}},
