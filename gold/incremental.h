@@ -241,6 +241,10 @@ class Incremental_input_entry
     : filename_key_(filename_key), offset_(0), info_offset_(0), mtime_(mtime)
   { }
 
+  virtual
+  ~Incremental_input_entry()
+  { }
+
   // Return the type of input file.
   Incremental_input_type
   type() const

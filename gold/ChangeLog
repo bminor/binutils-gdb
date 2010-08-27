@@ -1,5 +1,10 @@
 2010-08-27  Ian Lance Taylor  <iant@google.com>
 
+	* incremental.h (class Incremental_input_entry): Add virtual
+	destructor.
+
+2010-08-27  Ian Lance Taylor  <iant@google.com>
+
 	* testsuite/start_lib_test_3.c: Mark t3 as used.
 
 2010-08-27  Nick Clifton  <nickc@redhat.com>
