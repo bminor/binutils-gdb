@@ -14545,13 +14545,16 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 {
   struct dwarf2_per_objfile *data = d;
 
+  /* This is sorted according to the order they're defined in to make it easier
+     to keep in sync.  */
   munmap_section_buffer (&data->info);
   munmap_section_buffer (&data->abbrev);
   munmap_section_buffer (&data->line);
-  munmap_section_buffer (&data->str);
-  munmap_section_buffer (&data->macinfo);
-  munmap_section_buffer (&data->ranges);
   munmap_section_buffer (&data->loc);
+  munmap_section_buffer (&data->macinfo);
+  munmap_section_buffer (&data->str);
+  munmap_section_buffer (&data->ranges);
+  munmap_section_buffer (&data->types);
   munmap_section_buffer (&data->frame);
   munmap_section_buffer (&data->eh_frame);
   munmap_section_buffer (&data->gdb_index);
