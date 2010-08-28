@@ -2770,7 +2770,7 @@ _bfd_elf_link_sec_merge_syms (struct elf_link_hash_entry *h, void *data)
 bfd_boolean
 _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
 			   struct bfd_link_info *info,
-			   bfd_boolean ignore_protected)
+			   bfd_boolean not_local_protected)
 {
   bfd_boolean binding_stays_local_p;
   const struct elf_backend_data *bed;
@@ -2809,7 +2809,7 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
       /* Proper resolution for function pointer equality may require
 	 that these symbols perhaps be resolved dynamically, even though
 	 we should be resolving them to the current module.  */
-      if (!ignore_protected || !bed->is_function_type (h->type))
+      if (!not_local_protected || !bed->is_function_type (h->type))
 	binding_stays_local_p = TRUE;
       break;
 
@@ -2818,7 +2818,7 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
     }
 
   /* If it isn't defined locally, then clearly it's dynamic.  */
-  if (!h->def_regular)
+  if (!h->def_regular && !ELF_COMMON_DEF_P (h))
     return TRUE;
 
   /* Otherwise, the symbol is dynamic if binding rules don't tell
@@ -2829,7 +2829,15 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
 /* Return true if the symbol referred to by H should be considered
    to resolve local to the current module, and false otherwise.  Differs
    from (the inverse of) _bfd_elf_dynamic_symbol_p in the treatment of
-   undefined symbols and weak symbols.  */
+   undefined symbols.  The two functions are vitually identical except
+   for the place where forced_local and dynindx == -1 are tested.  If
+   either of those tests are true, _bfd_elf_dynamic_symbol_p will say
+   the symbol is local, while _bfd_elf_symbol_refs_local_p will say
+   the symbol is local only for defined symbols.
+   It might seem that _bfd_elf_dynamic_symbol_p could be rewritten as
+   !_bfd_elf_symbol_refs_local_p, except that targets differ in their
+   treatment of undefined weak symbols.  For those that do not make
+   undefined weak symbols dynamic, both functions may return false.  */
 
 bfd_boolean
 _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
@@ -8635,7 +8643,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	ignore_undef = bed->elf_backend_ignore_undef_symbol (h);
 
       /* If we are reporting errors for this situation then do so now.  */
-      if (ignore_undef == FALSE
+      if (!ignore_undef
 	  && h->ref_dynamic
 	  && (!h->ref_regular || finfo->info->gc_sections)
 	  && ! elf_link_check_versioned_symbol (finfo->info, bed, h)

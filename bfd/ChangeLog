@@ -1,3 +1,10 @@
+2010-08-28  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_dynamic_symbol_p): Rename param.  Make
+	common syms local.
+	(_bfd_elf_symbol_refs_local_p): Expand comment.
+	(elf_link_output_extsym): Fix style nit.
+
 2010-08-26  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link): Process stub sections
