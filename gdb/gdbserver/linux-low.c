@@ -98,6 +98,12 @@
 #define W_STOPCODE(sig) ((sig) << 8 | 0x7f)
 #endif
 
+/* This is the kernel's hard limit.  Not to be confused with
+   SIGRTMIN.  */
+#ifndef __SIGRTMIN
+#define __SIGRTMIN 32
+#endif
+
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
 #define HAS_NOMMU
@@ -566,7 +572,7 @@ linux_create_inferior (char *program, char **allargs)
     {
       ptrace (PTRACE_TRACEME, 0, 0, 0);
 
-#ifdef __SIGRTMIN /* Bionic doesn't use SIGRTMIN the way glibc does.  */
+#ifndef __ANDROID__ /* Bionic doesn't use SIGRTMIN the way glibc does.  */
       signal (__SIGRTMIN + 1, SIG_DFL);
 #endif
 
@@ -1335,6 +1341,30 @@ Deferring signal %d for LWP %ld.\n", WSTOPSIG (*wstat), lwpid_of (lwp));
 		 sig->signal);
 
       fprintf (stderr, "   (no more currently queued signals)\n");
+    }
+
+  /* Don't enqueue non-RT signals if they are already in the deferred
+     queue.  (SIGSTOP being the easiest signal to see ending up here
+     twice)  */
+  if (WSTOPSIG (*wstat) < __SIGRTMIN)
+    {
+      struct pending_signals *sig;
+
+      for (sig = lwp->pending_signals_to_report;
+	   sig != NULL;
+	   sig = sig->prev)
+	{
+	  if (sig->signal == WSTOPSIG (*wstat))
+	    {
+	      if (debug_threads)
+		fprintf (stderr,
+			 "Not requeuing already queued non-RT signal %d"
+			 " for LWP %ld\n",
+			 sig->signal,
+			 lwpid_of (lwp));
+	      return;
+	    }
+	}
     }
 
   p_sig = xmalloc (sizeof (*p_sig));
@@ -2230,7 +2260,7 @@ Check if we're already there.\n",
   if (WIFSTOPPED (w)
       && current_inferior->last_resume_kind != resume_step
       && (
-#if defined (USE_THREAD_DB) && defined (__SIGRTMIN)
+#if defined (USE_THREAD_DB) && !defined (__ANDROID__)
 	  (current_process ()->private->thread_db != NULL
 	   && (WSTOPSIG (w) == __SIGRTMIN
 	       || WSTOPSIG (w) == __SIGRTMIN + 1))
@@ -3332,7 +3362,14 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
 	     the thread already has a pending status to report, we
 	     will still report it the next time we wait - see
 	     status_pending_p_callback.  */
-	  send_sigstop (lwp);
+
+	  /* If we already have a pending signal to report, then
+	     there's no need to queue a SIGSTOP, as this means we're
+	     midway through moving the LWP out of the jumppad, and we
+	     will report the pending signal as soon as that is
+	     finished.  */
+	  if (lwp->pending_signals_to_report == NULL)
+	    send_sigstop (lwp);
 	}
 
       /* For stop requests, we're done.  */
@@ -3500,7 +3537,9 @@ proceed_one_lwp (struct inferior_list_entry *entry, void *except)
       return 0;
     }
 
-  if (thread->last_resume_kind == resume_stop)
+  if (thread->last_resume_kind == resume_stop
+      && lwp->pending_signals_to_report == NULL
+      && lwp->collecting_fast_tracepoint == 0)
     {
       /* We haven't reported this LWP as stopped yet (otherwise, the
 	 last_status.kind check above would catch it, and we wouldn't
@@ -5117,7 +5156,7 @@ linux_init_signals ()
 {
   /* FIXME drow/2002-06-09: As above, we should check with LinuxThreads
      to find what the cancel signal actually is.  */
-#ifdef __SIGRTMIN /* Bionic doesn't use SIGRTMIN the way glibc does.  */
+#ifndef __ANDROID__ /* Bionic doesn't use SIGRTMIN the way glibc does.  */
   signal (__SIGRTMIN+1, SIG_IGN);
 #endif
 }

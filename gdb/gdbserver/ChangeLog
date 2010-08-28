@@ -1,5 +1,20 @@
 2010-08-28  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-low.c (__SIGRTMIN): Define if not already defined.
+	(linux_create_inferior): Check for __ANDROID__ rather than
+	__SIGRTMIN.
+	(enqueue_one_deferred_signal): Don't requeue non-RT signals that
+	are already deferred.
+	(linux_wait_1): Check for __ANDROID__ rather than __SIGRTMIN.
+	(linux_resume_one_thread): Don't queue a SIGSTOP if the lwp is
+	stopped and already has a pending signal to report.
+	(proceed_one_lwp): : Don't queue a SIGSTOP if the lwp already has
+	a pending signal to report or is moving out of a jump pad.
+	(linux_init_signals): Check for __ANDROID__ rather than
+	__SIGRTMIN.
+
+2010-08-28  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.c (linux_stabilize_threads): Wrap debug output in a
 	debug_threads check.  Avoid a linear search when not doing debug
 	output.
