@@ -630,13 +630,20 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
     case UNDEF * 16 + WEAK_UNDEF:
     case WEAK_UNDEF * 16 + WEAK_UNDEF:
     case DYN_UNDEF * 16 + WEAK_UNDEF:
-    case DYN_WEAK_UNDEF * 16 + WEAK_UNDEF:
     case COMMON * 16 + WEAK_UNDEF:
     case WEAK_COMMON * 16 + WEAK_UNDEF:
     case DYN_COMMON * 16 + WEAK_UNDEF:
     case DYN_WEAK_COMMON * 16 + WEAK_UNDEF:
-      // A new weak undefined reference tells us nothing.
+      // A new weak undefined reference tells us nothing unless the
+      // exisiting symbol is a dynamic weak reference.
       return false;
+
+    case DYN_WEAK_UNDEF * 16 + WEAK_UNDEF:
+      // A new weak reference overrides an existing dynamic weak reference.
+      // This is necessary because a dynamic weak reference remembers
+      // the old binding, which may not be weak.  If we keeps the existing
+      // dynamic weak reference, the weakness may be dropped in the output.
+      return true;
 
     case DYN_DEF * 16 + WEAK_UNDEF:
     case DYN_WEAK_DEF * 16 + WEAK_UNDEF:

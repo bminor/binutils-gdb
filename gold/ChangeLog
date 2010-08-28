@@ -1,3 +1,13 @@
+2010-08-27  Doug Kwan  <dougkwan@google.com>
+
+	* gold/resolve.cc (Symbol_table::should_override): Let a weak
+	reference override an existing dynamic weak reference.
+	* testsuite/Makefile.am: Add new test dyn_weak_ref.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/dyn_weak_ref.sh: New file.
+	* testsuite/dyn_weak_ref_1.c: Ditto.
+	* testsuite/dyn_weak_ref_2.c: Ditto.
+
 2010-08-27  Ian Lance Taylor  <iant@google.com>
 
 	* incremental.h (class Incremental_input_entry): Add virtual

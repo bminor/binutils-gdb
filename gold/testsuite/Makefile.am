@@ -1750,6 +1750,26 @@ strong_ref_weak_def_1.so: strong_ref_weak_def_1.o strong_ref_weak_def_2.so \
 strong_ref_weak_def.stdout: strong_ref_weak_def_1.so
 	$(TEST_READELF) -sWD $< > $@
 
+# Test that a strong weak reference remains strong if there is another
+# weak reference in a DSO.
+check_SCRIPTS += dyn_weak_ref.sh
+check_DATA += dyn_weak_ref.stdout
+MOSTLYCLEANFILES += dyn_weak_ref_1.so dyn_weak_ref_2.so \
+	dyn_weak_ref.stdout
+dyn_weak_ref_2.o: dyn_weak_ref_2.c
+	$(COMPILE) -o $@ -c -fPIC $<
+dyn_weak_ref_2.so: dyn_weak_ref_2.o gcctestdir/ld
+	gcctestdir/ld -shared -o $@ dyn_weak_ref_2.o
+dyn_weak_ref_1.o: dyn_weak_ref_1.c
+	$(COMPILE) -o $@ -c -fPIC $<
+# We intentionally put dyn_weak_ref_2.so in front of dyn_weak_ref_1.o
+# so that the weak ref there goes to gold's symbol table first.
+dyn_weak_ref_1.so: dyn_weak_ref_1.o dyn_weak_ref_2.so gcctestdir/ld
+	gcctestdir/ld -shared -o $@ dyn_weak_ref_2.so dyn_weak_ref_1.o
+dyn_weak_ref.stdout: dyn_weak_ref_1.so
+	$(TEST_READELF) -sWD $< > $@
+
+
 # Test that --start-lib and --end-lib function correctly.
 check_PROGRAMS += start_lib_test
 start_lib_test: start_lib_test_main.o libstart_lib_test.a start_lib_test_2.o start_lib_test_3.o \
