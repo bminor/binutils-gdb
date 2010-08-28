@@ -1,3 +1,9 @@
+2010-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* linux-nat.c (pull_pid_from_list): Rename status to statusp.
+	(my_waitpid): Likewise.
+
 2010-08-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dw2_require_line_header): Read from .debug_types
