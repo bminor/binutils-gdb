@@ -1884,8 +1884,9 @@ linux_stabilize_threads (void)
 					 stuck_in_jump_pad_callback, NULL);
   if (lwp_stuck != NULL)
     {
-      fprintf (stderr, "can't stabilize, LWP %ld is stuck in jump pad\n",
-	       lwpid_of (lwp_stuck));
+      if (debug_threads)
+	fprintf (stderr, "can't stabilize, LWP %ld is stuck in jump pad\n",
+		 lwpid_of (lwp_stuck));
       return;
     }
 
@@ -1931,12 +1932,12 @@ linux_stabilize_threads (void)
 
   current_inferior = save_inferior;
 
-  lwp_stuck
-    = (struct lwp_info *) find_inferior (&all_lwps,
-					 stuck_in_jump_pad_callback, NULL);
-  if (lwp_stuck != NULL)
+  if (debug_threads)
     {
-      if (debug_threads)
+      lwp_stuck
+	= (struct lwp_info *) find_inferior (&all_lwps,
+					 stuck_in_jump_pad_callback, NULL);
+      if (lwp_stuck != NULL)
 	fprintf (stderr, "couldn't stabilize, LWP %ld got stuck in jump pad\n",
 		 lwpid_of (lwp_stuck));
     }

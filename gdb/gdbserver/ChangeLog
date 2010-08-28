@@ -1,3 +1,9 @@
+2010-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_stabilize_threads): Wrap debug output in a
+	debug_threads check.  Avoid a linear search when not doing debug
+	output.
+
 2010-08-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* event-loop.c (event_handle_func): Adjust to use gdb_fildes_t.
