@@ -1,3 +1,11 @@
+2010-08-30  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/11953
+	* elf.c (copy_elf_program_header): Calculate map->header_size
+	from lowest_section, not first_section.  Validate program
+	header p_paddr against section lma.  Find lowest_section in
+	second loop over headers.
+
 2010-08-28  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_dynamic_symbol_p): Rename param.  Make
@@ -191,7 +199,7 @@
 	elf_tdata's core_lwpid instead of to core_pid.
 	* elfn32-mips.c (elf32_mips_grok_prstatus): Write the LWPID to
 	elf_tdata's core_lwpid instead of to core_pid.
-	
+
 	* plugin.c (bfd_plugin_core_file_pid): New function.
 	* aout-target.h (MY_core_file_pid): Define.
 	* aout-tic30.c (MY_core_file_pid, MY_core_file_p): New defines.

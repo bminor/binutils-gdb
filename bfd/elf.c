@@ -5870,7 +5870,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       bfd_size_type amt;
       Elf_Internal_Shdr *this_hdr;
       asection *first_section = NULL;
-      asection *lowest_section = NULL;
+      asection *lowest_section;
 
       /* Compute how many sections are in this segment.  */
       for (section = ibfd->sections, section_count = 0;
@@ -5880,10 +5880,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	  this_hdr = &(elf_section_data(section)->this_hdr);
 	  if (ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 	    {
-	      if (!first_section)
-		first_section = lowest_section = section;
-	      if (section->lma < lowest_section->lma)
-		lowest_section = section;
+	      if (first_section == NULL)
+		first_section = section;
 	      section_count++;
 	    }
 	}
@@ -5937,17 +5935,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    phdr_included = TRUE;
 	}
 
-      if (map->includes_filehdr && first_section)
-	/* We need to keep the space used by the headers fixed.  */
-	map->header_size = first_section->vma - segment->p_vaddr;
-      
-      if (!map->includes_phdrs
-	  && !map->includes_filehdr
-	  && map->p_paddr_valid)
-	/* There is some other padding before the first section.  */
-	map->p_vaddr_offset = ((lowest_section ? lowest_section->lma : 0)
-			       - segment->p_paddr);
-
+      lowest_section = first_section;
       if (section_count != 0)
 	{
 	  unsigned int isec = 0;
@@ -5960,11 +5948,40 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	      if (ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 		{
 		  map->sections[isec++] = section->output_section;
+		  if (section->lma < lowest_section->lma)
+		    lowest_section = section;
+		  if ((section->flags & SEC_ALLOC) != 0)
+		    {
+		      bfd_vma seg_off;
+
+		      /* Section lmas are set up from PT_LOAD header
+			 p_paddr in _bfd_elf_make_section_from_shdr.
+			 If this header has a p_paddr that disagrees
+			 with the section lma, flag the p_paddr as
+			 invalid.  */
+		      if ((section->flags & SEC_LOAD) != 0)
+			seg_off = this_hdr->sh_offset - segment->p_offset;
+		      else
+			seg_off = this_hdr->sh_addr - segment->p_vaddr;
+		      if (section->lma - segment->p_paddr != seg_off)
+			map->p_paddr_valid = FALSE;
+		    }
 		  if (isec == section_count)
 		    break;
 		}
 	    }
 	}
+
+      if (map->includes_filehdr && lowest_section != NULL)
+	/* We need to keep the space used by the headers fixed.  */
+	map->header_size = lowest_section->vma - segment->p_vaddr;
+      
+      if (!map->includes_phdrs
+	  && !map->includes_filehdr
+	  && map->p_paddr_valid)
+	/* There is some other padding before the first section.  */
+	map->p_vaddr_offset = ((lowest_section ? lowest_section->lma : 0)
+			       - segment->p_paddr);
 
       map->count = section_count;
       *pointer_to_map = map;
