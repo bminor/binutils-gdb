@@ -1,3 +1,11 @@
+2010-08-30  Andre Poenitz  <andre.poenitz@nokia.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	PR python/11792:
+	* python/py-value.c (valpy_get_dynamic_type): New function.
+	(value_object_getset): Add "dynamic_type".
+	(valpy_get_type): Fail on error.
+
 2010-08-30  Yao Qi  <yao@codesourcery.com>
 
 	* arm-linux-tdep.c (arm_linux_sigreturn_return_addr): New.

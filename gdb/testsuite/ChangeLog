@@ -1,3 +1,9 @@
+2010-08-30  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11792:
+	* gdb.python/py-value.exp (test_subscript_regression): Add
+	dynamic_type test.
+
 2010-08-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/cpexprs.exp (test_breakpoint): Continue to test_function

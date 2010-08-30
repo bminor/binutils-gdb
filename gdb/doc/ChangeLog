@@ -1,3 +1,8 @@
+2010-08-30  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11792:
+	* gdb.texinfo (Values From Inferior): Document dynamic_type.
+
 2010-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (ARM Features): Document

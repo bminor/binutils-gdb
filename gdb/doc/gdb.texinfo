@@ -20759,6 +20759,16 @@ this value, thus it is not available for fetching from the inferior.
 The type of this @code{gdb.Value}.  The value of this attribute is a
 @code{gdb.Type} object.
 @end defivar
+
+@defivar Value dynamic_type
+The dynamic type of this @code{gdb.Value}.  This uses C@t{++} run-time
+type information to determine the dynamic type of the value.  If this
+value is of class type, it will return the class in which the value is
+embedded, if any.  If this value is of pointer or reference to a class
+type, it will compute the dynamic type of the referenced object, and
+return a pointer or reference to that type, respectively.  In all
+other cases, it will return the value's static type.
+@end defivar
 @end table
 
 The following methods are provided:

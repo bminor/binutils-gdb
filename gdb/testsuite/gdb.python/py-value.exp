@@ -379,6 +379,13 @@ proc test_subscript_regression {lang} {
      # the C++ tests.
      gdb_test "python print bool(gdb.parse_and_eval('base').dynamic_cast(gdb.lookup_type('Derived').pointer()))" \
 	 True
+
+     # Likewise.
+     gdb_test "python print gdb.parse_and_eval('base').dynamic_type" \
+	 "Derived \[*\]"
+     # A static type case.
+     gdb_test "python print gdb.parse_and_eval('5').dynamic_type" \
+	 "int"
  }
 
  gdb_breakpoint [gdb_get_line_number "break to inspect struct and union"]

@@ -27,6 +27,7 @@
 #include "valprint.h"
 #include "infcall.h"
 #include "expression.h"
+#include "cp-abi.h"
 
 #ifdef HAVE_PYTHON
 
@@ -62,6 +63,7 @@ typedef struct value_object {
   struct value *value;
   PyObject *address;
   PyObject *type;
+  PyObject *dynamic_type;
 } value_object;
 
 /* List of all values which are currently exposed to Python. It is
@@ -100,6 +102,8 @@ valpy_dealloc (PyObject *obj)
     {
       Py_DECREF (self->type);
     }
+
+  Py_XDECREF (self->dynamic_type);
 
   self->ob_type->tp_free (self);
 }
@@ -148,6 +152,7 @@ valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
   value_incref (value);
   value_obj->address = NULL;
   value_obj->type = NULL;
+  value_obj->dynamic_type = NULL;
   note_value (value_obj);
 
   return (PyObject *) value_obj;
@@ -218,13 +223,76 @@ valpy_get_type (PyObject *self, void *closure)
     {
       obj->type = type_to_type_object (value_type (obj->value));
       if (!obj->type)
-	{
-	  obj->type = Py_None;
-	  Py_INCREF (obj->type);
-	}
+	return NULL;
     }
   Py_INCREF (obj->type);
   return obj->type;
+}
+
+/* Return dynamic type of the value.  */
+
+static PyObject *
+valpy_get_dynamic_type (PyObject *self, void *closure)
+{
+  value_object *obj = (value_object *) self;
+  volatile struct gdb_exception except;
+  struct type *type = NULL;
+
+  if (obj->dynamic_type != NULL)
+    {
+      Py_INCREF (obj->dynamic_type);
+      return obj->dynamic_type;
+    }
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      struct value *val = obj->value;
+
+      type = value_type (val);
+      CHECK_TYPEDEF (type);
+
+      if (((TYPE_CODE (type) == TYPE_CODE_PTR)
+	   || (TYPE_CODE (type) == TYPE_CODE_REF))
+	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+	{
+	  struct value *target;
+	  int was_pointer = TYPE_CODE (type) == TYPE_CODE_PTR;
+
+	  target = value_ind (val);
+	  type = value_rtti_type (target, NULL, NULL, NULL);
+
+	  if (type)
+	    {
+	      if (was_pointer)
+		type = lookup_pointer_type (type);
+	      else
+		type = lookup_reference_type (type);
+	    }
+	}
+      else if (TYPE_CODE (type) == TYPE_CODE_CLASS)
+	type = value_rtti_type (val, NULL, NULL, NULL);
+      else
+	{
+	  /* Re-use object's static type.  */
+	  type = NULL;
+	}
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (type == NULL)
+    {
+      /* Ensure that the TYPE field is ready.  */
+      if (!valpy_get_type (self, NULL))
+	return NULL;
+      /* We don't need to incref here, because valpy_get_type already
+	 did it for us.  */
+      obj->dynamic_type = obj->type;
+    }
+  else
+    obj->dynamic_type = type_to_type_object (type);
+
+  Py_INCREF (obj->dynamic_type);
+  return obj->dynamic_type;
 }
 
 /* Implementation of gdb.Value.lazy_string ([encoding] [, length]) ->
@@ -994,6 +1062,7 @@ value_to_value_object (struct value *val)
       value_incref (val);
       val_obj->address = NULL;
       val_obj->type = NULL;
+      val_obj->dynamic_type = NULL;
       note_value (val_obj);
     }
 
@@ -1169,6 +1238,8 @@ static PyGetSetDef value_object_getset[] = {
     "Boolean telling whether the value is optimized out (i.e., not available).",
     NULL },
   { "type", valpy_get_type, NULL, "Type of the value.", NULL },
+  { "dynamic_type", valpy_get_dynamic_type, NULL,
+    "Dynamic type of the value.", NULL },
   {NULL}  /* Sentinel */
 };
 
