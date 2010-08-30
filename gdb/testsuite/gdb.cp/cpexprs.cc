@@ -309,8 +309,8 @@ class derived : public base1, public base2
 };
 
 int
-main (int argc, char* argv[]) // main
-{ // main
+test_function (int argc, char* argv[]) // test_function
+{ // test_function
   derived d;
   void (derived::*pfunc) (void) const = &derived::a_function;
   (d.*pfunc) ();
@@ -427,5 +427,19 @@ main (int argc, char* argv[]) // main
   char* str = a;
   fluff* flp = a;
   fluff** flpp = a;
+
+  return 0;
 }
 
+int
+main (int argc, char* argv[])
+{
+  int i;
+
+  /* Call the test function repeatedly, enough times for all our tests
+     without running forever if something goes wrong.  */
+  for (i = 0; i < 1000; i++)
+    test_function (argc, argv);
+
+  return 0;
+}

@@ -24,9 +24,14 @@
 proc test_breakpoint {func} {
     global DEC
 
-    # Restart every time
-    if {![runto_main]} {
-	perror "could not run to main when attempting to break at $func"
+    # Return to the top of the test function every time.
+    delete_breakpoints
+    if { ! [gdb_breakpoint test_function] } {
+	fail "set test_function breakpoint for $func"
+    } elseif { [gdb_test "continue" \
+		    "Continuing.\r\n\r\nBreakpoint $DEC+,.*test_function.*" \
+		    ""] != 0 } {
+	fail "continue to test_function for $func"
     } else {
 	gdb_breakpoint "$func"
 	set i [expr {[string last : $func] + 1}]
@@ -113,7 +118,7 @@ set ADDR "0x$HEX+"; # address
 array set all_functions {}
 
 # "Normal" functions/methods
-add {main} \
+add {test_function} \
     {int (int, char **)} \
     - \
     -
@@ -717,8 +722,8 @@ foreach name [get_functions list] {
 
 # Running to breakpoint -- use any function we can "list"
 foreach name [get_functions list] {
-    # Skip "main", since test_breakpoint uses it
-    if {[string compare $name "main"] != 0} {
+    # Skip "test_function", since test_breakpoint uses it
+    if {[string compare $name "test_function"] != 0} {
 	test_breakpoint $name
     }
 }
