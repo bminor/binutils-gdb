@@ -257,7 +257,7 @@ int arm_apcs_32 = 1;
 
 /* Determine if FRAME is executing in Thumb mode.  */
 
-static int
+int
 arm_frame_is_thumb (struct frame_info *frame)
 {
   CORE_ADDR cpsr;
@@ -2808,7 +2808,16 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
   else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
     {
       unsigned long cond = bits (inst1, 8, 11);
-      if (cond != 0x0f && condition_true (cond, status))    /* 0x0f = SWI */
+      if (cond == 0x0f)  /* 0x0f = SWI */
+	{
+	  struct gdbarch_tdep *tdep;
+	  tdep = gdbarch_tdep (gdbarch);
+
+	  if (tdep->syscall_next_pc != NULL)
+	    nextpc = tdep->syscall_next_pc (frame);
+
+	}
+      else if (cond != 0x0f && condition_true (cond, status))
 	nextpc = pc_val + (sbits (inst1, 0, 7) << 1);
     }
   else if ((inst1 & 0xf800) == 0xe000)	/* unconditional branch */
@@ -3257,7 +3266,16 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 	case 0xc:
 	case 0xd:
 	case 0xe:		/* coproc ops */
+	  break;
 	case 0xf:		/* SWI */
+	  {
+	    struct gdbarch_tdep *tdep;
+	    tdep = gdbarch_tdep (gdbarch);
+
+	    if (tdep->syscall_next_pc != NULL)
+	      nextpc = tdep->syscall_next_pc (frame);
+
+	  }
 	  break;
 
 	default:
