@@ -1,3 +1,55 @@
+2010-08-30  Richard Henderson   <rth@redhat.com>
+
+	* config/obj-coff-seh.c: Rewrite the entire file.
+	(symtab, symptr, reltab, relcount, relsize): Remove.
+	(seh_ctx_root, seh_ctx): Remove.
+	(xdata_seg, xdata_subseg, pdata_seg): New.
+	(switch_xdata, switch_pdata): New.
+	(verify_context, verify_context_and_target, skip_whitespace_and_comma):
+	New parsing functions.  Rewrite all parsing functions to use them.
+	(obj_coff_seh_32): Fix != arm thinko.
+	(obj_coff_seh_handler): For x64, don't accept handler pointer here,
+	only flags.
+	(obj_coff_seh_handlerdata): New.
+	(do_seh_endproc): Split out of ...
+	(obj_coff_seh_endproc): ... here.
+	(obj_coff_seh_proc): Use it, if needed.
+	(seh_x64_make_prologue_element): Use XRESIZEVEC, symbol_temp_new_now.
+	(seh_x64_read_reg): Remove mm_regs alternative.  Tidy integer reg
+	alternatives.  Don't slurp commas.
+	(seh_read_offset): Remove.
+	(obj_coff_seh_pushframe): Split out from obj_coff_seh_push.
+	(obj_coff_seh_scope): Remove.
+	(obj_coff_seh_save): Decide UWOP_SAVE_* vs _FAR immediately.
+	(obj_coff_seh_stackalloc): Decide _SMALL vs _LARGE immediately.
+	(out_one, out_two, out_four): New.
+	(seh_x64_write_prologue_data, seh_x64_size_prologue_data,
+	seh_x64_write_function_xdata, write_function_xdata): Rewrite
+	from seh_x64_write_xdata, seh_needed_unwind_info, seh_store_elm_data,
+	seh_getelm_data_size, seh_getsize_of_unwind_entry,
+	seh_make_unwind_entry, seh_getsize_unwind_data, and
+	seh_create_unwind_data.
+	(seh_arm_write_function_pdata): Rewrite from seh_arm_create_pdata.
+	(write_function_pdata): Rewrite from make_function_entry_pdata.
+	(seh_write_text_eh_data, make_function_entry_pdata,
+	seh_arm_create_pdata, seh_arm_write_pdata, seh_reloc, save_relocs,
+	seh_symbol_init, seh_symbol, quick_section, seh_emit_rva,
+	seh_emit_long, seh_make_globl, seh_make_section2, seh_make_section,
+	seh_make_xlbl_name, make_seh_text_label, seh_fill_pcsyms,
+	seh_needed_unwind_info, seh_store_elm_data, seh_getelm_data_size,
+	seh_getsize_of_unwind_entry, seh_make_unwind_entry,
+	seh_getsize_unwind_data, seh_create_unwind_data,
+	seh_make_function_entry_xdata, seh_x64_makescope_elem): Remove.
+	* config/obj-coff-seh.h (SEH_CMDS): Remove seh_savemm, seh_scope.
+	Add seh_handlerdata.  Adjust function/what arguments for
+	seh_savereg, seh_pushframe, seh_stackalloc.
+	(struct seh_prologue_element): Adjust members to closer match
+	the elements of the UNWIND_CODE structure.
+	(struct seh_scope_elem): Remove.
+	(struct seh_context): Replace char* members with symbolS or
+	expressionS as appropriate.  Sort members by ARM/x64 applicability.
+	Remove obsolete stuff wrt direct symbol and reloc manipulation.
+
 2010-08-25  Alan Modra  <amodra@gmail.com>
 
 	* NEWS: Mention ampersand in macro change.
