@@ -1,3 +1,12 @@
+2010-08-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* breakpoint.c (bpstat_alloc): Remove unused prototype.
+	(bpstat_alloc): Change parameters cbs to bs_link_pointer.  Adjust the
+	code.
+	(bpstat_stop_status): Change root_bs into bs_head and bs_link.  Adjust
+	calls of bpstat_alloc.  Remove explicit bs chain termination.
+
 2010-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
