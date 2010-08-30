@@ -1,3 +1,14 @@
+2010-08-30  Yao Qi  <yao@codesourcery.com>
+
+	* arm-linux-tdep.c (arm_linux_sigreturn_return_addr): New.
+	(arm_linux_syscall_next_pc): New.
+	(arm_linux_copy_svc): Use arm_linux_sigreturn_return_addr instead. 
+	(arm_linux_init_abi): Initialize syscall_next_pc.
+	* arm-tdep.c (thumb_get_next_pc_raw):  Get next pc of SWI in Thumb mode.
+	(arm_get_next_pc_raw): Get next pc of SWI in ARM mode.
+	* arm-tdep.h (struct gdbarch_tdep): Add a function pointer syscall_next_pc. 
+	Declare arm_frame_is_thumb.
+
 2010-08-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
