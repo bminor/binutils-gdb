@@ -1,5 +1,14 @@
 2010-08-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Make linux_get_siginfo_type `type *' unique.
+	* linux-tdep.c (linux_gdbarch_data_handle, struct linux_gdbarch_data)
+	(init_linux_gdbarch_data, get_linux_gdbarch_data): New.
+	(linux_get_siginfo_type): New variable linux_gdbarch_data.  Initialize
+	it.  Use linux_gdbarch_data->siginfo_type as a persistent storage.
+	(_initialize_linux_tdep): New.
+
+2010-08-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* defs.h (find_memory_region_ftype): New typedef.
 	(exec_set_find_memory_regions): Use it.

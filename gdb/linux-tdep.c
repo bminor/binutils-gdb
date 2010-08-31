@@ -25,17 +25,41 @@
 #include "elf/common.h"
 #include "inferior.h"
 
+static struct gdbarch_data *linux_gdbarch_data_handle;
+
+struct linux_gdbarch_data
+  {
+    struct type *siginfo_type;
+  };
+
+static void *
+init_linux_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct linux_gdbarch_data);
+}
+
+static struct linux_gdbarch_data *
+get_linux_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return gdbarch_data (gdbarch, linux_gdbarch_data_handle);
+}
+
 /* This function is suitable for architectures that don't
    extend/override the standard siginfo structure.  */
 
 struct type *
 linux_get_siginfo_type (struct gdbarch *gdbarch)
 {
+  struct linux_gdbarch_data *linux_gdbarch_data;
   struct type *int_type, *uint_type, *long_type, *void_ptr_type;
   struct type *uid_type, *pid_type;
   struct type *sigval_type, *clock_type;
   struct type *siginfo_type, *sifields_type;
   struct type *type;
+
+  linux_gdbarch_data = get_linux_gdbarch_data (gdbarch);
+  if (linux_gdbarch_data->siginfo_type != NULL)
+    return linux_gdbarch_data->siginfo_type;
 
   int_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
 			 	0, "int");
@@ -136,6 +160,8 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
 				       "_sifields", sifields_type,
 				       TYPE_LENGTH (long_type));
 
+  linux_gdbarch_data->siginfo_type = siginfo_type;
+
   return siginfo_type;
 }
 
@@ -177,4 +203,11 @@ void
 linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
+}
+
+void
+_initialize_linux_tdep (void)
+{
+  linux_gdbarch_data_handle =
+    gdbarch_data_register_post_init (init_linux_gdbarch_data);
 }
