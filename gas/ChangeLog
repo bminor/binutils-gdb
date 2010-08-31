@@ -1,3 +1,7 @@
+2010-08-31  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (obj_elf_init_stab_section): Fix assertion.
+
 2010-08-30  Richard Henderson   <rth@redhat.com>
 
 	* config/obj-coff-seh.c: Rewrite the entire file.
