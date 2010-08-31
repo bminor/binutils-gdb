@@ -1,5 +1,10 @@
 2010-08-31  Nick Clifton  <nickc@redhat.com>
 
+	* ldlex.l (WILDCHAR): Add the caret and exclamation point
+	characters, so that they can be used inside regexps.
+
+2010-08-31  Nick Clifton  <nickc@redhat.com>
+
 	* ld.texinfo (MEMORY): Clarify the behaviour of the ! character in
 	a region's attributes.
 
