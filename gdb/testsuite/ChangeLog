@@ -1,3 +1,7 @@
+2010-08-31  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw4-sig-types.exp: Use .x for executable name.
+
 2010-08-30  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11792:
