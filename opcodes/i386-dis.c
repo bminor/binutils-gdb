@@ -253,6 +253,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ib { OP_I, b_mode }
 #define sIb { OP_sI, b_mode }	/* sign extened byte */
 #define Iv { OP_I, v_mode }
+#define sIv { OP_sI, v_mode } 
 #define Iq { OP_I, q_mode }
 #define Iv64 { OP_I64, v_mode }
 #define Iw { OP_I, w_mode }
@@ -1773,7 +1774,7 @@ static const struct dis386 dis386[] = {
   { Bad_Opcode },	/* op size prefix */
   { Bad_Opcode },	/* adr size prefix */
   /* 68 */
-  { "pushT",		{ Iq } },
+  { "pushT",		{ sIv } },
   { "imulS",		{ Gv, Ev, Iv } },
   { "pushT",		{ sIb } },
   { "imulS",		{ Gv, Ev, sIb } },
@@ -2591,10 +2592,10 @@ static const struct dis386 reg_table[][8] = {
   {
     { "incQ",	{ Ev } },
     { "decQ",	{ Ev } },
-    { "callT",	{ indirEv } },
-    { "JcallT",	{ indirEp } },
-    { "jmpT",	{ indirEv } },
-    { "JjmpT",	{ indirEp } },
+    { "call{T|}", { indirEv } },
+    { "Jcall{T|}", { indirEp } },
+    { "jmp{T|}", { indirEv } },
+    { "Jjmp{T|}", { indirEp } },
     { "pushU",	{ stackEv } },
     { Bad_Opcode },
   },
@@ -5359,37 +5360,37 @@ static const struct dis386 prefix_table[][4] = {
 static const struct dis386 x86_64_table[][2] = {
   /* X86_64_06 */
   {
-    { "push{T|}", { es } },
+    { "pushP", { es } },
   },
 
   /* X86_64_07 */
   {
-    { "pop{T|}", { es } },
+    { "popP", { es } },
   },
 
   /* X86_64_0D */
   {
-    { "push{T|}", { cs } },
+    { "pushP", { cs } },
   },
 
   /* X86_64_16 */
   {
-    { "push{T|}", { ss } },
+    { "pushP", { ss } },
   },
 
   /* X86_64_17 */
   {
-    { "pop{T|}", { ss } },
+    { "popP", { ss } },
   },
 
   /* X86_64_1E */
   {
-    { "push{T|}", { ds } },
+    { "pushP", { ds } },
   },
 
   /* X86_64_1F */
   {
-    { "pop{T|}", { ds } },
+    { "popP", { ds } },
   },
 
   /* X86_64_27 */
@@ -5414,12 +5415,12 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_60 */
   {
-    { "pusha{P|}", { XX } },
+    { "pushaP", { XX } },
   },
 
   /* X86_64_61 */
   {
-    { "popa{P|}", { XX } },
+    { "popaP", { XX } },
   },
 
   /* X86_64_62 */
@@ -12335,9 +12336,9 @@ case_L:
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'T':
-	  if (intel_syntax)
-	    break;
-	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
+	  if (!intel_syntax
+	      && address_mode == mode_64bit
+	      && (sizeflag & DFLAG))
 	    {
 	      *obufp++ = 'q';
 	      break;
@@ -12345,7 +12346,16 @@ case_L:
 	  /* Fall through.  */
 	case 'P':
 	  if (intel_syntax)
-	    break;
+	    {
+	      if ((rex & REX_W) == 0
+		  && (prefixes & PREFIX_DATA))
+		{
+		  if ((sizeflag & DFLAG) == 0)
+		    *obufp++ = 'w';
+		   used_prefixes |= (prefixes & PREFIX_DATA);
+		}
+	      break;
+	    }
 	  if ((prefixes & PREFIX_DATA)
 	      || (rex & REX_W)
 	      || (sizeflag & SUFFIX_ALWAYS))
@@ -13623,28 +13633,10 @@ OP_sI (int bytemode, int sizeflag)
 	op -= 0x100;
       break;
     case v_mode:
-      USED_REX (REX_W);
-      if (rex & REX_W)
+      if (sizeflag & DFLAG)
 	op = get32s ();
       else
-	{
-	  if (sizeflag & DFLAG)
-	    {
-	      op = get32s ();
-	    }
-	  else
-	    {
-	      op = get16 ();
-	      if ((op & 0x8000) != 0)
-		op -= 0x10000;
-	    }
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	}
-      break;
-    case w_mode:
-      op = get16 ();
-      if ((op & 0x8000) != 0)
-	op -= 0x10000;
+	op = get16 ();
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);

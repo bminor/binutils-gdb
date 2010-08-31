@@ -295,5 +295,5 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 05                	syscall 
 [ 	]*[a-f0-9]+:	0f 07                	sysret 
 [ 	]*[a-f0-9]+:	0f 01 f8             	swapgs 
-	...
+[ 	]*[a-f0-9]+:	66 68 22 22          	pushw  \$0x2222
 #pass

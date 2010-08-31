@@ -1,3 +1,11 @@
+2010-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/11960
+	* gas/i386/opcode-intel.d: Updated.
+	* gas/i386/x86-64-opcode.d: Likewise.
+
+	* gas/i386/x86-64-opcode.s: Add a "pushw imm16" test.
+
 2010-08-25  Jie Zhang  <jie@codesourcery.com>
 
 	* gas/arm/ldst-pc.d: New test.

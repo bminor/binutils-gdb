@@ -1,3 +1,13 @@
+2010-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/11960
+	* i386-dis.c (sIv): New.
+	(dis386): Replace Iq with sIv on "pushT".
+	(reg_table): Replace T with {T|} on callT, JcallT, jmpT and JjmpT.
+	(x86_64_table): Replace {T|}/{P|} with P.  
+	(putop): Add 'w' to 'T'/'P' if needed for Intel syntax.
+	(OP_sI): Update v_mode.  Remove w_mode.
+
 2010-08-27  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* ppc-opc.c (powerpc_opcodes) [lswx,lswi,stswx,stswi]: Deprecate
