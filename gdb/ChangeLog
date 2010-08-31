@@ -1,3 +1,24 @@
+2010-08-31  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* psymtab.c (add_psymbol_to_bcache): Remove 'static' from
+	'static partial_symbol psymbol'.
+	(psymbol_hash): New function.
+	(psymbol_compare): New function.
+	* bcache.c (hash_continue): New.
+	(hash): Use hash_continue.
+	* bcache.c: Add hash_function and compare_function
+	pointers to bcache struct.
+	(bcache_full): Use bcache->hash_function, and
+	bcache->compare_function.
+	(bcache_compare): New function.
+	(bcache_xmalloc): Take hash_function and
+	compare_function arguments and initialize the
+	bcach's pointers.
+	Updated comment.
+	* objfiles.c (allocate_objfile): Updated.
+	* symfile.c (reread_symbols): Updated.
+	* python/py-type.c (typy_richcompare): Updated.
+
 2010-08-30  Andre Poenitz  <andre.poenitz@nokia.com>
 	    Tom Tromey  <tromey@redhat.com>
 

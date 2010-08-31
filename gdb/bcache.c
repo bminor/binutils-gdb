@@ -89,6 +89,12 @@ struct bcache
      16 bits of hash values) hit, but the corresponding combined
      length/data compare missed.  */
   unsigned long half_hash_miss_count;
+
+  /* Hash function to be used for this bcache object.  */
+  unsigned long (*hash_function)(const void *addr, int length);
+
+  /* Compare function to be used for this bcache object.  */
+  int (*compare_function)(const void *, const void *, int length);
 };
 
 /* The old hash function was stolen from SDBM. This is what DB 3.0 uses now,
@@ -98,12 +104,19 @@ struct bcache
 unsigned long
 hash(const void *addr, int length)
 {
+  return hash_continue (addr, length, 0);
+}
+
+/* Continue the calculation of the hash H at the given address.  */
+
+unsigned long
+hash_continue (const void *addr, int length, unsigned long h)
+{
   const unsigned char *k, *e;
-  unsigned long h;
 
   k = (const unsigned char *)addr;
   e = k+length;
-  for (h=0; k< e;++k)
+  for (; k< e;++k)
     {
       h *=16777619;
       h ^= *k;
@@ -235,7 +248,8 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
   bcache->total_count++;
   bcache->total_size += length;
 
-  full_hash = hash (addr, length);
+  full_hash = bcache->hash_function (addr, length);
+
   half_hash = (full_hash >> 16);
   hash_index = full_hash % bcache->num_buckets;
 
@@ -247,7 +261,7 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
       if (s->half_hash == half_hash)
 	{
 	  if (s->length == length
-	      && ! memcmp (&s->d.data, addr, length))
+	      && bcache->compare_function (&s->d.data, addr, length))
 	    return &s->d.data;
 	  else
 	    bcache->half_hash_miss_count++;
@@ -276,14 +290,39 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
   }
 }
 
+
+/* Compare the byte string at ADDR1 of lenght LENGHT to the
+   string at ADDR2.  Return 1 if they are equal.  */
+
+static int
+bcache_compare (const void *addr1, const void *addr2, int length)
+{
+  return memcmp (addr1, addr2, length) == 0;
+}
+
 /* Allocating and freeing bcaches.  */
 
+/* Allocated a bcache.  HASH_FUNCTION and COMPARE_FUNCTION can be used
+   to pass in custom hash, and compare functions to be used by this
+   bcache. If HASH_FUNCTION is NULL hash() is used and if COMPARE_FUNCTION
+   is NULL memcmp() is used.  */
+
 struct bcache *
-bcache_xmalloc (void)
+bcache_xmalloc (unsigned long (*hash_function)(const void *, int length),
+                int (*compare_function)(const void *, const void *, int length))
 {
   /* Allocate the bcache pre-zeroed.  */
   struct bcache *b = XCALLOC (1, struct bcache);
 
+  if (hash_function)
+    b->hash_function = hash_function;
+  else
+    b->hash_function = hash;
+
+  if (compare_function)
+    b->compare_function = compare_function;
+  else
+    b->compare_function = bcache_compare;
   return b;
 }
 

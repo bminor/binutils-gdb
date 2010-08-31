@@ -158,7 +158,9 @@ extern const void *bcache_full (const void *addr, int length,
 extern void bcache_xfree (struct bcache *bcache);
 
 /* Create a new bcache object.  */
-extern struct bcache *bcache_xmalloc (void);
+extern struct bcache *bcache_xmalloc (
+    unsigned long (*hash_function)(const void *, int length),
+    int (*compare_function)(const void *, const void *, int length));
 
 /* Print statistics on BCACHE's memory usage and efficacity at
    eliminating duplication.  TYPE should be a string describing the
@@ -167,7 +169,9 @@ extern struct bcache *bcache_xmalloc (void);
 extern void print_bcache_statistics (struct bcache *bcache, char *type);
 extern int bcache_memory_used (struct bcache *bcache);
 
-/* The hash function */
+/* The hash functions */
 extern unsigned long hash(const void *addr, int length);
+extern unsigned long hash_continue (const void *addr, int length,
+                                    unsigned long h);
 
 #endif /* BCACHE_H */

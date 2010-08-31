@@ -2432,11 +2432,12 @@ reread_symbols (void)
 
 	  /* Free the obstacks for non-reusable objfiles */
 	  bcache_xfree (objfile->psymbol_cache);
-	  objfile->psymbol_cache = bcache_xmalloc ();
+	  objfile->psymbol_cache = bcache_xmalloc (psymbol_hash,
+	                                           psymbol_compare);
 	  bcache_xfree (objfile->macro_cache);
-	  objfile->macro_cache = bcache_xmalloc ();
+	  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
 	  bcache_xfree (objfile->filename_cache);
-	  objfile->filename_cache = bcache_xmalloc ();
+	  objfile->filename_cache = bcache_xmalloc (NULL,NULL);
 	  if (objfile->demangled_names_hash != NULL)
 	    {
 	      htab_delete (objfile->demangled_names_hash);
@@ -2458,9 +2459,10 @@ reread_symbols (void)
 	  memset (&objfile->msymbol_demangled_hash, 0,
 		  sizeof (objfile->msymbol_demangled_hash));
 
-	  objfile->psymbol_cache = bcache_xmalloc ();
-	  objfile->macro_cache = bcache_xmalloc ();
-	  objfile->filename_cache = bcache_xmalloc ();
+	  objfile->psymbol_cache = bcache_xmalloc (psymbol_hash,
+	                                           psymbol_compare);
+	  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
+	  objfile->filename_cache = bcache_xmalloc (NULL, NULL);
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
 	     gdb_obstack.h specifies the alloc/dealloc

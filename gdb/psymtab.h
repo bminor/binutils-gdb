@@ -20,6 +20,9 @@
 #ifndef PSYMTAB_H
 #define PSYMTAB_H
 
+extern unsigned long psymbol_hash (const void *addr, int length);
+extern int psymbol_compare (const void *addr1, const void *addr2, int length);
+
 void map_partial_symbol_names (void (*) (const char *, void *), void *);
 
 void map_partial_symbol_filenames (void (*) (const char *, const char *,

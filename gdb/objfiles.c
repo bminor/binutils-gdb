@@ -199,9 +199,9 @@ allocate_objfile (bfd *abfd, int flags)
   struct objfile *objfile;
 
   objfile = (struct objfile *) xzalloc (sizeof (struct objfile));
-  objfile->psymbol_cache = bcache_xmalloc ();
-  objfile->macro_cache = bcache_xmalloc ();
-  objfile->filename_cache = bcache_xmalloc ();
+  objfile->psymbol_cache = bcache_xmalloc (psymbol_hash, psymbol_compare);
+  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
+  objfile->filename_cache = bcache_xmalloc (NULL, NULL);
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
   obstack_init (&objfile->objfile_obstack);

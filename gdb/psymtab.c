@@ -1270,6 +1270,47 @@ start_psymtab_common (struct objfile *objfile,
   return (psymtab);
 }
 
+/* Calculate a hash code for the given partial symbol.  The hash is
+   calculated using the symbol's value, language, domain, class
+   and name. These are the values which are set by
+   add_psymbol_to_bcache.  */
+
+unsigned long
+psymbol_hash (const void *addr, int length)
+{
+  unsigned long h = 0;
+  struct partial_symbol *psymbol = (struct partial_symbol *) addr;
+  unsigned int lang = psymbol->ginfo.language;
+  unsigned int domain = PSYMBOL_DOMAIN (psymbol);
+  unsigned int class = PSYMBOL_CLASS (psymbol);
+
+  h = hash_continue (&psymbol->ginfo.value, sizeof (psymbol->ginfo.value), h);
+  h = hash_continue (&lang, sizeof (unsigned int), h);
+  h = hash_continue (&domain, sizeof (unsigned int), h);
+  h = hash_continue (&class, sizeof (unsigned int), h);
+  h = hash_continue (psymbol->ginfo.name, strlen (psymbol->ginfo.name), h);
+
+  return h;
+}
+
+/* Returns true if the symbol at addr1 equals the symbol at addr2.
+   For the comparison this function uses a symbols value,
+   language, domain, class and name.  */
+
+int
+psymbol_compare (const void *addr1, const void *addr2, int length)
+{
+  struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
+  struct partial_symbol *sym2 = (struct partial_symbol *) addr2;
+
+  return (memcmp (&sym1->ginfo.value, &sym1->ginfo.value,
+                  sizeof (sym1->ginfo.value)) == 0
+	  && sym1->ginfo.language == sym2->ginfo.language
+          && PSYMBOL_DOMAIN (sym1) == PSYMBOL_DOMAIN (sym2)
+          && PSYMBOL_CLASS (sym1) == PSYMBOL_CLASS (sym2)
+          && sym1->ginfo.name == sym2->ginfo.name);
+}
+
 /* Helper function, initialises partial symbol structure and stashes 
    it into objfile's bcache.  Note that our caching mechanism will
    use all fields of struct partial_symbol to determine hash value of the
@@ -1285,15 +1326,8 @@ add_psymbol_to_bcache (char *name, int namelength, int copy_name,
 		       enum language language, struct objfile *objfile,
 		       int *added)
 {
-  /* psymbol is static so that there will be no uninitialized gaps in the
-     structure which might contain random data, causing cache misses in
-     bcache. */
-  static struct partial_symbol psymbol;
+  struct partial_symbol psymbol;
 
-  /* However, we must ensure that the entire 'value' field has been
-     zeroed before assigning to it, because an assignment may not
-     write the entire field.  */
-  memset (&psymbol.ginfo.value, 0, sizeof (psymbol.ginfo.value));
   /* val and coreaddr are mutually exclusive, one of them *will* be zero */
   if (val != 0)
     {
