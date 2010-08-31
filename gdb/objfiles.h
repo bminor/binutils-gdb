@@ -249,7 +249,7 @@ struct objfile
     /* A byte cache where we can stash arbitrary "chunks" of bytes that
        will not change. */
 
-    struct bcache *psymbol_cache;	/* Byte cache for partial syms */
+    struct psymbol_bcache *psymbol_cache; /* Byte cache for partial syms */
     struct bcache *macro_cache;          /* Byte cache for macros */
     struct bcache *filename_cache;	 /* Byte cache for file names.  */
 

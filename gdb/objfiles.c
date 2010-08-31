@@ -199,7 +199,7 @@ allocate_objfile (bfd *abfd, int flags)
   struct objfile *objfile;
 
   objfile = (struct objfile *) xzalloc (sizeof (struct objfile));
-  objfile->psymbol_cache = bcache_xmalloc (psymbol_hash, psymbol_compare);
+  objfile->psymbol_cache = psymbol_bcache_init ();
   objfile->macro_cache = bcache_xmalloc (NULL, NULL);
   objfile->filename_cache = bcache_xmalloc (NULL, NULL);
   /* We could use obstack_specify_allocation here instead, but
@@ -658,7 +658,7 @@ free_objfile (struct objfile *objfile)
   if (objfile->static_psymbols.list)
     xfree (objfile->static_psymbols.list);
   /* Free the obstacks for non-reusable objfiles */
-  bcache_xfree (objfile->psymbol_cache);
+  psymbol_bcache_free (objfile->psymbol_cache);
   bcache_xfree (objfile->macro_cache);
   bcache_xfree (objfile->filename_cache);
   if (objfile->demangled_names_hash)

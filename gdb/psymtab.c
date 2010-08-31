@@ -37,6 +37,11 @@
 #define DEV_TTY "/dev/tty"
 #endif
 
+struct psymbol_bcache
+{
+  struct bcache *bcache;
+};
+
 /* A fast way to get from a psymtab to its symtab (after the first time).  */
 #define PSYMTAB_TO_SYMTAB(pst)  \
     ((pst) -> symtab != NULL ? (pst) -> symtab : psymtab_to_symtab (pst))
@@ -1275,7 +1280,7 @@ start_psymtab_common (struct objfile *objfile,
    and name. These are the values which are set by
    add_psymbol_to_bcache.  */
 
-unsigned long
+static unsigned long
 psymbol_hash (const void *addr, int length)
 {
   unsigned long h = 0;
@@ -1297,7 +1302,7 @@ psymbol_hash (const void *addr, int length)
    For the comparison this function uses a symbols value,
    language, domain, class and name.  */
 
-int
+static int
 psymbol_compare (const void *addr1, const void *addr2, int length)
 {
   struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
@@ -1309,6 +1314,51 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
           && PSYMBOL_DOMAIN (sym1) == PSYMBOL_DOMAIN (sym2)
           && PSYMBOL_CLASS (sym1) == PSYMBOL_CLASS (sym2)
           && sym1->ginfo.name == sym2->ginfo.name);
+}
+
+/* Initialize a partial symbol bcache.  */
+
+struct psymbol_bcache *
+psymbol_bcache_init (void)
+{
+  struct psymbol_bcache *bcache = XCALLOC (1, struct psymbol_bcache);
+  bcache->bcache = bcache_xmalloc (psymbol_hash, psymbol_compare);
+  return bcache;
+}
+
+/* Free a partial symbol bcache.  */
+void
+psymbol_bcache_free (struct psymbol_bcache *bcache)
+{
+  if (bcache == NULL)
+    return;
+
+  bcache_xfree (bcache->bcache);
+  xfree (bcache);
+}
+
+/* Return the internal bcache of the psymbol_bcache BCACHE*/
+
+struct bcache *
+psymbol_bcache_get_bcache (struct psymbol_bcache *bcache)
+{
+  return bcache->bcache;
+}
+
+/* Find a copy of the SYM in BCACHE.  If BCACHE has never seen this
+   symbol before, add a copy to BCACHE.  In either case, return a pointer
+   to BCACHE's copy of the symbol.  If optional ADDED is not NULL, return
+   1 in case of new entry or 0 if returning an old entry.  */
+
+static const struct partial_symbol *
+psymbol_bcache_full (struct partial_symbol *sym,
+                     struct psymbol_bcache *bcache,
+                     int *added)
+{
+  return bcache_full (sym,
+                      sizeof (struct partial_symbol),
+                      bcache->bcache,
+                      added);
 }
 
 /* Helper function, initialises partial symbol structure and stashes 
@@ -1345,8 +1395,9 @@ add_psymbol_to_bcache (char *name, int namelength, int copy_name,
   SYMBOL_SET_NAMES (&psymbol, name, namelength, copy_name, objfile);
 
   /* Stash the partial symbol away in the cache */
-  return bcache_full (&psymbol, sizeof (struct partial_symbol),
-		      objfile->psymbol_cache, added);
+  return psymbol_bcache_full (&psymbol,
+                              objfile->psymbol_cache,
+                              added);
 }
 
 /* Helper function, adds partial symbol to the given partial symbol

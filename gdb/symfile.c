@@ -2431,9 +2431,8 @@ reread_symbols (void)
 		  sizeof (objfile->static_psymbols));
 
 	  /* Free the obstacks for non-reusable objfiles */
-	  bcache_xfree (objfile->psymbol_cache);
-	  objfile->psymbol_cache = bcache_xmalloc (psymbol_hash,
-	                                           psymbol_compare);
+	  psymbol_bcache_free (objfile->psymbol_cache);
+	  objfile->psymbol_cache = psymbol_bcache_init ();
 	  bcache_xfree (objfile->macro_cache);
 	  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
 	  bcache_xfree (objfile->filename_cache);
@@ -2459,8 +2458,7 @@ reread_symbols (void)
 	  memset (&objfile->msymbol_demangled_hash, 0,
 		  sizeof (objfile->msymbol_demangled_hash));
 
-	  objfile->psymbol_cache = bcache_xmalloc (psymbol_hash,
-	                                           psymbol_compare);
+	  objfile->psymbol_cache = psymbol_bcache_init ();
 	  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
 	  objfile->filename_cache = bcache_xmalloc (NULL, NULL);
 	  /* obstack_init also initializes the obstack so it is

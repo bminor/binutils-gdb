@@ -1,3 +1,23 @@
+2010-08-31  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* symfile.c (reread_symbols): Use psymbol_bcache_free, and
+	psymbol_bcache_init.
+	* psymtab.h (psymbol_bcache_init): New function prototype.
+	(psymbol_bcache_free): New function prototype.
+	(psymbol_bcache_get_bcache): New function prototype.
+	* psymtab.c (psymbol_bcache_init): New function.
+	(psymbol_bcache_free): New function.
+	(psymbol_bcache_full): New function.
+	(psymbol_bcache_get_bcache): New function.
+	(add_psymbol_to_bcache): use psymbol_bcache_full.
+	* objfiles.h (psymbol_cache): Change type of psymbol_cache to
+	psymbol_bcache.
+	* symmisc.c (print_symbol_bcache_statistics): Updated.
+	(print_objfile_statistics): Updated.
+	* objfiles.c (allocate_objfile): Use psymbol_bcache_init to initialize
+	psymbol_cache.
+	(free_objfile): Use psymbol_bcache_free.
+
 2010-08-31  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/11961:
