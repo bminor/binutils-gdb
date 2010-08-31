@@ -1,3 +1,8 @@
+2010-08-31  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* infrun.c (set_exec_direction_func): Error out if target does not
+	support reverse execution.
+
 2010-08-30  Yao Qi  <yao@codesourcery.com>
 
 	* arm-linux-tdep.c (arm_linux_sigreturn_return_addr): New.
