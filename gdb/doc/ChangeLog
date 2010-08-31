@@ -1,3 +1,7 @@
+2010-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.texinfo (i386 Features): Remove an extra "@item".
+
 2010-08-30  Tom Tromey  <tromey@redhat.com>
 
 	PR python/11792:

@@ -35733,7 +35733,6 @@ describe the upper 128 bits of @sc{ymm} registers:
 @samp{ymm0h} through @samp{ymm7h} for i386
 @item
 @samp{ymm0h} through @samp{ymm15h} for amd64
-@item 
 @end itemize
 
 The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
