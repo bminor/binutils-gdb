@@ -6437,6 +6437,11 @@ set_exec_direction_func (char *args, int from_tty,
       else if (!strcmp (exec_direction, exec_reverse))
 	execution_direction = EXEC_REVERSE;
     }
+  else
+    {
+      exec_direction = exec_forward;
+      error (_("Target does not support this operation."));
+    }
 }
 
 static void

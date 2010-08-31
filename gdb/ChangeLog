@@ -1,3 +1,8 @@
+2010-08-31  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* infrun.c (set_exec_direction_func): Error out if target does not
+	support reverse execution.
+
 2010-08-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Make linux_get_siginfo_type `type *' unique.
