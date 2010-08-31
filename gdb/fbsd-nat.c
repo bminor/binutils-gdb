@@ -92,9 +92,7 @@ fbsd_read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
    argument to FUNC.  */
 
 int
-fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
-				       int, int, int, void *),
-			  void *obfd)
+fbsd_find_memory_regions (find_memory_region_ftype func, void *obfd)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   char *mapfilename;

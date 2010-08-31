@@ -1,3 +1,26 @@
+2010-08-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* defs.h (find_memory_region_ftype): New typedef.
+	(exec_set_find_memory_regions): Use it.
+	* exec.c (exec_set_find_memory_regions): Use find_memory_region_ftype.
+	* fbsd-nat.c (fbsd_find_memory_regions): Likewise.
+	* gcore.c (objfile_find_memory_regions): Likewise.
+	* gnu-nat.c (gnu_find_memory_regions): Likewise.
+	* linux-nat.c (linux_nat_find_memory_regions): Likewise.
+	* procfs.c (iterate_over_mappings_cb_ftype): Remove.
+	(iterate_over_mappings): Rename iterate_over_mappings_cb_ftype to
+	find_memory_region_ftype.
+	(insert_dbx_link_bpt_in_region): Likewise.
+	(iterate_over_mappings): Likewise.  Drop the comment part about the
+	function prototype.
+	(find_memory_regions_callback): Use find_memory_region_ftype.
+	(proc_find_memory_regions): Likewise.
+	(info_mappings_callback): Rename iterate_over_mappings_cb_ftype to
+	find_memory_region_ftype.
+	* target.c (dummy_find_memory_regions): Use find_memory_region_ftype.
+	* target.h (struct target_ops) <to_find_memory_regions>: Likewise.
+
 2010-08-31  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* psymtab.c (add_psymbol_to_bcache): Remove 'static' from

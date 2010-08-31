@@ -504,11 +504,7 @@ struct target_ops
     int (*to_async_mask) (int);
     int (*to_supports_non_stop) (void);
     /* find_memory_regions support method for gcore */
-    int (*to_find_memory_regions) (int (*) (CORE_ADDR,
-					    unsigned long,
-					    int, int, int,
-					    void *),
-				   void *);
+    int (*to_find_memory_regions) (find_memory_region_ftype func, void *data);
     /* make_corefile_notes support method for gcore */
     char * (*to_make_corefile_notes) (bfd *, int *);
     /* get_bookmark support method for bookmarks */

@@ -835,11 +835,7 @@ exec_has_memory (struct target_ops *ops)
 /* Find mapped memory. */
 
 extern void
-exec_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR, 
-						    unsigned long, 
-						    int, int, int, 
-						    void *),
-					   void *))
+exec_set_find_memory_regions (int (*func) (find_memory_region_ftype, void *))
 {
   exec_ops.to_find_memory_regions = func;
 }

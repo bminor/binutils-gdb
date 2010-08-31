@@ -2487,11 +2487,7 @@ gnu_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 
 /* Call FUNC on each memory region in the task.  */
 static int
-gnu_find_memory_regions (int (*func) (CORE_ADDR,
-				      unsigned long,
-				      int, int, int,
-				      void *),
-			 void *data)
+gnu_find_memory_regions (find_memory_region_ftype func, void *data)
 {
   error_t err;
   task_t task;

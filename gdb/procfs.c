@@ -438,17 +438,9 @@ static void free_syscalls (procinfo *pi);
 static int find_syscall (procinfo *pi, char *name);
 #endif /* DYNAMIC_SYSCALLS */
 
-/* A function type used as a callback back iterate_over_mappings.  */
-typedef int (iterate_over_mappings_cb_ftype)
-  (CORE_ADDR vaddr, unsigned long size, int read, int write, int execute,
-   void *data);
-
 static int iterate_over_mappings
-  (procinfo *pi,
-   iterate_over_mappings_cb_ftype *child_func,
-   void *data,
-   int (*func) (struct prmap *map,
-		iterate_over_mappings_cb_ftype *child_func,
+  (procinfo *pi, find_memory_region_ftype child_func, void *data,
+   int (*func) (struct prmap *map, find_memory_region_ftype child_func,
 		void *data));
 
 /* The head of the procinfo list: */
@@ -3784,7 +3776,7 @@ solib_mappings_callback (struct prmap *map, int (*func) (int, CORE_ADDR),
 
 static int
 insert_dbx_link_bpt_in_region (struct prmap *map,
-			       iterate_over_mappings_cb_ftype *child_func,
+			       find_memory_region_ftype child_func,
 			       void *data)
 {
   procinfo *pi = (procinfo *) data;
@@ -5226,11 +5218,10 @@ procfs_use_watchpoints (struct target_ops *t)
    from the callback function, or zero.  */
 
 static int
-iterate_over_mappings (procinfo *pi,
-		       iterate_over_mappings_cb_ftype *child_func,
+iterate_over_mappings (procinfo *pi, find_memory_region_ftype child_func,
 		       void *data,
 		       int (*func) (struct prmap *map,
-				    iterate_over_mappings_cb_ftype *child_func,
+				    find_memory_region_ftype child_func,
 				    void *data))
 {
   char pathname[MAX_PROC_NAME_SIZE];
@@ -5282,23 +5273,12 @@ iterate_over_mappings (procinfo *pi,
 }
 
 /* Implements the to_find_memory_regions method.  Calls an external
-   function for each memory region.  The external function will have
-   the signature:
-
-     int callback (CORE_ADDR vaddr,
-		   unsigned long size,
-		   int read, int write, int execute,
-		   void *data);
-
+   function for each memory region.
    Returns the integer value returned by the callback.  */
 
 static int
 find_memory_regions_callback (struct prmap *map,
-			      int (*func) (CORE_ADDR,
-					   unsigned long,
-					   int, int, int,
-					   void *),
-			      void *data)
+			      find_memory_region_ftype func, void *data)
 {
   return (*func) ((CORE_ADDR) map->pr_vaddr,
 		  map->pr_size,
@@ -5321,11 +5301,7 @@ find_memory_regions_callback (struct prmap *map,
    the callback.  */
 
 static int
-proc_find_memory_regions (int (*func) (CORE_ADDR,
-				       unsigned long,
-				       int, int, int,
-				       void *),
-			  void *data)
+proc_find_memory_regions (find_memory_region_ftype func, void *data)
 {
   procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
 
@@ -5364,8 +5340,7 @@ mappingflags (long flags)
    mappings'.  */
 
 static int
-info_mappings_callback (struct prmap *map,
-			iterate_over_mappings_cb_ftype *ignore,
+info_mappings_callback (struct prmap *map, find_memory_region_ftype ignore,
 			void *unused)
 {
   unsigned int pr_off;
