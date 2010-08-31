@@ -4643,7 +4643,7 @@ Initialized section
 @item L
 Same as @samp{I}
 @item !
-Invert the sense of any of the preceding attributes
+Invert the sense of any of the attributes that follow
 @end table
 
 If a unmapped section matches any of the listed attributes other than
