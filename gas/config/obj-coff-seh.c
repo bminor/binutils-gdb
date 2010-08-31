@@ -493,12 +493,12 @@ obj_coff_seh_save (int what)
 
   scale = (what == 1 ? 8 : 16);
 
-  if ((off & (scale - 1)) == 0 && off <= 0xffff * scale)
+  if ((off & (scale - 1)) == 0 && off <= (offsetT) (0xffff * scale))
     {
       code = (what == 1 ? UWOP_SAVE_NONVOL : UWOP_SAVE_XMM128);
       off /= scale;
     }
-  else if (off < 0xffffffff)
+  else if (off < (offsetT) 0xffffffff)
     code = (what == 1 ? UWOP_SAVE_NONVOL_FAR : UWOP_SAVE_XMM128_FAR);
   else
     {
@@ -533,9 +533,9 @@ obj_coff_seh_stackalloc (int what ATTRIBUTE_UNUSED)
 
   if ((off & 7) == 0 && off <= 128)
     code = UWOP_ALLOC_SMALL, info = (off - 8) >> 3, off = 0;
-  else if ((off & 7) == 0 && off <= 0xffff * 8)
+  else if ((off & 7) == 0 && off <= (offsetT) (0xffff * 8))
     code = UWOP_ALLOC_LARGE, info = 0, off >>= 3;
-  else if (off <= 0xffffffff)
+  else if (off <= (offsetT) 0xffffffff)
     code = UWOP_ALLOC_LARGE, info = 1;
   else
     {

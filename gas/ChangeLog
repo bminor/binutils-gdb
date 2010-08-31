@@ -1,3 +1,8 @@
+2010-08-31  Kai Tietz  <kai.tietz@onevision.com>
+
+	* config/obj-coff-seh.c (obj_coff_seh_save): Correct comparison.
+	(obj_coff_seh_stackalloc): Likewise.
+
 2010-08-31  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-elf.c (obj_elf_init_stab_section): Fix assertion.
