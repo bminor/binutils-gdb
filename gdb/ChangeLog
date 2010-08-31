@@ -1,3 +1,9 @@
+2010-08-31  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/11961:
+	* dwarf2read.c (new_symbol_full) <DW_TAG_template_type_param>:
+	Don't set TYPE_NAME on the type.
+
 2010-08-31  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* infrun.c (set_exec_direction_func): Error out if target does not

@@ -10729,20 +10729,21 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			       && (cu->language == language_cplus
 				   || cu->language == language_java)
 			       ? &global_symbols : cu->list_in_scope);
-	      }
 
-	    /* The semantics of C++ state that "struct foo { ... }" also
-	       defines a typedef for "foo".  A Java class declaration also
-	       defines a typedef for the class.  */
-	    if (cu->language == language_cplus
-		|| cu->language == language_java
-		|| cu->language == language_ada)
-	      {
-		/* The symbol's name is already allocated along with
-		   this objfile, so we don't need to duplicate it for
-		   the type.  */
-		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_SEARCH_NAME (sym);
+		/* The semantics of C++ state that "struct foo {
+		   ... }" also defines a typedef for "foo".  A Java
+		   class declaration also defines a typedef for the
+		   class.  */
+		if (cu->language == language_cplus
+		    || cu->language == language_java
+		    || cu->language == language_ada)
+		  {
+		    /* The symbol's name is already allocated along
+		       with this objfile, so we don't need to
+		       duplicate it for the type.  */
+		    if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+		      TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_SEARCH_NAME (sym);
+		  }
 	      }
 	  }
 	  break;
