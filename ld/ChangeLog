@@ -1,7 +1,7 @@
 2010-08-31  Nick Clifton  <nickc@redhat.com>
 
 	* ldlex.l (WILDCHAR): Add the caret and exclamation point
-	characters, so that they can be used inside regexps.
+	characters, so that they can be used inside globs.
 
 2010-08-31  Nick Clifton  <nickc@redhat.com>
 

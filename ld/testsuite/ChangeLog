@@ -1,6 +1,6 @@
 2010-08-31  Nick Clifton  <nickc@redhat.com>
 
-	* ld-scripts/section-match.exp: New file.  Runs ths
+	* ld-scripts/section-match.exp: New file.  Runs the
 	section-match-1 test.
 	* ld-scripts/section-match-1.d: New file.
 	* ld-scripts/section-match-1.s: New file.
