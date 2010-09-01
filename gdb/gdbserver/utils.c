@@ -24,9 +24,6 @@
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 
 #ifdef IN_PROCESS_AGENT
 #  define PREFIX "ipa: "

@@ -1,5 +1,13 @@
 2010-09-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbreplay.c: Move include of alloca.h up, next to include of
+	malloc.h.
+	* server.h: Add include of malloc.h.
+	* mem-break.c: Remove include of malloc.h.
+	* server.c, tracepoint.c, utils.c, win32-low.c: Likewise.
+
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* Makefile.in (memmem.o): Build with -Wno-error.
 
 2010-09-01  Joel Brobecker  <brobecker@adacore.com>

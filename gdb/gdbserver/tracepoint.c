@@ -22,9 +22,6 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <stddef.h>
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #if HAVE_STDINT_H
 #include <stdint.h>
 #endif

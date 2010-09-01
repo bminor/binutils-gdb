@@ -31,7 +31,6 @@
 #include <tlhelp32.h>
 #include <psapi.h>
 #include <sys/param.h>
-#include <malloc.h>
 #include <process.h>
 
 #ifndef USE_WIN32API

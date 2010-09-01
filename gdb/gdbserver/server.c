@@ -28,9 +28,6 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 
 ptid_t cont_thread;
 ptid_t general_thread;
