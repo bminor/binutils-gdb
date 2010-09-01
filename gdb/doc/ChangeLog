@@ -1,3 +1,8 @@
+2010-09-01  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document new
+	feature `reverse' output by -list-target-features.
+
 2010-08-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.texinfo (PowerPC Embedded): Mention support for the DVC register.

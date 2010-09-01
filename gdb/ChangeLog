@@ -1,3 +1,8 @@
+2010-09-01  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* mi/mi-main.c (mi_cmd_list_target_features): Add `reverse'
+	as a feature reported by -list-target-features.
+
 2010-08-31  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* infrun.c (set_exec_direction_func): Error out if target does not
