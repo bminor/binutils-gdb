@@ -1,3 +1,10 @@
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* features/Makefile (WHICH): Add rs6000/powerpc-32.
+	(powerpc-32.o, powerpc-32.c): New rules.
+	(clean): Also remove powerpc-32.c.
+	* regformats/rs6000/powerpc-32.dat: Generate.
+
 2010-08-31  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* symfile.c (reread_symbols): Use psymbol_bcache_free, and

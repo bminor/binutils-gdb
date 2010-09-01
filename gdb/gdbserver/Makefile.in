@@ -235,7 +235,7 @@ clean:
 	rm -f arm-with-iwmmxt.c
 	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
 	rm -f mips-linux.c mips64-linux.c
-	rm -f powerpc-32l.c powerpc-64l.c powerpc-e500l.c
+	rm -f powerpc-32.c powerpc-32l.c powerpc-64l.c powerpc-e500l.c
 	rm -f powerpc-altivec32l.c powerpc-cell32l.c powerpc-vsx32l.c
 	rm -f powerpc-altivec64l.c powerpc-cell64l.c powerpc-vsx64l.c
 	rm -f powerpc-isa205-32l.c powerpc-isa205-64l.c
@@ -450,6 +450,9 @@ mips-linux.c : $(srcdir)/../regformats/mips-linux.dat $(regdat_sh)
 mips64-linux.o : mips64-linux.c $(regdef_h)
 mips64-linux.c : $(srcdir)/../regformats/mips64-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips64-linux.dat mips64-linux.c
+powerpc-32.o : powerpc-32.c $(regdef_h)
+powerpc-32.c : $(srcdir)/../regformats/rs6000/powerpc-32.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32.dat powerpc-32.c
 powerpc-32l.o : powerpc-32l.c $(regdef_h)
 powerpc-32l.c : $(srcdir)/../regformats/rs6000/powerpc-32l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32l.dat powerpc-32l.c
