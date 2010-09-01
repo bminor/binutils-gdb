@@ -174,7 +174,7 @@ do_attach (pid_t pid)
       close (nto_inferior.ctl_fd);
       init_nto_inferior (&nto_inferior);
     }
-  snprintf (nto_inferior.nto_procfs_path, PATH_MAX - 1, "/proc/%d/as", pid);
+  xsnprintf (nto_inferior.nto_procfs_path, PATH_MAX - 1, "/proc/%d/as", pid);
   nto_inferior.ctl_fd = open (nto_inferior.nto_procfs_path, O_RDWR);
   if (nto_inferior.ctl_fd == -1)
     {

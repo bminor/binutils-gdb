@@ -1,5 +1,12 @@
 2010-09-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* utils.c (xsnprintf): Make non-static.
+	* server.h: Add xsnprintf declaration.
+	* linux-low.c, nto-low.c, target.c, thread-db.c, tracepoint.c:
+	replace calls to snprintf by calls to xsnprintf throughout.
+
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Add configure check for alloca.
 	* configure, config.in: Regenerate.
 	* server.h: Include alloca.h if it exists.

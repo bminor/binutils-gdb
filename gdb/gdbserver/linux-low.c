@@ -4310,7 +4310,7 @@ linux_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
   int fd, n;
   int pid = lwpid_of (get_thread_lwp (current_inferior));
 
-  snprintf (filename, sizeof filename, "/proc/%d/auxv", pid);
+  xsnprintf (filename, sizeof filename, "/proc/%d/auxv", pid);
 
   fd = open (filename, O_RDONLY);
   if (fd < 0)

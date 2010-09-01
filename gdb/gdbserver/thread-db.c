@@ -150,7 +150,7 @@ thread_db_err_str (td_err_e err)
       return "version mismatch between libthread_db and libpthread";
 #endif
     default:
-      snprintf (buf, sizeof (buf), "unknown thread_db error '%d'", err);
+      xsnprintf (buf, sizeof (buf), "unknown thread_db error '%d'", err);
       return buf;
     }
 }
@@ -176,7 +176,7 @@ thread_db_state_str (td_thr_state_e state)
     case TD_THR_STOPPED_ASLEEP:
       return "stopped by debugger AND blocked";
     default:
-      snprintf (buf, sizeof (buf), "unknown thread_db state %d", state);
+      xsnprintf (buf, sizeof (buf), "unknown thread_db state %d", state);
       return buf;
     }
 }

@@ -244,7 +244,7 @@ get_cell (void)
 /* Stdarg wrapper around vsnprintf.
    SIZE is the size of the buffer pointed to by STR.  */
 
-static int
+int
 xsnprintf (char *str, size_t size, const char *format, ...)
 {
   va_list args;
