@@ -357,6 +357,15 @@ signals.o: ../common/signals.c $(server_h) $(signals_def)
 memmem.o: ../gnulib/memmem.c
 	$(CC) -o memmem.o -c $(CPPFLAGS) $(INTERNAL_WARN_CFLAGS) $<
 
+# We build vasprintf with -DHAVE_CONFIG_H because we want that unit to
+# include our config.h file.  Otherwise, some system headers do not get
+# included, and the compiler emits a warning about implicitly defined
+# functions (missing declaration).
+vasprintf.o: $(srcdir)/../../libiberty/vasprintf.c
+	$(CC) -o vasprintf.o -c $(CPPFLAGS) $(INTERNAL_CFLAGS) -DHAVE_CONFIG_H $<
+vsnprintf.o: $(srcdir)/../../libiberty/vsnprintf.c
+	$(CC) -o vsnprintf.o -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
+
 i386_low_h = $(srcdir)/i386-low.h
 
 i386-low.o: i386-low.c $(i386_low_h) $(server_h) $(target_h)

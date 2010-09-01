@@ -1,5 +1,12 @@
 2010-09-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* Makefile.in (vasprintf.o, vsnprintf.o): New rules.
+	* configure.ac: Add check for vasprintf and vsnprintf.
+	* configure, config.in: Regenerate.
+	* server.h (vasprintf, vsnprintf): Add conditional declarations.
+
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbreplay.c: Move include of alloca.h up, next to include of
 	malloc.h.
 	* server.h: Add include of malloc.h.

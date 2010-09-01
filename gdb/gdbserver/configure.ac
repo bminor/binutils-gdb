@@ -44,7 +44,7 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h sys/wait.h)
 AC_CHECK_FUNCS(pread pwrite pread64)
-AC_REPLACE_FUNCS(memmem)
+AC_REPLACE_FUNCS(memmem vasprintf vsnprintf)
 
 # Check for UST
 ustlibs=""
@@ -161,7 +161,7 @@ AC_TRY_LINK([
   [AC_MSG_RESULT(no)])
 fi
 
-AC_CHECK_DECLS([strerror, perror, memmem])
+AC_CHECK_DECLS([strerror, perror, memmem, vasprintf, vsnprintf])
 
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>

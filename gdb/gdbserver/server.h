@@ -63,6 +63,13 @@ extern void perror (const char *);
 extern void *memmem (const void *, size_t , const void *, size_t);
 #endif
 
+#if !HAVE_DECL_VASPRINTF
+extern int vasprintf(char **strp, const char *fmt, va_list ap);
+#endif
+#if !HAVE_DECL_VSNPRINTF
+int vsnprintf(char *str, size_t size, const char *format, va_list ap);
+#endif
+
 #ifndef ATTR_NORETURN
 #if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
 #define ATTR_NORETURN __attribute__ ((noreturn))

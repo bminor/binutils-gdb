@@ -30,6 +30,14 @@
    don't. */
 #undef HAVE_DECL_STRERROR
 
+/* Define to 1 if you have the declaration of `vasprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_VASPRINTF
+
+/* Define to 1 if you have the declaration of `vsnprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_VSNPRINTF
+
 /* Define to 1 if you have the `dladdr' function. */
 #undef HAVE_DLADDR
 
@@ -171,6 +179,12 @@
 
 /* Define if UST is available */
 #undef HAVE_UST
+
+/* Define to 1 if you have the `vasprintf' function. */
+#undef HAVE_VASPRINTF
+
+/* Define to 1 if you have the `vsnprintf' function. */
+#undef HAVE_VSNPRINTF
 
 /* Checking if errno must be defined */
 #undef MUST_DEFINE_ERRNO
