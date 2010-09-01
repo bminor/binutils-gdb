@@ -303,6 +303,8 @@ server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 
 linux_low_h = $(srcdir)/linux-low.h
 
+lynx_low_h = $(srcdir)/lynx-low.h $(srcdir)/server.h
+
 nto_low_h = $(srcdir)/nto-low.h
 
 UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
@@ -390,6 +392,8 @@ linux-x86-low.o: linux-x86-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h) $(i386_low_h)
 linux-xtensa-low.o: linux-xtensa-low.c xtensa-xtregs.c $(linux_low_h) $(server_h)
 
+lynx-low.o: lynx-low.c $(server_h) $(target_h) $(lynx_low_h)
+lynx-ppc-low.o: lynx-ppc-low.c $(server_h) $(lynx_low_h)
 nto-low.o: nto-low.c $(server_h) $(nto_low_h)
 nto-x86-low.o: nto-x86-low.c $(server_h) $(nto_low_h) $(regdef_h) $(regcache_h)
 

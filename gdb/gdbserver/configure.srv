@@ -200,6 +200,10 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
+  powerpc-*-lynxos*)	srv_regobj="powerpc-32.o"
+			srv_tgtobj="lynx-low.o lynx-ppc-low.o"
+			srv_lynxos=yes
+			;;
   s390*-*-linux*)	srv_regobj="s390-linux32.o"
 			srv_regobj="${srv_regobj} s390-linux64.o"
 			srv_regobj="${srv_regobj} s390x-linux64.o"

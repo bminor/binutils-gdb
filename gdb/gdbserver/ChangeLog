@@ -1,5 +1,15 @@
 2010-09-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbserver/lynx-low.c, gdbserver/lynx-low.h,
+	gdbserver/lynx-ppc-low.c: New files.
+	* Makefile.in (lynx_low_h): New variable.
+	(lynx-low.o, lynx-ppc-low.o): New rules.
+	* configure.ac: On LynxOS, link with -lnetinet.
+	* configure.srv: Add handling of powerpc-*-lynxos* targets.
+	* configure: regenerate.
+
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* Makefile.in (vasprintf.o, vsnprintf.o): New rules.
 	* configure.ac: Add check for vasprintf and vsnprintf.
 	* configure, config.in: Regenerate.
