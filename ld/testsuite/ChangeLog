@@ -1,3 +1,11 @@
+2010-08-31  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scripts/section-match.exp: New file.  Runs ths
+	section-match-1 test.
+	* ld-scripts/section-match-1.d: New file.
+	* ld-scripts/section-match-1.s: New file.
+	* ld-scripts/section-match-1.t: New file.
+
 2010-08-25  Julian Brown  <julian@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armelftests): Add cortex-a8-fix-blx-bcond.s.
