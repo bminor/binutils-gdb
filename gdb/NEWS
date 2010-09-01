@@ -62,6 +62,10 @@
   libthread_db library with the "set libthread-db-search-path"
   command.  See the user manual for more details on this command.
 
+* New features in the GDB remote stub, GDBserver
+
+  ** GDBserver is now supported on PowerPC LynxOS 4.x.
+
 *** Changes in GDB 7.2
 
 * Shared library support for remote targets by default

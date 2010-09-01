@@ -1,3 +1,7 @@
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Add entry announcing GDBserver support on powerpc-lynxos.
+
 2010-09-01  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_list_target_features): Add `reverse'
