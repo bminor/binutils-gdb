@@ -4487,7 +4487,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	    {
 	      (*_bfd_error_handler)
 		(_("%B: warning: illegal symbol index %ld in line numbers"),
-		 abfd, dst.l_addr.l_symndx);
+		 abfd, (long) symndx);
 	      symndx = 0;
 	      warned = TRUE;
 	    }
@@ -5123,7 +5123,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 	    {
 	      (*_bfd_error_handler)
 		(_("%B: warning: illegal symbol index %ld in relocs"),
-		 abfd, dst.r_symndx);
+		 abfd, (long) dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
 	    }

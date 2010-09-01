@@ -1,3 +1,8 @@
+2010-09-01  Tristan Gingold  <gingold@adacore.com>
+
+	* coffcode.h (coff_slurp_line_table): Add a cast.
+	(coff_slurp_reloc_table): Ditto.
+
 2010-08-30  Gunther Nikl  <gnikl@users.sourceforge.net>
 
 	* cisco-core.c (cisco_core_file_pid): Define.
