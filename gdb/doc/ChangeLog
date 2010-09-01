@@ -1,3 +1,8 @@
+2010-09-01  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document new
+	feature `reverse' output by -list-target-features.
+
 2010-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.texinfo (i386 Features): Remove an extra "@item".

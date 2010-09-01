@@ -29030,6 +29030,10 @@ Indicates that the target is capable of asynchronous command
 execution, which means that @value{GDBN} will accept further commands
 while the target is running.
 
+@item reverse
+Indicates that the target is capable of reverse execution.
+@xref{Reverse Execution}, for more information.
+
 @end table
 
 @subheading The @code{-list-thread-groups} Command

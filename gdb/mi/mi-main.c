@@ -1700,6 +1700,8 @@ mi_cmd_list_target_features (char *command, char **argv, int argc)
       cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
       if (target_can_async_p ())
 	ui_out_field_string (uiout, NULL, "async");
+      if (target_can_execute_reverse)
+	ui_out_field_string (uiout, NULL, "reverse");
       
       do_cleanups (cleanup);
       return;
