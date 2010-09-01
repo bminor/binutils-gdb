@@ -1,5 +1,9 @@
 2010-09-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* Makefile.in (memmem.o): Build with -Wno-error.
+
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* utils.c (xsnprintf): Make non-static.
 	* server.h: Add xsnprintf declaration.
 	* linux-low.c, nto-low.c, target.c, thread-db.c, tracepoint.c:

@@ -94,8 +94,10 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
 CFLAGS = @CFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS =  $(WARN_CFLAGS) $(WERROR_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
+INTERNAL_CFLAGS_BASE =  ${CFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS}
+INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
+INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -347,8 +349,13 @@ gdbreplay.o: gdbreplay.c config.h
 signals.o: ../common/signals.c $(server_h) $(signals_def)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
+# We build memmem.c without -Werror because this file is not under
+# our control.  On LynxOS, the compiler generates some warnings
+# because str-two-way.h uses a constant (MAX_SIZE) whose definition
+# makes it ambiguous whether it is signed or unsigned ("warning: this
+# decimal constant is unsigned only in ISO C90").
 memmem.o: ../gnulib/memmem.c
-	$(CC) -o memmem.o -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
+	$(CC) -o memmem.o -c $(CPPFLAGS) $(INTERNAL_WARN_CFLAGS) $<
 
 i386_low_h = $(srcdir)/i386-low.h
 
