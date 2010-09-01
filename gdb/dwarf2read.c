@@ -2198,7 +2198,7 @@ static struct symtab *
 dw2_lookup_symbol (struct objfile *objfile, int block_index,
 		   const char *name, domain_enum domain)
 {
-  /* We do all the work in the pre_expand_symtabs_matching hook
+  /* We do all the work in the expand_one_symtab_matching hook
      instead.  */
   return NULL;
 }
@@ -2229,12 +2229,46 @@ dw2_do_expand_symtabs_matching (struct objfile *objfile, const char *name)
     }
 }
 
-static void
-dw2_pre_expand_symtabs_matching (struct objfile *objfile,
-				 int kind, const char *name,
-				 domain_enum domain)
+static struct symbol *
+dw2_expand_one_symtab_matching (struct objfile *objfile,
+				int kind, const char *name,
+				domain_enum domain,
+				struct symbol *(*matcher) (struct symtab *,
+							   int,
+							   const char *,
+							   domain_enum,
+							   void *),
+				void *data)
 {
-  dw2_do_expand_symtabs_matching (objfile, name);
+  dw2_setup (objfile);
+
+  if (dwarf2_per_objfile->index_table)
+    {
+      offset_type *vec;
+
+      if (find_slot_in_mapped_hash (dwarf2_per_objfile->index_table,
+				    name, &vec))
+	{
+	  offset_type i, len = MAYBE_SWAP (*vec);
+	  for (i = 0; i < len; ++i)
+	    {
+	      offset_type cu_index = MAYBE_SWAP (vec[i + 1]);
+	      struct dwarf2_per_cu_data *cu = dw2_get_cu (cu_index);
+	      struct symtab *symtab;
+	      struct symbol *sym;
+
+	      if (cu->v.quick->symtab)
+		continue;
+
+	      symtab = dw2_instantiate_symtab (objfile, cu);
+	      sym = matcher (symtab, kind, name, domain, data);
+	      if (sym)
+		return sym;
+	    }
+	}
+    }
+
+  return NULL;
 }
 
 static void
@@ -2538,7 +2572,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_forget_cached_source_info,
   dw2_lookup_symtab,
   dw2_lookup_symbol,
-  dw2_pre_expand_symtabs_matching,
+  dw2_expand_one_symtab_matching,
   dw2_print_stats,
   dw2_dump,
   dw2_relocate,

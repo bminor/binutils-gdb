@@ -1,3 +1,27 @@
+2010-09-01  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (lookup_type_symbol): Declare.
+	* symtab.c (lookup_symbol_in_language_full): Rename from
+	lookup_symbol_in_language.  Add 'for_type' argument.
+	(lookup_symbol_in_language): New function.
+	(lookup_type_symbol): Likewise.
+	(lookup_symbol_aux): Add 'for_type' argument.
+	(match_symbol_aux): New function.
+	(lookup_symbol_aux_symtabs): Use expand_one_symtab_matching.
+	(match_transparent_type): New function.
+	(basic_lookup_transparent_type): Use expand_one_symtab_matching.
+	* symfile.h (struct quick_symbol_functions)
+	<pre_expand_symtabs_matching>: Remove.
+	<expand_one_symtab_matching>: New field.
+	* psymtab.c (expand_one_symtab_matching_psymtabs): New function.
+	(pre_expand_symtabs_matching_psymtabs): Remove.
+	(psym_functions): Update.
+	* gdbtypes.c (lookup_typename): Use lookup_type_symbol.
+	* dwarf2read.c (dw2_lookup_symbol): Update comment.
+	(dw2_pre_expand_symtabs_matching): Remove.
+	(dw2_expand_one_symtab_matching): New function.
+	(dwarf2_gdb_index_functions): Update.
+
 2010-09-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry announcing GDBserver support on powerpc-lynxos.

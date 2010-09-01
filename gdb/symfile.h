@@ -171,14 +171,25 @@ struct quick_symbol_functions
 				   int kind, const char *name,
 				   domain_enum domain);
 
-  /* This is called to expand symbol tables before looking up a
-     symbol.  A backend can choose to implement this and then have its
-     `lookup_symbol' hook always return NULL, or the reverse.  (It
-     doesn't make sense to implement both.)  The arguments are as for
-     `lookup_symbol'.  */
-  void (*pre_expand_symtabs_matching) (struct objfile *objfile,
-				       int kind, const char *name,
-				       domain_enum domain);
+  /* Expand each symbol table in OBJFILE that may have items matching
+     KIND, NAME, and DOMAIN -- these arguments are as for
+     `lookup_symbol'.  For each such symbol table, call MATCHER with
+     the symbol table and DATA arguments.  If MATCHER returns NULL,
+     keep going.  Otherwise, return the result of MATCHER.  If MATCHER
+     never returns non-NULL, return NULL.  A backend can choose to
+     implement this and then have its `lookup_symbol' hook always
+     return NULL, or the reverse.  (It doesn't make sense to implement
+     both.)  */
+  struct symbol *(*expand_one_symtab_matching)
+    (struct objfile *objfile,
+     int kind, const char *name,
+     domain_enum domain,
+     struct symbol *(*matcher) (struct symtab *symtab,
+				int kind,
+				const char *name,
+				domain_enum domain,
+				void *data),
+     void *data);
 
   /* Print statistics about any indices loaded for OBJFILE.  The
      statistics should be printed to gdb_stdout.  This is used for
