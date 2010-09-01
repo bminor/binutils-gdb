@@ -1,3 +1,10 @@
+2010-09-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add configure check for alloca.
+	* configure, config.in: Regenerate.
+	* server.h: Include alloca.h if it exists.
+	* gdbreplay.c: Include alloca.h if it exists.
+
 2010-08-31  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* symfile.c (reread_symbols): Use psymbol_bcache_free, and

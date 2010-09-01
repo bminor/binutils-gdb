@@ -57,9 +57,11 @@
 #if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-
 #if USE_WIN32API
 #include <winsock2.h>
+#endif
+#if HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
 
 #ifndef HAVE_SOCKLEN_T

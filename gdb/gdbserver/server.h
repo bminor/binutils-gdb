@@ -38,6 +38,10 @@
 #include <string.h>
 #endif
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
 #if !HAVE_DECL_STRERROR
 #ifndef strerror
 extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */

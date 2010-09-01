@@ -36,6 +36,7 @@ AC_ARG_PROGRAM
 
 AC_HEADER_STDC
 
+AC_FUNC_ALLOCA
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h thread_db.h linux/elf.h dnl
 		 stdlib.h unistd.h dnl
