@@ -6,7 +6,7 @@
 
 2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
-	* cli-logging.c: Include gdb_assert.h.
+	* cli/cli-logging.c: Include gdb_assert.h.
 	(set_logging_overwrite): New function.
 	(logging_redirect): New comment.
 	(logging_no_redirect_file, set_logging_redirect)
@@ -600,7 +600,7 @@
 
 2010-08-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
-	* cli-logging.c (logging_overwrite, logging_redirect): Make them
+	* cli/cli-logging.c (logging_overwrite, logging_redirect): Make them
 	static.
 
 2010-08-13  Ken Werner  <ken.werner@de.ibm.com>
