@@ -1,5 +1,23 @@
 2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* cli-logging.c: Include gdb_assert.h.
+	(set_logging_overwrite): New function.
+	(logging_redirect): New comment.
+	(logging_no_redirect_file, set_logging_redirect)
+	(pop_output_files) <logging_no_redirect_file>: New.
+	(handle_redirections) <!logging_redirect>: New variable
+	no_redirect_file.  Remove file autoclose for tee_file_new.  No longer
+	discard cleanup for the close of former OUTPUT.  Set
+	LOGGING_NO_REDIRECT_FILE.
+	(handle_redirections) <logging_redirect>: gdb_assert
+	LOGGING_NO_REDIRECT_FILE.
+	(show_logging_command) <logging_redirect handling>: Adjust messages
+	for SAVED_FILENAME not NULL.
+	(_initialize_cli_logging): Install set_logging_overwrite and
+	set_logging_redirect.
+
+2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* iq2000-tdep.c (iq2000_scan_prologue): Initialize SAL.END.
 
 2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
