@@ -2349,10 +2349,24 @@ dump_dwarf (bfd *abfd)
   else
     abort ();
 
-  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+  switch (bfd_get_arch (abfd))
     {
-      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-      init_dwarf_regnames (bed->elf_machine_code);
+    case bfd_arch_i386:
+      switch (bfd_get_mach (abfd))
+	{
+	case bfd_mach_x86_64:
+	case bfd_mach_x86_64_intel_syntax:
+	  init_dwarf_regnames_x86_64 ();
+	  break;
+
+	default:
+	  init_dwarf_regnames_i386 ();
+	  break;
+	}
+      break;
+
+    default:
+      break;
     }
 
   bfd_map_over_sections (abfd, dump_dwarf_section, NULL);

@@ -1,4 +1,12 @@
-2010-08-23  Richard Henderson  <rth@redhat.com>
+2010-09-02  Richard Henderson  <rth@redhat.com>
+
+	* dwarf.c (init_dwarf_regnames_i386, init_dwarf_regnames_x86_64): New.
+	(init_dwarf_regnames): Use them.
+	* dwarf.h: Declare them.
+	* objdump.c (dump_dwarf): Use bfd_get_arch + bfd_get_mach to set up
+	the regnames, rather than using elf_machine_code.
+
+2010-09-02  Richard Henderson  <rth@redhat.com>
 
 	* objdump.c (dump_dwarf): Use bfd_arch_bits_per_address.
 

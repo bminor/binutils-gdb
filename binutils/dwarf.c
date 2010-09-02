@@ -3961,6 +3961,13 @@ static const char *const dwarf_regnames_i386[] =
   "tr", "ldtr"
 };
 
+void
+init_dwarf_regnames_i386 (void)
+{
+  dwarf_regnames = dwarf_regnames_i386;
+  dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_i386);
+}
+
 static const char *const dwarf_regnames_x86_64[] =
 {
   "rax", "rdx", "rcx", "rbx",
@@ -3984,20 +3991,25 @@ static const char *const dwarf_regnames_x86_64[] =
 };
 
 void
+init_dwarf_regnames_x86_64 (void)
+{
+  dwarf_regnames = dwarf_regnames_x86_64;
+  dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_x86_64);
+}
+
+void
 init_dwarf_regnames (unsigned int e_machine)
 {
   switch (e_machine)
     {
     case EM_386:
     case EM_486:
-      dwarf_regnames = dwarf_regnames_i386;
-      dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_i386);
+      init_dwarf_regnames_i386 ();
       break;
 
     case EM_X86_64:
     case EM_L1OM:
-      dwarf_regnames = dwarf_regnames_x86_64;
-      dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_x86_64);
+      init_dwarf_regnames_x86_64 ();
       break;
 
     default:
