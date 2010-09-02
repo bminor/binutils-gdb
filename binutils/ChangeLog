@@ -1,3 +1,7 @@
+2010-08-23  Richard Henderson  <rth@redhat.com>
+
+	* objdump.c (dump_dwarf): Use bfd_arch_bits_per_address.
+
 2010-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfedit.c (input_elf_osabi): New.

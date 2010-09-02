@@ -2340,9 +2340,7 @@ dump_dwarf (bfd *abfd)
 {
   is_relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
 
-  /* FIXME: bfd_get_arch_size may return -1.  We assume that 64bit
-     targets will return 64.  */
-  eh_addr_size = bfd_get_arch_size (abfd) == 64 ? 8 : 4;
+  eh_addr_size = bfd_arch_bits_per_address (abfd) / 8;
 
   if (bfd_big_endian (abfd))
     byte_get = byte_get_big_endian;
