@@ -1,3 +1,8 @@
+2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+            Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf/dw2-filename.S, gdb.dwarf/dw2-filename.exp: New files.
+
 2010-08-31  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dw4-sig-types.exp: Use .x for executable name.
