@@ -1,5 +1,6 @@
-#readelf: -wf
+#objdump: -Wf
 #name: CFI common 1
+#...
 Contents of the .eh_frame section:
 
 00000000 00000010 00000000 CIE

@@ -1,3 +1,14 @@
+2010-09-02  Richard Henderson  <rth@redhat.com>
+
+	* gas/cfi/cfi-common-1.d: Use objdump instead of readelf to dump.
+	* gas/cfi/cfi-common-2.d, gas/cfi/cfi-common-3.d,
+	gas/cfi/cfi-common-4.d, gas/cfi/cfi-common-6.d,
+	gas/cfi/cfi-common-7.d, gas/cfi/cfi-x86_64.d: Likewise.
+	* gas/cfi/cfi-x86_64.s: Remove .type directives.
+	* gas/cfi/cfi.exp: Run for pecoff objects too.
+
+	* gas/cfi/reloc-pe-i386.d, gas/cfi/reloc-pe-i386.s: New test.
+
 2010-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/11960

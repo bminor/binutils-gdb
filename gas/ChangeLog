@@ -1,3 +1,8 @@
+2010-09-02  Richard Henderson  <rth@redhat.com>
+
+	* dw2gencfi.c (TC_DWARF2_EMIT_OFFSET): Provide default.
+	(output_fde): Use it.  Make sure to fully init exp before using it.
+
 2010-08-31  Kai Tietz  <kai.tietz@onevision.com>
 
 	* config/obj-coff-seh.c (obj_coff_seh_save): Correct comparison.
