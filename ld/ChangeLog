@@ -1,3 +1,7 @@
+2010-09-02  Richard Henderson  <rth@redhat.com>
+
+	* configure.tgt (x86_64-*-mingw*): Add 32-bit pe emulations too.
+
 2010-08-31  Nick Clifton  <nickc@redhat.com>
 
 	* ldlex.l (WILDCHAR): Add the caret and exclamation point

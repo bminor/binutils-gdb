@@ -1,3 +1,7 @@
+2010-09-02  Richard Henderson  <rth@redhat.com>
+
+	* config.bfd (x86_64-*-mingw*): Select 32-bit pei vectors too.
+
 2010-09-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* netbsd-core.c (netbsd_core_core_file_pid): Renamed to ...
