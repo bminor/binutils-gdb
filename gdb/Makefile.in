@@ -155,7 +155,8 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
 GDB_WARN_CFLAGS = $(WARN_CFLAGS)
 GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
-GDB_WARN_CFLAGS_NO_FORMAT = `echo " $(GDB_WARN_CFLAGS) " | sed "s/ -Wformat-nonliteral / /g"`
+GDB_WARN_CFLAGS_NO_FORMAT = `echo " $(GDB_WARN_CFLAGS) " \
+		   | sed "s/ -Wformat-nonliteral / -Wno-format-nonliteral /g"`
 
 RDYNAMIC = @RDYNAMIC@
 
@@ -1531,14 +1532,15 @@ main.o: $(srcdir)/main.c
 # definitly will not work.  "monitor.c" needs to be rewritten so that
 # it doesn't use format strings and instead uses callbacks.
 monitor.o: $(srcdir)/monitor.c
-	$(COMPILE.pre) $(INTERNAL_WARN_CFLAGS) $(COMPILE.post) $(srcdir)/monitor.c
+	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
+		$(COMPILE.post) $(srcdir)/monitor.c
 	$(POSTCOMPILE)
 
 # Do not try to build "printcmd.c" with -Wformat-nonliteral.  It manually
 # checks format strings.
 printcmd.o: $(srcdir)/printcmd.c
-	$(COMPILE.pre) $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS_NO_FORMAT) \
-		$(GDB_WERROR_CFLAGS) $(COMPILE.post) $(srcdir)/printcmd.c
+	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
+		$(COMPILE.post) $(srcdir)/printcmd.c
 	$(POSTCOMPILE)
 
 # Message files.  Based on code in gcc/Makefile.in.
