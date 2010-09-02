@@ -1,3 +1,21 @@
+2010-09-02  Joel Brobecker  <brobecker@adacore.com>
+
+	Back out the following change:
+	| 2010-06-29  Hui Zhu  <teawater@gmail.com>
+	| * record.c (set_record_pic_cmdlist,
+	| show_record_pic_cmdlist): New variables.
+	| (set_record_pic_command,
+	| show_record_pic_command): New functions.
+	| (record_pic_function, record_pic_line, record_pic_enum,
+	| set_record_pic_type, record_pic_hide_nofunction,
+	| record_pic_hide_nosource, record_pic_hide_same): New variables.
+	| (record_pic_fputs): New function.
+	| (function_list, node_list, edge_list): New struct.
+	| (function_list, node_list, edge_list): New variables.
+	| (record_pic_cleanups, record_pic_node,
+	| record_pic_edge, cmd_record_pic): New functions.
+	| (_initialize_record): Add new commands for record pic.
+
 2010-09-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config.in, configure: Regenerated.
