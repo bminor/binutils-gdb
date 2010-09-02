@@ -224,6 +224,8 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
       loop_end = scan_end;
       if (fi)
 	sal = find_last_line_symbol (scan_start, scan_end, 0);
+      else
+	sal.end = 0;	/* Avoid GCC false warning.  */
     }
 
   /* Saved registers:

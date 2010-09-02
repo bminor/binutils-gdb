@@ -1,5 +1,9 @@
 2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* iq2000-tdep.c (iq2000_scan_prologue): Initialize SAL.END.
+
+2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* Makefile.in (GDB_WARN_CFLAGS_NO_FORMAT): Convert it to the no- form.
 	(monitor.o): Replace $(INTERNAL_WARN_CFLAGS) by $(INTERNAL_CFLAGS) and
 	add $(GDB_WARN_CFLAGS_NO_FORMAT).
