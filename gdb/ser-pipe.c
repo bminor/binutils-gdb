@@ -31,6 +31,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include "gdb_string.h"
+#include "gdb_wait.h"
 
 #include <signal.h>
 
@@ -162,11 +163,14 @@ pipe_close (struct serial *scb)
 
   if (state != NULL)
     {
+      int status;
       kill (state->pid, SIGTERM);
-      /* Might be useful to check that the child does die,
-	 and while we're waiting for it to die print any remaining
-	 stderr output.  */
-
+#ifdef HAVE_WAITPID
+      /* Assume the program will exit after SIGTERM.  Might be
+	 useful to print any remaining stderr output from
+	 scb->error_fd while waiting.  */
+      waitpid (state->pid, &status, 0);
+#endif
       if (scb->error_fd != -1)
 	close (scb->error_fd);
       scb->error_fd = -1;
