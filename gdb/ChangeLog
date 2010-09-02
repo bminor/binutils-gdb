@@ -1,3 +1,8 @@
+2010-09-02  Yao Qi  <yao@codesourcery.com>
+
+	* linux-nat.c (status_to_str): Use WTERMSIG to extract the signal
+	number from a WIFSIGNALED status.
+
 2010-09-01  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.h (lookup_type_symbol): Declare.
