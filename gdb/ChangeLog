@@ -1,5 +1,9 @@
 2010-09-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Update GDB version number to 7.2.
+
+2010-09-02  Joel Brobecker  <brobecker@adacore.com>
+
 	Back out the following change:
 	| 2010-06-29  Hui Zhu  <teawater@gmail.com>
 	| * record.c (set_record_pic_cmdlist,
