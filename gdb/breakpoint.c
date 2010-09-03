@@ -11487,7 +11487,7 @@ save_breakpoints (char *filename, int from_tty,
 	fprintf_unfiltered (fp, "  commands\n");
 	
 	ui_out_redirect (uiout, fp);
-	TRY_CATCH (ex, RETURN_MASK_ERROR)
+	TRY_CATCH (ex, RETURN_MASK_ALL)
 	  {
 	    print_command_lines (uiout, tp->commands->commands, 2);
 	  }

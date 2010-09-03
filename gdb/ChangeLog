@@ -1,3 +1,27 @@
+2010-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (save_breakpoints): Use RETURN_MASK_ALL.
+	* cli-out.c: Include vec.h.
+	(cli_field_fmt, cli_spaces, cli_text, cli_message, cli_flush): New
+	variable stream, initialize it, use it.
+	(cli_redirect): New function comment.  Replace the stream and
+	original_stream fields by the new streams field.  Remove the
+	original_stream != NULL conditional, assert error on NULL instead.
+	(out_field_fmt, field_separator): New variable stream, initialize it, use it.
+	(cli_out_data_ctor): Assert non-NULL stream.  Replace the stream and
+	original_stream fields by the new streams field.
+	(cli_out_set_stream): Replace the stream field by the new streams
+	field.
+	* cli-out.h: Include vec.h.
+	(ui_filep): New typedef, call DEF_VEC_P for it.
+	(struct cli_ui_out_data): Replace the stream and original_stream
+	fields by the new streams field.
+	* cli/cli-logging.c (set_logging_redirect): Call ui_out_redirect with
+	NULL first.  Extend the comment.
+	(handle_redirections): Call ui_out_redirect with output.
+	* python/py-breakpoint.c (bppy_get_commands): Move ui_out_redirect
+	calls outside of the TRY_CATCH block.
+
 2010-09-03  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.2 released.

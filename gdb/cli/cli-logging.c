@@ -118,8 +118,13 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
   gdb_stdtarg = output;
   logging_no_redirect_file = new_logging_no_redirect_file;
 
-  /* It should not happen, the redirection has been already setup.  */
-  if (ui_out_redirect (uiout, output) < 0)
+  /* There is a former output pushed on the ui_out_redirect stack.  We want to
+     replace it by OUTPUT so we must pop the former value first.  We should
+     either do both the pop and push or to do neither of it.  At least do not
+     try to push OUTPUT if the pop already failed.  */
+
+  if (ui_out_redirect (uiout, NULL) < 0
+      || ui_out_redirect (uiout, output) < 0)
     warning (_("Current output protocol does not support redirection"));
 
   if (logging_redirect != 0)
@@ -212,7 +217,7 @@ handle_redirections (int from_tty)
   gdb_stdlog = output;
   gdb_stdtarg = output;
 
-  if (ui_out_redirect (uiout, gdb_stdout) < 0)
+  if (ui_out_redirect (uiout, output) < 0)
     warning (_("Current output protocol does not support redirection"));
 }
 
