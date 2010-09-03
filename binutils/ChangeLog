@@ -1,3 +1,9 @@
+2010-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (regname): New declaration.
+	(decode_location_expression): Print for registers also regname output.
+
 2010-09-02  Richard Henderson  <rth@redhat.com>
 
 	* dwarf.c (init_dwarf_regnames_i386, init_dwarf_regnames_x86_64): New.

@@ -23,7 +23,7 @@ Contents of the .debug_info section:
     <3c>   DW_AT_type        : <0x4a>	
     <40>   DW_AT_low_pc      : 0x.	
     <44>   DW_AT_high_pc     : 0x.	
-    <48>   DW_AT_frame_base  : 1 byte block: 55 	\(DW_OP_reg5\)
+    <48>   DW_AT_frame_base  : 1 byte block: 55 	\(DW_OP_reg5 \([^()]*\)\)
  <1><4a>: Abbrev Number: 3 \(DW_TAG_base_type\)
     <4b>   DW_AT_name        : int	
     <4f>   DW_AT_byte_size   : 4	

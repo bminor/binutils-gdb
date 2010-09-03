@@ -27,6 +27,8 @@
 #include "dwarf2.h"
 #include "dwarf.h"
 
+static const char *regname (unsigned int regno, int row);
+
 static int have_frame_base;
 static int need_base_address;
 
@@ -936,7 +938,8 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_reg29:
 	case DW_OP_reg30:
 	case DW_OP_reg31:
-	  printf ("DW_OP_reg%d", op - DW_OP_reg0);
+	  printf ("DW_OP_reg%d (%s)", op - DW_OP_reg0,
+		  regname (op - DW_OP_reg0, 1));
 	  break;
 
 	case DW_OP_breg0:
@@ -971,14 +974,16 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_breg29:
 	case DW_OP_breg30:
 	case DW_OP_breg31:
-	  printf ("DW_OP_breg%d: %ld", op - DW_OP_breg0,
+	  printf ("DW_OP_breg%d (%s): %ld", op - DW_OP_breg0,
+		  regname (op - DW_OP_breg0, 1),
 		  read_leb128 (data, &bytes_read, 1));
 	  data += bytes_read;
 	  break;
 
 	case DW_OP_regx:
-	  printf ("DW_OP_regx: %lu", read_leb128 (data, &bytes_read, 0));
+	  uvalue = read_leb128 (data, &bytes_read, 0);
 	  data += bytes_read;
+	  printf ("DW_OP_regx: %lu (%s)", uvalue, regname (uvalue, 1));
 	  break;
 	case DW_OP_fbreg:
 	  need_frame_base = 1;
@@ -988,7 +993,7 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_bregx:
 	  uvalue = read_leb128 (data, &bytes_read, 0);
 	  data += bytes_read;
-	  printf ("DW_OP_bregx: %lu %ld", uvalue,
+	  printf ("DW_OP_bregx: %lu (%s) %ld", uvalue, regname (uvalue, 1),
 		  read_leb128 (data, &bytes_read, 1));
 	  data += bytes_read;
 	  break;
