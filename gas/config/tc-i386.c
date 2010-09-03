@@ -6626,8 +6626,8 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
     {
       /* Size it properly later.  */
       i.types[this_operand].bitfield.imm64 = 1;
-      /* If BFD64, sign extend val.  */
-      if (!use_rela_relocations
+      /* If not 64bit, sign extend val.  */
+      if (flag_code != CODE_64BIT
 	  && (exp->X_add_number & ~(((addressT) 2 << 31) - 1)) == 0)
 	exp->X_add_number
 	  = (exp->X_add_number ^ ((addressT) 1 << 31)) - ((addressT) 1 << 31);
