@@ -83,6 +83,16 @@ static void xdb_handle_command (char *args, int from_tty);
 
 static int prepare_to_proceed (int);
 
+static void print_exited_reason (int exitstatus);
+
+static void print_signal_exited_reason (enum target_signal siggnal);
+
+static void print_no_history_reason (void);
+
+static void print_signal_received_reason (enum target_signal siggnal);
+
+static void print_end_stepping_range_reason (void);
+
 void _initialize_infrun (void);
 
 void nullify_last_target_wait_ptid (void);
@@ -2139,22 +2149,6 @@ enum infwait_states
   infwait_nonstep_watch_state
 };
 
-/* Why did the inferior stop? Used to print the appropriate messages
-   to the interface from within handle_inferior_event(). */
-enum inferior_stop_reason
-{
-  /* Step, next, nexti, stepi finished. */
-  END_STEPPING_RANGE,
-  /* Inferior terminated by signal. */
-  SIGNAL_EXITED,
-  /* Inferior exited. */
-  EXITED,
-  /* Inferior received signal, and user asked to be notified. */
-  SIGNAL_RECEIVED,
-  /* Reverse execution -- target ran out of history info.  */
-  NO_HISTORY
-};
-
 /* The PTID we'll do a target_wait on.*/
 ptid_t waiton_ptid;
 
@@ -2195,8 +2189,6 @@ static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
-static void print_stop_reason (enum inferior_stop_reason stop_reason,
-			       int stop_info);
 
 /* Callback for iterate over threads.  If the thread is stopped, but
    the user/frontend doesn't know about that yet, go through
@@ -3157,7 +3149,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       set_current_program_space (current_inferior ()->pspace);
       handle_vfork_child_exec_or_exit (0);
       target_terminal_ours ();	/* Must do this before mourn anyway */
-      print_stop_reason (EXITED, ecs->ws.value.integer);
+      print_exited_reason (ecs->ws.value.integer);
 
       /* Record the exit code in the convenience variable $_exitcode, so
          that the user can inspect this again later.  */
@@ -3188,7 +3180,7 @@ handle_inferior_event (struct execution_control_state *ecs)
          may be needed. */
       target_mourn_inferior ();
 
-      print_stop_reason (SIGNAL_EXITED, ecs->ws.value.sig);
+      print_signal_exited_reason (ecs->ws.value.sig);
       singlestep_breakpoints_inserted_p = 0;
       cancel_single_step_breakpoints ();
       stop_stepping (ecs);
@@ -3388,7 +3380,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_NO_HISTORY:
       /* Reverse execution: target ran out of history info.  */
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
-      print_stop_reason (NO_HISTORY, 0);
+      print_no_history_reason ();
       stop_stepping (ecs);
       return;
     }
@@ -3962,7 +3954,7 @@ process_event_stop_test:
 	{
 	  printed = 1;
 	  target_terminal_ours_for_output ();
-	  print_stop_reason (SIGNAL_RECEIVED, ecs->event_thread->stop_signal);
+	  print_signal_received_reason (ecs->event_thread->stop_signal);
 	}
       /* Always stop on signals if we're either just gaining control
 	 of the program, or the user explicitly requested this thread
@@ -4106,7 +4098,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	delete_step_resume_breakpoint (ecs->event_thread);
 
 	ecs->event_thread->stop_step = 1;
-	print_stop_reason (END_STEPPING_RANGE, 0);
+	print_end_stepping_range_reason ();
 	stop_stepping (ecs);
 	return;
 
@@ -4336,7 +4328,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  && execution_direction == EXEC_REVERSE)
 	{
 	  ecs->event_thread->stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  print_end_stepping_range_reason ();
 	  stop_stepping (ecs);
 	}
       else
@@ -4446,7 +4438,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	     well.  FENN */
 	  /* And this works the same backward as frontward.  MVS */
 	  ecs->event_thread->stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  print_end_stepping_range_reason ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -4552,7 +4544,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  && step_stop_if_no_debug)
 	{
 	  ecs->event_thread->stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  print_end_stepping_range_reason ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -4676,7 +4668,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	     is set, we stop the step so that the user has a chance to
 	     switch in assembly mode.  */
 	  ecs->event_thread->stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  print_end_stepping_range_reason ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -4697,7 +4689,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepi/nexti\n");
       ecs->event_thread->stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
+      print_end_stepping_range_reason ();
       stop_stepping (ecs);
       return;
     }
@@ -4711,7 +4703,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
       ecs->event_thread->stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
+      print_end_stepping_range_reason ();
       stop_stepping (ecs);
       return;
     }
@@ -4744,7 +4736,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	    step_into_inline_frame (ecs->ptid);
 
 	  ecs->event_thread->stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  print_end_stepping_range_reason ();
 	  stop_stepping (ecs);
 	  return;
 	}
@@ -4759,7 +4751,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  else
 	    {
 	      ecs->event_thread->stop_step = 1;
-	      print_stop_reason (END_STEPPING_RANGE, 0);
+	      print_end_stepping_range_reason ();
 	      stop_stepping (ecs);
 	    }
 	  return;
@@ -4786,7 +4778,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
       else
 	{
 	  ecs->event_thread->stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  print_end_stepping_range_reason ();
 	  stop_stepping (ecs);
 	}
       return;
@@ -4803,7 +4795,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped to a different line\n");
       ecs->event_thread->stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
+      print_end_stepping_range_reason ();
       stop_stepping (ecs);
       return;
     }
@@ -4904,7 +4896,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
     {
       /* We are already there: stop now.  */
       ecs->event_thread->stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
+      print_end_stepping_range_reason ();
       stop_stepping (ecs);
       return;
     }
@@ -4950,7 +4942,7 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
     {
       /* We're there already.  Just stop stepping now.  */
       ecs->event_thread->stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
+      print_end_stepping_range_reason ();
       stop_stepping (ecs);
     }
   else
@@ -5195,116 +5187,121 @@ prepare_to_wait (struct execution_control_state *ecs)
   ecs->wait_some_more = 1;
 }
 
-/* Print why the inferior has stopped. We always print something when
-   the inferior exits, or receives a signal. The rest of the cases are
-   dealt with later on in normal_stop() and print_it_typical().  Ideally
-   there should be a call to this function from handle_inferior_event()
-   each time stop_stepping() is called.*/
+/* Several print_*_reason functions to print why the inferior has stopped.
+   We always print something when the inferior exits, or receives a signal.
+   The rest of the cases are dealt with later on in normal_stop and
+   print_it_typical.  Ideally there should be a call to one of these
+   print_*_reason functions functions from handle_inferior_event each time
+   stop_stepping is called.  */
+
+/* Print why the inferior has stopped.  
+   We are done with a step/next/si/ni command, print why the inferior has
+   stopped.  For now print nothing.  Print a message only if not in the middle
+   of doing a "step n" operation for n > 1.  */
+
 static void
-print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
+print_end_stepping_range_reason (void)
 {
-  switch (stop_reason)
+  if ((!inferior_thread ()->step_multi || !inferior_thread ()->stop_step)
+      && ui_out_is_mi_like_p (uiout))
+    ui_out_field_string (uiout, "reason",
+                         async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
+}
+
+/* The inferior was terminated by a signal, print why it stopped.  */
+
+static void
+print_signal_exited_reason (enum target_signal siggnal)
+{
+  annotate_signalled ();
+  if (ui_out_is_mi_like_p (uiout))
+    ui_out_field_string
+      (uiout, "reason", async_reason_lookup (EXEC_ASYNC_EXITED_SIGNALLED));
+  ui_out_text (uiout, "\nProgram terminated with signal ");
+  annotate_signal_name ();
+  ui_out_field_string (uiout, "signal-name",
+		       target_signal_to_name (siggnal));
+  annotate_signal_name_end ();
+  ui_out_text (uiout, ", ");
+  annotate_signal_string ();
+  ui_out_field_string (uiout, "signal-meaning",
+		       target_signal_to_string (siggnal));
+  annotate_signal_string_end ();
+  ui_out_text (uiout, ".\n");
+  ui_out_text (uiout, "The program no longer exists.\n");
+}
+
+/* The inferior program is finished, print why it stopped.  */
+
+static void
+print_exited_reason (int exitstatus)
+{
+  annotate_exited (exitstatus);
+  if (exitstatus)
     {
-    case END_STEPPING_RANGE:
-      /* We are done with a step/next/si/ni command. */
-      /* For now print nothing. */
-      /* Print a message only if not in the middle of doing a "step n"
-         operation for n > 1 */
-      if (!inferior_thread ()->step_multi
-	  || !inferior_thread ()->stop_step)
-	if (ui_out_is_mi_like_p (uiout))
-	  ui_out_field_string
-	    (uiout, "reason",
-	     async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
-      break;
-    case SIGNAL_EXITED:
-      /* The inferior was terminated by a signal. */
-      annotate_signalled ();
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string (uiout, "reason", 
+			     async_reason_lookup (EXEC_ASYNC_EXITED));
+      ui_out_text (uiout, "\nProgram exited with code ");
+      ui_out_field_fmt (uiout, "exit-code", "0%o", (unsigned int) exitstatus);
+      ui_out_text (uiout, ".\n");
+    }
+  else
+    {
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string
-	  (uiout, "reason",
-	   async_reason_lookup (EXEC_ASYNC_EXITED_SIGNALLED));
-      ui_out_text (uiout, "\nProgram terminated with signal ");
+	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_EXITED_NORMALLY));
+      ui_out_text (uiout, "\nProgram exited normally.\n");
+    }
+  /* Support the --return-child-result option.  */
+  return_child_result_value = exitstatus;
+}
+
+/* Signal received, print why the inferior has stopped.  The signal table
+   tells us to print about it. */
+
+static void
+print_signal_received_reason (enum target_signal siggnal)
+{
+  annotate_signal ();
+
+  if (siggnal == TARGET_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
+    {
+      struct thread_info *t = inferior_thread ();
+
+      ui_out_text (uiout, "\n[");
+      ui_out_field_string (uiout, "thread-name",
+			   target_pid_to_str (t->ptid));
+      ui_out_field_fmt (uiout, "thread-id", "] #%d", t->num);
+      ui_out_text (uiout, " stopped");
+    }
+  else
+    {
+      ui_out_text (uiout, "\nProgram received signal ");
       annotate_signal_name ();
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string
+	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_SIGNAL_RECEIVED));
       ui_out_field_string (uiout, "signal-name",
-			   target_signal_to_name (stop_info));
+			   target_signal_to_name (siggnal));
       annotate_signal_name_end ();
       ui_out_text (uiout, ", ");
       annotate_signal_string ();
       ui_out_field_string (uiout, "signal-meaning",
-			   target_signal_to_string (stop_info));
+			   target_signal_to_string (siggnal));
       annotate_signal_string_end ();
-      ui_out_text (uiout, ".\n");
-      ui_out_text (uiout, "The program no longer exists.\n");
-      break;
-    case EXITED:
-      /* The inferior program is finished. */
-      annotate_exited (stop_info);
-      if (stop_info)
-	{
-	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string (uiout, "reason", 
-				 async_reason_lookup (EXEC_ASYNC_EXITED));
-	  ui_out_text (uiout, "\nProgram exited with code ");
-	  ui_out_field_fmt (uiout, "exit-code", "0%o",
-			    (unsigned int) stop_info);
-	  ui_out_text (uiout, ".\n");
-	}
-      else
-	{
-	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string
-	      (uiout, "reason",
-	       async_reason_lookup (EXEC_ASYNC_EXITED_NORMALLY));
-	  ui_out_text (uiout, "\nProgram exited normally.\n");
-	}
-      /* Support the --return-child-result option.  */
-      return_child_result_value = stop_info;
-      break;
-    case SIGNAL_RECEIVED:
-      /* Signal received.  The signal table tells us to print about
-	 it. */
-      annotate_signal ();
-
-      if (stop_info == TARGET_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
-	{
-	  struct thread_info *t = inferior_thread ();
-
-	  ui_out_text (uiout, "\n[");
-	  ui_out_field_string (uiout, "thread-name",
-			       target_pid_to_str (t->ptid));
-	  ui_out_field_fmt (uiout, "thread-id", "] #%d", t->num);
-	  ui_out_text (uiout, " stopped");
-	}
-      else
-	{
-	  ui_out_text (uiout, "\nProgram received signal ");
-	  annotate_signal_name ();
-	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string
-	      (uiout, "reason", async_reason_lookup (EXEC_ASYNC_SIGNAL_RECEIVED));
-	  ui_out_field_string (uiout, "signal-name",
-			       target_signal_to_name (stop_info));
-	  annotate_signal_name_end ();
-	  ui_out_text (uiout, ", ");
-	  annotate_signal_string ();
-	  ui_out_field_string (uiout, "signal-meaning",
-			       target_signal_to_string (stop_info));
-	  annotate_signal_string_end ();
-	}
-      ui_out_text (uiout, ".\n");
-      break;
-    case NO_HISTORY:
-      /* Reverse execution: target ran out of history info.  */
-      ui_out_text (uiout, "\nNo more reverse-execution history.\n");
-      break;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("print_stop_reason: unrecognized enum value"));
-      break;
     }
+  ui_out_text (uiout, ".\n");
 }
-
+
+/* Reverse execution: target ran out of history info, print why the inferior
+   has stopped.  */
+
+static void
+print_no_history_reason (void)
+{
+  ui_out_text (uiout, "\nNo more reverse-execution history.\n");
+}
 
 /* Here to return control to GDB when the inferior stops for real.
    Print appropriate messages, remove breakpoints, give terminal our modes.

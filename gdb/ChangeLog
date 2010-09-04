@@ -1,3 +1,18 @@
+2010-09-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup - split print_stop_reason.
+	* infrun.c (enum inferior_stop_reason): Remove.
+	(print_stop_reason): Remove by splitting into ...
+	(print_exited_reason, print_signal_exited_reason)
+	(print_no_history_reason, print_signal_received_reason)
+	(print_end_stepping_range_reason): ... these new functions.  Update
+	the preceding comment.
+	(handle_inferior_event): Change the calls to print_exited_reason,
+	print_signal_exited_reason, print_no_history_reason,
+	print_signal_received_reason, print_end_stepping_range_reason.
+	(handle_step_into_function, handle_step_into_function_backward):
+	Change the calls to print_end_stepping_range_reason.
+
 2010-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (save_breakpoints): Use RETURN_MASK_ALL.
