@@ -1,3 +1,8 @@
+2010-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.c (can_use_hardware_watchpoint): Handle the first
+	value specially.
+
 2010-09-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup - split print_stop_reason.

@@ -1,3 +1,10 @@
+2010-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/watchpoint.exp: Call test_inaccessible_watchpoint
+	before disabling hardware watchpoints.
+	(test_inaccessible_watchpoint): Check that hardware watchpoints
+	are used.  Test for watchpoints on a constant address.
+
 2010-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/ui-redirect.exp: New file.

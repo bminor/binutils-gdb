@@ -662,7 +662,28 @@ proc test_inaccessible_watchpoint {} {
 	    }
 	}
 
-	gdb_test "watch *global_ptr" ".*atchpoint \[0-9\]+: \\*global_ptr"
+	# See whether a watchpoint on a normal variable is a hardware
+	# watchpoint or not.  The watchpoints on NULL should be hardware
+	# iff this one is.
+	set watchpoint_msg "Watchpoint"
+	gdb_test_multiple "watch global_ptr" "watch global_ptr" {
+	    -re "Watchpoint \[0-9\]+: global_ptr\r\n.*$gdb_prompt $" {
+		pass "watch global_ptr"
+	    }
+	    -re "Hardware watchpoint \[0-9\]+: global_ptr\r\n.*$gdb_prompt $" {
+		set watchpoint_msg "Hardware watchpoint"
+		pass "watch global_ptr"
+	    }
+	}
+	delete_breakpoints
+
+	# Make sure that we can watch a constant address, and correctly
+	# use a HW watchpoint if supported.
+	gdb_test "watch *(int *) 0" \
+	    "$watchpoint_msg \[0-9\]+: \\*\\(int \\*\\) 0"
+	delete_breakpoints
+
+	gdb_test "watch *global_ptr" "$watchpoint_msg \[0-9\]+: \\*global_ptr"
 	gdb_test "set \$global_ptr_breakpoint_number = \$bpnum" ""
 	gdb_test "next" ".*global_ptr = buf.*" "global_ptr next"
 	gdb_test_multiple "next" "next over ptr init" {
@@ -771,6 +792,8 @@ if [initialize] then {
 	test_complex_watchpoint
     }
 
+    test_inaccessible_watchpoint
+
     # Verify that a user can force GDB to use "slow" watchpoints.
     # (This proves rather little on kernels that don't support
     # fast watchpoints, but still...)
@@ -848,8 +871,6 @@ if [initialize] then {
         timeout {fail "(timeout) access watches disallowed"}
       }
     }
-
-    test_inaccessible_watchpoint
 
     # See above.
     if [istarget "mips-idt-*"] then {
