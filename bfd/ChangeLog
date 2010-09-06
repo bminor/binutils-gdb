@@ -1,3 +1,11 @@
+2010-09-07  Alan Modra  <amodra@gmail.com>
+	    Marcus Brinkmann  <marcus.brinkmann@ruhr-uni-bochum.de>
+
+	* peXXigen.c: Whitespace.
+	(pe_print_idata): Correct section limit calculations.  Tidy array
+	indexing.
+	(_bfd_XX_print_ce_compressed_pdata): Don't leak memory.
+
 2010-09-02  Richard Henderson  <rth@redhat.com>
 
 	* config.bfd (x86_64-*-mingw*): Select 32-bit pei vectors too.
