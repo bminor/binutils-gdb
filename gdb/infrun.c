@@ -1560,13 +1560,19 @@ resume (int step, enum target_signal sig)
 
   QUIT;
 
-  /* Don't consider single-stepping when the inferior is 
-     waiting_for_vfork_done, either software or hardware step.  In
-     software step, child process will hit the software single step
-     breakpoint inserted in parent process.  In hardware step, GDB
-     can resumes inferior, and wait for vfork_done event.  */
   if (current_inferior ()->waiting_for_vfork_done)
     {
+      /* Don't try to single-step a vfork parent that is waiting for
+	 the child to get out of the shared memory region (by exec'ing
+	 or exiting).  This is particularly important on software
+	 single-step archs, as the child process would trip on the
+	 software single step breakpoint inserted for the parent
+	 process.  Since the parent will not actually execute any
+	 instruction until the child is out of the shared region (such
+	 are vfork's semantics), it is safe to simply continue it.
+	 Eventually, we'll see a TARGET_WAITKIND_VFORK_DONE event for
+	 the parent, and tell it to `keep_going', which automatically
+	 re-sets it stepping.  */
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog,
 			    "infrun: resume : clear step\n");
