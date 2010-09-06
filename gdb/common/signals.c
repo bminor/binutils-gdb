@@ -55,10 +55,8 @@ static const struct {
   const char *string;
   } signals [] =
 {
-#define SET(symbol, constant, name, string) ANY (symbol, name, string)
-#define ANY(symbol, name, string) { name, string },
+#define SET(symbol, constant, name, string) { name, string },
 #include "gdb/signals.def"
-#undef ANY
 #undef SET
 };
 

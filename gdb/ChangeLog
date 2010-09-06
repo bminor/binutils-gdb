@@ -1,3 +1,9 @@
+2010-09-06  Pedro Alves  <pedro@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* common/signals.c (ANY): Remove.
+	(SET): No longer use ANY.
+
 2010-09-06  Yao Qi  <yao@codesourcery.com>
 
 	* infrunc(resume): When inferior is waiting_for_vfork_done,
