@@ -448,7 +448,7 @@ startup_inferior (int ntraps)
 
   while (1)
     {
-      int resume_signal = TARGET_SIGNAL_0;
+      enum target_signal resume_signal = TARGET_SIGNAL_0;
       ptid_t event_ptid;
 
       struct target_waitstatus ws;

@@ -1,3 +1,7 @@
+2010-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* target.c (mywait) <TARGET_WAITKIND_EXITED>: Fix to use INTEGER.
+
 2010-09-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* Makefile.in (install-only): Replace $IPA_DEPFILES with

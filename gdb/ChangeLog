@@ -1,3 +1,18 @@
+2010-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* corelow.c (core_open): Use target_signal_from_host if CORE_GDBARCH
+	is NULL.
+	* fork-child.c (startup_inferior) <resume_signal>: Use enum
+	target_signal type.
+	* linux-nat.c (linux_nat_resume): Use target_signal_to_host before
+	calling strsignal.  Use enum target_signal type for saved_signo.
+	(linux_handle_extended_wait) <signo>: Use enum target_signal type.
+	(linux_nat_wait_1): Use enum target_signal type for signo.  Use
+	target_signal_to_host before calling strsignal.
+	* remote-m32r-sdi.c (m32r_wait, m32r_detach): Replace 0 by
+	TARGET_SIGNAL_0.
+
 2010-09-06  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

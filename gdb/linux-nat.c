@@ -1874,7 +1874,8 @@ linux_nat_resume (struct target_ops *ops,
 			"LLR: Preparing to %s %s, %s, inferior_ptid %s\n",
 			step ? "step" : "resume",
 			target_pid_to_str (ptid),
-			signo ? strsignal (signo) : "0",
+			(signo != TARGET_SIGNAL_0
+			 ? strsignal (target_signal_to_host (signo)) : "0"),
 			target_pid_to_str (inferior_ptid));
 
   block_child_signals (&prev_mask);
@@ -1907,7 +1908,7 @@ linux_nat_resume (struct target_ops *ops,
 
   if (lp->status && WIFSTOPPED (lp->status))
     {
-      int saved_signo;
+      enum target_signal saved_signo;
       struct inferior *inf;
 
       inf = find_inferior_pid (ptid_get_pid (lp->ptid));
@@ -1974,7 +1975,8 @@ linux_nat_resume (struct target_ops *ops,
 			"LLR: %s %s, %s (resume event thread)\n",
 			step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
 			target_pid_to_str (ptid),
-			signo ? strsignal (signo) : "0");
+			(signo != TARGET_SIGNAL_0
+			 ? strsignal (target_signal_to_host (signo)) : "0"));
 
   restore_child_signals_mask (&prev_mask);
   if (target_can_async_p ())
@@ -2266,7 +2268,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	     catchpoints.  */
 	  if (!stopping)
 	    {
-	      int signo;
+	      enum target_signal signo;
 
 	      new_lp->stopped = 0;
 	      new_lp->resumed = 1;
@@ -3567,7 +3569,7 @@ retry:
 
   if (WIFSTOPPED (status))
     {
-      int signo = target_signal_from_host (WSTOPSIG (status));
+      enum target_signal signo = target_signal_from_host (WSTOPSIG (status));
       struct inferior *inf;
 
       inf = find_inferior_pid (ptid_get_pid (lp->ptid));
@@ -3597,7 +3599,9 @@ retry:
 				lp->step ?
 				"PTRACE_SINGLESTEP" : "PTRACE_CONT",
 				target_pid_to_str (lp->ptid),
-				signo ? strsignal (signo) : "0");
+				(signo != TARGET_SIGNAL_0
+				 ? strsignal (target_signal_to_host (signo))
+				 : "0"));
 	  lp->stopped = 0;
 	  goto retry;
 	}

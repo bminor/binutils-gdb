@@ -98,7 +98,7 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 
   if (ourstatus->kind == TARGET_WAITKIND_EXITED)
     fprintf (stderr,
-	     "\nChild exited with status %d\n", ourstatus->value.sig);
+	     "\nChild exited with status %d\n", ourstatus->value.integer);
   else if (ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
     fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
 	     target_signal_to_host (ourstatus->value.sig),

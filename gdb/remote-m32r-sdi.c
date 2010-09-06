@@ -715,7 +715,7 @@ m32r_wait (struct target_ops *ops,
     fprintf_unfiltered (gdb_stdlog, "m32r_wait()\n");
 
   status->kind = TARGET_WAITKIND_EXITED;
-  status->value.sig = 0;
+  status->value.sig = TARGET_SIGNAL_0;
 
   interrupted = 0;
   prev_sigint = signal (SIGINT, gdb_cntrl_c);
@@ -886,7 +886,7 @@ m32r_detach (struct target_ops *ops, char *args, int from_tty)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_detach(%d)\n", from_tty);
 
-  m32r_resume (ops, inferior_ptid, 0, 0);
+  m32r_resume (ops, inferior_ptid, 0, TARGET_SIGNAL_0);
 
   /* calls m32r_close to do the real work */
   pop_target ();
