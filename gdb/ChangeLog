@@ -1,3 +1,8 @@
+2010-09-06  Yao Qi  <yao@codesourcery.com>
+
+	* infrunc(resume): When inferior is waiting_for_vfork_done,
+	clear step and don't use displaced stepping.
+
 2010-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.c (can_use_hardware_watchpoint): Handle the first

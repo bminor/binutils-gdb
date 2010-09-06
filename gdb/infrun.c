@@ -1560,6 +1560,19 @@ resume (int step, enum target_signal sig)
 
   QUIT;
 
+  /* Don't consider single-stepping when the inferior is 
+     waiting_for_vfork_done, either software or hardware step.  In
+     software step, child process will hit the software single step
+     breakpoint inserted in parent process.  In hardware step, GDB
+     can resumes inferior, and wait for vfork_done event.  */
+  if (current_inferior ()->waiting_for_vfork_done)
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: resume : clear step\n");
+      step = 0;
+    }
+
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
                         "infrun: resume (step=%d, signal=%d), "
@@ -1587,11 +1600,16 @@ a command like `return' or `jump' to continue execution."));
      We can't use displaced stepping when we have a signal to deliver;
      the comments for displaced_step_prepare explain why.  The
      comments in the handle_inferior event for dealing with 'random
-     signals' explain what we do instead.  */
+     signals' explain what we do instead.
+
+     We can't use displaced stepping when we are waiting for vfork_done
+     event, displaced stepping breaks the vfork child similarly as single
+     step software breakpoint.  */
   if (use_displaced_stepping (gdbarch)
       && (tp->trap_expected
 	  || (step && gdbarch_software_single_step_p (gdbarch)))
-      && sig == TARGET_SIGNAL_0)
+      && sig == TARGET_SIGNAL_0
+      && !current_inferior ()->waiting_for_vfork_done)
     {
       struct displaced_step_inferior_state *displaced;
 
