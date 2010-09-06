@@ -167,7 +167,7 @@ install: all install-only
 install-only:
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	if [ x$IPA_DEPFILES != x ]; then \
+	if [ x"$(IPA_DEPFILES)" != x ]; then \
 		$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(libdir); \
 		$(INSTALL_PROGRAM) $(IPA_LIB) $(DESTDIR)$(libdir)/$(IPA_LIB); \
 	fi; \
