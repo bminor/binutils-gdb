@@ -1,3 +1,18 @@
+2010-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/printcmds.exp (test_float_accepted): Import gdb_prompt.
+	Move here, negate and extend by XFAIL the "p 0x1.1" test from ...
+	(test_float_rejected): ... here.
+	* gdb.java/jv-print.exp (test_float_accepted): Import gdb_prompt.
+	Move here, negate and extend by XFAIL the "p 0x1.1" test from ...
+	(test_float_rejected): ... here.
+	* gdb.objc/print.exp (test_float_accepted): Import gdb_prompt.
+	Move here, negate and extend by XFAIL the "p 0x1.1" test from ...
+	(test_float_rejected): ... here.
+	* gdb.pascal/print.exp (test_float_accepted): Import gdb_prompt.
+	Move here, negate and extend by XFAIL the "p 0x1.1" test from ...
+	(test_float_rejected): ... here.
+
 2010-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/watchpoint.exp: Call test_inaccessible_watchpoint

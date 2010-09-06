@@ -98,6 +98,8 @@ proc test_integer_literals_rejected {} {
 }
 
 proc test_float_accepted {} {
+    global gdb_prompt
+
     # Test parsing of fp value with legit text following.
     gdb_test "p 1234.5+1" " = 1235.5" "check fp + text"
 
@@ -108,12 +110,21 @@ proc test_float_accepted {} {
     gdb_test "p 1.5f" " = 1.5"
     gdb_test "p 1.d" " = 1"
     gdb_test "p 1.5d" " = 1.5"
+
+    # Test hexadecimal floating point.
+    set test "p 0x1.1"
+    gdb_test_multiple $test $test {
+	-re " = 1\\.0625\r\n$gdb_prompt $" {
+	    pass $test
+	}
+	-re "Invalid number \"0x1\\.1\"\r\n$gdb_prompt $" {
+	    # Older glibc does not support hex float, newer does.
+	    xfail $test
+	}
+    }
 }
 
 proc test_float_rejected {} {
-    # Test invalid fp values.
-    test_print_reject "p 0x1.1"
-
     # Test bad suffixes.
     test_print_reject "p 1.1x"
     test_print_reject "p 1.1ff"
