@@ -1,3 +1,8 @@
+2010-09-06  Yao Qi  <yao@codesourcery.com>
+
+	* linux-low.c (maybe_move_out_of_jump_pad): Restore current_inferior
+	on return.
+
 2010-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* target.c (mywait) <TARGET_WAITKIND_EXITED>: Fix to use INTEGER.

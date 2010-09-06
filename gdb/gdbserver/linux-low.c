@@ -1244,6 +1244,7 @@ Checking whether LWP %ld needs to move out of the jump pad.\n",
 		fprintf (stderr, "\
 Checking whether LWP %ld needs to move out of the jump pad...it does\n",
 		 lwpid_of (lwp));
+	      current_inferior = saved_inferior;
 
 	      return 1;
 	    }
@@ -1314,6 +1315,8 @@ Checking whether LWP %ld needs to move out of the jump pad...it does\n",
     fprintf (stderr, "\
 Checking whether LWP %ld needs to move out of the jump pad...no\n",
 	     lwpid_of (lwp));
+
+  current_inferior = saved_inferior;
   return 0;
 }
 
