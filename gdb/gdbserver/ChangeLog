@@ -1,5 +1,13 @@
 2010-09-06  Yao Qi  <yao@codesourcery.com>
 
+	* linux-low.c (linux_kill): Remove unused variable.
+	(linux_stabilize_threads): Likewise.
+	* server.c (start_inferior): Likewise.
+	(queue_stop_reply_callback): Likewise.
+	* tracepoint.c (do_action_at_tracepoint): Likewise.
+
+2010-09-06  Yao Qi  <yao@codesourcery.com>
+
 	* linux-low.c (maybe_move_out_of_jump_pad): Restore current_inferior
 	on return.
 

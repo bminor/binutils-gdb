@@ -775,7 +775,6 @@ linux_kill (int pid)
 {
   struct process_info *process;
   struct lwp_info *lwp;
-  struct thread_info *thread;
   int wstat;
   int lwpid;
 
@@ -792,7 +791,6 @@ linux_kill (int pid)
   /* See the comment in linux_kill_one_lwp.  We did not kill the first
      thread in the list, so do so now.  */
   lwp = find_lwp_pid (pid_to_ptid (pid));
-  thread = get_lwp_thread (lwp);
 
   if (debug_threads)
     fprintf (stderr, "lk_1: killing lwp %ld, for pid: %d\n",
@@ -1935,13 +1933,12 @@ linux_stabilize_threads (void)
     {
       struct target_waitstatus ourstatus;
       struct lwp_info *lwp;
-      ptid_t ptid;
       int wstat;
 
       /* Note that we go through the full wait even loop.  While
 	 moving threads out of jump pad, we need to be able to step
 	 over internal breakpoints and such.  */
-      ptid = linux_wait_1 (minus_one_ptid, &ourstatus, 0);
+      linux_wait_1 (minus_one_ptid, &ourstatus, 0);
 
       if (ourstatus.kind == TARGET_WAITKIND_STOPPED)
 	{

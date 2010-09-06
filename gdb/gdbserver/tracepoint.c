@@ -4126,13 +4126,10 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
       }
     case 'R':
       {
-	struct collect_registers_action *raction;
-
 	unsigned char *regspace;
 	struct regcache tregcache;
 	struct regcache *context_regcache;
 
-	raction = (struct collect_registers_action *) taction;
 
 	trace_debug ("Want to collect registers");
 

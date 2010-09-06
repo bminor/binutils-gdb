@@ -273,13 +273,12 @@ start_inferior (char **argv)
   if (wrapper_argv != NULL)
     {
       struct thread_resume resume_info;
-      ptid_t ptid;
 
       resume_info.thread = pid_to_ptid (signal_pid);
       resume_info.kind = resume_continue;
       resume_info.sig = 0;
 
-      ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+      mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
       if (last_status.kind != TARGET_WAITKIND_STOPPED)
 	return signal_pid;
@@ -2155,11 +2154,6 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
      manage the thread's last_status field.  */
   if (the_target->thread_stopped == NULL)
     {
-      struct target_waitstatus status;
-
-      status.kind = TARGET_WAITKIND_STOPPED;
-      status.value.sig = TARGET_SIGNAL_TRAP;
-
       /* Pass the last stop reply back to GDB, but don't notify
 	 yet.  */
       queue_stop_reply (entry->id, &thread->last_status);
