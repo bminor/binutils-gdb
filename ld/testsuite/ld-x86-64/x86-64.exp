@@ -83,6 +83,9 @@ set x86_64tests {
      "--64" {mixed2a.s} {} "libmixe2a.o"}
     {"Helper 32bit object 2" "-r -melf_i386"
      "--32" {mixed2b.s} {} "libmixe2b.o"}
+    {"Split by file with 'l' flag on section." "-split-by-file -r"
+     "--64" {split-by-file1.s split-by-file2.s}
+     {{readelf -SW split-by-file.rd}} "split-by-file.o"}
 }
 
 run_ld_link_tests $x86_64tests

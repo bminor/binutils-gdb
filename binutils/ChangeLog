@@ -1,3 +1,8 @@
+2010-09-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_section_headers): Mention meaning of 'l'
+	section flag for x86-64 targets.
+
 2010-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Jakub Jelinek  <jakub@redhat.com>
 

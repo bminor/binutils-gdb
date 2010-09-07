@@ -1,3 +1,8 @@
+2010-09-07  Andrew Burgess  <aburgess@broadcom.com>
+
+	* ldwrite.c (clone_section): Call bfd_copy_private_section_data on
+	newly cloned section.
+
 2010-09-02  Richard Henderson  <rth@redhat.com>
 
 	* configure.tgt (x86_64-*-mingw*): Add 32-bit pe emulations too.

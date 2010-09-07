@@ -4861,10 +4861,19 @@ process_section_headers (FILE * file)
     }
 
   if (!do_section_details)
-    printf (_("Key to Flags:\n\
+    {
+      if (elf_header.e_machine == EM_X86_64
+	  || elf_header.e_machine == EM_L1OM)
+	printf (_("Key to Flags:\n\
+  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)\n\
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
+  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+      else
+	printf (_("Key to Flags:\n\
   W (write), A (alloc), X (execute), M (merge), S (strings)\n\
   I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
   O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+    }	
 
   return 1;
 }

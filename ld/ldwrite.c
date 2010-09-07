@@ -358,7 +358,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
 	}
       tname[5] = 0;
     }
-  
+
   if ((sname = bfd_get_unique_section_name (abfd, tname, count)) == NULL
       || (n = bfd_make_section_anyway (abfd, sname)) == NULL
       || (h = bfd_link_hash_lookup (link_info.hash,
@@ -369,7 +369,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
       return NULL;
     }
   free (tname);
-  
+
   /* Set up section symbol.  */
   h->type = bfd_link_hash_defined;
   h->u.def.value = 0;
@@ -385,6 +385,9 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
   n->orelocation = 0;
   n->reloc_count = 0;
   n->alignment_power = s->alignment_power;
+
+  bfd_copy_private_section_data (abfd, s, abfd, n);
+
   return n;
 }
 
