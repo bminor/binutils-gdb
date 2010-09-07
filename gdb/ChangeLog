@@ -1,3 +1,9 @@
+2010-09-09  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* psymtab.c (add_psymbol_to_bcache): Initialize
+	obj_section.
+	memset psymbol.ginfo.value to 0.
+
 2010-09-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (resume): Extend comment on ignoring single-step
