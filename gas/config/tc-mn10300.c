@@ -689,6 +689,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
       fragP->fr_literal[offset] = 0xdd;
       fragP->fr_literal[offset + 5] = fragP->fr_literal[offset + 3];
       fragP->fr_literal[offset + 6] = fragP->fr_literal[offset + 4];
+      fragP->fr_literal[offset + 3] = 0;
+      fragP->fr_literal[offset + 4] = 0;
 
       fix_new (fragP, fragP->fr_fix + 1, 4, fragP->fr_symbol,
 	       fragP->fr_offset + 1, 1, BFD_RELOC_32_PCREL);

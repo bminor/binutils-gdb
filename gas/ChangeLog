@@ -1,3 +1,9 @@
+2010-09-08  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/11973
+	* config/tc-mn10300.c (md_convert_frag): Zero out top two bytes of
+	long call instruction's displacement.
+
 2010-09-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11974
