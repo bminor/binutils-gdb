@@ -1,5 +1,10 @@
 2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (dwarf2_compute_name): Check that the first
+	argument is a pointer.
+
+2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (read_func_scope, read_structure_type)
 	(read_common_block): Check for a NULL return from new_symbol.
 

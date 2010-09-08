@@ -4848,8 +4848,14 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 		}
 	      else if (cu->language == language_cplus)
 		{
+		  /* Assume that an artificial first parameter is
+		     "this", but do not crash if it is not.  RealView
+		     marks unnamed (and thus unused) parameters as
+		     artificial; there is no way to differentiate
+		     the two cases.  */
 		  if (TYPE_NFIELDS (type) > 0
 		      && TYPE_FIELD_ARTIFICIAL (type, 0)
+		      && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_PTR
 		      && TYPE_CONST (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 0))))
 		    fputs_unfiltered (" const", buf);
 		}
