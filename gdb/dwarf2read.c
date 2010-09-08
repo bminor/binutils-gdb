@@ -6643,11 +6643,12 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
 }
 
 /* Called when we find the DIE that starts a structure or union scope
-   (definition) to process all dies that define the members of the
-   structure or union.
+   (definition) to create a type for the structure or union.  Fill in
+   the type's name and general properties; the members will not be
+   processed until process_structure_type.
 
-   NOTE: we need to call struct_type regardless of whether or not the
-   DIE has an at_name attribute, since it might be an anonymous
+   NOTE: we need to call these functions regardless of whether or not the
+   DIE has a DW_AT_name attribute, since it might be an anonymous
    structure or union.  This gets the type entered into our set of
    user defined types.
 
@@ -6665,7 +6666,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *attr;
   char *name;
-  struct cleanup *back_to;
 
   /* If the definition of this type lives in .debug_types, read that type.
      Don't follow DW_AT_specification though, that will take us back up
@@ -6686,8 +6686,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	 Ensure TYPE is recorded in CU's type_hash table.  */
       return set_die_type (die, type, cu);
     }
-
-  back_to = make_cleanup (null_cleanup, 0);
 
   type = alloc_type (objfile);
   INIT_CPLUS_SPECIFIC (type);
@@ -6763,11 +6761,29 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   /* set_die_type should be already done.  */
   set_descriptive_type (type, die, cu);
 
+  return type;
+}
+
+/* Finish creating a structure or union type, including filling in
+   its members and creating a symbol for it.  */
+
+static void
+process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct objfile *objfile = cu->objfile;
+  struct die_info *child_die = die->child;
+  struct type *type;
+
+  type = get_die_type (die, cu);
+  if (type == NULL)
+    type = read_structure_type (die, cu);
+
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
       struct field_info fi;
       struct die_info *child_die;
       VEC (symbolp) *template_args = NULL;
+      struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
       memset (&fi, 0, sizeof (struct field_info));
 
@@ -6918,23 +6934,11 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	      *dest = *src;
 	    }
 	}
+
+      do_cleanups (back_to);
     }
 
   quirk_gcc_member_function_pointer (type, cu->objfile);
-
-  do_cleanups (back_to);
-  return type;
-}
-
-static void
-process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
-{
-  struct die_info *child_die = die->child;
-  struct type *this_type;
-
-  this_type = get_die_type (die, cu);
-  if (this_type == NULL)
-    this_type = read_structure_type (die, cu);
 
   /* NOTE: carlton/2004-03-16: GCC 3.4 (or at least one of its
      snapshots) has been known to create a die giving a declaration
@@ -6964,7 +6968,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      attribute, and a declaration attribute.  */
   if (dwarf2_attr (die, DW_AT_byte_size, cu) != NULL
       || !die_is_declaration (die, cu))
-    new_symbol (die, this_type, cu);
+    new_symbol (die, type, cu);
 }
 
 /* Given a DW_AT_enumeration_type die, set its type.  We do not

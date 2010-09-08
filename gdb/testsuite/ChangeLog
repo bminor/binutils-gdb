@@ -1,3 +1,12 @@
+2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/templates.cc (Empty, FunctionArg): New classes.
+	(FunctionArg::method): New function.
+	(empty, arg): New variables.
+	(main): Call arg.method.
+	* gdb.cp/templates.exp (test_template_args): New function.
+	(do_tests): Call it.
+
 2010-09-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.threads/threxit-hop-specific.exp: Use "continue" instead

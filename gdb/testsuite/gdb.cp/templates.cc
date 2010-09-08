@@ -712,6 +712,23 @@ template<class T> T Garply<T>::garply (int i, T tt)
     }
 }
 
+template<class C> class Empty
+{
+};
+
+template<class C> class FunctionArg
+{
+public:
+  int method(Empty<void (FunctionArg<C>)> &);
+};
+
+template<class C> int FunctionArg<C>::method(Empty<void (FunctionArg<C>)> &arg)
+{
+  return 75;
+}
+
+Empty<void(FunctionArg<int>)> empty;
+FunctionArg<int> arg;
 
 int main()
 {
@@ -785,18 +802,7 @@ int main()
 
   t5i.value();
 
+  arg.method(empty);
+
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

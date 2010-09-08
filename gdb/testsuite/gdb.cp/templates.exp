@@ -196,6 +196,16 @@ proc test_template_typedef {} {
 	"print destructor of template typedef"
 }
 
+proc test_template_args {} {
+
+    set empty_re "Empty *<void *\\(FunctionArg *<int>\\)>"
+    gdb_test "ptype empty" \
+	"type = class $empty_re {.*<no data fields>.*}"
+
+    gdb_test "ptype arg" \
+	"type = class FunctionArg<int> {.*int method\\($empty_re \\&\\);.*}"
+}
+
 proc do_tests {} {
     global subdir
     global objdir
@@ -220,6 +230,7 @@ proc do_tests {} {
     test_ptype_of_templates
     test_template_breakpoints
     test_template_typedef
+    test_template_args
 
     if [ runto_main] {
 	test_template_calls
