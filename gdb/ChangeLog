@@ -1,3 +1,11 @@
+2010-09-08  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* infrunc(resume): When inferior is waiting_for_vfork_done,
+	clear step and don't use displaced stepping.
+	Extend comment on ignoring single-step requests on vfork 
+	parents waiting for a vfork-done.
+
 2010-09-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.2.0.20100903-cvs.

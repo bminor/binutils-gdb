@@ -1549,6 +1549,25 @@ resume (int step, enum target_signal sig)
 
   QUIT;
 
+  /* Don't try to single-step a vfork parent that is waiting for
+     the child to get out of the shared memory region (by exec'ing
+     or exiting).  This is particularly important on software
+     single-step archs, as the child process would trip on the
+     software single step breakpoint inserted for the parent
+     process.  Since the parent will not actually execute any
+     instruction until the child is out of the shared region (such
+     are vfork's semantics), it is safe to simply continue it.
+     Eventually, we'll see a TARGET_WAITKIND_VFORK_DONE event for
+     the parent, and tell it to `keep_going', which automatically
+     re-sets it stepping.  */
+  if (current_inferior ()->waiting_for_vfork_done)
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: resume : clear step\n");
+      step = 0;
+    }
+
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
                         "infrun: resume (step=%d, signal=%d), "
@@ -1576,11 +1595,16 @@ a command like `return' or `jump' to continue execution."));
      We can't use displaced stepping when we have a signal to deliver;
      the comments for displaced_step_prepare explain why.  The
      comments in the handle_inferior event for dealing with 'random
-     signals' explain what we do instead.  */
+     signals' explain what we do instead.
+
+     We can't use displaced stepping when we are waiting for vfork_done
+     event, displaced stepping breaks the vfork child similarly as single
+     step software breakpoint.  */
   if (use_displaced_stepping (gdbarch)
       && (tp->trap_expected
 	  || (step && gdbarch_software_single_step_p (gdbarch)))
-      && sig == TARGET_SIGNAL_0)
+      && sig == TARGET_SIGNAL_0
+      && !current_inferior ()->waiting_for_vfork_done)
     {
       struct displaced_step_inferior_state *displaced;
 
