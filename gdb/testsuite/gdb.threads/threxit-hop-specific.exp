@@ -52,7 +52,7 @@ gdb_test "break $bpthrline thread 2" \
 set bpexitline [gdb_get_line_number "set exit breakpoint here"]
 gdb_breakpoint "$bpexitline"
 
-gdb_test "next" \
+gdb_test "continue" \
     ".*set exit breakpoint here.*" \
     "get past the thread specific breakpoint"
 

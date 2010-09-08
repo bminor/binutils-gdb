@@ -1,5 +1,10 @@
 2010-09-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.threads/threxit-hop-specific.exp: Use "continue" instead
+	of "next" to proceed over pthread_exit call.
+
+2010-09-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.base/maint.exp: Avoid wildcards against potentially very long
 	"maint print statistics" output to prevent expect timeouts.
 
