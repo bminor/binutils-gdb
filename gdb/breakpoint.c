@@ -7545,7 +7545,7 @@ create_breakpoint (struct gdbarch *gdbarch,
           /* If pending breakpoint support is auto query and the user
 	     selects no, then simply return the error code.  */
 	  if (pending_break_support == AUTO_BOOLEAN_AUTO
-	      && !nquery ("Make breakpoint pending on future shared library load? "))
+	      && !nquery (_("Make breakpoint pending on future shared library load? ")))
 	    return 0;
 
 	  /* At this point, either the user was queried about setting
