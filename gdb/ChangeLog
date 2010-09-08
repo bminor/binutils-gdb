@@ -1,3 +1,7 @@
+2010-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_read_index): Return on no SEC_HAS_CONTENTS.
+
 2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (read_structure_type): Move processing of

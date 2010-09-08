@@ -1904,6 +1904,13 @@ dwarf2_read_index (struct objfile *objfile)
   if (dwarf2_per_objfile->gdb_index.asection == NULL
       || dwarf2_per_objfile->gdb_index.size == 0)
     return 0;
+
+  /* Older elfutils strip versions could keep the section in the main
+     executable while splitting it for the separate debug info file.  */
+  if ((bfd_get_file_flags (dwarf2_per_objfile->gdb_index.asection)
+       & SEC_HAS_CONTENTS) == 0)
+    return 0;
+
   dwarf2_read_section (objfile, &dwarf2_per_objfile->gdb_index);
 
   addr = dwarf2_per_objfile->gdb_index.buffer;
