@@ -37,6 +37,7 @@ struct Parser_output_section_trailer;
 struct Input_section_spec;
 class Expression;
 class Sections_element;
+class Memory_region;
 class Phdrs_element;
 class Output_data;
 class Output_section_definition;
@@ -220,6 +221,27 @@ class Script_sections
   set_saw_segment_start_expression(bool value)
   { this->saw_segment_start_expression_ = value; }
 
+  // Add a memory region.
+  void
+  add_memory_region(const char*, size_t, unsigned int,
+		    Expression*, Expression*);
+
+  // Find a memory region's origin.
+  Expression*
+  find_memory_region_origin(const char*, size_t);
+
+  // Find a memory region's length.
+  Expression*
+  find_memory_region_length(const char*, size_t);
+
+  // Find a memory region.
+  Memory_region*
+  find_memory_region(const char*, size_t);
+
+  // Set the memory region of the section.
+  void
+  set_memory_region(Memory_region*, bool);
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -228,6 +250,7 @@ class Script_sections
   typedef Sections_elements::iterator Elements_iterator;
 
  private:
+  typedef std::vector<Memory_region*> Memory_regions;
   typedef std::vector<Phdrs_element*> Phdrs_elements;
 
   // Create segments.
@@ -271,6 +294,8 @@ class Script_sections
   Sections_elements* sections_elements_;
   // The current output section, if there is one.
   Output_section_definition* output_section_;
+  // The list of memory regions in the MEMORY clause.
+  Memory_regions* memory_regions_;
   // The list of program headers in the PHDRS clause.
   Phdrs_elements* phdrs_elements_;
   // Where to put orphan sections.
@@ -284,6 +309,17 @@ class Script_sections
   bool saw_relro_end_;
   // Whether we have seen SEGMENT_START.
   bool saw_segment_start_expression_;
+};
+
+// Attributes for memory regions.
+enum
+{
+  MEM_EXECUTABLE   = (1 << 0),
+  MEM_WRITEABLE    = (1 << 1),
+  MEM_READABLE     = (1 << 2),
+  MEM_ALLOCATABLE  = (1 << 3),
+  MEM_INITIALIZED  = (1 << 4),
+  MEM_ATTR_MASK    = (1 << 5) - 1
 };
 
 } // End namespace gold.

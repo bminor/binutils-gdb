@@ -1237,19 +1237,4 @@ script_exp_function_segment_start(const char* segment_name,
 				      default_value);
 }
 
-// Functions for memory regions.  These can not be implemented unless
-// and until we implement memory regions.
-
-extern "C" Expression*
-script_exp_function_origin(const char*, size_t)
-{
-  gold_fatal(_("ORIGIN not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_length(const char*, size_t)
-{
-  gold_fatal(_("LENGTH not implemented"));
-}
-
 } // End namespace gold.

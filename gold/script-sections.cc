@@ -43,6 +43,174 @@
 namespace gold
 {
 
+// A region of memory.
+class Memory_region
+{
+ public:
+  Memory_region(const char* name, size_t namelen, unsigned int attributes,
+		Expression* start, Expression* length)
+    : name_(name, namelen),
+      attributes_(attributes),
+      start_(start),
+      length_(length),
+      current_vma_offset_(0),
+      current_lma_offset_(0),
+      vma_sections_(NULL),
+      lma_sections_(NULL)
+  { }
+
+  // Return the name of this region.
+  const std::string&
+  name() const
+  { return this->name_; }
+
+  // Return the start address of this region.
+  Expression*
+  start_address() const
+  { return this->start_; }
+
+  // Return the length of this region.
+  Expression*
+  length() const
+  { return this->length_; }
+
+  // Print the region (when debugging).
+  void
+  print(FILE*) const;
+
+  // Return true if <name,namelen> matches this region.
+  bool
+  name_match(const char* name, size_t namelen)
+  {
+    return (this->name_.length() == namelen
+	    && strncmp(this->name_.c_str(), name, namelen) == 0);
+  }
+
+  Expression*
+  get_current_vma_address(void) const
+  {
+    return
+      script_exp_binary_add(this->start_,
+			    script_exp_integer(this->current_vma_offset_));
+  }
+  
+  Expression*
+  get_current_lma_address(void) const
+  {
+    return
+      script_exp_binary_add(this->start_,
+			    script_exp_integer(this->current_lma_offset_));
+  }
+  
+  void
+  increment_vma_offset(std::string section_name, uint64_t amount,
+		       const Symbol_table* symtab, const Layout* layout)
+  {
+    this->current_vma_offset_ += amount;
+
+    if (this->current_vma_offset_
+	> this->length_->eval(symtab, layout, false))
+      gold_error (_("section %s overflows end of region %s"),
+		  section_name.c_str(), this->name_.c_str());
+  }
+  
+  void
+  increment_lma_offset(std::string section_name, uint64_t amount,
+		       const Symbol_table* symtab, const Layout* layout)
+  {
+    this->current_lma_offset_ += amount;
+
+    if (this->current_lma_offset_
+	> this->length_->eval(symtab, layout, false))
+      gold_error (_("section %s overflows end of region %s (based on load address)"),
+		  section_name.c_str(), this->name_.c_str());
+  }
+
+  void
+  add_section(Output_section_definition* sec, bool vma)
+  {
+    if (vma)
+      this->vma_sections_.push_back(sec);
+    else
+      this->lma_sections_.push_back(sec);
+  }
+
+  typedef std::vector<Output_section_definition*> Section_list;
+
+  // Return the start of the list of sections
+  // whose VMAs are taken from this region.
+  Section_list::const_iterator
+  get_vma_section_list_start(void) const
+  { return this->vma_sections_.begin(); }
+
+  // Return the start of the list of sections
+  // whose LMAs are taken from this region.
+  Section_list::const_iterator
+  get_lma_section_list_start(void) const
+  { return this->lma_sections_.begin(); }
+
+  // Return the end of the list of sections
+  // whose VMAs are taken from this region.
+  Section_list::const_iterator
+  get_vma_section_list_end(void) const
+  { return this->vma_sections_.end(); }
+
+  // Return the end of the list of sections
+  // whose LMAs are taken from this region.
+  Section_list::const_iterator
+  get_lma_section_list_end(void) const
+  { return this->lma_sections_.end(); }
+
+ private:
+
+  std::string name_;
+  unsigned int attributes_;
+  Expression* start_;
+  Expression* length_;
+  uint64_t current_vma_offset_;
+  uint64_t current_lma_offset_;
+  // A list of sections whose VMAs are set inside this region.
+  Section_list vma_sections_;
+  // A list of sections whose LMAs are set inside this region.
+  Section_list lma_sections_;
+};
+
+// Print a memory region.
+
+void
+Memory_region::print(FILE* f) const
+{
+  fprintf(f, "  %s", this->name_.c_str());
+
+  unsigned int attrs = this->attributes_;
+  if (attrs != 0)
+    {
+      fprintf(f, " (");
+      do
+	{
+	  switch (attrs & - attrs)
+	    {
+	    case MEM_EXECUTABLE:  fputc('x', f); break;
+	    case MEM_WRITEABLE:   fputc('w', f); break;
+	    case MEM_READABLE:    fputc('r', f); break;
+	    case MEM_ALLOCATABLE: fputc('a', f); break;
+	    case MEM_INITIALIZED: fputc('i', f); break;
+	    default:
+	      gold_unreachable();
+	    }
+	  attrs &= ~ (attrs & - attrs);
+	}
+      while (attrs != 0);
+      fputc(')', f);
+    }
+
+  fprintf(f, " : origin = ");
+  this->start_->print(f);
+  fprintf(f, ", length = ");
+  this->length_->print(f);
+  fprintf(f, "\n");
+}
+
 // Manage orphan sections.  This is intended to be largely compatible
 // with the GNU linker.  The Linux kernel implicitly relies on
 // something similar to the GNU linker's orphan placement.  We
@@ -414,6 +582,11 @@ class Sections_element
   virtual Output_section*
   get_output_section() const
   { return NULL; }
+
+  // Set the section's memory regions.
+  virtual void
+  set_memory_region(Memory_region*, bool)
+  { gold_error(_("Attempt to set a memory region for a non-output section")); }
 
   // Print the element for debugging purposes.
   virtual void
@@ -1675,6 +1848,22 @@ class Output_section_definition : public Sections_element
   Script_sections::Section_type
   section_type() const;
 
+  // Store the memory region to use.
+  void
+  set_memory_region(Memory_region*, bool set_vma);
+
+  void
+  set_section_vma(Expression* address)
+  { this->address_ = address; }
+  
+  void
+  set_section_lma(Expression* address)
+  { this->load_address_ = address; }
+
+  std::string
+  get_section_name(void) const
+  { return this->name_; }
+  
  private:
   static const char*
   script_section_type_name(Script_section_type);
@@ -2331,6 +2520,14 @@ Output_section_definition::script_section_type_name(
     }
 }
 
+void
+Output_section_definition::set_memory_region(Memory_region* mr, bool set_vma)
+{
+  gold_assert(mr != NULL);
+  // Add the current section to the specified region's list.
+  mr->add_section(this, set_vma);
+}
+
 // An output section created to hold orphaned input sections.  These
 // do not actually appear in linker scripts.  However, for convenience
 // when setting the output section addresses, we put a marker to these
@@ -2580,6 +2777,85 @@ Phdrs_element::print(FILE* f) const
   fprintf(f, ";\n");
 }
 
+// Add a memory region.
+
+void
+Script_sections::add_memory_region(const char* name, size_t namelen,
+				   unsigned int attributes,
+				   Expression* start, Expression* length)
+{
+  if (this->memory_regions_ == NULL)
+    this->memory_regions_ = new Memory_regions();
+  else if (this->find_memory_region(name, namelen))
+    {
+      gold_error (_("region '%.*s' already defined"), namelen, name);
+      // FIXME: Add a GOLD extension to allow multiple regions with the same
+      // name.  This would amount to a single region covering disjoint blocks
+      // of memory, which is useful for embedded devices.
+    }
+
+  // FIXME: Check the length and start values.  Currently we allow
+  // non-constant expressions for these values, whereas LD does not.
+
+  // FIXME: Add a GOLD extension to allow NEGATIVE LENGTHS.  This would
+  // describe a region that packs from the end address going down, rather
+  // than the start address going up.  This would be useful for embedded
+  // devices.
+
+  this->memory_regions_->push_back(new Memory_region(name, namelen, attributes,
+						     start, length));
+}
+
+// Find a memory region.
+
+Memory_region*
+Script_sections::find_memory_region(const char* name, size_t namelen)
+{
+  if (this->memory_regions_ == NULL)
+    return NULL;
+
+  for (Memory_regions::const_iterator m = this->memory_regions_->begin();
+       m != this->memory_regions_->end();
+       ++m)
+    if ((*m)->name_match(name, namelen))
+      return *m;
+
+  return NULL;
+}
+
+// Find a memory region's origin.
+
+Expression*
+Script_sections::find_memory_region_origin(const char* name, size_t namelen)
+{
+  Memory_region* mr = find_memory_region(name, namelen);
+  if (mr == NULL)
+    return NULL;
+
+  return mr->start_address();
+}
+
+// Find a memory region's length.
+
+Expression*
+Script_sections::find_memory_region_length(const char* name, size_t namelen)
+{
+  Memory_region* mr = find_memory_region(name, namelen);
+  if (mr == NULL)
+    return NULL;
+
+  return mr->length();
+}
+
+// Set the memory region to use for the current section.
+
+void
+Script_sections::set_memory_region(Memory_region* mr, bool set_vma)
+{
+  gold_assert(!this->sections_elements_->empty());
+  this->sections_elements_->back()->set_memory_region(mr, set_vma);
+}
+
 // Class Script_sections.
 
 Script_sections::Script_sections()
@@ -2587,6 +2863,7 @@ Script_sections::Script_sections()
     in_sections_clause_(false),
     sections_elements_(NULL),
     output_section_(NULL),
+    memory_regions_(NULL),
     phdrs_elements_(NULL),
     orphan_section_placement_(NULL),
     data_segment_align_start_(),
@@ -2910,6 +3187,41 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 {
   gold_assert(this->saw_sections_clause_);
 
+  // Walk the memory regions specified in this script, if any.
+  if (this->memory_regions_ != NULL)
+    {
+      for (Memory_regions::const_iterator mr = this->memory_regions_->begin();
+	   mr != this->memory_regions_->end();
+	   ++mr)
+	{
+	  // FIXME: What should we do with the attributes of the regions ?
+
+	  // For each region, set the VMA of the sections associated with it.
+	  for (Memory_region::Section_list::const_iterator s =
+		 (*mr)->get_vma_section_list_start();
+	       s != (*mr)->get_vma_section_list_end();
+	       ++s)
+	    {
+	      (*s)->set_section_vma((*mr)->get_current_vma_address());
+	      (*mr)->increment_vma_offset((*s)->get_section_name(),
+					  (*s)->get_output_section()->current_data_size(),
+					  symtab, layout);
+	    }
+
+	  // Similarly, set the LMA values.
+	  for (Memory_region::Section_list::const_iterator s =
+		 (*mr)->get_lma_section_list_start();
+	       s != (*mr)->get_lma_section_list_end();
+	       ++s)
+	    {
+	      (*s)->set_section_lma((*mr)->get_current_lma_address());
+	      (*mr)->increment_lma_offset((*s)->get_section_name(),
+					  (*s)->get_output_section()->current_data_size(),
+					  symtab, layout);
+	    }
+	}
+    }
+	 
   // Implement ONLY_IF_RO/ONLY_IF_RW constraints.  These are a pain
   // for our representation.
   for (Sections_elements::iterator p = this->sections_elements_->begin();
@@ -3654,6 +3966,26 @@ Script_sections::release_segments()
 void
 Script_sections::print(FILE* f) const
 {
+  if (this->phdrs_elements_ != NULL)
+    {
+      fprintf(f, "PHDRS {\n");
+      for (Phdrs_elements::const_iterator p = this->phdrs_elements_->begin();
+	   p != this->phdrs_elements_->end();
+	   ++p)
+	(*p)->print(f);
+      fprintf(f, "}\n");
+    }
+
+  if (this->memory_regions_ != NULL)
+    {
+      fprintf(f, "MEMORY {\n");
+      for (Memory_regions::const_iterator m = this->memory_regions_->begin();
+	   m != this->memory_regions_->end();
+	   ++m)
+	(*m)->print(f);
+      fprintf(f, "}\n");
+    }
+
   if (!this->saw_sections_clause_)
     return;
 
@@ -3665,16 +3997,6 @@ Script_sections::print(FILE* f) const
     (*p)->print(f);
 
   fprintf(f, "}\n");
-
-  if (this->phdrs_elements_ != NULL)
-    {
-      fprintf(f, "PHDRS {\n");
-      for (Phdrs_elements::const_iterator p = this->phdrs_elements_->begin();
-	   p != this->phdrs_elements_->end();
-	   ++p)
-	(*p)->print(f);
-      fprintf(f, "}\n");
-    }
 }
 
 } // End namespace gold.

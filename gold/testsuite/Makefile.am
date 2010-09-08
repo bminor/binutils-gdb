@@ -1779,6 +1779,16 @@ start_lib_test: start_lib_test_main.o libstart_lib_test.a start_lib_test_2.o sta
 libstart_lib_test.a: start_lib_test_1.o
 	$(TEST_AR) rc $@ $^
 
+# Test that MEMORY region support works.
+check_SCRIPTS += memory_test.sh
+check_DATA += memory_test.stdout
+MOSTLYCLEANFILES += memory_test.stdout memory_test memory_test.o
+memory_test: memory_test.s
+	$(COMPILE) -c $< -o memory_test.o
+	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
+memory_test.stdout: memory_test
+	$(TEST_READELF) -lS  $< > $@
+
 endif GCC
 endif NATIVE_LINKER
 

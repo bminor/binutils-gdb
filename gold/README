@@ -15,7 +15,6 @@ documentation for features which gold supports.  gold supports most of
 the features of the GNU linker for ELF targets.  Notable
 omissions--features of the GNU linker not currently supported in
 gold--are:
-  * MEMORY regions in linker scripts
   * MRI compatible linker scripts
   * cross-reference reports (--cref)
   * various other minor options

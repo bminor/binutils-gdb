@@ -421,6 +421,21 @@ script_data_segment_relro_end(void* closure);
 extern void
 script_saw_segment_start_expression(void* closure);
 
+/* Called by the bison parser for MEMORY regions.  */
+
+extern void
+script_add_memory(void*, const char*, size_t, unsigned int,
+		  Expression_ptr, Expression_ptr);
+
+extern unsigned int
+script_parse_memory_attr(void*, const char*, size_t, int);
+
+extern void
+script_set_section_region(void*, const char*, size_t, int);
+
+extern void
+script_include_directive(void *, const char*, size_t);
+  
 /* Called by the bison parser for expressions.  */
 
 extern Expression_ptr
@@ -488,9 +503,9 @@ script_exp_function_addr(const char*, size_t);
 extern Expression_ptr
 script_exp_function_loadaddr(const char*, size_t);
 extern Expression_ptr
-script_exp_function_origin(const char*, size_t);
+script_exp_function_origin(void*, const char*, size_t);
 extern Expression_ptr
-script_exp_function_length(const char*, size_t);
+script_exp_function_length(void*, const char*, size_t);
 extern Expression_ptr
 script_exp_function_constant(const char*, size_t);
 extern Expression_ptr

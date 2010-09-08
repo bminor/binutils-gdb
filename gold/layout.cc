@@ -503,10 +503,15 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
       const char* file_name = relobj == NULL ? NULL : relobj->name().c_str();
       Output_section** output_section_slot;
       Script_sections::Section_type script_section_type;
+      const char* orig_name = name;
       name = ss->output_section_name(file_name, name, &output_section_slot,
 				     &script_section_type);
       if (name == NULL)
 	{
+	  gold_debug(DEBUG_SCRIPT, _("Unable to create output section '%s' "
+				     "because it is not allowed by the "
+				     "SECTIONS clause of the linker script"),
+		     orig_name);
 	  // The SECTIONS clause says to discard this input section.
 	  return NULL;
 	}

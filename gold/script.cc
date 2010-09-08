@@ -3220,3 +3220,122 @@ script_saw_segment_start_expression(void* closurev)
   Script_sections* ss = closure->script_options()->script_sections();
   ss->set_saw_segment_start_expression(true);
 }
+
+extern "C" void
+script_set_section_region(void* closurev, const char* name, size_t namelen,
+			  int set_vma)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (!closure->script_options()->saw_sections_clause())
+    {
+      gold_error(_("%s:%d:%d: MEMORY region '%.*s' referred to outside of "
+		   "SECTIONS clause"),
+		 closure->filename(), closure->lineno(), closure->charpos(),
+		 namelen, name);
+      return;
+    }
+
+  Script_sections* ss = closure->script_options()->script_sections();
+  Memory_region* mr = ss->find_memory_region(name, namelen);
+  if (mr == NULL)
+    {
+      gold_error(_("%s:%d:%d: MEMORY region '%.*s' not declared"),
+		 closure->filename(), closure->lineno(), closure->charpos(),
+		 namelen, name);
+      return;
+    }
+
+  ss->set_memory_region(mr, set_vma);
+}
+
+extern "C" void
+script_add_memory(void* closurev, const char* name, size_t namelen,
+		  unsigned int attrs, Expression* origin, Expression* length)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  Script_sections* ss = closure->script_options()->script_sections();
+  ss->add_memory_region(name, namelen, attrs, origin, length);
+}
+
+extern "C" unsigned int
+script_parse_memory_attr(void* closurev, const char* attrs, size_t attrlen,
+			 int invert)
+{
+  int attributes = 0;
+
+  while (attrlen--)
+    switch (*attrs++)
+      {
+      case 'R':
+      case 'r':
+	attributes |= MEM_READABLE; break;
+      case 'W':
+      case 'w':
+	attributes |= MEM_READABLE | MEM_WRITEABLE; break;
+      case 'X':
+      case 'x':
+	attributes |= MEM_EXECUTABLE; break;
+      case 'A':
+      case 'a':
+	attributes |= MEM_ALLOCATABLE; break;
+      case 'I':
+      case 'i':
+      case 'L':
+      case 'l':
+	attributes |= MEM_INITIALIZED; break;
+      default:
+	yyerror(closurev, _("unknown MEMORY attribute"));
+      }
+
+  if (invert)
+    attributes = (~ attributes) & MEM_ATTR_MASK;
+
+  return attributes;
+}
+
+extern "C" void
+script_include_directive(void* closurev, const char*, size_t)
+{
+  // FIXME: Implement ?
+  yyerror (closurev, _("GOLD does not currently support INCLUDE directives"));
+}
+
+// Functions for memory regions.
+
+extern "C" Expression*
+script_exp_function_origin(void* closurev, const char* name, size_t namelen)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  Script_sections* ss = closure->script_options()->script_sections();
+  Expression* origin = ss->find_memory_region_origin(name, namelen);
+
+  if (origin == NULL)
+    {
+      gold_error(_("undefined memory region '%s' referenced "
+		   "in ORIGIN expression"),
+		 name);
+      // Create a dummy expression to prevent crashes later on.
+      origin = script_exp_integer(0);
+    }
+
+  return origin;
+}
+
+extern "C" Expression*
+script_exp_function_length(void* closurev, const char* name, size_t namelen)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  Script_sections* ss = closure->script_options()->script_sections();
+  Expression* length = ss->find_memory_region_length(name, namelen);
+
+  if (length == NULL)
+    {
+      gold_error(_("undefined memory region '%s' referenced "
+		   "in LENGTH expression"),
+		 name);
+      // Create a dummy expression to prevent crashes later on.
+      length = script_exp_integer(0);
+    }
+
+  return length;
+}

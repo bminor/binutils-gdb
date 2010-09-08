@@ -143,6 +143,7 @@
 %token INFO
 %token INPUT
 %token KEEP
+%token LEN
 %token LENGTH		/* LENGTH, l, len */
 %token LOADADDR
 %token LOCAL		/* local */
@@ -157,6 +158,7 @@
 %token NOLOAD
 %token ONLY_IF_RO
 %token ONLY_IF_RW
+%token ORG
 %token ORIGIN		/* ORIGIN, o, org */
 %token OUTPUT
 %token OUTPUT_ARCH
@@ -215,7 +217,7 @@
 %type <wildcard_section> wildcard_file wildcard_section
 %type <string_list> exclude_names
 %type <string> wildcard_name
-%type <integer> phdr_type
+%type <integer> phdr_type memory_attr
 %type <phdr_info> phdr_info
 %type <versyms> vers_defns
 %type <versnode> vers_tag
@@ -250,6 +252,7 @@ file_cmd:
 	| INHIBIT_COMMON_ALLOCATION
 	    { script_set_common_allocation(closure, 0); }
 	| INPUT '(' input_list ')'
+	| MEMORY '{' memory_defs '}'
         | OPTION '(' string ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
 	| OUTPUT_FORMAT '(' string ')'
@@ -471,14 +474,14 @@ section_trailer:
 /* A memory specification for an output section.  */
 opt_memspec:
 	  '>' string
-	    { yyerror(closure, "memory regions are not supported"); }
+	    { script_set_section_region(closure, $2.value, $2.length, 1); }
 	| /* empty */
 	;
 
 /* A memory specification for where to load an output section.  */
 opt_at_memspec:
 	  AT '>' string
-	    { yyerror(closure, "memory regions are not supported"); }
+	    { script_set_section_region(closure, $3.value, $3.length, 0); }
 	| /* empty */
 	;
 
@@ -688,6 +691,50 @@ file_or_sections_cmd:
 	    { script_add_assertion(closure, $3, $5.value, $5.length); }
 	;
 
+/* A list of MEMORY definitions.  */
+memory_defs:
+	  memory_defs opt_comma memory_def
+	| /* empty */
+	;
+
+/* A single MEMORY definition.  */
+memory_def:
+	  string memory_attr ':' memory_origin '=' parse_exp opt_comma memory_length '=' parse_exp
+	  { script_add_memory(closure, $1.value, $1.length, $2, $6, $10); }
+	|
+	  /* LD supports an INCLUDE directive here, currently GOLD does not.  */
+	  INCLUDE string
+	  { script_include_directive(closure, $2.value, $2.length); }
+	|
+	;
+
+/* The (optional) attributes of a MEMORY region.  */
+memory_attr:
+	  '(' string ')'
+	  { $$ = script_parse_memory_attr(closure, $2.value, $2.length, 0); }
+        | /* Inverted attributes. */
+	  '(' '!' string ')'
+	  { $$ = script_parse_memory_attr(closure, $3.value, $3.length, 1); }
+	| /* empty */
+	    { $$ = 0; }
+	;
+
+memory_origin:
+          ORIGIN
+	|
+	  ORG
+	|
+	  'o'
+	;
+
+memory_length:
+          LENGTH
+	|
+	  LEN
+	|
+	  'l'
+	;
+
 /* A list of program header definitions.  */
 phdrs_defs:
 	  phdrs_defs phdr_def
@@ -885,9 +932,9 @@ exp:
 	| LOADADDR '(' string ')'
 	    { $$ = script_exp_function_loadaddr($3.value, $3.length); }
 	| ORIGIN '(' string ')'
-	    { $$ = script_exp_function_origin($3.value, $3.length); }
+	    { $$ = script_exp_function_origin(closure, $3.value, $3.length); }
 	| LENGTH '(' string ')'
-	    { $$ = script_exp_function_length($3.value, $3.length); }
+	    { $$ = script_exp_function_length(closure, $3.value, $3.length); }
 	| CONSTANT '(' string ')'
 	    { $$ = script_exp_function_constant($3.value, $3.length); }
 	| ABSOLUTE '(' exp ')'

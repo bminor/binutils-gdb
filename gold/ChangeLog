@@ -1,3 +1,32 @@
+2010-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* README: Remove claim that MEMORY is not supported.
+	* expression.cc (script_exp_function_origin)
+	(script_exp_function_length): Move from here to ...
+	* script.cc: ... here.
+	(script_set_section_region, script_add_memory)
+	(script_parse_memory_attr, script_include_directive): New
+	functions.
+	* script-sections.cc
+	(class Memory_region): New class.
+	(class Output_section_definition): Add set_memory_region,
+	set_section_vma, set_section_lma and get_section_name methods.
+	(class Script_Sections): Add add_memory_region,
+	find_memory_region, find_memory_region_origin,
+	find_memory_region_length and set_memory_region methods.
+	Have set_section_addresses method walk the list of set memory
+	regions.
+	Extend the print methos to display memory regions.
+	* script-sections.h: Add prototypes for new methods.
+	Add enum for MEMORY region attributes.
+	* yyscript.y: Add support for parsing MEMORY regions.
+	* script-c.h: Add prototypes for new functions.
+	* testsuite/Makefile.am: Add test of MEMORY region functionality.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/memory_test.sh: New script.
+	* testsuite/memory_test.s: New assembler source file.
+	* testsuite/memory_test.t: New linker script.
+
 2010-08-27  Doug Kwan  <dougkwan@google.com>
 
 	* gold/resolve.cc (Symbol_table::should_override): Let a weak
