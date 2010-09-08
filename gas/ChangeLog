@@ -1,3 +1,8 @@
+2010-09-08  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (create_neon_reg_alias): Deal with case
+	sensitivity.
+
 2010-09-08  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/11973

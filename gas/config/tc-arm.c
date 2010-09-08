@@ -2303,7 +2303,16 @@ create_neon_reg_alias (char *newname, char *p)
         }
     }
 
+  /* If TC_CASE_SENSITIVE is defined, then newname already points to
+     the desired alias name, and p points to its end.  If not, then
+     the desired alias name is in the global original_case_string.  */
+#ifdef TC_CASE_SENSITIVE
   namelen = nameend - newname;
+#else
+  newname = original_case_string;
+  namelen = strlen (newname);
+#endif
+
   namebuf = (char *) alloca (namelen + 1);
   strncpy (namebuf, newname, namelen);
   namebuf[namelen] = '\0';
