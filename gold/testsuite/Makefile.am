@@ -1787,7 +1787,7 @@ memory_test: memory_test.s
 	$(COMPILE) -c $< -o memory_test.o
 	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
 memory_test.stdout: memory_test
-	$(TEST_READELF) -lS  $< > $@
+	$(TEST_READELF) -lWS  $< > $@
 
 endif GCC
 endif NATIVE_LINKER

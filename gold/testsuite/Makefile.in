@@ -4487,7 +4487,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c $< -o memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.stdout: memory_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lS  $< > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lWS  $< > $@
 @DEFAULT_TARGET_I386_TRUE@split_i386_1.o: split_i386_1.s
 @DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
 @DEFAULT_TARGET_I386_TRUE@split_i386_2.o: split_i386_2.s
