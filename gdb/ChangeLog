@@ -1,3 +1,8 @@
+2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (read_func_scope, read_structure_type)
+	(read_common_block): Check for a NULL return from new_symbol.
+
 2010-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_read_index): Return on no SEC_HAS_CONTENTS.

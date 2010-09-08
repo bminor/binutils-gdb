@@ -5486,7 +5486,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
-	      VEC_safe_push (symbolp, template_args, arg);
+	      if (arg != NULL)
+		VEC_safe_push (symbolp, template_args, arg);
 	    }
 	  else
 	    process_die (child_die, cu);
@@ -6825,7 +6826,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      struct symbol *arg = new_symbol (child_die, NULL, cu);
 
-	      VEC_safe_push (symbolp, template_args, arg);
+	      if (arg != NULL)
+		VEC_safe_push (symbolp, template_args, arg);
 	    }
 
 	  child_die = sibling_die (child_die);
@@ -7306,7 +7308,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  sym = new_symbol (child_die, NULL, cu);
 	  attr = dwarf2_attr (child_die, DW_AT_data_member_location, cu);
-	  if (attr)
+	  if (sym != NULL && attr != NULL)
 	    {
 	      CORE_ADDR byte_offset = 0;
 
