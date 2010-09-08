@@ -1,3 +1,8 @@
+2010-09-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/maint.exp: Avoid wildcards against potentially very long
+	"maint print statistics" output to prevent expect timeouts.
+
 2010-09-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/printcmds.exp (test_float_accepted): Import gdb_prompt.

@@ -149,14 +149,18 @@ if [istarget "*-*-cygwin*"] {
 	set timeout [expr $timeout + 500]
 }
 
-gdb_test_multiple "maint print statistics" "maint print statistics" {
-    -re "Statistics for.*break.*Number of \"minimal\" symbols read.*Number of \"partial\" symbols read.*Number of \"types\" defined.*Number of psym tables \\(not yet expanded\\).*Number of symbol tables.*Number of symbol tables with line tables.*Number of symbol tables with blockvectors.*Total memory used for psymbol obstack.*Total memory used for psymbol cache.*Total memory used for symbol obstack.*Total memory used for type obstack.*$gdb_prompt $" { 
-	# Old output for gdb 6.0 and earlier
-	pass "maint print statistics" 
+send_gdb "maint print statistics\n"
+gdb_expect  {
+    -re "Statistics for\[^\n\r\]*break\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n  Number of \"partial\" symbols read: $decimal\r\n  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n  Number of psym tables \\(not yet expanded\\): $decimal\r\n  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for psymbol cache: $decimal\r\n  Total memory used for macro cache: $decimal\r\n  Total memory used for file name cache: $decimal\r\n" {
+	gdb_expect {
+	    -re "$gdb_prompt $" {
+		pass "maint print statistics"
+	    }
+	    timeout { fail "(timeout) maint print statistics" }
+	}
     }
-    -re "Statistics for.*break.*Number of \"minimal\" symbols read.*Number of \"partial\" symbols read.*Number of \"types\" defined.*Number of psym tables \\(not yet expanded\\).*Number of symbol tables.*Number of symbol tables with line tables.*Number of symbol tables with blockvectors.*Total memory used for objfile obstack.*Total memory used for psymbol cache.*Total memory used for macro cache.*$gdb_prompt $" {
-	pass "maint print statistics"
-    }
+    -re ".*$gdb_prompt $"     { fail "maint print statistics" }
+    timeout         { fail "(timeout) maint print statistics" }
 }
 
 # There aren't any ...
