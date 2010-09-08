@@ -1,5 +1,9 @@
 2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.cp/templates.exp (test_template_args): Allow "struct".
+
+2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.cp/templates.cc (Empty, FunctionArg): New classes.
 	(FunctionArg::method): New function.
 	(empty, arg): New variables.

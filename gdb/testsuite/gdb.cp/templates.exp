@@ -200,10 +200,10 @@ proc test_template_args {} {
 
     set empty_re "Empty *<void *\\(FunctionArg *<int>\\)>"
     gdb_test "ptype empty" \
-	"type = class $empty_re {.*<no data fields>.*}"
+	"type = (struct|class) $empty_re {.*<no data fields>.*}"
 
     gdb_test "ptype arg" \
-	"type = class FunctionArg<int> {.*int method\\($empty_re \\&\\);.*}"
+	"type = (struct|class) FunctionArg<int> {.*int method\\($empty_re \\&\\);.*}"
 }
 
 proc do_tests {} {
