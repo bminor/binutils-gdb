@@ -1,3 +1,7 @@
+2010-09-08  Doug Evans  <dje@google.com>
+
+	* dwarf2-frame.h (dwarf2_frame_build_info): Delete, unused.
+
 2010-09-08  Tom Tromey  <tromey@redhat.com>
 
 	Revert:

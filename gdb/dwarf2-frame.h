@@ -114,10 +114,6 @@ void dwarf2_append_unwinders (struct gdbarch *gdbarch);
 extern const struct frame_base *
   dwarf2_frame_base_sniffer (struct frame_info *this_frame);
 
-/* Register the DWARF CFI for OBJFILE.  */
-
-void dwarf2_frame_build_info (struct objfile *objfile);
-
 /* Compute the DWARF CFA for a frame.  */
 
 CORE_ADDR dwarf2_frame_cfa (struct frame_info *this_frame);
