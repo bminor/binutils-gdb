@@ -1,3 +1,8 @@
+2010-09-08  Rafael Espindola  <espindola@google.com>
+
+	* arm.cc (do_finalize_sections): Create the __exidx_start and
+	__exdix_end symbols even when the section is missing.
+
 2010-09-08  Nick Clifton  <nickc@redhat.com>
 
 	* README: Remove claim that MEMORY is not supported.

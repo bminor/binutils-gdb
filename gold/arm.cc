@@ -8426,33 +8426,50 @@ Target_arm<big_endian>::do_finalize_sections(
 
   // Handle the .ARM.exidx section.
   Output_section* exidx_section = layout->find_output_section(".ARM.exidx");
-  if (exidx_section != NULL
-      && exidx_section->type() == elfcpp::SHT_ARM_EXIDX
-      && !parameters->options().relocatable())
-    {
-      // Create __exidx_start and __exdix_end symbols.
-      symtab->define_in_output_data("__exidx_start", NULL,
-				    Symbol_table::PREDEFINED,
-				    exidx_section, 0, 0, elfcpp::STT_OBJECT,
-				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
-				    false, true);
-      symtab->define_in_output_data("__exidx_end", NULL,
-				    Symbol_table::PREDEFINED,
-				    exidx_section, 0, 0, elfcpp::STT_OBJECT,
-				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
-				    true, true);
 
-      // For the ARM target, we need to add a PT_ARM_EXIDX segment for
-      // the .ARM.exidx section.
-      if (!layout->script_options()->saw_phdrs_clause())
-	{
-	  gold_assert(layout->find_output_segment(elfcpp::PT_ARM_EXIDX, 0, 0)
-		      == NULL);
-	  Output_segment*  exidx_segment =
-	    layout->make_output_segment(elfcpp::PT_ARM_EXIDX, elfcpp::PF_R);
-	  exidx_segment->add_output_section_to_nonload(exidx_section,
-						       elfcpp::PF_R);
-	}
+  if (!parameters->options().relocatable())
+    {
+      if (exidx_section != NULL
+          && exidx_section->type() == elfcpp::SHT_ARM_EXIDX)
+        {
+          // Create __exidx_start and __exdix_end symbols.
+          symtab->define_in_output_data("__exidx_start", NULL,
+                                        Symbol_table::PREDEFINED,
+                                        exidx_section, 0, 0, elfcpp::STT_OBJECT,
+                                        elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN,
+                                        0, false, true);
+          symtab->define_in_output_data("__exidx_end", NULL,
+                                        Symbol_table::PREDEFINED,
+                                        exidx_section, 0, 0, elfcpp::STT_OBJECT,
+                                        elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN,
+                                        0, true, true);
+
+          // For the ARM target, we need to add a PT_ARM_EXIDX segment for
+          // the .ARM.exidx section.
+          if (!layout->script_options()->saw_phdrs_clause())
+            {
+              gold_assert(layout->find_output_segment(elfcpp::PT_ARM_EXIDX, 0,
+                                                      0)
+                          == NULL);
+              Output_segment*  exidx_segment =
+                layout->make_output_segment(elfcpp::PT_ARM_EXIDX, elfcpp::PF_R);
+              exidx_segment->add_output_section_to_nonload(exidx_section,
+                                                           elfcpp::PF_R);
+            }
+        }
+      else
+        {
+          symtab->define_as_constant("__exidx_start", NULL,
+                                     Symbol_table::PREDEFINED,
+                                     0, 0, elfcpp::STT_OBJECT,
+                                     elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
+                                     true, false);
+          symtab->define_as_constant("__exidx_end", NULL,
+                                     Symbol_table::PREDEFINED,
+                                     0, 0, elfcpp::STT_OBJECT,
+                                     elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
+                                     true, false);
+        }
     }
 
   // Create an .ARM.attributes section if we have merged any attributes
