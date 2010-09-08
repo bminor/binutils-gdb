@@ -1,5 +1,6 @@
-# thumb_bl_out_of_range.s
-# Test THUMB/THUMB-2 bl instructions just out of the branch range limits.
+# thumb_bl_out_of_range_local.s
+# Test THUMB/THUMB-2 bl instructions just out of the branch range limits
+# and with local branch targets.
 	.syntax	unified
 
 	.section	.text.pre,"x"
@@ -7,13 +8,12 @@
 # Add padding so that target is just output of branch range. 
 	.space	6
 
-	.global	_backward_target
 	.code	16
 	.thumb_func
-	.type	_backword_target, %function
-_backward_target:
+	.type	.Lbackward_target, %function
+.Lbackward_target:
 	bx	lr
-	.size	_backward_target, .-_backward_target
+	.size	.Lbackward_target, .-.Lbackward_target
 	
 	.text
 # Use 256-byte alignment so that we know where the stubs start.
@@ -33,7 +33,7 @@ _start:
 	.thumb_func
 	.type	_backward_test, %function
 _backward_test:
-	bl	_backward_target
+	bl	.Lbackward_target
 	.size	_backward_test, .-_backward_test
 
 	.global	_forward_test
@@ -41,22 +41,21 @@ _backward_test:
 	.thumb_func
 	.type	_forward_test, %function
 _forward_test:
-	bl	_forward_target
+	bl	.Lforward_target
 	.size	_forward_test, .-_forward_test
-	
-# switch back to ARM mode so that stubs are disassembled correctly.
+
+# Switch back to ARM mode so that we can see stubs
 	.code	32
 	nop
-
+	
 	.section	.text.post,"x"
 
 # Add padding so that target is just out of branch range. 
 	.space	12
 
-	.global	_forward_target
 	.code	16
 	.thumb_func
-	.type	_forward_target, %function
-_forward_target:
+	.type	.Lforward_target, %function
+.Lforward_target:
 	bx	lr
-	.size	_forward_target, .-_forward_target
+	.size	.Lforward_target, .-.Lforward_target

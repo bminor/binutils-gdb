@@ -1878,6 +1878,178 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
   this->output_local_dynsym_count_ = dyncount;
 }
 
+// Compute the final value of a local symbol.
+
+template<int size, bool big_endian>
+typename Sized_relobj<size, big_endian>::Compute_final_local_value_status
+Sized_relobj<size, big_endian>::compute_final_local_value_internal(
+    unsigned int r_sym,
+    const Symbol_value<size>* lv_in,
+    Symbol_value<size>* lv_out,
+    bool relocatable,
+    const Output_sections& out_sections,
+    const std::vector<Address>& out_offsets,
+    const Symbol_table* symtab)
+{
+  // We are going to overwrite *LV_OUT, if it has a merged symbol value,
+  // we may have a memory leak.
+  gold_assert(lv_out->has_output_value());
+
+  bool is_ordinary;
+  unsigned int shndx = lv_in->input_shndx(&is_ordinary);
+  
+  // Set the output symbol value.
+  
+  if (!is_ordinary)
+    {
+      if (shndx == elfcpp::SHN_ABS || Symbol::is_common_shndx(shndx))
+	lv_out->set_output_value(lv_in->input_value());
+      else
+	{
+	  this->error(_("unknown section index %u for local symbol %u"),
+		      shndx, r_sym);
+	  lv_out->set_output_value(0);
+	  return This::CFLV_ERROR;
+	}
+    }
+  else
+    {
+      if (shndx >= this->shnum())
+	{
+	  this->error(_("local symbol %u section index %u out of range"),
+		      r_sym, shndx);
+	  lv_out->set_output_value(0);
+	  return This::CFLV_ERROR;
+	}
+      
+      Output_section* os = out_sections[shndx];
+      Address secoffset = out_offsets[shndx];
+      if (symtab->is_section_folded(this, shndx))
+	{
+	  gold_assert(os == NULL && secoffset == invalid_address);
+	  // Get the os of the section it is folded onto.
+	  Section_id folded = symtab->icf()->get_folded_section(this,
+								shndx);
+	  gold_assert(folded.first != NULL);
+	  Sized_relobj<size, big_endian>* folded_obj = reinterpret_cast
+	    <Sized_relobj<size, big_endian>*>(folded.first);
+	  os = folded_obj->output_section(folded.second);
+	  gold_assert(os != NULL);
+	  secoffset = folded_obj->get_output_section_offset(folded.second);
+	  
+	  // This could be a relaxed input section.
+	  if (secoffset == invalid_address)
+	    {
+	      const Output_relaxed_input_section* relaxed_section =
+		os->find_relaxed_input_section(folded_obj, folded.second);
+	      gold_assert(relaxed_section != NULL);
+	      secoffset = relaxed_section->address() - os->address();
+	    }
+	}
+      
+      if (os == NULL)
+	{
+	  // This local symbol belongs to a section we are discarding.
+	  // In some cases when applying relocations later, we will
+	  // attempt to match it to the corresponding kept section,
+	  // so we leave the input value unchanged here.
+	  return This::CFLV_DISCARDED;
+	}
+      else if (secoffset == invalid_address)
+	{
+	  uint64_t start;
+	  
+	  // This is a SHF_MERGE section or one which otherwise
+	  // requires special handling.
+	  if (shndx == this->discarded_eh_frame_shndx_)
+	    {
+	      // This local symbol belongs to a discarded .eh_frame
+	      // section.  Just treat it like the case in which
+	      // os == NULL above.
+	      gold_assert(this->has_eh_frame_);
+	      return This::CFLV_DISCARDED;
+	    }
+	  else if (!lv_in->is_section_symbol())
+	    {
+	      // This is not a section symbol.  We can determine
+	      // the final value now.
+	      lv_out->set_output_value(
+		  os->output_address(this, shndx, lv_in->input_value()));
+	    }
+	  else if (!os->find_starting_output_address(this, shndx, &start))
+	    {
+	      // This is a section symbol, but apparently not one in a
+	      // merged section.  First check to see if this is a relaxed
+	      // input section.  If so, use its address.  Otherwise just
+	      // use the start of the output section.  This happens with
+	      // relocatable links when the input object has section
+	      // symbols for arbitrary non-merge sections.
+	      const Output_section_data* posd =
+		os->find_relaxed_input_section(this, shndx);
+	      if (posd != NULL)
+		{
+		  Address relocatable_link_adjustment =
+		    relocatable ? os->address() : 0;
+		  lv_out->set_output_value(posd->address()
+					   - relocatable_link_adjustment);
+		}
+	      else
+		lv_out->set_output_value(os->address());
+	    }
+	  else
+	    {
+	      // We have to consider the addend to determine the
+	      // value to use in a relocation.  START is the start
+	      // of this input section.  If we are doing a relocatable
+	      // link, use offset from start output section instead of
+	      // address.
+	      Address adjusted_start =
+		relocatable ? start - os->address() : start;
+	      Merged_symbol_value<size>* msv =
+		new Merged_symbol_value<size>(lv_in->input_value(),
+					      adjusted_start);
+	      lv_out->set_merged_symbol_value(msv);
+	    }
+	}
+      else if (lv_in->is_tls_symbol())
+	lv_out->set_output_value(os->tls_offset()
+				 + secoffset
+				 + lv_in->input_value());
+      else
+	lv_out->set_output_value((relocatable ? 0 : os->address())
+				 + secoffset
+				 + lv_in->input_value());
+    }
+  return This::CFLV_OK;
+}
+
+// Compute final local symbol value.  R_SYM is the index of a local
+// symbol in symbol table.  LV points to a symbol value, which is
+// expected to hold the input value and to be over-written by the
+// final value.  SYMTAB points to a symbol table.  Some targets may want
+// to know would-be-finalized local symbol values in relaxation.
+// Hence we provide this method.  Since this method updates *LV, a
+// callee should make a copy of the original local symbol value and
+// use the copy instead of modifying an object's local symbols before
+// everything is finalized.  The caller should also free up any allocated
+// memory in the return value in *LV.
+template<int size, bool big_endian>
+typename Sized_relobj<size, big_endian>::Compute_final_local_value_status
+Sized_relobj<size, big_endian>::compute_final_local_value(
+    unsigned int r_sym,
+    const Symbol_value<size>* lv_in,
+    Symbol_value<size>* lv_out,
+    const Symbol_table* symtab)
+{
+  // This is just a wrapper of compute_final_local_value_internal.
+  const bool relocatable = parameters->options().relocatable();
+  const Output_sections& out_sections(this->output_sections());
+  const std::vector<Address>& out_offsets(this->section_offsets_);
+  return this->compute_final_local_value_internal(r_sym, lv_in, lv_out,
+						  relocatable, out_sections,
+						  out_offsets, symtab);
+}
+
 // Finalize the local symbols.  Here we set the final value in
 // THIS->LOCAL_VALUES_ and set their output symbol table indexes.
 // This function is always called from a singleton thread.  The actual
@@ -1897,141 +2069,31 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   const bool relocatable = parameters->options().relocatable();
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets_);
-  unsigned int shnum = this->shnum();
 
   for (unsigned int i = 1; i < loccount; ++i)
     {
-      Symbol_value<size>& lv(this->local_values_[i]);
+      Symbol_value<size>* lv = &this->local_values_[i];
 
-      bool is_ordinary;
-      unsigned int shndx = lv.input_shndx(&is_ordinary);
-
-      // Set the output symbol value.
-
-      if (!is_ordinary)
+      This::Compute_final_local_value_status cflv_status =
+	this->compute_final_local_value_internal(i, lv, lv, relocatable,
+						 out_sections, out_offsets,
+						 symtab);
+      switch (cflv_status)
 	{
-	  if (shndx == elfcpp::SHN_ABS || Symbol::is_common_shndx(shndx))
-	    lv.set_output_value(lv.input_value());
-	  else
+	case CFLV_OK:
+	  if (!lv->is_output_symtab_index_set())
 	    {
-	      this->error(_("unknown section index %u for local symbol %u"),
-			  shndx, i);
-	      lv.set_output_value(0);
+	      lv->set_output_symtab_index(index);
+	      ++index;
 	    }
+	  break;
+	case CFLV_DISCARDED:
+	case CFLV_ERROR:
+	  // Do nothing.
+	  break;
+	default:
+	  gold_unreachable();
 	}
-      else
-	{
-	  if (shndx >= shnum)
-	    {
-	      this->error(_("local symbol %u section index %u out of range"),
-			  i, shndx);
-	      shndx = 0;
-	    }
-
-	  Output_section* os = out_sections[shndx];
-          Address secoffset = out_offsets[shndx];
-          if (symtab->is_section_folded(this, shndx))
-            {
-              gold_assert(os == NULL && secoffset == invalid_address);
-              // Get the os of the section it is folded onto.
-              Section_id folded = symtab->icf()->get_folded_section(this,
-                                                                    shndx);
-              gold_assert(folded.first != NULL);
-              Sized_relobj<size, big_endian>* folded_obj = reinterpret_cast
-                <Sized_relobj<size, big_endian>*>(folded.first);
-              os = folded_obj->output_section(folded.second);
-              gold_assert(os != NULL);
-              secoffset = folded_obj->get_output_section_offset(folded.second);
-
-	      // This could be a relaxed input section.
-              if (secoffset == invalid_address)
-		{
-		  const Output_relaxed_input_section* relaxed_section =
-		    os->find_relaxed_input_section(folded_obj, folded.second);
-		  gold_assert(relaxed_section != NULL);
-		  secoffset = relaxed_section->address() - os->address();
-		}
-            }
-
-	  if (os == NULL)
-	    {
-              // This local symbol belongs to a section we are discarding.
-              // In some cases when applying relocations later, we will
-              // attempt to match it to the corresponding kept section,
-              // so we leave the input value unchanged here.
-	      continue;
-	    }
-	  else if (secoffset == invalid_address)
-	    {
-	      uint64_t start;
-
-	      // This is a SHF_MERGE section or one which otherwise
-	      // requires special handling.
-	      if (shndx == this->discarded_eh_frame_shndx_)
-		{
-		  // This local symbol belongs to a discarded .eh_frame
-		  // section.  Just treat it like the case in which
-		  // os == NULL above.
-		  gold_assert(this->has_eh_frame_);
-		  continue;
-		}
-	      else if (!lv.is_section_symbol())
-		{
-		  // This is not a section symbol.  We can determine
-		  // the final value now.
-		  lv.set_output_value(os->output_address(this, shndx,
-							 lv.input_value()));
-		}
-	      else if (!os->find_starting_output_address(this, shndx, &start))
-		{
-		  // This is a section symbol, but apparently not one in a
-		  // merged section.  First check to see if this is a relaxed
-		  // input section.  If so, use its address.  Otherwise just
-		  // use the start of the output section.  This happens with
-		  // relocatable links when the input object has section
-		  // symbols for arbitrary non-merge sections.
-		  const Output_section_data* posd =
-		    os->find_relaxed_input_section(this, shndx);
-		  if (posd != NULL)
-		    {
-		      Address relocatable_link_adjustment =
-			relocatable ? os->address() : 0;
-		      lv.set_output_value(posd->address()
-					  - relocatable_link_adjustment);
-		    }
-		  else
-		    lv.set_output_value(os->address());
-		}
-	      else
-		{
-		  // We have to consider the addend to determine the
-		  // value to use in a relocation.  START is the start
-		  // of this input section.  If we are doing a relocatable
-		  // link, use offset from start output section instead of
-		  // address.
-		  Address adjusted_start =
-		    relocatable ? start - os->address() : start;
-		  Merged_symbol_value<size>* msv =
-		    new Merged_symbol_value<size>(lv.input_value(),
-						  adjusted_start);
-		  lv.set_merged_symbol_value(msv);
-		}
-	    }
-          else if (lv.is_tls_symbol())
-	    lv.set_output_value(os->tls_offset()
-				+ secoffset
-				+ lv.input_value());
-	  else
-	    lv.set_output_value((relocatable ? 0 : os->address())
-				+ secoffset
-				+ lv.input_value());
-	}
-
-      if (!lv.is_output_symtab_index_set())
-        {
-          lv.set_output_symtab_index(index);
-          ++index;
-        }
     }
   return index;
 }

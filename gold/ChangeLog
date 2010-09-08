@@ -1,3 +1,42 @@
+2010-09-08  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_exidx_cantunwind::do_print_to_mapfile): New method.
+	(Arm_relobj::do_relocate_sections): Add new parameter for output
+	file to match the parent.
+	(Target_arm::scan_reloc_section_for_stubs): Use would-be final values
+	of local symbols instead of input values.  Update code to track
+	changes in gold::relocate_section.
+	* object.cc (Sized_relobj::compute_final_local_value): New methods.
+	(Sized_relobj::compute_final_local_value_internal): New methods.
+	(Sized_relobj::do_finalize_local_symbols): Move code from loop
+	body into private version of Sized_relobj::compute_final_local_value.
+	Call the inline method.
+	* object.h (Symbol_value::Symbol_value): Define destructor.  Free
+	merged symbol value if there is one.
+	(Symbol_value::has_output_value): New method defintiion.
+	(Sized_relobj::Compute_final_local_value_status): New enum type.
+	(Sized_relobj::compute_final_local_value): New methods.
+	(Sized_relobj::compute_final_local_value_internal): New methods.
+	* Makefile.am (check_SCRIPTS): Add arm_branch_out_of_range.sh
+	and arm_cortex_a8.sh.
+	(thumb_bl_out_of_range_local, arm_cortex_a8_b_cond, arm_cortex_a8_bl,
+	arm_cortex_a8_blx, arm_cortex_a8_local, arm_corte_a8_local_reloc):
+	New tests.
+	* Makefile.in: Regenerate.
+	* testsuite/arm_bl_out_of_range.s: Update test.
+	* testsuite/thumb_bl_out_of_range.s: Ditto.
+	* testsuite/thumb_blx_out_of_range.s: Ditto.
+	* testsuite/arm_branch_out_of_range.sh: New file.
+	* testsuite/arm_cortex_a8.sh: Ditto.
+	* testsuite/arm_cortex_a8_b.s: Ditto.
+	* testsuite/arm_cortex_a8_b_cond.s: Ditto.
+	* testsuite/arm_cortex_a8_b_local.s: Ditto.
+	* testsuite/arm_cortex_a8_bl.s: Ditto.
+	* testsuite/arm_cortex_a8_blx.s: Ditto.
+	* testsuite/arm_cortex_a8_local.s: Ditto.
+	* testsuite/arm_cortex_a8_local_reloc.s: Ditto.
+	* testsuite/thumb_bl_out_of_range_local.s: Ditto.
+
 2010-09-08  Rafael Espindola  <espindola@google.com>
 
 	* script-sections.cc (Script_sections::add_memory_region): Convert

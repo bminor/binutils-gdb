@@ -1155,6 +1155,12 @@ class Symbol_value
       is_tls_symbol_(false), is_ifunc_symbol_(false), has_output_value_(true)
   { this->u_.value = 0; }
 
+  ~Symbol_value()
+  {
+    if (!this->has_output_value_)
+      delete this->u_.merged_symbol_value;
+  }
+
   // Get the value of this symbol.  OBJECT is the object in which this
   // symbol is defined, and ADDEND is an addend to add to the value.
   template<bool big_endian>
@@ -1380,6 +1386,11 @@ class Symbol_value
   is_ifunc_symbol() const
   { return this->is_ifunc_symbol_; }
 
+  // Return true if this has output value.
+  bool
+  has_output_value() const
+  { return this->has_output_value_; }
+
  private:
   // The index of this local symbol in the output symbol table.  This
   // will be 0 if no value has been assigned yet, and the symbol may
@@ -1557,6 +1568,16 @@ class Sized_relobj : public Relobj
   typedef std::vector<Symbol_value<size> > Local_values;
 
   static const Address invalid_address = static_cast<Address>(0) - 1;
+
+  enum Compute_final_local_value_status
+  {
+    // No error.
+    CFLV_OK,
+    // An error occurred.
+    CFLV_ERROR,
+    // The local symbol has no output section.
+    CFLV_DISCARDED
+  };
 
   Sized_relobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);
@@ -1741,6 +1762,22 @@ class Sized_relobj : public Relobj
   // debugging sections.
   Address
   map_to_kept_section(unsigned int shndx, bool* found) const;
+
+  // Compute final local symbol value.  R_SYM is the local symbol index.
+  // LV_IN points to a local symbol value containing the input value.
+  // LV_OUT points to a local symbol value storing the final output value,
+  // which must not be a merged symbol value since before calling this
+  // method to avoid memory leak.  SYMTAB points to a symbol table.
+  //
+  // The method returns a status code at return.  If the return status is
+  // CFLV_OK, *LV_OUT contains the final value.  If the return status is
+  // CFLV_ERROR, *LV_OUT is 0.  If the return status is CFLV_DISCARDED,
+  // *LV_OUT is not modified.
+  Compute_final_local_value_status
+  compute_final_local_value(unsigned int r_sym,
+			    const Symbol_value<size>* lv_in,
+			    Symbol_value<size>* lv_out,
+			    const Symbol_table* symtab);
 
  protected:
   // Set up.
@@ -2161,6 +2198,28 @@ class Sized_relobj : public Relobj
     *kept_shndx = p->second.shndx;
     return true;
   }
+
+  // Compute final local symbol value.  R_SYM is the local symbol index.
+  // LV_IN points to a local symbol value containing the input value.
+  // LV_OUT points to a local symbol value storing the final output value,
+  // which must not be a merged symbol value since before calling this
+  // method to avoid memory leak.  RELOCATABLE indicates whether we are
+  // linking a relocatable output.  OUT_SECTIONS is an array of output
+  // sections.  OUT_OFFSETS is an array of offsets of the sections.  SYMTAB
+  // points to a symbol table.
+  //
+  // The method returns a status code at return.  If the return status is
+  // CFLV_OK, *LV_OUT contains the final value.  If the return status is
+  // CFLV_ERROR, *LV_OUT is 0.  If the return status is CFLV_DISCARDED,
+  // *LV_OUT is not modified.
+  inline Compute_final_local_value_status
+  compute_final_local_value_internal(unsigned int r_sym,
+				     const Symbol_value<size>* lv_in,
+				     Symbol_value<size>* lv_out,
+				     bool relocatable,
+				     const Output_sections& out_sections,
+				     const std::vector<Address>& out_offsets,
+				     const Symbol_table* symtab);
 
   // The GOT offsets of local symbols. This map also stores GOT offsets
   // for tp-relative offsets for TLS symbols.

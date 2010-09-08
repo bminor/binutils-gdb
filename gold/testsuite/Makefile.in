@@ -492,9 +492,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_X86_64_TRUE@am__append_39 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_4 split_x86_64_r
 
+
+# Cortex-A8 workaround test.
 @DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh \
-@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh arm_attr_merge.sh
+@DEFAULT_TARGET_ARM_TRUE@	arm_branch_out_of_range.sh \
+@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh arm_attr_merge.sh \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8.sh
 @DEFAULT_TARGET_ARM_TRUE@am__append_41 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_out_of_range.stdout \
@@ -506,12 +510,19 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_blx_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range_local.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_7.stdout
+@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_7.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_b_cond.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_b.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_bl.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_blx.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local_reloc.stdout
 @DEFAULT_TARGET_ARM_TRUE@am__append_42 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
@@ -521,10 +532,16 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_blx_in_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_blx_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_in_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range arm_fix_v4bx \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range_local \
+@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking \
 @DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx arm_attr_merge_6 \
-@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r arm_attr_merge_7
+@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r arm_attr_merge_7 \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_b_cond arm_cortex_a8_b \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_bl arm_cortex_a8_blx \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local \
+@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local_reloc
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -3297,10 +3314,14 @@ arm_abs_global.sh.log: arm_abs_global.sh
 	@p='arm_abs_global.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_branch_in_range.sh.log: arm_branch_in_range.sh
 	@p='arm_branch_in_range.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_branch_out_of_range.sh.log: arm_branch_out_of_range.sh
+	@p='arm_branch_out_of_range.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_fix_v4bx.sh.log: arm_fix_v4bx.sh
 	@p='arm_fix_v4bx.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_attr_merge.sh.log: arm_attr_merge.sh
 	@p='arm_attr_merge.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_cortex_a8.sh.log: arm_cortex_a8.sh
+	@p='arm_cortex_a8.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 object_unittest.log: object_unittest$(EXEEXT)
 	@p='object_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 binary_unittest.log: binary_unittest$(EXEEXT)
@@ -4641,6 +4662,15 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
 
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range_local.stdout: thumb_bl_out_of_range_local
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+
 @DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx.stdout: arm_fix_v4bx
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
@@ -4690,6 +4720,60 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7b.o: arm_attr_merge_7b.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b_cond.stdout: arm_cortex_a8_b_cond
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b_cond: arm_cortex_a8_b_cond.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b_cond.o: arm_cortex_a8_b_cond.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b.stdout: arm_cortex_a8_b
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b: arm_cortex_a8_b.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new --fix-cortex-a8 -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b.o: arm_cortex_a8_b.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_bl.stdout: arm_cortex_a8_bl
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_bl: arm_cortex_a8_bl.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_bl.o: arm_cortex_a8_bl.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_blx.stdout: arm_cortex_a8_blx
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_blx: arm_cortex_a8_blx.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_blx.o: arm_cortex_a8_blx.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local.stdout: arm_cortex_a8_local
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local: arm_cortex_a8_local.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local.o: arm_cortex_a8_local.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local_reloc.stdout: arm_cortex_a8_local_reloc
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local_reloc: arm_cortex_a8_local_reloc.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local_reloc.o: arm_cortex_a8_local_reloc.s
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

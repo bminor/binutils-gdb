@@ -1885,12 +1885,13 @@ arm_abs_global.stdout: arm_abs_global
 
 MOSTLYCLEANFILES += arm_abs_global
 
-check_SCRIPTS += arm_branch_in_range.sh
+check_SCRIPTS += arm_branch_in_range.sh arm_branch_out_of_range.sh
 check_DATA += arm_bl_in_range.stdout arm_bl_out_of_range.stdout \
 	thumb_bl_in_range.stdout thumb_bl_out_of_range.stdout \
 	thumb2_bl_in_range.stdout thumb2_bl_out_of_range.stdout \
 	thumb_blx_in_range.stdout thumb_blx_out_of_range.stdout \
-	thumb2_blx_in_range.stdout thumb2_blx_out_of_range.stdout
+	thumb2_blx_in_range.stdout thumb2_blx_out_of_range.stdout \
+	thumb_bl_out_of_range_local.stdout
 
 arm_bl_in_range.stdout: arm_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
@@ -1982,10 +1983,19 @@ thumb2_blx_out_of_range: thumb2_blx_out_of_range.o ../ld-new
 thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
 
+thumb_bl_out_of_range_local.stdout: thumb_bl_out_of_range_local
+	$(TEST_OBJDUMP) -D $< > $@
+
+thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
+	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
+	$(TEST_AS) -o $@ -march=armv5te $<
+
 MOSTLYCLEANFILES += arm_bl_in_range arm_bl_out_of_range thumb_bl_in_range \
 	thumb_bl_out_of_range thumb2_bl_in_range thumb2_bl_out_of_range \
 	thumb_blx_in_range thumb_blx_out_of_range thumb2_blx_in_range \
-	thumb2_blx_out_of_range
+	thumb2_blx_out_of_range thumb_bl_out_of_range_local
 
 check_SCRIPTS += arm_fix_v4bx.sh
 check_DATA += arm_fix_v4bx.stdout arm_fix_v4bx_interworking.stdout \
@@ -2049,5 +2059,69 @@ arm_attr_merge_7b.o: arm_attr_merge_7b.s
 	$(TEST_AS) -o $@ $<
 
 MOSTLYCLEANFILES += arm_attr_merge_6 arm_attr_merge_6r arm_attr_merge_7
+
+# Cortex-A8 workaround test.
+
+check_SCRIPTS += arm_cortex_a8.sh
+check_DATA += arm_cortex_a8_b_cond.stdout arm_cortex_a8_b.stdout \
+	arm_cortex_a8_bl.stdout arm_cortex_a8_blx.stdout \
+	arm_cortex_a8_local.stdout arm_cortex_a8_local_reloc.stdout
+
+arm_cortex_a8_b_cond.stdout: arm_cortex_a8_b_cond
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_cortex_a8_b_cond: arm_cortex_a8_b_cond.o ../ld-new
+	../ld-new -o $@ $<
+
+arm_cortex_a8_b_cond.o: arm_cortex_a8_b_cond.s
+	$(TEST_AS) -o $@ $<
+
+arm_cortex_a8_b.stdout: arm_cortex_a8_b
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_cortex_a8_b: arm_cortex_a8_b.o ../ld-new
+	../ld-new --fix-cortex-a8 -o $@ $<
+
+arm_cortex_a8_b.o: arm_cortex_a8_b.s
+	$(TEST_AS) -o $@ $<
+
+arm_cortex_a8_bl.stdout: arm_cortex_a8_bl
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_cortex_a8_bl: arm_cortex_a8_bl.o ../ld-new
+	../ld-new -o $@ $<
+
+arm_cortex_a8_bl.o: arm_cortex_a8_bl.s
+	$(TEST_AS) -o $@ $<
+
+arm_cortex_a8_blx.stdout: arm_cortex_a8_blx
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_cortex_a8_blx: arm_cortex_a8_blx.o ../ld-new
+	../ld-new -o $@ $<
+
+arm_cortex_a8_blx.o: arm_cortex_a8_blx.s
+	$(TEST_AS) -o $@ $<
+
+arm_cortex_a8_local.stdout: arm_cortex_a8_local
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_cortex_a8_local: arm_cortex_a8_local.o ../ld-new
+	../ld-new -o $@ $<
+
+arm_cortex_a8_local.o: arm_cortex_a8_local.s
+	$(TEST_AS) -o $@ $<
+
+arm_cortex_a8_local_reloc.stdout: arm_cortex_a8_local_reloc
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_cortex_a8_local_reloc: arm_cortex_a8_local_reloc.o ../ld-new
+	../ld-new -o $@ $<
+
+arm_cortex_a8_local_reloc.o: arm_cortex_a8_local_reloc.s
+	$(TEST_AS) -o $@ $<
+
+MOSTLYCLEANFILES += arm_cortex_a8_b_cond arm_cortex_a8_b arm_cortex_a8_bl \
+	arm_cortex_a8_blx arm_cortex_a8_local arm_cortex_a8_local_reloc
 
 endif DEFAULT_TARGET_ARM
