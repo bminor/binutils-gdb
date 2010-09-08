@@ -1,3 +1,9 @@
+2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gnu-v3-abi.c (gnuv3_print_method_ptr): Do not use
+	the domain type.
+	(gnuv3_make_method_ptr): Likewise.
+
 2010-09-08  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (create_breakpoint): Add missing _().
