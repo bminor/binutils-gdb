@@ -1,5 +1,12 @@
 2010-09-08  Rafael Espindola  <espindola@google.com>
 
+	* script-sections.cc (Script_sections::add_memory_region): Convert
+	field precision to int.
+	* script.cc (script_set_section_region, script_set_section_region):
+	Convert field precision to int.
+
+2010-09-08  Rafael Espindola  <espindola@google.com>
+
 	* arm.cc (do_finalize_sections): Create the __exidx_start and
 	__exdix_end symbols even when the section is missing.
 

@@ -2788,7 +2788,8 @@ Script_sections::add_memory_region(const char* name, size_t namelen,
     this->memory_regions_ = new Memory_regions();
   else if (this->find_memory_region(name, namelen))
     {
-      gold_error (_("region '%.*s' already defined"), namelen, name);
+      gold_error (_("region '%.*s' already defined"), static_cast<int>(namelen),
+                  name);
       // FIXME: Add a GOLD extension to allow multiple regions with the same
       // name.  This would amount to a single region covering disjoint blocks
       // of memory, which is useful for embedded devices.

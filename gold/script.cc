@@ -3231,7 +3231,7 @@ script_set_section_region(void* closurev, const char* name, size_t namelen,
       gold_error(_("%s:%d:%d: MEMORY region '%.*s' referred to outside of "
 		   "SECTIONS clause"),
 		 closure->filename(), closure->lineno(), closure->charpos(),
-		 namelen, name);
+		 static_cast<int>(namelen), name);
       return;
     }
 
@@ -3241,7 +3241,7 @@ script_set_section_region(void* closurev, const char* name, size_t namelen,
     {
       gold_error(_("%s:%d:%d: MEMORY region '%.*s' not declared"),
 		 closure->filename(), closure->lineno(), closure->charpos(),
-		 namelen, name);
+		 static_cast<int>(namelen), name);
       return;
     }
 
