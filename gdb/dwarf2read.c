@@ -2198,7 +2198,7 @@ static struct symtab *
 dw2_lookup_symbol (struct objfile *objfile, int block_index,
 		   const char *name, domain_enum domain)
 {
-  /* We do all the work in the expand_one_symtab_matching hook
+  /* We do all the work in the pre_expand_symtabs_matching hook
      instead.  */
   return NULL;
 }
@@ -2229,46 +2229,12 @@ dw2_do_expand_symtabs_matching (struct objfile *objfile, const char *name)
     }
 }
 
-static struct symbol *
-dw2_expand_one_symtab_matching (struct objfile *objfile,
-				int kind, const char *name,
-				domain_enum domain,
-				struct symbol *(*matcher) (struct symtab *,
-							   int,
-							   const char *,
-							   domain_enum,
-							   void *),
-				void *data)
+static void
+dw2_pre_expand_symtabs_matching (struct objfile *objfile,
+				 int kind, const char *name,
+				 domain_enum domain)
 {
-  dw2_setup (objfile);
-
-  if (dwarf2_per_objfile->index_table)
-    {
-      offset_type *vec;
-
-      if (find_slot_in_mapped_hash (dwarf2_per_objfile->index_table,
-				    name, &vec))
-	{
-	  offset_type i, len = MAYBE_SWAP (*vec);
-	  for (i = 0; i < len; ++i)
-	    {
-	      offset_type cu_index = MAYBE_SWAP (vec[i + 1]);
-	      struct dwarf2_per_cu_data *cu = dw2_get_cu (cu_index);
-	      struct symtab *symtab;
-	      struct symbol *sym;
-
-	      if (cu->v.quick->symtab)
-		continue;
-
-	      symtab = dw2_instantiate_symtab (objfile, cu);
-	      sym = matcher (symtab, kind, name, domain, data);
-	      if (sym)
-		return sym;
-	    }
-	}
-    }
-
-  return NULL;
+  dw2_do_expand_symtabs_matching (objfile, name);
 }
 
 static void
@@ -2572,7 +2538,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_forget_cached_source_info,
   dw2_lookup_symtab,
   dw2_lookup_symbol,
-  dw2_expand_one_symtab_matching,
+  dw2_pre_expand_symtabs_matching,
   dw2_print_stats,
   dw2_dump,
   dw2_relocate,
@@ -6305,9 +6271,9 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
       B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
 
-      /* We don't set TYPE_FIELD_IGNORE_BITS here.  The DWARF reader
-	 never sets any bits in that array, so leaving it NULL lets us
-	 save a little memory.  */
+      TYPE_FIELD_IGNORE_BITS (type) =
+	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
+      B_CLRALL (TYPE_FIELD_IGNORE_BITS (type), nfields);
     }
 
   /* If the type has baseclasses, allocate and clear a bit vector for

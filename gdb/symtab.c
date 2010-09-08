@@ -91,8 +91,7 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 const struct block *block,
 					 const domain_enum domain,
 					 enum language language,
-					 int *is_a_field_of_this,
-					 int for_type);
+					 int *is_a_field_of_this);
 
 static
 struct symbol *lookup_symbol_aux_local (const char *name,
@@ -995,8 +994,6 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
    C++: if IS_A_FIELD_OF_THIS is nonzero on entry, check to see if
    NAME is a field of the current implied argument `this'.  If so set
    *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero.
-   FOR_TYPE is non-zero if searching specifically for a type; zero
-   otherwise.
    BLOCK_FOUND is set to the block in which NAME is found (in the case of
    a field of `this', value_of_this sets BLOCK_FOUND to the proper value.) */
 
@@ -1010,10 +1007,10 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
    variable and thus can probably assume it will never hit the C++
    code).  */
 
-static struct symbol *
-lookup_symbol_in_language_full (const char *name, const struct block *block,
-				const domain_enum domain, enum language lang,
-				int *is_a_field_of_this, int for_type)
+struct symbol *
+lookup_symbol_in_language (const char *name, const struct block *block,
+			   const domain_enum domain, enum language lang,
+			   int *is_a_field_of_this)
 {
   char *demangled_name = NULL;
   const char *modified_name = NULL;
@@ -1078,39 +1075,10 @@ lookup_symbol_in_language_full (const char *name, const struct block *block,
     }
 
   returnval = lookup_symbol_aux (modified_name, block, domain, lang,
-				 is_a_field_of_this, for_type);
+				 is_a_field_of_this);
   do_cleanups (cleanup);
 
   return returnval;
-}
-
-/* Find the definition for a specified symbol name NAME
-   in domain DOMAIN, visible from lexical block BLOCK.
-   Returns the struct symbol pointer, or zero if no symbol is found.
-   C++: if IS_A_FIELD_OF_THIS is nonzero on entry, check to see if
-   NAME is a field of the current implied argument `this'.  If so set
-   *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero.
-   BLOCK_FOUND is set to the block in which NAME is found (in the case of
-   a field of `this', value_of_this sets BLOCK_FOUND to the proper value.) */
-
-struct symbol *
-lookup_symbol_in_language (const char *name, const struct block *block,
-			   const domain_enum domain, enum language lang,
-			   int *is_a_field_of_this)
-{
-  return lookup_symbol_in_language_full (name, block, domain, lang,
-					 is_a_field_of_this, 0);
-}
-
-/* Like lookup_symbol_in_language, but search specifically for a
-   type.  */
-
-struct symbol *
-lookup_type_symbol (const char *name, const struct block *block,
-		    const domain_enum domain, enum language lang)
-{
-  return lookup_symbol_in_language_full (name, block, domain, lang,
-					 NULL, 1);
 }
 
 /* Behave like lookup_symbol_in_language, but performed with the
@@ -1133,8 +1101,7 @@ lookup_symbol (const char *name, const struct block *block,
 static struct symbol *
 lookup_symbol_aux (const char *name, const struct block *block,
 		   const domain_enum domain, enum language language,
-		   int *is_a_field_of_this,
-		   int for_type)
+		   int *is_a_field_of_this)
 {
   struct symbol *sym;
   const struct language_defn *langdef;
@@ -1198,20 +1165,14 @@ lookup_symbol_aux (const char *name, const struct block *block,
     }
 
   /* Now do whatever is appropriate for LANGUAGE to look
-     up static and global variables.  If we are searching for a type,
-     we bypass this lookup, because types aren't global.  */
+     up static and global variables.  */
 
-  if (!for_type)
-    {
-      sym = langdef->la_lookup_symbol_nonlocal (name, block, domain);
-      if (sym != NULL)
-	return sym;
-    }
+  sym = langdef->la_lookup_symbol_nonlocal (name, block, domain);
+  if (sym != NULL)
+    return sym;
 
-  /* Now search all static file-level symbols.  When searching for a
-     type, this is what we generally want, because types are put into
-     the file scope.  For other objects, not strictly correct, but
-     more useful than an error.  */
+  /* Now search all static file-level symbols.  Not strictly correct,
+     but more useful than an error.  */
 
   return lookup_static_symbol_aux (name, domain);
 }
@@ -1366,35 +1327,6 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
   return NULL;
 }
 
-/* A helper for lookup_symbol_aux_symtabs that is passed as a callback
-   to the expand_one_symtab_matching quick function.  */
-
-static struct symbol *
-match_symbol_aux (struct symtab *symtab,
-		  int kind, const char *name, domain_enum domain,
-		  void *arg)
-{
-  struct objfile *objfile = arg;
-
-  if (symtab->primary)
-    {
-      struct symbol *sym;
-      struct blockvector *bv;
-      const struct block *block;
-
-      bv = BLOCKVECTOR (symtab);
-      block = BLOCKVECTOR_BLOCK (bv, kind);
-      sym = lookup_block_symbol (block, name, domain);
-      if (sym)
-	{
-	  block_found = block;
-	  return fixup_symbol_section (sym, objfile);
-	}
-    }
-
-  return NULL;
-}
-
 /* Check to see if the symbol is defined in one of the symtabs.
    BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
    depending on whether or not we want to search global symbols or
@@ -1412,6 +1344,11 @@ lookup_symbol_aux_symtabs (int block_index, const char *name,
 
   ALL_OBJFILES (objfile)
   {
+    if (objfile->sf)
+      objfile->sf->qf->pre_expand_symtabs_matching (objfile,
+						    block_index,
+						    name, domain);
+
     ALL_OBJFILE_SYMTABS (objfile, s)
       if (s->primary)
 	{
@@ -1424,17 +1361,6 @@ lookup_symbol_aux_symtabs (int block_index, const char *name,
 	      return fixup_symbol_section (sym, objfile);
 	    }
 	}
-
-    if (objfile->sf)
-      {
-	sym = objfile->sf->qf->expand_one_symtab_matching (objfile,
-							   block_index,
-							   name, domain,
-							   match_symbol_aux,
-							   objfile);
-	if (sym)
-	  return sym;
-      }
   }
 
   return NULL;
@@ -1656,30 +1582,6 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
   return NULL;
 }
 
-/* A helper function for basic_lookup_transparent_type that is passed
-   to the expand_one_symtab_matching quick function.  */
-
-static struct symbol *
-match_transparent_type (struct symtab *symtab,
-			int kind, const char *name, domain_enum domain,
-			void *data)
-{
-  if (symtab->primary)
-    {
-      struct blockvector *bv;
-      struct block *block;
-      struct symbol *sym;
-
-      bv = BLOCKVECTOR (symtab);
-      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-      sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
-      if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
-	return sym;
-    }
-
-  return NULL;
-}
-
 /* The standard implementation of lookup_transparent_type.  This code
    was modeled on lookup_symbol -- the parts not relevant to looking
    up types were just left out.  In particular it's assumed here that
@@ -1703,6 +1605,11 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
+    if (objfile->sf)
+      objfile->sf->qf->pre_expand_symtabs_matching (objfile,
+						    GLOBAL_BLOCK,
+						    name, STRUCT_DOMAIN);
+
     ALL_OBJFILE_SYMTABS (objfile, s)
       if (s->primary)
 	{
@@ -1714,18 +1621,6 @@ basic_lookup_transparent_type (const char *name)
 	      return SYMBOL_TYPE (sym);
 	    }
 	}
-
-    if (objfile->sf)
-      {
-	sym
-	  = objfile->sf->qf->expand_one_symtab_matching (objfile,
-							 GLOBAL_BLOCK, name,
-							 STRUCT_DOMAIN,
-							 match_transparent_type,
-							 NULL);
-	if (sym)
-	  return SYMBOL_TYPE (sym);
-      }
   }
 
   ALL_OBJFILES (objfile)
@@ -1745,6 +1640,10 @@ basic_lookup_transparent_type (const char *name)
 
   ALL_OBJFILES (objfile)
   {
+    if (objfile->sf)
+      objfile->sf->qf->pre_expand_symtabs_matching (objfile, STATIC_BLOCK,
+						    name, STRUCT_DOMAIN);
+
     ALL_OBJFILE_SYMTABS (objfile, s)
       {
 	bv = BLOCKVECTOR (s);
@@ -1754,18 +1653,6 @@ basic_lookup_transparent_type (const char *name)
 	  {
 	    return SYMBOL_TYPE (sym);
 	  }
-      }
-
-    if (objfile->sf)
-      {
-	sym
-	  = objfile->sf->qf->expand_one_symtab_matching (objfile,
-							 STATIC_BLOCK, name,
-							 STRUCT_DOMAIN,
-							 match_transparent_type,
-							 NULL);
-	if (sym)
-	  return SYMBOL_TYPE (sym);
       }
   }
 

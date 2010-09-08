@@ -977,10 +977,6 @@ extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
 extern void reread_symbols (void);
 
-extern struct symbol *lookup_type_symbol (const char* name,
-					  const struct block *block,
-					  const domain_enum domain,
-					  enum language lang);
 extern struct type *lookup_transparent_type (const char *);
 extern struct type *basic_lookup_transparent_type (const char *);
 

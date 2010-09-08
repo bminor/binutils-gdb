@@ -426,18 +426,12 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
   return NULL;
 }
 
-static struct symbol *
-expand_one_symtab_matching_psymtabs (struct objfile *objfile,
-				     int kind, const char *name,
-				     domain_enum domain,
-				     struct symbol *(*matcher) (struct symtab *,
-								int,
-								const char *,
-								domain_enum,
-								void *),
-				     void *data)
+static void
+pre_expand_symtabs_matching_psymtabs (struct objfile *objfile,
+				      int kind, const char *name,
+				      domain_enum domain)
 {
-  return NULL;
+  /* Nothing.  */
 }
 
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.
@@ -1218,7 +1212,7 @@ const struct quick_symbol_functions psym_functions =
   forget_cached_source_info_partial,
   lookup_symtab_via_partial_symtab,
   lookup_symbol_aux_psymtabs,
-  expand_one_symtab_matching_psymtabs,
+  pre_expand_symtabs_matching_psymtabs,
   print_psymtab_stats_for_objfile,
   dump_psymtabs_for_objfile,
   relocate_psymtabs,

@@ -1051,7 +1051,7 @@ lookup_typename (const struct language_defn *language,
   struct symbol *sym;
   struct type *tmp;
 
-  sym = lookup_type_symbol (name, block, VAR_DOMAIN, language->la_language);
+  sym = lookup_symbol (name, block, VAR_DOMAIN, 0);
   if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {
       tmp = language_lookup_primitive_type_by_name (language, gdbarch, name);
