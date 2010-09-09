@@ -136,10 +136,10 @@ proc reach {func command displacement} {
 		}
 		exp_continue
 	    }
-	    -re "Breakpoint \[0-9\]+, $func \\(.*\\) at .*:\[0-9\]+\r\n.*$gdb_prompt $" {
+	    -re "Breakpoint \[0-9\]+, \\.?$func \\(.*\\) at .*:\[0-9\]+\r\n.*$gdb_prompt $" {
 		pass $test
 	    }
-	    -re "Breakpoint \[0-9\]+, \[0-9xa-f\]+ in $func \\(\\).*\r\n$gdb_prompt $" {
+	    -re "Breakpoint \[0-9\]+, \[0-9xa-f\]+ in \\.?$func \\(\\).*\r\n$gdb_prompt $" {
 		pass $test
 	    }
 	}
@@ -397,6 +397,17 @@ proc test_ld {file ifmain trynosym displacement} {
 	    -re "\r\n\[\t \]*Entry point:\[\t \]*0x(\[0-9a-f\]+)\r\n.*$gdb_prompt $" {
 		set entrynohex $expect_out(1,string)
 		pass $test
+	    }
+	}
+	# `info sym' cannot be tested for .opd as the binary may not have
+	# symbols.
+	if [istarget powerpc64-*] {
+	    set test "convert entry point"
+	    gdb_test_multiple "p *(void(*)(void) *) 0x$entrynohex" $test {
+		-re " =( \\(\[^0-9\]*\\))? 0x(\[0-9a-f\]+)( < \[^\r\n\]*)?\r\n$gdb_prompt $" {
+		    set entrynohex $expect_out(2,string)
+		    pass $test
+		}
 	    }
 	}
 	if {$entrynohex != ""} {
