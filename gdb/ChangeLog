@@ -1,3 +1,8 @@
+2010-09-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* v850-tdep.c (v850_gdbarch_init): Change the v850's `char'
+	type to be signed.
+	
 2010-09-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2read.c (fixup_partial_die): Do not set dummy name for
