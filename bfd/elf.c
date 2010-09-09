@@ -4481,8 +4481,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      bfd_vma s_start = sec->lma;
 	      bfd_vma adjust = s_start - p_end;
 
-	      if (s_start < p_end
-		  || p_end < p_start)
+	      if (adjust != 0
+		  && (s_start < p_end
+		      || p_end < p_start))
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: section %A lma %#lx adjusted to %#lx"), abfd, sec,

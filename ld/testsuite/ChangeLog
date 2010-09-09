@@ -1,3 +1,10 @@
+2010-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11998
+	* ld-scripts/rgn-at5.d: New.
+	* ld-scripts/rgn-at5.s: Likewise.
+	* ld-scripts/rgn-at5.t: Likewise.
+
 2010-09-07  Andrew Burgess  <aburgess@broadcom.com>
 
 	* ld-x86-64/split-by-file.rd: New test.
