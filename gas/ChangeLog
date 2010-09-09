@@ -1,3 +1,8 @@
+2010-09-09  Gunther Nikl  <gnikl@users.sourceforge.net>
+
+	* gas/config/tc-m68k.c (tc_gen_reloc): Handle references to defined
+	weak symbols first if generating an a.out object.
+
 2010-09-09 Tejas Belagod  <tejas.belagod@arm.com>
 
 	* config/tc-arm.c (md_apply_fix): Check if widened add, sub are

@@ -1335,12 +1335,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 #ifndef OBJ_ELF
-  if (fixp->fx_pcrel)
-    reloc->addend = fixp->fx_addnumber;
-  else if (OUTPUT_FLAVOR == bfd_target_aout_flavour
-	   && fixp->fx_addsy
-	   && S_IS_WEAK (fixp->fx_addsy)
-	   && ! bfd_is_und_section (S_GET_SEGMENT (fixp->fx_addsy)))
+  if (OUTPUT_FLAVOR == bfd_target_aout_flavour
+      && fixp->fx_addsy
+      && S_IS_WEAK (fixp->fx_addsy)
+      && ! bfd_is_und_section (S_GET_SEGMENT (fixp->fx_addsy)))
     {
       /* PR gas/3041 References to weak symbols must be treated as extern
 	 in order to be overridable by the linker, even if they are defined
@@ -1364,6 +1362,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 		      - (S_GET_VALUE (fixp->fx_addsy)
 			 + S_GET_SEGMENT (fixp->fx_addsy)->vma);
     }
+  else if (fixp->fx_pcrel)
+    reloc->addend = fixp->fx_addnumber;
   else
     reloc->addend = 0;
 #else
