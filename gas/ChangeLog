@@ -1,3 +1,8 @@
+2010-09-09 Tejas Belagod  <tejas.belagod@arm.com>
+
+	* config/tc-arm.c (md_apply_fix): Check if widened add, sub are
+	flag-setting and handle accordingly.
+
 2010-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/11972

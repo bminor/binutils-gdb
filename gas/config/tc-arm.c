@@ -20252,17 +20252,20 @@ md_apply_fix (fixS *	fixP,
 	  /* Turn add/sum into addw/subw.  */
 	  if (fixP->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM)
 	    newval = (newval & 0xfeffffff) | 0x02000000;
-
-	  /* 12 bit immediate for addw/subw.  */
-	  if (value < 0)
+	  /* No flat 12-bit imm encoding for addsw/subsw.  */
+	  if ((newval & 0x00100000) == 0)
 	    {
-	      value = -value;
-	      newval ^= 0x00a00000;
+	      /* 12 bit immediate for addw/subw.  */
+	      if (value < 0)
+		{
+		  value = -value;
+		  newval ^= 0x00a00000;
+		}
+	      if (value > 0xfff)
+		newimm = (unsigned int) FAIL;
+	      else
+		newimm = value;
 	    }
-	  if (value > 0xfff)
-	    newimm = (unsigned int) FAIL;
-	  else
-	    newimm = value;
 	}
 
       if (newimm == (unsigned int)FAIL)
