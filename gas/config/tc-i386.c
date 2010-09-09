@@ -2803,6 +2803,7 @@ build_vex_prefix (const insn_template *t)
 
   /* Use 2-byte VEX prefix if possible.  */
   if (i.tm.opcode_modifier.vexopcode == VEX0F
+      && i.tm.opcode_modifier.vexw != VEXW1
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
       /* 2-byte VEX prefix.  */

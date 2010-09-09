@@ -1,3 +1,8 @@
+2010-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_vex_prefix): Check VEXW1 for 2-byte
+	VEX prefix.
+
 2010-09-09  Joseph Myers  <joseph@codesourcery.com>
 
 	* doc/c-tic6x.texi (.c6xabi_attribute): Document directive.
