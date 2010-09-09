@@ -1,3 +1,7 @@
+2010-09-09  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add entry to NEWS for hppa/som.
+
 2010-09-09  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.h (debug_info): Add offset_info and dwarf_version fields.

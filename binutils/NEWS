@@ -19,6 +19,8 @@
 * Add a new command line option -p / --pretty-print to addr2line to have
   a more human readable output.
 
+* The hppa/som targets can now be compiled on any host.
+
 Changes in 2.20:
 
 * Add support for delay importing to dlltool.  Use the --output-delaylib <file>
