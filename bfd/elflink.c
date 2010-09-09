@@ -10360,7 +10360,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    {
 		      size_t ext_size;
 
-		      ext_size = elf_section_data (sec)->rel_hdr.sh_size;
+		      ext_size = esdi->rel_hdr.sh_size;
+		      if (esdi->rel_hdr2 != NULL)
+			ext_size += esdi->rel_hdr2->sh_size;
+
 		      if (ext_size > max_external_reloc_size)
 			max_external_reloc_size = ext_size;
 		      if (sec->reloc_count > max_internal_reloc_count)
