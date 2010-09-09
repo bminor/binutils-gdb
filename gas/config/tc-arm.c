@@ -4420,14 +4420,32 @@ parse_big_immediate (char **str, int i)
 	}
     }
   else if (exp.X_op == O_big
-           && LITTLENUM_NUMBER_OF_BITS * exp.X_add_number > 32
-           && LITTLENUM_NUMBER_OF_BITS * exp.X_add_number <= 64)
+	   && LITTLENUM_NUMBER_OF_BITS * exp.X_add_number > 32)
     {
       unsigned parts = 32 / LITTLENUM_NUMBER_OF_BITS, j, idx = 0;
+
       /* Bignums have their least significant bits in
          generic_bignum[0]. Make sure we put 32 bits in imm and
          32 bits in reg,  in a (hopefully) portable way.  */
       gas_assert (parts != 0);
+
+      /* Make sure that the number is not too big.
+	 PR 11972: Bignums can now be sign-extended to the
+	 size of a .octa so check that the out of range bits
+	 are all zero or all one.  */
+      if (LITTLENUM_NUMBER_OF_BITS * exp.X_add_number > 64)
+	{
+	  LITTLENUM_TYPE m = -1;
+
+	  if (generic_bignum[parts * 2] != 0
+	      && generic_bignum[parts * 2] != m)
+	    return FAIL;
+
+	  for (j = parts * 2 + 1; j < (unsigned) exp.X_add_number; j++)
+	    if (generic_bignum[j] != generic_bignum[j-1])
+	      return FAIL;
+	}
+
       inst.operands[i].imm = 0;
       for (j = 0; j < parts; j++, idx++)
         inst.operands[i].imm |= generic_bignum[idx]
