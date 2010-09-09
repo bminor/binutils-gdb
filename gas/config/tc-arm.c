@@ -22331,6 +22331,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"cortex-a9",		ARM_ARCH_V7A,	 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           NULL},
+  {"cortex-a15",	ARM_ARCH_V7A,	 FPU_ARCH_NEON_VFP_V4,
+                                                          "Cortex-A15"},
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  NULL},
   {"cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,	  NULL},
   {"cortex-m4",		ARM_ARCH_V7EM,	 FPU_NONE,	  NULL},

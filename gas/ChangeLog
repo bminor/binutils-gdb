@@ -1,3 +1,8 @@
+2010-09-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add cortex-a15 entry.
+	* doc/c-arm.texi: Document -mcpu=cortex-a15.
+
 2010-09-09  Gunther Nikl  <gnikl@users.sourceforge.net>
 
 	* gas/config/tc-m68k.c (tc_gen_reloc): Handle references to defined
