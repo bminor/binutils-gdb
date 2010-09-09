@@ -1,5 +1,5 @@
 /* dwarf.h - DWARF support header file
-   Copyright 2005, 2007, 2008, 2009
+   Copyright 2005, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -84,6 +84,8 @@ extern struct dwarf_section_display debug_displays [];
 typedef struct
 {
   unsigned int   pointer_size;
+  unsigned int   offset_size;
+  int            dwarf_version;
   unsigned long  cu_offset;
   unsigned long	 base_address;
   /* This is an array of offsets to the location list table.  */

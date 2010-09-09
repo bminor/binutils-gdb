@@ -712,6 +712,8 @@ display_block (unsigned char *data, unsigned long length)
 static int
 decode_location_expression (unsigned char * data,
 			    unsigned int pointer_size,
+			    unsigned int offset_size,
+			    int dwarf_version,
 			    unsigned long length,
 			    unsigned long cu_offset,
 			    struct dwarf_section * section)
@@ -1018,20 +1020,36 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_call2:
 	  /* XXX: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
-	  printf ("DW_OP_call2: <%lx>", (long) byte_get (data, 2) + cu_offset);
+	  printf ("DW_OP_call2: <0x%lx>", (long) byte_get (data, 2) + cu_offset);
 	  data += 2;
 	  break;
 	case DW_OP_call4:
 	  /* XXX: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
-	  printf ("DW_OP_call4: <%lx>", (long) byte_get (data, 4) + cu_offset);
+	  printf ("DW_OP_call4: <0x%lx>", (long) byte_get (data, 4) + cu_offset);
 	  data += 4;
 	  break;
 	case DW_OP_call_ref:
 	  /* XXX: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
-	  printf ("DW_OP_call_ref: <%lx>", (long) byte_get (data, 4) + cu_offset);
-	  data += 4;
+	  if (dwarf_version == -1)
+	    {
+	      printf (_("(DW_OP_call_ref in frame info)"));
+	      /* No way to tell where the next op is, so just bail.  */
+	      return need_frame_base;
+	    }
+	  if (dwarf_version == 2)
+	    {
+	      printf ("DW_OP_call_ref: <0x%lx>",
+		      (long) byte_get (data, pointer_size));
+	      data += pointer_size;
+	    }
+	  else
+	    {
+	      printf ("DW_OP_call_ref: <0x%lx>",
+		      (long) byte_get (data, offset_size));
+	      data += offset_size;
+	    }
 	  break;
 	case DW_OP_form_tls_address:
 	  printf ("DW_OP_form_tls_address");
@@ -1082,6 +1100,30 @@ decode_location_expression (unsigned char * data,
 	    printf ("DW_OP_GNU_encoded_addr: fmt:%02x addr:", encoding);
 	    print_dwarf_vma (addr, pointer_size);
 	  }
+	  break;
+	case DW_OP_GNU_implicit_pointer:
+	  /* XXX: Strictly speaking for 64-bit DWARF3 files
+	     this ought to be an 8-byte wide computation.  */
+	  if (dwarf_version == -1)
+	    {
+	      printf (_("(DW_OP_GNU_implicit_pointer in frame info)"));
+	      /* No way to tell where the next op is, so just bail.  */
+	      return need_frame_base;
+	    }
+	  if (dwarf_version == 2)
+	    {
+	      printf ("DW_OP_GNU_implicit_pointer: <0x%lx> %ld",
+		      (long) byte_get (data, pointer_size),
+		      read_leb128 (data + pointer_size, &bytes_read, 1));
+	      data += pointer_size + bytes_read;
+	    }
+	  else
+	    {
+	      printf ("DW_OP_GNU_implicit_pointer: <0x%lx> %ld",
+		      (long) byte_get (data, offset_size),
+		      read_leb128 (data + offset_size, &bytes_read, 1));
+	      data += offset_size;
+	    }
 	  break;
 
 	  /* HP extensions.  */
@@ -1632,6 +1674,8 @@ read_and_display_attr_value (unsigned long attribute,
 	  printf ("(");
 	  need_frame_base = decode_location_expression (block_start,
 							pointer_size,
+							offset_size,
+							dwarf_version,
 							uvalue,
 							cu_offset, section);
 	  printf (")");
@@ -2023,6 +2067,8 @@ process_debug_info (struct dwarf_section *section,
 	  debug_information [unit].cu_offset = cu_offset;
 	  debug_information [unit].pointer_size
 	    = compunit.cu_pointer_size;
+	  debug_information [unit].offset_size = offset_size;
+	  debug_information [unit].dwarf_version = compunit.cu_version;
 	  debug_information [unit].base_address = 0;
 	  debug_information [unit].loc_offsets = NULL;
 	  debug_information [unit].have_frame_base = NULL;
@@ -3405,6 +3451,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
       unsigned short length;
       unsigned long offset;
       unsigned int pointer_size;
+      unsigned int offset_size;
+      int dwarf_version;
       unsigned long cu_offset;
       unsigned long base_address;
       int need_frame_base;
@@ -3412,6 +3460,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
 
       pointer_size = debug_information [i].pointer_size;
       cu_offset = debug_information [i].cu_offset;
+      offset_size = debug_information [i].offset_size;
+      dwarf_version = debug_information [i].dwarf_version;
 
       for (j = 0; j < debug_information [i].num_loc_offsets; j++)
 	{
@@ -3503,6 +3553,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	      putchar ('(');
 	      need_frame_base = decode_location_expression (start,
 							    pointer_size,
+							    offset_size,
+							    dwarf_version,
 							    length,
 							    cu_offset, section);
 	      putchar (')');
@@ -4774,8 +4826,8 @@ display_debug_frames (struct dwarf_section *section,
 	      if (! do_debug_frames_interp)
 		{
 		  printf ("  DW_CFA_def_cfa_expression (");
-		  decode_location_expression (start, eh_addr_size, ul, 0,
-					      section);
+		  decode_location_expression (start, eh_addr_size, 0, -1,
+					      ul, 0, section);
 		  printf (")\n");
 		}
 	      fc->cfa_exp = 1;
@@ -4791,7 +4843,7 @@ display_debug_frames (struct dwarf_section *section,
 		{
 		  printf ("  DW_CFA_expression: %s%s (",
 			  reg_prefix, regname (reg, 0));
-		  decode_location_expression (start, eh_addr_size,
+		  decode_location_expression (start, eh_addr_size, 0, -1,
 					      ul, 0, section);
 		  printf (")\n");
 		}
@@ -4809,8 +4861,8 @@ display_debug_frames (struct dwarf_section *section,
 		{
 		  printf ("  DW_CFA_val_expression: %s%s (",
 			  reg_prefix, regname (reg, 0));
-		  decode_location_expression (start, eh_addr_size, ul, 0,
-					      section);
+		  decode_location_expression (start, eh_addr_size, 0, -1,
+					      ul, 0, section);
 		  printf (")\n");
 		}
 	      if (*reg_prefix == '\0')

@@ -1,3 +1,16 @@
+2010-09-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.h (debug_info): Add offset_info and dwarf_version fields.
+	* dwarf.c (decode_location_expression): Add offset_size and
+	dwarf_version arguments.  Prefix DIE offset with 0x for
+	DW_OP_call{2,4,_ref}.  Fix up DW_OP_call_ref operand size,
+	complain if in frame info section.  Handle
+	DW_OP_GNU_implicit_pointer.
+	(read_and_display_attr_value, display_debug_loc,
+	display_debug_frames): Adjust decode_location_expression callers.
+	(process_debug_info): Save offset_size and dwarf_version values
+	into debug_information array.
+
 2010-09-07  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_section_headers): Mention meaning of 'l'
