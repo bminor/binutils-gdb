@@ -8,7 +8,7 @@
 
 2010-09-08  Rafael Espindola  <espindola@google.com>
 
-      * layout.cc (Layout::set_segment_offsets): Always advance to a new page.
+	* layout.cc (Layout::set_segment_offsets): Always advance to a new page.
 
 2010-09-08  Doug Kwan  <dougkwan@google.com>
 
@@ -48,6 +48,13 @@
 	* testsuite/arm_cortex_a8_local.s: Ditto.
 	* testsuite/arm_cortex_a8_local_reloc.s: Ditto.
 	* testsuite/thumb_bl_out_of_range_local.s: Ditto.
+
+2010-09-08  Rafael Espindola  <espindola@google.com>
+
+	* Makefile.am (memory_test.stdout): Run readelf with -W.
+	* Makefile.in: Regenerate.
+	* testsuite/memory_test.sh: Make the regexps accept both 32 and
+	64 bit output.
 
 2010-09-08  Rafael Espindola  <espindola@google.com>
 
