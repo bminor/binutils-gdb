@@ -1122,7 +1122,7 @@ decode_location_expression (unsigned char * data,
 	      printf ("DW_OP_GNU_implicit_pointer: <0x%lx> %ld",
 		      (long) byte_get (data, offset_size),
 		      read_leb128 (data + offset_size, &bytes_read, 1));
-	      data += offset_size;
+	      data += offset_size + bytes_read;
 	    }
 	  break;
 

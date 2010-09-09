@@ -1,3 +1,8 @@
+2010-09-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (decode_location_expression): Fix data adjustment
+	for DW_OP_GNU_implicit_pointer in v3+.
+
 2010-09-09  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add entry to NEWS for hppa/som.
