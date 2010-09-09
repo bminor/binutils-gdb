@@ -109,6 +109,15 @@ This has the same effect as @option{-march=@var{arch}}.
 These have the same effects as @option{-matomic} and
 @option{-mno-atomic}.
 
+@cindex @code{.c6xabi_attribute} directive, TIC6X
+@item .c6xabi_attribute @var{tag}, @var{value}
+Set the C6000 EABI build attribute @var{tag} to @var{value}.
+
+The @var{tag} is either an attribute number or
+@code{Tag_C6XABI_Tag_CPU_arch}.  The @var{value} is either a
+@code{number}, @code{"string"}, or @code{number, "string"} depending
+on the tag.
+
 @cindex @code{.nocmp} directive, TIC6X
 @item .nocmp
 Disallow use of C64x+ compact instructions in the current text

@@ -1,3 +1,7 @@
+2010-09-09  Joseph Myers  <joseph@codesourcery.com>
+
+	* doc/c-tic6x.texi (.c6xabi_attribute): Document directive.
+
 2010-09-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add cortex-a15 entry.
