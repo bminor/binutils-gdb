@@ -357,15 +357,35 @@ AC_COMPILE_IFELSE(AC_LANG_PROGRAM([]),
 	        	[gdbsrv_cv_have_visibility_hidden=no])
 CFLAGS="$saved_cflags"
 
-IPA_DEPFILES=""
 
-# Rather than allowing to build a broken IPA, we simply disable it if
-# we don't find a compiler supporting all the features we need.
+IPA_DEPFILES=""
+extra_libraries=""
+
+# check whether to enable the inprocess agent
 if test "$ipa_obj" != "" \
    -a "$gdbsrv_cv_have_sync_builtins" = yes \
    -a "$gdbsrv_cv_have_visibility_hidden" = yes; then
-   IPA_DEPFILES="$ipa_obj"
-   extra_libraries="libinproctrace.so"
+   have_ipa=true
+else
+   have_ipa=false
+fi
+
+AC_ARG_ENABLE(inprocess-agent,
+AS_HELP_STRING([--enable-inprocess-agent], [inprocess agent]),
+[case "$enableval" in
+  yes) want_ipa=true ;;
+  no) want_ipa=false ;;
+  *) AC_MSG_ERROR([bad value $enableval for inprocess-agent]) ;;
+esac],
+[want_ipa=$have_ipa])
+
+if $want_ipa ; then
+   if $have_ipa ; then
+     IPA_DEPFILES="$ipa_obj"
+     extra_libraries="$extra_libraries libinproctrace.so"
+   else
+     AC_MSG_ERROR([inprocess agent not supported for this target])
+   fi
 fi
 
 AC_SUBST(GDBSERVER_DEPFILES)

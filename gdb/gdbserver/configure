@@ -680,6 +680,7 @@ enable_werror
 with_pkgversion
 with_bugurl
 with_libthread_db
+enable_inprocess_agent
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1309,6 +1310,8 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-werror         treat compile warnings as errors
+  --enable-inprocess-agent
+                          inprocess agent
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -4904,15 +4907,38 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 CFLAGS="$saved_cflags"
 
-IPA_DEPFILES=""
 
-# Rather than allowing to build a broken IPA, we simply disable it if
-# we don't find a compiler supporting all the features we need.
+IPA_DEPFILES=""
+extra_libraries=""
+
+# check whether to enable the inprocess agent
 if test "$ipa_obj" != "" \
    -a "$gdbsrv_cv_have_sync_builtins" = yes \
    -a "$gdbsrv_cv_have_visibility_hidden" = yes; then
-   IPA_DEPFILES="$ipa_obj"
-   extra_libraries="libinproctrace.so"
+   have_ipa=true
+else
+   have_ipa=false
+fi
+
+# Check whether --enable-inprocess-agent was given.
+if test "${enable_inprocess_agent+set}" = set; then :
+  enableval=$enable_inprocess_agent; case "$enableval" in
+  yes) want_ipa=true ;;
+  no) want_ipa=false ;;
+  *) as_fn_error "bad value $enableval for inprocess-agent" "$LINENO" 5 ;;
+esac
+else
+  want_ipa=$have_ipa
+fi
+
+
+if $want_ipa ; then
+   if $have_ipa ; then
+     IPA_DEPFILES="$ipa_obj"
+     extra_libraries="$extra_libraries libinproctrace.so"
+   else
+     as_fn_error "inprocess agent not supported for this target" "$LINENO" 5
+   fi
 fi
 
 

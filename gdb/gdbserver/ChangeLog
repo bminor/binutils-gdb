@@ -1,3 +1,8 @@
+2010-09-09  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* configure.ac: Add --enable-inprocess-agent option.
+	* configure: Rebuilt.
+
 2010-09-06  Yao Qi  <yao@codesourcery.com>
 
 	* linux-low.c (linux_kill): Remove unused variable.
