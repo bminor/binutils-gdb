@@ -1,3 +1,7 @@
+2010-09-03  Rafael Espindola  <espindola@google.com>
+
+      * layout.cc (Layout::set_segment_offsets): Always advance to a new page.
+
 2010-09-08  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_exidx_cantunwind::do_print_to_mapfile): New method.
