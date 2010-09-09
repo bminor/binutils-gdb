@@ -1,3 +1,11 @@
+2010-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/11996
+	* object.cc (Sized_relobj::do_finalize_local_symbols): Remove
+	"This::" to work around a bug in gcc 4.2.
+
+	* testsuite/ifuncmain7.c (foo_ifunc): Add __attribute__ ((used)).
+
 2010-09-09  Rafael Espindola  <espindola@google.com>
 
 	* layout.cc (Layout::attach_allocated_section_to_segment): Don't put

@@ -2074,7 +2074,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
     {
       Symbol_value<size>* lv = &this->local_values_[i];
 
-      This::Compute_final_local_value_status cflv_status =
+      Compute_final_local_value_status cflv_status =
 	this->compute_final_local_value_internal(i, lv, lv, relocatable,
 						 out_sections, out_offsets,
 						 symtab);
