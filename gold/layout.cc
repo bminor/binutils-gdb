@@ -1171,10 +1171,11 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
   bool is_address_set = parameters->options().section_start(os->name(), &addr);
 
   // In general the only thing we really care about for PT_LOAD
-  // segments is whether or not they are writable, so that is how we
-  // search for them.  Large data sections also go into their own
-  // PT_LOAD segment.  People who need segments sorted on some other
-  // basis will have to use a linker script.
+  // segments is whether or not they are writable or executable,
+  // so that is how we search for them.
+  // Large data sections also go into their own PT_LOAD segment.
+  // People who need segments sorted on some other basis will
+  // have to use a linker script.
 
   Segment_list::const_iterator p;
   for (p = this->segment_list_.begin();
@@ -1186,6 +1187,9 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
       if (!parameters->options().omagic()
 	  && ((*p)->flags() & elfcpp::PF_W) != (seg_flags & elfcpp::PF_W))
 	continue;
+      if (parameters->options().rosegment()
+          && ((*p)->flags() & elfcpp::PF_X) != (seg_flags & elfcpp::PF_X))
+        continue;
       // If -Tbss was specified, we need to separate the data and BSS
       // segments.
       if (parameters->options().user_set_Tbss())
@@ -1454,6 +1458,7 @@ Layout::define_group_signatures(Symbol_table* symtab)
 Output_segment*
 Layout::find_first_load_seg()
 {
+  Output_segment* best = NULL;
   for (Segment_list::const_iterator p = this->segment_list_.begin();
        p != this->segment_list_.end();
        ++p)
@@ -1462,8 +1467,13 @@ Layout::find_first_load_seg()
 	  && ((*p)->flags() & elfcpp::PF_R) != 0
 	  && (parameters->options().omagic()
 	      || ((*p)->flags() & elfcpp::PF_W) == 0))
-	return *p;
+        {
+          if (best == NULL || this->segment_precedes(*p, best))
+            best = *p;
+        }
     }
+  if (best != NULL)
+    return best;
 
   gold_assert(!this->script_options_->saw_phdrs_clause());
 

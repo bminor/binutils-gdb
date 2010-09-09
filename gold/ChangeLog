@@ -1,4 +1,12 @@
-2010-09-03  Rafael Espindola  <espindola@google.com>
+2010-09-09  Rafael Espindola  <espindola@google.com>
+
+	* layout.cc (Layout::attach_allocated_section_to_segment): Don't put
+	sections with different PF_X flags in the same segment.
+	(Layout::find_first_load_seg): Search all segments to find the first
+	one.
+	* options.h (rosegment): New.
+
+2010-09-08  Rafael Espindola  <espindola@google.com>
 
       * layout.cc (Layout::set_segment_offsets): Always advance to a new page.
 

@@ -808,6 +808,10 @@ class General_options
               N_(" Only search directories specified on the command line."),
               NULL);
 
+  DEFINE_bool(rosegment, options::TWO_DASHES, '\0', false,
+              N_(" Put read-only non-executable sections in their own segment"),
+              NULL);
+
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
                 N_("Ignored for compatibility"), N_("EMULATION"));
 
