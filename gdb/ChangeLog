@@ -1,3 +1,8 @@
+2010-09-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2read.c (fixup_partial_die): Do not set dummy name for
+	anonymous class partial DIEs.
+
 2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (dwarf2_compute_name): Check that the first

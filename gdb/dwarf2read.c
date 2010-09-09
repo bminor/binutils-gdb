@@ -9009,9 +9009,6 @@ fixup_partial_die (struct partial_die_info *part_die,
     }
 
   /* Set default names for some unnamed DIEs.  */
-  if (part_die->name == NULL && (part_die->tag == DW_TAG_structure_type
-				 || part_die->tag == DW_TAG_class_type))
-    part_die->name = "(anonymous class)";
 
   if (part_die->name == NULL && part_die->tag == DW_TAG_namespace)
     part_die->name = "(anonymous namespace)";
