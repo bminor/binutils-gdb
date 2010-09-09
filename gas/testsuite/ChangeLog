@@ -1,8 +1,8 @@
 2010-09-09  Nick Clifton  <nickc@redhat.com>
 
-	PR gas/11931
-	* gas/mn10300/pr11931.s: New file: Test case.
-	* gas/mn10300/pr11931.d: New file: Expected output.
+	PR gas/11973
+	* gas/mn10300/pr11973.s: New file: Test case.
+	* gas/mn10300/pr11973.d: New file: Expected output.
 	* gas/mn10300/basic.exp: Run the new test.
 
 2010-09-09 Tejas Belagod  <tejas.belagod@arm.com>
