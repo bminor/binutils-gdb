@@ -580,6 +580,8 @@ extern void lang_add_reloc
    union etree_union *);
 extern void lang_for_each_statement
   (void (*) (lang_statement_union_type *));
+extern void lang_for_each_statement_worker
+  (void (*) (lang_statement_union_type *), lang_statement_union_type *);
 extern void *stat_alloc
   (size_t);
 extern void strip_excluded_output_sections

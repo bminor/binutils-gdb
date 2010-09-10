@@ -871,9 +871,10 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
 }
 
 /* lang_for_each_statement walks the parse tree and calls the provided
-   function for each node.  */
+   function for each node, except those inside output section statements
+   with constraint set to -1.  */
 
-static void
+void
 lang_for_each_statement_worker (void (*func) (lang_statement_union_type *),
 				lang_statement_union_type *s)
 {
@@ -887,8 +888,9 @@ lang_for_each_statement_worker (void (*func) (lang_statement_union_type *),
 	  lang_for_each_statement_worker (func, constructor_list.head);
 	  break;
 	case lang_output_section_statement_enum:
-	  lang_for_each_statement_worker
-	    (func, s->output_section_statement.children.head);
+	  if (s->output_section_statement.constraint != -1)
+	    lang_for_each_statement_worker
+	      (func, s->output_section_statement.children.head);
 	  break;
 	case lang_wild_statement_enum:
 	  lang_for_each_statement_worker (func,
@@ -3888,6 +3890,7 @@ print_assignment (lang_assignment_statement_type *assignment,
   bfd_boolean is_dot;
   bfd_boolean computation_is_valid = TRUE;
   etree_type *tree;
+  asection *osec;
 
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
@@ -3907,7 +3910,10 @@ print_assignment (lang_assignment_statement_type *assignment,
       computation_is_valid = is_dot || (scan_for_self_assignment (dst, tree) == FALSE);
     }
 
-  exp_fold_tree (tree, output_section->bfd_section, &print_dot);
+  osec = output_section->bfd_section;
+  if (osec == NULL)
+    osec = bfd_abs_section_ptr;
+  exp_fold_tree (tree, osec, &print_dot);
   if (expld.result.valid_p)
     {
       bfd_vma value;
@@ -4704,6 +4710,9 @@ lang_size_sections_1
 	    lang_memory_region_type *r;
 
 	    os = &s->output_section_statement;
+	    if (os->constraint == -1)
+	      break;
+
 	    /* FIXME: We shouldn't need to zero section vmas for ld -r
 	       here, in lang_insert_orphan, or in the default linker scripts.
 	       This is covering for coff backend linker bugs.  See PR6945.  */

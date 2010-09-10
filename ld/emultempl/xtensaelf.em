@@ -596,59 +596,6 @@ static size_t ld_count_children (lang_statement_union_type *);
 
 extern lang_statement_list_type constructor_list;
 
-/*  Begin verbatim code from ldlang.c:
-    the following are copied from ldlang.c because they are defined
-    there statically.  */
-
-static void
-lang_for_each_statement_worker (void (*func) (lang_statement_union_type *),
-				lang_statement_union_type *s)
-{
-  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
-    {
-      func (s);
-
-      switch (s->header.type)
-	{
-	case lang_constructors_statement_enum:
-	  lang_for_each_statement_worker (func, constructor_list.head);
-	  break;
-	case lang_output_section_statement_enum:
-	  lang_for_each_statement_worker
-	    (func,
-	     s->output_section_statement.children.head);
-	  break;
-	case lang_wild_statement_enum:
-	  lang_for_each_statement_worker
-	    (func,
-	     s->wild_statement.children.head);
-	  break;
-	case lang_group_statement_enum:
-	  lang_for_each_statement_worker (func,
-					  s->group_statement.children.head);
-	  break;
-	case lang_data_statement_enum:
-	case lang_reloc_statement_enum:
-	case lang_object_symbols_statement_enum:
-	case lang_output_statement_enum:
-	case lang_target_statement_enum:
-	case lang_input_section_enum:
-	case lang_input_statement_enum:
-	case lang_assignment_statement_enum:
-	case lang_padding_statement_enum:
-	case lang_address_statement_enum:
-	case lang_fill_statement_enum:
-	  break;
-	default:
-	  FAIL ();
-	  break;
-	}
-    }
-}
-
-/* End of verbatim code from ldlang.c.  */
-
-
 static reloc_deps_section *
 xtensa_get_section_deps (const reloc_deps_graph *deps ATTRIBUTE_UNUSED,
 			 asection *sec)

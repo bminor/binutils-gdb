@@ -1,3 +1,15 @@
+2010-09-10  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11931
+	* ldlang.h (lang_for_each_statement_worker): Declare.
+	* ldlang.c (lang_for_each_statement_worker): Make global.  Don't
+	recurse into children of output_section_statement with constraint
+	set to -1.
+	(print_assignment): Handle NULL output_section->bfd_section.
+	(lang_size_sections_1): Ignore output section statement address
+	when constraint is -1.
+	* emultempl/xtensaelf.em (lang_for_each_statement_worker): Delete.
+
 2010-09-09  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add a entry for alpha-vms.
