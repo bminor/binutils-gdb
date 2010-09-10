@@ -1,3 +1,15 @@
+2010-09-10  Ben Gardiner  <bengardiner@nanometrics.ca>
+
+	* objcopy.c: Add --interleave-width option to allow interleaving
+	of more than one byte at a time.
+	(copy_width): New variable.
+	(copy_options): Add --interleave-width.
+	(copy_section): When interleaving copy in units of copy_width
+	bytes.
+	(copy_main): Parse the new option.
+	* doc/binutils: Document the new option.
+	* NEWS: Mention the new feature.
+
 2010-09-09  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (decode_location_expression): Fix data adjustment

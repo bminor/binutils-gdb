@@ -80,9 +80,10 @@ static section_rename *section_rename_list;
 static asymbol **isympp = NULL;	/* Input symbols.  */
 static asymbol **osympp = NULL;	/* Output symbols that survive stripping.  */
 
-/* If `copy_byte' >= 0, copy only that byte of every `interleave' bytes.  */
+/* If `copy_byte' >= 0, copy 'copy_width' byte(s) of every `interleave' bytes.  */
 static int copy_byte = -1;
-static int interleave = 4;
+static int interleave = 0; /* Initialised to 4 in copy_main().  */
+static int copy_width = 1;
 
 static bfd_boolean verbose;		/* Print file and target names.  */
 static bfd_boolean preserve_dates;	/* Preserve input file timestamp.  */
@@ -302,6 +303,7 @@ enum command_line_switch
     OPTION_IMAGE_BASE,
     OPTION_SECTION_ALIGNMENT,
     OPTION_STACK,
+    OPTION_INTERLEAVE_WIDTH,
     OPTION_SUBSYSTEM
   };
 
@@ -368,7 +370,8 @@ static struct option copy_options[] =
   {"info", no_argument, 0, OPTION_FORMATS_INFO},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
-  {"interleave", required_argument, 0, 'i'},
+  {"interleave", optional_argument, 0, 'i'},
+  {"interleave-width", required_argument, 0, OPTION_INTERLEAVE_WIDTH},
   {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
   {"keep-global-symbol", required_argument, 0, 'G'},
   {"keep-global-symbols", required_argument, 0, OPTION_KEEPGLOBAL_SYMBOLS},
@@ -488,7 +491,8 @@ copy_usage (FILE *stream, int exit_status)
   -w --wildcard                    Permit wildcard in symbol comparison\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
-  -i --interleave <number>         Only copy one out of every <number> bytes\n\
+  -i --interleave [<number>]       Only copy N out of every <number> bytes\n\
+     --interleave-width <number>   Set N for --interleave\n\
   -b --byte <num>                  Select byte <num> in every interleaved block\n\
      --gap-fill <val>              Fill gaps between sections with <val>\n\
      --pad-to <addr>               Pad the last section up to address <addr>\n\
@@ -2443,7 +2447,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   size = bfd_section_size (ibfd, isection);
   if (copy_byte >= 0)
-    size = (size + interleave - 1) / interleave;
+    size = (size + interleave - 1) / interleave * copy_width;
   else if (extract_symbol)
     size = 0;
   if (! bfd_set_section_size (obfd, osection, size))
@@ -2674,11 +2678,13 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  char *from = (char *) memhunk + copy_byte;
 	  char *to = (char *) memhunk;
 	  char *end = (char *) memhunk + size;
+	  int i;
 
 	  for (; from < end; from += interleave)
-	    *to++ = *from;
+	    for (i = 0; i < copy_width; i++)
+	      *to++ = from[i];
 
-	  size = (size + interleave - 1 - copy_byte) / interleave;
+	  size = (size + interleave - 1 - copy_byte) / interleave * copy_width;
 	  osection->lma /= interleave;
 	}
 
@@ -3183,9 +3189,20 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case 'i':
-	  interleave = atoi (optarg);
-	  if (interleave < 1)
-	    fatal (_("interleave must be positive"));
+	  if (optarg)
+	    {
+	      interleave = atoi (optarg);
+	      if (interleave < 1)
+		fatal (_("interleave must be positive"));
+	    }
+	  else
+	    interleave = 4;
+	  break;
+
+	case OPTION_INTERLEAVE_WIDTH:
+	  copy_width = atoi (optarg);
+	  if (copy_width < 1)
+	    fatal(_("interleave width must be positive"));
 	  break;
 
 	case 'I':
@@ -3768,8 +3785,14 @@ copy_main (int argc, char *argv[])
   if (show_version)
     print_version ("objcopy");
 
+  if (interleave && copy_byte == -1)
+    fatal (_("interleave start byte must be set with --byte"));
+
   if (copy_byte >= interleave)
     fatal (_("byte number must be less than interleave"));
+
+  if (copy_width > interleave - copy_byte)
+    fatal (_("interleave width must be less than or equal to interleave - byte`"));
 
   if (optind == argc || optind + 2 < argc)
     copy_usage (stderr, 1);

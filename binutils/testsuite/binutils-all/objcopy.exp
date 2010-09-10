@@ -1,5 +1,5 @@
 #   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#   2004, 2006, 2007, 2009
+#   2004, 2006, 2007, 2009, 2010
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -142,6 +142,43 @@ if ![string match "" $got] then {
             fail "objcopy --reverse-bytes"
         }
     }
+}
+
+# Test interleaved copy of multiple byte width
+
+set sequence_file sequence_file
+set file [open ${sequence_file} w]
+puts ${file} "12345678"
+close ${file}
+
+if [is_remote host] {
+    remote_upload host ${sequence_file} tmpdir/sequence_file
+    set sequence_file tmpdir/sequence_file
+}
+
+set got [binutils_run $OBJCOPY "-I binary -i 4 -b 0 --interleave-width 2 ${sequence_file} ${copyfile}"]
+
+if ![string match "" $got] then {
+    fail "objcopy -i --interleave-width"
+} else {
+    if [is_remote host] {
+	remote_upload host ${copyfile} tmpdir/interleave_output
+	set interleave_output tmpdir/interleave_output
+    } else {
+	set interleave_output ${copyfile}
+    }
+
+    set file [open ${interleave_output} r]
+    gets $file line
+    send_log "$line\n"
+    verbose $line
+
+    if ![string match "1256" $line] then {
+	fail "objcopy -i --interleave-width"
+    }
+    pass "objcopy -i --interleave-width"
+
+    close $file
 }
 
 # Test generating S records.

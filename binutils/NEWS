@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --interleave-width option to objcopy to allowing copying a range of
+  bytes from the input to the output with the --interleave option.
+
 * Add support for the TMS320C6000 (TI C6X) processor family.
 
 * Readelf can now display ARM unwind tables (.ARM.exidx / .ARM.extab) using
