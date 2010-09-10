@@ -1,3 +1,8 @@
+2010-09-10  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.base/break-interp.exp (test_ld) <istarget powerpc64-*>: Add
+	is_lp64_target to check 64bit target.
+
 2010-09-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/break-interp.exp (reach): Permit leading . for ppc64.

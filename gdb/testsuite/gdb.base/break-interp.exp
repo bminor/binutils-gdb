@@ -401,7 +401,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	}
 	# `info sym' cannot be tested for .opd as the binary may not have
 	# symbols.
-	if [istarget powerpc64-*] {
+	if {[istarget powerpc64-*] && [is_lp64_target]} {
 	    set test "convert entry point"
 	    gdb_test_multiple "p *(void(*)(void) *) 0x$entrynohex" $test {
 		-re " =( \\(\[^0-9\]*\\))? 0x(\[0-9a-f\]+)( < \[^\r\n\]*)?\r\n$gdb_prompt $" {
