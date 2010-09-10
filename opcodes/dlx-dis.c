@@ -437,18 +437,18 @@ print_insn_dlx (bfd_vma memaddr, struct disassemble_info* info)
   bfd_byte buffer[4];
   int insn_idx;
   unsigned long insn_word;
-  unsigned long dlx_insn_type[] =
+  dlx_insn dlx_insn_type[] =
   {
-    (unsigned long) dlx_r_type,
-    (unsigned long) dlx_load_type,
-    (unsigned long) dlx_store_type,
-    (unsigned long) dlx_aluI_type,
-    (unsigned long) dlx_br_type,
-    (unsigned long) dlx_jmp_type,
-    (unsigned long) dlx_jr_type,
-    (unsigned long) NULL
+    dlx_r_type,
+    dlx_load_type,
+    dlx_store_type,
+    dlx_aluI_type,
+    dlx_br_type,
+    dlx_jmp_type,
+    dlx_jr_type,
+    (dlx_insn) NULL
   };
-  int dlx_insn_type_num = ((sizeof dlx_insn_type) / (sizeof (unsigned long))) - 1;
+  int dlx_insn_type_num = ((sizeof dlx_insn_type) / (sizeof (dlx_insn))) - 1;
   int status =
     (*info->read_memory_func) (memaddr, (bfd_byte *) &buffer[0], 4, info);
 
@@ -483,7 +483,7 @@ print_insn_dlx (bfd_vma memaddr, struct disassemble_info* info)
   current_insn_addr = (unsigned long) memaddr;
 
   for (insn_idx = 0; dlx_insn_type[insn_idx] != 0x0; insn_idx++)
-    switch (((dlx_insn) (dlx_insn_type[insn_idx])) (info))
+    switch ((dlx_insn_type[insn_idx]) (info))
       {
 	/* Found the correct opcode   */
       case R_TYPE:

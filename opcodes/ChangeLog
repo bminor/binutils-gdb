@@ -1,3 +1,8 @@
+2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* src/opcodes/dlx-dis.c (print_insn_dlx): Use dlx_insn type for
+	dlx_insn_type array.
+
 2010-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/11960
