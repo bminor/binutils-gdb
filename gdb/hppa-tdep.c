@@ -2506,7 +2506,7 @@ unwind_command (char *exp, int from_tty)
       return;
     }
 
-  printf_unfiltered ("unwind_table_entry (0x%lx):\n", (unsigned long)u);
+  printf_unfiltered ("unwind_table_entry (%s):\n", host_address_to_string (u));
 
   printf_unfiltered ("\tregion_start = %s\n", hex_string (u->region_start));
   gdb_flush (gdb_stdout);

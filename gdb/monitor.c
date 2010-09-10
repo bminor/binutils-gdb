@@ -1835,8 +1835,9 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
       return 0;
     }
 
-  monitor_debug ("MON read block ta(%s) ha(%lx) %d\n",
-		 paddress (target_gdbarch, memaddr), (long) myaddr, len);
+  monitor_debug ("MON read block ta(%s) ha(%s) %d\n",
+		 paddress (target_gdbarch, memaddr),
+		 host_address_to_string (myaddr), len);
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
     memaddr = gdbarch_addr_bits_remove (target_gdbarch, memaddr);
@@ -1924,7 +1925,8 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
       p += strlen (current_monitor->getmem.resp_delim);
 #endif
     }
-  monitor_debug ("MON scanning  %d ,%lx '%s'\n", len, (long) p, p);
+  monitor_debug ("MON scanning  %d ,%s '%s'\n", len,
+		 host_address_to_string (p), p);
   if (current_monitor->flags & MO_GETMEM_16_BOUNDARY)
     {
       char c;

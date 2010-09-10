@@ -1636,8 +1636,9 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
         {
 	  struct value *arg = args[i];
 	  struct type *arg_type = check_typedef (value_type (arg));
-	  fprintf_unfiltered (gdb_stdlog, "%2d: 0x%lx %3d ",
-			      i, (unsigned long) arg, TYPE_LENGTH (arg_type));
+	  fprintf_unfiltered (gdb_stdlog, "%2d: %s %3d ", i,
+			      host_address_to_string (arg),
+			      TYPE_LENGTH (arg_type));
 	  switch (TYPE_CODE (arg_type))
 	    {
 	    case TYPE_CODE_INT:
@@ -1650,8 +1651,8 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	      fprintf_unfiltered (gdb_stdlog, "%3d", TYPE_CODE (arg_type));
 	      break;
 	    }
-	  fprintf_unfiltered (gdb_stdlog, " 0x%lx\n",
-			      (unsigned long) value_contents (arg));
+	  fprintf_unfiltered (gdb_stdlog, " %s\n",
+			      host_address_to_string (value_contents (arg)));
 	}
     }
 

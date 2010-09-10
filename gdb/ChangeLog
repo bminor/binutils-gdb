@@ -1,5 +1,12 @@
 2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* hppa-tdep.c (unwind_command): Use host_address_to_string function
+	to display a host address.
+	* monitor.c (monitor_read_memory): Likewise.
+	* xtensa-tdep.c (xtensa_push_dummy_call): Likewise.
+
+2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* coffread.c (struct coff_symbol): Change c_value type from `long' to
 	`CORE_ADDRESS' as it might contain target addresses.
 
