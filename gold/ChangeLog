@@ -1,3 +1,9 @@
+2010-09-10  Nick Clifton  <nickc@redhat.com>
+
+	PR gold/11997
+	* testsuite/memory_test.t: Discard any sections that are not
+	needed.
+
 2010-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/11996
