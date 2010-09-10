@@ -1,5 +1,10 @@
 2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* coffread.c (struct coff_symbol): Change c_value type from `long' to
+	`CORE_ADDRESS' as it might contain target addresses.
+
+2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* alpha-mdebug-tdep.c (find_proc_desc): Use SYMBOL_VALUE_BYTES macro
 	before cast to pointer to avoid warning.
 

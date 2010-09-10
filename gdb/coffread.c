@@ -131,7 +131,7 @@ struct coff_symbol
     char *c_name;
     int c_symnum;		/* symbol number of this entry */
     int c_naux;			/* 0 if syment only, 1 if syment + auxent, etc */
-    long c_value;
+    CORE_ADDR c_value;
     int c_sclass;
     int c_secnum;
     unsigned int c_type;
