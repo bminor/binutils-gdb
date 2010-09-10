@@ -1,3 +1,8 @@
+2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* alpha-mdebug-tdep.c (find_proc_desc): Use SYMBOL_VALUE_BYTES macro
+	before cast to pointer to avoid warning.
+
 2010-09-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* v850-tdep.c (v850_gdbarch_init): Change the v850's `char'
