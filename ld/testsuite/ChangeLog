@@ -1,3 +1,9 @@
+2010-09-10  Alan Modra  <amodra@gmail.com>
+
+	* ld-gc/abi-note.d: Exclude aout and oldld targets.
+	* ld-gc/start.d: Likewise.
+	* ld-scripts/section-match-1.d: Likewise, and tic30.
+
 2010-09-10  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-scripts/rgn-at5.d: Restrict to *-*-linux*.
