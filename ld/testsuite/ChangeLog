@@ -1,3 +1,7 @@
+2010-09-10  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-scripts/rgn-at5.d: Restrict to *-*-linux*.
+
 2010-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11998
