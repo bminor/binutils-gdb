@@ -33,6 +33,7 @@ struct saved_output_files
   struct ui_file *err;
   struct ui_file *log;
   struct ui_file *targ;
+  struct ui_file *targerr;
 };
 static struct saved_output_files saved_output;
 static char *saved_filename;
@@ -116,6 +117,7 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
   gdb_stderr = output;
   gdb_stdlog = output;
   gdb_stdtarg = output;
+  gdb_stdtargerr = output;
   logging_no_redirect_file = new_logging_no_redirect_file;
 
   /* There is a former output pushed on the ui_out_redirect stack.  We want to
@@ -154,10 +156,12 @@ pop_output_files (void)
   gdb_stderr = saved_output.err;
   gdb_stdlog = saved_output.log;
   gdb_stdtarg = saved_output.targ;
+  gdb_stdtargerr = saved_output.targ;
   saved_output.out = NULL;
   saved_output.err = NULL;
   saved_output.log = NULL;
   saved_output.targ = NULL;
+  saved_output.targerr = NULL;
 
   ui_out_redirect (uiout, NULL);
 }
@@ -211,11 +215,13 @@ handle_redirections (int from_tty)
   saved_output.err = gdb_stderr;
   saved_output.log = gdb_stdlog;
   saved_output.targ = gdb_stdtarg;
+  saved_output.targerr = gdb_stdtargerr;
 
   gdb_stdout = output;
   gdb_stderr = output;
   gdb_stdlog = output;
   gdb_stdtarg = output;
+  gdb_stdtargerr = output;
 
   if (ui_out_redirect (uiout, output) < 0)
     warning (_("Current output protocol does not support redirection"));

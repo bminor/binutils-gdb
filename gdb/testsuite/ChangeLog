@@ -1,3 +1,8 @@
+2010-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/python.exp (set height 0, collect help from uiout)
+	(verify help to uiout): New tests.
+
 2010-09-10  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.base/break-interp.exp (test_ld) <istarget powerpc64-*>: Add

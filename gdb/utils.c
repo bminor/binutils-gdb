@@ -311,6 +311,26 @@ make_cleanup_ui_file_delete (struct ui_file *arg)
   return make_my_cleanup (&cleanup_chain, do_ui_file_delete, arg);
 }
 
+/* Helper function for make_cleanup_ui_out_redirect_pop.  */
+
+static void
+do_ui_out_redirect_pop (void *arg)
+{
+  struct ui_out *uiout = arg;
+
+  if (ui_out_redirect (uiout, NULL) < 0)
+    warning (_("Cannot restore redirection of the current output protocol"));
+}
+
+/* Return a new cleanup that pops the last redirection by ui_out_redirect
+   with NULL parameter.  */
+
+struct cleanup *
+make_cleanup_ui_out_redirect_pop (struct ui_out *uiout)
+{
+  return make_my_cleanup (&cleanup_chain, do_ui_out_redirect_pop, uiout);
+}
+
 static void
 do_free_section_addr_info (void *arg)
 {

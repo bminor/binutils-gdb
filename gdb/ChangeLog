@@ -1,3 +1,21 @@
+2010-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Paul Bolle  <pebolle@tiscali.nl>
+
+	Redirect also uiout and stdtarg{,err} in execute_command_to_string.
+	* cli-logging.c (struct saved_output_files) <targerr>: New.
+	(set_logging_redirect, pop_output_files, handle_redirections):
+	Redirect also gdb_stdtargerr.
+	* defs.h (struct ui_out, make_cleanup_ui_out_redirect_pop): New
+	declarations.
+	* event-top.c (gdb_setup_readline, gdb_disable_readline): Redirect
+	also gdb_stdtargerr.
+	* top.c (execute_command_to_string): Move make_cleanup_ui_file_delete
+	to the top.  Redirect also gdb_stdlog, gdb_stdtarg and gdb_stdtargerr.
+	Use ui_out_redirect, register make_cleanup_ui_out_redirect_pop.
+	* tui/tui-io.c (tui_setup_io): Redirect also gdb_stdtargerr.
+	* utils.c (do_ui_out_redirect_pop, make_cleanup_ui_out_redirect_pop):
+	New functions.
+
 2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* hppa-tdep.c (unwind_command): Use host_address_to_string function

@@ -149,6 +149,12 @@ gdb_test_multiple "python print \"\\n\" * $lines" $test {
 }
 gdb_test "q" "Quit" "verify pagination afterwards: q"
 
+gdb_test_no_output "set height 0"
+
+gdb_test_no_output "python a = gdb.execute('help', to_string=True)" "collect help from uiout"
+
+gdb_test "python print a" ".*aliases -- Aliases of other commands.*" "verify help to uiout"
+
 # Start with a fresh gdb.
 clean_restart ${testfile}
 

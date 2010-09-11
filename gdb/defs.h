@@ -337,6 +337,10 @@ extern struct cleanup *make_cleanup_freeargv (char **);
 struct ui_file;
 extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
 
+struct ui_out;
+extern struct cleanup *
+  make_cleanup_ui_out_redirect_pop (struct ui_out *uiout);
+
 struct section_addr_info;
 extern struct cleanup *(make_cleanup_free_section_addr_info 
                         (struct section_addr_info *));
