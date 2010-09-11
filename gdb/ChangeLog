@@ -1,3 +1,12 @@
+2010-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-tdep.c (amd64_register_name): Removed.
+	(amd64_init_abi): Don't call set_gdbarch_register_name.
+
+	* i386-tdep.c (i386_ymmh_regnum_p): Make it static.
+
+	* i386-tdep.h (i386_ymmh_regnum_p): Removed.
+
 2010-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Paul Bolle  <pebolle@tiscali.nl>
 

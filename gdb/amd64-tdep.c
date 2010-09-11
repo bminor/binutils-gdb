@@ -257,19 +257,6 @@ static const char *amd64_dword_names[] =
   "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d"
 };
 
-/* Return the name of register REGNUM, or the empty string if it is
-   an anonymous register. */
-
-static const char *
-amd64_register_name (struct gdbarch *gdbarch, int regnum)
-{
-  /* Hide the upper YMM registers.  */
-  if (i386_ymmh_regnum_p (gdbarch, regnum))
-    return "";
-
-  return tdesc_register_name (gdbarch, regnum);
-}
-
 /* Return the name of register REGNUM.  */
 
 static const char *
@@ -2406,8 +2393,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				     amd64_pseudo_register_write);
 
   set_tdesc_pseudo_register_name (gdbarch, amd64_pseudo_register_name);
-
-  set_gdbarch_register_name (gdbarch, amd64_register_name);
 
   /* AMD64 has an FPU and 16 SSE registers.  */
   tdep->st0_regnum = AMD64_ST0_REGNUM;

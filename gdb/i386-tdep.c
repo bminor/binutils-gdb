@@ -165,7 +165,7 @@ i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum)
   return regnum >= 0 && regnum < tdep->num_dword_regs;
 }
 
-int
+static int
 i386_ymmh_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
