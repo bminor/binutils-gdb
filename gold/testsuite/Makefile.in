@@ -160,7 +160,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test \
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_pie_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = two_file_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1 common_test_2 \
@@ -592,7 +593,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test$(EXEEXT) \
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test$(EXEEXT)
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test$(EXEEXT) \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_pie_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_strip_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test$(EXEEXT) \
@@ -1269,6 +1271,12 @@ two_file_mixed_2_shared_test_OBJECTS =  \
 two_file_mixed_2_shared_test_LINK = $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(two_file_mixed_2_shared_test_LDFLAGS) $(LDFLAGS) \
 	-o $@
+two_file_mixed_pie_test_SOURCES = two_file_mixed_pie_test.c
+two_file_mixed_pie_test_OBJECTS = two_file_mixed_pie_test.$(OBJEXT)
+two_file_mixed_pie_test_LDADD = $(LDADD)
+two_file_mixed_pie_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_mixed_shared_test_OBJECTS = two_file_test_main.$(OBJEXT)
 two_file_mixed_shared_test_OBJECTS =  \
 	$(am_two_file_mixed_shared_test_OBJECTS)
@@ -1518,6 +1526,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
 	$(tls_static_pic_test_SOURCES) $(tls_static_test_SOURCES) \
 	$(tls_test_SOURCES) $(two_file_mixed_2_shared_test_SOURCES) \
+	two_file_mixed_pie_test.c \
 	$(two_file_mixed_shared_test_SOURCES) \
 	$(two_file_pic_test_SOURCES) two_file_pie_test.c \
 	$(two_file_relocatable_test_SOURCES) \
@@ -2765,6 +2774,15 @@ tls_test$(EXEEXT): $(tls_test_OBJECTS) $(tls_test_DEPENDENCIES)
 two_file_mixed_2_shared_test$(EXEEXT): $(two_file_mixed_2_shared_test_OBJECTS) $(two_file_mixed_2_shared_test_DEPENDENCIES) 
 	@rm -f two_file_mixed_2_shared_test$(EXEEXT)
 	$(two_file_mixed_2_shared_test_LINK) $(two_file_mixed_2_shared_test_OBJECTS) $(two_file_mixed_2_shared_test_LDADD) $(LIBS)
+@FN_PTRS_IN_SO_WITHOUT_PIC_FALSE@two_file_mixed_pie_test$(EXEEXT): $(two_file_mixed_pie_test_OBJECTS) $(two_file_mixed_pie_test_DEPENDENCIES) 
+@FN_PTRS_IN_SO_WITHOUT_PIC_FALSE@	@rm -f two_file_mixed_pie_test$(EXEEXT)
+@FN_PTRS_IN_SO_WITHOUT_PIC_FALSE@	$(LINK) $(two_file_mixed_pie_test_OBJECTS) $(two_file_mixed_pie_test_LDADD) $(LIBS)
+@GCC_FALSE@two_file_mixed_pie_test$(EXEEXT): $(two_file_mixed_pie_test_OBJECTS) $(two_file_mixed_pie_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f two_file_mixed_pie_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(two_file_mixed_pie_test_OBJECTS) $(two_file_mixed_pie_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@two_file_mixed_pie_test$(EXEEXT): $(two_file_mixed_pie_test_OBJECTS) $(two_file_mixed_pie_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f two_file_mixed_pie_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(two_file_mixed_pie_test_OBJECTS) $(two_file_mixed_pie_test_LDADD) $(LIBS)
 two_file_mixed_shared_test$(EXEEXT): $(two_file_mixed_shared_test_OBJECTS) $(two_file_mixed_shared_test_DEPENDENCIES) 
 	@rm -f two_file_mixed_shared_test$(EXEEXT)
 	$(two_file_mixed_shared_test_LINK) $(two_file_mixed_shared_test_OBJECTS) $(two_file_mixed_shared_test_LDADD) $(LIBS)
@@ -2956,6 +2974,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test_file2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_mixed_pie_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_pie_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_strip_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_1.Po@am__quote@
@@ -3380,6 +3399,8 @@ two_file_mixed_shared_test.log: two_file_mixed_shared_test$(EXEEXT)
 	@p='two_file_mixed_shared_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_mixed_2_shared_test.log: two_file_mixed_2_shared_test$(EXEEXT)
 	@p='two_file_mixed_2_shared_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+two_file_mixed_pie_test.log: two_file_mixed_pie_test$(EXEEXT)
+	@p='two_file_mixed_pie_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_strip_test.log: two_file_strip_test$(EXEEXT)
 	@p='two_file_strip_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 two_file_same_shared_strip_test.log: two_file_same_shared_strip_test$(EXEEXT)
@@ -3877,6 +3898,9 @@ uninstall-am:
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_mixed_1.so: two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so gcctestdir/ld
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_mixed_pie_test: two_file_test_1.o two_file_test_1b_pie.o \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@		two_file_test_main_pie.o two_file_shared_2.so gcctestdir/ld
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,-R,. -pie two_file_test_1.o two_file_test_1b_pie.o two_file_test_main_pie.o two_file_shared_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_strip_test: two_file_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -o two_file_strip_test two_file_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_strip.so: two_file_shared.so

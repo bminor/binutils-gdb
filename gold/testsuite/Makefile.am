@@ -461,6 +461,11 @@ two_file_mixed_2_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared_mixed_
 two_file_mixed_2_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_mixed_2_shared_test_LDADD = two_file_shared_mixed_1.so two_file_shared_2.so
 
+check_PROGRAMS += two_file_mixed_pie_test
+two_file_mixed_pie_test: two_file_test_1.o two_file_test_1b_pie.o \
+		two_file_test_main_pie.o two_file_shared_2.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,-R,. -pie two_file_test_1.o two_file_test_1b_pie.o two_file_test_main_pie.o two_file_shared_2.so
+
 endif FN_PTRS_IN_SO_WITHOUT_PIC
 
 check_PROGRAMS += two_file_strip_test

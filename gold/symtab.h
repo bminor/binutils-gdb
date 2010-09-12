@@ -657,7 +657,8 @@ class Symbol
     // shared library cannot use a PLT entry.
     if ((flags & FUNCTION_CALL)
         && this->has_plt_offset()
-        && !((flags & NON_PIC_REF) && parameters->options().shared()))
+        && !((flags & NON_PIC_REF)
+             && parameters->options().output_is_position_independent()))
       return false;
 
     // A reference to any PLT entry in a non-position-independent executable
@@ -798,7 +799,7 @@ class Symbol
   bool
   may_need_copy_reloc() const
   {
-    return (!parameters->options().shared()
+    return (!parameters->options().output_is_position_independent()
 	    && parameters->options().copyreloc()
 	    && this->is_from_dynobj()
 	    && !this->is_func());

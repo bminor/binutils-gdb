@@ -1,3 +1,13 @@
+2010-09-12  Cary Coutant  <ccoutant@google.com>
+
+	* symtab.h (Symbol::needs_dynamic_reloc): Non-PIC calls from
+	position-independent executables to shared libraries need dynamic
+	relocations.
+	(Symbol::may_need_copy_reloc): Do not generate COPY relocs in
+	position-independent executables.
+	* testsuite/Makefile.am (two_file_mixed_pie_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+
 2010-09-10  Nick Clifton  <nickc@redhat.com>
 
 	PR gold/11997
