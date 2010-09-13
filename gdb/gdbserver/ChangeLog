@@ -1,3 +1,8 @@
+2010-09-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* lynx-low.c, lynx-ppc-loc.c: Include <sys/ptrace.h> instead of
+	<ptrace.h>
+
 2010-09-09  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* configure.ac: Add --enable-inprocess-agent option.

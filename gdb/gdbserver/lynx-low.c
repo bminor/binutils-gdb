@@ -20,7 +20,7 @@
 #include "lynx-low.h"
 
 #include <limits.h>
-#include <ptrace.h>
+#include <sys/ptrace.h>
 #include <sys/piddef.h> /* Provides PIDGET, TIDGET, BUILDPID, etc.  */
 #include <unistd.h>
 #include <sys/ioctl.h>

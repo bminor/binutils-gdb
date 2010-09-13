@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <limits.h>
-#include <ptrace.h>
+#include <sys/ptrace.h>
 
 /* The following two typedefs are defined in a .h file which is not
    in the standard include path (/sys/include/family/ppc/ucontext.h),
