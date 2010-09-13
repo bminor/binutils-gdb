@@ -2389,6 +2389,7 @@ classify_name (struct block *block)
 
   if (sym == NULL
       && parse_language->la_language == language_cplus
+      && !is_a_field_of_this
       && !lookup_minimal_symbol (copy, NULL, NULL))
     return UNKNOWN_CPP_NAME;
 

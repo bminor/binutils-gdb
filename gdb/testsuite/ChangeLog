@@ -1,3 +1,8 @@
+2010-09-13  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/koenig.cc: created class for testing member lookup.
+	* gdb.cp/koenig.exp: Added test for member lookup.
+
 2010-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix false FAILs on sourcetree topdir directory containing "kill".

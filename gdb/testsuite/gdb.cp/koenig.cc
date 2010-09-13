@@ -226,6 +226,16 @@ namespace P {
 
 //------------
 
+class R {
+  public:
+    int rfoo(){ return 31; }
+    int rbar(){
+      return 1; // marker1
+    }
+};
+
+//------------
+
 int
 main ()
 {
@@ -298,6 +308,10 @@ main ()
   q + 5.0f;
 
   ++q;
+
+  R r;
+  r.rbar();
+  r.rfoo();
 
   return first (0, c) + foo (eo) +
          foo (eo, eo) + foo (eo, eo, 1)  +

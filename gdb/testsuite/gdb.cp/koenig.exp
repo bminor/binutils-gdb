@@ -115,3 +115,14 @@ gdb_test "p q + 5" "= 29"
 # some unary operators for good measure
 # Cannot resolve function operator++ to any overloaded instance
 gdb_test "p ++q" "= 30"
+
+# Test that koening lookup does not affect
+# member variable lookup.
+gdb_test "p r.rfoo()" "= 31"
+
+# Do the same from inside class R.
+gdb_breakpoint [gdb_get_line_number "marker1"]
+gdb_continue_to_breakpoint "marker1"
+
+gdb_test "p rfoo()" "= 31"
+gdb_test "p this->rfoo()" "= 31"

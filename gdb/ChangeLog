@@ -1,3 +1,9 @@
+2010-09-13  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR symtab/11992:
+	* c-exp.y (classify_name): Check is_a_member_of_this before returning
+	UNKNOWN_CPP_NAME.
+
 2010-09-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add x86-lynxos to the list of platforms supported by
