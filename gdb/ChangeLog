@@ -1,3 +1,7 @@
+2010-09-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Announce GDBserver support for version 5.x of ppc-lynxos.
+
 2010-09-13  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add progspace.h.
