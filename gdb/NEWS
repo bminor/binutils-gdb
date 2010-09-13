@@ -64,7 +64,8 @@
 
 * New features in the GDB remote stub, GDBserver
 
-  ** GDBserver is now supported on PowerPC LynxOS 4.x and 5.x.
+  ** GDBserver is now supported on PowerPC LynxOS (versions 4.x and 5.x),
+     and i686 LynxOS (version 5.x).
 
 *** Changes in GDB 7.2
 
