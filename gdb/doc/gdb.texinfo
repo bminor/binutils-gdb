@@ -26041,8 +26041,13 @@ The @code{$pc} value for that frame.
 Function name.
 @item @var{file}
 File name of the source file where the function lives.
+@item @var{fullname}
+The full file name of the source file where the function lives.
 @item @var{line}
 Line number corresponding to the @code{$pc}.
+@item @var{from}
+The shared library where this function is defined.  This is only given
+if the frame's function is not known.
 @end table
 
 If invoked without arguments, this command prints a backtrace for the
