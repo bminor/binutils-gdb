@@ -1,3 +1,13 @@
+2010-09-13  Kai Tietz  <kai.tietz@onevision.com>
+
+	* gas/pe/pe.exp: Add x64 SEH tests.
+	* gas/pe/peseh-x64.s: New.
+	* gas/pe/peseh-x64.d: New.
+	* gas/pe/peseh-x64-2.s: New.
+	* gas/pe/peseh-x64-2.d: New.
+	* gas/pe/peseh-x64-3.s: New.
+	* gas/pe/peseh-x64-3.d: New.
+
 2010-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/11973

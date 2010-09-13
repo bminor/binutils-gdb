@@ -35,3 +35,13 @@ run_dump_test "aligncomm-d"
 
 run_dump_test "section-align-1"
 run_dump_test "section-align-3"
+
+# SEH related tests
+
+# These tests are only for x86_64 targets
+if ([istarget "x86_64-*-mingw*"]) then {
+
+	run_dump_test "peseh-x64"
+	run_dump_test "peseh-x64-2"
+	run_dump_test "peseh-x64-3"
+}
