@@ -208,16 +208,6 @@ ptrace_request_to_str (int request)
         return "PT_WRITE_FPR";
         break;
 #endif
-#ifdef PTRACE_GETVECREGS
-      case PTRACE_GETVECREGS:
-        return "PTRACE_GETVECREGS";
-        break;
-#endif
-#ifdef PTRACE_SETVECREGS
-      case PTRACE_SETVECREGS:
-        return "PTRACE_SETVECREGS";
-        break;
-#endif
 #ifdef PT_READ_VPR
       case PT_READ_VPR:
         return "PT_READ_VPR";
@@ -267,36 +257,6 @@ ptrace_request_to_str (int request)
         break;
       case PTRACE_GETTHREADLIST:
         return "PTRACE_GETTHREADLIST";
-        break;
-      case PTRACE_POSTSYSCALL:
-        return "PTRACE_POSTSYSCALL";
-        break;
-      case PTRACE_USE_SIGEXECED:
-        return "PTRACE_USE_SIGEXECED";
-        break;
-      case PTRACE_GETTRACESIG:
-        return "PTRACE_GETTRACESIG";
-        break;
-      case PTRACE_GETCWD:
-        return "PTRACE_GETCWD";
-        break;
-      case PTRACE_TRAPFORK:
-        return "PTRACE_TRAPFORK";
-        break;
-      case PTRACE_GETCHILDPID:
-        return "PTRACE_GETCHILDPID";
-        break;
-      case PTRACE_SYSCALL_ONE:
-        return "PTRACE_SYSCALL_ONE";
-        break;
-      case PTRACE_SIGMASK:
-        return "PTRACE_SIGMASK";
-        break;
-      case PTRACE_GETIWD:
-        return "PTRACE_GETIWD";
-        break;
-      case PTRACE_GETEXECFILE:
-        return "PTRACE_GETEXECFILE";
         break;
     }
   return "<unknown-request>";

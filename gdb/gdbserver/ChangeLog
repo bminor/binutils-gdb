@@ -1,5 +1,10 @@
 2010-09-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* lynx-low.c (ptrace_request_to_str): Remove handling for
+	request values that have been removed in LynxOS 5.x.
+
+2010-09-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* lynx-low.c, lynx-ppc-loc.c: Include <sys/ptrace.h> instead of
 	<ptrace.h>
 
