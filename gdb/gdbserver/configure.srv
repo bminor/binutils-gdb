@@ -93,6 +93,10 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			ipa_obj="${ipa_i386_linux_regobj} linux-i386-ipa.o"
 			;;
+  i[34567]86-*-lynxos*)	srv_regobj="i386.o"
+			srv_tgtobj="lynx-low.o lynx-i386-low.o"
+			srv_lynxos=yes
+			;;
   i[34567]86-*-mingw32ce*)
 			srv_regobj="$srv_i386_regobj"
 			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
