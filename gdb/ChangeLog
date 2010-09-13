@@ -1,3 +1,7 @@
+2010-09-13  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add progspace.h.
+
 2010-09-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-tdep.c (i386_ymm_type): Set type name to
