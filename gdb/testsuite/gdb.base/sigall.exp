@@ -94,11 +94,11 @@ proc test_one_sig {nextsig} {
 
     if { $missed_handler == "0" } then {
 	gdb_test_multiple "signal 0" "advance to $nextsig" {
-	    -re "Breakpoint.*gen_$nextsig.*kill.*$gdb_prompt $" {
+	    -re "Breakpoint.*gen_$nextsig.*\r\n\[0-9\]+\[ \t\]+kill \\(.*\r\n$gdb_prompt $" {
 	        pass "advance to $nextsig"
 	        set sig_supported 1
 	    }
-	    -re "Breakpoint.*gen_$nextsig.*handle.*$gdb_prompt $" {
+	    -re "Breakpoint.*gen_$nextsig.*\r\n\[0-9\]+\[ \t\]+handle_.*\r\n$gdb_prompt $" {
 	        pass "advance to $nextsig"
 	        set sig_supported 0
 	    }
