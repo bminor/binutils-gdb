@@ -1,3 +1,8 @@
+2010-09-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-tdep.c (i386_ymm_type): Set type name to
+	builtin_type_vec256i.
+
 2010-09-12  Michael Snyder  <msnyder@vmware.com>
 
 	* i386-tdep.c (i386_gdbarch_init): Fix typo in comments.

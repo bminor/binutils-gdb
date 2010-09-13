@@ -2417,7 +2417,7 @@ i386_ymm_type (struct gdbarch *gdbarch)
 				   init_vector_type (bt->builtin_int128, 2));
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "builtin_type_vec128i";
+      TYPE_NAME (t) = "builtin_type_vec256i";
       tdep->i386_ymm_type = t;
     }
 
