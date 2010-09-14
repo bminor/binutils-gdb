@@ -1,3 +1,8 @@
+2010-09-14  Kai Tietz  <kai.tietz@onevision.com>
+
+	* peXXigen.c (sort_x64_pdata): New helper.
+	(_bfd_XXi_final_link_postscript): Do pdata sorting.
+
 2010-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11998

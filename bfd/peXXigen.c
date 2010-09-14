@@ -2256,6 +2256,21 @@ _bfd_XX_get_symbol_info (bfd * abfd, asymbol *symbol, symbol_info *ret)
   coff_get_symbol_info (abfd, symbol, ret);
 }
 
+#if !defined(COFF_WITH_pep) && defined(COFF_WITH_pex64)
+static int
+sort_x64_pdata (const void *l, const void *r)
+{
+  const char *lp = (const char *) l;
+  const char *rp = (const char *) r;
+  bfd_vma vl, vr;
+  vl = bfd_getl32 (lp); vr = bfd_getl32 (rp);
+  if (vl != vr)
+    return (vl < vr ? -1 : 1);
+  /* We compare just begin address.  */
+  return 0;
+}
+#endif
+
 /* Handle the .idata section and other things that need symbol table
    access.  */
 
@@ -2382,6 +2397,28 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 
       pe_data (abfd)->pe_opthdr.DataDirectory[PE_TLS_TABLE].Size = 0x18;
     }
+
+/* If there is a .pdata section and we have linked pdata finally, we
+     need to sort the entries ascending.  */
+#if !defined(COFF_WITH_pep) && defined(COFF_WITH_pex64)
+  {
+    asection *sec = bfd_get_section_by_name (abfd, ".pdata");
+
+    if (sec)
+      {
+	bfd_size_type x = sec->rawsize ? sec->rawsize : sec->size;
+
+	if (x && bfd_get_section_contents (abfd, sec, pfinfo->contents, 0, x))
+	  {
+	    qsort (pfinfo->contents,
+	    	   (size_t) ((sec->size <x ? sec->size : x) / 12),
+	    	   12, sort_x64_pdata);
+	    bfd_set_section_contents (pfinfo->output_bfd, sec,
+	    			      pfinfo->contents, 0, x);
+	  }
+      }
+  }
+#endif
 
   /* If we couldn't find idata$2, we either have an excessively
      trivial program or are in DEEP trouble; we have to assume trivial
