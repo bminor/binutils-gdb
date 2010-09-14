@@ -1,5 +1,11 @@
 2010-09-14  Tom Tromey  <tromey@redhat.com>
 
+	PR symtab/8399:
+	* dwarf2loc.c (locexpr_describe_location_piece): Don't call error
+	for unrecognized frame base expression.
+
+2010-09-14  Tom Tromey  <tromey@redhat.com>
+
 	PR exp/11803:
 	* value.c (value_static_field): Use value_of_variable.
 

@@ -284,8 +284,8 @@ runto spin
 gdb_test "info address a_global" \
 	".*a_global.*static storage at address.*" "info address a_global"
 
-setup_kfail "gdb/1294" "*-*-*"
-gdb_test "info address me" ".*me.*is a variable at offset.*" "info address me"
+gdb_test "info address me" ".*me.*is a complex DWARF expression:.*" \
+    "info address me"
 
 
 # Test LOC_UNRESOLVED references resolving for `extern' TLS variables.

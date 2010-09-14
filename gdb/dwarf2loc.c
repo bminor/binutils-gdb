@@ -1940,7 +1940,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       struct symbol *framefunc;
       int frame_reg = 0;
       LONGEST frame_offset;
-      const gdb_byte *base_data, *new_data;
+      const gdb_byte *base_data, *new_data, *save_data = data;
       size_t base_size;
       LONGEST base_offset = 0;
 
@@ -1984,10 +1984,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	{
 	  /* We don't know what to do with the frame base expression,
 	     so we can't trace this variable; give up.  */
-	  error (_("Cannot describe location of symbol \"%s\"; "
-		   "DWARF 2 encoding not handled, "
-		   "first opcode in base data is 0x%x."),
-		 SYMBOL_PRINT_NAME (symbol), base_data[0]);
+	  return save_data;
 	}
 
       regno = gdbarch_dwarf2_reg_to_regnum (gdbarch, frame_reg);

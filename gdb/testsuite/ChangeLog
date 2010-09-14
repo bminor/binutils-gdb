@@ -1,5 +1,10 @@
 2010-09-14  Tom Tromey  <tromey@redhat.com>
 
+	PR symtab/8399:
+	* gdb.threads/tls.exp: Remove kfail.  Update expected output.
+
+2010-09-14  Tom Tromey  <tromey@redhat.com>
+
 	PR exp/11803:
 	* gdb.threads/tls.exp: Use C++.
 	(check_thread_local): Use K::another_thread_local.
