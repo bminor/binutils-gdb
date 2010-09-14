@@ -1,3 +1,8 @@
+2010-09-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dw2_map_ada_symtabs): Remove the internal_error.
+	Update the comment.
+
 2010-09-14  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/8399:

@@ -2369,10 +2369,9 @@ dw2_map_ada_symtabs (struct objfile *objfile,
 		     domain_enum namespace, int wild,
 		     void *data)
 {
-  /* For now, we don't support Ada, so this function can't be
-     reached.  */
-  internal_error (__FILE__, __LINE__,
-		  _("map_ada_symtabs called via index method"));
+  /* For now, we don't support Ada.  Still the function can be called if the
+     current language is Ada for a non-Ada objfile using GNU index.  As Ada
+     does not look for non-Ada symbols this function should just return.  */
 }
 
 static void
