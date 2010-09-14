@@ -1,3 +1,13 @@
+2010-09-14  Tom Tromey  <tromey@redhat.com>
+
+	* psympriv.h (add_psymbol_to_list, init_psymbol_list)
+	(start_psymtab_common, allocate_psymtab, discard_psymtab):
+	Declare.
+	* symfile.h (extend_psymbol_list): Remove.
+	(add_psymbol_to_list, init_psymbol_list, start_psymtab_common)
+	(allocate_psymtab, discard_psymtab): Move to psympriv.h.
+	* psymtab.c (extend_psymbol_list): Move earlier.  Now static.
+
 2010-09-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dw2_map_ada_symtabs): Remove the internal_error.

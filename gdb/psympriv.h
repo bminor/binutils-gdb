@@ -1,6 +1,6 @@
 /* Private partial symbol table definitions.
 
-   Copyright (C) 2009 Free Software Foundation, Inc.
+   Copyright (C) 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,8 @@
 #define PSYMPRIV_H
 
 #include "psymtab.h"
+
+struct psymbol_allocation_list;
 
 /* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
@@ -150,6 +152,28 @@ struct partial_symtab
 };
 
 extern void sort_pst_symbols (struct partial_symtab *);
+
+/* Add any kind of symbol to a psymbol_allocation_list.  */
+
+extern const
+struct partial_symbol *add_psymbol_to_list (char *, int, int, domain_enum,
+					    enum address_class,
+					    struct psymbol_allocation_list *,
+					    long, CORE_ADDR,
+					    enum language, struct objfile *);
+
+extern void init_psymbol_list (struct objfile *, int);
+
+extern struct partial_symtab *start_psymtab_common (struct objfile *,
+						    struct section_offsets *,
+						    const char *, CORE_ADDR,
+						    struct partial_symbol **,
+						    struct partial_symbol **);
+
+extern struct partial_symtab *allocate_psymtab (const char *,
+						struct objfile *);
+
+extern void discard_psymtab (struct partial_symtab *);
 
 /* Traverse all psymtabs in one objfile.  */
 
