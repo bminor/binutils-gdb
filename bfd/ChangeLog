@@ -1,5 +1,9 @@
 2010-09-14  Kai Tietz  <kai.tietz@onevision.com>
 
+	* pe-x86_64.c (COFF_SECTION_ALIGNMENT_ENTRIES): Make
+	.rdata, .data, and .text partial matched section names.
+	* pei-x86_64.c: Likewise.
+
 	* peXXigen.c (sort_x64_pdata): New helper.
 	(_bfd_XXi_final_link_postscript): Do pdata sorting.
 
