@@ -118,6 +118,7 @@ recognized:
 @code{cortex-a15},
 @code{cortex-r4},
 @code{cortex-r4f},
+@code{cortex-m4},
 @code{cortex-m3},
 @code{cortex-m1},
 @code{cortex-m0},

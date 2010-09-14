@@ -1,3 +1,7 @@
+2010-09-14  Jie Zhang  <jie@codesourcery.com>
+
+	* doc/c-arm.texi: Document -mcpu=cortex-m4.
+
 2010-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Check VEXW1 for 2-byte
