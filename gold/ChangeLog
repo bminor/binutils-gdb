@@ -1,3 +1,9 @@
+2010-09-14  Cary Coutant  <ccoutant@google.com>
+
+	* x86_64.cc (Target_x86_64::saw_tls_block_reloc_): Remove member.
+	(Target_x86_64::Relocate::relocate_tls): Replace check for
+	saw_tls_block_reloc_ with test for executable section.
+
 2010-09-12  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.h (Symbol::needs_dynamic_reloc): Non-PIC calls from

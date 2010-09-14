@@ -420,7 +420,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
   {
    public:
     Relocate()
-      : skip_call_tls_get_addr_(false), saw_tls_block_reloc_(false)
+      : skip_call_tls_get_addr_(false)
     { }
 
     ~Relocate()
@@ -511,12 +511,6 @@ class Target_x86_64 : public Target_freebsd<64, false>
     // This is set if we should skip the next reloc, which should be a
     // PLT32 reloc against ___tls_get_addr.
     bool skip_call_tls_get_addr_;
-
-    // This is set if we see a relocation which could load the address
-    // of the TLS block.  Whether we see such a relocation determines
-    // how we handle the R_X86_64_DTPOFF32 relocation, which is used
-    // in debugging sections.
-    bool saw_tls_block_reloc_;
   };
 
   // A class which returns the size required for a relocation type,
@@ -2492,18 +2486,29 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 
   const Sized_relobj<64, false>* object = relinfo->object;
   const elfcpp::Elf_Xword addend = rela.get_r_addend();
+  elfcpp::Shdr<64, false> data_shdr(relinfo->data_shdr);
+  bool is_executable = (data_shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0;
 
   elfcpp::Elf_types<64>::Elf_Addr value = psymval->value(relinfo->object, 0);
 
   const bool is_final = (gsym == NULL
 			 ? !parameters->options().shared()
 			 : gsym->final_value_is_known());
-  const tls::Tls_optimization optimized_type
+  tls::Tls_optimization optimized_type
       = Target_x86_64::optimize_tls_reloc(is_final, r_type);
   switch (r_type)
     {
     case elfcpp::R_X86_64_TLSGD:            // Global-dynamic
-      this->saw_tls_block_reloc_ = true;
+      if (!is_executable && optimized_type == tls::TLSOPT_TO_LE)
+	{
+	  // If this code sequence is used in a non-executable section,
+	  // we will not optimize the R_X86_64_DTPOFF32/64 relocation,
+	  // on the assumption that it's being used by itself in a debug
+	  // section.  Therefore, in the unlikely event that the code
+	  // sequence appears in a non-executable section, we simply
+	  // leave it unoptimized.
+	  optimized_type = tls::TLSOPT_NONE;
+	}
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  gold_assert(tls_segment != NULL);
@@ -2554,7 +2559,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 
     case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // Global-dynamic (from ~oliva url)
     case elfcpp::R_X86_64_TLSDESC_CALL:
-      this->saw_tls_block_reloc_ = true;
+      if (!is_executable && optimized_type == tls::TLSOPT_TO_LE)
+	{
+	  // See above comment for R_X86_64_TLSGD.
+	  optimized_type = tls::TLSOPT_NONE;
+	}
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  gold_assert(tls_segment != NULL);
@@ -2617,7 +2626,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_TLSLD:            // Local-dynamic
-      this->saw_tls_block_reloc_ = true;
+      if (!is_executable && optimized_type == tls::TLSOPT_TO_LE)
+	{
+	  // See above comment for R_X86_64_TLSGD.
+	  optimized_type = tls::TLSOPT_NONE;
+	}
       if (optimized_type == tls::TLSOPT_TO_LE)
         {
           gold_assert(tls_segment != NULL);
@@ -2642,31 +2655,27 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_DTPOFF32:
-      if (optimized_type == tls::TLSOPT_TO_LE)
-        {
-          // This relocation type is used in debugging information.
-          // In that case we need to not optimize the value.  If we
-          // haven't seen a TLSLD reloc, then we assume we should not
-          // optimize this reloc.
-          if (this->saw_tls_block_reloc_)
-	    {
-              gold_assert(tls_segment != NULL);
-              value -= tls_segment->memsz();
-	    }
-        }
+      // This relocation type is used in debugging information.
+      // In that case we need to not optimize the value.  If the
+      // section is not executable, then we assume we should not
+      // optimize this reloc.  See comments above for R_X86_64_TLSGD,
+      // R_X86_64_GOTPC32_TLSDESC, R_X86_64_TLSDESC_CALL, and
+      // R_X86_64_TLSLD.
+      if (optimized_type == tls::TLSOPT_TO_LE && is_executable)
+	{
+	  gold_assert(tls_segment != NULL);
+	  value -= tls_segment->memsz();
+	}
       Relocate_functions<64, false>::rela32(view, value, addend);
       break;
 
     case elfcpp::R_X86_64_DTPOFF64:
-      if (optimized_type == tls::TLSOPT_TO_LE)
-        {
-          // See R_X86_64_DTPOFF32, just above, for why we test this.
-          if (this->saw_tls_block_reloc_)
-	    {
-	      gold_assert(tls_segment != NULL);
-	      value -= tls_segment->memsz();
-	    }
-        }
+      // See R_X86_64_DTPOFF32, just above, for why we check for is_executable.
+      if (optimized_type == tls::TLSOPT_TO_LE && is_executable)
+	{
+	  gold_assert(tls_segment != NULL);
+	  value -= tls_segment->memsz();
+	}
       Relocate_functions<64, false>::rela64(view, value, addend);
       break;
 
