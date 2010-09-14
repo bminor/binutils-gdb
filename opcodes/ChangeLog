@@ -1,3 +1,8 @@
+2010-09-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add "sync_acquire",
+	"sync_mb", "sync_release", "sync_rmb" and "sync_wmb".
+
 2010-09-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* src/opcodes/dlx-dis.c (print_insn_dlx): Use dlx_insn type for
