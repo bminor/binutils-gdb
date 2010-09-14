@@ -45,7 +45,7 @@
  * All this stuff just to get my host computer's IP address!
  */
 #ifdef __MINGW32__
-#include <winsock.h>
+#include <winsock2.h>
 #else
 #include <sys/types.h>
 #include <netdb.h>		/* for hostent */

@@ -1,3 +1,8 @@
+2010-09-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* m32r-rom.c: Replace winsock.h with winsock2.h header.
+	* remote-m32r-sdi.c: Replace winsock.h by winsock2.h.
+
 2010-09-13  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	PR symtab/11992:

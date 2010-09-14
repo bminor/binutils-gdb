@@ -32,7 +32,7 @@
 #include <ctype.h>
 #include <signal.h>
 #ifdef __MINGW32__
-#include <winsock.h>
+#include <winsock2.h>
 #else
 #include <netinet/in.h>
 #endif
