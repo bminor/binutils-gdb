@@ -27,7 +27,7 @@ if [istarget "*-*-linux"] then {
     set target_cflags ""
 }
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile2}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile2}" "${binfile}" executable [list c++ debug "incdir=${objdir}"]] != "" } {
     return -1
 }
 
@@ -75,7 +75,7 @@ proc check_thread_local {number} {
 	    "= $expected_value" \
 	    "${number} thread local storage"
 
-    gdb_test "p another_thread_local" \
+    gdb_test "p K::another_thread_local" \
 	    "= $me_variable" \
 	    "${number} another thread local storage"
 
@@ -83,7 +83,7 @@ proc check_thread_local {number} {
 	    ".*a_thread_local.*a thread-local variable at offset.*" \
 	    "${number} info address a_thread_local"
 
-    gdb_test "info address another_thread_local" \
+    gdb_test "info address K::another_thread_local" \
     	    ".*another_thread_local.*a thread-local variable at offset.*" \
 	    "${number} info address another_thread_local"
 }

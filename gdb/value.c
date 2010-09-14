@@ -1903,17 +1903,7 @@ value_static_field (struct type *type, int fieldno)
 	    }
 	}
       else
-	{
-	  /* SYM should never have a SYMBOL_CLASS which will require
-	     read_var_value to use the FRAME parameter.  */
-	  if (symbol_read_needs_frame (sym))
-	    warning (_("static field's value depends on the current "
-		     "frame - bad debug info?"));
-	  retval = read_var_value (sym, NULL);
- 	}
-      if (retval && VALUE_LVAL (retval) == lval_memory)
-	SET_FIELD_PHYSADDR (TYPE_FIELD (type, fieldno),
-			    value_address (retval));
+	retval = value_of_variable (sym, NULL);
       break;
     }
     default:

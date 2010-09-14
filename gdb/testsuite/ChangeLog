@@ -1,3 +1,12 @@
+2010-09-14  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/11803:
+	* gdb.threads/tls.exp: Use C++.
+	(check_thread_local): Use K::another_thread_local.
+	* gdb.threads/tls.c (class K): New.
+	(another_thread_local): Now a member of K.
+	(spin): Update.  No longer K&R C.
+
 2010-09-13  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/koenig.cc: created class for testing member lookup.

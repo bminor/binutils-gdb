@@ -1,3 +1,8 @@
+2010-09-14  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/11803:
+	* value.c (value_static_field): Use value_of_variable.
+
 2010-09-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* m32r-rom.c: Replace winsock.h with winsock2.h header.
