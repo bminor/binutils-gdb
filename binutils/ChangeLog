@@ -1,3 +1,24 @@
+2010-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ar.c (plugin_target): New.
+	(main): Set plugin_target to "plugin" for --plugin.
+	(open_inarch): Initialize target to plugin_target.
+	(replace_members): Pass plugin_target to ar_emul_replace
+	and ar_emul_append.
+
+	* binemul.h (ar_emul_append): Add a target argument.
+	(ar_emul_default_append): Likewise.
+	(ar_emul_replace): Likewise.
+	(ar_emul_default_replace): Likewise.
+	(bin_emulation_xfer_struct): Add a target argument to
+	ar_append and ar_replace.
+
+	* binemul.c (ar_emul_append): Updated.  Pass target to bfd_openr.
+	(do_ar_emul_default_append): Likewise.
+	(ar_emul_default_append): Likewise.
+	(ar_emul_replace): Likewise.
+	(ar_emul_default_replace): Likewise.
+
 2010-09-10  Ben Gardiner  <bengardiner@nanometrics.ca>
 
 	* objcopy.c: Add --interleave-width option to allow interleaving

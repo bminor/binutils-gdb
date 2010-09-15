@@ -132,6 +132,8 @@ static bfd_boolean full_pathname = FALSE;
 /* Whether to create a "thin" archive (symbol index only -- no files).  */
 static bfd_boolean make_thin_archive = FALSE;
 
+static const char *plugin_target = NULL;
+
 int interactive = 0;
 
 static void
@@ -472,6 +474,8 @@ main (int argc, char **argv)
 
       arg_index += 2;
       arg_ptr = argv[arg_index];
+
+      plugin_target = "plugin";
 #else
       fprintf (stderr, _("sorry - this program has been built without plugin support\n"));
       xexit (1);
@@ -716,7 +720,7 @@ open_inarch (const char *archive_filename, const char *file)
 
   bfd_set_error (bfd_error_no_error);
 
-  target = NULL;
+  target = plugin_target;
 
   if (stat (archive_filename, &sbuf) != 0)
     {
@@ -747,7 +751,7 @@ open_inarch (const char *archive_filename, const char *file)
 	{
 	  bfd *obj;
 
-	  obj = bfd_openr (file, NULL);
+	  obj = bfd_openr (file, target);
 	  if (obj != NULL)
 	    {
 	      if (bfd_check_format (obj, bfd_object))
@@ -1205,7 +1209,7 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 		  after_bfd = get_pos_bfd (&arch->archive_next, pos_after,
 					   current->filename);
 		  if (ar_emul_replace (after_bfd, *files_to_move,
-				       verbose))
+				       plugin_target, verbose))
 		    {
 		      /* Snip out this entry from the chain.  */
 		      *current_ptr = (*current_ptr)->archive_next;
@@ -1221,8 +1225,8 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
       /* Add to the end of the archive.  */
       after_bfd = get_pos_bfd (&arch->archive_next, pos_end, NULL);
 
-      if (ar_emul_append (after_bfd, *files_to_move, verbose,
-                          make_thin_archive))
+      if (ar_emul_append (after_bfd, *files_to_move, plugin_target,
+			  verbose, make_thin_archive))
 	changed = TRUE;
 
     next_file:;
