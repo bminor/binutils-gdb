@@ -426,8 +426,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 	       || (start >= vaddr && end <= vaddr + size))
 	      && !(bfd_get_file_flags (abfd) & BFD_IN_MEMORY))
 	    {
-	      flags &= ~SEC_LOAD;
-	      flags |= SEC_NEVER_LOAD;
+	      flags &= ~(SEC_LOAD | SEC_HAS_CONTENTS);
 	      goto keep;	/* break out of two nested for loops */
 	    }
 	}

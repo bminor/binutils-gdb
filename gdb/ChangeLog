@@ -1,3 +1,9 @@
+2010-09-15  Alan Modra  <amodra@gmail.com>
+
+	PR 4606
+	* gcore.c (gcore_create_callback): Clear SEC_HAS_CONTENTS rather
+	than setting SEC_NEVER_LOAD on sections that need not be copied.
+
 2010-09-14  Tom Tromey  <tromey@redhat.com>
 
 	* psympriv.h (add_psymbol_to_list, init_psymbol_list)
@@ -109,7 +115,7 @@
 
 	* v850-tdep.c (v850_gdbarch_init): Change the v850's `char'
 	type to be signed.
-	
+
 2010-09-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2read.c (fixup_partial_die): Do not set dummy name for
