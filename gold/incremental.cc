@@ -873,6 +873,8 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	    for (unsigned int i = 0; i < nsyms; i++)
 	      {
 		const Symbol* sym = (*syms)[i];
+		if (sym->is_forwarder())
+		  sym = this->symtab_->resolve_forwards(sym);
 		unsigned int symtab_index = sym->symtab_index();
 		unsigned int chain = 0;
 		unsigned int first_reloc = 0;

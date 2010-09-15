@@ -1,3 +1,8 @@
+2010-09-15  Cary Coutant  <ccoutant@google.com>
+
+	* incremental.cc (Output_section_incremental_inputs::write_info_blocks):
+	Resolve forwarding symbols.
+
 2010-09-15  Doug Kwan  <dougkwan@google.com>
 
 	* gold/testsuite/script_test_3.t: Add ARM special sections.
