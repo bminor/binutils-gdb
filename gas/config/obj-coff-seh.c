@@ -155,6 +155,21 @@ seh_hash_find_or_make (segT cseg, const char *base_name)
   return item;
 }
 
+/* Check if current segment has same name.  */
+static int
+seh_validate_seg (const char *directive)
+{
+  const char *cseg_name, *nseg_name;
+  if (seh_ctx_cur->code_seg == now_seg)
+    return 1;
+  cseg_name = bfd_get_section_name (stdoutput, seh_ctx_cur->code_seg);
+  nseg_name = bfd_get_section_name (stdoutput, now_seg);
+  as_bad (_("%s used in segment '%s' instead of expected '%s'"),
+  	  directive, nseg_name, cseg_name);
+  ignore_rest_of_line ();
+  return 0;
+}
+
 static void
 switch_xdata (int subseg, segT code_seg)
 {
@@ -395,7 +410,7 @@ obj_coff_seh_endproc (int what ATTRIBUTE_UNUSED)
       as_bad (_(".seh_endproc used without .seh_proc"));
       return;
     }
-
+  seh_validate_seg (".seh_endproc");
   do_seh_endproc ();
 }
 
@@ -448,7 +463,8 @@ obj_coff_seh_proc (int what ATTRIBUTE_UNUSED)
 static void
 obj_coff_seh_endprologue (int what ATTRIBUTE_UNUSED)
 {
-  if (!verify_context (".seh_endprologue"))
+  if (!verify_context (".seh_endprologue")
+      || !seh_validate_seg (".seh_endprologue"))
     return;
   demand_empty_rest_of_line ();
 
@@ -553,7 +569,8 @@ obj_coff_seh_pushreg (int what ATTRIBUTE_UNUSED)
 {
   int reg;
 
-  if (!verify_context_and_target (".seh_pushreg", seh_kind_x64))
+  if (!verify_context_and_target (".seh_pushreg", seh_kind_x64)
+      || !seh_validate_seg (".seh_pushreg"))
     return;
 
   reg = seh_x64_read_reg (".seh_pushreg", 1);
@@ -570,7 +587,8 @@ obj_coff_seh_pushreg (int what ATTRIBUTE_UNUSED)
 static void
 obj_coff_seh_pushframe (int what ATTRIBUTE_UNUSED)
 {
-  if (!verify_context_and_target (".seh_pushframe", seh_kind_x64))
+  if (!verify_context_and_target (".seh_pushframe", seh_kind_x64)
+      || !seh_validate_seg (".seh_pushframe"))
     return;
   demand_empty_rest_of_line ();
 
@@ -586,7 +604,8 @@ obj_coff_seh_save (int what)
   int code, reg, scale;
   offsetT off;
 
-  if (!verify_context_and_target (directive, seh_kind_x64))
+  if (!verify_context_and_target (directive, seh_kind_x64)
+      || !seh_validate_seg (directive))
     return;
 
   reg = seh_x64_read_reg (directive, what);
@@ -631,7 +650,8 @@ obj_coff_seh_stackalloc (int what ATTRIBUTE_UNUSED)
   offsetT off;
   int code, info;
 
-  if (!verify_context_and_target (".seh_stackalloc", seh_kind_x64))
+  if (!verify_context_and_target (".seh_stackalloc", seh_kind_x64)
+      || !seh_validate_seg (".seh_stackalloc"))
     return;
 
   off = get_absolute_expression ();
@@ -668,7 +688,8 @@ obj_coff_seh_setframe (int what ATTRIBUTE_UNUSED)
   offsetT off;
   int reg;
 
-  if (!verify_context_and_target (".seh_setframe", seh_kind_x64))
+  if (!verify_context_and_target (".seh_setframe", seh_kind_x64)
+      || !seh_validate_seg (".seh_setframe"))
     return;
 
   reg = seh_x64_read_reg (".seh_setframe", 0);

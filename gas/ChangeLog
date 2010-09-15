@@ -1,8 +1,16 @@
 2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
 
-       * config/obj-coff-seh.h (seh_context): New member code_seg.
-       * config/obj-coff-seh.c: Implementing xdata/pdata section cloning
-       for link-once code-segment.
+	* config/obj-coff-seh.c (seh_validate_seg): New funtion.
+	(obj_coff_seh_endproc): Add check for segment.
+	(obj_coff_seh_endprologue): Likewise.
+	(obj_coff_seh_pushreg): Likewise.
+	(obj_coff_seh_pushframe): Likewise.
+	(obj_coff_seh_save): Likewise.
+	(obj_coff_seh_setframe): Likewise.
+
+	* config/obj-coff-seh.h (seh_context): New member code_seg.
+	* config/obj-coff-seh.c: Implementing xdata/pdata section cloning
+	for link-once code-segment.
 
 2010-09-14  Jie Zhang  <jie@codesourcery.com>
 

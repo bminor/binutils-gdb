@@ -1,10 +1,14 @@
 2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
 
-       * gas/pe/pe.exp: Add peseh-x64-4,5,6 tests.
-       * gas/pe/peseh-x64-4.s: New.
-       * gas/pe/peseh-x64-4.d: New.
-       * gas/pe/peseh-x64-5.d: New.
-       * gas/pe/peseh-x64-6.d: New.
+	* gas/pe/pe.exp: Add new test.
+	* gas/pe/seh-x64-err-1.l: New.
+	* gas/pe/seh-x64-err-1.s: New.
+
+	* gas/pe/pe.exp: Add peseh-x64-4,5,6 tests.
+	* gas/pe/peseh-x64-4.s: New.
+	* gas/pe/peseh-x64-4.d: New.
+	* gas/pe/peseh-x64-5.d: New.
+	* gas/pe/peseh-x64-6.d: New.
 
 2010-09-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
