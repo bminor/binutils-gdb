@@ -1,3 +1,8 @@
+2010-09-15  Paul Bolle  <pebolle@tiscali.nl>
+
+	* gdb.texinfo (Character Sets): Correctly reference host-charset
+	in example.
+
 2010-09-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation) <-stack-list-frames>:

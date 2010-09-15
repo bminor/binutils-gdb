@@ -8915,7 +8915,7 @@ automatically determine the appropriate host character set.  In this
 case, @value{GDBN} uses @samp{UTF-8}.
 
 @value{GDBN} can only use certain character sets as its host character
-set.  If you type @kbd{@w{set target-charset @key{TAB}@key{TAB}}},
+set.  If you type @kbd{@w{set host-charset @key{TAB}@key{TAB}}},
 @value{GDBN} will list the host character sets it supports.
 
 @item set charset @var{charset}
