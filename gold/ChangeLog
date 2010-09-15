@@ -1,3 +1,13 @@
+2010-09-15  Doug Kwan  <dougkwan@google.com>
+
+	* gold/testsuite/script_test_3.t: Add ARM special sections.
+	* gold/testsuite/script_test_4.t: Same.
+	* gold/testsuite/script_test_5.t: Same.
+	* gold/testsuite/script_test_6.t: Same.
+	* gold/testsuite/script_test_7.t: Same.
+	* gold/testsuite/script_test_7.t: Same.
+	* gold/testsuite/thumb_blx_out_of_range.s: Fix instruction alignment.
+
 2010-09-14  Cary Coutant  <ccoutant@google.com>
 
 	* x86_64.cc (Target_x86_64::saw_tls_block_reloc_): Remove member.

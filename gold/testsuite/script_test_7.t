@@ -31,6 +31,9 @@ SECTIONS
   .interp : { *(.interp) }
   .text : { *(.text .text.*) }
   .rodata : { *(.rodata .rodata.*) }
+  /* Required by the ARM target. */
+  .ARM.extab : { *(.ARM.extab*) }
+  .ARM.exidx : { *(.ARM.exidx*) }
   .dynamic : { *(.dynamic) }
 
   . = SEGMENT_START(".data", 0x10200000);

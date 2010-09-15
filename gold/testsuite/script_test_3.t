@@ -28,6 +28,9 @@ SECTIONS
   /* With luck this will be enough to get the program working.  */
   .interp : { *(.interp) } :text :interp
   .text : { *(.text) } :text
+  /* Required by the ARM target. */
+  .ARM.extab : { *(.ARM.extab*) }
+  .ARM.exidx : { *(.ARM.exidx*) }
   . += 0x100000;
   . = ALIGN(0x100);
   .dynamic : { *(.dynamic) } :data :dynamic

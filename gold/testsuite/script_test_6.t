@@ -31,6 +31,9 @@ SECTIONS
   .interp : { *(.interp) }
   .text : { *(.text .text.*) }
   .rodata : { *(.rodata .rodata.*) }
+  /* Required by the ARM target. */
+  .ARM.extab : { *(.ARM.extab*) }
+  .ARM.exidx : { *(.ARM.exidx*) }
   . += 0x100000;
   . = ALIGN(0x100);
   .dynamic : { *(.dynamic) }

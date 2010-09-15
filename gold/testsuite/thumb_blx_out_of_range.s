@@ -5,7 +5,7 @@
 	.section	.text.pre,"x"
 
 # Add padding so that target is just output of branch range. 
-	.space	6
+	.space	4
 
 	.global	_forward_target
 	.global	_backward_target
