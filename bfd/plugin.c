@@ -233,26 +233,31 @@ bfd_plugin_object_p (bfd *abfd)
   int claimed = 0;
   int t = load_plugin ();
   struct ld_plugin_input_file file;
+  bfd *iobfd;
+
   if (!t)
     return NULL;
 
   file.name = abfd->filename;
 
-  if (abfd->iostream)
+  if (abfd->my_archive)
     {
-      file.fd = fileno ((FILE *) abfd->iostream);
-      file.offset = 0;
-      file.filesize = 0; /*FIXME*/
+      iobfd = abfd->my_archive;
+      file.offset = abfd->origin;
+      file.filesize = arelt_size (abfd);
     }
   else
     {
-      bfd *archive = abfd->my_archive;
-      BFD_ASSERT (archive);
-      file.fd = fileno ((FILE *) archive->iostream);
-      file.offset = abfd->origin;
-      file.filesize = arelt_size (abfd);
-
+      iobfd = abfd;
+      file.offset = 0;
+      file.filesize = 0; /*FIXME*/
     }
+
+  if (!iobfd->iostream && !bfd_open_file (iobfd))
+    return NULL;
+
+  file.fd = fileno ((FILE *) iobfd->iostream);
+
   file.handle = abfd;
   claim_file (&file, &claimed);
   if (!claimed)

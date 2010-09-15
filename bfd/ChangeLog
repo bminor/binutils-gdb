@@ -1,3 +1,8 @@
+2010-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12004
+	* plugin.c (bfd_plugin_object_p): Handle NULL iostream.
+
 2010-09-14  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe-x86_64.c (COFF_SECTION_ALIGNMENT_ENTRIES): Make
