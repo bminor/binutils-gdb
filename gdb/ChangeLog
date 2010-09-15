@@ -1,3 +1,14 @@
+2010-09-15  Tom Tromey  <tromey@redhat.com>
+
+	* charset.c (iconv_open): New define.
+	(iconv): Likewise.
+	(iconv_close): Likewise.
+	(phony_iconv_open): Add "phony_" prefix.
+	(phony_iconv_close): Likewise.
+	(phony_iconv): Likewise.
+	* gdb_wchar.h: Check _LIBICONV_VERSION, __STDC_ISO_10646__.
+	Change how INTERMEDIATE_ENCODING is defined.
+
 2010-09-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct die_info): Fix comment.
