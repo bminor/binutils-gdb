@@ -1,3 +1,8 @@
+2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
+
+       * scripttempl/pep.sc: Add .xdata segment and
+       put into .pdata all segments beginning with .pdata.
+
 2010-09-10  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11931

@@ -90,6 +90,8 @@ typedef struct seh_context
 {
   struct seh_context *next;
 
+  /* Initial code-segment.  */
+  segT code_seg;
   /* Function name.  */
   char *func_name;
   /* BeginAddress.  */

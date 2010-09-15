@@ -44,4 +44,7 @@ if ([istarget "x86_64-*-mingw*"]) then {
 	run_dump_test "peseh-x64"
 	run_dump_test "peseh-x64-2"
 	run_dump_test "peseh-x64-3"
+	run_dump_test "peseh-x64-4"
+	run_dump_test "peseh-x64-5"
+	run_dump_test "peseh-x64-6"
 }
