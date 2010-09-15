@@ -1,5 +1,9 @@
 2010-09-15  Tom Tromey  <tromey@redhat.com>
 
+	* MAINTAINERS (GLOBAL MAINTAINERS): Add Jan Kratochvil.
+
+2010-09-15  Tom Tromey  <tromey@redhat.com>
+
 	* charset.c (iconv_open): New define.
 	(iconv): Likewise.
 	(iconv_close): Likewise.
