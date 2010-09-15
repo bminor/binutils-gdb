@@ -1,3 +1,13 @@
+2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pei-x86_64.c (pex64_get_unwind_info): Reorgnized.
+	(pex64_get_scope_entry): Removed.
+	(find_next_xdata_or_end): New helper.
+	(pex64_dump_xdata): Reworked.
+	(pex64_bfd_print_pdata): Add checking for
+	valid pdata sorting and values. Reworked
+	output.
+
 2010-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/12004
