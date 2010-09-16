@@ -1,3 +1,16 @@
+2010-09-16  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (NOLOAD): Do not erroneously state that contents will
+	appear in output file.
+	* ldlang.c (lang_add_section): Clear SEC_HAS_CONTENTS on noload
+	unless SEC_COFF_SHARED_LIBRARY.
+	(map_input_to_output_sections): Don't set SEC_HAS_CONTENTS for noload
+	output sections.
+	(lang_size_sections_1): Don't test SEC_NEVER_LOAD when deciding
+	to update dot in region.  Ditto when setting SEC_ALLOC if dot
+	advanced due to assignment.
+	* ldwrite.c (build_link_order): Don't test SEC_NEVER_LOAD.
+
 2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* scripttempl/pep.sc: Add .xdata segment and

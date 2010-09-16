@@ -4290,8 +4290,7 @@ The linker normally sets the attributes of an output section based on
 the input sections which map into it.  You can override this by using
 the section type.  For example, in the script sample below, the
 @samp{ROM} section is addressed at memory location @samp{0} and does not
-need to be loaded when the program is run.  The contents of the
-@samp{ROM} section will appear in the linker output file as usual.
+need to be loaded when the program is run.
 @smallexample
 @group
 SECTIONS @{

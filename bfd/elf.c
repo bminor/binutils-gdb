@@ -2452,8 +2452,7 @@ int
 bfd_elf_get_default_section_type (flagword flags)
 {
   if ((flags & SEC_ALLOC) != 0
-      && ((flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0
-	  || (flags & SEC_NEVER_LOAD) != 0))
+      && (flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
     return SHT_NOBITS;
   return SHT_PROGBITS;
 }

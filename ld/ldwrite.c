@@ -276,10 +276,9 @@ build_link_order (lang_statement_union_type *statement)
 	output_section = statement->padding_statement.output_section;
 	ASSERT (statement->padding_statement.output_section->owner
 		== link_info.output_bfd);
-	if (((output_section->flags & SEC_HAS_CONTENTS) != 0
-	     || ((output_section->flags & SEC_LOAD) != 0
-		 && (output_section->flags & SEC_THREAD_LOCAL)))
-	    && (output_section->flags & SEC_NEVER_LOAD) == 0)
+	if ((output_section->flags & SEC_HAS_CONTENTS) != 0
+	    || ((output_section->flags & SEC_LOAD) != 0
+		&& (output_section->flags & SEC_THREAD_LOCAL)))
 	  {
 	    link_order = bfd_new_link_order (link_info.output_bfd,
 					     output_section);

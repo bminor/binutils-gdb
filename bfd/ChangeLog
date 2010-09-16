@@ -1,3 +1,8 @@
+2010-09-16  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (bfd_elf_get_default_section_type): Don't test SEC_NEVER_LOAD.
+	* elflink.c (elf_link_input_bfd): Likewise.
+
 2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pei-x86_64.c (pex64_get_unwind_info): Reorgnized.

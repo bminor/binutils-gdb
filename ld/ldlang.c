@@ -2245,6 +2245,8 @@ lang_add_section (lang_statement_list_type *ptr,
     case noload_section:
       flags &= ~SEC_LOAD;
       flags |= SEC_NEVER_LOAD;
+      if ((flags & SEC_COFF_SHARED_LIBRARY) == 0)
+	flags &= ~SEC_HAS_CONTENTS;
       break;
     }
 
@@ -3479,8 +3481,8 @@ map_input_to_output_sections
 	  /* Make sure that any sections mentioned in the expression
 	     are initialized.  */
 	  exp_init_os (s->data_statement.exp);
-	  /* The output section gets CONTENTS, and usually ALLOC and
-	     LOAD, but the latter two may be overridden by the script.  */
+	  /* The output section gets CONTENTS, ALLOC and LOAD, but
+	     these may be overridden by the script.  */
 	  flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD;
 	  switch (os->sectype)
 	    {
@@ -3491,7 +3493,7 @@ map_input_to_output_sections
 	      flags = SEC_HAS_CONTENTS;
 	      break;
 	    case noload_section:
-	      flags = SEC_HAS_CONTENTS | SEC_NEVER_LOAD;
+	      flags = SEC_NEVER_LOAD;
 	      break;
 	    }
 	  if (os->bfd_section == NULL)
@@ -4979,14 +4981,9 @@ lang_size_sections_1
 	    /* Update dot in the region ?
 	       We only do this if the section is going to be allocated,
 	       since unallocated sections do not contribute to the region's
-	       overall size in memory.
-
-	       If the SEC_NEVER_LOAD bit is not set, it will affect the
-	       addresses of sections after it. We have to update
-	       dot.  */
+	       overall size in memory.  */
 	    if (os->region != NULL
-		&& ((os->bfd_section->flags & SEC_NEVER_LOAD) == 0
-		    || (os->bfd_section->flags & (SEC_ALLOC | SEC_LOAD))))
+		&& (os->bfd_section->flags & (SEC_ALLOC | SEC_LOAD)))
 	      {
 		os->region->current = dot;
 
@@ -5172,8 +5169,8 @@ lang_size_sections_1
 		    /* If dot is advanced, this implies that the section
 		       should have space allocated to it, unless the
 		       user has explicitly stated that the section
-		       should never be loaded.  */
-		    if (!(output_section_statement->flags & SEC_NEVER_LOAD))
+		       should not be allocated.  */
+		    if (output_section_statement->sectype != noalloc_section)
 		      output_section_statement->bfd_section->flags |= SEC_ALLOC;
 		  }
 		dot = newdot;
