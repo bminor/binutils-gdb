@@ -1,3 +1,7 @@
+2010-09-16  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/i386/i386.exp: Don't run on linuxaout.
+
 2010-09-10  Ben Gardiner  <bengardiner@nanometrics.ca>
 
 	* binutils-all/objcopy.exp: Add test of new --interleave-width
