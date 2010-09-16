@@ -1,3 +1,8 @@
+2010-09-16  Cary Coutant  <ccoutant@google.com>
+
+	* script_sections.cc (class Memory_region): Remove "NULL" from
+	vector initializations.
+
 2010-09-15  Cary Coutant  <ccoutant@google.com>
 
 	* incremental.cc (Output_section_incremental_inputs::write_info_blocks):

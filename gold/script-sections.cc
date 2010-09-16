@@ -55,8 +55,8 @@ class Memory_region
       length_(length),
       current_vma_offset_(0),
       current_lma_offset_(0),
-      vma_sections_(NULL),
-      lma_sections_(NULL)
+      vma_sections_(),
+      lma_sections_()
   { }
 
   // Return the name of this region.
