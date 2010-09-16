@@ -1,3 +1,9 @@
+2010-09-16  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/redef3.d: Don't run on arc.
+	* gas/i386/i386.exp: Don't run intel-got32 on linuxaout.  Move
+	x86_64 mingw exclusions to equivalent elf only block of tests.
+
 2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* gas/pe/pe.exp: Add new test.
