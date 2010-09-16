@@ -1,3 +1,10 @@
+2010-09-17  Andrew Burgess  <aburgess@broadcom.com>
+
+	PR gas/12011
+	* gas/elf/bad-section-flag.d, * gas/elf/bad-section-flag.err,
+	* gas/elf/bad-section-flag.s: New test.
+	* gas/elf/elf.exp: Run it.
+
 2010-09-16  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/redef3.d: Don't run on arc.

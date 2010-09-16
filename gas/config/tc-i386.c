@@ -8949,10 +8949,10 @@ x86_64_section_letter (int letter, char **ptr_msg)
       if (letter == 'l')
 	return SHF_X86_64_LARGE;
 
-      *ptr_msg = _("Bad .section directive: want a,l,w,x,M,S,G,T in string");
+      *ptr_msg = _("bad .section directive: want a,l,w,x,M,S,G,T in string");
     }
   else
-    *ptr_msg = _("Bad .section directive: want a,w,x,M,S,G,T in string");
+    *ptr_msg = _("bad .section directive: want a,w,x,M,S,G,T in string");
   return -1;
 }
 

@@ -1,3 +1,13 @@
+2010-09-17  Andrew Burgess  <aburgess@broadcom.com>
+
+	PR gas/12011
+	* config/obj-elf.c (obj_elf_parse_section_letters): Correct test
+	for error return from md_elf_section_letter.
+	* config/tc-alpha.c (alpha_elf_section_letter): Correct error message.
+	* config/tc-i386.c (x86_64_section_letter): Likewise.
+	* config/tc-ia64.c (ia64_elf_section_letter): Likewise.
+	* config/tc-mep.c (mep_elf_section_letter): Likewise.
+
 2010-09-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* config/obj-coff-seh.c (seh_validate_seg): New funtion.

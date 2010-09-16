@@ -794,7 +794,7 @@ obj_elf_parse_section_letters (char *str, size_t len, bfd_boolean *clone)
 	    char *bad_msg = _("unrecognized .section attribute: want a,e,w,x,M,S,G,T");
 #ifdef md_elf_section_letter
 	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
-	    if (md_attr > 0)
+	    if (md_attr != (bfd_vma) -1)
 	      attr |= md_attr;
 	    else
 #endif

@@ -861,7 +861,7 @@ ia64_elf_section_letter (int letter, char **ptr_msg)
     return SHF_IA_64_VMS_GLOBAL;
 #endif
 
-  *ptr_msg = _("Bad .section directive: want a,o,s,w,x,M,S,G,T in string");
+  *ptr_msg = _("bad .section directive: want a,o,s,w,x,M,S,G,T in string");
   return -1;
 }
 

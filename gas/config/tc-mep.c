@@ -2086,8 +2086,8 @@ mep_elf_section_letter (int letter, char **ptrmsg)
   if (letter == 'v')
     return SHF_MEP_VLIW;
 
-  *ptrmsg = _("Bad .section directive: want a,v,w,x,M,S in string");
-  return 0;
+  *ptrmsg = _("bad .section directive: want a,v,w,x,M,S in string");
+  return -1;
 }
 
 flagword
