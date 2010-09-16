@@ -1,3 +1,9 @@
+2010-09-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR mi/11407
+	* mi/mi-cmd-stack.c (list_args_or_locals): Catch exceptions from
+	read_var_value and common_val_print and print a warning.
+
 2010-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* MAINTAINERS (GLOBAL MAINTAINERS) <Jan Kratochvil>: Move the entry to

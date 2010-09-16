@@ -1,3 +1,12 @@
+2010-09-16  Phil Muldoon  <pmuldoon@redhat.com>
+            Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR mi/11407
+	* gdb.mi/dw2-ref-missing-frame-func.c: New File.
+	* gdb.mi/dw2-ref-missing-frame-main.c New File.
+	* gdb.mi/dw2-ref-missing-frame.S New File.
+	* gdb.mi/dw2-ref-missing-frame.exp New File.
+
 2010-09-14  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/8399:
