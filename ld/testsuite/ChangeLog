@@ -1,3 +1,12 @@
+2010-09-16  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/group3b.d: Disable for generic linker targets.
+	* ld-elf/linkonce2.d: Likewise.
+	* ld-scripts/empty-address-2a.d: Disable for frv and aout,oldld.
+	* ld-scripts/empty-address-2b.d: Likewise.
+	* ld-scripts/rgn-at5.s: Don't use .word.
+	* ld-scripts/rgn-at5.d: Update.
+
 2010-09-10  Alan Modra  <amodra@gmail.com>
 
 	* ld-gc/abi-note.d: Exclude aout and oldld targets.

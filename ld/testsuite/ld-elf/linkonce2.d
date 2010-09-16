@@ -2,6 +2,7 @@
 #source: linkonce1b.s
 #ld: -emit-relocs
 #objdump: -r
+#notarget arc-*-* d30v-*-* dlx-*-* i960-*-* or32-*-* pj*-*-*
 
 .*:     file format .*
 
