@@ -602,9 +602,12 @@ spu_elf_create_sections (struct bfd_link_info *info)
     {
       asection *s;
       flagword flags;
-      ibfd = info->input_bfds;
-      flags = SEC_LOAD | SEC_ALLOC | SEC_READONLY | SEC_HAS_CONTENTS
-	      | SEC_IN_MEMORY;
+
+      if (htab->elf.dynobj == NULL)
+	htab->elf.dynobj = ibfd;
+      ibfd = htab->elf.dynobj;
+      flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY | SEC_HAS_CONTENTS
+	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
       s = bfd_make_section_anyway_with_flags (ibfd, ".fixup", flags);
       if (s == NULL || !bfd_set_section_alignment (ibfd, s, 2))
 	return FALSE;
@@ -5096,6 +5099,13 @@ spu_elf_relocate_section (bfd *output_bfd,
   return ret;
 }
 
+static bfd_boolean
+spu_elf_finish_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+				 struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
 /* Adjust _SPUEAR_ syms to point at their overlay stubs.  */
 
 static int
@@ -5402,7 +5412,8 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 
 	      /* If there aren't any relocs, then there's nothing more
 	         to do.  */
-	      if ((isec->flags & SEC_RELOC) == 0
+	      if ((isec->flags & SEC_ALLOC) == 0
+		  || (isec->flags & SEC_RELOC) == 0
 		  || isec->reloc_count == 0)
 		continue;
 
@@ -5457,6 +5468,7 @@ spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
 #define elf_info_to_howto			spu_elf_info_to_howto
 #define elf_backend_count_relocs		spu_elf_count_relocs
 #define elf_backend_relocate_section		spu_elf_relocate_section
+#define elf_backend_finish_dynamic_sections	spu_elf_finish_dynamic_sections
 #define elf_backend_symbol_processing		spu_elf_backend_symbol_processing
 #define elf_backend_link_output_symbol_hook	spu_elf_output_symbol_hook
 #define elf_backend_object_p			spu_elf_object_p

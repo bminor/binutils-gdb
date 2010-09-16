@@ -1,5 +1,14 @@
 2010-09-16  Alan Modra  <amodra@gmail.com>
 
+	* elf32-spu.c (spu_elf_size_sections): Omit fixups for non-alloc
+	sections.
+	(spu_elf_create_sections): Mark .fixup with SEC_LINKER_CREATED and
+	set dynobj.
+	(spu_elf_finish_dynamic_sections): New function.
+	(elf_backend_finish_dynamic_sections): Define.
+
+2010-09-16  Alan Modra  <amodra@gmail.com>
+
 	* elf.c (bfd_elf_get_default_section_type): Don't test SEC_NEVER_LOAD.
 	* elflink.c (elf_link_input_bfd): Likewise.
 
