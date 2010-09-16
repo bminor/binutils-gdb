@@ -648,8 +648,13 @@ wchar_iterate (struct wchar_iterator *iter,
 	  switch (errno)
 	    {
 	    case EILSEQ:
-	      /* Invalid input sequence.  Skip it, and let the caller
-		 know about it.  */
+	      /* Invalid input sequence.  We still might have converted a
+		 character; if so, return it.  */
+	      if (out_avail < out_request * sizeof (gdb_wchar_t))
+		break;
+	      
+	      /* Otherwise skip the first invalid character, and let the
+		 caller know about it.  */
 	      *out_result = wchar_iterate_invalid;
 	      *ptr = iter->input;
 	      *len = iter->width;

@@ -1,3 +1,8 @@
+2010-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* charset.c (wchar_iterate) <EILSEQ>: Return any possibly converted
+	characters.
+
 2010-09-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR mi/11407
