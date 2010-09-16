@@ -1,5 +1,8 @@
 2010-09-16  Alan Modra  <amodra@gmail.com>
 
+	* ld-elf/orphan-region.d: xfail for spu.
+	* ld-elf/relocatable.d: xfail for hppa.
+
 	* ld-elf/group3b.d: Disable for generic linker targets.
 	* ld-elf/linkonce2.d: Likewise.
 	* ld-scripts/empty-address-2a.d: Disable for frv and aout,oldld.

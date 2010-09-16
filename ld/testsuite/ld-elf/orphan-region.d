@@ -1,6 +1,7 @@
 #source: orphan-region.s
 #ld: -T orphan-region.ld -N
 #readelf: -S -l --wide
+#xfail: spu-*-*
 
 #...
   \[[ 0-9]+\] \.text[ \t]+PROGBITS[ \t]+0*40000000[ \t]+.*
