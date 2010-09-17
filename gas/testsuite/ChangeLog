@@ -1,5 +1,12 @@
 2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
 
+	* gas/arm/thumb2_ldmstm.d: Change single-register stmia to use 16-bit
+	str encoding instead of str.w.  Likewise for ldmia.
+	* gas/arm/thumb2_ldmstm.s: Change stmia comment.  Add tests for T1
+	ldmia-to-ldr.
+
+2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
+
 	* gas/arm/msr-reg.s: New file.
 	* gas/arm/msr-reg.d: Likewise.
 	* gas/arm/msr-imm.s: Likewise.

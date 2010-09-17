@@ -52,6 +52,12 @@ ldmstm:
 	ldmia r8!, {r9}		@ ldr.w r9, [r8], #4
         ldmia r8, {r9}		@ ldr.w r9, [r8]
 	stmia.w r0!, {r1}	@ str.w r1, [r0], #4
-	stmia r0, {r1}		@ str.w r1, [r0]
+	stmia r0, {r1}		@ T1 str r1, [r0]
+	ldmia r1, {r2}		@ T1 ldr r2, [r1]
+	ldmia r0, {r7}		@ T1 ldr r7, [r0]
+	stmia sp, {r7}		@ T1 str r7, [sp]
+	stmia sp, {r0}		@ T1 str r0, [sp]
+	ldmia sp, {r7}		@ T1 ldr r7, [sp]
+	ldmia sp, {r0}		@ T1 ldr r0, [sp]
 	stmia r8!, {r9}		@ str.w r9, [r8], #4
 	stmia r8, {r9}		@ str.w r9, [r8]
