@@ -1,3 +1,9 @@
+2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* gas/arm/copro.s: Add test for APSR_nzcv as a MRC operand.
+	* gas/arm/copro.d: Change pc in MRC to disassemble as APSR_nzcv.  Also
+	add disassembly for test added in copro.s
+
 2010-09-17  Andrew Burgess  <aburgess@broadcom.com>
 
 	PR gas/12011

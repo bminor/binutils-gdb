@@ -1,3 +1,8 @@
+2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* config/tc-arm.c (insns): Change MRC entry to accept APSR_RR instead
+	of just RR.
+
 2010-09-17  Andrew Burgess  <aburgess@broadcom.com>
 
 	PR gas/12011
