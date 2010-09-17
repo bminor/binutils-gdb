@@ -1,5 +1,19 @@
 2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
 
+	* gas/arm/msr-reg.s: New file.
+	* gas/arm/msr-reg.d: Likewise.
+	* gas/arm/msr-imm.s: Likewise.
+	* gas/arm/msr-imm.d: Likewise.
+	* gas/arm/msr-imm-bad.d: Likewise.
+	* gas/arm/msr-imm-bad.l: Likewise.
+	* gas/arm/msr-reg-bad.d: Likewise.
+	* gas/arm/msr-imm-bad.d: Likewise.
+	* gas/arm/msr-reg-thumb.d: Likewise.
+	* gas/arm/arch7.s: Add tests for xpsr.
+	* gas/arm/arch7.d: Likewise.
+
+2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
+
 	* gas/arm/copro.s: Add test for APSR_nzcv as a MRC operand.
 	* gas/arm/copro.d: Change pc in MRC to disassemble as APSR_nzcv.  Also
 	add disassembly for test added in copro.s

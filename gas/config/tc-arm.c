@@ -5321,7 +5321,9 @@ parse_psr (char **str)
   p = *str;
   if (strncasecmp (p, "SPSR", 4) == 0)
     psr_field = SPSR_BIT;
-  else if (strncasecmp (p, "CPSR", 4) == 0)
+  else if (strncasecmp (p, "CPSR", 4) == 0 
+	   || (strncasecmp (p, "APSR", 4) == 0
+	       && !ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_m)))
     psr_field = 0;
   else
     {
@@ -16214,6 +16216,8 @@ static const struct asm_psr psrs[] =
   {"c",	   PSR_c},
   {"x",	   PSR_x},
   {"s",	   PSR_s},
+  {"g",	   PSR_s},
+
   /* Combinations of flags.  */
   {"fs",   PSR_f | PSR_s},
   {"fx",   PSR_f | PSR_x},
@@ -16275,6 +16279,10 @@ static const struct asm_psr psrs[] =
   {"csxf", PSR_c | PSR_s | PSR_x | PSR_f},
   {"cxfs", PSR_c | PSR_x | PSR_f | PSR_s},
   {"cxsf", PSR_c | PSR_x | PSR_s | PSR_f},
+
+  /* APSR flags */
+  {"nzcvq", PSR_f},
+  {"nzcvqg", PSR_s | PSR_f}
 };
 
 /* Table of V7M psr names.  */

@@ -1,5 +1,11 @@
 2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
 
+	* config/tc-arm.c (parse_psr): Add condition for matching "APSR" on
+	non-M-arch cpus.
+	(psrs): Add entry for PSR flags, g, nzcvq, nzcvqg.
+
+2010-09-17  Tejas Belagod  <tejas.belagod@arm.com>
+
 	* config/tc-arm.c (insns): Change MRC entry to accept APSR_RR instead
 	of just RR.
 
