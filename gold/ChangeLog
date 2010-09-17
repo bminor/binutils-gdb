@@ -1,3 +1,10 @@
+2010-09-17  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::Relocate::relocate): Ignore symbol type and
+	defintion if relocation uses GOT entries of the symbol.
+	* testsuite/icf_safe_test.sh: Fix test.
+	* testsuite/icf_safe_so_test.sh: Fix test.
+
 2010-09-16  Cary Coutant  <ccoutant@google.com>
 
 	* script_sections.cc (class Memory_region): Remove "NULL" from

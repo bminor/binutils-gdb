@@ -8582,7 +8582,46 @@ Target_arm<big_endian>::Relocate::relocate(
   Arm_address thumb_bit = 0;
   Symbol_value<32> symval;
   bool is_weakly_undefined_without_plt = false;
-  if (relnum != Target_arm<big_endian>::fake_relnum_for_stubs)
+  bool have_got_offset = false;
+  unsigned int got_offset = 0;
+
+  // If the relocation uses the GOT entry of a symbol instead of the symbol
+  // itself, we don't care about whether the symbol is defined or what kind
+  // of symbol it is.
+  if (reloc_property->uses_got_entry())
+    {
+      // Get the GOT offset.
+      // The GOT pointer points to the end of the GOT section.
+      // We need to subtract the size of the GOT section to get
+      // the actual offset to use in the relocation.
+      // TODO: We should move GOT offset computing code in TLS relocations
+      // to here.
+      switch (r_type)
+	{
+	case elfcpp::R_ARM_GOT_BREL:
+	case elfcpp::R_ARM_GOT_PREL:
+	  if (gsym != NULL)
+	    {
+	      gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+	      got_offset = (gsym->got_offset(GOT_TYPE_STANDARD)
+			    - target->got_size());
+	    }
+	  else
+	    {
+	      unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
+	      gold_assert(object->local_has_got_offset(r_sym,
+						       GOT_TYPE_STANDARD));
+	      got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
+			    - target->got_size());
+	    }
+	  have_got_offset = true;
+	  break;
+
+	default:
+	  break;
+	}
+    }
+  else if (relnum != Target_arm<big_endian>::fake_relnum_for_stubs)
     {
       if (gsym != NULL)
 	{
@@ -8650,36 +8689,6 @@ Target_arm<big_endian>::Relocate::relocate(
       symval.set_output_value(stripped_value);
       psymval = &symval;
     } 
-
-  // Get the GOT offset if needed.
-  // The GOT pointer points to the end of the GOT section.
-  // We need to subtract the size of the GOT section to get
-  // the actual offset to use in the relocation.
-  bool have_got_offset = false;
-  unsigned int got_offset = 0;
-  switch (r_type)
-    {
-    case elfcpp::R_ARM_GOT_BREL:
-    case elfcpp::R_ARM_GOT_PREL:
-      if (gsym != NULL)
-	{
-	  gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
-	  got_offset = (gsym->got_offset(GOT_TYPE_STANDARD)
-			- target->got_size());
-	}
-      else
-	{
-	  unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
-	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
-	  got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
-			- target->got_size());
-	}
-      have_got_offset = true;
-      break;
-
-    default:
-      break;
-    }
 
   // To look up relocation stubs, we need to pass the symbol table index of
   // a local symbol.

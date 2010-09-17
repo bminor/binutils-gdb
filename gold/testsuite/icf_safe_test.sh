@@ -49,7 +49,7 @@ check_fold()
 
 arch_specific_safe_fold()
 {
-    grep_x86=`grep -q -e "Advanced Micro Devices X86-64" -e "Intel 80386" $2`
+    grep_x86=`grep -q -e "Advanced Micro Devices X86-64" -e "Intel 80386" -e "ARM" $2`
     if [ $? == 0 ];
     then
       check_fold $1 $3 $4
