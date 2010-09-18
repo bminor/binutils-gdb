@@ -1,5 +1,13 @@
 2010-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* emul_aix.c (ar_emul_aix_append): Add a target argument
+	and ignore it if it is set.
+	(ar_emul_aix5_append): Likewise.
+	(ar_emul_aix_replace): Likewise.
+	(ar_emul_aix5_replace): Likewise.
+
+2010-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ar.c (plugin_target): New.
 	(main): Set plugin_target to "plugin" for --plugin.
 	(open_inarch): Initialize target to plugin_target.

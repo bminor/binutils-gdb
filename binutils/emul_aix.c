@@ -92,31 +92,41 @@ ar_emul_aix_internal (bfd **       after_bfd,
 
 
 static bfd_boolean
-ar_emul_aix_append (bfd **after_bfd, char *file_name, bfd_boolean verbose,
-                    bfd_boolean flatten)
+ar_emul_aix_append (bfd **after_bfd, char *file_name, const char *target,
+		    bfd_boolean verbose, bfd_boolean flatten)
 {
+  if (target)
+    non_fatal (_("target `%s' ignored."), target);
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
 			       "aixcoff64-rs6000", TRUE, flatten);
 }
 
 static bfd_boolean
-ar_emul_aix5_append (bfd **after_bfd, char *file_name, bfd_boolean verbose,
-                     bfd_boolean flatten)
+ar_emul_aix5_append (bfd **after_bfd, char *file_name, const char *target,
+		     bfd_boolean verbose, bfd_boolean flatten)
 {
+  if (target)
+    non_fatal (_("target `%s' ignored."), target);
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
 			       "aix5coff64-rs6000", TRUE, flatten);
 }
 
 static bfd_boolean
-ar_emul_aix_replace (bfd **after_bfd, char *file_name, bfd_boolean verbose)
+ar_emul_aix_replace (bfd **after_bfd, char *file_name, const char *target,
+		     bfd_boolean verbose)
 {
+  if (target)
+    non_fatal (_("target `%s' ignored."), target);
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
 			       "aixcoff64-rs6000", FALSE, FALSE);
 }
 
 static bfd_boolean
-ar_emul_aix5_replace (bfd **after_bfd, char *file_name, bfd_boolean verbose)
+ar_emul_aix5_replace (bfd **after_bfd, char *file_name,
+		      const char *target, bfd_boolean verbose)
 {
+  if (target)
+    non_fatal (_("target `%s' ignored."), target);
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
 			       "aix5coff64-rs6000", FALSE, FALSE);
 }
