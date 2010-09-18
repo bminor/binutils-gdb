@@ -4528,8 +4528,9 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--start-lib start_lib_test_2.o start_lib_test_3.o -Wl,--end-lib
 @GCC_TRUE@@NATIVE_LINKER_TRUE@libstart_lib_test.a: start_lib_test_1.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
-@GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test: memory_test.s
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c $< -o memory_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.o: memory_test.s
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -o $@ -c $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.stdout: memory_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lWS  $< > $@

@@ -1,6 +1,10 @@
 2010-09-17  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/memory_test.sh: Adjust for change of 2010-09-10.
+	* testsuite/Makefile.am (memory_test.o): New target.
+	(memory_test): Depend on memory_test.o, gcctestdir/ld, and
+	memory_test.t.
+	* testsuite/Makefile.in: Rebuild.
 
 2010-09-17  Doug Kwan  <dougkwan@google.com>
 
