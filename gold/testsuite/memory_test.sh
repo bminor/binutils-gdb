@@ -42,7 +42,7 @@ check memory_test.stdout \
 check memory_test.stdout \
   "  LOAD           0x002000 0x0*00005000 0x0*00005000 0x00000\?2 0x00000\?2 R   0x1000"
 check memory_test.stdout \
-  "  LOAD           0x00203c 0x0*00004000 0x0*0000603c 0x0000\?2a 0x0000\?2a R E 0x1000"
+  "  LOAD           0x00203c 0x0*00004000 0x0*0000603c 0x00000\?2 0x00000\?2 R   0x1000"
 
 
 exit 0

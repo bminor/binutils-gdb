@@ -1,3 +1,7 @@
+2010-09-17  Ian Lance Taylor  <iant@google.com>
+
+	* testsuite/memory_test.sh: Adjust for change of 2010-09-10.
+
 2010-09-17  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Relocate::relocate): Ignore symbol type and
