@@ -4,12 +4,13 @@
 #readelf: -l --wide
 #xfail: "arm*-*-*" "xscale-*-*"
 #xfail: "avr-*-*" "dlx-*-*" "h8300-*-*" "m32r-*-*" "msp430-*-*" "tic6x-*-*"
-#xfail: "*-*-hpux*"
+#xfail: "*-*-hpux*" "hppa*64*-*-*"
 # Fails on the ARM because the .section type character is % rather than @.
 # Fails on the AVR, DLX, H8300, M32R, MSP430 and TI C6X because the two
 #  sections are not merged into one segment.  (There is no good reason why
 #  they have to be).
 # Fails on HPUX systems because the .type pseudo-op behaves differently.
+# Fails on hppa64 because a PHDR is always added.
 
 #...
 Program Headers:

@@ -7,4 +7,5 @@ SECTIONS
 {
 	.text : ALIGN (4) { *(.text) } > region
 	.rodata : ALIGN (4) { *(.rodata) } > region
+	/DISCARD/ : { *(.reginfo) *(.trampolines) }
 }

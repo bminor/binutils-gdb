@@ -1,3 +1,40 @@
+2010-09-18  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (check_gc_sections_available): Fail more targets.
+	* ld-discard/discard.exp: Move xfails from here..
+	* ld-discard/extern.d: ..to here.
+	* ld-discard/start.d: ..and here.
+	* ld-discard/static.d: ..and here.
+	* ld-elf/binutils.exp: Don't run tbss1 and tbss2 tests on hppa64.
+	* ld-elf/empty2.d: Remove xfails.
+	* ld-elf/flags1.d: xfail hppa64.
+	* ld-elf/group1.d: Add comment.
+	* ld-elf/group2.d: xfail cr16 and crx.
+	* ld-elf/group3b.d: Correct xfail and add comment.
+	* ld-elf/group4.d: xfail cr16 and crx.
+	* ld-elf/group5.d: Likewise.
+	* ld-elf/group6.d: Likewise.
+	* ld-elf/group7.d: Likewise.
+	* ld-elf/group8a.d: Add more notarget and xfail entries.  Comment.
+	* ld-elf/group8b.d: Likewise.
+	* ld-elf/group9a.d: Likewise.
+	* ld-elf/group9b.d: Likewise.
+	* ld-elf/linkonce2.d: Correct notarget and comment.
+	* ld-elf/merge2.d: Remove iq2000 from xfail.
+	* ld-elf/multibss1.d: xfail hppa64.
+	* ld-elf/nobits-1.d: Likewise.
+	* ld-elf/note-1.d: Likewise.
+	* ld-elf/note-2.d: Likewise.
+	* ld-elf/orphan-region.d: Add xfails.
+	* ld-elf/orphan-region.ld: Discard some sections.
+	* ld-elf/orphan.d: Add xfails.
+	* ld-elf/orphan.ld: Discard some sections.
+	* ld-elf/orphan3.d: Replace xfail frv-*-* with frv-*-elf.  Remove
+	cr16, crx and d10v.
+	* ld-elf/pr349.d: Add xfails.
+	* ld-elf/warn2.d: Add xfails.  Tweak symbol section for hppa64.
+	* ld-scripts/rgn-at5.t: Discard .reginfo.
+
 2010-09-16  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/orphan-region.d: xfail for spu.

@@ -1656,9 +1656,19 @@ proc check_gc_sections_available { } {
     if {![info exists gc_sections_available_saved]} {
 	# Some targets don't support gc-sections despite whatever's
 	# advertised by ld's options.
-	if { [istarget alpha*-*-*]
-	     || [istarget mep-*-*]
+	if {[istarget arc-*-*]
+	     || [istarget d30v-*-*]
+	     || [istarget dlx-*-*]
+	     || [istarget i960-*-*]
+	     || [istarget or32-*-*]
+	     || [istarget pj*-*-*]
+	     || [istarget alpha-*-*]
+	     || [istarget hppa64-*-*]
+	     || [istarget i370-*-*]
+	     || [istarget i860-*-*]
 	     || [istarget ia64-*-*]
+	     || [istarget mep-*-*]
+	     || [istarget mn10200-*-*]
 	     || [istarget *-*-cygwin]
 	     || [istarget *-*-mingw*] } {
 	    set gc_sections_available_saved 0

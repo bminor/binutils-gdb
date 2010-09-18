@@ -120,24 +120,31 @@ if { ([istarget "i?86-*-elf*"]
 
 binutils_test strip "-T ${srcdir}/${subdir}/lma.lnk" lma
 
-binutils_test objcopy "" tbss1
-binutils_test objcopy "-z relro" tbss1
-binutils_test objcopy "-shared" tbss1
-binutils_test objcopy "-shared -z relro" tbss1
-binutils_test objcopy "-z max-page-size=0x100000" tbss1
-binutils_test objcopy "-z max-page-size=0x100000 -z common-page-size=0x1000" tbss1
+# hppa64 has its own .tbss section, with different flags.
+if { ![istarget "hppa64-*-*"] } {
+    binutils_test objcopy "" tbss1
+    binutils_test objcopy "-z relro" tbss1
+    binutils_test objcopy "-shared" tbss1
+    binutils_test objcopy "-shared -z relro" tbss1
+    binutils_test objcopy "-z max-page-size=0x100000" tbss1
+    binutils_test objcopy "-z max-page-size=0x100000 -z common-page-size=0x1000" tbss1
+}
+
 binutils_test objcopy "" tdata1
 binutils_test objcopy "-z relro" tdata1
 binutils_test objcopy "-shared" tdata1
 binutils_test objcopy "-shared -z relro" tdata1
 binutils_test objcopy "-z max-page-size=0x100000" tdata1
 binutils_test objcopy "-z max-page-size=0x100000 -z common-page-size=0x1000" tdata1
-binutils_test objcopy "" tbss2
-binutils_test objcopy "-z relro" tbss2
-binutils_test objcopy "-shared" tbss2
-binutils_test objcopy "-shared -z relro" tbss2
-binutils_test objcopy "-z max-page-size=0x100000" tbss2
-binutils_test objcopy "-z max-page-size=0x100000 -z common-page-size=0x1000" tbss2
+
+if { ![istarget "hppa64-*-*"] } {
+    binutils_test objcopy "" tbss2
+    binutils_test objcopy "-z relro" tbss2
+    binutils_test objcopy "-shared" tbss2
+    binutils_test objcopy "-shared -z relro" tbss2
+    binutils_test objcopy "-z max-page-size=0x100000" tbss2
+    binutils_test objcopy "-z max-page-size=0x100000 -z common-page-size=0x1000" tbss2
+}
 
 binutils_test objcopy "" tdata2
 binutils_test objcopy "-z relro" tdata2

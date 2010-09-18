@@ -18,12 +18,5 @@ SECTIONS
 
   .sec3 0x5000 : { *(*.sec3) }
 
-  /* In theory we could put:
-
-     /DISCARD/ : { *(*) }
-
-     here as we do not need any other sections for this test.
-     In practice however doing so breaks GOLD as it relies upon
-     being able to create/find various other sections such as
-     .dynamic, .dynsym and .gnu.hash.  */
+  /DISCARD/ : { *(.reginfo) }
 }
