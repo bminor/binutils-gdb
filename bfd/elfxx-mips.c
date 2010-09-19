@@ -8172,9 +8172,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (do_copy)
 	{
 	  /* Even though we don't directly need a GOT entry for this symbol,
-	     a symbol must have a dynamic symbol table index greater that
-	     DT_MIPS_GOTSYM if there are dynamic relocations against it.  */
-	  if (hmips->global_got_area > GGA_RELOC_ONLY)
+	     the SVR4 psABI requires it to have a dynamic symbol table
+	     index greater that DT_MIPS_GOTSYM if there are dynamic
+	     relocations against it.
+
+	     VxWorks does not enforce the same mapping between the GOT
+	     and the symbol table, so the same requirement does not
+	     apply there.  */
+	  if (!htab->is_vxworks && hmips->global_got_area > GGA_RELOC_ONLY)
 	    hmips->global_got_area = GGA_RELOC_ONLY;
 
 	  mips_elf_allocate_dynamic_relocations

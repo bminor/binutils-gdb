@@ -1,5 +1,10 @@
 2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (allocate_dynrelocs): Don't add relocation symbols
+	to the global GOT on VxWorks.
+
+2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_check_relocs): On VxWorks,
 	exclude __GOTT_BASE__ and __GOTT_INDEX__ from the warning
 	about HI/LO relocations in shared objects.
