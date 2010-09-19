@@ -7930,6 +7930,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  && strcmp (h->root.root.string, "_gp_disp") == 0)
 		break;
 
+	      /* Likewise __GOTT_BASE__ and __GOTT_INDEX__ on VxWorks.  */
+	      if (is_gott_symbol (info, h))
+		break;
+
 	      /* FALLTHROUGH */
 
 	    case R_MIPS16_26:
