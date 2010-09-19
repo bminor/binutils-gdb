@@ -1,5 +1,33 @@
 2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_entry): Adjust commentary.
+	(mips_elf_create_local_got_entry): If given a symbol, check that it
+	has been assigned to the local part of the GOT.
+	(mips_elf_count_got_symbols): Take the bfd_link_info as argument
+	instead of the master GOT.  Put all locally-binding symbols in
+	the local area.
+	(mips_elf_make_got_per_bfd): Use global_got_area to decide whether
+	a symbol lives in the local or global area.
+	(mips_elf_local_relocation_p): Remove check_forced argument and
+	retain only the !check_forced behavior.
+	(mips_elf_calculate_relocation): Adjust call accordingly.
+	Use global_got_area to decide whether an output relocation
+	should be local or global.  Explicitly decay R_MIPS_GOT_PAGE
+	into R_MIPS_GOT_DISP where appropriate.  Fix selection of
+	local vs. global semantics for R_MIPS*_26.  Remove redundant
+	reevaluation of what is stored in was_local_p.
+	(mips_elf_create_dynamic_relocation): Use global_got_area to decide
+	whether the relocation should be against a global or local symbol.
+	(mips_elf_lay_out_got): Update the GOT traversal after the above
+	change to mips_elf_count_got_symbols.
+	(mips_elf_adjust_addend): Adjust call to mips_elf_local_relocation_p.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Use global_got_area to decide
+	whether the symbol has a global got entry.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+
+2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (allocate_dynrelocs): Don't add relocation symbols
 	to the global GOT on VxWorks.
 

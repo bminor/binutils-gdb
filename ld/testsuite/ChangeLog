@@ -1,3 +1,18 @@
+2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/elf-rel-got-n32.d: Swap two local GOT entries
+	and remove some duplication between the global and local GOT
+	entries.  Adjust GP offsets accordingly.
+	* ld-mips-elf/elf-rel-got-n64-linux.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n32.d: Reorder GOT entries and update
+	GP offsets accordingly.
+	* ld-mips-elf/elf-rel-xgot-n64-linux.d: Likewise.
+	* ld-mips-elf/mips16-pic-1.gd: Move all global GOT entries to
+	the local GOT.
+	* ld-mips-elf/mips16-pic-1.dd: Update GP offsets accordingly.
+	* ld-mips-elf/multi-got-no-shared.d: Adjust GP setup for
+	smaller GOT sizes.
+
 2010-09-18  Alan Modra  <amodra@gmail.com>
 
 	* lib/ld-lib.exp (check_gc_sections_available): Fail more targets.
