@@ -1,5 +1,19 @@
 2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_link_hash_entry): Add got_only_for_calls.
+	(mips_elf_link_hash_newfunc): Initialize it.
+	(mips_elf_record_global_got_symbol): Add a for_call parameter.
+	(mips_elf_count_got_symbols): Check SYMBOL_CALLS_LOCAL rather
+	than SYMBOL_REFERENCES_LOCAL if the GOT entry is only used for calls.
+	Try to remove .got entries in favour of .got.plt entries on VxWorks.
+	(_bfd_mips_elf_check_relocs): Do not try to avoid allocating
+	a global GOT entry for VxWorks calls.  Update uses of
+	mips_elf_record_global_got_symbol.
+	(allocate_dynrelocs): Set got_only_for_calls to false if the GOT
+	entry is used for dynamic relocations.
+
+2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_entry): Adjust commentary.
 	(mips_elf_create_local_got_entry): If given a symbol, check that it
 	has been assigned to the local part of the GOT.

@@ -374,6 +374,11 @@ struct mips_elf_link_hash_entry
   /* The highest GGA_* value that satisfies all references to this symbol.  */
   unsigned int global_got_area : 2;
 
+  /* True if all GOT relocations against this symbol are for calls.  This is
+     a looser condition than no_fn_stub below, because there may be other
+     non-call non-GOT relocations against the symbol.  */
+  unsigned int got_only_for_calls : 1;
+
   /* True if one of the relocations described by possibly_dynamic_relocs
      is against a readonly section.  */
   unsigned int readonly_reloc : 1;
@@ -1073,6 +1078,7 @@ mips_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       ret->call_fp_stub = NULL;
       ret->tls_type = GOT_NORMAL;
       ret->global_got_area = GGA_NONE;
+      ret->got_only_for_calls = TRUE;
       ret->readonly_reloc = FALSE;
       ret->has_static_relocs = FALSE;
       ret->no_fn_stub = FALSE;
@@ -3477,11 +3483,13 @@ mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
 
 /* If H is a symbol that needs a global GOT entry, but has a dynamic
    symbol table index lower than any we've seen to date, record it for
-   posterity.  */
+   posterity.  FOR_CALL is true if the caller is only interested in
+   using the GOT entry for calls.  */
 
 static bfd_boolean
 mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 				   bfd *abfd, struct bfd_link_info *info,
+				   bfd_boolean for_call,
 				   unsigned char tls_flag)
 {
   struct mips_elf_link_hash_table *htab;
@@ -3493,6 +3501,8 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
   BFD_ASSERT (htab != NULL);
 
   hmips = (struct mips_elf_link_hash_entry *) h;
+  if (!for_call)
+    hmips->got_only_for_calls = FALSE;
 
   /* A global symbol in the GOT must also be in the dynamic symbol
      table.  */
@@ -3856,10 +3866,12 @@ static int
 mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 {
   struct bfd_link_info *info;
+  struct mips_elf_link_hash_table *htab;
   struct mips_got_info *g;
 
   info = (struct bfd_link_info *) data;
-  g = mips_elf_hash_table (info)->got_info;
+  htab = mips_elf_hash_table (info);
+  g = htab->got_info;
   if (h->global_got_area != GGA_NONE)
     {
       /* Make a final decision about whether the symbol belongs in the
@@ -3871,7 +3883,10 @@ mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 	 Note that the former condition does not always imply the
 	 latter: symbols do not bind locally if they are completely
 	 undefined.  We'll report undefined symbols later if appropriate.  */
-      if (h->root.dynindx == -1 || SYMBOL_REFERENCES_LOCAL (info, &h->root))
+      if (h->root.dynindx == -1
+	  || (h->got_only_for_calls
+	      ? SYMBOL_CALLS_LOCAL (info, &h->root)
+	      : SYMBOL_REFERENCES_LOCAL (info, &h->root)))
 	{
 	  /* The symbol belongs in the local GOT.  We no longer need this
 	     entry if it was only used for relocations; those relocations
@@ -3880,6 +3895,13 @@ mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 	    g->local_gotno++;
 	  h->global_got_area = GGA_NONE;
 	}
+      else if (htab->is_vxworks
+	       && h->got_only_for_calls
+	       && h->root.plt.offset != MINUS_ONE)
+	/* On VxWorks, calls can refer directly to the .got.plt entry;
+	   they don't need entries in the regular GOT.  .got.plt entries
+	   will be allocated by _bfd_mips_elf_adjust_dynamic_symbol.  */
+	h->global_got_area = GGA_NONE;
       else
 	{
 	  g->global_gotno++;
@@ -7654,11 +7676,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_CALL_LO16:
 	  if (h != NULL)
 	    {
-	      /* VxWorks call relocations point at the function's .got.plt
-		 entry, which will be allocated by adjust_dynamic_symbol.
-		 Otherwise, this symbol requires a global GOT entry.  */
-	      if ((!htab->is_vxworks || h->forced_local)
-		  && !mips_elf_record_global_got_symbol (h, abfd, info, 0))
+	      /* Make sure there is room in the regular GOT to hold the
+		 function's address.  We may eliminate it in favour of
+		 a .got.plt entry later; see mips_elf_count_got_symbols.  */
+	      if (!mips_elf_record_global_got_symbol (h, abfd, info, TRUE, 0))
 		return FALSE;
 
 	      /* We need a stub, not a plt entry for the undefined
@@ -7718,7 +7739,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* Fall through.  */
 
 	case R_MIPS_GOT_DISP:
-	  if (h && !mips_elf_record_global_got_symbol (h, abfd, info, 0))
+	  if (h && !mips_elf_record_global_got_symbol (h, abfd, info,
+						       FALSE, 0))
 	    return FALSE;
 	  break;
 
@@ -7750,8 +7772,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  (struct mips_elf_link_hash_entry *) h;
 		hmips->tls_type |= flag;
 
-		if (h && !mips_elf_record_global_got_symbol (h, abfd,
-							     info, flag))
+		if (h && !mips_elf_record_global_got_symbol (h, abfd, info,
+							     FALSE, flag))
 		  return FALSE;
 	      }
 	    else
@@ -8154,8 +8176,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     VxWorks does not enforce the same mapping between the GOT
 	     and the symbol table, so the same requirement does not
 	     apply there.  */
-	  if (!htab->is_vxworks && hmips->global_got_area > GGA_RELOC_ONLY)
-	    hmips->global_got_area = GGA_RELOC_ONLY;
+	  if (!htab->is_vxworks)
+	    {
+	      if (hmips->global_got_area > GGA_RELOC_ONLY)
+		hmips->global_got_area = GGA_RELOC_ONLY;
+	      hmips->got_only_for_calls = FALSE;
+	    }
 
 	  mips_elf_allocate_dynamic_relocations
 	    (dynobj, info, hmips->possibly_dynamic_relocs);
