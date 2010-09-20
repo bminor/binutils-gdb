@@ -6269,26 +6269,14 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 
   gas_assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
 
+  reloc->addend = fixp->fx_offset;
+
 #ifdef OBJ_ECOFF
+  /* Fake out bfd_perform_relocation. sigh.  */
+  /* ??? Better would be to use the special_function hook.  */
   if (fixp->fx_r_type == BFD_RELOC_ALPHA_LITERAL)
-    /* Fake out bfd_perform_relocation. sigh.  */
     reloc->addend = -alpha_gp_value;
-  else
 #endif
-    {
-      reloc->addend = fixp->fx_offset;
-#ifdef OBJ_ELF
-      /* Ohhh, this is ugly.  The problem is that if this is a local global
-         symbol, the relocation will entirely be performed at link time, not
-         at assembly time.  bfd_perform_reloc doesn't know about this sort
-         of thing, and as a result we need to fake it out here.  */
-      if ((S_IS_EXTERNAL (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)
-	   || (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE)
-	   || (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_THREAD_LOCAL))
-	  && !S_IS_COMMON (fixp->fx_addsy))
-	reloc->addend -= symbol_get_bfdsym (fixp->fx_addsy)->value;
-#endif
-    }
 
 #ifdef OBJ_EVAX
   switch (fixp->fx_r_type)

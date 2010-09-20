@@ -494,7 +494,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "REFLONG",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -509,7 +509,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "REFQUAD",		/* name */
 	 FALSE,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
@@ -526,7 +526,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "GPREL32",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -541,7 +541,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "ELF_LITERAL",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -607,7 +607,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "BRADDR",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1fffff,		/* src_mask */
@@ -622,7 +622,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "HINT",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x3fff,		/* src_mask */
@@ -637,7 +637,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "SREL16",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -652,7 +652,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "SREL32",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -667,7 +667,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "SREL64",		/* name */
 	 FALSE,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
@@ -689,7 +689,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "GPRELHIGH",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -704,7 +704,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "GPRELLOW",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -719,7 +719,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "GPREL16",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -805,7 +805,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "BRSGP",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1fffff,		/* src_mask */
@@ -820,7 +820,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "TLSGD",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -835,7 +835,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "TLSLDM",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -850,7 +850,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "DTPMOD64",		/* name */
 	 FALSE,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
@@ -866,7 +866,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "GOTDTPREL",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -881,7 +881,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "DTPREL64",		/* name */
 	 FALSE,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
@@ -896,7 +896,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "DTPRELHI",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -911,7 +911,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "DTPRELLO",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -926,7 +926,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "DTPREL16",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -942,7 +942,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "GOTTPREL",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -957,7 +957,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "TPREL64",		/* name */
 	 FALSE,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
@@ -972,7 +972,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "TPRELHI",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -987,7 +987,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "TPRELLO",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -1002,7 +1002,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 0,			/* special_function */
+	 bfd_elf_generic_reloc,	/* special_function */
 	 "TPREL16",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
