@@ -1,3 +1,7 @@
+2010-09-20  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/script-type.ld: Update to generate symbols in a section.
+
 2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/elf-rel-got-n32.d: Swap two local GOT entries
