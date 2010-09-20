@@ -1,3 +1,7 @@
+2010-09-20  David S. Miller  <davem@davemloft.net>
+
+	* emulparams/elf32_sparc.sh: Set NOP to 0x01000000
+
 2010-09-16  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (NOLOAD): Do not erroneously state that contents will
