@@ -1,5 +1,13 @@
 2010-09-20  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* ld-arm/attr-merge-6.attr: Update test for change in canonical CPU
+	name.
+	* ld-arm/attr-merge-7.attr: Likewise.
+	* ld-arm/attr-merge-2.attr: Likewise.
+	* ld-arm/attr-merge-arch-2.attr: Likewise.
+
+2010-09-20  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* ld-arm/script-type.ld: Update to generate symbols in a section.
 
 2010-09-19  Richard Sandiford  <rdsandiford@googlemail.com>

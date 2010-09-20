@@ -7,7 +7,7 @@
 
 Attribute Section: aeabi
 File Attributes
-  Tag_CPU_name: "CORTEX-A8"
+  Tag_CPU_name: "Cortex-A8"
   Tag_CPU_arch: v7
   Tag_CPU_arch_profile: Application
   Tag_ARM_ISA_use: Yes
