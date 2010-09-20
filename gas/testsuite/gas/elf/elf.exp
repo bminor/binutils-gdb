@@ -145,7 +145,10 @@ if { ([istarget "*-*-*elf*"]
 	run_elf_list_test "section5" "" "-al" "-SW" "| grep \" \\\\.test\\\[0-9\\\]\""
     }
     run_dump_test "struct"
-    run_dump_test "symtab"
+    if { ![istarget "alpha*-*-*"] } then {
+	# The alpha port uses .set for state, e.g. nomacro.
+	run_dump_test "symtab"
+    }
     run_dump_test "symver"
 
     # The MSP port sets the ELF header's OSABI field to ELFOSABI_STANDALONE.
