@@ -1,5 +1,11 @@
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* doc/c-bfin.texi (-mcpu): Add bf592.
+	* config/tc-bfin.c (bfin_cpu_type): Add BFIN_CPU_BF592.
+	(bfin_cpus[]): Add 0.0/0.1 for bf592.
+
+2010-09-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* config/tc-bfin.c (comment_chars): Add #.
 
 2010-09-20  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>

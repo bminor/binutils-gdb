@@ -181,7 +181,8 @@ typedef enum bfin_cpu_type
   BFIN_CPU_BF548M,
   BFIN_CPU_BF549,
   BFIN_CPU_BF549M,
-  BFIN_CPU_BF561
+  BFIN_CPU_BF561,
+  BFIN_CPU_BF592,
 } bfin_cpu_t;
 
 bfin_cpu_t bfin_cpu_type = BFIN_CPU_UNKNOWN;
@@ -312,6 +313,9 @@ struct bfin_cpu bfin_cpus[] =
   {"bf561", BFIN_CPU_BF561, 0x0005, AC_05000074},
   {"bf561", BFIN_CPU_BF561, 0x0003, AC_05000074},
   {"bf561", BFIN_CPU_BF561, 0x0002, AC_05000074},
+
+  {"bf592", BFIN_CPU_BF592, 0x0001, AC_05000074},
+  {"bf592", BFIN_CPU_BF592, 0x0000, AC_05000074},
 
   {NULL, 0, 0, 0}
 };
