@@ -1227,44 +1227,57 @@ decode_CC2stat_0 (TIword iw0, disassemble_info *outf)
   int op   = ((iw0 >> CC2stat_op_bits) & CC2stat_op_mask);
   int cbit = ((iw0 >> CC2stat_cbit_bits) & CC2stat_cbit_mask);
 
+  const char *bitname = statbits (cbit);
+  if (decode_statbits[cbit] == REG_LASTREG)
+    {
+      /* All ASTAT bits except CC may be operated on in hardware, but may
+         not have a dedicated insn, so still decode "valid" insns.  */
+      static char bitnames[64];
+      if (cbit != 5)
+	sprintf (bitnames, "ASTAT[%i /* unused bit */]", cbit);
+      else
+	strcpy (bitnames, "CC /* ... Illegal register ... */");
+      bitname = bitnames;
+    }
+
   if (op == 0 && D == 0)
     {
       OUTS (outf, "CC = ");
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
     }
   else if (op == 1 && D == 0)
     {
       OUTS (outf, "CC |= ");
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
     }
   else if (op == 2 && D == 0)
     {
       OUTS (outf, "CC &= ");
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
     }
   else if (op == 3 && D == 0)
     {
       OUTS (outf, "CC ^= ");
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
     }
   else if (op == 0 && D == 1)
     {
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
       OUTS (outf, " = CC");
     }
   else if (op == 1 && D == 1)
     {
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
       OUTS (outf, " |= CC");
     }
   else if (op == 2 && D == 1)
     {
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
       OUTS (outf, " &= CC");
     }
   else if (op == 3 && D == 1)
     {
-      OUTS (outf, statbits (cbit));
+      OUTS (outf, bitname);
       OUTS (outf, " ^= CC");
     }
   else

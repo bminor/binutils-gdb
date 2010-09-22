@@ -1,3 +1,7 @@
+2010-09-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (decode_CC2stat_0): Decode all ASTAT bits.
+
 2010-09-22  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-dis.c (IS_DREG, IS_PREG, IS_GENREG, IS_DAGREG): Reject
