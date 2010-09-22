@@ -208,6 +208,8 @@ int yylex (void);
 [bB]                                    return B;
 [aA][zZ]  _REG.regno = S_AZ;   return STATUS_REG;
 [aA][nN]  _REG.regno = S_AN;   return STATUS_REG;
+[aA][cC]0_[cC][oO][pP][yY]  _REG.regno = S_AC0_COPY; return STATUS_REG;
+[vV]_[cC][oO][pP][yY]       _REG.regno = S_V_COPY;   return STATUS_REG;
 [aA][qQ]  _REG.regno = S_AQ;   return STATUS_REG;
 [aA][cC]0 _REG.regno = S_AC0;  return STATUS_REG;
 [aA][cC]1 _REG.regno = S_AC1;  return STATUS_REG;
@@ -216,6 +218,7 @@ int yylex (void);
 [aA][vV]1 _REG.regno = S_AV1;  return STATUS_REG;
 [aA][vV]1[sS] _REG.regno = S_AV1S; return STATUS_REG;
 [vV][sS]  _REG.regno = S_VS;   return STATUS_REG;
+[rR][nN][dD]_[mM][oO][dD]  _REG.regno = S_RND_MOD; return STATUS_REG;
 
 
 [aA][sS][tT][aA][tT]   _REG.regno = REG_ASTAT; return REG;

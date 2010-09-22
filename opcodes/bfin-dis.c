@@ -242,6 +242,7 @@ enum machine_registers
   REG_BL0, REG_BL1, REG_BL2, REG_BL3, REG_LL0, REG_LL1, REG_LL2, REG_LL3,
   REG_IH0, REG_IH1, REG_IH2, REG_IH3, REG_MH0, REG_MH1, REG_MH2, REG_MH3,
   REG_BH0, REG_BH1, REG_BH2, REG_BH3, REG_LH0, REG_LH1, REG_LH2, REG_LH3,
+  REG_AC0_COPY, REG_V_COPY, REG_RND_MOD,
   REG_LASTREG,
 };
 
@@ -277,6 +278,7 @@ static const char *reg_names[] =
   "B0.L", "B1.L", "B2.L", "B3.L", "L0.L", "L1.L", "L2.L", "L3.L",
   "I0.H", "I1.H", "I2.H", "I3.H", "M0.H", "M1.H", "M2.H", "M3.H",
   "B0.H", "B1.H", "B2.H", "B3.H", "L0.H", "L1.H", "L2.H", "L3.H",
+  "AC0_COPY", "V_COPY", "RND_MOD",
   "LASTREG",
   0
 };
@@ -398,10 +400,14 @@ static enum machine_registers decode_regs_hi[] =
 
 static enum machine_registers decode_statbits[] =
 {
-  REG_AZ, REG_AN, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_AQ, REG_LASTREG,
-  REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_AC0, REG_AC1, REG_LASTREG, REG_LASTREG,
-  REG_AV0, REG_AV0S, REG_AV1, REG_AV1S, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG,
-  REG_V, REG_VS, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG,
+  REG_AZ,        REG_AN,        REG_AC0_COPY,    REG_V_COPY,
+  REG_LASTREG,   REG_LASTREG,   REG_AQ,          REG_LASTREG,
+  REG_RND_MOD,   REG_LASTREG,   REG_LASTREG,     REG_LASTREG,
+  REG_AC0,       REG_AC1,       REG_LASTREG,     REG_LASTREG,
+  REG_AV0,       REG_AV0S,      REG_AV1,         REG_AV1S,
+  REG_LASTREG,   REG_LASTREG,   REG_LASTREG,     REG_LASTREG,
+  REG_V,         REG_VS,        REG_LASTREG,     REG_LASTREG,
+  REG_LASTREG,   REG_LASTREG,   REG_LASTREG,     REG_LASTREG,
 };
 
 #define statbits(x) REGNAME (decode_statbits[(x) & 31])

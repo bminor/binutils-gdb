@@ -1,5 +1,5 @@
 /* bfin-defs.h ADI Blackfin gas header file
-   Copyright 2005, 2006, 2007, 2009
+   Copyright 2005, 2006, 2007, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -120,7 +120,10 @@ enum statusflags
 {
   S_AZ = 0,
   S_AN,
+  S_AC0_COPY,
+  S_V_COPY,
   S_AQ = 6,
+  S_RND_MOD = 8,
   S_AC0 = 12,
   S_AC1,
   S_AV0 = 16,

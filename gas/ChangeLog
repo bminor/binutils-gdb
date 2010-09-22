@@ -1,3 +1,8 @@
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
+	* config/bfin-defs.h (statusflags): Add AC0_COPY, V_COPY, and RND_MOD.
+	* config/bfin-lex.l: Tokenize AC0_COPY, V_COPY, and RND_MOD.
+
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-aux.h (bfin_gen_pseudochr): New prototype.
