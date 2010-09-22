@@ -52,7 +52,7 @@ pspy_get_filename (PyObject *self, void *closure)
     {
       struct objfile *objfile = obj->pspace->symfile_object_file;
 
-      if (objfile && objfile->name)
+      if (objfile)
 	return PyString_Decode (objfile->name, strlen (objfile->name),
 				host_charset (), NULL);
     }

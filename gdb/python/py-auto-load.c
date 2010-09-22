@@ -395,8 +395,6 @@ auto_load_new_objfile (struct objfile *objfile)
       clear_section_scripts ();
       return;
     }
-  if (!objfile->name)
-    return;
 
   load_auto_scripts_for_objfile (objfile);
 }

@@ -1,5 +1,18 @@
 2010-09-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* objfiles.c (allocate_objfile) <objfile->name != NULL>: Remove.
+	(free_objfile) <objfile->name != NULL>: Remove the conditional around
+	xfree.
+	* objfiles.h (struct objfile) <name>: New comment it is never NULL.
+	* python/py-auto-load.c (auto_load_new_objfile) <!objfile->name>:
+	Remove.
+	* python/py-objfile.c (objfpy_get_filename) <obj->objfile->name>
+	Remove the conditional.
+	* python/py-progspace.c (pspy_get_filename) <objfile->name>: Likewise.
+
+2010-09-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* main.c: Include objfiles.h.
 	(captured_main): New variable objfile.  Call
 	load_auto_scripts_for_objfile for ALL_OBJFILES.

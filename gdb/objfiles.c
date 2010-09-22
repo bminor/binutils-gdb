@@ -214,10 +214,6 @@ allocate_objfile (bfd *abfd, int flags)
      region. */
 
   objfile->obfd = gdb_bfd_ref (abfd);
-  if (objfile->name != NULL)
-    {
-      xfree (objfile->name);
-    }
   if (abfd != NULL)
     {
       /* Look up the gdbarch associated with the BFD.  */
@@ -649,10 +645,7 @@ free_objfile (struct objfile *objfile)
 
   /* The last thing we do is free the objfile struct itself. */
 
-  if (objfile->name != NULL)
-    {
-      xfree (objfile->name);
-    }
+  xfree (objfile->name);
   if (objfile->global_psymbols.list)
     xfree (objfile->global_psymbols.list);
   if (objfile->static_psymbols.list)

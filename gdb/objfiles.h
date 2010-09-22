@@ -188,8 +188,8 @@ struct objfile
 
     struct objfile *next;
 
-    /* The object file's name, tilde-expanded and absolute.
-       Malloc'd; free it if you free this struct.  */
+    /* The object file's name, tilde-expanded and absolute.  Malloc'd; free it
+       if you free this struct.  This pointer is never NULL.  */
 
     char *name;
 
