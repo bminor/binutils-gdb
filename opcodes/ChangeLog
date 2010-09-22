@@ -1,3 +1,25 @@
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-dis.c (decode_ProgCtrl_0): Check for parallel insns.
+	Reject P6/P7 to TESTSET.
+	(decode_PushPopReg_0): Check for parallel insns.  Reject pushing
+	SP onto the stack.
+	(decode_PushPopMultiple_0): Check for parallel insns.  Make sure
+	P/D fields match all the time.
+	(decode_CCflag_0): Check for parallel insns.  Verify x/y fields
+	are 0 for accumulator compares.
+	(decode_CC2stat_0): Check for parallel insns.  Reject CC<op>CC.
+	(decode_CaCTRL_0, decode_ccMV_0, decode_CC2dreg_0, decode_BRCC_0,
+	decode_UJUMP_0, decode_LOGI2op_0, decode_COMPI2opD_0,
+	decode_COMPI2opP_0, decode_LoopSetup_0, decode_LDIMMhalf_0,
+	decode_CALLa_0, decode_linkage_0, decode_pseudoDEBUG_0,
+	decode_pseudoOChar_0, decode_pseudodbg_assert_0): Check for parallel
+	insns.
+	(decode_dagMODim_0): Verify br field for IREG ops.
+	(decode_LDST_0): Reject preg load into same preg.
+	(_print_insn_bfin): Handle returns for ILLEGAL decodes.
+	(print_insn_bfin): Likewise.
+
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (decode_PushPopMultiple_0): Return 0 when pr > 5.
