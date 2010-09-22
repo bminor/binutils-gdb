@@ -299,7 +299,7 @@ int yylex (void);
     yylval.value = parse_int (&yytext);
     return NUMBER;
   }
-[A-Za-z_$.][A-Za-z0-9_$.]* {
+[[:alpha:]\x80-\xff_$.][[:alnum:]\x80-\xff_$.]* {
     yylval.symbol = symbol_find_or_make (yytext);
     symbol_mark_used (yylval.symbol);
     return SYMBOL;
