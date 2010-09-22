@@ -1,3 +1,7 @@
+2010-09-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (decode_PushPopMultiple_0): Return 0 when pr > 5.
+
 2010-09-22  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-dis.c (decode_dsp32shiftimm_0): Add missing "S" flag.

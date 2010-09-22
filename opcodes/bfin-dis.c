@@ -936,6 +936,9 @@ decode_PushPopMultiple_0 (TIword iw0, disassemble_info *outf)
   int dr = ((iw0 >> PushPopMultiple_dr_bits) & PushPopMultiple_dr_mask);
   int pr = ((iw0 >> PushPopMultiple_pr_bits) & PushPopMultiple_pr_mask);
 
+  if (pr > 5)
+    return 0;
+
   if (W == 1 && d == 1 && p == 1)
     {
       OUTS (outf, "[--SP] = (R7:");
