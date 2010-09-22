@@ -20762,12 +20762,18 @@ The type of this @code{gdb.Value}.  The value of this attribute is a
 
 @defivar Value dynamic_type
 The dynamic type of this @code{gdb.Value}.  This uses C@t{++} run-time
-type information to determine the dynamic type of the value.  If this
-value is of class type, it will return the class in which the value is
-embedded, if any.  If this value is of pointer or reference to a class
-type, it will compute the dynamic type of the referenced object, and
-return a pointer or reference to that type, respectively.  In all
-other cases, it will return the value's static type.
+type information (@acronym{RTTI}) to determine the dynamic type of the
+value.  If this value is of class type, it will return the class in
+which the value is embedded, if any.  If this value is of pointer or
+reference to a class type, it will compute the dynamic type of the
+referenced object, and return a pointer or reference to that type,
+respectively.  In all other cases, it will return the value's static
+type.
+
+Note that this feature will only work when debugging a C@t{++} program
+that includes @acronym{RTTI} for the object in question.  Otherwise,
+it will just return the static type of the value as in @kbd{ptype foo}
+(@pxref{Symbols, ptype}).
 @end defivar
 @end table
 
