@@ -4054,7 +4054,7 @@ decode_dsp32shift_0 (TIword iw0, TIword iw1, disassemble_info *outf)
   else if (sop == 2 && sopcde == 2)
     {
       OUTS (outf, dregs (dst0));
-      OUTS (outf, " = SHIFT ");
+      OUTS (outf, " = LSHIFT ");
       OUTS (outf, dregs (src1));
       OUTS (outf, " BY ");
       OUTS (outf, dregs_lo (src0));
@@ -4070,7 +4070,7 @@ decode_dsp32shift_0 (TIword iw0, TIword iw1, disassemble_info *outf)
   else if (sop == 2 && sopcde == 1)
     {
       OUTS (outf, dregs (dst0));
-      OUTS (outf, " = SHIFT ");
+      OUTS (outf, " = LSHIFT ");
       OUTS (outf, dregs (src1));
       OUTS (outf, " BY ");
       OUTS (outf, dregs_lo (src0));

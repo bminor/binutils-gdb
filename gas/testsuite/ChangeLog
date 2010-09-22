@@ -1,3 +1,8 @@
+2010-09-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/bfin/parallel2.d, gas/bfin/parallel3.d, gas/bfin/shift.d,
+	gas/bfin/vector.2, gas/bfin/vector2.d: Change SHIFT to LSHIFT.
+
 2010-09-20  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/attr-cpu-directive.d: Update test for change in canonical

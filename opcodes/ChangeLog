@@ -1,3 +1,8 @@
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-dis.c (decode_dsp32shift_0): Decode sub opcodes 2/2 as
+	LSHIFT instead of SHIFT.
+
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (constant_formats): Constify the whole structure.
