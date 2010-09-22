@@ -4461,7 +4461,7 @@ decode_dsp32shiftimm_0 (TIword iw0, TIword iw1, disassemble_info *outf)
       OUTS (outf, dregs (src1));
       OUTS (outf, " >>> ");
       OUTS (outf, imm5 (-immag));
-      OUTS (outf, " (V)");
+      OUTS (outf, " (V, S)");
     }
   else if (sop == 2 && sopcde == 1 && bit8 == 1)
     {
