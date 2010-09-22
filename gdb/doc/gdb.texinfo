@@ -20780,6 +20780,41 @@ it will just return the static type of the value as in @kbd{ptype foo}
 The following methods are provided:
 
 @table @code
+@defmethod Value __init__ @var{val}
+Many Python values can be converted directly to a @code{gdb.Value} via
+this object initializer.  Specifically:
+
+@table @asis
+@item Python boolean
+A Python boolean is converted to the boolean type from the current
+language.
+
+@item Python integer
+A Python integer is converted to the C @code{long} type for the
+current architecture.
+
+@item Python long
+A Python long is converted to the C @code{long long} type for the
+current architecture.
+
+@item Python float
+A Python float is converted to the C @code{double} type for the
+current architecture.
+
+@item Python string
+A Python string is converted to a target string, using the current
+target encoding.
+
+@item @code{gdb.Value}
+If @code{val} is a @code{gdb.Value}, then a copy of the value is made.
+
+@item @code{gdb.LazyString}
+If @code{val} is a @code{gdb.LazyString} (@pxref{Lazy Strings In
+Python}), then the lazy string's @code{value} method is called, and
+its result is used.
+@end table
+@end defmethod
+
 @defmethod Value cast type
 Return a new instance of @code{gdb.Value} that is the result of
 casting this instance to the type described by @var{type}, which must

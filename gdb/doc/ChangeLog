@@ -1,3 +1,7 @@
+2010-09-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Values From Inferior): Mention Value.__init__.
+
 2010-09-22  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Values From Inferior): Clarify that
