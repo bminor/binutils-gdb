@@ -833,7 +833,7 @@ asm_1:
 	    return yyerror ("Bad dreg pair");
 	  else
 	    {
-	      notethat ("dsp32alu: (dregs , dregs ) = BYTEOP16P (dregs_pair , dregs_pair ) (half)\n");
+	      notethat ("dsp32alu: (dregs , dregs ) = BYTEOP16P (dregs_pair , dregs_pair ) (aligndir)\n");
 	      $$ = DSP32ALU (21, 0, &$2, &$4, &$9, &$13, $17.r0, 0, 0);
 	    }
 	}
