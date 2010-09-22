@@ -1,12 +1,12 @@
+2010-09-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-const.S: Minor (space) reformatting.
+
 2010-09-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.fortran/module.exp (fully qualified name of DW_TAG_constant):
 	New test.
 	* gdb.fortran/module.f90 (mod1) <var_const>: New constant.
-
-2010-09-22  Joel Brobecker  <brobecker@adacore.com>
-
-	* gdb.dwarf2/dw2-const.S: Minor (space) reformatting.
 
 2010-09-22  Joel Brobecker  <brobecker@adacore.com>
 
