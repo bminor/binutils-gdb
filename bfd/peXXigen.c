@@ -2373,6 +2373,49 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  result = FALSE;
 	}
     }
+  else
+    {
+      h1 = coff_link_hash_lookup (coff_hash_table (info),
+				  "__IAT_start__", FALSE, FALSE, TRUE);
+      if (h1 != NULL
+	  && (h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
+	  && h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	{
+	  bfd_vma iat_va;
+
+	  iat_va =
+	    (h1->root.u.def.value
+	     + h1->root.u.def.section->output_section->vma
+	     + h1->root.u.def.section->output_offset);
+
+	  h1 = coff_link_hash_lookup (coff_hash_table (info),
+				      "__IAT_end__", FALSE, FALSE, TRUE);
+	  if (h1 != NULL
+	      && (h1->root.type == bfd_link_hash_defined
+	       || h1->root.type == bfd_link_hash_defweak)
+	      && h1->root.u.def.section != NULL
+	      && h1->root.u.def.section->output_section != NULL)
+	    {
+	      pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].Size =
+		((h1->root.u.def.value
+		  + h1->root.u.def.section->output_section->vma
+		  + h1->root.u.def.section->output_offset)
+		 - iat_va);
+	      if (pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].Size != 0)
+		pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].VirtualAddress =
+		  iat_va - pe_data (abfd)->pe_opthdr.ImageBase;
+	    }
+	  else
+	    {
+	      _bfd_error_handler
+		(_("%B: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)]"
+		   " because .idata$6 is missing"), abfd);
+	      result = FALSE;
+	    }
+        }
+    }
 
   h1 = coff_link_hash_lookup (coff_hash_table (info),
 			      "__tls_used", FALSE, FALSE, TRUE);

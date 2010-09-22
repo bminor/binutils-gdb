@@ -1,3 +1,8 @@
+2010-09-22  Kai Tietz  <kai.tietz@onevision.com>
+
+	* peXXigen.c (_bfd_XXi_final_link_postscript):
+	Add handling for setting IAT directory entry.
+
 2010-09-20  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_howto_table): Use bfd_elf_generic_reloc.
