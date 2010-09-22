@@ -1677,6 +1677,9 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 	  { ".text",
 	    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE,
 	    0, 0, 0, 0 },
+	  { ".idata",
+	    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
+	    0, 0, 0, 0 },
 	  { ".rdata",
 	    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
 	    0, 0, 0, 0 },
@@ -1690,6 +1693,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       enum orphan_save_index
 	{
 	  orphan_text = 0,
+	  orphan_idata,
 	  orphan_rodata,
 	  orphan_data,
 	  orphan_bss
@@ -1723,7 +1727,10 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       else if ((s->flags & SEC_READONLY) == 0)
 	place = &hold[orphan_data];
       else if ((s->flags & SEC_CODE) == 0)
-	place = &hold[orphan_rodata];
+	{
+	  place = (!strncmp (secname, ".idata\$", 7) ? &hold[orphan_idata]
+						     : &hold[orphan_rodata]);
+	}
       else
 	place = &hold[orphan_text];
 

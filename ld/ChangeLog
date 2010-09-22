@@ -1,3 +1,13 @@
+2010-09-22  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Add
+	idata to orphan set.
+	* emultempl/pep.em: Likewise.
+	* scripttempl/armcoff.sc: Separate idata
+	and add __IAT_start__ and __IAT_end__ labels.
+	* scripttempl/pe.sc: Likewise.
+	* scripttempl/pep.sc: Likewise.
+
 2010-09-20  David S. Miller  <davem@davemloft.net>
 
 	* emulparams/elf32_sparc.sh: Set NOP to 0x01000000
