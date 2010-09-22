@@ -1,5 +1,10 @@
 2010-09-22  Kai Tietz  <kai.tietz@onevision.com>
 
+	* coffcode.h (sec_to_styp_flags): Adjust debug
+	sections to be conform to pe-coff specification
+	and avoid marking them as excluded.
+	(styp_to_sec_flags): Doing reverse mapping.
+
 	* peXXigen.c (_bfd_XXi_final_link_postscript):
 	Add handling for setting IAT directory entry.
 
