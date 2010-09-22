@@ -380,6 +380,36 @@ is_group2 (INSTR_T x)
   return 0;
 }
 
+static int
+is_store (INSTR_T x)
+{
+  if (!x)
+    return 0;
+
+  if ((x->value & 0xf000) == 0x8000)
+    {
+      int aop = ((x->value >> 9) & 0x3);
+      int w = ((x->value >> 11) & 0x1);
+      if (!w || aop == 3)
+	return 0;
+      return 1;
+    }
+
+  if (((x->value & 0xFF60) == 0x9E60) ||  /* dagMODim_0 */
+      ((x->value & 0xFFF0) == 0x9F60))    /* dagMODik_0 */
+    return 0;
+
+  /* decode_dspLDST_0 */
+  if ((x->value & 0xFC00) == 0x9C00)
+    {
+      int w = ((x->value >> 9) & 0x1);
+      if (w)
+	return 1;
+    }
+
+  return 0;
+}
+
 static INSTR_T
 gen_multi_instr_1 (INSTR_T dsp32, INSTR_T dsp16_grp1, INSTR_T dsp16_grp2)
 {
@@ -399,6 +429,9 @@ gen_multi_instr_1 (INSTR_T dsp32, INSTR_T dsp16_grp1, INSTR_T dsp16_grp2)
 	  || (dsp16_grp1->value & 0xfc00) == 0xbc00))
     yyerror ("anomaly 05000074 - Multi-Issue Instruction with \
 dsp32shiftimm in slot1 and P-reg Store in slot2 Not Supported");
+
+  if (is_store (dsp16_grp1) && is_store (dsp16_grp2))
+    yyerror ("Only one instruction in multi-issue instruction can be a store");
 
   return bfin_gen_multi_instr (dsp32, dsp16_grp1, dsp16_grp2);
 }

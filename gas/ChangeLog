@@ -1,5 +1,10 @@
 2010-09-22  Robin Getz  <robin.getz@analog.com>
 
+	* config/bfin-parse.y (is_store): New function.
+	(gen_multi_instr_1): Check parallel slots for store insns.
+
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
 	* config/bfin-defs.h (IS_EMUDAT): New define.
 	* config/bfin-parse.y: Accept EMUDAT for any register move.
 
