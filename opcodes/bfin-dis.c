@@ -1385,19 +1385,37 @@ decode_REGMV_0 (TIword iw0, disassemble_info *outf)
   int src = ((iw0 >> RegMv_src_bits) & RegMv_src_mask);
   int dst = ((iw0 >> RegMv_dst_bits) & RegMv_dst_mask);
 
-  if (!((IS_GENREG (gd, dst) && IS_GENREG (gs, src))
-	|| (IS_GENREG (gd, dst) && IS_DAGREG (gs, src))
-	|| (IS_DAGREG (gd, dst) && IS_GENREG (gs, src))
-	|| (IS_DAGREG (gd, dst) && IS_DAGREG (gs, src))
-	|| (IS_GENREG (gd, dst) && gs == 7 && src == 0)
-	|| (gd == 7 && dst == 0 && IS_GENREG (gs, src))
-	|| (IS_DREG (gd, dst) && IS_SYSREG (gs, src))
-	|| (IS_PREG (gd, dst) && IS_SYSREG (gs, src))
-	|| (IS_SYSREG (gd, dst) && IS_DREG (gs, src))
-	|| (IS_SYSREG (gd, dst) && IS_PREG (gs, src))
-	|| (IS_SYSREG (gd, dst) && gs == 7 && src == 0)))
-    return 0;
+ /* Reserved slots cannot be a src/dst.  */
+  if (IS_RESERVEDREG (gs, src) || IS_RESERVEDREG (gd, dst))
+    goto invalid_move;
 
+  /* Standard register moves  */
+  if ((gs < 2) ||                               /* Dregs/Pregs as source  */
+      (gd < 2) ||                               /* Dregs/Pregs as dest    */
+      (gs == 4 && src < 4) ||                   /* Accumulators as source */
+      (gd == 4 && dst < 4 && (gs < 4)) ||       /* Accumulators as dest   */
+      (gs == 7 && src == 7 && !(gd == 4 && dst < 4)) || /* EMUDAT as src  */
+      (gd == 7 && dst == 7))                    /* EMUDAT as dest         */
+    goto valid_move;
+
+  /* dareg = dareg (IMBL) */
+  if (gs < 4 && gd < 4)
+    goto valid_move;
+
+  /* USP can be src to sysregs, but not dagregs.  */
+  if ((gs == 7 && src == 0) && (gd >= 4))
+    goto valid_move;
+
+  /* USP can move between genregs (only check Accumulators).  */
+  if (((gs == 7 && src == 0) && (gd == 4 && dst < 4)) ||
+      ((gd == 7 && dst == 0) && (gs == 4 && src < 4)))
+    goto valid_move;
+
+  /* Still here ?  Invalid reg pair.  */
+ invalid_move:
+  return 0;
+
+ valid_move:
   OUTS (outf, allregs (dst, gd));
   OUTS (outf, " = ");
   OUTS (outf, allregs (src, gs));
