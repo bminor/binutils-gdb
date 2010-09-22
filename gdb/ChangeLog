@@ -1,3 +1,8 @@
+2010-09-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (read_atcb): Do not compute the task ptid when
+	debugging a core file.
+
 2010-09-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
