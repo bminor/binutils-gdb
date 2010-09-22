@@ -1737,7 +1737,7 @@ asm_1:
 	      $$ = bfin_gen_regmv (&$3, &$1);
 	    }
 	  else
-	    return yyerror ("Register mismatch");
+	    return yyerror ("Unsupported register move");
 	}
 
 	| CCREG ASSIGN REG
@@ -1748,7 +1748,7 @@ asm_1:
 	      $$ = bfin_gen_cc2dreg (1, &$3);
 	    }
 	  else
-	    return yyerror ("Register mismatch");
+	    return yyerror ("Only 'CC = Dreg' supported");
 	}
 
 	| REG ASSIGN CCREG
@@ -1759,7 +1759,7 @@ asm_1:
 	      $$ = bfin_gen_cc2dreg (0, &$1);
 	    }
 	  else
-	    return yyerror ("Register mismatch");
+	    return yyerror ("Only 'Dreg = CC' supported");
 	}
 
 	| CCREG _ASSIGN_BANG CCREG
