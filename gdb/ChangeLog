@@ -1,3 +1,9 @@
+2010-09-22  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR C++/12028
+	* valops.c (find_oload_champ_namespace_loop): removed incorrect
+	'old_cleanups' reassignment.
+
 2010-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* charset.c (wchar_iterate) <EILSEQ>: Return any possibly converted
