@@ -1,5 +1,9 @@
 2010-09-22  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-dis.c (decode_pseudoDEBUG_0): Add space after DBG.
+
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-dis.c (machine_registers): Add AC0_COPY, V_COPY, and RND_MOD.
 	(reg_names): Likewise.
 	(decode_statbits): Likewise; while reformatting to make manageable.

@@ -1,3 +1,8 @@
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
+	* gas/bfin/pseudo.d, gas/bfin/pseudo.s: New test.
+	* gas/bfin/bfin.exp: Add new "pseudo" test.
+
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/bfin/parallel2.d, gas/bfin/parallel3.d, gas/bfin/shift.d,

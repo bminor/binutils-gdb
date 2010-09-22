@@ -1,5 +1,10 @@
 2010-09-22  Robin Getz  <robin.getz@analog.com>
 
+	* config/bfin-parse.y (DBG): Fix regno encoding.
+	(DBGCMPLX): Likewise.
+
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
 	* config/bfin-lex.l: Accept multibyte chars in symbol names.
 
 2010-09-22  Robin Getz  <robin.getz@analog.com>
