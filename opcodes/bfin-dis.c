@@ -53,6 +53,9 @@ typedef long TIword;
 
 typedef unsigned int bu32;
 
+static char comment = 0;
+static char parallel = 0;
+
 typedef enum
 {
   c_0, c_1, c_4, c_2, c_uimm2, c_uimm3, c_imm3, c_pcrel4,
@@ -62,20 +65,20 @@ typedef enum
   c_uimm16s4d, c_uimm16, c_pcrel24, c_uimm32, c_imm32, c_huimm32, c_huimm32e,
 } const_forms_t;
 
-static struct
+static const struct
 {
-  char *name;
-  int nbits;
-  char reloc;
-  char issigned;
-  char pcrel;
-  char scale;
-  char offset;
-  char negative;
-  char positive;
-  char decimal;
-  char leading;
-  char exact;
+  const char *name;
+  const int nbits;
+  const char reloc;
+  const char issigned;
+  const char pcrel;
+  const char scale;
+  const char offset;
+  const char negative;
+  const char positive;
+  const char decimal;
+  const char leading;
+  const char exact;
 } constant_formats[] =
 {
   { "0",          0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -123,11 +126,8 @@ static struct
   { "huimm32e",  32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
 
-static char comment = 0;
-static char parallel = 0;
-
-static char *
-fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info * outf)
+static const char *
+fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
 {
   static char buf[60];
 
@@ -254,7 +254,7 @@ enum reg_class
   LIM_REG_CLASSES
 };
 
-static char *reg_names[] =
+static const char *reg_names[] =
 {
   "R0.L", "R1.L", "R2.L", "R3.L", "R4.L", "R5.L", "R6.L", "R7.L",
   "R0.H", "R1.H", "R2.H", "R3.H", "R4.H", "R5.H", "R6.H", "R7.H",
@@ -557,7 +557,7 @@ aligndir (int r0, disassemble_info *outf)
 static int
 decode_multfunc (int h0, int h1, int src0, int src1, disassemble_info * outf)
 {
-  char *s0, *s1;
+  const char *s0, *s1;
 
   if (h0)
     s0 = dregs_hi (src0);
@@ -578,8 +578,8 @@ decode_multfunc (int h0, int h1, int src0, int src1, disassemble_info * outf)
 static int
 decode_macfunc (int which, int op, int h0, int h1, int src0, int src1, disassemble_info * outf)
 {
-  char *a;
-  char *sop = "<unknown op>";
+  const char *a;
+  const char *sop = "<unknown op>";
 
   if (which)
     a = "A1";
