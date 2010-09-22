@@ -26,6 +26,8 @@ if { [prepare_for_testing $testfile.exp $testfile $srcfile {debug f77}] } {
 # The current source language is "auto; currently fortran".
 gdb_test "p modmany::var_i" " = 14" "stopped language detection"
 
+gdb_test "print mod1::var_const" " = 20" "fully qualified name of DW_TAG_constant"
+
 if ![runto MAIN__] then {
     perror "couldn't run to breakpoint MAIN__"
     continue

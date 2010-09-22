@@ -15,6 +15,8 @@
 
 module mod1
         integer :: var_i = 1
+        integer :: var_const
+        parameter (var_const = 20)
 end module mod1
 
 module mod2

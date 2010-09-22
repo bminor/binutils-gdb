@@ -4614,6 +4614,7 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
       return 1;
 
     case DW_TAG_variable:
+    case DW_TAG_constant:
       /* We only need to prefix "globally" visible variables.  These include
 	 any variable marked with DW_AT_external or any variable that
 	 lives in a namespace.  [Variables in anonymous namespaces
