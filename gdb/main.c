@@ -42,6 +42,7 @@
 #include "source.h"
 #include "cli/cli-cmds.h"
 #include "python/python.h"
+#include "objfiles.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -290,6 +291,7 @@ captured_main (void *data)
 
   int i;
   int save_auto_load;
+  struct objfile *objfile;
 
   struct cleanup *pre_stat_chain = make_command_stats_cleanup (0);
 
@@ -875,8 +877,8 @@ Can't attach to process and specify a core file at the same time."));
      We wait until now because it is common to add to the source search
      path in local_gdbinit.  */
   gdbpy_global_auto_load = save_auto_load;
-  if (symfile_objfile != NULL)
-    load_auto_scripts_for_objfile (symfile_objfile);
+  ALL_OBJFILES (objfile)
+    load_auto_scripts_for_objfile (objfile);
 
   for (i = 0; i < ncmd; i++)
     {

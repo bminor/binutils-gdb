@@ -1,5 +1,11 @@
 2010-09-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* main.c: Include objfiles.h.
+	(captured_main): New variable objfile.  Call
+	load_auto_scripts_for_objfile for ALL_OBJFILES.
+
+2010-09-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (die_needs_namespace) <DW_TAG_variable>: Add also
 	DW_TAG_constant.
 
