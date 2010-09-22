@@ -1,5 +1,10 @@
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* config/bfin-lex.l (abort): Accept case-insensitive abort insn.
+	* config/bfin-parse.y (ABORT): Handle the ABORT token.
+
+2010-09-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* config/tc-bfin.c (bfin_cpus[]): Add 0.2 for bf512/bf514/bf516/bf518.
 
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>

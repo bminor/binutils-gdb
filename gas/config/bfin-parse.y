@@ -3558,6 +3558,12 @@ asm_1:
 
 /* pseudoDEBUG.  */
 
+	| ABORT
+	{
+	  notethat ("psedoDEBUG: ABORT\n");
+	  $$ = bfin_gen_pseudodbg (3, 3, 0);
+	}
+
 	| DBG
 	{
 	  notethat ("pseudoDEBUG: DBG\n");
