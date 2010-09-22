@@ -138,6 +138,9 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
       if (constant_formats[cf].pcrel)
 	ea += pc;
 
+     /* truncate to 32-bits for proper symbol lookup/matching */
+     ea = (bu32)ea;
+
      if (outf->symbol_at_address_func (ea, outf) || !constant_formats[cf].exact)
        {
 	  outf->print_address_func (ea, outf);

@@ -1,3 +1,7 @@
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-dis.c (fmtconst): Cast address to 32bits.
+
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (decode_REGMV_0): Rewrite valid combo checks.
