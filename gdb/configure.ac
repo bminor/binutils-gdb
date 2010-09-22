@@ -2085,15 +2085,31 @@ if test "x$enable_multi_ice" = xyes; then
    AC_CONFIG_SUBDIRS(multi-ice)
 fi
 
-# We only build gdbserver automatically in a native configuration. 
-if test "$gdb_native" = "yes"; then
+AC_ARG_ENABLE(gdbserver,
+AS_HELP_STRING([--enable-gdbserver],
+               [automatically build gdbserver (yes/no/auto, default is auto)]),
+[case "${enableval}" in
+  yes| no|auto) ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-gdbserver option) ;;
+esac],[enable_gdbserver=auto])
+
+# We only build gdbserver automatically in a native configuration, and
+# only if the user did not explicitly disable its build.
+if test "$gdb_native" = "yes" -a "$enable_gdbserver" != "no"; then
   AC_MSG_CHECKING(whether gdbserver is supported on this host)
   if test "x$build_gdbserver" = xyes; then
     AC_MSG_RESULT(yes)
     AC_CONFIG_SUBDIRS(gdbserver)
+    gdbserver_build_enabled=yes
   else
     AC_MSG_RESULT(no)
   fi
+fi
+
+# If the user explicitly request the gdbserver to be built, verify that
+# we were in fact able to enable it.
+if test "$enable_gdbserver" = "yes" -a "$gdbserver_build_enabled" != "yes"; then
+  AC_MSG_ERROR(Automatic gdbserver build is not supported for this configuration)
 fi
 
 # If nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link

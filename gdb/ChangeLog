@@ -1,3 +1,8 @@
+2010-09-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add support for --enable-gdbserver.
+	* configure: Regenerate.
+
 2010-09-22  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	PR C++/12028
