@@ -1,3 +1,8 @@
+2010-09-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-const.S: Use .4byte to reference the target
+	type of our const type.
+
 2010-09-22  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/pr12028.cc: New.
