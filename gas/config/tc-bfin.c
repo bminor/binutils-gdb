@@ -1820,6 +1820,16 @@ bfin_gen_pseudodbg_assert (int dbgop, REG_T regtest, int expected)
   return GEN_OPCODE32 ();
 }
 
+INSTR_T
+bfin_gen_pseudochr (int ch)
+{
+  INIT (PseudoChr);
+
+  ASSIGN (ch);
+
+  return GEN_OPCODE16 ();
+}
+
 /* Multiple instruction generation.  */
 
 INSTR_T

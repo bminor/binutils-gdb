@@ -1,5 +1,11 @@
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* config/bfin-aux.h (bfin_gen_pseudochr): New prototype.
+	* config/tc-bfin.c (bfin_gen_pseudochr): New function.
+	* config/bfin-parse.y: Call bfin_gen_pseudochr for OUTC tokens.
+
+2010-09-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* config/bfin-lex.l (abort): Accept case-insensitive abort insn.
 	* config/bfin-parse.y (ABORT): Handle the ABORT token.
 

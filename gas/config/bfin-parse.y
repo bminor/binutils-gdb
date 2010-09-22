@@ -212,6 +212,7 @@ extern int yylex (void);
 #define uimm5(x) EXPR_VALUE (x)
 #define imm6(x) EXPR_VALUE (x)
 #define imm7(x) EXPR_VALUE (x)
+#define uimm8(x) EXPR_VALUE (x)
 #define imm16(x) EXPR_VALUE (x)
 #define uimm16s4(x) ((EXPR_VALUE (x)) >> 2)
 #define uimm16(x) EXPR_VALUE (x)
@@ -3618,6 +3619,21 @@ asm_1:
 	  $$ = bfin_gen_pseudodbg_assert (2, &$3, uimm16 ($5));
 	}
 
+	| OUTC expr
+	{
+	  if (!IS_UIMM ($2, 8))
+	    return yyerror ("Constant out of range");
+	  notethat ("psedodbg_assert: OUTC uimm8\n");
+	  $$ = bfin_gen_pseudochr (uimm8 ($2));
+	}
+
+	| OUTC REG
+	{
+	  if (!IS_DREG ($2))
+	    return yyerror ("Dregs expected");
+	  notethat ("psedodbg_assert: OUTC dreg\n");
+	  $$ = bfin_gen_pseudodbg (2, $2.regno & CODE_MASK, 0);
+	}
 
 ;
 
