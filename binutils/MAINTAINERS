@@ -65,6 +65,7 @@ responsibility among the other maintainers.
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   BFIN		   Jie Zhang <jie@codesourcery.com>
   BFIN		   Bernd Schmidt <bernd.schmidt@analog.com>
+  BFIN		   Mike Frysinger <michael.frysinger@analog.com>
   BUILD SYSTEM	   Daniel Jacobowitz <dan@codesourcery.com>
   CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>

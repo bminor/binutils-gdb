@@ -1,3 +1,7 @@
+2010-09-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* MAINTAINERS: Add self as ADI Blackfin maintainer.
+
 2010-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emul_aix.c (ar_emul_aix_append): Add a target argument
