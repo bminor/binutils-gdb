@@ -55,7 +55,7 @@ func_cu1:
 
 .Ltype_const:
         .uleb128        0x9                     /* Abbrev: DW_TAG_const_type */
-        .4byte           .Ltype_int-.Lcu1_begin  /* DW_AT_type */
+        .4byte           .Ltype_int-.Lcu1_begin /* DW_AT_type */
 
 	/* func_cu1 */
 	.uleb128	2			/* Abbrev: DW_TAG_subprogram */

@@ -6,6 +6,10 @@
 
 2010-09-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/dw2-const.S: Minor (space) reformatting.
+
+2010-09-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.dwarf2/dw2-const.S: Use .4byte to reference the target
 	type of our const type.
 
