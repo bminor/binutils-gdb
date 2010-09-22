@@ -2245,7 +2245,15 @@ lang_add_section (lang_statement_list_type *ptr,
     case noload_section:
       flags &= ~SEC_LOAD;
       flags |= SEC_NEVER_LOAD;
-      if ((flags & SEC_COFF_SHARED_LIBRARY) == 0)
+      if (((bfd_get_flavour (section->owner)
+	    == bfd_target_ecoff_flavour)
+	   || (bfd_get_flavour (section->owner)
+	       == bfd_target_coff_flavour)))
+	{
+	  if ((flags & (SEC_COFF_SHARED_LIBRARY | SEC_DEBUGGING)) == 0)
+	    flags &= ~SEC_HAS_CONTENTS;
+	}
+      else
 	flags &= ~SEC_HAS_CONTENTS;
       break;
     }
@@ -4555,8 +4563,11 @@ sort_sections_by_lma (const void *arg1, const void *arg2)
   return 0;
 }
 
+/* On ELF, a debugging section must never set SEC_NEVER_LOAD, as no output
+   would be written for it. So the combination of debugging and never-load
+   is something which can only happen for pe-coff and must not be ignored.  */
 #define IGNORE_SECTION(s) \
-  ((s->flags & SEC_NEVER_LOAD) != 0				\
+  ((s->flags & (SEC_NEVER_LOAD | SEC_DEBUGGING)) == SEC_NEVER_LOAD	\
    || (s->flags & SEC_ALLOC) == 0				\
    || ((s->flags & SEC_THREAD_LOCAL) != 0			\
 	&& (s->flags & SEC_LOAD) == 0))
@@ -4590,7 +4601,7 @@ lang_check_section_addresses (void)
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
     {
       /* Only consider loadable sections with real contents.  */
-      if ((s->flags & SEC_NEVER_LOAD)
+      if ((s->flags & (SEC_NEVER_LOAD | SEC_DEBUGGING)) == SEC_NEVER_LOAD
 	  || !(s->flags & SEC_LOAD)
 	  || !(s->flags & SEC_ALLOC)
 	  || s->size == 0)

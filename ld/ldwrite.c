@@ -245,7 +245,8 @@ build_link_order (lang_statement_union_type *statement)
 		link_order = bfd_new_link_order (link_info.output_bfd,
 						 output_section);
 
-		if (i->flags & SEC_NEVER_LOAD)
+		if ((i->flags & SEC_NEVER_LOAD) != 0
+		    && (i->flags & SEC_DEBUGGING) == 0)
 		  {
 		    /* We've got a never load section inside one which
 		       is going to be output, we'll change it into a

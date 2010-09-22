@@ -1,5 +1,11 @@
 2010-09-22  Kai Tietz  <kai.tietz@onevision.com>
 
+	* ldlang.c (lang_add_section): Allow for debugging
+	section to be marked as noload but to keep content.
+	(IGNORE_SECTION): Likewise.
+	(lang_check_section_addresses): Likewise.
+	* ldwrite.c (build_link_order): Likewise.
+
 	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Add
 	idata to orphan set.
 	* emultempl/pep.em: Likewise.
