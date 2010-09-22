@@ -3,6 +3,10 @@
 	* gdb.cp/pr12028.cc: New.
 	* gdb.cp/pr12028.exp: New.
 
+2010-09-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-const.S, gdb.dwarf2/dw2-const.exp: New files.
+
 2010-09-16  Phil Muldoon  <pmuldoon@redhat.com>
             Jan Kratochvil  <jan.kratochvil@redhat.com>
 

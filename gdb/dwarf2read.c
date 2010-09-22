@@ -3466,6 +3466,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	    case DW_TAG_subprogram:
 	      add_partial_subprogram (pdi, lowpc, highpc, need_pc, cu);
 	      break;
+	    case DW_TAG_constant:
 	    case DW_TAG_variable:
 	    case DW_TAG_typedef:
 	    case DW_TAG_union_type:
@@ -3689,6 +3690,20 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 				      0, pdi->lowpc + baseaddr,
 				      cu->language, objfile);
 	}
+      break;
+    case DW_TAG_constant:
+      {
+        struct psymbol_allocation_list *list;
+
+	if (pdi->is_external)
+	  list = &objfile->global_psymbols;
+	else
+	  list = &objfile->static_psymbols;
+	psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+				    built_actual_name, VAR_DOMAIN, LOC_STATIC,
+				    list, 0, 0, cu->language, objfile);
+
+      }
       break;
     case DW_TAG_variable:
       if (pdi->locdesc)
@@ -8567,6 +8582,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
 	 static members).  */
       if (!load_all
 	  && !is_type_tag_for_partial (abbrev->tag)
+	  && abbrev->tag != DW_TAG_constant
 	  && abbrev->tag != DW_TAG_enumerator
 	  && abbrev->tag != DW_TAG_subprogram
 	  && abbrev->tag != DW_TAG_lexical_block
@@ -8677,6 +8693,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
 	 unit with load_all_dies set.  */
 
       if (load_all
+	  || abbrev->tag == DW_TAG_constant
 	  || abbrev->tag == DW_TAG_subprogram
 	  || abbrev->tag == DW_TAG_variable
 	  || abbrev->tag == DW_TAG_namespace
@@ -10583,6 +10600,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_template_value_param:
 	  suppress_add = 1;
 	  /* Fall through.  */
+	case DW_TAG_constant:
 	case DW_TAG_variable:
 	case DW_TAG_member:
 	  /* Compilation with minimal debug info may result in variables
