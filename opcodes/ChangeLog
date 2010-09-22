@@ -1,5 +1,14 @@
 2010-09-22  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-dis.c (IS_DREG, IS_PREG, IS_GENREG, IS_DAGREG): Reject
+	register values greater than 8.
+	(IS_RESERVEDREG, allreg, mostreg): New helpers.
+	(decode_ProgCtrl_0): Call IS_DREG/IS_PREG as appropriate.
+	(decode_PushPopReg_0): Call mostreg/allreg as appropriate.
+	(decode_CC2dreg_0): Check valid CC register number.
+
+2010-09-22  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-dis.c (decode_pseudoDEBUG_0): Add space after DBG.
 
 2010-09-22  Robin Getz  <robin.getz@analog.com>
