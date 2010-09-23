@@ -1,16 +1,15 @@
-# name: attributes for -march=all
+# name: attributes for -march=armv6k+sec
 # source: blank.s
-# as: -march=all
+# as: -march=armv6k+sec
 # readelf: -A
 # This test is only valid on EABI based ports.
 # target: *-*-*eabi
 
 Attribute Section: aeabi
 File Attributes
-  Tag_CPU_name: "all"
-  Tag_CPU_arch: v7
-  Tag_CPU_arch_profile: Application
+  Tag_CPU_name: "6K"
+  Tag_CPU_arch: v6KZ
   Tag_ARM_ISA_use: Yes
-  Tag_THUMB_ISA_use: Thumb-2
-  Tag_MPextension_use: Allowed
+  Tag_THUMB_ISA_use: Thumb-1
+  Tag_DIV_use: Not allowed
   Tag_Virtualization_use: TrustZone

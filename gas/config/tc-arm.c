@@ -184,7 +184,6 @@ static const arm_feature_set arm_ext_v5exp = ARM_FEATURE (ARM_EXT_V5ExP, 0);
 static const arm_feature_set arm_ext_v5j = ARM_FEATURE (ARM_EXT_V5J, 0);
 static const arm_feature_set arm_ext_v6 = ARM_FEATURE (ARM_EXT_V6, 0);
 static const arm_feature_set arm_ext_v6k = ARM_FEATURE (ARM_EXT_V6K, 0);
-static const arm_feature_set arm_ext_v6z = ARM_FEATURE (ARM_EXT_V6Z, 0);
 static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE (ARM_EXT_V6T2, 0);
 static const arm_feature_set arm_ext_v6_notm = ARM_FEATURE (ARM_EXT_V6_NOTM, 0);
 static const arm_feature_set arm_ext_v6_dsp = ARM_FEATURE (ARM_EXT_V6_DSP, 0);
@@ -198,6 +197,7 @@ static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
 static const arm_feature_set arm_ext_m =
   ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_V7M, 0);
 static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
+static const arm_feature_set arm_ext_sec = ARM_FEATURE (ARM_EXT_SEC, 0);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
@@ -11357,6 +11357,8 @@ static void
 do_t_smc (void)
 {
   unsigned int value = inst.reloc.exp.X_add_number;
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7a),
+	      _("SMC is not permitted on this architecture"));
   constraint (inst.reloc.exp.X_op != O_constant,
 	      _("expression too complex"));
   inst.reloc.type = BFD_RELOC_UNUSED;
@@ -17049,12 +17051,16 @@ static const struct asm_opcode insns[] =
  TUF("clrex",	57ff01f, f3bf8f2f, 0, (),			      noargs, noargs),
 
 #undef  ARM_VARIANT
-#define ARM_VARIANT  & arm_ext_v6z
+#define ARM_VARIANT    & arm_ext_sec
+#undef THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_sec
 
  TCE("smc",	1600070, f7f08000, 1, (EXPi), smc, t_smc),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v6t2
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2
 
  TCE("bfc",	7c0001f, f36f0000, 3, (RRnpc, I31, I32),	   bfc, t_bfc),
  TCE("bfi",	7c00010, f3600000, 4, (RRnpc, RRnpc_I0, I31, I32), bfi, t_bfi),
@@ -22381,14 +22387,18 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"arm1156t2f-s",	ARM_ARCH_V6T2,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1176jz-s",	ARM_ARCH_V6ZK,	 FPU_NONE,	  NULL},
   {"arm1176jzf-s",	ARM_ARCH_V6ZK,	 FPU_ARCH_VFP_V2, NULL},
-  {"cortex-a5",		ARM_ARCH_V7A_MP, FPU_NONE,	  "Cortex-A5"},
-  {"cortex-a8",		ARM_ARCH_V7A,	 ARM_FEATURE (0, FPU_VFP_V3
+  {"cortex-a5",		ARM_ARCH_V7A_MP_SEC, 
+					 FPU_NONE,	  "Cortex-A5"},
+  {"cortex-a8",		ARM_ARCH_V7A_SEC,
+					 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           "Cortex-A8"},
-  {"cortex-a9",		ARM_ARCH_V7A_MP, ARM_FEATURE (0, FPU_VFP_V3
+  {"cortex-a9",		ARM_ARCH_V7A_MP_SEC,
+					 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           "Cortex-A9"},
-  {"cortex-a15",	ARM_ARCH_V7A_MP, FPU_ARCH_NEON_VFP_V4,
+  {"cortex-a15",	ARM_ARCH_V7A_MP_SEC,
+    					 FPU_ARCH_NEON_VFP_V4,
                                                           "Cortex-A15"},
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"},
   {"cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,
@@ -22479,6 +22489,8 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   {"maverick",	ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY},
   {"mp",	ARM_FEATURE (ARM_EXT_MP, 0),
 		     ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)},
+  {"sec",	ARM_FEATURE (ARM_EXT_SEC, 0),
+    		     ARM_FEATURE (ARM_EXT_V6K | ARM_EXT_V7A, 0)},
   {"xscale",	ARM_FEATURE (0, ARM_CEXT_XSCALE),	ARM_ANY},
   {NULL,	ARM_ARCH_NONE,			  ARM_ARCH_NONE}
 };
@@ -22999,8 +23011,8 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {4, ARM_ARCH_V5TE},
     {5, ARM_ARCH_V5TEJ},
     {6, ARM_ARCH_V6},
-    {7, ARM_ARCH_V6Z},
     {9, ARM_ARCH_V6K},
+    {7, ARM_ARCH_V6Z},
     {11, ARM_ARCH_V6M},
     {8, ARM_ARCH_V6T2},
     {10, ARM_ARCH_V7A},
@@ -23161,6 +23173,10 @@ aeabi_set_public_attributes (void)
   /* Tag_MP_extension_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_mp))
     aeabi_set_attribute_int (Tag_MPextension_use, 1);
+
+  /* Tag Virtualization_use.  */
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_sec))
+    aeabi_set_attribute_int (Tag_Virtualization_use, 1);
 }
 
 /* Add the default contents for the .ARM.attributes section.  */

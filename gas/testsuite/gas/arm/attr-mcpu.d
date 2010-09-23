@@ -15,3 +15,4 @@ File Attributes
   Tag_FP_arch: VFPv3
   Tag_Advanced_SIMD_arch: NEONv1
   Tag_DIV_use: Not allowed
+  Tag_Virtualization_use: TrustZone

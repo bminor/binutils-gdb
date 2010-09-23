@@ -1,5 +1,18 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (arm_ext_v6z): Remove.
+	(arm_ext_sec): New variable.
+	(do_t_smc): In Thumb state SMC requires v7-A.
+	(insns): Make SMC depend on Security Extensions.
+	(arm_cpus): All -mcpu=cortex-a* options have the Security Extensions.
+	(arm_extensions): Add 'sec' extension.
+	(cpu_arch_ver): Reorder.
+	(aeabi_set_public_attributes): Emit Tag_Virtualization_use as
+	appropriate.
+	* doc/c-arm.texi: Document Security Extensions.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (arm_ext_mp): Add.
 	(do_pld): Update comment.
 	(insns): Add support for pldw.
