@@ -1,3 +1,7 @@
+2010-09-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* fpu.c, gdb-if.c, load.c, misc.c, syscalls.c (config.h): Include.
+
 2010-07-29  DJ Delorie  <dj@redhat.com>
 
 	* rx.c (decode_cache_base): New.
