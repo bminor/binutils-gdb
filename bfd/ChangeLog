@@ -1,3 +1,7 @@
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* bfd-in2.h (BFD_RELOC_ARM_HVC): New enum value.
+
 2010-09-23  Alan Modra  <amodra@gmail.com>
 
 	* cpu-d10v.c: Make bits_per_address 18 for all arch_info entries.

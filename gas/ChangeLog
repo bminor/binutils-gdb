@@ -1,5 +1,27 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (arm_ext_virt): New variable.
+	(arm_reg_type): Add REG_TYPE_RNB for banked registers.
+	(reg_entry): Allow registers to be larger than a byte.
+	(reg_alias): Fix type warning.
+	(parse_operands): Parse banked registers when appropriate.
+	(do_mrs): Add support for Virtualization Extensions.
+	(do_hvc): New function.
+	(do_t_mrs): Add support for Virtualization Extensions.
+	(do_t_msr): Likewise.
+	(do_t_hvc): New function.
+	(SPLRBANK): New define.
+	(reg_names): Add banked registers.
+	(insns): Add support for Virtualization Extensions.
+	(md_apply_fixup): Likewise.
+	(arm_cpus): -mcpu=cortex-a15 implies the Virtualization Extensions.
+	(arm_extensions): Add 'virt' extension.
+	(aeabi_set_public_attributes): Add support for Virtualization
+	Extensions.
+	* doc/c-arm.texi: Document 'virt' extension.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (arm_ext_adiv): New variable.
 	(do_div): New function.
 	(insns): Accept UDIV and SDIV in ARM state.

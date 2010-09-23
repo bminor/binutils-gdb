@@ -1,5 +1,13 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* arm-dis.c (arm_opcodes): Add Virtualiztion Extensions support.
+	(thumb32_opcodes): Likewise.
+	(banked_regname): New function.
+	(print_insn_arm): Add Virtualization Extensions support.
+	(print_insn_thumb32): Likewise.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* arm-dis.c (arm_opcodes): Support disassembly of UDIV and SDIV in
 	ARM state.
 

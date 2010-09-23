@@ -156,6 +156,8 @@ The following extensions are currently supported:
 @code{mp} (Multiprocessing Extensions for v7-A and v7-R architectures),
 @code{os} (Operating System for v6M architecture),
 @code{sec} (Security Extensions for v6K and v7-A architectures),
+@code{virt} (Virtualization Extensions for v7-A architecture, implies 
+@code{idiv}),
 and
 @code{xscale}.
 

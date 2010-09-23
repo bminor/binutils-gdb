@@ -201,6 +201,7 @@ static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
 static const arm_feature_set arm_ext_sec = ARM_FEATURE (ARM_EXT_SEC, 0);
 static const arm_feature_set arm_ext_os = ARM_FEATURE (ARM_EXT_OS, 0);
 static const arm_feature_set arm_ext_adiv = ARM_FEATURE (ARM_EXT_ADIV, 0);
+static const arm_feature_set arm_ext_virt = ARM_FEATURE (ARM_EXT_VIRT, 0);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
@@ -506,6 +507,7 @@ enum arm_reg_type
   REG_TYPE_MMXWC,
   REG_TYPE_MMXWCG,
   REG_TYPE_XSCALE,
+  REG_TYPE_RNB
 };
 
 /* Structure for a hash table entry for a register.
@@ -515,7 +517,7 @@ enum arm_reg_type
 struct reg_entry
 {
   const char *               name;
-  unsigned char              number;
+  unsigned int               number;
   unsigned char              type;
   unsigned char              builtin;
   struct neon_typed_alias *  neon;
@@ -2062,7 +2064,7 @@ parse_reloc (char **str)
 /* Directives: register aliases.  */
 
 static struct reg_entry *
-insert_reg_alias (char *str, int number, int type)
+insert_reg_alias (char *str, unsigned number, int type)
 {
   struct reg_entry *new_reg;
   const char *name;
@@ -6380,9 +6382,18 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  break;
 
         case OP_RVC_PSR:
-          po_reg_or_goto (REG_TYPE_VFC, try_psr);
+          po_reg_or_goto (REG_TYPE_VFC, try_banked_reg);
           inst.operands[i].isvec = 1;  /* Mark VFP control reg as vector.  */
           break;
+	  try_banked_reg:
+	  po_reg_or_goto (REG_TYPE_RNB, try_psr);
+	  if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_virt))
+	    {
+	      inst.error = _("Banked registers are not available with this "
+			     "architecture.");
+	      goto failure;
+	    }
+	  break;
           try_psr:
           val = parse_psr (&str);
           break;
@@ -7851,16 +7862,30 @@ do_vmsr (void)
 static void
 do_mrs (void)
 {
+  unsigned br;
+
   if (do_vfp_nsyn_mrs () == SUCCESS)
     return;
 
-  /* mrs only accepts CPSR/SPSR/CPSR_all/SPSR_all.  */
-  constraint ((inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f))
-	      != (PSR_c|PSR_f),
-	      _("'CPSR' or 'SPSR' expected"));
   constraint (inst.operands[0].reg == REG_PC, BAD_PC);
   inst.instruction |= inst.operands[0].reg << 12;
-  inst.instruction |= (inst.operands[1].imm & SPSR_BIT);
+
+  if (inst.operands[1].isreg)
+    {
+      br = inst.operands[1].reg;
+      if (((br & 0x200) == 0) && ((br & 0xf0000) != 0xf000))
+	as_bad (_("bad register for mrs"));
+    }
+  else
+    {
+      /* mrs only accepts CPSR/SPSR/CPSR_all/SPSR_all.  */
+      constraint ((inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f))
+		  != (PSR_c|PSR_f),
+		  _("'CPSR' or 'SPSR' expected"));
+      br = (15<<16) | (inst.operands[1].imm & SPSR_BIT);
+    }
+
+  inst.instruction |= br;
 }
 
 /* Two possible forms:
@@ -8118,6 +8143,13 @@ static void
 do_smc (void)
 {
   inst.reloc.type = BFD_RELOC_ARM_SMC;
+  inst.reloc.pc_rel = 0;
+}
+
+static void
+do_hvc (void)
+{
+  inst.reloc.type = BFD_RELOC_ARM_HVC;
   inst.reloc.pc_rel = 0;
 }
 
@@ -10734,34 +10766,48 @@ static void
 do_t_mrs (void)
 {
   unsigned Rd;
-  int flags;
 
   if (do_vfp_nsyn_mrs () == SUCCESS)
     return;
 
-  flags = inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f|SPSR_BIT);
-  if (flags == 0)
+  Rd = inst.operands[0].reg;
+  reject_bad_reg (Rd);
+  inst.instruction |= Rd << 8;
+
+  if (inst.operands[1].isreg)
     {
-      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_m),
-		  _("selected processor does not support "
-		    "requested special purpose register"));
+      unsigned br = inst.operands[1].reg;
+      if (((br & 0x200) == 0) && ((br & 0xf000) != 0xf000))
+	as_bad (_("bad register for mrs"));
+
+      inst.instruction |= br & (0xf << 16);
+      inst.instruction |= (br & 0x300) >> 4;
+      inst.instruction |= (br & SPSR_BIT) >> 2;
     }
   else
     {
-      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1),
-		  _("selected processor does not support "
-		    "requested special purpose register"));
-      /* mrs only accepts CPSR/SPSR/CPSR_all/SPSR_all.  */
-      constraint ((flags & ~SPSR_BIT) != (PSR_c|PSR_f),
-		  _("'CPSR' or 'SPSR' expected"));
+      int flags = inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f|SPSR_BIT);
+
+      if (flags == 0)
+	{
+	  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_m),
+		      _("selected processor does not support "
+			"requested special purpose register"));
+	}
+      else
+	{
+	  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1),
+		      _("selected processor does not support "
+			"requested special purpose register"));
+	  /* mrs only accepts CPSR/SPSR/CPSR_all/SPSR_all.  */
+	  constraint ((flags & ~SPSR_BIT) != (PSR_c|PSR_f),
+		      _("'CPSR' or 'SPSR' expected"));
+	}
+
+      inst.instruction |= (flags & SPSR_BIT) >> 2;
+      inst.instruction |= inst.operands[1].imm & 0xff;
+      inst.instruction |= 0xf0000;
     }
-
-  Rd = inst.operands[0].reg;
-  reject_bad_reg (Rd);
-
-  inst.instruction |= Rd << 8;
-  inst.instruction |= (flags & SPSR_BIT) >> 2;
-  inst.instruction |= inst.operands[1].imm & 0xff;
 }
 
 static void
@@ -10775,7 +10821,12 @@ do_t_msr (void)
 
   constraint (!inst.operands[1].isreg,
 	      _("Thumb encoding does not support an immediate here"));
-  flags = inst.operands[0].imm;
+
+  if (inst.operands[0].isreg)
+    flags = (int)(inst.operands[0].reg);
+  else
+    flags = inst.operands[0].imm;
+
   if (flags & ~0xff)
     {
       constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1),
@@ -10794,7 +10845,8 @@ do_t_msr (void)
   reject_bad_reg (Rn);
 
   inst.instruction |= (flags & SPSR_BIT) >> 2;
-  inst.instruction |= (flags & ~SPSR_BIT) >> 8;
+  inst.instruction |= (flags & 0xf0000) >> 8;
+  inst.instruction |= (flags & 0x300) >> 4;
   inst.instruction |= (flags & 0xff);
   inst.instruction |= Rn << 16;
 }
@@ -11387,6 +11439,16 @@ do_t_smc (void)
   inst.instruction |= (value & 0xf000) >> 12;
   inst.instruction |= (value & 0x0ff0);
   inst.instruction |= (value & 0x000f) << 16;
+}
+
+static void
+do_t_hvc (void)
+{
+  unsigned int value = inst.reloc.exp.X_add_number;
+
+  inst.reloc.type = BFD_RELOC_UNUSED;
+  inst.instruction |= (value & 0x0fff);
+  inst.instruction |= (value & 0xf000) << 4;
 }
 
 static void
@@ -16185,6 +16247,13 @@ arm_canonicalize_symbol_name (char * name)
   REGNUM2(p, 4,t), REGNUM2(p, 5,t), REGNUM2(p, 6,t), REGNUM2(p, 7,t), \
   REGNUM2(p, 8,t), REGNUM2(p, 9,t), REGNUM2(p,10,t), REGNUM2(p,11,t), \
   REGNUM2(p,12,t), REGNUM2(p,13,t), REGNUM2(p,14,t), REGNUM2(p,15,t)
+#define SPLRBANK(base,bank,t) \
+  REGDEF(lr_##bank, 768|((base+0)<<16), t), \
+  REGDEF(sp_##bank, 768|((base+1)<<16), t), \
+  REGDEF(spsr_##bank, 768|(base<<16)|SPSR_BIT, t), \
+  REGDEF(LR_##bank, 768|((base+0)<<16), t), \
+  REGDEF(SP_##bank, 768|((base+1)<<16), t), \
+  REGDEF(SPSR_##bank, 768|(base<<16)|SPSR_BIT, t)
 
 static const struct reg_entry reg_names[] =
 {
@@ -16214,6 +16283,34 @@ static const struct reg_entry reg_names[] =
      compatibility.  */
   REGSET(c,  CN), REGSET(C, CN),
   REGSET(cr, CN), REGSET(CR, CN),
+
+  /* ARM banked registers.  */
+  REGDEF(R8_usr,512|(0<<16),RNB), REGDEF(r8_usr,512|(0<<16),RNB),
+  REGDEF(R9_usr,512|(1<<16),RNB), REGDEF(r9_usr,512|(1<<16),RNB),
+  REGDEF(R10_usr,512|(2<<16),RNB), REGDEF(r10_usr,512|(2<<16),RNB),
+  REGDEF(R11_usr,512|(3<<16),RNB), REGDEF(r11_usr,512|(3<<16),RNB),
+  REGDEF(R12_usr,512|(4<<16),RNB), REGDEF(r12_usr,512|(4<<16),RNB),
+  REGDEF(SP_usr,512|(5<<16),RNB), REGDEF(sp_usr,512|(5<<16),RNB),
+  REGDEF(LR_usr,512|(6<<16),RNB), REGDEF(lr_usr,512|(6<<16),RNB),
+
+  REGDEF(R8_fiq,512|(8<<16),RNB), REGDEF(r8_fiq,512|(8<<16),RNB),
+  REGDEF(R9_fiq,512|(9<<16),RNB), REGDEF(r9_fiq,512|(9<<16),RNB),
+  REGDEF(R10_fiq,512|(10<<16),RNB), REGDEF(r10_fiq,512|(10<<16),RNB),
+  REGDEF(R11_fiq,512|(11<<16),RNB), REGDEF(r11_fiq,512|(11<<16),RNB),
+  REGDEF(R12_fiq,512|(12<<16),RNB), REGDEF(r12_fiq,512|(12<<16),RNB),
+  REGDEF(SP_fiq,512|(13<<16),RNB), REGDEF(SP_fiq,512|(13<<16),RNB),
+  REGDEF(LR_fiq,512|(14<<16),RNB), REGDEF(lr_fiq,512|(14<<16),RNB),
+  REGDEF(SPSR_fiq,512|(14<<16)|SPSR_BIT,RNB), REGDEF(spsr_fiq,512|(14<<16)|SPSR_BIT,RNB),
+
+  SPLRBANK(0,IRQ,RNB), SPLRBANK(0,irq,RNB),
+  SPLRBANK(2,SVC,RNB), SPLRBANK(2,svc,RNB),
+  SPLRBANK(4,ABT,RNB), SPLRBANK(4,abt,RNB),
+  SPLRBANK(6,UND,RNB), SPLRBANK(6,und,RNB),
+  SPLRBANK(12,MON,RNB), SPLRBANK(12,mon,RNB),
+  REGDEF(elr_hyp,768|(14<<16),RNB), REGDEF(ELR_hyp,768|(14<<16),RNB),
+  REGDEF(sp_hyp,768|(15<<16),RNB), REGDEF(SP_hyp,768|(15<<16),RNB),
+  REGDEF(spsr_hyp,768|(14<<16)|SPSR_BIT,RNB), 
+  REGDEF(SPSR_hyp,768|(14<<16)|SPSR_BIT,RNB),
 
   /* FPA registers.  */
   REGNUM(f,0,FN), REGNUM(f,1,FN), REGNUM(f,2,FN), REGNUM(f,3,FN),
@@ -16800,7 +16897,7 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_msr
 
- TCE("mrs",	10f0000, f3ef8000, 2, (APSR_RR, RVC_PSR), mrs, t_mrs),
+ TCE("mrs",	1000000, f3e08000, 2, (APSR_RR, RVC_PSR), mrs, t_mrs),
  TCE("msr",	120f000, f3808000, 2, (RVC_PSR, RR_EXi), msr, t_msr),
 
 #undef  ARM_VARIANT
@@ -17087,6 +17184,14 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT  & arm_ext_sec
 
  TCE("smc",	1600070, f7f08000, 1, (EXPi), smc, t_smc),
+
+#undef	ARM_VARIANT
+#define	ARM_VARIANT    & arm_ext_virt
+#undef	THUMB_VARIANT
+#define	THUMB_VARIANT    & arm_ext_virt
+
+ TCE("hvc",	1400070, f7e08000, 1, (EXPi), hvc, t_hvc),
+ TCE("eret",	160006e, f3de8f00, 0, (), noargs, noargs),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v6t2
@@ -20389,6 +20494,15 @@ md_apply_fix (fixS *	fixP,
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
+    case BFD_RELOC_ARM_HVC:
+      if (((unsigned long) value) > 0xffff)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("invalid hvc expression"));
+      newval = md_chars_to_number (buf, INSN_SIZE);
+      newval |= (value & 0xf) | ((value & 0xfff0) << 4);
+      md_number_to_chars (buf, newval, INSN_SIZE);
+      break;
+
     case BFD_RELOC_ARM_SWI:
       if (fixP->tc_fix_data != 0)
 	{
@@ -22430,7 +22544,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
 					 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           "Cortex-A9"},
-  {"cortex-a15",	ARM_ARCH_V7A_IDIV_MP_SEC,
+  {"cortex-a15",	ARM_ARCH_V7A_IDIV_MP_SEC_VIRT,
 					 FPU_ARCH_NEON_VFP_V4,
                                                           "Cortex-A15"},
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"},
@@ -22529,6 +22643,8 @@ static const struct arm_option_extension_value_table arm_extensions[] =
     				   ARM_FEATURE (ARM_EXT_V6M, 0)},
   {"sec",	ARM_FEATURE (ARM_EXT_SEC, 0),
     		     ARM_FEATURE (ARM_EXT_V6K | ARM_EXT_V7A, 0)},
+  {"virt",	ARM_FEATURE (ARM_EXT_VIRT | ARM_EXT_ADIV | ARM_EXT_DIV, 0),
+				   ARM_FEATURE (ARM_EXT_V7A, 0)},
   {"xscale",	ARM_FEATURE (0, ARM_CEXT_XSCALE),	ARM_ANY},
   {NULL,	ARM_ARCH_NONE,			  ARM_ARCH_NONE}
 };
@@ -23084,6 +23200,7 @@ static void
 aeabi_set_public_attributes (void)
 {
   int arch;
+  int virt_sec = 0;
   arm_feature_set flags;
   arm_feature_set tmp;
   const cpu_arch_ver_table *p;
@@ -23214,7 +23331,11 @@ aeabi_set_public_attributes (void)
 
   /* Tag Virtualization_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_sec))
-    aeabi_set_attribute_int (Tag_Virtualization_use, 1);
+    virt_sec |= 1;
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_virt))
+    virt_sec |= 2;
+  if (virt_sec != 0)
+    aeabi_set_attribute_int (Tag_Virtualization_use, virt_sec);
 }
 
 /* Add the default contents for the .ARM.attributes section.  */

@@ -1,5 +1,13 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/armv7-a+virt.d: New test.
+	* gas/arm/armv7-a+virt.s: Likewise.
+	* gas/arm/attr-march-all.d: Update for Virtualization Extensions.
+	* gas/arm/attr-march-armv7-a+sec+virt.d: New test.
+	* gas/arm/attr-march-armv7-a+virt.d: Likewise.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/armv7-a+idiv.d: New test.
 	* gas/arm/armv7-a+idiv.s: Likewise.
 	* gas/arm/attr-march-all.d: Update for Integer divide extension.
