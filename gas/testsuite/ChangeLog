@@ -1,3 +1,7 @@
+2010-09-23  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/jal.d: Remove duplicate pattern.
+
 2010-09-22  Robin Getz  <robin.getz@analog.com>
 
 	* gas/bfin/expected_move_errors.l: Update error output.
