@@ -133,12 +133,24 @@ assembler to accept instructions valid for any ARM processor.
 In addition to the basic instruction set, the assembler can be told to 
 accept various extension mnemonics that extend the processor using the 
 co-processor instruction space.  For example, @code{-mcpu=arm920+maverick}
-is equivalent to specifying @code{-mcpu=ep9312}.  The following extensions
-are currently supported: 
-@code{+maverick}
-@code{+iwmmxt}
+is equivalent to specifying @code{-mcpu=ep9312}.  
+
+Multiple extensions may be specified, separated by a @code{+}.  The 
+extensions should be specified in ascending alphabetical order.
+
+Extension mnemonics may also be removed from those the assembler accepts.  
+This is done be prepending @code{no} to the option that adds the extension.  
+Extensions that are removed should be listed after all extensions which have 
+been added, again in ascending alphabetical order.  For example, 
+@code{-mcpu=ep9312+nomaverick} is equivalent to specifying @code{-mcpu=arm920}.
+
+
+The following extensions are currently supported: 
+@code{iwmmxt},
+@code{iwmmxt2},
+@code{maverick},
 and
-@code{+xscale}.
+@code{xscale}.
 
 @cindex @code{-march=} command line option, ARM
 @item -march=@var{architecture}[+@var{extension}@dots{}]
@@ -503,6 +515,18 @@ boundary).  This is for compatibility with ARM's own assembler.
 Select the target architecture.  Valid values for @var{name} are the same as
 for the @option{-march} commandline option.
 
+Specifying @code{.arch} clears any previously selected architecture 
+extensions.
+
+@cindex @code{.arch_extension} directive, ARM
+@item .arch_extension @var{name}
+Add or remove an architecture extension to the target architecture.  Valid 
+values for @var{name} are the same as those accepted as architectural 
+extensions by the @option{-mcpu} commandline option.
+
+@code{.arch_extension} may be used multiple times to add or remove extensions
+incrementally to the architecture being compiled for.
+
 @cindex @code{.arm} directive, ARM
 @item .arm
 This performs the same action as @var{.code 32}.
@@ -536,6 +560,9 @@ selects Thumb, with the value 32 selecting ARM.
 @item .cpu @var{name}
 Select the target processor.  Valid values for @var{name} are the same as
 for the @option{-mcpu} commandline option.
+
+Specifying @code{.cpu} clears any previously selected architecture 
+extensions.
 
 @c DDDDDDDDDDDDDDDDDDDDDDDDDD
 

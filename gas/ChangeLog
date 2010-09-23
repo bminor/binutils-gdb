@@ -1,3 +1,18 @@
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (md_pseduo_table): Add .arch_extension directive.
+	(arm_option_extension_value_table): Add.
+	(arm_extensions): Change type.
+	(arm_option_cpu_table): Rename...
+	(arm_option_fpu_table): ...to this.
+	(arm_fpus): Change type.
+	(arm_parse_extension): Enforce alphabetical order.  Allow 
+	extensions to be removed.
+	(arm_parse_arch): Allow extensions to be specified with -march.
+	(s_arm_arch_extension): Add.
+	(s_arm_fpu): Update for type changes.
+	* doc/c-arm.texi: Document changes to infrastructure.
+
 2010-09-23  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-mn10300.c (tc_gen_reloc): Replace absolute symbols

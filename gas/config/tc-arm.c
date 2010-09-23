@@ -4270,6 +4270,7 @@ static void s_arm_arch (int);
 static void s_arm_object_arch (int);
 static void s_arm_cpu (int);
 static void s_arm_fpu (int);
+static void s_arm_arch_extension (int);
 
 #ifdef TE_PE
 
@@ -4323,6 +4324,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "arch",	   s_arm_arch,	  0 },
   { "object_arch", s_arm_object_arch,	0 },
   { "fpu",	   s_arm_fpu,	  0 },
+  { "arch_extension", s_arm_arch_extension, 0 },
 #ifdef OBJ_ELF
   { "word",	        s_arm_elf_cons, 4 },
   { "long",	        s_arm_elf_cons, 4 },
@@ -22451,25 +22453,35 @@ static const struct arm_arch_option_table arm_archs[] =
   {NULL,		ARM_ARCH_NONE,	 ARM_ARCH_NONE}
 };
 
-/* ISA extensions in the co-processor space.  */
-struct arm_option_cpu_value_table
+/* ISA extensions in the co-processor and main instruction set space.  */
+struct arm_option_extension_value_table
+{
+  char *name;
+  const arm_feature_set value;
+  const arm_feature_set allowed_archs;
+};
+
+/* The following table must be in alphabetical order with a NULL last entry.
+   */
+static const struct arm_option_extension_value_table arm_extensions[] =
+{
+  {"iwmmxt",	ARM_FEATURE (0, ARM_CEXT_IWMMXT),	ARM_ANY},
+  {"iwmmxt2",	ARM_FEATURE (0, ARM_CEXT_IWMMXT2),	ARM_ANY},
+  {"maverick",	ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY},
+  {"xscale",	ARM_FEATURE (0, ARM_CEXT_XSCALE),	ARM_ANY},
+  {NULL,	ARM_ARCH_NONE,				ARM_ARCH_NONE}
+};
+
+/* ISA floating-point and Advanced SIMD extensions.  */
+struct arm_option_fpu_value_table
 {
   char *name;
   const arm_feature_set value;
 };
 
-static const struct arm_option_cpu_value_table arm_extensions[] =
-{
-  {"maverick",		ARM_FEATURE (0, ARM_CEXT_MAVERICK)},
-  {"xscale",		ARM_FEATURE (0, ARM_CEXT_XSCALE)},
-  {"iwmmxt",		ARM_FEATURE (0, ARM_CEXT_IWMMXT)},
-  {"iwmmxt2",		ARM_FEATURE (0, ARM_CEXT_IWMMXT2)},
-  {NULL,		ARM_ARCH_NONE}
-};
-
 /* This list should, at a minimum, contain all the fpu names
    recognized by GCC.  */
-static const struct arm_option_cpu_value_table arm_fpus[] =
+static const struct arm_option_fpu_value_table arm_fpus[] =
 {
   {"softfpa",		FPU_NONE},
   {"fpe",		FPU_ARCH_FPE},
@@ -22547,15 +22559,23 @@ arm_parse_extension (char * str, const arm_feature_set **opt_p)
   arm_feature_set *ext_set = (arm_feature_set *)
       xmalloc (sizeof (arm_feature_set));
 
+  /* We insist on extensions being specified in alphabetical order, and with
+     extensions being added before being removed.  We achieve this by having 
+     the global ARM_EXTENSIONS table in alphabetical order, and using the 
+     ADDING_VALUE variable to indicate whether we are adding an extension (1)
+     or removing it (0) and only allowing it to change in the order 
+     -1 -> 1 -> 0.  */
+  const struct arm_option_extension_value_table * opt = NULL;
+  int adding_value = -1;
+
   /* Copy the feature set, so that we can modify it.  */
   *ext_set = **opt_p;
   *opt_p = ext_set;
 
   while (str != NULL && *str != 0)
     {
-      const struct arm_option_cpu_value_table * opt;
       char * ext;
-      int optlen;
+      size_t optlen;
 
       if (*str != '+')
 	{
@@ -22571,23 +22591,85 @@ arm_parse_extension (char * str, const arm_feature_set **opt_p)
       else
 	optlen = strlen (str);
 
+      if (optlen >= 2
+	  && strncmp (str, "no", 2) == 0)
+	{
+	  if (adding_value != 0)
+	    {
+	      adding_value = 0;
+	      opt = arm_extensions;
+	    }
+
+	  optlen -= 2;
+	  str += 2;
+	}
+      else if (optlen > 0)
+	{
+	  if (adding_value == -1)
+	    {
+	      adding_value = 1;
+	      opt = arm_extensions;
+	    }
+	  else if (adding_value != 1)
+	    {
+	      as_bad (_("must specify extensions to add before specifying "
+			"those to remove"));
+	      return FALSE;
+	    }
+	}
+
       if (optlen == 0)
 	{
 	  as_bad (_("missing architectural extension"));
 	  return FALSE;
 	}
 
-      for (opt = arm_extensions; opt->name != NULL; opt++)
-	if (strncmp (opt->name, str, optlen) == 0)
+      gas_assert (adding_value != -1);
+      gas_assert (opt != NULL);
+
+      /* Scan over the options table trying to find an exact match. */
+      for (; opt->name != NULL; opt++)
+	if (strncmp (opt->name, str, optlen) == 0
+	    && strlen (opt->name) == optlen)
 	  {
-	    ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->value);
+	    /* Check we can apply the extension to this architecture.  */
+	    if (!ARM_CPU_HAS_FEATURE (*ext_set, opt->allowed_archs))
+	      {
+		as_bad (_("extension does not apply to the base architecture"));
+		return FALSE;
+	      }
+
+	    /* Add or remove the extension.  */
+	    if (adding_value)
+	      ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, opt->value);
+	    else
+	      ARM_CLEAR_FEATURE (*ext_set, *ext_set, opt->value);
+
 	    break;
 	  }
 
       if (opt->name == NULL)
 	{
-	  as_bad (_("unknown architectural extension `%s'"), str);
+	  /* Did we fail to find an extension because it wasn't specified in
+	     alphabetical order, or because it does not exist?  */
+
+	  for (opt = arm_extensions; opt->name != NULL; opt++)
+	    if (strncmp (opt->name, str, optlen) == 0)
+	      break;
+
+	  if (opt->name == NULL)
+	    as_bad (_("unknown architectural extension `%s'"), str);
+	  else
+	    as_bad (_("architectural extensions must be specified in "
+		      "alphabetical order"));
+
 	  return FALSE;
+	}
+      else
+	{
+	  /* We should skip the extension we've just matched the next time
+	     round.  */
+	  opt++;
 	}
 
       str = ext;
@@ -22659,7 +22741,7 @@ arm_parse_arch (char * str)
     }
 
   for (opt = arm_archs; opt->name != NULL; opt++)
-    if (streq (opt->name, str))
+    if (strncmp (opt->name, str, optlen) == 0)
       {
 	march_cpu_opt = &opt->value;
 	march_fpu_opt = &opt->default_fpu;
@@ -22678,7 +22760,7 @@ arm_parse_arch (char * str)
 static bfd_boolean
 arm_parse_fpu (char * str)
 {
-  const struct arm_option_cpu_value_table * opt;
+  const struct arm_option_fpu_value_table * opt;
 
   for (opt = arm_fpus; opt->name != NULL; opt++)
     if (streq (opt->name, str))
@@ -23183,12 +23265,64 @@ s_arm_object_arch (int ignored ATTRIBUTE_UNUSED)
   ignore_rest_of_line ();
 }
 
+/* Parse a .arch_extension directive.  */
+
+static void
+s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
+{
+  const struct arm_option_extension_value_table *opt;
+  char saved_char;
+  char *name;
+  int adding_value = 1;
+
+  name = input_line_pointer;
+  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
+    input_line_pointer++;
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+
+  if (strlen (name) >= 2
+      && strncmp (name, "no", 2) == 0)
+    {
+      adding_value = 0;
+      name += 2;
+    }
+
+  for (opt = arm_extensions; opt->name != NULL; opt++)
+    if (streq (opt->name, name))
+      {
+	if (!ARM_CPU_HAS_FEATURE (*mcpu_cpu_opt, opt->allowed_archs))
+	  {
+	    as_bad (_("architectural extension `%s' is not allowed for the "
+		      "current base architecture"), name);
+	    break;
+	  }
+
+	if (adding_value)
+	  ARM_MERGE_FEATURE_SETS (selected_cpu, selected_cpu, opt->value);
+	else
+	  ARM_CLEAR_FEATURE (selected_cpu, selected_cpu, opt->value);
+
+	mcpu_cpu_opt = &selected_cpu;
+	ARM_MERGE_FEATURE_SETS (cpu_variant, *mcpu_cpu_opt, *mfpu_opt);
+	*input_line_pointer = saved_char;
+	demand_empty_rest_of_line ();
+	return;
+      }
+
+  if (opt->name == NULL)
+    as_bad (_("unknown architecture `%s'\n"), name);
+
+  *input_line_pointer = saved_char;
+  ignore_rest_of_line ();
+}
+
 /* Parse a .fpu directive.  */
 
 static void
 s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
 {
-  const struct arm_option_cpu_value_table *opt;
+  const struct arm_option_fpu_value_table *opt;
   char saved_char;
   char *name;
 
