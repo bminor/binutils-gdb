@@ -1,5 +1,9 @@
 2010-09-23  Alan Modra  <amodra@gmail.com>
 
+	* cpu-d10v.c: Make bits_per_address 18 for all arch_info entries.
+
+2010-09-23  Alan Modra  <amodra@gmail.com>
+
 	* elf.c (_bfd_elf_init_private_section_data): Allow for SEC_RELOC
 	difference between input and output section.
 
