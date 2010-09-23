@@ -185,6 +185,7 @@ static const arm_feature_set arm_ext_v5j = ARM_FEATURE (ARM_EXT_V5J, 0);
 static const arm_feature_set arm_ext_v6 = ARM_FEATURE (ARM_EXT_V6, 0);
 static const arm_feature_set arm_ext_v6k = ARM_FEATURE (ARM_EXT_V6K, 0);
 static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE (ARM_EXT_V6T2, 0);
+static const arm_feature_set arm_ext_v6m = ARM_FEATURE (ARM_EXT_V6M, 0);
 static const arm_feature_set arm_ext_v6_notm = ARM_FEATURE (ARM_EXT_V6_NOTM, 0);
 static const arm_feature_set arm_ext_v6_dsp = ARM_FEATURE (ARM_EXT_V6_DSP, 0);
 static const arm_feature_set arm_ext_barrier = ARM_FEATURE (ARM_EXT_BARRIER, 0);
@@ -195,9 +196,10 @@ static const arm_feature_set arm_ext_v7a = ARM_FEATURE (ARM_EXT_V7A, 0);
 static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
 static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
 static const arm_feature_set arm_ext_m =
-  ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_V7M, 0);
+  ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M, 0);
 static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
 static const arm_feature_set arm_ext_sec = ARM_FEATURE (ARM_EXT_SEC, 0);
+static const arm_feature_set arm_ext_os = ARM_FEATURE (ARM_EXT_OS, 0);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
@@ -11519,6 +11521,15 @@ do_t_sxth (void)
 static void
 do_t_swi (void)
 {
+  /* We have to do the following check manually as ARM_EXT_OS only applies
+     to ARM_EXT_V6M.  */
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6m))
+    {
+      if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_os))
+	as_bad (_("SVC is not permitted on this architecture"));
+      ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, arm_ext_os);
+    }
+
   inst.reloc.type = BFD_RELOC_ARM_SWI;
 }
 
@@ -22405,8 +22416,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
   							  "Cortex-R4F"},
   {"cortex-m4",		ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M4"},
   {"cortex-m3",		ARM_ARCH_V7M,	 FPU_NONE,	  "Cortex-M3"},
-  {"cortex-m1",		ARM_ARCH_V6M,	 FPU_NONE,	  "Cortex-M1"},
-  {"cortex-m0",		ARM_ARCH_V6M,	 FPU_NONE,	  "Cortex-M0"},
+  {"cortex-m1",		ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M1"},
+  {"cortex-m0",		ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M0"},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL},
   /* ??? iwmmxt is not a processor.  */
@@ -22456,6 +22467,7 @@ static const struct arm_arch_option_table arm_archs[] =
   {"armv6zt2",		ARM_ARCH_V6ZT2,	 FPU_ARCH_VFP},
   {"armv6zkt2",		ARM_ARCH_V6ZKT2, FPU_ARCH_VFP},
   {"armv6-m",		ARM_ARCH_V6M,	 FPU_ARCH_VFP},
+  {"armv6s-m",		ARM_ARCH_V6SM,	 FPU_ARCH_VFP},
   {"armv7",		ARM_ARCH_V7,	 FPU_ARCH_VFP},
   /* The official spelling of the ARMv7 profile variants is the dashed form.
      Accept the non-dashed form for compatibility with old toolchains.  */
@@ -22489,6 +22501,8 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   {"maverick",	ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY},
   {"mp",	ARM_FEATURE (ARM_EXT_MP, 0),
 		     ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)},
+  {"os",	ARM_FEATURE (ARM_EXT_OS, 0),
+    				   ARM_FEATURE (ARM_EXT_V6M, 0)},
   {"sec",	ARM_FEATURE (ARM_EXT_SEC, 0),
     		     ARM_FEATURE (ARM_EXT_V6K | ARM_EXT_V7A, 0)},
   {"xscale",	ARM_FEATURE (0, ARM_CEXT_XSCALE),	ARM_ANY},
@@ -23014,6 +23028,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {9, ARM_ARCH_V6K},
     {7, ARM_ARCH_V6Z},
     {11, ARM_ARCH_V6M},
+    {12, ARM_ARCH_V6SM},
     {8, ARM_ARCH_V6T2},
     {10, ARM_ARCH_V7A},
     {10, ARM_ARCH_V7R},

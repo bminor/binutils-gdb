@@ -153,6 +153,7 @@ The following extensions are currently supported:
 @code{iwmmxt2},
 @code{maverick},
 @code{mp} (Multiprocessing Extensions for v7-A and v7-R architectures),
+@code{os} (Operating System for v6M architecture),
 @code{sec} (Security Extensions for v6K and v7-A architectures),
 and
 @code{xscale}.
@@ -183,6 +184,8 @@ names are recognized:
 @code{armv6k},
 @code{armv6z},
 @code{armv6zk},
+@code{armv6-m},
+@code{armv6s-m},
 @code{armv7},
 @code{armv7-a},
 @code{armv7-r},

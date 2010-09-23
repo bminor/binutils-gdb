@@ -1,5 +1,14 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/archv6s-m-bad.d: New test.
+	* gas/arm/archv6s-m-bad.l: Likewise.
+	* gas/arm/archv6s-m.d: Likewise.
+	* gas/arm/archv6s-m.s: Likewise.
+	* gas/arm/attr-march-armv6-m+os.d: Likewise.
+	* gas/arm/attr-march-armv6s-m.d: Likewise.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/attr-march-all.d: Update for Security Extensions..
 	* gas/arm/attr-march-armv6k+sec.d: New test.
 	* gas/arm/attr-march-armv6z.d: Update for Security Extensions.

@@ -1,5 +1,19 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (arm_ext_v6m): New variable.
+	(arm_ext_m): Add support for OS extension.
+	(arm_ext_os): New variable.
+	(do_t_swi): In v6-M ensure we have the OS extension.
+	(arm_cpus): The cortex-m1 and cortex-m0 options have the OS 
+	extension by default.
+	(arm_archs): Add armv6s-m.
+	(arm_extensions): Add 'os' extension.
+	(cpu_arch_ver): Add support for v6S-M.
+	* doc/c-arm.texi: Document the OS Extension, and v6-m and v6s-m
+	architecture options.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (arm_ext_v6z): Remove.
 	(arm_ext_sec): New variable.
 	(do_t_smc): In Thumb state SMC requires v7-A.
