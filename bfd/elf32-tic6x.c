@@ -1348,6 +1348,31 @@ elf32_tic6x_set_use_rela_p (bfd *abfd, bfd_boolean use_rela_p)
 }
 
 static bfd_boolean
+elf32_tic6x_fake_sections (bfd *abfd,
+			   Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED,
+			   asection *sec)
+{
+  /* The generic elf_fake_sections will set up REL_HDR using the
+     default kind of relocations.  But, we may actually need both
+     kinds of relocations, so we set up the second header here.  */
+  if ((sec->flags & SEC_RELOC) != 0)
+    {
+      struct bfd_elf_section_data *esd;
+      bfd_size_type amt = sizeof (Elf_Internal_Shdr);
+
+      esd = elf_section_data (sec);
+      BFD_ASSERT (esd->rel_hdr2 == NULL);
+      esd->rel_hdr2 = bfd_zalloc (abfd, amt);
+      if (!esd->rel_hdr2)
+        return FALSE;
+      _bfd_elf_init_reloc_shdr (abfd, esd->rel_hdr2, sec,
+                                !sec->use_rela_p);
+    }
+
+  return TRUE;
+}
+
+static bfd_boolean
 elf32_tic6x_mkobject (bfd *abfd)
 {
   bfd_boolean ret;
@@ -1765,6 +1790,7 @@ elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_default_use_rela_p	1
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1
+#define elf_backend_fake_sections       elf32_tic6x_fake_sections
 #define elf_backend_obj_attrs_arg_type	elf32_tic6x_obj_attrs_arg_type
 #define elf_backend_obj_attrs_section	"__TI_build_attributes"
 #define elf_backend_obj_attrs_section_type	SHT_C6000_ATTRIBUTES

@@ -1,3 +1,8 @@
+2010-09-23  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* elf32-tic6x.c (elf32_tic6x_fake_sections): New function.
+	(elf_backend_fake_sections): Define.
+
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* bfd-in2.h (BFD_RELOC_ARM_HVC): New enum value.
