@@ -1,3 +1,9 @@
+2010-09-23  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR C++/12028
+	* valops.c (find_oload_champ_namespace_loop): removed incorrect
+	'old_cleanups' reassignment.
+
 2010-09-08  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
