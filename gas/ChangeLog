@@ -1,5 +1,17 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (arm_ext_mp): Add.
+	(do_pld): Update comment.
+	(insns): Add support for pldw.
+	(arm_cpus): Update cortex-a5, cortex-a9, and cortex-a15 to support
+	MP extension.
+	(arm_extensions): Add 'mp' extension.
+	(aeabi_set_public_attributes): Emit correct build attribute when
+	MP extension is enabled.
+	* doc/c-arm.texi: Update for MP extensions.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (md_pseduo_table): Add .arch_extension directive.
 	(arm_option_extension_value_table): Add.
 	(arm_extensions): Change type.

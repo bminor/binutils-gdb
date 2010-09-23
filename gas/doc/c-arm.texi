@@ -138,6 +138,9 @@ is equivalent to specifying @code{-mcpu=ep9312}.
 Multiple extensions may be specified, separated by a @code{+}.  The 
 extensions should be specified in ascending alphabetical order.
 
+Some extensions may be restricted to particular architectures; this is 
+documented in the list of extensions below.
+
 Extension mnemonics may also be removed from those the assembler accepts.  
 This is done be prepending @code{no} to the option that adds the extension.  
 Extensions that are removed should be listed after all extensions which have 
@@ -149,6 +152,7 @@ The following extensions are currently supported:
 @code{iwmmxt},
 @code{iwmmxt2},
 @code{maverick},
+@code{mp} (Multiprocessing Extensions for v7-A and v7-R architectures),
 and
 @code{xscale}.
 

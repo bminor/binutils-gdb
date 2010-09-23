@@ -197,6 +197,7 @@ static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
 static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
 static const arm_feature_set arm_ext_m =
   ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_V7M, 0);
+static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
@@ -7955,8 +7956,9 @@ do_pkhtb (void)
 }
 
 /* ARMv5TE: Preload-Cache
+   MP Extensions: Preload for write
 
-    PLD <addr_mode>
+    PLD(W) <addr_mode>
 
   Syntactically, like LDR with B=1, W=0, L=1.  */
 
@@ -17137,6 +17139,13 @@ static const struct asm_opcode insns[] =
  TUF("pli",	450f000, f910f000, 1, (ADDR),	  pli,	    t_pld),
  TCE("dbg",	320f0f0, f3af80f0, 1, (I15),	  dbg,	    t_dbg),
 
+#undef ARM_VARIANT
+#define ARM_VARIANT    & arm_ext_mp
+#undef THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_mp
+
+ TUF("pldw",	410f000, f830f000, 1, (ADDR),	pld,	t_pld),
+
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
 
@@ -22372,14 +22381,14 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"arm1156t2f-s",	ARM_ARCH_V6T2,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1176jz-s",	ARM_ARCH_V6ZK,	 FPU_NONE,	  NULL},
   {"arm1176jzf-s",	ARM_ARCH_V6ZK,	 FPU_ARCH_VFP_V2, NULL},
-  {"cortex-a5",		ARM_ARCH_V7A,	 FPU_NONE,	  "Cortex-A5"},
+  {"cortex-a5",		ARM_ARCH_V7A_MP, FPU_NONE,	  "Cortex-A5"},
   {"cortex-a8",		ARM_ARCH_V7A,	 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           "Cortex-A8"},
-  {"cortex-a9",		ARM_ARCH_V7A,	 ARM_FEATURE (0, FPU_VFP_V3
+  {"cortex-a9",		ARM_ARCH_V7A_MP, ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           "Cortex-A9"},
-  {"cortex-a15",	ARM_ARCH_V7A,	 FPU_ARCH_NEON_VFP_V4,
+  {"cortex-a15",	ARM_ARCH_V7A_MP, FPU_ARCH_NEON_VFP_V4,
                                                           "Cortex-A15"},
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"},
   {"cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,
@@ -22468,8 +22477,10 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   {"iwmmxt",	ARM_FEATURE (0, ARM_CEXT_IWMMXT),	ARM_ANY},
   {"iwmmxt2",	ARM_FEATURE (0, ARM_CEXT_IWMMXT2),	ARM_ANY},
   {"maverick",	ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY},
+  {"mp",	ARM_FEATURE (ARM_EXT_MP, 0),
+		     ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)},
   {"xscale",	ARM_FEATURE (0, ARM_CEXT_XSCALE),	ARM_ANY},
-  {NULL,	ARM_ARCH_NONE,				ARM_ARCH_NONE}
+  {NULL,	ARM_ARCH_NONE,			  ARM_ARCH_NONE}
 };
 
 /* ISA floating-point and Advanced SIMD extensions.  */
@@ -23146,6 +23157,10 @@ aeabi_set_public_attributes (void)
       aeabi_set_attribute_int (Tag_DIV_use, 2);  */
   else
     aeabi_set_attribute_int (Tag_DIV_use, 1);
+
+  /* Tag_MP_extension_use.  */
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_mp))
+    aeabi_set_attribute_int (Tag_MPextension_use, 1);
 }
 
 /* Add the default contents for the .ARM.attributes section.  */

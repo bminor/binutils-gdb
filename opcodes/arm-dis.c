@@ -829,6 +829,9 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
   {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
 
+  /* MP Extension instructions.  */
+  {ARM_EXT_MP, 0xf410f000, 0xfc70f000, "pldw\t%a"},
+
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf450f000, 0xfd70f000, "pli\t%P"},
   {ARM_EXT_V7, 0x0320f0f0, 0x0ffffff0, "dbg%c\t#%0-3d"},
@@ -1352,6 +1355,9 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_EXT_V7, 0xf3bf8f60, 0xfffffff0, "isb%c\t%U"},
   {ARM_EXT_DIV, 0xfb90f0f0, 0xfff0f0f0, "sdiv%c\t%8-11r, %16-19r, %0-3r"},
   {ARM_EXT_DIV, 0xfbb0f0f0, 0xfff0f0f0, "udiv%c\t%8-11r, %16-19r, %0-3r"},
+
+  /* MP Extension instructions.  */
+  {ARM_EXT_MP,   0xf830f000, 0xff70f000, "pldw%c\t%a"},
 
   /* Instructions defined in the basic V6T2 set.  */
   {ARM_EXT_V6T2, 0xf3af8000, 0xffffffff, "nop%c.w"},
