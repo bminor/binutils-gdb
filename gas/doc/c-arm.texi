@@ -148,7 +148,8 @@ been added, again in ascending alphabetical order.  For example,
 @code{-mcpu=ep9312+nomaverick} is equivalent to specifying @code{-mcpu=arm920}.
 
 
-The following extensions are currently supported: 
+The following extensions are currently supported:
+@code{idiv}, (Integer Divide Extensions for v7-A architecture),
 @code{iwmmxt},
 @code{iwmmxt2},
 @code{maverick},

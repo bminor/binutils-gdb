@@ -1,5 +1,12 @@
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/armv7-a+idiv.d: New test.
+	* gas/arm/armv7-a+idiv.s: Likewise.
+	* gas/arm/attr-march-all.d: Update for Integer divide extension.
+	* gas/arm/attr-march-armv7-a+idiv.d: New test.
+
+2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/archv6s-m-bad.d: New test.
 	* gas/arm/archv6s-m-bad.l: Likewise.
 	* gas/arm/archv6s-m.d: Likewise.

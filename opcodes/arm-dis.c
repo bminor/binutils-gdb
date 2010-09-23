@@ -829,6 +829,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
   {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
 
+  /* Integer Divide Extension instructions.  */
+  {ARM_EXT_ADIV, 0x0710f010, 0x0ff0f0f0, "sdiv%c\t%16-19r, %0-3r, %8-11r"},
+  {ARM_EXT_ADIV, 0x0730f010, 0x0ff0f0f0, "udiv%c\t%16-19r, %0-3r, %8-11r"},
+
   /* MP Extension instructions.  */
   {ARM_EXT_MP, 0xf410f000, 0xfc70f000, "pldw\t%a"},
 

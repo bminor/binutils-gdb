@@ -200,6 +200,7 @@ static const arm_feature_set arm_ext_m =
 static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
 static const arm_feature_set arm_ext_sec = ARM_FEATURE (ARM_EXT_SEC, 0);
 static const arm_feature_set arm_ext_os = ARM_FEATURE (ARM_EXT_OS, 0);
+static const arm_feature_set arm_ext_adiv = ARM_FEATURE (ARM_EXT_ADIV, 0);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
@@ -7489,6 +7490,25 @@ static void
 do_dbg (void)
 {
   inst.instruction |= inst.operands[0].imm;
+}
+
+static void
+do_div (void)
+{
+  unsigned Rd, Rn, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rn = (inst.operands[1].present
+	? inst.operands[1].reg : Rd);
+  Rm = inst.operands[2].reg;
+
+  constraint ((Rd == REG_PC), BAD_PC);
+  constraint ((Rn == REG_PC), BAD_PC);
+  constraint ((Rm == REG_PC), BAD_PC);
+
+  inst.instruction |= Rd << 16;
+  inst.instruction |= Rn << 0;
+  inst.instruction |= Rm << 8;
 }
 
 static void
@@ -17130,12 +17150,14 @@ static const struct asm_opcode insns[] =
  TCE("tbb",       0, e8d0f000, 1, (TB), 0, t_tb),
  TCE("tbh",       0, e8d0f010, 1, (TB), 0, t_tb),
 
- /* Thumb-2 hardware division instructions (R and M profiles only).  */
+ /* Hardware division instructions.  */
+#undef  ARM_VARIANT
+#define ARM_VARIANT    & arm_ext_adiv
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_div
 
- TCE("sdiv",	0, fb90f0f0, 3, (RR, oRR, RR), 0, t_div),
- TCE("udiv",	0, fbb0f0f0, 3, (RR, oRR, RR), 0, t_div),
+ TCE("sdiv",	710f010, fb90f0f0, 3, (RR, oRR, RR), div, t_div),
+ TCE("udiv",	730f010, fbb0f0f0, 3, (RR, oRR, RR), div, t_div),
 
  /* ARM V6M/V7 instructions.  */
 #undef  ARM_VARIANT
@@ -22408,8 +22430,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
 					 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           "Cortex-A9"},
-  {"cortex-a15",	ARM_ARCH_V7A_MP_SEC,
-    					 FPU_ARCH_NEON_VFP_V4,
+  {"cortex-a15",	ARM_ARCH_V7A_IDIV_MP_SEC,
+					 FPU_ARCH_NEON_VFP_V4,
                                                           "Cortex-A15"},
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"},
   {"cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,
@@ -22496,6 +22518,8 @@ struct arm_option_extension_value_table
    */
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
+  {"idiv",	ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
+				   ARM_FEATURE (ARM_EXT_V7A, 0)},
   {"iwmmxt",	ARM_FEATURE (0, ARM_CEXT_IWMMXT),	ARM_ANY},
   {"iwmmxt2",	ARM_FEATURE (0, ARM_CEXT_IWMMXT2),	ARM_ANY},
   {"maverick",	ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY},
@@ -23177,11 +23201,10 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
 
   /* Tag_DIV_use.  */
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_div))
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_adiv))
+    aeabi_set_attribute_int (Tag_DIV_use, 2);
+  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_div))
     aeabi_set_attribute_int (Tag_DIV_use, 0);
-  /* Fill this in when gas supports v7a sdiv/udiv.
-    else if (... v7a with div extension used ...)
-      aeabi_set_attribute_int (Tag_DIV_use, 2);  */
   else
     aeabi_set_attribute_int (Tag_DIV_use, 1);
 
