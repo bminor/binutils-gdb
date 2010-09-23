@@ -1,3 +1,11 @@
+2010-09-23  Alan Modra  <amodra@gmail.com>
+
+	* ld-d10v/reloc-007.d: Don't error.
+	* ld-d10v/reloc-008.d: Likewise.
+	* ld-d10v/reloc-015.d: Likewise.
+	* ld-d10v/reloc-016.d: Likewise.
+	* ld-d10v/reloc-012.ld: Use a sane offset.
+
 2010-09-20  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/attr-merge-6.attr: Update test for change in canonical CPU
