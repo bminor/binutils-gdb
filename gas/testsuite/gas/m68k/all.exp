@@ -27,7 +27,7 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
 
     # Reloc types etc. need changing for aout and coff to pass.
     setup_xfail "*-*"
-    clear_xfail "*-*-*elf*" "*-*-sysv4*" "*-*-rtems" "*-*-*gnu*" "*-*-psos*"
+    clear_xfail "*-*-*elf*" "*-*-sysv4*" "*-*-rtems*" "*-*-*linux*" "*-*-*gnu*" "*-*-psos*"
     run_dump_test pcrel
 
     # Since fido is basically CPU32, it does not support those

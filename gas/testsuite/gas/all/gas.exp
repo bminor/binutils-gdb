@@ -79,7 +79,7 @@ case $target_triplet in {
     { mn10\[23\]00*-*-* } { }
     default {
 	# Some targets don't manage to resolve BFD_RELOC_8 for constants.
-	setup_xfail "alpha*-*-*" "avr-*-*" "*c30*-*-*" "*c4x*-*-*" \
+	setup_xfail "alpha*-*-*" "*c30*-*-*" "*c4x*-*-*" \
 	    "d\[13\]0v*-*-*" "i860-*-*" "mips*-*-*" "msp430-*-*" \
 	    "pdp11-*-*" "sparc*-*-*" "xtensa*-*-*"
 	run_dump_test forward
@@ -114,10 +114,12 @@ case $target_triplet in {
 	    "*arm*-*-pe" "m68hc*-*-*" \
 	    "rx-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef2
-	setup_xfail "*-*-aix*" "*-*-coff" "*-*-cygwin" "*-*-mingw*" "*-*-pe*" \
-	    "bfin-*-*" "hppa*-*-hpux*" \
-	    "m68hc*-*-*" "or32-*-*" \
-	    "rx-*-*" "vax*-*-*" "z8k-*-*"
+	setup_xfail "*-*-aix*" "bfin-*-*" "hppa*-*-hpux*" \
+	    "i\[3-7\]86-*-*coff" "i\[3-7\]86-*-*pe" "i\[3-7\]86-*-go32*" \
+	    "i\[3-7\]86-*-cygwin*" "i\[3-7\]86-*-mingw*" \
+	    "x86_64-*-*coff" "x86_64-*-*pe" \
+	    "x86_64-*-cygwin*" "x86_64-*-mingw*" \
+	    "m68hc*-*-*" "or32-*-*" "rx-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef3
 	gas_test_error "redef4.s" "" ".set for symbol already used as label"
 	gas_test_error "redef5.s" "" ".set for symbol already defined through .comm"

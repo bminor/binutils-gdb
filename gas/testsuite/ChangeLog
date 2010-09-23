@@ -1,3 +1,9 @@
+2010-09-23  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/gas.exp: Update "forward" and "redef3" xfails.
+	* gas/m68k/all.exp: Don't xfail pcrel on uclinux.
+	* gas/sh/arch/arch.exp: Don't pass dashes to send_log.
+
 2010-09-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/jal.d: Remove duplicate pattern.
