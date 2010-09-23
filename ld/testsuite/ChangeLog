@@ -1,5 +1,17 @@
 2010-09-23  Alan Modra  <amodra@gmail.com>
 
+	* ld-elf/elf.exp: Don't run --gc-sections tls var test on v850.
+	* ld-elf/group2.d: xfail xstormy.
+	* ld-elf/group4.d: Likewise.
+	* ld-elf/group5.d: Likewise.
+	* ld-elf/group6.d: Likewise.
+	* ld-elf/init-fini-arrays.d: xfail cr16 and crx.
+	* ld-elf/orphan2.d: xfail xstormy.
+	* ld-elf/sec64k.exp: Don't run on targets using generic linker.
+	Allow a larger range for ld -r expected bar_1 section.  Don't run
+	final link test on a number of targets.  Select avr6 for avr targets.
+	* ld-elfcomm/elfcomm.exp: Don't attempt on hpux.
+
 	* ld-d10v/reloc-007.d: Don't error.
 	* ld-d10v/reloc-008.d: Likewise.
 	* ld-d10v/reloc-015.d: Likewise.

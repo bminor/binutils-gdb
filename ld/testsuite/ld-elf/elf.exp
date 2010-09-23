@@ -54,7 +54,8 @@ if { [istarget *-*-linux*] } {
     }
 }
 
-if { [check_gc_sections_available] } {
+#v850 gas complains about .tbss.var section attributes.
+if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
     run_ld_link_tests {
 	{"--gc-sections on tls variable"
 	    "--gc-section" "" {tls_gc.s} {} "tls_gc"}

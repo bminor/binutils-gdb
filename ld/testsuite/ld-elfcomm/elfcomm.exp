@@ -29,6 +29,11 @@ if ![is_elf_format] {
     return
 }
 
+# hpux assembly is weird
+if [istarget "hppa*-*-hpux*"] {
+    return
+}
+
 proc test_sort_common {} {
     global exec_output
     global objdump
