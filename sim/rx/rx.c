@@ -878,7 +878,7 @@ decode_opcode ()
   unsigned long long prev_cycle_count;
 #endif
 #ifdef CYCLE_ACCURATE
-  int tx;
+  unsigned int tx;
 #endif
 
 #ifdef CYCLE_STATS
