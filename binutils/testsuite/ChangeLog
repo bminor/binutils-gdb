@@ -1,3 +1,11 @@
+2010-09-23  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/ar.exp: Don't run unique_symbol on msp or hpux.
+	* binutils-all/copy-2.d: Update not-target list.
+	* binutils-all/note-1.d: Don't run on h8300.
+	* binutils-all/objcopy.exp: Don't run strip-10 on msp or hpux.
+	(objcopy_test): Remove h8300-rtems from xfails.
+
 2010-09-16  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/i386/i386.exp: Don't run on linuxaout.

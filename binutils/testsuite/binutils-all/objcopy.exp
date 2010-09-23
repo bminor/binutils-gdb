@@ -79,7 +79,7 @@ proc objcopy_test {testname srcfile} {
 	# files in the first place, and may order things a little
 	# differently. Those systems should use setup_xfail here.
 
-	setup_xfail "h8300-*-rtems*" "h8300-*-coff"
+	setup_xfail "h8300-*-coff"
 	setup_xfail "h8500-*-rtems*" "h8500-*-coff"
 	setup_xfail "hppa*-*-*"
 	setup_xfail "i960-*"
@@ -890,7 +890,10 @@ if [is_elf_format] {
     run_dump_test "strip-7"
     run_dump_test "strip-8"
     run_dump_test "strip-9"
-    run_dump_test "strip-10"
+    if { ![istarget "*-*-hpux*"]
+	 && ![istarget "msp*-*-*"] } {
+	run_dump_test "strip-10"
+    }
 
     if { [istarget "i*86-*"] || [istarget "x86_64-*-*"] } {
 	# Check to make sure we don't strip a symbol named in relocations.

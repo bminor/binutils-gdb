@@ -446,6 +446,8 @@ thin_archive
 thin_archive_with_nested
 argument_parsing
 deterministic_archive
-if [is_elf_format] {
+if { [is_elf_format]
+     && ![istarget "*-*-hpux*"]
+     && ![istarget "msp*-*-*"] } {
     unique_symbol
 }

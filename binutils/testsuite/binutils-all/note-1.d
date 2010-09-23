@@ -3,6 +3,7 @@
 #objcopy: --add-section .note=$srcdir/note-1.d
 #name: add notes section
 #source: copytest.s
+#not-target: h8300-*-*
 
 There are .*
 
