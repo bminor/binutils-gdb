@@ -4,6 +4,10 @@
 
 	* rx.c (decode_opcode): Declare `rx' as unsigned.
 
+	* cpu.h (reset_decoder): Declare.
+	* load.c (rx_load): Call `reset_decoder'.
+	* rx.c (reset_decoder): New function.
+
 2010-07-29  DJ Delorie  <dj@redhat.com>
 
 	* rx.c (decode_cache_base): New.

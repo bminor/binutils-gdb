@@ -142,6 +142,8 @@ rx_load (bfd *prog)
       heaptop = heapbottom = 0;
     }
 
+  reset_decoder ();
+
   if (verbose > 1)
     fprintf (stderr, "[start pc=%08x %s]\n",
 	     (unsigned int) regs.r_pc,

@@ -235,6 +235,7 @@ extern unsigned int heaptop;
 extern unsigned int heapbottom;
 
 extern int decode_opcode (void);
+extern void reset_decoder (void);
 extern void reset_pipeline_stats (void);
 extern void halt_pipeline_stats (void);
 extern void pipeline_stats (void);

@@ -298,6 +298,14 @@ static unsigned char *get_byte_base;
 static RX_Opcode_Decoded **decode_cache_base;
 static SI get_byte_page;
 
+void
+reset_decoder (void)
+{
+  get_byte_base = 0;
+  decode_cache_base = 0;
+  get_byte_page = 0;
+}
+
 static inline void
 maybe_get_mem_page (SI tpc)
 {
