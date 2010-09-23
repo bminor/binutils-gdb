@@ -6110,7 +6110,7 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
       && (osec->flags == isec->flags
 	  || (final_link
 	      && ((osec->flags ^ isec->flags)
-		  & ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES)) == 0)))
+		  & ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC)) == 0)))
     elf_section_type (osec) = elf_section_type (isec);
 
   /* FIXME: Is this correct for all OS/PROC specific flags?  */

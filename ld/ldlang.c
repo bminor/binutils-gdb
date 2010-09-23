@@ -2232,7 +2232,7 @@ lang_add_section (lang_statement_list_type *ptr,
      to see .text with SEC_LINK_ONCE set.  */
 
   if (!link_info.relocatable)
-    flags &= ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES);
+    flags &= ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC);
 
   switch (output->sectype)
     {

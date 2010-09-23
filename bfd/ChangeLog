@@ -1,3 +1,8 @@
+2010-09-23  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_init_private_section_data): Allow for SEC_RELOC
+	difference between input and output section.
+
 2010-09-22  Kai Tietz  <kai.tietz@onevision.com>
 
 	* coffcode.h (sec_to_styp_flags): Adjust debug
@@ -5,8 +10,8 @@
 	and avoid marking them as excluded.
 	(styp_to_sec_flags): Doing reverse mapping.
 
-	* peXXigen.c (_bfd_XXi_final_link_postscript):
-	Add handling for setting IAT directory entry.
+	* peXXigen.c (_bfd_XXi_final_link_postscript): Add handling for
+	setting IAT directory entry.
 
 2010-09-20  Richard Henderson  <rth@redhat.com>
 
