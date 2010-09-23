@@ -1,3 +1,8 @@
+2010-09-23  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-mn10300.c (tc_gen_reloc): Replace absolute symbols
+	with the absolute section symbol.
+
 2010-09-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-parse.y: Fix typo in BYTEOP16P comment.

@@ -2191,8 +2191,6 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
       asec = S_GET_SEGMENT (fixp->fx_addsy);
       ssec = S_GET_SEGMENT (fixp->fx_subsy);
 
-      reloc->sym_ptr_ptr = NULL;
-
       /* If we have a difference between two (non-absolute) symbols we must
 	 generate two relocs (one for each symbol) and allow the linker to
 	 resolve them - relaxation may change the distances between symbols,
@@ -2212,10 +2210,15 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 
 	  reloc->addend = fixp->fx_offset; 
 	  if (asec == absolute_section)
-	    reloc->addend += S_GET_VALUE (fixp->fx_addsy);
-
-	  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
-	  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+	    {
+	      reloc->addend += S_GET_VALUE (fixp->fx_addsy);
+	      reloc->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	    }
+	  else
+	    {
+	      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+	    }
 
 	  fixp->fx_pcrel = 0;
 	  fixp->fx_done = 1;
@@ -2252,8 +2255,6 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	      return relocs;
 	    }
 
-	  if (reloc->sym_ptr_ptr)
-	    free (reloc->sym_ptr_ptr);
 	  free (reloc);
 	  return & no_relocs;
 	}
