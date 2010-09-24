@@ -1,5 +1,9 @@
 2010-09-23  Kevin Buettner  <kevinb@redhat.com>
 
+	* rx.c (decode_opcode): Add cycle information for RXO_smovu.
+
+2010-09-23  Kevin Buettner  <kevinb@redhat.com>
+
 	* fpu.c, gdb-if.c, load.c, misc.c, syscalls.c (config.h): Include.
 
 	* rx.c (decode_opcode): Declare `tx' as unsigned.

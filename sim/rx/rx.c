@@ -1818,6 +1818,9 @@ decode_opcode ()
       break;
 
     case RXO_smovu:
+#ifdef CYCLE_ACCURATE
+      tx = regs.r[3];
+#endif
       while (regs.r[3] != 0)
 	{
 	  uma = mem_get_qi (regs.r[2] ++);
@@ -1826,6 +1829,7 @@ decode_opcode ()
 	  if (uma == 0)
 	    break;
 	}
+      cycles (2 + 3 * (int)(tx / 4) + 3 * (tx % 4));
       break;
 
     case RXO_shar: /* d = ma >> mb */
