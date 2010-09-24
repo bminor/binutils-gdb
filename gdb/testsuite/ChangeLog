@@ -1,3 +1,9 @@
+2010-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix lost siginfo_t for inferior calls.
+	* gdb.base/siginfo-infcall.exp: New file.
+	* gdb.base/siginfo-infcall.c: New file.
+
 2010-09-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/dw2-const.S: Minor (space) reformatting.

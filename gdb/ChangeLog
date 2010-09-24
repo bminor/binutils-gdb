@@ -1,3 +1,16 @@
+2010-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix lost siginfo_t for inferior calls.
+	* infrun.c
+	(struct inferior_thread_state) <siginfo_gdbarch, siginfo_data>: New.
+	(save_inferior_thread_state): New variables regcache, gdbarch and
+	siginfo_data.  Initialize SIGINFO_DATA if gdbarch_get_siginfo_type_p.
+	Move INF_STATE allocation later, pre-clear it.  Initialize REGISTERS
+	using REGCACHE.
+	(restore_inferior_thread_state): New variables regcache and gdbarch.
+	Restore SIGINFO_DATA for matching GDBARCH.  Restore REGISTERS using
+	REGCACHE.  Free also SIGINFO_DATA.
+
 2010-09-24  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dw2_expand_symtabs_matching): Add missing

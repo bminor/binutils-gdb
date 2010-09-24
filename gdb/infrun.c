@@ -6037,18 +6037,57 @@ struct inferior_thread_state
   enum target_signal stop_signal;
   CORE_ADDR stop_pc;
   struct regcache *registers;
+
+  /* Format of SIGINFO or NULL if it is not present.  */
+  struct gdbarch *siginfo_gdbarch;
+
+  /* The inferior format depends on SIGINFO_GDBARCH and it has a length of
+     TYPE_LENGTH (gdbarch_get_siginfo_type ()).  For different gdbarch the
+     content would be invalid.  */
+  gdb_byte *siginfo_data;
 };
 
 struct inferior_thread_state *
 save_inferior_thread_state (void)
 {
-  struct inferior_thread_state *inf_state = XMALLOC (struct inferior_thread_state);
+  struct inferior_thread_state *inf_state;
   struct thread_info *tp = inferior_thread ();
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  gdb_byte *siginfo_data = NULL;
+
+  if (gdbarch_get_siginfo_type_p (gdbarch))
+    {
+      struct type *type = gdbarch_get_siginfo_type (gdbarch);
+      size_t len = TYPE_LENGTH (type);
+      struct cleanup *back_to;
+
+      siginfo_data = xmalloc (len);
+      back_to = make_cleanup (xfree, siginfo_data);
+
+      if (target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
+		       siginfo_data, 0, len) == len)
+	discard_cleanups (back_to);
+      else
+	{
+	  /* Errors ignored.  */
+	  do_cleanups (back_to);
+	  siginfo_data = NULL;
+	}
+    }
+
+  inf_state = XZALLOC (struct inferior_thread_state);
+
+  if (siginfo_data)
+    {
+      inf_state->siginfo_gdbarch = gdbarch;
+      inf_state->siginfo_data = siginfo_data;
+    }
 
   inf_state->stop_signal = tp->stop_signal;
   inf_state->stop_pc = stop_pc;
 
-  inf_state->registers = regcache_dup (get_current_regcache ());
+  inf_state->registers = regcache_dup (regcache);
 
   return inf_state;
 }
@@ -6059,16 +6098,29 @@ void
 restore_inferior_thread_state (struct inferior_thread_state *inf_state)
 {
   struct thread_info *tp = inferior_thread ();
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   tp->stop_signal = inf_state->stop_signal;
   stop_pc = inf_state->stop_pc;
+
+  if (inf_state->siginfo_gdbarch == gdbarch)
+    {
+      struct type *type = gdbarch_get_siginfo_type (gdbarch);
+      size_t len = TYPE_LENGTH (type);
+
+      /* Errors ignored.  */
+      target_write (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
+		    inf_state->siginfo_data, 0, len);
+    }
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
   if (target_has_execution)
     /* NB: The register write goes through to the target.  */
-    regcache_cpy (get_current_regcache (), inf_state->registers);
+    regcache_cpy (regcache, inf_state->registers);
   regcache_xfree (inf_state->registers);
+  xfree (inf_state->siginfo_data);
   xfree (inf_state);
 }
 
