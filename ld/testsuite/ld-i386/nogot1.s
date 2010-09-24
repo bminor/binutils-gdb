@@ -5,6 +5,6 @@ bar:
 .globl foo
 	.type	foo, @function
 foo:
-	leal	bar@GOTOFF(%ecx), %eax
+	leal	bar, %eax
 	ret
 	.size	foo, .-foo

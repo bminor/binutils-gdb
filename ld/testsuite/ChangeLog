@@ -1,3 +1,8 @@
+2010-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11812
+	* ld-i386/nogot1.s: Don't use GOTOFF.
+
 2010-09-23  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* ld-tic6x/pcrel-reloc-local-r-rel-rela.d: New test.
