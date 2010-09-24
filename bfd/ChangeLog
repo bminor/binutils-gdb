@@ -1,3 +1,8 @@
+2010-09-24  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* elflink.c (bfd_elf_reloc_symbol_deleted_p): Compare the symbol index
+	to STN_UNDEF, not SHN_UNDEF.
+
 2010-09-23  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_fake_sections): New function.

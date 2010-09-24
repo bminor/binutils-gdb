@@ -12196,7 +12196,7 @@ bfd_elf_reloc_symbol_deleted_p (bfd_vma offset, void *cookie)
 	continue;
 
       r_symndx = rcookie->rel->r_info >> rcookie->r_sym_shift;
-      if (r_symndx == SHN_UNDEF)
+      if (r_symndx == STN_UNDEF)
 	return TRUE;
 
       if (r_symndx >= rcookie->locsymcount
