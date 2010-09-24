@@ -11668,7 +11668,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       /* Check that tls relocs are used with tls syms, and non-tls
 	 relocs are used with non-tls syms.  */
-      if (r_symndx != 0
+      if (r_symndx != STN_UNDEF
 	  && r_type != R_PPC64_NONE
 	  && (h == NULL
 	      || h->elf.root.type == bfd_link_hash_defined
@@ -11917,9 +11917,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			if (local_sections[r_symndx] == sec)
 			  break;
 		      if (r_symndx >= symtab_hdr->sh_info)
-			r_symndx = 0;
+			r_symndx = STN_UNDEF;
 		      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-		      if (r_symndx != 0)
+		      if (r_symndx != STN_UNDEF)
 			rel->r_addend -= (local_syms[r_symndx].st_value
 					  + sec->output_offset
 					  + sec->output_section->vma);
@@ -12025,9 +12025,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		if (local_sections[r_symndx] == sec)
 		  break;
 	      if (r_symndx >= symtab_hdr->sh_info)
-		r_symndx = 0;
+		r_symndx = STN_UNDEF;
 	      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-	      if (r_symndx != 0)
+	      if (r_symndx != STN_UNDEF)
 		rel->r_addend -= (local_syms[r_symndx].st_value
 				  + sec->output_offset
 				  + sec->output_section->vma);
@@ -12569,7 +12569,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TOC:
 	  /* Relocation value is TOC base.  */
 	  relocation = TOCstart;
-	  if (r_symndx == 0)
+	  if (r_symndx == STN_UNDEF)
 	    relocation += htab->stub_group[input_section->id].toc_off;
 	  else if (unresolved_reloc)
 	    ;
@@ -12819,7 +12819,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			     sym_name);
 			  ret = FALSE;
 			}
-		      else if (r_symndx == 0 || bfd_is_abs_section (sec))
+		      else if (r_symndx == STN_UNDEF || bfd_is_abs_section (sec))
 			;
 		      else if (sec == NULL || sec->owner == NULL)
 			{

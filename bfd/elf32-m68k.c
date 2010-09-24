@@ -4034,7 +4034,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_68K_PC16:
 	case R_68K_PC32:
 	  if (info->shared
-	      && r_symndx != 0
+	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && (h == NULL
 		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -4169,7 +4169,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  return FALSE;
 	}
 
-      if (r_symndx != 0
+      if (r_symndx != STN_UNDEF
 	  && r_type != R_68K_NONE
 	  && (h == NULL
 	      || h->root.type == bfd_link_hash_defined

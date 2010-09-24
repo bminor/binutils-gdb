@@ -1067,10 +1067,10 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 	    case (int) R_MICROBLAZE_64:
 	    case (int) R_MICROBLAZE_32:
 	      {
-		/* r_symndx will be zero only for relocs against symbols
+		/* r_symndx will be STN_UNDEF (zero) only for relocs against symbols
 		   from removed linkonce sections, or sections discarded by
 		   a linker script.  */
-		if (r_symndx == 0 || (input_section->flags & SEC_ALLOC) == 0)
+		if (r_symndx == STN_UNDEF || (input_section->flags & SEC_ALLOC) == 0)
 		  {
 		    relocation += addend;
 		    if (r_type == R_MICROBLAZE_32)

@@ -2619,7 +2619,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	    default:
 	      if (! used_sym)
 		{
-		  if (rela.r_sym == 0)
+		  if (rela.r_sym == STN_UNDEF)
 		    relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 		  else
 		    {

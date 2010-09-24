@@ -1493,7 +1493,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_CRIS_16:
 	case R_CRIS_32:
 	  if (info->shared
-	      && r_symndx != 0
+	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && ((r_type != R_CRIS_8_PCREL
 		   && r_type != R_CRIS_16_PCREL

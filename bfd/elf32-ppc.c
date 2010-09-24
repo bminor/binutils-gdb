@@ -6985,9 +6985,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			if (local_sections[r_symndx] == sec)
 			  break;
 		      if (r_symndx >= symtab_hdr->sh_info)
-			r_symndx = 0;
+			r_symndx = STN_UNDEF;
 		      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-		      if (r_symndx != 0)
+		      if (r_symndx != STN_UNDEF)
 			rel->r_addend -= (local_syms[r_symndx].st_value
 					  + sec->output_offset
 					  + sec->output_section->vma);
@@ -7053,9 +7053,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		if (local_sections[r_symndx] == sec)
 		  break;
 	      if (r_symndx >= symtab_hdr->sh_info)
-		r_symndx = 0;
+		r_symndx = STN_UNDEF;
 	      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-	      if (r_symndx != 0)
+	      if (r_symndx != STN_UNDEF)
 		rel->r_addend -= (local_syms[r_symndx].st_value
 				  + sec->output_offset
 				  + sec->output_section->vma);
@@ -7658,7 +7658,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			     sym_name);
 			  ret = FALSE;
 			}
-		      else if (r_symndx == 0 || bfd_is_abs_section (sec))
+		      else if (r_symndx == STN_UNDEF || bfd_is_abs_section (sec))
 			;
 		      else if (sec == NULL || sec->owner == NULL)
 			{

@@ -2800,7 +2800,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	    name = bfd_section_name (input_bfd, sec);
 	}
 
-      if (r_symndx != 0
+      if (r_symndx != STN_UNDEF
 	  && r_type != R_XTENSA_NONE
 	  && (h == NULL
 	      || h->root.type == bfd_link_hash_defined

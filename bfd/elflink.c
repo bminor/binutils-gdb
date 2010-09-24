@@ -2170,7 +2170,7 @@ elf_link_read_relocs_from_section (bfd *abfd,
 	      return FALSE;
 	    }
 	}
-      else if (r_symndx != 0)
+      else if (r_symndx != STN_UNDEF)
 	{
 	  (*_bfd_error_handler)
 	    (_("%B: non-zero symbol index (0x%lx) for offset 0x%lx in section `%A'"
@@ -9500,7 +9500,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		     discarded section.  */
 		  if ((sec = *ps) != NULL && elf_discarded_section (sec))
 		    {
-		      BFD_ASSERT (r_symndx != 0);
+		      BFD_ASSERT (r_symndx != STN_UNDEF);
 		      if (action_discarded & COMPLAIN)
 			(*finfo->info->callbacks->einfo)
 			  (_("%X`%s' referenced in section `%A' of %B: "
@@ -9667,7 +9667,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		      /* I suppose the backend ought to fill in the
 			 section of any STT_SECTION symbol against a
 			 processor specific section.  */
-		      r_symndx = 0;
+		      r_symndx = STN_UNDEF;
 		      if (bfd_is_abs_section (sec))
 			;
 		      else if (sec == NULL || sec->owner == NULL)
@@ -9696,7 +9696,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			  if (!bfd_is_abs_section (osec))
 			    {
 			      r_symndx = osec->target_index;
-			      if (r_symndx == 0)
+			      if (r_symndx == STN_UNDEF)
 				{
 				  struct elf_link_hash_table *htab;
 				  asection *oi;
@@ -9714,7 +9714,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 				    }
 				}
 
-			      BFD_ASSERT (r_symndx != 0);
+			      BFD_ASSERT (r_symndx != STN_UNDEF);
 			    }
 			}
 
@@ -11471,7 +11471,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
   struct elf_link_hash_entry *h;
 
   r_symndx = cookie->rel->r_info >> cookie->r_sym_shift;
-  if (r_symndx == 0)
+  if (r_symndx == STN_UNDEF)
     return NULL;
 
   if (r_symndx >= cookie->locsymcount

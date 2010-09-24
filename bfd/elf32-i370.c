@@ -1183,7 +1183,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 	case (int) R_I370_ADDR31:
 	case (int) R_I370_ADDR16:
 	  if (info->shared
-	      && r_symndx != 0)
+	      && r_symndx != STN_UNDEF)
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;

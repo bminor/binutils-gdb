@@ -2025,7 +2025,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
                && h != NULL
                && h->root.def_dynamic
                && !h->root.def_regular))
-           && r_symndx != 0
+           && r_symndx != STN_UNDEF
            && (input_section->flags & SEC_ALLOC) != 0)
         {
           /* If we're creating a shared library, or this relocation is against a symbol
@@ -2038,8 +2038,8 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
                                                     input_section))
             return bfd_reloc_undefined;
         }
-      else if (r_symndx == 0)
-        /* r_symndx will be zero only for relocs against symbols
+      else if (r_symndx == STN_UNDEF)
+        /* r_symndx will be STN_UNDEF (zero) only for relocs against symbols
            from removed linkonce sections, or sections discarded by
            a linker script.  */
         value = 0;

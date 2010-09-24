@@ -4695,7 +4695,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	case R_IA64_DIR64LSB:
 	  /* Install a dynamic relocation for this reloc.  */
 	  if ((dynamic_symbol_p || info->shared)
-	      && r_symndx != 0
+	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      unsigned int dyn_r_type;
@@ -4924,7 +4924,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	case R_IA64_PCREL64MSB:
 	case R_IA64_PCREL64LSB:
 	  /* Install a dynamic relocation for this reloc.  */
-	  if (dynamic_symbol_p && r_symndx != 0)
+	  if (dynamic_symbol_p && r_symndx != STN_UNDEF)
 	    {
 	      BFD_ASSERT (srel != NULL);
 

@@ -9063,7 +9063,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	    name = bfd_section_name (input_bfd, sec);
 	}
 
-      if (r_symndx != 0
+      if (r_symndx != STN_UNDEF
 	  && r_type != R_ARM_NONE
 	  && (h == NULL
 	      || h->root.type == bfd_link_hash_defined
@@ -10902,7 +10902,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* PR 9934: It is possible to have relocations that do not
 	     refer to symbols, thus it is also possible to have an
 	     object file containing relocations but no symbol table.  */
-	  && (r_symndx > 0 || nsyms > 0))
+	  && (r_symndx > STN_UNDEF || nsyms > 0))
 	{
 	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"), abfd,
 				   r_symndx);

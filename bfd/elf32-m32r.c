@@ -2897,7 +2897,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
             case R_M32R_HI16_ULO_RELA:
             case R_M32R_LO16_RELA:
               if (info->shared
-                  && r_symndx != 0
+                  && r_symndx != STN_UNDEF
                   && (input_section->flags & SEC_ALLOC) != 0
                   && ((   r_type != R_M32R_10_PCREL_RELA
                        && r_type != R_M32R_18_PCREL_RELA

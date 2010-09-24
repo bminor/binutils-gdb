@@ -2465,7 +2465,7 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 static enum elf_reloc_type_class
 elf64_hppa_reloc_type_class (const Elf_Internal_Rela *rela)
 {
-  if (ELF64_R_SYM (rela->r_info) == 0)
+  if (ELF64_R_SYM (rela->r_info) == STN_UNDEF)
     return reloc_class_relative;
 
   switch ((int) ELF64_R_TYPE (rela->r_info))

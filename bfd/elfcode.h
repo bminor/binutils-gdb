@@ -1466,7 +1466,7 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
       else
 	relent->address = rela.r_offset - asect->vma;
 
-      if (ELF_R_SYM (rela.r_info) == 0)
+      if (ELF_R_SYM (rela.r_info) == STN_UNDEF)
 	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else if (ELF_R_SYM (rela.r_info) > symcount)
 	{

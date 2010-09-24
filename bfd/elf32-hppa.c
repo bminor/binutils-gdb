@@ -4472,7 +4472,7 @@ static enum elf_reloc_type_class
 elf32_hppa_reloc_type_class (const Elf_Internal_Rela *rela)
 {
   /* Handle TLS relocs first; we don't want them to be marked
-     relative by the "if (ELF32_R_SYM (rela->r_info) == 0)"
+     relative by the "if (ELF32_R_SYM (rela->r_info) == STN_UNDEF)"
      check below.  */
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
@@ -4482,7 +4482,7 @@ elf32_hppa_reloc_type_class (const Elf_Internal_Rela *rela)
         return reloc_class_normal;
     }
 
-  if (ELF32_R_SYM (rela->r_info) == 0)
+  if (ELF32_R_SYM (rela->r_info) == STN_UNDEF)
     return reloc_class_relative;
 
   switch ((int) ELF32_R_TYPE (rela->r_info))

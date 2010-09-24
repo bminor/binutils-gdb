@@ -1,5 +1,12 @@
 2010-09-24  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* elf32-arm.c, elf32-cris.c, elf32-hppa.c, elf32-i370.c, elf32-m32r.c,
+	elf32-m68k.c, elf32-microblaze.c, elf32-ppc.c, elf32-score.c,
+	elf32-score7.c, elf32-sh.c, elf32-vax.c, elf32-xtensa.c, elf64-alpha.c,
+	elf64-hppa.c, elf64-mips.c, elf64-ppc.c, elf64-sparc.c, elfcode.h,
+	elflink.c, elfxx-ia64.c, elfxx-mips.c: Use STN_UNDEF when referring to
+	the zero symbol index.
+
 	* elflink.c (bfd_elf_reloc_symbol_deleted_p): Compare the symbol index
 	to STN_UNDEF, not SHN_UNDEF.
 

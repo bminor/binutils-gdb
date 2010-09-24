@@ -5282,7 +5282,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	       && h->root.def_dynamic
 	       && !h->root.def_regular
 	       && !h->has_static_relocs))
-	  && r_symndx != 0
+	  && r_symndx != STN_UNDEF
 	  && (h == NULL
 	      || h->root.root.type != bfd_link_hash_undefweak
 	      || ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
@@ -7752,7 +7752,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_TLS_LDM:
 	  if (r_type == R_MIPS_TLS_LDM)
 	    {
-	      r_symndx = 0;
+	      r_symndx = STN_UNDEF;
 	      h = NULL;
 	    }
 	  /* Fall through */
@@ -7778,7 +7778,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      }
 	    else
 	      {
-		BFD_ASSERT (flag == GOT_TLS_LDM || r_symndx != 0);
+		BFD_ASSERT (flag == GOT_TLS_LDM || r_symndx != STN_UNDEF);
 
 		if (!mips_elf_record_local_got_symbol (abfd, r_symndx,
 						       rel->r_addend,
@@ -7918,7 +7918,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_MIPS_HIGHEST:
 	      /* Don't refuse a high part relocation if it's against
 		 no symbol (e.g. part of a compound relocation).  */
-	      if (r_symndx == 0)
+	      if (r_symndx == STN_UNDEF)
 		break;
 
 	      /* R_MIPS_HI16 against _gp_disp is used for $gp setup,

@@ -4405,7 +4405,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      && (h == NULL
 		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		  || h->root.type != bfd_link_hash_undefweak)
-	      && r_symndx != 0
+	      && r_symndx != STN_UNDEF
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && !is_vxworks_tls
 	      && (r_type == R_SH_DIR32
