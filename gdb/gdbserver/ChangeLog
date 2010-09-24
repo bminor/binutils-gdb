@@ -1,3 +1,10 @@
+2010-09-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-x86-low.c (compat_siginfo_from_siginfo)
+	(siginfo_from_compat_siginfo): Also copy si_pid and si_uid when
+	si_code is < 0.  Check for si_code == SI_TIMER before checking for
+	si_code < 0.
+
 2010-09-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-i386-low.c: New file.

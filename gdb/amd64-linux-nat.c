@@ -574,8 +574,10 @@ compat_siginfo_from_siginfo (compat_siginfo_t *to, siginfo_t *from)
   to->si_errno = from->si_errno;
   to->si_code = from->si_code;
 
-  if (to->si_code < 0)
+  if (to->si_code == SI_TIMER)
     {
+      to->cpt_si_timerid = from->si_timerid;
+      to->cpt_si_overrun = from->si_overrun;
       to->cpt_si_ptr = (intptr_t) from->si_ptr;
     }
   else if (to->si_code == SI_USER)
@@ -583,10 +585,10 @@ compat_siginfo_from_siginfo (compat_siginfo_t *to, siginfo_t *from)
       to->cpt_si_pid = from->si_pid;
       to->cpt_si_uid = from->si_uid;
     }
-  else if (to->si_code == SI_TIMER)
+  else if (to->si_code < 0)
     {
-      to->cpt_si_timerid = from->si_timerid;
-      to->cpt_si_overrun = from->si_overrun;
+      to->cpt_si_pid = from->si_pid;
+      to->cpt_si_uid = from->si_uid;
       to->cpt_si_ptr = (intptr_t) from->si_ptr;
     }
   else
@@ -628,8 +630,10 @@ siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
   to->si_errno = from->si_errno;
   to->si_code = from->si_code;
 
-  if (to->si_code < 0)
+  if (to->si_code == SI_TIMER)
     {
+      to->si_timerid = from->cpt_si_timerid;
+      to->si_overrun = from->cpt_si_overrun;
       to->si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
     }
   else if (to->si_code == SI_USER)
@@ -637,10 +641,10 @@ siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
       to->si_pid = from->cpt_si_pid;
       to->si_uid = from->cpt_si_uid;
     }
-  else if (to->si_code == SI_TIMER)
+  if (to->si_code < 0)
     {
-      to->si_timerid = from->cpt_si_timerid;
-      to->si_overrun = from->cpt_si_overrun;
+      to->si_pid = from->cpt_si_pid;
+      to->si_uid = from->cpt_si_uid;
       to->si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
     }
   else

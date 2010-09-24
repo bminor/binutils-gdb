@@ -1,5 +1,12 @@
 2010-09-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* amd64-linux-nat.c (compat_siginfo_from_siginfo)
+	(siginfo_from_compat_siginfo): Also copy si_pid and si_uid when
+	si_code is < 0.  Check for si_code == SI_TIMER before checking for
+	si_code < 0.
+
+2010-09-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* objfiles.h (ALL_OBJSECTIONS): Handle breaks in the inner loop.
 
 2010-09-22  Joel Brobecker  <brobecker@adacore.com>
