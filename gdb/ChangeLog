@@ -1,3 +1,7 @@
+2010-09-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* objfiles.h (ALL_OBJSECTIONS): Handle breaks in the inner loop.
+
 2010-09-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-tasks.c (read_atcb): Do not compute the task ptid when
