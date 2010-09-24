@@ -1,3 +1,8 @@
+2010-09-24  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* valops.c (find_oload_champ_namespace_loop): replace incorrect
+	discard_cleanups do_cleanups.
+
 2010-09-24  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/11842

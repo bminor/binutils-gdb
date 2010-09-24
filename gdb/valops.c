@@ -2760,7 +2760,7 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
       *oload_syms = new_oload_syms;
       *oload_champ = new_oload_champ;
       *oload_champ_bv = new_oload_champ_bv;
-      discard_cleanups (old_cleanups);
+      do_cleanups (old_cleanups);
       return 0;
     }
 }
