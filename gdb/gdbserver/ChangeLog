@@ -1,5 +1,7 @@
 2010-09-24  Pedro Alves  <pedro@codesourcery.com>
 
+	PR gdb/11842
+
 	* linux-x86-low.c (compat_siginfo_from_siginfo)
 	(siginfo_from_compat_siginfo): Also copy si_pid and si_uid when
 	si_code is < 0.  Check for si_code == SI_TIMER before checking for
