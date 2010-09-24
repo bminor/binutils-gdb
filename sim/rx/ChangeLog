@@ -2,7 +2,7 @@
 
 	* fpu.c, gdb-if.c, load.c, misc.c, syscalls.c (config.h): Include.
 
-	* rx.c (decode_opcode): Declare `rx' as unsigned.
+	* rx.c (decode_opcode): Declare `tx' as unsigned.
 
 	* cpu.h (reset_decoder): Declare.
 	* load.c (rx_load): Call `reset_decoder'.
