@@ -1,3 +1,9 @@
+2010-09-24  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dw2_expand_symtabs_matching): Add missing
+	MAYBE_SWAPs.
+	(dw2_map_symbol_names): Likewise.
+
 2010-09-24  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* valops.c (find_oload_champ_namespace_loop): replace incorrect
