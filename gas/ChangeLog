@@ -1,3 +1,8 @@
+2010-09-27  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* config/tc-arm.c (do_neon_ldr_str): Deprecate ARM-mode PC-relative
+	VSTR, issue an error in THUMB mode.
+
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (arm_ext_virt): New variable.

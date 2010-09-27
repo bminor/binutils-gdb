@@ -1,3 +1,8 @@
+2010-09-27  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* arm_dis.c (print_insn_coprocessor): Apply off-by-alignment
+	correction to unaligned PCs while printing comment.
+
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm-dis.c (arm_opcodes): Add Virtualiztion Extensions support.

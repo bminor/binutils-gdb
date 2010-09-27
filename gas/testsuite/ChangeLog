@@ -1,3 +1,13 @@
+2010-09-27  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* gas/arm/vldr.s: New test for pc-relative VLDR disassembly comment.
+	* gas/arm/vldr.d: Likewise.
+	* gas/arm/vstr-bad.s: New test for PC-relative VSTR.
+	* gas/arm/vstr-thumb-bad.l: Likewise.
+	* gas/arm/vstr-thumb-bad.d: Likewise.
+	* gas/arm/vstr-arm-bad.l: Likewise.
+	* gas/arm/vstr-arm-bad.d: Likewise.
+
 2010-09-23  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/armv7-a+virt.d: New test.

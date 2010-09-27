@@ -1910,8 +1910,12 @@ print_insn_coprocessor (bfd_vma pc,
 		    if (rn == 15 && (PRE_BIT_SET || WRITEBACK_BIT_SET))
 		      {
 			func (stream, "\t; ");
-			info->print_address_func (offset + pc
-						  + info->bytes_per_chunk * 2, info);
+			/* For unaligned PCs, apply off-by-alignment
+			   correction.  */
+			info->print_address_func (offset + pc 
+						  + info->bytes_per_chunk * 2
+						  - (pc & 3),
+				 		  info);
 		      }
 		  }
 		  break;

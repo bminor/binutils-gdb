@@ -14885,6 +14885,18 @@ do_neon_ldr_str (void)
 {
   int is_ldr = (inst.instruction & (1 << 20)) != 0;
 
+  /* Use of PC in vstr in ARM mode is deprecated in ARMv7.
+     And is UNPREDICTABLE in thumb mode.  */
+  if (!is_ldr 
+      && inst.operands[1].reg == REG_PC
+      && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7))
+    {
+      if (!thumb_mode && warn_on_deprecated)
+	as_warn (_("Use of PC here is deprecated"));
+      else
+	inst.error = _("Use of PC here is UNPREDICTABLE");
+    }
+
   if (inst.operands[0].issingle)
     {
       if (is_ldr)
