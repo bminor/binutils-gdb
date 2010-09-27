@@ -1,5 +1,17 @@
 2010-09-27  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dwarf2_read_index): Only allow version 3.
+	(write_psymbols): Add 'psyms_seen' and 'is_static' arguments.
+	Only emit a given psymbol once.
+	(struct signatured_type_index_data) <psyms_seen>: New field.
+	(write_one_signatured_type): Update.
+	(cleanup_htab): New function.
+	(write_psymtabs_to_index): Update.  Create psyms_seen hash.  Bump
+	version to 3.
+	(save_gdb_index_command): Update index documentation.
+
+2010-09-27  Tom Tromey  <tromey@redhat.com>
+
 	* bcache.c (expand_hash_table): Use hash_function, not hash.
 
 2010-09-27  Tom Tromey  <tromey@redhat.com>

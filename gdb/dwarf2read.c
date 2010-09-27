@@ -1915,15 +1915,10 @@ dwarf2_read_index (struct objfile *objfile)
   addr = dwarf2_per_objfile->gdb_index.buffer;
   /* Version check.  */
   version = MAYBE_SWAP (*(offset_type *) addr);
-  if (version == 1)
-    {
-      /* Index version 1 neglected to account for .debug_types.  So,
-	 if we see .debug_types, we cannot use this index.  */
-      if (dwarf2_per_objfile->types.asection != NULL
-	  && dwarf2_per_objfile->types.size != 0)
-	return 0;
-    }
-  else if (version != 2)
+  /* Versions earlier than 3 emitted every copy of a psymbol.  This
+     causes the index to behave very poorly for certain requests.  So,
+     it seems better to just ignore such indices.  */
+  if (version < 3)
     return 0;
 
   map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
@@ -1937,14 +1932,11 @@ dwarf2_read_index (struct objfile *objfile)
 		      / 8);
   ++i;
 
-  if (version == 2)
-    {
-      types_list = addr + MAYBE_SWAP (metadata[i]);
-      types_list_elements = ((MAYBE_SWAP (metadata[i + 1])
-			      - MAYBE_SWAP (metadata[i]))
-			     / 8);
-      ++i;
-    }
+  types_list = addr + MAYBE_SWAP (metadata[i]);
+  types_list_elements = ((MAYBE_SWAP (metadata[i + 1])
+			  - MAYBE_SWAP (metadata[i]))
+			 / 8);
+  ++i;
 
   map->address_table = addr + MAYBE_SWAP (metadata[i]);
   map->address_table_size = (MAYBE_SWAP (metadata[i + 1])
@@ -1962,8 +1954,7 @@ dwarf2_read_index (struct objfile *objfile)
   if (!create_cus_from_index (objfile, cu_list, cu_list_elements))
     return 0;
 
-  if (version == 2
-      && types_list_elements
+  if (types_list_elements
       && !create_signatured_type_table_from_index (objfile, types_list,
 						   types_list_elements))
     return 0;
@@ -14921,15 +14912,38 @@ add_address_entry (struct objfile *objfile,
 /* Add a list of partial symbols to SYMTAB.  */
 static void
 write_psymbols (struct mapped_symtab *symtab,
+		htab_t psyms_seen,
 		struct partial_symbol **psymp,
 		int count,
-		offset_type cu_index)
+		offset_type cu_index,
+		int is_static)
 {
   for (; count-- > 0; ++psymp)
     {
+      void **slot, *lookup;
+
       if (SYMBOL_LANGUAGE (*psymp) == language_ada)
 	error (_("Ada is not currently supported by the index"));
-      add_index_entry (symtab, SYMBOL_NATURAL_NAME (*psymp), cu_index);
+
+      /* We only want to add a given psymbol once.  However, we also
+	 want to account for whether it is global or static.  So, we
+	 may add it twice, using slightly different values.  */
+      if (is_static)
+	{
+	  uintptr_t val = 1 | (uintptr_t) *psymp;
+
+	  lookup = (void *) val;
+	}
+      else
+	lookup = *psymp;
+
+      /* Only add a given psymbol once.  */
+      slot = htab_find_slot (psyms_seen, lookup, INSERT);
+      if (!*slot)
+	{
+	  *slot = lookup;
+	  add_index_entry (symtab, SYMBOL_NATURAL_NAME (*psymp), cu_index);
+	}
     }
 }
 
@@ -14959,6 +14973,7 @@ struct signatured_type_index_data
   struct objfile *objfile;
   struct mapped_symtab *symtab;
   struct obstack *types_list;
+  htab_t psyms_seen;
   int cu_index;
 };
 
@@ -14974,11 +14989,15 @@ write_one_signatured_type (void **slot, void *d)
   gdb_byte val[8];
 
   write_psymbols (info->symtab,
+		  info->psyms_seen,
 		  info->objfile->global_psymbols.list + psymtab->globals_offset,
-		  psymtab->n_global_syms, info->cu_index);
+		  psymtab->n_global_syms, info->cu_index,
+		  0);
   write_psymbols (info->symtab,
+		  info->psyms_seen,
 		  info->objfile->static_psymbols.list + psymtab->statics_offset,
-		  psymtab->n_static_syms, info->cu_index);
+		  psymtab->n_static_syms, info->cu_index,
+		  1);
 
   store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, entry->offset);
   obstack_grow (info->types_list, val, 8);
@@ -14990,6 +15009,14 @@ write_one_signatured_type (void **slot, void *d)
   ++info->cu_index;
 
   return 1;
+}
+
+/* A cleanup function for an htab_t.  */
+
+static void
+cleanup_htab (void *arg)
+{
+  htab_delete (arg);
 }
 
 /* Create an index file for OBJFILE in the directory DIR.  */
@@ -15006,6 +15033,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   offset_type val, size_of_contents, total_len;
   struct stat st;
   char buf[8];
+  htab_t psyms_seen;
 
   if (!objfile->psymtabs)
     return;
@@ -15038,6 +15066,10 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   obstack_init (&types_cu_list);
   make_cleanup_obstack_free (&types_cu_list);
 
+  psyms_seen = htab_create_alloc (100, htab_hash_pointer, htab_eq_pointer,
+				  NULL, xcalloc, xfree);
+  make_cleanup (cleanup_htab, psyms_seen);
+
   /* The list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
@@ -15048,11 +15080,15 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
       gdb_byte val[8];
 
       write_psymbols (symtab,
+		      psyms_seen,
 		      objfile->global_psymbols.list + psymtab->globals_offset,
-		      psymtab->n_global_syms, i);
+		      psymtab->n_global_syms, i,
+		      0);
       write_psymbols (symtab,
+		      psyms_seen,
 		      objfile->static_psymbols.list + psymtab->statics_offset,
-		      psymtab->n_static_syms, i);
+		      psymtab->n_static_syms, i,
+		      1);
 
       add_address_entry (objfile, &addr_obstack, psymtab, i);
 
@@ -15070,6 +15106,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
       sig_data.objfile = objfile;
       sig_data.symtab = symtab;
       sig_data.types_list = &types_cu_list;
+      sig_data.psyms_seen = psyms_seen;
       sig_data.cu_index = dwarf2_per_objfile->n_comp_units;
       htab_traverse_noresize (dwarf2_per_objfile->signatured_types,
 			      write_one_signatured_type, &sig_data);
@@ -15087,7 +15124,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   total_len = size_of_contents;
 
   /* The version number.  */
-  val = MAYBE_SWAP (2);
+  val = MAYBE_SWAP (3);
   obstack_grow (&contents, &val, sizeof (val));
 
   /* The offset of the CU list from the start of the file.  */
@@ -15144,18 +15181,16 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 
    1. The file header.  This is a sequence of values, of offset_type
    unless otherwise noted:
-   [0] The version number.  Currently 1 or 2.  The differences are
-   noted below.  Version 1 did not account for .debug_types sections;
-   the presence of a .debug_types section invalidates any version 1
-   index that may exist.
+
+   [0] The version number, currently 3.  Versions 1 and 2 are
+   obsolete.
    [1] The offset, from the start of the file, of the CU list.
-   [1.5] In version 2, the offset, from the start of the file, of the
-   types CU list.  This offset does not appear in version 1.  Note
-   that this can be empty, in which case this offset will be equal to
-   the next offset.
-   [2] The offset, from the start of the file, of the address section.
-   [3] The offset, from the start of the file, of the symbol table.
-   [4] The offset, from the start of the file, of the constant pool.
+   [2] The offset, from the start of the file, of the types CU list.
+   Note that this section can be empty, in which case this offset will
+   be equal to the next offset.
+   [3] The offset, from the start of the file, of the address section.
+   [4] The offset, from the start of the file, of the symbol table.
+   [5] The offset, from the start of the file, of the constant pool.
 
    2. The CU list.  This is a sequence of pairs of 64-bit
    little-endian values, sorted by the CU offset.  The first element
@@ -15166,19 +15201,19 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
    type CUs, then conceptually CUs and type CUs form a single list for
    the purposes of CU indices.
 
-   2.5 The types CU list.  This does not appear in a version 1 index.
-   This is a sequence of triplets of 64-bit little-endian values.  In
-   a triplet, the first value is the CU offset, the second value is
-   the type offset in the CU, and the third value is the type
-   signature.  The types CU list is not sorted.
+   3. The types CU list.  This is a sequence of triplets of 64-bit
+   little-endian values.  In a triplet, the first value is the CU
+   offset, the second value is the type offset in the CU, and the
+   third value is the type signature.  The types CU list is not
+   sorted.
 
-   3. The address section.  The address section consists of a sequence
+   4. The address section.  The address section consists of a sequence
    of address entries.  Each address entry has three elements.
    [0] The low address.  This is a 64-bit little-endian value.
    [1] The high address.  This is a 64-bit little-endian value.
    [2] The CU index.  This is an offset_type value.
 
-   4. The symbol table.  This is a hash table.  The size of the hash
+   5. The symbol table.  This is a hash table.  The size of the hash
    table is always a power of 2.  The initial hash and the step are
    currently defined by the `find_slot' function.
 
@@ -15200,7 +15235,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
    element in the hash table is used to indicate which CUs define the
    symbol.
 
-   5. The constant pool.  This is simply a bunch of bytes.  It is
+   6. The constant pool.  This is simply a bunch of bytes.  It is
    organized so that alignment is correct: CU vectors are stored
    first, followed by strings.  */
 static void
