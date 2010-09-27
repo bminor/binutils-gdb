@@ -146,4 +146,4 @@ Disassembly of section .text:
 .*:	eb 96 5f ff 00 0f [ 	]*tracg	%r9,%r6,4095\(%r5\)
 .*:	e3 95 af ff 00 82 [ 	]*xg	%r9,4095\(%r5,%r10\)
 .*:	b9 82 00 96 [ 	]*xgr	%r9,%r6
-.*:	07 07 [	 ]*bcr	0,%r7
+.*:	07 07 [	 ]*nopr	%r7

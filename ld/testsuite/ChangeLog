@@ -1,3 +1,10 @@
+2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* ld-s390/tlsbin.dd: bcr 0,%r7 -> nopr %r7.
+	* ld-s390/tlsbin_64.dd: Likewise.
+	* ld-s390/tlspic.dd: Likewise.
+	* ld-s390/tlspic_64.dd: Likewise.
+
 2010-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11812

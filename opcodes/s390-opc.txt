@@ -107,10 +107,10 @@ b7 lctl RS_CCRD "load control" g5 esa,zarch
 82 lpsw S_RD "load PSW" g5 esa,zarch
 18 lr RR_RR "load" g5 esa,zarch
 b1 lra RX_RRRD "load real address" g5 esa,zarch
-25 lrdr RR_FF "load rounded (ext. to long)" g5 esa,zarch
-35 lrer RR_FF "load rounded (long to short)" g5 esa,zarch
 25 ldxr RR_FF "load rounded (ext. to long)" g5 esa,zarch
+25 lrdr RR_FF "load rounded (ext. to long)" g5 esa,zarch
 35 ledr RR_FF "load rounded (long to short)" g5 esa,zarch
+35 lrer RR_FF "load rounded (long to short)" g5 esa,zarch
 22 ltdr RR_FF "load and test (long)" g5 esa,zarch
 32 lter RR_FF "load and test (short)" g5 esa,zarch
 12 ltr RR_RR "load and test" g5 esa,zarch
@@ -119,10 +119,10 @@ b24b lura RRE_RR "load using real address" g5 esa,zarch
 af mc SI_URD "monitor call" g5 esa,zarch
 6c md RX_FRRD "multiply (long)" g5 esa,zarch
 2c mdr RR_FF "multiply (long)" g5 esa,zarch
-7c me RX_FRRD "multiply (short to long)" g5 esa,zarch
 7c mde RX_FRRD "multiply (short to long)" g5 esa,zarch
-3c mer RR_FF "multiply (short to long)" g5 esa,zarch
+7c me RX_FRRD "multiply (short to long)" g5 esa,zarch
 3c mder RR_FF "multiply short to long hfp" g5 esa,zarch
+3c mer RR_FF "multiply (short to long)" g5 esa,zarch
 4c mh RX_RRRD "multiply halfword" g5 esa,zarch
 fc mp SS_LLRDRD "multiply decimal" g5 esa,zarch
 1c mr RR_RR "multiply" g5 esa,zarch
@@ -259,7 +259,9 @@ a8 mvcle RS_RRRD "move long extended" g5 esa,zarch
 a70c mhi RI_RI "multiply halfword immediate" g5 esa,zarch
 b252 msr RRE_RR "multiply single" g5 esa,zarch
 71 ms RX_RRRD "multiply single" g5 esa,zarch
+a700 tmlh RI_RU "test under mask low high" g5 esa,zarch
 a700 tmh RI_RU "test under mask high" g5 esa,zarch
+a701 tmll RI_RU "test under mask low low" g5 esa,zarch
 a701 tml RI_RU "test under mask low" g5 esa,zarch
 0700 nopr RR_0R_OPT "no operation" g5 esa,zarch
 0700 b*8r RR_0R "conditional branch" g5 esa,zarch
@@ -366,8 +368,6 @@ b277 rp S_RD "resume program" g5 esa,zarch
 b27d stsi S_RD "store system information" g5 esa,zarch
 01ff trap2 E "trap" g5 esa,zarch
 b2ff trap4 S_RD "trap4" g5 esa,zarch
-a700 tmlh RI_RU "test under mask low high" g5 esa,zarch
-a701 tmll RI_RU "test under mask low low" g5 esa,zarch
 b278 stcke S_RD "store clock extended" g5 esa,zarch
 b2a5 tre RRE_RR "translate extended" g5 esa,zarch
 eb000000008e mvclu RSE_RRRD "move long unicode" g5 esa,zarch

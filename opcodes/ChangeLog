@@ -1,3 +1,11 @@
+2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-dis.c (print_insn_s390): Pick instruction with most
+	specific mask.
+	* s390-opc.c: Add unused bits to the insn mask.
+	* s390-opc.txt: Reorder some instructions to prefer more recent
+	versions.
+
 2010-09-27  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* arm_dis.c (print_insn_coprocessor): Apply off-by-alignment
