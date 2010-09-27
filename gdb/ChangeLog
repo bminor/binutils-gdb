@@ -1,5 +1,9 @@
 2010-09-27  Tom Tromey  <tromey@redhat.com>
 
+	* bcache.c (expand_hash_table): Use hash_function, not hash.
+
+2010-09-27  Tom Tromey  <tromey@redhat.com>
+
 	* gdb_wchar.h: Change minimum libiconv to 0x108.
 
 2010-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>

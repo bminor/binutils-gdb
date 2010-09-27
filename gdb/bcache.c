@@ -184,7 +184,8 @@ expand_hash_table (struct bcache *bcache)
 	  struct bstring **new_bucket;
 	  next = s->next;
 
-	  new_bucket = &new_buckets[(hash (&s->d.data, s->length)
+	  new_bucket = &new_buckets[(bcache->hash_function (&s->d.data,
+							    s->length)
 				     % new_num_buckets)];
 	  s->next = *new_bucket;
 	  *new_bucket = s;
