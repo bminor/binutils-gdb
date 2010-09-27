@@ -122,6 +122,38 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct type *func_type,
     }
 }
 
+/* Check that the code pointed to by PC corresponds to a call to
+   __main, skip it if so.  Return PC otherwise.  */
+
+static CORE_ADDR
+amd64_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  gdb_byte op;
+
+  target_read_memory (pc, &op, 1);
+  if (op == 0xe8)
+    {
+      gdb_byte buf[4];
+
+      if (target_read_memory (pc + 1, buf, sizeof buf) == 0)
+ 	{
+ 	  struct minimal_symbol *s;
+ 	  CORE_ADDR call_dest;
+
+	  call_dest = pc + 5 + extract_signed_integer (buf, 4, byte_order);
+ 	  s = lookup_minimal_symbol_by_pc (call_dest);
+ 	  if (s != NULL
+ 	      && SYMBOL_LINKAGE_NAME (s) != NULL
+ 	      && strcmp (SYMBOL_LINKAGE_NAME (s), "__main") == 0)
+ 	    pc += 5;
+ 	}
+    }
+
+  return pc;
+}
+
+
 static void
 amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -140,6 +172,7 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->memory_args_by_pointer = 1;
   tdep->integer_param_regs_saved_in_caller_frame = 1;
   set_gdbarch_return_value (gdbarch, amd64_windows_return_value);
+  set_gdbarch_skip_main_prologue (gdbarch, amd64_skip_main_prologue);
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }

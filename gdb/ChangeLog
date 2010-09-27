@@ -1,3 +1,9 @@
+2010-09-27  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* amd64-windows-tdep.c (amd64_skip_main_prologue): New function.
+	(amd64_windows_init_abi): Register amd64_skip_main_prologue as gdbarch
+	skip_main_prologue method.
+
 2010-09-27  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_read_index): Only allow version 3.
