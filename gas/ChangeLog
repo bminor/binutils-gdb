@@ -1,3 +1,8 @@
+2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c: (md_parse_option): New option -march=z196.
+	* doc/c-s390.texi: Document new option.
+
 2010-09-27  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* config/tc-arm.c (do_neon_ldr_str): Deprecate ARM-mode PC-relative

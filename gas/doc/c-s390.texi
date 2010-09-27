@@ -17,7 +17,7 @@
 The s390 version of @code{@value{AS}} supports two architectures modes
 and seven chip levels. The architecture modes are the Enterprise System
 Architecture (ESA) and the newer z/Architecture mode. The chip levels
-are g5, g6, z900, z990, z9-109, z9-ec and z10.
+are g5, g6, z900, z990, z9-109, z9-ec, z10 and z196.
 
 @menu
 * s390 Options::                Command-line Options.
@@ -64,8 +64,9 @@ are recognized:
 @code{z900},
 @code{z990},
 @code{z9-109},
-@code{z9-ec} and
-@code{z10}.
+@code{z9-ec},
+@code{z10} and
+@code{z196}.
 Assembling an instruction that is not supported on the target processor
 results in an error message. Do not specify @code{g5} or @code{g6}
 with @samp{-mzarch}.

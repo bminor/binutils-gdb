@@ -419,7 +419,7 @@ e3000000000e cvbg RXE_RRRD "convert to binary 64" z900 zarch
 e30000000024 stg RXE_RRRD "store 64" z900 zarch
 e30000000080 ng RXE_RRRD "and 64" z900 zarch
 e30000000021 clg RXE_RRRD "compare logical 64" z900 zarch
-e30000000031 clgf RXE_RRRD "comparee logical 64<32" z900 zarch
+e30000000031 clgf RXE_RRRD "compare logical 64<32" z900 zarch
 e30000000081 og RXE_RRRD "or 64" z900 zarch
 e30000000082 xg RXE_RRRD "exclusive or 64" z900 zarch
 e30000000004 lg RXE_RRRD "load 64" z900 zarch
@@ -776,6 +776,8 @@ b9b2 cu41 RRE_RR "convert utf-32 to utf-8" z9-109 zarch
 b2a7 cu12 RRF_M0RR "convert utf-8 to utf-16" z9-109 zarch
 b2a7 cutfu RRF_M0RR "convert utf-8 to unicode" z9-109 zarch
 b9b0 cu14 RRF_M0RR "convert utf-8 to utf-32" z9-109 zarch
+b9eb srstu RRE_RR "search string unicode" z9-109 zarch
+d0 trtr SS_L0RDRD "tranlate and test reverse" z9-109 zarch
 # z9-109 unnormalized hfp multiply & multiply and add
 b33b myr RRF_F0FF "multiply unnormalized long hfp" z9-109 zarch
 b33d myhr RRF_F0FF "multiply unnormalized long hfp high" z9-109 zarch
@@ -958,3 +960,136 @@ b9a2 ptf RRE_R0 "perform topology function" z10 zarch
 b9af pfmf RRE_RR "perform frame management function" z10 zarch
 b9bf trte RRF_M0RR "translate and test extended" z10 zarch
 b9bd trtre RRF_M0RR "translate and test reverse extended" z10 zarch
+b9c8 ahhhr RRF_R0RR2 "add high high" z196 zarch
+b9d8 ahhlr RRF_R0RR2 "add high low" z196 zarch
+cc08 aih RIL_RI "add immediate high" z196 zarch
+b9ca alhhhr RRF_R0RR2 "add logical high high" z196 zarch
+b9da alhhlr RRF_R0RR2 "add logical high low" z196 zarch
+cc0a alsih RIL_RI "add logical with signed immediate high with cc" z196 zarch
+cc0b alsihn RIL_RI "add logical with signed immediate high no cc" z196 zarch
+cc06 brcth RIL_RP "branch relative on count high" z196 zarch
+b9cd chhr RRE_RR "compare high high" z196 zarch
+b9dd chlr RRE_RR "compare high low" z196 zarch
+e300000000cd chf RXY_RRRD "compare high" z196 zarch
+cc0d cih RIL_RI "compare immediate high" z196 zarch
+b9cf clhhr RRE_RR "compare logical high high" z196 zarch
+b9df clhlr RRE_RR "compare logical high low" z196 zarch
+e300000000cf clhf RXY_RRRD "compare logical high" z196 zarch
+cc0f clih RIL_RI "compare logical immediate" z196 zarch
+e300000000c0 lbh RXY_RRRD "load byte high" z196 zarch
+e300000000c4 lhh RXY_RRRD "load halfword high" z196 zarch
+e300000000ca lfh RXY_RRRD "load high" z196 zarch
+e300000000c2 llch RXY_RRRD "load logical character high" z196 zarch
+e300000000c6 llhh RXY_RRRD "load logical halfword high" z196 zarch
+ec000000005D risbhg RIE_RRUUU "rotate then insert selected bits high" z196 zarch
+ec0000000051 risblg RIE_RRUUU "rotate then insert selected bits low" z196 zarch
+e300000000c3 stch RXY_RRRD "store character high" z196 zarch
+e300000000c7 sthh RXY_RRRD "store halfword high" z196 zarch
+e300000000cb stfh RXY_RRRD "store high" z196 zarch
+b9c9 shhhr RRF_R0RR2 "subtract high high" z196 zarch
+b9d9 shhlr RRF_R0RR2 "subtract high low" z196 zarch
+b9cb slhhhr RRF_R0RR2 "subtract logical high high" z196 zarch
+b9db slhhlr RRF_R0RR2 "subtract logical high low" z196 zarch
+eb00000000f8 laa RSY_RRRD "load and add 32 bit" z196 zarch
+eb00000000e8 laag RSY_RRRD "load and add 64 bit" z196 zarch
+eb00000000fa laal RSY_RRRD "load and add logical 32 bit" z196 zarch
+eb00000000ea laalg RSY_RRRD "load and add logical 64 bit" z196 zarch
+eb00000000f4 lan RSY_RRRD "load and and 32 bit" z196 zarch
+eb00000000e4 lang RSY_RRRD "load and and 64 bit" z196 zarch
+eb00000000f7 lax RSY_RRRD "load and exclusive or 32 bit" z196 zarch
+eb00000000e7 laxg RSY_RRRD "load and exclusive or 64 bit" z196 zarch
+eb00000000f6 lao RSY_RRRD "load and or 32 bit" z196 zarch
+eb00000000e6 laog RSY_RRRD "load and or 64 bit" z196 zarch
+c804 lpd SSF_RRDRD2 "load pair disjoint 32 bit" z196 zarch
+c805 lpdg SSF_RRDRD2 "load pair disjoint 64 bit" z196 zarch
+b9f2 locr RRF_U0RR "load on condition 32 bit" z196 zarch
+b9f200000000 locr*16 RRF_00RR "load on condition 32 bit" z196 zarch
+b9e2 locgr RRF_U0RR "load on condition 64  bit" z196 zarch
+b9e200000000 locgr*16 RRF_00RR "load on condition 64  bit" z196 zarch
+eb00000000f2 loc RSY_RDRM "load on condition 32 bit" z196 zarch
+eb00000000f2 loc*12 RSY_RDR0 "load on condition 32 bit" z196 zarch
+eb00000000e2 lgoc RSY_RDRM "load on condition 64 bit" z196 zarch
+eb00000000e2 lgoc*12 RSY_RDR0 "load on condition 64 bit" z196 zarch
+eb00000000f3 stoc RSY_RDRM "store on condition 32 bit" z196 zarch
+eb00000000f3 stoc*12 RSY_RDR0 "store on condition 32 bit" z196 zarch
+eb00000000e3 stgoc RSY_RDRM "store on condition 64 bit" z196 zarch
+eb00000000e3 stgoc*12 RSY_RDR0 "store on condition 64 bit" z196 zarch
+b9f8 ark RRF_R0RR2 "add 3 operands 32 bit" z196 zarch
+b9e8 agrk RRF_R0RR2 "add 3 operands 64 bit" z196 zarch
+ec00000000d8 ahik RIE_RRI0 "add immediate 3 operands 32 bit" z196 zarch
+ec00000000d9 aghik RIE_RRI0 "add immediate 3 operands 64 bit" z196 zarch
+b9fa alrk RRF_R0RR2 "add logical 3 operands 32 bit" z196 zarch
+b9ea algrk RRF_R0RR2 "add logical 3 operands 64 bit" z196 zarch
+ec00000000da alhsik RIE_RRI0 "add logical immediate 3 operands 32 bit" z196 zarch
+ec00000000db alghsik RIE_RRI0 "add logical immediate 3 operands 64 bit" z196 zarch
+b9f4 nrk RRF_R0RR2 "and 3 operands 32 bit" z196 zarch
+b9e4 ngrk RRF_R0RR2 "and 3 operands 64 bit" z196 zarch
+b9f7 xrk RRF_R0RR2 "xor 3 operands 32 bit" z196 zarch
+b9e7 xgrk RRF_R0RR2 "xor 3 operands 64 bit" z196 zarch
+b9f6 ork RRF_R0RR2 "or 3 operands 32 bit" z196 zarch
+b9e6 ogrk RRF_R0RR2 "or 3 operands 64 bit" z196 zarch
+eb00000000dd slak RSY_RRRD "shift left single 3 operands 32 bit" z196 zarch
+eb00000000df sllk RSY_RRRD "shift left single logical 3 operands 32 bit" z196 zarch
+eb00000000dc srak RSY_RRRD "shift right single 3 operands 32 bit" z196 zarch
+eb00000000de srlk RSY_RRRD "shift right single logical 3 operands 32 bit" z196 zarch
+b9f9 srk RRF_R0RR2 "subtract 3 operands 32 bit" z196 zarch
+b9e9 sgrk RRF_R0RR2 "subtract 3 operands 64 bit" z196 zarch
+b9fb slrk RRF_R0RR2 "subtract logical 3 operands 32 bit" z196 zarch
+b9eb slgrk RRF_R0RR2 "subtract logical 3 operands 64 bit" z196 zarch
+b9e1 popcnt RRE_RR "population count" z196 zarch
+b9ae rrbm RRE_RR "reset reference bits multiple" z196 zarch
+b394 cefbra RRF_UUFR "convert from 32 bit fixed to short bfp with rounding mode" z196 zarch
+b395 cdfbra RRF_UUFR "convert from 32 bit fixed to long bfp with rounding mode" z196 zarch
+b396 cxfbra RRF_UUFR "convert from 32 bit fixed to extended bfp with rounding mode" z196 zarch
+b3a4 cegbra RRF_UUFR "convert from 64 bit fixed to short bfp with rounding mode" z196 zarch
+b3a5 cdgbra RRF_UUFR "convert from 64 bit fixed to long bfp with rounding mode" z196 zarch
+b3a6 cxgbra RRF_UUFR "convert from 64 bit fixed to extended bfp with rounding mode" z196 zarch
+b390 celfbr RRF_UUFR "convert from 32 bit logical fixed to short bfp with rounding mode" z196 zarch
+b391 cdlfbr RRF_UUFR "convert from 32 bit logical fixed to long bfp with rounding mode" z196 zarch
+b392 cxlfbr RRF_UUFR "convert from 32 bit logical fixed to extended bfp with rounding mode" z196 zarch
+b3a0 celgbr RRF_UUFR "convert from 64 bit logical fixed to short bfp with rounding mode" z196 zarch
+b3a1 cdlgbr RRF_UUFR "convert from 64 bit logical fixed to long bfp with rounding mode" z196 zarch
+b3a2 cxlgbr RRF_UUFR "convert from 64 bit logical fixed to extended bfp with rounding mode" z196 zarch
+b398 cfebra RRF_UURF "convert to 32 bit fixed from short bfp with rounding mode" z196 zarch
+b399 cfdbra RRF_UURF "convert to 32 bit fixed from long bfp with rounding mode" z196 zarch
+b39a cfxbra RRF_UURF "convert to 32 bit fixed from extended bfp with rounding mode" z196 zarch
+b3a8 cgebra RRF_UURF "convert to 64 bit fixed from short bfp with rounding mode" z196 zarch
+b3a9 cgdbra RRF_UURF "convert to 64 bit fixed from long bfp with rounding mode" z196 zarch
+b3aa cgxbra RRF_UURF "convert to 64 bit fixed from extended bfp with rounding mode" z196 zarch
+b39c clfebr RRF_UURF "convert to 32 bit fixed logical from short bfp with rounding mode" z196 zarch
+b39d clfdbr RRF_UURF "convert to 32 bit fixed logical from long bfp with rounding mode" z196 zarch
+b39e clfxbr RRF_UURF "convert to 32 bit fixed logical from extended bfp with rounding mode" z196 zarch
+b3ac clgebr RRF_UURF "convert to 64 bit fixed logical from short bfp with rounding mode" z196 zarch
+b3ad clgdbr RRF_UURF "convert to 64 bit fixed logical from long bfp with rounding mode" z196 zarch
+b3ae clgxbr RRF_UURF "convert to 64 bit fixed logical from extended bfp with rounding mode" z196 zarch
+b357 fiebra RRF_UUFF "load fp integer short bfp with rounding mode" z196 zarch
+b35f fidbra RRF_UUFF "load fp integer long bfp with rounding mode" z196 zarch
+b347 fixbra RRF_UUFF "load fp integer extended bfp with rounding mode" z196 zarch
+b344 ledbra RRF_UUFF "load rounded short/long bfp to short/long bfp with rounding mode" z196 zarch
+b345 ldxbra RRF_UUFF "load rounded long/extended bfp to long/extended bfp with rounding mode" z196 zarch
+b346 lexbra RRF_UUFF "load rounded short/extended bfp to short/extended bfp with rounding mode" z196 zarch
+b3d2 adtra RRF_FUFF2 "add long dfp with rounding mode" z196 zarch
+b3da axtra RRF_FUFF2 "add extended dfp with rounding mode" z196 zarch
+b3f1 cdgtra RRF_UUFR "convert from fixed long dfp with rounding mode" z196 zarch
+b951 cdftr RRF_UUFR "convert from 32 bit fixed to long dfp with rounding mode" z196 zarch
+b959 cxftr RRF_UUFR "convert from 32 bit fixed to extended dfp with rounding mode" z196 zarch
+b3f9 cxgtra RRF_UUFR "convert from fixed extended dfp with rounding mode" z196 zarch
+b952 cdlgtr RRF_UUFR "convert from 64 bit fixed logical to long dfp with rounding mode" z196 zarch
+b95a cxlgtr RRF_UUFR "convert from 64 bit fixed logical to extended dfp with rounding mode" z196 zarch
+b953 cdlftr RRF_UUFR "convert from 32 bit fixed logical to long dfp with rounding mode" z196 zarch
+b95b cxlftr RRF_UUFR "convert from 32 bit fixed logical to extended dfp with rounding mode" z196 zarch
+b3e1 cgdtra RRF_UURF "convert to 64 bit fixed from long dfp with rounding mode" z196 zarch
+b3e9 cgxtra RRF_UURF "convert to 64 bit fixed from extended dfp with rounding mode" z196 zarch
+b941 cfdtr RRF_UURF "convert to 32 bit fixed from long dfp source with rounding mode" z196 zarch
+b949 cfxtr RRF_UURF "convert to 32 bit fixed from extended dfp source with rounding mode" z196 zarch
+b942 clgdtr RRF_UURF "convert to 64 bit fixed logical from long dfp with rounding mode" z196 zarch
+b94a clgxtr RRF_UURF "convert to 64 bit fixed logical from extended dfp with rounding mode" z196 zarch
+b943 clfdtr RRF_UURF "convert to 32 bit fixed logical from long dfp with rounding mode" z196 zarch
+b94b clfxtr RRF_UURF "convert to 32 bit fixed logical from extended dfp with rounding mode" z196 zarch
+b3d1 ddtra RRF_FUFF2 "divide long dfp with rounding mode" z196 zarch
+b3d9 dxtra RRF_FUFF2 "divide extended dfp with rounding mode" z196 zarch
+b3d0 mdtra RRF_FUFF2 "multiply long dfp with rounding mode" z196 zarch
+b3d8 mxtra RRF_FUFF2 "multiply extended dfp with rounding mode" z196 zarch
+b3d3 sdtra RRF_FUFF2 "subtract long dfp with rounding mode" z196 zarch
+b3db sxtra RRF_FUFF2 "subtract extended dfp with rounding mode" z196 zarch
+b2b8 srnmb S_RD "set 3 bit bfp rounding mode" z196 zarch

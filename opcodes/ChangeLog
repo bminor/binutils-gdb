@@ -1,5 +1,12 @@
 2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
+	* s390-mkopc.c (enum s390_opcde_cpu_val): Add S390_OPCODE_Z196.
+	(main): Recognize the new CPU string.
+	* s390-opc.c: Add new instruction formats and masks.
+	* s390-opc.txt: Add new z196 instructions.
+
+2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
 	* s390-dis.c (print_insn_s390): Pick instruction with most
 	specific mask.
 	* s390-opc.c: Add unused bits to the insn mask.

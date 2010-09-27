@@ -1,5 +1,13 @@
 2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
+	* gas/s390/s390.exp: Run the zarch-z196 test.
+	* gas/s390/zarch-z196.d: Add new instructions.
+	* gas/s390/zarch-z196.s: Likewise.
+	* gas/s390/zarch-z9-109.d: Likewise.
+	* gas/s390/zarch-z9-109.s: Likewise.
+
+2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
 	* gas/s390/esa-g5.d: Adjust serveral instructions.
 	* gas/s390/esa-reloc.d: Likewise.
 	* gas/s390/esa-z990.d: Likewise.
