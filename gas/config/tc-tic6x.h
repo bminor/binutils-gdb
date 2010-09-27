@@ -147,6 +147,9 @@ extern void tic6x_start_line_hook (void);
 extern void tic6x_cons_fix_new (fragS *frag, int where, int size,
 				expressionS *exp);
 
+#define tc_fix_adjustable(FIX) tic6x_fix_adjustable (FIX)
+extern bfd_boolean tic6x_fix_adjustable (struct fix *);
+
 #define tc_frob_label(sym) tic6x_frob_label (sym)
 extern void tic6x_frob_label (symbolS *sym);
 

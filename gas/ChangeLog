@@ -1,3 +1,9 @@
+2010-09-27  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* config/tc-tic6x.c (tic6x_fix_adjustable): New function.
+	* config/tc-tic6x.h (tic6x_fix_adjustable): Declare.
+	(tc_fix_adjustable): New macro.
+
 2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c: (md_parse_option): New option -march=z196.

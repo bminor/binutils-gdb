@@ -1,3 +1,8 @@
+2010-09-27  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* gas/tic6x/got-reloc.s: New test.
+	* gas/tic6x/got-reloc.d: New test.
+
 2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/s390/s390.exp: Run the zarch-z196 test.

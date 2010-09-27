@@ -1591,6 +1591,25 @@ tic6x_init_fix_data (fixS *fixP)
   fixP->tc_fix_data.fix_adda = FALSE;
 }
 
+/* Return true if the fix can be handled by GAS, false if it must
+   be passed through to the linker.  */
+
+bfd_boolean
+tic6x_fix_adjustable (fixS *fixP)
+{
+  switch (fixP->fx_r_type)
+    {
+      /* Adjust_reloc_syms doesn't know about the GOT.  */
+    case BFD_RELOC_C6000_SBR_GOT_U15_W:
+    case BFD_RELOC_C6000_SBR_GOT_H16_W:
+    case BFD_RELOC_C6000_SBR_GOT_L16_W:
+      return 0;
+
+    default:
+      return 1;
+    }
+}
+
 /* Given the fine-grained form of an operand, return the coarse
    (bit-mask) form.  */
 
