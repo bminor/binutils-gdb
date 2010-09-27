@@ -52,12 +52,11 @@
 /* We use "btowc" as a sentinel to detect functioning wchar_t support.
    We check for either __STDC_ISO_10646__ or a new-enough libiconv in
    order to ensure we can convert to and from wchar_t.  We choose
-   libiconv version 0x10D because it was reported that earlier
-   versions do not always accept "wchar_t" as an encoding
-   argument.  */
+   libiconv version 0x108 because it is the first version with
+   iconvlist.  */
 #if defined (HAVE_ICONV) && defined (HAVE_WCHAR_H) && defined (HAVE_BTOWC) \
   && (defined (__STDC_ISO_10646__) \
-      || (defined (_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x10D))
+      || (defined (_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x108))
 
 #include <wchar.h>
 #include <wctype.h>
@@ -84,7 +83,7 @@ typedef wint_t gdb_wint_t;
 #else
 #define INTERMEDIATE_ENCODING "UCS-4LE"
 #endif
-#elif defined (_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x10D
+#elif defined (_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x108
 #define INTERMEDIATE_ENCODING "wchar_t"
 #else
 /* This shouldn't happen, because the earlier #if should have filtered
