@@ -1,3 +1,7 @@
+2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-mkopc.c (enum s390_opcde_cpu_val): Add S390_OPCODE_Z196.

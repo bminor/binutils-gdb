@@ -1,3 +1,7 @@
+2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2010-09-23  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* scripttempl/armcoff.sc: Revert 2010-09-22 change.
