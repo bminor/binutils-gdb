@@ -1,4 +1,8 @@
 2010-09-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Announce Ravenscar Profile support.
+
+2010-09-28  Joel Brobecker  <brobecker@adacore.com>
 	    Jerome Guitton  <guitton@adacore.com>
 
 	* ravenscar-thread.c, ravenscar-thread.h, ravenscar-sparc-thread.c:

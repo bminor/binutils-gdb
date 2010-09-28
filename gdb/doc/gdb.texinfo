@@ -12861,6 +12861,8 @@ to be difficult.
 * Stopping Before Main Program:: Debugging the program during elaboration.
 * Ada Tasks::                   Listing and setting breakpoints in tasks.
 * Ada Tasks and Core Files::    Tasking Support when Debugging Core Files
+* Ravenscar Profile::           Tasking Support when using the Ravenscar
+                                   Profile
 * Ada Glitches::                Known peculiarities of Ada mode.
 @end menu
 
@@ -13410,6 +13412,36 @@ a core file, this means that the core file must be opened with read-write
 privileges, using the command @samp{"set write on"} (@pxref{Patching}).
 Under these circumstances, you should make a backup copy of the core
 file before inspecting it with @value{GDBN}.
+
+@node Ravenscar Profile
+@subsubsection Tasking Support when using the Ravenscar Profile
+@cindex Ravenscar Profile
+
+The @dfn{Ravenscar Profile} is a subset of the Ada tasking features,
+specifically designed for systems with safety-critical real-time
+requirements.
+
+@table @code
+@kindex set ravenscar task-switching on
+@cindex task switching with program using Ravenscar Profile
+@item set ravenscar task-switching on
+Allows task switching when debugging a program that uses the Ravenscar
+Profile.  This is the default.
+
+@kindex set ravenscar task-switching off
+@item set ravenscar task-switching off
+Turn off task switching when debugging a program that uses the Ravenscar
+Profile.  This is mostly intended to disable the code that adds support
+for the Ravenscar Profile, in case a bug in either @value{GDBN} or in
+the Ravenscar runtime is preventing @value{GDBN} from working properly.
+To be effective, this command should be run before the program is started.
+
+@kindex show ravenscar task-switching
+@item show ravenscar task-switching
+Show whether it is possible to switch from task to task in a program
+using the Ravenscar Profile.
+
+@end table
 
 @node Ada Glitches
 @subsubsection Known Peculiarities of Ada Mode

@@ -67,6 +67,11 @@
   ** GDBserver is now supported on PowerPC LynxOS (versions 4.x and 5.x),
      and i686 LynxOS (version 5.x).
 
+* Ada task switching is now supported on sparc-elf targets when
+  debugging a program using the Ravenscar Profile.  For more information,
+  see the "Tasking Support when using the Ravenscar Profile" section
+  in the GDB user manual.
+
 *** Changes in GDB 7.2
 
 * Shared library support for remote targets by default
