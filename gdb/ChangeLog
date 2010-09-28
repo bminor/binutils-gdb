@@ -1,4 +1,12 @@
 2010-09-28  Joel Brobecker  <brobecker@adacore.com>
+	    Jerome Guitton  <guitton@adacore.com>
+
+	* ravenscar-thread.c, ravenscar-thread.h, ravenscar-sparc-thread.c:
+	New files.
+	* configure.tgt (sparc-*-*): Add ravenscar-thread.o and
+	ravenscar-sparc-thread.o to gdb_target_obs.
+
+2010-09-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-tasks.c (iterate_over_live_ada_tasks): New function.
 	* ada-lang.h (iterate_over_live_ada_tasks): Declare.

@@ -521,7 +521,8 @@ sparc-*-rtems*)
 	;;
 sparc-*-*)
 	# Target: SPARC
-	gdb_target_obs="sparc-tdep.o"
+	gdb_target_obs="sparc-tdep.o ravenscar-thread.o \
+			ravenscar-sparc-thread.o"
 	;;
 sparc64-*-*)
 	# Target: UltraSPARC
