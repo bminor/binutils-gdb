@@ -72,6 +72,13 @@ class Target
   can_check_for_function_pointers() const
   { return false; }
 
+  // This function is used in ICF (icf.cc).  This is set to true by
+  // the target if a relocation to a merged section can be processed
+  // to retrieve the contents of the merged section.
+  virtual bool
+  can_icf_inline_merge_sections () const
+  { return false; }
+
   // Whether a section called SECTION_NAME may have function pointers to
   // sections not eligible for safe ICF folding.
   virtual bool

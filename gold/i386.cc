@@ -175,6 +175,10 @@ class Target_i386 : public Target_freebsd<32, false>
   can_check_for_function_pointers() const
   { return true; }
 
+  virtual bool
+  can_icf_inline_merge_sections () const
+  { return true; }
+
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
   void

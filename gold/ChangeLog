@@ -1,3 +1,14 @@
+2010-09-28  Sriraman Tallam  <tmsriram@google.com>
+
+	* target.h (Target::can_icf_inline_merge_sections): New virtual
+	function. 
+	* x86_64.cc (Target__x86_64::can_icf_inline_merge_sections): New
+	virtual function.
+	* i386.cc (Target_i386::can_icf_inline_merge_sections): New
+	virtual function.
+	* icf.cc (get_section_contents): Inline merge sections only when
+	target allows it.
+
 2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

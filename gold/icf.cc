@@ -366,7 +366,8 @@ get_section_contents(bool first_iteration,
               uint64_t secn_flags = (it_v->first)->section_flags(it_v->second);
               // This reloc points to a merge section.  Hash the
               // contents of this section.
-              if ((secn_flags & elfcpp::SHF_MERGE) != 0)
+              if ((secn_flags & elfcpp::SHF_MERGE) != 0
+		  && parameters->target().can_icf_inline_merge_sections ())
                 {
                   uint64_t entsize =
                     (it_v->first)->section_entsize(it_v->second);

@@ -189,6 +189,10 @@ class Target_x86_64 : public Target_freebsd<64, false>
   can_check_for_function_pointers() const
   { return !parameters->options().pie(); }
 
+  virtual bool
+  can_icf_inline_merge_sections () const
+  { return true; }
+
   // Hook for a new output section.
   void
   do_new_output_section(Output_section*) const;
