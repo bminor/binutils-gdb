@@ -212,6 +212,27 @@ ada_task_is_alive (struct ada_task_info *task_info)
   return (task_info->state != Terminated);
 }
 
+/* Call the ITERATOR function once for each Ada task that hasn't been
+   terminated yet.  */
+
+void
+iterate_over_live_ada_tasks (ada_task_list_iterator_ftype *iterator)
+{
+  int i, nb_tasks;
+  struct ada_task_info *task;
+
+  ada_build_task_list (0);
+  nb_tasks = VEC_length (ada_task_info_s, task_list);
+
+  for (i = 0; i < nb_tasks; i++)
+    {
+      task = VEC_index (ada_task_info_s, task_list, i);
+      if (!ada_task_is_alive (task))
+        continue;
+      iterator (task);
+    }
+}
+
 /* Extract the contents of the value as a string whose length is LENGTH,
    and store the result in DEST.  */
 

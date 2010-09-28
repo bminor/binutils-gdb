@@ -1,3 +1,8 @@
+2010-09-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (iterate_over_live_ada_tasks): New function.
+	* ada-lang.h (iterate_over_live_ada_tasks): Declare.
+
 2010-09-27  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* amd64-windows-tdep.c (amd64_skip_main_prologue): New function.
