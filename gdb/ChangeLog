@@ -1,5 +1,10 @@
 2010-09-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.tgt (sparc-*-*): Set gdb_sim to ../sim/erc32/libsim.a.
+        (sparc-*-rtems*): Delete. Now redundant with sparc-*-*.
+
+2010-09-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Announce Ravenscar Profile support.
 
 2010-09-28  Joel Brobecker  <brobecker@adacore.com>

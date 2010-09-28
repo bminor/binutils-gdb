@@ -514,15 +514,11 @@ sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 	gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o sparc-tdep.o \
 			sparc-sol2-tdep.o sol2-tdep.o solib.o solib-svr4.o"
 	;;
-sparc-*-rtems*)
-	# Target: SPARC embedded with simulator
-	gdb_target_obs="sparc-tdep.o"
-	gdb_sim=../sim/erc32/libsim.a
-	;;
 sparc-*-*)
 	# Target: SPARC
 	gdb_target_obs="sparc-tdep.o ravenscar-thread.o \
 			ravenscar-sparc-thread.o"
+	gdb_sim=../sim/erc32/libsim.a
 	;;
 sparc64-*-*)
 	# Target: UltraSPARC
