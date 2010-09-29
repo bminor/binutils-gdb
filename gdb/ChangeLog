@@ -1,3 +1,9 @@
+2010-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix GDB crash on inferior calls with self-referencing classes.
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Do not call itself on static
+	member fields.
+
 2010-09-29  Doug Evans  <dje@google.com>
 
 	Workaround for gcc/45682.

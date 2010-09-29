@@ -1,3 +1,10 @@
+2010-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix GDB crash on inferior calls with self-referencing classes.
+	* gdb.dwarf2/dw2-cp-infcall-ref-static.exp: New file.
+	* gdb.dwarf2/dw2-cp-infcall-ref-static-main.c: New file.
+	* gdb.dwarf2/dw2-cp-infcall-ref-static.S: New file.
+
 2010-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix lost siginfo_t for inferior calls.
