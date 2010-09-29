@@ -86,6 +86,25 @@ case $target_triplet in {
     }
 }
 
+# aout relocs are often weird, so is mep and mips-ecoff. don't bother testing
+# som doesn't use a .text section
+# mmix doesn't like .L1:
+# ti addresses aren't octets.
+if { ![is_aout_format] } {
+    case $target_triplet in {
+	{ hppa-*-hpux* } { }
+	{ mep-*-* } { }
+	{ mips*-*-ecoff* } { }
+	{ mmix-*-* } { }
+	{ tic30*-*-* } { }
+	{ tic4x*-*-* } { }
+	{ tic54x*-*-* } { }
+	default {
+	    run_dump_test fwdexp
+	}
+    }
+}
+
 # .set works differently on some targets.
 # most of the tests won't work on targets that set linkrelax.
 # 4 octet bytes confuse address matching on ti targets.
