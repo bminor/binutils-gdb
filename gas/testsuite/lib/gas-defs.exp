@@ -277,51 +277,55 @@ proc gas_init { args } {
     return
 }
 
-#
-# is_elf_format
-#	true if the object format is known to be ELF
+# True if the object format is known to be ELF.
 #
 proc is_elf_format {} {
-    if { ![istarget *-*-sysv4*] \
-	 && ![istarget *-*-unixware*] \
-	 && ![istarget *-*-elf*] \
-	 && ![istarget *-*-eabi*] \
-	 && ![istarget hppa*64*-*-hpux*] \
-	 && ![istarget *-*-linux*] \
-	 && ![istarget frv-*-uclinux*] \
-	 && ![istarget sh*-*-uclinux*] \
-	 && ![istarget *-*-irix5*] \
-	 && ![istarget *-*-irix6*] \
-	 && ![istarget *-*-netbsd*] \
-	 && ![istarget *-*-openbsd*] \
+    if { ![istarget *-*-sysv4*]
+	 && ![istarget *-*-unixware*]
+	 && ![istarget *-*-elf*]
+	 && ![istarget *-*-eabi*]
+	 && ![istarget *-*-rtems*]
+	 && ![istarget hppa*64*-*-hpux*]
+	 && ![istarget ia64-*-hpux*]
+	 && ![istarget *-*-linux*]
+	 && ![istarget frv-*-uclinux*]
+	 && ![istarget bfin-*-uclinux]
+	 && ![istarget sh*-*-uclinux*]
+	 && ![istarget *-*-irix5*]
+	 && ![istarget *-*-irix6*]
+	 && ![istarget *-*-netbsd*]
+	 && ![istarget *-*-openbsd*]
 	 && ![istarget *-*-solaris2*] } {
 	return 0
     }
 
-    if { [istarget *-*-linux*aout*] \
-	 || [istarget *-*-linux*oldld*] } {
+    if { [istarget *-*-linux*aout*]
+	 || [istarget *-*-linux*oldld*]
+	 || [istarget h8500-*-rtems*]
+	 || [istarget i960-*-rtems*]
+	 || [istarget *-*-rtemscoff*] } {
 	return 0
     }
 
-    if { ![istarget *-*-netbsdelf*] \
-	 && ([istarget *-*-netbsd*aout*] \
-	     || [istarget *-*-netbsdpe*] \
-	     || [istarget arm*-*-netbsd*] \
-	     || [istarget sparc-*-netbsd*] \
-	     || [istarget i*86-*-netbsd*] \
-	     || [istarget m68*-*-netbsd*] \
-	     || [istarget vax-*-netbsd*] \
+    if { ![istarget *-*-netbsdelf*]
+	 && ([istarget *-*-netbsd*aout*]
+	     || [istarget *-*-netbsdpe*]
+	     || [istarget arm*-*-netbsd*]
+	     || [istarget sparc-*-netbsd*]
+	     || [istarget i*86-*-netbsd*]
+	     || [istarget m68*-*-netbsd*]
+	     || [istarget vax-*-netbsd*]
 	     || [istarget ns32k-*-netbsd*]) } {
     	return 0
     }
 
-    if { [istarget arm-*-openbsd*] \
-	 || [istarget i386-*-openbsd\[0-2\].*] \
-	 || [istarget i386-*-openbsd3.\[0-3\]] \
-	 || [istarget m68*-*-openbsd*] \
-	 || [istarget ns32k-*-openbsd*] \
-	 || [istarget sparc-*-openbsd\[0-2\].*] \
-	 || [istarget sparc-*-openbsd3.\[0-1\]] \
+    if { [istarget arm-*-openbsd*]
+	 || [istarget i386-*-openbsd\[0-2\].*]
+	 || [istarget i386-*-openbsd3.\[0-2\]]
+	 || [istarget m68*-*-openbsd*]
+	 || [istarget ns32k-*-openbsd*]
+	 || [istarget sparc-*-openbsd\[0-2\].*]
+	 || [istarget sparc-*-openbsd3.\[0-1\]]
 	 || [istarget vax-*-openbsd*] } {
 	return 0
     }
@@ -329,11 +333,49 @@ proc is_elf_format {} {
     return 1
 }
 
+# True if the object format is known to be a.out.
+#
+proc is_aout_format {} {
+    if { [istarget *-*-netbsdelf]
+	 || [istarget sparc64-*-netbsd*]
+	 || [istarget sparc64-*-openbsd*] } {
+	return 0
+    }
+    if { [istarget *-*-*\[ab\]out*]
+	 || [istarget *-*-linux*oldld*]
+	 || [istarget *-*-bsd*]
+	 || [istarget *-*-msdos*]
+	 || [istarget arm-*-netbsd*]
+	 || [istarget arm-*-openbsd*]
+	 || [istarget arm-*-riscix*]
+	 || [istarget i?86-*-freebsd\[12\]*]
+	 || [istarget i?86-*-netbsd*]
+	 || [istarget i?86-*-openbsd\[0-2\]*]
+	 || [istarget i?86-*-openbsd3.\[0-2\]*]
+	 || [istarget i?86-*-vsta]
+	 || [istarget i?86-*-mach*]
+	 || [istarget m68*-*-netbsd*]
+	 || [istarget m68*-*-openbsd*]
+	 || [istarget ns32k-*-*]
+	 || [istarget pdp11-*-*]
+	 || [istarget sparc*-*-sunos4*]
+	 || [istarget sparc*-*-netbsd*]
+	 || [istarget sparc*-*-openbsd\[0-2\]*]
+	 || [istarget sparc*-*-openbsd3.\[0-1\]*]
+	 || [istarget sparc*-fujitsu-none]
+	 || [istarget vax-dec-ultrix*]
+	 || [istarget vax-*-netbsd] } {
+	return 1
+    }
+    return 0
+}
+
 # True if the object format is known to be PE COFF.
 #
 proc is_pecoff_format {} {
-    if { ![istarget *-*-mingw*] \
-	 && ![istarget *-*-cygwin*] \
+    if { ![istarget *-*-mingw*]
+	 && ![istarget *-*-cygwin*]
+	 && ![istarget *-*-cegcc*]
 	 && ![istarget *-*-pe*] } {
 	return 0
     }
