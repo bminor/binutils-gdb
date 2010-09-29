@@ -1,3 +1,7 @@
+2010-09-29  Alan Modra  <amodra@gmail.com>
+
+	* lib/utils-lib.exp (is_elf_format): Merge with gas and ld versions.
+
 2010-09-23  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/ar.exp: Don't run unique_symbol on msp or hpux.
