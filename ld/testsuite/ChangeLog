@@ -1,3 +1,9 @@
+2010-09-29  Alan Modra  <amodra@gmail.com>
+
+	* lib/ld-lib.exp (is_elf_format): Merge with binutils and gas versions.
+	(is_aout_format): Update target list.
+	(is_pecoff_format): Remove unnecessary line continuation.
+
 2010-09-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* ld-s390/tlsbin.dd: bcr 0,%r7 -> nopr %r7.
