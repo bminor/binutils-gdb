@@ -1,3 +1,8 @@
+2010-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* rx.c (decode_opcode: RXO_int): Only break out of the emulation
+	loop if rx_syscall() does not return a RX_STEPPED result.
+
 2010-09-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* rx.c (decode_opcode): Add cycle information for RXO_smovu.

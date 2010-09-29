@@ -1232,7 +1232,9 @@ decode_opcode ()
       v = GS ();
       if (v == 255)
 	{
-	  DO_RETURN (rx_syscall (regs.r[5]));
+	  int rc = rx_syscall (regs.r[5]);
+	  if (! RX_STEPPED (rc))
+	    DO_RETURN (rc);
 	}
       else
 	{
