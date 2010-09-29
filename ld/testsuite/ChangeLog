@@ -1,5 +1,7 @@
 2010-09-29  Alan Modra  <amodra@gmail.com>
 
+	* ld-h8300/h8300.exp: Use is_elf_format.
+
 	* lib/ld-lib.exp (is_elf_format): Merge with binutils and gas versions.
 	(is_aout_format): Update target list.
 	(is_pecoff_format): Remove unnecessary line continuation.
