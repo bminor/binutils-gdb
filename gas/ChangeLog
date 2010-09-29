@@ -1,3 +1,7 @@
+2010-09-29  Alan Modra  <amodra@gmail.com>
+
+	* expr.c (expr): Correct returned segment value.
+
 2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
@@ -57,7 +61,7 @@
 	(arm_ext_m): Add support for OS extension.
 	(arm_ext_os): New variable.
 	(do_t_swi): In v6-M ensure we have the OS extension.
-	(arm_cpus): The cortex-m1 and cortex-m0 options have the OS 
+	(arm_cpus): The cortex-m1 and cortex-m0 options have the OS
 	extension by default.
 	(arm_archs): Add armv6s-m.
 	(arm_extensions): Add 'os' extension.
@@ -98,7 +102,7 @@
 	(arm_option_cpu_table): Rename...
 	(arm_option_fpu_table): ...to this.
 	(arm_fpus): Change type.
-	(arm_parse_extension): Enforce alphabetical order.  Allow 
+	(arm_parse_extension): Enforce alphabetical order.  Allow
 	extensions to be removed.
 	(arm_parse_arch): Allow extensions to be specified with -march.
 	(s_arm_arch_extension): Add.

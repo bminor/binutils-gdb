@@ -1969,16 +1969,27 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 
       if (retval != rightseg)
 	{
-	  if (! SEG_NORMAL (retval))
-	    {
-	      if (retval != undefined_section || SEG_NORMAL (rightseg))
-		retval = rightseg;
-	    }
-	  else if (SEG_NORMAL (rightseg)
+	  if (retval == undefined_section)
+	    ;
+	  else if (rightseg == undefined_section)
+	    retval = rightseg;
+	  else if (retval == expr_section)
+	    ;
+	  else if (rightseg == expr_section)
+	    retval = rightseg;
+	  else if (retval == reg_section)
+	    ;
+	  else if (rightseg == reg_section)
+	    retval = rightseg;
+	  else if (rightseg == absolute_section)
+	    ;
+	  else if (retval == absolute_section)
+	    retval = rightseg;
 #ifdef DIFF_EXPR_OK
-		   && op_left != O_subtract
+	  else if (op_left == O_subtract)
+	    ;
 #endif
-		   )
+	  else
 	    as_bad (_("operation combines symbols in different segments"));
 	}
 
