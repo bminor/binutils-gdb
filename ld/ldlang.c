@@ -5906,6 +5906,10 @@ lang_place_orphans (void)
 		      os = lang_output_section_statement_lookup (name,
 								 constraint,
 								 TRUE);
+		      if (os->addr_tree == NULL
+			  && (link_info.relocatable
+			      || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0))
+			os->addr_tree = exp_intop (0);
 		      lang_add_section (&os->children, s, os);
 		    }
 		}
