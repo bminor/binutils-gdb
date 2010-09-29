@@ -867,7 +867,6 @@
 [^:]*:854: Error: operand 1 of 'mvc' is write-only
 [^:]*:855: Error: operand 2 of 'mvc' is read-only
 [^:]*:856: Error: operand 2 of 'mvc' is read-only
-[^:]*:857: Error: operand 2 of 'mvc' is read-only
 [^:]*:858: Error: 'mv' instruction not supported on this functional unit
 [^:]*:859: Error: too many operands to 'mv'
 [^:]*:860: Error: operand 2 of 'mv' on wrong side

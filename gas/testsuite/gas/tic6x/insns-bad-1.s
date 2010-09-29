@@ -854,7 +854,7 @@ f:
 	mvc .S2 isr,b0
 	mvc .S2 b0,pce1
 	mvc .S2 b0,tsch
-	mvc .S2 b0,tscl
+
 	mv .M1 a1,a2
 	mv .L1 a1,a2,a3
 	mv .L1 a1,b2

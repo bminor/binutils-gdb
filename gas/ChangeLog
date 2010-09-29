@@ -1,3 +1,10 @@
+2010-09-29  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* gas/tic6x/insns-bad-1.s: Remove test for readonly tscl.
+	* gas/tic6x/insns-bad-1.l: Likewise.
+	* gas/tic6x/insns-c674x.d: Add test for writeable tscl.
+	* gas/tic6x/insns-c674x.s: Likewise.
+
 2010-09-29  Alan Modra  <amodra@gmail.com>
 
 	* expr.c (expr): Correct returned segment value.

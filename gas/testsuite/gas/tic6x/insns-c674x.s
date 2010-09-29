@@ -899,8 +899,9 @@ f:
 	mvc .S2 b17,ssr
 	mvc .S2 tsch,b18
 	mvc .S2 tscl,b19
-	mvc .S2 tsr,b20
-	mvc .S2 b21,tsr
+	mvc .S2 b20,tscl
+	mvc .S2 tsr,b21
+	mvc .S2 b22,tsr
 	.word 0x0001e3e2
 	.word 0x0005e3e2
 	.word 0x0181e3a2
