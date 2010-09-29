@@ -577,9 +577,15 @@ struct partial_die_info
     /* Flag set if any of the DIE's children are template arguments.  */
     unsigned int has_template_arguments : 1;
 
+    /* Flag set if fixup_partial_die has been called on this die.  */
+    unsigned int fixup_called : 1;
+
     /* The name of this DIE.  Normally the value of DW_AT_name, but
        sometimes a default name for unnamed DIEs.  */
     char *name;
+
+    /* The linkage name, if present.  */
+    const char *linkage_name;
 
     /* The scope to prepend to our children.  This is generally
        allocated on the comp_unit_obstack, so will disappear
@@ -595,6 +601,8 @@ struct partial_die_info
 
     /* Pointer into the info_buffer (or types_buffer) pointing at the target of
        DW_AT_sibling, if any.  */
+    /* NOTE: This member isn't strictly necessary, read_partial_die could
+       return DW_AT_sibling values to its caller load_partial_dies.  */
     gdb_byte *sibling;
 
     /* If HAS_SPECIFICATION, the offset of the DIE referred to by
@@ -3900,40 +3908,6 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	    add_partial_subprogram (pdi, lowpc, highpc, need_pc, cu);
 	  pdi = pdi->die_sibling;
 	}
-    }
-}
-
-/* See if we can figure out if the class lives in a namespace.  We do
-   this by looking for a member function; its demangled name will
-   contain namespace info, if there is any.  */
-
-static void
-guess_structure_name (struct partial_die_info *struct_pdi,
-		      struct dwarf2_cu *cu)
-{
-  if ((cu->language == language_cplus
-       || cu->language == language_java)
-      && cu->has_namespace_info == 0
-      && struct_pdi->has_children)
-    {
-      /* NOTE: carlton/2003-10-07: Getting the info this way changes
-	 what template types look like, because the demangler
-	 frequently doesn't give the same name as the debug info.  We
-	 could fix this by only using the demangled name to get the
-	 prefix (but see comment in read_structure_type).  */
-
-      struct partial_die_info *real_pdi;
-
-      /* If this DIE (this DIE's specification, if any) has a parent, then
-	 we should not do this.  We'll prepend the parent's fully qualified
-         name when we create the partial symbol.  */
-
-      real_pdi = struct_pdi;
-      while (real_pdi->has_specification)
-	real_pdi = find_partial_die (real_pdi->spec_offset, cu);
-
-      if (real_pdi->die_parent != NULL)
-	return;
     }
 }
 
@@ -8801,6 +8775,7 @@ read_partial_die (struct partial_die_info *part_die,
 	     one we see.  */
 	  if (cu->language == language_ada)
 	    part_die->name = DW_STRING (&attr);
+	  part_die->linkage_name = DW_STRING (&attr);
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
@@ -8984,6 +8959,57 @@ find_partial_die (unsigned int offset, struct dwarf2_cu *cu)
   return pd;
 }
 
+/* See if we can figure out if the class lives in a namespace.  We do
+   this by looking for a member function; its demangled name will
+   contain namespace info, if there is any.  */
+
+static void
+guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
+				  struct dwarf2_cu *cu)
+{
+  /* NOTE: carlton/2003-10-07: Getting the info this way changes
+     what template types look like, because the demangler
+     frequently doesn't give the same name as the debug info.  We
+     could fix this by only using the demangled name to get the
+     prefix (but see comment in read_structure_type).  */
+
+  struct partial_die_info *real_pdi;
+  struct partial_die_info *child_pdi;
+
+  /* If this DIE (this DIE's specification, if any) has a parent, then
+     we should not do this.  We'll prepend the parent's fully qualified
+     name when we create the partial symbol.  */
+
+  real_pdi = struct_pdi;
+  while (real_pdi->has_specification)
+    real_pdi = find_partial_die (real_pdi->spec_offset, cu);
+
+  if (real_pdi->die_parent != NULL)
+    return;
+
+  for (child_pdi = struct_pdi->die_child;
+       child_pdi != NULL;
+       child_pdi = child_pdi->die_sibling)
+    {
+      if (child_pdi->tag == DW_TAG_subprogram
+	  && child_pdi->linkage_name != NULL)
+	{
+	  char *actual_class_name
+	    = language_class_name_from_physname (cu->language_defn,
+						 child_pdi->linkage_name);
+	  if (actual_class_name != NULL)
+	    {
+	      struct_pdi->name
+		= obsavestring (actual_class_name,
+				strlen (actual_class_name),
+				&cu->objfile->objfile_obstack);
+	      xfree (actual_class_name);
+	    }
+	  break;
+	}
+    }
+}
+
 /* Adjust PART_DIE before generating a symbol for it.  This function
    may set the is_external flag or change the DIE's name.  */
 
@@ -8991,6 +9017,12 @@ static void
 fixup_partial_die (struct partial_die_info *part_die,
 		   struct dwarf2_cu *cu)
 {
+  /* Once we've fixed up a die, there's no point in doing so again.
+     This also avoids a memory leak if we were to call
+     guess_partial_die_structure_name multiple times.  */
+  if (part_die->fixup_called)
+    return;
+
   /* If we found a reference attribute and the DIE has no name, try
      to find a name in the referred to DIE.  */
 
@@ -9017,10 +9049,21 @@ fixup_partial_die (struct partial_die_info *part_die,
   if (part_die->name == NULL && part_die->tag == DW_TAG_namespace)
     part_die->name = "(anonymous namespace)";
 
-  if (part_die->tag == DW_TAG_structure_type
-      || part_die->tag == DW_TAG_class_type
-      || part_die->tag == DW_TAG_union_type)
-    guess_structure_name (part_die, cu);
+  /* If there is no parent die to provide a namespace, and there are
+     children, see if we can determine the namespace from their linkage
+     name.
+     NOTE: We need to do this even if cu->has_namespace_info != 0.
+     gcc-4.5 -gdwarf-4 can drop the enclosing namespace.  */
+  if (cu->language == language_cplus
+      && dwarf2_per_objfile->types.asection != NULL
+      && part_die->die_parent == NULL
+      && part_die->has_children
+      && (part_die->tag == DW_TAG_class_type
+	  || part_die->tag == DW_TAG_structure_type
+	  || part_die->tag == DW_TAG_union_type))
+    guess_partial_die_structure_name (part_die, cu);
+
+  part_die->fixup_called = 1;
 }
 
 /* Read an attribute value described by an attribute form.  */
@@ -11264,6 +11307,77 @@ read_type_die_1 (struct die_info *die, struct dwarf2_cu *cu)
   return this_type;
 }
 
+/* See if we can figure out if the class lives in a namespace.  We do
+   this by looking for a member function; its demangled name will
+   contain namespace info, if there is any.
+   Return the computed name or NULL.
+   Space for the result is allocated on the objfile's obstack.
+   This is the full-die version of guess_partial_die_structure_name.
+   In this case we know DIE has no useful parent.  */
+
+static char *
+guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct die_info *spec_die;
+  struct dwarf2_cu *spec_cu;
+  struct die_info *child;
+
+  spec_cu = cu;
+  spec_die = die_specification (die, &spec_cu);
+  if (spec_die != NULL)
+    {
+      die = spec_die;
+      cu = spec_cu;
+    }
+
+  for (child = die->child;
+       child != NULL;
+       child = child->sibling)
+    {
+      if (child->tag == DW_TAG_subprogram)
+	{
+	  struct attribute *attr;
+
+	  attr = dwarf2_attr (child, DW_AT_linkage_name, cu);
+	  if (attr == NULL)
+	    attr = dwarf2_attr (child, DW_AT_MIPS_linkage_name, cu);
+	  if (attr != NULL)
+	    {
+	      char *actual_name
+		= language_class_name_from_physname (cu->language_defn,
+						     DW_STRING (attr));
+	      char *name = NULL;
+
+	      if (actual_name != NULL)
+		{
+		  char *die_name = dwarf2_name (die, cu);
+
+		  if (die_name != NULL
+		      && strcmp (die_name, actual_name) != 0)
+		    {
+		      /* Strip off the class name from the full name.
+			 We want the prefix.  */
+		      int die_name_len = strlen (die_name);
+		      int actual_name_len = strlen (actual_name);
+
+		      /* Test for '::' as a sanity check.  */
+		      if (actual_name_len > die_name_len + 2
+			  && actual_name[actual_name_len - die_name_len - 1] == ':')
+			name =
+			  obsavestring (actual_name,
+					actual_name_len - die_name_len - 2,
+					&cu->objfile->objfile_obstack);
+		    }
+		}
+	      xfree (actual_name);
+	      return name;
+	    }
+	}
+    }
+
+  return NULL;
+}
+
 /* Return the name of the namespace/class that DIE is defined within,
    or "" if we can't tell.  The caller should not xfree the result.
 
@@ -11390,6 +11504,20 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	     members; no typedefs, no member functions, et cetera.
 	     So it does not need a prefix.  */
 	  return "";
+      case DW_TAG_compile_unit:
+	/* gcc-4.5 -gdwarf-4 can drop the enclosing namespace.  Cope.  */
+	if (cu->language == language_cplus
+	    && dwarf2_per_objfile->types.asection != NULL
+	    && die->child != NULL
+	    && (die->tag == DW_TAG_class_type
+		|| die->tag == DW_TAG_structure_type
+		|| die->tag == DW_TAG_union_type))
+	  {
+	    char *name = guess_full_die_structure_name (die, cu);
+	    if (name != NULL)
+	      return name;
+	  }
+	return "";
       default:
 	return determine_prefix (parent, cu);
       }

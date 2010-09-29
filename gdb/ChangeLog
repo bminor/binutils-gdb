@@ -1,3 +1,17 @@
+2010-09-29  Doug Evans  <dje@google.com>
+
+	Workaround for gcc/45682.
+	* dwarf2read.c (partial_die_info): New fields fixup_called,
+	linkage_name.
+	(guess_partial_die_structure_name): Renamed from guess_structure_name.
+	Move definition next to use.  Use linkage_name to determine if class
+	is in a namespace.  All callers updated.
+	(fixup_partial_die): Return early if already called.
+	Set fixup_called when done.
+	(guess_full_die_structure_name): New function.
+	(determine_prefix): Call it for class/struct/union dies if c++ and
+	.debug_types section is present and parent is DW_TAG_compile_unit.
+
 2010-09-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.tgt (sparc-*-*): Set gdb_sim to ../sim/erc32/libsim.a.
