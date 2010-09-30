@@ -1,5 +1,10 @@
 2010-09-30  Tom Tromey  <tromey@redhat.com>
 
+	* value.c (value_primitive_field): Take 'offset' into account for
+	packed field.
+
+2010-09-30  Tom Tromey  <tromey@redhat.com>
+
 	* completer.c (count_struct_fields): Handle anonymous structs and
 	unions.
 	(add_struct_fields): Likewise.

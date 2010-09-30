@@ -1973,8 +1973,9 @@ value_primitive_field (struct value *arg1, int offset,
 	v->bitpos = bitpos % container_bitsize;
       else
 	v->bitpos = bitpos % 8;
-      v->offset = value_embedded_offset (arg1)
-	+ (bitpos - v->bitpos) / 8;
+      v->offset = (value_embedded_offset (arg1)
+		   + offset
+		   + (bitpos - v->bitpos) / 8);
       v->parent = arg1;
       value_incref (v->parent);
       if (!value_lazy (arg1))

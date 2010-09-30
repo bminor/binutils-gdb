@@ -1,5 +1,10 @@
 2010-09-30  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/anon.exp: New file.
+	* gdb.base/anon.c: New file.
+
+2010-09-30  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/completion.exp: Test completion through anonymous
 	union.
 	* gdb.base/break1.c (struct some_struct): Add anonymous union.
