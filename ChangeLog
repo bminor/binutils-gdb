@@ -1,3 +1,28 @@
+2010-09-30  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Sync from GCC:
+
+	PR bootstrap/45796
+	* Makefile.def (info-gcc, dvi-gcc, pdf-gcc, html-gcc):
+	Depend on all-build-libiberty.
+	* Makefile.in: Regenerate.
+
+2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	Sync from GCC:
+
+	PR bootstrap/44621
+	* configure.ac: Fix unportable shell quoting.
+	* configure: Regenerate.
+
+2010-07-17  Jack Howarth  <howarth@bromo.med.uc.edu>
+
+	PR target/44862
+	* Makefile.tpl (POSTSTAGE1_CXX_EXPORT):
+	Provide -B option to allow for link spec %s substitutions for
+	libstdc++.a on darwin.
+	* Makefile.in: Regenerate.
+
 2010-06-10  Alexandre Oliva  <aoliva@redhat.com>
 
 	* Makefile.def (configure-gcc): Depend on all-libelf.

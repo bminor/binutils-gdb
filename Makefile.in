@@ -235,6 +235,7 @@ POSTSTAGE1_CXX_EXPORT = \
 POSTSTAGE1_CXX_EXPORT = \
 	CXX="$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/prev-gcc/g++$(exeext) \
 	  -B$$r/$(HOST_SUBDIR)/prev-gcc/ -B$(build_tooldir)/bin/ -nostdinc++ \
+	  -B$$r/prev-$(TARGET_SUBDIR)/libstdc++-v3/src/.libs \
 	  -I$$r/prev-$(TARGET_SUBDIR)/libstdc++-v3/include/$(TARGET_SUBDIR) \
 	  -I$$r/prev-$(TARGET_SUBDIR)/libstdc++-v3/include \
 	  -I$$s/libstdc++-v3/libsupc++ \
@@ -57908,6 +57909,38 @@ all-stage4-gcc: maybe-all-stage4-libiberty
 all-stageprofile-gcc: maybe-all-stageprofile-libiberty
 all-stagefeedback-gcc: maybe-all-stagefeedback-libiberty
 all-gcc: maybe-all-fixincludes
+info-gcc: maybe-all-build-libiberty
+
+info-stage1-gcc: maybe-all-build-libiberty
+info-stage2-gcc: maybe-all-build-libiberty
+info-stage3-gcc: maybe-all-build-libiberty
+info-stage4-gcc: maybe-all-build-libiberty
+info-stageprofile-gcc: maybe-all-build-libiberty
+info-stagefeedback-gcc: maybe-all-build-libiberty
+dvi-gcc: maybe-all-build-libiberty
+
+dvi-stage1-gcc: maybe-all-build-libiberty
+dvi-stage2-gcc: maybe-all-build-libiberty
+dvi-stage3-gcc: maybe-all-build-libiberty
+dvi-stage4-gcc: maybe-all-build-libiberty
+dvi-stageprofile-gcc: maybe-all-build-libiberty
+dvi-stagefeedback-gcc: maybe-all-build-libiberty
+pdf-gcc: maybe-all-build-libiberty
+
+pdf-stage1-gcc: maybe-all-build-libiberty
+pdf-stage2-gcc: maybe-all-build-libiberty
+pdf-stage3-gcc: maybe-all-build-libiberty
+pdf-stage4-gcc: maybe-all-build-libiberty
+pdf-stageprofile-gcc: maybe-all-build-libiberty
+pdf-stagefeedback-gcc: maybe-all-build-libiberty
+html-gcc: maybe-all-build-libiberty
+
+html-stage1-gcc: maybe-all-build-libiberty
+html-stage2-gcc: maybe-all-build-libiberty
+html-stage3-gcc: maybe-all-build-libiberty
+html-stage4-gcc: maybe-all-build-libiberty
+html-stageprofile-gcc: maybe-all-build-libiberty
+html-stagefeedback-gcc: maybe-all-build-libiberty
 install-gcc: maybe-install-fixincludes
 configure-libcpp: configure-libiberty
 
