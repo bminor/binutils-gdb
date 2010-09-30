@@ -1,5 +1,20 @@
 2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix printing parameters of inlined functions.
+	* ada-lang.c (is_known_support_routine)
+	(ada_unhandled_exception_name_addr_from_raise): Provide NULL parameter
+	for find_frame_funname.
+	* python/py-frame.c (frapy_name): Likewise.
+	* stack.c (find_frame_funname): New parameter funcp.  Update the
+	function comment.  Fill it in.
+	(print_frame): New variable func.  Initialize it by
+	find_frame_funname.  Print arguments only if FUNC is not NULL.  Use
+	FUNC as the parameter of print_args_stub.
+	* stack.h (find_frame_funname): New parameter funcp.  Remove the
+	function declaration comment.
+
+2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR corefiles/12071.
 	* inferior.c (have_live_inferiors): New variables old_chain, inf and
 	tp.  Iterate INFERIOR_LIST and call target_has_execution.

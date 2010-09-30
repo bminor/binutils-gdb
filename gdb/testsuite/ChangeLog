@@ -1,5 +1,12 @@
 2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix printing parameters of inlined functions.
+	* gdb.dwarf2/dw2-inline-param.exp: New file.
+	* gdb.dwarf2/dw2-inline-param-main.c: New file.
+	* gdb.dwarf2/dw2-inline-param.S: New file.
+
+2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR corefiles/12071.
 	* gdb.base/corefile.exp (quit with a process, no question: load core)
 	(quit with a core file): New tests.

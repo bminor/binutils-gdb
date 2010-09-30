@@ -10325,7 +10325,7 @@ is_known_support_routine (struct frame_info *frame)
 
   /* Check whether the function is a GNAT-generated entity.  */
 
-  find_frame_funname (frame, &func_name, &func_lang);
+  find_frame_funname (frame, &func_name, &func_lang, NULL);
   if (func_name == NULL)
     return 1;
 
@@ -10393,7 +10393,7 @@ ada_unhandled_exception_name_addr_from_raise (void)
       char *func_name;
       enum language func_lang;
 
-      find_frame_funname (fi, &func_name, &func_lang);
+      find_frame_funname (fi, &func_name, &func_lang, NULL);
       if (func_name != NULL
           && strcmp (func_name, exception_info->catch_exception_sym) == 0)
         break; /* We found the frame we were looking for...  */

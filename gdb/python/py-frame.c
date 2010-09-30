@@ -126,7 +126,7 @@ frapy_name (PyObject *self, PyObject *args)
     {
       FRAPY_REQUIRE_VALID ((frame_object *) self, frame);
 
-      find_frame_funname (frame, &name, &lang);
+      find_frame_funname (frame, &name, &lang, NULL);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 

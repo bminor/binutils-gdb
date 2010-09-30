@@ -661,16 +661,19 @@ print_frame_info (struct frame_info *frame, int print_level,
   gdb_flush (gdb_stdout);
 }
 
-/* Attempt to obtain the FUNNAME and FUNLANG of the function corresponding
-   to FRAME.  */
+/* Attempt to obtain the FUNNAME, FUNLANG and optionally FUNCP of the function
+   corresponding to FRAME.  */
+
 void
 find_frame_funname (struct frame_info *frame, char **funname,
-		    enum language *funlang)
+		    enum language *funlang, struct symbol **funcp)
 {
   struct symbol *func;
 
   *funname = NULL;
   *funlang = language_unknown;
+  if (funcp)
+    *funcp = NULL;
 
   func = get_frame_function (frame);
   if (func)
@@ -715,6 +718,8 @@ find_frame_funname (struct frame_info *frame, char **funname,
 	{
 	  *funname = SYMBOL_PRINT_NAME (func);
 	  *funlang = SYMBOL_LANGUAGE (func);
+	  if (funcp)
+	    *funcp = func;
 	  if (*funlang == language_cplus)
 	    {
 	      /* It seems appropriate to use SYMBOL_PRINT_NAME() here,
@@ -756,11 +761,12 @@ print_frame (struct frame_info *frame, int print_level,
   struct ui_stream *stb;
   struct cleanup *old_chain, *list_chain;
   struct value_print_options opts;
+  struct symbol *func;
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
 
-  find_frame_funname (frame, &funname, &funlang);
+  find_frame_funname (frame, &funname, &funlang, &func);
 
   annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
 			gdbarch, get_frame_pc (frame));
@@ -797,7 +803,7 @@ print_frame (struct frame_info *frame, int print_level,
       struct cleanup *args_list_chain;
 
       args.frame = frame;
-      args.func = find_pc_function (get_frame_address_in_block (frame));
+      args.func = func;
       args.stream = gdb_stdout;
       args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ERROR);
