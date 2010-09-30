@@ -75,7 +75,7 @@ check thumb_blx_out_of_range.stdout \
 check thumb_blx_out_of_range.stdout \
   " 800100:	e51ff004 	ldr	pc, \[pc, #-4\]"
 check thumb_blx_out_of_range.stdout \
-  " 800104:	00400006 "
+  " 800104:	00400004 "
 check thumb_blx_out_of_range.stdout \
   " 800108:	e51ff004 	ldr	pc, \[pc, #-4\]"
 check thumb_blx_out_of_range.stdout \
@@ -114,7 +114,7 @@ check thumb2_blx_out_of_range.stdout \
 check thumb2_blx_out_of_range.stdout \
   " 2000100:	e51ff004 	ldr	pc, \[pc, #-4\]"
 check thumb2_blx_out_of_range.stdout \
-  " 2000104:	01000006 "
+  " 2000104:	01000004 "
 check thumb2_blx_out_of_range.stdout \
   " 2000108:	e51ff004 	ldr	pc, \[pc, #-4\]"
 check thumb2_blx_out_of_range.stdout \
