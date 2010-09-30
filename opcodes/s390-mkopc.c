@@ -393,7 +393,10 @@ main (void)
 	  insertExpandedMnemonic (opcode, mnemonic, format, min_cpu, mode_bits);
 	}
       else
-        fprintf (stderr, "Couldn't scan line %s\n", currentLine);
+	{
+	  fprintf (stderr, "Couldn't scan line %s\n", currentLine);
+	  exit (1);
+	}
     }
 
   dumpTable ();

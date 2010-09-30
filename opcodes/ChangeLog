@@ -1,3 +1,8 @@
+2010-09-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* s390-mkopc.c (main): Exit with error 1 if sscanf fails
+	to parse all 6 parameters.
+
 2010-09-28  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* s390-mkopc.c (main): Change description array size to 80.
