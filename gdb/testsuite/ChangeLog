@@ -1,3 +1,9 @@
+2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR corefiles/12071.
+	* gdb.base/corefile.exp (quit with a process, no question: load core)
+	(quit with a core file): New tests.
+
 2010-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix GDB crash on inferior calls with self-referencing classes.

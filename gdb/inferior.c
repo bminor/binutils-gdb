@@ -461,16 +461,29 @@ have_inferiors (void)
 int
 have_live_inferiors (void)
 {
-  struct target_ops *t;
+  struct cleanup *old_chain;
+  struct inferior *inf;
 
-  /* The check on stratum suffices, as GDB doesn't currently support
-     multiple target interfaces.  */
-  if (have_inferiors ())
-    for (t = current_target.beneath; t != NULL; t = t->beneath)
-      if (t->to_stratum == process_stratum)
-	return 1;
+  old_chain = make_cleanup_restore_current_thread ();
 
-  return 0;
+  for (inf = inferior_list; inf; inf = inf->next)
+    if (inf->pid != 0)
+      {
+	struct thread_info *tp;
+	
+	tp = any_thread_of_process (inf->pid);
+	if (tp)
+	  {
+	    switch_to_thread (tp->ptid);
+
+	    if (target_has_execution)
+	      break;
+	  }
+      }
+
+  do_cleanups (old_chain);
+
+  return inf != NULL;
 }
 
 /* Prune away automatically added program spaces that aren't required

@@ -1,3 +1,9 @@
+2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR corefiles/12071.
+	* inferior.c (have_live_inferiors): New variables old_chain, inf and
+	tp.  Iterate INFERIOR_LIST and call target_has_execution.
+
 2010-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix GDB crash on inferior calls with self-referencing classes.
