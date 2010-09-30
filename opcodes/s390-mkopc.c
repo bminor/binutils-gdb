@@ -335,7 +335,7 @@ main (void)
       char  opcode[16];
       char  mnemonic[16];
       char  format[16];
-      char  description[64];
+      char  description[80];
       char  cpu_string[16];
       char  modes_string[16];
       int   min_cpu;
@@ -345,7 +345,7 @@ main (void)
       if (currentLine[0] == '#')
         continue;
       memset (opcode, 0, 8);
-      if (sscanf (currentLine, "%15s %15s %15s \"%[^\"]\" %15s %15s",
+      if (sscanf (currentLine, "%15s %15s %15s \"%79[^\"]\" %15s %15s",
 		  opcode, mnemonic, format, description,
 		  cpu_string, modes_string) == 6)
 	{

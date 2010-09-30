@@ -1,3 +1,8 @@
+2010-09-28  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* s390-mkopc.c (main): Change description array size to 80.
+	Add maximum length of 79 to description parsing.
+
 2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
