@@ -1,3 +1,9 @@
+2010-09-30  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/completion.exp: Test completion through anonymous
+	union.
+	* gdb.base/break1.c (struct some_struct): Add anonymous union.
+
 2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix printing parameters of inlined functions.

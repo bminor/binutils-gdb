@@ -351,7 +351,15 @@ count_struct_fields (struct type *type)
       if (i < TYPE_N_BASECLASSES (type))
 	result += count_struct_fields (TYPE_BASECLASS (type, i));
       else if (TYPE_FIELD_NAME (type, i))
-	++result;
+	{
+	  if (TYPE_FIELD_NAME (type, i)[0] != '\0')
+	    ++result;
+	  else if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
+	    {
+	      /* Recurse into anonymous unions.  */
+	      result += count_struct_fields (TYPE_FIELD_TYPE (type, i));
+	    }
+	}
     }
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
@@ -380,11 +388,22 @@ add_struct_fields (struct type *type, int *nextp, char **output,
       if (i < TYPE_N_BASECLASSES (type))
 	add_struct_fields (TYPE_BASECLASS (type, i), nextp, output,
 			   fieldname, namelen);
-      else if (TYPE_FIELD_NAME (type, i)
-	       && ! strncmp (TYPE_FIELD_NAME (type, i), fieldname, namelen))
+      else if (TYPE_FIELD_NAME (type, i))
 	{
-	  output[*nextp] = xstrdup (TYPE_FIELD_NAME (type, i));
-	  ++*nextp;
+	  if (TYPE_FIELD_NAME (type, i)[0] != '\0')
+	    {
+	      if (! strncmp (TYPE_FIELD_NAME (type, i), fieldname, namelen))
+		{
+		  output[*nextp] = xstrdup (TYPE_FIELD_NAME (type, i));
+		  ++*nextp;
+		}
+	    }
+	  else if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
+	    {
+	      /* Recurse into anonymous unions.  */
+	      add_struct_fields (TYPE_FIELD_TYPE (type, i), nextp, output,
+				 fieldname, namelen);
+	    }
 	}
     }
 

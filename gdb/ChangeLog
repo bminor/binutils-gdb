@@ -1,3 +1,9 @@
+2010-09-30  Tom Tromey  <tromey@redhat.com>
+
+	* completer.c (count_struct_fields): Handle anonymous structs and
+	unions.
+	(add_struct_fields): Likewise.
+
 2010-09-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix printing parameters of inlined functions.

@@ -24,6 +24,7 @@ struct some_struct
 {
   int a_field;
   int b_field;
+  union { int z_field; };
 };
 
 struct some_struct values[50];

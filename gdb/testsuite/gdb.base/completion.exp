@@ -684,6 +684,10 @@ gdb_expect  {
         timeout         { fail "(timeout) complete 'p &values\[0\] -> a' 2" }
         }
 
+gdb_test "complete p &values\[0\]->z" \
+    "p &values.0.->z_field" \
+    "copmletion of field in anonymous union"
+
 # The following tests used to simply try to complete `${objdir}/file',
 # and so on.  The problem is that ${objdir} can be very long; the
 # completed filename may be more than eighty characters wide.  When
