@@ -1,3 +1,9 @@
+2010-09-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* mem.c (rx_mem_ptr): When invalidating the decode cache, account
+	for the fact that the instruction decoder never uses swapped
+	addresses.
+
 2010-09-29  Nick Clifton  <nickc@redhat.com>
 
 	* rx.c (decode_opcode: RXO_int): Only break out of the emulation
