@@ -390,7 +390,7 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
 
 /* Initialization.  */
 
-static struct sym_fns ecoff_sym_fns =
+static const struct sym_fns ecoff_sym_fns =
 {
   bfd_target_ecoff_flavour,
   mipscoff_new_init,		/* sym_new_init: init anything gbl to entire symtab */
@@ -402,8 +402,7 @@ static struct sym_fns ecoff_sym_fns =
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
-  &psym_functions,
-  NULL				/* next: pointer to next struct sym_fns */
+  &psym_functions
 };
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -345,14 +345,6 @@ struct sym_fns
   /* The "quick" (aka partial) symbol functions for this symbol
      reader.  */
   const struct quick_symbol_functions *qf;
-
-  /* Finds the next struct sym_fns.  They are allocated and
-     initialized in whatever module implements the functions pointed
-     to; an initializer calls add_symtab_fns to add them to the global
-     chain.  */
-
-  struct sym_fns *next;
-
 };
 
 extern struct section_addr_info *
@@ -384,7 +376,7 @@ extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
 
 extern struct symtab *allocate_symtab (char *, struct objfile *);
 
-extern void add_symtab_fns (struct sym_fns *);
+extern void add_symtab_fns (const struct sym_fns *);
 
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to
    syms_from_objfile, symbol_file_add, etc.  */

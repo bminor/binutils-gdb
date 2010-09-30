@@ -1,5 +1,24 @@
 2010-09-30  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.h (struct sym_fns) <next>: Remove.
+	(add_symtab_fns): Update.
+	* symfile.c (sym_fns_ptr): New typedef.
+	(symtab_fns): Now a VEC.
+	(add_symtab_fns): Update.  Change argument type.
+	(find_sym_fns): Update.  Change return type.
+	(get_symfile_segment_data): Update.
+	* objfiles.h (struct objfile) <sf>: Now const.
+	* somread.c (som_sym_fns): Now const.  Update.
+	* xcoffread.c (xcoff_sym_fns): Now const.  Update.
+	* mipsread.c (ecoff_sym_fns): Now const.  Update.
+	* machoread.c (macho_sym_fns): Now const.  Update.
+	* elfread.c (elf_sym_fns): Now const.  Update.
+	(elf_sym_fns_gdb_index): Likewise.
+	* dbxread.c (aout_sym_fns): Now const.  Update.
+	* coffread.c (coff_sym_fns): Now const.  Update.
+
+2010-09-30  Tom Tromey  <tromey@redhat.com>
+
 	* value.c (value_primitive_field): Take 'offset' into account for
 	packed field.
 

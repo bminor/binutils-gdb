@@ -293,7 +293,7 @@ struct objfile
        allocated memory, and is shared by all objfiles that use the
        object module reader of this type. */
 
-    struct sym_fns *sf;
+    const struct sym_fns *sf;
 
     /* The per-objfile information about the entry point, the scope (file/func)
        containing the entry point, and the scope of the user's main() func. */

@@ -41,7 +41,7 @@
 extern void _initialize_elfread (void);
 
 /* Forward declaration.  */
-static struct sym_fns elf_sym_fns_gdb_index;
+static const struct sym_fns elf_sym_fns_gdb_index;
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
@@ -1034,7 +1034,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 
 /* Register that we are able to handle ELF object file formats.  */
 
-static struct sym_fns elf_sym_fns =
+static const struct sym_fns elf_sym_fns =
 {
   bfd_target_elf_flavour,
   elf_new_init,			/* sym_new_init: init anything gbl to entire symtab */
@@ -1046,13 +1046,12 @@ static struct sym_fns elf_sym_fns =
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
-  &psym_functions,
-  NULL				/* next: pointer to next struct sym_fns */
+  &psym_functions
 };
 
 /* The same as elf_sym_fns, but not registered and uses the
    DWARF-specific GNU index rather than psymtab.  */
-static struct sym_fns elf_sym_fns_gdb_index =
+static const struct sym_fns elf_sym_fns_gdb_index =
 {
   bfd_target_elf_flavour,
   elf_new_init,			/* sym_new_init: init anything gbl to entire symab */
@@ -1064,8 +1063,7 @@ static struct sym_fns elf_sym_fns_gdb_index =
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
-  &dwarf2_gdb_index_functions,
-  NULL				/* next: pointer to next struct sym_fns */
+  &dwarf2_gdb_index_functions
 };
 
 void

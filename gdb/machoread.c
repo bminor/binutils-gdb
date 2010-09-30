@@ -837,7 +837,7 @@ macho_symfile_offsets (struct objfile *objfile,
     }
 }
 
-static struct sym_fns macho_sym_fns = {
+static const struct sym_fns macho_sym_fns = {
   bfd_target_mach_o_flavour,
 
   macho_new_init,               /* sym_new_init: init anything gbl to entire symtab */
@@ -849,8 +849,7 @@ static struct sym_fns macho_sym_fns = {
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   macho_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
-  &psym_functions,
-  NULL                          /* next: pointer to next struct sym_fns */
+  &psym_functions
 };
 
 void

@@ -102,7 +102,7 @@ bfd *symfile_bfd_open (char *);
 
 int get_section_index (struct objfile *, char *);
 
-static struct sym_fns *find_sym_fns (bfd *);
+static const struct sym_fns *find_sym_fns (bfd *);
 
 static void decrement_reading_symtab (void *);
 
@@ -147,7 +147,10 @@ void _initialize_symfile (void);
    calls add_symtab_fns() to register information on each format it is
    prepared to read. */
 
-static struct sym_fns *symtab_fns = NULL;
+typedef const struct sym_fns *sym_fns_ptr;
+DEF_VEC_P (sym_fns_ptr);
+
+static VEC (sym_fns_ptr) *symtab_fns = NULL;
 
 /* Flag for whether user will be reloading symbols multiple times.
    Defaults to ON for VxWorks, otherwise OFF.  */
@@ -1702,10 +1705,9 @@ get_section_index (struct objfile *objfile, char *section_name)
    handle. */
 
 void
-add_symtab_fns (struct sym_fns *sf)
+add_symtab_fns (const struct sym_fns *sf)
 {
-  sf->next = symtab_fns;
-  symtab_fns = sf;
+  VEC_safe_push (sym_fns_ptr, symtab_fns, sf);
 }
 
 /* Initialize OBJFILE to read symbols from its associated BFD.  It
@@ -1713,18 +1715,19 @@ add_symtab_fns (struct sym_fns *sf)
    struct sym_fns in the objfile structure, that contains cached
    information about the symbol file.  */
 
-static struct sym_fns *
+static const struct sym_fns *
 find_sym_fns (bfd *abfd)
 {
-  struct sym_fns *sf;
+  const struct sym_fns *sf;
   enum bfd_flavour our_flavour = bfd_get_flavour (abfd);
+  int i;
 
   if (our_flavour == bfd_target_srec_flavour
       || our_flavour == bfd_target_ihex_flavour
       || our_flavour == bfd_target_tekhex_flavour)
     return NULL;	/* No symbols.  */
 
-  for (sf = symtab_fns; sf != NULL; sf = sf->next)
+  for (i = 0; VEC_iterate (sym_fns_ptr, symtab_fns, i, sf); ++i)
     if (our_flavour == sf->sym_flavour)
       return sf;
 
@@ -3587,7 +3590,7 @@ symfile_relocate_debug_section (struct objfile *objfile,
 struct symfile_segment_data *
 get_symfile_segment_data (bfd *abfd)
 {
-  struct sym_fns *sf = find_sym_fns (abfd);
+  const struct sym_fns *sf = find_sym_fns (abfd);
 
   if (sf == NULL)
     return NULL;

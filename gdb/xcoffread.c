@@ -3028,7 +3028,7 @@ xcoff_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 
 /* Register our ability to parse symbols for xcoff BFD files.  */
 
-static struct sym_fns xcoff_sym_fns =
+static const struct sym_fns xcoff_sym_fns =
 {
 
   /* It is possible that coff and xcoff should be merged as
@@ -3051,8 +3051,7 @@ static struct sym_fns xcoff_sym_fns =
 				   a file.  */
   aix_process_linenos,          /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
-  &psym_functions,
-  NULL				/* next: pointer to next struct sym_fns */
+  &psym_functions
 };
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
