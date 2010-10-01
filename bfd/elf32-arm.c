@@ -4486,7 +4486,6 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		    {
 		      /* It's a local symbol.  */
 		      Elf_Internal_Sym *sym;
-		      Elf_Internal_Shdr *hdr;
 
 		      if (local_syms == NULL)
 			{
@@ -4502,8 +4501,16 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			}
 
 		      sym = local_syms + r_indx;
-		      hdr = elf_elfsections (input_bfd)[sym->st_shndx];
-		      sym_sec = hdr->bfd_section;
+		      if (sym->st_shndx == SHN_UNDEF)
+			sym_sec = bfd_und_section_ptr;
+		      else if (sym->st_shndx == SHN_ABS)
+			sym_sec = bfd_abs_section_ptr;
+		      else if (sym->st_shndx == SHN_COMMON)
+			sym_sec = bfd_com_section_ptr;
+		      else
+			sym_sec =
+			  bfd_section_from_elf_index (input_bfd, sym->st_shndx);
+
 		      if (!sym_sec)
 			/* This is an undefined symbol.  It can never
 			   be resolved. */

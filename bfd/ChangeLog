@@ -1,3 +1,8 @@
+2010-10-01  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Don't choke on local symbols in
+	SHN_UNDEF, SHN_ABS, SHN_COMMON.
+
 2010-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11812
