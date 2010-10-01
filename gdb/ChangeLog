@@ -1,3 +1,8 @@
+2010-10-01  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (_initialize_dwarf2_read): Add usage info to help text
+	for `save gdb-index' command.
+
 2010-10-01  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.h (allocate_symtab): Update.

@@ -15368,6 +15368,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
    6. The constant pool.  This is simply a bunch of bytes.  It is
    organized so that alignment is correct: CU vectors are stored
    first, followed by strings.  */
+
 static void
 save_gdb_index_command (char *arg, int from_tty)
 {
@@ -15470,7 +15471,9 @@ The value is the maximum depth to print."),
 			    &setdebuglist, &showdebuglist);
 
   c = add_cmd ("gdb-index", class_files, save_gdb_index_command,
-	       _("Save a .gdb-index file"),
+	       _("\
+Save a .gdb-index file.\n\
+Usage: save gdb-index DIRECTORY"),
 	       &save_cmdlist);
   set_cmd_completer (c, filename_completer);
 }
