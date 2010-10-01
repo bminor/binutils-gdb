@@ -1,3 +1,13 @@
+2010-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11812
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Don't
+	 allocate .got.plt section if there are no GOT nor PLT
+	 entries and there is no refeence to _GLOBAL_OFFSET_TABLE_.
+	 * elf64-x86-64.c (elf64_x86_64_size_dynamic_sections): Li.kewise.
+
+	* elflink.c (_bfd_elf_define_linkage_sym): Clear non_elf.
+
 2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
