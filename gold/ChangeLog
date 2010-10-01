@@ -1,3 +1,25 @@
+2010-10-01  Nick Clifton  <nickc@redhat.com>
+
+	* expression.cc (eval): Replace dummy argument with NULL.
+	(eval_maybe_dot): Check for a NULL result section pointer.
+	(Symbol_expression::value): Likewise.
+	(Dot_expression::value): Likewise.
+	(BINARY_EXPRESSION): Likewise.
+	(Max_expression::value): Likewise.
+	(Min_expression::value): Likewise.
+	(Absolute_expression::value): Likewise.
+	(Addr_expression::value_from_output_section): Likewise.
+	(Loaddddr_expression::value_from_output_section): Likewise.
+	(Segment_start_expression::value): Likewise.
+	* script-sections.cc
+	(Sections_elememt_dot_assignment::finalize_symbols): Replace dummy
+	argument with NULL.
+	(Sections_elememt_dot_assignment::set_section_addresses):
+	Likewise.
+	(Output_data_expression::do_write_to_buffer): Likewise.
+	(Output_section_definition::finalize_symbols): Likewise.
+	(Output_section_definition::set_section_addresses): Likewise.
+
 2010-09-30  Doug Kwan  <dougkwan@google.com>
 
 	* gold/testsuite/arm_branch_out_of_range.sh: Fix broken tests.
@@ -5,7 +27,7 @@
 2010-09-28  Sriraman Tallam  <tmsriram@google.com>
 
 	* target.h (Target::can_icf_inline_merge_sections): New virtual
-	function. 
+	function.
 	* x86_64.cc (Target__x86_64::can_icf_inline_merge_sections): New
 	virtual function.
 	* i386.cc (Target_i386::can_icf_inline_merge_sections): New

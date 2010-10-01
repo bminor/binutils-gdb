@@ -76,9 +76,8 @@ uint64_t
 Expression::eval(const Symbol_table* symtab, const Layout* layout,
 		 bool check_assertions)
 {
-  Output_section* dummy;
   return this->eval_maybe_dot(symtab, layout, check_assertions,
-			      false, 0, NULL, &dummy, NULL);
+			      false, 0, NULL, NULL, NULL);
 }
 
 // Evaluate an expression which may refer to the dot symbol.
@@ -115,7 +114,8 @@ Expression::eval_maybe_dot(const Symbol_table* symtab, const Layout* layout,
 
   // We assume the value is absolute, and only set this to a section
   // if we find a section relative reference.
-  *result_section_pointer = NULL;
+  if (result_section_pointer != NULL)
+    *result_section_pointer = NULL;
   eei.result_section_pointer = result_section_pointer;
 
   eei.result_alignment_pointer = result_alignment_pointer;
@@ -181,7 +181,8 @@ Symbol_expression::value(const Expression_eval_info* eei)
       return 0;
     }
 
-  *eei->result_section_pointer = sym->output_section();
+  if (eei->result_section_pointer != NULL)
+    *eei->result_section_pointer = sym->output_section();
 
   if (parameters->target().get_size() == 32)
     return eei->symtab->get_sized_symbol<32>(sym)->value();
@@ -217,7 +218,8 @@ Dot_expression::value(const Expression_eval_info* eei)
 		   "SECTIONS clause"));
       return 0;
     }
-  *eei->result_section_pointer = eei->dot_section;
+  if (eei->result_section_pointer != NULL)
+    *eei->result_section_pointer = eei->dot_section;
   return eei->dot_value;
 }
 
@@ -406,7 +408,8 @@ class Binary_expression : public Expression
 					 &right_alignment);		\
       if (KEEP_RIGHT && left_section == NULL && right_section != NULL)	\
 	{								\
-	  *eei->result_section_pointer = right_section;			\
+	  if (eei->result_section_pointer != NULL)			\
+	    *eei->result_section_pointer = right_section;		\
 	  if (eei->result_alignment_pointer != NULL)			\
 	    *eei->result_alignment_pointer = right_alignment;		\
 	}								\
@@ -414,7 +417,8 @@ class Binary_expression : public Expression
 	       && left_section != NULL					\
 	       && right_section == NULL)				\
 	{								\
-	  *eei->result_section_pointer = left_section;			\
+	  if (eei->result_section_pointer != NULL)			\
+	    *eei->result_section_pointer = left_section;		\
 	  if (eei->result_alignment_pointer != NULL)			\
 	    *eei->result_alignment_pointer = right_alignment;		\
 	}								\
@@ -602,7 +606,10 @@ class Max_expression : public Binary_expression
     uint64_t right_alignment;
     uint64_t right = this->right_value(eei, &right_section, &right_alignment);
     if (left_section == right_section)
-      *eei->result_section_pointer = left_section;
+      {
+	if (eei->result_section_pointer != NULL)
+	  *eei->result_section_pointer = left_section;
+      }
     else if ((left_section != NULL || right_section != NULL)
 	     && parameters->options().relocatable())
       gold_warning(_("max applied to section relative value"));
@@ -650,7 +657,10 @@ class Min_expression : public Binary_expression
     uint64_t right_alignment;
     uint64_t right = this->right_value(eei, &right_section, &right_alignment);
     if (left_section == right_section)
-      *eei->result_section_pointer = left_section;
+      {
+	if (eei->result_section_pointer != NULL)
+	  *eei->result_section_pointer = left_section;
+      }
     else if ((left_section != NULL || right_section != NULL)
 	     && parameters->options().relocatable())
       gold_warning(_("min applied to section relative value"));
@@ -756,10 +766,10 @@ class Absolute_expression : public Unary_expression
   uint64_t
   value(const Expression_eval_info* eei)
   {
-    Output_section* dummy;
-    uint64_t ret = this->arg_value(eei, &dummy);
+    uint64_t ret = this->arg_value(eei, NULL);
     // Force the value to be absolute.
-    *eei->result_section_pointer = NULL;
+    if (eei->result_section_pointer != NULL)
+      *eei->result_section_pointer = NULL;
     return ret;
   }
 
@@ -873,7 +883,8 @@ class Addr_expression : public Section_expression
   value_from_output_section(const Expression_eval_info* eei,
 			    Output_section* os)
   {
-    *eei->result_section_pointer = os;
+    if (eei->result_section_pointer != NULL)
+      *eei->result_section_pointer = os;
     return os->address();
   }
 
@@ -1078,7 +1089,8 @@ class Loadaddr_expression : public Section_expression
       return os->load_address();
     else
       {
-	*eei->result_section_pointer = os;
+	if (eei->result_section_pointer != NULL)
+	  *eei->result_section_pointer = os;
 	return os->address();
       }
   }
@@ -1220,10 +1232,10 @@ Segment_start_expression::value(const Expression_eval_info* eei)
     return parameters->options().Tbss();
   else
     {
-      Output_section* dummy;
-      uint64_t ret = this->arg_value(eei, &dummy);
+      uint64_t ret = this->arg_value(eei, NULL);
       // Force the value to be absolute.
-      *eei->result_section_pointer = NULL;
+      if (eei->result_section_pointer != NULL)
+        *eei->result_section_pointer = NULL;
       return ret;
     }
 }

@@ -656,9 +656,8 @@ class Sections_element_dot_assignment : public Sections_element
     // We ignore the section of the result because outside of an
     // output section definition the dot symbol is always considered
     // to be absolute.
-    Output_section* dummy;
     *dot_value = this->val_->eval_with_dot(symtab, layout, true, *dot_value,
-					   NULL, &dummy, NULL);
+					   NULL, NULL, NULL);
   }
 
   // Update the dot symbol while setting section addresses.
@@ -667,9 +666,8 @@ class Sections_element_dot_assignment : public Sections_element
 			uint64_t* dot_value, uint64_t* dot_alignment,
 			uint64_t* load_address)
   {
-    Output_section* dummy;
     *dot_value = this->val_->eval_with_dot(symtab, layout, false, *dot_value,
-					   NULL, &dummy, dot_alignment);
+					   NULL, NULL, dot_alignment);
     *load_address = *dot_value;
   }
 
@@ -980,10 +978,9 @@ Output_data_expression::do_write(Output_file* of)
 void
 Output_data_expression::do_write_to_buffer(unsigned char* buf)
 {
-  Output_section* dummy;
   uint64_t val = this->val_->eval_with_dot(this->symtab_, this->layout_,
 					   true, this->dot_value_,
-					   this->dot_section_, &dummy, NULL);
+					   this->dot_section_, NULL, NULL);
 
   if (parameters->target().is_big_endian())
     this->endian_write_to_buffer<true>(val, buf);
@@ -2052,18 +2049,15 @@ Output_section_definition::finalize_symbols(Symbol_table* symtab,
       uint64_t address = *dot_value;
       if (this->address_ != NULL)
 	{
-	  Output_section* dummy;
 	  address = this->address_->eval_with_dot(symtab, layout, true,
 						  *dot_value, NULL,
-						  &dummy, NULL);
+						  NULL, NULL);
 	}
       if (this->align_ != NULL)
 	{
-	  Output_section* dummy;
 	  uint64_t align = this->align_->eval_with_dot(symtab, layout, true,
-						       *dot_value,
-						       NULL,
-						       &dummy, NULL);
+						       *dot_value, NULL,
+						       NULL, NULL);
 	  address = align_address(address, align);
 	}
       *dot_value = address;
@@ -2131,9 +2125,8 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
         address = *dot_value;
       else
         {
-          Output_section* dummy;
           address = this->address_->eval_with_dot(symtab, layout, true,
-                                                  *dot_value, NULL, &dummy,
+                                                  *dot_value, NULL, NULL,
                                                   dot_alignment);
         }
     }
@@ -2178,11 +2171,9 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     this->evaluated_load_address_ = address;
   else
     {
-      Output_section* dummy;
       uint64_t laddr =
 	this->load_address_->eval_with_dot(symtab, layout, true, *dot_value,
-					   this->output_section_, &dummy,
-					   NULL);
+					   this->output_section_, NULL, NULL);
       if (this->output_section_ != NULL)
         this->output_section_->set_load_address(laddr);
       this->evaluated_load_address_ = laddr;
