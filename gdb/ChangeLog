@@ -1,3 +1,10 @@
+2010-10-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* sparc-tdep.c (sparc32_frame_align): New function.
+	(sparc32_gdbarch_init): Set the frame_align gdbarch method.
+	* sparc64-tdep.c (sparc64_frame_align): New function.
+	(sparc64_gdbarch_init): Set the frame_align gdbarch method.
+
 2010-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* defs.h (MAX_REGISTER_SIZE): Set to 64.

@@ -399,6 +399,13 @@ sparc32_pseudo_register_write (struct gdbarch *gdbarch,
 
 
 static CORE_ADDR
+sparc32_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  /* The ABI requires double-word alignment.  */
+  return address & ~0x7;
+}
+
+static CORE_ADDR
 sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 			 CORE_ADDR funcaddr,
 			 struct value **args, int nargs,
@@ -1407,6 +1414,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, SPARC_F0_REGNUM); /* %f0 */
 
   /* Call dummy code.  */
+  set_gdbarch_frame_align (gdbarch, sparc32_frame_align);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_push_dummy_code (gdbarch, sparc32_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
