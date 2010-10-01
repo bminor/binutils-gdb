@@ -1491,8 +1491,26 @@ desc_bounds (struct value *arr)
     }
 
   else if (is_thick_pntr (type))
-    return value_struct_elt (&arr, NULL, "P_BOUNDS", NULL,
-                             _("Bad GNAT array descriptor"));
+    {
+      struct value *p_bounds = value_struct_elt (&arr, NULL, "P_BOUNDS", NULL,
+					       _("Bad GNAT array descriptor"));
+      struct type *p_bounds_type = value_type (p_bounds);
+
+      if (p_bounds_type
+	  && TYPE_CODE (p_bounds_type) == TYPE_CODE_PTR)
+	{
+	  struct type *target_type = TYPE_TARGET_TYPE (p_bounds_type);
+
+	  if (TYPE_STUB (target_type))
+	    p_bounds = value_cast (lookup_pointer_type
+				   (ada_check_typedef (target_type)),
+				   p_bounds);
+	}
+      else
+	error (_("Bad GNAT array descriptor"));
+
+      return p_bounds;
+    }
   else
     return NULL;
 }
@@ -1539,7 +1557,7 @@ desc_data_target_type (struct type *type)
 
       if (data_type
 	  && TYPE_CODE (ada_check_typedef (data_type)) == TYPE_CODE_PTR)
-	return TYPE_TARGET_TYPE (data_type);
+	return ada_check_typedef (TYPE_TARGET_TYPE (data_type));
     }
 
   return NULL;
@@ -7636,7 +7654,15 @@ ada_check_typedef (struct type *type)
       char *name = TYPE_TAG_NAME (type);
       struct type *type1 = ada_find_any_type (name);
 
-      return (type1 == NULL) ? type : type1;
+      if (type1 == NULL)
+        return type;
+
+      /* TYPE1 might itself be a TYPE_CODE_TYPEDEF (this can happen with
+	 stubs pointing to arrays, as we don't create symbols for array
+	 types, only for the typedef-to-array types).  This is why
+	 we process TYPE1 with ada_check_typedef before returning
+	 the result.  */
+      return ada_check_typedef (type1);
     }
 }
 

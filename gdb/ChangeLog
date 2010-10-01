@@ -1,5 +1,13 @@
 2010-10-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (desc_bounds): Add handling of the case where
+	the P_BOUNDS field is a pointer to a stub.
+	(desc_data_target_type): Same for P_ARRAY field.
+	(ada_check_typedef): Strip the typedef layers from the type
+	found by ada_find_any_type.
+
+2010-10-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* sparc-tdep.c (sparc32_frame_align): New function.
 	(sparc32_gdbarch_init): Set the frame_align gdbarch method.
 	* sparc64-tdep.c (sparc64_frame_align): New function.
