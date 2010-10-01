@@ -1,3 +1,14 @@
+2010-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11812
+	* ld-i386/nogot2.d: New
+	* ld-i386/nogot2.s: Likewise.
+	* ld-x86-64/nogot2.d: Likewise.
+	* ld-x86-64/nogot2.s: Likewise.
+
+	* ld-i386/i386.exp: Run nogot2.
+	* ld-x86-64/x86-64.exp: Likewise.
+
 2010-09-29  Alan Modra  <amodra@gmail.com>
 
 	* ld-h8300/h8300.exp: Use is_elf_format.

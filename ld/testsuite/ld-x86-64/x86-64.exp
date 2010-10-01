@@ -133,6 +133,7 @@ run_dump_test "tlsle1"
 run_dump_test "tlspie1"
 run_dump_test "unique1"
 run_dump_test "nogot1"
+run_dump_test "nogot2"
 run_dump_test "discarded1"
 
 if { ![istarget "x86_64-*-linux*"] } {
