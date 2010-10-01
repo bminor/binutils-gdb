@@ -5453,11 +5453,11 @@ value of a section relative symbol.  On the other hand, an absolute
 symbol will retain the same value throughout any further link
 operations.
 
-Some terms in linker expressions are addresses.  This is true of all
-symbols and for builtin functions that return an address, such as
-@code{ADDR}, @code{LOADADDR}, @code{ORIGIN} and @code{SEGMENT_START}.
-Other terms are simply numbers, or are builtin functions that return a
-non-address value, such as @code{LENGTH}.
+Some terms in linker expressions are addresses.  This is true of
+section relative symbols and for builtin functions that return an
+address, such as @code{ADDR}, @code{LOADADDR}, @code{ORIGIN} and
+@code{SEGMENT_START}.  Other terms are simply numbers, or are builtin
+functions that return a non-address value, such as @code{LENGTH}.
 
 When the linker evaluates an expression, the result depends on where
 the expression is located in a linker script.  Expressions appearing

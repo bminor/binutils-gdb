@@ -553,6 +553,8 @@ fold_name (etree_type *tree)
 			     " referenced in expression\n"),
 			   tree->name.name);
 		}
+	      else if (output_section == bfd_abs_section_ptr)
+		new_number (h->u.def.value + h->u.def.section->output_offset);
 	      else
 		new_rel (h->u.def.value + h->u.def.section->output_offset,
 			 output_section);
