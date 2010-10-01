@@ -523,7 +523,7 @@ make_blockvector (struct objfile *objfile)
    the directory in which the file was compiled (or NULL if not known).  */
 
 void
-start_subfile (char *name, char *dirname)
+start_subfile (const char *name, const char *dirname)
 {
   struct subfile *subfile;
 

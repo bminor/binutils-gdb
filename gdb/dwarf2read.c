@@ -1007,10 +1007,10 @@ static struct line_header *(dwarf_decode_line_header
                             (unsigned int offset,
                              bfd *abfd, struct dwarf2_cu *cu));
 
-static void dwarf_decode_lines (struct line_header *, char *, bfd *,
+static void dwarf_decode_lines (struct line_header *, const char *, bfd *,
 				struct dwarf2_cu *, struct partial_symtab *);
 
-static void dwarf2_start_subfile (char *, char *, char *);
+static void dwarf2_start_subfile (char *, const char *, const char *);
 
 static struct symbol *new_symbol (struct die_info *, struct type *,
 				  struct dwarf2_cu *);
@@ -9994,7 +9994,8 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
   char *include_name = fe.name;
   char *include_name_to_compare = include_name;
   char *dir_name = NULL;
-  char *pst_filename;
+  const char *pst_filename;
+  char *copied_name = NULL;
   int file_is_pst;
 
   if (fe.dir_index)
@@ -10039,16 +10040,17 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
   pst_filename = pst->filename;
   if (!IS_ABSOLUTE_PATH (pst_filename) && pst->dirname != NULL)
     {
-      pst_filename = concat (pst->dirname, SLASH_STRING,
-			     pst_filename, (char *)NULL);
+      copied_name = concat (pst->dirname, SLASH_STRING,
+			    pst_filename, (char *)NULL);
+      pst_filename = copied_name;
     }
 
   file_is_pst = strcmp (include_name_to_compare, pst_filename) == 0;
 
   if (include_name_to_compare != include_name)
     xfree (include_name_to_compare);
-  if (pst_filename != pst->filename)
-    xfree (pst_filename);
+  if (copied_name != NULL)
+    xfree (copied_name);
 
   if (file_is_pst)
     return NULL;
@@ -10078,7 +10080,7 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
    A good testcase for this is mb-inline.exp.  */
 
 static void
-dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
+dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
 		    struct dwarf2_cu *cu, struct partial_symtab *pst)
 {
   gdb_byte *line_ptr, *extended_end;
@@ -10421,7 +10423,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
    subfile's name.  */
 
 static void
-dwarf2_start_subfile (char *filename, char *dirname, char *comp_dir)
+dwarf2_start_subfile (char *filename, const char *dirname, const char *comp_dir)
 {
   char *fullname;
 

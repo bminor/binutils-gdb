@@ -232,7 +232,7 @@ enum block_type { FUNCTION_BLOCK, NON_FUNCTION_BLOCK };
 
 static struct block *new_block (enum block_type);
 
-static struct symtab *new_symtab (char *, int, struct objfile *);
+static struct symtab *new_symtab (const char *, int, struct objfile *);
 
 static struct linetable *new_linetable (int);
 
@@ -248,7 +248,7 @@ static void sort_blocks (struct symtab *);
 
 static struct partial_symtab *new_psymtab (char *, struct objfile *);
 
-static void psymtab_to_symtab_1 (struct partial_symtab *, char *);
+static void psymtab_to_symtab_1 (struct partial_symtab *, const char *);
 
 static void add_block (struct block *, struct symtab *);
 
@@ -3888,7 +3888,7 @@ mdebug_next_symbol_text (struct objfile *objfile)
    The flow of control and even the memory allocation differs.  FIXME.  */
 
 static void
-psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
+psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 {
   bfd_size_type external_sym_size;
   bfd_size_type external_pdr_size;
@@ -4671,7 +4671,7 @@ sort_blocks (struct symtab *s)
    linenumbers MAXLINES we'll put in it */
 
 static struct symtab *
-new_symtab (char *name, int maxlines, struct objfile *objfile)
+new_symtab (const char *name, int maxlines, struct objfile *objfile)
 {
   struct symtab *s = allocate_symtab (name, objfile);
 

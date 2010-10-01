@@ -979,7 +979,7 @@ elf_symfile_init (struct objfile *objfile)
 void
 elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 {
-  char *filename = pst->filename;
+  const char *filename = pst->filename;
   struct dbx_symfile_info *dbx = objfile->deprecated_sym_stab_info;
   struct stab_section_info *maybe = dbx->stab_section_info;
   struct stab_section_info *questionable = 0;

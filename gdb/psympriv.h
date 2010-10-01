@@ -73,7 +73,7 @@ struct partial_symtab
 
   /* Name of the source file which this partial_symtab defines */
 
-  char *filename;
+  const char *filename;
 
   /* Full path of the source file.  NULL if not known.  */
 
@@ -81,7 +81,7 @@ struct partial_symtab
 
   /* Directory in which it was compiled, or NULL if we don't know.  */
 
-  char *dirname;
+  const char *dirname;
 
   /* Information about the object file from which symbols should be read.  */
 
@@ -156,7 +156,7 @@ extern void sort_pst_symbols (struct partial_symtab *);
 /* Add any kind of symbol to a psymbol_allocation_list.  */
 
 extern const
-struct partial_symbol *add_psymbol_to_list (char *, int, int, domain_enum,
+struct partial_symbol *add_psymbol_to_list (const char *, int, int, domain_enum,
 					    enum address_class,
 					    struct psymbol_allocation_list *,
 					    long, CORE_ADDR,

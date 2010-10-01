@@ -1,3 +1,22 @@
+2010-10-01  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.h (allocate_symtab): Update.
+	* symfile.c (allocate_symtab): Make 'filename' const.
+	* psymtab.c (add_psymbol_to_bcache): Make 'name' const.
+	(add_psymbol_to_list): Likewise.
+	* psympriv.h (struct partial_symtab) <filename, dirname>: Now
+	const.
+	(add_psymbol_to_list): Update.
+	* mdebugread.c (new_symtab): Make 'name' const.
+	(psymtab_to_symtab_1): Make 'filename' const.
+	* elfread.c (elfstab_offset_sections): Update.
+	* dwarf2read.c (dwarf_decode_lines): Make 'comp_dir' const.
+	(dwarf2_start_subfile): Make 'dirname' and 'comp_dir' const.
+	(psymtab_include_file_name): Update.
+	* dbxread.c (find_stab_function_addr): Make 'filename' const.
+	* buildsym.h (start_subfile): Update.
+	* buildsym.c (start_subfile): Make arguments const.
+
 2010-09-30  Ali Lakhia  <lakhia@alumni.utexas.net>
 
 	* fork-child.c (breakup_args): Fix crash if shell forking is

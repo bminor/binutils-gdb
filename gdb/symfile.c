@@ -2724,7 +2724,7 @@ deduce_language_from_filename (const char *filename)
  */
 
 struct symtab *
-allocate_symtab (char *filename, struct objfile *objfile)
+allocate_symtab (const char *filename, struct objfile *objfile)
 {
   struct symtab *symtab;
 

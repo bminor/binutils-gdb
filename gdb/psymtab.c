@@ -1368,7 +1368,7 @@ psymbol_bcache_full (struct partial_symbol *sym,
    different domain (or address) is possible and correct.  */
 
 static const struct partial_symbol *
-add_psymbol_to_bcache (char *name, int namelength, int copy_name,
+add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
 		       domain_enum domain,
 		       enum address_class class,
 		       long val,	/* Value as a long */
@@ -1465,7 +1465,7 @@ append_psymbol_to_list (struct psymbol_allocation_list *list,
    cache.  */
 
 const struct partial_symbol *
-add_psymbol_to_list (char *name, int namelength, int copy_name,
+add_psymbol_to_list (const char *name, int namelength, int copy_name,
 		     domain_enum domain,
 		     enum address_class class,
 		     struct psymbol_allocation_list *list, 

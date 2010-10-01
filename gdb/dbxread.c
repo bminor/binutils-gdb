@@ -1125,7 +1125,7 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
 }
 
 static CORE_ADDR
-find_stab_function_addr (char *namestring, char *filename,
+find_stab_function_addr (char *namestring, const char *filename,
 			 struct objfile *objfile)
 {
   struct minimal_symbol *msym;

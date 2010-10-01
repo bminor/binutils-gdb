@@ -374,7 +374,7 @@ extern struct symfile_segment_data *default_symfile_segments (bfd *abfd);
 extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
                                            asection *sectp, bfd_byte *buf);
 
-extern struct symtab *allocate_symtab (char *, struct objfile *);
+extern struct symtab *allocate_symtab (const char *, struct objfile *);
 
 extern void add_symtab_fns (const struct sym_fns *);
 
