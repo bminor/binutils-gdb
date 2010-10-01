@@ -52,7 +52,7 @@ static char *exec_wrapper;
 static void
 breakup_args (char *scratch, char **argv)
 {
-  char *cp = scratch;
+  char *cp = scratch, *tmp;
 
   for (;;)
     {
@@ -68,15 +68,16 @@ breakup_args (char *scratch, char **argv)
       *argv++ = cp;
 
       /* Scan for next arg separator.  */
-      cp = strchr (cp, ' ');
-      if (cp == NULL)
-	cp = strchr (cp, '\t');
-      if (cp == NULL)
-	cp = strchr (cp, '\n');
+      tmp = strchr (cp, ' ');
+      if (tmp == NULL)
+	tmp = strchr (cp, '\t');
+      if (tmp == NULL)
+	tmp = strchr (cp, '\n');
 
       /* No separators => end of string => break.  */
-      if (cp == NULL)
+      if (tmp == NULL)
 	break;
+      cp = tmp;
 
       /* Replace the separator with a terminator.  */
       *cp++ = '\0';

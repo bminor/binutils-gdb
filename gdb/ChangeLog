@@ -1,3 +1,8 @@
+2010-09-30  Ali Lakhia  <lakhia@alumni.utexas.net>
+
+	* fork-child.c (breakup_args): Fix crash if shell forking is
+	disabled at compile time.
+
 2010-10-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (desc_bounds): Add handling of the case where
