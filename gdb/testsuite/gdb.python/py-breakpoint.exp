@@ -20,21 +20,12 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+load_lib gdb-python.exp
+
 set testfile "py-breakpoint"
 set srcfile ${testfile}.c
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return -1
-}
-
-# Run a command in GDB, and report a failure if a Python exception is thrown.
-# If report_pass is true, report a pass if no exception is thrown.
-proc gdb_py_test_silent_cmd {cmd name report_pass} {
-    global gdb_prompt
-
-  gdb_test_multiple $cmd $name {
-      -re "Traceback.*$gdb_prompt $"  { fail $name }
-      -re "$gdb_prompt $"	      { if $report_pass { pass $name } }
-  }
 }
 
 # Start with a fresh gdb.

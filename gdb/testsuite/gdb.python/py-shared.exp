@@ -15,6 +15,8 @@
 
 # This file is part of the GDB testsuite.
 
+load_lib gdb-python.exp
+
 if {[skip_shlib_tests]} {
     return 0
 }
@@ -36,17 +38,6 @@ set exec_opts [list debug shlib=${library}]
 if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
     untested "Could not compile $binfile."
     return -1
-}
-
-# Run a command in GDB, and report a failure if a Python exception is thrown.
-# If report_pass is true, report a pass if no exception is thrown.
-proc gdb_py_test_silent_cmd {cmd name report_pass} {
-    global gdb_prompt
-
-    gdb_test_multiple $cmd $name {
-	-re "Traceback.*$gdb_prompt $"  { fail $name }
-	-re "$gdb_prompt $"	      { if $report_pass { pass $name } }
-    }
 }
 
 # Start with a fresh gdb.

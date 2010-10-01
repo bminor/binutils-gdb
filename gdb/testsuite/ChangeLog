@@ -1,3 +1,19 @@
+2010-10-01  Doug Evans  <dje@google.com>
+
+	* lib/gdb-python.exp: New file.
+	* gdb.python/py-block.exp: Use it.
+	* gdb.python/py-breakpoint.exp: Ditto.
+	* gdb.python/py-frame.exp: Ditto.
+	* gdb.python/py-inferior.exp: Ditto.
+	* gdb.python/py-param.exp: Ditto.
+	* gdb.python/py-prettyprint.exp: Ditto.
+	* gdb.python/py-shared.exp: Ditto.
+	* gdb.python/py-symbol.exp: Ditto.
+	* gdb.python/py-symtab.exp: Ditto.
+	* gdb.python/py-type.exp: Ditto.
+	* gdb.python/py-value.exp: Ditto.
+	* gdb.python/python.exp: Ditto.
+
 2010-09-30  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/anon.exp: New file.

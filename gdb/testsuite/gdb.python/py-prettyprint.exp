@@ -20,6 +20,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+load_lib gdb-python.exp
+
 set testfile "py-prettyprint"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
@@ -30,17 +32,6 @@ gdb_start
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
-
-# Run a command in GDB, and report a failure if a Python exception is thrown.
-# If report_pass is true, report a pass if no exception is thrown.
-proc gdb_py_test_silent_cmd {cmd name report_pass} {
-  global gdb_prompt
-
-  gdb_test_multiple $cmd $name {
-      -re "Traceback.*$gdb_prompt $"  { fail $name }
-      -re "$gdb_prompt $"	      { if $report_pass { pass $name } }
-  }
-}
 
 proc run_lang_tests {lang} {
     global srcdir subdir srcfile binfile testfile hex

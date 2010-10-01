@@ -20,6 +20,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+load_lib gdb-python.exp
+
 set testfile "python"
 set srcfile  ${testfile}.c
 set srcfile1  ${testfile}-1.c
@@ -38,17 +40,6 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
-
-# Run a command in GDB, and report a failure if a Python exception is thrown.
-# If report_pass is true, report a pass if no exception is thrown.
-proc gdb_py_test_silent_cmd {cmd name report_pass} {
-    global gdb_prompt
-
-  gdb_test_multiple $cmd $name {
-      -re "Traceback.*$gdb_prompt $"  { fail $name }
-      -re "$gdb_prompt $"	      { if $report_pass { pass $name } }
-  }
-}
 
 gdb_test_multiple "python print 23" "verify python support" {
     -re "not supported.*$gdb_prompt $"	{
