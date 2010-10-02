@@ -41,7 +41,7 @@
 .Lcu1_begin:
 	.4byte	.Lcu1_end - .Lcu1_start	# Length of Compilation Unit Info
 .Lcu1_start:
-	.value	0x3	# DWARF version number
+	.2byte	0x3	# DWARF version number
 	.long	.Labbrev1_begin	# Offset Into Abbrev. Section
 	.byte	0x4	# Pointer Size (in bytes)
 

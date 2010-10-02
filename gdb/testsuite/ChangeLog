@@ -1,3 +1,8 @@
+2010-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix s390x testcase compatibility.
+	* gdb.dwarf2/dw2-double-set-die-type.S: Use .2byte, not .value.
+
 2010-10-01  Doug Evans  <dje@google.com>
 
 	* lib/gdb-python.exp: New file.
