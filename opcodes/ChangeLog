@@ -1,3 +1,8 @@
+2010-10-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12076
+	* i386-dis.c (RMAL): Remove duplicate.
+
 2010-09-30  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* s390-mkopc.c (main): Exit with error 1 if sscanf fails

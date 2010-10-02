@@ -282,7 +282,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define RMrSI { OP_REG, rSI_reg }
 #define RMrDI { OP_REG, rDI_reg }
 #define RMAL { OP_REG, al_reg }
-#define RMAL { OP_REG, al_reg }
 #define RMCL { OP_REG, cl_reg }
 #define RMDL { OP_REG, dl_reg }
 #define RMBL { OP_REG, bl_reg }
