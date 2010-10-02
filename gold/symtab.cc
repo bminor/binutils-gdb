@@ -501,14 +501,6 @@ Symbol_table::~Symbol_table()
 {
 }
 
-// The hash function.  The key values are Stringpool keys.
-
-inline size_t
-Symbol_table::Symbol_table_hash::operator()(const Symbol_table_key& key) const
-{
-  return key.first ^ key.second;
-}
-
 // The symbol table key equality function.  This is called with
 // Stringpool keys.
 

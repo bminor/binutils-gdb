@@ -1545,10 +1545,14 @@ class Symbol_table
 
   typedef std::pair<Stringpool::Key, Stringpool::Key> Symbol_table_key;
 
+  // The hash function.  The key values are Stringpool keys.
   struct Symbol_table_hash
   {
-    size_t
-    operator()(const Symbol_table_key&) const;
+    inline size_t
+    operator()(const Symbol_table_key& key) const
+    {
+      return key.first ^ key.second;
+    }
   };
 
   struct Symbol_table_eq
