@@ -1,3 +1,11 @@
+2010-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12088
+	* nm.c (plugin_target): New.
+	(main): Set plugin_target to "plugin" for --plugin.
+	(display_file): Pass plugin_target to bfd_openr if target
+	isn't set.
+
 2010-09-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
