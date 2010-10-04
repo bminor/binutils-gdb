@@ -1,4 +1,15 @@
-2010-10-03  Paul Hilfinger  <hilfingr@syracuse.mckusick.com>
+2010-10-03  Paul Hilfinger  <hilfinger@adacore.com>
+
+        * gdb/ada-typeprint.c (print_selected_record_field_types): New function,
+        incorporating and generalizing print_record_field_types.
+        (print_record_field_types): Change return value and update comment.
+        Re-implement using print_selected_record_field_types.
+        (print_choices): Print "=>" here.
+        Handle case of unencoded variant branch.
+        (print_variant_clauses): Reformat comment.
+        Special-case unencoded variant branch.
+
+2010-10-03  Paul Hilfinger  <hilfinger@adacore.com>
 
         * ada-lang.c (wild_match): Reimplement.
         Change API to eliminate unused length argument, reverse arguments and
