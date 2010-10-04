@@ -786,6 +786,9 @@ static int mips_fix_vr4130;
 /* ...likewise -mfix-24k.  */
 static int mips_fix_24k;
 
+/* ...likewise -mfix-cn63xxp1 */
+static bfd_boolean mips_fix_cn63xxp1;
+
 /* We don't relax branches by default, since this causes us to expand
    `la .l2 - .l1' if there's a branch between .l1 and .l2, because we
    fail to compute the offset before expanding the macro to the most
@@ -9401,7 +9404,26 @@ do_msbd:
 			 ip->insn_mo->name,
 			 (unsigned long) imm_expr.X_add_number);
 	      if (*args == 'k')
-		INSERT_OPERAND (CACHE, *ip, imm_expr.X_add_number);
+		{
+		  if (mips_fix_cn63xxp1 && strcmp ("pref", insn->name) == 0)
+		    switch (imm_expr.X_add_number)
+		      {
+		      case 5:
+		      case 25:
+		      case 26:
+		      case 27:
+		      case 28:
+		      case 29:
+		      case 30:
+		      case 31:  /* These are ok.  */
+			break;
+
+		      default:  /* The rest must be changed to 28.  */
+			imm_expr.X_add_number = 28;
+			break;
+		      }
+		  INSERT_OPERAND (CACHE, *ip, imm_expr.X_add_number);
+		}
 	      else if (*args == 'h')
 		INSERT_OPERAND (PREFX, *ip, imm_expr.X_add_number);
 	      else
@@ -11285,6 +11307,8 @@ enum options
     OPTION_NO_FIX_VR4120,
     OPTION_FIX_VR4130,
     OPTION_NO_FIX_VR4130,
+    OPTION_FIX_CN63XXP1,
+    OPTION_NO_FIX_CN63XXP1,
     OPTION_TRAP,
     OPTION_BREAK,
     OPTION_EB,
@@ -11379,6 +11403,8 @@ struct option md_longopts[] =
   {"mno-fix-vr4130", no_argument, NULL, OPTION_NO_FIX_VR4130},
   {"mfix-24k",    no_argument, NULL, OPTION_FIX_24K},
   {"mno-fix-24k", no_argument, NULL, OPTION_NO_FIX_24K},
+  {"mfix-cn63xxp1", no_argument, NULL, OPTION_FIX_CN63XXP1},
+  {"mno-fix-cn63xxp1", no_argument, NULL, OPTION_NO_FIX_CN63XXP1},
 
   /* Miscellaneous options.  */
   {"trap", no_argument, NULL, OPTION_TRAP},
@@ -11670,6 +11696,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_FIX_VR4130:
       mips_fix_vr4130 = 0;
+      break;
+
+    case OPTION_FIX_CN63XXP1:
+      mips_fix_cn63xxp1 = TRUE;
+      break;
+
+    case OPTION_NO_FIX_CN63XXP1:
+      mips_fix_cn63xxp1 = FALSE;
       break;
 
     case OPTION_RELAX_BRANCH:
@@ -15623,6 +15657,7 @@ MIPS options:\n\
 -mfix-vr4120		work around certain VR4120 errata\n\
 -mfix-vr4130		work around VR4130 mflo/mfhi errata\n\
 -mfix-24k		insert a nop after ERET and DERET instructions\n\
+-mfix-cn63xxp1		work around CN63XXP1 PREF errata\n\
 -mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
 -msym32			assume all symbols have 32-bit values\n\

@@ -200,6 +200,11 @@ Insert nops to work around the VR4130 @samp{mflo}/@samp{mfhi} errata.
 @itemx -no-mfix-24k
 Insert nops to work around the 24K @samp{eret}/@samp{deret} errata.
 
+@item -mfix-cn63xxp1
+@itemx -mno-fix-cn63xxp1
+Replace @code{pref} hints 0 - 4 and 6 - 24 with hint 28 to work around
+certain CN63XXP1 errata.
+
 @item -m4010
 @itemx -no-m4010
 Generate code for the LSI @sc{r4010} chip.  This tells the assembler to

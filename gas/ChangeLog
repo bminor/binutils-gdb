@@ -1,3 +1,16 @@
+2010-10-04  David Daney  <ddaney@caviumnetworks.com>
+
+	* config/tc-mips.c (mips_fix_cn63xxp1): New variable.
+	(mips_ip):  Add errata work around when mips_fix_cn63xxp1 set.
+	(OPTION_FIX_CN63XXP1, OPTION_NO_FIX_CN63XXP1): New enum options
+	enumerations.
+	(md_longopts): Add options for -mfix-cn63xxp1 and -mno-fix-cn63xxp1.
+	(md_parse_option): Handle OPTION_FIX_CN63XXP1 and
+	OPTION_NO_FIX_CN63XXP1.
+	(md_show_usage): Add documentation for -mfix-cn63xxp1.
+	* doc/c-mips.texi (-mfix-cn63xxp1, -mno-fix-cn63xxp1): Document
+	the new options.
+
 2010-09-29  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* gas/tic6x/insns-bad-1.s: Remove test for readonly tscl.

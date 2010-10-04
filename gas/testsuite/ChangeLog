@@ -1,3 +1,9 @@
+2010-10-04  David Daney  <ddaney@caviumnetworks.com>
+
+	* gas/mips/mips.exp (octeon-pref): Run the new test.
+	* gas/mips/octeon-pref.s: New test.
+	* gas/mips/octeon-pref.d: New expected results for the new test.
+
 2010-09-29  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/fwdexp.d, * gas/all/fwdexp.s: New test.
