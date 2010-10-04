@@ -1,3 +1,9 @@
+2010-10-04  Doug Evans  <dje@google.com>
+
+	* python/python.c (_initialize_python): Define new function
+	GdbSetPythonDirectory in python.  Use it to update sys.path and
+	gdb.__path__.
+
 2010-10-03  Paul Hilfinger  <hilfinger@adacore.com>
 
         * gdb/ada-typeprint.c (print_selected_record_field_types): New function,
