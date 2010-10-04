@@ -2359,7 +2359,7 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
 
 static void
 dw2_map_ada_symtabs (struct objfile *objfile,
-		     int (*wild_match) (const char *, int, const char *),
+		     int (*wild_match) (const char *, const char *),
 		     int (*is_name_suffix) (const char *),
 		     void (*callback) (struct objfile *,
 				       struct symtab *, void *),

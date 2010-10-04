@@ -1,3 +1,17 @@
+2010-10-03  Paul Hilfinger  <hilfingr@syracuse.mckusick.com>
+
+        * ada-lang.c (wild_match): Reimplement.
+        Change API to eliminate unused length argument, reverse arguments and
+        make 0 the 'true' return value.
+        (advance_wild_match): New auxiliary function for wild_match to improve
+        readability.
+        (ada_match_name, ada_add_block_symbols): Use new API for wild_match.
+        * psymtab.c (ada_lookup_partial_symbol, map_ada_symtabs): Use new
+        API for wild_match.
+        * symfile.h (map_ada_symtabs): Modify declaration to use new API for
+        wild_match.
+        * dwarf2read.c (dw2_map_ada_symtabs): Ditto.
+
 2010-10-01  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (_initialize_dwarf2_read): Add usage info to help text

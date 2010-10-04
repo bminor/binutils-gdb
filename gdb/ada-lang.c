@@ -200,7 +200,9 @@ static int equiv_types (struct type *, struct type *);
 
 static int is_name_suffix (const char *);
 
-static int wild_match (const char *, int, const char *);
+static int advance_wild_match (const char **, const char *, int);
+
+static int wild_match (const char *, const char *);
 
 static struct value *ada_coerce_ref (struct value *);
 
@@ -1260,7 +1262,7 @@ ada_match_name (const char *sym_name, const char *name, int wild)
   if (sym_name == NULL || name == NULL)
     return 0;
   else if (wild)
-    return wild_match (name, strlen (name), sym_name);
+    return wild_match (sym_name, name) == 0;
   else
     {
       int len_name = strlen (name);
@@ -5012,30 +5014,77 @@ is_valid_name_for_wild_match (const char *name0)
   return 1;
 }
 
-/* True if NAME represents a name of the form A1.A2....An, n>=1 and
-   PATN[0..PATN_LEN-1] = Ak.Ak+1.....An for some k >= 1.  Ignores
-   informational suffixes of NAME (i.e., for which is_name_suffix is
-   true).  */
+/* Advance *NAMEP to next occurrence of TARGET0 in the string NAME0
+   that could start a simple name.  Assumes that *NAMEP points into
+   the string beginning at NAME0.  */
 
 static int
-wild_match (const char *patn0, int patn_len, const char *name0)
+advance_wild_match (const char **namep, const char *name0, int target0)
 {
-  char* match;
-  const char* start;
+  const char *name = *namep;
 
-  start = name0;
   while (1)
     {
-      match = strstr (start, patn0);
-      if (match == NULL)
+      int t0, t1, t2;
+
+      t0 = *name;
+      if (t0 == '_')
+	{
+	  t1 = name[1];
+	  if ((t1 >= 'a' && t1 <= 'z') || (t1 >= '0' && t1 <= '9'))
+	    {
+	      name += 1;
+	      if (name == name0 + 5 && strncmp (name0, "_ada", 4) == 0)
+		break;
+	      else
+		name += 1;
+	    }
+	  else if (t1 == '_' &&
+		   (((t2 = name[2]) >= 'a' && t2 <= 'z') || t2 == target0))
+	    {
+	      name += 2;
+	      break;
+	    }
+	  else
+	    return 0;
+	}
+      else if ((t0 >= 'a' && t0 <= 'z') || (t0 >= '0' && t0 <= '9'))
+	name += 1;
+      else
 	return 0;
-      if ((match == name0 
-	   || match[-1] == '.' 
-	   || (match > name0 + 1 && match[-1] == '_' && match[-2] == '_')
-	   || (match == name0 + 5 && strncmp ("_ada_", name0, 5) == 0))
-          && is_name_suffix (match + patn_len))
-        return (match == name0 || is_valid_name_for_wild_match (name0));
-      start = match + 1;
+    }
+
+  *namep = name;
+  return 1;
+}
+
+/* Return 0 iff NAME encodes a name of the form prefix.PATN.  Ignores any
+   informational suffixes of NAME (i.e., for which is_name_suffix is
+   true).  Assumes that PATN is a lower-cased Ada simple name.  */
+
+static int
+wild_match (const char *name, const char *patn)
+{
+  const char *p, *n;
+  const char *name0 = name;
+
+  while (1)
+    {
+      const char *match = name;
+
+      if (*name == *patn)
+	{
+	  for (name += 1, p = patn + 1; *p != '\0'; name += 1, p += 1)
+	    if (*p != *name)
+	      break;
+	  if (*p == '\0' && is_name_suffix (name))
+	    return match != name0 && !is_valid_name_for_wild_match (name0);
+
+	  if (name[-1] == '_')
+	    name -= 1;
+	}
+      if (!advance_wild_match (&name, name0, *patn))
+	return 1;
     }
 }
 
@@ -5069,7 +5118,7 @@ ada_add_block_symbols (struct obstack *obstackp,
       {
         if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
                                    SYMBOL_DOMAIN (sym), domain)
-            && wild_match (name, name_len, SYMBOL_LINKAGE_NAME (sym)))
+            && wild_match (SYMBOL_LINKAGE_NAME (sym), name) == 0)
           {
 	    if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
 	      continue;

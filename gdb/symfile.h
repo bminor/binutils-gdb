@@ -220,7 +220,7 @@ struct quick_symbol_functions
      This function is completely ad hoc and new implementations should
      refer to the psymtab implementation to see what to do.  */
   void (*map_ada_symtabs) (struct objfile *objfile,
-			   int (*wild_match) (const char *, int, const char *),
+			   int (*wild_match) (const char *, const char *),
 			   int (*is_name_suffix) (const char *),
 			   void (*callback) (struct objfile *,
 					     struct symtab *, void *),
