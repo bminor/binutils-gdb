@@ -98,6 +98,7 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
   bfd_byte *insn_contents = NULL;
   unsigned entry_count;
   unsigned entry;
+  Elf_Internal_Shdr *rel_hdr;
   Elf_Internal_Rela *internal_relocs = NULL;
   unsigned reloc_count;
 
@@ -147,10 +148,9 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
 
   /* The entry size and size must be set to allow the linker to compute
      the number of relocations since it does not use reloc_count.  */
-  elf_section_data (prop_sec)->rel_hdr.sh_entsize =
-    sizeof (Elf32_External_Rela);
-  elf_section_data (prop_sec)->rel_hdr.sh_size =
-    elf_section_data (insn_sec)->rel_hdr.sh_size;
+  rel_hdr = _bfd_elf_single_rel_hdr (prop_sec);
+  rel_hdr->sh_entsize = sizeof (Elf32_External_Rela);
+  rel_hdr->sh_size = _bfd_elf_single_rel_hdr (insn_sec)->sh_size;
 
   if (prop_contents == NULL && prop_sec->size != 0)
     {

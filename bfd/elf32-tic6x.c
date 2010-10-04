@@ -1348,31 +1348,6 @@ elf32_tic6x_set_use_rela_p (bfd *abfd, bfd_boolean use_rela_p)
 }
 
 static bfd_boolean
-elf32_tic6x_fake_sections (bfd *abfd,
-			   Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED,
-			   asection *sec)
-{
-  /* The generic elf_fake_sections will set up REL_HDR using the
-     default kind of relocations.  But, we may actually need both
-     kinds of relocations, so we set up the second header here.  */
-  if ((sec->flags & SEC_RELOC) != 0)
-    {
-      struct bfd_elf_section_data *esd;
-      bfd_size_type amt = sizeof (Elf_Internal_Shdr);
-
-      esd = elf_section_data (sec);
-      BFD_ASSERT (esd->rel_hdr2 == NULL);
-      esd->rel_hdr2 = bfd_zalloc (abfd, amt);
-      if (!esd->rel_hdr2)
-        return FALSE;
-      _bfd_elf_init_reloc_shdr (abfd, esd->rel_hdr2, sec,
-                                !sec->use_rela_p);
-    }
-
-  return TRUE;
-}
-
-static bfd_boolean
 elf32_tic6x_mkobject (bfd *abfd)
 {
   bfd_boolean ret;
@@ -1408,14 +1383,13 @@ elf32_tic6x_rel_relocation_p (bfd *abfd, asection *sec,
   const struct elf_backend_data *bed;
 
   /* To determine which flavor of relocation this is, we depend on the
-     fact that the INPUT_SECTION's REL_HDR is read before its
-     REL_HDR2.  */
-  rel_hdr = &elf_section_data (sec)->rel_hdr;
+     fact that the INPUT_SECTION's REL_HDR is read before RELA_HDR.  */
+  rel_hdr = elf_section_data (sec)->rel.hdr;
+  if (rel_hdr == NULL)
+    return FALSE;
   bed = get_elf_backend_data (abfd);
-  if ((size_t) (rel - relocs)
-      >= (NUM_SHDR_ENTRIES (rel_hdr) * bed->s->int_rels_per_ext_rel))
-    rel_hdr = elf_section_data (sec)->rel_hdr2;
-  return rel_hdr->sh_entsize == bed->s->sizeof_rel;
+  return ((size_t) (rel - relocs)
+	  < NUM_SHDR_ENTRIES (rel_hdr) * bed->s->int_rels_per_ext_rel);
 }
 
 static bfd_boolean
@@ -1790,7 +1764,6 @@ elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_default_use_rela_p	1
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1
-#define elf_backend_fake_sections       elf32_tic6x_fake_sections
 #define elf_backend_obj_attrs_arg_type	elf32_tic6x_obj_attrs_arg_type
 #define elf_backend_obj_attrs_section	"__TI_build_attributes"
 #define elf_backend_obj_attrs_section_type	SHT_C6000_ATTRIBUTES

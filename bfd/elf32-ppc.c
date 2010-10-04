@@ -6391,6 +6391,7 @@ ppc_elf_relax_section (bfd *abfd,
     {
       /* Append sufficient NOP relocs so we can write out relocation
 	 information for the trampolines.  */
+      Elf_Internal_Shdr *rel_hdr;
       Elf_Internal_Rela *new_relocs = bfd_malloc ((changes + isec->reloc_count)
 						  * sizeof (*new_relocs));
       unsigned ix;
@@ -6409,8 +6410,8 @@ ppc_elf_relax_section (bfd *abfd,
 	free (internal_relocs);
       elf_section_data (isec)->relocs = new_relocs;
       isec->reloc_count += changes;
-      elf_section_data (isec)->rel_hdr.sh_size
-	+= changes * elf_section_data (isec)->rel_hdr.sh_entsize;
+      rel_hdr = _bfd_elf_single_rel_hdr (isec);
+      rel_hdr->sh_size += changes * rel_hdr->sh_entsize;
     }
   else if (elf_section_data (isec)->relocs != internal_relocs)
     free (internal_relocs);

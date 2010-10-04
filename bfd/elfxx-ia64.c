@@ -2598,7 +2598,7 @@ get_reloc_section (bfd *abfd,
 
   srel_name = (bfd_elf_string_from_elf_section
 	       (abfd, elf_elfheader(abfd)->e_shstrndx,
-		elf_section_data(sec)->rel_hdr.sh_name));
+		_bfd_elf_single_rel_hdr (sec)->sh_name));
   if (srel_name == NULL)
     return NULL;
 

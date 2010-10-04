@@ -783,23 +783,6 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_ELF_RTYPE_TO_HOWTO(abfd, rtype, rela)			\
   (get_elf_backend_data (abfd)->elf_backend_mips_rtype_to_howto (rtype, rela))
 
-/* Determine whether the internal relocation of index REL_IDX is REL
-   (zero) or RELA (non-zero).  The assumption is that, if there are
-   two relocation sections for this section, one of them is REL and
-   the other is RELA.  If the index of the relocation we're testing is
-   in range for the first relocation section, check that the external
-   relocation size is that for RELA.  It is also assumed that, if
-   rel_idx is not in range for the first section, and this first
-   section contains REL relocs, then the relocation is in the second
-   section, that is RELA.  */
-#define MIPS_RELOC_RELA_P(abfd, sec, rel_idx)				\
-  ((NUM_SHDR_ENTRIES (&elf_section_data (sec)->rel_hdr)			\
-    * get_elf_backend_data (abfd)->s->int_rels_per_ext_rel		\
-    > (bfd_vma)(rel_idx))						\
-   == (elf_section_data (sec)->rel_hdr.sh_entsize			\
-       == (ABI_64_P (abfd) ? sizeof (Elf64_External_Rela)		\
-	   : sizeof (Elf32_External_Rela))))
-
 /* The name of the dynamic relocation section.  */
 #define MIPS_ELF_REL_DYN_NAME(INFO) \
   (mips_elf_hash_table (INFO)->is_vxworks ? ".rela.dyn" : ".rel.dyn")
@@ -7110,14 +7093,14 @@ mips_elf_rel_relocation_p (bfd *abfd, asection *sec,
   Elf_Internal_Shdr *rel_hdr;
   const struct elf_backend_data *bed;
 
-  /* To determine which flavor or relocation this is, we depend on the
-     fact that the INPUT_SECTION's REL_HDR is read before its REL_HDR2.  */
-  rel_hdr = &elf_section_data (sec)->rel_hdr;
+  /* To determine which flavor of relocation this is, we depend on the
+     fact that the INPUT_SECTION's REL_HDR is read before RELA_HDR.  */
+  rel_hdr = elf_section_data (sec)->rel.hdr;
+  if (rel_hdr == NULL)
+    return FALSE;
   bed = get_elf_backend_data (abfd);
-  if ((size_t) (rel - relocs)
-      >= (NUM_SHDR_ENTRIES (rel_hdr) * bed->s->int_rels_per_ext_rel))
-    rel_hdr = elf_section_data (sec)->rel_hdr2;
-  return rel_hdr->sh_entsize == MIPS_ELF_REL_SIZE (abfd);
+  return ((size_t) (rel - relocs)
+	  < NUM_SHDR_ENTRIES (rel_hdr) * bed->s->int_rels_per_ext_rel);
 }
 
 /* Read the addend for REL relocation REL, which belongs to bfd ABFD.
@@ -8983,13 +8966,13 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       asection *sec;
       Elf_Internal_Shdr *symtab_hdr;
       struct elf_link_hash_entry *h;
+      bfd_boolean rel_reloc;
 
+      rel_reloc = (NEWABI_P (input_bfd)
+		   && mips_elf_rel_relocation_p (input_bfd, input_section,
+						 relocs, rel));
       /* Find the relocation howto for this relocation.  */
-      howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, r_type,
-				       NEWABI_P (input_bfd)
-				       && (MIPS_RELOC_RELA_P
-					   (input_bfd, input_section,
-					    rel - relocs)));
+      howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, r_type, !rel_reloc);
 
       r_symndx = ELF_R_SYM (input_bfd, rel->r_info);
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;

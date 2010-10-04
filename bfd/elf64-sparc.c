@@ -163,10 +163,10 @@ elf64_sparc_slurp_reloc_table (bfd *abfd, asection *asect,
 	  || asect->reloc_count == 0)
 	return TRUE;
 
-      rel_hdr = &d->rel_hdr;
-      rel_hdr2 = d->rel_hdr2;
+      rel_hdr = d->rel.hdr;
+      rel_hdr2 = d->rela.hdr;
 
-      BFD_ASSERT (asect->rel_filepos == rel_hdr->sh_offset
+      BFD_ASSERT ((rel_hdr && asect->rel_filepos == rel_hdr->sh_offset)
 		  || (rel_hdr2 && asect->rel_filepos == rel_hdr2->sh_offset));
     }
   else
@@ -193,8 +193,9 @@ elf64_sparc_slurp_reloc_table (bfd *abfd, asection *asect,
      canon_reloc_count.  */
   canon_reloc_count (asect) = 0;
 
-  if (!elf64_sparc_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols,
-					  dynamic))
+  if (rel_hdr
+      && !elf64_sparc_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols,
+					     dynamic))
     return FALSE;
 
   if (rel_hdr2
@@ -325,7 +326,7 @@ elf64_sparc_write_relocs (bfd *abfd, asection *sec, PTR data)
 	}
     }
 
-  rela_hdr = &elf_section_data (sec)->rel_hdr;
+  rela_hdr = elf_section_data (sec)->rela.hdr;
 
   rela_hdr->sh_size = rela_hdr->sh_entsize * count;
   rela_hdr->contents = (PTR) bfd_alloc (abfd, rela_hdr->sh_size);

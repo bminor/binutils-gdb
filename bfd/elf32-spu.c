@@ -5091,7 +5091,7 @@ spu_elf_relocate_section (bfd *output_bfd,
 	}
       input_section->reloc_count = wrel - relocs;
       /* Backflips for _bfd_elf_link_output_relocs.  */
-      rel_hdr = &elf_section_data (input_section)->rel_hdr;
+      rel_hdr = _bfd_elf_single_rel_hdr (input_section);
       rel_hdr->sh_size = input_section->reloc_count * rel_hdr->sh_entsize;
       ret = 2;
     }

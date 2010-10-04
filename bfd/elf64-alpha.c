@@ -4086,7 +4086,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       const char *section_name;
       section_name = (bfd_elf_string_from_elf_section
 		      (input_bfd, elf_elfheader(input_bfd)->e_shstrndx,
-		       elf_section_data(input_section)->rel_hdr.sh_name));
+		       _bfd_elf_single_rel_hdr (input_section)->sh_name));
       BFD_ASSERT(section_name != NULL);
       srel = bfd_get_section_by_name (dynobj, section_name);
     }

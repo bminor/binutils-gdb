@@ -1343,7 +1343,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   sreloc = NULL;
 
   if (ABI_64_P (abfd))
-    num_relocs = NUM_SHDR_ENTRIES (& elf_section_data (sec)->rel_hdr);
+    num_relocs = NUM_SHDR_ENTRIES (_bfd_elf_single_rel_hdr (sec));
   else
     num_relocs = sec->reloc_count;
 
@@ -2884,7 +2884,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
   rel = relocs;
   if (ABI_64_P (output_bfd))
-    num_relocs = NUM_SHDR_ENTRIES (& elf_section_data (input_section)->rel_hdr);
+    num_relocs = NUM_SHDR_ENTRIES (_bfd_elf_single_rel_hdr (input_section));
   else
     num_relocs = input_section->reloc_count;
   relend = relocs + num_relocs;

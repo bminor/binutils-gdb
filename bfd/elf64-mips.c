@@ -2722,13 +2722,13 @@ mips_elf64_slurp_reloc_table (bfd *abfd, asection *asect,
 	  || asect->reloc_count == 0)
 	return TRUE;
 
-      rel_hdr = &d->rel_hdr;
-      reloc_count = NUM_SHDR_ENTRIES (rel_hdr);
-      rel_hdr2 = d->rel_hdr2;
+      rel_hdr = d->rel.hdr;
+      reloc_count = rel_hdr ? NUM_SHDR_ENTRIES (rel_hdr) : 0;
+      rel_hdr2 = d->rela.hdr;
       reloc_count2 = (rel_hdr2 ? NUM_SHDR_ENTRIES (rel_hdr2) : 0);
 
       BFD_ASSERT (asect->reloc_count == reloc_count + reloc_count2);
-      BFD_ASSERT (asect->rel_filepos == rel_hdr->sh_offset
+      BFD_ASSERT ((rel_hdr && asect->rel_filepos == rel_hdr->sh_offset)
 		  || (rel_hdr2 && asect->rel_filepos == rel_hdr2->sh_offset));
 
     }
@@ -2756,19 +2756,18 @@ mips_elf64_slurp_reloc_table (bfd *abfd, asection *asect,
   /* The slurp_one_reloc_table routine increments reloc_count.  */
   asect->reloc_count = 0;
 
-  if (! mips_elf64_slurp_one_reloc_table (abfd, asect,
-					  rel_hdr, reloc_count,
-					  relents,
-					  symbols, dynamic))
+  if (rel_hdr != NULL
+      && ! mips_elf64_slurp_one_reloc_table (abfd, asect,
+					     rel_hdr, reloc_count,
+					     relents,
+					     symbols, dynamic))
     return FALSE;
-  if (d->rel_hdr2 != NULL)
-    {
-      if (! mips_elf64_slurp_one_reloc_table (abfd, asect,
-					      rel_hdr2, reloc_count2,
-					      relents + reloc_count * 3,
-					      symbols, dynamic))
-	return FALSE;
-    }
+  if (rel_hdr2 != NULL
+      && ! mips_elf64_slurp_one_reloc_table (abfd, asect,
+					     rel_hdr2, reloc_count2,
+					     relents + reloc_count * 3,
+					     symbols, dynamic))
+    return FALSE;
 
   asect->relocation = relents;
   return TRUE;
@@ -2827,7 +2826,7 @@ mips_elf64_write_relocs (bfd *abfd, asection *sec, void *data)
 	}
     }
 
-  rel_hdr = &elf_section_data (sec)->rel_hdr;
+  rel_hdr = _bfd_elf_single_rel_hdr (sec);
 
   /* Do the actual relocation.  */
 

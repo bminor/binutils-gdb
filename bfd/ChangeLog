@@ -1,3 +1,76 @@
+2010-10-04  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* elf-bfd.h (struct bfd_elf_section_reloc_data): New structure.
+	(struct bfd_elf_section_data): New members REL and RELA; delete
+	members REL_HDR, REL_HDR2, REL_COUNT, REL_COUNT2, REL_IDX,
+	REL_IDX2, REL_HASHES.
+	(_bfd_elf_init_reloc_shdr): Adjust declaration.
+	(_bfd_elf_single_rel_hdr): Declare.
+	(RELOC_AGAINST_DISCARDED_SECTION): Use it.
+	* elf.c (bfd_section_from_shdr): Adjusted to match changes in
+	data structures.
+	(_bfd_elf_init_reloc_shdr): New arg RELDATA.  Remove arg REL_HDR.
+	All callers changed.  Allocate memory for the Elf_Internal_Shdr
+	structure.
+	(_bfd_elf_single_rel_hdr): New function.
+	(struct fake_section_arg): New structure.
+	(elf_fake_section): Expect to see a pointer to it in the third
+	argument.  If doing a relocatable link, allocate both REL and RELA
+	sections as needed.
+	(assign_section_numbers): Adjusted to match changes in
+	data structures.
+	(_bfd_elf_compute_section_file_positions): Call elf_fake_sections
+	with a struct fake_section_args argument.
+	* elfcode.h (elf_write_relocs): Adjusted to match changes in
+	data structures.
+	(elf_slurp_reloc_table): Likewise.
+	* elflink.c (_bfd_elf_link_read_relocs): Likewise.
+	(_bfd_elf_link_size_reloc_section): Remove arg REL_HDR, replace with
+	RELDATA.  Remove argument O.  All callers changed.  Remove code to
+	discover the right rel_hdr and count.
+	(_bfd_elf_link_output_relocs): Adjusted to match changes in
+	data structures.
+	(elf_link_adjust_relocs): Remove args REL_HDR, COUNT and REL_HASH;
+	replace with RELDATA.  All callers changed.
+	(elf_link_input_bfd): Correctly generate rel_hash data when both
+	REL and RELA sections are present.
+	(elf_reloc_link_order): Adjusted to match changes in
+	data structures.
+	(bfd_elf_final_link): Simplify code to count relocs.  Free the
+	hashes array for both REL and RELA.
+	(get_dynamic_reloc_section_name): Use _bfd_elf_single_reloc_hdr
+	* elf32-m32r.c (m32r_elf_fake_sections, elf_backend_fake_sections):
+	Delete.
+	* elf32-tic6x.c (elf32_tic6x_fake_sections, elf_backend_fake_sections):
+	Delete.
+	(elf32_tic6x_rel_relocation_p): Adjusted to match changes in
+	data structures.
+ 	* elf32-microblaze.c (microblaze_elf_check_relocs): Use
+	_bfd_elf_single_rel_hdr.
+	* elf32-ppc.c (ppc_elf_relax_section): Likewise.
+	* elf32-spu.c (spu_elf_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-hppa.c (get_reloc_section): Likewise.
+	* elf64-mips.c (mips_elf64_slurp_reloc_table): Adjusted to match
+	changes in data structures.
+	(mips_elf64_write_relocs): Use _bfd_elf_single_rel_hdr.
+	* elf64-ppc.c (ppc64_elf_edit_opd): Likewise.
+	(ppc64_elf_edit_toc): Likewise.
+	(get_relocs): Adjusted to match changes in data structures.
+	Allocate an Elf_Internal_Shdr structure if necessary.
+	(ppc64_elf_finish_dynamic_sections): Use _bfd_elf_single_rel_hdr.
+	* elf64-sparc.c (elf64_sparc_slurp_reloc_table): Adjusted to match
+	changes in data structures.
+	* elfxx-ia64.c (get_reloc_section): Use _bfd_elf_single_rel_hdr.
+	* elfxx-mips.c (MIPS_RELOC_RELA_P): Remove macro.
+	(mips_elf_rel_relocation_p): Adjusted to match changes in data
+	structures.
+	(_bfd_mips_elf_relocate_section): Use mips_elf_rel_relocation_p rather
+	than MIPS_RELOC_RELOCA_P.
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Use
+	_bfd_elf_single_rel_hdr.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+
 2010-10-01  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Don't choke on local symbols in

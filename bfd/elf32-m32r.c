@@ -4034,39 +4034,6 @@ static const struct bfd_elf_special_section m32r_elf_special_sections[] =
   { NULL,                     0,  0, 0,            0 }
 };
 
-static bfd_boolean
-m32r_elf_fake_sections (bfd *abfd,
-			Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED,
-			asection *sec)
-{
-  /* The generic elf_fake_sections will set up REL_HDR using the
-     default kind of relocations.  But, we may actually need both
-     kinds of relocations, so we set up the second header here.
-
-     This is not necessary for the O32 ABI since that only uses Elf32_Rel
-     relocations (cf. System V ABI, MIPS RISC Processor Supplement,
-     3rd Edition, p. 4-17).  It breaks the IRIX 5/6 32-bit ld, since one
-     of the resulting empty .rela.<section> sections starts with
-     sh_offset == object size, and ld doesn't allow that.  While the check
-     is arguably bogus for empty or SHT_NOBITS sections, it can easily be
-     avoided by not emitting those useless sections in the first place.  */
-  if ((sec->flags & SEC_RELOC) != 0)
-    {
-      struct bfd_elf_section_data *esd;
-      bfd_size_type amt = sizeof (Elf_Internal_Shdr);
-
-      esd = elf_section_data (sec);
-      BFD_ASSERT (esd->rel_hdr2 == NULL);
-      esd->rel_hdr2 = bfd_zalloc (abfd, amt);
-      if (!esd->rel_hdr2)
-        return FALSE;
-      _bfd_elf_init_reloc_shdr (abfd, esd->rel_hdr2, sec,
-                                !sec->use_rela_p);
-    }
-
-  return TRUE;
-}
-
 static enum elf_reloc_type_class
 m32r_elf_reloc_type_class (const Elf_Internal_Rela *rela)
 {
@@ -4128,7 +4095,6 @@ m32r_elf_reloc_type_class (const Elf_Internal_Rela *rela)
 #else
 #define elf_backend_default_use_rela_p  1
 #define elf_backend_may_use_rela_p      1
-#define elf_backend_fake_sections       m32r_elf_fake_sections
 #endif
 
 #define elf_backend_object_p			m32r_elf_object_p

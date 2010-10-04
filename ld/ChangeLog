@@ -1,3 +1,8 @@
+2010-10-04  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* emultempl/xtensaelf.em (replace_insn_sec_with_prop_sec): Use
+	_bfd_elf_single_rel_hdr.
+
 2010-10-01  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12066

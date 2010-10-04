@@ -1710,8 +1710,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       /* *These* do a lot of work -- but build no sections!  */
       {
 	asection *target_sect;
-	Elf_Internal_Shdr *hdr2;
+	Elf_Internal_Shdr *hdr2, **p_hdr;
 	unsigned int num_sec = elf_numsections (abfd);
+	struct bfd_elf_section_data *esdt;
+	bfd_size_type amt;
 
 	if (hdr->sh_entsize
 	    != (bfd_size_type) (hdr->sh_type == SHT_REL
@@ -1790,20 +1792,19 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	if (target_sect == NULL)
 	  return FALSE;
 
-	if ((target_sect->flags & SEC_RELOC) == 0
-	    || target_sect->reloc_count == 0)
-	  hdr2 = &elf_section_data (target_sect)->rel_hdr;
+	esdt = elf_section_data (target_sect);
+	if (hdr->sh_type == SHT_RELA)
+	  p_hdr = &esdt->rela.hdr;
 	else
-	  {
-	    bfd_size_type amt;
-	    BFD_ASSERT (elf_section_data (target_sect)->rel_hdr2 == NULL);
-	    amt = sizeof (*hdr2);
-	    hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
-	    if (hdr2 == NULL)
-	      return FALSE;
-	    elf_section_data (target_sect)->rel_hdr2 = hdr2;
-	  }
+	  p_hdr = &esdt->rel.hdr;
+
+	BFD_ASSERT (*p_hdr == NULL);
+	amt = sizeof (*hdr2);
+	hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
+	if (hdr2 == NULL)
+	  return FALSE;
 	*hdr2 = *hdr;
+	*p_hdr = hdr2;
 	elf_elfsections (abfd)[shindex] = hdr2;
 	target_sect->reloc_count += NUM_SHDR_ENTRIES (hdr);
 	target_sect->flags |= SEC_RELOC;
@@ -1812,7 +1813,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	/* In the section to which the relocations apply, mark whether
 	   its relocations are of the REL or RELA variety.  */
 	if (hdr->sh_size != 0)
-	  target_sect->use_rela_p = hdr->sh_type == SHT_RELA;
+	  {
+	    if (hdr->sh_type == SHT_RELA)
+	      target_sect->use_rela_p = 1;
+	  }
 	abfd->flags |= HAS_RELOC;
 	return TRUE;
       }
@@ -2410,20 +2414,43 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int hdr_index)
     }
 }
 
-/* Initialize REL_HDR, the section-header for new section, containing
-   relocations against ASECT.  If USE_RELA_P is TRUE, we use RELA
-   relocations; otherwise, we use REL relocations.  */
+/* Return the REL_HDR for SEC, assuming there is only a single one, either
+   REL or RELA.  */
+
+Elf_Internal_Shdr *
+_bfd_elf_single_rel_hdr (asection *sec)
+{
+  if (elf_section_data (sec)->rel.hdr)
+    {
+      BFD_ASSERT (elf_section_data (sec)->rela.hdr == NULL);
+      return elf_section_data (sec)->rel.hdr;
+    }
+  else
+    return elf_section_data (sec)->rela.hdr;
+}
+
+/* Allocate and initialize a section-header for a new reloc section,
+   containing relocations against ASECT.  It is stored in RELDATA.  If
+   USE_RELA_P is TRUE, we use RELA relocations; otherwise, we use REL
+   relocations.  */
 
 bfd_boolean
 _bfd_elf_init_reloc_shdr (bfd *abfd,
-			  Elf_Internal_Shdr *rel_hdr,
+			  struct bfd_elf_section_reloc_data *reldata,
 			  asection *asect,
 			  bfd_boolean use_rela_p)
 {
+  Elf_Internal_Shdr *rel_hdr;
   char *name;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  bfd_size_type amt = sizeof ".rela" + strlen (asect->name);
+  bfd_size_type amt;
 
+  amt = sizeof (Elf_Internal_Shdr);
+  BFD_ASSERT (reldata->hdr == NULL);
+  rel_hdr = bfd_zalloc (abfd, amt);
+  reldata->hdr = rel_hdr;
+
+  amt = sizeof ".rela" + strlen (asect->name);      
   name = (char *) bfd_alloc (abfd, amt);
   if (name == NULL)
     return FALSE;
@@ -2457,30 +2484,37 @@ bfd_elf_get_default_section_type (flagword flags)
   return SHT_PROGBITS;
 }
 
+struct fake_section_arg
+{
+  struct bfd_link_info *link_info;
+  bfd_boolean failed;
+};
+
 /* Set up an ELF internal section header for a section.  */
 
 static void
-elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
+elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 {
+  struct fake_section_arg *arg = (struct fake_section_arg *)fsarg;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  bfd_boolean *failedptr = (bfd_boolean *) failedptrarg;
+  struct bfd_elf_section_data *esd = elf_section_data (asect);
   Elf_Internal_Shdr *this_hdr;
   unsigned int sh_type;
 
-  if (*failedptr)
+  if (arg->failed)
     {
       /* We already failed; just get out of the bfd_map_over_sections
 	 loop.  */
       return;
     }
 
-  this_hdr = &elf_section_data (asect)->this_hdr;
+  this_hdr = &esd->this_hdr;
 
   this_hdr->sh_name = (unsigned int) _bfd_elf_strtab_add (elf_shstrtab (abfd),
 							  asect->name, FALSE);
   if (this_hdr->sh_name == (unsigned int) -1)
     {
-      *failedptr = TRUE;
+      arg->failed = TRUE;
       return;
     }
 
@@ -2632,11 +2666,45 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
   if ((asect->flags & (SEC_GROUP | SEC_EXCLUDE)) == SEC_EXCLUDE)
     this_hdr->sh_flags |= SHF_EXCLUDE;
 
+  /* If the section has relocs, set up a section header for the
+     SHT_REL[A] section.  If two relocation sections are required for
+     this section, it is up to the processor-specific back-end to
+     create the other.  */
+  if ((asect->flags & SEC_RELOC) != 0)
+    {
+      /* When doing a relocatable link, create both REL and RELA sections if
+	 needed.  */
+      if (arg->link_info
+	  /* Do the normal setup if we wouldn't create any sections here.  */
+	  && esd->rel.count + esd->rela.count > 0
+	  && (arg->link_info->relocatable || arg->link_info->emitrelocations))
+	{
+	  if (esd->rel.count && esd->rel.hdr == NULL
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, asect, FALSE))
+	    {
+	      arg->failed = TRUE;
+	      return;
+	    }
+	  if (esd->rela.count && esd->rela.hdr == NULL
+	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, asect, TRUE))
+	    {
+	      arg->failed = TRUE;
+	      return;
+	    }
+	}
+      else if (!_bfd_elf_init_reloc_shdr (abfd,
+					  (asect->use_rela_p
+					   ? &esd->rela : &esd->rel),
+					  asect,
+					  asect->use_rela_p))
+	  arg->failed = TRUE;
+    }
+
   /* Check for processor-specific section types.  */
   sh_type = this_hdr->sh_type;
   if (bed->elf_backend_fake_sections
       && !(*bed->elf_backend_fake_sections) (abfd, this_hdr, asect))
-    *failedptr = TRUE;
+    arg->failed = TRUE;
 
   if (sh_type == SHT_NOBITS && asect->size != 0)
     {
@@ -2644,17 +2712,6 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
 	 called for objcopy --only-keep-debug.  */
       this_hdr->sh_type = sh_type;
     }
-
-  /* If the section has relocs, set up a section header for the
-     SHT_REL[A] section.  If two relocation sections are required for
-     this section, it is up to the processor-specific back-end to
-     create the other.  */
-  if ((asect->flags & SEC_RELOC) != 0
-      && !_bfd_elf_init_reloc_shdr (abfd,
-				    &elf_section_data (asect)->rel_hdr,
-				    asect,
-				    asect->use_rela_p))
-    *failedptr = TRUE;
 }
 
 /* Fill in the contents of a SHT_GROUP section.  Called from
@@ -2820,21 +2877,21 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
       if (d->this_hdr.sh_type != SHT_GROUP)
 	d->this_idx = section_number++;
       _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->this_hdr.sh_name);
-      if ((sec->flags & SEC_RELOC) == 0)
-	d->rel_idx = 0;
-      else
+      if (d->rel.hdr)
 	{
-	  d->rel_idx = section_number++;
-	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rel_hdr.sh_name);
+	  d->rel.idx = section_number++;
+	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rel.hdr->sh_name);
 	}
+      else
+	d->rel.idx = 0;
 
-      if (d->rel_hdr2)
+      if (d->rela.hdr)
 	{
-	  d->rel_idx2 = section_number++;
-	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rel_hdr2->sh_name);
+	  d->rela.idx = section_number++;
+	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rela.hdr->sh_name);
 	}
       else
-	d->rel_idx2 = 0;
+	d->rela.idx = 0;
     }
 
   t->shstrtab_section = section_number++;
@@ -2906,25 +2963,25 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
       d = elf_section_data (sec);
 
       i_shdrp[d->this_idx] = &d->this_hdr;
-      if (d->rel_idx != 0)
-	i_shdrp[d->rel_idx] = &d->rel_hdr;
-      if (d->rel_idx2 != 0)
-	i_shdrp[d->rel_idx2] = d->rel_hdr2;
+      if (d->rel.idx != 0)
+	i_shdrp[d->rel.idx] = d->rel.hdr;
+      if (d->rela.idx != 0)
+	i_shdrp[d->rela.idx] = d->rela.hdr;
 
       /* Fill in the sh_link and sh_info fields while we're at it.  */
 
       /* sh_link of a reloc section is the section index of the symbol
 	 table.  sh_info is the section index of the section to which
 	 the relocation entries apply.  */
-      if (d->rel_idx != 0)
+      if (d->rel.idx != 0)
 	{
-	  d->rel_hdr.sh_link = t->symtab_section;
-	  d->rel_hdr.sh_info = d->this_idx;
+	  d->rel.hdr->sh_link = t->symtab_section;
+	  d->rel.hdr->sh_info = d->this_idx;
 	}
-      if (d->rel_idx2 != 0)
+      if (d->rela.idx != 0)
 	{
-	  d->rel_hdr2->sh_link = t->symtab_section;
-	  d->rel_hdr2->sh_info = d->this_idx;
+	  d->rela.hdr->sh_link = t->symtab_section;
+	  d->rela.hdr->sh_info = d->this_idx;
 	}
 
       /* We need to set up sh_link for SHF_LINK_ORDER.  */
@@ -3278,6 +3335,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
 					 struct bfd_link_info *link_info)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct fake_section_arg fsargs;
   bfd_boolean failed;
   struct bfd_strtab_hash *strtab = NULL;
   Elf_Internal_Shdr *shstrtab_hdr;
@@ -3297,9 +3355,10 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   if (bed->elf_backend_post_process_headers)
     (*bed->elf_backend_post_process_headers) (abfd, link_info);
 
-  failed = FALSE;
-  bfd_map_over_sections (abfd, elf_fake_sections, &failed);
-  if (failed)
+  fsargs.failed = FALSE;
+  fsargs.link_info = link_info;
+  bfd_map_over_sections (abfd, elf_fake_sections, &fsargs);
+  if (fsargs.failed)
     return FALSE;
 
   if (!assign_section_numbers (abfd, link_info))
@@ -3319,6 +3378,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
 	return FALSE;
     }
 
+  failed = FALSE;
   if (link_info == NULL)
     {
       bfd_map_over_sections (abfd, bfd_elf_set_group_contents, &failed);

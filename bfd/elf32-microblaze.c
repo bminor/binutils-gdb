@@ -2060,7 +2060,7 @@ microblaze_elf_check_relocs (bfd * abfd,
 		    const char *name;
 		    bfd *dynobj;
 		    unsigned int strndx = elf_elfheader (abfd)->e_shstrndx;
-		    unsigned int shnam = elf_section_data (sec)->rel_hdr.sh_name;
+		    unsigned int shnam = _bfd_elf_single_rel_hdr (sec)->sh_name;
 
 		    name = bfd_elf_string_from_elf_section (abfd, strndx, shnam);
 		    if (name == NULL)
