@@ -1,3 +1,16 @@
+2010-10-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: #include "value.h".
+	(ensure_lval): Delete advance declaration.  Remove gdbarch and sp
+	arguments.  Implement using value_allocate_space_in_inferior
+	instead of allocating memory from the stack.
+	(make_array_descriptor): Remove gdbarch and sp parameters.  Update
+	calls to ensure_lval.
+	(ada_convert_actual): Remove gdbarch and sp parameters.  Update
+	calls to make_array_descriptor and ensure_lval.
+	* ada-lang.h (ada_convert_actual): Update declaration.
+	* infcall.c (value_arg_coerce): Update call to ada_convert_actual.
+
 2010-10-04  Doug Evans  <dje@google.com>
 
 	* python/python.c (_initialize_python): Define new function
