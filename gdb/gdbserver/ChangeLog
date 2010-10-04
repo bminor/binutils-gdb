@@ -1,3 +1,7 @@
+2010-10-04  Doug Evans  <dje@google.com>
+
+	* Makefile.in (uninstall): Use $(DESTDIR).
+
 2010-09-24  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/11842
