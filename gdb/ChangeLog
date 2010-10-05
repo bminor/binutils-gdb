@@ -1,5 +1,7 @@
 2010-10-04  Doug Evans  <dje@google.com>
 
+	* cc-with-index.sh: New file.
+
 	* dwarf2read.c (dw2_do_instantiate_symtab): Insert blank line after
 	function comment.
 	(dw2_instantiate_symtab, dw2_get_cu, extract_cu_value): Ditto.
