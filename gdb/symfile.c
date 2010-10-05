@@ -547,6 +547,23 @@ relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
     }
 }
 
+/* Transform section name S for a name comparison.  prelink can split section
+   `.bss' into two sections `.dynbss' and `.bss' (in this order).  Similarly
+   prelink can split `.sbss' into `.sdynbss' and `.sbss'.  Use virtual address
+   of the new `.dynbss' (`.sdynbss') section as the adjacent new `.bss'
+   (`.sbss') section has invalid (increased) virtual address.  */
+
+static const char *
+addr_section_name (const char *s)
+{
+  if (strcmp (s, ".dynbss") == 0)
+    return ".bss";
+  if (strcmp (s, ".sdynbss") == 0)
+    return ".sbss";
+
+  return s;
+}
+
 /* qsort comparator for addrs_section_sort.  Sort entries in ascending order by
    their (name, sectindex) pair.  sectindex makes the sort by name stable.  */
 
@@ -557,7 +574,7 @@ addrs_section_compar (const void *ap, const void *bp)
   const struct other_sections *b = *((struct other_sections **) bp);
   int retval, a_idx, b_idx;
 
-  retval = strcmp (a->name, b->name);
+  retval = strcmp (addr_section_name (a->name), addr_section_name (b->name));
   if (retval)
     return retval;
 
@@ -641,14 +658,16 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 
   while (*addrs_sorted)
     {
-      const char *sect_name = (*addrs_sorted)->name;
+      const char *sect_name = addr_section_name ((*addrs_sorted)->name);
 
       while (*abfd_addrs_sorted
-	     && strcmp ((*abfd_addrs_sorted)->name, sect_name) < 0)
+	     && strcmp (addr_section_name ((*abfd_addrs_sorted)->name),
+			sect_name) < 0)
 	abfd_addrs_sorted++;
 
       if (*abfd_addrs_sorted
-	  && strcmp ((*abfd_addrs_sorted)->name, sect_name) == 0)
+	  && strcmp (addr_section_name ((*abfd_addrs_sorted)->name),
+		     sect_name) == 0)
 	{
 	  int index_in_addrs;
 
@@ -676,7 +695,6 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 
   for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
     {
-      const char *sect_name = addrs->other[i].name;
       struct other_sections *sect = addrs_to_abfd_addrs[i];
 
       if (sect)
@@ -694,6 +712,9 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 	}
       else
 	{
+	  /* addr_section_name transformation is not used for SECT_NAME.  */
+	  const char *sect_name = addrs->other[i].name;
+
 	  /* This section does not exist in ABFD, which is normally
 	     unexpected and we want to issue a warning.
 
@@ -704,12 +725,20 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 	     a warning.  Shared libraries contain just the section
 	     ".gnu.liblist" but it is not marked as loadable there.  There is
 	     no other way to identify them than by their name as the sections
-	     created by prelink have no special flags.  */
+	     created by prelink have no special flags.
+
+	     For the sections `.bss' and `.sbss' see addr_section_name.  */
 
 	  if (!(strcmp (sect_name, ".gnu.liblist") == 0
 		|| strcmp (sect_name, ".gnu.conflict") == 0
-		|| strcmp (sect_name, ".dynbss") == 0
-		|| strcmp (sect_name, ".sdynbss") == 0))
+		|| (strcmp (sect_name, ".bss") == 0
+		    && i > 0
+		    && strcmp (addrs->other[i - 1].name, ".dynbss") == 0
+		    && addrs_to_abfd_addrs[i - 1] != NULL)
+		|| (strcmp (sect_name, ".sbss") == 0
+		    && i > 0
+		    && strcmp (addrs->other[i - 1].name, ".sdynbss") == 0
+		    && addrs_to_abfd_addrs[i - 1] != NULL)))
 	    warning (_("section %s not found in %s"), sect_name,
 		     bfd_get_filename (abfd));
 

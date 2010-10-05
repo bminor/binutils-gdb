@@ -1,3 +1,11 @@
+2010-10-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/prelink-lib.c (copyreloc): New initialized variable.
+	* gdb.base/prelink.c (copyreloc, bssvar, bssvarp): New variables.
+	(main): Use copyreloc.
+	* gdb.base/prelink.exp (split debug of executable)
+	(.dynbss vs. .bss address shift): New tests.
+
 2010-09-23  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/pr12028.cc: New.

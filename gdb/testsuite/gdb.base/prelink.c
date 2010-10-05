@@ -18,6 +18,11 @@
 
 #include <stdio.h>
 
+extern int copyreloc;
+
+/* Test GDB itself finds `&bssvar' right.   */
+static int bssvar, *bssvarp = &bssvar;
+
 extern void (*h (void)) (void (*)(void));
 
 int
@@ -25,5 +30,6 @@ main (void)
 {
   void (*f) (void (*)(void)) = h ();
   printf ("%p\n", f);
+  printf ("%d\n", copyreloc);
   f (0);
 }
