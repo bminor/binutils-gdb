@@ -103,10 +103,10 @@ proc altivec_abi_tests { extra_flags force_abi } {
 	"Attempt to take address of value not located in memory." \
 	"Attempt to take address of the return value of vec_func"
 
-    # Attempt to assing a value to the return value of vec_func.
+    # Attempt to assign a value to the return value of vec_func.
     gdb_test "set variable vec_func(vshort,vushort,vint,vuint,vchar,vuchar,vfloat,x,y,a,b,c,intv_on_stack) = {0,1,2,3}" \
 	"Left operand of assignment is not an lvalue." \
-	"Attempt to assing a value to the return value of vec_func"
+	"Attempt to assign a value to the return value of vec_func"
 
     # Let's step into the function, to see if the args are printed correctly.
     gdb_test "step" \
