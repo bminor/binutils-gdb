@@ -7,6 +7,14 @@
 	(mapped_index_string_hash, find_slot_in_mapped_hash): Ditto.
 	(dw2_setup, dw2_require_line_header, dw2_require_full_path): Ditto.
 	(dw2_do_expand_symtabs_matching): Ditto.
+	(eq_strtab_entry, create_strtab, add_string): Ditto.
+	(hash_strtab_entry): Ditto.
+	(hash_symtab_entry, eq_symtab_entry, delete_symtab_entry): Ditto.
+	(create_index_table, create_mapped_symtab, find_slot): Ditto.
+	(hash_expand, add_index_entry, add_indices_to_cpool): Ditto.
+	(write_hash_table, add_address_entry, write_psymbols): Ditto.
+	(write_obstack, unlink_if_set, write_one_signatured_type): Ditto.
+	(write_psymtabs_to_index): Ditto.
 
 2010-10-04  Joel Brobecker  <brobecker@adacore.com>
 

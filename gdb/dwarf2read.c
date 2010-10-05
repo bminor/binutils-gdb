@@ -14741,6 +14741,7 @@ struct strtab_entry
 };
 
 /* Hash function for a strtab_entry.  */
+
 static hashval_t
 hash_strtab_entry (const void *e)
 {
@@ -14749,6 +14750,7 @@ hash_strtab_entry (const void *e)
 }
 
 /* Equality function for a strtab_entry.  */
+
 static int
 eq_strtab_entry (const void *a, const void *b)
 {
@@ -14758,6 +14760,7 @@ eq_strtab_entry (const void *a, const void *b)
 }
 
 /* Create a strtab_entry hash table.  */
+
 static htab_t
 create_strtab (void)
 {
@@ -14767,6 +14770,7 @@ create_strtab (void)
 
 /* Add a string to the constant pool.  Return the string's offset in
    host order.  */
+
 static offset_type
 add_string (htab_t table, struct obstack *cpool, const char *str)
 {
@@ -14810,6 +14814,7 @@ struct mapped_symtab
 };
 
 /* Hash function for a symtab_index_entry.  */
+
 static hashval_t
 hash_symtab_entry (const void *e)
 {
@@ -14821,6 +14826,7 @@ hash_symtab_entry (const void *e)
 }
 
 /* Equality function for a symtab_index_entry.  */
+
 static int
 eq_symtab_entry (const void *a, const void *b)
 {
@@ -14835,6 +14841,7 @@ eq_symtab_entry (const void *a, const void *b)
 }
 
 /* Destroy a symtab_index_entry.  */
+
 static void
 delete_symtab_entry (void *p)
 {
@@ -14844,6 +14851,7 @@ delete_symtab_entry (void *p)
 }
 
 /* Create a hash table holding symtab_index_entry objects.  */
+
 static htab_t
 create_index_table (void)
 {
@@ -14852,6 +14860,7 @@ create_index_table (void)
 }
 
 /* Create a new mapped symtab object.  */
+
 static struct mapped_symtab *
 create_mapped_symtab (void)
 {
@@ -14863,6 +14872,7 @@ create_mapped_symtab (void)
 }
 
 /* Destroy a mapped_symtab.  */
+
 static void
 cleanup_mapped_symtab (void *p)
 {
@@ -14875,6 +14885,7 @@ cleanup_mapped_symtab (void *p)
 
 /* Find a slot in SYMTAB for the symbol NAME.  Returns a pointer to
    the slot.  */
+
 static struct symtab_index_entry **
 find_slot (struct mapped_symtab *symtab, const char *name)
 {
@@ -14892,6 +14903,7 @@ find_slot (struct mapped_symtab *symtab, const char *name)
 }
 
 /* Expand SYMTAB's hash table.  */
+
 static void
 hash_expand (struct mapped_symtab *symtab)
 {
@@ -14917,6 +14929,7 @@ hash_expand (struct mapped_symtab *symtab)
 
 /* Add an entry to SYMTAB.  NAME is the name of the symbol.  CU_INDEX
    is the index of the CU in which the symbol appears.  */
+
 static void
 add_index_entry (struct mapped_symtab *symtab, const char *name,
 		 offset_type cu_index)
@@ -14942,6 +14955,7 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
 }
 
 /* Add a vector of indices to the constant pool.  */
+
 static offset_type
 add_indices_to_cpool (htab_t index_table, struct obstack *cpool,
 		      struct symtab_index_entry *entry)
@@ -14979,6 +14993,7 @@ add_indices_to_cpool (htab_t index_table, struct obstack *cpool,
 
 /* Write the mapped hash table SYMTAB to the obstack OUTPUT, with
    constant pool entries going into the obstack CPOOL.  */
+
 static void
 write_hash_table (struct mapped_symtab *symtab,
 		  struct obstack *output, struct obstack *cpool)
@@ -15029,6 +15044,7 @@ write_hash_table (struct mapped_symtab *symtab,
 /* Write an address entry to ADDR_OBSTACK.  The addresses are taken
    from PST; CU_INDEX is the index of the CU in the vector of all
    CUs.  */
+
 static void
 add_address_entry (struct objfile *objfile,
 		   struct obstack *addr_obstack, struct partial_symtab *pst,
@@ -15053,6 +15069,7 @@ add_address_entry (struct objfile *objfile,
 }
 
 /* Add a list of partial symbols to SYMTAB.  */
+
 static void
 write_psymbols (struct mapped_symtab *symtab,
 		htab_t psyms_seen,
@@ -15092,6 +15109,7 @@ write_psymbols (struct mapped_symtab *symtab,
 
 /* Write the contents of an ("unfinished") obstack to FILE.  Throw an
    exception if there is an error.  */
+
 static void
 write_obstack (FILE *file, struct obstack *obstack)
 {
@@ -15102,6 +15120,7 @@ write_obstack (FILE *file, struct obstack *obstack)
 }
 
 /* Unlink a file if the argument is not NULL.  */
+
 static void
 unlink_if_set (void *p)
 {
@@ -15122,6 +15141,7 @@ struct signatured_type_index_data
 
 /* A helper function that writes a single signatured_type to an
    obstack.  */
+
 static int
 write_one_signatured_type (void **slot, void *d)
 {
@@ -15163,6 +15183,7 @@ cleanup_htab (void *arg)
 }
 
 /* Create an index file for OBJFILE in the directory DIR.  */
+
 static void
 write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 {
