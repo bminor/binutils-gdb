@@ -1,3 +1,18 @@
+2010-10-05  Alan Modra  <amodra@gmail.com>
+
+	* bucomm.c (bfd_nonfatal): Flush stdout before output to stderr.
+	(bfd_nonfatal_message, report, list_matching_formats): Likewise.
+	(list_supported_targets): Tidy.
+	* objdump.c (free_only_list): Formatting.
+	(slurp_dynamic_symtab): Non-zero exit status for "not a dynamic
+	object".
+	(update_source_path): Delete redundant check for NULL filename.
+	(disassemble_bytes): Error if disassemble_fn returns a value
+	that won't increment address.
+	(disassemble_data): Don't capitalize error message.
+	(read_section_stabs): Likewise.
+	(main): Return non-zero exit status on bad options.
+
 2010-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/12088
