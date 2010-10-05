@@ -1,3 +1,13 @@
+2010-10-04  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_do_instantiate_symtab): Insert blank line after
+	function comment.
+	(dw2_instantiate_symtab, dw2_get_cu, extract_cu_value): Ditto.
+	(create_cus_from_index, create_addrmap_from_index): Ditto.
+	(mapped_index_string_hash, find_slot_in_mapped_hash): Ditto.
+	(dw2_setup, dw2_require_line_header, dw2_require_full_path): Ditto.
+	(dw2_do_expand_symtabs_matching): Ditto.
+
 2010-10-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: #include "value.h".

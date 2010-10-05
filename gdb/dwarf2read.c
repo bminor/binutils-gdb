@@ -1638,6 +1638,7 @@ dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
 
 /* Read in the symbols for PER_CU.  OBJFILE is the objfile from which
    this CU came.  */
+
 static void
 dw2_do_instantiate_symtab (struct objfile *objfile,
 			   struct dwarf2_per_cu_data *per_cu)
@@ -1665,6 +1666,7 @@ dw2_do_instantiate_symtab (struct objfile *objfile,
 /* Ensure that the symbols for PER_CU have been read in.  OBJFILE is
    the objfile from which this CU came.  Returns the resulting symbol
    table.  */
+
 static struct symtab *
 dw2_instantiate_symtab (struct objfile *objfile,
 			struct dwarf2_per_cu_data *per_cu)
@@ -1680,6 +1682,7 @@ dw2_instantiate_symtab (struct objfile *objfile,
 }
 
 /* Return the CU given its index.  */
+
 static struct dwarf2_per_cu_data *
 dw2_get_cu (int index)
 {
@@ -1694,6 +1697,7 @@ dw2_get_cu (int index)
 /* A helper function that knows how to read a 64-bit value in a way
    that doesn't make gdb die.  Returns 1 if the conversion went ok, 0
    otherwise.  */
+
 static int
 extract_cu_value (const char *bytes, ULONGEST *result)
 {
@@ -1716,6 +1720,7 @@ extract_cu_value (const char *bytes, ULONGEST *result)
 /* Read the CU list from the mapped index, and use it to create all
    the CU objects for this objfile.  Return 0 if something went wrong,
    1 if everything went ok.  */
+
 static int
 create_cus_from_index (struct objfile *objfile, const gdb_byte *cu_list,
 		       offset_type cu_list_elements)
@@ -1806,6 +1811,7 @@ create_signatured_type_table_from_index (struct objfile *objfile,
 
 /* Read the address map data from the mapped index, and use it to
    populate the objfile's psymtabs_addrmap.  */
+
 static void
 create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 {
@@ -1848,6 +1854,7 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
    maintain control over the implementation.  This is necessary
    because the hash function is tied to the format of the mapped index
    file.  */
+
 static hashval_t
 mapped_index_string_hash (const void *p)
 {
@@ -1864,6 +1871,7 @@ mapped_index_string_hash (const void *p)
 /* Find a slot in the mapped index INDEX for the object named NAME.
    If NAME is found, set *VEC_OUT to point to the CU vector in the
    constant pool and return 1.  If NAME cannot be found, return 0.  */
+
 static int
 find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 			  offset_type **vec_out)
@@ -1896,6 +1904,7 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 
 /* Read the index file.  If everything went ok, initialize the "quick"
    elements of all the CUs and return 1.  Otherwise, return 0.  */
+
 static int
 dwarf2_read_index (struct objfile *objfile)
 {
@@ -1977,6 +1986,7 @@ dwarf2_read_index (struct objfile *objfile)
 
 /* A helper for the "quick" functions which sets the global
    dwarf2_per_objfile according to OBJFILE.  */
+
 static void
 dw2_setup (struct objfile *objfile)
 {
@@ -1986,6 +1996,7 @@ dw2_setup (struct objfile *objfile)
 
 /* A helper for the "quick" functions which attempts to read the line
    table for THIS_CU.  */
+
 static void
 dw2_require_line_header (struct objfile *objfile,
 			 struct dwarf2_per_cu_data *this_cu)
@@ -2072,6 +2083,7 @@ dw2_require_line_header (struct objfile *objfile,
    real path for a given file name from the line table.
    dw2_require_line_header must have been called before this is
    invoked.  */
+
 static const char *
 dw2_require_full_path (struct objfile *objfile,
 		       struct dwarf2_per_cu_data *per_cu,
@@ -2210,6 +2222,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 
 /* A helper function that expands all symtabs that hold an object
    named NAME.  */
+
 static void
 dw2_do_expand_symtabs_matching (struct objfile *objfile, const char *name)
 {
