@@ -1,3 +1,7 @@
+2010-10-06  Alan Modra  <amodra@gmail.com>
+
+	* bucomm.c (bfd_nonfatal, bfd_nonfatal_message): Don't clobber errno.
+
 2010-10-05  Alan Modra  <amodra@gmail.com>
 
 	* bucomm.c (bfd_nonfatal): Flush stdout before output to stderr.

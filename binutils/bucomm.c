@@ -54,8 +54,8 @@ bfd_nonfatal (const char *string)
 {
   const char *errmsg;
 
-  fflush (stdout);
   errmsg = bfd_errmsg (bfd_get_error ());
+  fflush (stdout);
   if (string)
     fprintf (stderr, "%s: %s: %s\n", program_name, string, errmsg);
   else
@@ -84,8 +84,8 @@ bfd_nonfatal_message (const char *filename,
   const char *section_name;
   va_list args;
 
-  fflush (stdout);
   errmsg = bfd_errmsg (bfd_get_error ());
+  fflush (stdout);
   section_name = NULL;
   va_start (args, format);
   fprintf (stderr, "%s", program_name);
