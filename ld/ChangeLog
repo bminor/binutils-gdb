@@ -1,3 +1,14 @@
+2010-10-06  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (ALL_EMULATIONS): Rewrite in terms of ...
+	(ALL_EMULATION_SOURCES): ... this new variable.
+	(ALL_64_EMULATIONS): Rewrite in terms of ...
+	(ALL_64_EMULATION_SOURCES): ... this new variable.
+	(EXTRA_ld_new_SOURCES): Rewrite in terms of the _SOURCES
+	variables.
+	(eelf32microblaze.c): Fix indentation.
+	* Makefile.in: Regenerate.
+
 2010-10-04  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* emultempl/xtensaelf.em (replace_insn_sec_with_prop_sec): Use
