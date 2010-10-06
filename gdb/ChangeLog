@@ -1,3 +1,16 @@
+2010-10-06  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdbtypes.h (struct main_type): Remove flag_nottext.
+	(enum type_flag_value): Remove TYPE_FLAG_NOTTEXT.
+	(enum type_instance_flag_value): Add TYPE_INSTANCE_FLAG_NOTTEXT.
+	(TYPE_NOTTEXT): Use TYPE_INSTANCE_FLAG_NOTTEXT instead of flag_nottext.
+	* gdbtypes.c (make_vector_type): Use TYPE_INSTANCE_FLAG_NOTTEXT instead
+	of TYPE_FLAG_NOTTEXT.
+	(init_type): Remove the initialization of the flag_nottext field.
+	(gdbtypes_post_init): Use TYPE_INSTANCE_FLAG_NOTTEXT instead of
+	TYPE_FLAG_NOTTEXT.
+	* c-valprint.c (c_val_print): Remove TYPE_VECTOR check.
+
 2010-10-04  Doug Evans  <dje@google.com>
 
 	* cc-with-index.sh: New file.

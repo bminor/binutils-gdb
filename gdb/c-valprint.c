@@ -180,8 +180,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	  /* Print arrays of textual chars with a string syntax, as
 	     long as the entire array is valid.  */
-          if (!TYPE_VECTOR (type)
-	      && c_textual_element_type (unresolved_elttype, options->format)
+          if (c_textual_element_type (unresolved_elttype, options->format)
 	      && value_bits_valid (original_value,
 				   TARGET_CHAR_BIT * embedded_offset,
 				   TARGET_CHAR_BIT * TYPE_LENGTH (type)))

@@ -1,3 +1,9 @@
+2010-10-06  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.base/gnu_vector.c: Add variable c4.
+	* gdb.base/gnu_vector.exp: Add tests for character vector printing.
+	* gdb.arch/altivec-abi.exp: Fix expect pattern of character vectors.
+
 2010-10-05  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.arch/altivec-abi.exp: Fix a typo.

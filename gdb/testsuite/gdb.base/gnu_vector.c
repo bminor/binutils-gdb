@@ -17,6 +17,7 @@
 
    Contributed by Ken Werner <ken.werner@de.ibm.com>  */
 
+char __attribute__ ((vector_size (4 * sizeof(char)))) c4 = {1, 2, 3, 4};
 int __attribute__ ((vector_size (4 * sizeof(int)))) i4a = {2, 4, 8, 16};
 int __attribute__ ((vector_size (4 * sizeof(int)))) i4b = {1, 2, 8, 4};
 float __attribute__ ((vector_size (4 * sizeof(float)))) f4a = {2, 4, 8, 16};

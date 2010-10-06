@@ -159,18 +159,17 @@ enum type_code
 
 enum type_flag_value
 {
-  TYPE_FLAG_UNSIGNED = (1 << 6),
-  TYPE_FLAG_NOSIGN = (1 << 7),
-  TYPE_FLAG_STUB = (1 << 8),
-  TYPE_FLAG_TARGET_STUB = (1 << 9),
-  TYPE_FLAG_STATIC = (1 << 10),
-  TYPE_FLAG_PROTOTYPED = (1 << 11),
-  TYPE_FLAG_INCOMPLETE = (1 << 12),
-  TYPE_FLAG_VARARGS = (1 << 13),
-  TYPE_FLAG_VECTOR = (1 << 14),
-  TYPE_FLAG_FIXED_INSTANCE = (1 << 15),
-  TYPE_FLAG_STUB_SUPPORTED = (1 << 16),
-  TYPE_FLAG_NOTTEXT = (1 << 17),
+  TYPE_FLAG_UNSIGNED = (1 << 7),
+  TYPE_FLAG_NOSIGN = (1 << 8),
+  TYPE_FLAG_STUB = (1 << 9),
+  TYPE_FLAG_TARGET_STUB = (1 << 10),
+  TYPE_FLAG_STATIC = (1 << 11),
+  TYPE_FLAG_PROTOTYPED = (1 << 12),
+  TYPE_FLAG_INCOMPLETE = (1 << 13),
+  TYPE_FLAG_VARARGS = (1 << 14),
+  TYPE_FLAG_VECTOR = (1 << 15),
+  TYPE_FLAG_FIXED_INSTANCE = (1 << 16),
+  TYPE_FLAG_STUB_SUPPORTED = (1 << 17),
 
   /* Used for error-checking.  */
   TYPE_FLAG_MIN = TYPE_FLAG_UNSIGNED
@@ -186,7 +185,8 @@ enum type_instance_flag_value
   TYPE_INSTANCE_FLAG_CODE_SPACE = (1 << 2),
   TYPE_INSTANCE_FLAG_DATA_SPACE = (1 << 3),
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 = (1 << 4),
-  TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2 = (1 << 5)
+  TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2 = (1 << 5),
+  TYPE_INSTANCE_FLAG_NOTTEXT = (1 << 6),
 };
 
 /* Unsigned integer type.  If this is not set for a TYPE_CODE_INT, the
@@ -269,7 +269,7 @@ enum type_instance_flag_value
 /* Not textual.  By default, GDB treats all single byte integers as
    characters (or elements of strings) unless this flag is set.  */
 
-#define TYPE_NOTTEXT(t)		(TYPE_MAIN_TYPE (t)->flag_nottext)
+#define TYPE_NOTTEXT(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_NOTTEXT)
 
 /* Type owner.  If TYPE_OBJFILE_OWNED is true, the type is owned by
    the objfile retrieved as TYPE_OBJFILE.  Otherweise, the type is
@@ -388,7 +388,6 @@ struct main_type
   unsigned int flag_varargs : 1;
   unsigned int flag_vector : 1;
   unsigned int flag_stub_supported : 1;
-  unsigned int flag_nottext : 1;
   unsigned int flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
   /* True if this type was declared with "class" rather than

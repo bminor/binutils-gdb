@@ -942,7 +942,7 @@ make_vector_type (struct type *array_type)
   elt_type = TYPE_TARGET_TYPE (inner_array);
   if (TYPE_CODE (elt_type) == TYPE_CODE_INT)
     {
-      flags = TYPE_INSTANCE_FLAGS (elt_type) | TYPE_FLAG_NOTTEXT;
+      flags = TYPE_INSTANCE_FLAGS (elt_type) | TYPE_INSTANCE_FLAG_NOTTEXT;
       elt_type = make_qualified_type (elt_type, flags, NULL);
       TYPE_TARGET_TYPE (inner_array) = elt_type;
     }
@@ -1801,8 +1801,6 @@ init_type (enum type_code code, int length, int flags,
     TYPE_VECTOR (type) = 1;
   if (flags & TYPE_FLAG_STUB_SUPPORTED)
     TYPE_STUB_SUPPORTED (type) = 1;
-  if (flags & TYPE_FLAG_NOTTEXT)
-    TYPE_NOTTEXT (type) = 1;
   if (flags & TYPE_FLAG_FIXED_INSTANCE)
     TYPE_FIXED_INSTANCE (type) = 1;
 
@@ -3490,8 +3488,10 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = arch_integer_type (gdbarch, 128, 0, "int128_t");
   builtin_type->builtin_uint128
     = arch_integer_type (gdbarch, 128, 1, "uint128_t");
-  TYPE_NOTTEXT (builtin_type->builtin_int8) = 1;
-  TYPE_NOTTEXT (builtin_type->builtin_uint8) = 1;
+  TYPE_INSTANCE_FLAGS (builtin_type->builtin_int8) |=
+    TYPE_INSTANCE_FLAG_NOTTEXT;
+  TYPE_INSTANCE_FLAGS (builtin_type->builtin_uint8) |=
+    TYPE_INSTANCE_FLAG_NOTTEXT;
 
   /* Wide character types.  */
   builtin_type->builtin_char16

@@ -46,6 +46,10 @@ if { ![runto main] } {
     return -1
 }
 
+# Test printing of character vector types
+gdb_test "print c4" "\\\$$decimal = \\{1, 2, 3, 4\\}"
+gdb_test "print c4\[2\]" "\\\$$decimal = 3"
+
 # Test binary operators on integer vector types
 gdb_test "print i4a" "\\\$$decimal = \\{2, 4, 8, 16\\}"
 gdb_test "print i4b" "\\\$$decimal = \\{1, 2, 8, 4\\}"
