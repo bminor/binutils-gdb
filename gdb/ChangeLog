@@ -4,6 +4,9 @@
 
 2010-10-06  Doug Evans  <dje@google.com>
 
+	* Makefile.in (REQUIRED_SUBDIRS): New var.
+	(subdir_do): Verify required subdir Makefiles exist.
+
 	Create subdir data-directory.
 	* Makefile.in (XML_SYSCALL_DIR, XML_SYSCALL_FILES): Moved to
 	data-directory/Makefile.in.

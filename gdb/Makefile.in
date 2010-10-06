@@ -875,6 +875,12 @@ TSOBS = inflow.o
 SUBDIRS = @subdirs@ data-directory
 CLEANDIRS = $(SUBDIRS) gnulib
 
+# List of subdirectories in the build tree that must exist.
+# This is used to force build failures in existing trees when
+# a new directory is added.
+# The format here is for the `case' shell command.
+REQUIRED_SUBDIRS = doc | testsuite | gnulib | data-directory
+
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.c \
 	cp-name-parser.c \
@@ -1239,6 +1245,13 @@ diststuff: $(DISTSTUFF) $(PACKAGE).pot $(CATALOGS)
 
 subdir_do: force
 	@for i in $(DODIRS); do \
+		case $$i in \
+		$(REQUIRED_SUBDIRS)) \
+			if [ ! -f ./$$i/Makefile ] ; then \
+				echo "Missing $$i/Makefile" >&2 ; \
+				exit 1 ; \
+			fi ;; \
+		esac ; \
 		if [ -f ./$$i/Makefile ] ; then \
 			if (cd ./$$i; \
 				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
