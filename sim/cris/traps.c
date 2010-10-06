@@ -1478,6 +1478,14 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
   s.arg2 = arg2;
   s.arg3 = arg3;
 
+  /* The type of s.arg2 is long, so for hosts with 64-bit longs, we need
+     to sign-extend the lseek offset to be passed as a signed number,
+     else we'll truncate it to something > 2GB on hosts where sizeof
+     long > sizeof USI.  We avoid doing it for all syscalls, as arg2 is
+     e.g. an address for some syscalls.  */
+  if (callnum == TARGET_SYS_lseek)
+    s.arg2 = (SI) arg2;
+
   if (callnum == TARGET_SYS_exit_group
       || (callnum == TARGET_SYS_exit && current_cpu->m1threads == 0))
     {
