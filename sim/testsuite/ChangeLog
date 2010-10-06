@@ -1,3 +1,7 @@
+2010-10-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/c/seek3.c, sim/cris/c/seek4.c: New tests.
+
 2010-08-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/asm/nonvcv32.ms: Neutralize changed &&-in-macro gas syntax.
