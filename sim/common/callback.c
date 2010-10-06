@@ -278,7 +278,7 @@ os_lseek (p, fd, off, way)
   result = fdbad (p, fd);
   if (result)
     return result;
-  result = lseek (fdmap (p, fd), off, way);
+  result = wrap (p, lseek (fdmap (p, fd), off, way));
   return result;
 }
 

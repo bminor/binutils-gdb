@@ -1,3 +1,7 @@
+2010-10-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* callback.c (os_lseek): Call wrap on lseek result.
+
 2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
 
 	* dv-sockser.c (dv_sockser_init): Check error return from socket()
