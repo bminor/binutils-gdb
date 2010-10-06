@@ -1,3 +1,22 @@
+2010-10-06  Doug Evans  <dje@google.com>
+
+	Create subdir data-directory.
+	* Makefile.in (XML_SYSCALL_DIR, XML_SYSCALL_FILES): Moved to
+	data-directory/Makefile.in.
+	(SUBDIRS): Add data-directory.
+	(all): Remove xml-syscall-copy dependency.
+	(xml-syscall-copy): Moved to data-directory/Makefile.in as
+	stamp-syscalls.
+	(xml-syscall-install): Moved to data-directory/Makefile.in as
+	install-syscalls.
+	(install-only): Remove xml-syscall-install dependency.
+	(all-data-directory): New rule.
+	(data-directory/Makefile): New rule.
+	* configure.ac (AC_OUTPUT): Add data-directory/Makefile.
+	* configure: Regenerate.
+	* data-directory/Makefile.in: New file.
+	* python/lib/gdb/__init__.py: New file.
+
 2010-10-06  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix ARI warnings in advance_wild_match.

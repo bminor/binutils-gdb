@@ -278,7 +278,7 @@ proc do_syscall_tests {} {
     global gdb_prompt srcdir
 
     # First, we need to set GDB datadir.
-    gdb_test_no_output "set data-directory $srcdir/.."
+    gdb_test_no_output "set data-directory [pwd]/../data-directory"
 
     # Verify that the 'catch syscall' help is available
     set thistest "help catch syscall"

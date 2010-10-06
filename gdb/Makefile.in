@@ -870,16 +870,9 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
 	jit.o progspace.o
 
-# Definitions for the syscall's XML files and dir
-XML_SYSCALLS_DIR = syscalls/
-XML_SYSCALLS_FILES = gdb-syscalls.dtd \
-		     ppc-linux.xml ppc64-linux.xml \
-		     i386-linux.xml amd64-linux.xml \
-		     sparc-linux.xml sparc64-linux.xml
-
 TSOBS = inflow.o
 
-SUBDIRS = @subdirs@
+SUBDIRS = @subdirs@ data-directory
 CLEANDIRS = $(SUBDIRS) gnulib
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
@@ -910,40 +903,10 @@ generated_files = config.h observer.h observer.inc ada-lex.c \
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-all: gdb$(EXEEXT) $(CONFIG_ALL) xml-syscall-copy
+all: gdb$(EXEEXT) $(CONFIG_ALL)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 .PHONY: all-tui
 all-tui: $(TUI)$(EXEEXT)
-
-# This is needed for running GDB from the build directory
-.PHONY: xml-syscall-copy
-xml-syscall-copy:
-	if [ "`cd $(srcdir) && pwd`" != "`pwd`" ] ; then \
-	  mkdir -p ./$(XML_SYSCALLS_DIR) ; \
-	  list='$(XML_SYSCALLS_FILES)' ; \
- 	  for file in $$list ; do \
-	    f=$(srcdir)/$(XML_SYSCALLS_DIR)/$$file ; \
-	    if test -f $$f ; then \
-	      $(INSTALL_DATA) $$f \
-	    	  ./$(XML_SYSCALLS_DIR) ; \
-	    fi ; \
-	  done ; \
-	fi ;
-
-# This target is responsible for properly installing the syscalls'
-# XML files in the system.
-.PHONY: xml-syscall-install
-xml-syscall-install:
-	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(DESTDIR)$(GDB_DATADIR)/$(XML_SYSCALLS_DIR) ; \
-	list='$(XML_SYSCALLS_FILES)' ; \
-	for file in $$list ; do \
-	  f=$(srcdir)/$(XML_SYSCALLS_DIR)/$$file ; \
-	  if test -f $$f ; then \
-	    $(INSTALL_DATA) $$f \
-	    	$(DESTDIR)$(GDB_DATADIR)/$(XML_SYSCALLS_DIR) ; \
-	  fi ; \
-	done ;
 
 installcheck:
 
@@ -1003,9 +966,7 @@ gdb.z:gdb.1
 # install-only is intended to address that need.
 install: all install-only 
 
-# The "install-only" target also installs the syscalls' XML files in
-# the system.
-install-only: $(CONFIG_INSTALL) xml-syscall-install
+install-only: $(CONFIG_INSTALL)
 	transformed_name=`t='$(program_transform_name)'; \
 			  echo gdb | sed -e "$$t"` ; \
 		if test "x$$transformed_name" = x; then \
@@ -1178,6 +1139,11 @@ all-lib: gnulib/Makefile
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=gnulib subdir_do
 .PHONY: all-lib
 
+# Convenience rule to handle recursion.
+.PHONY: all-data-directory
+all-data-directory: data-directory/Makefile
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=data-directory subdir_do
+
 # Create a library of the gdb object files and build GDB by linking
 # against that.
 #
@@ -1289,6 +1255,13 @@ Makefile: Makefile.in config.status @frags@
 
 gnulib/Makefile: gnulib/Makefile.in gnulib/Makefile.in config.status @frags@
 	CONFIG_FILES="gnulib/Makefile" \
+	  CONFIG_COMMANDS="depfiles" \
+	  CONFIG_HEADERS= \
+	  CONFIG_LINKS= \
+	  $(SHELL) config.status
+
+data-directory/Makefile: data-directory/Makefile.in config.status @frags@
+	CONFIG_FILES="data-directory/Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
