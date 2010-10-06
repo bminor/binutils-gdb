@@ -1,3 +1,7 @@
+2010-10-06  Ken Werner  <ken.werner@de.ibm.com>
+
+	* dwarf2read.c (read_tag_const_type): Handle const arrays.
+
 2010-10-06  Doug Evans  <dje@google.com>
 
 	Create subdir data-directory.

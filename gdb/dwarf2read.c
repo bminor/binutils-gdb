@@ -7607,6 +7607,29 @@ read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
   if (cv_type)
     return cv_type;
 
+  /* In case the const qualifier is applied to an array type, the element type
+     is so qualified, not the array type (section 6.7.3 of C99).  */
+  if (TYPE_CODE (base_type) == TYPE_CODE_ARRAY)
+    {
+      struct type *el_type, *inner_array;
+
+      base_type = copy_type (base_type);
+      inner_array = base_type;
+
+      while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
+	{
+	  TYPE_TARGET_TYPE (inner_array) =
+	    copy_type (TYPE_TARGET_TYPE (inner_array));
+	  inner_array = TYPE_TARGET_TYPE (inner_array);
+	}
+
+      el_type = TYPE_TARGET_TYPE (inner_array);
+      TYPE_TARGET_TYPE (inner_array) =
+	make_cv_type (1, TYPE_VOLATILE (el_type), el_type, NULL);
+
+      return set_die_type (die, base_type, cu);
+    }
+
   cv_type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
   return set_die_type (die, cv_type, cu);
 }

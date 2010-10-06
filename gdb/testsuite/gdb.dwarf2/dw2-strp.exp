@@ -49,7 +49,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 gdb_test "p a_string" " = \"hello world!\\\\n\""
-gdb_test "ptype a_string" "type = char \\\[14\\\]"
+gdb_test "ptype a_string" "type = const char \\\[14\\\]"
 
 gdb_test "p a_string2" " = \"hello world2\\\\n\""
-gdb_test "ptype a_string2" "type = char \\\[14\\\]"
+gdb_test "ptype a_string2" "type = const char \\\[14\\\]"

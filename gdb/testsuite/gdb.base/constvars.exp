@@ -253,6 +253,23 @@ proc do_constvar_tests {} {
     gdb_test "ptype locust" "type = double \\* const"
 
     local_compiler_xfail_check
+    gdb_test "ptype logical" "type = const char \\\[2\\\]"
+    local_compiler_xfail_check
+    gdb_test "ptype lugged" "type = const unsigned char \\\[2\\\]"
+    local_compiler_xfail_check
+    gdb_test "ptype luck" "type = const short( int)? \\\[2\\\]"
+    local_compiler_xfail_check
+    gdb_test "ptype lunar" "type = const (unsigned short|short unsigned)( int)? \\\[2\\\]"
+    local_compiler_xfail_check
+    gdb_test "ptype lumen" "type = const long( int)? \\\[2\\\]"
+    local_compiler_xfail_check
+    gdb_test "ptype lurk" "type = const (unsigned long|long unsigned)( int)? \\\[2\\\]"
+    local_compiler_xfail_check
+    gdb_test "ptype lush" "type = const float \\\[2\\\]"
+    local_compiler_xfail_check
+    gdb_test "ptype lynx" "type = const double \\\[2\\\]"
+
+    local_compiler_xfail_check
     local_compiler_xfail_check_2
     gdb_test "ptype crass" "type = struct crass \{\[\r\n\]+\[\ \t\]+char \\* const ptr;\[\r\n\]+\}"
     local_compiler_xfail_check

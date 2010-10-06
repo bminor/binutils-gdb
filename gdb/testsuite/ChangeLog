@@ -1,3 +1,10 @@
+2010-10-06  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.base/constvars.c (logical, lugged, luck, lunar, lumen, lurk,
+	lush, lynx) New constant.
+	* gdb.base/constvars.exp: Test const array types.
+	* gdb.dwarf2/dw2-strp.exp: Add const qualifier for ptype tests.
+
 2010-10-06  Doug Evans  <dje@google.com>
 
 	* gdb.base/catch-syscall.exp (do_syscall_tests): Update location
