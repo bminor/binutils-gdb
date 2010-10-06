@@ -1,5 +1,8 @@
 2010-10-06  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (ALL_64_EMULATIONS): Fix typo in last commit.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (ALL_EMULATIONS): Rewrite in terms of ...
 	(ALL_EMULATION_SOURCES): ... this new variable.
 	(ALL_64_EMULATIONS): Rewrite in terms of ...
