@@ -1,3 +1,8 @@
+2010-10-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-arm.c (encode_branch): Remove superfluous braces.
+	(do_t_branch): Move reloc setting to end of routine.
+
 2010-10-04  David Daney  <ddaney@caviumnetworks.com>
 
 	* config/tc-mips.c (mips_fix_cn63xxp1): New variable.

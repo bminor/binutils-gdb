@@ -7285,9 +7285,7 @@ encode_branch (int default_reloc)
       inst.reloc.type  = BFD_RELOC_ARM_PLT32;
     }
   else
-    {
-      inst.reloc.type = (bfd_reloc_code_real_type) default_reloc;
-    }
+    inst.reloc.type = (bfd_reloc_code_real_type) default_reloc;
   inst.reloc.pc_rel = 1;
 }
 
@@ -9666,6 +9664,7 @@ do_t_branch (void)
 {
   int opcode;
   int cond;
+  int reloc;
 
   cond = inst.cond;
   set_it_insn_type (IF_INSIDE_IT_LAST_INSN);
@@ -9688,29 +9687,29 @@ do_t_branch (void)
     {
       inst.instruction = THUMB_OP32(opcode);
       if (cond == COND_ALWAYS)
-	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH25;
+	reloc = BFD_RELOC_THUMB_PCREL_BRANCH25;
       else
 	{
 	  gas_assert (cond != 0xF);
 	  inst.instruction |= cond << 22;
-	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH20;
+	  reloc = BFD_RELOC_THUMB_PCREL_BRANCH20;
 	}
     }
   else
     {
       inst.instruction = THUMB_OP16(opcode);
       if (cond == COND_ALWAYS)
-	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH12;
+	reloc = BFD_RELOC_THUMB_PCREL_BRANCH12;
       else
 	{
 	  inst.instruction |= cond << 8;
-	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH9;
+	  reloc = BFD_RELOC_THUMB_PCREL_BRANCH9;
 	}
       /* Allow section relaxation.  */
       if (unified_syntax && inst.size_req != 2)
 	inst.relax = opcode;
     }
-
+  inst.reloc.type = reloc;
   inst.reloc.pc_rel = 1;
 }
 

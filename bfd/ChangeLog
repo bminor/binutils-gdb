@@ -1,3 +1,10 @@
+2010-10-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_stub_long_branch_any_arm_pic, 
+	elf32_arm_stub_long_branch_any_arm_pic): Use a consistent name for
+	ip/r12.
+	(arm_type_of_stub): Remove superfluous braces.
+
 2010-10-04  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* elf-bfd.h (struct bfd_elf_section_reloc_data): New structure.
