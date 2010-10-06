@@ -1,3 +1,36 @@
+2010-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* script-sections.cc(class Memory_region): Remove
+	current_lma_offset_ field.  Rename current_vma_offset_ to
+	current_offset_.  Add last_section_ field.
+	(Memory_region::get_current_vma_address): Rename to
+	get_current_address.
+	(Memory_region::get_current_lma_address): Delete.
+	(Memory_region::increment_vma_offset): Rename to
+	increment_offset.
+	(Memory_region::increment_lma_offset): Delete.
+	(Memory_region::attributes_compatible): New method.  Returns
+	true if the provided section is compatible with the region.
+	(Memory_region::get_last_section): New method.  Returns the last
+	section to use the region.
+	(Memory_region::set_last_section): New method.  Stores the last
+	section to use the region.
+	(Script_sections::block_in_region): New method.  Returns true if
+	a block of memory is contained within a region.
+	(Script_sections::find_memory_region): New method.  Locates a
+	memory region to be used to set a VMA or LMA address.
+	(Output_section_definition::set_section_addresses): Add code to
+	check for addresses set by memory regions.
+	(Output_segment::set_section_addresses): Remove memory region
+	walking code.
+	(Script_sections::create_segment): Add a warning if a header
+	segment is created outside of any region.
+	* script-sections.h (class Script_sections): Add prototypes for
+	find_memory_region and block_in_region methods.
+	* testsuite/memory_test.s: Use .long instead of .word.
+	* testsuite/memory_test.t: Add some more output sections.
+	* testsuite/memory_test.sh: Update expected output.
+
 2010-10-02  Doug Kwan  <dougkwan@google.com>
 
 	* symtab.cc (Symbol_table::Symbol_table_hash::operator()): Move

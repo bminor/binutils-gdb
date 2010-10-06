@@ -1,3 +1,8 @@
+2010-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scripts/rgn-at5.t: Add some more output sections.
+	* ld-scripts/rgn-at5.d: Update expected output.
+
 2010-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11812

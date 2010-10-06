@@ -1,3 +1,8 @@
+2010-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo: Update description of computation of VMA and LMA
+	addresses for output sections.
+
 2010-10-06  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (ALL_64_EMULATIONS): Fix typo in last commit.

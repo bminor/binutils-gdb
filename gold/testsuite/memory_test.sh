@@ -23,6 +23,14 @@
 # MA 02110-1301, USA.
 
 
+# NOTE: The linker script used in this test (memory_test.t)
+# should be the same as the one used in the rgn-at5 linker
+# test (ld/testsuite/ld-scripts/rgn-at5.t).
+#
+# Modulo some section ordering the output from GOLD in this
+# test should be the same as the output from GNU LD in the
+# rgn-at5 test.
+
 check()
 {
     file=$1
@@ -36,13 +44,14 @@ check()
 }
 
 check memory_test.stdout \
-  "  LOAD           0x001000 0x0*00000000 0x0*00000000 0x00000\?2 0x00000\?2 R   0x1000"
+  "  LOAD           0x001000 0x0*02000 0x0*02000 0x0*04 0x0*04 R   0x1000"
 check memory_test.stdout \
-  "  LOAD           0x00112c 0x0*00001000 0x0*0000012c 0x00000\?2 0x00000\?2 R   0x1000"
+  "  LOAD           0x001004 0x0*01000 0x0*02004 0x0*04 0x0*04 R   0x1000"
 check memory_test.stdout \
-  "  LOAD           0x002000 0x0*00005000 0x0*00005000 0x00000\?2 0x00000\?2 R   0x1000"
+  "  LOAD           0x001008 0x0*02008 0x0*02008 0x0*08 0x0*08 R   0x1000"
 check memory_test.stdout \
-  "  LOAD           0x00203c 0x0*00004000 0x0*0000603c 0x00000\?2 0x00000\?2 R   0x1000"
-
+  "  LOAD           0x002000 0x0*05000 0x0*05000 0x0*04 0x0*04 R   0x1000"
+check memory_test.stdout \
+  "  LOAD           0x00203c 0x0*04000 0x0*0603c 0x0*04 0x0*04 R   0x1000"
 
 exit 0

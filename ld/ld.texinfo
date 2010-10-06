@@ -3682,33 +3682,55 @@ Discarding}.
 @cindex address, section
 @cindex section address
 The @var{address} is an expression for the VMA (the virtual memory
-address) of the output section.  If you do not provide @var{address},
-the linker will set it based on @var{region} if present, or otherwise
-based on the current value of the location counter.
+address) of the output section.  This address is optional, but if it
+is provided then the output address will be set exactly as specified.
 
-If you provide @var{address}, the address of the output section will be
-set to precisely that.  If you provide neither @var{address} nor
-@var{region}, then the address of the output section will be set to the
-current value of the location counter aligned to the alignment
-requirements of the output section.  The alignment requirement of the
-output section is the strictest alignment of any input section contained
-within the output section.
+If the output address is not specified then one will be chosen for the
+section, based on the heuristic below.  This address will be adjusted
+to fit the alignment requirement of the output section.  The
+alignment requirement is the strictest alignment of any input section
+contained within the output section.
 
-For example,
+The output section address heuristic is as follows:
+
+@itemize @bullet
+@item
+If an output memory @var{region} is set for the section then it
+is added to this region and its address will be the next free address
+in that region.
+
+@item
+If the MEMORY command has been used to create a list of memory
+regions then the first region which has attributes compatible with the
+section is selected to contain it.  The section's output address will
+be the next free address in that region; @ref{MEMORY}.
+
+@item
+If no memory regions were specified, or none match the section then
+the output address will be based on the current value of the location
+counter.
+@end itemize
+
+@noindent
+For example:
+
 @smallexample
 .text . : @{ *(.text) @}
 @end smallexample
+
 @noindent
 and
+
 @smallexample
 .text : @{ *(.text) @}
 @end smallexample
+
 @noindent
 are subtly different.  The first will set the address of the
 @samp{.text} output section to the current value of the location
 counter.  The second will set it to the current value of the location
-counter aligned to the strictest alignment of a @samp{.text} input
-section.
+counter aligned to the strictest alignment of any of the @samp{.text}
+input sections.
 
 The @var{address} may be an arbitrary expression; @ref{Expressions}.
 For example, if you want to align the section on a 0x10 byte boundary,
@@ -4307,25 +4329,44 @@ SECTIONS @{
 @cindex load address
 @cindex section load address
 Every section has a virtual address (VMA) and a load address (LMA); see
-@ref{Basic Script Concepts}.  The address expression which may appear in
-an output section description sets the VMA (@pxref{Output Section
-Address}).
+@ref{Basic Script Concepts}.  The virtual address is specified by the
+@pxref{Output Section Address} described earlier.  The load address is
+specified by the @code{AT} or @code{AT>} keywords.  Specifying a load
+address is optional.
 
-The expression @var{lma} that follows the @code{AT} keyword specifies
-the load address of the section.
-
-Alternatively, with @samp{AT>@var{lma_region}} expression, you may
-specify a memory region for the section's load address. @xref{MEMORY}.
-Note that if the section has not had a VMA assigned to it then the
-linker will use the @var{lma_region} as the VMA region as well.
+The @code{AT} keyword takes an expression as an argument.  This
+specifies the exact load address of the section.  The @code{AT>} keyword
+takes the name of a memory region as an argument.  @xref{MEMORY}.  The
+load address of the section is set to the next free address in the
+region, aligned to the section's alignment requirements.
 
 If neither @code{AT} nor @code{AT>} is specified for an allocatable
-section, the linker will set the LMA such that the difference between
-VMA and LMA for the section is the same as the preceding output
-section in the same region.  If there is no preceding output section
-or the section is not allocatable, the linker will set the LMA equal
-to the VMA.
-@xref{Output Section Region}.
+section, the linker will use the following heuristic to determine the
+load address:
+
+@itemize @bullet
+@item
+If the section has a specific VMA address, then this is used as
+the LMA address as well.
+
+@item
+If the section is not allocatable then its LMA is set to its VMA.
+
+@item
+Otherwise if a memory region can be found that is compatible
+with the current section, and this region contains at least one
+section, then the LMA is set so the difference between the
+VMA and LMA is the same as the difference between the VMA and LMA of
+the last section in the located region.
+
+@item
+If no memory regions have been declared then a default region
+that covers the entire address space is used in the previous step.
+
+@item
+If no suitable region could be found, or there was no previous
+section then the LMA is set equal to the VMA.
+@end itemize
 
 @cindex ROM initialized data
 @cindex initialized data in ROM
@@ -4364,12 +4405,11 @@ extern char _etext, _data, _edata, _bstart, _bend;
 char *src = &_etext;
 char *dst = &_data;
 
-/* ROM has data at end of text; copy it. */
-while (dst < &_edata) @{
+/* ROM has data at end of text; copy it.  */
+while (dst < &_edata)
   *dst++ = *src++;
-@}
 
-/* Zero bss */
+/* Zero bss.  */
 for (dst = &_bstart; dst< &_bend; dst++)
   *dst = 0;
 @end group

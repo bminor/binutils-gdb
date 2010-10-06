@@ -53,10 +53,10 @@ class Memory_region
       attributes_(attributes),
       start_(start),
       length_(length),
-      current_vma_offset_(0),
-      current_lma_offset_(0),
+      current_offset_(0),
       vma_sections_(),
-      lma_sections_()
+      lma_sections_(),
+      last_section_(NULL)
   { }
 
   // Return the name of this region.
@@ -87,45 +87,40 @@ class Memory_region
   }
 
   Expression*
-  get_current_vma_address(void) const
+  get_current_address() const
   {
     return
       script_exp_binary_add(this->start_,
-			    script_exp_integer(this->current_vma_offset_));
-  }
-  
-  Expression*
-  get_current_lma_address(void) const
-  {
-    return
-      script_exp_binary_add(this->start_,
-			    script_exp_integer(this->current_lma_offset_));
+			    script_exp_integer(this->current_offset_));
   }
   
   void
-  increment_vma_offset(std::string section_name, uint64_t amount,
-		       const Symbol_table* symtab, const Layout* layout)
+  increment_offset(std::string section_name, uint64_t amount,
+		   const Symbol_table* symtab, const Layout* layout)
   {
-    this->current_vma_offset_ += amount;
+    this->current_offset_ += amount;
 
-    if (this->current_vma_offset_
+    if (this->current_offset_
 	> this->length_->eval(symtab, layout, false))
-      gold_error (_("section %s overflows end of region %s"),
-		  section_name.c_str(), this->name_.c_str());
+      gold_error(_("section %s overflows end of region %s"),
+		 section_name.c_str(), this->name_.c_str());
   }
   
-  void
-  increment_lma_offset(std::string section_name, uint64_t amount,
-		       const Symbol_table* symtab, const Layout* layout)
+  // Returns true iff there is room left in this region
+  // for AMOUNT more bytes of data.
+  bool
+  has_room_for(const Symbol_table* symtab, const Layout* layout,
+	       uint64_t amount) const
   {
-    this->current_lma_offset_ += amount;
-
-    if (this->current_lma_offset_
-	> this->length_->eval(symtab, layout, false))
-      gold_error (_("section %s overflows end of region %s (based on load address)"),
-		  section_name.c_str(), this->name_.c_str());
+    return (this->current_offset_ + amount
+	    < this->length_->eval(symtab, layout, false));
   }
 
+  // Return true if the provided section flags
+  // are compatible with this region's attributes.
+  bool
+  attributes_compatible(elfcpp::Elf_Xword flags, elfcpp::Elf_Xword type) const;
+  
   void
   add_section(Output_section_definition* sec, bool vma)
   {
@@ -140,26 +135,34 @@ class Memory_region
   // Return the start of the list of sections
   // whose VMAs are taken from this region.
   Section_list::const_iterator
-  get_vma_section_list_start(void) const
+  get_vma_section_list_start() const
   { return this->vma_sections_.begin(); }
 
   // Return the start of the list of sections
   // whose LMAs are taken from this region.
   Section_list::const_iterator
-  get_lma_section_list_start(void) const
+  get_lma_section_list_start() const
   { return this->lma_sections_.begin(); }
 
   // Return the end of the list of sections
   // whose VMAs are taken from this region.
   Section_list::const_iterator
-  get_vma_section_list_end(void) const
+  get_vma_section_list_end() const
   { return this->vma_sections_.end(); }
 
   // Return the end of the list of sections
   // whose LMAs are taken from this region.
   Section_list::const_iterator
-  get_lma_section_list_end(void) const
+  get_lma_section_list_end() const
   { return this->lma_sections_.end(); }
+
+  Output_section_definition*
+  get_last_section() const
+  { return this->last_section_; }
+
+  void
+  set_last_section(Output_section_definition* sec)
+  { this->last_section_ = sec; }
 
  private:
 
@@ -167,14 +170,68 @@ class Memory_region
   unsigned int attributes_;
   Expression* start_;
   Expression* length_;
-  uint64_t current_vma_offset_;
-  uint64_t current_lma_offset_;
+  // The offset to the next free byte in the region.
+  // Note - for compatibility with GNU LD we only maintain one offset
+  // regardless of whether the region is being used for VMA values,
+  // LMA values, or both.
+  uint64_t current_offset_;
   // A list of sections whose VMAs are set inside this region.
   Section_list vma_sections_;
   // A list of sections whose LMAs are set inside this region.
   Section_list lma_sections_;
+  // The latest section to make use of this region.
+  Output_section_definition* last_section_;
 };
 
+// Return true if the provided section flags
+// are compatible with this region's attributes.
+
+bool
+Memory_region::attributes_compatible(elfcpp::Elf_Xword flags,
+				     elfcpp::Elf_Xword type) const
+{
+  unsigned int attrs = this->attributes_;
+
+  // No attributes means that this region is not compatible with anything.
+  if (attrs == 0)
+    return false;
+
+  bool match = true;
+  do
+    {
+      switch (attrs & - attrs)
+	{
+	case MEM_EXECUTABLE:
+	  if ((flags & elfcpp::SHF_EXECINSTR) == 0)
+	    match = false;
+	  break;
+
+	case MEM_WRITEABLE:
+	  if ((flags & elfcpp::SHF_WRITE) == 0)
+	    match = false;
+	  break;
+
+	case MEM_READABLE:
+	  // All sections are presumed readable.
+	  break;
+
+	case MEM_ALLOCATABLE:
+	  if ((flags & elfcpp::SHF_ALLOC) == 0)
+	    match = false;
+	  break;
+
+	case MEM_INITIALIZED:
+	  if ((type & elfcpp::SHT_NOBITS) != 0)
+	    match = false;
+	  break;
+	}
+      attrs &= ~ (attrs & - attrs);
+    }
+  while (attrs != 0);
+  
+  return match;
+}
+  
 // Print a memory region.
 
 void
@@ -1512,7 +1569,7 @@ Output_section_element_input::set_section_addresses(
 	isi.set_section_name(relobj->section_name(shndx));
 	if (p->is_relaxed_input_section())
 	  {
-	    // We use current data size because relxed section sizes may not
+	    // We use current data size because relaxed section sizes may not
 	    // have finalized yet.
 	    isi.set_size(p->relaxed_input_section()->current_data_size());
 	    isi.set_addralign(p->relaxed_input_section()->addralign());
@@ -1857,8 +1914,8 @@ class Output_section_definition : public Sections_element
   set_section_lma(Expression* address)
   { this->load_address_ = address; }
 
-  std::string
-  get_section_name(void) const
+  const std::string&
+  get_section_name() const
   { return this->name_; }
   
  private:
@@ -2098,6 +2155,107 @@ Output_section_definition::output_section_name(
   return NULL;
 }
 
+// Return true if memory from START to START + LENGTH is contained
+// within a memory region.
+
+bool
+Script_sections::block_in_region(Symbol_table* symtab, Layout* layout,
+				 uint64_t start, uint64_t length) const
+{
+  if (this->memory_regions_ == NULL)
+    return false;
+
+  for (Memory_regions::const_iterator mr = this->memory_regions_->begin();
+       mr != this->memory_regions_->end();
+       ++mr)
+    {
+      uint64_t s = (*mr)->start_address()->eval(symtab, layout, false);
+      uint64_t l = (*mr)->length()->eval(symtab, layout, false);
+
+      if (s <= start
+	  && (s + l) >= (start + length))
+	return true;
+    }
+
+  return false;
+}
+
+// Find a memory region that should be used by a given output SECTION.
+// If provided set PREVIOUS_SECTION_RETURN to point to the last section
+// that used the return memory region.
+
+Memory_region*
+Script_sections::find_memory_region(
+    Output_section_definition* section,
+    bool find_vma_region,
+    Output_section_definition** previous_section_return)
+{
+  if (previous_section_return != NULL)
+    * previous_section_return = NULL;
+
+  // Walk the memory regions specified in this script, if any.
+  if (this->memory_regions_ == NULL)
+    return NULL;
+
+  // The /DISCARD/ section never gets assigned to any region.
+  if (section->get_section_name() == "/DISCARD/")
+    return NULL;
+
+  Memory_region* first_match = NULL;
+
+  // First check to see if a region has been assigned to this section.
+  for (Memory_regions::const_iterator mr = this->memory_regions_->begin();
+       mr != this->memory_regions_->end();
+       ++mr)
+    {
+      if (find_vma_region)
+	{
+	  for (Memory_region::Section_list::const_iterator s =
+		 (*mr)->get_vma_section_list_start();
+	       s != (*mr)->get_vma_section_list_end();
+	       ++s)
+	    if ((*s) == section)
+	      {
+		(*mr)->set_last_section(section);
+		return *mr;
+	      }
+	}
+      else
+	{
+	  for (Memory_region::Section_list::const_iterator s =
+		 (*mr)->get_lma_section_list_start();
+	       s != (*mr)->get_lma_section_list_end();
+	       ++s)
+	    if ((*s) == section)
+	      {
+		(*mr)->set_last_section(section);
+		return *mr;
+	      }
+	}
+
+      // Make a note of the first memory region whose attributes
+      // are compatible with the section.  If we do not find an
+      // explicit region assignment, then we will return this region.
+      Output_section* out_sec = section->get_output_section();
+      if (first_match == NULL
+	  && (*mr)->attributes_compatible(out_sec->flags(),
+					  out_sec->type()))
+	first_match = *mr;
+    }
+
+  // With LMA computations, if an explicit region has not been specified then
+  // we will want to set the difference between the VMA and the LMA of the
+  // section were searching for to be the same as the difference between the
+  // VMA and LMA of the last section to be added to first matched region.
+  // Hence, if it was asked for, we return a pointer to the last section
+  // known to be used by the first matched region.
+  if (first_match != NULL
+      && previous_section_return != NULL)
+    *previous_section_return = first_match->get_last_section();
+
+  return first_match;
+}
+
 // Set the section address.  Note that the OUTPUT_SECTION_ field will
 // be NULL if no input sections were mapped to this output section.
 // We still have to adjust dot and process symbol assignments.
@@ -2109,28 +2267,42 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 						 uint64_t* dot_alignment,
                                                  uint64_t* load_address)
 {
+  Memory_region* vma_region = NULL;
+  Memory_region* lma_region = NULL;
+  Script_sections* script_sections =
+    layout->script_options()->script_sections();
   uint64_t address;
   uint64_t old_dot_value = *dot_value;
   uint64_t old_load_address = *load_address;
 
-  // Check for --section-start.
-  bool is_address_set = false;
-  if (this->output_section_ != NULL)
-    is_address_set =
-      parameters->options().section_start(this->output_section_->name(),
-                                          &address);
-  if (!is_address_set)
-    {
-      if (this->address_ == NULL)
-        address = *dot_value;
-      else
-        {
-          address = this->address_->eval_with_dot(symtab, layout, true,
-                                                  *dot_value, NULL, NULL,
-                                                  dot_alignment);
-        }
-    }
+  // Decide the start address for the section.  The algorithm is:
+  // 1) If an address has been specified in a linker script, use that.
+  // 2) Otherwise if a memory region has been specified for the section,
+  //    use the next free address in the region.
+  // 3) Otherwise if memory regions have been specified find the first
+  //    region whose attributes are compatible with this section and
+  //    install it into that region.
+  // 4) Otherwise use the current location counter.
 
+  if (this->output_section_ != NULL
+      // Check for --section-start.
+      && parameters->options().section_start(this->output_section_->name(),
+					     &address))
+    ;
+  else if (this->address_ == NULL)
+    {
+      vma_region = script_sections->find_memory_region(this, true, NULL);
+
+      if (vma_region != NULL)
+	address = vma_region->get_current_address()->eval(symtab, layout,
+							  false);
+      else
+	address = *dot_value;
+    }
+  else
+    address = this->address_->eval_with_dot(symtab, layout, true,
+					    *dot_value, NULL, NULL,
+					    dot_alignment);
   uint64_t align;
   if (this->align_ == NULL)
     {
@@ -2167,17 +2339,73 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
   this->evaluated_address_ = address;
   this->evaluated_addralign_ = align;
 
+  uint64_t laddr;
+
   if (this->load_address_ == NULL)
-    this->evaluated_load_address_ = address;
+    {
+      Output_section_definition* previous_section;
+
+      // Determine if an LMA region has been set for this section.
+      lma_region = script_sections->find_memory_region(this, false,
+						       &previous_section);
+
+      if (lma_region != NULL)
+	{
+	  if (previous_section == NULL)
+	    // The LMA address was explicitly set to the given region.
+	    laddr = lma_region->get_current_address()->eval(symtab, layout,
+							    false);
+	  else 
+	    {
+	      // We are not going to use the discovered lma_region, so
+	      // make sure that we do not update it in the code below.
+	      lma_region = NULL;
+
+	      if (this->address_ != NULL || previous_section == this)
+		{
+		  // Either an explicit VMA address has been set, or an
+		  // explicit VMA region has been set, so set the LMA equal to
+		  // the VMA.
+		  laddr = address;
+		}
+	      else
+		{
+		  // The LMA address was not explicitly or implicitly set.
+		  //
+		  // We have been given the first memory region that is
+		  // compatible with the current section and a pointer to the
+		  // last section to use this region.  Set the LMA of this
+		  // section so that the difference between its' VMA and LMA
+		  // is the same as the difference between the VMA and LMA of
+		  // the last section in the given region.
+		  laddr = address + (previous_section->evaluated_load_address_
+				     - previous_section->evaluated_address_);
+		}
+	    }
+
+	  if (this->output_section_ != NULL)
+	    this->output_section_->set_load_address(laddr);
+	}
+      else
+	{
+	  // Do not set the load address of the output section, if one exists.
+	  // This allows future sections to determine what the load address
+	  // should be.  If none is ever set, it will default to being the
+	  // same as the vma address.
+	  laddr = address;
+	}
+    }
   else
     {
-      uint64_t laddr =
-	this->load_address_->eval_with_dot(symtab, layout, true, *dot_value,
-					   this->output_section_, NULL, NULL);
+      laddr = this->load_address_->eval_with_dot(symtab, layout, true,
+						 *dot_value,
+						 this->output_section_,
+						 NULL, NULL);
       if (this->output_section_ != NULL)
         this->output_section_->set_load_address(laddr);
-      this->evaluated_load_address_ = laddr;
     }
+
+  this->evaluated_load_address_ = laddr;
 
   uint64_t subalign;
   if (this->subalign_ == NULL)
@@ -2233,8 +2461,38 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 
   gold_assert(input_sections.empty());
 
-  if (this->load_address_ == NULL || this->output_section_ == NULL)
+  if (vma_region != NULL)
+    {
+      // Update the VMA region being used by the section now that we know how
+      // big it is.  Use the current address in the region, rather than
+      // start_address because that might have been aligned upwards and we
+      // need to allow for the padding.
+      Expression* addr = vma_region->get_current_address();
+      uint64_t size = *dot_value - addr->eval(symtab, layout, false);
+
+      vma_region->increment_offset(this->get_section_name(), size,
+				   symtab, layout);
+    }
+
+  // If the LMA region is different from the VMA region, then increment the
+  // offset there as well.  Note that we use the same "dot_value -
+  // start_address" formula that is used in the load_address assignment below.
+  if (lma_region != NULL && lma_region != vma_region)
+    lma_region->increment_offset(this->get_section_name(),
+				 *dot_value - start_address,
+				 symtab, layout);
+
+  // Compute the load address for the following section.
+  if (this->output_section_ == NULL)
     *load_address = *dot_value;
+  else if (this->load_address_ == NULL)
+    {
+      if (lma_region == NULL)
+	*load_address = *dot_value;
+      else
+	*load_address =
+	  lma_region->get_current_address()->eval(symtab, layout, false);
+    }
   else
     *load_address = (this->output_section_->load_address()
                      + (*dot_value - start_address));
@@ -2779,7 +3037,7 @@ Script_sections::add_memory_region(const char* name, size_t namelen,
     this->memory_regions_ = new Memory_regions();
   else if (this->find_memory_region(name, namelen))
     {
-      gold_error (_("region '%.*s' already defined"), static_cast<int>(namelen),
+      gold_error(_("region '%.*s' already defined"), static_cast<int>(namelen),
                   name);
       // FIXME: Add a GOLD extension to allow multiple regions with the same
       // name.  This would amount to a single region covering disjoint blocks
@@ -3178,41 +3436,6 @@ Output_segment*
 Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 {
   gold_assert(this->saw_sections_clause_);
-
-  // Walk the memory regions specified in this script, if any.
-  if (this->memory_regions_ != NULL)
-    {
-      for (Memory_regions::const_iterator mr = this->memory_regions_->begin();
-	   mr != this->memory_regions_->end();
-	   ++mr)
-	{
-	  // FIXME: What should we do with the attributes of the regions ?
-
-	  // For each region, set the VMA of the sections associated with it.
-	  for (Memory_region::Section_list::const_iterator s =
-		 (*mr)->get_vma_section_list_start();
-	       s != (*mr)->get_vma_section_list_end();
-	       ++s)
-	    {
-	      (*s)->set_section_vma((*mr)->get_current_vma_address());
-	      (*mr)->increment_vma_offset((*s)->get_section_name(),
-					  (*s)->get_output_section()->current_data_size(),
-					  symtab, layout);
-	    }
-
-	  // Similarly, set the LMA values.
-	  for (Memory_region::Section_list::const_iterator s =
-		 (*mr)->get_lma_section_list_start();
-	       s != (*mr)->get_lma_section_list_end();
-	       ++s)
-	    {
-	      (*s)->set_section_lma((*mr)->get_current_lma_address());
-	      (*mr)->increment_lma_offset((*s)->get_section_name(),
-					  (*s)->get_output_section()->current_data_size(),
-					  symtab, layout);
-	    }
-	}
-    }
 	 
   // Implement ONLY_IF_RO/ONLY_IF_RW constraints.  These are a pain
   // for our representation.
@@ -3566,6 +3789,18 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
   // trust that the user knows what they are doing.
   if (lma < subtract || vma < subtract)
     return NULL;
+
+  // If memory regions have been specified and the address range
+  // we are about to use is not contained within any region then
+  // issue a warning message about the segment we are going to
+  // create.  It will be outside of any region and so possibly
+  // using non-existent or protected memory.  We test LMA rather
+  // than VMA since we assume that the headers will never be
+  // relocated.
+  if (this->memory_regions_ != NULL
+      && !this->block_in_region (NULL, layout, lma - subtract, subtract))
+    gold_warning(_("creating a segment to contain the file and program"
+		   " headers outside of any MEMORY region"));
 
   Output_segment* load_seg = layout->make_output_segment(elfcpp::PT_LOAD,
 							 elfcpp::PF_R);
