@@ -4999,7 +4999,7 @@ advance_wild_match (const char **namep, const char *name0, int target0)
 
   while (1)
     {
-      int t0, t1, t2;
+      int t0, t1;
 
       t0 = *name;
       if (t0 == '_')
@@ -5013,8 +5013,8 @@ advance_wild_match (const char **namep, const char *name0, int target0)
 	      else
 		name += 1;
 	    }
-	  else if (t1 == '_' &&
-		   (((t2 = name[2]) >= 'a' && t2 <= 'z') || t2 == target0))
+	  else if (t1 == '_' && ((name[2] >= 'a' && name[2] <= 'z')
+				 || name[2] == target0))
 	    {
 	      name += 2;
 	      break;

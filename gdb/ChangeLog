@@ -1,3 +1,9 @@
+2010-10-06  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix ARI warnings in advance_wild_match.
+	* ada-lang.c (advance_wild_match): Delete local variable t2.
+	Adjust code accordingly.  Minor reformatting.
+
 2010-10-06  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdbtypes.h (struct main_type): Remove flag_nottext.
