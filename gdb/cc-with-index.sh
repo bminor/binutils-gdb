@@ -50,6 +50,7 @@ OBJCOPY=${OBJCOPY:-objcopy}
 
 have_link=unknown
 next_is_output_file=no
+output_file=a.out
 
 for arg in "$@"
 do

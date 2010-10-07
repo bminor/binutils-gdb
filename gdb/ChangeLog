@@ -1,5 +1,7 @@
 2010-10-07  Doug Evans  <dje@google.com>
 
+	* cc-with-index.sh (output_file): Default to a.out.
+
 	* dwarf2read.c (mapped_index): Rename member index_table to
 	symbol_table and index_table_slots to symbol_table_slots.
 	All uses updated.
