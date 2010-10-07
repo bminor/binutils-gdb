@@ -2503,6 +2503,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 
 	  if (opct->variable_fields[fld].coding_method == tic6x_coding_fstg)
 	    {
+	      int i, t;
 	      if (operands[opno].value.exp.X_add_number < 0
 		  || (operands[opno].value.exp.X_add_number
 		      >= (1 << (fldd->width - fcyc_bits))))
@@ -2513,7 +2514,13 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 		  *ok = FALSE;
 		  return 0;
 		}
-	      value = operands[opno].value.exp.X_add_number << fcyc_bits;
+	      value = operands[opno].value.exp.X_add_number;
+	      for (t = 0, i = fcyc_bits; i < fldd->width; i++)
+		{
+		  t = (t << 1) | (value & 1);
+		  value >>= 1;
+		}
+	      value = t << fcyc_bits;
 	    }
 	  else
 	    {

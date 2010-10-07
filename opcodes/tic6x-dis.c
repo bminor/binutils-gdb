@@ -882,9 +882,11 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		    abort ();
 		  if (enc->coding_method == tic6x_coding_fstg)
 		    {
+		      int i, t;
+		      for (t = 0, i = fcyc_bits; i < 6; i++)
+			t = (t << 1) | ((fld_val >> i) & 1);
 		      operands_text[op_num] = TRUE;
-		      snprintf (operands[op_num], 24, "%u",
-				fld_val >> fcyc_bits);
+		      snprintf (operands[op_num], 24, "%u", t);
 		    }
 		  else
 		    {

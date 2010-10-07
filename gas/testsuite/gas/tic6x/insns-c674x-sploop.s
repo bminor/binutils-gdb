@@ -77,3 +77,9 @@ f:
 	sploop 14
 	nop
 	spkernel 3,13
+	sploop 1
+	nop
+	spkernel 8,0
+	sploop 2
+	nop
+	spkernel 6,0
