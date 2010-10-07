@@ -1,5 +1,13 @@
 2010-10-07  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (mapped_index): Rename member index_table to
+	symbol_table and index_table_slots to symbol_table_slots.
+	All uses updated.
+	(create_symbol_hash_table): Renamed from create_index_table.
+	All callers updated.
+	(add_indices_to_cpool): Rename arg index_table to symbol_hash_table.
+	(write_hash_table): Rename local index_table to symbol_hash_table.
+
 	* addrmap.h (addrmap_foreach_fn): New typedef.
 	(addrmap_foreach): Declare.
 	* addrmap.c (struct addrmap_funcs): New member foreach.

@@ -154,10 +154,10 @@ struct mapped_index
   const gdb_byte *address_table;
   /* Size of the address table data in bytes.  */
   offset_type address_table_size;
-  /* The hash table.  */
-  const offset_type *index_table;
+  /* The symbol table, implemented as a hash table.  */
+  const offset_type *symbol_table;
   /* Size in slots, each slot is 2 offset_types.  */
-  offset_type index_table_slots;
+  offset_type symbol_table_slots;
   /* A pointer to the constant pool.  */
   const char *constant_pool;
 };
@@ -1879,26 +1879,26 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
   offset_type hash = mapped_index_string_hash (name);
   offset_type slot, step;
 
-  slot = hash & (index->index_table_slots - 1);
-  step = ((hash * 17) & (index->index_table_slots - 1)) | 1;
+  slot = hash & (index->symbol_table_slots - 1);
+  step = ((hash * 17) & (index->symbol_table_slots - 1)) | 1;
 
   for (;;)
     {
       /* Convert a slot number to an offset into the table.  */
       offset_type i = 2 * slot;
       const char *str;
-      if (index->index_table[i] == 0 && index->index_table[i + 1] == 0)
+      if (index->symbol_table[i] == 0 && index->symbol_table[i + 1] == 0)
 	return 0;
 
-      str = index->constant_pool + MAYBE_SWAP (index->index_table[i]);
+      str = index->constant_pool + MAYBE_SWAP (index->symbol_table[i]);
       if (!strcmp (name, str))
 	{
 	  *vec_out = (offset_type *) (index->constant_pool
-				      + MAYBE_SWAP (index->index_table[i + 1]));
+				      + MAYBE_SWAP (index->symbol_table[i + 1]));
 	  return 1;
 	}
 
-      slot = (slot + step) & (index->index_table_slots - 1);
+      slot = (slot + step) & (index->symbol_table_slots - 1);
     }
 }
 
@@ -1960,10 +1960,10 @@ dwarf2_read_index (struct objfile *objfile)
 			     - MAYBE_SWAP (metadata[i]));
   ++i;
 
-  map->index_table = (offset_type *) (addr + MAYBE_SWAP (metadata[i]));
-  map->index_table_slots = ((MAYBE_SWAP (metadata[i + 1])
-			     - MAYBE_SWAP (metadata[i]))
-			    / (2 * sizeof (offset_type)));
+  map->symbol_table = (offset_type *) (addr + MAYBE_SWAP (metadata[i]));
+  map->symbol_table_slots = ((MAYBE_SWAP (metadata[i + 1])
+			      - MAYBE_SWAP (metadata[i]))
+			     / (2 * sizeof (offset_type)));
   ++i;
 
   map->constant_pool = addr + MAYBE_SWAP (metadata[i]);
@@ -2425,16 +2425,16 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
 	}
     }
 
-  for (iter = 0; iter < index->index_table_slots; ++iter)
+  for (iter = 0; iter < index->symbol_table_slots; ++iter)
     {
       offset_type idx = 2 * iter;
       const char *name;
       offset_type *vec, vec_len, vec_idx;
 
-      if (index->index_table[idx] == 0 && index->index_table[idx + 1] == 0)
+      if (index->symbol_table[idx] == 0 && index->symbol_table[idx + 1] == 0)
 	continue;
 
-      name = index->constant_pool + MAYBE_SWAP (index->index_table[idx]);
+      name = index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]);
 
       if (! (*name_matcher) (name, data))
 	continue;
@@ -2442,7 +2442,7 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */
       vec = (offset_type *) (index->constant_pool
-			     + MAYBE_SWAP (index->index_table[idx + 1]));
+			     + MAYBE_SWAP (index->symbol_table[idx + 1]));
       vec_len = MAYBE_SWAP (vec[0]);
       for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
 	{
@@ -2494,16 +2494,16 @@ dw2_map_symbol_names (struct objfile *objfile,
     return;
   index = dwarf2_per_objfile->index_table;
 
-  for (iter = 0; iter < index->index_table_slots; ++iter)
+  for (iter = 0; iter < index->symbol_table_slots; ++iter)
     {
       offset_type idx = 2 * iter;
       const char *name;
       offset_type *vec, vec_len, vec_idx;
 
-      if (index->index_table[idx] == 0 && index->index_table[idx + 1] == 0)
+      if (index->symbol_table[idx] == 0 && index->symbol_table[idx + 1] == 0)
 	continue;
 
-      name = (index->constant_pool + MAYBE_SWAP (index->index_table[idx]));
+      name = (index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]));
 
       (*fun) (name, data);
     }
@@ -14876,7 +14876,7 @@ delete_symtab_entry (void *p)
 /* Create a hash table holding symtab_index_entry objects.  */
 
 static htab_t
-create_index_table (void)
+create_symbol_hash_table (void)
 {
   return htab_create_alloc (100, hash_symtab_entry, eq_symtab_entry,
 			    delete_symtab_entry, xcalloc, xfree);
@@ -14980,12 +14980,12 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
 /* Add a vector of indices to the constant pool.  */
 
 static offset_type
-add_indices_to_cpool (htab_t index_table, struct obstack *cpool,
+add_indices_to_cpool (htab_t symbol_hash_table, struct obstack *cpool,
 		      struct symtab_index_entry *entry)
 {
   void **slot;
 
-  slot = htab_find_slot (index_table, entry, INSERT);
+  slot = htab_find_slot (symbol_hash_table, entry, INSERT);
   if (!*slot)
     {
       offset_type len = VEC_length (offset_type, entry->cu_indices);
@@ -15022,17 +15022,18 @@ write_hash_table (struct mapped_symtab *symtab,
 		  struct obstack *output, struct obstack *cpool)
 {
   offset_type i;
-  htab_t index_table;
+  htab_t symbol_hash_table;
   htab_t str_table;
 
-  index_table = create_index_table ();
+  symbol_hash_table = create_symbol_hash_table ();
   str_table = create_strtab ();
+
   /* We add all the index vectors to the constant pool first, to
      ensure alignment is ok.  */
   for (i = 0; i < symtab->size; ++i)
     {
       if (symtab->data[i])
-	add_indices_to_cpool (index_table, cpool, symtab->data[i]);
+	add_indices_to_cpool (symbol_hash_table, cpool, symtab->data[i]);
     }
 
   /* Now write out the hash table.  */
@@ -15061,7 +15062,7 @@ write_hash_table (struct mapped_symtab *symtab,
     }
 
   htab_delete (str_table);
-  htab_delete (index_table);
+  htab_delete (symbol_hash_table);
 }
 
 /* Write an address entry to ADDR_OBSTACK.  The addresses are taken
