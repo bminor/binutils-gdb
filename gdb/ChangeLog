@@ -1,5 +1,10 @@
 2010-10-07  Paul Hilfinger  <hilfinger@adacore.com>
 
+	* dictionary.c (dict_hash): Revert to msymbol_hash_iw in
+	more cases.
+
+2010-10-07  Paul Hilfinger  <hilfinger@adacore.com>
+
         * ada-lang.c (full_match): Declare.
         (ada_match_name): Rename to match_name (we should avoid prefixing static
         symbols with "ada_").

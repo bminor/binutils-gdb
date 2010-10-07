@@ -786,7 +786,7 @@ expand_hashtable (struct dictionary *dict)
    comparison operators hash to the same value.  */
 
 static unsigned int
-dict_hash (const char *string)
+dict_hash (const char *string0)
 {
   /* The Ada-encoded version of a name P1.P2...Pn has either the form
      P1__P2__...Pn<suffix> or _ada_P1__P2__...Pn<suffix> (where the Pi
@@ -796,11 +796,18 @@ dict_hash (const char *string)
      does this for a superset of both valid Pi and of <suffix>, but 
      in other cases it simply returns msymbol_hash_iw(STRING0).  */
 
+  const char *string;
   unsigned int hash;
   int c;
 
-  if (*string == '_' && strncmp (string, "_ada_", 5) == 0)
-    string += 5;
+  string = string0;
+  if (*string == '_')
+    {
+      if (strncmp (string, "_ada_", 5) == 0)
+	string += 5;
+      else
+	return msymbol_hash_iw (string0);
+    }
 
   hash = 0;
   while (*string)
@@ -810,13 +817,15 @@ dict_hash (const char *string)
 	case '$':
 	case '.':
 	case 'X':
-	case '(':
-	  return hash;
+	  if (string0 == string)
+	    return msymbol_hash_iw (string0);
+	  else
+	    return hash;
 	case ' ':
-	  string += 1;
-	  break;
+	case '(':
+	  return msymbol_hash_iw (string0);
 	case '_':
-	  if (string[1] == '_')
+	  if (string[1] == '_' && string != string0)
 	    {
 	      if (((c = string[2]) < 'a' || c > 'z') && c != 'O')
 		return hash;
