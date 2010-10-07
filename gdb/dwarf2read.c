@@ -2371,16 +2371,16 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
 }
 
 static void
-dw2_map_ada_symtabs (struct objfile *objfile,
-		     int (*wild_match) (const char *, const char *),
-		     int (*is_name_suffix) (const char *),
-		     void (*callback) (struct objfile *,
-				       struct symtab *, void *),
-		     const char *name, int global,
-		     domain_enum namespace, int wild,
-		     void *data)
+dw2_map_matching_symbols (const char * name, domain_enum namespace,
+			  struct objfile *objfile, int global,
+			  int (*callback) (struct block *,
+					   struct symbol *, void *),
+			  void *data,
+			  int (*match) (const char *, const char *),
+			  int (*ordered_compare) (const char *,
+						  const char *))
 {
-  /* For now, we don't support Ada.  Still the function can be called if the
+  /* Currently unimplemented; used for Ada.  The function can be called if the
      current language is Ada for a non-Ada objfile using GNU index.  As Ada
      does not look for non-Ada symbols this function should just return.  */
 }
@@ -2560,7 +2560,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_expand_all_symtabs,
   dw2_expand_symtabs_with_filename,
   dw2_find_symbol_file,
-  dw2_map_ada_symtabs,
+  dw2_map_matching_symbols,
   dw2_expand_symtabs_matching,
   dw2_find_pc_sect_symtab,
   dw2_map_symbol_names,

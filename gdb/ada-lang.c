@@ -103,6 +103,8 @@ static int ada_type_match (struct type *, struct type *, int);
 
 static int ada_args_match (struct symbol *, struct value **, int);
 
+static int full_match (const char *, const char *);
+
 static struct value *make_array_descriptor (struct type *, struct value *);
 
 static void ada_add_block_symbols (struct obstack *,
@@ -1254,7 +1256,7 @@ ada_la_decode (const char *encoded, int options)
    either argument is NULL.  */
 
 static int
-ada_match_name (const char *sym_name, const char *name, int wild)
+match_name (const char *sym_name, const char *name, int wild)
 {
   if (sym_name == NULL || name == NULL)
     return 0;
@@ -4267,7 +4269,7 @@ ada_lookup_simple_minsym (const char *name)
 
   ALL_MSYMBOLS (objfile, msymbol)
   {
-    if (ada_match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match)
+    if (match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match)
         && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
       return msymbol;
   }
@@ -4627,28 +4629,91 @@ ada_add_local_symbols (struct obstack *obstackp, const char *name,
 }
 
 /* An object of this type is used as the user_data argument when
-   calling the map_ada_symtabs method.  */
+   calling the map_matching_symbols method.  */
 
-struct ada_psym_data
+struct match_data
 {
+  struct objfile *objfile;
   struct obstack *obstackp;
-  const char *name;
-  domain_enum domain;
-  int global;
-  int wild_match;
+  struct symbol *arg_sym;
+  int found_sym;
 };
 
-/* Callback function for map_ada_symtabs.  */
+/* A callback for add_matching_symbols that adds SYM, found in BLOCK,
+   to a list of symbols.  DATA0 is a pointer to a struct match_data *
+   containing the obstack that collects the symbol list, the file that SYM
+   must come from, a flag indicating whether a non-argument symbol has
+   been found in the current block, and the last argument symbol
+   passed in SYM within the current block (if any).  When SYM is null,
+   marking the end of a block, the argument symbol is added if no
+   other has been found.  */
 
-static void
-ada_add_psyms (struct objfile *objfile, struct symtab *s, void *user_data)
+static int
+aux_add_nonlocal_symbols (struct block *block, struct symbol *sym, void *data0)
 {
-  struct ada_psym_data *data = user_data;
-  const int block_kind = data->global ? GLOBAL_BLOCK : STATIC_BLOCK;
+  struct match_data *data = (struct match_data *) data0;
+  
+  if (sym == NULL)
+    {
+      if (!data->found_sym && data->arg_sym != NULL) 
+	add_defn_to_vec (data->obstackp,
+			 fixup_symbol_section (data->arg_sym, data->objfile),
+			 block);
+      data->found_sym = 0;
+      data->arg_sym = NULL;
+    }
+  else 
+    {
+      if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
+	return 0;
+      else if (SYMBOL_IS_ARGUMENT (sym))
+	data->arg_sym = sym;
+      else
+	{
+	  data->found_sym = 1;
+	  add_defn_to_vec (data->obstackp,
+			   fixup_symbol_section (sym, data->objfile),
+			   block);
+	}
+    }
+  return 0;
+}
 
-  ada_add_block_symbols (data->obstackp,
-			 BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), block_kind),
-			 data->name, data->domain, objfile, data->wild_match);
+/* Compare STRING1 to STRING2, with results as for strcmp.
+   Compatible with strcmp_iw in that strcmp_iw (STRING1, STRING2) <= 0
+   implies compare_names (STRING1, STRING2) (they may differ as to
+   what symbols compare equal).  */
+
+static int
+compare_names (const char *string1, const char *string2)
+{
+  while (*string1 != '\0' && *string2 != '\0')
+    {
+      if (isspace (*string1) || isspace (*string2))
+	return strcmp_iw_ordered (string1, string2);
+      if (*string1 != *string2)
+	break;
+      string1 += 1;
+      string2 += 1;
+    }
+  switch (*string1)
+    {
+    case '(':
+      return strcmp_iw_ordered (string1, string2);
+    case '_':
+      if (*string2 == '\0')
+	{
+	  if (is_name_suffix (string2))
+	    return 0;
+	  else
+	    return -1;
+	}
+    default:
+      if (*string2 == '(')
+	return strcmp_iw_ordered (string1, string2);
+      else
+	return *string1 - *string2;
+    }
 }
 
 /* Add to OBSTACKP all non-local symbols whose name and domain match
@@ -4656,27 +4721,43 @@ ada_add_psyms (struct objfile *objfile, struct symtab *s, void *user_data)
    symbols if GLOBAL is non-zero, or on STATIC_BLOCK symbols otherwise.  */
 
 static void
-ada_add_non_local_symbols (struct obstack *obstackp, const char *name,
-                           domain_enum domain, int global,
-                           int is_wild_match)
+add_nonlocal_symbols (struct obstack *obstackp, const char *name,
+		      domain_enum domain, int global,
+		      int is_wild_match)
 {
   struct objfile *objfile;
-  struct ada_psym_data data;
+  struct match_data data;
 
   data.obstackp = obstackp;
-  data.name = name;
-  data.domain = domain;
-  data.global = global;
-  data.wild_match = is_wild_match;
+  data.arg_sym = NULL;
 
   ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      objfile->sf->qf->map_ada_symtabs (objfile, wild_match, is_name_suffix,
-					ada_add_psyms, name,
-					global, domain,
-					is_wild_match, &data);
-  }
+    {
+      data.objfile = objfile;
+
+      if (is_wild_match)
+	objfile->sf->qf->map_matching_symbols (name, domain, objfile, global,
+					       aux_add_nonlocal_symbols, &data,
+					       wild_match, NULL);
+      else
+	objfile->sf->qf->map_matching_symbols (name, domain, objfile, global,
+					       aux_add_nonlocal_symbols, &data,
+					       full_match, compare_names);
+    }
+
+  if (num_defns_collected (obstackp) == 0 && global && !is_wild_match)
+    {
+      ALL_OBJFILES (objfile)
+        {
+	  char *name1 = alloca (strlen (name) + sizeof ("_ada_"));
+	  strcpy (name1, "_ada_");
+	  strcpy (name1 + sizeof ("_ada_") - 1, name);
+	  data.objfile = objfile;
+	  objfile->sf->qf->map_matching_symbols (name1, domain, objfile, global,
+						 aux_add_nonlocal_symbols, &data,
+						 full_match, compare_names);
+	}
+    }      	
 }
 
 /* Find symbols in DOMAIN matching NAME0, in BLOCK0 and enclosing
@@ -4753,15 +4834,15 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
 
   /* Search symbols from all global blocks.  */
  
-  ada_add_non_local_symbols (&symbol_list_obstack, name, namespace, 1,
-                             wild_match);
+  add_nonlocal_symbols (&symbol_list_obstack, name, namespace, 1,
+			wild_match);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
      (not strictly correct, but perhaps better than an error).  */
 
   if (num_defns_collected (&symbol_list_obstack) == 0)
-    ada_add_non_local_symbols (&symbol_list_obstack, name, namespace, 0,
-                               wild_match);
+    add_nonlocal_symbols (&symbol_list_obstack, name, namespace, 0,
+			  wild_match);
 
 done:
   ndefns = num_defns_collected (&symbol_list_obstack);
@@ -5062,10 +5143,13 @@ wild_match (const char *name, const char *patn)
     }
 }
 
+/* Returns 0 iff symbol name SYM_NAME matches SEARCH_NAME, apart from
+   informational suffix.  */
+
 static int
 full_match (const char *sym_name, const char *search_name)
 {
-  return !ada_match_name (sym_name, search_name, 0);
+  return !match_name (sym_name, search_name, 0);
 }
 
 
@@ -5118,7 +5202,7 @@ ada_add_block_symbols (struct obstack *obstackp,
   else
     {
      for (sym = dict_iter_match_first (BLOCK_DICT (block), name,
-					full_match, &iter);
+				       full_match, &iter);
 	   sym != NULL; sym = dict_iter_match_next (name, full_match, &iter))
       {
         if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),

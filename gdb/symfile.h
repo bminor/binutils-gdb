@@ -212,21 +212,31 @@ struct quick_symbol_functions
      named NAME.  If no such symbol exists in OBJFILE, return NULL.  */
   const char *(*find_symbol_file) (struct objfile *objfile, const char *name);
 
-  /* This method is specific to Ada.  It walks the partial symbol
-     tables of OBJFILE looking for a name match.  WILD_MATCH and
-     IS_NAME_SUFFIX are predicate functions that the implementation
-     may call to check for a match.
+  /* Find global or static symbols in all tables that are in NAMESPACE 
+     and for which MATCH (symbol name, NAME) == 0, passing each to 
+     CALLBACK, reading in partial symbol symbol tables as needed.  Look
+     through global symbols if GLOBAL and otherwise static symbols.  
+     Passes NAME, NAMESPACE, and DATA to CALLBACK with each symbol
+     found.  After each block is processed, passes NULL to CALLBACK.
+     MATCH must be weaker than strcmp_iw in the sense that
+     strcmp_iw(x,y) == 0 --> MATCH(x,y) == 0.  ORDERED_COMPARE, if
+     non-null, must be an ordering relation compatible with strcmp_iw
+     in the sense that  
+            strcmp(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0 
+     and 
+            strcmp(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
+     (allowing strcmp(x,y) < 0 while ORDERED_COMPARE(x, y) == 0). 
+     CALLBACK returns 0 to indicate that the scan should continue, or
+     non-zero to indicate that the scan should be terminated.  */
 
-     This function is completely ad hoc and new implementations should
-     refer to the psymtab implementation to see what to do.  */
-  void (*map_ada_symtabs) (struct objfile *objfile,
-			   int (*wild_match) (const char *, const char *),
-			   int (*is_name_suffix) (const char *),
-			   void (*callback) (struct objfile *,
-					     struct symtab *, void *),
-			   const char *name, int global,
-			   domain_enum namespace, int wild,
-			   void *data);
+  void (*map_matching_symbols) (const char *name, domain_enum namespace,
+				struct objfile *, int global,
+				int (*callback) (struct block *,
+						 struct symbol *, void *),
+				void *data,
+				int (*match) (const char *, const char *),
+				int (*ordered_compare) (const char *,
+							const char *));
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
 
