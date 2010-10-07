@@ -1,3 +1,25 @@
+2010-10-06  Paul Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.c (ada_match_name): Use new API for wild_match.
+    	(wild_match): Change API to be consistent with that of strcmp_iw;
+    	return 0 for a match, and switch operand order.
+    	(full_match): New function.
+    	(ada_add_block_symbols): Use dict_iter_match_{first,next} for
+    	matching to allow use of hashing.
+    	* dictionary.c (struct dict_vector): Generalize iter_name_first,
+    	iter_name_next ot iter_match_first, iter_match_next.
+    	(iter_name_first_hashed): Replace with iter_match_first_hashed.
+    	(iter_name_next_hashed): Replace with iter_match_next_hashed.
+    	(iter_name_first_linear): Replace with iter_match_first_linear.
+    	(iter_name_next_linear): Replace with iter_match_next_linear.
+    	(dict_iter_name_first): Re-implement to use dict_iter_match_first.
+    	(dict_iter_name_next): Re-implement to use dict_iter_match_next.
+    	(dict_iter_match_first): New function.
+    	(dict_iter_match_next): New function.
+    	(dict_hash): New function.
+    	* dictionary.h (dict_iter_match_first, dict_iter_match_next): Declare.
+    	* psymtab.c (ada_lookup_partial_symbol): Use new wild_match API.
+
 2010-10-06  Doug Evans  <dje@google.com>
 
 	* data-directory/Makefile.in: Remove @host_makefile_frag@, @frags@.

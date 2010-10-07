@@ -5062,6 +5062,13 @@ wild_match (const char *name, const char *patn)
     }
 }
 
+static int
+full_match (const char *sym_name, const char *search_name)
+{
+  return !ada_match_name (sym_name, search_name, 0);
+}
+
+
 /* Add symbols from BLOCK matching identifier NAME in DOMAIN to
    vector *defn_symbols, updating the list of symbols in OBSTACKP 
    (if necessary).  If WILD, treat as NAME with a wildcard prefix. 
@@ -5086,9 +5093,9 @@ ada_add_block_symbols (struct obstack *obstackp,
   found_sym = 0;
   if (wild)
     {
-      struct symbol *sym;
-
-      ALL_BLOCK_SYMBOLS (block, iter, sym)
+      for (sym = dict_iter_match_first (BLOCK_DICT (block), name,
+					wild_match, &iter);
+	   sym != NULL; sym = dict_iter_match_next (name, wild_match, &iter))
       {
         if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
                                    SYMBOL_DOMAIN (sym), domain)
@@ -5110,29 +5117,25 @@ ada_add_block_symbols (struct obstack *obstackp,
     }
   else
     {
-      ALL_BLOCK_SYMBOLS (block, iter, sym)
+     for (sym = dict_iter_match_first (BLOCK_DICT (block), name,
+					full_match, &iter);
+	   sym != NULL; sym = dict_iter_match_next (name, full_match, &iter))
       {
         if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
                                    SYMBOL_DOMAIN (sym), domain))
           {
-            int cmp = strncmp (name, SYMBOL_LINKAGE_NAME (sym), name_len);
-
-            if (cmp == 0
-                && is_name_suffix (SYMBOL_LINKAGE_NAME (sym) + name_len))
-              {
-		if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
+	    if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
+	      {
+		if (SYMBOL_IS_ARGUMENT (sym))
+		  arg_sym = sym;
+		else
 		  {
-		    if (SYMBOL_IS_ARGUMENT (sym))
-		      arg_sym = sym;
-		    else
-		      {
-			found_sym = 1;
-			add_defn_to_vec (obstackp,
-					 fixup_symbol_section (sym, objfile),
-					 block);
-		      }
+		    found_sym = 1;
+		    add_defn_to_vec (obstackp,
+				     fixup_symbol_section (sym, objfile),
+				     block);
 		  }
-              }
+	      }
           }
       }
     }

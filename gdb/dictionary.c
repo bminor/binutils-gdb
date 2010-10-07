@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include <ctype.h>
 #include "gdb_obstack.h"
 #include "symtab.h"
 #include "buildsym.h"
@@ -116,11 +117,15 @@ struct dict_vector
 				    struct dict_iterator *iterator);
   struct symbol *(*iterator_next) (struct dict_iterator *iterator);
   /* Functions to iterate over symbols with a given name.  */
-  struct symbol *(*iter_name_first) (const struct dictionary *dict,
+  struct symbol *(*iter_match_first) (const struct dictionary *dict,
 				     const char *name,
+				     int (*equiv) (const char *,
+						   const char *),
 				     struct dict_iterator *iterator);
-  struct symbol *(*iter_name_next) (const char *name,
-				    struct dict_iterator *iterator);
+  struct symbol *(*iter_match_next) (const char *name,
+				     int (*equiv) (const char *,
+						   const char *),
+				     struct dict_iterator *iterator);
   /* A size function, for maint print symtabs.  */
   int (*size) (const struct dictionary *dict);
 };
@@ -236,12 +241,18 @@ static struct symbol *iterator_first_hashed (const struct dictionary *dict,
 
 static struct symbol *iterator_next_hashed (struct dict_iterator *iterator);
 
-static struct symbol *iter_name_first_hashed (const struct dictionary *dict,
-					      const char *name,
+static struct symbol *iter_match_first_hashed (const struct dictionary *dict,
+					       const char *name,
+					       int (*compare) (const char *,
+							       const char *),
 					      struct dict_iterator *iterator);
 
-static struct symbol *iter_name_next_hashed (const char *name,
-					     struct dict_iterator *iterator);
+static struct symbol *iter_match_next_hashed (const char *name,
+					      int (*compare) (const char *,
+							      const char *),
+					      struct dict_iterator *iterator);
+
+static unsigned int dict_hash (const char *string);
 
 /* Functions only for DICT_HASHED.  */
 
@@ -264,12 +275,16 @@ static struct symbol *iterator_first_linear (const struct dictionary *dict,
 
 static struct symbol *iterator_next_linear (struct dict_iterator *iterator);
 
-static struct symbol *iter_name_first_linear (const struct dictionary *dict,
-					      const char *name,
-					      struct dict_iterator *iterator);
+static struct symbol *iter_match_first_linear (const struct dictionary *dict,
+					       const char *name,
+					       int (*compare) (const char *,
+							       const char *),
+					       struct dict_iterator *iterator);
 
-static struct symbol *iter_name_next_linear (const char *name,
-					     struct dict_iterator *iterator);
+static struct symbol *iter_match_next_linear (const char *name,
+					      int (*compare) (const char *,
+							      const char *),
+					      struct dict_iterator *iterator);
 
 static int size_linear (const struct dictionary *dict);
 
@@ -289,8 +304,8 @@ static const struct dict_vector dict_hashed_vector =
     add_symbol_nonexpandable,		/* add_symbol */
     iterator_first_hashed,		/* iterator_first */
     iterator_next_hashed,		/* iterator_next */
-    iter_name_first_hashed,		/* iter_name_first */
-    iter_name_next_hashed,		/* iter_name_next */
+    iter_match_first_hashed,		/* iter_name_first */
+    iter_match_next_hashed,		/* iter_name_next */
     size_hashed,			/* size */
   };
 
@@ -301,8 +316,8 @@ static const struct dict_vector dict_hashed_expandable_vector =
     add_symbol_hashed_expandable,	/* add_symbol */
     iterator_first_hashed,		/* iterator_first */
     iterator_next_hashed,		/* iterator_next */
-    iter_name_first_hashed,		/* iter_name_first */
-    iter_name_next_hashed,		/* iter_name_next */
+    iter_match_first_hashed,		/* iter_name_first */
+    iter_match_next_hashed,		/* iter_name_next */
     size_hashed_expandable,		/* size */
   };
 
@@ -313,8 +328,8 @@ static const struct dict_vector dict_linear_vector =
     add_symbol_nonexpandable,		/* add_symbol */
     iterator_first_linear,		/* iterator_first */
     iterator_next_linear,		/* iterator_next */
-    iter_name_first_linear,		/* iter_name_first */
-    iter_name_next_linear,		/* iter_name_next */
+    iter_match_first_linear,		/* iter_name_first */
+    iter_match_next_linear,		/* iter_name_next */
     size_linear,			/* size */
   };
 
@@ -325,8 +340,8 @@ static const struct dict_vector dict_linear_expandable_vector =
     add_symbol_linear_expandable,	/* add_symbol */
     iterator_first_linear,		/* iterator_first */
     iterator_next_linear,		/* iterator_next */
-    iter_name_first_linear,		/* iter_name_first */
-    iter_name_next_linear,		/* iter_name_next */
+    iter_match_first_linear,		/* iter_name_first */
+    iter_match_next_linear,		/* iter_name_next */
     size_linear,			/* size */
   };
 
@@ -516,14 +531,31 @@ dict_iter_name_first (const struct dictionary *dict,
 		      const char *name,
 		      struct dict_iterator *iterator)
 {
-  return (DICT_VECTOR (dict))->iter_name_first (dict, name, iterator);
+  return dict_iter_match_first (dict, name, strcmp_iw, iterator);
 }
 
 struct symbol *
 dict_iter_name_next (const char *name, struct dict_iterator *iterator)
 {
+  return dict_iter_match_next (name, strcmp_iw, iterator);
+}
+
+struct symbol *
+dict_iter_match_first (const struct dictionary *dict,
+		       const char *name,
+		       int (*compare) (const char *, const char *),
+		       struct dict_iterator *iterator)
+{
+  return (DICT_VECTOR (dict))->iter_match_first (dict, name, compare, iterator);
+}
+
+struct symbol *
+dict_iter_match_next (const char *name,
+		      int (*compare) (const char *, const char *),
+		      struct dict_iterator *iterator)
+{
   return (DICT_VECTOR (DICT_ITERATOR_DICT (iterator)))
-    ->iter_name_next (name, iterator);
+    ->iter_match_next (name, compare, iterator);
 }
 
 int
@@ -614,12 +646,12 @@ iterator_hashed_advance (struct dict_iterator *iterator)
 }
 
 static struct symbol *
-iter_name_first_hashed (const struct dictionary *dict,
-			const char *name,
-			struct dict_iterator *iterator)
+iter_match_first_hashed (const struct dictionary *dict,
+			 const char *name,
+			 int (*compare) (const char *, const char *),
+			 struct dict_iterator *iterator)
 {
-  unsigned int hash_index
-    = msymbol_hash_iw (name) % DICT_HASHED_NBUCKETS (dict);
+  unsigned int hash_index = dict_hash (name) % DICT_HASHED_NBUCKETS (dict);
   struct symbol *sym;
 
   DICT_ITERATOR_DICT (iterator) = dict;
@@ -632,8 +664,8 @@ iter_name_first_hashed (const struct dictionary *dict,
        sym != NULL;
        sym = sym->hash_next)
     {
-      /* Warning: the order of arguments to strcmp_iw matters!  */
-      if (strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+      /* Warning: the order of arguments to compare matters!  */
+      if (compare (SYMBOL_SEARCH_NAME (sym), name) == 0)
 	{
 	  break;
 	}
@@ -645,7 +677,9 @@ iter_name_first_hashed (const struct dictionary *dict,
 }
 
 static struct symbol *
-iter_name_next_hashed (const char *name, struct dict_iterator *iterator)
+iter_match_next_hashed (const char *name,
+			int (*compare) (const char *, const char *),
+			struct dict_iterator *iterator)
 {
   struct symbol *next;
 
@@ -653,7 +687,7 @@ iter_name_next_hashed (const char *name, struct dict_iterator *iterator)
        next != NULL;
        next = next->hash_next)
     {
-      if (strcmp_iw (SYMBOL_SEARCH_NAME (next), name) == 0)
+      if (compare (SYMBOL_SEARCH_NAME (next), name) == 0)
 	break;
     }
 
@@ -671,8 +705,8 @@ insert_symbol_hashed (struct dictionary *dict,
   unsigned int hash_index;
   struct symbol **buckets = DICT_HASHED_BUCKETS (dict);
 
-  hash_index = (msymbol_hash_iw (SYMBOL_SEARCH_NAME (sym))
-		% DICT_HASHED_NBUCKETS (dict));
+  hash_index = 
+    dict_hash (SYMBOL_SEARCH_NAME (sym)) % DICT_HASHED_NBUCKETS (dict);
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
 }
@@ -746,6 +780,60 @@ expand_hashtable (struct dictionary *dict)
   xfree (old_buckets);
 }
 
+/* Produce an unsigned hash value from STRING0 that is consistent
+   with strcmp_iw, strcmp, and, at least on Ada symbols, wild_match.
+   That is, two identifiers equivalent according to any of those three
+   comparison operators hash to the same value.  */
+
+static unsigned int
+dict_hash (const char *string)
+{
+  /* The Ada-encoded version of a name P1.P2...Pn has either the form
+     P1__P2__...Pn<suffix> or _ada_P1__P2__...Pn<suffix> (where the Pi
+     are lower-cased identifiers).  The <suffix> (which can be empty)
+     encodes additional information about the denoted entity.  This
+     routine hashes such names to msymbol_hash_iw(Pn).  It actually
+     does this for a superset of both valid Pi and of <suffix>, but 
+     in other cases it simply returns msymbol_hash_iw(STRING0).  */
+
+  unsigned int hash;
+  int c;
+
+  if (*string == '_' && strncmp (string, "_ada_", 5) == 0)
+    string += 5;
+
+  hash = 0;
+  while (*string)
+    {
+      switch (*string)
+	{
+	case '$':
+	case '.':
+	case 'X':
+	case '(':
+	  return hash;
+	case ' ':
+	  string += 1;
+	  break;
+	case '_':
+	  if (string[1] == '_')
+	    {
+	      if (((c = string[2]) < 'a' || c > 'z') && c != 'O')
+		return hash;
+	      hash = 0;
+	      string += 2;
+	      break;
+	    }
+	  /* FALL THROUGH */
+	default:
+	  hash = hash * 67 + *string - 113;
+	  string += 1;
+	  break;
+	}
+    }
+  return hash;
+}
+
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE.  */
 
 static struct symbol *
@@ -769,18 +857,21 @@ iterator_next_linear (struct dict_iterator *iterator)
 }
 
 static struct symbol *
-iter_name_first_linear (const struct dictionary *dict,
-			const char *name,
-			struct dict_iterator *iterator)
+iter_match_first_linear (const struct dictionary *dict,
+			 const char *name,
+			 int (*compare) (const char *, const char *),
+			 struct dict_iterator *iterator)
 {
   DICT_ITERATOR_DICT (iterator) = dict;
   DICT_ITERATOR_INDEX (iterator) = -1;
 
-  return iter_name_next_linear (name, iterator);
+  return iter_match_next_linear (name, compare, iterator);
 }
 
 static struct symbol *
-iter_name_next_linear (const char *name, struct dict_iterator *iterator)
+iter_match_next_linear (const char *name,
+			int (*compare) (const char *, const char *),
+			struct dict_iterator *iterator)
 {
   const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
   int i, nsyms = DICT_LINEAR_NSYMS (dict);
@@ -789,7 +880,7 @@ iter_name_next_linear (const char *name, struct dict_iterator *iterator)
   for (i = DICT_ITERATOR_INDEX (iterator) + 1; i < nsyms; ++i)
     {
       sym = DICT_LINEAR_SYM (dict, i);
-      if (strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+      if (compare (SYMBOL_SEARCH_NAME (sym), name) == 0)
 	{
 	  retval = sym;
 	  break;
