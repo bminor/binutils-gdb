@@ -53,10 +53,6 @@ PYTHON_INSTALL_DIR = $(DESTDIR)/$(GDB_DATADIR)/$(PYTHON_DIR)
 PYTHON_FILES = \
 	gdb/__init__.py
 
-# Host-dependent makefile fragment comes in here.
-@host_makefile_frag@
-# End of host-dependent makefile fragment
-
 .PHONY: all
 all: stamp-syscalls stamp-python
 
@@ -182,5 +178,5 @@ clean-info:
 # will remove them.
 MAKEOVERRIDES=
 
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status @frags@
+Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	cd $(top_builddir) && $(MAKE) data-directory/Makefile

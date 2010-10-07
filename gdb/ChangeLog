@@ -1,3 +1,7 @@
+2010-10-06  Doug Evans  <dje@google.com>
+
+	* data-directory/Makefile.in: Remove @host_makefile_frag@, @frags@.
+
 2010-10-06  Ken Werner  <ken.werner@de.ibm.com>
 
 	* dwarf2read.c (read_tag_const_type): Handle const arrays.
