@@ -91,4 +91,15 @@ struct addrmap *addrmap_create_fixed (struct addrmap *original,
    to either mutable or immutable maps.)  */
 void addrmap_relocate (struct addrmap *map, CORE_ADDR offset);
 
+/* The type of a function used to iterate over the map.
+   OBJ is NULL for unmapped regions.  */
+typedef int (*addrmap_foreach_fn) (void *data, CORE_ADDR start_addr,
+				   void *obj);
+
+/* Call FN, passing it DATA, for every address in MAP, following an
+   in-order traversal.  If FN ever returns a non-zero value, the
+   iteration ceases immediately, and the value is returned.
+   Otherwise, this function returns 0.  */
+int addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn, void *data);
+
 #endif /* ADDRMAP_H */

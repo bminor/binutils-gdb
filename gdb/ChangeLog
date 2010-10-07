@@ -1,3 +1,16 @@
+2010-10-07  Doug Evans  <dje@google.com>
+
+	* addrmap.h (addrmap_foreach_fn): New typedef.
+	(addrmap_foreach): Declare.
+	* addrmap.c (struct addrmap_funcs): New member foreach.
+	(addrmap_foreach): New function.
+	(addrmap_fixed_foreach): New function.
+	(addrmap_fixed_funcs): Update.
+	(struct mutable_foreach_data): New struct.
+	(addrmap_mutable_foreach_worker): New function.
+	(addrmap_mutable_foreach): New function.
+	(addrmap_mutable_funcs): Update.
+
 2010-10-07  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* dictionary.c (dict_hash): Revert to msymbol_hash_iw in
