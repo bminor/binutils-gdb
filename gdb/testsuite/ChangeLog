@@ -1,3 +1,8 @@
+2010-10-08  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/oranking.exp: New test.
+	* gdb.cp/oranking.cc: New test program.
+
 2010-10-08  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.base/gnu_vector.c (ia, ib, fa, fb): New variables.
