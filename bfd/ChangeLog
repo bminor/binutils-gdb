@@ -1,3 +1,13 @@
+2010-10-08  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pei-x86_64.c (find_next_xdata_or_end): Removed.
+	(pex64_dump_xdata): Remove arguments stop, onaline,
+	and pdata. New argument endx.  Print term "none"
+	instead of misleading "CFA".
+	(sort_xdata_arr): New function.
+	(pex64_bfd_print_pdata): Use binary search/sort for unwind-RVAs
+	instead of searching quadratic.
+
 2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 	    Alan Modra  <amodra@gmail.com>
 

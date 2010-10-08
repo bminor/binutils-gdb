@@ -303,41 +303,9 @@ pex64_get_section_by_rva (bfd *abfd, bfd_vma addr, const char *sec_name)
   return section;
 }
 
-static bfd_vma
-find_next_xdata_or_end (bfd *abfd, bfd_byte *pdata, bfd_size_type stop,
-			int onaline, bfd_vma cur_address, bfd_vma max_size)
-{
-  bfd_size_type i;
-  bfd_vma ret = 0;
-
-  for (i = 0; i < stop; i += onaline)
-    {
-      struct pex64_runtime_function rf;
-
-      if (i + PDATA_ROW_SIZE > stop)
-	break;
-      pex64_get_runtime_function (abfd, &rf, &pdata[i]);
-
-      if (rf.rva_BeginAddress == 0 && rf.rva_EndAddress == 0
-	  && rf.rva_UnwindData == 0)
-	/* We are probably into the padding of the section now.  */
-	break;
-      if (rf.rva_UnwindData != 0 && !rf.isChained)
-        {
-	  if (!ret && rf.rva_UnwindData > cur_address)
-	    ret = rf.rva_UnwindData;
-	  else if (rf.rva_UnwindData > cur_address && ret > rf.rva_UnwindData)
-	    ret = rf.rva_UnwindData;
-	}
-    }
-  if (!ret)
-    return max_size;
-  return ret;
-}
-
 static void
 pex64_dump_xdata (FILE *file, bfd *abfd, bfd_vma addr, bfd_vma pc_addr,
-		  bfd_size_type stop, int onaline, bfd_byte *pdata)
+		  bfd_vma *endx)
 {
   asection *section = pex64_get_section_by_rva (abfd, addr, ".rdata");
   bfd_vma vsize;
@@ -364,10 +332,11 @@ pex64_dump_xdata (FILE *file, bfd *abfd, bfd_vma addr, bfd_vma pc_addr,
   vsize = section->vma - pe_data (abfd)->pe_opthdr.ImageBase;
   addr -= vsize;
 
-  end_addr = find_next_xdata_or_end (abfd, pdata, stop, onaline, addr + vsize,
-  				     vsize + (section->rawsize != 0 ? section->rawsize : section->size));
+  if (endx)
+    end_addr = endx[0] - vsize;
+  else
+    end_addr = (section->rawsize != 0 ? section->rawsize : section->size);
 
-  end_addr -= vsize;
   if (bfd_malloc_and_get_section (abfd, section, &data))
     {
       struct pex64_unwind_info ui;
@@ -411,7 +380,7 @@ pex64_dump_xdata (FILE *file, bfd *abfd, bfd_vma addr, bfd_vma pc_addr,
       fprintf (file, "\tPrologue size: %u, Frame offset = 0x%x.\n",
 	       (unsigned int) ui.SizeOfPrologue, (unsigned int) ui.FrameOffset);
       fprintf (file, "\tFrame register is %s.\n",
-	ui.FrameRegister == 0 ? "CFA"
+	ui.FrameRegister == 0 ? "none"
 			      : pex_regs[(unsigned int) ui.FrameRegister]);
 
       pex64_xdata_print_uwd_codes (file, &ui, pc_addr);
@@ -438,6 +407,17 @@ pex64_dump_xdata (FILE *file, bfd *abfd, bfd_vma addr, bfd_vma pc_addr,
     free (data);
 }
 
+static int
+sort_xdata_arr (const void *l, const void *r)
+{
+  const bfd_vma *lp = (const bfd_vma *) l;
+  const bfd_vma *rp = (const bfd_vma *) r;
+
+  if (*lp == *rp)
+    return 0;
+  return (*lp < *rp ? -1 : 1);
+}
+
 static bfd_boolean
 pex64_bfd_print_pdata (bfd *abfd, void *vfile)
 {
@@ -450,6 +430,8 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
   bfd_vma prev_beginaddress = 0;
   int onaline = PDATA_ROW_SIZE;
   int seen_error = 0;
+  bfd_vma *xdata_arr;
+  int xdata_arr_cnt;
 
   if (section == NULL
       || coff_section_data (abfd, section) == NULL
@@ -478,6 +460,8 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
       return FALSE;
     }
 
+  xdata_arr = (bfd_vma *) xmalloc (sizeof (bfd_vma) * ((stop / onaline) + 1));
+  xdata_arr_cnt = 0;
   /* Do sanity check of pdata.  */
   for (i = 0; i < stop; i += onaline)
     {
@@ -523,14 +507,26 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
 	  seen_error = 1;
 	  fprintf (file, "  has negative unwind address\n");
 	}
+      if (rf.rva_UnwindData && !rf.isChained)
+        xdata_arr[xdata_arr_cnt++] = rf.rva_UnwindData;
     }
 
   if (seen_error)
     {
       free (data);
+      free (xdata_arr);
 
       return TRUE;
     }
+
+  /* Add end of list marker.  */
+  xdata_arr[xdata_arr_cnt++] = ~((bfd_vma) 0);
+
+  /* Sort start RVAs of xdata.  */
+  if (xdata_arr_cnt > 1)
+    qsort (xdata_arr, (size_t) xdata_arr_cnt, sizeof (bfd_vma),
+	   sort_xdata_arr);
+
   /* Do dump of pdata related xdata.  */
 
   for (i = 0; i < stop; i += onaline)
@@ -563,12 +559,31 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
 	      fprintf (file, ".\n");
 	    }
 	  else
-	    pex64_dump_xdata (file, abfd, rf.rva_UnwindData, rf.rva_BeginAddress,
-	    		      stop, onaline, data);
+	    {
+	      bfd_vma *p;
+
+	      /* Search for the current entry in the sorted array.  */
+	      p = (bfd_vma *)
+	          bsearch (&rf.rva_UnwindData, xdata_arr,
+			   (size_t) xdata_arr_cnt, sizeof (bfd_vma),
+			   sort_xdata_arr);
+
+	      /* Advance to the next pointer into the xdata section.  We may
+		 have shared xdata entries, which will result in a string of
+		 identical pointers in the array; advance past all of them.  */
+	      while (p[0] <= rf.rva_UnwindData)
+		++p;
+	      if (p[0] == ~((bfd_vma) 0))
+		p = NULL;
+
+	      pex64_dump_xdata (file, abfd, rf.rva_UnwindData,
+				rf.rva_BeginAddress, p);
+	    }
 	}
     }
 
   free (data);
+  free (xdata_arr);
 
   return TRUE;
 }
