@@ -1,3 +1,8 @@
+2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix build with -DDEBUG=7
+	* config/obj-coff.c (s_get_name, symbol_dump): Add prototypes.
+
 2010-10-07  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* config/tc-tic6x.c (tic6x_try_encode): Correct encoding of fstg field

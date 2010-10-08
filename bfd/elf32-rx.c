@@ -29,7 +29,7 @@
 
 #ifdef DEBUG
 char * rx_get_reloc (long);
-void dump_symtab (bfd *, void *, void *);
+void rx_dump_symtab (bfd *, void *, void *);
 #endif
 
 #define RXREL(n,sz,bit,shift,complain,pcrel)				     \
@@ -2962,7 +2962,7 @@ rx_elf_object_p (bfd * abfd)
 
 #ifdef DEBUG
 void
-dump_symtab (bfd * abfd, void * internal_syms, void * external_syms)
+rx_dump_symtab (bfd * abfd, void * internal_syms, void * external_syms)
 {
   size_t locsymcount;
   Elf_Internal_Sym * isymbuf;

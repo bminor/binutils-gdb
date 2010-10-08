@@ -5217,9 +5217,8 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
 #if DEBUG & 4
   {
     fprintf (stderr,
-	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n",
-	     (long) asym_ptr, asym_ptr->name, idx, flags,
-	     elf_symbol_flags (flags));
+	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx\n",
+	     (long) asym_ptr, asym_ptr->name, idx, (long) flags);
     fflush (stderr);
   }
 #endif

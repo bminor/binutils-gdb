@@ -1,3 +1,7 @@
+2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* frv.opc: #undef DEBUG.
+
 2010-07-03  DJ Delorie  <dj@delorie.com>
 
 	* m32c.cpu (f-dsp-8-s24): Mask high byte after shifting it.

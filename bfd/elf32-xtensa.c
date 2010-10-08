@@ -5710,7 +5710,7 @@ print_action_list (FILE *fp, text_action_list *action_list)
 
       fprintf (fp, "%s: %s[0x%lx] \"%s\" %d\n",
 	       r->sec->owner->filename,
-	       r->sec->name, r->offset, t, r->removed_bytes);
+	       r->sec->name, (unsigned long) r->offset, t, r->removed_bytes);
     }
 }
 

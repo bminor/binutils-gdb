@@ -1,3 +1,12 @@
+2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix build with -DDEBUG=7
+	* frv-opc.c: Regenerate.
+	* or32-dis.c (DEBUG): Don't redefine.
+	(find_bytes_big, or32_extract, or32_opcode_match, or32_print_register):
+	Adapt DEBUG code to some type changes throughout.
+	* or32-opc.c (or32_extract): Likewise.
+
 2010-10-07  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* tic6x-dis.c (print_insn_tic6x): Correct decoding of fstg field

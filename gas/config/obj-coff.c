@@ -1829,11 +1829,15 @@ obj_coff_init_stab_section (segT seg)
 }
 
 #ifdef DEBUG
+const char * s_get_name (symbolS *);
+
 const char *
 s_get_name (symbolS *s)
 {
   return ((s == NULL) ? "(NULL)" : S_GET_NAME (s));
 }
+
+void symbol_dump (void);
 
 void
 symbol_dump (void)

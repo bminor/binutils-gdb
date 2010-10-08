@@ -898,7 +898,7 @@ or32_extract (char param_ch, char *enc_initial, unsigned long insn)
           {
             unsigned long tmp = strtol (enc, NULL, 16);
 #if DEBUG
-            printf (" enc=%s, tmp=%x ", enc, tmp);
+            printf (" enc=%s, tmp=%lx ", enc, tmp);
 #endif
             if (param_ch == '0')
               tmp = 15 - tmp;
@@ -918,7 +918,7 @@ or32_extract (char param_ch, char *enc_initial, unsigned long insn)
         opc_pos--;
         param_pos--;
 #if DEBUG
-        printf ("\n  ret=%x opc_pos=%x, param_pos=%x\n", ret, opc_pos, param_pos);
+        printf ("\n  ret=%lx opc_pos=%x, param_pos=%x\n", ret, opc_pos, param_pos);
 #endif  
         if (ISLOWER (param_ch))
           ret -= ((insn >> opc_pos) & 0x1) << param_pos;
@@ -940,7 +940,7 @@ or32_extract (char param_ch, char *enc_initial, unsigned long insn)
       enc++;
 
 #if DEBUG
-  printf ("ret=%x\n", ret);
+  printf ("ret=%lx\n", ret);
 #endif
   return ret;
 }

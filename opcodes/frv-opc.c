@@ -34,6 +34,9 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #include "elf/frv.h"
 #include <stdio.h>
 
+/* DEBUG appears below as argument of OP macro.  */
+#undef DEBUG
+
 /* Returns TRUE if {MAJOR,MACH} is a major branch of the FRV
    development tree.  */
 

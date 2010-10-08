@@ -1,6 +1,18 @@
+2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+	    Alan Modra  <amodra@gmail.com>
+
+	Fix build with -DDEBUG=7
+	* elf.c (_bfd_elf_symbol_from_bfd_symbol): Remove call
+	to deleted function elf_symbol_flags.  Add typecast to avoid warning.
+	* elf32-rx.c (dump_symbol) : Rename to..
+	(rx_dump_symbol): ..this to avoid link errors.
+	* elflink.c (elf_link_input_bfd): Add typecast to avoid warnings.
+	(bfd_elf_perform_complex_relocation): Likewise.
+	* elf32-xtensa.c (print_action_list): Likewise.
+
 2010-10-06  Nathan Sidwell  <nathan@codesourcery.com>
 
-	* elf32-arm.c (elf32_arm_stub_long_branch_any_arm_pic, 
+	* elf32-arm.c (elf32_arm_stub_long_branch_any_arm_pic,
 	elf32_arm_stub_long_branch_any_arm_pic): Use a consistent name for
 	ip/r12.
 	(arm_type_of_stub): Remove superfluous braces.
@@ -240,7 +252,6 @@
 
 2010-09-09  Bernd Schmidt  <bernds@codesourcery.com>
 
-	bfd/
 	* elflink.c (bfd_elf_final_link): Correct calculation of
 	max_external_reloc_size.
 

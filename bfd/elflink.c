@@ -7884,7 +7884,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  "chunksz %ld, start %ld, len %ld, oplen %ld\n"
 	  "    dest: %8.8lx, mask: %8.8lx, reloc: %8.8lx\n",
 	  lsb0_p, signed_p, trunc_p, wordsz, chunksz, start, len,
-	  oplen, x, mask,  relocation);
+	  oplen, (unsigned long) x, (unsigned long) mask,
+	  (unsigned long) relocation);
 #endif
 
   r = bfd_reloc_ok;
@@ -7904,8 +7905,8 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  "         shifted mask: %8.8lx\n"
 	  " shifted/masked reloc: %8.8lx\n"
 	  "               result: %8.8lx\n",
-	  relocation, (mask << shift),
-	  ((relocation & mask) << shift), x);
+	  (unsigned long) relocation, (unsigned long) (mask << shift),
+	  (unsigned long) ((relocation & mask) << shift), (unsigned long) x);
 #endif
   /* FIXME: octets_per_byte.  */
   put_value (wordsz, chunksz, input_bfd, x, contents + rel->r_offset);
@@ -9464,7 +9465,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 #ifdef DEBUG
 		  printf ("Encountered a complex symbol!");
 		  printf (" (input_bfd %s, section %s, reloc %ld\n",
-			  input_bfd->filename, o->name, rel - internal_relocs);
+			  input_bfd->filename, o->name,
+			  (long) (rel - internal_relocs));
 		  printf (" symbol: idx  %8.8lx, name %s\n",
 			  r_symndx, sym_name);
 		  printf (" reloc : info %8.8lx, addr %8.8lx\n",

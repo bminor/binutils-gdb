@@ -1,3 +1,8 @@
+2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix build with -DDEBUG=7
+	* nlmheader.y (DEBUG token): Rename to DEBUG_K.
+
 2010-10-06  Alan Modra  <amodra@gmail.com>
 
 	* bucomm.c (bfd_nonfatal, bfd_nonfatal_message): Don't clobber errno.
