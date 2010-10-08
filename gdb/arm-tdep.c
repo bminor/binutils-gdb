@@ -1706,6 +1706,203 @@ arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     }
 }
 
+/* Return true if we are in the function's epilogue, i.e. after the
+   instruction that destroyed the function's stack frame.  */
+
+static int
+thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  unsigned int insn, insn2;
+  int found_return = 0, found_stack_adjust = 0;
+  CORE_ADDR func_start, func_end;
+  CORE_ADDR scan_pc;
+  gdb_byte buf[4];
+
+  if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
+    return 0;
+
+  /* The epilogue is a sequence of instructions along the following lines:
+
+    - add stack frame size to SP or FP
+    - [if frame pointer used] restore SP from FP
+    - restore registers from SP [may include PC]
+    - a return-type instruction [if PC wasn't already restored]
+
+    In a first pass, we scan forward from the current PC and verify the
+    instructions we find as compatible with this sequence, ending in a
+    return instruction.
+
+    However, this is not sufficient to distinguish indirect function calls
+    within a function from indirect tail calls in the epilogue in some cases.
+    Therefore, if we didn't already find any SP-changing instruction during
+    forward scan, we add a backward scanning heuristic to ensure we actually
+    are in the epilogue.  */
+
+  scan_pc = pc;
+  while (scan_pc < func_end && !found_return)
+    {
+      if (target_read_memory (scan_pc, buf, 2))
+	break;
+
+      scan_pc += 2;
+      insn = extract_unsigned_integer (buf, 2, byte_order_for_code);
+
+      if ((insn & 0xff80) == 0x4700)  /* bx <Rm> */
+	found_return = 1;
+      else if (insn == 0x46f7)  /* mov pc, lr */
+	found_return = 1;
+      else if (insn == 0x46bd)  /* mov sp, r7 */
+	found_stack_adjust = 1;
+      else if ((insn & 0xff00) == 0xb000)  /* add sp, imm or sub sp, imm  */
+	found_stack_adjust = 1;
+      else if ((insn & 0xfe00) == 0xbc00)  /* pop <registers> */
+	{
+	  found_stack_adjust = 1;
+	  if (insn & 0x0100)  /* <registers> include PC.  */
+	    found_return = 1;
+	}
+      else if ((insn & 0xe000) == 0xe000)  /* 32-bit Thumb-2 instruction */
+	{
+	  if (target_read_memory (scan_pc, buf, 2))
+	    break;
+
+	  scan_pc += 2;
+	  insn2 = extract_unsigned_integer (buf, 2, byte_order_for_code);
+
+	  if (insn == 0xe8bd)  /* ldm.w sp!, <registers> */
+	    {
+	      found_stack_adjust = 1;
+	      if (insn2 & 0x8000)  /* <registers> include PC.  */
+		found_return = 1;
+	    }
+	  else if (insn == 0xf85d  /* ldr.w <Rt>, [sp], #4 */
+		   && (insn2 & 0x0fff) == 0x0b04)
+	    {
+	      found_stack_adjust = 1;
+	      if ((insn2 & 0xf000) == 0xf000) /* <Rt> is PC.  */
+		found_return = 1;
+	    }
+	  else if ((insn & 0xffbf) == 0xecbd  /* vldm sp!, <list> */
+		   && (insn2 & 0x0e00) == 0x0a00)
+	    found_stack_adjust = 1;
+	  else
+	    break;
+	}
+      else
+	break;
+    }
+
+  if (!found_return)
+    return 0;
+
+  /* Since any instruction in the epilogue sequence, with the possible
+     exception of return itself, updates the stack pointer, we need to
+     scan backwards for at most one instruction.  Try either a 16-bit or
+     a 32-bit instruction.  This is just a heuristic, so we do not worry
+     too much about false positives.*/
+
+  if (!found_stack_adjust)
+    {
+      if (pc - 4 < func_start)
+	return 0;
+      if (target_read_memory (pc - 4, buf, 4))
+	return 0;
+
+      insn = extract_unsigned_integer (buf, 2, byte_order_for_code);
+      insn2 = extract_unsigned_integer (buf + 2, 2, byte_order_for_code);
+
+      if (insn2 == 0x46bd)  /* mov sp, r7 */
+	found_stack_adjust = 1;
+      else if ((insn2 & 0xff00) == 0xb000)  /* add sp, imm or sub sp, imm  */
+	found_stack_adjust = 1;
+      else if ((insn2 & 0xff00) == 0xbc00)  /* pop <registers> without PC */
+	found_stack_adjust = 1;
+      else if (insn == 0xe8bd)  /* ldm.w sp!, <registers> */
+	found_stack_adjust = 1;
+      else if (insn == 0xf85d  /* ldr.w <Rt>, [sp], #4 */
+	       && (insn2 & 0x0fff) == 0x0b04)
+	found_stack_adjust = 1;
+      else if ((insn & 0xffbf) == 0xecbd  /* vldm sp!, <list> */
+	       && (insn2 & 0x0e00) == 0x0a00)
+	found_stack_adjust = 1;
+    }
+
+  return found_stack_adjust;
+}
+
+/* Return true if we are in the function's epilogue, i.e. after the
+   instruction that destroyed the function's stack frame.  */
+
+static int
+arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  unsigned int insn;
+  int found_return, found_stack_adjust;
+  CORE_ADDR func_start, func_end;
+
+  if (arm_pc_is_thumb (gdbarch, pc))
+    return thumb_in_function_epilogue_p (gdbarch, pc);
+
+  if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
+    return 0;
+
+  /* We are in the epilogue if the previous instruction was a stack
+     adjustment and the next instruction is a possible return (bx, mov
+     pc, or pop).  We could have to scan backwards to find the stack
+     adjustment, or forwards to find the return, but this is a decent
+     approximation.  First scan forwards.  */
+
+  found_return = 0;
+  insn = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+  if (bits (insn, 28, 31) != INST_NV)
+    {
+      if ((insn & 0x0ffffff0) == 0x012fff10)
+	/* BX.  */
+	found_return = 1;
+      else if ((insn & 0x0ffffff0) == 0x01a0f000)
+	/* MOV PC.  */
+	found_return = 1;
+      else if ((insn & 0x0fff0000) == 0x08bd0000
+	  && (insn & 0x0000c000) != 0)
+	/* POP (LDMIA), including PC or LR.  */
+	found_return = 1;
+    }
+
+  if (!found_return)
+    return 0;
+
+  /* Scan backwards.  This is just a heuristic, so do not worry about
+     false positives from mode changes.  */
+
+  if (pc < func_start + 4)
+    return 0;
+
+  insn = read_memory_unsigned_integer (pc - 4, 4, byte_order_for_code);
+  if (bits (insn, 28, 31) != INST_NV)
+    {
+      if ((insn & 0x0df0f000) == 0x0080d000)
+	/* ADD SP (register or immediate).  */
+	found_stack_adjust = 1;
+      else if ((insn & 0x0df0f000) == 0x0040d000)
+	/* SUB SP (register or immediate).  */
+	found_stack_adjust = 1;
+      else if ((insn & 0x0ffffff0) == 0x01a0d000)
+	/* MOV SP.  */
+	found_return = 1;
+      else if ((insn & 0x0fff0000) == 0x08bd0000)
+	/* POP (LDMIA).  */
+	found_stack_adjust = 1;
+    }
+
+  if (found_stack_adjust)
+    return 1;
+
+  return 0;
+}
+
+
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
 
@@ -6880,6 +7077,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
+
+  /* Detect whether PC is in function epilogue.  */
+  set_gdbarch_in_function_epilogue_p (gdbarch, arm_in_function_epilogue_p);
 
   /* Skip trampolines.  */
   set_gdbarch_skip_trampoline_code (gdbarch, arm_skip_stub);

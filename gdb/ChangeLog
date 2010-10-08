@@ -1,3 +1,11 @@
+2010-10-08  Ulrich Weigand  <uweigand@de.ibm.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (thumb_in_function_epilogue_p)
+	(arm_in_function_epilogue_p): New.
+	(arm_gdbarch_init): Install arm_in_function_epilogue_p as
+	gdbarch_in_function_epilogue_p callback.
+
 2010-10-07  Doug Evans  <dje@google.com>
 
 	* cc-with-index.sh (output_file): Default to a.out.
