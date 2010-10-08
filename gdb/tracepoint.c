@@ -3139,13 +3139,17 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
     {
       tsv = find_matching_tsv (utsv);
       if (tsv)
-	printf_filtered (_("Assuming trace state variable $%s is same as target's variable %d.\n"),
-			 tsv->name, utsv->number);
+	{
+	  if (info_verbose)
+	    printf_filtered (_("Assuming trace state variable $%s is same as target's variable %d.\n"),
+			     tsv->name, utsv->number);
+	}
       else
 	{
 	  tsv = create_tsv_from_upload (utsv);
-	  printf_filtered (_("Created trace state variable $%s for target's variable %d.\n"),
-			   tsv->name, utsv->number);
+	  if (info_verbose)
+	    printf_filtered (_("Created trace state variable $%s for target's variable %d.\n"),
+			     tsv->name, utsv->number);
 	}
       /* Give precedence to numberings that come from the target.  */
       if (tsv)

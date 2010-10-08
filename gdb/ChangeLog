@@ -1,3 +1,8 @@
+2010-10-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* tracepoint.c (merge_uploaded_trace_state_variables): Only print
+	messages if info_verbose.
+
 2010-10-08  Ken Werner  <ken.werner@de.ibm.com>
 
 	* valops.c (value_cast): Handle vector types.
