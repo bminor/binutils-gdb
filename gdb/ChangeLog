@@ -1,3 +1,8 @@
+2010-10-08  Ken Werner  <ken.werner@de.ibm.com>
+
+	* valops.c (value_cast): Handle vector types.
+	* valarith.c (value_binop): Widen scalar to vector if appropriate.
+
 2010-10-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arm-tdep.c (thumb_expand_immediate): New function.

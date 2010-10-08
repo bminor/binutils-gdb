@@ -421,7 +421,8 @@ value_cast (struct type *type, struct value *arg2)
     }
 
   if (current_language->c_style_arrays
-      && TYPE_CODE (type2) == TYPE_CODE_ARRAY)
+      && TYPE_CODE (type2) == TYPE_CODE_ARRAY
+      && !TYPE_VECTOR (type2))
     arg2 = value_coerce_array (arg2);
 
   if (TYPE_CODE (type2) == TYPE_CODE_FUNC)
@@ -536,6 +537,26 @@ value_cast (struct type *type, struct value *arg2)
       /* The Itanium C++ ABI represents NULL pointers to members as
 	 minus one, instead of biasing the normal case.  */
       return value_from_longest (type, -1);
+    }
+  else if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (type) && scalar)
+    {
+      /* Widen the scalar to a vector.  */
+      struct type *eltype;
+      struct value *val;
+      int i, n;
+
+      eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      arg2 = value_cast (eltype, arg2);
+      val = allocate_value (type);
+      n = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
+
+      for (i = 0; i < n; i++)
+	{
+	  /* Duplicate the contents of arg2 into the destination vector.  */
+	  memcpy (value_contents_writeable (val) + (i * TYPE_LENGTH (eltype)),
+		  value_contents_all (arg2), TYPE_LENGTH (eltype));
+	}
+      return val;
     }
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {

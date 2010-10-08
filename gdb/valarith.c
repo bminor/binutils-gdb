@@ -1435,14 +1435,34 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 struct value *
 value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 {
+  struct value *val;
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));
+  int t1_is_vec = (TYPE_CODE (type1) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (type1));
+  int t2_is_vec = (TYPE_CODE (type2) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (type2));
 
-  if ((TYPE_CODE (type1) == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
-	  || (TYPE_CODE (type2) == TYPE_CODE_ARRAY && TYPE_VECTOR (type2)))
-    return vector_binop (arg1, arg2, op);
+  if (!t1_is_vec && !t2_is_vec)
+    val = scalar_binop (arg1, arg2, op);
+  else if (t1_is_vec && t2_is_vec)
+    val = vector_binop (arg1, arg2, op);
   else
-    return scalar_binop (arg1, arg2, op);
+    {
+      /* Widen the scalar operand to a vector.  */
+      struct value **v = t1_is_vec ? &arg2 : &arg1;
+      struct type *t = t1_is_vec ? type2 : type1;
+      
+      if (TYPE_CODE (t) != TYPE_CODE_FLT
+	  && TYPE_CODE (t) != TYPE_CODE_DECFLOAT
+	  && !is_integral_type (t))
+	error (_("Argument to operation not a number or boolean."));
+
+      *v = value_cast (t1_is_vec ? type1 : type2, *v);
+      val = vector_binop (arg1, arg2, op);
+    }
+
+  return val;
 }
 
 /* Simulate the C operator ! -- return 1 if ARG1 contains zero.  */

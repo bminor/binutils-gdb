@@ -1,3 +1,8 @@
+2010-10-08  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.base/gnu_vector.c (ia, ib, fa, fb): New variables.
+	* gdb.base/gnu_vector.exp: Add tests for scalar to vector widening.
+
 2010-10-06  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.base/constvars.c (logical, lugged, luck, lunar, lumen, lurk,
