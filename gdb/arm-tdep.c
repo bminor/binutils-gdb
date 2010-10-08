@@ -476,6 +476,12 @@ skip_prologue_function (CORE_ADDR pc)
   if (strncmp (name, "__aeabi_d2f", strlen ("__aeabi_d2f")) == 0)
     return 1;
 
+  /* Internal functions related to thread-local storage.  */
+  if (strncmp (name, "__tls_get_addr", strlen ("__tls_get_addr")) == 0)
+    return 1;
+  if (strncmp (name, "__aeabi_read_tp", strlen ("__aeabi_read_tp")) == 0)
+    return 1;
+
   return 0;
 }
 
@@ -487,6 +493,149 @@ skip_prologue_function (CORE_ADDR pc)
   ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
 #define BranchDest(addr,instr) \
   ((CORE_ADDR) (((long) (addr)) + 8 + (sbits (instr, 0, 23) << 2)))
+
+/* Decode immediate value; implements ThumbExpandImmediate pseudo-op.  */
+
+static unsigned int
+thumb_expand_immediate (unsigned int imm)
+{
+  unsigned int count = imm >> 7;
+
+  if (count < 8)
+    switch (count / 2)
+      {
+      case 0:
+	return imm & 0xff;
+      case 1:
+	return (imm & 0xff) | ((imm & 0xff) << 16);
+      case 2:
+	return ((imm & 0xff) << 8) | ((imm & 0xff) << 24);
+      case 3:
+	return (imm & 0xff) | ((imm & 0xff) << 8)
+		| ((imm & 0xff) << 16) | ((imm & 0xff) << 24);
+      }
+
+  return (0x80 | (imm & 0x7f)) << (32 - count);
+}
+
+/* Return 1 if the 16-bit Thumb instruction INST might change
+   control flow, 0 otherwise.  */
+
+static int
+thumb_instruction_changes_pc (unsigned short inst)
+{
+  if ((inst & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
+    return 1;
+
+  if ((inst & 0xf000) == 0xd000)	/* conditional branch */
+    return 1;
+
+  if ((inst & 0xf800) == 0xe000)	/* unconditional branch */
+    return 1;
+
+  if ((inst & 0xff00) == 0x4700)	/* bx REG, blx REG */
+    return 1;
+
+  if ((inst & 0xf500) == 0xb100)	/* CBNZ or CBZ.  */
+    return 1;
+
+  return 0;
+}
+
+/* Return 1 if the 32-bit Thumb instruction in INST1 and INST2
+   might change control flow, 0 otherwise.  */
+
+static int
+thumb2_instruction_changes_pc (unsigned short inst1, unsigned short inst2)
+{
+  if ((inst1 & 0xf800) == 0xf000 && (inst2 & 0x8000) == 0x8000)
+    {
+      /* Branches and miscellaneous control instructions.  */
+
+      if ((inst2 & 0x1000) != 0 || (inst2 & 0xd001) == 0xc000)
+	{
+	  /* B, BL, BLX.  */
+	  return 1;
+	}
+      else if (inst1 == 0xf3de && (inst2 & 0xff00) == 0x3f00)
+	{
+	  /* SUBS PC, LR, #imm8.  */
+	  return 1;
+	}
+      else if ((inst2 & 0xd000) == 0x8000 && (inst1 & 0x0380) != 0x0380)
+	{
+	  /* Conditional branch.  */
+	  return 1;
+	}
+
+      return 0;
+    }
+
+  if ((inst1 & 0xfe50) == 0xe810)
+    {
+      /* Load multiple or RFE.  */
+
+      if (bit (inst1, 7) && !bit (inst1, 8))
+	{
+	  /* LDMIA or POP */
+	  if (bit (inst2, 15))
+	    return 1;
+	}
+      else if (!bit (inst1, 7) && bit (inst1, 8))
+	{
+	  /* LDMDB */
+	  if (bit (inst2, 15))
+	    return 1;
+	}
+      else if (bit (inst1, 7) && bit (inst1, 8))
+	{
+	  /* RFEIA */
+	  return 1;
+	}
+      else if (!bit (inst1, 7) && !bit (inst1, 8))
+	{
+	  /* RFEDB */
+	  return 1;
+	}
+
+      return 0;
+    }
+
+  if ((inst1 & 0xffef) == 0xea4f && (inst2 & 0xfff0) == 0x0f00)
+    {
+      /* MOV PC or MOVS PC.  */
+      return 1;
+    }
+
+  if ((inst1 & 0xff70) == 0xf850 && (inst2 & 0xf000) == 0xf000)
+    {
+      /* LDR PC.  */
+      if (bits (inst1, 0, 3) == 15)
+	return 1;
+      if (bit (inst1, 7))
+	return 1;
+      if (bit (inst2, 11))
+	return 1;
+      if ((inst2 & 0x0fc0) == 0x0000)
+	return 1;	
+
+      return 0;
+    }
+
+  if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf000)
+    {
+      /* TBB.  */
+      return 1;
+    }
+
+  if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf010)
+    {
+      /* TBH.  */
+      return 1;
+    }
+
+  return 0;
+}
 
 /* Analyze a Thumb prologue, looking for a recognizable stack frame
    and frame pointer.  Scan until we encounter a store that could
@@ -506,6 +655,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
   struct pv_area *stack;
   struct cleanup *back_to;
   CORE_ADDR offset;
+  CORE_ADDR unrecognized_pc = 0;
 
   for (i = 0; i < 16; i++)
     regs[i] = pv_register (i, 0);
@@ -643,9 +793,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	  constant = read_memory_unsigned_integer (loc, 4, byte_order);
 	  regs[bits (insn, 8, 10)] = pv_constant (constant);
 	}
-      else if ((insn & 0xe000) == 0xe000 && cache == NULL)
+      else if ((insn & 0xe000) == 0xe000)
 	{
-	  /* Only recognize 32-bit instructions for prologue skipping.  */
 	  unsigned short inst2;
 
 	  inst2 = read_memory_unsigned_integer (start + 2, 2,
@@ -675,58 +824,256 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      if (!skip_prologue_function (nextpc))
 		break;
 	    }
-	  else if ((insn & 0xfe50) == 0xe800	/* stm{db,ia} Rn[!], { registers } */
+
+	  else if ((insn & 0xffd0) == 0xe900    /* stmdb Rn{!}, { registers } */
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
-	    ;
-	  else if ((insn & 0xfe50) == 0xe840	/* strd Rt, Rt2, [Rn, #imm] */
+	    {
+	      pv_t addr = regs[bits (insn, 0, 3)];
+	      int regno;
+
+	      if (pv_area_store_would_trash (stack, addr))
+		break;
+
+	      /* Calculate offsets of saved registers.  */
+	      for (regno = ARM_LR_REGNUM; regno >= 0; regno--)
+		if (inst2 & (1 << regno))
+		  {
+		    addr = pv_add_constant (addr, -4);
+		    pv_area_store (stack, addr, 4, regs[regno]);
+		  }
+
+	      if (insn & 0x0020)
+		regs[bits (insn, 0, 3)] = addr;
+	    }
+
+	  else if ((insn & 0xff50) == 0xe940	/* strd Rt, Rt2, [Rn, #+/-imm]{!} */
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    {
+	      int regno1 = bits (inst2, 12, 15);
+	      int regno2 = bits (inst2, 8, 11);
+	      pv_t addr = regs[bits (insn, 0, 3)];
+
+	      offset = inst2 & 0xff;
+	      if (insn & 0x0080)
+		addr = pv_add_constant (addr, offset);
+	      else
+		addr = pv_add_constant (addr, -offset);
+
+	      if (pv_area_store_would_trash (stack, addr))
+		break;
+
+	      pv_area_store (stack, addr, 4, regs[regno1]);
+	      pv_area_store (stack, pv_add_constant (addr, 4),
+			     4, regs[regno2]);
+
+	      if (insn & 0x0020)
+		regs[bits (insn, 0, 3)] = addr;
+	    }
+
+	  else if ((insn & 0xfff0) == 0xf8c0	/* str Rt,[Rn,+/-#imm]{!} */
+		   && (inst2 & 0x0c00) == 0x0c00
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    {
+	      int regno = bits (inst2, 12, 15);
+	      pv_t addr = regs[bits (insn, 0, 3)];
+
+	      offset = inst2 & 0xff;
+	      if (inst2 & 0x0200)
+		addr = pv_add_constant (addr, offset);
+	      else
+		addr = pv_add_constant (addr, -offset);
+
+	      if (pv_area_store_would_trash (stack, addr))
+		break;
+
+	      pv_area_store (stack, addr, 4, regs[regno]);
+
+	      if (inst2 & 0x0100)
+		regs[bits (insn, 0, 3)] = addr;
+	    }
+
+	  else if ((insn & 0xfff0) == 0xf8c0	/* str.w Rt,[Rn,#imm] */
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    {
+	      int regno = bits (inst2, 12, 15);
+	      pv_t addr;
+
+	      offset = inst2 & 0xfff;
+	      addr = pv_add_constant (regs[bits (insn, 0, 3)], offset);
+
+	      if (pv_area_store_would_trash (stack, addr))
+		break;
+
+	      pv_area_store (stack, addr, 4, regs[regno]);
+	    }
+
+	  else if ((insn & 0xffd0) == 0xf880	/* str{bh}.w Rt,[Rn,#imm] */
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    /* Ignore stores of argument registers to the stack.  */
 	    ;
+
+	  else if ((insn & 0xffd0) == 0xf800	/* str{bh} Rt,[Rn,#+/-imm] */
+		   && (inst2 & 0x0d00) == 0x0c00
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    /* Ignore stores of argument registers to the stack.  */
+	    ;
+
 	  else if ((insn & 0xffd0) == 0xe890	/* ldmia Rn[!], { registers } */
-	      && (inst2 & 0x8000) == 0x0000
-	      && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+		   && (inst2 & 0x8000) == 0x0000
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    /* Ignore block loads from the stack, potentially copying
+	       parameters from memory.  */
 	    ;
+
+	  else if ((insn & 0xffb0) == 0xe950	/* ldrd Rt, Rt2, [Rn, #+/-imm] */
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    /* Similarly ignore dual loads from the stack.  */
+	    ;
+
+	  else if ((insn & 0xfff0) == 0xf850	/* ldr Rt,[Rn,#+/-imm] */
+		   && (inst2 & 0x0d00) == 0x0c00
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    /* Similarly ignore single loads from the stack.  */
+	    ;
+
+	  else if ((insn & 0xfff0) == 0xf8d0	/* ldr.w Rt,[Rn,#imm] */
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    /* Similarly ignore single loads from the stack.  */
+	    ;
+
 	  else if ((insn & 0xfbf0) == 0xf100	/* add.w Rd, Rn, #imm */
 		   && (inst2 & 0x8000) == 0x0000)
-	    /* Since we only recognize this for prologue skipping, do not bother
-	       to compute the constant.  */
-	    regs[bits (inst2, 8, 11)] = regs[bits (insn, 0, 3)];
-	  else if ((insn & 0xfbf0) == 0xf1a0	/* sub.w Rd, Rn, #imm12 */
+	    {
+	      unsigned int imm = ((bits (insn, 10, 10) << 11)
+				  | (bits (inst2, 12, 14) << 8)
+				  | bits (inst2, 0, 7));
+
+	      regs[bits (inst2, 8, 11)]
+		= pv_add_constant (regs[bits (insn, 0, 3)],
+				   thumb_expand_immediate (imm));
+	    }
+
+	  else if ((insn & 0xfbf0) == 0xf200	/* addw Rd, Rn, #imm */
 		   && (inst2 & 0x8000) == 0x0000)
-	    /* Since we only recognize this for prologue skipping, do not bother
-	       to compute the constant.  */
-	    regs[bits (inst2, 8, 11)] = regs[bits (insn, 0, 3)];
-	  else if ((insn & 0xfbf0) == 0xf2a0	/* sub.w Rd, Rn, #imm8 */
+	    {
+	      unsigned int imm = ((bits (insn, 10, 10) << 11)
+				  | (bits (inst2, 12, 14) << 8)
+				  | bits (inst2, 0, 7));
+
+	      regs[bits (inst2, 8, 11)]
+		= pv_add_constant (regs[bits (insn, 0, 3)], imm);
+	    }
+
+	  else if ((insn & 0xfbf0) == 0xf1a0	/* sub.w Rd, Rn, #imm */
 		   && (inst2 & 0x8000) == 0x0000)
-	    /* Since we only recognize this for prologue skipping, do not bother
-	       to compute the constant.  */
-	    regs[bits (inst2, 8, 11)] = regs[bits (insn, 0, 3)];
-	  else if ((insn & 0xff50) == 0xf850	/* ldr.w Rd, [Rn, #imm]{!} */
-		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
-	    ;
-	  else if ((insn & 0xff50) == 0xe950	/* ldrd Rt, Rt2, [Rn, #imm]{!} */
-		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
-	    ;
-	  else if ((insn & 0xff50) == 0xf800	/* strb.w or strh.w */
-		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
-	    ;
+	    {
+	      unsigned int imm = ((bits (insn, 10, 10) << 11)
+				  | (bits (inst2, 12, 14) << 8)
+				  | bits (inst2, 0, 7));
+
+	      regs[bits (inst2, 8, 11)]
+		= pv_add_constant (regs[bits (insn, 0, 3)],
+				   - (CORE_ADDR) thumb_expand_immediate (imm));
+	    }
+
+	  else if ((insn & 0xfbf0) == 0xf2a0	/* subw Rd, Rn, #imm */
+		   && (inst2 & 0x8000) == 0x0000)
+	    {
+	      unsigned int imm = ((bits (insn, 10, 10) << 11)
+				  | (bits (inst2, 12, 14) << 8)
+				  | bits (inst2, 0, 7));
+
+	      regs[bits (inst2, 8, 11)]
+		= pv_add_constant (regs[bits (insn, 0, 3)], - (CORE_ADDR) imm);
+	    }
+
+	  else if ((insn & 0xfbff) == 0xf04f)	/* mov.w Rd, #const */
+	    {
+	      unsigned int imm = ((bits (insn, 10, 10) << 11)
+				  | (bits (inst2, 12, 14) << 8)
+				  | bits (inst2, 0, 7));
+
+	      regs[bits (inst2, 8, 11)]
+		= pv_constant (thumb_expand_immediate (imm));
+	    }
+
+	  else if ((insn & 0xfbf0) == 0xf240)	/* movw Rd, #const */
+	    {
+	      unsigned int imm = ((bits (insn, 0, 3) << 12)
+				  | (bits (insn, 10, 10) << 11)
+				  | (bits (inst2, 12, 14) << 8)
+				  | bits (inst2, 0, 7));
+
+	      regs[bits (inst2, 8, 11)] = pv_constant (imm);
+	    }
+
+	  else if (insn == 0xea5f		/* mov.w Rd,Rm */
+		   && (inst2 & 0xf0f0) == 0)
+	    {
+	      int dst_reg = (inst2 & 0x0f00) >> 8;
+	      int src_reg = inst2 & 0xf;
+	      regs[dst_reg] = regs[src_reg];
+	    }
+
+	  else if ((insn & 0xff7f) == 0xf85f)	/* ldr.w Rt,<label> */
+	    {
+	      /* Constant pool loads.  */
+	      unsigned int constant;
+	      CORE_ADDR loc;
+
+	      offset = bits (insn, 0, 11);
+	      if (insn & 0x0080)
+		loc = start + 4 + offset;
+	      else
+		loc = start + 4 - offset;
+
+	      constant = read_memory_unsigned_integer (loc, 4, byte_order);
+	      regs[bits (inst2, 12, 15)] = pv_constant (constant);
+	    }
+
+	  else if ((insn & 0xff7f) == 0xe95f)	/* ldrd Rt,Rt2,<label> */
+	    {
+	      /* Constant pool loads.  */
+	      unsigned int constant;
+	      CORE_ADDR loc;
+
+	      offset = bits (insn, 0, 7) << 2;
+	      if (insn & 0x0080)
+		loc = start + 4 + offset;
+	      else
+		loc = start + 4 - offset;
+
+	      constant = read_memory_unsigned_integer (loc, 4, byte_order);
+	      regs[bits (inst2, 12, 15)] = pv_constant (constant);
+
+	      constant = read_memory_unsigned_integer (loc + 4, 4, byte_order);
+	      regs[bits (inst2, 8, 11)] = pv_constant (constant);
+	    }
+
+	  else if (thumb2_instruction_changes_pc (insn, inst2))
+	    {
+	      /* Don't scan past anything that might change control flow.  */
+	      break;
+	    }
 	  else
 	    {
-	      /* We don't know what this instruction is.  We're finished
-		 scanning.  NOTE: Recognizing more safe-to-ignore
-		 instructions here will improve support for optimized
-		 code.  */
-	      break;
+	      /* The optimizer might shove anything into the prologue,
+		 so we just skip what we don't recognize.  */
+	      unrecognized_pc = start;
 	    }
 
 	  start += 2;
 	}
+      else if (thumb_instruction_changes_pc (insn))
+	{
+	  /* Don't scan past anything that might change control flow.  */
+	  break;
+	}
       else
 	{
-	  /* We don't know what this instruction is.  We're finished
-	     scanning.  NOTE: Recognizing more safe-to-ignore
-	     instructions here will improve support for optimized
-	     code.  */
-	  break;
+	  /* The optimizer might shove anything into the prologue,
+	     so we just skip what we don't recognize.  */
+	  unrecognized_pc = start;
 	}
 
       start += 2;
@@ -736,10 +1083,13 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
     fprintf_unfiltered (gdb_stdlog, "Prologue scan stopped at %s\n",
 			paddress (gdbarch, start));
 
+  if (unrecognized_pc == 0)
+    unrecognized_pc = start;
+
   if (cache == NULL)
     {
       do_cleanups (back_to);
-      return start;
+      return unrecognized_pc;
     }
 
   if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
@@ -772,7 +1122,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
       cache->saved_regs[i].addr = offset;
 
   do_cleanups (back_to);
-  return start;
+  return unrecognized_pc;
 }
 
 /* Advance the PC across any function entry prologue instructions to
@@ -956,12 +1306,12 @@ thumb_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR prev_pc,
   if (find_pc_partial_function (block_addr, NULL, &prologue_start,
 				&prologue_end))
     {
-      struct symtab_and_line sal = find_pc_line (prologue_start, 0);
-
-      if (sal.line == 0)		/* no line info, use current PC  */
-	prologue_end = prev_pc;
-      else if (sal.end < prologue_end)	/* next line begins after fn end */
-	prologue_end = sal.end;		/* (probably means no prologue)  */
+      /* See comment in arm_scan_prologue for an explanation of
+	 this heuristics.  */
+      if (prologue_end > prologue_start + 64)
+	{
+	  prologue_end = prologue_start + 64;
+	}
     }
   else
     /* We're in the boondocks: we have no idea where the start of the

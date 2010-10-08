@@ -1,4 +1,16 @@
 2010-10-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* arm-tdep.c (thumb_expand_immediate): New function.
+	(thumb_instruction_changes_pc): Likewise.
+	(thumb2_instruction_changes_pc): Likewise.
+	(thumb_analyze_prologue): Handle 32-bit Thumb instructions during
+	prologue parsing.  Improved support for optimized code.
+	(thumb_scan_prologue): Do not reply on line-number information,
+	use same heuristics as arm_scan_prologue insead.
+	(skip_prologue_function): Accept functions
+	"__tls_get_addr" and "__aeabi_read_tp".
+
+2010-10-08  Ulrich Weigand  <uweigand@de.ibm.com>
             Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (thumb_in_function_epilogue_p)
