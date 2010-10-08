@@ -1,3 +1,9 @@
+2010-10-08  Joseph Myers  <joseph@codesourcery.com>
+
+	* nm.c (value_format_64bit): Define appropriately for __MSVCRT__.
+	(set_print_radix): Update for __MSVCRT__ definition of
+	value_format_64bit.
+
 2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix build with -DDEBUG=7
