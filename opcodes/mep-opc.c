@@ -148,7 +148,7 @@ mep_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
 
   /* If the insn has an option bit set that we don't want,
      reject it.  */
-  if (CGEN_INSN_ATTRS (insn)->bool & OPTION_MASK & ~MEP_OMASK)
+  if (CGEN_INSN_ATTRS (insn)->bool_ & OPTION_MASK & ~MEP_OMASK)
     return 0;
 
   /* If attributes are absent, assume no restriction. */

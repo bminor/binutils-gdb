@@ -1,3 +1,19 @@
+2010-10-09  Matt Rice  <ratmice@gmail.com>
+
+	* fr30-desc.h: Regenerate.
+	* frv-desc.h: Regenerate.
+	* ip2k-desc.h: Regenerate.
+	* iq2000-desc.h: Regenerate.
+	* lm32-desc.h: Regenerate.
+	* m32c-desc.h: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mt-desc.h: Regenerate.
+	* openrisc-desc.h: Regenerate.
+	* xc16x-desc.h: Regenerate.
+	* xstormy16-desc.h: Regenerate.
+
 2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix build with -DDEBUG=7
@@ -174,7 +190,7 @@
 	* i386-dis.c (sIv): New.
 	(dis386): Replace Iq with sIv on "pushT".
 	(reg_table): Replace T with {T|} on callT, JcallT, jmpT and JjmpT.
-	(x86_64_table): Replace {T|}/{P|} with P.  
+	(x86_64_table): Replace {T|}/{P|} with P.
 	(putop): Add 'w' to 'T'/'P' if needed for Intel syntax.
 	(OP_sI): Update v_mode.  Remove w_mode.
 
