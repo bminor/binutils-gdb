@@ -163,7 +163,7 @@ byte_get_big_endian (unsigned char *field, int size)
     }
 }
 
-static dwarf_vma
+dwarf_vma
 byte_get_signed (unsigned char *field, int size)
 {
   dwarf_vma x = byte_get (field, size);

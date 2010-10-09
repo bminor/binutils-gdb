@@ -101,6 +101,7 @@ typedef struct
 debug_info;
 
 extern dwarf_vma (*byte_get) (unsigned char *, int);
+extern dwarf_vma byte_get_signed (unsigned char *, int);
 extern dwarf_vma byte_get_little_endian (unsigned char *, int);
 extern dwarf_vma byte_get_big_endian (unsigned char *, int);
 

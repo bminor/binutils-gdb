@@ -272,7 +272,8 @@ static void (* byte_put) (unsigned char *, bfd_vma, int);
 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
 
-#define BYTE_GET(field)	byte_get (field, sizeof (field))
+#define BYTE_GET(field)		byte_get (field, sizeof (field))
+#define BYTE_GET_SIGNED(field)	byte_get_signed (field, sizeof (field))
 
 #define GET_ELF_SYMBOLS(file, section)			\
   (is_32bit_elf ? get_32bit_elf_symbols (file, section)	\
@@ -734,7 +735,7 @@ slurp_rela_relocs (FILE * file,
 	{
 	  relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
 	  relas[i].r_info   = BYTE_GET (erelas[i].r_info);
-	  relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
+	  relas[i].r_addend = BYTE_GET_SIGNED (erelas[i].r_addend);
 	}
 
       free (erelas);
@@ -764,7 +765,7 @@ slurp_rela_relocs (FILE * file,
 	{
 	  relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
 	  relas[i].r_info   = BYTE_GET (erelas[i].r_info);
-	  relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
+	  relas[i].r_addend = BYTE_GET_SIGNED (erelas[i].r_addend);
 
 	  /* The #ifdef BFD64 below is to prevent a compile time
 	     warning.  We know that if we do not have a 64 bit data
@@ -1410,12 +1411,12 @@ dump_relocations (FILE * file,
 
 	      if (is_rela)
 		{
-		  long off = (long) (bfd_signed_vma) rels[i].r_addend;
+		  bfd_signed_vma off = rels[i].r_addend;
 
 		  if (off < 0)
-		    printf (" - %lx", - off);
+		    printf (" - %" BFD_VMA_FMT "x", - off);
 		  else
-		    printf (" + %lx", off);
+		    printf (" + %" BFD_VMA_FMT "x", off);
 		}
 	    }
 	}

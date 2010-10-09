@@ -1,3 +1,13 @@
+2010-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (byte_get_signed): Make it extern.
+
+	* dwarf.h (byte_get_signed): New.
+
+	* readelf.c (BYTE_GET_SIGNED): New.
+	(slurp_rela_relocs): Use BYTE_GET_SIGNED on r_addend.
+	(dump_relocations): Properly dump r_addend.
+
 2010-10-08  Joseph Myers  <joseph@codesourcery.com>
 
 	* nm.c (value_format_64bit): Define appropriately for __MSVCRT__.
