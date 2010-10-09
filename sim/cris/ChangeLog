@@ -1,3 +1,7 @@
+2010-10-09  Alan Modra  <amodra@gmail.com>
+
+	* cris-desc.h: Regenerate.
+
 2010-10-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* traps.c (cris_break_13_handler): Pass lseek
