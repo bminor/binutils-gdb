@@ -1,5 +1,9 @@
 2010-10-11  Alan Modra  <amodra@gmail.com>
 
+	* ld-elf/orphan-region.d: xfail frv-*-*.
+
+2010-10-11  Alan Modra  <amodra@gmail.com>
+
 	* ld-mmix/sec-3.d: Adjust for 2010-09-29 orphan change.
 	* ld-mmix/sec-7m.d: Likewise.
 
