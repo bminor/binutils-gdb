@@ -23,6 +23,9 @@ openlib (const char *filename)
 {
   void *h = dlopen (filename, RTLD_LAZY);
 
+  if (filename == NULL)
+    return 0;
+
   if (h == NULL)
     return 0;
   if (dlclose (h) != 0)
@@ -33,5 +36,8 @@ openlib (const char *filename)
 int
 main (void)
 {
+  /* Dummy call to get the function always compiled in.  */
+  openlib (NULL);
+
   return 0;
 }

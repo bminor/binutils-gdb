@@ -1,5 +1,10 @@
 2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/infcall-dlopen.cc (openlib): Support NULL FILENAME.
+	(main): Make openlib dummy call.
+
+2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix missing _start PIE relocation on ppc64 due to stop on dl_main.
 	* break-interp.exp (reach): Move the core body ...
 	(reach_1): ... here.  Use stop-on-solib-events for _dl_debug_state.
