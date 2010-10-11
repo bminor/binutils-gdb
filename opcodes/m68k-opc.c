@@ -1,6 +1,6 @@
 /* Opcode table for m680[012346]0/m6888[12]/m68851/mcf5200.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2003, 2004, 2005, 2006, 2007, 2009
+   2000, 2001, 2003, 2004, 2005, 2006, 2007, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
@@ -528,6 +528,9 @@ const struct m68k_opcode m68k_opcodes[] =
 {"fatanhx", 4,	two(0xF000, 0x000D), two(0xF1C0, 0xE07F), "IiF8F7", mfloat },
 {"fatanhx", 4,	two(0xF000, 0x480D), two(0xF1C0, 0xFC7F), "Ii;xF7", mfloat },
 {"fatanhx", 4,	two(0xF000, 0x000D), two(0xF1C0, 0xE07F), "IiFt",   mfloat },
+
+/* This is the same as `fbf .+2'.  */
+{"fnop", 4,	two(0xF280, 0x0000), two(0xFFFF, 0xFFFF), "Ii", mfloat | cfloat },
 
 {"fbeq", 2,	one(0xF081),		one(0xF1FF), "IdBW", mfloat | cfloat },
 {"fbf", 2,	one(0xF080),		one(0xF1FF), "IdBW", mfloat | cfloat },
@@ -1083,8 +1086,6 @@ const struct m68k_opcode m68k_opcodes[] =
 {"fdnegx", 4,	two(0xF000, 0x005E), two(0xF1C0, 0xE07F), "IiF8F7", m68040up },
 {"fdnegx", 4,	two(0xF000, 0x485E), two(0xF1C0, 0xFC7F), "Ii;xF7", m68040up },
 {"fdnegx", 4,	two(0xF000, 0x005E), two(0xF1C0, 0xE07F), "IiFt",   m68040up },
-
-{"fnop", 4,	two(0xF280, 0x0000), two(0xFFFF, 0xFFFF), "Ii", mfloat | cfloat },
 
 {"fremb", 4,	two(0xF000, 0x5825), two(0xF1C0, 0xFC7F), "Ii;bF7", mfloat },
 {"fremd", 4,	two(0xF000, 0x5425), two(0xF1C0, 0xFC7F), "Ii;FF7", mfloat },

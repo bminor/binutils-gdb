@@ -1,3 +1,7 @@
+2010-10-12  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* m68k-opc.c (m68k_opcodes): Move fnop before fbf.
+
 2010-10-11  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.c: Make the instruction masks for the load/store on

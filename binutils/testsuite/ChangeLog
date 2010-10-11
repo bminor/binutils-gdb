@@ -1,3 +1,8 @@
+2010-10-12  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* binutils-all/m68k/objdump.exp: Add fnop test.
+	* binutils-all/m68k/fnop.s: New file.
+
 2010-09-29  Alan Modra  <amodra@gmail.com>
 
 	* lib/utils-lib.exp (is_elf_format): Merge with gas and ld versions.
