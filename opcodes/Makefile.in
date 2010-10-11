@@ -69,8 +69,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libopcodes_a_AR = $(AR) $(ARFLAGS)
 libopcodes_a_LIBADD =
-libopcodes_a_SOURCES = libopcodes.c
-libopcodes_a_OBJECTS = libopcodes.$(OBJEXT)
+am_libopcodes_a_OBJECTS =
+libopcodes_a_OBJECTS = $(am_libopcodes_a_OBJECTS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -116,7 +116,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = libopcodes.c $(libopcodes_la_SOURCES) \
+SOURCES = $(libopcodes_a_SOURCES) $(libopcodes_la_SOURCES) \
 	$(EXTRA_libopcodes_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
@@ -542,6 +542,7 @@ EXTRA_libopcodes_la_SOURCES = $(LIBOPCODES_CFILES)
 # programs that use libopcodes.a simultaneously.  This is a hack which
 # should be removed if everything else starts using libtool.  FIXME.
 noinst_LIBRARIES = libopcodes.a
+libopcodes_a_SOURCES = 
 POTFILES = $(HFILES) $(CFILES)
 CLEANFILES = \
 	stamp-ip2k stamp-m32c stamp-m32r stamp-fr30 stamp-frv \
@@ -765,7 +766,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-ibld.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-opc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libopcodes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lm32-asm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lm32-desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lm32-dis.Plo@am__quote@

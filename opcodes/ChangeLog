@@ -1,3 +1,9 @@
+2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Jiang Jilin  <freephp@gmail.com>
+
+	* Makefile.am (libopcodes_a_SOURCES): New as empty.
+	* Makefile.in: Regenerate.
+
 2010-10-09  Matt Rice  <ratmice@gmail.com>
 
 	* fr30-desc.h: Regenerate.

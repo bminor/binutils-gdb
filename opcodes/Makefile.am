@@ -287,6 +287,7 @@ EXTRA_libopcodes_la_SOURCES = $(LIBOPCODES_CFILES)
 # should be removed if everything else starts using libtool.  FIXME.
 
 noinst_LIBRARIES = libopcodes.a
+libopcodes_a_SOURCES =
 
 stamp-lib: libopcodes.la
 	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
