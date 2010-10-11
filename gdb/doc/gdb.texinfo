@@ -20789,7 +20789,7 @@ this value, thus it is not available for fetching from the inferior.
 
 @defivar Value type
 The type of this @code{gdb.Value}.  The value of this attribute is a
-@code{gdb.Type} object.
+@code{gdb.Type} object (@pxref{Types In Python}).
 @end defivar
 
 @defivar Value dynamic_type
