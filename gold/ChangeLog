@@ -1,3 +1,8 @@
+2010-10-11  Cary Coutant  <ccoutant@google.com>
+
+	* options.h (class General_options): Redefine -z lazy as an alias for
+	the negation of -z now.
+
 2010-10-11  Ian Lance Taylor  <iant@google.com>
 
 	* resolve.cc (symbol_to_bits): Report the value of the unsupported

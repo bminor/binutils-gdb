@@ -1097,9 +1097,9 @@ class General_options
   DEFINE_bool(interpose, options::DASH_Z, '\0', false,
 	      N_("Mark object to interpose all DSOs but executable"),
 	      NULL);
-  DEFINE_bool(lazy, options::DASH_Z, '\0', false,
-	      N_("Mark object for lazy runtime binding (default)"),
-	      NULL);
+  DEFINE_bool_alias(lazy, now, options::DASH_Z, '\0',
+		    N_("Mark object for lazy runtime binding (default)"),
+		    NULL, true);
   DEFINE_bool(loadfltr, options::DASH_Z, '\0', false,
 	      N_("Mark object requiring immediate process"),
 	      NULL);
