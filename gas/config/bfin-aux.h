@@ -56,6 +56,7 @@ INSTR_T bfin_gen_cactrl (REG_T, int, int);
 INSTR_T bfin_gen_progctrl (int, int);
 INSTR_T bfin_gen_loopsetup (Expr_Node *, REG_T, int, Expr_Node *, REG_T);
 INSTR_T bfin_gen_loop (Expr_Node *, REG_T, int, REG_T);
+void bfin_loop_attempt_create_label (Expr_Node *, int);
 void bfin_loop_beginend (Expr_Node *, int);
 INSTR_T bfin_gen_pushpopmultiple (int, int, int, int, int);
 INSTR_T bfin_gen_pushpopreg (REG_T, int);

@@ -1905,6 +1905,15 @@ bfin_gen_loop (Expr_Node *exp, REG_T reg, int rop, REG_T preg)
 }
 
 void
+bfin_loop_attempt_create_label (Expr_Node *exp, int is_begin)
+{
+  char *name;
+  name = fb_label_name (exp->value.i_value, is_begin);
+  exp->value.s_value = xstrdup (name);
+  exp->type = Expr_Node_Reloc;
+}
+
+void
 bfin_loop_beginend (Expr_Node *exp, int begin)
 {
   const char *loopsym;
