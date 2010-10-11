@@ -1,3 +1,10 @@
+2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix results of prelinked PIEs on ppc*.
+	* gdb.base/break-interp.exp (reach, test_core, test_attach_gdb):
+	Accept also DISPLACEMENT "PRESENT".
+	(main): Replace "ZERO" displacements by "PRESENT".
+
 2010-10-08  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/oranking.exp: New test.

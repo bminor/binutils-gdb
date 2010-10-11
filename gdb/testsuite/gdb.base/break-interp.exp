@@ -109,7 +109,9 @@ proc strip_debug {dest} {
 }
 
 # `runto' does not check we stopped really at the function we specified.
-# DISPLACEMENT can be "NONE", "ZERO" or "NONZERO"
+# DISPLACEMENT can be "NONE" for no message to be present, "ZERO" for
+# displacement of 0 bytes to be present, "NONZERO" for displacement of non-0
+# bytes to be present and "PRESENT" if both "ZERO" and "NONZERO" are valid.
 proc reach {func command displacement} {
     global gdb_prompt expect_out
 
@@ -128,7 +130,7 @@ proc reach {func command displacement} {
 		} else {
 		    set case "NONZERO"
 		}
-		if {$displacement == $case} {
+		if {$displacement == $case || $displacement == "PRESENT"} {
 		    pass $test_displacement
 		    set displacement "FOUND-$displacement"
 		} else {
@@ -184,7 +186,7 @@ proc test_core {file displacement} {
 	    } else {
 		set case "NONZERO"
 	    }
-	    if {$displacement == $case} {
+	    if {$displacement == $case || $displacement == "PRESENT"} {
 		pass $test_displacement
 		set displacement "FOUND-$displacement"
 	    } else {
@@ -241,7 +243,7 @@ proc test_attach_gdb {file pid displacement prefix} {
 	    } else {
 		set case "NONZERO"
 	    }
-	    if {$displacement == $case} {
+	    if {$displacement == $case || $displacement == "PRESENT"} {
 		pass $test_displacement
 		set displacement "FOUND-$displacement"
 	    } else {
@@ -428,7 +430,7 @@ proc test_ld {file ifmain trynosym displacement} {
 		} else {
 		    set case "NONZERO"
 		}
-		if {$displacement == $case} {
+		if {$displacement == $case || $displacement == "PRESENT"} {
 		    pass $test_displacement
 		    set displacement "FOUND-$displacement"
 		} else {
@@ -533,7 +535,10 @@ foreach ldprelink {NO YES} {
 	if {$ldprelink == "NO"} {
 	    set displacement "NONZERO"
 	} else {
-	    set displacement "ZERO"
+	    # x86* kernel loads prelinked PIE binary at its prelinked address
+	    # but ppc* kernel loads it at a random address.  prelink normally
+	    # skips PIE binaries during the system scan.
+	    set displacement "PRESENT"
 	}
 	test_ld $interp 0 [expr {$ldsepdebug == "NO"}] $displacement
 
@@ -582,7 +587,11 @@ foreach ldprelink {NO YES} {
 		    } elseif {$binprelink == "NO"} {
 			set displacement "NONZERO"
 		    } else {
-			set displacement "ZERO"
+			# x86* kernel loads prelinked PIE binary at its
+			# prelinked address but ppc* kernel loads it at
+			# a random address.  prelink normally skips PIE
+			# binaries during the system scan.
+			set displacement "PRESENT"
 		    }
 
 		    if {[prelink$binprelink $relink_args [file tail $exec]]
