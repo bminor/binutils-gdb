@@ -39,6 +39,7 @@ int yylex (void);
    and <INITIAL> would match some keyword rules only with
    initial.  */
 %s KEYWORD
+%s FLAGS
 
 %%
 [sS][fF][tT][rR][eE][sS][eE][tT]        _REG.regno = REG_sftreset;  return REG;
@@ -47,8 +48,8 @@ int yylex (void);
 [hH][wW][eE][rR][rR][cC][aA][uU][sS][eE] _REG.regno = REG_hwerrcause; return REG;
 [eE][xX][cC][aA][uU][sS][eE]            _REG.regno = REG_excause;   return REG;
 [eE][mM][uU][cC][aA][uU][sS][eE]	_REG.regno = REG_emucause;  return REG;
-[zZ]                                    return Z;
-[xX]                                    return X;
+<FLAGS>[zZ]                             return Z;
+<FLAGS>[xX]                             return X;
 [wW]32                                  yylval.value = M_W32; return MMOD;
 [wW]                                    return W;
 [vV][iI][tT]_[mM][aA][xX]               return VIT_MAX;
@@ -58,8 +59,8 @@ int yylex (void);
 [tT][hH]                                return TH;
 [tT][fF][uU]                            yylval.value = M_TFU; return MMOD;
 [tT][eE][sS][tT][sS][eE][tT]            return TESTSET;
-[tT]                                    yylval.value = M_T; return MMOD;
-[sS]                                                        return S;
+<FLAGS>[tT]                             yylval.value = M_T; return MMOD;
+<FLAGS>[sS]                             return S;
 [sS][yY][sS][cC][fF][gG]       _REG.regno = REG_SYSCFG; return REG;
 [sS][tT][iI]                            return STI;
 [sS][sS][yY][nN][cC]                    return SSYNC;
@@ -122,7 +123,7 @@ int yylex (void);
 [mM][0-3]"."[lLhH]  return parse_halfreg (&yylval.reg, T_REG_M, yytext);
 [mM][0-3]           return parse_reg (&yylval.reg, T_REG_M, yytext);
 
-[mM]                                    return M;
+<FLAGS>[mM]                             return M;
 [lL][tT]                                return LT;
 [lL][sS][hH][iI][fF][tT]                return LSHIFT;
 [lL][sS][eE][tT][uU][pP]                return LSETUP;
@@ -263,8 +264,8 @@ int yylex (void);
 "<<="                   return _LESS_LESS_ASSIGN;
 "<<"                    return LESS_LESS;
 "<"                     return LESS_THAN;
-"("                     return LPAREN;
-")"                     return RPAREN;
+"("                     BEGIN(FLAGS); return LPAREN;
+")"                     BEGIN(INITIAL); return RPAREN;
 ":"                     return COLON;
 "/"                     return SLASH;
 "-="                    return _MINUS_ASSIGN;
