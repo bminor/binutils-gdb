@@ -1,16 +1,16 @@
-2010-09-11  Steve Kilbane  <steve.kilbane@analog.com>
+2010-10-11  Steve Kilbane  <steve.kilbane@analog.com>
 
 	* config/bfin-lex.l (FLAGS): New state.
 	(X, Z, S, M, T): Require FLAGS state.
 	("(", ")"): Start/stop FLAGS state.
 
-2010-09-11  David Gibson  <david.gibson@analog.com>
+2010-10-11  David Gibson  <david.gibson@analog.com>
 
 	* config/bfin-aux.h (bfin_loop_attempt_create_label): New prototype.
 	* config/bfin-parse.y (LOOP_BEGIN, LOOP_END): Handle numeric labels.
 	* config/tc-bfin.c (bfin_loop_attempt_create_label): New funtion.
 
-2010-09-11  David Gibson  <david.gibson@analog.com>
+2010-10-11  David Gibson  <david.gibson@analog.com>
 
 	* config/tc-bfin.c (bfin_gen_loop): Check symbol before removing.
 
