@@ -7229,12 +7229,12 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	  /* A branch to an undefined weak symbol is turned into a jump to
 	     the next instruction unless a PLT entry will be created.
-	     Do the same for local undefined symbols.
+	     Do the same for local undefined symbols (but not for STN_UNDEF).
 	     The jump to the next instruction is optimized as a NOP depending
 	     on the architecture.  */
 	  if (h ? (h->root.type == bfd_link_hash_undefweak
 		   && !(splt != NULL && h->plt.offset != (bfd_vma) -1))
-	      : bfd_is_und_section (sym_sec))
+	      : r_symndx != STN_UNDEF && bfd_is_und_section (sym_sec))
 	    {
 	      value = (bfd_get_32 (input_bfd, hit_data) & 0xf0000000);
 
@@ -8908,9 +8908,11 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	     undefined symbol.  This is a daft object file, but we
 	     should at least do something about it.  V4BX & NONE
 	     relocations do not use the symbol and are explicitly
-	     allowed to use the undefined symbol, so allow those.  */
+	     allowed to use the undefined symbol, so allow those.
+	     Likewise for relocations against STN_UNDEF.  */
 	  if (r_type != R_ARM_V4BX
 	      && r_type != R_ARM_NONE
+	      && r_symndx != STN_UNDEF
 	      && bfd_is_und_section (sec)
 	      && ELF_ST_BIND (sym->st_info) != STB_WEAK)
 	    {

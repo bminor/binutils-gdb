@@ -1,3 +1,8 @@
+2010-10-11  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate)
+	(elf32_arm_relocate_section): Handle relocations against STN_UNDEF.
+
 2010-10-11  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* elflink.c (_bfd_elf_link_output_relocs): Delete unused variable
