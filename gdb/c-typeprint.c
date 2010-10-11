@@ -321,7 +321,8 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     }
 }
 
-/* Print out "const" and "volatile" attributes.
+/* Print out "const" and "volatile" attributes,
+   and address space id if present.
    TYPE is a pointer to the type being printed out.
    STREAM is the output destination.
    NEED_SPACE = 1 indicates an initial white space is needed */
