@@ -1844,6 +1844,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  Elf32_External_Phdr *phdr2p;
 		  gdb_byte *buf_vaddr_p, *buf_paddr_p;
 		  CORE_ADDR vaddr, paddr;
+		  asection *plt2_asect;
 
 		  phdrp = &((Elf32_External_Phdr *) buf)[i];
 		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
@@ -1868,6 +1869,34 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
 		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
 		    continue;
+
+		  /* prelink can convert .plt SHT_NOBITS to SHT_PROGBITS.  */
+		  plt2_asect = bfd_get_section_by_name (exec_bfd, ".plt");
+		  if (plt2_asect)
+		    {
+		      int content2;
+		      gdb_byte *buf_filesz_p = (gdb_byte *) &phdrp->p_filesz;
+		      CORE_ADDR filesz;
+
+		      content2 = (bfd_get_section_flags (exec_bfd, plt2_asect)
+				  & SEC_HAS_CONTENTS) != 0;
+
+		      filesz = extract_unsigned_integer (buf_filesz_p, 4,
+							 byte_order);
+
+		      /* PLT2_ASECT is from on-disk file (exec_bfd) while
+			 FILESZ is from the in-memory image.  */
+		      if (content2)
+			filesz += bfd_get_section_size (plt2_asect);
+		      else
+			filesz -= bfd_get_section_size (plt2_asect);
+
+		      store_unsigned_integer (buf_filesz_p, 4, byte_order,
+					      filesz);
+
+		      if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
+			continue;
+		    }
 
 		  ok = 0;
 		  break;
@@ -1921,6 +1950,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  Elf64_External_Phdr *phdr2p;
 		  gdb_byte *buf_vaddr_p, *buf_paddr_p;
 		  CORE_ADDR vaddr, paddr;
+		  asection *plt2_asect;
 
 		  phdrp = &((Elf64_External_Phdr *) buf)[i];
 		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
@@ -1945,6 +1975,34 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
 		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
 		    continue;
+
+		  /* prelink can convert .plt SHT_NOBITS to SHT_PROGBITS.  */
+		  plt2_asect = bfd_get_section_by_name (exec_bfd, ".plt");
+		  if (plt2_asect)
+		    {
+		      int content2;
+		      gdb_byte *buf_filesz_p = (gdb_byte *) &phdrp->p_filesz;
+		      CORE_ADDR filesz;
+
+		      content2 = (bfd_get_section_flags (exec_bfd, plt2_asect)
+				  & SEC_HAS_CONTENTS) != 0;
+
+		      filesz = extract_unsigned_integer (buf_filesz_p, 8,
+							 byte_order);
+
+		      /* PLT2_ASECT is from on-disk file (exec_bfd) while
+			 FILESZ is from the in-memory image.  */
+		      if (content2)
+			filesz += bfd_get_section_size (plt2_asect);
+		      else
+			filesz -= bfd_get_section_size (plt2_asect);
+
+		      store_unsigned_integer (buf_filesz_p, 8, byte_order,
+					      filesz);
+
+		      if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
+			continue;
+		    }
 
 		  ok = 0;
 		  break;

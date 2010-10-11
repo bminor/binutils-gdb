@@ -1,3 +1,9 @@
+2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix attaching to re-prelinked executables on ppc64.
+	* solib-svr4.c (svr4_exec_displacement): New variable plt2_asect,
+	initialize it, try to adjust FILESZ field by it.
+
 2010-10-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* tracepoint.c (merge_uploaded_trace_state_variables): Only print
