@@ -2341,14 +2341,12 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
   Elf_Internal_Rela *irelaend;
   bfd_byte *erel;
   struct bfd_elf_section_reloc_data *output_reldata;
-  Elf_Internal_Shdr *output_rel_hdr;
   asection *output_section;
   const struct elf_backend_data *bed;
   void (*swap_out) (bfd *, const Elf_Internal_Rela *, bfd_byte *);
   struct bfd_elf_section_data *esdo;
 
   output_section = input_section->output_section;
-  output_rel_hdr = NULL;
 
   bed = get_elf_backend_data (output_bfd);
   esdo = elf_section_data (output_section);

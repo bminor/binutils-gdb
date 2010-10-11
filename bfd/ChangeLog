@@ -1,3 +1,8 @@
+2010-10-11  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* elflink.c (_bfd_elf_link_output_relocs): Delete unused variable
+	"output_rel_hdr".
+
 2010-10-09  John Tytgat  <john@bass-software.com>
 
 	* reloc.c (BFD_RELOC_ARM_HVC): Add.
