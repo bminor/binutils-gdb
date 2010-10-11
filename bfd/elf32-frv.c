@@ -2770,7 +2770,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
       struct elf_link_hash_entry *h;
       bfd_vma relocation;
       bfd_reloc_status_type r;
-      const char * name = NULL;
+      const char *name;
       int r_type;
       asection *osec;
       struct frvfdpic_relocs_info *picrel;
@@ -2796,7 +2796,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
+	  if (name == NULL || name[0] == 0)
+	    name = bfd_section_name (input_bfd, sec);
 	}
       else
 	{
@@ -2808,6 +2809,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
 	  osec = sec;
+	  name = h->root.root.string;
 	}
 
       if (sec != NULL && elf_discarded_section (sec))
@@ -5896,7 +5898,8 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 				       FALSE, FALSE, TRUE);
 	  if (hend
 	      && (hend->type == bfd_link_hash_defined
-		  || hend->type == bfd_link_hash_defweak))
+		  || hend->type == bfd_link_hash_defweak)
+	      && hend->u.def.section->output_section != NULL)
 	    {
 	      bfd_vma value =
 		frvfdpic_gotfixup_section (info)->output_section->vma

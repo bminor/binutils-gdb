@@ -1,3 +1,9 @@
+2010-10-11  Alan Modra  <amodra@gmail.com>
+
+	* elf32-frv.c (elf32_frv_relocate_section): Set "name" for global syms.
+	(elf32_frvfdpic_finish_dynamic_sections): Don't crash on
+	__ROFIXUP_END__ defined in shared lib.
+
 2010-10-11  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate)
