@@ -108,47 +108,87 @@ proc strip_debug {dest} {
     }
 }
 
+# Implementation of reach.
+
+proc reach_1 {func command displacement} {
+    global gdb_prompt expect_out
+
+    if {$func == "_dl_debug_state"} {
+	# Breakpoint on _dl_debug_state can have problems due to its overlap
+	# with the existing internal breakpoint from GDB.
+	gdb_test_no_output "set stop-on-solib-events 1"
+    } elseif {! [gdb_breakpoint $func allow-pending]} {
+	return
+    }
+
+    set test "reach"
+    set test_displacement "seen displacement message as $displacement"
+    set debug_state_count 0
+    gdb_test_multiple $command $test {
+	-re "Using PIE \\(Position Independent Executable\\) displacement (0x\[0-9a-f\]+) " {
+	    # Missing "$gdb_prompt $" is intentional.
+	    if {$expect_out(1,string) == "0x0"} {
+		set case "ZERO"
+	    } else {
+		set case "NONZERO"
+	    }
+	    if {$displacement == $case || $displacement == "PRESENT"} {
+		pass $test_displacement
+		set displacement "FOUND-$displacement"
+	    } else {
+		fail $test_displacement
+	    }
+	    exp_continue
+	}
+	-re "Breakpoint \[0-9\]+, \\.?$func \\(.*\\) at .*:\[0-9\]+\r\n.*$gdb_prompt $" {
+	    if {$func == "_dl_debug_state"} {
+		fail $test
+	    } else {
+		pass $test
+	    }
+	}
+	-re "Breakpoint \[0-9\]+, \[0-9xa-f\]+ in \\.?$func \\(\\).*\r\n$gdb_prompt $" {
+	    if {$func == "_dl_debug_state"} {
+		fail $test
+	    } else {
+		pass $test
+	    }
+	}
+	-re "Stopped due to shared library event\r\n$gdb_prompt $" {
+	    if {$func == "_dl_debug_state"} {
+		if {$debug_state_count == 0} {
+		    # First stop does not yet relocate the _start function
+		    # descriptor on ppc64.
+		    set debug_state_count 1
+		    send_gdb "continue\n"
+		    exp_continue
+		} else {
+		    pass $test
+		}
+	    } else {
+		fail $test
+	    }
+	}
+    }
+    if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
+	fail $test_displacement
+    }
+
+    if {$func == "_dl_debug_state"} {
+	gdb_test_no_output "set stop-on-solib-events 0"
+    }
+}
+
 # `runto' does not check we stopped really at the function we specified.
 # DISPLACEMENT can be "NONE" for no message to be present, "ZERO" for
 # displacement of 0 bytes to be present, "NONZERO" for displacement of non-0
 # bytes to be present and "PRESENT" if both "ZERO" and "NONZERO" are valid.
 proc reach {func command displacement} {
-    global gdb_prompt expect_out
-
     global pf_prefix
     set old_ldprefix $pf_prefix
     lappend pf_prefix "reach-$func:"
 
-    if [gdb_breakpoint $func allow-pending] {
-	set test "reach"
-	set test_displacement "seen displacement message as $displacement"
-	gdb_test_multiple $command $test {
-	    -re "Using PIE \\(Position Independent Executable\\) displacement (0x\[0-9a-f\]+) " {
-		# Missing "$gdb_prompt $" is intentional.
-		if {$expect_out(1,string) == "0x0"} {
-		    set case "ZERO"
-		} else {
-		    set case "NONZERO"
-		}
-		if {$displacement == $case || $displacement == "PRESENT"} {
-		    pass $test_displacement
-		    set displacement "FOUND-$displacement"
-		} else {
-		    fail $test_displacement
-		}
-		exp_continue
-	    }
-	    -re "Breakpoint \[0-9\]+, \\.?$func \\(.*\\) at .*:\[0-9\]+\r\n.*$gdb_prompt $" {
-		pass $test
-	    }
-	    -re "Breakpoint \[0-9\]+, \[0-9xa-f\]+ in \\.?$func \\(\\).*\r\n$gdb_prompt $" {
-		pass $test
-	    }
-	}
-	if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
-	    fail $test_displacement
-	}
-    }
+    reach_1 $func $command $displacement
 
     set pf_prefix $old_ldprefix
 }
@@ -344,9 +384,18 @@ proc test_ld {file ifmain trynosym displacement} {
     # prevents that from happening.  So turn it off.
     gdb_test "set disable-randomization off"
 
-    reach "dl_main" "run segv" $displacement
+    if $ifmain {
+	gdb_test_no_output "set args segv"
+    } else {
+	global objdir binfile_test
 
-    gdb_test "bt" "#0 +\[^\r\n\]*\\mdl_main\\M.*" "dl bt"
+	# ld.so needs some executable to run to reach _dl_debug_state.
+	gdb_test_no_output "set args ${objdir}/${subdir}/$binfile_test"
+    }
+
+    reach "_dl_debug_state" "run" $displacement
+
+    gdb_test "bt" "#0 +\[^\r\n\]*\\m_dl_debug_state\\M.*" "dl bt"
 
     if $ifmain {
 	reach "main" continue "NONE"
@@ -358,7 +407,7 @@ proc test_ld {file ifmain trynosym displacement} {
 
     # Try re-run if the new PIE displacement takes effect.
     gdb_test "kill" "" "kill" {Kill the program being debugged\? \(y or n\) } "y"
-    reach "dl_main" "run segv" $displacement
+    reach "_dl_debug_state" "run" $displacement
 
     if $ifmain {
 	test_core $file $displacement
@@ -391,7 +440,7 @@ proc test_ld {file ifmain trynosym displacement} {
     gdb_test "exec-file $file" "exec-file $escapedfile" "load"
 
     if $ifmain {
-	reach "dl_main" run $displacement
+	reach "_dl_debug_state" run $displacement
 
 	set test "info files"
 	set entrynohex ""

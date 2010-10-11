@@ -1,5 +1,13 @@
 2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix missing _start PIE relocation on ppc64 due to stop on dl_main.
+	* break-interp.exp (reach): Move the core body ...
+	(reach_1): ... here.  Use stop-on-solib-events for _dl_debug_state.
+	(test_ld): Provide always real argument, even to the linker.  Replace
+	dl_main by _dl_debug_state.
+
+2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix results of prelinked PIEs on ppc*.
 	* gdb.base/break-interp.exp (reach, test_core, test_attach_gdb):
 	Accept also DISPLACEMENT "PRESENT".
