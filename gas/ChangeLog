@@ -1,3 +1,7 @@
+2010-09-11  David Gibson  <david.gibson@analog.com>
+
+	* config/tc-bfin.c (bfin_gen_loop): Check symbol before removing.
+
 2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix build with -DDEBUG=7

@@ -1874,6 +1874,7 @@ bfin_gen_loop (Expr_Node *exp, REG_T reg, int rop, REG_T preg)
   char *lbeginsym, *lendsym;
   Expr_Node_Value lbeginval, lendval;
   Expr_Node *lbegin, *lend;
+  symbolS *sym;
 
   loopsym = exp->value.s_value;
   lbeginsym = (char *) xmalloc (strlen (loopsym) + strlen ("__BEGIN") + 5);
@@ -1896,9 +1897,11 @@ bfin_gen_loop (Expr_Node *exp, REG_T reg, int rop, REG_T preg)
   lbegin = Expr_Node_Create (Expr_Node_Reloc, lbeginval, NULL, NULL);
   lend   = Expr_Node_Create (Expr_Node_Reloc, lendval, NULL, NULL);
 
-  symbol_remove (symbol_find (loopsym), &symbol_rootP, &symbol_lastP);
+  sym = symbol_find(loopsym);
+  if (!S_IS_LOCAL (sym) || (S_IS_LOCAL (sym) && !symbol_used_p (sym)))
+    symbol_remove (sym, &symbol_rootP, &symbol_lastP);
 
-  return bfin_gen_loopsetup(lbegin, reg, rop, lend, preg);
+  return bfin_gen_loopsetup (lbegin, reg, rop, lend, preg);
 }
 
 void
