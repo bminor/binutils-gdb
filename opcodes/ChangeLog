@@ -1,3 +1,9 @@
+2010-10-11  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.c: Make the instruction masks for the load/store on
+	condition instructions to cover the condition code mask as well.
+	* s390-opc.txt: lgoc -> locg and stgoc -> stocg.
+
 2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Jiang Jilin  <freephp@gmail.com>
 
