@@ -195,7 +195,7 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
     default:
       // Any target which wants to handle STB_LOOS, etc., needs to
       // define a resolve method.
-      gold_error(_("unsupported symbol binding"));
+      gold_error(_("unsupported symbol binding %d"), static_cast<int>(binding));
       bits = global_flag;
     }
 

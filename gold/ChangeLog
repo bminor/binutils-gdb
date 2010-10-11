@@ -1,3 +1,8 @@
+2010-10-11  Ian Lance Taylor  <iant@google.com>
+
+	* resolve.cc (symbol_to_bits): Report the value of the unsupported
+	binding.
+
 2010-10-06  Nick Clifton  <nickc@redhat.com>
 
 	* script-sections.cc(class Memory_region): Remove
