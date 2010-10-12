@@ -843,6 +843,7 @@ static struct serial_ops dos_ops =
   0,
   dos_open,
   dos_close,
+  NULL,				/* fdopen, not implemented */
   dos_readchar,
   dos_write,
   dos_noop,			/* flush output */
