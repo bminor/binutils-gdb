@@ -1,3 +1,12 @@
+2010-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/break-interp.exp: Use ldlags for linking flags.
+	* gdb.base/prelink.exp: Likewise.
+	* gdb.base/solib-nodir.exp: Likewise.
+	* lib/gdb.exp (gdb_compile) <*-*-openbsd*>
+	(gdb_compile) <shlib_load>: Use ldlags for linking flags.
+	* lib/prelink-support.exp (build_executable_own_libs): Likewise.
+
 2010-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* break-interp.exp (test_ld): Use two separate gdb_expect statements

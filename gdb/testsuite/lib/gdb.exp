@@ -2010,7 +2010,7 @@ proc gdb_compile {source dest type options} {
 	      || [istarget hppa*-*-hpux*])} {
 	    # Do not need anything.
 	} elseif { [istarget *-*-openbsd*] } {
-	    lappend new_options "additional_flags=-Wl,-rpath,${outdir}"
+	    lappend new_options "ldflags=-Wl,-rpath,${outdir}"
 	} elseif { [istarget arm*-*-symbianelf*] } {
 	    if { $shlib_load } {
 		lappend new_options "libs=-ldl"
@@ -2019,7 +2019,7 @@ proc gdb_compile {source dest type options} {
 	    if { $shlib_load } {
 		lappend new_options "libs=-ldl"
 	    }
-	    lappend new_options "additional_flags=-Wl,-rpath,\\\$ORIGIN"
+	    lappend new_options "ldflags=-Wl,-rpath,\\\$ORIGIN"
 	}
     }
     set options $new_options

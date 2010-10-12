@@ -35,7 +35,7 @@ if [get_compiler_info ${binfile_lib}] {
 
 # Use -soname so that the new library gets copied by build_executable_own_libs.
 
-if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list debug additional_flags=-Wl,-soname,${test}.so]] != ""} {
+if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list debug ldflags=-Wl,-soname,${test}.so]] != ""} {
     return -1
 }
 
@@ -622,7 +622,7 @@ foreach ldprelink {NO YES} {
 		    set pf_prefix $old_binprefix
 		    lappend pf_prefix "$binname:"
 
-		    set opts "additional_flags=-Wl,$binfile_lib,-rpath,[file dirname $binfile_lib]"
+		    set opts "ldflags=-Wl,$binfile_lib,-rpath,[file dirname $binfile_lib]"
 		    if {$binsepdebug != "NO"} {
 			lappend opts {debug}
 		    }

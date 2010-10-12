@@ -44,7 +44,7 @@ set libfile ${objdir}/${subdir}/${testfile}.so
 
 # Use -soname so that the new library gets copied by build_executable_own_libs.
 
-if { [gdb_compile_shlib "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" [list debug "additional_flags=-Wl,-soname,[file tail ${libfile}]"]] != ""} {
+if { [gdb_compile_shlib "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" [list debug "ldflags=-Wl,-soname,[file tail ${libfile}]"]] != ""} {
     # If creating the shared library fails, maybe we don't have the right tools
     return -1
 }
@@ -52,7 +52,7 @@ if { [gdb_compile_shlib "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" [list d
 set srcfile ${testfile}.c
 set executable ${testfile}t
 set binfile ${objdir}/${subdir}/${executable}
-set prelink_args [build_executable_own_libs ${testfile}.exp $executable $srcfile [list debug "additional_flags=-Wl,${libfile},-rpath,[file dirname ${libfile}]"]]
+set prelink_args [build_executable_own_libs ${testfile}.exp $executable $srcfile [list debug "ldflags=-Wl,${libfile},-rpath,[file dirname ${libfile}]"]]
 if {$prelink_args == ""} {
     return -1
 }
