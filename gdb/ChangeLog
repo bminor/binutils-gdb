@@ -1,3 +1,7 @@
+2010-10-12  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-prettyprint.c (search_pp_list): Fix error checking.
+
 2010-10-12  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdbtypes.c (do_is_ancestor): New function.

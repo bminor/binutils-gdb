@@ -49,9 +49,20 @@ search_pp_list (PyObject *list, PyObject *value)
 	return NULL;
 
       /* Skip if disabled.  */
-      if (PyObject_HasAttr (function, gdbpy_enabled_cst)
-	  && ! PyObject_IsTrue (PyObject_GetAttr (function, gdbpy_enabled_cst)))
-	continue;
+      if (PyObject_HasAttr (function, gdbpy_enabled_cst))
+	{
+	  PyObject *attr = PyObject_GetAttr (function, gdbpy_enabled_cst);
+	  int cmp;
+
+	  if (!attr)
+	    return NULL;
+	  cmp = PyObject_IsTrue (attr);
+	  if (cmp == -1)
+	    return NULL;
+
+	  if (!cmp)
+	    continue;
+	}
 
       printer = PyObject_CallFunctionObjArgs (function, value, NULL);
       if (! printer)
