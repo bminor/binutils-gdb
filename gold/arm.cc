@@ -7633,7 +7633,6 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
         }
       break;
 
-    case elfcpp::R_ARM_PC24:
     case elfcpp::R_ARM_REL32:
     case elfcpp::R_ARM_LDR_PC_G0:
     case elfcpp::R_ARM_SBREL32:
@@ -7644,9 +7643,6 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_ARM_CALL:
     case elfcpp::R_ARM_JUMP24:
     case elfcpp::R_ARM_THM_JUMP24:
-    case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
-    case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
-    case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
     case elfcpp::R_ARM_SBREL31:
     case elfcpp::R_ARM_PREL31:
     case elfcpp::R_ARM_MOVW_PREL_NC:
@@ -7850,6 +7846,10 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
       }
       break;
 
+    case elfcpp::R_ARM_PC24:
+    case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
+    case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
+    case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
     default:
       unsupported_reloc_local(object, r_type);
       break;
@@ -8028,9 +8028,6 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_ARM_SBREL32:
     case elfcpp::R_ARM_THM_PC8:
     case elfcpp::R_ARM_BASE_PREL:
-    case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
-    case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
-    case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
     case elfcpp::R_ARM_MOVW_PREL_NC:
     case elfcpp::R_ARM_MOVT_PREL:
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
@@ -8093,7 +8090,6 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
       }
       break;
 
-    case elfcpp::R_ARM_PC24:
     case elfcpp::R_ARM_THM_CALL:
     case elfcpp::R_ARM_PLT32:
     case elfcpp::R_ARM_CALL:
@@ -8262,6 +8258,10 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
       }
       break;
 
+    case elfcpp::R_ARM_PC24:
+    case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
+    case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
+    case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
     default:
       unsupported_reloc_global(object, r_type, gsym);
       break;
@@ -9040,8 +9040,15 @@ Target_arm<big_endian>::Relocate::relocate(
 			   view, address, view_size);
       break;
 
+    // The known and unknown unsupported and/or deprecated relocations.
+    case elfcpp::R_ARM_PC24:
+    case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
+    case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
+    case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
     default:
-      gold_unreachable();
+      // Just silently leave the method. We should get an appropriate error
+      // message in the scan methods.
+      break;
     }
 
   // Report any errors.

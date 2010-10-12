@@ -1,3 +1,10 @@
+2010-10-12  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* arm.cc (Target_arm::Scan::local): Report the unsupported reloc
+	error for the deprecated relocations.
+	(Target_arm::Scan::global): Likewise.
+	(Target_arm::Relocate::relocate): Likewise.
+
 2010-10-12  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* fileread.cc (Input_file::find_file): Initialize *found_name
