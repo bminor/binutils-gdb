@@ -1,3 +1,9 @@
+2010-10-12  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdbtypes.c (do_is_ancestor): New function.
+	(is_ancestor): Use do_is_ancestor.
+	(is_public_ancestor): Use do_is_ancestor.
+
 2010-10-12  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* ser-go32.c (struct dos_ops): Add missing fdopen field.

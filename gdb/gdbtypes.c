@@ -1868,14 +1868,13 @@ class_types_same_p (const struct type *a, const struct type *b)
 	      && !strcmp (TYPE_NAME (a), TYPE_NAME (b))));
 }
 
-/* Check whether BASE is an ancestor or base class or DCLASS 
-   Return 1 if so, and 0 if not.
-   Note: callers may want to check for identity of the types before
-   calling this function -- identical types are considered to satisfy
-   the ancestor relationship even if they're identical.  */
+/* Check whether BASE is an ancestor or base class of DCLASS
+   Return 1 if so, and 0 if not.  If PUBLIC is 1 then only public
+   ancestors are considered, and the function returns 1 only if
+   BASE is a public ancestor of DCLASS.  */
 
-int
-is_ancestor (struct type *base, struct type *dclass)
+static int
+do_is_ancestor (struct type *base, struct type *dclass, int public)
 {
   int i;
 
@@ -1887,11 +1886,26 @@ is_ancestor (struct type *base, struct type *dclass)
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
     {
-      if (is_ancestor (base, TYPE_BASECLASS (dclass, i)))
+      if (public && ! BASETYPE_VIA_PUBLIC (dclass, i))
+	continue;
+
+      if (do_is_ancestor (base, TYPE_BASECLASS (dclass, i), public))
 	return 1;
     }
 
   return 0;
+}
+
+/* Check whether BASE is an ancestor or base class or DCLASS
+   Return 1 if so, and 0 if not.
+   Note: If BASE and DCLASS are of the same type, this function
+   will return 1. So for some class A, is_ancestor (A, A) will
+   return 1.  */
+
+int
+is_ancestor (struct type *base, struct type *dclass)
+{
+  return do_is_ancestor (base, dclass, 0);
 }
 
 /* Like is_ancestor, but only returns true when BASE is a public
@@ -1900,23 +1914,7 @@ is_ancestor (struct type *base, struct type *dclass)
 int
 is_public_ancestor (struct type *base, struct type *dclass)
 {
-  int i;
-
-  CHECK_TYPEDEF (base);
-  CHECK_TYPEDEF (dclass);
-
-  if (class_types_same_p (base, dclass))
-    return 1;
-
-  for (i = 0; i < TYPE_N_BASECLASSES (dclass); ++i)
-    {
-      if (! BASETYPE_VIA_PUBLIC (dclass, i))
-	continue;
-      if (is_public_ancestor (base, TYPE_BASECLASS (dclass, i)))
-	return 1;
-    }
-
-  return 0;
+  return do_is_ancestor (base, dclass, 1);
 }
 
 /* A helper function for is_unique_ancestor.  */
