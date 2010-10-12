@@ -857,6 +857,7 @@ eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"
 eelf32_sparc_sol2.c: $(srcdir)/emulparams/elf32_sparc_sol2.sh \
   $(srcdir)/emulparams/elf32_sparc.sh \
+  $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em $(ELF_DEPS) \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc_sol2 "$(tdir_elf32_sparc_sol2)"
@@ -1115,6 +1116,7 @@ eelf64_sparc_fbsd.c: $(srcdir)/emulparams/elf64_sparc_fbsd.sh \
 	${GENSCRIPTS} elf64_sparc_fbsd "$(tdir_elf64_sparc_fbsd)"
 eelf64_sparc_sol2.c: $(srcdir)/emulparams/elf64_sparc_sol2.sh \
   $(srcdir)/emulparams/elf64_sparc.sh \
+  $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_sparc_sol2 "$(tdir_elf64_sparc_sol2)"
@@ -1155,6 +1157,7 @@ eelf_x86_64_fbsd.c: $(srcdir)/emulparams/elf_x86_64_fbsd.sh \
 	${GENSCRIPTS} elf_x86_64_fbsd "$(tdir_elf_x86_64_fbsd)"
 eelf_x86_64_sol2.c: $(srcdir)/emulparams/elf_x86_64_sol2.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
+  $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_x86_64_sol2 "$(tdir_elf_x86_64_sol2)"
@@ -1179,6 +1182,7 @@ eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
 eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
+  $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_sol2 "$(tdir_elf_i386_sol2)"

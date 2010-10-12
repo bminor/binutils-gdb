@@ -1,3 +1,23 @@
+2010-10-12  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* emultempl/solaris2.em (elf_solaris2_before_allocation): Renamed
+	basever_syms to global_syms.
+	Emit global_syms into .dynamic section for all executables and
+	shared objects.
+	(elf_solaris2_after_allocation): New function.
+	(LDEMUL_AFTER_ALLOCATION): Use it.
+	* emulparams/solaris2.sh: New file.
+	* emulparams/elf32_sparc_sol2.sh: Use it.
+	* emulparams/elf64_sparc_sol2.sh: Likewise.
+	* emulparams/elf_i386_sol2.sh: Likewise.
+	* emulparams/elf_x86_64_sol2.sh: Likewise.
+	* Makefile.am (eelf32_sparc_sol2.c): Depend on
+	$(srcdir)/emulparams/solaris2.sh.
+	(eelf64_sparc_sol2.c): Likewise.
+	(eelf_x86_64_sol2.c): Likewise.
+	(eelf_i386_sol2.c): Likewise.
+	* Makefile.in: Regenerate.
+
 2010-10-06  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo: Update description of computation of VMA and LMA
