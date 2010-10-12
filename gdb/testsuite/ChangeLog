@@ -1,3 +1,8 @@
+2010-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* break-interp.exp (test_ld): Use two separate gdb_expect statements
+	for the "info files" test to avoid timeouts on slow machines.
+
 2010-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/infcall-dlopen.cc (openlib): Support NULL FILENAME.

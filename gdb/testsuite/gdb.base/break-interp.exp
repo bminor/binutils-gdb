@@ -442,14 +442,23 @@ proc test_ld {file ifmain trynosym displacement} {
     if $ifmain {
 	reach "_dl_debug_state" run $displacement
 
+	# Use two separate gdb_expect statements to avoid timeouts due to
+	# slow processing of wildcard capturing long output
 	set test "info files"
 	set entrynohex ""
-	gdb_test_multiple $test $test {
-	    -re "\r\n\[\t \]*Entry point:\[\t \]*0x(\[0-9a-f\]+)\r\n.*$gdb_prompt $" {
+	send_gdb "$test\n"
+	gdb_expect  {
+	    -re "\r\n\[\t \]*Entry point:\[\t \]*0x(\[0-9a-f\]+)\r\n" {
 		set entrynohex $expect_out(1,string)
-		pass $test
+	        gdb_expect {
+		    -re "$gdb_prompt $" { pass $test }
+		    timeout { fail "$test (timeout)" }
+		}
 	    }
+	    -re ".*$gdb_prompt $"  { fail $test }
+	    timeout         { fail "$test (timeout)" }
 	}
+
 	# `info sym' cannot be tested for .opd as the binary may not have
 	# symbols.
 	if {[istarget powerpc64-*] && [is_lp64_target]} {
