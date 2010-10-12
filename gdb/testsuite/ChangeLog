@@ -1,5 +1,10 @@
 2010-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/break-interp.exp (test_ld): Replace gdb_expect by
+	gdb_test_multiple.
+
+2010-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/break-interp.exp: Use ldlags for linking flags.
 	* gdb.base/prelink.exp: Likewise.
 	* gdb.base/solib-nodir.exp: Likewise.
