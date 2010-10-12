@@ -1,3 +1,7 @@
+2010-10-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-tdep.c (arm_mode_strings): Add NULL entry at end of array.
+
 2010-10-11  Doug Evans  <dje@google.com>
 
 	* c-typeprint.c (c_type_print_modifier): Add note that this prints

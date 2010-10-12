@@ -124,7 +124,8 @@ static const char *arm_mode_strings[] =
   {
     "auto",
     "arm",
-    "thumb"
+    "thumb",
+    NULL
   };
 
 static const char *arm_fallback_mode_string = "auto";
