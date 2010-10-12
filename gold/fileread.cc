@@ -963,6 +963,8 @@ Input_file::find_file(const Dirsearch& dirpath, int* pindex,
                      input_argument->name());
           return false;
         }
+      *found_name = input_argument->name();
+      *namep = name;
       *pindex = index + 1;
       return true;
     }
