@@ -47,12 +47,10 @@ class Orphan_section_placement;
 
 class Script_sections
 {
- private:
+ public:
   // This is a list, not a vector, because we insert orphan sections
   // in the middle.
   typedef std::list<Sections_element*> Sections_elements;
-
- public:
 
   // Logical script section types.  We map section types returned by the
   // parser into these since some section types have the same semantics.

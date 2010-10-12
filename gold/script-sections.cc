@@ -3552,8 +3552,19 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 class Sort_output_sections
 {
  public:
+  Sort_output_sections(const Script_sections::Sections_elements* elements)
+   : elements_(elements)
+  { }
+
   bool
   operator()(const Output_section* os1, const Output_section* os2) const;
+
+ private:
+  bool
+  is_before(const Output_section* os1, const Output_section* os2) const;
+
+ private:
+  const Script_sections::Sections_elements* elements_;
 };
 
 bool
@@ -3592,7 +3603,36 @@ Sort_output_sections::operator()(const Output_section* os1,
   if (!os1->is_noload() && os2->is_noload())
     return true;
   
-  // Otherwise we don't care.
+  // The sections have the same address. Check the section positions 
+  // in accordance with the linker script.
+  return this->is_before(os1, os2);
+}
+
+// Return true if OS1 comes before OS2 in ELEMENTS_.  This ensures
+// that we keep empty sections in the order in which they appear in a
+// linker script.
+
+bool
+Sort_output_sections::is_before(const Output_section* os1,
+				const Output_section* os2) const
+{
+  if (this->elements_ == NULL)
+    return false;
+
+  for (Script_sections::Sections_elements::const_iterator
+	 p = this->elements_->begin();
+       p != this->elements_->end();
+       ++p)
+    {
+      if (os1 == (*p)->get_output_section())
+	{
+	  for (++p; p != this->elements_->end(); ++p)
+	    if (os2 == (*p)->get_output_section())
+	      return true;
+	  break;
+	}
+    }
+
   return false;
 }
 
@@ -3666,7 +3706,8 @@ Script_sections::create_segments(Layout* layout, uint64_t dot_alignment)
   layout->get_allocated_sections(&sections);
 
   // Sort the sections by address.
-  std::stable_sort(sections.begin(), sections.end(), Sort_output_sections());
+  std::stable_sort(sections.begin(), sections.end(), 
+		   Sort_output_sections(this->sections_elements_));
 
   this->create_note_and_tls_segments(layout, &sections);
 

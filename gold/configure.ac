@@ -252,6 +252,9 @@ AM_CONDITIONAL(NATIVE_LINKER,
   test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias")
 AM_CONDITIONAL(GCC, test "$GCC" = yes)
 
+AM_CONDITIONAL(NATIVE_OR_CROSS_LINKER,
+  test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias" -o "x$host_alias" = "x$build_alias")
+
 dnl Some architectures do not support taking pointers of functions
 dnl defined in shared libraries except in -fPIC mode.  We need to
 dnl tell the unittest framework if we're compiling for one of those

@@ -70,12 +70,14 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 
 
 # The unittests themselves
+if NATIVE_OR_CROSS_LINKER
 check_PROGRAMS += object_unittest
 object_unittest_SOURCES = object_unittest.cc
 
 check_PROGRAMS += binary_unittest
 binary_unittest_SOURCES = binary_unittest.cc
 
+endif NATIVE_OR_CROSS_LINKER
 
 # ---------------------------------------------------------------------
 # These tests test the output of gold (end-to-end tests).  In
@@ -1798,7 +1800,21 @@ memory_test.stdout: memory_test
 endif GCC
 endif NATIVE_LINKER
 
-# These tests work with cross linkers.
+# These tests work with native and cross linkers.
+
+if NATIVE_OR_CROSS_LINKER
+
+# Test script section order.
+check_SCRIPTS += script_test_10.sh
+check_DATA += script_test_10.stdout
+script_test_10.o: script_test_10.s
+	$(TEST_AS) -o $@ $<
+script_test_10: $(srcdir)/script_test_10.t script_test_10.o gcctestdir/ld
+	gcctestdir/ld -o $@ script_test_10.o -T $(srcdir)/script_test_10.t
+script_test_10.stdout: script_test_10
+	$(TEST_READELF) -SW script_test_10 > $@
+
+# These tests work with cross linkers only.
 
 if DEFAULT_TARGET_I386
 
@@ -2131,3 +2147,6 @@ MOSTLYCLEANFILES += arm_cortex_a8_b_cond arm_cortex_a8_b arm_cortex_a8_bl \
 	arm_cortex_a8_blx arm_cortex_a8_local arm_cortex_a8_local_reloc
 
 endif DEFAULT_TARGET_ARM
+
+endif NATIVE_OR_CROSS_LINKER
+

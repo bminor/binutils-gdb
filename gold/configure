@@ -621,6 +621,8 @@ MCMODEL_MEDIUM_FALSE
 MCMODEL_MEDIUM_TRUE
 FN_PTRS_IN_SO_WITHOUT_PIC_FALSE
 FN_PTRS_IN_SO_WITHOUT_PIC_TRUE
+NATIVE_OR_CROSS_LINKER_FALSE
+NATIVE_OR_CROSS_LINKER_TRUE
 GCC_FALSE
 GCC_TRUE
 NATIVE_LINKER_FALSE
@@ -6085,6 +6087,15 @@ else
 fi
 
 
+ if test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias" -o "x$host_alias" = "x$build_alias"; then
+  NATIVE_OR_CROSS_LINKER_TRUE=
+  NATIVE_OR_CROSS_LINKER_FALSE='#'
+else
+  NATIVE_OR_CROSS_LINKER_TRUE='#'
+  NATIVE_OR_CROSS_LINKER_FALSE=
+fi
+
+
  if
   case $target_cpu in
     i?86) true;;
@@ -7221,6 +7232,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${GCC_TRUE}" && test -z "${GCC_FALSE}"; then
   as_fn_error "conditional \"GCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${NATIVE_OR_CROSS_LINKER_TRUE}" && test -z "${NATIVE_OR_CROSS_LINKER_FALSE}"; then
+  as_fn_error "conditional \"NATIVE_OR_CROSS_LINKER\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_TRUE}" && test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_FALSE}"; then
@@ -8562,7 +8577,7 @@ $as_echo X"$file" |
       case "$ac_file" in */Makefile.in)
         # Adjust a relative srcdir.
         ac_dir=`echo "$ac_file"|sed 's%/[^/][^/]*$%%'`
-        ac_dir_suffix=/`echo "$ac_dir"|sed 's%^\./%%'`
+        ac_dir_suffix="/`echo "$ac_dir"|sed 's%^\./%%'`"
         ac_dots=`echo "$ac_dir_suffix"|sed 's%/[^/]*%../%g'`
         # In autoconf-2.13 it is called $ac_given_srcdir.
         # In autoconf-2.50 it is called $srcdir.

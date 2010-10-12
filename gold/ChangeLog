@@ -1,3 +1,25 @@
+2010-10-12  Ian Lance Taylor  <iant@google.com>
+
+	* script-sections.h (class Script_sections): Make
+	Sections_elements typedef public.
+	* script-sections.cc (class Sort_output_sections): Add elements_
+	field.  Add constructor which sets it; change all callers.
+	(Sort_output_sections::is_before): New function.
+	(Sort_output_sections::operator()): Call is_before.
+	* configure.ac (NATIVE_OR_CROSS_LINKER): New automake
+	conditional.
+	* testsuite/script_test_10.sh: New test. Test script section
+	order.
+	* testsuite/script_test_10.t: Likewise.
+	* testsuite/script_test_10.s: Likewise.
+	* testsuite/Makefile.am: Wrap the cross linker tests and the
+	common tests into NATIVE_OR_CROSS_LINKER.
+	(check_SCRIPTS): Add script_test_10.sh.
+	(check_DATA): Add script_test_10.stdout.
+	(script_test_10.o, script_test_10): New targets.
+	(script_test_10.stdout): New target.
+	* configure, testsuite/Makefile.in: Regenerate.
+
 2010-10-12  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc (Target_arm::Scan::local): Report the unsupported reloc

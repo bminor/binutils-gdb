@@ -40,14 +40,18 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
 	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
 	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
 	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18) \
-	$(am__EXEEXT_19) $(am__EXEEXT_20) $(am__EXEEXT_21)
+	$(am__EXEEXT_19) $(am__EXEEXT_20) $(am__EXEEXT_21) \
+	$(am__EXEEXT_22)
+
+# The unittests themselves
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
+@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest
 
 # Test --detect-odr-violations
 
@@ -55,7 +59,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = incremental_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.sh gc_tls_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh \
@@ -86,7 +90,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = incremental_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.stdout \
@@ -117,7 +121,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_9.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = incremental_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = incremental_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test icf_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test \
@@ -129,7 +133,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = icf_virtual_function_folding_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -154,7 +158,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = two_file_shared_1_nonpic_test \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = two_file_shared_1_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_nonpic_test \
@@ -162,7 +166,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_pie_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = two_file_strip_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = two_file_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1 common_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test \
@@ -179,29 +183,29 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES =
 @GCC_FALSE@weak_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@weak_test_DEPENDENCIES =
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = weak_undef_nonpic_test
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = alt/weak_undef_lib_nonpic.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = weak_alias_test weak_plt \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = weak_undef_nonpic_test
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = alt/weak_undef_lib_nonpic.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = weak_alias_test weak_plt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_10 = tls_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_11 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pie_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pie_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_11 = tls_shared_gnu2_gd_to_ie_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_12 = tls_shared_gnu2_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_13 = tls_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_12 = tls_shared_gnu2_gd_to_ie_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_13 = tls_shared_gnu2_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_14 = tls_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_14 = tls_shared_nonpic_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = many_sections_test \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_15 = tls_shared_nonpic_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = many_sections_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test
 @GCC_FALSE@many_sections_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES =
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = many_sections_define.h \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = many_sections_define.h \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = many_sections_define.h \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
@@ -217,23 +221,23 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_2.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_4.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libthin2.a alt/libthin4.a
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = initpri1
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = initpri1
 @CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES =
 @GCC_FALSE@initpri1_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES =
 
 # Test -o when emitting to a special file (such as something in /dev).
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = flagstest_o_specialfile
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_20 = flagstest_o_specialfile
 
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
-@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_20 = flagstest_compress_debug_sections \
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_21 = flagstest_compress_debug_sections \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections
 
 # Test symbol versioning.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_21 = ver_test ver_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_22 = ver_test ver_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 ver_test_8 ver_test_9 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11 protected_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2 relro_test \
@@ -257,7 +261,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@thin_archive_test_2_DEPENDENCIES =
 
 # Test plugins with -r.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_22 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_23 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3 \
@@ -266,7 +270,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_6 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_8
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_23 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_24 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.sh \
@@ -276,7 +280,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test that symbols known in the IR file but not in the replacement file
 # produce an unresolved symbol error.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_24 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_25 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
@@ -286,7 +290,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err
 # Make a copy of two_file_test_1.o, which does not define the symbol _Z4t16av.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_25 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_26 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
@@ -297,7 +301,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	two_file_test_1c.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	unused.c
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
 
@@ -315,14 +319,14 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # weak reference in a DSO.
 
 # Test that MEMORY region support works.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = exclude_libs_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	strong_ref_weak_def.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.sh memory_test.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = exclude_libs_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test1.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test2.syms \
@@ -332,7 +336,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	strong_ref_weak_def.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = exclude_libs_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a \
@@ -358,7 +362,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout memory_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.o
-@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = large
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_31 = large
 @GCC_FALSE@large_DEPENDENCIES =
 @MCMODEL_MEDIUM_FALSE@large_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@large_DEPENDENCIES =
@@ -367,11 +371,11 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # it will get execute permission.
 
 # Check -l:foo.a
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_31 = permission_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_32 = permission_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test
 @GCC_FALSE@searched_file_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@searched_file_test_DEPENDENCIES =
-@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am__append_32 =  \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am__append_33 =  \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1static \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1picstatic \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1 \
@@ -476,73 +480,85 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 
 # Test that --start-lib and --end-lib function correctly.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_33 = start_lib_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_34 = start_lib_test
 
-# These tests work with cross linkers.
-@DEFAULT_TARGET_I386_TRUE@am__append_34 = split_i386.sh
-@DEFAULT_TARGET_I386_TRUE@am__append_35 = split_i386_1.stdout split_i386_2.stdout \
-@DEFAULT_TARGET_I386_TRUE@	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
+# These tests work with native and cross linkers.
 
-@DEFAULT_TARGET_I386_TRUE@am__append_36 = split_i386_1 split_i386_2 split_i386_3 \
-@DEFAULT_TARGET_I386_TRUE@	split_i386_4 split_i386_r
+# Test script section order.
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_35 = script_test_10.sh
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_36 = script_test_10.stdout
 
-@DEFAULT_TARGET_X86_64_TRUE@am__append_37 = split_x86_64.sh
-@DEFAULT_TARGET_X86_64_TRUE@am__append_38 = split_x86_64_1.stdout split_x86_64_2.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
+# These tests work with cross linkers only.
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_37 = split_i386.sh
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_38 = split_i386_1.stdout split_i386_2.stdout \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
 
-@DEFAULT_TARGET_X86_64_TRUE@am__append_39 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
-@DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_4 split_x86_64_r
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_39 = split_i386_1 split_i386_2 split_i386_3 \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_4 split_i386_r
+
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_40 = split_x86_64.sh
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_41 = split_x86_64_1.stdout split_x86_64_2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
+
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_42 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_4 split_x86_64_r
 
 
 # Cortex-A8 workaround test.
-@DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global.sh \
-@DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh \
-@DEFAULT_TARGET_ARM_TRUE@	arm_branch_out_of_range.sh \
-@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh arm_attr_merge.sh \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8.sh
-@DEFAULT_TARGET_ARM_TRUE@am__append_41 = arm_abs_global.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_bl_out_of_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_in_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_out_of_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_in_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range_local.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_7.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_b_cond.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_b.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_bl.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_blx.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local_reloc.stdout
-@DEFAULT_TARGET_ARM_TRUE@am__append_42 = arm_abs_global \
-@DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range arm_bl_out_of_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_in_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_out_of_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_in_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range_local \
-@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx \
-@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking \
-@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx arm_attr_merge_6 \
-@DEFAULT_TARGET_ARM_TRUE@	arm_attr_merge_6r arm_attr_merge_7 \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_b_cond arm_cortex_a8_b \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_bl arm_cortex_a8_blx \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local \
-@DEFAULT_TARGET_ARM_TRUE@	arm_cortex_a8_local_reloc
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_43 = arm_abs_global.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_in_range.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_out_of_range.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8.sh
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_44 = arm_abs_global.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_bl_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_bl_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_blx_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_blx_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_blx_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_blx_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_out_of_range_local.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx_interworking.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_no_fix_v4bx.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge_6.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge_6r.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge_7.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_b_cond.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_b.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_bl.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_blx.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local_reloc.stdout
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_45 = arm_abs_global \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_bl_in_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_bl_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_blx_in_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_blx_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_blx_in_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb2_blx_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_out_of_range_local \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx_interworking \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_no_fix_v4bx \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge_6 \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge_6r \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge_7 \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_b_cond \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_b \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_bl \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_blx \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local_reloc
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -567,7 +583,9 @@ libgoldtest_a_LIBADD =
 am_libgoldtest_a_OBJECTS = test.$(OBJEXT) testmain.$(OBJEXT) \
 	testfile.$(OBJEXT)
 libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_1 = icf_virtual_function_folding_test$(EXEEXT) \
+@NATIVE_OR_CROSS_LINKER_TRUE@am__EXEEXT_1 = object_unittest$(EXEEXT) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_2 = icf_virtual_function_folding_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test$(EXEEXT) \
@@ -587,7 +605,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test$(EXEEXT)
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_2 = two_file_shared_1_nonpic_test$(EXEEXT) \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 = two_file_shared_1_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_nonpic_test$(EXEEXT) \
@@ -595,7 +613,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_pie_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_4 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_strip_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1$(EXEEXT) \
@@ -609,11 +627,11 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT)
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_4 = weak_undef_nonpic_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_5 = weak_alias_test$(EXEEXT) \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_5 = weak_undef_nonpic_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_6 = weak_alias_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_7 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pie_test$(EXEEXT) \
@@ -621,19 +639,19 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__EXEEXT_7 = tls_shared_gnu2_gd_to_ie_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__EXEEXT_8 = tls_shared_gnu2_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_9 = tls_static_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__EXEEXT_8 = tls_shared_gnu2_gd_to_ie_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__EXEEXT_9 = tls_shared_gnu2_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_10 = tls_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT)
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_10 = tls_shared_nonpic_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_11 =  \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_11 = tls_shared_nonpic_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_12 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test$(EXEEXT)
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_12 = initpri1$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_13 = flagstest_o_specialfile$(EXEEXT)
-@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_14 = flagstest_compress_debug_sections$(EXEEXT) \
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_13 = initpri1$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_14 = flagstest_o_specialfile$(EXEEXT)
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_15 = flagstest_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_15 = ver_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_16 = ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_8$(EXEEXT) \
@@ -653,7 +671,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__EXEEXT_16 = plugin_test_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__EXEEXT_17 = plugin_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4$(EXEEXT) \
@@ -661,15 +679,15 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_8$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_17 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_18 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test$(EXEEXT)
-@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_18 = large$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_19 =  \
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_19 = large$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_20 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	permission_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test$(EXEEXT)
-@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_20 = ifuncmain1static$(EXEEXT) \
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_21 = ifuncmain1static$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1picstatic$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain1pic$(EXEEXT) \
@@ -699,7 +717,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pic$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pie$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_21 = start_lib_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_22 = start_lib_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -736,7 +754,8 @@ basic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 binary_test_OBJECTS = $(am_binary_test_OBJECTS)
 binary_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(binary_test_LDFLAGS) $(LDFLAGS) -o $@
-am_binary_unittest_OBJECTS = binary_unittest.$(OBJEXT)
+@NATIVE_OR_CROSS_LINKER_TRUE@am_binary_unittest_OBJECTS =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest.$(OBJEXT)
 binary_unittest_OBJECTS = $(am_binary_unittest_OBJECTS)
 binary_unittest_LDADD = $(LDADD)
 binary_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
@@ -1059,7 +1078,8 @@ many_sections_r_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 many_sections_test_OBJECTS = $(am_many_sections_test_OBJECTS)
 many_sections_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(many_sections_test_LDFLAGS) $(LDFLAGS) -o $@
-am_object_unittest_OBJECTS = object_unittest.$(OBJEXT)
+@NATIVE_OR_CROSS_LINKER_TRUE@am_object_unittest_OBJECTS =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	object_unittest.$(OBJEXT)
 object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 object_unittest_LDADD = $(LDADD)
 object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
@@ -1785,19 +1805,21 @@ TEST_AS = $(top_builddir)/../gas/as-new
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_3) \
-	$(am__append_8) $(am__append_17) $(am__append_25) \
-	$(am__append_29) $(am__append_36) $(am__append_39) \
-	$(am__append_42)
+MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
+	$(am__append_9) $(am__append_18) $(am__append_26) \
+	$(am__append_30) $(am__append_39) $(am__append_42) \
+	$(am__append_45)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_1) $(am__append_23) $(am__append_27) \
-	$(am__append_34) $(am__append_37) $(am__append_40)
-check_DATA = $(am__append_2) $(am__append_24) $(am__append_28) \
-	$(am__append_35) $(am__append_38) $(am__append_41)
-BUILT_SOURCES = $(am__append_16)
+check_SCRIPTS = $(am__append_2) $(am__append_24) $(am__append_28) \
+	$(am__append_35) $(am__append_37) $(am__append_40) \
+	$(am__append_43)
+check_DATA = $(am__append_3) $(am__append_25) $(am__append_29) \
+	$(am__append_36) $(am__append_38) $(am__append_41) \
+	$(am__append_44)
+BUILT_SOURCES = $(am__append_17)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1812,8 +1834,8 @@ DEPENDENCIES = \
 LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 	$(THREADSLIB) $(LIBDL)
 
-object_unittest_SOURCES = object_unittest.cc
-binary_unittest_SOURCES = binary_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_SOURCES = object_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDFLAGS = -Bgcctestdir/
@@ -2217,8 +2239,8 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_SOURCES = ifuncmain7.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_LDFLAGS = -Bgcctestdir/
-@DEFAULT_TARGET_I386_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
-@DEFAULT_TARGET_X86_64_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -3325,6 +3347,8 @@ dyn_weak_ref.sh.log: dyn_weak_ref.sh
 	@p='dyn_weak_ref.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 memory_test.sh.log: memory_test.sh
 	@p='memory_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_10.sh.log: script_test_10.sh
+	@p='script_test_10.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 split_i386.sh.log: split_i386.sh
 	@p='split_i386.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 split_x86_64.sh.log: split_x86_64.sh
@@ -4534,272 +4558,278 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.stdout: memory_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lWS  $< > $@
-@DEFAULT_TARGET_I386_TRUE@split_i386_1.o: split_i386_1.s
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@split_i386_2.o: split_i386_2.s
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@split_i386_3.o: split_i386_3.s
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@split_i386_4.o: split_i386_4.s
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@split_i386_n.o: split_i386_n.s
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_I386_TRUE@split_i386_1: split_i386_1.o split_i386_n.o ../ld-new
-@DEFAULT_TARGET_I386_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_1.o split_i386_n.o
-@DEFAULT_TARGET_I386_TRUE@split_i386_1.stdout: split_i386_1
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_OBJDUMP) -d $< > $@
-@DEFAULT_TARGET_I386_TRUE@split_i386_2: split_i386_2.o split_i386_n.o ../ld-new
-@DEFAULT_TARGET_I386_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_2.o split_i386_n.o
-@DEFAULT_TARGET_I386_TRUE@split_i386_2.stdout: split_i386_2
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_OBJDUMP) -d $< > $@
-@DEFAULT_TARGET_I386_TRUE@split_i386_3.stdout: split_i386_3.o split_i386_n.o ../ld-new
-@DEFAULT_TARGET_I386_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_i386_3 split_i386_3.o split_i386_n.o > $@ 2>&1 || exit 0
-@DEFAULT_TARGET_I386_TRUE@split_i386_4: split_i386_4.o split_i386_n.o ../ld-new
-@DEFAULT_TARGET_I386_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_4.o split_i386_n.o
-@DEFAULT_TARGET_I386_TRUE@split_i386_4.stdout: split_i386_4
-@DEFAULT_TARGET_I386_TRUE@	$(TEST_OBJDUMP) -d $< > $@
-@DEFAULT_TARGET_I386_TRUE@split_i386_r.stdout: split_i386_1.o split_i386_n.o ../ld-new
-@DEFAULT_TARGET_I386_TRUE@	../ld-new -r split_i386_1.o split_i386_n.o -o split_i386_r > $@ 2>&1 || exit 0
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_1.o: split_x86_64_1.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_2.o: split_x86_64_2.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_3.o: split_x86_64_3.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_4.o: split_x86_64_4.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_n.o: split_x86_64_n.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_1: split_x86_64_1.o split_x86_64_n.o ../ld-new
-@DEFAULT_TARGET_X86_64_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_1.o split_x86_64_n.o
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_1.stdout: split_x86_64_1
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_OBJDUMP) -d $< > $@
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_2: split_x86_64_2.o split_x86_64_n.o ../ld-new
-@DEFAULT_TARGET_X86_64_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_2.o split_x86_64_n.o
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_2.stdout: split_x86_64_2
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_OBJDUMP) -d $< > $@
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_3.stdout: split_x86_64_3.o split_x86_64_n.o ../ld-new
-@DEFAULT_TARGET_X86_64_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_x86_64_3 split_x86_64_3.o split_x86_64_n.o > $@ 2>&1 || exit 0
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_4: split_x86_64_4.o split_x86_64_n.o ../ld-new
-@DEFAULT_TARGET_X86_64_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_4.o split_x86_64_n.o
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_4.stdout: split_x86_64_4
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_OBJDUMP) -d $< > $@
-@DEFAULT_TARGET_X86_64_TRUE@split_x86_64_r.stdout: split_x86_64_1.o split_x86_64_n.o ../ld-new
-@DEFAULT_TARGET_X86_64_TRUE@	../ld-new -r split_x86_64_1.o split_x86_64_n.o -o split_x86_64_r > $@ 2>&1 || exit 0
-@DEFAULT_TARGET_ARM_TRUE@arm_abs_lib.o: arm_abs_lib.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -march=armv7-a -o $@ $<
-@DEFAULT_TARGET_ARM_TRUE@libarm_abs.so: arm_abs_lib.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -shared -o $@ arm_abs_lib.o
-@DEFAULT_TARGET_ARM_TRUE@arm_abs_global.o: arm_abs_global.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -march=armv7-a -o $@ $<
-@DEFAULT_TARGET_ARM_TRUE@arm_abs_global: arm_abs_global.o libarm_abs.so ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_abs_global.o -L. -larm_abs
-@DEFAULT_TARGET_ARM_TRUE@arm_abs_global.stdout: arm_abs_global
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -r $< > $@
-
-@DEFAULT_TARGET_ARM_TRUE@arm_bl_in_range.stdout: arm_bl_in_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
-
-@DEFAULT_TARGET_ARM_TRUE@arm_bl_in_range: arm_bl_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
-
-@DEFAULT_TARGET_ARM_TRUE@arm_bl_in_range.o: arm_bl_in_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
-
-@DEFAULT_TARGET_ARM_TRUE@arm_bl_out_of_range.stdout: arm_bl_out_of_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -S $< > $@
-
-@DEFAULT_TARGET_ARM_TRUE@arm_bl_out_of_range: arm_bl_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
-
-@DEFAULT_TARGET_ARM_TRUE@arm_bl_out_of_range.o: arm_bl_out_of_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
-
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_in_range.stdout: thumb_bl_in_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
-
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_in_range: thumb_bl_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
-
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_in_range.o: thumb_bl_in_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
-
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
-
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range: thumb_bl_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
-
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range.o: thumb_bl_out_of_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
-
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_in_range.stdout: thumb2_bl_in_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+@NATIVE_OR_CROSS_LINKER_TRUE@script_test_10.o: script_test_10.s
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@NATIVE_OR_CROSS_LINKER_TRUE@script_test_10: $(srcdir)/script_test_10.t script_test_10.o
+@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ script_test_10.o -T $(srcdir)/script_test_10.t
+@NATIVE_OR_CROSS_LINKER_TRUE@script_test_10.stdout: script_test_10
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -SW script_test_10 > script_test_10.stdout
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_1.o: split_i386_1.s
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_2.o: split_i386_2.s
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_3.o: split_i386_3.s
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_4.o: split_i386_4.s
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_n.o: split_i386_n.s
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_1: split_i386_1.o split_i386_n.o ../ld-new
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_1.o split_i386_n.o
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_1.stdout: split_i386_1
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_2: split_i386_2.o split_i386_n.o ../ld-new
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_2.o split_i386_n.o
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_2.stdout: split_i386_2
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_3.stdout: split_i386_3.o split_i386_n.o ../ld-new
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_i386_3 split_i386_3.o split_i386_n.o > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_4: split_i386_4.o split_i386_n.o ../ld-new
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_4.o split_i386_n.o
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_4.stdout: split_i386_4
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_r.stdout: split_i386_1.o split_i386_n.o ../ld-new
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -r split_i386_1.o split_i386_n.o -o split_i386_r > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_1.o: split_x86_64_1.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_2.o: split_x86_64_2.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_3.o: split_x86_64_3.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_4.o: split_x86_64_4.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_n.o: split_x86_64_n.s
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_1: split_x86_64_1.o split_x86_64_n.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_1.o split_x86_64_n.o
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_1.stdout: split_x86_64_1
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_2: split_x86_64_2.o split_x86_64_n.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_2.o split_x86_64_n.o
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_2.stdout: split_x86_64_2
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_3.stdout: split_x86_64_3.o split_x86_64_n.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o split_x86_64_3 split_x86_64_3.o split_x86_64_n.o > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_4: split_x86_64_4.o split_x86_64_n.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_4.o split_x86_64_n.o
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_4.stdout: split_x86_64_4
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -d $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_x86_64_r.stdout: split_x86_64_1.o split_x86_64_n.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -r split_x86_64_1.o split_x86_64_n.o -o split_x86_64_r > $@ 2>&1 || exit 0
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_abs_lib.o: arm_abs_lib.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -march=armv7-a -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@libarm_abs.so: arm_abs_lib.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -shared -o $@ arm_abs_lib.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_abs_global.o: arm_abs_global.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -march=armv7-a -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_abs_global: arm_abs_global.o libarm_abs.so ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ arm_abs_global.o -L. -larm_abs
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_abs_global.stdout: arm_abs_global
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -r $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_in_range.stdout: arm_bl_in_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_in_range: arm_bl_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_in_range.o: arm_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_out_of_range.stdout: arm_bl_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -S $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_out_of_range: arm_bl_out_of_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_out_of_range.o: arm_bl_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_in_range.stdout: thumb_bl_in_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_in_range: thumb_bl_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_in_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range: thumb_bl_out_of_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_in_range: thumb2_bl_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range.o: thumb_bl_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_in_range.o: thumb_bl_in_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_in_range.stdout: thumb2_bl_in_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.stdout: thumb2_bl_out_of_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_in_range: thumb2_bl_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range: thumb2_bl_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_in_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.o: thumb_bl_out_of_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_out_of_range.stdout: thumb2_bl_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_blx_in_range.stdout: thumb_blx_in_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_out_of_range: thumb2_bl_out_of_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_blx_in_range: thumb_blx_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_out_of_range.o: thumb_bl_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_blx_in_range.o: thumb_blx_in_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_in_range.stdout: thumb_blx_in_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_blx_out_of_range.stdout: thumb_blx_out_of_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_in_range: thumb_blx_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_blx_out_of_range: thumb_blx_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_in_range.o: thumb_blx_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_blx_out_of_range.o: thumb_blx_out_of_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_out_of_range.stdout: thumb_blx_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_in_range.stdout: thumb2_blx_in_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_out_of_range: thumb_blx_out_of_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_in_range: thumb2_blx_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_out_of_range.o: thumb_blx_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_in_range.o: thumb_blx_in_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_in_range.stdout: thumb2_blx_in_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_out_of_range.stdout: thumb2_blx_out_of_range
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_in_range: thumb2_blx_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_out_of_range: thumb2_blx_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_in_range.o: thumb_blx_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_out_of_range.stdout: thumb2_blx_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range_local.stdout: thumb_bl_out_of_range_local
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_out_of_range: thumb2_blx_out_of_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range_local.stdout: thumb_bl_out_of_range_local
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx.stdout: arm_fix_v4bx
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx: arm_fix_v4bx.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new --fix-v4bx -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx.o: arm_fix_v4bx.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_fix_v4bx.stdout: arm_fix_v4bx
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx_interworking.stdout: arm_fix_v4bx_interworking
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_fix_v4bx: arm_fix_v4bx.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --fix-v4bx -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx_interworking: arm_fix_v4bx.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new --fix-v4bx-interworking -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_fix_v4bx.o: arm_fix_v4bx.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_no_fix_v4bx.stdout: arm_no_fix_v4bx
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_fix_v4bx_interworking.stdout: arm_fix_v4bx_interworking
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_no_fix_v4bx: arm_fix_v4bx.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_fix_v4bx_interworking: arm_fix_v4bx.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --fix-v4bx-interworking -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6.stdout: arm_attr_merge_6
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -A $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_no_fix_v4bx.stdout: arm_no_fix_v4bx
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_attr_merge_6a.o arm_attr_merge_6b.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_no_fix_v4bx: arm_fix_v4bx.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6a.o: arm_attr_merge_6a.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6.stdout: arm_attr_merge_6
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -A $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6b.o: arm_attr_merge_6b.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6: arm_attr_merge_6a.o arm_attr_merge_6b.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ arm_attr_merge_6a.o arm_attr_merge_6b.o
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6r.stdout: arm_attr_merge_6r
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -A $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6a.o: arm_attr_merge_6a.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_attr_merge_6b.o arm_attr_merge_6a.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6b.o: arm_attr_merge_6b.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7.stdout: arm_attr_merge_7
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -A $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6r.stdout: arm_attr_merge_6r
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -A $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_attr_merge_7a.o arm_attr_merge_7b.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_6r: arm_attr_merge_6b.o arm_attr_merge_6a.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ arm_attr_merge_6b.o arm_attr_merge_6a.o
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7a.o: arm_attr_merge_7a.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7.stdout: arm_attr_merge_7
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -A $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_attr_merge_7b.o: arm_attr_merge_7b.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7: arm_attr_merge_7a.o arm_attr_merge_7b.o
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ arm_attr_merge_7a.o arm_attr_merge_7b.o
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b_cond.stdout: arm_cortex_a8_b_cond
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7a.o: arm_attr_merge_7a.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b_cond: arm_cortex_a8_b_cond.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_attr_merge_7b.o: arm_attr_merge_7b.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b_cond.o: arm_cortex_a8_b_cond.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_b_cond.stdout: arm_cortex_a8_b_cond
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b.stdout: arm_cortex_a8_b
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_b_cond: arm_cortex_a8_b_cond.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b: arm_cortex_a8_b.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new --fix-cortex-a8 -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_b_cond.o: arm_cortex_a8_b_cond.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_b.o: arm_cortex_a8_b.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_b.stdout: arm_cortex_a8_b
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_bl.stdout: arm_cortex_a8_bl
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_b: arm_cortex_a8_b.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --fix-cortex-a8 -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_bl: arm_cortex_a8_bl.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_b.o: arm_cortex_a8_b.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_bl.o: arm_cortex_a8_bl.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_bl.stdout: arm_cortex_a8_bl
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_blx.stdout: arm_cortex_a8_blx
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_bl: arm_cortex_a8_bl.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_blx: arm_cortex_a8_blx.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_bl.o: arm_cortex_a8_bl.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_blx.o: arm_cortex_a8_blx.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_blx.stdout: arm_cortex_a8_blx
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local.stdout: arm_cortex_a8_local
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_blx: arm_cortex_a8_blx.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local: arm_cortex_a8_local.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_blx.o: arm_cortex_a8_blx.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local.o: arm_cortex_a8_local.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_local.stdout: arm_cortex_a8_local
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local_reloc.stdout: arm_cortex_a8_local_reloc
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_local: arm_cortex_a8_local.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local_reloc: arm_cortex_a8_local_reloc.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_local.o: arm_cortex_a8_local.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@arm_cortex_a8_local_reloc.o: arm_cortex_a8_local_reloc.s
-@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_local_reloc.stdout: arm_cortex_a8_local_reloc
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_local_reloc: arm_cortex_a8_local_reloc.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_local_reloc.o: arm_cortex_a8_local_reloc.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
