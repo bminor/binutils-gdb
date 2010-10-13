@@ -20401,6 +20401,7 @@ the Python interpreter to locate all scripts installed at this location.
 * Python Commands::             Accessing Python from @value{GDBN}.
 * Python API::                  Accessing @value{GDBN} from Python.
 * Auto-loading::                Automatically loading Python code.
+* Python modules::              Python modules provided by @value{GDBN}.
 @end menu
 
 @node Python Commands
@@ -21244,6 +21245,9 @@ A decimal floating point type.
 A function internal to @value{GDBN}.  This is the type used to represent
 convenience functions.
 @end table
+
+Further support for types is provided in the @code{gdb.types}
+Python module (@pxref{gdb.types}).
 
 @node Pretty Printing API
 @subsubsection Pretty Printing API
@@ -22910,6 +22914,56 @@ cumbersome.  It may be easier to specify the scripts in the
 @code{.debug_gdb_scripts} section as relative paths, and add a path to the
 top of the source tree to the source search path.
 @end itemize
+
+@node Python modules
+@subsection Python modules
+@cindex python modules
+
+@c It is assumed that at least one more module will be added before
+@c the next release of gdb.  Thus we use a menu here.
+@value{GDBN} comes with a module to assist writing Python code.
+
+@menu
+* gdb.types::          Utilities for working with types.
+@end menu
+
+@node gdb.types
+@subsubsection gdb.types
+
+This module provides a collection of utilities for working with
+@code{gdb.Types} objects.
+
+@table @code
+@item get_basic_type (@var{type})
+Return @var{type} with const and volatile qualifiers stripped,
+and with typedefs and C@t{++} references converted to the underlying type.
+
+C@t{++} example:
+
+@smallexample
+typedef const int const_int;
+const_int foo (3);
+const_int& foo_ref (foo);
+int main () @{ return 0; @}
+@end smallexample
+
+Then in gdb:
+
+@smallexample
+(gdb) start
+(gdb) python import gdb.types
+(gdb) python foo_ref = gdb.parse_and_eval("foo_ref")
+(gdb) python print gdb.types.get_basic_type(foo_ref.type)
+int
+@end smallexample
+
+@item has_field (@var{type}, @var{field})
+Return @code{True} if @var{type}, assumed to be a type with fields
+(e.g., a structure or union), has field @var{field}.
+
+@item make_enum_dict (@var{enum_type})
+Return a Python @code{dictionary} type produced from @var{enum_type}.
+@end table
 
 @node Interpreters
 @chapter Command Interpreters

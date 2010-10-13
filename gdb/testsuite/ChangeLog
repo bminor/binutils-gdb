@@ -1,3 +1,10 @@
+2010-10-13  Doug Evans  <dje@google.com>
+
+	* lib/gdb-python.exp (gdb_check_python_config): New function.
+	* gdb.python/Makefile.in (EXECUTABLES): Add lib-types.
+	* gdb.python/lib-types.cc: New file.
+	* gdb.python/lib-types.exp: New file.
+
 2010-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-error.exp: New file.

@@ -45,3 +45,21 @@ proc gdb_py_test_multiple { name args } {
     }
     return 0
 }
+
+# Establish various python configuration parameters if necessary.
+# E.g. sys.path.
+
+proc gdb_check_python_config { } {
+    global USE_INSTALLED_TREE
+    # If we're running an installed version of gdb, and we want to test the
+    # installed versions of the python support scripts, then we don't want
+    # to point data-directory at the build tree.
+    if { [info exists USE_INSTALLED_TREE] && "$USE_INSTALLED_TREE" == "yes" } {
+	verbose -log "Assuming system config already installed."
+    } else {
+	verbose -log "Installing system config from build tree."
+	set gdb_data_dir "[pwd]/../data-directory"
+	gdb_test_no_output "set data-directory $gdb_data_dir"
+	gdb_test_no_output "python GdbSetPythonDirectory ('$gdb_data_dir/python')"
+    }
+}

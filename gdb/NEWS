@@ -12,6 +12,10 @@
 
      result = some_value (10,20)
 
+  ** Module gdb.types has been added.
+     It contains a collection of utilities for working with gdb.Types objects:
+     get_basic_type, has_field, make_enum_dict.
+
 * C++ Improvements:
 
   ** GDB now puts template parameters in scope when debugging in an

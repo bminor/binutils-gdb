@@ -51,7 +51,8 @@ SYSCALLS_FILES = \
 PYTHON_DIR = python
 PYTHON_INSTALL_DIR = $(DESTDIR)/$(GDB_DATADIR)/$(PYTHON_DIR)
 PYTHON_FILES = \
-	gdb/__init__.py
+	gdb/__init__.py \
+	gdb/types.py
 
 .PHONY: all
 all: stamp-syscalls stamp-python

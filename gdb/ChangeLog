@@ -4,6 +4,11 @@
 
 2010-10-13  Doug Evans  <dje@google.com>
 
+	New python module gdb.types.
+	* NEWS: Document it.
+	* data-directory/Makefile.in (PYTHON_FILES): Add gdb/types.py.
+	* python/lib/gdb/types.py: New file.
+
 	* c-typeprint.c: Whitespace cleanup.
 	(cp_type_print_method_args): Remove unnecessary forward decl.
 	(cp_type_print_derivation_info): Ditto.

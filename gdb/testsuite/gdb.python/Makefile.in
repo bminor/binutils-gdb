@@ -3,7 +3,7 @@ srcdir = @srcdir@
 
 EXECUTABLES = py-type py-value py-prettyprint py-template py-block \
 		py-symbol py-mi py-breakpoint py-inferior py-infthread \
-		py-shared python
+		py-shared python lib-types
 
 MISCELLANEOUS = py-shared-sl.sl
 
