@@ -385,7 +385,8 @@ frapy_find_sal (PyObject *self, PyObject *args)
    start the search from that block, otherwise search from the frame's
    current block (determined by examining the resume address of the
    frame).  The variable argument must be a string or an instance of a
-   gdb.Symbol.  The block argument must be an instance of gdb.Block.  */
+   gdb.Symbol.  The block argument must be an instance of gdb.Block.  Returns
+   NULL on error, with a python exception set.  */
 static PyObject *
 frapy_read_var (PyObject *self, PyObject *args)
 {

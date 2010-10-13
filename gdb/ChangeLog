@@ -1,3 +1,42 @@
+2010-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* python/py-breakpoint.c (bppy_set_condition): New comment.
+	* python/py-cmd.c (cmdpy_function): Call also gdbpy_print_stack for
+	failed PyUnicode_Decode.
+	(cmdpy_completer): Skip element for failed
+	python_string_to_host_string.
+	(cmdpy_init): Return -1 on failed python_string_to_host_string.
+	* python/py-frame.c (frapy_read_var): Extend the function comment.
+	* python/py-function.c (fnpy_init): Return -1 on failed
+	python_string_to_host_string.
+	* python/py-inferior.c (infpy_read_memory, infpy_write_memory): Extend
+	the function comment.
+	(infpy_search_memory): Extend the function comment.  Remove the
+	PyErr_SetString call on already set error state.
+	* python/py-param.c (set_parameter_value): Extend the function
+	comment.  Return -1 on failed python_string_to_host_string, twice.
+	(set_attr): Extend the function comment.
+	(compute_enum_values): Extend the function comment.  New variable
+	back_to.  Protect self->enumeration by BACK_TO cleanups.  Return 0 on
+	failed python_string_to_host_string.
+	(get_doc_string): Call gdbpy_print_stack on failed
+	python_string_to_host_string.
+	(parmpy_init): Extend the function comment.
+	* python/py-prettyprint.c (pretty_print_one_value): Likewise.
+	(gdbpy_get_display_hint, print_children): Call gdbpy_print_stack on
+	failed python_string_to_host_string.
+	* python/py-value.c (valpy_new, valpy_getitem, valpy_call)
+	(valpy_binop, valpy_richcompare): Extend the function comment.
+	* python/python.c
+	(struct python_env) <error_type, error_value, error_traceback>: New
+	fields.
+	(restore_python_env): Handle PyErr_Occurred.  Call PyErr_Restore.
+	(ensure_python_env): Call PyErr_Fetch.
+	* varobj.c (update_dynamic_varobj_children): Call gdbpy_print_stack on
+	failed convert_value_from_python.
+	(value_get_print_value): Call gdbpy_print_stack on failed
+	python_string_to_target_python_string.
+
 2010-10-12  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-prettyprint.c (search_pp_list): Fix error checking.

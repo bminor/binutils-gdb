@@ -110,8 +110,8 @@ get_attr (PyObject *obj, PyObject *attr_name)
   return PyObject_GenericGetAttr (obj, attr_name);
 }
 
-/* Set a parameter value from a Python value.  Return 0 on success, -1
-   on failure.  */
+/* Set a parameter value from a Python value.  Return 0 on success.  Returns
+   -1 on error, with a python exception set.  */
 static int
 set_parameter_value (parmpy_object *self, PyObject *value)
 {
@@ -132,17 +132,25 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 
 	  return -1;
 	}
-      if (self->value.stringval)
-	xfree (self->value.stringval);
       if (value == Py_None)
 	{
+	  xfree (self->value.stringval);
 	  if (self->type == var_optional_filename)
 	    self->value.stringval = xstrdup ("");
 	  else
 	    self->value.stringval = NULL;
 	}
       else
-	self->value.stringval = python_string_to_host_string (value);
+	{
+	  char *string;
+
+	  string = python_string_to_host_string (value);
+	  if (string == NULL)
+	    return -1;
+
+	  xfree (self->value.stringval);
+	  self->value.stringval = string;
+	}
       break;
 
     case var_enum:
@@ -158,6 +166,8 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	  }
 
 	str = python_string_to_host_string (value);
+	if (str == NULL)
+	  return -1;
 	for (i = 0; self->enumeration[i]; ++i)
 	  if (! strcmp (self->enumeration[i], str))
 	    break;
@@ -258,7 +268,7 @@ set_parameter_value (parmpy_object *self, PyObject *value)
   return 0;
 }
 
-/* Set an attribute.  */
+/* Set an attribute.  Returns -1 on error, with a python exception set.  */
 static int
 set_attr (PyObject *obj, PyObject *attr_name, PyObject *val)
 {
@@ -358,12 +368,13 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
     }
 }
 
-/* A helper which computes enum values.  Returns 1 on success, 0 on
-   error.  */
+/* A helper which computes enum values.  Returns 1 on success.  Returns 0 on
+   error, with a python exception set.  */
 static int
 compute_enum_values (parmpy_object *self, PyObject *enum_values)
 {
   Py_ssize_t size, i;
+  struct cleanup *back_to;
 
   if (! enum_values)
     {
@@ -390,6 +401,7 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
     }
 
   self->enumeration = xmalloc ((size + 1) * sizeof (char *));
+  back_to = make_cleanup (free_current_contents, &self->enumeration);
   memset (self->enumeration, 0, (size + 1) * sizeof (char *));
 
   for (i = 0; i < size; ++i)
@@ -397,16 +409,27 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
       PyObject *item = PySequence_GetItem (enum_values, i);
 
       if (! item)
-	return 0;
+	{
+	  do_cleanups (back_to);
+	  return 0;
+	}
       if (! gdbpy_is_string (item))
 	{
+	  do_cleanups (back_to);
 	  PyErr_SetString (PyExc_RuntimeError, 
 			   _("The enumeration item not a string."));
 	  return 0;
 	}
       self->enumeration[i] = python_string_to_host_string (item);
+      if (self->enumeration[i] == NULL)
+	{
+	  do_cleanups (back_to);
+	  return 0;
+	}
+      make_cleanup (xfree, (char *) self->enumeration[i]);
     }
 
+  discard_cleanups (back_to);
   return 1;
 }
 
@@ -422,7 +445,11 @@ get_doc_string (PyObject *object, PyObject *attr)
       PyObject *ds_obj = PyObject_GetAttr (object, attr);
 
       if (ds_obj && gdbpy_is_string (ds_obj))
-	result = python_string_to_host_string (ds_obj);
+	{
+	  result = python_string_to_host_string (ds_obj);
+	  if (result == NULL)
+	    gdbpy_print_stack ();
+	}
     }
   if (! result)
     result = xstrdup (_("This command is not documented."));
@@ -449,8 +476,9 @@ get_doc_string (PyObject *object, PyObject *attr)
 
    The documentation for the parameter is taken from the doc string
    for the python class.
-   
-*/
+
+   Returns -1 on error, with a python exception set.  */
+
 static int
 parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 {

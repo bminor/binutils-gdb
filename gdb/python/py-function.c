@@ -113,7 +113,14 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
     {
       PyObject *ds_obj = PyObject_GetAttrString (self, "__doc__");
       if (ds_obj && gdbpy_is_string (ds_obj))
-	docstring = python_string_to_host_string (ds_obj);
+	{
+	  docstring = python_string_to_host_string (ds_obj);
+	  if (docstring == NULL)
+	    {
+	      Py_DECREF (self);
+	      return -1;
+	    }
+	}
     }
   if (! docstring)
     docstring = xstrdup (_("This function is not documented."));

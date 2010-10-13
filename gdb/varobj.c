@@ -1052,6 +1052,8 @@ update_dynamic_varobj_children (struct varobj *var,
 	    error (_("Invalid item from the child list"));
 
 	  v = convert_value_from_python (py_v);
+	  if (v == NULL)
+	    gdbpy_print_stack ();
 	  install_dynamic_child (var, can_mention ? changed : NULL,
 				 can_mention ? new : NULL,
 				 can_mention ? unchanged : NULL,
@@ -2540,6 +2542,8 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 			type = builtin_type (gdbarch)->builtin_char;
 			Py_DECREF (py_str);
 		      }
+		    else
+		      gdbpy_print_stack ();
 		  }
 		Py_DECREF (output);
 	      }

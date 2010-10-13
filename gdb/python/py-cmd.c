@@ -139,7 +139,10 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
     args = "";
   argobj = PyUnicode_Decode (args, strlen (args), host_charset (), NULL);
   if (! argobj)
-    error (_("Could not convert arguments to Python string."));
+    {
+      gdbpy_print_stack ();
+      error (_("Could not convert arguments to Python string."));
+    }
 
   ttyobj = from_tty ? Py_True : Py_False;
   Py_INCREF (ttyobj);
@@ -256,6 +259,12 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
 	      continue;
 	    }
 	  result[out] = python_string_to_host_string (elt);
+	  if (result[out] == NULL)
+	    {
+	      /* Skip problem elements.  */
+	      PyErr_Clear ();
+	      continue;
+	    }
 	  ++out;
 	}
       result[out] = NULL;
@@ -466,7 +475,15 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       PyObject *ds_obj = PyObject_GetAttr (self, gdbpy_doc_cst);
 
       if (ds_obj && gdbpy_is_string (ds_obj))
-	docstring = python_string_to_host_string (ds_obj);
+	{
+	  docstring = python_string_to_host_string (ds_obj);
+	  if (docstring == NULL)
+	    {
+	      xfree (cmd_name);
+	      xfree (pfx_name);
+	      return -1;
+	    }
+	}
     }
   if (! docstring)
     docstring = xstrdup (_("This command is not documented."));

@@ -420,6 +420,9 @@ bppy_get_condition (PyObject *self, void *closure)
   return PyString_Decode (str, strlen (str), host_charset (), NULL);
 }
 
+/* Returns 0 on success.  Returns -1 on error, with a python exception set.
+   */
+
 static int
 bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
 {

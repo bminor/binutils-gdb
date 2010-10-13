@@ -79,12 +79,23 @@ struct python_env
   PyGILState_STATE state;
   struct gdbarch *gdbarch;
   const struct language_defn *language;
+  PyObject *error_type, *error_value, *error_traceback;
 };
 
 static void
 restore_python_env (void *p)
 {
   struct python_env *env = (struct python_env *)p;
+
+  /* Leftover Python error is forbidden by Python Exception Handling.  */
+  if (PyErr_Occurred ())
+    {
+      /* This order is similar to the one calling error afterwards. */
+      gdbpy_print_stack ();
+      warning (_("internal error: Unhandled Python exception"));
+    }
+
+  PyErr_Restore (env->error_type, env->error_value, env->error_traceback);
 
   PyGILState_Release (env->state);
   python_gdbarch = env->gdbarch;
@@ -108,6 +119,9 @@ ensure_python_env (struct gdbarch *gdbarch,
   python_gdbarch = gdbarch;
   python_language = language;
 
+  /* Save it and ensure ! PyErr_Occurred () afterwards.  */
+  PyErr_Fetch (&env->error_type, &env->error_value, &env->error_traceback);
+  
   return make_cleanup (restore_python_env, env);
 }
 

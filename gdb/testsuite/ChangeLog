@@ -1,3 +1,8 @@
+2010-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-error.exp: New file.
+	* gdb.python/py-error.py: New file.
+
 2010-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/break-interp.exp (test_ld): Replace gdb_expect by
