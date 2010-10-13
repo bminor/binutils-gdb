@@ -33,15 +33,8 @@
 #include "typeprint.h"
 #include "cp-abi.h"
 #include "jv-lang.h"
-
 #include "gdb_string.h"
 #include <errno.h>
-
-static void cp_type_print_method_args (struct type *mtype, char *prefix,
-				       char *varstring, int staticp,
-				       struct ui_file *stream);
-
-static void cp_type_print_derivation_info (struct ui_file *, struct type *);
 
 static void c_type_print_varspec_prefix (struct type *, struct ui_file *, int,
 				         int, int);
@@ -50,9 +43,6 @@ static void c_type_print_varspec_prefix (struct type *, struct ui_file *, int,
 static void c_type_print_modifier (struct type *, struct ui_file *,
 				   int, int);
 
-
-
-
 /* LEVEL is the depth to indent lines by.  */
 
 void
@@ -229,7 +219,7 @@ cp_type_print_method_args (struct type *mtype, char *prefix, char *varstring,
    between a trailing qualifier and a field, variable, or function
    name.  */
 
-void
+static void
 c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 			     int show, int passed_a_ptr, int need_post_space)
 {
@@ -325,7 +315,8 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
    and address space id if present.
    TYPE is a pointer to the type being printed out.
    STREAM is the output destination.
-   NEED_SPACE = 1 indicates an initial white space is needed */
+   NEED_PRE_SPACE = 1 indicates an initial white space is needed.
+   NEED_POST_SPACE = 1 indicates a final white space is needed.  */
 
 static void
 c_type_print_modifier (struct type *type, struct ui_file *stream,
@@ -426,11 +417,11 @@ c_type_print_args (struct type *type, struct ui_file *stream,
   fprintf_filtered (stream, ")");
 }
 
-
 /* Return true iff the j'th overloading of the i'th method of TYPE
    is a type conversion operator, like `operator int () { ... }'.
    When listing a class's methods, we don't print the return type of
    such operators.  */
+
 static int
 is_type_conversion_operator (struct type *type, int i, int j)
 {
@@ -479,7 +470,6 @@ is_type_conversion_operator (struct type *type, int i, int j)
   return 0;
 }
 
-
 /* Given a C++ qualified identifier QID, strip off the qualifiers,
    yielding the unqualified name.  The return value is a pointer into
    the original string.
@@ -487,6 +477,7 @@ is_type_conversion_operator (struct type *type, int i, int j)
    It's a pity we don't have this information in some more structured
    form.  Even the author of this function feels that writing little
    parsers like this everywhere is stupid.  */
+
 static char *
 remove_qualifiers (char *qid)
 {
@@ -561,7 +552,6 @@ remove_qualifiers (char *qid)
        whole thing an unqualified identifier.  */
     return qid;
 }
-
 
 /* Print any array sizes, function arguments or close parentheses
    needed after the variable name (to describe its type).

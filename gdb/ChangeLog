@@ -1,3 +1,11 @@
+2010-10-13  Doug Evans  <dje@google.com>
+
+	* c-typeprint.c: Whitespace cleanup.
+	(cp_type_print_method_args): Remove unnecessary forward decl.
+	(cp_type_print_derivation_info): Ditto.
+	(c_type_print_varspec_prefix): Mark as static at definition.
+	(c_type_print_modifier): Fix arg descriptions.
+
 2010-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* python/py-breakpoint.c (bppy_set_condition): New comment.
