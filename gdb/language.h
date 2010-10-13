@@ -418,7 +418,7 @@ extern enum language set_language (enum language);
 #define LA_GET_STRING(value, buffer, length, chartype, encoding) \
   (current_language->la_get_string(value, buffer, length, chartype, encoding))
 
-#define LA_PRINT_ARRAY_INDEX(index_value, stream, optins) \
+#define LA_PRINT_ARRAY_INDEX(index_value, stream, options) \
   (current_language->la_print_array_index(index_value, stream, options))
 
 /* Test a character to decide whether it can be printed in literal form

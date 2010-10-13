@@ -1,3 +1,7 @@
+2010-10-13  Tom Tromey  <tromey@redhat.com>
+
+	* language.h (LA_PRINT_ARRAY_INDEX): Fix argument name.
+
 2010-10-13  Doug Evans  <dje@google.com>
 
 	* c-typeprint.c: Whitespace cleanup.
