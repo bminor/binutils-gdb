@@ -66,7 +66,7 @@ Set_parameters_target_once set_parameters_target_once(&static_parameters);
 Parameters::Parameters()
    : errors_(NULL), options_(NULL), target_(NULL),
      doing_static_link_valid_(false), doing_static_link_(false),
-     debug_(0),
+     debug_(0), incremental_mode_(General_options::INCREMENTAL_OFF),
      set_parameters_target_once_(&set_parameters_target_once)
  {
  }
@@ -86,6 +86,9 @@ Parameters::set_options(const General_options* options)
   // For speed, we convert the options() debug var from a string to an
   // enum (from debug.h).
   this->debug_ = debug_string_to_enum(this->options().debug());
+  // Set incremental_mode_ based on the value of the --incremental option.
+  // We copy the mode into parameters because it can change based on inputs.
+  this->incremental_mode_ = this->options().incremental_mode();
   // If --verbose is set, it acts as "--debug=files".
   if (options->verbose())
     this->debug_ |= DEBUG_FILES;
@@ -208,6 +211,38 @@ Parameters::check_target_endianness()
     }
 }
 
+// Set the incremental linking mode to INCREMENTAL_FULL.  Used when
+// the linker determines that an incremental update is not possible.
+// Returns false if the incremental mode was INCREMENTAL_UPDATE,
+// indicating that the linker should exit if an update is not possible.
+
+bool
+Parameters::set_incremental_full()
+{
+  gold_assert(this->incremental_mode_ != General_options::INCREMENTAL_OFF);
+  if (this->incremental_mode_ == General_options::INCREMENTAL_UPDATE)
+    return false;
+  this->incremental_mode_ = General_options::INCREMENTAL_FULL;
+  return true;
+}
+
+// Return true if we need to prepare incremental linking information.
+
+bool
+Parameters::incremental() const
+{
+  return this->incremental_mode_ != General_options::INCREMENTAL_OFF;
+}
+
+// Return true if we are doing an incremental update.
+
+bool
+Parameters::incremental_update() const
+{
+  return (this->incremental_mode_ == General_options::INCREMENTAL_UPDATE
+	  || this->incremental_mode_ == General_options::INCREMENTAL_AUTO);
+}
+
 void
 set_parameters_errors(Errors* errors)
 { static_parameters.set_errors(errors); }
@@ -226,6 +261,14 @@ set_parameters_target(Target* target)
 void
 set_parameters_doing_static_link(bool doing_static_link)
 { static_parameters.set_doing_static_link(doing_static_link); }
+
+// Set the incremental linking mode to INCREMENTAL_FULL.  Used when
+// the linker determines that an incremental update is not possible.
+// Returns false if the incremental mode was INCREMENTAL_UPDATE,
+// indicating that the linker should exit if an update is not possible.
+bool
+set_parameters_incremental_full()
+{ return static_parameters.set_incremental_full(); }
 
 // Force the target to be valid by using the default.  Use the
 // --oformat option is set; this supports the x86_64 kernel build,

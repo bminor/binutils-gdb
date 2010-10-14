@@ -218,7 +218,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
   this->special_output_list_.reserve(2);
 
   // Initialize structure needed for an incremental build.
-  if (parameters->options().incremental())
+  if (parameters->incremental())
     this->incremental_inputs_ = new Incremental_inputs;
 
   // The section name pool is worth optimizing in all cases, because

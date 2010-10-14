@@ -317,6 +317,34 @@ General_options::parse_defsym(const char*, const char* arg,
 }
 
 void
+General_options::parse_incremental(const char*, const char*,
+                                   Command_line*)
+{
+  this->incremental_mode_ = INCREMENTAL_AUTO;
+}
+
+void
+General_options::parse_no_incremental(const char*, const char*,
+                                      Command_line*)
+{
+  this->incremental_mode_ = INCREMENTAL_OFF;
+}
+
+void
+General_options::parse_incremental_full(const char*, const char*,
+					Command_line*)
+{
+  this->incremental_mode_ = INCREMENTAL_FULL;
+}
+
+void
+General_options::parse_incremental_update(const char*, const char*,
+					  Command_line*)
+{
+  this->incremental_mode_ = INCREMENTAL_UPDATE;
+}
+
+void
 General_options::parse_incremental_changed(const char*, const char*,
                                            Command_line*)
 {
@@ -852,6 +880,7 @@ General_options::General_options()
     do_demangle_(false),
     plugins_(NULL),
     dynamic_list_(),
+    incremental_mode_(INCREMENTAL_OFF),
     incremental_disposition_(INCREMENTAL_CHECK),
     implicit_incremental_(false),
     excluded_libs_(),
@@ -1137,7 +1166,7 @@ General_options::finalize()
 		 "[0.0, 1.0)"),
 	       this->hash_bucket_empty_fraction());
 
-  if (this->implicit_incremental_ && !this->incremental())
+  if (this->implicit_incremental_ && this->incremental_mode_ == INCREMENTAL_OFF)
     gold_fatal(_("Options --incremental-changed, --incremental-unchanged, "
                  "--incremental-unknown require the use of --incremental"));
 

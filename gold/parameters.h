@@ -144,6 +144,20 @@ class Parameters
   Target_size_endianness
   size_and_endianness() const;
 
+  // Set the incremental linking mode to INCREMENTAL_FULL.  Used when
+  // the linker determines that an incremental update is not possible.
+  // Returns false if the incremental mode was INCREMENTAL_UPDATE,
+  // indicating that the linker should exit if an update is not possible.
+  bool
+  set_incremental_full();
+
+  // Return true if we need to prepare incremental linking information.
+  bool
+  incremental() const;
+
+  // Return true if we are doing an incremental update.
+  bool
+  incremental_update() const;
 
  private:
   void
@@ -160,6 +174,7 @@ class Parameters
   bool doing_static_link_valid_;
   bool doing_static_link_;
   int debug_;
+  int incremental_mode_;
   Set_parameters_target_once* set_parameters_target_once_;
 };
 
@@ -180,6 +195,9 @@ set_parameters_target(Target* target);
 
 extern void
 set_parameters_doing_static_link(bool doing_static_link);
+
+extern bool
+set_parameters_incremental_full();
 
 // Ensure that the target to be valid by using the default target if
 // necessary.

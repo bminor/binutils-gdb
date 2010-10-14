@@ -303,7 +303,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       if (!is_section_allocated
 	  && !parameters->options().relocatable()
 	  && !parameters->options().emit_relocs()
-	  && !parameters->options().incremental())
+	  && !parameters->incremental())
 	continue;
 
       if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx_)
@@ -1000,7 +1000,7 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
 	    this->emit_relocs(&relinfo, i, sh_type, prelocs, reloc_count,
 			      os, output_offset, view, address, view_size,
 			      (*pviews)[i].view, (*pviews)[i].view_size);
-	  if (parameters->options().incremental())
+	  if (parameters->incremental())
 	    this->incremental_relocs_write(&relinfo, sh_type, prelocs,
 					   reloc_count, os, output_offset, of);
 	}

@@ -178,7 +178,7 @@ queue_initial_tasks(const General_options& options,
     thread_count = cmdline.number_of_input_files();
   workqueue->set_thread_count(thread_count);
 
-  if (cmdline.options().incremental())
+  if (parameters->incremental())
     {
       Incremental_checker incremental_checker(
           parameters->options().output_file_name(),

@@ -1,3 +1,44 @@
+2010-10-14  Cary Coutant  <ccoutant@google.com>
+
+	* debug.h (DEBUG_INCREMENTAL): New flag.
+ 	(debug_string_to_enum): Add DEBUG_INCREMENTAL).
+ 	* gold.cc (queue_initial_tasks): Check parameters for incremental link
+ 	mode.
+ 	* incremental.cc (report_command_line): Ignore all forms of
+ 	--incremental.
+ 	* layout.cc (Layout::Layout): Check parameters for incremental link
+ 	mode.
+ 	* options.cc (General_options::parse_incremental): New function.
+ 	(General_options::parse_no_incremental): New function.
+ 	(General_options::parse_incremental_full): New function.
+ 	(General_options::parse_incremental_update): New function.
+ 	(General_options::incremental_mode_): New data member.
+ 	(General_options::finalize): Check incremental_mode_.
+ 	* options.h (General_options): Update help text for --incremental.
+ 	Add --no-incremental, --incremental-full, --incremental-update.
+ 	(General_options::Incremental_mode): New enum type.
+ 	(General_options::incremental_mode): New function.
+ 	(General_options::incremental_mode_): New data member.
+ 	* parameters.cc (Parameters::incremental_mode_): New data member.
+ 	(Parameters::set_options): Set incremental_mode_.
+ 	(Parameters::set_incremental_full): New function.
+ 	(Parameters::incremental): New function.
+ 	(Parameters::incremental_update): New function.
+ 	(set_parameters_incremental_full): New function.
+ 	* parameters.h (Parameters::set_incremental_full): New function.
+ 	(Parameters::incremental): New function.
+ 	(Parameters::incremental_update): New function.
+ 	(Parameters::incremental_mode_): New data member.
+ 	(set_parameters_incremental_full): New function.
+ 	* plugin.cc (Plugin_manager::add_input_file): Check parameters for
+ 	incremental link mode.
+ 	* reloc.cc (Sized_relobj::do_read_relocs): Likewise.
+ 	(Sized_relobj::do_relocate_sections): Likewise.
+ 	* testsuite/Makefile.am (incremental_test): Use --incremental-full
+ 	option.
+ 	* testsuite/Makefile.in: Regenerate.
+ 	* testsuite/incremental_test.sh: Filter all forms of --incremental.
+
 2010-10-12  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* script-sections.h (class Script_sections): Make

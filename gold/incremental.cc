@@ -401,7 +401,10 @@ Incremental_inputs::report_command_line(int argc, const char* const* argv)
   for (int i = 1; i < argc; ++i)
     {
       // Adding/removing these options should not result in a full relink.
-      if (strcmp(argv[i], "--incremental-changed") == 0
+      if (strcmp(argv[i], "--incremental") == 0
+	  || strcmp(argv[i], "--incremental-full") == 0
+	  || strcmp(argv[i], "--incremental-update") == 0
+	  || strcmp(argv[i], "--incremental-changed") == 0
 	  || strcmp(argv[i], "--incremental-unchanged") == 0
 	  || strcmp(argv[i], "--incremental-unknown") == 0)
         continue;
