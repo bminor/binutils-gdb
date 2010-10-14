@@ -40,6 +40,9 @@
 #include "ldver.h"
 #include "ldemul.h"
 #include "demangle.h"
+#ifdef ENABLE_PLUGINS
+#include "plugin.h"
+#endif /* ENABLE_PLUGINS */
 
 #ifndef PATH_SEPARATOR
 #if defined (__MSDOS__) || (defined (_WIN32) && ! defined (__CYGWIN32__))
@@ -167,7 +170,11 @@ enum option_values
   OPTION_WARN_SHARED_TEXTREL,
   OPTION_WARN_ALTERNATE_EM,
   OPTION_REDUCE_MEMORY_OVERHEADS,
-  OPTION_DEFAULT_SCRIPT
+#ifdef ENABLE_PLUGINS
+  OPTION_PLUGIN,
+  OPTION_PLUGIN_OPT,
+#endif /* ENABLE_PLUGINS */
+  OPTION_DEFAULT_SCRIPT,
 };
 
 /* The long options.  This structure is used for both the option
@@ -271,6 +278,12 @@ static const struct ld_option ld_options[] =
     'o', N_("FILE"), N_("Set output file name"), EXACTLY_TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
     'O', NULL, N_("Optimize output file"), ONE_DASH },
+#ifdef ENABLE_PLUGINS
+  { {"plugin", required_argument, NULL, OPTION_PLUGIN},
+    '\0', N_("PLUGIN"), N_("Load named plugin"), ONE_DASH },
+  { {"plugin-opt", required_argument, NULL, OPTION_PLUGIN_OPT},
+    '\0', N_("ARG"), N_("Send arg to last-loaded plugin"), ONE_DASH },
+#endif /* ENABLE_PLUGINS */
   { {"Qy", no_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for SVR4 compatibility"), ONE_DASH },
   { {"emit-relocs", no_argument, NULL, 'q'},
@@ -1040,6 +1053,16 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_OFORMAT:
 	  lang_add_output_format (optarg, NULL, NULL, 0);
 	  break;
+#ifdef ENABLE_PLUGINS
+	case OPTION_PLUGIN:
+	  if (plugin_opt_plugin (optarg))
+	    einfo(_("%P%F: bad -plugin option\n"));
+	  break;
+	case OPTION_PLUGIN_OPT:
+	  if (plugin_opt_plugin_arg (optarg))
+	    einfo(_("%P%F: bad -plugin-opt option\n"));
+	  break;
+#endif /* ENABLE_PLUGINS */
 	case 'q':
 	  link_info.emitrelocations = TRUE;
 	  break;
@@ -1517,6 +1540,12 @@ parse_args (unsigned argc, char **argv)
   if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
     /* FIXME: Should we allow emulations a chance to set this ?  */
     link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
+
+#ifdef ENABLE_PLUGINS
+  /* Now all the plugin arguments have been gathered, we can load them.  */
+  if (plugin_load_plugins ())
+    einfo (_("%P%F: %s: error loading plugin\n"), plugin_error_plugin ());
+#endif /* ENABLE_PLUGINS */
 }
 
 /* Add the (colon-separated) elements of DIRLIST_PTR to the

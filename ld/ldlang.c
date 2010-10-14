@@ -40,6 +40,10 @@
 #include "fnmatch.h"
 #include "demangle.h"
 #include "hashtab.h"
+#include "libbfd.h"
+#ifdef ENABLE_PLUGINS
+#include "plugin.h"
+#endif /* ENABLE_PLUGINS */
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
@@ -2701,6 +2705,7 @@ load_symbols (lang_input_statement_type *entry,
 
 	  for (;;)
 	    {
+	      bfd *subsbfd;
 	      member = bfd_openr_next_archived_file (entry->the_bfd, member);
 
 	      if (member == NULL)
@@ -2713,11 +2718,15 @@ load_symbols (lang_input_statement_type *entry,
 		  loaded = FALSE;
 		}
 
+	      subsbfd = NULL;
 	      if (! ((*link_info.callbacks->add_archive_element)
-		     (&link_info, member, "--whole-archive")))
+		     (&link_info, member, "--whole-archive", &subsbfd)))
 		abort ();
 
-	      if (! bfd_link_add_symbols (member, &link_info))
+	      /* Potentially, the add_archive_element hook may have set a
+		 substitute BFD for us.  */
+	      if (! bfd_link_add_symbols (subsbfd ? subsbfd : member,
+					&link_info))
 		{
 		  einfo (_("%F%B: could not read symbols: %E\n"), member);
 		  loaded = FALSE;
@@ -6347,6 +6356,25 @@ lang_process (void)
   /* Create a bfd for each input file.  */
   current_target = default_target;
   open_input_bfds (statement_list.head, FALSE);
+
+#ifdef ENABLE_PLUGINS
+  {
+    union lang_statement_union **listend;
+    /* Now all files are read, let the plugin(s) decide if there
+       are any more to be added to the link before we call the
+       emulation's after_open hook.  */
+    listend = statement_list.tail;
+    ASSERT (!*listend);
+    if (plugin_call_all_symbols_read ())
+      einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
+	plugin_error_plugin ());
+    /* If any new files were added, they will be on the end of the
+       statement list, and we can open them now by getting open_input_bfds
+       to carry on from where it ended last time.  */
+    if (*listend)
+      open_input_bfds (*listend, FALSE);
+  }
+#endif /* ENABLE_PLUGINS */
 
   link_info.gc_sym_list = &entry_symbol;
   if (entry_symbol.name == NULL)

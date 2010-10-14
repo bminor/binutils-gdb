@@ -159,8 +159,17 @@ AC_SUBST(HOSTING_LIBS)
 AC_SUBST(NATIVE_LIB_DIRS)
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h elf-hints.h limits.h sys/param.h)
+AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h)
 AC_CHECK_FUNCS(glob mkstemp realpath sbrk waitpid)
+AC_CHECK_FUNCS(open lseek close)
 AC_HEADER_DIRENT
+
+# Check for dlopen support and enable plugins if possible.
+enable_plugins=yes
+AC_CHECK_HEADER([dlfcn.h],[],[enable_plugins=no],[AC_INCLUDES_DEFAULT])
+AC_SEARCH_LIBS([dlopen],[dl],[],[enable_plugins=no],[])
+AC_CHECK_FUNCS([dlopen dlsym dlclose],[],[enable_plugins=no])
+AM_CONDITIONAL([ENABLE_PLUGINS], [test x$enable_plugins = xyes])
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
 AC_CACHE_VAL(ld_cv_decl_getopt_unistd_h,

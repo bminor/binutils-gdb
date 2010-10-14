@@ -1,3 +1,61 @@
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 6/6).
+	* ld-plugin/plugin-10.d: New dump test control script.
+	* ld-plugin/plugin-11.d: Likewise.
+	* ld-plugin/plugin.exp: Run them.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 5/6).
+	* ld-plugin/plugin-ignore.d: New dump test control script.
+	* ld-plugin/plugin-vis-1.d: Likewise.
+	* ld-plugin/plugin.exp: Add list of ELF-only tests and run them if
+	testing on an ELF target.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 4/6).
+	* ld-plugin/plugin-9.d: New testcase.
+	* ld-plugin/plugin.exp: Invoke it.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 3/6).
+	* ld-plugin/plugin-8.d: New testcase.
+	* ld-plugin/plugin.exp: Invoke it.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 2/6).
+	* ld-plugin/plugin-3.d: Enable regexes for new functionality.
+	* ld-plugin/plugin-5.d: Likewise.
+	* ld-plugin/plugin-6.d: New testcase.
+	* ld-plugin/plugin-7.d: Likewise.
+	* ld-plugin/plugin.exp: Use 'nm' on compiled test objects to determine
+	whether symbols in plugin arguments need an underscore prefix.  Add
+	new plugin-6.d and plugin-7.d testcases.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 1/6).
+	* ld-bootstrap/bootstrap.exp: Skip static tests also if LD plugins
+	are enabled.
+	* lib/ld-lib.exp (proc regexp_diff): Extend verbose debug output.
+	(proc set_file_contents): Write a file with the supplied content.
+	(run_ld_link_tests): Add new 'ld' action to test linker output.
+	(proc check_plugin_api_available): Return true if linker under test
+	supports the plugin API.
+	* ld-plugin/func.c: New test source file.
+	* ld-plugin/main.c: Likewise.
+	* ld-plugin/text.c: Likewise.
+	* ld-plugin/plugin-1.d: New dump test output pattern script.
+	* ld-plugin/plugin-2.d: Likewise.
+	* ld-plugin/plugin-3.d: Likewise.
+	* ld-plugin/plugin-4.d: Likewise.
+	* ld-plugin/plugin-5.d: Likewise.
+	* ld-plugin/plugin.exp: New test control script.
+
 2010-10-11  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/orphan-region.d: xfail frv-*-*.

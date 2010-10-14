@@ -3509,6 +3509,58 @@ ecoff_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   return FALSE;
 }
 
+/* Factored out from ecoff_link_check_archive_element.  */
+
+static bfd_boolean
+read_ext_syms_and_strs (HDRR **symhdr, bfd_size_type *external_ext_size,
+	bfd_size_type *esize, void **external_ext, char **ssext, bfd *abfd,
+	const struct ecoff_backend_data * const backend)
+{
+  if (! ecoff_slurp_symbolic_header (abfd))
+    return FALSE;
+
+  /* If there are no symbols, we don't want it.  */
+  if (bfd_get_symcount (abfd) == 0)
+    return TRUE;
+
+  *symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
+
+  *external_ext_size = backend->debug_swap.external_ext_size;
+  *esize = (*symhdr)->iextMax * *external_ext_size;
+  *external_ext = bfd_malloc (*esize);
+  if (*external_ext == NULL && *esize != 0)
+    return FALSE;
+
+  if (bfd_seek (abfd, (file_ptr) (*symhdr)->cbExtOffset, SEEK_SET) != 0
+      || bfd_bread (*external_ext, *esize, abfd) != *esize)
+    return FALSE;
+
+  *ssext = (char *) bfd_malloc ((bfd_size_type) (*symhdr)->issExtMax);
+  if (*ssext == NULL && (*symhdr)->issExtMax != 0)
+    return FALSE;
+
+  if (bfd_seek (abfd, (file_ptr) (*symhdr)->cbSsExtOffset, SEEK_SET) != 0
+      || (bfd_bread (*ssext, (bfd_size_type) (*symhdr)->issExtMax, abfd)
+	  != (bfd_size_type) (*symhdr)->issExtMax))
+    return FALSE;
+  return TRUE;
+}
+
+static bfd_boolean
+reread_ext_syms_and_strs (HDRR **symhdr, bfd_size_type *external_ext_size,
+	bfd_size_type *esize, void **external_ext, char **ssext, bfd *abfd,
+	const struct ecoff_backend_data * const backend)
+{
+  if (*external_ext != NULL)
+    free (*external_ext);
+  *external_ext = NULL;
+  if (*ssext != NULL)
+    free (*ssext);
+  *ssext = NULL;
+  return read_ext_syms_and_strs (symhdr, external_ext_size, esize,
+				external_ext, ssext, abfd, backend);
+}
+
 /* This is called if we used _bfd_generic_link_add_archive_symbols
    because we were not dealing with an ECOFF archive.  */
 
@@ -3530,34 +3582,14 @@ ecoff_link_check_archive_element (bfd *abfd,
 
   *pneeded = FALSE;
 
-  if (! ecoff_slurp_symbolic_header (abfd))
+  /* Read in the external symbols and external strings.  */
+  if (!read_ext_syms_and_strs (&symhdr, &external_ext_size, &esize,
+	&external_ext, &ssext, abfd, backend))
     goto error_return;
 
   /* If there are no symbols, we don't want it.  */
   if (bfd_get_symcount (abfd) == 0)
     goto successful_return;
-
-  symhdr = &ecoff_data (abfd)->debug_info.symbolic_header;
-
-  /* Read in the external symbols and external strings.  */
-  external_ext_size = backend->debug_swap.external_ext_size;
-  esize = symhdr->iextMax * external_ext_size;
-  external_ext = bfd_malloc (esize);
-  if (external_ext == NULL && esize != 0)
-    goto error_return;
-
-  if (bfd_seek (abfd, (file_ptr) symhdr->cbExtOffset, SEEK_SET) != 0
-      || bfd_bread (external_ext, esize, abfd) != esize)
-    goto error_return;
-
-  ssext = (char *) bfd_malloc ((bfd_size_type) symhdr->issExtMax);
-  if (ssext == NULL && symhdr->issExtMax != 0)
-    goto error_return;
-
-  if (bfd_seek (abfd, (file_ptr) symhdr->cbSsExtOffset, SEEK_SET) != 0
-      || (bfd_bread (ssext, (bfd_size_type) symhdr->issExtMax, abfd)
-	  != (bfd_size_type) symhdr->issExtMax))
-    goto error_return;
 
   /* Look through the external symbols to see if they define some
      symbol that is currently undefined.  */
@@ -3568,6 +3600,7 @@ ecoff_link_check_archive_element (bfd *abfd,
       EXTR esym;
       bfd_boolean def;
       const char *name;
+      bfd *subsbfd;
       struct bfd_link_hash_entry *h;
 
       (*swap_ext_in) (abfd, (void *) ext_ptr, &esym);
@@ -3612,9 +3645,18 @@ ecoff_link_check_archive_element (bfd *abfd,
 	continue;
 
       /* Include this element.  */
-      if (! (*info->callbacks->add_archive_element) (info, abfd, name))
+      subsbfd = NULL;
+      if (! (*info->callbacks->add_archive_element)
+					(info, abfd, name, &subsbfd))
 	goto error_return;
-      if (! ecoff_link_add_externals (abfd, info, external_ext, ssext))
+      /* Potentially, the add_archive_element hook may have set a
+	 substitute BFD for us.  */
+      if (subsbfd
+	  && !reread_ext_syms_and_strs (&symhdr, &external_ext_size, &esize,
+				&external_ext, &ssext, subsbfd, backend))
+	goto error_return;
+      if (! ecoff_link_add_externals (subsbfd ? subsbfd : abfd, info,
+				external_ext, ssext))
 	goto error_return;
 
       *pneeded = TRUE;
@@ -3691,6 +3733,7 @@ ecoff_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
       unsigned int file_offset;
       const char *name;
       bfd *element;
+      bfd *subsbfd;
 
       h = *pundef;
 
@@ -3777,9 +3820,13 @@ ecoff_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Unlike the generic linker, we know that this element provides
 	 a definition for an undefined symbol and we know that we want
 	 to include it.  We don't need to check anything.  */
-      if (! (*info->callbacks->add_archive_element) (info, element, name))
+      subsbfd = NULL;
+      if (! (*info->callbacks->add_archive_element)
+					(info, element, name, &subsbfd))
 	return FALSE;
-      if (! ecoff_link_add_object_symbols (element, info))
+      /* Potentially, the add_archive_element hook may have set a
+	 substitute BFD for us.  */
+      if (! ecoff_link_add_object_symbols (subsbfd ? subsbfd : element, info))
 	return FALSE;
 
       pundef = &(*pundef)->u.undef.next;

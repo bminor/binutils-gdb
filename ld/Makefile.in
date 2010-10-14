@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -71,14 +72,25 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
+LTLIBRARIES = $(noinst_LTLIBRARIES)
+libldtestplug_la_LIBADD =
+@ENABLE_PLUGINS_TRUE@am_libldtestplug_la_OBJECTS =  \
+@ENABLE_PLUGINS_TRUE@	libldtestplug_la-testplug.lo
+libldtestplug_la_OBJECTS = $(am_libldtestplug_la_OBJECTS)
+libldtestplug_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libldtestplug_la_CFLAGS) \
+	$(CFLAGS) $(libldtestplug_la_LDFLAGS) $(LDFLAGS) -o $@
+@ENABLE_PLUGINS_TRUE@am_libldtestplug_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
 	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
+@ENABLE_PLUGINS_TRUE@am__objects_1 = plugin.$(OBJEXT)
 am_ld_new_OBJECTS = ldgram.$(OBJEXT) ldlex-wrapper.$(OBJEXT) \
 	lexsup.$(OBJEXT) ldlang.$(OBJEXT) mri.$(OBJEXT) \
 	ldctor.$(OBJEXT) ldmain.$(OBJEXT) ldwrite.$(OBJEXT) \
 	ldexp.$(OBJEXT) ldemul.$(OBJEXT) ldver.$(OBJEXT) \
-	ldmisc.$(OBJEXT) ldfile.$(OBJEXT) ldcref.$(OBJEXT)
+	ldmisc.$(OBJEXT) ldfile.$(OBJEXT) ldcref.$(OBJEXT) \
+	$(am__objects_1)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -103,7 +115,8 @@ YLWRAP = $(top_srcdir)/../ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(YACC) $(YFLAGS) $(AM_YFLAGS)
-SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
+SOURCES = $(libldtestplug_la_SOURCES) $(ld_new_SOURCES) \
+	$(EXTRA_ld_new_SOURCES)
 INFO_DEPS = ld.info
 am__TEXINFO_TEX_DIR = $(srcdir)/$(top_srcdir)/../texinfo
 DVIS = ld.dvi
@@ -333,6 +346,16 @@ tooldir = $(exec_prefix)/$(target_alias)
 am__skiplex = 
 am__skipyacc = 
 AM_CFLAGS = $(WARN_CFLAGS)
+@ENABLE_PLUGINS_FALSE@PLUGIN_C = 
+
+# Conditionally enable the plugin interface.
+@ENABLE_PLUGINS_TRUE@PLUGIN_C = plugin.c
+@ENABLE_PLUGINS_FALSE@PLUGIN_H = 
+@ENABLE_PLUGINS_TRUE@PLUGIN_H = plugin.h
+@ENABLE_PLUGINS_FALSE@PLUGIN_OBJECT = 
+@ENABLE_PLUGINS_TRUE@PLUGIN_OBJECT = plugin.@OBJEXT@
+@ENABLE_PLUGINS_FALSE@PLUGIN_CFLAGS = 
+@ENABLE_PLUGINS_TRUE@PLUGIN_CFLAGS = -DENABLE_PLUGINS
 
 # We put the scripts in the directory $(scriptdir)/ldscripts.
 # We can't put the scripts in $(datadir) because the SEARCH_DIR
@@ -399,7 +422,7 @@ TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 		    -I $(top_srcdir)/../libiberty
 
 AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
-	@INCINTL@ $(HDEFINES) $(CFLAGS) \
+	@INCINTL@ $(HDEFINES) $(CFLAGS) $(PLUGIN_CFLAGS) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
@@ -747,11 +770,13 @@ ALL_EMUL_EXTRA_OFILES = \
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
-	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c
+	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c \
+	$(PLUGIN_C)
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
-	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h elf-hints-local.h
+	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h \
+	elf-hints-local.h $(PLUGIN_H)
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -759,7 +784,8 @@ GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 # Require an early dependency on the generated headers, as the dependency
 # tracking will not cause them to be built beforehand.
 BUILT_SOURCES = $(GENERATED_HFILES)
-OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ \
+OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ \
+	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ $(PLUGIN_OBJECT) \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
 	ldfile.@OBJEXT@ ldcref.@OBJEXT@ ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES}
 
@@ -783,10 +809,49 @@ ELF_GEN_DEPS = $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em
 EXTRA_ld_new_SOURCES = deffilep.y ldlex.l pep-dll.c pe-dll.c \
 	$(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES)
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
-	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
+	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C)
 
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
+
+# A test program for C++ constructors and destructors.
+# This test is now in the testsuite.
+#
+#cdtest: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
+#	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
+#	  cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ $(HOSTING_LIBS)
+#
+#cdtest.out: cdtest
+#	./cdtest > cdtest.tmp
+#	mv cdtest.tmp cdtest.out
+#
+#cdtest-ur.@OBJEXT@: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
+#	./ld.new $(HOSTING_EMU) -o cdtest-ur.@OBJEXT@ -Ur cdtest-main.@OBJEXT@ \
+#	  cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@
+#
+#cdtest-ur: cdtest-ur.@OBJEXT@
+#	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.@OBJEXT@ \
+#	  $(HOSTING_LIBS)
+#
+#cdtest-ur.out: cdtest-ur
+#	./cdtest-ur > cdtest-ur.tmp
+#	mv cdtest-ur.tmp cdtest-ur.out
+#
+#check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
+#	diff $(srcdir)/cdtest.exp cdtest.out
+#	diff $(srcdir)/cdtest.exp cdtest-ur.out
+#
+#.PHONY: check-cdtest
+
+# END OF CHECK TARGETS
+
+# 
+# Build a dummy plugin using libtool.
+#
+@ENABLE_PLUGINS_TRUE@noinst_LTLIBRARIES = libldtestplug.la
+@ENABLE_PLUGINS_TRUE@libldtestplug_la_SOURCES = testplug.c
+@ENABLE_PLUGINS_TRUE@libldtestplug_la_CFLAGS = -g -O2
+@ENABLE_PLUGINS_TRUE@libldtestplug_la_LDFLAGS = -no-undefined -rpath /nowhere
 MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.  We
@@ -863,6 +928,17 @@ distclean-hdr:
 	-rm -f config.h stamp-h1
 po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libldtestplug.la: $(libldtestplug_la_OBJECTS) $(libldtestplug_la_DEPENDENCIES) 
+	$(libldtestplug_la_LINK) $(am_libldtestplug_la_rpath) $(libldtestplug_la_OBJECTS) $(libldtestplug_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -1271,9 +1347,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldwrite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lexsup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug_la-testplug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mri.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-dll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pep-dll.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1295,6 +1373,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+libldtestplug_la-testplug.lo: testplug.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug_la_CFLAGS) $(CFLAGS) -MT libldtestplug_la-testplug.lo -MD -MP -MF $(DEPDIR)/libldtestplug_la-testplug.Tpo -c -o libldtestplug_la-testplug.lo `test -f 'testplug.c' || echo '$(srcdir)/'`testplug.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libldtestplug_la-testplug.Tpo $(DEPDIR)/libldtestplug_la-testplug.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='testplug.c' object='libldtestplug_la-testplug.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libldtestplug_la_CFLAGS) $(CFLAGS) -c -o libldtestplug_la-testplug.lo `test -f 'testplug.c' || echo '$(srcdir)/'`testplug.c
 
 .l.c:
 	$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
@@ -1650,7 +1735,8 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(INFO_DEPS) $(PROGRAMS) $(MANS) config.h
+all-am: Makefile $(INFO_DEPS) $(LTLIBRARIES) $(PROGRAMS) $(MANS) \
+		config.h
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
@@ -1695,7 +1781,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-aminfo clean-binPROGRAMS clean-generic clean-libtool \
-	mostlyclean-am
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1855,13 +1941,13 @@ uninstall-man: uninstall-man1
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-DEJAGNU check-am clean \
 	clean-aminfo clean-binPROGRAMS clean-generic clean-libtool \
-	ctags ctags-recursive dist-info distclean distclean-DEJAGNU \
-	distclean-compile distclean-generic distclean-hdr \
-	distclean-libtool distclean-local distclean-tags dvi dvi-am \
-	html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am \
-	install-data-local install-dvi install-dvi-am install-exec \
-	install-exec-am install-exec-local install-html \
+	clean-noinstLTLIBRARIES ctags ctags-recursive dist-info \
+	distclean distclean-DEJAGNU distclean-compile \
+	distclean-generic distclean-hdr distclean-libtool \
+	distclean-local distclean-tags dvi dvi-am html html-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-data-local install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-local install-html \
 	install-html-am install-info install-info-am install-man \
 	install-man1 install-pdf install-pdf-am install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
@@ -3277,37 +3363,6 @@ bootstrap: ld3$(EXEEXT)
 	cmp ld2$(EXEEXT) ld3$(EXEEXT)
 
 .PHONY: bootstrap
-
-# A test program for C++ constructors and destructors.
-# This test is now in the testsuite.
-#
-#cdtest: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
-#	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
-#	  cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ $(HOSTING_LIBS)
-#
-#cdtest.out: cdtest
-#	./cdtest > cdtest.tmp
-#	mv cdtest.tmp cdtest.out
-#
-#cdtest-ur.@OBJEXT@: cdtest-main.@OBJEXT@ cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@ ld.new
-#	./ld.new $(HOSTING_EMU) -o cdtest-ur.@OBJEXT@ -Ur cdtest-main.@OBJEXT@ \
-#	  cdtest-bar.@OBJEXT@ cdtest-foo.@OBJEXT@
-#
-#cdtest-ur: cdtest-ur.@OBJEXT@
-#	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.@OBJEXT@ \
-#	  $(HOSTING_LIBS)
-#
-#cdtest-ur.out: cdtest-ur
-#	./cdtest-ur > cdtest-ur.tmp
-#	mv cdtest-ur.tmp cdtest-ur.out
-#
-#check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
-#	diff $(srcdir)/cdtest.exp cdtest.out
-#	diff $(srcdir)/cdtest.exp cdtest-ur.out
-#
-#.PHONY: check-cdtest
-
-# END OF CHECK TARGETS
 
 # DOCUMENTATION TARGETS
 # Manual configuration file; not usually attached to normal configuration,

@@ -1151,6 +1151,7 @@ proc regexp_diff { file_1 file_2 } {
         } else {
             verbose "regexp \"^$line_b$\"\nline   \"$line_a\"" 3
             if ![regexp "^$line_b$" "$line_a"] {
+		verbose "regexp_diff match failure\n" 3
 		send_log "regexp_diff match failure\n"
 		send_log "regexp \"^$line_b$\"\nline   \"$line_a\"\n"
 		set differences 1
@@ -1185,6 +1186,12 @@ proc file_contents { filename } {
     return $contents
 }
 
+proc set_file_contents { filename contents } {
+    set file [open $filename w]
+    puts $file "$contents"
+    close $file
+}
+
 # Create an archive using ar
 #
 proc ar_simple_create { ar aropts target objects } {
@@ -1211,6 +1218,10 @@ proc ar_simple_create { ar aropts target objects } {
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
 # nm: Apply nm options on result.  Compare with regex (last arg).
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
+# ld: Don't apply anything on result.  Compare output during linking with 
+#     regex (second arg).  Note that this *must* be the first action if it
+#     is to be used at all; in all other cases, any output from the linker
+#     during linking is treated as a sign of an error and FAILs the test.
 #
 proc run_ld_link_tests { ldtests } {
     global ld
@@ -1225,6 +1236,7 @@ proc run_ld_link_tests { ldtests } {
     global CC
     global CFLAGS
     global runtests
+    global exec_output
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -1242,6 +1254,8 @@ proc run_ld_link_tests { ldtests } {
 	set objfiles {}
 	set is_unresolved 0
 	set failed 0
+	set maybe_failed 0
+	set ld_output ""
 
 #	verbose -log "Testname is $testname"
 #	verbose -log "ld_options is $ld_options"
@@ -1284,8 +1298,8 @@ proc run_ld_link_tests { ldtests } {
 		set failed 0
 	    }
 	} elseif { ![ld_simple_link $ld $binfile "-L$srcdir/$subdir $ld_options $objfiles"] } {
-	    fail $testname
-	    set failed 1
+	    set maybe_failed 1
+	    set ld_output "$exec_output"
 	} else {
 	    set failed 0
 	}
@@ -1306,6 +1320,8 @@ proc run_ld_link_tests { ldtests } {
 		        { set dump_prog $nm }
 		    readelf
 		        { set dump_prog $READELF }
+		    ld
+		        { set dump_prog "ld" }
 		    default
 			{
 			    perror "Unrecognized action $action"
@@ -1314,7 +1330,21 @@ proc run_ld_link_tests { ldtests } {
 			}
 		    }
 
-		if { $dump_prog != "" } {
+		if { $action == "ld" } {
+		    set dumpfile [lindex $actionlist 1]
+		    verbose "dumpfile is $dumpfile"
+		    set_file_contents "tmpdir/ld.messages" "$ld_output"
+		    verbose "ld.messages has '[file_contents tmpdir/ld.messages]'"
+		    if { [regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$dumpfile"] } then {
+			verbose "output is $ld_output" 2
+			set failed 1
+			break
+		    }
+		    set maybe_failed 0
+		} elseif { $maybe_failed != 0 } {
+		    set failed 1
+		    break
+		} elseif { $dump_prog != "" } {
 		    set dumpfile [lindex $actionlist 2]
 		    set binary $dump_prog
 
@@ -1718,6 +1748,22 @@ proc check_gc_sections_available { } {
 	}
     }
     return $gc_sections_available_saved
+}
+
+# Returns true if the target ld supports the plugin API.
+proc check_plugin_api_available { } {
+    global plugin_api_available_saved
+    global ld
+    if {![info exists plugin_api_available_saved]} {
+	# Check if the ld used by gcc supports --plugin.
+	set ld_output [remote_exec host $ld "--help"]
+	if { [ string first "-plugin" $ld_output ] >= 0 } {
+	    set plugin_api_available_saved 1
+	} else {
+	    set plugin_api_available_saved 0
+	}
+    }
+    return $plugin_api_available_saved
 }
 
 # Check if the assembler supports CFI statements.

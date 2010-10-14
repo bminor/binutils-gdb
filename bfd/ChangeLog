@@ -1,3 +1,35 @@
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 6/6).
+	* aoutx.h (aout_link_check_ar_symbols): Take new "subsbfd" reference
+	parameter and pass it when invoking add_archive_element callback.
+	(aout_link_check_archive_element): Handle substitute bfd if it
+	was set during add_archive_element callback in the above.
+	* cofflink.c (coff_link_check_ar_symbols): Take new "subsbfd" reference
+	parameter and pass it when invoking add_archive_element callback.
+	(coff_link_check_archive_element): Handle substitute bfd if it
+	was set during add_archive_element callback in the above.
+	* ecoff.c (read_ext_syms_and_strs): New function holds symbol-reading
+	code factored-out from ecoff_link_check_archive_element.
+	(reread_ext_syms_and_strs): Clear old symbols and call it.
+	(ecoff_link_check_archive_element):  Use the above.  Handle substitute
+	BFD if one is set by add_archive_element callback.
+	(ecoff_link_add_archive_symbols): Likewise allow bfd substitution.
+	* elflink.c (elf_link_add_archive_symbols): Likewise.
+	* linker.c (generic_link_check_archive_element): Likewise.
+	* pdp11.c (aout_link_check_ar_symbols): Take new "subsbfd" reference
+	parameter and pass it when invoking add_archive_element callback.
+	(aout_link_check_archive_element): Handle substitute bfd if it was
+	set during add_archive_element callback in the above.
+	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Handle substitute
+	BFD if one is set by add_archive_element callback.
+	* xcofflink.c (xcoff_link_check_dynamic_ar_symbols): Take new "subsbfd"
+	reference parameter and pass it when invoking add_archive_element
+	callback.
+	(xcoff_link_check_ar_symbols): Likewise.
+	(xcoff_link_check_archive_element): Handle bfd substitution if it was
+	set by callback in the above.
+
 2010-10-11  Alan Modra  <amodra@gmail.com>
 
 	* elf32-frv.c (elf32_frv_relocate_section): Set "name" for global syms.

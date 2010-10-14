@@ -57,12 +57,13 @@
  %d integer, like printf
  %ld long, like printf
  %lu unsigned long, like printf
+ %p native (host) void* pointer, like printf
  %s arbitrary string, like printf
  %u integer, like printf
  %v hex bfd_vma, no leading zeros
 */
 
-static void
+void
 vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 {
   bfd_boolean fatal = FALSE;
@@ -366,6 +367,11 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		      }
 		  }
 	      }
+	      break;
+
+	    case 'p':
+	      /* native (host) void* pointer, like printf */
+	      fprintf (fp, "%p", va_arg (arg, void *));
 	      break;
 
 	    case 's':

@@ -609,6 +609,8 @@ EMUL_EXTRA_OFILES
 EMULATION_OFILES
 EMUL
 STRINGIFY
+ENABLE_PLUGINS_FALSE
+ENABLE_PLUGINS_TRUE
 NATIVE_LIB_DIRS
 HOSTING_LIBS
 HOSTING_CRT0
@@ -11620,7 +11622,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11623 "configure"
+#line 11625 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11726,7 +11728,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11729 "configure"
+#line 11731 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12633,7 +12635,34 @@ fi
 
 done
 
+for ac_header in fcntl.h sys/file.h sys/time.h sys/stat.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
 for ac_func in glob mkstemp realpath sbrk waitpid
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+eval as_val=\$$as_ac_var
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+for ac_func in open lseek close
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -12803,6 +12832,99 @@ if test "$ac_res" != no; then :
 
 fi
 
+fi
+
+
+# Check for dlopen support and enable plugins if possible.
+enable_plugins=yes
+ac_fn_c_check_header_compile "$LINENO" "dlfcn.h" "ac_cv_header_dlfcn_h" "$ac_includes_default
+"
+if test "x$ac_cv_header_dlfcn_h" = x""yes; then :
+
+else
+  enable_plugins=no
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
+$as_echo_n "checking for library containing dlopen... " >&6; }
+if test "${ac_cv_search_dlopen+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' dl; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_dlopen=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_dlopen+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_dlopen+set}" = set; then :
+
+else
+  ac_cv_search_dlopen=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_dlopen" >&5
+$as_echo "$ac_cv_search_dlopen" >&6; }
+ac_res=$ac_cv_search_dlopen
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  enable_plugins=no
+fi
+
+for ac_func in dlopen dlsym dlclose
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+eval as_val=\$$as_ac_var
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  enable_plugins=no
+fi
+done
+
+ if test x$enable_plugins = xyes; then
+  ENABLE_PLUGINS_TRUE=
+  ENABLE_PLUGINS_FALSE='#'
+else
+  ENABLE_PLUGINS_TRUE='#'
+  ENABLE_PLUGINS_FALSE=
 fi
 
 
@@ -13298,6 +13420,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${GENINSRC_NEVER_TRUE}" && test -z "${GENINSRC_NEVER_FALSE}"; then
   as_fn_error "conditional \"GENINSRC_NEVER\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_PLUGINS_TRUE}" && test -z "${ENABLE_PLUGINS_FALSE}"; then
+  as_fn_error "conditional \"ENABLE_PLUGINS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

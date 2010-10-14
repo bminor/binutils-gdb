@@ -1,3 +1,158 @@
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 6/6).
+	* ldlang.c (load_symbols): Handle bfd subsitution when calling the
+	add_archive_element callback.
+	* ldmain.c (add_archive_element)[ENABLE_PLUGINS]: Offer the archive
+	member to the plugins and if claimed set "subsbfd" output parameter to
+	point to the dummy IR-only BFD.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 5/6).
+	* plugin.c (asymbol_from_plugin_symbol): If the bfd is an ELF bfd,
+	find the elf symbol data and set the visibility in the st_other field.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 4/6).
+	* ldlang.c (lang_process)[ENABLE_PLUGINS]: Move invocation of
+	plugin_call_all_symbols_read to before setting of gc_sym_list, and
+	open any new input files that may have been added during it.
+	* ldmain.c (multiple_definition)[ENABLE_PLUGINS]: Call out to
+	plugin_multiple_definition and let it have first say over what to do
+	with the clashing definitions.
+	* plugin.c (no_more_claiming): New boolean variable.
+	(plugin_cached_allow_multiple_defs): Likewise.
+	(add_input_file): Implement.
+	(add_input_library): Likewise.
+	(set_extra_library_path): Likewise.
+	(plugin_call_claim_file): Don't do anything when no_more_claiming set.
+	(plugin_call_all_symbols_read): Set it.  Disable link info
+	"allow_multiple_definition" flag, but cache its value.
+	(plugin_multiple_definition): New function.
+	* plugin.h (plugin_multiple_definition): Add prototype.
+	* testplug.c (addfile_enum_t): New enumerated typedef.
+	(add_file_t): New struct typedef.
+	(addfiles_list): New variable.
+	(addfiles_tail_chain_ptr): Likewise.
+	(record_add_file): New function.
+	(parse_option): Parse "add:", "lib:" and "dir:" options and call it.
+	(onall_symbols_read): Iterate the list of new files, libs and dirs,
+	adding them.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 3/6).
+	* ldmain.c (notice)[ENABLE_PLUGINS]: Call plugin_notice.
+	* plugin.c (non_ironly_hash): Add new bfd hash table.
+	(plugin_load_plugins): Exit early if no plugins to load.  If plugins
+	do load successfully, set notice_all flag in link info.
+	(get_symbols): Implement.
+	(plugin_load_plugins): Exit early if no plugins to load, else after
+	loading plugins successfully enable notice_all mode.
+	(init_non_ironly_hash): Lazily init non_ironly_hash table.
+	(plugin_notice): Record symbols referenced from non-IR files in the
+	non_ironly_hash.  Suppress tracing, cref generation and nocrossrefs
+	tracking for symbols from dummy IR bfds.
+	* plugin.h: Fix formatting.
+	(plugin_notice): Add prototype.
+	* testplug.c (dumpresolutions): New global var.
+	(parse_options): Accept "dumpresolutions".
+	(onall_symbols_read): Get syms and dump resolutions if it was given.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 2/6).
+	* ldfile.c (ldfile_try_open_bfd)[ENABLE_PLUGINS]: Don't return early
+	during compat checks if they pass, instead offer any successfully
+	opened and accepted file to the plugin claim file hooks chain.  Create
+	a dummy bfd to accept symbols added by the plugin, if the plugin
+	claims the file.
+	* ldlang.c (lang_process)[ENABLE_PLUGINS]: Call plugin all symbols
+	read hook chain before ldemul_after_open.
+	* ldlang.h (struct lang_input_statement_struct): Add new single-bit
+	'claimed' flag.
+	* plugin.c (IRONLY_SUFFIX): New macro for dummy bfd file suffix.
+	(IRONLY_SUFFIX_LEN): Length of the above string.
+	(plugin_get_ir_dummy_bfd): New function to create the dummy bfd used
+	to store symbols for ir-only files.
+	(is_ir_dummy_bfd): New function to check if a bfd is ir-only.
+	(asymbol_from_plugin_symbol): New function converts symbol formats.
+	(add_symbols): Call it to convert plugin syms to bfd syms and add
+	them to the dummy bfd.
+	* plugin.h: Add missing include guards.
+	(plugin_get_ir_dummy_bfd): Add prototype.
+	(is_ir_dummy_bfd): Likewise.
+	* testplug.c (TV_MESSAGE): New helper macro.
+	(struct claim_file): New struct.
+	(claim_file_t): New typedef.
+	(tag_names[]): Make static and const.
+	(claimfiles_list): New variable.
+	(claimfiles_tail_chain_ptr): Likewise.
+	(last_claimfile): Likewise.
+	(record_claim_file): Record a file to claim on a singly-linked list.
+	(parse_symdefstr): Parse an ASCII representation of a symbol from a
+	plugin option into the fields of a struct ld_plugin_symbol.
+	(record_claimed_file_symbol):  Use it to parse plugin option for
+	adding a symbol.
+	(parse_option): Parse claim file and add symbol options.
+	(dump_tv_tag): Use TV_MESSAGE.
+	(onload): Likewise.
+	(onclaim_file): Make static.  Use TV_MESSAGE.  Scan list of files to
+	claim and claim this file if required, adding any symbols specified.
+	(onall_symbols_read): Make static and use TV_MESSAGE.
+	(oncleanup): Likewise.
+
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+
+	Apply LD plugin patch series (part 1/6).
+	* configure.in: Add AC_CHECKs for file io and dlfcn headers and
+	functions and AC_SEARCH for -ldl.
+	(enable_plugins): New shell variable set if above tests find dlopen
+	functionality.
+	(ENABLE_PLUGINS): Add related automake conditional.
+	* configure: Regenerate.
+	* config.in: Likewise.
+	* Makefile.am (PLUGIN_C): Declare plugin C source file, conditional
+	on ENABLE_PLUGINS being defined.
+	(PLUGIN_H): Likewise for header file.
+	(PLUGIN_OBJECT): Likewise for object file.
+	(PLUGIN_CFLAGS): Likewise -D flag required to compile plugin support.
+	(AM_CPPFLAGS): Use PLUGIN_CFLAGS.
+	(CFILES): Use PLUGIN_C.
+	(HFILES): Use PLUGIN_H.
+	(OFILES): Use PLUGIN_OBJECT.
+	(ld_new_SOURCES): Use PLUGIN_C.
+	(noinst_LTLIBRARIES)[ENABLE_PLUGINS]: Declare test plugin.
+	(libldtestplug_la_SOURCES)[ENABLE_PLUGINS]: Add automake definition
+	for test plugin.
+	(libldtestplug_la_CFLAGS)[ENABLE_PLUGINS]: Likewise.
+	(libldtestplug_la_LDFLAGS)[ENABLE_PLUGINS]: Likewise.
+	* Makefile.in: Regenerate.
+	* sysdep.h: Include stdarg.h, unistd.h and one of fcntl.h or
+	sys/file.h where available.  Include dlfcn.h when ENABLE_PLUGINS.
+	(O_RDONLY): Supply default definition likewise to bfd's sysdep.h
+	(O_WRONLY): Likewise.
+	(O_RDWR): Likewise.
+	(O_ACCMODE): Likewise.
+	(O_BINARY): Likewise.
+	(SEEK_SET): Likewise.
+	(SEEK_CUR): Likewise.
+	(SEEK_END): Likewise.
+	* ldmisc.c (vfinfo): Make non-static.  Add %p format char.
+	* ldmisc.h (vfinfo): Declare extern prototype.
+	* lexsup.c (enum option_values)[ENABLE_PLUGINS]: Add new entries for
+	OPTION_PLUGIN and OPTION_PLUGIN_OPT.
+	(ld_options[])[ENABLE_PLUGINS]: Add option data for the above two.
+	(parse_args)[ENABLE_PLUGINS]: Handle them, and load all plugins once
+	option parsing is complete.
+	* ldmain.c (main)[ENABLE_PLUGINS]: Call plugin cleanup hooks just
+	after lang_finish.
+	* plugin.c: New source file.
+	* plugin.h: Likewise new header.
+	* testplug.c: New source file.
+
 2010-10-12  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* emultempl/solaris2.em (elf_solaris2_before_allocation): Renamed

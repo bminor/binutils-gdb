@@ -34,6 +34,10 @@
 #include "ldemul.h"
 #include "libiberty.h"
 #include "filenames.h"
+#ifdef ENABLE_PLUGINS
+#include "plugin-api.h"
+#include "plugin.h"
+#endif /* ENABLE_PLUGINS */
 
 const char * ldfile_input_filename;
 bfd_boolean  ldfile_assumed_script = FALSE;
@@ -150,7 +154,12 @@ ldfile_try_open_bfd (const char *attempt,
      compatible with the output file.  If it isn't, keep searching.
      If we can't open the file as an object file, stop the search
      here.  If we are statically linking, ensure that we don't link
-     a dynamic object.  */
+     a dynamic object.
+
+     In the code below, it's OK to exit early if the check fails,
+     closing the checked BFD and returning FALSE, but if the BFD
+     checks out compatible, do not exit early returning TRUE, or
+     the plugins will not get a chance to claim the file.  */
 
   if (entry->search_dirs_flag || !entry->dynamic)
     {
@@ -259,7 +268,7 @@ ldfile_try_open_bfd (const char *attempt,
 		      return FALSE;
 		    }
 		}
-	      return TRUE;
+	      goto success;
 	    }
 
 	  if (!entry->dynamic && (entry->the_bfd->flags & DYNAMIC) != 0)
@@ -289,7 +298,57 @@ ldfile_try_open_bfd (const char *attempt,
 	    }
 	}
     }
+success:
+#ifdef ENABLE_PLUGINS
+  /* If plugins are active, they get first chance to claim
+     any successfully-opened input file.  We skip archives
+     here; the plugin wants us to offer it the individual
+     members when we enumerate them, not the whole file.  We
+     also ignore corefiles, because that's just weird.  It is
+     a needed side-effect of calling  bfd_check_format with
+     bfd_object that it sets the bfd's arch and mach, which
+     will be needed when and if we want to bfd_create a new
+     one using this one as a template.  */
+  if (bfd_check_format (entry->the_bfd, bfd_object))
+    {
+      int fd = open (attempt, O_RDONLY | O_BINARY);
+      if (fd >= 0)
+	{
+	  struct ld_plugin_input_file file;
+	  int claimed = 0;
 
+	  file.name = attempt;
+	  file.offset = 0;
+	  file.filesize = lseek (fd, 0, SEEK_END);
+	  file.fd = fd;
+	  /* We create a dummy BFD, initially empty, to house
+	     whatever symbols the plugin may want to add.  */
+	  file.handle = plugin_get_ir_dummy_bfd (attempt, entry->the_bfd);
+	  if (plugin_call_claim_file (&file, &claimed))
+	    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
+	      plugin_error_plugin ());
+	  if (claimed)
+	    {
+	      /* Discard the real file's BFD and substitute the dummy one.  */
+	      bfd_close (entry->the_bfd);
+	      entry->the_bfd = file.handle;
+	      entry->claimed = TRUE;
+	      bfd_make_readable (entry->the_bfd);
+	    }
+	  else
+	    {
+	      /* If plugin didn't claim the file, we don't need the fd or the
+	         dummy bfd.  Can't avoid speculatively creating it, alas.  */
+	      bfd_close_all_done (file.handle);
+	      close (fd);
+	      entry->claimed = FALSE;
+	    }
+	}
+    }
+#endif /* ENABLE_PLUGINS */
+
+  /* It opened OK, the format checked out, and the plugins have had
+     their chance to claim it, so this is success.  */
   return TRUE;
 }
 

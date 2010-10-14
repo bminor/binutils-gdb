@@ -2545,7 +2545,8 @@ aout_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 static bfd_boolean
 aout_link_check_ar_symbols (bfd *abfd,
 			    struct bfd_link_info *info,
-			    bfd_boolean *pneeded)
+			    bfd_boolean *pneeded,
+			    bfd **subsbfd)
 {
   struct external_nlist *p;
   struct external_nlist *pend;
@@ -2600,7 +2601,8 @@ aout_link_check_ar_symbols (bfd *abfd,
 	     but not if it is defined in the .text section.  That
 	     seems a bit crazy to me, and I haven't implemented it.
 	     However, it might be correct.  */
-	  if (! (*info->callbacks->add_archive_element) (info, abfd, name))
+	  if (! (*info->callbacks->add_archive_element)
+					(info, abfd, name, subsbfd))
 	    return FALSE;
 	  *pneeded = TRUE;
 	  return TRUE;
@@ -2628,7 +2630,7 @@ aout_link_check_ar_symbols (bfd *abfd,
 			 in the object file.  This is done for the -u
 			 option in the linker.  */
 		      if (! (*info->callbacks->add_archive_element)
-			  (info, abfd, name))
+			  (info, abfd, name, subsbfd))
 			return FALSE;
 		      *pneeded = TRUE;
 		      return TRUE;
@@ -2680,15 +2682,21 @@ aout_link_check_archive_element (bfd *abfd,
 				 struct bfd_link_info *info,
 				 bfd_boolean *pneeded)
 {
+  bfd *subsbfd = NULL;
+
   if (! aout_get_external_symbols (abfd))
     return FALSE;
 
-  if (! aout_link_check_ar_symbols (abfd, info, pneeded))
+  if (! aout_link_check_ar_symbols (abfd, info, pneeded, &subsbfd))
     return FALSE;
 
   if (*pneeded)
     {
-      if (! aout_link_add_symbols (abfd, info))
+      /* Potentially, the add_archive_element hook may have set a
+	 substitute BFD for us.  */
+      if (subsbfd && ! aout_get_external_symbols (subsbfd))
+	return FALSE;
+      if (! aout_link_add_symbols (subsbfd ? subsbfd : abfd, info))
 	return FALSE;
     }
 
