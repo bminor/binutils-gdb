@@ -1399,6 +1399,9 @@ extern int is_unique_ancestor (struct type *, struct value *);
 #define INTEGER_PROMOTION_BADNESS      1
 /* Badness of floating promotion */
 #define FLOAT_PROMOTION_BADNESS        1
+/* Badness of converting a derived class pointer
+   to a base class pointer.  */
+#define BASE_PTR_CONVERSION_BADNESS    1
 /* Badness of integral conversion */
 #define INTEGER_CONVERSION_BADNESS     2
 /* Badness of floating conversion */

@@ -2102,6 +2102,56 @@ integer_types_same_name_p (const char *first, const char *second)
   return 1;
 }
 
+/* Compares type A to type B returns 1 if the represent the same type
+   0 otherwise.  */
+
+static int
+types_equal (struct type *a, struct type *b)
+{
+  /* Identical type pointers.  */
+  /* However, this still doesn't catch all cases of same type for b
+     and a.  The reason is that builtin types are different from
+     the same ones constructed from the object.  */
+  if (a == b)
+    return 1;
+
+  /* Resolve typedefs */
+  if (TYPE_CODE (a) == TYPE_CODE_TYPEDEF)
+    a = check_typedef (a);
+  if (TYPE_CODE (b) == TYPE_CODE_TYPEDEF)
+    b = check_typedef (b);
+
+  /* If after resolving typedefs a and b are not of the same type
+     code then they are not equal.  */
+  if (TYPE_CODE (a) != TYPE_CODE (b))
+    return 0;
+
+  /* If a and b are both pointers types or both reference types then
+     they are equal of the same type iff the objects they refer to are
+     of the same type.  */
+  if (TYPE_CODE (a) == TYPE_CODE_PTR
+      || TYPE_CODE (a) == TYPE_CODE_REF)
+    return types_equal (TYPE_TARGET_TYPE (a),
+                        TYPE_TARGET_TYPE (b));
+
+  /*
+     Well, damnit, if the names are exactly the same, I'll say they
+     are exactly the same.  This happens when we generate method
+     stubs.  The types won't point to the same address, but they
+     really are the same.
+  */
+
+  if (TYPE_NAME (a) && TYPE_NAME (b)
+      && strcmp (TYPE_NAME (a), TYPE_NAME (b)) == 0)
+    return 1;
+
+  /* Check if identical after resolving typedefs.  */
+  if (a == b)
+    return 1;
+
+  return 0;
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -2115,11 +2165,8 @@ integer_types_same_name_p (const char *first, const char *second)
 int
 rank_one_type (struct type *parm, struct type *arg)
 {
-  /* Identical type pointers.  */
-  /* However, this still doesn't catch all cases of same type for arg
-     and param.  The reason is that builtin types are different from
-     the same ones constructed from the object.  */
-  if (parm == arg)
+
+  if (types_equal (parm, arg))
     return 0;
 
   /* Resolve typedefs */
@@ -2127,21 +2174,6 @@ rank_one_type (struct type *parm, struct type *arg)
     parm = check_typedef (parm);
   if (TYPE_CODE (arg) == TYPE_CODE_TYPEDEF)
     arg = check_typedef (arg);
-
-  /*
-     Well, damnit, if the names are exactly the same, I'll say they
-     are exactly the same.  This happens when we generate method
-     stubs.  The types won't point to the same address, but they
-     really are the same.
-  */
-
-  if (TYPE_NAME (parm) && TYPE_NAME (arg) 
-      && !strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
-    return 0;
-
-  /* Check if identical after resolving typedefs.  */
-  if (parm == arg)
-    return 0;
 
   /* See through references, since we can almost make non-references
      references.  */
@@ -2166,15 +2198,23 @@ rank_one_type (struct type *parm, struct type *arg)
       switch (TYPE_CODE (arg))
 	{
 	case TYPE_CODE_PTR:
-	  if (TYPE_CODE (TYPE_TARGET_TYPE (parm)) == TYPE_CODE_VOID
-	      && TYPE_CODE (TYPE_TARGET_TYPE (arg)) != TYPE_CODE_VOID)
+
+	  /* Allowed pointer conversions are:
+	     (a) pointer to void-pointer conversion.  */
+	  if (TYPE_CODE (TYPE_TARGET_TYPE (parm)) == TYPE_CODE_VOID)
 	    return VOID_PTR_CONVERSION_BADNESS;
-	  else
-	    return rank_one_type (TYPE_TARGET_TYPE (parm), 
-				  TYPE_TARGET_TYPE (arg));
+
+	  /* (b) pointer to ancestor-pointer conversion.  */
+	  if (is_ancestor (TYPE_TARGET_TYPE (parm),
+	                          TYPE_TARGET_TYPE (arg)))
+	    return BASE_PTR_CONVERSION_BADNESS;
+
+	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_ARRAY:
-	  return rank_one_type (TYPE_TARGET_TYPE (parm), 
-				TYPE_TARGET_TYPE (arg));
+	  if (types_equal (TYPE_TARGET_TYPE (parm),
+	                   TYPE_TARGET_TYPE (arg)))
+	    return 0;
+	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_FUNC:
 	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg);
 	case TYPE_CODE_INT:

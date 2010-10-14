@@ -24,6 +24,9 @@ int overload1arg (unsigned long);
 int overload1arg (float);
 int overload1arg (double);
 
+int overload1arg (int*);
+int overload1arg (void*);
+
 int overloadfnarg (void);
 int overloadfnarg (int);
 int overloadfnarg (int, int (*) (int));
@@ -99,6 +102,8 @@ int main ()
     unsigned long arg10 =10;
     float arg11 =100.0;
     double arg12 = 200.0;
+    int arg13 = 200.0;
+    char arg14 = 'a';
 
     char *str = (char *) "A";
     foo foo_instance1(111);
@@ -150,6 +155,8 @@ int foo::overload1arg (long arg)            { arg = 0; return 9;}
 int foo::overload1arg (unsigned long arg)   { arg = 0; return 10;}
 int foo::overload1arg (float arg)           { arg = 0; return 11;}
 int foo::overload1arg (double arg)          { arg = 0; return 12;}
+int foo::overload1arg (int* arg)            { arg = 0; return 13;}
+int foo::overload1arg (void* arg)           { arg = 0; return 14;}
 
 /* Test to see that we can explicitly request overloaded functions
    with function pointers in the prototype. */

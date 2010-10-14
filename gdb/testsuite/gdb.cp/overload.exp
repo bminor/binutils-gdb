@@ -80,6 +80,8 @@ set re_methods	"${re_methods}${ws}int overload1arg\\(long( int)?\\);"
 set re_methods	"${re_methods}${ws}int overload1arg\\((unsigned long|long unsigned)( int)?\\);"
 set re_methods	"${re_methods}${ws}int overload1arg\\(float\\);"
 set re_methods	"${re_methods}${ws}int overload1arg\\(double\\);"
+set re_methods	"${re_methods}${ws}int overload1arg\\(int \\*\\);"
+set re_methods	"${re_methods}${ws}int overload1arg\\(void \\*\\);"
 set re_methods	"${re_methods}${ws}int overloadfnarg\\((void|)\\);"
 set re_methods	"${re_methods}${ws}int overloadfnarg\\(int\\);"
 set re_methods	"${re_methods}${ws}int overloadfnarg\\(int, int ?\\(\\*\\) ?\\(int\\)\\);"
@@ -255,6 +257,14 @@ gdb_test "print foo_instance1.overload1arg((float)arg11)" \
 gdb_test "print foo_instance1.overload1arg((double)arg12)" \
     "\\$\[0-9\]+ = 12" \
     "print call overloaded func double arg"
+
+gdb_test "print foo_instance1.overload1arg(&arg13)" \
+    "\\$\[0-9\]+ = 13" \
+    "print call overloaded func int\\* arg"
+
+gdb_test "print foo_instance1.overload1arg(&arg14)" \
+    "\\$\[0-9\]+ = 14" \
+    "print call overloaded func char\\* arg"
 
 # ---
 

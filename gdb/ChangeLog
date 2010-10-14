@@ -1,3 +1,14 @@
+2010-10-14  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdbtypes.h: Create BASE_PTR_CONVERSION_BADNESS.
+	* gdbtypes.c (rank_one_type): Move type comparison code out of here
+	to...
+	(types_equal): ...here. And changed it as follows:
+	Outside of typedefs type must be of the same TYPE_CODE.
+	When compairing two pointers or references they are equal if their
+	targets are equal.
+	Correct pointer conversions.
+
 2010-10-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): Avoid crashes on structures

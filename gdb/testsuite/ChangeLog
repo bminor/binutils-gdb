@@ -1,3 +1,11 @@
+2010-10-14  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/converts.cc: New test program.
+	* gdb.cp/converts.exp: New test.
+	* gdb.cp/overload.exp: Added test for void* vs int*.
+	* gdb.cp/overload.exp: Ditto.
+	* gdb.cp/oranking.exp: Removed related kfail.
+
 2010-10-13  Doug Evans  <dje@google.com>
 
 	* lib/gdb-python.exp (gdb_check_python_config): New function.
