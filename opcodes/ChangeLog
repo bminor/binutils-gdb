@@ -1,5 +1,11 @@
 2010-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Remove CheckRegSize from instructions with
+	0, 1 or fixed operands.
+	* i386-tbl.h: Regenerated.
+
+2010-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Add CheckRegSize.
 
 	* i386-opc.h (CheckRegSize): New.
