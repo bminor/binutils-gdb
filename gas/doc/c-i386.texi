@@ -394,7 +394,8 @@ quadruple word).
 
 Different encoding options can be specified via optional mnemonic
 suffix.  @samp{.s} suffix swaps 2 register operands in encoding when
-moving from one register to another.
+moving from one register to another.  @samp{.d32} suffix forces 32bit
+displacement in encoding.
 
 @cindex conversion instructions, i386
 @cindex i386 conversion instructions

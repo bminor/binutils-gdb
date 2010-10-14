@@ -1,3 +1,13 @@
+2010-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (_i386_insn): Add disp32_encoding.
+	(md_assemble): Don't call optimize_disp if disp32_encoding is
+	set.
+	(parse_insn): Support .d32 to force 32bit displacement.
+	(output_branch): Use BIG if disp32_encoding is set.
+
+	* doc/c-i386.texi: Document .d32 encoding suffix.
+
 2010-10-11  Steve Kilbane  <steve.kilbane@analog.com>
 
 	* config/bfin-lex.l (FLAGS): New state.

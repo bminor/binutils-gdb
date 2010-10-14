@@ -277,6 +277,9 @@ struct _i386_insn
     /* Swap operand in encoding.  */
     unsigned int swap_operand;
 
+    /* Force 32bit displacement in encoding.  */
+    unsigned int disp32_encoding;
+
     /* Error message.  */
     enum i386_error error;
   };
@@ -2982,6 +2985,7 @@ md_assemble (char *line)
   /* Don't optimize displacement for movabs since it only takes 64bit
      displacement.  */
   if (i.disp_operands
+      && !i.disp32_encoding
       && (flag_code != CODE_64BIT
 	  || strcmp (mnemonic, "movabs") != 0))
     optimize_disp ();
@@ -3256,9 +3260,15 @@ parse_insn (char *line, char *mnemonic)
 
   if (!current_templates)
     {
-      /* Check if we should swap operand in encoding.  */
+      /* Check if we should swap operand or force 32bit displacement in
+	 encoding.  */
       if (mnem_p - 2 == dot_p && dot_p[1] == 's')
 	i.swap_operand = 1;
+      else if (mnem_p - 4 == dot_p 
+	       && dot_p[1] == 'd'
+	       && dot_p[2] == '3'
+	       && dot_p[3] == '2')
+	i.disp32_encoding = 1;
       else
 	goto check_suffix;
       mnem_p = dot_p;
@@ -5691,15 +5701,15 @@ static void
 output_branch (void)
 {
   char *p;
+  int size;
   int code16;
   int prefix;
   relax_substateT subtype;
   symbolS *sym;
   offsetT off;
 
-  code16 = 0;
-  if (flag_code == CODE_16BIT)
-    code16 = CODE16;
+  code16 = flag_code == CODE_16BIT ? CODE16 : 0;
+  size = i.disp32_encoding ? BIG : SMALL;
 
   prefix = 0;
   if (i.prefix[DATA_PREFIX] != 0)
@@ -5742,11 +5752,11 @@ output_branch (void)
   *p = i.tm.base_opcode;
 
   if ((unsigned char) *p == JUMP_PC_RELATIVE)
-    subtype = ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL);
+    subtype = ENCODE_RELAX_STATE (UNCOND_JUMP, size);
   else if (cpu_arch_flags.bitfield.cpui386)
-    subtype = ENCODE_RELAX_STATE (COND_JUMP, SMALL);
+    subtype = ENCODE_RELAX_STATE (COND_JUMP, size);
   else
-    subtype = ENCODE_RELAX_STATE (COND_JUMP86, SMALL);
+    subtype = ENCODE_RELAX_STATE (COND_JUMP86, size);
   subtype |= code16;
 
   sym = i.op[0].disps->X_add_symbol;
