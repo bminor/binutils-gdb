@@ -1,5 +1,10 @@
 2010-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (match_template): Check checkregsize
+	instead of w for register size check.
+
+2010-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (_i386_insn): Add disp32_encoding.
 	(md_assemble): Don't call optimize_disp if disp32_encoding is
 	set.

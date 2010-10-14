@@ -3996,9 +3996,8 @@ match_template (void)
 	    }
 	  }
 
-      /* We check register size only if size of operands can be
-	 encoded the canonical way.  */
-      check_register = t->opcode_modifier.w;
+      /* We check register size if needed.  */
+      check_register = t->opcode_modifier.checkregsize;
       overlap0 = operand_type_and (i.types[0], operand_types[0]);
       switch (t->operands)
 	{

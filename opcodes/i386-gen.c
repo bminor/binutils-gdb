@@ -351,6 +351,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Size16),
   BITFIELD (Size32),
   BITFIELD (Size64),
+  BITFIELD (CheckRegSize),
   BITFIELD (IgnoreSize),
   BITFIELD (DefaultSize),
   BITFIELD (No_bSuf),

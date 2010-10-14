@@ -1,3 +1,14 @@
+2010-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Add CheckRegSize.
+
+	* i386-opc.h (CheckRegSize): New.
+	(i386_opcode_modifier): Add checkregsize.
+
+	* i386-opc.tbl: Add CheckRegSize to instructions which
+	require register size check.
+	* i386-tbl.h: Regenerated.
+
 2010-10-12  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* m68k-opc.c (m68k_opcodes): Move fnop before fbf.
