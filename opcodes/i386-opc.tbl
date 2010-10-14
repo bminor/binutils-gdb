@@ -956,8 +956,8 @@ movd, 2, 0xf7e, None, 2, CpuMMX|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|
 // 64bit displacement value.  We put the 64bit displacement first and
 // we only mark constants larger than 32bit as Disp64.
 movq, 2, 0xa0, None, 1, Cpu64, D|W|CheckRegSize|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp64|Unspecified|Qword, Acc|Qword }
-movq, 2, 0x88, None, 1, Cpu64, D|W|CheckRegSize|Modrm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg64, Reg64|Unspecified|Qword|BaseIndex|Disp8|Disp32|Disp32S }
-movq, 2, 0xc6, 0x0, 1, Cpu64, W|CheckRegSize|Modrm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm32S, Reg64|Qword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S }
+movq, 2, 0x88, None, 1, Cpu64, D|W|Modrm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg64, Reg64|Unspecified|Qword|BaseIndex|Disp8|Disp32|Disp32S }
+movq, 2, 0xc6, 0x0, 1, Cpu64, W|Modrm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm32S, Reg64|Qword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S }
 movq, 2, 0xb0, None, 1, Cpu64, W|ShortForm|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm64, Reg64 }
 movq, 2, 0xf37e, None, 1, CpuAVX, S|Modrm|Vex=3|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|SSE2AVX, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 movq, 2, 0x66d6, None, 1, CpuAVX, Modrm|Vex=3|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|SSE2AVX, { RegXMM, Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM }
