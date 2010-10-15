@@ -623,7 +623,14 @@ struct type
   struct type *chain;
 
   /* Flags specific to this instance of the type, indicating where
-     on the ring we are.  */
+     on the ring we are.
+
+     For TYPE_CODE_TYPEDEF the flags of the typedef type should be binary
+     or-ed with the target type, with a special case for address class and
+     space class.  For example if this typedef does not specify any new
+     qualifiers, TYPE_INSTANCE_FLAGS is 0 and the instance flags are
+     completely inherited from the target type.  No qualifiers can be cleared
+     by the typedef.  See also check_typedef.  */
   int instance_flags;
 
   /* Length of storage for a value of this type.  This is what

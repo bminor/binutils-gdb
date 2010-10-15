@@ -1,3 +1,12 @@
+2010-10-15  Doug Evans  <dje@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR exp/12117
+	* gdbtypes.c (check_typedef): Clean up function comment.
+	Keep track of instance flags as we strip typedefs and create a new
+	type to preserve them if necessary.
+	* gdbtypes.h (type) <instance_flags>: Extend the comment.
+
 2010-10-15  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): Use TYPE_FIELD_NAME accessor.

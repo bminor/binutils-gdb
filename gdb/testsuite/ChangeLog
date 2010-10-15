@@ -1,3 +1,10 @@
+2010-10-13  Doug Evans  <dje@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR exp/12117
+	* gdb.cp/ptype-cv-cp.cc: New file.
+	* gdb.cp/ptype-cv-cp.exp: New file.
+
 2010-10-14  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/converts.cc: New test program.

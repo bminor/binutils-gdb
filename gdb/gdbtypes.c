@@ -1347,7 +1347,21 @@ stub_noname_complaint (void)
   complaint (&symfile_complaints, _("stub type has NULL name"));
 }
 
-/* Added by Bryan Boreham, Kewill, Sun Sep 17 18:07:17 1989.
+/* Find the real type of TYPE.  This function returns the real type,
+   after removing all layers of typedefs, and completing opaque or stub
+   types.  Completion changes the TYPE argument, but stripping of
+   typedefs does not.
+
+   Instance flags (e.g. const/volatile) are preserved as typedefs are
+   stripped.  If necessary a new qualified form of the underlying type
+   is created.
+
+   NOTE: This will return a typedef if TYPE_TARGET_TYPE for the typedef has
+   not been computed and we're either in the middle of reading symbols, or
+   there was no name for the typedef in the debug info.
+
+   If TYPE is a TYPE_CODE_TYPEDEF, its length is updated to the length of
+   the target type.
 
    If this is a stubbed struct (i.e. declared as struct foo *), see if
    we can find a full definition in some other file. If so, copy this
@@ -1355,26 +1369,15 @@ stub_noname_complaint (void)
    (but not any code) that if we don't find a full definition, we'd
    set a flag so we don't spend time in the future checking the same
    type.  That would be a mistake, though--we might load in more
-   symbols which contain a full definition for the type.
-
-   This used to be coded as a macro, but I don't think it is called 
-   often enough to merit such treatment.
-
-   Find the real type of TYPE.  This function returns the real type,
-   after removing all layers of typedefs and completing opaque or stub
-   types.  Completion changes the TYPE argument, but stripping of
-   typedefs does not.
-
-   If TYPE is a TYPE_CODE_TYPEDEF, its length is (also) set to the length of
-   the target type instead of zero.  However, in the case of TYPE_CODE_TYPEDEF
-   check_typedef can still return different type than the original TYPE
-   pointer.  */
+   symbols which contain a full definition for the type.  */
 
 struct type *
 check_typedef (struct type *type)
 {
   struct type *orig_type = type;
-  int is_const, is_volatile;
+  /* While we're removing typedefs, we don't want to lose qualifiers.
+     E.g., const/volatile.  */
+  int instance_flags = TYPE_INSTANCE_FLAGS (type);
 
   gdb_assert (type);
 
@@ -1388,7 +1391,7 @@ check_typedef (struct type *type)
 	  /* It is dangerous to call lookup_symbol if we are currently
 	     reading a symtab.  Infinite recursion is one danger.  */
 	  if (currently_reading_symtab)
-	    return type;
+	    return make_qualified_type (type, instance_flags, NULL);
 
 	  name = type_name_no_tag (type);
 	  /* FIXME: shouldn't we separately check the TYPE_NAME and
@@ -1398,7 +1401,7 @@ check_typedef (struct type *type)
 	  if (name == NULL)
 	    {
 	      stub_noname_complaint ();
-	      return type;
+	      return make_qualified_type (type, instance_flags, NULL);
 	    }
 	  sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0);
 	  if (sym)
@@ -1407,10 +1410,33 @@ check_typedef (struct type *type)
 	    TYPE_TARGET_TYPE (type) = alloc_type_arch (get_type_arch (type));
 	}
       type = TYPE_TARGET_TYPE (type);
-    }
 
-  is_const = TYPE_CONST (type);
-  is_volatile = TYPE_VOLATILE (type);
+      /* Preserve the instance flags as we traverse down the typedef chain.
+
+	 Handling address spaces/classes is nasty, what do we do if there's a
+	 conflict?
+	 E.g., what if an outer typedef marks the type as class_1 and an inner
+	 typedef marks the type as class_2?
+	 This is the wrong place to do such error checking.  We leave it to
+	 the code that created the typedef in the first place to flag the
+	 error.  We just pick the outer address space (akin to letting the
+	 outer cast in a chain of casting win), instead of assuming
+	 "it can't happen".  */
+      {
+	const int ALL_SPACES = (TYPE_INSTANCE_FLAG_CODE_SPACE
+				| TYPE_INSTANCE_FLAG_DATA_SPACE);
+	const int ALL_CLASSES = TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL;
+	int new_instance_flags = TYPE_INSTANCE_FLAGS (type);
+
+	/* Treat code vs data spaces and address classes separately.  */
+	if ((instance_flags & ALL_SPACES) != 0)
+	  new_instance_flags &= ~ALL_SPACES;
+	if ((instance_flags & ALL_CLASSES) != 0)
+	  new_instance_flags &= ~ALL_CLASSES;
+
+	instance_flags |= new_instance_flags;
+      }
+    }
 
   /* If this is a struct/class/union with no fields, then check
      whether a full definition exists somewhere else.  This is for
@@ -1428,7 +1454,7 @@ check_typedef (struct type *type)
       if (name == NULL)
 	{
 	  stub_noname_complaint ();
-	  return type;
+	  return make_qualified_type (type, instance_flags, NULL);
 	}
       newtype = lookup_transparent_type (name);
 
@@ -1445,7 +1471,9 @@ check_typedef (struct type *type)
 	     move over any other types NEWTYPE refers to, which could
 	     be an unbounded amount of stuff.  */
 	  if (TYPE_OBJFILE (newtype) == TYPE_OBJFILE (type))
-	    make_cv_type (is_const, is_volatile, newtype, &type);
+	    type = make_qualified_type (newtype,
+					TYPE_INSTANCE_FLAGS (type),
+					type);
 	  else
 	    type = newtype;
 	}
@@ -1464,17 +1492,18 @@ check_typedef (struct type *type)
       if (name == NULL)
 	{
 	  stub_noname_complaint ();
-	  return type;
+	  return make_qualified_type (type, instance_flags, NULL);
 	}
       sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0);
       if (sym)
         {
           /* Same as above for opaque types, we can replace the stub
-             with the complete type only if they are int the same
+             with the complete type only if they are in the same
              objfile.  */
 	  if (TYPE_OBJFILE (SYMBOL_TYPE(sym)) == TYPE_OBJFILE (type))
-            make_cv_type (is_const, is_volatile, 
-			  SYMBOL_TYPE (sym), &type);
+            type = make_qualified_type (SYMBOL_TYPE (sym),
+					TYPE_INSTANCE_FLAGS (type),
+					type);
 	  else
 	    type = SYMBOL_TYPE (sym);
         }
@@ -1534,8 +1563,12 @@ check_typedef (struct type *type)
 	  TYPE_TARGET_STUB (type) = 0;
 	}
     }
+
+  type = make_qualified_type (type, instance_flags, NULL);
+
   /* Cache TYPE_LENGTH for future use.  */
   TYPE_LENGTH (orig_type) = TYPE_LENGTH (type);
+
   return type;
 }
 
