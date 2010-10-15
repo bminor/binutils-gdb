@@ -433,7 +433,8 @@ static enum ld_plugin_status
 add_input_file (const char *pathname)
 {
   ASSERT (called_plugin);
-  if (!lang_add_input_file (pathname, lang_input_file_is_file_enum, NULL))
+  if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_file_enum,
+	NULL))
     return LDPS_ERR;
   return LDPS_OK;
 }
@@ -443,7 +444,8 @@ static enum ld_plugin_status
 add_input_library (const char *pathname)
 {
   ASSERT (called_plugin);
-  if (!lang_add_input_file (pathname, lang_input_file_is_l_enum, NULL))
+  if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_l_enum,
+	NULL))
     return LDPS_ERR;
   return LDPS_OK;
 }
@@ -454,7 +456,7 @@ static enum ld_plugin_status
 set_extra_library_path (const char *path)
 {
   ASSERT (called_plugin);
-  ldfile_add_library_path (path, FALSE);
+  ldfile_add_library_path (xstrdup (path), FALSE);
   return LDPS_OK;
 }
 

@@ -1,3 +1,9 @@
+2010-10-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* plugin.c (add_input_file): Take copy of input string.
+	(add_input_library): Likewise.
+	(set_extra_library_path): Likewise.
+
 2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
 
 	Apply LD plugin patch series (part 6/6).
