@@ -1,3 +1,8 @@
+2010-10-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-plugin/plugin.exp: Don't error out if there is no target compiler
+	available, make tests UNSUPPORTED instead.
+
 2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
 
 	Apply LD plugin patch series (part 6/6).

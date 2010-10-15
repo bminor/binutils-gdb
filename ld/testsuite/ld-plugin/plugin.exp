@@ -24,6 +24,13 @@ if ![check_plugin_api_available] {
     return
 }
 
+# And a compiler to be available.
+set can_compile 1
+if { [which $CC] == 0 } {
+  # Don't fail immediately, 
+  set can_compile 0
+}
+
 pass "plugin API enabled"
 
 global base_dir
@@ -62,12 +69,15 @@ set regcln "-plugin-opt registercleanup"
 set failed_compile 0
 set _ ""
 set plugin_nm_output ""
-if { ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c tmpdir/main.o]
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/func.c tmpdir/func.o]
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/text.c tmpdir/text.o] } {
+if { $can_compile && \
+	(![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c tmpdir/main.o] \
+	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/func.c tmpdir/func.o] \
+	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/text.c tmpdir/text.o]) } {
     # Defer fail until we have list of tests set.
     set failed_compile 1
-} else {
+}
+
+if { $can_compile && !$failed_compile } {
     # Find out if symbols have prefix on this platform before setting tests.
     catch "exec $NM tmpdir/func.o" plugin_nm_output
     if { [regexp "_func" "$plugin_nm_output"] } {
@@ -142,7 +152,7 @@ set plugin_extra_elf_tests [list \
 				{readelf -s plugin-vis-1.d}} "main.x" ] \
 ]
 
-if { $failed_compile != 0 } {
+if { !$can_compile || $failed_compile } {
     foreach testitem $plugin_tests {
 	unresolved [lindex $testitem 0]
     }
