@@ -1,3 +1,9 @@
+2010-10-15  Robin Getz  <robin.getz@analog.com>
+
+	* gas/bfin/16bit_illegals.s, gas/bfin/16bit_illegals.d,
+	gas/bfin/parallel_illegal.s, gas/bfin/parallel_illegal.d: New tests.
+	* gas/bfin/bfin.exp: Add 16bit_illegals and parallel_illegal.
+
 2010-10-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/bfin/video.s: Add BYTEOP2M insns.
