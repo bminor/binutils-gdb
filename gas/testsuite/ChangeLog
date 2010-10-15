@@ -1,3 +1,10 @@
+2010-10-15  David Gibson  <david.gibson@analog.com>
+
+	* gas/bfin/loop_label.s, gas/bfin/loop_label.d,
+	gas/bfin/loop_label2.s, gas/bfin/loop_label2.d,
+	gas/bfin/loop_temps.s, gas/bfin/loop_temps.d: New tests.
+	* gas/bfin/bfin.exp: Add loop_label, loop_label2, and loop_temps.
+
 2010-10-15  Robin Getz  <robin.getz@analog.com>
 
 	* gas/bfin/16bit_illegals.s, gas/bfin/16bit_illegals.d,
