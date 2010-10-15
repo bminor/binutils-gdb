@@ -298,7 +298,7 @@ print_formatted (struct value *val, int size,
 	    struct type *elttype = value_type (val);
 
 	    next_address = (value_address (val)
-			    + val_print_string (elttype,
+			    + val_print_string (elttype, NULL,
 						value_address (val), -1,
 						stream, options) * len);
 	  }

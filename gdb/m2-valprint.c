@@ -235,7 +235,7 @@ print_unpacked_pointer (struct type *type,
       && TYPE_CODE (elttype) == TYPE_CODE_INT
       && (options->format == 0 || options->format == 's')
       && addr != 0)
-    return val_print_string (TYPE_TARGET_TYPE (type), addr, -1,
+    return val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
 			     stream, options);
   
   return 0;
@@ -296,7 +296,7 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 	   || ((current_language->la_language == language_m2)
 	       && (TYPE_CODE (type) == TYPE_CODE_CHAR)))
 	  && (options->format == 0 || options->format == 's'))
-	val_print_string (type, address, len+1, stream, options);
+	val_print_string (type, NULL, address, len+1, stream, options);
       else
 	{
 	  fprintf_filtered (stream, "{");

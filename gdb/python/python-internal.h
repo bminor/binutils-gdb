@@ -209,9 +209,9 @@ char *gdbpy_obj_to_string (PyObject *obj);
 char *gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue);
 
 int gdbpy_is_lazy_string (PyObject *result);
-gdb_byte *gdbpy_extract_lazy_string (PyObject *string,
-				     struct type **str_type, 
-				     long *length, char **encoding);
+void gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
+				struct type **str_type, 
+				long *length, char **encoding);
 
 int gdbpy_is_value_object (PyObject *obj);
 

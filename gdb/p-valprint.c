@@ -183,7 +183,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  && addr != 0)
 	{
 	  /* no wide string yet */
-	  i = val_print_string (elttype, addr, -1, stream, options);
+	  i = val_print_string (elttype, NULL, addr, -1, stream, options);
 	}
       /* also for pointers to pascal strings */
       /* Note: this is Free Pascal specific:
@@ -202,7 +202,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  string_length = extract_unsigned_integer (buffer, length_size,
 						    byte_order);
 	  xfree (buffer);
-	  i = val_print_string (char_type ,addr + string_pos, string_length, stream, options);
+	  i = val_print_string (char_type, NULL,
+				addr + string_pos, string_length,
+				stream, options);
 	}
       else if (pascal_object_is_vtbl_member (type))
 	{

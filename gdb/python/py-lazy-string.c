@@ -24,6 +24,7 @@
 #include "exceptions.h"
 #include "valprint.h"
 #include "language.h"
+#include "gdb_assert.h"
 
 typedef struct {
   PyObject_HEAD
@@ -169,86 +170,26 @@ gdbpy_is_lazy_string (PyObject *result)
   return PyObject_TypeCheck (result, &lazy_string_object_type);
 }
 
-/* Extract and return the actual string from the lazy string object
-   STRING.  Addtionally, the string type is written to *STR_TYPE, the
-   string length is written to *LENGTH, and the string encoding is
-   written to *ENCODING.  On error, NULL is returned.  The caller is
-   responsible for freeing the returned buffer.  */
-gdb_byte *
-gdbpy_extract_lazy_string (PyObject *string, struct type **str_type,
-		     long *length, char **encoding)
+/* Extract the parameters from the lazy string object STRING.
+   ENCODING will either be set to NULL, or will be allocated with
+   xmalloc, in which case the callers is responsible for freeing
+   it.  */
+
+void
+gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
+			   struct type **str_type,
+			   long *length, char **encoding)
 {
-  int width;
-  int bytes_read;
-  gdb_byte *buffer = NULL;
-  int errcode = 0;
-  CORE_ADDR addr;
-  struct gdbarch *gdbarch;
-  enum bfd_endian byte_order;
-  PyObject *py_len = NULL, *py_encoding = NULL; 
-  PyObject *py_addr = NULL, *py_type = NULL;
-  volatile struct gdb_exception except;
+  lazy_string_object *lazy;
 
-  py_len = PyObject_GetAttrString (string, "length");
-  py_encoding = PyObject_GetAttrString (string, "encoding");
-  py_addr = PyObject_GetAttrString (string, "address");
-  py_type = PyObject_GetAttrString (string, "type");
+  gdb_assert (gdbpy_is_lazy_string (string));
 
-  /* A NULL encoding, length, address or type is not ok.  */
-  if (!py_len || !py_encoding || !py_addr || !py_type)
-    goto error;
+  lazy = (lazy_string_object *) string;
 
-  *length = PyLong_AsLong (py_len);
-  addr = PyLong_AsUnsignedLongLong (py_addr);
-
-  /* If the user supplies Py_None an encoding, set encoding to NULL.
-     This will trigger the resulting LA_PRINT_CALL to automatically
-     select an encoding.  */
-  if (py_encoding == Py_None)
-    *encoding = NULL;
-  else
-    *encoding = xstrdup (PyString_AsString (py_encoding));
-
-  *str_type = type_object_to_type (py_type);
-  gdbarch = get_type_arch (*str_type);
-  byte_order = gdbarch_byte_order (gdbarch);
-  width = TYPE_LENGTH (*str_type);
-
-  TRY_CATCH (except, RETURN_MASK_ALL)
-    {
-      errcode = read_string (addr, *length, width,
-			     *length, byte_order, &buffer,
-			     &bytes_read);
-    }
-  if (except.reason < 0)
-    {
-      PyErr_Format (except.reason == RETURN_QUIT			\
-		    ? PyExc_KeyboardInterrupt : PyExc_RuntimeError,	\
-		    "%s", except.message);				\
-      goto error;
-
-    }
-
-  if (errcode)
-    goto error;
-
-  *length = bytes_read / width;
-
-  Py_DECREF (py_encoding);
-  Py_DECREF (py_len);
-  Py_DECREF (py_addr);
-  Py_DECREF (py_type);
-  return buffer;
-
- error:
-  Py_XDECREF (py_encoding);
-  Py_XDECREF (py_len);
-  Py_XDECREF (py_addr);
-  Py_XDECREF (py_type);
-  xfree (buffer);
-  *length = 0;
-  *str_type = NULL;
-  return NULL;
+  *addr = lazy->address;
+  *str_type = lazy->type;
+  *length = lazy->length;
+  *encoding = lazy->encoding ? xstrdup (lazy->encoding) : NULL;
 }
 
 

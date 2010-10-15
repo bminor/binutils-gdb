@@ -1,3 +1,25 @@
+2010-10-15  Tom Tromey  <tromey@redhat.com>
+
+	PR python/11948:
+	* varobj.c (value_get_print_value): Use val_print_string to print
+	lazy strings.
+	* python/py-prettyprint.c (print_string_repr): Use
+	val_print_string to print lazy strings.  Fix cleanup logic.
+	(print_children): Likewise.
+	* python/python-internal.h (gdbpy_extract_lazy_string): Update.
+	* python/py-lazy-string.c (gdbpy_extract_lazy_string): Rewrite.
+	Change return type to 'void', add 'addr' argument.
+	* value.h (val_print_string): Update.
+	* valprint.c (val_print_string): Add 'encoding' argument.
+	* printcmd.c (print_formatted): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* m2-valprint.c (print_unpacked_pointer): Update.
+	(m2_print_array_contents): Likewise.
+	* jv-valprint.c (java_value_print): Update.
+	* f-valprint.c (f_val_print): Update.
+	* c-valprint.c (c_val_print): Update.
+	* auxv.c (fprint_target_auxv): Update.
+
 2010-10-15  Doug Evans  <dje@google.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

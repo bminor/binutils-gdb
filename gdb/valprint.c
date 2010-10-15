@@ -1414,10 +1414,13 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
    characters, of WIDTH bytes a piece, to STREAM.  If LEN is -1, printing
    stops at the first null byte, otherwise printing proceeds (including null
    bytes) until either print_max or LEN characters have been printed,
-   whichever is smaller.  */
+   whichever is smaller.  ENCODING is the name of the string's
+   encoding.  It can be NULL, in which case the target encoding is
+   assumed.  */
 
 int
-val_print_string (struct type *elttype, CORE_ADDR addr, int len,
+val_print_string (struct type *elttype, const char *encoding,
+		  CORE_ADDR addr, int len,
 		  struct ui_file *stream,
 		  const struct value_print_options *options)
 {

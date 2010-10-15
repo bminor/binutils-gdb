@@ -289,7 +289,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (c_textual_element_type (unresolved_elttype, options->format)
 	      && addr != 0)
 	    {
-	      i = val_print_string (unresolved_elttype, addr, -1, stream,
+	      i = val_print_string (unresolved_elttype, NULL, addr, -1, stream,
 				    options);
 	    }
 	  else if (cp_is_vtbl_member (type))

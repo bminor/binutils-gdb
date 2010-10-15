@@ -299,8 +299,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && (options->format == 0 || options->format == 's')
 	      && addr != 0)
-	    i = val_print_string (TYPE_TARGET_TYPE (type), addr, -1, stream,
-				  options);
+	    i = val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
+				  stream, options);
 
 	  /* Return number of characters printed, including the terminating
 	     '\0' if we reached the end.  val_print_string takes care including

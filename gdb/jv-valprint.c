@@ -239,7 +239,8 @@ java_value_print (struct value *val, struct ui_file *stream,
       value_free_to_mark (mark);	/* Release unnecessary values */
 
       char_type = builtin_java_type (gdbarch)->builtin_char;
-      val_print_string (char_type, data + boffset, count, stream, options);
+      val_print_string (char_type, NULL, data + boffset, count, stream,
+			options);
 
       return 0;
     }

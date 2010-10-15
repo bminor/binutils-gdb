@@ -2479,13 +2479,15 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 		       struct varobj *var)
 {
   struct ui_file *stb;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   gdb_byte *thevalue = NULL;
   struct value_print_options opts;
   struct type *type = NULL;
   long len = 0;
   char *encoding = NULL;
   struct gdbarch *gdbarch = NULL;
+  CORE_ADDR str_addr;
+  int string_print = 0;
 
   if (value == NULL)
     return NULL;
@@ -2493,8 +2495,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
   gdbarch = get_type_arch (value_type (value));
 #if HAVE_PYTHON
   {
-    struct cleanup *back_to = varobj_ensure_python_env (var);
     PyObject *value_formatter = var->pretty_printer;
+
+    varobj_ensure_python_env (var);
 
     if (value_formatter)
       {
@@ -2507,7 +2510,6 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 	  {
 	    char *hint;
 	    struct value *replacement;
-	    int string_print = 0;
 	    PyObject *output = NULL;
 
 	    hint = gdbpy_get_display_hint (value_formatter);
@@ -2522,10 +2524,13 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 						  &replacement);
 	    if (output)
 	      {
+		make_cleanup_py_decref (output);
+
 		if (gdbpy_is_lazy_string (output))
 		  {
-		    thevalue = gdbpy_extract_lazy_string (output, &type,
-							  &len, &encoding);
+		    gdbpy_extract_lazy_string (output, &str_addr, &type,
+					       &len, &encoding);
+		    make_cleanup (free_current_contents, &encoding);
 		    string_print = 1;
 		  }
 		else
@@ -2541,38 +2546,36 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 			thevalue = xmemdup (s, len + 1, len + 1);
 			type = builtin_type (gdbarch)->builtin_char;
 			Py_DECREF (py_str);
+
+			if (!string_print)
+			  {
+			    do_cleanups (old_chain);
+			    return thevalue;
+			  }
+
+			make_cleanup (xfree, thevalue);
 		      }
 		    else
 		      gdbpy_print_stack ();
 		  }
-		Py_DECREF (output);
-	      }
-	    if (thevalue && !string_print)
-	      {
-		do_cleanups (back_to);
-		xfree (encoding);
-		return thevalue;
 	      }
 	    if (replacement)
 	      value = replacement;
 	  }
       }
-    do_cleanups (back_to);
   }
 #endif
 
   stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
+  make_cleanup_ui_file_delete (stb);
 
   get_formatted_print_options (&opts, format_code[(int) format]);
   opts.deref_ref = 0;
   opts.raw = 1;
   if (thevalue)
-    {
-      make_cleanup (xfree, thevalue);
-      make_cleanup (xfree, encoding);
-      LA_PRINT_STRING (stb, type, thevalue, len, encoding, 0, &opts);
-    }
+    LA_PRINT_STRING (stb, type, thevalue, len, encoding, 0, &opts);
+  else if (string_print)
+    val_print_string (type, encoding, str_addr, len, stb, &opts);
   else
     common_val_print (value, stb, 0, &opts, current_language);
   thevalue = ui_file_xstrdup (stb, NULL);

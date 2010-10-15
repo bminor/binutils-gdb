@@ -687,7 +687,8 @@ extern int common_val_print (struct value *val,
 			     const struct value_print_options *options,
 			     const struct language_defn *language);
 
-extern int val_print_string (struct type *elttype, CORE_ADDR addr, int len,
+extern int val_print_string (struct type *elttype, const char *encoding,
+			     CORE_ADDR addr, int len,
 			     struct ui_file *stream,
 			     const struct value_print_options *options);
 

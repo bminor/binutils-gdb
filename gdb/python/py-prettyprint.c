@@ -275,53 +275,51 @@ print_string_repr (PyObject *printer, const char *hint,
   py_str = pretty_print_one_value (printer, &replacement);
   if (py_str)
     {
+      struct cleanup *cleanup = make_cleanup_py_decref (py_str);
+
       if (py_str == Py_None)
 	is_py_none = 1;
-      else
+      else if (gdbpy_is_lazy_string (py_str))
 	{
-	  gdb_byte *output = NULL;
+	  CORE_ADDR addr;
 	  long length;
 	  struct type *type;
 	  char *encoding = NULL;
-	  PyObject *string = NULL;
-	  int is_lazy;
 
-	  is_lazy = gdbpy_is_lazy_string (py_str);
-	  if (is_lazy)
-	    output = gdbpy_extract_lazy_string (py_str, &type, &length, &encoding);
-	  else
+	  make_cleanup (free_current_contents, &encoding);
+	  gdbpy_extract_lazy_string (py_str, &addr, &type,
+				     &length, &encoding);
+
+	  val_print_string (type, encoding, addr, (int) length,
+			    stream, options);
+	}
+      else
+	{
+	  PyObject *string;
+
+	  string = python_string_to_target_python_string (py_str);
+	  if (string)
 	    {
-	      string = python_string_to_target_python_string (py_str);
-	      if (string)
-		{
-		  output = PyString_AsString (string);
-		  length = PyString_Size (string);
-		  type = builtin_type (gdbarch)->builtin_char;
-		}
-	      else
-		gdbpy_print_stack ();
-	      
-	    }
-	
-	  if (output)
-	    {
-	      if (is_lazy || (hint && !strcmp (hint, "string")))
-		LA_PRINT_STRING (stream, type, output, length, encoding,
+	      gdb_byte *output;
+	      long length;
+	      struct type *type;
+
+	      make_cleanup_py_decref (string);
+	      output = PyString_AsString (string);
+	      length = PyString_Size (string);
+	      type = builtin_type (gdbarch)->builtin_char;
+
+	      if (hint && !strcmp (hint, "string"))
+		LA_PRINT_STRING (stream, type, output, length, NULL,
 				 0, options);
 	      else
 		fputs_filtered (output, stream);
 	    }
 	  else
 	    gdbpy_print_stack ();
-	  
-	  if (string)
-	    Py_DECREF (string);
-	  else
-	    xfree (output);
-      
-	  xfree (encoding);
-	  Py_DECREF (py_str);
 	}
+
+      do_cleanups (cleanup);
     }
   else if (replacement)
     {
@@ -548,32 +546,31 @@ print_children (PyObject *printer, const char *hint,
 	  fputs_filtered (" = ", stream);
 	}
 
-      if (gdbpy_is_lazy_string (py_v) || gdbpy_is_string (py_v))
+      if (gdbpy_is_lazy_string (py_v))
 	{
-	  gdb_byte *output = NULL;
+	  CORE_ADDR addr;
+	  struct type *type;
+	  long length;
+	  char *encoding = NULL;
 
-	  if (gdbpy_is_lazy_string (py_v))
-	    {
-	      struct type *type;
-	      long length;
-	      char *encoding = NULL;
+	  make_cleanup (free_current_contents, &encoding);
+	  gdbpy_extract_lazy_string (py_v, &addr, &type, &length, &encoding);
 
-	      output = gdbpy_extract_lazy_string (py_v, &type,
-						  &length, &encoding);
-	      if (!output)
-		gdbpy_print_stack ();
-	      LA_PRINT_STRING (stream, type, output, length, encoding,
-			       0, options);
-	      xfree (encoding);
-	      xfree (output);
-	    }
+	  val_print_string (type, encoding, addr, (int) length, stream,
+			    options);
+
+	  do_cleanups (inner_cleanup);
+	}
+      else if (gdbpy_is_string (py_v))
+	{
+	  gdb_byte *output;
+
+	  output = python_string_to_host_string (py_v);
+	  if (!output)
+	    gdbpy_print_stack ();
 	  else
 	    {
-	      output = python_string_to_host_string (py_v);
-	      if (!output)
-		gdbpy_print_stack ();
-	      else
-		fputs_filtered (output, stream);
+	      fputs_filtered (output, stream);
 	      xfree (output);
 	    }
 	}
