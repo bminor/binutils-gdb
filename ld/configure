@@ -12919,6 +12919,22 @@ else
 fi
 done
 
+# We also support plugins on Windows (MinGW).
+if test x$enable_plugins = xno ; then
+  for ac_header in Windows.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "Windows.h" "ac_cv_header_Windows_h" "$ac_includes_default
+"
+if test "x$ac_cv_header_Windows_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINDOWS_H 1
+_ACEOF
+ enable_plugins=yes
+fi
+
+done
+
+fi
  if test x$enable_plugins = xyes; then
   ENABLE_PLUGINS_TRUE=
   ENABLE_PLUGINS_FALSE='#'

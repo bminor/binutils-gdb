@@ -1,5 +1,18 @@
 2010-10-15  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	* configure.in: If <dlfcn.h> can't be found, try for <Windows.h>
+	* configure: Regenerate.
+	* config.in: Likewise.
+	* plugin.c [!HAVE_DLFCN_H && HAVE_WINDOWS_H] (dlopen): Provide
+	trival LoadLibrary-based replacement for Windows systems.
+	[!HAVE_DLFCN_H && HAVE_WINDOWS_H] (dlsym): Likewise trivial
+	replacement based on GetProcAddress.
+	[!HAVE_DLFCN_H && HAVE_WINDOWS_H] (dlsym): Likewise FreeLibrary.
+	* sysdep.h: Don't infer presence of <dlfcn.h> from ENABLE_PLUGINS
+	anymore, use its own guard.
+
+2010-10-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	* plugin.c (add_input_file): Take copy of input string.
 	(add_input_library): Likewise.
 	(set_extra_library_path): Likewise.

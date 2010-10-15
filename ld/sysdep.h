@@ -90,8 +90,7 @@ extern char *strrchr ();
 #endif
 #endif
 
-/* This is both more precise than and includes HAVE_DLFCN_H.  */
-#ifdef ENABLE_PLUGINS
+#ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
 

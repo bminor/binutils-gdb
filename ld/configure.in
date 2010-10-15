@@ -169,6 +169,10 @@ enable_plugins=yes
 AC_CHECK_HEADER([dlfcn.h],[],[enable_plugins=no],[AC_INCLUDES_DEFAULT])
 AC_SEARCH_LIBS([dlopen],[dl],[],[enable_plugins=no],[])
 AC_CHECK_FUNCS([dlopen dlsym dlclose],[],[enable_plugins=no])
+# We also support plugins on Windows (MinGW).
+if test x$enable_plugins = xno ; then
+  AC_CHECK_HEADERS([Windows.h],[enable_plugins=yes],[],[AC_INCLUDES_DEFAULT])
+fi
 AM_CONDITIONAL([ENABLE_PLUGINS], [test x$enable_plugins = xyes])
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)

@@ -32,6 +32,9 @@
 #include "plugin.h"
 #include "plugin-api.h"
 #include "elf-bfd.h"
+#if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
+#include <Windows.h>
+#endif
 
 /* The suffix to append to the name of the real (claimed) object file
    when generating a dummy BFD to hold the IR symbols sent from the
@@ -127,6 +130,31 @@ static const enum ld_plugin_tag tv_header_tags[] =
 
 /* How many entries in the constant leading part of the tv array.  */
 static const size_t tv_header_size = ARRAY_SIZE (tv_header_tags);
+
+#if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
+
+#define RTLD_NOW 0	/* Dummy value.  */
+
+static void *
+dlopen (const char *file, int mode ATTRIBUTE_UNUSED)
+{
+  return LoadLibrary (file);
+}
+
+static void *
+dlsym (void *handle, const char *name)
+{
+  return GetProcAddress (handle, name);
+}
+
+static int
+dlclose (void *handle)
+{
+  FreeLibrary (handle);
+  return 0;
+}
+
+#endif /* !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)  */
 
 /* Helper function for exiting with error status.  */
 static int
