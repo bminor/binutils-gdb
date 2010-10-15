@@ -1,5 +1,10 @@
 2010-10-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* gas/bfin/video.s: Add BYTEOP2M insns.
+	* gas/bfin/video.d, gas/bfin/video2.s, gas/bfin/video2.d: Likewise.
+
+2010-10-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* gas/bfin/video.d: Change addresses to regexps.
 	* gas/bfin/video2.d: Likewise.
 

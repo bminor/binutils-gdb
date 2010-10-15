@@ -1,3 +1,7 @@
+2010-10-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (decode_dsp32alu_0): Call imm5d() for BYTEOP2M.
+
 2010-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Remove CheckRegSize from movq.
