@@ -3656,18 +3656,26 @@ Output_segment::has_dynamic_reloc_list(const Output_data_list* pdl) const
 // Set the section addresses for an Output_segment.  If RESET is true,
 // reset the addresses first.  ADDR is the address and *POFF is the
 // file offset.  Set the section indexes starting with *PSHNDX.
+// *PINCREASE_RELRO is the size of the portion of the first non-relro
+// section that should be included in the PT_GNU_RELRO segment; if
+// there is alignment padding between the last relro section and the
+// next section, we add that padding to that size and return the
+// updated value.  If this segment has relro sections, and has been
+// aligned for that purpose, set *HAS_RELRO to TRUE.
 // Return the address of the immediately following segment.  Update
-// *POFF and *PSHNDX.
+// *PINCREASE_RELRO, *HAS_RELRO, *POFF, and *PSHNDX.
 
 uint64_t
 Output_segment::set_section_addresses(const Layout* layout, bool reset,
                                       uint64_t addr,
-				      unsigned int increase_relro,
+				      unsigned int* pincrease_relro,
+				      bool* has_relro,
 				      off_t* poff,
 				      unsigned int* pshndx)
 {
   gold_assert(this->type_ == elfcpp::PT_LOAD);
 
+  uint64_t last_relro_pad = 0;
   off_t orig_off = *poff;
 
   // If we have relro sections, we need to pad forward now so that the
@@ -3678,6 +3686,7 @@ Output_segment::set_section_addresses(const Layout* layout, bool reset,
     {
       uint64_t relro_size = 0;
       off_t off = *poff;
+      uint64_t max_align = 0;
       for (int i = 0; i < static_cast<int>(ORDER_MAX); ++i)
 	{
 	  Output_data_list* pdl = &this->output_lists_[i];
@@ -3689,6 +3698,10 @@ Output_segment::set_section_addresses(const Layout* layout, bool reset,
 	      Output_section* pos = (*p)->output_section();
 	      if (!pos->is_relro())
 		break;
+	      uint64_t align = (*p)->addralign();
+	      if (align > max_align)
+		max_align = align;
+	      relro_size = align_address(relro_size, align);
 	      if ((*p)->is_address_valid())
 		relro_size += (*p)->data_size();
 	      else
@@ -3703,12 +3716,20 @@ Output_segment::set_section_addresses(const Layout* layout, bool reset,
 	  if (p != pdl->end())
 	    break;
 	}
-      relro_size += increase_relro;
+      relro_size += *pincrease_relro;
+      // Pad the total relro size to a multiple of the maximum
+      // section alignment seen.
+      uint64_t aligned_size = align_address(relro_size, max_align);
+      // Note the amount of padding added after the last relro section.
+      last_relro_pad = aligned_size - relro_size;
+      // Adjust *PINCREASE_RELRO to include the padding.
+      *pincrease_relro += last_relro_pad;
+      *has_relro = true;
 
       uint64_t page_align = parameters->target().common_pagesize();
 
       // Align to offset N such that (N + RELRO_SIZE) % PAGE_ALIGN == 0.
-      uint64_t desired_align = page_align - (relro_size % page_align);
+      uint64_t desired_align = page_align - (aligned_size % page_align);
       if (desired_align < *poff % page_align)
 	*poff += page_align - *poff % page_align;
       *poff += desired_align - *poff % page_align;
@@ -3739,6 +3760,11 @@ Output_segment::set_section_addresses(const Layout* layout, bool reset,
       addr = this->set_section_list_addresses(layout, reset,
 					      &this->output_lists_[i],
 					      addr, poff, pshndx, &in_tls);
+      if (i == static_cast<int>(ORDER_RELRO_LAST))
+	{
+	  *poff += last_relro_pad;
+	  addr += last_relro_pad;
+	}
       if (i < static_cast<int>(ORDER_SMALL_BSS))
 	{
 	  this->filesz_ = *poff - orig_off;
