@@ -1,3 +1,7 @@
+2010-10-16  Kai Tietz  <kai.tietz@onevision.com>
+
+	* ld-pe/pe-run2.exp: Prefix --enable-auto-import by -Wl.
+
 2010-10-15  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-plugin/plugin.exp: Don't error out if there is no target compiler

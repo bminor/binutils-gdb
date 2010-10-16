@@ -85,7 +85,7 @@ proc test_direct2_link_dll {} {
 	} else {
 	    # Check linking directly to direct2_dll.dll.
 	    set msg "linking client (.dll) fastcall/stdcall"
-	    if [ld_simple_link "$CC -Wl,--enable-stdcall-fixup --enable-auto-import" $tmpdir/direct2_client_dll.exe \
+	    if [ld_simple_link "$CC -Wl,--enable-stdcall-fixup -Wl,--enable-auto-import" $tmpdir/direct2_client_dll.exe \
 	      "$tmpdir/direct2_client.o $tmpdir/direct2_dll.dll" ] {
 		pass $msg
 	    } else {
