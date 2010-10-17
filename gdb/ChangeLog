@@ -1,3 +1,8 @@
+2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix GCC false warning.
+	* varobj.c (value_get_print_value) <str_addr>: Initialize it.
+
 2010-10-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-typeprint.c (pascal_type_print_method_args): Fix problem in

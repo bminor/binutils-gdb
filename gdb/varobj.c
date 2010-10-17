@@ -2486,7 +2486,8 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
   long len = 0;
   char *encoding = NULL;
   struct gdbarch *gdbarch = NULL;
-  CORE_ADDR str_addr;
+  /* Initialize it just to avoid a GCC false warning.  */
+  CORE_ADDR str_addr = 0;
   int string_print = 0;
 
   if (value == NULL)
