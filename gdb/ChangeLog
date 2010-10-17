@@ -1,4 +1,14 @@
 2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix the `stopped language detection' testcase for gcc-4.5.
+	* dwarf2read.c (read_partial_die): Set also LANGUAGE_OF_MAIN.
+	* symfile.c (set_initial_language): Move variable filename to a more
+	inner block.  Prefer LANGUAGE_OF_MAIN.
+	* symtab.c (language_of_main): New variable.
+	(set_main_name): Always reset LANGUAGE_OF_MAIN.
+	* symtab.h (language_of_main): New declaration.
+
+2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	* gdbthread.h (currently_stepping): New declaration.

@@ -1238,6 +1238,7 @@ extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
    const. */
 extern void set_main_name (const char *name);
 extern /*const */ char *main_name (void);
+extern enum language language_of_main;
 
 /* Check global symbols in objfile.  */
 struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,

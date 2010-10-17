@@ -4389,6 +4389,7 @@ decode_line_spec (char *string, int funfirstline)
 
 /* Track MAIN */
 static char *name_of_main;
+enum language language_of_main = language_unknown;
 
 void
 set_main_name (const char *name)
@@ -4397,10 +4398,12 @@ set_main_name (const char *name)
     {
       xfree (name_of_main);
       name_of_main = NULL;
+      language_of_main = language_unknown;
     }
   if (name != NULL)
     {
       name_of_main = xstrdup (name);
+      language_of_main = language_unknown;
     }
 }
 

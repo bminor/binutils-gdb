@@ -1568,12 +1568,18 @@ symbol_file_command (char *args, int from_tty)
 void
 set_initial_language (void)
 {
-  const char *filename;
   enum language lang = language_unknown;
 
-  filename = find_main_filename ();
-  if (filename != NULL)
-    lang = deduce_language_from_filename (filename);
+  if (language_of_main != language_unknown)
+    lang = language_of_main;
+  else
+    {
+      const char *filename;
+      
+      filename = find_main_filename ();
+      if (filename != NULL)
+	lang = deduce_language_from_filename (filename);
+    }
 
   if (lang == language_unknown)
     {

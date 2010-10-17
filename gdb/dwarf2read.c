@@ -8880,7 +8880,13 @@ read_partial_die (struct partial_die_info *part_die,
 	     practice.  */
 	  if (DW_UNSND (&attr) == DW_CC_program
 	      && cu->language == language_fortran)
-	    set_main_name (part_die->name);
+	    {
+	      set_main_name (part_die->name);
+
+	      /* As this DIE has a static linkage the name would be difficult
+		 to look up later.  */
+	      language_of_main = language_fortran;
+	    }
 	  break;
 	default:
 	  break;
