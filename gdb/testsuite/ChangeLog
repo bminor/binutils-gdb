@@ -1,5 +1,10 @@
 2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.threads/sigstep-threads.exp: New file.
+	* gdb.threads/sigstep-threads.c: New file.
+
+2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/pie-execl.exp: New file.
 	* gdb.base/pie-execl.c: New file.
 
