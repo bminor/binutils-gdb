@@ -188,7 +188,7 @@ m32r_load (char *filename, int from_tty)
      the stack may not be valid, and things would get horribly
      confused... */
 
-  clear_symtab_users ();
+  clear_symtab_users (0);
 }
 
 static void
@@ -551,7 +551,7 @@ m32r_upload_command (char *args, int from_tty)
      the stack may not be valid, and things would get horribly
      confused... */
 
-  clear_symtab_users ();
+  clear_symtab_users (0);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

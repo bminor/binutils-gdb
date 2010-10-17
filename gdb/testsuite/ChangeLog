@@ -1,3 +1,8 @@
+2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/pie-execl.exp: New file.
+	* gdb.base/pie-execl.c: New file.
+
 2010-10-13  Doug Evans  <dje@google.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

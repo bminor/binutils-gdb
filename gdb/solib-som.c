@@ -354,7 +354,7 @@ keep_going:
   /* Make the breakpoint at "_start" a shared library event breakpoint.  */
   create_solib_event_breakpoint (target_gdbarch, anaddr);
 
-  clear_symtab_users ();
+  clear_symtab_users (0);
 }
 
 static void

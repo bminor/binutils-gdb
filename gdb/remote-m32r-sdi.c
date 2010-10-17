@@ -1377,7 +1377,7 @@ m32r_load (char *args, int from_tty)
      might be to call normal_stop, except that the stack may not be valid,
      and things would get horribly confused... */
 
-  clear_symtab_users ();
+  clear_symtab_users (0);
 
   if (!nostart)
     {

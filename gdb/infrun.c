@@ -835,8 +835,15 @@ follow_exec (ptid_t pid, char *execd_pathname)
   /* That a.out is now the one to use. */
   exec_file_attach (execd_pathname, 0);
 
-  /* Load the main file's symbols.  */
-  symbol_file_add_main (execd_pathname, 0);
+  /* SYMFILE_DEFER_BP_RESET is used as the proper displacement for PIE
+     (Position Independent Executable) main symbol file will get applied by
+     solib_create_inferior_hook below.  breakpoint_re_set would fail to insert
+     the breakpoints with the zero displacement.  */
+
+  symbol_file_add (execd_pathname, SYMFILE_MAINLINE | SYMFILE_DEFER_BP_RESET,
+		   NULL, 0);
+
+  set_initial_language ();
 
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
@@ -845,6 +852,8 @@ follow_exec (ptid_t pid, char *execd_pathname)
 #endif
 
   jit_inferior_created_hook ();
+
+  breakpoint_re_set ();
 
   /* Reinsert all breakpoints.  (Those which were symbolic have
      been reset to the proper address in the new a.out, thanks

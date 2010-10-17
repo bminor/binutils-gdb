@@ -692,7 +692,7 @@ free_all_objfiles (void)
   {
     free_objfile (objfile);
   }
-  clear_symtab_users ();
+  clear_symtab_users (0);
 }
 
 /* A helper function for objfile_relocate1 that relocates a single

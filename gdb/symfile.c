@@ -1038,7 +1038,7 @@ syms_from_objfile (struct objfile *objfile,
 
 /* Perform required actions after either reading in the initial
    symbols for a new objfile, or mapping in the symbols from a reusable
-   objfile. */
+   objfile.  ADD_FLAGS is a bitmask of enum symfile_add_flags.  */
 
 void
 new_symfile_objfile (struct objfile *objfile, int add_flags)
@@ -1051,7 +1051,7 @@ new_symfile_objfile (struct objfile *objfile, int add_flags)
       /* OK, make it the "real" symbol file.  */
       symfile_objfile = objfile;
 
-      clear_symtab_users ();
+      clear_symtab_users (add_flags);
     }
   else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
     {
@@ -2530,7 +2530,7 @@ reread_symbols (void)
       /* Notify objfiles that we've modified objfile sections.  */
       objfiles_changed ();
 
-      clear_symtab_users ();
+      clear_symtab_users (0);
       /* At least one objfile has changed, so we can consider that
          the executable we're debugging has changed too.  */
       observer_notify_executable_changed ();
@@ -2748,10 +2748,10 @@ allocate_symtab (const char *filename, struct objfile *objfile)
 
 
 /* Reset all data structures in gdb which may contain references to symbol
-   table data.  */
+   table data.  ADD_FLAGS is a bitmask of enum symfile_add_flags.  */
 
 void
-clear_symtab_users (void)
+clear_symtab_users (int add_flags)
 {
   /* Someday, we should do better than this, by only blowing away
      the things that really need to be blown.  */
@@ -2761,7 +2761,8 @@ clear_symtab_users (void)
   clear_current_source_symtab_and_line ();
 
   clear_displays ();
-  breakpoint_re_set ();
+  if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
+    breakpoint_re_set ();
   set_default_breakpoint (0, NULL, 0, 0, 0);
   clear_pc_function_cache ();
   observer_notify_new_objfile (NULL);
@@ -2780,7 +2781,7 @@ clear_symtab_users (void)
 static void
 clear_symtab_users_cleanup (void *ignore)
 {
-  clear_symtab_users ();
+  clear_symtab_users (0);
 }
 
 /* OVERLAYS:

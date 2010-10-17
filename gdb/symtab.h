@@ -1186,7 +1186,7 @@ extern void skip_prologue_sal (struct symtab_and_line *);
 
 /* symfile.c */
 
-extern void clear_symtab_users (void);
+extern void clear_symtab_users (int add_flags);
 
 extern enum language deduce_language_from_filename (const char *);
 
