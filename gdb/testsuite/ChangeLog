@@ -1,5 +1,11 @@
 2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix s390x compatibility.
+	* gdb.dwarf2/pr11465.S (DW_TAG_pointer_type): Use PTRBITS.  Twice.
+	* gdb.dwarf2/pr11465.exp: Set ptrbits, use it for -DPTRBITS.
+
+2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.threads/sigstep-threads.exp: New file.
 	* gdb.threads/sigstep-threads.c: New file.
 

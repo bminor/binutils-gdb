@@ -29,8 +29,14 @@ set srcfile "$testfile.S"
 set executable "$testfile.x"
 set binfile [file join $objdir $subdir $executable]
 
+if [is_ilp32_target] {
+    set ptrbits 32
+} else {
+    set ptrbits 64
+}
+
 if  { [gdb_compile [file join $srcdir $subdir $srcfile] \
-	   $binfile object {}] != "" } {
+	   $binfile object [list additional_flags=-DPTRBITS=$ptrbits]] != "" } {
     return -1
 }
 
