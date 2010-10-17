@@ -1,3 +1,8 @@
+2010-10-17  Doug Kwan  <dougkwan@google.com>
+
+	* gold/arm.cc (Target_arm::got_section): Use correct order and set
+	GOT output section to be writable.
+
 2010-10-14  Cary Coutant  <ccoutant@google.com>
 
 	* debug.h (DEBUG_INCREMENTAL): New flag.

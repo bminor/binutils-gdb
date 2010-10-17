@@ -4183,9 +4183,8 @@ Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
       this->got_ = new Arm_output_data_got<big_endian>(symtab, layout);
 
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				      (elfcpp::SHF_ALLOC
-				       | elfcpp::SHF_WRITE),
-				      this->got_, ORDER_RELRO, true);
+				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
+				      this->got_, ORDER_DATA, false);
 
       // The old GNU linker creates a .got.plt section.  We just
       // create another set of data in the .got section.  Note that we
@@ -4193,8 +4192,7 @@ Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
       // might be empty.
       this->got_plt_ = new Output_data_space(4, "** GOT PLT");
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				      (elfcpp::SHF_ALLOC
-				       | elfcpp::SHF_WRITE),
+				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
 				      this->got_plt_, ORDER_DATA, false);
 
       // The first three entries are reserved.
