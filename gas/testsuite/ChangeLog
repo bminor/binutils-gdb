@@ -1,3 +1,8 @@
+2010-10-18  Kai Tietz  <kaI.tietz@onevision.com>
+
+	* gas/i386/disp32.d: Adjust initial symbol check.
+	* gas/i386/x86-64-disp32.d: Likewise.
+
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/ld.d: Spell out section offsets and addends
