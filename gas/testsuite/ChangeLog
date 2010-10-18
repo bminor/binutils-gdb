@@ -1,5 +1,11 @@
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/mips.exp (run_dump_test_arch): Get the name of the
+	architecture to check against for an architecture-specific test
+	from the properties instead of the name passed.
+
+2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/lineno.s: Convert to o32.
 	* gas/mips/lineno.d: Adjust patterns accordingly.  Force the o32
 	ABI.

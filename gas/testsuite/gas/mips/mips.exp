@@ -194,9 +194,12 @@ proc mips_arch_displayname {arch} {
 # mips_arch_properties ARCH (optional:) INCLUDE_GPRSIZE
 #
 # This function returns the property list associated with ARCH in the
-# architecture data array.  If INCLUDE_GPRSIZE is non-zero, an additional
-# "gpr32" or "gpr64" property will be returned as part of the list based
-# on the architecture's GPR size.
+# architecture data array, including the "canonical" target name as the
+# first element.
+#
+# If INCLUDE_GPRSIZE is non-zero, an additional "gpr32" or "gpr64"
+# property will be returned as part of the list based on the
+# architecture's GPR size.
 proc mips_arch_properties {arch {include_gprsize 1}} {
     array set archdata [mips_arch_data $arch]
     set props $archdata(props)
@@ -286,7 +289,8 @@ proc mips_arch_list_matching {args} {
 proc run_dump_test_arch { name arch } {
     global subdir srcdir
 
-    set archname "${arch}@${name}"
+    set proparch [lindex [mips_arch_properties $arch 0] 0]
+    set archname "${proparch}@${name}"
     if { [file exists "$srcdir/$subdir/${archname}.d"] } {
 	set name $archname
     }
