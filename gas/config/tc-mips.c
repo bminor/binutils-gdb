@@ -1191,6 +1191,9 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"origin", s_org, 0},
   {"repeat", s_rept, 0},
 
+  /* For MIPS this is non-standard, but we define it for consistency.  */
+  {"sbss", s_change_sec, 'B'},
+
   /* These pseudo-ops are defined in read.c, but must be overridden
      here for one reason or another.  */
   {"align", s_align, 0},
@@ -12673,6 +12676,17 @@ s_change_sec (int sec)
 	{
 	  bfd_set_section_flags (stdoutput, seg,
 				 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+	  if (strncmp (TARGET_OS, "elf", 3) != 0)
+	    record_alignment (seg, 4);
+	}
+      demand_empty_rest_of_line ();
+      break;
+
+    case 'B':
+      seg = subseg_new (".sbss", (subsegT) get_absolute_expression ());
+      if (IS_ELF)
+	{
+	  bfd_set_section_flags (stdoutput, seg, SEC_ALLOC);
 	  if (strncmp (TARGET_OS, "elf", 3) != 0)
 	    record_alignment (seg, 4);
 	}
