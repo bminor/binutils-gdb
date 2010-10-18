@@ -1,5 +1,11 @@
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/ld.d: Use wildcard address matching.
+	* gas/mips/ld-ilocks.d: Likewise.
+	* gas/mips/ld-ilocks-addr32.d: Likewise.
+
+2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/mips.exp (run_dump_test_arch): Get the name of the
 	architecture to check against for an architecture-specific test
 	from the properties instead of the name passed.
