@@ -1,3 +1,12 @@
+2010-10-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Test encoding
+	argument to lazy_string.
+	* gdb.python/py-prettyprint.py (pp_ls_encoding): New global.
+	(pp_ls.to_string): Use it.
+	* gdb.python/py-prettyprint.c (main): Move declarations to top.
+	Add "estring2" local.
+
 2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix s390x compatibility.
