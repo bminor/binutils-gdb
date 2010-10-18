@@ -1,3 +1,8 @@
+2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* mips-opc.c (mips_builtin_opcodes): Move M_LD_OB and M_SD_OB
+	macros before their corresponding MIPS III hardware instructions.
+
 2010-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuNop to CPU_GENERIC64_FLAGS.

@@ -7367,15 +7367,18 @@ macro (struct mips_cl_insn *ip)
       break;
 
     case M_LD_OB:
-      s = "lw";
+      s = HAVE_64BIT_GPRS ? "ld" : "lw";
       goto sd_ob;
     case M_SD_OB:
-      s = "sw";
+      s = HAVE_64BIT_GPRS ? "sd" : "sw";
     sd_ob:
-      gas_assert (HAVE_32BIT_ADDRESSES);
       macro_build (&offset_expr, s, "t,o(b)", treg, BFD_RELOC_LO16, breg);
-      offset_expr.X_add_number += 4;
-      macro_build (&offset_expr, s, "t,o(b)", treg + 1, BFD_RELOC_LO16, breg);
+      if (!HAVE_64BIT_GPRS)
+	{
+	  offset_expr.X_add_number += 4;
+	  macro_build (&offset_expr, s, "t,o(b)", treg + 1,
+		       BFD_RELOC_LO16, breg);
+	}
       break;
 
    /* New code added to support COPZ instructions.

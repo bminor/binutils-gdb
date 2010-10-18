@@ -1,3 +1,9 @@
+2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/lineno.s: Convert to o32.
+	* gas/mips/lineno.d: Adjust patterns accordingly.  Force the o32
+	ABI.
+
 2010-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run x86-64-nops-1-g64.

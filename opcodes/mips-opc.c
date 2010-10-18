@@ -743,8 +743,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"lbu",     "t,o(b)",	0x90000000, 0xfc000000,	LDD|RD_b|WR_t,		0,		I1	},
 {"lbu",     "t,A(b)",	0,    (int) M_LBU_AB,	INSN_MACRO,		0,		I1	},
 {"lca",     "t,A(b)",	0,    (int) M_LCA_AB,	INSN_MACRO,		0,		I1	},
-{"ld",	    "t,o(b)",   0xdc000000, 0xfc000000, WR_t|RD_b,		0,		I3	},
+/* The macro has to be first to handle o32 correctly.  */
 {"ld",      "t,o(b)",	0,    (int) M_LD_OB,	INSN_MACRO,		0,		I1	},
+{"ld",      "t,o(b)",   0xdc000000, 0xfc000000, WR_t|RD_b,		0,		I3	},
 {"ld",      "t,A(b)",	0,    (int) M_LD_AB,	INSN_MACRO,		0,		I1	},
 {"ldaddw",  "t,b",	0x70000010, 0xfc00ffff,	SM|RD_t|WR_t|RD_b,	0,		XLR	},
 {"ldaddwu", "t,b",	0x70000011, 0xfc00ffff,	SM|RD_t|WR_t|RD_b,	0,		XLR	},
@@ -1173,8 +1174,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sc",	    "t,A(b)",	0,    (int) M_SC_AB,	INSN_MACRO,		0,		I2	},
 {"scd",	    "t,o(b)",	0xf0000000, 0xfc000000, SM|RD_t|WR_t|RD_b,	0,		I3	},
 {"scd",	    "t,A(b)",	0,    (int) M_SCD_AB,	INSN_MACRO,		0,		I3	},
-{"sd",	    "t,o(b)",	0xfc000000, 0xfc000000,	SM|RD_t|RD_b,		0,		I3	},
+/* The macro has to be first to handle o32 correctly.  */
 {"sd",      "t,o(b)",	0,    (int) M_SD_OB,	INSN_MACRO,		0,		I1	},
+{"sd",      "t,o(b)",	0xfc000000, 0xfc000000,	SM|RD_t|RD_b,		0,		I3	},
 {"sd",      "t,A(b)",	0,    (int) M_SD_AB,	INSN_MACRO,		0,		I1	},
 {"sdbbp",   "",		0x0000000e, 0xffffffff,	TRAP,           	0,		G2	},
 {"sdbbp",   "c",	0x0000000e, 0xfc00ffff,	TRAP,			0,		G2	},

@@ -1,5 +1,9 @@
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* config/tc-mips.c (macro)[M_LD_OB, M_SD_OB]: Handle 64-bit ABIs.
+
+2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* config/tc-mips.c (mips_pseudo_table): Add "sbss".
 	(s_change_sec): Handle it.
 
