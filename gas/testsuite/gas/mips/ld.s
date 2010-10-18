@@ -1,8 +1,13 @@
 # Source file used to test the ld macro.
-	
+
 	.set	mips1
 
+	.bss
+	.align	12
+	.sbss
+	.align	12
 	.data
+	.align	12
 data_label:
 	.extern big_external_data_label,1000
 	.extern small_external_data_label,1
@@ -10,8 +15,9 @@ data_label:
 	.comm small_external_common,1
 	.lcomm big_local_common,1000
 	.lcomm small_local_common,1
-	
+
 	.text
+	.align	12
 	ld	$4,0
 	ld	$4,1
 	ld	$4,0x8000
@@ -140,5 +146,6 @@ data_label:
 	ld	$4,big_local_common+0x1a5a5($5)
 	sd	$4,small_local_common+0x1a5a5($5)
 
-# Round to a 16 byte boundary, for ease in testing multiple targets.
-	nop
+# Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
+	.align	2
+	.space	8

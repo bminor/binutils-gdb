@@ -1,5 +1,14 @@
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/ld.d: Spell out section offsets and addends
+	explicitly.  Clean up some regexps.
+	* gas/mips/ld-ilocks.d: Likewise.  Add missing "$" prefixes to
+	the names of FP registers.
+	* gas/mips/ld-ilocks-addr32.d: Likewise.
+	* gas/mips/ld.s: Align sections to 4k, adjust padding.
+
+2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/ld.d: Use wildcard address matching.
 	* gas/mips/ld-ilocks.d: Likewise.
 	* gas/mips/ld-ilocks-addr32.d: Likewise.
