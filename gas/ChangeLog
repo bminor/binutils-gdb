@@ -1,5 +1,10 @@
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* config/tc-mips.c (macro)[ldd_std]: Fix the relaxation variant
+	for absolute addressing.
+
+2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* config/tc-mips.c (macro)[M_LD_OB, M_SD_OB]: Handle 64-bit ABIs.
 
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>

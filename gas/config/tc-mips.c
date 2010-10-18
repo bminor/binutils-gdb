@@ -7203,26 +7203,7 @@ macro (struct mips_cl_insn *ip)
 
 	      relax_switch ();
 
-	      /* We just generated two relocs.  When tc_gen_reloc
-		 handles this case, it will skip the first reloc and
-		 handle the second.  The second reloc already has an
-		 extra addend of 4, which we added above.  We must
-		 subtract it out, and then subtract another 4 to make
-		 the first reloc come out right.  The second reloc
-		 will come out right because we are going to add 4 to
-		 offset_expr when we build its instruction below.
-
-		 If we have a symbol, then we don't want to include
-		 the offset, because it will wind up being included
-		 when we generate the reloc.  */
-
-	      if (offset_expr.X_op == O_constant)
-		offset_expr.X_add_number -= 8;
-	      else
-		{
-		  offset_expr.X_add_number = -4;
-		  offset_expr.X_op = O_constant;
-		}
+	      offset_expr.X_add_number -= 4;
 	    }
 	  used_at = 1;
 	  macro_build_lui (&offset_expr, AT);
