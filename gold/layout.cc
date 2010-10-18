@@ -2658,7 +2658,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	  unsigned int shndx_hold = *pshndx;
 	  bool has_relro = false;
 	  uint64_t new_addr = (*p)->set_section_addresses(this, false, addr,
-							  &increase_relro,
+							  increase_relro,
 							  &has_relro,
                                                           &off, pshndx);
 
@@ -2688,7 +2688,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 		  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
 		  off = align_file_offset(off, addr, abi_pagesize);
 		  new_addr = (*p)->set_section_addresses(this, true, addr,
-							 &increase_relro,
+							 increase_relro,
 							 &has_relro,
                                                          &off, pshndx);
 		}

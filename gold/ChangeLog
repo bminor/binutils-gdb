@@ -1,3 +1,12 @@
+2010-10-17  Cary Coutant  <ccoutant@google.com>
+
+	* output.h (Output_segment::set_section_addresses): Change function
+	signature.  Update all callers.
+	* output.cc (Output_segment::is_first_section_relro): Ignore TLS
+	sections.
+	(Output_segment::set_section_addresses): Align after last TLS
+	section.  Add padding before last relro section instead of after.
+
 2010-10-17  Doug Kwan  <dougkwan@google.com>
 
 	* gold/arm.cc (Target_arm::got_section): Use correct order and set
