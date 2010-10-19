@@ -537,6 +537,9 @@ thumb_instruction_changes_pc (unsigned short inst)
   if ((inst & 0xff00) == 0x4700)	/* bx REG, blx REG */
     return 1;
 
+  if ((inst & 0xff87) == 0x4687)	/* mov pc, REG */
+    return 1;
+
   if ((inst & 0xf500) == 0xb100)	/* CBNZ or CBZ.  */
     return 1;
 
@@ -3571,6 +3574,15 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 	nextpc = pc_val;
       else
 	nextpc = get_frame_register_unsigned (frame, bits (inst1, 3, 6));
+    }
+  else if ((inst1 & 0xff87) == 0x4687)	/* mov pc, REG */
+    {
+      if (bits (inst1, 3, 6) == 0x0f)
+	nextpc = pc_val;
+      else
+	nextpc = get_frame_register_unsigned (frame, bits (inst1, 3, 6));
+
+      nextpc = MAKE_THUMB_ADDR (nextpc);
     }
   else if ((inst1 & 0xf500) == 0xb100)
     {

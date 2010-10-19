@@ -1,3 +1,9 @@
+2010-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* arm-tdep.c (thumb_get_next_pc_raw): Handle Thumb-16 encoding
+	for "mov pc, REG" as well.
+	(thumb_instruction_changes_pc): Likewise.
+
 2010-10-19  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	 PR C++/11500:
