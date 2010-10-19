@@ -1,3 +1,11 @@
+2010-10-19  Alan Modra  <amodra@gmail.com>
+
+	PR gas/12049
+	* frags.h (struct frag): Add "region" field.
+	* write.c (relax_frag): Don't add "stretch" to forward reference
+	target if there is an intervening org or align.
+	(relax_segment): Set region.
+
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (macro)[ldd_std]: Fix the relaxation variant

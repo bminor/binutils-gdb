@@ -1,7 +1,7 @@
 /* write.c - emit .o file
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+   2010 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2148,16 +2148,21 @@ relax_frag (segT segment, fragS *fragP, long stretch)
 	    || sym_frag == &zero_address_frag);
       target += S_GET_VALUE (symbolP);
 
-      /* If frag has yet to be reached on this pass,
-	 assume it will move by STRETCH just as we did.
-	 If this is not so, it will be because some frag
-	 between grows, and that will force another pass.  */
+      /* If SYM_FRAG has yet to be reached on this pass, assume it
+	 will move by STRETCH just as we did, unless there is an
+	 alignment frag between here and SYM_FRAG.  An alignment may
+	 well absorb any STRETCH, and we don't want to choose a larger
+	 branch insn by overestimating the needed reach of this
+	 branch.  It isn't critical to calculate TARGET exactly;  We
+	 know we'll be doing another pass if STRETCH is non-zero.  */
 
       if (stretch != 0
 	  && sym_frag->relax_marker != fragP->relax_marker
 	  && S_GET_SEGMENT (symbolP) == segment)
 	{
-	  target += stretch;
+	  if (stretch < 0
+	      || sym_frag->region == fragP->region)
+	    target += stretch;
 	}
     }
 
@@ -2245,6 +2250,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
   unsigned long frag_count;
   struct frag *fragP;
   relax_addressT address;
+  int region;
   int ret;
 
   /* In case md_estimate_size_before_relax() wants to make fixSs.  */
@@ -2253,10 +2259,12 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
   /* For each frag in segment: count and store  (a 1st guess of)
      fr_address.  */
   address = 0;
+  region = 0;
   for (frag_count = 0, fragP = segment_frag_root;
        fragP;
        fragP = fragP->fr_next, frag_count ++)
     {
+      fragP->region = region;
       fragP->relax_marker = 0;
       fragP->fr_address = address;
       address += fragP->fr_fix;
@@ -2285,12 +2293,16 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 	      }
 
 	    address += offset;
+	    region += 1;
 	  }
 	  break;
 
 	case rs_org:
-	case rs_space:
 	  /* Assume .org is nugatory. It will grow with 1st relax.  */
+	  region += 1;
+	  break;
+
+	case rs_space:
 	  break;
 
 	case rs_machine_dependent:
