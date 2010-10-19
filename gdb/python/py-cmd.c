@@ -192,7 +192,12 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	    error (_("Error occurred in Python command."));
 	}
       else
-	error ("%s", msg);
+	{
+	  Py_XDECREF (ptype);
+	  Py_XDECREF (pvalue);
+	  Py_XDECREF (ptraceback);
+	  error ("%s", msg);
+	}
     }
 
   Py_DECREF (result);
