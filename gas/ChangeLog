@@ -1,5 +1,10 @@
 2010-10-19  Alan Modra  <amodra@gmail.com>
 
+	* write.c (relax_segment): Correct address on frag added to stop
+	leb128/align frags bouncing.
+
+2010-10-19  Alan Modra  <amodra@gmail.com>
+
 	PR gas/12049
 	* frags.h (struct frag): Add "region" field.
 	* write.c (relax_frag): Don't add "stretch" to forward reference

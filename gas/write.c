@@ -2525,6 +2525,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			      fragP->fr_literal + fragP->fr_fix,
 			      fragP->fr_var);
 		      newf->fr_type = rs_fill;
+		      newf->fr_address = address + fragP->fr_fix + newoff;
 		      newf->fr_fix = 0;
 		      newf->fr_offset = (((offsetT) 1 << fragP->fr_offset)
 					 / fragP->fr_var);
@@ -2534,13 +2535,11 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			  newf->fr_offset = (offsetT) 1 << fragP->fr_offset;
 			  newf->fr_var = 1;
 			}
-		      /* Include growth of new frag, because rs_fill
-			 frags don't normally grow.  */
+		      /* Include size of new frag in GROWTH.  */
 		      growth += newf->fr_offset * newf->fr_var;
-		      /* The new frag address is newoff.  Adjust this
-			 for the amount we'll add when we process the
-			 new frag.  */
-		      newf->fr_address = newoff - stretch - growth;
+		      /* Adjust the new frag address for the amount
+			 we'll add when we process the new frag.  */
+		      newf->fr_address -= stretch + growth;
 		      newf->relax_marker ^= 1;
 		      fragP->fr_next = newf;
 #ifdef DEBUG
