@@ -1,3 +1,8 @@
+2010-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/foll-fork.exp: Make regexps to match catchpoint hits more
+	strict, but do not check for any particular function name within libc.
+
 2010-10-19  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/smartp.exp: New test.

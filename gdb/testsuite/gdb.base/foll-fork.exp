@@ -122,7 +122,7 @@ proc catch_fork_child_follow {} {
 
     set bp_after_fork [gdb_get_line_number "set breakpoint here"]
 
-    gdb_test "catch fork" "Catchpoint .*(fork).*" \
+    gdb_test "catch fork" "Catchpoint \[0-9\]* \\(fork\\)" \
 	"explicit child follow, set catch fork"
 
     # Verify that the catchpoint is mentioned in an "info breakpoints",
@@ -136,7 +136,7 @@ proc catch_fork_child_follow {} {
     }
 
     gdb_test "continue" \
-	"Catchpoint.*(forked process.*),.*in .*(fork|__kernel_v?syscall).*" \
+	"Catchpoint \[0-9\]* \\(forked process \[0-9\]*\\),.*" \
 	"explicit child follow, catch fork"
 
     # Verify that the catchpoint is mentioned in an "info breakpoints",
@@ -184,7 +184,7 @@ proc catch_fork_unpatch_child {} {
 	"unpatch child, set catch fork"
 
     gdb_test "continue" \
-	"Catchpoint.*\\(forked process.*\\).*,.*in .*(fork|__kernel_v?syscall).*" \
+	"Catchpoint \[0-9\]* \\(forked process \[0-9\]*\\),.*" \
 	"unpatch child, catch fork"
 
     # Delete all breakpoints and catchpoints.
@@ -225,14 +225,15 @@ proc tcatch_fork_parent_follow {} {
 
     set bp_after_fork [gdb_get_line_number "set breakpoint here"]
 
-    gdb_test "catch fork" "Catchpoint .*(fork).*" \
+    gdb_test "catch fork" "Catchpoint \[0-9\]* \\(fork\\)" \
 	"explicit parent follow, set tcatch fork"
 
 # ??rehrauer: I don't yet know how to get the id of the tcatch
 # via this script, so that I can add a -do list to it.  For now,
 # do the follow stuff after the catch happens.
 
-    gdb_test "continue" "in .*(fork|__kernel_v?syscall).*" \
+    gdb_test "continue" \
+	"Catchpoint \[0-9\]* \\(forked process \[0-9\]*\\),.*" \
 	"explicit parent follow, tcatch fork"
 
     gdb_test_no_output "set follow-fork parent"
