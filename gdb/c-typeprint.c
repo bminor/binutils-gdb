@@ -707,6 +707,13 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_TYPEDEF:
+      /* If we get here, the typedef doesn't have a name, and we couldn't
+	 resolve TYPE_TARGET_TYPE.  Not much we can do.  */
+      gdb_assert (TYPE_NAME (type) == NULL);
+      gdb_assert (TYPE_TARGET_TYPE (type) == NULL);
+      fprintf_filtered (stream, _("<unnamed typedef>"));
+      break;
+
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_PTR:
     case TYPE_CODE_MEMBERPTR:

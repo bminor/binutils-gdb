@@ -1,3 +1,8 @@
+2010-10-18  Doug Evans  <dje@google.com>
+
+	* c-typeprint.c (c_type_print_base, case TYPE_CODE_TYPEDEF): Verify
+	assumptions of when this case happens.  Print "<unnamed typedef>".
+
 2010-10-18  Tom Tromey  <tromey@redhat.com>
 
 	* valprint.c (val_print_string): Pass 'encoding' to
