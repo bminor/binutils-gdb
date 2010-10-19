@@ -46,6 +46,7 @@
 #include "observer.h"
 #include "objfiles.h"
 #include "symtab.h"
+#include "exceptions.h"
 
 extern int overload_debug;
 /* Local functions.  */
@@ -2215,7 +2216,8 @@ value_struct_elt (struct value **argp, struct value **args,
     }
 
   if (!v)
-    error (_("Structure has no component named %s."), name);
+    throw_error (NOT_FOUND_ERROR,
+                 _("Structure has no component named %s."), name);
   return v;
 }
 
@@ -2533,7 +2535,9 @@ find_overload_match (struct type **arg_types, int nargs,
 
   /* Did we find a match ?  */
   if (method_oload_champ == -1 && func_oload_champ == -1)
-    error (_("No symbol \"%s\" in current context."), name);
+    throw_error (NOT_FOUND_ERROR,
+                 _("No symbol \"%s\" in current context."),
+                 name);
 
   /* If we have found both a method match and a function
      match, find out which one is better, and calculate match

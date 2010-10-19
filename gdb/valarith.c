@@ -541,7 +541,8 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	}
       return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
     }
-  error (_("member function %s not found"), tstr);
+  throw_error (NOT_FOUND_ERROR,
+               _("member function %s not found"), tstr);
 #ifdef lint
   return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
 #endif
@@ -616,6 +617,9 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
     case UNOP_IND:
       strcpy (ptr, "*");
       break;
+    case STRUCTOP_PTR:
+      strcpy (ptr, "->");
+      break;
     default:
       error (_("Invalid unary operation specified."));
     }
@@ -641,7 +645,9 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	}
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
     }
-  error (_("member function %s not found"), tstr);
+  throw_error (NOT_FOUND_ERROR,
+               _("member function %s not found"), tstr);
+
   return 0;			/* For lint -- never reached */
 }
 

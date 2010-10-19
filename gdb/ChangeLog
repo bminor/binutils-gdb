@@ -1,3 +1,15 @@
+2010-10-19  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	 PR C++/11500:
+	* valarith.c (value_x_unop): Handle STRUCTOP_PTR.
+	* eval.c (evaluate_subexp_standard): Check for overload of
+	'operator->'.
+	* valarith.c (value_x_binop): Throw NOT_FOUND_ERROR.
+	(value_x_unop): Ditto.
+	* valops.c: Include "exceptions.h".
+	(find_overload_match): Throw NOT_FOUND_ERROR.
+	(value_struct_elt): Ditto.
+
 2010-10-19  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-cmd.c (cmdpy_function): Unreference exception state.

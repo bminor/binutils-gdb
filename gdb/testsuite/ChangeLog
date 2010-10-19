@@ -1,5 +1,10 @@
 2010-10-19  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* gdb.cp/smartp.exp: New test.
+	* gdb.cp/smartp.cc : New test.
+
+2010-10-19  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	* gdb.cp/converts.exp: Test pointer to bool conversion.
 	Test pointer to long conversion.
 	* gdb.cp/oranking.exp: Removed relevant kfail.

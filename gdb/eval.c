@@ -1510,6 +1510,28 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    {
 	      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+
+	      /* Check to see if the operator '->' has been overloaded.  If the operator
+	         has been overloaded replace arg2 with the value returned by the custom
+	         operator and continue evaluation.  */
+	      while (unop_user_defined_p (op, arg2))
+		{
+		  volatile struct gdb_exception except;
+		  struct value *value = NULL;
+		  TRY_CATCH (except, RETURN_MASK_ERROR)
+		    {
+		      value = value_x_unop (arg2, op, noside);
+		    }
+
+		  if (except.reason < 0)
+		    {
+		      if (except.error == NOT_FOUND_ERROR)
+			break;
+		      else
+			throw_exception (except);
+		    }
+		  arg2 = value;
+		}
 	    }
 	  /* Now, say which argument to start evaluating from */
 	  tem = 2;
@@ -1897,6 +1919,27 @@ evaluate_subexp_standard (struct type *expect_type,
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
+
+      /* Check to see if operator '->' has been overloaded.  If so replace
+         arg1 with the value returned by evaluating operator->().  */
+      while (unop_user_defined_p (op, arg1))
+	{
+	  volatile struct gdb_exception except;
+	  struct value *value = NULL;
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      value = value_x_unop (arg1, op, noside);
+	    }
+
+	  if (except.reason < 0)
+	    {
+	      if (except.error == NOT_FOUND_ERROR)
+		break;
+	      else
+		throw_exception (except);
+	    }
+	  arg1 = value;
+	}
 
       /* JYG: if print object is on we need to replace the base type
 	 with rtti type in order to continue on with successful
