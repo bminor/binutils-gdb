@@ -1,3 +1,13 @@
+2010-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/12049
+	* gas/i386/i386.exp: Run relax-1 and relax-2.
+
+	* gas/i386/relax-1.d: New.
+	* gas/i386/relax-1.s: Likewise.
+	* gas/i386/relax-2.d: Likewise.
+	* gas/i386/relax-2.s: Likewise.
+
 2010-10-18  Kai Tietz  <kaI.tietz@onevision.com>
 
 	* gas/i386/disp32.d: Adjust initial symbol check.
