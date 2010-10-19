@@ -1,3 +1,10 @@
+2010-10-19  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdbtypes.h: Introduce BOOL_PTR_CONVERSION_BADNESS.
+	* gdbtypes.c (rank_one_type): Use BOOL_PTR_CONVERSION_BADNESS
+	for conversion.
+	Make all other conversions illegal.
+
 2010-10-18  Doug Evans  <dje@google.com>
 
 	* c-typeprint.c (c_type_print_base, case TYPE_CODE_TYPEDEF): Verify

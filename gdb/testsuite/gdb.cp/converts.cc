@@ -14,7 +14,9 @@ int foo1_2 (char[]) {return 12;}
 int foo1_3 (int*)   {return 13;}
 int foo1_4 (A*)     {return 14;}
 int foo1_5 (void*)  {return 15;}
-int foo1_6 (void**) {return 15;}
+int foo1_6 (void**) {return 16;}
+int foo1_7 (bool)   {return 17;}
+int foo1_8 (long)   {return 18;}
 
 int foo2_1 (char**  )  {return 21;}
 int foo2_2 (char[][1]) {return 22;}
@@ -40,7 +42,9 @@ int main()
   foo1_3 ((int*)bp);   // ..pointer of wrong type
   foo1_4 (bp);         // ..ancestor pointer
   foo1_5 (bp);         // ..void pointer
-  foo1_6 ((void**)bp); // ..void pointer
+  foo1_6 ((void**)bp); // ..void pointer pointer
+  foo1_7 (bp);         // ..boolean
+  foo1_8 ((long)bp);   // ..long int
 
   char **b;          // pointer pointer to..
   char ba[1][1];

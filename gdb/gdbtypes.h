@@ -1415,12 +1415,10 @@ extern int is_unique_ancestor (struct type *, struct value *);
 #define FLOAT_CONVERSION_BADNESS       2
 /* Badness of integer<->floating conversions */
 #define INT_FLOAT_CONVERSION_BADNESS   2
-/* Badness of converting to a boolean */
-#define BOOLEAN_CONVERSION_BADNESS     2
-/* Badness of pointer conversion */
-#define POINTER_CONVERSION_BADNESS     2
 /* Badness of conversion of pointer to void pointer */
 #define VOID_PTR_CONVERSION_BADNESS    2
+/* Badness of conversion of pointer to boolean.  */
+#define BOOL_PTR_CONVERSION_BADNESS    3
 /* Badness of converting derived to base class */
 #define BASE_CONVERSION_BADNESS        2
 /* Badness of converting from non-reference to reference */

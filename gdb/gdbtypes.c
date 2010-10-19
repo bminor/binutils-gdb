@@ -2256,7 +2256,6 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
-	  return POINTER_CONVERSION_BADNESS;
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
@@ -2434,8 +2433,9 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_FLT:
+	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_PTR:
-	  return BOOLEAN_CONVERSION_BADNESS;
+	  return BOOL_PTR_CONVERSION_BADNESS;
 	case TYPE_CODE_BOOL:
 	  return 0;
 	default:

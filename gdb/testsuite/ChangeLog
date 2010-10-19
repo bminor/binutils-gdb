@@ -1,3 +1,9 @@
+2010-10-19  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/converts.exp: Test pointer to bool conversion.
+	Test pointer to long conversion.
+	* gdb.cp/oranking.exp: Removed relevant kfail.
+
 2010-10-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-prettyprint.exp (run_lang_tests): Test encoding

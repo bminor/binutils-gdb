@@ -52,7 +52,6 @@ setup_kfail "gdb/12098" *-*-*
 gdb_test "p foo4(&a)" "24"
 
 gdb_test "p test5()" "26"
-setup_kfail "gdb/12098" *-*-*
 gdb_test "p foo5(c)" "26"
 
 gdb_test "p test6()"  "28"
