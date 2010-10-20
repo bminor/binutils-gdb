@@ -489,10 +489,14 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   // Some flags in the input section should not be automatically
   // copied to the output section.
   flags &= ~ (elfcpp::SHF_INFO_LINK
-	      | elfcpp::SHF_LINK_ORDER
 	      | elfcpp::SHF_GROUP
 	      | elfcpp::SHF_MERGE
 	      | elfcpp::SHF_STRINGS);
+
+  // We only clear the SHF_LINK_ORDER flag in for
+  // a non-relocatable link.
+  if (!parameters->options().relocatable())
+    flags &= ~elfcpp::SHF_LINK_ORDER;
 
   if (this->script_options_->saw_sections_clause())
     {

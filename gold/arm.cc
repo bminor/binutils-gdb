@@ -6662,6 +6662,10 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 						     + text_shndx * shdr_size);
 	      this->make_exidx_input_section(i, shdr, text_shndx, text_shdr);
 	    }
+	  // EHABI 4.4.1 requires that SHF_LINK_ORDER flag to be set.
+	  if ((shdr.get_sh_flags() & elfcpp::SHF_LINK_ORDER) == 0)
+	    gold_warning(_("SHF_LINK_ORDER not set in EXIDX section %s of %s"),
+			 this->section_name(i).c_str(), this->name().c_str());
 	}
     }
 

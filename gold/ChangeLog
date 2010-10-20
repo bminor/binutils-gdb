@@ -1,3 +1,10 @@
+2010-10-20  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::do_read_symbols): Warn about ARM EXIDX sections
+	without SHF_LINK_ORDER flags.
+	* layout.cc (Layout::choose_output_section): Do not filter
+	SHF_LINK_ORDER flag in a relocatable link.
+
 2010-10-17  Cary Coutant  <ccoutant@google.com>
 
 	* output.h (Output_segment::set_section_addresses): Change function
