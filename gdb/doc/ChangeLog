@@ -1,3 +1,10 @@
+2010-10-20  Doug Evans  <dje@google.com>
+
+	* gdbint.texinfo (Misc Guidelines): Renamed from Coding.
+	All references updated.  Correct sections marked as subsections.
+	(Coding Standards): New chapter.  Move the coding standard related
+	subsections here.  Add section on Python coding standards.
+
 2010-10-13  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Python): Add "Python modules".
