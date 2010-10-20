@@ -1,3 +1,9 @@
+2010-10-20  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* remote.c (remote_get_threadlist): If we got empty
+	response, bail out immediately, and don't emit any
+	warnings.
+
 2010-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arm-tdep.c (thumb_get_next_pc_raw): Handle Thumb-16 encoding

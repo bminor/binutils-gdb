@@ -2353,7 +2353,7 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
   getpkt (&rs->buf, &rs->buf_size, 0);
 
   if (*rs->buf == '\0')
-    *result_count = 0;
+    return 0;
   else
     *result_count =
       parse_threadlist_response (rs->buf + 2, result_limit, &echo_nextthread,
