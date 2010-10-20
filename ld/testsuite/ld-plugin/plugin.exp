@@ -26,9 +26,11 @@ if ![check_plugin_api_available] {
 
 # And a compiler to be available.
 set can_compile 1
+set failure_kind "unresolved"
 if { [which $CC] == 0 } {
   # Don't fail immediately, 
   set can_compile 0
+  set failure_kind "unsupported"
 }
 
 pass "plugin API enabled"
@@ -154,11 +156,11 @@ set plugin_extra_elf_tests [list \
 
 if { !$can_compile || $failed_compile } {
     foreach testitem $plugin_tests {
-	unresolved [lindex $testitem 0]
+	$failure_kind [lindex $testitem 0]
     }
     if { [is_elf_format] } {
 	foreach testitem $plugin_extra_elf_tests {
-	    unresolved [lindex $testitem 0]
+	    $failure_kind [lindex $testitem 0]
 	}
     }
     return
