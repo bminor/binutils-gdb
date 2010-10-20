@@ -1,3 +1,7 @@
+2010-10-20  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.threads/fork-child-threads.exp: Don't run on remote target.
+
 2010-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/watch_thread_num.exp: Revert 2008-09-03 change.

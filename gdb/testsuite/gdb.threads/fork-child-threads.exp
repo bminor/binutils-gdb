@@ -18,6 +18,10 @@ if { ! [istarget "*-*-linux*"] } {
     return 0
 }
 
+if { [is_remote target] || ![isnative] } then {
+    return 0
+}
+
 set testfile fork-child-threads
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
