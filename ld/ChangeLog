@@ -1,3 +1,7 @@
+2010-10-20  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* plugin.c (get_symbols): Check symbol type correctly.
+
 2010-10-15  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* configure.in: If <dlfcn.h> can't be found, try for <Windows.h>

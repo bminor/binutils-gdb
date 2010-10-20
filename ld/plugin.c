@@ -417,7 +417,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
       if (syms[n].def == LDPK_UNDEF || syms[n].def == LDPK_WEAKUNDEF
 	  || syms[n].def == LDPK_COMMON)
 	{
-	  asection *owner_sec = (syms[n].def == LDPK_COMMON)
+	  asection *owner_sec = (blhe->type == bfd_link_hash_common)
 				? blhe->u.c.p->section
 				: blhe->u.def.section;
 	  if (owner_sec->owner == link_info.output_bfd)
