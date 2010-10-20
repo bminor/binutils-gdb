@@ -1,3 +1,14 @@
+2010-10-20  Hui Zhu  <teawater@gmail.com>
+
+	* tracepoint.c (tfile_get_traceframe_address): Call
+	extract_signed_integer.
+	(tfile_trace_find): Call extract_signed_integer and
+	extract_unsigned_integer.  Change data_size to unsigned int.
+	(tfile_fetch_registers): Call extract_unsigned_integer.
+	(tfile_xfer_partial): Ditto.
+	(tfile_get_trace_state_variable_value): Call
+	extract_signed_integer and extract_unsigned_integer.
+
 2010-10-20  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* remote.c (remote_get_threadlist): If we got empty
