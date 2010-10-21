@@ -1,6 +1,7 @@
 /* ldwrite.c -- write out the linked file
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2010
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain sac@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -50,6 +51,11 @@ build_link_order (lang_statement_union_type *statement)
 
 	output_section = statement->data_statement.output_section;
 	ASSERT (output_section->owner == link_info.output_bfd);
+
+	if (!((output_section->flags & SEC_HAS_CONTENTS) != 0
+	      || ((output_section->flags & SEC_LOAD) != 0
+		  && (output_section->flags & SEC_THREAD_LOCAL))))
+	  break;
 
 	link_order = bfd_new_link_order (link_info.output_bfd, output_section);
 	if (link_order == NULL)
@@ -191,6 +197,11 @@ build_link_order (lang_statement_union_type *statement)
 	output_section = rs->output_section;
 	ASSERT (output_section->owner == link_info.output_bfd);
 
+	if (!((output_section->flags & SEC_HAS_CONTENTS) != 0
+	      || ((output_section->flags & SEC_LOAD) != 0
+		  && (output_section->flags & SEC_THREAD_LOCAL))))
+	  break;
+
 	link_order = bfd_new_link_order (link_info.output_bfd, output_section);
 	if (link_order == NULL)
 	  einfo (_("%P%F: bfd_new_link_order failed\n"));
@@ -233,37 +244,35 @@ build_link_order (lang_statement_union_type *statement)
 	    && (i->flags & SEC_EXCLUDE) == 0)
 	  {
 	    asection *output_section = i->output_section;
+	    struct bfd_link_order *link_order;
 
 	    ASSERT (output_section->owner == link_info.output_bfd);
 
-	    if ((output_section->flags & SEC_HAS_CONTENTS) != 0
-		|| ((output_section->flags & SEC_LOAD) != 0
-		    && (output_section->flags & SEC_THREAD_LOCAL)))
+	    if (!((output_section->flags & SEC_HAS_CONTENTS) != 0
+		  || ((output_section->flags & SEC_LOAD) != 0
+		      && (output_section->flags & SEC_THREAD_LOCAL))))
+	      break;
+
+	    link_order = bfd_new_link_order (link_info.output_bfd,
+					     output_section);
+
+	    if ((i->flags & SEC_NEVER_LOAD) != 0
+		&& (i->flags & SEC_DEBUGGING) == 0)
 	      {
-		struct bfd_link_order *link_order;
-
-		link_order = bfd_new_link_order (link_info.output_bfd,
-						 output_section);
-
-		if ((i->flags & SEC_NEVER_LOAD) != 0
-		    && (i->flags & SEC_DEBUGGING) == 0)
-		  {
-		    /* We've got a never load section inside one which
-		       is going to be output, we'll change it into a
-		       fill.  */
-		    link_order->type = bfd_data_link_order;
-		    link_order->u.data.contents = (unsigned char *) "";
-		    link_order->u.data.size = 1;
-		  }
-		else
-		  {
-		    link_order->type = bfd_indirect_link_order;
-		    link_order->u.indirect.section = i;
-		    ASSERT (i->output_section == output_section);
-		  }
-		link_order->size = i->size;
-		link_order->offset = i->output_offset;
+		/* We've got a never load section inside one which is
+		   going to be output, we'll change it into a fill.  */
+		link_order->type = bfd_data_link_order;
+		link_order->u.data.contents = (unsigned char *) "";
+		link_order->u.data.size = 1;
 	      }
+	    else
+	      {
+		link_order->type = bfd_indirect_link_order;
+		link_order->u.indirect.section = i;
+		ASSERT (i->output_section == output_section);
+	      }
+	    link_order->size = i->size;
+	    link_order->offset = i->output_offset;
 	  }
       }
       break;
@@ -277,18 +286,19 @@ build_link_order (lang_statement_union_type *statement)
 	output_section = statement->padding_statement.output_section;
 	ASSERT (statement->padding_statement.output_section->owner
 		== link_info.output_bfd);
-	if ((output_section->flags & SEC_HAS_CONTENTS) != 0
-	    || ((output_section->flags & SEC_LOAD) != 0
-		&& (output_section->flags & SEC_THREAD_LOCAL)))
-	  {
-	    link_order = bfd_new_link_order (link_info.output_bfd,
-					     output_section);
-	    link_order->type = bfd_data_link_order;
-	    link_order->size = statement->padding_statement.size;
-	    link_order->offset = statement->padding_statement.output_offset;
-	    link_order->u.data.contents = statement->padding_statement.fill->data;
-	    link_order->u.data.size = statement->padding_statement.fill->size;
-	  }
+
+	if (!((output_section->flags & SEC_HAS_CONTENTS) != 0
+	      || ((output_section->flags & SEC_LOAD) != 0
+		  && (output_section->flags & SEC_THREAD_LOCAL))))
+	  break;
+
+	link_order = bfd_new_link_order (link_info.output_bfd,
+					 output_section);
+	link_order->type = bfd_data_link_order;
+	link_order->size = statement->padding_statement.size;
+	link_order->offset = statement->padding_statement.output_offset;
+	link_order->u.data.contents = statement->padding_statement.fill->data;
+	link_order->u.data.size = statement->padding_statement.fill->size;
       }
       break;
 

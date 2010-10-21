@@ -1,3 +1,9 @@
+2010-10-22  Alan Modra  <amodra@gmail.com>
+
+	* ldwrite.c (build_link_order <lang_data_statement_enum>): Don't
+	output when section has no contents.
+	(build_link_order <lang_reloc_statement_enum>): Likewise.
+
 2010-10-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* emulparams/elf32_tic6x_le.sh (ATTRS_SECTIONS): Use
@@ -26,7 +32,7 @@
 	(add_input_library): Likewise.
 	(set_extra_library_path): Likewise.
 
-2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Apply LD plugin patch series (part 6/6).
 	* ldlang.c (load_symbols): Handle bfd subsitution when calling the
@@ -35,13 +41,13 @@
 	member to the plugins and if claimed set "subsbfd" output parameter to
 	point to the dummy IR-only BFD.
 
-2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Apply LD plugin patch series (part 5/6).
 	* plugin.c (asymbol_from_plugin_symbol): If the bfd is an ELF bfd,
 	find the elf symbol data and set the visibility in the st_other field.
 
-2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Apply LD plugin patch series (part 4/6).
 	* ldlang.c (lang_process)[ENABLE_PLUGINS]: Move invocation of
@@ -69,7 +75,7 @@
 	(onall_symbols_read): Iterate the list of new files, libs and dirs,
 	adding them.
 
-2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Apply LD plugin patch series (part 3/6).
 	* ldmain.c (notice)[ENABLE_PLUGINS]: Call plugin_notice.
@@ -89,7 +95,7 @@
 	(parse_options): Accept "dumpresolutions".
 	(onall_symbols_read): Get syms and dump resolutions if it was given.
 
-2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Apply LD plugin patch series (part 2/6).
 	* ldfile.c (ldfile_try_open_bfd)[ENABLE_PLUGINS]: Don't return early
@@ -132,7 +138,7 @@
 	(onall_symbols_read): Make static and use TV_MESSAGE.
 	(oncleanup): Likewise.
 
-2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Apply LD plugin patch series (part 1/6).
 	* configure.in: Add AC_CHECKs for file io and dlfcn headers and
