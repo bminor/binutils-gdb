@@ -1,3 +1,8 @@
+2010-10-22  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (CLEANFILES): Add stamp-lm32.  Sort.
+	* Makefile.in: Regenerate.
+
 2010-10-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* mips-opc.c (mips_builtin_opcodes): Move M_LD_OB and M_SD_OB
