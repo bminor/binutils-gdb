@@ -10770,32 +10770,32 @@ display_tic6x_attribute (unsigned char * p)
 
   switch (tag)
     {
-    case Tag_C6XABI_Tag_CPU_arch:
+    case Tag_ISA:
       val = read_uleb128 (p, &len);
       p += len;
-      printf ("  Tag_C6XABI_Tag_CPU_arch: ");
+      printf ("  Tag_ISA: ");
 
       switch (val)
 	{
-	case C6XABI_Tag_CPU_arch_none:
+	case C6XABI_Tag_ISA_none:
 	  printf (_("None\n"));
 	  break;
-	case C6XABI_Tag_CPU_arch_C62X:
+	case C6XABI_Tag_ISA_C62X:
 	  printf ("C62x\n");
 	  break;
-	case C6XABI_Tag_CPU_arch_C67X:
+	case C6XABI_Tag_ISA_C67X:
 	  printf ("C67x\n");
 	  break;
-	case C6XABI_Tag_CPU_arch_C67XP:
+	case C6XABI_Tag_ISA_C67XP:
 	  printf ("C67x+\n");
 	  break;
-	case C6XABI_Tag_CPU_arch_C64X:
+	case C6XABI_Tag_ISA_C64X:
 	  printf ("C64x\n");
 	  break;
-	case C6XABI_Tag_CPU_arch_C64XP:
+	case C6XABI_Tag_ISA_C64XP:
 	  printf ("C64x+\n");
 	  break;
-	case C6XABI_Tag_CPU_arch_C674X:
+	case C6XABI_Tag_ISA_C674X:
 	  printf ("C674x\n");
 	  break;
 	default:

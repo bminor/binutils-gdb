@@ -1,3 +1,9 @@
+2010-10-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-tic6x.c (elf32_tic6x_merge_arch_attributes): Update for
+	attribute renaming.
+	(elf_backend_obj_attrs_section): Change to ".c6xabi.attributes".
+
 2010-10-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* elf-bfd.h (struct elf_backend_data): New member

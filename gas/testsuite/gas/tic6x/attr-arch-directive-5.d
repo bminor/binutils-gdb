@@ -5,4 +5,4 @@
 
 Attribute Section: c6xabi
 File Attributes
-  Tag_C6XABI_Tag_CPU_arch: C62x
+  Tag_ISA: C62x

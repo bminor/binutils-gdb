@@ -1,3 +1,8 @@
+2010-10-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* emulparams/elf32_tic6x_le.sh (ATTRS_SECTIONS): Use
+	.c6xabi.attributes, not __TI_build_attributes.
+
 2010-10-20  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* plugin.c (get_symbols): Check symbol type correctly.

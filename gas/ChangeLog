@@ -1,3 +1,9 @@
+2010-10-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-tic6x.c (tic6x_arch_attribute, tic6x_arches,
+	md_assemble, tic6x_set_attributes): Update for attribute renaming.
+	* doc/c-tic6x.texi: Update for attribute renaming.
+
 2010-10-19  Alan Modra  <amodra@gmail.com>
 
 	* write.c (relax_segment): Correct address on frag added to stop

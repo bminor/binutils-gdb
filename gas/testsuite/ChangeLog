@@ -1,3 +1,21 @@
+2010-10-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x/attr-arch-directive-1.d,
+	gas/tic6x/attr-arch-directive-2.d,
+	gas/tic6x/attr-arch-directive-3.d,
+	gas/tic6x/attr-arch-directive-4.d,
+	gas/tic6x/attr-arch-directive-4.s,
+	gas/tic6x/attr-arch-directive-5.d,
+	gas/tic6x/attr-arch-directive-5.s,
+	gas/tic6x/attr-arch-opts-c62x.d, gas/tic6x/attr-arch-opts-c64x+.d,
+	gas/tic6x/attr-arch-opts-c64x.d, gas/tic6x/attr-arch-opts-c674x.d,
+	gas/tic6x/attr-arch-opts-c67x+.d, gas/tic6x/attr-arch-opts-c67x.d,
+	gas/tic6x/attr-arch-opts-none-1.d,
+	gas/tic6x/attr-arch-opts-none-2.d,
+	gas/tic6x/attr-arch-opts-override-1.d,
+	gas/tic6x/attr-arch-opts-override-2.d: Update for attribute
+	renaming and renumbering.
+
 2010-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/12049

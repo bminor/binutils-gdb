@@ -82,9 +82,9 @@ static unsigned short tic6x_arch_enable = (TIC6X_INSN_C62X
    (architecture, as modified by other options).  */
 static unsigned short tic6x_features;
 
-/* The architecture attribute value, or C6XABI_Tag_CPU_arch_none if
+/* The architecture attribute value, or C6XABI_Tag_ISA_none if
    not yet set.  */
-static int tic6x_arch_attribute = C6XABI_Tag_CPU_arch_none;
+static int tic6x_arch_attribute = C6XABI_Tag_ISA_none;
 
 /* Whether any instructions at all have been seen.  Once any
    instructions have been seen, architecture attributes merge into the
@@ -120,21 +120,21 @@ typedef struct
 } tic6x_arch_table;
 static const tic6x_arch_table tic6x_arches[] =
   {
-    { "c62x", C6XABI_Tag_CPU_arch_C62X, TIC6X_INSN_C62X },
-    { "c64x", C6XABI_Tag_CPU_arch_C64X, TIC6X_INSN_C62X | TIC6X_INSN_C64X },
-    { "c64x+", C6XABI_Tag_CPU_arch_C64XP, (TIC6X_INSN_C62X
-					   | TIC6X_INSN_C64X
-					   | TIC6X_INSN_C64XP) },
-    { "c67x", C6XABI_Tag_CPU_arch_C67X, TIC6X_INSN_C62X | TIC6X_INSN_C67X },
-    { "c67x+", C6XABI_Tag_CPU_arch_C67XP, (TIC6X_INSN_C62X
-					   | TIC6X_INSN_C67X
-					   | TIC6X_INSN_C67XP) },
-    { "c674x", C6XABI_Tag_CPU_arch_C674X, (TIC6X_INSN_C62X
-					   | TIC6X_INSN_C64X
-					   | TIC6X_INSN_C64XP
-					   | TIC6X_INSN_C67X
-					   | TIC6X_INSN_C67XP
-					   | TIC6X_INSN_C674X) }
+    { "c62x", C6XABI_Tag_ISA_C62X, TIC6X_INSN_C62X },
+    { "c64x", C6XABI_Tag_ISA_C64X, TIC6X_INSN_C62X | TIC6X_INSN_C64X },
+    { "c64x+", C6XABI_Tag_ISA_C64XP, (TIC6X_INSN_C62X
+				      | TIC6X_INSN_C64X
+				      | TIC6X_INSN_C64XP) },
+    { "c67x", C6XABI_Tag_ISA_C67X, TIC6X_INSN_C62X | TIC6X_INSN_C67X },
+    { "c67x+", C6XABI_Tag_ISA_C67XP, (TIC6X_INSN_C62X
+				      | TIC6X_INSN_C67X
+				      | TIC6X_INSN_C67XP) },
+    { "c674x", C6XABI_Tag_ISA_C674X, (TIC6X_INSN_C62X
+				      | TIC6X_INSN_C64X
+				      | TIC6X_INSN_C64XP
+				      | TIC6X_INSN_C67X
+				      | TIC6X_INSN_C67XP
+				      | TIC6X_INSN_C674X) }
   };
 
 /* Update the selected architecture based on ARCH, giving an error if
@@ -2685,8 +2685,8 @@ md_assemble (char *str)
   /* If no .arch directives or -march options have been seen, we are
      assessing instruction validity based on the C674X default, so set
      the attribute accordingly.  */
-  if (tic6x_arch_attribute == C6XABI_Tag_CPU_arch_none)
-    tic6x_arch_attribute = C6XABI_Tag_CPU_arch_C674X;
+  if (tic6x_arch_attribute == C6XABI_Tag_ISA_none)
+    tic6x_arch_attribute = C6XABI_Tag_ISA_C674X;
 
   /* Reset global settings for parallel bars and predicates now to
      avoid extra errors if there are problems with this opcode.  */
@@ -3891,10 +3891,10 @@ tic6x_set_attribute_int (int tag, int value)
 static void
 tic6x_set_attributes (void)
 {
-  if (tic6x_arch_attribute == C6XABI_Tag_CPU_arch_none)
-    tic6x_arch_attribute = C6XABI_Tag_CPU_arch_C674X;
+  if (tic6x_arch_attribute == C6XABI_Tag_ISA_none)
+    tic6x_arch_attribute = C6XABI_Tag_ISA_C674X;
 
-  tic6x_set_attribute_int (Tag_C6XABI_Tag_CPU_arch, tic6x_arch_attribute);
+  tic6x_set_attribute_int (Tag_ISA, tic6x_arch_attribute);
 }
 
 /* Do machine-dependent manipulations of the frag chains after all

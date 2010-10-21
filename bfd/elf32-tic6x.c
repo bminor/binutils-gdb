@@ -1673,7 +1673,7 @@ elf32_tic6x_obj_attrs_arg_type (int tag)
     return ATTR_TYPE_FLAG_INT_VAL;
 }
 
-/* Merge the Tag_C6XABI_Tag_CPU_arch attribute values ARCH1 and ARCH2
+/* Merge the Tag_ISA attribute values ARCH1 and ARCH2
    and return the merged value.  At present, all merges succeed, so no
    return value for errors is defined.  */
 
@@ -1687,11 +1687,11 @@ elf32_tic6x_merge_arch_attributes (int arch1, int arch2)
 
   /* In most cases, the numerically greatest value is the correct
      merged value, but merging C64 and C67 results in C674X.  */
-  if ((min_arch == C6XABI_Tag_CPU_arch_C67X
-       || min_arch == C6XABI_Tag_CPU_arch_C67XP)
-      && (max_arch == C6XABI_Tag_CPU_arch_C64X
-	  || max_arch == C6XABI_Tag_CPU_arch_C64XP))
-    return C6XABI_Tag_CPU_arch_C674X;
+  if ((min_arch == C6XABI_Tag_ISA_C67X
+       || min_arch == C6XABI_Tag_ISA_C67XP)
+      && (max_arch == C6XABI_Tag_ISA_C64X
+	  || max_arch == C6XABI_Tag_ISA_C64XP))
+    return C6XABI_Tag_ISA_C674X;
 
   return max_arch;
 }
@@ -1724,9 +1724,9 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
 
   /* No specification yet for handling of unknown attributes, so just
      ignore them and handle known ones.  */
-  out_attr[Tag_C6XABI_Tag_CPU_arch].i
-    = elf32_tic6x_merge_arch_attributes (in_attr[Tag_C6XABI_Tag_CPU_arch].i,
-					 out_attr[Tag_C6XABI_Tag_CPU_arch].i);
+  out_attr[Tag_ISA].i
+    = elf32_tic6x_merge_arch_attributes (in_attr[Tag_ISA].i,
+					 out_attr[Tag_ISA].i);
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   _bfd_elf_merge_object_attributes (ibfd, obfd);
@@ -1765,7 +1765,7 @@ elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_obj_attrs_arg_type	elf32_tic6x_obj_attrs_arg_type
-#define elf_backend_obj_attrs_section	"__TI_build_attributes"
+#define elf_backend_obj_attrs_section	".c6xabi.attributes"
 #define elf_backend_obj_attrs_section_type	SHT_C6000_ATTRIBUTES
 #define elf_backend_obj_attrs_vendor	"c6xabi"
 #define elf_backend_rela_normal		1

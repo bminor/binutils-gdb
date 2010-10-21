@@ -1,3 +1,25 @@
+2010-10-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-tic6x/attr-arch-c62x-c62x.d, ld-tic6x/attr-arch-c62x-c64x+.d,
+	ld-tic6x/attr-arch-c62x-c64x.d, ld-tic6x/attr-arch-c62x-c674x.d,
+	ld-tic6x/attr-arch-c62x-c67x+.d, ld-tic6x/attr-arch-c62x-c67x.d,
+	ld-tic6x/attr-arch-c64x+-c62x.d, ld-tic6x/attr-arch-c64x+-c64x+.d,
+	ld-tic6x/attr-arch-c64x+-c64x.d, ld-tic6x/attr-arch-c64x+-c674x.d,
+	ld-tic6x/attr-arch-c64x+-c67x+.d, ld-tic6x/attr-arch-c64x+-c67x.d,
+	ld-tic6x/attr-arch-c64x-c62x.d, ld-tic6x/attr-arch-c64x-c64x+.d,
+	ld-tic6x/attr-arch-c64x-c64x.d, ld-tic6x/attr-arch-c64x-c674x.d,
+	ld-tic6x/attr-arch-c64x-c67x+.d, ld-tic6x/attr-arch-c64x-c67x.d,
+	ld-tic6x/attr-arch-c674x-c62x.d, ld-tic6x/attr-arch-c674x-c64x+.d,
+	ld-tic6x/attr-arch-c674x-c64x.d, ld-tic6x/attr-arch-c674x-c674x.d,
+	ld-tic6x/attr-arch-c674x-c67x+.d, ld-tic6x/attr-arch-c674x-c67x.d,
+	ld-tic6x/attr-arch-c67x+-c62x.d, ld-tic6x/attr-arch-c67x+-c64x+.d,
+	ld-tic6x/attr-arch-c67x+-c64x.d, ld-tic6x/attr-arch-c67x+-c674x.d,
+	ld-tic6x/attr-arch-c67x+-c67x+.d, ld-tic6x/attr-arch-c67x+-c67x.d,
+	ld-tic6x/attr-arch-c67x-c62x.d, ld-tic6x/attr-arch-c67x-c64x+.d,
+	ld-tic6x/attr-arch-c67x-c64x.d, ld-tic6x/attr-arch-c67x-c674x.d,
+	ld-tic6x/attr-arch-c67x-c67x+.d, ld-tic6x/attr-arch-c67x-c67x.d:
+	Update for attribute renaming.
+
 2010-10-20  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-plugin/plugin.exp: Mark tests UNSUPPORTED, not UNRESOLVED, if

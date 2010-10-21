@@ -37,4 +37,4 @@ OTHER_BSS_SECTIONS="
     . +=  0x100000;
     _STACK_START = .;
   }"
-ATTRS_SECTIONS='__TI_build_attributes 0 : { KEEP (*(__TI_build_attributes)) KEEP (*(.gnu.attributes)) }'
+ATTRS_SECTIONS='.c6xabi.attributes 0 : { KEEP (*(.c6xabi.attributes)) KEEP (*(.gnu.attributes)) }'
