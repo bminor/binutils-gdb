@@ -54,6 +54,38 @@ PYTHON_FILES = \
 	gdb/__init__.py \
 	gdb/types.py
 
+FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"infodir=$(infodir)" \
+	"datarootdir=$(datarootdir)" \
+	"docdir=$(docdir)" \
+	"htmldir=$(htmldir)" \
+	"pdfdir=$(pdfdir)" \
+	"libdir=$(libdir)" \
+	"mandir=$(mandir)" \
+	"datadir=$(datadir)" \
+	"includedir=$(includedir)" \
+	"against=$(against)" \
+	"DESTDIR=$(DESTDIR)" \
+	"AR=$(AR)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"CC=$(CC)" \
+	"CFLAGS=$(CFLAGS)" \
+	"CXX=$(CXX)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
+	"DLLTOOL=$(DLLTOOL)" \
+	"LDFLAGS=$(LDFLAGS)" \
+	"RANLIB=$(RANLIB)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"MAKEHTML=$(MAKEHTML)" \
+	"MAKEHTMLFLAGS=$(MAKEHTMLFLAGS)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"RUNTEST=$(RUNTEST)" \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+
 .PHONY: all
 all: stamp-syscalls stamp-python
 
@@ -146,7 +178,7 @@ uninstall-python:
 # install-only is intended to address that need.
 .PHONY: install
 install: all
-	$(MAKE) install-only
+	@$(MAKE) $(FLAGS_TO_PASS) install-only
 
 .PHONY: install-only
 install-only: install-syscalls install-python

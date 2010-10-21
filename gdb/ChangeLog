@@ -1,3 +1,10 @@
+2010-10-22  Jie Zhang  <jie@codesourcery.com>
+
+	* Makefile.in (install): Remove dependency of install-only and
+	recursively invoke make for install-only.
+	* data-directory/Makefile.in: Add FLAGS_TO_PASS variable.
+	(install): Pass FLAGS_TO_PASS when recursively make install-only.
+
 2010-10-20  Hui Zhu  <teawater@gmail.com>
 
 	* tracepoint.c (tfile_get_traceframe_address): Call
