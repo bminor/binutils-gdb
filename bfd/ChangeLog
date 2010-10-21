@@ -1,3 +1,22 @@
+2010-10-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* elf-bfd.h (struct elf_backend_data): New member
+	static_tls_alignment.
+	* elfxx-target.h (elf_backend_static_tls_alignment): Provide
+	default.
+	(elfNN_bed): Initialize static_tls_alignment.
+	* elflink.c (bfd_elf_final_link): Don't round end of TLS section
+	if static TLS has special alignment requirements.
+	* elf32-i386.c (elf_i386_tpoff): Define bed, static_tls_size.
+	Consider static_tls_alignment.
+	(elf_backend_static_tls_alignment): Redefine for Solaris 2.
+	Undef again for VxWorks.
+	* elf64-x86-64.c (elf64_x86_64_tpoff):  Define bed,
+	static_tls_size.
+	Consider static_tls_alignment.
+	(elf_backend_static_tls_alignment): Redefine for Solaris 2.
+	Undef again for Intel L1OM.
+
 2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
 
 	Apply LD plugin patch series (part 6/6).

@@ -2607,11 +2607,16 @@ static bfd_vma
 elf64_x86_64_tpoff (struct bfd_link_info *info, bfd_vma address)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
+  const struct elf_backend_data *bed = get_elf_backend_data (info->output_bfd);
+  bfd_vma static_tls_size;
 
   /* If tls_segment is NULL, we should have signalled an error already.  */
   if (htab->tls_sec == NULL)
     return 0;
-  return address - htab->tls_size - htab->tls_sec->vma;
+
+  /* Consider special static TLS alignment requirements.  */
+  static_tls_size = BFD_ALIGN (htab->tls_size, bed->static_tls_alignment);
+  return address - static_tls_size - htab->tls_sec->vma;
 }
 
 /* Is the instruction before OFFSET in CONTENTS a 32bit relative
@@ -4565,6 +4570,11 @@ static const struct bfd_elf_special_section
 #undef  elf64_bed
 #define elf64_bed			    elf64_x86_64_sol2_bed
 
+/* The 64-bit static TLS arena size is rounded to the nearest 16-byte
+   boundary.  */
+#undef elf_backend_static_tls_alignment
+#define elf_backend_static_tls_alignment    16
+
 /* The Solaris 2 ABI requires a plt symbol on all platforms.
 
    Cf. Linker and Libraries Guide, Ch. 2, Link-Editor, Generating the Output
@@ -4603,6 +4613,7 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #define elf_backend_object_p		    elf64_l1om_elf_object_p
 
 #undef  elf_backend_post_process_headers
+#undef  elf_backend_static_tls_alignment
 
 #include "elf64-target.h"
 

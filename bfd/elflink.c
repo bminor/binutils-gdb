@@ -10624,7 +10624,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  end = sec->vma + size;
 	}
       base = elf_hash_table (info)->tls_sec->vma;
-      end = align_power (end, elf_hash_table (info)->tls_sec->alignment_power);
+      /* Only align end of TLS section if static TLS doesn't have special
+	 alignment requirements.  */
+      if (bed->static_tls_alignment == 1)
+	end = align_power (end,
+			   elf_hash_table (info)->tls_sec->alignment_power);
       elf_hash_table (info)->tls_size = end - base;
     }
 

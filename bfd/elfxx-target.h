@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -477,6 +477,9 @@
 #ifndef elf_backend_obj_attrs_order
 #define elf_backend_obj_attrs_order		NULL
 #endif
+#ifndef elf_backend_static_tls_alignment
+#define elf_backend_static_tls_alignment	1
+#endif
 #ifndef elf_backend_post_process_headers
 #define elf_backend_post_process_headers	NULL
 #endif
@@ -738,6 +741,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_obj_attrs_arg_type,
   elf_backend_obj_attrs_section_type,
   elf_backend_obj_attrs_order,
+  elf_backend_static_tls_alignment,
   elf_backend_collect,
   elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,

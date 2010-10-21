@@ -1256,6 +1256,9 @@ struct elf_backend_data
      actual tag number to place in the input position.  */
   int (*obj_attrs_order) (int);
 
+  /* This is non-zero if static TLS segments require a special alignment.  */
+  unsigned static_tls_alignment;
+
   /* This is TRUE if the linker should act like collect and gather
      global constructors and destructors by name.  This is TRUE for
      MIPS ELF because the Irix 5 tools can not handle the .init

@@ -2828,11 +2828,16 @@ static bfd_vma
 elf_i386_tpoff (struct bfd_link_info *info, bfd_vma address)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
+  const struct elf_backend_data *bed = get_elf_backend_data (info->output_bfd);
+  bfd_vma static_tls_size;
 
   /* If tls_sec is NULL, we should have signalled an error already.  */
   if (htab->tls_sec == NULL)
     return 0;
-  return htab->tls_size + htab->tls_sec->vma - address;
+
+  /* Consider special static TLS alignment requirements.  */
+  static_tls_size = BFD_ALIGN (htab->tls_size, bed->static_tls_alignment);
+  return static_tls_size + htab->tls_sec->vma - address;
 }
 
 /* Relocate an i386 ELF section.  */
@@ -4795,6 +4800,11 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 #undef	elf32_bed
 #define	elf32_bed			elf32_i386_sol2_bed
 
+/* The 32-bit static TLS arena size is rounded to the nearest 8-byte
+   boundary.  */
+#undef elf_backend_static_tls_alignment
+#define elf_backend_static_tls_alignment 8
+
 /* The Solaris 2 ABI requires a plt symbol on all platforms.
 
    Cf. Linker and Libraries Guide, Ch. 2, Link-Editor, Generating the Output
@@ -4848,6 +4858,7 @@ elf_i386_vxworks_link_hash_table_create (bfd *abfd)
 #undef elf_backend_final_write_processing
 #define elf_backend_final_write_processing \
   elf_vxworks_final_write_processing
+#undef elf_backend_static_tls_alignment
 
 /* On VxWorks, we emit relocations against _PROCEDURE_LINKAGE_TABLE_, so
    define it.  */
