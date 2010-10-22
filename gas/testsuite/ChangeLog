@@ -1,3 +1,11 @@
+2010-10-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/fwdexp.d: Also look for f8ffffff.
+	* gas/arm/msr-reg-thumb.d: Skip for non-ELF based targets.
+	* gas/arm/vldr.d: Likewise.
+	* gas/arm/thumb2_ldmstm.d: Allow for extra NOPs at the end of the disassembly.
+	* gas/cfi/cfi.exp (cfi-arm-1): Only run for ELF based ARM targets.
+
 2010-10-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/tic6x/attr-arch-directive-1.d,

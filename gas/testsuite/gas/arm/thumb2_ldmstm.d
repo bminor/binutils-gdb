@@ -57,3 +57,4 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> 9800      	ldr	r0, \[sp, #0\]
 0[0-9a-f]+ <[^>]+> f848 9b04 	str.w	r9, \[r8\], #4
 0[0-9a-f]+ <[^>]+> f8c8 9000 	str.w	r9, \[r8\]
+#pass
