@@ -1,3 +1,9 @@
+2010-10-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* config/tc-sparc.h [TE_SOLARIS] (ELF_TARGET_FORMAT): Define as
+	elf32-sparc-sol2.
+	(ELF64_TARGET_FORMAT): Define as elf64-sparc-sol2.
+
 2010-10-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-tic6x.c (tic6x_arch_attribute, tic6x_arches,

@@ -1,3 +1,40 @@
+2010-10-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* elfxx-sparc.c (tpoff): Define bed, static_tls_size.
+	Consider static_tls_alignment.
+
+	* elf32-sparc.c (TARGET_BIG_SYM): Redefine to
+	bfd_elf32_sparc_sol2_vec.
+	(TARGET_BIG_NAME): Redefine to elf32-sparc-sol2.
+	(elf32_bed): Redefine to elf32_sparc_sol2_bed.
+	(elf_backend_static_tls_alignment): Redefine to 8.
+	Include elf32-target.h.
+	(elf_backend_static_tls_alignment): Undef again for VxWorks.
+
+	* elf64-sparc.c (TARGET_BIG_SYM): Redefine to
+	bfd_elf64_sparc_sol2_vec.
+	(TARGET_BIG_NAME): Redefine to elf64-sparc-sol2.
+	(ELF_OSABI): Undef.
+	(elf64_bed): Redefine to elf64_sparc_sol2_bed.
+	(elf_backend_static_tls_alignment): Redefine to 16.
+	Include elf64-target.h.
+
+	* config.bfd (sparc-*-solaris2.[0-6]): Split from sparc-*-elf*.
+	Set targ_defvec to bfd_elf32_sparc_sol2_vec.
+	[BFD64] (sparc-*-solaris2*): Set targ_defvec to
+	bfd_elf32_sparc_sol2_vec.
+	Replace bfd_elf64_sparc_vec by bfd_elf64_sparc_sol2_vec in
+	targ_selvecs.
+
+	* configure.in: Handle bfd_elf32_sparc_sol2_vec,
+	bfd_elf64_sparc_sol2_vec.
+	* configure: Regenerate.
+
+	* targets.c (bfd_elf32_sparc_sol2_vec): Declare.
+	(bfd_elf64_sparc_sol2_vec): Declare.
+	(_bfd_target_vector): Add bfd_elf32_sparc_sol2_vec,
+	bfd_elf64_sparc_sol2_vec.
+
 2010-10-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_merge_arch_attributes): Update for

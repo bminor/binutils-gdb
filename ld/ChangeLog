@@ -1,3 +1,10 @@
+2010-10-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* emulparams/elf32_sparc_sol2.sh (OUTPUT_FORMAT): Set to
+	elf32-sparc-sol2.
+	* emulparams/elf64_sparc_sol2.sh (OUTPUT_FORMAT): Set to
+	elf64-sparc-sol2.
+
 2010-10-22  Alan Modra  <amodra@gmail.com>
 
 	* ldwrite.c (build_link_order <lang_data_statement_enum>): Don't

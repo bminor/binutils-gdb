@@ -1,6 +1,6 @@
 /* SPARC-specific support for 64-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -934,3 +934,23 @@ const struct elf_size_info elf64_sparc_size_info =
 
 #include "elf64-target.h"
 
+/* Solaris 2.  */
+
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM				bfd_elf64_sparc_sol2_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME				"elf64-sparc-sol2"
+
+/* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
+   objects won't be recognized.  */
+#undef	ELF_OSABI
+
+#undef elf64_bed
+#define elf64_bed				elf64_sparc_sol2_bed
+
+/* The 64-bit static TLS arena size is rounded to the nearest 16-byte
+   boundary.  */
+#undef elf_backend_static_tls_alignment
+#define elf_backend_static_tls_alignment	16
+
+#include "elf64-target.h"

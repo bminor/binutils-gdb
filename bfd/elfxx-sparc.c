@@ -2819,11 +2819,16 @@ static bfd_vma
 tpoff (struct bfd_link_info *info, bfd_vma address)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
+  const struct elf_backend_data *bed = get_elf_backend_data (info->output_bfd);
+  bfd_vma static_tls_size;
 
   /* If tls_sec is NULL, we should have signalled an error already.  */
   if (htab->tls_sec == NULL)
     return 0;
-  return address - htab->tls_size - htab->tls_sec->vma;
+
+  /* Consider special static TLS alignment requirements.  */
+  static_tls_size = BFD_ALIGN (htab->tls_size, bed->static_tls_alignment);
+  return address - static_tls_size - htab->tls_sec->vma;
 }
 
 /* Return the relocation value for a %gdop relocation.  */

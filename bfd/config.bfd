@@ -1395,14 +1395,18 @@ case "${targ}" in
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs=sparcnetbsd_vec
     ;;
-  sparc-*-elf* | sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
+  sparc-*-elf*)
     targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs=sunos_big_vec
+    ;;
+  sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
+    targ_defvec=bfd_elf32_sparc_sol2_vec
     targ_selvecs=sunos_big_vec
     ;;
 #ifdef BFD64
   sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
-    targ_defvec=bfd_elf32_sparc_vec
-    targ_selvecs="bfd_elf64_sparc_vec sunos_big_vec"
+    targ_defvec=bfd_elf32_sparc_sol2_vec
+    targ_selvecs="bfd_elf64_sparc_sol2_vec sunos_big_vec"
     want64=true
     ;;
 #endif
