@@ -1,3 +1,17 @@
+2010-10-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* gas/elf/elf.exp: Add group0c test.
+	* gas/elf/group0c.d: New.
+	* gas/elf/group0a.d: Expect ".group" for the name of group
+	sections.
+	* gas/elf/group0b.d: Likewise.
+	* gas/elf/group1a.d: Likewise.
+	* gas/elf/group1b.d: Likewise.
+	* gas/elf/groupautoa.d: Likewise.
+	* gas/elf/groupautob.d: Likewise.
+	* gas/elf/section4.d: Likewise.
+	* gas/ia64/group-1.d: Likewise.  Adjust hard-coded constants.
+
 2010-10-22  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/fwdexp.d: Also look for f8ffffff.

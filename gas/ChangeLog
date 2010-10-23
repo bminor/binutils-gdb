@@ -1,3 +1,14 @@
+2010-10-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* config/obj-elf.c (elf_adjust_symtab): New.  Move group section
+	processing here from elf_frob_file.  Ensure that group signature
+	symbols have the name of the group.
+	(elf_frob_file): Move group section processing to
+	elf_adjust_symtab.
+	* config/obj-elf.h (elf_adjust_symtab): Declare.
+	(obj_adjust_symtab): Define.
+	* config/tc-arm.c (arm_adjust_symtab): Call elf_adjust_symtab.
+
 2010-10-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* config/tc-sparc.h [TE_SOLARIS] (ELF_TARGET_FORMAT): Define as

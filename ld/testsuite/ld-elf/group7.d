@@ -9,7 +9,7 @@
 # well with unique group sections under ld -r.
 
 #...
-COMDAT group section \[[ 0-9]+\] `foo_group' \[foo_group\] contains 2 sections:
+COMDAT group section \[[ 0-9]+\] `\.group' \[foo_group\] contains 2 sections:
    \[Index\]    Name
    \[[ 0-9]+\]   .text.foo
    \[[ 0-9]+\]   .data.foo

@@ -2081,32 +2081,29 @@ static void free_section_idx (const char *key ATTRIBUTE_UNUSED, void *val)
 }
 
 void
-elf_frob_file (void)
+elf_adjust_symtab (void)
 {
   struct group_list list;
   unsigned int i;
-
-  bfd_map_over_sections (stdoutput, adjust_stab_sections, NULL);
 
   /* Go find section groups.  */
   list.num_group = 0;
   list.head = NULL;
   list.elt_count = NULL;
-  list.indexes  = hash_new ();
+  list.indexes = hash_new ();
   bfd_map_over_sections (stdoutput, build_group_lists, &list);
-
+  
   /* Make the SHT_GROUP sections that describe each section group.  We
      can't set up the section contents here yet, because elf section
      indices have yet to be calculated.  elf.c:set_group_contents does
      the rest of the work.  */
-  for (i = 0; i < list.num_group; i++)
+ for (i = 0; i < list.num_group; i++)
     {
       const char *group_name = elf_group_name (list.head[i]);
       const char *sec_name;
       asection *s;
       flagword flags;
       struct symbol *sy;
-      int has_sym;
       bfd_size_type size;
 
       flags = SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_GROUP;
@@ -2122,17 +2119,7 @@ elf_frob_file (void)
 	      }
 	  }
 
-      sec_name = group_name;
-      sy = symbol_find_exact (group_name);
-      has_sym = 0;
-      if (sy != NULL
-	  && (sy == symbol_lastP
-	      || (sy->sy_next != NULL
-		  && sy->sy_next->sy_previous == sy)))
-	{
-	  has_sym = 1;
-	  sec_name = ".group";
-	}
+      sec_name = ".group";
       s = subseg_force_new (sec_name, 0);
       if (s == NULL
 	  || !bfd_set_section_flags (stdoutput, s, flags)
@@ -2145,8 +2132,20 @@ elf_frob_file (void)
 
       /* Pass a pointer to the first section in this group.  */
       elf_next_in_group (s) = list.head[i];
-      if (has_sym)
-	elf_group_id (s) = sy->bsym;
+      /* Make sure that the signature symbol for the group has the
+	 name of the group.  */
+      sy = symbol_find_exact (group_name);
+      if (!sy
+	  || (sy != symbol_lastP
+	      && (sy->sy_next == NULL
+		  || sy->sy_next->sy_previous != sy)))
+	{
+	  /* Create the symbol now.  */
+	  sy = symbol_new (group_name, now_seg, (valueT) 0, frag_now);
+	  symbol_get_obj (sy)->local = 1;
+	  symbol_table_insert (sy);
+	}
+      elf_group_id (s) = symbol_get_bfdsym (sy);
 
       size = 4 * (list.elt_count[i] + 1);
       bfd_set_section_size (stdoutput, s, size);
@@ -2155,13 +2154,19 @@ elf_frob_file (void)
       frag_wane (frag_now);
     }
 
-#ifdef elf_tc_final_processing
-  elf_tc_final_processing ();
-#endif
-
   /* Cleanup hash.  */
   hash_traverse (list.indexes, free_section_idx);
   hash_die (list.indexes);
+}
+
+void
+elf_frob_file (void)
+{
+  bfd_map_over_sections (stdoutput, adjust_stab_sections, NULL);
+
+#ifdef elf_tc_final_processing
+  elf_tc_final_processing ();
+#endif
 }
 
 /* It removes any unneeded versioned symbols from the symbol table.  */

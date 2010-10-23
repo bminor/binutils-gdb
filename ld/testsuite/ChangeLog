@@ -1,3 +1,10 @@
+2010-10-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* ld-elf/group10.d: Expect ".group" for the name of group
+	sections.
+	* ld-elf/group2.d: Likewise.
+	* ld-elf/group7.d: Likewise.
+
 2010-10-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-tic6x/attr-arch-c62x-c62x.d, ld-tic6x/attr-arch-c62x-c64x+.d,

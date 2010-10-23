@@ -1,3 +1,9 @@
+2010-10-22  Mark Mitchell  <mark@codesourcery.com>
+
+	* binutils-all/group-5.d: Expect ".group" for the name of group
+	sections.
+	* binutils-all/strip-2.d: Likewise.
+
 2010-10-12  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* binutils-all/m68k/objdump.exp: Add fnop test.

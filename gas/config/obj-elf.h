@@ -197,6 +197,11 @@ void elf_copy_symbol_attributes (symbolS *, symbolS *);
   (elf_copy_symbol_attributes (DEST, SRC))
 #endif
 
+void elf_adjust_symtab (void);
+#ifndef obj_adjust_symtab
+#define obj_adjust_symtab	elf_adjust_symtab
+#endif
+
 #ifndef SEPARATE_STAB_SECTIONS
 /* Avoid ifndef each separate macro setting by wrapping the whole of the
    stab group on the assumption that whoever sets SEPARATE_STAB_SECTIONS

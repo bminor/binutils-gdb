@@ -104,6 +104,7 @@ if { ([istarget "*-*-*elf*"]
     }
     run_dump_test "group0a"
     run_dump_test "group0b"
+    run_dump_test "group0c"
     run_dump_test "group1a"
     run_dump_test "group1b"
     run_dump_test "groupautoa"
