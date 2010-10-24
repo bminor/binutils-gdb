@@ -286,13 +286,30 @@ proc mips_arch_list_matching {args} {
 #
 # Invoke "run_dump_test" for test NAME, with extra assembler and
 # disassembler flags to test architecture ARCH.
+#
+# You can override the expected output for particular architectures
+# and file formats.  The possible test names are, in order of preference:
+#
+# 1. CARCH@FORMAT@NAME.d
+# 2. CARCH@NAME.d
+# 3. FORMAT@NAME.d
+# 4. NAME.d
+#
+# where CARCH is the "canonical" name of architecture ARCH as recorded
+# in its associated property list, and where FORMAT is the target's
+# file format (one of "elf", "ecoff" or "aout").
 proc run_dump_test_arch { name arch } {
+    upvar elf elf ecoff ecoff aout aout
     global subdir srcdir
 
+    set format [expr { $elf ? "elf" : $ecoff ? "ecoff" : "aout" }]
     set proparch [lindex [mips_arch_properties $arch 0] 0]
-    set archname "${proparch}@${name}"
-    if { [file exists "$srcdir/$subdir/${archname}.d"] } {
-	set name $archname
+    foreach prefix [list ${proparch}@${format}@ ${proparch}@ ${format}@] {
+	set archname ${prefix}${name}
+	if { [file exists "$srcdir/$subdir/${archname}.d"] } {
+	    set name $archname
+	    break
+	}
     }
 
     if [catch {run_dump_test $name \
@@ -309,6 +326,7 @@ proc run_dump_test_arch { name arch } {
 # Invoke "run_dump_test_arch" for test NAME, for each architecture
 # listed in ARCH_LIST.
 proc run_dump_test_arches { name arch_list } {
+    upvar elf elf ecoff ecoff aout aout
     foreach arch $arch_list {
 	run_dump_test_arch "$name" "$arch"
     }

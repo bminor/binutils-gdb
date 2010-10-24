@@ -1,4 +1,12 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+            Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/mips.exp (run_dump_test_arch): Check for the presence
+	of a file-format-specific test too.
+	(run_dump_test_arches): Pull elf, ecoff and aout variables for
+	use by the above.
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/ld.s: Remove "l.d", "s.d" and "sd" instructions.
 	* gas/mips/ld.d: Adjust accordingly.
