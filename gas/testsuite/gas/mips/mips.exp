@@ -517,14 +517,69 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "ld"	[mips_arch_list_matching mips1]
 	run_dump_test_arches "ld-forward" \
 					[mips_arch_list_matching mips1]
+	run_dump_test_arches "sd"	[mips_arch_list_matching mips1]
+	run_dump_test_arches "sd-forward" \
+					[mips_arch_list_matching mips1]
+	run_dump_test_arches "l_d"	[mips_arch_list_matching mips1]
+	run_dump_test_arches "l_d-forward" \
+					[mips_arch_list_matching mips1]
+	run_dump_test_arches "s_d"	[mips_arch_list_matching mips1]
+	run_dump_test_arches "s_d-forward" \
+					[mips_arch_list_matching mips1]
+	run_dump_test_arches "ldc1"	[mips_arch_list_matching mips2]
+	run_dump_test_arches "ldc1-forward" \
+					[mips_arch_list_matching mips2]
+	run_dump_test_arches "sdc1"	[mips_arch_list_matching mips2]
+	run_dump_test_arches "sdc1-forward" \
+					[mips_arch_list_matching mips2]
 	if $has_newabi {
 	    run_dump_test_arches "ld-n32" \
 					[mips_arch_list_matching mips3]
 	    run_dump_test_arches "ld-forward-n32" \
 					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sd-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sd-forward-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "l_d-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "l_d-forward-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "s_d-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "s_d-forward-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "ldc1-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "ldc1-forward-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sdc1-n32" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sdc1-forward-n32" \
+					[mips_arch_list_matching mips3]
 	    run_dump_test_arches "ld-n64" \
 					[mips_arch_list_matching mips3]
 	    run_dump_test_arches "ld-forward-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sd-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sd-forward-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "l_d-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "l_d-forward-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "s_d-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "s_d-forward-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "ldc1-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "ldc1-forward-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sdc1-n64" \
+					[mips_arch_list_matching mips3]
+	    run_dump_test_arches "sdc1-forward-n64" \
 					[mips_arch_list_matching mips3]
 	}
     }

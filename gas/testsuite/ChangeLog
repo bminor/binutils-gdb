@@ -1,5 +1,75 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/ld.s: Adjust to let SD, L.D, S.D, LDC1 and SDC1
+	macros to be tested, according to the "tsd", "tl_d", "ts_d",
+	"tldc1" and "tsdc1" symbols.
+	* gas/mips/sd.d: New test.
+	* gas/mips/ecoff@sd.d: Likewise, ECOFF version.
+	* gas/mips/mips1@ecoff@sd.d: Likewise, MIPS I/ECOFF version.
+	* gas/mips/r3000@ecoff@sd.d: Likewise, R3000/ECOFF version.
+	* gas/mips/r3900@ecoff@sd.d: Likewise, R3900/ECOFF version.
+	* gas/mips/mips2@ecoff@sd.d: Likewise, MIPS II/ECOFF version.
+	* gas/mips/mips32@ecoff@sd.d: Likewise, MIPS32/ECOFF version.
+	* gas/mips/mips32r2@ecoff@sd.d: Likewise, MIPS32r2/ECOFF
+	version.
+	* gas/mips/sd-forward.d: New test.
+	* gas/mips/ecoff@sd-forward.d: Likewise, ECOFF version.
+	* gas/mips/mips1@ecoff@sd-forward.d: Likewise, MIPS I/ECOFF
+	version.
+	* gas/mips/r3000@ecoff@sd-forward.d: Likewise, R3000/ECOFF
+	version.
+	* gas/mips/r3900@ecoff@sd-forward.d: Likewise, R3900/ECOFF
+	version.
+	* gas/mips/mips2@ecoff@sd-forward.d: Likewise, MIPS II/ECOFF
+	version.
+	* gas/mips/mips32@ecoff@sd-forward.d: Likewise, MIPS32/ECOFF
+	version.
+	* gas/mips/mips32r2@ecoff@sd-forward.d: Likewise, MIPS32r2/ECOFF
+	version.
+	* gas/mips/l_d.d: New test.
+	* gas/mips/mips1@l_d.d: Likewise, MIPS I version.
+	* gas/mips/r3000@l_d.d: Likewise, R3000 version.
+	* gas/mips/r3900@l_d.d: Likewise, R3900 version.
+	* gas/mips/l_d-forward.d: New test.
+	* gas/mips/mips1@l_d-forward.d: Likewise, MIPS I version.
+	* gas/mips/r3000@l_d-forward.d: Likewise, R3000 version.
+	* gas/mips/r3900@l_d-forward.d: Likewise, R3900 version.
+	* gas/mips/s_d.d: New test.
+	* gas/mips/mips1@s_d.d: Likewise, MIPS I version.
+	* gas/mips/r3000@s_d.d: Likewise, R3000 version.
+	* gas/mips/r3900@s_d.d: Likewise, R3900 version.
+	* gas/mips/s_d-forward.d: New test.
+	* gas/mips/mips1@s_d-forward.d: Likewise, MIPS I version.
+	* gas/mips/r3000@s_d-forward.d: Likewise, R3000 version.
+	* gas/mips/r3900@s_d-forward.d: Likewise, R3900 version.
+	* gas/mips/ldc1.d: New test.
+	* gas/mips/ldc1-forward.d: Likewise.
+	* gas/mips/sdc1.d: Likewise.
+	* gas/mips/sdc1-forward.d: Likewise.
+	* gas/mips/sd-n32.d: Likewise.
+	* gas/mips/sd-n64.d: Likewise.
+	* gas/mips/sd-f-n32.d: Likewise.
+	* gas/mips/sd-f-n64.d: Likewise.
+	* gas/mips/l_d-n32.d: Likewise.
+	* gas/mips/l_d-n64.d: Likewise.
+	* gas/mips/l_d-f-n32.d: Likewise.
+	* gas/mips/l_d-f-n64.d: Likewise.
+	* gas/mips/s_d-n32.d: Likewise.
+	* gas/mips/s_d-n64.d: Likewise.
+	* gas/mips/s_d-f-n32.d: Likewise.
+	* gas/mips/s_d-f-n64.d: Likewise.
+	* gas/mips/ldc1-n32.d: Likewise.
+	* gas/mips/ldc1-n64.d: Likewise.
+	* gas/mips/ldc1-f-n32.d: Likewise.
+	* gas/mips/ldc1-f-n64.d: Likewise.
+	* gas/mips/sdc1-n32.d: Likewise.
+	* gas/mips/sdc1-n64.d: Likewise.
+	* gas/mips/sdc1-f-n32.d: Likewise.
+	* gas/mips/sdc1-f-n64.d: Likewise.
+	* gas/mips/mips.exp: Run the new tests.
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/ld.s: Adjust to let data objects be only
 	defined/declared (as appropriate) at the end of assembly, based
 	on the presence or not of the "forward" symbol.
