@@ -419,12 +419,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "vxworks1-el"
     run_dump_test "vxworks1-xgot-el"
 } elseif { [istarget mips*-*-*] } {
-    set no_mips16 0
     set elf [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] || [istarget *-*-linux*] || [istarget *-*-netbsd*] ]
     set ecoff [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
     set aout [expr [istarget *-*-bsd*] || [istarget *-*-openbsd*] ]
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] || [istarget mips*-*-ecoff]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
+    set no_mips16 [expr !$elf]
 
     if { [istarget "mips*-*-*linux*"] || [istarget "mips*-sde-elf*"] } then {
 	set tmips "t"
@@ -435,9 +435,6 @@ if { [istarget mips*-*-vxworks*] } {
 	set el "el"
     } {
 	set el ""
-    }
-    if { $ecoff } {
-	set no_mips16 1
     }
     if { $no_mips16 } {
 	mips_arch_destroy mips16
