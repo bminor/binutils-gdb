@@ -1,8 +1,8 @@
-#objdump: -d
-#name: MIPS eret-3 disassembly
-#as: -mabi=32 -mfix-24k -march=24kc --no-warn
+#objdump: -d -mmips:isa32r2
+#name: MIPS eret-3
+#as: -32 -mfix-24k -march=24kc --no-warn
 
-.*\.o:     file format .*mips.*
+.*\.o: +file format .*mips.*
 
 Disassembly of section \.text:
 

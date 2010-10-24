@@ -1,5 +1,13 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/at-1.d: Handle ECOFF relocations.
+	* gas/mips/eret-1.d: Handle ECOFF.
+	* gas/mips/eret-2.d: Likewise.
+	* gas/mips/eret-3.d: Likewise.
+	* gas/mips/mips.exp: Only run "aent" for ELF.
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/ld.s: Adjust to let SD, L.D, S.D, LDC1 and SDC1
 	macros to be tested, according to the "tsd", "tl_d", "ts_d",
 	"tldc1" and "tsdc1" symbols.

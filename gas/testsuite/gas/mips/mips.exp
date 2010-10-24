@@ -823,6 +823,8 @@ if { [istarget mips*-*-vxworks*] } {
 	run_list_test "tls-ill" "-32"
 	run_dump_test "tls-o32"
 	run_dump_test "jalr2"
+
+	run_dump_test_arches "aent"	[mips_arch_list_matching mips1]
     }
 
     if $has_newabi {
@@ -962,6 +964,4 @@ if { [istarget mips*-*-vxworks*] } {
 					[mips_arch_list_matching mips32r2]
 
     if $has_newabi { run_dump_test "cfi-n64-1" }
-
-    run_dump_test_arches "aent"		[mips_arch_list_matching mips1]
 }

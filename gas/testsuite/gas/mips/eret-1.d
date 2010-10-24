@@ -1,12 +1,12 @@
-#objdump: -d
-#name: MIPS eret-1 disassembly
-#as: -mabi=32 -mfix-24k -march=24kc --no-warn
+#objdump: -d -mmips:isa32r2
+#name: MIPS eret-1
+#as: -32 -mfix-24k -march=24kc --no-warn
 
-.*\.o:     file format .*mips.*
+.*\.o: +file format .*mips.*
 
 Disassembly of section \.text:
 
-[0-9a-f]+ <foo>:
+[0-9a-f]+ <.*>:
 [ 0-9a-f]+:	240c0000 	li	t4,0
 [ 0-9a-f]+:	42000018 	eret
 [ 0-9a-f]+:	00000000 	nop
