@@ -1,5 +1,11 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/ld-n32.d: New test.
+	* gas/mips/ld-n64.d: Likewise.
+	* gas/mips/mips.exp: Run the new tests.
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/ld.d: Rename to...
 	* gas/mips/mips1@ld.d: ... this.
 	* gas/mips/ld-ilocks.d: Rename to...
