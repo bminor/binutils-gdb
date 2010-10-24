@@ -141,11 +141,6 @@ data_label:
 # sd is handled like ld.  Sanity check it.
 	sd	$4,0
 
-# Sanity check the -mips3 versions
-	.set	mips3
-	ld	$4,big_local_common+0x1a5a5($5)
-	sd	$4,small_local_common+0x1a5a5($5)
-
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.align	2
 	.space	8

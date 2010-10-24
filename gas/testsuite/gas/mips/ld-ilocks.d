@@ -618,14 +618,4 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_common
 [0-9a-f]+ <[^>]*> sw	a0,0\(zero\)
 [0-9a-f]+ <[^>]*> sw	a1,4\(zero\)
-[0-9a-f]+ <[^>]*> lui	a0,0x2
-[ 	]*[0-9a-f]+: (R_MIPS_HI16|REFHI)	\.bss(\+0xffffe000)?
-[0-9a-f]+ <[^>]*> (d|)addu	a0,a0,a1
-[0-9a-f]+ <[^>]*> ld	a0,-(23131|14939)\(a0\)
-[ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	\.bss(\+0xffffe000)?
-[0-9a-f]+ <[^>]*> lui	at,0x2
-[ 	]*[0-9a-f]+: (R_MIPS_HI16|REFHI)	\.sbss(\+0xfffff000)?
-[0-9a-f]+ <[^>]*> (d|)addu	at,at,a1
-[0-9a-f]+ <[^>]*> sd	a0,-(23131|19035)\(at\)
-[ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	\.sbss(\+0xfffff000)?
 	\.\.\.

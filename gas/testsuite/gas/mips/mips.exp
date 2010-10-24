@@ -500,11 +500,7 @@ if { [istarget mips*-*-vxworks*] } {
         if !$gpr_ilocks {
             run_dump_test "ld"
         } else { 
-            if !$addr32 {
-                run_dump_test "ld-ilocks"
-            } else {
-                run_dump_test "ld-ilocks-addr32"
-            }
+	    run_dump_test "ld-ilocks"
         }
     }
     if $elf { run_dump_test "ld-svr4pic" }
