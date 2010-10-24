@@ -1,7 +1,7 @@
 #objdump: -dr --prefix-addresses
+#as: -32
 #name: MIPS ld-ilocks
 #source: ld.s
-#as:
 
 # Test the ld macro.
 

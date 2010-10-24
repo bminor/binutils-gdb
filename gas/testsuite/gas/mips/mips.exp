@@ -405,7 +405,6 @@ if { [istarget mips*-*-vxworks*] } {
     set elf [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] || [istarget *-*-linux*] || [istarget *-*-netbsd*] ]
     set ecoff [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
     set aout [expr [istarget *-*-bsd*] || [istarget *-*-openbsd*] ]
-    set gpr_ilocks [expr [istarget mipstx39*-*-*]]
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] || [istarget mips*-*-ecoff]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 
@@ -497,11 +496,10 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "lb-xgot-ilocks"
     }
     if !$aout {
-        if !$gpr_ilocks {
-            run_dump_test "ld"
-        } else { 
-	    run_dump_test "ld-ilocks"
-        }
+	run_dump_test_arches "ld" \
+				[mips_arch_list_matching mips1 !gpr_ilocks]
+	run_dump_test_arches "ld-ilocks" \
+				[mips_arch_list_matching gpr_ilocks !mips2]
     }
     if $elf { run_dump_test "ld-svr4pic" }
     if $elf { run_dump_test "ld-xgot" }

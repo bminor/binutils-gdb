@@ -1,5 +1,5 @@
-#objdump: -dr --prefix-addresses -mmips:4000
-#as: -32 -march=r4000
+#objdump: -dr --prefix-addresses
+#as: -32
 #name: MIPS ld
 
 # Test the ld macro.

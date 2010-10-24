@@ -1,5 +1,13 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/ld.s: Remove ".set mips1".
+	* gas/mips/ld.d: Remove "-march=r4000" and "-mmips:4000" from
+	gas/objdump options.
+	* gas/mips/ld-ilocks.d: Add "-32" to gas options.
+	* gas/mips/mips.exp: Run the two cases with run_dump_test_arches.
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/ld.s: Remove MIPS III bits.
 	* gas/mips/ld.d: Adjust accordingly.
 	* gas/mips/ld-ilocks.d: Likewise.

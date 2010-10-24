@@ -1,7 +1,5 @@
 # Source file used to test the ld macro.
 
-	.set	mips1
-
 	.bss
 	.align	12
 	.sbss
