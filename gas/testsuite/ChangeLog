@@ -1,4 +1,19 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/ld.d: Rename to...
+	* gas/mips/mips1@ld.d: ... this.
+	* gas/mips/ld-ilocks.d: Rename to...
+	* gas/mips/ld.d: ... this.
+	* gas/mips/r3000@ld.d: New test, R3000 version.
+	* gas/mips/ecoff@ld.d: Likewise, ECOFF version.
+	* gas/mips/r3900@ecoff@ld.d: Likewise, R3900/ECOFF version.
+	* gas/mips/mips2@ecoff@ld.d: Likewise, MIPS II/ECOFF version.
+	* gas/mips/mips32@ecoff@ld.d: Likewise, MIPS32/ECOFF version.
+	* gas/mips/mips32r2@ecoff@ld.d: Likewise, MIPS32r2/ECOFF version.
+	* gas/mips/mips.exp: Remove "ld-ilocks" and run "ld" over all
+	architectures matching "mips1".
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
             Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/mips.exp (run_dump_test_arch): Check for the presence

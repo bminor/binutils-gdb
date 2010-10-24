@@ -1,6 +1,7 @@
 #objdump: -dr --prefix-addresses
 #as: -32
 #name: MIPS ld
+#source: ld.s
 
 # Test the ld macro.
 
@@ -22,17 +23,14 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> lui	at,0x2
 [0-9a-f]+ <[^>]*> lw	a0,-23131\(at\)
 [0-9a-f]+ <[^>]*> lw	a1,-23127\(at\)
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> lw	a0,0\(a1\)
 [0-9a-f]+ <[^>]*> lw	a1,4\(a1\)
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> lw	a0,1\(a1\)
 [0-9a-f]+ <[^>]*> lw	a1,5\(a1\)
 [0-9a-f]+ <[^>]*> lui	at,0x1
 [0-9a-f]+ <[^>]*> addu	at,a1,at
 [0-9a-f]+ <[^>]*> lw	a0,-32768\(at\)
 [0-9a-f]+ <[^>]*> lw	a1,-32764\(at\)
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> lw	a0,-32768\(a1\)
 [0-9a-f]+ <[^>]*> lw	a1,-32764\(a1\)
 [0-9a-f]+ <[^>]*> lui	at,0x1
@@ -297,7 +295,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_data_label
 [0-9a-f]+ <[^>]*> lw	a1,4\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_data_label
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> addu	at,a1,gp
 [0-9a-f]+ <[^>]*> lw	a0,0\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_GPREL16|GPREL)	small_external_data_label
@@ -310,7 +307,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_common
 [0-9a-f]+ <[^>]*> lw	a1,4\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_common
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> addu	at,a1,gp
 [0-9a-f]+ <[^>]*> lw	a0,0\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_GPREL16|GPREL)	small_external_common
@@ -323,7 +319,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	\.bss(\+0xffffe000)?
 [0-9a-f]+ <[^>]*> lw	a1,(4|8196)\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	\.bss(\+0xffffe000)?
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> addu	at,a1,gp
 [0-9a-f]+ <[^>]*> lw	a0,(0|-16384)\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_GPREL16|GPREL)	\.sbss(\+0x4000)?
@@ -343,7 +338,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_data_label
 [0-9a-f]+ <[^>]*> lw	a1,5\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_data_label
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> addu	at,a1,gp
 [0-9a-f]+ <[^>]*> lw	a0,1\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_GPREL16|GPREL)	small_external_data_label
@@ -356,7 +350,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_common
 [0-9a-f]+ <[^>]*> lw	a1,5\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	big_external_common
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> addu	at,a1,gp
 [0-9a-f]+ <[^>]*> lw	a0,1\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_GPREL16|GPREL)	small_external_common
@@ -369,7 +362,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	\.bss(\+0xffffe000)?
 [0-9a-f]+ <[^>]*> lw	a1,(5|8197)\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_LO16|REFLO)	\.bss(\+0xffffe000)?
-[0-9a-f]+ <[^>]*> nop
 [0-9a-f]+ <[^>]*> addu	at,a1,gp
 [0-9a-f]+ <[^>]*> lw	a0,(1|-16383)\(at\)
 [ 	]*[0-9a-f]+: (R_MIPS_GPREL16|GPREL)	\.sbss(\+0x4000)?
