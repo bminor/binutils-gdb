@@ -1,3 +1,9 @@
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/ld.d: Spell out reloc names.
+	* gas/mips/ld-ilocks.d: Likewise.
+	* gas/mips/ld-ilocks-addr32.d: Likewise.
+
 2010-10-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* gas/elf/elf.exp: Add group0c test.
