@@ -1,5 +1,6 @@
 # Source file used to test the ld macro.
 
+	.macro	data
 	.bss
 	.align	12
 	.sbss
@@ -13,6 +14,11 @@ data_label:
 	.comm small_external_common,1
 	.lcomm big_local_common,1000
 	.lcomm small_local_common,1
+	.endm
+
+	.ifndef	forward
+	data
+	.endif
 
 	.text
 	.align	12
@@ -116,3 +122,7 @@ data_label:
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.align	2
 	.space	8
+
+	.ifdef	forward
+	data
+	.endif

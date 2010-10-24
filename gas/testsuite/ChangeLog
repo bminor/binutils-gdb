@@ -1,5 +1,26 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/ld.s: Adjust to let data objects be only
+	defined/declared (as appropriate) at the end of assembly, based
+	on the presence or not of the "forward" symbol.
+	* gas/mips/ld-forward.d: New test.
+	* gas/mips/mips1@ld-forward.d: Likewise. MIPS I version.
+	* gas/mips/r3000@ld-forward.d: Likewise, R3000 version.
+	* gas/mips/ecoff@ld-forward.d: Likewise, ECOFF version.
+	* gas/mips/r3900@ecoff@ld-forward.d: Likewise, R3900/ECOFF
+	version.
+	* gas/mips/mips2@ecoff@ld-forward.d: Likewise, MIPS II/ECOFF
+	version.
+	* gas/mips/mips32@ecoff@ld-forward.d: Likewise, MIPS32/ECOFF
+	version.
+	* gas/mips/mips32r2@ecoff@ld-forward.d: Likewise, MIPS32r2/ECOFF
+	version.
+	* gas/mips/ld-n32-forward.d: New test.
+	* gas/mips/ld-n64-forward.d: Likewise.
+	* gas/mips/mips.exp: Run the new tests.
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/ld-n32.d: New test.
 	* gas/mips/ld-n64.d: Likewise.
 	* gas/mips/mips.exp: Run the new tests.
