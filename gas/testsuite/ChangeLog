@@ -1,5 +1,11 @@
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/ld.s: Remove "l.d", "s.d" and "sd" instructions.
+	* gas/mips/ld.d: Adjust accordingly.
+	* gas/mips/ld-ilocks.d: Likewise
+
+2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/ld.s: Remove ".set mips1".
 	* gas/mips/ld.d: Remove "-march=r4000" and "-mmips:4000" from
 	gas/objdump options.

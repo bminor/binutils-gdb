@@ -113,32 +113,6 @@ data_label:
 	ld	$4,big_local_common+0x1a5a5($5)
 	ld	$4,small_local_common+0x1a5a5($5)
 
-# l.d and s.d are sort of like ld.
-	l.d	$f4,0
-	l.d	$f4,1
-	l.d	$f4,0x8000
-	l.d	$f4,-0x8000
-	l.d	$f4,0($5)
-	l.d	$f4,1($5)
-	l.d	$f4,0x8000($5)
-	l.d	$f4,-0x8000($5)
-	l.d	$f4,small_external_common+0x1a5a5($5)
-	# Little endian will insert a nop here.
-	# We put it in explicitly so that big and little endian are similar.
-	nop
-	s.d	$f4,0
-	s.d	$f4,1
-	s.d	$f4,0x8000
-	s.d	$f4,-0x8000
-	s.d	$f4,0($5)
-	s.d	$f4,1($5)
-	s.d	$f4,0x8000($5)
-	s.d	$f4,-0x8000($5)
-	s.d	$f4,big_external_common+0x1a5a5($5)
-
-# sd is handled like ld.  Sanity check it.
-	sd	$4,0
-
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.align	2
 	.space	8
