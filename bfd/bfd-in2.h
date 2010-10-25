@@ -964,6 +964,7 @@ extern struct coff_comdat_info *bfd_coff_get_comdat_section
 void bfd_init (void);
 
 /* Extracted from opncls.c.  */
+extern unsigned int bfd_use_reserved_id;
 bfd *bfd_fopen (const char *filename, const char *target,
     const char *mode, int fd);
 

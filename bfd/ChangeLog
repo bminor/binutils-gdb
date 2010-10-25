@@ -1,3 +1,11 @@
+2010-10-25  Alan Modra  <amodra@gmail.com>
+
+	* opncls.c (_bfd_id_counter): Rename to bfd_id_counter.
+	(bfd_reserved_id_counter, bfd_use_reserved_id): New vars.
+	(_bfd_new_bfd): Use negative id when bfd_use_reserved_id.
+	(bfd_create): Doc fix.
+	* bfd-in2.h: Regenerate.
+
 2010-10-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* elfxx-sparc.c (tpoff): Define bed, static_tls_size.
