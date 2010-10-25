@@ -1072,9 +1072,6 @@ static void macro_start (void);
 static void macro_end (void);
 static void macro (struct mips_cl_insn * ip);
 static void mips16_macro (struct mips_cl_insn * ip);
-#ifdef LOSING_COMPILER
-static void macro2 (struct mips_cl_insn * ip);
-#endif
 static void mips_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_immed
@@ -7407,66 +7404,6 @@ macro (struct mips_cl_insn *ip)
     case M_MOVE:
       move_register (dreg, sreg);
       break;
-
-#ifdef LOSING_COMPILER
-    default:
-      /* Try and see if this is a new itbl instruction.
-         This code builds table entries out of the macros in mip_opcodes.
-         FIXME: For now we just assemble the expression and pass it's
-         value along as a 32-bit immediate.
-         We may want to have the assembler assemble this value,
-         so that we gain the assembler's knowledge of delay slots,
-         symbols, etc.
-         Would it be more efficient to use mask (id) here? */
-      if (itbl_have_entries
-	  && (immed_expr = itbl_assemble (ip->insn_mo->name, "")))
-	{
-	  s = ip->insn_mo->name;
-	  s2 = "cop3";
-	  coproc = ITBL_DECODE_PNUM (immed_expr);;
-	  macro_build (&immed_expr, s, "C");
-	  break;
-	}
-      macro2 (ip);
-      break;
-    }
-  if (!mips_opts.at && used_at)
-    as_bad (_("Macro used $at after \".set noat\""));
-}
-
-static void
-macro2 (struct mips_cl_insn *ip)
-{
-  unsigned int treg, sreg, dreg, breg;
-  unsigned int tempreg;
-  int mask;
-  int used_at;
-  expressionS expr1;
-  const char *s;
-  const char *s2;
-  const char *fmt;
-  int likely = 0;
-  int dbl = 0;
-  int coproc = 0;
-  int lr = 0;
-  int imm = 0;
-  int off;
-  offsetT maxnum;
-  bfd_reloc_code_real_type r;
-
-  treg = (ip->insn_opcode >> 16) & 0x1f;
-  dreg = (ip->insn_opcode >> 11) & 0x1f;
-  sreg = breg = (ip->insn_opcode >> 21) & 0x1f;
-  mask = ip->insn_mo->mask;
-
-  expr1.X_op = O_constant;
-  expr1.X_op_symbol = NULL;
-  expr1.X_add_symbol = NULL;
-  expr1.X_add_number = 1;
-
-  switch (mask)
-    {
-#endif /* LOSING_COMPILER */
 
     case M_DMUL:
       dbl = 1;
