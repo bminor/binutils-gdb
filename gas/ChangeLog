@@ -1,3 +1,7 @@
+2010-10-25  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-tic6x.c: Add attribution.
+
 2010-10-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* obj.h (struct format_ops): Add adjust_symtab.

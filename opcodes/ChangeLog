@@ -1,3 +1,7 @@
+2010-10-25  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* tic6x-dis.c: Add attribution.
+
 2010-10-22  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (CLEANFILES): Add stamp-lm32.  Sort.

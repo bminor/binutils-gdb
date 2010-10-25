@@ -1,6 +1,8 @@
 /* TI C6X assembler.
    Copyright 2010
    Free Software Foundation, Inc.
+   Contributed by Joseph Myers <joseph@codesourcery.com>
+   		  Bernd Schmidt  <bernds@codesourcery.com>
 
    This file is part of GAS, the GNU Assembler.
 
