@@ -1,3 +1,9 @@
+2010-10-25  Alan Modra  <amodra@gmail.com>
+
+	PR gas/12049
+	* write.c (relax_frag): Don't allow forward branches to temporarily
+	becomde backward branches.
+
 2010-10-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/obj-elf.c (elf_adjust_symtab): New.  Move group section

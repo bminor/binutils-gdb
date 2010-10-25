@@ -2163,6 +2163,13 @@ relax_frag (segT segment, fragS *fragP, long stretch)
 	  if (stretch < 0
 	      || sym_frag->region == fragP->region)
 	    target += stretch;
+	  /* If we get here we know we have a forward branch.  This
+	     relax pass may have stretched previous instructions so
+	     far that omitting STRETCH would make the branch
+	     negative.  Don't allow this in case the negative reach is
+	     large enough to require a larger branch instruction.  */
+	  else if (target < address)
+	    target = fragP->fr_next->fr_address + stretch;
 	}
     }
 
