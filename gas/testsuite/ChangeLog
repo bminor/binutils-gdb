@@ -1,3 +1,12 @@
+2010-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/12049
+	* gas/i386/i386.exp: Run relax-1 and relax-2 for all 32bit
+	targets.  Run x86-64-relax-1.
+
+	* gas/i386/x86-64-relax-1.d: New.
+	* gas/i386/x86-64-relax-1.s: Likewise.
+
 2010-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/mips.exp: Simplify enabling of MIPS16 testing.
