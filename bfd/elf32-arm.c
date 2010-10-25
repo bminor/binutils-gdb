@@ -3704,7 +3704,12 @@ find_stub_size_and_template (enum elf32_arm_stub_type stub_type,
   unsigned int size;
 
   template_sequence = stub_definitions[stub_type].template_sequence;
+  if (stub_template)
+    *stub_template = template_sequence;
+
   template_size = stub_definitions[stub_type].template_size;
+  if (stub_template_size)
+    *stub_template_size = template_size;
 
   size = 0;
   for (i = 0; i < template_size; i++)
@@ -3723,15 +3728,9 @@ find_stub_size_and_template (enum elf32_arm_stub_type stub_type,
 
 	default:
 	  BFD_FAIL ();
-	  return FALSE;
+	  return 0;
 	}
     }
-
-  if (stub_template)
-    *stub_template = template_sequence;
-
-  if (stub_template_size)
-    *stub_template_size = template_size;
 
   return size;
 }

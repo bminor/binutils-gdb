@@ -1,5 +1,10 @@
 2010-10-25  Alan Modra  <amodra@gmail.com>
 
+	* elf32-arm.c (find_stub_size_and_template): Avoid uninitialized
+	var warning at -O3.
+
+2010-10-25  Alan Modra  <amodra@gmail.com>
+
 	* opncls.c (bfd_alloc, bfd_zalloc): Don't mark internal.
 	* libbfd-in.h (bfd_alloc, bfd_zalloc): Don't declare here.
 	* libbfd.h: Regenerate
