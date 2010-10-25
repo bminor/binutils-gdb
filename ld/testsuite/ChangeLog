@@ -1,3 +1,7 @@
+2010-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-discard/zero-range.d, ld-discard/zero-range.s: New files.
+
 2010-10-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* ld-elf/group10.d: Expect ".group" for the name of group

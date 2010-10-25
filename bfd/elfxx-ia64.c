@@ -4662,16 +4662,9 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	    continue;
 	}
 
-      /* For relocs against symbols from removed linkonce sections,
-	 or sections discarded by a linker script, we just want the
-	 section contents zeroed.  Avoid any special processing.  */
       if (sym_sec != NULL && elf_discarded_section (sym_sec))
-	{
-	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	  rel->r_info = 0;
-	  rel->r_addend = 0;
-	  continue;
-	}
+	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					 rel, relend, howto, contents);
 
       if (info->relocatable)
 	continue;

@@ -11624,16 +11624,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       h = (struct ppc_link_hash_entry *) h_elf;
 
       if (sec != NULL && elf_discarded_section (sec))
-	{
-	  /* For relocs against symbols from removed linkonce sections,
-	     or sections discarded by a linker script, we just want the
-	     section contents zeroed.  Avoid any special processing.  */
-	  _bfd_clear_contents (ppc64_elf_howto_table[r_type], input_bfd,
-			       contents + rel->r_offset);
-	  rel->r_info = 0;
-	  rel->r_addend = 0;
-	  continue;
-	}
+	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					 rel, relend,
+					 ppc64_elf_howto_table[r_type],
+					 contents);
 
       if (info->relocatable)
 	continue;

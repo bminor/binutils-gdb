@@ -1544,14 +1544,15 @@ _bfd_relocate_contents (reloc_howto_type *howto,
   return flag;
 }
 
-/* Clear a given location using a given howto, by applying a relocation value
-   of zero and discarding any in-place addend.  This is used for fixed-up
+/* Clear a given location using a given howto, by applying a fixed relocation
+   value and discarding any in-place addend.  This is used for fixed-up
    relocations against discarded symbols, to make ignorable debug or unwind
    information more obvious.  */
 
 void
 _bfd_clear_contents (reloc_howto_type *howto,
 		     bfd *input_bfd,
+		     asection *input_section,
 		     bfd_byte *location)
 {
   int size;
@@ -1584,6 +1585,13 @@ _bfd_clear_contents (reloc_howto_type *howto,
 
   /* Zero out the unwanted bits of X.  */
   x &= ~howto->dst_mask;
+
+  /* For a range list, use 1 instead of 0 as placeholder.  0
+     would terminate the list, hiding any later entries.  */
+  if (strcmp (bfd_get_section_name (input_bfd, input_section),
+	      ".debug_ranges") == 0
+      && (howto->dst_mask & 1) != 0)
+    x |= 1;
 
   /* Put the relocated value back in the object file.  */
   switch (size)
@@ -5756,7 +5764,8 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 			 "unused", FALSE, 0, 0, FALSE);
 
 	      p = data + (*parent)->address * bfd_octets_per_byte (input_bfd);
-	      _bfd_clear_contents ((*parent)->howto, input_bfd, p);
+	      _bfd_clear_contents ((*parent)->howto, input_bfd, input_section,
+				   p);
 	      (*parent)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
 	      (*parent)->addend = 0;
 	      (*parent)->howto = &none_howto;

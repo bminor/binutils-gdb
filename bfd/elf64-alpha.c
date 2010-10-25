@@ -4025,16 +4025,10 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
 
       if (sec != NULL && elf_discarded_section (sec))
-	{
-	  /* For relocs against symbols from removed linkonce sections,
-	     or sections discarded by a linker script, we just want the
-	     section contents zeroed.  */
-	  _bfd_clear_contents (elf64_alpha_howto_table + r_type,
-			       input_bfd, contents + rel->r_offset);
-	  rel->r_info = 0;
-	  rel->r_addend = 0;
-	  continue;
-	}
+	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					 rel, relend,
+					 elf64_alpha_howto_table + r_type,
+					 contents);
 
       if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 	rel->r_addend += sec->output_offset;
@@ -4240,15 +4234,8 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
 
       if (sec != NULL && elf_discarded_section (sec))
-	{
-	  /* For relocs against symbols from removed linkonce sections,
-	     or sections discarded by a linker script, we just want the
-	     section contents zeroed.  Avoid any special processing.  */
-	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	  rel->r_info = 0;
-	  rel->r_addend = 0;
-	  continue;
-	}
+	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					 rel, relend, howto, contents);
 
       addend = rel->r_addend;
       value += addend;

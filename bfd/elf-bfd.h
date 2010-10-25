@@ -2355,6 +2355,9 @@ extern asection _bfd_elf_large_com_section;
 #define RELOC_AGAINST_DISCARDED_SECTION(info, input_bfd, input_section,	\
 					rel, relend, howto, contents)	\
   {									\
+    _bfd_clear_contents (howto, input_bfd, input_section,		\
+			 contents + rel->r_offset);			\
+									\
     if (info->relocatable						\
 	&& (input_section->flags & SEC_DEBUGGING))			\
       {									\
@@ -2380,7 +2383,6 @@ extern asection _bfd_elf_large_com_section;
 	  }								\
       }									\
 									\
-    _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);	\
     rel->r_info = 0;							\
     rel->r_addend = 0;							\
     continue;								\

@@ -6817,10 +6817,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  howto = NULL;
 	  if (r_type < R_PPC_max)
 	    howto = ppc_elf_howto_table[r_type];
-	  _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
-	  rel->r_info = 0;
-	  rel->r_addend = 0;
-	  continue;
+	  RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					   rel, relend, howto, contents);
 	}
 
       if (info->relocatable)
