@@ -1,5 +1,12 @@
 2010-10-25  Alan Modra  <amodra@gmail.com>
 
+	* opncls.c (bfd_alloc, bfd_zalloc): Don't mark internal.
+	* libbfd-in.h (bfd_alloc, bfd_zalloc): Don't declare here.
+	* libbfd.h: Regenerate
+	* bfd-in2.h: Regenerate.
+
+2010-10-25  Alan Modra  <amodra@gmail.com>
+
 	* opncls.c (_bfd_id_counter): Rename to bfd_id_counter.
 	(bfd_reserved_id_counter, bfd_use_reserved_id): New vars.
 	(_bfd_new_bfd): Use negative id when bfd_use_reserved_id.
@@ -68,7 +75,7 @@
 	(elf_backend_static_tls_alignment): Redefine for Solaris 2.
 	Undef again for Intel L1OM.
 
-2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com> 
+2010-10-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Apply LD plugin patch series (part 6/6).
 	* aoutx.h (aout_link_check_ar_symbols): Take new "subsbfd" reference
@@ -197,7 +204,7 @@
 	Delete.
 	(elf32_tic6x_rel_relocation_p): Adjusted to match changes in
 	data structures.
- 	* elf32-microblaze.c (microblaze_elf_check_relocs): Use
+	* elf32-microblaze.c (microblaze_elf_check_relocs): Use
 	_bfd_elf_single_rel_hdr.
 	* elf32-ppc.c (ppc_elf_relax_section): Likewise.
 	* elf32-spu.c (spu_elf_relocate_section): Likewise.

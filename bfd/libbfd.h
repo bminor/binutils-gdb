@@ -123,10 +123,6 @@ extern bfd_error_handler_type _bfd_error_handler;
 
 /* These routines allocate and free things on the BFD's objalloc.  */
 
-extern void *bfd_alloc
-  (bfd *, bfd_size_type);
-extern void *bfd_zalloc
-  (bfd *, bfd_size_type);
 extern void *bfd_alloc2
   (bfd *, bfd_size_type, bfd_size_type);
 extern void *bfd_zalloc2

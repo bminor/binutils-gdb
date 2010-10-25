@@ -1001,6 +1001,10 @@ bfd_boolean bfd_make_writable (bfd *abfd);
 
 bfd_boolean bfd_make_readable (bfd *abfd);
 
+void *bfd_alloc (bfd *abfd, bfd_size_type wanted);
+
+void *bfd_zalloc (bfd *abfd, bfd_size_type wanted);
+
 unsigned long bfd_calc_gnu_debuglink_crc32
    (unsigned long crc, const unsigned char *buf, bfd_size_type len);
 

@@ -892,7 +892,7 @@ bfd_make_readable (bfd *abfd)
 }
 
 /*
-INTERNAL_FUNCTION
+FUNCTION
 	bfd_alloc
 
 SYNOPSIS
@@ -960,7 +960,7 @@ bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
 }
 
 /*
-INTERNAL_FUNCTION
+FUNCTION
 	bfd_zalloc
 
 SYNOPSIS
