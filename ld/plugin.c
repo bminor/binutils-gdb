@@ -224,16 +224,18 @@ bfd *
 plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 {
   asection *sec;
-  bfd *abfd = bfd_create (
-		concat (name, IRONLY_SUFFIX, (const char *)NULL),
-		srctemplate);
+  bfd *abfd;
+
+  bfd_use_reserved_id = 1;
+  abfd = bfd_create (concat (name, IRONLY_SUFFIX, (const char *)NULL),
+		     srctemplate);
   bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
   bfd_make_writable (abfd);
   /* Create a minimal set of sections to own the symbols.  */
   sec = bfd_make_section_old_way (abfd, ".text");
   bfd_set_section_flags (abfd, sec,
-	SEC_CODE | SEC_HAS_CONTENTS | SEC_READONLY
-	| SEC_ALLOC | SEC_LOAD | SEC_KEEP);
+			 (SEC_CODE | SEC_HAS_CONTENTS | SEC_READONLY
+			  | SEC_ALLOC | SEC_LOAD | SEC_KEEP));
   sec->output_section = sec;
   sec->output_offset = 0;
   return abfd;

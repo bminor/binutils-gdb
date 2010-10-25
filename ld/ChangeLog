@@ -1,3 +1,8 @@
+2010-10-25  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (plugin_get_ir_dummy_bfd): Set bfd_use_reserved_id.
+	Formatting.
+
 2010-10-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* emulparams/elf32_sparc_sol2.sh (OUTPUT_FORMAT): Set to
