@@ -1,3 +1,12 @@
+2010-10-25  Mark Mitchell  <mark@codesourcery.com>
+
+	* obj.h (struct format_ops): Add adjust_symtab.
+	* config/obj-multi.h (obj_adjust_symtab): Define.
+	* config/obj-aout.c (aout_format_ops): Init new field.
+	* config/obj-coff.c (coff_format_ops): Likewise.
+	* config/obj-ecoff.c (ecoff_format_ops): Likewise.
+	* config/obj-elf.c (elf_format_ops): Likewise.
+
 2010-10-25  Alan Modra  <amodra@gmail.com>
 
 	PR gas/12049

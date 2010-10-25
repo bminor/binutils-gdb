@@ -1943,5 +1943,6 @@ const struct format_ops coff_format_ops =
   0,	/* ecoff_set_ext */
   coff_obj_read_begin_hook,
   coff_obj_symbol_new_hook,
-  coff_obj_symbol_clone_hook
+  coff_obj_symbol_clone_hook,
+  coff_obj_adjust_symtab
 };

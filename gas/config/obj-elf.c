@@ -2446,5 +2446,6 @@ const struct format_ops elf_format_ops =
 #endif
   elf_obj_read_begin_hook,
   elf_obj_symbol_new_hook,
-  0
+  0,
+  elf_adjust_symtab
 };

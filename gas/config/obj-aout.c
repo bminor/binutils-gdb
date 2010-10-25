@@ -309,8 +309,9 @@ const struct format_ops aout_format_ops =
   aout_pop_insert,
   0,	/* ecoff_set_ext.  */
   0,	/* read_begin_hook.  */
-  0, 	/* symbol_new_hook.  */
-  0 	/* symbol_clone_hook.  */
+  0,	/* symbol_new_hook.  */
+  0,	/* symbol_clone_hook.  */
+  0	/* adjust_symtab.  */
 };
 
 const pseudo_typeS aout_pseudo_table[] =

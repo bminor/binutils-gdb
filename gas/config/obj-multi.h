@@ -1,5 +1,5 @@
 /* Multiple object format emulation.
-   Copyright 1995, 1996, 1997, 1999, 2000, 2002, 2004, 2005, 2007, 2009
+   Copyright 1995, 1996, 1997, 1999, 2000, 2002, 2004, 2005, 2007, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -90,6 +90,11 @@
 	(this_format->sec_sym_ok_for_reloc		\
 	 ? (*this_format->sec_sym_ok_for_reloc) (A)	\
 	 : 0)
+
+#define obj_adjust_symtab()				\
+	(this_format->adjust_symtab			\
+	 ? (*this_format->adjust_symtab) ()		\
+	 : (void) 0)
 
 #define S_GET_SIZE					\
 	(*this_format->s_get_size)
