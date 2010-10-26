@@ -1,3 +1,7 @@
+2010-10-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: Updated Japanese transaltion.
+
 2010-10-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* readelf.c (display_tic6x_attribute): Update for attribute
