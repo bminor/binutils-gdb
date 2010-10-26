@@ -1,5 +1,10 @@
 2010-10-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2read.c (psymtab_include_file_name): Replace call to strcmp
+	by call to FILENAME_CMP.
+
+2010-10-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* dictionary.c (dict_hash): Move assignment out of if condition.
 
 2010-10-22  Jie Zhang  <jie@codesourcery.com>

@@ -10087,7 +10087,7 @@ psymtab_include_file_name (const struct line_header *lh, int file_index,
       pst_filename = copied_name;
     }
 
-  file_is_pst = strcmp (include_name_to_compare, pst_filename) == 0;
+  file_is_pst = FILENAME_CMP (include_name_to_compare, pst_filename) == 0;
 
   if (include_name_to_compare != include_name)
     xfree (include_name_to_compare);
