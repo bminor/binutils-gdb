@@ -1,5 +1,8 @@
 2010-10-27  Alan Modra  <amodra@gmail.com>
 
+	* gas/i386/x86-64-relax-1.s: Use .balign. not .align.
+	* gas/i386/x86-64-relax-1.d: Remove label match, match pe output.
+
 	* gas/i386/relax-1.s: Use .p2align, not .align.
 	* gas/i386/relax-2.s: Likewise.
 	* gas/i386/relax-1.d: Remove label match.

@@ -50,11 +50,11 @@
 	je	.LBB0_46
         .zero 131, 0x90
 .LBB0_46:
-	.align	16, 0x90
+	.balign	16, 0x90
 	movq	168(%rsp), %rax
         .zero 3, 0x90
 	je	.LBB1_35
-	.align	16, 0x90
+	.balign	16, 0x90
         .zero 2, 0x90
 	je	.LBB1_35
         .zero 37, 0x90
@@ -63,7 +63,7 @@
 	je	.LBB1_35
         .zero 68, 0x90
 	je	.LBB1_17
-	.align	16, 0x90
+	.balign	16, 0x90
 .LBB1_17:
         .zero 85, 0x90
 .LBB1_35:
