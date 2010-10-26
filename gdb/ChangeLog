@@ -1,3 +1,7 @@
+2010-10-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* dictionary.c (dict_hash): Move assignment out of if condition.
+
 2010-10-22  Jie Zhang  <jie@codesourcery.com>
 
 	* Makefile.in (install): Remove dependency of install-only and

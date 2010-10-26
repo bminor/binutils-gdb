@@ -798,7 +798,6 @@ dict_hash (const char *string0)
 
   const char *string;
   unsigned int hash;
-  int c;
 
   string = string0;
   if (*string == '_')
@@ -827,7 +826,9 @@ dict_hash (const char *string0)
 	case '_':
 	  if (string[1] == '_' && string != string0)
 	    {
-	      if (((c = string[2]) < 'a' || c > 'z') && c != 'O')
+	      int c = string[2];
+
+	      if ((c < 'a' || c > 'z') && c != 'O')
 		return hash;
 	      hash = 0;
 	      string += 2;
