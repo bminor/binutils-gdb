@@ -36,6 +36,11 @@
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
 
+/* On sparc-solaris, /usr/include/sys/feature_tests.h defines
+   _FILE_OFFSET_BITS, which pyconfig.h also defines.  Same work
+   arount technique as above.  */
+#undef _FILE_OFFSET_BITS
+
 #if HAVE_LIBPYTHON2_4
 #include "python2.4/Python.h"
 #include "python2.4/frameobject.h"
@@ -63,10 +68,9 @@ typedef int Py_ssize_t;
 #ifndef WITH_THREAD
 #define PyGILState_Ensure() ((PyGILState_STATE) 0)
 #define PyGILState_Release(ARG) ((void)(ARG))
-#define PyEval_InitThreads() 0
+#define PyEval_InitThreads()
 #define PyThreadState_Swap(ARG) ((void)(ARG))
-#define PyEval_InitThreads() 0
-#define PyEval_ReleaseLock() 0
+#define PyEval_ReleaseLock()
 #endif
 
 /* In order to be able to parse symtab_and_line_to_sal_object function 
