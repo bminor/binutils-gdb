@@ -1,5 +1,9 @@
 2010-10-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* (_FILE_OFFSET_BITS): Fix typo in comment.
+
+2010-10-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* python/python-internal.h (_FILE_OFFSET_BITS): Undefine.
 	(PyEval_InitThreads): Remove duplicate. Define as nothing.
 	(PyEval_ReleaseLock): Define as nothing.

@@ -38,7 +38,7 @@
 
 /* On sparc-solaris, /usr/include/sys/feature_tests.h defines
    _FILE_OFFSET_BITS, which pyconfig.h also defines.  Same work
-   arount technique as above.  */
+   around technique as above.  */
 #undef _FILE_OFFSET_BITS
 
 #if HAVE_LIBPYTHON2_4
