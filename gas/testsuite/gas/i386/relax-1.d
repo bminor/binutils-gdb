@@ -6,7 +6,6 @@
 
 Disassembly of section .text:
 
-0+ <.text>:
 #...
    e:	e9 8d 00 00 00       	jmp    (0x)?a0( .*)?
 #...
