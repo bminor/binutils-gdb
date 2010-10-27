@@ -1,3 +1,7 @@
+2010-10-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* ld-s390/tlsbin.dd: bc 0,0 -> nop 0 and bcr 0,%r0 -> nopr %r0.
+
 2010-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-discard/zero-range.d, ld-discard/zero-range.s: New files.
