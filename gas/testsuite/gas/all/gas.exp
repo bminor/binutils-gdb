@@ -350,8 +350,8 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] && ![istarget "hppa*-
     run_dump_test relax
 }
 
-# powerpc allows a string argument to .byte
-if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000*-*-*"] } {
+# powerpc and s390 allow a string argument to .byte
+if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000*-*-*"] && ![istarget "s390*-*-*"] } {
     run_dump_test byte
 }
 

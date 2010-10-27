@@ -1,3 +1,7 @@
+2010-10-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/all/gas.exp: Don't run byte test on s390.
+
 2010-10-27  Alan Modra  <amodra@gmail.com>
 
 	* gas/i386/x86-64-relax-1.s: Use .balign. not .align.
