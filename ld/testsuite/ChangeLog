@@ -1,3 +1,9 @@
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/flags1.s: Use arm compatible .type syntax.
+	* ld-elf/flags1.d: Remove arm and xscale xfails, add i960, ip2k,
+	moxie, mt.
+
 2010-10-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* ld-s390/tlsbin.dd: bc 0,0 -> nop 0 and bcr 0,%r0 -> nopr %r0.
