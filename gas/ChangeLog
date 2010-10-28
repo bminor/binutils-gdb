@@ -1,3 +1,8 @@
+2010-10-28  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (md_begin): Only add to hash table if cpu and
+	mode mask fit.
+
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-d30v.c (d30v_cons_align): Don't align .eh_frame.
