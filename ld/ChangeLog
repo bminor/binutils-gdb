@@ -1,5 +1,10 @@
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_new_vers_pattern): For
+	--no-undefined-version, don't report dot sym versions added by ld.
+
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.h (ldlang_add_undef): Add cmdline param.
 	* ldlang.c (undef_from_cmdline): New var.
 	(ldlang_add_undef): Add cmdline param.  Set undef_from_cmdline.
