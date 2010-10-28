@@ -1,5 +1,8 @@
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
+	* ld-elf/sec-to-seg.exp (B_test_same_seg): Clear for i960,
+	microblaze, moxie, and mt.
+
 	* ld-elf/flags1.s: Use arm compatible .type syntax.
 	* ld-elf/flags1.d: Remove arm and xscale xfails, add i960, ip2k,
 	moxie, mt.
