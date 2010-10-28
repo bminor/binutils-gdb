@@ -1,3 +1,8 @@
+2010-10-28  Matthias Klose  <doko@ubuntu.com>
+
+	* ld.texinfo: Add directory section for info document.
+	* ldint.texinfo: Likewise.
+
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_new_vers_pattern): For

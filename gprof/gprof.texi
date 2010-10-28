@@ -10,15 +10,14 @@
 @include bfdver.texi
 @c man end
 
-@ifinfo
+@ifnottex
 @c This is a dir.info fragment to support semi-automated addition of
 @c manuals to an info tree.  zoo@cygnus.com is developing this facility.
-@format
-START-INFO-DIR-ENTRY
+@dircategory Software development
+@direntry
 * gprof: (gprof).                Profiling your program's execution
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
+@end ifnottex
 
 @copying
 This file documents the gprof profiler of the GNU system.

@@ -87,14 +87,13 @@
 @c might as well show 'em anyways.
 @end ifinfo
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
+@ifnottex
+@dircategory Software development
+@direntry
 * As: (as).                     The GNU assembler.
 * Gas: (as).                    The GNU assembler.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
+@end ifnottex
 
 @finalout
 @syncodeindex ky cp

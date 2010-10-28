@@ -39,13 +39,12 @@
 @end ifset
 @c man end
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
+@ifnottex
+@dircategory Software development
+@direntry
 * Ld: (ld).                       The GNU linker.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
+@end ifnottex
 
 @copying
 This file documents the @sc{gnu} linker LD

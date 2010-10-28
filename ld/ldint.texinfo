@@ -4,13 +4,12 @@
 @c 2003, 2005, 2006, 2007
 @c Free Software Foundation, Inc.
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
+@ifnottex
+@dircategory Software development
+@direntry
 * Ld-Internals: (ldint).	The GNU linker internals.
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
+@end ifnottex
 
 @copying
 This file documents the internals of the GNU linker ld.

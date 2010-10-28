@@ -1,3 +1,7 @@
+2010-10-28  Matthias Klose  <doko@ubuntu.com>
+
+	* bfd.texinfo: Add directory section for info document.
+
 2010-05-07  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.in: Regenerate with automake 1.11.1.
