@@ -1307,7 +1307,7 @@ parse_args (unsigned argc, char **argv)
 	  config.dynamic_link = FALSE;
 	  break;
 	case 'u':
-	  ldlang_add_undef (optarg);
+	  ldlang_add_undef (optarg, TRUE);
 	  break;
 	case OPTION_UNIQUE:
 	  if (optarg != NULL)

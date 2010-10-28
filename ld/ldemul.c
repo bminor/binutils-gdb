@@ -219,7 +219,7 @@ after_parse_default (void)
 	  is_vma = *send == '\0';
 	}
       if (!is_vma)
-	ldlang_add_undef (entry_symbol.name);
+	ldlang_add_undef (entry_symbol.name, entry_from_cmdline);
     }
 }
 

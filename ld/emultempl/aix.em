@@ -1193,7 +1193,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
 	    {
 	      struct export_symbol_list *n;
 
-	      ldlang_add_undef (symname);
+	      ldlang_add_undef (symname, TRUE);
 	      n = ((struct export_symbol_list *)
 		   xmalloc (sizeof (struct export_symbol_list)));
 	      n->next = export_symbols;

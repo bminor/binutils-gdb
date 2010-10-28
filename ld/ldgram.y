@@ -287,11 +287,11 @@ extern_name_list:
 
 extern_name_list_body:
 	  NAME
-			{ ldlang_add_undef ($1); }
+			{ ldlang_add_undef ($1, FALSE); }
 	| extern_name_list_body NAME
-			{ ldlang_add_undef ($2); }
+			{ ldlang_add_undef ($2, FALSE); }
 	| extern_name_list_body ',' NAME
-			{ ldlang_add_undef ($3); }
+			{ ldlang_add_undef ($3, FALSE); }
 	;
 
 script_file:

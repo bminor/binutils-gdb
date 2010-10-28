@@ -1,3 +1,15 @@
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (ldlang_add_undef): Add cmdline param.
+	* ldlang.c (undef_from_cmdline): New var.
+	(ldlang_add_undef): Add cmdline param.  Set undef_from_cmdline.
+	(lang_end): Really require -e or -u from command line on
+	relocatable --gc-sections.
+	* ldemul.c (after_parse_default): Adjust ldlang_add_undef call.
+	* ldgram.y (extern_name_list_body): Likewise.
+	* lexsup.c (parse_args): Likewise.
+	* emultempl/aix.em (gld${EMULATION_NAME}_read_file): Likewise.
+
 2010-10-25  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c (plugin_get_ir_dummy_bfd): Set bfd_use_reserved_id.

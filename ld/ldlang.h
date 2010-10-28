@@ -568,7 +568,7 @@ extern lang_output_section_statement_type *lang_output_section_statement_lookup
 extern lang_output_section_statement_type *next_matching_output_section_statement
   (lang_output_section_statement_type *, int);
 extern void ldlang_add_undef
-  (const char *const);
+  (const char *const, bfd_boolean);
 extern void lang_add_output_format
   (const char *, const char *, const char *, int);
 extern void lang_list_init
