@@ -43,9 +43,9 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget mips*-*-irix5*] \
      && ![istarget mips*-*-linux*] \
-     && ![istarget powerpc-*-elf*] \
-     && ![istarget powerpc-*-linux*] \
-     && ![istarget powerpc-*-sysv4*] \
+     && ![istarget powerpc*-*-elf*] \
+     && ![istarget powerpc*-*-linux*] \
+     && ![istarget powerpc*-*-sysv4*] \
      && ![istarget sparc*-*-elf] \
      && ![istarget sparc*-*-solaris2*] \
      && ![istarget sparc*-*-sunos4*] \
@@ -226,6 +226,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	setup_xfail "*-*-sunos4*"
 	setup_xfail "ia64-*-linux*"
 	setup_xfail "alpha*-*-linux*"
+	setup_xfail "powerpc64*-*-*"
 	if { ![istarget hppa*64*-*-linux*] } {
 	    setup_xfail "hppa*-*-linux*"
 	}
@@ -245,7 +246,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	# the load address is not zero (which is the default).
 	setup_xfail "*-*-sunos4*"
 	setup_xfail "*-*-linux*libc1"
-	setup_xfail "powerpc-*-linux*"
+	setup_xfail "powerpc*-*-linux*"
 	setup_xfail "ia64-*-linux*"
 	setup_xfail "alpha*-*-linux*"
 	setup_xfail "mips*-*-linux*"
@@ -301,6 +302,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    setup_xfail "*-*-sunos4*"
 	    setup_xfail "ia64-*-linux*"
 	    setup_xfail "alpha*-*-linux*"
+	    setup_xfail "powerpc64*-*-*"
 	    if { ![istarget hppa*64*-*-linux*] } {
 		setup_xfail "hppa*-*-linux*"
 	    }

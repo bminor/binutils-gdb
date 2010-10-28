@@ -41,9 +41,9 @@ if {    ![istarget alpha*-*-linux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget mips*-*-irix5*] \
      && ![istarget mips*-*-linux*] \
-     && ![istarget powerpc-*-elf*] \
-     && ![istarget powerpc-*-linux*] \
-     && ![istarget powerpc-*-sysv4*] \
+     && ![istarget powerpc*-*-elf*] \
+     && ![istarget powerpc*-*-linux*] \
+     && ![istarget powerpc*-*-sysv4*] \
      && ![istarget sh\[34\]*-*-linux*] \
      && ![istarget sparc*-*-elf] \
      && ![istarget sparc*-*-solaris2*] \
