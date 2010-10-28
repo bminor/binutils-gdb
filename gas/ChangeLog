@@ -1,3 +1,7 @@
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-d30v.c (d30v_cons_align): Don't align .eh_frame.
+
 2010-10-26  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-coff.c (coff_format_ops): Fix typo.
