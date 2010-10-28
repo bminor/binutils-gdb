@@ -547,7 +547,6 @@ check_for_scripts_dir (char *dir)
 
    SCRIPTDIR (passed from Makefile)
 	     (adjusted according to the current location of the binary)
-   SCRIPTDIR (passed from Makefile)
    the dir where this program is (for using it from the build tree).  */
 
 static char *
@@ -570,10 +569,6 @@ find_scripts_dir (void)
 	return dir;
       free (dir);
     }
-
-  if (check_for_scripts_dir (SCRIPTDIR))
-    /* We've been installed normally.  */
-    return SCRIPTDIR;
 
   /* Look for "ldscripts" in the dir where our binary is.  */
   dir = make_relative_prefix (program_name, ".", ".");

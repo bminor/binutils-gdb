@@ -1,3 +1,7 @@
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
+	* ldfile.c (find_scripts_dir): Don't look in absolute SCRIPTDIR.
+
 2010-10-28  Matthias Klose  <doko@ubuntu.com>
 
 	* ld.texinfo: Add directory section for info document.
