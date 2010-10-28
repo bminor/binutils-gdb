@@ -9286,8 +9286,10 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_68K_32.  */
     case EM_860:
       return reloc_type == 1; /* R_860_32.  */
+    case EM_960:
+      return reloc_type == 2; /* R_960_32.  */
     case EM_ALPHA:
-      return reloc_type == 1; /* XXX Is this right ?  */
+      return reloc_type == 1; /* R_ALPHA_REFLONG.  */
     case EM_ARC:
       return reloc_type == 1; /* R_ARC_32.  */
     case EM_ARM:
@@ -9339,6 +9341,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_MCORE_ADDR32.  */
     case EM_CYGNUS_MEP:
       return reloc_type == 4; /* R_MEP_32.  */
+    case EM_MICROBLAZE:
+      return reloc_type == 1; /* R_MICROBLAZE_32.  */
     case EM_MIPS:
       return reloc_type == 2; /* R_MIPS_32.  */
     case EM_MMIX:
@@ -9432,6 +9436,8 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 10; /* R_ALPHA_SREL32.  */
     case EM_ARM:
       return reloc_type == 3;  /* R_ARM_REL32 */
+    case EM_MICROBLAZE:
+      return reloc_type == 2;  /* R_MICROBLAZE_32_PCREL.  */
     case EM_PARISC:
       return reloc_type == 9;  /* R_PARISC_PCREL32.  */
     case EM_PPC:

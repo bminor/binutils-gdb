@@ -1,3 +1,8 @@
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (is_32bit_abs_reloc): Support i960 and microblaze.
+	(is_32bit_pcrel_reloc): Support microblaze.
+
 2010-10-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese transaltion.
