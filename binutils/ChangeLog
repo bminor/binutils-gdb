@@ -1,3 +1,9 @@
+2010-10-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12058
+	* ar.c (usage): Remove spurious 's' from list of accepted command
+	letters.
+
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (is_32bit_abs_reloc): Support i960 and microblaze.

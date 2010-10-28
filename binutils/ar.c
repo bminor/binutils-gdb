@@ -230,9 +230,9 @@ usage (int help)
       /* xgettext:c-format */
       const char * command_line =
 #if BFD_SUPPORTS_PLUGINS
-	_("Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
+	_("Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrtx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
 #else
-	_("Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
+	_("Usage: %s [emulation options] [-]{dmpqrtx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
 #endif
       fprintf (s, command_line, program_name);
 
