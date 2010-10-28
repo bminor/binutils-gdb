@@ -2734,7 +2734,7 @@ trace_save (const char *filename, int target_does_save)
       for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
 	fprintf (fp, "tp A%x:%s:%s\n",
 		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
-      for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
+      for (a = 0; VEC_iterate (char_ptr, utp->step_actions, a, act); ++a)
 	fprintf (fp, "tp S%x:%s:%s\n",
 		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
       if (utp->at_string)

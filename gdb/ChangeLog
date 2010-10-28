@@ -1,3 +1,8 @@
+2010-10-28  Hui Zhu  <teawater@gmail.com>
+
+	* tracepoint.c (trace_save): Change utp->actions to
+	utp->step_actions.
+
 2010-10-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* (_FILE_OFFSET_BITS): Fix typo in comment.
