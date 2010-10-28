@@ -1,3 +1,7 @@
+2010-10-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Fix formatting of "ld".
+
 2010-10-28  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.txt: cfxr, cfdr and cfer z900 -> g5.
