@@ -1,3 +1,9 @@
+2010-10-28  Thomas Schwinge  <thomas@schwinge.name>
+
+	* gas/iq2000/load-hazards.exp: Sort all filename globs.
+	* gas/iq2000/yield.exp: Likewise.
+	* gas/mt/errors.exp: Likewise.
+
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
 	* gas/elf/elf.exp (groupautob): Don't run on xtensa.

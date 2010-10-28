@@ -1,3 +1,7 @@
+2010-10-28  Thomas Schwinge  <thomas@schwinge.name>
+
+	* ld-scripts/script.exp: Sort all filename globs.
+
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/plugin.exp (libs): Remove $LIBS.
