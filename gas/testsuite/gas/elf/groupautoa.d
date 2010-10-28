@@ -1,5 +1,5 @@
 #readelf: -SW
-#name: automatic section group
+#name: automatic section group a
 #source: groupauto.s
 
 #...

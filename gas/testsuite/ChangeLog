@@ -1,3 +1,9 @@
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
+	* gas/elf/elf.exp (groupautob): Don't run on xtensa.
+	* gas/elf/groupautoa.d: Change test name.
+	* gas/elf/groupautob.d: Change test name.
+
 2010-10-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/all/gas.exp: Don't run byte test on s390.
