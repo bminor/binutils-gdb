@@ -55,7 +55,7 @@ verbose "Full plugin path $plugin_path" 2
 
 set testobjfiles "$HOSTING_CRT0 tmpdir/main.o tmpdir/func.o tmpdir/text.o"
 set testobjfiles_notext "$HOSTING_CRT0 tmpdir/main.o tmpdir/func.o"
-set libs "$LIBS $HOSTING_LIBS"
+set libs "$HOSTING_LIBS"
 
 set regclm "-plugin-opt registerclaimfile"
 set regas "-plugin-opt registerallsymbolsread"

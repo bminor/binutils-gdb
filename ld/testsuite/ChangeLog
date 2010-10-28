@@ -1,5 +1,9 @@
 2010-10-28  Alan Modra  <amodra@gmail.com>
 
+	* ld-plugin/plugin.exp (libs): Remove $LIBS.
+
+2010-10-28  Alan Modra  <amodra@gmail.com>
+
 	* ld-elf/sec-to-seg.exp (B_test_same_seg): Clear for i960,
 	microblaze, moxie, and mt.
 
