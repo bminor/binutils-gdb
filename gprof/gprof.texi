@@ -786,9 +786,9 @@ number, and then exit.
 @node Deprecated Options
 @section Deprecated Options
 
-@table @code
-
 These options have been replaced with newer versions that use symspecs.
+
+@table @code
 
 @item -e @var{function_name}
 The @samp{-e @var{function}} option tells @code{gprof} to not print
