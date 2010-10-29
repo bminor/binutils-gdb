@@ -1,3 +1,9 @@
+2010-10-29  Pawel Sikora  <pluto@pld-linux.org>
+
+	PR binutils/12075
+	* compress.c (bfd_compress_section_contents): Use uLong on
+	compressed_size.
+
 2010-10-29  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_obj_attrs_arg_type): Check

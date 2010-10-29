@@ -94,7 +94,7 @@ bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;
 #else
-  bfd_size_type compressed_size;
+  uLong compressed_size;
   bfd_byte *compressed_buffer;
 
   compressed_size = compressBound (uncompressed_size) + 12;
