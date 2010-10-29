@@ -1,3 +1,9 @@
+2010-10-29  Nick Clifton  <nickc@redhat.com>
+
+	PR bintils/6962
+	* coffcode.h (handle_COMDAT): Only check the base type when
+	looking for a section symbol.
+
 2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 	    Cary Coutant  <ccoutant@google.com>
 

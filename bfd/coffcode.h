@@ -956,7 +956,7 @@ handle_COMDAT (bfd * abfd,
 
 		if (! ((isym.n_sclass == C_STAT
 			|| isym.n_sclass == C_EXT)
-		       && isym.n_type == T_NULL
+		       && BTYPE (isym.n_type) == T_NULL
 		       && isym.n_value == 0))
 		  abort ();
 
