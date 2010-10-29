@@ -15,10 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This tests that gdb can read compressed sections.  The contents
-   are a basic assembly file, but the .debug_abbrev section has been
-   comrpessed using zlib.  */
-
 /* Dummy function to provide debug information for.  */
 
 	.file "dwarf2-1.c"
@@ -144,76 +140,60 @@ func_cu1:
 
 .Lline1_end:
 
-/* Abbrev table -- compressed */
-	.section .zdebug_abbrev
+/* Abbrev table */
+	.section .debug_abbrev
 .Labbrev1_begin:
-	.ascii		"ZLIB"
-	.4byte		0
-	.2byte		0
-	.byte		0
-	.byte		51
-	.byte		0x78
-	.byte		0x5e
-	.byte		0x63
-	.byte		0x14
-	.byte		0x64
-	.byte		0x14
-	.byte		0x60
-	.byte		0x13
-	.byte		0x62
-	.byte		0x14
-	.byte		0x64
-	.byte		0x64
-	.byte		0xe6
-	.byte		0x50
-	.byte		0xe5
-	.byte		0x10
-	.byte		0xe6
-	.byte		0x66
-	.byte		0x60
-	.byte		0x60
-	.byte		0xd2
-	.byte		0x63
-	.byte		0xb0
-	.byte		0xe7
-	.byte		0xb1
-	.byte		0xe2
-	.byte		0xb6
-	.byte		0xe6
-	.byte		0x66
-	.byte		0xe6
-	.byte		0xf0
-	.byte		0x14
-	.byte		0x16
-	.byte		0x64
-	.byte		0x14
-	.byte		0x62
-	.byte		0x74
-	.byte		0xe0
-	.byte		0x02
-	.byte		0x00
-	.byte		0x25
-	.byte		0x78
-	.byte		0x02
-	.byte		0x81
-	.byte		0x78
-	.byte		0x9c
-	.byte		0x63
-	.byte		0x60
-	.byte		0x60
-	.byte		0x56
-	.byte		0x61
-	.byte		0x60
-	.byte		0xe6
-	.byte		0xe0
-	.byte		0xe6
-	.byte		0xb6
-	.byte		0xe3
-	.byte		0x66
-	.byte		0x00
-	.byte		0x02
-	.byte		0x00
-	.byte		0x04
-	.byte		0x9c
-	.byte		0x00
-	.byte		0x92
+	.uleb128	1			/* Abbrev code */
+	.uleb128	0x11			/* DW_TAG_compile_unit */
+	.byte		1			/* has_children */
+	.uleb128	0x10			/* DW_AT_stmt_list */
+	.uleb128	0x6			/* DW_FORM_data4 */
+	.uleb128	0x12			/* DW_AT_high_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x11			/* DW_AT_low_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x25			/* DW_AT_producer */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x13			/* DW_AT_language */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.uleb128	2			/* Abbrev code */
+	.uleb128	0x2e			/* DW_TAG_subprogram */
+	.byte		0			/* has_children */
+	.uleb128	0x3f			/* DW_AT_external */
+	.uleb128	0xc			/* DW_FORM_flag */
+	.uleb128	0x3a			/* DW_AT_decl_file */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.uleb128	0x3b			/* DW_AT_decl_line */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x49			/* DW_AT_type */
+	.uleb128	0x13			/* DW_FORM_ref4 */
+	.uleb128	0x11			/* DW_AT_low_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x12			/* DW_AT_high_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
+	.uleb128	0x40			/* DW_AT_frame_base */
+	.uleb128	0xa			/* DW_FORM_block1 */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.uleb128	3			/* Abbrev code */
+	.uleb128	0x24			/* DW_TAG_base_type */
+	.byte		0			/* has_children */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0xb			/* DW_AT_byte_size */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.uleb128	0x3e			/* DW_AT_encoding */
+	.uleb128	0xb			/* DW_FORM_data1 */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */

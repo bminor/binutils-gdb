@@ -1,3 +1,16 @@
+2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/dwarf2-1.s: Replace .zdebug_abbrev section with
+	.debug_abbrev section.
+	* elf/dwarf2-2.3: Likewise.
+
+	* elf/dwarf2-1.d: Pass --compress-debug-sections to assembler.
+	Updated.
+	* elf/dwarf2-2.d: Likewise.
+
+	* gas/i386/i386.exp: Remove xfail on dw2-compress-2 and
+	x86-64-dw2-compress-2.
+
 2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

@@ -5721,15 +5721,13 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
   long reloc_size;
   arelent **reloc_vector;
   long reloc_count;
-  bfd_size_type sz;
 
   reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   if (reloc_size < 0)
     return NULL;
 
   /* Read in the section.  */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (!bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
+  if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
     return NULL;
 
   if (reloc_size == 0)

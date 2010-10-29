@@ -275,6 +275,60 @@ struct attr_abbrev
   enum dwarf_form form;
 };
 
+/* Map of uncompressed DWARF debug section name to compressed one.  It
+   is terminated by NULL uncompressed_name.  */
+
+struct dwarf_debug_section dwarf_debug_sections[] =
+{
+  { ".debug_abbrev",		".zdebug_abbrev" },
+  { ".debug_aranges",		".zdebug_aranges" },
+  { ".debug_frame",		".zdebug_frame" },
+  { ".debug_info",		".zdebug_info" },
+  { ".debug_line",		".zdebug_line" },
+  { ".debug_loc",		".zdebug_loc" },
+  { ".debug_macinfo",		".zdebug_macinfo" },
+  { ".debug_pubnames",		".zdebug_pubnames" },
+  { ".debug_pubtypes",		".zdebug_pubtypes" },
+  { ".debug_ranges",		".zdebug_ranges" },
+  { ".debug_static_func",	".zdebug_static_func" },
+  { ".debug_static_vars",	".zdebug_static_vars" },
+  { ".debug_str",		".zdebug_str", },
+  { ".debug_types",		".zdebug_types" },
+  /* GNU DWARF 1 extensions */
+  { ".debug_sfnames",		".zdebug_sfnames" },
+  { ".debug_srcinfo",		".zebug_srcinfo" },
+  /* SGI/MIPS DWARF 2 extensions */
+  { ".debug_funcnames",		".zdebug_funcnames" },
+  { ".debug_typenames",		".zdebug_typenames" },
+  { ".debug_varnames",		".zdebug_varnames" },
+  { ".debug_weaknames",		".zdebug_weaknames" },
+  { NULL,			NULL },
+};
+
+enum dwarf_debug_section_enum
+{
+  debug_abbrev = 0,
+  debug_aranges,
+  debug_frame,
+  debug_info,
+  debug_line,
+  debug_loc,
+  debug_macinfo,
+  debug_pubnames,
+  debug_pubtypes,
+  debug_ranges,
+  debug_static_func,
+  debug_static_vars,
+  debug_str,
+  debug_types,
+  debug_sfnames,
+  debug_srcinfo,
+  debug_funcnames,
+  debug_typenames,
+  debug_varnames,
+  debug_weaknames
+};
+
 #ifndef ABBREV_HASH_SIZE
 #define ABBREV_HASH_SIZE 121
 #endif
@@ -413,24 +467,23 @@ lookup_info_hash_table (struct info_hash_table *hash_table, const char *key)
 
 static bfd_boolean
 read_section (bfd *           abfd,
-	      const char *    section_name,
-	      const char *    compressed_section_name,
+	      enum dwarf_debug_section_enum sec,
 	      asymbol **      syms,
 	      bfd_uint64_t    offset,
 	      bfd_byte **     section_buffer,
 	      bfd_size_type * section_size)
 {
   asection *msec;
-  bfd_boolean section_is_compressed = FALSE;
+  const char *section_name = dwarf_debug_sections[sec].uncompressed_name;
 
   /* read_section is a noop if the section has already been read.  */
   if (!*section_buffer)
     {
       msec = bfd_get_section_by_name (abfd, section_name);
-      if (! msec && compressed_section_name)
+      if (! msec)
 	{
-	  msec = bfd_get_section_by_name (abfd, compressed_section_name);
-	  section_is_compressed = TRUE;
+	  section_name = dwarf_debug_sections[sec].compressed_name;
+	  msec = bfd_get_section_by_name (abfd, section_name);
 	}
       if (! msec)
 	{
@@ -455,16 +508,6 @@ read_section (bfd *           abfd,
 	  if (! bfd_get_section_contents (abfd, msec, *section_buffer,
 					  0, *section_size))
 	    return FALSE;
-	}
-
-      if (section_is_compressed)
-	{
-	  if (! bfd_uncompress_section_contents (section_buffer, section_size))
-	    {
-	      (*_bfd_error_handler) (_("Dwarf Error: unable to decompress %s section."), compressed_section_name);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
 	}
     }
 
@@ -561,8 +604,7 @@ read_indirect_string (struct comp_unit * unit,
 
   *bytes_read_ptr = unit->offset_size;
 
-  if (! read_section (unit->abfd, ".debug_str", ".zdebug_str",
-		      stash->syms, offset,
+  if (! read_section (unit->abfd, debug_str, stash->syms, offset,
 		      &stash->dwarf_str_buffer, &stash->dwarf_str_size))
     return NULL;
 
@@ -644,8 +686,7 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
   unsigned int abbrev_form, hash_number;
   bfd_size_type amt;
 
-  if (! read_section (abfd, ".debug_abbrev", ".zdebug_abbrev",
-		      stash->syms, offset,
+  if (! read_section (abfd, debug_abbrev, stash->syms, offset,
 		      &stash->dwarf_abbrev_buffer, &stash->dwarf_abbrev_size))
     return NULL;
 
@@ -1353,8 +1394,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   unsigned char op_code, extended_op, adj_opcode;
   bfd_size_type amt;
 
-  if (! read_section (abfd, ".debug_line", ".zdebug_line",
-		      stash->syms, unit->line_offset,
+  if (! read_section (abfd, debug_line, stash->syms, unit->line_offset,
 		      &stash->dwarf_line_buffer, &stash->dwarf_line_size))
     return NULL;
 
@@ -1769,8 +1809,7 @@ static bfd_boolean
 read_debug_ranges (struct comp_unit *unit)
 {
   struct dwarf2_debug *stash = unit->stash;
-  return read_section (unit->abfd, ".debug_ranges", ".zdebug_ranges",
-		       stash->syms, 0,
+  return read_section (unit->abfd, debug_ranges, stash->syms, 0,
 		       &stash->dwarf_ranges_buffer, &stash->dwarf_ranges_size);
 }
 
@@ -3192,86 +3231,37 @@ find_line (bfd *abfd,
 	{
 	  /* Case 1: only one info section.  */
 	  total_size = msec->size;
-	  if (! read_section (debug_bfd, ".debug_info", ".zdebug_info",
-			      symbols, 0,
+	  if (! read_section (debug_bfd, debug_info, symbols, 0,
 			      &stash->info_ptr_memory, &total_size))
 	    goto done;
 	}
       else
 	{
-	  int all_uncompressed = 1;
+	  /* Case 2: multiple sections.  */
 	  for (total_size = 0; msec; msec = find_debug_info (debug_bfd, msec))
+	    total_size += msec->size;
+
+	  stash->info_ptr_memory = (bfd_byte *) bfd_malloc (total_size);
+	  if (stash->info_ptr_memory == NULL)
+	    goto done;
+
+	  total_size = 0;
+	  for (msec = find_debug_info (debug_bfd, NULL);
+	       msec;
+	       msec = find_debug_info (debug_bfd, msec))
 	    {
-	      total_size += msec->size;
-	      if (strcmp (msec->name, DWARF2_COMPRESSED_DEBUG_INFO) == 0)
-		all_uncompressed = 0;
-	    }
-	  if (all_uncompressed)
-	    {
-	      /* Case 2: multiple sections, but none is compressed.  */
-	      stash->info_ptr_memory = (bfd_byte *) bfd_malloc (total_size);
-	      if (stash->info_ptr_memory == NULL)
+	      bfd_size_type size;
+
+	      size = msec->size;
+	      if (size == 0)
+		continue;
+
+	      if (!(bfd_simple_get_relocated_section_contents
+		    (debug_bfd, msec, stash->info_ptr_memory + total_size,
+		     symbols)))
 		goto done;
 
-	      total_size = 0;
-	      for (msec = find_debug_info (debug_bfd, NULL);
-		   msec;
-		   msec = find_debug_info (debug_bfd, msec))
-		{
-		  bfd_size_type size;
-
-		  size = msec->size;
-		  if (size == 0)
-		    continue;
-
-		  if (!(bfd_simple_get_relocated_section_contents
-			(debug_bfd, msec, stash->info_ptr_memory + total_size,
-			 symbols)))
-		    goto done;
-
-		  total_size += size;
-		}
-	    }
-	  else
-	    {
-	      /* Case 3: multiple sections, some or all compressed.  */
-	      stash->info_ptr_memory = NULL;
-	      total_size = 0;
-	      for (msec = find_debug_info (debug_bfd, NULL);
-		   msec;
-		   msec = find_debug_info (debug_bfd, msec))
-		{
-		  bfd_size_type size = msec->size;
-		  bfd_byte *buffer, *tmp;
-
-		  if (size == 0)
-		    continue;
-
-		  buffer = (bfd_simple_get_relocated_section_contents
-			    (debug_bfd, msec, NULL, symbols));
-		  if (! buffer)
-		    goto done;
-
-		  if (strcmp (msec->name, DWARF2_COMPRESSED_DEBUG_INFO) == 0)
-		    {
-		      if (! bfd_uncompress_section_contents (&buffer, &size))
-			{
-			  free (buffer);
-			  goto done;
-			}
-		    }
-		  tmp = (bfd_byte *) bfd_realloc (stash->info_ptr_memory,
-						  total_size + size);
-		  if (tmp == NULL)
-		    {
-		      free (buffer);
-		      goto done;
-		    }
-		  stash->info_ptr_memory = tmp;
-		  memcpy (stash->info_ptr_memory + total_size, buffer, size);
-		  free (buffer);
-		  total_size += size;
-		}
+	      total_size += size;
 	    }
 	}
 

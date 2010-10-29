@@ -1,3 +1,67 @@
+2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+	    Cary Coutant  <ccoutant@google.com>
+
+	* archive.c (bfd_openr_next_archived_file): Copy BFD_COMPRESS
+	and BFD_DECOMPRESS.
+
+	* bfd.c (BFD_COMPRESS): New.
+	(BFD_DECOMPRESS): Likewise.
+	(BFD_FLAGS_SAVED): Likewise.
+	(bfd_preserve_save): Replace BFD_IN_MEMORY with BFD_FLAGS_SAVED.
+
+	* compress.c (bfd_uncompress_section_contents): Removed.
+	(get_uncompressed_size): New.
+	(decompress_contents): Likewise.
+	(bfd_compress_section_contents): Likewise.
+	(bfd_get_full_section_contents): Likewise.
+	(bfd_is_section_compressed): Likewise.
+	(bfd_init_section_decompress_status): Likewise.
+	(bfd_init_section_compress_status): Likewise.
+
+	* dwarf2.c (dwarf_debug_sections): New.
+	(dwarf_debug_section_enum): Likewise.
+	(read_section): Remove section_name and compressed_section_name.
+	Add dwarf_debug_section_enum.  Try compressed debug section.
+	(read_indirect_string): Updated.
+	(read_abbrevs): Likewise.
+	(decode_line_info): Likewise.
+	(read_debug_ranges): Likewise.
+	(find_line): Updated.
+
+	* ecoff.c (bfd_debug_section): Add compress_status and
+	compressed_size.
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Call
+	bfd_is_section_compressed to check if a DWARF debug section is
+	compressed.  Call bfd_init_section_compress_status or
+	bfd_init_section_decompress_status if needed.
+
+	* elflink.c (elf_link_input_bfd): Replace bfd_get_section_contents
+	with bfd_get_full_section_contents.
+	* merge.c (_bfd_add_merge_section): Likewise.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Likewise.
+	* simple.c (bfd_simple_get_relocated_section_contents): Likewise.
+
+	* elfxx-target.h (TARGET_BIG_SYM): Allow BFD_COMPRESS and
+	BFD_DECOMPRESS.
+	(TARGET_LITTLE_SYM): Likewise.
+
+	* libbfd-in.h (dwarf_debug_section): New.
+	(dwarf_debug_sections): Likewise.
+
+	* libbfd.c (_bfd_generic_get_section_contents): Issue an error
+	when getting contents on compressed/decompressed section.
+
+	* section.c (COMPRESS_SECTION_NONE): New.
+	(COMPRESS_SECTION_DONE): Likewise.
+	(DECOMPRESS_SECTION_SIZED): Likewise.
+	(BFD_FAKE_SECTION): Add compress_status and compressed_size.
+	(bfd_malloc_and_get_section): Replace bfd_get_section_contents
+	with bfd_get_full_section_contents.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
 2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

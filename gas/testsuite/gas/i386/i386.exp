@@ -219,7 +219,6 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "localpic"
 	run_dump_test "debug1"
 
-	setup_xfail "*-*-*"
 	run_dump_test "dw2-compress-2"
     }
 
@@ -409,7 +408,6 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "x86-64-localpic"
 	run_dump_test "debug1"
 
-	setup_xfail "*-*-*"
 	run_dump_test "x86-64-dw2-compress-2"
     }
 

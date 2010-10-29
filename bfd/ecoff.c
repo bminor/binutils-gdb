@@ -55,14 +55,14 @@ static asection bfd_debug_section =
 {
   /* name,      id,  index, next, prev, flags, user_set_vma,       */
      "*DEBUG*", 0,   0,     NULL, NULL, 0,     0,
-  /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
+  /* linker_mark, linker_has_input, gc_mark, compress_status,      */
      0,           0,                1,       0,
-  /* sec_info_type, use_rela_p,                                    */
-     0,             0,
+  /* segment_mark, sec_info_type, use_rela_p,                      */
+     0,            0,             0,
   /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,   */
      0,        0,        0,        0,        0,        0,
-  /* vma, lma, size, rawsize, relax, relax_count,                  */
-     0,   0,   0,    0,       0,     0,
+  /* vma, lma, size, rawsize, compressed_size, relax, relax_count, */
+     0,   0,   0,    0,       0,               0,     0,
   /* output_offset, output_section, alignment_power,               */
      0,             NULL,           0,
   /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */

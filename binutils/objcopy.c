@@ -194,6 +194,14 @@ static const char * gnu_debuglink_filename = NULL;
 /* Whether to convert debugging information.  */
 static bfd_boolean convert_debugging = FALSE;
 
+/* Whether to compress/decompress DWARF debug sections.  */
+static enum
+{
+  nothing,
+  compress,
+  decompress
+} do_debug_sections = nothing;
+
 /* Whether to change the leading character in symbol names.  */
 static bfd_boolean change_leading_char = FALSE;
 
@@ -259,7 +267,9 @@ enum command_line_switch
     OPTION_CHANGE_SECTION_LMA,
     OPTION_CHANGE_SECTION_VMA,
     OPTION_CHANGE_WARNINGS,
+    OPTION_COMPRESS_DEBUG_SECTIONS,
     OPTION_DEBUGGING,
+    OPTION_DECOMPRESS_DEBUG_SECTIONS,
     OPTION_GAP_FILL,
     OPTION_NO_CHANGE_WARNINGS,
     OPTION_PAD_TO,
@@ -357,7 +367,9 @@ static struct option copy_options[] =
   {"change-section-vma", required_argument, 0, OPTION_CHANGE_SECTION_VMA},
   {"change-start", required_argument, 0, OPTION_CHANGE_START},
   {"change-warnings", no_argument, 0, OPTION_CHANGE_WARNINGS},
+  {"compress-debug-sections", no_argument, 0, OPTION_COMPRESS_DEBUG_SECTIONS},
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
+  {"decompress-debug-sections", no_argument, 0, OPTION_DECOMPRESS_DEBUG_SECTIONS},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
   {"extract-symbol", no_argument, 0, OPTION_EXTRACT_SYMBOL},
@@ -551,6 +563,8 @@ copy_usage (FILE *stream, int exit_status)
                                    <commit>\n\
      --subsystem <name>[:<version>]\n\
                                    Set PE subsystem to <name> [& <version>]\n\
+     --compress-debug-sections     Compress DWARF debug sections using zlib\n\
+     --decompress-debug-sections   Decompress DWARF debug sections using zlib\n\
   -v --verbose                     List all object files modified\n\
   @<file>                          Read options from <file>\n\
   -V --version                     Display this program's version number\n\
@@ -2193,6 +2207,18 @@ copy_file (const char *input_filename, const char *output_filename,
       return;
     }
 
+  switch (do_debug_sections)
+    {
+    case compress:
+      ibfd->flags |= BFD_COMPRESS;
+      break;
+    case decompress:
+      ibfd->flags |= BFD_DECOMPRESS;
+      break;
+    default:
+      break;
+    }
+
   if (bfd_check_format (ibfd, bfd_archive))
     {
       bfd_boolean force_output_target;
@@ -2637,9 +2663,9 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
     {
-      void *memhunk = xmalloc (size);
+      bfd_byte *memhunk = NULL;
 
-      if (!bfd_get_section_contents (ibfd, isection, memhunk, 0, size))
+      if (!bfd_get_full_section_contents (ibfd, isection, &memhunk))
 	{
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);
@@ -3170,6 +3196,7 @@ copy_main (int argc, char *argv[])
   struct section_list *p;
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
+  struct dwarf_debug_section *d;
 
   while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:w",
 			   copy_options, (int *) 0)) != EOF)
@@ -3462,8 +3489,16 @@ copy_main (int argc, char *argv[])
 	  change_leading_char = TRUE;
 	  break;
 
+	case OPTION_COMPRESS_DEBUG_SECTIONS:
+	  do_debug_sections = compress;
+	  break;
+
 	case OPTION_DEBUGGING:
 	  convert_debugging = TRUE;
+	  break;
+
+	case OPTION_DECOMPRESS_DEBUG_SECTIONS:
+	  do_debug_sections = decompress;
 	  break;
 
 	case OPTION_GAP_FILL:
@@ -3876,6 +3911,22 @@ copy_main (int argc, char *argv[])
   if (tmpname == NULL)
     fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
 	   input_filename, strerror (errno));
+
+  switch (do_debug_sections)
+    {
+    case compress:
+      for (d = dwarf_debug_sections; d->uncompressed_name; d++)
+	add_section_rename (d->uncompressed_name, d->compressed_name,
+			    (flagword) -1);
+      break;
+    case decompress:
+      for (d = dwarf_debug_sections; d->uncompressed_name; d++)
+	add_section_rename (d->compressed_name, d->uncompressed_name,
+			    (flagword) -1);
+      break;
+    default:
+      break;
+    }
 
   copy_file (input_filename, tmpname, input_target, output_target, input_arch);
   if (status == 0)

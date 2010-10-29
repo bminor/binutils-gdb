@@ -1,3 +1,11 @@
+2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress.exp: New.
+	* ld-elf/compress1.s: Likewise.
+	* ld-elf/compress1a.d: Likewise.
+	* ld-elf/compress1b.d: Likewise.
+	* ld-elf/compress1c.d: Likewise.
+
 2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

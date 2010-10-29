@@ -857,6 +857,15 @@ _bfd_generic_get_section_contents (bfd *abfd,
   if (count == 0)
     return TRUE;
 
+  if (section->compress_status != COMPRESS_SECTION_NONE)
+    {
+      (*_bfd_error_handler)
+	(_("%B: unable to get decompressed section %A"),
+	 abfd, section);
+      bfd_set_error (bfd_error_invalid_operation);
+      return FALSE;
+    }
+
   sz = section->rawsize ? section->rawsize : section->size;
   if (offset + count < count
       || offset + count > sz)

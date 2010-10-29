@@ -313,6 +313,9 @@ process_file (const char *file_name, const char *section_name,
   if (abfd == NULL)
     bfd_fatal (file_name);
 
+  /* Decompress sections.  */
+  abfd->flags |= BFD_DECOMPRESS;
+
   if (bfd_check_format (abfd, bfd_archive))
     fatal (_("%s: cannot get addresses from archive"), file_name);
 

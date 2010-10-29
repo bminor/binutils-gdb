@@ -9354,10 +9354,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	contents = elf_section_data (o)->this_hdr.contents;
       else
 	{
-	  bfd_size_type amt = o->rawsize ? o->rawsize : o->size;
-
 	  contents = finfo->contents;
-	  if (! bfd_get_section_contents (input_bfd, o, contents, 0, amt))
+	  if (! bfd_get_full_section_contents (input_bfd, o, &contents))
 	    return FALSE;
 	}
 

@@ -1074,6 +1074,8 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--section-alignment=}@var{num}]
         [@option{--stack=}@var{size}]
         [@option{--subsystem=}@var{which}:@var{major}.@var{minor}]
+        [@option{--compress-debug-sections}]
+        [@option{--decompress-debug-sections}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]
         [@option{--help}] [@option{--info}]
@@ -1679,6 +1681,12 @@ Specifically, the option:
 This option is used to build a @file{.sym} file for a VxWorks kernel.
 It can also be a useful way of reducing the size of a @option{--just-symbols}
 linker input file.
+
+@item --compress-debug-sections
+Compress DWARF debug sections using zlib.
+
+@item --decompress-debug-sections
+Decompress DWARF debug sections using zlib.
 
 @item -V
 @itemx --version

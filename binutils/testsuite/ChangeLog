@@ -1,3 +1,11 @@
+2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp: New.
+	* binutils-all/dw2-1.S: Likewise.
+	* binutils-all/dw2-2.S: Likewise.
+	* binutils-all/libdw2-compressed.out: Likewise.
+	* binutils-all/libdw2.out: Likewise.
+
 2010-10-22  Mark Mitchell  <mark@codesourcery.com>
 
 	* binutils-all/group-5.d: Expect ".group" for the name of group

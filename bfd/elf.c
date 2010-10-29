@@ -1009,6 +1009,52 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	}
     }
 
+  /* Compress/decompress DWARF debug sections with names: .debug_* and
+     .zdebug_*, after the section flags is set.  */
+  if ((flags & SEC_DEBUGGING)
+      && ((name[1] == 'd' && name[6] == '_')
+	  || (name[1] == 'z' && name[7] == '_')))
+    {
+      enum { nothing, compress, decompress } action = nothing;
+
+      if (bfd_is_section_compressed (abfd, newsect))
+	{
+	  /* Compressed section.  Check if we should decompress.  */
+	  if ((abfd->flags & BFD_DECOMPRESS))
+	    action = decompress;
+	}
+      else
+	{
+	  /* Normal section.  Check if we should compress.  */
+	  if ((abfd->flags & BFD_COMPRESS))
+	    action = compress;
+	}
+
+      switch (action)
+	{
+	case nothing:
+	  break;
+	case compress:
+	  if (!bfd_init_section_compress_status (abfd, newsect))
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: unable to initialize commpress status for section %s"),
+		 abfd, name);
+	      return FALSE;
+	    }
+	  break;
+	case decompress:
+	  if (!bfd_init_section_decompress_status (abfd, newsect))
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: unable to initialize decommpress status for section %s"),
+		 abfd, name);
+	      return FALSE;
+	    }
+	  break;
+	}
+    }
+
   return TRUE;
 }
 

@@ -9987,8 +9987,7 @@ dump_section_as_bytes (Elf_Internal_Shdr * section,
   putchar ('\n');
 }
 
-/* Uncompresses a section that was compressed using zlib, in place.
-   This is a copy of bfd_uncompress_section_contents, in bfd/compress.c  */
+/* Uncompresses a section that was compressed using zlib, in place.  */
 
 static int
 uncompress_section_contents (unsigned char **buffer ATTRIBUTE_UNUSED,
@@ -10054,6 +10053,8 @@ uncompress_section_contents (unsigned char **buffer ATTRIBUTE_UNUSED,
 
  fail:
   free (uncompressed_buffer);
+  /* Indicate decompression failure.  */
+  *buffer = NULL;
   return 0;
 #endif  /* HAVE_ZLIB_H */
 }
@@ -10064,13 +10065,10 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 {
   struct dwarf_section * section = &debug_displays [debug].section;
   char buf [64];
-  int section_is_compressed;
 
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
     return 1;
-
-  section_is_compressed = section->name == section->compressed_name;
 
   snprintf (buf, sizeof (buf), _("%s section data"), section->name);
   section->address = sec->sh_addr;
@@ -10078,15 +10076,11 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->start = (unsigned char *) get_data (NULL, (FILE *) file,
                                                sec->sh_offset, 1,
                                                sec->sh_size, buf);
+  if (uncompress_section_contents (&section->start, &section->size))
+    sec->sh_size = section->size;
+
   if (section->start == NULL)
     return 0;
-
-  if (section_is_compressed)
-    {
-      if (! uncompress_section_contents (&section->start, &section->size))
-        return 0;
-      sec->sh_size = section->size;
-    }
 
   if (debug_displays [debug].relocate)
     apply_relocations ((FILE *) file, sec, section->start);

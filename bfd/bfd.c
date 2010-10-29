@@ -151,6 +151,16 @@ CODE_FRAGMENT
 .     will be consistent from run to run.  *}
 .#define BFD_DETERMINISTIC_OUTPUT 0x4000
 .
+.  {* Compress sections in this BFD.  *}
+.#define BFD_COMPRESS 0x8000
+.
+.  {* Decompress sections in this BFD.  *}
+.#define BFD_DECOMPRESS 0x10000
+.
+.  {* Flags bits to be saved in bfd_preserve_save.  *}
+.#define BFD_FLAGS_SAVED \
+.  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS)
+.
 .  {* Currently my_archive is tested before adding origin to
 .     anything. I believe that this can become always an add of
 .     origin, with origin set to 0 for non archive files.  *}
@@ -1628,7 +1638,7 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve)
 
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
-  abfd->flags &= BFD_IN_MEMORY;
+  abfd->flags &= BFD_FLAGS_SAVED;
   abfd->sections = NULL;
   abfd->section_last = NULL;
   abfd->section_count = 0;

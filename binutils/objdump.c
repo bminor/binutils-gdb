@@ -2198,20 +2198,15 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   struct dwarf_section *section = &debug_displays [debug].section;
   bfd *abfd = (bfd *) file;
   bfd_boolean ret;
-  int section_is_compressed;
 
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
     return 1;
 
-  section_is_compressed = section->name == section->compressed_name;
-
   section->address = 0;
   section->size = bfd_get_section_size (sec);
-  section->start = (unsigned char *) xmalloc (section->size);
-
-  ret = bfd_get_section_contents (abfd, sec, section->start, 0,
-				  section->size);
+  section->start = NULL;
+  ret = bfd_get_full_section_contents (abfd, sec, &section->start);
 
   if (! ret)
     {
@@ -2219,18 +2214,6 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
       printf (_("\nCan't get contents for section '%s'.\n"),
 	      section->name);
       return 0;
-    }
-
-  if (section_is_compressed)
-    {
-      bfd_size_type size = section->size;
-      if (! bfd_uncompress_section_contents (&section->start, &size))
-        {
-          free_debug_section (debug);
-          printf (_("\nCan't uncompress section '%s'.\n"), section->name);
-          return 0;
-        }
-      section->size = size;
     }
 
   if (is_relocatable && debug_displays [debug].relocate)
@@ -2662,9 +2645,11 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 	    (unsigned long) (section->filepos + start_offset));
   printf ("\n");
 
-  data = (bfd_byte *) xmalloc (datasize);
-
-  bfd_get_section_contents (abfd, section, data, 0, datasize);
+  if (!bfd_get_full_section_contents (abfd, section, &data))
+    {
+      non_fatal (_("Reading section failed"));
+      return;
+    }
 
   width = 4;
 
@@ -3207,6 +3192,10 @@ display_file (char *filename, char *target)
       nonfatal (filename);
       return;
     }
+
+  /* Decompress sections unless dumping the section contents.  */
+  if (!dump_section_contents)
+    file->flags |= BFD_DECOMPRESS;
 
   /* If the file is an archive, process all of its elements.  */
   if (bfd_check_format (file, bfd_archive))

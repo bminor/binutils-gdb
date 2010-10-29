@@ -1,6 +1,6 @@
 /* This testcase is derived from a similar test in GDB.
 
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,24 +17,20 @@
 
 /* Dummy function to provide debug information for.  */
 
-	.file "dwarf2-2.c"
-	.section .gnu.linkonce.t.foo,"axG",%progbits,foo,comdat
-	.globl _start
-_start:
-	.int 0
+	.text
 .Lbegin_text1:
-	.globl func_cu1
-	.type func_cu1, %function
-func_cu1:
-.Lbegin_func_cu1:
+	.globl func_cu2
+	.type func_cu2, %function
+func_cu2:
+.Lbegin_func_cu2:
 	.int 0
-.Lend_func_cu1:
-	.size func_cu1, .-func_cu1
+.Lend_func_cu2:
+	.size func_cu2, .-func_cu2
 .Lend_text1:
 
 /* Debug information */
 
-	.section .debug_info,"G",%progbits,foo,comdat
+	.section .debug_info
 .Lcu1_begin:
 	/* CU header */
 	.4byte	.Lcu1_end - .Lcu1_start		/* Length of Compilation Unit */
@@ -52,15 +48,15 @@ func_cu1:
 	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
 	.byte	1				/* DW_AT_language (C) */
 
-	/* func_cu1 */
+	/* func_cu2 */
 	.uleb128	2			/* Abbrev: DW_TAG_subprogram */
 	.byte		1			/* DW_AT_external */
 	.byte		1			/* DW_AT_decl_file */
 	.byte		2			/* DW_AT_decl_line */
-	.ascii		"func_cu1\0"		/* DW_AT_name */
+	.ascii		"func_cu2\0"		/* DW_AT_name */
 	.4byte		.Ltype_int-.Lcu1_begin	/* DW_AT_type */
-	.4byte		.Lbegin_func_cu1	/* DW_AT_low_pc */
-	.4byte		.Lend_func_cu1		/* DW_AT_high_pc */
+	.4byte		.Lbegin_func_cu2	/* DW_AT_low_pc */
+	.4byte		.Lend_func_cu2		/* DW_AT_high_pc */
 	.byte		1			/* DW_AT_frame_base: length */
 	.byte		0x55			/* DW_AT_frame_base: DW_OP_reg5 */
 
@@ -75,7 +71,7 @@ func_cu1:
 .Lcu1_end:
 
 /* Line table */
-	.section .debug_line,"G",%progbits,foo,comdat
+	.section .debug_line
 .Lline1_begin:
 	.4byte		.Lline1_end - .Lline1_start	/* Initial length */
 .Lline1_start:
@@ -120,7 +116,7 @@ func_cu1:
 	.byte		0	/* DW_LNE_set_address */
 	.uleb128	5
 	.byte		2
-	.4byte		.Lbegin_func_cu1
+	.4byte		.Lbegin_func_cu2
 
 	.byte		3	/* DW_LNS_advance_line */
 	.sleb128	3	/* ... to 4 */
@@ -132,7 +128,7 @@ func_cu1:
 	.byte		0	/* DW_LNE_set_address */
 	.uleb128	5
 	.byte		2
-	.4byte		.Lend_func_cu1
+	.4byte		.Lend_func_cu2
 
 	.byte		0	/* DW_LNE_end_of_sequence */
 	.uleb128	1
@@ -141,7 +137,7 @@ func_cu1:
 .Lline1_end:
 
 /* Abbrev table */
-	.section .debug_abbrev,"G",%progbits,foo,comdat
+	.section .debug_abbrev
 .Labbrev1_begin:
 	.uleb128	1			/* Abbrev code */
 	.uleb128	0x11			/* DW_TAG_compile_unit */

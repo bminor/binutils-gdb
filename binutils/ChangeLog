@@ -1,3 +1,36 @@
+2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* addr2line.c (process_file): Set BFD_DECOMPRESS.
+
+	* objcopy.c (do_debug_sections): New.
+	(OPTION_COMPRESS_DEBUG_SECTIONS): New.
+	(OPTION_DECOMPRESS_DEBUG_SECTIONS): Likewise.
+	(copy_options): Add OPTION_COMPRESS_DEBUG_SECTIONS and
+	OPTION_DECOMPRESS_DEBUG_SECTIONS.
+	(copy_usage): Add --compress-debug-sections and
+	--decompress-debug-sections.
+	(copy_file): Set BFD_COMPRESS or BFD_DECOMPRESS.
+	(copy_section): Replace bfd_get_section_contents with
+	bfd_get_full_section_contents.
+	(copy_main): Handle OPTION_COMPRESS_DEBUG_SECTIONS and
+	OPTION_DECOMPRESS_DEBUG_SECTIONS.  Check do_debug_sections to
+	rename DWARF debug sections.
+
+	* objdump.c (load_specific_debug_section): Replace
+	bfd_get_section_contents with bfd_get_full_section_contents. 
+	Remove bfd_uncompress_section_contents.
+	(dump_section): Replace bfd_get_section_contents with
+	bfd_get_full_section_contents.
+	(display_file): Set BFD_DECOMPRESS if needed.
+
+	* readelf.c (uncompress_section_contents): Set buffer to NULL
+	to indiate decompression failure.
+	(load_specific_debug_section): Always call
+	uncompress_section_contents.
+
+	* doc/binutils.texi: Document --compress-debug-sections and
+	--decompress-debug-sections.
+
 2010-10-29  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12058

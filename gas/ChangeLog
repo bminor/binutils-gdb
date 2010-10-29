@@ -1,3 +1,7 @@
+2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (compress_debug): Optimize section flags check.
+
 2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

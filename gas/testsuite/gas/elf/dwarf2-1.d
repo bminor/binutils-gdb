@@ -1,8 +1,9 @@
+#as:  --compress-debug-sections
 #readelf: -w
 #name: DWARF2 1
 #not-target: ia64-*-*
 
-Contents of the .debug_info section:
+Contents of the .[z]?debug_info section:
 
   Compilation Unit @ offset 0x0:
    Length:        0x4e \(32-bit\)
@@ -30,7 +31,7 @@ Contents of the .debug_info section:
     <4f>   DW_AT_byte_size   : 4	
     <50>   DW_AT_encoding    : 5	\(signed\)
 
-Raw dump of debug contents of section .debug_line:
+Raw dump of debug contents of section .[z]?debug_line:
 
   Offset:                      0x0
   Length:                      62
@@ -74,7 +75,7 @@ Raw dump of debug contents of section .debug_line:
   Extended opcode 1: End of Sequence
 
 
-Contents of the .zdebug_abbrev section:
+Contents of the .[z]?debug_abbrev section:
 
   Number TAG
    1      DW_TAG_compile_unit    \[has children\]

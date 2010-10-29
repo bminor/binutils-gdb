@@ -697,6 +697,8 @@ DESCRIPTION
 bfd *
 bfd_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
+  bfd *abfd;
+
   if ((bfd_get_format (archive) != bfd_archive)
       || (archive->direction == write_direction))
     {
@@ -704,8 +706,14 @@ bfd_openr_next_archived_file (bfd *archive, bfd *last_file)
       return NULL;
     }
 
-  return BFD_SEND (archive,
+  abfd = BFD_SEND (archive,
 		   openr_next_archived_file, (archive, last_file));
+
+  /* Copy BFD_COMPRESS and BFD_DECOMPRESS flags.  */
+  if (abfd)
+    abfd->flags |= archive->flags & (BFD_COMPRESS | BFD_DECOMPRESS);
+
+  return abfd;
 }
 
 bfd *

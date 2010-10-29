@@ -808,3 +808,13 @@ extern void bfd_section_already_linked_table_traverse
 extern bfd_vma read_unsigned_leb128 (bfd *, bfd_byte *, unsigned int *);
 extern bfd_signed_vma read_signed_leb128 (bfd *, bfd_byte *, unsigned int *);
 
+struct dwarf_debug_section
+{
+  const char *uncompressed_name;
+  const char *compressed_name;
+};
+
+/* Map of uncompressed DWARF debug section name to compressed one.  It
+   is terminated by NULL uncompressed_name.  */
+
+extern struct dwarf_debug_section dwarf_debug_sections[];

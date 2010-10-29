@@ -1350,10 +1350,10 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   char *header;
   struct z_stream_s *strm;
   int x;
+  flagword flags = bfd_get_section_flags (abfd, sec);
 
   if (seginfo == NULL
-      || !(bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS)
-      || (bfd_get_section_flags (abfd, sec) & SEC_ALLOC))
+      || (flags & (SEC_ALLOC | SEC_HAS_CONTENTS)) == SEC_ALLOC)
     return;
 
   section_name = bfd_get_section_name (stdoutput, sec);

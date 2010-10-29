@@ -1,6 +1,6 @@
 /* This testcase is derived from a similar test in GDB.
 
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,8 +17,7 @@
 
 /* Dummy function to provide debug information for.  */
 
-	.file "dwarf2-2.c"
-	.section .gnu.linkonce.t.foo,"axG",%progbits,foo,comdat
+	.text
 	.globl _start
 _start:
 	.int 0
@@ -34,7 +33,7 @@ func_cu1:
 
 /* Debug information */
 
-	.section .debug_info,"G",%progbits,foo,comdat
+	.section .debug_info
 .Lcu1_begin:
 	/* CU header */
 	.4byte	.Lcu1_end - .Lcu1_start		/* Length of Compilation Unit */
@@ -75,7 +74,7 @@ func_cu1:
 .Lcu1_end:
 
 /* Line table */
-	.section .debug_line,"G",%progbits,foo,comdat
+	.section .debug_line
 .Lline1_begin:
 	.4byte		.Lline1_end - .Lline1_start	/* Initial length */
 .Lline1_start:
@@ -141,7 +140,7 @@ func_cu1:
 .Lline1_end:
 
 /* Abbrev table */
-	.section .debug_abbrev,"G",%progbits,foo,comdat
+	.section .debug_abbrev
 .Labbrev1_begin:
 	.uleb128	1			/* Abbrev code */
 	.uleb128	0x11			/* DW_TAG_compile_unit */
