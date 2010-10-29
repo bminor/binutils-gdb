@@ -71,6 +71,17 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 
 # The unittests themselves
 if NATIVE_OR_CROSS_LINKER
+if GCC
+
+# Infrastucture needed for the unittests: a directory where the linker
+# is named 'ld'.  This is because the -B flag appends 'ld' to its arg.
+gcctestdir/ld: ../ld-new
+	test -d gcctestdir || mkdir -p gcctestdir
+	rm -f gcctestdir/ld
+	(cd gcctestdir && $(LN_S) ../../ld-new ld)
+
+endif GCC
+
 check_PROGRAMS += object_unittest
 object_unittest_SOURCES = object_unittest.cc
 
@@ -90,13 +101,6 @@ endif NATIVE_OR_CROSS_LINKER
 
 if NATIVE_LINKER
 if GCC
-
-# Infrastucture needed for the unittests: a directory where the linker
-# is named 'ld'.  This is because the -B flag appends 'ld' to its arg.
-gcctestdir/ld: ../ld-new
-	test -d gcctestdir || mkdir -p gcctestdir
-	rm -f gcctestdir/ld
-	(cd gcctestdir && $(LN_S) ../../ld-new ld)
 
 # Each of these .o's is a useful, small complete program.  They're
 # particularly useful for making sure ld-new's flags do what they're

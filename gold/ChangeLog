@@ -1,3 +1,9 @@
+2010-10-29  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* testsuite/Makefile.am: Move gcctestdir/ld rule to
+        NATIVE_OR_CROSS_LINKER.
+	* testsuite/Makefile.in: Regenerate.
+
 2010-10-20  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::do_read_symbols): Warn about ARM EXIDX sections

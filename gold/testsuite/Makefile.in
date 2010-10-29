@@ -48,8 +48,6 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18) \
 	$(am__EXEEXT_19) $(am__EXEEXT_20) $(am__EXEEXT_21) \
 	$(am__EXEEXT_22)
-
-# The unittests themselves
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest
 
@@ -3760,6 +3758,15 @@ uninstall-am:
 	recheck recheck-html tags uninstall uninstall-am
 
 
+# The unittests themselves
+
+# Infrastucture needed for the unittests: a directory where the linker
+# is named 'ld'.  This is because the -B flag appends 'ld' to its arg.
+@GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@gcctestdir/ld: ../ld-new
+@GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	test -d gcctestdir || mkdir -p gcctestdir
+@GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	rm -f gcctestdir/ld
+@GCC_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	(cd gcctestdir && $(LN_S) ../../ld-new ld)
+
 # ---------------------------------------------------------------------
 # These tests test the output of gold (end-to-end tests).  In
 # particular, they make sure that gold can link "difficult" object
@@ -3768,13 +3775,6 @@ uninstall-am:
 # we're not cross-compiling it), since we run ld-new as part of these
 # tests.  We use the gcc-specific flag '-B' to use our linker instead
 # of the default linker, which is why we only run our tests under gcc.
-
-# Infrastucture needed for the unittests: a directory where the linker
-# is named 'ld'.  This is because the -B flag appends 'ld' to its arg.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@gcctestdir/ld: ../ld-new
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d gcctestdir || mkdir -p gcctestdir
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	(cd gcctestdir && $(LN_S) ../../ld-new ld)
 
 # Each of these .o's is a useful, small complete program.  They're
 # particularly useful for making sure ld-new's flags do what they're
