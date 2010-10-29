@@ -1,3 +1,10 @@
+2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-tic6x/attr-dsbt-0.s, ld-tic6x/attr-dsbt-00.d,
+	ld-tic6x/attr-dsbt-01.d, ld-tic6x/attr-dsbt-1.s,
+	ld-tic6x/attr-dsbt-10.d, ld-tic6x/attr-dsbt-11.d: New tests.
+
 2010-10-28  Thomas Schwinge  <thomas@schwinge.name>
 
 	* ld-scripts/script.exp: Sort all filename globs.

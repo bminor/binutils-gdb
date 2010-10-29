@@ -50,6 +50,8 @@ enum
     OPTION_MNO_ATOMIC,
     OPTION_MBIG_ENDIAN,
     OPTION_MLITTLE_ENDIAN,
+    OPTION_MDSBT,
+    OPTION_MNO_DSBT,
     OPTION_MGENERATE_REL
   };
 
@@ -60,6 +62,8 @@ struct option md_longopts[] =
     { "mno-atomic", no_argument, NULL, OPTION_MNO_ATOMIC },
     { "mbig-endian", no_argument, NULL, OPTION_MBIG_ENDIAN },
     { "mlittle-endian", no_argument, NULL, OPTION_MLITTLE_ENDIAN },
+    { "mdsbt", no_argument, NULL, OPTION_MDSBT },
+    { "mno-dsbt", no_argument, NULL, OPTION_MNO_DSBT },
     { "mgenerate-rel", no_argument, NULL, OPTION_MGENERATE_REL },
     { NULL, no_argument, NULL, 0 }
   };
@@ -112,6 +116,9 @@ static bfd_boolean tic6x_compact_insns;
 
 /* Whether to generate RELA relocations.  */
 static bfd_boolean tic6x_generate_rela = TRUE;
+
+/* Whether the code uses DSBT addressing.  */
+static bfd_boolean tic6x_dsbt;
 
 /* Table of supported architecture variants.  */
 typedef struct
@@ -191,6 +198,14 @@ md_parse_option (int c, char *arg)
       target_big_endian = 0;
       break;
 
+    case OPTION_MDSBT:
+      tic6x_dsbt = 1;
+      break;
+
+    case OPTION_MNO_DSBT:
+      tic6x_dsbt = 0;
+      break;
+
     case OPTION_MGENERATE_REL:
       tic6x_generate_rela = FALSE;
       break;
@@ -213,6 +228,8 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
   fprintf (stream, _("  -mno-atomic             disable atomic operation instructions\n"));
   fprintf (stream, _("  -mbig-endian            generate big-endian code\n"));
   fprintf (stream, _("  -mlittle-endian         generate little-endian code\n"));
+  fprintf (stream, _("  -mdsbt                  code uses DSBT addressing\n"));
+  fprintf (stream, _("  -mno-dsbt               code does not use DSBT addressing\n"));
   /* -mgenerate-rel is only for testsuite use and is deliberately
       undocumented.  */
 
@@ -341,7 +358,7 @@ typedef struct
 
 static const tic6x_attribute_table tic6x_attributes[] =
   {
-#define TAG(tag, value) { #tag, tag }
+#define TAG(tag, value) { #tag, tag },
 #include "elf/tic6x-attrs.h"
 #undef TAG
   };
@@ -3897,6 +3914,7 @@ tic6x_set_attributes (void)
     tic6x_arch_attribute = C6XABI_Tag_ISA_C674X;
 
   tic6x_set_attribute_int (Tag_ISA, tic6x_arch_attribute);
+  tic6x_set_attribute_int (Tag_ABI_DSBT, tic6x_dsbt);
 }
 
 /* Do machine-dependent manipulations of the frag chains after all

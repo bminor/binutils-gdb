@@ -1,3 +1,18 @@
+2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-tic6x.c (OPTION_MDSBT, OPTION_MNO_DSBT): New enum
+	values.
+	(md_longopts): Add mdsbt and mno-dsbt.
+	(tic6x_dsbt): New static variable.
+	(md_parse_option): Handle OPTION_MDSBT and OPTION_MNO_DSBT.
+	(md_show_usage): Output help text for -mdsbt and -mno-dsbt.
+	(TAG): Add comma at the end.
+	(tic6x_set_attributes): Set Tag_ABI_DSBT.
+	* doc/as.texinfo: Document -mdsbt and -mno-dsbt.
+	* doc/c-tic6x.texi (TIC6X Options): Likewise.
+	(TIC6X Directives): Mention Tag_ABI_DSBT.
+
 2010-10-28  Matthias Klose  <doko@ubuntu.com>
 
 	* doc/as.texinfo: Add directory section for info document.

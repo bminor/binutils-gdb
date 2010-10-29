@@ -10810,6 +10810,24 @@ display_tic6x_attribute (unsigned char * p)
 	}
       return p;
 
+    case Tag_ABI_DSBT:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_DSBT: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("DSBT addressing not used\n"));
+	  break;
+	case 1:
+	  printf (_("DSBT addressing used\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
     case 32:
       /* Tag_compatibility - treated as generic by binutils for now
 	 although not currently specified for C6X.  */

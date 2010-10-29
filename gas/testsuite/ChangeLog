@@ -1,3 +1,13 @@
+2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x/attr-dsbt-directive-1.d,
+	gas/tic6x/attr-dsbt-directive-1.s,
+	gas/tic6x/attr-dsbt-directive-2.d,
+	gas/tic6x/attr-dsbt-directive-2.s,
+	gas/tic6x/attr-dsbt-opts-mdsbt.d,
+	gas/tic6x/attr-dsbt-opts-mno-dsbt.d: New tests.
+
 2010-10-28  Thomas Schwinge  <thomas@schwinge.name>
 
 	* gas/iq2000/load-hazards.exp: Sort all filename globs.
