@@ -1,3 +1,7 @@
+2010-10-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Fix a typo.
+
 2010-10-29  Pawel Sikora  <pluto@pld-linux.org>
 
 	PR binutils/12075

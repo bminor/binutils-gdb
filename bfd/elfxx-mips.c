@@ -5152,7 +5152,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       addend = 0;
     }
 
-  /* If we haven't already determined the GOT offset, oand we're going
+  /* If we haven't already determined the GOT offset, and we're going
      to need it, get it now.  */
   switch (r_type)
     {
