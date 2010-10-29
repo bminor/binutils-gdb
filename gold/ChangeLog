@@ -1,3 +1,14 @@
+2010-10-29  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_outout_section::fix_exidx_coverage): Adjust call to
+	Output_section::add_relaxed_input_section.
+	* output.cc (Output_section::add_relaxed_input_section): Add new
+	arguments LAYOUT and NAME.  Set section order index.
+	(Output_section::convert_input_sections_in_list_to_relaxed_sections):
+	Copy section order index.
+	* output.h (Output_section::add_relaxed_input_section): Add new
+	arguments LAYOUT and NAME.
+
 2010-10-29  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* testsuite/Makefile.am: Move gcctestdir/ld rule to

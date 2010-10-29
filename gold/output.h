@@ -2542,9 +2542,12 @@ class Output_section : public Output_data
   void
   add_output_section_data(Output_section_data* posd);
 
-  // Add a relaxed input section PORIS to this output section.
+  // Add a relaxed input section PORIS called NAME to this output section
+  // with LAYOUT.
   void
-  add_relaxed_input_section(Output_relaxed_input_section* poris);
+  add_relaxed_input_section(Layout* layout,
+			    Output_relaxed_input_section* poris,
+			    const std::string& name);
 
   // Return the section name.
   const char*

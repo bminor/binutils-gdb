@@ -5847,7 +5847,8 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 	  Arm_exidx_merged_section* merged_section =
 	    new Arm_exidx_merged_section(*exidx_input_section,
 					 *section_offset_map, deleted_bytes);
-	  this->add_relaxed_input_section(merged_section);
+	  const std::string secname = exidx_relobj->section_name(exidx_shndx);
+	  this->add_relaxed_input_section(layout, merged_section, secname);
 	  arm_relobj->convert_input_section_to_relaxed_section(exidx_shndx);
 
 	  // All local symbols defined in discarded portions of this input

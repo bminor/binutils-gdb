@@ -2203,9 +2203,25 @@ Output_section::add_output_section_data(Output_section_data* posd)
 // Add a relaxed input section.
 
 void
-Output_section::add_relaxed_input_section(Output_relaxed_input_section* poris)
+Output_section::add_relaxed_input_section(Layout* layout,
+					  Output_relaxed_input_section* poris,
+					  const std::string& name)
 {
   Input_section inp(poris);
+
+  // If the --section-ordering-file option is used to specify the order of
+  // sections, we need to keep track of sections.
+  if (parameters->options().section_ordering_file())
+    {
+      unsigned int section_order_index =
+        layout->find_section_order_index(name);
+      if (section_order_index != 0)
+        {
+          inp.set_section_order_index(section_order_index);
+          this->set_input_section_order_specified();
+        }
+    }
+
   this->add_output_section_data(&inp);
   if (this->lookup_maps_->is_valid())
     this->lookup_maps_->add_relaxed_input_section(poris->relobj(),
@@ -2373,7 +2389,13 @@ Output_section::convert_input_sections_in_list_to_relaxed_sections(
       Relaxation_map::const_iterator p = map.find(sid);
       gold_assert(p != map.end());
       gold_assert((*input_sections)[p->second].is_input_section());
+
+      // Remember section order index of original input section
+      // if it is set.  Copy it to the relaxed input section.
+      unsigned int soi =
+	(*input_sections)[p->second].section_order_index();
       (*input_sections)[p->second] = Input_section(poris);
+      (*input_sections)[p->second].set_section_order_index(soi);
     }
 }
   
