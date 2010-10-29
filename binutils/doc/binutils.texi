@@ -345,6 +345,13 @@ output for each file inserted, along with one of the letters @samp{a} or
 @samp{r} to indicate whether the file was appended (no old member
 deleted) or replaced.
 
+@item s
+@cindex ranlib
+Add an index to the archive, or update it if it already exists.  Note
+this command is an exception to the rule that there can only be one
+command letter, as it is possible to use it as either a command or a
+modifier.  In either case it does the same thing.
+
 @item t
 @cindex contents of archive
 Display a @emph{table} listing the contents of @var{archive}, or those

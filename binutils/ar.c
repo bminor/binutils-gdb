@@ -230,9 +230,9 @@ usage (int help)
       /* xgettext:c-format */
       const char * command_line =
 #if BFD_SUPPORTS_PLUGINS
-	_("Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrtx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
+	_("Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
 #else
-	_("Usage: %s [emulation options] [-]{dmpqrtx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
+	_("Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
 #endif
       fprintf (s, command_line, program_name);
 
@@ -244,6 +244,7 @@ usage (int help)
       fprintf (s, _("  p            - print file(s) found in the archive\n"));
       fprintf (s, _("  q[f]         - quick append file(s) to the archive\n"));
       fprintf (s, _("  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"));
+      fprintf (s, _("  s            - act as ranlib\n"));
       fprintf (s, _("  t            - display contents of archive\n"));
       fprintf (s, _("  x[o]         - extract file(s) from the archive\n"));
       fprintf (s, _(" command specific modifiers:\n"));
