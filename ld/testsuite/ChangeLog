@@ -1,5 +1,9 @@
 2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/compress1c.d: Only run for Linux targets.
+
+2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elf/compress.exp: New.
 	* ld-elf/compress1.s: Likewise.
 	* ld-elf/compress1a.d: Likewise.

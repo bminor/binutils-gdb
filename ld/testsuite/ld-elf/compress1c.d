@@ -2,6 +2,7 @@
 #as: --compress-debug-sections
 #ld: -shared
 #readelf: -S --wide
+#target: *-*-linux*
 
 #failif
 #...
