@@ -10822,11 +10822,10 @@ display_tic6x_attribute (unsigned char * p)
 	}
       return p;
 
-    case 32:
-      /* Tag_compatibility - treated as generic by binutils for now
-	 although not currently specified for C6X.  */
+    case Tag_ABI_compatibility:
       val = read_uleb128 (p, &len);
       p += len;
+      printf ("  Tag_ABI_compatibility: ");
       printf (_("flag = %d, vendor = %s\n"), val, p);
       p += strlen ((char *) p) + 1;
       return p;

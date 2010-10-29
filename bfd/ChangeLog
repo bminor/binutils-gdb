@@ -1,3 +1,10 @@
+2010-10-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-tic6x.c (elf32_tic6x_obj_attrs_arg_type): Check
+	Tag_ABI_compatibility not Tag_compatibility.
+	(elf32_tic6x_merge_attributes): Update compatibility attribute
+	name in comment.  Return FALSE if merging common attributes fails.
+
 2010-10-29  Nick Clifton  <nickc@redhat.com>
 
 	PR bintils/6962

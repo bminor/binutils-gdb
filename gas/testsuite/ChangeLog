@@ -1,3 +1,10 @@
+2010-10-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x/attr-compatibility-directive-1.d,
+	gas/tic6x/attr-compatibility-directive-1.s,
+	gas/tic6x/attr-compatibility-directive-2.d,
+	gas/tic6x/attr-compatibility-directive-2.s: New tests.
+
 2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf/dwarf2-1.s: Replace .zdebug_abbrev section with

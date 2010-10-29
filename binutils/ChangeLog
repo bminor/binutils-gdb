@@ -1,3 +1,8 @@
+2010-10-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* readelf.c (display_tic6x_attribute): Use Tag_ABI_compatibility
+	not hardcoded 32.  Display name of this attribute.
+
 2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* addr2line.c (process_file): Set BFD_DECOMPRESS.

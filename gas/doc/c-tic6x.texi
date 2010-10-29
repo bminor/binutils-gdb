@@ -125,7 +125,7 @@ These have the same effects as @option{-matomic} and
 Set the C6000 EABI build attribute @var{tag} to @var{value}.
 
 The @var{tag} is either an attribute number or one of
-@code{Tag_ISA} or @code{Tag_ABI_DSBT}.  The
+@code{Tag_ISA}, @code{Tag_ABI_DSBT} and @code{Tag_ABI_compatibility}.  The
 @var{value} is either a @code{number}, @code{"string"}, or
 @code{number, "string"} depending on the tag.
 

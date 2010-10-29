@@ -1661,7 +1661,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 static int
 elf32_tic6x_obj_attrs_arg_type (int tag)
 {
-  if (tag == Tag_compatibility)
+  if (tag == Tag_ABI_compatibility)
     return ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL;
   else
     /* Correct for known attributes, arbitrary for others.  */
@@ -1729,8 +1729,9 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
 	(_("warning: %B and %B differ in whether code is compiled for DSBT"),
 	 obfd, ibfd);
     }
-  /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  /* Merge Tag_ABI_compatibility attributes and any common GNU ones.  */
+  if (!_bfd_elf_merge_object_attributes (ibfd, obfd))
+    return FALSE;
 
   return TRUE;
 }

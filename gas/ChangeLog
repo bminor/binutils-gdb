@@ -1,3 +1,8 @@
+2010-10-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* doc/c-tic6x.texi (TIC6X Directives): Mention
+	Tag_ABI_compatibility.
+
 2010-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* write.c (compress_debug): Optimize section flags check.
