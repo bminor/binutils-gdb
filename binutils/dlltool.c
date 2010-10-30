@@ -1399,12 +1399,26 @@ scan_drectve_symbols (bfd *abfd)
 	  flagword flags = BSF_FUNCTION;
 
 	  p += 8;
-	  name = p;
-	  while (p < e && *p != ',' && *p != ' ' && *p != '-')
-	    p++;
+	  /* Do we have a quoted export?  */
+	  if (*p == '"')
+	    {
+	      p++;
+	      name = p;
+	      while (p < e && *p != '"')
+		++p;
+	    }
+	  else
+	    {
+	      name = p;
+	      while (p < e && *p != ',' && *p != ' ' && *p != '-')
+		p++;
+	    }
 	  c = xmalloc (p - name + 1);
 	  memcpy (c, name, p - name);
 	  c[p - name] = 0;
+	  /* Advance over trailing quote.  */
+	  if (p < e && *p == '"')
+	    ++p;
 	  if (p < e && *p == ',')       /* found type tag.  */
 	    {
 	      char *tag_start = ++p;
