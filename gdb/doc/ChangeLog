@@ -1,3 +1,7 @@
+2010-10-29  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Python): Fix long line.
+
 2010-10-20  Doug Evans  <dje@google.com>
 
 	* gdbint.texinfo (Misc Guidelines): Renamed from Coding.

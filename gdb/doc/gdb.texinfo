@@ -20393,7 +20393,8 @@ Python programming language}.  This feature is available only if
 @cindex python directory
 Python scripts used by @value{GDBN} should be installed in
 @file{@var{data-directory}/python}, where @var{data-directory} is
-the data directory as determined at @value{GDBN} startup (@pxref{Data Files}).  This directory, known as the @dfn{python directory},
+the data directory as determined at @value{GDBN} startup (@pxref{Data Files}).
+This directory, known as the @dfn{python directory},
 is automatically added to the Python Search Path in order to allow
 the Python interpreter to locate all scripts installed at this location.
 
