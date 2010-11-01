@@ -1,3 +1,9 @@
+2010-11-01  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (macro)[M_LD_OB, M_SD_OB]: Use the offset
+	reloc supplied.
+	(mips_ip)['o']: Initialise offset_reloc.
+
 2010-10-29  Joseph Myers  <joseph@codesourcery.com>
 
 	* doc/c-tic6x.texi (TIC6X Directives): Mention

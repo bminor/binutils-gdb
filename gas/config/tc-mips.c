@@ -7350,12 +7350,15 @@ macro (struct mips_cl_insn *ip)
     case M_SD_OB:
       s = HAVE_64BIT_GPRS ? "sd" : "sw";
     sd_ob:
-      macro_build (&offset_expr, s, "t,o(b)", treg, BFD_RELOC_LO16, breg);
+      macro_build (&offset_expr, s, "t,o(b)", treg,
+		   -1, offset_reloc[0], offset_reloc[1], offset_reloc[2],
+		   breg);
       if (!HAVE_64BIT_GPRS)
 	{
 	  offset_expr.X_add_number += 4;
 	  macro_build (&offset_expr, s, "t,o(b)", treg + 1,
-		       BFD_RELOC_LO16, breg);
+		       -1, offset_reloc[0], offset_reloc[1], offset_reloc[2],
+		       breg);
 	}
       break;
 
@@ -9960,6 +9963,10 @@ do_msbd:
 	      continue;
 
 	    case 'o':		/* 16 bit offset */
+	      offset_reloc[0] = BFD_RELOC_LO16;
+	      offset_reloc[1] = BFD_RELOC_UNUSED;
+	      offset_reloc[2] = BFD_RELOC_UNUSED;
+
 	      /* Check whether there is only a single bracketed expression
 		 left.  If so, it must be the base register and the
 		 constant must be zero.  */
