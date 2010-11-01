@@ -3991,7 +3991,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       asection *s;
       bfd_size_type size;
-      bfd_vma lma;
+      bfd_vma vma;
 
       for (s = exec_bfd->sections; s; s = s->next)
 	{
@@ -3999,16 +3999,16 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	      (s->flags & SEC_READONLY) == 0)
 	    continue;
 
-	  lma = s->lma;
+	  vma = s->vma;
 	  size = bfd_get_section_size (s);
-	  if (lma <= offset && offset < (lma + size))
+	  if (vma <= offset && offset < (vma + size))
 	    {
-	      amt = (lma + size) - offset;
+	      amt = (vma + size) - offset;
 	      if (amt > len)
 		amt = len;
 
 	      amt = bfd_get_section_contents (exec_bfd, s,
-					      readbuf, offset - lma, amt);
+					      readbuf, offset - vma, amt);
 	      return amt;
 	    }
 	}
