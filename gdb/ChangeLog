@@ -1,3 +1,15 @@
+2010-11-02  Doug Evans  <dje@google.com>
+
+	New python module gdb.printing, and new commands info pretty-printer,
+	enable pretty-printer, disable pretty-printer.
+	* NEWS: Mention them.
+	* data-directory/Makefile.in (PYTHON_FILES): Add gdb/printing.py,
+	gdb/command/__init__.py, gdb/command/pretty_printers.py.
+	* python/lib/gdb/__init__.py: Install pretty-printer commands.
+	* python/lib/gdb/printing.py: New file.
+	* python/lib/gdb/command/__init__.py: New file.
+	* python/lib/gdb/command/pretty_printers.py: New file.
+
 2010-11-02  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Mention Guile removal.

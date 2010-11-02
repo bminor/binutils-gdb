@@ -1,3 +1,9 @@
+2010-11-02  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-pp-maint.c: New file.
+	* gdb.python/py-pp-maint.exp: New file.
+	* gdb.python/py-pp-maint.py: New file.
+
 2010-11-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/default.exp: Remove "scheme" from language list.

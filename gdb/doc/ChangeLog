@@ -1,3 +1,14 @@
+2010-11-02  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Pretty Printing): Expand into three sections,
+	introduction, example, and commands.
+	(Python API): Delete section Disabling Pretty-Printers, merge into
+	Selecting Pretty-Printers.
+	(Writing a Pretty-Printer): New section.  Move the pretty-printer
+	example here, and reformat to match python coding style.  Add a second
+	example using the gdb.printing module.
+	(Python modules): Add gdb.printing.
+
 2010-10-29  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Python): Fix long line.

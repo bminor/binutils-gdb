@@ -8127,8 +8127,60 @@ Show whether C@t{++} virtual function tables are pretty printed, or not.
 Python code.  It greatly simplifies the display of complex objects.  This
 mechanism works for both MI and the CLI.
 
-For example, here is how a C@t{++} @code{std::string} looks without a
-pretty-printer:
+@menu
+* Pretty-Printer Introduction::  Introduction to pretty-printers
+* Pretty-Printer Example::       An example pretty-printer
+* Pretty-Printer Commands::      Pretty-printer commands
+@end menu
+
+@node Pretty-Printer Introduction
+@subsection Pretty-Printer Introduction
+
+When @value{GDBN} prints a value, it first sees if there is a pretty-printer
+registered for the value.  If there is then @value{GDBN} invokes the
+pretty-printer to print the value.  Otherwise the value is printed normally.
+
+Pretty-printers are normally named.  This makes them easy to manage.
+The @samp{info pretty-printer} command will list all the installed
+pretty-printers with their names.
+If a pretty-printer can handle multiple data types, then its
+@dfn{subprinters} are the printers for the individual data types.
+Each such subprinter has its own name.
+The format of the name is @var{printer-name}:@var{subprinter-name}.
+
+Pretty-printers are installed by @dfn{registering} them with @value{GDBN}.
+Typically they are automatically loaded and registered when the corresponding
+debug information is loaded, thus making them available without having to
+do anything special.
+
+There are three places where a pretty-printer can be registered.
+
+@itemize @bullet
+@item
+Pretty-printers registered globally are available when debugging
+all inferiors.
+
+@item
+Pretty-printers registered with a program space are available only
+when debugging that program.
+@xref{Progspaces In Python}, for more details on program spaces in Python.
+
+@item
+Pretty-printers registered with an objfile are loaded and unloaded
+with the corresponding objfile (e.g., shared library).
+@xref{Objfiles In Python}, for more details on objfiles in Python.
+@end itemize
+
+@xref{Selecting Pretty-Printers}, for further information on how 
+pretty-printers are selected,
+
+@xref{Writing a Pretty-Printer}, for implementing pretty printers
+for new types.
+
+@node Pretty-Printer Example
+@subsection Pretty-Printer Example
+
+Here is how a C@t{++} @code{std::string} looks without a pretty-printer:
 
 @smallexample
 (@value{GDBP}) print s
@@ -8153,8 +8205,91 @@ With a pretty-printer for @code{std::string} only the contents are printed:
 $2 = "abcd"
 @end smallexample
 
-For implementing pretty printers for new types you should read the Python API
-details (@pxref{Pretty Printing API}).
+@node Pretty-Printer Commands
+@subsection Pretty-Printer Commands
+@cindex pretty-printer commands
+
+@table @code
+@kindex info pretty-printer
+@item info pretty-printer [@var{object-regexp} [@var{name-regexp}]]
+Print the list of installed pretty-printers.
+This includes disabled pretty-printers, which are marked as such.
+
+@var{object-regexp} is a regular expression matching the objects
+whose pretty-printers to list.
+Objects can be @code{global}, the program space's file
+(@pxref{Progspaces In Python}),
+and the object files within that program space (@pxref{Objfiles In Python}).
+@xref{Selecting Pretty-Printers}, for details on how @value{GDBN}
+looks up a printer from these three objects.
+
+@var{name-regexp} is a regular expression matching the name of the printers
+to list.
+
+@kindex disable pretty-printer
+@item disable pretty-printer [@var{object-regexp} [@var{name-regexp}]]
+Disable pretty-printers matching @var{object-regexp} and @var{name-regexp}.
+A disabled pretty-printer is not forgotten, it may be enabled again later.
+
+@kindex enable pretty-printer
+@item enable pretty-printer [@var{object-regexp} [@var{name-regexp}]]
+Enable pretty-printers matching @var{object-regexp} and @var{name-regexp}.
+@end table
+
+Example:
+
+Suppose we have three pretty-printers installed: one from library1.so
+named @code{foo} that prints objects of type @code{foo}, and
+another from library2.so named @code{bar} that prints two types of objects,
+@code{bar1} and @code{bar2}.
+
+@smallexample
+(gdb) info pretty-printer
+library1.so:
+  foo
+library2.so:
+  bar
+    bar1
+    bar2
+(gdb) info pretty-printer library2
+library2.so:
+  bar
+    bar1
+    bar2
+(gdb) disable pretty-printer library1
+1 printer disabled
+2 of 3 printers enabled
+(gdb) info pretty-printer
+library1.so:
+  foo [disabled]
+library2.so:
+  bar
+    bar1
+    bar2
+(gdb) disable pretty-printer library2 bar:bar1
+1 printer disabled
+1 of 3 printers enabled
+(gdb) info pretty-printer library2
+library1.so:
+  foo [disabled]
+library2.so:
+  bar
+    bar1 [disabled]
+    bar2
+(gdb) disable pretty-printer library2 bar
+1 printer disabled
+0 of 3 printers enabled
+(gdb) info pretty-printer library2
+library1.so:
+  foo [disabled]
+library2.so:
+  bar [disabled]
+    bar1 [disabled]
+    bar2
+@end smallexample
+
+Note that for @code{bar} the entire printer can be disabled,
+as can each individual subprinter.
 
 @node Value History
 @section Value History
@@ -20484,7 +20619,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Types In Python::             Python representation of types.
 * Pretty Printing API::         Pretty-printing values.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
-* Disabling Pretty-Printers::   Disabling broken printers.
+* Writing a Pretty-Printer::    Writing a Pretty-Printer.
 * Inferiors In Python::         Python representation of inferiors (processes)
 * Threads In Python::           Accessing inferior threads from Python.
 * Commands In Python::          Implementing new commands in Python.
@@ -21349,12 +21484,13 @@ printer exists, then this returns @code{None}.
 
 The Python list @code{gdb.pretty_printers} contains an array of
 functions or callable objects that have been registered via addition
-as a pretty-printer.
+as a pretty-printer.  Printers in this list are called @code{global}
+printers, they're available when debugging all inferiors.
 Each @code{gdb.Progspace} contains a @code{pretty_printers} attribute.
 Each @code{gdb.Objfile} also contains a @code{pretty_printers}
 attribute.
 
-A function on one of these lists is passed a single @code{gdb.Value}
+Each function on these lists is passed a single @code{gdb.Value}
 argument and should return a pretty-printer object conforming to the
 interface definition above (@pxref{Pretty Printing API}).  If a function
 cannot create a pretty-printer for the value, it should return
@@ -21362,9 +21498,8 @@ cannot create a pretty-printer for the value, it should return
 
 @value{GDBN} first checks the @code{pretty_printers} attribute of each
 @code{gdb.Objfile} in the current program space and iteratively calls
-each enabled function (@pxref{Disabling Pretty-Printers})
-in the list for that @code{gdb.Objfile} until it receives
-a pretty-printer object.
+each enabled lookup routine in the list for that @code{gdb.Objfile}
+until it receives a pretty-printer object.
 If no pretty-printer is found in the objfile lists, @value{GDBN} then
 searches the pretty-printer list of the current program space,
 calling each enabled function until an object is returned.
@@ -21377,20 +21512,43 @@ given list, functions are always invoked from the head of the list,
 and iterated over sequentially until the end of the list, or a printer
 object is returned.
 
+For various reasons a pretty-printer may not work.
+For example, the underlying data structure may have changed and
+the pretty-printer is out of date.
+
+The consequences of a broken pretty-printer are severe enough that
+@value{GDBN} provides support for enabling and disabling individual
+printers.  For example, if @code{print frame-arguments} is on,
+a backtrace can become highly illegible if any argument is printed
+with a broken printer.
+
+Pretty-printers are enabled and disabled by attaching an @code{enabled}
+attribute to the registered function or callable object.  If this attribute
+is present and its value is @code{False}, the printer is disabled, otherwise
+the printer is enabled.
+
+@node Writing a Pretty-Printer
+@subsubsection Writing a Pretty-Printer
+@cindex writing a pretty-printer
+
+A pretty-printer consists of two parts: a lookup function to detect
+if the type is supported, and the printer itself.
+
 Here is an example showing how a @code{std::string} printer might be
-written:
+written.  @xref{Pretty Printing API}, for details on the API this class
+must provide.
 
 @smallexample
-class StdStringPrinter:
+class StdStringPrinter(object):
     "Print a std::string"
 
-    def __init__ (self, val):
+    def __init__(self, val):
         self.val = val
 
-    def to_string (self):
+    def to_string(self):
         return self.val['_M_dataplus']['_M_p']
 
-    def display_hint (self):
+    def display_hint(self):
         return 'string'
 @end smallexample
 
@@ -21398,15 +21556,13 @@ And here is an example showing how a lookup function for the printer
 example above might be written.
 
 @smallexample
-def str_lookup_function (val):
-
+def str_lookup_function(val):
     lookup_tag = val.type.tag
-    regex = re.compile ("^std::basic_string<char,.*>$")
     if lookup_tag == None:
         return None
-    if regex.match (lookup_tag):
-        return StdStringPrinter (val)
-    
+    regex = re.compile("^std::basic_string<char,.*>$")
+    if regex.match(lookup_tag):
+        return StdStringPrinter(val)
     return None
 @end smallexample
 
@@ -21442,8 +21598,8 @@ To continue the @code{std::string} example (@pxref{Pretty Printing API}),
 this code might appear in @code{gdb.libstdcxx.v6}:
 
 @smallexample
-def register_printers (objfile):
-    objfile.pretty_printers.add (str_lookup_function)
+def register_printers(objfile):
+    objfile.pretty_printers.add(str_lookup_function)
 @end smallexample
 
 @noindent
@@ -21451,27 +21607,92 @@ And then the corresponding contents of the auto-load file would be:
 
 @smallexample
 import gdb.libstdcxx.v6
-gdb.libstdcxx.v6.register_printers (gdb.current_objfile ())
+gdb.libstdcxx.v6.register_printers(gdb.current_objfile())
 @end smallexample
 
-@node Disabling Pretty-Printers
-@subsubsection Disabling Pretty-Printers
-@cindex disabling pretty-printers
+The previous example illustrates a basic pretty-printer.
+There are a few things that can be improved on.
+The printer doesn't have a name, making it hard to identify in a
+list of installed printers.  The lookup function has a name, but
+lookup functions can have arbitrary, even identical, names.
 
-For various reasons a pretty-printer may not work.
-For example, the underlying data structure may have changed and
-the pretty-printer is out of date.
+Second, the printer only handles one type, whereas a library typically has
+several types.  One could install a lookup function for each desired type
+in the library, but one could also have a single lookup function recognize
+several types.  The latter is the conventional way this is handled.
+If a pretty-printer can handle multiple data types, then its
+@dfn{subprinters} are the printers for the individual data types.
 
-The consequences of a broken pretty-printer are severe enough that
-@value{GDBN} provides support for enabling and disabling individual
-printers.  For example, if @code{print frame-arguments} is on,
-a backtrace can become highly illegible if any argument is printed
-with a broken printer.
+The @code{gdb.printing} module provides a formal way of solving these
+problems (@pxref{gdb.printing}).
+Here is another example that handles multiple types.
 
-Pretty-printers are enabled and disabled by attaching an @code{enabled}
-attribute to the registered function or callable object.  If this attribute
-is present and its value is @code{False}, the printer is disabled, otherwise
-the printer is enabled.
+These are the types we are going to pretty-print:
+
+@smallexample
+struct foo @{ int a, b; @};
+struct bar @{ struct foo x, y; @};
+@end smallexample
+
+Here are the printers:
+
+@smallexample
+class fooPrinter:
+    """Print a foo object."""
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return ("a=<" + str(self.val["a"]) +
+                "> b=<" + str(self.val["b"]) + ">")
+
+class barPrinter:
+    """Print a bar object."""
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return ("x=<" + str(self.val["x"]) +
+                "> y=<" + str(self.val["y"]) + ">")
+@end smallexample
+
+This example doesn't need a lookup function, that is handled by the
+@code{gdb.printing} module.  Instead a function is provided to build up
+the object that handles the lookup.
+
+@smallexample
+import gdb.printing
+
+def build_pretty_printer():
+    pp = gdb.printing.RegexpCollectionPrettyPrinter(
+        "my_library")
+    pp.add_printer('foo', '^foo$', fooPrinter)
+    pp.add_printer('bar', '^bar$', barPrinter)
+    return pp
+@end smallexample
+
+And here is the autoload support:
+
+@smallexample
+import gdb.printing
+import my_library
+gdb.printing.register_pretty_printer(
+    gdb.current_objfile(),
+    my_library.build_pretty_printer())
+@end smallexample
+
+Finally, when this printer is loaded into @value{GDBN}, here is the
+corresponding output of @samp{info pretty-printer}:
+
+@smallexample
+(gdb) info pretty-printer
+my_library.so:
+  my_library
+    foo
+    bar
+@end smallexample
 
 @node Inferiors In Python
 @subsubsection Inferiors In Python
@@ -22920,16 +23141,42 @@ top of the source tree to the source search path.
 @subsection Python modules
 @cindex python modules
 
-@c It is assumed that at least one more module will be added before
-@c the next release of gdb.  Thus we use a menu here.
 @value{GDBN} comes with a module to assist writing Python code.
 
 @menu
+* gdb.printing::       Building and registering pretty-printers.
 * gdb.types::          Utilities for working with types.
 @end menu
 
+@node gdb.printing
+@subsubsection gdb.printing
+@cindex gdb.printing
+
+This module provides a collection of utilities for working with
+pretty-printers.
+
+@table @code
+@item PrettyPrinter (@var{name}, @var{subprinters}=None)
+This class specifies the API that makes @samp{info pretty-printer},
+@samp{enable pretty-printer} and @samp{disable pretty-printer} work.
+Pretty-printers should generally inherit from this class.
+
+@item SubPrettyPrinter (@var{name})
+For printers that handle multiple types, this class specifies the
+corresponding API for the subprinters.
+
+@item RegexpCollectionPrettyPrinter (@var{name})
+Utility class for handling multiple printers, all recognized via
+regular expressions.
+@xref{Writing a Pretty-Printer}, for an example.
+
+@item register_pretty_printer (@var{obj}, @var{printer})
+Register @var{printer} with the pretty-printer list of @var{obj}.
+@end table
+
 @node gdb.types
 @subsubsection gdb.types
+@cindex gdb.types
 
 This module provides a collection of utilities for working with
 @code{gdb.Types} objects.

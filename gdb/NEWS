@@ -16,6 +16,15 @@
      It contains a collection of utilities for working with gdb.Types objects:
      get_basic_type, has_field, make_enum_dict.
 
+  ** Module gdb.printing has been added.
+     It contains utilities for writing and registering pretty-printers.
+     New classes: PrettyPrinter,  SubPrettyPrinter,
+     RegexpCollectionPrettyPrinter.
+     New function: register_pretty_printer.
+
+  ** New commands "info pretty-printers", "enable pretty-printer" and
+     "disable pretty-printer" have been added.
+
 * C++ Improvements:
 
   ** GDB now puts template parameters in scope when debugging in an

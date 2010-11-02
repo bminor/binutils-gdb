@@ -13,6 +13,4 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gdb.command.pretty_printers
 
-gdb.command.pretty_printers.register_pretty_printer_commands()
