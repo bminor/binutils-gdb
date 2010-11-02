@@ -1,3 +1,14 @@
+2010-11-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-tic6x.c (elf32_tic6x_obj_attrs_arg_type): Except for
+	Tag_ABI_compatibility, treat odd tags as strings and even ones as
+	integers.
+	(elf32_tic6x_obj_attrs_order, elf32_tic6x_tag_to_array_alignment,
+	elf32_tic6x_array_alignment_to_tag): New.
+	(elf32_tic6x_merge_attributes): Handle more attributes.  Set type
+	for merged attributes.
+	(elf_backend_obj_attrs_order): Define.
+
 2010-10-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Fix a typo.

@@ -52,6 +52,9 @@ enum
     OPTION_MLITTLE_ENDIAN,
     OPTION_MDSBT,
     OPTION_MNO_DSBT,
+    OPTION_MPID,
+    OPTION_MPIC,
+    OPTION_MNO_PIC,
     OPTION_MGENERATE_REL
   };
 
@@ -64,6 +67,9 @@ struct option md_longopts[] =
     { "mlittle-endian", no_argument, NULL, OPTION_MLITTLE_ENDIAN },
     { "mdsbt", no_argument, NULL, OPTION_MDSBT },
     { "mno-dsbt", no_argument, NULL, OPTION_MNO_DSBT },
+    { "mpid", required_argument, NULL, OPTION_MPID },
+    { "mpic", no_argument, NULL, OPTION_MPIC },
+    { "mno-pic", no_argument, NULL, OPTION_MNO_PIC },
     { "mgenerate-rel", no_argument, NULL, OPTION_MGENERATE_REL },
     { NULL, no_argument, NULL, 0 }
   };
@@ -120,6 +126,21 @@ static bfd_boolean tic6x_generate_rela = TRUE;
 /* Whether the code uses DSBT addressing.  */
 static bfd_boolean tic6x_dsbt;
 
+/* Types of position-independent data (attribute values for
+   Tag_ABI_PID).  */
+typedef enum
+  {
+    tic6x_pid_no = 0,
+    tic6x_pid_near = 1,
+    tic6x_pid_far = 2
+  } tic6x_pid_type;
+
+/* The type of data addressing used in this code.  */
+static tic6x_pid_type tic6x_pid;
+
+/* Whether the code uses position-independent code.  */
+static bfd_boolean tic6x_pic;
+
 /* Table of supported architecture variants.  */
 typedef struct
 {
@@ -171,6 +192,36 @@ tic6x_use_arch (const char *arch)
   as_bad (_("unknown architecture '%s'"), arch);
 }
 
+/* Table of supported -mpid arguments.  */
+typedef struct
+{
+  const char *arg;
+  tic6x_pid_type attr;
+} tic6x_pid_type_table;
+static const tic6x_pid_type_table tic6x_pid_types[] =
+  {
+    { "no", tic6x_pid_no },
+    { "near", tic6x_pid_near },
+    { "far", tic6x_pid_far }
+  };
+
+/* Handle -mpid=ARG.  */
+
+static void
+tic6x_use_pid (const char *arg)
+{
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (tic6x_pid_types); i++)
+    if (strcmp (arg, tic6x_pid_types[i].arg) == 0)
+      {
+	tic6x_pid = tic6x_pid_types[i].attr;
+	return;
+      }
+
+  as_bad (_("unknown -mpid= argument '%s'"), arg);
+}
+
 /* Parse a target-specific option.  */
 
 int
@@ -206,6 +257,18 @@ md_parse_option (int c, char *arg)
       tic6x_dsbt = 0;
       break;
 
+    case OPTION_MPID:
+      tic6x_use_pid (arg);
+      break;
+
+    case OPTION_MPIC:
+      tic6x_pic = 1;
+      break;
+
+    case OPTION_MNO_PIC:
+      tic6x_pic = 0;
+      break;
+
     case OPTION_MGENERATE_REL:
       tic6x_generate_rela = FALSE;
       break;
@@ -230,6 +293,13 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
   fprintf (stream, _("  -mlittle-endian         generate little-endian code\n"));
   fprintf (stream, _("  -mdsbt                  code uses DSBT addressing\n"));
   fprintf (stream, _("  -mno-dsbt               code does not use DSBT addressing\n"));
+  fprintf (stream, _("  -mpid=no                code uses position-dependent data addressing\n"));
+  fprintf (stream, _("  -mpid=near              code uses position-independent data addressing,\n"
+		     "                            GOT accesses use near DP addressing\n"));
+  fprintf (stream, _("  -mpid=far               code uses position-independent data addressing,\n"
+		     "                            GOT accesses use far DP addressing\n"));
+  fprintf (stream, _("  -mpic                   code addressing is position-independent\n"));
+  fprintf (stream, _("  -mno-pic                code addressing is position-dependent\n"));
   /* -mgenerate-rel is only for testsuite use and is deliberately
       undocumented.  */
 
@@ -3915,6 +3985,8 @@ tic6x_set_attributes (void)
 
   tic6x_set_attribute_int (Tag_ISA, tic6x_arch_attribute);
   tic6x_set_attribute_int (Tag_ABI_DSBT, tic6x_dsbt);
+  tic6x_set_attribute_int (Tag_ABI_PID, tic6x_pid);
+  tic6x_set_attribute_int (Tag_ABI_PIC, tic6x_pic);
 }
 
 /* Do machine-dependent manipulations of the frag chains after all

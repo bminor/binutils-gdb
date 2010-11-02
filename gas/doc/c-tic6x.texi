@@ -59,6 +59,32 @@ default, causes the tag to have a value of 0, indicating that the code
 does not use DSBT addressing.  The linker will emit a warning if
 objects of different type (DSBT and non-DSBT) are linked together.
 
+@cindex @code{-mpid=} command line option, TIC6X
+@item -mpid=no
+@itemx -mpid=near
+@itemx -mpid=far
+The @option{-mpid=} option causes the assembler to generate the
+@code{Tag_ABI_PID} attribute with a value indicating the form of data
+addressing used by the code.  @option{-mpid=no}, the default,
+indicates position-dependent data addressing, @option{-mpid=near}
+indicates position-independent addressing with GOT accesses using near
+DP addressing, and @option{-mpid=far} indicates position-independent
+addressing with GOT accesses using far DP addressing.  The linker will
+emit a warning if objects built with different settings of this option
+are linked together.
+
+@cindex @code{-mpic} command line option, TIC6X
+@cindex @code{-mno-pic} command line option, TIC6X
+@item -mpic
+@itemx -mno-pic
+The @option{-mpic} option causes the assembler to generate the
+@code{Tag_ABI_PIC} attribute with a value of 1, indicating that the
+code is using position-independent code addressing,  The
+@code{-mno-pic} option, the default, causes the tag to have a value of
+0, indicating position-dependent code addressing.  The linker will
+emit a warning if objects of different type (position-dependent and
+position-independent) are linked together.
+
 @cindex TIC6X big-endian output
 @cindex TIC6X little-endian output
 @cindex big-endian output, TIC6X
@@ -125,7 +151,13 @@ These have the same effects as @option{-matomic} and
 Set the C6000 EABI build attribute @var{tag} to @var{value}.
 
 The @var{tag} is either an attribute number or one of
-@code{Tag_ISA}, @code{Tag_ABI_DSBT} and @code{Tag_ABI_compatibility}.  The
+@code{Tag_ISA}, @code{Tag_ABI_wchar_t},
+@code{Tag_ABI_stack_align_needed},
+@code{Tag_ABI_stack_align_preserved}, @code{Tag_ABI_DSBT},
+@code{Tag_ABI_PID}, @code{Tag_ABI_PIC},
+@code{TAG_ABI_array_object_alignment},
+@code{TAG_ABI_array_object_align_expected},
+@code{Tag_ABI_compatibility} and @code{Tag_ABI_conformance}.  The
 @var{value} is either a @code{number}, @code{"string"}, or
 @code{number, "string"} depending on the tag.
 

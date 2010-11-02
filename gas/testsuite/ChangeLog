@@ -1,3 +1,38 @@
+2010-11-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x/attr-array-directive-1.d,
+	gas/tic6x/attr-array-directive-1.s,
+	gas/tic6x/attr-array-directive-2.d,
+	gas/tic6x/attr-array-directive-2.s,
+	gas/tic6x/attr-array-directive-3.d,
+	gas/tic6x/attr-array-directive-3.s,
+	gas/tic6x/attr-array-directive-4.d,
+	gas/tic6x/attr-array-directive-4.s,
+	gas/tic6x/attr-conformance-directive-1.d,
+	gas/tic6x/attr-conformance-directive-1.s,
+	gas/tic6x/attr-conformance-directive-2.d,
+	gas/tic6x/attr-conformance-directive-2.s,
+	gas/tic6x/attr-pic-directive-1.d,
+	gas/tic6x/attr-pic-directive-1.s,
+	gas/tic6x/attr-pic-directive-2.d,
+	gas/tic6x/attr-pic-directive-2.s,
+	gas/tic6x/attr-pic-opts-mno-pic.d, gas/tic6x/attr-pic-opts-mpic.d,
+	gas/tic6x/attr-pid-directive-1.d,
+	gas/tic6x/attr-pid-directive-1.s,
+	gas/tic6x/attr-pid-directive-2.d,
+	gas/tic6x/attr-pid-directive-2.s,
+	gas/tic6x/attr-pid-opts-mpid-far.d,
+	gas/tic6x/attr-pid-opts-mpid-near.d,
+	gas/tic6x/attr-pid-opts-mpid-no.d,
+	gas/tic6x/attr-stack-directive-1.d,
+	gas/tic6x/attr-stack-directive-1.s,
+	gas/tic6x/attr-stack-directive-2.d,
+	gas/tic6x/attr-stack-directive-2.s,
+	gas/tic6x/attr-wchar-directive-1.d,
+	gas/tic6x/attr-wchar-directive-1.s,
+	gas/tic6x/attr-wchar-directive-2.d,
+	gas/tic6x/attr-wchar-directive-2.s: New tests.
+
 2010-10-29  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/tic6x/attr-compatibility-directive-1.d,

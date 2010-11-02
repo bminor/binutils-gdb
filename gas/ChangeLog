@@ -1,3 +1,16 @@
+2010-11-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-tic6x.c (OPTION_MPID, OPTION_MPIC, OPTION_MNO_PIC):
+	New enum values.
+	(md_longopts): Add options mpid, mpic and mno-pic.
+	(tic6x_pid_type, tic6x_pid, tic6x_pic, tic6x_pid_type_table,
+	tic6x_pid_types, tic6x_use_pid): New.
+	(md_parse_option): Handle new options.
+	(md_show_usage): Output help text for new options.
+	(tic6x_set_attributes): Set PID and PIC attributes.
+	* doc/as.texinfo: Document -mpid=, -mpic and -mno-pic.
+	* doc/c-tic6x.texi (TIC6X Options): Likewise.
+
 2010-11-01  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (macro)[M_LD_OB, M_SD_OB]: Use the offset

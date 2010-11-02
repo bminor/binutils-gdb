@@ -10804,6 +10804,63 @@ display_tic6x_attribute (unsigned char * p)
 	}
       return p;
 
+    case Tag_ABI_wchar_t:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_wchar_t: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("Not used\n"));
+	  break;
+	case 1:
+	  printf (_("2 bytes\n"));
+	  break;
+	case 2:
+	  printf (_("4 bytes\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
+    case Tag_ABI_stack_align_needed:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_stack_align_needed: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("8-byte\n"));
+	  break;
+	case 1:
+	  printf (_("16-byte\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
+    case Tag_ABI_stack_align_preserved:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_stack_align_preserved: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("8-byte\n"));
+	  break;
+	case 1:
+	  printf (_("16-byte\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
     case Tag_ABI_DSBT:
       val = read_uleb128 (p, &len);
       p += len;
@@ -10822,6 +10879,87 @@ display_tic6x_attribute (unsigned char * p)
 	}
       return p;
 
+    case Tag_ABI_PID:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_PID: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("Data addressing position-dependent\n"));
+	  break;
+	case 1:
+	  printf (_("Data addressing position-independent, GOT near DP\n"));
+	  break;
+	case 2:
+	  printf (_("Data addressing position-independent, GOT far from DP\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
+    case Tag_ABI_PIC:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_PIC: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("Code addressing position-dependent\n"));
+	  break;
+	case 1:
+	  printf (_("Code addressing position-independent\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
+    case Tag_ABI_array_object_alignment:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_array_object_alignment: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("8-byte\n"));
+	  break;
+	case 1:
+	  printf (_("4-byte\n"));
+	  break;
+	case 2:
+	  printf (_("16-byte\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
+    case Tag_ABI_array_object_align_expected:
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_ABI_array_object_align_expected: ");
+      switch (val)
+	{
+	case 0:
+	  printf (_("8-byte\n"));
+	  break;
+	case 1:
+	  printf (_("4-byte\n"));
+	  break;
+	case 2:
+	  printf (_("16-byte\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+
     case Tag_ABI_compatibility:
       val = read_uleb128 (p, &len);
       p += len;
@@ -10829,15 +10967,27 @@ display_tic6x_attribute (unsigned char * p)
       printf (_("flag = %d, vendor = %s\n"), val, p);
       p += strlen ((char *) p) + 1;
       return p;
+
+    case Tag_ABI_conformance:
+      printf ("  Tag_ABI_conformance: ");
+      printf ("\"%s\"\n", p);
+      p += strlen ((char *) p) + 1;
+      return p;
     }
 
   printf ("  Tag_unknown_%d: ", tag);
 
-  /* No general documentation of handling unknown attributes, treat as
-     ULEB128 for now.  */
-  val = read_uleb128 (p, &len);
-  p += len;
-  printf ("%d (0x%x)\n", val, val);
+  if (tag & 1)
+    {
+      printf ("\"%s\"\n", p);
+      p += strlen ((char *) p) + 1;
+    }
+  else
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("%d (0x%x)\n", val, val);
+    }
 
   return p;
 }

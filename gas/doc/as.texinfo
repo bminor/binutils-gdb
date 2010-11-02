@@ -477,6 +477,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target TIC6X options:}
    [@b{-march=@var{arch}}] [@b{-matomic}|@b{-mno-atomic}]
    [@b{-mbig-endian}|@b{-mlittle-endian}] [@b{-mdsbt}|@b{-mno-dsbt}]
+   [@b{-mpid=no}|@b{-mpid=near}|@b{-mpid=far}] [@b{-mpic}|@b{-mno-pic}]
 @end ifset
 
 @ifset Z80
@@ -1293,6 +1294,29 @@ code is using DSBT addressing.  The @option{-mno-dsbt} option, the
 default, causes the tag to have a value of 0, indicating that the code
 does not use DSBT addressing.  The linker will emit a warning if
 objects of different type (DSBT and non-DSBT) are linked together.
+
+@item -mpid=no
+@itemx -mpid=near
+@itemx -mpid=far
+The @option{-mpid=} option causes the assembler to generate the
+@code{Tag_ABI_PID} attribute with a value indicating the form of data
+addressing used by the code.  @option{-mpid=no}, the default,
+indicates position-dependent data addressing, @option{-mpid=near}
+indicates position-independent addressing with GOT accesses using near
+DP addressing, and @option{-mpid=far} indicates position-independent
+addressing with GOT accesses using far DP addressing.  The linker will
+emit a warning if objects built with different settings of this option
+are linked together.
+
+@item -mpic
+@itemx -mno-pic
+The @option{-mpic} option causes the assembler to generate the
+@code{Tag_ABI_PIC} attribute with a value of 1, indicating that the
+code is using position-independent code addressing,  The
+@code{-mno-pic} option, the default, causes the tag to have a value of
+0, indicating position-dependent code addressing.  The linker will
+emit a warning if objects of different type (position-dependent and
+position-independent) are linked together.
 
 @item -mbig-endian
 @itemx -mlittle-endian
