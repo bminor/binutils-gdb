@@ -352,6 +352,4 @@ extern struct thread_info* inferior_thread (void);
 
 extern void update_thread_list (void);
 
-extern int currently_stepping (struct thread_info *tp);
-
 #endif /* GDBTHREAD_H */

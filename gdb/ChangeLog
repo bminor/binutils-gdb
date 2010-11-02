@@ -1,3 +1,20 @@
+2010-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert:
+	2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+		    Pedro Alves  <pedro@codesourcery.com>
+	* gdbthread.h (currently_stepping): New declaration.
+	* infrun.c (currently_stepping): Remove the forward declaration.
+	(currently_stepping): Make it global.
+	* linux-nat.c (resume_callback) <lp->stopped && lp->status == 0>: New
+	variables tp and step, initialized them.  Pass STEP to to_resume.
+	Print also possibly "PTRACE_SINGLESTEP" if STEP.  Initialize LP->STEP.
+	* remote.c (currently_stepping_callback): New.
+	(remote_vcont_resume)
+	<ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid)>:
+	New variable tp.  Call currently_stepping_callback and step such
+	thread.
+
 2010-11-01  Hui Zhu  <teawater@gmail.com>
 
 	* tracepoint.c (tfile_xfer_partial): Change lma to vma.

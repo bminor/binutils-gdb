@@ -74,6 +74,8 @@ static int follow_fork (void);
 static void set_schedlock_func (char *args, int from_tty,
 				struct cmd_list_element *c);
 
+static int currently_stepping (struct thread_info *tp);
+
 static int currently_stepping_or_nexting_callback (struct thread_info *tp,
 						   void *data);
 
@@ -4849,7 +4851,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 
 /* Is thread TP in the middle of single-stepping?  */
 
-int
+static int
 currently_stepping (struct thread_info *tp)
 {
   return ((tp->step_range_end && tp->step_resume_breakpoint == NULL)

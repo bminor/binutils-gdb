@@ -1,3 +1,10 @@
+2010-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert:
+	2010-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* gdb.threads/sigstep-threads.exp: New file.
+	* gdb.threads/sigstep-threads.c: New file.
+
 2010-10-20  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.threads/fork-child-threads.exp: Don't run on remote target.
