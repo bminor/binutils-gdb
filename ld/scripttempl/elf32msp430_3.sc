@@ -167,21 +167,21 @@ SECTIONS
   .line           0 : { *(.line) }
 
   /* GNU DWARF 1 extensions */
-  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-  .debug_sfnames  0 : { *(.debug_sfnames) }
+  .debug_srcinfo  0 : { *(.debug_srcinfo .zdebug_srcinfo) }
+  .debug_sfnames  0 : { *(.debug_sfnames .zdebug_sfnames) }
 
   /* DWARF 1.1 and DWARF 2 */
-  .debug_aranges  0 : { *(.debug_aranges) }
-  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_aranges  0 : { *(.debug_aranges .zdebug_aranges) }
+  .debug_pubnames 0 : { *(.debug_pubnames .zdebug_pubnames) }
 
   /* DWARF 2 */
-  .debug_info     0 : { *(.debug_info) *(.gnu.linkonce.wi.*) }
-  .debug_abbrev   0 : { *(.debug_abbrev) }
-  .debug_line     0 : { *(.debug_line) }
-  .debug_frame    0 : { *(.debug_frame) }
-  .debug_str      0 : { *(.debug_str) }
-  .debug_loc      0 : { *(.debug_loc) }
-  .debug_macinfo  0 : { *(.debug_macinfo) }
+  .debug_info     0 : { *(.debug_info${RELOCATING+ .gnu.linkonce.wi.*} .zdebug_info) }
+  .debug_abbrev   0 : { *(.debug_abbrev .zdebug_abbrev) }
+  .debug_line     0 : { *(.debug_line .zdebug_line) }
+  .debug_frame    0 : { *(.debug_frame .zdebug_frame) }
+  .debug_str      0 : { *(.debug_str .zdebug_str) }
+  .debug_loc      0 : { *(.debug_loc .zdebug_loc) }
+  .debug_macinfo  0 : { *(.debug_macinfo .zdebug_macinfo) }
 
   PROVIDE (__stack = ${STACK}) ;
   PROVIDE (__data_start_rom = _etext) ;

@@ -1,3 +1,9 @@
+2010-11-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/compress1a.d: Also check MIPS_DWARF.
+	* ld-elf/compress1b.d: Likewise.
+	* ld-elf/compress1c.d: Likewise.
+
 2010-10-29  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-tic6x/attr-compatibility-gnu-gnu.d,

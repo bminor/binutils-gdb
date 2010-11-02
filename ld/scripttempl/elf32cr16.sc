@@ -154,15 +154,15 @@ SECTIONS
      Symbols in the DWARF debugging sections are relative to the beginning
      of the section so we begin them at 0.  */
 
-  .debug_aranges  0 : { *(.debug_aranges) }
-  .debug_pubnames 0 : { *(.debug_pubnames) }
-  .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
-  .debug_abbrev   0 : { *(.debug_abbrev) }
-  .debug_line     0 : { *(.debug_line) }
-  .debug_frame    0 : { *(.debug_frame) }
-  .debug_str      0 : { *(.debug_str) }
-  .debug_loc      0 : { *(.debug_loc) }
-  .debug_macinfo  0 : { *(.debug_macinfo) }
+  .debug_aranges  0 : { *(.debug_aranges .zdebug_aranges) }
+  .debug_pubnames 0 : { *(.debug_pubnames .zdebug_pubnames) }
+  .debug_info     0 : { *(.debug_info${RELOCATING+ .gnu.linkonce.wi.*} .zdebug_info) }
+  .debug_abbrev   0 : { *(.debug_abbrev .zdebug_abbrev) }
+  .debug_line     0 : { *(.debug_line .zdebug_line) }
+  .debug_frame    0 : { *(.debug_frame .zdebug_frame) }
+  .debug_str      0 : { *(.debug_str .zdebug_str) }
+  .debug_loc      0 : { *(.debug_loc .zdebug_loc) }
+  .debug_macinfo  0 : { *(.debug_macinfo .zdebug_macinfo) }
 }
 
 __DATA_IMAGE_START = LOADADDR(.data);
