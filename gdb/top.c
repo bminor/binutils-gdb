@@ -47,6 +47,7 @@
 #include "main.h"
 #include "event-loop.h"
 #include "gdbthread.h"
+#include "python/python.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -1657,7 +1658,10 @@ gdb_init (char *argv0)
   init_cmd_lists ();		/* This needs to be done first */
   initialize_targets ();	/* Setup target_terminal macros for utils.c */
   initialize_utils ();		/* Make errors and warnings possible */
+
+  /* Here is where we call all the _initialize_foo routines.  */
   initialize_all_files ();
+
   /* This creates the current_program_space.  Do this after all the
      _initialize_foo routines have had a chance to install their
      per-sspace data keys.  Also do this before
@@ -1684,4 +1688,12 @@ gdb_init (char *argv0)
      deprecated_init_ui_hook.  */
   if (deprecated_init_ui_hook)
     deprecated_init_ui_hook (argv0);
+
+#ifdef HAVE_PYTHON
+  /* Python initialization can require various commands to be installed.
+     For example "info pretty-printer" needs the "info" prefix to be
+     installed.  Keep things simple and just do final python initialization
+     here.  */
+  finish_python_initialization ();
+#endif
 }

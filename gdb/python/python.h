@@ -24,6 +24,8 @@
 
 extern int gdbpy_global_auto_load;
 
+extern void finish_python_initialization (void);
+
 void eval_python_from_control_command (struct command_line *);
 
 void source_python_script (FILE *stream, const char *file);

@@ -997,9 +997,26 @@ Enables or disables printing of Python stack traces."),
   gdbpy_doc_cst = PyString_FromString ("__doc__");
   gdbpy_enabled_cst = PyString_FromString ("enabled");
 
-  /* Remaining initialization is done in Python.
-     - create a couple objects which are used for Python's stdout and stderr
-     - provide function GdbSetPythonDirectory  */
+  /* Release the GIL while gdb runs.  */
+  PyThreadState_Swap (NULL);
+  PyEval_ReleaseLock ();
+
+#endif /* HAVE_PYTHON */
+}
+
+#ifdef HAVE_PYTHON
+
+/* Perform the remaining python initializations.
+   These must be done after GDB is at least mostly initialized.
+   E.g., The "info pretty-printer" command needs the "info" prefix
+   command installed.  */
+
+void
+finish_python_initialization (void)
+{
+  struct cleanup *cleanup;
+
+  cleanup = ensure_python_env (get_current_arch (), current_language);
 
   PyRun_SimpleString ("\
 import os\n\
@@ -1055,16 +1072,14 @@ def GdbSetPythonDirectory (dir):\n\
 GdbSetPythonDirectory (gdb.PYTHONDIR)\n\
 ");
 
-  /* Release the GIL while gdb runs.  */
-  PyThreadState_Swap (NULL);
-  PyEval_ReleaseLock ();
+  do_cleanups (cleanup);
+}
 
 #endif /* HAVE_PYTHON */
-}
 
 
 
-#if HAVE_PYTHON
+#ifdef HAVE_PYTHON
 
 static PyMethodDef GdbMethods[] =
 {

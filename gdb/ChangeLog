@@ -1,3 +1,14 @@
+2010-11-02  Doug Evans  <dje@google.com>
+
+	* top.c: #include "python/python.h".
+	(gdb_init): Add a comment regarding initialize_all_files.
+	Call finish_python_initialization at the end.
+	* python/python.h (finish_python_initialization): Declare.
+	* python/python.c (finish_python_initialization): New function.
+	(_initialize_python): Move python-implemented initialization there
+	and call it.
+	(GdbMethods): Use #ifdef HAVE_PYTHON for consistency.
+
 2010-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert:
