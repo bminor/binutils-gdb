@@ -693,7 +693,6 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	proc-service.list progspace.c \
 	prologue-value.c psymtab.c \
 	regcache.c reggroups.c remote.c remote-fileio.c reverse.c \
-	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
 	serial.c ser-base.c ser-unix.c \
 	solib.c solib-target.c source.c \
@@ -747,7 +746,7 @@ gdbserver/regcache.h gdbthread.h dwarf2-frame.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
 gdbarch.h bsd-uthread.h gdb_thread_db.h gdb_stat.h memory-map.h	\
 mdebugread.h m88k-tdep.h stabsread.h hppa-linux-offsets.h linux-fork.h \
-ser-unix.h scm-lang.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
+ser-unix.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
 f-lang.h dwarf2loc.h value.h sparc-tdep.h defs.h target-descriptions.h \
 objfiles.h vec.h disasm.h mips-tdep.h ser-base.h \
 gdb_curses.h bfd-target.h memattr.h inferior.h ax.h dummy-frame.h \
@@ -773,7 +772,7 @@ doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h rs6000-tdep.h \
 gdb_locale.h gdb_dirent.h arch-utils.h trad-frame.h gnu-nat.h \
 language.h nbsd-tdep.h wrapper.h solib-svr4.h \
 macroexp.h ui-file.h regcache.h gdb_string.h tracepoint.h i386-tdep.h \
-inf-child.h p-lang.h event-top.h gdbtypes.h scm-tags.h user-regs.h \
+inf-child.h p-lang.h event-top.h gdbtypes.h user-regs.h \
 regformats/regdef.h config/alpha/nm-osf3.h  config/i386/nm-i386gnu.h \
 config/i386/nm-fbsd.h \
 config/nm-nto.h config/sparc/nm-sol2.h config/nm-linux.h \
@@ -847,7 +846,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	varobj.o vec.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
 	m2-lang.o p-lang.o p-typeprint.o p-valprint.o \
-	scm-exp.o scm-lang.o scm-valprint.o \
 	sentinel-frame.o \
 	complaints.o typeprint.o \
 	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \

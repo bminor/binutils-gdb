@@ -76,6 +76,8 @@
   see the "Tasking Support when using the Ravenscar Profile" section
   in the GDB user manual.
 
+* Guile support was removed.
+
 *** Changes in GDB 7.2
 
 * Shared library support for remote targets by default

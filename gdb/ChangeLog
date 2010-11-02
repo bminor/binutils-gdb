@@ -1,3 +1,14 @@
+2010-11-02  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Mention Guile removal.
+	* defs.h (enum language) <language_scm>: Remove.
+	* Makefile.in (SFILES): Remove scm-exp.c, scm-lang.c,
+	scm-valprint.c.
+	(HFILES_NO_SRCDIR): Remove scm-lang.h, scm-tags.h.
+	(COMMON_OBS): Remove scm-exp.o, scm-lang.o, scm-valprint.o.
+	* scm-exp.c, scm-lang.c, scm-valprint.c, scm-lang.h, scm-tags.h:
+	Remove.
+
 2010-11-02  Doug Evans  <dje@google.com>
 
 	* top.c: #include "python/python.h".
