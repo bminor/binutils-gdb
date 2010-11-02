@@ -2734,7 +2734,7 @@ trace_save (const char *filename, int target_does_save)
       for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
 	fprintf (fp, "tp A%x:%s:%s\n",
 		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
-      for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
+      for (a = 0; VEC_iterate (char_ptr, utp->step_actions, a, act); ++a)
 	fprintf (fp, "tp S%x:%s:%s\n",
 		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
       if (utp->at_string)
@@ -3661,6 +3661,9 @@ tfile_get_traceframe_address (off_t tframe_offset)
     perror_with_name (trace_filename);
   else if (gotten < 2)
     error (_("Premature end of file while reading trace file"));
+  tpnum = (short) extract_signed_integer ((gdb_byte *)&tpnum, 2,
+					  gdbarch_byte_order
+					      (target_gdbarch));
 
   tp = get_tracepoint_by_number_on_target (tpnum);
   /* FIXME this is a poor heuristic if multiple locations */
@@ -3684,7 +3687,7 @@ tfile_trace_find (enum trace_find_type type, int num,
 {
   short tpnum;
   int tfnum = 0, found = 0, gotten;
-  int data_size;
+  unsigned int data_size;
   struct breakpoint *tp;
   off_t offset, tframe_offset;
   ULONGEST tfaddr;
@@ -3699,6 +3702,9 @@ tfile_trace_find (enum trace_find_type type, int num,
 	perror_with_name (trace_filename);
       else if (gotten < 2)
 	error (_("Premature end of file while reading trace file"));
+      tpnum = (short) extract_signed_integer ((gdb_byte *)&tpnum, 2,
+					      gdbarch_byte_order
+						  (target_gdbarch));
       offset += 2;
       if (tpnum == 0)
 	break;
@@ -3707,6 +3713,9 @@ tfile_trace_find (enum trace_find_type type, int num,
 	perror_with_name (trace_filename);
       else if (gotten < 4)
 	error (_("Premature end of file while reading trace file"));
+      data_size = (unsigned int) extract_unsigned_integer
+                                     ((gdb_byte *)&data_size, 4,
+				      gdbarch_byte_order (target_gdbarch));
       offset += 4;
       switch (type)
 	{
@@ -3828,6 +3837,10 @@ tfile_fetch_registers (struct target_ops *ops,
 	    perror_with_name (trace_filename);
 	  else if (gotten < 2)
 	    error (_("Premature end of file while reading trace file"));
+          mlen = (unsigned short)
+		 extract_unsigned_integer ((gdb_byte *)&mlen, 2,
+					   gdbarch_byte_order
+					       (target_gdbarch));
 	  lseek (trace_fd, mlen, SEEK_CUR);
 	  pos += (8 + 2 + mlen);
 	  break;
@@ -3920,12 +3933,18 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	    perror_with_name (trace_filename);
 	  else if (gotten < 8)
 	    error (_("Premature end of file while reading trace file"));
-
+          maddr = extract_unsigned_integer ((gdb_byte *)&maddr, 8,
+					    gdbarch_byte_order
+						(target_gdbarch));
 	  gotten = read (trace_fd, &mlen, 2);
 	  if (gotten < 0)
 	    perror_with_name (trace_filename);
 	  else if (gotten < 2)
 	    error (_("Premature end of file while reading trace file"));
+          mlen = (unsigned short)
+		 extract_unsigned_integer ((gdb_byte *)&mlen, 2,
+					   gdbarch_byte_order
+					       (target_gdbarch));
 	  /* If the block includes the first part of the desired
 	     range, return as much it has; GDB will re-request the
 	     remainder, which might be in a different block of this
@@ -3968,7 +3987,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       asection *s;
       bfd_size_type size;
-      bfd_vma lma;
+      bfd_vma vma;
 
       for (s = exec_bfd->sections; s; s = s->next)
 	{
@@ -3976,16 +3995,16 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	      (s->flags & SEC_READONLY) == 0)
 	    continue;
 
-	  lma = s->lma;
+	  vma = s->vma;
 	  size = bfd_get_section_size (s);
-	  if (lma <= offset && offset < (lma + size))
+	  if (vma <= offset && offset < (vma + size))
 	    {
-	      amt = (lma + size) - offset;
+	      amt = (vma + size) - offset;
 	      if (amt > len)
 		amt = len;
 
 	      amt = bfd_get_section_contents (exec_bfd, s,
-					      readbuf, offset - lma, amt);
+					      readbuf, offset - vma, amt);
 	      return amt;
 	    }
 	}
@@ -4028,6 +4047,10 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	    perror_with_name (trace_filename);
 	  else if (gotten < 2)
 	    error (_("Premature end of file while reading trace file"));
+          mlen = (unsigned short)
+		 extract_unsigned_integer ((gdb_byte *)&mlen, 2,
+					   gdbarch_byte_order
+					       (target_gdbarch));
 	  lseek (trace_fd, mlen, SEEK_CUR);
 	  pos += (8 + 2 + mlen);
 	  break;
@@ -4037,6 +4060,9 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	    perror_with_name (trace_filename);
 	  else if (gotten < 4)
 	    error (_("Premature end of file while reading trace file"));
+          vnum = (int) extract_signed_integer ((gdb_byte *)&vnum, 4,
+					       gdbarch_byte_order
+						   (target_gdbarch));
 	  if (tsvnum == vnum)
 	    {
 	      gotten = read (trace_fd, val, 8);
@@ -4044,6 +4070,9 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 		perror_with_name (trace_filename);
 	      else if (gotten < 8)
 		error (_("Premature end of file while reading trace file"));
+              *val = extract_signed_integer ((gdb_byte *)val, 8,
+					     gdbarch_byte_order
+						 (target_gdbarch));
 	      return 1;
 	    }
 	  lseek (trace_fd, 8, SEEK_CUR);
