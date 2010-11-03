@@ -50,7 +50,7 @@ if { ![runto main] } {
 gdb_test "print c4" "\\\$$decimal = \\{1, 2, 3, 4\\}"
 gdb_test "print c4\[2\]" "\\\$$decimal = 3"
 
-# Test binary operators on integer vector types
+# Test operators on integer vector types
 gdb_test "print i4a" "\\\$$decimal = \\{2, 4, 8, 16\\}"
 gdb_test "print i4b" "\\\$$decimal = \\{1, 2, 8, 4\\}"
 # Arithmetic operators
@@ -59,15 +59,23 @@ gdb_test "print i4a - i4b" "\\\$$decimal = \\{1, 2, 0, 12\\}"
 gdb_test "print i4a * i4b" "\\\$$decimal = \\{2, 8, 64, 64\\}"
 gdb_test "print i4a / i4b" "\\\$$decimal = \\{2, 2, 1, 4\\}"
 gdb_test "print i4a % i4b" "\\\$$decimal = \\{0, 0, 0, 0\\}"
+gdb_test "print i4a++" "\\\$$decimal = \\{2, 4, 8, 16\\}"
+gdb_test "print ++i4a" "\\\$$decimal = \\{4, 6, 10, 18\\}"
+gdb_test "print i4a--" "\\\$$decimal = \\{4, 6, 10, 18\\}"
+gdb_test "print --i4a" "\\\$$decimal = \\{2, 4, 8, 16\\}"
+gdb_test "print +i4a" "\\\$$decimal = \\{2, 4, 8, 16\\}"
+gdb_test "print -i4a" "\\\$$decimal = \\{-2, -4, -8, -16\\}"
+
 # Bitwise operators
 gdb_test "print i4a & i4b" "\\\$$decimal = \\{0, 0, 8, 0\\}"
 gdb_test "print i4a | i4b" "\\\$$decimal = \\{3, 6, 8, 20\\}"
 gdb_test "print i4a ^ i4b" "\\\$$decimal = \\{3, 6, 0, 20\\}"
+gdb_test "print ~i4a" "\\\$$decimal = \\{-3, -5, -9, -17\\}"
 # Shift operators
 gdb_test "print i4a << i4b" "\\\$$decimal = \\{4, 16, 2048, 256\\}"
 gdb_test "print i4a >> i4b" "\\\$$decimal = \\{1, 1, 0, 1\\}"
 
-# Test binary operators on floating point vector types
+# Test operators on floating point vector types
 gdb_test "print f4a" "\\\$$decimal = \\{2, 4, 8, 16\\}"
 gdb_test "print f4b" "\\\$$decimal = \\{1, 2, 8, 4\\}"
 # Arithmetic operators
@@ -75,6 +83,8 @@ gdb_test "print f4a + f4b" "\\\$$decimal = \\{3, 6, 16, 20\\}"
 gdb_test "print f4a - f4b" "\\\$$decimal = \\{1, 2, 0, 12\\}"
 gdb_test "print f4a * f4b" "\\\$$decimal = \\{2, 8, 64, 64\\}"
 gdb_test "print f4a / f4b" "\\\$$decimal = \\{2, 2, 1, 4\\}"
+gdb_test "print +f4a" "\\\$$decimal = \\{2, 4, 8, 16\\}"
+gdb_test "print -f4a" "\\\$$decimal = \\{-2, -4, -8, -16\\}"
 
 # Test scalar to vector widening
 gdb_test "print (int2) 1" "\\\$$decimal = \\{1, 1\\}"

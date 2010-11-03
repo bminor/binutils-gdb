@@ -1712,6 +1712,14 @@ value_pos (struct value *arg1)
     {
       return value_from_longest (type, value_as_long (arg1));
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+    {
+      struct value *val = allocate_value (type);
+
+      memcpy (value_contents_raw (val), value_contents (arg1),
+              TYPE_LENGTH (type));
+      return val;
+    }
   else
     {
       error ("Argument to positive operation not a number.");
@@ -1749,6 +1757,20 @@ value_neg (struct value *arg1)
     {
       return value_from_longest (type, -value_as_long (arg1));
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+    {
+      struct value *tmp, *val = allocate_value (type);
+      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      int i, n = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
+
+      for (i = 0; i < n; i++)
+	{
+	  tmp = value_neg (value_subscript (arg1, i));
+	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
+		  value_contents_all (tmp), TYPE_LENGTH (eltype));
+	}
+      return val;
+    }
   else
     {
       error (_("Argument to negate operation not a number."));
@@ -1760,14 +1782,31 @@ struct value *
 value_complement (struct value *arg1)
 {
   struct type *type;
+  struct value *val;
 
   arg1 = coerce_ref (arg1);
   type = check_typedef (value_type (arg1));
 
-  if (!is_integral_type (type))
-    error (_("Argument to complement operation not an integer or boolean."));
+  if (is_integral_type (type))
+    val = value_from_longest (type, ~value_as_long (arg1));
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+    {
+      struct value *tmp;
+      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      int i, n = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
 
-  return value_from_longest (type, ~value_as_long (arg1));
+      val = allocate_value (type);
+      for (i = 0; i < n; i++)
+        {
+          tmp = value_complement (value_subscript (arg1, i));
+          memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
+                  value_contents_all (tmp), TYPE_LENGTH (eltype));
+        }
+    }
+  else
+    error (_("Argument to complement operation not an integer, boolean."));
+
+  return val;
 }
 
 /* The INDEX'th bit of SET value whose value_type is TYPE,

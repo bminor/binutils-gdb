@@ -1,5 +1,11 @@
 2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
 
+	* valarith.c (value_pos, value_neg, value_complement): Handle
+	vector types.
+	* valops.c (value_one): Likewise.
+
+2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
+
 	* value.h (value_non_lval): Declare.
 	* value.c (value_non_lval): New function.
 	* eval.c (evaluate_subexp_standard) <UNOP_POSTINCREMENT,

@@ -871,6 +871,20 @@ value_one (struct type *type, enum lval_type lv)
     {
       val = value_from_longest (type, (LONGEST) 1);
     }
+  else if (TYPE_CODE (type1) == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
+    {
+      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type1));
+      int i, n = TYPE_LENGTH (type1) / TYPE_LENGTH (eltype);
+      struct value *tmp;
+
+      val = allocate_value (type);
+      for (i = 0; i < n; i++)
+	{
+	  tmp = value_one (eltype, lv);
+	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
+		  value_contents_all (tmp), TYPE_LENGTH (eltype));
+	}
+    }
   else
     {
       error (_("Not a numeric type."));
