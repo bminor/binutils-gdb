@@ -1,3 +1,8 @@
+2010-11-03  Ryan Mansfield  <rmansfield@qnx.com>
+
+	* script-sections.cc (Script_sections::find_memory_region): Check
+	for a NULL output section pointer.
+
 2010-10-29  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_outout_section::fix_exidx_coverage): Adjust call to

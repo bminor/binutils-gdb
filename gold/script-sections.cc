@@ -2238,6 +2238,7 @@ Script_sections::find_memory_region(
       // explicit region assignment, then we will return this region.
       Output_section* out_sec = section->get_output_section();
       if (first_match == NULL
+	  && out_sec != NULL
 	  && (*mr)->attributes_compatible(out_sec->flags(),
 					  out_sec->type()))
 	first_match = *mr;
