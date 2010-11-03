@@ -1,3 +1,9 @@
+2010-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/12186
+	* config/tc-i386-intel.c (i386_intel_fold): Properly fold
+	_GLOBAL_OFFSET_TABLE_.
+
 2010-11-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-tic6x.c (OPTION_MPID, OPTION_MPIC, OPTION_MNO_PIC):
