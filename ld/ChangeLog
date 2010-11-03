@@ -1,3 +1,17 @@
+2010-11-03  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12001
+	* ldlang.c (ldlang_def_chain_list): New variable.  Contains a list
+	of symbols defined via the --defsym command line option and
+	currently waiting assignment.
+	(insert_defined): Add a defined symbol to the symbol table.
+	(ldlang_add_def): Add a entry to the ldlang_def_chain_list.
+	(lang_place_defineds): Walk ldlang_def_chain_list defining the
+	symbols.
+	(lang_process): Call lang_place_defineds.
+	(lang_add_assignment): If the assignment has come from a --defsym
+	command line option then call lang_add_def.
+
 2010-11-03  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (eelf64hppa.c): Correct dependencies.

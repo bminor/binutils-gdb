@@ -1,3 +1,14 @@
+2010-11-03  Nick Clifton  <nickc@redhat.com>
+
+	PR gold/12001
+	* script.h (class Symbol_assignment: name): New member.  Returns
+	the name of the symbol.
+	* scrfipt.cc (Script_options::is_pending_assignment): New member.
+	Returns true if the given symbol name is on the list of
+	assignments wating to be processed.
+	* archive.cc (should_incldue_member): If the symbol is undefined,
+	check to see if it is on the list of symbols pending assignment.
+
 2010-11-03  Ryan Mansfield  <rmansfield@qnx.com>
 
 	* script-sections.cc (Script_sections::find_memory_region): Check

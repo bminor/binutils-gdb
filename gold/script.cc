@@ -1050,6 +1050,20 @@ Script_options::Script_options()
 {
 }
 
+// Returns true if NAME is on the list of symbol assignments waiting
+// to be processed.
+
+bool
+Script_options::is_pending_assignment(const char* name)
+{
+  for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
+       p != this->symbol_assignments_.end();
+       ++p)
+    if ((*p)->name() == name)
+      return true;
+  return false;
+}
+
 // Add a symbol to be defined.
 
 void

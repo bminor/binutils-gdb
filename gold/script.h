@@ -345,6 +345,10 @@ class Symbol_assignment
   set_if_absolute(Symbol_table*, const Layout*, bool is_dot_available,
 		  uint64_t dot_value);
 
+  const std::string&
+  name() const
+  { return this->name_; }
+
   // Print the assignment to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -423,6 +427,10 @@ class Script_options
   add_symbol_assignment(const char* name, size_t length, bool is_defsym,
 			Expression* value, bool provide, bool hidden);
 
+  // Look for an assigned symbol.
+  bool
+  is_pending_assignment(const char* name);
+  
   // Add a reference to a symbol.
   void
   add_symbol_reference(const char* name, size_t length);

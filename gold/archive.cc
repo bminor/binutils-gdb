@@ -671,6 +671,10 @@ Archive::should_include_member(Symbol_table* symtab, Layout* layout,
     }
   else if (!sym->is_undefined())
     return Archive::SHOULD_INCLUDE_NO;
+  // PR 12001: Do not include an archive when the undefined
+  // symbol has actually been defined on the command line.
+  else if (layout->script_options()->is_pending_assignment(sym_name))
+    return Archive::SHOULD_INCLUDE_NO;
   else if (sym->binding() == elfcpp::STB_WEAK)
     return Archive::SHOULD_INCLUDE_UNKNOWN;
 
