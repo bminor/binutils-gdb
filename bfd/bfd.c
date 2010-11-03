@@ -161,6 +161,11 @@ CODE_FRAGMENT
 .#define BFD_FLAGS_SAVED \
 .  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS)
 .
+.  {* Flags bits which are for BFD use only.  *}
+.#define BFD_FLAGS_FOR_BFD_USE_MASK \
+.  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
+.   | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT)
+.
 .  {* Currently my_archive is tested before adding origin to
 .     anything. I believe that this can become always an add of
 .     origin, with origin set to 0 for non archive files.  *}

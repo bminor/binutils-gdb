@@ -1,3 +1,8 @@
+2010-11-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (BFD_FLAGS_FOR_BFD_USE_MASK): New.
+	* bfd-in2.h: Regenerated.
+
 2010-11-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_obj_attrs_arg_type): Except for

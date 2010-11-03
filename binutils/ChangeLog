@@ -1,3 +1,8 @@
+2010-11-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (dump_bfd_header): Don't display
+	BFD_FLAGS_FOR_BFD_USE_MASK bits in abfd->flags.
+
 2010-11-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* readelf.c (display_tic6x_attribute): Handle more attributes.
