@@ -2526,8 +2526,7 @@ eelf64alpha_nbsd.c: $(srcdir)/emulparams/elf64alpha_nbsd.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha_nbsd "$(tdir_elf64alpha_nbsd)"
 eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
-  $(srcdir)/emulparams/hppa64linux.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf64hppa.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64hppa "$(tdir_elf64hppa)"
 eelf64_aix.c: $(srcdir)/emulparams/elf64_aix.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
