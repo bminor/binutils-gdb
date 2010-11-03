@@ -1,3 +1,8 @@
+2010-11-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* valprint.c (val_print_array_elements): Put back handling of
+	empty arrays.
+
 2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
 
 	* dwarf2read.c (read_array_type): Read the DW_AT_byte_size from the

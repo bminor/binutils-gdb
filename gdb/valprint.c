@@ -1118,7 +1118,17 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
   index_type = TYPE_INDEX_TYPE (type);
 
   if (get_array_bounds (type, &low_bound, &high_bound))
-    len = high_bound - low_bound + 1;
+    {
+      /* The array length should normally be HIGH_BOUND - LOW_BOUND + 1.
+         But we have to be a little extra careful, because some languages
+	 such as Ada allow LOW_BOUND to be greater than HIGH_BOUND for
+	 empty arrays.  In that situation, the array length is just zero,
+	 not negative!  */
+      if (low_bound > high_bound)
+	len = 0;
+      else
+	len = high_bound - low_bound + 1;
+    }
   else
     {
       warning (_("unable to get bounds of array, assuming null array"));
