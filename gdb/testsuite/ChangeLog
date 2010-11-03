@@ -1,3 +1,7 @@
+2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.base/exprs.exp: Add tests for pre-/post- in-/decrement operators.
+
 2010-11-02  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-pp-maint.c: New file.

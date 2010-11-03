@@ -826,6 +826,26 @@ value_copy (struct value *arg)
   return val;
 }
 
+/* Return a version of ARG that is non-lvalue.  */
+
+struct value *
+value_non_lval (struct value *arg)
+{
+  if (VALUE_LVAL (arg) != not_lval)
+    {
+      struct type *enc_type = value_enclosing_type (arg);
+      struct value *val = allocate_value (enc_type);
+
+      memcpy (value_contents_all_raw (val), value_contents_all (arg),
+	      TYPE_LENGTH (enc_type));
+      val->type = arg->type;
+      set_value_embedded_offset (val, value_embedded_offset (arg));
+      set_value_pointed_to_offset (val, value_pointed_to_offset (arg));
+      return val;
+    }
+   return arg;
+}
+
 void
 set_value_component_location (struct value *component,
 			      const struct value *whole)

@@ -2782,6 +2782,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  arg3 = value_non_lval (arg1);
+
 	  if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
 	    arg2 = value_ptradd (arg1, 1);
 	  else
@@ -2794,7 +2796,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 
 	  value_assign (arg1, arg2);
-	  return arg1;
+	  return arg3;
 	}
 
     case UNOP_POSTDECREMENT:
@@ -2807,6 +2809,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  arg3 = value_non_lval (arg1);
+
 	  if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
 	    arg2 = value_ptradd (arg1, -1);
 	  else
@@ -2819,7 +2823,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 
 	  value_assign (arg1, arg2);
-	  return arg1;
+	  return arg3;
 	}
 
     case OP_THIS:

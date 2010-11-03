@@ -711,6 +711,8 @@ extern void preserve_values (struct objfile *);
 
 extern struct value *value_copy (struct value *);
 
+extern struct value *value_non_lval (struct value *);
+
 extern void preserve_one_value (struct value *, struct objfile *, htab_t);
 
 /* From valops.c */

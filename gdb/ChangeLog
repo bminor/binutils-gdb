@@ -1,3 +1,11 @@
+2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
+
+	* value.h (value_non_lval): Declare.
+	* value.c (value_non_lval): New function.
+	* eval.c (evaluate_subexp_standard) <UNOP_POSTINCREMENT,
+	UNOP_POSTDECREMENT>: Call value_non_lval to ensure to return a
+	non-lvalue.
+
 2010-11-02  Doug Evans  <dje@google.com>
 
 	New python module gdb.printing, and new commands info pretty-printer,
