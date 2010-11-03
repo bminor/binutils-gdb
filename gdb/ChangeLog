@@ -1,5 +1,11 @@
 2010-11-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_array): Move variables `eltlen'
+	and `len' declaration and computation inside block where they
+	are being used.
+
+2010-11-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* valprint.c (val_print_array_elements): Put back handling of
 	empty arrays.
 

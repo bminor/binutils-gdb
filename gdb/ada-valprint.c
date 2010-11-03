@@ -603,23 +603,24 @@ ada_val_print_array (struct type *type, const gdb_byte *valaddr,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   struct type *elttype = TYPE_TARGET_TYPE (type);
-  unsigned int eltlen;
-  unsigned int len;
   int result = 0;
-
-  if (elttype == NULL)
-    eltlen = 0;
-  else
-    eltlen = TYPE_LENGTH (elttype);
-  if (eltlen == 0)
-    len = 0;
-  else
-    len = TYPE_LENGTH (type) / eltlen;
 
   /* For an array of chars, print with string syntax.  */
   if (ada_is_string_type (type)
       && (options->format == 0 || options->format == 's'))
     {
+      unsigned int eltlen;
+      unsigned int len;
+
+      if (elttype == NULL)
+        eltlen = 0;
+      else
+        eltlen = TYPE_LENGTH (elttype);
+      if (eltlen == 0)
+        len = 0;
+      else
+        len = TYPE_LENGTH (type) / eltlen;
+
       if (options->prettyprint_arrays)
         print_spaces_filtered (2 + 2 * recurse, stream);
 
