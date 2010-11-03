@@ -802,6 +802,50 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
     }
 }
 
+/* Assuming TYPE is a simple, non-empty array type, compute its upper
+   and lower bound.  Save the low bound into LOW_BOUND if not NULL.
+   Save the high bound into HIGH_BOUND if not NULL.
+
+   Return 1 if the operation was successful. Return zero otherwise,
+   in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.
+
+   We now simply use get_discrete_bounds call to get the values
+   of the low and high bounds.
+   get_discrete_bounds can return three values:
+   1, meaning that index is a range,
+   0, meaning that index is a discrete type,
+   or -1 for failure.  */
+
+int
+get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
+{
+  struct type *index = TYPE_INDEX_TYPE (type);
+  LONGEST low = 0;
+  LONGEST high = 0;
+  int res;
+
+  if (index == NULL)
+    return 0;
+
+  res = get_discrete_bounds (index, &low, &high);
+  if (res == -1)
+    return 0;
+
+  /* Check if the array bounds are undefined.  */
+  if (res == 1
+      && ((low_bound && TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED (type))
+	  || (high_bound && TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))))
+    return 0;
+
+  if (low_bound)
+    *low_bound = low;
+
+  if (high_bound)
+    *high_bound = high;
+
+  return 1;
+}
+
 /* Create an array type using either a blank type supplied in
    RESULT_TYPE, or creating a new type, inheriting the objfile from
    RANGE_TYPE.

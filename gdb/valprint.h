@@ -109,9 +109,6 @@ extern void get_raw_print_options (struct value_print_options *opts);
 extern void get_formatted_print_options (struct value_print_options *opts,
 					 char format);
 
-extern int get_array_bounds (struct type *type, LONGEST *low_bound,
-			     LONGEST *high_bound);
-
 extern void maybe_print_array_index (struct type *index_type, LONGEST index,
                                      struct ui_file *stream,
 				     const struct value_print_options *options);

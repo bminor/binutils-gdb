@@ -1394,7 +1394,8 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 {
   struct value *val, *tmp, *mark;
   struct type *type1, *type2, *eltype1, *eltype2, *result_type;
-  int t1_is_vec, t2_is_vec, elsize, n, i;
+  int t1_is_vec, t2_is_vec, elsize, i;
+  LONGEST low_bound1, high_bound1, low_bound2, high_bound2;
 
   type1 = check_typedef (value_type (val1));
   type2 = check_typedef (value_type (val2));
@@ -1407,23 +1408,23 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
   if (!t1_is_vec || !t2_is_vec)
     error (_("Vector operations are only supported among vectors"));
 
+  if (!get_array_bounds (type1, &low_bound1, &high_bound1)
+      || !get_array_bounds (type2, &low_bound2, &high_bound2))
+    error (_("Could not determine the vector bounds"));
+
   eltype1 = check_typedef (TYPE_TARGET_TYPE (type1));
   eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
+  elsize = TYPE_LENGTH (eltype1);
 
   if (TYPE_CODE (eltype1) != TYPE_CODE (eltype2)
-      || TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2)
-      || TYPE_UNSIGNED (eltype1) != TYPE_UNSIGNED (eltype2))
+      || elsize != TYPE_LENGTH (eltype2)
+      || TYPE_UNSIGNED (eltype1) != TYPE_UNSIGNED (eltype2)
+      || low_bound1 != low_bound2 || high_bound1 != high_bound2)
     error (_("Cannot perform operation on vectors with different types"));
-
-  elsize = TYPE_LENGTH (eltype1);
-  n = TYPE_LENGTH (type1) / elsize;
-
-  if (n != TYPE_LENGTH (type2) / TYPE_LENGTH (eltype2))
-    error (_("Cannot perform operation on vectors with different sizes"));
 
   val = allocate_value (type1);
   mark = value_mark ();
-  for (i = 0; i < n; i++)
+  for (i = 0; i < high_bound1 - low_bound1 + 1; i++)
     {
       tmp = value_binop (value_subscript (val1, i),
 			 value_subscript (val2, i), op);

@@ -572,19 +572,20 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (passed_a_ptr)
-	fprintf_filtered (stream, ")");
+      {
+	LONGEST low_bound, high_bound;
 
-      fprintf_filtered (stream, "[");
-      if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-	&& !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
-	fprintf_filtered (stream, "%d",
-			  (TYPE_LENGTH (type)
-			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
-      fprintf_filtered (stream, "]");
+	if (passed_a_ptr)
+	  fprintf_filtered (stream, ")");
 
-      c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
-				   0, 0);
+	fprintf_filtered (stream, "[");
+	if (get_array_bounds (type, &low_bound, &high_bound))
+	  fprintf_filtered (stream, "%d", (int) (high_bound - low_bound + 1));
+	fprintf_filtered (stream, "]");
+
+	c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
+				     0, 0);
+      }
       break;
 
     case TYPE_CODE_MEMBERPTR:

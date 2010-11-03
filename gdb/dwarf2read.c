@@ -7194,6 +7194,19 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     make_vector_type (type);
 
+  /* The DIE may have DW_AT_byte_size set.  For example an OpenCL
+     implementation may choose to implement triple vectors using this
+     attribute.  */
+  attr = dwarf2_attr (die, DW_AT_byte_size, cu);
+  if (attr)
+    {
+      if (DW_UNSND (attr) >= TYPE_LENGTH (type))
+	TYPE_LENGTH (type) = DW_UNSND (attr);
+      else
+	complaint (&symfile_complaints, _("\
+DW_AT_byte_size for array type smaller than the total size of elements"));
+    }
+
   name = dwarf2_name (die, cu);
   if (name)
     TYPE_NAME (type) = name;

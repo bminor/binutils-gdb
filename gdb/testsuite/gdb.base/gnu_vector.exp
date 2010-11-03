@@ -129,8 +129,8 @@ gdb_test "print f4a + d2" "Cannot perform operation on vectors with different ty
 gdb_test "print d2 + f4a" "Cannot perform operation on vectors with different types"
 gdb_test "print ui4 + i4a" "Cannot perform operation on vectors with different types"
 gdb_test "print i4a + ui4" "Cannot perform operation on vectors with different types"
-gdb_test "print i4a + i2" "Cannot perform operation on vectors with different sizes"
-gdb_test "print i2 + i4a" "Cannot perform operation on vectors with different sizes"
-gdb_test "print f4a + f2" "Cannot perform operation on vectors with different sizes"
-gdb_test "print f2 + f4a" "Cannot perform operation on vectors with different sizes"
+gdb_test "print i4a + i2" "Cannot perform operation on vectors with different types"
+gdb_test "print i2 + i4a" "Cannot perform operation on vectors with different types"
+gdb_test "print f4a + f2" "Cannot perform operation on vectors with different types"
+gdb_test "print f2 + f4a" "Cannot perform operation on vectors with different types"
 

@@ -1067,44 +1067,6 @@ print_char_chars (struct ui_file *stream, struct type *type,
     }
 }
 
-/* Assuming TYPE is a simple, non-empty array type, compute its upper
-   and lower bound.  Save the low bound into LOW_BOUND if not NULL.
-   Save the high bound into HIGH_BOUND if not NULL.
-
-   Return 1 if the operation was successful. Return zero otherwise,
-   in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.
-  
-   We now simply use get_discrete_bounds call to get the values
-   of the low and high bounds. 
-   get_discrete_bounds can return three values:
-   1, meaning that index is a range,
-   0, meaning that index is a discrete type,
-   or -1 for failure.  */
-
-int
-get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
-{
-  struct type *index = TYPE_INDEX_TYPE (type);
-  LONGEST low = 0;
-  LONGEST high = 0;
-  int res;
-                                
-  if (index == NULL)
-    return 0;
-
-  res = get_discrete_bounds (index, &low, &high);
-  if (res == -1)
-    return 0;
-
-  if (low_bound)
-    *low_bound = low;
-
-  if (high_bound)
-    *high_bound = high;
-
-  return 1;
-}
-
 /* Print on STREAM using the given OPTIONS the index for the element
    at INDEX of an array whose index type is INDEX_TYPE.  */
     
@@ -1149,38 +1111,19 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
   unsigned int rep1;
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
-  LONGEST low_bound_index = 0;
+  LONGEST low_bound, high_bound;
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
   index_type = TYPE_INDEX_TYPE (type);
 
-  /* Compute the number of elements in the array.  On most arrays,
-     the size of its elements is not zero, and so the number of elements
-     is simply the size of the array divided by the size of the elements.
-     But for arrays of elements whose size is zero, we need to look at
-     the bounds.  */
-  if (eltlen != 0)
-    len = TYPE_LENGTH (type) / eltlen;
+  if (get_array_bounds (type, &low_bound, &high_bound))
+    len = high_bound - low_bound + 1;
   else
     {
-      LONGEST low, hi;
-
-      if (get_array_bounds (type, &low, &hi))
-        len = hi - low + 1;
-      else
-        {
-          warning (_("unable to get bounds of array, assuming null array"));
-          len = 0;
-        }
-    }
-
-  /* Get the array low bound.  This only makes sense if the array
-     has one or more element in it.  */
-  if (len > 0 && !get_array_bounds (type, &low_bound_index, NULL))
-    {
-      warning (_("unable to get low bound of array, using zero as default"));
-      low_bound_index = 0;
+      warning (_("unable to get bounds of array, assuming null array"));
+      low_bound = 0;
+      len = 0;
     }
 
   annotate_array_section_begin (i, elttype);
@@ -1200,7 +1143,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 	    }
 	}
       wrap_here (n_spaces (2 + 2 * recurse));
-      maybe_print_array_index (index_type, i + low_bound_index,
+      maybe_print_array_index (index_type, i + low_bound,
                                stream, options);
 
       rep1 = i + 1;

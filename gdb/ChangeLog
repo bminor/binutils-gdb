@@ -1,5 +1,22 @@
 2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
 
+	* dwarf2read.c (read_array_type): Read the DW_AT_byte_size from the
+	DIE and set the length of the type.
+	* gdbtypes.h (get_array_bounds): Move here from valprint.h.
+	* gdbtypes.c (get_array_bounds): Move here from valprint.c and
+	return 0 if the corresponding bounds of the type are undefined.
+	* valprint.h (get_array_bounds): Move declaration to gdbtypes.h.
+	* valprint.c (get_array_bounds): Move implementation to gdbtypes.c.
+	(val_print_array_elements): Use get_array_bounds to compute the number
+	of array elements instead of dividing the length of the array by the
+	length of the element types.
+	* valarith.c (vector_binop): Likewise.
+	* valops.c (value_cast): Likewise.
+	* c-valprint.c (c_val_print): Likewise.
+	* c-typeprint.c (c_type_print_varspec_suffix): Likewise.
+
+2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
+
 	* valarith.c (value_pos, value_neg, value_complement): Handle
 	vector types.
 	* valops.c (value_one): Likewise.

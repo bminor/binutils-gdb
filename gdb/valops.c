@@ -544,14 +544,17 @@ value_cast (struct type *type, struct value *arg2)
       /* Widen the scalar to a vector.  */
       struct type *eltype;
       struct value *val;
-      int i, n;
+      LONGEST low_bound, high_bound;
+      int i;
+
+      if (!get_array_bounds (type, &low_bound, &high_bound))
+	error (_("Could not determine the vector bounds"));
 
       eltype = check_typedef (TYPE_TARGET_TYPE (type));
       arg2 = value_cast (eltype, arg2);
       val = allocate_value (type);
-      n = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
 
-      for (i = 0; i < n; i++)
+      for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  /* Duplicate the contents of arg2 into the destination vector.  */
 	  memcpy (value_contents_writeable (val) + (i * TYPE_LENGTH (eltype)),

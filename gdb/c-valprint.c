@@ -171,8 +171,13 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       elttype = check_typedef (unresolved_elttype);
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
 	{
+          LONGEST low_bound, high_bound;
+
+          if (!get_array_bounds (type, &low_bound, &high_bound))
+            error (_("Could not determine the array high bound"));
+
 	  eltlen = TYPE_LENGTH (elttype);
-	  len = TYPE_LENGTH (type) / eltlen;
+	  len = high_bound - low_bound + 1;
 	  if (options->prettyprint_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
