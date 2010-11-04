@@ -477,6 +477,9 @@
 #ifndef elf_backend_obj_attrs_order
 #define elf_backend_obj_attrs_order		NULL
 #endif
+#ifndef elf_backend_obj_attrs_handle_unknown
+#define elf_backend_obj_attrs_handle_unknown	NULL
+#endif
 #ifndef elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment	1
 #endif
@@ -741,6 +744,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_obj_attrs_arg_type,
   elf_backend_obj_attrs_section_type,
   elf_backend_obj_attrs_order,
+  elf_backend_obj_attrs_handle_unknown,
   elf_backend_static_tls_alignment,
   elf_backend_collect,
   elf_backend_type_change_ok,

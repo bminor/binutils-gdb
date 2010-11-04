@@ -9653,6 +9653,27 @@ elf32_arm_obj_attrs_order (int num)
   return num;
 }
 
+/* Attribute numbers >=64 (mod 128) can be safely ignored.  */
+static bfd_boolean
+elf32_arm_obj_attrs_handle_unknown (bfd *abfd, int tag)
+{
+  if ((tag & 127) < 64)
+    {
+      _bfd_error_handler
+	(_("%B: Unknown mandatory EABI object attribute %d"),
+	 abfd, tag);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  else
+    {
+      _bfd_error_handler
+	(_("Warning: %B: Unknown EABI object attribute %d"),
+	 abfd, tag);
+      return TRUE;
+    }
+}
+
 /* Read the architecture from the Tag_also_compatible_with attribute, if any.
    Returns -1 if no architecture could be read.  */
 
@@ -10382,45 +10403,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  break;
 
 	default:
-	  {
-	    bfd *err_bfd = NULL;
-
-	    /* The "known_obj_attributes" table does contain some undefined
-	       attributes.  Ensure that there are unused.  */
-	    if (out_attr[i].i != 0 || out_attr[i].s != NULL)
-	      err_bfd = obfd;
-	    else if (in_attr[i].i != 0 || in_attr[i].s != NULL)
-	      err_bfd = ibfd;
-
-	    if (err_bfd != NULL)
-	      {
-		/* Attribute numbers >=64 (mod 128) can be safely ignored.  */
-		if ((i & 127) < 64)
-		  {
-		    _bfd_error_handler
-		      (_("%B: Unknown mandatory EABI object attribute %d"),
-		       err_bfd, i);
-		    bfd_set_error (bfd_error_bad_value);
-		    result = FALSE;
-		  }
-		else
-		  {
-		    _bfd_error_handler
-		      (_("Warning: %B: Unknown EABI object attribute %d"),
-		       err_bfd, i);
-		  }
-	      }
-
-	    /* Only pass on attributes that match in both inputs.  */
-	    if (in_attr[i].i != out_attr[i].i
-		|| in_attr[i].s != out_attr[i].s
-		|| (in_attr[i].s != NULL && out_attr[i].s != NULL
-		    && strcmp (in_attr[i].s, out_attr[i].s) != 0))
-	      {
-		out_attr[i].i = 0;
-		out_attr[i].s = NULL;
-	      }
-	  }
+	  result
+	    = result && _bfd_elf_merge_unknown_attribute_low (ibfd, obfd, i);
 	}
 
       /* If out_attr was copied from in_attr then it won't have a type yet.  */
@@ -10437,74 +10421,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   out_listp = &elf_other_obj_attributes_proc (obfd);
   out_list = *out_listp;
 
-  for (; in_list || out_list; )
-    {
-      bfd *err_bfd = NULL;
-      int err_tag = 0;
+  result &= _bfd_elf_merge_unknown_attribute_list (ibfd, obfd);
 
-      /* The tags for each list are in numerical order.  */
-      /* If the tags are equal, then merge.  */
-      if (out_list && (!in_list || in_list->tag > out_list->tag))
-	{
-	  /* This attribute only exists in obfd.  We can't merge, and we don't
-	     know what the tag means, so delete it.  */
-	  err_bfd = obfd;
-	  err_tag = out_list->tag;
-	  *out_listp = out_list->next;
-	  out_list = *out_listp;
-	}
-      else if (in_list && (!out_list || in_list->tag < out_list->tag))
-	{
-	  /* This attribute only exists in ibfd. We can't merge, and we don't
-	     know what the tag means, so ignore it.  */
-	  err_bfd = ibfd;
-	  err_tag = in_list->tag;
-	  in_list = in_list->next;
-	}
-      else /* The tags are equal.  */
-	{
-	  /* As present, all attributes in the list are unknown, and
-	     therefore can't be merged meaningfully.  */
-	  err_bfd = obfd;
-	  err_tag = out_list->tag;
-
-	  /*  Only pass on attributes that match in both inputs.  */
-	  if (in_list->attr.i != out_list->attr.i
-	      || in_list->attr.s != out_list->attr.s
-	      || (in_list->attr.s && out_list->attr.s
-		  && strcmp (in_list->attr.s, out_list->attr.s) != 0))
-	    {
-	      /* No match.  Delete the attribute.  */
-	      *out_listp = out_list->next;
-	      out_list = *out_listp;
-	    }
-	  else
-	    {
-	      /* Matched.  Keep the attribute and move to the next.  */
-	      out_list = out_list->next;
-	      in_list = in_list->next;
-	    }
-	}
-
-      if (err_bfd)
-	{
-	  /* Attribute numbers >=64 (mod 128) can be safely ignored.  */
-	  if ((err_tag & 127) < 64)
-	    {
-	      _bfd_error_handler
-		(_("%B: Unknown mandatory EABI object attribute %d"),
-		 err_bfd, err_tag);
-	      bfd_set_error (bfd_error_bad_value);
-	      result = FALSE;
-	    }
-	  else
-	    {
-	      _bfd_error_handler
-		(_("Warning: %B: Unknown EABI object attribute %d"),
-		 err_bfd, err_tag);
-	    }
-	}
-    }
   return result;
 }
 
@@ -13977,6 +13895,7 @@ const struct elf_size_info elf32_arm_size_info =
 #undef  elf_backend_obj_attrs_section_type
 #define elf_backend_obj_attrs_section_type	SHT_ARM_ATTRIBUTES
 #define elf_backend_obj_attrs_order	elf32_arm_obj_attrs_order
+#define elf_backend_obj_attrs_handle_unknown elf32_arm_obj_attrs_handle_unknown
 
 #include "elf32-target.h"
 

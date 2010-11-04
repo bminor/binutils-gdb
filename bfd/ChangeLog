@@ -1,3 +1,20 @@
+2010-11-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf-attrs.c (_bfd_elf_merge_unknown_attribute_low,
+	_bfd_elf_merge_unknown_attribute_list): New.
+	* elf-bfd.h (struct elf_backend_data): Add
+	obj_attrs_handle_unknown.
+	(_bfd_elf_merge_unknown_attribute_low,
+	_bfd_elf_merge_unknown_attribute_list): Declare.
+	* elf32-arm.c (elf32_arm_obj_attrs_handle_unknown): New.  Split
+	out from elf32_arm_merge_eabi_attributes.
+	(elf32_arm_merge_eabi_attributes): Use
+	_bfd_elf_merge_unknown_attribute_low and
+	_bfd_elf_merge_unknown_attribute_list.
+	(elf_backend_obj_attrs_handle_unknown): Define.
+	* elfxx-target.h (elf_backend_obj_attrs_handle_unknown): Define.
+	(elfNN_bed): Update initializer.
+
 2010-11-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (BFD_FLAGS_FOR_BFD_USE_MASK): New.
