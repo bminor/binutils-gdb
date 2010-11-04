@@ -852,7 +852,15 @@ struct vbase
 /* Struct used to store conversion rankings.  */
 struct rank
   {
-    int rank;
+    short rank;
+
+    /* When two conversions are of the same type and therefore have the same
+       rank, subrank is used to differentiate the two.
+       Eg: Two derived-class-pointer to base-class-pointer conversions would
+       both have base pointer conversion rank, but the conversion with the
+       shorter distance to the ancestor is preferable. 'subrank' would be used
+       to reflect that.  */
+    short subrank;
   };
 
 /* Struct used for ranking a function for overload resolution */

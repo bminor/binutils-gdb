@@ -89,6 +89,14 @@ namespace XXX {
   void marker2() {}
 }
 
+class A {};
+class B: public A {};
+class C: public B {};
+class D: C {};
+
+int bar (A) { return 11; }
+int bar (B) { return 22; }
+
 int main () 
 {
     char arg2 = 2;
@@ -104,6 +112,15 @@ int main ()
     double arg12 = 200.0;
     int arg13 = 200.0;
     char arg14 = 'a';
+
+    A a;
+    B b;
+    C c;
+    D d;
+
+    bar (a);
+    bar (b);
+    bar (c);
 
     char *str = (char *) "A";
     foo foo_instance1(111);
@@ -132,6 +149,7 @@ int main ()
 
     marker1(); // marker1-returns-here
     XXX::marker2(); // marker1-returns-here
+
     return 0;
 }
 

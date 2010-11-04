@@ -1,3 +1,9 @@
+2010-11-04  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/overload.exp: Added test for inheritance overload.
+	* gdb.cp/overload.cc: Ditto.
+	* gdb.cp/oranking.exp: Removed releveant kfails.
+
 2010-11-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

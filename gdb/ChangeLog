@@ -1,5 +1,17 @@
 2010-11-04  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* gdbtypes.h (struct rank): Created subrank.
+	* gdbtypes.c: Initialized subrank for all
+	'BADNESS' constants.
+	(distance_to_ancestor): New function.
+	(is_ancestor): Use distance_to_ancestor.
+	(is_public_ancestor): Ditto.
+	(sum_ranks): Handle subrank.
+	(compare_ranks): Ditto.
+	(rank_one_type): Subrank base conversions.
+
+2010-11-04  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	* gdbtypes.h: Create struct rank.
 	Convert all 'BADNESS' macros to const struct rank declarations.
 	(sum_ranks): New function.

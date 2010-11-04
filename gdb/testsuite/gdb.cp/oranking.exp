@@ -58,15 +58,12 @@ gdb_test "p test6()"  "28"
 gdb_test "p foo6(bp)" "28"
 
 gdb_test "p test7()"  "210"
-setup_kfail "gdb/10343" *-*-*
 gdb_test "p foo7(cp)" "210"
 
 gdb_test "p test8()"  "212"
-setup_kfail "gdb/10343" *-*-*
 gdb_test "p foo8(co)" "212"
 
 gdb_test "p test9()"  "214"
-setup_kfail "gdb/12098" *-*-*
 gdb_test "p foo9(co)" "214"
 
 gdb_test "p test10()"   "216"

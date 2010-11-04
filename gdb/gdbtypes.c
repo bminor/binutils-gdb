@@ -43,25 +43,25 @@
 
 /* Initialize BADNESS constants.  */
 
-const struct rank LENGTH_MISMATCH_BADNESS = {100};
+const struct rank LENGTH_MISMATCH_BADNESS = {100,0};
 
-const struct rank TOO_FEW_PARAMS_BADNESS = {100};
-const struct rank INCOMPATIBLE_TYPE_BADNESS = {100};
+const struct rank TOO_FEW_PARAMS_BADNESS = {100,0};
+const struct rank INCOMPATIBLE_TYPE_BADNESS = {100,0};
 
-const struct rank EXACT_MATCH_BADNESS = {0};
+const struct rank EXACT_MATCH_BADNESS = {0,0};
 
-const struct rank INTEGER_PROMOTION_BADNESS = {1};
-const struct rank FLOAT_PROMOTION_BADNESS = {1};
-const struct rank BASE_PTR_CONVERSION_BADNESS = {1};
-const struct rank INTEGER_CONVERSION_BADNESS = {2};
-const struct rank FLOAT_CONVERSION_BADNESS = {2};
-const struct rank INT_FLOAT_CONVERSION_BADNESS = {2};
-const struct rank VOID_PTR_CONVERSION_BADNESS = {2};
-const struct rank BOOL_PTR_CONVERSION_BADNESS = {3};
-const struct rank BASE_CONVERSION_BADNESS = {2};
-const struct rank REFERENCE_CONVERSION_BADNESS = {2};
+const struct rank INTEGER_PROMOTION_BADNESS = {1,0};
+const struct rank FLOAT_PROMOTION_BADNESS = {1,0};
+const struct rank BASE_PTR_CONVERSION_BADNESS = {1,0};
+const struct rank INTEGER_CONVERSION_BADNESS = {2,0};
+const struct rank FLOAT_CONVERSION_BADNESS = {2,0};
+const struct rank INT_FLOAT_CONVERSION_BADNESS = {2,0};
+const struct rank VOID_PTR_CONVERSION_BADNESS = {2,0};
+const struct rank BOOL_PTR_CONVERSION_BADNESS = {3,0};
+const struct rank BASE_CONVERSION_BADNESS = {2,0};
+const struct rank REFERENCE_CONVERSION_BADNESS = {2,0};
 
-const struct rank NS_POINTER_CONVERSION_BADNESS = {10};
+const struct rank NS_POINTER_CONVERSION_BADNESS = {10,0};
 
 /* Floatformat pairs.  */
 const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN] = {
@@ -1967,32 +1967,50 @@ class_types_same_p (const struct type *a, const struct type *b)
 	      && !strcmp (TYPE_NAME (a), TYPE_NAME (b))));
 }
 
-/* Check whether BASE is an ancestor or base class of DCLASS
-   Return 1 if so, and 0 if not.  If PUBLIC is 1 then only public
-   ancestors are considered, and the function returns 1 only if
-   BASE is a public ancestor of DCLASS.  */
+/* If BASE is an ancestor of DCLASS return the distance between them.
+   otherwise return -1;
+   eg:
+
+   class A {};
+   class B: public A {};
+   class C: public B {};
+   class D: C {};
+
+   distance_to_ancestor (A, A, 0) = 0
+   distance_to_ancestor (A, B, 0) = 1
+   distance_to_ancestor (A, C, 0) = 2
+   distance_to_ancestor (A, D, 0) = 3
+
+   If PUBLIC is 1 then only public ancestors are considered,
+   and the function returns the distance only if BASE is a public ancestor
+   of DCLASS.
+   Eg:
+
+   distance_to_ancestor (A, D, 1) = -1  */
 
 static int
-do_is_ancestor (struct type *base, struct type *dclass, int public)
+distance_to_ancestor (struct type *base, struct type *dclass, int public)
 {
   int i;
+  int d;
 
   CHECK_TYPEDEF (base);
   CHECK_TYPEDEF (dclass);
 
   if (class_types_same_p (base, dclass))
-    return 1;
+    return 0;
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
     {
       if (public && ! BASETYPE_VIA_PUBLIC (dclass, i))
 	continue;
 
-      if (do_is_ancestor (base, TYPE_BASECLASS (dclass, i), public))
-	return 1;
+      d = distance_to_ancestor (base, TYPE_BASECLASS (dclass, i), public);
+      if (d >= 0)
+	return 1 + d;
     }
 
-  return 0;
+  return -1;
 }
 
 /* Check whether BASE is an ancestor or base class or DCLASS
@@ -2004,7 +2022,7 @@ do_is_ancestor (struct type *base, struct type *dclass, int public)
 int
 is_ancestor (struct type *base, struct type *dclass)
 {
-  return do_is_ancestor (base, dclass, 0);
+  return distance_to_ancestor (base, dclass, 0) >= 0;
 }
 
 /* Like is_ancestor, but only returns true when BASE is a public
@@ -2013,7 +2031,7 @@ is_ancestor (struct type *base, struct type *dclass)
 int
 is_public_ancestor (struct type *base, struct type *dclass)
 {
-  return do_is_ancestor (base, dclass, 1);
+  return distance_to_ancestor (base, dclass, 1) >= 0;
 }
 
 /* A helper function for is_unique_ancestor.  */
@@ -2085,6 +2103,7 @@ sum_ranks (struct rank a, struct rank b)
 {
   struct rank c;
   c.rank = a.rank + b.rank;
+  c.subrank = a.subrank + b.subrank;
   return c;
 }
 
@@ -2097,11 +2116,19 @@ int
 compare_ranks (struct rank a, struct rank b)
 {
   if (a.rank == b.rank)
-    return 0;
+    {
+      if (a.subrank == b.subrank)
+	return 0;
+      if (a.subrank < b.subrank)
+	return 1;
+      if (a.subrank > b.subrank)
+	return -1;
+    }
 
   if (a.rank < b.rank)
     return 1;
 
+  /* a.rank > b.rank  */
   return -1;
 }
 
@@ -2292,6 +2319,7 @@ types_equal (struct type *a, struct type *b)
 struct rank
 rank_one_type (struct type *parm, struct type *arg)
 {
+  struct rank rank = {0,0};
 
   if (types_equal (parm, arg))
     return EXACT_MATCH_BADNESS;
@@ -2332,9 +2360,11 @@ rank_one_type (struct type *parm, struct type *arg)
 	    return VOID_PTR_CONVERSION_BADNESS;
 
 	  /* (b) pointer to ancestor-pointer conversion.  */
-	  if (is_ancestor (TYPE_TARGET_TYPE (parm),
-	                          TYPE_TARGET_TYPE (arg)))
-	    return BASE_PTR_CONVERSION_BADNESS;
+	  rank.subrank = distance_to_ancestor (TYPE_TARGET_TYPE (parm),
+	                                       TYPE_TARGET_TYPE (arg),
+	                                       0);
+	  if (rank.subrank >= 0)
+	    return sum_ranks (BASE_PTR_CONVERSION_BADNESS, rank);
 
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_ARRAY:
@@ -2573,8 +2603,9 @@ rank_one_type (struct type *parm, struct type *arg)
 	{
 	case TYPE_CODE_STRUCT:
 	  /* Check for derivation */
-	  if (is_ancestor (parm, arg))
-	    return BASE_CONVERSION_BADNESS;
+	  rank.subrank = distance_to_ancestor (parm, arg, 0);
+	  if (rank.subrank >= 0)
+	    return sum_ranks (BASE_CONVERSION_BADNESS, rank);
 	  /* else fall through */
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
