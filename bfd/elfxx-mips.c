@@ -7583,6 +7583,25 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		elf_hash_table (info)->dynobj = dynobj = abfd;
 	      break;
 	    }
+	  /* For sections that are not SEC_ALLOC a copy reloc would be
+	     output if possible (implying questionable semantics for
+	     read-only data objects) or otherwise the final link would
+	     fail as ld.so will not process them and could not therefore
+	     handle any outstanding dynamic relocations.
+
+	     For such sections that are also SEC_DEBUGGING, we can avoid
+	     these problems by simply ignoring any relocs as these
+	     sections have a predefined use and we know it is safe to do
+	     so.
+
+	     This is needed in cases such as a global symbol definition
+	     in a shared library causing a common symbol from an object
+	     file to be converted to an undefined reference.  If that
+	     happens, then all the relocations against this symbol from
+	     SEC_DEBUGGING sections in the object file will resolve to
+	     nil.  */
+	  if ((sec->flags & SEC_DEBUGGING) != 0)
+	    break;
 	  /* Fall through.  */
 
 	default:
