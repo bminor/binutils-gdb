@@ -1,3 +1,8 @@
+2010-11-04  Doug Evans  <dje@google.com>
+
+	* python/py-prettyprint.c (find_pretty_printer_from_gdb): Fix comment.
+	(find_pretty_printer): Fix comments.
+
 2010-11-04  Hui Zhu  <teawater@gmail.com>
 
 	* tracepoint.c (remote_trace_set_readonly_regions): Change lma to vma.

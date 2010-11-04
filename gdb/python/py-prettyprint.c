@@ -149,7 +149,7 @@ find_pretty_printer_from_gdb (PyObject *value)
   PyObject *pp_list;
   PyObject *function;
 
-  /* Fetch the global pretty printer dictionary.  */
+  /* Fetch the global pretty printer list.  */
   if (! PyObject_HasAttrString (gdb_module, "pretty_printers"))
     Py_RETURN_NONE;
   pp_list = PyObject_GetAttrString (gdb_module, "pretty_printers");
@@ -173,20 +173,20 @@ find_pretty_printer (PyObject *value)
 {
   PyObject *function;
 
-  /* Look at the pretty-printer dictionary for each objfile
+  /* Look at the pretty-printer list for each objfile
      in the current program-space.  */
   function = find_pretty_printer_from_objfiles (value);
   if (function == NULL || function != Py_None)
     return function;
   Py_DECREF (function);
 
-  /* Look at the pretty-printer dictionary for the current program-space.  */
+  /* Look at the pretty-printer list for the current program-space.  */
   function = find_pretty_printer_from_progspace (value);
   if (function == NULL || function != Py_None)
     return function;
   Py_DECREF (function);
 
-  /* Look at the pretty-printer dictionary in the gdb module.  */
+  /* Look at the pretty-printer list in the gdb module.  */
   function = find_pretty_printer_from_gdb (value);
   return function;
 }
