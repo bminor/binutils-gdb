@@ -1,3 +1,8 @@
+2010-11-04  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (vms_write_index): Fix thinko: reverse the loop.
+	Use bfd_zmalloc instead of bfd_malloc.  Fix comment.
+
 2010-11-04  Kai Tietz  <kai.tietz@onevision.com>
 
 	* coffcode.h (GNU_LINKONCE_WT): New.
