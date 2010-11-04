@@ -245,7 +245,11 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 bfd_boolean
 is_ir_dummy_bfd (const bfd *abfd)
 {
-  size_t namlen = strlen (abfd->filename);
+  size_t namlen;
+
+  if (abfd == NULL)
+    return FALSE;
+  namlen = strlen (abfd->filename);
   if (namlen < IRONLY_SUFFIX_LEN)
     return FALSE;
   return !strcmp (abfd->filename + namlen - IRONLY_SUFFIX_LEN, IRONLY_SUFFIX);
