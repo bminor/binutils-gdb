@@ -1,3 +1,13 @@
+2010-11-04  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (nop_limit): New var.
+	(OPTION_NOPS): Define.
+	(md_longopts): Add --nops.
+	(md_parse_option): Handle it.
+	(md_show_usage): Publish.
+	(ppc_handle_align): Pad with a branch followed by nops if more
+	than nop_limit nops.
+
 2010-11-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/12186
