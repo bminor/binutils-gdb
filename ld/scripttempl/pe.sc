@@ -294,5 +294,11 @@ SECTIONS
   {
     *(.debug_ranges)
   }
+
+  /* DWARF 4.  */
+  .debug_types ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_types) *(.gnu.linkonce.wt.*)
+  }
 }
 EOF

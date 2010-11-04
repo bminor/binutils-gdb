@@ -373,6 +373,7 @@ CODE_FRAGMENT
 
 #define DOT_DEBUG	".debug"
 #define GNU_LINKONCE_WI ".gnu.linkonce.wi."
+#define GNU_LINKONCE_WT ".gnu.linkonce.wt."
 #define DOT_RELOC	".reloc"
 
 #if defined (COFF_LONG_SECTION_NAMES)
@@ -557,7 +558,8 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       styp_flags = STYP_DEBUG_INFO;
     }
 #ifdef COFF_LONG_SECTION_NAMES
-  else if (CONST_STRNEQ (sec_name, GNU_LINKONCE_WI))
+  else if (CONST_STRNEQ (sec_name, GNU_LINKONCE_WI)
+  	   || CONST_STRNEQ (sec_name, GNU_LINKONCE_WT))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
@@ -641,6 +643,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   if (CONST_STRNEQ (sec_name, DOT_DEBUG)
 #ifdef COFF_LONG_SECTION_NAMES
       || CONST_STRNEQ (sec_name, GNU_LINKONCE_WI)
+      || CONST_STRNEQ (sec_name, GNU_LINKONCE_WT)
 #endif
       || CONST_STRNEQ (sec_name, ".stab"))
     is_dbg = TRUE;
@@ -799,6 +802,7 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
 	   || CONST_STRNEQ (name, GNU_LINKONCE_WI)
+	   || CONST_STRNEQ (name, GNU_LINKONCE_WT)
 #endif
 	   || CONST_STRNEQ (name, ".stab"))
     {
@@ -1132,6 +1136,7 @@ styp_to_sec_flags (bfd *abfd,
   if (CONST_STRNEQ (name, DOT_DEBUG)
 #ifdef COFF_LONG_SECTION_NAMES
       || CONST_STRNEQ (name, GNU_LINKONCE_WI)
+      || CONST_STRNEQ (name, GNU_LINKONCE_WT)
 #endif
       || CONST_STRNEQ (name, ".stab"))
     is_dbg = TRUE;

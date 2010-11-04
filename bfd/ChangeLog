@@ -1,3 +1,10 @@
+2010-11-04  Kai Tietz  <kai.tietz@onevision.com>
+
+	* coffcode.h (GNU_LINKONCE_WT): New.
+	(sec_to_styp_flags): Add handling of new debug
+	section.
+	(styp_to_sec_flags): Likewise.
+
 2010-11-04  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms (CFLAGS): Make badalias warnings informational.

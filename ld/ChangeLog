@@ -1,3 +1,8 @@
+2010-11-04  Kai Tietz  <kai.tietz@onevision.com>
+
+	* scripttempl/pe.sc (.debug_types): New.
+	* scripttempl/pep.sc: Likewise.
+
 2010-11-04  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c (is_ir_dummy_bfd): Don't segfault on NULL abfd.
