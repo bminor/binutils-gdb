@@ -2905,7 +2905,7 @@ find_oload_champ (struct type **arg_types, int nargs, int method,
 	  for (jj = 0; jj < nargs - static_offset; jj++)
 	    fprintf_filtered (gdb_stderr,
 			      "...Badness @ %d : %d\n", 
-			      jj, bv->rank[jj]);
+			      jj, bv->rank[jj].rank);
 	  fprintf_filtered (gdb_stderr,
 			    "Overload resolution champion is %d, ambiguous? %d\n", 
 			    oload_champ, oload_ambiguous);
@@ -2939,9 +2939,15 @@ classify_oload_match (struct badness_vector *oload_champ_bv,
 
   for (ix = 1; ix <= nargs - static_offset; ix++)
     {
-      if (oload_champ_bv->rank[ix] >= 100)
+      /* If this conversion is as bad as INCOMPATIBLE_TYPE_BADNESS
+         or worse return INCOMPATIBLE.  */
+      if (compare_ranks (oload_champ_bv->rank[ix],
+                         INCOMPATIBLE_TYPE_BADNESS) <= 0)
 	return INCOMPATIBLE;	/* Truly mismatched types.  */
-      else if (oload_champ_bv->rank[ix] >= 10)
+      /* Otherwise If this conversion is as bad as
+         NS_POINTER_CONVERSION_BADNESS or worse return NON_STANDARD.  */
+      else if (compare_ranks (oload_champ_bv->rank[ix],
+                              NS_POINTER_CONVERSION_BADNESS) <= 0)
 	return NON_STANDARD;	/* Non-standard type conversions
 				   needed.  */
     }
@@ -3077,9 +3083,9 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 
       for (i = 0; i < TYPE_NFIELDS (t2); ++i)
 	{
-	  if (rank_one_type (TYPE_FIELD_TYPE (t1, start + i),
-			      TYPE_FIELD_TYPE (t2, i))
-	      != 0)
+	  if (compare_ranks (rank_one_type (TYPE_FIELD_TYPE (t1, start + i),
+	                                   TYPE_FIELD_TYPE (t2, i)),
+	                     EXACT_MATCH_BADNESS) != 0)
 	    return 0;
 	}
 

@@ -41,6 +41,28 @@
 #include "hashtab.h"
 
 
+/* Initialize BADNESS constants.  */
+
+const struct rank LENGTH_MISMATCH_BADNESS = {100};
+
+const struct rank TOO_FEW_PARAMS_BADNESS = {100};
+const struct rank INCOMPATIBLE_TYPE_BADNESS = {100};
+
+const struct rank EXACT_MATCH_BADNESS = {0};
+
+const struct rank INTEGER_PROMOTION_BADNESS = {1};
+const struct rank FLOAT_PROMOTION_BADNESS = {1};
+const struct rank BASE_PTR_CONVERSION_BADNESS = {1};
+const struct rank INTEGER_CONVERSION_BADNESS = {2};
+const struct rank FLOAT_CONVERSION_BADNESS = {2};
+const struct rank INT_FLOAT_CONVERSION_BADNESS = {2};
+const struct rank VOID_PTR_CONVERSION_BADNESS = {2};
+const struct rank BOOL_PTR_CONVERSION_BADNESS = {3};
+const struct rank BASE_CONVERSION_BADNESS = {2};
+const struct rank REFERENCE_CONVERSION_BADNESS = {2};
+
+const struct rank NS_POINTER_CONVERSION_BADNESS = {10};
+
 /* Floatformat pairs.  */
 const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ieee_half_big,
@@ -2056,6 +2078,32 @@ is_unique_ancestor (struct type *base, struct value *val)
 
 
 
+/* Return the sum of the rank of A with the rank of B.  */
+
+struct rank
+sum_ranks (struct rank a, struct rank b)
+{
+  struct rank c;
+  c.rank = a.rank + b.rank;
+  return c;
+}
+
+/* Compare rank A and B and return:
+   0 if a = b
+   1 if a is better than b
+  -1 if b is better than a.  */
+
+int
+compare_ranks (struct rank a, struct rank b)
+{
+  if (a.rank == b.rank)
+    return 0;
+
+  if (a.rank < b.rank)
+    return 1;
+
+  return -1;
+}
 
 /* Functions for overload resolution begin here */
 
@@ -2080,7 +2128,7 @@ compare_badness (struct badness_vector *a, struct badness_vector *b)
   /* Subtract b from a */
   for (i = 0; i < a->length; i++)
     {
-      tmp = a->rank[i] - b->rank[i];
+      tmp = compare_ranks (b->rank[i], a->rank[i]);
       if (tmp > 0)
 	found_pos = 1;
       else if (tmp < 0)
@@ -2128,7 +2176,9 @@ rank_function (struct type **parms, int nparms,
      arguments and ellipsis parameter lists, we should consider those
      and rank the length-match more finely.  */
 
-  LENGTH_MATCH (bv) = (nargs != nparms) ? LENGTH_MISMATCH_BADNESS : 0;
+  LENGTH_MATCH (bv) = (nargs != nparms)
+		      ? LENGTH_MISMATCH_BADNESS
+		      : EXACT_MATCH_BADNESS;
 
   /* Now rank all the parameters of the candidate function */
   for (i = 1; i <= min_len; i++)
@@ -2239,12 +2289,12 @@ types_equal (struct type *a, struct type *b)
  * PARM is to ARG.  The higher the return value, the worse the match.
  * Generally the "bad" conversions are all uniformly assigned a 100.  */
 
-int
+struct rank
 rank_one_type (struct type *parm, struct type *arg)
 {
 
   if (types_equal (parm, arg))
-    return 0;
+    return EXACT_MATCH_BADNESS;
 
   /* Resolve typedefs */
   if (TYPE_CODE (parm) == TYPE_CODE_TYPEDEF)
@@ -2255,11 +2305,11 @@ rank_one_type (struct type *parm, struct type *arg)
   /* See through references, since we can almost make non-references
      references.  */
   if (TYPE_CODE (arg) == TYPE_CODE_REF)
-    return (rank_one_type (parm, TYPE_TARGET_TYPE (arg))
-	    + REFERENCE_CONVERSION_BADNESS);
+    return (sum_ranks (rank_one_type (parm, TYPE_TARGET_TYPE (arg)),
+                       REFERENCE_CONVERSION_BADNESS));
   if (TYPE_CODE (parm) == TYPE_CODE_REF)
-    return (rank_one_type (TYPE_TARGET_TYPE (parm), arg)
-	    + REFERENCE_CONVERSION_BADNESS);
+    return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg),
+                       REFERENCE_CONVERSION_BADNESS));
   if (overload_debug)
   /* Debugging only.  */
     fprintf_filtered (gdb_stderr, 
@@ -2290,7 +2340,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_ARRAY:
 	  if (types_equal (TYPE_TARGET_TYPE (parm),
 	                   TYPE_TARGET_TYPE (arg)))
-	    return 0;
+	    return EXACT_MATCH_BADNESS;
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_FUNC:
 	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg);
@@ -2333,7 +2383,7 @@ rank_one_type (struct type *parm, struct type *arg)
 		{
 		  /* This case only for character types */
 		  if (TYPE_NOSIGN (arg))
-		    return 0;	/* plain char -> plain char */
+		    return EXACT_MATCH_BADNESS;	/* plain char -> plain char */
 		  else		/* signed/unsigned char -> plain char */
 		    return INTEGER_CONVERSION_BADNESS;
 		}
@@ -2345,7 +2395,7 @@ rank_one_type (struct type *parm, struct type *arg)
 			 unsigned long -> unsigned long */
 		      if (integer_types_same_name_p (TYPE_NAME (parm), 
 						     TYPE_NAME (arg)))
-			return 0;
+			return EXACT_MATCH_BADNESS;
 		      else if (integer_types_same_name_p (TYPE_NAME (arg), 
 							  "int")
 			       && integer_types_same_name_p (TYPE_NAME (parm),
@@ -2369,7 +2419,7 @@ rank_one_type (struct type *parm, struct type *arg)
 		{
 		  if (integer_types_same_name_p (TYPE_NAME (parm), 
 						 TYPE_NAME (arg)))
-		    return 0;
+		    return EXACT_MATCH_BADNESS;
 		  else if (integer_types_same_name_p (TYPE_NAME (arg), 
 						      "int")
 			   && integer_types_same_name_p (TYPE_NAME (parm), 
@@ -2435,19 +2485,19 @@ rank_one_type (struct type *parm, struct type *arg)
 	  if (TYPE_NOSIGN (parm))
 	    {
 	      if (TYPE_NOSIGN (arg))
-		return 0;
+		return EXACT_MATCH_BADNESS;
 	      else
 		return INTEGER_CONVERSION_BADNESS;
 	    }
 	  else if (TYPE_UNSIGNED (parm))
 	    {
 	      if (TYPE_UNSIGNED (arg))
-		return 0;
+		return EXACT_MATCH_BADNESS;
 	      else
 		return INTEGER_PROMOTION_BADNESS;
 	    }
 	  else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
-	    return 0;
+	    return EXACT_MATCH_BADNESS;
 	  else
 	    return INTEGER_CONVERSION_BADNESS;
 	default:
@@ -2481,7 +2531,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_PTR:
 	  return BOOL_PTR_CONVERSION_BADNESS;
 	case TYPE_CODE_BOOL:
-	  return 0;
+	  return EXACT_MATCH_BADNESS;
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
@@ -2493,7 +2543,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	  if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
 	    return FLOAT_PROMOTION_BADNESS;
 	  else if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
-	    return 0;
+	    return EXACT_MATCH_BADNESS;
 	  else
 	    return FLOAT_CONVERSION_BADNESS;
 	case TYPE_CODE_INT:
@@ -2512,7 +2562,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_FLT:
 	  return FLOAT_PROMOTION_BADNESS;
 	case TYPE_CODE_COMPLEX:
-	  return 0;
+	  return EXACT_MATCH_BADNESS;
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
