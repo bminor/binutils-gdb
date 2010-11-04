@@ -951,11 +951,12 @@ vms_lib_dcx (struct vms_lib_iovec *vec, unsigned char *buf, file_ptr nbytes)
 /* Standard IOVEC function.  */
 
 static file_ptr
-vms_lib_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
+vms_lib_bread (struct bfd *abfd, void *vbuf, file_ptr nbytes)
 {
   struct vms_lib_iovec *vec = (struct vms_lib_iovec *) abfd->iostream;
   file_ptr res;
   file_ptr chunk;
+  unsigned char *buf = (unsigned char *)vbuf;
 
   /* Do not read past the end.  */
   if (vec->where >= vec->file_len)
@@ -1071,7 +1072,7 @@ vms_lib_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
             }
           if (buf != NULL)
             {
-              *(unsigned char *)buf = c;
+              *buf = c;
               buf++;
             }
           nbytes--;
