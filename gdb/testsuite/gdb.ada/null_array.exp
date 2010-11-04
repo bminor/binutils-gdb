@@ -37,6 +37,15 @@ gdb_load ${binfile}
 set bp_location [gdb_get_line_number "START" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    # Ada array bounds are missing in older GCCs.
+    setup_xfail *-*-* 
+}
 gdb_test "print my_table" \
          "= \\(\\)" \
          "print my_table"

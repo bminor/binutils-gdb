@@ -1,3 +1,9 @@
+2010-11-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/null_array.exp (print my_table): Call get_compiler_info and
+	check test_compiler_info.
+
 2010-11-03  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.base/gnu_vector.exp: Adjust expect messages.
