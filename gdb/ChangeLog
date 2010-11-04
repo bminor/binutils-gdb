@@ -1,3 +1,7 @@
+2010-11-04  Hui Zhu  <teawater@gmail.com>
+
+	* tracepoint.c (remote_trace_set_readonly_regions): Change lma to vma.
+
 2010-11-02  Hui Zhu  <teawater@gmail.com>
 
 	* tracepoint.c (tfile_xfer_partial): Change lma to vma.
