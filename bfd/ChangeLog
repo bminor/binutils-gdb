@@ -1,3 +1,8 @@
+2010-11-05  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.21.51
+	* configure: Regenerate.
+
 2010-11-04  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	PR ld/10144
