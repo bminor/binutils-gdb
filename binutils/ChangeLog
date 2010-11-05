@@ -1,3 +1,9 @@
+2010-11-05  Alan Modra  <amodra@gmail.com>
+
+	* bin2c.c: Remove internationalization and version report.
+	* Makefile.am: Update bin2c rule.
+	* Makefile.in: Regenerate.
+
 2010-11-05  Tristan Gingold  <gingold@adacore.com>
 
 	* po/binutils.pot: Regenerate
