@@ -1,3 +1,9 @@
+2010-11-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-cr16.c (getprocreg_image): Fix typo MAX_PREG ->
+	MAX_REG.
+	(getprocregp_image): Likewise.
+
 2010-11-05  Tristan Gingold  <gingold@adacore.com>
 
 	* po/gas.pot: Regenerate
