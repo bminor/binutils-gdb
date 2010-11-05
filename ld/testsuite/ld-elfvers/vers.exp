@@ -1,6 +1,6 @@
 # Expect script for ld-version tests
 #   Copyright 1997, 1998, 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-#   2009 Free Software Foundation, Inc.
+#   2009, 2010 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -1000,5 +1000,3 @@ build_vers_lib_pic "vers31" vers31.c vers31 "" vers31.map vers31.ver vers31.dsym
 # Test #32 -- linker --defsym
 build_vers_lib_pic "vers32a" vers32a.c vers32a "" vers32.map vers32a.ver vers32a.dsym ""
 build_vers_lib_pic_flags "vers32b" vers32b.c vers32b "vers32a.so" vers32.map vers32b.ver vers32b.dsym "" "--defsym foo=0"
-build_vers_lib_pic_flags "vers32c" vers32a.c vers32c "vers32a.so" vers32.map vers32c.ver vers32c.dsym "" "--defsym foo=0"
-build_vers_lib_pic_flags "vers32d" vers32a.c vers32d "" vers32.map vers32d.ver vers32c.dsym "" "--defsym foo=0"
