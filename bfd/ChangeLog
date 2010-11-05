@@ -1,5 +1,9 @@
 2010-11-05  Tristan Gingold  <gingold@adacore.com>
 
+	* po/bfd.pot: Regenerate
+
+2010-11-05  Tristan Gingold  <gingold@adacore.com>
+
 	* configure.in: Bump version to 2.21.51
 	* configure: Regenerate.
 

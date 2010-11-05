@@ -1,3 +1,7 @@
+2010-11-05  Tristan Gingold  <gingold@adacore.com>
+
+	* po/opcodes.pot: Regenerate
+
 2010-10-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Fix formatting of "ld".
