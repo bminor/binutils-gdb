@@ -1679,6 +1679,26 @@ elf32_tic6x_obj_attrs_order (int num)
   return num;
 }
 
+static bfd_boolean
+elf32_tic6x_obj_attrs_handle_unknown (bfd *abfd, int tag)
+{
+  if ((tag & 127) < 64)
+    {
+      _bfd_error_handler
+	(_("%B: error: unknown mandatory EABI object attribute %d"),
+	 abfd, tag);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  else
+    {
+      _bfd_error_handler
+	(_("%B: warning: unknown EABI object attribute %d"),
+	 abfd, tag);
+      return TRUE;
+    }
+}
+
 /* Merge the Tag_ISA attribute values ARCH1 and ARCH2
    and return the merged value.  At present, all merges succeed, so no
    return value for errors is defined.  */
@@ -1938,7 +1958,13 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
 	    out_attr[i].s = NULL;
 	  break;
 
+	case Tag_ABI_compatibility:
+	  /* Merged in _bfd_elf_merge_object_attributes.  */
+	  break;
+
 	default:
+	  result
+	    = result && _bfd_elf_merge_unknown_attribute_low (ibfd, obfd, i);
 	  break;
 	}
 
@@ -1949,6 +1975,8 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
   /* Merge Tag_ABI_compatibility attributes and any common GNU ones.  */
   if (!_bfd_elf_merge_object_attributes (ibfd, obfd))
     return FALSE;
+
+  result &= _bfd_elf_merge_unknown_attribute_list (ibfd, obfd);
 
   return result;
 }
@@ -1984,6 +2012,7 @@ elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_obj_attrs_arg_type	elf32_tic6x_obj_attrs_arg_type
+#define elf_backend_obj_attrs_handle_unknown	elf32_tic6x_obj_attrs_handle_unknown
 #define elf_backend_obj_attrs_order	elf32_tic6x_obj_attrs_order
 #define elf_backend_obj_attrs_section	".c6xabi.attributes"
 #define elf_backend_obj_attrs_section_type	SHT_C6000_ATTRIBUTES

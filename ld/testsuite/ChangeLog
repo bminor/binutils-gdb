@@ -1,3 +1,14 @@
+2010-11-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-tic6x/attr-unknown-1.d, ld-tic6x/attr-unknown-1000-1.s,
+	ld-tic6x/attr-unknown-1000-2.s, ld-tic6x/attr-unknown-1024-1.s,
+	ld-tic6x/attr-unknown-2.d, ld-tic6x/attr-unknown-3.d,
+	ld-tic6x/attr-unknown-4.d, ld-tic6x/attr-unknown-5.d,
+	ld-tic6x/attr-unknown-54-1.s, ld-tic6x/attr-unknown-55-a.s,
+	ld-tic6x/attr-unknown-6.d, ld-tic6x/attr-unknown-7.d,
+	ld-tic6x/attr-unknown-71-a.s, ld-tic6x/attr-unknown-71-b.s: New
+	tests.
+
 2010-11-05  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-plugin/plugin.exp (testobjfiles): Dont use HOSTING_CRT0.

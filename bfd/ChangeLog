@@ -1,5 +1,13 @@
 2010-11-05  Joseph Myers  <joseph@codesourcery.com>
 
+	* elf32-tic6x.c (elf32_tic6x_obj_attrs_handle_unknown): New.
+	(elf32_tic6x_merge_attributes): Use
+	_bfd_elf_merge_unknown_attribute_low and
+	_bfd_elf_merge_unknown_attribute_list.
+	(elf_backend_obj_attrs_handle_unknown): Define.
+
+2010-11-05  Joseph Myers  <joseph@codesourcery.com>
+
 	* elf-attrs.c (_bfd_elf_merge_unknown_attribute_low,
 	_bfd_elf_merge_unknown_attribute_list): Correct test for matching
 	string attributes.
