@@ -1,3 +1,19 @@
+2010-11-05  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/10708
+	* copy-relocs.cc (Copy_relocs::emit_copy_reloc): Hold a lock on the
+	object when reading from the file.
+	* gold.cc (queue_middle_tasks): Hold a lock on the object when doing
+	second layout pass.
+	* icf.cc (preprocess_for_unique_sections): Hold a lock on the object
+	when reading section contents.
+	(get_section_contents): Likewise.
+	(icf::find_identical_sections): Likewise.
+	* mapfile.cc (Mapfile::print_discarded_sections): Hold a lock on the
+	object when reading from the file.
+	* plugin.cc (Plugin_manager::layout_deferred_objects): Hold a lock on
+	the object when doing deferred section layout.
+
 2010-11-03  Nick Clifton  <nickc@redhat.com>
 
 	PR gold/12001

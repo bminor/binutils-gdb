@@ -361,7 +361,14 @@ Plugin_manager::layout_deferred_objects()
   for (obj = this->deferred_layout_objects_.begin();
        obj != this->deferred_layout_objects_.end();
        ++obj)
-    (*obj)->layout_deferred_sections(this->layout_);
+    {
+      // Lock the object so we can read from it.  This is only called
+      // single-threaded from queue_middle_tasks, so it is OK to lock.
+      // Unfortunately we have no way to pass in a Task token.
+      const Task* dummy_task = reinterpret_cast<const Task*>(-1);
+      Task_lock_obj<Object> tl(dummy_task, *obj);
+      (*obj)->layout_deferred_sections(this->layout_);
+    }
 }
 
 // Call the cleanup handlers.
