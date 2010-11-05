@@ -1,3 +1,9 @@
+2010-11-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf-attrs.c (_bfd_elf_merge_unknown_attribute_low,
+	_bfd_elf_merge_unknown_attribute_list): Correct test for matching
+	string attributes.
+
 2010-11-05  Tristan Gingold  <gingold@adacore.com>
 
 	* po/bfd.pot: Regenerate
