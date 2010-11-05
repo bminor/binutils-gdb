@@ -1,3 +1,11 @@
+2010-11-05  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_add_section): Distinguish ELF treatment of NOLOAD.
+	(map_input_to_output_sections): Likewise.
+	(lang_size_sections_1): Likewise.
+	(IGNORE_SECTION): Don't test SEC_NEVER_LOAD.
+	(lang_check_section_addresses): Likewise.
+
 2010-11-04  Kai Tietz  <kai.tietz@onevision.com>
 
 	* scripttempl/pe.sc (.debug_types): New.
