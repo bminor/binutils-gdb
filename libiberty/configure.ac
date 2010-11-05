@@ -246,7 +246,7 @@ AC_SUBST_FILE(host_makefile_frag)
 # It's OK to check for header files.  Although the compiler may not be
 # able to link anything, it had better be able to at least compile
 # something.
-AC_CHECK_HEADERS(sys/file.h sys/param.h limits.h stdlib.h malloc.h string.h unistd.h strings.h sys/time.h time.h sys/resource.h sys/stat.h sys/mman.h fcntl.h alloca.h sys/pstat.h sys/sysmp.h sys/sysinfo.h machine/hal_sysinfo.h sys/table.h sys/sysctl.h sys/systemcfg.h stdint.h stdio_ext.h process.h)
+AC_CHECK_HEADERS(sys/file.h sys/param.h limits.h stdlib.h malloc.h string.h unistd.h strings.h sys/time.h time.h sys/resource.h sys/stat.h sys/mman.h fcntl.h alloca.h sys/pstat.h sys/sysmp.h sys/sysinfo.h machine/hal_sysinfo.h sys/table.h sys/sysctl.h sys/systemcfg.h stdint.h stdio_ext.h)
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
 
@@ -290,7 +290,6 @@ fi
 
 AC_TYPE_INTPTR_T
 AC_TYPE_UINTPTR_T
-AC_TYPE_SSIZE_T
 
 # Given the above check, we always have uintptr_t or a fallback
 # definition.  So define HAVE_UINTPTR_T in case any imported code
@@ -358,10 +357,9 @@ funcs="$funcs setproctitle"
 
 vars="sys_errlist sys_nerr sys_siglist"
 
-checkfuncs="__fsetlocking canonicalize_file_name dup3 getrusage getsysinfo \
- gettimeofday on_exit psignal pstat_getdynamic pstat_getstatic realpath \
- sbrk spawnve spawnvpe strerror strsignal sysconf sysctl sysmp table \
- times wait3 wait4"
+checkfuncs="getrusage on_exit psignal strerror strsignal sysconf times sbrk gettimeofday"
+checkfuncs="$checkfuncs realpath canonicalize_file_name pstat_getstatic pstat_getdynamic sysmp"
+checkfuncs="$checkfuncs getsysinfo table sysctl wait3 wait4 __fsetlocking"
 
 # These are neither executed nor required, but they help keep
 # autoheader happy without adding a bunch of text to acconfig.h.
@@ -369,7 +367,6 @@ if test "x" = "y"; then
   AC_CHECK_FUNCS(asprintf atexit \
     basename bcmp bcopy bsearch bzero \
     calloc canonicalize_file_name clock \
-    dup3 \
     ffs __fsetlocking \
     getcwd getpagesize getrusage getsysinfo gettimeofday \
     index insque \
@@ -377,8 +374,8 @@ if test "x" = "y"; then
     on_exit \
     psignal pstat_getdynamic pstat_getstatic putenv \
     random realpath rename rindex \
-    sbrk setenv setproctitle sigsetmask snprintf spawnve spawnvpe \
-     stpcpy stpncpy strcasecmp strchr strdup \
+    sbrk setenv setproctitle sigsetmask snprintf stpcpy stpncpy strcasecmp strchr \
+    strdup \
      strerror strncasecmp strndup strrchr strsignal strstr strtod strtol \
      strtoul strverscmp sysconf sysctl sysmp \
     table times tmpnam \

@@ -1663,20 +1663,9 @@ elf32_tic6x_obj_attrs_arg_type (int tag)
 {
   if (tag == Tag_ABI_compatibility)
     return ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL;
-  else if (tag & 1)
-    return ATTR_TYPE_FLAG_STR_VAL;
   else
+    /* Correct for known attributes, arbitrary for others.  */
     return ATTR_TYPE_FLAG_INT_VAL;
-}
-
-static int
-elf32_tic6x_obj_attrs_order (int num)
-{
-  if (num == LEAST_KNOWN_OBJ_ATTRIBUTE)
-    return Tag_ABI_conformance;
-  if ((num - 1) < Tag_ABI_conformance)
-    return num - 1;
-  return num;
 }
 
 /* Merge the Tag_ISA attribute values ARCH1 and ARCH2
@@ -1702,64 +1691,14 @@ elf32_tic6x_merge_arch_attributes (int arch1, int arch2)
   return max_arch;
 }
 
-/* Convert a Tag_ABI_array_object_alignment or
-   Tag_ABI_array_object_align_expected tag value TAG to a
-   corresponding alignment value; return the alignment, or -1 for an
-   unknown tag value.  */
-
-static int
-elf32_tic6x_tag_to_array_alignment (int tag)
-{
-  switch (tag)
-    {
-    case 0:
-      return 8;
-
-    case 1:
-      return 4;
-
-    case 2:
-      return 16;
-
-    default:
-      return -1;
-    }
-}
-
-/* Convert a Tag_ABI_array_object_alignment or
-   Tag_ABI_array_object_align_expected alignment ALIGN to a
-   corresponding tag value; return the tag value.  */
-
-static int
-elf32_tic6x_array_alignment_to_tag (int align)
-{
-  switch (align)
-    {
-    case 8:
-      return 0;
-
-    case 4:
-      return 1;
-
-    case 16:
-      return 2;
-
-    default:
-      abort ();
-    }
-}
-
 /* Merge attributes from IBFD and OBFD, returning TRUE if the merge
    succeeded, FALSE otherwise.  */
 
 static bfd_boolean
 elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
 {
-  bfd_boolean result = TRUE;
   obj_attribute *in_attr;
   obj_attribute *out_attr;
-  int i;
-  int array_align_in, array_align_out, array_expect_in, array_expect_out;
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
@@ -1780,177 +1719,21 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
 
   /* No specification yet for handling of unknown attributes, so just
      ignore them and handle known ones.  */
+  out_attr[Tag_ISA].i
+    = elf32_tic6x_merge_arch_attributes (in_attr[Tag_ISA].i,
+					 out_attr[Tag_ISA].i);
 
-  if (out_attr[Tag_ABI_stack_align_preserved].i
-      < in_attr[Tag_ABI_stack_align_needed].i)
+  if (out_attr[Tag_ABI_DSBT].i != in_attr[Tag_ABI_DSBT].i)
     {
       _bfd_error_handler
-	(_("error: %B requires more stack alignment than %B preserves"),
-	 ibfd, obfd);
-      result = FALSE;
-    }
-  if (in_attr[Tag_ABI_stack_align_preserved].i
-      < out_attr[Tag_ABI_stack_align_needed].i)
-    {
-      _bfd_error_handler
-	(_("error: %B requires more stack alignment than %B preserves"),
+	(_("warning: %B and %B differ in whether code is compiled for DSBT"),
 	 obfd, ibfd);
-      result = FALSE;
     }
-
-  array_align_in = elf32_tic6x_tag_to_array_alignment
-    (in_attr[Tag_ABI_array_object_alignment].i);
-  if (array_align_in == -1)
-    {
-      _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_alignment value in %B"),
-	 ibfd);
-      result = FALSE;
-    }
-  array_align_out = elf32_tic6x_tag_to_array_alignment
-    (out_attr[Tag_ABI_array_object_alignment].i);
-  if (array_align_out == -1)
-    {
-      _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_alignment value in %B"),
-	 obfd);
-      result = FALSE;
-    }
-  array_expect_in = elf32_tic6x_tag_to_array_alignment
-    (in_attr[Tag_ABI_array_object_align_expected].i);
-  if (array_expect_in == -1)
-    {
-      _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_align_expected value in %B"),
-	 ibfd);
-      result = FALSE;
-    }
-  array_expect_out = elf32_tic6x_tag_to_array_alignment
-    (out_attr[Tag_ABI_array_object_align_expected].i);
-  if (array_expect_out == -1)
-    {
-      _bfd_error_handler
-	(_("error: unknown Tag_ABI_array_object_align_expected value in %B"),
-	 obfd);
-      result = FALSE;
-    }
-
-  if (array_align_out < array_expect_in)
-    {
-      _bfd_error_handler
-	(_("error: %B requires more array alignment than %B preserves"),
-	 ibfd, obfd);
-      result = FALSE;
-    }
-  if (array_align_in < array_expect_out)
-    {
-      _bfd_error_handler
-	(_("error: %B requires more array alignment than %B preserves"),
-	 obfd, ibfd);
-      result = FALSE;
-    }
-
-  for (i = LEAST_KNOWN_OBJ_ATTRIBUTE; i < NUM_KNOWN_OBJ_ATTRIBUTES; i++)
-    {
-      switch (i)
-	{
-	case Tag_ISA:
-	  out_attr[i].i = elf32_tic6x_merge_arch_attributes (in_attr[i].i,
-							     out_attr[i].i);
-	  break;
-
-	case Tag_ABI_wchar_t:
-	  if (out_attr[i].i == 0)
-	    out_attr[i].i = in_attr[i].i;
-	  if (out_attr[i].i != 0
-	      && in_attr[i].i != 0
-	      && out_attr[i].i != in_attr[i].i)
-	    {
-	      _bfd_error_handler
-		(_("warning: %B and %B differ in wchar_t size"), obfd, ibfd);
-	    }
-	  break;
-
-	case Tag_ABI_stack_align_needed:
-	  if (out_attr[i].i < in_attr[i].i)
-	    out_attr[i].i = in_attr[i].i;
-	  break;
-
-	case Tag_ABI_stack_align_preserved:
-	  if (out_attr[i].i > in_attr[i].i)
-	    out_attr[i].i = in_attr[i].i;
-	  break;
-
-	case Tag_ABI_DSBT:
-	  if (out_attr[i].i != in_attr[i].i)
-	    {
-	      _bfd_error_handler
-		(_("warning: %B and %B differ in whether code is "
-		   "compiled for DSBT"),
-		 obfd, ibfd);
-	    }
-	  break;
-
-	case Tag_ABI_PID:
-	  if (out_attr[i].i != in_attr[i].i)
-	    {
-	      _bfd_error_handler
-		(_("warning: %B and %B differ in position-dependence of "
-		   "data addressing"),
-		 obfd, ibfd);
-	    }
-	  break;
-
-	case Tag_ABI_PIC:
-	  if (out_attr[i].i != in_attr[i].i)
-	    {
-	      _bfd_error_handler
-		(_("warning: %B and %B differ in position-dependence of "
-		   "code addressing"),
-		 obfd, ibfd);
-	    }
-	  break;
-
-	case Tag_ABI_array_object_alignment:
-	  if (array_align_out != -1
-	      && array_align_in != -1
-	      && array_align_out > array_align_in)
-	    out_attr[i].i
-	      = elf32_tic6x_array_alignment_to_tag (array_align_in);
-	  break;
-
-	case Tag_ABI_array_object_align_expected:
-	  if (array_expect_out != -1
-	      && array_expect_in != -1
-	      && array_expect_out < array_expect_in)
-	    out_attr[i].i
-	      = elf32_tic6x_array_alignment_to_tag (array_expect_in);
-	  break;
-
-	case Tag_ABI_conformance:
-	  /* Merging for this attribute is not specified.  As on ARM,
-	     treat a missing attribute as no claim to conform and only
-	     merge identical values.  */
-	  if (out_attr[i].s == NULL
-	      || in_attr[i].s == NULL
-	      || strcmp (out_attr[i].s,
-			 in_attr[i].s) != 0)
-	    out_attr[i].s = NULL;
-	  break;
-
-	default:
-	  break;
-	}
-
-      if (in_attr[i].type && !out_attr[i].type)
-	out_attr[i].type = in_attr[i].type;
-    }
-
   /* Merge Tag_ABI_compatibility attributes and any common GNU ones.  */
   if (!_bfd_elf_merge_object_attributes (ibfd, obfd))
     return FALSE;
 
-  return result;
+  return TRUE;
 }
 
 static bfd_boolean
@@ -1984,7 +1767,6 @@ elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_obj_attrs_arg_type	elf32_tic6x_obj_attrs_arg_type
-#define elf_backend_obj_attrs_order	elf32_tic6x_obj_attrs_order
 #define elf_backend_obj_attrs_section	".c6xabi.attributes"
 #define elf_backend_obj_attrs_section_type	SHT_C6000_ATTRIBUTES
 #define elf_backend_obj_attrs_vendor	"c6xabi"
