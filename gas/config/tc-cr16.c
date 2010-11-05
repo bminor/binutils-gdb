@@ -1669,7 +1669,7 @@ getprocreg_image (reg r)
   char *reg_name;
 
   /* Check whether the register is in registers table.  */
-  if (r < MAX_PREG)
+  if (r < MAX_REG)
     rreg = &cr16_pregtab[r - MAX_REG];
   /* Register not found.  */
   else
@@ -1708,7 +1708,7 @@ getprocregp_image (reg r)
   int pregptab_disp = 0;
 
   /* Check whether the register is in registers table.  */
-  if (r < MAX_PREG)
+  if (r < MAX_REG)
     {
       r = r - MAX_REG;
       switch (r)
