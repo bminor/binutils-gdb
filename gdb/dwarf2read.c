@@ -5089,6 +5089,12 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     cu->producer = DW_STRING (attr);
 
+  /* The XLCL doesn't generate DW_LANG_OpenCL because this attribute is not
+     standardised yet.  As a workaround for the language detection we fall
+     back to the DW_AT_producer string.  */
+  if (cu->producer && strstr (cu->producer, "IBM XL C for OpenCL") != NULL)
+    cu->language = language_opencl;
+
   /* We assume that we're processing GCC output. */
   processing_gcc_compilation = 2;
 

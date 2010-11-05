@@ -221,6 +221,9 @@ Support for D is partial.  For information on D, see
 Support for Modula-2 is partial.  For information on Modula-2, see
 @ref{Modula-2,,Modula-2}.
 
+Support for OpenCL C is partial.  For information on OpenCL C, see
+@ref{OpenCL C,,OpenCL C}.
+
 @cindex Pascal
 Debugging Pascal programs which use sets, subranges, file variables, or
 nested functions does not currently work.  @value{GDBN} does not support
@@ -11611,7 +11614,7 @@ being set automatically by @value{GDBN}.
 @node Supported Languages
 @section Supported Languages
 
-@value{GDBN} supports C, C@t{++}, D, Objective-C, Fortran, Java, Pascal,
+@value{GDBN} supports C, C@t{++}, D, Objective-C, Fortran, Java, OpenCL C, Pascal,
 assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
@@ -11632,6 +11635,7 @@ language reference or tutorial.
 * C::                           C and C@t{++}
 * D::                           D
 * Objective-C::                 Objective-C
+* OpenCL C::                    OpenCL C
 * Fortran::                     Fortran
 * Pascal::                      Pascal
 * Modula-2::                    Modula-2
@@ -12277,6 +12281,42 @@ and print the result.  Also, an additional command has been added,
 the description of an object.  However, this command may only work
 with certain Objective-C libraries that have a particular hook
 function, @code{_NSPrintForDebugger}, defined.
+
+@node OpenCL C
+@subsection OpenCL C
+
+@cindex OpenCL C
+This section provides information about @value{GDBN}s OpenCL C support.
+
+@menu
+* OpenCL C Datatypes::
+* OpenCL C Expressions::
+* OpenCL C Operators::
+@end menu
+
+@node OpenCL C Datatypes
+@subsubsection OpenCL C Datatypes
+
+@cindex OpenCL C Datatypes
+@value{GDBN} supports the builtin scalar and vector datatypes specified
+by OpenCL 1.1.  In addition the half- and double-precision floating point
+data types of the @code{cl_khr_fp16} and @code{cl_khr_fp64} OpenCL
+extensions are also known to @value{GDBN}.
+
+@node OpenCL C Expressions
+@subsubsection OpenCL C Expressions
+
+@cindex OpenCL C Expressions
+@value{GDBN} supports accesses to vector components including the access as
+lvalue where possible.  Since OpenCL C is based on C99 most C expressions
+supported by @value{GDBN} can be used as well.
+
+@node OpenCL C Operators
+@subsubsection OpenCL C Operators
+
+@cindex OpenCL C Operators
+@value{GDBN} supports the operators specified by OpenCL 1.1 for scalar and
+vector data types.
 
 @node Fortran
 @subsection Fortran

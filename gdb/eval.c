@@ -603,6 +603,7 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	case language_cplus:
 	case language_asm:
 	case language_objc:
+	case language_opencl:
 	  /* No promotion required.  */
 	  break;
 
@@ -690,7 +691,24 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 			       : builtin->builtin_long_long);
 	    }
 	  break;
-
+	case language_opencl:
+	  if (result_len <= TYPE_LENGTH (lookup_signed_typename
+					 (language, gdbarch, "int")))
+	    {
+	      promoted_type =
+		(unsigned_operation
+		 ? lookup_unsigned_typename (language, gdbarch, "int")
+		 : lookup_signed_typename (language, gdbarch, "int"));
+	    }
+	  else if (result_len <= TYPE_LENGTH (lookup_signed_typename
+					      (language, gdbarch, "long")))
+	    {
+	      promoted_type =
+		(unsigned_operation
+		 ? lookup_unsigned_typename (language, gdbarch, "long")
+		 : lookup_signed_typename (language, gdbarch,"long"));
+	    }
+	  break;
 	default:
 	  /* For other languages the result type is unchanged from gdb
 	     version 6.7 for backward compatibility.

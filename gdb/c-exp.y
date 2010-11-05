@@ -612,7 +612,9 @@ exp	:	VARIABLE
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (parse_type->builtin_int);
+			  write_exp_elt_type (lookup_signed_typename
+					      (parse_language, parse_gdbarch,
+					       "int"));
 			  CHECK_TYPEDEF ($3);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
@@ -980,61 +982,117 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	:	TYPENAME
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
-			{ $$ = parse_type->builtin_int; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "int"); }
 	|	LONG
-			{ $$ = parse_type->builtin_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long"); }
 	|	SHORT
-			{ $$ = parse_type->builtin_short; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "short"); }
 	|	LONG INT_KEYWORD
-			{ $$ = parse_type->builtin_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long"); }
 	|	LONG SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = parse_type->builtin_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long"); }
 	|	LONG SIGNED_KEYWORD
-			{ $$ = parse_type->builtin_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long"); }
 	|	SIGNED_KEYWORD LONG INT_KEYWORD
-			{ $$ = parse_type->builtin_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long"); }
 	|	UNSIGNED LONG INT_KEYWORD
-			{ $$ = parse_type->builtin_unsigned_long; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "long"); }
 	|	LONG UNSIGNED INT_KEYWORD
-			{ $$ = parse_type->builtin_unsigned_long; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "long"); }
 	|	LONG UNSIGNED
-			{ $$ = parse_type->builtin_unsigned_long; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "long"); }
 	|	LONG LONG
-			{ $$ = parse_type->builtin_long_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long long"); }
 	|	LONG LONG INT_KEYWORD
-			{ $$ = parse_type->builtin_long_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = parse_type->builtin_long_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD
-			{ $$ = parse_type->builtin_long_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG
-			{ $$ = parse_type->builtin_long_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
-			{ $$ = parse_type->builtin_long_long; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "long long"); }
 	|	UNSIGNED LONG LONG
-			{ $$ = parse_type->builtin_unsigned_long_long; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "long long"); }
 	|	UNSIGNED LONG LONG INT_KEYWORD
-			{ $$ = parse_type->builtin_unsigned_long_long; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "long long"); }
 	|	LONG LONG UNSIGNED
-			{ $$ = parse_type->builtin_unsigned_long_long; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "long long"); }
 	|	LONG LONG UNSIGNED INT_KEYWORD
-			{ $$ = parse_type->builtin_unsigned_long_long; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "long long"); }
 	|	SHORT INT_KEYWORD
-			{ $$ = parse_type->builtin_short; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "short"); }
 	|	SHORT SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = parse_type->builtin_short; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "short"); }
 	|	SHORT SIGNED_KEYWORD
-			{ $$ = parse_type->builtin_short; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "short"); }
 	|	UNSIGNED SHORT INT_KEYWORD
-			{ $$ = parse_type->builtin_unsigned_short; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "short"); }
 	|	SHORT UNSIGNED 
-			{ $$ = parse_type->builtin_unsigned_short; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "short"); }
 	|	SHORT UNSIGNED INT_KEYWORD
-			{ $$ = parse_type->builtin_unsigned_short; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "short"); }
 	|	DOUBLE_KEYWORD
-			{ $$ = parse_type->builtin_double; }
+			{ $$ = lookup_typename (parse_language, parse_gdbarch,
+						"double", (struct block *) NULL,
+						0); }
 	|	LONG DOUBLE_KEYWORD
-			{ $$ = parse_type->builtin_long_double; }
+			{ $$ = lookup_typename (parse_language, parse_gdbarch,
+						"long double",
+						(struct block *) NULL, 0); }
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
@@ -1052,13 +1110,17 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 							 parse_gdbarch,
 							 TYPE_NAME($2.type)); }
 	|	UNSIGNED
-			{ $$ = parse_type->builtin_unsigned_int; }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 "int"); }
 	|	SIGNED_KEYWORD typename
 			{ $$ = lookup_signed_typename (parse_language,
 						       parse_gdbarch,
 						       TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
-			{ $$ = parse_type->builtin_int; }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       "int"); }
                 /* It appears that this rule for templates is never
                    reduced; template recognition happens by lookahead
                    in the token processing code in yylex. */         
@@ -1077,19 +1139,25 @@ typename:	TYPENAME
 		{
 		  $$.stoken.ptr = "int";
 		  $$.stoken.length = 3;
-		  $$.type = parse_type->builtin_int;
+		  $$.type = lookup_signed_typename (parse_language,
+						    parse_gdbarch,
+						    "int");
 		}
 	|	LONG
 		{
 		  $$.stoken.ptr = "long";
 		  $$.stoken.length = 4;
-		  $$.type = parse_type->builtin_long;
+		  $$.type = lookup_signed_typename (parse_language,
+						    parse_gdbarch,
+						    "long");
 		}
 	|	SHORT
 		{
 		  $$.stoken.ptr = "short";
 		  $$.stoken.length = 5;
-		  $$.type = parse_type->builtin_short;
+		  $$.type = lookup_signed_typename (parse_language,
+						    parse_gdbarch,
+						    "short");
 		}
 	;
 

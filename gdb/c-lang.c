@@ -933,7 +933,7 @@ parse_one_string (struct obstack *output, char *data, int len,
    are delegated to evaluate_subexp_standard; see that function for a
    description of the arguments.  */
 
-static struct value *
+struct value *
 evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 		   int *pos, enum noside noside)
 {

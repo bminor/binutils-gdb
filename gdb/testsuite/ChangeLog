@@ -1,3 +1,25 @@
+2010-11-05  Ken Werner  <ken.werner@de.ibm.com>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.opencl.
+	* configure.ac (AC_OUTPUT): Add gdb.opencl/Makefile.
+	* configure: Regenerate.
+	* gdb.opencl/Makefile.in: New File.
+	* gdb.opencl/datatypes.exp: Likewise.
+	* gdb.opencl/datatypes.cl: Likewise.
+	* gdb.opencl/operators.exp: Likewise.
+	* gdb.opencl/operators.cl: Likewise.
+	* gdb.opencl/vec_comps.exp: Likewise.
+	* gdb.opencl/vec_comps.cl: Likewise.
+	* gdb.opencl/convs_casts.exp: Likewise.
+	* gdb.opencl/convs_casts.cl: Likewise.
+	* lib/opencl.exp: Likewise.
+	* lib/opencl_hostapp.c: Likewise.
+	* lib/opencl_kernel.cl: Likewise.
+	* lib/cl_util.c: Likewise.
+	* lib/cl_util.c: Likewise.
+	* gdb.base/default.exp (set language): Add "opencl" to the list of
+	languages.
+
 2010-11-04  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/overload.exp: Added test for inheritance overload.

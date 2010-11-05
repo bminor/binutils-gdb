@@ -1,3 +1,20 @@
+2010-11-05  Ken Werner  <ken.werner@de.ibm.com>
+
+	* NEWS: Mention OpenCL C language support.
+	* Makefile.in (SFILES): Add opencl-lang.c.
+	(COMMON_OBS): Add opencl-lang.o.
+	* opencl-lang.c: New File
+	* defs.h (enum language): Add language_opencl.
+	* dwarf2read.c (read_file_scope): Handle DW_AT_producer for the
+	IBM XL C OpenCL compiler.
+	* c-lang.h: Include "parser-defs.h".
+	(evaluate_subexp_c): Declare.
+	* c-lang.c (evaluate_subexp_c): Remove the static qualifier.
+	(c_op_print_tab): Add declaration.
+	* eval.c (binop_promote): Handle language_opencl.
+	* c-exp.y: Lookup the primitive types instead of referring to the
+	builtins.
+
 2010-11-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix configure --enable-plugins --without-python.

@@ -27,6 +27,7 @@ struct language_arch_info;
 
 #include "value.h"
 #include "macroexp.h"
+#include "parser-defs.h"
 
 
 /* The various kinds of C string and character.  Note that these
@@ -78,6 +79,10 @@ extern int c_value_print (struct value *, struct ui_file *,
 
 /* These are in c-lang.c: */
 
+extern struct value *evaluate_subexp_c (struct type *expect_type,
+					 struct expression *exp, int *pos,
+					 enum noside noside);
+
 extern void c_printchar (int, struct type *, struct ui_file *);
 
 extern void c_printstr (struct ui_file * stream, struct type *elttype,
@@ -92,6 +97,8 @@ extern const struct exp_descriptor exp_descriptor_c;
 
 extern void c_emit_char (int c, struct type *type,
 			 struct ui_file *stream, int quoter);
+
+extern const struct op_print c_op_print_tab[];
 
 /* These are in c-typeprint.c: */
 

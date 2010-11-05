@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.2
 
+* OpenCL C
+  Initial support for the OpenCL C language (http://www.khronos.org/opencl)
+  has been integrated into GDB.
+
 * Python scripting
 
   ** GDB values in Python are now callable if the value represents a
