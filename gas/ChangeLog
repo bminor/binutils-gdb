@@ -1,3 +1,7 @@
+2010-11-05  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.21.
+
 2010-11-05  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	PR gas/12166

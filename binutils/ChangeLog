@@ -1,3 +1,7 @@
+2010-11-05  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.21.
+
 2010-11-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (dump_bfd_header): Don't display
