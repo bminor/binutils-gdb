@@ -1,5 +1,6 @@
 2010-11-05  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	PR gas/12166
 	* config/obj-coff.c (weak_altname2name): Don't infer from the presence
 	of a period that the symbol has been already uniquify-d.
 	(weak_uniquify): Don't worry that the symbol might have been already
