@@ -369,6 +369,11 @@ proc ld_simple_link_defsyms {} {
         append flags " --defsym __gccmain=0"
     }
 
+    # Windows targets need __main, prefixed with underscore.
+    if {[istarget *-*-cygwin* ] || [istarget *-*-mingw*]} {
+        append flags " --defsym ___main=0"
+    }
+
     # PowerPC EABI code calls __eabi.
     if {[istarget powerpc*-*-eabi*] || [istarget powerpc*-*-rtems*]} {
 	append flags " --defsym __eabi=0"

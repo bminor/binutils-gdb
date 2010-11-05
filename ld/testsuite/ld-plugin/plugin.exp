@@ -53,10 +53,6 @@ set lt_objdir [regsub "objdir=" "$lt_objdir" ""]
 set plugin_path "$base_dir/$lt_objdir/$plugin_name"
 verbose "Full plugin path $plugin_path" 2
 
-set testobjfiles "$HOSTING_CRT0 tmpdir/main.o tmpdir/func.o tmpdir/text.o"
-set testobjfiles_notext "$HOSTING_CRT0 tmpdir/main.o tmpdir/func.o"
-set libs "$HOSTING_LIBS"
-
 set regclm "-plugin-opt registerclaimfile"
 set regas "-plugin-opt registerallsymbolsread"
 set regcln "-plugin-opt registercleanup"
@@ -86,6 +82,12 @@ if { $can_compile && !$failed_compile } {
 	set _ "_"
     }
 }
+
+set testobjfiles "tmpdir/main.o tmpdir/func.o tmpdir/text.o"
+set testobjfiles_notext "tmpdir/main.o tmpdir/func.o"
+# Rather than having libs we just define dummy values for anything
+# we may need to link a target exe; we aren't going to run it anyway.
+set libs "[ld_simple_link_defsyms] --defsym ${_}printf=0 --defsym ${_}puts=0"
 
 set plugin_tests [list \
     [list "load plugin" "-plugin $plugin_path \

@@ -1,3 +1,10 @@
+2010-11-05  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-plugin/plugin.exp (testobjfiles): Dont use HOSTING_CRT0.
+	(testobjfiles_notext): Likewise.
+	(libs): Don't use HOSTING_LIBS; fill with default symbol defs instead.
+	* lib/ld-lib.exp (ld_simple_link_defsyms): Add cygming clause.
+
 2010-11-05  Alan Modra  <amodra@gmail.com>
 
 	* ld-elfvers/vers32c.dsym, * ld-elfvers/vers32c.ver: Delete.
