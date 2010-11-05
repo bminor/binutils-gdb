@@ -6623,6 +6623,11 @@ Reset the source path to its default value (@samp{$cdir:$cwd} on Unix systems). 
 @c RET-repeat for @code{directory} is explicitly disabled, but since
 @c repeating it would be a no-op we do not say that.  (thanks to RMS)
 
+@item set directories @var{path-list}
+@kindex set directories
+Set the source path to @var{path-list}.
+@samp{$cdir:$cwd} are added if missing.
+
 @item show directories
 @kindex show directories
 Print the source path: show which directories it contains.

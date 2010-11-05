@@ -68,8 +68,6 @@ static void line_info (char *, int);
 
 static void source_info (char *, int);
 
-static void show_directories (char *, int);
-
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
 
@@ -293,12 +291,47 @@ select_source_symtab (struct symtab *s)
   error (_("Can't find a default source file"));
 }
 
+/* Handler for "set directories path-list" command.
+   "set dir mumble" doesn't prepend paths, it resets the entire
+   path list.  The theory is that set(show(dir)) should be a no-op.  */
+
 static void
-show_directories (char *ignore, int from_tty)
+set_directories_command (char *args, int from_tty, struct cmd_list_element *c)
+{
+  /* This is the value that was set.
+     It needs to be processed to maintain $cdir:$cwd and remove dups.  */
+  char *set_path = source_path;
+
+  /* We preserve the invariant that $cdir:$cwd begins life at the end of
+     the list by calling init_source_path.  If they appear earlier in
+     SET_PATH then mod_path will move them appropriately.
+     mod_path will also remove duplicates.  */
+  init_source_path ();
+  if (*set_path != '\0')
+    mod_path (set_path, &source_path);
+
+  xfree (set_path);
+}
+
+/* Print the list of source directories.
+   This is used by the "ld" command, so it has the signature of a command
+   function.  */
+
+static void
+show_directories_1 (char *ignore, int from_tty)
 {
   puts_filtered ("Source directories searched: ");
   puts_filtered (source_path);
   puts_filtered ("\n");
+}
+
+/* Handler for "show directories" command.  */
+
+static void
+show_directories_command (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  show_directories_1 (NULL, from_tty);
 }
 
 /* Forget what we learned about line positions in source files, and
@@ -367,7 +400,7 @@ directory_command (char *dirname, int from_tty)
       forget_cached_source_info ();
     }
   if (from_tty)
-    show_directories ((char *) 0, from_tty);
+    show_directories_1 ((char *) 0, from_tty);
 }
 
 /* Add a path given with the -d command line switch.
@@ -1938,16 +1971,27 @@ With no argument, reset the search path to $cdir:$cwd, the default."),
 
   set_cmd_completer (c, filename_completer);
 
-  add_cmd ("directories", no_class, show_directories, _("\
-Current search path for finding source files.\n\
+  add_setshow_optional_filename_cmd ("directories",
+				     class_files,
+				     &source_path,
+				     _("\
+Set the search path for finding source files."),
+				     _("\
+Show the search path for finding source files."),
+				     _("\
 $cwd in the path means the current working directory.\n\
-$cdir in the path means the compilation directory of the source file."),
-	   &showlist);
+$cdir in the path means the compilation directory of the source file.\n\
+GDB ensures the search path always ends with $cdir:$cwd by\n\
+appending these directories if necessary.\n\
+Setting the value to an empty string sets it to $cdir:$cwd, the default."),
+			    set_directories_command,
+			    show_directories_command,
+			    &setlist, &showlist);
 
   if (xdb_commands)
     {
       add_com_alias ("D", "directory", class_files, 0);
-      add_cmd ("ld", no_class, show_directories, _("\
+      add_cmd ("ld", no_class, show_directories_1, _("\
 Current search path for finding source files.\n\
 $cwd in the path means the current working directory.\n\
 $cdir in the path means the compilation directory of the source file."),

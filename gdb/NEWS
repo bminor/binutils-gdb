@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.2
 
+* GDB has a new command: "set directories".
+  It is like the "dir" command except that it replaces the
+  source path list instead of augmenting it.
+
 * OpenCL C
   Initial support for the OpenCL C language (http://www.khronos.org/opencl)
   has been integrated into GDB.
@@ -28,6 +32,8 @@
 
   ** New commands "info pretty-printers", "enable pretty-printer" and
      "disable pretty-printer" have been added.
+
+  ** gdb.parameter("directories") is now available.
 
 * C++ Improvements:
 

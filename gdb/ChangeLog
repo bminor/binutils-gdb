@@ -1,3 +1,15 @@
+2010-11-05  Doug Evans  <dje@google.com>
+
+	Make gdb.parameter("directories") work.
+	New command "set directories".
+	* NEWS: Document them.
+	* source.c (set_directories_command): New function.
+	(show_directories_1): Renamed from show_directories.
+	All callers updated.
+	(show_directories_command): New function.
+	(_initialize_source): Install "directories" as a set/show
+	variable instead of just a show command.
+
 2010-11-05  Ken Werner  <ken.werner@de.ibm.com>
 
 	* NEWS: Mention OpenCL C language support.

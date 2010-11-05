@@ -1,3 +1,8 @@
+2010-11-05  Doug Evans  <dje@google.com>
+
+	* gdb.base/help.exp: Update expected output.
+	* gdb.python/py-parameter.exp: New file.
+
 2010-11-05  Ken Werner  <ken.werner@de.ibm.com>
 
 	* Makefile.in (ALL_SUBDIRS): Add gdb.opencl.

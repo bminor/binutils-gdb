@@ -507,7 +507,7 @@ gdb_test "help show confirm" "Show whether to confirm potentially dangerous oper
 # test help show convenience
 gdb_test "help show convenience" "Debugger convenience \\(\"\\\$foo\"\\) variables\.\[\r\n\]+These variables are created when you assign them values;\[\r\n\]+thus, \"print \\\$foo=1\" gives \"\\\$foo\" the value 1\.  Values may be any type\.\[\r\n\]+A few convenience variables are given values automatically:\[\r\n\]+\"\\\$_\"holds the last address examined with \"x\" or \"info lines\",\[\r\n\]+\"\\\$__\" holds the contents of the last address examined with \"x\"\." "help show convenience"
 # test help show directories
-gdb_test "help show directories" "Current search path for finding source files\.\[\r\n\]+\\\$cwd in the path means the current working directory\.\[\r\n\]+\\\$cdir in the path means the compilation directory of the source file\." "help show directories"
+gdb_test "help show directories" "Show the search path for finding source files\.\[\r\n\]+\\\$cwd in the path means the current working directory\.\[\r\n\]+\\\$cdir in the path means the compilation directory of the source file\..*" "help show directories"
 # test help show editing
 gdb_test "help show editing" "Show editing of command lines as they are typed\.\[\r\n\]+Use \"on\" to enable the editing, and \"off\" to disable it\.\[\r\n\]+Without an argument, command line editing is enabled\.  To edit, use\[\r\n\]+EMACS-like or VI-like commands like control-P or ESC\." "help show editing"
 # test help show environment
