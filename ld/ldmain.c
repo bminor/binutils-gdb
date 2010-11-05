@@ -809,7 +809,7 @@ add_archive_element (struct bfd_link_info *info,
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
 #ifdef ENABLE_PLUGINS
-  if (bfd_my_archive (abfd) != NULL)
+  if (bfd_my_archive (abfd) != NULL && plugin_active_plugins_p ())
     {
       /* We must offer this archive member to the plugins to claim.  */
       int fd = open (bfd_my_archive (abfd)->filename, O_RDONLY | O_BINARY);
@@ -831,6 +831,8 @@ add_archive_element (struct bfd_link_info *info,
 	  if (plugin_call_claim_file (&file, &claimed))
 	    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	      plugin_error_plugin ());
+	  /* fd belongs to us, not the plugin; but we don't need it.  */
+	  close (fd);
 	  if (claimed)
 	    {
 	      /* Substitute the dummy BFD.  */
@@ -843,7 +845,6 @@ add_archive_element (struct bfd_link_info *info,
 	    {
 	      /* Abandon the dummy BFD.  */
 	      bfd_close_all_done (file.handle);
-	      close (fd);
 	      input->claimed = FALSE;
 	    }
 	}

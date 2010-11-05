@@ -172,13 +172,15 @@ plugin_error_p (void)
 }
 
 /* Return name of plugin which caused an error if any.  */
-const char *plugin_error_plugin (void)
+const char *
+plugin_error_plugin (void)
 {
   return error_plugin ? error_plugin : _("<no plugin>");
 }
 
 /* Handle -plugin arg: find and load plugin, or return error.  */
-int plugin_opt_plugin (const char *plugin)
+int
+plugin_opt_plugin (const char *plugin)
 {
   plugin_t *newplug;
 
@@ -201,7 +203,8 @@ int plugin_opt_plugin (const char *plugin)
 
 /* Accumulate option arguments for last-loaded plugin, or return
    error if none.  */
-int plugin_opt_plugin_arg (const char *arg)
+int
+plugin_opt_plugin_arg (const char *arg)
 {
   plugin_arg_t *newarg;
 
@@ -241,8 +244,8 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
   return abfd;
 }
 
-/* Check if the BFD is an IR dummy.  */
-bfd_boolean
+/* Check if the BFD passed in is an IR dummy object file.  */
+static bfd_boolean
 is_ir_dummy_bfd (const bfd *abfd)
 {
   size_t namlen;
@@ -615,8 +618,17 @@ set_tv_plugin_args (plugin_t *plugin, struct ld_plugin_tv *tv)
   tv->tv_u.tv_val = 0;
 }
 
+/* Return true if any plugins are active this run.  Only valid
+   after options have been processed.  */
+bfd_boolean
+plugin_active_plugins_p (void)
+{
+  return plugins_list != NULL;
+}
+
 /* Load up and initialise all plugins after argument parsing.  */
-int plugin_load_plugins (void)
+int
+plugin_load_plugins (void)
 {
   struct ld_plugin_tv *my_tv;
   unsigned int max_args = 0;

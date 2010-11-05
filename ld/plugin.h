@@ -33,6 +33,10 @@ extern int plugin_opt_plugin (const char *plugin);
    error if none.  */
 extern int plugin_opt_plugin_arg (const char *arg);
 
+/* Return true if any plugins are active this run.  Only valid
+   after options have been processed.  */
+extern bfd_boolean plugin_active_plugins_p (void);
+
 /* Load up and initialise all plugins after argument parsing.  */
 extern int plugin_load_plugins (void);
 
@@ -55,9 +59,6 @@ extern int plugin_call_cleanup (void);
    that symbols can be added to it; it must be made readable after the
    add_symbols hook has been called so that it can be read when linking.  */
 extern bfd *plugin_get_ir_dummy_bfd (const char *name, bfd *template);
-
-/* Check if the BFD passed in is an IR dummy object file.  */
-extern bfd_boolean is_ir_dummy_bfd (const bfd *abfd);
 
 /* Notice-symbol bfd linker callback hook.  */
 extern bfd_boolean plugin_notice (struct bfd_link_info *info,

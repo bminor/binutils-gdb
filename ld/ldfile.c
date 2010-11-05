@@ -312,7 +312,8 @@ success:
      bfd_object that it sets the bfd's arch and mach, which
      will be needed when and if we want to bfd_create a new
      one using this one as a template.  */
-  if (bfd_check_format (entry->the_bfd, bfd_object))
+  if (bfd_check_format (entry->the_bfd, bfd_object)
+	&& plugin_active_plugins_p ())
     {
       int fd = open (attempt, O_RDONLY | O_BINARY);
       if (fd >= 0)
@@ -330,6 +331,8 @@ success:
 	  if (plugin_call_claim_file (&file, &claimed))
 	    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
 	      plugin_error_plugin ());
+	  /* fd belongs to us, not the plugin; but we don't need it.  */
+	  close (fd);
 	  if (claimed)
 	    {
 	      /* Discard the real file's BFD and substitute the dummy one.  */
@@ -340,10 +343,9 @@ success:
 	    }
 	  else
 	    {
-	      /* If plugin didn't claim the file, we don't need the fd or the
-	         dummy bfd.  Can't avoid speculatively creating it, alas.  */
+	      /* If plugin didn't claim the file, we don't need the dummy
+	         bfd.  Can't avoid speculatively creating it, alas.  */
 	      bfd_close_all_done (file.handle);
-	      close (fd);
 	      entry->claimed = FALSE;
 	    }
 	}

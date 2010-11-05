@@ -1,3 +1,14 @@
+2010-11-05  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* plugin.h (plugin_active_plugins_p): New prototype.
+	(is_ir_dummy_bfd): Delete prototype.
+	* plugin.c: Fix formatting issues.
+	(is_ir_dummy_bfd): Make static.
+	(plugin_active_plugins_p): New function.
+	* ldfile.c (ldfile_try_open_bfd): Use it to save work if no plugins
+	are loaded.  Always close file descriptor after claim handler returns.
+	* ldmain.c (add_archive_element): Likewise.
+
 2010-11-05  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_add_section): Distinguish ELF treatment of NOLOAD.
