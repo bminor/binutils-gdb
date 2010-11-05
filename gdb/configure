@@ -14937,6 +14937,10 @@ OLD_LIBS=$LIBS
 CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+# -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
+if test "$plugins" = "yes"; then
+  LIBS="-ldl $LIBS"
+fi
 LIBS="-lbfd -liberty $intl $LIBS"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ELF support in BFD" >&5
 $as_echo_n "checking for ELF support in BFD... " >&6; }
@@ -14972,6 +14976,10 @@ if test $gdb_cv_var_elf = yes; then
 
 $as_echo "#define HAVE_ELF 1" >>confdefs.h
 
+  # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
+  if test "$plugins" = "yes"; then
+    OLD_LIBS="-ldl $OLD_LIBS"
+  fi
 fi
 CFLAGS=$OLD_CFLAGS
 LDFLAGS=$OLD_LDFLAGS

@@ -1,5 +1,11 @@
 2010-11-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix configure --enable-plugins --without-python.
+	* configure.ac (for ELF support in BFD) <"$plugins" = "yes">: New.
+	* configure: Regenerate.
+
+2010-11-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* solib.c (solib_read_symbols): Call exception_fprintf even without
 	FROM_TTY.  Print also so->so_name.
 

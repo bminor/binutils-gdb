@@ -1838,6 +1838,10 @@ OLD_LIBS=$LIBS
 CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+# -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
+if test "$plugins" = "yes"; then
+  LIBS="-ldl $LIBS"
+fi
 LIBS="-lbfd -liberty $intl $LIBS"
 AC_CACHE_CHECK([for ELF support in BFD], gdb_cv_var_elf,
 [AC_TRY_LINK(
@@ -1851,6 +1855,10 @@ if test $gdb_cv_var_elf = yes; then
   CONFIG_OBS="$CONFIG_OBS elfread.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
+  # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
+  if test "$plugins" = "yes"; then
+    OLD_LIBS="-ldl $OLD_LIBS"
+  fi
 fi
 CFLAGS=$OLD_CFLAGS
 LDFLAGS=$OLD_LDFLAGS
