@@ -652,12 +652,9 @@ solib_read_symbols (struct so_list *so, int flags)
 	}
 
       if (e.reason < 0)
-	{
-	  if (from_tty)
-	    exception_fprintf
-	      (gdb_stderr, e,
-	       _("Error while reading shared library symbols:\n"));
-	}
+	exception_fprintf (gdb_stderr, e, _("Error while reading shared"
+					    " library symbols for %s:\n"),
+			   so->so_name);
       else
 	{
 	  if (from_tty || info_verbose)
