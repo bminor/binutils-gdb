@@ -1,3 +1,7 @@
+2010-11-06  Kirill A. Shutemov  <kirill@shutemov.name>
+
+	* ld-plugin/plugin-6.d: Relax file name match.
+
 2010-11-05  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-tic6x/attr-unknown-1.d, ld-tic6x/attr-unknown-1000-1.s,
