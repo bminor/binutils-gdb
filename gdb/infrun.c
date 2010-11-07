@@ -6128,9 +6128,8 @@ restore_inferior_thread_state (struct inferior_thread_state *inf_state)
   if (target_has_execution)
     /* NB: The register write goes through to the target.  */
     regcache_cpy (regcache, inf_state->registers);
-  regcache_xfree (inf_state->registers);
-  xfree (inf_state->siginfo_data);
-  xfree (inf_state);
+
+  discard_inferior_thread_state (inf_state);
 }
 
 static void
@@ -6149,6 +6148,7 @@ void
 discard_inferior_thread_state (struct inferior_thread_state *inf_state)
 {
   regcache_xfree (inf_state->registers);
+  xfree (inf_state->siginfo_data);
   xfree (inf_state);
 }
 

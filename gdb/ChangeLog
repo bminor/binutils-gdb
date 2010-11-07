@@ -1,3 +1,9 @@
+2010-11-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* infrun.c (restore_inferior_thread_state): Use
+	discard_inferior_thread_state to free the data.
+	(discard_inferior_thread_state): xfree also siginfo_data.
+
 2010-11-05  Doug Evans  <dje@google.com>
 
 	Make gdb.parameter("directories") work.
