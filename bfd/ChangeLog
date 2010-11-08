@@ -1,3 +1,16 @@
+2010-11-08  Alan Modra  <amodra@gmail.com>
+
+	* hash.c (bfd_hash_hash): Extract from..
+	(bfd_hash_lookup): ..here.
+	(bfd_hash_rename): New function.
+	* section.c (bfd_rename_section): New function.
+	* bfd-in.h (bfd_hash_rename): Declare.
+	* bfd-in2.h: Regenerate.
+	* elf.c (_bfd_elf_make_section_from_shdr): Rename input sections
+	when compressing or decompressing.  Don't assert name match.
+	* elf64-hppa.c (get_reloc_section): Don't assert name match.
+	* elfxx-ia64.c (get_reloc_section): Likewise.
+
 2010-11-05  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_obj_attrs_handle_unknown): New.

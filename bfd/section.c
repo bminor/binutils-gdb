@@ -1215,6 +1215,29 @@ bfd_set_section_flags (bfd *abfd ATTRIBUTE_UNUSED,
 
 /*
 FUNCTION
+	bfd_rename_section
+
+SYNOPSIS
+	void bfd_rename_section
+	  (bfd *abfd, asection *sec, const char *newname);
+
+DESCRIPTION
+	Rename section @var{sec} in @var{abfd} to @var{newname}.
+*/
+
+void
+bfd_rename_section (bfd *abfd, sec_ptr sec, const char *newname)
+{
+  struct section_hash_entry *sh;
+
+  sh = (struct section_hash_entry *)
+    ((char *) sec - offsetof (struct section_hash_entry, section));
+  sh->section.name = newname;
+  bfd_hash_rename (&abfd->section_htab, newname, &sh->root);
+}
+
+/*
+FUNCTION
 	bfd_map_over_sections
 
 SYNOPSIS

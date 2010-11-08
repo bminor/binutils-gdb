@@ -1,3 +1,8 @@
+2010-11-08  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (copy_main): No need to rename sections when compressing
+	or decompressing.
+
 2010-11-05  Alan Modra  <amodra@gmail.com>
 
 	* bin2c.c: Remove internationalization and version report.

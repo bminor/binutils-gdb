@@ -73,7 +73,7 @@ Raw dump of debug contents of section .debug_line:
   Extended opcode 1: End of Sequence
 
 
-Contents of the .zdebug_abbrev section:
+Contents of the .debug_abbrev section:
 
   Number TAG
    1      DW_TAG_compile_unit    \[has children\]
