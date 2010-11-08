@@ -1,3 +1,7 @@
+2010-11-08  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: Updated Japanese translation.
+
 2010-11-08  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (copy_main): No need to rename sections when compressing
@@ -55,7 +59,7 @@
 	rename DWARF debug sections.
 
 	* objdump.c (load_specific_debug_section): Replace
-	bfd_get_section_contents with bfd_get_full_section_contents. 
+	bfd_get_section_contents with bfd_get_full_section_contents.
 	Remove bfd_uncompress_section_contents.
 	(dump_section): Replace bfd_get_section_contents with
 	bfd_get_full_section_contents.
