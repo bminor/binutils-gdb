@@ -1,3 +1,7 @@
+2010-11-08  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: Updated Japanese translation.
+
 2010-11-05  Tristan Gingold  <gingold@adacore.com>
 
 	* po/bfd.pot: Regenerate

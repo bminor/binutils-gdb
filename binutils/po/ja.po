@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: binutils 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-03-03 14:57+0100\n"
-"PO-Revision-Date: 2010-10-23 15:17+0900\n"
+"PO-Revision-Date: 2010-11-07 21:15+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -1923,13 +1923,13 @@ msgid "    %-18s %s\n"
 msgstr "    %-18s %s\n"
 
 #: dwarf.c:3106 dwarf.c:3312 dwarf.c:3528
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "The %s section is empty.\n"
 msgstr ""
 "\n"
-" ディレクトリテーブルは空です。\n"
+"%s セクションが空です。\n"
 
 #. FIXME: Should we handle this case?
 #: dwarf.c:3156
@@ -2483,19 +2483,18 @@ msgid "%s: read: %s"
 msgstr "%s: 読込み: %s"
 
 #: nlmconv.c:924
-#, fuzzy
 msgid "warning: FULLMAP is not supported; try ld -M"
-msgstr "警告: MAP と FULLMAP はサポートされません -- ld -M を試してください"
+msgstr "警告: FULLMAP はサポートされていません。 ld -M を試してください"
 
 #: nlmconv.c:1100
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] [in-file [out-file]]\n"
-msgstr "使い方: %s [オプション] [入力ファイル] [出力ファイル]\n"
+msgstr "使用法: %s [option(s)] [in-file [out-file]]\n"
 
 #: nlmconv.c:1101
-#, fuzzy, c-format
+#, c-format
 msgid " Convert an object file into a NetWare Loadable Module\n"
-msgstr "%s: オブジェクトファイルを NetWare ローダブルモジュールに変換します\n"
+msgstr " オブジェクトファイルを NetWare ローダブルモジュールに変換します\n"
 
 #: nlmconv.c:1102
 #, c-format
@@ -2510,11 +2509,20 @@ msgid ""
 "  -h --help                     Display this information\n"
 "  -v --version                  Display the program's version\n"
 msgstr ""
+"オプションは以下の通りです:\n"
+"  -I --input-target=<bfdname>   入力バイナリ形式を設定する\n"
+"  -O --output-target=<bfdname>  出力バイナリ形式を設定する\n"
+"  -T --header-file=<file>       <file> for NLM ヘッダ情報のために <file> を読み込む\n"
+"  -l --linker=<linker>          リンクのために <linker> を使用する\n"
+"  -d --debug                    リンカのコマンドラインを標準エラー出力に表示する\n"
+"  @<file>                       <file> からオプションを読み込む\n"
+"  -h --help                     この情報を表示する\n"
+"  -v --version                  プログラムのバージョンを表示する\n"
 
 #: nlmconv.c:1143
 #, c-format
 msgid "support not compiled in for %s"
-msgstr "%s 用サポートはコンパイルされていません"
+msgstr "%s に対するサポートはコンパイル時に組み込まれていません"
 
 #: nlmconv.c:1180
 msgid "make section"
@@ -2526,7 +2534,7 @@ msgstr "セクションサイズを設定"
 
 #: nlmconv.c:1200
 msgid "set section alignment"
-msgstr "セクションアラインメントを設定"
+msgstr "セクション配列を設定"
 
 #: nlmconv.c:1204
 msgid "set section flags"
@@ -2561,22 +2569,22 @@ msgstr "%s に対する再配置を調整中にオーバーフローしました
 #: nlmconv.c:2117
 #, c-format
 msgid "%s: execution of %s failed: "
-msgstr "%s: %s の実行が失敗しました: "
+msgstr "%s: %s の実行に失敗しました: "
 
 #: nlmconv.c:2132
 #, c-format
 msgid "Execution of %s failed"
-msgstr "%s の実行が失敗しました"
+msgstr "%s の実行に失敗しました"
 
 #: nm.c:220 size.c:78 strings.c:659
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] [file(s)]\n"
-msgstr "使い方 %s <オプション> <オブジェクトファイル>...\n"
+msgstr "使用法: %s [option(s)] [file(s)]\n"
 
 #: nm.c:221
-#, fuzzy, c-format
+#, c-format
 msgid " List symbols in [file(s)] (a.out by default).\n"
-msgstr "ファイル(デフォルトでは a.out)からシンボルをリスト表示します。\n"
+msgstr " [file(s)] に含まれるシンボルを一覧表示します (デフォルトは a.out)。\n"
 
 #: nm.c:222
 #, fuzzy, c-format
@@ -2638,7 +2646,7 @@ msgstr ""
 #: nm.c:245
 #, c-format
 msgid "      --plugin NAME      Load the specified plugin\n"
-msgstr ""
+msgstr "      --plugin NAME      指定したプラグインを読み込む\n"
 
 #: nm.c:248
 #, c-format
@@ -2765,7 +2773,7 @@ msgstr ""
 #: nm.c:1387
 #, c-format
 msgid "Print width has not been initialized (%d)"
-msgstr ""
+msgstr "表示幅が初期化されていません (%d)"
 
 #: nm.c:1615
 msgid "Only -X 32_64 is supported"
@@ -2773,7 +2781,7 @@ msgstr "-X 32_64 しかサポートされません"
 
 #: nm.c:1643
 msgid "Using the --size-sort and --undefined-only options together"
-msgstr ""
+msgstr "--size-sort および --undefined-only オプションを同時に使用しています"
 
 #: nm.c:1644
 msgid "will produce no output, since undefined symbols have no size."
@@ -2785,19 +2793,19 @@ msgid "data size %ld"
 msgstr "データサイズ %ld"
 
 #: objcopy.c:463 srconv.c:1730
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] in-file [out-file]\n"
-msgstr "使い方: %s [オプション] [入力ファイル] [出力ファイル]\n"
+msgstr "使用法: %s [option(s)] in-file [out-file]\n"
 
 #: objcopy.c:464
 #, c-format
 msgid " Copies a binary file, possibly transforming it in the process\n"
-msgstr ""
+msgstr " バイナリファイルをコピーします。場合によってはプロセスないで形式を変換します。\n"
 
 #: objcopy.c:465 objcopy.c:572
-#, fuzzy, c-format
+#, c-format
 msgid " The options are:\n"
-msgstr "  オプション:\n"
+msgstr " オプション:\n"
 
 #: objcopy.c:466
 #, c-format
@@ -2898,14 +2906,14 @@ msgid ""
 msgstr ""
 
 #: objcopy.c:570
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <option(s)> in-file(s)\n"
-msgstr "使い方: %s <スイッチ> 入力ファイル...\n"
+msgstr "使用法: %s <option(s)> in-file(s)\n"
 
 #: objcopy.c:571
 #, c-format
 msgid " Removes symbols and sections from files\n"
-msgstr ""
+msgstr "シンボルおよびセクションをファイルから取り除きます。\n"
 
 #: objcopy.c:573
 #, fuzzy, c-format
@@ -2959,9 +2967,9 @@ msgid "supported flags: %s"
 msgstr "サポートされるフラグ: %s"
 
 #: objcopy.c:748
-#, fuzzy, c-format
+#, c-format
 msgid "cannot open '%s': %s"
-msgstr "open できません: %s: %s"
+msgstr "'%s' を開けません: %s"
 
 #: objcopy.c:751 objcopy.c:3336
 #, c-format
@@ -3019,9 +3027,8 @@ msgid "copy from `%s' [unknown] to `%s' [unknown]\n"
 msgstr ""
 
 #: objcopy.c:1420
-#, fuzzy
 msgid "Unable to change endianness of input file(s)"
-msgstr "ファイル末尾に seek できません!"
+msgstr "入力ファイルのエンディアンを変更できません"
 
 #: objcopy.c:1429
 #, fuzzy, c-format
@@ -3118,30 +3125,27 @@ msgstr "%s: プライベート BFD データコピー中のエラー: %s"
 
 #: objcopy.c:2429
 msgid "failed to create output section"
-msgstr ""
+msgstr "出力セクションの作成に失敗しました"
 
 #: objcopy.c:2443
-#, fuzzy
 msgid "failed to set size"
-msgstr "セクションサイズを設定"
+msgstr "サイズの設定に失敗しました"
 
 #: objcopy.c:2457
 msgid "failed to set vma"
-msgstr ""
+msgstr "vma の設定に失敗しました"
 
 #: objcopy.c:2482
-#, fuzzy
 msgid "failed to set alignment"
-msgstr "セクションアラインメントを設定"
+msgstr "整列の設定に失敗しました"
 
 #: objcopy.c:2516
-#, fuzzy
 msgid "failed to copy private data"
-msgstr "%s: プライベート BFD データコピー中のエラー: %s"
+msgstr "プライベートデータのコピーに失敗しました"
 
 #: objcopy.c:2598
 msgid "relocation count is negative"
-msgstr ""
+msgstr "再配置数が負の値です"
 
 #. User must pad the section up in order to do this.
 #: objcopy.c:2659
@@ -3150,14 +3154,12 @@ msgid "cannot reverse bytes: length of section %s must be evenly divisible by %d
 msgstr ""
 
 #: objcopy.c:2843
-#, fuzzy
 msgid "can't create debugging section"
-msgstr "%s: デバッグセクションを作成できません: %s"
+msgstr "デバッグセクションを作成できません"
 
 #: objcopy.c:2856
-#, fuzzy
 msgid "can't set debugging section contents"
-msgstr "%s: デバッグセクションの内容を設定できません: %s"
+msgstr "デバッグセクションの内容を設定できません"
 
 #: objcopy.c:2864
 #, fuzzy, c-format
