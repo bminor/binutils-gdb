@@ -1,3 +1,8 @@
+2010-11-08  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.20.90
+	* configure: Regenerate.
+
 2010-11-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.
