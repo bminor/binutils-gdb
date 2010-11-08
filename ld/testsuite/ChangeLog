@@ -1,3 +1,61 @@
+2010-11-08  Thomas Schwinge  <thomas@schwinge.name>
+
+	* lib/ld-lib.exp (is_elf_format): Consider for *-*-gnu*, too.
+	* ld-discard/discard.exp: Likewise.
+	* ld-elf/binutils.exp: Likewise.
+	* ld-elf/commonpage1.d (target): Likewise.
+	* ld-elf/compress1c.d (target): Likewise.
+	* ld-elf/discard1.d (target): Likewise.
+	* ld-elf/discard2.d (target): Likewise.
+	* ld-elf/discard3.d (target): Likewise.
+	* ld-elf/dynsym1.d (target): Likewise.
+	* ld-elf/eh6.d (target): Likewise.
+	* ld-elf/elf.exp: Likewise.
+	(array_tests): Move -static tests to...
+	(array_tests_static): ... here, and handle it accordingly.
+	* ld-elf/hash.d (target): Likewise.
+	* ld-elf/header.d (target): Likewise.
+	* ld-elf/loadaddr1.d (target): Likewise.
+	* ld-elf/loadaddr2.d (target): Likewise.
+	* ld-elf/loadaddr3a.d (target): Likewise.
+	* ld-elf/loadaddr3b.d (target): Likewise.
+	* ld-elf/local1.d (target): Likewise.
+	* ld-elf/maxpage1.d (target): Likewise.
+	* ld-elf/maxpage2.d (target): Likewise.
+	* ld-elf/maxpage3a.d (target): Likewise.
+	* ld-elf/multibss1.d (target): Likewise.
+	* ld-elf/noload-2.d (target): Likewise.
+	* ld-elf/seg.d (target): Likewise.
+	* ld-elf/textaddr1.d (target): Likewise.
+	* ld-elf/textaddr2.d (target): Likewise.
+	* ld-elf/textaddr3.d (target): Likewise.
+	* ld-elf/textaddr4.d (target): Likewise.
+	* ld-elf/textaddr5.d (target): Likewise.
+	* ld-elf/textaddr6.d (target): Likewise.
+	* ld-elf/textaddr7.d (target): Likewise.
+	* ld-elf/tls_common.exp: Likewise.
+	* ld-elf/unknown2.d (target): Likewise.
+	* ld-elfvers/vers.exp: Likewise.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfweak/elfweak.exp: Likewise.
+	(setup_xfail_gnu_hurd): New function.  Use it where appropriate.
+	* ld-gc/abi-note.d (target): Likewise.
+	* ld-gc/gc.exp: Likewise.
+	* ld-gc/pr11218.d (target): Likewise.
+	* ld-gc/start.d (target): Likewise.
+	* ld-i386/i386.exp: Likewise.
+	* ld-ifunc/binutils.exp: Likewise.
+	* ld-ifunc/ifunc.exp: Likewise.
+	* ld-linkonce/linkonce.exp: Likewise.
+	* ld-linkonce/zeroehl32.d (target): Likewise.
+	* ld-pie/pie.exp: Likewise.
+	* ld-scripts/phdrs2.exp: Likewise.
+	* ld-scripts/rgn-at5.d (target): Likewise.
+	* ld-shared/shared.exp: Likewise.
+	* ld-undefined/entry-3.d (target): Likewise.
+	* ld-undefined/entry-4.d (target): Likewise.
+	* ld-undefined/weak-undef.exp: Likewise.
+
 2010-11-06  Kirill A. Shutemov  <kirill@shutemov.name>
 
 	* ld-plugin/plugin-6.d: Relax file name match.

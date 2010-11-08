@@ -1,5 +1,5 @@
 # Expect script for ld-visibility tests
-#   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+#   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2010
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -30,6 +30,7 @@
 if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget hppa*-*-linux*] \
      && ![istarget i?86-*-linux*] \
+     && ![istarget i?86-*-gnu*] \
      && ![istarget ia64-*-linux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget mips*-*-linux*] \
@@ -115,7 +116,8 @@ if [istarget arm*-*-linux*] {
 
 set support_protected "no"
 
-if [istarget *-*-linux*] {
+if { [istarget *-*-linux*]
+     || [istarget *-*-gnu*] } {
     if [ld_compile "$CC -g $CFLAGS -DPROTECTED_CHECK" $srcdir/$subdir/main.c $tmpdir/main.o] {
       if [ld_simple_link $CC $tmpdir/main "$tmpdir/main.o"] {
 	catch "exec $tmpdir/main" support_protected

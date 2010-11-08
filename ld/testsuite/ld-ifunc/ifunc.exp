@@ -1,6 +1,6 @@
 # Expect script for linker support of IFUNC symbols and relocations.
 #
-#   Copyright 2009  Free Software Foundation, Inc.
+#   Copyright 2009, 2010 Free Software Foundation, Inc.
 #   Contributed by Red Hat.
 #
 # This file is part of the GNU Binutils.
@@ -32,7 +32,8 @@ if {!(([istarget "i?86-*-*"]
       && ([istarget "*-*-elf*"]
 	  || ([istarget "*-*-linux*"]
 	      && ![istarget "*-*-*aout*"]
-	      && ![istarget "*-*-*oldld*"]))) } {
+	      && ![istarget "*-*-*oldld*"])
+	  || ([istarget "*-*-gnu*"]))) } {
     verbose "IFUNC tests not run - target does not support IFUNC"
     return
 }

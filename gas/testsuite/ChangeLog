@@ -1,3 +1,9 @@
+2010-11-08  Thomas Schwinge  <thomas@schwinge.name>
+
+	* lib/gas-defs.exp (is_elf_format): Consider for *-*-gnu*, too.
+	* gas/elf/elf.exp: Likewise.
+	* gas/symver/symver.exp: Likewise.
+
 2010-11-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/12186

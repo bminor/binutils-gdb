@@ -1,7 +1,7 @@
 #name: --gc-sections with note section
 #ld: --gc-sections -e _start
 #readelf: -S --wide
-#target: *-*-linux*
+#target: *-*-linux* *-*-gnu*
 #notarget: *-*-*aout *-*-*oldld
 
 #...

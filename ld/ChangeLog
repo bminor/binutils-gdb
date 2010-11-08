@@ -1,3 +1,7 @@
+2010-11-08  Thomas Schwinge  <thomas@schwinge.name>
+
+	* configure.host: Add stanza for *-*-gnu*.
+
 2010-11-05  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* emultempl/spuelf.em (new_tmp_file): Fix wrong first parameter.

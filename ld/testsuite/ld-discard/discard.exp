@@ -1,5 +1,5 @@
 # Expect script for ld discard tests
-#   Copyright 2001, 2002, 2005, 2007 Free Software Foundation, Inc.
+#   Copyright 2001, 2002, 2005, 2007, 2010 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -26,7 +26,7 @@
 # in every .d-file.
 
 if { ![istarget *-*-linux*] \
-     && ![istarget *-*-gnu] \
+     && ![istarget *-*-gnu*] \
      && ![istarget hppa*64*-*-hpux*] \
      && ![istarget *-*-elf] } {
     return
