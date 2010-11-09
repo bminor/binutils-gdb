@@ -683,6 +683,11 @@ proc test_inaccessible_watchpoint {} {
 	    "$watchpoint_msg \[0-9\]+: \\*\\(int \\*\\) 0"
 	delete_breakpoints
 
+	# The same, but using -location through an indirection.
+	gdb_test "watch -location *global_ptr" \
+	    "$watchpoint_msg \[0-9\]+: \-location: \\*global_ptr"
+	delete_breakpoints
+
 	# This step requires two HW watchpoints.  Since PPC Server only has
 	# a single one, it will use a SW watchpoint in this case.
 	if [istarget powerpc64-*] {

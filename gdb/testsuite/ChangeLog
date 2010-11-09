@@ -1,3 +1,8 @@
+2010-11-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/watchpoint.exp: Test "watch -location" with an
+	innacessible location.
+
 2010-11-09  Edjunior Machado  <emachado@br.ibm.com>
 	    Luis Machado  <luisgpm@br.ibm.com>
 

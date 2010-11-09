@@ -1,3 +1,10 @@
+2010-11-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (watch_command_1): Get a pointer of the lazy
+	version of the expression's value, even if reading the value from
+	memory fails.  When creating a -location watchpoint, get the
+	value's address from the lazy value pointer.
+
 2010-11-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infrun.c (restore_inferior_thread_state): Use

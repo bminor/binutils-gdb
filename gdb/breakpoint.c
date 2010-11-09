@@ -8022,7 +8022,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty, int just_location)
   struct breakpoint *b, *scope_breakpoint = NULL;
   struct expression *exp;
   struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
-  struct value *val, *mark;
+  struct value *val, *mark, *result;
   struct frame_info *frame;
   char *exp_start = NULL;
   char *exp_end = NULL;
@@ -8121,12 +8121,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty, int just_location)
 
   exp_valid_block = innermost_block;
   mark = value_mark ();
-  fetch_subexp_value (exp, &pc, &val, NULL, NULL);
+  fetch_subexp_value (exp, &pc, &val, &result, NULL);
 
   if (just_location)
     {
       exp_valid_block = NULL;
-      val = value_addr (val);
+      val = value_addr (result);
       release_value (val);
       value_free_to_mark (mark);
     }
