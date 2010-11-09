@@ -56,6 +56,7 @@ class Symbol_table;
 class Output_data;
 class Output_section;
 class Input_objects;
+class Task;
 
 // The abstract class for target specific handling.
 
@@ -332,13 +333,13 @@ class Target
   // Perform a relaxation pass.  Return true if layout may be changed.
   bool
   relax(int pass, const Input_objects* input_objects, Symbol_table* symtab,
-	Layout* layout)
+	Layout* layout, const Task* task)
   {
     // Run the dummy relaxation pass twice if relaxation debugging is enabled.
     if (is_debugging_enabled(DEBUG_RELAXATION))
       return pass < 2;
 
-    return this->do_relax(pass, input_objects, symtab, layout);
+    return this->do_relax(pass, input_objects, symtab, layout, task);
   } 
 
   // Return the target-specific name of attributes section.  This is
@@ -555,7 +556,7 @@ class Target
 
   // Virtual function which may be overriden by the child class.
   virtual bool
-  do_relax(int, const Input_objects*, Symbol_table*, Layout*)
+  do_relax(int, const Input_objects*, Symbol_table*, Layout*, const Task*)
   { return false; }
 
   // A function for targets to call.  Return whether BYTES/LEN matches

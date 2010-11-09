@@ -1,3 +1,52 @@
+2010-11-08  Doug Kwan  <dougkwan@google.com>
+	    Cary Coutant  <ccoutant@google.com>
+
+	* arm.cc (Arm_exidx_merge_section::build_contents): New method.
+	(Arm_exidx_merge_section::section_contents_): New data member.
+	(Arm_input_section::Arm_input_section): Initialize original_contents_.
+	(Arm_input_section::~Arm_input_section): De-allocate memory.
+	(Arm_input_section::original_contents_): New data member.	
+	(Arm_exidx_fixup::process_exidx_section): Pass EXIDX section contents
+	in parameters instead of calling Object::section_contents without
+	locking.
+	(Arm_output_section::group_section): New parameter TASK.  Pass it
+	to callees that need locking objects.
+	(Arm_output_section::fix_exidx_coverage): New parameter TASK.  Use it
+	to lock EXIDX input sections.  Fix a formatting issue.  Call
+	Arm_exidx_merged_section::build_contents to create merged section
+	contents.
+	(Arm_output_section::create_stub_group): New parameter TASK.  Use it
+	to lock object of stub table owner.
+	(Arm_exidx_input_section::Arm_exidx_input_section): Add new parameter
+	TEXT_SIZE to initialize data member TEXT_SIZE_.
+	(Arm_exidx_input_section::addralign): Fix typo in comment.
+	(Arm_exidx_input_section::text_size): New method.
+	(Target_arm::do_relax): New parameter TASK.  Pass it to callees
+	that require locking objects.  Lock objects before scanning for stubs
+	and updating local symbols.
+	(Arm_input_section<big_endian>::init): Copy contents of original
+	input section.
+ 	(Arm_input_section<big_endian>::do_write): Use saved contents of
+	original input section instead of calling Object::section_contents
+	without locking.
+	(Arm_exidx_cantunwind::do_fixed_endian_write): Find out text section
+	size without calling Object::section_size().
+	(Arm_exidx_merged_section::Arm_exidx_merged_section): Add sanity check
+	for size.  Allocate a buffer for merged EXIDX entries.
+	(Arm_exidx_merged_section::build_contents): New method.
+ 	(Arm_exidx_merged_section::do_write): Move merge section contents
+	building code to Arm_exidx_merged_section::build_contetns.  Write
+	out contetns in buffer instead of building it on the fly.
+	(Arm_relobj::make_exidx_input_section): Also pass text section size
+	to Arm_exidx_input_section constructor.
+	(Arm_relobj::do_read_symbols): Fix memory leak.  Fix a formatting issue.
+	(Arm_dynobj::do_read_symbols): Fix memory leak.
+	* layout.cc (Layout::finalize): Pass TASK to Target::relax().
+	* target.h: (class Task): Add forward declaration.
+	(Target::relax): Add new parameter TASK and pass it to
+	Target::do_relax().
+	(Target::do_relax):: New parameter TASK.  Fix a formatting issue.
+
 2010-11-05  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/10708

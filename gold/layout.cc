@@ -1943,7 +1943,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       pass++;
     }
   while (target->may_relax()
-	 && target->relax(pass, input_objects, symtab, this));
+	 && target->relax(pass, input_objects, symtab, this, task));
 
   // Set the file offsets of all the non-data sections we've seen so
   // far which don't have to wait for the input sections.  We need
