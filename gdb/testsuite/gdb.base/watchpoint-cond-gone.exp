@@ -46,6 +46,7 @@ gdb_test "watch c if c == 30" "atchpoint \[0-9\]*.*" "Place the watchpoint"
 
 # We may stay either in the function itself or only at the first instruction of
 # its caller depending on the epilogue unwinder (or valid epilogue CFI) presence.
+
 gdb_test "finish" \
-	 "Watchpoint .* deleted because the program has left the block in.*which its expression is valid..*in (jumper|func).*" \
+	 "Watchpoint .* deleted because the program has left the block in.*which its expression is valid..*in (\\.?jumper|func).*" \
 	 "Catch the no longer valid watchpoint"

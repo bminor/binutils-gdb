@@ -75,7 +75,7 @@ if [runto inner] then {
     
     if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
     gdb_test "p top" \
-	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <top(\\(int\\)|)>"
+	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <\\.?top(\\(int\\)|)>"
     if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
     gdb_test "whatis top" \
 	"(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))"
@@ -85,7 +85,7 @@ if [runto inner] then {
     if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" }
     setup_xfail "mips-sgi-irix6*"
     gdb_test "p middle" \
-	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <middle(\\(int\\)|)>"
+	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <\\.?middle(\\(int\\)|)>"
     if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" }
     setup_xfail "mips-sgi-irix6*"
     gdb_test "whatis middle" \

@@ -45,7 +45,7 @@ gdb_load ${binfile}
 set command "info sym main"
 set command_regex [string_to_regexp $command]
 gdb_test_multiple "$command" "$command" {
-    -re "^${command_regex}\[\r\n\]+main in section \[^\r\n\]+\[\r\n\]+$gdb_prompt \$" {
+    -re "^${command_regex}\[\r\n\]+\\.?main in section \[^\r\n\]+\[\r\n\]+$gdb_prompt \$" {
 	pass "$command"
     }
 }

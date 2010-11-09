@@ -1,3 +1,13 @@
+2010-11-09  Edjunior Machado  <emachado@br.ibm.com>
+	    Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdb.base/maint.exp: Expect "." prefix.
+	* gdb.base/nodebug.exp: Expect "." Likewise.
+	* gdb.base/sepsymtab.exp: Expect "." Likewise.
+	* gdb.base/watchpoint-cond-gone.exp: Likewise.
+	* gdb.base/watchpoint.exp: Expect a software watch to be created for
+	POWER server processors.
+
 2010-11-08  Edjunior Machado  <emachado@br.ibm.com>
 	    Luis Machado  <luisgpm@br.ibm.com>
 

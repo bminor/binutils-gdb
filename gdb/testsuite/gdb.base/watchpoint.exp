@@ -683,7 +683,13 @@ proc test_inaccessible_watchpoint {} {
 	    "$watchpoint_msg \[0-9\]+: \\*\\(int \\*\\) 0"
 	delete_breakpoints
 
-	gdb_test "watch *global_ptr" "$watchpoint_msg \[0-9\]+: \\*global_ptr"
+	# This step requires two HW watchpoints.  Since PPC Server only has
+	# a single one, it will use a SW watchpoint in this case.
+	if [istarget powerpc64-*] {
+	    set watchpoint_msg "Watchpoint"
+	}
+
+	gdb_test "watch *global_ptr" "$watchpoint_msg \[0-9\]+: \\\*global_ptr"
 	gdb_test "set \$global_ptr_breakpoint_number = \$bpnum" ""
 	gdb_test "next" ".*global_ptr = buf.*" "global_ptr next"
 	gdb_test_multiple "next" "next over ptr init" {
