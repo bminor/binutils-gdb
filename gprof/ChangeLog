@@ -1,3 +1,7 @@
+2010-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: New Russian translation.
+
 2010-11-05  Tristan Gingold  <gingold@adacore.com>
 
 	* po/gprof.pot: Regenerate

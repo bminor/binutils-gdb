@@ -1,4 +1,4 @@
-# Japanese message for bfd 2.11
+# Japanese message for bfd
 # This file is distributed under the same license as the binutils package.
 # Copyright (C) 2001, 2010 Free Software Foundation, Inc.
 # Daisuke Yamashita <yamad@mb.infoweb.ne.jp>, 2001
@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bfd 2.20.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-03-03 15:03+0100\n"
-"PO-Revision-Date: 2010-11-07 20:53+0900\n"
+"PO-Revision-Date: 2010-11-09 20:28+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -154,19 +154,19 @@ msgid "#<Invalid error code>"
 msgstr "#<不適切なエラーコード>"
 
 #: bfd.c:920
-#, fuzzy, c-format
+#, c-format
 msgid "BFD %s assertion fail %s:%d"
-msgstr "bfd アサーションが失敗 %s:%d"
+msgstr "BFD %s アサーション失敗 %s:%d"
 
 #: bfd.c:932
-#, fuzzy, c-format
+#, c-format
 msgid "BFD %s internal error, aborting at %s line %d in %s\n"
-msgstr "BFD 内部エラー。%s の %d 行目 %s で中断しました\n"
+msgstr "BFD %1$s 内部エラー。 %4$s 内 %3$d 行 %2$s で中止しました\n"
 
 #: bfd.c:936
-#, fuzzy, c-format
+#, c-format
 msgid "BFD %s internal error, aborting at %s line %d\n"
-msgstr "BFD 内部エラー。%s の %d 行目で中断しました\n"
+msgstr "BFD %1$s 内部エラー。%3$d 行 %2$s で中止しました\n"
 
 #: bfd.c:938
 msgid "Please report this bug.\n"
@@ -185,7 +185,7 @@ msgstr "マップしません: 環境変数が設定されていません\n"
 #: binary.c:284
 #, c-format
 msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
-msgstr "警告: セクション `%s' 巨大(例 負数)なファイルオフセット 0x%lx への書込みです。"
+msgstr "警告: セクション `%s' で巨大な (例: 負数) ファイルオフセット 0x%lx への書き込みです"
 
 #: bout.c:1150 elf-m10300.c:2078 elf32-avr.c:1639 elf32-frv.c:5743
 #: elfxx-sparc.c:2456 reloc.c:5386 reloc16.c:162 vms.c:1918 elf32-ia64.c:788
@@ -219,11 +219,11 @@ msgstr "複数の gp 値を使用しています"
 
 #: coff-alpha.c:1560
 msgid "%B: unsupported relocation: ALPHA_R_GPRELHIGH"
-msgstr "%B: サポートされていない再配置: ALPHA_R_GPRELHIGH"
+msgstr "%B: サポートされていない再配置です: ALPHA_R_GPRELHIGH"
 
 #: coff-alpha.c:1567
 msgid "%B: unsupported relocation: ALPHA_R_GPRELLOW"
-msgstr "%B: サポートされていない再配置: ALPHA_R_GPRELLOW"
+msgstr "%B: サポートされていない再配置です: ALPHA_R_GPRELLOW"
 
 #: coff-alpha.c:1574 elf32-m32r.c:2477 elf64-alpha.c:3943 elf64-alpha.c:4098
 #: elf32-ia64.c:4462 elf64-ia64.c:4462
@@ -231,21 +231,23 @@ msgid "%B: unknown relocation type %d"
 msgstr "%B: 不明な再配置型 %d です"
 
 #: coff-arm.c:1039
-#, fuzzy, c-format
+#, c-format
 msgid "%B: unable to find THUMB glue '%s' for `%s'"
-msgstr "%s: THUMB グルー '%s' (`%s' 用) を見つけられません"
+msgstr "%1$B: `%3$s' に対する THUMB 糊 '%2$s' が見つかりません"
 
 #: coff-arm.c:1068
-#, fuzzy, c-format
+#, c-format
 msgid "%B: unable to find ARM glue '%s' for `%s'"
-msgstr "%s: ARM グルー '%s' (`%s' 用) を見つけられません"
+msgstr "%1$B: `%3$s' に対する ARM 糊 '%2$s' が見つかりません"
 
 #: coff-arm.c:1370 elf32-arm.c:6372
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%B(%s): warning: interworking not enabled.\n"
 "  first occurrence: %B: arm call to thumb"
-msgstr "%s(%s): 警告: interworking が有効ではありません。"
+msgstr ""
+"%B(%s): 警告: ARM/THUMB 命令相互利用が有効になっていません。\n"
+"  最初の出現箇所: %B: THUMB を呼び出す ARM 命令"
 
 #: coff-arm.c:1460
 #, c-format
@@ -254,49 +256,52 @@ msgid ""
 "  first occurrence: %B: thumb call to arm\n"
 "  consider relinking with --support-old-code enabled"
 msgstr ""
+"%B(%s): 警告: ARM/THUMB 命令相互利用が有効になっていません。\n"
+"  最初の出現箇所: %B: ARM を呼び出す THUMB 命令\n"
+"  --support-old-code を有効にして再リンクすることを検討してください"
 
 #: coff-arm.c:1755 coff-tic80.c:695 cofflink.c:3030
 msgid "%B: bad reloc address 0x%lx in section `%A'"
-msgstr "%B: 不正な再配置アドレス 0x%lx がセクション `%s' 内にあります"
+msgstr "%1$B: セクション `%3$A' 内に誤った再配置アドレス 0x%2$lx があります"
 
 #: coff-arm.c:2080
 msgid "%B: illegal symbol index in reloc: %d"
 msgstr "%B: 再配置内のシンボル索引が不正です: %d"
 
 #: coff-arm.c:2211
-#, fuzzy, c-format
+#, c-format
 msgid "error: %B is compiled for APCS-%d, whereas %B is compiled for APCS-%d"
-msgstr "エラー: %s は APCS-%d 用にコンパイルされたにもかかわらず、%s が APCS-%d 用にコンパイルされました"
+msgstr "エラー: %B は APCS-%d に対してコンパイルされているにもかかわらず、 %B は APCS-%d に対してコンパイルされています"
 
 #: coff-arm.c:2227 elf32-arm.c:10334
-#, fuzzy, c-format
+#, c-format
 msgid "error: %B passes floats in float registers, whereas %B passes them in integer registers"
-msgstr "エラー: %s は浮動小数を%sレジスタに渡しているにもかかわらず、%s がそれらを%sレジスタに渡しています"
+msgstr "エラー: %B は浮動小数を浮動小数レジスタに渡しているにもかかわらず、 %B は浮動小数を整数レジスタに渡しています"
 
 #: coff-arm.c:2230 elf32-arm.c:10338
-#, fuzzy, c-format
+#, c-format
 msgid "error: %B passes floats in integer registers, whereas %B passes them in float registers"
-msgstr "エラー: %s は浮動小数を%sレジスタに渡しているにもかかわらず、%s がそれらを%sレジスタに渡しています"
+msgstr "エラー: %B は浮動小数を整数レジスタに渡しているにもかかわらず、 %B は浮動小数を浮動小数レジスタに渡しています"
 
 #: coff-arm.c:2244
-#, fuzzy, c-format
+#, c-format
 msgid "error: %B is compiled as position independent code, whereas target %B is absolute position"
-msgstr "%s: エラー: 位置非依存コードとしてコンパイルされたにもかかわらず、ターゲット %s は絶対位置になっています"
+msgstr "エラー: %B は位置非依存コードとしてコンパイルされているにも関わらず、ターゲット %B は絶対位置コードになっています"
 
 #: coff-arm.c:2247
-#, fuzzy, c-format
+#, c-format
 msgid "error: %B is compiled as absolute position code, whereas target %B is position independent"
-msgstr "%s: エラー: 絶対位置コードとしてコンパイルされたにもかかわらず、ターゲット %s は位置非依存コードになっています"
+msgstr "エラー: %B は絶対位置コードとしてコンパイルされているにもかかわらず、ターゲット %B は位置非依存コードになっています"
 
 #: coff-arm.c:2275 elf32-arm.c:10403
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: %B supports interworking, whereas %B does not"
-msgstr "警告: 入力ファイル %s が interworking をサポートしているにもかかわらず、%s はサポートしていません。"
+msgstr "警告: %B は ARM/THUMB 命令相互利用をサポートしているにもかかわらず、 %B はサポートしていません"
 
 #: coff-arm.c:2278 elf32-arm.c:10409
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: %B does not support interworking, whereas %B does"
-msgstr "警告: 入力ファイル %s が interworking をサポートしているにもかかわらず、%s はサポートしています。"
+msgstr "警告: %B は ARM/THUMB 命令相互利用をサポートしていないにもかかわらず、 %B はサポートしています"
 
 #: coff-arm.c:2302
 #, c-format
@@ -326,32 +331,32 @@ msgstr " [絶対位置]"
 #: coff-arm.c:2321
 #, c-format
 msgid " [interworking flag not initialised]"
-msgstr " [interworking フラグは初期化されていません]"
+msgstr " [ARM/THUMB 命令相互利用のフラグは初期化されていません]"
 
 #: coff-arm.c:2323
 #, c-format
 msgid " [interworking supported]"
-msgstr " [interworking がサポートされます]"
+msgstr " [ARM/THUMB 命令相互利用がサポートされています]"
 
 #: coff-arm.c:2325
 #, c-format
 msgid " [interworking not supported]"
-msgstr " [interworking はサポートされません]"
+msgstr " [ARM/THUMB 命令相互利用はサポートされていません]"
 
 #: coff-arm.c:2371 elf32-arm.c:9367
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: Not setting interworking flag of %B since it has already been specified as non-interworking"
-msgstr "警告: 既に非 interworking と指定されているため、%s の interworking フラグを設定しません"
+msgstr "警告: ARM/THUMB 命令相互利用をしないように既に指定されているため、 %B の ARM/THUMB 命令相互利用フラグを設定しません"
 
 #: coff-arm.c:2375 elf32-arm.c:9371
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: Clearing the interworking flag of %B due to outside request"
-msgstr "警告: 要求外のため %s の interworking フラグをクリアします"
+msgstr "警告: 要求外のため %s の ARM/THUMB 命令相互利用フラグをクリアします"
 
 #: coff-h8300.c:1122
 #, c-format
 msgid "cannot handle R_MEM_INDIRECT reloc when using %s output"
-msgstr ""
+msgstr "%s 出力を利用している時には R_MEM_INDIRECT 再配置を扱えません"
 
 #: coff-i860.c:147
 #, c-format
@@ -360,11 +365,11 @@ msgstr "再配置 `%s' はまだ実装されていません\n"
 
 #: coff-i860.c:605 coff-tic54x.c:398 coffcode.h:5143
 msgid "%B: warning: illegal symbol index %ld in relocs"
-msgstr "%B: 警告: 不正なシンボル索引 %ld が再配置内にあります"
+msgstr "%B: 警告: 不正なシンボル索引 %ld が再配置領域内にあります"
 
 #: coff-i960.c:143 coff-i960.c:506
 msgid "uncertain calling convention for non-COFF symbol"
-msgstr "非 COFF シンボル用の呼び出し規約が不確定です"
+msgstr "非 COFF シンボルに対する呼び出し規約が不確定です"
 
 #: coff-m68k.c:506 elf32-bfin.c:5691 elf32-cr16.c:2965 elf32-m68k.c:4615
 msgid "unsupported reloc type"
@@ -372,19 +377,19 @@ msgstr "サポートされていない再配置型です"
 
 #: coff-maxq.c:126
 msgid "Can't Make it a Short Jump"
-msgstr ""
+msgstr "短いジャンプを行うことができません"
 
 #: coff-maxq.c:191
 msgid "Exceeds Long Jump Range"
-msgstr ""
+msgstr "長いジャンプの範囲を超えています"
 
 #: coff-maxq.c:202 coff-maxq.c:276
 msgid "Absolute address Exceeds 16 bit Range"
-msgstr ""
+msgstr "絶対アドレスが 16 bit の範囲を超えています"
 
 #: coff-maxq.c:240
 msgid "Absolute address Exceeds 8 bit Range"
-msgstr ""
+msgstr "絶対アドレスが 8 bit の範囲を超えています"
 
 #: coff-maxq.c:333
 msgid "Unrecognized Reloc Type"
@@ -402,7 +407,7 @@ msgstr "認識できない再配置です"
 #: coff-rs6000.c:2789
 #, c-format
 msgid "%s: unsupported relocation type 0x%02x"
-msgstr "%s: 再配置型 0x%02x はサポートされません"
+msgstr "%s: 再配置型 0x%02x はサポートされていません"
 
 #: coff-rs6000.c:2882
 #, c-format
@@ -421,7 +426,7 @@ msgstr "認識できない再配置型 0x%x です"
 #: coff-tic4x.c:240
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
-msgstr "%s: 警告: 不正なシンボル索引 %ld が再配置内にあります"
+msgstr "%s: 警告: 不正なシンボル索引 %ld が再配置領域内にあります"
 
 #: coff-w65.c:367
 #, c-format
@@ -429,20 +434,19 @@ msgid "ignoring reloc %s\n"
 msgstr "再配置 %s を無視しています\n"
 
 #: coffcode.h:960
-#, fuzzy
 msgid "%B: warning: COMDAT symbol '%s' does not match section name '%s'"
-msgstr "警告: %s: 局所シンボル `%s' がセクションを持っていません"
+msgstr "%B: 警告: COMDAT シンボル '%s' はセクション名 '%s' に適合しません"
 
 #. Generate a warning message rather using the 'unhandled'
 #. variable as this will allow some .sys files generate by
 #. other toolchains to be processed.  See bugzilla issue 196.
 #: coffcode.h:1176
 msgid "%B: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"
-msgstr ""
+msgstr "%B: 警告: セクション %s 内の IMAGE_SCN_MEM_NOT_PAGED セクションフラグを無視しています"
 
 #: coffcode.h:1240
 msgid "%B (%s): Section flag %s (0x%x) ignored"
-msgstr ""
+msgstr "%B (%s): セクションフラグ %s (0x%x) を無視しました"
 
 #: coffcode.h:2382
 #, c-format
@@ -455,7 +459,7 @@ msgstr "%B: 存在しないシンボル索引に対する再配置です: %ld"
 
 #: coffcode.h:3669
 msgid "%B: section %s: string table overflow at offset %ld"
-msgstr "%B: セクション %s: オフセット %ld で文字列テーブルがオーバーフローしました"
+msgstr "%B: セクション %s: オフセット %ld で文字列テーブルが溢れました"
 
 #: coffcode.h:4477
 msgid "%B: warning: line number table read failed"
@@ -470,9 +474,8 @@ msgid "%B: warning: duplicate line number information for `%s'"
 msgstr "%B: 警告: `%s' に対する行番号情報が重複しています"
 
 #: coffcode.h:4912
-#, fuzzy
 msgid "%B: Unrecognized storage class %d for %s symbol `%s'"
-msgstr "%s: 記憶クラス %d (section %s, symbol `%s') を認識できません"
+msgstr "%1$B: %3$s シンボル `%4$s' に対する認識できない記憶域クラス %2$d です"
 
 #: coffcode.h:5038
 msgid "warning: %B: local symbol `%s' has no section"
@@ -487,34 +490,31 @@ msgid "%B: bad string table size %lu"
 msgstr "%s: 文字列テーブルサイズ %lu が誤っています"
 
 #: cofflink.c:513 elflink.c:4308
-#, fuzzy
 msgid "Warning: type of symbol `%s' changed from %d to %d in %B"
-msgstr "警告: シンボル `%s' の型は %d から %d に変更されました (%s 内)"
+msgstr "警告: %4$B 内でシンボル `%1$s' の型が %2$d から %3$d に変更されました"
 
 #: cofflink.c:2308
-#, fuzzy
 msgid "%B: relocs in section `%A', but it has no contents"
-msgstr "%s: セクション `%s' 内の再配置領域に内容がありません"
+msgstr "%B: セクション `%A' に再配置領域がありますが、中身がありません"
 
 #: cofflink.c:2639 coffswap.h:826
 #, c-format
 msgid "%s: %s: reloc overflow: 0x%lx > 0xffff"
-msgstr "%s: %s: 再配置領域がオーバーフローしました: 0x%lx > 0xffff"
+msgstr "%s: %s: 再配置領域が溢れました: 0x%lx > 0xffff"
 
 #: cofflink.c:2648 coffswap.h:812
 #, c-format
 msgid "%s: warning: %s: line number overflow: 0x%lx > 0xffff"
-msgstr "%s: 警告: %s: 行番号がオーバーフローしました: 0x%lx > 0xffff"
+msgstr "%s: 警告: %s: 行番号が溢れました: 0x%lx > 0xffff"
 
 #: cpu-arm.c:189 cpu-arm.c:200
-#, fuzzy
 msgid "error: %B is compiled for the EP9312, whereas %B is compiled for XScale"
-msgstr "エラー: %s は APCS-%d 用にコンパイルされたにもかかわらず、%s が APCS-%d 用にコンパイルされました"
+msgstr "エラー: %B は EP9312 に対してコンパイルされているにもかかわらず、 %B は XScale に対してコンパイルされています"
 
 #: cpu-arm.c:332
 #, c-format
 msgid "warning: unable to update contents of %s section in %s"
-msgstr ""
+msgstr "警告: %2$s 内にある %1$s セクションの内容を更新できません"
 
 #: dwarf2.c:436
 #, c-format
@@ -522,19 +522,19 @@ msgid "Dwarf Error: Can't find %s section."
 msgstr "Dwarf エラー: %s セクションが見つかりません。"
 
 #: dwarf2.c:463
-#, fuzzy, c-format
+#, c-format
 msgid "Dwarf Error: unable to decompress %s section."
-msgstr "Dwarf エラー: 行番号セクションが変形されました。"
+msgstr "Dwarf エラー: %s セクションを伸張できません。"
 
 #: dwarf2.c:474
-#, fuzzy, c-format
+#, c-format
 msgid "Dwarf Error: Offset (%lu) greater than or equal to %s size (%lu)."
-msgstr "Dwarf エラー: line オフセット (%u) が line サイズ (%u) より大きいです。"
+msgstr "Dwarf エラー: オフセット (%lu) が %s のサイズ (%lu) 以上です。"
 
 #: dwarf2.c:871
-#, fuzzy, c-format
+#, c-format
 msgid "Dwarf Error: Invalid or unhandled FORM value: %u."
-msgstr "Dwarf エラー: FORM 値が不適切であるか、取り扱えません: %d。"
+msgstr "Dwarf エラー: 無効または扱えない FORM 値です: %u"
 
 #: dwarf2.c:1085
 msgid "Dwarf Error: mangled line number section (bad file number)."
@@ -882,18 +882,20 @@ msgid "%B: unsupported relocation type %s"
 msgstr "%s: サポートされていない再配置タイプ %s です"
 
 #: elf32-arm.c:3149
-#, fuzzy
 msgid ""
 "%B(%s): warning: interworking not enabled.\n"
 "  first occurrence: %B: Thumb call to ARM"
-msgstr "%s(%s): 警告: interworking が有効ではありません。"
+msgstr ""
+"%B(%s): 警告: ARM/THUMB 命令相互利用が有効ではありません\n"
+"  最初の出現箇所: %B: ARM を呼び出す THUMB 命令"
 
 #: elf32-arm.c:3190
-#, fuzzy
 msgid ""
 "%B(%s): warning: interworking not enabled.\n"
 "  first occurrence: %B: ARM call to Thumb"
-msgstr "%s(%s): 警告: interworking が有効ではありません。"
+msgstr ""
+"%B(%s):  警告: ARM/THUMB 命令相互利用が有効ではありません\n"
+"  最初の出現箇所: %B: THUMB を呼び出す ARM 命令"
 
 #: elf32-arm.c:3387 elf32-arm.c:4692
 #, c-format
@@ -901,18 +903,18 @@ msgid "%s: cannot create stub entry %s"
 msgstr "%s: スタブエントリ %s を作成できません"
 
 #: elf32-arm.c:4804
-#, fuzzy, c-format
+#, c-format
 msgid "unable to find THUMB glue '%s' for '%s'"
-msgstr "%s: THUMB グルー '%s' (`%s' 用) を見つけられません"
+msgstr "'%2$s' に対する THUMB 糊 '%1$s' が見つかりません"
 
 #: elf32-arm.c:4838
-#, fuzzy, c-format
+#, c-format
 msgid "unable to find ARM glue '%s' for '%s'"
-msgstr "%s: ARM グルー '%s' (`%s' 用) を見つけられません"
+msgstr "'%2$s' に対する  ARM 糊 '%1$s' が見つかりません"
 
 #: elf32-arm.c:5365
 msgid "%B: BE8 images only valid in big-endian mode."
-msgstr ""
+msgstr "%B: BE8 イメージはビッグエンディアンモードでのみ有効です"
 
 #. Give a warning, but do as the user requests anyway.
 #: elf32-arm.c:5590
@@ -1096,17 +1098,17 @@ msgstr " [interworking は有効]"
 #: elf32-arm.c:10453
 #, c-format
 msgid " [VFP float format]"
-msgstr ""
+msgstr " [VFP 浮動小数形式]"
 
 #: elf32-arm.c:10455
 #, c-format
 msgid " [Maverick float format]"
-msgstr ""
+msgstr " [Maverick 浮動小数形式]"
 
 #: elf32-arm.c:10457
 #, c-format
 msgid " [FPA float format]"
-msgstr ""
+msgstr " [FPA 浮動小数形式]"
 
 #: elf32-arm.c:10466
 #, c-format
@@ -1126,7 +1128,7 @@ msgstr " [ソフトウェア浮動小数点]"
 #: elf32-arm.c:10481
 #, c-format
 msgid " [Version1 EABI]"
-msgstr " [バージョン1 EABI]"
+msgstr " [バージョン 1 EABI]"
 
 #: elf32-arm.c:10484 elf32-arm.c:10495
 #, c-format
@@ -1139,9 +1141,9 @@ msgid " [unsorted symbol table]"
 msgstr " [未ソートシンボルテーブル]"
 
 #: elf32-arm.c:10492
-#, fuzzy, c-format
+#, c-format
 msgid " [Version2 EABI]"
-msgstr " [バージョン1 EABI]"
+msgstr " [バージョン 2 EABI]"
 
 #: elf32-arm.c:10500
 #, c-format
@@ -1154,29 +1156,29 @@ msgid " [mapping symbols precede others]"
 msgstr ""
 
 #: elf32-arm.c:10510
-#, fuzzy, c-format
+#, c-format
 msgid " [Version3 EABI]"
-msgstr " [バージョン1 EABI]"
+msgstr " [バージョン 3 EABI]"
 
 #: elf32-arm.c:10514
-#, fuzzy, c-format
+#, c-format
 msgid " [Version4 EABI]"
-msgstr " [バージョン1 EABI]"
+msgstr " [バージョン 4 EABI]"
 
 #: elf32-arm.c:10518
-#, fuzzy, c-format
+#, c-format
 msgid " [Version5 EABI]"
-msgstr " [バージョン1 EABI]"
+msgstr " [バージョン 5 EABI]"
 
 #: elf32-arm.c:10521
 #, c-format
 msgid " [BE8]"
-msgstr ""
+msgstr " [BE8]"
 
 #: elf32-arm.c:10524
 #, c-format
 msgid " [LE8]"
-msgstr ""
+msgstr " [LE8]"
 
 #: elf32-arm.c:10530
 #, c-format
@@ -1385,7 +1387,7 @@ msgstr "%s: 再配置 %s は共有オブジェクトを作成したときには�
 
 #: elf32-cris.c:4054
 msgid "Unexpected machine number"
-msgstr ""
+msgstr "予期しないマシン番号です"
 
 #: elf32-cris.c:4108
 #, c-format
@@ -1395,30 +1397,28 @@ msgstr " [ _ 接頭辞つきシンボル]"
 #: elf32-cris.c:4111
 #, c-format
 msgid " [v10 and v32]"
-msgstr ""
+msgstr " [v10 および v32]"
 
 #: elf32-cris.c:4114
-#, fuzzy, c-format
+#, c-format
 msgid " [v32]"
-msgstr " [cpu32]"
+msgstr " [v32]"
 
 #: elf32-cris.c:4159
-#, fuzzy
 msgid "%B: uses _-prefixed symbols, but writing file with non-prefixed symbols"
-msgstr "%s: _ 接頭辞シンボルを使っていますが、ファイルに接頭辞無しで書き込みます"
+msgstr "%B: _ 接頭辞付きシンボルを使用していますが、ファイルには _ 接頭辞無しシンボルとして書き込みます"
 
 #: elf32-cris.c:4160
-#, fuzzy
 msgid "%B: uses non-prefixed symbols, but writing file with _-prefixed symbols"
-msgstr "%s: 接頭辞無しのシンボルを使っていますが、ファイルには _ 接頭辞付きで書き込みます"
+msgstr "%B: _ 接頭辞無しシンボルを使用していますが、ファイルには _ 接頭辞付きシンボルとして書き込みます"
 
 #: elf32-cris.c:4179
 msgid "%B contains CRIS v32 code, incompatible with previous objects"
-msgstr ""
+msgstr "%B には CRIS v32 コードが含まれています。これは前のオブジェクトと互換性がありません"
 
 #: elf32-cris.c:4181
 msgid "%B contains non-CRIS-v32 code, incompatible with previous objects"
-msgstr ""
+msgstr "%B には非-CRIS-v32 コードが含まれています。これは前のオブジェクトと互換性がありません"
 
 #: elf32-frv.c:1507 elf32-frv.c:1656
 msgid "relocation requires zero addend"
@@ -1430,51 +1430,51 @@ msgstr ""
 
 #: elf32-frv.c:2980
 msgid "R_FRV_GETTLSOFF not applied to a call instruction"
-msgstr ""
+msgstr "R_FRV_GETTLSOFF は call 命令に適用されません"
 
 #: elf32-frv.c:3022
 msgid "R_FRV_GOTTLSDESC12 not applied to an lddi instruction"
-msgstr ""
+msgstr "R_FRV_GOTTLSDESC12 は lddi 命令に適用されません"
 
 #: elf32-frv.c:3093
 msgid "R_FRV_GOTTLSDESCHI not applied to a sethi instruction"
-msgstr ""
+msgstr "R_FRV_GOTTLSDESCHI は sethi 命令に適用されません"
 
 #: elf32-frv.c:3130
 msgid "R_FRV_GOTTLSDESCLO not applied to a setlo or setlos instruction"
-msgstr ""
+msgstr "R_FRV_GOTTLSDESCLO は setlo または setlos 命令に適用されません"
 
 #: elf32-frv.c:3178
 msgid "R_FRV_TLSDESC_RELAX not applied to an ldd instruction"
-msgstr ""
+msgstr "R_FRV_TLSDESC_RELAX は ldd 命令に適用されません"
 
 #: elf32-frv.c:3262
 msgid "R_FRV_GETTLSOFF_RELAX not applied to a calll instruction"
-msgstr ""
+msgstr "R_FRV_GETTLSOFF_RELAX は calll 命令に適用されません"
 
 #: elf32-frv.c:3317
 msgid "R_FRV_GOTTLSOFF12 not applied to an ldi instruction"
-msgstr ""
+msgstr "R_FRV_GOTTLSOFF12 は ldi 命令に適用されません"
 
 #: elf32-frv.c:3347
 msgid "R_FRV_GOTTLSOFFHI not applied to a sethi instruction"
-msgstr ""
+msgstr "R_FRV_GOTTLSOFFHI は sethi 命令に適用されません"
 
 #: elf32-frv.c:3376
 msgid "R_FRV_GOTTLSOFFLO not applied to a setlo or setlos instruction"
-msgstr ""
+msgstr "R_FRV_GOTTLSOFFLO は setlo または setlos 命令に適用されません"
 
 #: elf32-frv.c:3407
 msgid "R_FRV_TLSOFF_RELAX not applied to an ld instruction"
-msgstr ""
+msgstr "R_FRV_TLSOFF_RELAX は ld 命令に適用されません"
 
 #: elf32-frv.c:3452
 msgid "R_FRV_TLSMOFFHI not applied to a sethi instruction"
-msgstr ""
+msgstr "R_FRV_TLSMOFFHI は sethi 命令に適用されません"
 
 #: elf32-frv.c:3479
 msgid "R_FRV_TLSMOFFLO not applied to a setlo or setlos instruction"
-msgstr ""
+msgstr "R_FRV_TLSMOFFLO は setlo または setlos 命令に適用されません"
 
 #: elf32-frv.c:3600
 msgid "R_FRV_FUNCDESC references dynamic symbol with nonzero addend"
@@ -1485,28 +1485,27 @@ msgid "R_FRV_FUNCDESC_VALUE references dynamic symbol with nonzero addend"
 msgstr ""
 
 #: elf32-frv.c:3977 elf32-frv.c:4133
-#, fuzzy
 msgid "%B(%A+0x%lx): reloc against `%s': %s"
-msgstr "%s(%s+0x%lx): %s (%s) を取り扱えません"
+msgstr "%B(%A+0x%lx): `%s' に対する再配置: %s"
 
 #: elf32-frv.c:3979 elf32-frv.c:3983
 msgid "relocation references a different segment"
 msgstr ""
 
 #: elf32-frv.c:6730
-#, fuzzy, c-format
+#, c-format
 msgid "%s: compiled with %s and linked with modules that use non-pic relocations"
-msgstr "%s: -mrelocatable を付けてコンパイルされたものと普通にコンパイルされたモジュールとをリンクしました"
+msgstr ""
 
 #: elf32-frv.c:6783 elf32-iq2000.c:852 elf32-m32c.c:814
-#, fuzzy, c-format
+#, c-format
 msgid "%s: compiled with %s and linked with modules compiled with %s"
-msgstr "%s: -mrelocatable を付けてコンパイルされたものと普通にコンパイルされたモジュールとをリンクしました"
+msgstr ""
 
 #: elf32-frv.c:6795
-#, fuzzy, c-format
+#, c-format
 msgid "%s: uses different unknown e_flags (0x%lx) fields than previous modules (0x%lx)"
-msgstr "%s: 使用している e_flags(0x%lx) が以前のモジュール (0x%lx) と異なっています"
+msgstr ""
 
 #: elf32-frv.c:6845 elf32-iq2000.c:889 elf32-m32c.c:850 elf32-mt.c:583
 #, fuzzy, c-format
@@ -1547,9 +1546,8 @@ msgstr ".got セクションが .plt セクションの直後にありません"
 
 #: elf32-i386.c:371 elf32-ppc.c:1674 elf32-s390.c:379 elf64-ppc.c:2283
 #: elf64-s390.c:403 elf64-x86-64.c:234
-#, fuzzy
 msgid "%B: invalid relocation type %d"
-msgstr "%s: 再配置タイプ %d は不適切です"
+msgstr "%B: 無効な再配置型 %d です"
 
 #: elf32-i386.c:1246 elf64-x86-64.c:1030
 msgid "%B: TLS transition from %s to %s against `%s' at 0x%lx in section `%A' failed"
@@ -1562,41 +1560,35 @@ msgstr ""
 #: elf32-i386.c:1549 elf32-s390.c:1180 elf32-sh.c:5065 elf32-xtensa.c:1173
 #: elf64-s390.c:1143 elfxx-sparc.c:1257
 msgid "%B: `%s' accessed both as normal and thread local symbol"
-msgstr ""
+msgstr "%B: `%s' が通常のシンボルとスレッド局所シンボルにアクセスしました"
 
 #: elf32-i386.c:2807
-#, fuzzy
 msgid "%B: unrecognized relocation (0x%x) in section `%A'"
-msgstr "%s: 不正な再配置アドレス 0x%lx がセクション `%s' 内にあります"
+msgstr "%1$B: セクション `%3$A' に認識できない再配置 (0x%2$x) があります"
 
 #: elf32-i386.c:3221 elf64-x86-64.c:3082
-#, fuzzy
 msgid "hidden symbol"
-msgstr "シンボルがありません"
+msgstr "隠されたシンボル"
 
 #: elf32-i386.c:3224 elf64-x86-64.c:3085
 msgid "internal symbol"
-msgstr ""
+msgstr "内部シンボル"
 
 #: elf32-i386.c:3227 elf64-x86-64.c:3088
-#, fuzzy
 msgid "protected symbol"
-msgstr "シンボルがありません"
+msgstr "保護されたシンボル"
 
 #: elf32-i386.c:3230 elf64-x86-64.c:3091
-#, fuzzy
 msgid "symbol"
-msgstr "シンボルがありません"
+msgstr "シンボル"
 
 #: elf32-i386.c:3235
-#, fuzzy
 msgid "%B: relocation R_386_GOTOFF against undefined %s `%s' can not be used when making a shared object"
-msgstr "%s: 再配置 %s は共有オブジェクトを作成している時点では利用できません"
+msgstr ""
 
 #: elf32-i386.c:3245
-#, fuzzy
 msgid "%B: relocation R_386_GOTOFF against protected function `%s' can not be used when making a shared object"
-msgstr "%s: 再配置 %s は共有オブジェクトを作成している時点では利用できません"
+msgstr ""
 
 #: elf32-ip2k.c:868 elf32-ip2k.c:874 elf32-ip2k.c:941 elf32-ip2k.c:947
 msgid "ip2k relaxer: switch table without complete matching relocation information."
@@ -1670,9 +1662,9 @@ msgid ": m32rx instructions"
 msgstr ": m32rx 命令"
 
 #: elf32-m32r.c:3595
-#, fuzzy, c-format
+#, c-format
 msgid ": m32r2 instructions"
-msgstr ": m32r 命令"
+msgstr ": m32r2 命令"
 
 #: elf32-m68hc1x.c:1048
 #, c-format
@@ -1710,37 +1702,37 @@ msgstr "%s: 使用している e_flags(0x%lx) が以前のモジュール (0x%lx
 #: elf32-m68hc1x.c:1283
 #, c-format
 msgid "[abi=32-bit int, "
-msgstr ""
+msgstr "[abi=32-ビット整数, "
 
 #: elf32-m68hc1x.c:1285
 #, c-format
 msgid "[abi=16-bit int, "
-msgstr ""
+msgstr "[abi=16-ビット整数, "
 
 #: elf32-m68hc1x.c:1288
 #, c-format
 msgid "64-bit double, "
-msgstr ""
+msgstr "64-ビット倍精度浮動小数, "
 
 #: elf32-m68hc1x.c:1290
 #, c-format
 msgid "32-bit double, "
-msgstr ""
+msgstr "32-ビット倍精度浮動小数, "
 
 #: elf32-m68hc1x.c:1293
 #, c-format
 msgid "cpu=HC11]"
-msgstr ""
+msgstr "cpu=HC11]"
 
 #: elf32-m68hc1x.c:1295
 #, c-format
 msgid "cpu=HCS12]"
-msgstr ""
+msgstr "cpu=HCS12]"
 
 #: elf32-m68hc1x.c:1297
 #, c-format
 msgid "cpu=HC12]"
-msgstr ""
+msgstr "cpu=HC12]"
 
 #: elf32-m68hc1x.c:1300
 #, c-format
@@ -1753,9 +1745,8 @@ msgid " [memory=flat]"
 msgstr ""
 
 #: elf32-m68k.c:1184 elf32-m68k.c:1185
-#, fuzzy
 msgid "unknown"
-msgstr "*不 明*"
+msgstr "不明"
 
 #: elf32-m68k.c:1645
 msgid "%B: GOT overflow: Number of relocations with 8-bit offset > %d"
@@ -1770,32 +1761,30 @@ msgid "%B(%A+0x%lx): R_68K_TLS_LE32 relocation not permitted in shared object"
 msgstr ""
 
 #: elf32-mcore.c:99 elf32-mcore.c:442
-#, fuzzy
 msgid "%B: Relocation %s (%d) is not currently supported.\n"
-msgstr "%s: 再配置 %s (%d) は現在のところサポートされていません\n"
+msgstr "%B: 再配置 %s (%d) は現在のところサポートされていません。\n"
 
 #: elf32-mcore.c:428
-#, fuzzy
 msgid "%B: Unknown relocation type %d\n"
-msgstr "%s: 再配置タイプ %d は不明です\n"
+msgstr "%B: 不明な再配置型 %d です\n"
 
 #: elf32-mep.c:654
 msgid "%B and %B are for different cores"
-msgstr ""
+msgstr "%B および %B は異なるコアに対するものです"
 
 #: elf32-mep.c:671
 msgid "%B and %B are for different configurations"
-msgstr ""
+msgstr "%B および %B は異なる設定に対するものです"
 
 #: elf32-mep.c:708
 #, fuzzy, c-format
 msgid "private flags = 0x%lx"
-msgstr "private フラグ = %lx"
+msgstr "private フラグ = 0x%lx"
 
 #: elf32-microblaze.c:737
 #, c-format
 msgid "%s: unknown relocation type %d"
-msgstr "%s: 再配置タイプ %d が不明です"
+msgstr "%s: 再配置型 %d が不明です"
 
 #: elf32-microblaze.c:862 elf32-microblaze.c:907
 #, c-format
@@ -1803,9 +1792,8 @@ msgid "%s: The target (%s) of an %s relocation is in the wrong section (%s)"
 msgstr "%s: ターゲット (%s, %s 再配置) が間違ったセクション (%s) 内にあります"
 
 #: elf32-microblaze.c:1150 elfxx-sparc.c:2957
-#, fuzzy
 msgid "%B: probably compiled without -fPIC?"
-msgstr "%s: 恐らく -fPIC を付けずにコンパイルしたのでは？"
+msgstr "%B: 恐らく -fPIC を付けずにコンパイルしたのでは?"
 
 #: elf32-microblaze.c:2086 elflink.c:12457
 #, fuzzy
