@@ -240,7 +240,8 @@ def do_enable_pretty_printer_1 (pretty_printers, name_re, subname_re, flag):
     for printer in pretty_printers:
         if (hasattr(printer, "name") and name_re.match(printer.name) or
             hasattr(printer, "__name__") and name_re.match(printer.__name__)):
-            if hasattr(printer, "subprinters"):
+            if (hasattr(printer, "subprinters") and
+                printer.subprinters is not None):
                 if not subname_re:
                     # Only record printers that change state.
                     if printer_enabled_p(printer) != flag:

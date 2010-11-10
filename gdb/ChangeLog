@@ -1,5 +1,8 @@
 2010-11-10  Doug Evans  <dje@google.com>
 
+	* python/lib/gdb/command/pretty_printers.py
+	(do_enable_pretty_printer_1): Handle printer.subprinters is None.
+
 	* value.c (set_value_enclosing_type): Renamed from
 	value_change_enclosing_type.  All callers updated.
 	* value.h (set_value_enclosing_type): Update.
