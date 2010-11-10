@@ -1,3 +1,7 @@
+2010-11-10  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* config/tc-arm.c (do_t_branch): Treat (PLT) branches as wide.
+
 2010-11-05  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-cr16.c (getprocreg_image): Fix typo MAX_PREG ->

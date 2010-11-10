@@ -1,3 +1,7 @@
+2010-11-10  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* gas/arm/plt-1.s, gas/arm/plt-1.d: New test.
+
 2010-11-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/12186
