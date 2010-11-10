@@ -136,8 +136,9 @@ extern void deprecated_set_value_modifiable (struct value *value,
    normally.  */
 
 extern struct type *value_enclosing_type (struct value *);
-extern struct value *value_change_enclosing_type (struct value *val,
-						  struct type *new_type);
+extern void set_value_enclosing_type (struct value *val,
+				      struct type *new_type);
+
 extern int value_pointed_to_offset (struct value *value);
 extern void set_value_pointed_to_offset (struct value *value, int val);
 extern int value_embedded_offset (struct value *value);

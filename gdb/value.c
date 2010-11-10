@@ -1933,21 +1933,20 @@ value_static_field (struct type *type, int fieldno)
   return retval;
 }
 
-/* Change the enclosing type of a value object VAL to NEW_ENCL_TYPE.  
-   You have to be careful here, since the size of the data area for the value 
-   is set by the length of the enclosing type.  So if NEW_ENCL_TYPE is bigger 
-   than the old enclosing type, you have to allocate more space for the data.  
-   The return value is a pointer to the new version of this value structure. */
+/* Change the enclosing type of a value object VAL to NEW_ENCL_TYPE.
+   You have to be careful here, since the size of the data area for the value
+   is set by the length of the enclosing type.  So if NEW_ENCL_TYPE is bigger
+   than the old enclosing type, you have to allocate more space for the
+   data.  */
 
-struct value *
-value_change_enclosing_type (struct value *val, struct type *new_encl_type)
+void
+set_value_enclosing_type (struct value *val, struct type *new_encl_type)
 {
   if (TYPE_LENGTH (new_encl_type) > TYPE_LENGTH (value_enclosing_type (val))) 
     val->contents =
       (gdb_byte *) xrealloc (val->contents, TYPE_LENGTH (new_encl_type));
 
   val->enclosing_type = new_encl_type;
-  return val;
 }
 
 /* Given a value ARG1 (offset by OFFSET bytes)

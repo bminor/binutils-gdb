@@ -1,3 +1,11 @@
+2010-11-10  Doug Evans  <dje@google.com>
+
+	* value.c (set_value_enclosing_type): Renamed from
+	value_change_enclosing_type.  All callers updated.
+	* value.h (set_value_enclosing_type): Update.
+	* valops.c (value_full_object): Always return a copy if we need to
+	make changes to the input value.
+
 2010-11-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (watch_command_1): Get a pointer of the lazy
