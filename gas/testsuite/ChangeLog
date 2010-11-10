@@ -1,3 +1,7 @@
+2010-11-10  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* gas/arm/plt-1.s, gas/arm/plt-1.d: New test.
+
 2010-11-08  Thomas Schwinge  <thomas@schwinge.name>
 
 	* lib/gas-defs.exp (is_elf_format): Consider for *-*-gnu*, too.

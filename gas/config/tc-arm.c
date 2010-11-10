@@ -2213,7 +2213,7 @@ create_neon_reg_alias (char *newname, char *p)
   struct reg_entry mybasereg;
   struct neon_type ntype;
   struct neon_typed_alias typeinfo;
-  char *namebuf, *nameend;
+  char *namebuf, *nameend ATTRIBUTE_UNUSED;
   int namelen;
 
   typeinfo.defined = 0;
@@ -9683,7 +9683,9 @@ do_t_branch (void)
   else
     opcode = inst.instruction;
 
-  if (unified_syntax && inst.size_req == 4)
+  if (unified_syntax
+      && (inst.size_req == 4
+	  || (inst.size_req != 2 && inst.operands[0].hasreloc)))
     {
       inst.instruction = THUMB_OP32(opcode);
       if (cond == COND_ALWAYS)
