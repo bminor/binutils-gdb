@@ -1,3 +1,8 @@
+2010-11-10  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Remove unused
+	variables.
+
 2010-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.

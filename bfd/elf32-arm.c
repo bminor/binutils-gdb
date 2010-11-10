@@ -9904,9 +9904,6 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 {
   obj_attribute *in_attr;
   obj_attribute *out_attr;
-  obj_attribute_list *in_list;
-  obj_attribute_list *out_list;
-  obj_attribute_list **out_listp;
   /* Some tags have 0 = don't care, 1 = strong requirement,
      2 = weak requirement.  */
   static const int order_021[3] = {0, 2, 1};
@@ -10417,10 +10414,6 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
     return FALSE;
 
   /* Check for any attributes not known on ARM.  */
-  in_list = elf_other_obj_attributes_proc (ibfd);
-  out_listp = &elf_other_obj_attributes_proc (obfd);
-  out_list = *out_listp;
-
   result &= _bfd_elf_merge_unknown_attribute_list (ibfd, obfd);
 
   return result;
