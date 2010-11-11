@@ -362,6 +362,9 @@ class Target_x86_64 : public Target_freebsd<64, false>
       : issued_non_pic_error_(false)
     { }
 
+    static inline int
+    get_reference_flags(unsigned int r_type);
+
     inline void
     local(Symbol_table* symtab, Layout* layout, Target_x86_64* target,
 	  Sized_relobj<64, false>* object,
@@ -1236,6 +1239,73 @@ Target_x86_64::optimize_tls_reloc(bool is_final, int r_type)
     }
 }
 
+// Get the Reference_flags for a particular relocation.
+
+int
+Target_x86_64::Scan::get_reference_flags(unsigned int r_type)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_X86_64_NONE:
+    case elfcpp::R_X86_64_GNU_VTINHERIT:
+    case elfcpp::R_X86_64_GNU_VTENTRY:
+    case elfcpp::R_X86_64_GOTPC32:
+    case elfcpp::R_X86_64_GOTPC64:
+      // No symbol reference.
+      return 0;
+
+    case elfcpp::R_X86_64_64:
+    case elfcpp::R_X86_64_32:
+    case elfcpp::R_X86_64_32S:
+    case elfcpp::R_X86_64_16:
+    case elfcpp::R_X86_64_8:
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_X86_64_PC64:
+    case elfcpp::R_X86_64_PC32:
+    case elfcpp::R_X86_64_PC16:
+    case elfcpp::R_X86_64_PC8:
+    case elfcpp::R_X86_64_GOTOFF64:
+      return Symbol::RELATIVE_REF;
+
+    case elfcpp::R_X86_64_PLT32:
+    case elfcpp::R_X86_64_PLTOFF64:
+      return Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
+
+    case elfcpp::R_X86_64_GOT64:
+    case elfcpp::R_X86_64_GOT32:
+    case elfcpp::R_X86_64_GOTPCREL64:
+    case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPLT64:
+      // Absolute in GOT.
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_X86_64_TLSGD:            // Global-dynamic
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // Global-dynamic (from ~oliva url)
+    case elfcpp::R_X86_64_TLSDESC_CALL:
+    case elfcpp::R_X86_64_TLSLD:            // Local-dynamic
+    case elfcpp::R_X86_64_DTPOFF32:
+    case elfcpp::R_X86_64_DTPOFF64:
+    case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
+    case elfcpp::R_X86_64_TPOFF32:          // Local-exec
+      return Symbol::TLS_REF;
+
+    case elfcpp::R_X86_64_COPY:
+    case elfcpp::R_X86_64_GLOB_DAT:
+    case elfcpp::R_X86_64_JUMP_SLOT:
+    case elfcpp::R_X86_64_RELATIVE:
+    case elfcpp::R_X86_64_IRELATIVE:
+    case elfcpp::R_X86_64_TPOFF64:
+    case elfcpp::R_X86_64_DTPMOD64:
+    case elfcpp::R_X86_64_TLSDESC:
+    case elfcpp::R_X86_64_SIZE32:
+    case elfcpp::R_X86_64_SIZE64:
+    default:
+      // Not expected.  We will give an error later.
+      return 0;
+    }
+}
+
 // Report an unsupported relocation against a local symbol.
 
 void
@@ -1297,63 +1367,11 @@ bool
 Target_x86_64::Scan::reloc_needs_plt_for_ifunc(Sized_relobj<64, false>* object,
 					       unsigned int r_type)
 {
-  switch (r_type)
-    {
-    case elfcpp::R_X86_64_NONE:
-    case elfcpp::R_X86_64_GNU_VTINHERIT:
-    case elfcpp::R_X86_64_GNU_VTENTRY:
-      return false;
-
-    case elfcpp::R_X86_64_64:
-    case elfcpp::R_X86_64_32:
-    case elfcpp::R_X86_64_32S:
-    case elfcpp::R_X86_64_16:
-    case elfcpp::R_X86_64_8:
-    case elfcpp::R_X86_64_PC64:
-    case elfcpp::R_X86_64_PC32:
-    case elfcpp::R_X86_64_PC16:
-    case elfcpp::R_X86_64_PC8:
-    case elfcpp::R_X86_64_PLT32:
-    case elfcpp::R_X86_64_GOTPC32:
-    case elfcpp::R_X86_64_GOTOFF64:
-    case elfcpp::R_X86_64_GOTPC64:
-    case elfcpp::R_X86_64_PLTOFF64:
-    case elfcpp::R_X86_64_GOT64:
-    case elfcpp::R_X86_64_GOT32:
-    case elfcpp::R_X86_64_GOTPCREL64:
-    case elfcpp::R_X86_64_GOTPCREL:
-    case elfcpp::R_X86_64_GOTPLT64:
-      return true;
-
-    case elfcpp::R_X86_64_COPY:
-    case elfcpp::R_X86_64_GLOB_DAT:
-    case elfcpp::R_X86_64_JUMP_SLOT:
-    case elfcpp::R_X86_64_RELATIVE:
-    case elfcpp::R_X86_64_IRELATIVE:
-    case elfcpp::R_X86_64_TPOFF64:
-    case elfcpp::R_X86_64_DTPMOD64:
-    case elfcpp::R_X86_64_TLSDESC:
-      // We will give an error later.
-      return false;
-
-    case elfcpp::R_X86_64_TLSGD:
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:
-    case elfcpp::R_X86_64_TLSDESC_CALL:
-    case elfcpp::R_X86_64_TLSLD:
-    case elfcpp::R_X86_64_DTPOFF32:
-    case elfcpp::R_X86_64_DTPOFF64:
-    case elfcpp::R_X86_64_GOTTPOFF:
-    case elfcpp::R_X86_64_TPOFF32:
-      gold_error(_("%s: unsupported TLS reloc %u for IFUNC symbol"),
-		 object->name().c_str(), r_type);
-      return false;
-
-    case elfcpp::R_X86_64_SIZE32:
-    case elfcpp::R_X86_64_SIZE64:
-    default:
-      // We will give an error later.
-      return false;
-    }
+  int flags = Scan::get_reference_flags(r_type);
+  if (flags & Symbol::TLS_REF)
+    gold_error(_("%s: unsupported TLS reloc %u for IFUNC symbol"),
+               object->name().c_str(), r_type);
+  return flags != 0;
 }
 
 // Scan a relocation for a local symbol.
@@ -1779,7 +1797,7 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
-        if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
+        if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
           {
             if (gsym->may_need_copy_reloc())
               {
@@ -1836,10 +1854,7 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
         if (gsym->needs_plt_entry())
           target->make_plt_entry(symtab, layout, gsym);
         // Make a dynamic relocation if necessary.
-        int flags = Symbol::NON_PIC_REF;
-        if (gsym->is_func())
-          flags |= Symbol::FUNCTION_CALL;
-        if (gsym->needs_dynamic_reloc(flags))
+        if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
           {
             if (gsym->may_need_copy_reloc())
               {
@@ -2242,10 +2257,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
   // Pick the value to use for symbols defined in the PLT.
   Symbol_value<64> symval;
   if (gsym != NULL
-      && gsym->use_plt_offset(r_type == elfcpp::R_X86_64_PC64
-			      || r_type == elfcpp::R_X86_64_PC32
-			      || r_type == elfcpp::R_X86_64_PC16
-			      || r_type == elfcpp::R_X86_64_PC8))
+      && gsym->use_plt_offset(Scan::get_reference_flags(r_type)))
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());

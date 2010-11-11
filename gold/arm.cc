@@ -2556,6 +2556,9 @@ class Target_arm : public Sized_target<32, big_endian>
       : issued_non_pic_error_(false)
     { }
 
+    static inline int
+    get_reference_flags(unsigned int r_type);
+
     inline void
     local(Symbol_table* symtab, Layout* layout, Target_arm* target,
 	  Sized_relobj<32, big_endian>* object,
@@ -2638,7 +2641,7 @@ class Target_arm : public Sized_target<32, big_endian>
     // Return whether the static relocation needs to be applied.
     inline bool
     should_apply_static_reloc(const Sized_symbol<32>* gsym,
-			      int ref_flags,
+			      unsigned int r_type,
 			      bool is_32bit,
 			      Output_section* output_section);
 
@@ -7568,6 +7571,125 @@ Target_arm<big_endian>::optimize_tls_reloc(bool, int)
   return tls::TLSOPT_NONE;
 }
 
+// Get the Reference_flags for a particular relocation.
+
+template<bool big_endian>
+int
+Target_arm<big_endian>::Scan::get_reference_flags(unsigned int r_type)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_ARM_NONE:
+    case elfcpp::R_ARM_V4BX:
+    case elfcpp::R_ARM_GNU_VTENTRY:
+    case elfcpp::R_ARM_GNU_VTINHERIT:
+      // No symbol reference.
+      return 0;
+
+    case elfcpp::R_ARM_ABS32:
+    case elfcpp::R_ARM_ABS16:
+    case elfcpp::R_ARM_ABS12:
+    case elfcpp::R_ARM_THM_ABS5:
+    case elfcpp::R_ARM_ABS8:
+    case elfcpp::R_ARM_BASE_ABS:
+    case elfcpp::R_ARM_MOVW_ABS_NC:
+    case elfcpp::R_ARM_MOVT_ABS:
+    case elfcpp::R_ARM_THM_MOVW_ABS_NC:
+    case elfcpp::R_ARM_THM_MOVT_ABS:
+    case elfcpp::R_ARM_ABS32_NOI:
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_ARM_REL32:
+    case elfcpp::R_ARM_LDR_PC_G0:
+    case elfcpp::R_ARM_SBREL32:
+    case elfcpp::R_ARM_THM_PC8:
+    case elfcpp::R_ARM_BASE_PREL:
+    case elfcpp::R_ARM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_MOVT_PREL:
+    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_PREL:
+    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
+    case elfcpp::R_ARM_THM_PC12:
+    case elfcpp::R_ARM_REL32_NOI:
+    case elfcpp::R_ARM_ALU_PC_G0_NC:
+    case elfcpp::R_ARM_ALU_PC_G0:
+    case elfcpp::R_ARM_ALU_PC_G1_NC:
+    case elfcpp::R_ARM_ALU_PC_G1:
+    case elfcpp::R_ARM_ALU_PC_G2:
+    case elfcpp::R_ARM_LDR_PC_G1:
+    case elfcpp::R_ARM_LDR_PC_G2:
+    case elfcpp::R_ARM_LDRS_PC_G0:
+    case elfcpp::R_ARM_LDRS_PC_G1:
+    case elfcpp::R_ARM_LDRS_PC_G2:
+    case elfcpp::R_ARM_LDC_PC_G0:
+    case elfcpp::R_ARM_LDC_PC_G1:
+    case elfcpp::R_ARM_LDC_PC_G2:
+    case elfcpp::R_ARM_ALU_SB_G0_NC:
+    case elfcpp::R_ARM_ALU_SB_G0:
+    case elfcpp::R_ARM_ALU_SB_G1_NC:
+    case elfcpp::R_ARM_ALU_SB_G1:
+    case elfcpp::R_ARM_ALU_SB_G2:
+    case elfcpp::R_ARM_LDR_SB_G0:
+    case elfcpp::R_ARM_LDR_SB_G1:
+    case elfcpp::R_ARM_LDR_SB_G2:
+    case elfcpp::R_ARM_LDRS_SB_G0:
+    case elfcpp::R_ARM_LDRS_SB_G1:
+    case elfcpp::R_ARM_LDRS_SB_G2:
+    case elfcpp::R_ARM_LDC_SB_G0:
+    case elfcpp::R_ARM_LDC_SB_G1:
+    case elfcpp::R_ARM_LDC_SB_G2:
+    case elfcpp::R_ARM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_MOVT_BREL:
+    case elfcpp::R_ARM_MOVW_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL:
+    case elfcpp::R_ARM_GOTOFF32:
+    case elfcpp::R_ARM_GOTOFF12:
+    case elfcpp::R_ARM_PREL31:
+    case elfcpp::R_ARM_SBREL31:
+      return Symbol::RELATIVE_REF;
+
+    case elfcpp::R_ARM_PLT32:
+    case elfcpp::R_ARM_CALL:
+    case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_THM_CALL:
+    case elfcpp::R_ARM_THM_JUMP24:
+    case elfcpp::R_ARM_THM_JUMP19:
+    case elfcpp::R_ARM_THM_JUMP6:
+    case elfcpp::R_ARM_THM_JUMP11:
+    case elfcpp::R_ARM_THM_JUMP8:
+      return Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
+
+    case elfcpp::R_ARM_GOT_BREL:
+    case elfcpp::R_ARM_GOT_ABS:
+    case elfcpp::R_ARM_GOT_PREL:
+      // Absolute in GOT.
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_ARM_TLS_GD32:	// Global-dynamic
+    case elfcpp::R_ARM_TLS_LDM32:	// Local-dynamic
+    case elfcpp::R_ARM_TLS_LDO32:	// Alternate local-dynamic
+    case elfcpp::R_ARM_TLS_IE32:	// Initial-exec
+    case elfcpp::R_ARM_TLS_LE32:	// Local-exec
+      return Symbol::TLS_REF;
+
+    case elfcpp::R_ARM_TARGET1:
+    case elfcpp::R_ARM_TARGET2:
+    case elfcpp::R_ARM_COPY:
+    case elfcpp::R_ARM_GLOB_DAT:
+    case elfcpp::R_ARM_JUMP_SLOT:
+    case elfcpp::R_ARM_RELATIVE:
+    case elfcpp::R_ARM_PC24:
+    case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
+    case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
+    case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
+    default:
+      // Not expected.  We will give an error later.
+      return 0;
+    }
+}
+
 // Report an unsupported relocation against a local symbol.
 
 template<bool big_endian>
@@ -8074,7 +8196,7 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
-        if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
+        if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
           {
             if (gsym->may_need_copy_reloc())
               {
@@ -8155,8 +8277,7 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
       // Relative addressing relocations.
       {
 	// Make a dynamic relocation if necessary.
-	int flags = Symbol::NON_PIC_REF;
-	if (gsym->needs_dynamic_reloc(flags))
+	if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
 	  {
 	    if (target->may_need_copy_reloc(gsym))
 	      {
@@ -8596,7 +8717,7 @@ template<bool big_endian>
 inline bool
 Target_arm<big_endian>::Relocate::should_apply_static_reloc(
     const Sized_symbol<32>* gsym,
-    int ref_flags,
+    unsigned int r_type,
     bool is_32bit,
     Output_section* output_section)
 {
@@ -8605,6 +8726,8 @@ Target_arm<big_endian>::Relocate::should_apply_static_reloc(
   // the reloc here.
   if ((output_section->flags() & elfcpp::SHF_ALLOC) == 0)
       return true;
+
+  int ref_flags = Scan::get_reference_flags(r_type);
 
   // For local symbols, we will have created a non-RELATIVE dynamic
   // relocation only if (a) the output is position independent,
@@ -8711,7 +8834,7 @@ Target_arm<big_endian>::Relocate::relocate(
 	{
 	  // This is a global symbol.  Determine if we use PLT and if the
 	  // final target is THUMB.
-	  if (gsym->use_plt_offset(reloc_is_non_pic(r_type)))
+	  if (gsym->use_plt_offset(Scan::get_reference_flags(r_type)))
 	    {
 	      // This uses a PLT, change the symbol value.
 	      symval.set_output_value(target->plt_section()->address()
@@ -8835,62 +8958,53 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_ABS8:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::abs8(view, object, psymval);
       break;
 
     case elfcpp::R_ARM_ABS12:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::abs12(view, object, psymval);
       break;
 
     case elfcpp::R_ARM_ABS16:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::abs16(view, object, psymval);
       break;
 
     case elfcpp::R_ARM_ABS32:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, true, output_section))
 	reloc_status = Arm_relocate_functions::abs32(view, object, psymval,
 						     thumb_bit);
       break;
 
     case elfcpp::R_ARM_ABS32_NOI:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, true, output_section))
 	// No thumb bit for this relocation: (S + A)
 	reloc_status = Arm_relocate_functions::abs32(view, object, psymval,
 						     0);
       break;
 
     case elfcpp::R_ARM_MOVW_ABS_NC:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::movw(view, object, psymval,
 						    0, thumb_bit,
 						    check_overflow);
       break;
 
     case elfcpp::R_ARM_MOVT_ABS:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::movt(view, object, psymval, 0);
       break;
 
     case elfcpp::R_ARM_THM_MOVW_ABS_NC:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::thm_movw(view, object, psymval,
        						        0, thumb_bit, false);
       break;
 
     case elfcpp::R_ARM_THM_MOVT_ABS:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::thm_movt(view, object,
 							psymval, 0);
       break;
@@ -8933,8 +9047,7 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_THM_ABS5:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::thm_abs5(view, object, psymval);
       break;
 
@@ -8964,13 +9077,8 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_BASE_ABS:
-      {
-	if (!should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				      output_section))
-	  break;
-
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
 	reloc_status = Arm_relocate_functions::base_abs(view, sym_origin);
-      }
       break;
 
     case elfcpp::R_ARM_GOT_BREL:
@@ -10824,7 +10932,7 @@ Target_arm<big_endian>::scan_reloc_for_stub(
     {
       // This is a global symbol.  Determine if we use PLT and if the
       // final target is THUMB.
-      if (gsym->use_plt_offset(Relocate::reloc_is_non_pic(r_type)))
+      if (gsym->use_plt_offset(Scan::get_reference_flags(r_type)))
 	{
 	  // This uses a PLT, change the symbol value.
 	  symval.set_output_value(this->plt_section()->address()

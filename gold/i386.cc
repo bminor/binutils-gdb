@@ -335,6 +335,10 @@ class Target_i386 : public Target_freebsd<32, false>
   // The class which scans relocations.
   struct Scan
   {
+    static inline int
+
+    get_reference_flags(unsigned int r_type);
+
     inline void
     local(Symbol_table* symtab, Layout* layout, Target_i386* target,
 	  Sized_relobj<32, false>* object,
@@ -406,7 +410,7 @@ class Target_i386 : public Target_freebsd<32, false>
     // Return whether the static relocation needs to be applied.
     inline bool
     should_apply_static_reloc(const Sized_symbol<32>* gsym,
-                              int ref_flags,
+                              unsigned int r_type,
                               bool is_32bit,
 			      Output_section* output_section);
 
@@ -1191,6 +1195,76 @@ Target_i386::optimize_tls_reloc(bool is_final, int r_type)
     }
 }
 
+// Get the Reference_flags for a particular relocation.
+
+int
+Target_i386::Scan::get_reference_flags(unsigned int r_type)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_386_NONE:
+    case elfcpp::R_386_GNU_VTINHERIT:
+    case elfcpp::R_386_GNU_VTENTRY:
+    case elfcpp::R_386_GOTPC:
+      // No symbol reference.
+      return 0;
+
+    case elfcpp::R_386_32:
+    case elfcpp::R_386_16:
+    case elfcpp::R_386_8:
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_386_PC32:
+    case elfcpp::R_386_PC16:
+    case elfcpp::R_386_PC8:
+    case elfcpp::R_386_GOTOFF:
+      return Symbol::RELATIVE_REF;
+
+    case elfcpp::R_386_PLT32:
+      return Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
+
+    case elfcpp::R_386_GOT32:
+      // Absolute in GOT.
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_386_TLS_GD:            // Global-dynamic
+    case elfcpp::R_386_TLS_GOTDESC:       // Global-dynamic (from ~oliva url)
+    case elfcpp::R_386_TLS_DESC_CALL:
+    case elfcpp::R_386_TLS_LDM:           // Local-dynamic
+    case elfcpp::R_386_TLS_LDO_32:        // Alternate local-dynamic
+    case elfcpp::R_386_TLS_IE:            // Initial-exec
+    case elfcpp::R_386_TLS_IE_32:
+    case elfcpp::R_386_TLS_GOTIE:
+    case elfcpp::R_386_TLS_LE:            // Local-exec
+    case elfcpp::R_386_TLS_LE_32:
+      return Symbol::TLS_REF;
+
+    case elfcpp::R_386_COPY:
+    case elfcpp::R_386_GLOB_DAT:
+    case elfcpp::R_386_JUMP_SLOT:
+    case elfcpp::R_386_RELATIVE:
+    case elfcpp::R_386_IRELATIVE:
+    case elfcpp::R_386_TLS_TPOFF:
+    case elfcpp::R_386_TLS_DTPMOD32:
+    case elfcpp::R_386_TLS_DTPOFF32:
+    case elfcpp::R_386_TLS_TPOFF32:
+    case elfcpp::R_386_TLS_DESC:
+    case elfcpp::R_386_32PLT:
+    case elfcpp::R_386_TLS_GD_32:
+    case elfcpp::R_386_TLS_GD_PUSH:
+    case elfcpp::R_386_TLS_GD_CALL:
+    case elfcpp::R_386_TLS_GD_POP:
+    case elfcpp::R_386_TLS_LDM_32:
+    case elfcpp::R_386_TLS_LDM_PUSH:
+    case elfcpp::R_386_TLS_LDM_CALL:
+    case elfcpp::R_386_TLS_LDM_POP:
+    case elfcpp::R_386_USED_BY_INTEL_200:
+    default:
+      // Not expected.  We will give an error later.
+      return 0;
+    }
+}
+
 // Report an unsupported relocation against a local symbol.
 
 void
@@ -1208,66 +1282,11 @@ bool
 Target_i386::Scan::reloc_needs_plt_for_ifunc(Sized_relobj<32, false>* object,
 					     unsigned int r_type)
 {
-  switch (r_type)
-    {
-    case elfcpp::R_386_NONE:
-    case elfcpp::R_386_GNU_VTINHERIT:
-    case elfcpp::R_386_GNU_VTENTRY:
-      return false;
-
-    case elfcpp::R_386_32:
-    case elfcpp::R_386_16:
-    case elfcpp::R_386_8:
-    case elfcpp::R_386_PC32:
-    case elfcpp::R_386_PC16:
-    case elfcpp::R_386_PC8:
-    case elfcpp::R_386_PLT32:
-    case elfcpp::R_386_GOTOFF:
-    case elfcpp::R_386_GOTPC:
-    case elfcpp::R_386_GOT32:
-      return true;
-
-    case elfcpp::R_386_COPY:
-    case elfcpp::R_386_GLOB_DAT:
-    case elfcpp::R_386_JUMP_SLOT:
-    case elfcpp::R_386_RELATIVE:
-    case elfcpp::R_386_IRELATIVE:
-    case elfcpp::R_386_TLS_TPOFF:
-    case elfcpp::R_386_TLS_DTPMOD32:
-    case elfcpp::R_386_TLS_DTPOFF32:
-    case elfcpp::R_386_TLS_TPOFF32:
-    case elfcpp::R_386_TLS_DESC:
-      // We will give an error later.
-      return false;
-
-    case elfcpp::R_386_TLS_GD:
-    case elfcpp::R_386_TLS_GOTDESC:
-    case elfcpp::R_386_TLS_DESC_CALL:
-    case elfcpp::R_386_TLS_LDM:
-    case elfcpp::R_386_TLS_LDO_32:
-    case elfcpp::R_386_TLS_IE:
-    case elfcpp::R_386_TLS_IE_32:
-    case elfcpp::R_386_TLS_GOTIE:
-    case elfcpp::R_386_TLS_LE:
-    case elfcpp::R_386_TLS_LE_32:
-      gold_error(_("%s: unsupported TLS reloc %u for IFUNC symbol"),
-		 object->name().c_str(), r_type);
-      return false;
-
-    case elfcpp::R_386_32PLT:
-    case elfcpp::R_386_TLS_GD_32:
-    case elfcpp::R_386_TLS_GD_PUSH:
-    case elfcpp::R_386_TLS_GD_CALL:
-    case elfcpp::R_386_TLS_GD_POP:
-    case elfcpp::R_386_TLS_LDM_32:
-    case elfcpp::R_386_TLS_LDM_PUSH:
-    case elfcpp::R_386_TLS_LDM_CALL:
-    case elfcpp::R_386_TLS_LDM_POP:
-    case elfcpp::R_386_USED_BY_INTEL_200:
-    default:
-      // We will give an error later.
-      return false;
-    }
+  int flags = Scan::get_reference_flags(r_type);
+  if (flags & Symbol::TLS_REF)
+    gold_error(_("%s: unsupported TLS reloc %u for IFUNC symbol"),
+               object->name().c_str(), r_type);
+  return flags != 0;
 }
 
 // Scan a relocation for a local symbol.
@@ -1676,7 +1695,7 @@ Target_i386::Scan::global(Symbol_table* symtab,
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
-        if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
+        if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
           {
             if (gsym->may_need_copy_reloc())
               {
@@ -1737,10 +1756,7 @@ Target_i386::Scan::global(Symbol_table* symtab,
               target->make_plt_entry(symtab, layout, gsym);
           }
         // Make a dynamic relocation if necessary.
-        int flags = Symbol::NON_PIC_REF;
-        if (gsym->is_func())
-          flags |= Symbol::FUNCTION_CALL;
-        if (gsym->needs_dynamic_reloc(flags))
+        if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
           {
             if (gsym->may_need_copy_reloc())
               {
@@ -2109,7 +2125,7 @@ Target_i386::do_finalize_sections(
 
 inline bool
 Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
-                                                 int ref_flags,
+                                                 unsigned int r_type,
                                                  bool is_32bit,
 						 Output_section* output_section)
 {
@@ -2118,6 +2134,8 @@ Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
   // the reloc here.
   if ((output_section->flags() & elfcpp::SHF_ALLOC) == 0)
     return true;
+
+  int ref_flags = Scan::get_reference_flags(r_type);
 
   // For local symbols, we will have created a non-RELATIVE dynamic
   // relocation only if (a) the output is position independent,
@@ -2176,7 +2194,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
   if (gsym != NULL
       && gsym->type() == elfcpp::STT_GNU_IFUNC
       && r_type == elfcpp::R_386_32
-      && gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF)
+      && gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type))
       && gsym->can_use_relative_reloc(false)
       && !gsym->is_from_dynobj()
       && !gsym->is_undefined()
@@ -2186,9 +2204,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       // want to use the real value of the symbol, not the PLT offset.
     }
   else if (gsym != NULL
-	   && gsym->use_plt_offset(r_type == elfcpp::R_386_PC8
-				   || r_type == elfcpp::R_386_PC16
-				   || r_type == elfcpp::R_386_PC32))
+	   && gsym->use_plt_offset(Scan::get_reference_flags(r_type)))
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());
@@ -2242,52 +2258,33 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_32:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, true, output_section))
         Relocate_functions<32, false>::rel32(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC32:
-      {
-        int ref_flags = Symbol::NON_PIC_REF;
-        if (gsym != NULL && gsym->is_func())
-          ref_flags |= Symbol::FUNCTION_CALL;
-        if (should_apply_static_reloc(gsym, ref_flags, true, output_section))
-          Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
-      }
+      if (should_apply_static_reloc(gsym, r_type, true, output_section))
+        Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_16:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
         Relocate_functions<32, false>::rel16(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC16:
-      {
-        int ref_flags = Symbol::NON_PIC_REF;
-        if (gsym != NULL && gsym->is_func())
-          ref_flags |= Symbol::FUNCTION_CALL;
-        if (should_apply_static_reloc(gsym, ref_flags, false, output_section))
-          Relocate_functions<32, false>::pcrel16(view, object, psymval, address);
-      }
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
+        Relocate_functions<32, false>::pcrel16(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_8:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
-				    output_section))
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
         Relocate_functions<32, false>::rel8(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC8:
-      {
-        int ref_flags = Symbol::NON_PIC_REF;
-        if (gsym != NULL && gsym->is_func())
-          ref_flags |= Symbol::FUNCTION_CALL;
-        if (should_apply_static_reloc(gsym, ref_flags, false,
-				      output_section))
-          Relocate_functions<32, false>::pcrel8(view, object, psymval, address);
-      }
+      if (should_apply_static_reloc(gsym, r_type, false, output_section))
+        Relocate_functions<32, false>::pcrel8(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_PLT32:

@@ -198,6 +198,9 @@ class Target_sparc : public Sized_target<size, big_endian>
       : issued_non_pic_error_(false)
     { }
 
+    static inline int
+    get_reference_flags(unsigned int r_type);
+
     inline void
     local(Symbol_table* symtab, Layout* layout, Target_sparc* target,
 	  Sized_relobj<size, big_endian>* object,
@@ -1576,6 +1579,119 @@ optimize_tls_reloc(bool is_final, int r_type)
     }
 }
 
+// Get the Reference_flags for a particular relocation.
+
+template<int size, bool big_endian>
+int
+Target_sparc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
+{
+  r_type &= 0xff;
+  switch (r_type)
+    {
+    case elfcpp::R_SPARC_NONE:
+    case elfcpp::R_SPARC_REGISTER:
+    case elfcpp::R_SPARC_GNU_VTINHERIT:
+    case elfcpp::R_SPARC_GNU_VTENTRY:
+      // No symbol reference.
+      return 0;
+
+    case elfcpp::R_SPARC_UA64:
+    case elfcpp::R_SPARC_64:
+    case elfcpp::R_SPARC_HIX22:
+    case elfcpp::R_SPARC_LOX10:
+    case elfcpp::R_SPARC_H44:
+    case elfcpp::R_SPARC_M44:
+    case elfcpp::R_SPARC_L44:
+    case elfcpp::R_SPARC_HH22:
+    case elfcpp::R_SPARC_HM10:
+    case elfcpp::R_SPARC_LM22:
+    case elfcpp::R_SPARC_HI22:
+    case elfcpp::R_SPARC_LO10:
+    case elfcpp::R_SPARC_OLO10:
+    case elfcpp::R_SPARC_UA32:
+    case elfcpp::R_SPARC_32:
+    case elfcpp::R_SPARC_UA16:
+    case elfcpp::R_SPARC_16:
+    case elfcpp::R_SPARC_11:
+    case elfcpp::R_SPARC_10:
+    case elfcpp::R_SPARC_8:
+    case elfcpp::R_SPARC_7:
+    case elfcpp::R_SPARC_6:
+    case elfcpp::R_SPARC_5:
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_SPARC_DISP8:
+    case elfcpp::R_SPARC_DISP16:
+    case elfcpp::R_SPARC_DISP32:
+    case elfcpp::R_SPARC_DISP64:
+    case elfcpp::R_SPARC_PC_HH22:
+    case elfcpp::R_SPARC_PC_HM10:
+    case elfcpp::R_SPARC_PC_LM22:
+    case elfcpp::R_SPARC_PC10:
+    case elfcpp::R_SPARC_PC22:
+    case elfcpp::R_SPARC_WDISP30:
+    case elfcpp::R_SPARC_WDISP22:
+    case elfcpp::R_SPARC_WDISP19:
+    case elfcpp::R_SPARC_WDISP16:
+      return Symbol::RELATIVE_REF;
+
+    case elfcpp::R_SPARC_PLT64:
+    case elfcpp::R_SPARC_PLT32:
+    case elfcpp::R_SPARC_HIPLT22:
+    case elfcpp::R_SPARC_LOPLT10:
+    case elfcpp::R_SPARC_PCPLT10:
+      return Symbol::FUNCTION_CALL | Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_SPARC_PCPLT32:
+    case elfcpp::R_SPARC_PCPLT22:
+    case elfcpp::R_SPARC_WPLT30:
+      return Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
+
+    case elfcpp::R_SPARC_GOTDATA_OP:
+    case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
+    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
+    case elfcpp::R_SPARC_GOT10:
+    case elfcpp::R_SPARC_GOT13:
+    case elfcpp::R_SPARC_GOT22:
+      // Absolute in GOT.
+      return Symbol::ABSOLUTE_REF;
+
+    case elfcpp::R_SPARC_TLS_GD_HI22: // Global-dynamic
+    case elfcpp::R_SPARC_TLS_GD_LO10:
+    case elfcpp::R_SPARC_TLS_GD_ADD:
+    case elfcpp::R_SPARC_TLS_GD_CALL:
+    case elfcpp::R_SPARC_TLS_LDM_HI22:	// Local-dynamic
+    case elfcpp::R_SPARC_TLS_LDM_LO10:
+    case elfcpp::R_SPARC_TLS_LDM_ADD:
+    case elfcpp::R_SPARC_TLS_LDM_CALL:
+    case elfcpp::R_SPARC_TLS_LDO_HIX22:	// Alternate local-dynamic
+    case elfcpp::R_SPARC_TLS_LDO_LOX10:
+    case elfcpp::R_SPARC_TLS_LDO_ADD:
+    case elfcpp::R_SPARC_TLS_LE_HIX22:
+    case elfcpp::R_SPARC_TLS_LE_LOX10:
+    case elfcpp::R_SPARC_TLS_IE_HI22:	// Initial-exec
+    case elfcpp::R_SPARC_TLS_IE_LO10:
+    case elfcpp::R_SPARC_TLS_IE_LD:
+    case elfcpp::R_SPARC_TLS_IE_LDX:
+    case elfcpp::R_SPARC_TLS_IE_ADD:
+      return Symbol::TLS_REF;
+
+    case elfcpp::R_SPARC_COPY:
+    case elfcpp::R_SPARC_GLOB_DAT:
+    case elfcpp::R_SPARC_JMP_SLOT:
+    case elfcpp::R_SPARC_RELATIVE:
+    case elfcpp::R_SPARC_TLS_DTPMOD64:
+    case elfcpp::R_SPARC_TLS_DTPMOD32:
+    case elfcpp::R_SPARC_TLS_DTPOFF64:
+    case elfcpp::R_SPARC_TLS_DTPOFF32:
+    case elfcpp::R_SPARC_TLS_TPOFF64:
+    case elfcpp::R_SPARC_TLS_TPOFF32:
+    default:
+      // Not expected.  We will give an error later.
+      return 0;
+    }
+}
+
 // Generate a PLT entry slot for a call to __tls_get_addr
 template<int size, bool big_endian>
 void
@@ -2068,10 +2184,7 @@ Target_sparc<size, big_endian>::Scan::global(
 	if (gsym->needs_plt_entry())
 	  target->make_plt_entry(symtab, layout, gsym);
 	// Make a dynamic relocation if necessary.
-	int flags = Symbol::NON_PIC_REF;
-	if (gsym->type() == elfcpp::STT_FUNC)
-	  flags |= Symbol::FUNCTION_CALL;
-	if (gsym->needs_dynamic_reloc(flags))
+	if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
 	  {
 	    if (gsym->may_need_copy_reloc())
 	      {
@@ -2127,7 +2240,7 @@ Target_sparc<size, big_endian>::Scan::global(
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
-        if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
+        if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
           {
 	    unsigned int r_off = reloc.get_r_offset();
 
@@ -2512,19 +2625,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<size> symval;
   if (gsym != NULL
-      && gsym->use_plt_offset(r_type == elfcpp::R_SPARC_DISP8
-			      || r_type == elfcpp::R_SPARC_DISP16
-			      || r_type == elfcpp::R_SPARC_DISP32
-			      || r_type == elfcpp::R_SPARC_DISP64
-			      || r_type == elfcpp::R_SPARC_PC_HH22
-			      || r_type == elfcpp::R_SPARC_PC_HM10
-			      || r_type == elfcpp::R_SPARC_PC_LM22
-			      || r_type == elfcpp::R_SPARC_PC10
-			      || r_type == elfcpp::R_SPARC_PC22
-			      || r_type == elfcpp::R_SPARC_WDISP30
-			      || r_type == elfcpp::R_SPARC_WDISP22
-			      || r_type == elfcpp::R_SPARC_WDISP19
-			      || r_type == elfcpp::R_SPARC_WDISP16))
+      && gsym->use_plt_offset(Scan::get_reference_flags(r_type)))
     {
       elfcpp::Elf_Xword value;
 

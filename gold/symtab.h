@@ -614,15 +614,20 @@ class Symbol
 
   // When determining whether a reference to a symbol needs a dynamic
   // relocation, we need to know several things about the reference.
-  // These flags may be or'ed together.
+  // These flags may be or'ed together.  0 means that the symbol
+  // isn't referenced at all.
   enum Reference_flags
   {
-    // Reference to the symbol's absolute address.
+    // A reference to the symbol's absolute address.  This includes
+    // references that cause an absolute address to be stored in the GOT.
     ABSOLUTE_REF = 1,
-    // A non-PIC reference.
-    NON_PIC_REF = 2,
-    // A function call.
-    FUNCTION_CALL = 4
+    // A reference that calculates the offset of the symbol from some
+    // anchor point, such as the PC or GOT.
+    RELATIVE_REF = 2,
+    // A TLS-related reference.
+    TLS_REF = 4,
+    // A reference that can always be treated as a function call.
+    FUNCTION_CALL = 8
   };
 
   // Given a direct absolute or pc-relative static relocation against
@@ -653,12 +658,8 @@ class Symbol
       return true;
 
     // A function call that can branch to a local PLT entry does not need
-    // a dynamic relocation.  A non-pic pc-relative function call in a
-    // shared library cannot use a PLT entry.
-    if ((flags & FUNCTION_CALL)
-        && this->has_plt_offset()
-        && !((flags & NON_PIC_REF)
-             && parameters->options().output_is_position_independent()))
+    // a dynamic relocation.
+    if ((flags & FUNCTION_CALL) && this->has_plt_offset())
       return false;
 
     // A reference to any PLT entry in a non-position-independent executable
@@ -679,12 +680,10 @@ class Symbol
   }
 
   // Whether we should use the PLT offset associated with a symbol for
-  // a relocation.  IS_NON_PIC_REFERENCE is true if this is a non-PIC
-  // reloc--the same set of relocs for which we would pass NON_PIC_REF
-  // to the needs_dynamic_reloc function.
+  // a relocation.  FLAGS is a set of Reference_flags.
 
   bool
-  use_plt_offset(bool is_non_pic_reference) const
+  use_plt_offset(int flags) const
   {
     // If the symbol doesn't have a PLT offset, then naturally we
     // don't want to use it.
@@ -697,10 +696,7 @@ class Symbol
 
     // If we are going to generate a dynamic relocation, then we will
     // wind up using that, so no need to use the PLT entry.
-    if (this->needs_dynamic_reloc(FUNCTION_CALL
-				  | (is_non_pic_reference
-				     ? NON_PIC_REF
-				     : 0)))
+    if (this->needs_dynamic_reloc(flags))
       return false;
 
     // If the symbol is from a dynamic object, we need to use the PLT
@@ -714,10 +710,10 @@ class Symbol
 	&& (this->is_undefined() || this->is_preemptible()))
       return true;
 
-    // If this is a weak undefined symbol, we need to use the PLT
-    // entry; the symbol may be defined by a library loaded at
-    // runtime.
-    if (this->is_weak_undefined())
+    // If this is a call to a weak undefined symbol, we need to use
+    // the PLT entry; the symbol may be defined by a library loaded
+    // at runtime.
+    if ((flags & FUNCTION_CALL) && this->is_weak_undefined())
       return true;
 
     // Otherwise we can use the regular definition.

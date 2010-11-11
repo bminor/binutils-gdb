@@ -1,3 +1,41 @@
+2010-11-11  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* symtab.h (Symbol::NON_PIC_REF): Remove.
+	(Symbol::RELATIVE_REF, Symbol::TLS_REF): New Reference_flags.
+	(Symbol::FUNCTION_CALL): Renumber.  Reword comment.
+	(Symbol::needs_dynamic_reloc): Don't check NON_PIC_REF.
+	(Symbol::use_plt_offset): Take a flags argument and pass it
+	directly to needs_dynamic_reloc.  Restrict check for undefined
+	weak symbols to function calls.
+	* arm.cc (Target_arm::Scan::get_reference_flags): New function.
+	(Target_arm::Scan::global): Use it.
+	(Target_arm::Scan::scan_reloc_for_stub): Likewise.
+	(Target_arm::Relocate::relocate): Likewise.
+	(Target_arm::Relocate::should_apply_static_reloc): Replace flags
+	parameter with an r_type parameter.  Use get_reference_flags
+	to get the flags.
+	(Target_arm::Relocate::relocate): Update accordingly.
+	* i386.cc (Target_i386::Scan::get_reference_flags): New function.
+	(Target_i386::Scan::reloc_needs_plt_for_ifunc): Use it.
+	(Target_i386::Scan::global): Likewise.
+	(Target_i386::Relocate::relocate): Likewise.
+	(Target_i386::Relocate::should_apply_static_reloc): Replace flags
+	parameter with an r_type parameter.  Use get_reference_flags
+	to get the flags.
+	(Target_i386::Relocate::relocate): Update accordingly.
+	* powerpc.cc (Target_powerpc::Scan::get_reference_flags): New function.
+	(Target_powerpc::Scan::global): Use it.
+	(Target_powerpc::Scan::scan_reloc_for_stub): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+	* sparc.cc (Target_sparc::Scan::get_reference_flags): New function.
+	(Target_sparc::Scan::global): Use it.
+	(Target_sparc::Scan::scan_reloc_for_stub): Likewise.
+	(Target_sparc::Relocate::relocate): Likewise.
+	* x86_64.cc (Target_x86_64::Scan::get_reference_flags): New function.
+	(Target_x86_64::Scan::reloc_needs_plt_for_ifunc): Use it.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::Relocate::relocate): Likewise.
+
 2010-11-08  Doug Kwan  <dougkwan@google.com>
 	    Cary Coutant  <ccoutant@google.com>
 
