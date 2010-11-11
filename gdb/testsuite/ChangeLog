@@ -1,3 +1,8 @@
+2010-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-breakpoint.exp: Add internal watchpoint and
+	breakpoint tests.
+
 2010-11-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/watchpoint.exp: Test "watch -location" with an

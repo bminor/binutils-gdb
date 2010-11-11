@@ -117,6 +117,33 @@ gdb_test "end"
 gdb_py_test_silent_cmd "python blist = gdb.breakpoints()" "Get Breakpoint List" 0
 gdb_test "python print blist\[len(blist)-1\].commands" "print \"Command for breakpoint has been executed.\".*print result"
 
+# Start with a fresh gdb.
+clean_restart ${testfile}
+
+if ![runto_main] then {
+    fail "Cannot run to main."
+    return 0
+}
+
+# Test invisible breakpooints.
+delete_breakpoints
+set ibp_location [gdb_get_line_number "Break at multiply."]
+gdb_py_test_silent_cmd  "python ibp = gdb.Breakpoint(\"$ibp_location\", internal=False)" "Set invisible breakpoint" 0
+gdb_py_test_silent_cmd "python ilist = gdb.breakpoints()" "Get Breakpoint List" 0
+gdb_test "python print ilist\[0\]" "<gdb.Breakpoint object at $hex>" "Check invisible bp obj exists"
+gdb_test "python print ilist\[0\].location" "py-breakpoint\.c:$ibp_location*" "Check breakpoint location"
+gdb_test "python print ilist\[0\].visible" "True" "Check breakpoint visibility"
+gdb_test "info breakpoints" "py-breakpoint\.c:$ibp_location.*" "Check info breakpoints shows visible breakpoints"
+delete_breakpoints
+gdb_py_test_silent_cmd  "python ibp = gdb.Breakpoint(\"$ibp_location\", internal=True)" "Set invisible breakpoint" 0
+gdb_py_test_silent_cmd "python ilist = gdb.breakpoints()" "Get Breakpoint List" 0
+gdb_test "python print ilist\[0\]" "<gdb.Breakpoint object at $hex>" "Check invisible bp obj exists"
+gdb_test "python print ilist\[0\].location" "py-breakpoint\.c:$ibp_location*" "Check breakpoint location"
+gdb_test "python print ilist\[0\].visible" "False" "Check breakpoint visibility"
+gdb_test "info breakpoints" "No breakpoints or watchpoints.*" "Check info breakpoints does not show invisible breakpoints"
+gdb_test "maint info breakpoints" "py-breakpoint\.c:$ibp_location.*" "Check maint info breakpoints shows invisible breakpoints"
+
+
 # Watchpoints
 # Start with a fresh gdb.
 clean_restart ${testfile}
@@ -134,5 +161,17 @@ if ![runto_main] then {
 gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE )" "Set watchpoint" 0
 gdb_test "continue" ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*main.*" "Test watchpoint write"
 
+# Internal breakpoints.
 
+# Start with a fresh gdb.
+clean_restart ${testfile}
 
+if ![runto_main] then {
+    fail "Cannot run to main."
+    return 0
+}
+delete_breakpoints
+gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE, internal=True )" "Set watchpoint" 0
+gdb_test "info breakpoints" "No breakpoints or watchpoints.*" "Check info breakpoints does not show invisible breakpoints"
+gdb_test "maint info breakpoints" ".*hw watchpoint.*result.*" "Check maint info breakpoints shows invisible breakpoints"
+gdb_test "continue" ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*" "Test watchpoint write"

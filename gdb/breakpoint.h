@@ -24,6 +24,11 @@
 #include "value.h"
 #include "vec.h"
 
+#if HAVE_PYTHON
+#include "python/python.h"
+#include "python/python-internal.h"
+#endif
+
 struct value;
 struct block;
 
@@ -557,7 +562,14 @@ struct breakpoint
        breakpoints, we will use this index to try to find the same
        marker again.  */
     int static_trace_marker_id_idx;
-  };
+
+    /* With a Python scripting enabled GDB, store a reference to the
+       Python object that has been associated with this breakpoint.
+       This is always NULL for a GDB that is not script enabled.  It
+       can sometimes be NULL for enabled GDBs as not all breakpoint
+       types are tracked by the Python scripting API.  */
+    PyObject *py_bp_object;
+};
 
 typedef struct breakpoint *breakpoint_p;
 DEF_VEC_P(breakpoint_p);
@@ -855,9 +867,9 @@ extern void break_command (char *, int);
 extern void hbreak_command_wrapper (char *, int);
 extern void thbreak_command_wrapper (char *, int);
 extern void rbreak_command_wrapper (char *, int);
-extern void watch_command_wrapper (char *, int);
-extern void awatch_command_wrapper (char *, int);
-extern void rwatch_command_wrapper (char *, int);
+extern void watch_command_wrapper (char *, int, int);
+extern void awatch_command_wrapper (char *, int, int);
+extern void rwatch_command_wrapper (char *, int, int);
 extern void tbreak_command (char *, int);
 
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
@@ -868,7 +880,8 @@ extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      enum auto_boolean pending_break_support,
 			      struct breakpoint_ops *ops,
 			      int from_tty,
-			      int enabled);
+			      int enabled,
+			      int internal);
 
 extern void insert_breakpoints (void);
 
@@ -1100,5 +1113,16 @@ extern void check_tracepoint_command (char *line, void *closure);
    breakpoint numbers for a later "commands" command.  */
 extern void start_rbreak_breakpoints (void);
 extern void end_rbreak_breakpoints (void);
+
+/* Breakpoint iterator function.
+
+   Calls a callback function once for each breakpoint, so long as the
+   callback function returns false.  If the callback function returns
+   true, the iteration will end and the current breakpoint will be
+   returned.  This can be useful for implementing a search for a
+   breakpoint with arbitrary attributes, or for applying an operation
+   to every breakpoint.  */
+extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *,
+							     void *), void *);
 
 #endif /* !defined (BREAKPOINT_H) */

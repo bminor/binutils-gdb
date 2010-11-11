@@ -22823,7 +22823,7 @@ Return the symbol table's source absolute file name.
 Python code can manipulate breakpoints via the @code{gdb.Breakpoint}
 class.
 
-@defmethod Breakpoint __init__ spec @r{[}type@r{]} @r{[}wp_class@r{]}
+@defmethod Breakpoint __init__ spec @r{[}type@r{]} @r{[}wp_class@r{]} @r{[}internal@r{]}
 Create a new breakpoint.  @var{spec} is a string naming the
 location of the breakpoint, or an expression that defines a
 watchpoint.  The contents can be any location recognized by the
@@ -22831,10 +22831,14 @@ watchpoint.  The contents can be any location recognized by the
 command.  The optional @var{type} denotes the breakpoint to create
 from the types defined later in this chapter.  This argument can be
 either: @code{BP_BREAKPOINT} or @code{BP_WATCHPOINT}.  @var{type}
-defaults to @code{BP_BREAKPOINT}.  The optional @var{wp_class}
+defaults to @code{BP_BREAKPOINT}.  The optional @var{internal} argument
+allows the breakpoint to become invisible to the user.  The breakpoint
+will neither be reported when created, nor will it be listed in the
+output from @code{info breakpoints} (but will be listed with the
+@code{maint info breakpoints} command).  The optional @var{wp_class}
 argument defines the class of watchpoint to create, if @var{type} is
-defined as @code{BP_WATCHPOINT}.  If a watchpoint class is not
-provided, it is assumed to be a @var{WP_WRITE} class.
+@code{BP_WATCHPOINT}.  If a watchpoint class is not provided, it is
+assumed to be a @var{WP_WRITE} class.
 @end defmethod
 
 The available watchpoint types represented by constants are defined in the
@@ -22907,6 +22911,12 @@ the user to manipulate the breakpoint.  This attribute is not writable.
 This attribute holds the breakpoint's type --- the identifier used to
 determine the actual breakpoint type or use-case.  This attribute is not
 writable.
+@end defivar
+
+@defivar Breakpoint visible
+This attribute tells whether the breakpoint is visible to the user
+when set, or when the @samp{info breakpoints} command is run.  This
+attribute is not writable.
 @end defivar
 
 The available types are represented by constants defined in the @code{gdb}

@@ -39,8 +39,6 @@
 #if HAVE_PYTHON
 #include "python/python.h"
 #include "python/python-internal.h"
-#else
-typedef int PyObject;
 #endif
 
 /* Non-zero if we want to see trace of varobj level stuff.  */

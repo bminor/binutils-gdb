@@ -1,3 +1,39 @@
+2010-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-breakpoint.c (BPPY_REQUIRE_VALID): Check if bp is
+	NULL.
+	(BPPY_SET_REQUIRE_VALID): Ditto.
+	(bpnum_is_valid): Delete function.
+	(bppy_get_visibility): New function.
+	(bppy_new): Parse for, and validate internal keyword.  Pass
+	internal keyword to breakpoint or watchpoint functions.
+	(build_bp_list): New function.
+	(gdbpy_breakpoints): Rewrite.  Use build_bp_list and
+	iterate_over_breakpoints.
+	(gdbpy_breakpoint_created): Rewrite.  Do not store breakpoints in a
+	look-aside vector.
+	(gdbpy_breakpoint_deleted): Rewrite, defer breakpoint management
+	to internal breakpoint chain.
+
+	* breakpoint.c (set_breakpoint_number): New function.
+	(breakpoint_1): Check if breakpoint number is more than zero.
+	(set_raw_breakpoint_without_location): Set py_bp_object to NULL.
+	(create_breakpoint_sal): Take a new parameter called internal.
+	Call set_breakpoint_number with internal parameter.  Do not
+	mention internal breakpoints.  All callers updated.
+	(create_breakpoint): Ditto.
+	(create_breakpoints_sal): Ditto.
+	(watch_command_1): Ditto.
+	(watch_command_wrapper): Take a new parameter called internal.
+	All callers updated.
+	(rwatch_command_wrapper): Ditto.
+	(awatch_command_wrapper): Ditto.
+	(save_breakpoints): Update breakpoint save condition check.
+	(iterate_over_breakpoints): New function.
+	* breakpoint.h: Add conditional python includes.  Add py_bp_object
+	and comment to struct breakpoint.  Update all callers.
+	* defs.h: Add PyObject definition for GDB builds without Python.
+
 2010-11-10  Doug Evans  <dje@google.com>
 
 	* python/lib/gdb/command/pretty_printers.py

@@ -1,3 +1,8 @@
+2010-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Breakpoints In Python): Document "internal"
+	parameter, and visible attribute.
+
 2010-11-05  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Source Path): Document "set directories".

@@ -2068,6 +2068,24 @@ reattach_breakpoints (int pid)
 
 static int internal_breakpoint_number = -1;
 
+/* Set the breakpoint number of B, depending on the value of INTERNAL.
+   If INTERNAL is non-zero, the breakpoint number will be populated
+   from internal_breakpoint_number and that variable decremented.
+   Otherwis the breakpoint number will be populated from
+   breakpoint_count and that value incremented.  Internal breakpoints
+   do not set the internal var bpnum.  */
+static void
+set_breakpoint_number (int internal, struct breakpoint *b)
+{
+  if (internal)
+    b->number = internal_breakpoint_number--;
+  else
+    {
+      set_breakpoint_count (breakpoint_count + 1);
+      b->number = breakpoint_count;
+    }
+}
+
 static struct breakpoint *
 create_internal_breakpoint (struct gdbarch *gdbarch,
 			    CORE_ADDR address, enum bptype type)
@@ -4939,7 +4957,8 @@ breakpoint_1 (int bnum, int allflag, int (*filter) (const struct breakpoint *))
 	if (filter && !filter (b))
 	  continue;
 	
-	if (allflag || user_settable_breakpoint (b))
+	if (allflag || (user_settable_breakpoint (b)
+			&& b->number > 0))
 	  {
 	    int addr_bit, type_len;
 
@@ -5007,7 +5026,8 @@ breakpoint_1 (int bnum, int allflag, int (*filter) (const struct breakpoint *))
 	
 	/* We only print out user settable breakpoints unless the
 	   allflag is set. */
-	if (allflag || user_settable_breakpoint (b))
+	if (allflag || (user_settable_breakpoint (b)
+			&& b->number > 0))
 	  print_one_breakpoint (b, &last_loc, print_address_bits, allflag);
       }
   }
@@ -5456,6 +5476,7 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
   b->syscalls_to_be_caught = NULL;
   b->ops = NULL;
   b->condition_not_parsed = 0;
+  b->py_bp_object = NULL;
 
   /* Add this breakpoint to the end of the chain
      so that a list of breakpoints will come out in order
@@ -6914,7 +6935,8 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       char *cond_string,
 		       enum bptype type, enum bpdisp disposition,
 		       int thread, int task, int ignore_count,
-		       struct breakpoint_ops *ops, int from_tty, int enabled)
+		       struct breakpoint_ops *ops, int from_tty,
+		       int enabled, int internal)
 {
   struct breakpoint *b = NULL;
   int i;
@@ -6951,8 +6973,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
       if (i == 0)
 	{
 	  b = set_raw_breakpoint (gdbarch, sal, type);
-	  set_breakpoint_count (breakpoint_count + 1);
-	  b->number = breakpoint_count;
+	  set_breakpoint_number (internal, b);
 	  b->thread = thread;
 	  b->task = task;
   
@@ -7034,7 +7055,12 @@ Couldn't determine the static tracepoint marker to probe"));
       = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
 
   b->ops = ops;
-  mention (b);
+  if (internal)
+    /* Do not mention breakpoints with a negative number, but do
+       notify observers.  */
+    observer_notify_breakpoint_created (b->number);
+  else
+    mention (b);
 }
 
 /* Remove element at INDEX_TO_REMOVE from SAL, shifting other
@@ -7190,7 +7216,7 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 			enum bptype type, enum bpdisp disposition,
 			int thread, int task, int ignore_count,
 			struct breakpoint_ops *ops, int from_tty,
-			int enabled)
+			int enabled, int internal)
 {
   int i;
 
@@ -7201,7 +7227,8 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 
       create_breakpoint_sal (gdbarch, expanded, addr_string[i],
 			     cond_string, type, disposition,
-			     thread, task, ignore_count, ops, from_tty, enabled);
+			     thread, task, ignore_count, ops,
+			     from_tty, enabled, internal);
     }
 }
 
@@ -7470,8 +7497,10 @@ decode_static_tracepoint_spec (char **arg_p)
    parameter.  If non-zero, the function will parse arg, extracting
    breakpoint location, address and thread. Otherwise, ARG is just the
    location of breakpoint, with condition and thread specified by the
-   COND_STRING and THREAD parameters.  Returns true if any breakpoint
-   was created; false otherwise.  */
+   COND_STRING and THREAD parameters.  If INTERNAL is non-zero, the
+   breakpoint number will be allocated from the internal breakpoint
+   count.  Returns true if any breakpoint was created; false
+   otherwise.  */
 
 int
 create_breakpoint (struct gdbarch *gdbarch,
@@ -7481,8 +7510,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 		   int ignore_count,
 		   enum auto_boolean pending_break_support,
 		   struct breakpoint_ops *ops,
-		   int from_tty,
-		   int enabled)
+		   int from_tty, int enabled, int internal)
 {
   struct gdb_exception e;
   struct symtabs_and_lines sals;
@@ -7658,12 +7686,15 @@ create_breakpoint (struct gdbarch *gdbarch,
 				     cond_string, type_wanted,
 				     tempflag ? disp_del : disp_donttouch,
 				     thread, task, ignore_count, ops,
-				     from_tty, enabled);
+				     from_tty, enabled, internal);
 
 	      do_cleanups (old_chain);
 
 	      /* Get the tracepoint we just created.  */
-	      tp = get_breakpoint (breakpoint_count);
+	      if (internal)
+		tp = get_breakpoint (internal_breakpoint_number);
+	      else
+		tp = get_breakpoint (breakpoint_count);
 	      gdb_assert (tp != NULL);
 
 	      /* Given that its possible to have multiple markers with
@@ -7679,7 +7710,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	create_breakpoints_sal (gdbarch, sals, addr_string, cond_string,
 				type_wanted, tempflag ? disp_del : disp_donttouch,
 				thread, task, ignore_count, ops, from_tty,
-				enabled);
+				enabled, internal);
     }
   else
     {
@@ -7688,8 +7719,7 @@ create_breakpoint (struct gdbarch *gdbarch,
       make_cleanup (xfree, copy_arg);
 
       b = set_raw_breakpoint_without_location (gdbarch, type_wanted);
-      set_breakpoint_count (breakpoint_count + 1);
-      b->number = breakpoint_count;
+      set_breakpoint_number (internal, b);
       b->thread = -1;
       b->addr_string = addr_string[0];
       b->cond_string = NULL;
@@ -7699,13 +7729,19 @@ create_breakpoint (struct gdbarch *gdbarch,
       b->ops = ops;
       b->enable_state = enabled ? bp_enabled : bp_disabled;
       b->pspace = current_program_space;
+      b->py_bp_object = NULL;
 
       if (enabled && b->pspace->executing_startup
 	  && (b->type == bp_breakpoint
 	      || b->type == bp_hardware_breakpoint))
 	b->enable_state = bp_startup_disabled;
 
-      mention (b);
+      if (internal)
+        /* Do not mention breakpoints with a negative number, 
+	   but do notify observers.  */
+        observer_notify_breakpoint_created (b->number);
+      else
+        mention (b);
     }
   
   if (sals.nelts > 1)
@@ -7750,7 +7786,8 @@ break_command_1 (char *arg, int flag, int from_tty)
 		     pending_break_support,
 		     NULL /* breakpoint_ops */,
 		     from_tty,
-		     1 /* enabled */);
+		     1 /* enabled */,
+		     0 /* internal */);
 }
 
 
@@ -8017,7 +8054,8 @@ watchpoint_exp_is_const (const struct expression *exp)
                 hw_read:   watch read, 
 		hw_access: watch access (read or write) */
 static void
-watch_command_1 (char *arg, int accessflag, int from_tty, int just_location)
+watch_command_1 (char *arg, int accessflag, int from_tty,
+		 int just_location, int internal)
 {
   struct breakpoint *b, *scope_breakpoint = NULL;
   struct expression *exp;
@@ -8225,8 +8263,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty, int just_location)
 
   /* Now set up the breakpoint.  */
   b = set_raw_breakpoint_without_location (NULL, bp_type);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
+  set_breakpoint_number (internal, b);
   b->thread = thread;
   b->disposition = disp_donttouch;
   b->exp = exp;
@@ -8285,8 +8322,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty, int just_location)
   /* Finally update the new watchpoint.  This creates the locations
      that should be inserted.  */
   update_watchpoint (b, 1);
-
-  mention (b);
+  if (internal)
+    /* Do not mention breakpoints with a negative number, but do
+       notify observers.  */
+    observer_notify_breakpoint_created (b->number);
+  else
+    mention (b);
   update_global_location_list (1);
 }
 
@@ -8370,9 +8411,9 @@ can_use_hardware_watchpoint (struct value *v)
 }
 
 void
-watch_command_wrapper (char *arg, int from_tty)
+watch_command_wrapper (char *arg, int from_tty, int internal)
 {
-  watch_command_1 (arg, hw_write, from_tty, 0);
+  watch_command_1 (arg, hw_write, from_tty, 0, internal);
 }
 
 /* A helper function that looks for an argument at the start of a
@@ -8408,7 +8449,7 @@ watch_maybe_just_location (char *arg, int accessflag, int from_tty)
       just_location = 1;
     }
 
-  watch_command_1 (arg, accessflag, from_tty, just_location);
+  watch_command_1 (arg, accessflag, from_tty, just_location, 0);
 }
 
 static void
@@ -8418,9 +8459,9 @@ watch_command (char *arg, int from_tty)
 }
 
 void
-rwatch_command_wrapper (char *arg, int from_tty)
+rwatch_command_wrapper (char *arg, int from_tty, int internal)
 {
-  watch_command_1 (arg, hw_read, from_tty, 0);
+  watch_command_1 (arg, hw_read, from_tty, 0, internal);
 }
 
 static void
@@ -8430,9 +8471,9 @@ rwatch_command (char *arg, int from_tty)
 }
 
 void
-awatch_command_wrapper (char *arg, int from_tty)
+awatch_command_wrapper (char *arg, int from_tty, int internal)
 {
-  watch_command_1 (arg, hw_access, from_tty, 0);
+  watch_command_1 (arg, hw_access, from_tty, 0, internal);
 }
 
 static void
@@ -8790,7 +8831,8 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
 		     0,
 		     AUTO_BOOLEAN_TRUE /* pending */,
 		     &gnu_v3_exception_catchpoint_ops, from_tty,
-		     1 /* enabled */);
+		     1 /* enabled */,
+		     0 /* internal */);
 
   return 1;
 }
@@ -11010,7 +11052,8 @@ trace_command (char *arg, int from_tty)
 			 pending_break_support,
 			 NULL,
 			 from_tty,
-			 1 /* enabled */))
+			 1 /* enabled */,
+			 0 /* internal */))
     set_tracepoint_count (breakpoint_count);
 }
 
@@ -11026,7 +11069,8 @@ ftrace_command (char *arg, int from_tty)
 			 pending_break_support,
 			 NULL,
 			 from_tty,
-			 1 /* enabled */))
+			 1 /* enabled */,
+			 0 /* internal */))
     set_tracepoint_count (breakpoint_count);
 }
 
@@ -11044,7 +11088,8 @@ strace_command (char *arg, int from_tty)
 			 pending_break_support,
 			 NULL,
 			 from_tty,
-			 1 /* enabled */))
+			 1 /* enabled */,
+			 0 /* internal */))
     set_tracepoint_count (breakpoint_count);
 }
 
@@ -11106,7 +11151,8 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 			  pending_break_support,
 			  NULL,
 			  0 /* from_tty */,
-			  utp->enabled /* enabled */))
+			  utp->enabled /* enabled */,
+			  0 /* internal */))
     return NULL;
 
   set_tracepoint_count (breakpoint_count);
@@ -11372,7 +11418,7 @@ save_breakpoints (char *filename, int from_tty,
   ALL_BREAKPOINTS (tp)
   {
     /* Skip internal and momentary breakpoints.  */
-    if (!user_settable_breakpoint (tp))
+    if (!user_settable_breakpoint (tp) || tp->number < 0)
       continue;
 
     /* If we have a filter, only save the breakpoints it accepts.  */
@@ -11410,7 +11456,7 @@ save_breakpoints (char *filename, int from_tty,
   ALL_BREAKPOINTS (tp)
   {
     /* Skip internal and momentary breakpoints.  */
-    if (!user_settable_breakpoint (tp))
+    if (!user_settable_breakpoint (tp) || tp->number < 0)
       continue;
 
     /* If we have a filter, only save the breakpoints it accepts.  */
@@ -11625,6 +11671,21 @@ save_command (char *arg, int from_tty)
   printf_unfiltered (_("\
 \"save\" must be followed by the name of a save subcommand.\n"));
   help_list (save_cmdlist, "save ", -1, gdb_stdout);
+}
+
+struct breakpoint *
+iterate_over_breakpoints (int (*callback) (struct breakpoint *, void *),
+			  void *data)
+{
+  struct breakpoint *b, *temp;
+
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    {
+      if ((*callback) (b, data))
+	return b;
+    }
+
+  return NULL;
 }
 
 void
