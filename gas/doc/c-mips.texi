@@ -303,6 +303,7 @@ sb1,
 sb1a,
 loongson2e,
 loongson2f,
+loongson3a,
 octeon,
 xlr
 @end quotation

@@ -1,3 +1,7 @@
+2010-11-11  Mingming Sun  <mingm.sun@gmail.com>
+
+	* readelf.c (get_machine_flags): Add loongson-3a.
+
 2010-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.

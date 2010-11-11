@@ -173,6 +173,7 @@ DESCRIPTION
 .#define bfd_mach_mips5                 5
 .#define bfd_mach_mips_loongson_2e      3001
 .#define bfd_mach_mips_loongson_2f      3002
+.#define bfd_mach_mips_loongson_3a      3003
 .#define bfd_mach_mips_sb1              12310201 {* octal 'SB', 01 *}
 .#define bfd_mach_mips_octeon		6501
 .#define bfd_mach_mips_xlr              887682   {* decimal 'XLR'  *}

@@ -1,3 +1,13 @@
+2010-11-11  Mingming Sun  <mingm.sun@gmail.com>
+
+	* archures.c (bfd_mach_mips_loongson_3a): Defined.
+	* bfd-in2.h (bfd_mach_mips_loongson_3a): Defined.
+	* cpu-mips.c (I_loongson_3a): New add.
+	(arch_info_struct): Add loongson_3a.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Add loongson_3a.
+	(mips_set_isa_flags): Add loongson_3a.
+	(mips_mach_extensions): Add loongson_3a in MIPS64 extensions.
+
 2010-11-10  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Remove unused
