@@ -136,7 +136,7 @@ static const char * id_names[] = {
 };
 
 static const char * optype_names[] = {
-  "    ",
+  " -  ",
   "#Imm",	/* #addend */
   " Rn ",	/* Rn */
   "[Rn]",	/* [Rn + addend] */
@@ -264,6 +264,52 @@ cycles (int throughput)
       new_rt = r;				\
     }
 
+static int
+lsb_count (unsigned long v, int is_signed)
+{
+  int i, lsb;
+  if (is_signed && (v & 0x80000000U))
+    v = (unsigned long)(long)(-v);
+  for (i=31; i>=0; i--)
+    if (v & (1 << i))
+      {
+	/* v is 0..31, we want 1=1-2, 2=3-4, 3=5-6, etc. */
+	lsb = (i + 2) / 2;
+	return lsb;
+      }
+  return 0;
+}
+
+static int
+divu_cycles(unsigned long num, unsigned long den)
+{
+  int nb = lsb_count (num, 0);
+  int db = lsb_count (den, 0);
+  int rv;
+
+  if (nb < db)
+    rv = 2;
+  else
+    rv = 3 + nb - db;
+  E (rv);
+  return rv;
+}
+
+static int
+div_cycles(long num, long den)
+{
+  int nb = lsb_count ((unsigned long)num, 1);
+  int db = lsb_count ((unsigned long)den, 1);
+  int rv;
+
+  if (nb < db)
+    rv = 3;
+  else
+    rv = 5 + nb - db;
+  E (rv);
+  return rv;
+}
+
 #else /* !CYCLE_ACCURATE */
 
 #define cycles(t)
@@ -273,6 +319,9 @@ cycles (int throughput)
 #define EBIT
 #define RL(r)
 #define RLD(r)
+
+#define divu_cycles(n,d)
+#define div_cycles(n,d)
 
 #endif /* else CYCLE_ACCURATE */
 
@@ -1126,6 +1175,7 @@ decode_opcode ()
 	{
 	  tprintf("#NAN\n");
 	  set_flags (FLAGBIT_O, FLAGBIT_O);
+	  cycles (3);
 	}
       else
 	{
@@ -1133,9 +1183,8 @@ decode_opcode ()
 	  tprintf("%d\n", v);
 	  set_flags (FLAGBIT_O, 0);
 	  PD (v);
+	  div_cycles (mb, ma);
 	}
-      /* Note: spec says 3 to 22 cycles, we are pessimistic.  */
-      cycles (22);
       break;
 
     case RXO_divu: /* d = d / s */
@@ -1146,6 +1195,7 @@ decode_opcode ()
 	{
 	  tprintf("#NAN\n");
 	  set_flags (FLAGBIT_O, FLAGBIT_O);
+	  cycles (2);
 	}
       else
 	{
@@ -1153,9 +1203,8 @@ decode_opcode ()
 	  tprintf("%u\n", v);
 	  set_flags (FLAGBIT_O, 0);
 	  PD (v);
+	  divu_cycles (umb, uma);
 	}
-      /* Note: spec says 2 to 20 cycles, we are pessimistic.  */
-      cycles (20);
       break;
 
     case RXO_emul:
@@ -1906,7 +1955,7 @@ decode_opcode ()
     case RXO_suntil:
       RL(3);
 #ifdef CYCLE_ACCURATE
-      tx = regs.r[3];
+      tx = 0;
 #endif
       if (regs.r[3] == 0)
 	{
@@ -1922,10 +1971,15 @@ decode_opcode ()
 	      regs.r[3] --;
 	      umb = mem_get_si (get_reg (1));
 	      regs.r[1] += 4;
+#ifdef CYCLE_ACCURATE
+	      tx ++;
+#endif
 	      if (umb == uma)
 		break;
 	    }
+#ifdef CYCLE_ACCURATE
 	  cycles (3 + 3 * tx);
+#endif
 	  break;
 	case RX_Word:
 	  uma = get_reg (2) & 0xffff;
@@ -1934,10 +1988,15 @@ decode_opcode ()
 	      regs.r[3] --;
 	      umb = mem_get_hi (get_reg (1));
 	      regs.r[1] += 2;
+#ifdef CYCLE_ACCURATE
+	      tx ++;
+#endif
 	      if (umb == uma)
 		break;
 	    }
+#ifdef CYCLE_ACCURATE
 	  cycles (3 + 3 * (tx / 2) + 3 * (tx % 2));
+#endif
 	  break;
 	case RX_Byte:
 	  uma = get_reg (2) & 0xff;
@@ -1946,10 +2005,15 @@ decode_opcode ()
 	      regs.r[3] --;
 	      umb = mem_get_qi (regs.r[1]);
 	      regs.r[1] += 1;
+#ifdef CYCLE_ACCURATE
+	      tx ++;
+#endif
 	      if (umb == uma)
 		break;
 	    }
+#ifdef CYCLE_ACCURATE
 	  cycles (3 + 3 * (tx / 4) + 3 * (tx % 4));
+#endif
 	  break;
 	default:
 	  abort();
@@ -1963,7 +2027,7 @@ decode_opcode ()
     case RXO_swhile:
       RL(3);
 #ifdef CYCLE_ACCURATE
-      tx = regs.r[3];
+      tx = 0;
 #endif
       if (regs.r[3] == 0)
 	break;
@@ -1976,10 +2040,15 @@ decode_opcode ()
 	      regs.r[3] --;
 	      umb = mem_get_si (get_reg (1));
 	      regs.r[1] += 4;
+#ifdef CYCLE_ACCURATE
+	      tx ++;
+#endif
 	      if (umb != uma)
 		break;
 	    }
+#ifdef CYCLE_ACCURATE
 	  cycles (3 + 3 * tx);
+#endif
 	  break;
 	case RX_Word:
 	  uma = get_reg (2) & 0xffff;
@@ -1988,10 +2057,15 @@ decode_opcode ()
 	      regs.r[3] --;
 	      umb = mem_get_hi (get_reg (1));
 	      regs.r[1] += 2;
+#ifdef CYCLE_ACCURATE
+	      tx ++;
+#endif
 	      if (umb != uma)
 		break;
 	    }
+#ifdef CYCLE_ACCURATE
 	  cycles (3 + 3 * (tx / 2) + 3 * (tx % 2));
+#endif
 	  break;
 	case RX_Byte:
 	  uma = get_reg (2) & 0xff;
@@ -2000,10 +2074,15 @@ decode_opcode ()
 	      regs.r[3] --;
 	      umb = mem_get_qi (regs.r[1]);
 	      regs.r[1] += 1;
+#ifdef CYCLE_ACCURATE
+	      tx ++;
+#endif
 	      if (umb != uma)
 		break;
 	    }
+#ifdef CYCLE_ACCURATE
 	  cycles (3 + 3 * (tx / 4) + 3 * (tx % 4));
+#endif
 	  break;
 	default:
 	  abort();

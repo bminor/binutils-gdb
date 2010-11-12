@@ -1,3 +1,11 @@
+2010-11-11  DJ Delorie  <dj@redhat.com>
+
+	* rx.c (lsb_count): New.
+	(divu_cycles): New.
+	(div_cycles): New.
+	(decode_opcode): Fix cycle count math for div, divu, suntil, and
+	swhile.
+
 2010-09-29  Kevin Buettner  <kevinb@redhat.com>
 
 	* mem.c (rx_mem_ptr): When invalidating the decode cache, account
