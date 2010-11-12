@@ -1,5 +1,9 @@
 2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
 
+	* gdb.base/break-entry.exp: Skip if using a stub.
+
+2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
+
 	* gdb.python/py-inferior.exp: Pack values in target endianness.
 
 2010-11-12  Tom Tromey  <tromey@redhat.com>
