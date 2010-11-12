@@ -3029,7 +3029,19 @@ static int
 gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
 {
   if (!info->disassembler_options)
-    info->disassembler_options = "any";
+    {
+      /* When debugging E500 binaries and disassembling code containing
+	 E500-specific (SPE) instructions, one sometimes sees AltiVec
+	 instructions instead.  The opcode spaces for SPE instructions
+	 and AltiVec instructions overlap, and specifiying the "any" cpu
+	 looks for AltiVec instructions first.  If we know we're
+	 debugging an E500 binary, however, we can specify the "e500x2"
+	 cpu and get much more sane disassembly output.  */
+      if (info->mach == bfd_mach_ppc_e500)
+	info->disassembler_options = "e500x2";
+      else
+	info->disassembler_options = "any";
+    }
 
   if (info->endian == BFD_ENDIAN_BIG)
     return print_insn_big_powerpc (memaddr, info);
