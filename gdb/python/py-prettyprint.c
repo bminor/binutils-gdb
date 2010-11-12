@@ -29,6 +29,18 @@
 #ifdef HAVE_PYTHON
 #include "python-internal.h"
 
+/* Return type of print_string_repr.  */
+
+enum string_repr_result
+  {
+    /* The string method returned None.  */
+    string_repr_none,
+    /* The string method had an error.  */
+    string_repr_error,
+    /* Everything ok.  */
+    string_repr_ok
+  };
+
 /* Helper function for find_pretty_printer which iterates over a list,
    calls each function and inspects output.  This will return a
    printer object if one recognizes VALUE.  If no printer is found, it
@@ -256,12 +268,40 @@ gdbpy_get_display_hint (PyObject *printer)
   return result;
 }
 
+/* A wrapper for gdbpy_print_stack that ignores MemoryError.  */
+
+static void
+print_stack_unless_memory_error (struct ui_file *stream)
+{
+  if (PyErr_ExceptionMatches (gdbpy_gdb_memory_error))
+    {
+      struct cleanup *cleanup;
+      PyObject *type, *value, *trace;
+      char *msg;
+
+      PyErr_Fetch (&type, &value, &trace);
+      cleanup = make_cleanup_py_decref (type);
+      make_cleanup_py_decref (value);
+      make_cleanup_py_decref (trace);
+
+      msg = gdbpy_exception_to_string (type, value);
+      make_cleanup (xfree, msg);
+
+      if (msg == NULL || *msg == '\0')
+	fprintf_filtered (stream, _("<error reading variable"));
+      else
+	fprintf_filtered (stream, _("<error reading variable: %s>"), msg);
+
+      do_cleanups (cleanup);
+    }
+  else
+    gdbpy_print_stack ();
+}
+
 /* Helper for apply_val_pretty_printer which calls to_string and
-   formats the result.  If the value returnd is Py_None, nothing is
-   printed and the function returns a 1; in all other cases data is
-   printed as given by the pretty printer and the function returns 0.
-*/
-static int
+   formats the result.  */
+
+static enum string_repr_result
 print_string_repr (PyObject *printer, const char *hint,
 		   struct ui_file *stream, int recurse,
 		   const struct value_print_options *options,
@@ -270,7 +310,7 @@ print_string_repr (PyObject *printer, const char *hint,
 {
   struct value *replacement = NULL;
   PyObject *py_str = NULL;
-  int is_py_none = 0;
+  enum string_repr_result result = string_repr_ok;
 
   py_str = pretty_print_one_value (printer, &replacement);
   if (py_str)
@@ -278,7 +318,7 @@ print_string_repr (PyObject *printer, const char *hint,
       struct cleanup *cleanup = make_cleanup_py_decref (py_str);
 
       if (py_str == Py_None)
-	is_py_none = 1;
+	result = string_repr_none;
       else if (gdbpy_is_lazy_string (py_str))
 	{
 	  CORE_ADDR addr;
@@ -316,7 +356,10 @@ print_string_repr (PyObject *printer, const char *hint,
 		fputs_filtered (output, stream);
 	    }
 	  else
-	    gdbpy_print_stack ();
+	    {
+	      result = string_repr_error;
+	      print_stack_unless_memory_error (stream);
+	    }
 	}
 
       do_cleanups (cleanup);
@@ -329,9 +372,12 @@ print_string_repr (PyObject *printer, const char *hint,
       common_val_print (replacement, stream, recurse, &opts, language);
     }
   else
-    gdbpy_print_stack ();
+    {
+      result = string_repr_error;
+      print_stack_unless_memory_error (stream);
+    }
 
-  return is_py_none;
+  return result;
 }
 
 static void
@@ -437,7 +483,7 @@ print_children (PyObject *printer, const char *hint,
 					 NULL);
   if (! children)
     {
-      gdbpy_print_stack ();
+      print_stack_unless_memory_error (stream);
       return;
     }
 
@@ -446,7 +492,7 @@ print_children (PyObject *printer, const char *hint,
   iter = PyObject_GetIter (children);
   if (!iter)
     {
-      gdbpy_print_stack ();
+      print_stack_unless_memory_error (stream);
       goto done;
     }
   make_cleanup_py_decref (iter);
@@ -476,7 +522,7 @@ print_children (PyObject *printer, const char *hint,
       if (! item)
 	{
 	  if (PyErr_Occurred ())
-	    gdbpy_print_stack ();
+	    print_stack_unless_memory_error (stream);
 	  /* Set a flag so we can know whether we printed all the
 	     available elements.  */
 	  else	  
@@ -631,7 +677,7 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   char *hint = NULL;
   struct cleanup *cleanups;
   int result = 0;
-  int is_py_none = 0;
+  enum string_repr_result print_result;
   cleanups = ensure_python_env (gdbarch, language);
 
   /* Instantiate the printer.  */
@@ -666,17 +712,18 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   make_cleanup (free_current_contents, &hint);
 
   /* Print the section */
-  is_py_none = print_string_repr (printer, hint, stream, recurse,
-				  options, language, gdbarch);
-  print_children (printer, hint, stream, recurse, options, language,
-		  is_py_none);
+  print_result = print_string_repr (printer, hint, stream, recurse,
+				    options, language, gdbarch);
+  if (print_result != string_repr_error)
+    print_children (printer, hint, stream, recurse, options, language,
+		    print_result == string_repr_none);
 
   result = 1;
 
 
  done:
   if (PyErr_Occurred ())
-    gdbpy_print_stack ();
+    print_stack_unless_memory_error (stream);
   do_cleanups (cleanups);
   return result;
 }
@@ -693,7 +740,8 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
    NULL.  */
 PyObject *
 apply_varobj_pretty_printer (PyObject *printer_obj,
-			     struct value **replacement)
+			     struct value **replacement,
+			     struct ui_file *stream)
 {
   PyObject *py_str = NULL;
 
@@ -701,7 +749,7 @@ apply_varobj_pretty_printer (PyObject *printer_obj,
   py_str = pretty_print_one_value (printer_obj, replacement);
 
   if (*replacement == NULL && py_str == NULL)
-    gdbpy_print_stack ();
+    print_stack_unless_memory_error (stream);
 
   return py_str;
 }

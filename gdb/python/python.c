@@ -66,6 +66,12 @@ PyObject *gdbpy_enabled_cst;
 /* The GdbError exception.  */
 PyObject *gdbpy_gdberror_exc;
 
+/* The `gdb.error' base class.  */
+PyObject *gdbpy_gdb_error;
+
+/* The `gdb.MemoryError' exception.  */
+PyObject *gdbpy_gdb_memory_error;
+
 /* Architecture and language to be used in callbacks from
    the Python interpreter.  */
 struct gdbarch *python_gdbarch;
@@ -966,6 +972,13 @@ Enables or disables printing of Python stack traces."),
     PyModule_AddStringConstant (gdb_module, "PYTHONDIR", gdb_pythondir);
     xfree (gdb_pythondir);
   }
+
+  gdbpy_gdb_error = PyErr_NewException ("gdb.error", PyExc_RuntimeError, NULL);
+  PyModule_AddObject (gdb_module, "error", gdbpy_gdb_error);
+
+  gdbpy_gdb_memory_error = PyErr_NewException ("gdb.MemoryError",
+					       gdbpy_gdb_error, NULL);
+  PyModule_AddObject (gdb_module, "MemoryError", gdbpy_gdb_memory_error);
 
   gdbpy_gdberror_exc = PyErr_NewException ("gdb.GdbError", NULL, NULL);
   PyModule_AddObject (gdb_module, "GdbError", gdbpy_gdberror_exc);

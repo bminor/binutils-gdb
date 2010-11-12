@@ -213,7 +213,7 @@ main ()
   /* Clearing by being `static' could invoke an other GDB C++ bug.  */
   struct nullstr nullstr;
   nostring_type nstype;
-  struct ns  ns;
+  struct ns ns, ns2;
   struct lazystring estring, estring2;
 
   nstype.elements = narray;
@@ -230,6 +230,10 @@ main ()
 
   ns.null_str = "embedded\0null\0string";
   ns.length = 20;
+
+  /* Make a "corrupted" string.  */
+  ns2.null_str = NULL;
+  ns2.length = 20;
 
   estring.lazy_str = "embedded x\201\202\203\204" ;
 

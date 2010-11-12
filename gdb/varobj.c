@@ -2477,7 +2477,7 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 		       struct varobj *var)
 {
   struct ui_file *stb;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  struct cleanup *old_chain;
   gdb_byte *thevalue = NULL;
   struct value_print_options opts;
   struct type *type = NULL;
@@ -2491,6 +2491,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
   if (value == NULL)
     return NULL;
 
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
+
   gdbarch = get_type_arch (value_type (value));
 #if HAVE_PYTHON
   {
@@ -2503,7 +2506,10 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 	/* First check to see if we have any children at all.  If so,
 	   we simply return {...}.  */
 	if (dynamic_varobj_has_child_method (var))
-	  return xstrdup ("{...}");
+	  {
+	    do_cleanups (old_chain);
+	    return xstrdup ("{...}");
+	  }
 
 	if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
 	  {
@@ -2520,7 +2526,8 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 	      }
 
 	    output = apply_varobj_pretty_printer (value_formatter,
-						  &replacement);
+						  &replacement,
+						  stb);
 	    if (output)
 	      {
 		make_cleanup_py_decref (output);
@@ -2564,9 +2571,6 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
       }
   }
 #endif
-
-  stb = mem_fileopen ();
-  make_cleanup_ui_file_delete (stb);
 
   get_formatted_print_options (&opts, format_code[(int) format]);
   opts.deref_ref = 0;

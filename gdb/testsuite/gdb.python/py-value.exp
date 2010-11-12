@@ -210,6 +210,9 @@ proc test_value_in_inferior {} {
   # Test address attribute
   gdb_test "python print 'result =', arg0.address" "= 0x\[\[:xdigit:\]\]+" "Test address attribute"
 
+  # Test memory error.
+  gdb_test "python print gdb.parse_and_eval('*(int*)0')" "gdb.MemoryError: Cannot access memory at address 0x0.*"
+
   # Test string fetches,  both partial and whole.
   gdb_test "print st" "\"divide et impera\""
   gdb_py_test_silent_cmd "python st = gdb.history (0)" "get value from history" 1
@@ -371,7 +374,7 @@ proc test_subscript_regression {lang} {
 
  # Try to access an int with a subscript.  This should fail.
  gdb_test "python print intv" "1" "Baseline print of a Python value"
- gdb_test "python print intv\[0\]" "RuntimeError: Cannot subscript requested type.*" \
+ gdb_test "python print intv\[0\]" "gdb.error: Cannot subscript requested type.*" \
      "Attempt to access an integer with a subscript"
 
  # Try to access a string with a subscript.  This should pass.
@@ -386,7 +389,7 @@ proc test_subscript_regression {lang} {
 
  # Try to access a single dimension array with a subscript to the
  # result.  This should fail.
- gdb_test "python print pointer\[intv\]\[0\]" "RuntimeError: Cannot subscript requested type.*" \
+ gdb_test "python print pointer\[intv\]\[0\]" "gdb.error: Cannot subscript requested type.*" \
      "Attempt to access an integer with a subscript"
 
  # Lastly, test subscript access to an array with multiple

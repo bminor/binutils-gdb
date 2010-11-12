@@ -160,7 +160,7 @@ runto [gdb_get_line_number "Break to end."]
 
 # Test gdb.decode_line.
 gdb_test "python gdb.decode_line(\"main.c:43\")" \
-    "RuntimeError: No source file named main.c.*" "test decode_line no source named main"
+    "gdb.error: No source file named main.c.*" "test decode_line no source named main"
 
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line()" "test decode_line current location" 1
 gdb_test "python print len(symtab)" "2" "Test decode_line current location"
@@ -177,7 +177,7 @@ gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python
 gdb_test "python print symtab\[1\]\[0\].line" "26" "Test decode_line python.c:26 line number"
 
 gdb_test "python gdb.decode_line(\"randomfunc\")" \
-    "RuntimeError: Function \"randomfunc\" not defined.*" "test decode_line randomfunc"
+    "gdb.error: Function \"randomfunc\" not defined.*" "test decode_line randomfunc"
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"func1\")" "test decode_line func1()" 1
 gdb_test "python print len(symtab)" "2" "Test decode_line func1 length"
 gdb_test "python print len(symtab\[1\])" "1" "Test decode_line func1 length"

@@ -1,3 +1,14 @@
+2010-11-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-prettyprint.c (main): Add new 'ns2' local.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add test for
+	MemoryError.
+	* gdb.python/python.exp (gdb_py_test_multiple): Update exception
+	type.
+	* gdb.python/py-value.exp (test_value_in_inferior): Add test for
+	MemoryError.
+	(test_subscript_regression): Update exception type.
+
 2010-11-11  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-breakpoint.exp: Add internal watchpoint and

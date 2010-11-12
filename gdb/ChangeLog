@@ -1,3 +1,29 @@
+2010-11-12  Tom Tromey  <tromey@redhat.com>
+
+	* varobj.c (value_get_print_value): Rearrange.  Pass stream to
+	apply_varobj_pretty_printer.
+	* c-lang.c: Include exceptions.h.
+	(c_get_string): Throw MEMORY_ERROR when appropriate.
+	* python/py-prettyprint.c (enum string_repr_result): New.
+	(print_stack_unless_memory_error): New function.
+	(print_string_repr): Change return type.  Use
+	print_stack_unless_memory_error.
+	(print_children): Use print_stack_unless_memory_error.
+	(apply_val_pretty_printer): Update.  Don't print children if
+	string representation threw an exception.
+	(apply_varobj_pretty_printer): Add 'stream' argument.  Use
+	print_stack_unless_memory_error.
+	* python/python.c (gdbpy_gdb_error, gdbpy_gdb_memory_error): New
+	globals.
+	(_initialize_python): Initialize them.
+	* python/python-internal.h (GDB_PY_HANDLE_EXCEPTION): Use
+	gdbpy_convert_exception.
+	(GDB_PY_SET_HANDLE_EXCEPTION): Likewise.
+	(gdbpy_gdb_error, gdbpy_gdb_memory_error): Declare.
+	(gdbpy_convert_exception): Declare.
+	(apply_varobj_pretty_printer): Update.
+	* python/py-utils.c (gdbpy_convert_exception): New function.
+
 2010-11-12  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_target_detach): Accept new
