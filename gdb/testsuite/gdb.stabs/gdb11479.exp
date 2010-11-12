@@ -25,8 +25,12 @@ if $tracelevel then {
 set testfile "gdb11479"
 
 proc do_test {version} {
+    if ![runto_main] {
+        fail "Can't run to main $version"
+        return -1
+    }
     gdb_test "rb test" "" "Set breakpoints $version"
-    gdb_test "run" "Breakpoint .* test2 .*" "Stop at first breakpoint $version"
+    gdb_test "continue" "Breakpoint .* test2 .*" "Stop at first breakpoint $version"
     # Check that the struct is read in correctly
     gdb_test "print *t" ".*\{x = 5, y = 25, b = 2.5\}.*" \
 	"Inspect t in test2 $version"

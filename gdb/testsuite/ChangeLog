@@ -1,5 +1,9 @@
 2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
 
+	* gdb.stabs/gdb11479.exp: Use runto_main.
+
+2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
+
 	* gdb.base/break-entry.exp: Skip if using a stub.
 
 2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
