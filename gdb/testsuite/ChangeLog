@@ -1,3 +1,7 @@
+2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* gdb.python/py-inferior.exp: Pack values in target endianness.
+
 2010-11-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-prettyprint.c (main): Add new 'ns2' local.
