@@ -418,19 +418,40 @@ void
 mi_cmd_target_detach (char *command, char **argv, int argc)
 {
   if (argc != 0 && argc != 1)
-    error ("Usage: -target-detach [thread-group]");
+    error ("Usage: -target-detach [pid | thread-group]");
 
   if (argc == 1)
     {
       struct thread_info *tp;
       char *end = argv[0];
-      int pid = strtol (argv[0], &end, 10);
+      int pid;
 
-      if (*end != '\0')
-	error (_("Cannot parse thread group id '%s'"), argv[0]);
+      /* First see if we are dealing with a thread-group id.  */
+      if (*argv[0] == 'i')
+	{
+	  struct inferior *inf;
+	  int id = strtoul (argv[0] + 1, &end, 0);
+
+	  if (*end != '\0')
+	    error (_("Invalid syntax of thread-group id '%s'"), argv[0]);
+
+	  inf = find_inferior_id (id);
+	  if (!inf)
+	    error (_("Non-existent thread-group id '%d'"), id);
+
+	  pid = inf->pid;
+	}
+      else
+	{
+	  /* We must be dealing with a pid.  */
+	  pid = strtol (argv[0], &end, 10);
+
+	  if (*end != '\0')
+	    error (_("Invalid identifier '%s'"), argv[0]);
+	}
 
       /* Pick any thread in the desired process.  Current
-	 target_detach deteches from the parent of inferior_ptid.  */
+	 target_detach detaches from the parent of inferior_ptid.  */
       tp = iterate_over_threads (find_thread_of_process, &pid);
       if (!tp)
 	error (_("Thread group is empty"));
