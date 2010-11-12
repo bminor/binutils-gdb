@@ -1,3 +1,7 @@
+2010-11-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* spu-tdep.c (spu_catch_start): Fix compilation error typo.
+
 2010-11-11  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/py-breakpoint.c (BPPY_REQUIRE_VALID): Check if bp is
