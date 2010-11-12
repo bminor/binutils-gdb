@@ -1,3 +1,9 @@
+2010-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archive.c (_bfd_get_elt_at_filepos): Copy BFD_COMPRESS and
+	BFD_DECOMPRESS.
+	(bfd_openr_next_archived_file): Revert the last change.
+
 2010-11-11  Mingming Sun  <mingm.sun@gmail.com>
 
 	* archures.c (bfd_mach_mips_loongson_3a): Defined.
