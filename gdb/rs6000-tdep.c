@@ -3357,6 +3357,123 @@ ppc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 }
 
 
+/* Return true if a .gnu_attributes section exists in BFD and it
+   indicates we are using SPE extensions OR if a .PPC.EMB.apuinfo
+   section exists in BFD and it indicates that SPE extensions are in
+   use.  Check the .gnu.attributes section first, as the binary might be
+   compiled for SPE, but not actually using SPE instructions.  */
+
+static int
+bfd_uses_spe_extensions (bfd *abfd)
+{
+  asection *sect;
+  gdb_byte *contents = NULL;
+  bfd_size_type size;
+  gdb_byte *ptr;
+  int success = 0;
+  int vector_abi;
+
+  if (!abfd)
+    return 0;
+
+  /* Using Tag_GNU_Power_ABI_Vector here is a bit of a hack, as the user
+     could be using the SPE vector abi without actually using any spe
+     bits whatsoever.  But it's close enough for now.  */
+  vector_abi = bfd_elf_get_obj_attr_int (abfd, OBJ_ATTR_GNU,
+					 Tag_GNU_Power_ABI_Vector);
+  if (vector_abi == 3)
+    return 1;
+
+  sect = bfd_get_section_by_name (abfd, ".PPC.EMB.apuinfo");
+  if (!sect)
+    return 0;
+
+  size = bfd_get_section_size (sect);
+  contents = xmalloc (size);
+  if (!bfd_get_section_contents (abfd, sect, contents, 0, size))
+    {
+      xfree (contents);
+      return 0;
+    }
+
+  /* Parse the .PPC.EMB.apuinfo section.  The layout is as follows:
+
+     struct {
+       uint32 name_len;
+       uint32 data_len;
+       uint32 type;
+       char name[name_len rounded up to 4-byte alignment];
+       char data[data_len];
+     };
+
+     Technically, there's only supposed to be one such structure in a
+     given apuinfo section, but the linker is not always vigilant about
+     merging apuinfo sections from input files.  Just go ahead and parse
+     them all, exiting early when we discover the binary uses SPE
+     insns.
+
+     It's not specified in what endianness the information in this
+     section is stored.  Assume that it's the endianness of the BFD.  */
+  ptr = contents;
+  while (1)
+    {
+      unsigned int name_len;
+      unsigned int data_len;
+      unsigned int type;
+
+      /* If we can't read the first three fields, we're done.  */
+      if (size < 12)
+	break;
+
+      name_len = bfd_get_32 (abfd, ptr);
+      name_len = (name_len + 3) & ~3U; /* Round to 4 bytes.  */
+      data_len = bfd_get_32 (abfd, ptr + 4);
+      type = bfd_get_32 (abfd, ptr + 8);
+      ptr += 12;
+
+      /* The name must be "APUinfo\0".  */
+      if (name_len != 8
+	  && strcmp ((const char *) ptr, "APUinfo") != 0)
+	break;
+      ptr += name_len;
+
+      /* The type must be 2.  */
+      if (type != 2)
+	break;
+
+      /* The data is stored as a series of uint32.  The upper half of
+	 each uint32 indicates the particular APU used and the lower
+	 half indicates the revision of that APU.  We just care about
+	 the upper half.  */
+
+      /* Not 4-byte quantities.  */
+      if (data_len & 3U)
+	break;
+
+      while (data_len)
+	{
+	  unsigned int apuinfo = bfd_get_32 (abfd, ptr);
+	  unsigned int apu = apuinfo >> 16;
+	  ptr += 4;
+	  data_len -= 4;
+
+	  /* The SPE APU is 0x100; the SPEFP APU is 0x101.  Accept
+	     either.  */
+	  if (apu == 0x100 || apu == 0x101)
+	    {
+	      success = 1;
+	      data_len = 0;
+	    }
+	}
+
+      if (success)
+	break;
+    }
+
+  xfree (contents);
+  return success;
+}
+
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -3437,19 +3554,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      Application-specific Processing Unit that is present on the
      chip.  The content of the section is determined by the assembler
      which looks at each instruction and determines which unit (and
-     which version of it) can execute it. In our case we just look for
-     the existance of the section.  */
+     which version of it) can execute it.  Grovel through the section
+     looking for relevant e500 APUs.  */
 
-  if (info.abfd)
+  if (bfd_uses_spe_extensions (info.abfd))
     {
-      sect = bfd_get_section_by_name (info.abfd, ".PPC.EMB.apuinfo");
-      if (sect)
-	{
-	  arch = info.bfd_arch_info->arch;
-	  mach = bfd_mach_ppc_e500;
-	  bfd_default_set_arch_mach (&abfd, arch, mach);
-	  info.bfd_arch_info = bfd_get_arch_info (&abfd);
-	}
+      arch = info.bfd_arch_info->arch;
+      mach = bfd_mach_ppc_e500;
+      bfd_default_set_arch_mach (&abfd, arch, mach);
+      info.bfd_arch_info = bfd_get_arch_info (&abfd);
     }
 
   /* Find a default target description which describes our register
