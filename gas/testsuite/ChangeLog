@@ -1,3 +1,9 @@
+2010-11-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/elf-rel28.s, gas/mips/elf-rel28-n32.d,
+	gas/mips/elf-rel28-n64.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2010-11-10  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* gas/arm/plt-1.s, gas/arm/plt-1.d: New test.

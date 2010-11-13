@@ -3765,20 +3765,16 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
 	case 'i':
 	case 'j':
-	case 'o':
 	  macro_read_relocs (&args, r);
 	  gas_assert (*r == BFD_RELOC_GPREL16
-		  || *r == BFD_RELOC_MIPS_LITERAL
-		  || *r == BFD_RELOC_MIPS_HIGHER
-		  || *r == BFD_RELOC_HI16_S
-		  || *r == BFD_RELOC_LO16
-		  || *r == BFD_RELOC_MIPS_GOT16
-		  || *r == BFD_RELOC_MIPS_CALL16
-		  || *r == BFD_RELOC_MIPS_GOT_DISP
-		  || *r == BFD_RELOC_MIPS_GOT_PAGE
-		  || *r == BFD_RELOC_MIPS_GOT_OFST
-		  || *r == BFD_RELOC_MIPS_GOT_LO16
-		  || *r == BFD_RELOC_MIPS_CALL_LO16);
+		      || *r == BFD_RELOC_MIPS_HIGHER
+		      || *r == BFD_RELOC_HI16_S
+		      || *r == BFD_RELOC_LO16
+		      || *r == BFD_RELOC_MIPS_GOT_OFST);
+	  continue;
+
+	case 'o':
+	  macro_read_relocs (&args, r);
 	  continue;
 
 	case 'u':
@@ -9970,6 +9966,9 @@ do_msbd:
 	      /* Check whether there is only a single bracketed expression
 		 left.  If so, it must be the base register and the
 		 constant must be zero.  */
+	      offset_reloc[0] = BFD_RELOC_LO16;
+	      offset_reloc[1] = BFD_RELOC_UNUSED;
+	      offset_reloc[2] = BFD_RELOC_UNUSED;
 	      if (*s == '(' && strchr (s + 1, '(') == 0)
 		{
 		  offset_expr.X_op = O_constant;
