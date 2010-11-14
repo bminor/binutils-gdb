@@ -1,3 +1,8 @@
+2010-11-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* arm-tdep.c (arm_in_function_epilogue_p): Fix code to avoid
+	possible used of uninitialized variable.
+
 2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* rs6000-tdep.c (bfd_uses_spe_extensions): New function.
