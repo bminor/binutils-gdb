@@ -28,8 +28,8 @@ set compressedfile2 tmpdir/dw2-2-compressed.o
 set libfile tmpdir/libdw2.a
 set compressedcopyfile tmpdir/dw2-copy-compressed
 
-if { ![binutils_assemble $srcdir/$subdir/dw2-1.S $testfile] } then {
-    fail "compressed debug sections"
+if { ![binutils_assemble $srcdir/$subdir/dw2-1.S $testfile --nocompress-debug-sections] } then {
+    unsupported "compressed debug sections"
     return
 }
 

@@ -1,3 +1,10 @@
+2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/dwarf2-3.d: Also expect .zdebug in section name.
+	* gas/i386/debug1.d: Likewise.
+	* gas/lns/lns-common-1.d: Likewise.
+	* gas/lns/lns-duplicate.d: Likewise.
+
 2010-11-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	PR gas/12198

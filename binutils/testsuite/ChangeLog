@@ -1,3 +1,10 @@
+2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/compress.exp: Pass --nocompress-debug-sections to
+	assembler for uncompressed debug sections.
+
+	* binutils-all/testranges.d: Also expect .zdebug in section name.
+
 2010-11-08  Thomas Schwinge  <thomas@schwinge.name>
 
 	* lib/utils-lib.exp (is_elf_format): Consider for *-*-gnu*, too.
