@@ -3442,14 +3442,8 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
 
       bfinfdpic_gotfixup_section (info) = s;
-      flags = BSF_GLOBAL;
-    }
-  else
-    {
-      flags = BSF_GLOBAL | BSF_WEAK;
     }
 
-  flags = pltflags;
   pltflags |= SEC_CODE;
   if (bed->plt_not_loaded)
     pltflags &= ~ (SEC_CODE | SEC_LOAD | SEC_HAS_CONTENTS);

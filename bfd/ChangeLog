@@ -1,3 +1,8 @@
+2010-11-15  Mike Frysinger  <vapier@gentoo.org>
+
+	PR binutils/12177
+	* elf32-bfin.c (_bfin_create_got_section): Drop unused flags code.
+
 2010-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* archive.c (_bfd_get_elt_at_filepos): Copy BFD_COMPRESS and
