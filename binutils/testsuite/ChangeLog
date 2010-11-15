@@ -1,5 +1,10 @@
 2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* binutils-all/compress.exp: Replace binutils_assemble with
+	binutils_assemble_flags for --nocompress-debug-sections.
+
+2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* binutils-all/compress.exp: Pass --nocompress-debug-sections to
 	assembler for uncompressed debug sections.
 
