@@ -143,10 +143,11 @@ gdb_test "maint demangle main" "Can't demangle \"main\""
 
 # The timeout value is raised, because printing all the symbols and
 # statistical information about Cygwin and Windows libraries takes a lot
-# of time.  This has been noticed on some linux systems too, so just raise
-# the timeout globally.
-set oldtimeout $timeout
-set timeout [expr $timeout + 500]
+# of time.
+if [istarget "*-*-cygwin*"] {
+	set oldtimeout $timeout
+	set timeout [expr $timeout + 500]
+}
 
 send_gdb "maint print statistics\n"
 gdb_expect  {
@@ -161,8 +162,6 @@ gdb_expect  {
     -re ".*$gdb_prompt $"     { fail "maint print statistics" }
     timeout         { fail "(timeout) maint print statistics" }
 }
-
-set timeout $oldtimeout
 
 # There aren't any ...
 gdb_test_no_output "maint print dummy-frames"
