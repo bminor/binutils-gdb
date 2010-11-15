@@ -2388,6 +2388,29 @@ sco_id (void)
 
 #endif /* SCO_ELF */
 
+static void
+elf_generate_asm_lineno (void)
+{
+#ifdef NEED_ECOFF_DEBUG
+  if (ECOFF_DEBUGGING)
+    ecoff_generate_asm_lineno ();
+#endif
+}
+
+static void
+elf_process_stab (segT sec,
+		  int what,
+		  const char *string,
+		  int type,
+		  int other,
+		  int desc)
+{
+#ifdef NEED_ECOFF_DEBUG
+  if (ECOFF_DEBUGGING)
+    ecoff_stab (sec, what, string, type, other, desc);
+#endif
+}
+
 static int
 elf_separate_stab_sections (void)
 {
@@ -2428,13 +2451,8 @@ const struct format_ops elf_format_ops =
   0,	/* s_get_type */
   0,	/* s_set_type */
   elf_copy_symbol_attributes,
-#ifdef NEED_ECOFF_DEBUG
-  ecoff_generate_asm_lineno,
-  ecoff_stab,
-#else
-  0,	/* generate_asm_lineno */
-  0,	/* process_stab */
-#endif
+  elf_generate_asm_lineno,
+  elf_process_stab,
   elf_separate_stab_sections,
   elf_init_stab_section,
   elf_sec_sym_ok_for_reloc,
