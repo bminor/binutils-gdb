@@ -1,5 +1,5 @@
 /* windmc.c -- a program to compile Windows message files.
-   Copyright 2007, 2008, 2009
+   Copyright 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Kai Tietz, Onevision.
 
@@ -187,7 +187,7 @@ mc_create_path_text_file (const char *path, const char *ext)
   sprintf (hsz, "%s%s%s", (path != NULL ? path : ""), mcset_mc_basename,
     (ext != NULL ? ext : ""));
   if ((ret = fopen (hsz, "wb")) == NULL)
-    fatal (_("can't create %s file ,%s' for output.\n"), (ext ? ext : "text"), hsz);
+    fatal (_("can't create %s file `%s' for output.\n"), (ext ? ext : "text"), hsz);
   free (hsz);
   return ret;
 }
@@ -259,7 +259,7 @@ probe_codepage (rc_uint_type *cp, int *is_uni, const char *pswitch, int defmode)
       if (*cp != 0 && *cp != CP_UTF16)
 	{
 	  fprintf (stderr, _("%s: warning: "), program_name);
-	  fprintf (stderr, _("A codepage was specified switch ,%s' and UTF16.\n"), pswitch);
+	  fprintf (stderr, _("A codepage was specified switch `%s' and UTF16.\n"), pswitch);
 	  fprintf (stderr, _("\tcodepage settings are ignored.\n"));
 	}
       *cp = CP_UTF16;
@@ -1113,7 +1113,7 @@ main (int argc, char **argv)
     FILE *fp = fopen (input_filename, "rb");
 
     if (!fp)
-      fatal (_("unable to open file ,%s' for input.\n"), input_filename);
+      fatal (_("unable to open file `%s' for input.\n"), input_filename);
 
     fseek (fp, 0, SEEK_END);
     flen = ftell (fp);

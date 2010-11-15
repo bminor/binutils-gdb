@@ -1,3 +1,7 @@
+2010-11-16  Jorma Karvonen  <karvonen.jorma@gmail.com>
+
+	* windmc.c: ,%s' -> `%s' in a number of strings.
+
 2010-11-16  Jie Zhang  <jie.zhang@analog.com>
 
 	* readelf.c (get_machine_flags): Deal with Blackfin specific flags.
