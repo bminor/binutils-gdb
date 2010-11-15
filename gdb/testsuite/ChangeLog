@@ -1,3 +1,8 @@
+2010-11-15  Doug Evans  <dje@google.com>
+
+	* gdb.base/maint.exp (maint print statistics): Increase timeout for
+	all targets.  Restore old timeout afterwards.
+
 2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* gdb.stabs/gdb11479.exp: Use runto_main.
