@@ -1,3 +1,8 @@
+2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (elf_process_stab): Mark parameters as
+	ATTRIBUTE_UNUSED.
+
 2010-11-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
         * config/obj-elf.c (elf_generate_asm_lineno): New function.
