@@ -1,3 +1,10 @@
+2010-11-16  Jie Zhang  <jie.zhang@analog.com>
+
+	* elf32-bfin.c (elf32_bfin_code_in_l1): New variable.
+	(elf32_bfin_data_in_l1): New variable.
+	(elf32_bfin_final_write_processing): New.
+	(elf_backend_final_write_processing): Define.
+
 2010-11-15  Mike Frysinger  <vapier@gentoo.org>
 
 	PR binutils/12177

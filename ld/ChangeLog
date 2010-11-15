@@ -1,3 +1,11 @@
+2010-11-16  Jie Zhang  <jie.zhang@analog.com>
+
+	* Makefile.am (eelf32bfinfd.c, eelf32bfin.c): Depend on bfin.em.
+	* Makefile.in: Regenerated.
+	* emulparams/bfin.sh (EXTRA_EM_FILE): Set.
+	* emulparams/elf32bfinfd.sh (EXTRA_EM_FILE): Likewise.
+	* emultempl/bfin.em: New.
+
 2010-11-16  Yasuaki Taniguchi  <taniguchi.yasua@jp.fujitsu.com>
 
 	* emultempl/pe.em (_list_options): Correct typo.

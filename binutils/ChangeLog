@@ -1,3 +1,7 @@
+2010-11-16  Jie Zhang  <jie.zhang@analog.com>
+
+	* readelf.c (get_machine_flags): Deal with Blackfin specific flags.
+
 2010-11-11  Mingming Sun  <mingm.sun@gmail.com>
 
 	* readelf.c (get_machine_flags): Add loongson-3a.
