@@ -1,3 +1,8 @@
+2010-11-15  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (macro_build): Remove gas_assert from 'o' case.
+	Use a restricted gas_assert for 'i' and 'j'.
+
 2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-elf.c (elf_process_stab): Mark parameters as

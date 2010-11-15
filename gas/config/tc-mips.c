@@ -3765,20 +3765,16 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
 	case 'i':
 	case 'j':
-	case 'o':
 	  macro_read_relocs (&args, r);
 	  gas_assert (*r == BFD_RELOC_GPREL16
-		  || *r == BFD_RELOC_MIPS_LITERAL
-		  || *r == BFD_RELOC_MIPS_HIGHER
-		  || *r == BFD_RELOC_HI16_S
-		  || *r == BFD_RELOC_LO16
-		  || *r == BFD_RELOC_MIPS_GOT16
-		  || *r == BFD_RELOC_MIPS_CALL16
-		  || *r == BFD_RELOC_MIPS_GOT_DISP
-		  || *r == BFD_RELOC_MIPS_GOT_PAGE
-		  || *r == BFD_RELOC_MIPS_GOT_OFST
-		  || *r == BFD_RELOC_MIPS_GOT_LO16
-		  || *r == BFD_RELOC_MIPS_CALL_LO16);
+		      || *r == BFD_RELOC_MIPS_HIGHER
+		      || *r == BFD_RELOC_HI16_S
+		      || *r == BFD_RELOC_LO16
+		      || *r == BFD_RELOC_MIPS_GOT_OFST);
+	  continue;
+
+	case 'o':
+	  macro_read_relocs (&args, r);
 	  continue;
 
 	case 'u':

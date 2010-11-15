@@ -810,6 +810,11 @@ if { [istarget mips*-*-vxworks*] } {
 
 	run_dump_test_arches "elf-rel27" [mips_arch_list_all]
 
+	if $has_newabi {
+	    run_dump_test "elf-rel28-n32"
+	    run_dump_test "elf-rel28-n64"
+	}
+
 	if { !$no_mips16 } {
 	    run_dump_test "${tmips}mips${el}16-e"
 	    run_dump_test "${tmips}mips${el}16-f"
