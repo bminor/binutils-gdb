@@ -1,3 +1,8 @@
+2010-11-16  Yasuaki Taniguchi  <taniguchi.yasua@jp.fujitsu.com>
+
+	* emultempl/pe.em (_list_options): Correct typo.
+	* emultempl/pep.em (_list_options): Likewise.
+
 2010-11-08  Thomas Schwinge  <thomas@schwinge.name>
 
 	* configure.host: Add stanza for *-*-gnu*.
