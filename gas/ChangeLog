@@ -1,3 +1,10 @@
+2010-11-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* config/obj-elf.c (elf_generate_asm_lineno): New function.
+	(elf_process_stab): New function.
+	(elf_format_ops): Always use them as generate_asm_lineno,
+	process_stab members.
+
 2010-11-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	PR gas/12198
