@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* FIXME: later add a device ptr arg */
 extern int dv_sockser_status (SIM_DESC);
 int dv_sockser_write (SIM_DESC, unsigned char);
+int dv_sockser_write_buffer (SIM_DESC, const unsigned char *, unsigned);
 int dv_sockser_read (SIM_DESC);
 
 #endif /* DV_SOCKSER_H */

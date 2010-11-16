@@ -1,3 +1,9 @@
+2010-11-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-sockser.c (dv_sockser_write_buffer): New function.
+	(dv_sockser_write): Rewrite to use dv_sockser_write_buffer.
+	* dv-sockser.h (dv_sockser_write_buffer): New prototype.
+
 2010-10-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* callback.c (os_lseek): Call wrap on lseek result.

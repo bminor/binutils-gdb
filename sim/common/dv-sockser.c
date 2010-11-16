@@ -346,13 +346,14 @@ dv_sockser_status (SIM_DESC sd)
 }
 
 int
-dv_sockser_write (SIM_DESC sd, unsigned char c)
+dv_sockser_write_buffer (SIM_DESC sd, const unsigned char *buffer,
+			 unsigned nr_bytes)
 {
   int n;
 
   if (! connected_p (sd))
     return -1;
-  n = write (sockser_fd, &c, 1);
+  n = write (sockser_fd, buffer, nr_bytes);
   if (n == -1)
     {
       if (errno == EPIPE)
@@ -362,9 +363,15 @@ dv_sockser_write (SIM_DESC sd, unsigned char c)
 	}
       return -1;
     }
-  if (n != 1)
+  if (n != nr_bytes)
     return -1;
-  return 1;
+  return nr_bytes;
+}
+
+int
+dv_sockser_write (SIM_DESC sd, unsigned char c)
+{
+  return dv_sockser_write_buffer (sd, &c, 1);
 }
 
 int
