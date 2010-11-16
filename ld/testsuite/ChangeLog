@@ -1,3 +1,8 @@
+2010-11-17  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ld-gc/pr11218-2.c: Declare
+	unresolved_detected_at_runtime_not_at_linktime.
+
 2010-11-17  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/plugin.exp: Define printf and puts as main.
