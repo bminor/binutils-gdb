@@ -2128,7 +2128,10 @@ dw2_forget_cached_source_info (struct objfile *objfile)
 	  int j;
 
 	  for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
-	    xfree ((void *) per_cu->v.quick->full_names[j]);
+	    {
+	      xfree ((void *) per_cu->v.quick->full_names[j]);
+	      per_cu->v.quick->full_names[j] = NULL;
+	    }
 	}
     }
 }

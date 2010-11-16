@@ -1,3 +1,8 @@
+2010-11-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dw2_forget_cached_source_info): Clear the FULL_NAMES
+	elements after xfree.
+
 2010-11-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb-add-index.sh: Really remove.
