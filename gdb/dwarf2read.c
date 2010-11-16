@@ -1241,7 +1241,11 @@ static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
 static struct dwarf2_per_cu_data *dwarf2_find_comp_unit
   (unsigned int offset, struct objfile *objfile);
 
-static struct dwarf2_cu *alloc_one_comp_unit (struct objfile *objfile);
+static void init_one_comp_unit (struct dwarf2_cu *cu,
+				struct objfile *objfile);
+
+static void prepare_one_comp_unit (struct dwarf2_cu *cu,
+				   struct die_info *comp_unit_die);
 
 static void free_one_comp_unit (void *);
 
@@ -2018,10 +2022,7 @@ dw2_require_line_header (struct objfile *objfile,
     return;
   this_cu->v.quick->read_lines = 1;
 
-  memset (&cu, 0, sizeof (cu));
-  cu.objfile = objfile;
-  obstack_init (&cu.comp_unit_obstack);
-
+  init_one_comp_unit (&cu, objfile);
   cleanups = make_cleanup (free_stack_comp_unit, &cu);
 
   if (this_cu->from_debug_types)
@@ -3024,10 +3025,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
   CORE_ADDR best_lowpc = 0, best_highpc = 0;
   struct die_reader_specs reader_specs;
 
-  memset (&cu, 0, sizeof (cu));
-  cu.objfile = objfile;
-  obstack_init (&cu.comp_unit_obstack);
-
+  init_one_comp_unit (&cu, objfile);
   back_to_inner = make_cleanup (free_stack_comp_unit, &cu);
 
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
@@ -3081,12 +3079,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
       return info_ptr;
     }
 
-  /* Set the language we're debugging.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_language, &cu);
-  if (attr)
-    set_cu_language (DW_UNSND (attr), &cu);
-  else
-    set_cu_language (language_minimal, &cu);
+  prepare_one_comp_unit (&cu, comp_unit_die);
 
   /* Allocate a new partial symbol table structure.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_name, &cu);
@@ -3301,7 +3294,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
   struct die_info *comp_unit_die;
   struct dwarf2_cu *cu;
   struct cleanup *free_abbrevs_cleanup, *free_cu_cleanup = NULL;
-  struct attribute *attr;
   int has_children;
   struct die_reader_specs reader_specs;
   int read_cu = 0;
@@ -3314,7 +3306,8 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
 
   if (this_cu->cu == NULL)
     {
-      cu = alloc_one_comp_unit (objfile);
+      cu = xmalloc (sizeof (*cu));
+      init_one_comp_unit (cu, objfile);
 
       read_cu = 1;
 
@@ -3354,12 +3347,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
   info_ptr = read_full_die (&reader_specs, &comp_unit_die, info_ptr,
 			    &has_children);
 
-  /* Set the language we're debugging.  */
-  attr = dwarf2_attr (comp_unit_die, DW_AT_language, cu);
-  if (attr)
-    set_cu_language (DW_UNSND (attr), cu);
-  else
-    set_cu_language (language_minimal, cu);
+  prepare_one_comp_unit (cu, comp_unit_die);
 
   /* Check if comp unit has_children.
      If so, read the rest of the partial symbols from this comp unit.
@@ -4314,7 +4302,8 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
 
   if (per_cu->cu == NULL)
     {
-      cu = alloc_one_comp_unit (objfile);
+      cu = xmalloc (sizeof (*cu));
+      init_one_comp_unit (cu, objfile);
 
       read_cu = 1;
 
@@ -4352,11 +4341,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
      all objfiles needed for references have been loaded yet, and symbol
      table processing isn't initialized.  But we have to set the CU language,
      or we won't be able to build types correctly.  */
-  attr = dwarf2_attr (cu->dies, DW_AT_language, cu);
-  if (attr)
-    set_cu_language (DW_UNSND (attr), cu);
-  else
-    set_cu_language (language_minimal, cu);
+  prepare_one_comp_unit (cu, cu->dies);
 
   /* Similarly, if we do not read the producer, we can not apply
      producer-specific interpretation.  */
@@ -13220,17 +13205,15 @@ read_signatured_type (struct objfile *objfile,
   struct dwarf2_cu *cu;
   ULONGEST signature;
   struct cleanup *back_to, *free_cu_cleanup;
-  struct attribute *attr;
 
   dwarf2_read_section (objfile, &dwarf2_per_objfile->types);
   types_ptr = dwarf2_per_objfile->types.buffer + type_sig->offset;
 
   gdb_assert (type_sig->per_cu.cu == NULL);
 
-  cu = xmalloc (sizeof (struct dwarf2_cu));
-  memset (cu, 0, sizeof (struct dwarf2_cu));
-  obstack_init (&cu->comp_unit_obstack);
-  cu->objfile = objfile;
+  cu = xmalloc (sizeof (*cu));
+  init_one_comp_unit (cu, objfile);
+
   type_sig->per_cu.cu = cu;
   cu->per_cu = &type_sig->per_cu;
 
@@ -13262,11 +13245,7 @@ read_signatured_type (struct objfile *objfile,
      all objfiles needed for references have been loaded yet, and symbol
      table processing isn't initialized.  But we have to set the CU language,
      or we won't be able to build types correctly.  */
-  attr = dwarf2_attr (cu->dies, DW_AT_language, cu);
-  if (attr)
-    set_cu_language (DW_UNSND (attr), cu);
-  else
-    set_cu_language (language_minimal, cu);
+  prepare_one_comp_unit (cu, cu->dies);
 
   do_cleanups (back_to);
 
@@ -14314,15 +14293,29 @@ dwarf2_find_comp_unit (unsigned int offset, struct objfile *objfile)
   return this_cu;
 }
 
-/* Malloc space for a dwarf2_cu for OBJFILE and initialize it.  */
+/* Initialize dwarf2_cu CU for OBJFILE in a pre-allocated space.  */
 
-static struct dwarf2_cu *
-alloc_one_comp_unit (struct objfile *objfile)
+static void
+init_one_comp_unit (struct dwarf2_cu *cu, struct objfile *objfile)
 {
-  struct dwarf2_cu *cu = xcalloc (1, sizeof (struct dwarf2_cu));
+  memset (cu, 0, sizeof (*cu));
   cu->objfile = objfile;
   obstack_init (&cu->comp_unit_obstack);
-  return cu;
+}
+
+/* Initialize basic fields of dwarf_cu CU according to DIE COMP_UNIT_DIE.  */
+
+static void
+prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die)
+{
+  struct attribute *attr;
+
+  /* Set the language we're debugging.  */
+  attr = dwarf2_attr (comp_unit_die, DW_AT_language, cu);
+  if (attr)
+    set_cu_language (DW_UNSND (attr), cu);
+  else
+    set_cu_language (language_minimal, cu);
 }
 
 /* Release one cached compilation unit, CU.  We unlink it from the tree

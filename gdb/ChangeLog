@@ -1,3 +1,23 @@
+2010-11-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* dwarf2read.c (alloc_one_comp_unit): Rename prototype to ...
+	(init_one_comp_unit): ... this one.
+	(prepare_one_comp_unit): New prototype.
+	(dw2_require_line_header, process_psymtab_comp_unit): Use
+	init_one_comp_unit.
+	(process_psymtab_comp_unit): Use prepare_one_comp_unit.
+	(load_partial_comp_unit): Remove variable attr.  Use
+	init_one_comp_unit with xmalloc.  Use prepare_one_comp_unit.
+	(load_full_comp_unit): Use init_one_comp_unit with xmalloc.  Use
+	prepare_one_comp_unit.
+	(read_signatured_type): Remove variable attr.  Use init_one_comp_unit.
+	Use prepare_one_comp_unit.
+	(alloc_one_comp_unit): Rename to ...
+	(init_one_comp_unit): ... here and remove there calloc, new parameter
+	cu.
+	(prepare_one_comp_unit): New function.
+
 2010-11-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* arm-tdep.c (arm_in_function_epilogue_p): Fix code to avoid
