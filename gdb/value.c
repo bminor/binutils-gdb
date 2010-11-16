@@ -2202,7 +2202,7 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
    target byte order; the bitfield starts in the byte pointed to.  FIELDVAL
    is the desired value of the field, in host byte order.  BITPOS and BITSIZE
    indicate which bits (in target bit order) comprise the bitfield.  
-   Requires 0 < BITSIZE <= lbits, 0 <= BITPOS+BITSIZE <= lbits, and
+   Requires 0 < BITSIZE <= lbits, 0 <= BITPOS % 8 + BITSIZE <= lbits, and
    0 <= BITPOS, where lbits is the size of a LONGEST in bits.  */
 
 void
@@ -2212,6 +2212,11 @@ modify_field (struct type *type, gdb_byte *addr,
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   ULONGEST oword;
   ULONGEST mask = (ULONGEST) -1 >> (8 * sizeof (ULONGEST) - bitsize);
+  int bytesize;
+
+  /* Normalize BITPOS.  */
+  addr += bitpos / 8;
+  bitpos %= 8;
 
   /* If a negative fieldval fits in the field in question, chop
      off the sign extension bits.  */
@@ -2229,16 +2234,20 @@ modify_field (struct type *type, gdb_byte *addr,
       fieldval &= mask;
     }
 
-  oword = extract_unsigned_integer (addr, sizeof oword, byte_order);
+  /* Ensure no bytes outside of the modified ones get accessed as it may cause
+     false valgrind reports.  */
+
+  bytesize = (bitpos + bitsize + 7) / 8;
+  oword = extract_unsigned_integer (addr, bytesize, byte_order);
 
   /* Shifting for bit field depends on endianness of the target machine.  */
   if (gdbarch_bits_big_endian (get_type_arch (type)))
-    bitpos = sizeof (oword) * 8 - bitpos - bitsize;
+    bitpos = bytesize * 8 - bitpos - bitsize;
 
   oword &= ~(mask << bitpos);
   oword |= fieldval << bitpos;
 
-  store_unsigned_integer (addr, sizeof oword, byte_order, oword);
+  store_unsigned_integer (addr, bytesize, byte_order, oword);
 }
 
 /* Pack NUM into BUF using a target format of TYPE.  */

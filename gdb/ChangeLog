@@ -1,5 +1,13 @@
 2010-11-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* ada-lang.c (modify_general_field): Remove.
+	(make_array_descriptor): Replace all modify_general_field calls by
+	modify_field.
+	* value.c (modify_field): Update comment.  New variable bytesize.
+	Normalize BITPOS.  Initialize BYTESIZE, use it.
+
+2010-11-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (dw2_forget_cached_source_info): Clear the FULL_NAMES
 	elements after xfree.
 

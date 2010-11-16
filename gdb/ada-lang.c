@@ -69,8 +69,6 @@
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
-static void modify_general_field (struct type *, char *, LONGEST, int, int);
-
 static struct type *desc_base_type (struct type *);
 
 static struct type *desc_bounds_type (struct type *);
@@ -1342,15 +1340,6 @@ static char *bound_name[] = {
 /* Maximum number of array dimensions we are prepared to handle.  */
 
 #define MAX_ADA_DIMENS (sizeof(bound_name) / (2*sizeof(char *)))
-
-/* Like modify_field, but allows bitpos > wordlength.  */
-
-static void
-modify_general_field (struct type *type, char *addr,
-		      LONGEST fieldval, int bitpos, int bitsize)
-{
-  modify_field (type, addr + bitpos / 8, fieldval, bitpos % 8, bitsize);
-}
 
 
 /* The desc_* routines return primitive portions of array descriptors
@@ -4038,33 +4027,31 @@ make_array_descriptor (struct type *type, struct value *arr)
 
   for (i = ada_array_arity (ada_check_typedef (value_type (arr))); i > 0; i -= 1)
     {
-      modify_general_field (value_type (bounds),
-			    value_contents_writeable (bounds),
-                            ada_array_bound (arr, i, 0),
-                            desc_bound_bitpos (bounds_type, i, 0),
-                            desc_bound_bitsize (bounds_type, i, 0));
-      modify_general_field (value_type (bounds),
-			    value_contents_writeable (bounds),
-                            ada_array_bound (arr, i, 1),
-                            desc_bound_bitpos (bounds_type, i, 1),
-                            desc_bound_bitsize (bounds_type, i, 1));
+      modify_field (value_type (bounds), value_contents_writeable (bounds),
+		    ada_array_bound (arr, i, 0),
+		    desc_bound_bitpos (bounds_type, i, 0),
+		    desc_bound_bitsize (bounds_type, i, 0));
+      modify_field (value_type (bounds), value_contents_writeable (bounds),
+		    ada_array_bound (arr, i, 1),
+		    desc_bound_bitpos (bounds_type, i, 1),
+		    desc_bound_bitsize (bounds_type, i, 1));
     }
 
   bounds = ensure_lval (bounds);
 
-  modify_general_field (value_type (descriptor),
-			value_contents_writeable (descriptor),
-                        value_pointer (ensure_lval (arr),
-                                       TYPE_FIELD_TYPE (desc_type, 0)),
-                        fat_pntr_data_bitpos (desc_type),
-                        fat_pntr_data_bitsize (desc_type));
+  modify_field (value_type (descriptor),
+		value_contents_writeable (descriptor),
+		value_pointer (ensure_lval (arr),
+			       TYPE_FIELD_TYPE (desc_type, 0)),
+		fat_pntr_data_bitpos (desc_type),
+		fat_pntr_data_bitsize (desc_type));
 
-  modify_general_field (value_type (descriptor),
-			value_contents_writeable (descriptor),
-                        value_pointer (bounds,
-                                       TYPE_FIELD_TYPE (desc_type, 1)),
-                        fat_pntr_bounds_bitpos (desc_type),
-                        fat_pntr_bounds_bitsize (desc_type));
+  modify_field (value_type (descriptor),
+		value_contents_writeable (descriptor),
+		value_pointer (bounds,
+			       TYPE_FIELD_TYPE (desc_type, 1)),
+		fat_pntr_bounds_bitpos (desc_type),
+		fat_pntr_bounds_bitsize (desc_type));
 
   descriptor = ensure_lval (descriptor);
 
