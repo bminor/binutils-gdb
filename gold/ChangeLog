@@ -1,3 +1,13 @@
+2010-11-16  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/12220
+	* layout.cc (Layout::choose_output_section): Transform names of
+	compressed sections even when using a script with a SECTIONS clause.
+	(Layout::output_section_name): Remove code to transform
+	compressed debug section names.
+	* output.cc (Output_section::add_input_section): Use uncompressed
+	section size when tracking input sections.
+
 2010-11-11  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* symtab.h (Symbol::NON_PIC_REF): Remove.

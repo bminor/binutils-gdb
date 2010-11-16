@@ -2165,7 +2165,7 @@ Output_section::add_input_section(Layout* layout,
       || parameters->target().may_relax()
       || parameters->options().section_ordering_file())
     {
-      Input_section isecn(object, shndx, shdr.get_sh_size(), addralign);
+      Input_section isecn(object, shndx, input_section_size, addralign);
       if (parameters->options().section_ordering_file())
         {
           unsigned int section_order_index =
