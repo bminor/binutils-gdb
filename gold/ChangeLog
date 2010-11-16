@@ -1,3 +1,14 @@
+2010-11-16  Doug Kwan  <dougkwan@google.com>
+	    Cary Coutant  <ccoutant@google.com>
+
+	* output.h (Output_segment::set_section_addresses): Pass increase_relro
+	by reference; adjust all callers.
+	* output.cc (Output_segment::set_section_addresses): Adjust references
+	to increase_relro. Add padding to *increase_relro when ORDER_RELRO_LAST
+	list is empty.
+	(Output_segment::set_offset): Assert if PT_GNU_RELRO segment does not
+	end at page boundary.
+
 2010-11-16  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/12220

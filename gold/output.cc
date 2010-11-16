@@ -3692,7 +3692,7 @@ Output_segment::has_dynamic_reloc_list(const Output_data_list* pdl) const
 uint64_t
 Output_segment::set_section_addresses(const Layout* layout, bool reset,
                                       uint64_t addr,
-				      unsigned int increase_relro,
+				      unsigned int* increase_relro,
 				      bool* has_relro,
 				      off_t* poff,
 				      unsigned int* pshndx)
@@ -3752,7 +3752,7 @@ Output_segment::set_section_addresses(const Layout* layout, bool reset,
 	  if (p != pdl->end())
 	    break;
 	}
-      relro_size += increase_relro;
+      relro_size += *increase_relro;
       // Pad the total relro size to a multiple of the maximum
       // section alignment seen.
       uint64_t aligned_size = align_address(relro_size, max_align);
@@ -3795,6 +3795,13 @@ Output_segment::set_section_addresses(const Layout* layout, bool reset,
 	{
 	  *poff += last_relro_pad;
 	  addr += last_relro_pad;
+	  if (this->output_lists_[i].empty())
+	    {
+	      // If there is nothing in the ORDER_RELRO_LAST list,
+	      // the padding will occur at the end of the relro
+	      // segment, and we need to add it to *INCREASE_RELRO.
+	      *increase_relro += last_relro_pad;
+	    }
 	}
       addr = this->set_section_list_addresses(layout, reset,
 					      &this->output_lists_[i],
@@ -4013,6 +4020,15 @@ Output_segment::set_offset(unsigned int increase)
 
   this->filesz_ += increase;
   this->memsz_ += increase;
+
+  // If this is a RELRO segment, verify that the segment ends at a
+  // page boundary.
+  if (this->type_ == elfcpp::PT_GNU_RELRO)
+    {
+      uint64_t page_align = parameters->target().common_pagesize();
+      uint64_t segment_end = this->vaddr_ + this->memsz_;
+      gold_assert(segment_end == align_address(segment_end, page_align));
+    }
 
   // If this is a TLS segment, align the memory size.  The code in
   // set_section_list ensures that the section after the TLS segment

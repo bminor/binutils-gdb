@@ -3911,7 +3911,7 @@ class Output_segment
   // *PSHNDX.  This should only be called for a PT_LOAD segment.
   uint64_t
   set_section_addresses(const Layout*, bool reset, uint64_t addr,
-			unsigned int increase_relro, bool* has_relro,
+			unsigned int* increase_relro, bool* has_relro,
 			off_t* poff, unsigned int* pshndx);
 
   // Set the minimum alignment of this segment.  This may be adjusted
