@@ -1,3 +1,7 @@
+2010-11-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* linux-low.c (linux_tracefork_child): Add char* cast to arg.
+
 2010-10-22  Jie Zhang  <jie@codesourcery.com>
 
 	* Makefile.in: Add FLAGS_TO_PASS variable.

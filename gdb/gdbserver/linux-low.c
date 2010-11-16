@@ -4148,7 +4148,7 @@ linux_tracefork_child (void *arg)
   __clone2 (linux_tracefork_grandchild, arg, STACK_SIZE,
 	    CLONE_VM | SIGCHLD, NULL);
 #else
-  clone (linux_tracefork_grandchild, arg + STACK_SIZE,
+  clone (linux_tracefork_grandchild, (char *) arg + STACK_SIZE,
 	 CLONE_VM | SIGCHLD, NULL);
 #endif
 
