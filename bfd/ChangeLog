@@ -1,3 +1,8 @@
+2010-11-17  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (vms_write_index): Add comments.
+	Partially revert previous patch.  Free blocks later.
+
 2010-11-17  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12161
