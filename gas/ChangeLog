@@ -1,3 +1,10 @@
+2010-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* input-file.c (input_file_open): Check for empty input files.
+	(input_file_get): Check for end of file before reading any more
+	data.
+	(input_file_give_next_buffer): Likewise.
+
 2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-elf.c (elf_process_stab): Mark parameters as

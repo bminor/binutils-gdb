@@ -157,6 +157,15 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
       return;
     }
 
+  /* Check for an empty input file.  */
+  if (feof (f_in))
+    {
+      fclose (f_in);
+      f_in = NULL;
+      return;
+    }
+  gas_assert (c != EOF);
+
   if (c == '#')
     {
       /* Begins with comment, may not want to preprocess.  */
@@ -209,6 +218,9 @@ input_file_get (char *buf, int buflen)
 {
   int size;
 
+  if (feof (f_in))
+    return 0;
+  
   size = fread (buf, sizeof (char), buflen, f_in);
   if (size < 0)
     {
@@ -224,7 +236,7 @@ char *
 input_file_give_next_buffer (char *where /* Where to place 1st character of new buffer.  */)
 {
   char *return_value;		/* -> Last char of what we read, + 1.  */
-  register int size;
+  int size;
 
   if (f_in == (FILE *) 0)
     return 0;
@@ -235,7 +247,13 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
   if (preprocess)
     size = do_scrub_chars (input_file_get, where, BUFFER_SIZE);
   else
-    size = fread (where, sizeof (char), BUFFER_SIZE, f_in);
+    {
+      if (feof (f_in))
+	size = 0;
+      else
+	size = fread (where, sizeof (char), BUFFER_SIZE, f_in);
+    }
+
   if (size < 0)
     {
       as_bad (_("can't read from %s: %s"), file_name, xstrerror (errno));
