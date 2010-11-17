@@ -1,3 +1,8 @@
+2010-11-17  Tom Tromey  <tromey@redhat.com>
+
+	* value.c (value_entirely_optimized_out): Check the
+	'check_any_valid' field.
+
 2010-11-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ada-lang.c (modify_general_field): Remove.

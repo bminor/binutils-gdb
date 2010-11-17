@@ -519,7 +519,7 @@ value_entirely_optimized_out (const struct value *value)
   if (!value->optimized_out)
     return 0;
   if (value->lval != lval_computed
-      || !value->location.computed.funcs->check_validity)
+      || !value->location.computed.funcs->check_any_valid)
     return 1;
   return !value->location.computed.funcs->check_any_valid (value);
 }
