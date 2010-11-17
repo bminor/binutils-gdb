@@ -68,16 +68,19 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
     directories_(), files_(), current_header_index_(-1)
 {
   unsigned int debug_shndx;
-  for (debug_shndx = 0; debug_shndx < object->shnum(); ++debug_shndx)
-    // FIXME: do this more efficiently: section_name() isn't super-fast
-    if (object->section_name(debug_shndx) == ".debug_line")
-      {
-        section_size_type buffer_size;
-        this->buffer_ = object->section_contents(debug_shndx, &buffer_size,
-						 false);
-        this->buffer_end_ = this->buffer_ + buffer_size;
-        break;
-      }
+  for (debug_shndx = 1; debug_shndx < object->shnum(); ++debug_shndx)
+    {
+      // FIXME: do this more efficiently: section_name() isn't super-fast
+      std::string name = object->section_name(debug_shndx);
+      if (name == ".debug_line" || name == ".zdebug_line")
+	{
+	  section_size_type buffer_size;
+	  this->buffer_ = object->section_contents(debug_shndx, &buffer_size,
+						   false);
+	  this->buffer_end_ = this->buffer_ + buffer_size;
+	  break;
+	}
+    }
   if (this->buffer_ == NULL)
     return;
 

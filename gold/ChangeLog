@@ -1,3 +1,9 @@
+2010-11-16  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/12220
+	* dwarf_reader.cc (Sized_dwarf_line_info::Sized_dwarf_line_info):
+	Check for ".zdebug_line".
+
 2010-11-16  Doug Kwan  <dougkwan@google.com>
 	    Cary Coutant  <ccoutant@google.com>
 
