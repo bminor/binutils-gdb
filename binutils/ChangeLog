@@ -1,3 +1,19 @@
+2010-11-17  Alan Modra  <amodra@gmail.com>
+
+	* ar.c (print_contents): Don't internationalize strings without words.
+	* dwarf.c (process_extended_line_op): Likewise.
+	(process_debug_info): Likwise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_abbrev): Likewise.
+	* readelf.c (process_file_header): Likewise.
+	(GET_OP): Likewise.
+	(decode_arm_unwind): Likewise.
+	(process_mips_specific): Likewise.
+	* resrc.c (run_cmd): Likewise.
+	(rcparse_warning): Likewise.
+	* objdump.c (dump_headers): Don't print "Pg".
+
 2010-11-16  Jorma Karvonen  <karvonen.jorma@gmail.com>
 
 	* windmc.c: ,%s' -> `%s' in a number of strings.

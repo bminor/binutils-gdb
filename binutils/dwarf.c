@@ -336,15 +336,15 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       printf (_("  define new File Table entry\n"));
       printf (_("  Entry\tDir\tTime\tSize\tName\n"));
 
-      printf (_("   %d\t"), ++state_machine_regs.last_file_entry);
+      printf ("   %d\t", ++state_machine_regs.last_file_entry);
       name = data;
       data += strlen ((char *) data) + 1;
-      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
+      printf ("%lu\t", read_leb128 (data, & bytes_read, 0));
       data += bytes_read;
-      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
+      printf ("%lu\t", read_leb128 (data, & bytes_read, 0));
       data += bytes_read;
-      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
-      printf (_("%s\n\n"), name);
+      printf ("%lu\t", read_leb128 (data, & bytes_read, 0));
+      printf ("%s\n\n", name);
       break;
 
     case DW_LNE_set_discriminator:
@@ -2203,7 +2203,7 @@ process_debug_info (struct dwarf_section *section,
 	    }
 
 	  if (!do_loc)
-	    printf (_(" (%s)\n"), get_TAG_name (entry->tag));
+	    printf (" (%s)\n", get_TAG_name (entry->tag));
 
 	  switch (entry->tag)
 	    {
@@ -2413,7 +2413,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 
 	  while (*data != 0)
 	    {
-	      printf (_("  %s\n"), data);
+	      printf ("  %s\n", data);
 
 	      data += strlen ((char *) data) + 1;
 	    }
@@ -2435,18 +2435,18 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      unsigned char *name;
 	      unsigned int bytes_read;
 
-	      printf (_("  %d\t"), ++state_machine_regs.last_file_entry);
+	      printf ("  %d\t", ++state_machine_regs.last_file_entry);
 	      name = data;
 
 	      data += strlen ((char *) data) + 1;
 
-	      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
+	      printf ("%lu\t", read_leb128 (data, & bytes_read, 0));
 	      data += bytes_read;
-	      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
+	      printf ("%lu\t", read_leb128 (data, & bytes_read, 0));
 	      data += bytes_read;
-	      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
+	      printf ("%lu\t", read_leb128 (data, & bytes_read, 0));
 	      data += bytes_read;
-	      printf (_("%s\n"), name);
+	      printf ("%s\n", name);
 	    }
 	}
 
@@ -2824,14 +2824,11 @@ display_debug_lines_decoded (struct dwarf_section *section,
           else
             {
               if (do_wide || strlen ((char *) directory_table[0]) < 76)
-                {
-                  printf (_("CU: %s/%s:\n"), directory_table[0],
-                          file_table[0].name);
-                }
+		printf (_("CU: %s/%s:\n"), directory_table[0],
+			file_table[0].name);
               else
-                {
-                  printf (_("%s:\n"), file_table[0].name);
-                }
+		printf ("%s:\n", file_table[0].name);
+
               printf (_("File name                            Line number    Starting address\n"));
             }
         }
@@ -2915,7 +2912,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
                       op_code_data += bytes_read;
                       read_leb128 (op_code_data, & bytes_read, 0);
 
-                      printf (_("%s:\n"), directory_table[dir_index]);
+                      printf ("%s:\n", directory_table[dir_index]);
                       break;
                     }
                   default:
@@ -2961,13 +2958,13 @@ display_debug_lines_decoded (struct dwarf_section *section,
               if (file_table[state_machine_regs.file - 1].directory_index == 0)
                 {
                   /* If directory index is 0, that means current directory.  */
-                  printf (_("\n./%s:[++]\n"),
+                  printf ("\n./%s:[++]\n",
                           file_table[state_machine_regs.file - 1].name);
                 }
               else
                 {
                   /* The directory index starts counting at 1.  */
-                  printf (_("\n%s/%s:\n"),
+                  printf ("\n%s/%s:\n",
                           directory_table[file_table[state_machine_regs.file - 1].directory_index - 1],
                           file_table[state_machine_regs.file - 1].name);
                 }
@@ -3067,11 +3064,11 @@ display_debug_lines_decoded (struct dwarf_section *section,
               if (!do_wide || (fileNameLength <= MAX_FILENAME_LENGTH))
                 {
 		  if (linfo.li_max_ops_per_insn == 1)
-		    printf (_("%-35s  %11d  %#18lx\n"), newFileName,
+		    printf ("%-35s  %11d  %#18lx\n", newFileName,
 			    state_machine_regs.line,
 			    state_machine_regs.address);
 		  else
-		    printf (_("%-35s  %11d  %#18lx[%d]\n"), newFileName,
+		    printf ("%-35s  %11d  %#18lx[%d]\n", newFileName,
 			    state_machine_regs.line,
 			    state_machine_regs.address,
 			    state_machine_regs.op_index);
@@ -3079,11 +3076,11 @@ display_debug_lines_decoded (struct dwarf_section *section,
               else
                 {
 		  if (linfo.li_max_ops_per_insn == 1)
-		    printf (_("%s  %11d  %#18lx\n"), newFileName,
+		    printf ("%s  %11d  %#18lx\n", newFileName,
 			    state_machine_regs.line,
 			    state_machine_regs.address);
 		  else
-		    printf (_("%s  %11d  %#18lx[%d]\n"), newFileName,
+		    printf ("%s  %11d  %#18lx[%d]\n", newFileName,
 			    state_machine_regs.line,
 			    state_machine_regs.address,
 			    state_machine_regs.op_index);
@@ -3340,13 +3337,13 @@ display_debug_abbrev (struct dwarf_section *section,
 	{
 	  abbrev_attr *attr;
 
-	  printf (_("   %ld      %s    [%s]\n"),
+	  printf ("   %ld      %s    [%s]\n",
 		  entry->entry,
 		  get_TAG_name (entry->tag),
 		  entry->children ? _("has children") : _("no children"));
 
 	  for (attr = entry->first_attr; attr; attr = attr->next)
-	    printf (_("    %-18s %s\n"),
+	    printf ("    %-18s %s\n",
 		    get_AT_name (attr->attribute),
 		    get_FORM_name (attr->form));
 	}

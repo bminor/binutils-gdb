@@ -511,8 +511,6 @@ dump_headers (bfd *abfd)
 
   if (wide_output)
     printf (_("  Flags"));
-  if (abfd->flags & HAS_LOAD_PAGE)
-    printf (_("  Pg"));
   printf ("\n");
 
   bfd_map_over_sections (abfd, dump_section_header, NULL);

@@ -281,7 +281,7 @@ run_cmd (char *cmd, const char *redir)
 
   if (pid == -1)
     {
-      fatal (_("%s %s: %s"), errmsg_fmt, errmsg_arg, strerror (errno));
+      fatal ("%s %s: %s", errmsg_fmt, errmsg_arg, strerror (errno));
       return 1;
     }
 
@@ -628,7 +628,7 @@ yyerror (const char *msg)
 void
 rcparse_warning (const char *msg)
 {
-  fprintf (stderr, _("%s:%d: %s\n"), rc_filename, rc_lineno, msg);
+  fprintf (stderr, "%s:%d: %s\n", rc_filename, rc_lineno, msg);
 }
 
 /* Die if we get an unexpected end of file.  */

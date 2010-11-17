@@ -3564,7 +3564,7 @@ process_file_header (void)
       if (section_headers != NULL
 	  && elf_header.e_phnum == PN_XNUM
 	  && section_headers[0].sh_info != 0)
-	printf (_(" (%ld)"), (long) section_headers[0].sh_info);
+	printf (" (%ld)", (long) section_headers[0].sh_info);
       putc ('\n', stdout);
       printf (_("  Size of section headers:           %ld (bytes)\n"),
 	      (long) elf_header.e_shentsize);
@@ -6442,7 +6442,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
       printf (_("[Truncated opcode]\n"));	\
       return;				\
     }					\
-  printf (_("0x%02x "), OP)
+  printf ("0x%02x ", OP)
 
   if (remaining == 0)
     {
@@ -6528,17 +6528,17 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
       op = word >> 24;
       word <<= 8;
 
-      printf (_("  0x%02x "), op);
+      printf ("  0x%02x ", op);
 
       if ((op & 0xc0) == 0x00)
 	{
 	  int offset = ((op & 0x3f) << 2) + 4;
-	  printf (_("     vsp = vsp + %d"), offset);
+	  printf ("     vsp = vsp + %d", offset);
 	}
       else if ((op & 0xc0) == 0x40)
 	{
 	  int offset = ((op & 0x3f) << 2) + 4;
-	  printf (_("     vsp = vsp - %d"), offset);
+	  printf ("     vsp = vsp - %d", offset);
 	}
       else if ((op & 0xf0) == 0x80)
 	{
@@ -6569,7 +6569,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	  if (op == 0x9d || op == 0x9f)
 	    printf (_("     [Reserved]"));
 	  else
-	    printf (_("     vsp = r%d"), op & 0x0f);
+	    printf ("     vsp = r%d", op & 0x0f);
 	}
       else if ((op & 0xf0) == 0xa0)
 	{
@@ -6633,7 +6633,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	  offset = read_uleb128 (buf, &len);
 	  assert (len == i + 1);
 	  offset = offset * 4 + 0x204;
-	  printf (_("vsp = vsp + %ld"), offset);
+	  printf ("vsp = vsp + %ld", offset);
 	}
       else
 	{
@@ -11684,7 +11684,7 @@ process_mips_specific (FILE * file)
       if (ent < local_end)
 	{
 	  printf (_(" Local entries:\n"));
-	  printf (_("  %*s %10s %*s\n"),
+	  printf ("  %*s %10s %*s\n",
 		  addr_size * 2, _("Address"), _("Access"),
 		  addr_size * 2, _("Initial"));
 	  while (ent < local_end)
@@ -11700,7 +11700,7 @@ process_mips_specific (FILE * file)
 	  int sym_width;
 
 	  printf (_(" Global entries:\n"));
-	  printf (_("  %*s %10s %*s %*s %-7s %3s %s\n"),
+	  printf ("  %*s %10s %*s %*s %-7s %3s %s\n",
 		  addr_size * 2, _("Address"), _("Access"),
 		  addr_size * 2, _("Initial"),
 		  addr_size * 2, _("Sym.Val."), _("Type"), _("Ndx"), _("Name"));
@@ -11768,7 +11768,7 @@ process_mips_specific (FILE * file)
       printf ("\n");
 
       printf (_(" Entries:\n"));
-      printf (_("  %*s %*s %*s %-7s %3s %s\n"),
+      printf ("  %*s %*s %*s %-7s %3s %s\n",
 	      addr_size * 2, _("Address"),
 	      addr_size * 2, _("Initial"),
 	      addr_size * 2, _("Sym.Val."), _("Type"), _("Ndx"), _("Name"));
