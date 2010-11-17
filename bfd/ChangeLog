@@ -1,3 +1,9 @@
+2010-11-17  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12161
+	* elf32-avr.c (elf32_avr_check_relocs): Delete.
+	(elf_backend_check_relocs): Delete.
+
 2010-11-16  Jie Zhang  <jie.zhang@analog.com>
 
 	* elf32-bfin.c (elf32_bfin_code_in_l1): New variable.
