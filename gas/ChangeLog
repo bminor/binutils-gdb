@@ -1,3 +1,9 @@
+2010-11-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gas/12181
+	* config/obj-elf.c (elf_adjust_symtab) [TE_SOLARIS]: Make sy
+	weak hidden.
+
 2010-11-17  Nick Clifton  <nickc@redhat.com>
 
 	* input-file.c (input_file_open): Check for empty input files.

@@ -2142,7 +2142,14 @@ elf_adjust_symtab (void)
 	{
 	  /* Create the symbol now.  */
 	  sy = symbol_new (group_name, now_seg, (valueT) 0, frag_now);
+#ifdef TE_SOLARIS
+	  /* Before Solaris 11 build 154, Sun ld rejects local group
+	     signature symbols, so make them weak hidden instead.  */
+	  symbol_get_bfdsym (sy)->flags |= BSF_WEAK;
+	  S_SET_OTHER (sy, STV_HIDDEN);
+#else
 	  symbol_get_obj (sy)->local = 1;
+#endif
 	  symbol_table_insert (sy);
 	}
       elf_group_id (s) = symbol_get_bfdsym (sy);
