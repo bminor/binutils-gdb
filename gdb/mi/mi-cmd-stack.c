@@ -31,7 +31,7 @@
 #include "gdb_string.h"
 #include "language.h"
 #include "valprint.h"
-
+#include "exceptions.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -334,27 +334,47 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 		      && TYPE_CODE (type) != TYPE_CODE_STRUCT
 		      && TYPE_CODE (type) != TYPE_CODE_UNION)
 		    {
-		      struct value_print_options opts;
+		      volatile struct gdb_exception except;
 
-		      val = read_var_value (sym2, fi);
-		      get_raw_print_options (&opts);
-		      opts.deref_ref = 1;
-		      common_val_print
-			(val, stb->stream, 0, &opts,
-			 language_def (SYMBOL_LANGUAGE (sym2)));
+		      TRY_CATCH (except, RETURN_MASK_ERROR)
+			{
+			  struct value_print_options opts;
+
+			  val = read_var_value (sym2, fi);
+			  get_raw_print_options (&opts);
+			  opts.deref_ref = 1;
+			  common_val_print
+			    (val, stb->stream, 0, &opts,
+			     language_def (SYMBOL_LANGUAGE (sym2)));
+			}
+		      if (except.reason < 0)
+			fprintf_filtered (stb->stream,
+					  _("<error reading variable: %s>"),
+					  except.message);
+
 		      ui_out_field_stream (uiout, "value", stb);
 		    }
 		  break;
 		case PRINT_ALL_VALUES:
 		  {
-		    struct value_print_options opts;
+		    volatile struct gdb_exception except;
 
-		    val = read_var_value (sym2, fi);
-		    get_raw_print_options (&opts);
-		    opts.deref_ref = 1;
-		    common_val_print
-		      (val, stb->stream, 0, &opts,
-		       language_def (SYMBOL_LANGUAGE (sym2)));
+		    TRY_CATCH (except, RETURN_MASK_ERROR)
+		      {
+			struct value_print_options opts;
+
+			val = read_var_value (sym2, fi);
+			get_raw_print_options (&opts);
+			opts.deref_ref = 1;
+			common_val_print
+			  (val, stb->stream, 0, &opts,
+			   language_def (SYMBOL_LANGUAGE (sym2)));
+		      }
+		    if (except.reason < 0)
+		      fprintf_filtered (stb->stream,
+					_("<error reading variable: %s>"),
+					except.message);
+
 		    ui_out_field_stream (uiout, "value", stb);
 		  }
 		  break;

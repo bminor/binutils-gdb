@@ -1,3 +1,12 @@
+2010-11-18  Phil Muldoon  <pmuldoon@redhat.com>
+            Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+    	PR mi/11407
+    	* gdb.mi/dw2-ref-missing-frame-func.c: New File.
+    	* gdb.mi/dw2-ref-missing-frame-main.c New File.
+    	* gdb.mi/dw2-ref-missing-frame.S New File.
+    	* gdb.mi/dw2-ref-missing-frame.exp New File.
+
 2010-10-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/prelink-lib.c (copyreloc): New initialized variable.
