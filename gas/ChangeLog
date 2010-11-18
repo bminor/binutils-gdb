@@ -1,3 +1,9 @@
+2010-11-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gas/12181
+	* config/obj-elf.c (elf_adjust_symtab) [TE_SOLARIS]: Make sy
+	weak hidden.
+
 2010-11-15  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (macro_build): Remove gas_assert from 'o' case.
