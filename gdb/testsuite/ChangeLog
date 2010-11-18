@@ -1,3 +1,7 @@
+2010-11-18  Doug Evans  <dje@google.com>
+
+	* gdb.server/ext-run.exp: Fix intermittent failures.
+
 2010-11-12  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* gdb.stabs/gdb11479.exp: Use runto_main.
