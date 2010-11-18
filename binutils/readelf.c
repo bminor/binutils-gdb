@@ -12831,14 +12831,20 @@ get_archive_member_name (struct archive_info *  arch,
 
       /* This is a proxy for a member of a nested archive.
          Find the name of the member in that archive.  */
-      member_file_name = adjust_relative_path (arch->file_name, arch->longnames + k, j - k);
+      member_file_name = adjust_relative_path (arch->file_name,
+					       arch->longnames + k, j - k);
       if (member_file_name != NULL
-          && setup_nested_archive (nested_arch, member_file_name) == 0
-          && (member_name = get_archive_member_name_at (nested_arch, arch->nested_member_origin, NULL)) != NULL)
-        {
-          free (member_file_name);
-          return member_name;
-        }
+          && setup_nested_archive (nested_arch, member_file_name) == 0)
+	{
+          member_name = get_archive_member_name_at (nested_arch,
+						    arch->nested_member_origin,
+						    NULL);
+	  if (member_name != NULL)
+	    {
+	      free (member_file_name);
+	      return member_name;
+	    }
+	}
       free (member_file_name);
 
       /* Last resort: just return the name of the nested archive.  */
@@ -12846,12 +12852,21 @@ get_archive_member_name (struct archive_info *  arch,
     }
 
   /* We have a normal (short) name.  */
-  j = 0;
-  while ((arch->arhdr.ar_name[j] != '/')
-	 && (j < sizeof (arch->arhdr.ar_name) - 1))
-    j++;
-  arch->arhdr.ar_name[j] = '\0';
-  return arch->arhdr.ar_name;
+  for (j = 0; j < sizeof (arch->arhdr.ar_name); j++)
+    if (arch->arhdr.ar_name[j] == '/')
+      {
+	arch->arhdr.ar_name[j] = '\0';
+	return arch->arhdr.ar_name;
+      }
+
+  /* The full ar_name field is used.  Don't rely on ar_date starting
+     with a zero byte.  */
+  {
+    char *name = xmalloc (sizeof (arch->arhdr.ar_name) + 1);
+    memcpy (name, arch->arhdr.ar_name, sizeof (arch->arhdr.ar_name));
+    name[sizeof (arch->arhdr.ar_name)] = '\0';
+    return name;
+  }
 }
 
 /* Get the name of an archive member at a given OFFSET within an archive ARCH.  */

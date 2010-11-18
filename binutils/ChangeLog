@@ -1,3 +1,9 @@
+2010-11-18  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/11742
+	* readelf.c (get_archive_member_name): Formatting.  Properly
+	handle full size ar_name.
+
 2010-11-17  Alan Modra  <amodra@gmail.com>
 
 	* ar.c (print_contents): Don't internationalize strings without words.
