@@ -1,3 +1,9 @@
+2010-11-18  Doug Kwan  <dougkwan@google.com>
+
+	* expression.cc (BINARY_EXPRESSION): Initialize left_alignment
+	and right_alignment to be zero.  Store result alignment only if it is
+	greater than existing alignment.
+
 2010-11-16  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/12220
