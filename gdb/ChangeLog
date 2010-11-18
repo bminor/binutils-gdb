@@ -1,3 +1,8 @@
+2010-11-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* arm-tdep.c (arm_in_function_epilogue_p): Fix code when "MOV SP"
+	instruction is found.
+
 2010-11-17  Tom Tromey  <tromey@redhat.com>
 
 	* value.c (value_entirely_optimized_out): Check the

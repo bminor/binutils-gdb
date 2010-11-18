@@ -2245,7 +2245,7 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	found_stack_adjust = 1;
       else if ((insn & 0x0ffffff0) == 0x01a0d000)
 	/* MOV SP.  */
-	found_return = 1;
+	found_stack_adjust = 1;
       else if ((insn & 0x0fff0000) == 0x08bd0000)
 	/* POP (LDMIA).  */
 	found_stack_adjust = 1;
