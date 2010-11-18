@@ -1,3 +1,14 @@
+2010-11-18  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/binutils.exp: Correct x86 gnu target match.
+	* ld-i386/i386.exp: Likewise.
+	* ld-ifunc/binutils.exp: Likewise.
+	* ld-ifunc/ifunc.exp: Likewise.
+	* ld-discard/discard.exp: Remove unnecessary line continuations.
+	* ld-elfvers/vers.exp: Likewise.  Simplify linuxaout and linuxoldld
+	test.
+	* ld-elfweak/elfweak.exp: Likewise.
+
 2010-11-17  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ld-gc/pr11218-2.c: Declare

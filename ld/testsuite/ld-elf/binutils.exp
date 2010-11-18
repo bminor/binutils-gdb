@@ -109,10 +109,10 @@ binutils_test strip "-z relro -shared" relro1
 binutils_test objcopy "-z relro" relro1
 binutils_test objcopy "-z relro -shared" relro1
 if { ([istarget "i?86-*-elf*"]		
-      || ([istarget "i?86-*-linux*"]
+      || (([istarget "i?86-*-linux*"]
+	   || [istarget "i?86-*-gnu*"])
 	  && ![istarget "*-*-*aout*"]
 	  && ![istarget "*-*-*oldld*"])
-      || [istarget "i?86-*-gnu*"]
       || [istarget "x86_64-*-linux*"]
       || [istarget "amd64-*-linux*"]) } {
     binutils_test strip "-z relro -shared" relro2

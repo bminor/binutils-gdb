@@ -99,10 +99,10 @@ if [istarget "*-*-go32*"] {
 }
 
 if { !([istarget "i?86-*-elf*"]		
-       || ([istarget "i?86-*-linux*"]
+       || (([istarget "i?86-*-linux*"]
+	    || [istarget "i?86-*-gnu*"])
 	   && ![istarget "*-*-*aout*"]
 	   && ![istarget "*-*-*oldld*"])
-       || [istarget "i?86-*-gnu*"]
        || [istarget "x86_64-*-linux*"]
        || [istarget "amd64-*-linux*"]) } {
     return

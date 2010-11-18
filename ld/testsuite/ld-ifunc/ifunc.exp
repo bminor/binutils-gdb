@@ -30,10 +30,10 @@ if {!(([istarget "i?86-*-*"]
        || [istarget "powerpc*-*-*"]
        || [istarget "sparc*-*-*"])
       && ([istarget "*-*-elf*"]
-	  || ([istarget "*-*-linux*"]
+	  || (([istarget "*-*-linux*"]
+	       || [istarget "*-*-gnu*"])
 	      && ![istarget "*-*-*aout*"]
-	      && ![istarget "*-*-*oldld*"])
-	  || ([istarget "*-*-gnu*"]))) } {
+	      && ![istarget "*-*-*oldld*"]))) } {
     verbose "IFUNC tests not run - target does not support IFUNC"
     return
 }
