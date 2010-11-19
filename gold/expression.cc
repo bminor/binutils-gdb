@@ -399,18 +399,19 @@ class Binary_expression : public Expression
     value(const Expression_eval_info* eei)				\
     {									\
       Output_section* left_section;					\
-      uint64_t left_alignment;						\
+      uint64_t left_alignment = 0;					\
       uint64_t left = this->left_value(eei, &left_section,		\
 				       &left_alignment);		\
       Output_section* right_section;					\
-      uint64_t right_alignment;						\
+      uint64_t right_alignment = 0;					\
       uint64_t right = this->right_value(eei, &right_section,		\
 					 &right_alignment);		\
       if (KEEP_RIGHT && left_section == NULL && right_section != NULL)	\
 	{								\
 	  if (eei->result_section_pointer != NULL)			\
 	    *eei->result_section_pointer = right_section;		\
-	  if (eei->result_alignment_pointer != NULL)			\
+	  if (eei->result_alignment_pointer != NULL			\
+	      && right_alignment > *eei->result_alignment_pointer)	\
 	    *eei->result_alignment_pointer = right_alignment;		\
 	}								\
       else if (KEEP_LEFT						\
@@ -419,8 +420,9 @@ class Binary_expression : public Expression
 	{								\
 	  if (eei->result_section_pointer != NULL)			\
 	    *eei->result_section_pointer = left_section;		\
-	  if (eei->result_alignment_pointer != NULL)			\
-	    *eei->result_alignment_pointer = right_alignment;		\
+	  if (eei->result_alignment_pointer != NULL			\
+	      && left_alignment > *eei->result_alignment_pointer)	\
+	    *eei->result_alignment_pointer = left_alignment;		\
 	}								\
       else if ((WARN || left_section != right_section)			\
 	       && (left_section != NULL || right_section != NULL)	\
