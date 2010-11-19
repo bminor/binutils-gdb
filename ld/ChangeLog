@@ -1,3 +1,8 @@
+2010-11-19  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* plugin.c (is_visible_from_outside): New function.
+	(get_symbols): Use it.
+
 2010-11-05  Tristan Gingold  <gingold@adacore.com>
 
 	* po/ld.pot: Regenerate

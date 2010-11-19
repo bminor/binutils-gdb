@@ -382,6 +382,43 @@ release_input_file (const void *handle)
   return LDPS_ERR;
 }
 
+/* Return TRUE if a defined symbol might be reachable from outside the
+   universe of claimed objects.  */
+static inline bfd_boolean
+is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
+			struct bfd_link_hash_entry *blhe)
+{
+  /* Section's owner may be NULL if it is the absolute
+     section, fortunately is_ir_dummy_bfd handles that.  */
+  if (!is_ir_dummy_bfd (section->owner))
+    return TRUE;
+  if (link_info.relocatable)
+    return TRUE;
+  if (link_info.export_dynamic || link_info.shared)
+    {
+      /* Only ELF symbols really have visibility.  */
+      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+	{
+	  struct elf_link_hash_entry *el = (struct elf_link_hash_entry *)blhe;
+	  int vis = ELF_ST_VISIBILITY (el->other);
+	  return vis == STV_DEFAULT || vis == STV_PROTECTED;
+	}
+      /* On non-ELF targets, we can safely make inferences by considering
+         what visibility the plugin would have liked to apply when it first
+	 sent us the symbol.  During ELF symbol processing, visibility only
+	 ever becomes more restrictive, not less, when symbols are merged,
+	 so this is a conservative estimate; it may give false positives,
+	 declaring something visible from outside when it in fact would
+	 not have been, but this will only lead to missed optimisation
+	 opportunities during LTRANS at worst; it will not give false
+	 negatives, which can lead to the disastrous conclusion that the
+	 related symbol is IRONLY.  (See GCC PR46319 for an example.)  */
+      return lsym->visibility == LDPV_DEFAULT
+	  || lsym->visibility == LDPV_PROTECTED;
+    }
+  return FALSE;
+}
+
 /* Get the symbol resolution info for a plugin-claimed input file.  */
 static enum ld_plugin_status
 get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
@@ -393,6 +430,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
     {
       struct bfd_link_hash_entry *blhe;
       bfd_boolean ironly;
+      asection *owner_sec;
 
       blhe = bfd_link_hash_lookup (link_info.hash, syms[n].name,
 				FALSE, FALSE, TRUE);
@@ -418,17 +456,25 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 		called_plugin->name, blhe->type);
 	}
 
-      /* We need to know if the sym is referenced from non-IR files.  */
-      ironly = !bfd_hash_lookup (non_ironly_hash, syms[n].name, FALSE, FALSE);
+      /* Find out which section owns the symbol.  Since it's not undef,
+	 it must have an owner; if it's not a common symbol, both defs
+	 and weakdefs keep it in the same place. */
+      owner_sec = (blhe->type == bfd_link_hash_common)
+		? blhe->u.c.p->section
+		: blhe->u.def.section;
+
+      /* We need to know if the sym is referenced from non-IR files.  Or
+         even potentially-referenced, perhaps in a future final link if
+	 this is a partial one, perhaps dynamically at load-time if the
+	 symbol is externally visible.  */
+      ironly = !is_visible_from_outside (&syms[n], owner_sec, blhe)
+	&& !bfd_hash_lookup (non_ironly_hash, syms[n].name, FALSE, FALSE);
 
       /* If it was originally undefined or common, then it has been
          resolved; determine how.  */
       if (syms[n].def == LDPK_UNDEF || syms[n].def == LDPK_WEAKUNDEF
 	  || syms[n].def == LDPK_COMMON)
 	{
-	  asection *owner_sec = (blhe->type == bfd_link_hash_common)
-				? blhe->u.c.p->section
-				: blhe->u.def.section;
 	  if (owner_sec->owner == link_info.output_bfd)
 	    syms[n].resolution = LDPR_RESOLVED_EXEC;
 	  else if (owner_sec->owner == abfd)
@@ -447,9 +493,9 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
       /* Was originally def, or weakdef.  Does it prevail?  If the
          owner is the original dummy bfd that supplied it, then this
 	 is the definition that has prevailed.  */
-      if (blhe->u.def.section->owner == link_info.output_bfd)
+      if (owner_sec->owner == link_info.output_bfd)
 	syms[n].resolution = LDPR_PREEMPTED_REG;
-      else if (blhe->u.def.section->owner == abfd)
+      else if (owner_sec->owner == abfd)
 	{
 	  syms[n].resolution = (ironly)
 				? LDPR_PREVAILING_DEF_IRONLY
@@ -458,7 +504,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	}
 
       /* Was originally def, weakdef, or common, but has been pre-empted.  */
-      syms[n].resolution = is_ir_dummy_bfd (blhe->u.def.section->owner)
+      syms[n].resolution = is_ir_dummy_bfd (owner_sec->owner)
 				? LDPR_PREEMPTED_IR
 				: LDPR_PREEMPTED_REG;
     }
