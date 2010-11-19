@@ -41,7 +41,7 @@ INSTALL_DIR = $(SHELL) $(srcdir)/../../mkinstalldirs
 GDB_DATADIR = @GDB_DATADIR@
 
 SYSCALLS_DIR = syscalls
-SYSCALLS_INSTALL_DIR = $(DESTDIR)/$(GDB_DATADIR)/$(SYSCALLS_DIR)
+SYSCALLS_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(SYSCALLS_DIR)
 SYSCALLS_FILES = \
 	gdb-syscalls.dtd \
 	ppc-linux.xml ppc64-linux.xml \
@@ -49,7 +49,7 @@ SYSCALLS_FILES = \
 	sparc-linux.xml sparc64-linux.xml
 
 PYTHON_DIR = python
-PYTHON_INSTALL_DIR = $(DESTDIR)/$(GDB_DATADIR)/$(PYTHON_DIR)
+PYTHON_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(PYTHON_DIR)
 PYTHON_FILES = \
 	gdb/__init__.py \
 	gdb/types.py \

@@ -1,3 +1,9 @@
+2010-11-19  Keith Seitz  <keiths@redhat.com>
+
+	* data-directory/Makefile.in (SYSCALLS_INSTALL_DIR):
+	Remove extraneous '/' after $(DESTDIR).
+	(PYTHON_INSTALL_DIR): Likewise.
+
 2010-11-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix stale memory references.
