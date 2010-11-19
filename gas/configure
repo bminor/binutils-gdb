@@ -12316,6 +12316,11 @@ if test ${all_targets} = "yes"; then
   esac
 fi
 
+# PE code has way too many macros tweaking behaviour
+case ${te_file} in
+  pe*) emulations="" ;;
+esac
+
 # Assign floating point type.  Most processors with FP support
 # IEEE FP.  On those that don't support FP at all, usually IEEE
 # is emulated.

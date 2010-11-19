@@ -1,3 +1,9 @@
+2010-11-19  Alan Modra  <amodra@gmail.com>
+
+    	PR 2606
+	* configure.in: Disable emulations for PE targets.
+	* configure: Regenerate.
+
 2010-11-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR gas/12181
