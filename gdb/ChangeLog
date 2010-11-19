@@ -1,3 +1,10 @@
+2010-11-19  Will Drewry  <wad@google.com>
+	    Tavis Ormandy  <taviso@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (decode_locdesc): Enforce location description stack
+	boundaries.
+
 2010-11-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* arm-tdep.c (arm_in_function_epilogue_p): Fix code when "MOV SP"

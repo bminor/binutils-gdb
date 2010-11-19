@@ -13279,8 +13279,7 @@ read_signatured_type (struct objfile *objfile,
    callers will only want a very basic result and this can become a
    complaint.
 
-   Note that stack[0] is unused except as a default error return.
-   Note that stack overflow is not yet handled.  */
+   Note that stack[0] is unused except as a default error return.  */
 
 static CORE_ADDR
 decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
@@ -13297,6 +13296,7 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
   i = 0;
   stacki = 0;
   stack[stacki] = 0;
+  stack[++stacki] = 0;
 
   while (i < size)
     {
@@ -13477,6 +13477,22 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  complaint (&symfile_complaints, _("unsupported stack op: '%s'"),
 		     dwarf_stack_op_name (op, 1));
 	  return (stack[stacki]);
+	}
+
+      /* Enforce maximum stack depth of SIZE-1 to avoid writing
+         outside of the allocated space.  Also enforce minimum>0.  */
+      if (stacki >= ARRAY_SIZE (stack) - 1)
+	{
+	  complaint (&symfile_complaints,
+		     _("location description stack overflow"));
+	  return 0;
+	}
+
+      if (stacki <= 0)
+	{
+	  complaint (&symfile_complaints,
+		     _("location description stack underflow"));
+	  return 0;
 	}
     }
   return (stack[stacki]);
