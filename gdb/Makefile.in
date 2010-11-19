@@ -1615,8 +1615,10 @@ po/$(PACKAGE).pot: force
 
 .SUFFIXES: .y .l
 .y.c:
-	$(SHELL) $(YLWRAP) $< y.tab.c $@.tmp -- $(YACC) $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
+	rm -f $@ $@.tmp
+	$(SHELL) $(YLWRAP) $< y.tab.c $@ -- $(YACC) $(YFLAGS) && mv $@ $@.tmp \
+		|| (rm -f $@; false)
+	sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
 	     -e '/include.*malloc.h/d' \
@@ -1625,9 +1627,9 @@ po/$(PACKAGE).pot: force
 	     -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
 	     -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
 	     -e '/^#line.*y.tab.c/d' \
-	  < $@.tmp > $@.new
-	-rm $@.tmp
-	mv $@.new ./$*.c
+	     -e "s/^\(#line.*\)`basename $<`/\1`echo $<|sed 's/\//\\\\\//g'`/" \
+	  < $@.tmp > $@
+	rm -f $@.tmp
 .l.c:
 	if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
 	    $(FLEX) -o$@ $< && \
@@ -1651,13 +1653,7 @@ po/$(PACKAGE).pot: force
 	    false; \
 	fi
 
-.PRECIOUS: ada-exp.c ada-lex.c
-.PRECIOUS: c-exp.c
-.PRECIOUS: f-exp.c
-.PRECIOUS: jv-exp.c
-.PRECIOUS: m2-exp.c
-.PRECIOUS: objc-exp.c
-.PRECIOUS: p-exp.c
+.PRECIOUS: ada-exp.c
 
 # XML rules
 
