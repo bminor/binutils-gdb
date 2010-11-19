@@ -1,3 +1,8 @@
+2010-11-19  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* plugin.c (is_visible_from_outside): New function.
+	(get_symbols): Use it.
+
 2010-11-16  Jie Zhang  <jie.zhang@analog.com>
 
 	* Makefile.am (eelf32bfinfd.c, eelf32bfin.c): Depend on bfin.em.
