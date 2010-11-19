@@ -790,8 +790,14 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 
   if (storage_needed > 0)
     {
-      dyn_symbol_table = (asymbol **) xmalloc (storage_needed);
-      make_cleanup (xfree, dyn_symbol_table);
+      /* Memory gets permanently referenced from ABFD after
+	 bfd_get_synthetic_symtab so it must not get freed before ABFD gets.
+	 It happens only in the case when elf_slurp_reloc_table sees
+	 asection->relocation NULL.  Determining which section is asection is
+	 done by _bfd_elf_get_synthetic_symtab which is all a bfd
+	 implementation detail, though.  */
+
+      dyn_symbol_table = bfd_alloc (abfd, storage_needed);
       dynsymcount = bfd_canonicalize_dynamic_symtab (objfile->obfd,
 						     dyn_symbol_table);
 

@@ -1,4 +1,10 @@
 2010-11-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix stale memory references.
+	* elfread.c (elf_symfile_read): Replace xmalloc by bfd_alloc, drop
+	xfree, new comment.
+
+2010-11-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (.y.c): Directly create $@ from YLWRAP.
