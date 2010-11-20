@@ -1,3 +1,9 @@
+2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* lib/ld-lib.exp (load_common_lib): New function.  Load
+	binutils-common.exp.
+	(is_elf_format, is_elf64, is_aout_format, is_pecoff_format): Delete.
+
 2010-11-18  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/binutils.exp: Correct x86 gnu target match.

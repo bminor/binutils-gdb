@@ -1,3 +1,10 @@
+2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* lib/binutils-common.exp: New file.
+	* lib/utils-lib.exp (load_common_lib): New function.  Load
+	binutils-common.exp.
+	(is_elf_format): Delete.
+
 2010-11-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/compress.exp: Replace binutils_assemble with
