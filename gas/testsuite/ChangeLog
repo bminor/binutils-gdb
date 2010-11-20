@@ -1,5 +1,18 @@
 2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* lib/gas-defs.exp (regexp_diff): Delete.
+	(run_dump_test): Remove final "" argument in call to regexp_diff.
+	(run_list_test): Likewise.
+	(run_list_test_stdin): Likewise.
+	* gas/all/gas.exp (test_cond): Likewise.
+	* gas/elf/elf.exp (run_elf_list_test): Likewise.
+	* gas/m68k/all.exp: Likewise.
+	* gas/mep/complex-relocs.exp (regexp_test): Likewise.
+	* gas/mt/relocs.exp (regexp_test): Likewise.
+	* gas/symver/symver.exp (run_error_test): Likewise.
+
+2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* lib/gas-defs.exp (load_common_lib): New function.  Load
 	binutils-common.exp.
 	(is_elf_format, is_aout_format, is_pecoff_format): Delete.

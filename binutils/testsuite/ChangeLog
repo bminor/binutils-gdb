@@ -1,5 +1,10 @@
 2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* lib/binutils-common.exp (regexp_diff): New procedure.
+	* lib/utils-lib.exp (regexp_diff): Delete.
+
+2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* lib/binutils-common.exp: New file.
 	* lib/utils-lib.exp (load_common_lib): New function.  Load
 	binutils-common.exp.
