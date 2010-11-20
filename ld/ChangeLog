@@ -1,3 +1,8 @@
+2010-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12247
+	* lexsup.c (parse_args): Properly report loading plugin error.
+
 2010-11-19  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* plugin.c (is_visible_from_outside): New function.

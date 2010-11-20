@@ -1056,7 +1056,8 @@ parse_args (unsigned argc, char **argv)
 #ifdef ENABLE_PLUGINS
 	case OPTION_PLUGIN:
 	  if (plugin_opt_plugin (optarg))
-	    einfo(_("%P%F: bad -plugin option\n"));
+	    einfo (_("%P%F: %s: error loading plugin\n"),
+		   plugin_error_plugin ());
 	  break;
 	case OPTION_PLUGIN_OPT:
 	  if (plugin_opt_plugin_arg (optarg))
