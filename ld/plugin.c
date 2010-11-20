@@ -292,6 +292,9 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
       flags = BSF_GLOBAL;
       section = bfd_com_section_ptr;
       asym->value = ldsym->size;
+      /* For ELF targets, set alignment of common symbol to 1.  */
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	((elf_symbol_type *) asym)->internal_elf_sym.st_value = 1;
       break;
 
     default:

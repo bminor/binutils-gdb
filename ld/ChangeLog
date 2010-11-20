@@ -1,5 +1,11 @@
 2010-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/12246
+	* plugin.c (asymbol_from_plugin_symbol): Set alignment of
+	common symbol to 1 for For ELF targets.
+
+2010-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/12247
 	* lexsup.c (parse_args): Properly report loading plugin error.
 
