@@ -482,7 +482,8 @@ main (int argc, char **argv)
 #ifdef ENABLE_PLUGINS
   /* Now everything is finished, we can tell the plugins to clean up.  */
   if (plugin_call_cleanup ())
-    info_msg (_("%P: %s: error in plugin cleanup (ignored)\n"), plugin_error_plugin ());
+    info_msg (_("%P: %s: error in plugin cleanup (ignored)\n"),
+	      plugin_error_plugin ());
 #endif /* ENABLE_PLUGINS */
 
   /* Even if we're producing relocatable output, some non-fatal errors should
@@ -830,7 +831,7 @@ add_archive_element (struct bfd_link_info *info,
 	  file.handle = plugin_get_ir_dummy_bfd (abfd->filename, abfd);
 	  if (plugin_call_claim_file (&file, &claimed))
 	    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
-	      plugin_error_plugin ());
+		   plugin_error_plugin ());
 	  /* fd belongs to us, not the plugin; but we don't need it.  */
 	  close (fd);
 	  if (claimed)
@@ -955,15 +956,15 @@ multiple_definition (struct bfd_link_info *info ATTRIBUTE_UNUSED,
      it will let us know not to continue by returning TRUE even if this
      is not an IR-only vs. non-IR symbol conflict.  */
   if (plugin_multiple_definition (info, name, obfd, osec, oval, nbfd,
-	nsec, nval))
+				  nsec, nval))
     return TRUE;
 #endif /* ENABLE_PLUGINS */
 
   /* If either section has the output_section field set to
      bfd_abs_section_ptr, it means that the section is being
      discarded, and this is not really a multiple definition at all.
-     FIXME: It would be cleaner to somehow ignore symbols defined in
-     sections which are being discarded.  */
+FIXME: It would be cleaner to somehow ignore symbols defined in
+sections which are being discarded.  */
   if ((osec->output_section != NULL
        && ! bfd_is_abs_section (osec)
        && bfd_is_abs_section (osec->output_section))

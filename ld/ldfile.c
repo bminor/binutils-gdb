@@ -313,7 +313,7 @@ success:
      will be needed when and if we want to bfd_create a new
      one using this one as a template.  */
   if (bfd_check_format (entry->the_bfd, bfd_object)
-	&& plugin_active_plugins_p ())
+      && plugin_active_plugins_p ())
     {
       int fd = open (attempt, O_RDONLY | O_BINARY);
       if (fd >= 0)
@@ -330,7 +330,7 @@ success:
 	  file.handle = plugin_get_ir_dummy_bfd (attempt, entry->the_bfd);
 	  if (plugin_call_claim_file (&file, &claimed))
 	    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
-	      plugin_error_plugin ());
+		   plugin_error_plugin ());
 	  /* fd belongs to us, not the plugin; but we don't need it.  */
 	  close (fd);
 	  if (claimed)
@@ -344,7 +344,7 @@ success:
 	  else
 	    {
 	      /* If plugin didn't claim the file, we don't need the dummy
-	         bfd.  Can't avoid speculatively creating it, alas.  */
+		 bfd.  Can't avoid speculatively creating it, alas.  */
 	      bfd_close_all_done (file.handle);
 	      entry->claimed = FALSE;
 	    }

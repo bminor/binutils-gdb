@@ -1,3 +1,10 @@
+2010-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldfile.c: Re-indent plugin code.
+	* ldlang.c: Likewise.
+	* ldmain.c: Likewise.
+	* plugin.c: Likewise.
+
 2010-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12246

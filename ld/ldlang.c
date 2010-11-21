@@ -6419,22 +6419,22 @@ lang_process (void)
   open_input_bfds (statement_list.head, FALSE);
 
 #ifdef ENABLE_PLUGINS
-  {
-    union lang_statement_union **listend;
-    /* Now all files are read, let the plugin(s) decide if there
-       are any more to be added to the link before we call the
-       emulation's after_open hook.  */
-    listend = statement_list.tail;
-    ASSERT (!*listend);
-    if (plugin_call_all_symbols_read ())
-      einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
-	plugin_error_plugin ());
-    /* If any new files were added, they will be on the end of the
-       statement list, and we can open them now by getting open_input_bfds
-       to carry on from where it ended last time.  */
-    if (*listend)
-      open_input_bfds (*listend, FALSE);
-  }
+    {
+      union lang_statement_union **listend;
+      /* Now all files are read, let the plugin(s) decide if there
+	 are any more to be added to the link before we call the
+	 emulation's after_open hook.  */
+      listend = statement_list.tail;
+      ASSERT (!*listend);
+      if (plugin_call_all_symbols_read ())
+	einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
+	       plugin_error_plugin ());
+      /* If any new files were added, they will be on the end of the
+	 statement list, and we can open them now by getting open_input_bfds
+	 to carry on from where it ended last time.  */
+      if (*listend)
+	open_input_bfds (*listend, FALSE);
+    }
 #endif /* ENABLE_PLUGINS */
 
   link_info.gc_sym_list = &entry_symbol;
