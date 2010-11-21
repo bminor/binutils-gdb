@@ -23,6 +23,7 @@
 #include "libiberty.h"
 #include "bfd.h"
 #include "bucomm.h"
+#include "elfcomm.h"
 #include "elf/common.h"
 #include "dwarf2.h"
 #include "dwarf.h"
@@ -63,125 +64,6 @@ int do_wide;
 /* Values for do_debug_lines.  */
 #define FLAG_DEBUG_LINES_RAW	 1
 #define FLAG_DEBUG_LINES_DECODED 2
-
-dwarf_vma (*byte_get) (unsigned char *, int);
-
-dwarf_vma
-byte_get_little_endian (unsigned char *field, int size)
-{
-  switch (size)
-    {
-    case 1:
-      return *field;
-
-    case 2:
-      return  ((unsigned int) (field[0]))
-	|    (((unsigned int) (field[1])) << 8);
-
-    case 3:
-      return  ((unsigned long) (field[0]))
-	|    (((unsigned long) (field[1])) << 8)
-	|    (((unsigned long) (field[2])) << 16);
-
-    case 4:
-      return  ((unsigned long) (field[0]))
-	|    (((unsigned long) (field[1])) << 8)
-	|    (((unsigned long) (field[2])) << 16)
-	|    (((unsigned long) (field[3])) << 24);
-
-    case 8:
-      if (sizeof (dwarf_vma) == 8)
-	return  ((dwarf_vma) (field[0]))
-	  |    (((dwarf_vma) (field[1])) << 8)
-	  |    (((dwarf_vma) (field[2])) << 16)
-	  |    (((dwarf_vma) (field[3])) << 24)
-	  |    (((dwarf_vma) (field[4])) << 32)
-	  |    (((dwarf_vma) (field[5])) << 40)
-	  |    (((dwarf_vma) (field[6])) << 48)
-	  |    (((dwarf_vma) (field[7])) << 56);
-      else if (sizeof (dwarf_vma) == 4)
-	/* We want to extract data from an 8 byte wide field and
-	   place it into a 4 byte wide field.  Since this is a little
-	   endian source we can just use the 4 byte extraction code.  */
-	return  ((unsigned long) (field[0]))
-	  |    (((unsigned long) (field[1])) << 8)
-	  |    (((unsigned long) (field[2])) << 16)
-	  |    (((unsigned long) (field[3])) << 24);
-
-    default:
-      error (_("Unhandled data length: %d\n"), size);
-      abort ();
-    }
-}
-
-dwarf_vma
-byte_get_big_endian (unsigned char *field, int size)
-{
-  switch (size)
-    {
-    case 1:
-      return *field;
-
-    case 2:
-      return ((unsigned int) (field[1])) | (((int) (field[0])) << 8);
-
-    case 3:
-      return ((unsigned long) (field[2]))
-	|   (((unsigned long) (field[1])) << 8)
-	|   (((unsigned long) (field[0])) << 16);
-
-    case 4:
-      return ((unsigned long) (field[3]))
-	|   (((unsigned long) (field[2])) << 8)
-	|   (((unsigned long) (field[1])) << 16)
-	|   (((unsigned long) (field[0])) << 24);
-
-    case 8:
-      if (sizeof (dwarf_vma) == 8)
-	return ((dwarf_vma) (field[7]))
-	  |   (((dwarf_vma) (field[6])) << 8)
-	  |   (((dwarf_vma) (field[5])) << 16)
-	  |   (((dwarf_vma) (field[4])) << 24)
-	  |   (((dwarf_vma) (field[3])) << 32)
-	  |   (((dwarf_vma) (field[2])) << 40)
-	  |   (((dwarf_vma) (field[1])) << 48)
-	  |   (((dwarf_vma) (field[0])) << 56);
-      else if (sizeof (dwarf_vma) == 4)
-	{
-	  /* Although we are extracing data from an 8 byte wide field,
-	     we are returning only 4 bytes of data.  */
-	  field += 4;
-	  return ((unsigned long) (field[3]))
-	    |   (((unsigned long) (field[2])) << 8)
-	    |   (((unsigned long) (field[1])) << 16)
-	    |   (((unsigned long) (field[0])) << 24);
-	}
-
-    default:
-      error (_("Unhandled data length: %d\n"), size);
-      abort ();
-    }
-}
-
-dwarf_vma
-byte_get_signed (unsigned char *field, int size)
-{
-  dwarf_vma x = byte_get (field, size);
-
-  switch (size)
-    {
-    case 1:
-      return (x ^ 0x80) - 0x80;
-    case 2:
-      return (x ^ 0x8000) - 0x8000;
-    case 4:
-      return (x ^ 0x80000000) - 0x80000000;
-    case 8:
-      return x;
-    default:
-      abort ();
-    }
-}
 
 static int
 size_of_encoded_value (int encoding)
@@ -5017,28 +4899,6 @@ xcrealloc (void *ptr, size_t nmemb, size_t size)
     return NULL;
   else
     return xrealloc (ptr, nmemb * size);
-}
-
-void
-error (const char *message, ...)
-{
-  va_list args;
-
-  va_start (args, message);
-  fprintf (stderr, _("%s: Error: "), program_name);
-  vfprintf (stderr, message, args);
-  va_end (args);
-}
-
-void
-warn (const char *message, ...)
-{
-  va_list args;
-
-  va_start (args, message);
-  fprintf (stderr, _("%s: Warning: "), program_name);
-  vfprintf (stderr, message, args);
-  va_end (args);
 }
 
 void

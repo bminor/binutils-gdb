@@ -55,6 +55,7 @@
 #include "elf-bfd.h"
 #include "progress.h"
 #include "bucomm.h"
+#include "elfcomm.h"
 #include "dwarf.h"
 #include "getopt.h"
 #include "safe-ctype.h"

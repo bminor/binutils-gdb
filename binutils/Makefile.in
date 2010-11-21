@@ -121,7 +121,9 @@ am_dlltool_OBJECTS = dlltool.$(OBJEXT) defparse.$(OBJEXT) \
 dlltool_OBJECTS = $(am_dlltool_OBJECTS)
 am_dllwrap_OBJECTS = dllwrap.$(OBJEXT) version.$(OBJEXT)
 dllwrap_OBJECTS = $(am_dllwrap_OBJECTS)
-am_elfedit_OBJECTS = elfedit.$(OBJEXT) version.$(OBJEXT)
+am__objects_2 = elfcomm.$(OBJEXT)
+am_elfedit_OBJECTS = elfedit.$(OBJEXT) version.$(OBJEXT) \
+	$(am__objects_2)
 elfedit_OBJECTS = $(am_elfedit_OBJECTS)
 am_nlmconv_OBJECTS = nlmconv.$(OBJEXT) nlmheader.$(OBJEXT) \
 	$(am__objects_1)
@@ -130,22 +132,22 @@ nlmconv_LDADD = $(LDADD)
 am_nm_new_OBJECTS = nm.$(OBJEXT) $(am__objects_1)
 nm_new_OBJECTS = $(am_nm_new_OBJECTS)
 nm_new_LDADD = $(LDADD)
-am__objects_2 = rddbg.$(OBJEXT) debug.$(OBJEXT) stabs.$(OBJEXT) \
+am__objects_3 = rddbg.$(OBJEXT) debug.$(OBJEXT) stabs.$(OBJEXT) \
 	ieee.$(OBJEXT) rdcoff.$(OBJEXT)
-am__objects_3 = $(am__objects_2) wrstabs.$(OBJEXT)
+am__objects_4 = $(am__objects_3) wrstabs.$(OBJEXT)
 am_objcopy_OBJECTS = objcopy.$(OBJEXT) not-strip.$(OBJEXT) \
-	rename.$(OBJEXT) $(am__objects_3) $(am__objects_1)
+	rename.$(OBJEXT) $(am__objects_4) $(am__objects_1)
 objcopy_OBJECTS = $(am_objcopy_OBJECTS)
 objcopy_LDADD = $(LDADD)
 am_objdump_OBJECTS = objdump.$(OBJEXT) dwarf.$(OBJEXT) prdbg.$(OBJEXT) \
-	$(am__objects_2) $(am__objects_1)
+	$(am__objects_3) $(am__objects_1) $(am__objects_2)
 objdump_OBJECTS = $(am_objdump_OBJECTS)
 am_ranlib_OBJECTS = ar.$(OBJEXT) is-ranlib.$(OBJEXT) arparse.$(OBJEXT) \
 	arlex.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
 	binemul.$(OBJEXT) emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
 ranlib_OBJECTS = $(am_ranlib_OBJECTS)
 am_readelf_OBJECTS = readelf.$(OBJEXT) version.$(OBJEXT) \
-	unwind-ia64.$(OBJEXT) dwarf.$(OBJEXT)
+	unwind-ia64.$(OBJEXT) dwarf.$(OBJEXT) $(am__objects_2)
 readelf_OBJECTS = $(am_readelf_OBJECTS)
 am_size_OBJECTS = size.$(OBJEXT) $(am__objects_1)
 size_OBJECTS = $(am_size_OBJECTS)
@@ -158,7 +160,7 @@ am_strings_OBJECTS = strings.$(OBJEXT) $(am__objects_1)
 strings_OBJECTS = $(am_strings_OBJECTS)
 strings_LDADD = $(LDADD)
 am_strip_new_OBJECTS = objcopy.$(OBJEXT) is-strip.$(OBJEXT) \
-	rename.$(OBJEXT) $(am__objects_3) $(am__objects_1)
+	rename.$(OBJEXT) $(am__objects_4) $(am__objects_1)
 strip_new_OBJECTS = $(am_strip_new_OBJECTS)
 strip_new_LDADD = $(LDADD)
 am_sysdump_OBJECTS = sysdump.$(OBJEXT) $(am__objects_1)
@@ -426,7 +428,7 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 
 HFILES = \
 	arsup.h binemul.h bucomm.h budbg.h \
-	coffgrok.h debug.h dlltool.h dwarf.h nlmconv.h \
+	coffgrok.h debug.h dlltool.h dwarf.h elfcomm.h nlmconv.h \
 	sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
 	windmc.h
 
@@ -436,7 +438,7 @@ CFILES = \
 	addr2line.c ar.c arsup.c bin2c.c binemul.c bucomm.c \
 	coffdump.c coffgrok.c cxxfilt.c \
 	dwarf.c debug.c dlltool.c dllwrap.c \
-	emul_aix.c emul_vanilla.c filemode.c \
+	elfcomm.c emul_aix.c emul_vanilla.c filemode.c \
 	ieee.c is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c \
@@ -456,6 +458,9 @@ WRITE_DEBUG_SRCS = $(DEBUG_SRCS) wrstabs.c
 
 # Code shared by all the binutils.
 BULIBS = bucomm.c version.c filemode.c
+
+# Code shared by the ELF related programs.
+ELFLIBS = elfcomm.c
 BFDLIB = ../bfd/libbfd.la
 OPCODES = ../opcodes/libopcodes.la
 LIBIBERTY = ../libiberty/libiberty.a
@@ -505,13 +510,13 @@ LDADD = $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 size_SOURCES = size.c $(BULIBS)
 objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
-readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c
+readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c $(ELFLIBS)
 readelf_LDADD = $(LIBINTL) $(LIBIBERTY)
-elfedit_SOURCES = elfedit.c version.c
+elfedit_SOURCES = elfedit.c version.c $(ELFLIBS)
 elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c $(BULIBS)
-objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
+objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
 objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
@@ -771,6 +776,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlltool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dllwrap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfcomm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfedit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emul_$(EMULATION).Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emul_aix.Po@am__quote@

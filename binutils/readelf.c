@@ -61,6 +61,7 @@
 
 #include "bfd.h"
 #include "bucomm.h"
+#include "elfcomm.h"
 #include "dwarf.h"
 
 #include "elf/common.h"
@@ -145,8 +146,6 @@
 #include "elf/xc16x.h"
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
-
-#include "aout/ar.h"
 
 #include "getopt.h"
 #include "libiberty.h"
@@ -260,8 +259,6 @@ typedef enum print_mode
 }
 print_mode;
 
-static void (* byte_put) (unsigned char *, bfd_vma, int);
-
 #define UNKNOWN -1
 
 #define SECTION_NAME(X)						\
@@ -272,9 +269,6 @@ static void (* byte_put) (unsigned char *, bfd_vma, int);
 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
 
-#define BYTE_GET(field)		byte_get (field, sizeof (field))
-#define BYTE_GET_SIGNED(field)	byte_get_signed (field, sizeof (field))
-
 #define GET_ELF_SYMBOLS(file, section)			\
   (is_32bit_elf ? get_32bit_elf_symbols (file, section)	\
    : get_64bit_elf_symbols (file, section))
@@ -283,11 +277,6 @@ static void (* byte_put) (unsigned char *, bfd_vma, int);
 /* GET_DYNAMIC_NAME asssumes that VALID_DYNAMIC_NAME has
    already been called and verified that the string exists.  */
 #define GET_DYNAMIC_NAME(offset)	(dynamic_strings + offset)
-
-/* This is just a bit of syntatic sugar.  */
-#define streq(a,b)	  (strcmp ((a), (b)) == 0)
-#define strneq(a,b,n)	  (strncmp ((a), (b), (n)) == 0)
-#define const_strneq(a,b) (strncmp ((a), (b), sizeof (b) - 1) == 0)
 
 #define REMOVE_ARCH_BITS(ADDR) do {		\
     if (elf_header.e_machine == EM_ARM)		\
@@ -338,36 +327,6 @@ get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
     }
 
   return mvar;
-}
-
-static void
-byte_put_little_endian (unsigned char * field, bfd_vma value, int size)
-{
-  switch (size)
-    {
-    case 8:
-      field[7] = (((value >> 24) >> 24) >> 8) & 0xff;
-      field[6] = ((value >> 24) >> 24) & 0xff;
-      field[5] = ((value >> 24) >> 16) & 0xff;
-      field[4] = ((value >> 24) >> 8) & 0xff;
-      /* Fall through.  */
-    case 4:
-      field[3] = (value >> 24) & 0xff;
-      /* Fall through.  */
-    case 3:
-      field[2] = (value >> 16) & 0xff;
-      /* Fall through.  */
-    case 2:
-      field[1] = (value >> 8) & 0xff;
-      /* Fall through.  */
-    case 1:
-      field[0] = value & 0xff;
-      break;
-
-    default:
-      error (_("Unhandled data length: %d\n"), size);
-      abort ();
-    }
 }
 
 /* Print a VMA value.  */
@@ -501,41 +460,6 @@ print_symbol (int width, const char * symbol)
     }
 
   return num_printed;
-}
-
-static void
-byte_put_big_endian (unsigned char * field, bfd_vma value, int size)
-{
-  switch (size)
-    {
-    case 8:
-      field[7] = value & 0xff;
-      field[6] = (value >> 8) & 0xff;
-      field[5] = (value >> 16) & 0xff;
-      field[4] = (value >> 24) & 0xff;
-      value >>= 16;
-      value >>= 16;
-      /* Fall through.  */
-    case 4:
-      field[3] = value & 0xff;
-      value >>= 8;
-      /* Fall through.  */
-    case 3:
-      field[2] = value & 0xff;
-      value >>= 8;
-      /* Fall through.  */
-    case 2:
-      field[1] = value & 0xff;
-      value >>= 8;
-      /* Fall through.  */
-    case 1:
-      field[0] = value & 0xff;
-      break;
-
-    default:
-      error (_("Unhandled data length: %d\n"), size);
-      abort ();
-    }
 }
 
 /* Return a pointer to section NAME, or NULL if no such section exists.  */
@@ -12505,432 +12429,6 @@ process_object (char * file_name, FILE * file)
   free_debug_memory ();
 
   return 0;
-}
-
-/* Return the path name for a proxy entry in a thin archive, adjusted relative
-   to the path name of the thin archive itself if necessary.  Always returns
-   a pointer to malloc'ed memory.  */
-
-static char *
-adjust_relative_path (char * file_name, char * name, int name_len)
-{
-  char * member_file_name;
-  const char * base_name = lbasename (file_name);
-
-  /* This is a proxy entry for a thin archive member.
-     If the extended name table contains an absolute path
-     name, or if the archive is in the current directory,
-     use the path name as given.  Otherwise, we need to
-     find the member relative to the directory where the
-     archive is located.  */
-  if (IS_ABSOLUTE_PATH (name) || base_name == file_name)
-    {
-      member_file_name = (char *) malloc (name_len + 1);
-      if (member_file_name == NULL)
-        {
-          error (_("Out of memory\n"));
-          return NULL;
-        }
-      memcpy (member_file_name, name, name_len);
-      member_file_name[name_len] = '\0';
-    }
-  else
-    {
-      /* Concatenate the path components of the archive file name
-         to the relative path name from the extended name table.  */
-      size_t prefix_len = base_name - file_name;
-      member_file_name = (char *) malloc (prefix_len + name_len + 1);
-      if (member_file_name == NULL)
-        {
-          error (_("Out of memory\n"));
-          return NULL;
-        }
-      memcpy (member_file_name, file_name, prefix_len);
-      memcpy (member_file_name + prefix_len, name, name_len);
-      member_file_name[prefix_len + name_len] = '\0';
-    }
-  return member_file_name;
-}
-
-/* Structure to hold information about an archive file.  */
-
-struct archive_info
-{
-  char * file_name;                     /* Archive file name.  */
-  FILE * file;                          /* Open file descriptor.  */
-  unsigned long index_num;              /* Number of symbols in table.  */
-  unsigned long * index_array;          /* The array of member offsets.  */
-  char * sym_table;                     /* The symbol table.  */
-  unsigned long sym_size;               /* Size of the symbol table.  */
-  char * longnames;                     /* The long file names table.  */
-  unsigned long longnames_size;         /* Size of the long file names table.  */
-  unsigned long nested_member_origin;   /* Origin in the nested archive of the current member.  */
-  unsigned long next_arhdr_offset;      /* Offset of the next archive header.  */
-  bfd_boolean is_thin_archive;          /* TRUE if this is a thin archive.  */
-  struct ar_hdr arhdr;                  /* Current archive header.  */
-};
-
-/* Read the symbol table and long-name table from an archive.  */
-
-static int
-setup_archive (struct archive_info * arch, char * file_name, FILE * file,
-               bfd_boolean is_thin_archive, bfd_boolean read_symbols)
-{
-  size_t got;
-  unsigned long size;
-
-  arch->file_name = strdup (file_name);
-  arch->file = file;
-  arch->index_num = 0;
-  arch->index_array = NULL;
-  arch->sym_table = NULL;
-  arch->sym_size = 0;
-  arch->longnames = NULL;
-  arch->longnames_size = 0;
-  arch->nested_member_origin = 0;
-  arch->is_thin_archive = is_thin_archive;
-  arch->next_arhdr_offset = SARMAG;
-
-  /* Read the first archive member header.  */
-  if (fseek (file, SARMAG, SEEK_SET) != 0)
-    {
-      error (_("%s: failed to seek to first archive header\n"), file_name);
-      return 1;
-    }
-  got = fread (&arch->arhdr, 1, sizeof arch->arhdr, file);
-  if (got != sizeof arch->arhdr)
-    {
-      if (got == 0)
-	return 0;
-
-      error (_("%s: failed to read archive header\n"), file_name);
-      return 1;
-    }
-
-  /* See if this is the archive symbol table.  */
-  if (const_strneq (arch->arhdr.ar_name, "/               ")
-      || const_strneq (arch->arhdr.ar_name, "/SYM64/         "))
-    {
-      size = strtoul (arch->arhdr.ar_size, NULL, 10);
-      size = size + (size & 1);
-
-      arch->next_arhdr_offset += sizeof arch->arhdr + size;
-
-      if (read_symbols)
-	{
-	  unsigned long i;
-	  /* A buffer used to hold numbers read in from an archive index.
-	     These are always 4 bytes long and stored in big-endian format.  */
-#define SIZEOF_AR_INDEX_NUMBERS 4
-	  unsigned char integer_buffer[SIZEOF_AR_INDEX_NUMBERS];
-	  unsigned char * index_buffer;
-
-	  /* Check the size of the archive index.  */
-	  if (size < SIZEOF_AR_INDEX_NUMBERS)
-	    {
-	      error (_("%s: the archive index is empty\n"), file_name);
-	      return 1;
-	    }
-
-	  /* Read the numer of entries in the archive index.  */
-	  got = fread (integer_buffer, 1, sizeof integer_buffer, file);
-	  if (got != sizeof (integer_buffer))
-	    {
-	      error (_("%s: failed to read archive index\n"), file_name);
-	      return 1;
-	    }
-	  arch->index_num = byte_get_big_endian (integer_buffer, sizeof integer_buffer);
-	  size -= SIZEOF_AR_INDEX_NUMBERS;
-
-	  /* Read in the archive index.  */
-	  if (size < arch->index_num * SIZEOF_AR_INDEX_NUMBERS)
-	    {
-	      error (_("%s: the archive index is supposed to have %ld entries, but the size in the header is too small\n"),
-		     file_name, arch->index_num);
-	      return 1;
-	    }
-	  index_buffer = (unsigned char *)
-              malloc (arch->index_num * SIZEOF_AR_INDEX_NUMBERS);
-	  if (index_buffer == NULL)
-	    {
-	      error (_("Out of memory whilst trying to read archive symbol index\n"));
-	      return 1;
-	    }
-	  got = fread (index_buffer, SIZEOF_AR_INDEX_NUMBERS, arch->index_num, file);
-	  if (got != arch->index_num)
-	    {
-	      free (index_buffer);
-	      error (_("%s: failed to read archive index\n"), file_name);
-	      return 1;
-	    }
-	  size -= arch->index_num * SIZEOF_AR_INDEX_NUMBERS;
-
-	  /* Convert the index numbers into the host's numeric format.  */
-	  arch->index_array = (long unsigned int *)
-              malloc (arch->index_num * sizeof (* arch->index_array));
-	  if (arch->index_array == NULL)
-	    {
-	      free (index_buffer);
-	      error (_("Out of memory whilst trying to convert the archive symbol index\n"));
-	      return 1;
-	    }
-
-	  for (i = 0; i < arch->index_num; i++)
-	    arch->index_array[i] = byte_get_big_endian ((unsigned char *) (index_buffer + (i * SIZEOF_AR_INDEX_NUMBERS)),
-						        SIZEOF_AR_INDEX_NUMBERS);
-	  free (index_buffer);
-
-	  /* The remaining space in the header is taken up by the symbol table.  */
-	  if (size < 1)
-	    {
-	      error (_("%s: the archive has an index but no symbols\n"), file_name);
-	      return 1;
-	    }
-	  arch->sym_table = (char *) malloc (size);
-	  arch->sym_size = size;
-	  if (arch->sym_table == NULL)
-	    {
-	      error (_("Out of memory whilst trying to read archive index symbol table\n"));
-	      return 1;
-	    }
-	  got = fread (arch->sym_table, 1, size, file);
-	  if (got != size)
-	    {
-	      error (_("%s: failed to read archive index symbol table\n"), file_name);
-	      return 1;
-	    }
-  	}
-      else
-	{
-	  if (fseek (file, size, SEEK_CUR) != 0)
-	    {
-	      error (_("%s: failed to skip archive symbol table\n"), file_name);
-	      return 1;
-	    }
-	}
-
-      /* Read the next archive header.  */
-      got = fread (&arch->arhdr, 1, sizeof arch->arhdr, file);
-      if (got != sizeof arch->arhdr)
-	{
-	  if (got == 0)
-            return 0;
-	  error (_("%s: failed to read archive header following archive index\n"), file_name);
-	  return 1;
-	}
-    }
-  else if (read_symbols)
-    printf (_("%s has no archive index\n"), file_name);
-
-  if (const_strneq (arch->arhdr.ar_name, "//              "))
-    {
-      /* This is the archive string table holding long member names.  */
-      arch->longnames_size = strtoul (arch->arhdr.ar_size, NULL, 10);
-      arch->next_arhdr_offset += sizeof arch->arhdr + arch->longnames_size;
-
-      arch->longnames = (char *) malloc (arch->longnames_size);
-      if (arch->longnames == NULL)
-	{
-	  error (_("Out of memory reading long symbol names in archive\n"));
-	  return 1;
-	}
-
-      if (fread (arch->longnames, arch->longnames_size, 1, file) != 1)
-	{
-	  free (arch->longnames);
-	  arch->longnames = NULL;
-	  error (_("%s: failed to read long symbol name string table\n"), file_name);
-	  return 1;
-	}
-
-      if ((arch->longnames_size & 1) != 0)
-	getc (file);
-    }
-
-  return 0;
-}
-
-/* Release the memory used for the archive information.  */
-
-static void
-release_archive (struct archive_info * arch)
-{
-  if (arch->file_name != NULL)
-    free (arch->file_name);
-  if (arch->index_array != NULL)
-    free (arch->index_array);
-  if (arch->sym_table != NULL)
-    free (arch->sym_table);
-  if (arch->longnames != NULL)
-    free (arch->longnames);
-}
-
-/* Open and setup a nested archive, if not already open.  */
-
-static int
-setup_nested_archive (struct archive_info * nested_arch, char * member_file_name)
-{
-  FILE * member_file;
-
-  /* Have we already setup this archive?  */
-  if (nested_arch->file_name != NULL
-      && streq (nested_arch->file_name, member_file_name))
-    return 0;
-
-  /* Close previous file and discard cached information.  */
-  if (nested_arch->file != NULL)
-    fclose (nested_arch->file);
-  release_archive (nested_arch);
-
-  member_file = fopen (member_file_name, "rb");
-  if (member_file == NULL)
-    return 1;
-  return setup_archive (nested_arch, member_file_name, member_file, FALSE, FALSE);
-}
-
-static char *
-get_archive_member_name_at (struct archive_info *  arch,
-			    unsigned long          offset,
-			    struct archive_info *  nested_arch);
-
-/* Get the name of an archive member from the current archive header.
-   For simple names, this will modify the ar_name field of the current
-   archive header.  For long names, it will return a pointer to the
-   longnames table.  For nested archives, it will open the nested archive
-   and get the name recursively.  NESTED_ARCH is a single-entry cache so
-   we don't keep rereading the same information from a nested archive.  */
-
-static char *
-get_archive_member_name (struct archive_info *  arch,
-                         struct archive_info *  nested_arch)
-{
-  unsigned long j, k;
-
-  if (arch->arhdr.ar_name[0] == '/')
-    {
-      /* We have a long name.  */
-      char * endp;
-      char * member_file_name;
-      char * member_name;
-
-      arch->nested_member_origin = 0;
-      k = j = strtoul (arch->arhdr.ar_name + 1, &endp, 10);
-      if (arch->is_thin_archive && endp != NULL && * endp == ':')
-        arch->nested_member_origin = strtoul (endp + 1, NULL, 10);
-
-      while ((j < arch->longnames_size)
-             && (arch->longnames[j] != '\n')
-             && (arch->longnames[j] != '\0'))
-        j++;
-      if (arch->longnames[j-1] == '/')
-        j--;
-      arch->longnames[j] = '\0';
-
-      if (!arch->is_thin_archive || arch->nested_member_origin == 0)
-        return arch->longnames + k;
-
-      /* This is a proxy for a member of a nested archive.
-         Find the name of the member in that archive.  */
-      member_file_name = adjust_relative_path (arch->file_name,
-					       arch->longnames + k, j - k);
-      if (member_file_name != NULL
-          && setup_nested_archive (nested_arch, member_file_name) == 0)
-	{
-          member_name = get_archive_member_name_at (nested_arch,
-						    arch->nested_member_origin,
-						    NULL);
-	  if (member_name != NULL)
-	    {
-	      free (member_file_name);
-	      return member_name;
-	    }
-	}
-      free (member_file_name);
-
-      /* Last resort: just return the name of the nested archive.  */
-      return arch->longnames + k;
-    }
-
-  /* We have a normal (short) name.  */
-  for (j = 0; j < sizeof (arch->arhdr.ar_name); j++)
-    if (arch->arhdr.ar_name[j] == '/')
-      {
-	arch->arhdr.ar_name[j] = '\0';
-	return arch->arhdr.ar_name;
-      }
-
-  /* The full ar_name field is used.  Don't rely on ar_date starting
-     with a zero byte.  */
-  {
-    char *name = xmalloc (sizeof (arch->arhdr.ar_name) + 1);
-    memcpy (name, arch->arhdr.ar_name, sizeof (arch->arhdr.ar_name));
-    name[sizeof (arch->arhdr.ar_name)] = '\0';
-    return name;
-  }
-}
-
-/* Get the name of an archive member at a given OFFSET within an archive ARCH.  */
-
-static char *
-get_archive_member_name_at (struct archive_info * arch,
-                            unsigned long         offset,
-			    struct archive_info * nested_arch)
-{
-  size_t got;
-
-  if (fseek (arch->file, offset, SEEK_SET) != 0)
-    {
-      error (_("%s: failed to seek to next file name\n"), arch->file_name);
-      return NULL;
-    }
-  got = fread (&arch->arhdr, 1, sizeof arch->arhdr, arch->file);
-  if (got != sizeof arch->arhdr)
-    {
-      error (_("%s: failed to read archive header\n"), arch->file_name);
-      return NULL;
-    }
-  if (memcmp (arch->arhdr.ar_fmag, ARFMAG, 2) != 0)
-    {
-      error (_("%s: did not find a valid archive header\n"), arch->file_name);
-      return NULL;
-    }
-
-  return get_archive_member_name (arch, nested_arch);
-}
-
-/* Construct a string showing the name of the archive member, qualified
-   with the name of the containing archive file.  For thin archives, we
-   use square brackets to denote the indirection.  For nested archives,
-   we show the qualified name of the external member inside the square
-   brackets (e.g., "thin.a[normal.a(foo.o)]").  */
-
-static char *
-make_qualified_name (struct archive_info * arch,
-                     struct archive_info * nested_arch,
-                     char * member_name)
-{
-  size_t len;
-  char * name;
-
-  len = strlen (arch->file_name) + strlen (member_name) + 3;
-  if (arch->is_thin_archive && arch->nested_member_origin != 0)
-    len += strlen (nested_arch->file_name) + 2;
-
-  name = (char *) malloc (len);
-  if (name == NULL)
-    {
-      error (_("Out of memory\n"));
-      return NULL;
-    }
-
-  if (arch->is_thin_archive && arch->nested_member_origin != 0)
-    snprintf (name, len, "%s[%s(%s)]", arch->file_name, nested_arch->file_name, member_name);
-  else if (arch->is_thin_archive)
-    snprintf (name, len, "%s[%s]", arch->file_name, member_name);
-  else
-    snprintf (name, len, "%s(%s)", arch->file_name, member_name);
-
-  return name;
 }
 
 /* Process an ELF archive.

@@ -1,3 +1,77 @@
+2010-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12235
+	* elfcomm.c: New.
+	* elfcomm.h: Likewise.
+
+	* Makefile.am (HFILES): Add elfcomm.h.
+	(CFILES): Add elfcomm.c.
+	(ELFLIBS): New.
+	(readelf_SOURCES): Add $(ELFLIBS).
+	(elfedit_SOURCES): Likewise.
+	(objdump_SOURCES): Likewise.
+	* Makefile.in: Regenerated.
+
+	* dwarf.c: Include "elfcomm.h".
+	(byte_get): Removed.
+	(byte_get_little_endian): Likewise.
+	(byte_get_big_endian): Likewise.
+	(byte_get_signed): Likewise.
+	(error): Likewise.
+	(warn): Likewise.
+
+	* dwarf.h (dwarf_vma): Defined with HOST_WIDEST_INT.
+	(dwarf_size_type): Likewise.
+	(byte_get): Removed.
+	(byte_get_signed): Likewise.
+	(byte_get_little_endian): Likewise.
+	(byte_get_big_endian): Likewise.
+	(error): Likewise.
+	(warn): Likewise.
+
+	* elfedit.c: Include "elfcomm.h".  Don't include "aout/ar.h".
+	Call error () instead of non_fatal ().
+	(streq): Removed.
+	(strneq): Likewise.
+	(const_strneq): Likewise.
+	(non_fatal): Likewise.
+	(BYTE_GET): Likewise.
+	(BYTE_PUT): Likewise.
+	(byte_get): Likewise.
+	(byte_put): Likewise.
+	(byte_get_little_endian): Likewise.
+	(byte_get_big_endian): Likewise.
+	(byte_put_little_endian): Likewise.
+	(byte_put_big_endian): Likewise.
+	(adjust_relative_path): Likewise.
+	(archive_info): Likewise.
+	(setup_archive): Likewise.
+	(release_archive): Likewise.
+	(setup_nested_archive): Likewise.
+	(get_archive_member_name): Likewise.
+	(get_archive_member_name_at): Likewise.
+	(make_qualified_name): Likewise.
+
+	* objdump.c: Include "elfcomm.h".
+
+	* readelf.c: Include "elfcomm.h".  Don't include "aout/ar.h".
+	(BYTE_GET): Removed.
+	(BYTE_GET_SIGNED): Removed.
+	(streq): Likewise.
+	(strneq): Likewise.
+	(const_strneq): Likewise.
+	(byte_put): Likewise.
+	(byte_put_little_endian): Likewise.
+	(byte_put_big_endian): Likewise.
+	(adjust_relative_path): Likewise.
+	(archive_info): Likewise.
+	(setup_archive): Likewise.
+	(release_archive): Likewise.
+	(setup_nested_archive): Likewise.
+	(get_archive_member_name): Likewise.
+	(get_archive_member_name_at): Likewise.
+	(make_qualified_name): Likewise.
+
 2010-11-18  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/11742

@@ -19,15 +19,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
-/* We can't use any bfd types here since readelf may define BFD64 and
-   objdump may not.  */
-typedef unsigned long long dwarf_vma;
-typedef unsigned long long dwarf_size_type;
-#else
-typedef unsigned long dwarf_vma;
-typedef unsigned long dwarf_size_type;
-#endif
+typedef unsigned HOST_WIDEST_INT dwarf_vma;
+typedef unsigned HOST_WIDEST_INT dwarf_size_type;
 
 struct dwarf_section
 {
@@ -100,11 +93,6 @@ typedef struct
 }
 debug_info;
 
-extern dwarf_vma (*byte_get) (unsigned char *, int);
-extern dwarf_vma byte_get_signed (unsigned char *, int);
-extern dwarf_vma byte_get_little_endian (unsigned char *, int);
-extern dwarf_vma byte_get_big_endian (unsigned char *, int);
-
 extern int eh_addr_size;
 
 extern int do_debug_info;
@@ -141,9 +129,6 @@ extern void dwarf_select_sections_all (void);
 void *cmalloc (size_t, size_t);
 void *xcmalloc (size_t, size_t);
 void *xcrealloc (void *, size_t, size_t);
-
-void error (const char *, ...) ATTRIBUTE_PRINTF_1;
-void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
 
 unsigned long int read_leb128 (unsigned char *data,
 			       unsigned int *length_return, int sign);
