@@ -1653,7 +1653,7 @@ po/$(PACKAGE).pot: force
 	    false; \
 	fi
 
-.PRECIOUS: ada-exp.c
+.PRECIOUS: ada-lex.c
 
 # XML rules
 

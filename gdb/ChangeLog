@@ -1,3 +1,7 @@
+2010-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (.PRECIOUS): Reference ada-lex.c.
+
 2010-11-19  Keith Seitz  <keiths@redhat.com>
 
 	* data-directory/Makefile.in (SYSCALLS_INSTALL_DIR):
