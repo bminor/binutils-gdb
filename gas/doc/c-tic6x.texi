@@ -1,6 +1,7 @@
 @c Copyright 2010 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
+@c man end
 @ifset GENERIC
 @page
 @node TIC6X-Dependent
@@ -24,7 +25,8 @@
 @cindex TIC6X options
 @cindex options for TIC6X
 
-@table @code
+@c man begin OPTIONS
+@table @gcctabopt
 
 @cindex @code{-march=} command line option, TIC6X
 @item -march=@var{arch}
@@ -95,6 +97,7 @@ Generate code for the specified endianness.  The default is
 little-endian.
 
 @end table
+@c man end
 
 @node TIC6X Syntax
 @section TIC6X Syntax

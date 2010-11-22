@@ -1,3 +1,11 @@
+2010-11-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* doc/as.texinfo: Refer to or include c-alpha.texi for Alpha
+	options.  Refer to or include c-tic6x.texi for C6X options instead
+	of duplicating documentation here.
+	* doc/c-alpha.texi, doc/c-tic6x.texi: Add markup for use in
+	manpage generation.
+
 2010-11-19  Alan Modra  <amodra@gmail.com>
 
     	PR 2606

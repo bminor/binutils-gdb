@@ -702,7 +702,28 @@ Generate an object file even after errors.
 Standard input, or source files to assemble.
 
 @end table
+@c man end
 
+@ifset ALPHA
+
+@ifclear man
+@xref{Alpha Options}, for the options available when @value{AS} is configured
+for an Alpha processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for an Alpha
+processor.
+@c man end
+@c man begin INCLUDE
+@include c-alpha.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@c man begin OPTIONS
 @ifset ARC
 The following options are available when @value{AS} is configured for
 an ARC processor.
@@ -1261,71 +1282,28 @@ Warn whenever the operand for a base or index register has been specified
 but evaluates to zero.
 @end table
 @end ifset
+@c man end
 
 @ifset TIC6X
+
+@ifclear man
+@xref{TIC6X Options}, for the options available when @value{AS} is configured
+for a TMS320C6000 processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
 The following options are available when @value{AS} is configured for a
 TMS320C6000 processor.
-
-@table @gcctabopt
-@item -march=@var{arch}
-Enable (only) instructions from architecture @var{arch}.  By default,
-all instructions are permitted.
-
-The following values of @var{arch} are accepted: @code{c62x},
-@code{c64x}, @code{c64x+}, @code{c67x}, @code{c67x+}, @code{c674x}.
-
-@item -matomic
-@itemx -mno-atomic
-Enable or disable the optional C64x+ atomic operation instructions.
-By default, they are enabled if no @option{-march} option is given, or
-if an architecture is specified with @option{-march} that implies
-these instructions are present (currently, there are no such
-architectures); they are disabled if an architecture is specified with
-@option{-march} on which the instructions are optional or not
-present.  This option overrides such a default from the architecture,
-independent of the order in which the @option{-march} or
-@option{-matomic} or @option{-mno-atomic} options are passed.
-
-@item -mdsbt
-@itemx -mno-dsbt
-The @option{-mdsbt} option causes the assembler to generate the
-@code{Tag_ABI_DSBT} attribute with a value of 1, indicating that the
-code is using DSBT addressing.  The @option{-mno-dsbt} option, the
-default, causes the tag to have a value of 0, indicating that the code
-does not use DSBT addressing.  The linker will emit a warning if
-objects of different type (DSBT and non-DSBT) are linked together.
-
-@item -mpid=no
-@itemx -mpid=near
-@itemx -mpid=far
-The @option{-mpid=} option causes the assembler to generate the
-@code{Tag_ABI_PID} attribute with a value indicating the form of data
-addressing used by the code.  @option{-mpid=no}, the default,
-indicates position-dependent data addressing, @option{-mpid=near}
-indicates position-independent addressing with GOT accesses using near
-DP addressing, and @option{-mpid=far} indicates position-independent
-addressing with GOT accesses using far DP addressing.  The linker will
-emit a warning if objects built with different settings of this option
-are linked together.
-
-@item -mpic
-@itemx -mno-pic
-The @option{-mpic} option causes the assembler to generate the
-@code{Tag_ABI_PIC} attribute with a value of 1, indicating that the
-code is using position-independent code addressing,  The
-@code{-mno-pic} option, the default, causes the tag to have a value of
-0, indicating position-dependent code addressing.  The linker will
-emit a warning if objects of different type (position-dependent and
-position-independent) are linked together.
-
-@item -mbig-endian
-@itemx -mlittle-endian
-Generate code for the specified endianness.  The default is
-little-endian.
-@end table
+@c man end
+@c man begin INCLUDE
+@include c-tic6x.texi
+@c ended inside the included file
+@end ifset
 
 @end ifset
 
+@c man begin OPTIONS
 @ifset XTENSA
 The following options are available when @value{AS} is configured for
 an Xtensa processor.
