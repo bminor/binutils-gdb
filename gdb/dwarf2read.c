@@ -1941,6 +1941,10 @@ dwarf2_read_index (struct objfile *objfile)
      it seems better to just ignore such indices.  */
   if (version < 3)
     return 0;
+  /* Indexes with higher version than the one supported by GDB may be no
+     longer backward compatible.  */
+  if (version > 3)
+    return 0;
 
   map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
   map->total_size = dwarf2_per_objfile->gdb_index.size;
