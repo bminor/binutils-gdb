@@ -177,7 +177,7 @@ Dynamic symbol table reloading multiple times in one run is %s.\n"),
    this flag and then add the shared library symbols as needed.  Note
    that there is a potential for confusion, since if the shared
    library symbols are not loaded, commands like "info fun" will *not*
-   report all the functions that are actually present. */
+   report all the functions that are actually present.  */
 
 int auto_solib_add = 1;
 
@@ -187,7 +187,7 @@ int auto_solib_add = 1;
    size to exceed this threshhold, then the shlib's symbols are not
    added.  The threshold is ignored if the user explicitly asks for a
    shlib to be added, such as when using the "sharedlibrary"
-   command. */
+   command.  */
 
 int auto_solib_limit;
 
@@ -195,7 +195,7 @@ int auto_solib_limit;
 /* Make a null terminated copy of the string at PTR with SIZE characters in
    the obstack pointed to by OBSTACKP .  Returns the address of the copy.
    Note that the string at PTR does not have to be null terminated, I.E. it
-   may be part of a larger string and we are only saving a substring. */
+   may be part of a larger string and we are only saving a substring.  */
 
 char *
 obsavestring (const char *ptr, int size, struct obstack *obstackp)
@@ -241,7 +241,7 @@ obconcat (struct obstack *obstackp, ...)
   return obstack_finish (obstackp);
 }
 
-/* True if we are reading a symbol table. */
+/* True if we are reading a symbol table.  */
 
 int currently_reading_symtab = 0;
 

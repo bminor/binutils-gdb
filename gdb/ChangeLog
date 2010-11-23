@@ -1,5 +1,9 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* symfile.c: Add missing second space after period in various comments.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-typeprint.c (print_array_type): Fix formatting in comment.
 	(print_selected_record_field_types): Fix formatting in function
 	documentation.
