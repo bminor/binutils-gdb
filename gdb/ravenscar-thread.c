@@ -438,7 +438,7 @@ _initialize_ravenscar (void)
 
   add_prefix_cmd ("ravenscar", no_class, show_ravenscar_command,
                   _("Prefix command for showing Ravenscar-specific settings"),
-                  &show_ravenscar_list, "set ravenscar ", 0, &showlist);
+                  &show_ravenscar_list, "show ravenscar ", 0, &showlist);
 
   add_setshow_boolean_cmd ("task-switching", class_obscure,
                            &ravenscar_task_support, _("\

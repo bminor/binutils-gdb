@@ -1,5 +1,10 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ravenscar-thread.c (_initialize_ravenscar): Fix copy/paste typo
+	in name of "show ravenscar" prefix command name.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* ravenscar-thread.c (show_ravenscar_task_switching_command):
 	Add missing '\n' in output.
 
