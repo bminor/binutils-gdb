@@ -1,5 +1,11 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_template_to_fixed_record_type_1):
+	For dynamic fields, check the field size against the maximum
+	object size.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* mips-irix-tdep.c (mips_irix_n32_stack_tramp_frame_init): New
 	function.
 	(mips_irix_n32_stack_tramp_frame): New static global.

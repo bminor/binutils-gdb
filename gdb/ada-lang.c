@@ -7122,9 +7122,23 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	  field_type = ada_get_base_type (field_type);
 	  field_type = ada_to_fixed_type (field_type, field_valaddr,
 					  field_address, dval, 0);
+	  /* If the field size is already larger than the maximum
+	     object size, then the record itself will necessarily
+	     be larger than the maximum object size.  We need to make
+	     this check now, because the size might be so ridiculously
+	     large (due to an uninitialized variable in the inferior)
+	     that it would cause an overflow when adding it to the
+	     record size.  */
+	  check_size (field_type);
 
 	  TYPE_FIELD_TYPE (rtype, f) = field_type;
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
+	  /* The multiplication can potentially overflow.  But because
+	     the field length has been size-checked just above, and
+	     assuming that the maximum size is a reasonable value,
+	     an overflow should not happen in practice.  So rather than
+	     adding overflow recovery code to this already complex code,
+	     we just assume that it's not going to happen.  */
           bit_incr = fld_bit_len =
             TYPE_LENGTH (TYPE_FIELD_TYPE (rtype, f)) * TARGET_CHAR_BIT;
         }
