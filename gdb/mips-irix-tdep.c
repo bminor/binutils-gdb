@@ -227,11 +227,51 @@ static const struct tramp_frame mips_irix_n32_tramp_frame =
   mips_irix_n32_tramp_frame_init
 };
 
+/* Implement the "init" routine in struct tramp_frame for the stack-based
+   trampolines used on mips-irix.  */
+
+static void
+mips_irix_n32_stack_tramp_frame_init (const struct tramp_frame *self,
+				      struct frame_info *this_frame,
+				      struct trad_frame_cache *this_cache,
+				      CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  const int num_regs = gdbarch_num_regs (gdbarch);
+  int sp_cooked_regno = num_regs + MIPS_SP_REGNUM;
+  const CORE_ADDR sp = get_frame_register_signed (this_frame, sp_cooked_regno);
+
+  /* The previous frame's PC is stored in RA.  */
+  trad_frame_set_reg_realreg (this_cache, gdbarch_pc_regnum (gdbarch),
+                              num_regs + MIPS_RA_REGNUM);
+
+  trad_frame_set_id (this_cache, frame_id_build (sp, func));
+}
+
+/* A tramp_frame structure describing the stack-based trampoline
+   used on mips-irix.  These trampolines are created on the stack
+   before being called.  */
+
+static const struct tramp_frame mips_irix_n32_stack_tramp_frame =
+{
+  SIGTRAMP_FRAME,
+  4,
+  {
+   { 0x8f210000, 0xffff0000 },  /* lw     at, N(t9) */
+   { 0x8f2f0000, 0xffff0000 },  /* lw     t3, M(t9) */
+   { 0x00200008, 0xffffffff },  /* jr     at        */
+   { 0x0020c82d, 0xffffffff },  /* move   t9, at    */
+   { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips_irix_n32_stack_tramp_frame_init
+};
+
 static void
 mips_irix_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
   set_solib_ops (gdbarch, &irix_so_ops);
+  tramp_frame_prepend_unwinder (gdbarch, &mips_irix_n32_stack_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch, &mips_irix_n32_tramp_frame);
 }
 
