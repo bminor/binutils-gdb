@@ -1,5 +1,11 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-typeprint.c (print_array_type): Fix formatting in comment.
+	(print_selected_record_field_types): Fix formatting in function
+	documentation.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* ravenscar-thread.c (_initialize_ravenscar): Fix copy/paste typo
 	in name of "show ravenscar" prefix command name.
 
