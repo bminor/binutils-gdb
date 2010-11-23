@@ -1,3 +1,11 @@
+2010-11-23  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_test_sequence): New function.
+	(gdb_expect_list): Add verbose -log call for each pattern.
+	* gdb.base/signals.exp (test_handle_all_print): Call it.
+	Reduce timeout increment from 6 minutes to 1 minute.
+	* gdb.server/ext-run.exp: Call it.
+
 2010-11-23  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12212

@@ -921,6 +921,32 @@ proc gdb_test_no_output { args } {
     }
 }
 
+# Send a command and then wait for a sequence of outputs.
+# This is useful when the sequence is long and contains ".*", a single
+# regexp to match the entire output can get a timeout much easier.
+#
+# COMMAND is the command to send.
+# TEST_NAME is passed to pass/fail.  COMMAND is used if TEST_NAME is "".
+# EXPECTED_OUTPUT_LIST is a list of regexps of expected output, which are
+# processed in order, and all must be present in the output.
+#
+# It is unnecessary to specify ".*" at the beginning or end of any regexp,
+# there is an implicit ".*" between each element of EXPECTED_OUTPUT_LIST.
+# There is also an implicit ".*" between the last regexp and the gdb prompt.
+#
+# Like gdb_test and gdb_test_multiple, the output is expected to end with the
+# gdb prompt, which must not be specified in EXPECTED_OUTPUT_LIST.
+
+proc gdb_test_sequence { command test_name expected_output_list } {
+    global gdb_prompt
+    if { $test_name == "" } {
+	set test_name $command
+    }
+    lappend expected_output_list ""; # implicit ".*" before gdb prompt
+    send_gdb "$command\n"
+    gdb_expect_list $test_name "$gdb_prompt $" $expected_output_list
+}
+
 
 # Test that a command gives an error.  For pass or fail, return
 # a 1 to indicate that more tests can proceed.  However a timeout
@@ -2375,6 +2401,7 @@ proc gdb_expect_list {test sentinel list} {
     while { ${index} < [llength ${list}] } {
 	set pattern [lindex ${list} ${index}]
         set index [expr ${index} + 1]
+	verbose -log "gdb_expect_list pattern: /$pattern/" 2
 	if { ${index} == [llength ${list}] } {
 	    if { ${ok} } {
 		gdb_expect {

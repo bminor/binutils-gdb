@@ -53,21 +53,9 @@ if { [istarget *-*-linux*] } {
     # But only if xml support is compiled in.
     if { $do_xml_test } {
 	# This is done in a way to avoid the timeout that can occur from
-	# applying .* regexp to large output.  It is copied from
-	# gdb.base/maint.exp "maint check-symtabs".
-	send_gdb "info os processes\n"
-	gdb_expect {
-	    -re ".*pid +user +command.*1 +root +\[/a-z\]*init" {
-		gdb_expect {
-		    -re "$gdb_prompt $" {
-			pass "get process list"
-		    }
-		    timeout { fail "(timeout) get process list" }
-		}
-	    }
-	    -re ".*$gdb_prompt $" { fail "get process list" }
-	    timeout { fail "(timeout) get process list" }
-	}
+	# applying .* regexp to large output.
+	gdb_test_sequence "info os processes" "get process list" \
+	    { "pid +user +command" "1 +root +\[/a-z\]*init" }
     }
 }
 
