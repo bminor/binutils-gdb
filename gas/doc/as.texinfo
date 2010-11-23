@@ -480,6 +480,15 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mpid=no}|@b{-mpid=near}|@b{-mpid=far}] [@b{-mpic}|@b{-mno-pic}]
 @end ifset
 
+@ifset XTENSA
+
+@emph{Target Xtensa options:}
+ [@b{--[no-]text-section-literals}] [@b{--[no-]absolute-literals}]
+ [@b{--[no-]target-align}] [@b{--[no-]longcalls}]
+ [@b{--[no-]transform}]
+ [@b{--rename-section} @var{oldname}=@var{newname}]
+@end ifset
+
 @ifset Z80
 
 @emph{Target Z80 options:}
@@ -495,14 +504,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset Z8000
 @c Z8000 has no machine-dependent assembler options
 @end ifset
-@ifset XTENSA
 
-@emph{Target Xtensa options:}
- [@b{--[no-]text-section-literals}] [@b{--[no-]absolute-literals}]
- [@b{--[no-]target-align}] [@b{--[no-]longcalls}]
- [@b{--[no-]transform}]
- [@b{--rename-section} @var{oldname}=@var{newname}]
-@end ifset
 @c man end
 @end smallexample
 
@@ -1324,46 +1326,26 @@ TMS320C6000 processor.
 
 @end ifset
 
-@c man begin OPTIONS
 @ifset XTENSA
-The following options are available when @value{AS} is configured for
-an Xtensa processor.
 
-@table @gcctabopt
-@item --text-section-literals | --no-text-section-literals
-With @option{--text-@-section-@-literals}, literal pools are interspersed
-in the text section.  The default is
-@option{--no-@-text-@-section-@-literals}, which places literals in a
-separate section in the output file.  These options only affect literals
-referenced via PC-relative @code{L32R} instructions; literals for
-absolute mode @code{L32R} instructions are handled separately.
+@ifclear man
+@xref{Xtensa Options}, for the options available when @value{AS} is configured
+for an Xtensa processor.
+@end ifclear
 
-@item --absolute-literals | --no-absolute-literals
-Indicate to the assembler whether @code{L32R} instructions use absolute
-or PC-relative addressing.  The default is to assume absolute addressing
-if the Xtensa processor includes the absolute @code{L32R} addressing
-option.  Otherwise, only the PC-relative @code{L32R} mode can be used.
-
-@item --target-align | --no-target-align
-Enable or disable automatic alignment to reduce branch penalties at the
-expense of some code density.  The default is @option{--target-@-align}.
-
-@item --longcalls | --no-longcalls
-Enable or disable transformation of call instructions to allow calls
-across a greater range of addresses.  The default is
-@option{--no-@-longcalls}.
-
-@item --transform | --no-transform
-Enable or disable all assembler transformations of Xtensa instructions.
-The default is @option{--transform};
-@option{--no-transform} should be used only in the rare cases when the
-instructions must be exactly as specified in the assembly source.
-
-@item --rename-section @var{oldname}=@var{newname}
-When generating output sections, rename the @var{oldname} section to
-@var{newname}.
-@end table
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for an
+Xtensa processor.
+@c man end
+@c man begin INCLUDE
+@include c-xtensa.texi
+@c ended inside the included file
 @end ifset
+
+@end ifset
+
+@c man begin OPTIONS
 
 @ifset Z80
 The following options are available when @value{AS} is configured for

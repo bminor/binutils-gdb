@@ -1,3 +1,10 @@
+2010-11-23  Sterling Augustine  <sterling@tensilica.com>
+
+	* doc/as.texinfo: Refer to and include c-xtensa.texi for Xtensa
+	options.  Move Xtensa options to proper alphabetical location.
+
+	* doc/c-xtensa.texi: Add markup for use in manpage generation.
+
 2010-11-23  Mingming Sun  <mingm.sun@gmail.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Move loongson3a after sb1.

@@ -3,6 +3,7 @@
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c
+@c man end
 @ifset GENERIC
 @page
 @node Xtensa-Dependent
@@ -30,10 +31,9 @@ Reference Manual}.
 @node Xtensa Options
 @section Command Line Options
 
-The Xtensa version of the @sc{gnu} assembler supports these
-special options:
+@c man begin OPTIONS
+@table @gcctabopt
 
-@table @code
 @item --text-section-literals | --no-text-section-literals
 @kindex --text-section-literals
 @kindex --no-text-section-literals
@@ -93,6 +93,8 @@ instruction operands to be errors.
 Rename the @var{oldname} section to @var{newname}.  This option can be used
 multiple times to rename multiple sections.
 @end table
+
+@c man end
 
 @node Xtensa Syntax
 @section Assembler Syntax
