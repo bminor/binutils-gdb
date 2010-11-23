@@ -7756,10 +7756,12 @@ ada_check_typedef (struct type *type)
 
       /* TYPE1 might itself be a TYPE_CODE_TYPEDEF (this can happen with
 	 stubs pointing to arrays, as we don't create symbols for array
-	 types, only for the typedef-to-array types).  This is why
-	 we process TYPE1 with ada_check_typedef before returning
-	 the result.  */
-      return ada_check_typedef (type1);
+	 types, only for the typedef-to-array types).  If that's the case,
+	 strip the typedef layer.  */
+      if (TYPE_CODE (type1) == TYPE_CODE_TYPEDEF)
+	type1 = ada_check_typedef (type1);
+
+      return type1;
     }
 }
 

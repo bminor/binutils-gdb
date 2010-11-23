@@ -1,5 +1,10 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_check_typedef): Call ada_check_typedef only
+	if type1 is a typedef.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS): Add
 	"_finalizer" to the list.
 
