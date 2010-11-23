@@ -1,5 +1,11 @@
 2010-11-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-profile.c (PROFILE_PC_FREQ, PROFILE_PC_NR_BUCKETS,
+	PROFILE_PC_SHIFT, PROFILE_PC_START, PROFILE_PC_END,
+	PROFILE_INSN_COUNT): Add stubs when profile is disabled.
+
+2010-11-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-core.c (WITH_HW): Add device casts to device_error,
 	device_io_read_buffer, and device_io_write_buffer.
 
