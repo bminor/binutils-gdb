@@ -1,3 +1,10 @@
+2010-11-23  Matthias Klose  <doko@ubuntu.com>
+
+	* configure.in: For --enable-gold, handle value `default' instead of
+	`both*'.  Always install ld as ld.bfd, install as ld if gold is
+	not the default.
+	* configure: Regenerate.
+
 2010-11-18  Doug Kwan  <dougkwan@google.com>
 
 	* expression.cc (BINARY_EXPRESSION): Initialize left_alignment

@@ -41,27 +41,33 @@ AC_DEFINE_UNQUOTED(TARGET_SYSTEM_ROOT_RELOCATABLE, $sysroot_relocatable,
 dnl "install_as_default" is true if the linker to be installed as the
 dnl default linker, ld.
 dnl "installed_linker" is the installed gold linker name.
-AC_ARG_ENABLE(gold,
-[[  --enable-gold[=ARG]     build gold [ARG={both}[/{gold,ld}]]]],
+
+default_ld=
+AC_ARG_ENABLE(ld,
+[[  --enable-ld[=ARG]     build ld [ARG={default,yes,no}]]],
 [case "${enableval}" in 
- yes)
-   install_as_default=gold
-   installed_linker=ld
-   ;;
- both/gold)
-   install_as_default=yes
+  default)
+    default_ld=ld.bfd
+    ;;
+esac])
+
+AC_ARG_ENABLE(gold,
+[[  --enable-gold[=ARG]     build gold [ARG={default,yes,no}]]],
+[case "${enableval}" in
+ yes|default)
+   if test x${default_ld} = x; then
+     install_as_default=yes
+   fi
    installed_linker=ld.gold
    ;;
- both|both/ld)
-   install_as_default=no
-   installed_linker=ld.gold
+ no)
    ;;
  *)
    AC_MSG_ERROR([invalid --enable-gold argument])
    ;;
  esac],
-[install_as_default=gold
- installed_linker=ld])
+[install_as_default=no
+ installed_linker=ld.gold])
 AC_SUBST(install_as_default)
 AC_SUBST(installed_linker)
 

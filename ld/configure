@@ -1414,7 +1414,7 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --enable-targets        alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
-  --enable-gold[=ARG]     build gold [ARG={both}[/{gold,ld}]]
+  --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
   --enable-got=<type>     GOT handling scheme (target, single, negative,
                           multigot)
   --enable-werror         treat compile warnings as errors
@@ -4179,11 +4179,11 @@ fi
 # Check whether --enable-gold was given.
 if test "${enable_gold+set}" = set; then :
   enableval=$enable_gold; case "${enableval}" in
- yes|both/gold)
+ default)
    install_as_default=no
    installed_linker=ld.bfd
    ;;
- both|both/ld)
+ yes|no)
    install_as_default=yes
    installed_linker=ld.bfd
    ;;
@@ -4192,8 +4192,8 @@ if test "${enable_gold+set}" = set; then :
    ;;
  esac
 else
-  install_as_default=ld
- installed_linker=ld
+  install_as_default=yes
+ installed_linker=ld.bfd
 fi
 
 

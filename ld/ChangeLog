@@ -1,3 +1,10 @@
+2010-11-23  Matthias Klose  <doko@ubuntu.com>
+
+	* configure.ac: For --enable-gold, handle value `default' instead of
+	`both*'. Always install ld as ld.gold, install as ld if gold is
+	the default.
+	* configure: Regenerate.
+
 2010-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldfile.c: Re-indent plugin code.

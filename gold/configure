@@ -765,6 +765,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_sysroot
+enable_ld
 enable_gold
 enable_threads
 enable_plugins
@@ -1410,7 +1411,8 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-gold[=ARG]     build gold [ARG={both}[/{gold,ld}]]
+  --enable-ld[=ARG]     build ld [ARG={default,yes,no}]
+  --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
   --enable-threads        multi-threaded linking
   --enable-plugins        linker plugins
   --enable-targets        alternative target configurations
@@ -3247,28 +3249,36 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+
+default_ld=
+# Check whether --enable-ld was given.
+if test "${enable_ld+set}" = set; then :
+  enableval=$enable_ld; case "${enableval}" in
+  default)
+    default_ld=ld.bfd
+    ;;
+esac
+fi
+
+
 # Check whether --enable-gold was given.
 if test "${enable_gold+set}" = set; then :
   enableval=$enable_gold; case "${enableval}" in
- yes)
-   install_as_default=gold
-   installed_linker=ld
-   ;;
- both/gold)
-   install_as_default=yes
+ yes|default)
+   if test x${default_ld} = x; then
+     install_as_default=yes
+   fi
    installed_linker=ld.gold
    ;;
- both|both/ld)
-   install_as_default=no
-   installed_linker=ld.gold
+ no)
    ;;
  *)
    as_fn_error "invalid --enable-gold argument" "$LINENO" 5
    ;;
  esac
 else
-  install_as_default=gold
- installed_linker=ld
+  install_as_default=no
+ installed_linker=ld.gold
 fi
 
 
@@ -8577,7 +8587,7 @@ $as_echo X"$file" |
       case "$ac_file" in */Makefile.in)
         # Adjust a relative srcdir.
         ac_dir=`echo "$ac_file"|sed 's%/[^/][^/]*$%%'`
-        ac_dir_suffix="/`echo "$ac_dir"|sed 's%^\./%%'`"
+        ac_dir_suffix=/`echo "$ac_dir"|sed 's%^\./%%'`
         ac_dots=`echo "$ac_dir_suffix"|sed 's%/[^/]*%../%g'`
         # In autoconf-2.13 it is called $ac_given_srcdir.
         # In autoconf-2.50 it is called $srcdir.
