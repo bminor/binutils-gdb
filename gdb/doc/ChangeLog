@@ -1,5 +1,21 @@
 2010-11-23  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Top): Check SYSTEM_READLINE.
+	(Editing): Likewise.
+	(Command History): Likewise.
+	(TUI Keys): Likewise.
+	(Bug Reporting): Conditionally include rluser.texi and
+	inc-history.texinfo.
+	* Makefile.in (READLINE_TEXI_INCFLAG): New variable.
+	(GDB_DOC_SOURCE_INCLUDES): Add comment.
+	(GDBvn.texi): Set SYSTEM_READLINE when appropriate.
+	(gdb.dvi): Use READLINE_TEXI_INCFLAG.
+	(gdb.pdf): Likewise.
+	(gdb.info): Likewise.
+	(gdb/index.html): Likewise.
+
+2010-11-23  Tom Tromey  <tromey@redhat.com>
+
 	* Makefile.in (Makefile): Run ../config.status.
 	(distclean): Update.
 	* configure: Remove.

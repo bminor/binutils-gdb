@@ -63,6 +63,7 @@ BUGURL_TEXI = @REPORT_BUGS_TEXI@
 # Where is the source dir for the READLINE library doc?  
 # Traditionally readline is in .. or .
 READLINE_DIR = ${gdbdir}/../readline/doc
+READLINE_TEXI_INCFLAG = @READLINE_TEXI_INCFLAG@
 
 # The GDB/MI docs come from a sibling directory ../mi
 GDBMI_DIR = ${gdbdir}/mi
@@ -108,6 +109,9 @@ PDFTEX = pdftex
 DVIPS = dvips
 
 # Main GDB manual
+# Note that this unconditionally includes the readline texi files,
+# even when --with-system-readline is used.  This is harmless because
+# these are only used as dependencies.
 GDB_DOC_SOURCE_INCLUDES = \
 	$(srcdir)/fdl.texi \
 	$(srcdir)/gpl.texi \
@@ -303,6 +307,9 @@ GDBvn.texi : ${gdbdir}/version.in
 	if [ "$(BUGURL_TEXI)" = "@uref{http://www.gnu.org/software/gdb/bugs/}" ]; then \
 	  echo "@set BUGURL_DEFAULT" >> ./GDBvn.new; \
 	fi
+	if test -z "$(READLINE_TEXI_INCFLAG)"; then \
+	  echo "@set SYSTEM_READLINE" >> ./GDBvn.new; \
+	fi
 	mv GDBvn.new GDBvn.texi
 
 # Updated atomically
@@ -340,7 +347,7 @@ gdb.dvi: ${GDB_DOC_FILES}
 		ln $(srcdir)/GDBvn.texi . || \
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
-	$(TEXI2DVI) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) \
+	$(TEXI2DVI) $(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
 		$(srcdir)/gdb.texinfo
 
 gdb.ps: gdb.dvi
@@ -352,12 +359,12 @@ gdb.pdf: ${GDB_DOC_FILES}
 		ln $(srcdir)/GDBvn.texi . || \
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
-	$(TEXI2DVI) --pdf -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) \
+	$(TEXI2DVI) --pdf $(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
 		$(srcdir)/gdb.texinfo
 
 # GDB MANUAL: info file
 gdb.info: ${GDB_DOC_FILES}
-	$(MAKEINFO) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) \
+	$(MAKEINFO) $(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
 		-o gdb.info $(srcdir)/gdb.texinfo
 
 # GDB MANUAL: roff translations
@@ -433,7 +440,7 @@ gdb.mm: $(GDB_DOC_FILES) links2roff
 # GDB MANUAL: HTML file
 
 gdb/index.html: ${GDB_DOC_FILES}
-	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
+	$(MAKEHTML) $(MAKEHTMLFLAGS) $(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
 
 # Clean these up before each run.  Avoids a catch 22 with not being
 # able to re-generate these files (to fix a corruption) because these

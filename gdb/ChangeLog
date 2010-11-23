@@ -1,5 +1,10 @@
 2010-11-23  Tom Tromey  <tromey@redhat.com>
 
+	* configure: Rebuild.
+	* configure.ac (READLINE_TEXI_INCFLAG): New subst.
+
+2010-11-19  Tom Tromey  <tromey@redhat.com>
+
 	* Makefile.in (SUBDIRS): Add doc.
 	* configure: Rebuild.
 	* configure.ac: Don't configure in doc.  Create doc/Makefile.
