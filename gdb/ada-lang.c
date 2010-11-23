@@ -7659,7 +7659,23 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 
 /* The same as ada_to_fixed_type_1, except that it preserves the type
    if it is a TYPE_CODE_TYPEDEF of a type that is already fixed.
-   ada_to_fixed_type_1 would return the type referenced by TYPE.  */
+
+   The typedef layer needs be preserved in order to differentiate between
+   arrays and array pointers when both types are implemented using the same
+   fat pointer.  In the array pointer case, the pointer is encoded as
+   a typedef of the pointer type.  For instance, considering:
+
+	  type String_Access is access String;
+	  S1 : String_Access := null;
+
+   To the debugger, S1 is defined as a typedef of type String.  But
+   to the user, it is a pointer.  So if the user tries to print S1,
+   we should not dereference the array, but print the array address
+   instead.
+
+   If we didn't preserve the typedef layer, we would lose the fact that
+   the type is to be presented as a pointer (needs de-reference before
+   being printed).  And we would also use the source-level type name.  */
 
 struct type *
 ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
@@ -7669,8 +7685,26 @@ ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
   struct type *fixed_type =
     ada_to_fixed_type_1 (type, valaddr, address, dval, check_tag);
 
+  /*  If TYPE is a typedef and its target type is the same as the FIXED_TYPE,
+      then preserve the typedef layer.
+
+      Implementation note: We can only check the main-type portion of
+      the TYPE and FIXED_TYPE, because eliminating the typedef layer
+      from TYPE now returns a type that has the same instance flags
+      as TYPE.  For instance, if TYPE is a "typedef const", and its
+      target type is a "struct", then the typedef elimination will return
+      a "const" version of the target type.  See check_typedef for more
+      details about how the typedef layer elimination is done.
+
+      brobecker/2010-11-19: It seems to me that the only case where it is
+      useful to preserve the typedef layer is when dealing with fat pointers.
+      Perhaps, we could add a check for that and preserve the typedef layer
+      only in that situation.  But this seems unecessary so far, probably
+      because we call check_typedef/ada_check_typedef pretty much everywhere.
+      */
   if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF
-      && TYPE_TARGET_TYPE (type) == fixed_type)
+      && (TYPE_MAIN_TYPE (TYPE_TARGET_TYPE (type))
+	  == TYPE_MAIN_TYPE (fixed_type)))
     return type;
 
   return fixed_type;
