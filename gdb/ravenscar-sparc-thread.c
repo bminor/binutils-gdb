@@ -69,7 +69,7 @@ supply_register_at_address (struct regcache *regcache, int regnum,
 
   buf = (char *) alloca (buf_size);
   read_memory (register_addr, buf, buf_size);
-  regcache_raw_supply (regcache, regnum, &buf);
+  regcache_raw_supply (regcache, regnum, buf);
 }
 
 /* Return true if, for a non-running thread, REGNUM has been saved on the
