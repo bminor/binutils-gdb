@@ -1,3 +1,8 @@
+2010-11-22  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-tasks.c (get_tcb_types_info): Use C lookups to get
+	ATCB symbols.
+
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_check_typedef): Call ada_check_typedef only

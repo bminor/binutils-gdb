@@ -380,20 +380,29 @@ get_tcb_types_info (struct type **atcb_type,
   const char *private_data_name = "system__task_primitives__private_data";
   const char *entry_call_record_name = "system__tasking__entry_call_record";
 
+  /* ATCB symbols may be found in several compilation units. As we
+     are only interested in one instance, use standard (literal,
+     C-like) lookups to get the first match.  */
+
   struct symbol *atcb_sym =
-    lookup_symbol (atcb_name, NULL, VAR_DOMAIN, NULL);
+    lookup_symbol_in_language (atcb_name, NULL, VAR_DOMAIN,
+			       language_c, NULL);
   const struct symbol *common_atcb_sym =
-    lookup_symbol (common_atcb_name, NULL, VAR_DOMAIN, NULL);
+    lookup_symbol_in_language (common_atcb_name, NULL, VAR_DOMAIN,
+			       language_c, NULL);
   const struct symbol *private_data_sym =
-    lookup_symbol (private_data_name, NULL, VAR_DOMAIN, NULL);
+    lookup_symbol_in_language (private_data_name, NULL, VAR_DOMAIN,
+			       language_c, NULL);
   const struct symbol *entry_call_record_sym =
-    lookup_symbol (entry_call_record_name, NULL, VAR_DOMAIN, NULL);
+    lookup_symbol_in_language (entry_call_record_name, NULL, VAR_DOMAIN,
+			       language_c, NULL);
 
   if (atcb_sym == NULL || atcb_sym->type == NULL)
     {
       /* In Ravenscar run-time libs, the  ATCB does not have a dynamic
          size, so the symbol name differs.  */
-      atcb_sym = lookup_symbol (atcb_name_fixed, NULL, VAR_DOMAIN, NULL);
+      atcb_sym = lookup_symbol_in_language (atcb_name_fixed, NULL, VAR_DOMAIN,
+					    language_c, NULL);
 
       if (atcb_sym == NULL || atcb_sym->type == NULL)
         error (_("Cannot find Ada_Task_Control_Block type. Aborting"));
