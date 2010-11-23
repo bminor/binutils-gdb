@@ -1,5 +1,18 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ravenscar-thread.c (running_thread_name): Change value.
+	(read_thread_id): Remove advance declaration.
+	(get_running_thread_msymbol): New function.
+	(has_ravenscar_runtime): Use get_running_thread_msymbol to
+	compute msym_running_thread.
+	(get_running_thread_id): Renames read_thread_id. Slight modifications
+	to not take any argument anymore, using get_running_thread_msymbol
+	to determine which symbol to use instead.
+	(ravenscar_running_thread): Use get_running_thread_id instead of
+	read_thread_id.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* ravenscar-sparc-thread.c (supply_register_at_address):
 	Fix passing of buf in call to regcache_raw_supply.
 
