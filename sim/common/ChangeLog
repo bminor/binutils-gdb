@@ -1,3 +1,8 @@
+2010-11-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-core.c (WITH_HW): Add device casts to device_error,
+	device_io_read_buffer, and device_io_write_buffer.
+
 2010-11-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-sockser.c (dv_sockser_write_buffer): New function.

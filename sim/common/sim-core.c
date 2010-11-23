@@ -28,6 +28,9 @@
 
 #if (WITH_HW)
 #include "sim-hw.h"
+#define device_error(client, ...) device_error ((device *)(client), __VA_ARGS__)
+#define device_io_read_buffer(client, ...) device_io_read_buffer ((device *)(client), __VA_ARGS__)
+#define device_io_write_buffer(client, ...) device_io_write_buffer ((device *)(client), __VA_ARGS__)
 #endif
 
 /* "core" module install handler.
