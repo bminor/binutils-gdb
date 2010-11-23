@@ -10559,12 +10559,12 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_LS2F;
       break;
 
-    case bfd_mach_mips_loongson_3a:
-      val = E_MIPS_ARCH_64 | E_MIPS_MACH_LS3A;
-      break;
-
     case bfd_mach_mips_sb1:
       val = E_MIPS_ARCH_64 | E_MIPS_MACH_SB1;
+      break;
+
+    case bfd_mach_mips_loongson_3a:
+      val = E_MIPS_ARCH_64 | E_MIPS_MACH_LS3A;
       break;
 
     case bfd_mach_mips_octeon:

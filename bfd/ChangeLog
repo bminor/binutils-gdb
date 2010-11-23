@@ -1,3 +1,8 @@
+2010-11-23  Mingming Sun  <mingm.sun@gmail.com>
+
+	* elfxx-mips.c (mips_set_isa_flags): Move bfd_mach_loongson_3a
+	after bfd_mach_mips_sb1.
+
 2010-11-17  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-lib.c (vms_write_index): Add comments.

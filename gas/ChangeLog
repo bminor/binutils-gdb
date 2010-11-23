@@ -1,6 +1,10 @@
+2010-11-23  Mingming Sun  <mingm.sun@gmail.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Move loongson3a after sb1.
+
 2010-11-23  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* doc/as.texinfo: Refer to and include c-i386.texi for i386 
+	* doc/as.texinfo: Refer to and include c-i386.texi for i386
 	options.
 
 	* doc/c-i386.texi: Add markup for use in manpage generation.
