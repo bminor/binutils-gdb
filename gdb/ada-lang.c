@@ -7030,7 +7030,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   int nfields, bit_len;
   int variant_field;
   long off;
-  int fld_bit_len, bit_incr;
+  int fld_bit_len;
   int f;
 
   /* Compute the number of fields in this record type that are going
@@ -7072,7 +7072,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
       if (ada_is_variant_part (type, f))
         {
           variant_field = f;
-          fld_bit_len = bit_incr = 0;
+          fld_bit_len = 0;
         }
       else if (is_dynamic_field (type, f))
         {
@@ -7139,7 +7139,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     an overflow should not happen in practice.  So rather than
 	     adding overflow recovery code to this already complex code,
 	     we just assume that it's not going to happen.  */
-          bit_incr = fld_bit_len =
+          fld_bit_len =
             TYPE_LENGTH (TYPE_FIELD_TYPE (rtype, f)) * TARGET_CHAR_BIT;
         }
       else
@@ -7149,15 +7149,15 @@ ada_template_to_fixed_record_type_1 (struct type *type,
           TYPE_FIELD_TYPE (rtype, f) = field_type;
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
           if (TYPE_FIELD_BITSIZE (type, f) > 0)
-            bit_incr = fld_bit_len =
+            fld_bit_len =
               TYPE_FIELD_BITSIZE (rtype, f) = TYPE_FIELD_BITSIZE (type, f);
           else
-            bit_incr = fld_bit_len =
+            fld_bit_len =
               TYPE_LENGTH (ada_check_typedef (field_type)) * TARGET_CHAR_BIT;
         }
       if (off + fld_bit_len > bit_len)
         bit_len = off + fld_bit_len;
-      off += bit_incr;
+      off += fld_bit_len;
       TYPE_LENGTH (rtype) =
         align_value (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT;
     }

@@ -1,5 +1,9 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_template_to_fixed_record_type_1): Delete bit_incr.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_to_fixed_type): Expand function documentation.
 	Return the original type if the main type portions match rather
 	than when the type themselves match.
