@@ -51,7 +51,8 @@ struct frame_info;
    interest to users. Each name (a basic regular expression string)
    is followed by a comma. */
 #define ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS \
-   "___clean[.$a-zA-Z0-9_]*$",
+   "___clean[.$a-zA-Z0-9_]*$", \
+   "___finalizer[.$a-zA-Z0-9_]*$",
 
 /* The maximum number of frame levels searched for non-local,
  * non-global symbols.  This limit exists as a precaution to prevent

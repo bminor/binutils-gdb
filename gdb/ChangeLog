@@ -1,5 +1,10 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS): Add
+	"_finalizer" to the list.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* symfile.c: Remove all "#if 0"/"#endif" blocks.
 
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
