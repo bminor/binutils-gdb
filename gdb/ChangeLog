@@ -1,3 +1,8 @@
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* ravenscar-sparc-thread.c (supply_register_at_address):
+	Fix passing of buf in call to regcache_raw_supply.
+
 2010-11-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_read_index): Ignore higher .gdb_index versions.
