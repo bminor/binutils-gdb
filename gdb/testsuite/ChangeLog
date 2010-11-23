@@ -1,3 +1,10 @@
+2010-11-23  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12212
+
+	* gdb.python/python.exp: Check that selected_thread raises an
+	error when no inferior is loaded.
+
 2010-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-stack-boundary.exp: New file.

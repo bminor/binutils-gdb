@@ -130,6 +130,9 @@ find_thread_object (ptid_t ptid)
   PyObject *inf_obj;
 
   pid = PIDGET (ptid);
+  if (pid == 0)
+    return NULL;
+
   inf_obj = find_inferior_object (pid);
 
   if (inf_obj)

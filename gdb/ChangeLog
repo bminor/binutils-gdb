@@ -1,4 +1,11 @@
-2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+2010-11-23  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12212
+
+	* python/py-inferior.c (find_thread_object): Check if PIDGET
+	returns 0.
+
+010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_template_to_fixed_record_type_1): Delete bit_incr.
 

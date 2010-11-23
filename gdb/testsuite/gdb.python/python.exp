@@ -146,6 +146,11 @@ gdb_test_no_output "python a = gdb.execute('help', to_string=True)" "collect hel
 
 gdb_test "python print a" ".*aliases -- Aliases of other commands.*" "verify help to uiout"
 
+# Test PR 12212, using InfThread.selected_thread() when no inferior is
+# loaded.
+gdb_py_test_silent_cmd "python nothread = gdb.selected_thread()" "Attempt to aquire thread with no inferior" 1
+gdb_test "python print nothread == None" "True" "Ensure that no threads are returned"
+
 # Start with a fresh gdb.
 clean_restart ${testfile}
 
