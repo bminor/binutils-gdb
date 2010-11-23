@@ -989,7 +989,7 @@ CPP
 YACC
 YFLAGS
 XMKMF'
-ac_subdirs_all='doc testsuite
+ac_subdirs_all='testsuite
 gdbtk
 multi-ice
 gdbserver'
@@ -7883,7 +7883,7 @@ fi
 
 
 
-subdirs="$subdirs doc testsuite"
+subdirs="$subdirs testsuite"
 
 
 # Check whether to support alternative target configurations
@@ -15899,7 +15899,7 @@ ac_config_links="$ac_config_links $ac_config_links_1"
 $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 
 
-ac_config_files="$ac_config_files Makefile .gdbinit:gdbinit.in gnulib/Makefile data-directory/Makefile"
+ac_config_files="$ac_config_files Makefile .gdbinit:gdbinit.in doc/Makefile gnulib/Makefile data-directory/Makefile"
 
 ac_config_commands="$ac_config_commands default"
 
@@ -16665,6 +16665,7 @@ do
     "$ac_config_links_1") CONFIG_LINKS="$CONFIG_LINKS $ac_config_links_1" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     ".gdbinit") CONFIG_FILES="$CONFIG_FILES .gdbinit:gdbinit.in" ;;
+    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "gnulib/Makefile") CONFIG_FILES="$CONFIG_FILES gnulib/Makefile" ;;
     "data-directory/Makefile") CONFIG_FILES="$CONFIG_FILES data-directory/Makefile" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;

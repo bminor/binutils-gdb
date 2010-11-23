@@ -871,7 +871,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 
 TSOBS = inflow.o
 
-SUBDIRS = @subdirs@ data-directory
+SUBDIRS = doc @subdirs@ data-directory
 CLEANDIRS = $(SUBDIRS) gnulib
 
 # List of subdirectories in the build tree that must exist.

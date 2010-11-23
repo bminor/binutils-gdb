@@ -1,3 +1,9 @@
+2010-11-23  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (SUBDIRS): Add doc.
+	* configure: Rebuild.
+	* configure.ac: Don't configure in doc.  Create doc/Makefile.
+
 2010-11-23  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12212

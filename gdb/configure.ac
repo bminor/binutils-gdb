@@ -108,7 +108,7 @@ AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this pat
               [Relocated directory for source files. ])
 ])
 
-AC_CONFIG_SUBDIRS(doc testsuite)
+AC_CONFIG_SUBDIRS(testsuite)
 
 # Check whether to support alternative target configurations
 AC_ARG_ENABLE(targets,
@@ -2148,7 +2148,7 @@ dnl  At the moment, we just assume it's UTF-8.
 AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
           [Define to be a string naming the default host character set.])
 
-AC_OUTPUT(Makefile .gdbinit:gdbinit.in gnulib/Makefile data-directory/Makefile,
+AC_OUTPUT(Makefile .gdbinit:gdbinit.in doc/Makefile gnulib/Makefile data-directory/Makefile,
 [
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)

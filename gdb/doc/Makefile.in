@@ -515,8 +515,8 @@ annotate/index.html: $(ANNOTATE_DOC_FILES)
 
 force:
 
-Makefile: Makefile.in $(host_makefile_frag) config.status
-	$(SHELL) ./config.status
+Makefile: Makefile.in $(host_makefile_frag) ../config.status
+	cd .. && $(SHELL) ./config.status doc/Makefile
 
 
 # The "least clean" level of cleaning.  Get rid of files which are
@@ -534,7 +534,7 @@ clean: mostlyclean
 	rm -f gdb-cfg.texi
 
 distclean: clean
-	rm -f Makefile config.status config.log
+	rm -f Makefile
 
 # GDBvn.texi, the dvi files, the info files, and the postscript files, 
 # are all part of the distribution, so it should not be removed by

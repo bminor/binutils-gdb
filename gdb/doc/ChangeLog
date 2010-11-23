@@ -1,3 +1,10 @@
+2010-11-23  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (Makefile): Run ../config.status.
+	(distclean): Update.
+	* configure: Remove.
+	* configure.ac: Remove.
+
 2010-11-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Basic Python): Update.  Add xref.
