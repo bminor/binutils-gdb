@@ -3,6 +3,8 @@
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
+@c man end
+
 @ifset GENERIC
 @page
 @node i386-Dependent
@@ -50,7 +52,8 @@ extending the Intel architecture to 64-bits.
 The i386 version of @code{@value{AS}} has a few machine
 dependent options:
 
-@table @code
+@c man begin OPTIONS
+@table @gcctabopt
 @cindex @samp{--32} option, i386
 @cindex @samp{--32} option, x86-64
 @cindex @samp{--64} option, i386
@@ -226,6 +229,7 @@ This opetion specifies that registers don't require a @samp{%} prefix.
 The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
 
 @end table
+@c man end
 
 @node i386-Directives
 @section x86 specific Directives

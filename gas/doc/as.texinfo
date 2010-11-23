@@ -812,7 +812,28 @@ Warn when nops are generated.
 Warn when a nop after a 32-bit multiply instruction is generated.
 @end table
 @end ifset
+@c man end
 
+@ifset I80386
+
+@ifclear man
+@xref{i386-Options}, for the options available when @value{AS} is
+configured for an i386 processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for
+an i386 processor.
+@c man end
+@c man begin INCLUDE
+@include c-i386.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@c man begin OPTIONS
 @ifset I960
 The following options are available when @value{AS} is configured for the
 Intel 80960 processor.

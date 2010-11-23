@@ -1,3 +1,10 @@
+2010-11-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/as.texinfo: Refer to and include c-i386.texi for i386 
+	options.
+
+	* doc/c-i386.texi: Add markup for use in manpage generation.
+
 2010-11-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* doc/as.texinfo: Refer to or include c-alpha.texi for Alpha
