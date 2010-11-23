@@ -1,5 +1,10 @@
 2010-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* ravenscar-thread.c (show_ravenscar_task_switching_command):
+	Add missing '\n' in output.
+
+2010-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* ravenscar-thread.c (running_thread_name): Change value.
 	(read_thread_id): Remove advance declaration.
 	(get_running_thread_msymbol): New function.

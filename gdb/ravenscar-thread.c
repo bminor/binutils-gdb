@@ -411,10 +411,10 @@ show_ravenscar_task_switching_command (struct ui_file *file, int from_tty,
 {
   if (ravenscar_task_support)
     fprintf_filtered (file, _("\
-Support for Ravenscar task/thread switching is enabled"));
+Support for Ravenscar task/thread switching is enabled\n"));
   else
     fprintf_filtered (file, _("\
-Support for Ravenscar task/thread switching is disabled"));
+Support for Ravenscar task/thread switching is disabled\n"));
 }
 
 /* Module startup initialization function, automagically called by
