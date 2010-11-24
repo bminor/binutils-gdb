@@ -1,5 +1,9 @@
 2010-11-24  Edjunior Machado  <emachado@br.ibm.com>
 
+	* gdb.asm/powerpc.inc: Use 'sys_exit' on gdbasm_exit0 macro.
+
+2010-11-24  Edjunior Machado  <emachado@br.ibm.com>
+
 	* gdb.asm/asm-source.exp: Add new target "powerpc64"; expect leading `.'
 	on ppc64's symbols; "finish" and "return" commands must accept to
 	show the caller line again as well as the line after.

@@ -29,9 +29,9 @@
 
 	comment "exit (0)"
 	.macro gdbasm_exit0
-	comment "Don't know how to exit, but this will certainly halt..."
-	li	0, 0
-	lwz 	0, 0(0)
+	comment "sys_exit"
+	li	0, 1
+	sc
 	.endm
 
 	comment "crt0 startup"
