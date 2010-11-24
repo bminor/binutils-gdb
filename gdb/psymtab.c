@@ -50,11 +50,8 @@ struct psymbol_bcache
 static struct partial_symbol *match_partial_symbol (struct partial_symtab *,
 						    int,
 						    const char *, domain_enum,
-						    int (*) (const char *,
-							     const char *),
-						    int (*) (const char *,
-							     const char *));
-
+						    symbol_compare_ftype *,
+						    symbol_compare_ftype *);
 
 static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *, int,
@@ -446,8 +443,8 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 static struct partial_symbol *
 match_partial_symbol (struct partial_symtab *pst, int global,
 		      const char *name, domain_enum domain,
-		      int (*match) (const char *, const char *),
-		      int (*ordered_compare) (const char *, const char *))
+		      symbol_compare_ftype *match,
+		      symbol_compare_ftype *ordered_compare)
 {
   struct partial_symbol **start, **psym;
   struct partial_symbol **top, **real_top, **bottom, **center;
@@ -1064,8 +1061,7 @@ static int
 map_block (const char *name, domain_enum namespace, struct objfile *objfile,
 	   struct block *block,
 	   int (*callback) (struct block *, struct symbol *, void *),
-	   void *data,
-	   int (*match) (const char *, const char *))
+	   void *data, symbol_compare_ftype *match)
 {
   struct dict_iterator iter;
   struct symbol *sym;
@@ -1093,9 +1089,8 @@ map_matching_symbols_psymtab (const char *name, domain_enum namespace,
 			      int (*callback) (struct block *,
 					       struct symbol *, void *),
 			      void *data,
-			      int (*match) (const char *, const char *),
-			      int (*ordered_compare) (const char *,
-						      const char *))
+			      symbol_compare_ftype *match,
+			      symbol_compare_ftype *ordered_compare)
 {
   const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
   struct partial_symtab *ps;

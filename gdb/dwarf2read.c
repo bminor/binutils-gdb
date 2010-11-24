@@ -2383,10 +2383,8 @@ dw2_map_matching_symbols (const char * name, domain_enum namespace,
 			  struct objfile *objfile, int global,
 			  int (*callback) (struct block *,
 					   struct symbol *, void *),
-			  void *data,
-			  int (*match) (const char *, const char *),
-			  int (*ordered_compare) (const char *,
-						  const char *))
+			  void *data, symbol_compare_ftype *match,
+			  symbol_compare_ftype *ordered_compare)
 {
   /* Currently unimplemented; used for Ada.  The function can be called if the
      current language is Ada for a non-Ada objfile using GNU index.  As Ada

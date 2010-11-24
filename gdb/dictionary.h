@@ -23,6 +23,8 @@
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
+#include "symfile.h"
+
 /* An opaque type for dictionaries; only dictionary.c should know
    about its innards.  */
 
@@ -142,8 +144,7 @@ extern struct symbol *dict_iter_name_next (const char *name,
 
 extern struct symbol *dict_iter_match_first (const struct dictionary *dict,
 					     const char *name,
-					     int (*compare) (const char*, 
-							     const char *),
+					     symbol_compare_ftype *compare,
 					     struct dict_iterator *iterator);
 
 /* Advance ITERATOR to point at the next symbol in DICT whose
@@ -155,8 +156,7 @@ extern struct symbol *dict_iter_match_first (const struct dictionary *dict,
    previous call to dict_iter_match_first with the same NAME and COMPARE.  */
 
 extern struct symbol *dict_iter_match_next (const char *name,
-					    int (*compare) (const char*, 
-							    const char *),
+					    symbol_compare_ftype *compare,
 					    struct dict_iterator *iterator);
 
 /* Return some notion of the size of the dictionary: the number of

@@ -1,3 +1,23 @@
+2010-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* dictionary.c
+	(struct dict_vector) <iter_match_first, iter_match_next>
+	(iter_match_first_hashed, iter_match_next_hashed)
+	(iter_match_first_linear, iter_match_next_linear)
+	(dict_iter_match_first, dict_iter_match_next, iter_match_first_hashed)
+	(iter_match_next_hashed, iter_match_first_linear)
+	(iter_match_next_linear): Use symbol_compare_ftype.
+	* dictionary.h: Include symfile.h.
+	(dict_iter_match_first, dict_iter_match_next): Use
+	symbol_compare_ftype.
+	* dwarf2read.c (dw2_map_matching_symbols): Likewise.
+	* psymtab.c (match_partial_symbol, match_partial_symbol, map_block)
+	(map_matching_symbols_psymtab): Likewise.
+	* symfile.h (symbol_compare_ftype): New typedef.
+	(struct quick_symbol_functions) <map_matching_symbols): Use
+	symbol_compare_ftype.
+
 2010-11-23  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.
