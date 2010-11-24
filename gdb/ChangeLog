@@ -1,5 +1,11 @@
 2010-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* infrun.c (struct inferior_status, save_inferior_status)
+	(restore_inferior_status): Group and reorder the fields, comment their
+	groups.
+
+2010-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* dictionary.c
 	(struct dict_vector) <iter_match_first, iter_match_next>
