@@ -1,3 +1,9 @@
+2010-11-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* doc/as.texinfo: Refer to and include c-bfin.texi for Blackfin
+	options.
+	* doc/c-bfin.texi: Add markup for use in manpage generation.
+
 2010-11-23  Sterling Augustine  <sterling@tensilica.com>
 
 	* doc/as.texinfo: Refer to and include c-xtensa.texi for Xtensa

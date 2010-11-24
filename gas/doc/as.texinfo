@@ -766,19 +766,22 @@ Specify that PIC code has been generated.
 @end ifset
 
 @ifset Blackfin
+
+@ifclear man
+@xref{Blackfin Options}, for the options available when @value{AS} is
+configured for the Blackfin processor family.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
 The following options are available when @value{AS} is configured for
 the Blackfin processor family.
+@c man end
+@c man begin INCLUDE
+@include c-bfin.texi
+@c ended inside the included file
+@end ifset
 
-@table @gcctabopt
-@item -mcpu=@var{processor}@r{[}-@var{sirevision}@r{]}
-This option specifies the target processor.  The optional @var{sirevision}
-is not used in assembler.
-@item -mfdpic
-Assemble for the FDPIC ABI.
-@item -mno-fdpic
-@itemx -mnopic
-Disable -mfdpic.
-@end table
 @end ifset
 
 @ifset CRIS
