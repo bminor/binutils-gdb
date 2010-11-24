@@ -101,7 +101,15 @@ switch -glob -- [istarget] {
         set asm-arch mips
     }
     "powerpc*-*" {
-        set asm-arch powerpc
+        if { [is_lp64_target] } {
+            set asm-arch powerpc64
+            set asm-flags "-a64 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+            append link-flags " -m elf64ppc"
+        } else {
+            set asm-arch powerpc
+            set asm-flags "-a32 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+            append link-flags " -m elf32ppc"
+        }
     }
     "sh*-*-*" {
         set asm-arch sh
@@ -362,8 +370,19 @@ gdb_test "info source" \
 	"info source asmsrc1.s"
 
 # Try 'finishing' from foo3
-gdb_test "finish" "Run till exit from.*\[\r\n\]$line_call_foo3_again\[ \t\]+gdbasm_call foo3" \
-	"finish from foo3"
+# Some architectures will have one or more instructions after the
+# call instruction which still is part of the call sequence, so we
+# must be prepared for a "finish" to show us the caller line
+# again as well as the statement after.
+gdb_test_multiple "finish" "finish from foo3" {
+    -re "Run till exit from.*\[\r\n\]$line_call_foo3\[ \t\]+gdbasm_call foo3.*$gdb_prompt $" {
+        pass "finish from foo3"
+        gdb_test "s" ".*" "s after finish"
+    }
+    -re "Run till exit from.*\[\r\n\]$line_call_foo3_again\[ \t\]+gdbasm_call foo3.*$gdb_prompt $" {
+        pass "finish from foo3"
+    }
+}
 
 # Try 'info source' from asmsrc2.s
 gdb_test "info source" \
@@ -400,15 +419,28 @@ gdb_test_multiple "info sources" "info sources" {
 
 # Try 'info line'
 gdb_test "info line" \
-	"Line $line_call_foo3_again of.*asmsrc2.s.*starts at.*<foo2+.*> and ends at.*<foo2+.*>." \
+	"Line $line_call_foo3_again of.*asmsrc2.s.*starts at.*<\\.?foo2+.*> and ends at.*<\\.?foo2+.*>." \
 	"info line"
 
 # Try 'nexting' over next call to foo3
 gdb_test "next" "$line_foo2_leave\[ \t\]+gdbasm_leave" "next over foo3"
 
 # Try 'return' from foo2
-gdb_test "return" "\#0  main .*$line_main_exit\[ \t\]+gdbasm_exit0" "return from foo2" \
-	"Make (foo2|selected stack frame) return now\?.*" "y"
+# Like "finish", "return" command also can return to the caller
+# line again or the statement after, depending on the architecture.
+gdb_test_multiple "return" "return from foo2" {
+    -re "Make (foo2|selected stack frame) return now\?.*" {
+        send_gdb "y\n"
+        exp_continue
+    }
+    -re "\#0.*main .*$line_call_foo2\[ \t\]+gdbasm_call foo2.*$gdb_prompt $" {
+        pass "return from foo2"
+        gdb_test "s" ".*" "s after return"
+    }
+    -re "\#0.*main .*$line_main_exit\[ \t\]+gdbasm_exit0.*$gdb_prompt $" {
+        pass "return from foo2"
+    }
+}
 
 # Disassemble something, check the output
 proc test_dis { command var } {

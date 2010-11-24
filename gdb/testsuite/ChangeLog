@@ -1,3 +1,10 @@
+2010-11-24  Edjunior Machado  <emachado@br.ibm.com>
+
+	* gdb.asm/asm-source.exp: Add new target "powerpc64"; expect leading `.'
+	on ppc64's symbols; "finish" and "return" commands must accept to
+	show the caller line again as well as the line after.
+	* gdb.asm/powerpc64.inc: New file.
+
 2010-11-23  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_test_sequence): New function.
@@ -8,7 +15,7 @@
 
 2010-11-23  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/12212
+	PR python/12212
 
 	* gdb.python/python.exp: Check that selected_thread raises an
 	error when no inferior is loaded.
