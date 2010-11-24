@@ -1,5 +1,15 @@
 2010-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* infrun.c (struct inferior_status) <stepping_over_breakpoint>
+	(save_inferior_status) <stepping_over_breakpoint>
+	(restore_inferior_status) <stepping_over_breakpoint>: Rename to
+	trap_expected.
+	(struct inferior_status) <step_resume_break_address>: Remove.
+
+2010-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* infrun.c (struct inferior_status, save_inferior_status)
 	(restore_inferior_status): Group and reorder the fields, comment their
 	groups.

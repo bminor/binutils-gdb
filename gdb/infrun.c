@@ -6171,7 +6171,7 @@ struct inferior_status
   CORE_ADDR step_range_end;
   struct frame_id step_frame_id;
   struct frame_id step_stack_frame_id;
-  int stepping_over_breakpoint;
+  int trap_expected;
   int proceed_to_finish;
   int in_infcall;
   enum step_over_calls_kind step_over_calls;
@@ -6184,7 +6184,6 @@ struct inferior_status
   /* Other fields:  */
   enum stop_stack_kind stop_stack_dummy;
   int stopped_by_random_signal;
-  CORE_ADDR step_resume_break_address;
   int stop_after_trap;
 
   /* ID if the selected frame when the inferior function call was made.  */
@@ -6206,7 +6205,7 @@ save_inferior_status (void)
   inf_status->step_range_end = tp->step_range_end;
   inf_status->step_frame_id = tp->step_frame_id;
   inf_status->step_stack_frame_id = tp->step_stack_frame_id;
-  inf_status->stepping_over_breakpoint = tp->trap_expected;
+  inf_status->trap_expected = tp->trap_expected;
   inf_status->proceed_to_finish = tp->proceed_to_finish;
   inf_status->in_infcall = tp->in_infcall;
   inf_status->step_over_calls = tp->step_over_calls;
@@ -6266,7 +6265,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   tp->step_range_end = inf_status->step_range_end;
   tp->step_frame_id = inf_status->step_frame_id;
   tp->step_stack_frame_id = inf_status->step_stack_frame_id;
-  tp->trap_expected = inf_status->stepping_over_breakpoint;
+  tp->trap_expected = inf_status->trap_expected;
   tp->proceed_to_finish = inf_status->proceed_to_finish;
   tp->in_infcall = inf_status->in_infcall;
   tp->step_over_calls = inf_status->step_over_calls;
