@@ -222,7 +222,7 @@ static void trace_pass_command (char *, int);
 /* Assuming we're creating a static tracepoint, does S look like a
    static tracepoint marker spec ("-m MARKER_ID")?  */
 #define is_marker_spec(s)						\
-  (strncmp (s, "-m", 2) == 0 && ((s)[2] == ' ' || (s)[2] == '\t'))
+  (s != NULL && strncmp (s, "-m", 2) == 0 && ((s)[2] == ' ' || (s)[2] == '\t'))
 
 /* A reference-counted struct command_line.  This lets multiple
    breakpoints share a single command list.  */
