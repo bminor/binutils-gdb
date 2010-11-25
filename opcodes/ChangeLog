@@ -1,9 +1,16 @@
+2010-11-25  Alan Modra  <amodra@gmail.com>
+
+	* po/es.po: Update.
+	* po/fr.po: Update.
+	* po/nl.po: Update.
+	* po/zh_CN.po: Update.
+
 2010-11-11  Mingming Sun  <mingm.sun@gmail.com>
 
 	* mips-dis.c (mips_arch_choices): Add loongson3a.
 	* mips-opc.c (IL3A): Defined as INSN_LOONGSON_3A.
 	(mips_builtin_opcodes): Modify some instructions' membership from
-	IL2F to IL2F|IL3A, since these instructions are supported by Loongson_3A.
+	IL2F to IL2F|IL3A.
 
 2010-11-10  Nick Clifton  <nickc@redhat.com>
 

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: binutils 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-11-05 11:33+0100\n"
-"PO-Revision-Date: 2010-11-10 22:08+0900\n"
+"PO-Revision-Date: 2010-11-24 23:10+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -32,7 +32,7 @@ msgid " If no addresses are specified on the command line, they will be read fro
 msgstr "コマンドラインでアドレスが指定されない場合、標準入力から読み取ります\n"
 
 #: addr2line.c:83
-#, fuzzy, c-format
+#, c-format
 msgid ""
 " The options are:\n"
 "  @<file>                Read options from <file>\n"
@@ -963,12 +963,12 @@ msgstr "      --add-stdcall-underscore インターフェースライブラリ�
 #: dlltool.c:3904
 #, c-format
 msgid "      --no-leading-underscore All symbols shouldn't be prefixed by an underscore.\n"
-msgstr ""
+msgstr "      --no-leading-underscore 全てのシンボルの先頭に下線 (_) が付いていないとする\n"
 
 #: dlltool.c:3905
 #, c-format
 msgid "      --leading-underscore   All symbols should be prefixed by an underscore.\n"
-msgstr ""
+msgstr "      --leading-underscore   すべのシンボルの先頭に下線 (_) が付いているとする\n"
 
 #: dlltool.c:3906
 #, c-format
@@ -1293,12 +1293,12 @@ msgstr "   --nodelete             一時ファイルを削除しない\n"
 #: dllwrap.c:519
 #, c-format
 msgid "   --no-leading-underscore  Entrypoint without underscore\n"
-msgstr ""
+msgstr "   --no-leading-underscore  下線 (_) が付いていないエントリポイント\n"
 
 #: dllwrap.c:520
 #, c-format
 msgid "   --leading-underscore     Entrypoint with underscore.\n"
-msgstr ""
+msgstr "   --leading-underscore     下線 (_) が付いているエントリポイント\n"
 
 #: dllwrap.c:521
 #, c-format
@@ -1412,7 +1412,7 @@ msgstr "ユーザ定義: 長さ %d\n"
 #: dwarf.c:395 dwarf.c:2922
 #, c-format
 msgid "UNKNOWN: length %d\n"
-msgstr "UNKNOWN: 長さ %d\n"
+msgstr "不明: 長さ %d\n"
 
 #: dwarf.c:408
 msgid "<no .debug_str section>"
@@ -1513,7 +1513,7 @@ msgstr "(location list)"
 #: dwarf.c:1683 dwarf.c:3563
 #, c-format
 msgid " [without DW_AT_frame_base]"
-msgstr ""
+msgstr " [DW_AT_frame_base 無し]"
 
 #: dwarf.c:1698
 #, c-format
@@ -1528,12 +1528,12 @@ msgstr "不明な AT 値: %lx"
 #: dwarf.c:1960
 #, c-format
 msgid "Reserved length value (%lx) found in section %s\n"
-msgstr ""
+msgstr "セクション %2$s 内に予約された長さの値 (%1$lx) が見つかりました\n"
 
 #: dwarf.c:1971
 #, c-format
 msgid "Corrupt unit length (%lx) found in section %s\n"
-msgstr ""
+msgstr "%2$s セクション内に壊れたユニット長 (%1$lx) が見つかりました\n"
 
 #: dwarf.c:1978
 #, c-format
@@ -1543,7 +1543,7 @@ msgstr ""
 #: dwarf.c:1987
 #, c-format
 msgid "Not enough memory for a debug info array of %u entries"
-msgstr ""
+msgstr "%u 個のエントリを持つデバッグ情報配列のために十分なメモリがありません"
 
 #: dwarf.c:1995 dwarf.c:3158 dwarf.c:3252 dwarf.c:3326 dwarf.c:3443
 #: dwarf.c:3598 dwarf.c:3667 dwarf.c:3862
@@ -1588,7 +1588,7 @@ msgstr "   ポインタサイズ:%d\n"
 #: dwarf.c:2093
 #, c-format
 msgid "   Signature:     "
-msgstr ""
+msgstr "   シグネチャ:     "
 
 #: dwarf.c:2097
 #, c-format
@@ -1608,26 +1608,26 @@ msgstr "オフセット %lx にある CU が壊れているか、サポートし
 #: dwarf.c:2125
 #, c-format
 msgid "Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"
-msgstr ""
+msgstr "デバッグ情報が壊れています。省略オフセット (%lx) が省略セクションサイズ (%lx) より大きいです\n"
 
 #: dwarf.c:2172
 #, c-format
 msgid "Bogus end-of-siblings marker detected at offset %lx in .debug_info section\n"
-msgstr ""
+msgstr ".debug_info セクション内オフセット %lx で誤った end-of-siblings マーカーが検出されました\n"
 
 #: dwarf.c:2176
 msgid "Further warnings about bogus end-of-sibling markers suppressed\n"
-msgstr ""
+msgstr "これ以降の誤った end-of-sibling マーカーに関する警告は抑止されます\n"
 
 #: dwarf.c:2183
-#, fuzzy, c-format
+#, c-format
 msgid " <%d><%lx>: Abbrev Number: %lu"
-msgstr " <%d><%x>: 省略番号: %lu (%s)\n"
+msgstr " <%d><%lx>: 省略番号: %lu"
 
 #: dwarf.c:2200
 #, c-format
 msgid "DIE at offset %lx refers to abbreviation number %lu which does not exist\n"
-msgstr ""
+msgstr "オフセット %lx にある DIE が存在しない省略番号 %lu を参照しています\n"
 
 #: dwarf.c:2206
 #, c-format
@@ -1635,13 +1635,12 @@ msgid " (%s)\n"
 msgstr " (%s)\n"
 
 #: dwarf.c:2298
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Raw dump of debug contents of section %s:\n"
 "\n"
 msgstr ""
-"\n"
-"セクション内容のデバッグダンプ %s:\n"
+"セクション %s のデバッグ内容の生ダンプ:\n"
 "\n"
 
 #: dwarf.c:2336
@@ -1783,14 +1782,14 @@ msgstr ""
 " 行番号ステートメント:\n"
 
 #: dwarf.c:2476
-#, fuzzy, c-format
+#, c-format
 msgid "  Special opcode %d: advance Address by %lu to 0x%lx"
-msgstr "  特殊オペコード %d: アドレスを %d 分進め 0x%lx とし"
+msgstr "  特殊オペコード %d: アドレスを %lu 分進め 0x%lx とし、"
 
 #: dwarf.c:2488
-#, fuzzy, c-format
+#, c-format
 msgid "  Special opcode %d: advance Address by %lu to 0x%lx[%d]"
-msgstr "  特殊オペコード %d: アドレスを %d 分進め 0x%lx とし"
+msgstr "  特殊オペコード %d: アドレスを %lu 分進め 0x%lx[%d] とし、"
 
 #: dwarf.c:2494
 #, c-format
@@ -1803,14 +1802,14 @@ msgid "  Copy\n"
 msgstr "  コピー\n"
 
 #: dwarf.c:2514
-#, fuzzy, c-format
+#, c-format
 msgid "  Advance PC by %lu to 0x%lx\n"
-msgstr "  PC を %d 分進め %lx とします\n"
+msgstr "  PC を %lu 分進め 0x%lx とします\n"
 
 #: dwarf.c:2526
-#, fuzzy, c-format
+#, c-format
 msgid "  Advance PC by %lu to 0x%lx[%d]\n"
-msgstr "  PC を %d 分進め %lx とします\n"
+msgstr "  PC を %lu 分進め 0x%lx[%d] とします\n"
 
 #: dwarf.c:2536
 #, c-format
@@ -1820,7 +1819,7 @@ msgstr "  行を %d 進め %d とします\n"
 #: dwarf.c:2543
 #, c-format
 msgid "  Set File Name to entry %d in the File Name Table\n"
-msgstr "  エントリ %d のファイル名をファイル名テーブルにセット\n"
+msgstr "  エントリ %d のファイル名をファイル名テーブルに設定します\n"
 
 #: dwarf.c:2551
 #, c-format
@@ -1838,19 +1837,19 @@ msgid "  Set basic block\n"
 msgstr "  基本ブロックを設定\n"
 
 #: dwarf.c:2573
-#, fuzzy, c-format
+#, c-format
 msgid "  Advance PC by constant %lu to 0x%lx\n"
-msgstr "  PC を定数 %d 分進め 0x%lx とします\n"
+msgstr "  PC を定数 %lu 分進め 0x%lx とします\n"
 
 #: dwarf.c:2585
-#, fuzzy, c-format
+#, c-format
 msgid "  Advance PC by constant %lu to 0x%lx[%d]\n"
-msgstr "  PC を定数 %d 分進め 0x%lx とします\n"
+msgstr "  PC を定数 %lu 分進め 0x%lx[%d] とします\n"
 
 #: dwarf.c:2596
-#, fuzzy, c-format
+#, c-format
 msgid "  Advance PC by fixed size amount %lu to 0x%lx\n"
-msgstr "  PC を固定サイズ %d 分進め 0x%lx とします\n"
+msgstr "  PC を固定サイズ %lu 分進め 0x%lx とします\n"
 
 #: dwarf.c:2601
 #, c-format
@@ -1870,41 +1869,40 @@ msgstr "  ISA を %lu に設定します\n"
 #: dwarf.c:2615 dwarf.c:3031
 #, c-format
 msgid "  Unknown opcode %d with operands: "
-msgstr ""
+msgstr "  不明な被演算子付きのオペコード %d : "
 
 #: dwarf.c:2648
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Decoded dump of debug contents of section %s:\n"
 "\n"
 msgstr ""
-"\n"
-"セクション内容のデバッグダンプ %s:\n"
+"セクション %s のデバッグ内容のデコードしたダンプ:\n"
 "\n"
 
 #: dwarf.c:2689
 msgid "The line info appears to be corrupt - the section is too small\n"
-msgstr "line 情報は壊れています - セクションが小さすぎます\n"
+msgstr "行情報が壊れているようです - このセクションは小さすぎます\n"
 
 #: dwarf.c:2821
-#, fuzzy, c-format
+#, c-format
 msgid "CU: %s:\n"
-msgstr "  %s\n"
+msgstr "CU: %s:\n"
 
 #: dwarf.c:2822 dwarf.c:2835
-#, fuzzy, c-format
+#, c-format
 msgid "File name                            Line number    Starting address\n"
-msgstr "番号: 名前                           境界まで    フラグ\n"
+msgstr "ファイル名                           行番号         開始アドレス\n"
 
 #: dwarf.c:2828
 #, c-format
 msgid "CU: %s/%s:\n"
-msgstr ""
+msgstr "CU: %s/%s:\n"
 
 #: dwarf.c:2833 dwarf.c:2918
-#, fuzzy, c-format
+#, c-format
 msgid "%s:\n"
-msgstr "%s\n"
+msgstr "%s:\n"
 
 #. If directory index is 0, that means current directory.
 #: dwarf.c:2964
@@ -1913,6 +1911,8 @@ msgid ""
 "\n"
 "./%s:[++]\n"
 msgstr ""
+"\n"
+"./%s:[++]\n"
 
 #. The directory index starts counting at 1.
 #: dwarf.c:2970
@@ -1921,36 +1921,37 @@ msgid ""
 "\n"
 "%s/%s:\n"
 msgstr ""
+"\n"
+"%s/%s:\n"
 
 #: dwarf.c:3070
 #, c-format
 msgid "%-35s  %11d  %#18lx\n"
-msgstr ""
+msgstr "%-35s  %11d  %#18lx\n"
 
 #: dwarf.c:3074
 #, c-format
 msgid "%-35s  %11d  %#18lx[%d]\n"
-msgstr ""
+msgstr "%-35s  %11d  %#18lx[%d]\n"
 
 #: dwarf.c:3082
 #, c-format
 msgid "%s  %11d  %#18lx\n"
-msgstr ""
+msgstr "%s  %11d  %#18lx\n"
 
 #: dwarf.c:3086
 #, c-format
 msgid "%s  %11d  %#18lx[%d]\n"
-msgstr ""
+msgstr "%s  %11d  %#18lx[%d]\n"
 
 #: dwarf.c:3192 dwarf.c:3712
 #, c-format
 msgid ".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"
-msgstr ""
+msgstr "%2$s セクション内オフセット 0x%1$lx の .debug_info が CU ヘッダを指していません。\n"
 
 #: dwarf.c:3206
-#, fuzzy
 msgid "Only DWARF 2 and 3 pubnames are currently supported\n"
-msgstr "現在のところ、DWARF 2 だけが pubnames をサポートしています\n"
+msgstr "DWARF 2 および 3 の pubnames のみ現在サポートされています\n"
 
 #: dwarf.c:3213
 #, c-format
@@ -1963,9 +1964,9 @@ msgid "  Version:                             %d\n"
 msgstr "  バージョン:                          %d\n"
 
 #: dwarf.c:3217
-#, fuzzy, c-format
+#, c-format
 msgid "  Offset into .debug_info section:     0x%lx\n"
-msgstr "  .debug_info セクションへのオフセット:%ld\n"
+msgstr "  .debug_info セクションのオフセット:     0x%lx\n"
 
 #: dwarf.c:3219
 #, c-format
@@ -1984,27 +1985,27 @@ msgstr ""
 #: dwarf.c:3273
 #, c-format
 msgid " DW_MACINFO_start_file - lineno: %d filenum: %d\n"
-msgstr ""
+msgstr " DW_MACINFO_start_file - 行番号: %d ファイル番号: %d\n"
 
 #: dwarf.c:3279
 #, c-format
 msgid " DW_MACINFO_end_file\n"
-msgstr ""
+msgstr " DW_MACINFO_end_file\n"
 
 #: dwarf.c:3287
 #, c-format
 msgid " DW_MACINFO_define - lineno : %d macro : %s\n"
-msgstr ""
+msgstr " DW_MACINFO_define - 行番号 : %d マクロ : %s\n"
 
 #: dwarf.c:3296
 #, c-format
 msgid " DW_MACINFO_undef - lineno : %d macro : %s\n"
-msgstr ""
+msgstr " DW_MACINFO_undef - 行番号 : %d マクロ : %s\n"
 
 #: dwarf.c:3308
 #, c-format
 msgid " DW_MACINFO_vendor_ext - constant : %d string : %s\n"
-msgstr ""
+msgstr " DW_MACINFO_vendor_ext - 定数 : %d 文字列 : %s\n"
 
 #: dwarf.c:3337
 #, c-format
@@ -2041,77 +2042,73 @@ msgstr ""
 #: dwarf.c:3388 dwarf.c:3825
 #, c-format
 msgid "Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"
-msgstr ""
+msgstr ".debug_info のロード/構文解析が出来ません。そのため %s セクションを解釈できません。\n"
 
 #. FIXME: Should we handle this case?
 #: dwarf.c:3432
 msgid "Location lists in .debug_info section aren't in ascending order!\n"
-msgstr ""
+msgstr ".debug_info セクションの位置リストが昇順ではありません!\n"
 
 #: dwarf.c:3435
-#, fuzzy
 msgid "No location lists in .debug_info section!\n"
-msgstr "  .debug_info セクションへのオフセット:%ld\n"
+msgstr ".debug_info セクションに位置リストがありません!\n"
 
 #: dwarf.c:3440
 #, c-format
 msgid "Location lists in %s section start at 0x%lx\n"
-msgstr ""
+msgstr "%s セクションの位置リストが 0x%lx から開始します\n"
 
 #: dwarf.c:3444
 #, c-format
 msgid "    Offset   Begin    End      Expression\n"
-msgstr ""
+msgstr "    オフセット 開始   終了     Expression\n"
 
 #: dwarf.c:3479
 #, c-format
 msgid "There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"
-msgstr ""
+msgstr ".debug_loc セクション内に穴 [0x%lx - 0x%lx] があります。\n"
 
 #: dwarf.c:3483
 #, c-format
 msgid "There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"
-msgstr ""
+msgstr ".debug_loc セクションに重なり合っている部分 [0x%lx - 0x%lx] があります\n"
 
 #: dwarf.c:3491
 #, c-format
 msgid "Offset 0x%lx is bigger than .debug_loc section size.\n"
-msgstr ""
+msgstr "オフセット 0x%lx が .debug_loc セクションサイズより大きいです。\n"
 
 #: dwarf.c:3500 dwarf.c:3535 dwarf.c:3545
-#, fuzzy, c-format
+#, c-format
 msgid "Location list starting at offset 0x%lx is not terminated.\n"
-msgstr ""
-"\n"
-"オフセット 0x%lx の再配置セクションは %ld バイトで構成されています:\n"
+msgstr "オフセット 0x%lx から始まる位置リストが終端されていません。\n"
 
 #: dwarf.c:3519 dwarf.c:3913
 #, c-format
 msgid "<End of list>\n"
-msgstr ""
+msgstr "<リストの終端>\n"
 
 #: dwarf.c:3529
-#, fuzzy, c-format
+#, c-format
 msgid "(base address)\n"
-msgstr "開始アドレスを設定"
+msgstr "(ベースアドレス)\n"
 
 #: dwarf.c:3566
 msgid " (start == end)"
-msgstr ""
+msgstr " (開始 == 終了)"
 
 #: dwarf.c:3568
 msgid " (start > end)"
-msgstr ""
+msgstr " (開始 > 終了)"
 
 #: dwarf.c:3578
 #, c-format
 msgid "There are %ld unused bytes at the end of section %s\n"
-msgstr ""
+msgstr "セクション %2$s の末端に %1$ld バイトの未使用部分があります\n"
 
 #: dwarf.c:3723
-#, fuzzy
 msgid "Only DWARF 2 and 3 aranges are currently supported.\n"
-msgstr "現在のところ DWARF 2 だけが arange をサポートしています。\n"
+msgstr "現在のところ DWARF 2 および 3 arange のみサポートされています\n"
 
 #: dwarf.c:3727
 #, c-format
@@ -2124,9 +2121,9 @@ msgid "  Version:                  %d\n"
 msgstr "  バージョン:               %d\n"
 
 #: dwarf.c:3729
-#, fuzzy, c-format
+#, c-format
 msgid "  Offset into .debug_info:  0x%lx\n"
-msgstr "  .debug_info 内へのoffset: %lx\n"
+msgstr "  .debug_info 内へのオフセット: %lx\n"
 
 #: dwarf.c:3730
 #, c-format
@@ -2140,69 +2137,66 @@ msgstr "  セグメントサイズ:         %d\n"
 
 #: dwarf.c:3740
 msgid "Pointer size + Segment size is not a power of two.\n"
-msgstr ""
+msgstr "ポインタサイズ + セグメントサイズが2のべき乗数ではありません。\n"
 
 #: dwarf.c:3745
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "    Address            Length\n"
 msgstr ""
 "\n"
-"    アドレス長\n"
+"    アドレス           長さ\n"
 
 #: dwarf.c:3747
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "    Address    Length\n"
 msgstr ""
 "\n"
-"    アドレス長\n"
+"    アドレス   長さ\n"
 
 #: dwarf.c:3835
-#, fuzzy
 msgid "No range lists in .debug_info section!\n"
-msgstr "  .debug_info セクションへのオフセット:%ld\n"
+msgstr ".debug_info セクションに範囲リストがありません!\n"
 
 #: dwarf.c:3859
 #, c-format
 msgid "Range lists in %s section start at 0x%lx\n"
-msgstr ""
+msgstr "%s セクションの範囲リストが 0x%lx から開始します\n"
 
 #: dwarf.c:3863
 #, c-format
 msgid "    Offset   Begin    End\n"
-msgstr ""
+msgstr "    オフセット 開始   終了\n"
 
 #: dwarf.c:3884
 #, c-format
 msgid "There is a hole [0x%lx - 0x%lx] in %s section.\n"
-msgstr ""
+msgstr "%3$s セクションに穴 [0x%1$lx - 0x%2$lx] があります。\n"
 
 #: dwarf.c:3888
 #, c-format
 msgid "There is an overlap [0x%lx - 0x%lx] in %s section.\n"
-msgstr ""
+msgstr "%3$s セクションに重なり合っている部分 [0x%1$lx - 0x%2$lx] があります。\n"
 
 #: dwarf.c:3931
 msgid "(start == end)"
-msgstr ""
+msgstr "(開始 == 終了)"
 
 #: dwarf.c:3933
 msgid "(start > end)"
-msgstr ""
+msgstr "(開始 > 終了)"
 
 #: dwarf.c:4185
 msgid "bad register: "
-msgstr ""
+msgstr "間違ったレジスタ: "
 
 #: dwarf.c:4188
-#, fuzzy, c-format
+#, c-format
 msgid "Contents of the %s section:\n"
-msgstr ""
-"%s セクションの内容:\n"
-"\n"
+msgstr "%s セクションの内容:\n"
 
 #: dwarf.c:4962
 #, c-format
@@ -2230,66 +2224,65 @@ msgid "%s: Warning: "
 msgstr "%s: 警告: "
 
 #: dwarf.c:5145 dwarf.c:5215
-#, fuzzy, c-format
+#, c-format
 msgid "Unrecognized debug option '%s'\n"
-msgstr "デバッグオプション '%s' を認識できません\n"
+msgstr "認識できないデバッグオプション '%s' です\n"
 
 #: elfedit.c:243
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Not an ELF file - wrong magic bytes at the start\n"
-msgstr "ELF ファイルではありません - 始点にあるマジック番号が異なります\n"
+msgstr "%s: ELF ファイルではありません - 開始にあるマジックバイトが異なります\n"
 
 #: elfedit.c:251
 #, c-format
 msgid "%s: Unsupported EI_VERSION: %d is not %d\n"
-msgstr ""
+msgstr "%s: サポートされない EI_VERSION です: %d は %d ではありません\n"
 
 #: elfedit.c:267
 #, c-format
 msgid "%s: Unmatched EI_CLASS: %d is not %d\n"
-msgstr ""
+msgstr "%s: 一致しない EI_CLASS です: %d は %d ではありません\n"
 
 #: elfedit.c:278
 #, c-format
 msgid "%s: Unmatched e_machine: %d is not %d\n"
-msgstr ""
+msgstr "%s: 一致しない e_machine です: %d は %d ではありません\n"
 
 #: elfedit.c:289
 #, c-format
 msgid "%s: Unmatched e_type: %d is not %d\n"
-msgstr ""
+msgstr "%s: 一致しない e_type です: %d は %d ではありません\n"
 
 #: elfedit.c:300
 #, c-format
 msgid "%s: Unmatched EI_OSABI: %d is not %d\n"
-msgstr ""
+msgstr "%s: 一致しない EI_OSABI です: %d は %d ではありません\n"
 
 #: elfedit.c:333
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Failed to update ELF header: %s\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: ELF ヘッダの更新に失敗しました: %s\n"
 
 #: elfedit.c:366
 #, c-format
 msgid "Unsupported EI_CLASS: %d\n"
-msgstr ""
+msgstr "サポートされない EI_CLASS です: %d\n"
 
 #: elfedit.c:399
-#, fuzzy
 msgid ""
 "This executable has been built without support for a\n"
 "64 bit data type and so it cannot process 64 bit ELF files.\n"
-msgstr "この readelf の実体は 64 bit データ型サポート無しでビルドされており、\n"
+msgstr ""
 
 #: elfedit.c:440
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Failed to read ELF header\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: ELF ヘッダの読み込みに失敗しました\n"
 
 #: elfedit.c:447
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Failed to seek to ELF header\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: ELF ヘッダの探査 (seek) に失敗しました\n"
 
 #: elfedit.c:477 elfedit.c:491 elfedit.c:776 readelf.c:3674 readelf.c:3978
 #: readelf.c:4021 readelf.c:4093 readelf.c:4171 readelf.c:4936 readelf.c:4960
@@ -2301,69 +2294,69 @@ msgid "Out of memory\n"
 msgstr "メモリが足りません\n"
 
 #: elfedit.c:543 readelf.c:12581
-#, fuzzy, c-format
+#, c-format
 msgid "%s: failed to seek to first archive header\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: 最初の書庫ヘッダへの探査 (seek) に失敗しました\n"
 
 #: elfedit.c:553 elfedit.c:741 elfedit.c:845 readelf.c:12590 readelf.c:12858
 #: readelf.c:13026
-#, fuzzy, c-format
+#, c-format
 msgid "%s: failed to read archive header\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: 書庫ヘッダの読み込みに失敗しました\n"
 
 #: elfedit.c:568 readelf.c:12691
 #, c-format
 msgid "%s: failed to skip archive symbol table\n"
-msgstr ""
+msgstr "%s: 書庫シンボル表のスキップに失敗しました\n"
 
 #: elfedit.c:579 readelf.c:12702
-#, fuzzy, c-format
+#, c-format
 msgid "%s: failed to read archive header following archive index\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: 書庫索引の後に続く書庫ヘッダの読み込みに失敗しました\n"
 
 #: elfedit.c:594 readelf.c:12718
 msgid "Out of memory reading long symbol names in archive\n"
-msgstr ""
+msgstr "書庫内の長いシンボル名の読み込み中にメモリが足りなくなりました\n"
 
 #: elfedit.c:602 readelf.c:12726
-#, fuzzy, c-format
+#, c-format
 msgid "%s: failed to read long symbol name string table\n"
-msgstr "動的文字列テーブルの長さを決定できません\n"
+msgstr ""
 
 #: elfedit.c:734 readelf.c:12852
-#, fuzzy, c-format
+#, c-format
 msgid "%s: failed to seek to next file name\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: 次のファイル名の探査 (seek) に失敗しました\n"
 
 #: elfedit.c:747 elfedit.c:852 readelf.c:12863 readelf.c:13032
-#, fuzzy, c-format
+#, c-format
 msgid "%s: did not find a valid archive header\n"
-msgstr "%s は正常な書庫ではありません"
+msgstr "%s: 有効な書庫ヘッダを見つけられませんでした\n"
 
 #: elfedit.c:836 readelf.c:13018
-#, fuzzy, c-format
+#, c-format
 msgid "%s: failed to seek to next archive header\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: 次の書庫ヘッダへの探査 (seek) に失敗しました\n"
 
 #: elfedit.c:867 elfedit.c:876 readelf.c:13046 readelf.c:13055
-#, fuzzy, c-format
+#, c-format
 msgid "%s: bad archive file name\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: 誤った書庫ファイル名です\n"
 
 #: elfedit.c:896 elfedit.c:988
-#, fuzzy, c-format
+#, c-format
 msgid "Input file '%s' is not readable\n"
-msgstr "入力ファイル %s が見つかりません。\n"
+msgstr "入力ファイル '%s' が読み込み可能ではありません\n"
 
 #: elfedit.c:920
-#, fuzzy, c-format
+#, c-format
 msgid "%s: failed to seek to archive member\n"
-msgstr "%s: ファイル %s は書庫ではありません\n"
+msgstr "%s: 書庫のメンバの探査 (seek) に失敗しました\n"
 
 #: elfedit.c:959 readelf.c:13134
 #, c-format
 msgid "'%s': No such file\n"
-msgstr ""
+msgstr "'%s': そのようなファイルはありません\n"
 
 #: elfedit.c:961 readelf.c:13136
 #, c-format
@@ -2371,44 +2364,44 @@ msgid "Could not locate '%s'.  System error message: %s\n"
 msgstr ""
 
 #: elfedit.c:968 readelf.c:13143
-#, fuzzy, c-format
+#, c-format
 msgid "'%s' is not an ordinary file\n"
-msgstr "%s は書庫ではありません"
+msgstr "'%s' は正常なファイルではありません\n"
 
 #: elfedit.c:994 readelf.c:13156
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Failed to read file's magic number\n"
-msgstr "%s: ファイルヘッダの読込みが失敗しました\n"
+msgstr "%s: ファイルのマジック番号の読み出しに失敗しました\n"
 
 #: elfedit.c:1052
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown OSABI: %s\n"
-msgstr "不明な AT 値: %lx"
+msgstr "不明な OSABI です: %s\n"
 
 #: elfedit.c:1071
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown machine type: %s\n"
-msgstr "内部エラー: 不明なマシン型です: %d"
+msgstr "不明なマシン型です: %s\n"
 
 #: elfedit.c:1089
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown machine type: %d\n"
-msgstr "内部エラー: 不明なマシン型です: %d"
+msgstr "不明なマシン型です: %d\n"
 
 #: elfedit.c:1108
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown type: %s\n"
-msgstr "不明な BB 型です"
+msgstr "不明な型です: %s\n"
 
 #: elfedit.c:1139
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <option(s)> elffile(s)\n"
-msgstr "使い方 %s <オプション> <オブジェクトファイル>...\n"
+msgstr "使用法: %s <option(s)> elffile(s)\n"
 
 #: elfedit.c:1141
 #, c-format
 msgid " Update the ELF header of ELF files\n"
-msgstr ""
+msgstr "ELF ファイルの ELF ヘッダを更新します\n"
 
 #: elfedit.c:1142 objcopy.c:475 objcopy.c:585
 #, c-format
@@ -2427,31 +2420,39 @@ msgid ""
 "  -h --help                   Display this information\n"
 "  -v --version                Display the version number of %s\n"
 msgstr ""
+"  --input-mach <machine>      入力のマシン型を <machine> に設定する\n"
+"  --output-mach <machine>     出力のマシン型を <machine> に設定する\n"
+"  --input-type <type>         入力のファイル型を <type> に設定する\n"
+"  --output-type <type>        出力のマシン型を <type> に設定する\n"
+"  --input-osabi <osabi>       入力の OSABI を <osabi> に設定する\n"
+"  --output-osabi <osabi>      出力の OSABI を <osabi> に設定する\n"
+"  -h --help                   この情報を表示する\n"
+"  -v --version                %s のバージョン情報を表示する\n"
 
 #: emul_aix.c:43
-#, fuzzy, c-format
+#, c-format
 msgid "  [-g]         - 32 bit small archive\n"
-msgstr "  x[o]         - アーカイブからファイルを抽出する\n"
+msgstr "  [-g]         - 32 ビットの小さな書庫を作成する\n"
 
 #: emul_aix.c:44
-#, fuzzy, c-format
+#, c-format
 msgid "  [-X32]       - ignores 64 bit objects\n"
-msgstr "  [-X32_64]    - (無視される)\n"
+msgstr "  [-X32]       - 64 ビットオブジェクトを無視する\n"
 
 #: emul_aix.c:45
-#, fuzzy, c-format
+#, c-format
 msgid "  [-X64]       - ignores 32 bit objects\n"
-msgstr "  [-X32_64]    - (無視される)\n"
+msgstr "  [-X64]       - 32 ビットオブジェクトを無視する\n"
 
 #: emul_aix.c:46
 #, c-format
 msgid "  [-X32_64]    - accepts 32 and 64 bit objects\n"
-msgstr ""
+msgstr "  [-X32_64]    - 32 および 64 ビットオブジェクトを受容する\n"
 
 #: emul_aix.c:99 emul_aix.c:109 emul_aix.c:119 emul_aix.c:129
 #, c-format
 msgid "target `%s' ignored."
-msgstr ""
+msgstr "ターゲット `%s' は無視されました。"
 
 #: ieee.c:311
 msgid "unexpected end of debugging information"
@@ -2459,11 +2460,11 @@ msgstr "デバッグ情報が予期しない所で終わっています"
 
 #: ieee.c:398
 msgid "invalid number"
-msgstr "不適切な番号"
+msgstr "無効な番号"
 
 #: ieee.c:451
 msgid "invalid string length"
-msgstr "不適切な文字列長"
+msgstr "無効な文字列長"
 
 #: ieee.c:506 ieee.c:547
 msgid "expression stack overflow"
@@ -2539,9 +2540,8 @@ msgid "Pascal file name not supported"
 msgstr "Pascal ファイル名はサポートされていません"
 
 #: ieee.c:1889
-#, fuzzy
 msgid "unsupported qualifier"
-msgstr "サポートされていない修飾子です"
+msgstr ""
 
 #: ieee.c:2158
 msgid "undefined variable in ATN"
@@ -2587,7 +2587,7 @@ msgstr "サポートされていない C++ オブジェクト型です"
 
 #: ieee.c:2659
 msgid "C++ base class not defined"
-msgstr "C++ ベースクラスが定義されていません"
+msgstr "C++ 基底クラスが定義されていません"
 
 #: ieee.c:2671 ieee.c:2776
 msgid "C++ object has no fields"
@@ -2595,7 +2595,7 @@ msgstr "C++ オブジェクトがフィールドを持っていません"
 
 #: ieee.c:2690
 msgid "C++ base class not found in container"
-msgstr "C++ ベースクラスがコンテナ内に見つかりません"
+msgstr "C++ 基底クラスがコンテナ内に見つかりません"
 
 #: ieee.c:2797
 msgid "C++ data member not found in container"
@@ -2607,11 +2607,11 @@ msgstr "不明な C++ 可視性です"
 
 #: ieee.c:2872
 msgid "bad C++ field bit pos or size"
-msgstr "C++ フィールドビット位置又はサイズが不正です"
+msgstr "C++ フィールドビット位置またはサイズに誤りがあります"
 
 #: ieee.c:2964
 msgid "bad type for C++ method function"
-msgstr "C++ メソッド関数の型が不正です"
+msgstr "C++ メソッド関数の型に誤りがあります"
 
 #: ieee.c:2974
 msgid "no type information for C++ method function"
@@ -2627,7 +2627,7 @@ msgstr "C++ オブジェクトオーバーヘッド仕様を認識できませ�
 
 #: ieee.c:3147
 msgid "undefined C++ vtable"
-msgstr "C++ 仮想関数テーブル(vtable) が定義されていません"
+msgstr "C++ 仮想関数表 (vtable) が定義されていません"
 
 #: ieee.c:3216
 msgid "C++ default values not in a function"
@@ -2692,7 +2692,7 @@ msgstr "IEEE は複素数型サイズ %u をサポートしていません\n"
 
 #: mclex.c:241
 msgid "Duplicate symbol entered into keyword list."
-msgstr ""
+msgstr "重複したシンボルがキーワードシンボルに入れられました。"
 
 #: nlmconv.c:273 srconv.c:1823
 msgid "input and output files must be different"
@@ -2898,7 +2898,7 @@ msgid " List symbols in [file(s)] (a.out by default).\n"
 msgstr " [file(s)] に含まれるシンボルを一覧表示します (デフォルトは a.out)。\n"
 
 #: nm.c:227
-#, fuzzy, c-format
+#, c-format
 msgid ""
 " The options are:\n"
 "  -a, --debug-syms       Display debugger-only symbols\n"
@@ -2923,36 +2923,28 @@ msgid ""
 "  -P, --portability      Same as --format=posix\n"
 "  -r, --reverse-sort     Reverse the sense of the sort\n"
 msgstr ""
-"\n"
-"  -a, --debug-syms       デバッグ専用シンボルを表示する\n"
-"  -A, --print-file-name  各シンボルの前に入力ファイル名を表示する\n"
-"  -B                     --format=bsd と同じ\n"
-"  -C, --demangle[=STYLE] 低位シンボル名をユーザレベル名に復元する\n"
-"                          STYLE に以下のものを指定できる -- `auto'(default),\n"
-"                          `gnu', 'lucid', 'arm', 'hp', 'edg', 'gnu-new-abi'\n"
-"      --no-demangle      低位シンボル名を復元しない\n"
-"  -D, --dynamic          通常シンボルではなく動的シンボルを表示する。\n"
-"      --defined-only     定義済シンボルのみを表示する\n"
+"オプション:\n"
+"  -a, --debug-syms       デバッグ用のみのシンボルを表示する\n"
+"  -A, --print-file-name  各シンボルの前に入力ファイルの名前を表示する\n"
+"  -B                     --format=bsd と同様\n"
+"  -C, --demangle[=STYLE] 下位レベルのシンボル名を利用者レベルのシンボル名にデコードする\n"
+"                          STYLE を指定する場合は `auto' (デフォルト),\n"
+"                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n"
+"                          または `gnat'\n"
+"      --no-demangle      下位レベルのシンボルを名前復元 (demangle) しない\n"
+"  -D, --dynamic          通常シンボルの代わりに動的シンボルを表示する\n"
+"      --defined-only     定義済みのシンボルのみ表示する\n"
 "  -e                     (無視される)\n"
-"  -f, --format=FORMAT    出力形式を FORMAT とする。FORMAT には `bsd',\n"
-"                           `sysv', `posix' を指定できる。デフォルトは `bsd'\n"
-"  -g, --extern-only      外部シンボルのみを表示する\n"
-"  -h, --help             この情報を表示する\n"
-"  -l, --line-numbers     各シンボルのデバッグ情報から、シンボルのファイル名と\n"
-"                           行番号を見つける\n"
-"  -n, --numeric-sort     アドレス値によってソートする\n"
-"  -o                     -A と同じ\n"
-"  -p, --no-sort          シンボルによるソートを行わない\n"
-"  -P, --portability      --format=posix と同じ\n"
-"  -r, --reverse-sort     ソート順を逆にする\n"
-"  -s, --print-armap      書庫メンバからのシンボル用の索引を含める\n"
-"      --size-sort        サイズによってソートする\n"
-"  -t, --radix=RADIX      シンボル値の表示基数に RADIX を使う\n"
-"      --target=BFDNAME   ターゲットオブジェクト形式を BFDNAME として指定する\n"
-"  -u, --undefined-only   未定義シンボルのみを表示する\n"
-"  -V, --version          このプログラムのバージョンを表示する\n"
-"  -X 32_64               (無視される)\n"
-"\n"
+"  -f, --format=FORMAT    出力形式を FORMAT にする。FORMAT は `bsd',\n"
+"                           `sysv' または `posix'。  デフォルトは `bsd'\n"
+"  -g, --extern-only      外部シンボルのみ表示する\n"
+"  -l, --line-numbers     各シンボルに対してファイル名と行番号を探すために\n"
+"                           デバッグ情報を使用する\n"
+"  -n, --numeric-sort     シンボルをアドレスで数値的にソートする\n"
+"  -o                     -A と同様\n"
+"  -p, --no-sort          シンボルをソートしない\n"
+"  -P, --portability      --format=posix と同様\n"
+"  -r, --reverse-sort     ソートの順番を逆にする\n"
 
 #: nm.c:250
 #, c-format
@@ -2976,16 +2968,29 @@ msgid ""
 "  -V, --version          Display this program's version number\n"
 "\n"
 msgstr ""
+"  -S, --print-size       定義されたシンボルのサイズを表示する\n"
+"  -s, --print-armap      書庫メンバからのシンボルの索引を含める\n"
+"      --size-sort        シンボルをサイズでソートする\n"
+"      --special-syms     出力に特殊なシンボルを含める\n"
+"      --synthetic        合成したシンボルも表示する\n"
+"  -t, --radix=RADIX      シンボルの値を表示する際に基数 RADIX を使用する\n"
+"      --target=BFDNAME   ターゲットオブジェクト形式を BFDNAME として指定する\n"
+"  -u, --undefined-only   未定義シンボルのみ表示する\n"
+"  -X 32_64               (無視される)\n"
+"  @FILE                  オプションを FILE から読み込む\n"
+"  -h, --help             この情報を表示する\n"
+"  -V, --version          プログラムのバージョン番号を表示する\n"
+"\n"
 
 #: nm.c:301
 #, c-format
 msgid "%s: invalid radix"
-msgstr "%s: 基数が不適切です"
+msgstr "%s: 無効な基数です"
 
 #: nm.c:325
 #, c-format
 msgid "%s: invalid output format"
-msgstr "%s: 出力形式が不適切です"
+msgstr "%s: 無効な出力形式です"
 
 #: nm.c:346 readelf.c:8259 readelf.c:8304
 #, c-format
@@ -3038,7 +3043,7 @@ msgstr ""
 "\n"
 
 #: nm.c:1255 nm.c:1306
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Name                  Value   Class        Type         Size     Line  Section\n"
 "\n"
@@ -3047,12 +3052,12 @@ msgstr ""
 "\n"
 
 #: nm.c:1258 nm.c:1309
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Name                  Value           Class        Type         Size             Line  Section\n"
 "\n"
 msgstr ""
-"名前                  値      クラス       型         サイズ     行 セクション\n"
+"名前            値             クラス       型         サイズ             行 セクション\n"
 "\n"
 
 #: nm.c:1302
@@ -3111,10 +3116,10 @@ msgstr "使用法: %s [option(s)] in-file [out-file]\n"
 #: objcopy.c:474
 #, c-format
 msgid " Copies a binary file, possibly transforming it in the process\n"
-msgstr " バイナリファイルをコピーします。場合によってはプロセス内で形式を変換します。\n"
+msgstr " バイナリファイルをコピーします。場合によっては処理中に形式を変換します。\n"
 
 #: objcopy.c:476
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n"
 "  -O --output-target <bfdname>     Create an output file in format <bfdname>\n"
@@ -3213,27 +3218,28 @@ msgid ""
 "  -h --help                        Display this output\n"
 "     --info                        List object formats & architectures supported\n"
 msgstr ""
-"  -I --input-target <bfdname>      入力ファイル形式を <bfdname> と見なす\n"
-"  -O --output-target <bfdname>     <bfdname> 形式の出力ファイルを作成する\n"
-"  -B --binary-architecture <arch>  入力がバイナリの時に出力ファイルのアーキテク\n"
-"                                     チャを arch に設定する\n"
-"  -F --target <bfdname>            入力・出力両方の形式を <bfdname> に設定する\n"
-"     --debugging                   可能な場合にはデバッグ情報を変換する\n"
-"  -p --preserve-dates              更新/アクセス日時を出力に対してコピーする\n"
-"  -j --only-section <name>         セクション <name> のみ出力にコピーする\n"
-"     --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n"
+"  -I --input-target <bfdname>      入力ファイルの形式を <bfdname> であると仮定する\n"
+"  -O --output-target <bfdname>     出力ファイルを形式 <bfdname> で作成する\n"
+"  -B --binary-architecture <arch>  入力のアーキテクチャが無い場合に出力アーキテクチャを\n"
+"                                    arch に設定する\n"
+"  -F --target <bfdname>            入出力の形式を <bfdname> に設定する\n"
+"     --debugging                   デバッグ情報を変換する (可能な場合)\n"
+"  -p --preserve-dates              更新/アクセス日時を出力にコピーする\n"
+"  -j --only-section <name>         出力にセクション <name> のみをコピーする\n"
+"     --add-gnu-debuglink=<file>    <file> にリンクしているときにセクション\n"
+"                                     .gnu_debuglink を加える\n"
 "  -R --remove-section <name>       出力からセクション <name> を削除する\n"
 "  -S --strip-all                   全てのシンボルおよび再配置情報を削除する\n"
 "  -g --strip-debug                 全てのデバッグシンボルおよびセクションを削除する\n"
 "     --strip-unneeded              再配置に必要でない全てのシンボルを削除する\n"
-"  -N --strip-symbol <name>         <name> という名前のシンボルをコピーしない\n"
+"  -N --strip-symbol <name>         シンボル <name> をコピーしない\n"
 "     --strip-unneeded-symbol <name>\n"
-"                                   再配置に必要で無い限り、 <name> という名前のシ\n"
-"                                     ンボルをコピーしない\n"
+"                                   再配置に必要でない限りシンボル <name> を\n"
+"                                     コピーしない\n"
 "     --only-keep-debug             デバッグ情報以外を取り除く\n"
-"     --extract-symbol              Remove section contents but keep symbols\n"
-"  -K --keep-symbol <name>          Do not strip symbol <name>\n"
-"     --keep-file-symbols           Do not strip file symbol(s)\n"
+"     --extract-symbol              セクションの中身を削除するが、シンボルは保持する\n"
+"  -K --keep-symbol <name>          シンボル <name> を取り除かない\n"
+"     --keep-file-symbols           ファイルに関するシンボルを取り除かない\n"
 "     --localize-hidden             Turn all ELF hidden symbols into locals\n"
 "  -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n"
 "     --globalize-symbol <name>     Force symbol <name> to be marked as a global\n"
@@ -3243,7 +3249,8 @@ msgstr ""
 "  -w --wildcard                    Permit wildcard in symbol comparison\n"
 "  -x --discard-all                 Remove all non-global symbols\n"
 "  -X --discard-locals              Remove any compiler-generated symbols\n"
-"  -i --interleave <number>         Only copy one out of every <number> bytes\n"
+"  -i --interleave [<number>]       Only copy N out of every <number> bytes\n"
+"     --interleave-width <number>   Set N for --interleave\n"
 "  -b --byte <num>                  Select byte <num> in every interleaved block\n"
 "     --gap-fill <val>              Fill gaps between sections with <val>\n"
 "     --pad-to <addr>               Pad the last section up to address <addr>\n"
@@ -3302,7 +3309,9 @@ msgstr ""
 "                                   <commit>\n"
 "     --subsystem <name>[:<version>]\n"
 "                                   Set PE subsystem to <name> [& <version>]\n"
-"]  -v --verbose                     List all object files modified\n"
+"     --compress-debug-sections     Compress DWARF debug sections using zlib\n"
+"     --decompress-debug-sections   Decompress DWARF debug sections using zlib\n"
+"  -v --verbose                     List all object files modified\n"
 "  @<file>                          Read options from <file>\n"
 "  -V --version                     Display this program's version number\n"
 "  -h --help                        Display this output\n"
@@ -3319,7 +3328,7 @@ msgid " Removes symbols and sections from files\n"
 msgstr "シンボルおよびセクションをファイルから取り除きます。\n"
 
 #: objcopy.c:586
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  -I --input-target=<bfdname>      Assume input file is in format <bfdname>\n"
 "  -O --output-target=<bfdname>     Create an output file in format <bfdname>\n"
@@ -3391,7 +3400,7 @@ msgstr ""
 #: objcopy.c:1128
 #, c-format
 msgid "not stripping symbol `%s' because it is named in a relocation"
-msgstr ""
+msgstr "再配置用に名付けられているためシンボル `%s' を取り除きません"
 
 #: objcopy.c:1211
 #, c-format
@@ -3453,9 +3462,9 @@ msgid "Unable to recognise the format of the input file `%s'"
 msgstr "入力ファイル `%s' の形式を認識できません"
 
 #: objcopy.c:1496
-#, fuzzy, c-format
+#, c-format
 msgid "Output file cannot represent architecture `%s'"
-msgstr "警告: 出力ファイルはアーキテクチャ `%s' を表すことができません"
+msgstr "出力ファイルはアーキテクチャ `%s' を表すことができません"
 
 #: objcopy.c:1559
 #, c-format
@@ -3522,9 +3531,9 @@ msgid "error: the input file '%s' is empty"
 msgstr "エラー: 入力ファイル '%s' が空です"
 
 #: objcopy.c:2338
-#, fuzzy, c-format
+#, c-format
 msgid "Multiple renames of section %s"
-msgstr "セクション %s の内容:\n"
+msgstr "セクション %s の名前変更が複数回行われています"
 
 #: objcopy.c:2389
 msgid "error in private header data"
@@ -3592,18 +3601,17 @@ msgid "byte number must be non-negative"
 msgstr "バイト数は非負でなければなりません"
 
 #: objcopy.c:3215
-#, fuzzy, c-format
+#, c-format
 msgid "architecture %s unknown"
-msgstr "アーキテクチャ: %s, "
+msgstr "アーキテクチャ %s は不明です"
 
 #: objcopy.c:3223
 msgid "interleave must be positive"
-msgstr "interleave は正の数値でなければなりません"
+msgstr "interleave は正の数値でなければいけません"
 
 #: objcopy.c:3232
-#, fuzzy
 msgid "interleave width must be positive"
-msgstr "interleave は正の数値でなければなりません"
+msgstr "interleave 幅は正の数値でなければいけません"
 
 #: objcopy.c:3252 objcopy.c:3260
 #, c-format
@@ -3636,9 +3644,8 @@ msgid "unable to parse alternative machine code"
 msgstr ""
 
 #: objcopy.c:3740
-#, fuzzy
 msgid "number of bytes to reverse must be positive and even"
-msgstr "interleave は正の数値でなければなりません"
+msgstr ""
 
 #: objcopy.c:3743
 #, c-format
@@ -3648,56 +3655,54 @@ msgstr ""
 #: objcopy.c:3758
 #, c-format
 msgid "%s: invalid reserve value for --heap"
-msgstr ""
+msgstr "%s: --heap に対する無効な予約値です"
 
 #: objcopy.c:3764
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid commit value for --heap"
-msgstr "%s: 出力形式が不適切です"
+msgstr "%s: --heap に対する無効な確定値です"
 
 #: objcopy.c:3789
 #, c-format
 msgid "%s: invalid reserve value for --stack"
-msgstr ""
+msgstr "%s: --stack に対する無効な予約値です"
 
 #: objcopy.c:3795
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid commit value for --stack"
-msgstr "%s: 出力形式が不適切です"
+msgstr "%s: --stack に対する無効な確定値です"
 
 #: objcopy.c:3824
-#, fuzzy
 msgid "interleave start byte must be set with --byte"
-msgstr "interleave は正の数値でなければなりません"
+msgstr "interleave の開始バイトを --byte で設定しなければいけません"
 
 #: objcopy.c:3827
 msgid "byte number must be less than interleave"
 msgstr "バイト数は interleave 未満でなければなりません"
 
 #: objcopy.c:3830
-#, fuzzy
 msgid "interleave width must be less than or equal to interleave - byte`"
-msgstr "バイト数は interleave 未満でなければなりません"
+msgstr ""
 
 #: objcopy.c:3857
 #, c-format
 msgid "unknown input EFI target: %s"
-msgstr ""
+msgstr "不明な入力 EFI ターゲットです: %s"
 
 #: objcopy.c:3888
-#, fuzzy, c-format
+#, c-format
 msgid "unknown output EFI target: %s"
-msgstr "不明なフォーマット型 `%s'"
+msgstr "不明な出力 EFI ターゲットです: %s"
 
 #: objcopy.c:3901
 #, c-format
 msgid "warning: could not locate '%s'.  System error message: %s"
-msgstr ""
+msgstr "警告: '%s' を配置できません。システムエラーメッセージ: %s"
 
 #: objcopy.c:3912
 #, c-format
 msgid "warning: could not create temporary file whilst copying '%s', (error: %s)"
-msgstr ""
+msgstr "警告: '%s' をコピー中に一時ファイルを作成できませんでした (エラー: %s)"
 
 #: objcopy.c:3956 objcopy.c:3970
 #, c-format
@@ -3705,24 +3710,22 @@ msgid "%s %s%c0x%s never used"
 msgstr "%s %s%c0x%s は使われることがありません"
 
 #: objdump.c:190
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <option(s)> <file(s)>\n"
-msgstr "使い方 %s <オプション> <オブジェクトファイル>...\n"
+msgstr "使用法: %s <option(s)> <file(s)>\n"
 
 #: objdump.c:191
-#, fuzzy, c-format
+#, c-format
 msgid " Display information from object <file(s)>.\n"
-msgstr "オブジェクトファイルからの情報を表示する。\n"
+msgstr " オブジェクトファイル <file(s)> の情報を表示する\n"
 
 #: objdump.c:192
-#, fuzzy, c-format
+#, c-format
 msgid " At least one of the following switches must be given:\n"
-msgstr ""
-"\n"
-" 以下のスイッチから少なくとも一つは指定されなければなりません:\n"
+msgstr " 下記のスイッチの中で最低一つは指定しなければいけません:\n"
 
 #: objdump.c:193
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  -a, --archive-headers    Display archive header information\n"
 "  -f, --file-headers       Display the contents of the overall file header\n"
@@ -3751,22 +3754,30 @@ msgid ""
 "  -H, --help               Display this information\n"
 msgstr ""
 "  -a, --archive-headers    書庫ヘッダ情報を表示する\n"
-"  -f, --file-headers       ファイルヘッダ全体の情報を表示する\n"
-"  -p, --private-headers    オブジェクト形式特有のファイルヘッダ内容を表示する\n"
-"  -h, --[section-]headers  セクションヘッダの内容を表示する\n"
-"  -x, --all-headers        全ヘッダの内容を表示する\n"
-"  -d, --disassemble        executable セクションの内容をアセンブリ形式表示\n"
-"  -D, --disassemble-all    全セクションの内容をアセンブリ形式表示\n"
-"  -S, --source             逆アセンブルとソースコードを混在させて表示する\n"
-"  -s, --full-contents      要求された全セクションの全ての内容を表示する\n"
-"  -g, --debugging          オブジェクトファイルのデバッグ情報を表示\n"
-"  -G, --stabs              ファイルの STABS 情報を素の形式で表示する\n"
-"  -t, --syms               シンボルテーブルの内容を表示する\n"
-"  -T, --dynamic-syms       動的シンボルテーブルの内容を表示する\n"
+"  -f, --file-headers       全てのファイルヘッダの内容を表示する\n"
+"  -p, --private-headers    オブジェクト形式特有のファイルヘッダの内容を表示する\n"
+"  -h, --[section-]headers  セクションヘッダの中身を表示する\n"
+"  -x, --all-headers        全てのヘッダの中身を表示する\n"
+"  -d, --disassemble        実行可能セクションのアセンブラを表示する\n"
+"  -D, --disassemble-all    全てのセクションのアセンブラを表示する\n"
+"  -S, --source             逆アセンブル結果にソースコードを混ぜて表示する\n"
+"  -s, --full-contents      要求された全てのセクションの完全な内容を表示する\n"
+"  -g, --debugging          オブジェクトファイルのデバッグ情報を表示する\n"
+"  -e, --debugging-tags     ctags 形式を使用してデバッグ情報を表示する\n"
+"  -G, --stabs              ファイル内の全てのスタブ情報を (生の形式で) 表示する\n"
+"  -W[lLiaprmfFsoRt] or\n"
+"  --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n"
+"          =frames-interp,=str,=loc,=Ranges,=pubtypes,\n"
+"          =trace_info,=trace_abbrev,=trace_aranges]\n"
+"                           ファイルの DWARF 情報を表示する\n"
+"  -t, --syms               シンボル表の内容を表示する\n"
+"  -T, --dynamic-syms       動的シンボル表の内容を表示する\n"
 "  -r, --reloc              ファイルの再配置エントリを表示する\n"
 "  -R, --dynamic-reloc      ファイルの動的再配置エントリを表示する\n"
-"  -V, --version            このプログラムのバージョン番号を表示する\n"
-"  -i, --info               サポートされるオブジェクト形式とアーキテクチャを表示\n"
+"  @<file>                  オプションを <file> から読み込む\n"
+"  -v, --version            このプログラムのバージョン番号を表示する\n"
+"  -i, --info               サポートされているオブジェクト形式とアーキテクチャを\n"
+"                             表示する\n"
 "  -H, --help               この情報を表示する\n"
 
 #: objdump.c:222
@@ -3831,7 +3842,7 @@ msgstr ""
 #: objdump.c:396
 #, c-format
 msgid "section '%s' mentioned in a -j option, but not found in any input file"
-msgstr ""
+msgstr "セクション '%s' が -j オプションで指定されましたがどの入力ファイルにもありません"
 
 #: objdump.c:500
 #, c-format
@@ -3856,7 +3867,7 @@ msgstr " フラグ"
 #: objdump.c:515
 #, c-format
 msgid "  Pg"
-msgstr ""
+msgstr "  Pg"
 
 #: objdump.c:558
 #, c-format
@@ -3864,9 +3875,9 @@ msgid "%s: not a dynamic object"
 msgstr "%s: 動的オブジェクトではありません"
 
 #: objdump.c:984 objdump.c:1008
-#, fuzzy, c-format
+#, c-format
 msgid " (File Offset: 0x%lx)"
-msgstr "  ファイル: %lx"
+msgstr " (ファイルオフセット: 0x%lx)"
 
 #: objdump.c:1634
 #, c-format
@@ -3874,28 +3885,32 @@ msgid "disassemble_fn returned length %d"
 msgstr ""
 
 #: objdump.c:1939
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Disassembly of section %s:\n"
-msgstr "セクション %s の逆アセンブル:\n"
+msgstr ""
+"\n"
+"セクション %s の逆アセンブル:\n"
 
 #: objdump.c:2115
-#, fuzzy, c-format
+#, c-format
 msgid "can't use supplied machine %s"
-msgstr "与えられたマシン %s を使えません"
+msgstr "与えられたマシン %s を使用できません"
 
 #: objdump.c:2134
-#, fuzzy, c-format
+#, c-format
 msgid "can't disassemble for architecture %s\n"
-msgstr "%s アーキテクチャ用には逆アセンブルできません\n"
+msgstr "アーキテクチャ %s 用に逆アセンブルできません\n"
 
 #: objdump.c:2214 objdump.c:2237
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Can't get contents for section '%s'.\n"
-msgstr "セクション %s の内容:\n"
+msgstr ""
+"\n"
+"セクション '%s' の内容を取得できません。\n"
 
 #: objdump.c:2378
 #, c-format
@@ -3907,9 +3922,9 @@ msgstr ""
 "\n"
 
 #: objdump.c:2387
-#, fuzzy, c-format
+#, c-format
 msgid "reading %s section of %s failed: %s"
-msgstr "%s セクション (%s) 読込みに失敗しました: %s"
+msgstr "%2$s の %1$s セクションの読み込みに失敗しました: %3$s"
 
 #: objdump.c:2431
 #, c-format
@@ -3940,34 +3955,33 @@ msgstr ""
 "開始アドレス 0x"
 
 #: objdump.c:2642
-#, fuzzy, c-format
+#, c-format
 msgid "Contents of section %s:"
-msgstr "セクション %s の内容:\n"
+msgstr "セクション %s の内容:"
 
 #: objdump.c:2644
 #, c-format
 msgid "  (Starting at file offset: 0x%lx)"
-msgstr ""
+msgstr "  (開始ファイルオフセット: 0x%lx)"
 
 #: objdump.c:2650
-#, fuzzy
 msgid "Reading section failed"
-msgstr "%s セクション (%s) 読込みに失敗しました: %s"
+msgstr "セクションの読み込みに失敗しました"
 
 #: objdump.c:2753
-#, fuzzy, c-format
+#, c-format
 msgid "no symbols\n"
-msgstr "%s: シンボルがありません"
+msgstr "シンボルがありません\n"
 
 #: objdump.c:2760
 #, c-format
 msgid "no information for symbol number %ld\n"
-msgstr ""
+msgstr "シンボル番号 %ld に関する情報がありません\n"
 
 #: objdump.c:2763
-#, fuzzy, c-format
+#, c-format
 msgid "could not determine the type of symbol number %ld\n"
-msgstr "ロードすべきシンボルの数を決定できません\n"
+msgstr "シンボル番号 %ld の型を決定できませんでした\n"
 
 #: objdump.c:3043
 #, c-format
@@ -3990,21 +4004,19 @@ msgstr "書庫 %s 内:\n"
 
 #: objdump.c:3316
 msgid "error: the start address should be before the end address"
-msgstr ""
+msgstr "エラー: 開始アドレスは終了アドレスより前でなければいけません"
 
 #: objdump.c:3321
 msgid "error: the stop address should be after the start address"
-msgstr ""
+msgstr "エラー: 停止アドレスは開始アドレスより後でなければいけません"
 
 #: objdump.c:3333
-#, fuzzy
 msgid "error: prefix strip must be non-negative"
-msgstr "バイト数は非負でなければなりません"
+msgstr ""
 
 #: objdump.c:3338
-#, fuzzy
 msgid "error: instruction width must be positive"
-msgstr "interleave は正の数値でなければなりません"
+msgstr "エラー: 命令幅は正の数値でなければいけません"
 
 #: objdump.c:3347
 msgid "unrecognized -E option"
@@ -4017,7 +4029,7 @@ msgstr "--endian タイプ `%s' を認識できません"
 
 #: rclex.c:197
 msgid "invalid value specified for pragma code_page.\n"
-msgstr ""
+msgstr "pragma code_page に対して無効な値が指定されました。\n"
 
 #: rdcoff.c:198
 #, c-format
@@ -4055,20 +4067,18 @@ msgid "Last stabs entries before error:\n"
 msgstr "エラーの直前のスタブエントリ:\n"
 
 #: readelf.c:268
-#, fuzzy
 msgid "<none>"
-msgstr "なし"
+msgstr "<無し>"
 
 #: readelf.c:269
-#, fuzzy
 msgid "<no-name>"
-msgstr "なし"
+msgstr "<名前無し>"
 
 #: readelf.c:270 readelf.c:5047 readelf.c:5557 readelf.c:7794 readelf.c:7912
 #: readelf.c:8865 readelf.c:8945 readelf.c:8998 readelf.c:11860
 #: readelf.c:11863
 msgid "<corrupt>"
-msgstr ""
+msgstr "<破損>"
 
 #: readelf.c:308
 #, fuzzy, c-format
@@ -4091,12 +4101,11 @@ msgstr "このマシンアーキテクチャでの再配置について解って
 
 #: readelf.c:718 readelf.c:748 readelf.c:816 readelf.c:845
 msgid "relocs"
-msgstr ""
+msgstr "再配置"
 
 #: readelf.c:730 readelf.c:760 readelf.c:827 readelf.c:856
-#, fuzzy
 msgid "out of memory parsing relocs\n"
-msgstr "再配置データ解析中にメモリ不足に陥りました"
+msgstr "再配置を解析中にメモリが不足しました\n"
 
 #: readelf.c:961
 #, fuzzy, c-format
@@ -4139,7 +4148,7 @@ msgid "  Offset          Info           Type           Sym. Value    Sym. Name\n
 msgstr "  Offset    情報  タイプ          シンボルの値     シンボル名\n"
 
 #: readelf.c:1291 readelf.c:1448 readelf.c:1456
-#, fuzzy, c-format
+#, c-format
 msgid "unrecognized: %-7lx"
 msgstr "認識できません: %-7lx"
 
@@ -4149,19 +4158,19 @@ msgid "<unknown addend: %lx>"
 msgstr "<不明: %x>"
 
 #: readelf.c:1323
-#, fuzzy, c-format
+#, c-format
 msgid " bad symbol index: %08lx"
-msgstr "名前索引: %ld\n"
+msgstr "誤ったシンボル索引: %08lx"
 
 #: readelf.c:1406
-#, fuzzy, c-format
+#, c-format
 msgid "<string table index: %3ld>"
-msgstr "<文字列テーブルの索引 %3ld>"
+msgstr "<文字列表索引: %3ld>"
 
 #: readelf.c:1408
-#, fuzzy, c-format
+#, c-format
 msgid "<corrupt string table index: %3ld>"
-msgstr "<文字列テーブルの索引 %3ld>"
+msgstr "<破損した文字列表索引: %3ld>"
 
 #: readelf.c:1801
 #, c-format
@@ -4218,19 +4227,17 @@ msgid "None"
 msgstr "なし"
 
 #: readelf.c:2034
-#, fuzzy, c-format
+#, c-format
 msgid "<unknown>: 0x%x"
-msgstr "<不明>: %x"
+msgstr "<不明>: 0x%x"
 
 #: readelf.c:2220
-#, fuzzy
 msgid ", <unknown>"
-msgstr "<不明>: %x"
+msgstr ", <不明>"
 
 #: readelf.c:2291 readelf.c:7145
-#, fuzzy
 msgid "unknown"
-msgstr "<不明>: %x"
+msgstr "不明"
 
 #: readelf.c:2292
 #, fuzzy
@@ -4238,33 +4245,28 @@ msgid "unknown mac"
 msgstr "不明なセクションです"
 
 #: readelf.c:2356
-#, fuzzy
 msgid ", relocatable"
-msgstr "REL (再配置可能ファイル)"
+msgstr ", 再配置可能"
 
 #: readelf.c:2359
-#, fuzzy
 msgid ", relocatable-lib"
-msgstr "REL (再配置可能ファイル)"
+msgstr ", 再配置可能ライブラリ"
 
 #: readelf.c:2382
 msgid ", unknown v850 architecture variant"
 msgstr ""
 
 #: readelf.c:2438
-#, fuzzy
 msgid ", unknown CPU"
-msgstr "<不明>: %x"
+msgstr ", 不明な CPU"
 
 #: readelf.c:2453
-#, fuzzy
 msgid ", unknown ABI"
-msgstr "<不明>: %x"
+msgstr ", 不明な ABI"
 
 #: readelf.c:2473 readelf.c:2507
-#, fuzzy
 msgid ", unknown ISA"
-msgstr "<不明>: %x"
+msgstr ", 不明な ISA"
 
 #: readelf.c:2680
 msgid "Standalone App"
@@ -4272,7 +4274,7 @@ msgstr "Standalone App"
 
 #: readelf.c:2689
 msgid "Bare-metal C6000"
-msgstr ""
+msgstr "Bare-metal C6000"
 
 #: readelf.c:2699 readelf.c:3462 readelf.c:3478
 #, c-format
@@ -4280,14 +4282,14 @@ msgid "<unknown: %x>"
 msgstr "<不明: %x>"
 
 #: readelf.c:3172
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: readelf <option(s)> elf-file(s)\n"
-msgstr "使い方: readelf {オプション} elfファイル\n"
+msgstr "使用法: readelf <option(s)> elf-file(s)\n"
 
 #: readelf.c:3173
 #, c-format
 msgid " Display information about the contents of ELF format files\n"
-msgstr ""
+msgstr " ELF 形式のファイルの内容に関する情報を表示します\n"
 
 #: readelf.c:3174
 #, c-format
@@ -4327,11 +4329,13 @@ msgid ""
 msgstr ""
 
 #: readelf.c:3207
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  -i --instruction-dump=<number|name>\n"
 "                         Disassemble the contents of section <number|name>\n"
-msgstr "                            セクション <番号> の内容を逆アセンブルする\n"
+msgstr ""
+"  -i --instruction-dump=<number|name>\n"
+"                         セクション <number|name> の内容を逆アセンブルする\n"
 
 #: readelf.c:3211
 #, c-format
@@ -4351,7 +4355,7 @@ msgstr "要求されたテーブルのダンプ中にメモリ確保が失敗し
 #: readelf.c:3431
 #, c-format
 msgid "Invalid option '-%c'\n"
-msgstr "オプション '-%c' が不適切です\n"
+msgstr "無効なオプション '-%c'\n"
 
 #: readelf.c:3446
 msgid "Nothing to do.\n"
@@ -4472,14 +4476,14 @@ msgid "  Size of program headers:           %ld (bytes)\n"
 msgstr "  プログラムヘッダサイズ:            %ld (バイト)\n"
 
 #: readelf.c:3546
-#, fuzzy, c-format
+#, c-format
 msgid "  Number of program headers:         %ld"
-msgstr "  プログラムヘッダ数:                %ld\n"
+msgstr "  プログラムヘッダ数:                %ld"
 
 #: readelf.c:3551
-#, fuzzy, c-format
+#, c-format
 msgid " (%ld)"
-msgstr "  %s\n"
+msgstr " (%ld)"
 
 #: readelf.c:3553
 #, c-format
@@ -4487,26 +4491,23 @@ msgid "  Size of section headers:           %ld (bytes)\n"
 msgstr "  セクションヘッダ:                  %ld (バイト)\n"
 
 #: readelf.c:3555
-#, fuzzy, c-format
+#, c-format
 msgid "  Number of section headers:         %ld"
-msgstr "  セクションヘッダサイズ:            %ld\n"
+msgstr "  セクションヘッダサイズ:            %ld"
 
 #: readelf.c:3560
-#, fuzzy, c-format
+#, c-format
 msgid "  Section header string table index: %ld"
-msgstr "  セクションヘッダ文字列テーブル索引:%ld\n"
+msgstr "  セクションヘッダ文字列表索引:      %ld"
 
 #: readelf.c:3567
 #, c-format
 msgid " <corrupt: out of range>"
-msgstr ""
+msgstr " <破損: 範囲外>"
 
 #: readelf.c:3601 readelf.c:3635
-#, fuzzy
 msgid "program headers"
-msgstr ""
-"\n"
-"プログラムヘッダ%.0s:\n"
+msgstr "プログラムヘッダ"
 
 #: readelf.c:3701
 #, c-format
@@ -4541,13 +4542,13 @@ msgstr ""
 "%d 個のプログラムヘッダ、始点オフセット "
 
 #: readelf.c:3722 readelf.c:3724
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Program Headers:\n"
 msgstr ""
 "\n"
-"プログラムヘッダ%.0s:\n"
+"プログラムヘッダ:\n"
 
 #: readelf.c:3728
 #, c-format
@@ -4574,17 +4575,16 @@ msgid "more than one dynamic segment\n"
 msgstr "複数の動的セグメント\n"
 
 #: readelf.c:3849
-#, fuzzy
 msgid "no .dynamic section in the dynamic segment\n"
-msgstr "複数の動的セグメント\n"
+msgstr "動的セグメントに内 .dynamic セクションがありません\n"
 
 #: readelf.c:3864
 msgid "the .dynamic section is not contained within the dynamic segment\n"
-msgstr ""
+msgstr "動的セグメント内に .dynamic セクションが含まれていません\n"
 
 #: readelf.c:3867
 msgid "the .dynamic section is not the first section in the dynamic segment.\n"
-msgstr ""
+msgstr ".dynamic セクションが動的セグメントの最初のセクションではありません\n"
 
 #: readelf.c:3875
 msgid "Unable to find program interpreter name\n"
@@ -4592,12 +4592,11 @@ msgstr "プログラムインタプリタ名は見つかりません\n"
 
 #: readelf.c:3882
 msgid "Internal error: failed to create format string to display program interpreter\n"
-msgstr ""
+msgstr "内部エラー: プログラムインタプリタを表示するための書式文字列作成に失敗しました\n"
 
 #: readelf.c:3886
-#, fuzzy
 msgid "Unable to read program interpreter name\n"
-msgstr "プログラムインタプリタ名は見つかりません\n"
+msgstr "プログラムインタプリタ名を読み込めません\n"
 
 #: readelf.c:3889
 #, c-format
@@ -4624,7 +4623,7 @@ msgstr "  セグメントセクション...\n"
 
 #: readelf.c:3938
 msgid "Cannot interpret virtual addresses without program headers.\n"
-msgstr ""
+msgstr "プログラムヘッダ無しに仮想アドレスを解釈できません。\n"
 
 #: readelf.c:3954
 #, c-format
@@ -4632,24 +4631,20 @@ msgid "Virtual address 0x%lx not located in any PT_LOAD segment.\n"
 msgstr ""
 
 #: readelf.c:3969 readelf.c:4012
-#, fuzzy
 msgid "section headers"
-msgstr ""
-"\n"
-"セクションヘッダ%.0s:\n"
+msgstr "セクションヘッダ"
 
 #: readelf.c:4059 readelf.c:4134
 msgid "sh_entsize is zero\n"
-msgstr ""
+msgstr "sh_entsize が 0 です\n"
 
 #: readelf.c:4067 readelf.c:4142
 msgid "Invalid sh_entsize\n"
-msgstr ""
+msgstr "無効な sh_entsize です\n"
 
 #: readelf.c:4072 readelf.c:4147
-#, fuzzy
 msgid "symbols"
-msgstr "%s: シンボルがありません"
+msgstr "シンボル"
 
 #: readelf.c:4084 readelf.c:4159
 msgid "symtab shndx"
@@ -4658,7 +4653,7 @@ msgstr ""
 #: readelf.c:4419
 #, c-format
 msgid "UNKNOWN (%*.*lx)"
-msgstr ""
+msgstr "UNKNOWN (%*.*lx)"
 
 #: readelf.c:4440 readelf.c:4920
 #, c-format
@@ -4676,9 +4671,8 @@ msgstr "%d 個のセクションヘッダ、始点オフセット 0x%lx:\n"
 
 #: readelf.c:4467 readelf.c:5043 readelf.c:5454 readelf.c:5760 readelf.c:6173
 #: readelf.c:6754 readelf.c:8843
-#, fuzzy
 msgid "string table"
-msgstr "stringtable 文字列"
+msgstr "文字列表"
 
 #: readelf.c:4534
 #, c-format
@@ -7133,21 +7127,21 @@ msgstr ""
 #: windmc.c:263
 #, c-format
 msgid "\tcodepage settings are ignored.\n"
-msgstr ""
+msgstr "\tコードページ設定は無視されます。\n"
 
 #: windmc.c:307
 msgid "try to add a ill language."
-msgstr ""
+msgstr "不正な言語を加えようとしています。"
 
 #: windmc.c:1116
-#, fuzzy, c-format
+#, c-format
 msgid "unable to open file ,%s' for input.\n"
-msgstr "出力ファイル %s を開けません"
+msgstr "ファイル ,%s' を入力として開くことができません。\n"
 
 #: windmc.c:1124
-#, fuzzy, c-format
+#, c-format
 msgid "unable to read contents of %s"
-msgstr "%d バイトの読込みに失敗 (%s)\n"
+msgstr "%s の内容を読み込めません"
 
 #: windmc.c:1136
 msgid "input file does not seems to be UFT16.\n"
@@ -7185,17 +7179,17 @@ msgstr "%s: サポートされているフォーマット:"
 
 #. Otherwise, we give up.
 #: windres.c:647
-#, fuzzy, c-format
+#, c-format
 msgid "can not determine type of file `%s'; use the -J option"
-msgstr "ファイル `%s' の型を決定できません -- -I オプションを使いましょう"
+msgstr "ファイル `%s' の型を決定できません。-J オプションを使用してください"
 
 #: windres.c:659
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] [input-file] [output-file]\n"
-msgstr "使い方: %s [オプション] [入力ファイル] [出力ファイル]\n"
+msgstr "使用法: %s [option(s)] [input-file] [output-file]\n"
 
 #: windres.c:661
-#, fuzzy, c-format
+#, c-format
 msgid ""
 " The options are:\n"
 "  -i --input=<file>            Name input file\n"
@@ -7215,38 +7209,39 @@ msgid ""
 "     --no-use-temp-file        Use popen (default)\n"
 msgstr ""
 "オプション:\n"
-"  -i FILE, --input FILE       入力ファイル名\n"
-"  -o FILE, --output FILE      出力ファイル名\n"
-"  -I FORMAT, --input-format FORMAT\n"
-"                              入力フォーマットを指定する\n"
-"  -O FORMAT, --output-format FORMAT\n"
-"                              出力フォーマットを指定する\n"
-"  -F TARGET, --target TARGET  COFF ターゲットを指定する\n"
-"  --preprocessor PROGRAM      rc ファイルの前処理に使うプログラム\n"
-"  --include-dir DIR           rc ファイル前処理時のインクルードディレクトリ\n"
-"  -DSYM[=VAL], --define SYM[=VAL]\n"
-"                              rc ファイル前処理時に SYM を定義する\n"
-"  -v                          饒舌 --行われることを知らせる\n"
-"  --language VAL              rc 読込み時の言語を設定する\n"
-"  --use-temp-file             前処理出力の読込みに popen ではなく\n"
-"                              一時ファイルを使う\n"
-"  --no-use-temp-file          popen を使う (デフォルト)\n"
+"  -i --input=<file>            入力ファイル名\n"
+"  -o --output=<file>           出力ファイル名\n"
+"  -J --input-format=<format>   入力形式を指定する\n"
+"  -O --output-format=<format>  出力形式を指定する\n"
+"  -F --target=<target>         COFF ターゲットを指定する\n"
+"     --preprocessor=<program>  Program to use to preprocess rc file\n"
+"  -I --include-dir=<dir>       Include directory when preprocessing rc file\n"
+"  -D --define <sym>[=<val>]    rc ファイルを前処理する際に SYM を定義する\n"
+"  -U --undefine <sym>          rc ファイルを前処理する際に SYM を非定義にする\n"
+"  -v --verbose                 冗長 - 実行していることを表示する\n"
+"  -c --codepage=<codepage>     デフォルトコードページを指定する\n"
+"  -l --language=<val>          rc ファイルを読み出すときの言語を設定する\n"
+"     --use-temp-file           Use a temporary file instead of popen to read\n"
+"                               the preprocessor output\n"
+"     --no-use-temp-file        popen を使用する (デフォルト)\n"
 
 #: windres.c:678
-#, fuzzy, c-format
+#, c-format
 msgid "     --yydebug                 Turn on parser debugging\n"
-msgstr "  --yydebug                   構文解析器のデバッグを有効にする\n"
+msgstr "     --yydebug                 構文解析のデバッグを有効にする\n"
 
 #: windres.c:681
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  -r                           Ignored for compatibility with rc\n"
 "  @<file>                      Read options from <file>\n"
 "  -h --help                    Print this help message\n"
 "  -V --version                 Print version information\n"
 msgstr ""
-"  --help                      この使い方を表示する\n"
-"  --version                   バージョン情報を表示する\n"
+"  -r                           無視される (rc との互換性のため)\n"
+"  @<file>                      <file> からオプションを読み出す\n"
+"  -h --help                    このヘルプメッセージを表示する\n"
+"  -V --version                 バージョン情報を表示する\n"
 
 #: windres.c:686
 #, c-format
@@ -7261,21 +7256,16 @@ msgstr ""
 "標準出力が使用され、rc 形式がデフォルトになります。\n"
 
 #: windres.c:847
-#, fuzzy
 msgid "invalid codepage specified.\n"
-msgstr "操作が指定されていません"
+msgstr "無効なコードページが指定されています。\n"
 
 #: windres.c:862
-#, fuzzy
 msgid "invalid option -f\n"
-msgstr "オプション '-%c' が不適切です\n"
+msgstr "無効なオプション -f です\n"
 
 #: windres.c:867
-#, fuzzy
 msgid "No filename following the -fo option.\n"
-msgstr ""
-"\n"
-" 以下のスイッチはオプションです:\n"
+msgstr "-fo オプションの後にファイル名が続いていません。\n"
 
 #: windres.c:938
 #, c-format

@@ -1,3 +1,11 @@
+2010-11-25  Alan Modra  <amodra@gmail.com>
+
+	* po/es.po: Update.
+	* po/fi.po: Update.
+	* po/fr.po: Update.
+	* po/ja.po: Update.
+	* po/zh_CN.po: Update.
+
 2010-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.am (OPTIONAL_BACKENDS): Add rs6000-core.lo.
@@ -250,7 +258,7 @@
 	* libbfd.h: Likewise.
 
 2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_merge_attributes): Check for mismatch
 	of DSBT attributes.

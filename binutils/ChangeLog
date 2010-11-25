@@ -1,3 +1,12 @@
+2010-11-25  Alan Modra  <amodra@gmail.com>
+
+	* po/bg.po: Update.
+	* po/es.po: Update.
+	* po/fi.po: Update.
+	* po/ja.po: Update.
+	* po/ru.po: Update.
+	* po/zh_CN.po: Update.
+
 2010-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/12235

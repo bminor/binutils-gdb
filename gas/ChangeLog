@@ -1,5 +1,9 @@
 2010-11-25  Alan Modra  <amodra@gmail.com>
 
+	* po/es.po: Update.
+
+2010-11-25  Alan Modra  <amodra@gmail.com>
+
 	PR gas/12264
 	* compress-debug.c: Include config.h first.
 

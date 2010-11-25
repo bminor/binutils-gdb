@@ -5,10 +5,10 @@
 # Roumen Petrov <transl@roumenpetrov.info>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.20.1\n"
+"Project-Id-Version: gprof 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2010-03-03 15:06+0100\n"
-"PO-Revision-Date: 2010-04-21 22:47+0300\n"
+"POT-Creation-Date: 2010-11-05 11:34+0100\n"
+"PO-Revision-Date: 2010-11-10 22:47+0200\n"
 "Last-Translator: Roumen Petrov <transl@roumenpetrov.info>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "MIME-Version: 1.0\n"
@@ -35,7 +35,7 @@ msgstr "[find_call] 0x%lx: jsr%s <косвен_потомък>\n"
 msgid "[find_call] 0x%lx: bsr"
 msgstr "[find_call] 0x%lx: bsr <относително адресиране>"
 
-#: basic_blocks.c:128 call_graph.c:89 hist.c:105
+#: basic_blocks.c:128 call_graph.c:89 hist.c:107
 #, c-format
 msgid "%s: %s: unexpected end of file\n"
 msgstr "%s: %s: неочакван край на файл\n"
@@ -135,7 +135,7 @@ msgstr ""
 "\t\t\tГраф на извикванията\n"
 "\n"
 
-#: cg_print.c:79 hist.c:466
+#: cg_print.c:79 hist.c:468
 #, c-format
 msgid ""
 "\n"
@@ -178,10 +178,11 @@ msgstr "родители"
 msgid "index"
 msgstr "индекс"
 
+#
 #: cg_print.c:98
 #, fuzzy, c-format
 msgid "%time"
-msgstr "време"
+msgstr "%време"
 
 #: cg_print.c:98 cg_print.c:99
 msgid "self"
@@ -191,7 +192,7 @@ msgstr "собст."
 msgid "descendants"
 msgstr "наследници"
 
-#: cg_print.c:99 hist.c:492
+#: cg_print.c:99 hist.c:494
 msgid "name"
 msgstr "име"
 
@@ -238,7 +239,7 @@ msgstr "<цикъл %d>"
 msgid "%s: unable to parse mapping file %s.\n"
 msgstr "%s: не може да се обработи файла със съответствията %s.\n"
 
-#: corefile.c:84 corefile.c:496
+#: corefile.c:84 corefile.c:504
 #, c-format
 msgid "%s: could not open %s.\n"
 msgstr "%s: не може да се отвори %s.\n"
@@ -268,12 +269,12 @@ msgstr "%s: не може с команда -c\n"
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: -c не се поддържа за архитектура %s\n"
 
-#: corefile.c:505 corefile.c:590
+#: corefile.c:513 corefile.c:598
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: файлът '%s' е без символи\n"
 
-#: corefile.c:851
+#: corefile.c:859
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: нещо не е преброено: ltab.len=%d вместо %ld\n"
@@ -323,47 +324,47 @@ msgstr "%s: файлът'%s', изглежда, не е в формата на g
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr "%s: неочакван край на файл(EOF) след прочитане на %d/%d \"сандъци\"\n"
 
-#: gmon_io.c:565
+#: gmon_io.c:563
 #, c-format
 msgid "time is in ticks, not seconds\n"
 msgstr "времето е в отметки, а не в секунди\n"
 
-#: gmon_io.c:571 gmon_io.c:748
+#: gmon_io.c:569 gmon_io.c:749
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
 msgstr "%s: не е известно как да се обработи файлов формат %d\n"
 
-#: gmon_io.c:578
+#: gmon_io.c:579
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
 msgstr "Файлът '%s' (версия %d) съдържа:\n"
 
-#: gmon_io.c:581
+#: gmon_io.c:582
 #, c-format
 msgid "\t%d histogram record\n"
 msgstr "\t%d запис с хистограма\n"
 
-#: gmon_io.c:582
+#: gmon_io.c:583
 #, c-format
 msgid "\t%d histogram records\n"
 msgstr "\t%d записа(-и) с хистограма\n"
 
-#: gmon_io.c:584
+#: gmon_io.c:585
 #, c-format
 msgid "\t%d call-graph record\n"
 msgstr "\t%d запис за граф на извикванията\n"
 
-#: gmon_io.c:585
+#: gmon_io.c:586
 #, c-format
 msgid "\t%d call-graph records\n"
 msgstr "\t%d записа(-и) за граф на извикванията\n"
 
-#: gmon_io.c:587
+#: gmon_io.c:588
 #, c-format
 msgid "\t%d basic-block count record\n"
 msgstr "\t%d запис за базов-блок\n"
 
-#: gmon_io.c:588
+#: gmon_io.c:589
 #, c-format
 msgid "\t%d basic-block count records\n"
 msgstr "\t%d записа(-и) за базов-блок\n"
@@ -455,7 +456,7 @@ msgstr "%s: gmon.out файл без хистограма\n"
 msgid "%s: gmon.out file is missing call-graph data\n"
 msgstr "%s: gmon.out файл без граф за извикванията\n"
 
-#: hist.c:133
+#: hist.c:135
 #, c-format
 msgid ""
 "%s: dimension unit changed between histogram records\n"
@@ -466,7 +467,7 @@ msgstr ""
 "%s: от '%s'\n"
 "%s: на '%s'\n"
 
-#: hist.c:143
+#: hist.c:145
 #, c-format
 msgid ""
 "%s: dimension abbreviation changed between histogram records\n"
@@ -477,27 +478,27 @@ msgstr ""
 "%s: от '%c'\n"
 "%s: на '%c'\n"
 
-#: hist.c:157
+#: hist.c:159
 #, c-format
 msgid "%s: different scales in histogram records"
 msgstr "%s: различни скали в записите за хистограма"
 
-#: hist.c:194
+#: hist.c:196
 #, c-format
 msgid "%s: overlapping histogram records\n"
 msgstr "%s: припокрити записи с хистограма\n"
 
-#: hist.c:228
+#: hist.c:230
 #, c-format
 msgid "%s: %s: unexpected EOF after reading %u of %u samples\n"
 msgstr "%s: %s: неочакван край на файл(EOF) след прочитане на %u от %u проби\n"
 
-#: hist.c:462
+#: hist.c:464
 #, c-format
 msgid "%c%c/call"
 msgstr "%c%c/извикване"
 
-#: hist.c:470
+#: hist.c:472
 #, c-format
 msgid ""
 " for %.2f%% of %.2f %s\n"
@@ -506,7 +507,7 @@ msgstr ""
 " за %.2f%% от %.2f %s\n"
 "\n"
 
-#: hist.c:476
+#: hist.c:478
 #, c-format
 msgid ""
 "\n"
@@ -515,7 +516,7 @@ msgstr ""
 "\n"
 "Всяка проба се брой за %g %s.\n"
 
-#: hist.c:481
+#: hist.c:483
 #, c-format
 msgid ""
 " no time accumulated\n"
@@ -524,27 +525,27 @@ msgstr ""
 " без натрупване за време\n"
 "\n"
 
-#: hist.c:488
+#: hist.c:490
 msgid "cumulative"
 msgstr "натрупани"
 
-#: hist.c:488
+#: hist.c:490
 msgid "self  "
 msgstr "собст."
 
-#: hist.c:488
+#: hist.c:490
 msgid "total "
 msgstr "общо"
 
-#: hist.c:491
+#: hist.c:493
 msgid "time"
 msgstr "време"
 
-#: hist.c:491
+#: hist.c:493
 msgid "calls"
 msgstr "извикв."
 
-#: hist.c:580
+#: hist.c:582
 #, c-format
 msgid ""
 "\n"
@@ -557,12 +558,12 @@ msgstr ""
 "\n"
 "диагностика:\n"
 
-#: hist.c:586
+#: hist.c:588
 #, c-format
 msgid "Flat profile:\n"
 msgstr "Диагностика:\n"
 
-#: hist.c:705
+#: hist.c:709
 #, c-format
 msgid "%s: found a symbol that covers several histogram records"
 msgstr "%s: намерен е символ, който покрива няколко записа с хистограма"

@@ -1,160 +1,159 @@
-# Mensajes en espa�ol para ld 2.20.90.
-# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+# Japanese messages for GNU ld
+# Copyright (C) 2010 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Cristian Oth�n Mart�nez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010.
+# Yasuaki Taniguchi <yasuakit@gmail.com>, 2010
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: ld 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-11-05 11:34+0100\n"
-"PO-Revision-Date: 2010-11-18 12:31-0600\n"
-"Last-Translator: Cristian Oth�n Mart�nez Vera <cfuga@itam.mx>\n"
-"Language-Team: Spanish <es@li.org>\n"
+"PO-Revision-Date: 2010-11-14 17:53+0900\n"
+"Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
+"Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: emultempl/armcoff.em:73
 #, c-format
 msgid "  --support-old-code          Support interworking with old code\n"
-msgstr "  --support-old-code          Admite interoperar con c�digo antiguo\n"
+msgstr "  --support-old-code          古いコードの相互利用をサポートする\n"
 
 #: emultempl/armcoff.em:74
 #, c-format
 msgid "  --thumb-entry=<sym>         Set the entry point to be Thumb symbol <sym>\n"
-msgstr "  --thumb-entry=<sim>         Establece el punto de entrada para el s�mbolo Thumb <sim>\n"
+msgstr "  --thumb-entry=<sym>         エントリポイントを Thumb シンボル <sym> に設定する\n"
 
 #: emultempl/armcoff.em:122
 #, c-format
 msgid "Errors encountered processing file %s"
-msgstr "Se encontraron errores al procesar el fichero %s"
+msgstr "ファイル %s を処理中にエラーに遭遇しました"
 
 #: emultempl/armcoff.em:190 emultempl/pe.em:1812
 msgid "%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"
-msgstr "%P: aviso: '--thumb-entry %s' se impone a '-e %s'\n"
+msgstr "%P: 警告: '--thumb-entry %s' は '-e %s' を上書きします\n"
 
+# thumb となっているが公式には Thumb なので先頭を大文字にしています
 #: emultempl/armcoff.em:195 emultempl/pe.em:1817
 msgid "%P: warning: cannot find thumb start symbol %s\n"
-msgstr "%P: aviso: no se puede encontrar el s�mbolo de inicio thumb %s\n"
+msgstr "%P: 警告: Thumb 開始シンボル %s が見つかりません\n"
 
 #: emultempl/pe.em:418
 #, c-format
 msgid "  --base_file <basefile>             Generate a base file for relocatable DLLs\n"
-msgstr "  --base_file <ficherobase>          Genera un fichero base para DLLs reubicables\n"
+msgstr ""
 
-# DLL son las siglas en ingl�s de `Biblioteca de Enlace Din�mico'.
-# El problema es que las siglas en espa�ol (BED) no est�n muy extendidas.
-# Se dej� `DLL' sin traducir en todas las ocasiones. cfuga
 #: emultempl/pe.em:419
 #, c-format
 msgid "  --dll                              Set image base to the default for DLLs\n"
-msgstr "  --dll                              Establece la imagen base por defecto para las DLLs\n"
+msgstr ""
 
 #: emultempl/pe.em:420
 #, c-format
 msgid "  --file-alignment <size>            Set file alignment\n"
-msgstr "  --file-alignment <tama�o>          Establece el fichero de alineaci�n\n"
+msgstr "  --file-alignment <size>            ファイル整列を設定する\n"
 
 #: emultempl/pe.em:421
 #, c-format
 msgid "  --heap <size>                      Set initial size of the heap\n"
-msgstr "  --heap <tama�o>                    Establece el tama�o inicial del mont�n\n"
+msgstr "  --heap <size>                      ヒープの初期サイズを設定する\n"
 
 #: emultempl/pe.em:422
 #, c-format
 msgid "  --image-base <address>             Set start address of the executable\n"
-msgstr "  --image-base <direcci�n>           Establece la direcci�n de inicio del ejecutable\n"
+msgstr "  --image-base <address>             実行ファイルの開始アドレスを設定する\n"
 
 #: emultempl/pe.em:423
 #, c-format
 msgid "  --major-image-version <number>     Set version number of the executable\n"
-msgstr "  --major-image-version <n�mero>     Establece el n�mero de versi�n del ejecutable\n"
+msgstr "  --major-image-version <number>     実行ファイルのバージョン番号を設定する\n"
 
 #: emultempl/pe.em:424
 #, c-format
 msgid "  --major-os-version <number>        Set minimum required OS version\n"
-msgstr "  --major-os-version <n�mero>        Establece la versi�n m�nima requerida del SO\n"
+msgstr "  --major-os-version <number>        最小の要求される OS バージョンを設定する\n"
 
 #: emultempl/pe.em:425
 #, c-format
 msgid "  --major-subsystem-version <number> Set minimum required OS subsystem version\n"
-msgstr "  --major-subsystem-version <n�mero> Establece la versi�n m�nima requerida del subsistema del SO\n"
+msgstr "  --major-subsystem-version <number> 最小の要求される OS サブシステムバージョンを設定する\n"
 
 #: emultempl/pe.em:426
 #, c-format
 msgid "  --minor-image-version <number>     Set revision number of the executable\n"
-msgstr "  --minor-image-version <n�mero>     Establece el n�mero de revisi�n del ejecutable\n"
+msgstr "  --minor-image-version <number>     実行ファイルのリビジョン番号を設定する\n"
 
 #: emultempl/pe.em:427
 #, c-format
 msgid "  --minor-os-version <number>        Set minimum required OS revision\n"
-msgstr "  --minor-os-version <n�mero>        Establece la revisi�n m�nima requerida del SO\n"
+msgstr "  --minor-os-version <number>        最小の要求される OS リビジョンを設定する\n"
 
 #: emultempl/pe.em:428
 #, c-format
 msgid "  --minor-subsystem-version <number> Set minimum required OS subsystem revision\n"
-msgstr "  --minor-subsystem-version <n�mero> Establece la revisi�n m�nima requerida del subsistema del SO\n"
+msgstr "  --minor-subsystem-version <number> 最小の要求される OS 子サブシステムリビジョンを設定する\n"
 
 #: emultempl/pe.em:429
 #, c-format
 msgid "  --section-alignment <size>         Set section alignment\n"
-msgstr "  --section-alignment <tama�o>       Establece la alineaci�n de la secci�n\n"
+msgstr "  --section-alignment <size>         セクション整列を設定する\n"
 
 #: emultempl/pe.em:430
 #, c-format
 msgid "  --stack <size>                     Set size of the initial stack\n"
-msgstr "  --stack <size>                     Establece el tama�o de la pila inicial\n"
+msgstr "  --stack <size>                     インラインスタックの大きさを設定する\n"
 
 #: emultempl/pe.em:431
 #, c-format
 msgid "  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"
-msgstr "  --subsystem <nombre>[:<versi�n>]   Establece el subsistema [y versi�n] requeridos del SO\n"
+msgstr "  --subsystem <name>[:<version>]     要求される OS のサブシステム [およびバージョン] を設定する\n"
 
 #: emultempl/pe.em:432
 #, c-format
 msgid "  --support-old-code                 Support interworking with old code\n"
-msgstr "  --support-old-code                 Admite interoperar con c�digo antiguo\n"
+msgstr "  --support-old-code                 古いコードの相互利用をサポートする\n"
 
 #: emultempl/pe.em:433
 #, c-format
 msgid "  --[no-]leading-underscore          Set explicit symbol underscore prefix mode\n"
-msgstr "  --[no-]leading-underscore          Establece el modo expl�cito de prefijo de s�mbolo con subrayado\n"
+msgstr "  --[no-]leading-underscore          シンボルの下線 (_) 接頭辞モードを明示的に設定する\n"
 
 #: emultempl/pe.em:434
 #, c-format
 msgid "  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"
-msgstr "  --thumb-entry=<s�mbolo>            Establece el punto de entrada para el s�mbolo Thumb <s�mbolo>\n"
+msgstr "  --thumb-entry=<symbol>             エントリポイントを Thumb の <symbol> に設定する\n"
 
 #: emultempl/pe.em:436
 #, c-format
 msgid "  --add-stdcall-alias                Export symbols with and without @nn\n"
-msgstr "  --add-stdcall-alias                Exporta s�mbolos con y sin @nn\n"
+msgstr "  --add-stdcall-alias                シンボルを @nn 付きと @nn 無しとでエクスポートする\n"
 
 #: emultempl/pe.em:437
 #, c-format
 msgid "  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"
-msgstr "  --disable-stdcall-fixup            No enlaza _sym con _sym@nn\n"
+msgstr "  --disable-stdcall-fixup            _sym から _sym@nn へのリンクを行わない\n"
 
 #: emultempl/pe.em:438
 #, c-format
 msgid "  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"
-msgstr "  --enable-stdcall-fixup             Enlaza _sym con _sym@nn sin avisos\n"
+msgstr "  --enable-stdcall-fixup             _sym を _sym@nn へ警告なしにリンクする\n"
 
 #: emultempl/pe.em:439
 #, c-format
 msgid "  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"
-msgstr "  --exclude-symbols sim,sim,...      Excluye s�mbolos de la exportaci�n autom�tica\n"
+msgstr "  --exclude-symbols sym,sym,...      シンボルを自動エクスポートから除外する\n"
 
 #: emultempl/pe.em:440
 #, c-format
 msgid "  --exclude-all-symbols              Exclude all symbols from automatic export\n"
-msgstr "  --exclude-all-symbols              Excluye todos los s�mbolos de la exportaci�n autom�tica\n"
+msgstr "  --exclude-all-symbols              全てのシンボルを自動エクスポートから除外する\n"
 
 #: emultempl/pe.em:441
 #, c-format
 msgid "  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"
-msgstr "  --exclude-libs bib,bib,...         Excluye bibliotecas de la exportaci�n autom�tica\n"
+msgstr "  --exclude-libs lib,lib,...         ライブラリを自動エクスポートから除外する\n"
 
 #: emultempl/pe.em:442
 #, c-format
@@ -164,37 +163,37 @@ msgstr "  --exclude-modules-for-implib mod,mod,...\n"
 #: emultempl/pe.em:443
 #, c-format
 msgid "                                     Exclude objects, archive members from auto\n"
-msgstr "                                     Excluye objetos, miembros de archivo de la exportaci�n\n"
+msgstr ""
 
 #: emultempl/pe.em:444
 #, c-format
 msgid "                                     export, place into import library instead.\n"
-msgstr "                                     autom�tica, los coloca en la biblioteca de importaci�n.\n"
+msgstr ""
 
 #: emultempl/pe.em:445
 #, c-format
 msgid "  --export-all-symbols               Automatically export all globals to DLL\n"
-msgstr "  --export-all-symbols               Exporta autom�ticamente todos los globales a la DLL\n"
+msgstr "  --export-all-symbols               全てのグローバルシンボルを DLL に対して自動的にエクスポートする\n"
 
 #: emultempl/pe.em:446
 #, c-format
 msgid "  --kill-at                          Remove @nn from exported symbols\n"
-msgstr "  --kill-at                          Elimina @nn de los s�mbolos exportados\n"
+msgstr "  --kill-at                          エクスポートされたシンボルから @nn を削除する\n"
 
 #: emultempl/pe.em:447
 #, c-format
 msgid "  --out-implib <file>                Generate import library\n"
-msgstr "  --out-implib <fichero>             Genera una biblioteca de importaci�n\n"
+msgstr "  --out-implib <file>                インポートライブラリを生成する\n"
 
 #: emultempl/pe.em:448
 #, c-format
 msgid "  --output-def <file>                Generate a .DEF file for the built DLL\n"
-msgstr "  --output-def <fichero>             Genera un fichero .DEF para la DLL construida\n"
+msgstr "  --output-def <file>                構築した DLL から .DEF ファイルを生成する\n"
 
 #: emultempl/pe.em:449
 #, c-format
 msgid "  --warn-duplicate-exports           Warn about duplicate exports.\n"
-msgstr "  --warn-duplicate-exports           Avisa sobre exportaciones duplicadas.\n"
+msgstr "  --warn-duplicate-exports           重複したエクスポートに関して警告する\n"
 
 #: emultempl/pe.em:450
 #, c-format
@@ -202,8 +201,8 @@ msgid ""
 "  --compat-implib                    Create backward compatible import libs;\n"
 "                                       create __imp_<SYMBOL> as well.\n"
 msgstr ""
-"  --compat-implib                    Crea bibliotecas de importaci�n compatibles hacia atr�s;\n"
-"                                       crea adem�s __imp_<S�MBOLO>.\n"
+"  --compat-implib                    後方互換性のためのインポートライブラリを作成し、\n"
+"                                       __imp_<SYMBOL> も作成する\n"
 
 #: emultempl/pe.em:452
 #, c-format
@@ -211,13 +210,13 @@ msgid ""
 "  --enable-auto-image-base           Automatically choose image base for DLLs\n"
 "                                       unless user specifies one\n"
 msgstr ""
-"  --enable-auto-image-base           Escoge autom�ticamente la imagen base para las DLLs\n"
-"                                       a menos que el usuario especifique una\n"
+"  --enable-auto-image-base           利用者が指定しない限り DLL のイメージベースを\n"
+"                                       自動的に選択する\n"
 
 #: emultempl/pe.em:454
 #, c-format
 msgid "  --disable-auto-image-base          Do not auto-choose image base. (default)\n"
-msgstr "  --disable-auto-image-base          No escoge autom�ticamente una imagen base. (por defecto)\n"
+msgstr "  --disable-auto-image-base          イメージベースを自動選択しない (デフォルト)\n"
 
 #: emultempl/pe.em:455
 #, c-format
@@ -226,23 +225,21 @@ msgid ""
 "                                       an importlib, use <string><basename>.dll\n"
 "                                       in preference to lib<basename>.dll \n"
 msgstr ""
-"  --dll-search-prefix=<cadena>       Al enlazar din�micamente con una dll sin una\n"
-"                                       biblioteca de importaci�n, usa <cadena><nombrebase>.dll \n"
-"                                       en lugar de lib<nombrebase>.dll \n"
+"  --dll-search-prefix=<string>       インポートライブラリが無い dll を動的にリンクする時、\n"
+"                                       lib<basename>.dll の代わりに <string><basename>.dll\n"
+"                                       を使用する\n"
 
 #: emultempl/pe.em:458
 #, c-format
 msgid ""
 "  --enable-auto-import               Do sophistcated linking of _sym to\n"
 "                                       __imp_sym for DATA references\n"
-msgstr ""
-"  --enable-auto-import               Hace enlazado sofisticado de _sym a\n"
-"                                       __imp_sym para las referencias DATA\n"
+msgstr "  --enable-auto-import               DATA 参照時に _sym を __imp_sym にリンクする\n"
 
 #: emultempl/pe.em:460
 #, c-format
 msgid "  --disable-auto-import              Do not auto-import DATA items from DLLs\n"
-msgstr "  --disable-auto-import              No importa autom�ticamente elementos DATA de las DLLs\n"
+msgstr "  --disable-auto-import              DLL から DATA 項目を自動インポートしない\n"
 
 #: emultempl/pe.em:461
 #, c-format
@@ -251,9 +248,8 @@ msgid ""
 "                                       adding pseudo-relocations resolved at\n"
 "                                       runtime.\n"
 msgstr ""
-"  --enable-runtime-pseudo-reloc      Evita limitaciones de autoimportaci�n\n"
-"                                       agregando pseudo-reubicaciones resueltas\n"
-"                                       al momento de ejecuci�n.\n"
+"  --enable-runtime-pseudo-reloc      実行時に疑似再配置による名前解決を行うことで\n"
+"                                       自動インポートの制限を回避をする\n"
 
 #: emultempl/pe.em:464
 #, c-format
@@ -261,8 +257,8 @@ msgid ""
 "  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations for\n"
 "                                       auto-imported DATA.\n"
 msgstr ""
-"  --disable-runtime-pseudo-reloc     No agrega pseudo-reubicaciones al momento\n"
-"                                       de ejecuci�n para DATOS autoimportados.\n"
+"  --disable-runtime-pseudo-reloc     DATA の自動インポートに対する実行時疑似再配置\n"
+"                                       を行わない\n"
 
 #: emultempl/pe.em:466
 #, c-format
@@ -270,8 +266,8 @@ msgid ""
 "  --enable-extra-pe-debug            Enable verbose debug output when building\n"
 "                                       or linking to DLLs (esp. auto-import)\n"
 msgstr ""
-"  --enable-extra-pe-debug            Activa la salida de depuraci�n detallada al construir\n"
-"                                       o enlazar a DLLs (en part. con auto-importaci�n)\n"
+"  --enable-extra-pe-debug            DLL のビルドまたはリンク時に冗長なデバッグ出力\n"
+"                                       を行う (特に自動インポート)\n"
 
 #: emultempl/pe.em:469
 #, c-format
@@ -279,8 +275,8 @@ msgid ""
 "  --large-address-aware              Executable supports virtual addresses\n"
 "                                       greater than 2 gigabytes\n"
 msgstr ""
-"  --large-address-aware              El ejecutable admite direcciones\n"
-"                                       virtuales mayores a 2 gigabytes\n"
+"  --large-address-aware              実行ファイルが 2GB 以上の仮想アドレスを\n"
+"                                       サポートするようにする\n"
 
 #: emultempl/pe.em:471
 #, c-format
@@ -288,8 +284,8 @@ msgid ""
 "  --enable-long-section-names        Use long COFF section names even in\n"
 "                                       executable image files\n"
 msgstr ""
-"  --enable-long-section-names        Usa nombres de secci�n COFF largos a�n\n"
-"                                      en ficheros de im�genes ejecutables\n"
+"  --enable-long-section-names        実行可能なイメージファイルの中でも長い COFF\n"
+"                                       セクション名を使用する\n"
 
 #: emultempl/pe.em:473
 #, c-format
@@ -297,8 +293,8 @@ msgid ""
 "  --disable-long-section-names       Never use long COFF section names, even\n"
 "                                       in object files\n"
 msgstr ""
-"  --disable-long-section-names       Nunca usa nombres de secci�n COFF largos,\n"
-"                                       a�n en ficheros objeto\n"
+"  --disable-long-section-names       オブジェクトファイル内でも長い COFF セクション\n"
+"                                       名を使用しない\n"
 
 #: emultempl/pe.em:475
 #, c-format
@@ -306,24 +302,21 @@ msgid ""
 "  --dynamicbase\t\t\t Image base address may be relocated using\n"
 "\t\t\t\t       address space layout randomization (ASLR)\n"
 msgstr ""
-"  --dynamicbase\t\t\t La direcci�n base de la imagen se puede\n"
-"\t\t\t\t       reubicar usando la disposici�n aleatoria\n"
-"\t\t\t\t       del espacio de direcciones (en ingl�s: ASLR)\n"
 
 #: emultempl/pe.em:477
 #, c-format
 msgid "  --forceinteg\t\t Code integrity checks are enforced\n"
-msgstr "  --forceinteg\t\t Activa la revisi�n de integridad de c�digo\n"
+msgstr "  --forceinteg\t\t コードの完全性チェックを強制する\n"
 
 #: emultempl/pe.em:478
 #, c-format
 msgid "  --nxcompat\t\t Image is compatible with data execution prevention\n"
-msgstr "  --nxcompat\t\t La imagen es compatible con la prevenci�n de ejecuci�n de datos\n"
+msgstr ""
 
 #: emultempl/pe.em:479
 #, c-format
 msgid "  --no-isolation\t\t Image understands isolation but do not isolate the image\n"
-msgstr "  --no-isolation\t\t La imagen entiende aislamiento, pero no a�sla la imagen\n"
+msgstr ""
 
 #: emultempl/pe.em:480
 #, c-format
@@ -331,120 +324,118 @@ msgid ""
 "  --no-seh\t\t\t Image does not use SEH. No SE handler may\n"
 "\t\t\t\t       be called in this image\n"
 msgstr ""
-"  --no-seh\t\t\t La imagen no usa SEH. No se puede llamar\n"
-"\t\t\t\t       un manejador SE en esta imagen\n"
 
 #: emultempl/pe.em:482
 #, c-format
 msgid "  --no-bind\t\t\t Do not bind this image\n"
-msgstr "  --no-bind\t\t\t No enlaza esta imagen\n"
+msgstr ""
 
 #: emultempl/pe.em:483
 #, c-format
 msgid "  --wdmdriver\t\t Driver uses the WDM model\n"
-msgstr "  --wdmdriver\t\t El controlador usa el modelo WDB\n"
+msgstr ""
 
 #: emultempl/pe.em:484
 #, c-format
 msgid "  --tsaware                  Image is Terminal Server aware\n"
-msgstr "  --tsaware                  La imagen funciona con Terminal Server\n"
+msgstr ""
 
 #: emultempl/pe.em:613
 msgid "%P: warning: bad version number in -subsystem option\n"
-msgstr "%P: aviso: n�mero de versi�n err�neo en la opci�n -subsystem\n"
+msgstr "%P: 警告: -subsystem オプションのバージョン番号に誤りがあります\n"
 
 #: emultempl/pe.em:638
 msgid "%P%F: invalid subsystem type %s\n"
-msgstr "%P%F: tipo de subsistema %s inv�lido\n"
+msgstr "%P%F: 無効な子システム型 %s です\n"
 
 #: emultempl/pe.em:659
 msgid "%P%F: invalid hex number for PE parameter '%s'\n"
-msgstr "%P%F: n�mero hexadecimal inv�lido para el par�metro PE '%s'\n"
+msgstr "%P%F: PE パラメータ '%s' に対する無効な十六進数です\n"
 
 #: emultempl/pe.em:676
 msgid "%P%F: strange hex info for PE parameter '%s'\n"
-msgstr "%P%F: informaci�n hexadecimal extra�a para el par�metro PE '%s'\n"
+msgstr "%P%F: PE パラメータ '%s' に対しておかしな十六進情報があります\n"
 
 #: emultempl/pe.em:693
 #, c-format
 msgid "%s: Can't open base file %s\n"
-msgstr "%s: No se puede abrir el fichero base %s\n"
+msgstr "%s: ベースファイル %s を開けません\n"
 
 #: emultempl/pe.em:969
 msgid "%P: warning, file alignment > section alignment.\n"
-msgstr "%P: aviso, alineaci�n del fichero > alineaci�n de la secci�n.\n"
+msgstr "%P: 警告: ファイル引数 > セクション引数 となっています\n"
 
 #: emultempl/pe.em:982
 msgid "%P: warning: --export-dynamic is not supported for PE targets, did you mean --export-all-symbols?\n"
-msgstr "%P: aviso: --export-dynamic no se admite para objetivos PE, �quiso decir --export-all-symbols?\n"
+msgstr "%P: 警告: PE ターゲットに対して --export-dynamic はサポートされていません。--export-all-symbols を行いたいのではないですか?\n"
 
 #: emultempl/pe.em:1058 emultempl/pe.em:1085
 #, c-format
 msgid "Warning: resolving %s by linking to %s\n"
-msgstr "Aviso: se resuelve %s al enlazar con %s\n"
+msgstr "警告: %2$s にリンクすることによって %1$s を解決しています\n"
 
 #: emultempl/pe.em:1063 emultempl/pe.em:1090
 msgid "Use --enable-stdcall-fixup to disable these warnings\n"
-msgstr "Use --enable-stdcall-fixup para desactivar estos avisos\n"
+msgstr "これらの警告を無効にするためには --enable-stdcall-fixup を使用してください\n"
 
 #: emultempl/pe.em:1064 emultempl/pe.em:1091
 msgid "Use --disable-stdcall-fixup to disable these fixups\n"
-msgstr "Use --disable-stdcall-fixup para desactivar estas composturas\n"
+msgstr "これらの修正を無効にするためには --disable-stdcall-fixup を使用してください\n"
 
 #: emultempl/pe.em:1110
 #, c-format
 msgid "%C: Cannot get section contents - auto-import exception\n"
-msgstr "%C: No se puede obtener el contenido de la secci�n - excepci�n de auto-importaci�n\n"
+msgstr "%C: セクションの中身を取得できません - 自動インポート例外です\n"
 
 #: emultempl/pe.em:1150
 #, c-format
 msgid "Info: resolving %s by linking to %s (auto-import)\n"
-msgstr "Informaci�n: se resuelve %s al enlazar con %s (auto-importaci�n)\n"
+msgstr "情報: %2$s にリンクすることによって %1$s を解決しています (自動インポート)\n"
 
 #: emultempl/pe.em:1157
 msgid ""
 "%P: warning: auto-importing has been activated without --enable-auto-import specified on the command line.\n"
 "This should work unless it involves constant data structures referencing symbols from auto-imported DLLs.\n"
 msgstr ""
-"%P: aviso: la importaci�n autom�tica se activ� sin especificar --enable-auto-import en la l�nea de �rdenes.\n"
-"Esto debe funcionar a menos que involucre estructuras de datos constantes que referenc�en s�mbolos de DLLs auto-importadas.\n"
+"%P: 警告: --enable-auto-import のコマンドライン指定無しで自動インポートが有効になりました。\n"
+"自動インポートされた DLL にシンボルを参照する定数データ構造が含まれない限りこれは動作します。\n"
 
 #: emultempl/pe.em:1164 emultempl/pe.em:1369 emultempl/pe.em:1575 ldcref.c:490
 #: ldcref.c:588 ldmain.c:1183 ldmisc.c:286 pe-dll.c:705 pe-dll.c:1253
 #: pe-dll.c:1348
 msgid "%B%F: could not read symbols: %E\n"
-msgstr "%B%F: no se pueden leer s�mbolos: %E\n"
+msgstr "%B%F: シンボルを読み込むことができませんでした: %E\n"
 
 #: emultempl/pe.em:1245
 msgid "%F%P: cannot perform PE operations on non PE output file '%B'.\n"
-msgstr "%F%P: no se pueden realizar operaciones PE en el fichero de salida '%B' que no es PE.\n"
+msgstr "%F%P: PE ではない出力ファイル '%B' に対して PE 操作は行えません。\n"
 
 #: emultempl/pe.em:1616
 #, c-format
 msgid "Errors encountered processing file %s\n"
-msgstr "Se encontraron errores al procesar el fichero %s\n"
+msgstr "ファイル %s を処理中にエラーが発生しました\n"
 
 #: emultempl/pe.em:1639
 #, c-format
 msgid "Errors encountered processing file %s for interworking\n"
-msgstr "Se encontraron errores al procesar el fichero %s para interoperabilidad\n"
+msgstr "相互利用のためにファイル %s を処理中にエラーが発生しました\n"
 
 #: emultempl/pe.em:1701 ldexp.c:542 ldlang.c:3323 ldlang.c:3358 ldlang.c:6804
 #: ldlang.c:6835 ldmain.c:1128
 msgid "%P%F: bfd_link_hash_lookup failed: %E\n"
-msgstr "%P%F: fall� bfd_link_hash_lookup: %E\n"
+msgstr "%P%F: bfd_link_hash_lookup に失敗しました: %E\n"
 
 #: ldcref.c:168
 msgid "%X%P: bfd_hash_table_init of cref table failed: %E\n"
-msgstr "%X%P: fall� bfd_hash_table_init de la tabla cref: %E\n"
+msgstr "%X%P: cref テーブルの bfd_hash_table_init に失敗しました: %E\n"
 
 #: ldcref.c:174
 msgid "%X%P: cref_hash_lookup failed: %E\n"
-msgstr "%X%P: fall� cref_hash_lookup: %E\n"
+msgstr "%X%P: cref_hash_lookup に失敗しました: %E\n"
 
 #: ldcref.c:184
 msgid "%X%P: cref alloc failed: %E\n"
-msgstr "%X%P: fall� la reubicaci�n cref: %E\n"
+msgstr "%X%P: cref のメモリ確保に失敗しました: %E\n"
 
 #: ldcref.c:366
 #, c-format
@@ -454,30 +445,30 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Tabla de Referencias Cruzadas\n"
+"相互参照テーブル\n"
 "\n"
 
 #: ldcref.c:367
 msgid "Symbol"
-msgstr "S�mbolo"
+msgstr "シンボル"
 
 #: ldcref.c:375
 #, c-format
 msgid "File\n"
-msgstr "Fichero\n"
+msgstr "ファイル\n"
 
 #: ldcref.c:379
 #, c-format
 msgid "No symbols\n"
-msgstr "No hay s�mbolos\n"
+msgstr "シンボル無し\n"
 
 #: ldcref.c:532
 msgid "%P: symbol `%T' missing from main hash table\n"
-msgstr "%P: falta el s�mbolo `%T' de la tabla principal de dispersi�n\n"
+msgstr ""
 
 #: ldcref.c:650 ldcref.c:657 ldmain.c:1217 ldmain.c:1224
 msgid "%B%F: could not read relocs: %E\n"
-msgstr "%B%F: no se pueden leer las reubicaciones: %E\n"
+msgstr "%B%F: 再配置を読み込めませんでした: %E\n"
 
 #. We found a reloc for the symbol.  The symbol is defined
 #. in OUTSECNAME.  This reloc is from a section which is
@@ -485,23 +476,23 @@ msgstr "%B%F: no se pueden leer las reubicaciones: %E\n"
 #. are prohibited.  We must report an error.
 #: ldcref.c:684
 msgid "%X%C: prohibited cross reference from %s to `%T' in %s\n"
-msgstr "%X%C: referencia cruzada prohibida de %s a `%T' en %s\n"
+msgstr "%1$X%2$C: %5$s 内で %3$s から `%4$T' への相互参照は禁止されています\n"
 
 #: ldctor.c:85
 msgid "%P%X: Different relocs used in set %s\n"
-msgstr "%P%X: Se usaron diferentes reubicaciones en el conjunto %s\n"
+msgstr ""
 
 #: ldctor.c:103
 msgid "%P%X: Different object file formats composing set %s\n"
-msgstr "%P%X: Formatos diferentes de fichero objeto componen al conjunto %s\n"
+msgstr ""
 
 #: ldctor.c:281 ldctor.c:295
 msgid "%P%X: %s does not support reloc %s for set %s\n"
-msgstr "%P%X: %s no se admite la reubicaci�n %s para el conjunto %s\n"
+msgstr ""
 
 #: ldctor.c:316
 msgid "%P%X: Unsupported size %d for set %s\n"
-msgstr "%P%X: No se admite el tama�o %d para el conjunto %s\n"
+msgstr ""
 
 #: ldctor.c:337
 msgid ""
@@ -509,187 +500,184 @@ msgid ""
 "Set                 Symbol\n"
 "\n"
 msgstr ""
-"\n"
-"Conjunto            S�mbolo\n"
-"\n"
 
 #: ldemul.c:265
 #, c-format
 msgid "%S SYSLIB ignored\n"
-msgstr "%S se descarta SYSLIB\n"
+msgstr "%S SYSLIB は無視されました\n"
 
 #: ldemul.c:271
 #, c-format
 msgid "%S HLL ignored\n"
-msgstr "%S se descarta HLL\n"
+msgstr "%S HLL は無視されました\n"
 
 #: ldemul.c:291
 msgid "%P: unrecognised emulation mode: %s\n"
-msgstr "%P: no se reconoce el modo de emulaci�n: %s\n"
+msgstr "%P: 認識できないエミュレーションモードです: %s\n"
 
 #: ldemul.c:292
 msgid "Supported emulations: "
-msgstr "Emulaciones admitidas: "
+msgstr "サポートされているエミュレーションモード: "
 
 #: ldemul.c:334
 #, c-format
 msgid "  no emulation specific options.\n"
-msgstr "  no hay opciones espec�ficas de emulaci�n.\n"
+msgstr ""
 
 #: ldexp.c:313
 msgid "%P: warning: address of `%s' isn't multiple of maximum page size\n"
-msgstr "%P: aviso: la direcci�n de `%s' no es un m�ltiplo del tama�o m�ximo de p�gina\n"
+msgstr "%P: 警告: `%s' のアドレスが最大ページサイズの倍数ではありません\n"
 
 #: ldexp.c:351
 #, c-format
 msgid "%F%S %% by zero\n"
-msgstr "%F%S %% por cero\n"
+msgstr "%F%S 0 による剰余演算\n"
 
 #: ldexp.c:359
 #, c-format
 msgid "%F%S / by zero\n"
-msgstr "%F%S / por cero\n"
+msgstr "%F%S 0 による除算\n"
 
 #: ldexp.c:552
 #, c-format
 msgid "%X%S: unresolvable symbol `%s' referenced in expression\n"
-msgstr "%X%S: se referenc�a el s�mbolo sin resoluci�n `%s' en la expresi�n\n"
+msgstr ""
 
 #: ldexp.c:564
 #, c-format
 msgid "%F%S: undefined symbol `%s' referenced in expression\n"
-msgstr "%F%S: se referenc�a el s�mbolo sin definir `%s' en la expresi�n\n"
+msgstr ""
 
 #: ldexp.c:585 ldexp.c:602 ldexp.c:629
 #, c-format
 msgid "%F%S: undefined section `%s' referenced in expression\n"
-msgstr "%F%S: se referenc�a la secci�n sin definir `%s' en la expresi�n\n"
+msgstr ""
 
 #: ldexp.c:656 ldexp.c:670
 #, c-format
 msgid "%F%S: undefined MEMORY region `%s' referenced in expression\n"
-msgstr "%F%S: se referenc�a la regi�n MEMORY sin definir `%s' en la expresi�n\n"
+msgstr ""
 
 #: ldexp.c:681
 #, c-format
 msgid "%F%S: unknown constant `%s' referenced in expression\n"
-msgstr "%F%S: se referenc�a la constante sin definir `%s' en la expresi�n\n"
+msgstr ""
 
 #: ldexp.c:743
 #, c-format
 msgid "%F%S can not PROVIDE assignment to location counter\n"
-msgstr "%F%S no se puede hacer una asignaci�n PROVIDE al contador de ubicaci�n\n"
+msgstr ""
 
 #: ldexp.c:757
 #, c-format
 msgid "%F%S invalid assignment to location counter\n"
-msgstr "%F%S asignaci�n inv�lida al contador de ubicaci�n\n"
+msgstr ""
 
 #: ldexp.c:760
 #, c-format
 msgid "%F%S assignment to location counter invalid outside of SECTION\n"
-msgstr "%F%S asignaci�n al contador de ubicaci�n inv�lida fuera de SECTION\n"
+msgstr ""
 
 #: ldexp.c:773
 msgid "%F%S cannot move location counter backwards (from %V to %V)\n"
-msgstr "%F%S no se puede mover el contador de ubicaci�n hacia atr�s (de %V a %V)\n"
+msgstr ""
 
 #: ldexp.c:812
 msgid "%P%F:%s: hash creation failed\n"
-msgstr "%P%F:%s: fall� la creaci�n de la dispersi�n\n"
+msgstr "%P%F:%s: ハッシュ作成に失敗しました\n"
 
 #: ldexp.c:1119 ldexp.c:1144 ldexp.c:1204
 #, c-format
 msgid "%F%S: nonconstant expression for %s\n"
-msgstr "%F%S: la expresi�n no es constante para %s\n"
+msgstr ""
 
 #: ldfile.c:141
 #, c-format
 msgid "attempt to open %s failed\n"
-msgstr "fall� el intento de abrir %s\n"
+msgstr ""
 
 #: ldfile.c:143
 #, c-format
 msgid "attempt to open %s succeeded\n"
-msgstr "tuvo �xito el intento de abrir %s\n"
+msgstr "%s を開くのに成功しました\n"
 
 #: ldfile.c:149
 msgid "%F%P: invalid BFD target `%s'\n"
-msgstr "%F%P: objetivo BFD inv�lido `%s'\n"
+msgstr "%F%P: 無効な BFD ターゲット `%s' です\n"
 
 #: ldfile.c:266 ldfile.c:295
 msgid "%P: skipping incompatible %s when searching for %s\n"
-msgstr "%P: se salta el %s incompatible mientras se busca %s\n"
+msgstr "%1$P: %3$s を探索しているときに互換性のない %2$s をスキップしました\n"
 
 #: ldfile.c:279
 msgid "%F%P: attempted static link of dynamic object `%s'\n"
-msgstr "%F%P: se intent� el enlazado est�tico del objeto din�mico `%s'\n"
+msgstr "%F%P: 動的オブジェクト `%s' に対する静的リンクが試みられました\n"
 
 #: ldfile.c:332 ldmain.c:832
 msgid "%P%F: %s: plugin reported error claiming file\n"
-msgstr "%P%F: %s: el plugin report� error al reclamar el fichero\n"
+msgstr ""
 
 #: ldfile.c:447
 msgid "%P: cannot find %s (%s): %E\n"
-msgstr "%P: no se puede encontrar %s (%s): %E\n"
+msgstr "%P: %s (%s) が見つかりません: %E\n"
 
 #: ldfile.c:450
 msgid "%P: cannot find %s: %E\n"
-msgstr "%P: no se puede encontrar %s: %E\n"
+msgstr "%P: %s が見つかりません: %E\n"
 
 #: ldfile.c:485
 msgid "%P: cannot find %s inside %s\n"
-msgstr "%P: no se puede encontrar %s dentro de %s\n"
+msgstr "%1$P: %3$s 内に %2$s が見つかりません\n"
 
 #: ldfile.c:488
 msgid "%P: cannot find %s\n"
-msgstr "%P: no se puede encontrar %s\n"
+msgstr "%P: %s が見つかりません\n"
 
 #: ldfile.c:507 ldfile.c:525
 #, c-format
 msgid "cannot find script file %s\n"
-msgstr "no se puede encontrar el fichero de gui�n %s\n"
+msgstr "スクリプトファイル %s が見つかりません\n"
 
 #: ldfile.c:509 ldfile.c:527
 #, c-format
 msgid "opened script file %s\n"
-msgstr "fichero de gui�n %s abierto\n"
+msgstr "スクリプトファイル %s が開かれました\n"
 
 #: ldfile.c:657
 msgid "%P%F: cannot open linker script file %s: %E\n"
-msgstr "%P%F: no se puede abrir el fichero de gui�n del enlazador %s: %E\n"
+msgstr "%P%F: リンカスクリプトファイル %s を開けません: %E\n"
 
 #: ldfile.c:722
 msgid "%P%F: cannot represent machine `%s'\n"
-msgstr "%P%F: no se puede representar la m�quina `%s'\n"
+msgstr ""
 
 #: ldlang.c:1160 ldlang.c:1202 ldlang.c:3048
 msgid "%P%F: can not create hash table: %E\n"
-msgstr "%P%F: no se puede crear la tabla de dispersi�n: %E\n"
+msgstr "%P%F: ハッシュテーブルを作成できません: %E\n"
 
 #: ldlang.c:1253
 msgid "%P:%S: warning: redeclaration of memory region `%s'\n"
-msgstr "%P:%S: aviso: redeclaraci�n de la regi�n de memoria `%s'\n"
+msgstr "%P:%S: 警告: メモリ領域 `%s' が再宣言されています\n"
 
 #: ldlang.c:1259
 msgid "%P:%S: warning: memory region `%s' not declared\n"
-msgstr "%P:%S: aviso: no se declar� la regi�n de memoria `%s'\n"
+msgstr "%P:%S: メモリ領域 `%s' が宣言されていません\n"
 
 #: ldlang.c:1293
 msgid "%F%P:%S: error: alias for default memory region\n"
-msgstr "%F%P:%S: aviso: alias para la regi�n de memoria por defecto\n"
+msgstr ""
 
 #: ldlang.c:1304
 msgid "%F%P:%S: error: redefinition of memory region alias `%s'\n"
-msgstr "%F%P:%S: aviso: redefinici�n del alias de la regi�n de memoria '%s'\n"
+msgstr ""
 
 #: ldlang.c:1311
 msgid "%F%P:%S: error: memory region `%s' for alias `%s' does not exist\n"
-msgstr "%F%P:%S: aviso: no existe la regi�n de memoria `%s' para el alias `%s'\n"
+msgstr ""
 
 #: ldlang.c:1363 ldlang.c:1402
 msgid "%P%F: failed creating section `%s': %E\n"
-msgstr "%P%F: fall� la creaci�n de la secci�n `%s': %E\n"
+msgstr "%P%F: セクション `%s' の作成に失敗しました: %E\n"
 
 #: ldlang.c:1958
 #, c-format
@@ -699,7 +687,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Secciones de salida descartadas\n"
+"宣言された入力セクション\n"
 "\n"
 
 #: ldlang.c:1966
@@ -709,24 +697,24 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Configuraci�n de la Memoria\n"
+"メモリ設定\n"
 "\n"
 
 #: ldlang.c:1968
 msgid "Name"
-msgstr "Nombre"
+msgstr ""
 
 #: ldlang.c:1968
 msgid "Origin"
-msgstr "Origen"
+msgstr ""
 
 #: ldlang.c:1968
 msgid "Length"
-msgstr "Longitud"
+msgstr ""
 
 #: ldlang.c:1968
 msgid "Attributes"
-msgstr "Atributos"
+msgstr ""
 
 #: ldlang.c:2008
 #, c-format
@@ -736,179 +724,179 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Gui�n del enlazador y mapa de memoria\n"
+"リンカスクリプトおよびメモリマップ\n"
 "\n"
 
 #: ldlang.c:2074
 msgid "%P%F: Illegal use of `%s' section\n"
-msgstr "%P%F: Uso ilegal de la secci�n `%s'\n"
+msgstr "%P%F: `%s' セクションの不正な利用です\n"
 
 #: ldlang.c:2083
 msgid "%P%F: output format %s cannot represent section called %s\n"
-msgstr "%P%F: el formato de salida %s no puede representar la secci�n llamada %s\n"
+msgstr ""
 
 #: ldlang.c:2636
 msgid "%B: file not recognized: %E\n"
-msgstr "%B: no se reconoce el fichero: %E\n"
+msgstr "%B: ファイルが認識できませんでした: %E\n"
 
 #: ldlang.c:2637
 msgid "%B: matching formats:"
-msgstr "%B: formatos coincidentes:"
+msgstr ""
 
 #: ldlang.c:2644
 msgid "%F%B: file not recognized: %E\n"
-msgstr "%F%B: no se reconoce el fichero: %E\n"
+msgstr "%F%B: ファイルが認識できませんでした: %E\n"
 
 #: ldlang.c:2715
 msgid "%F%B: member %B in archive is not an object\n"
-msgstr "%F%B: el miembro %B en el archivo no es un objeto\n"
+msgstr "%F%B: 書庫内のメンバ %B はオブジェクトではありません\n"
 
 #: ldlang.c:2730 ldlang.c:2744
 msgid "%F%B: could not read symbols: %E\n"
-msgstr "%F%B: no se puede leer s�mbolos: %E\n"
+msgstr "%F%B: シンボルを読み込めませんでした: %E\n"
 
 #: ldlang.c:3018
 msgid "%P: warning: could not find any targets that match endianness requirement\n"
-msgstr "%P: aviso: no se puede encontrar ning�n objetivo que coincida con los requerimientos de `endianez'\n"
+msgstr ""
 
 #: ldlang.c:3032
 msgid "%P%F: target %s not found\n"
-msgstr "%P%F: no se encontr� el objetivo %s\n"
+msgstr "%P%F: ターゲット %s が見つかりませんでした\n"
 
 #: ldlang.c:3034
 msgid "%P%F: cannot open output file %s: %E\n"
-msgstr "%P%F: no se puede abrir el fichero de salida %s: %E\n"
+msgstr "%P%F: 出力ファイル %s が開けません: %E\n"
 
 #: ldlang.c:3040
 msgid "%P%F:%s: can not make object file: %E\n"
-msgstr "%P%F:%s: no se puede hacer el fichero objeto: %E\n"
+msgstr "%P%F:%s: オブジェクトファイルを作成できません: %E\n"
 
 #: ldlang.c:3044
 msgid "%P%F:%s: can not set architecture: %E\n"
-msgstr "%P%F:%s: no se puede establecer la arquitectura: %E\n"
+msgstr "%P%F:%s: アーキテクチャを設定できません: %E\n"
 
 #: ldlang.c:3185
 msgid "%P: warning: %s contains output sections; did you forget -T?\n"
-msgstr "%P: aviso: %s contiene secciones de salida. �Olvid� -T?\n"
+msgstr "%P: 警告: %s には出力セクションが含まれます。-T オプションを忘れていませんか?\n"
 
 #: ldlang.c:3215
 msgid "%P%F: bfd_hash_lookup failed creating symbol %s\n"
-msgstr "%P%F: fall� bfd_hash_lookup al crear el s�mbolo %s\n"
+msgstr "%P%F: シンボル %s 作成時に bfd_hash_lookup が失敗しました\n"
 
 #: ldlang.c:3233
 msgid "%P%F: bfd_hash_allocate failed creating symbol %s\n"
-msgstr "%P%F: fall� bfd_hash_allocate al crear el s�mbolo %s\n"
+msgstr "%P%F: シンボル %s 作成時に bfd_hash_allocate が失敗しました\n"
 
 #: ldlang.c:3688
 msgid "%F%P: %s not found for insert\n"
-msgstr "%F%P: no se puede encontrar %s para insert\n"
+msgstr ""
 
 #: ldlang.c:3903
 msgid " load address 0x%V"
-msgstr " direcci�n de carga 0x%V"
+msgstr ""
 
 #: ldlang.c:4179
 msgid "%W (size before relaxing)\n"
-msgstr "%W (tama�o antes de la relajaci�n)\n"
+msgstr ""
 
 #: ldlang.c:4270
 #, c-format
 msgid "Address of section %s set to "
-msgstr "La direcci�n de la secci�n %s se estableci� a "
+msgstr ""
 
 #: ldlang.c:4423
 #, c-format
 msgid "Fail with %d\n"
-msgstr "Fall� con %d\n"
+msgstr ""
 
 #: ldlang.c:4710
 msgid "%X%P: section %s loaded at [%V,%V] overlaps section %s loaded at [%V,%V]\n"
-msgstr "%X%P: la secci�n %s cargada en [%V,%V] sobreescribe la secci�n %s cargada en [%V,%V]\n"
+msgstr ""
 
 #: ldlang.c:4726
 msgid "%X%P: region `%s' overflowed by %ld bytes\n"
-msgstr "%X%P: la regi�n `%s' se desborda por %ld bytes\n"
+msgstr "%X%P: 領域 `%s' が %ld バイト溢れました\n"
 
 #: ldlang.c:4749
 msgid "%X%P: address 0x%v of %B section `%s' is not within region `%s'\n"
-msgstr "%X%P: la direcci�n 0x%v de la secci�n %B %s no est� dentro de la regi�n `%s'\n"
+msgstr ""
 
 #: ldlang.c:4760
 msgid "%X%P: %B section `%s' will not fit in region `%s'\n"
-msgstr "%X%P: la secci�n %B `%s' no cabe en la regi�n `%s'\n"
+msgstr ""
 
 #: ldlang.c:4816
 #, c-format
 msgid "%F%S: non constant or forward reference address expression for section %s\n"
-msgstr "%F%S: expresi�n de direcci�n de referencia hacia adelante o no constante para la secci�n %s\n"
+msgstr ""
 
 #: ldlang.c:4841
 msgid "%P%X: Internal error on COFF shared library section %s\n"
-msgstr "%P%X: Error interno en la secci�n de biblioteca compartida COFF %s\n"
+msgstr "%P%X: COFF 共有ライブラリのセクション %s で内部エラーが発生しました\n"
 
 #: ldlang.c:4900
 msgid "%P%F: error: no memory region specified for loadable section `%s'\n"
-msgstr "%P%F: aviso: no se especific� una regi�n de memoria para la secci�n cargable `%s'\n"
+msgstr ""
 
 #: ldlang.c:4905
 msgid "%P: warning: no memory region specified for loadable section `%s'\n"
-msgstr "%P: aviso: no se especific� una regi�n de memoria para la secci�n cargable `%s'\n"
+msgstr ""
 
 #: ldlang.c:4927
 msgid "%P: warning: changing start of section %s by %lu bytes\n"
-msgstr "%P: aviso: se cambia el inicio de la secci�n %s por %lu bytes\n"
+msgstr ""
 
 #: ldlang.c:5004
 msgid "%P: warning: dot moved backwards before `%s'\n"
-msgstr "%P: aviso: el punto se movi� hacia atr�s antes de `%s'\n"
+msgstr ""
 
 #: ldlang.c:5170
 msgid "%P%F: can't relax section: %E\n"
-msgstr "%P%F: no se puede relajar la secci�n: %E\n"
+msgstr ""
 
 #: ldlang.c:5497
 msgid "%F%P: invalid data statement\n"
-msgstr "%F%P: declaraci�n de datos inv�lida\n"
+msgstr ""
 
 #: ldlang.c:5530
 msgid "%F%P: invalid reloc statement\n"
-msgstr "%F%P: declaraci�n de reubicaci�n inv�lida\n"
+msgstr ""
 
 #: ldlang.c:5648
 msgid "%P%F: gc-sections requires either an entry or an undefined symbol\n"
-msgstr "%P%F: las secciones-gc requieren de una entrada o un s�mbolo indefinido\n"
+msgstr ""
 
 #: ldlang.c:5673
 msgid "%P%F:%s: can't set start address\n"
-msgstr "%P%F:%s: no se puede establecer la direcci�n de inicio\n"
+msgstr "%P%F:%s: 開始アドレスを設定できません\n"
 
 #: ldlang.c:5686 ldlang.c:5705
 msgid "%P%F: can't set start address\n"
-msgstr "%P%F: no se puede establecer la direcci�n de inicio\n"
+msgstr "%P%F: 開始アドレスを設定できません\n"
 
 #: ldlang.c:5698
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
-msgstr "%P: aviso: no se puede encontrar el s�mbolo de entrada %s; se usa por defecto %V\n"
+msgstr ""
 
 #: ldlang.c:5710
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
-msgstr "%P: aviso: no se puede encontrar el s�mbolo de entrada %s; no se establece la direcci�n de inicio\n"
+msgstr ""
 
 #: ldlang.c:5760
 msgid "%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"
-msgstr "%P%F: No se admite el enlazado reubicable con reubicaciones del formato %s (%B) al formato %s (%B)\n"
+msgstr ""
 
 #: ldlang.c:5770
 msgid "%P%X: %s architecture of input file `%B' is incompatible with %s output\n"
-msgstr "%P%X: la arquitectura %s del fichero de entrada `%B' es incompatible con la salida %s\n"
+msgstr ""
 
 #: ldlang.c:5792
 msgid "%P%X: failed to merge target specific data of file %B\n"
-msgstr "%P%X: fall� la mezcla de datos espec�ficos de objetivo del fichero %B\n"
+msgstr ""
 
 #: ldlang.c:5863
 msgid "%P%F: Could not define common symbol `%T': %E\n"
-msgstr "%P%F: No se puede definir el s�mbolo com�n `%T': %E\n"
+msgstr "%P%F: 共通シンボル `%T' を定義できませんでした: %E\n"
 
 #: ldlang.c:5875
 msgid ""
@@ -916,174 +904,172 @@ msgid ""
 "Allocating common symbols\n"
 msgstr ""
 "\n"
-"Se asignan s�mbolos comunes\n"
+"割り当てている共通シンボル\n"
 
 #: ldlang.c:5876
 msgid ""
 "Common symbol       size              file\n"
 "\n"
 msgstr ""
-"S�mbolo com�n       tama�o            fichero\n"
-"\n"
 
 #: ldlang.c:6022
 msgid "%P%F: invalid syntax in flags\n"
-msgstr "%P%F: sintaxis inv�lida en los interruptores\n"
+msgstr ""
 
 #: ldlang.c:6415
 msgid "%P%F: Failed to create hash table\n"
-msgstr "%P%F: Fall� al crear la tabla de dispersi�n\n"
+msgstr "%P%F: ハッシュ表の作成に失敗しました\n"
 
 #: ldlang.c:6430
 msgid "%P%F: %s: plugin reported error after all symbols read\n"
-msgstr "%P%F: %s: el plugin report� error despu�s de leer todos los s�mbolos\n"
+msgstr "%P%F: %s: 全てのシンボル読み込み後にプラグインがエラーを報告しました\n"
 
 #: ldlang.c:6717
 msgid "%P%F: multiple STARTUP files\n"
-msgstr "%P%F: ficheros STARTUP m�ltiples\n"
+msgstr "%P%F: 複数の STARTUP ファイルがあります\n"
 
 #: ldlang.c:6765
 msgid "%X%P:%S: section has both a load address and a load region\n"
-msgstr "%X%P:%S: la secci�n tiene tanto una direcci�n de carga como una regi�n de carga\n"
+msgstr ""
 
 #: ldlang.c:6950
 msgid "%X%P:%S: PHDRS and FILEHDR are not supported when prior PT_LOAD headers lack them\n"
-msgstr "%X%P:%S: no se admiten PHDRS y FILEHDR cuando los encabezados PT_LOAD previso no los tienen\n"
+msgstr ""
 
 #: ldlang.c:7022
 msgid "%F%P: no sections assigned to phdrs\n"
-msgstr "%F%P: no se asignaron secciones a phdrs\n"
+msgstr ""
 
 #: ldlang.c:7060
 msgid "%F%P: bfd_record_phdr failed: %E\n"
-msgstr "%F%P: fall� bfd_record_phdr: %E\n"
+msgstr ""
 
 #: ldlang.c:7080
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
-msgstr "%X%P: se asign� la secci�n `%s' al phdr que no existe `%s'\n"
+msgstr ""
 
 #: ldlang.c:7481
 msgid "%X%P: unknown language `%s' in version information\n"
-msgstr "%X%P: lenguaje `%s' desconocido en la informaci�n de la versi�n\n"
+msgstr "%X%P: バージョン情報内に不明な言語 `%s' があります\n"
 
 #: ldlang.c:7626
 msgid "%X%P: anonymous version tag cannot be combined with other version tags\n"
-msgstr "%X%P: la marca de versi�n an�nima no se puede combinar con otras marcas de versi�n\n"
+msgstr ""
 
 #: ldlang.c:7635
 msgid "%X%P: duplicate version tag `%s'\n"
-msgstr "%X%P: marca de versi�n `%s' duplicada\n"
+msgstr "%X%P: バージョンタグ `%s' が重複しています\n"
 
 #: ldlang.c:7656 ldlang.c:7665 ldlang.c:7683 ldlang.c:7693
 msgid "%X%P: duplicate expression `%s' in version information\n"
-msgstr "%X%P: expresi�n `%s' duplicada en la informaci�n de la versi�n\n"
+msgstr ""
 
 #: ldlang.c:7733
 msgid "%X%P: unable to find version dependency `%s'\n"
-msgstr "%X%P: no se puede encontrar la dependencia de versi�n `%s'\n"
+msgstr ""
 
 #: ldlang.c:7756
 msgid "%X%P: unable to read .exports section contents\n"
-msgstr "%X%P: no se pueden leer los contenidos de la secci�n .exports\n"
+msgstr "%X%P: .exports セクションの中身を読み込めません\n"
 
 #: ldmain.c:239
 msgid "%X%P: can't set BFD default target to `%s': %E\n"
-msgstr "%X%P: no se puede establecer el objetivo BFD por defecto a `%s': %E\n"
+msgstr "%X%P: BFD デフォルトターゲットを `%s' に設定できません: %E\n"
 
 #: ldmain.c:307
 msgid "%P%F: -r and -shared may not be used together\n"
-msgstr "%P%F: no se pueden usar juntos -r y -shared\n"
+msgstr "%P%F: -r および -shared は同時に使用できません\n"
 
 #: ldmain.c:350
 msgid "%P%F: -F may not be used without -shared\n"
-msgstr "%P%F: no se puede usar -F sin -shared\n"
+msgstr "%P%F: -F は -shared 無しでは使用できません\n"
 
 #: ldmain.c:352
 msgid "%P%F: -f may not be used without -shared\n"
-msgstr "%P%F: no se puede usar -f sin -shared\n"
+msgstr "%P%F: -f は -shared 無しでは使用できません\n"
 
 #: ldmain.c:400
 msgid "using external linker script:"
-msgstr "se usa el gui�n externo del enlazador:"
+msgstr "外部リンカスクリプトを使用しています:"
 
 #: ldmain.c:402
 msgid "using internal linker script:"
-msgstr "se usa el gui�n interno del enlazador:"
+msgstr "内部リンカスクリプトを使用しています:"
 
 #: ldmain.c:436
 msgid "%P%F: no input files\n"
-msgstr "%P%F: no hay ficheros de entrada\n"
+msgstr "%P%F: 入力ファイルがありません\n"
 
 #: ldmain.c:440
 msgid "%P: mode %s\n"
-msgstr "%P: modo %s\n"
+msgstr "%P: モード %s\n"
 
 #: ldmain.c:456
 msgid "%P%F: cannot open map file %s: %E\n"
-msgstr "%P%F: no se puede encontrar el fichero de mapeo %s: %E\n"
+msgstr "%P%F: マップファイル %s を開けません: %E\n"
 
 #: ldmain.c:485
 msgid "%P: %s: error in plugin cleanup (ignored)\n"
-msgstr "%P %s: error en la limpieza de plugin (se descarta)\n"
+msgstr ""
 
 #: ldmain.c:494
 msgid "%P: link errors found, deleting executable `%s'\n"
-msgstr "%P: se encontraron errores de enlace, se borra el ejecutable `%s'\n"
+msgstr "%P: リンクエラーが発生しました。実行ファイル `%s' を削除しています\n"
 
 #: ldmain.c:503
 msgid "%F%B: final close failed: %E\n"
-msgstr "%F%B: fall� el cerrado final: %E\n"
+msgstr "%F%B: 最後のクローズに失敗しました: %E\n"
 
 #: ldmain.c:529
 msgid "%X%P: unable to open for source of copy `%s'\n"
-msgstr "%X%P: no se puede abrir para la fuente de la copia `%s'\n"
+msgstr ""
 
 #: ldmain.c:532
 msgid "%X%P: unable to open for destination of copy `%s'\n"
-msgstr "%X%P: no se puede abrir para el destino de la copia `%s'\n"
+msgstr ""
 
 #: ldmain.c:539
 msgid "%P: Error writing file `%s'\n"
-msgstr "%P: Error al escribir el fichero `%s'\n"
+msgstr "%P: ファイル `%s' を書き込み中にエラーが発生しました\n"
 
 #: ldmain.c:544 pe-dll.c:1729
 #, c-format
 msgid "%P: Error closing file `%s'\n"
-msgstr "%P: Error al cerrar el fichero `%s'\n"
+msgstr "%P: ファイル `%s' を閉じている途中でエラーが発生しました\n"
 
 #: ldmain.c:560
 #, c-format
 msgid "%s: total time in link: %ld.%06ld\n"
-msgstr "%s: tiempo total de enlazado: %ld.%06ld\n"
+msgstr "%s: リンクにかかった総時間: %ld.%06ld\n"
 
 #: ldmain.c:563
 #, c-format
 msgid "%s: data size %ld\n"
-msgstr "%s: tama�o de los datos %ld\n"
+msgstr "%s: データサイズ %ld\n"
 
 #: ldmain.c:646
 msgid "%P%F: missing argument to -m\n"
-msgstr "%P%F: falta el argumento para -m\n"
+msgstr "%P%F: -m に対する引数がありません\n"
 
 #: ldmain.c:694 ldmain.c:714 ldmain.c:746 plugin.c:772
 msgid "%P%F: bfd_hash_table_init failed: %E\n"
-msgstr "%P%F: fall� bfd_hash_table_init: %E\n"
+msgstr "%P%F: bfd_hash_table_init に失敗しました: %E\n"
 
 #: ldmain.c:698 ldmain.c:718
 msgid "%P%F: bfd_hash_lookup failed: %E\n"
-msgstr "%P%F: fall� bfd_hash_lookup: %E\n"
+msgstr "%P%F: bfd_hash_lookup に失敗しました: %E\n"
 
 #: ldmain.c:732
 msgid "%X%P: error: duplicate retain-symbols-file\n"
-msgstr "%X%P: error: fichero de s�mbolos a retener duplicado\n"
+msgstr ""
 
 #: ldmain.c:776
 msgid "%P%F: bfd_hash_lookup for insertion failed: %E\n"
-msgstr "%P%F: fall� bfd_hash_lookup para la inserci�n: %E\n"
+msgstr ""
 
 #: ldmain.c:781
 msgid "%P: `-retain-symbols-file' overrides `-s' and `-S'\n"
-msgstr "%P `-retain-symbols-file' se impone a `-s' y `-S'\n"
+msgstr "%P: `-retain-symbols-file' は `-s' および `-S' を上書きします\n"
 
 #: ldmain.c:895
 #, c-format
@@ -1091,181 +1077,177 @@ msgid ""
 "Archive member included because of file (symbol)\n"
 "\n"
 msgstr ""
-"Se incluy� el miembro del archivo debido al fichero (s�mbolo)\n"
-"\n"
 
 #: ldmain.c:975
 msgid "%X%C: multiple definition of `%T'\n"
-msgstr "%X%C: definiciones m�ltiples de `%T'\n"
+msgstr "%X%C: `%T' が複数定義されています\n"
 
 #: ldmain.c:978
 msgid "%D: first defined here\n"
-msgstr "%D: primero se defini� aqu�\n"
+msgstr "%D: ここで最初に定義されています\n"
 
 #: ldmain.c:982
 msgid "%P: Disabling relaxation: it will not work with multiple definitions\n"
-msgstr "%P: Se desactiva la relajaci�n: no funcionar� con definiciones m�ltiples\n"
+msgstr ""
 
-# FIXME: Revisar en el c�digo fuente si `common' se refiere a una orden o
-# se puede sustituir por `com�n'. cfuga
 #: ldmain.c:1012
 msgid "%B: warning: definition of `%T' overriding common\n"
-msgstr "%B: aviso: la definici�n de `%T' se impone a common\n"
+msgstr ""
 
 #: ldmain.c:1015
 msgid "%B: warning: common is here\n"
-msgstr "%B: aviso: common est� aqu�\n"
+msgstr ""
 
 #: ldmain.c:1022
 msgid "%B: warning: common of `%T' overridden by definition\n"
-msgstr "%B: aviso: el common de `%T' se sobrepasa por definici�n\n"
+msgstr ""
 
 #: ldmain.c:1025
 msgid "%B: warning: defined here\n"
-msgstr "%B: aviso: se defini� aqu�\n"
+msgstr ""
 
 #: ldmain.c:1032
 msgid "%B: warning: common of `%T' overridden by larger common\n"
-msgstr "%B: aviso: el common de `%T' se sobrepasa con un common m�s grande\n"
+msgstr ""
 
 #: ldmain.c:1035
 msgid "%B: warning: larger common is here\n"
-msgstr "%B: aviso: el common m�s grande est� aqu�\n"
+msgstr ""
 
 #: ldmain.c:1039
 msgid "%B: warning: common of `%T' overriding smaller common\n"
-msgstr "%B: aviso: el common de `%T' se sobrepasa con un common m�s peque�o\n"
+msgstr ""
 
 #: ldmain.c:1042
 msgid "%B: warning: smaller common is here\n"
-msgstr "%B: aviso: el common m�s peque�o est� aqu�\n"
+msgstr ""
 
 #: ldmain.c:1046
 msgid "%B: warning: multiple common of `%T'\n"
-msgstr "%B: aviso: common m�ltiple de `%T'\n"
+msgstr ""
 
 #: ldmain.c:1048
 msgid "%B: warning: previous common is here\n"
-msgstr "%B: aviso: el common previo est� aqu�\n"
+msgstr ""
 
 #: ldmain.c:1068 ldmain.c:1106
 msgid "%P: warning: global constructor %s used\n"
-msgstr "%P: aviso: se us� el constructor global %s\n"
+msgstr ""
 
 #: ldmain.c:1116
 msgid "%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n"
-msgstr "%P%F: error del frente trasero de BFD: no se admite BFD_RELOC_CTOR\n"
+msgstr ""
 
 #. We found a reloc for the symbol we are looking for.
 #: ldmain.c:1170 ldmain.c:1172 ldmain.c:1174 ldmain.c:1192 ldmain.c:1237
 msgid "warning: "
-msgstr "aviso: "
+msgstr ""
 
 #: ldmain.c:1273
 msgid "%F%P: bfd_hash_table_init failed: %E\n"
-msgstr "%F%P: fall� bfd_hash_table_init: %E\n"
+msgstr ""
 
 #: ldmain.c:1280
 msgid "%F%P: bfd_hash_lookup failed: %E\n"
-msgstr "%F%P: fall� bfd_hash_lookup: %E\n"
+msgstr ""
 
 #: ldmain.c:1301
 msgid "%X%C: undefined reference to `%T'\n"
-msgstr "%X%C: referencia a `%T' sin definir\n"
+msgstr ""
 
 #: ldmain.c:1304
 msgid "%C: warning: undefined reference to `%T'\n"
-msgstr "%C: aviso: referencia a `%T' sin definir\n"
+msgstr ""
 
 #: ldmain.c:1310
 msgid "%X%D: more undefined references to `%T' follow\n"
-msgstr "%X%D: m�s referencias a `%T' sin definir a continuaci�n\n"
+msgstr ""
 
 #: ldmain.c:1313
 msgid "%D: warning: more undefined references to `%T' follow\n"
-msgstr "%D: aviso: m�s referencias a `%T' sin definir a continuaci�n\n"
+msgstr ""
 
 #: ldmain.c:1324
 msgid "%X%B: undefined reference to `%T'\n"
-msgstr "%X%B: referencia a `%T' sin definir\n"
+msgstr ""
 
 #: ldmain.c:1327
 msgid "%B: warning: undefined reference to `%T'\n"
-msgstr "%B: aviso: referencia a `%T' sin definir\n"
+msgstr ""
 
 #: ldmain.c:1333
 msgid "%X%B: more undefined references to `%T' follow\n"
-msgstr "%X%B: m�s referencias a `%T' sin definir a continuaci�n\n"
+msgstr ""
 
 #: ldmain.c:1336
 msgid "%B: warning: more undefined references to `%T' follow\n"
-msgstr "%B: aviso: m�s referencias a `%T' sin definir a continuaci�n\n"
+msgstr ""
 
 #: ldmain.c:1375
 msgid " additional relocation overflows omitted from the output\n"
-msgstr " se omitieron desbordamientos de reubicaci�n adicionales de la salida\n"
+msgstr ""
 
 #: ldmain.c:1388
 msgid " relocation truncated to fit: %s against undefined symbol `%T'"
-msgstr " reubicaci�n truncada para ajustar: %s contra el s�mbolo `%T' sin definir"
+msgstr ""
 
 #: ldmain.c:1393
 msgid " relocation truncated to fit: %s against symbol `%T' defined in %A section in %B"
-msgstr " reubicaci�n truncada para ajustar: %s contra el s�mbolo `%T' definido en la secci�n %A en %B"
+msgstr ""
 
 #: ldmain.c:1405
 msgid " relocation truncated to fit: %s against `%T'"
-msgstr " reubicaci�n truncada para ajustar: %s contra `%T'"
+msgstr ""
 
 #: ldmain.c:1422
 #, c-format
 msgid "%X%C: dangerous relocation: %s\n"
-msgstr "%X%C: reubicaci�n peligrosa: %s\n"
+msgstr "%X%C: 危険な再配置です: %s\n"
 
 #: ldmain.c:1437
 msgid "%X%C: reloc refers to symbol `%T' which is not being output\n"
-msgstr "%X%C: la reubicaci�n se refiere al s�mbolo `%T' el cual no se muestra\n"
+msgstr ""
 
 #: ldmisc.c:149
 #, c-format
 msgid "no symbol"
-msgstr "no hay s�mbolo"
+msgstr "シンボルがありません"
 
 #: ldmisc.c:246
 #, c-format
 msgid "built in linker script:%u"
-msgstr "gui�n interno del enlazador:%u"
+msgstr ""
 
 #: ldmisc.c:324
 msgid "%B: In function `%T':\n"
-msgstr "%B: En la funci�n `%T':\n"
+msgstr "%B: 関数 `%T' 内:\n"
 
 #: ldmisc.c:451
 msgid "%F%P: internal error %s %d\n"
-msgstr "%F%P: error interno %s %d\n"
+msgstr "%F%P: 内部エラー %s %d\n"
 
 #: ldmisc.c:500
 msgid "%P: internal error: aborting at %s line %d in %s\n"
-msgstr "%P: error interno: se aborta en %s l�nea %d en %s\n"
+msgstr ""
 
 #: ldmisc.c:503
 msgid "%P: internal error: aborting at %s line %d\n"
-msgstr "%P: error interno: se aborta en %s l�nea %d\n"
+msgstr ""
 
 #: ldmisc.c:505
 msgid "%P%F: please report this bug\n"
-msgstr "%P%F: por favor reporte este bicho\n"
+msgstr "%P%F: このバグを報告してください\n"
 
 #. Output for noisy == 2 is intended to follow the GNU standards.
 #: ldver.c:39
 #, c-format
 msgid "GNU ld %s\n"
-msgstr "GNU ld %s\n"
+msgstr ""
 
 #: ldver.c:43
 #, c-format
 msgid "Copyright 2010 Free Software Foundation, Inc.\n"
-msgstr "Copyright 2010 Free Software Foundation, Inc.\n"
+msgstr ""
 
 #: ldver.c:44
 #, c-format
@@ -1274,619 +1256,610 @@ msgid ""
 "the GNU General Public License version 3 or (at your option) a later version.\n"
 "This program has absolutely no warranty.\n"
 msgstr ""
-"Este programa es software libre; se puede redistribuir bajo los t�rminos de\n"
-"la Licencia P�blica General de GNU versi�n 3 o (a su elecci�n) una versi�n\n"
-"posterior.\n"
-"Este programa no tiene absolutamente ninguna garant�a.\n"
 
 #: ldver.c:54
 #, c-format
 msgid "  Supported emulations:\n"
-msgstr "  Emulaciones admitidas:\n"
+msgstr ""
 
 #: ldwrite.c:62 ldwrite.c:207
 msgid "%P%F: bfd_new_link_order failed\n"
-msgstr "%P%F: fall� bfd_new_link_order\n"
+msgstr ""
 
 #: ldwrite.c:365
 msgid "%F%P: cannot create split section name for %s\n"
-msgstr "%F%P: no se puede crear el nombre de secci�n dividida para %s\n"
+msgstr ""
 
 #: ldwrite.c:377
 msgid "%F%P: clone section failed: %E\n"
-msgstr "%F%P: fall� la clonaci�n de la secci�n: %E\n"
+msgstr ""
 
 #: ldwrite.c:418
 #, c-format
 msgid "%8x something else\n"
-msgstr "%8x algo m�s\n"
+msgstr ""
 
 #: ldwrite.c:588
 msgid "%F%P: final link failed: %E\n"
-msgstr "%F%P: fall� el enlace final: %E\n"
+msgstr ""
 
 #: lexsup.c:219 lexsup.c:368
 msgid "KEYWORD"
-msgstr "PALABRA CLAVE"
+msgstr ""
 
 #: lexsup.c:219
 msgid "Shared library control for HP/UX compatibility"
-msgstr "Control de biblioteca compartida para compatibilidad con HP/UX"
+msgstr ""
 
 #: lexsup.c:222
 msgid "ARCH"
-msgstr "ARQ"
+msgstr ""
 
 #: lexsup.c:222
 msgid "Set architecture"
-msgstr "Establece la arquitectura"
+msgstr ""
 
 #: lexsup.c:224 lexsup.c:487
 msgid "TARGET"
-msgstr "OBJETIVO"
+msgstr ""
 
 #: lexsup.c:224
 msgid "Specify target for following input files"
-msgstr "Especifica el objetivo para los siguientes ficheros de entrada"
+msgstr ""
 
 #: lexsup.c:227 lexsup.c:278 lexsup.c:296 lexsup.c:309 lexsup.c:311
 #: lexsup.c:441 lexsup.c:501 lexsup.c:563 lexsup.c:576
 msgid "FILE"
-msgstr "FICHERO"
+msgstr ""
 
 #: lexsup.c:227
 msgid "Read MRI format linker script"
-msgstr "Lee el gui�n del enlazador de formato MRI"
+msgstr ""
 
 #: lexsup.c:229
 msgid "Force common symbols to be defined"
-msgstr "Fuerza que se definan los s�mbolos comunes"
+msgstr ""
 
 #: lexsup.c:233 lexsup.c:545 lexsup.c:547 lexsup.c:549 lexsup.c:551
 msgid "ADDRESS"
-msgstr "DIRECCI�N"
+msgstr ""
 
 #: lexsup.c:233
 msgid "Set start address"
-msgstr "Establece la direcci�n de inicio"
+msgstr ""
 
 #: lexsup.c:235
 msgid "Export all dynamic symbols"
-msgstr "Exporta todos los s�mbolos din�micos"
+msgstr ""
 
 #: lexsup.c:237
 msgid "Undo the effect of --export-dynamic"
-msgstr "Deshace el efecto de --export-dynamic"
+msgstr ""
 
 #: lexsup.c:239
 msgid "Link big-endian objects"
-msgstr "Enlaza objetos big-endian"
+msgstr ""
 
 #: lexsup.c:241
 msgid "Link little-endian objects"
-msgstr "Enlaza objetos little-endian"
+msgstr ""
 
 #: lexsup.c:243 lexsup.c:246
 msgid "SHLIB"
-msgstr "BIBCOMP"
+msgstr ""
 
 #: lexsup.c:243
 msgid "Auxiliary filter for shared object symbol table"
-msgstr "Filtro auxiliar para la tabla de s�mbolos de objetos compartidos"
+msgstr ""
 
 #: lexsup.c:246
 msgid "Filter for shared object symbol table"
-msgstr "Filtro para la tabla de s�mbolos de objetos compartidos"
+msgstr ""
 
 #: lexsup.c:249
 msgid "Ignored"
-msgstr "Se descarta"
+msgstr ""
 
 #: lexsup.c:251
 msgid "SIZE"
-msgstr "TAMA�O"
+msgstr ""
 
 #: lexsup.c:251
 msgid "Small data size (if no size, same as --shared)"
-msgstr "Tama�o de los datos small (si no se especifica, es el mismo que --shared)"
+msgstr ""
 
 #: lexsup.c:254
 msgid "FILENAME"
-msgstr "FICHERO"
+msgstr ""
 
 #: lexsup.c:254
 msgid "Set internal name of shared library"
-msgstr "Establece el nombre interno de la biblioteca compartida"
+msgstr ""
 
 #: lexsup.c:256
 msgid "PROGRAM"
-msgstr "PROGRAMA"
+msgstr ""
 
 #: lexsup.c:256
 msgid "Set PROGRAM as the dynamic linker to use"
-msgstr "Establece el PROGRAMA como el enlazador din�mico a utilizar"
+msgstr ""
 
 #: lexsup.c:259
 msgid "LIBNAME"
-msgstr "NOMBREBIB"
+msgstr ""
 
 #: lexsup.c:259
 msgid "Search for library LIBNAME"
-msgstr "Busca la biblioteca NOMBREBIB"
+msgstr ""
 
 #: lexsup.c:261
 msgid "DIRECTORY"
-msgstr "DIRECTORIO"
+msgstr ""
 
 #: lexsup.c:261
 msgid "Add DIRECTORY to library search path"
-msgstr "Agrega el DIRECTORIO a la ruta de b�squeda de bibliotecas"
+msgstr ""
 
 #: lexsup.c:264
 msgid "Override the default sysroot location"
-msgstr "Sobreescribe la ubicaci�n de sysroot por defecto"
+msgstr ""
 
 #: lexsup.c:266
 msgid "EMULATION"
-msgstr "EMULACI�N"
+msgstr ""
 
 #: lexsup.c:266
 msgid "Set emulation"
-msgstr "Establece la emulaci�n"
+msgstr ""
 
 #: lexsup.c:268
 msgid "Print map file on standard output"
-msgstr "Muestra el fichero mapa en la salida est�ndar"
+msgstr ""
 
 #: lexsup.c:270
 msgid "Do not page align data"
-msgstr "No pagina los datos alineados"
+msgstr ""
 
 #: lexsup.c:272
 msgid "Do not page align data, do not make text readonly"
-msgstr "No pagina los datos alineados, no hace el texto de s�lo lectura"
+msgstr ""
 
 #: lexsup.c:275
 msgid "Page align data, make text readonly"
-msgstr "Pagina los datos alineados, hace el texto de s�lo lectura"
+msgstr ""
 
 #: lexsup.c:278
 msgid "Set output file name"
-msgstr "Establece el nombre del fichero de salida"
+msgstr ""
 
 #: lexsup.c:280
 msgid "Optimize output file"
-msgstr "Optimiza la salida del fichero"
+msgstr ""
 
 #: lexsup.c:283
 msgid "PLUGIN"
-msgstr "PLUGIN"
+msgstr ""
 
 #: lexsup.c:283
 msgid "Load named plugin"
-msgstr "Carga el plugin nombrado"
+msgstr ""
 
 #: lexsup.c:285
 msgid "ARG"
-msgstr "ARG"
+msgstr ""
 
 #: lexsup.c:285
 msgid "Send arg to last-loaded plugin"
-msgstr "Env�a el argumento al �ltimo plugin cargado"
+msgstr ""
 
 #: lexsup.c:288
 msgid "Ignored for SVR4 compatibility"
-msgstr "Se descarta por compatibilidad con SVR4"
+msgstr ""
 
 #: lexsup.c:292
 msgid "Generate relocatable output"
-msgstr "Genera salida reubicable"
+msgstr ""
 
 #: lexsup.c:296
 msgid "Just link symbols (if directory, same as --rpath)"
-msgstr "S�lo enlaza s�mbolos (si es un directorio, es igual que --rpath)"
+msgstr ""
 
 #: lexsup.c:299
 msgid "Strip all symbols"
-msgstr "Descarta todos los s�mbolos"
+msgstr ""
 
 #: lexsup.c:301
 msgid "Strip debugging symbols"
-msgstr "Descarta los s�mbolos de depuraci�n"
+msgstr ""
 
 #: lexsup.c:303
 msgid "Strip symbols in discarded sections"
-msgstr "Descarta s�mbolos en las secciones descartadas"
+msgstr ""
 
 #: lexsup.c:305
 msgid "Do not strip symbols in discarded sections"
-msgstr "No descarta s�mbolos en las secciones descartadas"
+msgstr ""
 
 #: lexsup.c:307
 msgid "Trace file opens"
-msgstr "Rastrea la apertura de ficheros"
+msgstr ""
 
 #: lexsup.c:309
 msgid "Read linker script"
-msgstr "Lee el gui�n del enlazador"
+msgstr ""
 
 #: lexsup.c:311
 msgid "Read default linker script"
-msgstr "Lee el gui�n del enlazador por defecto"
+msgstr ""
 
 #: lexsup.c:315 lexsup.c:333 lexsup.c:418 lexsup.c:439 lexsup.c:538
 #: lexsup.c:566 lexsup.c:605
 msgid "SYMBOL"
-msgstr "S�MBOLO"
+msgstr ""
 
 #: lexsup.c:315
 msgid "Start with undefined reference to SYMBOL"
-msgstr "Inicia con una referencia sin definir hacia el S�MBOLO"
+msgstr ""
 
 #: lexsup.c:318
 msgid "[=SECTION]"
-msgstr "[=SECCI�N]"
+msgstr ""
 
 #: lexsup.c:319
 msgid "Don't merge input [SECTION | orphan] sections"
-msgstr "No mezcla secciones de entrada [SECCI�N | hu�rfanas]"
+msgstr ""
 
 #: lexsup.c:321
 msgid "Build global constructor/destructor tables"
-msgstr "Construye tablas globales de constructores/destructores"
+msgstr ""
 
 #: lexsup.c:323
 msgid "Print version information"
-msgstr "Muestra la informaci�n de la versi�n"
+msgstr ""
 
 #: lexsup.c:325
 msgid "Print version and emulation information"
-msgstr "Muestra la informaci�n de la versi�n y de la emulaci�n"
+msgstr ""
 
 #: lexsup.c:327
 msgid "Discard all local symbols"
-msgstr "Descarta todos los s�mbolos locales"
+msgstr ""
 
 #: lexsup.c:329
 msgid "Discard temporary local symbols (default)"
-msgstr "Descarta los s�mbolos locales temporales (por defecto)"
+msgstr ""
 
 #: lexsup.c:331
 msgid "Don't discard any local symbols"
-msgstr "No descarta ning�n s�mbolo local"
+msgstr ""
 
 #: lexsup.c:333
 msgid "Trace mentions of SYMBOL"
-msgstr "Rastrea las menciones del S�MBOLO"
+msgstr ""
 
 #: lexsup.c:335 lexsup.c:503 lexsup.c:505
 msgid "PATH"
-msgstr "RUTA"
+msgstr ""
 
 #: lexsup.c:335
 msgid "Default search path for Solaris compatibility"
-msgstr "Ruta de b�squeda por defecto para compatibilidad con Solaris"
+msgstr ""
 
 #: lexsup.c:338
 msgid "Start a group"
-msgstr "Inicia un grupo"
+msgstr ""
 
 #: lexsup.c:340
 msgid "End a group"
-msgstr "Termina un grupo"
+msgstr ""
 
 #: lexsup.c:344
 msgid "Accept input files whose architecture cannot be determined"
-msgstr "Acepta ficheros de entrada cuya arquitectura no se pueda determinar"
+msgstr ""
 
 #: lexsup.c:348
 msgid "Reject input files whose architecture is unknown"
-msgstr "Rechaza ficheros de entrada cuya arquitectura es desconocida"
+msgstr ""
 
 #: lexsup.c:361
 msgid "Only set DT_NEEDED for following dynamic libs if used"
-msgstr "S�lo establece DT_NEEDED para las siguientes bibliotecas din�micas si se usan"
+msgstr ""
 
 #: lexsup.c:364
 msgid ""
 "Always set DT_NEEDED for dynamic libraries mentioned on\n"
 "                                the command line"
 msgstr ""
-"Siempre establece DT_NEEDED para las bibliotecas din�micas\n"
-"                                mencionadas en la l�nea de �rdenes"
 
 #: lexsup.c:368
 msgid "Ignored for SunOS compatibility"
-msgstr "Se descarta por compatibilidad con SunOS"
+msgstr ""
 
 #: lexsup.c:370
 msgid "Link against shared libraries"
-msgstr "Enlaza contra bibliotecas compartidas"
+msgstr ""
 
 #: lexsup.c:376
 msgid "Do not link against shared libraries"
-msgstr "No enlaza contra bibliotecas compartidas"
+msgstr ""
 
 #: lexsup.c:384
 msgid "Bind global references locally"
-msgstr "Asocia localmente las referencias globlales"
+msgstr ""
 
 #: lexsup.c:386
 msgid "Bind global function references locally"
-msgstr "Asocia localmente las referencias a funci�n globales"
+msgstr ""
 
 #: lexsup.c:388
 msgid "Check section addresses for overlaps (default)"
-msgstr "Revisa las direcciones de las secciones por traslapes (por defecto)"
+msgstr ""
 
 #: lexsup.c:391
 msgid "Do not check section addresses for overlaps"
-msgstr "No revisa las direcciones de las secciones por traslapes"
+msgstr ""
 
 #: lexsup.c:395
 msgid "Copy DT_NEEDED links mentioned inside DSOs that follow"
-msgstr "Copia los enlaces DT_NEEDED mencionados dentro de los DSOs a continuaci�n"
+msgstr ""
 
 #: lexsup.c:399
 msgid "Do not copy DT_NEEDED links mentioned inside DSOs that follow"
-msgstr "No copia los enlaces DT_NEEDED mencionados dentro de los DSOs a continuaci�n"
+msgstr ""
 
 #: lexsup.c:403
 msgid "Output cross reference table"
-msgstr "Muestra la tabla de referencias cruzadas"
+msgstr ""
 
 #: lexsup.c:405
 msgid "SYMBOL=EXPRESSION"
-msgstr "S�MBOLO=EXPRESI�N"
+msgstr ""
 
 #: lexsup.c:405
 msgid "Define a symbol"
-msgstr "Define un s�mbolo"
+msgstr ""
 
 #: lexsup.c:407
 msgid "[=STYLE]"
-msgstr "[=ESTILO]"
+msgstr ""
 
 #: lexsup.c:407
 msgid "Demangle symbol names [using STYLE]"
-msgstr "Desenreda los nombres de los s�mbolos [utilizando el ESTILO]"
+msgstr ""
 
-# No me convence mucho la traducci�n de `embedded' por imbu�do. cfuga
 #: lexsup.c:410
 msgid "Generate embedded relocs"
-msgstr "Genera reubicaciones imbu�das"
+msgstr ""
 
 #: lexsup.c:412
 msgid "Treat warnings as errors"
-msgstr "Trata los avisos como errores"
+msgstr ""
 
 #: lexsup.c:415
 msgid "Do not treat warnings as errors (default)"
-msgstr "No trata los avisos como errores (por defecto)"
+msgstr ""
 
 #: lexsup.c:418
 msgid "Call SYMBOL at unload-time"
-msgstr "Llama al S�MBOLO al momento de descargar"
+msgstr ""
 
 #: lexsup.c:420
 msgid "Force generation of file with .exe suffix"
-msgstr "Fuerza la generaci�n del fichero con sufijo .exe"
+msgstr ""
 
 #: lexsup.c:422
 msgid "Remove unused sections (on some targets)"
-msgstr "Elimina las secciones sin uso (en algunos objetivos)"
+msgstr ""
 
 #: lexsup.c:425
 msgid "Don't remove unused sections (default)"
-msgstr "No elimina las secciones sin uso (por defecto)"
+msgstr ""
 
 #: lexsup.c:428
 msgid "List removed unused sections on stderr"
-msgstr "Muestra las secciones sin uso eliminadas en la salida de error est�ndar"
+msgstr ""
 
 #: lexsup.c:431
 msgid "Do not list removed unused sections"
-msgstr "No muestra las secciones sin uso eliminadas"
+msgstr ""
 
 #: lexsup.c:434
 msgid "Set default hash table size close to <NUMBER>"
-msgstr "Establece el tama�o de de la tabla de dispersi�n cercano al <N�MERO>"
+msgstr ""
 
 #: lexsup.c:437
 msgid "Print option help"
-msgstr "Muestra la ayuda de opciones"
+msgstr ""
 
 #: lexsup.c:439
 msgid "Call SYMBOL at load-time"
-msgstr "Llama al S�MBOLO al momento de cargar"
+msgstr ""
 
 #: lexsup.c:441
 msgid "Write a map file"
-msgstr "Escribe un fichero mapa"
+msgstr ""
 
 #: lexsup.c:443
 msgid "Do not define Common storage"
-msgstr "No define almacenamiento Common"
+msgstr ""
 
 #: lexsup.c:445
 msgid "Do not demangle symbol names"
-msgstr "No desenreda los nombres de los s�mbolos"
+msgstr ""
 
 #: lexsup.c:447
 msgid "Use less memory and more disk I/O"
-msgstr "Usa menos memoria y m�s E/S de disco"
+msgstr ""
 
 #: lexsup.c:449
 msgid "Do not allow unresolved references in object files"
-msgstr "No permite referencias sin resolver en ficheros objeto"
+msgstr ""
 
 #: lexsup.c:452
 msgid "Allow unresolved references in shared libaries"
-msgstr "Permite referencias sin resolver en bibliotecas compartidas"
+msgstr ""
 
 #: lexsup.c:456
 msgid "Do not allow unresolved references in shared libs"
-msgstr "No permite referencias sin resolver en bibliotecas compartidas"
+msgstr ""
 
 #: lexsup.c:460
 msgid "Allow multiple definitions"
-msgstr "Permite definiciones m�ltiples"
+msgstr ""
 
 #: lexsup.c:462
 msgid "Disallow undefined version"
-msgstr "No permite versiones sin definir"
+msgstr ""
 
 #: lexsup.c:464
 msgid "Create default symbol version"
-msgstr "Crea la versi�n de s�mbolo por defecto"
+msgstr ""
 
 #: lexsup.c:467
 msgid "Create default symbol version for imported symbols"
-msgstr "Crea la versi�n de s�mbolo por defecto para s�mbolos importados"
+msgstr ""
 
 #: lexsup.c:470
 msgid "Don't warn about mismatched input files"
-msgstr "No avisa sobre ficheros de entrada sin coincidencia"
+msgstr ""
 
 #: lexsup.c:473
 msgid "Don't warn on finding an incompatible library"
-msgstr "No avisa al encontrar una biblioteca incompatible"
+msgstr ""
 
 #: lexsup.c:476
 msgid "Turn off --whole-archive"
-msgstr "Apaga --whole-archive"
+msgstr ""
 
 #: lexsup.c:478
 msgid "Create an output file even if errors occur"
-msgstr "Crea un fichero de salida a�n si ocurren errores"
+msgstr ""
 
 #: lexsup.c:483
 msgid ""
 "Only use library directories specified on\n"
 "                                the command line"
 msgstr ""
-"Utiliza solamente los directorios de bibliotecas\n"
-"                                especificados en la l�nea de �rdenes"
 
 #: lexsup.c:487
 msgid "Specify target of output file"
-msgstr "Especifica el objetivo del fichero de salida"
+msgstr ""
 
 #: lexsup.c:490
 msgid "Ignored for Linux compatibility"
-msgstr "Se descarta por compatibilidad con Linux"
+msgstr ""
 
 #: lexsup.c:493
 msgid "Reduce memory overheads, possibly taking much longer"
-msgstr "Reduce las saturaciones de memoria, tal vez tomando m�s tiempo"
+msgstr ""
 
 #: lexsup.c:496
 msgid "Reduce code size by using target specific optimizations"
-msgstr "Reduce el tama�o del c�digo usando optimizaciones espec�ficas del objetivo"
+msgstr ""
 
 #: lexsup.c:498
 msgid "Do not use relaxation techniques to reduce code size"
-msgstr "No utiliza t�cnicas de relajaci�n para reducir el tama�o del c�digo"
+msgstr ""
 
 #: lexsup.c:501
 msgid "Keep only symbols listed in FILE"
-msgstr "Conserva solamente los s�mbolos enlistados en el FICHERO"
+msgstr ""
 
 #: lexsup.c:503
 msgid "Set runtime shared library search path"
-msgstr "Establece la ruta de b�squeda de bibliotecas compartidas en tiempo de ejecuci�n"
+msgstr ""
 
 #: lexsup.c:505
 msgid "Set link time shared library search path"
-msgstr "Establece la ruta de b�squeda de bibliotecas compartidas en tiempo de enlace"
+msgstr ""
 
 #: lexsup.c:508
 msgid "Create a shared library"
-msgstr "Crea una biblioteca compartida"
+msgstr ""
 
 #: lexsup.c:512
 msgid "Create a position independent executable"
-msgstr "Crea un ejecutable independiente de posici�n"
+msgstr ""
 
 #: lexsup.c:516
 msgid "[=ascending|descending]"
-msgstr "[=ascending|descending]"
+msgstr ""
 
 #: lexsup.c:517
 msgid "Sort common symbols by alignment [in specified order]"
-msgstr "Ordena los s�mbolos comunes por alineaci�n [en orden espec�fico]"
+msgstr ""
 
 #: lexsup.c:522
 msgid "name|alignment"
-msgstr "nombre|alineaci�n"
+msgstr ""
 
 #: lexsup.c:523
 msgid "Sort sections by name or maximum alignment"
-msgstr "Ordena secciones por nombre o alineaci�n m�xima"
+msgstr ""
 
 #: lexsup.c:525
 msgid "COUNT"
-msgstr "CUENTA"
+msgstr ""
 
 #: lexsup.c:525
 msgid "How many tags to reserve in .dynamic section"
-msgstr "C�antas marcas reserva en la secci�n .dynamic"
+msgstr ""
 
 #: lexsup.c:528
 msgid "[=SIZE]"
-msgstr "[=TAMA�O]"
+msgstr ""
 
 #: lexsup.c:528
 msgid "Split output sections every SIZE octets"
-msgstr "Divide las secciones de salida cada TAMA�O octetos"
+msgstr ""
 
 #: lexsup.c:531
 msgid "[=COUNT]"
-msgstr "[=CUENTA]"
+msgstr ""
 
 #: lexsup.c:531
 msgid "Split output sections every COUNT relocs"
-msgstr "Divide las secciones de salida cada CUENTA reubicaciones"
+msgstr ""
 
 #: lexsup.c:534
 msgid "Print memory usage statistics"
-msgstr "Muestra las estad�sticas de uso de memoria"
+msgstr ""
 
 #: lexsup.c:536
 msgid "Display target specific options"
-msgstr "Muestra las opciones espec�ficas del objetivo"
+msgstr ""
 
 #: lexsup.c:538
 msgid "Do task level linking"
-msgstr "Enlaza a nivel de tarea"
+msgstr ""
 
 #: lexsup.c:540
 msgid "Use same format as native linker"
-msgstr "Usa el mismo formato que el enlazador nativo"
+msgstr ""
 
 #: lexsup.c:542
 msgid "SECTION=ADDRESS"
-msgstr "SECCI�N=DIRECCI�N"
+msgstr ""
 
 #: lexsup.c:542
 msgid "Set address of named section"
-msgstr "Establece la direcci�n de la secci�n nombrada"
+msgstr "named セクションのアドレスを設定する"
 
 #: lexsup.c:545
 msgid "Set address of .bss section"
-msgstr "Establece la direcci�n de la secci�n .bss"
+msgstr ".bss セクションのアドレスを設定する"
 
 #: lexsup.c:547
 msgid "Set address of .data section"
-msgstr "Establece la direcci�n de la secci�n .data"
+msgstr ".data セクションのアドレスを設定する"
 
 #: lexsup.c:549
 msgid "Set address of .text section"
-msgstr "Establece la direcci�n de la secci�n .text"
+msgstr ".text セクションのアドレスを設定する"
 
 #: lexsup.c:551
 msgid "Set address of text segment"
-msgstr "Establece la direcci�n del segmento de texto"
+msgstr "text セグメントのアドレスを設定する"
 
 #: lexsup.c:554
 msgid ""
@@ -1894,121 +1867,119 @@ msgid ""
 "                                ignore-all, report-all, ignore-in-object-files,\n"
 "                                ignore-in-shared-libs"
 msgstr ""
-"C�mo manejar s�mbolos sin resolver. <m�todo> es:\n"
+"解決されなかったシンボルをどのように扱うかを指定する。 <method> は以下の通り:\n"
 "                                ignore-all, report-all, ignore-in-object-files,\n"
 "                                ignore-in-shared-libs"
 
 #: lexsup.c:559
 msgid "Output lots of information during link"
-msgstr "Muestra mucha informaci�n durante el enlace"
+msgstr "リンク中に多数の情報を表示する"
 
 #: lexsup.c:563
 msgid "Read version information script"
-msgstr "Lee la informaci�n de la versi�n del gui�n"
+msgstr "バージョン情報スクリプトを読み込む"
 
 #: lexsup.c:566
 msgid ""
 "Take export symbols list from .exports, using\n"
 "                                SYMBOL as the version."
 msgstr ""
-"Toma la lista de exportaci�n de s�mbolos de .exports, usando\n"
-"                                el S�MBOLO como la versi�n."
 
 #: lexsup.c:570
 msgid "Add data symbols to dynamic list"
-msgstr "Agrega s�mbolos de datos a la lista din�mica"
+msgstr ""
 
 #: lexsup.c:572
 msgid "Use C++ operator new/delete dynamic list"
-msgstr "Usa la lista din�mica de los operadores de C++ new/delete"
+msgstr ""
 
 #: lexsup.c:574
 msgid "Use C++ typeinfo dynamic list"
-msgstr "Usa la lista din�mica de tipo de dato de C++"
+msgstr ""
 
 #: lexsup.c:576
 msgid "Read dynamic list"
-msgstr "Lee la lista din�mica"
+msgstr "動的リストを読み込む"
 
 #: lexsup.c:578
 msgid "Warn about duplicate common symbols"
-msgstr "Avisa sobre s�mbolos comunes duplicados"
+msgstr ""
 
 #: lexsup.c:580
 msgid "Warn if global constructors/destructors are seen"
-msgstr "Avisa si se ven constructores/destructores globales"
+msgstr "大域コンストラクタ/デストラクタが見つかったときに警告する"
 
 #: lexsup.c:583
 msgid "Warn if the multiple GP values are used"
-msgstr "Avisa si se usan valores m�ltiples de GP"
+msgstr "複数の GP 値が使用されているときに警告する"
 
 #: lexsup.c:585
 msgid "Warn only once per undefined symbol"
-msgstr "Avisa s�lo una vez por cada s�mbolo sin definir"
+msgstr "定義されていないシンボルがあるごとに一回のみ警告する"
 
 #: lexsup.c:587
 msgid "Warn if start of section changes due to alignment"
-msgstr "Avisa si el inicio de la secci�n cambia debido a la alineaci�n"
+msgstr "整列によりセクションの開始が変更されたときに警告する"
 
 #: lexsup.c:590
 msgid "Warn if shared object has DT_TEXTREL"
-msgstr "Avisa si el objeto compartido tiene DT_TEXTREL"
+msgstr "共有オブジェクトに DT_TEXTREL が含まれるときに警告する"
 
 #: lexsup.c:593
 msgid "Warn if an object has alternate ELF machine code"
-msgstr "Avisa si el objeto tiene c�digo m�quina ELF alternativo"
+msgstr ""
 
 #: lexsup.c:597
 msgid "Report unresolved symbols as warnings"
-msgstr "Reporta s�mbolos sin resolver como avisos"
+msgstr "解決できないシンボルを警告として報告する"
 
 #: lexsup.c:600
 msgid "Report unresolved symbols as errors"
-msgstr "Reporta s�mbolos sin resolver como errores"
+msgstr "解決できないシンボルをエラーとして報告する"
 
 #: lexsup.c:602
 msgid "Include all objects from following archives"
-msgstr "Incluye todos los objetos de los siguientes ficheros"
+msgstr "これ以降の書庫からは全てのオブジェクトを含める"
 
 #: lexsup.c:605
 msgid "Use wrapper functions for SYMBOL"
-msgstr "Usa funciones de envoltura para el S�MBOLO"
+msgstr ""
 
 #: lexsup.c:754
 msgid "%P: unrecognized option '%s'\n"
-msgstr "%P: no se reconoce la opci�n `%s'\n"
+msgstr "%P: 認識できないオプション '%s' です\n"
 
 #: lexsup.c:758
 msgid "%P%F: use the --help option for usage information\n"
-msgstr "%P%F: use la opci�n --help para informaci�n de modo de empleo\n"
+msgstr "%P%F: 使用法に関する情報については --help オプションを使用してください\n"
 
 #: lexsup.c:776
 msgid "%P%F: unrecognized -a option `%s'\n"
-msgstr "%P%F: no se reconoce la opci�n -a `%s'\n"
+msgstr ""
 
 #: lexsup.c:789
 msgid "%P%F: unrecognized -assert option `%s'\n"
-msgstr "%P%F: no se reconoce la opci�n -assert `%s'\n"
+msgstr ""
 
 #: lexsup.c:832
 msgid "%F%P: unknown demangling style `%s'"
-msgstr "%F%P: estilo de desenredo `%s' desconocido"
+msgstr "%F%P: 不明な名前復元 (demangle) 形式 `%s' です"
 
 #: lexsup.c:898
 msgid "%P%F: invalid number `%s'\n"
-msgstr "%P%F: n�mero `%s' inv�lido\n"
+msgstr "%P%F: 無効な数値 `%s' です\n"
 
 #: lexsup.c:996
 msgid "%P%F: bad --unresolved-symbols option: %s\n"
-msgstr "%P%F: opci�n --unresolved-symbols err�nea: %s\n"
+msgstr "%P%F: 誤った --unresolved-symbols オプションです: %s\n"
 
 #: lexsup.c:1059
 msgid "%P%F: bad -plugin option\n"
-msgstr "%P%F: opci�n -plugin err�nea\n"
+msgstr "%P%F: 誤った -plugin オプションです\n"
 
 #: lexsup.c:1063
 msgid "%P%F: bad -plugin-opt option\n"
-msgstr "%P%F: opci�n -plugin-opt err�nea\n"
+msgstr "%P%F: 誤った -plugin-opt オプションです\n"
 
 #. This can happen if the user put "-rpath,a" on the command
 #. line.  (Or something similar.  The comma is important).
@@ -2020,335 +1991,217 @@ msgstr "%P%F: opci�n -plugin-opt err�nea\n"
 #. and will seg-fault the next time around.
 #: lexsup.c:1080
 msgid "%P%F: bad -rpath option\n"
-msgstr "%P%F: opci�n -rpath err�nea\n"
+msgstr "%P%F: 誤った -rpath オプションです\n"
 
 #: lexsup.c:1194
 msgid "%P%F: -shared not supported\n"
-msgstr "%P%F: no se admite -shared\n"
+msgstr "%P%F: -shared はサポートされていません\n"
 
 #: lexsup.c:1203
 msgid "%P%F: -pie not supported\n"
-msgstr "%P%F: no se admite -pie\n"
+msgstr "%P%F: -pie はサポートされていません\n"
 
 #: lexsup.c:1211
 msgid "descending"
-msgstr "descendente"
+msgstr "descending"
 
 #: lexsup.c:1213
 msgid "ascending"
-msgstr "ascendente"
+msgstr "ascending"
 
 #: lexsup.c:1216
 msgid "%P%F: invalid common section sorting option: %s\n"
-msgstr "%P%F: opci�n de ordenado de secci�n com�n inv�lida: %s\n"
+msgstr ""
 
 #: lexsup.c:1220
 msgid "name"
-msgstr "nombre"
+msgstr ""
 
 #: lexsup.c:1222
 msgid "alignment"
-msgstr "alineaci�n"
+msgstr ""
 
 #: lexsup.c:1225
 msgid "%P%F: invalid section sorting option: %s\n"
-msgstr "%P%F: opci�n de ordenado de secci�n inv�lida: %s\n"
+msgstr ""
 
 #: lexsup.c:1259
 msgid "%P%F: invalid argument to option \"--section-start\"\n"
-msgstr "%P%F: argumento inv�lido para la opci�n \"--section-start\"\n"
+msgstr ""
 
 #: lexsup.c:1266
 msgid "%P%F: missing argument(s) to option \"--section-start\"\n"
-msgstr "%P%F: falta(n) argumento(s) para la opci�n \"--section-start\"\n"
+msgstr ""
 
 #: lexsup.c:1490
 msgid "%P%F: group ended before it began (--help for usage)\n"
-msgstr "%P%F: el grupo termin� antes de empezar (--help para modo de empleo)\n"
+msgstr ""
 
 #: lexsup.c:1518
 msgid "%P%X: --hash-size needs a numeric argument\n"
-msgstr "%P%X: --hash-size necesita un argumento num�rico\n"
+msgstr ""
 
 #: lexsup.c:1547
 msgid "%P%F: %s: error loading plugin\n"
-msgstr "%P%F: %s: error al cargar el plugin\n"
+msgstr "%P%F: %s: プラグインの読み込み中にエラーが発生しました\n"
 
 #: lexsup.c:1578 lexsup.c:1591
 msgid "%P%F: invalid hex number `%s'\n"
-msgstr "%P%F: n�mero hexadecimal `%s' inv�lido\n"
+msgstr "%P%F: 無効な十六進数 `%s' です\n"
 
 #: lexsup.c:1627
 #, c-format
 msgid "Usage: %s [options] file...\n"
-msgstr "Modo de empleo: %s [opciones] fichero...\n"
+msgstr "使用法: %s [options] file...\n"
 
 #: lexsup.c:1629
 #, c-format
 msgid "Options:\n"
-msgstr "Opciones:\n"
+msgstr "オプション:\n"
 
 #: lexsup.c:1707
 #, c-format
 msgid "  @FILE"
-msgstr "  @FICHERO"
+msgstr ""
 
 #: lexsup.c:1710
 #, c-format
 msgid "Read options from FILE\n"
-msgstr "Lee opciones del FICHERO\n"
+msgstr "オプションを FILE から読み込む\n"
 
 #. Note: Various tools (such as libtool) depend upon the
 #. format of the listings below - do not change them.
 #: lexsup.c:1715
 #, c-format
 msgid "%s: supported targets:"
-msgstr "%s: objetivos admitidos:"
+msgstr "%s: supported targets:"
 
 #: lexsup.c:1723
 #, c-format
 msgid "%s: supported emulations: "
-msgstr "%s: emulaciones admitidas: "
+msgstr "%s: supported emulations: "
 
 #: lexsup.c:1728
 #, c-format
 msgid "%s: emulation specific options:\n"
-msgstr "%s: opciones espec�ficas de emulaci�n:\n"
+msgstr "%s: emulation specific options:\n"
 
 #: lexsup.c:1733
 #, c-format
 msgid "Report bugs to %s\n"
-msgstr "Reporte bichos a %s\n"
+msgstr ""
+"バグを発見したら <%s> に報告して下さい。\n"
+"翻訳に関するバグは<translation-team-ja@lists.sourceforge.net>に報告してください。\n"
 
 #: mri.c:292
 msgid "%P%F: unknown format type %s\n"
-msgstr "%P%F: tipo de formato %s desconocido\n"
+msgstr ""
 
 #: pe-dll.c:430
 #, c-format
 msgid "%XUnsupported PEI architecture: %s\n"
-msgstr "%XNo se admite la arquitectura PEI: %s\n"
+msgstr ""
 
 #: pe-dll.c:788
 #, c-format
 msgid "%XCannot export %s: invalid export name\n"
-msgstr "%XNo se puede exportar %s: nombre de exportaci�n inv�lido\n"
+msgstr ""
 
 #: pe-dll.c:844
 #, c-format
 msgid "%XError, duplicate EXPORT with ordinals: %s (%d vs %d)\n"
-msgstr "%XError, EXPORT duplicado con ordinales: %s (%d vs %d)\n"
+msgstr ""
 
 #: pe-dll.c:851
 #, c-format
 msgid "Warning, duplicate EXPORT: %s\n"
-msgstr "Aviso, EXPORT duplicado: %s\n"
+msgstr ""
 
 #: pe-dll.c:938
 #, c-format
 msgid "%XCannot export %s: symbol not defined\n"
-msgstr "%XNo se puede exportar %s: s�mbolo sin definir\n"
+msgstr ""
 
 #: pe-dll.c:944
 #, c-format
 msgid "%XCannot export %s: symbol wrong type (%d vs %d)\n"
-msgstr "%XNo se puede exportar %s: tipo err�neo del s�mbolo (%d vs %d)\n"
+msgstr ""
 
 #: pe-dll.c:951
 #, c-format
 msgid "%XCannot export %s: symbol not found\n"
-msgstr "%XNo se puede exportar %s: no se encuentra el s�mbolo\n"
+msgstr ""
 
 #: pe-dll.c:1065
 #, c-format
 msgid "%XError, ordinal used twice: %d (%s vs %s)\n"
-msgstr "%XError, ordinal utilizado dos veces: %d (%s vs %s)\n"
+msgstr ""
 
 #: pe-dll.c:1446
 #, c-format
 msgid "%XError: %d-bit reloc in dll\n"
-msgstr "%XError: reubicaci�n de %d-bit en la dll\n"
+msgstr ""
 
 #: pe-dll.c:1574
 #, c-format
 msgid "%s: Can't open output def file %s\n"
-msgstr "%s: No se puede abrir el fichero por defecto de salida %s\n"
+msgstr ""
 
 #: pe-dll.c:1725
 #, c-format
 msgid "; no contents available\n"
-msgstr "; no hay contenido disponible\n"
+msgstr ""
 
 #: pe-dll.c:2652
 msgid "%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"
-msgstr "%C: no se puede auto-importar la variable '%T'. Por favor lea la documentaci�n para --enable-auto-import de ld para m�s detalles.\n"
+msgstr ""
 
 #: pe-dll.c:2682
 #, c-format
 msgid "%XCan't open .lib file: %s\n"
-msgstr "%XNo se puede abrir el fichero .lib: %s\n"
+msgstr ""
 
 #: pe-dll.c:2687
 #, c-format
 msgid "Creating library file: %s\n"
-msgstr "Se crea el fichero de biblioteca: %s\n"
+msgstr ""
 
 #: pe-dll.c:2716
 #, c-format
 msgid "%Xbfd_openr %s: %E\n"
-msgstr "%Xbfd_openr %s: %E\n"
+msgstr ""
 
 #: pe-dll.c:2728
 #, c-format
 msgid "%X%s(%s): can't find member in non-archive file"
-msgstr "%X%s(%s): no se puede encontrar el miembro en un fichero que no es archivo"
+msgstr ""
 
 #: pe-dll.c:2740
 #, c-format
 msgid "%X%s(%s): can't find member in archive"
-msgstr "%X%s(%s): no se puede encontrar el miembro en el archivo"
+msgstr ""
 
 #: pe-dll.c:3177
 #, c-format
 msgid "%XError: can't use long section names on this arch\n"
-msgstr "%XError: no se pueden usar nombres de secci�n largos en esta arquitectura\n"
+msgstr ""
 
 #: plugin.c:178 plugin.c:212
 msgid "<no plugin>"
-msgstr "<sin plugin>"
+msgstr ""
 
 #: plugin.c:308
 msgid "%P%F: %s: non-ELF symbol in ELF BFD!"
-msgstr "%P%F: %s: �S�mbolo que no es ELF en el BFD ELF!"
+msgstr ""
 
 #: plugin.c:800
 msgid "%P%X: %s: hash table failure adding symbol %s"
-msgstr "%P%X: %s: fall� la tabla de dispersi�n al agregar el s�mbolo %s"
+msgstr ""
 
 #: plugin.c:833
 msgid "%P%X: %s: can't find IR symbol '%s'"
-msgstr "%P%X: %s: no se puede encontrar el s�mbolo IR '%s'"
+msgstr ""
 
 #: plugin.c:836
 msgid "%P%x: %s: bad IR symbol type %d"
-msgstr "%P%x: %s: tipo de s�mbolo IR %d err�neo"
-
-#~ msgid "%F%P: %s (%s): No such file: %E\n"
-#~ msgstr "%F%P: %s (%s): No hay tal fichero: %E\n"
-
-#~ msgid "%F%P: %s: No such file: %E\n"
-#~ msgstr "%F%P: %s No hay tal fichero: %E\n"
-
-#~ msgid ""
-#~ "Set DT_NEEDED tags for DT_NEEDED entries in\n"
-#~ "                                following dynamic libs"
-#~ msgstr ""
-#~ "Establece marcas DT_NEEDED para entradas DT_NEEDED en\n"
-#~ "                                las siguientes bibliotecas din�micas"
-
-#~ msgid ""
-#~ "Do not set DT_NEEDED tags for DT_NEEDED entries\n"
-#~ "                                in following dynamic libs"
-#~ msgstr ""
-#~ "No establece marcas DT_NEEDED para entradas DT_NEEDED en\n"
-#~ "                                las siguientes bibliotecas din�micas"
-
-#~ msgid "Always set DT_NEEDED for following dynamic libs"
-#~ msgstr "Siempre establece DT_NEEDED para las siguientes bibliotecas din�micas"
-
-#~ msgid "Relax branches on certain targets"
-#~ msgstr "Relaja ramificaciones en ciertos objetivos"
-
-#~ msgid "%P%F: may not nest groups (--help for usage)\n"
-#~ msgstr "%P%F: no se pueden anidar grupos (--help para modo de empleo)\n"
-
-#~ msgid "%P%F: --relax and -r may not be used together\n"
-#~ msgstr "%P%F: no se pueden usar juntos -relax y -r\n"
-
-#~ msgid "  --support-old-code   Support interworking with old code\n"
-#~ msgstr "  --support-old-code   Admite interoperar con c�digo antiguo\n"
-
-#~ msgid "%B%F: could not read symbols; %E\n"
-#~ msgstr "%B%F: no se pueden leer s�mbolos; %E\n"
-
-#~ msgid "%F%S nonconstant expression for %s\n"
-#~ msgstr "%F%S expresi�n no constante para %s\n"
-
-#~ msgid "%B%F: could not read symbols\n"
-#~ msgstr "%B%F: no se pueden leer los s�mbolos\n"
-
-#~ msgid "%F%S non constant expression for %s\n"
-#~ msgstr "%F%S expresi�n no constante para %s\n"
-
-#~ msgid "%P%F: out of memory during initialization"
-#~ msgstr "%P%F: memoria agotada durante la inicializaci�n"
-
-#~ msgid "%P%F: -static and -shared may not be used together\n"
-#~ msgstr "%P%F: no se pueden usar juntos -static y -shared\n"
-
-#~ msgid "%P%X: generated"
-#~ msgstr "%P%X: generado"
-
-#~ msgid "%F%P: %s uses undefined section %s\n"
-#~ msgstr "%F%P: %s usa la secci�n sin definir %s\n"
-
-#~ msgid "%F%P: %s forward reference of section %s\n"
-#~ msgstr "%F%P: %s es una referencia hacia adelante de la secci�n %s\n"
-
-#~ msgid "%F%P: cannot open %s for %s: %E\n"
-#~ msgstr "%F%P: no se puede abrir %s para %s: %E\n"
-
-#~ msgid "%F%P: cannot open %s: %E\n"
-#~ msgstr "%F%P: no se puede abrir %s: %E\n"
-
-#~ msgid "%P%F: unknown architecture: %s\n"
-#~ msgstr "%P%F: arquitectura desconocida: %s\n"
-
-#~ msgid "%P%F: target architecture respecified\n"
-#~ msgstr "%P%F: arquitectura destino reespecificada\n"
-
-#~ msgid "%P: %B: warning: ignoring duplicate `%s' section symbol `%s'\n"
-#~ msgstr "%P: %B: aviso: ignorando el s�mbolo duplicado `%s' de la secci�n `%s'\n"
-
-#~ msgid "%P: %B: warning: duplicate section `%s' has different size\n"
-#~ msgstr "%P: %B: aviso: la secci�n duplicada `%s' tiene tama�o diferente\n"
-
-#~ msgid "%P: no [COMMON] command, defaulting to .bss\n"
-#~ msgstr "%P: no hay una orden [COMMON], usando .bss por defecto\n"
-
-#~ msgid "%P%F: -r and --mpc860c0 may not be used together\n"
-#~ msgstr "%P%F: no se pueden usar juntos -r y --mpc860c0\n"
-
-#~ msgid "Allow no undefined symbols"
-#~ msgstr "No permitir s�mbolos sin definir"
-
-#~ msgid "Allow undefined symbols in shared objects (the default)"
-#~ msgstr "Permitir s�mbolos sin definir en objetos compartidos (por defecto)"
-
-#~ msgid "[=WORDS]"
-#~ msgstr "[=PALABRAS]"
-
-#~ msgid ""
-#~ "Modify problematic branches in last WORDS (1-10,\n"
-#~ "\t\t\t\tdefault 5) words of a page"
-#~ msgstr ""
-#~ "Modificar las ramificaciones problem�ticas en las �ltimas PALABRAS (1-10,\n"
-#~ "\t\t\t5 por defecto) palabras de una p�gina"
-
-#~ msgid "%P%F: invalid argument to option \"mpc860c0\"\n"
-#~ msgstr "%P%F: Argumento inv�lido para la opci�n \"mpc860c0\"\n"
-
-#~ msgid "                                       create __imp_<SYMBOL> as well.\n"
-#~ msgstr "                                       creando tambi�n __imp_<S�MBOLO>.\n"
-
-#~ msgid "  --dll-search-prefix=<string>       When linking dynamically to a dll witout an\n"
-#~ msgstr "  --dll-search-prefix=<cadena>       Al enlazar din�micamente con una dll sin una\n"
-
-#~ msgid "                                       importlib, use <string><basename>.dll \n"
-#~ msgstr "                                       biblioteca de importaci�n, usar <cadena><nombrebase>.dll\n"
-
-#~ msgid "Archive member included"
-#~ msgstr "Se incluy� el fichero miembro"
-
-#~ msgid "Don't merge orphan sections with the same name"
-#~ msgstr "No mezclar secciones hu�rfanas con el mismo nombre"
+msgstr ""
