@@ -1,3 +1,9 @@
+2010-11-25  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	PR breakpoints/12217
+
+	* breakpoint.c (is_marker_spec): Check for NULL.
+
 2010-11-25  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_value_data): Never sign extend.
