@@ -1,3 +1,8 @@
+2010-11-25  Alan Modra  <amodra@gmail.com>
+
+	PR gas/12264
+	* compress-debug.c: Include config.h first.
+
 2010-11-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* doc/as.texinfo: Refer to and include c-bfin.texi for Blackfin
@@ -32,7 +37,7 @@
 
 2010-11-19  Alan Modra  <amodra@gmail.com>
 
-    	PR 2606
+	PR 2606
 	* configure.in: Disable emulations for PE targets.
 	* configure: Regenerate.
 
