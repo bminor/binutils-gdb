@@ -1,3 +1,9 @@
+2010-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.am (OPTIONAL_BACKENDS): Add rs6000-core.lo.
+	(OPTIONAL_BACKENDS_CFILES): Add rs6000-core.c.
+	* Makefile.in: Regenerate.
+
 2010-11-24  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12253
