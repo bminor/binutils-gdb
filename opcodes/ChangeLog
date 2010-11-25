@@ -1,3 +1,10 @@
+2010-11-25  Alan Modra  <amodra@gmail.com>
+
+	* po/es.po: Update.
+	* po/fr.po: Update.
+	* po/nl.po: Update.
+	* po/zh_CN.po: Update.
+
 2010-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.
