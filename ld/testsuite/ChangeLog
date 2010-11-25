@@ -1,3 +1,8 @@
+2010-11-25  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/arm-elf.exp (armeabitests): Replace --defsym argument in
+	jump-reloc-veneers* tests with --section-start .text=0x8000.
+
 2010-11-05  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-plugin/plugin.exp (testobjfiles): Dont use HOSTING_CRT0.
