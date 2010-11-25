@@ -1,3 +1,9 @@
+2010-11-25  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (current_cpu): Initialize with latest CPU.
+	(init_default_arch): Default to z/Architecture mode if CPU provides it.
+	Remove the check setting the CPU default.
+
 2010-11-25  Alan Modra  <amodra@gmail.com>
 
 	* po/es.po: Update.
