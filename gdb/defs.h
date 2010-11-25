@@ -1240,8 +1240,4 @@ void dummy_obstack_deallocate (void *object, void *data);
 extern void initialize_progspace (void);
 extern void initialize_inferiors (void);
 
-#ifndef HAVE_PYTHON
-typedef int PyObject;
-#endif
-
 #endif /* #ifndef DEFS_H */

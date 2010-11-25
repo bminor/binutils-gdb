@@ -636,7 +636,7 @@ static int
 build_bp_list (struct breakpoint *b, void *arg)
 {
   PyObject *list = arg;
-  PyObject *bp = b->py_bp_object;
+  PyObject *bp = (PyObject *) b->py_bp_object;
   int iserr = 0;
 
   /* Not all breakpoints will have a companion Python object.
@@ -718,7 +718,7 @@ gdbpy_breakpoint_created (int num)
     {
       newbp->number = num;
       newbp->bp = bp;
-      newbp->bp->py_bp_object = (PyObject *) newbp;
+      newbp->bp->py_bp_object = newbp;
       Py_INCREF (newbp);
       ++bppy_live;
     }
@@ -746,7 +746,7 @@ gdbpy_breakpoint_deleted (int num)
   if (! bp)
     return;
 
-  bp_obj = ((breakpoint_object *) bp->py_bp_object);
+  bp_obj = bp->py_bp_object;
   if (bp_obj)
     {
       bp_obj->bp = NULL;

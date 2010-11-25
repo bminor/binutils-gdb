@@ -24,13 +24,9 @@
 #include "value.h"
 #include "vec.h"
 
-#if HAVE_PYTHON
-#include "python/python.h"
-#include "python/python-internal.h"
-#endif
-
 struct value;
 struct block;
+struct breakpoint_object;
 
 /* This is the maximum number of bytes a breakpoint instruction can take.
    Feel free to increase it.  It's just used in a few places to size
@@ -568,7 +564,7 @@ struct breakpoint
        This is always NULL for a GDB that is not script enabled.  It
        can sometimes be NULL for enabled GDBs as not all breakpoint
        types are tracked by the Python scripting API.  */
-    PyObject *py_bp_object;
+    struct breakpoint_object *py_bp_object;
 };
 
 typedef struct breakpoint *breakpoint_p;

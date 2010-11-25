@@ -1,3 +1,14 @@
+2010-11-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.h: No longer include python.h or python-internal.h.
+	(struct breakpoint_object): Forward declare.
+	* defs.h (PyObject) [!HAVE_PYTHON]: Don't define.
+	* varobj.c (PyObject) [!HAVE_PYTHON]: Define.
+	* python/py-breakpoint.c (build_bp_list): Cast py_bp_object to
+	PyObject pointer.
+	(gdbpy_breakpoint_created): Remove casts around py_bp_object
+	accesses.
+
 2010-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-tdep.c (bfd_uses_spe_extensions): Use bfd_elf_get_obj_attr_int
