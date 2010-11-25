@@ -1,3 +1,8 @@
+2010-11-25  Alan Modra  <amodra@gmail.com>
+
+	PR gas/12264
+	* compress-debug.c: Include config.h first.
+
 2010-11-17  Nick Clifton  <nickc@redhat.com>
 
 	* input-file.c (input_file_open): Check for empty input files.
@@ -23,10 +28,10 @@
 
 2010-11-15  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
-        * config/obj-elf.c (elf_generate_asm_lineno): New function.
-        (elf_process_stab): New function.
-        (elf_format_ops): Always use them as generate_asm_lineno,
-        process_stab members.
+	* config/obj-elf.c (elf_generate_asm_lineno): New function.
+	(elf_process_stab): New function.
+	(elf_format_ops): Always use them as generate_asm_lineno,
+	process_stab members.
 
 2010-11-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
@@ -107,7 +112,7 @@
 	* write.c (compress_debug): Optimize section flags check.
 
 2010-10-29  Bernd Schmidt  <bernds@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-tic6x.c (OPTION_MDSBT, OPTION_MNO_DSBT): New enum
 	values.
