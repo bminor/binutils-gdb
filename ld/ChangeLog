@@ -1,3 +1,8 @@
+2010-11-25  Jan Hubicka  <hubicka@ucw.cz>
+
+	* scripttempl/elf.sc: Group .text.exit, text.startup and .text.hot
+	sections.
+
 2010-11-23  Matthias Klose  <doko@ubuntu.com>
 
 	* configure.ac: For --enable-gold, handle value `default' instead of
