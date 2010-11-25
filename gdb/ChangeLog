@@ -1,3 +1,7 @@
+2010-11-25  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_const_value_data): Never sign extend.
+
 2010-11-18  Phil Muldoon  <pmuldoon@redhat.com>
 
     	PR mi/11407
