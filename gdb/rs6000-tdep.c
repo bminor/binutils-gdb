@@ -3376,6 +3376,7 @@ bfd_uses_spe_extensions (bfd *abfd)
   if (!abfd)
     return 0;
 
+#ifdef HAVE_ELF
   /* Using Tag_GNU_Power_ABI_Vector here is a bit of a hack, as the user
      could be using the SPE vector abi without actually using any spe
      bits whatsoever.  But it's close enough for now.  */
@@ -3383,6 +3384,7 @@ bfd_uses_spe_extensions (bfd *abfd)
 					 Tag_GNU_Power_ABI_Vector);
   if (vector_abi == 3)
     return 1;
+#endif
 
   sect = bfd_get_section_by_name (abfd, ".PPC.EMB.apuinfo");
   if (!sect)
