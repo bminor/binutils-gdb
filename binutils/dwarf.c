@@ -79,14 +79,21 @@ size_of_encoded_value (int encoding)
 }
 
 static dwarf_vma
-get_encoded_value (unsigned char *data, int encoding)
+get_encoded_value (unsigned char *data,
+		   int encoding,
+		   struct dwarf_section *section)
 {
   int size = size_of_encoded_value (encoding);
+  dwarf_vma val;
 
   if (encoding & DW_EH_PE_signed)
-    return byte_get_signed (data, size);
+    val = byte_get_signed (data, size);
   else
-    return byte_get (data, size);
+    val = byte_get (data, size);
+
+  if ((encoding & 0x70) == DW_EH_PE_pcrel)
+    val += section->address + (data - section->start);
+  return val;
 }
 
 /* Print a dwarf_vma value (typically an address, offset or length) in
@@ -974,9 +981,7 @@ decode_location_expression (unsigned char * data,
 	    dwarf_vma addr;
 	
 	    encoding = *data++;
-	    addr = get_encoded_value (data, encoding);
-	    if ((encoding & 0x70) == DW_EH_PE_pcrel)
-	      addr += section->address + (data - section->start);
+	    addr = get_encoded_value (data, encoding, section);
 	    data += size_of_encoded_value (encoding);
 
 	    printf ("DW_OP_GNU_encoded_addr: fmt:%02x addr:", encoding);
@@ -4282,9 +4287,7 @@ display_debug_frames (struct dwarf_section *section,
 	      segment_selector = byte_get (start, fc->segment_size);
 	      start += fc->segment_size;
 	    }
-	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding);
-	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
-	    fc->pc_begin += section->address + (start - section_start);
+	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding, section);
 	  start += encoded_ptr_size;
 	  fc->pc_range = byte_get (start, encoded_ptr_size);
 	  start += encoded_ptr_size;
@@ -4502,9 +4505,7 @@ display_debug_frames (struct dwarf_section *section,
 	      break;
 
 	    case DW_CFA_set_loc:
-	      vma = get_encoded_value (start, fc->fde_encoding);
-	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
-		vma += section->address + (start - section_start);
+	      vma = get_encoded_value (start, fc->fde_encoding, section);
 	      start += encoded_ptr_size;
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);

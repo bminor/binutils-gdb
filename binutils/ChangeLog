@@ -1,5 +1,11 @@
 2010-11-26  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (decode_location_expression, display_debug_frames): Move
+	code handling DW_EH_PE_pcrel into..
+	(get_encoded_value): ..here.
+
+2010-11-26  Alan Modra  <amodra@gmail.com>
+
 	* po/ja.po: Update.
 
 2010-11-25  Alan Modra  <amodra@gmail.com>
