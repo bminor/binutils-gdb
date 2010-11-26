@@ -1,5 +1,11 @@
 2010-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* infcall.c (struct inferior_thread_state) <siginfo_gdbarch>: Fix up
+	the comment.
+	(save_inferior_thread_state): Reset tp->stop_signal.
+
+2010-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* infcall.c (call_function_by_hand): Remove variable
 	caller_state_cleanup.
 

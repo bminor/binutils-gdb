@@ -6047,7 +6047,7 @@ struct inferior_thread_state
   CORE_ADDR stop_pc;
   struct regcache *registers;
 
-  /* Format of SIGINFO or NULL if it is not present.  */
+  /* Format of SIGINFO_DATA or NULL if it is not present.  */
   struct gdbarch *siginfo_gdbarch;
 
   /* The inferior format depends on SIGINFO_GDBARCH and it has a length of
@@ -6094,6 +6094,10 @@ save_inferior_thread_state (void)
     }
 
   inf_state->stop_signal = tp->stop_signal;
+  /* run_inferior_call will not use the signal due to its `proceed' call with
+     TARGET_SIGNAL_0 anyway.  */
+  tp->stop_signal = TARGET_SIGNAL_0;
+
   inf_state->stop_pc = stop_pc;
 
   inf_state->registers = regcache_dup (regcache);
