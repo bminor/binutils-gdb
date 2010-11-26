@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: ld 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-11-05 11:34+0100\n"
-"PO-Revision-Date: 2010-11-14 17:53+0900\n"
+"PO-Revision-Date: 2010-11-25 19:58+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -43,12 +43,12 @@ msgstr "%P: 警告: Thumb 開始シンボル %s が見つかりません\n"
 #: emultempl/pe.em:418
 #, c-format
 msgid "  --base_file <basefile>             Generate a base file for relocatable DLLs\n"
-msgstr ""
+msgstr "  --base_file <basefile>             再配置可能 DLL のベースファイルを生成する\n"
 
 #: emultempl/pe.em:419
 #, c-format
 msgid "  --dll                              Set image base to the default for DLLs\n"
-msgstr ""
+msgstr "  --dll                              イメージのベースを DLL のデフォルトに設定する\n"
 
 #: emultempl/pe.em:420
 #, c-format
@@ -311,7 +311,7 @@ msgstr "  --forceinteg\t\t コードの完全性チェックを強制する\n"
 #: emultempl/pe.em:478
 #, c-format
 msgid "  --nxcompat\t\t Image is compatible with data execution prevention\n"
-msgstr ""
+msgstr "  --nxcompat\t\t イメージをデータ実行防止と互換性を保つようにする\n"
 
 #: emultempl/pe.em:479
 #, c-format
@@ -333,12 +333,12 @@ msgstr ""
 #: emultempl/pe.em:483
 #, c-format
 msgid "  --wdmdriver\t\t Driver uses the WDM model\n"
-msgstr ""
+msgstr "  --wdmdriver\t\t WDM モデルを使用するドライバにする\n"
 
 #: emultempl/pe.em:484
 #, c-format
 msgid "  --tsaware                  Image is Terminal Server aware\n"
-msgstr ""
+msgstr "  --tsaware                  ターミナルサーバで使用できるイメージにする\n"
 
 #: emultempl/pe.em:613
 msgid "%P: warning: bad version number in -subsystem option\n"
@@ -464,7 +464,7 @@ msgstr "シンボル無し\n"
 
 #: ldcref.c:532
 msgid "%P: symbol `%T' missing from main hash table\n"
-msgstr ""
+msgstr "%P: 主ハッシュ表にシンボル `%T' がありません\n"
 
 #: ldcref.c:650 ldcref.c:657 ldmain.c:1217 ldmain.c:1224
 msgid "%B%F: could not read relocs: %E\n"
@@ -522,7 +522,7 @@ msgstr "サポートされているエミュレーションモード: "
 #: ldemul.c:334
 #, c-format
 msgid "  no emulation specific options.\n"
-msgstr ""
+msgstr "  エミュレーション固有でないオプション。\n"
 
 #: ldexp.c:313
 msgid "%P: warning: address of `%s' isn't multiple of maximum page size\n"
@@ -541,17 +541,17 @@ msgstr "%F%S 0 による除算\n"
 #: ldexp.c:552
 #, c-format
 msgid "%X%S: unresolvable symbol `%s' referenced in expression\n"
-msgstr ""
+msgstr "%X%S: 式で参照された解決できないシンボル `%s' \n"
 
 #: ldexp.c:564
 #, c-format
 msgid "%F%S: undefined symbol `%s' referenced in expression\n"
-msgstr ""
+msgstr "%F%S: 式で参照された定義されていないシンボル `%s'\n"
 
 #: ldexp.c:585 ldexp.c:602 ldexp.c:629
 #, c-format
 msgid "%F%S: undefined section `%s' referenced in expression\n"
-msgstr ""
+msgstr "%F%S: 式で参照された未定義セクション `%s'\n"
 
 #: ldexp.c:656 ldexp.c:670
 #, c-format
@@ -594,7 +594,7 @@ msgstr ""
 #: ldfile.c:141
 #, c-format
 msgid "attempt to open %s failed\n"
-msgstr ""
+msgstr "%s を開くのに失敗しました\n"
 
 #: ldfile.c:143
 #, c-format
@@ -615,7 +615,7 @@ msgstr "%F%P: 動的オブジェクト `%s' に対する静的リンクが試み
 
 #: ldfile.c:332 ldmain.c:832
 msgid "%P%F: %s: plugin reported error claiming file\n"
-msgstr ""
+msgstr "%P%F: %s: プラグインがファイルを要求時にエラーを報告しました\n"
 
 #: ldfile.c:447
 msgid "%P: cannot find %s (%s): %E\n"
@@ -649,7 +649,7 @@ msgstr "%P%F: リンカスクリプトファイル %s を開けません: %E\n"
 
 #: ldfile.c:722
 msgid "%P%F: cannot represent machine `%s'\n"
-msgstr ""
+msgstr "%P%F: マシン `%s' を表すことができません\n"
 
 #: ldlang.c:1160 ldlang.c:1202 ldlang.c:3048
 msgid "%P%F: can not create hash table: %E\n"
@@ -665,15 +665,15 @@ msgstr "%P:%S: メモリ領域 `%s' が宣言されていません\n"
 
 #: ldlang.c:1293
 msgid "%F%P:%S: error: alias for default memory region\n"
-msgstr ""
+msgstr "%F%P:%S: エラー: デフォルトメモリ区画の別名です\n"
 
 #: ldlang.c:1304
 msgid "%F%P:%S: error: redefinition of memory region alias `%s'\n"
-msgstr ""
+msgstr "%F%P:%S: エラー: メモリ区画の別名 `%s' の再定義です\n"
 
 #: ldlang.c:1311
 msgid "%F%P:%S: error: memory region `%s' for alias `%s' does not exist\n"
-msgstr ""
+msgstr "%1$F%2$P:%3$S: エラー: 別名 `%5$s' のためのメモリ区画 `%4$s' が存在しません\n"
 
 #: ldlang.c:1363 ldlang.c:1402
 msgid "%P%F: failed creating section `%s': %E\n"
@@ -687,7 +687,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"宣言された入力セクション\n"
+"破棄された入力セクション\n"
 "\n"
 
 #: ldlang.c:1966
@@ -702,7 +702,7 @@ msgstr ""
 
 #: ldlang.c:1968
 msgid "Name"
-msgstr ""
+msgstr "名前"
 
 #: ldlang.c:1968
 msgid "Origin"
@@ -710,11 +710,11 @@ msgstr ""
 
 #: ldlang.c:1968
 msgid "Length"
-msgstr ""
+msgstr "長さ"
 
 #: ldlang.c:1968
 msgid "Attributes"
-msgstr ""
+msgstr "属性"
 
 #: ldlang.c:2008
 #, c-format
@@ -741,7 +741,7 @@ msgstr "%B: ファイルが認識できませんでした: %E\n"
 
 #: ldlang.c:2637
 msgid "%B: matching formats:"
-msgstr ""
+msgstr "%B: 一致した形式:"
 
 #: ldlang.c:2644
 msgid "%F%B: file not recognized: %E\n"
@@ -807,7 +807,7 @@ msgstr ""
 #: ldlang.c:4423
 #, c-format
 msgid "Fail with %d\n"
-msgstr ""
+msgstr "コード %d で失敗しました\n"
 
 #: ldlang.c:4710
 msgid "%X%P: section %s loaded at [%V,%V] overlaps section %s loaded at [%V,%V]\n"
@@ -836,15 +836,15 @@ msgstr "%P%X: COFF 共有ライブラリのセクション %s で内部エラー
 
 #: ldlang.c:4900
 msgid "%P%F: error: no memory region specified for loadable section `%s'\n"
-msgstr ""
+msgstr "%P%F: エラー: ロード可能セクション `%s' のためのメモリ区画が指定されていません\n"
 
 #: ldlang.c:4905
 msgid "%P: warning: no memory region specified for loadable section `%s'\n"
-msgstr ""
+msgstr "%P: 警告: ロード可能セクション `%s' のためのメモリ区画が指定されていません\n"
 
 #: ldlang.c:4927
 msgid "%P: warning: changing start of section %s by %lu bytes\n"
-msgstr ""
+msgstr "%P: 警告: セクション %s の開始を %lu バイト分変更しています\n"
 
 #: ldlang.c:5004
 msgid "%P: warning: dot moved backwards before `%s'\n"
@@ -876,11 +876,11 @@ msgstr "%P%F: 開始アドレスを設定できません\n"
 
 #: ldlang.c:5698
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
-msgstr ""
+msgstr "%P: 警告: エントリシンボル %s が見つかりません。デフォルトとして %V を使用します\n"
 
 #: ldlang.c:5710
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
-msgstr ""
+msgstr "%P: 警告: エントリシンボル %s が見つかりません。開始アドレスを設定しません\n"
 
 #: ldlang.c:5760
 msgid "%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"
@@ -888,7 +888,7 @@ msgstr ""
 
 #: ldlang.c:5770
 msgid "%P%X: %s architecture of input file `%B' is incompatible with %s output\n"
-msgstr ""
+msgstr "%1$P%2$X: `%4$B' の %3$s アーキテクチャは %5$s 出力と互換性がありません\n"
 
 #: ldlang.c:5792
 msgid "%P%X: failed to merge target specific data of file %B\n"
@@ -911,10 +911,12 @@ msgid ""
 "Common symbol       size              file\n"
 "\n"
 msgstr ""
+"共通シンボル        サイズ            ファイル\n"
+"\n"
 
 #: ldlang.c:6022
 msgid "%P%F: invalid syntax in flags\n"
-msgstr ""
+msgstr "%P%F: フラグ内で無効な構文です\n"
 
 #: ldlang.c:6415
 msgid "%P%F: Failed to create hash table\n"
@@ -930,7 +932,7 @@ msgstr "%P%F: 複数の STARTUP ファイルがあります\n"
 
 #: ldlang.c:6765
 msgid "%X%P:%S: section has both a load address and a load region\n"
-msgstr ""
+msgstr "%X%P:%S: セクションにロードアドレスおよびロード区画の両方が存在します\n"
 
 #: ldlang.c:6950
 msgid "%X%P:%S: PHDRS and FILEHDR are not supported when prior PT_LOAD headers lack them\n"
@@ -2145,7 +2147,7 @@ msgstr ""
 #: pe-dll.c:1574
 #, c-format
 msgid "%s: Can't open output def file %s\n"
-msgstr ""
+msgstr "%s: 出力定義ファイル %s を開くことができません\n"
 
 #: pe-dll.c:1725
 #, c-format
@@ -2159,12 +2161,12 @@ msgstr ""
 #: pe-dll.c:2682
 #, c-format
 msgid "%XCan't open .lib file: %s\n"
-msgstr ""
+msgstr "%X .lib ファイルを開くことができません: %s\n"
 
 #: pe-dll.c:2687
 #, c-format
 msgid "Creating library file: %s\n"
-msgstr ""
+msgstr "ライブラリファイルを作成しています: %s\n"
 
 #: pe-dll.c:2716
 #, c-format
@@ -2179,12 +2181,12 @@ msgstr ""
 #: pe-dll.c:2740
 #, c-format
 msgid "%X%s(%s): can't find member in archive"
-msgstr ""
+msgstr "%X%s(%s): 書庫内にメンバが見つかりません"
 
 #: pe-dll.c:3177
 #, c-format
 msgid "%XError: can't use long section names on this arch\n"
-msgstr ""
+msgstr "%Xエラー: このアーキテクチャでは長いセクション名を使用できません\n"
 
 #: plugin.c:178 plugin.c:212
 msgid "<no plugin>"
@@ -2192,7 +2194,7 @@ msgstr ""
 
 #: plugin.c:308
 msgid "%P%F: %s: non-ELF symbol in ELF BFD!"
-msgstr ""
+msgstr "%P%F: %s: ELF BFD 内に非 ELF シンボルがあります!"
 
 #: plugin.c:800
 msgid "%P%X: %s: hash table failure adding symbol %s"
