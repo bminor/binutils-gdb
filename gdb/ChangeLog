@@ -1,6 +1,7 @@
 2010-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
-	* infcall.c (caller_state_cleanup): Remove variable caller_state_cleanup.
+	* infcall.c (call_function_by_hand): Remove variable
+	caller_state_cleanup.
 
 2010-11-25  Marc Khouzam  <marc.khouzam@ericsson.com>
 
