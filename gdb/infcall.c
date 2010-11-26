@@ -443,7 +443,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct inferior_status *inf_status;
   struct cleanup *inf_status_cleanup;
   struct inferior_thread_state *caller_state;
-  struct cleanup *caller_state_cleanup;
   CORE_ADDR funaddr;
   CORE_ADDR real_pc;
   struct type *ftype = check_typedef (value_type (function));
@@ -483,7 +482,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
      down) pushed onto a dummy frame stack.  Include a cleanup (which
      is tossed once the regcache has been pushed).  */
   caller_state = save_inferior_thread_state ();
-  caller_state_cleanup = make_cleanup_restore_inferior_thread_state (caller_state);
+  make_cleanup_restore_inferior_thread_state (caller_state);
 
   /* Ensure that the initial SP is correctly aligned.  */
   {
