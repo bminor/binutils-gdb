@@ -37,6 +37,9 @@ struct thread_control_state
 {
   /* User/external stepping state.  */
 
+  /* Step-resume or longjmp-resume breakpoint.  */
+  struct breakpoint *step_resume_breakpoint;
+
   /* Range to single step within.
 
      If this is nonzero, respond to a single-step signal by continuing
@@ -150,11 +153,6 @@ struct thread_info
   /* State of inferior thread to restore after GDB is done with an inferior
      call.  See `struct thread_suspend_state'.  */
   struct thread_suspend_state suspend;
-
-  /* User/external stepping state.  */
-
-  /* Step-resume or longjmp-resume breakpoint.  */
-  struct breakpoint *step_resume_breakpoint;
 
   int current_line;
   struct symtab *current_symtab;

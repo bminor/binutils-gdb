@@ -791,7 +791,8 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
 	    fprintf_unfiltered (gdb_stdlog, "displaced: unwind pc = %lx. "
 	      "Setting momentary breakpoint.\n", (unsigned long) return_to);
 
-	  gdb_assert (inferior_thread ()->step_resume_breakpoint == NULL);
+	  gdb_assert (inferior_thread ()->control.step_resume_breakpoint
+		      == NULL);
 
 	  sal = find_pc_line (return_to, 0);
 	  sal.pc = return_to;
@@ -802,7 +803,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
 
 	  if (frame)
 	    {
-	      inferior_thread ()->step_resume_breakpoint
+	      inferior_thread ()->control.step_resume_breakpoint
         	= set_momentary_breakpoint (gdbarch, sal, get_frame_id (frame),
 					    bp_step_resume);
 

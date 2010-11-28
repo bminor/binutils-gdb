@@ -83,10 +83,10 @@ inferior_thread (void)
 void
 delete_step_resume_breakpoint (struct thread_info *tp)
 {
-  if (tp && tp->step_resume_breakpoint)
+  if (tp && tp->control.step_resume_breakpoint)
     {
-      delete_breakpoint (tp->step_resume_breakpoint);
-      tp->step_resume_breakpoint = NULL;
+      delete_breakpoint (tp->control.step_resume_breakpoint);
+      tp->control.step_resume_breakpoint = NULL;
     }
 }
 
@@ -97,10 +97,10 @@ clear_thread_inferior_resources (struct thread_info *tp)
      but not any user-specified thread-specific breakpoints.  We can not
      delete the breakpoint straight-off, because the inferior might not
      be stopped at the moment.  */
-  if (tp->step_resume_breakpoint)
+  if (tp->control.step_resume_breakpoint)
     {
-      tp->step_resume_breakpoint->disposition = disp_del_at_next_stop;
-      tp->step_resume_breakpoint = NULL;
+      tp->control.step_resume_breakpoint->disposition = disp_del_at_next_stop;
+      tp->control.step_resume_breakpoint = NULL;
     }
 
   bpstat_clear (&tp->control.stop_bpstat);

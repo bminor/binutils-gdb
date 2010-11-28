@@ -1,5 +1,18 @@
 2010-11-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix step_resume_breakpoint unsaved during an infcall.
+	* gdbthread.h (struct thread_control_state): Move here field
+	step_resume_breakpoint ...
+	(struct thread_info): ... from here.
+	* infrun.c (save_infcall_control_state): Reset
+	control.step_resume_breakpoint to NULL.
+	(restore_infcall_control_state, discard_infcall_control_state): Delete
+	control.step_resume_breakpoint.
+	* arm-linux-tdep.c, infrun.c, thread.c: Update all the references to
+	the moved field.
+
+2010-11-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Rename and move inferior_thread_state and inferior_status.
 	* gdbthread.h (struct thread_control_state): New struct, move fields
 	step_range_start, step_range_end, step_frame_id, step_stack_frame_id,

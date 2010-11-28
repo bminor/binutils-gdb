@@ -1,3 +1,9 @@
+2010-11-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix step_resume_breakpoint unsaved during an infcall.
+	* gdb.base/step-resume-infcall.exp: New file.
+	* gdb.base/step-resume-infcall.c: New file.
+
 2010-11-24  Edjunior Machado  <emachado@br.ibm.com>
 
 	* gdb.asm/powerpc.inc: Use 'sys_exit' on gdbasm_exit0 macro.
