@@ -1648,7 +1648,7 @@ get_pending_status (struct lwp_info *lp, int *status)
     {
       struct thread_info *tp = find_thread_ptid (lp->ptid);
 
-      signo = tp->stop_signal;
+      signo = tp->suspend.stop_signal;
     }
   else if (!non_stop)
     {
@@ -1661,7 +1661,7 @@ get_pending_status (struct lwp_info *lp, int *status)
 	{
 	  struct thread_info *tp = find_thread_ptid (lp->ptid);
 
-	  signo = tp->stop_signal;
+	  signo = tp->suspend.stop_signal;
 	}
     }
 
@@ -1917,7 +1917,7 @@ linux_nat_resume (struct target_ops *ops,
 
       /* Defer to common code if we're gaining control of the
 	 inferior.  */
-      if (inf->stop_soon == NO_STOP_QUIETLY
+      if (inf->control.stop_soon == NO_STOP_QUIETLY
 	  && signal_stop_state (saved_signo) == 0
 	  && signal_print_state (saved_signo) == 0
 	  && signal_pass_state (saved_signo) == 1)
@@ -3580,7 +3580,7 @@ retry:
 	 skip the signal handler, or, if we're gaining control of the
 	 inferior.  */
       if (!lp->step
-	  && inf->stop_soon == NO_STOP_QUIETLY
+	  && inf->control.stop_soon == NO_STOP_QUIETLY
 	  && signal_stop_state (signo) == 0
 	  && signal_print_state (signo) == 0
 	  && signal_pass_state (signo) == 1)
@@ -4162,7 +4162,7 @@ linux_nat_find_memory_regions (find_memory_region_ftype func, void *obfd)
 static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
-  if (info->stop_signal != TARGET_SIGNAL_0
+  if (info->suspend.stop_signal != TARGET_SIGNAL_0
       && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
     return 1;
 
@@ -4176,7 +4176,7 @@ find_stop_signal (void)
     iterate_over_threads (find_signalled_thread, NULL);
 
   if (info)
-    return info->stop_signal;
+    return info->suspend.stop_signal;
   else
     return TARGET_SIGNAL_0;
 }

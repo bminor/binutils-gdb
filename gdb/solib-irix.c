@@ -469,15 +469,15 @@ irix_solib_create_inferior_hook (int from_tty)
 
   clear_proceed_status ();
 
-  inf->stop_soon = STOP_QUIETLY;
-  tp->stop_signal = TARGET_SIGNAL_0;
+  inf->control.stop_soon = STOP_QUIETLY;
+  tp->suspend.stop_signal = TARGET_SIGNAL_0;
 
   do
     {
-      target_resume (pid_to_ptid (-1), 0, tp->stop_signal);
+      target_resume (pid_to_ptid (-1), 0, tp->suspend.stop_signal);
       wait_for_inferior (0);
     }
-  while (tp->stop_signal != TARGET_SIGNAL_TRAP);
+  while (tp->suspend.stop_signal != TARGET_SIGNAL_TRAP);
 
   /* We are now either at the "mapping complete" breakpoint (or somewhere
      else, a condition we aren't prepared to deal with anyway), so adjust
@@ -496,7 +496,7 @@ irix_solib_create_inferior_hook (int from_tty)
      Delaying the resetting of stop_soon until after symbol loading
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
-  inf->stop_soon = NO_STOP_QUIETLY;
+  inf->control.stop_soon = NO_STOP_QUIETLY;
 }
 
 /* LOCAL FUNCTION

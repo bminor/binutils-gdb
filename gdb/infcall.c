@@ -360,16 +360,18 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 {
   volatile struct gdb_exception e;
   int saved_async = 0;
-  int saved_in_infcall = call_thread->in_infcall;
+  int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
   char *saved_target_shortname = xstrdup (target_shortname);
 
-  call_thread->in_infcall = 1;
+  call_thread->control.in_infcall = 1;
 
   clear_proceed_status ();
 
   disable_watchpoints_before_interactive_call_start ();
-  call_thread->proceed_to_finish = 1; /* We want stop_registers, please... */
+
+  /* We want stop_registers, please... */
+  call_thread->control.proceed_to_finish = 1;
 
   if (target_can_async_p ())
     saved_async = target_async_mask (0);
@@ -397,11 +399,11 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   if (e.reason < 0)
     {
       if (call_thread != NULL)
-	breakpoint_auto_delete (call_thread->stop_bpstat);
+	breakpoint_auto_delete (call_thread->control.stop_bpstat);
     }
 
   if (call_thread != NULL)
-    call_thread->in_infcall = saved_in_infcall;
+    call_thread->control.in_infcall = saved_in_infcall;
 
   xfree (saved_target_shortname);
 
@@ -440,9 +442,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct type *values_type, *target_values_type;
   unsigned char struct_return = 0, lang_struct_return = 0;
   CORE_ADDR struct_addr = 0;
-  struct inferior_status *inf_status;
+  struct infcall_control_state *inf_status;
   struct cleanup *inf_status_cleanup;
-  struct inferior_thread_state *caller_state;
+  struct infcall_suspend_state *caller_state;
   CORE_ADDR funaddr;
   CORE_ADDR real_pc;
   struct type *ftype = check_typedef (value_type (function));
@@ -473,16 +475,17 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
   /* A cleanup for the inferior status.
      This is only needed while we're preparing the inferior function call.  */
-  inf_status = save_inferior_status ();
-  inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
+  inf_status = save_infcall_control_state ();
+  inf_status_cleanup
+    = make_cleanup_restore_infcall_control_state (inf_status);
 
   /* Save the caller's registers and other state associated with the
      inferior itself so that they can be restored once the
      callee returns.  To allow nested calls the registers are (further
      down) pushed onto a dummy frame stack.  Include a cleanup (which
      is tossed once the regcache has been pushed).  */
-  caller_state = save_inferior_thread_state ();
-  make_cleanup_restore_inferior_thread_state (caller_state);
+  caller_state = save_infcall_suspend_state ();
+  make_cleanup_restore_infcall_suspend_state (caller_state);
 
   /* Ensure that the initial SP is correctly aligned.  */
   {
@@ -810,7 +813,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       const char *name = get_function_name (funaddr,
                                             name_buf, sizeof (name_buf));
 
-      discard_inferior_status (inf_status);
+      discard_infcall_control_state (inf_status);
 
       /* We could discard the dummy frame here if the program exited,
          but it will get garbage collected the next time the program is
@@ -842,7 +845,7 @@ When the function is done executing, GDB will silently stop."),
 
       /* If we try to restore the inferior status,
 	 we'll crash as the inferior is no longer running.  */
-      discard_inferior_status (inf_status);
+      discard_infcall_control_state (inf_status);
 
       /* We could discard the dummy frame here given that the program exited,
          but it will get garbage collected the next time the program is
@@ -864,7 +867,7 @@ Evaluation of the expression containing the function\n\
 	 signal or breakpoint while our thread was running.
 	 There's no point in restoring the inferior status,
 	 we're in a different thread.  */
-      discard_inferior_status (inf_status);
+      discard_infcall_control_state (inf_status);
       /* Keep the dummy frame record, if the user switches back to the
 	 thread with the hand-call, we'll need it.  */
       if (stopped_by_random_signal)
@@ -905,7 +908,7 @@ When the function is done executing, GDB will silently stop."),
 
 	      /* We also need to restore inferior status to that before the
 		 dummy call.  */
-	      restore_inferior_status (inf_status);
+	      restore_infcall_control_state (inf_status);
 
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
@@ -923,7 +926,7 @@ Evaluation of the expression containing the function\n\
 		 (default).
 		 Discard inferior status, we're not at the same point
 		 we started at.  */
-	      discard_inferior_status (inf_status);
+	      discard_infcall_control_state (inf_status);
 
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
@@ -946,7 +949,7 @@ When the function is done executing, GDB will silently stop."),
 
 	  /* We also need to restore inferior status to that before
 	     the dummy call.  */
-	  restore_inferior_status (inf_status);
+	  restore_infcall_control_state (inf_status);
 
 	  error (_("\
 The program being debugged entered a std::terminate call, most likely\n\
@@ -965,7 +968,7 @@ will be abandoned."),
 	     Keep the dummy frame, the user may want to examine its state.
 	     Discard inferior status, we're not at the same point
 	     we started at.  */
-	  discard_inferior_status (inf_status);
+	  discard_infcall_control_state (inf_status);
 
 	  /* The following error message used to say "The expression
 	     which contained the function call has been discarded."
@@ -1002,7 +1005,7 @@ When the function is done executing, GDB will silently stop."),
 
     /* Inferior call is successful.  Restore the inferior status.
        At this stage, leave the RETBUF alone.  */
-    restore_inferior_status (inf_status);
+    restore_infcall_control_state (inf_status);
 
     /* Figure out the value returned by the function.  */
 

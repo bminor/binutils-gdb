@@ -3008,7 +3008,7 @@ breakpoint_about_to_proceed (void)
 	 interrupt the command list.  When the call finishes
 	 successfully, the inferior will be standing at the same
 	 breakpoint as if nothing happened.  */
-      if (tp->in_infcall)
+      if (tp->control.in_infcall)
 	return;
     }
 
@@ -3127,7 +3127,7 @@ bpstat_do_actions (void)
        and only return when it is stopped at the next breakpoint, we
        keep doing breakpoint actions until it returns false to
        indicate the inferior was not resumed.  */
-    if (!bpstat_do_actions_1 (&inferior_thread ()->stop_bpstat))
+    if (!bpstat_do_actions_1 (&inferior_thread ()->control.stop_bpstat))
       break;
 }
 
@@ -9680,7 +9680,7 @@ bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
 {
   struct breakpoint *bpt = data;
 
-  bpstat_remove_bp_location (th->stop_bpstat, bpt);
+  bpstat_remove_bp_location (th->control.stop_bpstat, bpt);
   return 0;
 }
 

@@ -43,7 +43,7 @@ struct dummy_frame
      gdbarch_dummy_id.  */
   struct frame_id id;
   /* The caller's state prior to the call.  */
-  struct inferior_thread_state *caller_state;
+  struct infcall_suspend_state *caller_state;
 };
 
 static struct dummy_frame *dummy_frame_stack = NULL;
@@ -86,7 +86,7 @@ deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc)
    dummy-frame stack.  */
 
 void
-dummy_frame_push (struct inferior_thread_state *caller_state,
+dummy_frame_push (struct infcall_suspend_state *caller_state,
 		  const struct frame_id *dummy_id)
 {
   struct dummy_frame *dummy_frame;
@@ -106,7 +106,7 @@ remove_dummy_frame (struct dummy_frame **dummy_ptr)
   struct dummy_frame *dummy = *dummy_ptr;
 
   *dummy_ptr = dummy->next;
-  discard_inferior_thread_state (dummy->caller_state);
+  discard_infcall_suspend_state (dummy->caller_state);
   xfree (dummy);
 }
 
@@ -118,9 +118,9 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
 {
   struct dummy_frame *dummy;
 
-  restore_inferior_thread_state ((*dummy_ptr)->caller_state);
+  restore_infcall_suspend_state ((*dummy_ptr)->caller_state);
 
-  /* restore_inferior_status frees inf_state,
+  /* restore_infcall_control_state frees inf_state,
      all that remains is to pop *dummy_ptr */
   dummy = *dummy_ptr;
   *dummy_ptr = dummy->next;
@@ -220,7 +220,8 @@ dummy_frame_sniffer (const struct frame_unwind *self,
 	      struct dummy_frame_cache *cache;
 
 	      cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
-	      cache->prev_regcache = get_inferior_thread_state_regcache (dummyframe->caller_state);
+	      cache->prev_regcache = get_infcall_suspend_state_regcache
+						   (dummyframe->caller_state);
 	      cache->this_id = this_id;
 	      (*this_prologue_cache) = cache;
 	      return 1;

@@ -434,7 +434,7 @@ mi_about_to_proceed (void)
     {
       struct thread_info *tp = inferior_thread ();
 
-      if (tp->in_infcall)
+      if (tp->control.in_infcall)
 	return;
     }
 
@@ -477,7 +477,7 @@ mi_on_resume (ptid_t ptid)
     tp = find_thread_ptid (ptid);
 
   /* Suppress output while calling an inferior function.  */
-  if (tp->in_infcall)
+  if (tp->control.in_infcall)
     return;
 
   /* To cater for older frontends, emit ^running, but do it only once

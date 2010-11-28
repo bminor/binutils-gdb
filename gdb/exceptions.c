@@ -226,7 +226,10 @@ throw_exception (struct gdb_exception exception)
   /* Perhaps it would be cleaner to do this via the cleanup chain (not sure
      I can think of a reason why that is vital, though).  */
   if (tp != NULL)
-    bpstat_clear_actions (tp->stop_bpstat);	/* Clear queued breakpoint commands */
+    {
+      /* Clear queued breakpoint commands */
+      bpstat_clear_actions (tp->control.stop_bpstat);
+    }
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);

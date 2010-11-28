@@ -340,14 +340,14 @@ osf_solib_create_inferior_hook (int from_tty)
 
   tp = inferior_thread ();
   clear_proceed_status ();
-  inf->stop_soon = STOP_QUIETLY;
-  tp->stop_signal = TARGET_SIGNAL_0;
+  inf->control.stop_soon = STOP_QUIETLY;
+  tp->suspend.stop_signal = TARGET_SIGNAL_0;
   do
     {
-      target_resume (minus_one_ptid, 0, tp->stop_signal);
+      target_resume (minus_one_ptid, 0, tp->suspend.stop_signal);
       wait_for_inferior (0);
     }
-  while (tp->stop_signal != TARGET_SIGNAL_TRAP);
+  while (tp->suspend.stop_signal != TARGET_SIGNAL_TRAP);
 
   /*  solib_add will call reinit_frame_cache.
      But we are stopped in the runtime loader and we do not have symbols
@@ -356,7 +356,7 @@ osf_solib_create_inferior_hook (int from_tty)
      Delaying the resetting of stop_soon until after symbol loading
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
-  inf->stop_soon = NO_STOP_QUIETLY;
+  inf->control.stop_soon = NO_STOP_QUIETLY;
 }
 
 /* target_so_ops callback.  Do additional symbol handling, lookup, etc. after

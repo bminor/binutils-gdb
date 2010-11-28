@@ -2558,7 +2558,7 @@ heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 	   stop_soon, but with this test, at least we
 	   don't print out warnings for every child forked (eg, on
 	   decstation).  22apr93 rich@cygnus.com.  */
-	if (inf->stop_soon == NO_STOP_QUIETLY)
+	if (inf->control.stop_soon == NO_STOP_QUIETLY)
 	  {
 	    static int blurb_printed = 0;
 

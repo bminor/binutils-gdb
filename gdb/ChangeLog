@@ -1,3 +1,62 @@
+2010-11-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Rename and move inferior_thread_state and inferior_status.
+	* gdbthread.h (struct thread_control_state): New struct, move fields
+	step_range_start, step_range_end, step_frame_id, step_stack_frame_id,
+	trap_expected, proceed_to_finish, in_infcall, step_over_calls,
+	stop_step and stop_bpstat here from struct thread_info.
+	(struct thread_suspend_state): New struct, move field stop_signal here
+	from struct thread_info.
+	(struct thread_info): Move the fields above from this struct.
+	* inferior.h: Move the inferior_thread_state and inferior_status
+	declarations comment to their definitions at infrun.c.
+	(struct inferior_control_state): New struct, move field stop_soon from
+	struct inferior here.
+	(struct inferior_suspend_state): New empty struct.
+	(struct inferior): New fields control and suspend.  Move out field
+	stop_soon.
+	* infrun.c (struct inferior_thread_state): Rename to ...
+	(infcall_suspend_state): ... here.  Replace field stop_signal by
+	fields thread_suspend and inferior_suspend.
+	(save_inferior_thread_state): Rename to ...
+	(save_infcall_suspend_state): ... here.  New variable inf.  Update the
+	code for new fields.
+	(restore_inferior_thread_state): Rename to ...
+	(restore_infcall_suspend_state): ... here.  New variable inf.  Update
+	the code for new fields.
+	(do_restore_inferior_thread_state_cleanup): Rename to ...
+	(do_restore_infcall_suspend_state_cleanup): ... here.
+	(make_cleanup_restore_inferior_thread_state): Rename to ...
+	(make_cleanup_restore_infcall_suspend_state): ... here.
+	(discard_inferior_thread_state): Rename to ...
+	(discard_infcall_suspend_state): ... here.
+	(get_inferior_thread_state_regcache): Rename to ...
+	(get_infcall_suspend_state_regcache): ... here.
+	(struct inferior_status): Rename to ...
+	(struct infcall_control_state): ... here.  Replace fields
+	step_range_start, step_range_end, step_frame_id, step_stack_frame_id,
+	trap_expected, proceed_to_finish, in_infcall, step_over_calls,
+	stop_step, stop_bpstat and stop_soon by fields thread_control and
+	inferior_control.
+	(save_inferior_status): Rename to ...
+	(save_infcall_control_state): ... here.  Update the code for new
+	fields.
+	(restore_inferior_status): Rename to ...
+	(restore_infcall_control_state): ... here.  Update the code for new
+	fields.
+	(do_restore_inferior_status_cleanup): Rename to ...
+	(do_restore_infcall_control_state_cleanup): ... here.
+	(make_cleanup_restore_inferior_status): Rename to ...
+	(make_cleanup_restore_infcall_control_state): ... here.
+	(discard_inferior_status): Rename to ...
+	(discard_infcall_control_state): ... here.
+	* alpha-tdep.c, breakpoint.c, dummy-frame.c, dummy-frame.h,
+	exceptions.c, fbsd-nat.c, gdbthread.h, infcall.c, infcmd.c,
+	inferior.c, inferior.h, infrun.c, linux-nat.c, mi/mi-interp.c,
+	mips-tdep.c, procfs.c, solib-irix.c, solib-osf.c, solib-spu.c,
+	solib-sunos.c, solib-svr4.c, thread.c, windows-nat.c: Update all the
+	references to the moved fields and renamed functions.
+
 2010-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infcall.c (struct inferior_thread_state) <siginfo_gdbarch>: Fix up

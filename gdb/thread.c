@@ -103,7 +103,7 @@ clear_thread_inferior_resources (struct thread_info *tp)
       tp->step_resume_breakpoint = NULL;
     }
 
-  bpstat_clear (&tp->stop_bpstat);
+  bpstat_clear (&tp->control.stop_bpstat);
 
   discard_all_intermediate_continuations_thread (tp);
   discard_all_continuations_thread (tp);

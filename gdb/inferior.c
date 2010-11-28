@@ -124,7 +124,7 @@ add_inferior_silent (int pid)
   memset (inf, 0, sizeof (*inf));
   inf->pid = pid;
 
-  inf->stop_soon = NO_STOP_QUIETLY;
+  inf->control.stop_soon = NO_STOP_QUIETLY;
 
   inf->num = ++highest_inferior_num;
   inf->next = inferior_list;

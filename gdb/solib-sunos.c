@@ -772,15 +772,15 @@ sunos_solib_create_inferior_hook (int from_tty)
 
   clear_proceed_status ();
 
-  inf->stop_soon = STOP_QUIETLY;
-  tp->stop_signal = TARGET_SIGNAL_0;
+  inf->control.stop_soon = STOP_QUIETLY;
+  tp->suspend.stop_signal = TARGET_SIGNAL_0;
   do
     {
-      target_resume (pid_to_ptid (-1), 0, tp->stop_signal);
+      target_resume (pid_to_ptid (-1), 0, tp->suspend.stop_signal);
       wait_for_inferior (0);
     }
-  while (tp->stop_signal != TARGET_SIGNAL_TRAP);
-  inf->stop_soon = NO_STOP_QUIETLY;
+  while (tp->suspend.stop_signal != TARGET_SIGNAL_TRAP);
+  inf->control.stop_soon = NO_STOP_QUIETLY;
 
   /* We are now either at the "mapping complete" breakpoint (or somewhere
      else, a condition we aren't prepared to deal with anyway), so adjust

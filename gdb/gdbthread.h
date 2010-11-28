@@ -29,6 +29,88 @@ struct symtab;
 #include "ui-out.h"
 #include "inferior.h"
 
+/* Inferior thread specific part of `struct infcall_control_state'.
+
+   Inferior process counterpart is `struct inferior_control_state'.  */
+
+struct thread_control_state
+{
+  /* User/external stepping state.  */
+
+  /* Range to single step within.
+
+     If this is nonzero, respond to a single-step signal by continuing
+     to step if the pc is in this range.
+
+     If step_range_start and step_range_end are both 1, it means to
+     step for a single instruction (FIXME: it might clean up
+     wait_for_inferior in a minor way if this were changed to the
+     address of the instruction and that address plus one.  But maybe
+     not.).  */
+  CORE_ADDR step_range_start;	/* Inclusive */
+  CORE_ADDR step_range_end;	/* Exclusive */
+
+  /* Stack frame address as of when stepping command was issued.
+     This is how we know when we step into a subroutine call, and how
+     to set the frame for the breakpoint used to step out.  */
+  struct frame_id step_frame_id;
+
+  /* Similarly, the frame ID of the underlying stack frame (skipping
+     any inlined frames).  */
+  struct frame_id step_stack_frame_id;
+
+  /* Nonzero if we are presently stepping over a breakpoint.
+
+     If we hit a breakpoint or watchpoint, and then continue, we need
+     to single step the current thread with breakpoints disabled, to
+     avoid hitting the same breakpoint or watchpoint again.  And we
+     should step just a single thread and keep other threads stopped,
+     so that other threads don't miss breakpoints while they are
+     removed.
+
+     So, this variable simultaneously means that we need to single
+     step the current thread, keep other threads stopped, and that
+     breakpoints should be removed while we step.
+
+     This variable is set either:
+     - in proceed, when we resume inferior on user's explicit request
+     - in keep_going, if handle_inferior_event decides we need to
+     step over breakpoint.
+
+     The variable is cleared in normal_stop.  The proceed calls
+     wait_for_inferior, which calls handle_inferior_event in a loop,
+     and until wait_for_inferior exits, this variable is changed only
+     by keep_going.  */
+  int trap_expected;
+
+  /* Nonzero if the thread is being proceeded for a "finish" command
+     or a similar situation when stop_registers should be saved.  */
+  int proceed_to_finish;
+
+  /* Nonzero if the thread is being proceeded for an inferior function
+     call.  */
+  int in_infcall;
+
+  enum step_over_calls_kind step_over_calls;
+
+  /* Nonzero if stopped due to a step command.  */
+  int stop_step;
+
+  /* Chain containing status of breakpoint(s) the thread stopped
+     at.  */
+  bpstat stop_bpstat;
+};
+
+/* Inferior thread specific part of `struct infcall_suspend_state'.
+
+   Inferior process counterpart is `struct inferior_suspend_state'.  */
+
+struct thread_suspend_state
+{
+  /* Last signal that the inferior received (why it stopped).  */
+  enum target_signal stop_signal;
+};
+
 struct thread_info
 {
   struct thread_info *next;
@@ -61,32 +143,18 @@ struct thread_info
      if we detect it exiting.  */
   int refcount;
 
+  /* State of GDB control of inferior thread execution.
+     See `struct thread_control_state'.  */
+  struct thread_control_state control;
+
+  /* State of inferior thread to restore after GDB is done with an inferior
+     call.  See `struct thread_suspend_state'.  */
+  struct thread_suspend_state suspend;
+
   /* User/external stepping state.  */
 
   /* Step-resume or longjmp-resume breakpoint.  */
   struct breakpoint *step_resume_breakpoint;
-
-  /* Range to single step within.
-
-     If this is nonzero, respond to a single-step signal by continuing
-     to step if the pc is in this range.
-
-     If step_range_start and step_range_end are both 1, it means to
-     step for a single instruction (FIXME: it might clean up
-     wait_for_inferior in a minor way if this were changed to the
-     address of the instruction and that address plus one.  But maybe
-     not.).  */
-  CORE_ADDR step_range_start;	/* Inclusive */
-  CORE_ADDR step_range_end;	/* Exclusive */
-
-  /* Stack frame address as of when stepping command was issued.
-     This is how we know when we step into a subroutine call, and how
-     to set the frame for the breakpoint used to step out.  */
-  struct frame_id step_frame_id;
-
-  /* Similarly, the frame ID of the underlying stack frame (skipping
-     any inlined frames).  */
-  struct frame_id step_stack_frame_id;
 
   int current_line;
   struct symtab *current_symtab;
@@ -98,30 +166,6 @@ struct thread_info
      adjust_pc_after_break to distinguish a hardware single-step
      SIGTRAP from a breakpoint SIGTRAP.  */
   CORE_ADDR prev_pc;
-
-  /* Nonzero if we are presently stepping over a breakpoint.
-
-     If we hit a breakpoint or watchpoint, and then continue, we need
-     to single step the current thread with breakpoints disabled, to
-     avoid hitting the same breakpoint or watchpoint again.  And we
-     should step just a single thread and keep other threads stopped,
-     so that other threads don't miss breakpoints while they are
-     removed.
-
-     So, this variable simultaneously means that we need to single
-     step the current thread, keep other threads stopped, and that
-     breakpoints should be removed while we step.
-
-     This variable is set either:
-     - in proceed, when we resume inferior on user's explicit request
-     - in keep_going, if handle_inferior_event decides we need to
-     step over breakpoint.
-
-     The variable is cleared in normal_stop.  The proceed calls
-     wait_for_inferior, which calls handle_inferior_event in a loop,
-     and until wait_for_inferior exits, this variable is changed only
-     by keep_going.  */
-  int trap_expected;
 
   /* Should we step over breakpoint next time keep_going is called?  */
   int stepping_over_breakpoint;
@@ -153,19 +197,6 @@ struct thread_info
      command.  */
   struct continuation *intermediate_continuations;
 
-  /* Nonzero if the thread is being proceeded for a "finish" command
-     or a similar situation when stop_registers should be saved.  */
-  int proceed_to_finish;
-
-  /* Nonzero if the thread is being proceeded for an inferior function
-     call.  */
-  int in_infcall;
-
-  enum step_over_calls_kind step_over_calls;
-
-  /* Nonzero if stopped due to a step command.  */
-  int stop_step;
-
   /* If stepping, nonzero means step count is > 1 so don't print frame
      next time inferior stops if it stops due to stepping.  */
   int step_multi;
@@ -174,13 +205,6 @@ struct thread_info
      a catchpoint, and thus the event is to be followed at the next
      resume of the thread, and not immediately.  */
   struct target_waitstatus pending_follow;
-
-  /* Last signal that the inferior received (why it stopped).  */
-  enum target_signal stop_signal;
-
-  /* Chain containing status of breakpoint(s) the thread stopped
-     at.  */
-  bpstat stop_bpstat;
 
   /* True if this thread has been explicitly requested to stop.  */
   int stop_requested;

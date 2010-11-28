@@ -85,13 +85,13 @@ spu_skip_standalone_loader (void)
 	 this will step past the first instruction of the stand-alone SPE
 	 executable loader, but we don't care about that.  */
 
-      inferior_thread ()->in_infcall = 1;   /* Suppress MI messages.  */
+      inferior_thread ()->control.in_infcall = 1; /* Suppress MI messages.  */
 
       target_resume (inferior_ptid, 1, TARGET_SIGNAL_0);
       target_wait (minus_one_ptid, &ws, 0);
       set_executing (minus_one_ptid, 0);
 
-      inferior_thread ()->in_infcall = 0;
+      inferior_thread ()->control.in_infcall = 0;
     }
 }
 

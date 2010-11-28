@@ -43,37 +43,25 @@ struct terminal_info;
 
 #include "progspace.h"
 
-/* Two structures are used to record inferior state.
+struct infcall_suspend_state;
+struct infcall_control_state;
 
-   inferior_thread_state contains state about the program itself like its
-   registers and any signal it received when it last stopped.
-   This state must be restored regardless of how the inferior function call
-   ends (either successfully, or after it hits a breakpoint or signal)
-   if the program is to properly continue where it left off.
+extern struct infcall_suspend_state *save_infcall_suspend_state (void);
+extern struct infcall_control_state *save_infcall_control_state (void);
 
-   inferior_status contains state regarding gdb's control of the inferior
-   itself like stepping control.  It also contains session state like the
-   user's currently selected frame.
+extern void restore_infcall_suspend_state (struct infcall_suspend_state *);
+extern void restore_infcall_control_state (struct infcall_control_state *);
 
-   Call these routines around hand called functions, including function calls
-   in conditional breakpoints for example.  */
+extern struct cleanup *make_cleanup_restore_infcall_suspend_state
+					    (struct infcall_suspend_state *);
+extern struct cleanup *make_cleanup_restore_infcall_control_state
+					    (struct infcall_control_state *);
 
-struct inferior_thread_state;
-struct inferior_status;
+extern void discard_infcall_suspend_state (struct infcall_suspend_state *);
+extern void discard_infcall_control_state (struct infcall_control_state *);
 
-extern struct inferior_thread_state *save_inferior_thread_state (void);
-extern struct inferior_status *save_inferior_status (void);
-
-extern void restore_inferior_thread_state (struct inferior_thread_state *);
-extern void restore_inferior_status (struct inferior_status *);
-
-extern struct cleanup *make_cleanup_restore_inferior_thread_state (struct inferior_thread_state *);
-extern struct cleanup *make_cleanup_restore_inferior_status (struct inferior_status *);
-
-extern void discard_inferior_thread_state (struct inferior_thread_state *);
-extern void discard_inferior_status (struct inferior_status *);
-
-extern struct regcache *get_inferior_thread_state_regcache (struct inferior_thread_state *);
+extern struct regcache *
+  get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
 
 /* The -1 ptid, often used to indicate either an error condition
    or a "don't care" condition, i.e, "run all threads."  */
@@ -405,6 +393,24 @@ void displaced_step_dump_bytes (struct ui_file *file,
 
 struct private_inferior;
 
+/* Inferior process specific part of `struct infcall_control_state'.
+
+   Inferior thread counterpart is `struct thread_control_state'.  */
+
+struct inferior_control_state
+{
+  /* See the definition of stop_kind above.  */
+  enum stop_kind stop_soon;
+};
+
+/* Inferior process specific part of `struct infcall_suspend_state'.
+
+   Inferior thread counterpart is `struct thread_suspend_state'.  */
+
+struct inferior_suspend_state
+{
+};
+
 /* GDB represents the state of each program execution with an object
    called an inferior.  An inferior typically corresponds to a process
    but is more general and applies also to targets that do not have a
@@ -426,6 +432,14 @@ struct inferior
   /* Actual target inferior id, usually, a process id.  This matches
      the ptid_t.pid member of threads of this inferior.  */
   int pid;
+
+  /* State of GDB control of inferior process execution.
+     See `struct inferior_control_state'.  */
+  struct inferior_control_state control;
+
+  /* State of inferior process to restore after GDB is done with an inferior
+     call.  See `struct inferior_suspend_state'.  */
+  struct inferior_suspend_state suspend;
 
   /* True if this was an auto-created inferior, e.g. created from
      following a fork; false, if this inferior was manually added by
@@ -457,9 +471,6 @@ struct inferior
   /* Environment to use for running inferior,
      in format described in environ.h.  */
   struct gdb_environ *environment;
-
-  /* See the definition of stop_kind above.  */
-  enum stop_kind stop_soon;
 
   /* Nonzero if this child process was attached rather than
      forked.  */
