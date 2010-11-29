@@ -1,3 +1,8 @@
+2010-11-29  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-pp-maint.exp: Change printer-name:subprinter-name to
+	printer-name;subprinter-name.
+
 2010-11-29  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/implptr.exp: New file.

@@ -1,3 +1,11 @@
+2010-11-29  Doug Evans  <dje@google.com>
+
+	* python/lib/gdb/printing.py (register_pretty_printer): Change
+	printer-name:subprinter-name to printer-name;subprinter-name.
+	* python/lib/gdb/command/pretty_printers.py (parse_printer_regexps):
+	Ditto.
+	(InfoPrettyPrinter, EnablePrettyPrinter, DisablePrettyPrinter): Ditto.
+
 2010-11-29  Tom Tromey  <tromey@redhat.com>
 
 	* opencl-lang.c (lval_func_check_synthetic_pointer): New

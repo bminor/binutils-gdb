@@ -80,14 +80,20 @@ gdb_test "print ss" " = a=<a=<1> b=<$hex>> b=<a=<2> b=<$hex>>" \
 gdb_test "disable pretty-printer" \
     "5 printers disabled.*0 of 5 printers enabled"
 
+gdb_test "enable pretty-printer" \
+    "5 printers enabled.*5 of 5 printers enabled"
+
 gdb_test "disable pretty-printer global" \
-    "0 printers disabled.*0 of 5 printers enabled"
+    "5 printers disabled.*0 of 5 printers enabled"
+
+gdb_test "enable pretty-printer" \
+    "5 printers enabled.*5 of 5 printers enabled"
 
 gdb_test "disable pretty-printer global lookup_function_lookup_test" \
-    "0 printers disabled.*0 of 5 printers enabled"
+    "1 printer disabled.*4 of 5 printers enabled"
 
-gdb_test "disable pretty-printer global pp-test:.*" \
-    "0 printers disabled.*0 of 5 printers enabled"
+gdb_test "disable pretty-printer global pp-test;.*" \
+    "4 printers disabled.*0 of 5 printers enabled"
 
 gdb_test "info pretty-printer global .*function" \
     {.*function_lookup_test \[disabled\].*}
@@ -110,10 +116,10 @@ gdb_test "enable pretty-printer global lookup_function_lookup_test" \
 gdb_test "enable pretty-printer global pp-test" \
     "0 printers enabled.*1 of 5 printers enabled"
 
-gdb_test "enable pretty-printer global pp-test:.*ss.*" \
+gdb_test "enable pretty-printer global pp-test;.*ss.*" \
     "2 printers enabled.*3 of 5 printers enabled"
 
-gdb_test "enable pretty-printer global pp-test:.*s.*" \
+gdb_test "enable pretty-printer global pp-test;.*s.*" \
     "2 printers enabled.*5 of 5 printers enabled"
 
 gdb_test "info pretty-printer" \

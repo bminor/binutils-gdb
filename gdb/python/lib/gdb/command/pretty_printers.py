@@ -28,7 +28,7 @@ def parse_printer_regexps(arg):
         arg: The arguments to the command.  The format is:
              [object-regexp [name-regexp]].
              Individual printers in a collection are named as
-             printer-name:subprinter-name.
+             printer-name;subprinter-name.
 
     Returns:
         The result is a 3-tuple of compiled regular expressions, except that
@@ -48,7 +48,7 @@ def parse_printer_regexps(arg):
     if argc >= 1:
         object_regexp = argv[0]
     if argc >= 2:
-        name_subname = argv[1].split(":", 1)
+        name_subname = argv[1].split(";", 1)
         name_regexp = name_subname[0]
         if len(name_subname) == 2:
             subname_regexp = name_subname[1]
@@ -92,7 +92,7 @@ class InfoPrettyPrinter(gdb.Command):
 
     NAME-REGEXP matches the name of the pretty-printer.
     Individual printers in a collection are named as
-    printer-name:subprinter-name.
+    printer-name;subprinter-name.
     """
 
     def __init__ (self):
@@ -328,7 +328,7 @@ class EnablePrettyPrinter (gdb.Command):
 
     NAME-REGEXP matches the name of the pretty-printer.
     Individual printers in a collection are named as
-    printer-name:subprinter-name.
+    printer-name;subprinter-name.
     """
 
     def __init__(self):
@@ -351,7 +351,7 @@ class DisablePrettyPrinter (gdb.Command):
 
     NAME-REGEXP matches the name of the pretty-printer.
     Individual printers in a collection are named as
-    printer-name:subprinter-name.
+    printer-name;subprinter-name.
     """
 
     def __init__(self):

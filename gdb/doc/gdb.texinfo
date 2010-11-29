@@ -8160,7 +8160,7 @@ pretty-printers with their names.
 If a pretty-printer can handle multiple data types, then its
 @dfn{subprinters} are the printers for the individual data types.
 Each such subprinter has its own name.
-The format of the name is @var{printer-name}:@var{subprinter-name}.
+The format of the name is @var{printer-name};@var{subprinter-name}.
 
 Pretty-printers are installed by @dfn{registering} them with @value{GDBN}.
 Typically they are automatically loaded and registered when the corresponding
