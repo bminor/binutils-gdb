@@ -233,6 +233,11 @@ add_piece (struct dwarf_expr_context *ctx, ULONGEST size, ULONGEST offset)
       p->v.mem.addr = dwarf_expr_fetch_address (ctx, 0);
       p->v.mem.in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
     }
+  else if (p->location == DWARF_VALUE_IMPLICIT_POINTER)
+    {
+      p->v.ptr.die = ctx->len;
+      p->v.ptr.offset = (LONGEST) dwarf_expr_fetch (ctx, 0);
+    }
   else
     {
       p->v.value = dwarf_expr_fetch (ctx, 0);
@@ -526,6 +531,26 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  ctx->location = DWARF_VALUE_STACK;
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_stack_value");
 	  goto no_push;
+
+	case DW_OP_GNU_implicit_pointer:
+	  {
+	    ULONGEST die;
+	    LONGEST len;
+
+	    /* The referred-to DIE.  */
+	    ctx->len = extract_unsigned_integer (op_ptr, ctx->addr_size,
+						 byte_order);
+	    op_ptr += ctx->addr_size;
+
+	    /* The byte offset into the data.  */
+	    op_ptr = read_sleb128 (op_ptr, op_end, &len);
+	    result = (ULONGEST) len;
+
+	    ctx->location = DWARF_VALUE_IMPLICIT_POINTER;
+	    dwarf_expr_require_composition (op_ptr, op_end,
+					    "DW_OP_GNU_implicit_pointer");
+	  }
+	  break;
 
 	case DW_OP_breg0:
 	case DW_OP_breg1:
@@ -883,6 +908,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
       dwarf_expr_push (ctx, result, in_stack_memory);
     no_push:;
     }
+
+  /* To simplify our main caller, if the result is an implicit
+     pointer, then make a pieced value.  This is ok because we can't
+     have implicit pointers in contexts where pieces are invalid.  */
+  if (ctx->location == DWARF_VALUE_IMPLICIT_POINTER)
+    add_piece (ctx, 8 * ctx->addr_size, 0);
 
   ctx->recursion_depth--;
   gdb_assert (ctx->recursion_depth >= 0);

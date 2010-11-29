@@ -1618,6 +1618,19 @@ value_ind (struct value *arg1)
 
   base_type = check_typedef (value_type (arg1));
 
+  if (VALUE_LVAL (arg1) == lval_computed)
+    {
+      struct lval_funcs *funcs = value_computed_funcs (arg1);
+
+      if (funcs->indirect)
+	{
+	  struct value *result = funcs->indirect (arg1);
+
+	  if (result)
+	    return result;
+	}
+    }
+
   if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
     {
       struct type *enc_type;

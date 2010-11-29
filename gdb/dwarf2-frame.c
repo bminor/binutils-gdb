@@ -325,6 +325,15 @@ no_get_frame_cfa (void *baton)
 		  _("Support for DW_OP_call_frame_cfa is unimplemented"));
 }
 
+/* Helper function for execute_stack_op.  */
+
+static CORE_ADDR
+no_get_frame_pc (void *baton)
+{
+  internal_error (__FILE__, __LINE__,
+		  _("Support for DW_OP_GNU_implicit_pointer is unimplemented"));
+}
+
 static CORE_ADDR
 no_get_tls_address (void *baton, CORE_ADDR offset)
 {
@@ -391,6 +400,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   ctx->read_mem = read_mem;
   ctx->get_frame_base = no_get_frame_base;
   ctx->get_frame_cfa = no_get_frame_cfa;
+  ctx->get_frame_pc = no_get_frame_pc;
   ctx->get_tls_address = no_get_tls_address;
   ctx->dwarf_call = no_dwarf_call;
 

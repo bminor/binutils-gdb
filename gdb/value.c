@@ -537,6 +537,18 @@ value_bits_valid (const struct value *value, int offset, int length)
 }
 
 int
+value_bits_synthetic_pointer (const struct value *value,
+			      int offset, int length)
+{
+  if (value == NULL || value->lval != lval_computed
+      || !value->location.computed.funcs->check_synthetic_pointer)
+    return 0;
+  return value->location.computed.funcs->check_synthetic_pointer (value,
+								  offset,
+								  length);
+}
+
+int
 value_embedded_offset (struct value *value)
 {
   return value->embedded_offset;

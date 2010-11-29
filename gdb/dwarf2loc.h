@@ -24,6 +24,7 @@
 struct symbol_computed_ops;
 struct objfile;
 struct dwarf2_per_cu_data;
+struct dwarf2_loclist_baton;
 
 /* This header is private to the DWARF-2 reader.  It is shared between
    dwarf2read.c and dwarf2loc.c.  */
@@ -45,8 +46,16 @@ int dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *cu);
    offset in the parent objfile.  */
 CORE_ADDR dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *cu);
 
+/* Find a particular location expression from a location list.  */
+const gdb_byte *dwarf2_find_location_expression
+  (struct dwarf2_loclist_baton *baton,
+   size_t *locexpr_length,
+   CORE_ADDR pc);
+
 struct dwarf2_locexpr_baton dwarf2_fetch_die_location_block
-  (unsigned int offset, struct dwarf2_per_cu_data *per_cu);
+  (unsigned int offset, struct dwarf2_per_cu_data *per_cu,
+   CORE_ADDR (*get_frame_pc) (void *baton),
+   void *baton);
 
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the context

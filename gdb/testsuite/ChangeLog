@@ -1,3 +1,9 @@
+2010-11-29  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/implptr.exp: New file.
+	* gdb.dwarf2/implptr.c: New file.
+	* gdb.dwarf2/implptr.S: New file.
+
 2010-11-29  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12199

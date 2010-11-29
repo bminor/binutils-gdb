@@ -173,6 +173,16 @@ struct lval_funcs
   /* Return 1 if any bit in VALUE is valid, 0 if they are all invalid.  */
   int (*check_any_valid) (const struct value *value);
 
+  /* If non-NULL, this is used to implement pointer indirection for
+     this value.  This method may return NULL, in which case value_ind
+     will fall back to ordinary indirection.  */
+  struct value *(*indirect) (struct value *value);
+
+  /* If non-NULL, this is used to determine whether the indicated bits
+     of VALUE are a synthetic pointer.  */
+  int (*check_synthetic_pointer) (const struct value *value,
+				  int offset, int length);
+
   /* Return a duplicate of VALUE's closure, for use in a new value.
      This may simply return the same closure, if VALUE's is
      reference-counted or statically allocated.
@@ -337,6 +347,12 @@ extern struct value *coerce_array (struct value *value);
 
 extern int value_bits_valid (const struct value *value,
 			     int offset, int length);
+
+/* Given a value, determine whether the bits starting at OFFSET and
+   extending for LENGTH bits are a synthetic pointer.  */
+
+extern int value_bits_synthetic_pointer (const struct value *value,
+					 int offset, int length);
 
 
 

@@ -1221,6 +1221,10 @@ static int attr_form_is_section_offset (struct attribute *);
 
 static int attr_form_is_constant (struct attribute *);
 
+static void fill_in_loclist_baton (struct dwarf2_cu *cu,
+				   struct dwarf2_loclist_baton *baton,
+				   struct attribute *attr);
+
 static void dwarf2_symbol_mark_computed (struct attribute *attr,
 					 struct symbol *sym,
 					 struct dwarf2_cu *cu);
@@ -12572,6 +12576,8 @@ dwarf_stack_op_name (unsigned op, int def)
       return "DW_OP_GNU_push_tls_address";
     case DW_OP_GNU_uninit:
       return "DW_OP_GNU_uninit";
+    case DW_OP_GNU_implicit_pointer:
+      return "DW_OP_GNU_implicit_pointer";
     default:
       return def ? "OP_<unknown>" : NULL;
     }
@@ -13076,12 +13082,16 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 
 struct dwarf2_locexpr_baton
 dwarf2_fetch_die_location_block (unsigned int offset,
-				 struct dwarf2_per_cu_data *per_cu)
+				 struct dwarf2_per_cu_data *per_cu,
+				 CORE_ADDR (*get_frame_pc) (void *baton),
+				 void *baton)
 {
   struct dwarf2_cu *cu = per_cu->cu;
   struct die_info *die;
   struct attribute *attr;
   struct dwarf2_locexpr_baton retval;
+
+  dw2_setup (per_cu->objfile);
 
   die = follow_die_offset (offset, &cu);
   if (!die)
@@ -13095,6 +13105,18 @@ dwarf2_fetch_die_location_block (unsigned int offset,
 
       retval.data = NULL;
       retval.size = 0;
+    }
+  else if (attr_form_is_section_offset (attr))
+    {
+      struct dwarf2_loclist_baton loclist_baton;
+      CORE_ADDR pc = (*get_frame_pc) (baton);
+      size_t size;
+
+      fill_in_loclist_baton (cu, &loclist_baton, attr);
+
+      retval.data = dwarf2_find_location_expression (&loclist_baton,
+						     &size, pc);
+      retval.size = size;
     }
   else
     {
@@ -14119,6 +14141,25 @@ attr_form_is_constant (struct attribute *attr)
     }
 }
 
+/* A helper function that fills in a dwarf2_loclist_baton.  */
+
+static void
+fill_in_loclist_baton (struct dwarf2_cu *cu,
+		       struct dwarf2_loclist_baton *baton,
+		       struct attribute *attr)
+{
+  dwarf2_read_section (dwarf2_per_objfile->objfile,
+		       &dwarf2_per_objfile->loc);
+
+  baton->per_cu = cu->per_cu;
+  gdb_assert (baton->per_cu);
+  /* We don't know how long the location list is, but make sure we
+     don't run off the edge of the section.  */
+  baton->size = dwarf2_per_objfile->loc.size - DW_UNSND (attr);
+  baton->data = dwarf2_per_objfile->loc.buffer + DW_UNSND (attr);
+  baton->base_address = cu->base_address;
+}
+
 static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu)
@@ -14133,17 +14174,9 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 
       baton = obstack_alloc (&cu->objfile->objfile_obstack,
 			     sizeof (struct dwarf2_loclist_baton));
-      baton->per_cu = cu->per_cu;
-      gdb_assert (baton->per_cu);
 
-      dwarf2_read_section (dwarf2_per_objfile->objfile,
-			   &dwarf2_per_objfile->loc);
+      fill_in_loclist_baton (cu, baton, attr);
 
-      /* We don't know how long the location list is, but make sure we
-	 don't run off the edge of the section.  */
-      baton->size = dwarf2_per_objfile->loc.size - DW_UNSND (attr);
-      baton->data = dwarf2_per_objfile->loc.buffer + DW_UNSND (attr);
-      baton->base_address = cu->base_address;
       if (cu->base_known == 0)
 	complaint (&symfile_complaints,
 		   _("Location list used without specifying the CU base address."));

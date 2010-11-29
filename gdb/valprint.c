@@ -273,6 +273,13 @@ valprint_check_validity (struct ui_file *stream,
 	  fprintf_filtered (stream, _("<value optimized out>"));
 	  return 0;
 	}
+
+      if (value_bits_synthetic_pointer (val, TARGET_CHAR_BIT * offset,
+					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+	{
+	  fputs_filtered (_("<synthetic pointer>"), stream);
+	  return 0;
+	}
     }
 
   return 1;

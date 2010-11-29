@@ -90,13 +90,17 @@ value_ptradd (struct value *arg1, LONGEST arg2)
 {
   struct type *valptrtype;
   LONGEST sz;
+  struct value *result;
 
   arg1 = coerce_array (arg1);
   valptrtype = check_typedef (value_type (arg1));
   sz = find_size_for_pointer_math (valptrtype);
 
-  return value_from_pointer (valptrtype,
-			     value_as_address (arg1) + sz * arg2);
+  result = value_from_pointer (valptrtype,
+			       value_as_address (arg1) + sz * arg2);
+  if (VALUE_LVAL (result) != lval_internalvar)
+    set_value_component_location (result, arg1);
+  return result;
 }
 
 /* Given two compatible pointer values ARG1 and ARG2, return the
