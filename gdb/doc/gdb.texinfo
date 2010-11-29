@@ -22911,6 +22911,12 @@ watchpoint scope, the watchpoint remains valid even if execution of the
 inferior leaves the scope of that watchpoint.
 @end defmethod
 
+@defmethod Breakpoint delete
+Permanently deletes the @value{GDBN} breakpoint.  This also
+invalidates the Python @code{Breakpoint} object.  Any further access
+to this object's attributes or methods will raise an error.
+@end defmethod
+
 @defivar Breakpoint enabled
 This attribute is @code{True} if the breakpoint is enabled, and
 @code{False} otherwise.  This attribute is writable.

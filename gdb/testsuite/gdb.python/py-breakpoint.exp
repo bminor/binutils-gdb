@@ -91,6 +91,29 @@ if ![runto_main] then {
     return 0
 }
 
+# Test breakpoints are deleted correctly.
+set deltst_location [gdb_get_line_number "Break at multiply."]
+set end_location [gdb_get_line_number "Break at end."]
+gdb_py_test_silent_cmd  "python dp1 = gdb.Breakpoint (\"$deltst_location\")" "Set breakpoint" 0
+gdb_breakpoint [gdb_get_line_number "Break at end."]
+gdb_py_test_silent_cmd "python del_list = gdb.breakpoints()" "Get Breakpoint List" 0
+gdb_test "python print len(del_list)" "3" "Number of breakpoints before delete"
+gdb_continue_to_breakpoint "Break at multiply." ".*/$srcfile:$deltst_location.*"
+gdb_py_test_silent_cmd  "python dp1.delete()" "Delete Breakpoint" 0
+gdb_test "python print dp1.number" "RuntimeError: Breakpoint 2 is invalid.*" "Check breakpoint invalidated"
+gdb_py_test_silent_cmd "python del_list = gdb.breakpoints()" "Get Breakpoint List" 0
+gdb_test "python print len(del_list)" "2" "Number of breakpoints after delete"
+gdb_continue_to_breakpoint "Break at end." ".*/$srcfile:$end_location.*"
+
+
+# Start with a fresh gdb.
+clean_restart ${testfile}
+
+if ![runto_main] then {
+    fail "Cannot run to main."
+    return 0
+}
+
 # Test conditional setting.
 set bp_location1 [gdb_get_line_number "Break at multiply."]
 gdb_py_test_silent_cmd  "python bp1 = gdb.Breakpoint (\"$bp_location1\")" "Set breakpoint" 0

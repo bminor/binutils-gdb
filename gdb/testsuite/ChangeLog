@@ -1,3 +1,9 @@
+2010-11-29  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12199
+
+	* gdb.python/py-breakpoint.exp: Test the delete method.
+
 2010-11-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix step_resume_breakpoint unsaved during an infcall.

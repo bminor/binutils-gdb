@@ -1,3 +1,9 @@
+2010-11-29  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12199
+
+	* gdb.texinfo (Breakpoints In Python): Document "delete" method.
+
 2010-11-23  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Top): Check SYSTEM_READLINE.
