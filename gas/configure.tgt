@@ -369,6 +369,7 @@ case ${generic_target} in
   shle*-*-kaos*)			fmt=elf ;;
   sh64-*-elf*)				fmt=elf ;;
 
+  sparc64-*-rtems*)			fmt=elf ;;
   sparc-*-rtems*)			fmt=elf ;;
   sparc-*-sunos4*)			fmt=aout em=sun3 ;;
   sparc-*-aout)				fmt=aout em=sparcaout ;;

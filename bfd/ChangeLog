@@ -1,3 +1,7 @@
+2010-11-30  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* config.bfd: Add sparc64-rtems.
+
 2010-11-25  Alan Modra  <amodra@gmail.com>
 
 	* po/es.po: Update.
