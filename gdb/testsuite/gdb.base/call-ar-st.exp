@@ -86,21 +86,19 @@ gdb_test continue \
 #call print_double_array(double_array)
 if {![gdb_skip_float_test "print print_double_array(double_array)"] && \
     ![gdb_skip_stdio_test "print print_double_array(double_array)"] } {
-  send_gdb "print print_double_array(double_array)\n"
-  gdb_expect_list "print print_double_array(double_array)" ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_double_array(double_array)" "" {
 	"\[ \t\r\n\]+array_d :"
 	"\[ \t\r\n\]+========="
 	"\[ \t\r\n\]+0.000000"
 	"\[ \t\r\n\]+23.456\[0-9\]*  46.913\[0-9\]*  70.370\[0-9\]*  93.826\[0-9\]*  117.283\[0-9\]*  140.740\[0-9\]*  164.196\[0-9\]*  187.653\[0-9\]"
 	"\[ \t\r\n\]+"
-  }
+    }
 }
 
 #call print_char_array(char_array)
 
 if ![gdb_skip_stdio_test "print_char_array(char_array)"] {
-    send_gdb "print print_char_array(char_array)\n"
-    gdb_expect_list "print print_char_array(char_array)" ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_char_array(char_array)" "" {
 	"\[ \t\r\n\]+array_c :"
 	"\[ \t\r\n\]+========="
 	"\[ \t\r\n\]+\[ \t\r\n\]+Z"
@@ -110,17 +108,13 @@ if ![gdb_skip_stdio_test "print_char_array(char_array)"] {
     }
 }
 
-
-
-
 #go -until 1216
 gdb_test "tbreak 1216" \
 "Temporary breakpoint.*file.*$srcfile, line 1216.*" \
 "tbreakpoint line 1216"
 
 if ![gdb_skip_stdio_test "continue to 1216"] {
-    send_gdb "continue\n"
-    gdb_expect_list "continue to 1216" ".*$gdb_prompt $" {
+    gdb_test_sequence "continue" "continue to 1216" {
 	"\[ \t\r\n\]+array_c :"
 	"\[ \t\r\n\]+========="
 	"\[ \t\r\n\]+\[ \t\r\n\]+Z"
@@ -154,18 +148,17 @@ gdb_test "tbreak 1220" \
 
 if {![gdb_skip_float_test "continuing to breakpoint 1220"] && \
     ![gdb_skip_stdio_test "continuing to breakpoint 1220"] } {
-    send_gdb "continue\n"
-    gdb_expect_list "continuing to breakpoint 1220" ".*$gdb_prompt $" {
+    gdb_test_sequence "continue" "continuing to breakpoint 1220" {
 	"Continuing\\."
 	"\[ \t\r\n\]+array_d :"
 	"\[ \t\r\n\]+========="
 	"\[ \t\r\n\]+0.000000"
 	"\[ \t\r\n\]+23.456\[0-9\]*  46.913\[0-9\]*  70.370\[0-9\]*  93.826\[0-9\]*  117.283\[0-9\]*  140.740\[0-9\]*  164.196\[0-9\]*  187.653\[0-9\]*"
 	"\[ \t\r\n\]+"
-	".*array_f :"
-	".*student id :\[\t \]+.*YELLOW"
-	".*array_i :"
-	".*main \\(\\) at .*call-ar-st.c:1220\[ \t\r\n\]+.*print_all_arrays\\(integer_array, char_array, float_array, double_array\\)."
+	"array_f :"
+	"student id :\[\t \]+.*YELLOW"
+	"array_i :"
+	"main \\(\\) at .*call-ar-st.c:1220\[ \t\r\n\]+.*print_all_arrays\\(integer_array, char_array, float_array, double_array\\)."
     }
 } else {
     gdb_test "continue" ".*" ""
@@ -188,8 +181,7 @@ if ![gdb_skip_stdio_test "next over print_int_array in print_all_arrays"] {
 #call print_double_array(array_d)
 if {![gdb_skip_float_test "print print_double_array(array_d)"] && \
     ![gdb_skip_stdio_test "print print_double_array(array_d)"] } {
-    send_gdb "print print_double_array(array_d)\n"
-    gdb_expect_list "print print_double_array(array_d)" ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_double_array(array_d)" "" {
 	"array_d :"
 	"\[ \t\r\n\]+========="
 	"\[ \t\r\n\]+\[ \t\r\n\]+0.000000"
@@ -205,10 +197,9 @@ gdb_test "tbreak 1236" \
 
 if {![gdb_skip_float_test "continuing to 1236"] && \
     ![gdb_skip_stdio_test "continuing to 1236"] } {
-    send_gdb "continue\n"
-    gdb_expect_list "continuing to 1236"  ".*$gdb_prompt $" {
+    gdb_test_sequence "continue" "continuing to 1236" {
 	"Continuing\\..*array_c"
-	".*array_f"
+	"array_f"
 	"\[ \t\r\n\]+array_d :"
 	"\[ \t\r\n\]+========="
 	"\[ \t\r\n\]+0.000000"
@@ -304,8 +295,7 @@ if ![gdb_skip_stdio_test "continuing to 1281"] {
 
 if {![gdb_skip_float_test "print print_small_structs(...)"] && \
     ![gdb_skip_stdio_test "print print_small_structs(...)"] } {
-    send_gdb "print print_small_structs(*struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
-    gdb_expect_list "print print_small_structs" ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_small_structs(*struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)" "print print_small_structs" {
 	"\[\t\r\n \]+alpha"
 	"\[\t\r\n \]+gamma"
 	"\[\t\r\n \]+epsilon"
@@ -353,8 +343,7 @@ gdb_test "print compute_with_small_structs(20)" \
 
 if {![gdb_skip_float_test "print print_ten_doubles(...)"] && \
     ![gdb_skip_stdio_test "print print_ten_doubles(...)"]} {
-    send_gdb "print print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)\n"
-    gdb_expect_list "print print_ten_doubles" ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)" "print print_ten_doubles" {
 	"\[\t\r\n \]+Two Doubles : 123.45\[0-9\]*.*123.45\[0-9\]*"
 	"\[\t\r\n \]+Two Doubles : -0.1200\[0-9\]*.*-1.2300\[0-9\]*"
 	"\[\t\r\n \]+Two Doubles : 343434.\[0-9\]*.*89.09\[0-9\]*"
@@ -428,8 +417,7 @@ if {![gdb_skip_float_test "print_small_structs from print_long_arg_list"] && \
 	setup_kfail "gdb/1539" "sparc-*-*"
     }
 
-    send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
-    gdb_expect_list "print print_small_structs from print_long_arg_list" ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)" "print print_small_structs from print_long_arg_list" {
 	"\[\t\r\n \]+alpha"
 	"\[\t\r\n \]+gamma"
 	"\[\t\r\n \]+epsilon"
@@ -510,8 +498,7 @@ if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*" CLLbs16994}
 
 if {![gdb_skip_float_test "print print_long_arg_list"] && \
     ![gdb_skip_stdio_test "print print_long_arg_list"] } {
-    send_gdb "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
-    gdb_expect_list "print print_long_arg_list" ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)" "print print_long_arg_list" {
 	"\[ \n\r\t\]+double : 22.250000"
 	"\[ \n\r\t\]+double : 33.375000"
 	"\[ \n\r\t\]+int : 0"
@@ -571,9 +558,8 @@ if ![gdb_skip_stdio_test "print sum_struct_print(...)"] {
 
 #call print_struct_rep(*struct1, *struct2, *struct3)
 if ![gdb_skip_stdio_test "print print_struct_rep(...)"] {
-    send_gdb "print print_struct_rep(*struct1, *struct2, *struct3)\n"
-    gdb_expect_list "print print_struct_rep(*struct1, *struct2, *struct3)" \
-	    ".*$gdb_prompt $" {
+    gdb_test_sequence "print print_struct_rep(*struct1, *struct2, *struct3)" \
+	"print print_struct_rep(*struct1, *struct2, *struct3)" {
 	"\[ \t\n\r\]+Contents of struct1:"
 	"\[ \t\n\r\]+        22         0"
 	"\[ \t\n\r\]+Contents of struct2:"

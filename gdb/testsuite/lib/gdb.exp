@@ -936,6 +936,11 @@ proc gdb_test_no_output { args } {
 #
 # Like gdb_test and gdb_test_multiple, the output is expected to end with the
 # gdb prompt, which must not be specified in EXPECTED_OUTPUT_LIST.
+#
+# Returns:
+#    1 if the test failed,
+#    0 if the test passes,
+#   -1 if there was an internal error.
 
 proc gdb_test_sequence { command test_name expected_output_list } {
     global gdb_prompt
@@ -944,7 +949,7 @@ proc gdb_test_sequence { command test_name expected_output_list } {
     }
     lappend expected_output_list ""; # implicit ".*" before gdb prompt
     send_gdb "$command\n"
-    gdb_expect_list $test_name "$gdb_prompt $" $expected_output_list
+    return [gdb_expect_list $test_name "$gdb_prompt $" $expected_output_list]
 }
 
 
@@ -2376,10 +2381,10 @@ proc gdb_expect { args } {
     }
 }
 
-# gdb_expect_list MESSAGE SENTINEL LIST -- expect a sequence of outputs
+# gdb_expect_list TEST SENTINEL LIST -- expect a sequence of outputs
 #
 # Check for long sequence of output by parts.
-# MESSAGE: is the test message to be printed with the test success/fail.
+# TEST: is the test message to be printed with the test success/fail.
 # SENTINEL: Is the terminal pattern indicating that output has finished.
 # LIST: is the sequence of outputs to match.
 # If the sentinel is recognized early, it is considered an error.
@@ -2388,7 +2393,7 @@ proc gdb_expect { args } {
 #    1 if the test failed,
 #    0 if the test passes,
 #   -1 if there was an internal error.
-#
+
 proc gdb_expect_list {test sentinel list} {
     global gdb_prompt
     global suppress_flag

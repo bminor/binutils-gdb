@@ -25,8 +25,7 @@ gdb_start
 
 gdb_test_no_output "set pagination off"
 gdb_test "show pagination" "State of pagination is off.*" "pagination is off"
-send_gdb "help\n"
-gdb_expect_list "unpaged help" ".*$gdb_prompt $" {
+gdb_test_sequence "help" "unpaged help" {
     "List of classes of commands:"
     ""
     "aliases -- Aliases of other commands"

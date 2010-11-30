@@ -63,8 +63,7 @@ gdb_test "continue" ".* catcher .*" "continue to catch"
 gdb_test "next"
 
 # Full backtrace?
-send_gdb "bt\n"
-gdb_expect_list "backtrace" ".*$gdb_prompt $" {
+gdb_test_sequence "bt" "backtrace" {
     "\[\r\n\]+.0 \[^\r\n\]* catcher "
     "\[\r\n\]+.1  .signal handler called."
     "\[\r\n\]+.2 \[^\r\n\]* thrower .next_level=INNER"
@@ -72,7 +71,7 @@ gdb_expect_list "backtrace" ".*$gdb_prompt $" {
     "\[\r\n\]+.4  .signal handler called."
     "\[\r\n\]+.5 \[^\r\n\]* thrower .next_level=OUTER"
     "\[\r\n\]+.6 \[^\r\n\]* catcher "
-    "\[\r\n\]+.7 \[^\r\n\]* main .*"
+    "\[\r\n\]+.7 \[^\r\n\]* main "
 }
 
 proc finish_test { pattern msg } {

@@ -154,17 +154,16 @@ gdb_expect {
     }
 }
 
-send_gdb "where\n"
-gdb_expect_list "where in corefile" ".*$gdb_prompt $" {
-    ".*\[\r\n\]+#0 .* terminal_func \\(\\) at "
-    ".*\[\r\n\]+#1 .* array_func \\(\\) at "
-    ".*\[\r\n\]+#2 .* factorial_func \\(value=1\\) at "
-    ".*\[\r\n\]+#3 .* factorial_func \\(value=2\\) at "
-    ".*\[\r\n\]+#4 .* factorial_func \\(value=3\\) at "
-    ".*\[\r\n\]+#5 .* factorial_func \\(value=4\\) at "
-    ".*\[\r\n\]+#6 .* factorial_func \\(value=5\\) at "
-    ".*\[\r\n\]+#7 .* factorial_func \\(value=6\\) at "
-    ".*\[\r\n\]+#8 .* main \\(.*\\) at "
+gdb_test_sequence "where" "where in corefile" {
+    "\[\r\n\]+#0 .* terminal_func \\(\\) at "
+    "\[\r\n\]+#1 .* array_func \\(\\) at "
+    "\[\r\n\]+#2 .* factorial_func \\(value=1\\) at "
+    "\[\r\n\]+#3 .* factorial_func \\(value=2\\) at "
+    "\[\r\n\]+#4 .* factorial_func \\(value=3\\) at "
+    "\[\r\n\]+#5 .* factorial_func \\(value=4\\) at "
+    "\[\r\n\]+#6 .* factorial_func \\(value=5\\) at "
+    "\[\r\n\]+#7 .* factorial_func \\(value=6\\) at "
+    "\[\r\n\]+#8 .* main \\(.*\\) at "
 }
 
 set post_corefile_regs [capture_command_output "info registers" ""]

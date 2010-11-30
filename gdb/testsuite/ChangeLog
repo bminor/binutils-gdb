@@ -1,3 +1,18 @@
+2010-11-30  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_test_sequence): Return result of gdb_expect_list.
+	(gdb_expect_list): Fix spelling errors in comments.
+	* gdb.arch/system-gcore.exp: Use gdb_test_sequence instead of
+	send_gdb/gdb_expect_list where applicable.
+	* gdb.base/call-ar-st.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.
+	* gdb.base/gcore.exp: Ditto.
+	* gdb.base/page.exp: Ditto.
+	* gdb.base/sigaltstack.exp: Ditto.
+	* gdb.base/siginfo.exp: Ditto.
+	* gdb.base/sigstep.exp: Ditto.
+	* gdb.base/trace-commands.exp: Ditto.
+
 2010-11-29  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-pp-maint.exp: Change printer-name:subprinter-name to

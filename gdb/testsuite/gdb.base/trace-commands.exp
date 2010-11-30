@@ -48,8 +48,7 @@ gdb_test "show trace-commands" "State of GDB CLI command tracing is off\\." \
 	 "show trace-commands says off"
 
 # Source the script with verbose mode.
-send_gdb "source -v tracecommandsscript\n"
-gdb_expect_list "source -v" ".*$gdb_prompt $" {
+gdb_test_sequence "source -v tracecommandsscript" "source -v" {
   {[\r\n]\+echo in tracecommandsscript\\n}
   {[\r\n]\+define func}
   {[\r\n]\+if 1}
@@ -73,8 +72,8 @@ gdb_test "show trace-commands" \
 gdb_test "echo hi\\n" {\+echo hi\\n[\r\n]+hi} "simple trace-commands test"
 
 # Nested test
-send_gdb "if 1\nset \$i = 0\nwhile \$i < 5\nfunc \$i\nset \$i += 1\nend\nend\n"
-gdb_expect_list	"nested trace-commands test" ".*$gdb_prompt $" {
+gdb_test_sequence "if 1\nset \$i = 0\nwhile \$i < 5\nfunc \$i\nset \$i += 1\nend\nend" \
+    "nested trace-commands test" {
   {[\r\n]\+if 1}
   {[\r\n]\+\+set \$i = 0}
   {[\r\n]\+\+while \$i < 5}
@@ -96,12 +95,11 @@ gdb_expect_list	"nested trace-commands test" ".*$gdb_prompt $" {
 }
 
 # Function with source works
-send_gdb "define topfunc\nsource tracecommandsscript\nend\n"
-gdb_expect_list "define user command" ".*$gdb_prompt $" {
+gdb_test_sequence "define topfunc\nsource tracecommandsscript\nend" \
+    "define user command" {
   {[\r\n]\+define topfunc}
 }
-send_gdb "topfunc\n"
-gdb_expect_list "nested trace-commands test with source" ".*$gdb_prompt $" {
+gdb_test_sequence "topfunc" "nested trace-commands test with source" {
   {[\r\n]\+topfunc}
   {[\r\n]\+\+source tracecommandsscript}
   {[\r\n]\+\+echo in tracecommandsscript\\n}
@@ -116,8 +114,8 @@ gdb_expect_list "nested trace-commands test with source" ".*$gdb_prompt $" {
 }
 
 # Test nest depth resets properly on error
-send_gdb "if 1\nif 2\nload\necho should not get here\\n\nend\nend\n"
-gdb_expect_list "depth resets on error part 1" ".*$gdb_prompt $" {
+gdb_test_sequence "if 1\nif 2\nload\necho should not get here\\n\nend\nend" \
+    "depth resets on error part 1" {
   {[\r\n]\+if 1}
   {[\r\n]\+\+if 2}
   {[\r\n]\+\+\+load}

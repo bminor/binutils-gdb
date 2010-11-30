@@ -62,11 +62,10 @@ if { ![runto_main] } then {
 # Run to the signal handler, validate the backtrace.
 gdb_test "break handler"
 gdb_test "continue" ".* handler .*" "continue to stepi handler"
-send_gdb "bt\n"
-gdb_expect_list "backtrace for nexti" ".*$gdb_prompt $" {
+gdb_test_sequence "bt" "backtrace for nexti" {
     "\[\r\n\]+.0 \[^\r\n\]* handler "
     "\[\r\n\]+.1  .signal handler called."
-    "\[\r\n\]+.2 \[^\r\n\]* main .*"
+    "\[\r\n\]+.2 \[^\r\n\]* main "
 }
 
 # Check that GDB can step the inferior back to main
