@@ -1,3 +1,7 @@
+2010-11-30  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* configure.tgt: Add sparc64-rtems.
+
 2010-11-25  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (current_cpu): Initialize with latest CPU.
