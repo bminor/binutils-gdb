@@ -1,3 +1,8 @@
+2010-11-30  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-scripts/script.exp: Remove full path from REGION_ALIAS test
+	names.
+
 2010-11-25  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Replace --defsym argument in

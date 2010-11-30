@@ -130,9 +130,10 @@ if ![ld_simple_link $ld tmpdir/script "$flags -T $srcdir/$subdir/memory.t tmpdir
 set test_script_list [lsort [glob $srcdir/$subdir/region-alias-*.t]]
 
 foreach test_script $test_script_list {
+    set testname [file tail $test_script]
     if ![ld_simple_link $ld tmpdir/script "$flags -T $test_script tmpdir/script.o"] {
-        xfail "REGION_ALIAS: $test_script"
+        xfail "REGION_ALIAS: $testname"
     } else {
-        xpass "REGION_ALIAS: $test_script"
+        xpass "REGION_ALIAS: $testname"
     }
 }
