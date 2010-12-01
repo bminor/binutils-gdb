@@ -1,5 +1,19 @@
 2010-12-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* symbols.h (dot_symbol): New declaration.
+	(dot_symbol_init): New prototype.
+	* symbols.c (dot_symbol): New variable.
+	(symbol_clone): Assert it's not dot_symbol being cloned.
+	(dot_symbol_init): New function.
+	(symbol_clone_if_forward_ref): Create a new temporary symbol
+	when trying to clone dot_symbol.
+	* expr.c (current_location): Refer to dot_symbol instead of
+	making a new temporary symbol.
+	* read.c (read_a_source_file): Update dot_symbol as we go.
+	* as.c (main): Call dot_symbol_init.
+
+2010-12-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* symbols.c (symbol_clone_if_forward_ref): Don't limit cloning
 	to expr_section symbols; clone all equated symbols.  Clear
 	sy_resolving of the cloned copy.

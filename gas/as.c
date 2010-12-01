@@ -1181,6 +1181,8 @@ main (int argc, char ** argv)
   output_file_create (out_file_name);
   gas_assert (stdoutput != 0);
 
+  dot_symbol_init ();
+
 #ifdef tc_init_after_args
   tc_init_after_args ();
 #endif

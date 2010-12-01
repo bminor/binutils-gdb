@@ -705,7 +705,7 @@ current_location (expressionS *expressionp)
   else
     {
       expressionp->X_op = O_symbol;
-      expressionp->X_add_symbol = symbol_temp_new_now ();
+      expressionp->X_add_symbol = &dot_symbol;
       expressionp->X_add_number = 0;
     }
 }

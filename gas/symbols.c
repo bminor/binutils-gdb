@@ -48,6 +48,7 @@ static struct hash_control *local_hash;
 symbolS *symbol_rootP;
 symbolS *symbol_lastP;
 symbolS abs_symbol;
+symbolS dot_symbol;
 
 #ifdef DEBUG_SYMS
 #define debug_verify_symchain verify_symbol_chain
@@ -557,6 +558,9 @@ symbol_clone (symbolS *orgsymP, int replace)
   symbolS *newsymP;
   asymbol *bsymorg, *bsymnew;
 
+  /* Make sure we never clone the dot special symbol.  */
+  gas_assert (orgsymP != &dot_symbol);
+
   /* Running local_symbol_convert on a clone that's not the one currently
      in local_hash would incorrectly replace the hash entry.  Thus the
      symbol must be converted here.  Note that the rest of the function
@@ -658,8 +662,13 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 	  || add_symbol != symbolP->sy_value.X_add_symbol
 	  || op_symbol != symbolP->sy_value.X_op_symbol)
 	{
-	  symbolP = symbol_clone (symbolP, 0);
-	  symbolP->sy_resolving = 0;
+	  if (symbolP != &dot_symbol)
+	    {
+	      symbolP = symbol_clone (symbolP, 0);
+	      symbolP->sy_resolving = 0;
+	    }
+	  else
+	    symbolP = symbol_temp_new_now ();
 	}
 
       symbolP->sy_value.X_add_symbol = add_symbol;
@@ -2748,6 +2757,17 @@ symbol_begin (void)
 
   if (LOCAL_LABELS_FB)
     fb_label_init ();
+}
+
+void
+dot_symbol_init (void)
+{
+  dot_symbol.bsym = bfd_make_empty_symbol (stdoutput);
+  if (dot_symbol.bsym == NULL)
+    as_fatal ("bfd_make_empty_symbol: %s", bfd_errmsg (bfd_get_error ()));
+  dot_symbol.bsym->name = ".";
+  dot_symbol.sy_forward_ref = 1;
+  dot_symbol.sy_value.X_op = O_constant;
 }
 
 int indent_level;
