@@ -15471,6 +15471,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
    of address entries.  Each address entry has three elements.
    [0] The low address.  This is a 64-bit little-endian value.
    [1] The high address.  This is a 64-bit little-endian value.
+       Like DW_AT_high_pc, the value is one byte beyond the end.
    [2] The CU index.  This is an offset_type value.
 
    5. The symbol table.  This is a hash table.  The size of the hash

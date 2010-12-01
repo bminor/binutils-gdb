@@ -1,3 +1,7 @@
+2010-12-01  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (save_gdb_index_command): Add comment.
+
 2010-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* valops.c (value_assign): Returned value is never lazy.  If a
