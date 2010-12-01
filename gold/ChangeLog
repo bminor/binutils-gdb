@@ -1,3 +1,7 @@
+2010-12-01  Ian Lance Taylor  <iant@google.com>
+
+	* README: Update compilers known to work and fail.
+
 2010-11-23  Matthias Klose  <doko@ubuntu.com>
 
 	* configure.in: For --enable-gold, handle value `default' instead of
