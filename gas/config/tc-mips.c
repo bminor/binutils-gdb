@@ -14548,8 +14548,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  ext = FALSE;
 	}
 
-      resolve_symbol_value (fragp->fr_symbol);
-      val = S_GET_VALUE (fragp->fr_symbol);
+      val = resolve_symbol_value (fragp->fr_symbol);
       if (op->pcrel)
 	{
 	  addressT addr;
