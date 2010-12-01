@@ -1,5 +1,10 @@
 2010-12-01  Ian Lance Taylor  <iant@google.com>
 
+	* testsuite/icf_virtual_function_folding_test.cc (class Bar): Add
+	virtual destructor.
+
+2010-12-01  Ian Lance Taylor  <iant@google.com>
+
 	* README: Update compilers known to work and fail.
 
 2010-11-23  Matthias Klose  <doko@ubuntu.com>
