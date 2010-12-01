@@ -46,6 +46,12 @@
      feature requires proper debuginfo support from the compiler; it
      was added to GCC 4.5.
 
+* GDB now follows GCC's rules on accessing volatile objects when
+  reading or writing target state during expression evaluation.
+  One notable difference to prior behavior is that "print x = 0"
+  no longer generates a read of x; the value of the assignment is
+  now always taken directly from the value being assigned.
+
 * GDB now has some support for using labels in the program's source in
   linespecs.  For instance, you can use "advance label" to continue
   execution to a label.

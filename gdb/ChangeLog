@@ -1,3 +1,13 @@
+2010-12-01  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* valops.c (value_assign): Returned value is never lazy.  If a
+	C++ class type is returned, fix incorrect enclosing type / embedded
+	offset.  If internal variable is returned, allocate new internalvar
+	value using value_of_internalvar.
+
+	* NEWS: Document changes in behavior of "print x = 0" and similar
+	expressions.
+
 2010-11-29  Doug Evans  <dje@google.com>
 
 	* python/lib/gdb/printing.py (register_pretty_printer): Change

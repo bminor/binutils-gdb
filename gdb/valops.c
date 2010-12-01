@@ -1138,11 +1138,8 @@ value_assign (struct value *toval, struct value *fromval)
     {
     case lval_internalvar:
       set_internalvar (VALUE_INTERNALVAR (toval), fromval);
-      val = value_copy (fromval);
-      set_value_enclosing_type (val, value_enclosing_type (fromval));
-      set_value_embedded_offset (val, value_embedded_offset (fromval));
-      set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
-      return val;
+      return value_of_internalvar (get_type_arch (type),
+				   VALUE_INTERNALVAR (toval));
 
     case lval_internalvar_component:
       set_internalvar_component (VALUE_INTERNALVAR (toval),
@@ -1328,13 +1325,23 @@ value_assign (struct value *toval, struct value *fromval)
       fromval = value_from_longest (type, fieldval);
     }
 
+  /* The return value is a copy of TOVAL so it shares its location
+     information, but its contents are updated from FROMVAL.  This
+     implies the returned value is not lazy, even if TOVAL was.  */
   val = value_copy (toval);
+  set_value_lazy (val, 0);
   memcpy (value_contents_raw (val), value_contents (fromval),
 	  TYPE_LENGTH (type));
-  deprecated_set_value_type (val, type);
-  set_value_enclosing_type (val, value_enclosing_type (fromval));
-  set_value_embedded_offset (val, value_embedded_offset (fromval));
-  set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
+
+  /* We copy over the enclosing type and pointed-to offset from FROMVAL
+     in the case of pointer types.  For object types, the enclosing type
+     and embedded offset must *not* be copied: the target object refered
+     to by TOVAL retains its original dynamic type after assignment.  */
+  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    {
+      set_value_enclosing_type (val, value_enclosing_type (fromval));
+      set_value_pointed_to_offset (val, value_pointed_to_offset (fromval));
+    }
 
   return val;
 }
