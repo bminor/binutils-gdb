@@ -1591,6 +1591,20 @@ Track_relocs<size, big_endian>::next_symndx() const
   return elfcpp::elf_r_sym<size>(rel.get_r_info());
 }
 
+// Return the addend of the next reloc, or 0 if there isn't one.
+
+template<int size, bool big_endian>
+uint64_t
+Track_relocs<size, big_endian>::next_addend() const
+{
+  if (this->pos_ >= this->len_)
+    return 0;
+  if (this->reloc_size_ == elfcpp::Elf_sizes<size>::rel_size)
+    return 0;
+  elfcpp::Rela<size, big_endian> rela(this->prelocs_ + this->pos_);
+  return rela.get_r_addend();
+}
+
 // Advance to the next reloc whose r_offset is greater than or equal
 // to OFFSET.  Return the number of relocs we skip.
 

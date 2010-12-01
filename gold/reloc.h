@@ -678,7 +678,7 @@ class Track_relocs
 	     unsigned int reloc_type);
 
   // Return the offset in the data section to which the next reloc
-  // applies.  THis returns -1 if there is no next reloc.
+  // applies.  This returns -1 if there is no next reloc.
   off_t
   next_offset() const;
 
@@ -686,6 +686,11 @@ class Track_relocs
   // there is no next reloc.
   unsigned int
   next_symndx() const;
+
+  // Return the addend of the next reloc.  This returns 0 if there is
+  // no next reloc.
+  uint64_t
+  next_addend() const;
 
   // Advance to OFFSET within the data section, and return the number
   // of relocs which would be skipped.

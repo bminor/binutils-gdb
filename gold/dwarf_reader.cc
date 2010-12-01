@@ -1,6 +1,6 @@
 // dwarf_reader.cc -- parse dwarf2/3 debug information
 
-// Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -113,6 +113,7 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
 	{
 	  got_relocs = this->track_relocs_.initialize(object, reloc_shndx,
                                                       reloc_sh_type);
+	  this->track_relocs_type_ = reloc_sh_type;
 	  break;
 	}
     }
@@ -392,13 +393,21 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
 
           case elfcpp::DW_LNE_set_address:
             {
-              lsm->address = elfcpp::Swap_unaligned<size, big_endian>::readval(start);
+              lsm->address =
+		elfcpp::Swap_unaligned<size, big_endian>::readval(start);
               typename Reloc_map::const_iterator it
-                  = reloc_map_.find(start - this->buffer_);
+                  = this->reloc_map_.find(start - this->buffer_);
               if (it != reloc_map_.end())
                 {
-                  // value + addend.
-                  lsm->address += it->second.second;
+		  // If this is a SHT_RELA section, then ignore the
+		  // section contents.  This assumes that this is a
+		  // straight reloc which just uses the reloc addend.
+		  // The reloc addend has already been included in the
+		  // symbol value.
+		  if (this->track_relocs_type_ == elfcpp::SHT_RELA)
+		    lsm->address = 0;
+		  // Add in the symbol value.
+		  lsm->address += it->second.second;
                   lsm->shndx = it->second.first;
                 }
               else
@@ -536,7 +545,10 @@ Sized_dwarf_line_info<size, big_endian>::read_relocs(Object* object)
       // There is no reason to record non-ordinary section indexes, or
       // SHN_UNDEF, because they will never match the real section.
       if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
-	this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
+	{
+	  value += this->track_relocs_.next_addend();
+	  this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
+	}
 
       this->track_relocs_.advance(reloc_offset + 1);
     }

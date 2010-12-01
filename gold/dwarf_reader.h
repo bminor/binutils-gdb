@@ -1,6 +1,6 @@
 // dwarf_reader.h -- parse dwarf2/3 debug information for gold  -*- C++ -*-
 
-// Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -178,6 +178,8 @@ class Sized_dwarf_line_info : public Dwarf_line_info
 
   // This has relocations that point into buffer.
   Track_relocs<size, big_endian> track_relocs_;
+  // The type of the reloc section in track_relocs_--SHT_REL or SHT_RELA.
+  unsigned int track_relocs_type_;
 
   // This is used to figure out what section to apply a relocation to.
   const unsigned char* symtab_buffer_;

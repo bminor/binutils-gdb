@@ -1,5 +1,18 @@
 2010-12-01  Ian Lance Taylor  <iant@google.com>
 
+	* dwarf_reader.h (class Sized_dwarf_line_info): Add
+	track_relocs_type_ field.
+	* dwarf_reader.cc (Sized_dwarf_line_info::Sized_dwarf_line_info):
+	Set track_relocs_type_.
+	(Sized_dwarf_line_info::process_one_opcode): Ignore the section
+	contents when using RELA relocs.
+	(Sized_dwarf_line_info::read_relocs): Add the reloc addend to
+	reloc_map_.
+	* reloc.cc (Track_relocs::next_addend): New function.
+	* reloc.h (class Track_relocs): Declare next_addend.
+
+2010-12-01  Ian Lance Taylor  <iant@google.com>
+
 	* testsuite/icf_virtual_function_folding_test.cc (class Bar): Add
 	virtual destructor.
 
