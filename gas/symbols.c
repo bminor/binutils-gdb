@@ -645,7 +645,8 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 
       /* Re-using sy_resolving here, as this routine cannot get called from
 	 symbol resolution code.  */
-      if (symbolP->bsym->section == expr_section && !symbolP->sy_resolving)
+      if ((symbolP->bsym->section == expr_section || symbolP->sy_forward_ref)
+	  && !symbolP->sy_resolving)
 	{
 	  symbolP->sy_resolving = 1;
 	  add_symbol = symbol_clone_if_forward_ref (add_symbol, is_forward);
@@ -656,7 +657,10 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
       if (symbolP->sy_forward_ref
 	  || add_symbol != symbolP->sy_value.X_add_symbol
 	  || op_symbol != symbolP->sy_value.X_op_symbol)
-	symbolP = symbol_clone (symbolP, 0);
+	{
+	  symbolP = symbol_clone (symbolP, 0);
+	  symbolP->sy_resolving = 0;
+	}
 
       symbolP->sy_value.X_add_symbol = add_symbol;
       symbolP->sy_value.X_op_symbol = op_symbol;

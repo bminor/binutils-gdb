@@ -1373,8 +1373,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
   if (expressionP->X_add_symbol)
     symbol_mark_used (expressionP->X_add_symbol);
 
-  expressionP->X_add_symbol = symbol_clone_if_forward_ref (expressionP->X_add_symbol);
-  expressionP->X_op_symbol = symbol_clone_if_forward_ref (expressionP->X_op_symbol);
+  if (mode != expr_defer)
+    {
+      expressionP->X_add_symbol
+	= symbol_clone_if_forward_ref (expressionP->X_add_symbol);
+      expressionP->X_op_symbol
+	= symbol_clone_if_forward_ref (expressionP->X_op_symbol);
+    }
 
   switch (expressionP->X_op)
     {
