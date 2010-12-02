@@ -103,8 +103,10 @@ proc finish_tests { } {
     finish_1 "int"
     finish_1 "long"
     finish_1 "long_long"
-    finish_1 "float"
-    finish_1 "double"
+    if ![target_info exists gdb,skip_float_tests] {
+	finish_1 "float"
+	finish_1 "double"
+    }
     finish_abbreviation "fin"
 }
 

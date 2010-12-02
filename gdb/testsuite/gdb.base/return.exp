@@ -89,7 +89,10 @@ proc return_tests { } {
     # is not xfailed.
 
     setup_xfail "sparc-*-solaris2.3*" "sparc-*-solaris2.4*" "m6811-*-*"
-    gdb_test "p tmp3" ".* = 5.*" "correct value returned double test (known problem with sparc solaris)"
+    if ![target_info exists gdb,skip_float_tests] {
+	gdb_test "p tmp3" ".* = 5.*" \
+	    "correct value returned double test (known problem with sparc solaris)"
+    }
 }
 
 set prev_timeout $timeout

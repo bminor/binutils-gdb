@@ -440,20 +440,22 @@ start_scalars_test tll
 test_scalar_calls
 test_scalar_returns
 
-# Approx size: 4, 8, ...
-start_scalars_test tf
-test_scalar_calls
-test_scalar_returns
+if ![target_info exists gdb,skip_float_tests] {
+    # Approx size: 4, 8, ...
+    start_scalars_test tf
+    test_scalar_calls
+    test_scalar_returns
 
-# Approx size: 8, 16, ...
-start_scalars_test td
-test_scalar_calls
-test_scalar_returns
+    # Approx size: 8, 16, ...
+    start_scalars_test td
+    test_scalar_calls
+    test_scalar_returns
 
-# Approx size: 16, 32, ...
-start_scalars_test tld
-test_scalar_calls
-test_scalar_returns
+    # Approx size: 16, 32, ...
+    start_scalars_test tld
+    test_scalar_calls
+    test_scalar_returns
+}
 
 # Approx size: 4, 8, ...
 start_scalars_test te

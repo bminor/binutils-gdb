@@ -98,9 +98,11 @@ proc return2_tests { } {
     if { ! [istarget "m6811-*-*"] && ![istarget "h8300*-*"] } then {
         return_1 "long_long"
     }
-    return_1 "float"
-    if { ! [istarget "m6811-*-*"] } then {
-        return_1 "double"
+    if ![target_info exists gdb,skip_float_tests] {
+	return_1 "float"
+	if { ! [istarget "m6811-*-*"] } then {
+	    return_1 "double"
+	}
     }
 }
 

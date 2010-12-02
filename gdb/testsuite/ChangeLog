@@ -1,3 +1,11 @@
+2010-11-29  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* gdb.base/callfuncs.exp: Test for skip_float_tests.
+	* gdb.base/call-sc.exp: Ditto.
+	* gdb.base/finish.exp: Ditto.
+	* gdb.base/return.exp: Ditto.
+	* gdb.base/return2.exp: Ditto.
+
 2010-11-30  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_test_sequence): Return result of gdb_expect_list.
