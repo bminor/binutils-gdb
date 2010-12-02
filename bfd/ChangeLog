@@ -1,5 +1,27 @@
 2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* elf32-arm.c (elf32_arm_link_hash_table): Remove sgot, sgotplt,
+	srelgot, splt, srelplt.
+	(create_got_section, elf32_arm_link_hash_table_create): Don't set them.
+	(elf32_arm_create_dynamic_sections): Likewise.  Use htab->root
+	fields instead.
+	(arm_type_of_stub): Use the root fields instead of the removed ones.
+	(cortex_a8_erratum_scan, elf32_arm_size_stubs): Likewise.
+	(bfd_elf32_arm_process_before_allocation): Likewise.
+	(elf32_arm_check_relocs, allocate_dynrelocs): Likewise.
+	(elf32_arm_size_dynamic_sections): Likewise.
+	(elf32_arm_output_arch_local_syms): Likewise.
+	(elf32_arm_final_link_relocate): Set sgot, splt and srelgot from the
+	htab fields instead of looking them up by name.  Consistently use
+	these local variables instead of htab fields.
+	(elf32_arm_finish_dynamic_symbol): Likewise sgot, splt and srel.
+	Use srelbss instead of looking it up by name.
+	(elf32_arm_finish_dynamic_sections): Use sgotplt, splt and srelplt
+	instead of looking up the symbols by name.  Use the root fields
+	instead of the removed ones.
+
+2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* elf32-arm.c (elf32_arm_relocs_copied): Delete.
 	(elf32_arm_link_hash_entry): Replace relocs_copied with dyn_relocs.
 	(elf32_arm_link_hash_newfunc): Update accordingly.
