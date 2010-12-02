@@ -62,13 +62,15 @@ extern bfd *plugin_get_ir_dummy_bfd (const char *name, bfd *template);
 
 /* Notice-symbol bfd linker callback hook.  */
 extern bfd_boolean plugin_notice (struct bfd_link_info *info,
-				  const char *name, bfd *abfd, asection *section,
-				  bfd_vma value);
+				  const char *name, bfd *abfd,
+				  asection *section, bfd_vma value);
 
 /* Multiple-definition bfd linker callback hook.  */
 extern bfd_boolean plugin_multiple_definition (struct bfd_link_info *info,
 					       const char *name,
-					       bfd *obfd, asection *osec, bfd_vma oval,
-					       bfd *nbfd, asection *nsec, bfd_vma nval);
+					       bfd *obfd, asection *osec,
+					       bfd_vma oval, bfd *nbfd,
+					       asection *nsec,
+					       bfd_vma nval);
 
 #endif /* !def GLD_PLUGIN_H */
