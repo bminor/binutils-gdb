@@ -1325,7 +1325,9 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	  /* If we have an absolute symbol or a reg, then we know its
 	     value now.  */
 	  segment = S_GET_SEGMENT (symbolP);
-	  if (mode != expr_defer && segment == absolute_section)
+	  if (mode != expr_defer
+	      && segment == absolute_section
+	      && !S_FORCE_RELOC (symbolP, 0))
 	    {
 	      expressionP->X_op = O_constant;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
@@ -1840,7 +1842,9 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 #ifdef md_allow_local_subtract
 	       && md_allow_local_subtract (resultP, & right, rightseg)
 #endif
-	       && (SEG_NORMAL (rightseg)
+	       && ((SEG_NORMAL (rightseg)
+		    && !S_FORCE_RELOC (resultP->X_add_symbol, 0)
+		    && !S_FORCE_RELOC (right.X_add_symbol, 0))
 		   || right.X_add_symbol == resultP->X_add_symbol)
 	       && frag_offset_fixed_p (symbol_get_frag (resultP->X_add_symbol),
 				       symbol_get_frag (right.X_add_symbol),
@@ -1954,7 +1958,10 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  else if (op_left == O_subtract)
 	    {
 	      resultP->X_add_number -= right.X_add_number;
-	      if (retval == rightseg && SEG_NORMAL (retval))
+	      if (retval == rightseg
+		  && SEG_NORMAL (retval)
+		  && !S_FORCE_RELOC (resultP->X_add_symbol, 0)
+		  && !S_FORCE_RELOC (right.X_add_symbol, 0))
 		{
 		  retval = absolute_section;
 		  rightseg = absolute_section;

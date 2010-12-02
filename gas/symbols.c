@@ -2065,9 +2065,9 @@ S_FORCE_RELOC (symbolS *s, int strict)
 
   return ((strict
 	   && ((s->bsym->flags & BSF_WEAK) != 0
-	       || (s->bsym->flags & BSF_GNU_INDIRECT_FUNCTION) != 0
 	       || (EXTERN_FORCE_RELOC
 		   && (s->bsym->flags & BSF_GLOBAL) != 0)))
+	  || (s->bsym->flags & BSF_GNU_INDIRECT_FUNCTION) != 0
 	  || s->bsym->section == undefined_section
 	  || bfd_is_com_section (s->bsym->section));
 }

@@ -932,6 +932,8 @@ fixup_segment (fixS *fixP, segT this_segment)
 	  sub_symbol_segment = S_GET_SEGMENT (fixP->fx_subsy);
 	  if (fixP->fx_addsy != NULL
 	      && sub_symbol_segment == add_symbol_segment
+	      && !S_FORCE_RELOC (fixP->fx_addsy, 0)
+	      && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 	      && !TC_FORCE_RELOCATION_SUB_SAME (fixP, add_symbol_segment))
 	    {
 	      add_number += S_GET_VALUE (fixP->fx_addsy);
@@ -945,6 +947,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 #endif
 	    }
 	  else if (sub_symbol_segment == absolute_section
+		   && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP, add_symbol_segment))
 	    {
 	      add_number -= S_GET_VALUE (fixP->fx_subsy);
@@ -952,6 +955,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      fixP->fx_subsy = NULL;
 	    }
 	  else if (sub_symbol_segment == this_segment
+		   && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 		   && !TC_FORCE_RELOCATION_SUB_LOCAL (fixP, add_symbol_segment))
 	    {
 	      add_number -= S_GET_VALUE (fixP->fx_subsy);
@@ -994,6 +998,7 @@ fixup_segment (fixS *fixP, segT this_segment)
       if (fixP->fx_addsy)
 	{
 	  if (add_symbol_segment == this_segment
+	      && !S_FORCE_RELOC (fixP->fx_addsy, 0)
 	      && !TC_FORCE_RELOCATION_LOCAL (fixP))
 	    {
 	      /* This fixup was made when the symbol's segment was
@@ -1007,6 +1012,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      fixP->fx_pcrel = 0;
 	    }
 	  else if (add_symbol_segment == absolute_section
+		   && !S_FORCE_RELOC (fixP->fx_addsy, 0)
 		   && !TC_FORCE_RELOCATION_ABS (fixP))
 	    {
 	      add_number += S_GET_VALUE (fixP->fx_addsy);

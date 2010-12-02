@@ -1,3 +1,9 @@
+2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* gas/i386/ifunc-2.s, gas/i386/ifunc-2.l: New test.
+	* gas/i386/ifunc-3.s, gas/i386/ifunc-3.d: Likeise.
+	* gas/i386/i386.exp: Run them.
+
 2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* lib/gas-defs.exp (regexp_diff): Delete.

@@ -1,3 +1,14 @@
+2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* symbols.c (S_FORCE_RELOC): Return true for indirect functions
+	even if !strict.
+	* expr.c (operand): Don't convert absolute symbols to constants
+	if S_FORCE_RELOC is true.
+	(expr): Only reduce subtractions between different symbols if
+	S_FORCE_RELOC is false for both of them.
+	* write.c (fixup_segment): Don't remove symbols if S_FORCE_RELOC
+	is true for them, regardless of their segment.
+
 2010-12-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* symbols.h (dot_symbol): New declaration.
