@@ -1589,15 +1589,20 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
       if (strchr (saved_arg, '(') != NULL)
 	{
 	  int i;
+	  char *name = saved_arg;
+	  char *canon = cp_canonicalize_string (name);
+	  struct cleanup *cleanup;
+
+	  if (canon != NULL)
+	    {
+	      name = canon;
+	      cleanup = make_cleanup (xfree, canon);
+	    }
+	  else
+	    cleanup = make_cleanup (null_cleanup, NULL);
 
 	  for (i = 0; i < i1; ++i)
 	    {
-	      char *name = saved_arg;
-	      char *canon = cp_canonicalize_string (name);
-
-	      if (canon != NULL)
-		name = canon;
-
 	      if (strcmp_iw (name, SYMBOL_LINKAGE_NAME (sym_arr[i])) == 0)
 		{
 		  values.sals = (struct symtab_and_line *)
@@ -1605,13 +1610,9 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 		  values.nelts = 1;
 		  values.sals[0] = find_function_start_sal (sym_arr[i],
 							    funfirstline);
-		  if (canon)
-		    xfree (canon);
+		  do_cleanups (cleanup);
 		  return values;
 		}
-
-	      if (canon)
-		xfree (canon);
 	    }
 
 	  error (_("the class `%s' does not have any method instance named %s\n"),

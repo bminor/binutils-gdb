@@ -1,3 +1,9 @@
+2010-12-02  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (find_method): Move name canonicalization outside
+	the loop.
+	Be paranoid and use a cleanup.
+
 2010-12-01  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (save_gdb_index_command): Add comment.
