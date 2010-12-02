@@ -2777,7 +2777,9 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       switch (type)
 	{
 	default:
-	  abort ();
+	  /* Anything else should be a debugging symbol.  */
+	  BFD_ASSERT ((type & N_STAB) != 0);
+	  continue;
 
 	case N_UNDF:
 	case N_ABS:

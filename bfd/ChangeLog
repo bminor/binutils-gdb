@@ -1,3 +1,7 @@
+2010-12-02  Paul Koning  <ni1d@arrl.net>
+
+	* pdp11.c (aout_link_add_symbols): Ignore debug symbols.
+
 2010-11-30  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	* config.bfd: Add sparc64-rtems.
