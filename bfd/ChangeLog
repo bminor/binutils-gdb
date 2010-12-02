@@ -1,3 +1,13 @@
+2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* elf32-arm.c (elf32_arm_relocs_copied): Delete.
+	(elf32_arm_link_hash_entry): Replace relocs_copied with dyn_relocs.
+	(elf32_arm_link_hash_newfunc): Update accordingly.
+	(elf32_arm_copy_indirect_symbol, elf32_arm_gc_sweep_hook): Likewise.
+	(elf32_arm_check_relocs, allocate_dynrelocs): Likewise.
+	(elf32_arm_readonly_dynrelocs): Likewise.
+	(elf32_arm_size_dynamic_sections): Likewise.
+
 2010-12-02  Paul Koning  <ni1d@arrl.net>
 
 	* pdp11.c (aout_link_add_symbols): Ignore debug symbols.

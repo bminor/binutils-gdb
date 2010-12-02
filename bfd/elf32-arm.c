@@ -2451,26 +2451,6 @@ elf32_arm_mkobject (bfd *abfd)
 				  ARM_ELF_DATA);
 }
 
-/* The ARM linker needs to keep track of the number of relocs that it
-   decides to copy in check_relocs for each symbol.  This is so that
-   it can discard PC relative relocs if it doesn't need them when
-   linking with -Bsymbolic.  We store the information in a field
-   extending the regular ELF linker hash table.  */
-
-/* This structure keeps track of the number of relocs we have copied
-   for a given symbol.  */
-struct elf32_arm_relocs_copied
-  {
-    /* Next section.  */
-    struct elf32_arm_relocs_copied * next;
-    /* A section in dynobj.  */
-    asection * section;
-    /* Number of relocs copied in this section.  */
-    bfd_size_type count;
-    /* Number of PC-relative relocs copied in this section.  */
-    bfd_size_type pc_count;
-  };
-
 #define elf32_arm_hash_entry(ent) ((struct elf32_arm_link_hash_entry *)(ent))
 
 /* Arm ELF linker hash entry.  */
@@ -2478,8 +2458,8 @@ struct elf32_arm_link_hash_entry
   {
     struct elf_link_hash_entry root;
 
-    /* Number of PC relative relocs copied for this symbol.  */
-    struct elf32_arm_relocs_copied * relocs_copied;
+    /* Track dynamic relocs copied for this symbol.  */
+    struct elf_dyn_relocs *dyn_relocs;
 
     /* We reference count Thumb references to a PLT entry separately,
        so that we can emit the Thumb trampoline only if needed.  */
@@ -2686,7 +2666,7 @@ elf32_arm_link_hash_newfunc (struct bfd_hash_entry * entry,
 				     table, string));
   if (ret != NULL)
     {
-      ret->relocs_copied = NULL;
+      ret->dyn_relocs = NULL;
       ret->tls_type = GOT_UNKNOWN;
       ret->plt_thumb_refcount = 0;
       ret->plt_maybe_thumb_refcount = 0;
@@ -2841,21 +2821,21 @@ elf32_arm_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf32_arm_link_hash_entry *) dir;
   eind = (struct elf32_arm_link_hash_entry *) ind;
 
-  if (eind->relocs_copied != NULL)
+  if (eind->dyn_relocs != NULL)
     {
-      if (edir->relocs_copied != NULL)
+      if (edir->dyn_relocs != NULL)
 	{
-	  struct elf32_arm_relocs_copied **pp;
-	  struct elf32_arm_relocs_copied *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->relocs_copied; (p = *pp) != NULL; )
+	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      struct elf32_arm_relocs_copied *q;
+	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->relocs_copied; q != NULL; q = q->next)
-		if (q->section == p->section)
+	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
 		    q->count += p->count;
@@ -2865,11 +2845,11 @@ elf32_arm_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->relocs_copied;
+	  *pp = edir->dyn_relocs;
 	}
 
-      edir->relocs_copied = eind->relocs_copied;
-      eind->relocs_copied = NULL;
+      edir->dyn_relocs = eind->dyn_relocs;
+      eind->dyn_relocs = NULL;
     }
 
   if (ind->root.type == bfd_link_hash_indirect)
@@ -10710,8 +10690,8 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	  if (h != NULL)
 	    {
 	      struct elf32_arm_link_hash_entry *eh;
-	      struct elf32_arm_relocs_copied **pp;
-	      struct elf32_arm_relocs_copied *p;
+	      struct elf_dyn_relocs **pp;
+	      struct elf_dyn_relocs *p;
 
 	      eh = (struct elf32_arm_link_hash_entry *) h;
 
@@ -10730,20 +10710,17 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 		  || r_type == R_ARM_REL32
                   || r_type == R_ARM_ABS32_NOI
                   || r_type == R_ARM_REL32_NOI)
-		{
-		  for (pp = &eh->relocs_copied; (p = *pp) != NULL;
-		       pp = &p->next)
-		  if (p->section == sec)
+		for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+		  if (p->sec == sec)
 		    {
 		      p->count -= 1;
 		      if (ELF32_R_TYPE (rel->r_info) == R_ARM_REL32
-                          || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32_NOI)
+			  || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32_NOI)
 			p->pc_count -= 1;
 		      if (p->count == 0)
 			*pp = p->next;
 		      break;
 		    }
-		}
 	    }
 	  break;
 
@@ -11001,14 +10978,14 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
                possible that DEF_REGULAR is not set now but will be set
                later (it is never cleared).  We account for that
                possibility below by storing information in the
-               relocs_copied field of the hash table entry.  */
+               dyn_relocs field of the hash table entry.  */
 	    if ((info->shared || htab->root.is_relocatable_executable)
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& ((r_type == R_ARM_ABS32 || r_type == R_ARM_ABS32_NOI)
 		    || (h != NULL && ! h->needs_plt
 			&& (! info->symbolic || ! h->def_regular))))
 	      {
-		struct elf32_arm_relocs_copied *p, **head;
+		struct elf_dyn_relocs *p, **head;
 
 	        /* When creating a shared object, we must copy these
                    reloc types into the output file.  We create a reloc
@@ -11036,7 +11013,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   relocations we need for this symbol.  */
 		if (h != NULL)
 		  {
-		    head = &((struct elf32_arm_link_hash_entry *) h)->relocs_copied;
+		    head = &((struct elf32_arm_link_hash_entry *) h)->dyn_relocs;
 		  }
 		else
 		  {
@@ -11057,21 +11034,21 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      s = sec;
 
 		    vpp = &elf_section_data (s)->local_dynrel;
-		    head = (struct elf32_arm_relocs_copied **) vpp;
+		    head = (struct elf_dyn_relocs **) vpp;
 		  }
 
 		p = *head;
-		if (p == NULL || p->section != sec)
+		if (p == NULL || p->sec != sec)
 		  {
 		    bfd_size_type amt = sizeof *p;
 
-		    p = (struct elf32_arm_relocs_copied *)
+		    p = (struct elf_dyn_relocs *)
                         bfd_alloc (htab->root.dynobj, amt);
 		    if (p == NULL)
 		      return FALSE;
 		    p->next = *head;
 		    *head = p;
-		    p->section = sec;
+		    p->sec = sec;
 		    p->count = 0;
 		    p->pc_count = 0;
 		  }
@@ -11425,7 +11402,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct bfd_link_info *info;
   struct elf32_arm_link_hash_table *htab;
   struct elf32_arm_link_hash_entry *eh;
-  struct elf32_arm_relocs_copied *p;
+  struct elf_dyn_relocs *p;
   bfd_signed_vma thumb_refs;
 
   eh = (struct elf32_arm_link_hash_entry *) h;
@@ -11640,7 +11617,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       h->root.u.def.value = th->root.u.def.value & ~1;
     }
 
-  if (eh->relocs_copied == NULL)
+  if (eh->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -11659,9 +11636,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
          should avoid writing assembly like ".long foo - .".  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  struct elf32_arm_relocs_copied **pp;
+	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->relocs_copied; (p = *pp) != NULL; )
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -11674,11 +11651,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       if (htab->vxworks_p)
 	{
-	  struct elf32_arm_relocs_copied **pp;
+	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->relocs_copied; (p = *pp) != NULL; )
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      if (strcmp (p->section->output_section->name, ".tls_vars") == 0)
+	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
 		*pp = p->next;
 	      else
 		pp = &p->next;
@@ -11687,11 +11664,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       /* Also discard relocs on undefined weak syms with non-default
          visibility.  */
-      if (eh->relocs_copied != NULL
+      if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-	    eh->relocs_copied = NULL;
+	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -11742,15 +11719,15 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    goto keep;
 	}
 
-      eh->relocs_copied = NULL;
+      eh->dyn_relocs = NULL;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->relocs_copied; p != NULL; p = p->next)
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
-      asection *sreloc = elf_section_data (p->section)->sreloc;
+      asection *sreloc = elf_section_data (p->sec)->sreloc;
       sreloc->size += p->count * RELOC_SIZE (htab);
     }
 
@@ -11763,15 +11740,15 @@ static bfd_boolean
 elf32_arm_readonly_dynrelocs (struct elf_link_hash_entry * h, void * inf)
 {
   struct elf32_arm_link_hash_entry * eh;
-  struct elf32_arm_relocs_copied * p;
+  struct elf_dyn_relocs * p;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct elf32_arm_link_hash_entry *) h;
-  for (p = eh->relocs_copied; p != NULL; p = p->next)
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
-      asection *s = p->section;
+      asection *s = p->sec;
 
       if (s != NULL && (s->flags & SEC_READONLY) != 0)
 	{
@@ -11849,13 +11826,13 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct elf32_arm_relocs_copied *p;
+	  struct elf_dyn_relocs *p;
 
-	  for (p = (struct elf32_arm_relocs_copied *)
+	  for (p = (struct elf_dyn_relocs *)
                    elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
-	      if (!bfd_is_abs_section (p->section)
-		  && bfd_is_abs_section (p->section->output_section))
+	      if (!bfd_is_abs_section (p->sec)
+		  && bfd_is_abs_section (p->sec->output_section))
 		{
 		  /* Input section has been discarded, either because
 		     it is a copy of a linkonce section or due to
@@ -11863,7 +11840,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 		     the relocs too.  */
 		}
 	      else if (is_vxworks
-		       && strcmp (p->section->output_section->name,
+		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
 		  /* Relocations in vxworks .tls_vars sections are
@@ -11871,9 +11848,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 		}
 	      else if (p->count != 0)
 		{
-		  srel = elf_section_data (p->section)->sreloc;
+		  srel = elf_section_data (p->sec)->sreloc;
 		  srel->size += p->count * RELOC_SIZE (htab);
-		  if ((p->section->output_section->flags & SEC_READONLY) != 0)
+		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
 		    info->flags |= DF_TEXTREL;
 		}
 	    }
