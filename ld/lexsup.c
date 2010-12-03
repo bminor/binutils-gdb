@@ -350,8 +350,7 @@ static const struct ld_option ld_options[] =
 
   /* The next two options are deprecated because of their similarity to
      --as-needed and --no-as-needed.  They have been replaced by
-     --resolve-implicit-dynamic-symbols and
-     --no-resolve-implicit-dynamic-symbols.  */
+     --copy-dt-needed-entries and --no-copy-dt-needed-entries.  */
   { {"add-needed", no_argument, NULL, OPTION_ADD_DT_NEEDED_FOR_DYNAMIC},
     '\0', NULL, NULL, NO_HELP },
   { {"no-add-needed", no_argument, NULL, OPTION_NO_ADD_DT_NEEDED_FOR_DYNAMIC},
