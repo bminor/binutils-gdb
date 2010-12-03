@@ -22,6 +22,7 @@
 #include "sysdep.h"
 #include "libiberty.h"
 #include "bfd.h"
+#include "bfd_stdint.h"
 #include "bucomm.h"
 #include "elfcomm.h"
 #include "elf/common.h"
@@ -56,6 +57,7 @@ int do_debug_frames_interp;
 int do_debug_macinfo;
 int do_debug_str;
 int do_debug_loc;
+int do_gdb_index;
 int do_trace_info;
 int do_trace_abbrevs;
 int do_trace_aranges;
@@ -4863,6 +4865,135 @@ display_debug_frames (struct dwarf_section *section,
 #undef SLEB
 
 static int
+display_gdb_index (struct dwarf_section *section,
+		   void *file ATTRIBUTE_UNUSED)
+{
+  unsigned char *start = section->start;
+  uint32_t version;
+  uint32_t cu_list_offset, tu_list_offset;
+  uint32_t address_table_offset, symbol_table_offset, constant_pool_offset;
+  unsigned int cu_list_elements, tu_list_elements;
+  unsigned int address_table_size, symbol_table_slots;
+  unsigned char *cu_list, *tu_list;
+  unsigned char *address_table, *symbol_table, *constant_pool;
+  unsigned int i;
+
+  /* The documentation for the format of this file is in gdb/dwarf2read.c.  */
+
+  printf (_("Contents of the %s section:\n"), section->name);
+
+  if (section->size < 6 * sizeof (uint32_t))
+    {
+      warn (_("Truncated header in the %s section.\n"), section->name);
+      return 0;
+    }
+
+  version = byte_get_little_endian (start, 4);
+  printf (_("Version %d\n"), version);
+
+  /* Prior versions are obsolete, and future versions may not be
+     backwards compatible.  */
+  if (version != 3)
+    {
+      warn (_("Unsupported version %u.\n"), version);
+      return 0;
+    }
+
+  cu_list_offset = byte_get_little_endian (start + 4, 4);
+  tu_list_offset = byte_get_little_endian (start + 8, 4);
+  address_table_offset = byte_get_little_endian (start + 12, 4);
+  symbol_table_offset = byte_get_little_endian (start + 16, 4);
+  constant_pool_offset = byte_get_little_endian (start + 20, 4);
+
+  if (cu_list_offset > section->size
+      || tu_list_offset > section->size
+      || address_table_offset > section->size
+      || symbol_table_offset > section->size
+      || constant_pool_offset > section->size)
+    {
+      warn (_("Corrupt header in the %s section.\n"), section->name);
+      return 0;
+    }
+
+  cu_list_elements = (tu_list_offset - cu_list_offset) / 8;
+  tu_list_elements = (address_table_offset - tu_list_offset) / 8;
+  address_table_size = symbol_table_offset - address_table_offset;
+  symbol_table_slots = (constant_pool_offset - symbol_table_offset) / 8;
+
+  cu_list = start + cu_list_offset;
+  tu_list = start + tu_list_offset;
+  address_table = start + address_table_offset;
+  symbol_table = start + symbol_table_offset;
+  constant_pool = start + constant_pool_offset;
+
+  printf (_("\nCU table:\n"));
+  for (i = 0; i < cu_list_elements; i += 2)
+    {
+      uint64_t cu_offset = byte_get_little_endian (cu_list + i * 8, 8);
+      uint64_t cu_length = byte_get_little_endian (cu_list + i * 8 + 8, 8);
+
+      printf (_("[%3u] 0x%lx - 0x%lx\n"), i / 2,
+	      (unsigned long) cu_offset,
+	      (unsigned long) (cu_offset + cu_length - 1));
+    }
+
+  printf (_("\nTU table:\n"));
+  for (i = 0; i < tu_list_elements; i += 3)
+    {
+      uint64_t tu_offset = byte_get_little_endian (tu_list + i * 8, 8);
+      uint64_t type_offset = byte_get_little_endian (tu_list + i * 8 + 8, 8);
+      uint64_t signature = byte_get_little_endian (tu_list + i * 8 + 16, 8);
+
+      printf (_("[%3u] 0x%lx 0x%lx "), i / 3,
+	      (unsigned long) tu_offset,
+	      (unsigned long) type_offset);
+      print_dwarf_vma (signature, 8);
+      printf ("\n");
+    }
+
+  printf (_("\nAddress table:\n"));
+  for (i = 0; i < address_table_size; i += 2 * 8 + 4)
+    {
+      uint64_t low = byte_get_little_endian (address_table + i, 8);
+      uint64_t high = byte_get_little_endian (address_table + i + 8, 8);
+      uint32_t cu_index = byte_get_little_endian (address_table + i + 16, 4);
+
+      print_dwarf_vma (low, 8);
+      print_dwarf_vma (high, 8);
+      printf (_("%u\n"), cu_index);
+    }
+
+  printf (_("\nSymbol table:\n"));
+  for (i = 0; i < symbol_table_slots; ++i)
+    {
+      uint32_t name_offset = byte_get_little_endian (symbol_table + i * 8, 4);
+      uint32_t cu_vector_offset = byte_get_little_endian (symbol_table + i * 8 + 4, 4);
+      uint32_t num_cus, cu;
+
+      if (name_offset != 0
+	  || cu_vector_offset != 0)
+	{
+	  unsigned int j;
+
+	  printf ("[%3u] %s:", i, constant_pool + name_offset);
+	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+	  for (j = 0; j < num_cus; ++j)
+	    {
+	      cu = byte_get_little_endian (constant_pool + cu_vector_offset + 4 + j * 4, 4);
+	      /* Convert to TU number if it's for a type unit.  */
+	      if (cu >= cu_list_elements)
+		printf (" T%u", cu - cu_list_elements);
+	      else
+		printf (" %u", cu);
+	    }
+	  printf ("\n");
+	}
+    }
+
+  return 1;
+}
+
+static int
 display_debug_not_supported (struct dwarf_section *section,
 			     void *file ATTRIBUTE_UNUSED)
 {
@@ -4965,6 +5096,8 @@ dwarf_select_sections_by_names (const char *names)
 	 with earlier versions of readelf.  */
       { "ranges", & do_debug_aranges, 1 },
       { "str", & do_debug_str, 1 },
+      /* The special .gdb_index section.  */
+      { "gdb_index", & do_gdb_index, 1 },
       /* These trace_* sections are used by Itanium VMS.  */
       { "trace_abbrev", & do_trace_abbrevs, 1 },
       { "trace_aranges", & do_trace_aranges, 1 },
@@ -5089,6 +5222,7 @@ dwarf_select_sections_all (void)
   do_debug_macinfo = 1;
   do_debug_str = 1;
   do_debug_loc = 1;
+  do_gdb_index = 1;
   do_trace_info = 1;
   do_trace_abbrevs = 1;
   do_trace_aranges = 1;
@@ -5128,6 +5262,8 @@ struct dwarf_section_display debug_displays[] =
     display_debug_types,		&do_debug_info,		1 },
   { { ".debug_weaknames",	".zdebug_weaknames",	NULL, NULL, 0, 0 },
     display_debug_not_supported,	NULL,			0 },
+  { { ".gdb_index",		"",			NULL, NULL, 0, 0 },
+    display_gdb_index,			&do_gdb_index,		0 },
   { { ".trace_info",		"",			NULL, NULL, 0, 0 },
     display_trace_info,			&do_trace_info,		1 },
   { { ".trace_abbrev",		"",			NULL, NULL, 0, 0 },

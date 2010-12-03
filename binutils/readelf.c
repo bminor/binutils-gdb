@@ -3141,7 +3141,7 @@ usage (FILE * stream)
   -w[lLiaprmfFsoRt] or\n\
   --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
                =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
-               =trace_info,=trace_abbrev,=trace_aranges]\n\
+               =gdb_index,=trace_info,=trace_abbrev,=trace_aranges]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
@@ -4563,6 +4563,8 @@ process_section_headers (FILE * file)
 	       && const_strneq (name, ".gnu.linkonce.wi."))
 	request_dump_bynumber (i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
+	request_dump_bynumber (i, DEBUG_DUMP);
+      else if (do_gdb_index && streq (name, ".gdb_index"))
 	request_dump_bynumber (i, DEBUG_DUMP);
       /* Trace sections for Itanium VMS.  */
       else if ((do_debugging || do_trace_info || do_trace_abbrevs
