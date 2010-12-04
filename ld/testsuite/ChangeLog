@@ -1,5 +1,10 @@
 2010-12-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-selective/selective.exp: Don't pass -fvtable-gc to GCC
+	3.4.0 or above.
+
+2010-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elfvers/vers.exp: Replace -export-dynamic with
 	-Wl,-export-dynamic.
 
