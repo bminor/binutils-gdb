@@ -1,3 +1,9 @@
+2010-12-04  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	PR gas/12282
+	* expr.c (expr_build_dot): Make a clone of the symbol to return if
+	needed.
+
 2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* symbols.c (S_FORCE_RELOC): Return true for indirect functions

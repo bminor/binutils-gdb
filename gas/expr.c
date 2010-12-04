@@ -172,7 +172,7 @@ expr_build_dot (void)
   expressionS e;
 
   current_location (&e);
-  return make_expr_symbol (&e);
+  return symbol_clone_if_forward_ref (make_expr_symbol (&e));
 }
 
 /* Build any floating-point literal here.
