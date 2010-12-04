@@ -1,3 +1,8 @@
+2010-12-04  Masaki Muranaka  <monaka@monami-software.com>
+
+	* configure.tgt: Accept microblaze*-*-linux* for linux target
+	and microblaze*-*-* for  as target.
+
 2010-12-02  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (find_method): Move name canonicalization outside
