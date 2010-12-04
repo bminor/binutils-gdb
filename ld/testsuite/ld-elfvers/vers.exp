@@ -803,11 +803,11 @@ build_exec "vers3" vers3.c vers3 "" vers1.so vers3.ver vers3.dsym ""
 setup_xfail "mips*-*-*"
 build_exec "vers4" vers4.c vers4 "" "" "" "" vers4.sym
 
-build_exec "vers4a" vers4.c vers4a "-export-dynamic" "" vers4a.ver vers4a.dsym vers4a.sym
+build_exec "vers4a" vers4.c vers4a "-Wl,-export-dynamic" "" vers4a.ver vers4a.dsym vers4a.sym
 
 # Verify that --no-export-dynamic undoes the effect of --export-dynamic.
 setup_xfail "mips*-*-*"
-build_exec "vers4b" vers4.c vers4b "-export-dynamic -Wl,--no-export-dynamic" "" "" "" vers4.sym
+build_exec "vers4b" vers4.c vers4b "-Wl,-export-dynamic -Wl,--no-export-dynamic" "" "" "" vers4.sym
 
 
 #
@@ -848,7 +848,7 @@ build_vers_lib_pic "vers8" vers1.c vers8 vers8.map "" vers8.ver vers1.dsym vers1
 # This test tries to make sure that version references to versioned symbols
 # don't collide with default definitions with the same symbol.
 #
-build_exec "vers9" vers9.c vers9 "-export-dynamic" "" vers9.ver vers9.dsym vers9.sym
+build_exec "vers9" vers9.c vers9 "-Wl,-export-dynamic" "" vers9.ver vers9.dsym vers9.sym
 
 
 #

@@ -1,3 +1,8 @@
+2010-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfvers/vers.exp: Replace -export-dynamic with
+	-Wl,-export-dynamic.
+
 2010-11-30  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-scripts/script.exp: Remove full path from REGION_ALIAS test
