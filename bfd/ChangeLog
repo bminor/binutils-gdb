@@ -1,3 +1,9 @@
+2010-12-04  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12277
+	* elflink.c (elf_link_output_extsym): Set bfd_error on symbol
+	and section errors.  Allow better translation of error messages.
+
 2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* elf32-arm.c (elf32_arm_link_hash_table): Remove sgot, sgotplt,

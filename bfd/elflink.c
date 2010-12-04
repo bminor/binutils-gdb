@@ -8643,6 +8643,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 		  h->ref_regular ? NULL : h->root.u.undef.abfd,
 		  NULL, 0, finfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)))
 	    {
+	      bfd_set_error (bfd_error_bad_value);
 	      eoinfo->failed = TRUE;
 	      return FALSE;
 	    }
@@ -8659,16 +8660,21 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
       && !h->dynamic_weak
       && ! elf_link_check_versioned_symbol (finfo->info, bed, h))
     {
-      (*_bfd_error_handler)
-	(_("%B: %s symbol `%s' in %B is referenced by DSO"),
-	 finfo->output_bfd,
-	 h->root.u.def.section == bfd_abs_section_ptr
-	 ? finfo->output_bfd : h->root.u.def.section->owner,
-	 ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
-	 ? "internal"
-	 : ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
-	 ? "hidden" : "local",
-	 h->root.root.string);
+      bfd *def_bfd;
+      const char *msg;
+
+      if (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL)
+	msg = _("%B: internal symbol `%s' in %B is referenced by DSO");
+      else if (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
+	msg = _("%B: hidden symbol `%s' in %B is referenced by DSO");
+      else
+	msg = _("%B: local symbol `%s' in %B is referenced by DSO");
+      def_bfd = finfo->output_bfd;
+      if (h->root.u.def.section != bfd_abs_section_ptr)
+	def_bfd = h->root.u.def.section->owner;
+      (*_bfd_error_handler) (msg, finfo->output_bfd, def_bfd,
+			     h->root.root.string);
+      bfd_set_error (bfd_error_bad_value);
       eoinfo->failed = TRUE;
       return FALSE;
     }
@@ -8753,6 +8759,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 		(*_bfd_error_handler)
 		  (_("%B: could not find output section %A for input section %A"),
 		   finfo->output_bfd, input_sec->output_section, input_sec);
+		bfd_set_error (bfd_error_nonrepresentable_section);
 		eoinfo->failed = TRUE;
 		return FALSE;
 	      }
@@ -8870,14 +8877,16 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
       && h->root.type == bfd_link_hash_undefined
       && !h->def_regular)
     {
-      (*_bfd_error_handler)
-	(_("%B: %s symbol `%s' isn't defined"),
-	 finfo->output_bfd,
-	 ELF_ST_VISIBILITY (sym.st_other) == STV_PROTECTED
-	 ? "protected"
-	 : ELF_ST_VISIBILITY (sym.st_other) == STV_INTERNAL
-	 ? "internal" : "hidden",
-	 h->root.root.string);
+      const char *msg;
+
+      if (ELF_ST_VISIBILITY (sym.st_other) == STV_PROTECTED)
+	msg = _("%B: protected symbol `%s' isn't defined");
+      else if (ELF_ST_VISIBILITY (sym.st_other) == STV_INTERNAL)
+	msg = _("%B: internal symbol `%s' isn't defined");
+      else
+	msg = _("%B: hidden symbol `%s' isn't defined");
+      (*_bfd_error_handler) (msg, finfo->output_bfd, h->root.root.string);
+      bfd_set_error (bfd_error_bad_value);
       eoinfo->failed = TRUE;
       return FALSE;
     }
