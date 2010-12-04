@@ -1,3 +1,8 @@
+2010-12-04  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_size_sections_1): Align lma using same alignment
+	as for vma.
+
 2010-12-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lexsup.c (ld_options): Fix a typo in comments.
