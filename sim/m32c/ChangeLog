@@ -1,3 +1,7 @@
+2010-12-04  Masaki Muranaka  <monaka@monami-software.com>
+
+	* Makefile.in: Use CC_FOR_BUILD to build opc2c.
+
 2010-05-26  Ozkan Sezer  <sezeroz@gmail.com>
 
 	* main.c (setup_tcp_console): Check error return from socket() call
