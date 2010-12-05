@@ -769,8 +769,12 @@ emit_mx (char prefix, char opcode, int shift, expressionS * arg)
       q = frag_more (2);
       *q++ = (rnum & R_IX) ? 0xDD : 0xFD;
       *q = (prefix) ? prefix : (opcode + (6 << shift));
-      emit_byte (symbol_get_value_expression (arg->X_add_symbol),
-		 BFD_RELOC_Z80_DISP8);
+      {
+	expressionS offset = *arg;
+	offset.X_op = O_symbol;
+	offset.X_add_number = 0;
+	emit_byte (&offset, BFD_RELOC_Z80_DISP8);
+      }
       if (prefix)
 	{
 	  q = frag_more (1);
@@ -1598,8 +1602,13 @@ emit_ld (char prefix_in ATTRIBUTE_UNUSED, char opcode_in ATTRIBUTE_UNUSED,
   switch (dst.X_op)
     {
     case O_md1:
-      emit_ldxhl ((dst.X_add_number & R_IX) ? 0xDD : 0xFD, 0x70,
-		  &src, symbol_get_value_expression (dst.X_add_symbol));
+      {
+        expressionS dst_offset = dst;
+	dst_offset.X_op = O_symbol;
+	dst_offset.X_add_number = 0;
+	emit_ldxhl ((dst.X_add_number & R_IX) ? 0xDD : 0xFD, 0x70,
+		    &src, &dst_offset);
+      }
       break;
 
     case O_register:

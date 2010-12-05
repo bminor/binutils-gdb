@@ -11,6 +11,8 @@ if [istarget z80-*-*] then {
     run_dump_test "suffix"
 # test assembling and disassembling instructions involving offsets
     run_dump_test "offset"
+# test assembling instruction with offset that is a label defined later
+    run_dump_test "atend"
 # test for data transfer instructions
     run_dump_test "ld-group"
 # test for block instructions
