@@ -1,3 +1,14 @@
+2010-12-05  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	PR gas/12269
+	* config/tc-z80.c (emit_mx, emit_ldxhl): Do not use
+	symbol_get_value_expression on a symbol that may not yet have
+	a value.
+	* testsuite/gas/z80/atend.s: New file, test case for bug 12269,
+	provided by Chris Smith.
+	* testsuite/gas/z80/atend.d: New file, expected results for atend.s.
+	* testsuite/gas/z80/z80.exp: Run new test case.
+
 2010-12-04  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	PR gas/12282
