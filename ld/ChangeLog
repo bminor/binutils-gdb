@@ -1,5 +1,9 @@
 2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* plugin.c (message): Add a space after `:' in error message.
+
+2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* plugin.c (asymbol_from_plugin_symbol): Add the trailing `\n'
 	to einfo.
 	(get_symbols): Likewise.
