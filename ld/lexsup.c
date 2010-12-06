@@ -283,6 +283,12 @@ static const struct ld_option ld_options[] =
     '\0', N_("PLUGIN"), N_("Load named plugin"), ONE_DASH },
   { {"plugin-opt", required_argument, NULL, OPTION_PLUGIN_OPT},
     '\0', N_("ARG"), N_("Send arg to last-loaded plugin"), ONE_DASH },
+  { {"flto", optional_argument, NULL, OPTION_IGNORE},
+    '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
+    ONE_DASH },
+  { {"flto-partition=", required_argument, NULL, OPTION_IGNORE},
+    '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
+    ONE_DASH },
 #endif /* ENABLE_PLUGINS */
   { {"Qy", no_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for SVR4 compatibility"), ONE_DASH },

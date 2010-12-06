@@ -1,5 +1,10 @@
 2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* lexsup.c (ld_options): Add -flto and -flto-partition= for
+	GCC LTO option compatibility.
+
+2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/12288
 	* plugin.c (message): Don't add the trailing `\n' for
 	LDPL_ERROR.
