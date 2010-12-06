@@ -1618,7 +1618,7 @@ gld${EMULATION_NAME}_open_dynamic_archive
   const char *filename;
   char *string;
 
-  if (! entry->is_archive)
+  if (! entry->maybe_archive)
     return FALSE;
 
   filename = entry->filename;
@@ -1672,7 +1672,7 @@ gld${EMULATION_NAME}_open_dynamic_archive
   if (bfd_check_format (entry->the_bfd, bfd_object)
       && (entry->the_bfd->flags & DYNAMIC) != 0)
     {
-      ASSERT (entry->is_archive && entry->search_dirs_flag);
+      ASSERT (entry->maybe_archive && entry->search_dirs_flag);
 
       /* Rather than duplicating the logic above.  Just use the
 	 filename we recorded earlier.  */

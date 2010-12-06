@@ -2086,7 +2086,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   unsigned int i;
 
 
-  if (! entry->is_archive)
+  if (! entry->maybe_archive)
     return FALSE;
 
   filename = entry->filename;

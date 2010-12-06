@@ -249,7 +249,7 @@ typedef struct lang_input_statement_struct
 
   const char *target;
 
-  unsigned int is_archive : 1;
+  unsigned int maybe_archive : 1;
 
   /* 1 means search a set of directories for this file.  */
   unsigned int search_dirs_flag : 1;

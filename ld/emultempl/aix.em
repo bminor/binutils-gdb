@@ -1426,7 +1426,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
 {
   char *path;
 
-  if (!entry->is_archive)
+  if (!entry->maybe_archive)
     return FALSE;
 
   path = concat (search->name, "/lib", entry->filename, arch, ".a", NULL);

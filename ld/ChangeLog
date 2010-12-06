@@ -1,5 +1,22 @@
 2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldfile.c (ldfile_open_file_search): Check maybe_archive instead
+	of is_archive.
+	* emultempl/aix.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/vms.em: Likewise.
+
+	* ldlang.c (new_afile): Set maybe_archive instead of is_archive..
+
+	* ldlang.h (lang_input_statement_struct): Replace is_archive
+	with maybe_archive.
+
+2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* plugin.c (asymbol_from_plugin_symbol): Properly convert LTO
 	plugin visibility to ELF visibility.
 	(is_visible_from_outside): Re-indent.

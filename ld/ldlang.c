@@ -1015,7 +1015,7 @@ new_afile (const char *name,
     {
     case lang_input_file_is_symbols_only_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = TRUE;
       p->local_sym_name = name;
       p->just_syms_flag = TRUE;
@@ -1023,14 +1023,14 @@ new_afile (const char *name,
       break;
     case lang_input_file_is_fake_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = FALSE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;
       p->search_dirs_flag = FALSE;
       break;
     case lang_input_file_is_l_enum:
-      p->is_archive = TRUE;
+      p->maybe_archive = TRUE;
       p->filename = name;
       p->real = TRUE;
       p->local_sym_name = concat ("-l", name, (const char *) NULL);
@@ -1039,7 +1039,7 @@ new_afile (const char *name,
       break;
     case lang_input_file_is_marker_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = FALSE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;
@@ -1048,7 +1048,7 @@ new_afile (const char *name,
     case lang_input_file_is_search_file_enum:
       p->sysrooted = ldlang_sysrooted_script;
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = TRUE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;
@@ -1056,7 +1056,7 @@ new_afile (const char *name,
       break;
     case lang_input_file_is_file_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = TRUE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;

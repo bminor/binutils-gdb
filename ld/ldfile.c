@@ -370,7 +370,7 @@ ldfile_open_file_search (const char *arch,
 
   /* If this is not an archive, try to open it in the current
      directory first.  */
-  if (! entry->is_archive)
+  if (! entry->maybe_archive)
     {
       if (entry->sysrooted && IS_ABSOLUTE_PATH (entry->filename))
 	{
@@ -407,7 +407,7 @@ ldfile_open_file_search (const char *arch,
 	    }
 	}
 
-      if (entry->is_archive)
+      if (entry->maybe_archive)
 	string = concat (search->name, slash, lib, entry->filename,
 			 arch, suffix, (const char *) NULL);
       else
