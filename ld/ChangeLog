@@ -1,5 +1,10 @@
 2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/12288
+	* plugin.c (message): Add the trailing `\n'.
+
+2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ldfile.c (ldfile_open_file_search): Check maybe_archive instead
 	of is_archive.
 	* emultempl/aix.em: Likewise.

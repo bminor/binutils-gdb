@@ -588,11 +588,13 @@ message (int level, const char *format, ...)
     default:
 	{
 	  char *newfmt = ACONCAT ((level == LDPL_FATAL ? "%F" : "%X",
-				   format, NULL));
+				   format, "\n", NULL));
 	  vfinfo (stderr, newfmt, args, TRUE);
 	}
       break;
     }
+
+  fputc('\n', stderr);
 
   va_end (args);
   return LDPS_OK;
