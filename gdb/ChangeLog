@@ -1,3 +1,7 @@
+2010-12-06  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* mi/mi-parse.c (mi_parse): Missing else.
+
 2010-12-04  Masaki Muranaka  <monaka@monami-software.com>
 
 	* configure.tgt: Accept microblaze*-*-linux* for linux target
