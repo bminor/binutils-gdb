@@ -319,7 +319,7 @@ mi_parse (char *cmd)
 	  chp += 1;
 	  parse->thread_group = strtol (chp, &chp, 10);
 	}
-      if (strncmp (chp, "--thread ", ts) == 0)
+      else if (strncmp (chp, "--thread ", ts) == 0)
 	{
 	  if (parse->thread != -1)
 	    error (_("Duplicate '--thread' option"));
