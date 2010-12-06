@@ -38,6 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 @INSTALL_LIBBFD_FALSE@am__append_1 = -rpath $(rpath_bfdlibdir)
+@PLUGINS_TRUE@am__append_2 = $(INCDIR)/plugin-api.h
 subdir = .
 DIST_COMMON = README ChangeLog $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -136,8 +137,8 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
-am__bfdinclude_HEADERS_DIST = bfd.h $(INCDIR)/ansidecl.h \
-	$(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
+am__bfdinclude_HEADERS_DIST = $(INCDIR)/plugin-api.h bfd.h \
+	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
 HEADERS = $(bfdinclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -327,7 +328,10 @@ bfddocdir = doc
 libbfd_la_LDFLAGS = $(am__append_1) -release `cat libtool-soversion` \
 	@SHARED_LDFLAGS@ $(am__empty)
 @INSTALL_LIBBFD_TRUE@bfdlib_LTLIBRARIES = libbfd.la
-@INSTALL_LIBBFD_TRUE@bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
+@INSTALL_LIBBFD_FALSE@bfdinclude_HEADERS = $(am__append_2)
+@INSTALL_LIBBFD_TRUE@bfdinclude_HEADERS = $(BFD_H) \
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/bfdlink.h $(am__append_2)
 @INSTALL_LIBBFD_FALSE@rpath_bfdlibdir = @bfdlibdir@
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libbfd.la
 AM_CFLAGS = $(WARN_CFLAGS)
