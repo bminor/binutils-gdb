@@ -479,13 +479,6 @@ main (int argc, char **argv)
 
   lang_finish ();
 
-#ifdef ENABLE_PLUGINS
-  /* Now everything is finished, we can tell the plugins to clean up.  */
-  if (plugin_call_cleanup ())
-    info_msg (_("%P: %s: error in plugin cleanup (ignored)\n"),
-	      plugin_error_plugin ());
-#endif /* ENABLE_PLUGINS */
-
   /* Even if we're producing relocatable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
      want to ignore for relocatable output?)  */

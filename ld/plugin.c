@@ -108,6 +108,9 @@ static bfd_boolean no_more_claiming = FALSE;
    TRUE is returned from the hook.  */
 static bfd_boolean plugin_cached_allow_multiple_defs = FALSE;
 
+/* Call 'cleanup' hook for all plugins at exit.  */
+static void plugin_call_cleanup (void);
+
 /* List of tags to set in the constant leading part of the tv array. */
 static const enum ld_plugin_tag tv_header_tags[] =
 {
@@ -590,9 +593,6 @@ message (int level, const char *format, ...)
 	  char *newfmt = ACONCAT ((level == LDPL_FATAL
 				   ? "%P%F: " : "%P%X: ",
 				   format, "\n", NULL));
-	  if (plugin_call_cleanup ())
-	    info_msg (_("%P: %s: error in plugin cleanup (ignored)\n"),
-		      plugin_error_plugin ());
 	  vfinfo (stderr, newfmt, args, TRUE);
 	}
       break;
@@ -716,6 +716,8 @@ plugin_load_plugins (void)
   if (!curplug)
     return 0;
 
+  xatexit (plugin_call_cleanup);
+
   /* First pass over plugins to find max # args needed so that we
      can size and allocate the tv array.  */
   while (curplug)
@@ -812,8 +814,8 @@ plugin_call_all_symbols_read (void)
   return plugin_error_p () ? -1 : 0;
 }
 
-/* Call 'cleanup' hook for all plugins.  */
-int
+/* Call 'cleanup' hook for all plugins at exit.  */
+static void
 plugin_call_cleanup (void)
 {
   plugin_t *curplug = plugins_list;
@@ -832,7 +834,9 @@ plugin_call_cleanup (void)
 	}
       curplug = curplug->next;
     }
-  return plugin_error_p () ? -1 : 0;
+  if (plugin_error_p ())
+    info_msg (_("%P: %s: error in plugin cleanup (ignored)\n"),
+	      plugin_error_plugin ());
 }
 
 /* Lazily init the non_ironly hash table.  */
