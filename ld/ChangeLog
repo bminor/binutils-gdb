@@ -1,5 +1,11 @@
 2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/12289
+	* plugin.c (message): Call plugin_call_cleanup on fatal
+	error.
+
+2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* plugin.c (message): Add a space after `:' in error message.
 
 2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>

@@ -590,6 +590,9 @@ message (int level, const char *format, ...)
 	  char *newfmt = ACONCAT ((level == LDPL_FATAL
 				   ? "%P%F: " : "%P%X: ",
 				   format, "\n", NULL));
+	  if (plugin_call_cleanup ())
+	    info_msg (_("%P: %s: error in plugin cleanup (ignored)\n"),
+		      plugin_error_plugin ());
 	  vfinfo (stderr, newfmt, args, TRUE);
 	}
       break;
