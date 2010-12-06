@@ -307,10 +307,31 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
       elf_symbol_type *elfsym = elf_symbol_from (abfd, asym);
+      unsigned char visibility;
+
       if (!elfsym)
 	einfo (_("%P%F: %s: non-ELF symbol in ELF BFD!"), asym->name);
-      elfsym->internal_elf_sym.st_other &= ~3;
-      elfsym->internal_elf_sym.st_other |= ldsym->visibility;
+      switch (ldsym->visibility)
+	{
+	default:
+	  einfo (_("%P%F: unknown ELF symbol visibility: %d!"),
+		 ldsym->visibility);
+	case LDPV_DEFAULT:
+	  visibility = STV_DEFAULT;
+	  break;
+	case LDPV_PROTECTED:
+	  visibility = STV_PROTECTED;
+	  break;
+	case LDPV_INTERNAL:
+	  visibility = STV_INTERNAL;
+	  break;
+	case LDPV_HIDDEN:
+	  visibility = STV_HIDDEN;
+	  break;
+	}
+      elfsym->internal_elf_sym.st_other
+	= (visibility | (elfsym->internal_elf_sym.st_other
+			 & ~ELF_ST_VISIBILITY (-1)));
     }
 
   return LDPS_OK;
@@ -416,8 +437,8 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
 	 opportunities during LTRANS at worst; it will not give false
 	 negatives, which can lead to the disastrous conclusion that the
 	 related symbol is IRONLY.  (See GCC PR46319 for an example.)  */
-      return lsym->visibility == LDPV_DEFAULT
-	|| lsym->visibility == LDPV_PROTECTED;
+      return (lsym->visibility == LDPV_DEFAULT
+	      || lsym->visibility == LDPV_PROTECTED);
     }
   return FALSE;
 }

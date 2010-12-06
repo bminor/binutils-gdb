@@ -1,3 +1,7 @@
+2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-plugin/plugin-vis-1.d: Updated.
+
 2010-12-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-selective/selective.exp: Don't pass -fvtable-gc to GCC
