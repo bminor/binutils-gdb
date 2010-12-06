@@ -1,3 +1,8 @@
+2010-12-06  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+
+	PR ld/12288
+	* plugin.c (message): Add putchar for the trailing `\n'.
+
 2010-12-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am (!INSTALL_LIBBFD/bfdinclude_HEADERS): Set to nothing.

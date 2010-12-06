@@ -598,7 +598,7 @@ message (int level, const char *format, ...)
       break;
     }
 
-  fputc('\n', stderr);
+  putchar('\n');
 
   va_end (args);
   return LDPS_OK;
