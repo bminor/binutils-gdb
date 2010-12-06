@@ -582,9 +582,11 @@ message (int level, const char *format, ...)
     {
     case LDPL_INFO:
       vfinfo (stdout, format, args, FALSE);
+      putchar ('\n');
       break;
     case LDPL_WARNING:
       vfinfo (stdout, format, args, TRUE);
+      putchar ('\n');
       break;
     case LDPL_FATAL:
     case LDPL_ERROR:
@@ -597,8 +599,6 @@ message (int level, const char *format, ...)
 	}
       break;
     }
-
-  putchar('\n');
 
   va_end (args);
   return LDPS_OK;

@@ -1,6 +1,12 @@
 2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12288
+	* plugin.c (message): Don't add the trailing `\n' for
+	LDPL_ERROR.
+
+2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12288
 	* testplug.c: Remove the trailing `\n' from TV_MESSAGE.
 
 2010-12-06  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
