@@ -587,7 +587,7 @@ message (int level, const char *format, ...)
     case LDPL_ERROR:
     default:
 	{
-	  char *newfmt = ACONCAT ((level == LDPL_FATAL ? "%F" : "%X",
+	  char *newfmt = ACONCAT ((level == LDPL_FATAL ? "%P%F:" : "%P%X:",
 				   format, "\n", NULL));
 	  vfinfo (stderr, newfmt, args, TRUE);
 	}
