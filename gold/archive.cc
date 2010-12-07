@@ -527,14 +527,16 @@ Archive::get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
   return true;
 }
 
-// Return an ELF object for the member at offset OFF.  If the ELF
-// object has an unsupported target type, set *PUNCONFIGURED to true
-// and return NULL.
+// Return an ELF object for the member at offset OFF.  If
+// PUNCONFIGURED is not NULL, then if the ELF object has an
+// unsupported target type, set *PUNCONFIGURED to true and return
+// NULL.
 
 Object*
 Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
 {
-  *punconfigured = false;
+  if (punconfigured != NULL)
+    *punconfigured = false;
 
   Input_file* input_file;
   off_t memoff;
@@ -593,9 +595,7 @@ Archive::read_all_symbols()
 void
 Archive::read_symbols(off_t off)
 {
-  bool dummy;
-  Object* obj = this->get_elf_object_for_member(off, &dummy);
-
+  Object* obj = this->get_elf_object_for_member(off, NULL);
   if (obj == NULL)
     return;
 
@@ -863,17 +863,22 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       return true;
     }
 
-  bool unconfigured;
-  Object* obj = this->get_elf_object_for_member(off, &unconfigured);
+  // If this is the first object we are including from this archive,
+  // and we searched for this archive, most likely because it was
+  // found via a -l option, then if the target is incompatible we want
+  // to move on to the next archive found in the search path.
+  bool unconfigured = false;
+  bool* punconfigured = NULL;
+  if (!this->included_member_ && this->searched_for())
+    punconfigured = &unconfigured;
 
-  if (!this->included_member_
-      && this->searched_for()
-      && obj == NULL
-      && unconfigured)
-    return false;
-
+  Object* obj = this->get_elf_object_for_member(off, punconfigured);
   if (obj == NULL)
-    return true;
+    {
+      // Return false to search for another archive, true if we found
+      // an error.
+      return unconfigured ? false : true;
+    }
 
   if (mapfile != NULL)
     mapfile->report_include_archive_member(obj->name(), sym, why);
