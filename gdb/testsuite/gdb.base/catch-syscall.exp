@@ -277,8 +277,8 @@ proc test_catch_syscall_fail_nodatadir {} {
 proc do_syscall_tests {} {
     global gdb_prompt srcdir
 
-    # First, we need to set GDB datadir.
-    gdb_test_no_output "set data-directory [pwd]/../data-directory"
+    # NOTE: We don't have to point gdb at the correct data-directory.
+    # For the build tree that is handled by INTERNAL_GDBFLAGS.
 
     # Verify that the 'catch syscall' help is available
     set thistest "help catch syscall"

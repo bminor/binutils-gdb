@@ -432,6 +432,7 @@ captured_main (void *data)
       {"i", required_argument, 0, 'i'},
       {"directory", required_argument, 0, 'd'},
       {"d", required_argument, 0, 'd'},
+      {"data-directory", required_argument, 0, 'D'},
       {"cd", required_argument, 0, OPT_CD},
       {"tty", required_argument, 0, 't'},
       {"baud", required_argument, 0, 'b'},
@@ -550,6 +551,10 @@ captured_main (void *data)
 	  case 'B':
 	    batch_flag = batch_silent = 1;
 	    gdb_stdout = ui_file_new();
+	    break;
+	  case 'D':
+	    xfree (gdb_datadir);
+	    gdb_datadir = xstrdup (optarg);
 	    break;
 #ifdef GDBTK
 	  case 'z':

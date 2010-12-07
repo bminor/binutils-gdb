@@ -44,9 +44,6 @@ if ![runto_main] then {
     return 0
 }
 
-# Ensure sys.path, et.al. are initialized properly.
-gdb_check_python_config
-
 gdb_test_no_output "python import gdb.types"
 
 # test get_basic_type const stripping

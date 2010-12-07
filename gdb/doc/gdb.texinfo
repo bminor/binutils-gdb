@@ -1111,6 +1111,12 @@ used if possible.
 Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
 
+@item -data-directory @var{directory}
+@cindex @code{--data-directory}
+Run @value{GDBN} using @var{directory} as its data directory.
+The data directory is where @value{GDBN} searches for its
+auxiliary files.  @xref{Data Files}.
+
 @item -fullname
 @itemx -f
 @cindex @code{--fullname}
@@ -15597,6 +15603,10 @@ You can set the default data directory by using the configure-time
 @samp{--exec-prefix}), then the default data directory will be updated
 automatically if the installed @value{GDBN} is moved to a new
 location.
+
+The data directory may also be specified with the
+@code{--data-directory} command line option.
+@xref{Mode Options}.
 
 @node Targets
 @chapter Specifying a Debugging Target

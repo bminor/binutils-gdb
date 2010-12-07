@@ -3,6 +3,11 @@
 
 *** Changes since GDB 7.2
 
+* New command line options
+
+-data-directory DIR	Specify DIR as the "data-directory".
+			This is mostly for testing purposes.
+
 * GDB has a new command: "set directories".
   It is like the "dir" command except that it replaces the
   source path list instead of augmenting it.
