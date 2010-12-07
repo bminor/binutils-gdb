@@ -655,6 +655,9 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 
   n_nfd->arelt_data = new_areldata;
 
+  /* Copy BFD_COMPRESS and BFD_DECOMPRESS flags.  */
+  n_nfd->flags |= archive->flags & (BFD_COMPRESS | BFD_DECOMPRESS);
+
   if (_bfd_add_bfd_to_archive_cache (archive, filepos, n_nfd))
     return n_nfd;
 
@@ -697,8 +700,6 @@ DESCRIPTION
 bfd *
 bfd_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
-  bfd *abfd;
-
   if ((bfd_get_format (archive) != bfd_archive)
       || (archive->direction == write_direction))
     {
@@ -706,14 +707,8 @@ bfd_openr_next_archived_file (bfd *archive, bfd *last_file)
       return NULL;
     }
 
-  abfd = BFD_SEND (archive,
+  return BFD_SEND (archive,
 		   openr_next_archived_file, (archive, last_file));
-
-  /* Copy BFD_COMPRESS and BFD_DECOMPRESS flags.  */
-  if (abfd)
-    abfd->flags |= archive->flags & (BFD_COMPRESS | BFD_DECOMPRESS);
-
-  return abfd;
 }
 
 bfd *
