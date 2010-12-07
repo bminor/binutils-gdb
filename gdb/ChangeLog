@@ -1,5 +1,8 @@
 2010-12-07  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dw2_lookup_symtab): Remove duplicate call to
+	gdb_realpath.
+
 	PR python/12227
 	* NEWS: Mention -data-directory.
 	* main.c (captured_main): Recognize -data-directory.

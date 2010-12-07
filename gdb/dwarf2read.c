@@ -2199,16 +2199,11 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 	      const char *this_full_name = dw2_require_full_path (objfile,
 								  per_cu, j);
 
-	      if (this_full_name != NULL)
+	      if (this_full_name != NULL
+		  && FILENAME_CMP (real_path, this_full_name) == 0)
 		{
-		  char *rp = gdb_realpath (this_full_name);
-		  if (rp != NULL && FILENAME_CMP (real_path, rp) == 0)
-		    {
-		      xfree (rp);
-		      *result = dw2_instantiate_symtab (objfile, per_cu);
-		      return 1;
-		    }
-		  xfree (rp);
+		  *result = dw2_instantiate_symtab (objfile, per_cu);
+		  return 1;
 		}
 	    }
 	}
