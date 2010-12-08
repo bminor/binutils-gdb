@@ -2339,7 +2339,7 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
       for (j = 0; j < per_cu->v.quick->lines->num_file_names; ++j)
 	{
 	  const char *this_name = per_cu->v.quick->file_names[j];
-	  if (strcmp (this_name, filename) == 0)
+	  if (FILENAME_CMP (this_name, filename) == 0)
 	    {
 	      dw2_instantiate_symtab (objfile, per_cu);
 	      break;
