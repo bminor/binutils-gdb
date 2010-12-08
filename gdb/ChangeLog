@@ -1,5 +1,7 @@
 2010-12-08  Doug Evans  <dje@google.com>
 
+	* gdbtypes.c (check_typedef): Tweak comment.
+
 	PR symtab/12302
 	* dwarf2read.c (struct psymtab_cu_index_map): New struct.
 	(hash_psymtab_cu_index, eq_psymtab_cu_index): New functions.
