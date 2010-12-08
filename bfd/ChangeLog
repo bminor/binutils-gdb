@@ -1,3 +1,9 @@
+2010-12-08  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.21
+	* Makefile.am (RELEASE): Set.
+	* configure, Makefile.in: Regenerate.
+
 2010-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* archive.c (_bfd_get_elt_at_filepos): Copy BFD_COMPRESS and
