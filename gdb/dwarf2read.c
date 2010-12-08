@@ -15301,7 +15301,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
     error (_("Cannot use an index to create the index"));
 
   if (stat (objfile->name, &st) < 0)
-    perror_with_name (_("Could not stat"));
+    perror_with_name (objfile->name);
 
   filename = concat (dir, SLASH_STRING, lbasename (objfile->name),
 		     INDEX_SUFFIX, (char *) NULL);

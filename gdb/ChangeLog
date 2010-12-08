@@ -1,5 +1,8 @@
 2010-12-08  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (write_psymtabs_to_index): When stat fails, pass file
+	name to perror.
+
 	* symfile.h (quick_symbol_functions): Clarify usage of
 	expand_symtabs_with_filename.
 	* dwarf2read.c (dw2_expand_symtabs_with_filename): Only iterate over
