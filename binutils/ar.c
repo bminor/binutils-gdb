@@ -143,12 +143,16 @@ static int show_help = 0;
 
 static const char *plugin_target = NULL;
 
+static const char *target = NULL;
+
 #define OPTION_PLUGIN 201
+#define OPTION_TARGET 202
 
 static struct option long_options[] =
 {
   {"help", no_argument, &show_help, 1},
   {"plugin", required_argument, NULL, OPTION_PLUGIN},
+  {"target", required_argument, NULL, OPTION_TARGET},
   {"version", no_argument, &show_version, 1},
   {NULL, no_argument, NULL, 0}
 };
@@ -529,6 +533,9 @@ decode_options(int argc, char **argv)
 	  xexit (1);
 #endif
 	  break;
+	case OPTION_TARGET:
+	  target = optarg;
+	  break;
 	case 0:		/* A long option that just sets a flag.  */
 	  break;
         default:
@@ -773,7 +780,6 @@ main (int argc, char **argv)
 bfd *
 open_inarch (const char *archive_filename, const char *file)
 {
-  const char *target;
   bfd **last_one;
   bfd *next_one;
   struct stat sbuf;
@@ -782,7 +788,8 @@ open_inarch (const char *archive_filename, const char *file)
 
   bfd_set_error (bfd_error_no_error);
 
-  target = plugin_target;
+  if (target == NULL)
+    target = plugin_target;
 
   if (stat (archive_filename, &sbuf) != 0)
     {
@@ -1270,7 +1277,7 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 		  after_bfd = get_pos_bfd (&arch->archive_next, pos_after,
 					   current->filename);
 		  if (ar_emul_replace (after_bfd, *files_to_move,
-				       plugin_target, verbose))
+				       target, verbose))
 		    {
 		      /* Snip out this entry from the chain.  */
 		      *current_ptr = (*current_ptr)->archive_next;
@@ -1286,7 +1293,7 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
       /* Add to the end of the archive.  */
       after_bfd = get_pos_bfd (&arch->archive_next, pos_end, NULL);
 
-      if (ar_emul_append (after_bfd, *files_to_move, plugin_target,
+      if (ar_emul_append (after_bfd, *files_to_move, target,
 			  verbose, make_thin_archive))
 	changed = TRUE;
 

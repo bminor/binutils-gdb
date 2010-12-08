@@ -1,5 +1,10 @@
 2010-12-08  Arnaud Lacombe  <lacombar@gmail.com>
 
+	* ar.c (long_options): Add target.
+	(decode_options): Handle the --target option.
+	(open_inarch): Check for plugin's target, default to --target
+	(replace_members): Use generic `target'.
+
 	* ar.c (operation): New global variable.
 	(show_version): Likewise.
 	(show_help): Likewise.
