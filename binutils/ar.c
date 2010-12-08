@@ -225,67 +225,78 @@ usage (int help)
 
   s = help ? stdout : stderr;
 
-  if (! is_ranlib)
-    {
-      /* xgettext:c-format */
-      const char * command_line =
+  /* xgettext:c-format */
+  const char * command_line =
 #if BFD_SUPPORTS_PLUGINS
 	_("Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
 #else
 	_("Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
 #endif
-      fprintf (s, command_line, program_name);
+  fprintf (s, command_line, program_name);
 
-      /* xgettext:c-format */
-      fprintf (s, _("       %s -M [<mri-script]\n"), program_name);
-      fprintf (s, _(" commands:\n"));
-      fprintf (s, _("  d            - delete file(s) from the archive\n"));
-      fprintf (s, _("  m[ab]        - move file(s) in the archive\n"));
-      fprintf (s, _("  p            - print file(s) found in the archive\n"));
-      fprintf (s, _("  q[f]         - quick append file(s) to the archive\n"));
-      fprintf (s, _("  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"));
-      fprintf (s, _("  s            - act as ranlib\n"));
-      fprintf (s, _("  t            - display contents of archive\n"));
-      fprintf (s, _("  x[o]         - extract file(s) from the archive\n"));
-      fprintf (s, _(" command specific modifiers:\n"));
-      fprintf (s, _("  [a]          - put file(s) after [member-name]\n"));
-      fprintf (s, _("  [b]          - put file(s) before [member-name] (same as [i])\n"));
-      fprintf (s, _("  [D]          - use zero for timestamps and uids/gids\n"));
-      fprintf (s, _("  [N]          - use instance [count] of name\n"));
-      fprintf (s, _("  [f]          - truncate inserted file names\n"));
-      fprintf (s, _("  [P]          - use full path names when matching\n"));
-      fprintf (s, _("  [o]          - preserve original dates\n"));
-      fprintf (s, _("  [u]          - only replace files that are newer than current archive contents\n"));
-      fprintf (s, _(" generic modifiers:\n"));
-      fprintf (s, _("  [c]          - do not warn if the library had to be created\n"));
-      fprintf (s, _("  [s]          - create an archive index (cf. ranlib)\n"));
-      fprintf (s, _("  [S]          - do not build a symbol table\n"));
-      fprintf (s, _("  [T]          - make a thin archive\n"));
-      fprintf (s, _("  [v]          - be verbose\n"));
-      fprintf (s, _("  [V]          - display the version number\n"));
-      fprintf (s, _("  @<file>      - read options from <file>\n"));
+  /* xgettext:c-format */
+  fprintf (s, _("       %s -M [<mri-script]\n"), program_name);
+  fprintf (s, _(" commands:\n"));
+  fprintf (s, _("  d            - delete file(s) from the archive\n"));
+  fprintf (s, _("  m[ab]        - move file(s) in the archive\n"));
+  fprintf (s, _("  p            - print file(s) found in the archive\n"));
+  fprintf (s, _("  q[f]         - quick append file(s) to the archive\n"));
+  fprintf (s, _("  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"));
+  fprintf (s, _("  s            - act as ranlib\n"));
+  fprintf (s, _("  t            - display contents of archive\n"));
+  fprintf (s, _("  x[o]         - extract file(s) from the archive\n"));
+  fprintf (s, _(" command specific modifiers:\n"));
+  fprintf (s, _("  [a]          - put file(s) after [member-name]\n"));
+  fprintf (s, _("  [b]          - put file(s) before [member-name] (same as [i])\n"));
+  fprintf (s, _("  [D]          - use zero for timestamps and uids/gids\n"));
+  fprintf (s, _("  [N]          - use instance [count] of name\n"));
+  fprintf (s, _("  [f]          - truncate inserted file names\n"));
+  fprintf (s, _("  [P]          - use full path names when matching\n"));
+  fprintf (s, _("  [o]          - preserve original dates\n"));
+  fprintf (s, _("  [u]          - only replace files that are newer than current archive contents\n"));
+  fprintf (s, _(" generic modifiers:\n"));
+  fprintf (s, _("  [c]          - do not warn if the library had to be created\n"));
+  fprintf (s, _("  [s]          - create an archive index (cf. ranlib)\n"));
+  fprintf (s, _("  [S]          - do not build a symbol table\n"));
+  fprintf (s, _("  [T]          - make a thin archive\n"));
+  fprintf (s, _("  [v]          - be verbose\n"));
+  fprintf (s, _("  [V]          - display the version number\n"));
+  fprintf (s, _("  @<file>      - read options from <file>\n"));
 #if BFD_SUPPORTS_PLUGINS
-      fprintf (s, _(" optional:\n"));
-      fprintf (s, _("  --plugin <p> - load the specified plugin\n"));
+  fprintf (s, _(" optional:\n"));
+  fprintf (s, _("  --plugin <p> - load the specified plugin\n"));
 #endif
-      ar_emul_usage (s);
-    }
-  else
-    {
-      /* xgettext:c-format */
-      fprintf (s, _("Usage: %s [options] archive\n"), program_name);
-      fprintf (s, _(" Generate an index to speed access to archives\n"));
-      fprintf (s, _(" The options are:\n\
+
+  ar_emul_usage (s);
+
+  list_supported_targets (program_name, s);
+
+  if (REPORT_BUGS_TO[0] && help)
+    fprintf (s, _("Report bugs to %s\n"), REPORT_BUGS_TO);
+
+  xexit (help ? 0 : 1);
+}
+
+static void
+ranlib_usage(int help)
+{
+  FILE *s;
+
+  s = help ? stdout : stderr;
+
+  /* xgettext:c-format */
+  fprintf (s, _("Usage: %s [options] archive\n"), program_name);
+  fprintf (s, _(" Generate an index to speed access to archives\n"));
+  fprintf (s, _(" The options are:\n\
   @<file>                      Read options from <file>\n"));
 #if BFD_SUPPORTS_PLUGINS
-      fprintf (s, _("\
+  fprintf (s, _("\
   --plugin <name>              Load the specified plugin\n"));
 #endif
-      fprintf (s, _("\
+  fprintf (s, _("\
   -t                           Update the archive's symbol map timestamp\n\
   -h --help                    Print this help message\n\
   -v --version                 Print version information\n"));
-    }
 
   list_supported_targets (program_name, s);
 
@@ -343,6 +354,52 @@ remove_output (void)
     }
 }
 
+static void
+ranlib_main(int argc, char **argv)
+{
+  int arg_index, status = 0;
+  bfd_boolean touch = FALSE;
+
+  if (argc > 1 && argv[1][0] == '-')
+    {
+      if (strcmp (argv[1], "--help") == 0)
+	ranlib_usage (1);
+      else if (strcmp (argv[1], "--version") == 0)
+	{
+	  print_version ("ranlib");
+	}
+    }
+
+  if (argc < 2
+      || strcmp (argv[1], "--help") == 0
+      || strcmp (argv[1], "-h") == 0
+      || strcmp (argv[1], "-H") == 0)
+    ranlib_usage (0);
+
+  if (strcmp (argv[1], "-V") == 0
+      || strcmp (argv[1], "-v") == 0
+      || CONST_STRNEQ (argv[1], "--v"))
+    print_version ("ranlib");
+  arg_index = 1;
+
+  if (strcmp (argv[1], "-t") == 0)
+    {
+      ++arg_index;
+      touch = TRUE;
+    }
+
+  while (arg_index < argc)
+    {
+      if (! touch)
+        status |= ranlib_only (argv[arg_index]);
+      else
+        status |= ranlib_touch (argv[arg_index]);
+      ++arg_index;
+    }
+
+  xexit (status);
+}
+
 /* The option parsing should be in its own function.
    It will be when I have getopt working.  */
 
@@ -394,18 +451,6 @@ main (int argc, char **argv)
 	is_ranlib = 0;
     }
 
-  if (argc > 1 && argv[1][0] == '-')
-    {
-      if (strcmp (argv[1], "--help") == 0)
-	usage (1);
-      else if (strcmp (argv[1], "--version") == 0)
-	{
-	  if (is_ranlib)
-	    print_version ("ranlib");
-	  else
-	    print_version ("ar");
-	}
-    }
 
   START_PROGRESS (program_name, 0);
 
@@ -423,34 +468,14 @@ main (int argc, char **argv)
   argc -= (i - 1);
 
   if (is_ranlib)
-    {
-      int status = 0;
-      bfd_boolean touch = FALSE;
+    ranlib_main(argc, argv);
 
-      if (argc < 2
-	  || strcmp (argv[1], "--help") == 0
-	  || strcmp (argv[1], "-h") == 0
-	  || strcmp (argv[1], "-H") == 0)
-	usage (0);
-      if (strcmp (argv[1], "-V") == 0
-	  || strcmp (argv[1], "-v") == 0
-	  || CONST_STRNEQ (argv[1], "--v"))
-	print_version ("ranlib");
-      arg_index = 1;
-      if (strcmp (argv[1], "-t") == 0)
-	{
-	  ++arg_index;
-	  touch = TRUE;
-	}
-      while (arg_index < argc)
-	{
-	  if (! touch)
-	    status |= ranlib_only (argv[arg_index]);
-	  else
-	    status |= ranlib_touch (argv[arg_index]);
-	  ++arg_index;
-	}
-      xexit (status);
+  if (argc > 1 && argv[1][0] == '-')
+    {
+      if (strcmp (argv[1], "--help") == 0)
+	usage (1);
+      else if (strcmp (argv[1], "--version") == 0)
+	print_version ("ar");
     }
 
   if (argc == 2 && strcmp (argv[1], "-M") == 0)

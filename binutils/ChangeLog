@@ -1,3 +1,9 @@
+2010-12-08  Arnaud Lacombe  <lacombar@gmail.com>
+
+	* ar.c (main): Split ranlib path.
+	(ranlib_usage): New
+	(ranlib_main): New
+
 2010-12-03  Doug Evans  <dje@google.com>
 
 	* dwarf.c: #include "bfd_stdint.h".
