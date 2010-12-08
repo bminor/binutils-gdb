@@ -15137,31 +15137,129 @@ write_hash_table (struct mapped_symtab *symtab,
   htab_delete (symbol_hash_table);
 }
 
-/* Write an address entry to ADDR_OBSTACK.  The addresses are taken
-   from PST; CU_INDEX is the index of the CU in the vector of all
-   CUs.  */
+/* Struct to map psymtab to CU index in the index file.  */
+struct psymtab_cu_index_map
+{
+  struct partial_symtab *psymtab;
+  unsigned int cu_index;
+};
+
+static hashval_t
+hash_psymtab_cu_index (const void *item)
+{
+  const struct psymtab_cu_index_map *map = item;
+
+  return htab_hash_pointer (map->psymtab);
+}
+
+static int
+eq_psymtab_cu_index (const void *item_lhs, const void *item_rhs)
+{
+  const struct psymtab_cu_index_map *lhs = item_lhs;
+  const struct psymtab_cu_index_map *rhs = item_rhs;
+
+  return lhs->psymtab == rhs->psymtab;
+}
+
+/* Helper struct for building the address table.  */
+struct addrmap_index_data
+{
+  struct objfile *objfile;
+  struct obstack *addr_obstack;
+  htab_t cu_index_htab;
+
+  /* Non-zero if the previous_* fields are valid.
+     We can't write an entry until we see the next entry (since it is only then
+     that we know the end of the entry).  */
+  int previous_valid;
+  /* Index of the CU in the table of all CUs in the index file.  */
+  unsigned int previous_cu_index;
+  /* Start address of the CU. */
+  CORE_ADDR previous_cu_start;
+};
+
+/* Write an address entry to OBSTACK.  */
 
 static void
-add_address_entry (struct objfile *objfile,
-		   struct obstack *addr_obstack, struct partial_symtab *pst,
-		   unsigned int cu_index)
+add_address_entry (struct objfile *objfile, struct obstack *obstack,
+		   CORE_ADDR start, CORE_ADDR end, unsigned int cu_index)
 {
-  offset_type offset;
+  offset_type cu_index_to_write;
   char addr[8];
   CORE_ADDR baseaddr;
 
-  /* Don't bother recording empty ranges.  */
-  if (pst->textlow == pst->texthigh)
-    return;
-
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  store_unsigned_integer (addr, 8, BFD_ENDIAN_LITTLE, pst->textlow - baseaddr);
-  obstack_grow (addr_obstack, addr, 8);
-  store_unsigned_integer (addr, 8, BFD_ENDIAN_LITTLE, pst->texthigh - baseaddr);
-  obstack_grow (addr_obstack, addr, 8);
-  offset = MAYBE_SWAP (cu_index);
-  obstack_grow (addr_obstack, &offset, sizeof (offset_type));
+  store_unsigned_integer (addr, 8, BFD_ENDIAN_LITTLE, start - baseaddr);
+  obstack_grow (obstack, addr, 8);
+  store_unsigned_integer (addr, 8, BFD_ENDIAN_LITTLE, end - baseaddr);
+  obstack_grow (obstack, addr, 8);
+  cu_index_to_write = MAYBE_SWAP (cu_index);
+  obstack_grow (obstack, &cu_index_to_write, sizeof (offset_type));
+}
+
+/* Worker function for traversing an addrmap to build the address table.  */
+
+static int
+add_address_entry_worker (void *datap, CORE_ADDR start_addr, void *obj)
+{
+  struct addrmap_index_data *data = datap;
+  struct partial_symtab *pst = obj;
+  offset_type cu_index;
+  void **slot;
+
+  if (data->previous_valid)
+    add_address_entry (data->objfile, data->addr_obstack,
+		       data->previous_cu_start, start_addr,
+		       data->previous_cu_index);
+
+  data->previous_cu_start = start_addr;
+  if (pst != NULL)
+    {
+      struct psymtab_cu_index_map find_map, *map;
+      find_map.psymtab = pst;
+      map = htab_find (data->cu_index_htab, &find_map);
+      gdb_assert (map != NULL);
+      data->previous_cu_index = map->cu_index;
+      data->previous_valid = 1;
+    }
+  else
+      data->previous_valid = 0;
+
+  return 0;
+}
+
+/* Write OBJFILE's address map to OBSTACK.
+   CU_INDEX_HTAB is used to map addrmap entries to their CU indices
+   in the index file.  */
+
+static void
+write_address_map (struct objfile *objfile, struct obstack *obstack,
+		   htab_t cu_index_htab)
+{
+  struct addrmap_index_data addrmap_index_data;
+
+  /* When writing the address table, we have to cope with the fact that
+     the addrmap iterator only provides the start of a region; we have to
+     wait until the next invocation to get the start of the next region.  */
+
+  addrmap_index_data.objfile = objfile;
+  addrmap_index_data.addr_obstack = obstack;
+  addrmap_index_data.cu_index_htab = cu_index_htab;
+  addrmap_index_data.previous_valid = 0;
+
+  addrmap_foreach (objfile->psymtabs_addrmap, add_address_entry_worker,
+		   &addrmap_index_data);
+
+  /* It's highly unlikely the last entry (end address = 0xff...ff)
+     is valid, but we should still handle it.
+     The end address is recorded as the start of the next region, but that
+     doesn't work here.  To cope we pass 0xff...ff, this is a rare situation
+     anyway.  */
+  if (addrmap_index_data.previous_valid)
+    add_address_entry (objfile, obstack,
+		       addrmap_index_data.previous_cu_start, (CORE_ADDR) -1,
+		       addrmap_index_data.previous_cu_index);
 }
 
 /* Add a list of partial symbols to SYMTAB.  */
@@ -15294,6 +15392,8 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   struct stat st;
   char buf[8];
   htab_t psyms_seen;
+  htab_t cu_index_htab;
+  struct psymtab_cu_index_map *psymtab_cu_index_map;
 
   if (!objfile->psymtabs)
     return;
@@ -15330,7 +15430,21 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 				  NULL, xcalloc, xfree);
   make_cleanup (cleanup_htab, psyms_seen);
 
-  /* The list is already sorted, so we don't need to do additional
+  /* While we're scanning CU's create a table that maps a psymtab pointer
+     (which is what addrmap records) to its index (which is what is recorded
+     in the index file).  This will later be needed to write the address
+     table.  */
+  cu_index_htab = htab_create_alloc (100,
+				     hash_psymtab_cu_index,
+				     eq_psymtab_cu_index,
+				     NULL, xcalloc, xfree);
+  make_cleanup (cleanup_htab, cu_index_htab);
+  psymtab_cu_index_map = (struct psymtab_cu_index_map *)
+    xmalloc (sizeof (struct psymtab_cu_index_map)
+	     * dwarf2_per_objfile->n_comp_units);
+  make_cleanup (xfree, psymtab_cu_index_map);
+
+  /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
@@ -15338,6 +15452,8 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
       struct dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->all_comp_units[i];
       struct partial_symtab *psymtab = per_cu->v.psymtab;
       gdb_byte val[8];
+      struct psymtab_cu_index_map *map;
+      void **slot;
 
       write_psymbols (symtab,
 		      psyms_seen,
@@ -15350,13 +15466,22 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 		      psymtab->n_static_syms, i,
 		      1);
 
-      add_address_entry (objfile, &addr_obstack, psymtab, i);
+      map = &psymtab_cu_index_map[i];
+      map->psymtab = psymtab;
+      map->cu_index = i;
+      slot = htab_find_slot (cu_index_htab, map, INSERT);
+      gdb_assert (slot != NULL);
+      gdb_assert (*slot == NULL);
+      *slot = map;
 
       store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, per_cu->offset);
       obstack_grow (&cu_list, val, 8);
       store_unsigned_integer (val, 8, BFD_ENDIAN_LITTLE, per_cu->length);
       obstack_grow (&cu_list, val, 8);
     }
+
+  /* Dump the address map.  */
+  write_address_map (objfile, &addr_obstack, cu_index_htab);
 
   /* Write out the .debug_type entries, if any.  */
   if (dwarf2_per_objfile->signatured_types)

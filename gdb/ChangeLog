@@ -1,5 +1,15 @@
 2010-12-08  Doug Evans  <dje@google.com>
 
+	PR symtab/12302
+	* dwarf2read.c (struct psymtab_cu_index_map): New struct.
+	(hash_psymtab_cu_index, eq_psymtab_cu_index): New functions.
+	(struct addrmap_index_data): New struct.
+	(add_address_entry): Remove arg `pst', new args `start', `end'.
+	(add_address_entry_worker, write_address_map): New functions.
+	(write_psymtabs_to_index): Address table generation moved to
+	write_address_map.  Build a table mapping psymtab to CU index
+	to pass to it.
+
 	* dwarf2read.c (write_psymtabs_to_index): When stat fails, pass file
 	name to perror.
 
