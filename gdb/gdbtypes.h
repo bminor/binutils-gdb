@@ -1094,12 +1094,13 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_TYPEDEF_FIELD_COUNT(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field_count
 
-#define TYPE_IS_OPAQUE(thistype) (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) ||        \
-                                   (TYPE_CODE (thistype) == TYPE_CODE_UNION))        && \
-                                  (TYPE_NFIELDS (thistype) == 0)                     && \
-                                  (!HAVE_CPLUS_STRUCT (thistype)			\
-				   || TYPE_NFN_FIELDS (thistype) == 0) &&		\
-                                  (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
+#define TYPE_IS_OPAQUE(thistype) \
+  (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) \
+    || (TYPE_CODE (thistype) == TYPE_CODE_UNION)) \
+   && (TYPE_NFIELDS (thistype) == 0) \
+   && (!HAVE_CPLUS_STRUCT (thistype) \
+       || TYPE_NFN_FIELDS (thistype) == 0) \
+   && (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
 
 /* A helper macro that returns the name of an error type.  If the type
    has a name, it is used; otherwise, a default is used.  */

@@ -1,5 +1,7 @@
 2010-12-08  Doug Evans  <dje@google.com>
 
+	* gdbtypes.h (TYPE_IS_OPAQUE): Reformat.
+
 	* gdbtypes.c (check_typedef): Tweak comment.
 
 	PR symtab/12302
