@@ -2323,8 +2323,13 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
   int i;
 
   dw2_setup (objfile);
-  for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		   + dwarf2_per_objfile->n_type_comp_units); ++i)
+
+  /* We don't need to consider type units here.
+     This is only called for examining code, e.g. expand_line_sal.
+     There can be an order of magnitude (or more) more type units
+     than comp units, and we avoid them if we can.  */
+
+  for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
       int j;
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);

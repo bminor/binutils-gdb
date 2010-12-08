@@ -1,5 +1,10 @@
 2010-12-08  Doug Evans  <dje@google.com>
 
+	* symfile.h (quick_symbol_functions): Clarify usage of
+	expand_symtabs_with_filename.
+	* dwarf2read.c (dw2_expand_symtabs_with_filename): Only iterate over
+	comp units, ignore type units.
+
 	* dwarf2read.c (dw2_expand_symtabs_with_filename): Use FILENAME_CMP.
 
 2010-12-07  Doug Evans  <dje@google.com>
