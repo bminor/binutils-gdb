@@ -1,3 +1,8 @@
+2010-12-07  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::Scan::get_reference_flags): Treat R_ARM_PREL31
+	like function call relocations.
+
 2010-12-07  Ian Lance Taylor  <iant@google.com>
 
 	* archive.cc (Archive::get_elf_object_for_member): Permit

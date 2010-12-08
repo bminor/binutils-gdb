@@ -7646,7 +7646,6 @@ Target_arm<big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_ARM_THM_MOVW_BREL:
     case elfcpp::R_ARM_GOTOFF32:
     case elfcpp::R_ARM_GOTOFF12:
-    case elfcpp::R_ARM_PREL31:
     case elfcpp::R_ARM_SBREL31:
       return Symbol::RELATIVE_REF;
 
@@ -7659,6 +7658,10 @@ Target_arm<big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_ARM_THM_JUMP6:
     case elfcpp::R_ARM_THM_JUMP11:
     case elfcpp::R_ARM_THM_JUMP8:
+    // R_ARM_PREL31 is not used to relocate call/jump instructions but
+    // in unwind tables. It may point to functions via PLTs.
+    // So we treat it like call/jump relocations above.
+    case elfcpp::R_ARM_PREL31:
       return Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
 
     case elfcpp::R_ARM_GOT_BREL:
