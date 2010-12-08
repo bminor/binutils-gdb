@@ -216,8 +216,8 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
 	      filename = normalize (filename, arch);
 	    }
 
-	  if ((filename != NULL) &&
-	      (!FILENAME_CMP (normalize (*files, arch), filename)))
+	  if (filename != NULL
+	      && !FILENAME_CMP (normalize (*files, arch), filename))
 	    {
 	      ++match_count;
 	      if (counted_name_mode
@@ -248,12 +248,17 @@ usage (int help)
 
   s = help ? stdout : stderr;
 
-  /* xgettext:c-format */
-  const char * command_line =
 #if BFD_SUPPORTS_PLUGINS
-	_("Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [--plugin <name>] [member-name] [count] archive-file file...\n");
+  /* xgettext:c-format */
+  const char *command_line
+    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoPsSTuvV]"
+	" [--plugin <name>] [member-name] [count] archive-file file...\n");
+
 #else
-	_("Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
+  /* xgettext:c-format */
+  const char *command_line
+    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoPsSTuvV]"
+	" [member-name] [count] archive-file file...\n");
 #endif
   fprintf (s, command_line, program_name);
 
@@ -301,7 +306,7 @@ usage (int help)
 }
 
 static void
-ranlib_usage(int help)
+ranlib_usage (int help)
 {
   FILE *s;
 
@@ -378,7 +383,7 @@ remove_output (void)
 }
 
 static char **
-decode_options(int argc, char **argv)
+decode_options (int argc, char **argv)
 {
   int c;
 
@@ -427,7 +432,7 @@ decode_options(int argc, char **argv)
       argv = new_argv;
     }
 
-  while ((c = getopt_long (argc, argv, "hdmpqrstxabcfilNoPsSuvV",
+  while ((c = getopt_long (argc, argv, "hdmpqrtxlcoVsSuvabiMNfPTD",
 			   long_options, NULL)) != EOF)
     {
       switch (c)
@@ -539,8 +544,6 @@ decode_options(int argc, char **argv)
 	case 0:		/* A long option that just sets a flag.  */
 	  break;
         default:
-          /* xgettext:c-format */
-          non_fatal (_("illegal option -- '%d'"), c);
           usage (0);
         }
     }
@@ -549,7 +552,7 @@ decode_options(int argc, char **argv)
 }
 
 static void
-ranlib_main(int argc, char **argv)
+ranlib_main (int argc, char **argv)
 {
   int arg_index, status = 0;
   bfd_boolean touch = FALSE;
@@ -577,7 +580,7 @@ ranlib_main(int argc, char **argv)
     ranlib_usage (0);
 
   if (show_help)
-    usage(1);
+    usage (1);
 
   if (show_version)
     print_version ("ranlib");
@@ -595,9 +598,6 @@ ranlib_main(int argc, char **argv)
 
   xexit (status);
 }
-
-/* The option parsing should be in its own function.
-   It will be when I have getopt working.  */
 
 int main (int, char **);
 
@@ -652,21 +652,15 @@ main (int argc, char **argv)
   argc -= (i - 1);
 
   if (is_ranlib)
-    ranlib_main(argc, argv);
-
-  if (argc == 2 && strcmp (argv[1], "-M") == 0)
-    {
-      mri_emul ();
-      xexit (0);
-    }
+    ranlib_main (argc, argv);
 
   if (argc < 2)
     usage (0);
 
-  argv = decode_options(argc, argv);
+  argv = decode_options (argc, argv);
 
   if (show_help)
-    usage(1);
+    usage (1);
 
   if (show_version)
     print_version ("ar");
@@ -709,7 +703,7 @@ main (int argc, char **argv)
       if (counted_name_mode)
 	{
 	  if (operation != extract && operation != del)
-	     fatal (_("`N' is only meaningful with the `x' and `d' options."));
+	    fatal (_("`N' is only meaningful with the `x' and `d' options."));
 	  counted_name_counter = atoi (argv[arg_index++]);
 	  if (counted_name_counter <= 0)
 	    fatal (_("Value for `N' must be positive."));
@@ -718,7 +712,7 @@ main (int argc, char **argv)
       inarch_filename = argv[arg_index++];
 
       for (file_count = 0; argv[arg_index + file_count] != NULL; file_count++)
-	      continue;
+	continue;
 
       files = (file_count > 0) ? argv + arg_index : NULL;
 
@@ -800,8 +794,8 @@ open_inarch (const char *archive_filename, const char *file)
 	 stat() works just fine in v2.x, so I think this should be
 	 removed.  For now, I enable it for DJGPP v2. -- EZ.  */
 
-/* KLUDGE ALERT! Temporary fix until I figger why
-   stat() is wrong ... think it's buried in GO32's IDT - Jax */
+      /* KLUDGE ALERT! Temporary fix until I figger why
+	 stat() is wrong ... think it's buried in GO32's IDT - Jax */
       if (errno != ENOENT)
 	bfd_fatal (archive_filename);
 #endif

@@ -1,3 +1,11 @@
+2010-12-08  Alan Modra  <amodra@gmail.com>
+
+	* ar.c: Formatting.
+	(usage): Correct help strings.
+	(decode_options): Correct getopt_long short options.  Remove
+	duplicate non-handled option message.
+	(main): Don't handle -M specially.
+
 2010-12-08  Arnaud Lacombe  <lacombar@gmail.com>
 
 	* ar.c (long_options): Add target.
