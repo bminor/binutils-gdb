@@ -21,16 +21,15 @@
    MA 02110-1301, USA.  */
 
 /*
-   Bugs: should use getopt the way tar does (complete w/optional -) and
-   should have long options too. GNU ar used to check file against filesystem
-   in quick_update and replace operations (would check mtime). Doesn't warn
-   when name truncated. No way to specify pos_end. Error messages should be
-   more consistent.  */
+   Bugs: GNU ar used to check file against filesystem in quick_update and
+   replace operations (would check mtime). Doesn't warn when name truncated.
+   No way to specify pos_end. Error messages should be more consistent.  */
 
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
 #include "progress.h"
+#include "getopt.h"
 #include "aout/ar.h"
 #include "libbfd.h"
 #include "bucomm.h"
@@ -113,6 +112,12 @@ enum pos
     pos_default, pos_before, pos_after, pos_end
   } postype = pos_default;
 
+enum operations
+  {
+    none = 0, del, replace, print_table,
+    print_files, extract, move, quick_append
+  } operation = none;
+
 static bfd **
 get_pos_bfd (bfd **, enum pos, const char *);
 
@@ -132,7 +137,21 @@ static bfd_boolean full_pathname = FALSE;
 /* Whether to create a "thin" archive (symbol index only -- no files).  */
 static bfd_boolean make_thin_archive = FALSE;
 
+static int show_version = 0;
+
+static int show_help = 0;
+
 static const char *plugin_target = NULL;
+
+#define OPTION_PLUGIN 201
+
+static struct option long_options[] =
+{
+  {"help", no_argument, &show_help, 1},
+  {"plugin", required_argument, NULL, OPTION_PLUGIN},
+  {"version", no_argument, &show_version, 1},
+  {NULL, no_argument, NULL, 0}
+};
 
 int interactive = 0;
 
@@ -228,7 +247,7 @@ usage (int help)
   /* xgettext:c-format */
   const char * command_line =
 #if BFD_SUPPORTS_PLUGINS
-	_("Usage: %s [emulation options] [--plugin <name>] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
+	_("Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [--plugin <name>] [member-name] [count] archive-file file...\n");
 #else
 	_("Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n");
 #endif
@@ -354,39 +373,209 @@ remove_output (void)
     }
 }
 
+static char **
+decode_options(int argc, char **argv)
+{
+  int c;
+
+  /* Convert old-style tar call by exploding option element and rearranging
+     options accordingly.  */
+
+  if (argc > 1 && argv[1][0] != '-')
+    {
+      int new_argc;		/* argc value for rearranged arguments */
+      char **new_argv;		/* argv value for rearranged arguments */
+      char *const *in;		/* cursor into original argv */
+      char **out;		/* cursor into rearranged argv */
+      const char *letter;	/* cursor into old option letters */
+      char buffer[3];		/* constructed option buffer */
+
+      /* Initialize a constructed option.  */
+
+      buffer[0] = '-';
+      buffer[2] = '\0';
+
+      /* Allocate a new argument array, and copy program name in it.  */
+
+      new_argc = argc - 1 + strlen (argv[1]);
+      new_argv = xmalloc ((new_argc + 1) * sizeof (*argv));
+      in = argv;
+      out = new_argv;
+      *out++ = *in++;
+
+      /* Copy each old letter option as a separate option.  */
+
+      for (letter = *in++; *letter; letter++)
+	{
+	  buffer[1] = *letter;
+	  *out++ = xstrdup (buffer);
+	}
+
+      /* Copy all remaining options.  */
+
+      while (in < argv + argc)
+	*out++ = *in++;
+      *out = NULL;
+
+      /* Replace the old option list by the new one.  */
+
+      argc = new_argc;
+      argv = new_argv;
+    }
+
+  while ((c = getopt_long (argc, argv, "hdmpqrstxabcfilNoPsSuvV",
+			   long_options, NULL)) != EOF)
+    {
+      switch (c)
+        {
+        case 'd':
+        case 'm':
+        case 'p':
+        case 'q':
+        case 'r':
+        case 't':
+        case 'x':
+          if (operation != none)
+            fatal (_("two different operation options specified"));
+	  break;
+	}
+
+      switch (c)
+        {
+        case 'h':
+	  show_help = 1;
+	  break;
+        case 'd':
+          operation = del;
+          operation_alters_arch = TRUE;
+          break;
+        case 'm':
+          operation = move;
+          operation_alters_arch = TRUE;
+          break;
+        case 'p':
+          operation = print_files;
+          break;
+        case 'q':
+          operation = quick_append;
+          operation_alters_arch = TRUE;
+          break;
+        case 'r':
+          operation = replace;
+          operation_alters_arch = TRUE;
+          break;
+        case 't':
+          operation = print_table;
+          break;
+        case 'x':
+          operation = extract;
+          break;
+        case 'l':
+          break;
+        case 'c':
+          silent_create = 1;
+          break;
+        case 'o':
+          preserve_dates = 1;
+          break;
+        case 'V':
+          show_version = TRUE;
+          break;
+        case 's':
+          write_armap = 1;
+          break;
+        case 'S':
+          write_armap = -1;
+          break;
+        case 'u':
+          newer_only = 1;
+          break;
+        case 'v':
+          verbose = 1;
+          break;
+        case 'a':
+          postype = pos_after;
+          break;
+        case 'b':
+          postype = pos_before;
+          break;
+        case 'i':
+          postype = pos_before;
+          break;
+        case 'M':
+          mri_mode = 1;
+          break;
+        case 'N':
+          counted_name_mode = TRUE;
+          break;
+        case 'f':
+          ar_truncate = TRUE;
+          break;
+        case 'P':
+          full_pathname = TRUE;
+          break;
+        case 'T':
+          make_thin_archive = TRUE;
+          break;
+        case 'D':
+          deterministic = TRUE;
+          break;
+	case OPTION_PLUGIN:
+#if BFD_SUPPORTS_PLUGINS
+	  plugin_target = "plugin";
+	  bfd_plugin_set_plugin (optarg);
+#else
+	  fprintf (stderr, _("sorry - this program has been built without plugin support\n"));
+	  xexit (1);
+#endif
+	  break;
+	case 0:		/* A long option that just sets a flag.  */
+	  break;
+        default:
+          /* xgettext:c-format */
+          non_fatal (_("illegal option -- '%d'"), c);
+          usage (0);
+        }
+    }
+
+  return &argv[optind];
+}
+
 static void
 ranlib_main(int argc, char **argv)
 {
   int arg_index, status = 0;
   bfd_boolean touch = FALSE;
+  int c;
 
-  if (argc > 1 && argv[1][0] == '-')
+  while ((c = getopt_long (argc, argv, "hHvVt", long_options, NULL)) != EOF)
     {
-      if (strcmp (argv[1], "--help") == 0)
-	ranlib_usage (1);
-      else if (strcmp (argv[1], "--version") == 0)
-	{
-	  print_version ("ranlib");
-	}
+      switch (c)
+        {
+	case 'h':
+	case 'H':
+	  show_help = 1;
+	  break;
+	case 't':
+	  touch = TRUE;
+	  break;
+	case 'v':
+	case 'V':
+	  show_version = 1;
+	  break;
+        }
     }
 
-  if (argc < 2
-      || strcmp (argv[1], "--help") == 0
-      || strcmp (argv[1], "-h") == 0
-      || strcmp (argv[1], "-H") == 0)
+  if (argc < 2)
     ranlib_usage (0);
 
-  if (strcmp (argv[1], "-V") == 0
-      || strcmp (argv[1], "-v") == 0
-      || CONST_STRNEQ (argv[1], "--v"))
-    print_version ("ranlib");
-  arg_index = 1;
+  if (show_help)
+    usage(1);
 
-  if (strcmp (argv[1], "-t") == 0)
-    {
-      ++arg_index;
-      touch = TRUE;
-    }
+  if (show_version)
+    print_version ("ranlib");
+
+  arg_index = 1;
 
   while (arg_index < argc)
     {
@@ -408,20 +597,11 @@ int main (int, char **);
 int
 main (int argc, char **argv)
 {
-  char *arg_ptr;
-  char c;
-  enum
-    {
-      none = 0, del, replace, print_table,
-      print_files, extract, move, quick_append
-    } operation = none;
   int arg_index;
   char **files;
   int file_count;
   char *inarch_filename;
-  int show_version;
   int i;
-  int do_posix = 0;
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -451,13 +631,10 @@ main (int argc, char **argv)
 	is_ranlib = 0;
     }
 
-
   START_PROGRESS (program_name, 0);
 
   bfd_init ();
   set_default_bfd_target ();
-
-  show_version = 0;
 
   xatexit (remove_output);
 
@@ -470,14 +647,6 @@ main (int argc, char **argv)
   if (is_ranlib)
     ranlib_main(argc, argv);
 
-  if (argc > 1 && argv[1][0] == '-')
-    {
-      if (strcmp (argv[1], "--help") == 0)
-	usage (1);
-      else if (strcmp (argv[1], "--version") == 0)
-	print_version ("ar");
-    }
-
   if (argc == 2 && strcmp (argv[1], "-M") == 0)
     {
       mri_emul ();
@@ -487,150 +656,15 @@ main (int argc, char **argv)
   if (argc < 2)
     usage (0);
 
-  arg_index = 1;
-  arg_ptr = argv[arg_index];
+  argv = decode_options(argc, argv);
 
-  if (strcmp (arg_ptr, "--plugin") == 0)
-    {
-#if BFD_SUPPORTS_PLUGINS
-      if (argc < 4)
-	usage (1);
-
-      bfd_plugin_set_plugin (argv[2]);
-
-      arg_index += 2;
-      arg_ptr = argv[arg_index];
-
-      plugin_target = "plugin";
-#else
-      fprintf (stderr, _("sorry - this program has been built without plugin support\n"));
-      xexit (1);
-#endif
-    }
-
-  if (*arg_ptr == '-')
-    {
-      /* When the first option starts with '-' we support POSIX-compatible
-	 option parsing.  */
-      do_posix = 1;
-      ++arg_ptr;			/* compatibility */
-    }
-
-  do
-    {
-      while ((c = *arg_ptr++) != '\0')
-	{
-	  switch (c)
-	    {
-	    case 'd':
-	    case 'm':
-	    case 'p':
-	    case 'q':
-	    case 'r':
-	    case 't':
-	    case 'x':
-	      if (operation != none)
-		fatal (_("two different operation options specified"));
-	      switch (c)
-		{
-		case 'd':
-		  operation = del;
-		  operation_alters_arch = TRUE;
-		  break;
-		case 'm':
-		  operation = move;
-		  operation_alters_arch = TRUE;
-		  break;
-		case 'p':
-		  operation = print_files;
-		  break;
-		case 'q':
-		  operation = quick_append;
-		  operation_alters_arch = TRUE;
-		  break;
-		case 'r':
-		  operation = replace;
-		  operation_alters_arch = TRUE;
-		  break;
-		case 't':
-		  operation = print_table;
-		  break;
-		case 'x':
-		  operation = extract;
-		  break;
-		}
-	    case 'l':
-	      break;
-	    case 'c':
-	      silent_create = 1;
-	      break;
-	    case 'o':
-	      preserve_dates = 1;
-	      break;
-	    case 'V':
-	      show_version = TRUE;
-	      break;
-	    case 's':
-	      write_armap = 1;
-	      break;
-	    case 'S':
-	      write_armap = -1;
-	      break;
-	    case 'u':
-	      newer_only = 1;
-	      break;
-	    case 'v':
-	      verbose = 1;
-	      break;
-	    case 'a':
-	      postype = pos_after;
-	      break;
-	    case 'b':
-	      postype = pos_before;
-	      break;
-	    case 'i':
-	      postype = pos_before;
-	      break;
-	    case 'M':
-	      mri_mode = 1;
-	      break;
-	    case 'N':
-	      counted_name_mode = TRUE;
-	      break;
-	    case 'f':
-	      ar_truncate = TRUE;
-	      break;
-	    case 'P':
-	      full_pathname = TRUE;
-	      break;
-	    case 'T':
-	      make_thin_archive = TRUE;
-	      break;
-	    case 'D':
-	      deterministic = TRUE;
-	      break;
-	    default:
-	      /* xgettext:c-format */
-	      non_fatal (_("illegal option -- %c"), c);
-	      usage (0);
-	    }
-	}
-
-      /* With POSIX-compatible option parsing continue with the next
-	 argument if it starts with '-'.  */
-      if (do_posix && arg_index + 1 < argc && argv[arg_index + 1][0] == '-')
-	arg_ptr = argv[++arg_index] + 1;
-      else
-	do_posix = 0;
-    }
-  while (do_posix);
+  if (show_help)
+    usage(1);
 
   if (show_version)
     print_version ("ar");
 
-  ++arg_index;
-  if (arg_index >= argc)
-    usage (0);
+  arg_index = 0;
 
   if (mri_mode)
     {
@@ -676,8 +710,10 @@ main (int argc, char **argv)
 
       inarch_filename = argv[arg_index++];
 
-      files = arg_index < argc ? argv + arg_index : NULL;
-      file_count = argc - arg_index;
+      for (file_count = 0; argv[arg_index + file_count] != NULL; file_count++)
+	      continue;
+
+      files = (file_count > 0) ? argv + arg_index : NULL;
 
       arch = open_inarch (inarch_filename,
 			  files == NULL ? (char *) NULL : files[0]);

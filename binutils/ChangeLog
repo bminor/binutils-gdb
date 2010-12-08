@@ -1,5 +1,14 @@
 2010-12-08  Arnaud Lacombe  <lacombar@gmail.com>
 
+	* ar.c (operation): New global variable.
+	(show_version): Likewise.
+	(show_help): Likewise.
+	(long_options): Likewise.
+	(usage): Fix help string argument order.
+	(decode_options): New.
+	(ranlib_main): Use getopt_long.
+	(main): Use decode_options.
+
 	* ar.c (main): Split ranlib path.
 	(ranlib_usage): New
 	(ranlib_main): New
