@@ -743,7 +743,10 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "elf_arch_mips64r2"
 
 	# Verify that ASE markings are handled properly.
-	if { !$no_mips16 } { run_dump_test "elf_ase_mips16" }
+	if { !$no_mips16 } {
+	    run_dump_test "elf_ase_mips16"
+	    run_dump_test "elf_ase_mips16-2"
+	}
 
  	run_dump_test "mips-gp32-fp32-pic"
  	run_dump_test "mips-gp32-fp64-pic"

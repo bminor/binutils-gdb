@@ -282,8 +282,7 @@ unsigned long mips_cprmask[4];
 /* MIPS ISA we are using for this output file.  */
 static int file_mips_isa = ISA_UNKNOWN;
 
-/* True if -mips16 was passed or implied by arguments passed on the
-   command line (e.g., by -march).  */
+/* True if any MIPS16 code was produced.  */
 static int file_ase_mips16;
 
 #define ISA_SUPPORTS_MIPS16E (mips_opts.isa == ISA_MIPS32		\
@@ -2810,6 +2809,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
   /* Mark instruction labels in mips16 mode.  */
   mips16_mark_labels ();
+
+  file_ase_mips16 |= mips_opts.mips16;
 
   prev_pinfo = history[0].insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
@@ -12045,7 +12046,6 @@ mips_after_parse_args (void)
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   file_mips_isa = mips_opts.isa;
-  file_ase_mips16 = mips_opts.mips16;
   file_ase_mips3d = mips_opts.ase_mips3d;
   file_ase_mdmx = mips_opts.ase_mdmx;
   file_ase_smartmips = mips_opts.ase_smartmips;

@@ -1,3 +1,8 @@
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/binutils-common.exp (regexp_diff): Implement inverse
+	matching, requested by `!'.
+
 2010-11-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* lib/binutils-common.exp (regexp_diff): New procedure.

@@ -1,5 +1,11 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (file_ase_mips16): Adjust comment.
+	(append_insn): Update file_ase_mips16.
+	(mips_after_parse_args): Don't set file_ase_mips16 here.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (macro)
 	<M_MSGSND, M_MSGLD, M_MSGLD_T, M_MSGWAIT, M_MSGWAIT_T>: Remove
 	dedicated return points.

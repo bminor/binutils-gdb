@@ -167,7 +167,9 @@ proc is_elf64 { binary_file } {
 #    REGEXP
 #        Skip all lines in FILE_1 until the first that matches REGEXP.
 #
-# Other # lines are comments.  Skip empty lines in both files.
+# Other # lines are comments.  Regexp lines starting with the `!' character
+# specify inverse matching (use `\!' for literal matching against a leading
+# `!').  Skip empty lines in both files.
 #
 # The first optional argument is a list of regexp substitutions of the form:
 #
@@ -235,12 +237,15 @@ proc regexp_diff { file_1 file_2 args } {
 		    set diff_pass 1
 		    break
 		}
+		set negated [expr { [string index $line_b 0] eq "!" }]
+		set line_bx [string range $line_b $negated end]
+		set n [expr { $negated ? "! " : "" }]
 		# Substitute on the reference.
 		foreach {name value} $ref_subst {
-		    regsub -- $name $line_b $value line_b
+		    regsub -- $name $line_bx $value line_bx
 		}
-		verbose "looking for \"^$line_b$\"" 3
-		while { ![regexp "^$line_b$" "$line_a"] } {
+		verbose "looking for $n\"^$line_bx$\"" 3
+		while { [expr [regexp "^$line_bx$" "$line_a"] == $negated] } {
 		    verbose "skipping    \"$line_a\"" 3
 		    if { [gets $file_a line_a] == $eof } {
 			set end_1 1
@@ -270,14 +275,18 @@ proc regexp_diff { file_1 file_2 args } {
 	    set differences 1
 	    break
 	} else {
+	    set negated [expr { [string index $line_b 0] eq "!" }]
+	    set line_bx [string range $line_b $negated end]
+	    set n [expr { $negated ? "! " : "" }]
+	    set s [expr { $negated ? "  " : "" }]
 	    # Substitute on the reference.
 	    foreach {name value} $ref_subst {
-		regsub -- $name $line_b $value line_b
+		regsub -- $name $line_bx $value line_bx
 	    }
-	    verbose "regexp \"^$line_b$\"\nline   \"$line_a\"" 3
-	    if { ![regexp "^$line_b$" "$line_a"] } {
+	    verbose "regexp $n\"^$line_bx$\"\nline   \"$line_a\"" 3
+	    if { [expr [regexp "^$line_bx$" "$line_a"] == $negated] } {
 		send_log "regexp_diff match failure\n"
-		send_log "regexp \"^$line_b$\"\nline   \"$line_a\"\n"
+		send_log "regexp $n\"^$line_bx$\"\nline   $s\"$line_a\"\n"
 		verbose "regexp_diff match failure\n" 3
 		set differences 1
 	    }

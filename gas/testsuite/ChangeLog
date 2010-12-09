@@ -1,5 +1,13 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/elf_ase_mips16.d: Update test for new MIPS16 ASE flag
+	semantics.
+	* gas/mips/elf_ase_mips16-2.d: New test.
+	* gas/mips/nop.s: Source for the new test.
+	* gas/mips/mips.exp: Run the new test.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/jal-svr4pic.d: Also use wildcard address matching in
 	relocations.
 	* gas/mips/mips1@jal-svr4pic.d: Likewise.
