@@ -6144,37 +6144,32 @@ macro (struct mips_cl_insn *ip)
 	unsigned long temp = (treg << 16) | (0x01);
 	macro_build (NULL, "c2", "C", temp);
       }
-      /* AT is not used, just return */
-      return;
+      break;
 
     case M_MSGLD:
       {
 	unsigned long temp = (0x02);
 	macro_build (NULL, "c2", "C", temp);
       }
-      /* AT is not used, just return */
-      return;
+      break;
 
     case M_MSGLD_T:
       {
 	unsigned long temp = (treg << 16) | (0x02);
 	macro_build (NULL, "c2", "C", temp);
       }
-      /* AT is not used, just return */
-      return;
+      break;
 
     case M_MSGWAIT:
       macro_build (NULL, "c2", "C", 3);
-      /* AT is not used, just return */
-      return;
+      break;
 
     case M_MSGWAIT_T:
       {
 	unsigned long temp = (treg << 16) | 0x03;
 	macro_build (NULL, "c2", "C", temp);
       }
-      /* AT is not used, just return */
-      return;
+      break;
 
     case M_J_A:
       /* The j instruction may not be used in PIC code, since it

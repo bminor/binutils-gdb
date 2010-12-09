@@ -1,5 +1,11 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro)
+	<M_MSGSND, M_MSGLD, M_MSGLD_T, M_MSGWAIT, M_MSGWAIT_T>: Remove
+	dedicated return points.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (macro) <M_DEXT, M_DINS>: Correct types used
 	for pos and size.
 
