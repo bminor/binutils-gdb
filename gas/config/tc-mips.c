@@ -8631,7 +8631,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   struct mips_opcode *insn;
   char *argsStart;
   unsigned int regno;
-  unsigned int lastregno = 0;
+  unsigned int lastregno;
   unsigned int lastpos = 0;
   unsigned int limlo, limhi;
   char *s_reset;
