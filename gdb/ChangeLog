@@ -1,3 +1,12 @@
+2010-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* mi/mi-parse.h (mi_parse): Update.
+	* mi/mi-parse.c (mi_parse_cleanup): New function.
+	(mi_parse): Add 'token' argument.  Throw exception on error.
+	* mi/mi-main.c (mi_print_exception): New function.
+	(mi_execute_command): Use mi_print_exception.  Catch exceptions
+	from mi_parse.
+
 2010-12-06  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-parse.c (mi_parse): Missing else.
