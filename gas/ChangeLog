@@ -1,5 +1,10 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro) <M_DEXT, M_DINS>: Correct types used
+	for pos and size.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (macro) <ld_st>: Don't load a zero into an
 	auxiliary register when using a signed 16-bit constant offset.
 

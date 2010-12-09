@@ -5262,8 +5262,9 @@ macro (struct mips_cl_insn *ip)
 
     case M_DEXT:
       {
-	unsigned long pos;
-	unsigned long size;
+	/* Use unsigned arithmetic.  */
+	addressT pos;
+	addressT size;
 
 	if (imm_expr.X_op != O_constant || imm2_expr.X_op != O_constant)
 	  {
@@ -5272,19 +5273,19 @@ macro (struct mips_cl_insn *ip)
 	  }
 	else
 	  {
-	    pos = (unsigned long) imm_expr.X_add_number;
-	    size = (unsigned long) imm2_expr.X_add_number;
+	    pos = imm_expr.X_add_number;
+	    size = imm2_expr.X_add_number;
 	  }
 
 	if (pos > 63)
 	  {
-	    as_bad (_("Improper position (%lu)"), pos);
+	    as_bad (_("Improper position (%lu)"), (unsigned long) pos);
 	    pos = 1;
 	  }
 	if (size == 0 || size > 64 || (pos + size - 1) > 63)
 	  {
 	    as_bad (_("Improper extract size (%lu, position %lu)"),
-		    size, pos);
+		    (unsigned long) size, (unsigned long) pos);
 	    size = 1;
 	  }
 
@@ -5303,14 +5304,16 @@ macro (struct mips_cl_insn *ip)
 	    s = "dextm";
 	    fmt = "t,r,+A,+G";
 	  }
-	macro_build ((expressionS *) NULL, s, fmt, treg, sreg, pos, size - 1);
+	macro_build ((expressionS *) NULL, s, fmt, treg, sreg, (int) pos,
+		     (int) (size - 1));
       }
       break;
 
     case M_DINS:
       {
-	unsigned long pos;
-	unsigned long size;
+	/* Use unsigned arithmetic.  */
+	addressT pos;
+	addressT size;
 
 	if (imm_expr.X_op != O_constant || imm2_expr.X_op != O_constant)
 	  {
@@ -5319,19 +5322,19 @@ macro (struct mips_cl_insn *ip)
 	  }
 	else
 	  {
-	    pos = (unsigned long) imm_expr.X_add_number;
-	    size = (unsigned long) imm2_expr.X_add_number;
+	    pos = imm_expr.X_add_number;
+	    size = imm2_expr.X_add_number;
 	  }
 
 	if (pos > 63)
 	  {
-	    as_bad (_("Improper position (%lu)"), pos);
+	    as_bad (_("Improper position (%lu)"), (unsigned long) pos);
 	    pos = 1;
 	  }
 	if (size == 0 || size > 64 || (pos + size - 1) > 63)
 	  {
 	    as_bad (_("Improper insert size (%lu, position %lu)"),
-		    size, pos);
+		    (unsigned long) size, (unsigned long) pos);
 	    size = 1;
 	  }
 
