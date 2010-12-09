@@ -1,3 +1,7 @@
+2010-12-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: New file.
+
 2010-12-06  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR ld/12288

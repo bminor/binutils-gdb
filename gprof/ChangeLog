@@ -1,3 +1,7 @@
+2010-12-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: New file.
+
 2010-11-25  Alan Modra  <amodra@gmail.com>
 
 	* po/bg.po: Update.
