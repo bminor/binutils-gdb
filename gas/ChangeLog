@@ -1,3 +1,8 @@
+2010-12-09  Arnold Metselaar  <arnold@phurua.lan>
+
+	Backport from trunk to fix faillure to compile with -Wshadow -Werror.
+	* config/tc-z80.c (md_apply_fix): Rename var to fix shadow warning.
+
 2010-12-07  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	Backport from trunk for PR gas/12269
