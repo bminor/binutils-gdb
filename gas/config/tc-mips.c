@@ -4954,7 +4954,7 @@ macro (struct mips_cl_insn *ip)
     beq_i:
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
-	  macro_build (&offset_expr, s, "s,t,p", sreg, 0);
+	  macro_build (&offset_expr, s, "s,t,p", sreg, ZERO);
 	  break;
 	}
       used_at = 1;
@@ -4977,7 +4977,7 @@ macro (struct mips_cl_insn *ip)
 	}
       used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, sreg, treg);
-      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, ZERO);
       break;
 
     case M_BGTL_I:
@@ -5001,7 +5001,7 @@ macro (struct mips_cl_insn *ip)
 	  if (! likely)
 	    macro_build (NULL, "nop", "", 0);
 	  else
-	    macro_build (&offset_expr, "bnel", "s,t,p", 0, 0);
+	    macro_build (&offset_expr, "bnel", "s,t,p", ZERO, ZERO);
 	  break;
 	}
       if (imm_expr.X_op != O_constant)
@@ -5043,7 +5043,7 @@ macro (struct mips_cl_insn *ip)
 	}
       used_at = 1;
       set_at (sreg, 0);
-      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, ZERO);
       break;
 
     case M_BGEUL:
@@ -5054,12 +5054,12 @@ macro (struct mips_cl_insn *ip)
       if (sreg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "beql" : "beq",
-		       "s,t,p", 0, treg);
+		       "s,t,p", ZERO, treg);
 	  break;
 	}
       used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, sreg, treg);
-      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, ZERO);
       break;
 
     case M_BGTUL_I:
@@ -5083,12 +5083,12 @@ macro (struct mips_cl_insn *ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build (&offset_expr, likely ? "bnel" : "bne",
-		       "s,t,p", sreg, 0);
+		       "s,t,p", sreg, ZERO);
 	  break;
 	}
       used_at = 1;
       set_at (sreg, 1);
-      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, ZERO);
       break;
 
     case M_BGTL:
@@ -5106,7 +5106,7 @@ macro (struct mips_cl_insn *ip)
 	}
       used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, treg, sreg);
-      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, ZERO);
       break;
 
     case M_BGTUL:
@@ -5115,14 +5115,14 @@ macro (struct mips_cl_insn *ip)
       if (treg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bnel" : "bne",
-		       "s,t,p", sreg, 0);
+		       "s,t,p", sreg, ZERO);
 	  break;
 	}
       if (sreg == 0)
 	goto do_false;
       used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, treg, sreg);
-      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, ZERO);
       break;
 
     case M_BLEL:
@@ -5140,7 +5140,7 @@ macro (struct mips_cl_insn *ip)
 	}
       used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, treg, sreg);
-      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, ZERO);
       break;
 
     case M_BLEL_I:
@@ -5178,7 +5178,7 @@ macro (struct mips_cl_insn *ip)
 	}
       used_at = 1;
       set_at (sreg, 0);
-      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, ZERO);
       break;
 
     case M_BLEUL:
@@ -5187,14 +5187,14 @@ macro (struct mips_cl_insn *ip)
       if (treg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "beql" : "beq",
-		       "s,t,p", sreg, 0);
+		       "s,t,p", sreg, ZERO);
 	  break;
 	}
       if (sreg == 0)
 	goto do_true;
       used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, treg, sreg);
-      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, ZERO);
       break;
 
     case M_BLEUL_I:
@@ -5218,12 +5218,12 @@ macro (struct mips_cl_insn *ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build (&offset_expr, likely ? "beql" : "beq",
-		       "s,t,p", sreg, 0);
+		       "s,t,p", sreg, ZERO);
 	  break;
 	}
       used_at = 1;
       set_at (sreg, 1);
-      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, ZERO);
       break;
 
     case M_BLTL:
@@ -5241,7 +5241,7 @@ macro (struct mips_cl_insn *ip)
 	}
       used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, sreg, treg);
-      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, ZERO);
       break;
 
     case M_BLTUL:
@@ -5252,12 +5252,12 @@ macro (struct mips_cl_insn *ip)
       if (sreg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bnel" : "bne",
-		       "s,t,p", 0, treg);
+		       "s,t,p", ZERO, treg);
 	  break;
 	}
       used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, sreg, treg);
-      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
+      macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, ZERO);
       break;
 
     case M_DEXT:
@@ -5369,7 +5369,7 @@ macro (struct mips_cl_insn *ip)
 	{
 	  as_warn (_("Divide by zero."));
 	  if (mips_trap)
-	    macro_build (NULL, "teq", "s,t,q", 0, 0, 7);
+	    macro_build (NULL, "teq", "s,t,q", ZERO, ZERO, 7);
 	  else
 	    macro_build (NULL, "break", "c", 7);
 	  break;
@@ -5378,13 +5378,13 @@ macro (struct mips_cl_insn *ip)
       start_noreorder ();
       if (mips_trap)
 	{
-	  macro_build (NULL, "teq", "s,t,q", treg, 0, 7);
+	  macro_build (NULL, "teq", "s,t,q", treg, ZERO, 7);
 	  macro_build (NULL, dbl ? "ddiv" : "div", "z,s,t", sreg, treg);
 	}
       else
 	{
 	  expr1.X_add_number = 8;
-	  macro_build (&expr1, "bne", "s,t,p", treg, 0);
+	  macro_build (&expr1, "bne", "s,t,p", treg, ZERO);
 	  macro_build (NULL, dbl ? "ddiv" : "div", "z,s,t", sreg, treg);
 	  macro_build (NULL, "break", "c", 7);
 	}
@@ -5466,7 +5466,7 @@ macro (struct mips_cl_insn *ip)
 	{
 	  as_warn (_("Divide by zero."));
 	  if (mips_trap)
-	    macro_build (NULL, "teq", "s,t,q", 0, 0, 7);
+	    macro_build (NULL, "teq", "s,t,q", ZERO, ZERO, 7);
 	  else
 	    macro_build (NULL, "break", "c", 7);
 	  break;
@@ -5476,7 +5476,7 @@ macro (struct mips_cl_insn *ip)
 	  if (strcmp (s2, "mflo") == 0)
 	    move_register (dreg, sreg);
 	  else
-	    move_register (dreg, 0);
+	    move_register (dreg, ZERO);
 	  break;
 	}
       if (imm_expr.X_op == O_constant
@@ -5488,7 +5488,7 @@ macro (struct mips_cl_insn *ip)
 	      macro_build (NULL, dbl ? "dneg" : "neg", "d,w", dreg, sreg);
 	    }
 	  else
-	    move_register (dreg, 0);
+	    move_register (dreg, ZERO);
 	  break;
 	}
 
@@ -5517,7 +5517,7 @@ macro (struct mips_cl_insn *ip)
       start_noreorder ();
       if (mips_trap)
 	{
-	  macro_build (NULL, "teq", "s,t,q", treg, 0, 7);
+	  macro_build (NULL, "teq", "s,t,q", treg, ZERO, 7);
 	  macro_build (NULL, s, "z,s,t", sreg, treg);
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
@@ -5526,7 +5526,7 @@ macro (struct mips_cl_insn *ip)
       else
 	{
 	  expr1.X_add_number = 8;
-	  macro_build (&expr1, "bne", "s,t,p", treg, 0);
+	  macro_build (&expr1, "bne", "s,t,p", treg, ZERO);
 	  macro_build (NULL, s, "z,s,t", sreg, treg);
 
 	  /* We want to close the noreorder block as soon as possible, so
@@ -7470,11 +7470,11 @@ macro (struct mips_cl_insn *ip)
       macro_build (NULL, "mfhi", "d", AT);
       macro_build (NULL, "mflo", "d", dreg);
       if (mips_trap)
-	macro_build (NULL, "tne", "s,t,q", AT, 0, 6);
+	macro_build (NULL, "tne", "s,t,q", AT, ZERO, 6);
       else
 	{
 	  expr1.X_add_number = 8;
-	  macro_build (&expr1, "beq", "s,t,p", AT, 0);
+	  macro_build (&expr1, "beq", "s,t,p", AT, ZERO);
 	  macro_build (NULL, "nop", "", 0);
 	  macro_build (NULL, "break", "c", 6);
 	}
@@ -7498,7 +7498,7 @@ macro (struct mips_cl_insn *ip)
 	  break;
 	}
       used_at = 1;
-      macro_build (NULL, "dsubu", "d,v,t", AT, 0, treg);
+      macro_build (NULL, "dsubu", "d,v,t", AT, ZERO, treg);
       macro_build (NULL, "dsrlv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "dsllv", "d,t,s", dreg, sreg, treg);
       macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7521,7 +7521,7 @@ macro (struct mips_cl_insn *ip)
 	  break;
 	}
       used_at = 1;
-      macro_build (NULL, "subu", "d,v,t", AT, 0, treg);
+      macro_build (NULL, "subu", "d,v,t", AT, ZERO, treg);
       macro_build (NULL, "srlv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "sllv", "d,t,s", dreg, sreg, treg);
       macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7591,7 +7591,7 @@ macro (struct mips_cl_insn *ip)
 	  break;
 	}
       used_at = 1;
-      macro_build (NULL, "dsubu", "d,v,t", AT, 0, treg);
+      macro_build (NULL, "dsubu", "d,v,t", AT, ZERO, treg);
       macro_build (NULL, "dsllv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "dsrlv", "d,t,s", dreg, sreg, treg);
       macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7604,7 +7604,7 @@ macro (struct mips_cl_insn *ip)
 	  break;
 	}
       used_at = 1;
-      macro_build (NULL, "subu", "d,v,t", AT, 0, treg);
+      macro_build (NULL, "subu", "d,v,t", AT, ZERO, treg);
       macro_build (NULL, "sllv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "srlv", "d,t,s", dreg, sreg, treg);
       macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);

@@ -1,5 +1,10 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro): Replace 0 with ZERO in macro_build
+	and move_register calls referring to $0.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (macro, mips_ip): Correct message
 	capitalization.
 
