@@ -52,13 +52,15 @@ struct mi_parse
     int frame;
   };
 
-/* Attempts to parse CMD returning a ``struct mi_command''.  If CMD is
-   invalid, an error mesage is reported (MI format) and NULL is
-   returned. For a CLI_COMMAND, COMMAND, TOKEN and OP are initialized.
-   For an MI_COMMAND COMMAND, TOKEN, ARGS and OP are
-   initialized. Un-initialized fields are zero. */
+/* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is
+   invalid, an exception is thrown.  For an MI_COMMAND COMMAND, ARGS
+   and OP are initialized.  Un-initialized fields are zero.  *TOKEN is
+   set to the token, even if an exception is thrown.  It is allocated
+   with xmalloc; it must either be freed with xfree, or assigned to
+   the TOKEN field of the resultant mi_parse object, to be freed by
+   mi_parse_free.  */
 
-extern struct mi_parse *mi_parse (char *cmd);
+extern struct mi_parse *mi_parse (char *cmd, char **token);
 
 /* Free a command returned by mi_parse_command. */
 

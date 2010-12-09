@@ -33,4 +33,15 @@ gdb_test_multiple $cmd $cmd {
 }
 gdb_test "interpreter-exec console \"show version\"" "GNU gdb .*"
 
+# Regression test for crash when an exception occurs in mi_parse.
+gdb_test_multiple "interpreter-exec mi \"-break-insert --thread a\"" \
+    "regression test for mi_parse crash" {
+	-re ".error,msg=.Invalid value for the '--thread' option.\r\n$gdb_prompt " {
+	    pass "$cmd"
+	    gdb_expect 1 {
+		-re "\r\n$gdb_prompt $" { }
+	    }
+	}
+    }
+
 gdb_exit

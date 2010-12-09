@@ -1,5 +1,9 @@
 2010-12-09  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/interp.exp: Add regression test.
+
+2010-12-09  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.java/jnpe.java: New file.
 	* gdb.java/jnpe.exp: New file.
 	* gdb.cp/nextoverthrow.exp: New file.
