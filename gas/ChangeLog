@@ -1,3 +1,8 @@
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (macro_build, macro, mips_ip, md_apply_fix):
+	Fix formatting.
+
 2010-12-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: New file.
