@@ -157,6 +157,11 @@ if { [istarget rx-*-*] } {
     set ASFLAGS "-muse-conventional-section-names"
 }
 
+# Blackfin ELF targets require selection of an explicit CPU.  Use the sim.
+if {[istarget bfin*-elf*]} {
+    append gcc_B_opt " -msim"
+}
+
 # load the utility procedures
 load_lib ld-lib.exp
 
