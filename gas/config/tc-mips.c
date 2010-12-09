@@ -9999,7 +9999,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  && imm_expr.X_op == O_constant
 		  && (imm_expr.X_add_number < 0
 		      || imm_expr.X_add_number >= 0x10000))
-		as_bad (_("lui expression not in range 0..65535"));
+		as_bad (_("lui expression (%lu) not in range 0..65535"),
+			(unsigned long) imm_expr.X_add_number);
 	      s = expr_end;
 	      continue;
 
