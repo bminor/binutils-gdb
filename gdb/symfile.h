@@ -287,9 +287,9 @@ struct quick_symbol_functions
 			    void (*fun) (const char *, void *),
 			    void *data);
 
-  /* Call a callback for every file defined in OBJFILE.  FUN is the
-     callback.  It is passed the file's name, the file's full name,
-     and the DATA passed to this function.  */
+  /* Call a callback for every file defined in OBJFILE whose symtab is
+     not already read in.  FUN is the callback.  It is passed the file's name,
+     the file's full name, and the DATA passed to this function.  */
   void (*map_symbol_filenames) (struct objfile *objfile,
 				void (*fun) (const char *, const char *,
 					     void *),

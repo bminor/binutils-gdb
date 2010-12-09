@@ -1,3 +1,8 @@
+2010-12-09  Doug Evans  <dje@google.com>
+
+	* symfile.h (quick_symbol_functions): Clarify usage of
+	map_symbol_filenames.
+
 2010-12-09  Tom Tromey  <tromey@redhat.com>
 
 	* mi/mi-parse.h (mi_parse): Update.
