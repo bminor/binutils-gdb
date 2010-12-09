@@ -297,7 +297,7 @@ mi_parse (char *cmd, char **token)
      to CLI.  */
   for (;;)
     {
-      char *start = chp;
+      const char *option;
       size_t as = sizeof ("--all ") - 1;
       size_t tgs = sizeof ("--thread-group ") - 1;
       size_t ts = sizeof ("--thread ") - 1;
@@ -316,6 +316,7 @@ mi_parse (char *cmd, char **token)
         }
       if (strncmp (chp, "--thread-group ", tgs) == 0)
 	{
+	  option = "--thread-group";
 	  if (parse->thread_group != -1)
 	    error (_("Duplicate '--thread-group' option"));
 	  chp += tgs;
@@ -326,6 +327,7 @@ mi_parse (char *cmd, char **token)
 	}
       else if (strncmp (chp, "--thread ", ts) == 0)
 	{
+	  option = "--thread";
 	  if (parse->thread != -1)
 	    error (_("Duplicate '--thread' option"));
 	  chp += ts;
@@ -333,6 +335,7 @@ mi_parse (char *cmd, char **token)
 	}
       else if (strncmp (chp, "--frame ", fs) == 0)
 	{
+	  option = "--frame";
 	  if (parse->frame != -1)
 	    error (_("Duplicate '--frame' option"));
 	  chp += fs;
@@ -342,8 +345,7 @@ mi_parse (char *cmd, char **token)
 	break;
 
       if (*chp != '\0' && !isspace (*chp))
-	error (_("Invalid value for the '%s' option"),
-	       start[2] == 't' ? "--thread" : "--frame");
+	error (_("Invalid value for the '%s' option"), option);
       while (isspace (*chp))
 	chp++;
     }

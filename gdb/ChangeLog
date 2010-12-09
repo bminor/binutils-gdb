@@ -1,3 +1,7 @@
+2010-12-09  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* mi/mi-parse.c (mi_parse): Wrong error message.
+
 2010-12-09  Tom Tromey  <tromey@redhat.com>
 
 	* mi/mi-parse.h (mi_parse): Update.
