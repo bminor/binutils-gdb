@@ -7062,6 +7062,17 @@ macro (struct mips_cl_insn *ip)
 		   target_big_endian ? treg : treg + 1, r, breg);
       break;
 
+    case M_S_DOB:
+      gas_assert (mips_opts.isa == ISA_MIPS1);
+      /* Even on a big endian machine $fn comes before $fn+1.  We have
+	 to adjust when storing to memory.  */
+      macro_build (&offset_expr, "swc1", "T,o(b)",
+		   target_big_endian ? treg + 1 : treg, BFD_RELOC_LO16, breg);
+      offset_expr.X_add_number += 4;
+      macro_build (&offset_expr, "swc1", "T,o(b)",
+		   target_big_endian ? treg : treg + 1, BFD_RELOC_LO16, breg);
+      break;
+
     case M_L_DAB:
       /*
        * The MIPS assembler seems to check for X_add_number not
@@ -7664,17 +7675,6 @@ macro (struct mips_cl_insn *ip)
 	macro_build (NULL, "sll", "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
 	macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
       }
-      break;
-
-    case M_S_DOB:
-      gas_assert (mips_opts.isa == ISA_MIPS1);
-      /* Even on a big endian machine $fn comes before $fn+1.  We have
-	 to adjust when storing to memory.  */
-      macro_build (&offset_expr, "swc1", "T,o(b)",
-		   target_big_endian ? treg + 1 : treg, BFD_RELOC_LO16, breg);
-      offset_expr.X_add_number += 4;
-      macro_build (&offset_expr, "swc1", "T,o(b)",
-		   target_big_endian ? treg : treg + 1, BFD_RELOC_LO16, breg);
       break;
 
     case M_SEQ:
