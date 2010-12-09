@@ -1,5 +1,11 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro)
+	<M_BGTUL_I, M_BGTU_I, M_BLEUL_I, M_BLEU_I>: Fix the constant
+	used to compare against for the always-false/true case.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (macro): Remove a trailing 0 from NOP
 	requests.
 

@@ -5068,7 +5068,7 @@ macro (struct mips_cl_insn *ip)
       if (sreg == 0
 	  || (HAVE_32BIT_GPRS
 	      && imm_expr.X_op == O_constant
-	      && imm_expr.X_add_number == (offsetT) 0xffffffff))
+	      && imm_expr.X_add_number == -1))
 	goto do_false;
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
@@ -5203,7 +5203,7 @@ macro (struct mips_cl_insn *ip)
       if (sreg == 0
 	  || (HAVE_32BIT_GPRS
 	      && imm_expr.X_op == O_constant
-	      && imm_expr.X_add_number == (offsetT) 0xffffffff))
+	      && imm_expr.X_add_number == -1))
 	goto do_true;
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
