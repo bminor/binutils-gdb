@@ -1,3 +1,7 @@
+2010-12-09  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* config/tc-z80.c (md_apply_fix): Rename var to fix shadow warning.
+
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (macro_build, macro, mips_ip, md_apply_fix):
