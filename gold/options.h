@@ -1035,6 +1035,10 @@ class General_options
   DEFINE_bool(warn_constructors, options::TWO_DASHES, '\0', false,
 	      N_("Ignored"), N_("Ignored"));
 
+  DEFINE_bool(warn_execstack, options::TWO_DASHES, '\0', false,
+	      N_("Warn if the stack is executable"),
+	      N_("Do not warn if the stack is executable (default)"));
+
   DEFINE_bool(warn_mismatch, options::TWO_DASHES, '\0', true,
 	      NULL, N_("Don't warn about mismatched input files"));
 

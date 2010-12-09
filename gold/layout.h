@@ -470,7 +470,8 @@ class Layout
   // .note.GNU-stack section.  GNU_STACK_FLAGS is the section flags
   // from that section if there was one.
   void
-  layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags);
+  layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags,
+		   const Object*);
 
   // Add an Output_section_data to the layout.  This is used for
   // special sections like the GOT section.  ORDER is where the

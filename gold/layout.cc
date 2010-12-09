@@ -1344,15 +1344,29 @@ Layout::expected_segment_count() const
 // object.  On some targets that will force an executable stack.
 
 void
-Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags)
+Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags,
+			 const Object* obj)
 {
   if (!seen_gnu_stack)
-    this->input_without_gnu_stack_note_ = true;
+    {
+      this->input_without_gnu_stack_note_ = true;
+      if (parameters->options().warn_execstack()
+	  && parameters->target().is_default_stack_executable())
+	gold_warning(_("%s: missing .note.GNU-stack section"
+		       " implies executable stack"),
+		     obj->name().c_str());
+    }
   else
     {
       this->input_with_gnu_stack_note_ = true;
       if ((gnu_stack_flags & elfcpp::SHF_EXECINSTR) != 0)
-	this->input_requires_executable_stack_ = true;
+	{
+	  this->input_requires_executable_stack_ = true;
+	  if (parameters->options().warn_execstack()
+	      || parameters->options().is_stack_executable())
+	    gold_warning(_("%s: requires executable stack"),
+			 obj->name().c_str());
+	}
     }
 }
 

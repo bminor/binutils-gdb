@@ -1429,7 +1429,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
     }
 
   if (!is_gc_pass_two)
-    layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
+    layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags, this);
 
   // When doing a relocatable link handle the reloc sections at the
   // end.  Garbage collection  and Identical Code Folding is not 

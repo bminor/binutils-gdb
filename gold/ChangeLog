@@ -1,3 +1,12 @@
+2010-12-09  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::layout_gnu_stack): Add warnings for executable
+	stack.
+	* layout.h (Layout::layout_gnu_stack): Add pointer to Object
+	parameter; change all callers.
+	* object.cc (Sized_relobj::do_layout): Adjust call to layout_gnu_stack.
+	* options.h (warn_execstack): New option.
+
 2010-12-07  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Scan::get_reference_flags): Treat R_ARM_PREL31
