@@ -40,6 +40,9 @@ struct thread_control_state
   /* Step-resume or longjmp-resume breakpoint.  */
   struct breakpoint *step_resume_breakpoint;
 
+  /* Exception-resume breakpoint.  */
+  struct breakpoint *exception_resume_breakpoint;
+
   /* Range to single step within.
 
      If this is nonzero, respond to a single-step signal by continuing
@@ -207,6 +210,10 @@ struct thread_info
   /* True if this thread has been explicitly requested to stop.  */
   int stop_requested;
 
+  /* The initiating frame of a nexting operation, used for deciding
+     which exceptions to intercept.  */
+  struct frame_id initiating_frame;
+
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
 
@@ -242,6 +249,9 @@ extern void delete_thread_silent (ptid_t);
 
 /* Delete a step_resume_breakpoint from the thread database. */
 extern void delete_step_resume_breakpoint (struct thread_info *);
+
+/* Delete an exception_resume_breakpoint from the thread database. */
+extern void delete_exception_resume_breakpoint (struct thread_info *);
 
 /* Translate the integer thread id (GDB's homegrown id, not the system's)
    into a "pid" (which may be overloaded with extra thread information).  */

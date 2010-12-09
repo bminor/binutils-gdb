@@ -45,6 +45,8 @@
 #include "language.h"
 #include "solib.h"
 #include "main.h"
+#include "dictionary.h"
+#include "block.h"
 #include "gdb_assert.h"
 #include "mi/mi-common.h"
 #include "event-top.h"
@@ -377,6 +379,7 @@ follow_fork (void)
      parent thread structure's run control related fields, not just these.
      Initialized to avoid "may be used uninitialized" warnings from gcc.  */
   struct breakpoint *step_resume_breakpoint = NULL;
+  struct breakpoint *exception_resume_breakpoint = NULL;
   CORE_ADDR step_range_start = 0;
   CORE_ADDR step_range_end = 0;
   struct frame_id step_frame_id = { 0 };
@@ -429,6 +432,8 @@ follow_fork (void)
 	    step_range_start = tp->control.step_range_start;
 	    step_range_end = tp->control.step_range_end;
 	    step_frame_id = tp->control.step_frame_id;
+	    exception_resume_breakpoint
+	      = clone_momentary_breakpoint (tp->control.exception_resume_breakpoint);
 
 	    /* For now, delete the parent's sr breakpoint, otherwise,
 	       parent/child sr breakpoints are considered duplicates,
@@ -439,6 +444,7 @@ follow_fork (void)
 	    tp->control.step_range_start = 0;
 	    tp->control.step_range_end = 0;
 	    tp->control.step_frame_id = null_frame_id;
+	    delete_exception_resume_breakpoint (tp);
 	  }
 
 	parent = inferior_ptid;
@@ -481,6 +487,8 @@ follow_fork (void)
 		    tp->control.step_range_start = step_range_start;
 		    tp->control.step_range_end = step_range_end;
 		    tp->control.step_frame_id = step_frame_id;
+		    tp->control.exception_resume_breakpoint
+		      = exception_resume_breakpoint;
 		  }
 		else
 		  {
@@ -533,6 +541,9 @@ follow_inferior_reset_breakpoints (void)
 
   if (tp->control.step_resume_breakpoint)
     breakpoint_re_set_thread (tp->control.step_resume_breakpoint);
+
+  if (tp->control.exception_resume_breakpoint)
+    breakpoint_re_set_thread (tp->control.exception_resume_breakpoint);
 
   /* Reinsert all breakpoints in the child.  The user may have set
      breakpoints after catching the fork, in which case those
@@ -771,6 +782,7 @@ follow_exec (ptid_t pid, char *execd_pathname)
   /* If there was one, it's gone now.  We cannot truly step-to-next
      statement through an exec(). */
   th->control.step_resume_breakpoint = NULL;
+  th->control.exception_resume_breakpoint = NULL;
   th->control.step_range_start = 0;
   th->control.step_range_end = 0;
 
@@ -2219,6 +2231,8 @@ static void insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
 						  struct symtab_and_line sr_sal,
 						  struct frame_id sr_id);
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
+static void check_exception_resume (struct execution_control_state *,
+				    struct frame_info *, struct symbol *);
 
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
@@ -2340,6 +2354,7 @@ delete_step_resume_breakpoint_callback (struct thread_info *info, void *data)
     return 0;
 
   delete_step_resume_breakpoint (info);
+  delete_exception_resume_breakpoint (info);
   return 0;
 }
 
@@ -2364,6 +2379,7 @@ delete_step_thread_step_resume_breakpoint (void)
       struct thread_info *tp = inferior_thread ();
 
       delete_step_resume_breakpoint (tp);
+      delete_exception_resume_breakpoint (tp);
     }
   else
     /* In all-stop mode, delete all step-resume and longjmp-resume
@@ -4112,23 +4128,33 @@ process_event_stop_test:
 
 	ecs->event_thread->stepping_over_breakpoint = 1;
 
-	if (!gdbarch_get_longjmp_target_p (gdbarch)
-	    || !gdbarch_get_longjmp_target (gdbarch, frame, &jmp_buf_pc))
+	if (what.is_longjmp)
 	  {
-	    if (debug_infrun)
-	      fprintf_unfiltered (gdb_stdlog, "\
+	    if (!gdbarch_get_longjmp_target_p (gdbarch)
+		|| !gdbarch_get_longjmp_target (gdbarch,
+						frame, &jmp_buf_pc))
+	      {
+		if (debug_infrun)
+		  fprintf_unfiltered (gdb_stdlog, "\
 infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
-	    keep_going (ecs);
-	    return;
+		keep_going (ecs);
+		return;
+	      }
+
+	    /* We're going to replace the current step-resume breakpoint
+	       with a longjmp-resume breakpoint.  */
+	    delete_step_resume_breakpoint (ecs->event_thread);
+
+	    /* Insert a breakpoint at resume address.  */
+	    insert_longjmp_resume_breakpoint (gdbarch, jmp_buf_pc);
 	  }
+	else
+	  {
+	    struct symbol *func = get_frame_function (frame);
 
-	/* We're going to replace the current step-resume breakpoint
-	   with a longjmp-resume breakpoint.  */
-	delete_step_resume_breakpoint (ecs->event_thread);
-
-	/* Insert a breakpoint at resume address.  */
-	insert_longjmp_resume_breakpoint (gdbarch, jmp_buf_pc);
-
+	    if (func)
+	      check_exception_resume (ecs, frame, func);
+	  }
 	keep_going (ecs);
 	return;
 
@@ -4137,9 +4163,54 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  fprintf_unfiltered (gdb_stdlog,
 			      "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
 
-	gdb_assert (ecs->event_thread->control.step_resume_breakpoint
-		    != NULL);
-	delete_step_resume_breakpoint (ecs->event_thread);
+	if (what.is_longjmp)
+	  {
+	    gdb_assert (ecs->event_thread->control.step_resume_breakpoint
+			!= NULL);
+	    delete_step_resume_breakpoint (ecs->event_thread);
+	  }
+	else
+	  {
+	    /* There are several cases to consider.
+
+	       1. The initiating frame no longer exists.  In this case
+	       we must stop, because the exception has gone too far.
+
+	       2. The initiating frame exists, and is the same as the
+	       current frame.  We stop, because the exception has been
+	       caught.
+
+	       3. The initiating frame exists and is different from
+	       the current frame.  This means the exception has been
+	       caught beneath the initiating frame, so keep going.  */
+	    struct frame_info *init_frame
+	      = frame_find_by_id (ecs->event_thread->initiating_frame);
+
+	    gdb_assert (ecs->event_thread->control.exception_resume_breakpoint
+			!= NULL);
+	    delete_exception_resume_breakpoint (ecs->event_thread);
+
+	    if (init_frame)
+	      {
+		struct frame_id current_id
+		  = get_frame_id (get_current_frame ());
+		if (frame_id_eq (current_id,
+				 ecs->event_thread->initiating_frame))
+		  {
+		    /* Case 2.  Fall through.  */
+		  }
+		else
+		  {
+		    /* Case 3.  */
+		    keep_going (ecs);
+		    return;
+		  }
+	      }
+
+	    /* For Cases 1 and 2, remove the step-resume breakpoint,
+	       if it exists.  */
+	    delete_step_resume_breakpoint (ecs->event_thread);
+	  }
 
 	ecs->event_thread->control.stop_step = 1;
 	print_end_stepping_range_reason ();
@@ -5107,6 +5178,97 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   inferior_thread ()->control.step_resume_breakpoint =
     set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume);
+}
+
+/* Insert an exception resume breakpoint.  TP is the thread throwing
+   the exception.  The block B is the block of the unwinder debug hook
+   function.  FRAME is the frame corresponding to the call to this
+   function.  SYM is the symbol of the function argument holding the
+   target PC of the exception.  */
+
+static void
+insert_exception_resume_breakpoint (struct thread_info *tp,
+				    struct block *b,
+				    struct frame_info *frame,
+				    struct symbol *sym)
+{
+  struct gdb_exception e;
+
+  /* We want to ignore errors here.  */
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      struct symbol *vsym;
+      struct value *value;
+      CORE_ADDR handler;
+      struct breakpoint *bp;
+
+      vsym = lookup_symbol (SYMBOL_LINKAGE_NAME (sym), b, VAR_DOMAIN, NULL);
+      value = read_var_value (vsym, frame);
+      /* If the value was optimized out, revert to the old behavior.  */
+      if (! value_optimized_out (value))
+	{
+	  handler = value_as_address (value);
+
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: exception resume at %lx\n",
+				(unsigned long) handler);
+
+	  bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
+					       handler, bp_exception_resume);
+	  bp->thread = tp->num;
+	  inferior_thread ()->control.exception_resume_breakpoint = bp;
+	}
+    }
+}
+
+/* This is called when an exception has been intercepted.  Check to
+   see whether the exception's destination is of interest, and if so,
+   set an exception resume breakpoint there.  */
+
+static void
+check_exception_resume (struct execution_control_state *ecs,
+			struct frame_info *frame, struct symbol *func)
+{
+  struct gdb_exception e;
+
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      struct block *b;
+      struct dict_iterator iter;
+      struct symbol *sym;
+      int argno = 0;
+
+      /* The exception breakpoint is a thread-specific breakpoint on
+	 the unwinder's debug hook, declared as:
+	 
+	 void _Unwind_DebugHook (void *cfa, void *handler);
+	 
+	 The CFA argument indicates the frame to which control is
+	 about to be transferred.  HANDLER is the destination PC.
+	 
+	 We ignore the CFA and set a temporary breakpoint at HANDLER.
+	 This is not extremely efficient but it avoids issues in gdb
+	 with computing the DWARF CFA, and it also works even in weird
+	 cases such as throwing an exception from inside a signal
+	 handler.  */
+
+      b = SYMBOL_BLOCK_VALUE (func);
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
+	{
+	  if (!SYMBOL_IS_ARGUMENT (sym))
+	    continue;
+
+	  if (argno == 0)
+	    ++argno;
+	  else
+	    {
+	      insert_exception_resume_breakpoint (ecs->event_thread,
+						  b, frame, sym);
+	      break;
+	    }
+	}
+    }
 }
 
 static void

@@ -279,6 +279,8 @@ extern void interrupt_target_command (char *args, int from_tty);
 
 extern void interrupt_target_1 (int all_threads);
 
+extern void delete_longjmp_breakpoint_cleanup (void *arg);
+
 extern void detach_command (char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);

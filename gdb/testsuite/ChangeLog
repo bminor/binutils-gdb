@@ -1,3 +1,10 @@
+2010-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.java/jnpe.java: New file.
+	* gdb.java/jnpe.exp: New file.
+	* gdb.cp/nextoverthrow.exp: New file.
+	* gdb.cp/nextoverthrow.cc: New file.
+
 2010-12-07  Doug Evans  <dje@google.com>
 
 	* gdb.base/catch-syscall.exp (do_syscall_tests): Remove setting

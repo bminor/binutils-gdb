@@ -90,6 +90,16 @@ delete_step_resume_breakpoint (struct thread_info *tp)
     }
 }
 
+void
+delete_exception_resume_breakpoint (struct thread_info *tp)
+{
+  if (tp && tp->control.exception_resume_breakpoint)
+    {
+      delete_breakpoint (tp->control.exception_resume_breakpoint);
+      tp->control.exception_resume_breakpoint = NULL;
+    }
+}
+
 static void
 clear_thread_inferior_resources (struct thread_info *tp)
 {
@@ -103,10 +113,19 @@ clear_thread_inferior_resources (struct thread_info *tp)
       tp->control.step_resume_breakpoint = NULL;
     }
 
+  if (tp->control.exception_resume_breakpoint)
+    {
+      tp->control.exception_resume_breakpoint->disposition
+	= disp_del_at_next_stop;
+      tp->control.exception_resume_breakpoint = NULL;
+    }
+
   bpstat_clear (&tp->control.stop_bpstat);
 
   discard_all_intermediate_continuations_thread (tp);
   discard_all_continuations_thread (tp);
+
+  delete_longjmp_breakpoint (tp->num);
 }
 
 static void

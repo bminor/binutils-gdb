@@ -1,3 +1,47 @@
+2010-12-09  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9593:
+	* thread.c (clear_thread_inferior_resources): Call
+	delete_longjmp_breakpoint.
+	* infrun.c (handle_inferior_event): Handle exception breakpoints.
+	(handle_inferior_event): Likewise.
+	(insert_exception_resume_breakpoint): New function.
+	(check_exception_resume): Likewise.
+	* inferior.h (delete_longjmp_breakpoint_cleanup): Declare.
+	* infcmd.c (delete_longjmp_breakpoint_cleanup): No longer static.
+	(step_1): Set thread's initiating frame.
+	(until_next_continuation): New function.
+	(until_next_command): Support exception breakpoints.
+	(finish_command_continuation): Delete longjmp breakpoint.
+	(finish_forward): Support exception breakpoints.
+	* gdbthread.h (struct thread_info) <initiating_frame>: New field.
+	* breakpoint.h (enum bptype) <bp_exception, bp_exception_resume,
+	bp_exception_master>: New constants.
+	(struct bpstat_what) <is_longjmp>: New field.
+	(set_longjmp_breakpoint): Update.
+	* breakpoint.c (create_exception_master_breakpoint): New function.
+	(update_breakpoints_after_exec): Handle bp_exception_master.  Call
+	create_exception_master_breakpoint.
+	(print_it_typical): Handle bp_exception_master, bp_exception.
+	(bpstat_stop_status): Handle bp_exception_master.
+	(bpstat_what): Handle bp_exception_master, bp_exception,
+	bp_exception_resume.
+	(bptype_string): Likewise.
+	(print_one_breakpoint_location): Likewise.
+	(allocate_bp_location): Likewise.
+	(set_longjmp_breakpoint): Handle exception breakpoints.  Change
+	interface.
+	(delete_longjmp_breakpoint): Handle exception breakpoints.
+	(mention): Likewise.
+	(struct until_break_command_continuation_args) <thread_num>: New
+	field.
+	(until_break_command_continuation): Call
+	delete_longjmp_breakpoint.
+	(until_break_command): Support exception breakpoints.
+	(delete_command): Likewise.
+	(breakpoint_re_set_one): Likewise.
+	(breakpoint_re_set): Likewise.
+
 2010-12-08  Doug Evans  <dje@google.com>
 
 	* gdbtypes.h (TYPE_IS_OPAQUE): Reformat.

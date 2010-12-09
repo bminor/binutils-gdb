@@ -57,6 +57,13 @@ enum bptype
     bp_longjmp,			/* secret breakpoint to find longjmp() */
     bp_longjmp_resume,		/* secret breakpoint to escape longjmp() */
 
+    /* An internal breakpoint that is installed on the unwinder's
+       debug hook.  */
+    bp_exception,
+    /* An internal breakpoint that is set at the point where an
+       exception will land.  */
+    bp_exception_resume,
+
     /* Used by wait_for_inferior for stepping over subroutine calls, for
        stepping over signal handlers, and for skipping prologues.  */
     bp_step_resume,
@@ -125,6 +132,9 @@ enum bptype
 
     /* Master copies of std::terminate breakpoints.  */
     bp_std_terminate_master,
+
+    /* Like bp_longjmp_master, but for exceptions.  */
+    bp_exception_master,
 
     bp_catchpoint,
 
@@ -665,6 +675,11 @@ struct bpstat_what
        continuing from a call dummy without popping the frame is not a
        useful one).  */
     enum stop_stack_kind call_dummy;
+
+    /* Used for BPSTAT_WHAT_SET_LONGJMP_RESUME and
+       BPSTAT_WHAT_CLEAR_LONGJMP_RESUME.  True if we are handling a
+       longjmp, false if we are handling an exception.  */
+    int is_longjmp;
   };
 
 /* The possible return values for print_bpstat, print_it_normal,
@@ -925,7 +940,8 @@ extern int detach_breakpoints (int);
    this PSPACE anymore.  */
 extern void breakpoint_program_space_exit (struct program_space *pspace);
 
-extern void set_longjmp_breakpoint (int thread);
+extern void set_longjmp_breakpoint (struct thread_info *tp,
+				    struct frame_id frame);
 extern void delete_longjmp_breakpoint (int thread);
 
 extern void enable_overlay_breakpoints (void);

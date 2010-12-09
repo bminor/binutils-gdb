@@ -822,7 +822,7 @@ nexti_command (char *count_string, int from_tty)
   step_1 (1, 1, count_string);
 }
 
-static void
+void
 delete_longjmp_breakpoint_cleanup (void *arg)
 {
   int thread = * (int *) arg;
@@ -862,10 +862,12 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
+      struct thread_info *tp = inferior_thread ();
+
       if (in_thread_list (inferior_ptid))
  	thread = pid_to_thread_id (inferior_ptid);
 
-      set_longjmp_breakpoint (thread);
+      set_longjmp_breakpoint (tp, get_frame_id (get_current_frame ()));
 
       make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
     }
@@ -1220,6 +1222,16 @@ signal_command (char *signum_exp, int from_tty)
   proceed ((CORE_ADDR) -1, oursig, 0);
 }
 
+/* A continuation callback for until_next_command.  */
+
+static void
+until_next_continuation (void *arg)
+{
+  struct thread_info *tp = arg;
+
+  delete_longjmp_breakpoint (tp->num);
+}
+
 /* Proceed until we reach a different source line with pc greater than
    our current one or exit the function.  We skip calls in both cases.
 
@@ -1236,6 +1248,8 @@ until_next_command (int from_tty)
   struct symbol *func;
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
+  int thread = tp->num;
+  struct cleanup *old_chain;
 
   clear_proceed_status ();
   set_step_frame ();
@@ -1271,7 +1285,18 @@ until_next_command (int from_tty)
 
   tp->step_multi = 0;		/* Only one call to proceed */
 
+  set_longjmp_breakpoint (tp, get_frame_id (frame));
+  old_chain = make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
+
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
+
+  if (target_can_async_p () && is_running (inferior_ptid))
+    {
+      discard_cleanups (old_chain);
+      add_continuation (tp, until_next_continuation, tp, NULL);
+    }
+  else
+    do_cleanups (old_chain);
 }
 
 static void
@@ -1464,6 +1489,7 @@ finish_command_continuation (void *arg)
   if (bs != NULL && tp->control.proceed_to_finish)
     observer_notify_normal_stop (bs, 1 /* print frame */);
   delete_breakpoint (a->breakpoint);
+  delete_longjmp_breakpoint (inferior_thread ()->num);
 }
 
 static void
@@ -1548,6 +1574,7 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
   struct finish_command_continuation_args *cargs;
+  int thread = tp->num;
 
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
@@ -1557,6 +1584,9 @@ finish_forward (struct symbol *function, struct frame_info *frame)
                                          bp_finish);
 
   old_chain = make_cleanup_delete_breakpoint (breakpoint);
+
+  set_longjmp_breakpoint (tp, get_frame_id (frame));
+  make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
   /* We want stop_registers, please...  */
   tp->control.proceed_to_finish = 1;
