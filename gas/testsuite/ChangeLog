@@ -1,3 +1,10 @@
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/ldstla-32.d: Use wildcard address matching.
+	* gas/mips/ldstla-32-mips3.d: Likewise.
+	* gas/mips/ldstla-32-shared.d: Likewise.
+	* gas/mips/ldstla-32-mips3-shared.d: Likewise.
+
 2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* gas/i386/ifunc-2.s, gas/i386/ifunc-2.l: New test.
