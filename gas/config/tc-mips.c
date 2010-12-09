@@ -5577,7 +5577,7 @@ macro (struct mips_cl_insn *ip)
       if (offset_expr.X_op != O_symbol
 	  && offset_expr.X_op != O_constant)
 	{
-	  as_bad (_("expression too complex"));
+	  as_bad (_("Expression too complex"));
 	  offset_expr.X_op = O_constant;
 	}
 
@@ -5665,7 +5665,7 @@ macro (struct mips_cl_insn *ip)
 		  relax_switch ();
 		}
 	      if (!IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
-		as_bad (_("offset too large"));
+		as_bad (_("Offset too large"));
 	      macro_build_lui (&offset_expr, tempreg);
 	      macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
 			   tempreg, tempreg, BFD_RELOC_LO16);
@@ -6525,7 +6525,7 @@ macro (struct mips_cl_insn *ip)
 	  && NO_ISA_COP (mips_opts.arch)
 	  && (ip->insn_mo->pinfo2 & (INSN2_M_FP_S | INSN2_M_FP_D)) == 0)
 	{
-	  as_bad (_("opcode not supported on this processor: %s"),
+	  as_bad (_("Opcode not supported on this processor: %s"),
 		  mips_cpu_info_from_arch (mips_opts.arch)->name);
 	  break;
 	}
@@ -6548,7 +6548,7 @@ macro (struct mips_cl_insn *ip)
       if (offset_expr.X_op != O_constant
 	  && offset_expr.X_op != O_symbol)
 	{
-	  as_bad (_("expression too complex"));
+	  as_bad (_("Expression too complex"));
 	  offset_expr.X_op = O_constant;
 	}
 
@@ -7124,7 +7124,7 @@ macro (struct mips_cl_insn *ip)
       if (offset_expr.X_op != O_symbol
 	  && offset_expr.X_op != O_constant)
 	{
-	  as_bad (_("expression too complex"));
+	  as_bad (_("Expression too complex"));
 	  offset_expr.X_op = O_constant;
 	}
 
@@ -7995,7 +7995,7 @@ macro (struct mips_cl_insn *ip)
     ulh:
       used_at = 1;
       if (offset_expr.X_add_number >= 0x7fff)
-	as_bad (_("operand overflow"));
+	as_bad (_("Operand overflow"));
       if (!target_big_endian)
 	++offset_expr.X_add_number;
       macro_build (&offset_expr, s, "t,o(b)", AT, BFD_RELOC_LO16, breg);
@@ -8019,7 +8019,7 @@ macro (struct mips_cl_insn *ip)
       off = 3;
     ulw:
       if (offset_expr.X_add_number >= 0x8000 - off)
-	as_bad (_("operand overflow"));
+	as_bad (_("Operand overflow"));
       if (treg != breg)
 	tempreg = treg;
       else
@@ -8092,7 +8092,7 @@ macro (struct mips_cl_insn *ip)
     case M_USH:
       used_at = 1;
       if (offset_expr.X_add_number >= 0x7fff)
-	as_bad (_("operand overflow"));
+	as_bad (_("Operand overflow"));
       if (target_big_endian)
 	++offset_expr.X_add_number;
       macro_build (&offset_expr, "sb", "t,o(b)", treg, BFD_RELOC_LO16, breg);
@@ -8115,7 +8115,7 @@ macro (struct mips_cl_insn *ip)
       off = 3;
     usw:
       if (offset_expr.X_add_number >= 0x8000 - off)
-	as_bad (_("operand overflow"));
+	as_bad (_("Operand overflow"));
       if (!target_big_endian)
 	offset_expr.X_add_number += off;
       macro_build (&offset_expr, s, "t,o(b)", treg, BFD_RELOC_LO16, breg);
@@ -8677,7 +8677,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       /* If we did not find a '.', then we can quit now.  */
       if (*s != '.')
 	{
-	  insn_error = _("unrecognized opcode");
+	  insn_error = _("Unrecognized opcode");
 	  return;
 	}
 
@@ -8685,7 +8685,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       *s++ = '\0';
       if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
 	{
-	  insn_error = _("unrecognized opcode");
+	  insn_error = _("Unrecognized opcode");
 	  return;
 	}
     }
@@ -9279,7 +9279,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  continue;
 
 		default:
-		  as_bad (_("Internal: bad mips opcode "
+		  as_bad (_("Internal error: bad mips opcode "
 			    "(unknown extension operand type `+%c'): %s %s"),
 			  *args, insn->name, insn->args);
 		  /* Further processing is fruitless.  */
@@ -9464,9 +9464,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  if (regno == AT && mips_opts.at)
 		    {
 		      if (mips_opts.at == ATREG)
-			as_warn (_("used $at without \".set noat\""));
+			as_warn (_("Used $at without \".set noat\""));
 		      else
-			as_warn (_("used $%u with \".set at=$%u\""),
+			as_warn (_("Used $%u with \".set at=$%u\""),
 				 regno, mips_opts.at);
 		    }
 		}
@@ -9493,13 +9493,13 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		      if (regno == lastregno)
 			{
 			  insn_error
-			    = _("source and destination must be different");
+			    = _("Source and destination must be different");
 			  continue;
 			}
 		      if (regno == 31 && lastregno == 0xffffffff)
 			{
 			  insn_error
-			    = _("a destination register must be supplied");
+			    = _("A destination register must be supplied");
 			  continue;
 			}
 		    }
@@ -9952,7 +9952,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			break;
 		      if (imm_expr.X_op == O_constant
 			  || imm_expr.X_op == O_big)
-			as_bad (_("expression out of range"));
+			as_bad (_("Expression out of range"));
 		    }
 		}
 	      s = expr_end;
@@ -10053,7 +10053,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		c = 8; /* Invalid sel value.  */
 
 	      if (c > 7)
-		as_bad (_("invalid coprocessor sub-selection value (0-7)"));
+		as_bad (_("Invalid coprocessor sub-selection value (0-7)"));
 	      ip->insn_opcode |= c;
 	      continue;
 
@@ -10093,7 +10093,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    default:
-	      as_bad (_("bad char = '%c'\n"), *args);
+	      as_bad (_("Bad char = '%c'\n"), *args);
 	      internalError ();
 	    }
 	  break;
@@ -10104,12 +10104,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	{
 	  ++insn;
 	  s = argsStart;
-	  insn_error = _("illegal operands");
+	  insn_error = _("Illegal operands");
 	  continue;
 	}
       if (save_c)
 	*(--argsStart) = save_c;
-      insn_error = _("illegal operands");
+      insn_error = _("Illegal operands");
       return;
     }
 }
