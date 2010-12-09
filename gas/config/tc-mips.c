@@ -9517,7 +9517,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		      INSERT_OPERAND (RS, *ip, regno);
 		      break;
 		    case 'd':
-		    case 'G':
 		    case 'K':
 		    case 'g':
 		      INSERT_OPERAND (RD, *ip, regno);
@@ -9546,11 +9545,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			 is $0.  This only matches $0, and is checked
 			 outside the switch.  */
 		      break;
-		    case 'D':
-		      /* Itbl operand; not yet implemented. FIXME ?? */
-		      break;
-		      /* What about all other operands like 'i', which
-			 can be specified in the opcode table? */
 		    }
 		  lastregno = regno;
 		  continue;

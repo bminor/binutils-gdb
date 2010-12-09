@@ -1,5 +1,9 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (mips_ip): Remove dead format specifier code.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (file_ase_mips16): Adjust comment.
 	(append_insn): Update file_ase_mips16.
 	(mips_after_parse_args): Don't set file_ase_mips16 here.
