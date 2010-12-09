@@ -1,5 +1,10 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro) <ld_st>: Don't load a zero into an
+	auxiliary register when using a signed 16-bit constant offset.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (mips_ip): Remove lastregno's
 	preinitialization.
 

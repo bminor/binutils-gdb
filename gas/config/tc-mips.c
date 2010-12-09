@@ -6565,14 +6565,19 @@ macro (struct mips_cl_insn *ip)
 	 is in non PIC code.  */
       if (offset_expr.X_op == O_constant)
 	{
-	  expr1.X_add_number = ((offset_expr.X_add_number + 0x8000)
-				& ~(bfd_vma) 0xffff);
+	  expr1.X_add_number = offset_expr.X_add_number;
 	  normalize_address_expr (&expr1);
-	  load_register (tempreg, &expr1, HAVE_64BIT_ADDRESSES);
-	  if (breg != 0)
-	    macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
-			 tempreg, tempreg, breg);
-	  macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_LO16, tempreg);
+	  if (!IS_SEXT_16BIT_NUM (expr1.X_add_number))
+	    {
+	      expr1.X_add_number = ((expr1.X_add_number + 0x8000)
+				    & ~(bfd_vma) 0xffff);
+	      load_register (tempreg, &expr1, HAVE_64BIT_ADDRESSES);
+	      if (breg != 0)
+		macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
+			     tempreg, tempreg, breg);
+	      breg = tempreg;
+	    }
+	  macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_LO16, breg);
 	}
       else if (mips_pic == NO_PIC)
 	{
