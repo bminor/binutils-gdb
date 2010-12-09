@@ -1,5 +1,13 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/jal-svr4pic.d: Also use wildcard address matching in
+	relocations.
+	* gas/mips/mips1@jal-svr4pic.d: Likewise.
+	* gas/mips/jal-svr4pic-noreorder.d: Likewise.
+	* gas/mips/mips1@jal-svr4pic-noreorder.d: Likewise.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/ldstla-32.d: Update according to a 16-bit constant
 	offset optimization.
 	* gas/mips/ldstla-32-mips3.d: Likewise.
