@@ -1,3 +1,7 @@
+2010-12-09  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* mi/mi-parse.c (mi_parse): Wrong error message.
+
 2010-12-09  Doug Evans  <dje@google.com>
 
 	* symfile.h (quick_symbol_functions): Clarify usage of
