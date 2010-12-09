@@ -1,5 +1,10 @@
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro): Remove a trailing 0 from NOP
+	requests.
+
+2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (macro): Use EXTRACT_OPERAND to get register
 	numbers.
 

@@ -4848,7 +4848,7 @@ macro (struct mips_cl_insn *ip)
       expr1.X_add_number = 8;
       macro_build (&expr1, "bgez", "s,p", sreg);
       if (dreg == sreg)
-	macro_build (NULL, "nop", "", 0);
+	macro_build (NULL, "nop", "");
       else
 	move_register (dreg, sreg);
       macro_build (NULL, dbl ? "dsub" : "sub", "d,v,t", dreg, 0, sreg);
@@ -4999,7 +4999,7 @@ macro (struct mips_cl_insn *ip)
 	do_false:
 	  /* Result is always false.  */
 	  if (! likely)
-	    macro_build (NULL, "nop", "", 0);
+	    macro_build (NULL, "nop", "");
 	  else
 	    macro_build (&offset_expr, "bnel", "s,t,p", ZERO, ZERO);
 	  break;
@@ -5415,7 +5415,7 @@ macro (struct mips_cl_insn *ip)
 	{
 	  expr1.X_add_number = 8;
 	  macro_build (&expr1, "bne", "s,t,p", sreg, AT);
-	  macro_build (NULL, "nop", "", 0);
+	  macro_build (NULL, "nop", "");
 
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
@@ -7444,7 +7444,7 @@ macro (struct mips_cl_insn *ip)
 	{
 	  expr1.X_add_number = 8;
 	  macro_build (&expr1, "beq", "s,t,p", dreg, AT);
-	  macro_build (NULL, "nop", "", 0);
+	  macro_build (NULL, "nop", "");
 	  macro_build (NULL, "break", "c", 6);
 	}
       end_noreorder ();
@@ -7475,7 +7475,7 @@ macro (struct mips_cl_insn *ip)
 	{
 	  expr1.X_add_number = 8;
 	  macro_build (&expr1, "beq", "s,t,p", AT, ZERO);
-	  macro_build (NULL, "nop", "", 0);
+	  macro_build (NULL, "nop", "");
 	  macro_build (NULL, "break", "c", 6);
 	}
       end_noreorder ();
