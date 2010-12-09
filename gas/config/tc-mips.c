@@ -8991,8 +8991,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		 we must have a left paren.  */
 	      /* This is dependent on the next operand specifier
 		 is a base register specification.  */
-	      gas_assert (args[1] == 'b' || args[1] == '5'
-		      || args[1] == '-' || args[1] == '4');
+	      gas_assert (args[1] == 'b');
 	      if (*s == '\0')
 		return;
 
