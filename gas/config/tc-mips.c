@@ -4823,9 +4823,9 @@ macro (struct mips_cl_insn *ip)
 
   gas_assert (! mips_opts.mips16);
 
-  treg = (ip->insn_opcode >> 16) & 0x1f;
-  dreg = (ip->insn_opcode >> 11) & 0x1f;
-  sreg = breg = (ip->insn_opcode >> 21) & 0x1f;
+  treg = EXTRACT_OPERAND (RT, *ip);
+  dreg = EXTRACT_OPERAND (RD, *ip);
+  sreg = breg = EXTRACT_OPERAND (RS, *ip);
   mask = ip->insn_mo->mask;
 
   expr1.X_op = O_constant;
