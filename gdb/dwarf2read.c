@@ -204,10 +204,11 @@ struct dwarf2_per_objfile
      VMA of 0.  */
   int has_section_at_zero;
 
-  /* True if we are using the mapped index.  */
+  /* True if we are using the mapped index,
+     or we are faking it for OBJF_READNOW's sake.  */
   unsigned char using_index;
 
-  /* The mapped index.  */
+  /* The mapped index, or NULL if .gdb_index is missing or not being used.  */
   struct mapped_index *index_table;
 
   /* Set during partial symbol reading, to prevent queueing of full
@@ -2115,6 +2116,7 @@ static struct symtab *
 dw2_find_last_source_symtab (struct objfile *objfile)
 {
   int index;
+
   dw2_setup (objfile);
   index = dwarf2_per_objfile->n_comp_units - 1;
   return dw2_instantiate_symtab (objfile, dw2_get_cu (index));
@@ -2154,6 +2156,7 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
   struct dwarf2_per_cu_data *base_cu = NULL;
 
   dw2_setup (objfile);
+
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
@@ -2235,6 +2238,7 @@ dw2_do_expand_symtabs_matching (struct objfile *objfile, const char *name)
 {
   dw2_setup (objfile);
 
+  /* index_table is NULL if OBJF_READNOW.  */
   if (dwarf2_per_objfile->index_table)
     {
       offset_type *vec;
@@ -2361,6 +2365,7 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
 
   dw2_setup (objfile);
 
+  /* index_table is NULL if OBJF_READNOW.  */
   if (!dwarf2_per_objfile->index_table)
     return NULL;
 
@@ -2407,6 +2412,8 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
   struct mapped_index *index;
 
   dw2_setup (objfile);
+
+  /* index_table is NULL if OBJF_READNOW.  */
   if (!dwarf2_per_objfile->index_table)
     return;
   index = dwarf2_per_objfile->index_table;
@@ -2500,6 +2507,7 @@ dw2_map_symbol_names (struct objfile *objfile,
 
   dw2_setup (objfile);
 
+  /* index_table is NULL if OBJF_READNOW.  */
   if (!dwarf2_per_objfile->index_table)
     return;
   index = dwarf2_per_objfile->index_table;
@@ -2527,6 +2535,7 @@ dw2_map_symbol_filenames (struct objfile *objfile,
   int i;
 
   dw2_setup (objfile);
+
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
     {
@@ -4996,6 +5005,8 @@ initialize_cu_func_list (struct dwarf2_cu *cu)
   cu->first_fn = cu->last_fn = cu->cached_fn = NULL;
 }
 
+/* Cleanup function for read_file_scope.  */
+
 static void
 free_cu_line_header (void *arg)
 {
@@ -5044,6 +5055,8 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
   if (*name == NULL)
     *name = "<unknown>";
 }
+
+/* Process DW_TAG_compile_unit.  */
 
 static void
 read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
@@ -5142,7 +5155,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   do_cleanups (back_to);
 }
 
-/* For TUs we want to skip the first top level sibling if it's not the
+/* Process DW_TAG_type_unit.
+   For TUs we want to skip the first top level sibling if it's not the
    actual type being defined by this TU.  In this case the first top
    level sibling is there to provide context only.  */
 
@@ -9783,7 +9797,9 @@ die_specification (struct die_info *die, struct dwarf2_cu **spec_cu)
 }
 
 /* Free the line_header structure *LH, and any arrays and strings it
-   refers to.  */
+   refers to.
+   NOTE: This is also used as a "cleanup" function.  */
+
 static void
 free_line_header (struct line_header *lh)
 {
@@ -9802,8 +9818,8 @@ free_line_header (struct line_header *lh)
   xfree (lh);
 }
 
-
 /* Add an entry to LH's include directory table.  */
+
 static void
 add_include_dir (struct line_header *lh, char *include_dir)
 {
@@ -9825,8 +9841,8 @@ add_include_dir (struct line_header *lh, char *include_dir)
   lh->include_dirs[lh->num_include_dirs++] = include_dir;
 }
 
-
 /* Add an entry to LH's file name table.  */
+
 static void
 add_file_name (struct line_header *lh,
                char *name,
@@ -9860,7 +9876,6 @@ add_file_name (struct line_header *lh,
   fe->symtab = NULL;
 }
 
-
 /* Read the statement program header starting at OFFSET in
    .debug_line, according to the endianness of ABFD.  Return a pointer
    to a struct line_header, allocated using xmalloc.
@@ -9868,6 +9883,7 @@ add_file_name (struct line_header *lh,
    NOTE: the strings in the include directory and file name tables of
    the returned object point into debug_line_buffer, and must not be
    freed.  */
+
 static struct line_header *
 dwarf_decode_line_header (unsigned int offset, bfd *abfd,
 			  struct dwarf2_cu *cu)
@@ -13562,7 +13578,6 @@ dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 
 /* Macro support.  */
 
-
 /* Return the full name of file number I in *LH's file name table.
    Use COMP_DIR as the name of the current directory of the
    compilation.  The result is allocated using xmalloc; the caller is
@@ -14826,6 +14841,7 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 }
 
 
+/* The "save gdb-index" command.  */
 
 /* The contents of the hash table we create when building the string
    table.  */
