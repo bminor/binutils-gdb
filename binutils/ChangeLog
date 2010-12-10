@@ -1,3 +1,17 @@
+2010-12-10  Alan Modra  <amodra@gmail.com>
+
+	* binemul.h (do_ar_emul_append): Declare.
+	* binemul.c (any_ok): New function.
+	(do_ar_emul_append): Rename from do_ar_emul_default_append.  Make
+	global, add check arg.  Adjust callers.
+	(ar_emul_default_replace): Tidy.
+	* configure.tgt (powerpc-*-aix[5-9]*,rs6000-*-aix[5-9]*): Use
+	bin_aix_emulation.
+	* emul_aix.c (bin_aix5_emulation, ar_emul_aix_internal): Delete.
+	(ar_emul_aix5_append, ar_emul_aix5_replace): Delete.
+	(check_aix): New function.
+	(ar_emul_aix_append, ar_emul_aix_replace): Rewrite.
+
 2010-12-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: New file.
