@@ -51,6 +51,13 @@
      feature requires proper debuginfo support from the compiler; it
      was added to GCC 4.5.
 
+  ** The motion commands "next", "finish", "until", and "advance" now
+     work better when exceptions are thrown.  In particular, GDB will
+     no longer lose control of the inferior; instead, the GDB will
+     stop the inferior at the point at which the exception is caught.
+     This functionality requires a change in the exception handling
+     code that was introduced in GCC 4.5.
+
 * GDB now follows GCC's rules on accessing volatile objects when
   reading or writing target state during expression evaluation.
   One notable difference to prior behavior is that "print x = 0"

@@ -1,3 +1,7 @@
+2010-12-10  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Document exception-handling change.
+
 2010-12-09  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-parse.c (mi_parse): Wrong error message.
