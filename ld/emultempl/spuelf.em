@@ -355,7 +355,7 @@ new_tmp_file (char **fname)
   *fname = mktemp (*fname);
   if (*fname == NULL)
     return -1;
-  fd = open (fname, O_RDWR | O_CREAT | O_EXCL, 0600);
+  fd = open (*fname, O_RDWR | O_CREAT | O_EXCL, 0600);
 #endif
   return fd;
 }
