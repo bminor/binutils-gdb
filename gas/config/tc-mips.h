@@ -42,6 +42,9 @@ struct expressionS;
 #define MAX_RELOC_EXPANSION 3
 #define LOCAL_LABELS_FB 1
 
+#define TC_ADDRESS_BYTES mips_address_bytes
+extern int mips_address_bytes (void);
+
 /* Maximum symbol offset that can be encoded in a BFD_RELOC_GPREL16
    relocation.  */
 #define MAX_GPREL_OFFSET (0x7FF0)

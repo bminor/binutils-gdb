@@ -1,3 +1,9 @@
+2010-12-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.h (TC_ADDRESS_BYTES): New macro.
+	(mips_address_bytes): New prototype.
+	* config/tc-mips.c (mips_address_bytes): New function.
+
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips_ip): Remove dead format specifier code.

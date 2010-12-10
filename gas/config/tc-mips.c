@@ -1234,6 +1234,15 @@ static const pseudo_typeS mips_nonecoff_pseudo_table[] =
   { NULL, NULL, 0 },
 };
 
+/* Export the ABI address size for use by TC_ADDRESS_BYTES for the
+   purpose of the `.dc.a' internal pseudo-op.  */
+
+int
+mips_address_bytes (void)
+{
+  return HAVE_64BIT_ADDRESSES ? 8 : 4;
+}
+
 extern void pop_insert (const pseudo_typeS *);
 
 void
