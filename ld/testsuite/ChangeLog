@@ -1,3 +1,32 @@
+2010-12-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* ld-elfvers/vers.h: New file.
+	* ld-elfvers/vers1.c: Include vers.h.  Change asm(.symver) to SYMVER().
+	* ld-elfvers/vers4.c, ld-elfvers/vers5.c, ld-elfvers/vers6.c,
+	ld-elfvers/vers7a.c, ld-elfvers/vers9.c, ld-elfvers/vers15.c,
+	ld-elfvers/vers18.c, ld-elfvers/vers21.c, ld-elfvers/vers22a.c,
+	ld-elfvers/vers23a.c, ld-elfvers/vers24a.c, ld-elfvers/vers24c.c,
+	ld-elfvers/vers27d1.c: Likewise.
+
+	* ld-elf/pr9676.rd: Include _? in symbol match
+	* ld-elf/pr9676.rd, ld-elf/pr9679.rd, ld-elfvers/vers1.dsym,
+	ld-elfvers/vers1.sym, ld-elfvers/vers15.dsym, ld-elfvers/vers15.sym,
+	ld-elfvers/vers16.dsym, ld-elfvers/vers16a.dsym, ld-elfvers/vers17.dsym,
+	ld-elfvers/vers18.dsym, ld-elfvers/vers18.sym, ld-elfvers/vers19.dsym,
+	ld-elfvers/vers2.dsym, ld-elfvers/vers20.dsym, ld-elfvers/vers21.dsym,
+	ld-elfvers/vers21.sym, ld-elfvers/vers22.dsym, ld-elfvers/vers22a.dsym,
+	ld-elfvers/vers22a.sym, ld-elfvers/vers22b.dsym, ld-elfvers/vers23.dsym,
+	ld-elfvers/vers23a.dsym, ld-elfvers/vers23a.sym, ld-elfvers/vers23b.dsym,
+	ld-elfvers/vers23d.dsym, ld-elfvers/vers24.rd, ld-elfvers/vers25a.dsym,
+	ld-elfvers/vers26a.dsym, ld-elfvers/vers27a.dsym, ld-elfvers/vers27d.dsym,
+	ld-elfvers/vers27d.sym, ld-elfvers/vers27d4.dsym, ld-elfvers/vers28b.dsym,
+	ld-elfvers/vers28c.dsym, ld-elfvers/vers29.dsym, ld-elfvers/vers3.dsym,
+	ld-elfvers/vers30.dsym, ld-elfvers/vers31.dsym, ld-elfvers/vers32a.dsym,
+	ld-elfvers/vers32b.dsym, ld-elfvers/vers4.sym, ld-elfvers/vers4a.dsym,
+	ld-elfvers/vers4a.sym, ld-elfvers/vers6.dsym, ld-elfvers/vers6.sym,
+	ld-elfvers/vers7a.dsym, ld-elfvers/vers7a.sym, ld-elfvers/vers9.dsym,
+	ld-elfvers/vers9.sym: Likewise.
+
 2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-plugin/plugin-vis-1.d: Updated.
