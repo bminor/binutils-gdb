@@ -1,3 +1,8 @@
+2010-12-11 Mingming Sun <mingm.sun@gmail.com>
+
+	* gas/mips/loongson-3a.s, gas/mips/loongson-3a.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2010-12-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/elf_ase_mips16.d: Update test for new MIPS16 ASE flag

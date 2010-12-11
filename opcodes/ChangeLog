@@ -1,3 +1,8 @@
+2010-12-11 Mingming Sun <mingm.sun@gmail.com>
+
+	* mips-opc.c: (mips_builtin_opcodes): Add loongson3a mul/div and
+	fixed point instructions.
+
 2010-12-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: New file.
