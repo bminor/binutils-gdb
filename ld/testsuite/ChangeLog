@@ -1,3 +1,7 @@
+2010-12-11  Alan Modra  <amodra@gmail.com>
+
+	* ld-elfvers/vers25a.dsym: Really include _? in match.
+
 2010-12-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* ld-elfvers/vers.h: New file.
@@ -16,10 +20,12 @@
 	ld-elfvers/vers2.dsym, ld-elfvers/vers20.dsym, ld-elfvers/vers21.dsym,
 	ld-elfvers/vers21.sym, ld-elfvers/vers22.dsym, ld-elfvers/vers22a.dsym,
 	ld-elfvers/vers22a.sym, ld-elfvers/vers22b.dsym, ld-elfvers/vers23.dsym,
-	ld-elfvers/vers23a.dsym, ld-elfvers/vers23a.sym, ld-elfvers/vers23b.dsym,
-	ld-elfvers/vers23d.dsym, ld-elfvers/vers24.rd, ld-elfvers/vers25a.dsym,
-	ld-elfvers/vers26a.dsym, ld-elfvers/vers27a.dsym, ld-elfvers/vers27d.dsym,
-	ld-elfvers/vers27d.sym, ld-elfvers/vers27d4.dsym, ld-elfvers/vers28b.dsym,
+	ld-elfvers/vers23a.dsym, ld-elfvers/vers23a.sym,
+	ld-elfvers/vers23b.dsym, ld-elfvers/vers23d.dsym,
+	ld-elfvers/vers24.rd, ld-elfvers/vers25a.dsym,
+	ld-elfvers/vers26a.dsym, ld-elfvers/vers27a.dsym,
+	ld-elfvers/vers27d.dsym, ld-elfvers/vers27d.sym,
+	ld-elfvers/vers27d4.dsym, ld-elfvers/vers28b.dsym,
 	ld-elfvers/vers28c.dsym, ld-elfvers/vers29.dsym, ld-elfvers/vers3.dsym,
 	ld-elfvers/vers30.dsym, ld-elfvers/vers31.dsym, ld-elfvers/vers32a.dsym,
 	ld-elfvers/vers32b.dsym, ld-elfvers/vers4.sym, ld-elfvers/vers4a.dsym,
