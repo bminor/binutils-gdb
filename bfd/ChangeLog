@@ -1,3 +1,8 @@
+2010-12-13  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (bfd_plugin_mkobject): Delete.
+	(plugin_vec): Use bfd_false instead.
+
 2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_link_add_archive_symbols): Remove subsbfd.

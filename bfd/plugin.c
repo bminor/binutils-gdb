@@ -448,13 +448,6 @@ bfd_plugin_sizeof_headers (bfd *a ATTRIBUTE_UNUSED,
   return 0;
 }
 
-static bfd_boolean
-bfd_plugin_mkobject (bfd *abfd ATTRIBUTE_UNUSED)
-{
-  BFD_ASSERT (0);
-  return 0;
-}
-
 const bfd_target plugin_vec =
 {
   "plugin",			/* Name.  */
@@ -485,7 +478,7 @@ const bfd_target plugin_vec =
   },
   {				/* bfd_set_format.  */
     bfd_false,
-    bfd_plugin_mkobject,
+    bfd_false,
     _bfd_generic_mkarchive,
     bfd_false,
   },
