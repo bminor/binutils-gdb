@@ -1,3 +1,8 @@
+2010-12-12  Mark Kettenis  <kettenis@xian.sibelius.xs4all.nl>
+
+	* mips64obsd-tdep.c (floatformats_mips64_quad): New define.
+	(mips64obsd_init_abi): Set long_double_bit and long_double_format.
+
 2010-12-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c: Fix typo in comment.

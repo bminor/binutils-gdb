@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "gdbtypes.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
@@ -29,6 +30,10 @@
 
 #include "mips-tdep.h"
 #include "solib-svr4.h"
+
+/* The MIPS64 Floating-Point Quad-Precision format is similar to
+   big-endian IA-64 Quad-Precision format.  */
+#define floatformats_mips64_quad floatformats_ia64_quad
 
 #define MIPS64OBSD_NUM_REGS 73
 
@@ -146,6 +151,9 @@ mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, mips64obsd_regset_from_core_section);
 
   tramp_frame_prepend_unwinder (gdbarch, &mips64obsd_sigframe);
+
+  set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, floatformats_mips64_quad);
 
   /* OpenBSD/mips64 has SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
