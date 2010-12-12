@@ -2717,15 +2717,14 @@ load_symbols (lang_input_statement_type *entry,
 		  loaded = FALSE;
 		}
 
-	      subsbfd = NULL;
+	      subsbfd = member;
 	      if (! ((*link_info.callbacks->add_archive_element)
 		     (&link_info, member, "--whole-archive", &subsbfd)))
 		abort ();
 
 	      /* Potentially, the add_archive_element hook may have set a
 		 substitute BFD for us.  */
-	      if (! bfd_link_add_symbols (subsbfd ? subsbfd : member,
-					&link_info))
+	      if (! bfd_link_add_symbols (member, &link_info))
 		{
 		  einfo (_("%F%B: could not read symbols: %E\n"), member);
 		  loaded = FALSE;

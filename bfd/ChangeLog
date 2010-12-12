@@ -1,5 +1,9 @@
 2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elflink.c (elf_link_add_archive_symbols): Remove subsbfd.
+
+2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf.c (special_sections_g): Add ".gnu.lto_".
 
 2010-12-10  Alan Modra  <amodra@gmail.com>

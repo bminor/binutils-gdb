@@ -1,3 +1,7 @@
+2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (load_symbols): Optimize for add_archive_element.
+
 2010-12-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: New file.
