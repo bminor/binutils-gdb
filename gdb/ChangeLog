@@ -1,3 +1,24 @@
+2010-12-12  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_per_objfile): New member quick_file_names_table.
+	(dwarf2_per_cu_quick_data): Move definition down to "quick functions"
+	section.  Delete members lines full_names.  Rename read_lines to
+	no_file_data.
+	(quick_file_names): New struct.
+	(hash_file_name_entry, eq_file_name_entry): New functions.
+	(delete_file_name_entry, create_quick_file_names_table): New functions.
+	(dwarf2_read_index): Initialize quick_file_names_table.
+	(dw2_get_file_names): Renamed from dw2_require_line_header.
+	Return pointer to quick_file_names entry.  All callers updated.
+	(dw2_get_real_path): Renamed from dw2_require_full_path.
+	Replace per_cu arg with pointer to quick_file_names entry.
+	All callers updated.
+	(dw2_free_cached_file_names): New function.
+	(dw2_forget_cached_source_info): Call it (via htab_traverse_noresize).
+	(dwarf2_initialize_objfile): Initialize quick_file_names_table in
+	the OBJF_READNOW case.
+	(dwarf2_free_objfile): Rewrite freeing of quick file names tables.
+
 2010-12-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* mips64obsd-tdep.c (floatformats_mips64_quad): New define.
