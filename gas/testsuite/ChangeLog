@@ -1,4 +1,11 @@
-2010-12-11 Mingming Sun <mingm.sun@gmail.com>
+2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/elf.exp: Run section9.
+
+	* gas/elf/section9.d: New.
+	* gas/elf/section9.s: Likewise.
+
+2010-12-11  Mingming Sun  <mingm.sun@gmail.com>
 
 	* gas/mips/loongson-3a.s, gas/mips/loongson-3a.d: New test.
 	* gas/mips/mips.exp: Run it.
