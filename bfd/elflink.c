@@ -5073,10 +5073,10 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  undefs_tail = info->hash->undefs_tail;
 
-	  if (! (*info->callbacks->add_archive_element)
-				(info, element, symdef->name, &element))
+	  if (!(*info->callbacks
+		->add_archive_element) (info, element, symdef->name, &element))
 	    goto error_return;
-	  if (! bfd_link_add_symbols (element, info))
+	  if (!bfd_link_add_symbols (element, info))
 	    goto error_return;
 
 	  /* If there are any new undefined symbols, we need to make

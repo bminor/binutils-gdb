@@ -1223,20 +1223,18 @@ generic_link_check_archive_element (bfd *abfd,
 	{
 	  bfd_size_type symcount;
 	  asymbol **symbols;
-	  bfd *subsbfd = NULL;
+	  bfd *oldbfd = abfd;
 
 	  /* This object file defines this symbol, so pull it in.  */
-	  if (! (*info->callbacks->add_archive_element)
-				(info, abfd, bfd_asymbol_name (p), &subsbfd))
+	  if (!(*info->callbacks
+		->add_archive_element) (info, abfd, bfd_asymbol_name (p),
+					&abfd))
 	    return FALSE;
 	  /* Potentially, the add_archive_element hook may have set a
 	     substitute BFD for us.  */
-	  if (subsbfd)
-	    {
-	      abfd = subsbfd;
-	      if (!bfd_generic_link_read_symbols (abfd))
-		return FALSE;
-	    }
+	  if (abfd != oldbfd
+	      && !bfd_generic_link_read_symbols (abfd))
+	    return FALSE;
 	  symcount = _bfd_generic_link_get_symcount (abfd);
 	  symbols = _bfd_generic_link_get_symbols (abfd);
 	  if (! generic_link_add_symbol_list (abfd, info, symcount,
@@ -1257,12 +1255,12 @@ generic_link_check_archive_element (bfd *abfd,
 	  symbfd = h->u.undef.abfd;
 	  if (symbfd == NULL)
 	    {
-	      bfd *subsbfd = NULL;
 	      /* This symbol was created as undefined from outside
 		 BFD.  We assume that we should link in the object
 		 file.  This is for the -u option in the linker.  */
-	      if (! (*info->callbacks->add_archive_element)
-				(info, abfd, bfd_asymbol_name (p), &subsbfd))
+	      if (!(*info->callbacks
+		    ->add_archive_element) (info, abfd, bfd_asymbol_name (p),
+					    &abfd))
 		return FALSE;
 	      /* Potentially, the add_archive_element hook may have set a
 		 substitute BFD for us.  But no symbols are going to get

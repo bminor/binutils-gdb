@@ -1,5 +1,30 @@
 2010-12-13  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h (aout_link_check_ar_symbols): Formatting.
+	* cofflink.c (coff_link_check_ar_symbols): Likewise.
+	* elflink.c (elf_link_add_archive_symbols): Likewise.
+	* pdp11.c (aout_link_check_ar_symbols): Likewise.
+	* xcofflink.c (xcoff_link_check_dynamic_ar_symbols,
+	xcoff_link_check_dynamic_ar_symbols): Likewise.
+
+	* aoutx.h (aout_link_check_archive_element): Simplify code dealing
+	with add_archive_element substitute BFD.
+	* cofflink.c (coff_link_check_archive_element): Likewise.
+	* ecoff.c (ecoff_link_check_archive_element): Likewise.
+	(ecoff_link_add_archive_symbols): Likewise.
+	* linker.c (generic_link_check_archive_element): Likewise.
+	* pdp11.c (aout_link_check_archive_element): Likewise.
+	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Likewise.
+	* xcofflink.c (xcoff_link_check_archive_element): Likewise.
+
+	* aoutx.h (aout_link_check_archive_element): Free symbols from old
+	bfd if !keep_memory.
+	* cofflink.c (coff_link_check_archive_element): Likewise.
+	* pdp11.c (aout_link_check_archive_element): Likewise.
+	* xcofflink.c (xcoff_link_check_archive_element): Likewise.
+
+2010-12-13  Alan Modra  <amodra@gmail.com>
+
 	* plugin.c (bfd_plugin_mkobject): Delete.
 	(plugin_vec): Use bfd_false instead.
 
