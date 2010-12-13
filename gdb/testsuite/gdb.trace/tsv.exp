@@ -27,15 +27,10 @@ set srcfile ${testfile}.c
 set binfile $objdir/$subdir/tsv
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings}] != "" } {
-    untested tracecmd.exp
+    untested tsv.exp
     return -1
 }
-gdb_reinitialize_dir $srcdir/$subdir
-
-# If testing on a remote host, download the source file.
-# remote_download host $srcdir/$subdir/$srcfile
-
-gdb_file_cmd $binfile
+gdb_load $binfile
 
 gdb_test "tvariable \$tvar1" \
   "Trace state variable \\\$tvar1 created, with initial value 0." \
@@ -72,6 +67,9 @@ gdb_test "info tvariables" \
 \\\$tvar3\[\t \]+1234567000000\[\t \]+.*<undefined>.*" \
   "List tvariables"
 
+gdb_test "print \$tvar2" " = void" \
+    "Print a trace state variable before run"
+
 gdb_test_no_output "delete tvariable \$tvar2" \
   "delete trace state variable"
 
@@ -90,5 +88,63 @@ gdb_test "delete tvariable" \
 gdb_test "info tvariables" \
   "No trace state variables.*" \
   "List tvariables after deleting all"
+
+# Now try running a trace.
+
+runto_main
+gdb_reinitialize_dir $srcdir/$subdir
+
+# The rest of the testing needs actual tracing to work.
+if { ![gdb_target_supports_trace] } then {
+    pass "Current target does not support trace"
+    return 1;
+}
+
+# define relative source line numbers:
+# all subsequent line numbers are relative to this first one (baseline)
+
+set baseline  [gdb_find_recursion_test_baseline $srcfile];
+if { $baseline == -1 } then {
+    fail "Could not find gdb_recursion_test function"
+    return;
+}
+
+set testline1 [expr $baseline + 7]
+
+gdb_delete_tracepoints
+set trcpt1 [gdb_gettpnum gdb_c_test];
+set trcpt2 [gdb_gettpnum gdb_asm_test];
+set trcpt3 [gdb_gettpnum $testline1];
+if { $trcpt1 <= 0 || $trcpt2 <= 0 || $trcpt3 <= 0 } then {
+    fail "setting tracepoints"
+    return;
+}
+
+gdb_test "tvariable \$tvar5 = 15" \
+  "Trace state variable \\\$tvar5 created, with initial value 15." \
+  "Create a trace state variable tvar5"
+
+gdb_trace_setactions "collect tsv for first tracepoint" \
+	"$trcpt1" \
+	"collect \$tvar5 += 1" "^$"
+
+gdb_test "tstart" ".*" ""
+
+gdb_test "print \$tvar5" " = 15" \
+    "Print a trace state variable at start of run"
+
+# Be sure not to fall off the end of the program.
+gdb_test "break end" ".*" ""
+gdb_test "continue" \
+    "Continuing.*Breakpoint $decimal, end.*" \
+    "run trace experiment"
+
+gdb_test "print \$tvar5" " = 16" \
+    "Print a trace state variable during run"
+
+gdb_test "tstop" ".*" ""
+
+gdb_test "print \$tvar5" " = 16" \
+    "Print a trace state variable after run"
 
 

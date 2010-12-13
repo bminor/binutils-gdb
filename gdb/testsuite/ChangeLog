@@ -1,3 +1,7 @@
+2010-12-12  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/tsv.exp: Test print command on trace state variables.
+
 2010-12-09  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/interp.exp: Add regression test.
