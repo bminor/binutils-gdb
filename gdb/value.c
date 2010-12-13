@@ -42,6 +42,8 @@
 
 #include "python/python.h"
 
+#include "tracepoint.h"
+
 /* Prototypes for exported functions. */
 
 void _initialize_values (void);
@@ -1163,6 +1165,22 @@ struct value *
 value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
 {
   struct value *val;
+  struct trace_state_variable *tsv;
+
+  /* If there is a trace state variable of the same name, assume that
+     is what we really want to see.  */
+  tsv = find_trace_state_variable (var->name);
+  if (tsv)
+    {
+      tsv->value_known = target_get_trace_state_variable_value (tsv->number,
+								&(tsv->value));
+      if (tsv->value_known)
+	val = value_from_longest (builtin_type (gdbarch)->builtin_int64,
+				  tsv->value);
+      else
+	val = allocate_value (builtin_type (gdbarch)->builtin_void);
+      return val;
+    }
 
   switch (var->kind)
     {
