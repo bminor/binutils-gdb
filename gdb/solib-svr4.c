@@ -1607,17 +1607,20 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
     }
 
-  for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
+  if (!current_inferior ()->attach_flag)
     {
-      msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
-      if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+      for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  sym_addr = SYMBOL_VALUE_ADDRESS (msymbol);
-	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch,
-							 sym_addr,
-							 &current_target);
-	  create_solib_event_breakpoint (target_gdbarch, sym_addr);
-	  return 1;
+	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
+	  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	    {
+	      sym_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch,
+							     sym_addr,
+							     &current_target);
+	      create_solib_event_breakpoint (target_gdbarch, sym_addr);
+	      return 1;
+	    }
 	}
     }
   return 0;
