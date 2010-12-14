@@ -1,5 +1,13 @@
 2010-12-14  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* fileread.cc (file_counts_lock, file_counts_initialize_lock)
+	(total_mapped_bytes, current_mapped_bytes, maximum_mapped_bytes):
+	Move definition before File_read::View member definitions.
+	(File_read::View::~View): Initialize and hold lock before
+	updating current_mapped_bytes.
+
+2010-12-14  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
 	* dwarf_reader.cc: Remove outdated comment.
 	* gold-threads.cc: Fix typo in error message.
 	* archive.cc: Fix typos in comments.

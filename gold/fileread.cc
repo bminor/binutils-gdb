@@ -57,6 +57,17 @@ readv(int, const iovec*, int)
 namespace gold
 {
 
+// Class File_read.
+
+// A lock for the File_read static variables.
+static Lock* file_counts_lock = NULL;
+static Initialize_lock file_counts_initialize_lock(&file_counts_lock);
+
+// The File_read static variables.
+unsigned long long File_read::total_mapped_bytes;
+unsigned long long File_read::current_mapped_bytes;
+unsigned long long File_read::maximum_mapped_bytes;
+
 // Class File_read::View.
 
 File_read::View::~View()
@@ -70,7 +81,12 @@ File_read::View::~View()
     case DATA_MMAPPED:
       if (::munmap(const_cast<unsigned char*>(this->data_), this->size_) != 0)
         gold_warning(_("munmap failed: %s"), strerror(errno));
-      File_read::current_mapped_bytes -= this->size_;
+      if (!parameters->options_valid() || parameters->options().stats())
+	{
+	  file_counts_initialize_lock.initialize();
+	  Hold_optional_lock hl(file_counts_lock);
+	  File_read::current_mapped_bytes -= this->size_;
+	}
       break;
     case DATA_NOT_OWNED:
       break;
@@ -99,15 +115,6 @@ File_read::View::is_locked()
 }
 
 // Class File_read.
-
-// A lock for the File_read static variables.
-static Lock* file_counts_lock = NULL;
-static Initialize_lock file_counts_initialize_lock(&file_counts_lock);
-
-// The File_read static variables.
-unsigned long long File_read::total_mapped_bytes;
-unsigned long long File_read::current_mapped_bytes;
-unsigned long long File_read::maximum_mapped_bytes;
 
 File_read::~File_read()
 {
