@@ -1,3 +1,11 @@
+2010-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* irix5-nat.c: Replace fp_r, fp_regs and fp_scr by __fp_r, __fp_regs
+	and __fp_scr respectively throughout.
+	* configure.ac: Compile with -Dsiginfo=__siginfo if building with
+	Python using GCC on IRIX.
+	* configure: Regenerate.
+
 2010-12-13  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c (enable_break): Don't attempt to place breakpoints,

@@ -858,6 +858,21 @@ if test "${have_libpython}" != no; then
     done
     AC_MSG_RESULT(${PYTHON_CFLAGS})
   fi
+
+  # On IRIX, type siginfo is not defined.  Instead, sys/siginfo.h provides:
+  #    #if _SGIAPI
+  #    #define siginfo __siginfo
+  #    #endif
+  # The problem is that including Python causes some XOPEN macros to be
+  # unilaterally defined, and that in turn causes _SGIAPI to evaluate
+  # to false.  So, we work around this issue by defining siginfo ourself
+  # though the command-line.
+  case "$gdb_host" in
+    irix*) if test "${GCC}" = yes; then
+             CPPFLAGS="$CPPFLAGS -Dsiginfo=__siginfo"
+           fi
+           ;;
+  esac
 else
   # Even if Python support is not compiled in, we need to have these files
   # included.

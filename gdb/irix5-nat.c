@@ -151,7 +151,7 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 
   for (regi = 0; regi < 32; regi++)
     regcache_raw_supply (regcache, gdbarch_fp0_regnum (gdbarch) + regi,
-			 (const char *) &fpregsetp->fp_r.fp_regs[regi]);
+			 (const char *) &fpregsetp->__fp_r.__fp_regs[regi]);
 
   /* We can't supply the FSR register directly to the regcache,
      because there is a size issue: On one hand, fpregsetp->fp_csr
@@ -159,7 +159,7 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
      So we use a buffer of the correct size and copy into it the register
      value at the proper location.  */
   memset (fsrbuf, 0, 4);
-  memcpy (fsrbuf + 4, &fpregsetp->fp_csr, 4);
+  memcpy (fsrbuf + 4, &fpregsetp->__fp_csr, 4);
 
   regcache_raw_supply (regcache,
 		       mips_regnum (gdbarch)->fp_control_status, fsrbuf);
@@ -184,8 +184,9 @@ fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - gdbarch_fp0_regnum
-							 (gdbarch)]);
+	  const int fp0_regnum = gdbarch_fp0_regnum (gdbarch);
+
+	  to = (char *) &(fpregsetp->__fp_r.__fp_regs[regi - fp0_regnum]);
           regcache_raw_collect (regcache, regi, to);
 	}
     }
@@ -203,7 +204,7 @@ fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno
       regcache_raw_collect (regcache,
 			    mips_regnum (gdbarch)->fp_control_status, fsrbuf);
 
-      memcpy (&fpregsetp->fp_csr, fsrbuf + 4, 4);
+      memcpy (&fpregsetp->__fp_csr, fsrbuf + 4, 4);
     }
 }
 
