@@ -45,7 +45,7 @@ namespace gold
 {
 
 // The header of an entry in the archive.  This is all readable text,
-// padded with spaces where necesary.  If the contents of an archive
+// padded with spaces where necessary.  If the contents of an archive
 // are all text file, the entire archive is readable.
 
 struct Archive::Archive_header
@@ -1019,7 +1019,7 @@ Lib_group::Lib_group(const Input_file_lib* lib, Task* task)
 }
 
 // Select members from the lib group and add them to the link.  We walk
-// through the the members, and check if each one up should be included.
+// through the members, and check if each one up should be included.
 // If the object says it should be included, we do so.  We have to do
 // this in a loop, since including one member may create new undefined
 // symbols which may be satisfied by other members.

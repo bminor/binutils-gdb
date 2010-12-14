@@ -1,3 +1,41 @@
+2010-12-14  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* dwarf_reader.cc: Remove outdated comment.
+	* gold-threads.cc: Fix typo in error message.
+	* archive.cc: Fix typos in comments.
+	* archive.h: Likewise.
+	* arm-reloc-property.cc: Likewise.
+	* arm-reloc-property.h: Likewise.
+	* arm-reloc.def: Likewise.
+	* arm.cc: Likewise.
+	* attributes.h: Likewise.
+	* cref.cc: Likewise.
+	* ehframe.cc: Likewise.
+	* fileread.h: Likewise.
+	* gold.h: Likewise.
+	* i386.cc: Likewise.
+	* icf.cc: Likewise.
+	* incremental.h: Likewise.
+	* int_encoding.cc: Likewise.
+	* layout.h: Likewise.
+	* main.cc: Likewise.
+	* merge.h: Likewise.
+	* object.cc: Likewise.
+	* object.h: Likewise.
+	* options.cc: Likewise.
+	* readsyms.cc: Likewise.
+	* reduced_debug_output.cc: Likewise.
+	* reloc.cc: Likewise.
+	* script-sections.cc: Likewise.
+	* sparc.cc: Likewise.
+	* symtab.h: Likewise.
+	* target-reloc.h: Likewise.
+	* target.cc: Likewise.
+	* target.h: Likewise.
+	* timer.cc: Likewise.
+	* timer.h: Likewise.
+	* x86_64.cc: Likewise.
+
 2010-12-09  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::layout_gnu_stack): Add warnings for executable

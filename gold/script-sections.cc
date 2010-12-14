@@ -1,6 +1,6 @@
 // script-sections.cc -- linker script SECTIONS for gold
 
-// Copyright 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -592,7 +592,7 @@ class Sections_element
   { }
 
   // Set section addresses.  This includes applying assignments if the
-  // the expression is an absolute value.
+  // expression is an absolute value.
   virtual void
   set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*,
 			uint64_t*)
@@ -804,7 +804,7 @@ class Output_section_element
   { return false; }
 
   // Set section addresses.  This includes applying assignments if the
-  // the expression is an absolute value.
+  // expression is an absolute value.
   virtual void
   set_section_addresses(Symbol_table*, Layout*, Output_section*, uint64_t,
 			uint64_t*, uint64_t*, Output_section**, std::string*,
@@ -3673,7 +3673,7 @@ Script_sections::total_header_size(Layout* layout) const
   return file_header_size + segment_headers_size;
 }
 
-// Return the amount we have to subtract from the LMA to accomodate
+// Return the amount we have to subtract from the LMA to accommodate
 // headers of the given size.  The complication is that the file
 // header have to be at the start of a page, as otherwise it will not
 // be at the start of the file.

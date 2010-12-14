@@ -42,7 +42,7 @@ Timer::Timer()
   this->start_time_.sys = 0;
 }
 
-// Start couting the time.
+// Start counting the time.
 void
 Timer::start()
 {
@@ -63,8 +63,8 @@ Timer::start()
 # endif
 #endif
 
-// times returns statistics in clock_t units. This variable will hold the
-// conversion factor to seconds. We use a variable that is initialize once
+// times returns statistics in clock_t units.  This variable will hold the
+// conversion factor to seconds.  We use a variable that is initialized once
 // because sysconf can be slow.
 static long ticks_per_sec;
 class Timer_init
@@ -77,7 +77,7 @@ class Timer_init
 };
 Timer_init timer_init;
 
-// Write the current time infortamion.
+// Write the current time information.
 void
 Timer::get_time(TimeStats *now)
 {

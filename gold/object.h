@@ -664,7 +664,7 @@ class Object
 			     Symbol_table*);
 
   // If NAME is the name of the special section which indicates that
-  // this object was compiled with -fstack-split, mark it accordingly,
+  // this object was compiled with -fsplit-stack, mark it accordingly,
   // and return true.  Otherwise return false.
   bool
   handle_split_stack_section(const char* name);

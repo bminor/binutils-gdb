@@ -293,7 +293,7 @@ get_section_contents(bool first_iteration,
       for (; it_v != v.end(); ++it_v, ++it_s, ++it_a, ++it_o, ++it_addend_size)
         {
           // ADDEND_STR stores the symbol value and addend and offset,
-          // each atmost 16 hex digits long.  it_a points to a pair
+          // each at most 16 hex digits long.  it_a points to a pair
           // where first is the symbol value and second is the
           // addend.
           char addend_str[50];
@@ -550,7 +550,7 @@ get_section_contents(bool first_iteration,
 // KEPT_SECTION_ID    : Vector which maps folded sections to kept sections.
 // ID_SECTION         : Vector mapping a section to an unique integer.
 // IS_SECN_OR_GROUP_UNIQUE : To check if a section or a group of identical
-//                            sectionsis already known to be unique.
+//                            sections is already known to be unique.
 // SECTION_CONTENTS   : Store the section's text and relocs to non-ICF
 //                      sections.
 

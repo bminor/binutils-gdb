@@ -445,7 +445,7 @@ class Add_archive_symbols : public Task
   Task_token* next_blocker_;
 };
 
-// This class represents the files surrunded by a --start-lib ... --end-lib.
+// This class represents the files surrounded by a --start-lib ... --end-lib.
 
 class Lib_group
 {

@@ -256,7 +256,7 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
 }
 
 // If NAME is the name of the special section which indicates that
-// this object was compiled with -fstack-split, mark it accordingly.
+// this object was compiled with -fsplit-stack, mark it accordingly.
 
 bool
 Object::handle_split_stack_section(const char* name)
@@ -350,7 +350,7 @@ Relobj::is_section_name_included(const char* name)
 // Finalize the incremental relocation information.  Allocates a block
 // of relocation entries for each symbol, and sets the reloc_bases_
 // array to point to the first entry in each block.  Returns the next
-// available reloation index.
+// available relocation index.
 
 void
 Relobj::finalize_incremental_relocs(Layout* layout)
@@ -669,7 +669,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
 // Return the section index of symbol SYM.  Set *VALUE to its value in
 // the object file.  Set *IS_ORDINARY if this is an ordinary section
-// index.  not a special cod between SHN_LORESERVE and SHN_HIRESERVE.
+// index, not a special code between SHN_LORESERVE and SHN_HIRESERVE.
 // Note that for a symbol which is not defined in this object file,
 // this will set *VALUE to 0 and return SHN_UNDEF; it will not return
 // the final value of the symbol in the link.

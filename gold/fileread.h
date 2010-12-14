@@ -249,7 +249,7 @@ class File_read
     {
       // Data owned by File object - nothing done in destructor.
       DATA_NOT_OWNED,
-      // Data alocated with new[] and owned by this object - should
+      // Data allocated with new[] and owned by this object - should
       // use delete[].
       DATA_ALLOCATED_ARRAY,
       // Data mmapped and owned by this object - should munmap.

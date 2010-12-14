@@ -1141,7 +1141,7 @@ class Layout
   Incremental_inputs* incremental_inputs_;
   // Whether we record output section data created in script
   bool record_output_section_data_from_script_;
-  // List of output data that needs to be removed at relexation clean up.
+  // List of output data that needs to be removed at relaxation clean up.
   Output_section_data_list script_output_section_data_list_;
   // Structure to save segment states before entering the relaxation loop.
   Segment_states* segment_states_;

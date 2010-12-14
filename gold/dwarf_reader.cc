@@ -271,10 +271,6 @@ Sized_dwarf_line_info<size, big_endian>::read_header_tables(
 
 // Process a single opcode in the .debug.line structure.
 
-// Templating on size and big_endian would yield more efficient (and
-// simpler) code, but would bloat the binary.  Speed isn't important
-// here.
-
 template<int size, bool big_endian>
 bool
 Sized_dwarf_line_info<size, big_endian>::process_one_opcode(

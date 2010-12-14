@@ -467,7 +467,7 @@ class Target
   do_adjust_elf_header(unsigned char*, int) const
   { }
 
-  // Virtual function which may be overriden by the child class.
+  // Virtual function which may be overridden by the child class.
   virtual bool
   do_is_local_label_name(const char*) const;
 
@@ -477,7 +477,7 @@ class Target
   do_reloc_symbol_index(void*, unsigned int) const
   { gold_unreachable(); }
 
-  // Virtual function that must be overidden by a target which uses
+  // Virtual function that must be overridden by a target which uses
   // target specific relocations.
   virtual uint64_t
   do_reloc_addend(void*, unsigned int, uint64_t) const
@@ -517,44 +517,44 @@ class Target
   }
   
 #ifdef HAVE_TARGET_32_LITTLE
-  // Virtual functions which may be overriden by the child class.
+  // Virtual functions which may be overridden by the child class.
   virtual Object*
   do_make_elf_object(const std::string&, Input_file*, off_t,
 		     const elfcpp::Ehdr<32, false>&);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
-  // Virtual functions which may be overriden by the child class.
+  // Virtual functions which may be overridden by the child class.
   virtual Object*
   do_make_elf_object(const std::string&, Input_file*, off_t,
 		     const elfcpp::Ehdr<32, true>&);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
-  // Virtual functions which may be overriden by the child class.
+  // Virtual functions which may be overridden by the child class.
   virtual Object*
   do_make_elf_object(const std::string&, Input_file*, off_t,
 		     const elfcpp::Ehdr<64, false>& ehdr);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
-  // Virtual functions which may be overriden by the child class.
+  // Virtual functions which may be overridden by the child class.
   virtual Object*
   do_make_elf_object(const std::string& name, Input_file* input_file,
 		     off_t offset, const elfcpp::Ehdr<64, true>& ehdr);
 #endif
 
-  // Virtual functions which may be overriden by the child class.
+  // Virtual functions which may be overridden by the child class.
   virtual Output_section*
   do_make_output_section(const char* name, elfcpp::Elf_Word type,
 			 elfcpp::Elf_Xword flags);
 
-  // Virtual function which may be overriden by the child class.
+  // Virtual function which may be overridden by the child class.
   virtual bool
   do_may_relax() const
   { return parameters->options().relax(); }
 
-  // Virtual function which may be overriden by the child class.
+  // Virtual function which may be overridden by the child class.
   virtual bool
   do_relax(int, const Input_objects*, Symbol_table*, Layout*, const Task*)
   { return false; }
@@ -571,7 +571,7 @@ class Target
   set_view_to_nop(unsigned char* view, section_size_type view_size,
 		  section_offset_type offset, size_t len) const;
 
-  // This must be overriden by the child class if it has target-specific
+  // This must be overridden by the child class if it has target-specific
   // attributes subsection in the attribute section. 
   virtual int
   do_attribute_arg_type(int) const

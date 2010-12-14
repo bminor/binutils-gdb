@@ -1,6 +1,6 @@
 // reduced_debug_output.cc -- output reduced debugging information to save space
 
-// Copyright 2008 Free Software Foundation, Inc.
+// Copyright 2008, 2010 Free Software Foundation, Inc.
 // Written by Caleb Howe <cshowe@google.com>.
 
 // This file is part of gold.
@@ -154,20 +154,20 @@ Output_reduced_debug_abbrev_section::set_final_data_size()
           abbrev_data += LEB_size;
 
           // Together with the abbreviation number these fields make up
-          // the header for each abbreviation
+          // the header for each abbreviation.
           uint64_t abbrev_type = read_unsigned_LEB_128(abbrev_data, &LEB_size);
           abbrev_data += LEB_size;
 
           // This would ordinarily be the has_children field of the
-          // abbreviation.  But it's going to be false after reducting the
-          // information, so there's no point in storing it
+          // abbreviation.  But it's going to be false after reducing the
+          // information, so there's no point in storing it.
           abbrev_data++;
 
-          // Read to the end of the current abbreviation
+          // Read to the end of the current abbreviation.
           // This is indicated by two zero unsigned LEBs in a row.  We don't
           // need to parse the data yet, so we just scan through the data
           // looking for two consecutive 0 bytes indicating the end of the
-          // abbreviation
+          // abbreviation.
           unsigned char* current_abbrev;
           for (current_abbrev = abbrev_data;
                current_abbrev[0] || current_abbrev[1];

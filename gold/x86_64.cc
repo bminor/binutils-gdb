@@ -309,7 +309,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
   do_plt_section_for_local(const Relobj*, unsigned int) const
   { return this->plt_section(); }
 
-  // Adjust -fstack-split code which calls non-stack-split code.
+  // Adjust -fsplit-stack code which calls non-split-stack code.
   void
   do_calls_non_split(Relobj* object, unsigned int shndx,
 		     section_offset_type fnoffset, section_size_type fnsize,
@@ -3238,7 +3238,7 @@ Target_x86_64::do_reloc_addend(void* arg, unsigned int r_type,
 }
 
 // FNOFFSET in section SHNDX in OBJECT is the start of a function
-// compiled with -fstack-split.  The function calls non-stack-split
+// compiled with -fsplit-stack.  The function calls non-split-stack
 // code.  We have to change the function so that it always ensures
 // that it has enough stack space to run some random function.
 

@@ -167,7 +167,7 @@ Read_symbols::run(Workqueue* workqueue)
 					    this->next_blocker_));
 }
 
-// Handle a whole lib group. Other then collecting statisticts, this just
+// Handle a whole lib group. Other than collecting statistics, this just
 // mimics what we do for regular object files in the command line.
 
 bool

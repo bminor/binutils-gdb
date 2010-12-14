@@ -735,7 +735,7 @@ class Symbol
       return true;
 
     // A reference to a symbol defined in a dynamic object or to a
-    // symbol that is preemptible can not use a RELATIVE relocaiton.
+    // symbol that is preemptible can not use a RELATIVE relocation.
     if (this->is_from_dynobj()
         || this->is_undefined()
         || this->is_preemptible())
@@ -1258,7 +1258,7 @@ class Symbol_table
     SORT_COMMONS_BY_ALIGNMENT_ASCENDING
   };
 
-  // COUNT is an estimate of how many symbosl will be inserted in the
+  // COUNT is an estimate of how many symbols will be inserted in the
   // symbol table.  It's ok to put 0 if you don't know; a correct
   // guess will just save some CPU by reducing hashtable resizes.
   Symbol_table(unsigned int count, const Version_script_info& version_script);
@@ -1471,7 +1471,7 @@ class Symbol_table
   {
     // No error.
     CFVS_OK,
-    // Unspported symbol section.
+    // Unsupported symbol section.
     CFVS_UNSUPPORTED_SYMBOL_SECTION,
     // No output section.
     CFVS_NO_OUTPUT_SECTION

@@ -369,7 +369,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 }
 
 // Process the relocs to generate mappings from source sections to referenced
-// sections.  This is used during garbage colletion to determine garbage 
+// sections.  This is used during garbage collection to determine garbage
 // sections.
 
 template<int size, bool big_endian>

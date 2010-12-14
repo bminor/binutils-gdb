@@ -125,7 +125,7 @@ class Incremental_binary
 
   // Find the .gnu_incremental_inputs and related sections.  It selects the
   // first section of type SHT_GNU_INCREMENTAL_INPUTS,
-  // SHT_GNU_INCRMENTAL_SYMTAB, and SHT_GNU_INCREMENTAL_RELOCS.
+  // SHT_GNU_INCREMENTAL_SYMTAB, and SHT_GNU_INCREMENTAL_RELOCS.
   // Returns false if the sections are not found.
   bool
   find_incremental_inputs_sections(unsigned int* p_inputs_shndx,

@@ -1,6 +1,6 @@
 // target.cc
 
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2010 Free Software Foundation, Inc.
 // Written by Doug Kwan <dougkwan@google.com>.
 
 // This file is part of gold.
@@ -31,7 +31,7 @@ namespace gold
 {
 
 // Return whether NAME is a local label name.  This is used to implement the
-// --discard-locals options and can be overriden by children classes to
+// --discard-locals options and can be overridden by child classes to
 // implement system-specific behaviour.  The logic here is the same as that
 // in _bfd_elf_is_local_label_name().
 

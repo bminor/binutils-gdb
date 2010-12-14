@@ -3079,7 +3079,7 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 		  // The compiler can put the TLS_GD_ADD instruction
 		  // into the delay slot of the call.  If so, we need
 		  // to transpose the two instructions so that the
-		  // the new sequence works properly.
+		  // new sequence works properly.
 		  //
 		  // The test we use is if the instruction in the
 		  // delay slot is an add with destination register

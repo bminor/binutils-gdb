@@ -295,7 +295,7 @@ class Target_i386 : public Target_freebsd<32, false>
   bool
   do_is_call_to_non_split(const Symbol* sym, unsigned int) const;
 
-  // Adjust -fstack-split code which calls non-stack-split code.
+  // Adjust -fsplit-stack code which calls non-split-stack code.
   void
   do_calls_non_split(Relobj* object, unsigned int shndx,
 		     section_offset_type fnoffset, section_size_type fnsize,
@@ -3217,7 +3217,7 @@ Target_i386::do_is_call_to_non_split(const Symbol* sym, unsigned int) const
 }
 
 // FNOFFSET in section SHNDX in OBJECT is the start of a function
-// compiled with -fstack-split.  The function calls non-stack-split
+// compiled with -fsplit-stack.  The function calls non-split-stack
 // code.  We have to change the function so that it always ensures
 // that it has enough stack space to run some random function.
 
