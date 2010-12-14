@@ -2826,23 +2826,23 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      int low_offset = gdbarch_byte_order (gdbarch)
 			       == BFD_ENDIAN_BIG ? 4 : 0;
-	      unsigned long regval;
+	      long regval;
 
 	      /* Write the low word of the double to the even register(s).  */
-	      regval = extract_unsigned_integer (val + low_offset,
-						 4, byte_order);
+	      regval = extract_signed_integer (val + low_offset,
+					       4, byte_order);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				    float_argreg, phex (regval, 4));
-	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
+	      regcache_cooked_write_signed (regcache, float_argreg++, regval);
 
 	      /* Write the high word of the double to the odd register(s).  */
-	      regval = extract_unsigned_integer (val + 4 - low_offset,
-						 4, byte_order);
+	      regval = extract_signed_integer (val + 4 - low_offset,
+					       4, byte_order);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				    float_argreg, phex (regval, 4));
-	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
+	      regcache_cooked_write_signed (regcache, float_argreg++, regval);
 	    }
 	  else
 	    {
@@ -2850,11 +2850,11 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	         in a single register.  */
 	      /* On 32 bit ABI's the float_argreg is further adjusted
 	         above to ensure that it is even register aligned.  */
-	      LONGEST regval = extract_unsigned_integer (val, len, byte_order);
+	      LONGEST regval = extract_signed_integer (val, len, byte_order);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				    float_argreg, phex (regval, len));
-	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
+	      regcache_cooked_write_signed (regcache, float_argreg++, regval);
 	    }
 	}
       else
@@ -2937,13 +2937,13 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  && !fp_register_arg_p (gdbarch, typecode, arg_type))
 		{
 		  LONGEST regval =
-		    extract_unsigned_integer (val, partial_len, byte_order);
+		    extract_signed_integer (val, partial_len, byte_order);
 
 		  if (mips_debug)
 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
 				      argreg,
 				      phex (regval, regsize));
-		  regcache_cooked_write_unsigned (regcache, argreg, regval);
+		  regcache_cooked_write_signed (regcache, argreg, regval);
 		  argreg++;
 		}
 
