@@ -1,3 +1,12 @@
+2010-12-14  Yao Qi  <yao@codesourcery.com>
+
+	Backport from mainline:
+
+	2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* gdb.base/printcmds.exp (test_float_accepted): Import gdb_prompt.
+	Move here, negate and extend by XFAIL the "p 0x1.1" test from ... 
+	(test_float_rejected): ... here.
+
 2010-12-12  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tsv.exp: Test print command on trace state variables.
