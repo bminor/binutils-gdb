@@ -1766,9 +1766,13 @@ value_neg (struct value *arg1)
     {
       struct value *tmp, *val = allocate_value (type);
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
-      int i, n = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
+      int i;
+      LONGEST low_bound, high_bound;
 
-      for (i = 0; i < n; i++)
+      if (!get_array_bounds (type, &low_bound, &high_bound))
+	error (_("Could not determine the vector bounds"));
+
+      for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  tmp = value_neg (value_subscript (arg1, i));
 	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
@@ -1798,10 +1802,14 @@ value_complement (struct value *arg1)
     {
       struct value *tmp;
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
-      int i, n = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
+      int i;
+      LONGEST low_bound, high_bound;
+
+      if (!get_array_bounds (type, &low_bound, &high_bound))
+	error (_("Could not determine the vector bounds"));
 
       val = allocate_value (type);
-      for (i = 0; i < n; i++)
+      for (i = 0; i < high_bound - low_bound + 1; i++)
         {
           tmp = value_complement (value_subscript (arg1, i));
           memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),

@@ -877,11 +877,15 @@ value_one (struct type *type, enum lval_type lv)
   else if (TYPE_CODE (type1) == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
     {
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type1));
-      int i, n = TYPE_LENGTH (type1) / TYPE_LENGTH (eltype);
+      int i;
+      LONGEST low_bound, high_bound;
       struct value *tmp;
 
+      if (!get_array_bounds (type1, &low_bound, &high_bound))
+	error (_("Could not determine the vector bounds"));
+
       val = allocate_value (type);
-      for (i = 0; i < n; i++)
+      for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  tmp = value_one (eltype, lv);
 	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
