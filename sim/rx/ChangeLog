@@ -2,6 +2,8 @@
 
 	* rx.c (decode_opcode): For "MVFC PC,", use the address of the
 	opcode, not the address following the opcode.
+	(decode_opcode): RXO_branchrel is relative to the opcode's PC, not
+	the address following the opcode.
 
 2010-11-11  DJ Delorie  <dj@redhat.com>
 
