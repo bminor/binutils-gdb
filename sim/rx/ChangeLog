@@ -1,3 +1,8 @@
+2010-12-14  DJ Delorie  <dj@redhat.com>
+
+	* rx.c (decode_opcode): For "MVFC PC,", use the address of the
+	opcode, not the address following the opcode.
+
 2010-11-11  DJ Delorie  <dj@redhat.com>
 
 	* rx.c (lsb_count): New.
