@@ -1,3 +1,8 @@
+2010-12-15  Kai Tietz  <kai.tietz@onevision.com>
+
+	* dwarf.c (display_gdb_index): Fix printf types for
+	used formatters.
+
 2010-12-12  Peter Breitenlohner  <peb@mppmu.mpg.de>
 
 	PR binutils/12306

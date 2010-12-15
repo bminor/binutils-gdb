@@ -4889,13 +4889,13 @@ display_gdb_index (struct dwarf_section *section,
     }
 
   version = byte_get_little_endian (start, 4);
-  printf (_("Version %d\n"), version);
+  printf (_("Version %ld\n"), (long) version);
 
   /* Prior versions are obsolete, and future versions may not be
      backwards compatible.  */
   if (version != 3)
     {
-      warn (_("Unsupported version %u.\n"), version);
+      warn (_("Unsupported version %lu.\n"), (unsigned long) version);
       return 0;
     }
 
@@ -4960,7 +4960,7 @@ display_gdb_index (struct dwarf_section *section,
 
       print_dwarf_vma (low, 8);
       print_dwarf_vma (high, 8);
-      printf (_("%u\n"), cu_index);
+      printf (_("%lu\n"), (unsigned long) cu_index);
     }
 
   printf (_("\nSymbol table:\n"));
@@ -4982,9 +4982,9 @@ display_gdb_index (struct dwarf_section *section,
 	      cu = byte_get_little_endian (constant_pool + cu_vector_offset + 4 + j * 4, 4);
 	      /* Convert to TU number if it's for a type unit.  */
 	      if (cu >= cu_list_elements)
-		printf (" T%u", cu - cu_list_elements);
+		printf (" T%lu", (unsigned long) (cu - cu_list_elements));
 	      else
-		printf (" %u", cu);
+		printf (" %lu", (unsigned long) cu);
 	    }
 	  printf ("\n");
 	}
