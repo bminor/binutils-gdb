@@ -67,7 +67,8 @@ enum {
   OPTION_MEMORY_ALIAS,
   OPTION_MEMORY_CLEAR,
   OPTION_MEMORY_FILL,
-  OPTION_MEMORY_MAPFILE
+  OPTION_MEMORY_MAPFILE,
+  OPTION_MAP_INFO
 };
 
 static DECLARE_OPTION_HANDLER (memory_option_handler);
@@ -112,6 +113,9 @@ static const OPTION memory_options[] =
       memory_option_handler },
   { {"info-memory", no_argument, NULL, OPTION_MEMORY_INFO },
       '\0', NULL, NULL,
+      memory_option_handler },
+  { {"map-info", no_argument, NULL, OPTION_MAP_INFO },
+      '\0', NULL, "List mapped regions",
       memory_option_handler },
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
@@ -516,6 +520,45 @@ memory_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	      }
 	    sim_io_printf (sd, "\n");
 	  }
+	return SIM_RC_OK;
+	break;
+      }
+
+    case OPTION_MAP_INFO:
+      {
+	sim_core *memory = STATE_CORE (sd);
+	unsigned nr_map;
+
+	for (nr_map = 0; nr_map < nr_maps; ++nr_map)
+	  {
+	    sim_core_map *map = &memory->common.map[nr_map];
+	    sim_core_mapping *mapping = map->first;
+
+	    if (!mapping)
+	      continue;
+
+	    sim_io_printf (sd, "%s maps:\n", map_to_str (nr_map));
+	    do
+	      {
+		unsigned modulo;
+
+		sim_io_printf (sd, " map ");
+		if (mapping->space != 0)
+		  sim_io_printf (sd, "0x%x:", mapping->space);
+		sim_io_printf (sd, "0x%08lx", (long) mapping->base);
+		if (mapping->level != 0)
+		  sim_io_printf (sd, "@0x%x", mapping->level);
+		sim_io_printf (sd, ",0x%lx", (long) mapping->nr_bytes);
+		modulo = mapping->mask + 1;
+		if (modulo != 0)
+		  sim_io_printf (sd, "%%0x%x", modulo);
+		sim_io_printf (sd, "\n");
+
+		mapping = mapping->next;
+	      }
+	    while (mapping);
+	  }
+
 	return SIM_RC_OK;
 	break;
       }

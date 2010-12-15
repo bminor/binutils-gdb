@@ -1,3 +1,9 @@
+2010-12-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-memopt.c (OPTION_MAP_INFO): Define.
+	(memory_options): Handle --map-info.
+	(memory_option_handler): Handle OPTION_MAP_INFO.
+
 2010-11-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-profile.c (PROFILE_PC_FREQ, PROFILE_PC_NR_BUCKETS,
