@@ -1,3 +1,10 @@
+2010-12-15  Tom Tromey  <tromey@redhat.com>
+
+	* infrun.c (save_infcall_control_state): Handle the
+	exception-resume breakpoint.
+	(restore_infcall_control_state): Likewise.
+	(discard_infcall_control_state): Likewise.
+
 2010-12-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_pseudo_register_write): Sign extend 32-bit

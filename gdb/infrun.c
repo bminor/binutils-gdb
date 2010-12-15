@@ -6379,6 +6379,7 @@ save_infcall_control_state (void)
   inf_status->inferior_control = inf->control;
 
   tp->control.step_resume_breakpoint = NULL;
+  tp->control.exception_resume_breakpoint = NULL;
 
   /* Save original bpstat chain to INF_STATUS; replace it in TP with copy of
      chain.  If caller's caller is walking the chain, they'll be happier if we
@@ -6428,6 +6429,10 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
   if (tp->control.step_resume_breakpoint)
     tp->control.step_resume_breakpoint->disposition = disp_del_at_next_stop;
 
+  if (tp->control.exception_resume_breakpoint)
+    tp->control.exception_resume_breakpoint->disposition
+      = disp_del_at_next_stop;
+
   /* Handle the bpstat_copy of the chain.  */
   bpstat_clear (&tp->control.stop_bpstat);
 
@@ -6474,6 +6479,10 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
 {
   if (inf_status->thread_control.step_resume_breakpoint)
     inf_status->thread_control.step_resume_breakpoint->disposition
+      = disp_del_at_next_stop;
+
+  if (inf_status->thread_control.exception_resume_breakpoint)
+    inf_status->thread_control.exception_resume_breakpoint->disposition
       = disp_del_at_next_stop;
 
   /* See save_infcall_control_state for info on stop_bpstat. */

@@ -149,5 +149,14 @@ gdb_test "advance $line" ".*" "advance-over-throw"
 tbreak_and_cont "End: advance"
 verify_testval "pre-check - advance" 8
 
+tbreak_and_cont "Start: resumebpt"
+gdb_test "tbreak _Unwind_RaiseException"
+gdb_test "continue" "Temporary breakpoint.*" "continuing to _Unwind_RaiseException"
+gdb_test "finish" "Run till exit .*"
+gdb_test {set $retpc=$pc}
+gdb_test {break *$retpc if dummy ()}
+tbreak_and_cont "Second: resumebpt"
+gdb_test "next"
+
 tbreak_and_cont "done"
-verify_testval "post-check - advance" 9
+verify_testval "post-check - advance" 10

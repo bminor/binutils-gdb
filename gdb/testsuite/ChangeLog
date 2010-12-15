@@ -1,3 +1,11 @@
+2010-12-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/nextoverthrow.cc (dummy): Return int 0.
+	(NextOverThrowDerivates) <resumebpt>: New.
+	(resumebpt_test): New.
+	(main): Call resumebpt_test.
+	* gdb.cp/nextoverthrow.exp: New block for test of "resumebpt".
+
 2010-12-12  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tsv.exp: Test print command on trace state variables.

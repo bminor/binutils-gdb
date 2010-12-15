@@ -19,8 +19,9 @@
 
 using namespace std;
 
-void dummy ()
+int dummy ()
 {
+  return 0;
 }
 
 class NextOverThrowDerivates
@@ -89,9 +90,38 @@ public:
     function1 (val);		// until here
   }
 
+  void resumebpt (int val)
+  {
+    try
+      {
+	throw val;
+      }
+    catch (int x)
+      {
+	dummy ();
+      }
+  }
+
 };
 NextOverThrowDerivates next_cases;
 
+
+int
+resumebpt_test (int x)
+{
+  try
+    {
+      next_cases.resumebpt (x);	    // Start: resumebpt
+      next_cases.resumebpt (x + 1); // Second: resumebpt
+    }
+  catch (int val)
+    {
+      dummy ();
+      x = val;
+    }
+
+  return x;
+}
 
 int main () 
 { 
@@ -198,6 +228,8 @@ int main ()
       testval = val;		// End: advance
     }
 
+  // Test of "resumebpt".
+  testval = resumebpt_test (10);
+
   testval = 32;			// done
 }
-
