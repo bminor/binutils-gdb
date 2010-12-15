@@ -1146,8 +1146,10 @@ binary.txt: $(srcdir)/binary.in
 check_SCRIPTS += ver_matching_test.sh
 check_DATA += ver_matching_test.stdout
 MOSTLYCLEANFILES += ver_matching_test.stdout
-ver_matching_def.so: ver_matching_def.cc $(srcdir)/version_script.map gcctestdir/ld
-	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
+ver_matching_def.so: ver_matching_def_pic.o $(srcdir)/version_script.map gcctestdir/ld
+	$(CXXLINK) -O0 -Bgcctestdir/ -shared ver_matching_def_pic.o -Wl,--version-script=$(srcdir)/version_script.map
+ver_matching_def_pic.o: ver_matching_def.cc
+	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 ver_matching_test.stdout: ver_matching_def.so
 	$(TEST_OBJDUMP) -T ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
 

@@ -1329,7 +1329,8 @@ Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
 {
   switch (r_type)
     {
-      // These are the relocation types supported by glibc for x86_64.
+      // These are the relocation types supported by glibc for x86_64
+      // which should always work.
     case elfcpp::R_X86_64_RELATIVE:
     case elfcpp::R_X86_64_IRELATIVE:
     case elfcpp::R_X86_64_GLOB_DAT:
@@ -1338,9 +1339,18 @@ Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_TPOFF64:
     case elfcpp::R_X86_64_64:
+    case elfcpp::R_X86_64_COPY:
+      return;
+
+      // glibc supports these reloc types, but they can overflow.
     case elfcpp::R_X86_64_32:
     case elfcpp::R_X86_64_PC32:
-    case elfcpp::R_X86_64_COPY:
+      if (this->issued_non_pic_error_)
+	return;
+      gold_assert(parameters->options().output_is_position_independent());
+      object->error(_("requires dynamic reloc which may overflow at runtime; "
+		      "recompile with -fPIC"));
+      this->issued_non_pic_error_ = true;
       return;
 
     default:

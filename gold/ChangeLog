@@ -1,3 +1,12 @@
+2010-12-15  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12324
+	* x86_64.cc (Target_x86_64::Scan::check_non_pic): Give an error
+	for R_X86_64_32 and R_X86_64_PC32.
+	* testsuite/Makefile.am (ver_matching_def.so): Depend on and use
+	ver_matching_def_pic.o.
+	(ver_matching_def_pic.o): New target.
+
 2010-12-14  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* fileread.cc (file_counts_lock, file_counts_initialize_lock)
