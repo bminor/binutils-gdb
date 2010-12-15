@@ -1,3 +1,7 @@
+2010-12-15  Greg Watson  <g.watson@computer.org>
+
+	* f-exp.y (yylex): Check entire token against keywords.
+
 2010-12-15  Doug Evans  <dje@google.com>
 
 	Rename "maint set python auto-load" to "set auto-load-scripts".

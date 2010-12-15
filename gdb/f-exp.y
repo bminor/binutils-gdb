@@ -1150,8 +1150,8 @@ yylex ()
   /* Catch specific keywords.  */
   
   for (i = 0; f77_keywords[i].operator != NULL; i++)
-    if (strncmp (tokstart, f77_keywords[i].operator,
-		 strlen(f77_keywords[i].operator)) == 0)
+    if (strlen (f77_keywords[i].operator) == namelen
+	&& strncmp (tokstart, f77_keywords[i].operator, namelen) == 0)
       {
 	/* 	lexptr += strlen(f77_keywords[i].operator); */ 
 	yylval.opcode = f77_keywords[i].opcode;
