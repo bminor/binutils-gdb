@@ -559,11 +559,15 @@ mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else if (register_size (gdbarch, rawnum) >
 	   register_size (gdbarch, cookednum))
     {
-      if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
-	  || gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
+      if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
 	regcache_raw_read_part (regcache, rawnum, 0, 4, buf);
       else
-	regcache_raw_read_part (regcache, rawnum, 4, 4, buf);
+	{
+	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+	  LONGEST regval;
+	  regcache_raw_read_signed (regcache, rawnum, &regval);
+	  store_signed_integer (buf, 4, byte_order, regval);
+	}
     }
   else
     internal_error (__FILE__, __LINE__, _("bad register size"));
@@ -582,11 +586,17 @@ mips_pseudo_register_write (struct gdbarch *gdbarch,
   else if (register_size (gdbarch, rawnum) >
 	   register_size (gdbarch, cookednum))
     {
-      if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
-	  || gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
+      if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
 	regcache_raw_write_part (regcache, rawnum, 0, 4, buf);
       else
-	regcache_raw_write_part (regcache, rawnum, 4, 4, buf);
+	{
+	  /* Sign extend the shortened version of the register prior
+	     to placing it in the raw register.  This is required for
+	     some mips64 parts in order to avoid unpredictable behavior.  */
+	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+	  LONGEST regval = extract_signed_integer (buf, 4, byte_order);
+	  regcache_raw_write_signed (regcache, rawnum, regval);
+	}
     }
   else
     internal_error (__FILE__, __LINE__, _("bad register size"));

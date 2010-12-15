@@ -1,3 +1,10 @@
+2010-12-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_pseudo_register_write): Sign extend 32-bit
+	cooked values that are being transferred to 64-bit raw registers.
+	(mips_pseudo_register_read): Revise to preserve symmetry with
+	mips_pseudo_register_write().
+
 2010-12-15  Greg Watson  <g.watson@computer.org>
 
 	* f-exp.y (yylex): Check entire token against keywords.
