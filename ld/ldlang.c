@@ -371,17 +371,69 @@ match_simple_wild (const char *pattern, const char *name)
   return TRUE;
 }
 
+/* Return the numerical value of the init_priority attribute from
+   section name NAME.  */
+
+static unsigned long
+get_init_priority (const char *name)
+{
+  char *end;
+  unsigned long init_priority;
+
+  /* GCC uses the following section names for the init_priority
+     attribute with numerical values 101 and 65535 inclusive. A
+     lower value means a higher priority.
+
+     1: .init_array.NNNN/.fini_array.NNNN: Where NNNN is the
+	decimal numerical value of the init_priority attribute.
+	The order of execution in .init_array is forward and
+	.fini_array is backward.
+     2: .ctors.NNNN/.ctors.NNNN: Where NNNN is 65535 minus the
+	decimal numerical value of the init_priority attribute.
+	The order of execution in .ctors is backward and .dtors
+	is forward.
+   */
+  if (strncmp (name, ".init_array.", 12) == 0
+      || strncmp (name, ".fini_array.", 12) == 0)
+    {
+      init_priority = strtoul (name + 12, &end, 10);
+      return *end ? 0 : init_priority;
+    }
+  else if (strncmp (name, ".ctors.", 7) == 0
+	   || strncmp (name, ".dtors.", 7) == 0)
+    {
+      init_priority = strtoul (name + 7, &end, 10);
+      return *end ? 0 : 65535 - init_priority;
+    }
+
+  return 0;
+}
+
 /* Compare sections ASEC and BSEC according to SORT.  */
 
 static int
 compare_section (sort_type sort, asection *asec, asection *bsec)
 {
   int ret;
+  unsigned long ainit_priority, binit_priority;
 
   switch (sort)
     {
     default:
       abort ();
+
+    case by_init_priority:
+      ainit_priority
+	= get_init_priority (bfd_get_section_name (asec->owner, asec));
+      binit_priority
+	= get_init_priority (bfd_get_section_name (bsec->owner, bsec));
+      if (ainit_priority == 0 || binit_priority == 0)
+	goto sort_by_name;
+      ret = ainit_priority - binit_priority;
+      if (ret)
+	break;
+      else
+	goto sort_by_name;
 
     case by_alignment_name:
       ret = (bfd_section_alignment (bsec->owner, bsec)
@@ -391,6 +443,7 @@ compare_section (sort_type sort, asection *asec, asection *bsec)
       /* Fall through.  */
 
     case by_name:
+sort_by_name:
       ret = strcmp (bfd_get_section_name (asec->owner, asec),
 		    bfd_get_section_name (bsec->owner, bsec));
       break;

@@ -1,3 +1,33 @@
+2010-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (GENSCRIPTS): Add @enable_initfini_array@.
+
+	* NEWS: Mention SORT_BY_INIT_PRIORITY.
+
+	* configure.in: Add AC_CANONICAL_BUILD.
+	Add --enable-initfini-array.
+
+	* genscripts.sh (ENABLE_INITFINI_ARRAY): New.
+
+	* ld.h (sort_type): Add by_init_priority.
+
+	* ld.texinfo: Document SORT_BY_INIT_PRIORITY.
+
+	* ldgram.y (SORT_BY_INIT_PRIORITY): New.
+	(wildcard_spec): Handle SORT_BY_INIT_PRIORITY.
+
+	* ldlang.c (get_init_priority): New.
+	(compare_section): Use get_init_priority for by_init_priority.
+
+	* ldlex.l (SORT_BY_INIT_PRIORITY): New.
+
+	* scripttempl/elf.sc: Support ENABLE_INITFINI_ARRAY.
+
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Regenerated.
+	* config.in: Likewise.
+	* configure: Likewise.
+
 2010-12-13  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (load_symbols): Correct last change.

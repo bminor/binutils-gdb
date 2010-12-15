@@ -1,3 +1,8 @@
+2010-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_new_section_hook): Special handling for
+	.init_array/.fini_array output sections.
+
 2010-12-13  Alan Modra  <amodra@gmail.com>
 
 	* aoutx.h (aout_link_check_ar_symbols): Formatting.

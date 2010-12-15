@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Added SORT_BY_INIT_PRIORITY to the linker script language to permit
+sorting sections by numerical value of the GCC init_priority attribute
+encoded in the section name.
+
 Changes in 2.21:
 
 

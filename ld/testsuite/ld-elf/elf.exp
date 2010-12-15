@@ -74,11 +74,13 @@ set array_tests {
     {"preinit array" "" "" {preinit.c} "preinit" "preinit.out"}
     {"init array" "" "" {init.c} "init" "init.out"}
     {"fini array" "" "" {fini.c} "fini" "fini.out"}
+    {"init array mixed" "" "" {init-mixed.c} "init-mixed" "init-mixed.out" "-I."}
 }
 set array_tests_static {
     {"static preinit array" "-static" "" {preinit.c} "preinit" "preinit.out"}
     {"static init array" "-static" "" {init.c} "init" "init.out"}
     {"static fini array" "-static" "" {fini.c} "fini" "fini.out"}
+    {"static init array mixed" "" "" {init-mixed.c} "init-mixed" "init-mixed.out" "-I."}
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
@@ -93,4 +95,4 @@ switch -regexp $target_triplet {
 }
 run_ld_link_exec_tests $xfails $array_tests_static
 
-catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini" status
+catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini tmpdir/init-mixed" status

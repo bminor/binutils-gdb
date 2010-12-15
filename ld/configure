@@ -609,6 +609,7 @@ EMUL_EXTRA_OFILES
 EMULATION_OFILES
 EMUL
 STRINGIFY
+enable_initfini_array
 ENABLE_PLUGINS_FALSE
 ENABLE_PLUGINS_TRUE
 NATIVE_LIB_DIRS
@@ -778,6 +779,7 @@ enable_fast_install
 with_gnu_ld
 enable_libtool_lock
 enable_nls
+enable_initfini_array
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1427,6 +1429,7 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-nls           do not use Native Language Support
+  --enable-initfini-array	use .init_array/.fini_array sections
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2591,6 +2594,7 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -11622,7 +11626,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11625 "configure"
+#line 11629 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11728,7 +11732,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11731 "configure"
+#line 11735 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12943,6 +12947,54 @@ else
   ENABLE_PLUGINS_FALSE=
 fi
 
+
+# Check whether --enable-initfini-array was given.
+if test "${enable_initfini_array+set}" = set; then :
+  enableval=$enable_initfini_array;
+else
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for .preinit_array/.init_array/.fini_array support" >&5
+$as_echo_n "checking for .preinit_array/.init_array/.fini_array support... " >&6; }
+if test "${gcc_cv_initfini_array+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+    if test "x${build}" = "x${target}" ; then
+    if test "$cross_compiling" = yes; then :
+  gcc_cv_initfini_array=no
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+static int x = -1;
+int main (void) { return x; }
+int foo (void) { x = 0; }
+int (*fp) (void) __attribute__ ((section (".init_array"))) = foo;
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  gcc_cv_initfini_array=yes
+else
+  gcc_cv_initfini_array=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+   else
+     gcc_cv_initfini_array=no
+   fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gcc_cv_initfini_array" >&5
+$as_echo "$gcc_cv_initfini_array" >&6; }
+  enable_initfini_array=$gcc_cv_initfini_array
+
+fi
+
+
+if test $enable_initfini_array = yes; then
+
+$as_echo "#define HAVE_INITFINI_ARRAY 1" >>confdefs.h
+
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a known getopt prototype in unistd.h" >&5
 $as_echo_n "checking for a known getopt prototype in unistd.h... " >&6; }

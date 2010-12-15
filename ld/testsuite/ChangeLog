@@ -1,3 +1,12 @@
+2010-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/elf.exp (array_tests): Add init-mixed.
+	(array_tests_static): Likewise.
+	Also delete tmpdir/init-mixed.
+
+	* ld-elf/init-mixed.c: New.
+	* ld-elf/init-mixed.out: Likewise.
+
 2010-12-11  Alan Modra  <amodra@gmail.com>
 
 	* ld-elfvers/vers25a.dsym: Really include _? in match.

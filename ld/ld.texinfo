@@ -3911,6 +3911,12 @@ into ascending order by name before placing them in the output file.
 difference is @code{SORT_BY_ALIGNMENT} will sort sections into
 ascending order by alignment before placing them in the output file.
 
+@cindex SORT_BY_INIT_PRIORITY
+@code{SORT_BY_INIT_PRIORITY} is very similar to @code{SORT_BY_NAME}. The
+difference is @code{SORT_BY_INIT_PRIORITY} will sort sections into
+ascending order by numerical value of the GCC init_priority attribute
+encoded in the section name before placing them in the output file.
+
 @cindex SORT
 @code{SORT} is an alias for @code{SORT_BY_NAME}.
 

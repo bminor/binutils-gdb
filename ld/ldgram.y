@@ -126,6 +126,7 @@ static int error_index;
 %token SECTIONS PHDRS INSERT_K AFTER BEFORE
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT
+%token SORT_BY_INIT_PRIORITY
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION
@@ -481,6 +482,12 @@ wildcard_spec:
 			  $$.name = $7;
 			  $$.sorted = by_name;
 			  $$.exclude_name_list = $5;
+			}
+	|	SORT_BY_INIT_PRIORITY '(' wildcard_name ')'
+			{
+			  $$.name = $3;
+			  $$.sorted = by_init_priority;
+			  $$.exclude_name_list = NULL;
 			}
 	;
 
