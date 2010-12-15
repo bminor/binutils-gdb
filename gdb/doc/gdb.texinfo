@@ -1263,6 +1263,25 @@ to the program you are debugging, in the directory where you invoke
 @value{GDBN}.
 
 @item
+If the command line specified a program to debug, or a process to
+attach to, or a core file, @value{GDBN} loads any auto-loaded
+scripts provided for the program or for its loaded shared libraries.
+@xref{Auto-loading}.
+
+If you wish to disable the auto-loading during startup,
+you must do something like the following:
+
+@smallexample
+$ gdb -ex "set auto-load-scripts off" -ex "file myprogram"
+@end smallexample
+
+The following does not work because the auto-loading is turned off too late:
+
+@smallexample
+$ gdb -ex "set auto-load-scripts off" myprogram
+@end smallexample
+
+@item
 Reads command files specified by the @samp{-x} option.  @xref{Command
 Files}, for more details about @value{GDBN} command files.
 
@@ -23114,13 +23133,13 @@ debugging commands and scripts.
 Auto-loading can be enabled or disabled.
 
 @table @code
-@kindex maint set python auto-load
-@item maint set python auto-load [yes|no]
-Enable or disable the Python auto-loading feature.
+@kindex set auto-load-scripts
+@item set auto-load-scripts [yes|no]
+Enable or disable the auto-loading of Python scripts.
 
-@kindex maint show python auto-load
-@item maint show python auto-load
-Show whether Python auto-loading is enabled or disabled.
+@kindex show auto-load-scripts
+@item show auto-load-scripts
+Show whether auto-loading of Python scripts is enabled or disabled.
 @end table
 
 When reading an auto-loaded file, @value{GDBN} sets the

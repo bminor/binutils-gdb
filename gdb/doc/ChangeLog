@@ -1,3 +1,10 @@
+2010-12-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Startup): Document auto-loading of scripts during
+	startup.
+	(Auto-loading): Delete "maint set python auto-load on|off".
+	Add "set auto-load-scripts on|off".
+
 2010-12-07  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Mode Options): Document -data-directory.

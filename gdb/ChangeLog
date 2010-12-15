@@ -1,3 +1,13 @@
+2010-12-15  Doug Evans  <dje@google.com>
+
+	Rename "maint set python auto-load" to "set auto-load-scripts".
+	* NEWS: Mention it.
+	* python/py-auto-load.c (auto_load_scripts): Renamed from
+	gdbpy_auto_load.
+	(load_auto_scripts_for_objfile): Update.
+	(gdbpy_initialize_auto_load): Rename "maint set python auto-load" to
+	"set auto-load-scripts".
+
 2010-12-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_eabi_push_dummy_call): Place signed, rather

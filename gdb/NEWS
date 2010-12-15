@@ -8,6 +8,9 @@
 -data-directory DIR	Specify DIR as the "data-directory".
 			This is mostly for testing purposes.
 
+* The "maint set python auto-load on|off" command has been renamed to
+  "set auto-load-scripts on|off".
+
 * GDB has a new command: "set directories".
   It is like the "dir" command except that it replaces the
   source path list instead of augmenting it.
