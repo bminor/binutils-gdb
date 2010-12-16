@@ -1,3 +1,11 @@
+2010-12-16  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* testsuite/Makefile.am (ifuncmain2static_LDADD)
+	(ifuncmain2_LDADD, ifuncmain4static_LDADD, ifuncmain4_LDADD)
+	(ifuncmain7static_LDADD, ifuncmain7_LDADD): New empty variables,
+	to avoid unneeded links against $(LDADD).
+	* testsuite/Makefile.in: Regenerate.
+
 2010-12-15  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12324

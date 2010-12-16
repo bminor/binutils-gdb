@@ -406,78 +406,27 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7 \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pic \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pie
-@GCC_FALSE@ifuncmain2static_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@IFUNC_FALSE@ifuncmain2static_DEPENDENCIES = libgoldtest.a \
-@IFUNC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@ifuncmain2static_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@ifuncmain2_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@IFUNC_FALSE@ifuncmain2_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@IFUNC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@ifuncmain2_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@ifuncmain2static_DEPENDENCIES =
+@IFUNC_FALSE@ifuncmain2static_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@ifuncmain2static_DEPENDENCIES =
+@GCC_FALSE@ifuncmain2_DEPENDENCIES =
+@IFUNC_FALSE@ifuncmain2_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@ifuncmain2_DEPENDENCIES =
 @GCC_FALSE@ifuncmain3_DEPENDENCIES =
 @IFUNC_FALSE@ifuncmain3_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@ifuncmain3_DEPENDENCIES =
-@GCC_FALSE@ifuncmain4static_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@IFUNC_FALSE@ifuncmain4static_DEPENDENCIES = libgoldtest.a \
-@IFUNC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@ifuncmain4static_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@ifuncmain4_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@IFUNC_FALSE@ifuncmain4_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@IFUNC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@ifuncmain4_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@ifuncmain7static_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@IFUNC_FALSE@ifuncmain7static_DEPENDENCIES = libgoldtest.a \
-@IFUNC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@ifuncmain7static_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@ifuncmain7_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@IFUNC_FALSE@ifuncmain7_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@IFUNC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@IFUNC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@ifuncmain7_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@ifuncmain4static_DEPENDENCIES =
+@IFUNC_FALSE@ifuncmain4static_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@ifuncmain4static_DEPENDENCIES =
+@GCC_FALSE@ifuncmain4_DEPENDENCIES =
+@IFUNC_FALSE@ifuncmain4_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@ifuncmain4_DEPENDENCIES =
+@GCC_FALSE@ifuncmain7static_DEPENDENCIES =
+@IFUNC_FALSE@ifuncmain7static_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@ifuncmain7static_DEPENDENCIES =
+@GCC_FALSE@ifuncmain7_DEPENDENCIES =
+@IFUNC_FALSE@ifuncmain7_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@ifuncmain7_DEPENDENCIES =
 
 # Test that --start-lib and --end-lib function correctly.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_34 = start_lib_test
@@ -941,7 +890,6 @@ ifuncmain1vispie_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain2_OBJECTS = ifuncmain2.$(OBJEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncdep2.$(OBJEXT)
 ifuncmain2_OBJECTS = $(am_ifuncmain2_OBJECTS)
-ifuncmain2_LDADD = $(LDADD)
 ifuncmain2_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain2_LDFLAGS) \
 	$(LDFLAGS) -o $@
 ifuncmain2pic_SOURCES = ifuncmain2pic.c
@@ -959,7 +907,6 @@ ifuncmain2picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain2static_OBJECTS = ifuncmain2.$(OBJEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncdep2.$(OBJEXT)
 ifuncmain2static_OBJECTS = $(am_ifuncmain2static_OBJECTS)
-ifuncmain2static_LDADD = $(LDADD)
 ifuncmain2static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(ifuncmain2static_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain3_OBJECTS = ifuncmain3.$(OBJEXT)
@@ -968,7 +915,6 @@ ifuncmain3_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain3_LDFLAGS) \
 	$(LDFLAGS) -o $@
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain4_OBJECTS = ifuncmain4.$(OBJEXT)
 ifuncmain4_OBJECTS = $(am_ifuncmain4_OBJECTS)
-ifuncmain4_LDADD = $(LDADD)
 ifuncmain4_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain4_LDFLAGS) \
 	$(LDFLAGS) -o $@
 ifuncmain4picstatic_SOURCES = ifuncmain4picstatic.c
@@ -979,7 +925,6 @@ ifuncmain4picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain4static_OBJECTS = ifuncmain4.$(OBJEXT)
 ifuncmain4static_OBJECTS = $(am_ifuncmain4static_OBJECTS)
-ifuncmain4static_LDADD = $(LDADD)
 ifuncmain4static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(ifuncmain4static_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain5_OBJECTS = ifuncmain5.$(OBJEXT)
@@ -1022,7 +967,6 @@ ifuncmain6pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain7_OBJECTS = ifuncmain7.$(OBJEXT)
 ifuncmain7_OBJECTS = $(am_ifuncmain7_OBJECTS)
-ifuncmain7_LDADD = $(LDADD)
 ifuncmain7_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain7_LDFLAGS) \
 	$(LDFLAGS) -o $@
 ifuncmain7pic_SOURCES = ifuncmain7pic.c
@@ -1045,7 +989,6 @@ ifuncmain7pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain7static_OBJECTS = ifuncmain7.$(OBJEXT)
 ifuncmain7static_OBJECTS = $(am_ifuncmain7static_OBJECTS)
-ifuncmain7static_LDADD = $(LDADD)
 ifuncmain7static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(ifuncmain7static_LDFLAGS) $(LDFLAGS) -o $@
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS = initpri1.$(OBJEXT)
@@ -2212,9 +2155,11 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2static_SOURCES = ifuncmain2.c ifuncdep2.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2static_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2static_LDADD = 
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2_SOURCES = ifuncmain2.c ifuncdep2.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain2_LDADD = 
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain3_SOURCES = ifuncmain3.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain3_DEPENDENCIES = gcctestdir/ld ifuncmod3.so
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain3_LDFLAGS = -Bgcctestdir/ -Wl,--export-dynamic -Wl,-R,.
@@ -2222,9 +2167,11 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4static_SOURCES = ifuncmain4.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4static_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4static_LDADD = 
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4_SOURCES = ifuncmain4.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain4_LDADD = 
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5static_SOURCES = ifuncmain5.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5static_DEPENDENCIES = gcctestdir/ld ifuncdep5.o
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain5static_LDFLAGS = -Bgcctestdir/ -static
@@ -2236,9 +2183,11 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7static_SOURCES = ifuncmain7.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7static_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7static_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7static_LDADD = 
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_SOURCES = ifuncmain7.c
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@ifuncmain7_LDADD = 
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 all: $(BUILT_SOURCES)

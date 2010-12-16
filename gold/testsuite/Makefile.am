@@ -1623,6 +1623,7 @@ check_PROGRAMS += ifuncmain2static
 ifuncmain2static_SOURCES = ifuncmain2.c ifuncdep2.c
 ifuncmain2static_DEPENDENCIES = gcctestdir/ld
 ifuncmain2static_LDFLAGS = -Bgcctestdir/ -static
+ifuncmain2static_LDADD =
 
 check_PROGRAMS += ifuncmain2picstatic
 ifuncmain2picstatic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
@@ -1632,6 +1633,7 @@ check_PROGRAMS += ifuncmain2
 ifuncmain2_SOURCES = ifuncmain2.c ifuncdep2.c
 ifuncmain2_DEPENDENCIES = gcctestdir/ld
 ifuncmain2_LDFLAGS = -Bgcctestdir/
+ifuncmain2_LDADD =
 
 check_PROGRAMS += ifuncmain2pic
 ifuncmain2pic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
@@ -1655,6 +1657,7 @@ check_PROGRAMS += ifuncmain4static
 ifuncmain4static_SOURCES = ifuncmain4.c
 ifuncmain4static_DEPENDENCIES = gcctestdir/ld
 ifuncmain4static_LDFLAGS = -Bgcctestdir/ -static
+ifuncmain4static_LDADD =
 
 check_PROGRAMS += ifuncmain4picstatic
 ifuncmain4picstatic: ifuncmain4pic.o gcctestdir/ld
@@ -1664,6 +1667,7 @@ check_PROGRAMS += ifuncmain4
 ifuncmain4_SOURCES = ifuncmain4.c
 ifuncmain4_DEPENDENCIES = gcctestdir/ld
 ifuncmain4_LDFLAGS = -Bgcctestdir/
+ifuncmain4_LDADD =
 
 ifuncmain5pic.o: ifuncmain5.c
 	$(COMPILE) -c -fpic -o $@ $<
@@ -1729,6 +1733,7 @@ check_PROGRAMS += ifuncmain7static
 ifuncmain7static_SOURCES = ifuncmain7.c
 ifuncmain7static_DEPENDENCIES = gcctestdir/ld
 ifuncmain7static_LDFLAGS = -Bgcctestdir/ -static
+ifuncmain7static_LDADD =
 
 check_PROGRAMS += ifuncmain7picstatic
 ifuncmain7picstatic: ifuncmain7pic.o gcctestdir/ld
@@ -1738,6 +1743,7 @@ check_PROGRAMS += ifuncmain7
 ifuncmain7_SOURCES = ifuncmain7.c
 ifuncmain7_DEPENDENCIES = gcctestdir/ld
 ifuncmain7_LDFLAGS = -Bgcctestdir/
+ifuncmain7_LDADD =
 
 check_PROGRAMS += ifuncmain7pic
 ifuncmain7pic: ifuncmain7pic.o gcctestdir/ld
