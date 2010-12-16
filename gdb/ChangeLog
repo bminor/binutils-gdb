@@ -1,3 +1,13 @@
+2010-12-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_convert_register_float_case_p)
+	(mips_convert_register_gpreg_case_p): New functions.
+	(mips_convert_register_p): Invoke new functions above.
+	(mips_register_to_value): Add case for fetching value shorter
+	than 64 bits from a 64-bit register.
+	(mips_value_to_register): Add case for storing value shorter
+	than 64 bits into a 64-bit register.
+
 2010-12-16  Joel Borggrén-Franck  <joel.borggren.franck@gmail.com>
 
 	* python/py-value.c (value_object_type) <tp_flags>: Add

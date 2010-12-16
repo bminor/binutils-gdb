@@ -635,8 +635,13 @@ set_mips64_transfers_32bit_regs (char *args, int from_tty,
 
 /* Convert to/from a register and the corresponding memory value.  */
 
+/* This predicate tests for the case of an 8 byte floating point
+   value that is being transferred to or from a pair of floating point
+   registers each of which are (or are considered to be) only 4 bytes
+   wide.  */
 static int
-mips_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
+mips_convert_register_float_case_p (struct gdbarch *gdbarch, int regnum,
+				    struct type *type)
 {
   return (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
 	  && register_size (gdbarch, regnum) == 4
@@ -647,20 +652,99 @@ mips_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
 	  && TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8);
 }
 
+/* This predicate tests for the case of a value of less than 8
+   bytes in width that is being transfered to or from an 8 byte
+   general purpose register.  */
+static int
+mips_convert_register_gpreg_case_p (struct gdbarch *gdbarch, int regnum,
+				    struct type *type)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+
+  return (register_size (gdbarch, regnum) == 8
+          && regnum % num_regs > 0 && regnum % num_regs < 32
+          && TYPE_LENGTH (type) < 8);
+}
+
+static int
+mips_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
+{
+  return mips_convert_register_float_case_p (gdbarch, regnum, type)
+      || mips_convert_register_gpreg_case_p (gdbarch, regnum, type);
+}
+
 static void
 mips_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to)
 {
-  get_frame_register (frame, regnum + 0, to + 4);
-  get_frame_register (frame, regnum + 1, to + 0);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
+  if (mips_convert_register_float_case_p (gdbarch, regnum, type))
+    {
+      get_frame_register (frame, regnum + 0, to + 4);
+      get_frame_register (frame, regnum + 1, to + 0);
+    }
+  else if (mips_convert_register_gpreg_case_p (gdbarch, regnum, type))
+    {
+      int len = TYPE_LENGTH (type);
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	get_frame_register_bytes (frame, regnum, 8 - len, len, to);
+      else
+	get_frame_register_bytes (frame, regnum, 0, len, to);
+    }
+  else
+    {
+      internal_error (__FILE__, __LINE__,
+                      _("mips_register_to_value: unrecognized case"));
+    }
 }
 
 static void
 mips_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const gdb_byte *from)
 {
-  put_frame_register (frame, regnum + 0, from + 4);
-  put_frame_register (frame, regnum + 1, from + 0);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
+  if (mips_convert_register_float_case_p (gdbarch, regnum, type))
+    {
+      put_frame_register (frame, regnum + 0, from + 4);
+      put_frame_register (frame, regnum + 1, from + 0);
+    }
+  else if (mips_convert_register_gpreg_case_p (gdbarch, regnum, type))
+    {
+      gdb_byte fill[8];
+      int len = TYPE_LENGTH (type);
+      
+      /* Sign extend values, irrespective of type, that are stored to 
+         a 64-bit general purpose register.  (32-bit unsigned values
+	 are stored as signed quantities within a 64-bit register.
+	 When performing an operation, in compiled code, that combines
+	 a 32-bit unsigned value with a signed 64-bit value, a type
+	 conversion is first performed that zeroes out the high 32 bits.)  */
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	{
+	  if (from[0] & 0x80)
+	    store_signed_integer (fill, 8, BFD_ENDIAN_BIG, -1);
+	  else
+	    store_signed_integer (fill, 8, BFD_ENDIAN_BIG, 0);
+	  put_frame_register_bytes (frame, regnum, 0, 8 - len, fill);
+	  put_frame_register_bytes (frame, regnum, 8 - len, len, from);
+	}
+      else
+	{
+	  if (from[len-1] & 0x80)
+	    store_signed_integer (fill, 8, BFD_ENDIAN_LITTLE, -1);
+	  else
+	    store_signed_integer (fill, 8, BFD_ENDIAN_LITTLE, 0);
+	  put_frame_register_bytes (frame, regnum, 0, len, from);
+	  put_frame_register_bytes (frame, regnum, len, 8 - len, fill);
+	}
+    }
+  else
+    {
+      internal_error (__FILE__, __LINE__,
+                      _("mips_value_to_register: unrecognized case"));
+    }
 }
 
 /* Return the GDB type object for the "standard" data type of data in
