@@ -1,3 +1,8 @@
+2010-12-16  Joel Borggrén-Franck  <joel.borggren.franck@gmail.com>
+
+	* python/py-value.c (value_object_type) <tp_flags>: Add
+	Py_TPFLAGS_BASETYPE.
+
 2010-12-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* NEWS: Mention new sim --map-info flag.
