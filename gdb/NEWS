@@ -118,6 +118,10 @@
 
 * Guile support was removed.
 
+* New features in the GNU simulator
+
+  ** The --map-info flag lists all known core mappings.
+
 *** Changes in GDB 7.2
 
 * Shared library support for remote targets by default

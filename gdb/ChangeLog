@@ -1,3 +1,7 @@
+2010-12-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* NEWS: Mention new sim --map-info flag.
+
 2010-12-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (_initialize_dwarf2_read): Fix help text of
