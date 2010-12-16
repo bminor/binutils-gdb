@@ -11136,26 +11136,12 @@ static void
 my_getExpression (expressionS *ep, char *str)
 {
   char *save_in;
-  valueT val;
 
   save_in = input_line_pointer;
   input_line_pointer = str;
   expression (ep);
   expr_end = input_line_pointer;
   input_line_pointer = save_in;
-
-  /* If we are in mips16 mode, and this is an expression based on `.',
-     then we bump the value of the symbol by 1 since that is how other
-     text symbols are handled.  We don't bother to handle complex
-     expressions, just `.' plus or minus a constant.  */
-  if (mips_opts.mips16
-      && ep->X_op == O_symbol
-      && strcmp (S_GET_NAME (ep->X_add_symbol), FAKE_LABEL_NAME) == 0
-      && S_GET_SEGMENT (ep->X_add_symbol) == now_seg
-      && symbol_get_frag (ep->X_add_symbol) == frag_now
-      && symbol_constant_p (ep->X_add_symbol)
-      && (val = S_GET_VALUE (ep->X_add_symbol)) == frag_now_fix ())
-    S_SET_VALUE (ep->X_add_symbol, val + 1);
 }
 
 char *
@@ -12726,8 +12712,8 @@ s_cons (int log_size)
   mips_emit_delays ();
   if (log_size > 0 && auto_align)
     mips_align (log_size, 0, label);
-  mips_clear_insn_labels ();
   cons (1 << log_size);
+  mips_clear_insn_labels ();
 }
 
 static void
@@ -12749,9 +12735,8 @@ s_float_cons (int type)
 	mips_align (2, 0, label);
     }
 
-  mips_clear_insn_labels ();
-
   float_cons (type);
+  mips_clear_insn_labels ();
 }
 
 /* Handle .globl.  We need to override it because on Irix 5 you are
@@ -13516,9 +13501,9 @@ s_gpword (int ignore ATTRIBUTE_UNUSED)
   mips_emit_delays ();
   if (auto_align)
     mips_align (2, 0, label);
-  mips_clear_insn_labels ();
 
   expression (&ex);
+  mips_clear_insn_labels ();
 
   if (ex.X_op != O_symbol || ex.X_add_number != 0)
     {
@@ -13556,9 +13541,9 @@ s_gpdword (int ignore ATTRIBUTE_UNUSED)
   mips_emit_delays ();
   if (auto_align)
     mips_align (3, 0, label);
-  mips_clear_insn_labels ();
 
   expression (&ex);
+  mips_clear_insn_labels ();
 
   if (ex.X_op != O_symbol || ex.X_add_number != 0)
     {
@@ -14706,12 +14691,14 @@ mips_frob_file_after_relocs (void)
 
 #endif
 
-/* This function is called whenever a label is defined.  It is used
-   when handling branch delays; if a branch has a label, we assume we
-   can not move it.  */
+/* This function is called whenever a label is defined, including fake
+   labels instantiated off the dot special symbol.  It is used when
+   handling branch delays; if a branch has a label, we assume we cannot
+   move it.  This also bumps the value of the symbol by 1 in compressed
+   code.  */
 
 void
-mips_define_label (symbolS *sym)
+mips_record_label (symbolS *sym)
 {
   segment_info_type *si = seg_info (now_seg);
   struct insn_label_list *l;
@@ -14727,7 +14714,15 @@ mips_define_label (symbolS *sym)
   l->label = sym;
   l->next = si->label_list;
   si->label_list = l;
+}
 
+/* This function is called as tc_frob_label() whenever a label is defined
+   and adds a DWARF-2 record we only want for true labels.  */
+
+void
+mips_define_label (symbolS *sym)
+{
+  mips_record_label (sym);
 #ifdef OBJ_ELF
   dwarf2_emit_label (sym);
 #endif

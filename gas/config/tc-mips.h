@@ -112,6 +112,9 @@ extern int mips_parse_long_option (const char *);
 #define tc_frob_label(sym) mips_define_label (sym)
 extern void mips_define_label (symbolS *);
 
+#define tc_new_dot_label(sym) mips_record_label (sym)
+extern void mips_record_label (symbolS *);
+
 #define tc_frob_file_before_adjust() mips_frob_file_before_adjust ()
 extern void mips_frob_file_before_adjust (void);
 

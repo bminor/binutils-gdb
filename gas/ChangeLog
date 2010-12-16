@@ -1,3 +1,17 @@
+2010-12-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* symbols.c (symbol_clone_if_forward_ref): Call tc_new_dot_label
+	for new fake labels created off the dot special symbol.
+	* config/tc-mips.h (tc_new_dot_label): New macro.
+	(mips_record_label): New prototype.
+	* config/tc-mips.c (my_getExpression): Remove MIPS16 fake label
+	annotation.
+	(s_cons, s_float_cons, s_gpword, s_gpdword): Only clear labels
+	recorded once data expressions have been evaluated.
+	(mips_define_label): Move code to record labels over to...
+	(mips_record_label): ... this new function.
+	* doc/internals.texi: Document tc_new_dot_label.
+
 2010-12-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.h (TC_ADDRESS_BYTES): New macro.

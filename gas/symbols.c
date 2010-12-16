@@ -668,7 +668,12 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 	      symbolP->sy_resolving = 0;
 	    }
 	  else
-	    symbolP = symbol_temp_new_now ();
+	    {
+	      symbolP = symbol_temp_new_now ();
+#ifdef tc_new_dot_label
+	      tc_new_dot_label (symbolP);
+#endif
+	    }
 	}
 
       symbolP->sy_value.X_add_symbol = add_symbol;
