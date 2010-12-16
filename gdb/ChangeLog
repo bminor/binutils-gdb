@@ -1,3 +1,8 @@
+2010-12-15  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (_initialize_dwarf2_read): Fix help text of
+	"save gdb-index" command.
+
 2010-12-15  Tom Tromey  <tromey@redhat.com>
 
 	* infrun.c (save_infcall_control_state): Handle the

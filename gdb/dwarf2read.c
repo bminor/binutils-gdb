@@ -15839,7 +15839,7 @@ The value is the maximum depth to print."),
 
   c = add_cmd ("gdb-index", class_files, save_gdb_index_command,
 	       _("\
-Save a .gdb-index file.\n\
+Save a gdb-index file.\n\
 Usage: save gdb-index DIRECTORY"),
 	       &save_cmdlist);
   set_cmd_completer (c, filename_completer);
