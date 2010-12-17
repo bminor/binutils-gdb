@@ -129,6 +129,12 @@ struct partial_symtab
   int statics_offset;
   int n_static_syms;
 
+  /* Non-zero if the symtab corresponding to this psymtab has been
+     readin.  This is located here so that this structure packs better
+     on 64-bit systems.  */
+
+  unsigned char readin;
+
   /* Pointer to symtab eventually allocated for this source file, 0 if
      !readin or if we haven't looked for the symtab after it was readin.  */
 
@@ -145,10 +151,6 @@ struct partial_symtab
      the various symbol reading modules.  */
 
   void *read_symtab_private;
-
-  /* Non-zero if the symtab corresponding to this psymtab has been readin */
-
-  unsigned char readin;
 };
 
 extern void sort_pst_symbols (struct partial_symtab *);
