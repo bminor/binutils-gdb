@@ -1943,10 +1943,14 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 int
 rx_validate_fix_sub (struct fix * f)
 {
-  /* We permit the subtraction of two symbols as a 32-bit relocation.  */
+  /* We permit the subtraction of two symbols in a few cases.  */
+  /* mov #sym1-sym2, R3 */
+  if (f->fx_r_type == BFD_RELOC_RX_32_OP)
+    return 1;
+  /* .long sym1-sym2 */
   if (f->fx_r_type == BFD_RELOC_RX_DIFF
       && ! f->fx_pcrel
-      && f->fx_size == 4)
+      && (f->fx_size == 4 || f->fx_size == 2 || f->fx_size == 1))
     return 1;
   return 0;
 }
@@ -2206,6 +2210,7 @@ arelent **
 tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 {
   static arelent * reloc[5];
+  int is_opcode = 0;
 
   if (fixp->fx_r_type == BFD_RELOC_NONE)
     {
@@ -2225,6 +2230,13 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
   * reloc[0]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc[0]->address       = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc[0]->addend        = fixp->fx_offset;
+
+  if (fixp->fx_r_type == BFD_RELOC_RX_32_OP
+      && fixp->fx_subsy)
+    {
+      fixp->fx_r_type = BFD_RELOC_RX_DIFF;
+      is_opcode = 1;
+    }
 
   /* Certain BFD relocations cannot be translated directly into
      a single (non-Red Hat) RX relocation, but instead need
@@ -2254,10 +2266,16 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	  reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS8);
 	  break;
 	case 2:
-	  reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS16);
+	  if (!is_opcode && target_big_endian)
+	    reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS16_REV);
+	  else
+	    reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS16);
 	  break;
 	case 4:
-	  reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS32);
+	  if (!is_opcode && target_big_endian)
+	    reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS32_REV);
+	  else
+	    reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS32);
 	  break;
 	}
       reloc[3]->addend      = 0;

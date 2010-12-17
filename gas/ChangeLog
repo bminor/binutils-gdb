@@ -1,3 +1,9 @@
+2010-12-16  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rx.c (rx_validate_fix_sub): Permit subtraction in more
+	cases.
+	(tc_gen_reloc): Fix handling of subtraction (esp wrt endianness).
+
 2010-12-16  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* symbols.c (symbol_clone_if_forward_ref): Call tc_new_dot_label

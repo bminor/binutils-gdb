@@ -1,3 +1,11 @@
+2010-12-16  DJ Delorie  <dj@redhat.com>
+
+	* reloc.c (BFD_RELOC_RX_ABS16_REV): Add.
+	(BFD_RELOC_RX_ABS32_REV): Add.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-rx.c (rx_reloc_map): Add them.
+
 2010-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_new_section_hook): Special handling for
