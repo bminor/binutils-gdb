@@ -205,6 +205,12 @@ unmake_mips16_addr (CORE_ADDR addr)
   return ((addr) & ~(CORE_ADDR) 1);
 }
 
+static CORE_ADDR
+make_mips16_addr (CORE_ADDR addr)
+{
+  return ((addr) | (CORE_ADDR) 1);
+}
+
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi
 mips_abi (struct gdbarch *gdbarch)
@@ -264,7 +270,6 @@ mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
   if (((elf_symbol_type *) (sym))->internal_elf_sym.st_other == STO_MIPS16)
     {
       MSYMBOL_TARGET_FLAG_1 (msym) = 1;
-      SYMBOL_VALUE_ADDRESS (msym) |= 1;
     }
 }
 
@@ -931,14 +936,21 @@ mips_read_pc (struct regcache *regcache)
   ULONGEST pc;
   int regnum = mips_regnum (get_regcache_arch (regcache))->pc;
   regcache_cooked_read_signed (regcache, regnum, &pc);
+  if (is_mips16_addr (pc))
+    pc = unmake_mips16_addr (pc);
   return pc;
 }
 
 static CORE_ADDR
 mips_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_unwind_register_signed
-	   (next_frame, gdbarch_num_regs (gdbarch) + mips_regnum (gdbarch)->pc);
+  ULONGEST pc;
+
+  pc = frame_unwind_register_signed
+	 (next_frame, gdbarch_num_regs (gdbarch) + mips_regnum (gdbarch)->pc);
+  if (is_mips16_addr (pc))
+    pc = unmake_mips16_addr (pc);
+  return pc;
 }
 
 static CORE_ADDR
@@ -967,7 +979,10 @@ static void
 mips_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   int regnum = mips_regnum (get_regcache_arch (regcache))->pc;
-  regcache_cooked_write_unsigned (regcache, regnum, pc);
+  if (mips_pc_is_mips16 (pc))
+    regcache_cooked_write_unsigned (regcache, regnum, make_mips16_addr (pc));
+  else
+    regcache_cooked_write_unsigned (regcache, regnum, pc);
 }
 
 /* Fetch and return instruction from the specified location.  If the PC
@@ -2450,6 +2465,10 @@ static CORE_ADDR
 mips_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (is_mips16_addr (addr))
+    addr = unmake_mips16_addr (addr);
+
   if (mips_mask_address_p (tdep) && (((ULONGEST) addr) >> 32 == 0xffffffffUL))
     /* This hack is a work-around for existing boards using PMON, the
        simulator, and any other 64-bit targets that doesn't have true
@@ -2869,9 +2888,25 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    "mips_eabi_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
+      /* Function pointer arguments to mips16 code need to be made into
+         mips16 pointers.  */
+      if (typecode == TYPE_CODE_PTR
+          && TYPE_CODE (TYPE_TARGET_TYPE (arg_type)) == TYPE_CODE_FUNC)
+	{
+	  CORE_ADDR addr = extract_signed_integer (value_contents (arg),
+						   len, byte_order);
+	  if (mips_pc_is_mips16 (addr))
+	    {
+	      store_signed_integer (valbuf, len, byte_order, 
+				    make_mips16_addr (addr));
+	      val = valbuf;
+	    }
+	  else
+	    val = value_contents (arg);
+	}
       /* The EABI passes structures that do not fit in a register by
          reference.  */
-      if (len > regsize
+      else if (len > regsize
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
 	  store_unsigned_integer (valbuf, regsize, byte_order,
@@ -4159,6 +4194,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       const gdb_byte *val;
+      gdb_byte valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -4170,6 +4206,21 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    argnum + 1, len, (int) typecode);
 
       val = value_contents (arg);
+
+      /* Function pointer arguments to mips16 code need to be made into
+         mips16 pointers.  */
+      if (typecode == TYPE_CODE_PTR
+          && TYPE_CODE (TYPE_TARGET_TYPE (arg_type)) == TYPE_CODE_FUNC)
+	{
+	  CORE_ADDR addr = extract_signed_integer (value_contents (arg),
+						   len, byte_order);
+	  if (mips_pc_is_mips16 (addr))
+	    {
+	      store_signed_integer (valbuf, len, byte_order, 
+				    make_mips16_addr (addr));
+	      val = valbuf;
+	    }
+	}
 
       /* Floating point arguments passed in registers have to be
          treated specially.  On 32-bit architectures, doubles

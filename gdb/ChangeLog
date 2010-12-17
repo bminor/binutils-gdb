@@ -1,3 +1,15 @@
+2010-12-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (make_mips16_addr): New function.
+	(mips_elf_make_msymbol_special): Don't set the low bit in the
+	symbol's address.
+	(mips_read_pc, mips_unwind_pc, mips_addr_bits_remove): Strip bit
+	indicating mips16 address, if present.
+	(mips_write_pc): Set bit indicating mips16 address when in a mips16
+	function.
+	(mips_eabi_push_dummy_call, mips_o64_push_dummy_call): Likewise,
+	but for each function pointer argument to inferior function call.
+
 2010-12-17  Tom Tromey  <tromey@redhat.com>
 
 	* psympriv.h (struct partial_symtab) <readin>: Move field
