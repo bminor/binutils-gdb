@@ -23,6 +23,7 @@
 #include "progspace.h"
 #include "objfiles.h"
 #include "language.h"
+#include "arch-utils.h"
 
 typedef struct
 {
@@ -134,9 +135,7 @@ py_free_pspace (struct program_space *pspace, void *datum)
 {
   struct cleanup *cleanup;
   pspace_object *object = datum;
-  /* FIXME: What's the right way to get a program space's arch?
-     There may be multiple.  */
-  struct gdbarch *arch = get_objfile_arch (pspace->symfile_object_file);
+  struct gdbarch *arch = get_current_arch ();
 
   cleanup = ensure_python_env (arch, current_language);
   object->pspace = NULL;
