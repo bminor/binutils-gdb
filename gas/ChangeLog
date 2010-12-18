@@ -1,3 +1,8 @@
+2010-12-18  DJ Delorie  <dj@redhat.com>
+
+	* config/rx-parse.y (SUB): Correct subtraction of immediate
+	pattern.
+
 2010-12-16  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-rx.c (rx_validate_fix_sub): Permit subtraction in more

@@ -331,7 +331,7 @@ statement :
 	      { B2 (0x60, 0); FE ($3, 8, 4); F ($5, 12, 4); }
 	    else
 	      /* This is really an add, but we negate the immediate.  */
-	      { B2 (0x38, 0); F ($5, 8, 4); F ($5, 12, 4); NIMM ($3, 6); } } /* ? */
+	      { B2 (0x70, 0); F ($5, 8, 4); F ($5, 12, 4); NIMM ($3, 6); } }
 
 	| CMP '#' EXPR ',' REG
 	  { if (rx_uintop ($3, 4))
