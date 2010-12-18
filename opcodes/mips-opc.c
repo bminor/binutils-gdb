@@ -164,6 +164,13 @@
 /* MIPS MT ASE support.  */
 #define MT32	INSN_MT
 
+/* Loongson support.  */
+#define WR_z	INSN2_WRITE_GPR_Z
+#define WR_Z	INSN2_WRITE_FPR_Z
+#define RD_z	INSN2_READ_GPR_Z
+#define RD_Z	INSN2_READ_FPR_Z
+#define RD_d	INSN2_READ_GPR_D
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -198,6 +205,64 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"b",       "p",	0x10000000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1	},/* beq 0,0 */
 {"b",       "p",	0x04010000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1	},/* bgez 0 */
 {"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31,		INSN2_ALIAS,	I1	},/* bgezal 0*/
+
+/* Loongson specific instructions.  Loongson 3A redefines the Coprocessor 2
+   instructions.  Put them here so that disassembler will find them first.
+   The assemblers uses a hash table based on the instruction name anyhow.  */
+{"campi",	"d,s",		0x70000075,	0xfc1f07ff,	WR_d|RD_s,	0,	IL3A	},
+{"campv",	"d,s",		0x70000035,	0xfc1f07ff,	WR_d|RD_s,	0,	IL3A	},
+{"camwi",	"d,s,t",	0x700000b5,	0xfc0007ff,	RD_s|RD_t,	RD_d,	IL3A	},
+{"ramri",	"d,s",		0x700000f5,	0xfc1f07ff,	WR_d|RD_s,	0,	IL3A	},
+{"gsle",	"s,t",		0x70000026,	0xfc00ffff,	RD_s|RD_t,	0,	IL3A	},
+{"gsgt",	"s,t",		0x70000027,	0xfc00ffff,	RD_s|RD_t,	0,	IL3A	},
+{"gslble",	"t,b,d",	0xc8000010,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gslbgt",	"t,b,d",	0xc8000011,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gslhle",	"t,b,d",	0xc8000012,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gslhgt",	"t,b,d",	0xc8000013,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gslwle",	"t,b,d",	0xc8000014,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gslwgt",	"t,b,d",	0xc8000015,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gsldle",	"t,b,d",	0xc8000016,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gsldgt",	"t,b,d",	0xc8000017,	0xfc0007ff,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gssble",	"t,b,d",	0xe8000010,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gssbgt",	"t,b,d",	0xe8000011,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gsshle",	"t,b,d",	0xe8000012,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gsshgt",	"t,b,d",	0xe8000013,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gsswle",	"t,b,d",	0xe8000014,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gsswgt",	"t,b,d",	0xe8000015,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gssdle",	"t,b,d",	0xe8000016,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gssdgt",	"t,b,d",	0xe8000017,	0xfc0007ff,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gslwlec1",	"T,b,d",	0xc8000018,	0xfc0007ff,	WR_T|RD_b|LDD,	RD_d,	IL3A	},
+{"gslwgtc1",	"T,b,d",	0xc8000019,	0xfc0007ff,	WR_T|RD_b|LDD,	RD_d,	IL3A	},
+{"gsldlec1",	"T,b,d",	0xc800001a,	0xfc0007ff,	WR_T|RD_b|LDD,	RD_d,	IL3A	},
+{"gsldgtc1",	"T,b,d",	0xc800001b,	0xfc0007ff,	WR_T|RD_b|LDD,	RD_d,	IL3A	},
+{"gsswlec1",	"T,b,d",	0xe800001c,	0xfc0007ff,	RD_T|RD_b|SM,	RD_d,	IL3A	},
+{"gsswgtc1",	"T,b,d",	0xe800001d,	0xfc0007ff,	RD_T|RD_b|SM,	RD_d,	IL3A	},
+{"gssdlec1",	"T,b,d",	0xe800001e,	0xfc0007ff,	RD_T|RD_b|SM,	RD_d,	IL3A	},
+{"gssdgtc1",	"T,b,d",	0xe800001f,	0xfc0007ff,	RD_T|RD_b|SM,	RD_d,	IL3A	},
+{"gslwlc1",	"T,+a(b)",	0xc8000004,	0xfc00c03f,	WR_T|RD_b|LDD,	0,	IL3A	},
+{"gslwrc1",	"T,+a(b)",	0xc8000005,	0xfc00c03f,	WR_T|RD_b|LDD,	0,	IL3A	},
+{"gsldlc1",	"T,+a(b)",	0xc8000006,	0xfc00c03f,	WR_T|RD_b|LDD,	0,	IL3A	},
+{"gsldrc1",	"T,+a(b)",	0xc8000007,	0xfc00c03f,	WR_T|RD_b|LDD,	0,	IL3A	},
+{"gsswlc1",	"T,+a(b)",	0xe8000004,	0xfc00c03f,	RD_T|RD_b|SM,	0,	IL3A	},
+{"gsswrc1",	"T,+a(b)",	0xe8000005,	0xfc00c03f,	RD_T|RD_b|SM,	0,	IL3A	},
+{"gssdlc1",	"T,+a(b)",	0xe8000006,	0xfc00c03f,	RD_T|RD_b|SM,	0,	IL3A	},
+{"gssdrc1",	"T,+a(b)",	0xe8000007,	0xfc00c03f,	RD_T|RD_b|SM,	0,	IL3A	},
+{"gslbx",	"t,+b(b,d)",	0xd8000000,	0xfc000007,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gslhx",	"t,+b(b,d)",	0xd8000001,	0xfc000007,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gslwx",	"t,+b(b,d)",	0xd8000002,	0xfc000007,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gsldx",	"t,+b(b,d)",	0xd8000003,	0xfc000007,	WR_t|RD_b|LDD,	RD_d,	IL3A	},
+{"gssbx",	"t,+b(b,d)",	0xf8000000,	0xfc000007,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gsshx",	"t,+b(b,d)",	0xf8000001,	0xfc000007,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gsswx",	"t,+b(b,d)",	0xf8000002,	0xfc000007,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gssdx",	"t,+b(b,d)",	0xf8000003,	0xfc000007,	RD_t|RD_b|SM,	RD_d,	IL3A	},
+{"gslwxc1",	"T,+b(b,d)",	0xd8000006,	0xfc000007,	WR_T|RD_b|LDD,	RD_d,	IL3A	},
+{"gsldxc1",	"T,+b(b,d)",	0xd8000007,	0xfc000007,	WR_T|RD_b|LDD,	RD_d,	IL3A	},
+{"gsswxc1",	"T,+b(b,d)",	0xf8000006,	0xfc000007,	RD_T|RD_b|SM,	RD_d,	IL3A	},
+{"gssdxc1",	"T,+b(b,d)",	0xf8000007,	0xfc000007,	RD_T|RD_b|SM,	RD_d,	IL3A	},
+{"gslq",	"+z,t,+c(b)",	0xc8000020,	0xfc008020,	WR_t|RD_b|LDD,	WR_z,	IL3A	},
+{"gssq",	"+z,t,+c(b)",	0xe8000020,	0xfc008020,	RD_t|RD_b|SM,	RD_z,	IL3A	},
+{"gslqc1",	"+Z,T,+c(b)",	0xc8008020,	0xfc008020,	WR_T|RD_b|LDD,	WR_Z,	IL3A	},
+{"gssqc1",	"+Z,T,+c(b)",	0xe8008020,	0xfc008020,	RD_T|RD_b|SM,	RD_Z,	IL3A	},
 
 {"abs",     "d,v",	0,    (int) M_ABS,	INSN_MACRO,		0,		I1	},
 {"abs.s",   "D,V",	0x46000005, 0xffff003f,	WR_D|RD_S|FP_S,		0,		I1	},

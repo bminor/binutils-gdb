@@ -1,3 +1,11 @@
+2010-12-18  Mingjie Xing  <mingjie.xing@gmail.com>
+
+	* config/tc-mips.c (insn_uses_reg): Handle the new flags
+	INSN2_READ_FPR_Z, INSN2_READ_GPR_D and INSN2_READ_GPR_Z.
+	(append_insn): Handle delay-slot filling for the new flags.
+	(validate_mips_insn): Handle the new arguments +a|b|c|z|Z.
+	(mips_ip): Handle the new arguments +a|b|c|z|Z.
+
 2010-12-18  DJ Delorie  <dj@redhat.com>
 
 	* config/rx-parse.y (SUB): Correct subtraction of immediate

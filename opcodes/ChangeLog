@@ -1,3 +1,9 @@
+2010-12-18  Mingjie Xing  <mingjie.xing@gmail.com>
+
+	* mips-opc.c (WR_z, WR_Z, RD_z, RD_Z, RD_d): Define.
+	(mips_builtin_opcodes): Add loongson3a specific instructions.
+	* mips-dis.c (print_insn_args): Handle the new arguments +a|b|c|z|Z.
+
 2010-12-11 Mingming Sun <mingm.sun@gmail.com>
 
 	* mips-opc.c: (mips_builtin_opcodes): Add loongson3a mul/div and

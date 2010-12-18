@@ -2275,6 +2275,10 @@ insn_uses_reg (const struct mips_cl_insn *ip, unsigned int reg,
 	  && ((EXTRACT_OPERAND (FT, *ip) & ~(unsigned) 1)
 	      == (reg &~ (unsigned) 1)))
 	return 1;
+      if ((ip->insn_mo->pinfo2 & INSN2_READ_FPR_Z)
+	  && ((EXTRACT_OPERAND (FZ, *ip) & ~(unsigned) 1)
+	      == (reg &~ (unsigned) 1)))
+	return 1;
     }
   else if (! mips_opts.mips16)
     {
@@ -2283,6 +2287,12 @@ insn_uses_reg (const struct mips_cl_insn *ip, unsigned int reg,
 	return 1;
       if ((ip->insn_mo->pinfo & INSN_READ_GPR_T)
 	  && EXTRACT_OPERAND (RT, *ip) == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo2 & INSN2_READ_GPR_D)
+	  && EXTRACT_OPERAND (RD, *ip) == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo2 & INSN2_READ_GPR_Z)
+	  && EXTRACT_OPERAND (RZ, *ip) == reg)
 	return 1;
     }
   else
@@ -2809,6 +2819,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type)
 {
   unsigned long prev_pinfo, pinfo;
+  unsigned long prev_pinfo2, pinfo2;
   relax_stateT prev_insn_frag_type = 0;
   bfd_boolean relaxed_branch = FALSE;
   segment_info_type *si = seg_info (now_seg);
@@ -2822,7 +2833,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   file_ase_mips16 |= mips_opts.mips16;
 
   prev_pinfo = history[0].insn_mo->pinfo;
+  prev_pinfo2 = history[0].insn_mo->pinfo2;
   pinfo = ip->insn_mo->pinfo;
+  pinfo2 = ip->insn_mo->pinfo2;
 
   if (mips_relax.sequence != 2 && !mips_opts.noreorder)
     {
@@ -3162,7 +3175,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   /* Update the register mask information.  */
   if (! mips_opts.mips16)
     {
-      if (pinfo & INSN_WRITE_GPR_D)
+      if ((pinfo & INSN_WRITE_GPR_D) || (pinfo2 & INSN2_READ_GPR_D))
 	mips_gprmask |= 1 << EXTRACT_OPERAND (RD, *ip);
       if ((pinfo & (INSN_WRITE_GPR_T | INSN_READ_GPR_T)) != 0)
 	mips_gprmask |= 1 << EXTRACT_OPERAND (RT, *ip);
@@ -3170,6 +3183,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	mips_gprmask |= 1 << EXTRACT_OPERAND (RS, *ip);
       if (pinfo & INSN_WRITE_GPR_31)
 	mips_gprmask |= 1 << RA;
+      if (pinfo2 & (INSN2_WRITE_GPR_Z | INSN2_READ_GPR_Z))
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RZ, *ip);
       if (pinfo & INSN_WRITE_FPR_D)
 	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FD, *ip);
       if ((pinfo & (INSN_WRITE_FPR_S | INSN_READ_FPR_S)) != 0)
@@ -3178,6 +3193,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FT, *ip);
       if ((pinfo & INSN_READ_FPR_R) != 0)
 	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FR, *ip);
+      if (pinfo2 & (INSN2_WRITE_FPR_Z | INSN2_READ_FPR_Z))
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FZ, *ip);
       if (pinfo & INSN_COP)
 	{
 	  /* We don't keep enough information to sort these cases out.
@@ -3271,6 +3288,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_D)
 		  && insn_uses_reg (ip, EXTRACT_OPERAND (RD, history[0]),
+				    MIPS_GR_REG))
+	      || (! mips_opts.mips16
+		  && (prev_pinfo2 & INSN2_WRITE_GPR_Z)
+		  && insn_uses_reg (ip, EXTRACT_OPERAND (RZ, history[0]),
 				    MIPS_GR_REG))
 	      || (mips_opts.mips16
 		  && (((prev_pinfo & MIPS16_INSN_WRITE_X)
@@ -8479,6 +8500,11 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'Q': USE_BITS (OP_MASK_SEQI,	OP_SH_SEQI);	break;
 	  case 's': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
 	  case 'S': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
+	  case 'z': USE_BITS (OP_MASK_RZ,	OP_SH_RZ);	break;
+	  case 'Z': USE_BITS (OP_MASK_FZ,	OP_SH_FZ);	break;
+	  case 'a': USE_BITS (OP_MASK_OFFSET_A,	OP_SH_OFFSET_A); break;
+	  case 'b': USE_BITS (OP_MASK_OFFSET_B,	OP_SH_OFFSET_B); break;
+	  case 'c': USE_BITS (OP_MASK_OFFSET_C,	OP_SH_OFFSET_C); break;
 
 	  default:
 	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
@@ -9288,6 +9314,77 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  INSERT_OPERAND (SEQI, *ip, imm_expr.X_add_number);
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
+		  continue;
+
+		case 'a': /* 8-bit signed offset in bit 6 */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  min_range = -((OP_MASK_OFFSET_A + 1) >> 1);
+		  max_range = ((OP_MASK_OFFSET_A + 1) >> 1) - 1;
+		  if (imm_expr.X_add_number < min_range
+		      || imm_expr.X_add_number > max_range)
+		    {
+		      as_bad (_("immediate not in range %ld..%ld (%ld)"),
+		              (long) min_range, (long) max_range,
+		              (long) imm_expr.X_add_number);
+		    }
+		  INSERT_OPERAND (OFFSET_A, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'b': /* 8-bit signed offset in bit 3 */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  min_range = -((OP_MASK_OFFSET_B + 1) >> 1);
+		  max_range = ((OP_MASK_OFFSET_B + 1) >> 1) - 1;
+		  if (imm_expr.X_add_number < min_range
+		      || imm_expr.X_add_number > max_range)
+		    {
+		      as_bad (_("immediate not in range %ld..%ld (%ld)"),
+		              (long) min_range, (long) max_range,
+		              (long) imm_expr.X_add_number);
+		    }
+		  INSERT_OPERAND (OFFSET_B, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'c': /* 9-bit signed offset in bit 6 */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  min_range = -((OP_MASK_OFFSET_C + 1) >> 1);
+		  max_range = ((OP_MASK_OFFSET_C + 1) >> 1) - 1;
+		  if (imm_expr.X_add_number < min_range
+		      || imm_expr.X_add_number > max_range)
+		    {
+		      as_bad (_("immediate not in range %ld..%ld (%ld)"),
+		              (long) min_range, (long) max_range,
+		              (long) imm_expr.X_add_number);
+		    }
+		  INSERT_OPERAND (OFFSET_C, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'z':
+		  if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno))
+		    break;
+		  if (regno == AT && mips_opts.at)
+		    {
+		      if (mips_opts.at == ATREG)
+			as_warn (_("used $at without \".set noat\""));
+		      else
+			as_warn (_("used $%u with \".set at=$%u\""),
+				 regno, mips_opts.at);
+		    }
+		  INSERT_OPERAND (RZ, *ip, regno);
+		  continue;
+
+		case 'Z':
+		  if (!reg_lookup (&s, RTYPE_FPU, &regno))
+		    break;
+		  INSERT_OPERAND (FZ, *ip, regno);
 		  continue;
 
 		default:
