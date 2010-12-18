@@ -475,7 +475,7 @@ do_my_cleanups (struct cleanup **pmy_chain,
 
   while ((ptr = *pmy_chain) != old_chain)
     {
-      *pmy_chain = ptr->next;	/* Do this first incase recursion */
+      *pmy_chain = ptr->next;	/* Do this first in case of recursion.  */
       (*ptr->function) (ptr->arg);
       if (ptr->free_arg)
 	(*ptr->free_arg) (ptr->arg);
