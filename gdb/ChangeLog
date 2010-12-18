@@ -1,3 +1,8 @@
+2010-12-17  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* python/py-progspace.c (py_free_pspace): Obtain arch another
+	way to avoid dereferencing a null pointer.
+
 2010-12-17  Michael Snyder  <msnyder@vmware.com>
 
 	* utils.c (do_my_cleanups): Comment fix-up.
