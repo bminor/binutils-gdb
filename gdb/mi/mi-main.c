@@ -1623,6 +1623,18 @@ mi_cmd_add_inferior (char *command, char **argv, int argc)
   ui_out_field_fmt (uiout, "inferior", "i%d", inf->num);
 }
 
+/* Callback used to find the first inferior other than the
+   current one. */
+   
+static int
+get_other_inferior (struct inferior *inf, void *arg)
+{
+  if (inf == current_inferior ())
+    return 0;
+
+  return 1;
+}
+
 void
 mi_cmd_remove_inferior (char *command, char **argv, int argc)
 {
@@ -1638,6 +1650,22 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
   inf = find_inferior_id (id);
   if (!inf)
     error ("the specified thread group does not exist");
+
+  if (inf == current_inferior ())
+    {
+      struct thread_info *tp = 0;
+      struct inferior *new_inferior 
+	= iterate_over_inferiors (get_other_inferior, NULL);
+
+      if (new_inferior == NULL)
+	error (_("Cannot remove last inferior"));
+
+      set_current_inferior (new_inferior);
+      if (new_inferior->pid != 0)
+	tp = any_thread_of_process (new_inferior->pid);
+      switch_to_thread (tp ? tp->ptid : null_ptid);
+      set_current_program_space (new_inferior->pspace);
+    }
 
   delete_inferior_1 (inf, 1 /* silent */);
 }
