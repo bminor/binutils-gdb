@@ -1,5 +1,10 @@
 2010-12-17  Marc Khouzam  <marc.khouzam@ericsson.com>
 
+	* mi/mi-main.c (mi_cmd_remove_inferior): Don't delete current inferior.
+	(get_other_inferior): New.
+
+2010-12-17  Marc Khouzam  <marc.khouzam@ericsson.com>
+
 	* python/py-progspace.c (py_free_pspace): Obtain arch another
 	way to avoid dereferencing a null pointer.
 
