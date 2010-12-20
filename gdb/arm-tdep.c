@@ -29,6 +29,7 @@
 #include "gdb_string.h"
 #include "dis-asm.h"		/* For register styles. */
 #include "regcache.h"
+#include "reggroups.h"
 #include "doublest.h"
 #include "value.h"
 #include "arch-utils.h"
@@ -6998,6 +6999,17 @@ arm_elf_osabi_sniffer (bfd *abfd)
   return osabi;
 }
 
+static int
+arm_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			  struct reggroup *group)
+{
+  /* FPS register's type is INT, but belongs to float_group.  */
+  if (regnum == ARM_FPS_REGNUM)
+    return (group == float_reggroup);
+  else
+    return default_register_reggroup_p (gdbarch, regnum, group);
+}
+
 
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
@@ -7462,6 +7474,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_num_regs (gdbarch, ARM_NUM_REGS);
   set_gdbarch_register_type (gdbarch, arm_register_type);
+  set_gdbarch_register_reggroup_p (gdbarch, arm_register_reggroup_p);
 
   /* This "info float" is FPA-specific.  Use the generic version if we
      do not have FPA.  */

@@ -1,5 +1,11 @@
 2010-12-20  Yao Qi  <yao@codesourcery.com>
 
+	* arm-tdep.c (arm_register_reggroup_p): New.
+	(arm_gdbarch_init): Set arm_register_reggroup_p for hook
+	register_reggroup_p.
+
+2010-12-20  Yao Qi  <yao@codesourcery.com>
+
 	* features/arm-core.xml:  Add attribute type to reg from r0 to r12.
 	* features/arm-with-iwmmxt.c: Regenerate.
 	* features/arm-with-neon.c: Regenerate.
