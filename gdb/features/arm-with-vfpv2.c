@@ -1,7 +1,7 @@
 /* THIS FILE IS GENERATED.  Original: arm-with-vfpv2.xml */
 
 #include "defs.h"
-#include "gdbtypes.h"
+#include "osabi.h"
 #include "target-descriptions.h"
 
 struct target_desc *tdesc_arm_with_vfpv2;
@@ -10,22 +10,22 @@ initialize_tdesc_arm_with_vfpv2 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct type *field_type, *type;
+  struct tdesc_type *field_type, *type;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arm.core");
-  tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r1", 1, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r2", 2, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r3", 3, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r4", 4, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r5", 5, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r6", 6, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r7", 7, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r8", 8, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r9", 9, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r10", 10, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r11", 11, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "r12", 12, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r1", 1, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r2", 2, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r3", 3, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r4", 4, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r5", 5, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r6", 6, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r7", 7, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r8", 8, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r9", 9, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r10", 10, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r11", 11, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "r12", 12, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "sp", 13, 1, NULL, 32, "data_ptr");
   tdesc_create_reg (feature, "lr", 14, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "pc", 15, 1, NULL, 32, "code_ptr");
