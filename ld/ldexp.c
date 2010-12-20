@@ -44,7 +44,6 @@
 #include "safe-ctype.h"
 
 static void exp_fold_tree_1 (etree_type *);
-static void exp_fold_tree_no_dot (etree_type *);
 static bfd_vma align_n (bfd_vma, bfd_vma);
 
 segment_type *segments;
@@ -504,6 +503,7 @@ fold_name (etree_type *tree)
       break;
 
     case DEFINED:
+      expld.uses_defined = TRUE;
       if (expld.phase == lang_first_phase_enum)
 	lang_track_definedness (tree->name.name);
       else
@@ -802,7 +802,9 @@ exp_fold_tree_1 (etree_type *tree)
 	    }
 
 	  exp_fold_tree_1 (tree->assign.src);
-	  if (expld.result.valid_p)
+	  if (expld.result.valid_p
+	      || (expld.phase == lang_first_phase_enum
+		  && !expld.uses_defined))
 	    {
 	      if (h == NULL)
 		{
@@ -872,15 +874,17 @@ exp_fold_tree (etree_type *tree, asection *current_section, bfd_vma *dotp)
   expld.dot = *dotp;
   expld.dotp = dotp;
   expld.section = current_section;
+  expld.uses_defined = FALSE;
   exp_fold_tree_1 (tree);
 }
 
-static void
+void
 exp_fold_tree_no_dot (etree_type *tree)
 {
   expld.dot = 0;
   expld.dotp = NULL;
   expld.section = bfd_abs_section_ptr;
+  expld.uses_defined = FALSE;
   exp_fold_tree_1 (tree);
 }
 

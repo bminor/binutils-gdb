@@ -1,3 +1,24 @@
+2010-12-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12001
+	Revert 2010-11-03 Nick Clifton
+	* ldlang.c (ldlang_def_chain_list): Delete.
+	(insert_defined, ldlang_add_def, lang_place_defineds): Delete.
+	(lang_process): Don't call lang_place_defineds.
+	(lang_add_assignment): Don't do anything special for --defsym.
+
+	* ldexp.h (struct ldexp_control): Add uses_defined.
+	(exp_fold_tree_no_dot): Declare.
+	* ldexp.c (exp_fold_tree): Clear uses_defined.
+	(exp_fold_tree_no_dot): Likewise.  Make global.
+	(fold_name <DEFINED>): Set uses_defined.
+	(exp_fold_tree_1 <etree_assign>): Define symbol during first phase
+	even when the value being assigned isn't valid.
+	* ldlang.c (open_input_bfds): Process assignment statements.
+	(lang_process): Bump lang_statement_iteration.
+	(scan_for_self_assignment): Formatting.
+	(print_assignment): Style.
+
 2010-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (GENSCRIPTS): Add @enable_initfini_array@.
