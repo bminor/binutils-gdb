@@ -1,5 +1,9 @@
 2010-12-20  Alan Modra  <amodra@gmail.com>
 
+	* ld-bootstrap/bootstrap.exp: Fix misplaced comment.
+
+2010-12-20  Alan Modra  <amodra@gmail.com>
+
 	PR ld/12001
 	* ld-scripts/default-script2.d: Revert 2010-11-03 change.
 
