@@ -226,6 +226,16 @@ after_parse_default (void)
 void
 after_open_default (void)
 {
+  struct bfd_link_hash_entry *h;
+
+  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+				    &link_info,
+				    "__ld_compatibility",
+				    FALSE, FALSE, TRUE);
+  if (h != NULL
+      && (h->type == bfd_link_hash_defined
+	  || h->type == bfd_link_hash_defweak))
+    ld_compatibility = h->u.def.value;
 }
 
 void

@@ -366,6 +366,8 @@ gld${EMULATION_NAME}_after_open (void)
 {
   struct bfd_link_needed_list *needed, *l;
 
+  after_open_default ();
+
   /* We only need to worry about this when doing a final link.  */
   if (link_info.relocatable || link_info.shared)
     return;

@@ -109,6 +109,7 @@ bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
 bfd_boolean missing_file = FALSE;
+int ld_compatibility;
 
  /* Functions that traverse the linker script and might evaluate
     DEFINED() need to increment this.  */

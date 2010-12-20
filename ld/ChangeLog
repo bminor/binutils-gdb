@@ -1,5 +1,24 @@
 2010-12-20  Alan Modra  <amodra@gmail.com>
 
+	* ld.texinfo (Expression Section): Describe treatment of numbers
+	and absolute symbols.
+	* ldemul.c (after_open_default): Look up __ld_compatibility.
+	* ldexp.c (fold_name): Convert absolute symbols to numbers when
+	inside output section definitions, or when __ld_compatibility >= 221.
+	(exp_fold_tree_1): Convert numbers to absolute when not in output
+	section definition and __ld_compatibility < 221.  Don't always
+	convert values outside an output section definition to absolute.
+	* ldexp.h (uses_defined): Comment.
+	* ldlang.c (ld_compatibility): New variable.
+	* ldlang.h (ld_compatibility): Declare.
+	* emultempl/aix.em, * emultempl/armcoff.em, * emultempl/beos.em,
+	* emultempl/elf32.em, * emultempl/genelf.em, * emultempl/lnk960.em,
+	* emultempl/m68kcoff.em, * emultempl/mmo.em, * emultempl/pe.em,
+	* emultempl/pep.em, * emultempl/sunos.em, * emultempl/z80.em: Call
+	after_open_default from after_open function.
+
+2010-12-20  Alan Modra  <amodra@gmail.com>
+
 	PR ld/12001
 	Revert 2010-11-03 Nick Clifton
 	* ldlang.c (ldlang_def_chain_list): Delete.

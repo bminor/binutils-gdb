@@ -5503,17 +5503,17 @@ section relative symbols and for builtin functions that return an
 address, such as @code{ADDR}, @code{LOADADDR}, @code{ORIGIN} and
 @code{SEGMENT_START}.  Other terms are simply numbers, or are builtin
 functions that return a non-address value, such as @code{LENGTH}.
+One complication is that unless you assign @code{__ld_compatibility}
+a value of 221 or larger, numbers and absolute symbols are treated
+differently depending on their location, for compatibility with older
+versions of @code{ld}.  Expressions appearing outside an output
+section definition treat all numbers as absolute addresses.
+Expressions appearing inside an output section definition treat
+absolute symbols as numbers.  If @code{__ld_compatibility} is assigned
+a value larger than 221, then absolute symbols and numbers are simply
+treated as numbers everywhere.
 
-When the linker evaluates an expression, the result depends on where
-the expression is located in a linker script.  Expressions appearing
-outside an output section definitions are evaluated with all terms
-first being converted to absolute addresses before applying operators,
-and evaluate to an absolute address result.  Expressions appearing
-inside an output section definition are evaluated with more complex
-rules, but the aim is to treat terms as relative addresses and produce
-a relative address result.  In particular, an assignment of a number
-to a symbol results in a symbol relative to the output section with an
-offset given by the number.  So, in the following simple example,
+In the following simple example,
 
 @smallexample
 @group
@@ -5537,9 +5537,8 @@ address 0x100 in the first two assignments, then both @code{.} and
 @code{__data_start} are set to 0x10 relative to the @code{.data}
 section in the second two assignments.
 
-For expressions appearing inside an output section definition
-involving numbers, relative addresses and absolute addresses, ld
-follows these rules to evaluate terms:
+For expressions involving numbers, relative addresses and absolute
+addresses, ld follows these rules to evaluate terms:
 
 @itemize @bullet
 @item

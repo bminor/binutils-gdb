@@ -127,6 +127,7 @@ struct ldexp_control {
   /* Working results.  */
   etree_value_type result;
   bfd_vma dot;
+  /* Set if an expression contains DEFINED().  */
   bfd_boolean uses_defined;
 
   /* Current dot and section passed to ldexp folder.  */

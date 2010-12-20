@@ -35,6 +35,8 @@ gld${EMULATION_NAME}_after_open (void)
   asection *sec;
   asymbol **syms;
 
+  after_open_default ();
+
   if (link_info.relocatable)
     for (ibfd = link_info.input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
       if ((syms = bfd_get_outsymbols (ibfd)) != NULL

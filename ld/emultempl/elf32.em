@@ -1059,6 +1059,8 @@ gld${EMULATION_NAME}_after_open (void)
   struct bfd_link_needed_list *needed, *l;
   struct elf_link_hash_table *htab;
 
+  after_open_default ();
+
   htab = elf_hash_table (&link_info);
   if (!is_elf_hash_table (htab))
     return;

@@ -608,6 +608,8 @@ gld${EMULATION_NAME}_after_open (void)
   bfd_boolean r;
   struct set_info *p;
 
+  after_open_default ();
+
   /* Call ldctor_build_sets, after pretending that this is a
      relocatable link.  We do this because AIX requires relocation
      entries for all references to symbols, even in a final

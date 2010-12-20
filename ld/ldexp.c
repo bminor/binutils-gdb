@@ -553,7 +553,9 @@ fold_name (etree_type *tree)
 			     " referenced in expression\n"),
 			   tree->name.name);
 		}
-	      else if (output_section == bfd_abs_section_ptr)
+	      else if (output_section == bfd_abs_section_ptr
+		       && (expld.section != bfd_abs_section_ptr
+			   || ld_compatibility >= 221))
 		new_number (h->u.def.value + h->u.def.section->output_offset);
 	      else
 		new_rel (h->u.def.value + h->u.def.section->output_offset,
@@ -700,7 +702,11 @@ exp_fold_tree_1 (etree_type *tree)
   switch (tree->type.node_class)
     {
     case etree_value:
-      new_number (tree->value.value);
+      if (expld.section == bfd_abs_section_ptr
+	  && ld_compatibility < 221)
+	new_abs (tree->value.value);
+      else
+	new_number (tree->value.value);
       expld.result.str = tree->value.str;
       break;
 
@@ -860,12 +866,6 @@ exp_fold_tree_1 (etree_type *tree)
       memset (&expld.result, 0, sizeof (expld.result));
       break;
     }
-
-  /* Any value not inside an output section statement is an
-     absolute value.  */
-  if (expld.result.valid_p
-      && expld.section == bfd_abs_section_ptr)
-    make_abs ();
 }
 
 void

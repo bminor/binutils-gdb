@@ -1219,6 +1219,8 @@ debug_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
 static void
 gld_${EMULATION_NAME}_after_open (void)
 {
+  after_open_default ();
+
 #ifdef DLL_SUPPORT
   if (pe_dll_extra_pe_debug)
     {
