@@ -46,7 +46,10 @@ struct Offset_to_lineno_entry
   int header_num;  // which file-list to use (i.e. which .o file are we in)
   int file_num;    // a pointer into files_
   int line_num;    // the line number in the source file
-  // Offsets are unique within a section, so that's a sufficient sort key.
+
+  // When we add entries to the table, we always use the last entry
+  // with a given offset.  Given proper DWARF info, this should ensure
+  // that the offset is a sufficient sort key.
   bool operator<(const Offset_to_lineno_entry& that) const
   { return this->offset < that.offset; }
 };

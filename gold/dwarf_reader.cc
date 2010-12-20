@@ -493,7 +493,18 @@ Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr
               Offset_to_lineno_entry entry
                   = { lsm.address, this->current_header_index_,
                       lsm.file_num, lsm.line_num };
-              line_number_map_[lsm.shndx].push_back(entry);
+	      std::vector<Offset_to_lineno_entry>&
+		map(this->line_number_map_[lsm.shndx]);
+	      // If we see two consecutive entries with the same
+	      // offset and a real line number, then always use the
+	      // second one.
+	      if (!map.empty()
+		  && (map.back().offset == static_cast<off_t>(lsm.address))
+		  && lsm.line_num != -1
+		  && map.back().line_num != -1)
+		map.back() = entry;
+	      else
+		map.push_back(entry);
             }
           lineptr += oplength;
         }
