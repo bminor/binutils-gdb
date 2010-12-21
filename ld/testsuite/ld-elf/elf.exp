@@ -89,7 +89,7 @@ run_ld_link_exec_tests $xfails $array_tests
 # Be cautious to not XFAIL for *-*-linux-gnu*, *-*-kfreebsd-gnu*, etc.
 switch -regexp $target_triplet {
     ^\[^-\]*-\[^-\]*-gnu.*$ {
-	# <http://www.gnu.org/software/hurd/open_issues/binutils/testsuite.html#static>
+	# <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>
 	lappend xfails "*-*-*"
     }
 }

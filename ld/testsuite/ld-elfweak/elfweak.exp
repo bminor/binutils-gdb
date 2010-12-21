@@ -69,7 +69,7 @@ set SOBJDUMP_FLAGS --syms
 set shared --shared
 
 
-# <http://www.gnu.org/software/hurd/open_issues/binutils/testsuite.html#weak>
+# <http://www.gnu.org/software/hurd/open_issues/binutils.html#weak>
 proc setup_xfail_gnu_hurd {} {
     global target_triplet
     # Be cautious to not XFAIL for *-*-linux-gnu*, *-*-kfreebsd-gnu*, etc.
