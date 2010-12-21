@@ -38,6 +38,8 @@ if {[istarget i*86-*-cygwin*]
 	 {{objdump -s secrel_64.d}} "secrel.x"}
 	{"Empty export table" "" "" "exports.s"
 	 {{objdump -p exports64.d}} "exports.dll"}
+	{"TLS directory entry" "" "" "tlssec.s"
+	 {{objdump -p tlssec64.d}} "tlssec.dll"}
       }
     } elseif {[istarget i*86-*-cygwin*] } {
       set pe_tests {
@@ -45,6 +47,8 @@ if {[istarget i*86-*-cygwin*]
 	 {{objdump -s secrel.d}} "secrel.x"}
 	{"Empty export table" "" "" "exports.s"
 	 {{objdump -p exports.d}} "exports.dll"}
+	{"TLS directory entry" "" "" "tlssec.s"
+	 {{objdump -p tlssec32.d}} "tlssec.dll"}
       }
     } else {
       set pe_tests {
@@ -52,6 +56,8 @@ if {[istarget i*86-*-cygwin*]
 	 {{objdump -s secrel.d}} "secrel.x"}
 	{"Empty export table" "" "" "exports.s"
 	 {{objdump -p exports.d}} "exports.dll"}
+	{"TLS directory entry" "" "" "tlssec.s"
+	 {{objdump -p tlssec32.d}} "tlssec.dll"}
       }
     }
 

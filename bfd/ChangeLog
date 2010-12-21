@@ -1,3 +1,8 @@
+2010-12-21  Kai Tietz  <kai.tietz@onevision.com>
+
+	* peXXigen.c (_bfd_XXi_final_link_postscript): Use
+	bfd_get_symbol_leading_char to determine "_tls_used" name.
+
 2010-12-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* peXXigen.c (_bfd_XXi_final_link_postscript): Use correct size

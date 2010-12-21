@@ -1,3 +1,10 @@
+2010-12-21  Kai Tietz  <kai.tietz@onevision.com>
+
+	* ld-pe/pe.exp: Add TLS directory test.
+	* ld-pe/tlssec.s: New.
+	* ld-pe/tlssec64.d: New.
+	* ld-pe/tlssec32.d: New.
+
 2010-12-20  Alan Modra  <amodra@gmail.com>
 
 	* ld-bootstrap/bootstrap.exp: Fix misplaced comment.
