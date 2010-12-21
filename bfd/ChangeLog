@@ -1,3 +1,8 @@
+2010-12-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* peXXigen.c (_bfd_XXi_final_link_postscript): Use correct size
+	for windows 64-bit TLS table size.
+
 2010-12-16  DJ Delorie  <dj@redhat.com>
 
 	* reloc.c (BFD_RELOC_RX_ABS16_REV): Add.
