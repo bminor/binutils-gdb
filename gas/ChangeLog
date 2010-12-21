@@ -1,3 +1,7 @@
+2010-12-21  Alan Modra  <amodra@gmail.com>
+
+	* po/ja.po: New translation.
+
 2010-12-09  Arnold Metselaar  <arnold@phurua.lan>
 
 	Backport from trunk to fix faillure to compile with -Wshadow -Werror.
