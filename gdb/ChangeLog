@@ -1,3 +1,7 @@
+2010-12-21  Tom Tromey  <tromey@redhat.com>
+
+	* thread.c (print_thread_info): Make a ui-out table in CLI mode.
+
 2010-12-20  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (arm_register_reggroup_p): New.

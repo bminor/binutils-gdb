@@ -1,3 +1,10 @@
+2010-12-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.threads/execl.exp: Update.
+	* gdb.threads/linux-dp.exp: Update.
+	* gdb.threads/manythreads.exp: Update.
+	* gdb.threads/tls.exp: Update.
+
 2010-12-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/nextoverthrow.cc (dummy): Return int 0.

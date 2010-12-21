@@ -70,7 +70,10 @@ for {set i 0} {$i < 5} {incr i} {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
-	-re "^. +(\[0-9\]+ Thread \[-0-9a-fx\]+) \[^\n\]*\n" {
+	-re "^ *Id.*Frame *\[\r\n\]+" {
+	    exp_continue
+	}
+	-re "^. +(\[0-9\]+ *Thread \[-0-9a-fx\]+) \[^\n\]*\n" {
 	    verbose -log "found thread $expect_out(1,string)" 2
 	    lappend threads_before $expect_out(1,string)
 	    exp_continue
@@ -136,7 +139,10 @@ for {set i 0} {$i < 5} {incr i} {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
-	-re "^. +(\[0-9\]+ Thread \[-0-9a-fx\]+) \[^\n\]*\n" {
+	-re "^ *Id.*Frame *\[\r\n\]+" {
+	    exp_continue
+	}
+	-re "^. +(\[0-9\]+ *Thread \[-0-9a-fx\]+) \[^\n\]*\n" {
 	    set name $expect_out(1,string)
 	    for {set j 0} {$j != [llength $threads_before] } {incr j} {
 		if {$name == [lindex $threads_before $j]} {
@@ -177,12 +183,12 @@ set nthreads 6
 # Run until there are some threads.
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: info threads 2"]
 gdb_continue_to_breakpoint "main thread's sleep"
-set info_threads_ptn ""
+set info_threads_ptn ".*"
 for {set i $nthreads} {$i > 0} {incr i -1} {
-    append info_threads_ptn "$i Thread .*"
+    append info_threads_ptn "$i *Thread .*"
 }
 append info_threads_ptn "\[\r\n\]+$gdb_prompt $"
-set info_threads_manager_ptn "[expr $nthreads + 1] Thread .*$info_threads_ptn"
+set info_threads_manager_ptn "[expr $nthreads + 1] *Thread .*$info_threads_ptn"
 
 gdb_test_multiple "info threads" "info threads 2" {
     -re "$info_threads_manager_ptn" {
@@ -245,7 +251,7 @@ set only_five 1
 for {set i 0} {$only_five > 0 && $i < 10} {incr i} {
     gdb_continue_to_breakpoint "thread 5's print, pass: $i"
     gdb_test_multiple "info threads" "" {
-	-re "\\* 5 Thread .*  print_philosopher .*\r\n$gdb_prompt $" {
+	-re "\[*\] 5 *Thread .* +print_philosopher .*\r\n$gdb_prompt $" {
 	    # Okay this time.
 	}
 	-re ".*$gdb_prompt $" {
