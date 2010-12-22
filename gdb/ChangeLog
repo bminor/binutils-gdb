@@ -1,3 +1,8 @@
+2010-12-22  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* inferior.c (remove_inferior_command): Don't remove an active inferior.
+	* mi/mi-main.c (mi_cmd_remove_inferior): Ditto.
+
 2010-12-17  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_remove_inferior): Don't delete current inferior.

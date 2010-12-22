@@ -1651,6 +1651,9 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
   if (!inf)
     error ("the specified thread group does not exist");
 
+  if (inf->pid != 0)
+    error ("can not remove an active inferior");
+
   if (inf == current_inferior ())
     {
       struct thread_info *tp = 0;
