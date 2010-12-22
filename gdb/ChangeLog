@@ -1,3 +1,8 @@
+2010-12-22  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* inferior.c (remove_inferior_command): Don't remove an active inferior.
+	* mi/mi-main.c (mi_cmd_remove_inferior): Ditto.
+
 2010-12-21  Tom Tromey  <tromey@redhat.com>
 
 	* thread.c (print_thread_info): Make a ui-out table in CLI mode.

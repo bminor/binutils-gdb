@@ -754,6 +754,9 @@ remove_inferior_command (char *args, int from_tty)
 
   if (inf == current_inferior ())
     error (_("Can not remove current symbol inferior."));
+    
+  if (inf->pid != 0)
+    error (_("Can not remove an active inferior."));
 
   delete_inferior_1 (inf, 1);
 }
