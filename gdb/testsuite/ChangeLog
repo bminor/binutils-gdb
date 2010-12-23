@@ -1,3 +1,8 @@
+2010-12-23  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.arch/arm-disp-step.exp: New.
+	* gdb.arch/arm-disp-step.S: New.
+
 2010-12-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.threads/execl.exp: Update.
