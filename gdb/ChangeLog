@@ -1,3 +1,8 @@
+2010-12-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c (mi_cmd_remove_inferior): Use _() marker for error
+	message.  Change spelling of "can not" into "cannot".
+
 2010-12-22  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* inferior.c (remove_inferior_command): Don't remove an active inferior.
