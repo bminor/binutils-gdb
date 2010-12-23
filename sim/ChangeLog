@@ -1,3 +1,7 @@
+2010-12-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: New file.
+
 2010-07-28  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: Add self as RX maintainer.  Sort list.
