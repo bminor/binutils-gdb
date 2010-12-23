@@ -1789,13 +1789,13 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   void
   add_output_section(Output_section* os, unsigned int type, Output_data* od,
 		     Address address, Addend addend)
-  { this->add(os, Output_reloc_type(os, type, od, address, addend)); }
+  { this->add(od, Output_reloc_type(os, type, od, address, addend)); }
 
   void
-  add_output_section(Output_section* os, unsigned int type,
+  add_output_section(Output_section* os, unsigned int type, Output_data* od,
                      Sized_relobj<size, big_endian>* relobj,
 		     unsigned int shndx, Address address, Addend addend)
-  { this->add(os, Output_reloc_type(os, type, relobj, shndx, address,
+  { this->add(od, Output_reloc_type(os, type, relobj, shndx, address,
                                     addend)); }
 
   // Add an absolute relocation.

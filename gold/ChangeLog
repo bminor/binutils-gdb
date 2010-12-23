@@ -1,3 +1,8 @@
+2010-12-23  Cary Coutant  <ccoutant@google.com>
+
+	* output.h (Output_data_reloc::add_output_section): Pass OD instead
+	of OS to this->add.  Add OD parameter to second form of the function.
+
 2010-12-21  Alan Modra  <amodra@gmail.com>
 
 	* po/ja.po: New translation.
