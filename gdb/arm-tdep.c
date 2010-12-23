@@ -496,6 +496,21 @@ skip_prologue_function (CORE_ADDR pc)
 #define BranchDest(addr,instr) \
   ((CORE_ADDR) (((long) (addr)) + 8 + (sbits (instr, 0, 23) << 2)))
 
+/* Extract the immediate from instruction movw/movt of encoding T.  INSN1 is
+   the first 16-bit of instruction, and INSN2 is the second 16-bit of
+   instruction.  */
+#define EXTRACT_MOVW_MOVT_IMM_T(insn1, insn2) \
+  ((bits ((insn1), 0, 3) << 12)               \
+   | (bits ((insn1), 10, 10) << 11)           \
+   | (bits ((insn2), 12, 14) << 8)            \
+   | bits ((insn2), 0, 7))
+
+/* Extract the immediate from instruction movw/movt of encoding A.  INSN is
+   the 32-bit instruction.  */
+#define EXTRACT_MOVW_MOVT_IMM_A(insn) \
+  ((bits ((insn), 16, 19) << 12) \
+   | bits ((insn), 0, 11))
+
 /* Decode immediate value; implements ThumbExpandImmediate pseudo-op.  */
 
 static unsigned int
@@ -1004,10 +1019,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 
 	  else if ((insn & 0xfbf0) == 0xf240)	/* movw Rd, #const */
 	    {
-	      unsigned int imm = ((bits (insn, 0, 3) << 12)
-				  | (bits (insn, 10, 10) << 11)
-				  | (bits (inst2, 12, 14) << 8)
-				  | bits (inst2, 0, 7));
+	      unsigned int imm
+		= EXTRACT_MOVW_MOVT_IMM_T (insn, inst2);
 
 	      regs[bits (inst2, 8, 11)] = pv_constant (imm);
 	    }
@@ -1130,6 +1143,188 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
   return unrecognized_pc;
 }
 
+
+/* Try to analyze the instructions starting from PC, which load symbol
+   __stack_chk_guard.  Return the address of instruction after loading this
+   symbol, set the dest register number to *BASEREG, and set the size of
+   instructions for loading symbol in OFFSET.  Return 0 if instructions are
+   not recognized.  */
+
+static CORE_ADDR
+arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
+				 unsigned int *destreg, int *offset)
+{
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  int is_thumb = arm_pc_is_thumb (gdbarch, pc);
+  unsigned int low, high, address;
+
+  address = 0;
+  if (is_thumb)
+    {
+      unsigned short insn1
+	= read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+
+      if ((insn1 & 0xf800) == 0x4800) /* ldr Rd, #immed */
+	{
+	  *destreg = bits (insn1, 8, 10);
+	  *offset = 2;
+	  address = bits (insn1, 0, 7);
+	}
+      else if ((insn1 & 0xfbf0) == 0xf240) /* movw Rd, #const */
+	{
+	  unsigned short insn2
+	    = read_memory_unsigned_integer (pc + 2, 2, byte_order_for_code);
+
+	  low = EXTRACT_MOVW_MOVT_IMM_T (insn1, insn2);
+
+	  insn1
+	    = read_memory_unsigned_integer (pc + 4, 2, byte_order_for_code);
+	  insn2
+	    = read_memory_unsigned_integer (pc + 6, 2, byte_order_for_code);
+
+	  /* movt Rd, #const */
+	  if ((insn1 & 0xfbc0) == 0xf2c0)
+	    {
+	      high = EXTRACT_MOVW_MOVT_IMM_T (insn1, insn2);
+	      *destreg = bits (insn2, 8, 11);
+	      *offset = 8;
+	      address = (high << 16 | low);
+	    }
+	}
+    }
+  else
+    {
+       unsigned int insn
+	 = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+
+       if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, #immed */
+	 {
+	   address = bits (insn, 0, 11);
+	   *destreg = bits (insn, 12, 15);
+	   *offset = 4;
+	 }
+       else if ((insn & 0x0ff00000) == 0x03000000) /* movw Rd, #const */
+	 {
+	   low = EXTRACT_MOVW_MOVT_IMM_A (insn);
+
+	   insn
+	     = read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code);
+
+	   if ((insn & 0x0ff00000) == 0x03400000)       /* movt Rd, #const */
+	     high = EXTRACT_MOVW_MOVT_IMM_A (insn);
+
+	   address = (high << 16 | low);
+	   *destreg = bits (insn, 12, 15);
+	   *offset = 8;
+	 }
+    }
+
+  return address;
+}
+
+/* Try to skip a sequence of instructions used for stack protector.  If PC
+   points to the first instruction of this sequence, return the address of first
+   instruction after this sequence, otherwise, return original PC.
+
+   On arm, this sequence of instructions is composed of mainly three steps,
+     Step 1: load symbol __stack_chk_guard,
+     Step 2: load from address of __stack_chk_guard,
+     Step 3: store it to somewhere else.
+
+   Usually, instructions on step 2 and step 3 are the same on various ARM
+   architectures.  On step 2, it is one instruction 'ldr Rx, [Rn, #0]', and
+   on step 3, it is also one instruction 'str Rx, [r7, #immd]'.  However,
+   instructions in step 1 vary from different ARM architectures.  On ARMv7,
+   they are,
+
+	movw	Rn, #:lower16:__stack_chk_guard
+	movt	Rn, #:upper16:__stack_chk_guard
+
+   On ARMv5t, it is,
+
+	ldr	Rn, .Label
+	....
+	.Lable:
+	.word	__stack_chk_guard
+
+   Since ldr/str is a very popular instruction, we can't use them as
+   'fingerprint' or 'signature' of stack protector sequence.  Here we choose
+   sequence {movw/movt, ldr}/ldr/str plus symbol __stack_chk_guard, if not
+   stripped, as the 'fingerprint' of a stack protector cdoe sequence.  */
+
+static CORE_ADDR
+arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
+{
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  unsigned int address, basereg;
+  struct minimal_symbol *stack_chk_guard;
+  int offset;
+  int is_thumb = arm_pc_is_thumb (gdbarch, pc);
+  CORE_ADDR addr;
+
+  /* Try to parse the instructions in Step 1.  */
+  addr = arm_analyze_load_stack_chk_guard (pc, gdbarch,
+					   &basereg, &offset);
+  if (!addr)
+    return pc;
+
+  stack_chk_guard = lookup_minimal_symbol_by_pc (addr);
+  /* If name of symbol doesn't start with '__stack_chk_guard', this
+     instruction sequence is not for stack protector.  If symbol is
+     removed, we conservatively think this sequence is for stack protector.  */
+  if (stack_chk_guard
+      && strcmp (SYMBOL_LINKAGE_NAME(stack_chk_guard), "__stack_chk_guard"))
+   return pc;
+
+  if (is_thumb)
+    {
+      unsigned int destreg;
+      unsigned short insn
+	= read_memory_unsigned_integer (pc + offset, 2, byte_order_for_code);
+
+      /* Step 2: ldr Rd, [Rn, #immed], encoding T1.  */
+      if ((insn & 0xf800) != 0x6800)
+	return pc;
+      if (bits (insn, 3, 5) != basereg)
+	return pc;
+      destreg = bits (insn, 0, 2);
+
+      insn = read_memory_unsigned_integer (pc + offset + 2, 2,
+					   byte_order_for_code);
+      /* Step 3: str Rd, [Rn, #immed], encoding T1.  */
+      if ((insn & 0xf800) != 0x6000)
+	return pc;
+      if (destreg != bits (insn, 0, 2))
+	return pc;
+    }
+  else
+    {
+      unsigned int destreg;
+      unsigned int insn
+	= read_memory_unsigned_integer (pc + offset, 4, byte_order_for_code);
+
+      /* Step 2: ldr Rd, [Rn, #immed], encoding A1.  */
+      if ((insn & 0x0e500000) != 0x04100000)
+	return pc;
+      if (bits (insn, 16, 19) != basereg)
+	return pc;
+      destreg = bits (insn, 12, 15);
+      /* Step 3: str Rd, [Rn, #immed], encoding A1.  */
+      insn = read_memory_unsigned_integer (pc + offset + 4,
+					   4, byte_order_for_code);
+      if ((insn & 0x0e500000) != 0x04000000)
+	return pc;
+      if (bits (insn, 12, 15) != destreg)
+	return pc;
+    }
+  /* The size of total two instructions ldr/str is 4 on Thumb-2, while 8
+     on arm.  */
+  if (is_thumb)
+    return pc + offset + 4;
+  else
+    return pc + offset + 8;
+}
+
 /* Advance the PC across any function entry prologue instructions to
    reach some "real" code.
 
@@ -1162,6 +1357,11 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
       struct symtab *s = find_pc_symtab (func_addr);
+
+      if (post_prologue_pc)
+	post_prologue_pc
+	  = arm_skip_stack_protector (post_prologue_pc, gdbarch);
+
 
       /* GCC always emits a line note before the prologue and another
 	 one after, even if the two are at the same address or on the

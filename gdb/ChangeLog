@@ -1,3 +1,13 @@
+2010-12-23  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (thumb_analyze_prologue): Move some code ...
+	(EXTRACT_MOVW_MOVT_IMM_T): ... here.  New macro.
+	(EXTRACT_MOVW_MOVT_IMM_A): New macro.
+	(arm_analyze_load_stack_chk_guard): New.
+	(arm_skip_stack_protector): New.
+	(arm_skip_prologue): Adjust post_prologue_pc by
+	arm_skip_stack_protector.
+
 2010-12-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-main.c (mi_cmd_remove_inferior): Use _() marker for error
