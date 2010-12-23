@@ -31815,6 +31815,21 @@ each register and their position within the @samp{g} packet are
 determined by the @value{GDBN} internal gdbarch functions
 @code{DEPRECATED_REGISTER_RAW_SIZE} and @code{gdbarch_register_name}.  The
 specification of several standard @samp{g} packets is specified below.
+
+When reading registers from a trace frame (@pxref{Analyze Collected
+Data,,Using the Collected Data}), the stub may also return a string of
+literal @samp{x}'s in place of the register data digits, to indicate
+that the corresponding register has not been collected, thus its value
+is unavailable.  For example, for an architecture with 4 registers of
+4 bytes each, the following reply indicates to @value{GDBN} that
+registers 0 and 2 have not been collected, while registers 1 and 3
+have been collected, and both have zero value:
+
+@smallexample
+-> @code{g}
+<- @code{xxxxxxxx00000000xxxxxxxx00000000}
+@end smallexample
+
 @item E @var{NN}
 for an error.
 @end table
