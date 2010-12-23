@@ -7469,7 +7469,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					 arm_remote_breakpoint_from_pc);
 
   /* Information about registers, etc.  */
-  set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_num_regs (gdbarch, ARM_NUM_REGS);

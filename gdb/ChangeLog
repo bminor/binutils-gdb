@@ -1,3 +1,8 @@
+2010-12-23  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_gdbarch_init): Remove invoke to
+	set_gdbarch_deprecated_fp_regnum.
+
 2010-12-22  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* inferior.c (remove_inferior_command): Don't remove an active inferior.
