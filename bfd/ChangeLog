@@ -1,3 +1,10 @@
+2010-12-24  Alan Modra  <amodra@gmail.com>
+
+	* compress.c (decompress_contents): Style.
+	(bfd_get_full_section_contents): Do not decompress directly into
+	caller buffer or directly return cached section contents.
+	Check malloc return for compressed_buffer.
+
 2010-12-21  Kai Tietz  <kai.tietz@onevision.com>
 
 	* peXXigen.c (_bfd_XXi_final_link_postscript): Use
