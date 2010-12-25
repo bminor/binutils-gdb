@@ -57,11 +57,11 @@ gdb_test "info threads" ".*" "info threads after exec"
 
 set test "info threads after exec"
 gdb_test_multiple "info threads" "$test" {
-    -re "2 Thread .*$gdb_prompt $" {
+    -re "2 *Thread .*$gdb_prompt $" {
 	# Old threads left behind.
 	fail "$test"
     }
-    -re "4 Thread .*$gdb_prompt $" {
+    -re "4 *Thread .*$gdb_prompt $" {
 	# New threads registered.
 	fail "$test"
     }
