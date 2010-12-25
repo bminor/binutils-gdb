@@ -1,5 +1,7 @@
 2010-12-25  Andreas Schwab  <schwab@linux-m68k.org>
 
+	* gdb.threads/tls.exp: Fix typo.
+
 	* gdb.threads/thread-specific.exp (get_thread_list): Update.
 	* gdb.threads/execl.exp: Update.
 
