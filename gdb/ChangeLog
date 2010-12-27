@@ -1,3 +1,11 @@
+2010-12-27  Pedro Alves  <pedro@codesourcery.com>
+
+	gdb/
+	* breakpoint.c (breakpoint_restore_shadows): When looking for the
+	location with the lowest address that overlaps the memory range we
+	want to restore shadows for, account for multiple locations at the
+	same address.
+
 2010-12-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup - renaming.

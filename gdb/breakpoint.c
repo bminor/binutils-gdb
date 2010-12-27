@@ -1130,6 +1130,23 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
 	bc_r = bc;
     }
 
+  /* Due to the binary search above, we need to make sure we pick the
+     first location that's at BC_L's address.  E.g., if there are
+     multiple locations at the same address, BC_L may end up pointing
+     at a duplicate location, and miss the "master"/"inserted"
+     location.  Say, given locations L1, L2 and L3 at addresses A and
+     B:
+
+      L1@A, L2@A, L3@B, ...
+
+     BC_L could end up pointing at location L2, while the "master"
+     location could be L1.  Since the `loc->inserted' flag is only set
+     on "master" locations, we'd forget to restore the shadow of L1
+     and L2.  */
+  while (bc_l > 0
+	 && bp_location[bc_l]->address == bp_location[bc_l - 1]->address)
+    bc_l--;
+
   /* Now do full processing of the found relevant range of elements.  */
 
   for (bc = bc_l; bc < bp_location_count; bc++)
