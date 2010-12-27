@@ -1085,14 +1085,15 @@ bp_location_has_shadow (struct bp_location *bl)
    by replacing any memory breakpoints with their shadowed contents.
 
    The range of shadowed area by each bp_location is:
-     b->address - bp_location_placed_address_before_address_max
-     up to b->address + bp_location_shadow_len_after_address_max
+     bl->address - bp_location_placed_address_before_address_max
+     up to bl->address + bp_location_shadow_len_after_address_max
    The range we were requested to resolve shadows for is:
      memaddr ... memaddr + len
    Thus the safe cutoff boundaries for performance optimization are
-     memaddr + len <= b->address - bp_location_placed_address_before_address_max
+     memaddr + len <= (bl->address
+		       - bp_location_placed_address_before_address_max)
    and:
-     b->address + bp_location_shadow_len_after_address_max <= memaddr  */
+     bl->address + bp_location_shadow_len_after_address_max <= memaddr  */
 
 void
 breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
@@ -1107,12 +1108,12 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
   bc_r = bp_location_count;
   while (bc_l + 1 < bc_r)
     {
-      struct bp_location *b;
+      struct bp_location *bl;
 
       bc = (bc_l + bc_r) / 2;
-      b = bp_location[bc];
+      bl = bp_location[bc];
 
-      /* Check first B->ADDRESS will not overflow due to the added constant.
+      /* Check first BL->ADDRESS will not overflow due to the added constant.
 	 Then advance the left boundary only if we are sure the BC element can
 	 in no way affect the BUF content (MEMADDR to MEMADDR + LEN range).
 
@@ -1120,8 +1121,10 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
 	 we cannot miss a breakpoint with its shadow range tail still reaching
 	 MEMADDR.  */
 
-      if (b->address + bp_location_shadow_len_after_address_max >= b->address
-	  && b->address + bp_location_shadow_len_after_address_max <= memaddr)
+      if ((bl->address + bp_location_shadow_len_after_address_max
+	   >= bl->address)
+	  && (bl->address + bp_location_shadow_len_after_address_max
+	      <= memaddr))
 	bc_l = bc;
       else
 	bc_r = bc;
@@ -1131,34 +1134,34 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
 
   for (bc = bc_l; bc < bp_location_count; bc++)
   {
-    struct bp_location *b = bp_location[bc];
+    struct bp_location *bl = bp_location[bc];
     CORE_ADDR bp_addr = 0;
     int bp_size = 0;
     int bptoffset = 0;
 
-    /* bp_location array has B->OWNER always non-NULL.  */
-    if (b->owner->type == bp_none)
+    /* bp_location array has BL->OWNER always non-NULL.  */
+    if (bl->owner->type == bp_none)
       warning (_("reading through apparently deleted breakpoint #%d?"),
-              b->owner->number);
+	       bl->owner->number);
 
     /* Performance optimization: any futher element can no longer affect BUF
        content.  */
 
-    if (b->address >= bp_location_placed_address_before_address_max
-        && memaddr + len <= b->address
-			    - bp_location_placed_address_before_address_max)
+    if (bl->address >= bp_location_placed_address_before_address_max
+        && memaddr + len <= (bl->address
+			     - bp_location_placed_address_before_address_max))
       break;
 
-    if (!bp_location_has_shadow (b))
+    if (!bp_location_has_shadow (bl))
       continue;
-    if (!breakpoint_address_match (b->target_info.placed_address_space, 0,
+    if (!breakpoint_address_match (bl->target_info.placed_address_space, 0,
 				   current_program_space->aspace, 0))
       continue;
 
     /* Addresses and length of the part of the breakpoint that
        we need to copy.  */
-    bp_addr = b->target_info.placed_address;
-    bp_size = b->target_info.shadow_len;
+    bp_addr = bl->target_info.placed_address;
+    bp_size = bl->target_info.shadow_len;
 
     if (bp_addr + bp_size <= memaddr)
       /* The breakpoint is entirely before the chunk of memory we
@@ -1186,7 +1189,7 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
       }
 
     memcpy (buf + bp_addr - memaddr,
-	    b->target_info.shadow_contents + bptoffset, bp_size);
+	    bl->target_info.shadow_contents + bptoffset, bp_size);
   }
 }
 
@@ -1518,15 +1521,15 @@ in which its expression is valid.\n"),
 /* Returns 1 iff breakpoint location should be
    inserted in the inferior.  */
 static int
-should_be_inserted (struct bp_location *bpt)
+should_be_inserted (struct bp_location *bl)
 {
-  if (bpt->owner == NULL || !breakpoint_enabled (bpt->owner))
+  if (bl->owner == NULL || !breakpoint_enabled (bl->owner))
     return 0;
 
-  if (bpt->owner->disposition == disp_del_at_next_stop)
+  if (bl->owner->disposition == disp_del_at_next_stop)
     return 0;
 
-  if (!bpt->enabled || bpt->shlib_disabled || bpt->duplicate)
+  if (!bl->enabled || bl->shlib_disabled || bl->duplicate)
     return 0;
 
   /* This is set for example, when we're attached to the parent of a
@@ -1537,43 +1540,43 @@ should_be_inserted (struct bp_location *bpt)
      memory region, do not insert breakpoints in the parent, otherwise
      the child could still trip on the parent's breakpoints.  Since
      the parent is blocked anyway, it won't miss any breakpoint.  */
-  if (bpt->pspace->breakpoints_not_allowed)
+  if (bl->pspace->breakpoints_not_allowed)
     return 0;
 
   /* Tracepoints are inserted by the target at a time of its choosing,
      not by us.  */
-  if (is_tracepoint (bpt->owner))
+  if (is_tracepoint (bl->owner))
     return 0;
 
   return 1;
 }
 
-/* Insert a low-level "breakpoint" of some type.  BPT is the breakpoint.
-   Any error messages are printed to TMP_ERROR_STREAM; and DISABLED_BREAKS,
-   and HW_BREAKPOINT_ERROR are used to report problems.
+/* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
+   location.  Any error messages are printed to TMP_ERROR_STREAM; and
+   DISABLED_BREAKS, and HW_BREAKPOINT_ERROR are used to report problems.
 
    NOTE drow/2003-09-09: This routine could be broken down to an object-style
    method for each breakpoint or catchpoint type.  */
 static int
-insert_bp_location (struct bp_location *bpt,
+insert_bp_location (struct bp_location *bl,
 		    struct ui_file *tmp_error_stream,
 		    int *disabled_breaks,
 		    int *hw_breakpoint_error)
 {
   int val = 0;
 
-  if (!should_be_inserted (bpt) || bpt->inserted)
+  if (!should_be_inserted (bl) || bl->inserted)
     return 0;
 
   /* Initialize the target-specific information.  */
-  memset (&bpt->target_info, 0, sizeof (bpt->target_info));
-  bpt->target_info.placed_address = bpt->address;
-  bpt->target_info.placed_address_space = bpt->pspace->aspace;
+  memset (&bl->target_info, 0, sizeof (bl->target_info));
+  bl->target_info.placed_address = bl->address;
+  bl->target_info.placed_address_space = bl->pspace->aspace;
 
-  if (bpt->loc_type == bp_loc_software_breakpoint
-      || bpt->loc_type == bp_loc_hardware_breakpoint)
+  if (bl->loc_type == bp_loc_software_breakpoint
+      || bl->loc_type == bp_loc_hardware_breakpoint)
     {
-      if (bpt->owner->type != bp_hardware_breakpoint)
+      if (bl->owner->type != bp_hardware_breakpoint)
 	{
 	  /* If the explicitly specified breakpoint type
 	     is not hardware breakpoint, check the memory map to see
@@ -1591,7 +1594,7 @@ insert_bp_location (struct bp_location *bpt,
 	     problem is that memory map has changed during running program,
 	     but it's not going to work anyway with current gdb.  */
 	  struct mem_region *mr 
-	    = lookup_mem_region (bpt->target_info.placed_address);
+	    = lookup_mem_region (bl->target_info.placed_address);
 	  
 	  if (mr)
 	    {
@@ -1604,11 +1607,11 @@ insert_bp_location (struct bp_location *bpt,
 		  else 
 		    new_type = bp_loc_software_breakpoint;
 		  
-		  if (new_type != bpt->loc_type)
+		  if (new_type != bl->loc_type)
 		    {
 		      static int said = 0;
 
-		      bpt->loc_type = new_type;
+		      bl->loc_type = new_type;
 		      if (!said)
 			{
 			  fprintf_filtered (gdb_stdout, _("\
@@ -1617,26 +1620,26 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 			}
 		    }
 		}
-	      else if (bpt->loc_type == bp_loc_software_breakpoint
+	      else if (bl->loc_type == bp_loc_software_breakpoint
 		       && mr->attrib.mode != MEM_RW)	    
 		warning (_("cannot set software breakpoint at readonly address %s"),
-			 paddress (bpt->gdbarch, bpt->address));
+			 paddress (bl->gdbarch, bl->address));
 	    }
 	}
         
       /* First check to see if we have to handle an overlay.  */
       if (overlay_debugging == ovly_off
-	  || bpt->section == NULL
-	  || !(section_is_overlay (bpt->section)))
+	  || bl->section == NULL
+	  || !(section_is_overlay (bl->section)))
 	{
 	  /* No overlay handling: just set the breakpoint.  */
 
-	  if (bpt->loc_type == bp_loc_hardware_breakpoint)
-	    val = target_insert_hw_breakpoint (bpt->gdbarch,
-					       &bpt->target_info);
+	  if (bl->loc_type == bp_loc_hardware_breakpoint)
+	    val = target_insert_hw_breakpoint (bl->gdbarch,
+					       &bl->target_info);
 	  else
-	    val = target_insert_breakpoint (bpt->gdbarch,
-					    &bpt->target_info);
+	    val = target_insert_breakpoint (bl->gdbarch,
+					    &bl->target_info);
 	}
       else
 	{
@@ -1647,34 +1650,34 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	      /* Yes -- overlay event support is not active, 
 		 so we must try to set a breakpoint at the LMA.
 		 This will not work for a hardware breakpoint.  */
-	      if (bpt->loc_type == bp_loc_hardware_breakpoint)
+	      if (bl->loc_type == bp_loc_hardware_breakpoint)
 		warning (_("hardware breakpoint %d not supported in overlay!"),
-			 bpt->owner->number);
+			 bl->owner->number);
 	      else
 		{
-		  CORE_ADDR addr = overlay_unmapped_address (bpt->address,
-							     bpt->section);
+		  CORE_ADDR addr = overlay_unmapped_address (bl->address,
+							     bl->section);
 		  /* Set a software (trap) breakpoint at the LMA.  */
-		  bpt->overlay_target_info = bpt->target_info;
-		  bpt->overlay_target_info.placed_address = addr;
-		  val = target_insert_breakpoint (bpt->gdbarch,
-						  &bpt->overlay_target_info);
+		  bl->overlay_target_info = bl->target_info;
+		  bl->overlay_target_info.placed_address = addr;
+		  val = target_insert_breakpoint (bl->gdbarch,
+						  &bl->overlay_target_info);
 		  if (val != 0)
 		    fprintf_unfiltered (tmp_error_stream,
 					"Overlay breakpoint %d failed: in ROM?\n",
-					bpt->owner->number);
+					bl->owner->number);
 		}
 	    }
 	  /* Shall we set a breakpoint at the VMA? */
-	  if (section_is_mapped (bpt->section))
+	  if (section_is_mapped (bl->section))
 	    {
 	      /* Yes.  This overlay section is mapped into memory.  */
-	      if (bpt->loc_type == bp_loc_hardware_breakpoint)
-		val = target_insert_hw_breakpoint (bpt->gdbarch,
-						   &bpt->target_info);
+	      if (bl->loc_type == bp_loc_hardware_breakpoint)
+		val = target_insert_hw_breakpoint (bl->gdbarch,
+						   &bl->target_info);
 	      else
-		val = target_insert_breakpoint (bpt->gdbarch,
-						&bpt->target_info);
+		val = target_insert_breakpoint (bl->gdbarch,
+						&bl->target_info);
 	    }
 	  else
 	    {
@@ -1687,40 +1690,40 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
       if (val)
 	{
 	  /* Can't set the breakpoint.  */
-	  if (solib_name_from_address (bpt->pspace, bpt->address))
+	  if (solib_name_from_address (bl->pspace, bl->address))
 	    {
 	      /* See also: disable_breakpoints_in_shlibs. */
 	      val = 0;
-	      bpt->shlib_disabled = 1;
+	      bl->shlib_disabled = 1;
 	      if (!*disabled_breaks)
 		{
 		  fprintf_unfiltered (tmp_error_stream, 
 				      "Cannot insert breakpoint %d.\n", 
-				      bpt->owner->number);
+				      bl->owner->number);
 		  fprintf_unfiltered (tmp_error_stream, 
 				      "Temporarily disabling shared library breakpoints:\n");
 		}
 	      *disabled_breaks = 1;
 	      fprintf_unfiltered (tmp_error_stream,
-				  "breakpoint #%d\n", bpt->owner->number);
+				  "breakpoint #%d\n", bl->owner->number);
 	    }
 	  else
 	    {
-	      if (bpt->loc_type == bp_loc_hardware_breakpoint)
+	      if (bl->loc_type == bp_loc_hardware_breakpoint)
 		{
 		  *hw_breakpoint_error = 1;
 		  fprintf_unfiltered (tmp_error_stream, 
 				      "Cannot insert hardware breakpoint %d.\n",
-				      bpt->owner->number);
+				      bl->owner->number);
 		}
 	      else
 		{
 		  fprintf_unfiltered (tmp_error_stream, 
 				      "Cannot insert breakpoint %d.\n", 
-				      bpt->owner->number);
+				      bl->owner->number);
 		  fprintf_filtered (tmp_error_stream, 
 				    "Error accessing memory address ");
-		  fputs_filtered (paddress (bpt->gdbarch, bpt->address),
+		  fputs_filtered (paddress (bl->gdbarch, bl->address),
 				  tmp_error_stream);
 		  fprintf_filtered (tmp_error_stream, ": %s.\n",
 				    safe_strerror (val));
@@ -1729,24 +1732,24 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	    }
 	}
       else
-	bpt->inserted = 1;
+	bl->inserted = 1;
 
       return val;
     }
 
-  else if (bpt->loc_type == bp_loc_hardware_watchpoint
+  else if (bl->loc_type == bp_loc_hardware_watchpoint
 	   /* NOTE drow/2003-09-08: This state only exists for removing
 	      watchpoints.  It's not clear that it's necessary... */
-	   && bpt->owner->disposition != disp_del_at_next_stop)
+	   && bl->owner->disposition != disp_del_at_next_stop)
     {
-      val = target_insert_watchpoint (bpt->address,
-				      bpt->length,
-				      bpt->watchpoint_type,
-				      bpt->owner->cond_exp);
+      val = target_insert_watchpoint (bl->address,
+				      bl->length,
+				      bl->watchpoint_type,
+				      bl->owner->cond_exp);
 
       /* If trying to set a read-watchpoint, and it turns out it's not
 	 supported, try emulating one with an access watchpoint.  */
-      if (val == 1 && bpt->watchpoint_type == hw_read)
+      if (val == 1 && bl->watchpoint_type == hw_read)
 	{
 	  struct bp_location *loc, **loc_temp;
 
@@ -1754,42 +1757,42 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	     hw_access location that would be considered a duplicate
 	     of this one.  */
 	  ALL_BP_LOCATIONS (loc, loc_temp)
-	    if (loc != bpt
+	    if (loc != bl
 		&& loc->watchpoint_type == hw_access
-		&& watchpoint_locations_match (bpt, loc))
+		&& watchpoint_locations_match (bl, loc))
 	      {
-		bpt->duplicate = 1;
-		bpt->inserted = 1;
-		bpt->target_info = loc->target_info;
-		bpt->watchpoint_type = hw_access;
+		bl->duplicate = 1;
+		bl->inserted = 1;
+		bl->target_info = loc->target_info;
+		bl->watchpoint_type = hw_access;
 		val = 0;
 		break;
 	      }
 
 	  if (val == 1)
 	    {
-	      val = target_insert_watchpoint (bpt->address,
-					      bpt->length,
+	      val = target_insert_watchpoint (bl->address,
+					      bl->length,
 					      hw_access,
-					      bpt->owner->cond_exp);
+					      bl->owner->cond_exp);
 	      if (val == 0)
-		bpt->watchpoint_type = hw_access;
+		bl->watchpoint_type = hw_access;
 	    }
 	}
 
-      bpt->inserted = (val == 0);
+      bl->inserted = (val == 0);
     }
 
-  else if (bpt->owner->type == bp_catchpoint)
+  else if (bl->owner->type == bp_catchpoint)
     {
       struct gdb_exception e = catch_exception (uiout, insert_catchpoint,
-						bpt->owner, RETURN_MASK_ERROR);
+						bl->owner, RETURN_MASK_ERROR);
       exception_fprintf (gdb_stderr, e, "warning: inserting catchpoint %d: ",
-			 bpt->owner->number);
+			 bl->owner->number);
       if (e.reason < 0)
-	bpt->owner->enable_state = bp_disabled;
+	bl->owner->enable_state = bp_disabled;
       else
-	bpt->inserted = 1;
+	bl->inserted = 1;
 
       /* We've already printed an error message if there was a problem
 	 inserting this catchpoint, and we've disabled the catchpoint,
@@ -1874,7 +1877,7 @@ static void
 insert_breakpoint_locations (void)
 {
   struct breakpoint *bpt;
-  struct bp_location *b, **bp_tmp;
+  struct bp_location *bl, **blp_tmp;
   int error = 0;
   int val = 0;
   int disabled_breaks = 0;
@@ -1889,19 +1892,19 @@ insert_breakpoint_locations (void)
 
   save_current_space_and_thread ();
 
-  ALL_BP_LOCATIONS (b, bp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
     {
-      if (!should_be_inserted (b) || b->inserted)
+      if (!should_be_inserted (bl) || bl->inserted)
 	continue;
 
       /* There is no point inserting thread-specific breakpoints if the
-	 thread no longer exists.  ALL_BP_LOCATIONS bp_location has B->OWNER
+	 thread no longer exists.  ALL_BP_LOCATIONS bp_location has BL->OWNER
 	 always non-NULL.  */
-      if (b->owner->thread != -1
-	  && !valid_thread_id (b->owner->thread))
+      if (bl->owner->thread != -1
+	  && !valid_thread_id (bl->owner->thread))
 	continue;
 
-      switch_to_program_space_and_thread (b->pspace);
+      switch_to_program_space_and_thread (bl->pspace);
 
       /* For targets that support global breakpoints, there's no need
 	 to select an inferior to insert breakpoint to.  In fact, even
@@ -1911,8 +1914,7 @@ insert_breakpoint_locations (void)
 	  && ptid_equal (inferior_ptid, null_ptid))
 	continue;
 
-      val = insert_bp_location (b, tmp_error_stream,
-				    &disabled_breaks,
+      val = insert_bp_location (bl, tmp_error_stream, &disabled_breaks,
 				    &hw_breakpoint_error);
       if (val)
 	error = val;
@@ -1974,13 +1976,13 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
 int
 remove_breakpoints (void)
 {
-  struct bp_location *b, **bp_tmp;
+  struct bp_location *bl, **blp_tmp;
   int val = 0;
 
-  ALL_BP_LOCATIONS (b, bp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
   {
-    if (b->inserted)
-      val |= remove_breakpoint (b, mark_uninserted);
+    if (bl->inserted)
+      val |= remove_breakpoint (bl, mark_uninserted);
   }
   return val;
 }
@@ -1990,18 +1992,18 @@ remove_breakpoints (void)
 int
 remove_breakpoints_pid (int pid)
 {
-  struct bp_location *b, **b_tmp;
+  struct bp_location *bl, **blp_tmp;
   int val;
   struct inferior *inf = find_inferior_pid (pid);
 
-  ALL_BP_LOCATIONS (b, b_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
   {
-    if (b->pspace != inf->pspace)
+    if (bl->pspace != inf->pspace)
       continue;
 
-    if (b->inserted)
+    if (bl->inserted)
       {
-	val = remove_breakpoint (b, mark_uninserted);
+	val = remove_breakpoint (bl, mark_uninserted);
 	if (val != 0)
 	  return val;
       }
@@ -2012,13 +2014,13 @@ remove_breakpoints_pid (int pid)
 int
 remove_hw_watchpoints (void)
 {
-  struct bp_location *b, **bp_tmp;
+  struct bp_location *bl, **blp_tmp;
   int val = 0;
 
-  ALL_BP_LOCATIONS (b, bp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
   {
-    if (b->inserted && b->loc_type == bp_loc_hardware_watchpoint)
-      val |= remove_breakpoint (b, mark_uninserted);
+    if (bl->inserted && bl->loc_type == bp_loc_hardware_watchpoint)
+      val |= remove_breakpoint (bl, mark_uninserted);
   }
   return val;
 }
@@ -2027,7 +2029,7 @@ int
 reattach_breakpoints (int pid)
 {
   struct cleanup *old_chain;
-  struct bp_location *b, **bp_tmp;
+  struct bp_location *bl, **blp_tmp;
   int val;
   struct ui_file *tmp_error_stream = mem_fileopen ();
   int dummy1 = 0, dummy2 = 0;
@@ -2045,16 +2047,15 @@ reattach_breakpoints (int pid)
 
   make_cleanup_ui_file_delete (tmp_error_stream);
 
-  ALL_BP_LOCATIONS (b, bp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
   {
-    if (b->pspace != inf->pspace)
+    if (bl->pspace != inf->pspace)
       continue;
 
-    if (b->inserted)
+    if (bl->inserted)
       {
-	b->inserted = 0;
-	val = insert_bp_location (b, tmp_error_stream,
-				  &dummy1, &dummy2);
+	bl->inserted = 0;
+	val = insert_bp_location (bl, tmp_error_stream, &dummy1, &dummy2);
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);
@@ -2241,8 +2242,7 @@ create_exception_master_breakpoint (void)
 void
 update_breakpoints_after_exec (void)
 {
-  struct breakpoint *b;
-  struct breakpoint *temp;
+  struct breakpoint *b, *b_tmp;
   struct bp_location *bploc, **bplocp_tmp;
 
   /* We're about to delete breakpoints from GDB's lists.  If the
@@ -2257,7 +2257,7 @@ update_breakpoints_after_exec (void)
     if (bploc->pspace == current_program_space)
       gdb_assert (!bploc->inserted);
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
     if (b->pspace != current_program_space)
       continue;
@@ -2364,7 +2364,7 @@ update_breakpoints_after_exec (void)
 int
 detach_breakpoints (int pid)
 {
-  struct bp_location *b, **bp_tmp;
+  struct bp_location *bl, **blp_tmp;
   int val = 0;
   struct cleanup *old_chain = save_inferior_ptid ();
   struct inferior *inf = current_inferior ();
@@ -2374,13 +2374,13 @@ detach_breakpoints (int pid)
 
   /* Set inferior_ptid; remove_breakpoint_1 uses this global.  */
   inferior_ptid = pid_to_ptid (pid);
-  ALL_BP_LOCATIONS (b, bp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
   {
-    if (b->pspace != inf->pspace)
+    if (bl->pspace != inf->pspace)
       continue;
 
-    if (b->inserted)
-      val |= remove_breakpoint_1 (b, mark_inserted);
+    if (bl->inserted)
+      val |= remove_breakpoint_1 (bl, mark_inserted);
   }
 
   /* Detach single-step breakpoints as well.  */
@@ -2390,30 +2390,30 @@ detach_breakpoints (int pid)
   return val;
 }
 
-/* Remove the breakpoint location B from the current address space.
+/* Remove the breakpoint location BL from the current address space.
    Note that this is used to detach breakpoints from a child fork.
    When we get here, the child isn't in the inferior list, and neither
    do we have objects to represent its address space --- we should
-   *not* look at b->pspace->aspace here.  */
+   *not* look at bl->pspace->aspace here.  */
 
 static int
-remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
+remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
 {
   int val;
 
-  /* B is never in moribund_locations by our callers.  */
-  gdb_assert (b->owner != NULL);
+  /* BL is never in moribund_locations by our callers.  */
+  gdb_assert (bl->owner != NULL);
 
-  if (b->owner->enable_state == bp_permanent)
+  if (bl->owner->enable_state == bp_permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
 
   /* The type of none suggests that owner is actually deleted.
      This should not ever happen.  */
-  gdb_assert (b->owner->type != bp_none);
+  gdb_assert (bl->owner->type != bp_none);
 
-  if (b->loc_type == bp_loc_software_breakpoint
-      || b->loc_type == bp_loc_hardware_breakpoint)
+  if (bl->loc_type == bp_loc_software_breakpoint
+      || bl->loc_type == bp_loc_hardware_breakpoint)
     {
       /* "Normal" instruction breakpoint: either the standard
 	 trap-instruction bp (bp_breakpoint), or a
@@ -2421,15 +2421,15 @@ remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
 
       /* First check to see if we have to handle an overlay.  */
       if (overlay_debugging == ovly_off
-	  || b->section == NULL
-	  || !(section_is_overlay (b->section)))
+	  || bl->section == NULL
+	  || !(section_is_overlay (bl->section)))
 	{
 	  /* No overlay handling: just remove the breakpoint.  */
 
-	  if (b->loc_type == bp_loc_hardware_breakpoint)
-	    val = target_remove_hw_breakpoint (b->gdbarch, &b->target_info);
+	  if (bl->loc_type == bp_loc_hardware_breakpoint)
+	    val = target_remove_hw_breakpoint (bl->gdbarch, &bl->target_info);
 	  else
-	    val = target_remove_breakpoint (b->gdbarch, &b->target_info);
+	    val = target_remove_breakpoint (bl->gdbarch, &bl->target_info);
 	}
       else
 	{
@@ -2442,31 +2442,31 @@ remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
 		*/
 		/* Ignore any failures: if the LMA is in ROM, we will
 		   have already warned when we failed to insert it.  */
-		if (b->loc_type == bp_loc_hardware_breakpoint)
-		  target_remove_hw_breakpoint (b->gdbarch,
-					       &b->overlay_target_info);
+		if (bl->loc_type == bp_loc_hardware_breakpoint)
+		  target_remove_hw_breakpoint (bl->gdbarch,
+					       &bl->overlay_target_info);
 		else
-		  target_remove_breakpoint (b->gdbarch,
-					    &b->overlay_target_info);
+		  target_remove_breakpoint (bl->gdbarch,
+					    &bl->overlay_target_info);
 	      }
 	  /* Did we set a breakpoint at the VMA? 
 	     If so, we will have marked the breakpoint 'inserted'.  */
-	  if (b->inserted)
+	  if (bl->inserted)
 	    {
 	      /* Yes -- remove it.  Previously we did not bother to
 		 remove the breakpoint if the section had been
 		 unmapped, but let's not rely on that being safe.  We
 		 don't know what the overlay manager might do.  */
-	      if (b->loc_type == bp_loc_hardware_breakpoint)
-		val = target_remove_hw_breakpoint (b->gdbarch,
-						   &b->target_info);
+	      if (bl->loc_type == bp_loc_hardware_breakpoint)
+		val = target_remove_hw_breakpoint (bl->gdbarch,
+						   &bl->target_info);
 
 	      /* However, we should remove *software* breakpoints only
 		 if the section is still mapped, or else we overwrite
 		 wrong code with the saved shadow contents.  */
-	      else if (section_is_mapped (b->section))
-		val = target_remove_breakpoint (b->gdbarch,
-						&b->target_info);
+	      else if (section_is_mapped (bl->section))
+		val = target_remove_breakpoint (bl->gdbarch,
+						&bl->target_info);
 	      else
 		val = 0;
 	    }
@@ -2480,61 +2480,61 @@ remove_breakpoint_1 (struct bp_location *b, insertion_state_t is)
       /* In some cases, we might not be able to remove a breakpoint
 	 in a shared library that has already been removed, but we
 	 have not yet processed the shlib unload event.  */
-      if (val && solib_name_from_address (b->pspace, b->address))
+      if (val && solib_name_from_address (bl->pspace, bl->address))
 	val = 0;
 
       if (val)
 	return val;
-      b->inserted = (is == mark_inserted);
+      bl->inserted = (is == mark_inserted);
     }
-  else if (b->loc_type == bp_loc_hardware_watchpoint)
+  else if (bl->loc_type == bp_loc_hardware_watchpoint)
     {
-      b->inserted = (is == mark_inserted);
-      val = target_remove_watchpoint (b->address, b->length,
-				      b->watchpoint_type, b->owner->cond_exp);
+      bl->inserted = (is == mark_inserted);
+      val = target_remove_watchpoint (bl->address, bl->length,
+				      bl->watchpoint_type, bl->owner->cond_exp);
 
       /* Failure to remove any of the hardware watchpoints comes here.  */
-      if ((is == mark_uninserted) && (b->inserted))
+      if ((is == mark_uninserted) && (bl->inserted))
 	warning (_("Could not remove hardware watchpoint %d."),
-		 b->owner->number);
+		 bl->owner->number);
     }
-  else if (b->owner->type == bp_catchpoint
-           && breakpoint_enabled (b->owner)
-           && !b->duplicate)
+  else if (bl->owner->type == bp_catchpoint
+           && breakpoint_enabled (bl->owner)
+           && !bl->duplicate)
     {
-      gdb_assert (b->owner->ops != NULL && b->owner->ops->remove != NULL);
+      gdb_assert (bl->owner->ops != NULL && bl->owner->ops->remove != NULL);
 
-      val = b->owner->ops->remove (b->owner);
+      val = bl->owner->ops->remove (bl->owner);
       if (val)
 	return val;
-      b->inserted = (is == mark_inserted);
+      bl->inserted = (is == mark_inserted);
     }
 
   return 0;
 }
 
 static int
-remove_breakpoint (struct bp_location *b, insertion_state_t is)
+remove_breakpoint (struct bp_location *bl, insertion_state_t is)
 {
   int ret;
   struct cleanup *old_chain;
 
-  /* B is never in moribund_locations by our callers.  */
-  gdb_assert (b->owner != NULL);
+  /* BL is never in moribund_locations by our callers.  */
+  gdb_assert (bl->owner != NULL);
 
-  if (b->owner->enable_state == bp_permanent)
+  if (bl->owner->enable_state == bp_permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
 
   /* The type of none suggests that owner is actually deleted.
      This should not ever happen.  */
-  gdb_assert (b->owner->type != bp_none);
+  gdb_assert (bl->owner->type != bp_none);
 
   old_chain = save_current_space_and_thread ();
 
-  switch_to_program_space_and_thread (b->pspace);
+  switch_to_program_space_and_thread (bl->pspace);
 
-  ret = remove_breakpoint_1 (b, is);
+  ret = remove_breakpoint_1 (bl, is);
 
   do_cleanups (old_chain);
   return ret;
@@ -2545,11 +2545,11 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 void
 mark_breakpoints_out (void)
 {
-  struct bp_location *bpt, **bptp_tmp;
+  struct bp_location *bl, **blp_tmp;
 
-  ALL_BP_LOCATIONS (bpt, bptp_tmp)
-    if (bpt->pspace == current_program_space)
-      bpt->inserted = 0;
+  ALL_BP_LOCATIONS (bl, blp_tmp)
+    if (bl->pspace == current_program_space)
+      bl->inserted = 0;
 }
 
 /* Clear the "inserted" flag in all breakpoints and delete any
@@ -2567,8 +2567,8 @@ mark_breakpoints_out (void)
 void
 breakpoint_init_inferior (enum inf_context context)
 {
-  struct breakpoint *b, *temp;
-  struct bp_location *bpt, **bptp_tmp;
+  struct breakpoint *b, *b_tmp;
+  struct bp_location *bl, **blp_tmp;
   int ix;
   struct program_space *pspace = current_program_space;
 
@@ -2577,15 +2577,15 @@ breakpoint_init_inferior (enum inf_context context)
   if (gdbarch_has_global_breakpoints (target_gdbarch))
     return;
 
-  ALL_BP_LOCATIONS (bpt, bptp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
   {
-    /* ALL_BP_LOCATIONS bp_location has BPT->OWNER always non-NULL.  */
-    if (bpt->pspace == pspace
-	&& bpt->owner->enable_state != bp_permanent)
-      bpt->inserted = 0;
+    /* ALL_BP_LOCATIONS bp_location has BL->OWNER always non-NULL.  */
+    if (bl->pspace == pspace
+	&& bl->owner->enable_state != bp_permanent)
+      bl->inserted = 0;
   }
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
     if (b->loc && b->loc->pspace != pspace)
       continue;
@@ -2645,8 +2645,8 @@ breakpoint_init_inferior (enum inf_context context)
   }
 
   /* Get rid of the moribund locations.  */
-  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, bpt); ++ix)
-    decref_bp_location (&bpt);
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, bl); ++ix)
+    decref_bp_location (&bl);
   VEC_free (bp_location_p, moribund_locations);
 }
 
@@ -2668,26 +2668,26 @@ breakpoint_init_inferior (enum inf_context context)
 enum breakpoint_here
 breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
-  struct bp_location *bpt, **bptp_tmp;
+  struct bp_location *bl, **blp_tmp;
   int any_breakpoint_here = 0;
 
-  ALL_BP_LOCATIONS (bpt, bptp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
     {
-      if (bpt->loc_type != bp_loc_software_breakpoint
-	  && bpt->loc_type != bp_loc_hardware_breakpoint)
+      if (bl->loc_type != bp_loc_software_breakpoint
+	  && bl->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
-      /* ALL_BP_LOCATIONS bp_location has BPT->OWNER always non-NULL.  */
-      if ((breakpoint_enabled (bpt->owner)
-	   || bpt->owner->enable_state == bp_permanent)
-	  && breakpoint_address_match (bpt->pspace->aspace, bpt->address,
+      /* ALL_BP_LOCATIONS bp_location has bl->OWNER always non-NULL.  */
+      if ((breakpoint_enabled (bl->owner)
+	   || bl->owner->enable_state == bp_permanent)
+	  && breakpoint_address_match (bl->pspace->aspace, bl->address,
 				       aspace, pc))
 	{
 	  if (overlay_debugging 
-	      && section_is_overlay (bpt->section) 
-	      && !section_is_mapped (bpt->section))
+	      && section_is_overlay (bl->section)
+	      && !section_is_mapped (bl->section))
 	    continue;		/* unmapped overlay -- can't be a match */
-	  else if (bpt->owner->enable_state == bp_permanent)
+	  else if (bl->owner->enable_state == bp_permanent)
 	    return permanent_breakpoint_here;
 	  else
 	    any_breakpoint_here = 1;
@@ -2721,21 +2721,21 @@ moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 int
 regular_breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
-  struct bp_location *bpt, **bptp_tmp;
+  struct bp_location *bl, **blp_tmp;
 
-  ALL_BP_LOCATIONS (bpt, bptp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
     {
-      if (bpt->loc_type != bp_loc_software_breakpoint
-	  && bpt->loc_type != bp_loc_hardware_breakpoint)
+      if (bl->loc_type != bp_loc_software_breakpoint
+	  && bl->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
-      if (bpt->inserted
-	  && breakpoint_address_match (bpt->pspace->aspace, bpt->address,
+      if (bl->inserted
+	  && breakpoint_address_match (bl->pspace->aspace, bl->address,
 				       aspace, pc))
 	{
 	  if (overlay_debugging 
-	      && section_is_overlay (bpt->section) 
-	      && !section_is_mapped (bpt->section))
+	      && section_is_overlay (bl->section)
+	      && !section_is_mapped (bl->section))
 	    continue;		/* unmapped overlay -- can't be a match */
 	  else
 	    return 1;
@@ -2765,20 +2765,20 @@ breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 int
 software_breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
-  struct bp_location *bpt, **bptp_tmp;
+  struct bp_location *bl, **blp_tmp;
 
-  ALL_BP_LOCATIONS (bpt, bptp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
     {
-      if (bpt->loc_type != bp_loc_software_breakpoint)
+      if (bl->loc_type != bp_loc_software_breakpoint)
 	continue;
 
-      if (bpt->inserted
-	  && breakpoint_address_match (bpt->pspace->aspace, bpt->address,
+      if (bl->inserted
+	  && breakpoint_address_match (bl->pspace->aspace, bl->address,
 				       aspace, pc))
 	{
 	  if (overlay_debugging 
-	      && section_is_overlay (bpt->section) 
-	      && !section_is_mapped (bpt->section))
+	      && section_is_overlay (bl->section)
+	      && !section_is_mapped (bl->section))
 	    continue;		/* unmapped overlay -- can't be a match */
 	  else
 	    return 1;
@@ -2831,51 +2831,51 @@ int
 breakpoint_thread_match (struct address_space *aspace, CORE_ADDR pc,
 			 ptid_t ptid)
 {
-  struct bp_location *bpt, **bptp_tmp;
+  struct bp_location *bl, **blp_tmp;
   /* The thread and task IDs associated to PTID, computed lazily.  */
   int thread = -1;
   int task = 0;
   
-  ALL_BP_LOCATIONS (bpt, bptp_tmp)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
     {
-      if (bpt->loc_type != bp_loc_software_breakpoint
-	  && bpt->loc_type != bp_loc_hardware_breakpoint)
+      if (bl->loc_type != bp_loc_software_breakpoint
+	  && bl->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
-      /* ALL_BP_LOCATIONS bp_location has BPT->OWNER always non-NULL.  */
-      if (!breakpoint_enabled (bpt->owner)
-	  && bpt->owner->enable_state != bp_permanent)
+      /* ALL_BP_LOCATIONS bp_location has bl->OWNER always non-NULL.  */
+      if (!breakpoint_enabled (bl->owner)
+	  && bl->owner->enable_state != bp_permanent)
 	continue;
 
-      if (!breakpoint_address_match (bpt->pspace->aspace, bpt->address,
+      if (!breakpoint_address_match (bl->pspace->aspace, bl->address,
 				     aspace, pc))
 	continue;
 
-      if (bpt->owner->thread != -1)
+      if (bl->owner->thread != -1)
 	{
 	  /* This is a thread-specific breakpoint.  Check that ptid
 	     matches that thread.  If thread hasn't been computed yet,
 	     it is now time to do so.  */
 	  if (thread == -1)
 	    thread = pid_to_thread_id (ptid);
-	  if (bpt->owner->thread != thread)
+	  if (bl->owner->thread != thread)
 	    continue;
 	}
 
-      if (bpt->owner->task != 0)
+      if (bl->owner->task != 0)
         {
 	  /* This is a task-specific breakpoint.  Check that ptid
 	     matches that task.  If task hasn't been computed yet,
 	     it is now time to do so.  */
 	  if (task == 0)
 	    task = ada_get_task_number (ptid);
-	  if (bpt->owner->task != task)
+	  if (bl->owner->task != task)
 	    continue;
         }
 
       if (overlay_debugging 
-	  && section_is_overlay (bpt->section) 
-	  && !section_is_mapped (bpt->section))
+	  && section_is_overlay (bl->section)
+	  && !section_is_mapped (bl->section))
 	continue;	    /* unmapped overlay -- can't be a match */
 
       return 1;
@@ -3745,7 +3745,7 @@ bpstat_check_location (const struct bp_location *bl,
 				     aspace, bp_addr))
 	return 0;
       if (overlay_debugging		/* unmapped overlay section */
-	  && section_is_overlay (bl->section) 
+	  && section_is_overlay (bl->section)
 	  && !section_is_mapped (bl->section))
 	return 0;
     }
@@ -3766,7 +3766,7 @@ bpstat_check_location (const struct bp_location *bl,
       if (bl->address != bp_addr)
 	return 0;
       if (overlay_debugging		/* unmapped overlay section */
-	  && section_is_overlay (bl->section) 
+	  && section_is_overlay (bl->section)
 	  && !section_is_mapped (bl->section))
 	return 0;
     }
@@ -5667,14 +5667,14 @@ make_breakpoint_permanent (struct breakpoint *b)
 void
 set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
   int thread = tp->num;
 
   /* To avoid having to rescan all objfile symbols at every step,
      we maintain a list of continually-inserted but always disabled
      longjmp "master" breakpoints.  Here, we simply create momentary
      clones of those and enable them for the requested thread.  */
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
     if (b->pspace == current_program_space
 	&& (b->type == bp_longjmp_master
 	    || b->type == bp_exception_master))
@@ -5692,9 +5692,9 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 void
 delete_longjmp_breakpoint (int thread)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
     if (b->type == bp_longjmp || b->type == bp_exception)
       {
 	if (b->thread == thread)
@@ -5735,9 +5735,9 @@ disable_overlay_breakpoints (void)
 void
 set_std_terminate_breakpoint (void)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
     if (b->pspace == current_program_space
 	&& b->type == bp_std_terminate_master)
       {
@@ -5750,9 +5750,9 @@ set_std_terminate_breakpoint (void)
 void
 delete_std_terminate_breakpoint (void)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
     if (b->type == bp_std_terminate)
       delete_breakpoint (b);
 }
@@ -5777,9 +5777,9 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 void
 remove_thread_event_breakpoints (void)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
     if (b->type == bp_thread_event
 	&& b->loc->pspace == current_program_space)
       delete_breakpoint (b);
@@ -5814,9 +5814,9 @@ create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 void
 remove_solib_event_breakpoints (void)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
     if (b->type == bp_shlib_event
 	&& b->loc->pspace == current_program_space)
       delete_breakpoint (b);
@@ -9314,7 +9314,7 @@ clear_command (char *arg, int from_tty)
 void
 breakpoint_auto_delete (bpstat bs)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
   for (; bs; bs = bs->next)
     if (bs->breakpoint_at
@@ -9322,7 +9322,7 @@ breakpoint_auto_delete (bpstat bs)
 	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at);
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
     if (b->disposition == disp_del_at_next_stop)
       delete_breakpoint (b);
@@ -9873,7 +9873,7 @@ do_delete_breakpoint (struct breakpoint *b, void *ignore)
 void
 delete_command (char *arg, int from_tty)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
   dont_repeat ();
 
@@ -9906,7 +9906,7 @@ delete_command (char *arg, int from_tty)
       if (!from_tty
 	  || (breaks_to_delete && query (_("Delete all breakpoints? "))))
 	{
-	  ALL_BREAKPOINTS_SAFE (b, temp)
+	  ALL_BREAKPOINTS_SAFE (b, b_tmp)
 	  {
 	    if (b->type != bp_call_dummy
 		&& b->type != bp_std_terminate
@@ -10415,7 +10415,7 @@ breakpoint_re_set_one (void *bint)
 void
 breakpoint_re_set (void)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
   enum language save_language;
   int save_input_radix;
   struct cleanup *old_chain;
@@ -10424,7 +10424,7 @@ breakpoint_re_set (void)
   save_input_radix = input_radix;
   old_chain = save_current_program_space ();
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
   {
     /* Format possible error msg */
     char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
@@ -11315,7 +11315,7 @@ disable_trace_command (char *args, int from_tty)
 static void
 delete_trace_command (char *arg, int from_tty)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
   dont_repeat ();
 
@@ -11339,7 +11339,7 @@ delete_trace_command (char *arg, int from_tty)
       if (!from_tty
 	  || (breaks_to_delete && query (_("Delete all tracepoints? "))))
 	{
-	  ALL_BREAKPOINTS_SAFE (b, temp)
+	  ALL_BREAKPOINTS_SAFE (b, b_tmp)
 	  {
 	    if (is_tracepoint (b)
 		&& b->number >= 0)
@@ -11757,9 +11757,9 @@ struct breakpoint *
 iterate_over_breakpoints (int (*callback) (struct breakpoint *, void *),
 			  void *data)
 {
-  struct breakpoint *b, *temp;
+  struct breakpoint *b, *b_tmp;
 
-  ALL_BREAKPOINTS_SAFE (b, temp)
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
     {
       if ((*callback) (b, data))
 	return b;

@@ -1,5 +1,12 @@
+2010-12-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup - renaming.
+	* breakpoint.c: Use bl for `*bp_location' variables, blp_tmp for
+	`**bp_location' helper variables, b_tmp for `*breakpoint' helper
+	variables.
+
 2010-12-27  Kevin Buettner  <kevinb@redhat.com>
-            Hui Zhu  <teawater@gmail.com>
+	    Hui Zhu  <teawater@gmail.com>
 
 	* mips-tedp.c (mips_register_name): Add comments.
 
