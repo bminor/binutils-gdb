@@ -1,3 +1,8 @@
+2010-12-27  Kevin Buettner  <kevinb@redhat.com>
+            Hui Zhu  <teawater@gmail.com>
+
+	* mips-tedp.c (mips_register_name): Add comments.
+
 2010-12-23  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (thumb_analyze_prologue): Move some code ...
