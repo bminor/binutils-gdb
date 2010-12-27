@@ -3758,6 +3758,8 @@ pa_ip (char *str)
 		  else
 		    break;
 
+		  /* Set doubleword carry bit.  */
+		  opcode |= 0x20;
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
 
 		/* Handle 32 bit carry for ADD.  */
@@ -3826,6 +3828,8 @@ pa_ip (char *str)
 		  else
 		    break;
 
+		  /* Set doubleword borrow bit.  */
+		  opcode |= 0x20;
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
 
 		/* Handle 32 bit borrow for SUB.  */
@@ -3970,11 +3974,13 @@ pa_ip (char *str)
 		  /* Handle an add condition.  */
 		  case 'A':
 		    /* PR gas/11395
-		       If we are looking for 64-bit add conditions and we
-		       do not have the ",*" prefix, then we have no match.  */
-		    if (*s != ',')
+		       If we don't have a ",*" condition or "dc" completer,
+		       then we have a doubleword carry match failure.  */
+		    if (*s != ',' && !(opcode & 0x20))
 		      break;
+		    opcode |= 0x20;
 		    /* Fall through.  */
+
 		  case 'a':
 		    cmpltr = 0;
 		    flag = 0;
@@ -4142,6 +4148,14 @@ pa_ip (char *str)
 
 		  /* Handle a compare/subtract condition.  */
 		  case 'S':
+		    /* PR gas/11395
+		       If we don't have a ",*" condition or "dc" completer,
+		       then we have a doubleword carry match failure.  */
+		    if (*s != ',' && !(opcode & 0x20))
+		      break;
+		    opcode |= 0x20;
+		    /* Fall through.  */
+
 		  case 's':
 		    cmpltr = 0;
 		    flag = 0;

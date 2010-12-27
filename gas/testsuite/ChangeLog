@@ -1,3 +1,12 @@
+2010-12-26  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR gas/11395
+	* gas/hppa/basic/add2.s: Add test for a simple doubleword carry
+	instruction.
+	* gas/hppa/basic/sub2.s: Add tests for simple word and doubleword
+	borrow instructions.
+	* gas/hppa/basic/basic.exp: Update regexps for above.
+
 2010-12-18  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* gas/mips/loongson-3a-2.s, gas/mips/loongson-3a-2.d,

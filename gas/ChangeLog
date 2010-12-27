@@ -1,3 +1,11 @@
+2010-12-26  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR gas/11395
+	* config/tc-hppa.c (pa_ip): Set doubleword carry/borrow bit when a
+	doubleword completer or doubleword condition is found in an add/sub
+	instruction.  Reject match for 'A'/'S' only if there is no condition
+	and d bit is not set.
+
 2010-12-18  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* config/tc-mips.c (insn_uses_reg): Handle the new flags
