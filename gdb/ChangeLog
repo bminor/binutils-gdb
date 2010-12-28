@@ -1,3 +1,7 @@
+2010-12-28  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_register_aliases): Remove sp, pc, and fp.
+
 2010-12-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* inf-child.c (inf_child_acknowledge_created_inferior): Delete.
@@ -45,10 +49,6 @@
 	(arm_skip_prologue): Adjust post_prologue_pc by
 	arm_skip_stack_protector.
 
-2010-12-23  Joel Brobecker  <brobecker@adacore.com>
-
-	* mi/mi-main.c (mi_cmd_remove_inferior): Use _() marker for error
-	message.  Change spelling of "can not" into "cannot".
 
 2010-12-23  Yao Qi  <yao@codesourcery.com>
 

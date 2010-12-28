@@ -135,7 +135,10 @@ static const char *arm_force_mode_string = "auto";
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
 
-/* The standard register names, and all the valid aliases for them.  */
+/* The standard register names, and all the valid aliases for them.  Note
+   that `fp', `sp' and `pc' are not added in this alias list, because they
+   have been added as builtin user registers in
+   std-regs.c:_initialize_frame_reg.  */
 static const struct
 {
   const char *name;
@@ -176,12 +179,9 @@ static const struct
   { "tr", 9 },
   /* Special names.  */
   { "ip", 12 },
-  { "sp", 13 },
   { "lr", 14 },
-  { "pc", 15 },
   /* Names used by GCC (not listed in the ARM EABI).  */
   { "sl", 10 },
-  { "fp", 11 },
   /* A special name from the older ATPCS.  */
   { "wr", 7 },
 };
