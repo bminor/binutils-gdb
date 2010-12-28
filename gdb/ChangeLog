@@ -1,3 +1,20 @@
+2010-12-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* inf-child.c (inf_child_acknowledge_created_inferior): Delete.
+	(inf_child_target): Do not set t->to_acknowledge_created_inferior.
+	* inf-ptrace.c (inf_ptrace_create_inferior): Remove call to
+	target_acknowledge_created_inferior.
+	* inf-ttrace.c (inf_ttrace_him): Likewise.
+	* target.h (struct target_ops): Delete to_acknowledge_created_inferior
+	field.
+	(target_acknowledge_created_inferior): Delete.
+	* target.c (update_current_target): Remove setting of
+	to_acknowledge_created_inferior field. Do default value for that
+	field either.
+	(debug_to_acknowledge_created_inferior): Delete.
+	(setup_target_debug): Remove setting of
+	current_target.to_acknowledge_created_inferior.
+
 2010-12-27  Pedro Alves  <pedro@codesourcery.com>
 
 	gdb/

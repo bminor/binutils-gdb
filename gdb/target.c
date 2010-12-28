@@ -624,7 +624,6 @@ update_current_target (void)
       INHERIT (to_lookup_symbol, t);
       /* Do no inherit to_create_inferior.  */
       INHERIT (to_post_startup_inferior, t);
-      INHERIT (to_acknowledge_created_inferior, t);
       INHERIT (to_insert_fork_catchpoint, t);
       INHERIT (to_remove_fork_catchpoint, t);
       INHERIT (to_insert_vfork_catchpoint, t);
@@ -777,9 +776,6 @@ update_current_target (void)
 	    nosymbol);
   de_fault (to_post_startup_inferior,
 	    (void (*) (ptid_t))
-	    target_ignore);
-  de_fault (to_acknowledge_created_inferior,
-	    (void (*) (int))
 	    target_ignore);
   de_fault (to_insert_fork_catchpoint,
 	    (void (*) (int))
@@ -3649,15 +3645,6 @@ debug_to_post_startup_inferior (ptid_t ptid)
 }
 
 static void
-debug_to_acknowledge_created_inferior (int pid)
-{
-  debug_target.to_acknowledge_created_inferior (pid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_acknowledge_created_inferior (%d)\n",
-		      pid);
-}
-
-static void
 debug_to_insert_fork_catchpoint (int pid)
 {
   debug_target.to_insert_fork_catchpoint (pid);
@@ -3831,7 +3818,6 @@ setup_target_debug (void)
   current_target.to_load = debug_to_load;
   current_target.to_lookup_symbol = debug_to_lookup_symbol;
   current_target.to_post_startup_inferior = debug_to_post_startup_inferior;
-  current_target.to_acknowledge_created_inferior = debug_to_acknowledge_created_inferior;
   current_target.to_insert_fork_catchpoint = debug_to_insert_fork_catchpoint;
   current_target.to_remove_fork_catchpoint = debug_to_remove_fork_catchpoint;
   current_target.to_insert_vfork_catchpoint = debug_to_insert_vfork_catchpoint;

@@ -139,13 +139,6 @@ inf_ptrace_create_inferior (struct target_ops *ops,
   if (! ops_already_pushed)
     discard_cleanups (back_to);
 
-  /* On some targets, there must be some explicit synchronization
-     between the parent and child processes after the debugger
-     forks, and before the child execs the debuggee program.  This
-     call basically gives permission for the child to exec.  */
-
-  target_acknowledge_created_inferior (pid);
-
   /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h, and will
      be 1 or 2 depending on whether we're starting without or with a
      shell.  */

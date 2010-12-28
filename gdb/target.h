@@ -467,7 +467,6 @@ struct target_ops
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);
-    void (*to_acknowledge_created_inferior) (int);
     void (*to_insert_fork_catchpoint) (int);
     int (*to_remove_fork_catchpoint) (int);
     void (*to_insert_vfork_catchpoint) (int);
@@ -1025,12 +1024,6 @@ void target_create_inferior (char *exec_file, char *args,
 
 #define target_post_startup_inferior(ptid) \
      (*current_target.to_post_startup_inferior) (ptid)
-
-/* On some targets, the sequence of starting up an inferior requires
-   some synchronization between gdb and the new inferior process, PID.  */
-
-#define target_acknowledge_created_inferior(pid) \
-     (*current_target.to_acknowledge_created_inferior) (pid)
 
 /* On some targets, we can catch an inferior fork or vfork event when
    it occurs.  These functions insert/remove an already-created

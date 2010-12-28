@@ -88,13 +88,6 @@ inf_child_post_startup_inferior (ptid_t ptid)
 }
 
 static void
-inf_child_acknowledge_created_inferior (int pid)
-{
-  /* This version of Unix doesn't require a meaningful "acknowledge
-     created inferior" operation by a debugger.  */
-}
-
-static void
 inf_child_insert_fork_catchpoint (int pid)
 {
   /* This version of Unix doesn't support notification of fork
@@ -192,7 +185,6 @@ inf_child_target (void)
   t->to_terminal_ours = terminal_ours;
   t->to_terminal_info = child_terminal_info;
   t->to_post_startup_inferior = inf_child_post_startup_inferior;
-  t->to_acknowledge_created_inferior = inf_child_acknowledge_created_inferior;
   t->to_insert_fork_catchpoint = inf_child_insert_fork_catchpoint;
   t->to_remove_fork_catchpoint = inf_child_remove_fork_catchpoint;
   t->to_insert_vfork_catchpoint = inf_child_insert_vfork_catchpoint;
