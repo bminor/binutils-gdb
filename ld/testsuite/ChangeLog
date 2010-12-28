@@ -1,3 +1,17 @@
+2010-12-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12327
+	* ld-scripts/defined4.d: New.
+	* ld-scripts/defined4.s: Likewise.
+	* ld-scripts/defined4.t: Likewise.
+	* ld-scripts/expr2.d: Likewise.
+	* ld-scripts/expr2.s: Likewise.
+	* ld-scripts/expr2.t: Likewise.
+
+	* ld-scripts/defined.exp: Run defined4.
+
+	* ld-scripts/expr.exp: Run expr2.
+
 2010-12-21  Kai Tietz  <kai.tietz@onevision.com>
 
 	* ld-pe/pe.exp: Add TLS directory test.
