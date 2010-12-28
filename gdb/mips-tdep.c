@@ -449,7 +449,16 @@ mips_register_name (struct gdbarch *gdbarch, int regno)
   enum mips_abi abi = mips_abi (gdbarch);
 
   /* Map [gdbarch_num_regs .. 2*gdbarch_num_regs) onto the raw registers, 
-     but then don't make the raw register names visible.  */
+     but then don't make the raw register names visible.  This (upper)
+     range of user visible register numbers are the pseudo-registers.
+
+     This approach was adopted accommodate the following scenario:
+     It is possible to debug a 64-bit device using a 32-bit
+     programming model.  In such instances, the raw registers are
+     configured to be 64-bits wide, while the pseudo registers are
+     configured to be 32-bits wide.  The registers that the user
+     sees - the pseudo registers - match the users expectations
+     given the programming model being used.  */
   int rawnum = regno % gdbarch_num_regs (gdbarch);
   if (regno < gdbarch_num_regs (gdbarch))
     return "";

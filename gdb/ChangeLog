@@ -1,3 +1,8 @@
+2010-12-28  Kevin Buettner  <kevinb@redhat.com>
+            Hui Zhu  <teawater@gmail.com>
+
+	* mips-tedp.c (mips_register_name): Add comments.
+
 2010-12-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (breakpoint_restore_shadows): When looking for the
