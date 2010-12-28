@@ -28,6 +28,8 @@
 #include "value.h"
 #include "gdb_string.h"
 
+#include "user-regs.h"
+
 static void grow_expr (struct agent_expr *x, int n);
 
 static void append_const (struct agent_expr *x, LONGEST val, int n);
@@ -272,14 +274,28 @@ ax_const_d (struct agent_expr *x, LONGEST d)
 void
 ax_reg (struct agent_expr *x, int reg)
 {
-  /* Make sure the register number is in range.  */
-  if (reg < 0 || reg > 0xffff)
-    error (_("GDB bug: ax-general.c (ax_reg): register number out of range"));
-  grow_expr (x, 3);
-  x->buf[x->len] = aop_reg;
-  x->buf[x->len + 1] = (reg >> 8) & 0xff;
-  x->buf[x->len + 2] = (reg) & 0xff;
-  x->len += 3;
+  if (reg >= gdbarch_num_regs (x->gdbarch))
+    {
+      /* This is a pseudo-register.  */
+      if (!gdbarch_ax_pseudo_register_push_stack_p (x->gdbarch))
+	error (_("'%s' is a pseudo-register; "
+		 "GDB cannot yet trace its contents."),
+	       user_reg_map_regnum_to_name (x->gdbarch, reg));
+      if (gdbarch_ax_pseudo_register_push_stack (x->gdbarch, x, reg))
+	error (_("Trace '%s' failed."),
+	       user_reg_map_regnum_to_name (x->gdbarch, reg));
+    }
+  else
+    {
+      /* Make sure the register number is in range.  */
+      if (reg < 0 || reg > 0xffff)
+        error (_("GDB bug: ax-general.c (ax_reg): register number out of range"));
+      grow_expr (x, 3);
+      x->buf[x->len] = aop_reg;
+      x->buf[x->len + 1] = (reg >> 8) & 0xff;
+      x->buf[x->len + 2] = (reg) & 0xff;
+      x->len += 3;
+    }
 }
 
 /* Assemble code to operate on a trace state variable.  */
@@ -413,23 +429,38 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 void
 ax_reg_mask (struct agent_expr *ax, int reg)
 {
-  int byte = reg / 8;
-
-  /* Grow the bit mask if necessary.  */
-  if (byte >= ax->reg_mask_len)
+  if (reg >= gdbarch_num_regs (ax->gdbarch))
     {
-      /* It's not appropriate to double here.  This isn't a
-	 string buffer.  */
-      int new_len = byte + 1;
-      unsigned char *new_reg_mask = xrealloc (ax->reg_mask,
-					      new_len * sizeof (ax->reg_mask[0]));
-      memset (new_reg_mask + ax->reg_mask_len, 0,
-	      (new_len - ax->reg_mask_len) * sizeof (ax->reg_mask[0]));
-      ax->reg_mask_len = new_len;
-      ax->reg_mask = new_reg_mask;
+      /* This is a pseudo-register.  */
+      if (!gdbarch_ax_pseudo_register_collect_p (ax->gdbarch))
+	error (_("'%s' is a pseudo-register; "
+		 "GDB cannot yet trace its contents."),
+	       user_reg_map_regnum_to_name (ax->gdbarch, reg));
+      if (gdbarch_ax_pseudo_register_collect (ax->gdbarch, ax, reg))
+	error (_("Trace '%s' failed."),
+	       user_reg_map_regnum_to_name (ax->gdbarch, reg));
     }
+  else
+    {
+      int byte = reg / 8;
 
-  ax->reg_mask[byte] |= 1 << (reg % 8);
+      /* Grow the bit mask if necessary.  */
+      if (byte >= ax->reg_mask_len)
+        {
+          /* It's not appropriate to double here.  This isn't a
+	     string buffer.  */
+          int new_len = byte + 1;
+          unsigned char *new_reg_mask = xrealloc (ax->reg_mask,
+					          new_len
+					          * sizeof (ax->reg_mask[0]));
+          memset (new_reg_mask + ax->reg_mask_len, 0,
+	          (new_len - ax->reg_mask_len) * sizeof (ax->reg_mask[0]));
+          ax->reg_mask_len = new_len;
+          ax->reg_mask = new_reg_mask;
+        }
+
+      ax->reg_mask[byte] |= 1 << (reg % 8);
+    }
 }
 
 /* Given an agent expression AX, fill in requirements and other descriptive

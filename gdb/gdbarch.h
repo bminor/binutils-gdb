@@ -53,6 +53,7 @@ struct target_desc;
 struct displaced_step_closure;
 struct core_regset_section;
 struct syscall;
+struct agent_expr;
 
 /* The architecture associated with the connection to the target.
  
@@ -231,6 +232,25 @@ extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
 
 extern int gdbarch_num_pseudo_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo_regs);
+
+/* Assemble agent expression bytecode to collect pseudo-register REG.
+   Return -1 if something goes wrong, 0 otherwise. */
+
+extern int gdbarch_ax_pseudo_register_collect_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_ax_pseudo_register_collect_ftype) (struct gdbarch *gdbarch, struct agent_expr *ax, int reg);
+extern int gdbarch_ax_pseudo_register_collect (struct gdbarch *gdbarch, struct agent_expr *ax, int reg);
+extern void set_gdbarch_ax_pseudo_register_collect (struct gdbarch *gdbarch, gdbarch_ax_pseudo_register_collect_ftype *ax_pseudo_register_collect);
+
+/* Assemble agent expression bytecode to push the value of pseudo-register
+   REG on the interpreter stack.
+   Return -1 if something goes wrong, 0 otherwise. */
+
+extern int gdbarch_ax_pseudo_register_push_stack_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_ax_pseudo_register_push_stack_ftype) (struct gdbarch *gdbarch, struct agent_expr *ax, int reg);
+extern int gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch, struct agent_expr *ax, int reg);
+extern void set_gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch, gdbarch_ax_pseudo_register_push_stack_ftype *ax_pseudo_register_push_stack);
 
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at

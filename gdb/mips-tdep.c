@@ -58,6 +58,7 @@
 #include "dwarf2-frame.h"
 #include "user-regs.h"
 #include "valprint.h"
+#include "ax.h"
 
 static const struct objfile_data *mips_pdr_data;
 
@@ -614,6 +615,48 @@ mips_pseudo_register_write (struct gdbarch *gdbarch,
     }
   else
     internal_error (__FILE__, __LINE__, _("bad register size"));
+}
+
+static int
+mips_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				 struct agent_expr *ax, int reg)
+{
+  int rawnum = reg % gdbarch_num_regs (gdbarch);
+  gdb_assert (reg >= gdbarch_num_regs (gdbarch)
+	      && reg < 2 * gdbarch_num_regs (gdbarch));
+
+  ax_reg_mask (ax, rawnum);
+
+  return 0;
+}
+
+static int
+mips_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
+				    struct agent_expr *ax, int reg)
+{
+  int rawnum = reg % gdbarch_num_regs (gdbarch);
+  gdb_assert (reg >= gdbarch_num_regs (gdbarch)
+	      && reg < 2 * gdbarch_num_regs (gdbarch));
+  if (register_size (gdbarch, rawnum) >= register_size (gdbarch, reg))
+    {
+      ax_reg (ax, rawnum);
+
+      if (register_size (gdbarch, rawnum) > register_size (gdbarch, reg))
+        {
+	  if (!gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
+	      || gdbarch_byte_order (gdbarch) != BFD_ENDIAN_BIG)
+	    {
+	      ax_const_l (ax, 32);
+	      ax_simple (ax, aop_lsh);
+	    }
+	  ax_const_l (ax, 32);
+	  ax_simple (ax, aop_rsh_signed);
+	}
+    }
+  else
+    internal_error (__FILE__, __LINE__, _("bad register size"));
+
+  return 0;
 }
 
 /* Table to translate MIPS16 register field to actual register number.  */
@@ -5932,6 +5975,11 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_reggroup_p (gdbarch, mips_register_reggroup_p);
   set_gdbarch_pseudo_register_read (gdbarch, mips_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, mips_pseudo_register_write);
+
+  set_gdbarch_ax_pseudo_register_collect (gdbarch,
+					  mips_ax_pseudo_register_collect);
+  set_gdbarch_ax_pseudo_register_push_stack
+      (gdbarch, mips_ax_pseudo_register_push_stack);
 
   set_gdbarch_elf_make_msymbol_special (gdbarch,
 					mips_elf_make_msymbol_special);

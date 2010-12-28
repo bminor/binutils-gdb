@@ -1978,10 +1978,6 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	if (reg == -1)
 	  internal_error (__FILE__, __LINE__,
 			  _("Register $%s not available"), name);
-	if (reg >= gdbarch_num_regs (exp->gdbarch))
-	  error (_("'%s' is a pseudo-register; "
-		   "GDB cannot yet trace pseudoregister contents."),
-		 name);
 	value->kind = axs_lvalue_register;
 	value->u.reg = reg;
 	value->type = register_type (exp->gdbarch, reg);
