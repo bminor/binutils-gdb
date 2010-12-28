@@ -1,3 +1,8 @@
+2010-12-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* ax-gdb.c (gen_expr) <OP_REGISTER>: Error out if trying to
+	collect a user register.
+
 2010-12-28  Hui Zhu  <teawater@gmail.com>
 
 	* gdbarch.sh (ax_pseudo_register_collect,
