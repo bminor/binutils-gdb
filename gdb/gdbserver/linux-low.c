@@ -4373,6 +4373,10 @@ linux_stopped_data_address (void)
 #define PT_TEXT_ADDR 49*4
 #define PT_DATA_ADDR 50*4
 #define PT_TEXT_END_ADDR  51*4
+#elif defined(BFIN)
+#define PT_TEXT_ADDR 220
+#define PT_TEXT_END_ADDR 224
+#define PT_DATA_ADDR 228
 #endif
 
 /* Under uClinux, programs are loaded at non-zero offsets, which we need

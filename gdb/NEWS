@@ -111,6 +111,8 @@
   ** GDBserver is now supported on PowerPC LynxOS (versions 4.x and 5.x),
      and i686 LynxOS (version 5.x).
 
+  ** GDBserver is now supported on Blackfin Linux.
+
 * New targets:
 
 Analog Devices, Inc. Blackfin Processor	bfin-*

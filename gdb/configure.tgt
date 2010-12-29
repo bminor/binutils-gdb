@@ -109,6 +109,7 @@ avr-*-*)
 bfin-*-*linux*)
 	# Target: Blackfin Linux
 	gdb_target_obs="bfin-tdep.o bfin-linux-tdep.o linux-tdep.o"
+	build_gdbserver=yes
 	;;
 bfin-*-*)
 	# Target: Blackfin processor

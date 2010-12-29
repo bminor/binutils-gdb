@@ -81,6 +81,8 @@ Building GDBserver:
 
 The supported targets as of November 2006 are:
 	arm-*-linux*
+	bfin-*-uclinux
+	bfin-*-linux-uclibc
 	crisv32-*-linux*
 	cris-*-linux*
 	i[34567]86-*-cygwin*

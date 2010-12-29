@@ -1,3 +1,14 @@
+2010-12-29  Jie Zhang  <jie.zhang@analog.com>
+
+	* configure.srv (bfin-*-*linux*): Handle Blackfin/Linux targets.
+	* linux-bfin-low.c: New file.
+	* linux-low.c: Define PT_TEXT_ADDR, PT_TEXT_END_ADDR, and
+	PT_DATA_ADDR for BFIN targets.
+	* Makefile.in (SFILES): Add linux-bfin-low.c.
+	(clean): Remove reg-bfin.c.
+	(linux-bfin-low.o, reg-bfin.o, reg-bfin.c): New targets.
+	* README: Mention supported Blackfin targets.
+
 2010-12-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: New file.

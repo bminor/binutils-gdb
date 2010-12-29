@@ -111,8 +111,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/proc-service.list $(srcdir)/regcache.c \
 	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
 	$(srcdir)/thread-db.c $(srcdir)/utils.c \
-	$(srcdir)/linux-arm-low.c $(srcdir)/linux-cris-low.c \
-	$(srcdir)/linux-crisv32-low.c \
+	$(srcdir)/linux-arm-low.c $(srcdir)/linux-bfin-low.c \
+	$(srcdir)/linux-cris-low.c $(srcdir)/linux-crisv32-low.c \
 	${srcdir}/i386-low.c $(srcdir)/i387-fp.c \
 	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
 	$(srcdir)/linux-m32r-low.c \
@@ -263,7 +263,7 @@ clean:
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f $(IPA_LIB)
-	rm -f reg-arm.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
+	rm -f reg-arm.c reg-bfin.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
 	rm -f arm-with-iwmmxt.c
@@ -413,6 +413,7 @@ linux-low.o: linux-low.c $(linux_low_h) $(server_h)
 
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h)
+linux-bfin-low.o: linux-bfin-low.c $(linux_low_h) $(server_h)
 linux-cris-low.o: linux-cris-low.c $(linux_low_h) $(server_h)
 linux-crisv32-low.o: linux-crisv32-low.c $(linux_low_h) $(server_h)
 linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)
@@ -455,6 +456,9 @@ arm-with-vfpv3.c : $(srcdir)/../regformats/arm-with-vfpv3.dat $(regdat_sh)
 arm-with-neon.o : arm-with-neon.c $(regdef_h)
 arm-with-neon.c : $(srcdir)/../regformats/arm-with-neon.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-neon.dat arm-with-neon.c
+reg-bfin.o : reg-bfin.c $(regdef_h)
+reg-bfin.c : $(srcdir)/../regformats/reg-bfin.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-bfin.dat reg-bfin.c
 reg-cris.o : reg-cris.c $(regdef_h)
 reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c

@@ -1,4 +1,10 @@
 2010-12-29  Jie Zhang  <jie.zhang@analog.com>
+
+	* configure.tgt (bfin-*-*): Set build_gdbserver to yes.
+	* NEWS: Mention new Blackfin support.
+	* regformats/reg-bfin.dat: New file.
+
+2010-12-29  Jie Zhang  <jie.zhang@analog.com>
 	    Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (ALLDEPFILES): Add bfin-linux-tdep.c and bfin-tdep.c.
