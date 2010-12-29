@@ -1,5 +1,9 @@
 2010-12-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* hw-alloc.h (HW_NALLOC): Define.
+
+010-12-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* hw-alloc.h (HW_NZALLOC): Change ME,TYPE,N to me,type,n.
 
 2010-12-15  Mike Frysinger  <vapier@gentoo.org>
