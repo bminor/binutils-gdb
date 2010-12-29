@@ -508,6 +508,7 @@ ALL_TARGET_OBS = \
 	armnbsd-tdep.o armobsd-tdep.o \
 	arm-tdep.o arm-wince-tdep.o \
 	avr-tdep.o \
+	bfin-linux-tdep.o bfin-tdep.o \
 	cris-tdep.o \
 	dicos-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
@@ -782,7 +783,7 @@ annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
 gdb_usleep.h jit.h xml-syscall.h ada-operator.inc microblaze-tdep.h \
-psymtab.h psympriv.h progspace.h
+psymtab.h psympriv.h progspace.h bfin-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1420,6 +1421,7 @@ ALLDEPFILES = \
 	arm-linux-nat.c arm-linux-tdep.c arm-symbian-tdep.c arm-tdep.c \
 	armnbsd-nat.c armbsd-tdep.c armnbsd-tdep.c armobsd-tdep.c \
 	avr-tdep.c \
+	bfin-linux-tdep.c bfin-tdep.c \
 	bsd-uthread.c bsd-kvm.c \
 	core-regset.c corelow.c \
 	dcache.c dicos-tdep.c darwin-nat.c \

@@ -106,6 +106,15 @@ avr-*-*)
 	gdb_sim=../sim/avr/libsim.a
 	;;
 
+bfin-*-*linux*)
+	# Target: Blackfin Linux
+	gdb_target_obs="bfin-tdep.o bfin-linux-tdep.o linux-tdep.o"
+	;;
+bfin-*-*)
+	# Target: Blackfin processor
+	gdb_target_obs="bfin-tdep.o"
+	;;
+
 cris*)
 	# Target: CRIS
 	gdb_target_obs="cris-tdep.o corelow.o solib.o solib-svr4.o"

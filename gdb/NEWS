@@ -111,6 +111,10 @@
   ** GDBserver is now supported on PowerPC LynxOS (versions 4.x and 5.x),
      and i686 LynxOS (version 5.x).
 
+* New targets:
+
+Analog Devices, Inc. Blackfin Processor	bfin-*
+
 * Ada task switching is now supported on sparc-elf targets when
   debugging a program using the Ravenscar Profile.  For more information,
   see the "Tasking Support when using the Ravenscar Profile" section

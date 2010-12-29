@@ -1,3 +1,14 @@
+2010-12-29  Jie Zhang  <jie.zhang@analog.com>
+	    Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (ALLDEPFILES): Add bfin-linux-tdep.c and bfin-tdep.c.
+	(HFILES_NO_SRCDIR): Add bfin-tdep.h.
+	(ALL_TARGET_OBS): Add bfin-linux-tdep.o and bfin-tdep.o.
+	* NEWS: Mention new Blackfin port.
+	* bfin-tdep.c, bfin-tdep.h, bfin-linux-tdep.c,
+	syscalls/bfin-linux.xml: New files.
+	* configure.tgt (bfin-*-*): Handle bfin targets.
+
 2010-12-29  Hui Zhu  <teawater@gmail.com>
 
 	* ax-gdb.c (gen_expr): Change error message.
