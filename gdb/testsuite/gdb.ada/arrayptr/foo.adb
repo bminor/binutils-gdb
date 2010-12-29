@@ -19,6 +19,8 @@ procedure Foo is
    type String_Access is access String;
 
    String_P : String_Access := new String'("Hello");
+   Null_String : String_Access := null;
 begin
    Do_Nothing (String_P'Address);  -- STOP
+   Do_Nothing (Null_String'Address);
 end Foo;

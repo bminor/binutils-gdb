@@ -1,5 +1,10 @@
 2010-12-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_1): Print null array pointers as
+	`0x0' rather than `(null)'.  Add assertion.
+
+2010-12-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ada_coerce_to_simple_array): Add declaration.
 	* ada-lang.c (ada_typedef_target_type): New function.
 	(desc_base_type): Add handling of fat pointer typedefs.

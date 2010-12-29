@@ -1,5 +1,10 @@
 2010-12-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/arrayptr/foo.adb: Add new local variable Null_String.
+	* gdb.ada/arrayptr.exp: Add test printing that new variable.
+
+2010-12-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/lang_switch.exp: Correct expected parameter value.
 
 2010-12-25  Andreas Schwab  <schwab@linux-m68k.org>

@@ -44,3 +44,4 @@ gdb_test "print string_p" \
          "= \\(foo\\.string_access\\) 0x\[0-9a-zA-Z\]+" \
          "print string_p"
 
+gdb_test "print null_string" "= \\(foo\\.string_access\\) 0x0"

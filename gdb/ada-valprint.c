@@ -690,7 +690,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	val = ada_coerce_to_simple_array (val);
       if (val == NULL)
 	{
-	  fprintf_filtered (stream, "(null)");
+	  gdb_assert (TYPE_CODE (type) == TYPE_CODE_TYPEDEF);
+	  fprintf_filtered (stream, "0x0");
 	  retn = 0;
 	}
       else
