@@ -20,7 +20,7 @@
 #define COMMAND_H 1
 
 /* Command classes are top-level categories into which commands are broken
-   down for "help" purposes.  
+   down for "help" purposes.
    Notes on classes: class_alias is for alias commands which are not
    abbreviations of the original command.  class-pseudo is for
    commands which are not really commands nor help topics ("stop").  */
@@ -60,7 +60,7 @@ typedef enum var_types
        "auto.  *VAR is an ``enum auto_boolean''.  NOTE: In general a
        custom show command will need to be implemented - one that for
        "auto" prints both the "auto" and the current auto-selected
-       value. */
+       value.  */
     var_auto_boolean,
 
     /* Unsigned Integer.  *VAR is an unsigned int.  The user can type 0
@@ -146,7 +146,7 @@ extern void set_cmd_completer (struct cmd_list_element *cmd,
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 			 void (*cfunc) (char *args, int from_tty));
 
-/* Each command object has a local context attached to it. .  */
+/* Each command object has a local context attached to it.  */
 extern void set_cmd_context (struct cmd_list_element *cmd, void *context);
 extern void *get_cmd_context (struct cmd_list_element *cmd);
 
@@ -342,7 +342,7 @@ extern void add_setshow_zuinteger_cmd (char *name,
 extern void cmd_show_list (struct cmd_list_element *, int, char *);
 
 /* Used everywhere whenever at least one parameter is required and
-   none is specified. */
+   none is specified.  */
 
 extern void error_no_arg (char *) ATTRIBUTE_NORETURN;
 

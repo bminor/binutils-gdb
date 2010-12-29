@@ -1,5 +1,19 @@
 2010-12-28  Michael Snyder  <msnyder@vmware.com>
 
+	* command.h: Comment clean-up.
+	* cli/cli-cmds.c: Ditto.
+	* cli/cli-cmds.h: Ditto.
+	* cli/cli-decode.c: Ditto.
+	* cli/cli-decode.h: Ditto.
+	* cli/cli-dump.c: Ditto.
+	* cli/cli-interp.c: Ditto.
+	* cli/cli-logging.c: Ditto.
+	* cli/cli-script.c: Ditto.
+	* cli/cli-setshow.c: Ditto.
+	* cli/cli-setshow.h: Ditto.
+
+2010-12-28  Michael Snyder  <msnyder@vmware.com>
+
 	* event-loop.c: Comment clean-up.
 	* event-loop.h: Ditto.
 	* event-top.c: Ditto.

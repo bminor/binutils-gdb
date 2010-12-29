@@ -29,7 +29,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-setshow.h"
 
-/* Prototypes for local functions */
+/* Prototypes for local functions.  */
 
 static int parse_binary_operation (char *);
 
@@ -58,7 +58,7 @@ parse_auto_binary_operation (const char *arg)
 	return AUTO_BOOLEAN_AUTO;
     }
   error (_("\"on\", \"off\" or \"auto\" expected."));
-  return AUTO_BOOLEAN_AUTO; /* pacify GCC */
+  return AUTO_BOOLEAN_AUTO; /* Pacify GCC.  */
 }
 
 static int
@@ -117,10 +117,10 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
     }
 }
 
-/* Do a "set" or "show" command.  ARG is NULL if no argument, or the text
-   of the argument, and FROM_TTY is nonzero if this command is being entered
-   directly by the user (i.e. these are just like any other
-   command).  C is the command list element for the command.  */
+/* Do a "set" or "show" command.  ARG is NULL if no argument, or the
+   text of the argument, and FROM_TTY is nonzero if this command is
+   being entered directly by the user (i.e. these are just like any
+   other command).  C is the command list element for the command.  */
 
 void
 do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
@@ -249,7 +249,8 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    const char *match = NULL;
 	    char *p;
 
-	    /* if no argument was supplied, print an informative error message */
+	    /* If no argument was supplied, print an informative error
+	       message.  */
 	    if (arg == NULL)
 	      {
 		char *msg;
@@ -268,7 +269,8 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 		      strcat (msg, ", ");
 		    strcat (msg, c->enums[i]);
 		  }
-		error (_("Requires an argument. Valid arguments are %s."), msg);
+		error (_("Requires an argument. Valid arguments are %s."), 
+		       msg);
 	      }
 
 	    p = strchr (arg, ' ');
@@ -286,7 +288,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 		    {
 		      match = c->enums[i];
 		      nmatches = 1;
-		      break; /* exact match. */
+		      break; /* Exact match.  */
 		    }
 		  else
 		    {

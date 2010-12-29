@@ -69,10 +69,10 @@ Whether logging overwrites or appends to the log file is %s.\n"),
 /* Value as configured by the user.  */
 static int logging_redirect;
 
-/* The on-disk file in use if logging is currently active together with
-   redirection turned off (and therefore using tee_file_new).  For active
-   logging with redirection the on-disk file is directly in GDB_STDOUT and
-   this variable is NULL.  */
+/* The on-disk file in use if logging is currently active together
+   with redirection turned off (and therefore using tee_file_new).
+   For active logging with redirection the on-disk file is directly in
+   GDB_STDOUT and this variable is NULL.  */
 static struct ui_file *logging_no_redirect_file;
 
 static void
@@ -90,7 +90,8 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
     {
       gdb_assert (logging_no_redirect_file != NULL);
 
-      /* ui_out_redirect still has not been called for next gdb_stdout.  */
+      /* ui_out_redirect still has not been called for next
+	 gdb_stdout.  */
       cleanups = make_cleanup_ui_file_delete (gdb_stdout);
 
       output = logging_no_redirect_file;
@@ -120,10 +121,11 @@ set_logging_redirect (char *args, int from_tty, struct cmd_list_element *c)
   gdb_stdtargerr = output;
   logging_no_redirect_file = new_logging_no_redirect_file;
 
-  /* There is a former output pushed on the ui_out_redirect stack.  We want to
-     replace it by OUTPUT so we must pop the former value first.  We should
-     either do both the pop and push or to do neither of it.  At least do not
-     try to push OUTPUT if the pop already failed.  */
+  /* There is a former output pushed on the ui_out_redirect stack.  We
+     want to replace it by OUTPUT so we must pop the former value
+     first.  We should either do both the pop and push or to do
+     neither of it.  At least do not try to push OUTPUT if the pop
+     already failed.  */
 
   if (ui_out_redirect (uiout, NULL) < 0
       || ui_out_redirect (uiout, output) < 0)

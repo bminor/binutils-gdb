@@ -24,9 +24,9 @@
 #include "readline/readline.h"
 #include "readline/tilde.h"
 #include "completer.h"
-#include "target.h"	 /* For baud_rate, remote_debug and remote_timeout */
-#include "gdb_wait.h"		/* For shell escape implementation */
-#include "gdb_regex.h"		/* Used by apropos_command */
+#include "target.h"	/* For baud_rate, remote_debug and remote_timeout.  */
+#include "gdb_wait.h"	/* For shell escape implementation.  */
+#include "gdb_regex.h"	/* Used by apropos_command.  */
 #include "gdb_string.h"
 #include "gdb_vfork.h"
 #include "linespec.h"
@@ -34,7 +34,7 @@
 #include "frame.h"
 #include "value.h"
 #include "language.h"
-#include "filenames.h"		/* for DOSish file names */
+#include "filenames.h"	/* For DOSish file names.  */
 #include "objfiles.h"
 #include "source.h"
 #include "disasm.h"
@@ -51,7 +51,7 @@
 #include "python/python.h"
 
 #ifdef TUI
-#include "tui/tui.h"		/* For tui_active et.al.   */
+#include "tui/tui.h"	/* For tui_active et.al.  */
 #endif
 
 #include <fcntl.h>
@@ -105,35 +105,35 @@ struct cmd_list_element *cmdlist;
 
 struct cmd_list_element *infolist;
 
-/* Chain containing all defined enable subcommands. */
+/* Chain containing all defined enable subcommands.  */
 
 struct cmd_list_element *enablelist;
 
-/* Chain containing all defined disable subcommands. */
+/* Chain containing all defined disable subcommands.  */
 
 struct cmd_list_element *disablelist;
 
-/* Chain containing all defined toggle subcommands. */
+/* Chain containing all defined toggle subcommands.  */
 
 struct cmd_list_element *togglelist;
 
-/* Chain containing all defined stop subcommands. */
+/* Chain containing all defined stop subcommands.  */
 
 struct cmd_list_element *stoplist;
 
-/* Chain containing all defined delete subcommands. */
+/* Chain containing all defined delete subcommands.  */
 
 struct cmd_list_element *deletelist;
 
-/* Chain containing all defined detach subcommands. */
+/* Chain containing all defined detach subcommands.  */
 
 struct cmd_list_element *detachlist;
 
-/* Chain containing all defined kill subcommands. */
+/* Chain containing all defined kill subcommands.  */
 
 struct cmd_list_element *killlist;
 
-/* Chain containing all defined "enable breakpoint" subcommands. */
+/* Chain containing all defined "enable breakpoint" subcommands.  */
 
 struct cmd_list_element *enablebreaklist;
 
@@ -161,15 +161,15 @@ struct cmd_list_element *showhistlist;
 
 struct cmd_list_element *unsethistlist;
 
-/* Chain containing all defined maintenance subcommands. */
+/* Chain containing all defined maintenance subcommands.  */
 
 struct cmd_list_element *maintenancelist;
 
-/* Chain containing all defined "maintenance info" subcommands. */
+/* Chain containing all defined "maintenance info" subcommands.  */
 
 struct cmd_list_element *maintenanceinfolist;
 
-/* Chain containing all defined "maintenance print" subcommands. */
+/* Chain containing all defined "maintenance print" subcommands.  */
 
 struct cmd_list_element *maintenanceprintlist;
 
@@ -206,7 +206,7 @@ static const char *script_ext_enums[] = {
 static const char *script_ext_mode = script_ext_soft;
 
 /* Utility used everywhere when at least one argument is needed and
-   none is supplied. */
+   none is supplied.  */
 
 void
 error_no_arg (char *why)
@@ -215,7 +215,8 @@ error_no_arg (char *why)
 }
 
 /* The "info" command is defined as a prefix, with allow_unknown = 0.
-   Therefore, its own definition is called only for "info" with no args.  */
+   Therefore, its own definition is called only for "info" with no
+   args.  */
 
 static void
 info_command (char *arg, int from_tty)
@@ -265,10 +266,10 @@ complete_command (char *arg, int from_tty)
     arg = "";
   argpoint = strlen (arg);
 
-  /* complete_line assumes that its first argument is somewhere within,
-     and except for filenames at the beginning of, the word to be completed.
-     The following crude imitation of readline's word-breaking tries to
-     accomodate this.  */
+  /* complete_line assumes that its first argument is somewhere
+     within, and except for filenames at the beginning of, the word to
+     be completed.  The following crude imitation of readline's
+     word-breaking tries to accomodate this.  */
   point = arg + argpoint;
   while (point > arg)
     {
@@ -444,8 +445,8 @@ cd_command (char *dir, int from_tty)
 		}
 	    }
 	  else
-	    /* We are dealing with leading repetitions of "/..", for example
-	       "/../..", which is the Mach super-root.  */
+	    /* We are dealing with leading repetitions of "/..", for
+	       example "/../..", which is the Mach super-root.  */
 	    p += 3;
 	}
       else
@@ -574,10 +575,10 @@ source_script_with_search (const char *file, int from_tty, int search_path)
 
   if (!find_and_open_script (file, search_path, &stream, &full_path))
     {
-      /* The script wasn't found, or was otherwise inaccessible.
-	 If the source command was invoked interactively, throw an error.
-	 Otherwise (e.g. if it was invoked by a script), silently ignore
-	 the error.  */
+      /* The script wasn't found, or was otherwise inaccessible.  
+         If the source command was invoked interactively, throw an
+	 error.  Otherwise (e.g. if it was invoked by a script),
+	 silently ignore the error.  */
       if (from_tty)
 	perror_with_name (file);
       else
@@ -616,7 +617,8 @@ source_command (char *args, int from_tty)
   int search_path = 0;
 
   *old_source_verbose = source_verbose;
-  old_cleanups = make_cleanup (source_verbose_cleanup, old_source_verbose);
+  old_cleanups = make_cleanup (source_verbose_cleanup, 
+			       old_source_verbose);
 
   /* -v causes the source command to run in verbose mode.
      -s causes the file to be searched in the source search path,
@@ -628,7 +630,8 @@ source_command (char *args, int from_tty)
     {
       while (args[0] != '\0')
 	{
-	  /* Make sure leading white space does not break the comparisons.  */
+	  /* Make sure leading white space does not break the
+	     comparisons.  */
 	  while (isspace(args[0]))
 	    args++;
 
@@ -717,8 +720,8 @@ shell_escape (char *arg, int from_tty)
       gdb_flush (gdb_stderr);
     }
 #ifdef GLOBAL_CURDIR
-  /* Make sure to return to the directory GDB thinks it is, in case the
-     shell command we just ran changed it.  */
+  /* Make sure to return to the directory GDB thinks it is, in case
+     the shell command we just ran changed it.  */
   chdir (current_directory);
 #endif
 #else /* Can fork.  */
@@ -731,7 +734,7 @@ shell_escape (char *arg, int from_tty)
       if ((user_shell = (char *) getenv ("SHELL")) == NULL)
 	user_shell = "/bin/sh";
 
-      /* Get the name of the shell for arg0 */
+      /* Get the name of the shell for arg0.  */
       if ((p = strrchr (user_shell, '/')) == NULL)
 	p = user_shell;
       else
@@ -773,7 +776,7 @@ edit_command (char *arg, int from_tty)
       sal = get_current_source_symtab_and_line ();
     }
 
-  /* bare "edit" edits file with present line.  */
+  /* Bare "edit" edits file with present line.  */
 
   if (arg == 0)
     {
@@ -806,10 +809,10 @@ edit_command (char *arg, int from_tty)
       if (*arg1)
         error (_("Junk at end of line specification."));
 
-      /* If line was specified by address,
-         first print exactly which line, and which file.
-         In this case, sal.symtab == 0 means address is outside
-         of all known source files, not that user failed to give a filename.  */
+      /* If line was specified by address, first print exactly which
+         line, and which file.  In this case, sal.symtab == 0 means
+         address is outside of all known source files, not that user
+         failed to give a filename.  */
       if (*arg == '*')
         {
 	  struct gdbarch *gdbarch;
@@ -832,8 +835,8 @@ edit_command (char *arg, int from_tty)
 			     sal.symtab->filename, sal.line);
         }
 
-      /* If what was given does not imply a symtab, it must be an undebuggable
-         symbol which means no source code.  */
+      /* If what was given does not imply a symtab, it must be an
+         undebuggable symbol which means no source code.  */
 
       if (sal.symtab == 0)
         error (_("No line number known for %s."), arg);
@@ -875,7 +878,7 @@ list_command (char *arg, int from_tty)
   int linenum_beg = 0;
   char *p;
 
-  /* Pull in the current default source line if necessary */
+  /* Pull in the current default source line if necessary.  */
   if (arg == 0 || arg[0] == '+' || arg[0] == '-')
     {
       set_default_source_symtab_and_line ();
@@ -891,7 +894,8 @@ list_command (char *arg, int from_tty)
       return;
     }
 
-  /* "l -" lists previous ten lines, the ones before the ten just listed.  */
+  /* "l -" lists previous ten lines, the ones before the ten just
+     listed.  */
   if (strcmp (arg, "-") == 0)
     {
       print_source_lines (cursal.symtab,
@@ -972,10 +976,11 @@ list_command (char *arg, int from_tty)
   if (dummy_beg && dummy_end)
     error (_("Two empty args do not say what lines to list."));
 
-  /* if line was specified by address,
+  /* If line was specified by address,
      first print exactly which line, and which file.
-     In this case, sal.symtab == 0 means address is outside
-     of all known source files, not that user failed to give a filename.  */
+
+     In this case, sal.symtab == 0 means address is outside of all
+     known source files, not that user failed to give a filename.  */
   if (*arg == '*')
     {
       struct gdbarch *gdbarch;
@@ -998,9 +1003,9 @@ list_command (char *arg, int from_tty)
 			 sal.symtab->filename, sal.line);
     }
 
-  /* If line was not specified by just a line number,
-     and it does not imply a symtab, it must be an undebuggable symbol
-     which means no source code.  */
+  /* If line was not specified by just a line number, and it does not
+     imply a symtab, it must be an undebuggable symbol which means no
+     source code.  */
 
   if (!linenum_beg && sal.symtab == 0)
     error (_("No line number known for %s."), arg);
@@ -1241,12 +1246,13 @@ show_user (char *args, int from_tty)
 }
 
 /* Search through names of commands and documentations for a certain
-   regular expression.
-*/
+   regular expression.  */
+
 void 
 apropos_command (char *searchstr, int from_tty)
 {
-  extern struct cmd_list_element *cmdlist; /*This is the main command list*/
+  extern struct cmd_list_element *cmdlist; /* This is the main command
+					      list.  */
   regex_t pattern;
   char *pattern_fastmap;
   char errorbuffer[512];
@@ -1270,9 +1276,9 @@ apropos_command (char *searchstr, int from_tty)
 }
 
 /* Print a list of files and line numbers which a user may choose from
-   in order to list a function which was specified ambiguously (as with
-   `list classname::overloadedfuncname', for example).  The vector in
-   SALS provides the filenames and line numbers.  */
+   in order to list a function which was specified ambiguously (as
+   with `list classname::overloadedfuncname', for example).  The
+   vector in SALS provides the filenames and line numbers.  */
 
 static void
 ambiguous_line_spec (struct symtabs_and_lines *sals)
@@ -1421,7 +1427,7 @@ The commands below can be used to select other frames by number or address."),
 	   &cmdlist);
   add_cmd ("running", class_run, NULL, _("Running the program."), &cmdlist);
 
-  /* Define general commands. */
+  /* Define general commands.  */
 
   add_com ("pwd", class_files, pwd_command, _("\
 Print working directory.  This is used for your program as well."));
@@ -1544,8 +1550,8 @@ followed by a new line.  The nested commands must be entered one per line,\n\
 and should be terminated by the word 'else' or `end'.  If an else clause\n\
 is used, the same rules apply to its nested commands as to the first ones."));
 
-  /* If target is open when baud changes, it doesn't take effect until the
-     next open (I think, not sure).  */
+  /* If target is open when baud changes, it doesn't take effect until
+     the next open (I think, not sure).  */
   add_setshow_zinteger_cmd ("remotebaud", no_class, &baud_rate, _("\
 Set baud rate for remote serial I/O."), _("\
 Show baud rate for remote serial I/O."), _("\
@@ -1637,7 +1643,7 @@ Two arguments (separated by a comma) are taken as a range of memory to dump,\n\
      this.  Instead it adds support for the form ``(gdb) ! ls''
      (i.e. the space is required).  If the ``!'' command below is
      added the complains about no ``!'' command would be replaced by
-     complains about how the ``!'' command is broken :-) */
+     complains about how the ``!'' command is broken :-)  */
   if (xdb_commands)
     add_com_alias ("!", "shell", class_support, 0);
 

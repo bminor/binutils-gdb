@@ -149,8 +149,8 @@ bfd_openw_with_cleanup (const char *filename, const char *target,
       if (!bfd_set_format (obfd, bfd_object))
 	error (_("bfd_openw_with_cleanup: %s."), bfd_errmsg (bfd_get_error ()));
     }
-  else if (*mode == 'a')	/* Append to existing file */
-    {	/* FIXME -- doesn't work... */
+  else if (*mode == 'a')	/* Append to existing file.  */
+    {	/* FIXME -- doesn't work...  */
       error (_("bfd_openw does not work with append."));
     }
   else
@@ -430,7 +430,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
     c->doc = concat ("Append ", c->doc + 6, (char *)NULL);
 }
 
-/* Opaque data for restore_section_callback. */
+/* Opaque data for restore_section_callback.  */
 struct callback_data {
   CORE_ADDR load_offset;
   CORE_ADDR load_start;
@@ -455,7 +455,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   gdb_byte *buf;
   int ret;
 
-  /* Ignore non-loadable sections, eg. from elf files. */
+  /* Ignore non-loadable sections, eg. from elf files.  */
   if (!(bfd_get_section_flags (ibfd, isec) & SEC_LOAD))
     return;
 
@@ -463,7 +463,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   if (sec_end <= data->load_start 
       || (data->load_end > 0 && sec_start >= data->load_end))
     {
-      /* No, no useable data in this section. */
+      /* No, no useable data in this section.  */
       printf_filtered (_("skipping section %s...\n"), 
 		       bfd_section_name (ibfd, isec));
       return;
@@ -474,7 +474,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
      transfer should start and end.  */
   if (sec_start < data->load_start)
     sec_offset = data->load_start - sec_start;
-  /* Size of a partial transfer: */
+  /* Size of a partial transfer.  */
   sec_load_count -= sec_offset;
   if (data->load_end > 0 && sec_end > data->load_end)
     sec_load_count -= sec_end - data->load_end;
@@ -528,10 +528,10 @@ restore_binary_file (char *filename, struct callback_data *data)
     error (_("Start address is greater than length of binary file %s."), 
 	   filename);
 
-  /* Chop off "len" if it exceeds the requested load_end addr. */
+  /* Chop off "len" if it exceeds the requested load_end addr.  */
   if (data->load_end != 0 && data->load_end < len)
     len = data->load_end;
-  /* Chop off "len" if the requested load_start addr skips some bytes. */
+  /* Chop off "len" if the requested load_start addr skips some bytes.  */
   if (data->load_start > 0)
     len -= data->load_start;
 
@@ -551,7 +551,7 @@ restore_binary_file (char *filename, struct callback_data *data)
   if (fread (buf, 1, len, file) != len)
     perror_with_name (filename);
 
-  /* Now write the buffer into target memory. */
+  /* Now write the buffer into target memory.  */
   len = target_write_memory (data->load_start + data->load_offset, buf, len);
   if (len != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (len));
@@ -573,7 +573,7 @@ restore_command (char *args, int from_tty)
   data.load_start  = 0;
   data.load_end    = 0;
 
-  /* Parse the input arguments.  First is filename (required). */
+  /* Parse the input arguments.  First is filename (required).  */
   filename = scan_filename_with_cleanup (&args, NULL);
   if (args != NULL && *args != '\0')
     {
@@ -586,18 +586,18 @@ restore_command (char *args, int from_tty)
 	  args += strlen (binary_string);
 	  args = skip_spaces (args);
 	}
-      /* Parse offset (optional). */
+      /* Parse offset (optional).  */
       if (args != NULL && *args != '\0')
       data.load_offset = 
 	parse_and_eval_address (scan_expression_with_cleanup (&args, NULL));
       if (args != NULL && *args != '\0')
 	{
-	  /* Parse start address (optional). */
+	  /* Parse start address (optional).  */
 	  data.load_start = 
 	    parse_and_eval_long (scan_expression_with_cleanup (&args, NULL));
 	  if (args != NULL && *args != '\0')
 	    {
-	      /* Parse end address (optional). */
+	      /* Parse end address (optional).  */
 	      data.load_end = parse_and_eval_long (args);
 	      if (data.load_end <= data.load_start)
 		error (_("Start must be less than end."));
@@ -617,10 +617,10 @@ restore_command (char *args, int from_tty)
     }
   else
     {
-      /* Open the file for loading. */
+      /* Open the file for loading.  */
       ibfd = bfd_openr_with_cleanup (filename, NULL);
 
-      /* Process the sections. */
+      /* Process the sections.  */
       bfd_map_over_sections (ibfd, restore_section_callback, &data);
     }
   return;
@@ -786,5 +786,5 @@ OFFSET will be added to the base address of the file (default zero).\n\
 If START and END are given, only the file contents within that range\n\
 (file relative) will be restored to target memory."));
   c->completer = filename_completer;
-  /* FIXME: completers for other commands. */
+  /* FIXME: completers for other commands.  */
 }
