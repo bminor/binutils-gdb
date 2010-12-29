@@ -13665,13 +13665,6 @@ some of which will be fixed with planned future releases of the debugger
 and the GNU Ada compiler.
 
 @itemize @bullet
-@item
-Currently, the debugger 
-has insufficient information to determine whether certain pointers represent
-pointers to objects or the objects themselves.
-Thus, the user may have to tack an extra @code{.all} after an expression
-to get it printed properly.
-
 @item 
 Static constants that the compiler chooses not to materialize as objects in 
 storage are invisible to the debugger.

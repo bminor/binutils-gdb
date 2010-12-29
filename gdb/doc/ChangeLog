@@ -1,3 +1,9 @@
+2010-12-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Glitches): Remove paragraph describing the
+	occasional case where the debugger prints an array address
+	instead of the array itself.
+
 2010-12-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Packets) <read registers packet>: Document support

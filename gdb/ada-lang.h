@@ -197,6 +197,8 @@ struct type *ada_type_of_array (struct value *, int);
 
 extern struct value *ada_coerce_to_simple_array_ptr (struct value *);
 
+struct value *ada_coerce_to_simple_array (struct value *);
+
 extern int ada_is_simple_array_type (struct type *);
 
 extern int ada_is_array_descriptor_type (struct type *);

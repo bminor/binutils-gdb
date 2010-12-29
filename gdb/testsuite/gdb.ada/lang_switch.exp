@@ -46,7 +46,7 @@ gdb_test_no_output "set print frame-arguments all"
 # Make sure that the language is switched to Ada for the second frame
 # by checking the string parameter.
 gdb_test "bt" \
-         ".*#1.*lang_switch\\.ada_procedure\\s*\\(msg=$hex\\).*" \
+         ".*#1.*lang_switch\\.ada_procedure\\s*\\(msg=\"msg\"\\).*" \
          "backtrace"
 
 # Now, make sure that the language doesn't get automatically switched

@@ -796,6 +796,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	fprintf_filtered (stream, ">");
 	break;
       case TYPE_CODE_PTR:
+      case TYPE_CODE_TYPEDEF:
 	fprintf_filtered (stream, "access ");
 	ada_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level);
 	break;

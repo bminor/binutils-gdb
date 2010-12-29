@@ -1,5 +1,23 @@
 2010-12-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (ada_coerce_to_simple_array): Add declaration.
+	* ada-lang.c (ada_typedef_target_type): New function.
+	(desc_base_type): Add handling of fat pointer typedefs.
+	(ada_coerce_to_simple_array): Make non-static.
+	(decode_packed_array_bitsize): Add handling of fat pointer typedefs.
+	Add assertion.
+	(ada_template_to_fixed_record_type_1, ada_to_fixed_type)
+	(ada_check_typedef): Add handling of fat pointer typedefs.
+	(ada_evaluate_subexp) [OP_FUNCALL]: Likewise.
+	* ada-typeprint.c (ada_print_type): Add handling of fat pointer
+	typedefs.
+	* ada-valprint.c (ada_val_print_1): Convert fat pointers that are not
+	array accesses to simple arrays rather than simple array pointers.
+	(ada_value_print): In the case of array descriptors, do not print
+	the value type description unless it is an array access.
+
+2010-12-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* target.h (enum target_object): Expand the documentation of
 	TARGET_OBJECT_OSDATA a bit.
 

@@ -684,7 +684,10 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       struct value *val;
 
       val = value_from_contents_and_address (type, valaddr, address);
-      val = ada_coerce_to_simple_array_ptr (val);
+      if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)  /* array access type.  */
+	val = ada_coerce_to_simple_array_ptr (val);
+      else
+	val = ada_coerce_to_simple_array (val);
       if (val == NULL)
 	{
 	  fprintf_filtered (stream, "(null)");
@@ -947,9 +950,15 @@ ada_value_print (struct value *val0, struct ui_file *stream,
     }
   else if (ada_is_array_descriptor_type (type))
     {
-      fprintf_filtered (stream, "(");
-      type_print (type, "", stream, -1);
-      fprintf_filtered (stream, ") ");
+      /* We do not print the type description unless TYPE is an array
+	 access type (this is encoded by the compiler as a typedef to
+	 a fat pointer - hence the check against TYPE_CODE_TYPEDEF).  */
+      if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+        {
+	  fprintf_filtered (stream, "(");
+	  type_print (type, "", stream, -1);
+	  fprintf_filtered (stream, ") ");
+	}
     }
   else if (ada_is_bogus_array_descriptor (type))
     {

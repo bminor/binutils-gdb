@@ -1,3 +1,7 @@
+2010-12-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/lang_switch.exp: Correct expected parameter value.
+
 2010-12-25  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* gdb.threads/tls.exp: Fix typo.
