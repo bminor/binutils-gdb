@@ -1,3 +1,7 @@
+2010-12-29  Hui Zhu  <teawater@gmail.com>
+
+	* ax-gdb.c (gen_expr): Change error message.
+
 2010-12-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.c: Revert the previous change, which was probably committed
