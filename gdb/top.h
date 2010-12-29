@@ -52,21 +52,21 @@ extern void execute_command (char *, int);
 extern void prepare_execute_command (void);
 
 /* This function returns a pointer to the string that is used
-   by gdb for its command prompt. */
+   by gdb for its command prompt.  */
 extern char *get_prompt (void);
 
 /* This function copies the specified string into the string that
-   is used by gdb for its command prompt. */
+   is used by gdb for its command prompt.  */
 extern void set_prompt (char *);
 
 /* From random places.  */
 extern int readnow_symbol_files;
 
-/* Perform _initialize initialization */
+/* Perform _initialize initialization.  */
 extern void gdb_init (char *);
 
-/* For use by event-top.c */
-/* Variables from top.c. */
+/* For use by event-top.c.  */
+/* Variables from top.c.  */
 extern int source_line_number;
 extern const char *source_file_name;
 extern int history_expansion_p;

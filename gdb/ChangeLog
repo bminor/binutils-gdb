@@ -1,3 +1,14 @@
+2010-12-28  Michael Snyder  <msnyder@vmware.com>
+
+	* event-loop.c: Comment clean-up.
+	* event-loop.h: Ditto.
+	* event-top.c: Ditto.
+	* gdb.c: Ditto.
+	* gdb.h: Ditto.
+	* main.c: Ditto.
+	* top.c: Ditto.
+	* top.h: Ditto.	
+
 2010-12-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* ax-gdb.c (gen_expr) <OP_REGISTER>: Error out if trying to

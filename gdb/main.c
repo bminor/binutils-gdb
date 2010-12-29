@@ -46,13 +46,13 @@
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
-   do_setshow_command will free it. */
+   do_setshow_command will free it.  */
 char *interpreter_p;
 
-/* Whether xdb commands will be handled */
+/* Whether xdb commands will be handled.  */
 int xdb_commands = 0;
 
-/* Whether dbx commands will be handled */
+/* Whether dbx commands will be handled.  */
 int dbx_commands = 0;
 
 /* System root path, used to find libraries etc.  */
@@ -69,7 +69,7 @@ struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
 struct ui_file *gdb_stdin;
-/* target IO streams */
+/* Target IO streams.  */
 struct ui_file *gdb_stdtargin;
 struct ui_file *gdb_stdtarg;
 struct ui_file *gdb_stdtargerr;
@@ -86,7 +86,7 @@ int batch_silent = 0;
 int return_child_result = 0;
 int return_child_result_value = -1;
 
-/* Whether to enable writing into executable and core files */
+/* Whether to enable writing into executable and core files.  */
 extern int write_files;
 
 /* GDB as it has been invoked from the command line (i.e. argv[0]).  */
@@ -94,8 +94,8 @@ static char *gdb_program_name;
 
 static void print_gdb_help (struct ui_file *);
 
-/* These two are used to set the external editor commands when gdb is farming
-   out files to be edited by another program. */
+/* These two are used to set the external editor commands when gdb is
+   farming out files to be edited by another program.  */
 
 extern char *external_editor_command;
 
@@ -151,11 +151,11 @@ relocate_directory (const char *progname, const char *initial, int flag)
   return dir;
 }
 
-/* Compute the locations of init files that GDB should source and return
-   them in SYSTEM_GDBINIT, HOME_GDBINIT, LOCAL_GDBINIT.  If there is 
-   no system gdbinit (resp. home gdbinit and local gdbinit) to be loaded,
-   then SYSTEM_GDBINIT (resp. HOME_GDBINIT and LOCAL_GDBINIT) is set to
-   NULL.  */
+/* Compute the locations of init files that GDB should source and
+   return them in SYSTEM_GDBINIT, HOME_GDBINIT, LOCAL_GDBINIT.  If
+   there is no system gdbinit (resp. home gdbinit and local gdbinit)
+   to be loaded, then SYSTEM_GDBINIT (resp. HOME_GDBINIT and
+   LOCAL_GDBINIT) is set to NULL.  */
 static void
 get_init_files (char **system_gdbinit,
 		char **home_gdbinit,
@@ -220,7 +220,7 @@ get_init_files (char **system_gdbinit,
 }
 
 /* Call command_loop.  If it happens to return, pass that through as a
-   non-zero return status. */
+   non-zero return status.  */
 
 static int
 captured_command_loop (void *data)
@@ -232,12 +232,12 @@ captured_command_loop (void *data)
      the do_cleanups() below is redundant.  Unfortunately, many FUNCs
      are not that well behaved.  do_cleanups should either be replaced
      with a do_cleanups call (to cover the problem) or an assertion
-     check to detect bad FUNCs code. */
+     check to detect bad FUNCs code.  */
   do_cleanups (ALL_CLEANUPS);
   /* If the command_loop returned, normally (rather than threw an
      error) we try to quit. If the quit is aborted, catch_errors()
      which called this catch the signal and restart the command
-     loop. */
+     loop.  */
   quit_command (NULL, instream == stdin);
   return 1;
 }
@@ -260,7 +260,8 @@ captured_main (void *data)
   char *cdarg = NULL;
   char *ttyarg = NULL;
 
-  /* These are static so that we can take their address in an initializer.  */
+  /* These are static so that we can take their address in an
+     initializer.  */
   static int print_help;
   static int print_version;
 
@@ -317,7 +318,7 @@ captured_main (void *data)
 
   quit_flag = 0;
   line = (char *) xmalloc (linesize);
-  line[0] = '\0';		/* Terminate saved (now empty) cmd line */
+  line[0] = '\0';		/* Terminate saved (now empty) cmd line.  */
   instream = stdin;
 
   gdb_stdout = stdio_fileopen (stdout);
@@ -332,7 +333,7 @@ captured_main (void *data)
 
   if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
     /* Don't use *_filtered or warning() (which relies on
-       current_target) until after initialize_all_files(). */
+       current_target) until after initialize_all_files().  */
     fprintf_unfiltered (gdb_stderr,
                         _("%s: warning: error finding working directory: %s\n"),
                         argv[0], safe_strerror (errno));
@@ -400,9 +401,9 @@ captured_main (void *data)
       {"batch", no_argument, &batch_flag, 1},
       {"epoch", no_argument, &epoch_interface, 1},
 
-    /* This is a synonym for "--annotate=1".  --annotate is now preferred,
-       but keep this here for a long time because people will be running
-       emacses which use --fullname.  */
+    /* This is a synonym for "--annotate=1".  --annotate is now
+       preferred, but keep this here for a long time because people
+       will be running emacses which use --fullname.  */
       {"fullname", no_argument, 0, 'f'},
       {"f", no_argument, 0, 'f'},
 
@@ -559,10 +560,12 @@ captured_main (void *data)
 #ifdef GDBTK
 	  case 'z':
 	    {
-extern int gdbtk_test (char *);
+	      extern int gdbtk_test (char *);
+
 	      if (!gdbtk_test (optarg))
 		{
-		  fprintf_unfiltered (gdb_stderr, _("%s: unable to load tclcommand file \"%s\""),
+		  fprintf_unfiltered (gdb_stderr, 
+				      _("%s: unable to load tclcommand file \"%s\""),
 				      argv[0], optarg);
 		  exit (1);
 		}
@@ -605,7 +608,7 @@ extern int gdbtk_test (char *);
 	      if (i == 0 && p == optarg)
 
 		/* Don't use *_filtered or warning() (which relies on
-		   current_target) until after initialize_all_files(). */
+		   current_target) until after initialize_all_files().  */
 
 		fprintf_unfiltered
 		  (gdb_stderr,
@@ -623,7 +626,7 @@ extern int gdbtk_test (char *);
 	      if (i == 0 && p == optarg)
 
 		/* Don't use *_filtered or warning() (which relies on
-		   current_target) until after initialize_all_files(). */
+		   current_target) until after initialize_all_files().  */
 
 		fprintf_unfiltered
 		  (gdb_stderr,
@@ -655,8 +658,8 @@ extern int gdbtk_test (char *);
      control of the console via the deprecated_init_ui_hook ().  */
   gdb_init (argv[0]);
 
-  /* Now that gdb_init has created the initial inferior, we're in position
-     to set args for that inferior.  */
+  /* Now that gdb_init has created the initial inferior, we're in
+     position to set args for that inferior.  */
   if (set_args)
     {
       /* The remaining options are the command-line options for the
@@ -706,9 +709,9 @@ Excess command line arguments ignored. (%s%s)\n"),
 			    (optind == argc - 1) ? "" : " ...");
     }
 
-  /* Lookup gdbinit files. Note that the gdbinit file name may be overriden
-     during file initialization, so get_init_files should be called after
-     gdb_init.  */
+  /* Lookup gdbinit files. Note that the gdbinit file name may be
+     overriden during file initialization, so get_init_files should be
+     called after gdb_init.  */
   get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
@@ -737,19 +740,19 @@ Excess command line arguments ignored. (%s%s)\n"),
      it isn't encapsulated in MI output.  */
   if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
     {
-      /* Print all the junk at the top, with trailing "..." if we are about
-         to read a symbol file (possibly slowly).  */
+      /* Print all the junk at the top, with trailing "..." if we are
+         about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout);
       if (symarg)
 	printf_filtered ("..");
       wrap_here ("");
       printf_filtered ("\n");
-      gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
+      gdb_flush (gdb_stdout);	/* Force to screen during slow
+				   operations.  */
     }
 
-
   /* Install the default UI.  All the interpreters should have had a
-     look at things by now.  Initialize the default interpreter. */
+     look at things by now.  Initialize the default interpreter.  */
 
   {
     /* Find it.  */
@@ -773,14 +776,15 @@ Excess command line arguments ignored. (%s%s)\n"),
      any sane interpreter.  */
   if (!quiet && !current_interp_named_p (INTERP_MI1))
     {
-      /* Print all the junk at the top, with trailing "..." if we are about
-         to read a symbol file (possibly slowly).  */
+      /* Print all the junk at the top, with trailing "..." if we are
+         about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout);
       if (symarg)
 	printf_filtered ("..");
       wrap_here ("");
       printf_filtered ("\n");
-      gdb_flush (gdb_stdout);	/* Force to screen during slow operations */
+      gdb_flush (gdb_stdout);	/* Force to screen during slow
+				   operations.  */
     }
 
   /* Set off error and warning messages with a blank line.  */
@@ -814,7 +818,8 @@ Excess command line arguments ignored. (%s%s)\n"),
   xfree (dirarg);
 
   /* Skip auto-loading section-specified scripts until we've sourced
-     local_gdbinit (which is often used to augment the source search path).  */
+     local_gdbinit (which is often used to augment the source search
+     path).  */
   save_auto_load = gdbpy_global_auto_load;
   gdbpy_global_auto_load = 0;
 
@@ -824,7 +829,7 @@ Excess command line arguments ignored. (%s%s)\n"),
     {
       /* The exec file and the symbol-file are the same.  If we can't
          open it, better only print one error message.
-         catch_command_errors returns non-zero on success! */
+         catch_command_errors returns non-zero on success!  */
       if (catch_command_errors (exec_file_attach, execarg, !batch_flag, RETURN_MASK_ALL))
 	catch_command_errors (symbol_file_add_main, symarg, !batch_flag, RETURN_MASK_ALL);
     }
@@ -867,7 +872,7 @@ Can't attach to process and specify a core file at the same time."));
   if (ttyarg != NULL)
     set_inferior_io_terminal (ttyarg);
 
-  /* Error messages should no longer be distinguished with extra output. */
+  /* Error messages should no longer be distinguished with extra output.  */
   error_pre_print = NULL;
   quit_pre_print = NULL;
   warning_pre_print = _("warning: ");
@@ -896,7 +901,8 @@ Can't attach to process and specify a core file at the same time."));
     }
   xfree (cmdarg);
 
-  /* Read in the old history after all the command files have been read. */
+  /* Read in the old history after all the command files have been
+     read.  */
   init_history ();
 
   if (batch_flag)
@@ -911,7 +917,7 @@ Can't attach to process and specify a core file at the same time."));
   /* NOTE: cagney/1999-11-07: There is probably no reason for not
      moving this loop and the code found in captured_command_loop()
      into the command_loop() proper.  The main thing holding back that
-     change - SET_TOP_LEVEL() - has been eliminated. */
+     change - SET_TOP_LEVEL() - has been eliminated.  */
   while (1)
     {
       catch_errors (captured_command_loop, 0, "", RETURN_MASK_ALL);

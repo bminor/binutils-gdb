@@ -20,16 +20,21 @@
 #include "main.h"
 #include "gdb_string.h"
 #include "interps.h"
+#include <mcheck.h>
 
 int
 main (int argc, char **argv)
 {
   struct captured_main_args args;
+  int ret;
 
+  mtrace ();
   memset (&args, 0, sizeof args);
   args.argc = argc;
   args.argv = argv;
   args.use_windows = 0;
   args.interpreter_p = INTERP_CONSOLE;
-  return gdb_main (&args);
+  ret = gdb_main (&args);
+  muntrace();
+  return ret;
 }
