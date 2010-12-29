@@ -256,7 +256,8 @@ enum target_object
   /* Currently loaded libraries, in XML format.  */
   TARGET_OBJECT_LIBRARIES,
   /* Get OS specific data.  The ANNEX specifies the type (running
-     processes, etc.).  */
+     processes, etc.).  The data being transfered is expected to follow
+     the DTD specified in features/osdata.dtd.  */
   TARGET_OBJECT_OSDATA,
   /* Extra signal info.  Usually the contents of `siginfo_t' on unix
      platforms.  */

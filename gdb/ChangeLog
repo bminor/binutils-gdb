@@ -1,3 +1,8 @@
+2010-12-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.h (enum target_object): Expand the documentation of
+	TARGET_OBJECT_OSDATA a bit.
+
 2010-12-28  Michael Snyder  <msnyder@vmware.com>
 
 	* command.h: Comment clean-up.
