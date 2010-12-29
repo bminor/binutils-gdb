@@ -1,3 +1,12 @@
+2010-12-29  Michael Snyder  <msnyder@vmware.com>
+
+	* bcache.c: Comment clean-up.
+	* block.c: Ditto.
+	* blockframe.c: Ditto.
+	* breakpoint.c: Ditto.
+	* bsd-kvm.c: Ditto.
+	* buildsym.c: Ditto.
+
 2010-12-29  Jie Zhang  <jie.zhang@analog.com>
 
 	* configure.tgt (bfin-*-*): Set build_gdbserver to yes.

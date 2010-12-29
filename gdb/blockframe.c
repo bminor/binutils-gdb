@@ -39,8 +39,8 @@
 #include "inline-frame.h"
 #include "psymtab.h"
 
-/* Return the innermost lexical block in execution
-   in a specified stack frame.  The frame address is assumed valid.
+/* Return the innermost lexical block in execution in a specified
+   stack frame.  The frame address is assumed valid.
 
    If ADDR_IN_BLOCK is non-zero, set *ADDR_IN_BLOCK to the exact code
    address we used to choose the block.  We use this to find a source
@@ -144,7 +144,8 @@ find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
 }
 
 /* Return the function containing pc value PC.
-   Returns 0 if function is not known.  Backward compatibility, no section */
+   Returns 0 if function is not known.  
+   Backward compatibility, no section */
 
 struct symbol *
 find_pc_function (CORE_ADDR pc)
@@ -153,14 +154,14 @@ find_pc_function (CORE_ADDR pc)
 }
 
 /* These variables are used to cache the most recent result
- * of find_pc_partial_function. */
+   of find_pc_partial_function.  */
 
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
 static char *cache_pc_function_name = 0;
 static struct obj_section *cache_pc_function_section = NULL;
 
-/* Clear cache, e.g. when symbol table is discarded. */
+/* Clear cache, e.g. when symbol table is discarded.  */
 
 void
 clear_pc_function_cache (void)
@@ -240,10 +241,10 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 	}
     }
 
-  /* Not in the normal symbol tables, see if the pc is in a known section.
-     If it's not, then give up.  This ensures that anything beyond the end
-     of the text seg doesn't appear to be part of the last function in the
-     text segment.  */
+  /* Not in the normal symbol tables, see if the pc is in a known
+     section.  If it's not, then give up.  This ensures that anything
+     beyond the end of the text seg doesn't appear to be part of the
+     last function in the text segment.  */
 
   if (!section)
     msymbol = NULL;
@@ -314,7 +315,7 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 	  /* Because the high address is actually beyond the end of
 	     the function (and therefore possibly beyond the end of
 	     the overlay), we must actually convert (high - 1) and
-	     then add one to that. */
+	     then add one to that.  */
 
 	  *endaddr = 1 + overlay_unmapped_address (cache_pc_function_high - 1,
 						   section);
@@ -326,8 +327,8 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
   return 1;
 }
 
-/* Return the innermost stack frame executing inside of BLOCK,
-   or NULL if there is no such frame.  If BLOCK is NULL, just return NULL.  */
+/* Return the innermost stack frame executing inside of BLOCK, or NULL
+   if there is no such frame.  If BLOCK is NULL, just return NULL.  */
 
 struct frame_info *
 block_innermost_frame (struct block *block)

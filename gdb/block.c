@@ -40,7 +40,7 @@ static void block_initialize_namespace (struct block *block,
 
 /* Return Nonzero if block a is lexically nested within block b,
    or if a and b have the same pc range.
-   Return zero otherwise. */
+   Return zero otherwise.  */
 
 int
 contained_in (const struct block *a, const struct block *b)

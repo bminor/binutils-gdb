@@ -194,7 +194,7 @@ bsd_kvm_fetch_registers (struct target_ops *ops,
 
   if (nl[0].n_value != 0)
     {
-      /* Found dumppcb. If it contains a valid context, return
+      /* Found dumppcb.  If it contains a valid context, return
 	 immediately.  */
       if (bsd_kvm_fetch_pcb (regcache, (struct pcb *) nl[0].n_value))
 	return;
