@@ -365,7 +365,7 @@ ada_inferior_exit (struct inferior *inf)
                         /* Utilities */
 
 /* If TYPE is a TYPE_CODE_TYPEDEF type, return the target type after
-   all typedef layers have been pealed.  Otherwise, return TYPE.
+   all typedef layers have been peeled.  Otherwise, return TYPE.
 
    Normally, we really expect a typedef type to only have 1 typedef layer.
    In other words, we really expect the target type of a typedef type to be

@@ -1,5 +1,9 @@
 2010-12-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c: Fix typo in comment.
+
+2010-12-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_1): Print null array pointers as
 	`0x0' rather than `(null)'.  Add assertion.
 
