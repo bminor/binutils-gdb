@@ -1,5 +1,6 @@
 2010-12-20  Alan Modra  <amodra@gmail.com>
 
+	PR ld/12327
 	* ld.texinfo (Expression Section): Describe treatment of numbers
 	and absolute symbols.
 	* ldemul.c (after_open_default): Look up __ld_compatibility.
