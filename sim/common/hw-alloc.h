@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define HW_ZALLOC(me,type) (type*) hw_zalloc (me, sizeof (type))
 #define HW_MALLOC(me,type) (type*) hw_malloc (me, sizeof (type))
-#define HW_NZALLOC(ME,TYPE,N) (TYPE*) hw_zalloc (me, sizeof (TYPE) * (N))
+#define HW_NZALLOC(me,type,n) (type*) hw_zalloc (me, sizeof (type) * (n))
 
 extern void *hw_zalloc (struct hw *me, unsigned long size);
 extern void *hw_malloc (struct hw *me, unsigned long size);
