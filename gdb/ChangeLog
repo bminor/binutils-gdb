@@ -1,3 +1,7 @@
+2010-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-tdep.c (bfin_register_type): Move || to start of line.
+
 2010-12-29  Michael Snyder  <msnyder@vmware.com>
 
 	* bcache.c: Comment clean-up.

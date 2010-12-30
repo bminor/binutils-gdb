@@ -478,11 +478,11 @@ bfin_register_type (struct gdbarch *gdbarch, int regnum)
       || regnum == BFIN_USP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
 
-  if (regnum == BFIN_PC_REGNUM || regnum == BFIN_RETS_REGNUM ||
-      regnum == BFIN_RETI_REGNUM || regnum == BFIN_RETX_REGNUM ||
-      regnum == BFIN_RETN_REGNUM || regnum == BFIN_RETE_REGNUM ||
-      regnum == BFIN_LT0_REGNUM || regnum == BFIN_LB0_REGNUM ||
-      regnum == BFIN_LT1_REGNUM || regnum == BFIN_LB1_REGNUM)
+  if (regnum == BFIN_PC_REGNUM || regnum == BFIN_RETS_REGNUM
+      || regnum == BFIN_RETI_REGNUM || regnum == BFIN_RETX_REGNUM
+      || regnum == BFIN_RETN_REGNUM || regnum == BFIN_RETE_REGNUM
+      || regnum == BFIN_LT0_REGNUM || regnum == BFIN_LB0_REGNUM
+      || regnum == BFIN_LT1_REGNUM || regnum == BFIN_LB1_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
 
   return builtin_type (gdbarch)->builtin_int32;
