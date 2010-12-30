@@ -163,6 +163,8 @@ struct gdbarch
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
   int num_regs;
   int num_pseudo_regs;
+  gdbarch_ax_pseudo_register_collect_ftype *ax_pseudo_register_collect;
+  gdbarch_ax_pseudo_register_push_stack_ftype *ax_pseudo_register_push_stack;
   int sp_regnum;
   int pc_regnum;
   int ps_regnum;
@@ -313,6 +315,8 @@ struct gdbarch startup_gdbarch =
   0,  /* pseudo_register_write */
   0,  /* num_regs */
   0,  /* num_pseudo_regs */
+  0,  /* ax_pseudo_register_collect */
+  0,  /* ax_pseudo_register_push_stack */
   -1,  /* sp_regnum */
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
@@ -592,6 +596,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->num_regs == -1)
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
+  /* Skip verify of ax_pseudo_register_collect, has predicate */
+  /* Skip verify of ax_pseudo_register_push_stack, has predicate */
   /* Skip verify of sp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
@@ -759,6 +765,18 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: auto_wide_charset = <%s>\n",
                       host_address_to_string (gdbarch->auto_wide_charset));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_ax_pseudo_register_collect_p() = %d\n",
+                      gdbarch_ax_pseudo_register_collect_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: ax_pseudo_register_collect = <%s>\n",
+                      host_address_to_string (gdbarch->ax_pseudo_register_collect));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_ax_pseudo_register_push_stack_p() = %d\n",
+                      gdbarch_ax_pseudo_register_push_stack_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: ax_pseudo_register_push_stack = <%s>\n",
+                      host_address_to_string (gdbarch->ax_pseudo_register_push_stack));
   fprintf_unfiltered (file,
                       "gdbarch_dump: believe_pcc_promotion = %s\n",
                       plongest (gdbarch->believe_pcc_promotion));
@@ -1719,6 +1737,54 @@ set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch,
                              int num_pseudo_regs)
 {
   gdbarch->num_pseudo_regs = num_pseudo_regs;
+}
+
+int
+gdbarch_ax_pseudo_register_collect_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->ax_pseudo_register_collect != NULL;
+}
+
+int
+gdbarch_ax_pseudo_register_collect (struct gdbarch *gdbarch, struct agent_expr *ax, int reg)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->ax_pseudo_register_collect != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_ax_pseudo_register_collect called\n");
+  return gdbarch->ax_pseudo_register_collect (gdbarch, ax, reg);
+}
+
+void
+set_gdbarch_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+                                        gdbarch_ax_pseudo_register_collect_ftype ax_pseudo_register_collect)
+{
+  gdbarch->ax_pseudo_register_collect = ax_pseudo_register_collect;
+}
+
+int
+gdbarch_ax_pseudo_register_push_stack_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->ax_pseudo_register_push_stack != NULL;
+}
+
+int
+gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch, struct agent_expr *ax, int reg)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->ax_pseudo_register_push_stack != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_ax_pseudo_register_push_stack called\n");
+  return gdbarch->ax_pseudo_register_push_stack (gdbarch, ax, reg);
+}
+
+void
+set_gdbarch_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
+                                           gdbarch_ax_pseudo_register_push_stack_ftype ax_pseudo_register_push_stack)
+{
+  gdbarch->ax_pseudo_register_push_stack = ax_pseudo_register_push_stack;
 }
 
 int

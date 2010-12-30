@@ -1,3 +1,28 @@
+2010-12-30  Hui Zhu  <teawater@gmail.com>
+
+	* ax-gdb.c (gen_expr): Change error message.
+
+2010-12-30  Pedro Alves  <pedro@codesourcery.com>
+
+	* ax-gdb.c (gen_expr) <OP_REGISTER>: Error out if trying to
+	collect a user register.
+
+2010-12-30  Hui Zhu  <teawater@gmail.com>
+
+	* gdbarch.sh (ax_pseudo_register_collect,
+	ax_pseudo_register_push_stack): new callbacks.
+	(agent_expr): Forward declare.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* ax-gdb.c (gen_expr): Remove pseudo-register check code.
+	* ax-general.c (user-regs.h): New include.
+	(ax_reg): Call gdbarch_ax_pseudo_register_push_stack.
+	(ax_reg_mask): Call gdbarch_ax_pseudo_register_collect.
+	* mips-tdep.c (ax.h): New include.
+	(mips_ax_pseudo_register_collect,
+	mips_ax_pseudo_register_push_stack): New functions.
+	(mips_gdbarch_init): Set mips_ax_pseudo_register_collect and
+	mips_ax_pseudo_register_push_stack.
+
 2010-12-28  Kevin Buettner  <kevinb@redhat.com>
             Hui Zhu  <teawater@gmail.com>
 
