@@ -23,7 +23,7 @@
 #include "arch-utils.h"
 #include "buildsym.h"
 #include "gdbcmd.h"
-#include "inferior.h"		/* enum CALL_DUMMY_LOCATION et.al. */
+#include "inferior.h"		/* enum CALL_DUMMY_LOCATION et al.  */
 #include "gdb_string.h"
 #include "regcache.h"
 #include "gdb_assert.h"
@@ -146,7 +146,7 @@ core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs)
   return (lhs > rhs);
 }
 
-/* Misc helper functions for targets. */
+/* Misc helper functions for targets.  */
 
 CORE_ADDR
 core_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr)
@@ -186,8 +186,8 @@ cannot_register_not (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Legacy version of target_virtual_frame_pointer().  Assumes that
-   there is an gdbarch_deprecated_fp_regnum and that it is the same, cooked or
-   raw.  */
+   there is an gdbarch_deprecated_fp_regnum and that it is the same,
+   cooked or raw.  */
 
 void
 legacy_virtual_frame_pointer (struct gdbarch *gdbarch, 
@@ -211,7 +211,8 @@ legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
   else
     /* Should this be an internal error?  I guess so, it is reflecting
        an architectural limitation in the current design.  */
-    internal_error (__FILE__, __LINE__, _("No virtual frame pointer available"));
+    internal_error (__FILE__, __LINE__, 
+		    _("No virtual frame pointer available"));
   *frame_offset = 0;
 }
 
@@ -373,8 +374,9 @@ choose_architecture_for_target (const struct target_desc *target_desc,
 
   if (compat1 == NULL && compat2 == NULL)
     {
-      /* BFD considers the architectures incompatible.  Check our target
-	 description whether it accepts SELECTED as compatible anyway.  */
+      /* BFD considers the architectures incompatible.  Check our
+	 target description whether it accepts SELECTED as compatible
+	 anyway.  */
       if (tdesc_compatible_p (target_desc, selected))
 	return from_target;
 
@@ -391,10 +393,10 @@ choose_architecture_for_target (const struct target_desc *target_desc,
   if (compat1 == compat2)
     return compat1;
 
-  /* If the two didn't match, but one of them was a default architecture,
-     assume the more specific one is correct.  This handles the case
-     where an executable or target description just says "mips", but
-     the other knows which MIPS variant.  */
+  /* If the two didn't match, but one of them was a default
+     architecture, assume the more specific one is correct.  This
+     handles the case where an executable or target description just
+     says "mips", but the other knows which MIPS variant.  */
   if (compat1->the_default)
     return compat2;
   if (compat2->the_default)
@@ -408,7 +410,7 @@ choose_architecture_for_target (const struct target_desc *target_desc,
   return selected;
 }
 
-/* Functions to manipulate the architecture of the target */
+/* Functions to manipulate the architecture of the target.  */
 
 enum set_arch { set_arch_auto, set_arch_manual };
 
@@ -426,7 +428,7 @@ selected_architecture_name (void)
 }
 
 /* Called if the user enters ``show architecture'' without an
-   argument. */
+   argument.  */
 
 static void
 show_architecture (struct ui_file *file, int from_tty,
@@ -443,7 +445,7 @@ The target architecture is assumed to be %s\n"), set_architecture_string);
 
 
 /* Called if the user enters ``set architecture'' with or without an
-   argument. */
+   argument.  */
 
 static void
 set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
@@ -583,14 +585,14 @@ initialize_current_architecture (void)
   const char **arches = gdbarch_printable_names ();
   struct gdbarch_info info;
 
-  /* determine a default architecture and byte order. */
+  /* determine a default architecture and byte order.  */
   gdbarch_info_init (&info);
   
-  /* Find a default architecture. */
+  /* Find a default architecture.  */
   if (default_bfd_arch == NULL)
     {
       /* Choose the architecture by taking the first one
-	 alphabetically. */
+	 alphabetically.  */
       const char *chosen = arches[0];
       const char **arch;
       for (arch = arches; *arch != NULL; arch++)
@@ -613,7 +615,7 @@ initialize_current_architecture (void)
   if (default_byte_order == BFD_ENDIAN_UNKNOWN
       && default_bfd_vec != NULL)
     {
-      /* Extract BFD's default vector's byte order. */
+      /* Extract BFD's default vector's byte order.  */
       switch (default_bfd_vec->byteorder)
 	{
 	case BFD_ENDIAN_BIG:
@@ -628,7 +630,7 @@ initialize_current_architecture (void)
     }
   if (default_byte_order == BFD_ENDIAN_UNKNOWN)
     {
-      /* look for ``*el-*'' in the target name. */
+      /* look for ``*el-*'' in the target name.  */
       const char *chp;
       chp = strchr (target_name, '-');
       if (chp != NULL
@@ -651,9 +653,9 @@ initialize_current_architecture (void)
 		      "initial architecture failed"));
 
   /* Create the ``set architecture'' command appending ``auto'' to the
-     list of architectures. */
+     list of architectures.  */
   {
-    /* Append ``auto''. */
+    /* Append ``auto''.  */
     int nr;
     for (nr = 0; arches[nr] != NULL; nr++);
     arches = xrealloc (arches, sizeof (char*) * (nr + 2));
@@ -742,12 +744,13 @@ gdbarch_info_fill (struct gdbarch_info *info)
   gdb_assert (info->bfd_arch_info != NULL);
 }
 
-/* Return "current" architecture.  If the target is running, this is the
-   architecture of the selected frame.  Otherwise, the "current" architecture
-   defaults to the target architecture.
+/* Return "current" architecture.  If the target is running, this is
+   the architecture of the selected frame.  Otherwise, the "current"
+   architecture defaults to the target architecture.
 
-   This function should normally be called solely by the command interpreter
-   routines to determine the architecture to execute a command in.  */
+   This function should normally be called solely by the command
+   interpreter routines to determine the architecture to execute a
+   command in.  */
 struct gdbarch *
 get_current_arch (void)
 {

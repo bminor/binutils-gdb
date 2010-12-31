@@ -59,7 +59,7 @@
 
 
 
-/* Prototypes for local functions. */
+/* Prototypes for local functions.  */
 
 /* There's a standard order to the arguments of these functions:
    union exp_element ** --- pointer into expression
@@ -614,7 +614,7 @@ static void
 gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 	     struct axs_value *value, struct symbol *var)
 {
-  /* Dereference any typedefs. */
+  /* Dereference any typedefs.  */
   value->type = check_typedef (SYMBOL_TYPE (var));
   value->optimized_out = 0;
 
@@ -986,7 +986,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
   /* GCC does allow casts to yield lvalues, so this should be fixed
      before merging these changes into the trunk.  */
   require_rvalue (ax, value);
-  /* Dereference typedefs. */
+  /* Dereference typedefs.  */
   type = check_typedef (type);
 
   switch (TYPE_CODE (type))
@@ -1289,7 +1289,7 @@ gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
      equal to the number of `one' bits in bytesize, but who cares?  */
   int fragment_count;
 
-  /* Dereference any typedefs. */
+  /* Dereference any typedefs.  */
   type = check_typedef (type);
 
   /* Can we fetch the number of bits requested at all?  */
@@ -1677,7 +1677,7 @@ gen_aggregate_elt_ref (struct expression *exp,
   return 0;
 }
 
-/* Generate code for GDB's magical `repeat' operator.  
+/* Generate code for GDB's magical `repeat' operator.
    LVALUE @ INT creates an array INT elements long, and whose elements
    have the same type as LVALUE, located in memory so that LVALUE is
    its first element.  For example, argv[0]@argc gives you the array
@@ -2049,7 +2049,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
     case UNOP_PLUS:
       (*pc)++;
-      /* + FOO is equivalent to 0 + FOO, which can be optimized. */
+      /* + FOO is equivalent to 0 + FOO, which can be optimized.  */
       gen_expr (exp, pc, ax, value);
       gen_usual_unary (exp, ax, value);
       break;

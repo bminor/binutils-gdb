@@ -248,7 +248,7 @@ ax_const_l (struct agent_expr *x, LONGEST l)
         break;
     }
 
-  /* Emit the right opcode... */
+  /* Emit the right opcode...  */
   ax_simple (x, ops[op]);
 
   /* Emit the low SIZE bytes as an unsigned number.  We know that

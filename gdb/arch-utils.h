@@ -59,7 +59,7 @@ extern int
    leaving space for inferior function call return breakpoints.  */
 extern CORE_ADDR displaced_step_at_entry_point (struct gdbarch *gdbarch);
 
-/* The only possible cases for inner_than. */
+/* The only possible cases for inner_than.  */
 extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 
@@ -68,20 +68,20 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern CORE_ADDR core_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr_identity;
 
-/* No-op conversion of reg to regnum. */
+/* No-op conversion of reg to regnum.  */
 
 extern int no_op_reg_to_regnum (struct gdbarch *gdbarch, int reg);
 
-/* Do nothing version of elf_make_msymbol_special. */
+/* Do nothing version of elf_make_msymbol_special.  */
 
 void default_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym);
 
-/* Do nothing version of coff_make_msymbol_special. */
+/* Do nothing version of coff_make_msymbol_special.  */
 
 void default_coff_make_msymbol_special (int val, struct minimal_symbol *msym);
 
 /* Version of cannot_fetch_register() / cannot_store_register() that
-   always fails. */
+   always fails.  */
 
 int cannot_register_not (struct gdbarch *gdbarch, int regnum);
 

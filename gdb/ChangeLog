@@ -1,10 +1,23 @@
+2010-12-31  Michael Snyder  <msnyder@vmware.com>
+
+	* annotate.c: Comment cleanup, shorten long lines.
+	* arch-utils.c: Ditto.
+	* arch-utils.h: Ditto.
+	* auxv.c: Ditto.
+	* auxv.h: Ditto.
+	* ax-gdb.c: Ditto.
+	* ax-gdb.h: Ditto.
+	* ax-general.c: Ditto.
+	* breakpoint.h: Ditto.
+	* buildsym.h: Ditto.
+
 2010-12-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-tdep.c (bfin_register_type): Move || to start of line.
 
 2010-12-29  Michael Snyder  <msnyder@vmware.com>
 
-	* bcache.c: Comment clean-up.
+	* bcache.c: Comment clean-up, shorten long lines..
 	* block.c: Ditto.
 	* blockframe.c: Ditto.
 	* breakpoint.c: Ditto.
@@ -71,7 +84,7 @@
 
 2010-12-28  Michael Snyder  <msnyder@vmware.com>
 
-	* command.h: Comment clean-up.
+	* command.h: Comment clean-up, shorten long lines.
 	* cli/cli-cmds.c: Ditto.
 	* cli/cli-cmds.h: Ditto.
 	* cli/cli-decode.c: Ditto.
@@ -85,7 +98,7 @@
 
 2010-12-28  Michael Snyder  <msnyder@vmware.com>
 
-	* event-loop.c: Comment clean-up.
+	* event-loop.c: Comment clean-up, shorten long lines.
 	* event-loop.h: Ditto.
 	* event-top.c: Ditto.
 	* gdb.c: Ditto.

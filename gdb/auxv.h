@@ -40,7 +40,7 @@ extern int target_auxv_parse (struct target_ops *ops,
 extern int target_auxv_search (struct target_ops *ops,
 			       CORE_ADDR match, CORE_ADDR *valp);
 
-/* Print the contents of the target's AUXV on the specified file. */
+/* Print the contents of the target's AUXV on the specified file.  */
 extern int fprint_target_auxv (struct ui_file *file, struct target_ops *ops);
 
 extern LONGEST memory_xfer_auxv (struct target_ops *ops,

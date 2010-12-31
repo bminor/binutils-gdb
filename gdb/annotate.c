@@ -26,7 +26,7 @@
 #include "observer.h"
 
 
-/* Prototypes for local functions. */
+/* Prototypes for local functions.  */
 
 extern void _initialize_annotate (void);
 
@@ -57,7 +57,7 @@ breakpoints_changed (void)
       target_terminal_ours ();
       printf_unfiltered (("\n\032\032breakpoints-invalid\n"));
       if (ignore_count_changed)
-	ignore_count_changed = 0;	/* Avoid multiple break annotations. */
+	ignore_count_changed = 0;   /* Avoid multiple break annotations.  */
     }
 }
 
@@ -65,7 +65,7 @@ breakpoints_changed (void)
    want to provide successive multiple breakpoints-invalid messages
    that are all caused by the fact that the ignore count is changing
    (which could keep the GUI very busy).  One is enough, after the
-   target actually "stops". */
+   target actually "stops".  */
 
 void
 annotate_ignore_count_change (void)
