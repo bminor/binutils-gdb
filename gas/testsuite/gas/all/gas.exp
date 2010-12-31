@@ -92,7 +92,10 @@ case $target_triplet in {
 # ti addresses aren't octets.
 if { ![is_aout_format] } {
     case $target_triplet in {
-	{ hppa-*-hpux* } { }
+	{ hppa*64*-*-* } {
+	    run_dump_test fwdexp
+	}
+	{ hppa*-*-hpux* } { }
 	{ mep-*-* } { }
 	{ mips*-*-ecoff* } { }
 	{ mmix-*-* } { }
@@ -360,7 +363,16 @@ if { ![istarget "i960-*-*"] } {
     run_dump_test quad
 }
 
-run_dump_test octa
+# som doesn't use .data section.
+case $target_triplet in {
+    { hppa*64*-*-* } {
+	run_dump_test octa
+    }
+    { hppa*-*-hpux* } { }
+    default {
+	run_dump_test octa
+    }
+}
 
 # .set works differently on some targets.
 case $target_triplet in {

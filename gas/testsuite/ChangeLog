@@ -1,5 +1,9 @@
 2010-12-31  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* gas/all/gas.exp (fwdexp): Run on hppa*64*-*-*.  Skip on 32-bit
+	hppa*-*-hpux*.
+	(octa): Likewise.
+
 	* gas/cfi/cfi.exp: Skip cfi-common-6 on hppa64*-*.
 
 2010-12-31  Richard Sandiford  <rdsandiford@googlemail.com>
