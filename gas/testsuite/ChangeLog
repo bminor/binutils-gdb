@@ -1,6 +1,7 @@
 2010-12-31  Richard Sandiford  <rdsandiford@googlemail.com>
 
-	* gas/mips/e32el-rel2.d: Accept any file format.
+	* gas/mips/e32-rel2.d: Accept any file format.
+	* gas/mips/e32el-rel2.d: Likewise.
 	* gas/mips/elf-rel.d: Likewise.
 	* gas/mips/elf-rel2.d: Likewise.
 	* gas/mips/elf-rel3.d: Likewise.

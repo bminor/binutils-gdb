@@ -1,4 +1,5 @@
 2010-12-31  Robert Millan  <rmh@gnu.org>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* configure.tgt: Recognize mips-freebsd and mips-kfreebsd-gnu.
 

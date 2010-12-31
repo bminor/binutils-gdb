@@ -1,5 +1,4 @@
 2010-12-31  Robert Millan  <rmh@gnu.org>
-	    Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (ELF_TARGET): New macro.  Generates target
 	names accordingly to whether TE_FreeBSD and whether TE_TMIPS
