@@ -1,3 +1,11 @@
+2010-12-31  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR gas/11395
+	* config/tc-hppa.c (pa_ip): Revert last change.  Add variable need_cond
+	to determine whether a 64-bit condition is needed for 'A' and 'S'
+	conditions.  Default to 32-bit never condition for logical and unit
+	instructions.  Add error message for missing branch on bit condition.
+
 2010-12-31  Robert Millan  <rmh@gnu.org>
 
 	* config/tc-mips.c (ELF_TARGET): New macro.  Generates target

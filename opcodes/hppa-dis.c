@@ -86,7 +86,7 @@ static const char *const compare_cond_names[] =
 };
 static const char *const compare_cond_64_names[] =
 {
-  "", ",*=", ",*<", ",*<=", ",*<<", ",*<<=", ",*sv", ",*od",
+  ",*", ",*=", ",*<", ",*<=", ",*<<", ",*<<=", ",*sv", ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", ",*>>=", ",*>>", ",*nsv", ",*ev"
 };
 static const char *const cmpib_cond_64_names[] =
@@ -100,7 +100,7 @@ static const char *const add_cond_names[] =
 };
 static const char *const add_cond_64_names[] =
 {
-  "", ",*=", ",*<", ",*<=", ",*nuv", ",*znv", ",*sv", ",*od",
+  ",*", ",*=", ",*<", ",*<=", ",*nuv", ",*znv", ",*sv", ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", ",*uv", ",*vnz", ",*nsv", ",*ev"
 };
 static const char *const wide_add_cond_names[] =
@@ -114,7 +114,7 @@ static const char *const logical_cond_names[] =
   ",tr", ",<>", ",>=", ",>", 0, 0, 0, ",ev"};
 static const char *const logical_cond_64_names[] =
 {
-  "", ",*=", ",*<", ",*<=", 0, 0, 0, ",*od",
+  ",*", ",*=", ",*<", ",*<=", 0, 0, 0, ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", 0, 0, 0, ",*ev"};
 static const char *const unit_cond_names[] =
 {
@@ -123,7 +123,7 @@ static const char *const unit_cond_names[] =
 };
 static const char *const unit_cond_64_names[] =
 {
-  "", ",*swz", ",*sbz", ",*shz", ",*sdc", ",*swc", ",*sbc", ",*shc",
+  ",*", ",*swz", ",*sbz", ",*shz", ",*sdc", ",*swc", ",*sbc", ",*shc",
   ",*tr", ",*nwz", ",*nbz", ",*nhz", ",*ndc", ",*nwc", ",*nbc", ",*nhc"
 };
 static const char *const shift_cond_names[] =
@@ -132,7 +132,7 @@ static const char *const shift_cond_names[] =
 };
 static const char *const shift_cond_64_names[] =
 {
-  "", ",*=", ",*<", ",*od", ",*tr", ",*<>", ",*>=", ",*ev"
+  ",*", ",*=", ",*<", ",*od", ",*tr", ",*<>", ",*>=", ",*ev"
 };
 static const char *const bb_cond_64_names[] =
 {

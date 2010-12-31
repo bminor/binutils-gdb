@@ -1,3 +1,11 @@
+2010-12-31  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR gas/11395
+	* hppa-dis.c (compare_cond_64_names): Change never condition to ",*".
+	(add_cond_64_names): Likewise.
+	(logical_cond_64_names): Likewise.
+	(unit_cond_64_names): Likewise.
+
 2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (print_insn): Support bfd_mach_x64_32 and
