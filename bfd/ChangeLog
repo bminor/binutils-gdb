@@ -1,5 +1,11 @@
 2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_relocs_compatible): New.
+	(elf_backend_relocs_compatible): Defined to
+	elf_x86_64_relocs_compatible.
+
+2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* archures.c (bfd_mach_x64_32): New.
 	(bfd_mach_x64_32_intel_syntax): Likewise.
 	* bfd-in2.h: Regenerated.

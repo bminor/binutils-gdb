@@ -4496,6 +4496,17 @@ elf_x86_64_hash_symbol (struct elf_link_hash_entry *h)
   return _bfd_elf_hash_symbol (h);
 }
 
+/* Return TRUE iff relocations for INPUT are compatible with OUTPUT. */
+
+static bfd_boolean
+elf_x86_64_relocs_compatible (const bfd_target *input,
+			      const bfd_target *output)
+{
+  return ((xvec_get_elf_backend_data (input)->s->elfclass
+	   == xvec_get_elf_backend_data (output)->s->elfclass)
+	  && _bfd_elf_relocs_compatible (input, output));
+}
+
 static const struct bfd_elf_special_section
   elf_x86_64_special_sections[]=
 {
@@ -4536,7 +4547,7 @@ static const struct bfd_elf_special_section
   elf_x86_64_reloc_name_lookup
 
 #define elf_backend_adjust_dynamic_symbol   elf_x86_64_adjust_dynamic_symbol
-#define elf_backend_relocs_compatible	    _bfd_elf_relocs_compatible
+#define elf_backend_relocs_compatible	    elf_x86_64_relocs_compatible
 #define elf_backend_check_relocs	    elf_x86_64_check_relocs
 #define elf_backend_copy_indirect_symbol    elf_x86_64_copy_indirect_symbol
 #define elf_backend_create_dynamic_sections elf_x86_64_create_dynamic_sections
