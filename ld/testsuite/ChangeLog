@@ -1,5 +1,7 @@
 2010-12-31  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* ld-undefined/undefined.exp (testline): XFAIL hppa*64*-*-*.
+
 	PR ld/12360
 	* ld-elfcomm/elfcomm.exp (test1w1): Use same check as MIPS on
 	hppa*64*-*-*.

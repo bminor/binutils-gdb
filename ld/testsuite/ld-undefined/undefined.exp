@@ -140,5 +140,6 @@ setup_xfail s390-*-*
 
 # See comments above for Xtensa.
 setup_xfail xtensa*-*-linux*
+setup_xfail hppa*64*-*-*
 
 checkund $ml $testline
