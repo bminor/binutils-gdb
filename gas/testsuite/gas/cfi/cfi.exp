@@ -100,10 +100,9 @@ if { ![istarget "hppa64*-*"] } then {
     # This test uses .subsection/.previous which are elf-specific.
     run_dump_test "cfi-common-5"
   }
-  run_dump_test "cfi-common-7"
-}
-
-# MIPS doesn't support PC relative cfi directives.
-if { ![istarget "mips*-*"] } then {
+  # MIPS doesn't support PC relative cfi directives.
+  if { ![istarget "mips*-*"] } then {
     run_dump_test "cfi-common-6"
+  }
+  run_dump_test "cfi-common-7"
 }
