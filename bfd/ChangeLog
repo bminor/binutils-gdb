@@ -1,5 +1,15 @@
 2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfcode.h (NAME(elf,r_info)): New.
+	(NAME(elf,r_sym)): Likewise.
+
+	* elflink.c (elf64_r_info): Removed.
+	(elf32_r_info): Likewise.
+	(elf64_r_sym): Likewise.
+	(elf32_r_sym): Likewise.
+
+2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_relocs_compatible): New.
 	(elf_backend_relocs_compatible): Defined to
 	elf_x86_64_relocs_compatible.

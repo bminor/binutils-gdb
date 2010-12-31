@@ -1855,6 +1855,22 @@ NAME(_bfd_elf,bfd_from_remote_memory)
     *loadbasep = loadbase;
   return nbfd;
 }
+
+/* Function for ELF_R_INFO.  */
+
+bfd_vma
+NAME(elf,r_info) (bfd_vma sym, bfd_vma type)
+{
+  return ELF_R_INFO (sym, type);
+}
+
+/* Function for ELF_R_SYM.  */
+
+bfd_vma
+NAME(elf,r_sym) (bfd_vma r_info)
+{
+  return ELF_R_SYM (r_info);
+}
 
 #include "elfcore.h"
 
