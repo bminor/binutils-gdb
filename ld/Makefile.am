@@ -442,6 +442,7 @@ ALL_64_EMULATION_SOURCES = \
 	eshelf64_nbsd.c \
 	eshlelf64_nbsd.c \
 	eelf_x86_64.c \
+	eelf32_x86_64.c \
 	eelf_x86_64_fbsd.c \
 	eelf_x86_64_sol2.c \
 	eelf_l1om.c \
@@ -1167,6 +1168,9 @@ eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
 eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_x86_64 "$(tdir_elf_x86_64)"
+eelf32_x86_64.c: $(srcdir)/emulparams/elf32_x86_64.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_x86_64 "$(tdir_elf32_x86_64)"
 eelf_x86_64_fbsd.c: $(srcdir)/emulparams/elf_x86_64_fbsd.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

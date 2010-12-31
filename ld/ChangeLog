@@ -1,3 +1,17 @@
+2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh: New.
+
+	* configure.tgt (targ64_extra_emuls): Add elf32_x86_64 for
+	i[3-7]86-*-linux-*.
+	(targ_extra_libpath): Likewise.
+	(targ_extra_emuls): Add elf32_x86_64 for x86_64-*-linux-*.
+	(targ_extra_libpath): Likewise.
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eelf32_x86_64.c.
+	(eelf32_x86_64.c): New.
+	* Makefile.in: Regenerated.
+
 2010-12-20  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12327

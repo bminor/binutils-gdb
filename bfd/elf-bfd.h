@@ -2272,6 +2272,14 @@ extern bfd_boolean _bfd_elf_allocate_ifunc_dyn_relocs
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_dyn_relocs **, unsigned int, unsigned int);
 
+extern void elf_append_rela (bfd *, asection *, Elf_Internal_Rela *);
+extern void elf_append_rel (bfd *, asection *, Elf_Internal_Rela *);
+
+extern bfd_vma elf64_r_info (bfd_vma, bfd_vma);
+extern bfd_vma elf64_r_sym (bfd_vma);
+extern bfd_vma elf32_r_info (bfd_vma, bfd_vma);
+extern bfd_vma elf32_r_sym (bfd_vma);
+
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
 

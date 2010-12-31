@@ -742,6 +742,7 @@ ALL_64_EMULATION_SOURCES = \
 	eshelf64_nbsd.c \
 	eshlelf64_nbsd.c \
 	eelf_x86_64.c \
+	eelf32_x86_64.c \
 	eelf_x86_64_fbsd.c \
 	eelf_x86_64_sol2.c \
 	eelf_l1om.c \
@@ -1057,6 +1058,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32_spu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32_tic6x_be.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32_tic6x_le.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32_x86_64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32b4300.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32bfin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32bfinfd.Po@am__quote@
@@ -2591,6 +2593,9 @@ eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
 eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_x86_64 "$(tdir_elf_x86_64)"
+eelf32_x86_64.c: $(srcdir)/emulparams/elf32_x86_64.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_x86_64 "$(tdir_elf32_x86_64)"
 eelf_x86_64_fbsd.c: $(srcdir)/emulparams/elf_x86_64_fbsd.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

@@ -1,3 +1,78 @@
+2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archures.c (bfd_mach_x64_32): New.
+	(bfd_mach_x64_32_intel_syntax): Likewise.
+	* bfd-in2.h: Regenerated.
+
+	* config.bfd (targ64_selvecs): Add bfd_elf32_x86_64_vec for
+	i[3-7]86-*-linux-*.
+	(targ_selvecs): Add bfd_elf32_x86_64_vec for x86_64-*-linux-*.
+
+	* configure.in: Support bfd_elf32_x86_64_vec.
+	* configure: Regenerated.
+
+	* cpu-i386.c (bfd_x64_32_arch_intel_syntax): New.
+	(bfd_x64_32_arch): Likewise.
+
+	* elf-bfd.h (elf_append_rela): New prototype.
+	(elf_append_rel): Likewise.
+	(elf64_r_info): Likewise.
+	(elf32_r_info): Likewise.
+	(elf64_r_sym): Likewise.
+	(elf32_r_sym): Likewise.
+
+	* elf64-x86-64.c (ABI_64_P): New.
+	(elf_x86_64_info_to_howto): Replace ELF64_R_TYPE with
+	ELF32_R_TYPE.  Replace ELF64_ST_TYPE with ELF_ST_TYPE.
+	(elf_x86_64_check_tls_transition):Likewise.
+	(elf_x86_64_check_relocs): Likewise.
+	(elf_x86_64_gc_mark_hook):Likewise.
+	(elf_x86_64_gc_sweep_hook): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_reloc_type_class): Likewise.
+	(ELF_DYNAMIC_INTERPRETER): Renamed to ...
+	(ELF64_DYNAMIC_INTERPRETER): This.
+	(ELF32_DYNAMIC_INTERPRETER): New.
+	(elf_x86_64_link_hash_table): Add r_info, r_sym, swap_reloca_out,
+	dynamic_interpreter and dynamic_interpreter_size.
+	(elf_x86_64_get_local_sym_hash): Replace ELF64_R_SYM with
+	htab->r_sym.  Replace ELF64_R_INFO with htab->r_info.
+	(elf_x86_64_get_local_sym_hash): Likewise.
+	(elf_x86_64_check_tls_transition):Likewise.
+	(elf_x86_64_check_relocs): Likewise.
+	(elf_x86_64_gc_mark_hook):Likewise.
+	(elf_x86_64_gc_sweep_hook): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_finish_dynamic_symbol): Likewise.
+	(elf_x86_64_finish_local_dynamic_symbol): Likewise.
+	(elf_x86_64_link_hash_table_create): Initialize r_info, r_sym,
+	swap_reloca_out, dynamic_interpreter and dynamic_interpreter_size.
+	(elf_x86_64_check_relocs): Check ABI_64_P when requesting for
+	PIC.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf64_x86_64_adjust_dynamic_symbol): Replace sizeof
+	(Elf64_External_Rela) with bed->s->sizeof_rela.
+	(elf64_x86_64_allocate_dynrelocs): Likewise.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_finish_dynamic_symbol): Likewise.
+	(elf64_x86_64_append_rela): Removed.
+	(elf32_x86_64_elf_object_p): New.
+	Add bfd_elf32_x86_64_vec.
+
+	* elf64-x86-64.c (elf64_x86_64_xxx): Renamed to ...
+	(elf_x86_64_xxx): This.
+
+	* elflink.c (bfd_elf_final_link): Check ELF file class on error.
+	(elf_append_rela): New.
+	(elf_append_rel): Likewise.
+	(elf64_r_info): Likewise.
+	(elf32_r_info): Likewise.
+	(elf64_r_sym): Likewise.
+	(elf32_r_sym): Likewise.
+
+	* targets.c (bfd_elf32_x86_64_vec): New.
+	(_bfd_target_vector): Add bfd_elf32_x86_64_vec.
+
 2010-12-24  Alan Modra  <amodra@gmail.com>
 
 	* compress.c (decompress_contents): Style.

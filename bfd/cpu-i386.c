@@ -24,6 +24,22 @@
 #include "bfd.h"
 #include "libbfd.h"
 
+static const bfd_arch_info_type bfd_x64_32_arch_intel_syntax =
+{
+  64, /* 64 bits in a word */
+  32, /* 32 bits in an address */
+  8,  /* 8 bits in a byte */
+  bfd_arch_i386,
+  bfd_mach_x64_32_intel_syntax,
+  "i386:intel",
+  "i386:x64-32:intel",
+  3,
+  FALSE,
+  bfd_default_compatible,
+  bfd_default_scan,
+  0
+};
+
 static const bfd_arch_info_type bfd_x86_64_arch_intel_syntax =
 {
   64, /* 64 bits in a word */
@@ -37,7 +53,7 @@ static const bfd_arch_info_type bfd_x86_64_arch_intel_syntax =
   FALSE,
   bfd_default_compatible,
   bfd_default_scan,
-  0
+  &bfd_x64_32_arch_intel_syntax,
 };
 
 static const bfd_arch_info_type bfd_i386_arch_intel_syntax =
@@ -72,6 +88,22 @@ static const bfd_arch_info_type i8086_arch =
   &bfd_i386_arch_intel_syntax
 };
 
+static const bfd_arch_info_type bfd_x64_32_arch =
+{
+  64, /* 64 bits in a word */
+  32, /* 32 bits in an address */
+  8,  /* 8 bits in a byte */
+  bfd_arch_i386,
+  bfd_mach_x64_32,
+  "i386",
+  "i386:x64-32",
+  3,
+  FALSE,
+  bfd_default_compatible,
+  bfd_default_scan,
+  &i8086_arch
+};
+
 static const bfd_arch_info_type bfd_x86_64_arch =
 {
   64, /* 64 bits in a word */
@@ -85,7 +117,7 @@ static const bfd_arch_info_type bfd_x86_64_arch =
   FALSE,
   bfd_default_compatible,
   bfd_default_scan,
-  &i8086_arch
+  &bfd_x64_32_arch
 };
 
 const bfd_arch_info_type bfd_i386_arch =

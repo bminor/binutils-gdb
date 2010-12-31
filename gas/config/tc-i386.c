@@ -391,6 +391,16 @@ static enum flag_code flag_code;
 static unsigned int object_64bit;
 static int use_rela_relocations = 0;
 
+/* The ELF ABI to use.  */
+enum x86_elf_abi
+{
+  I386_ABI,
+  X86_64_LP64_ABI,
+  X86_64_ILP32_ABI
+};
+
+static enum x86_elf_abi x86_elf_abi = I386_ABI;
+
 /* The names used to print error messages.  */
 static const char *flag_code_names[] =
   {
@@ -2207,16 +2217,19 @@ i386_arch (void)
 unsigned long
 i386_mach ()
 {
-  if (!strcmp (default_arch, "x86_64"))
+  if (!strncmp (default_arch, "x86_64", 6))
     {
       if (cpu_arch_isa == PROCESSOR_L1OM)
 	{
-	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour
+	      || default_arch[6] != '\0')
 	    as_fatal (_("Intel L1OM is 64bit ELF only"));
 	  return bfd_mach_l1om;
 	}
-      else
+      else if (default_arch[6] == '\0')
 	return bfd_mach_x86_64;
+      else
+	return bfd_mach_x64_32;
     }
   else if (!strcmp (default_arch, "i386"))
     return bfd_mach_i386_i386;
@@ -8093,6 +8106,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
 #define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
 #define OPTION_MAVXSCALAR (OPTION_MD_BASE + 12)
+#define OPTION_N32 (OPTION_MD_BASE + 13)
 
 struct option md_longopts[] =
 {
@@ -8100,6 +8114,9 @@ struct option md_longopts[] =
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
      || defined (TE_PE) || defined (TE_PEP))
   {"64", no_argument, NULL, OPTION_64},
+#endif
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  {"n32", no_argument, NULL, OPTION_N32},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
   {"march", required_argument, NULL, OPTION_MARCH},
@@ -8172,6 +8189,28 @@ md_parse_option (int c, char *arg)
 	  as_fatal (_("No compiled in support for x86_64"));
 	free (list);
       }
+      break;
+#endif
+
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+    case OPTION_N32:
+      if (IS_ELF)
+	{
+	  const char **list, **l;
+
+	  list = bfd_target_list ();
+	  for (l = list; *l != NULL; l++)
+	    if (CONST_STRNEQ (*l, "elf32-x86-64"))
+	      {
+		default_arch = "x86_64:32";
+		break;
+	      }
+	  if (*l == NULL)
+	    as_fatal (_("No compiled in support for 32bit x86_64"));
+	  free (list);
+	}
+      else
+	as_fatal (_("32bit x86_64 is only supported for ELF"));
       break;
 #endif
 
@@ -8438,7 +8477,7 @@ md_show_usage (FILE *stream)
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
      || defined (TE_PE) || defined (TE_PEP))
   fprintf (stream, _("\
-  --32/--64               generate 32bit/64bit code\n"));
+  --32/--64/--n32         generate 32bit/64bit/n32bit code\n"));
 #endif
 #ifdef SVR4_COMMENT_CHARS
   fprintf (stream, _("\
@@ -8486,8 +8525,14 @@ md_show_usage (FILE *stream)
 const char *
 i386_target_format (void)
 {
-  if (!strcmp (default_arch, "x86_64"))
-    update_code_flag (CODE_64BIT, 1);
+  if (!strncmp (default_arch, "x86_64", 6))
+    {
+      update_code_flag (CODE_64BIT, 1);
+      if (default_arch[6] == '\0')
+	x86_elf_abi = X86_64_LP64_ABI;
+      else
+	x86_elf_abi = X86_64_ILP32_ABI;
+    }
   else if (!strcmp (default_arch, "i386"))
     update_code_flag (CODE_32BIT, 1);
   else
@@ -8519,20 +8564,32 @@ i386_target_format (void)
 #if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
     case bfd_target_elf_flavour:
       {
-	if (flag_code == CODE_64BIT)
+	const char *format;
+
+	switch (x86_elf_abi)
 	  {
-	    object_64bit = 1;
+	  default:
+	    format = ELF_TARGET_FORMAT;
+	    break;
+	  case X86_64_LP64_ABI:
 	    use_rela_relocations = 1;
+	    object_64bit = 1;
+	    format = ELF_TARGET_FORMAT64;
+	    break;
+	  case X86_64_ILP32_ABI:
+	    use_rela_relocations = 1;
+	    object_64bit = 1;
+	    format = ELF_TARGET_FORMAT32;
+	    break;
 	  }
 	if (cpu_arch_isa == PROCESSOR_L1OM)
 	  {
-	    if (flag_code != CODE_64BIT)
+	    if (x86_elf_abi != X86_64_LP64_ABI)
 	      as_fatal (_("Intel L1OM is 64bit only"));
 	    return ELF_TARGET_L1OM_FORMAT;
 	  }
 	else
-	  return (flag_code == CODE_64BIT
-		  ? ELF_TARGET_FORMAT64 : ELF_TARGET_FORMAT);
+	  return format;
       }
 #endif
 #if defined (OBJ_MACH_O)

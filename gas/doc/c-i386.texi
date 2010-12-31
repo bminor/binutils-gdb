@@ -56,11 +56,14 @@ dependent options:
 @table @gcctabopt
 @cindex @samp{--32} option, i386
 @cindex @samp{--32} option, x86-64
+@cindex @samp{--n32} option, i386
+@cindex @samp{--n32} option, x86-64
 @cindex @samp{--64} option, i386
 @cindex @samp{--64} option, x86-64
-@item --32 | --64
+@item --32 | --n32 | --64
 Select the word size, either 32 bits or 64 bits. Selecting 32-bit
 implies Intel i386 architecture, while 64-bit implies AMD x86-64
+architecture.  @samp{--n32} selects 32bit word size with AMD x86-64
 architecture.
 
 These options are only available with the ELF object file format, and

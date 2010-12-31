@@ -1,3 +1,18 @@
+2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (x86_elf_abi): New.
+	(i386_mach): Return bfd_mach_x64_32 for ILP32.
+	(OPTION_N32): Likewise.
+	(md_longopts): Add "n32" for ELF.
+	(md_parse_option): Handle OPTION_N32.
+	(md_show_usage): Add --n32.
+	(i386_target_format): Update and check x86_elf_abi.
+
+	* config/tc-i386.h (ELF_TARGET_FORMAT32): New.
+
+	* doc/as.texinfo: Document --n32.
+	* doc/c-i386.texi: Likewise.
+
 2010-12-26  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	PR gas/11395

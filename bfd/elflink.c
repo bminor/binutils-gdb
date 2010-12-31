@@ -10690,7 +10690,34 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  else
 	    {
 	      if (! _bfd_default_link_order (abfd, info, o, p))
-		goto error_return;
+		{
+		  if (p->type == bfd_indirect_link_order
+		      && (bfd_get_flavour (sub)
+			  == bfd_target_elf_flavour)
+		      && (elf_elfheader (sub)->e_ident[EI_CLASS]
+			  != bed->s->elfclass))
+		    {
+		      const char *iclass, *oclass;
+
+		      if (bed->s->elfclass == ELFCLASS64)
+			{
+			  iclass = "ELFCLASS32";
+			  oclass = "ELFCLASS64";
+			}
+		      else
+			{
+			  iclass = "ELFCLASS64";
+			  oclass = "ELFCLASS32";
+			}
+
+		      bfd_set_error (bfd_error_wrong_format);
+		      (*_bfd_error_handler)
+			(_("%B: file class %s incompatible with %s"),
+			 sub, iclass, oclass);
+		    }
+
+		  goto error_return;
+		}
 	    }
 	}
     }
@@ -12701,4 +12728,58 @@ _bfd_elf_copy_link_hash_symbol_type (bfd *abfd ATTRIBUTE_UNUSED,
   struct elf_link_hash_entry *ehsrc = (struct elf_link_hash_entry *)hsrc;
 
   ehdest->type = ehsrc->type;
+}
+
+/* Append a RELA relocation REL to section S in BFD.  */
+
+void
+elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rela);
+  BFD_ASSERT (loc + bed->s->sizeof_rela <= s->contents + s->size);
+  bed->s->swap_reloca_out (abfd, rel, loc);
+}
+
+/* Append a REL relocation REL to section S in BFD.  */
+
+void
+elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rel);
+  BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
+  bed->s->swap_reloca_out (abfd, rel, loc);
+}
+
+/* Function for ELF64_R_INFO.  */
+
+bfd_vma
+elf64_r_info (bfd_vma sym, bfd_vma type)
+{
+  return ELF64_R_INFO (sym, type);
+}
+
+/* Function for ELF32_R_INFO.  */
+
+bfd_vma
+elf32_r_info (bfd_vma sym, bfd_vma type)
+{
+  return ELF32_R_INFO (sym, type);
+}
+
+/* Function for ELF64_R_SYM .  */
+
+bfd_vma
+elf64_r_sym (bfd_vma r_info)
+{
+  return ELF64_R_SYM (r_info);
+}
+
+/* Function for ELF32_R_SYM .  */
+
+bfd_vma
+elf32_r_sym (bfd_vma r_info)
+{
+  return ELF32_R_SYM (r_info);
 }

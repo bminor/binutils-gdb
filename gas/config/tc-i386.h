@@ -76,6 +76,10 @@ extern unsigned long i386_mach (void);
 #define ELF_TARGET_FORMAT64	"elf64-x86-64"
 #endif
 
+#ifndef ELF_TARGET_FORMAT32
+#define ELF_TARGET_FORMAT32	"elf32-x86-64"
+#endif
+
 #ifndef ELF_TARGET_L1OM_FORMAT
 #define ELF_TARGET_L1OM_FORMAT	"elf64-l1om"
 #endif

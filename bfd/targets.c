@@ -720,6 +720,7 @@ extern const bfd_target bfd_elf64_tradlittlemips_vec;
 extern const bfd_target bfd_elf64_x86_64_freebsd_vec;
 extern const bfd_target bfd_elf64_x86_64_sol2_vec;
 extern const bfd_target bfd_elf64_x86_64_vec;
+extern const bfd_target bfd_elf32_x86_64_vec;
 extern const bfd_target bfd_elf64_l1om_freebsd_vec;
 extern const bfd_target bfd_elf64_l1om_vec;
 extern const bfd_target bfd_mmo_vec;
@@ -1072,6 +1073,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf64_x86_64_freebsd_vec,
 	&bfd_elf64_x86_64_sol2_vec,
 	&bfd_elf64_x86_64_vec,
+	&bfd_elf32_x86_64_vec,
 	&bfd_elf64_l1om_freebsd_vec,
 	&bfd_elf64_l1om_vec,
 	&bfd_mmo_vec,
