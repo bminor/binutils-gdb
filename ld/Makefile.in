@@ -490,10 +490,14 @@ ALL_EMULATION_SOURCES = \
 	eelf32bmip.c \
 	eelf32bmipn32.c \
 	eelf32btsmip.c \
+	eelf32btsmip_fbsd.c \
 	eelf32crx.c \
 	eelf32btsmipn32.c \
+	eelf32btsmipn32_fbsd.c \
 	eelf32ltsmip.c \
+	eelf32ltsmip_fbsd.c \
 	eelf32ltsmipn32.c \
+	eelf32ltsmipn32_fbsd.c \
 	eelf32ebmip.c \
 	eelf32ebmipvxworks.c \
 	eelf32elmip.c \
@@ -756,7 +760,9 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64alpha_nbsd.c \
 	eelf64bmip.c \
 	eelf64btsmip.c \
+	eelf64btsmip_fbsd.c \
 	eelf64ltsmip.c \
+	eelf64ltsmip_fbsd.c \
 	eelf64hppa.c \
 	eelf64mmix.c \
 	emmo.c \
@@ -1065,7 +1071,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32bmip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32bmipn32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32btsmip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32btsmip_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32btsmipn32.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32btsmipn32_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cr16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cr16c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32crx.Po@am__quote@
@@ -1088,7 +1096,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppcnto.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppcsim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ltsmip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ltsmip_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ltsmipn32.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ltsmipn32_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32m32c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32mb_linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32mcore.Po@am__quote@
@@ -1124,9 +1134,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64alpha_nbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64bmip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64btsmip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64btsmip_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64hppa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ltsmip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ltsmip_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64mmix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ppc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386.Po@am__quote@
@@ -2357,6 +2369,10 @@ eelf32btsmip.c: $(srcdir)/emulparams/elf32btsmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32btsmip "$(tdir_elf32btsmip)"
+eelf32btsmip_fbsd.c: $(srcdir)/emulparams/elf32btsmip_fbsd.sh \
+  $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32btsmip_fbsd "$(tdir_elf32btsmip_fbsd)"
 eelf32crx.c: $(srcdir)/emulparams/elf32crx.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/crxelf.em \
   $(srcdir)/scripttempl/elf32crx.sc ${GEN_DEPENDS}
@@ -2365,16 +2381,30 @@ eelf32btsmipn32.c: $(srcdir)/emulparams/elf32btsmipn32.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32btsmipn32 "$(tdir_elf32btsmipn32)"
+eelf32btsmipn32_fbsd.c: $(srcdir)/emulparams/elf32btsmipn32_fbsd.sh \
+  $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32btsmipn32_fbsd "$(tdir_elf32btsmipn32_fbsd)"
 eelf32ltsmip.c: $(srcdir)/emulparams/elf32ltsmip.sh \
   $(srcdir)/emulparams/elf32btsmip.sh $(srcdir)/emulparams/elf32bmip.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ltsmip "$(tdir_elf32ltsmip)"
+eelf32ltsmip_fbsd.c: $(srcdir)/emulparams/elf32ltsmip_fbsd.sh \
+  $(srcdir)/emulparams/elf32btsmip.sh $(srcdir)/emulparams/elf32bmip.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ltsmip_fbsd "$(tdir_elf32ltsmip_fbsd)"
 eelf32ltsmipn32.c: $(srcdir)/emulparams/elf32ltsmipn32.sh \
   $(srcdir)/emulparams/elf32btsmipn32.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ltsmipn32 "$(tdir_elf32ltsmipn32)"
+eelf32ltsmipn32_fbsd.c: $(srcdir)/emulparams/elf32ltsmipn32_fbsd.sh \
+  $(srcdir)/emulparams/elf32btsmipn32.sh \
+  $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ltsmipn32_fbsd "$(tdir_elf32ltsmipn32_fbsd)"
 eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -2582,11 +2612,21 @@ eelf64btsmip.c: $(srcdir)/emulparams/elf64btsmip.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64btsmip "$(tdir_elf64btsmip)"
+eelf64btsmip_fbsd.c: $(srcdir)/emulparams/elf64btsmip_fbsd.sh \
+  $(srcdir)/emulparams/elf64bmip-defs.sh \
+  $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64btsmip_fbsd "$(tdir_elf64btsmip_fbsd)"
 eelf64ltsmip.c: $(srcdir)/emulparams/elf64ltsmip.sh \
   $(srcdir)/emulparams/elf64btsmip.sh $(srcdir)/emulparams/elf64bmip-defs.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64ltsmip "$(tdir_elf64ltsmip)"
+eelf64ltsmip_fbsd.c: $(srcdir)/emulparams/elf64ltsmip_fbsd.sh \
+  $(srcdir)/emulparams/elf64btsmip_fbsd.sh $(srcdir)/emulparams/elf64bmip-defs.sh \
+  $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
+  $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64ltsmip_fbsd "$(tdir_elf64ltsmip_fbsd)"
 eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386 "$(tdir_elf_i386)"

@@ -12084,10 +12084,10 @@ _ACEOF
 	esac
 	# Decide which ABI to target by default.
 	case ${target} in
-	  mips64*-linux* | mips-sgi-irix6*)
+	  mips64*-linux* | mips-sgi-irix6* | mips64*-freebsd* | mips64*-kfreebsd*-gnu)
 	    mips_default_abi=N32_ABI
 	    ;;
-	  mips*-linux*)
+	  mips*-linux* | mips*-freebsd* | mips*-kfreebsd*-gnu)
 	    mips_default_abi=O32_ABI
 	    ;;
 	  mips64*-openbsd*)
@@ -12251,7 +12251,8 @@ _ACEOF
 
     case ${generic_target}-${fmt} in
       mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
-      mips*-*-linux*-*) case "$endian" in
+      mips*-*-linux*-* | mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
+			case "$endian" in
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;

@@ -1,3 +1,20 @@
+2010-12-31  Robert Millan  <rmh@gnu.org>
+
+	* configure.tgt: Recognize mips-freebsd and mips-kfreebsd-gnu.
+
+	* emulparams/elf32btsmip_fbsd.sh: New file.
+	* emulparams/elf32btsmipn32_fbsd.sh: Likewise.
+	* emulparams/elf32ltsmip_fbsd.sh: Likewise.
+	* emulparams/elf32ltsmipn32_fbsd.sh: Likewise.
+	* emulparams/elf64btsmip_fbsd.sh: Likewise.
+	* emulparams/elf64ltsmip_fbsd.sh: Likewise.
+
+	* Makefile.am: Add build rules for `eelf32btsmip_fbsd.c',
+	`eelf32btsmipn32_fbsd.c', `eelf32ltsmip_fbsd.c',
+	`eelf32ltsmipn32_fbsd.c', `eelf64btsmip_fbsd.c' and
+	`eelf64ltsmip_fbsd.c'.
+	* Makefile.in: Regenerate.
+
 2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/elf32_x86_64.sh: New.

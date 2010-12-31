@@ -290,6 +290,8 @@ case ${generic_target} in
   mips-*-lnews*)			fmt=ecoff em=lnews ;;
   mips-*-riscos*)			fmt=ecoff ;;
   mips*-*-linux*)			fmt=elf em=tmips ;;
+  mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
+					fmt=elf em=freebsd ;;
   mips-*-sysv4*MP* | mips-*-gnu*)	fmt=elf em=tmips ;;
   mips*-sde-elf*)			fmt=elf em=tmips ;;
   mips-*-sysv*)				fmt=ecoff ;;

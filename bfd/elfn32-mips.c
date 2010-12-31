@@ -2547,3 +2547,36 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 
 /* Include the target file again for this target.  */
 #include "elf32-target.h"
+
+
+/* FreeBSD support.  */
+
+#undef TARGET_LITTLE_SYM
+#undef TARGET_LITTLE_NAME
+#undef TARGET_BIG_SYM
+#undef TARGET_BIG_NAME
+
+#define	TARGET_LITTLE_SYM		bfd_elf32_ntradlittlemips_freebsd_vec
+#define	TARGET_LITTLE_NAME		"elf32-ntradlittlemips-freebsd"
+#define	TARGET_BIG_SYM			bfd_elf32_ntradbigmips_freebsd_vec
+#define	TARGET_BIG_NAME			"elf32-ntradbigmips-freebsd"
+
+#undef	ELF_OSABI
+#define	ELF_OSABI			ELFOSABI_FREEBSD
+
+/* The kernel recognizes executables as valid only if they carry a
+   "FreeBSD" label in the ELF header.  So we put this label on all
+   executables and (for simplicity) also all other object files.  */
+
+static void
+elf_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
+{
+  _bfd_elf_set_osabi (abfd, info);
+}
+
+#undef	elf_backend_post_process_headers
+#define	elf_backend_post_process_headers	elf_fbsd_post_process_headers
+#undef	elf32_bed
+#define elf32_bed				elf32_fbsd_tradbed
+
+#include "elf32-target.h"

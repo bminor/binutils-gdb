@@ -1,3 +1,22 @@
+2010-12-31  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/e32el-rel2.d: Accept any file format.
+	* gas/mips/elf-rel.d: Likewise.
+	* gas/mips/elf-rel2.d: Likewise.
+	* gas/mips/elf-rel3.d: Likewise.
+	* gas/mips/elfel-rel.d: Likewise.
+	* gas/mips/elfel-rel2.d: Likewise.
+	* gas/mips/elfel-rel3.d: Likewise.
+	* gas/mips/ldstla-32-mips3-shared.d: Likewise.
+	* gas/mips/ldstla-32-mips3.d: Likewise.
+	* gas/mips/ldstla-32-shared.d: Likewise.
+	* gas/mips/ldstla-32.d: Likewise.
+	* gas/mips/ldstla-n64-shared.d: Likewise.
+	* gas/mips/ldstla-n64.d: Likewise.
+	* gas/mips/noat-1.d: Likewise.
+	* gas/mips/set-arch.d: Likewise.
+	* gas/mips/tls-o32.d: Likewise.
+
 2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/lns/ilp32.exp: New.

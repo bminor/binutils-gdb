@@ -1016,6 +1016,40 @@ case "${targ}" in
     want64=true
     ;;
 #ifdef BFD64
+  mips64*el-*-freebsd* | mips64*el-*-kfreebsd*-gnu)
+    # FreeBSD vectors
+    targ_defvec=bfd_elf32_ntradlittlemips_freebsd_vec
+    targ_selvecs="bfd_elf32_ntradbigmips_freebsd_vec bfd_elf32_tradlittlemips_freebsd_vec bfd_elf32_tradbigmips_freebsd_vec bfd_elf64_tradlittlemips_freebsd_vec bfd_elf64_tradbigmips_freebsd_vec"
+    # Generic vectors
+    targ_selvecs="${targ_selvecs} bfd_elf32_ntradlittlemips_vec bfd_elf32_ntradbigmips_vec bfd_elf32_tradlittlemips_vec bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
+    want64=true
+    ;;
+  mips64*-*-freebsd* | mips64*-*-kfreebsd*-gnu)
+    # FreeBSD vectors
+    targ_defvec=bfd_elf32_ntradbigmips_freebsd_vec
+    targ_selvecs="bfd_elf32_ntradlittlemips_freebsd_vec bfd_elf32_tradbigmips_freebsd_vec bfd_elf32_tradlittlemips_freebsd_vec bfd_elf64_tradbigmips_freebsd_vec bfd_elf64_tradlittlemips_freebsd_vec"
+    # Generic vectors
+    targ_selvecs="${targ_selvecs} bfd_elf32_ntradbigmips_vec bfd_elf32_ntradlittlemips_vec bfd_elf32_tradbigmips_vec bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
+    want64=true
+    ;;
+#endif
+  mips*el-*-freebsd* | mips*el-*-kfreebsd*-gnu)
+    # FreeBSD vectors
+    targ_defvec=bfd_elf32_tradlittlemips_freebsd_vec
+    targ_selvecs="bfd_elf32_tradbigmips_freebsd_vec bfd_elf32_ntradlittlemips_freebsd_vec bfd_elf64_tradlittlemips_freebsd_vec bfd_elf32_ntradbigmips_freebsd_vec bfd_elf64_tradbigmips_freebsd_vec"
+    # Generic vectors
+    targ_selvecs="${targ_selvecs} bfd_elf32_tradlittlemips_vec bfd_elf32_tradbigmips_vec bfd_elf32_ntradlittlemips_vec bfd_elf64_tradlittlemips_vec bfd_elf32_ntradbigmips_vec bfd_elf64_tradbigmips_vec"
+    want64=true
+    ;;
+  mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
+    # FreeBSD vectors
+    targ_defvec=bfd_elf32_tradbigmips_freebsd_vec
+    targ_selvecs="bfd_elf32_tradlittlemips_freebsd_vec bfd_elf32_ntradbigmips_freebsd_vec bfd_elf64_tradbigmips_freebsd_vec bfd_elf32_ntradlittlemips_freebsd_vec bfd_elf64_tradlittlemips_freebsd_vec"
+    # Generic vectors
+    targ_selvecs="${targ_selvecs} bfd_elf32_tradbigmips_vec bfd_elf32_tradlittlemips_vec bfd_elf32_ntradbigmips_vec bfd_elf64_tradbigmips_vec bfd_elf32_ntradlittlemips_vec bfd_elf64_tradlittlemips_vec"
+    want64=true
+    ;;
+#ifdef BFD64
   mmix-*-*)
     targ_defvec=bfd_elf64_mmix_vec
     targ_selvecs=bfd_mmo_vec

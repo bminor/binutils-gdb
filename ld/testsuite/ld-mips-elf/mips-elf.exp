@@ -109,6 +109,9 @@ if { $linux_gnu } {
 if { [istarget mips64*-linux-gnu] } {
     set o32_as_flags "-32 -EB"
     set o32_ld_flags "-melf32btsmip"
+} elseif { [istarget mips64*-*freebsd*] } {
+    set o32_as_flags "-32 -EB"
+    set o32_ld_flags "-melf32btsmip_fbsd"
 } else {
     set o32_as_flags ""
     set o32_ld_flags ""

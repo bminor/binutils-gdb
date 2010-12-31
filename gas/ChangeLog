@@ -1,3 +1,16 @@
+2010-12-31  Robert Millan  <rmh@gnu.org>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (ELF_TARGET): New macro.  Generates target
+	names accordingly to whether TE_FreeBSD and whether TE_TMIPS
+	are defined.
+	(mips_target_format): Refactor code using ELF_TARGET().
+	(support_64bit_objects): Likewise.
+
+	* configure.in: Recognize mips-freebsd and mips-kfreebsd-gnu.
+	* configure.tgt: Likewise.
+	* configure: Regenerate.
+
 2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (x86_elf_abi): New.

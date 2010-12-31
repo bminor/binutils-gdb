@@ -1313,6 +1313,14 @@ static segT pdr_seg;
 
 /* The default target format to use.  */
 
+#if defined (TE_FreeBSD)
+#define ELF_TARGET(PREFIX, ENDIAN) PREFIX "trad" ENDIAN "mips-freebsd"
+#elif defined (TE_TMIPS)
+#define ELF_TARGET(PREFIX, ENDIAN) PREFIX "trad" ENDIAN "mips"
+#else
+#define ELF_TARGET(PREFIX, ENDIAN) PREFIX ENDIAN "mips"
+#endif
+
 const char *
 mips_target_format (void)
 {
@@ -1329,28 +1337,17 @@ mips_target_format (void)
 		? "elf32-bigmips-vxworks"
 		: "elf32-littlemips-vxworks");
 #endif
-#ifdef TE_TMIPS
-      /* This is traditional mips.  */
       return (target_big_endian
 	      ? (HAVE_64BIT_OBJECTS
-		 ? "elf64-tradbigmips"
+		 ? ELF_TARGET ("elf64-", "big")
 		 : (HAVE_NEWABI
-		    ? "elf32-ntradbigmips" : "elf32-tradbigmips"))
+		    ? ELF_TARGET ("elf32-n", "big")
+		    : ELF_TARGET ("elf32-", "big")))
 	      : (HAVE_64BIT_OBJECTS
-		 ? "elf64-tradlittlemips"
+		 ? ELF_TARGET ("elf64-", "little")
 		 : (HAVE_NEWABI
-		    ? "elf32-ntradlittlemips" : "elf32-tradlittlemips")));
-#else
-      return (target_big_endian
-	      ? (HAVE_64BIT_OBJECTS
-		 ? "elf64-bigmips"
-		 : (HAVE_NEWABI
-		    ? "elf32-nbigmips" : "elf32-bigmips"))
-	      : (HAVE_64BIT_OBJECTS
-		 ? "elf64-littlemips"
-		 : (HAVE_NEWABI
-		    ? "elf32-nlittlemips" : "elf32-littlemips")));
-#endif
+		    ? ELF_TARGET ("elf32-n", "little")
+		    : ELF_TARGET ("elf32-", "little"))));
     default:
       abort ();
       return NULL;
@@ -11264,14 +11261,8 @@ static int support_64bit_objects(void)
 
   list = bfd_target_list ();
   for (l = list; *l != NULL; l++)
-#ifdef TE_TMIPS
-    /* This is traditional mips */
-    if (strcmp (*l, "elf64-tradbigmips") == 0
-	|| strcmp (*l, "elf64-tradlittlemips") == 0)
-#else
-    if (strcmp (*l, "elf64-bigmips") == 0
-	|| strcmp (*l, "elf64-littlemips") == 0)
-#endif
+    if (strcmp (*l, ELF_TARGET ("elf64-", "big")) == 0
+	|| strcmp (*l, ELF_TARGET ("elf64-", "little")) == 0)
       break;
   yes = (*l != NULL);
   free (list);

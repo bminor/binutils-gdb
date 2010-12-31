@@ -3,7 +3,7 @@
 #name: MIPS ld-st-la constants (ABI n64)
 #source: ldstla-n64.s
 
-.*: +file format elf64-.*mips
+.*: +file format .*
 
 Disassembly of section \.text:
 

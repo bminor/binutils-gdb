@@ -3,7 +3,7 @@
 #name: MIPS ld-st-la constants (ABI o32, mips3, shared)
 #source: ldstla-32-mips3.s
 
-.*: +file format elf32-.*mips
+.*: +file format .*
 
 Disassembly of section \.text:
 

@@ -1,3 +1,27 @@
+2010-12-31  Robert Millan  <rmh@gnu.org>
+
+	* config.bfd: Recognize mips-freebsd and mips-kfreebsd-gnu.
+	* configure.host: Likewise.
+	* configure.in: Support for `bfd_elf32_ntradbigmips_freebsd_vec',
+	`bfd_elf32_ntradlittlemips_freebsd_vec',
+	`bfd_elf32_tradbigmips_freebsd_vec',
+	`bfd_elf32_tradlittlemips_freebsd_vec',
+	`bfd_elf64_tradbigmips_freebsd_vec' and
+	`bfd_elf64_tradlittlemips_freebsd_vec'.
+	* configure: Regenerate.
+	* elf32-mips.c: New target for FreeBSD support
+	(same as traditional MIPS but overrides ELF_OSABI
+	with ELFOSABI_FREEBSD).
+	* elf64-mips.c: Likewise.
+	* elfn32-mips.c: Likewise.
+	* targets.c (_bfd_target_vector): Add
+	`bfd_elf32_ntradbigmips_freebsd_vec',
+	`bfd_elf32_ntradlittlemips_freebsd_vec',
+	`bfd_elf32_tradbigmips_freebsd_vec',
+	`bfd_elf32_tradlittlemips_freebsd_vec',
+	`bfd_elf64_tradbigmips_freebsd_vec' and
+	`bfd_elf64_tradlittlemips_freebsd_vec'.
+
 2010-12-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfcode.h (NAME(elf,r_info)): New.
