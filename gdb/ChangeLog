@@ -11,6 +11,30 @@
 	* breakpoint.h: Ditto.
 	* buildsym.h: Ditto.
 
+	* charset.c: Ditto.
+	* charset.h: Ditto.
+	* c-lang.c: Ditto.
+	* c-lang.h: Ditto.
+	* coff-pe-read.c: Ditto.
+	* coff-pe-read.h: Ditto.
+	* coffread.c: Ditto.
+	* command.h: Ditto.
+	* complaints.c: Ditto.
+	* complaints.h: Ditto.
+	* completer.c: Ditto.
+	* completer.h: Ditto.
+	* corefile.c: Ditto.
+	* corelow.c: Ditto.
+	* core-regset.c: Ditto.
+	* cp-abi.c: Ditto.
+	* cp-abi.h: Ditto.
+	* cp-namespace.c: Ditto.
+	* cp-support.c: Ditto.
+	* cp-support.h: Ditto.
+	* cp-valprint.c: Ditto.
+	* cp-typeprint.c: Ditto.
+	* c-valprint.c: Ditto.
+
 2010-12-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-tdep.c (bfin_register_type): Move || to start of line.

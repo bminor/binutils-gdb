@@ -1,7 +1,7 @@
 /* Machine independent GDB support for core files on systems using "regsets".
 
-   Copyright (C) 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003, 2007, 2008,
-   2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003, 2007,
+   2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -59,7 +59,9 @@
 
 static void
 fetch_core_registers (struct regcache *regcache,
-		      char *core_reg_sect, unsigned core_reg_size, int which,
+		      char *core_reg_sect,
+		      unsigned core_reg_size,
+		      int which,
 		      CORE_ADDR reg_addr)
 {
   gdb_gregset_t gregset;
@@ -86,7 +88,8 @@ fetch_core_registers (struct regcache *regcache,
 	{
 	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
 	  if (gdbarch_fp0_regnum (get_regcache_arch (regcache)) >= 0)
-	    supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset_p);
+	    supply_fpregset (regcache,
+			     (const gdb_fpregset_t *) fpregset_p);
 	}
       break;
 

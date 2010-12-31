@@ -26,8 +26,8 @@
 
 extern void _initialize_complaints (void);
 
-/* Should each complaint message be self explanatory, or should we assume that
-   a series of complaints is being produced?  */
+/* Should each complaint message be self explanatory, or should we
+   assume that a series of complaints is being produced?  */
 
 /* case 1: First message of a series that must
    start off with explanation.  case 2: Subsequent message of a series
@@ -165,11 +165,13 @@ static int stop_whining = 0;
    later handling.  */
 
 static void ATTRIBUTE_PRINTF (4, 0)
-vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
+vcomplaint (struct complaints **c, const char *file, 
+	    int line, const char *fmt,
 	    va_list args)
 {
   struct complaints *complaints = get_complaints (c);
-  struct complain *complaint = find_complaint (complaints, file, line, fmt);
+  struct complain *complaint = find_complaint (complaints, file, 
+					       line, fmt);
   enum complaint_series series;
 
   gdb_assert (complaints != NULL);
@@ -184,7 +186,8 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
     series = complaints->series;
 
   if (complaint->file != NULL)
-    internal_vwarning (complaint->file, complaint->line, complaint->fmt, args);
+    internal_vwarning (complaint->file, complaint->line, 
+		       complaint->fmt, args);
   else if (deprecated_warning_hook)
     (*deprecated_warning_hook) (complaint->fmt, args);
   else
@@ -294,7 +297,8 @@ clear_complaints (struct complaints **c, int less_verbose, int noisy)
     case SUBSEQUENT_MESSAGE:
       /* It would be really nice to use begin_line() here.
          Unfortunately that function doesn't track GDB_STDERR and
-         consequently will sometimes supress a line when it shouldn't.  */
+         consequently will sometimes supress a line when it
+         shouldn't.  */
       fputs_unfiltered ("\n", gdb_stderr);
       break;
     default:
@@ -321,7 +325,8 @@ complaints_show_value (struct ui_file *file, int from_tty,
 void
 _initialize_complaints (void)
 {
-  add_setshow_zinteger_cmd ("complaints", class_support, &stop_whining, _("\
+  add_setshow_zinteger_cmd ("complaints", class_support, 
+			    &stop_whining, _("\
 Set max number of complaints about incorrect symbols."), _("\
 Show max number of complaints about incorrect symbols."), NULL,
 			    NULL, complaints_show_value,

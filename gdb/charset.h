@@ -60,8 +60,10 @@ enum transliterations
    caller is responsible for initializing the obstack, and for
    destroying the obstack should an error occur.
    TRANSLIT specifies how invalid conversions should be handled.  */
+
 void convert_between_encodings (const char *from, const char *to,
-				const gdb_byte *bytes, unsigned int num_bytes,
+				const gdb_byte *bytes,
+				unsigned int num_bytes,
 				int width, struct obstack *output,
 				enum transliterations translit);
 
@@ -91,7 +93,8 @@ struct wchar_iterator;
    This function either returns a new character set iterator, or calls
    error.  The result can be freed using a cleanup; see
    make_cleanup_wchar_iterator.  */
-struct wchar_iterator *make_wchar_iterator (const gdb_byte *input, size_t bytes,
+struct wchar_iterator *make_wchar_iterator (const gdb_byte *input,
+					    size_t bytes,
 					    const char *charset,
 					    size_t width);
 

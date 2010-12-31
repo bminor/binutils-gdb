@@ -24,7 +24,8 @@
 
 struct objfile;
 
-/* Read the export table and convert it to minimal symbol table entries */
+/* Read the export table and convert it to minimal symbol table
+   entries */
 extern void read_pe_exported_syms (struct objfile *objfile);
 
 #endif /* !defined (COFF_PE_READ_H) */

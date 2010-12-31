@@ -238,8 +238,10 @@ show_target_charset_name (struct ui_file *file, int from_tty,
 
 static const char *target_wide_charset_name = "auto";
 static void
-show_target_wide_charset_name (struct ui_file *file, int from_tty,
-			       struct cmd_list_element *c, const char *value)
+show_target_wide_charset_name (struct ui_file *file, 
+			       int from_tty,
+			       struct cmd_list_element *c, 
+			       const char *value)
 {
   if (!strcmp (value, "auto"))
     fprintf_filtered (file,
@@ -338,9 +340,10 @@ validate (struct gdbarch *gdbarch)
 
 /* This is the sfunc for the 'set charset' command.  */
 static void
-set_charset_sfunc (char *charset, int from_tty, struct cmd_list_element *c)
+set_charset_sfunc (char *charset, int from_tty, 
+		   struct cmd_list_element *c)
 {
-  /* CAREFUL: set the target charset here as well. */
+  /* CAREFUL: set the target charset here as well.  */
   target_charset_name = host_charset_name;
   validate (get_current_arch ());
 }
@@ -372,12 +375,14 @@ set_target_wide_charset_sfunc (char *charset, int from_tty,
 
 /* sfunc for the 'show charset' command.  */
 static void
-show_charset (struct ui_file *file, int from_tty, struct cmd_list_element *c,
+show_charset (struct ui_file *file, int from_tty, 
+	      struct cmd_list_element *c,
 	      const char *name)
 {
   show_host_charset_name (file, from_tty, c, host_charset_name);
   show_target_charset_name (file, from_tty, c, target_charset_name);
-  show_target_wide_charset_name (file, from_tty, c, target_wide_charset_name);
+  show_target_wide_charset_name (file, from_tty, c, 
+				 target_wide_charset_name);
 }
 
 
@@ -579,8 +584,8 @@ struct wchar_iterator
 
 /* Create a new iterator.  */
 struct wchar_iterator *
-make_wchar_iterator (const gdb_byte *input, size_t bytes, const char *charset,
-		     size_t width)
+make_wchar_iterator (const gdb_byte *input, size_t bytes, 
+		     const char *charset, size_t width)
 {
   struct wchar_iterator *result;
   iconv_t desc;
@@ -640,21 +645,21 @@ wchar_iterate (struct wchar_iterator *iter,
       size_t out_avail = out_request * sizeof (gdb_wchar_t);
       size_t num;
       size_t r = iconv (iter->desc,
-			(ICONV_CONST char **) &iter->input, &iter->bytes,
-			&outptr, &out_avail);
+			(ICONV_CONST char **) &iter->input, 
+			&iter->bytes, &outptr, &out_avail);
 
       if (r == (size_t) -1)
 	{
 	  switch (errno)
 	    {
 	    case EILSEQ:
-	      /* Invalid input sequence.  We still might have converted a
-		 character; if so, return it.  */
+	      /* Invalid input sequence.  We still might have
+		 converted a character; if so, return it.  */
 	      if (out_avail < out_request * sizeof (gdb_wchar_t))
 		break;
 	      
-	      /* Otherwise skip the first invalid character, and let the
-		 caller know about it.  */
+	      /* Otherwise skip the first invalid character, and let
+		 the caller know about it.  */
 	      *out_result = wchar_iterate_invalid;
 	      *ptr = iter->input;
 	      *len = iter->width;
@@ -794,9 +799,9 @@ find_charset_names (void)
   int fail = 1;
   struct gdb_environ *iconv_env;
 
-  /* Older iconvs, e.g. 2.2.2, don't omit the intro text if stdout is not
-     a tty.  We need to recognize it and ignore it.  This text is subject
-     to translation, so force LANGUAGE=C.  */
+  /* Older iconvs, e.g. 2.2.2, don't omit the intro text if stdout is
+     not a tty.  We need to recognize it and ignore it.  This text is
+     subject to translation, so force LANGUAGE=C.  */
   iconv_env = make_environ ();
   init_environ (iconv_env);
   set_in_environ (iconv_env, "LANGUAGE", "C");
@@ -845,8 +850,8 @@ find_charset_names (void)
 	  buf[len] = '\0';
 
 	  /* libiconv will print multiple entries per line, separated
-	     by spaces.  Older iconvs will print multiple entries per line,
-	     indented by two spaces, and separated by ", "
+	     by spaces.  Older iconvs will print multiple entries per
+	     line, indented by two spaces, and separated by ", "
 	     (i.e. the human readable form).  */
 	  start = buf;
 	  while (1)
@@ -933,15 +938,15 @@ _initialize_charset (void)
      leak a little memory, if the user later changes the host charset,
      but that doesn't matter much.  */
   auto_host_charset_name = xstrdup (nl_langinfo (CODESET));
-  /* Solaris will return `646' here -- but the Solaris iconv then
-     does not accept this.  Darwin (and maybe FreeBSD) may return "" here,
+  /* Solaris will return `646' here -- but the Solaris iconv then does
+     not accept this.  Darwin (and maybe FreeBSD) may return "" here,
      which GNU libiconv doesn't like (infinite loop).  */
   if (!strcmp (auto_host_charset_name, "646") || !*auto_host_charset_name)
     auto_host_charset_name = "ASCII";
   auto_target_charset_name = auto_host_charset_name;
 #elif defined (USE_WIN32API)
   {
-    static char w32_host_default_charset[16]; /* "CP" + x<=5 digits + paranoia. */
+    static char w32_host_default_charset[16]; /* "CP" + x<=5 digits + paranoia.  */
 
     snprintf (w32_host_default_charset, sizeof w32_host_default_charset,
 	      "CP%d", GetACP());

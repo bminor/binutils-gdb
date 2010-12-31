@@ -52,9 +52,10 @@ static void call_extra_exec_file_hooks (char *filename);
 
 typedef void (*hook_type) (char *);
 
-hook_type deprecated_exec_file_display_hook;	/* the original hook */
-static hook_type *exec_file_extra_hooks;	/* array of additional hooks */
-static int exec_file_hook_count = 0;	/* size of array */
+hook_type deprecated_exec_file_display_hook;	/* The original hook.  */
+static hook_type *exec_file_extra_hooks;	/* Array of additional
+						   hooks.  */
+static int exec_file_hook_count = 0;		/* Size of array.  */
 
 /* Binary file diddling handle for the core file.  */
 
@@ -70,7 +71,7 @@ struct target_ops *core_target;
 void
 core_file_command (char *filename, int from_tty)
 {
-  dont_repeat ();		/* Either way, seems bogus. */
+  dont_repeat ();		/* Either way, seems bogus.  */
 
   if (core_target == NULL)
     error (_("GDB can't read core files on this machine."));
@@ -106,11 +107,13 @@ specify_exec_file_hook (void (*hook) (char *))
   if (deprecated_exec_file_display_hook != NULL)
     {
       /* There's already a hook installed.  Arrange to have both it
-       * and the subsequent hooks called. */
+	 and the subsequent hooks called.  */
       if (exec_file_hook_count == 0)
 	{
-	  /* If this is the first extra hook, initialize the hook array.  */
-	  exec_file_extra_hooks = (hook_type *) xmalloc (sizeof (hook_type));
+	  /* If this is the first extra hook, initialize the hook
+	     array.  */
+	  exec_file_extra_hooks = (hook_type *)
+	    xmalloc (sizeof (hook_type));
 	  exec_file_extra_hooks[0] = deprecated_exec_file_display_hook;
 	  deprecated_exec_file_display_hook = call_extra_exec_file_hooks;
 	  exec_file_hook_count = 1;
@@ -120,9 +123,9 @@ specify_exec_file_hook (void (*hook) (char *))
          Yes, it's inefficient to grow it by one each time but since
          this is hardly ever called it's not a big deal.  */
       exec_file_hook_count++;
-      new_array =
-	(hook_type *) xrealloc (exec_file_extra_hooks,
-				exec_file_hook_count * sizeof (hook_type));
+      new_array = (hook_type *)
+	xrealloc (exec_file_extra_hooks,
+		  exec_file_hook_count * sizeof (hook_type));
       exec_file_extra_hooks = new_array;
       exec_file_extra_hooks[exec_file_hook_count - 1] = hook;
     }
@@ -155,11 +158,11 @@ reopen_exec_file (void)
   struct stat st;
   struct cleanup *cleanups;
 
-  /* Don't do anything if there isn't an exec file. */
+  /* Don't do anything if there isn't an exec file.  */
   if (exec_bfd == NULL)
     return;
 
-  /* If the timestamp of the exec file has changed, reopen it. */
+  /* If the timestamp of the exec file has changed, reopen it.  */
   filename = xstrdup (bfd_get_filename (exec_bfd));
   cleanups = make_cleanup (xfree, filename);
   res = stat (filename, &st);
@@ -265,7 +268,7 @@ struct captured_read_memory_integer_arguments
 };
 
 /* Helper function for gdb_read_memory_integer().  DATA must be a
-   pointer to a captured_read_memory_integer_arguments struct. 
+   pointer to a captured_read_memory_integer_arguments struct.
    Return 1 if successful.  Note that the catch_errors() interface
    will return 0 if an error occurred while reading memory.  This
    choice of return code is so that we can distinguish between
@@ -274,7 +277,8 @@ struct captured_read_memory_integer_arguments
 static int
 do_captured_read_memory_integer (void *data)
 {
-  struct captured_read_memory_integer_arguments *args = (struct captured_read_memory_integer_arguments*) data;
+  struct captured_read_memory_integer_arguments *args
+    = (struct captured_read_memory_integer_arguments*) data;
   CORE_ADDR memaddr = args->memaddr;
   int len = args->len;
   enum bfd_endian byte_order = args->byte_order;
@@ -301,7 +305,7 @@ safe_read_memory_integer (CORE_ADDR memaddr, int len,
   args.byte_order = byte_order;
 
   status = catch_errors (do_captured_read_memory_integer, &args,
-                        "", RETURN_MASK_ALL);
+			 "", RETURN_MASK_ALL);
   if (status)
     *return_value = args.result;
 
@@ -309,7 +313,8 @@ safe_read_memory_integer (CORE_ADDR memaddr, int len,
 }
 
 LONGEST
-read_memory_integer (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
+read_memory_integer (CORE_ADDR memaddr, int len,
+		     enum bfd_endian byte_order)
 {
   gdb_byte buf[sizeof (LONGEST)];
 
@@ -318,7 +323,8 @@ read_memory_integer (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
 }
 
 ULONGEST
-read_memory_unsigned_integer (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
+read_memory_unsigned_integer (CORE_ADDR memaddr, int len,
+			      enum bfd_endian byte_order)
 {
   gdb_byte buf[sizeof (ULONGEST)];
 
@@ -362,9 +368,11 @@ read_memory_typed_address (CORE_ADDR addr, struct type *type)
   return extract_typed_address (buf, type);
 }
 
-/* Same as target_write_memory, but report an error if can't write.  */
+/* Same as target_write_memory, but report an error if can't
+   write.  */
 void
-write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr, int len)
+write_memory (CORE_ADDR memaddr, 
+	      const bfd_byte *myaddr, int len)
 {
   int status;
 
@@ -373,7 +381,8 @@ write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr, int len)
     memory_error (status, memaddr);
 }
 
-/* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
+/* Store VALUE at ADDR in the inferior as a LEN-byte unsigned
+   integer.  */
 void
 write_memory_unsigned_integer (CORE_ADDR addr, int len, 
 			       enum bfd_endian byte_order,
@@ -385,7 +394,8 @@ write_memory_unsigned_integer (CORE_ADDR addr, int len,
   write_memory (addr, buf, len);
 }
 
-/* Store VALUE at ADDR in the inferior as a LEN-byte signed integer.  */
+/* Store VALUE at ADDR in the inferior as a LEN-byte signed
+   integer.  */
 void
 write_memory_signed_integer (CORE_ADDR addr, int len, 
 			     enum bfd_endian byte_order,
@@ -405,15 +415,19 @@ char *gnutarget;
 static char *gnutarget_string;
 static void
 show_gnutarget_string (struct ui_file *file, int from_tty,
-		       struct cmd_list_element *c, const char *value)
+		       struct cmd_list_element *c,
+		       const char *value)
 {
-  fprintf_filtered (file, _("The current BFD target is \"%s\".\n"), value);
+  fprintf_filtered (file,
+		    _("The current BFD target is \"%s\".\n"), value);
 }
 
-static void set_gnutarget_command (char *, int, struct cmd_list_element *);
+static void set_gnutarget_command (char *, int,
+				   struct cmd_list_element *);
 
 static void
-set_gnutarget_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_gnutarget_command (char *ignore, int from_tty,
+		       struct cmd_list_element *c)
 {
   if (strcmp (gnutarget_string, "auto") == 0)
     gnutarget = NULL;

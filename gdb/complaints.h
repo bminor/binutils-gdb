@@ -30,10 +30,12 @@ struct complaints;
 extern struct complaints *symfile_complaints;
 
 /* Register a complaint.  */
-extern void complaint (struct complaints **complaints, const char *fmt,
+extern void complaint (struct complaints **complaints,
+		       const char *fmt,
 		       ...) ATTRIBUTE_PRINTF (2, 3);
 extern void internal_complaint (struct complaints **complaints,
-				const char *file, int line, const char *fmt,
+				const char *file, int line,
+				const char *fmt,
 				...) ATTRIBUTE_PRINTF (4, 5);
 
 /* Clear out / initialize all complaint counters that have ever been

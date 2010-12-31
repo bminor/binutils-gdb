@@ -37,13 +37,14 @@ struct type;
 struct demangle_component;
 
 /* This struct is designed to store data from using directives.  It
-   says that names from namespace IMPORT_SRC should be visible within namespace
-   IMPORT_DEST.  These form a linked list; NEXT is the next element of the
-   list.  If the imported namespace or declaration has been aliased within the
-   IMPORT_DEST namespace, ALIAS is set to a string representing the alias.
-   Otherwise, ALIAS is NULL.  DECLARATION is the name of the imported
-   declaration, if this import statement represents one.  Otherwise DECLARATION
-   is NULL and this import statement represents a namespace.
+   says that names from namespace IMPORT_SRC should be visible within
+   namespace IMPORT_DEST.  These form a linked list; NEXT is the next
+   element of the list.  If the imported namespace or declaration has
+   been aliased within the IMPORT_DEST namespace, ALIAS is set to a
+   string representing the alias.  Otherwise, ALIAS is NULL.
+   DECLARATION is the name of the imported declaration, if this import
+   statement represents one.  Otherwise DECLARATION is NULL and this
+   import statement represents a namespace.
 
    C++:      using namespace A;
    Fortran:  use A
@@ -66,15 +67,18 @@ struct demangle_component;
    import_dest = local scope of the import statement even such as ""
    alias = "LOCALNS"
    declaration = NULL
-   The namespace will get imported as the import_dest::LOCALNS namespace.
+   The namespace will get imported as the import_dest::LOCALNS
+   namespace.
 
-   C++ cannot express it, it would be something like:  using localname = A::x;
+   C++ cannot express it, it would be something like: using localname
+   = A::x;
    Fortran:  use A, only localname => x
    import_src = "A"
    import_dest = local scope of the import statement even such as ""
    alias = "localname"
    declaration = "x"
-   The declaration will get imported as localname or `import_dest`localname.  */
+   The declaration will get imported as localname or
+   `import_dest`localname.  */
 
 struct using_direct
 {
@@ -86,7 +90,8 @@ struct using_direct
 
   struct using_direct *next;
 
-  /* Used during import search to temporarily mark this node as searched.  */
+  /* Used during import search to temporarily mark this node as
+     searched.  */
   int searched;
 };
 
