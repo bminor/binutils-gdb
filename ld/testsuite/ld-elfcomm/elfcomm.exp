@@ -209,8 +209,8 @@ if { [ld_simple_link $ld tmpdir/common1.o $options] } {
 }
 
 # This test fails on MIPS because the backend sets type_change_ok.
-# The size change warning is suppressed.
-if {[istarget mips*-*-*]} {
+# The size change warning is suppressed.  Same on hppa64.
+if {[istarget mips*-*-*] || [istarget hppa*64*-*-*]} {
     if { ![regexp "Warning: alignment (\[0-9\]+) of symbol \`_?foo1\' in tmpdir/common1b.o is smaller than 64 in tmpdir/common1a.o" $link_output] } {
         fail $test1w1
     } else {
