@@ -1,3 +1,7 @@
+2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.cc (print_version): Update copyright to 2011.
+
 2010-12-23  Cary Coutant  <ccoutant@google.com>
 
 	* output.h (Output_data_reloc::add_output_section): Pass OD instead

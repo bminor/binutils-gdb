@@ -617,7 +617,7 @@ parse_args (int * pargc, char *** pargv)
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
 	  printf (_("GNU assembler %s\n"), BFD_VERSION_STRING);
-	  printf (_("Copyright 2010 Free Software Foundation, Inc.\n"));
+	  printf (_("Copyright 2011 Free Software Foundation, Inc.\n"));
 	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or later.\n\

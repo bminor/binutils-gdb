@@ -1,3 +1,7 @@
+2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.c (print_version): Update copyright to 2011.
+
 For older changes see ChangeLog-2010
 
 Local Variables:
