@@ -131,6 +131,10 @@ if ![string match "" $got] then {
     set found_rev [regexp -lineanchor $want $revdata -> revdata]
 
     if {$found_orig == 0 || $found_rev == 0} then {
+	# som doesn't have a .data section
+	setup_xfail "hppa*-*-hpux*"
+	clear_xfail "hppa*64*-*-hpux*"
+
         fail "objcopy --reverse-bytes"
     } else {
         scan $origdata "%2x%2x%2x%2x" b1 b2 b3 b4
