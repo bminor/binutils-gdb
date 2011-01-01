@@ -1,5 +1,5 @@
 /* Inferior process information for the remote server for GDB.
-   Copyright (C) 2002, 2005, 2007, 2008, 2009, 2010
+   Copyright (C) 2002, 2005, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.

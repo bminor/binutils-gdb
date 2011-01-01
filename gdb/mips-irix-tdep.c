@@ -1,7 +1,8 @@
 /* Target-dependent code for the MIPS architecture running on IRIX,
    for GDB, the GNU Debugger.
 
-   Copyright (C) 2002, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 

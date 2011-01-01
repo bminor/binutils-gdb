@@ -1,6 +1,6 @@
 /*  This file is part of the program GDB, the GNU debugger.
     
-    Copyright (C) 1998, 1999, 2007, 2008, 2009, 2010
+    Copyright (C) 1998, 1999, 2007, 2008, 2009, 2010, 2011
     Free Software Foundation, Inc.
     Contributed by Cygnus Solutions.
     

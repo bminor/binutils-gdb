@@ -1,5 +1,5 @@
 /* Definitions used by the GDB event loop.
-   Copyright (C) 1999, 2000, 2007, 2008, 2009, 2010
+   Copyright (C) 1999, 2000, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 

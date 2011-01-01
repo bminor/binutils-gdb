@@ -1,5 +1,5 @@
 /* SH5 simulator support code
-   Copyright (C) 2000, 2001, 2006, 2008, 2009, 2010
+   Copyright (C) 2000, 2001, 2006, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 

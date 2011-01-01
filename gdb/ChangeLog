@@ -1,5 +1,9 @@
 2011-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Copyright year update in most files (performed by copyright.sh).
+
+2011-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c (print_gdb_version): Update copyright year in version output.
 
 For older changes see ChangeLog-2010.

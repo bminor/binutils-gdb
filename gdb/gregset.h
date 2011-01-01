@@ -1,5 +1,5 @@
 /* Interface for functions using gregset and fpregset types.
-   Copyright (C) 2000, 2002, 2007, 2008, 2009, 2010
+   Copyright (C) 2000, 2002, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of GDB.

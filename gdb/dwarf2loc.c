@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003, 2005, 2007, 2008, 2009, 2010
+   Copyright (C) 2003, 2005, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.

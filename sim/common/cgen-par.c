@@ -1,5 +1,5 @@
 /* Simulator parallel routines for CGEN simulators (and maybe others).
-   Copyright (C) 1999, 2000, 2007, 2008, 2009, 2010
+   Copyright (C) 1999, 2000, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 

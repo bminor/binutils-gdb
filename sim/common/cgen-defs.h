@@ -1,5 +1,5 @@
 /* General Cpu tools GENerated simulator support.
-   Copyright (C) 1996, 1997, 1998, 1999, 2007, 2008, 2009, 2010
+   Copyright (C) 1996, 1997, 1998, 1999, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 

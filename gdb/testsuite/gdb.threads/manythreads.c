@@ -1,5 +1,6 @@
 /* Manythreads test program.
-   Copyright 2004, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright 2004, 2006, 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
 
    Written by Jeff Johnston <jjohnstn@redhat.com> 
    Contributed by Red Hat

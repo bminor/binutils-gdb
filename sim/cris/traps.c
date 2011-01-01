@@ -1,5 +1,5 @@
 /* CRIS exception, interrupt, and trap (EIT) support
-   Copyright (C) 2004, 2005, 2007, 2008, 2009, 2010
+   Copyright (C) 2004, 2005, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Contributed by Axis Communications.
 

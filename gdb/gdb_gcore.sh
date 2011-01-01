@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#   Copyright (C) 2003, 2005, 2007, 2008, 2009, 2010
+#   Copyright (C) 2003, 2005, 2007, 2008, 2009, 2010, 2011
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
