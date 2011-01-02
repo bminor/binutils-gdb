@@ -1,3 +1,12 @@
+2011-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12001
+	* ld-misc/defsym.exp: New.
+	* ld-misc/defsym1.d: Likewise.
+	* ld-misc/dummy.s: Likewise.
+	* ld-misc/foo.s: Likewise.
+	* ld-misc/start.s: Likewise.
+
 For older changes see ChangeLog-2010
 
 Local Variables:
