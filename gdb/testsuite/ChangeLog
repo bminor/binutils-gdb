@@ -1,3 +1,7 @@
+2011-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.ada/gnat_ada.gpr: Fix copyright comment line regression by 2011.
+
 2010-12-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/arrayptr/foo.adb: Add new local variable Null_String.
