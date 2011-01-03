@@ -1,3 +1,7 @@
+2011-01-03  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* lib/binutils-common.exp (regexp_diff): Use "==" instead of "eq".
+
 2010-12-31  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* binutils-all/copy-2.d: Change "hppa" to "hppa*" in not-target list.

@@ -237,7 +237,7 @@ proc regexp_diff { file_1 file_2 args } {
 		    set diff_pass 1
 		    break
 		}
-		set negated [expr { [string index $line_b 0] eq "!" }]
+		set negated [expr { [string index $line_b 0] == "!" }]
 		set line_bx [string range $line_b $negated end]
 		set n [expr { $negated ? "! " : "" }]
 		# Substitute on the reference.
@@ -275,7 +275,7 @@ proc regexp_diff { file_1 file_2 args } {
 	    set differences 1
 	    break
 	} else {
-	    set negated [expr { [string index $line_b 0] eq "!" }]
+	    set negated [expr { [string index $line_b 0] == "!" }]
 	    set line_bx [string range $line_b $negated end]
 	    set n [expr { $negated ? "! " : "" }]
 	    set s [expr { $negated ? "  " : "" }]
