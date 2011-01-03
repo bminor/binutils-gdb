@@ -1,3 +1,15 @@
+2011-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* cpu-i386.c (bfd_i386_compatible): New.
+	(bfd_x64_32_arch_intel_syntax): Replace bfd_default_compatible
+	with bfd_i386_compatible.
+	(bfd_x86_64_arch_intel_syntax): Likewise.
+	(bfd_i386_arch_intel_syntax): Likewise.
+	(i8086_arch): Likewise.
+	(bfd_x64_32_arch): Likewise.
+	(bfd_x86_64_arch): Likewise.
+	(bfd_i386_arch): Likewise.
+
 For older changes see ChangeLog-2010
 
 Local Variables:

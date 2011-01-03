@@ -1,3 +1,21 @@
+2011-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/dummy.s: New.
+	* ld-x86-64/foo.s: Likewise.
+	* ld-x86-64/ia32-1.d: Likewise.
+	* ld-x86-64/ia32-2.d: Likewise.
+	* ld-x86-64/ia32-3.d: Likewise.
+	* ld-x86-64/ilp32-1.d: Likewise.
+	* ld-x86-64/ilp32-2.d: Likewise.
+	* ld-x86-64/ilp32-3.d: Likewise.
+	* ld-x86-64/lp64-1.d: Likewise.
+	* ld-x86-64/lp64-2.d: Likewise.
+	* ld-x86-64/lp64-3.d: Likewise.
+	* ld-x86-64/start.s: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run ilp32-1, ilp32-2, ilp32-3, ia32-1,
+	ia32-2, ia32-3, lp64-1, lp64-2 and lp64-3.
+
 2011-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12001
