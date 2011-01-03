@@ -1742,6 +1742,8 @@ find_sym_fns (bfd *abfd)
 static void
 load_command (char *arg, int from_tty)
 {
+  dont_repeat ();
+
   /* The user might be reloading because the binary has changed.  Take
      this opportunity to check.  */
   reopen_exec_file ();

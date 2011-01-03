@@ -1,3 +1,7 @@
+2011-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile.c (find_sym_fns): Add call to dont_repeat.
+
 2011-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Copyright year update in most files (performed by copyright.sh).
