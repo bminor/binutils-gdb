@@ -1,3 +1,8 @@
+2011-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (diststuff): Remove gdb-cfg.texi and GDBvn.texi.
+	(clean): Add GDBvn.texi.
+
 2010-12-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Ada Glitches): Remove paragraph describing the

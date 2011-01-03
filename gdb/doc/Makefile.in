@@ -170,6 +170,7 @@ html: $(HTMLFILES)
 pdf: $(PDFFILES)
 all-doc: info dvi ps # pdf
 diststuff: info
+	rm -f gdb-cfg.texi GDBvn.texi
 
 install-info: $(INFO_DEPS)
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(infodir)
@@ -538,7 +539,7 @@ mostlyclean:
 	rm -f sedref.dvi sedref.tex tmp.sed
 
 clean: mostlyclean
-	rm -f gdb-cfg.texi
+	rm -f gdb-cfg.texi GDBvn.texi
 
 distclean: clean
 	rm -f Makefile
