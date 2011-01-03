@@ -1502,14 +1502,26 @@ get_prev_frame_1 (struct frame_info *this_frame)
       && frame_id_inner (get_frame_arch (this_frame->next), this_id,
 			 get_frame_id (this_frame->next)))
     {
-      if (frame_debug)
+      CORE_ADDR this_pc_in_block;
+      struct minimal_symbol *morestack_msym;
+      const char *morestack_name = NULL;
+      
+      /* gcc -fsplit-stack __morestack can continue the stack anywhere.  */
+      this_pc_in_block = get_frame_address_in_block (this_frame);
+      morestack_msym = lookup_minimal_symbol_by_pc (this_pc_in_block);
+      if (morestack_msym)
+	morestack_name = SYMBOL_LINKAGE_NAME (morestack_msym);
+      if (!morestack_name || strcmp (morestack_name, "__morestack") != 0)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // this frame ID is inner }\n");
+	  if (frame_debug)
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog, " // this frame ID is inner }\n");
+	    }
+	  this_frame->stop_reason = UNWIND_INNER_ID;
+	  return NULL;
 	}
-      this_frame->stop_reason = UNWIND_INNER_ID;
-      return NULL;
     }
 
   /* Check that this and the next frame are not identical.  If they

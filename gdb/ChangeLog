@@ -1,3 +1,9 @@
+2011-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* frame.c (get_prev_frame_1) <UNWIND_INNER_ID>: New variables
+	this_pc_in_block, morestack_msym and morestack_name.  Check for
+	"__morestack" minimal symbol there.
+
 2011-01-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* symfile.c (find_sym_fns): Add call to dont_repeat.
