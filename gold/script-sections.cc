@@ -1,6 +1,6 @@
 // script-sections.cc -- linker script SECTIONS for gold
 
-// Copyright 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -3586,17 +3586,18 @@ Sort_output_sections::operator()(const Output_section* os1,
   if (os1->address() != os2->address())
     return os1->address() < os2->address();
 
-  // Sort TLS sections to the end.
+  // Sort PROGBITS before NOBITS.
+  bool nobits1 = os1->type() == elfcpp::SHT_NOBITS;
+  bool nobits2 = os2->type() == elfcpp::SHT_NOBITS;
+  if (nobits1 != nobits2)
+    return nobits2;
+
+  // Sort PROGBITS TLS sections to the end, NOBITS TLS sections to the
+  // beginning.
   bool tls1 = (os1->flags() & elfcpp::SHF_TLS) != 0;
   bool tls2 = (os2->flags() & elfcpp::SHF_TLS) != 0;
   if (tls1 != tls2)
-    return tls2;
-
-  // Sort PROGBITS before NOBITS.
-  if (os1->type() == elfcpp::SHT_PROGBITS && os2->type() == elfcpp::SHT_NOBITS)
-    return true;
-  if (os1->type() == elfcpp::SHT_NOBITS && os2->type() == elfcpp::SHT_PROGBITS)
-    return false;
+    return nobits1 ? tls1 : tls2;
 
   // Sort non-NOLOAD before NOLOAD.
   if (os1->is_noload() && !os2->is_noload())

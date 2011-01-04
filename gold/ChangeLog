@@ -1,3 +1,8 @@
+2011-01-04  Cary Coutant  <ccoutant@google.com>
+
+	* script-sections.cc (Sort_output_sections::operator()): Sort TLS
+	sections before NOBITS sections.
+
 2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.cc (print_version): Update copyright to 2011.
