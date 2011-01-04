@@ -1,3 +1,8 @@
+2011-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (VexGdq): New.
+	(OP_VEX): Handle dq_mode.
+
 2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (process_copyright): Update copyright to 2011.

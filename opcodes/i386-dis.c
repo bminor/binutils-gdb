@@ -370,6 +370,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VexScalar { OP_VEX, vex_scalar_mode }
 #define Vex128 { OP_VEX, vex128_mode }
 #define Vex256 { OP_VEX, vex256_mode }
+#define VexGdq { OP_VEX, dq_mode }
 #define VexI4 { VEXI4_Fixup, 0}
 #define EXdVex { OP_EX_Vex, d_mode }
 #define EXdVexS { OP_EX_Vex, d_swap_mode }
@@ -14527,13 +14528,18 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	{
 	case vex_mode:
 	case vex128_mode:
+	  names = names_xmm;
+	  break;
+	case dq_mode:
+	  if (vex.w)
+	    names = names64;
+	  else
+	    names = names32;
 	  break;
 	default:
 	  abort ();
 	  return;
 	}
-
-      names = names_xmm;
       break;
     case 256:
       switch (bytemode)
