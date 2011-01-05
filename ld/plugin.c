@@ -511,7 +511,8 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 				  : LDPR_PREVAILING_DEF);
 	  else if (is_ir_dummy_bfd (owner_sec->owner))
 	    syms[n].resolution = LDPR_RESOLVED_IR;
-	  else if (owner_sec->owner->flags & DYNAMIC)
+	  else if (owner_sec->owner != NULL
+		   && (owner_sec->owner->flags & DYNAMIC) != 0)
 	    syms[n].resolution =  LDPR_RESOLVED_DYN;
 	  else
 	    syms[n].resolution = LDPR_RESOLVED_EXEC;

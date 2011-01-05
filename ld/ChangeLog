@@ -1,3 +1,9 @@
+2011-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12364
+	* plugin.c (get_symbols): Check if owner_sec->owner is NULL
+	before accessing its flags field.
+
 2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldver.c (ldversion): Update copyright to 2011.
