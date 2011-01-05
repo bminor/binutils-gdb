@@ -1,3 +1,9 @@
+2011-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* doc/agentexpr.texi, doc/all-cfg.texi, doc/annotate.texinfo,
+	doc/gdb.texinfo, doc/gdbint.texinfo, doc/observer.texi,
+	doc/refcard.tex, doc/stabs.texinfo: Copyright year update.
+
 2011-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (diststuff): Remove gdb-cfg.texi and GDBvn.texi.

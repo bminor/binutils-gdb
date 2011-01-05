@@ -1,3 +1,7 @@
+2011-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* run.1: Copyright year update.
+
 2010-12-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* hw-alloc.h (HW_NALLOC): Define.

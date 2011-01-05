@@ -1,5 +1,17 @@
 2011-01-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* testsuite/configure.ac, testsuite/gdb.arch/gdb1291.s,
+	testsuite/gdb.arch/gdb1431.s, testsuite/gdb.fortran/array-element.f,
+	testsuite/gdb.fortran/complex.f,
+	testsuite/gdb.fortran/derived-type.f90,
+	testsuite/gdb.fortran/library-module-lib.f90,
+	testsuite/gdb.fortran/library-module-main.f90,
+	testsuite/gdb.fortran/logical.f90, testsuite/gdb.fortran/module.f90,
+	testsuite/gdb.fortran/subarray.f, testsuite/gdb.mi/array.f:
+	Copyright year update.
+
+2011-01-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/langs1.f: Add copyright header.
 
 2011-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
