@@ -1,3 +1,7 @@
+2011-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/langs1.f: Add copyright header.
+
 2011-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/morestack.exp: New file.
