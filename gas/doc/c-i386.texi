@@ -61,10 +61,10 @@ dependent options:
 @cindex @samp{--64} option, i386
 @cindex @samp{--64} option, x86-64
 @item --32 | --n32 | --64
-Select the word size, either 32 bits or 64 bits. Selecting 32-bit
-implies Intel i386 architecture, while 64-bit implies AMD x86-64
-architecture.  @samp{--n32} selects 32bit word size with AMD x86-64
-architecture.
+Select the word size, either 32 bits or 64 bits.  @samp{--32}
+implies Intel i386 architecture, while @samp{--n32} and @samp{--64}
+imply AMD x86-64 architecture with 32-bit or 64-bit word-size
+respectively.
 
 These options are only available with the ELF object file format, and
 require that the necessary BFD support has been included (on a 32-bit

@@ -1,3 +1,7 @@
+2011-01-05  Jonathan Wakely  <jwakely.gcc@gmail.com>
+
+	* doc/c-i386.texi: Clarify --n32.
+
 2011-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Allow encoding 32/64bit
