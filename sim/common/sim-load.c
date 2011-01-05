@@ -111,7 +111,7 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
 	  size = bfd_get_section_size (s);
 	  if (size > 0)
 	    {
-	      char *buffer;
+	      unsigned char *buffer;
 	      bfd_vma lma;
 
 	      buffer = malloc (size);
