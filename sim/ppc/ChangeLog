@@ -1,3 +1,7 @@
+2011-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* psim.texinfo: Copyright year update.
+
 2010-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim_calls.c (sim_write): Add const to buf arg.
