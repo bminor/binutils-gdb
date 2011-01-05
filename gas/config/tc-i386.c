@@ -5310,16 +5310,34 @@ build_modrm_byte (void)
 	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
 	    {
 	      /* For instructions with VexNDS, the register-only
-		 source operand must be XMM or YMM register. It is
-		 encoded in VEX prefix.  We need to clear RegMem bit
-		 before calling operand_type_equal.  */
-	      i386_operand_type op = i.tm.operand_types[dest];
+		 source operand must be 32/64bit integer, XMM or
+		 YMM register.  It is encoded in VEX prefix.  We
+		 need to clear RegMem bit before calling
+		 operand_type_equal.  */
+
+	      i386_operand_type op;
+	      unsigned int vvvv;
+
+	      /* Check register-only source operand when two source
+		 operands are swapped.  */
+	      if (!i.tm.operand_types[source].bitfield.baseindex
+		  && i.tm.operand_types[dest].bitfield.baseindex)
+		{
+		  vvvv = source;
+		  source = dest;
+		}
+	      else
+		vvvv = dest;
+
+	      op = i.tm.operand_types[vvvv];
 	      op.bitfield.regmem = 0;
 	      if ((dest + 1) >= i.operands
-		  || (!operand_type_equal (&op, &regxmm)
+		  || (op.bitfield.reg32 != 1
+		      && !op.bitfield.reg64 != 1
+		      && !operand_type_equal (&op, &regxmm)
 		      && !operand_type_equal (&op, &regymm)))
 		abort ();
-	      i.vex.register_specifier = i.op[dest].regs;
+	      i.vex.register_specifier = i.op[vvvv].regs;
 	      dest++;
 	    }
 	}
@@ -5647,30 +5665,51 @@ build_modrm_byte (void)
 		}
 	      else
 		{
-		  vex_reg = op + 1;
-		  gas_assert (vex_reg < i.operands);
+		  /* Check register-only source operand when two source
+		     operands are swapped.  */
+		  if (!i.tm.operand_types[op].bitfield.baseindex
+		      && i.tm.operand_types[op + 1].bitfield.baseindex)
+		    {
+		      vex_reg = op;
+		      op += 2;
+		      gas_assert (mem == (vex_reg + 1)
+				  && op < i.operands);
+		    }
+		  else
+		    {
+		      vex_reg = op + 1;
+		      gas_assert (vex_reg < i.operands);
+		    }
 		}
 	    }
 	  else if (i.tm.opcode_modifier.vexvvvv == VEXNDD)
 	    {
-	      /* For instructions with VexNDD, there should be
-		 no memory operand and the register destination
+	      /* For instructions with VexNDD, the register destination
 		 is encoded in VEX prefix.  */
-	      gas_assert (i.mem_operands == 0
-			  && (op + 2) == i.operands);
-	      vex_reg = op + 1;
+	      if (i.mem_operands == 0)
+		{
+		  /* There is no memory operand.  */
+		  gas_assert ((op + 2) == i.operands);
+		  vex_reg = op + 1;
+		}
+	      else
+		{ 
+		  /* There are only 2 operands.  */
+		  gas_assert (op < 2 && i.operands == 2);
+		  vex_reg = 1;
+		}
 	    }
 	  else
 	    gas_assert (op < i.operands);
 
 	  if (vex_reg != (unsigned int) ~0)
 	    {
-	      gas_assert (i.reg_operands == 2);
+	      i386_operand_type *type = &i.tm.operand_types[vex_reg];
 
-	      if (!operand_type_equal (&i.tm.operand_types[vex_reg],
-				       &regxmm)
-		  && !operand_type_equal (&i.tm.operand_types[vex_reg],
-					  &regymm))
+	      if (type->bitfield.reg32 != 1
+		  && type->bitfield.reg64 != 1
+		  && !operand_type_equal (type, &regxmm)
+		  && !operand_type_equal (type, &regymm))
 		abort ();
 
 	      i.vex.register_specifier = i.op[vex_reg].regs;

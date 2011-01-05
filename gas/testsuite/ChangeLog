@@ -1,3 +1,15 @@
+2011-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/bmi-intel.d: New.
+	* gas/i386/bmi.d: Likewise.
+	* gas/i386/bmi.s: Likewise.
+	* gas/i386/x86-64-bmi-intel.d: Likewise.
+	* gas/i386/x86-64-bmi.d: Likewise.
+	* gas/i386/x86-64-bmi.s: Likewise.
+
+	* gas/i386/i386.exp: Run bmi, bmi-intel, x86-64-bmi and
+	x86-64-bmi-intel.
+
 2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/lns/lns-common-1.d: Also expect .zdebug in

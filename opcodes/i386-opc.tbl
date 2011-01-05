@@ -2733,6 +2733,15 @@ lwpval, 3, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=5|VexW=2|IgnoreSize|No_bSuf|No_
 lwpins, 3, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=5|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|Vex, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32 }
 lwpins, 3, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=5|VexW=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|NoRex64|Vex, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg64 }
 
+// BMI instructions
+
+andn, 3, 0xf2, None, 1, CpuBMI, Modrm|CheckRegSize|Vex=3|VexOpcode=1|VexVVVV=1|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64, Reg32|Reg64 }
+bextr, 3, 0xf7, None, 1, CpuBMI, Modrm|CheckRegSize|Vex=3|VexOpcode=1|VexVVVV=1|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64, Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64 }
+blsi, 2, 0xf3, 0x3, 1, CpuBMI, Modrm|CheckRegSize|Vex=3|VexOpcode=1|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64 }
+blsmsk, 2, 0xf3, 0x2, 1, CpuBMI, Modrm|CheckRegSize|Vex=3|VexOpcode=1|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64 }
+blsr, 2, 0xf3, 0x1, 1, CpuBMI, Modrm|CheckRegSize|Vex=3|VexOpcode=1|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64 }
+tzcnt, 2, 0xf30fbc, None, 2, CpuBMI, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
+
 // AMD 3DNow! instructions.
 
 prefetch, 1, 0xf0d, 0x0, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }

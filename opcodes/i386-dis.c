@@ -599,6 +599,7 @@ enum
   REG_VEX_0F72,
   REG_VEX_0F73,
   REG_VEX_0FAE,
+  REG_VEX_0F38F3,
   REG_XOP_LWPCB,
   REG_XOP_LWP
 };
@@ -747,6 +748,7 @@ enum
   PREFIX_0FAE_REG_2,
   PREFIX_0FAE_REG_3,
   PREFIX_0FB8,
+  PREFIX_0FBC,
   PREFIX_0FBD,
   PREFIX_0FC2,
   PREFIX_0FC3,
@@ -1015,6 +1017,11 @@ enum
   PREFIX_VEX_0F38DD,
   PREFIX_VEX_0F38DE,
   PREFIX_VEX_0F38DF,
+  PREFIX_VEX_0F38F2,
+  PREFIX_VEX_0F38F3_REG_1,
+  PREFIX_VEX_0F38F3_REG_2,
+  PREFIX_VEX_0F38F3_REG_3,
+  PREFIX_VEX_0F38F7,
   PREFIX_VEX_0F3A04,
   PREFIX_VEX_0F3A05,
   PREFIX_VEX_0F3A06,
@@ -1298,6 +1305,11 @@ enum
   VEX_LEN_0F38DD_P_2,
   VEX_LEN_0F38DE_P_2,
   VEX_LEN_0F38DF_P_2,
+  VEX_LEN_0F38F2_P_0,
+  VEX_LEN_0F38F3_R_1_P_0,
+  VEX_LEN_0F38F3_R_2_P_0,
+  VEX_LEN_0F38F3_R_3_P_0,
+  VEX_LEN_0F38F7_P_0,
   VEX_LEN_0F3A06_P_2,
   VEX_LEN_0F3A0A_P_2,
   VEX_LEN_0F3A0B_P_2,
@@ -2159,7 +2171,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "ud1",		{ XX } },
   { REG_TABLE (REG_0FBA) },
   { "btcS",		{ Ev, Gv } },
-  { "bsfS",		{ Gv, Ev } },
+  { PREFIX_TABLE (PREFIX_0FBC) },
   { PREFIX_TABLE (PREFIX_0FBD) },
   { "movs{bR|x}",	{ Gv, Eb } },
   { "movs{wR|x}",	{ Gv, Ew } }, /* yes, there really is movsww ! */
@@ -2750,6 +2762,13 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_VEX_0FAE_REG_2) },
     { MOD_TABLE (MOD_VEX_0FAE_REG_3) },
   },
+  /* REG_VEX_0F38F3 */
+  {
+    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_1) },
+    { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_2) },
+    { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_3) },
+  },
   /* REG_XOP_LWPCB */
   {
     { "llwpcb", { { OP_LWPCB_E, 0 } } },
@@ -3068,6 +3087,13 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { "popcntS", { Gv, Ev } },
+  },
+
+  /* PREFIX_0FBC */
+  {
+    { "bsfS",	{ Gv, Ev } },
+    { "tzcntS",	{ Gv, Ev } },
+    { "bsfS",	{ Gv, Ev } },
   },
 
   /* PREFIX_0FBD */
@@ -4967,6 +4993,31 @@ static const struct dis386 prefix_table[][4] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { VEX_LEN_TABLE (VEX_LEN_0F38DF_P_2) },
+  },
+
+  /* PREFIX_VEX_0F38F2 */
+  {
+    { VEX_LEN_TABLE (VEX_LEN_0F38F2_P_0) },
+  },
+
+  /* PREFIX_VEX_0F38F3_REG_1 */
+  {
+    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_1_P_0) },
+  },
+
+  /* PREFIX_VEX_0F38F3_REG_2 */
+  {
+    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_2_P_0) },
+  },
+
+  /* PREFIX_VEX_0F38F3_REG_3 */
+  {
+    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_3_P_0) },
+  },
+
+  /* PREFIX_VEX_0F38F7 */
+  {
+    { VEX_LEN_TABLE (VEX_LEN_0F38F7_P_0) },
   },
 
   /* PREFIX_VEX_0F3A04 */
@@ -7829,12 +7880,12 @@ static const struct dis386 vex_table[][256] = {
     /* f0 */
     { Bad_Opcode },
     { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_VEX_0F38F2) },
+    { REG_TABLE (REG_VEX_0F38F3) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_VEX_0F38F7) },
     /* f8 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -9032,6 +9083,31 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F38DF_P_2 */
   {
     { VEX_W_TABLE (VEX_W_0F38DF_P_2) },
+  },
+
+  /* VEX_LEN_0F38F2_P_0 */
+  {
+    { "andnS",		{ Gdq, VexGdq, Edq } },
+  },
+
+  /* VEX_LEN_0F38F3_R_1_P_0 */
+  {
+    { "blsrS",		{ VexGdq, Edq } },
+  },
+
+  /* VEX_LEN_0F38F3_R_2_P_0 */
+  {
+    { "blsmskS",	{ VexGdq, Edq } },
+  },
+
+  /* VEX_LEN_0F38F3_R_3_P_0 */
+  {
+    { "blsiS",		{ VexGdq, Edq } },
+  },
+
+  /* VEX_LEN_0F38F7_P_0 */
+  {
+    { "bextrS",		{ Gdq, Edq, VexGdq } },
   },
 
   /* VEX_LEN_0F3A06_P_2 */

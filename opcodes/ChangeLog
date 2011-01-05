@@ -1,5 +1,40 @@
 2011-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (REG_VEX_38F3): New.
+	(PREFIX_0FBC): Likewise.
+	(PREFIX_VEX_38F2): Likewise.
+	(PREFIX_VEX_38F3_REG_1): Likewise.
+	(PREFIX_VEX_38F3_REG_2): Likewise.
+	(PREFIX_VEX_38F3_REG_3): Likewise.
+	(PREFIX_VEX_38F7): Likewise.
+	(VEX_LEN_38F2_P_0): Likewise.
+	(VEX_LEN_38F3_R_1_P_0): Likewise.
+	(VEX_LEN_38F3_R_2_P_0): Likewise.
+	(VEX_LEN_38F3_R_3_P_0): Likewise.
+	(VEX_LEN_38F7_P_0): Likewise.
+	(dis386_twobyte): Use PREFIX_0FBC.
+	(reg_table): Add REG_VEX_38F3.
+	(prefix_table): Add PREFIX_0FBC, PREFIX_VEX_38F2,
+	PREFIX_VEX_38F3_REG_1, PREFIX_VEX_38F3_REG_2,
+	PREFIX_VEX_38F3_REG_3 and PREFIX_VEX_38F7.
+	(vex_table): Use PREFIX_VEX_38F2, REG_VEX_38F3 and
+	PREFIX_VEX_38F7.
+	(vex_len_table): Add VEX_LEN_38F2_P_0, VEX_LEN_38F3_R_1_P_0,
+	VEX_LEN_38F3_R_2_P_0, VEX_LEN_38F3_R_3_P_0 and
+	VEX_LEN_38F7_P_0.
+
+	* i386-gen.c (cpu_flag_init): Add CPU_BMI_FLAGS.
+	(cpu_flags): Add CpuBMI.
+
+	* i386-opc.h (CpuBMI): New.
+	(i386_cpu_flags): Add cpubmi.
+
+	* i386-opc.tbl: Add andn, bextr, blsi, blsmsk, blsr and tzcnt.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2011-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (VexGdq): New.
 	(OP_VEX): Handle dq_mode.
 
