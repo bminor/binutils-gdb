@@ -283,7 +283,8 @@ extern const struct program_space_data *register_program_space_data_with_cleanup
   (void (*cleanup) (struct program_space *, void *));
 extern void clear_program_space_data (struct program_space *pspace);
 extern void set_program_space_data (struct program_space *pspace,
-			      const struct program_space_data *data, void *value);
+				    const struct program_space_data *data,
+				    void *value);
 extern void *program_space_data (struct program_space *pspace,
 			   const struct program_space_data *data);
 

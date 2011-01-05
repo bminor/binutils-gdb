@@ -231,7 +231,8 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 				  sizeof (dld_cache_p->dld_flags))
 	      != 0)
 	    {
-	      error (_("Error while reading in .dynamic section of the program."));
+	      error (_("Error while reading in "
+		       ".dynamic section of the program."));
 	    }
 	}
       else if (dyn_tag == DT_HP_LOAD_MAP)
@@ -244,7 +245,8 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 				  sizeof (dld_cache_p->load_map_addr))
 	      != 0)
 	    {
-	      error (_("Error while reading in .dynamic section of the program."));
+	      error (_("Error while reading in "
+		       ".dynamic section of the program."));
 	    }
 	}
       else 
@@ -406,7 +408,8 @@ pa64_solib_create_inferior_hook (int from_tty)
       /* Make sure the dynamic linker's really a useful object.  */
       if (!bfd_check_format (tmp_bfd, bfd_object))
 	{
-	  warning (_("Unable to grok dynamic linker %s as an object file"), buf);
+	  warning (_("Unable to grok dynamic linker %s as an object file"),
+		   buf);
 	  bfd_close (tmp_bfd);
 	  return;
 	}

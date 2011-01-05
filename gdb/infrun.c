@@ -357,8 +357,9 @@ static void
 show_follow_fork_mode_string (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Debugger response to a program call of fork or vfork is \"%s\".\n"),
+  fprintf_filtered (file,
+		    _("Debugger response to a program "
+		      "call of fork or vfork is \"%s\".\n"),
 		    value);
 }
 
@@ -498,8 +499,8 @@ follow_fork (void)
 		       forked.  In that case, the resume command
 		       issued is most likely not applicable to the
 		       child, so just warn, and refuse to resume.  */
-		    warning (_("\
-Not resuming: switched threads before following fork child.\n"));
+		    warning (_("Not resuming: switched threads "
+			       "before following fork child.\n"));
 		  }
 
 		/* Reset breakpoints in the child as appropriate.  */
@@ -636,11 +637,13 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	      if (exec)
 		fprintf_filtered (gdb_stdlog,
-				  "Detaching vfork parent process %d after child exec.\n",
+				  "Detaching vfork parent process "
+				  "%d after child exec.\n",
 				  inf->vfork_parent->pid);
 	      else
 		fprintf_filtered (gdb_stdlog,
-				  "Detaching vfork parent process %d after child exit.\n",
+				  "Detaching vfork parent process "
+				  "%d after child exit.\n",
 				  inf->vfork_parent->pid);
 	    }
 
@@ -717,7 +720,8 @@ handle_vfork_child_exec_or_exit (int exec)
 	  struct cleanup *old_chain = make_cleanup_restore_current_thread ();
 
 	  if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog, "infrun: resuming vfork parent process %d\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: resuming vfork parent process %d\n",
 				resume_parent);
 
 	  iterate_over_threads (proceed_after_vfork_done, &resume_parent);
@@ -1135,14 +1139,14 @@ show_can_use_displaced_stepping (struct ui_file *file, int from_tty,
 				 const char *value)
 {
   if (can_use_displaced_stepping == can_use_displaced_stepping_auto)
-    fprintf_filtered (file, _("\
-Debugger's willingness to use displaced stepping to step over \
-breakpoints is %s (currently %s).\n"),
+    fprintf_filtered (file,
+		      _("Debugger's willingness to use displaced stepping "
+			"to step over breakpoints is %s (currently %s).\n"),
 		      value, non_stop ? "on" : "off");
   else
-    fprintf_filtered (file, _("\
-Debugger's willingness to use displaced stepping to step over \
-breakpoints is %s.\n"), value);
+    fprintf_filtered (file,
+		      _("Debugger's willingness to use displaced stepping "
+			"to step over breakpoints is %s.\n"), value);
 }
 
 /* Return non-zero if displaced stepping can/should be used to step
@@ -1319,7 +1323,8 @@ displaced_step_prepare (ptid_t ptid)
 }
 
 static void
-write_memory_ptid (ptid_t ptid, CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+write_memory_ptid (ptid_t ptid, CORE_ADDR memaddr,
+		   const gdb_byte *myaddr, int len)
 {
   struct cleanup *ptid_cleanup = save_inferior_ptid ();
 
@@ -1450,7 +1455,8 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 	  step = currently_stepping (tp);
 
 	  if (debug_displaced)
-	    fprintf_unfiltered (gdb_stdlog, "breakpoint is gone %s: step(%d)\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"breakpoint is gone %s: step(%d)\n",
 				target_pid_to_str (tp->ptid), step);
 
 	  target_resume (ptid, step, TARGET_SIGNAL_0);
@@ -1516,8 +1522,9 @@ static void
 show_scheduler_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Mode for locking scheduler during execution is \"%s\".\n"),
+  fprintf_filtered (file,
+		    _("Mode for locking scheduler "
+		      "during execution is \"%s\".\n"),
 		    value);
 }
 
@@ -1616,10 +1623,11 @@ resume (int step, enum target_signal sig)
       if (gdbarch_skip_permanent_breakpoint_p (gdbarch))
 	gdbarch_skip_permanent_breakpoint (gdbarch, regcache);
       else
-	error (_("\
-The program is stopped at a permanent breakpoint, but GDB does not know\n\
-how to step past a permanent breakpoint on this architecture.  Try using\n\
-a command like `return' or `jump' to continue execution."));
+	error (_("The program is stopped at a permanent "
+		 "breakpoint, but GDB does not know\n"
+		 "how to step past a permanent breakpoint "
+		 "on this architecture.  Try using\na command "
+		 "like `return' or `jump' to continue execution."));
     }
 
   /* If enabled, step over breakpoints by executing a copy of the
@@ -2225,11 +2233,11 @@ static void handle_step_into_function (struct gdbarch *gdbarch,
 				       struct execution_control_state *ecs);
 static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
-static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_frame);
+static void insert_step_resume_breakpoint_at_frame (struct frame_info *);
 static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
-static void insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
-						  struct symtab_and_line sr_sal,
-						  struct frame_id sr_id);
+static void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
+						  struct symtab_and_line ,
+						  struct frame_id);
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 static void check_exception_resume (struct execution_control_state *,
 				    struct frame_info *, struct symbol *);
@@ -2491,7 +2499,8 @@ prepare_for_detach (void)
       /* If an error happens while handling the event, propagate GDB's
 	 knowledge of the executing state to the frontend/user running
 	 state.  */
-      old_chain_2 = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+      old_chain_2 = make_cleanup (finish_thread_state_cleanup,
+				  &minus_one_ptid);
 
       /* In non-stop mode, each thread is handled individually.
 	 Switch early, so the global state is set correctly for this
@@ -2894,8 +2903,8 @@ init_infwait_state (void)
 void
 error_is_running (void)
 {
-  error (_("\
-Cannot execute this command while the selected thread is running."));
+  error (_("Cannot execute this command while "
+	   "the selected thread is running."));
 }
 
 void
@@ -3302,7 +3311,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  ptid_t parent;
 	  ptid_t child;
 	  int should_resume;
-	  int follow_child = (follow_fork_mode_string == follow_fork_mode_child);
+	  int follow_child
+	    = (follow_fork_mode_string == follow_fork_mode_child);
 
 	  ecs->event_thread->suspend.stop_signal = TARGET_SIGNAL_0;
 
@@ -3346,7 +3356,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 the parent, and keep going.  */
 
       if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_VFORK_DONE\n");
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: TARGET_WAITKIND_VFORK_DONE\n");
 
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	context_switch (ecs->ptid);
@@ -3406,7 +3417,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          that's in a syscall.  It's frequently a losing proposition.  */
     case TARGET_WAITKIND_SYSCALL_ENTRY:
       if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SYSCALL_ENTRY\n");
+        fprintf_unfiltered (gdb_stdlog,
+			    "infrun: TARGET_WAITKIND_SYSCALL_ENTRY\n");
       /* Getting the current syscall number */
       if (handle_syscall_event (ecs) != 0)
         return;
@@ -3419,7 +3431,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          into user code.)  */
     case TARGET_WAITKIND_SYSCALL_RETURN:
       if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SYSCALL_RETURN\n");
+        fprintf_unfiltered (gdb_stdlog,
+			    "infrun: TARGET_WAITKIND_SYSCALL_RETURN\n");
       if (handle_syscall_event (ecs) != 0)
         return;
       goto process_event_stop_test;
@@ -3443,8 +3456,9 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (non_stop)
 	/* Non-stop assumes that the target handles adding new threads
 	   to the thread list.  */
-	internal_error (__FILE__, __LINE__, "\
-targets should add new threads to the thread list themselves in non-stop mode.");
+	internal_error (__FILE__, __LINE__,
+			"targets should add new threads to the thread "
+			"list themselves in non-stop mode.");
 
       /* We may want to consider not doing a resume here in order to
 	 give the user a chance to play with the new thread.  It might
@@ -3522,7 +3536,9 @@ targets should add new threads to the thread list themselves in non-stop mode.")
       if (ecs->event_thread->suspend.stop_signal == TARGET_SIGNAL_TRAP)
 	{
 	  if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog, "infrun: stepping_past_singlestep_breakpoint\n");
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepping_past_"
+				"singlestep_breakpoint\n");
 	  /* Pull the single step breakpoints out of the target.  */
 	  remove_single_step_breakpoints ();
 	  singlestep_breakpoints_inserted_p = 0;
@@ -3939,8 +3955,9 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	  && ecs->event_thread->suspend.stop_signal == TARGET_SIGNAL_TRAP
 	  && !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat)
 	  && stopped_by_watchpoint)
-	fprintf_unfiltered (gdb_stdlog, "\
-infrun: no user watchpoint explains watchpoint SIGTRAP, ignoring\n");
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: no user watchpoint explains "
+			    "watchpoint SIGTRAP, ignoring\n");
 
       /* NOTE: cagney/2003-03-29: These two checks for a random signal
          at one stage in the past included checks for an inferior
@@ -4135,8 +4152,9 @@ process_event_stop_test:
 						frame, &jmp_buf_pc))
 	      {
 		if (debug_infrun)
-		  fprintf_unfiltered (gdb_stdlog, "\
-infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
+		  fprintf_unfiltered (gdb_stdlog,
+				      "infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME "
+				      "(!gdbarch_get_longjmp_target)\n");
 		keep_going (ecs);
 		return;
 	      }
@@ -4330,8 +4348,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	      || !target_thread_alive (tp->ptid))
 	    {
 	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog, "\
-infrun: not switching back to stepped thread, it has vanished\n");
+		fprintf_unfiltered (gdb_stdlog,
+				    "infrun: not switching back to "
+				    "stepped thread, it has vanished\n");
 
 	      delete_thread (tp->ptid);
 	      keep_going (ecs);
@@ -4365,7 +4384,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
       if (SOLIB_IN_DYNAMIC_LINKER (PIDGET (ecs->ptid), stop_pc))
 	{
           if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog, "infrun: stepping in dynamic linker\n");
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepping in dynamic linker\n");
 	  ecs->event_thread->stepping_over_breakpoint = 1;
 	  keep_going (ecs);
 	  return;
@@ -4474,7 +4494,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	gdbarch_skip_solib_resolver (gdbarch, stop_pc);
 
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into dynsym resolve code\n");
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: stepped into dynsym resolve code\n");
 
       if (pc_after_resolver)
 	{
@@ -4500,7 +4521,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
       && get_frame_type (frame) == SIGTRAMP_FRAME)
     {
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into signal trampoline\n");
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: stepped into signal trampoline\n");
       /* The inferior, while doing a "step" or "next", has ended up in
          a signal trampoline (either by a signal being delivered or by
          the signal handler returning).  Just single-step until the
@@ -4730,7 +4752,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
       real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
 
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into solib return tramp\n");
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: stepped into solib return tramp\n");
 
       /* Only proceed through if we know where it's going.  */
       if (real_stop_pc)
@@ -4766,7 +4789,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
       && stop_pc_sal.line == 0)
     {
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into undebuggable function\n");
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: stepped into undebuggable function\n");
 
       /* The inferior just stepped into, or returned to, an
          undebuggable function (where there is no debugging information
@@ -4908,7 +4932,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
          That is said to make things like for (;;) statements work
          better.  */
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped to a different line\n");
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: stepped to a different line\n");
       ecs->event_thread->control.stop_step = 1;
       print_end_stepping_range_reason ();
       stop_stepping (ecs);
@@ -5570,9 +5595,9 @@ normal_stop (void)
       if (remove_breakpoints ())
 	{
 	  target_terminal_ours_for_output ();
-	  printf_filtered (_("\
-Cannot remove breakpoints because program is no longer writable.\n\
-Further execution is probably impossible.\n"));
+	  printf_filtered (_("Cannot remove breakpoints because "
+			     "program is no longer writable.\nFurther "
+			     "execution is probably impossible.\n"));
 	}
     }
 
@@ -5663,12 +5688,15 @@ Further execution is probably impossible.\n"));
 		  && frame_id_eq (tp->control.step_frame_id,
 				  get_frame_id (get_current_frame ()))
 		  && step_start_function == find_pc_function (stop_pc))
-		source_flag = SRC_LINE;	/* finished step, just print source line */
+		source_flag = SRC_LINE;		/* finished step, just
+						   print source line */
 	      else
-		source_flag = SRC_AND_LOC;	/* print location and source line */
+		source_flag = SRC_AND_LOC;	/* print location and
+						   source line */
 	      break;
 	    case PRINT_SRC_AND_LOC:
-	      source_flag = SRC_AND_LOC;	/* print location and source line */
+	      source_flag = SRC_AND_LOC;	/* print location and
+						   source line */
 	      break;
 	    case PRINT_SRC_ONLY:
 	      source_flag = SRC_LINE;
@@ -5716,14 +5744,15 @@ Further execution is probably impossible.\n"));
 
       gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
       frame_pop (frame);
-      /* frame_pop() calls reinit_frame_cache as the last thing it does
-	 which means there's currently no selected frame.  We don't need
-	 to re-establish a selected frame if the dummy call returns normally,
-	 that will be done by restore_infcall_control_state.  However, we do have
-	 to handle the case where the dummy call is returning after being
-	 stopped (e.g. the dummy call previously hit a breakpoint).  We
-	 can't know which case we have so just always re-establish a
-	 selected frame here.  */
+      /* frame_pop() calls reinit_frame_cache as the last thing it
+	 does which means there's currently no selected frame.  We
+	 don't need to re-establish a selected frame if the dummy call
+	 returns normally, that will be done by
+	 restore_infcall_control_state.  However, we do have to handle
+	 the case where the dummy call is returning after being
+	 stopped (e.g. the dummy call previously hit a breakpoint).
+	 We can't know which case we have so just always re-establish
+	 a selected frame here.  */
       select_frame (get_current_frame ());
     }
 
@@ -5827,8 +5856,8 @@ signal_pass_update (int signo, int state)
 static void
 sig_print_header (void)
 {
-  printf_filtered (_("\
-Signal        Stop\tPrint\tPass to program\tDescription\n"));
+  printf_filtered (_("Signal        Stop\tPrint\tPass "
+		     "to program\tDescription\n"));
 }
 
 static void
@@ -5983,7 +6012,8 @@ handle_command (char *args, int from_tty)
 	      if (!allsigs && !sigs[signum])
 		{
 		  if (query (_("%s is used by the debugger.\n\
-Are you sure you want to change it? "), target_signal_to_name ((enum target_signal) signum)))
+Are you sure you want to change it? "),
+			     target_signal_to_name ((enum target_signal) signum)))
 		    {
 		      sigs[signum] = 1;
 		    }
@@ -6133,7 +6163,8 @@ signals_info (char *signum_exp, int from_tty)
 	sig_print_info (oursig);
     }
 
-  printf_filtered (_("\nUse the \"handle\" command to change these tables.\n"));
+  printf_filtered (_("\nUse the \"handle\" command "
+		     "to change these tables.\n"));
 }
 
 /* The $_siginfo convenience variable is a bit special.  We don't know
@@ -6727,8 +6758,8 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
     break;
   case EXEC_ERROR:
   default:
-    fprintf_filtered (out, 
-		      _("Forward (target `%s' does not support exec-direction).\n"),
+    fprintf_filtered (out, _("Forward (target `%s' does not "
+			     "support exec-direction).\n"),
 		      target_shortname);
     break;
   }
@@ -6764,8 +6795,8 @@ static void
 show_schedule_multiple (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Resuming the execution of threads of all processes is %s.\n"), value);
+  fprintf_filtered (file, _("Resuming the execution of threads "
+			    "of all processes is %s.\n"), value);
 }
 
 void
@@ -6832,7 +6863,8 @@ When non-zero, inferior specific debugging is enabled."),
 			    show_debug_infrun,
 			    &setdebuglist, &showdebuglist);
 
-  add_setshow_boolean_cmd ("displaced", class_maintenance, &debug_displaced, _("\
+  add_setshow_boolean_cmd ("displaced", class_maintenance,
+			   &debug_displaced, _("\
 Set displaced stepping debugging."), _("\
 Show displaced stepping debugging."), _("\
 When non-zero, displaced stepping specific debugging is enabled."),

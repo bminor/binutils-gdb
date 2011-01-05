@@ -458,8 +458,9 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      break;
 
 	    default:
-	      internal_error (__FILE__, __LINE__, _("\
-generic_elf_osabi_sniff_abi_tag_sections: unknown OS number %d"),
+	      internal_error (__FILE__, __LINE__,
+			      _("generic_elf_osabi_sniff_abi_tag_sections: "
+				"unknown OS number %d"),
 			      abi_tag);
 	    }
 	  return;
@@ -615,7 +616,8 @@ show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 {
   if (user_osabi_state == osabi_auto)
     fprintf_filtered (file,
-		      _("The current OS ABI is \"auto\" (currently \"%s\").\n"),
+		      _("The current OS ABI is \"auto\" "
+			"(currently \"%s\").\n"),
 		      gdbarch_osabi_name (gdbarch_osabi (get_current_arch ())));
   else
     fprintf_filtered (file, _("The current OS ABI is \"%s\".\n"),
@@ -643,11 +645,10 @@ _initialize_gdb_osabi (void)
 
   /* Register the "set osabi" command.  */
   add_setshow_enum_cmd ("osabi", class_support, gdb_osabi_available_names,
-			&set_osabi_string, _("\
-Set OS ABI of target."), _("\
-Show OS ABI of target."), NULL,
-			set_osabi,
-			show_osabi,
+			&set_osabi_string,
+			_("Set OS ABI of target."),
+			_("Show OS ABI of target."),
+			NULL, set_osabi, show_osabi,
 			&setlist, &showlist);
   user_osabi_state = osabi_auto;
 }

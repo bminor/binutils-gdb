@@ -473,9 +473,11 @@ frv_current_sos (void)
 			    "current_sos: reading link_map entry at %s\n",
 			    hex_string_custom (lm_addr, 8));
 
-      if (target_read_memory (lm_addr, (gdb_byte *) &lm_buf, sizeof (lm_buf)) != 0)
+      if (target_read_memory (lm_addr, (gdb_byte *) &lm_buf,
+			      sizeof (lm_buf)) != 0)
 	{
-	  warning (_("frv_current_sos: Unable to read link map entry.  Shared object chain may be incomplete."));
+	  warning (_("frv_current_sos: Unable to read link map entry.  "
+		     "Shared object chain may be incomplete."));
 	  break;
 	}
 
@@ -501,7 +503,8 @@ frv_current_sos (void)
 	  loadmap = fetch_loadmap (addr);
 	  if (loadmap == NULL)
 	    {
-	      warning (_("frv_current_sos: Unable to fetch load map.  Shared object chain may be incomplete."));
+	      warning (_("frv_current_sos: Unable to fetch load map.  "
+			 "Shared object chain may be incomplete."));
 	      break;
 	    }
 
@@ -739,7 +742,8 @@ enable_break2 (void)
       addr = bfd_lookup_symbol (tmp_bfd, "_dl_debug_addr");
       if (addr == 0)
 	{
-	  warning (_("Could not find symbol _dl_debug_addr in dynamic linker"));
+	  warning (_("Could not find symbol _dl_debug_addr "
+		     "in dynamic linker"));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
 	  return 0;
@@ -747,20 +751,23 @@ enable_break2 (void)
 
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: _dl_debug_addr (prior to relocation) = %s\n",
+			    "enable_break: _dl_debug_addr "
+			    "(prior to relocation) = %s\n",
 			    hex_string_custom (addr, 8));
 
       addr += displacement_from_map (ldm, addr);
 
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: _dl_debug_addr (after relocation) = %s\n",
+			    "enable_break: _dl_debug_addr "
+			    "(after relocation) = %s\n",
 			    hex_string_custom (addr, 8));
 
       /* Fetch the address of the r_debug struct.  */
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
 	{
-	  warning (_("Unable to fetch contents of _dl_debug_addr (at address %s) from dynamic linker"),
+	  warning (_("Unable to fetch contents of _dl_debug_addr "
+		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr, 8));
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
@@ -785,7 +792,8 @@ enable_break2 (void)
          _dl_debug_addr.  */
       if (target_read_memory (addr + 8, addr_buf, sizeof addr_buf) != 0)
 	{
-	  warning (_("Unable to fetch _dl_debug_addr->r_brk (at address %s) from dynamic linker"),
+	  warning (_("Unable to fetch _dl_debug_addr->r_brk "
+		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
@@ -796,7 +804,8 @@ enable_break2 (void)
       /* Now fetch the function entry point.  */
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
 	{
-	  warning (_("Unable to fetch _dl_debug_addr->.r_brk entry point (at address %s) from dynamic linker"),
+	  warning (_("Unable to fetch _dl_debug_addr->.r_brk entry point "
+		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr, 8));
 	  enable_break_failure_warning ();
 	  bfd_close (tmp_bfd);
@@ -868,8 +877,10 @@ enable_break (void)
 
   if (solib_frv_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"enable_break: solib event breakpoint placed at entry point: %s\n",
-			hex_string_custom (symfile_objfile->ei.entry_point, 8));
+			"enable_break: solib event breakpoint "
+			"placed at entry point: %s\n",
+			hex_string_custom (symfile_objfile->ei.entry_point,
+					   8));
   return 1;
 }
 
@@ -1064,7 +1075,8 @@ main_got (void)
 {
   struct minimal_symbol *got_sym;
 
-  got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL, symfile_objfile);
+  got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_",
+				   NULL, symfile_objfile);
   if (got_sym == 0)
     return 0;
 

@@ -54,8 +54,9 @@ struct dbx_symfile_info
     int stringtab_size;		/* Its size */
     file_ptr symtab_offset;	/* Offset in file to symbol table */
     int symbol_size;		/* Bytes in a single symbol */
-    struct stab_section_info *stab_section_info;	/* section starting points
-							   of the original .o files before linking. */
+    struct stab_section_info *stab_section_info;    /* Section starting points
+						       of the original .o files
+						       before linking.  */
 
     /* See stabsread.h for the use of the following. */
     struct header_file *header_files;

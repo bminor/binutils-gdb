@@ -1024,8 +1024,8 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
   /* Warn the user.  */
   if (frame_level > 0 && !ui_out_is_mi_like_p (uiout))
     {
-      warning (_("\
-Couldn't restore frame #%d in current thread, at reparsed frame #0\n"),
+      warning (_("Couldn't restore frame #%d in "
+		 "current thread, at reparsed frame #0\n"),
 	       frame_level);
       /* For MI, we should probably have a notification about
 	 current frame change.  But this error is not very
@@ -1157,7 +1157,8 @@ thread_apply_all_command (char *cmd, int from_tty)
 	printf_filtered (_("\nThread %d (%s):\n"),
 			 tp->num, target_pid_to_str (inferior_ptid));
 	execute_command (cmd, from_tty);
-	strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
+	strcpy (cmd, saved_cmd);	/* Restore exact command used
+					   previously.  */
       }
 
   do_cleanups (old_chain);
@@ -1273,8 +1274,8 @@ static void
 show_print_thread_events (struct ui_file *file, int from_tty,
                           struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Printing of thread events is %s.\n"),
+  fprintf_filtered (file,
+		    _("Printing of thread events is %s.\n"),
                     value);
 }
 

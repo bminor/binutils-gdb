@@ -466,8 +466,9 @@ show_disassemble_next_line (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c,
 				 const char *value)
 {
-  fprintf_filtered (file, _("\
-Debugger's willingness to use disassemble-next-line is %s.\n"),
+  fprintf_filtered (file,
+		    _("Debugger's willingness to use "
+		      "disassemble-next-line is %s.\n"),
                     value);
 }
 
@@ -2018,9 +2019,10 @@ return_command (char *retval_exp, int from_tty)
 	       && using_struct_return (gdbarch,
 				       SYMBOL_TYPE (thisfun), return_type))
 	{
-	  query_prefix = "\
-The location at which to store the function's return value is unknown.\n\
-If you continue, the return value that you specified will be ignored.\n";
+	  query_prefix = "The location at which to store the "
+	    "function's return value is unknown.\n"
+	    "If you continue, the return value "
+	    "that you specified will be ignored.\n";
 	  return_value = NULL;
 	}
     }
@@ -2187,8 +2189,8 @@ Same as the `down' command, but does not print anything.\n\
 This is useful in command scripts."));
 
   add_com ("frame", class_stack, frame_command, _("\
-Select and print a stack frame.\n\
-With no argument, print the selected stack frame.  (See also \"info frame\").\n\
+Select and print a stack frame.\nWith no argument, \
+print the selected stack frame.  (See also \"info frame\").\n\
 An argument specifies the frame to select.\n\
 It can be a stack frame number or the address of the frame.\n\
 With argument, nothing is printed if input is coming from\n\
@@ -2209,8 +2211,8 @@ It can be a stack frame number or the address of the frame.\n"));
 
   add_com ("backtrace", class_stack, backtrace_command, _("\
 Print backtrace of all stack frames, or innermost COUNT frames.\n\
-With a negative argument, print outermost -COUNT frames.\n\
-Use of the 'full' qualifier also prints the values of the local variables.\n"));
+With a negative argument, print outermost -COUNT frames.\nUse of the \
+'full' qualifier also prints the values of the local variables.\n"));
   add_com_alias ("bt", "backtrace", class_stack, 0);
   if (xdb_commands)
     {
@@ -2253,8 +2255,10 @@ Usage: func <name>\n"));
 
   add_setshow_auto_boolean_cmd ("disassemble-next-line", class_stack,
 			        &disassemble_next_line, _("\
-Set whether to disassemble next source line or insn when execution stops."), _("\
-Show whether to disassemble next source line or insn when execution stops."), _("\
+Set whether to disassemble next source line or insn when execution stops."),
+				_("\
+Show whether to disassemble next source line or insn when execution stops."),
+				_("\
 If ON, GDB will display disassembly of the next source line, in addition\n\
 to displaying the source line itself.  If the next source line cannot\n\
 be displayed (e.g., source is unavailable or there's no line info), GDB\n\

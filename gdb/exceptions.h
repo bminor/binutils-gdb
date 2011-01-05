@@ -108,8 +108,8 @@ extern const struct gdb_exception exception_none;
 /* Functions to drive the exceptions state m/c (internal to
    exceptions).  */
 EXCEPTIONS_SIGJMP_BUF *exceptions_state_mc_init (struct ui_out *func_uiout,
-						 volatile struct gdb_exception *
-						 exception,
+						 volatile struct
+						 gdb_exception *exception,
 						 return_mask mask);
 int exceptions_state_mc_action_iter (void);
 int exceptions_state_mc_action_iter_1 (void);
@@ -166,7 +166,8 @@ extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
    be a good thing or a dangerous thing.'' -- the Existential
    Wombat.  */
 
-extern void throw_exception (struct gdb_exception exception) ATTRIBUTE_NORETURN;
+extern void throw_exception (struct gdb_exception exception)
+     ATTRIBUTE_NORETURN;
 extern void throw_verror (enum errors, const char *fmt, va_list ap)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
 extern void throw_vfatal (const char *fmt, va_list ap)
@@ -250,6 +251,7 @@ extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
    functions. */
 
 typedef void (catch_command_errors_ftype) (char *, int);
-extern int catch_command_errors (catch_command_errors_ftype *func, char *command, int from_tty, return_mask);
+extern int catch_command_errors (catch_command_errors_ftype *func,
+				 char *command, int from_tty, return_mask);
 
 #endif

@@ -177,8 +177,8 @@ static void
 repeated_header_complaint (const char *arg1, int arg2)
 {
   complaint (&symfile_complaints,
-	     _("\"repeated\" header file %s not previously seen, at symtab \
-pos %d"),
+	     _("\"repeated\" header file %s not "
+	       "previously seen, at symtab pos %d"),
 	     arg1, arg2);
 }
 
@@ -968,7 +968,8 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
       >= DBX_STRINGTAB_SIZE (objfile)
       || nlist->n_strx + file_string_table_offset < nlist->n_strx)
     {
-      complaint (&symfile_complaints, _("bad string table offset in symbol %d"),
+      complaint (&symfile_complaints,
+		 _("bad string table offset in symbol %d"),
 		 symnum);
       namestring = "<bad string table offset>";
     } 
@@ -1172,8 +1173,8 @@ static void
 function_outside_compilation_unit_complaint (const char *arg1)
 {
   complaint (&symfile_complaints,
-	     _("function `%s' appears to be defined outside of all compilation \
-units"),
+	     _("function `%s' appears to be defined "
+	       "outside of all compilation units"),
 	     arg1);
 }
 
@@ -1579,8 +1580,8 @@ read_dbx_symtab (struct objfile *objfile)
 		/* FIXME: we should not get here without a PST to work on.
 		   Attempt to recover.  */
 		complaint (&symfile_complaints,
-			   _("N_BINCL %s not in entries for any file, at symtab \
-pos %d"),
+			   _("N_BINCL %s not in entries for "
+			     "any file, at symtab pos %d"),
 			   namestring, symnum);
 		continue;
 	      }
@@ -2040,7 +2041,8 @@ pos %d"),
 		 time searching to the end of every string looking for
 		 a backslash.  */
 
-	      complaint (&symfile_complaints, _("unknown symbol descriptor `%c'"),
+	      complaint (&symfile_complaints,
+			 _("unknown symbol descriptor `%c'"),
 			 p[1]);
 
 	      /* Ignore it; perhaps it is an extension that we don't
@@ -2094,7 +2096,8 @@ pos %d"),
 			     * sizeof (struct partial_symtab *)));
 #ifdef DEBUG_INFO
 		    fprintf_unfiltered (gdb_stderr,
-					"Had to reallocate dependency list.\n");
+					"Had to reallocate "
+					"dependency list.\n");
 		    fprintf_unfiltered (gdb_stderr,
 					"New dependencies allocated: %d\n",
 					dependencies_allocated);
@@ -2113,8 +2116,8 @@ pos %d"),
 	    {
 	      end_psymtab (pst, psymtab_include_list, includes_used,
 			   symnum * symbol_size,
-			   (CORE_ADDR) 0,
-			   dependency_list, dependencies_used, textlow_not_set);
+			   (CORE_ADDR) 0, dependency_list,
+			   dependencies_used, textlow_not_set);
 	      pst = (struct partial_symtab *) 0;
 	      includes_used = 0;
 	      dependencies_used = 0;
@@ -2884,9 +2887,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	     2000 would output N_LSYM entries after N_LBRAC
 	     entries.  As a consequence, these symbols are simply
 	     discarded.  Complain if this is the case.  */
-	  complaint (&symfile_complaints, _("\
-misplaced N_LBRAC entry; discarding local symbols which have \
-no enclosing block"));
+	  complaint (&symfile_complaints,
+		     _("misplaced N_LBRAC entry; discarding local "
+		       "symbols which have no enclosing block"));
 	}
       local_symbols = new->locals;
 
@@ -3542,13 +3545,16 @@ section (%s)"),
   DBX_SYMCOUNT (objfile) = bfd_section_size (sym_bfd, stabsect)
     / DBX_SYMBOL_SIZE (objfile);
   DBX_STRINGTAB_SIZE (objfile) = bfd_section_size (sym_bfd, stabstrsect);
-  DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;	/* XXX - FIXME: POKING INSIDE BFD DATA STRUCTURES */
+  DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;	/* XXX - FIXME: POKING
+							   INSIDE BFD DATA
+							   STRUCTURES */
 
   if (DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
     error (_("ridiculous string table size: %d bytes"),
 	   DBX_STRINGTAB_SIZE (objfile));
   DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->objfile_obstack, DBX_STRINGTAB_SIZE (objfile) + 1);
+    obstack_alloc (&objfile->objfile_obstack,
+		   DBX_STRINGTAB_SIZE (objfile) + 1);
   OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile) + 1);
 
   /* Now read in the string table in one big gulp.  */
@@ -3556,8 +3562,9 @@ section (%s)"),
   val = bfd_get_section_contents (sym_bfd,	/* bfd */
 				  stabstrsect,	/* bfd section */
 				  DBX_STRINGTAB (objfile), /* input buffer */
-				  0,	/* offset into section */
-				  DBX_STRINGTAB_SIZE (objfile)); /* amount to read */
+				  0,		/* offset into section */
+				  DBX_STRINGTAB_SIZE (objfile)); /* amount to
+								    read */
 
   if (!val)
     perror_with_name (name);

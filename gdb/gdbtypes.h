@@ -295,7 +295,8 @@ enum type_instance_flag_value
  * volatile modifier.
  */
 
-#define TYPE_VOLATILE(t) (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE)
+#define TYPE_VOLATILE(t) \
+  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE)
 
 /* Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -489,10 +490,11 @@ struct main_type
       union field_location
       {
 	/* Position of this field, counting in bits from start of
-	   containing structure.
-	   For gdbarch_bits_big_endian=1 targets, it is the bit offset to the MSB.
-	   For gdbarch_bits_big_endian=0 targets, it is the bit offset to the LSB.
-	   For a range bound or enum value, this is the value itself. */
+	   containing structure.  For gdbarch_bits_big_endian=1
+	   targets, it is the bit offset to the MSB.  For
+	   gdbarch_bits_big_endian=0 targets, it is the bit offset to
+	   the LSB.  For a range bound or enum value, this is the
+	   value itself. */
 
 	int bitpos;
 
@@ -697,9 +699,10 @@ struct cplus_struct_type
        dynamic.  Zero if not yet computed.  */
     int is_dynamic : 2;
 
-    /* For derived classes, the number of base classes is given by n_baseclasses
-       and virtual_field_bits is a bit vector containing one bit per base class.
-       If the base class is virtual, the corresponding bit will be set.
+    /* For derived classes, the number of base classes is given by
+       n_baseclasses and virtual_field_bits is a bit vector containing
+       one bit per base class.  If the base class is virtual, the
+       corresponding bit will be set.
        I.E, given:
 
        class A{};
@@ -888,7 +891,8 @@ extern void allocate_cplus_struct_type (struct type *);
 
 #define INIT_CPLUS_SPECIFIC(type) \
   (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_CPLUS_STUFF, \
-   TYPE_RAW_CPLUS_SPECIFIC (type) = (struct cplus_struct_type*) &cplus_struct_default)
+   TYPE_RAW_CPLUS_SPECIFIC (type) = (struct cplus_struct_type*) \
+   &cplus_struct_default)
 
 #define ALLOCATE_CPLUS_STRUCT_TYPE(type) allocate_cplus_struct_type (type)
 

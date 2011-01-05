@@ -281,13 +281,16 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 
       for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
 	{
-	  if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
-	      && SYMBOL_OBJ_SECTION (msymbol + i) == SYMBOL_OBJ_SECTION (msymbol))
+	  if (SYMBOL_VALUE_ADDRESS (msymbol + i)
+	      != SYMBOL_VALUE_ADDRESS (msymbol)
+	      && SYMBOL_OBJ_SECTION (msymbol + i)
+	      == SYMBOL_OBJ_SECTION (msymbol))
 	    break;
 	}
 
       if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
-	  && SYMBOL_VALUE_ADDRESS (msymbol + i) < obj_section_endaddr (section))
+	  && SYMBOL_VALUE_ADDRESS (msymbol + i)
+	  < obj_section_endaddr (section))
 	cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
       else
 	/* We got the start address from the last msymbol in the objfile.

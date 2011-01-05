@@ -40,7 +40,7 @@ extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
 
 /* Return REGCACHE's address space.  */
 
-extern struct address_space *get_regcache_aspace (const struct regcache *regcache);
+extern struct address_space *get_regcache_aspace (const struct regcache *);
 
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
@@ -154,9 +154,10 @@ extern void regcache_restore (struct regcache *dst,
    only transfer values already in the cache.  */
 
 extern struct regcache *regcache_dup (struct regcache *regcache);
-extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
+extern struct regcache *regcache_dup_no_passthrough (struct regcache *);
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
-extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
+extern void regcache_cpy_no_passthrough (struct regcache *dest,
+					 struct regcache *src);
 
 extern void registers_changed (void);
 extern void registers_changed_ptid (ptid_t);

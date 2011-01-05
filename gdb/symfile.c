@@ -67,7 +67,8 @@
 
 #include "psymtab.h"
 
-int (*deprecated_ui_load_progress_hook) (const char *section, unsigned long num);
+int (*deprecated_ui_load_progress_hook) (const char *section,
+					 unsigned long num);
 void (*deprecated_show_load_progress) (const char *section,
 			    unsigned long section_sent,
 			    unsigned long section_size,
@@ -159,8 +160,8 @@ static void
 show_symbol_reloading (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Dynamic symbol table reloading multiple times in one run is %s.\n"),
+  fprintf_filtered (file, _("Dynamic symbol table reloading "
+			    "multiple times in one run is %s.\n"),
 		    value);
 }
 
@@ -211,9 +212,10 @@ obsavestring (const char *ptr, int size, struct obstack *obstackp)
   return p;
 }
 
-/* Concatenate NULL terminated variable argument list of `const char *' strings;
-   return the new string.  Space is found in the OBSTACKP.  Argument list must
-   be terminated by a sentinel expression `(char *) NULL'.  */
+/* Concatenate NULL terminated variable argument list of `const char *'
+   strings; return the new string.  Space is found in the OBSTACKP.
+   Argument list must be terminated by a sentinel expression `(char *)
+   NULL'.  */
 
 char *
 obconcat (struct obstack *obstackp, ...)
@@ -826,7 +828,8 @@ default_symfile_offsets (struct objfile *objfile,
 		continue;
 
 	      bfd_set_section_vma (abfd, cur_sec, offsets[cur_sec->index]);
-	      exec_set_section_address (bfd_get_filename (abfd), cur_sec->index,
+	      exec_set_section_address (bfd_get_filename (abfd),
+					cur_sec->index,
 					offsets[cur_sec->index]);
 	      offsets[cur_sec->index] = 0;
 	    }
@@ -1372,8 +1375,9 @@ static void
 show_debug_file_directory (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-The directory where separate debug symbols are searched for is \"%s\".\n"),
+  fprintf_filtered (file,
+		    _("The directory where separate debug "
+		      "symbols are searched for is \"%s\".\n"),
 		    value);
 }
 
@@ -1928,7 +1932,8 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
   memset (new_request, 0, sizeof (struct memory_write_request));
   section_data = xcalloc (1, sizeof (struct load_progress_section_data));
   new_request->begin = bfd_section_lma (abfd, asec) + args->load_offset;
-  new_request->end = new_request->begin + size; /* FIXME Should size be in instead?  */
+  new_request->end = new_request->begin + size; /* FIXME Should size
+						   be in instead?  */
   new_request->data = xmalloc (size);
   new_request->baton = section_data;
 
@@ -2248,7 +2253,8 @@ add_symbol_file_command (char *args, int from_tty)
 			}
 		    }
 		  else
-		    error (_("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*"));
+		    error (_("USAGE: add-symbol-file <filename> <textaddress>"
+			     " [-mapped] [-readnow] [-s <secname> <addr>]*"));
 	      }
 	  }
     }
@@ -2573,8 +2579,9 @@ static void
 show_ext_args (struct ui_file *file, int from_tty,
 	       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Mapping between filename extension and source language is \"%s\".\n"),
+  fprintf_filtered (file,
+		    _("Mapping between filename extension "
+		      "and source language is \"%s\".\n"),
 		    value);
 }
 
@@ -2594,7 +2601,8 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
     cp++;
 
   if (*cp == '\0')
-    error (_("'%s': two arguments required -- filename extension and language"),
+    error (_("'%s': two arguments required -- "
+	     "filename extension and language"),
 	   ext_args);
 
   /* Null-terminate first arg */
@@ -2605,7 +2613,8 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
     cp++;
 
   if (*cp == '\0')
-    error (_("'%s': two arguments required -- filename extension and language"),
+    error (_("'%s': two arguments required -- "
+	     "filename extension and language"),
 	   ext_args);
 
   /* Lookup the language from among those we know.  */
@@ -3134,9 +3143,9 @@ map_overlay_command (char *args, int from_tty)
   struct obj_section *sec, *sec2;
 
   if (!overlay_debugging)
-    error (_("\
-Overlay debugging not enabled.  Use either the 'overlay auto' or\n\
-the 'overlay manual' command."));
+    error (_("Overlay debugging not enabled.  Use "
+	     "either the 'overlay auto' or\n"
+	     "the 'overlay manual' command."));
 
   if (args == 0 || *args == 0)
     error (_("Argument required: name of an overlay section"));
@@ -3179,9 +3188,9 @@ unmap_overlay_command (char *args, int from_tty)
   struct obj_section *sec;
 
   if (!overlay_debugging)
-    error (_("\
-Overlay debugging not enabled.  Use either the 'overlay auto' or\n\
-the 'overlay manual' command."));
+    error (_("Overlay debugging not enabled.  "
+	     "Use either the 'overlay auto' or\n"
+	     "the 'overlay manual' command."));
 
   if (args == 0 || *args == 0)
     error (_("Argument required: name of an overlay section"));
@@ -3436,7 +3445,8 @@ simple_overlay_update (struct obj_section *osect)
     if (cache_ovly_table != NULL)
       /* Does its cached location match what's currently in the symtab? */
       if (cache_ovly_table_base ==
-	  SYMBOL_VALUE_ADDRESS (lookup_minimal_symbol ("_ovly_table", NULL, NULL)))
+	  SYMBOL_VALUE_ADDRESS (lookup_minimal_symbol ("_ovly_table",
+						       NULL, NULL)))
 	/* Then go ahead and try to look up this single section in the cache */
 	if (simple_overlay_update_1 (osect))
 	  /* Found it!  We're done. */
@@ -3657,8 +3667,8 @@ to execute."), &cmdlist);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
-Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
-ADDR is the starting address of the file's text.\n\
+Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR>\
+ ...]\nADDR is the starting address of the file's text.\n\
 The optional arguments are section-name section-address pairs and\n\
 should be specified if the data and bss segments are not contiguous\n\
 with the text.  SECT is a section name to be loaded at SECT_ADDR."),

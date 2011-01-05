@@ -714,7 +714,8 @@ update_current_target (void)
 	    (void (*) (struct regcache *))
 	    noprocess);
   de_fault (deprecated_xfer_memory,
-	    (int (*) (CORE_ADDR, gdb_byte *, int, int, struct mem_attrib *, struct target_ops *))
+	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
+		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
   de_fault (to_files_info,
 	    (void (*) (struct target_ops *))
@@ -921,7 +922,8 @@ push_target (struct target_ops *t)
       fprintf_unfiltered (gdb_stderr,
 			  "Magic number of %s target struct wrong\n",
 			  t->to_shortname);
-      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+      internal_error (__FILE__, __LINE__,
+		      _("failed internal consistency check"));
     }
 
   /* Find the proper stratum to install this target in.  */
@@ -1047,7 +1049,8 @@ target_is_pushed (struct target_ops *t)
       fprintf_unfiltered (gdb_stderr,
 			  "Magic number of %s target struct wrong\n",
 			  t->to_shortname);
-      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+      internal_error (__FILE__, __LINE__,
+		      _("failed internal consistency check"));
     }
 
   for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
@@ -1091,7 +1094,8 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
 			 _("TLS load module not found"));
 
-	  addr = target->to_get_thread_local_address (target, ptid, lm_addr, offset);
+	  addr = target->to_get_thread_local_address (target, ptid,
+						      lm_addr, offset);
 	}
       /* If an error occurred, print TLS related messages here.  Otherwise,
          throw the error to some higher catcher.  */
@@ -1102,7 +1106,8 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	  switch (ex.error)
 	    {
 	    case TLS_NO_LIBRARY_SUPPORT_ERROR:
-	      error (_("Cannot find thread-local variables in this thread library."));
+	      error (_("Cannot find thread-local variables "
+		       "in this thread library."));
 	      break;
 	    case TLS_LOAD_MODULE_NOT_FOUND_ERROR:
 	      if (objfile_is_library)
@@ -1489,7 +1494,8 @@ target_xfer_partial (struct target_ops *ops,
       const unsigned char *myaddr = NULL;
 
       fprintf_unfiltered (gdb_stdlog,
-			  "%s:target_xfer_partial (%d, %s, %s, %s, %s, %s) = %s",
+			  "%s:target_xfer_partial "
+			  "(%d, %s, %s, %s, %s, %s) = %s",
 			  ops->to_shortname,
 			  (int) object,
 			  (annex ? annex : "(null)"),
@@ -1674,8 +1680,8 @@ static void
 show_trust_readonly (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Mode for reading from readonly sections is %s.\n"),
+  fprintf_filtered (file,
+		    _("Mode for reading from readonly sections is %s.\n"),
 		    value);
 }
 
@@ -1806,10 +1812,12 @@ target_read (struct target_ops *ops,
     the memory is 'patchy'. However, supporting 'patchy' memory would require
     trying to read every single byte, and it seems unacceptable solution.
     Explicit memory map is recommended for this case -- and
-    target_read_memory_robust will take care of reading multiple ranges then.  */
+    target_read_memory_robust will take care of reading multiple ranges
+    then.  */
 
 static void
-read_whatever_is_readable (struct target_ops *ops, ULONGEST begin, ULONGEST end,
+read_whatever_is_readable (struct target_ops *ops,
+			   ULONGEST begin, ULONGEST end,
 			   VEC(memory_read_result_s) **result)
 {
   gdb_byte *buf = xmalloc (end-begin);
@@ -1876,7 +1884,8 @@ read_whatever_is_readable (struct target_ops *ops, ULONGEST begin, ULONGEST end,
 
       if (xfer == first_half_end - first_half_begin)
 	{
-	  /* This half reads up fine. So, the error must be in the other half.  */
+	  /* This half reads up fine. So, the error must be in the
+	     other half.  */
 	  current_begin = second_half_begin;
 	  current_end = second_half_end;
 	}
@@ -1967,7 +1976,8 @@ read_memory_robust (struct target_ops *ops, ULONGEST offset, LONGEST len)
 	      /* Got an error reading full chunk. See if maybe we can read
 		 some subrange.  */
 	      xfree (buffer);
-	      read_whatever_is_readable (ops, offset + xfered, offset + xfered + to_read, &result);
+	      read_whatever_is_readable (ops, offset + xfered,
+					 offset + xfered + to_read, &result);
 	      xfered += to_read;
 	    }
 	  else
@@ -2206,7 +2216,8 @@ target_info (char *args, int from_tty)
       if ((int) (t->to_stratum) <= (int) dummy_stratum)
 	continue;
       if (has_all_mem)
-	printf_unfiltered (_("\tWhile running this, GDB does not access memory from...\n"));
+	printf_unfiltered (_("\tWhile running this, "
+			     "GDB does not access memory from...\n"));
       printf_unfiltered ("%s:\n", t->to_longname);
       (t->to_files_info) (t);
       has_all_mem = (*t->to_has_all_memory) (t);
@@ -2680,8 +2691,8 @@ target_require_runnable (void)
 	  || t->to_stratum == arch_stratum)
 	continue;
 
-      error (_("\
-The \"%s\" target does not support \"run\".  Try \"help target\" or \"continue\"."),
+      error (_("The \"%s\" target does not support \"run\".  "
+	       "Try \"help target\" or \"continue\"."),
 	     t->to_shortname);
     }
 
@@ -2852,8 +2863,8 @@ target_thread_address_space (ptid_t ptid)
   inf = find_inferior_pid (ptid_get_pid (ptid));
 
   if (inf == NULL || inf->aspace == NULL)
-    internal_error (__FILE__, __LINE__, "\
-Can't determine the current address space of thread %s\n",
+    internal_error (__FILE__, __LINE__,
+		    "Can't determine the current address space of thread %s\n",
 		    target_pid_to_str (ptid));
 
   return inf->aspace;
@@ -3298,7 +3309,8 @@ target_core_of_thread (ptid_t ptid)
 	  int retval = t->to_core_of_thread (t, ptid);
 
 	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_core_of_thread (%d) = %d\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"target_core_of_thread (%d) = %d\n",
 				PIDGET (ptid), retval);
 	  return retval;
 	}
@@ -3319,7 +3331,8 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
 	  int retval = t->to_verify_memory (t, data, memaddr, size);
 
 	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_verify_memory (%s, %s) = %d\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"target_verify_memory (%s, %s) = %d\n",
 				paddress (target_gdbarch, memaddr),
 				pulongest (size),
 				retval);
@@ -3453,10 +3466,12 @@ debug_to_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
 {
   int retval;
 
-  retval = debug_target.to_can_accel_watchpoint_condition (addr, len, rw, cond);
+  retval = debug_target.to_can_accel_watchpoint_condition (addr, len,
+							   rw, cond);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_can_accel_watchpoint_condition (%s, %d, %d, %s) = %ld\n",
+		      "target_can_accel_watchpoint_condition "
+		      "(%s, %d, %d, %s) = %ld\n",
 		      core_addr_to_string (addr), len, rw,
 		      host_address_to_string (cond), (unsigned long) retval);
   return retval;
@@ -3751,8 +3766,10 @@ debug_to_thread_architecture (struct target_ops *ops, ptid_t ptid)
 
   retval = debug_target.to_thread_architecture (ops, ptid);
 
-  fprintf_unfiltered (gdb_stdlog, "target_thread_architecture (%s) = %s [%s]\n",
-		      target_pid_to_str (ptid), host_address_to_string (retval),
+  fprintf_unfiltered (gdb_stdlog, 
+		      "target_thread_architecture (%s) = %s [%s]\n",
+		      target_pid_to_str (ptid),
+		      host_address_to_string (retval),
 		      gdbarch_bfd_arch_info (retval)->printable_name);
   return retval;
 }
@@ -3806,12 +3823,16 @@ setup_target_debug (void)
   current_target.to_remove_watchpoint = debug_to_remove_watchpoint;
   current_target.to_stopped_by_watchpoint = debug_to_stopped_by_watchpoint;
   current_target.to_stopped_data_address = debug_to_stopped_data_address;
-  current_target.to_watchpoint_addr_within_range = debug_to_watchpoint_addr_within_range;
-  current_target.to_region_ok_for_hw_watchpoint = debug_to_region_ok_for_hw_watchpoint;
-  current_target.to_can_accel_watchpoint_condition = debug_to_can_accel_watchpoint_condition;
+  current_target.to_watchpoint_addr_within_range
+    = debug_to_watchpoint_addr_within_range;
+  current_target.to_region_ok_for_hw_watchpoint
+    = debug_to_region_ok_for_hw_watchpoint;
+  current_target.to_can_accel_watchpoint_condition
+    = debug_to_can_accel_watchpoint_condition;
   current_target.to_terminal_init = debug_to_terminal_init;
   current_target.to_terminal_inferior = debug_to_terminal_inferior;
-  current_target.to_terminal_ours_for_output = debug_to_terminal_ours_for_output;
+  current_target.to_terminal_ours_for_output
+    = debug_to_terminal_ours_for_output;
   current_target.to_terminal_ours = debug_to_terminal_ours;
   current_target.to_terminal_save_ours = debug_to_terminal_save_ours;
   current_target.to_terminal_info = debug_to_terminal_info;
@@ -3835,8 +3856,8 @@ setup_target_debug (void)
 
 
 static char targ_desc[] =
-"Names of targets and files being debugged.\n\
-Shows the entire stack of targets currently in use (including the exec-file,\n\
+"Names of targets and files being debugged.\nShows the entire \
+stack of targets currently in use (including the exec-file,\n\
 core-file, and process, if any), as well as the symbol file name.";
 
 static void
@@ -3892,8 +3913,9 @@ show_maintenance_target_async_permitted (struct ui_file *file, int from_tty,
 					 struct cmd_list_element *c,
 					 const char *value)
 {
-  fprintf_filtered (file, _("\
-Controlling the inferior in asynchronous mode is %s.\n"), value);
+  fprintf_filtered (file,
+		    _("Controlling the inferior in "
+		      "asynchronous mode is %s.\n"), value);
 }
 
 /* Temporary copies of permission settings.  */

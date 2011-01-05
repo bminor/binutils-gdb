@@ -49,7 +49,8 @@ int libunwind_sigtramp_frame_sniffer (const struct frame_unwind *self,
                                       struct frame_info *this_frame,
                                       void **this_cache);
 
-void libunwind_frame_set_descr (struct gdbarch *arch, struct libunwind_descr *descr);
+void libunwind_frame_set_descr (struct gdbarch *arch,
+				struct libunwind_descr *descr);
 
 void libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
 			      struct frame_id *this_id);

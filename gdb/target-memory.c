@@ -380,7 +380,8 @@ target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 
 	  qsort (VEC_address (memory_write_request_s, flash),
 		 VEC_length (memory_write_request_s, flash),
-		 sizeof (struct memory_write_request), compare_block_starting_address);
+		 sizeof (struct memory_write_request),
+		 compare_block_starting_address);
 	}
     }
 
@@ -423,7 +424,8 @@ target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 
 	  len = target_write_with_progress (&current_target,
 					    TARGET_OBJECT_FLASH, NULL,
-					    r->data, r->begin, r->end - r->begin,
+					    r->data, r->begin,
+					    r->end - r->begin,
 					    progress_cb, r->baton);
 	  if (len < (LONGEST) (r->end - r->begin))
 	    error (_("Error writing data to flash"));

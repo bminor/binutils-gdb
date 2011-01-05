@@ -63,7 +63,8 @@ struct memrw_cmd
     char *cmdll;		/* Command for long long (64 bit) read/write */
     char *resp_delim;		/* String just prior to the desired value */
     char *term;			/* Terminating string to search for */
-    char *term_cmd;		/* String to get out of sub-mode (if necessary) */
+    char *term_cmd;		/* String to get out of sub-mode (if
+				   necessary) */
   };
 
 struct regrw_cmd
@@ -72,7 +73,8 @@ struct regrw_cmd
     char *resp_delim;		/* String (actually a regexp if getmem) just
 				   prior to the desired value */
     char *term;			/* Terminating string to search for */
-    char *term_cmd;		/* String to get out of sub-mode (if necessary) */
+    char *term_cmd;		/* String to get out of sub-mode (if
+				   necessary) */
   };
 
 struct monitor_ops
@@ -82,8 +84,9 @@ struct monitor_ops
     char *cont;			/* continue command */
     char *step;			/* single step */
     char *stop;			/* Interrupt program string */
-    char *set_break;		/* set a breakpoint. If NULL, monitor implementation
-				   sets its own to_insert_breakpoint method. */
+    char *set_break;		/* set a breakpoint. If NULL, monitor
+				   implementation sets its own
+				   to_insert_breakpoint method. */
     char *clr_break;		/* clear a breakpoint */
     char *clr_all_break;	/* Clear all breakpoints */
     char *fill;			/* Memory fill cmd (addr len val) */
@@ -97,7 +100,8 @@ struct monitor_ops
        of registers that we can parse to supply
        GDB with the value of a register.  */
     char *dump_registers;	/* Command to dump all regs at once */
-    char *register_pattern;	/* Pattern that picks out register from reg dump */
+    char *register_pattern;	/* Pattern that picks out register
+				   from reg dump */
     void (*supply_register) (struct regcache *regcache, char *name,
 			     int namelen, char *val, int vallen);
     void (*load_routine) (struct serial *desc, char *file,

@@ -43,8 +43,9 @@ enum varobj_type
 enum varobj_scope_status
   {
     VAROBJ_IN_SCOPE = 0,        /* Varobj is scope, value available.  */
-    VAROBJ_NOT_IN_SCOPE = 1,    /* Varobj is not in scope, value not available, 
-				   but varobj can become in scope later.  */
+    VAROBJ_NOT_IN_SCOPE = 1,    /* Varobj is not in scope, value not
+				   available, but varobj can become in
+				   scope later.  */
     VAROBJ_INVALID = 2,         /* Varobj no longer has any value, and never
 				   will.  */
   };

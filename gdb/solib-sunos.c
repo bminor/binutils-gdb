@@ -540,7 +540,8 @@ disable_break (void)
 
   if (stop_pc != breakpoint_addr)
     {
-      warning (_("stopped at unknown breakpoint while handling shared libraries"));
+      warning (_("stopped at unknown breakpoint "
+		 "while handling shared libraries"));
     }
 
   return 1;

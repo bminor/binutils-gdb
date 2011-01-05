@@ -85,7 +85,8 @@ frame_base_append_sniffer (struct gdbarch *gdbarch,
 {
   struct frame_base_table *table = gdbarch_data (gdbarch, frame_base_data);
 
-  (*table->tail) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_base_table_entry);
+  (*table->tail)
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_base_table_entry);
   (*table->tail)->sniffer = sniffer;
   table->tail = &(*table->tail)->next;
 }

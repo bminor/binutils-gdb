@@ -122,9 +122,9 @@ value_ptrdiff (struct value *arg1, struct value *arg2)
 
   if (TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)))
       != TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type2))))
-    error (_("\
-First argument of `-' is a pointer and second argument is neither\n\
-an integer nor a pointer of the same type."));
+    error (_("First argument of `-' is a pointer and "
+	     "second argument is neither\n"
+	     "an integer nor a pointer of the same type."));
 
   sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
   if (sz == 0) 
@@ -543,7 +543,8 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
+      return call_function_by_hand (argvec[0], 2 - static_memfuncp,
+				    argvec + 1);
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);
@@ -799,7 +800,8 @@ value_concat (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type2) != TYPE_CODE_BITSTRING
 	  && TYPE_CODE (type2) != TYPE_CODE_BOOL)
 	{
-	  error (_("Bitstrings or booleans can only be concatenated with other bitstrings or booleans."));
+	  error (_("Bitstrings or booleans can only be concatenated "
+		   "with other bitstrings or booleans."));
 	}
       error (_("unimplemented support for bitstring/boolean concatenation."));
     }
@@ -892,7 +894,8 @@ value_args_as_decimal (struct value *arg1, struct value *arg2,
     /* The DFP extension to the C language does not allow mixing of
      * decimal float types with other float types in expressions
      * (see WDTR 24732, page 12).  */
-    error (_("Mixing decimal floating types with other floating types is not allowed."));
+    error (_("Mixing decimal floating types with "
+	     "other floating types is not allowed."));
 
   /* Obtain decimal value of arg1, converting from other types
      if necessary.  */
@@ -1035,7 +1038,8 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  errno = 0;
 	  v = pow (v1, v2);
 	  if (errno)
-	    error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
+	    error (_("Cannot perform exponentiation: %s"),
+		   safe_strerror (errno));
 	  break;
 
 	case BINOP_MIN:

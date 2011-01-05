@@ -135,8 +135,8 @@ add_symbol_file_from_memory_command (char *args, int from_tty)
   else
     templ = exec_bfd;
   if (templ == NULL)
-    error (_("\
-Must use symbol-file or exec-file before add-symbol-file-from-memory."));
+    error (_("Must use symbol-file or exec-file "
+	     "before add-symbol-file-from-memory."));
 
   symbol_file_add_from_memory (templ, addr, NULL, from_tty);
 }
@@ -164,8 +164,8 @@ symbol_file_add_from_memory_wrapper (struct ui_out *uiout, void *data)
   return 0;
 }
 
-/* Try to add the symbols for the vsyscall page, if there is one.  This function
-   is called via the inferior_created observer.  */
+/* Try to add the symbols for the vsyscall page, if there is one.
+   This function is called via the inferior_created observer.  */
 
 static void
 add_vsyscall_page (struct target_ops *target, int from_tty)
@@ -190,9 +190,9 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
 	  ``bfd_runtime'' (a BFD created using the loaded image) file
 	  format should fix this.  */
 	{
-	  warning (_("\
-Could not load vsyscall page because no executable was specified\n\
-try using the \"file\" command first."));
+	  warning (_("Could not load vsyscall page "
+		     "because no executable was specified\n"
+		     "try using the \"file\" command first."));
 	  return;
 	}
       args.bfd = bfd;
@@ -217,9 +217,11 @@ void
 _initialize_symfile_mem (void)
 {
   add_cmd ("add-symbol-file-from-memory", class_files,
-           add_symbol_file_from_memory_command, _("\
-Load the symbols out of memory from a dynamically loaded object file.\n\
-Give an expression for the address of the file's shared object file header."),
+           add_symbol_file_from_memory_command,
+	   _("Load the symbols out of memory from a "
+	     "dynamically loaded object file.\n"
+	     "Give an expression for the address "
+	     "of the file's shared object file header."),
            &cmdlist);
 
   /* Want to know of each new inferior so that its vsyscall info can

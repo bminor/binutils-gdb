@@ -98,7 +98,7 @@ extern void add_file_handler (int fd, handler_func *proc,
 extern struct async_signal_handler *
   create_async_signal_handler (sig_handler_func *proc, 
 			       gdb_client_data client_data);
-extern void delete_async_signal_handler (struct async_signal_handler **async_handler_ptr);
+extern void delete_async_signal_handler (struct async_signal_handler **);
 extern int create_timer (int milliseconds, 
 			 timer_handler_func *proc, 
 			 gdb_client_data client_data);

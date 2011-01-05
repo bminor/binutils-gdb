@@ -335,7 +335,8 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
   fprintf_filtered (outfile, "Read from object file %s (", objfile->name);
   gdb_print_host_address (objfile, outfile);
   fprintf_filtered (outfile, ")\n");
-  fprintf_filtered (outfile, "Language: %s\n", language_str (symtab->language));
+  fprintf_filtered (outfile, "Language: %s\n",
+		    language_str (symtab->language));
 
   /* First print the line table.  */
   l = LINETABLE (symtab);
@@ -448,8 +449,8 @@ maintenance_print_symbols (char *args, int from_tty)
 
   if (args == NULL)
     {
-      error (_("\
-Arguments missing: an output file name and an optional symbol file name"));
+      error (_("Arguments missing: an output file name "
+	       "and an optional symbol file name"));
     }
   argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
@@ -668,7 +669,8 @@ maintenance_print_msymbols (char *args, int from_tty)
 
   if (args == NULL)
     {
-      error (_("print-msymbols takes an output file name and optional symbol file name"));
+      error (_("print-msymbols takes an output file "
+	       "name and optional symbol file name"));
     }
   argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
@@ -697,8 +699,8 @@ maintenance_print_msymbols (char *args, int from_tty)
   immediate_quit++;
   ALL_PSPACES (pspace)
     ALL_PSPACE_OBJFILES (pspace, objfile)
-      if (symname == NULL
-	  || (!stat (objfile->name, &obj_st) && sym_st.st_ino == obj_st.st_ino))
+      if (symname == NULL || (!stat (objfile->name, &obj_st)
+			      && sym_st.st_ino == obj_st.st_ino))
 	dump_msymbols (objfile, outfile);
   immediate_quit--;
   fprintf_filtered (outfile, "\n\n");
@@ -764,12 +766,15 @@ maintenance_info_symtabs (char *regexp, int from_tty)
 			       symtab->dirname ? symtab->dirname : "(null)");
 	      printf_filtered ("	  fullname %s\n",
 			       symtab->fullname ? symtab->fullname : "(null)");
-	      printf_filtered ("	  blockvector ((struct blockvector *) %s)%s\n",
+	      printf_filtered ("	  "
+			       "blockvector ((struct blockvector *) %s)%s\n",
 			       host_address_to_string (symtab->blockvector),
 			       symtab->primary ? " (primary)" : "");
-	      printf_filtered ("	  linetable ((struct linetable *) %s)\n",
+	      printf_filtered ("	  "
+			       "linetable ((struct linetable *) %s)\n",
 			       host_address_to_string (symtab->linetable));
-	      printf_filtered ("	  debugformat %s\n", symtab->debugformat);
+	      printf_filtered ("	  debugformat %s\n",
+			       symtab->debugformat);
 	      printf_filtered ("	}\n");
 	    }
 	}

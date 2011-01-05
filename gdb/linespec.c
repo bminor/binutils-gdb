@@ -494,9 +494,8 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
   const char *select_mode = multiple_symbols_select_mode ();
 
   if (select_mode == multiple_symbols_cancel)
-    error (_("\
-canceled because the command is ambiguous\n\
-See set/show multiple-symbol."));
+    error (_("canceled because the command is ambiguous\n"
+	     "See set/show multiple-symbol."));
   
   values.sals = (struct symtab_and_line *)
     alloca (nelts * sizeof (struct symtab_and_line));
@@ -542,7 +541,8 @@ See set/show multiple-symbol."));
                                    values.sals[i].symtab->filename,
                                    values.sals[i].line);
               else
-                printf_unfiltered (_("[%d] %s at ?FILE:%d [No symtab? Probably broken debug info...]\n"),
+                printf_unfiltered (_("[%d] %s at ?FILE:%d [No symtab? "
+				     "Probably broken debug info...]\n"),
                                    (i + 2),
                                    SYMBOL_PRINT_NAME (sym_arr[i]),
                                    values.sals[i].line);
@@ -619,7 +619,8 @@ See set/show multiple-symbol."));
 	    }
 	  else
 	    {
-	      printf_unfiltered (_("duplicate request for %d ignored.\n"), num);
+	      printf_unfiltered (_("duplicate request for %d ignored.\n"),
+				 num);
 	    }
 	}
 
@@ -703,10 +704,10 @@ find_method_overload_end (char *p)
    if no file is validly specified.  Callers must check that.
    Also, the line number returned may be invalid.  
  
-   If NOT_FOUND_PTR is not null, store a boolean true/false value at the location, based
-   on whether or not failure occurs due to an unknown function or file.  In the case
-   where failure does occur due to an unknown function or file, do not issue an error
-   message.  */
+   If NOT_FOUND_PTR is not null, store a boolean true/false value at
+   the location, based on whether or not failure occurs due to an
+   unknown function or file.  In the case where failure does occur due
+   to an unknown function or file, do not issue an error message.  */
 
 /* We allow single quotes in various places.  This is a hideous
    kludge, which exists because the completer can't yet deal with the
@@ -1168,21 +1169,26 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
       else
 	{
 	  sym = find_pc_function (SYMBOL_VALUE_ADDRESS (sym_arr[0]));
-	  if ((sym != NULL) && strcmp (SYMBOL_LINKAGE_NAME (sym_arr[0]), SYMBOL_LINKAGE_NAME (sym)) != 0)
+	  if ((sym != NULL) && strcmp (SYMBOL_LINKAGE_NAME (sym_arr[0]),
+				       SYMBOL_LINKAGE_NAME (sym)) != 0)
 	    {
-	      warning (_("debugging symbol \"%s\" does not match selector; ignoring"), SYMBOL_LINKAGE_NAME (sym));
+	      warning (_("debugging symbol \"%s\" does "
+			 "not match selector; ignoring"),
+		       SYMBOL_LINKAGE_NAME (sym));
 	      sym = NULL;
 	    }
 	}
 	      
-      values.sals = (struct symtab_and_line *) xmalloc (sizeof (struct symtab_and_line));
+      values.sals = (struct symtab_and_line *)
+	xmalloc (sizeof (struct symtab_and_line));
       values.nelts = 1;
 	      
       if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
 	{
 	  /* Canonicalize this, so it remains resolved for dylib loads.  */
 	  values.sals[0] = find_function_start_sal (sym, funfirstline);
-	  build_canonical_line_spec (values.sals, SYMBOL_NATURAL_NAME (sym), canonical);
+	  build_canonical_line_spec (values.sals,
+				     SYMBOL_NATURAL_NAME (sym), canonical);
 	}
       else
 	{
@@ -1453,7 +1459,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	  if (strcmp_iw (SYMBOL_LINKAGE_NAME (sym), saved_arg) != 0)
 	    {
 	      xfree (values.sals);
-	      error (_("the class `%s' does not have any method instance named %s\n"),
+	      error (_("the class `%s' does not have "
+		       "any method instance named %s\n"),
 		     SYMBOL_PRINT_NAME (sym_class), copy);
 	    }
 	}
@@ -1482,7 +1489,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   if (not_found_ptr)
     *not_found_ptr = 1;
   cplusplus_error (saved_arg,
-		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
+		   "Can't find member of namespace, "
+		   "class, struct, or union named \"%s\"\n",
 		   copy);
 }
 
@@ -1548,7 +1556,8 @@ lookup_prefix_sym (char **argptr, char *p)
 
 static struct symtabs_and_lines
 find_method (int funfirstline, char ***canonical, char *saved_arg,
-	     char *copy, struct type *t, struct symbol *sym_class, int *not_found_ptr)
+	     char *copy, struct type *t, struct symbol *sym_class,
+	     int *not_found_ptr)
 {
   struct symtabs_and_lines values;
   struct symbol *sym = NULL;
@@ -1615,7 +1624,8 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 		}
 	    }
 
-	  error (_("the class `%s' does not have any method instance named %s\n"),
+	  error (_("the class `%s' does not have "
+		   "any method instance named %s\n"),
 		 SYMBOL_PRINT_NAME (sym_class), copy);
 	}
 
@@ -1674,7 +1684,8 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
 	*not_found_ptr = 1;
       if (!have_full_symbols () && !have_partial_symbols ())
 	throw_error (NOT_FOUND_ERROR,
-		     _("No symbol table is loaded.  Use the \"file\" command."));
+		     _("No symbol table is loaded.  "
+		       "Use the \"file\" command."));
       throw_error (NOT_FOUND_ERROR, _("No source file named %s."), copy);
     }
 
@@ -1806,7 +1817,8 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
       sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
       val_history = access_value_history ((copy[1] == '$') ? -index : index);
       if (TYPE_CODE (value_type (val_history)) != TYPE_CODE_INT)
-	error (_("History values used in line specs must have integer values."));
+	error (_("History values used in line "
+		 "specs must have integer values."));
       valx = value_as_long (val_history);
     }
   else
@@ -1830,7 +1842,8 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
       /* Not a user variable or function -- must be convenience variable.  */
       if (!get_internalvar_integer (lookup_internalvar (copy + 1), &valx))
-	error (_("Convenience variables used in line specs must have integer values."));
+	error (_("Convenience variables used in line "
+		 "specs must have integer values."));
     }
 
   init_sal (&val);
@@ -1875,9 +1888,9 @@ decode_label (char *copy, char ***canonical, struct symtabs_and_lines *result)
 }
 
 /* Decode a linespec that's a variable.  If FILE_SYMTAB is non-NULL,
-   look in that symtab's static variables first.  If NOT_FOUND_PTR is not NULL and
-   the function cannot be found, store boolean true in the location pointed to
-   and do not issue an error message.  */ 
+   look in that symtab's static variables first.  If NOT_FOUND_PTR is
+   not NULL and the function cannot be found, store boolean true in
+   the location pointed to and do not issue an error message.  */ 
 
 static struct symtabs_and_lines
 decode_variable (char *copy, int funfirstline, char ***canonical,

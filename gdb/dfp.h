@@ -30,7 +30,8 @@
 #define MAX_DECIMAL_STRING  43
 
 extern void decimal_to_string (const gdb_byte *, int, enum bfd_endian, char *);
-extern int decimal_from_string (gdb_byte *, int, enum bfd_endian, const char *);
+extern int decimal_from_string (gdb_byte *, int, enum bfd_endian,
+				const char *);
 extern void decimal_from_integral (struct value *from, gdb_byte *to,
 				   int len, enum bfd_endian byte_order);
 extern void decimal_from_floating (struct value *from, gdb_byte *to,

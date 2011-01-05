@@ -441,7 +441,7 @@ static ui_file_fputs_ftype stdio_file_fputs;
 static ui_file_read_ftype stdio_file_read;
 static ui_file_isatty_ftype stdio_file_isatty;
 static ui_file_delete_ftype stdio_file_delete;
-static struct ui_file *stdio_file_new (FILE * file, int close_p);
+static struct ui_file *stdio_file_new (FILE *file, int close_p);
 static ui_file_flush_ftype stdio_file_flush;
 
 static int stdio_file_magic;

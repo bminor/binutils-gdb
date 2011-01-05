@@ -721,8 +721,9 @@ varobj_get_expression (struct varobj *var)
 }
 
 /* Deletes a varobj and all its children if only_children == 0,
-   otherwise deletes only the children; returns a malloc'ed list of all the 
-   (malloc'ed) names of the variables that have been deleted (NULL terminated) */
+   otherwise deletes only the children; returns a malloc'ed list of
+   all the (malloc'ed) names of the variables that have been deleted
+   (NULL terminated) */
 
 int
 varobj_delete (struct varobj *var, char ***dellist, int only_children)
@@ -1455,8 +1456,8 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   char *print_value = NULL;
 
   /* We need to know the varobj's type to decide if the value should
-     be fetched or not.  C++ fake children (public/protected/private) don't have
-     a type. */
+     be fetched or not.  C++ fake children (public/protected/private)
+     don't have a type. */
   gdb_assert (var->type || CPLUS_FAKE_CHILD (var));
   changeable = varobj_value_is_changeable_p (var);
 
@@ -1528,10 +1529,11 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      to compare with.  */
   if (!initial && changeable)
     {
-      /* If the value of the varobj was changed by -var-set-value, then the 
-	 value in the varobj and in the target is the same.  However, that value
-	 is different from the value that the varobj had after the previous
-	 -var-update. So need to the varobj as changed.  */
+      /* If the value of the varobj was changed by -var-set-value,
+	 then the value in the varobj and in the target is the same.
+	 However, that value is different from the value that the
+	 varobj had after the previous -var-update. So need to the
+	 varobj as changed.  */
       if (var->updated)
 	{
 	  changed = 1;
@@ -2058,9 +2060,9 @@ uninstall_variable (struct varobj *var)
 	    }
 	  if (cr == NULL)
 	    {
-	      warning
-		("Assertion failed: Could not find varobj \"%s\" in root list",
-		 var->obj_name);
+	      warning ("Assertion failed: Could not find "
+		       "varobj \"%s\" in root list",
+		       var->obj_name);
 	      return;
 	    }
 	  if (prer == NULL)
@@ -2158,7 +2160,7 @@ new_root_variable (void)
 {
   struct varobj *var = new_variable ();
 
-  var->root = (struct varobj_root *) xmalloc (sizeof (struct varobj_root));;
+  var->root = (struct varobj_root *) xmalloc (sizeof (struct varobj_root));
   var->root->lang = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
@@ -2358,14 +2360,16 @@ number_of_children (struct varobj *var)
   return (*var->root->lang->number_of_children) (var);;
 }
 
-/* What is the expression for the root varobj VAR? Returns a malloc'd string. */
+/* What is the expression for the root varobj VAR? Returns a malloc'd
+   string. */
 static char *
 name_of_variable (struct varobj *var)
 {
   return (*var->root->lang->name_of_variable) (var);
 }
 
-/* What is the name of the INDEX'th child of VAR? Returns a malloc'd string. */
+/* What is the name of the INDEX'th child of VAR? Returns a malloc'd
+   string. */
 static char *
 name_of_child (struct varobj *var, int index)
 {
@@ -2848,9 +2852,10 @@ c_describe_child (struct varobj *parent, int index,
     {
     case TYPE_CODE_ARRAY:
       if (cname)
-	*cname = xstrdup (int_string (index 
-				      + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)),
-				      10, 1, 0, 0));
+	*cname
+	  = xstrdup (int_string (index 
+				 + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)),
+				 10, 1, 0, 0));
 
       if (cvalue && value)
 	{
@@ -3298,9 +3303,10 @@ cplus_describe_child (struct varobj *parent, int index,
 	    *ctype = TYPE_FIELD_TYPE (type, type_index);
 
 	  if (cfull_expression)
-	    *cfull_expression = xstrprintf ("((%s)%s%s)", parent_expression,
-					    join, 
-					    TYPE_FIELD_NAME (type, type_index));
+	    *cfull_expression
+	      = xstrprintf ("((%s)%s%s)", parent_expression,
+			    join, 
+			    TYPE_FIELD_NAME (type, type_index));
 	}
       else if (index < TYPE_N_BASECLASSES (type))
 	{
@@ -3549,12 +3555,11 @@ _initialize_varobj (void)
   memset (varobj_table, 0, sizeof_table);
 
   add_setshow_zinteger_cmd ("debugvarobj", class_maintenance,
-			    &varobjdebug, _("\
-Set varobj debugging."), _("\
-Show varobj debugging."), _("\
-When non-zero, varobj debugging is enabled."),
-			    NULL,
-			    show_varobjdebug,
+			    &varobjdebug,
+			    _("Set varobj debugging."),
+			    _("Show varobj debugging."),
+			    _("When non-zero, varobj debugging is enabled."),
+			    NULL, show_varobjdebug,
 			    &setlist, &showlist);
 }
 

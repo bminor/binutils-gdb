@@ -865,15 +865,20 @@ record_open_1 (char *name, int from_tty)
   if (!tmp_to_wait)
     error (_("Could not find 'to_wait' method on the target stack."));
   if (!tmp_to_store_registers)
-    error (_("Could not find 'to_store_registers' method on the target stack."));
+    error (_("Could not find 'to_store_registers' "
+	     "method on the target stack."));
   if (!tmp_to_insert_breakpoint)
-    error (_("Could not find 'to_insert_breakpoint' method on the target stack."));
+    error (_("Could not find 'to_insert_breakpoint' "
+	     "method on the target stack."));
   if (!tmp_to_remove_breakpoint)
-    error (_("Could not find 'to_remove_breakpoint' method on the target stack."));
+    error (_("Could not find 'to_remove_breakpoint' "
+	     "method on the target stack."));
   if (!tmp_to_stopped_by_watchpoint)
-    error (_("Could not find 'to_stopped_by_watchpoint' method on the target stack."));
+    error (_("Could not find 'to_stopped_by_watchpoint' "
+	     "method on the target stack."));
   if (!tmp_to_stopped_data_address)
-    error (_("Could not find 'to_stopped_data_address' method on the target stack."));
+    error (_("Could not find 'to_stopped_data_address' "
+	     "method on the target stack."));
 
   push_target (&record_ops);
 }
@@ -1162,7 +1167,8 @@ record_wait (struct target_ops *ops,
 			 handle it.  */
 		      if (software_breakpoint_inserted_here_p (aspace, tmp_pc))
 			{
-			  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+			  struct gdbarch *gdbarch
+			    = get_regcache_arch (regcache);
 			  CORE_ADDR decr_pc_after_break
 			    = gdbarch_decr_pc_after_break (gdbarch);
 			  if (decr_pc_after_break)
@@ -1333,8 +1339,9 @@ record_wait (struct target_ops *ops,
 		  if (record_hw_watchpoint)
 		    {
 		      if (record_debug)
-			fprintf_unfiltered (gdb_stdlog, "\
-Process record: hit hw watchpoint.\n");
+			fprintf_unfiltered (gdb_stdlog,
+					    "Process record: hit hw "
+					    "watchpoint.\n");
 		      continue_flag = 0;
 		    }
 		  /* Check target signal */
@@ -2029,8 +2036,8 @@ static struct cmd_list_element *record_cmdlist, *set_record_cmdlist,
 static void
 set_record_command (char *args, int from_tty)
 {
-  printf_unfiltered (_("\
-\"set record\" must be followed by an apporpriate subcommand.\n"));
+  printf_unfiltered (_("\"set record\" must be followed "
+		       "by an apporpriate subcommand.\n"));
   help_list (set_record_cmdlist, "set record ", all_commands, gdb_stdout);
 }
 
@@ -2222,8 +2229,9 @@ record_restore (void)
     error (_("Version mis-match or file format error in core file %s."),
 	   bfd_get_filename (core_bfd));
   if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "\
-  Reading 4-byte magic cookie RECORD_FILE_MAGIC (0x%s)\n",
+    fprintf_unfiltered (gdb_stdlog,
+			"  Reading 4-byte magic cookie "
+			"RECORD_FILE_MAGIC (0x%s)\n",
 			phex_nz (netorder32 (magic), 4));
 
   /* Restore the entries in recfd into record_arch_list_head and
@@ -2260,8 +2268,9 @@ record_restore (void)
 			rec->u.reg.len, &bfd_offset);
 
 	  if (record_debug)
-	    fprintf_unfiltered (gdb_stdlog, "\
-  Reading register %d (1 plus %lu plus %d bytes)\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"  Reading register %d (1 "
+				"plus %lu plus %d bytes)\n",
 				rec->u.reg.num,
 				(unsigned long) sizeof (regnum),
 				rec->u.reg.len);
@@ -2285,8 +2294,9 @@ record_restore (void)
 			rec->u.mem.len, &bfd_offset);
 
 	  if (record_debug)
-	    fprintf_unfiltered (gdb_stdlog, "\
-  Reading memory %s (1 plus %lu plus %lu plus %d bytes)\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"  Reading memory %s (1 plus "
+				"%lu plus %lu plus %d bytes)\n",
 				paddress (get_current_arch (),
 					  rec->u.mem.addr),
 				(unsigned long) sizeof (addr),
@@ -2311,8 +2321,9 @@ record_restore (void)
 	  rec->u.end.insn_num = count;
 	  record_insn_count = count + 1;
 	  if (record_debug)
-	    fprintf_unfiltered (gdb_stdlog, "\
-  Reading record_end (1 + %lu + %lu bytes), offset == %s\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"  Reading record_end (1 + "
+				"%lu + %lu bytes), offset == %s\n",
 				(unsigned long) sizeof (signal),
 				(unsigned long) sizeof (count),
 				paddress (get_current_arch (),
@@ -2489,8 +2500,9 @@ cmd_record_save (char *args, int from_tty)
   /* Write the magic code.  */
   magic = RECORD_FILE_MAGIC;
   if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "\
-  Writing 4-byte magic cookie RECORD_FILE_MAGIC (0x%s)\n",
+    fprintf_unfiltered (gdb_stdlog,
+			"  Writing 4-byte magic cookie "
+			"RECORD_FILE_MAGIC (0x%s)\n",
 		      phex_nz (magic, 4));
   bfdcore_write (obfd, osec, &magic, sizeof (magic), &bfd_offset);
 
@@ -2513,8 +2525,9 @@ cmd_record_save (char *args, int from_tty)
             {
             case record_reg: /* reg */
 	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog, "\
-  Writing register %d (1 plus %lu plus %d bytes)\n",
+		fprintf_unfiltered (gdb_stdlog,
+				    "  Writing register %d (1 "
+				    "plus %lu plus %d bytes)\n",
 				    record_list->u.reg.num,
 				    (unsigned long) sizeof (regnum),
 				    record_list->u.reg.len);
@@ -2531,8 +2544,9 @@ cmd_record_save (char *args, int from_tty)
 
             case record_mem: /* mem */
 	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog, "\
-  Writing memory %s (1 plus %lu plus %lu plus %d bytes)\n",
+		fprintf_unfiltered (gdb_stdlog,
+				    "  Writing memory %s (1 plus "
+				    "%lu plus %lu plus %d bytes)\n",
 				    paddress (gdbarch,
 					      record_list->u.mem.addr),
 				    (unsigned long) sizeof (addr),
@@ -2555,8 +2569,9 @@ cmd_record_save (char *args, int from_tty)
 
               case record_end:
 		if (record_debug)
-		  fprintf_unfiltered (gdb_stdlog, "\
-  Writing record_end (1 + %lu + %lu bytes)\n", 
+		  fprintf_unfiltered (gdb_stdlog,
+				      "  Writing record_end (1 + "
+				      "%lu + %lu bytes)\n", 
 				      (unsigned long) sizeof (signal),
 				      (unsigned long) sizeof (count));
 		/* Write signal value.  */
@@ -2768,8 +2783,8 @@ Argument is filename.  File must be created with 'record save'."),
   add_setshow_boolean_cmd ("stop-at-limit", no_class,
 			   &record_stop_at_limit, _("\
 Set whether record/replay stops when record/replay buffer becomes full."), _("\
-Show whether record/replay stops when record/replay buffer becomes full."), _("\
-Default is ON.\n\
+Show whether record/replay stops when record/replay buffer becomes full."),
+			   _("Default is ON.\n\
 When ON, if the record/replay buffer becomes full, ask user what to do.\n\
 When OFF, if the record/replay buffer becomes full,\n\
 delete the oldest recorded instruction to make room for each new one."),

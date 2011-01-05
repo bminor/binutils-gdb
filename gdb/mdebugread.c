@@ -142,7 +142,8 @@ basic_type_complaint (int arg1, const char *arg2)
 static void
 bad_tag_guess_complaint (const char *arg1)
 {
-  complaint (&symfile_complaints, _("guessed tag type of %s incorrectly"), arg1);
+  complaint (&symfile_complaints,
+	     _("guessed tag type of %s incorrectly"), arg1);
 }
 
 static void
@@ -372,9 +373,11 @@ mdebug_build_psymtabs (struct objfile *objfile,
   if (compare_glevel (max_glevel, GLEVEL_2) < 0)
     {
       if (max_gdbinfo == 0)
-	printf_unfiltered (_("\n%s not compiled with -g, debugging support is limited.\n"),
+	printf_unfiltered (_("\n%s not compiled with -g, "
+			     "debugging support is limited.\n"),
 			   objfile->name);
-      printf_unfiltered (_("You should compile with -g2 or -g3 for best debugging support.\n"));
+      printf_unfiltered (_("You should compile with -g2 or "
+			   "-g3 for best debugging support.\n"));
       gdb_flush (gdb_stdout);
     }
 #endif
@@ -935,7 +938,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	      default:
 		complaint (&symfile_complaints,
-			   _("declaration block contains unhandled symbol type %d"),
+			   _("declaration block contains "
+			     "unhandled symbol type %d"),
 			   tsym.st);
 	      }
 	  }
@@ -998,8 +1002,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	if (sh->iss == 0 || name[0] == '.' || name[0] == '\0')
 	  TYPE_TAG_NAME (t) = NULL;
 	else
-	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->objfile_obstack, name,
-					(char *) NULL);
+	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->objfile_obstack,
+					name, (char *) NULL);
 
 	TYPE_CODE (t) = type_code;
 	TYPE_LENGTH (t) = sh->value;
@@ -1227,7 +1231,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       FIELD_NAME (*f) = name;
       SET_FIELD_BITPOS (*f, sh->value);
       bitsize = 0;
-      FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index, &bitsize, bigend, name);
+      FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index,
+				    &bitsize, bigend, name);
       FIELD_BITSIZE (*f) = bitsize;
       break;
 
@@ -1592,7 +1597,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  else if (t->bt == btEnum)
 	    ;
 	  else
-	    complaint (&symfile_complaints, _("can't handle TIR fBitfield for %s"),
+	    complaint (&symfile_complaints,
+		       _("can't handle TIR fBitfield for %s"),
 		       sym_name);
 	}
       else
@@ -1689,8 +1695,9 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	    TYPE_TAG_NAME (tp) = NULL;
 	  else if (TYPE_TAG_NAME (tp) == NULL
 		   || strcmp (TYPE_TAG_NAME (tp), name) != 0)
-	    TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
-					    &current_objfile->objfile_obstack);
+	    TYPE_TAG_NAME (tp)
+	      = obsavestring (name, strlen (name),
+			      &current_objfile->objfile_obstack);
 	}
     }
 
@@ -1784,7 +1791,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
   /* Complain for illegal continuations due to corrupt aux entries.  */
   if (t->continued)
-    complaint (&symfile_complaints, _("illegal TIR continued for %s"), sym_name);
+    complaint (&symfile_complaints,
+	       _("illegal TIR continued for %s"), sym_name);
 
   return tp;
 }
@@ -1847,7 +1855,8 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
       if (TYPE_CODE (indx) != TYPE_CODE_INT)
 	{
 	  complaint (&symfile_complaints,
-		     _("illegal array index type for %s, assuming int"), sym_name);
+		     _("illegal array index type for %s, assuming int"),
+		     sym_name);
 	  indx = objfile_type (current_objfile)->builtin_int;
 	}
 
@@ -2145,7 +2154,8 @@ parse_external (EXTR *es, int bigend, struct section_offsets *section_offsets,
 
       /* Note that the case of a symbol with indexNil must be handled
          anyways by parse_symbol().  */
-      parse_symbol (&es->asym, ax, (char *) NULL, bigend, section_offsets, objfile);
+      parse_symbol (&es->asym, ax, (char *) NULL,
+		    bigend, section_offsets, objfile);
       break;
     default:
       break;
@@ -2231,7 +2241,8 @@ static void
 function_outside_compilation_unit_complaint (const char *arg1)
 {
   complaint (&symfile_complaints,
-	     _("function `%s' appears to be defined outside of all compilation units"),
+	     _("function `%s' appears to be defined "
+	       "outside of all compilation units"),
 	     arg1);
 }
 
@@ -2399,7 +2410,8 @@ parse_partial_symbols (struct objfile *objfile)
   /* Allocate the map FDR -> PST.
      Minor hack: -O3 images might claim some global data belongs
      to FDR -1. We`ll go along with that */
-  fdr_to_pst = (struct pst_map *) xzalloc ((hdr->ifdMax + 1) * sizeof *fdr_to_pst);
+  fdr_to_pst = (struct pst_map *)
+    xzalloc ((hdr->ifdMax + 1) * sizeof *fdr_to_pst);
   old_chain = make_cleanup (xfree, fdr_to_pst);
   fdr_to_pst++;
   {
@@ -2493,8 +2505,8 @@ parse_partial_symbols (struct objfile *objfile)
       if (ext_in->ifd < -1 || ext_in->ifd >= hdr->ifdMax)
 	{
 	  complaint (&symfile_complaints,
-		     _("bad ifd for external symbol: %d (max %ld)"), ext_in->ifd,
-		     hdr->ifdMax);
+		     _("bad ifd for external symbol: %d (max %ld)"),
+		     ext_in->ifd, hdr->ifdMax);
 	  continue;
 	}
       if (ext_in->asym.iss < 0 || ext_in->asym.iss >= hdr->issExtMax)
@@ -2521,12 +2533,14 @@ parse_partial_symbols (struct objfile *objfile)
 	{
 	case stProc:
 	  /* Beginnning of Procedure */
-	  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	  svalue += ANOFFSET (objfile->section_offsets,
+			      SECT_OFF_TEXT (objfile));
 	  break;
 	case stStaticProc:
 	  /* Load time only static procs */
 	  ms_type = mst_file_text;
-	  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	  svalue += ANOFFSET (objfile->section_offsets,
+			      SECT_OFF_TEXT (objfile));
 	  break;
 	case stGlobal:
 	  /* External symbol */
@@ -2539,12 +2553,14 @@ parse_partial_symbols (struct objfile *objfile)
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
 	      ms_type = mst_data;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	      svalue += ANOFFSET (objfile->section_offsets,
+				  SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
 	      ms_type = mst_bss;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+	      svalue += ANOFFSET (objfile->section_offsets,
+				  SECT_OFF_BSS (objfile));
 	    }
           else if (SC_IS_SBSS (ext_in->asym.sc))
             {
@@ -2584,7 +2600,8 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
                 
 	      ms_type = mst_file_text;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	      svalue += ANOFFSET (objfile->section_offsets,
+				  SECT_OFF_TEXT (objfile));
 	    }
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
@@ -2592,7 +2609,8 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
 	      ms_type = mst_file_data;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	      svalue += ANOFFSET (objfile->section_offsets,
+				  SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
@@ -2600,7 +2618,8 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
 	      ms_type = mst_file_bss;
-	      svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+	      svalue += ANOFFSET (objfile->section_offsets,
+				  SECT_OFF_BSS (objfile));
 	    }
           else if (SC_IS_SBSS (ext_in->asym.sc))
             {
@@ -2655,7 +2674,8 @@ parse_partial_symbols (struct objfile *objfile)
 	{
 	  textlow = fh->adr;
 	  if (relocatable || textlow != 0)
-	    textlow += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	    textlow += ANOFFSET (objfile->section_offsets,
+				 SECT_OFF_TEXT (objfile));
 	}
       else
 	textlow = 0;
@@ -2743,7 +2763,8 @@ parse_partial_symbols (struct objfile *objfile)
 		      CORE_ADDR procaddr;
 		      long isym;
 
-		      sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		      sh.value += ANOFFSET (objfile->section_offsets,
+					    SECT_OFF_TEXT (objfile));
 		      if (sh.st == stStaticProc)
 			{
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
@@ -2790,7 +2811,8 @@ parse_partial_symbols (struct objfile *objfile)
 			case scPData:
 			case scXData:
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+			  sh.value += ANOFFSET (objfile->section_offsets,
+						SECT_OFF_DATA (objfile));
                           record_minimal_symbol (namestring, sh.value,
                                                  mst_file_data, sh.sc,
                                                  objfile);
@@ -2800,7 +2822,8 @@ parse_partial_symbols (struct objfile *objfile)
 			  /* FIXME!  Shouldn't this use cases for bss, 
 			     then have the default be abs? */
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+			  sh.value += ANOFFSET (objfile->section_offsets,
+						SECT_OFF_BSS (objfile));
                           record_minimal_symbol (namestring, sh.value,
                                                  mst_file_bss, sh.sc,
                                                  objfile);
@@ -2851,25 +2874,26 @@ parse_partial_symbols (struct objfile *objfile)
 		  {
 		    char *p;
 
-		    /*
-		     * Standard, external, non-debugger, symbols
-		     */
+		    /* Standard, external, non-debugger, symbols.  */
 
 		  case N_TEXT | N_EXT:
 		  case N_NBTEXT | N_EXT:
-		    sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		    sh.value += ANOFFSET (objfile->section_offsets,
+					  SECT_OFF_TEXT (objfile));
 		    goto record_it;
 
 		  case N_DATA | N_EXT:
 		  case N_NBDATA | N_EXT:
-		    sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+		    sh.value += ANOFFSET (objfile->section_offsets,
+					  SECT_OFF_DATA (objfile));
 		    goto record_it;
 
 		  case N_BSS:
 		  case N_BSS | N_EXT:
 		  case N_NBBSS | N_EXT:
 		  case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
-		    sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+		    sh.value += ANOFFSET (objfile->section_offsets,
+					  SECT_OFF_BSS (objfile));
 		    goto record_it;
 
 		  case N_ABS | N_EXT:
@@ -2880,10 +2904,11 @@ parse_partial_symbols (struct objfile *objfile)
 
 		  case N_NBTEXT:
 
-		    /* We need to be able to deal with both N_FN or N_TEXT,
-		       because we have no way of knowing whether the sys-supplied ld
-		       or GNU ld was used to make the executable.  Sequents throw
-		       in another wrinkle -- they renumbered N_FN.  */
+		    /* We need to be able to deal with both N_FN or
+		       N_TEXT, because we have no way of knowing
+		       whether the sys-supplied ld or GNU ld was used
+		       to make the executable.  Sequents throw in
+		       another wrinkle -- they renumbered N_FN.  */
 
 		  case N_FN:
 		  case N_FN_SEQ:
@@ -2891,11 +2916,12 @@ parse_partial_symbols (struct objfile *objfile)
 		    continue;
 
 		  case N_DATA:
-		    sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+		    sh.value += ANOFFSET (objfile->section_offsets,
+					  SECT_OFF_DATA (objfile));
 		    goto record_it;
 
 		  case N_UNDF | N_EXT:
-		    continue;			/* Just undefined, not COMMON */
+		    continue;		/* Just undefined, not COMMON */
 
 		  case N_UNDF:
 		    continue;
@@ -2937,13 +2963,14 @@ parse_partial_symbols (struct objfile *objfile)
 		      char *p;
 		      int prev_textlow_not_set;
 
-		      valu = sh.value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		      valu = sh.value + ANOFFSET (objfile->section_offsets,
+						  SECT_OFF_TEXT (objfile));
 
 		      prev_textlow_not_set = textlow_not_set;
 
-		      /* A zero value is probably an indication for the SunPRO 3.0
-			 compiler. end_psymtab explicitly tests for zero, so
-			 don't relocate it.  */
+		      /* A zero value is probably an indication for the
+			 SunPRO 3.0 compiler. end_psymtab explicitly tests
+			 for zero, so don't relocate it.  */
 
 		      if (sh.value == 0
 			  && gdbarch_sofun_address_maybe_missing (gdbarch))
@@ -2975,22 +3002,26 @@ parse_partial_symbols (struct objfile *objfile)
 		      /* SET_NAMESTRING ();*/
 		      namestring = stabstring;
 
-		      /* Null name means end of .o file.  Don't start a new one. */
+		      /* Null name means end of .o file.  Don't start a new
+			 one. */
 		      if (*namestring == '\000')
 			continue;
 
-		      /* Some compilers (including gcc) emit a pair of initial N_SOs.
-			 The first one is a directory name; the second the file name.
-			 If pst exists, is empty, and has a filename ending in '/',
-			 we assume the previous N_SO was a directory name. */
+		      /* Some compilers (including gcc) emit a pair of
+			 initial N_SOs.  The first one is a directory name;
+			 the second the file name.  If pst exists, is
+			 empty, and has a filename ending in '/', we assume
+			 the previous N_SO was a directory name. */
 
 		      p = strrchr (namestring, '/');
 		      if (p && *(p + 1) == '\000')
-			continue;		/* Simply ignore directory name SOs */
+			continue;		/* Simply ignore directory
+						   name SOs */
 
-		      /* Some other compilers (C++ ones in particular) emit useless
-			 SOs for non-existant .c files.  We ignore all subsequent SOs that
-			 immediately follow the first.  */
+		      /* Some other compilers (C++ ones in particular) emit
+			 useless SOs for non-existant .c files.  We ignore
+			 all subsequent SOs that immediately follow the
+			 first.  */
 
 		      if (!pst)
 			pst = save_pst;
@@ -3009,27 +3040,31 @@ parse_partial_symbols (struct objfile *objfile)
 		      /* SET_NAMESTRING ();*/
 		      namestring = stabstring;
 
-		      tmp_language = deduce_language_from_filename (namestring);
+		      tmp_language
+			= deduce_language_from_filename (namestring);
 
-		      /* Only change the psymtab's language if we've learned
-			 something useful (eg. tmp_language is not language_unknown).
-			 In addition, to match what start_subfile does, never change
-			 from C++ to C.  */
+		      /* Only change the psymtab's language if we've
+			 learned something useful (eg. tmp_language is not
+			 language_unknown).  In addition, to match what
+			 start_subfile does, never change from C++ to
+			 C.  */
 		      if (tmp_language != language_unknown
 			  && (tmp_language != language_c
 			      || psymtab_language != language_cplus))
 			psymtab_language = tmp_language;
 
-		      /* In C++, one may expect the same filename to come round many
-			 times, when code is coming alternately from the main file
-			 and from inline functions in other files. So I check to see
-			 if this is a file we've seen before -- either the main
-			 source file, or a previously included file.
+		      /* In C++, one may expect the same filename to come
+			 round many times, when code is coming alternately
+			 from the main file and from inline functions in
+			 other files. So I check to see if this is a file
+			 we've seen before -- either the main source file,
+			 or a previously included file.
 
-			 This seems to be a lot of time to be spending on N_SOL, but
-			 things like "break c-exp.y:435" need to work (I
-			 suppose the psymtab_include_list could be hashed or put
-			 in a binary tree, if profiling shows this is a major hog).  */
+			 This seems to be a lot of time to be spending on
+			 N_SOL, but things like "break c-exp.y:435" need to
+			 work (I suppose the psymtab_include_list could be
+			 hashed or put in a binary tree, if profiling shows
+			 this is a major hog).  */
 		      if (pst && strcmp (namestring, pst->filename) == 0)
 			continue;
 
@@ -3060,43 +3095,46 @@ parse_partial_symbols (struct objfile *objfile)
 			}
 		      continue;
 		    }
-		  case N_LSYM:			/* Typedef or automatic variable. */
-		  case N_STSYM:		/* Data seg var -- static  */
-		  case N_LCSYM:		/* BSS      "  */
-		  case N_ROSYM:		/* Read-only data seg var -- static.  */
-		  case N_NBSTS:		/* Gould nobase.  */
-		  case N_NBLCS:		/* symbols.  */
+		  case N_LSYM:	    /* Typedef or automatic variable. */
+		  case N_STSYM:	    /* Data seg var -- static  */
+		  case N_LCSYM:	    /* BSS      "  */
+		  case N_ROSYM:	    /* Read-only data seg var -- static.  */
+		  case N_NBSTS:	    /* Gould nobase.  */
+		  case N_NBLCS:	    /* symbols.  */
 		  case N_FUN:
-		  case N_GSYM:			/* Global (extern) variable; can be
-						   data or bss (sigh FIXME).  */
+		  case N_GSYM:	    /* Global (extern) variable; can be
+				       data or bss (sigh FIXME).  */
 
 		    /* Following may probably be ignored; I'll leave them here
 		       for now (until I do Pascal and Modula 2 extensions).  */
 
-		  case N_PC:			/* I may or may not need this; I
-						   suspect not.  */
-		  case N_M2C:			/* I suspect that I can ignore this here. */
-		  case N_SCOPE:		/* Same.   */
+		  case N_PC:	    /* I may or may not need this; I
+				       suspect not.  */
+		  case N_M2C:	    /* I suspect that I can ignore this
+				       here. */
+		  case N_SCOPE:	    /* Same.   */
 
 		    /*    SET_NAMESTRING ();*/
 		    namestring = stabstring;
 		    p = (char *) strchr (namestring, ':');
 		    if (!p)
-		      continue;			/* Not a debugging symbol.   */
+		      continue;	    /* Not a debugging symbol.   */
 
 
 
 		    /* Main processing section for debugging symbols which
-		       the initial read through the symbol tables needs to worry
-		       about.  If we reach this point, the symbol which we are
-		       considering is definitely one we are interested in.
-		       p must also contain the (valid) index into the namestring
-		       which indicates the debugging type symbol.  */
+		       the initial read through the symbol tables needs to
+		       worry about.  If we reach this point, the symbol
+		       which we are considering is definitely one we are
+		       interested in.  p must also contain the (valid)
+		       index into the namestring which indicates the
+		       debugging type symbol.  */
 
 		    switch (p[1])
 		      {
 		      case 'S':
-			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+			sh.value += ANOFFSET (objfile->section_offsets,
+					      SECT_OFF_DATA (objfile));
 
 			if (gdbarch_static_transform_name_p (gdbarch))
 			  namestring = gdbarch_static_transform_name
@@ -3109,7 +3147,8 @@ parse_partial_symbols (struct objfile *objfile)
 					     psymtab_language, objfile);
 			continue;
 		      case 'G':
-			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+			sh.value += ANOFFSET (objfile->section_offsets,
+					      SECT_OFF_DATA (objfile));
 			/* The addresses in these entries are reported to be
 			   wrong.  See the code that reads 'G's for symtabs. */
 			add_psymbol_to_list (namestring, p - namestring, 1,
@@ -3138,18 +3177,20 @@ parse_partial_symbols (struct objfile *objfile)
 			    if (p[2] == 't')
 			      {
 				/* Also a typedef with the same name.  */
-				add_psymbol_to_list (namestring, p - namestring,
-						     1,
+				add_psymbol_to_list (namestring,
+						     p - namestring, 1,
 						     VAR_DOMAIN, LOC_TYPEDEF,
 						     &objfile->static_psymbols,
 						     sh.value, 0,
-						     psymtab_language, objfile);
+						     psymtab_language,
+						     objfile);
 				p += 1;
 			      }
 			  }
 			goto check_enum;
 		      case 't':
-			if (p != namestring)	/* a name is there, not just :T... */
+			if (p != namestring)	/* a name is there, not
+						   just :T... */
 			  {
 			    add_psymbol_to_list (namestring, p - namestring, 1,
 						 VAR_DOMAIN, LOC_TYPEDEF,
@@ -3158,14 +3199,15 @@ parse_partial_symbols (struct objfile *objfile)
 						 psymtab_language, objfile);
 			  }
 		      check_enum:
-			/* If this is an enumerated type, we need to
-			   add all the enum constants to the partial symbol
-			   table.  This does not cover enums without names, e.g.
-			   "enum {a, b} c;" in C, but fortunately those are
-			   rare.  There is no way for GDB to find those from the
-			   enum type without spending too much time on it.  Thus
-			   to solve this problem, the compiler needs to put out the
-			   enum in a nameless type.  GCC2 does this.  */
+			/* If this is an enumerated type, we need to add
+			   all the enum constants to the partial symbol
+			   table.  This does not cover enums without names,
+			   e.g.  "enum {a, b} c;" in C, but fortunately
+			   those are rare.  There is no way for GDB to find
+			   those from the enum type without spending too
+			   much time on it.  Thus to solve this problem,
+			   the compiler needs to put out the enum in a
+			   nameless type.  GCC2 does this.  */
 
 			/* We are looking for something of the form
 			   <name> ":" ("t" | "T") [<number> "="] "e"
@@ -3173,8 +3215,8 @@ parse_partial_symbols (struct objfile *objfile)
 
 			/* Skip over the colon and the 't' or 'T'.  */
 			p += 2;
-			/* This type may be given a number.  Also, numbers can come
-			   in pairs like (0,26).  Skip over it.  */
+			/* This type may be given a number.  Also, numbers
+			   can come in pairs like (0,26).  Skip over it.  */
 			while ((*p >= '0' && *p <= '9')
 			       || *p == '(' || *p == ',' || *p == ')'
 			       || *p == '=')
@@ -3182,7 +3224,8 @@ parse_partial_symbols (struct objfile *objfile)
 
 			if (*p++ == 'e')
 			  {
-			    /* The aix4 compiler emits extra crud before the members.  */
+			    /* The aix4 compiler emits extra crud before
+			       the members.  */
 			    if (*p == '-')
 			      {
 				/* Skip over the type (?).  */
@@ -3202,8 +3245,8 @@ parse_partial_symbols (struct objfile *objfile)
 			      {
 				char *q;
 
-				/* Check for and handle cretinous dbx symbol name
-				   continuation!  */
+				/* Check for and handle cretinous dbx
+				   symbol name continuation!  */
 				if (*p == '\\' || (*p == '?' && p[1] == '\0'))
 				  p = next_symbol_text (objfile);
 
@@ -3212,11 +3255,13 @@ parse_partial_symbols (struct objfile *objfile)
 				for (q = p; *q && *q != ':'; q++)
 				  ;
 				/* Note that the value doesn't matter for
-				   enum constants in psymtabs, just in symtabs.  */
+				   enum constants in psymtabs, just in
+				   symtabs.  */
 				add_psymbol_to_list (p, q - p, 1,
 						     VAR_DOMAIN, LOC_CONST,
-						     &objfile->static_psymbols, 0,
-						     0, psymtab_language, objfile);
+						     &objfile->static_psymbols,
+						     0, 0, psymtab_language,
+						     objfile);
 				/* Point past the name.  */
 				p = q;
 				/* Skip over the value.  */
@@ -3232,8 +3277,9 @@ parse_partial_symbols (struct objfile *objfile)
 			/* Constant, e.g. from "const" in Pascal.  */
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_CONST,
-					     &objfile->static_psymbols, sh.value,
-					     0, psymtab_language, objfile);
+					     &objfile->static_psymbols,
+					     sh.value, 0, psymtab_language,
+					     objfile);
 			continue;
 
 		      case 'f':
@@ -3247,7 +3293,8 @@ parse_partial_symbols (struct objfile *objfile)
 			    function_outside_compilation_unit_complaint (name);
 			    xfree (name);
 			  }
-			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+			sh.value += ANOFFSET (objfile->section_offsets,
+					      SECT_OFF_TEXT (objfile));
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->static_psymbols,
@@ -3256,8 +3303,9 @@ parse_partial_symbols (struct objfile *objfile)
 			continue;
 
 			/* Global functions were ignored here, but now they
-			   are put into the global psymtab like one would expect.
-			   They're also in the minimal symbol table.  */
+			   are put into the global psymtab like one would
+			   expect.  They're also in the minimal symbol
+			   table.  */
 		      case 'F':
 			if (! pst)
 			  {
@@ -3269,7 +3317,8 @@ parse_partial_symbols (struct objfile *objfile)
 			    function_outside_compilation_unit_complaint (name);
 			    xfree (name);
 			  }
-			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+			sh.value += ANOFFSET (objfile->section_offsets,
+					      SECT_OFF_TEXT (objfile));
 			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->global_psymbols,
@@ -3277,9 +3326,10 @@ parse_partial_symbols (struct objfile *objfile)
 					     psymtab_language, objfile);
 			continue;
 
-			/* Two things show up here (hopefully); static symbols of
-			   local scope (static used inside braces) or extensions
-			   of structure symbols.  We can ignore both.  */
+			/* Two things show up here (hopefully); static
+			   symbols of local scope (static used inside
+			   braces) or extensions of structure symbols.  We
+			   can ignore both.  */
 		      case 'V':
 		      case '(':
 		      case '0':
@@ -3293,25 +3343,27 @@ parse_partial_symbols (struct objfile *objfile)
 		      case '8':
 		      case '9':
 		      case '-':
-		      case '#':		/* for symbol identification (used in live ranges) */
+		      case '#':		/* For symbol identification (used
+					   in live ranges).  */
 			continue;
 
 		      case ':':
-			/* It is a C++ nested symbol.  We don't need to record it
-			   (I don't think); if we try to look up foo::bar::baz,
-			   then symbols for the symtab containing foo should get
-			   read in, I think.  */
+			/* It is a C++ nested symbol.  We don't need to
+			   record it (I don't think); if we try to look up
+			   foo::bar::baz, then symbols for the symtab
+			   containing foo should get read in, I think.  */
 			/* Someone says sun cc puts out symbols like
 			   /foo/baz/maclib::/usr/local/bin/maclib,
 			   which would get here with a symbol type of ':'.  */
 			continue;
 
 		      default:
-			/* Unexpected symbol descriptor.  The second and subsequent stabs
-			   of a continued stab can show up here.  The question is
-			   whether they ever can mimic a normal stab--it would be
-			   nice if not, since we certainly don't want to spend the
-			   time searching to the end of every string looking for
+			/* Unexpected symbol descriptor.  The second and
+			   subsequent stabs of a continued stab can show up
+			   here.  The question is whether they ever can
+			   mimic a normal stab--it would be nice if not,
+			   since we certainly don't want to spend the time
+			   searching to the end of every string looking for
 			   a backslash.  */
 
 			complaint (&symfile_complaints,
@@ -3347,12 +3399,14 @@ parse_partial_symbols (struct objfile *objfile)
 		  case N_EINCL:
 		  case N_DSLINE:
 		  case N_BSLINE:
-		  case N_SSYM:			/* Claim: Structure or union element.
-						   Hopefully, I can ignore this.  */
-		  case N_ENTRY:		/* Alternate entry point; can ignore. */
-		  case N_MAIN:			/* Can definitely ignore this.   */
+		  case N_SSYM:		/* Claim: Structure or union
+					   element.  Hopefully, I can
+					   ignore this.  */
+		  case N_ENTRY:		/* Alternate entry point; can
+					   ignore. */
+		  case N_MAIN:		/* Can definitely ignore this.   */
 		  case N_CATCH:		/* These are GNU C++ extensions */
-		  case N_EHDECL:		/* that can safely be ignored here. */
+		  case N_EHDECL:	/* that can safely be ignored here. */
 		  case N_LENG:
 		  case N_BCOMM:
 		  case N_ECOMM:
@@ -3364,18 +3418,21 @@ parse_partial_symbols (struct objfile *objfile)
 		  case N_LBRAC:
 		  case N_NSYMS:		/* Ultrix 4.0: symbol count */
 		  case N_DEFD:			/* GNU Modula-2 */
-		  case N_ALIAS:		/* SunPro F77: alias name, ignore for now.  */
+		  case N_ALIAS:		/* SunPro F77: alias name, ignore
+					   for now.  */
 
-		  case N_OBJ:			/* useless types from Solaris */
+		  case N_OBJ:		/* useless types from Solaris */
 		  case N_OPT:
-		    /* These symbols aren't interesting; don't worry about them */
+		    /* These symbols aren't interesting; don't worry about
+		       them */
 
 		    continue;
 
 		  default:
-		    /* If we haven't found it yet, ignore it.  It's probably some
-		       new type we don't know about yet.  */
-		    complaint (&symfile_complaints, _("unknown symbol type %s"),
+		    /* If we haven't found it yet, ignore it.  It's
+		       probably some new type we don't know about yet.  */
+		    complaint (&symfile_complaints,
+			       _("unknown symbol type %s"),
 			       hex_string (type_code)); /*CUR_SYMBOL_TYPE*/
 		    continue;
 		  }
@@ -3424,18 +3481,21 @@ parse_partial_symbols (struct objfile *objfile)
 		  /* The value of a stEnd symbol is the displacement from the
 		     corresponding start symbol value, do not relocate it.  */
 		  if (sh.st != stEnd)
-		    sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		    sh.value += ANOFFSET (objfile->section_offsets,
+					  SECT_OFF_TEXT (objfile));
 		  break;
 		case scData:
 		case scSData:
 		case scRData:
 		case scPData:
 		case scXData:
-		  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+		  sh.value += ANOFFSET (objfile->section_offsets,
+					SECT_OFF_DATA (objfile));
 		  break;
 		case scBss:
 		case scSBss:
-		  sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+		  sh.value += ANOFFSET (objfile->section_offsets,
+					SECT_OFF_BSS (objfile));
 		  break;
 		}
 
@@ -3448,8 +3508,8 @@ parse_partial_symbols (struct objfile *objfile)
 		case stStaticProc:
 		  prim_record_minimal_symbol_and_info (name, sh.value,
 						       mst_file_text,
-						       SECT_OFF_TEXT (objfile), NULL,
-						       objfile);
+						       SECT_OFF_TEXT (objfile),
+						       NULL, objfile);
 
 		  /* FALLTHROUGH */
 
@@ -3635,7 +3695,8 @@ parse_partial_symbols (struct objfile *objfile)
 	      CORE_ADDR svalue;
 
 	      if (ext_ptr->ifd != f_idx)
-		internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+		internal_error (__FILE__, __LINE__,
+				_("failed internal consistency check"));
 	      psh = &ext_ptr->asym;
 
 	      /* Do not add undefined symbols to the partial symbol table.  */
@@ -3647,18 +3708,21 @@ parse_partial_symbols (struct objfile *objfile)
 		{
 		case scText:
 		case scRConst:
-		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		  svalue += ANOFFSET (objfile->section_offsets,
+				      SECT_OFF_TEXT (objfile));
 		  break;
 		case scData:
 		case scSData:
 		case scRData:
 		case scPData:
 		case scXData:
-		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+		  svalue += ANOFFSET (objfile->section_offsets,
+				      SECT_OFF_DATA (objfile));
 		  break;
 		case scBss:
 		case scSBss:
-		  svalue += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+		  svalue += ANOFFSET (objfile->section_offsets,
+				      SECT_OFF_BSS (objfile));
 		  break;
 		}
 
@@ -3750,8 +3814,8 @@ parse_partial_symbols (struct objfile *objfile)
       if (fh->crfd <= 1)
 	continue;
 
-      /* Skip the first file indirect entry as it is a self dependency
-         for source files or a reverse .h -> .c dependency for header files.  */
+      /* Skip the first file indirect entry as it is a self dependency for
+         source files or a reverse .h -> .c dependency for header files.  */
       pst->number_of_dependencies = 0;
       pst->dependencies =
 	((struct partial_symtab **)
@@ -3779,7 +3843,8 @@ parse_partial_symbols (struct objfile *objfile)
 	  /* Do not add to dependeny list if psymtab was empty.  */
 	  if (fdr_to_pst[rh].pst == (struct partial_symtab *) NULL)
 	    continue;
-	  pst->dependencies[pst->number_of_dependencies++] = fdr_to_pst[rh].pst;
+	  pst->dependencies[pst->number_of_dependencies++]
+	    = fdr_to_pst[rh].pst;
 	}
     }
 
@@ -4067,7 +4132,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 	      else
 		{
 		  /* Handle encoded stab line number. */
-		  valu += ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (pst->objfile));
+		  valu += ANOFFSET (pst->section_offsets,
+				    SECT_OFF_TEXT (pst->objfile));
 		  record_line (current_subfile, sh.index,
 			       gdbarch_addr_bits_remove (gdbarch, valu));
 		}
@@ -4077,12 +4143,14 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 	    /* These are generated by gcc-2.x, do not complain */
 	    ;
 	  else
-	    complaint (&symfile_complaints, _("unknown stabs symbol %s"), name);
+	    complaint (&symfile_complaints,
+		       _("unknown stabs symbol %s"), name);
 	}
 
       if (! last_symtab_ended)
 	{
-	  st = end_symtab (pst->texthigh, pst->objfile, SECT_OFF_TEXT (pst->objfile));
+	  st = end_symtab (pst->texthigh, pst->objfile,
+			   SECT_OFF_TEXT (pst->objfile));
 	  end_stabs ();
 	}
 
@@ -4188,7 +4256,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 	      (*swap_sym_in) (cur_bfd, sym_ptr, &sh);
 	      c = parse_symbol (&sh,
 				debug_info->external_aux + fh->iauxBase,
-				sym_ptr, fh->fBigendian, pst->section_offsets, pst->objfile);
+				sym_ptr, fh->fBigendian,
+				pst->section_offsets, pst->objfile);
 	      sym_ptr += c * external_sym_size;
 	    }
 
@@ -4226,7 +4295,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 		    lowest_pdr_addr = pdr_in->adr;
 		}
 
-	      parse_lines (fh, pr_block, lines, maxlines, pst, lowest_pdr_addr);
+	      parse_lines (fh, pr_block, lines, maxlines,
+			   pst, lowest_pdr_addr);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 
@@ -4246,13 +4316,15 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
          XXX use the global list to speed up things here. how?
          FIXME, Maybe quit once we have found the right number of ext's? */
       top_stack->cur_st = st;
-      top_stack->cur_block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (top_stack->cur_st),
-						GLOBAL_BLOCK);
+      top_stack->cur_block
+	= BLOCKVECTOR_BLOCK (BLOCKVECTOR (top_stack->cur_st),
+			     GLOBAL_BLOCK);
       top_stack->blocktype = stFile;
 
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
-	parse_external (ext_ptr, fh->fBigendian, pst->section_offsets, pst->objfile);
+	parse_external (ext_ptr, fh->fBigendian,
+			pst->section_offsets, pst->objfile);
 
       /* If there are undefined symbols, tell the user.
          The alpha has an undefined symbol for every symbol that is
@@ -4261,7 +4333,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 	{
 	  printf_filtered (_("File %s contains %d unresolved references:"),
 			   st->filename, n_undef_symbols);
-	  printf_filtered ("\n\t%4d variables\n\t%4d procedures\n\t%4d labels\n",
+	  printf_filtered ("\n\t%4d variables\n\t%4d "
+			   "procedures\n\t%4d labels\n",
 			   n_undef_vars, n_undef_procs, n_undef_labels);
 	  n_undef_symbols = n_undef_labels = n_undef_vars = n_undef_procs = 0;
 
@@ -4317,7 +4390,9 @@ has_opaque_xref (FDR *fh, SYMR *sh)
    Return value says how many aux symbols we ate. */
 
 static int
-cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_code,	/* Use to alloc new type if none is found. */
+cross_ref (int fd, union aux_ext *ax, struct type **tpp,
+	   enum type_code type_code,
+	   /* Use to alloc new type if none is found. */
 	   char **pname, int bigend, char *sym_name)
 {
   RNDXR rn[1];
@@ -4350,7 +4425,8 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
   if (rf == -1)
     {
       *pname = "<undefined>";
-      *tpp = init_type (type_code, 0, TYPE_FLAG_STUB, (char *) NULL, current_objfile);
+      *tpp = init_type (type_code, 0, TYPE_FLAG_STUB,
+			(char *) NULL, current_objfile);
       return result;
     }
 

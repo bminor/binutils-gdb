@@ -41,7 +41,8 @@
 #endif /* ! defined (HAVE_SGTTY_H) */
 #endif /* ! defined (HAVE_TERMIO_H) */
 #endif /* ! defined (HAVE_TERMIOS_H) */
-#endif /* !defined (HAVE_TERMIOS) && !defined(HAVE_TERMIO) && !defined(HAVE_SGTTY) */
+#endif /* !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) &&
+	  !defined (HAVE_SGTTY) */
 
 #if defined(HAVE_TERMIOS)
 #include <termios.h>

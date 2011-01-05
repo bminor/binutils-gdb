@@ -78,8 +78,8 @@ solib_info (char *args, int from_tty)
   /* Skip over the first vmap, it is the main program, always loaded.  */
   vp = vp->nxt;
 
-  printf_unfiltered ("\
-Text Range		Data Range		Syms	Shared Object Library\n");
+  printf_unfiltered ("Text Range		Data Range		"
+		     "Syms	Shared Object Library\n");
 
   for (; vp != NULL; vp = vp->nxt)
     {
@@ -173,7 +173,8 @@ Show autoloading of shared library symbols."), _("\
 If \"on\", symbols from all shared object libraries will be loaded\n\
 automatically when the inferior begins execution, when the dynamic linker\n\
 informs gdb that a new library has been loaded, or when attaching to the\n\
-inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'."),
+inferior.  Otherwise, symbols must be loaded manually, using \
+`sharedlibrary'."),
 			   NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);

@@ -88,8 +88,9 @@ struct header_file
 
     char *name;
 
-    /* Numeric code distinguishing instances of one header file that produced
-       different results when included.  It comes from the N_BINCL or N_EXCL. */
+    /* Numeric code distinguishing instances of one header file that
+       produced different results when included.  It comes from the
+       N_BINCL or N_EXCL. */
 
     int instance;
 

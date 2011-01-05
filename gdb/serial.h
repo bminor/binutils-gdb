@@ -140,7 +140,9 @@ extern int serial_set_tty_state (struct serial *scb, serial_ttystate ttystate);
    the specified STREAM. FIXME: At present this sends output to the
    default stream - GDB_STDOUT.  */
 
-extern void serial_print_tty_state (struct serial *scb, serial_ttystate ttystate, struct ui_file *);
+extern void serial_print_tty_state (struct serial *scb,
+				    serial_ttystate ttystate,
+				    struct ui_file *);
 
 /* Set the tty state to NEW_TTYSTATE, where OLD_TTYSTATE is the
    current state (generally obtained from a recent call to
@@ -148,7 +150,9 @@ extern void serial_print_tty_state (struct serial *scb, serial_ttystate ttystate
    This means that we never switch in or out of raw mode, even if
    NEW_TTYSTATE specifies a switch.  */
 
-extern int serial_noflush_set_tty_state (struct serial *scb, serial_ttystate new_ttystate, serial_ttystate old_ttystate);
+extern int serial_noflush_set_tty_state (struct serial *scb,
+					 serial_ttystate new_ttystate,
+					 serial_ttystate old_ttystate);
 
 /* Set the baudrate to the decimal value supplied.  Returns 0 for
    success, -1 for failure.  */
@@ -179,7 +183,8 @@ extern int serial_is_async_p (struct serial *scb);
    callback.  */
 
 typedef void (serial_event_ftype) (struct serial *scb, void *context);
-extern void serial_async (struct serial *scb, serial_event_ftype *handler, void *context);
+extern void serial_async (struct serial *scb,
+			  serial_event_ftype *handler, void *context);
 
 /* Provide direct access to the underlying FD (if any) used to
    implement the serial device.  This interface is clearly

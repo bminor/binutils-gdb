@@ -85,7 +85,8 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
   while (1)
     {
       if (buf_end - loc_ptr < 2 * addr_size)
-	error (_("dwarf2_find_location_expression: Corrupted DWARF expression."));
+	error (_("dwarf2_find_location_expression: "
+		 "Corrupted DWARF expression."));
 
       if (signed_addr_p)
 	low = extract_signed_integer (loc_ptr, addr_size, byte_order);
@@ -253,8 +254,9 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
   return target_translate_tls_address (objfile, offset);
 }
 
-/* Call DWARF subroutine from DW_AT_location of DIE at DIE_OFFSET in current CU
-   (as is PER_CU).  State of the CTX is not affected by the call and return.  */
+/* Call DWARF subroutine from DW_AT_location of DIE at DIE_OFFSET in
+   current CU (as is PER_CU).  State of the CTX is not affected by the
+   call and return.  */
 
 static void
 per_cu_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset,
@@ -502,7 +504,8 @@ read_pieced_value (struct value *v)
   long offset = 0;
   ULONGEST bits_to_skip;
   gdb_byte *contents;
-  struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
+  struct piece_closure *c
+    = (struct piece_closure *) value_computed_closure (v);
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (v));
   size_t type_len;
   size_t buffer_size = 0;
@@ -680,7 +683,8 @@ write_pieced_value (struct value *to, struct value *from)
   long offset = 0;
   ULONGEST bits_to_skip;
   const gdb_byte *contents;
-  struct piece_closure *c = (struct piece_closure *) value_computed_closure (to);
+  struct piece_closure *c
+    = (struct piece_closure *) value_computed_closure (to);
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (to));
   size_t type_len;
   size_t buffer_size = 0;
@@ -986,7 +990,8 @@ indirect_pieced_value (struct value *value)
 static void *
 copy_pieced_value_closure (const struct value *v)
 {
-  struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
+  struct piece_closure *c
+    = (struct piece_closure *) value_computed_closure (v);
   
   ++c->refc;
   return c;
@@ -995,7 +1000,8 @@ copy_pieced_value_closure (const struct value *v)
 static void
 free_pieced_value_closure (struct value *v)
 {
-  struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
+  struct piece_closure *c
+    = (struct piece_closure *) value_computed_closure (v);
 
   --c->refc;
   if (c->refc == 0)
@@ -1023,7 +1029,8 @@ static struct lval_funcs pieced_value_funcs = {
 static void
 invalid_synthetic_pointer (void)
 {
-  error (_("access outside bounds of object referenced via synthetic pointer"));
+  error (_("access outside bounds of object "
+	   "referenced via synthetic pointer"));
 }
 
 /* Evaluate a location description, starting at DATA and with length
@@ -2181,7 +2188,8 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	  buf_end = read_sleb128 (base_data + 1,
 				  base_data + base_size, &base_offset);
 	  if (buf_end != base_data + base_size)
-	    error (_("Unexpected opcode after DW_OP_breg%u for symbol \"%s\"."),
+	    error (_("Unexpected opcode after "
+		     "DW_OP_breg%u for symbol \"%s\"."),
 		   frame_reg, SYMBOL_PRINT_NAME (symbol));
 	}
       else if (base_data[0] >= DW_OP_reg0 && base_data[0] <= DW_OP_reg31)
@@ -2199,7 +2207,8 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
       regno = gdbarch_dwarf2_reg_to_regnum (gdbarch, frame_reg);
 
-      fprintf_filtered (stream, _("a variable at frame base reg $%s offset %s+%s"),
+      fprintf_filtered (stream,
+			_("a variable at frame base reg $%s offset %s+%s"),
 			gdbarch_register_name (gdbarch, regno),
 			plongest (base_offset), plongest (frame_offset));
     }
@@ -2562,7 +2571,8 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 
       if (!dwarf2_always_disassemble)
 	{
-	  data = locexpr_describe_location_piece (symbol, stream, addr, objfile,
+	  data = locexpr_describe_location_piece (symbol, stream,
+						  addr, objfile,
 						  data, end, addr_size);
 	  /* If we printed anything, or if we have an empty piece,
 	     then don't disassemble.  */
@@ -2572,7 +2582,8 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	    disassemble = 0;
 	}
       if (disassemble)
-	data = disassemble_dwarf_expression (stream, get_objfile_arch (objfile),
+	data = disassemble_dwarf_expression (stream,
+					     get_objfile_arch (objfile),
 					     addr_size, offset_size, data, end,
 					     dwarf2_always_disassemble);
 
@@ -2636,7 +2647,8 @@ locexpr_describe_location (struct symbol *symbol, CORE_ADDR addr,
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
   int offset_size = dwarf2_per_cu_offset_size (dlbaton->per_cu);
 
-  locexpr_describe_location_1 (symbol, addr, stream, dlbaton->data, dlbaton->size,
+  locexpr_describe_location_1 (symbol, addr, stream,
+			       dlbaton->data, dlbaton->size,
 			       objfile, addr_size, offset_size);
 }
 

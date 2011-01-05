@@ -111,7 +111,7 @@ extern void get_formatted_print_options (struct value_print_options *opts,
 
 extern void maybe_print_array_index (struct type *index_type, LONGEST index,
                                      struct ui_file *stream,
-				     const struct value_print_options *options);
+				     const struct value_print_options *);
 
 extern void val_print_array_elements (struct type *, const gdb_byte *,
 				      CORE_ADDR, struct ui_file *, int,

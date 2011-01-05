@@ -178,7 +178,7 @@ net_open (struct serial *scb, const char *name)
   port_str = strchr (name, ':');
 
   if (!port_str)
-    error (_("net_open: No colon in host name!"));	   /* Shouldn't ever happen */
+    error (_("net_open: No colon in host name!"));  /* Shouldn't ever happen */
 
   tmp = min (port_str - name, (int) sizeof hostname - 1);
   strncpy (hostname, name, tmp);	/* Don't want colon */
@@ -216,7 +216,8 @@ net_open (struct serial *scb, const char *name)
   ioarg = 1;
   ioctl (scb->fd, FIONBIO, &ioarg);
 
-  /* Use Non-blocking connect.  connect() will return 0 if connected already. */
+  /* Use Non-blocking connect.  connect() will return 0 if connected
+     already. */
   n = connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof (sockaddr));
 
   if (n < 0)

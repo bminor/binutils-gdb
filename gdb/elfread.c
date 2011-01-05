@@ -469,7 +469,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 			  if (filesym == NULL)
 			    {
 			      complaint (&symfile_complaints,
-					 _("elf/stab section information %s without a preceding file symbol"),
+					 _("elf/stab section information %s "
+					   "without a preceding file symbol"),
 					 sym->name);
 			    }
 			  else
@@ -480,7 +481,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 			}
 		      if (sectinfo->sections[special_local_sect] != 0)
 			complaint (&symfile_complaints,
-				   _("duplicated elf/stab section information for %s"),
+				   _("duplicated elf/stab section "
+				     "information for %s"),
 				   sectinfo->filename);
 		      /* BFD symbols are section relative.  */
 		      symaddr = sym->value + sym->section->vma;
@@ -617,7 +619,8 @@ build_id_verify (const char *filename, struct build_id *check)
     warning (_("File \"%s\" has no build-id, file skipped"), filename);
   else if (found->size != check->size
            || memcmp (found->data, check->data, found->size) != 0)
-    warning (_("File \"%s\" has a different build-id, file skipped"), filename);
+    warning (_("File \"%s\" has a different build-id, file skipped"),
+	     filename);
   else
     retval = 1;
 
@@ -759,16 +762,19 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   /* Allocate struct to keep track of the symfile */
   objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
     xmalloc (sizeof (struct dbx_symfile_info));
-  memset ((char *) objfile->deprecated_sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset ((char *) objfile->deprecated_sym_stab_info,
+	  0, sizeof (struct dbx_symfile_info));
   make_cleanup (free_elfinfo, (void *) objfile);
 
-  /* Process the normal ELF symbol table first.  This may write some 
-     chain of info into the dbx_symfile_info in objfile->deprecated_sym_stab_info,
-     which can later be used by elfstab_offset_sections.  */
+  /* Process the normal ELF symbol table first.  This may write some
+     chain of info into the dbx_symfile_info in
+     objfile->deprecated_sym_stab_info, which can later be used by
+     elfstab_offset_sections.  */
 
   storage_needed = bfd_get_symtab_upper_bound (objfile->obfd);
   if (storage_needed < 0)
-    error (_("Can't read symbols from %s: %s"), bfd_get_filename (objfile->obfd),
+    error (_("Can't read symbols from %s: %s"),
+	   bfd_get_filename (objfile->obfd),
 	   bfd_errmsg (bfd_get_error ()));
 
   if (storage_needed > 0)
@@ -778,7 +784,8 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
       symcount = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
 
       if (symcount < 0)
-	error (_("Can't read symbols from %s: %s"), bfd_get_filename (objfile->obfd),
+	error (_("Can't read symbols from %s: %s"),
+	       bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
 
       elf_symtab_read (objfile, ST_REGULAR, symcount, symbol_table, 0);
@@ -802,7 +809,8 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 						     dyn_symbol_table);
 
       if (dynsymcount < 0)
-	error (_("Can't read symbols from %s: %s"), bfd_get_filename (objfile->obfd),
+	error (_("Can't read symbols from %s: %s"),
+	       bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
 
       elf_symtab_read (objfile, ST_DYNAMIC, dynsymcount, dyn_symbol_table, 0);
@@ -823,7 +831,8 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;
       make_cleanup (xfree, synth_symbol_table);
-      elf_symtab_read (objfile, ST_SYNTHETIC, synthcount, synth_symbol_table, 1);
+      elf_symtab_read (objfile, ST_SYNTHETIC, synthcount,
+		       synth_symbol_table, 1);
     }
 
   /* Install any minimal symbols that have been collected as the current
@@ -882,9 +891,10 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   if (dwarf2_has_info (objfile) && dwarf2_initialize_objfile (objfile))
     objfile->sf = &elf_sym_fns_gdb_index;
 
-  /* If the file has its own symbol tables it has no separate debug info.
-     `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to SYMTABS/PSYMTABS.
-     `.gnu_debuglink' may no longer be present with `.note.gnu.build-id'.  */
+  /* If the file has its own symbol tables it has no separate debug
+     info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
+     SYMTABS/PSYMTABS.  `.gnu_debuglink' may no longer be present with
+     `.note.gnu.build-id'.  */
   if (!objfile_has_partial_symbols (objfile))
     {
       char *debugfile;
@@ -931,7 +941,8 @@ free_elfinfo (void *objp)
    file is specified (not just adding some symbols from another file, e.g. a
    shared library).
 
-   We reinitialize buildsym, since we may be reading stabs from an ELF file.  */
+   We reinitialize buildsym, since we may be reading stabs from an ELF
+   file.  */
 
 static void
 elf_new_init (struct objfile *ignore)
@@ -1016,7 +1027,8 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
   if (maybe == 0 && questionable != 0)
     {
       complaint (&symfile_complaints,
-		 _("elf/stab section information questionable for %s"), filename);
+		 _("elf/stab section information questionable for %s"),
+		 filename);
       maybe = questionable;
     }
 
@@ -1043,15 +1055,14 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 static const struct sym_fns elf_sym_fns =
 {
   bfd_target_elf_flavour,
-  elf_new_init,			/* sym_new_init: init anything gbl to entire symtab */
-  elf_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
-  elf_symfile_read,		/* sym_read: read a symbol file into symtab */
-  elf_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
-  elf_symfile_segments,		/* sym_segments: Get segment information from
-				   a file.  */
-  NULL,                         /* sym_read_linetable */
-  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  elf_new_init,			/* init anything gbl to entire symtab */
+  elf_symfile_init,		/* read initial info, setup for sym_read() */
+  elf_symfile_read,		/* read a symbol file into symtab */
+  elf_symfile_finish,		/* finished with file, cleanup */
+  default_symfile_offsets,	/* Translate ext. to int. relocation */
+  elf_symfile_segments,		/* Get segment information from a file.  */
+  NULL,
+  default_symfile_relocate,	/* Relocate a debug section.  */
   &psym_functions
 };
 
@@ -1060,15 +1071,14 @@ static const struct sym_fns elf_sym_fns =
 static const struct sym_fns elf_sym_fns_gdb_index =
 {
   bfd_target_elf_flavour,
-  elf_new_init,			/* sym_new_init: init anything gbl to entire symab */
-  elf_symfile_init,		/* sym_init: read initial info, setup for sym_red() */
-  elf_symfile_read,		/* sym_read: read a symbol file into symtab */
-  elf_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocatin */
-  elf_symfile_segments,		/* sym_segments: Get segment information from
-				   a file.  */
-  NULL,                         /* sym_read_linetable */
-  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  elf_new_init,			/* init anything gbl to entire symab */
+  elf_symfile_init,		/* read initial info, setup for sym_red() */
+  elf_symfile_read,		/* read a symbol file into symtab */
+  elf_symfile_finish,		/* finished with file, cleanup */
+  default_symfile_offsets,	/* Translate ext. to int. relocatin */
+  elf_symfile_segments,		/* Get segment information from a file.  */
+  NULL,
+  default_symfile_relocate,	/* Relocate a debug section.  */
   &dwarf2_gdb_index_functions
 };
 

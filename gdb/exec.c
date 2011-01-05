@@ -439,7 +439,8 @@ build_section_table (struct bfd *some_bfd, struct target_section **start,
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
   if (*end > *start + count)
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+    internal_error (__FILE__, __LINE__,
+		    _("failed internal consistency check"));
   /* We could realloc the table, but it probably loses for most files.  */
   return 0;
 }
@@ -584,7 +585,8 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   ULONGEST memend = memaddr + len;
 
   if (len <= 0)
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+    internal_error (__FILE__, __LINE__,
+		    _("failed internal consistency check"));
 
   for (p = sections; p < sections_end; p++)
     {
@@ -668,7 +670,8 @@ print_section_info (struct target_section_table *t, bfd *abfd)
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == exec_bfd)
     {
-      /* gcc-3.4 does not like the initialization in <p == t->sections_end>.  */
+      /* gcc-3.4 does not like the initialization in
+	 <p == t->sections_end>.  */
       bfd_vma displacement = 0;
       bfd_vma entry_point;
 
@@ -712,7 +715,8 @@ print_section_info (struct target_section_table *t, bfd *abfd)
       if (info_verbose)
 	printf_filtered (" @ %s",
 			 hex_string_custom (p->the_bfd_section->filepos, 8));
-      printf_filtered (" is %s", bfd_section_name (p->bfd, p->the_bfd_section));
+      printf_filtered (" is %s", bfd_section_name (p->bfd,
+						   p->the_bfd_section));
       if (p->bfd != abfd)
 	printf_filtered (" in %s", bfd_get_filename (p->bfd));
       printf_filtered ("\n");
@@ -774,7 +778,8 @@ set_section_command (char *args, int from_tty)
   table = current_target_sections;
   for (p = table->sections; p < table->sections_end; p++)
     {
-      if (!strncmp (secname, bfd_section_name (exec_bfd, p->the_bfd_section), seclen)
+      if (!strncmp (secname, bfd_section_name (exec_bfd,
+					       p->the_bfd_section), seclen)
 	  && bfd_section_name (exec_bfd, p->the_bfd_section)[seclen] == '\0')
 	{
 	  offset = secaddr - p->addr;

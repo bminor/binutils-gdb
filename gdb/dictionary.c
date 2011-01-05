@@ -540,7 +540,8 @@ dict_iter_match_first (const struct dictionary *dict,
 		       const char *name, symbol_compare_ftype *compare,
 		       struct dict_iterator *iterator)
 {
-  return (DICT_VECTOR (dict))->iter_match_first (dict, name, compare, iterator);
+  return (DICT_VECTOR (dict))->iter_match_first (dict, name,
+						 compare, iterator);
 }
 
 struct symbol *

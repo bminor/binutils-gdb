@@ -517,7 +517,8 @@ console_select_thread (void *arg)
 	  wait_events[0] = state->stop_select;
 	  wait_events[1] = h;
 
-	  event_index = WaitForMultipleObjects (2, wait_events, FALSE, INFINITE);
+	  event_index = WaitForMultipleObjects (2, wait_events,
+						FALSE, INFINITE);
 
 	  if (event_index == WAIT_OBJECT_0
 	      || WaitForSingleObject (state->stop_select, 0) == WAIT_OBJECT_0)
@@ -653,7 +654,8 @@ file_select_thread (void *arg)
     {
       select_thread_wait (state);
 
-      if (SetFilePointer (h, 0, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
+      if (SetFilePointer (h, 0, NULL, FILE_CURRENT)
+	  == INVALID_SET_FILE_POINTER)
 	SetEvent (state->except_event);
       else
 	SetEvent (state->read_event);

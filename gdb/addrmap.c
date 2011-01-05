@@ -307,7 +307,8 @@ addrmap_node_set_value (splay_tree_node node, void *value)
 
 
 static void
-addrmap_splay_tree_insert (struct addrmap_mutable *map, CORE_ADDR key, void *value)
+addrmap_splay_tree_insert (struct addrmap_mutable *map,
+			   CORE_ADDR key, void *value)
 {
   splay_tree_insert (map->tree,
                      allocate_key (map, key),

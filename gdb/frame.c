@@ -181,8 +181,9 @@ static void
 show_backtrace_past_main (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Whether backtraces should continue past \"main\" is %s.\n"),
+  fprintf_filtered (file,
+		    _("Whether backtraces should "
+		      "continue past \"main\" is %s.\n"),
 		    value);
 }
 
@@ -191,8 +192,8 @@ static void
 show_backtrace_past_entry (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Whether backtraces should continue past the entry point of a program is %s.\n"),
+  fprintf_filtered (file, _("Whether backtraces should continue past the "
+			    "entry point of a program is %s.\n"),
 		    value);
 }
 
@@ -201,8 +202,9 @@ static void
 show_backtrace_limit (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-An upper bound on the number of backtrace levels is %s.\n"),
+  fprintf_filtered (file,
+		    _("An upper bound on the number "
+		      "of backtrace levels is %s.\n"),
 		    value);
 }
 
@@ -447,7 +449,8 @@ frame_id_eq (struct frame_id l, struct frame_id r)
 {
   int eq;
 
-  if (!l.stack_addr_p && l.special_addr_p && !r.stack_addr_p && r.special_addr_p)
+  if (!l.stack_addr_p && l.special_addr_p
+      && !r.stack_addr_p && r.special_addr_p)
     /* The outermost frame marker is equal to itself.  This is the
        dodgy thing about outer_frame_id, since between execution steps
        we might step into another function - from which we can't
@@ -649,7 +652,8 @@ frame_unwind_pc (struct frame_info *this_frame)
       this_frame->prev_pc.p = 1;
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "{ frame_unwind_caller_pc (this_frame=%d) -> %s }\n",
+			    "{ frame_unwind_caller_pc "
+			    "(this_frame=%d) -> %s }\n",
 			    this_frame->level,
 			    hex_string (this_frame->prev_pc.value));
     }
@@ -832,8 +836,9 @@ frame_unwind_register_value (struct frame_info *frame, int regnum)
 
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "\
-{ frame_unwind_register_value (frame=%d,regnum=%d(%s),...) ",
+      fprintf_unfiltered (gdb_stdlog,
+			  "{ frame_unwind_register_value "
+			  "(frame=%d,regnum=%d(%s),...) ",
 			  frame->level, regnum,
 			  user_reg_map_regnum_to_name (gdbarch, regnum));
     }
@@ -1314,7 +1319,8 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
-  fi->next = create_sentinel_frame (current_program_space, get_current_regcache ());
+  fi->next = create_sentinel_frame (current_program_space,
+				    get_current_regcache ());
 
   /* Set/update this frame's cached PC value, found in the next frame.
      Do this before looking for this frame's unwinder.  A sniffer is
@@ -1517,7 +1523,8 @@ get_prev_frame_1 (struct frame_info *this_frame)
 	    {
 	      fprintf_unfiltered (gdb_stdlog, "-> ");
 	      fprint_frame (gdb_stdlog, NULL);
-	      fprintf_unfiltered (gdb_stdlog, " // this frame ID is inner }\n");
+	      fprintf_unfiltered (gdb_stdlog,
+				  " // this frame ID is inner }\n");
 	    }
 	  this_frame->stop_reason = UNWIND_INNER_ID;
 	  return NULL;

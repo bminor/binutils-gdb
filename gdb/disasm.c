@@ -286,7 +286,8 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 	  else
 	    {
 	      ui_out_tuple_chain
-		= make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
+		= make_cleanup_ui_out_tuple_begin_end (uiout,
+						       "src_and_asm_line");
 	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
 	    }
 

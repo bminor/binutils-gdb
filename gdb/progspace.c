@@ -596,7 +596,8 @@ set_program_space_data (struct program_space *pspace,
 }
 
 void *
-program_space_data (struct program_space *pspace, const struct program_space_data *data)
+program_space_data (struct program_space *pspace,
+		    const struct program_space_data *data)
 {
   gdb_assert (data->index < pspace->num_data);
   return pspace->data[data->index];
@@ -608,8 +609,8 @@ void
 initialize_progspace (void)
 {
   add_cmd ("program-spaces", class_maintenance,
-	   maintenance_info_program_spaces_command, _("\
-Info about currently known program spaces."),
+	   maintenance_info_program_spaces_command,
+	   _("Info about currently known program spaces."),
 	   &maintenanceinfolist);
 
   /* There's always one program space.  Note that this function isn't

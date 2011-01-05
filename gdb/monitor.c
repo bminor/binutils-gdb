@@ -104,8 +104,9 @@ static char setreg_resp_delim_fastmap[256];
 static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
 
-static int first_time = 0;	/* is this the first time we're executing after 
-				   gaving created the child proccess? */
+static int first_time = 0;	/* Is this the first time we're
+				   executing after gaving created the
+				   child proccess? */
 
 
 /* This is the ptid we use while we're connected to a monitor.  Its
@@ -323,7 +324,8 @@ monitor_printf_noecho (char *pattern,...)
 
   len = strlen (sndbuf);
   if (len + 1 > sizeof sndbuf)
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+    internal_error (__FILE__, __LINE__,
+		    _("failed internal consistency check"));
 
   if (monitor_debug_p)
     {
@@ -352,7 +354,8 @@ monitor_printf (char *pattern,...)
 
   len = strlen (sndbuf);
   if (len + 1 > sizeof sndbuf)
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+    internal_error (__FILE__, __LINE__,
+		    _("failed internal consistency check"));
 
   if (monitor_debug_p)
     {
@@ -364,10 +367,11 @@ monitor_printf (char *pattern,...)
 
   monitor_write (sndbuf, len);
 
-  /* We used to expect that the next immediate output was the characters we
-     just output, but sometimes some extra junk appeared before the characters
-     we expected, like an extra prompt, or a portmaster sending telnet negotiations.
-     So, just start searching for what we sent, and skip anything unknown.  */
+  /* We used to expect that the next immediate output was the
+     characters we just output, but sometimes some extra junk appeared
+     before the characters we expected, like an extra prompt, or a
+     portmaster sending telnet negotiations.  So, just start searching
+     for what we sent, and skip anything unknown.  */
   monitor_debug ("ExpectEcho\n");
   monitor_expect (sndbuf, (char *) 0, 0);
 }
@@ -698,7 +702,8 @@ compile_pattern (char *pattern, struct re_pattern_buffer *compiled_pattern,
   re_set_syntax (tmp);
 
   if (val)
-    error (_("compile_pattern: Can't compile pattern string `%s': %s!"), pattern, val);
+    error (_("compile_pattern: Can't compile pattern string `%s': %s!"),
+	   pattern, val);
 
   if (fastmap)
     re_compile_fastmap (compiled_pattern);
@@ -808,7 +813,8 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
       if (mon_ops->num_breakpoints == 0)
 	mon_ops->num_breakpoints = 8;
 
-      breakaddr = (CORE_ADDR *) xmalloc (mon_ops->num_breakpoints * sizeof (CORE_ADDR));
+      breakaddr = (CORE_ADDR *)
+	xmalloc (mon_ops->num_breakpoints * sizeof (CORE_ADDR));
       memset (breakaddr, 0, mon_ops->num_breakpoints * sizeof (CORE_ADDR));
     }
 
@@ -821,7 +827,8 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
     }
 
   if (from_tty)
-    printf_unfiltered (_("Remote target %s connected to %s\n"), name, dev_name);
+    printf_unfiltered (_("Remote target %s connected to %s\n"),
+		       name, dev_name);
 
   push_target (targ_ops);
 
@@ -1058,7 +1065,9 @@ monitor_wait_filter (char *buf,
       *ext_resp_len = resp_len;
 
       if (resp_len <= 0)
-	fprintf_unfiltered (gdb_stderr, "monitor_wait:  excessive response from monitor: %s.", buf);
+	fprintf_unfiltered (gdb_stderr,
+			    "monitor_wait:  excessive "
+			    "response from monitor: %s.", buf);
     }
   while (resp_len < 0);
 
@@ -1116,7 +1125,9 @@ monitor_wait (struct target_ops *ops,
       resp_len = monitor_expect_prompt (buf, sizeof (buf));
 
       if (resp_len <= 0)
-	fprintf_unfiltered (gdb_stderr, "monitor_wait:  excessive response from monitor: %s.", buf);
+	fprintf_unfiltered (gdb_stderr,
+			    "monitor_wait:  excessive "
+			    "response from monitor: %s.", buf);
     }
   while (resp_len < 0);
 
@@ -1221,7 +1232,8 @@ monitor_fetch_register (struct regcache *regcache, int regno)
       if ((c == '0') && ((c = readchar (timeout)) == 'x'))
 	;
       else
-	error (_("Bad value returned from monitor while fetching register %x."),
+	error (_("Bad value returned from monitor "
+		 "while fetching register %x."),
 	       regno);
     }
 
@@ -1254,7 +1266,8 @@ monitor_fetch_register (struct regcache *regcache, int regno)
   if (current_monitor->getreg.term)
     {
       monitor_debug ("EXP getreg.term\n");
-      monitor_expect (current_monitor->getreg.term, NULL, 0);		/* get response */
+      monitor_expect (current_monitor->getreg.term, NULL, 0);	/* get
+								   response */
     }
 
   if (current_monitor->getreg.term_cmd)
@@ -1304,7 +1317,9 @@ monitor_dump_regs (struct regcache *regcache)
       parse_register_dump (regcache, buf, resp_len);
     }
   else
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));			/* Need some way to read registers */
+    /* Need some way to read registers */
+    internal_error (__FILE__, __LINE__,
+		    _("failed internal consistency check"));
 }
 
 static void
@@ -1447,7 +1462,8 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 	{
 	  monitor_debug ("MON FILL %d\n", i);
 	  if (current_monitor->flags & MO_FILL_USES_ADDR)
-	    monitor_printf (current_monitor->fill, memaddr, (memaddr + i) - 1, 0);
+	    monitor_printf (current_monitor->fill, memaddr,
+			    (memaddr + i) - 1, 0);
 	  else
 	    monitor_printf (current_monitor->fill, memaddr, i, 0);
 
@@ -1789,7 +1805,8 @@ monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
 
   if (current_monitor->getmem.term)
     {
-      monitor_expect (current_monitor->getmem.term, NULL, 0);	/* get response */
+      monitor_expect (current_monitor->getmem.term, NULL, 0);	/* get
+								   response */
 
       if (current_monitor->getmem.term_cmd)
 	{
@@ -1875,7 +1892,8 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
   if (current_monitor->getmem.term)
     {
-      resp_len = monitor_expect (current_monitor->getmem.term, buf, sizeof buf);	/* get response */
+      resp_len = monitor_expect (current_monitor->getmem.term,
+				 buf, sizeof buf);	/* get response */
 
       if (resp_len <= 0)
 	monitor_error ("monitor_read_memory",
@@ -1890,7 +1908,7 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 	}
     }
   else
-    resp_len = monitor_expect_prompt (buf, sizeof buf);		/* get response */
+    resp_len = monitor_expect_prompt (buf, sizeof buf);	    /* get response */
 
   p = buf;
 
@@ -1903,7 +1921,8 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
       int retval, tmp;
       struct re_registers resp_strings;
 
-      monitor_debug ("MON getmem.resp_delim %s\n", current_monitor->getmem.resp_delim);
+      monitor_debug ("MON getmem.resp_delim %s\n",
+		     current_monitor->getmem.resp_delim);
 
       memset (&resp_strings, 0, sizeof (struct re_registers));
       tmp = strlen (p);
@@ -2088,7 +2107,8 @@ monitor_insert_breakpoint (struct gdbarch *gdbarch,
 	}
     }
 
-  error (_("Too many breakpoints (> %d) for monitor."), current_monitor->num_breakpoints);
+  error (_("Too many breakpoints (> %d) for monitor."),
+	 current_monitor->num_breakpoints);
 }
 
 /* Tell the monitor to remove a breakpoint.  */
@@ -2343,7 +2363,8 @@ init_monitor_ops (struct target_ops *ops)
 
 /* Define additional commands that are usually only used by monitors.  */
 
-extern initialize_file_ftype _initialize_remote_monitors; /* -Wmissing-prototypes */
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_remote_monitors;
 
 void
 _initialize_remote_monitors (void)

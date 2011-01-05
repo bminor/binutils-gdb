@@ -132,8 +132,8 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 {
   if (sym->demangled_hash_next == NULL)
     {
-      unsigned int hash
-	= msymbol_hash_iw (SYMBOL_SEARCH_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash = msymbol_hash_iw (SYMBOL_SEARCH_NAME (sym))
+	% MINIMAL_SYMBOL_HASH_SIZE;
 
       sym->demangled_hash_next = table[hash];
       table[hash] = sym;

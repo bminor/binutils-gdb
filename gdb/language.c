@@ -133,7 +133,8 @@ show_language_command (struct ui_file *file, int from_tty,
 			"\"auto; currently %s\".\n"),
 		      current_language->la_name);
   else
-    fprintf_filtered (gdb_stdout, _("The current source language is \"%s\".\n"),
+    fprintf_filtered (gdb_stdout,
+		      _("The current source language is \"%s\".\n"),
 		      current_language->la_name);
 
   flang = get_frame_language ();
@@ -362,7 +363,8 @@ show_case_command (struct ui_file *file, int from_tty,
 			tmp);
     }
   else
-    fprintf_filtered (gdb_stdout, _("Case sensitivity in name search is \"%s\".\n"),
+    fprintf_filtered (gdb_stdout,
+		      _("Case sensitivity in name search is \"%s\".\n"),
 		      value);
 
   if (case_sensitivity != current_language->la_case_sensitivity)
@@ -498,7 +500,8 @@ binop_result_type (struct value *v1, struct value *v2)
 	return VALUE_TYPE (v1);
       else if (TYPE_UNSIGNED (t2) && l2 > l1)
 	return VALUE_TYPE (v2);
-      else			/* Both are signed.  Result is the longer type */
+      else			/* Both are signed.  Result is the
+				   longer type.  */
 	return l1 > l2 ? VALUE_TYPE (v1) : VALUE_TYPE (v2);
       break;
     case language_m2:
@@ -576,7 +579,8 @@ int
 same_type (struct type *arg1, struct type *arg2)
 {
   CHECK_TYPEDEF (type);
-  if (structured_type (arg1) ? !structured_type (arg2) : structured_type (arg2))
+  if (structured_type (arg1)
+      ? !structured_type (arg2) : structured_type (arg2))
     /* One is structured and one isn't */
     return 0;
   else if (structured_type (arg1) && structured_type (arg2))
@@ -900,9 +904,11 @@ add_language (const struct language_defn *lang)
 
   if (lang->la_magic != LANG_MAGIC)
     {
-      fprintf_unfiltered (gdb_stderr, "Magic number of %s language struct wrong\n",
+      fprintf_unfiltered (gdb_stderr,
+			  "Magic number of %s language struct wrong\n",
 			  lang->la_name);
-      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+      internal_error (__FILE__, __LINE__,
+		      _("failed internal consistency check"));
     }
 
   if (!languages)
@@ -930,10 +936,10 @@ add_language (const struct language_defn *lang)
   /* Build the "help set language" docs.  */
   tmp_stream = mem_fileopen ();
 
-  fprintf_unfiltered (tmp_stream, _("\
-Set the current source language.\n\
-The currently understood settings are:\n\n\
-local or auto    Automatic setting based on source file\n"));
+  fprintf_unfiltered (tmp_stream,
+		      _("Set the current source language.\n"
+			"The currently understood settings are:\n\nlocal or "
+			"auto    Automatic setting based on source file\n"));
 
   for (i = 0; i < languages_size; ++i)
     {
@@ -958,9 +964,9 @@ local or auto    Automatic setting based on source file\n"));
   add_setshow_enum_cmd ("language", class_support,
 			(const char **) language_names,
 			&language,
-			language_set_doc, _("\
-Show the current source language."), NULL,
-			set_language_command,
+			language_set_doc,
+			_("Show the current source language."),
+			NULL, set_language_command,
 			show_language_command,
 			&setlist, &showlist);
 
@@ -1010,7 +1016,8 @@ char *
 language_class_name_from_physname (const struct language_defn *current_language,
 				   const char *physname)
 {
-  if (current_language != NULL && current_language->la_class_name_from_physname)
+  if (current_language != NULL
+      && current_language->la_class_name_from_physname)
     return current_language->la_class_name_from_physname (physname);
   return NULL;
 }
@@ -1078,13 +1085,15 @@ static void
 unk_lang_emit_char (int c, struct type *type, struct ui_file *stream,
 		    int quoter)
 {
-  error (_("internal error - unimplemented function unk_lang_emit_char called."));
+  error (_("internal error - unimplemented "
+	   "function unk_lang_emit_char called."));
 }
 
 static void
 unk_lang_printchar (int c, struct type *type, struct ui_file *stream)
 {
-  error (_("internal error - unimplemented function unk_lang_printchar called."));
+  error (_("internal error - unimplemented "
+	   "function unk_lang_printchar called."));
 }
 
 static void
@@ -1093,14 +1102,16 @@ unk_lang_printstr (struct ui_file *stream, struct type *type,
 		   const char *encoding, int force_ellipses,
 		   const struct value_print_options *options)
 {
-  error (_("internal error - unimplemented function unk_lang_printstr called."));
+  error (_("internal error - unimplemented "
+	   "function unk_lang_printstr called."));
 }
 
 static void
 unk_lang_print_type (struct type *type, const char *varstring,
 		     struct ui_file *stream, int show, int level)
 {
-  error (_("internal error - unimplemented function unk_lang_print_type called."));
+  error (_("internal error - unimplemented "
+	   "function unk_lang_print_type called."));
 }
 
 static int
@@ -1110,14 +1121,16 @@ unk_lang_val_print (struct type *type, const gdb_byte *valaddr,
 		    const struct value *val,
 		    const struct value_print_options *options)
 {
-  error (_("internal error - unimplemented function unk_lang_val_print called."));
+  error (_("internal error - unimplemented "
+	   "function unk_lang_val_print called."));
 }
 
 static int
 unk_lang_value_print (struct value *val, struct ui_file *stream,
 		      const struct value_print_options *options)
 {
-  error (_("internal error - unimplemented function unk_lang_value_print called."));
+  error (_("internal error - unimplemented "
+	   "function unk_lang_value_print called."));
 }
 
 static CORE_ADDR unk_lang_trampoline (struct frame_info *frame, CORE_ADDR pc)
@@ -1176,7 +1189,8 @@ const struct language_defn unknown_language_defn =
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
-  unk_lang_class_name,		/* Language specific class_name_from_physname */
+  unk_lang_class_name,		/* Language specific
+				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1215,7 +1229,8 @@ const struct language_defn auto_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
-  unk_lang_class_name,		/* Language specific class_name_from_physname */
+  unk_lang_class_name,		/* Language specific
+				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1253,7 +1268,8 @@ const struct language_defn local_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
-  unk_lang_class_name,		/* Language specific class_name_from_physname */
+  unk_lang_class_name,		/* Language specific
+				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1376,18 +1392,18 @@ _initialize_language (void)
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);
 
-  add_setshow_enum_cmd ("type", class_support, type_or_range_names, &type, _("\
-Set type checking.  (on/warn/off/auto)"), _("\
-Show type checking.  (on/warn/off/auto)"), NULL,
-			set_type_command,
+  add_setshow_enum_cmd ("type", class_support, type_or_range_names, &type,
+			_("Set type checking.  (on/warn/off/auto)"),
+			_("Show type checking.  (on/warn/off/auto)"),
+			NULL, set_type_command,
 			show_type_command,
 			&setchecklist, &showchecklist);
 
   add_setshow_enum_cmd ("range", class_support, type_or_range_names,
-			&range, _("\
-Set range checking.  (on/warn/off/auto)"), _("\
-Show range checking.  (on/warn/off/auto)"), NULL,
-			set_range_command,
+			&range,
+			_("Set range checking.  (on/warn/off/auto)"),
+			_("Show range checking.  (on/warn/off/auto)"),
+			NULL, set_range_command,
 			show_range_command,
 			&setchecklist, &showchecklist);
 

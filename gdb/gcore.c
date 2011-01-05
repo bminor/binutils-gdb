@@ -537,7 +537,8 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
       if (target_read_memory (bfd_section_vma (obfd, osec) + offset,
 			      memhunk, size) != 0)
 	{
-	  warning (_("Memory read failed for corefile section, %s bytes at %s."),
+	  warning (_("Memory read failed for corefile "
+		     "section, %s bytes at %s."),
 		   plongest (size),
 		   paddress (target_gdbarch, bfd_section_vma (obfd, osec)));
 	  break;

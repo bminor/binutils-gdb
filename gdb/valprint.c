@@ -117,8 +117,9 @@ static void
 show_print_max (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Limit on string chars or array elements to print is %s.\n"),
+  fprintf_filtered (file,
+		    _("Limit on string chars or array "
+		      "elements to print is %s.\n"),
 		    value);
 }
 
@@ -130,8 +131,8 @@ static void
 show_input_radix (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Default input radix for entering numbers is %s.\n"),
+  fprintf_filtered (file,
+		    _("Default input radix for entering numbers is %s.\n"),
 		    value);
 }
 
@@ -140,8 +141,8 @@ static void
 show_output_radix (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Default output radix for printing of values is %s.\n"),
+  fprintf_filtered (file,
+		    _("Default output radix for printing of values is %s.\n"),
 		    value);
 }
 
@@ -173,8 +174,9 @@ static void
 show_stop_print_at_null (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Printing of char arrays to stop at first null char is %s.\n"),
+  fprintf_filtered (file,
+		    _("Printing of char arrays to stop "
+		      "at first null char is %s.\n"),
 		    value);
 }
 
@@ -203,8 +205,8 @@ static void
 show_unionprint (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Printing of unions interior to structures is %s.\n"),
+  fprintf_filtered (file,
+		    _("Printing of unions interior to structures is %s.\n"),
 		    value);
 }
 
@@ -553,7 +555,8 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
     case 'o':
       val = int_string (val_long, 8, 0, 0, use_c_format); break;
     default:
-      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+      internal_error (__FILE__, __LINE__,
+		      _("failed internal consistency check"));
     } 
   fputs_filtered (val, stream);
 }
@@ -1038,7 +1041,8 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
     }
 }
 
-/* VALADDR points to a char integer of LEN bytes.  Print it out in appropriate language form on stream.  
+/* VALADDR points to a char integer of LEN bytes.
+   Print it out in appropriate language form on stream.  
    Omit any leading zero chars.  */
 
 void
@@ -1207,7 +1211,8 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
    function be eliminated.  */
 
 static int
-partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int *errnoptr)
+partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
+		     int len, int *errnoptr)
 {
   int nread;			/* Number of bytes actually read. */
   int errcode;			/* Error from last read. */
@@ -1269,7 +1274,8 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
   int errcode;			/* Errno returned from bad reads.  */
   unsigned int nfetch;		/* Chars to fetch / chars fetched.  */
   unsigned int chunksize;	/* Size of each fetch, in chars.  */
-  gdb_byte *bufptr;		/* Pointer to next available byte in buffer.  */
+  gdb_byte *bufptr;		/* Pointer to next available byte in
+				   buffer.  */
   gdb_byte *limit;		/* First location past end of fetch buffer.  */
   struct cleanup *old_chain = NULL;	/* Top of the old cleanup chain.  */
 
@@ -1403,7 +1409,8 @@ val_print_string (struct type *elttype, const char *encoding,
      because finding the null byte (or available memory) is what actually
      limits the fetch.  */
 
-  fetchlimit = (len == -1 ? options->print_max : min (len, options->print_max));
+  fetchlimit = (len == -1 ? options->print_max : min (len,
+						      options->print_max));
 
   errcode = read_string (addr, len, width, fetchlimit, byte_order,
 			 &buffer, &bytes_read);
@@ -1411,8 +1418,9 @@ val_print_string (struct type *elttype, const char *encoding,
 
   addr += bytes_read;
 
-  /* We now have either successfully filled the buffer to fetchlimit, or
-     terminated early due to an error or finding a null char when LEN is -1.  */
+  /* We now have either successfully filled the buffer to fetchlimit,
+     or terminated early due to an error or finding a null char when
+     LEN is -1.  */
 
   /* Determine found_nul by looking at the last character read.  */
   found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
@@ -1510,7 +1518,8 @@ set_input_radix_1 (int from_tty, unsigned radix)
   input_radix_1 = input_radix = radix;
   if (from_tty)
     {
-      printf_filtered (_("Input radix now set to decimal %u, hex %x, octal %o.\n"),
+      printf_filtered (_("Input radix now set to "
+			 "decimal %u, hex %x, octal %o.\n"),
 		       radix, radix, radix);
     }
 }
@@ -1545,13 +1554,15 @@ set_output_radix_1 (int from_tty, unsigned radix)
       break;
     default:
       output_radix_1 = output_radix;
-      error (_("Unsupported output radix ``decimal %u''; output radix unchanged."),
+      error (_("Unsupported output radix ``decimal %u''; "
+	       "output radix unchanged."),
 	     radix);
     }
   output_radix_1 = output_radix = radix;
   if (from_tty)
     {
-      printf_filtered (_("Output radix now set to decimal %u, hex %x, octal %o.\n"),
+      printf_filtered (_("Output radix now set to "
+			 "decimal %u, hex %x, octal %o.\n"),
 		       radix, radix, radix);
     }
 }
@@ -1574,7 +1585,8 @@ set_radix (char *arg, int from_tty)
   set_input_radix_1 (0, radix);
   if (from_tty)
     {
-      printf_filtered (_("Input and output radices now set to decimal %u, hex %x, octal %o.\n"),
+      printf_filtered (_("Input and output radices now set to "
+			 "decimal %u, hex %x, octal %o.\n"),
 		       radix, radix, radix);
     }
 }
@@ -1588,14 +1600,17 @@ show_radix (char *arg, int from_tty)
     {
       if (input_radix == output_radix)
 	{
-	  printf_filtered (_("Input and output radices set to decimal %u, hex %x, octal %o.\n"),
+	  printf_filtered (_("Input and output radices set to "
+			     "decimal %u, hex %x, octal %o.\n"),
 			   input_radix, input_radix, input_radix);
 	}
       else
 	{
-	  printf_filtered (_("Input radix set to decimal %u, hex %x, octal %o.\n"),
+	  printf_filtered (_("Input radix set to decimal "
+			     "%u, hex %x, octal %o.\n"),
 			   input_radix, input_radix, input_radix);
-	  printf_filtered (_("Output radix set to decimal %u, hex %x, octal %o.\n"),
+	  printf_filtered (_("Output radix set to decimal "
+			     "%u, hex %x, octal %o.\n"),
 			   output_radix, output_radix, output_radix);
 	}
     }

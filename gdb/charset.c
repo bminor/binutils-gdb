@@ -522,8 +522,8 @@ convert_between_encodings (const char *from, const char *to,
 
 		/* Invalid input sequence.  */
 		if (translit == translit_none)
-		  error (_("Could not convert character to `%s' character set"),
-			 to);
+		  error (_("Could not convert character "
+			   "to `%s' character set"), to);
 
 		/* We emit escape sequence for the bytes, skip them,
 		   and try again.  */
@@ -553,7 +553,8 @@ convert_between_encodings (const char *from, const char *to,
 	      break;
 
 	    default:
-	      perror_with_name ("Internal error while converting character sets");
+	      perror_with_name ("Internal error while "
+				"converting character sets");
 	    }
 	}
     }
@@ -693,7 +694,8 @@ wchar_iterate (struct wchar_iterator *iter,
 	      return 0;
 
 	    default:
-	      perror_with_name ("Internal error while converting character sets");
+	      perror_with_name ("Internal error while "
+				"converting character sets");
 	    }
 	}
 
@@ -946,7 +948,8 @@ _initialize_charset (void)
   auto_target_charset_name = auto_host_charset_name;
 #elif defined (USE_WIN32API)
   {
-    static char w32_host_default_charset[16]; /* "CP" + x<=5 digits + paranoia.  */
+    /* "CP" + x<=5 digits + paranoia.  */
+    static char w32_host_default_charset[16];
 
     snprintf (w32_host_default_charset, sizeof w32_host_default_charset,
 	      "CP%d", GetACP());
@@ -978,8 +981,8 @@ Set the host character set."), _("\
 Show the host character set."), _("\
 The `host character set' is the one used by the system GDB is running on.\n\
 You may only use supersets of ASCII for your host character set; GDB does\n\
-not support any others.\n\
-To see a list of the character sets GDB supports, type `set host-charset <TAB>'."),
+not support any others.\nTo see a list of the character sets GDB supports, \
+type `set host-charset <TAB>'."),
 			set_host_charset_sfunc,
 			show_host_charset_name,
 			&setlist, &showlist);
@@ -990,8 +993,8 @@ Set the target character set."), _("\
 Show the target character set."), _("\
 The `target character set' is the one used by the program being debugged.\n\
 GDB translates characters and strings between the host and target\n\
-character sets as needed.\n\
-To see a list of the character sets GDB supports, type `set target-charset'<TAB>"),
+character sets as needed.\nTo see a list of the character sets GDB supports, \
+type `set target-charset'<TAB>"),
 			set_target_charset_sfunc,
 			show_target_charset_name,
 			&setlist, &showlist);
@@ -1001,8 +1004,8 @@ To see a list of the character sets GDB supports, type `set target-charset'<TAB>
 			_("\
 Set the target wide character set."), _("\
 Show the target wide character set."), _("\
-The `target wide character set' is the one used by the program being debugged.\n\
-In particular it is the encoding used by `wchar_t'.\n\
+The `target wide character set' is the one used by the program being debugged.\
+\nIn particular it is the encoding used by `wchar_t'.\n\
 GDB translates characters and strings between the host and target\n\
 character sets as needed.\n\
 To see a list of the character sets GDB supports, type\n\

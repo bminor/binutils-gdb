@@ -138,7 +138,8 @@ add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
   section.objfile = objfile;
   section.the_bfd_section = asect;
   section.ovly_mapped = 0;
-  obstack_grow (&objfile->objfile_obstack, (char *) &section, sizeof (section));
+  obstack_grow (&objfile->objfile_obstack,
+		(char *) &section, sizeof (section));
   objfile->sections_end
     = (struct obj_section *) (((size_t) objfile->sections_end) + 1);
 }

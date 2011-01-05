@@ -162,7 +162,8 @@ sniff_core_bfd (bfd *abfd)
     }
   else if (matches == 0)
     {
-      warning (_("\"%s\": no core file handler recognizes format, using default"),
+      warning (_("\"%s\": no core file handler "
+		 "recognizes format, using default"),
 	       bfd_get_filename (abfd));
     }
   if (yummy == NULL)
@@ -294,7 +295,8 @@ core_open (char *filename, int from_tty)
   if (!filename)
     {
       if (core_bfd)
-	error (_("No core file specified.  (Use `detach' to stop debugging a core file.)"));
+	error (_("No core file specified.  (Use `detach' "
+		 "to stop debugging a core file.)"));
       else
 	error (_("No core file specified."));
     }

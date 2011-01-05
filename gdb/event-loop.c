@@ -691,7 +691,8 @@ delete_file_handler (int fd)
 	    {
 	      (new_poll_fds + j)->fd = (gdb_notifier.poll_fds + i)->fd;
 	      (new_poll_fds + j)->events = (gdb_notifier.poll_fds + i)->events;
-	      (new_poll_fds + j)->revents = (gdb_notifier.poll_fds + i)->revents;
+	      (new_poll_fds + j)->revents
+		= (gdb_notifier.poll_fds + i)->revents;
 	      j++;
 	    }
 	}
@@ -792,11 +793,14 @@ handle_file_event (event_data data)
 		  /* Work in progress.  We may need to tell somebody
 		     what kind of error we had.  */
 		  if (error_mask_returned & POLLHUP)
-		    printf_unfiltered (_("Hangup detected on fd %d\n"), file_ptr->fd);
+		    printf_unfiltered (_("Hangup detected on fd %d\n"),
+				       file_ptr->fd);
 		  if (error_mask_returned & POLLERR)
-		    printf_unfiltered (_("Error detected on fd %d\n"), file_ptr->fd);
+		    printf_unfiltered (_("Error detected on fd %d\n"),
+				       file_ptr->fd);
 		  if (error_mask_returned & POLLNVAL)
-		    printf_unfiltered (_("Invalid or non-`poll'able fd %d\n"), file_ptr->fd);
+		    printf_unfiltered (_("Invalid or non-`poll'able fd %d\n"),
+				       file_ptr->fd);
 		  file_ptr->error = 1;
 		}
 	      else
@@ -810,7 +814,8 @@ handle_file_event (event_data data)
 	    {
 	      if (file_ptr->ready_mask & GDB_EXCEPTION)
 		{
-		  printf_unfiltered (_("Exception condition detected on fd %d\n"), file_ptr->fd);
+		  printf_unfiltered (_("Exception condition detected "
+				       "on fd %d\n"), file_ptr->fd);
 		  file_ptr->error = 1;
 		}
 	      else
@@ -987,7 +992,8 @@ gdb_wait_for_event (int block)
    PROC is the function to call with CLIENT_DATA argument 
    whenever the handler is invoked.  */
 async_signal_handler *
-create_async_signal_handler (sig_handler_func * proc, gdb_client_data client_data)
+create_async_signal_handler (sig_handler_func * proc,
+			     gdb_client_data client_data)
 {
   async_signal_handler *async_handler_ptr;
 
@@ -1169,7 +1175,8 @@ delete_async_event_handler (async_event_handler **async_handler_ptr)
 
   if (async_event_handler_list.first_handler == *async_handler_ptr)
     {
-      async_event_handler_list.first_handler = (*async_handler_ptr)->next_handler;
+      async_event_handler_list.first_handler
+	= (*async_handler_ptr)->next_handler;
       if (async_event_handler_list.first_handler == NULL)
 	async_event_handler_list.last_handler = NULL;
     }

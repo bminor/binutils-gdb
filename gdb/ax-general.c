@@ -154,7 +154,8 @@ generic_ext (struct agent_expr *x, enum agent_op op, int n)
     error (_("GDB bug: ax-general.c (generic_ext): bit count out of range"));
   /* That had better be enough range.  */
   if (sizeof (LONGEST) * 8 > 255)
-    error (_("GDB bug: ax-general.c (generic_ext): opcode has inadequate range"));
+    error (_("GDB bug: ax-general.c (generic_ext): "
+	     "opcode has inadequate range"));
 
   grow_expr (x, 2);
   x->buf[x->len++] = op;
@@ -184,7 +185,8 @@ ax_trace_quick (struct agent_expr *x, int n)
 {
   /* N must fit in a byte.  */
   if (n < 0 || n > 255)
-    error (_("GDB bug: ax-general.c (ax_trace_quick): size out of range for trace_quick"));
+    error (_("GDB bug: ax-general.c (ax_trace_quick): "
+	     "size out of range for trace_quick"));
 
   grow_expr (x, 2);
   x->buf[x->len++] = aop_trace_quick;
@@ -265,7 +267,8 @@ void
 ax_const_d (struct agent_expr *x, LONGEST d)
 {
   /* FIXME: floating-point support not present yet.  */
-  error (_("GDB bug: ax-general.c (ax_const_d): floating point not supported yet"));
+  error (_("GDB bug: ax-general.c (ax_const_d): "
+	   "floating point not supported yet"));
 }
 
 
@@ -289,7 +292,8 @@ ax_reg (struct agent_expr *x, int reg)
     {
       /* Make sure the register number is in range.  */
       if (reg < 0 || reg > 0xffff)
-        error (_("GDB bug: ax-general.c (ax_reg): register number out of range"));
+        error (_("GDB bug: ax-general.c (ax_reg): "
+		 "register number out of range"));
       grow_expr (x, 3);
       x->buf[x->len] = aop_reg;
       x->buf[x->len + 1] = (reg >> 8) & 0xff;
@@ -305,7 +309,9 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
 {
   /* Make sure the tsv number is in range.  */
   if (num < 0 || num > 0xffff)
-    internal_error (__FILE__, __LINE__, _("ax-general.c (ax_tsv): variable number is %d, out of range"), num);
+    internal_error (__FILE__, __LINE__, 
+		    _("ax-general.c (ax_tsv): variable "
+		      "number is %d, out of range"), num);
 
   grow_expr (x, 3);
   x->buf[x->len] = op;

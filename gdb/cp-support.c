@@ -1016,7 +1016,8 @@ cp_lookup_rtti_type (const char *name, struct block *block)
 static  void
 maint_cplus_command (char *arg, int from_tty)
 {
-  printf_unfiltered (_("\"maintenance cplus\" must be followed by the name of a command.\n"));
+  printf_unfiltered (_("\"maintenance cplus\" must be followed "
+		       "by the name of a command.\n"));
   help_list (maint_cplus_cmd_list,
 	     "maintenance cplus ",
 	     -1, gdb_stdout);

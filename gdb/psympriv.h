@@ -158,7 +158,8 @@ extern void sort_pst_symbols (struct partial_symtab *);
 /* Add any kind of symbol to a psymbol_allocation_list.  */
 
 extern const
-struct partial_symbol *add_psymbol_to_list (const char *, int, int, domain_enum,
+struct partial_symbol *add_psymbol_to_list (const char *, int,
+					    int, domain_enum,
 					    enum address_class,
 					    struct psymbol_allocation_list *,
 					    long, CORE_ADDR,

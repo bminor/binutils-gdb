@@ -50,7 +50,8 @@ static char *serial_logfile = NULL;
 static struct ui_file *serial_logfp = NULL;
 
 static struct serial_ops *serial_interface_lookup (const char *);
-static void serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout);
+static void serial_logchar (struct ui_file *stream,
+			    int ch_type, int ch, int timeout);
 static const char logbase_hex[] = "hex";
 static const char logbase_octal[] = "octal";
 static const char logbase_ascii[] = "ascii";
@@ -123,7 +124,8 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
 	    fputs_unfiltered ("\\v", stream);
 	    break;
 	  default:
-	    fprintf_unfiltered (stream, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
+	    fprintf_unfiltered (stream,
+				isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
 	    break;
 	  }
     }
@@ -658,7 +660,9 @@ connect_command (char *args, int fromtty)
   dont_repeat ();
 
   if (args)
-    fprintf_unfiltered (gdb_stderr, "This command takes no args.  They have been ignored.\n");
+    fprintf_unfiltered (gdb_stderr,
+			"This command takes no args.  "
+			"They have been ignored.\n");
 
   printf_unfiltered ("[Entering connect mode.  Use ~. or ~^D to escape]\n");
 
@@ -747,7 +751,8 @@ static struct cmd_list_element *serial_show_cmdlist;
 static void
 serial_set_cmd (char *args, int from_tty)
 {
-  printf_unfiltered ("\"set serial\" must be followed by the name of a command.\n");
+  printf_unfiltered ("\"set serial\" must be followed "
+		     "by the name of a command.\n");
   help_list (serial_set_cmdlist, "set serial ", -1, gdb_stdout);
 }
 

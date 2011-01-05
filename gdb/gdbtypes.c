@@ -120,8 +120,8 @@ show_opaque_type_resolution (struct ui_file *file, int from_tty,
 			     struct cmd_list_element *c, 
 			     const char *value)
 {
-  fprintf_filtered (file, _("\
-Resolution of opaque struct/class/union types (if set before loading symbols) is %s.\n"),
+  fprintf_filtered (file, _("Resolution of opaque struct/class/union types "
+			    "(if set before loading symbols) is %s.\n"),
 		    value);
 }
 
@@ -2430,9 +2430,11 @@ rank_one_type (struct type *parm, struct type *arg)
 							  "int")
 			       && integer_types_same_name_p (TYPE_NAME (parm),
 							     "long"))
-			return INTEGER_PROMOTION_BADNESS;	/* unsigned int -> unsigned long */
+			/* unsigned int -> unsigned long */
+			return INTEGER_PROMOTION_BADNESS;
 		      else
-			return INTEGER_CONVERSION_BADNESS;	/* unsigned long -> unsigned int */
+			/* unsigned long -> unsigned int */
+			return INTEGER_CONVERSION_BADNESS;
 		    }
 		  else
 		    {
@@ -2440,9 +2442,11 @@ rank_one_type (struct type *parm, struct type *arg)
 						     "long")
 			  && integer_types_same_name_p (TYPE_NAME (parm), 
 							"int"))
-			return INTEGER_CONVERSION_BADNESS;	/* signed long -> unsigned int */
+			/* signed long -> unsigned int */
+			return INTEGER_CONVERSION_BADNESS;
 		      else
-			return INTEGER_CONVERSION_BADNESS;	/* signed int/long -> unsigned int/long */
+			/* signed int/long -> unsigned int/long */
+			return INTEGER_CONVERSION_BADNESS;
 		    }
 		}
 	      else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
@@ -3105,7 +3109,8 @@ recursive_dump_type (struct type *type, int spaces)
 			plongest (TYPE_LOW_BOUND (type)), 
 			TYPE_LOW_BOUND_UNDEFINED (type) ? " (undefined)" : "",
 			plongest (TYPE_HIGH_BOUND (type)),
-			TYPE_HIGH_BOUND_UNDEFINED (type) ? " (undefined)" : "");
+			TYPE_HIGH_BOUND_UNDEFINED (type) 
+			? " (undefined)" : "");
     }
   printfi_filtered (spaces, "vptr_basetype ");
   gdb_print_host_address (TYPE_VPTR_BASETYPE (type), gdb_stdout);
@@ -3236,7 +3241,8 @@ copy_type_recursive (struct objfile *objfile,
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
-  stored = obstack_alloc (&objfile->objfile_obstack, sizeof (struct type_pair));
+  stored
+    = obstack_alloc (&objfile->objfile_obstack, sizeof (struct type_pair));
   stored->old = type;
   stored->new = new_type;
   *slot = stored;
@@ -3870,20 +3876,23 @@ _initialize_gdbtypes (void)
   gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
   objfile_type_data = register_objfile_data ();
 
-  add_setshow_zinteger_cmd ("overload", no_class, &overload_debug, _("\
-Set debugging of C++ overloading."), _("\
-Show debugging of C++ overloading."), _("\
-When enabled, ranking of the functions is displayed."),
+  add_setshow_zinteger_cmd ("overload", no_class, &overload_debug,
+			    _("Set debugging of C++ overloading."),
+			    _("Show debugging of C++ overloading."),
+			    _("When enabled, ranking of the "
+			      "functions is displayed."),
 			    NULL,
 			    show_overload_debug,
 			    &setdebuglist, &showdebuglist);
 
   /* Add user knob for controlling resolution of opaque types.  */
   add_setshow_boolean_cmd ("opaque-type-resolution", class_support,
-			   &opaque_type_resolution, _("\
-Set resolution of opaque struct/class/union types (if set before loading symbols)."), _("\
-Show resolution of opaque struct/class/union types (if set before loading symbols)."), NULL,
-			   NULL,
+			   &opaque_type_resolution,
+			   _("Set resolution of opaque struct/class/union"
+			     " types (if set before loading symbols)."),
+			   _("Show resolution of opaque struct/class/union"
+			     " types (if set before loading symbols)."),
+			   NULL, NULL,
 			   show_opaque_type_resolution,
 			   &setlist, &showlist);
 }

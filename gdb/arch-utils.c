@@ -279,7 +279,7 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 				  "(currently big endian)\n"));
     else
       fprintf_unfiltered (file, _("The target endianness is set automatically "
-			   "(currently little endian)\n"));
+				  "(currently little endian)\n"));
   else
     if (target_byte_order_user == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file,
@@ -435,12 +435,12 @@ show_architecture (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
   if (target_architecture_user == NULL)
-    fprintf_filtered (file, _("\
-The target architecture is set automatically (currently %s)\n"),
-		gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
+    fprintf_filtered (file, _("The target architecture is set "
+			      "automatically (currently %s)\n"),
+		      gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
   else
-    fprintf_filtered (file, _("\
-The target architecture is assumed to be %s\n"), set_architecture_string);
+    fprintf_filtered (file, _("The target architecture is assumed to be %s\n"),
+		      set_architecture_string);
 }
 
 
@@ -662,9 +662,9 @@ initialize_current_architecture (void)
     arches[nr + 0] = "auto";
     arches[nr + 1] = NULL;
     add_setshow_enum_cmd ("architecture", class_support,
-			  arches, &set_architecture_string, _("\
-Set architecture of target."), _("\
-Show architecture of target."), NULL,
+			  arches, &set_architecture_string, 
+			  _("Set architecture of target."),
+			  _("Show architecture of target."), NULL,
 			  set_architecture, show_architecture,
 			  &setlist, &showlist);
     add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
@@ -788,15 +788,16 @@ default_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 
 /* */
 
-extern initialize_file_ftype _initialize_gdbarch_utils; /* -Wmissing-prototypes */
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_gdbarch_utils;
 
 void
 _initialize_gdbarch_utils (void)
 {
   add_setshow_enum_cmd ("endian", class_support,
-			endian_enum, &set_endian_string, _("\
-Set endianness of target."), _("\
-Show endianness of target."), NULL,
-			set_endian, show_endian,
+			endian_enum, &set_endian_string, 
+			_("Set endianness of target."),
+			_("Show endianness of target."),
+			NULL, set_endian, show_endian,
 			&setlist, &showlist);
 }

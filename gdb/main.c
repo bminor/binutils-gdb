@@ -335,7 +335,8 @@ captured_main (void *data)
     /* Don't use *_filtered or warning() (which relies on
        current_target) until after initialize_all_files().  */
     fprintf_unfiltered (gdb_stderr,
-                        _("%s: warning: error finding working directory: %s\n"),
+			_("%s: warning: error finding "
+			  "working directory: %s\n"),
                         argv[0], safe_strerror (errno));
     
   current_directory = gdb_dirbuf;
@@ -564,8 +565,9 @@ captured_main (void *data)
 
 	      if (!gdbtk_test (optarg))
 		{
-		  fprintf_unfiltered (gdb_stderr, 
-				      _("%s: unable to load tclcommand file \"%s\""),
+		  fprintf_unfiltered (gdb_stderr,
+				      _("%s: unable to load "
+					"tclcommand file \"%s\""),
 				      argv[0], optarg);
 		  exit (1);
 		}
@@ -628,9 +630,9 @@ captured_main (void *data)
 		/* Don't use *_filtered or warning() (which relies on
 		   current_target) until after initialize_all_files().  */
 
-		fprintf_unfiltered
-		  (gdb_stderr,
-		 _("warning: could not set timeout limit to `%s'.\n"), optarg);
+		fprintf_unfiltered (gdb_stderr,
+				    _("warning: could not set "
+				      "timeout limit to `%s'.\n"), optarg);
 	      else
 		remote_timeout = i;
 	    }
@@ -638,7 +640,8 @@ captured_main (void *data)
 
 	  case '?':
 	    fprintf_unfiltered (gdb_stderr,
-			_("Use `%s --help' for a complete list of options.\n"),
+				_("Use `%s --help' for a "
+				  "complete list of options.\n"),
 				argv[0]);
 	    exit (1);
 	  }
@@ -668,7 +671,8 @@ captured_main (void *data)
       if (optind >= argc)
 	{
 	  fprintf_unfiltered (gdb_stderr,
-			      _("%s: `--args' specified but no program specified\n"),
+			      _("%s: `--args' specified but "
+				"no program specified\n"),
 			      argv[0]);
 	  exit (1);
 	}
@@ -703,8 +707,9 @@ captured_main (void *data)
       /* Any argument left on the command line is unexpected and
 	 will be ignored.  Inform the user.  */
       if (optind < argc)
-	fprintf_unfiltered (gdb_stderr, _("\
-Excess command line arguments ignored. (%s%s)\n"),
+	fprintf_unfiltered (gdb_stderr,
+			    _("Excess command line "
+			      "arguments ignored. (%s%s)\n"),
 			    argv[optind],
 			    (optind == argc - 1) ? "" : " ...");
     }
@@ -830,20 +835,24 @@ Excess command line arguments ignored. (%s%s)\n"),
       /* The exec file and the symbol-file are the same.  If we can't
          open it, better only print one error message.
          catch_command_errors returns non-zero on success!  */
-      if (catch_command_errors (exec_file_attach, execarg, !batch_flag, RETURN_MASK_ALL))
-	catch_command_errors (symbol_file_add_main, symarg, !batch_flag, RETURN_MASK_ALL);
+      if (catch_command_errors (exec_file_attach, execarg,
+				!batch_flag, RETURN_MASK_ALL))
+	catch_command_errors (symbol_file_add_main, symarg,
+			      !batch_flag, RETURN_MASK_ALL);
     }
   else
     {
       if (execarg != NULL)
-	catch_command_errors (exec_file_attach, execarg, !batch_flag, RETURN_MASK_ALL);
+	catch_command_errors (exec_file_attach, execarg,
+			      !batch_flag, RETURN_MASK_ALL);
       if (symarg != NULL)
-	catch_command_errors (symbol_file_add_main, symarg, !batch_flag, RETURN_MASK_ALL);
+	catch_command_errors (symbol_file_add_main, symarg,
+			      !batch_flag, RETURN_MASK_ALL);
     }
 
   if (corearg && pidarg)
-    error (_("\
-Can't attach to process and specify a core file at the same time."));
+    error (_("Can't attach to process and specify "
+	     "a core file at the same time."));
 
   if (corearg != NULL)
     catch_command_errors (core_file_command, corearg,

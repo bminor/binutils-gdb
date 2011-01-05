@@ -355,9 +355,10 @@ ldfrexp (long double value, int *eptr)
   long double tmp;
   int exp;
 
-  /* Unfortunately, there are no portable functions for extracting the exponent
-     of a long double, so we have to do it iteratively by multiplying or dividing
-     by two until the fraction is between 0.5 and 1.0.  */
+  /* Unfortunately, there are no portable functions for extracting the
+     exponent of a long double, so we have to do it iteratively by
+     multiplying or dividing by two until the fraction is between 0.5
+     and 1.0.  */
 
   if (value < 0.0l)
     value = -value;
@@ -699,7 +700,8 @@ floatformat_mantissa (const struct floatformat *fmt,
 
 static const struct floatformat *host_float_format = GDB_HOST_FLOAT_FORMAT;
 static const struct floatformat *host_double_format = GDB_HOST_DOUBLE_FORMAT;
-static const struct floatformat *host_long_double_format = GDB_HOST_LONG_DOUBLE_FORMAT;
+static const struct floatformat *host_long_double_format
+  = GDB_HOST_LONG_DOUBLE_FORMAT;
 
 void
 floatformat_to_doublest (const struct floatformat *fmt,
@@ -924,7 +926,8 @@ _initialize_doublest (void)
   floatformat_ieee_single[BFD_ENDIAN_BIG] = &floatformat_ieee_single_big;
   floatformat_ieee_double[BFD_ENDIAN_LITTLE] = &floatformat_ieee_double_little;
   floatformat_ieee_double[BFD_ENDIAN_BIG] = &floatformat_ieee_double_big;
-  floatformat_arm_ext[BFD_ENDIAN_LITTLE] = &floatformat_arm_ext_littlebyte_bigword;
+  floatformat_arm_ext[BFD_ENDIAN_LITTLE]
+    = &floatformat_arm_ext_littlebyte_bigword;
   floatformat_arm_ext[BFD_ENDIAN_BIG] = &floatformat_arm_ext_big;
   floatformat_ia64_spill[BFD_ENDIAN_LITTLE] = &floatformat_ia64_spill_little;
   floatformat_ia64_spill[BFD_ENDIAN_BIG] = &floatformat_ia64_spill_big;

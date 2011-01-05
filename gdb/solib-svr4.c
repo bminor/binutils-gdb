@@ -1369,8 +1369,8 @@ enable_break (struct svr4_info *info, int from_tty)
 
       sym_addr = gdbarch_addr_bits_remove
 	(target_gdbarch, gdbarch_convert_from_func_ptr_addr (target_gdbarch,
-							      sym_addr,
-							      &current_target));
+							     sym_addr,
+							     &current_target));
 
       /* On at least some versions of Solaris there's a dynamic relocation
 	 on _r_debug.r_brk and SYM_ADDR may not be relocated yet, e.g., if
@@ -1788,8 +1788,8 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	     may be different from EXEC_BFD as the file may have been prelinked
 	     to a different address after the executable has been loaded.
 	     Moreover the address of placement in target memory can be
-	     different from what the program headers in target memory say - this
-	     is the goal of PIE.
+	     different from what the program headers in target memory say -
+	     this is the goal of PIE.
 
 	     Detected DISPLACEMENT covers both the offsets of PIE placement and
 	     possible new prelink performed after start of the program.  Here
@@ -1799,7 +1799,8 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	  if (phdrs_size != phdrs2_size
 	      || bfd_get_arch_size (exec_bfd) != arch_size)
 	    ok = 0;
-	  else if (arch_size == 32 && phdrs_size >= sizeof (Elf32_External_Phdr)
+	  else if (arch_size == 32
+		   && phdrs_size >= sizeof (Elf32_External_Phdr)
 	           && phdrs_size % sizeof (Elf32_External_Phdr) == 0)
 	    {
 	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
@@ -1862,11 +1863,13 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
 		  /* Check also other adjustment combinations - PR 11786.  */
 
-		  vaddr = extract_unsigned_integer (buf_vaddr_p, 4, byte_order);
+		  vaddr = extract_unsigned_integer (buf_vaddr_p, 4,
+						    byte_order);
 		  vaddr -= displacement;
 		  store_unsigned_integer (buf_vaddr_p, 4, byte_order, vaddr);
 
-		  paddr = extract_unsigned_integer (buf_paddr_p, 4, byte_order);
+		  paddr = extract_unsigned_integer (buf_paddr_p, 4,
+						    byte_order);
 		  paddr -= displacement;
 		  store_unsigned_integer (buf_paddr_p, 4, byte_order, paddr);
 
@@ -1905,7 +1908,8 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  break;
 		}
 	    }
-	  else if (arch_size == 64 && phdrs_size >= sizeof (Elf64_External_Phdr)
+	  else if (arch_size == 64
+		   && phdrs_size >= sizeof (Elf64_External_Phdr)
 	           && phdrs_size % sizeof (Elf64_External_Phdr) == 0)
 	    {
 	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
@@ -1968,11 +1972,13 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
 		  /* Check also other adjustment combinations - PR 11786.  */
 
-		  vaddr = extract_unsigned_integer (buf_vaddr_p, 8, byte_order);
+		  vaddr = extract_unsigned_integer (buf_vaddr_p, 8,
+						    byte_order);
 		  vaddr -= displacement;
 		  store_unsigned_integer (buf_vaddr_p, 8, byte_order, vaddr);
 
-		  paddr = extract_unsigned_integer (buf_paddr_p, 8, byte_order);
+		  paddr = extract_unsigned_integer (buf_paddr_p, 8,
+						    byte_order);
 		  paddr -= displacement;
 		  store_unsigned_integer (buf_paddr_p, 8, byte_order, paddr);
 

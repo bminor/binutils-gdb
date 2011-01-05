@@ -268,13 +268,14 @@ struct objfile
     struct psymbol_allocation_list static_psymbols;
 
     /* Each file contains a pointer to an array of minimal symbols for all
-       global symbols that are defined within the file.  The array is terminated
-       by a "null symbol", one that has a NULL pointer for the name and a zero
-       value for the address.  This makes it easy to walk through the array
-       when passed a pointer to somewhere in the middle of it.  There is also
-       a count of the number of symbols, which does not include the terminating
-       null symbol.  The array itself, as well as all the data that it points
-       to, should be allocated on the objfile_obstack for this file. */
+       global symbols that are defined within the file.  The array is
+       terminated by a "null symbol", one that has a NULL pointer for the
+       name and a zero value for the address.  This makes it easy to walk
+       through the array when passed a pointer to somewhere in the middle
+       of it.  There is also a count of the number of symbols, which does
+       not include the terminating null symbol.  The array itself, as well
+       as all the data that it points to, should be allocated on the
+       objfile_obstack for this file. */
 
     struct minimal_symbol *msymbols;
     int minimal_symbol_count;
@@ -653,17 +654,20 @@ extern int gdb_bfd_close_or_warn (struct bfd *abfd);
 
 #define SECT_OFF_DATA(objfile) \
      ((objfile->sect_index_data == -1) \
-      ? (internal_error (__FILE__, __LINE__, _("sect_index_data not initialized")), -1) \
+      ? (internal_error (__FILE__, __LINE__, \
+			 _("sect_index_data not initialized")), -1)	\
       : objfile->sect_index_data)
 
 #define SECT_OFF_RODATA(objfile) \
      ((objfile->sect_index_rodata == -1) \
-      ? (internal_error (__FILE__, __LINE__, _("sect_index_rodata not initialized")), -1) \
+      ? (internal_error (__FILE__, __LINE__, \
+			 _("sect_index_rodata not initialized")), -1)	\
       : objfile->sect_index_rodata)
 
 #define SECT_OFF_TEXT(objfile) \
      ((objfile->sect_index_text == -1) \
-      ? (internal_error (__FILE__, __LINE__, _("sect_index_text not initialized")), -1) \
+      ? (internal_error (__FILE__, __LINE__, \
+			 _("sect_index_text not initialized")), -1)	\
       : objfile->sect_index_text)
 
 /* Sometimes the .bss section is missing from the objfile, so we don't

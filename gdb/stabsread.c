@@ -34,7 +34,7 @@
 #include "expression.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "aout/stab_gnu.h"	/* We always use GNU stabs, not native */
+#include "aout/stab_gnu.h"	/* We always use GNU stabs, not native.  */
 #include "libaout.h"
 #include "aout/aout64.h"
 #include "gdb-stabs.h"
@@ -233,7 +233,8 @@ dbx_lookup_type (int typenums[2], struct objfile *objfile)
   if (filenum < 0 || filenum >= n_this_object_header_files)
     {
       complaint (&symfile_complaints,
-		 _("Invalid symbol data: type number (%d,%d) out of range at symtab pos %d."),
+		 _("Invalid symbol data: type number "
+		   "(%d,%d) out of range at symtab pos %d."),
 		 filenum, index, symnum);
       goto error_return;
     }
@@ -852,9 +853,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	    /* NULL terminate the string.  */
 	    string_local[ind] = 0;
-	    range_type = create_range_type (NULL,
-					    objfile_type (objfile)->builtin_int,
-					    0, ind);
+	    range_type
+	      = create_range_type (NULL,
+				   objfile_type (objfile)->builtin_int,
+				   0, ind);
 	    SYMBOL_TYPE (sym) = create_array_type (NULL,
 				  objfile_type (objfile)->builtin_char,
 				  range_type);
@@ -1162,7 +1164,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	  struct minimal_symbol *msym;
 
-	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym), NULL, objfile);
+	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
+					NULL, objfile);
 	  if (msym != NULL)
 	    {
 	      char *new_name = gdbarch_static_transform_name
@@ -1289,9 +1292,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
           SYMBOL_VALUE (struct_sym) = valu;
           SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
           if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-            TYPE_NAME (SYMBOL_TYPE (sym)) = obconcat (&objfile->objfile_obstack,
-						      SYMBOL_LINKAGE_NAME (sym),
-						      (char *) NULL);
+            TYPE_NAME (SYMBOL_TYPE (sym))
+	      = obconcat (&objfile->objfile_obstack,
+			  SYMBOL_LINKAGE_NAME (sym),
+			  (char *) NULL);
           add_symbol_to_list (struct_sym, &file_symbols);
         }
       
@@ -1316,9 +1320,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
       if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
-	TYPE_TAG_NAME (SYMBOL_TYPE (sym)) = obconcat (&objfile->objfile_obstack,
-						      SYMBOL_LINKAGE_NAME (sym),
-						      (char *) NULL);
+	TYPE_TAG_NAME (SYMBOL_TYPE (sym))
+	  = obconcat (&objfile->objfile_obstack,
+		      SYMBOL_LINKAGE_NAME (sym),
+		      (char *) NULL);
       add_symbol_to_list (sym, &file_symbols);
 
       if (synonym)
@@ -1332,9 +1337,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	    TYPE_NAME (SYMBOL_TYPE (sym)) = obconcat (&objfile->objfile_obstack,
-						      SYMBOL_LINKAGE_NAME (sym),
-						      (char *) NULL);
+	    TYPE_NAME (SYMBOL_TYPE (sym))
+	      = obconcat (&objfile->objfile_obstack,
+			  SYMBOL_LINKAGE_NAME (sym),
+			  (char *) NULL);
 	  add_symbol_to_list (typedef_sym, &file_symbols);
 	}
       break;
@@ -1460,7 +1466,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 static struct type *
 error_type (char **pp, struct objfile *objfile)
 {
-  complaint (&symfile_complaints, _("couldn't parse type; debugger out of date?"));
+  complaint (&symfile_complaints,
+	     _("couldn't parse type; debugger out of date?"));
   while (1)
     {
       /* Skip to end of symbol.  */
@@ -1581,7 +1588,8 @@ again:
 		/* Complain and keep going, so compilers can invent new
 		   cross-reference types.  */
 		complaint (&symfile_complaints,
-			   _("Unrecognized cross-reference type `%c'"), (*pp)[0]);
+			   _("Unrecognized cross-reference type `%c'"),
+			   (*pp)[0]);
 		code = TYPE_CODE_STRUCT;
 		break;
 	      }
@@ -1625,8 +1633,8 @@ again:
 	    }
 	  if (type_name == NULL)
 	    {
-	      to = type_name =
-		(char *) obstack_alloc (&objfile->objfile_obstack, p - *pp + 1);
+	      to = type_name = (char *)
+		obstack_alloc (&objfile->objfile_obstack, p - *pp + 1);
 
 	      /* Copy the name.  */
 	      from = *pp + 1;
@@ -1808,7 +1816,8 @@ again:
         else
           {
 	    complaint (&symfile_complaints,
-		       _("Prototyped function type didn't end arguments with `#':\n%s"),
+		       _("Prototyped function type didn't "
+			 "end arguments with `#':\n%s"),
 		       type_start);
           }
 
@@ -1920,7 +1929,8 @@ again:
 	  return_type = read_type (pp, objfile);
 	  if (*(*pp)++ != ';')
 	    complaint (&symfile_complaints,
-		       _("invalid (minimal) member type data format at symtab pos %d."),
+		       _("invalid (minimal) member type "
+			 "data format at symtab pos %d."),
 		       symnum);
 	  type = allocate_stub_method (return_type);
 	  if (typenums[0] != -1)
@@ -2044,7 +2054,8 @@ static const struct objfile_data *rs6000_builtin_type_data;
 static struct type *
 rs6000_builtin_type (int typenum, struct objfile *objfile)
 {
-  struct type **negative_types = objfile_data (objfile, rs6000_builtin_type_data);
+  struct type **negative_types = objfile_data (objfile,
+					       rs6000_builtin_type_data);
 
   /* We recognize types numbered from -NUMBER_RECOGNIZED to -1.  */
 #define NUMBER_RECOGNIZED 34
@@ -2418,13 +2429,15 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      new_sublist->fn_field.is_volatile = 1;
 	      (*pp)++;
 	      break;
-	    case '*':		/* File compiled with g++ version 1 -- no info */
+	    case '*':		/* File compiled with g++ version 1 --
+				   no info */
 	    case '?':
 	    case '.':
 	      break;
 	    default:
 	      complaint (&symfile_complaints,
-			 _("const/volatile indicator missing, got '%c'"), **pp);
+			 _("const/volatile indicator missing, got '%c'"),
+			 **pp);
 	      break;
 	    }
 
@@ -2507,7 +2520,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	    default:
 	      /* error */
 	      complaint (&symfile_complaints,
-			 _("member function type missing, got '%c'"), (*pp)[-1]);
+			 _("member function type missing, got '%c'"),
+			 (*pp)[-1]);
 	      /* Fall through into normal member function.  */
 
 	    case '.':
@@ -2591,8 +2605,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	     method name     physname      physname   method name
 
 	     __opi            [none]     __opi__3Foo  operator int    opname
-	                                                           [now or later]
-	     Foo              _._3Foo       _._3Foo      ~Foo       separate and
+	                                                         [now or later]
+	     Foo              _._3Foo       _._3Foo      ~Foo      separate and
 	                                                               rename
 	     operator i     _ZN3FoocviEv _ZN3FoocviEv operator int    demangle
 	     __comp_ctor  _ZN3FooC1ERKS_ _ZN3FooC1ERKS_   Foo         demangle
@@ -2775,7 +2789,8 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 	  if (name == NULL)
 	    {
 	      complaint (&symfile_complaints,
-			 _("C++ abbreviated type name unknown at symtab pos %d"),
+			 _("C++ abbreviated type name "
+			   "unknown at symtab pos %d"),
 			 symnum);
 	      name = "FOO";
 	    }
@@ -3134,7 +3149,8 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
 	  /* Unknown character.  Complain and treat it as non-virtual.  */
 	  {
 	    complaint (&symfile_complaints,
-		       _("Unknown virtual character `%c' for baseclass"), **pp);
+		       _("Unknown virtual character `%c' for baseclass"),
+		       **pp);
 	  }
 	}
       ++(*pp);
@@ -3260,7 +3276,8 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 		}
 	      /* Virtual function table field not found.  */
 	      complaint (&symfile_complaints,
-			 _("virtual function table pointer not found when defining class `%s'"),
+			 _("virtual function table pointer "
+			   "not found when defining class `%s'"),
 			 TYPE_NAME (type));
 	      return 0;
 	    }
@@ -3370,7 +3387,8 @@ attach_fields_to_type (struct field_info *fip, struct type *type,
 	default:
 	  /* Unknown visibility.  Complain and treat it as public.  */
 	  {
-	    complaint (&symfile_complaints, _("Unknown visibility `%c' for field"),
+	    complaint (&symfile_complaints,
+		       _("Unknown visibility `%c' for field"),
 		       fip->list->visibility);
 	  }
 	  break;
@@ -3516,7 +3534,7 @@ read_struct_type (char **pp, struct type *type, enum type_code type_code,
   /* Now read the baseclasses, if any, read the regular C struct or C++
      class member fields, attach the fields to the type, read the C++
      member functions, attach them to the type, and then read any tilde
-     field (baseclass specifier for the class holding the main vtable). */
+     field (baseclass specifier for the class holding the main vtable).  */
 
   if (!read_baseclasses (&fi, pp, type, objfile)
       || !read_struct_fields (&fi, pp, type, objfile)
@@ -3892,7 +3910,8 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
 
       len = p1 - p;
       if (len > twos_complement_bits / 3
-	  || (twos_complement_bits % 3 == 0 && len == twos_complement_bits / 3))
+	  || (twos_complement_bits % 3 == 0
+	      && len == twos_complement_bits / 3))
 	{
 	  /* Ok, we have enough characters for a signed value, check
 	     for signness by testing if the sign bit is set.  */
@@ -4706,7 +4725,8 @@ scan_file_globals (struct objfile *objfile)
 	    SYMBOL_CLASS (prev) = LOC_UNRESOLVED;
 	  else
 	    complaint (&symfile_complaints,
-		       _("%s: common block `%s' from global_sym_chain unresolved"),
+		       _("%s: common block `%s' from "
+			 "global_sym_chain unresolved"),
 		       objfile->name, SYMBOL_PRINT_NAME (prev));
 	}
     }

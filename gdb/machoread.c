@@ -840,15 +840,14 @@ macho_symfile_offsets (struct objfile *objfile,
 static const struct sym_fns macho_sym_fns = {
   bfd_target_mach_o_flavour,
 
-  macho_new_init,               /* sym_new_init: init anything gbl to entire symtab */
-  macho_symfile_init,           /* sym_init: read initial info, setup for sym_read() */
-  macho_symfile_read,           /* sym_read: read a symbol file into symtab */
-  macho_symfile_finish,         /* sym_finish: finished with file, cleanup */
-  macho_symfile_offsets,        /* sym_offsets:  xlate external to internal form */
-  default_symfile_segments,	/* sym_segments: Get segment information from
-				   a file.  */
-  NULL,                         /* sym_read_linetable */
-  macho_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  macho_new_init,               /* init anything gbl to entire symtab */
+  macho_symfile_init,           /* read initial info, setup for sym_read() */
+  macho_symfile_read,           /* read a symbol file into symtab */
+  macho_symfile_finish,         /* finished with file, cleanup */
+  macho_symfile_offsets,        /* xlate external to internal form */
+  default_symfile_segments,	/* Get segment information from a file.  */
+  NULL,
+  macho_symfile_relocate,	/* Relocate a debug section.  */
   &psym_functions
 };
 
@@ -858,9 +857,9 @@ _initialize_machoread ()
   add_symtab_fns (&macho_sym_fns);
 
   add_setshow_zinteger_cmd ("mach-o", class_obscure,
-			    &mach_o_debug_level, _("\
-Set if printing Mach-O symbols processing."), _("\
-Show if printing Mach-O symbols processing."), NULL,
-			    NULL, NULL,
+			    &mach_o_debug_level,
+			    _("Set if printing Mach-O symbols processing."),
+			    _("Show if printing Mach-O symbols processing."),
+			    NULL, NULL, NULL,
 			    &setdebuglist, &showdebuglist);
 }

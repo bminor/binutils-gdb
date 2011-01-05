@@ -470,8 +470,8 @@ macro_include (struct macro_source_file *source,
 
          First, squawk.  */
       complaint (&symfile_complaints,
-		 _("both `%s' and `%s' allegedly #included at %s:%d"), included,
-		 (*link)->filename, source->filename, line);
+		 _("both `%s' and `%s' allegedly #included at %s:%d"),
+		 included, (*link)->filename, source->filename, line);
 
       /* Now, choose a new, unoccupied line number for this
          #inclusion, after the alleged #inclusion line.  */
@@ -729,7 +729,8 @@ check_for_redefinition (struct macro_source_file *source, int line,
       if (! same)
         {
 	  complaint (&symfile_complaints,
-		     _("macro `%s' redefined at %s:%d; original definition at %s:%d"),
+		     _("macro `%s' redefined at %s:%d; "
+		       "original definition at %s:%d"),
 		     name, source->filename, line,
 		     found_key->start_file->filename, found_key->start_line);
         }

@@ -1521,12 +1521,11 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 			 const char *value)
 {
   if (value != NULL && *value != '\0')
-    printf_filtered (_("\
-The target description will be read from \"%s\".\n"),
+    printf_filtered (_("The target description will be read from \"%s\".\n"),
 		     value);
   else
-    printf_filtered (_("\
-The target description will be read from the target.\n"));
+    printf_filtered (_("The target description will be "
+		       "read from the target.\n"));
 }
 
 static void
@@ -1631,7 +1630,8 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
        VEC_iterate (tdesc_feature_p, tdesc->features, ix, feature);
        ix++)
     {
-      printf_unfiltered ("  feature = tdesc_create_feature (result, \"%s\");\n",
+      printf_unfiltered ("  \
+feature = tdesc_create_feature (result, \"%s\");\n",
 			 feature->name);
 
       for (ix2 = 0;

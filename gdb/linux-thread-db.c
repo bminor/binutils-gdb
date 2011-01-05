@@ -503,7 +503,8 @@ verbose_dlsym (void *handle, const char *name)
 {
   void *sym = dlsym (handle, name);
   if (sym == NULL)
-    warning (_("Symbol \"%s\" not found in libthread_db: %s"), name, dlerror ());
+    warning (_("Symbol \"%s\" not found in libthread_db: %s"),
+	     name, dlerror ());
   return sym;
 }
 
@@ -659,7 +660,8 @@ try_thread_db_load_1 (struct thread_db_info *info)
   err = info->td_init_p ();
   if (err != TD_OK)
     {
-      warning (_("Cannot initialize libthread_db: %s"), thread_db_err_str (err));
+      warning (_("Cannot initialize libthread_db: %s"),
+	       thread_db_err_str (err));
       return 0;
     }
 
@@ -698,7 +700,8 @@ try_thread_db_load_1 (struct thread_db_info *info)
   if (info->td_ta_map_id2thr_p == NULL)
     return 0;
 
-  info->td_ta_map_lwp2thr_p = verbose_dlsym (info->handle, "td_ta_map_lwp2thr");
+  info->td_ta_map_lwp2thr_p = verbose_dlsym (info->handle,
+					     "td_ta_map_lwp2thr");
   if (info->td_ta_map_lwp2thr_p == NULL)
     return 0;
 

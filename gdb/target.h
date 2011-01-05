@@ -693,8 +693,9 @@ struct target_ops
        This information is updated only when:
        - update_thread_list is called
        - thread stops
-       If the core cannot be determined -- either for the specified thread, or
-       right now, or in this debug session, or for this target -- return -1.  */
+       If the core cannot be determined -- either for the specified
+       thread, or right now, or in this debug session, or for this
+       target -- return -1.  */
     int (*to_core_of_thread) (struct target_ops *, ptid_t ptid);
 
     /* Verify that the memory in the [MEMADDR, MEMADDR+SIZE) range
@@ -1526,13 +1527,17 @@ extern struct target_section_table *target_get_section_table
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint (struct gdbarch *, struct bp_target_info *);
+extern int memory_remove_breakpoint (struct gdbarch *,
+				     struct bp_target_info *);
 
-extern int memory_insert_breakpoint (struct gdbarch *, struct bp_target_info *);
+extern int memory_insert_breakpoint (struct gdbarch *,
+				     struct bp_target_info *);
 
-extern int default_memory_remove_breakpoint (struct gdbarch *, struct bp_target_info *);
+extern int default_memory_remove_breakpoint (struct gdbarch *,
+					     struct bp_target_info *);
 
-extern int default_memory_insert_breakpoint (struct gdbarch *, struct bp_target_info *);
+extern int default_memory_insert_breakpoint (struct gdbarch *,
+					     struct bp_target_info *);
 
 
 /* From target.c */

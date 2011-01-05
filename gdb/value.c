@@ -956,7 +956,8 @@ access_value_history (int num)
   /* Now absnum is always absolute and origin zero.  */
 
   chunk = value_history_chain;
-  for (i = (value_history_count - 1) / VALUE_HISTORY_CHUNK - absnum / VALUE_HISTORY_CHUNK;
+  for (i = (value_history_count - 1) / VALUE_HISTORY_CHUNK
+	 - absnum / VALUE_HISTORY_CHUNK;
        i > 0; i--)
     chunk = chunk->next;
 
@@ -1091,8 +1092,8 @@ struct internalvar
 
 static struct internalvar *internalvars;
 
-/* If the variable does not already exist create it and give it the value given.
-   If no value is given then the default is zero.  */
+/* If the variable does not already exist create it and give it the
+   value given.  If no value is given then the default is zero.  */
 static void
 init_if_undefined_command (char* args, int from_tty)
 {
@@ -1112,7 +1113,8 @@ init_if_undefined_command (char* args, int from_tty)
   /* Extract the variable from the parsed expression.
      In the case of an assign the lvalue will be in elts[1] and elts[2].  */
   if (expr->elts[1].opcode != OP_INTERNALVAR)
-    error (_("The first parameter to init-if-undefined should be a GDB variable."));
+    error (_("The first parameter to init-if-undefined "
+	     "should be a GDB variable."));
   intvar = expr->elts[2].internalvar;
 
   /* Only evaluate the expression if the lvalue is void.
@@ -1636,10 +1638,11 @@ show_convenience (char *ignore, int from_tty)
       printf_filtered (("\n"));
     }
   if (!varseen)
-    printf_unfiltered (_("\
-No debugger convenience variables now defined.\n\
-Convenience variables have names starting with \"$\";\n\
-use \"set\" as in \"set $foo = 5\" to define them.\n"));
+    printf_unfiltered (_("No debugger convenience variables now defined.\n"
+			 "Convenience variables have "
+			 "names starting with \"$\";\n"
+			 "use \"set\" as in \"set "
+			 "$foo = 5\" to define them.\n"));
 }
 
 /* Extract a value as a C number (either long or double).
@@ -2099,7 +2102,8 @@ value_field (struct value *arg1, int fieldno)
  */
 
 struct value *
-value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *type,
+value_fn_field (struct value **arg1p, struct fn_field *f,
+		int j, struct type *type,
 		int offset)
 {
   struct value *v;
@@ -2345,8 +2349,8 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
       break;
 
     default:
-      error (_("\
-Unexpected type (%d) encountered for unsigned integer constant."),
+      error (_("Unexpected type (%d) encountered "
+	       "for unsigned integer constant."),
 	     TYPE_CODE (type));
     }
 }
@@ -2522,8 +2526,8 @@ A few convenience variables are given values automatically:\n\
 \"$__\" holds the contents of the last address examined with \"x\"."),
 	   &showlist);
 
-  add_cmd ("values", no_class, show_values,
-	   _("Elements of value history around item number IDX (or last ten)."),
+  add_cmd ("values", no_class, show_values, _("\
+Elements of value history around item number IDX (or last ten)."),
 	   &showlist);
 
   add_com ("init-if-undefined", class_vars, init_if_undefined_command, _("\

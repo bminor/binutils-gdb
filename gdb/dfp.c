@@ -89,7 +89,8 @@ decimal_check_errors (decContext *ctx)
     {
       /* Leave only the error bits in the status flags.  */
       ctx->status &= DEC_IEEE_854_Invalid_operation;
-      error (_("Cannot perform operation: %s"), decContextStatusToString (ctx));
+      error (_("Cannot perform operation: %s"),
+	     decContextStatusToString (ctx));
     }
 }
 
@@ -217,7 +218,8 @@ decimal_from_integral (struct value *from,
 
   if (TYPE_LENGTH (type) > 4)
     /* libdecnumber can convert only 32-bit integers.  */
-    error (_("Conversion of large integer to a decimal floating type is not supported."));
+    error (_("Conversion of large integer to a "
+	     "decimal floating type is not supported."));
 
   l = value_as_long (from);
 

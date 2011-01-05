@@ -129,7 +129,8 @@ ULONGEST
 dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n)
 {
   if (ctx->stack_len <= n)
-     error (_("Asked for position %d of stack, stack only has %d elements on it."),
+     error (_("Asked for position %d of stack, "
+	      "stack only has %d elements on it."),
 	    n, ctx->stack_len);
   return ctx->stack[ctx->stack_len - (1 + n)].value;
 
@@ -183,7 +184,8 @@ int
 dwarf_expr_fetch_in_stack_memory (struct dwarf_expr_context *ctx, int n)
 {
   if (ctx->stack_len <= n)
-     error (_("Asked for position %d of stack, stack only has %d elements on it."),
+     error (_("Asked for position %d of stack, "
+	      "stack only has %d elements on it."),
 	    n, ctx->stack_len);
   return ctx->stack[ctx->stack_len - (1 + n)].in_stack_memory;
 
@@ -620,7 +622,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    else if (ctx->location == DWARF_VALUE_REGISTER)
 	      result = (ctx->read_reg) (ctx->baton, dwarf_expr_fetch (ctx, 0));
 	    else
-	      error (_("Not implemented: computing frame base using explicit value operator"));
+	      error (_("Not implemented: computing frame "
+		       "base using explicit value operator"));
 	    result = result + offset;
 	    in_stack_memory = 1;
 	    ctx->stack_len = before_stack_len;
@@ -648,7 +651,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    struct dwarf_stack_value t1, t2;
 
 	    if (ctx->stack_len < 2)
-	       error (_("Not enough elements for DW_OP_swap. Need 2, have %d."),
+	       error (_("Not enough elements for "
+			"DW_OP_swap. Need 2, have %d."),
 		      ctx->stack_len);
 	    t1 = ctx->stack[ctx->stack_len - 1];
 	    t2 = ctx->stack[ctx->stack_len - 2];

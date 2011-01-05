@@ -91,7 +91,8 @@ show_watchdog (struct ui_file *file, int from_tty,
 static void
 maintenance_command (char *args, int from_tty)
 {
-  printf_unfiltered (_("\"maintenance\" must be followed by the name of a maintenance command.\n"));
+  printf_unfiltered (_("\"maintenance\" must be followed by "
+		       "the name of a maintenance command.\n"));
   help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
 }
 
@@ -150,7 +151,8 @@ maintenance_demangle (char *args, int from_tty)
 
   if (args == NULL || *args == '\0')
     {
-      printf_unfiltered (_("\"maintenance demangle\" takes an argument to demangle.\n"));
+      printf_unfiltered (_("\"maintenance demangle\" takes "
+			   "an argument to demangle.\n"));
     }
   else
     {
@@ -193,7 +195,8 @@ maintenance_space_display (char *args, int from_tty)
 static void
 maintenance_info_command (char *arg, int from_tty)
 {
-  printf_unfiltered (_("\"maintenance info\" must be followed by the name of an info command.\n"));
+  printf_unfiltered (_("\"maintenance info\" must be followed "
+		       "by the name of an info command.\n"));
   help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
 }
 
@@ -438,7 +441,8 @@ maintenance_print_architecture (char *args, int from_tty)
 static void
 maintenance_print_command (char *arg, int from_tty)
 {
-  printf_unfiltered (_("\"maintenance print\" must be followed by the name of a print command.\n"));
+  printf_unfiltered (_("\"maintenance print\" must be followed "
+		       "by the name of a print command.\n"));
   help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
 }
 
@@ -493,7 +497,8 @@ maintenance_translate_address (char *arg, int from_tty)
   if (sym)
     {
       const char *symbol_name = SYMBOL_PRINT_NAME (sym);
-      const char *symbol_offset = pulongest (address - SYMBOL_VALUE_ADDRESS (sym));
+      const char *symbol_offset
+	= pulongest (address - SYMBOL_VALUE_ADDRESS (sym));
 
       sect = SYMBOL_OBJ_SECTION(sym);
       if (sect != NULL)
@@ -509,7 +514,8 @@ maintenance_translate_address (char *arg, int from_tty)
 
 	  if (MULTI_OBJFILE_P ())
 	    printf_filtered (_("%s + %s in section %s of %s\n"),
-			     symbol_name, symbol_offset, section_name, obj_name);
+			     symbol_name, symbol_offset,
+			     section_name, obj_name);
 	  else
 	    printf_filtered (_("%s + %s in section %s\n"),
 			     symbol_name, symbol_offset, section_name);
@@ -649,7 +655,8 @@ struct cmd_list_element *maintenance_show_cmdlist;
 static void
 maintenance_set_cmd (char *args, int from_tty)
 {
-  printf_unfiltered (_("\"maintenance set\" must be followed by the name of a set command.\n"));
+  printf_unfiltered (_("\"maintenance set\" must be followed "
+		       "by the name of a set command.\n"));
   help_list (maintenance_set_cmdlist, "maintenance set ", -1, gdb_stdout);
 }
 
@@ -691,7 +698,8 @@ mcleanup_wrapper (void)
 }
 
 static void
-maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
+maintenance_set_profile_cmd (char *args, int from_tty,
+			     struct cmd_list_element *c)
 {
   if (maintenance_profile_p == profiling_state)
     return;
@@ -724,7 +732,8 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
 }
 #else
 static void
-maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
+maintenance_set_profile_cmd (char *args, int from_tty,
+			     struct cmd_list_element *c)
 {
   error (_("Profiling support is not available on this system."));
 }
@@ -873,7 +882,8 @@ Takes an optional file parameter."),
 	   _("Check consistency of psymtabs and symtabs."),
 	   &maintenancelist);
 
-  add_cmd ("translate-address", class_maintenance, maintenance_translate_address,
+  add_cmd ("translate-address", class_maintenance,
+	   maintenance_translate_address,
 	   _("Translate a section name and address to a symbol."),
 	   &maintenancelist);
 

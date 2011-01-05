@@ -461,8 +461,9 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
       detach_breakpoints (pid);
 
       target_terminal_ours ();
-      fprintf_unfiltered (gdb_stdlog, _("\
-Attaching after fork to child process %ld.\n"), (long)fpid);
+      fprintf_unfiltered (gdb_stdlog,
+			  _("Attaching after fork to child process %ld.\n"),
+			  (long)fpid);
     }
   else
     {
@@ -470,8 +471,9 @@ Attaching after fork to child process %ld.\n"), (long)fpid);
       detach_breakpoints (fpid);
 
       target_terminal_ours ();
-      fprintf_unfiltered (gdb_stdlog, _("\
-Detaching after fork from child process %ld.\n"), (long)fpid);
+      fprintf_unfiltered (gdb_stdlog,
+			  _("Detaching after fork from child process %ld.\n"),
+			  (long)fpid);
     }
 
   if (tts.tts_event == TTEVT_VFORK)
@@ -1168,7 +1170,8 @@ inf_ttrace_xfer_memory (CORE_ADDR addr, ULONGEST len,
 static LONGEST
 inf_ttrace_xfer_partial (struct target_ops *ops, enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
-			 const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+			 const gdb_byte *writebuf,
+			 ULONGEST offset, LONGEST len)
 {
   switch (object)
     {

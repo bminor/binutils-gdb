@@ -330,15 +330,15 @@ no_get_frame_cfa (void *baton)
 static CORE_ADDR
 no_get_frame_pc (void *baton)
 {
-  internal_error (__FILE__, __LINE__,
-		  _("Support for DW_OP_GNU_implicit_pointer is unimplemented"));
+  internal_error (__FILE__, __LINE__, _("\
+Support for DW_OP_GNU_implicit_pointer is unimplemented"));
 }
 
 static CORE_ADDR
 no_get_tls_address (void *baton, CORE_ADDR offset)
 {
-  internal_error (__FILE__, __LINE__,
-		  _("Support for DW_OP_GNU_push_tls_address is unimplemented"));
+  internal_error (__FILE__, __LINE__, _("\
+Support for DW_OP_GNU_push_tls_address is unimplemented"));
 }
 
 /* Helper function for execute_stack_op.  */
@@ -416,7 +416,8 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
       /* This is actually invalid DWARF, but if we ever do run across
 	 it somehow, we might as well support it.  So, instead, report
 	 it as unimplemented.  */
-      error (_("Not implemented: computing unwound register using explicit value operator"));
+      error (_("\
+Not implemented: computing unwound register using explicit value operator"));
     }
 
   do_cleanups (old_chain);
@@ -704,7 +705,8 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	      break;
 
 	    default:
-	      internal_error (__FILE__, __LINE__, _("Unknown CFI encountered."));
+	      internal_error (__FILE__, __LINE__,
+			      _("Unknown CFI encountered."));
 	    }
 	}
     }
@@ -856,7 +858,8 @@ dwarf2_frame_set_adjust_regnum (struct gdbarch *gdbarch,
    register.  */
 
 static int
-dwarf2_frame_adjust_regnum (struct gdbarch *gdbarch, int regnum, int eh_frame_p)
+dwarf2_frame_adjust_regnum (struct gdbarch *gdbarch,
+			    int regnum, int eh_frame_p)
 {
   struct dwarf2_frame_ops *ops = gdbarch_data (gdbarch, dwarf2_frame_data);
 
@@ -1486,7 +1489,8 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 	}
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("Invalid or unsupported encoding"));
+      internal_error (__FILE__, __LINE__,
+		      _("Invalid or unsupported encoding"));
     }
 
   if ((encoding & 0x07) == 0x00)
@@ -1533,7 +1537,8 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       *bytes_read_ptr += 8;
       return (base + bfd_get_signed_64 (unit->abfd, (bfd_byte *) buf));
     default:
-      internal_error (__FILE__, __LINE__, _("Invalid or unsupported encoding"));
+      internal_error (__FILE__, __LINE__,
+		      _("Invalid or unsupported encoding"));
     }
 }
 
@@ -2025,15 +2030,15 @@ decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
       break;
 
     case ALIGN4:
-      complaint (&symfile_complaints,
-		 _("Corrupt data in %s:%s; align 4 workaround apparently succeeded"),
+      complaint (&symfile_complaints, _("\
+Corrupt data in %s:%s; align 4 workaround apparently succeeded"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;
 
     case ALIGN8:
-      complaint (&symfile_complaints,
-		 _("Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
+      complaint (&symfile_complaints, _("\
+Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
 		 unit->dwarf_frame_section->owner->filename,
 		 unit->dwarf_frame_section->name);
       break;
@@ -2051,8 +2056,9 @@ decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
 
 
 /* Imported from dwarf2read.c.  */
-extern void dwarf2_get_section_info (struct objfile *, const char *, asection **,
-                                     gdb_byte **, bfd_size_type *);
+extern void dwarf2_get_section_info (struct objfile *, const char *,
+				     asection **, gdb_byte **,
+				     bfd_size_type *);
 
 static int
 qsort_fde_cmp (const void *a, const void *b)

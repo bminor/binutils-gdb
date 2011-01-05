@@ -47,13 +47,15 @@ static struct gdbarch_data *libunwind_descr_handle;
 /* Required function pointers from libunwind.  */
 static int (*unw_get_reg_p) (unw_cursor_t *, unw_regnum_t, unw_word_t *);
 static int (*unw_get_fpreg_p) (unw_cursor_t *, unw_regnum_t, unw_fpreg_t *);
-static int (*unw_get_saveloc_p) (unw_cursor_t *, unw_regnum_t, unw_save_loc_t *);
+static int (*unw_get_saveloc_p) (unw_cursor_t *, unw_regnum_t,
+				 unw_save_loc_t *);
 static int (*unw_is_signal_frame_p) (unw_cursor_t *);
 static int (*unw_step_p) (unw_cursor_t *);
 static int (*unw_init_remote_p) (unw_cursor_t *, unw_addr_space_t, void *);
 static unw_addr_space_t (*unw_create_addr_space_p) (unw_accessors_t *, int);
 static void (*unw_destroy_addr_space_p) (unw_addr_space_t);
-static int (*unw_search_unwind_table_p) (unw_addr_space_t, unw_word_t, unw_dyn_info_t *,
+static int (*unw_search_unwind_table_p) (unw_addr_space_t, unw_word_t,
+					 unw_dyn_info_t *,
 					 unw_proc_info_t *, int, void *);
 static unw_word_t (*unw_find_dyn_list_p) (unw_addr_space_t, unw_dyn_info_t *,
 					  void *);
@@ -87,7 +89,8 @@ static char *step_name = STRINGIFY(UNW_OBJ(step));
 static char *init_remote_name = STRINGIFY(UNW_OBJ(init_remote));
 static char *create_addr_space_name = STRINGIFY(UNW_OBJ(create_addr_space));
 static char *destroy_addr_space_name = STRINGIFY(UNW_OBJ(destroy_addr_space));
-static char *search_unwind_table_name = STRINGIFY(UNW_OBJ(search_unwind_table));
+static char *search_unwind_table_name
+  = STRINGIFY(UNW_OBJ(search_unwind_table));
 static char *find_dyn_list_name = STRINGIFY(UNW_OBJ(find_dyn_list));
 
 static struct libunwind_descr *
@@ -99,14 +102,15 @@ libunwind_descr (struct gdbarch *gdbarch)
 static void *
 libunwind_descr_init (struct gdbarch *gdbarch)
 {
-  struct libunwind_descr *descr = GDBARCH_OBSTACK_ZALLOC (gdbarch,
-							  struct libunwind_descr);
+  struct libunwind_descr *descr
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct libunwind_descr);
 
   return descr;
 }
 
 void
-libunwind_frame_set_descr (struct gdbarch *gdbarch, struct libunwind_descr *descr)
+libunwind_frame_set_descr (struct gdbarch *gdbarch,
+			   struct libunwind_descr *descr)
 {
   struct libunwind_descr *arch_descr;
 
@@ -118,7 +122,8 @@ libunwind_frame_set_descr (struct gdbarch *gdbarch, struct libunwind_descr *desc
     {
       /* First time here.  Must initialize data area.  */
       arch_descr = libunwind_descr_init (gdbarch);
-      deprecated_set_gdbarch_data (gdbarch, libunwind_descr_handle, arch_descr);
+      deprecated_set_gdbarch_data (gdbarch,
+				   libunwind_descr_handle, arch_descr);
     }
 
   /* Copy new descriptor info into arch descriptor.  */
@@ -546,7 +551,8 @@ void _initialize_libunwind_frame (void);
 void
 _initialize_libunwind_frame (void)
 {
-  libunwind_descr_handle = gdbarch_data_register_post_init (libunwind_descr_init);
+  libunwind_descr_handle
+    = gdbarch_data_register_post_init (libunwind_descr_init);
 
   libunwind_initialized = libunwind_load ();
 }

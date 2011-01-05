@@ -623,8 +623,8 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
     {
       if (!info->stabstrsect)
 	{
-	  error (_("The debugging information in `%s' is corrupted.\n"
-		   "The file has a `.stabs' section, but no `.stabstr' section."),
+	  error (_("The debugging information in `%s' is corrupted.\nThe "
+		   "file has a `.stabs' section, but no `.stabstr' section."),
 		 name);
 	}
 
@@ -1023,7 +1023,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (context_stack_depth <= 0)
 		{	/* We attempted to pop an empty context stack.  */
 		  complaint (&symfile_complaints,
-			     _("`.ef' symbol without matching `.bf' symbol ignored starting at symnum %d"),
+			     _("`.ef' symbol without matching `.bf' "
+			       "symbol ignored starting at symnum %d"),
 			     cs->c_symnum);
 		  within_function = 0;
 		  break;
@@ -1034,7 +1035,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (context_stack_depth > 0 || new == NULL)
 		{
 		  complaint (&symfile_complaints,
-			     _("Unmatched .ef symbol(s) ignored starting at symnum %d"),
+			     _("Unmatched .ef symbol(s) ignored "
+			       "starting at symnum %d"),
 			     cs->c_symnum);
 		  within_function = 0;
 		  break;
@@ -1090,7 +1092,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (context_stack_depth <= 0)
 		{	/* We attempted to pop an empty context stack. */
 		  complaint (&symfile_complaints,
-			     _("`.eb' symbol without matching `.bb' symbol ignored starting at symnum %d"),
+			     _("`.eb' symbol without matching `.bb' "
+			       "symbol ignored starting at symnum %d"),
 			     cs->c_symnum);
 		  break;
 		}
@@ -1098,8 +1101,9 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      new = pop_context ();
 	      if (depth-- != new->depth)
 		{
-		  complaint (&symfile_complaints, 
-			     _("Mismatched .eb symbol ignored starting at symnum %d"),
+		  complaint (&symfile_complaints,
+			     _("Mismatched .eb symbol ignored "
+			       "starting at symnum %d"),
 			     symnum);
 		  break;
 		}

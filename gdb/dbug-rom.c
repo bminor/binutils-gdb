@@ -107,7 +107,8 @@ static char *dbug_inits[] =
 static void
 init_dbug_cmds (void)
 {
-  dbug_cmds.flags = MO_CLR_BREAK_USES_ADDR | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR;
+  dbug_cmds.flags = MO_CLR_BREAK_USES_ADDR
+    | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR;
   dbug_cmds.init = dbug_inits;	/* Init strings */
   dbug_cmds.cont = "go\r";	/* continue command */
   dbug_cmds.step = "trace\r";	/* single step */
@@ -139,7 +140,8 @@ init_dbug_cmds (void)
   dbug_cmds.getreg.term = NULL;	/* getreg.term */
   dbug_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
   dbug_cmds.dump_registers = "rd\r";	/* dump_registers */
-  dbug_cmds.register_pattern = "\\(\\w+\\) +:\\([0-9a-fA-F]+\\b\\)";	/* register_pattern */
+					/* register_pattern */
+  dbug_cmds.register_pattern = "\\(\\w+\\) +:\\([0-9a-fA-F]+\\b\\)";
   dbug_cmds.supply_register = dbug_supply_register;
   dbug_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   dbug_cmds.load = "dl\r";	/* download command */

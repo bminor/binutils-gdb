@@ -105,8 +105,9 @@ static void
 show_lines_to_list (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Number of source lines gdb will list by default is %s.\n"),
+  fprintf_filtered (file,
+		    _("Number of source lines gdb "
+		      "will list by default is %s.\n"),
 		    value);
 }
 
@@ -599,8 +600,9 @@ add_path (char *dirname, char **which_path, int parse_separators)
 	    tinybuf[0] = DIRNAME_SEPARATOR;
 	    tinybuf[1] = '\0';
 
-	    /* If we have already tacked on a name(s) in this command, be sure they stay 
-	       on the front as we tack on some more.  */
+	    /* If we have already tacked on a name(s) in this command,
+	       be sure they stay on the front as we tack on some
+	       more.  */
 	    if (prefix)
 	      {
 		char *temp, c;
@@ -609,7 +611,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 		old[prefix] = '\0';
 		temp = concat (old, tinybuf, name, (char *)NULL);
 		old[prefix] = c;
-		*which_path = concat (temp, "", &old[prefix], (char *)NULL);
+		*which_path = concat (temp, "", &old[prefix], (char *) NULL);
 		prefix = strlen (temp);
 		xfree (temp);
 	      }
@@ -1044,8 +1046,9 @@ find_and_open_source (const char *filename,
 	    alloca (strlen (source_path) + 1 + strlen (dirname) + 1);
 	  len = p - source_path;
 	  strncpy (path, source_path, len);	/* Before $cdir */
-	  strcpy (path + len, dirname);	/* new stuff */
-	  strcat (path + len, source_path + len + cdir_len);	/* After $cdir */
+	  strcpy (path + len, dirname);		/* new stuff */
+	  strcat (path + len, source_path + len + cdir_len);	/* After
+								   $cdir */
 	}
     }
 
@@ -1336,7 +1339,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
   current_source_line = line;
   first_line_listed = line;
 
-  /* If printing of source lines is disabled, just print file and line number */
+  /* If printing of source lines is disabled, just print file and line
+     number */
   if (ui_out_test_flags (uiout, ui_source_list))
     {
       /* Only prints "No such file or directory" once */

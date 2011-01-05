@@ -36,11 +36,13 @@ struct vmap
     char *member;		/* ptr to member name                   */
     CORE_ADDR tstart;		/* virtual addr where member is mapped  */
     CORE_ADDR tend;		/* virtual upper bound of member        */
-    CORE_ADDR tvma;		/* virtual addr of text section in object file */
+    CORE_ADDR tvma;		/* virtual addr of text section in
+				   object file */
     CORE_ADDR toffs;		/* offset of text section in object file */
     CORE_ADDR dstart;		/* virtual address of data start        */
     CORE_ADDR dend;		/* virtual address of data end          */
-    CORE_ADDR dvma;		/* virtual addr of data section in object file */
+    CORE_ADDR dvma;		/* virtual addr of data section in
+				   object file */
 
     /* This is NULL for the exec-file.  */
     struct objfile *objfile;

@@ -455,7 +455,8 @@ print_bcache_statistics (struct bcache *c, char *type)
   printf_filtered (_("    Median entry size:  %d\n"), median_entry_size);
   printf_filtered ("\n");
 
-  printf_filtered (_("    Total memory used by bcache, including overhead: %ld\n"),
+  printf_filtered (_("    \
+Total memory used by bcache, including overhead: %ld\n"),
 		   c->structure_size);
   printf_filtered (_("    Percentage memory overhead: "));
   print_percentage (c->structure_size - c->unique_size, c->unique_size);

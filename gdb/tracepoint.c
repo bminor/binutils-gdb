@@ -232,7 +232,7 @@ set_traceframe_context (struct frame_info *trace_frame)
 {
   CORE_ADDR trace_pc;
 
-  if (trace_frame == NULL)		/* Cease debugging any trace buffers.  */
+  if (trace_frame == NULL)	/* Cease debugging any trace buffers.  */
     {
       traceframe_fun = 0;
       traceframe_sal.pc = traceframe_sal.line = 0;
@@ -364,7 +364,8 @@ trace_variable_command (char *args, int from_tty)
   if (tsv)
     {
       tsv->initial_value = initval;
-      printf_filtered (_("Trace state variable $%s now has initial value %s.\n"),
+      printf_filtered (_("Trace state variable $%s "
+			 "now has initial value %s.\n"),
 		       tsv->name, plongest (tsv->initial_value));
       do_cleanups (old_chain);
       return;
@@ -374,7 +375,8 @@ trace_variable_command (char *args, int from_tty)
   tsv = create_trace_state_variable (internalvar_name (intvar));
   tsv->initial_value = initval;
 
-  printf_filtered (_("Trace state variable $%s created, with initial value %s.\n"),
+  printf_filtered (_("Trace state variable $%s "
+		     "created, with initial value %s.\n"),
 		   tsv->name, plongest (tsv->initial_value));
 
   do_cleanups (old_chain);
@@ -549,7 +551,8 @@ trace_actions_command (char *args, int from_tty)
 		    t->number);
       struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
 
-      l = read_command_lines (tmpbuf, from_tty, 1, check_tracepoint_command, t);
+      l = read_command_lines (tmpbuf, from_tty, 1,
+			      check_tracepoint_command, t);
       do_cleanups (cleanups);
       breakpoint_set_commands (t, l);
     }
@@ -643,13 +646,16 @@ validate_actionline (char **line, struct breakpoint *t)
 		{
 		  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
 		    {
-		      error (_("constant `%s' (value %ld) will not be collected."),
+		      error (_("constant `%s' (value %ld) "
+			       "will not be collected."),
 			     SYMBOL_PRINT_NAME (exp->elts[2].symbol),
 			     SYMBOL_VALUE (exp->elts[2].symbol));
 		    }
-		  else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
+		  else if (SYMBOL_CLASS (exp->elts[2].symbol)
+			   == LOC_OPTIMIZED_OUT)
 		    {
-		      error (_("`%s' is optimized away and cannot be collected."),
+		      error (_("`%s' is optimized away "
+			       "and cannot be collected."),
 			     SYMBOL_PRINT_NAME (exp->elts[2].symbol));
 		    }
 		}
@@ -854,7 +860,7 @@ add_memrange (struct collection_list *memranges,
 				  memranges->listsize);
     }
 
-  if (type != memrange_absolute)		/* Better collect the base register!  */
+  if (type != memrange_absolute)    /* Better collect the base register!  */
     add_register (memranges, type);
 }
 
@@ -1683,7 +1689,8 @@ trace_status_command (char *args, int from_tty)
 	  break;
 	case tracepoint_error:
 	  if (ts->stopping_tracepoint)
-	    printf_filtered (_("Trace stopped by an error (%s, tracepoint %d).\n"),
+	    printf_filtered (_("Trace stopped by an "
+			       "error (%s, tracepoint %d).\n"),
 			     ts->error_desc, ts->stopping_tracepoint);
 	  else
 	    printf_filtered (_("Trace stopped by an error (%s).\n"),
@@ -1702,7 +1709,8 @@ trace_status_command (char *args, int from_tty)
   if (ts->traceframes_created >= 0
       && ts->traceframe_count != ts->traceframes_created)
     {
-      printf_filtered (_("Buffer contains %d trace frames (of %d created total).\n"),
+      printf_filtered (_("Buffer contains %d trace "
+			 "frames (of %d created total).\n"),
 		       ts->traceframe_count, ts->traceframes_created);
     }
   else if (ts->traceframe_count >= 0)
@@ -1864,12 +1872,14 @@ disconnect_tracing (int from_tty)
     {
       if (current_trace_status ()->disconnected_tracing)
 	{
-	  if (!query (_("Trace is running and will continue after detach; detach anyway? ")))
+	  if (!query (_("Trace is running and will "
+			"continue after detach; detach anyway? ")))
 	    error (_("Not confirmed."));
 	}
       else
 	{
-	  if (!query (_("Trace is running but will stop on detach; detach anyway? ")))
+	  if (!query (_("Trace is running but will "
+			"stop on detach; detach anyway? ")))
 	    error (_("Not confirmed."));
 	}
     }
@@ -2284,7 +2294,8 @@ scope_info (char *args, int from_tty)
   int regno;
 
   if (args == 0 || *args == 0)
-    error (_("requires an argument (function, line or *addr) to define a scope"));
+    error (_("requires an argument (function, "
+	     "line or *addr) to define a scope"));
 
   sals = decode_line_1 (&args, 1, NULL, 0, &canonical, NULL);
   if (sals.nelts == 0)
@@ -2343,7 +2354,8 @@ scope_info (char *args, int from_tty)
 		 We assume the objfile architecture will contain all the
 		 standard registers that occur in debug info in that
 		 objfile.  */
-	      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
+	      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym,
+								  gdbarch);
 
 	      if (SYMBOL_IS_ARGUMENT (sym))
 		printf_filtered ("an argument in register $%s",
@@ -2366,7 +2378,8 @@ scope_info (char *args, int from_tty)
 	      break;
 	    case LOC_REGPARM_ADDR:
 	      /* Note comment at LOC_REGISTER.  */
-	      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
+	      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym,
+								  gdbarch);
 	      printf_filtered ("the address of an argument, in register $%s",
 			       gdbarch_register_name (gdbarch, regno));
 	      break;
@@ -2594,7 +2607,8 @@ encode_source_string (int tpnum, ULONGEST addr,
   if (80 + strlen (srctype) > buf_size)
     error (_("Buffer too small for source encoding"));
   sprintf (buf, "%x:%s:%s:%x:%x:",
-	   tpnum, phex_nz (addr, sizeof (addr)), srctype, 0, (int) strlen (src));
+	   tpnum, phex_nz (addr, sizeof (addr)),
+	   srctype, 0, (int) strlen (src));
   if (strlen (buf) + strlen (src) * 2 >= buf_size)
     error (_("Source string too long for buffer"));
   bin2hex (src, buf + strlen (buf), 0);
@@ -2746,7 +2760,8 @@ trace_save (const char *filename, int target_does_save)
       if (utp->cond_string)
 	{
 	  encode_source_string (utp->number, utp->addr,
-				"cond", utp->cond_string, buf, MAX_TRACE_UPLOAD);
+				"cond", utp->cond_string,
+				buf, MAX_TRACE_UPLOAD);
 	  fprintf (fp, "tp Z%s\n", buf);
 	}
       for (a = 0; VEC_iterate (char_ptr, utp->cmd_strings, a, act); ++a)
@@ -3053,17 +3068,23 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
     {
       t = find_matching_tracepoint (utp);
       if (t)
-	printf_filtered (_("Assuming tracepoint %d is same as target's tracepoint %d at %s.\n"),
-			 t->number, utp->number, paddress (get_current_arch (), utp->addr));
+	printf_filtered (_("Assuming tracepoint %d is same "
+			   "as target's tracepoint %d at %s.\n"),
+			 t->number, utp->number,
+			 paddress (get_current_arch (), utp->addr));
       else
 	{
 	  t = create_tracepoint_from_upload (utp);
 	  if (t)
-	    printf_filtered (_("Created tracepoint %d for target's tracepoint %d at %s.\n"),
-			     t->number, utp->number, paddress (get_current_arch (), utp->addr));
+	    printf_filtered (_("Created tracepoint %d for "
+			       "target's tracepoint %d at %s.\n"),
+			     t->number, utp->number,
+			     paddress (get_current_arch (), utp->addr));
 	  else
-	    printf_filtered (_("Failed to create tracepoint for target's tracepoint %d at %s, skipping it.\n"),
-			     utp->number, paddress (get_current_arch (), utp->addr));
+	    printf_filtered (_("Failed to create tracepoint for target's "
+			       "tracepoint %d at %s, skipping it.\n"),
+			     utp->number,
+			     paddress (get_current_arch (), utp->addr));
 	}
       /* Whether found or created, record the number used by the
 	 target, to help with mapping target tracepoints back to their
@@ -3141,14 +3162,16 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
       if (tsv)
 	{
 	  if (info_verbose)
-	    printf_filtered (_("Assuming trace state variable $%s is same as target's variable %d.\n"),
+	    printf_filtered (_("Assuming trace state variable $%s "
+			       "is same as target's variable %d.\n"),
 			     tsv->name, utsv->number);
 	}
       else
 	{
 	  tsv = create_tsv_from_upload (utsv);
 	  if (info_verbose)
-	    printf_filtered (_("Created trace state variable $%s for target's variable %d.\n"),
+	    printf_filtered (_("Created trace state variable "
+			       "$%s for target's variable %d.\n"),
 			     tsv->name, utsv->number);
 	}
       /* Give precedence to numberings that come from the target.  */
@@ -3390,7 +3413,8 @@ Status line: '%s'\n"), p, line);
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->stop_reason = trace_never_run;
 	}
-      else if (strncmp (p, stop_reason_names[tracepoint_passcount], p1 - p) == 0)
+      else if (strncmp (p, stop_reason_names[tracepoint_passcount],
+			p1 - p) == 0)
 	{
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->stop_reason = tracepoint_passcount;
@@ -3524,7 +3548,8 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
 	      p += 2 * xlen;
 	    }
 	  else
-	    warning (_("Unrecognized char '%c' in tracepoint definition, skipping rest"), *p);
+	    warning (_("Unrecognized char '%c' in tracepoint "
+		       "definition, skipping rest"), *p);
 	}
       utp = get_uploaded_tp (num, addr, utpp);
       utp->type = type;
@@ -3878,7 +3903,8 @@ tfile_fetch_registers (struct target_ops *ops,
 	  /* But don't try to guess if tracepoint is multi-location...  */
 	  if (tp->loc->next)
 	    {
-	      warning ("Tracepoint %d has multiple locations, cannot infer $pc",
+	      warning ("Tracepoint %d has multiple "
+		       "locations, cannot infer $pc",
 		       tp->number);
 	      return;
 	    }
@@ -4121,8 +4147,8 @@ init_tfile_ops (void)
 {
   tfile_ops.to_shortname = "tfile";
   tfile_ops.to_longname = "Local trace dump file";
-  tfile_ops.to_doc =
-    "Use a trace file as a target.  Specify the filename of the trace file.";
+  tfile_ops.to_doc
+    = "Use a trace file as a target.  Specify the filename of the trace file.";
   tfile_ops.to_open = tfile_open;
   tfile_ops.to_close = tfile_close;
   tfile_ops.to_fetch_registers = tfile_fetch_registers;
@@ -4130,7 +4156,8 @@ init_tfile_ops (void)
   tfile_ops.to_files_info = tfile_files_info;
   tfile_ops.to_get_trace_status = tfile_get_trace_status;
   tfile_ops.to_trace_find = tfile_trace_find;
-  tfile_ops.to_get_trace_state_variable_value = tfile_get_trace_state_variable_value;
+  tfile_ops.to_get_trace_state_variable_value
+    = tfile_get_trace_state_variable_value;
   tfile_ops.to_stratum = process_stratum;
   tfile_ops.to_has_all_memory = tfile_has_all_memory;
   tfile_ops.to_has_memory = tfile_has_memory;

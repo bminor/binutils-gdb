@@ -70,7 +70,8 @@ static struct value *const_var_ref (struct symbol *var);
 static struct value *const_expr (union exp_element **pc);
 static struct value *maybe_const_expr (union exp_element **pc);
 
-static void gen_traced_pop (struct gdbarch *, struct agent_expr *, struct axs_value *);
+static void gen_traced_pop (struct gdbarch *, struct agent_expr *,
+			    struct axs_value *);
 
 static void gen_sign_extend (struct agent_expr *, struct type *);
 static void gen_extend (struct agent_expr *, struct type *);
@@ -633,7 +634,8 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 
     case LOC_CONST_BYTES:
       internal_error (__FILE__, __LINE__,
-		      _("gen_var_ref: LOC_CONST_BYTES symbols are not supported"));
+		      _("gen_var_ref: LOC_CONST_BYTES "
+			"symbols are not supported"));
 
       /* Variable at a fixed location in memory.  Easy.  */
     case LOC_STATIC:
@@ -1092,9 +1094,8 @@ gen_ptrdiff (struct agent_expr *ax, struct axs_value *value,
 
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (value1->type))
       != TYPE_LENGTH (TYPE_TARGET_TYPE (value2->type)))
-    error (_("\
-First argument of `-' is a pointer, but second argument is neither\n\
-an integer nor a pointer of the same type."));
+    error (_("First argument of `-' is a pointer, but second argument "
+	     "is neither\nan integer nor a pointer of the same type."));
 
   ax_simple (ax, aop_sub);
   gen_scale (ax, aop_div_unsigned, value1->type);
@@ -1138,8 +1139,9 @@ gen_less (struct agent_expr *ax, struct axs_value *value,
    operator, used in error messages */
 static void
 gen_binop (struct agent_expr *ax, struct axs_value *value,
-	   struct axs_value *value1, struct axs_value *value2, enum agent_op op,
-	   enum agent_op op_unsigned, int may_carry, char *name)
+	   struct axs_value *value1, struct axs_value *value2,
+	   enum agent_op op, enum agent_op op_unsigned,
+	   int may_carry, char *name)
 {
   /* We only handle INT op INT.  */
   if ((TYPE_CODE (value1->type) != TYPE_CODE_INT)
@@ -1447,7 +1449,8 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
 		{
 		  gen_static_field (exp->gdbarch, ax, value, type, i);
 		  if (value->optimized_out)
-		    error (_("static field `%s' has been optimized out, cannot use"),
+		    error (_("static field `%s' has been "
+			     "optimized out, cannot use"),
 			   field);
 		  return 1;
 		}
@@ -1469,7 +1472,8 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
       struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
 
       rslt = gen_struct_ref_recursive (exp, ax, value, field,
-				       offset + TYPE_BASECLASS_BITPOS (type, i) / TARGET_CHAR_BIT,
+				       offset + TYPE_BASECLASS_BITPOS (type, i)
+				       / TARGET_CHAR_BIT,
 				       basetype);
       if (rslt)
 	return 1;
@@ -1587,7 +1591,8 @@ gen_struct_elt_for_reference (struct expression *exp,
 	    {
 	      gen_static_field (exp->gdbarch, ax, value, t, i);
 	      if (value->optimized_out)
-		error (_("static field `%s' has been optimized out, cannot use"),
+		error (_("static field `%s' has been "
+			 "optimized out, cannot use"),
 		       fieldname);
 	      return 1;
 	    }
@@ -1706,7 +1711,8 @@ gen_repeat (struct expression *exp, union exp_element **pc,
     int length;
 
     if (!v)
-      error (_("Right operand of `@' must be a constant, in agent expressions."));
+      error (_("Right operand of `@' must be a "
+	       "constant, in agent expressions."));
     if (TYPE_CODE (value_type (v)) != TYPE_CODE_INT)
       error (_("Right operand of `@' must be an integer."));
     length = value_as_long (v);
@@ -1890,7 +1896,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
 		ax_tsv (ax, aop_tracev, tsv->number);
 	    }
 	  else
-	    error (_("$%s is not a trace state variable, may not assign to it"), name);
+	    error (_("$%s is not a trace state variable, "
+		     "may not assign to it"), name);
 	}
       else
 	error (_("May only assign to trace state variables"));
@@ -1925,7 +1932,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
 		ax_tsv (ax, aop_tracev, tsv->number);
 	    }
 	  else
-	    error (_("$%s is not a trace state variable, may not assign to it"), name);
+	    error (_("$%s is not a trace state variable, "
+		     "may not assign to it"), name);
 	}
       else
 	error (_("May only assign to trace state variables"));
@@ -2007,7 +2015,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	    value->type = builtin_type (exp->gdbarch)->builtin_long_long;
 	  }
 	else
-	  error (_("$%s is not a trace state variable; GDB agent expressions cannot use convenience variables."), name);
+	  error (_("$%s is not a trace state variable; GDB agent "
+		   "expressions cannot use convenience variables."), name);
       }
       break;
 
@@ -2247,8 +2256,8 @@ gen_expr_binop_rest (struct expression *exp,
 
 	if (binop_types_user_defined_p (op, value1->type, value2->type))
 	  {
-	    error (_("\
-cannot subscript requested type: cannot call user defined functions"));
+	    error (_("cannot subscript requested type: "
+		     "cannot call user defined functions"));
 	  }
 	else
 	  {
@@ -2268,7 +2277,8 @@ cannot subscript requested type: cannot call user defined functions"));
 	  }
 
 	if (!is_integral_type (value2->type))
-	  error (_("Argument to arithmetic operation not a number or boolean."));
+	  error (_("Argument to arithmetic operation "
+		   "not a number or boolean."));
 
 	gen_ptradd (ax, value, value1, value2);
 	gen_deref (ax, value);
@@ -2511,10 +2521,12 @@ void
 _initialize_ax_gdb (void)
 {
   add_cmd ("agent", class_maintenance, agent_command,
-	   _("Translate an expression into remote agent bytecode for tracing."),
+	   _("Translate an expression into "
+	     "remote agent bytecode for tracing."),
 	   &maintenancelist);
 
   add_cmd ("agent-eval", class_maintenance, agent_eval_command,
-	   _("Translate an expression into remote agent bytecode for evaluation."),
+	   _("Translate an expression into remote "
+	     "agent bytecode for evaluation."),
 	   &maintenancelist);
 }

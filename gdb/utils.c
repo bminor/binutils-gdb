@@ -142,8 +142,9 @@ static void
 show_demangle (struct ui_file *file, int from_tty,
 	       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Demangling of encoded C++/ObjC names when displaying symbols is %s.\n"),
+  fprintf_filtered (file,
+		    _("Demangling of encoded C++/ObjC names "
+		      "when displaying symbols is %s.\n"),
 		    value);
 }
 
@@ -156,8 +157,9 @@ static void
 show_asm_demangle (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Demangling of C++/ObjC names in disassembly listings is %s.\n"),
+  fprintf_filtered (file,
+		    _("Demangling of C++/ObjC names in "
+		      "disassembly listings is %s.\n"),
 		    value);
 }
 
@@ -170,8 +172,8 @@ static void
 show_sevenbit_strings (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Printing of 8-bit characters in strings as \\nnn is %s.\n"),
+  fprintf_filtered (file, _("Printing of 8-bit characters "
+			    "in strings as \\nnn is %s.\n"),
 		    value);
 }
 
@@ -357,8 +359,8 @@ restore_integer (void *p)
   *(closure->variable) = closure->value;
 }
 
-/* Remember the current value of *VARIABLE and make it restored when the cleanup
-   is run.  */
+/* Remember the current value of *VARIABLE and make it restored when
+   the cleanup is run.  */
 
 struct cleanup *
 make_cleanup_restore_integer (int *variable)
@@ -373,8 +375,8 @@ make_cleanup_restore_integer (int *variable)
 			   xfree);
 }
 
-/* Remember the current value of *VARIABLE and make it restored when the cleanup
-   is run.  */
+/* Remember the current value of *VARIABLE and make it restored when
+   the cleanup is run.  */
 
 struct cleanup *
 make_cleanup_restore_uinteger (unsigned int *variable)
@@ -914,7 +916,8 @@ do_all_intermediate_continuations_thread (struct thread_info *thread)
 void
 do_all_intermediate_continuations (void)
 {
-  iterate_over_threads (do_all_intermediate_continuations_thread_callback, NULL);
+  iterate_over_threads (do_all_intermediate_continuations_thread_callback,
+			NULL);
 }
 
 /* Callback for iterate over threads.  */
@@ -940,7 +943,8 @@ discard_all_intermediate_continuations_thread (struct thread_info *thread)
 void
 discard_all_intermediate_continuations (void)
 {
-  iterate_over_threads (discard_all_intermediate_continuations_thread_callback, NULL);
+  iterate_over_threads (discard_all_intermediate_continuations_thread_callback,
+			NULL);
 }
 
 
@@ -1048,7 +1052,8 @@ dump_core (void)
   abort ();		/* NOTE: GDB has only three calls to abort().  */
 }
 
-/* Check whether GDB will be able to dump core using the dump_core function.  */
+/* Check whether GDB will be able to dump core using the dump_core
+   function.  */
 
 static int
 can_dump_core (const char *reason)
@@ -1063,8 +1068,9 @@ can_dump_core (const char *reason)
   if (rlim.rlim_max == 0)
     {
       fprintf_unfiltered (gdb_stderr,
-			  _("%s\nUnable to dump core, use `ulimit -c unlimited'"
-			    " before executing GDB next time.\n"), reason);
+			  _("%s\nUnable to dump core, use `ulimit -c"
+			    " unlimited' before executing GDB next time.\n"),
+			  reason);
       return 0;
     }
 #endif /* HAVE_GETRLIMIT */
@@ -1149,10 +1155,10 @@ internal_vproblem (struct internal_problem *problem,
     char *msg;
 
     msg = xstrvprintf (fmt, ap);
-    reason = xstrprintf ("\
-%s:%d: %s: %s\n\
-A problem internal to GDB has been detected,\n\
-further debugging may prove unreliable.", file, line, problem->name, msg);
+    reason = xstrprintf ("%s:%d: %s: %s\n"
+			 "A problem internal to GDB has been detected,\n"
+			 "further debugging may prove unreliable.",
+			 file, line, problem->name, msg);
     xfree (msg);
     make_cleanup (xfree, reason);
   }
@@ -1320,11 +1326,11 @@ add_internal_problem_command (struct internal_problem *problem)
 			  (char *) NULL),
 		  0/*allow-unknown*/, &maintenance_show_cmdlist);
 
-  set_doc = xstrprintf (_("\
-Set whether GDB should quit when an %s is detected"),
+  set_doc = xstrprintf (_("Set whether GDB should quit "
+			  "when an %s is detected"),
 			problem->name);
-  show_doc = xstrprintf (_("\
-Show whether GDB will quit when an %s is detected"),
+  show_doc = xstrprintf (_("Show whether GDB will quit "
+			   "when an %s is detected"),
 			 problem->name);
   add_setshow_enum_cmd ("quit", class_maintenance,
 			internal_problem_modes,
@@ -1340,11 +1346,11 @@ Show whether GDB will quit when an %s is detected"),
   xfree (set_doc);
   xfree (show_doc);
 
-  set_doc = xstrprintf (_("\
-Set whether GDB should create a core file of GDB when %s is detected"),
+  set_doc = xstrprintf (_("Set whether GDB should create a core "
+			  "file of GDB when %s is detected"),
 			problem->name);
-  show_doc = xstrprintf (_("\
-Show whether GDB will create a core file of GDB when %s is detected"),
+  show_doc = xstrprintf (_("Show whether GDB will create a core "
+			   "file of GDB when %s is detected"),
 			 problem->name);
   add_setshow_enum_cmd ("corefile", class_maintenance,
 			internal_problem_modes,
@@ -1697,7 +1703,8 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       wrap_here ("");
       vfprintf_filtered (gdb_stdout, ctlstr, args);
 
-      printf_filtered (_("(%s or %s) [answered %c; input not from terminal]\n"),
+      printf_filtered (_("(%s or %s) [answered %c; "
+			 "input not from terminal]\n"),
 		       y_string, n_string, def_answer);
       gdb_flush (gdb_stdout);
 
@@ -2061,8 +2068,8 @@ static void
 show_lines_per_page (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Number of lines gdb thinks are in a page is %s.\n"),
+  fprintf_filtered (file,
+		    _("Number of lines gdb thinks are in a page is %s.\n"),
 		    value);
 }
 
@@ -2072,8 +2079,9 @@ static void
 show_chars_per_line (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Number of characters gdb thinks are in a line is %s.\n"),
+  fprintf_filtered (file,
+		    _("Number of characters gdb thinks "
+		      "are in a line is %s.\n"),
 		    value);
 }
 
@@ -2340,7 +2348,8 @@ wrap_here (char *indent)
 {
   /* This should have been allocated, but be paranoid anyway. */
   if (!wrap_buffer)
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+    internal_error (__FILE__, __LINE__,
+		    _("failed internal consistency check"));
 
   if (wrap_buffer[0])
     {
@@ -2349,7 +2358,7 @@ wrap_here (char *indent)
     }
   wrap_pointer = wrap_buffer;
   wrap_buffer[0] = '\0';
-  if (chars_per_line == UINT_MAX)	/* No line overflow checking */
+  if (chars_per_line == UINT_MAX)	/* No line overflow checking.  */
     {
       wrap_column = 0;
     }
@@ -2521,7 +2530,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		{
 		  fputs_unfiltered (wrap_indent, stream);
 		  *wrap_pointer = '\0';	/* Null-terminate saved stuff */
-		  fputs_unfiltered (wrap_buffer, stream);	/* and eject it */
+		  fputs_unfiltered (wrap_buffer, stream);   /* and eject it */
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
@@ -2540,7 +2549,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       if (*lineptr == '\n')
 	{
 	  chars_printed = 0;
-	  wrap_here ((char *) 0);	/* Spit out chars, cancel further wraps */
+	  wrap_here ((char *) 0);	/* Spit out chars, cancel
+					   further wraps.  */
 	  lines_printed++;
 	  fputc_unfiltered ('\n', stream);
 	  lineptr++;
@@ -3066,7 +3076,8 @@ static void
 show_debug_timestamp (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Timestamping debugging messages is %s.\n"), value);
+  fprintf_filtered (file, _("Timestamping debugging messages is %s.\n"),
+		    value);
 }
 
 
@@ -3371,8 +3382,8 @@ hex_string_custom (LONGEST num, int width)
   if (hex_len > width)
     width = hex_len;
   if (width + 2 >= CELLSIZE)
-    internal_error (__FILE__, __LINE__,
-		    _("hex_string_custom: insufficient space to store result"));
+    internal_error (__FILE__, __LINE__, _("\
+hex_string_custom: insufficient space to store result"));
 
   strcpy (result_end - width - 2, "0x");
   memset (result_end - width, '0', width);
@@ -3879,7 +3890,8 @@ compare_positive_ints (const void *ap, const void *bp)
 }
 
 #define AMBIGUOUS_MESS1	".\nMatching formats:"
-#define AMBIGUOUS_MESS2	".\nUse \"set gnutarget format-name\" to specify the format."
+#define AMBIGUOUS_MESS2	\
+  ".\nUse \"set gnutarget format-name\" to specify the format."
 
 const char *
 gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)

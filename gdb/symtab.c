@@ -291,8 +291,8 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 
   is_full_physname_constructor = is_constructor_name (physname);
 
-  is_constructor =
-    is_full_physname_constructor || (newname && strcmp (field_name, newname) == 0);
+  is_constructor = is_full_physname_constructor 
+    || (newname && strcmp (field_name, newname) == 0);
 
   if (!is_destructor)
     is_destructor = (strncmp (physname, "__dt", 4) == 0);
@@ -1405,7 +1405,10 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
 				 STATIC_BLOCK : GLOBAL_BLOCK);
       sym = lookup_block_symbol (block, name, domain);
       if (!sym)
-	error (_("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>)."),
+	error (_("\
+Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
+%s may be an inlined function, or may be a template function\n\
+(if a template, try specifying an instantiation: %s<type>)."),
 	       kind == GLOBAL_BLOCK ? "global" : "static",
 	       name, symtab->filename, name, name);
     }
@@ -1571,7 +1574,8 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
       sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
       if (!sym)
 	/* FIXME; error is wrong in one case */
-	error (_("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
+	error (_("\
+Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
 (if a template, try specifying an instantiation: %s<type>)."),
 	       name, symtab->filename, name, name);
@@ -2000,12 +2004,15 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	   * so of course we can't find the real func/line info,
 	   * but the "break" still works, and the warning is annoying.
 	   * So I commented out the warning. RT */
-	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info",
+	     SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
-	else if (SYMBOL_VALUE_ADDRESS (mfunsym) == SYMBOL_VALUE_ADDRESS (msymbol))
+	else if (SYMBOL_VALUE_ADDRESS (mfunsym)
+		 == SYMBOL_VALUE_ADDRESS (msymbol))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out */
-	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info",
+	     SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
 	else
 	  return find_pc_line (SYMBOL_VALUE_ADDRESS (mfunsym), 0);
@@ -2623,7 +2630,7 @@ operator_chars (char *p, char **end)
       case '\\':			/* regexp quoting */
 	if (p[1] == '*')
 	  {
-	    if (p[2] == '=')	/* 'operator\*=' */
+	    if (p[2] == '=')		/* 'operator\*=' */
 	      *end = p + 3;
 	    else			/* 'operator\*'  */
 	      *end = p + 2;
@@ -2632,7 +2639,8 @@ operator_chars (char *p, char **end)
 	else if (p[1] == '[')
 	  {
 	    if (p[2] == ']')
-	      error (_("mismatched quoting on brackets, try 'operator\\[\\]'"));
+	      error (_("mismatched quoting on brackets, "
+		       "try 'operator\\[\\]'"));
 	    else if (p[2] == '\\' && p[3] == ']')
 	      {
 		*end = p + 4;	/* 'operator\[\]' */
@@ -2695,17 +2703,20 @@ operator_chars (char *p, char **end)
 	return p;
       case '(':
 	if (p[1] != ')')
-	  error (_("`operator ()' must be specified without whitespace in `()'"));
+	  error (_("`operator ()' must be specified "
+		   "without whitespace in `()'"));
 	*end = p + 2;
 	return p;
       case '?':
 	if (p[1] != ':')
-	  error (_("`operator ?:' must be specified without whitespace in `?:'"));
+	  error (_("`operator ?:' must be specified "
+		   "without whitespace in `?:'"));
 	*end = p + 2;
 	return p;
       case '[':
 	if (p[1] != ']')
-	  error (_("`operator []' must be specified without whitespace in `[]'"));
+	  error (_("`operator []' must be specified "
+		   "without whitespace in `[]'"));
 	*end = p + 2;
 	return p;
       default:
@@ -2828,7 +2839,8 @@ sources_info (char *ignore, int from_tty)
   }
   printf_filtered ("\n\n");
 
-  printf_filtered ("Source files for which symbols will be read in on demand:\n\n");
+  printf_filtered ("Source files for which symbols "
+		   "will be read in on demand:\n\n");
 
   first = 1;
   map_partial_symbol_filenames (output_partial_symbol_filename, &first);
@@ -3021,7 +3033,8 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 
       if (*opname)
 	{
-	  int fix = -1;		/* -1 means ok; otherwise number of spaces needed. */
+	  int fix = -1;		/* -1 means ok; otherwise number of
+                                    spaces needed.  */
 
 	  if (isalpha (*opname) || *opname == '_' || *opname == '$')
 	    {
@@ -3139,12 +3152,16 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 			      e.g., c++ static const members.
 			      We only want to skip enums here.  */
 			   && !(SYMBOL_CLASS (sym) == LOC_CONST
-				&& TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_ENUM))
-			  || (kind == FUNCTIONS_DOMAIN && SYMBOL_CLASS (sym) == LOC_BLOCK)
-			  || (kind == TYPES_DOMAIN && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
+				&& TYPE_CODE (SYMBOL_TYPE (sym))
+				== TYPE_CODE_ENUM))
+			  || (kind == FUNCTIONS_DOMAIN 
+			      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+			  || (kind == TYPES_DOMAIN
+			      && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
 		{
 		  /* match */
-		  psr = (struct symbol_search *) xmalloc (sizeof (struct symbol_search));
+		  psr = (struct symbol_search *)
+		    xmalloc (sizeof (struct symbol_search));
 		  psr->block = i;
 		  psr->symtab = real_symtab;
 		  psr->symbol = sym;
@@ -3203,7 +3220,8 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 			 == NULL)
 		      {
 			/* match */
-			psr = (struct symbol_search *) xmalloc (sizeof (struct symbol_search));
+			psr = (struct symbol_search *)
+			  xmalloc (sizeof (struct symbol_search));
 			psr->block = i;
 			psr->msymbol = msymbol;
 			psr->symtab = NULL;

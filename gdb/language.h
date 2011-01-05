@@ -186,7 +186,8 @@ struct language_defn
 
     void (*la_post_parser) (struct expression ** expp, int void_context_p);
 
-    void (*la_printchar) (int ch, struct type *chtype, struct ui_file * stream);
+    void (*la_printchar) (int ch, struct type *chtype,
+			  struct ui_file * stream);
 
     void (*la_printstr) (struct ui_file * stream, struct type *elttype,
 			 const gdb_byte *string, unsigned int length,
@@ -410,7 +411,7 @@ extern enum language set_language (enum language);
 
 #define LA_PRINT_CHAR(ch, type, stream) \
   (current_language->la_printchar(ch, type, stream))
-#define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses,options) \
+#define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \
   (current_language->la_printstr(stream, elttype, string, length, \
 				 encoding, force_ellipses,options))
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \

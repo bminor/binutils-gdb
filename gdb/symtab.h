@@ -723,9 +723,10 @@ struct section_offsets
 };
 
 #define	ANOFFSET(secoff, whichone) \
-   ((whichone == -1) \
-    ? (internal_error (__FILE__, __LINE__, _("Section index is uninitialized")), -1) \
-    : secoff->offsets[whichone])
+  ((whichone == -1)			  \
+   ? (internal_error (__FILE__, __LINE__, \
+		      _("Section index is uninitialized")), -1) \
+   : secoff->offsets[whichone])
 
 /* The size of a section_offsets table for N sections.  */
 #define SIZEOF_N_SECTION_OFFSETS(n) \
@@ -1241,7 +1242,7 @@ extern /*const */ char *main_name (void);
 extern enum language language_of_main;
 
 /* Check global symbols in objfile.  */
-struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,
+struct symbol *lookup_global_symbol_from_objfile (const struct objfile *,
 						  const char *name,
 						  const domain_enum domain);
 

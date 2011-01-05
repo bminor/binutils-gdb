@@ -388,7 +388,8 @@ hardwire_raw (struct serial *scb)
   struct hardwire_ttystate state;
 
   if (get_tty_state (scb, &state))
-    fprintf_unfiltered (gdb_stderr, "get_tty_state failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "get_tty_state failed: %s\n",
+			safe_strerror (errno));
 
 #ifdef HAVE_TERMIOS
   state.termios.c_iflag = 0;
@@ -431,7 +432,8 @@ hardwire_raw (struct serial *scb)
   scb->current_timeout = 0;
 
   if (set_tty_state (scb, &state))
-    fprintf_unfiltered (gdb_stderr, "set_tty_state failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "set_tty_state failed: %s\n",
+			safe_strerror (errno));
 }
 
 /* Wait for input on scb, with timeout seconds.  Returns 0 on success,
@@ -497,7 +499,8 @@ wait_for (struct serial *scb, int timeout)
     struct hardwire_ttystate state;
 
     if (get_tty_state (scb, &state))
-      fprintf_unfiltered (gdb_stderr, "get_tty_state failed: %s\n", safe_strerror (errno));
+      fprintf_unfiltered (gdb_stderr, "get_tty_state failed: %s\n",
+			  safe_strerror (errno));
 
 #ifdef HAVE_TERMIOS
     if (timeout < 0)
@@ -549,17 +552,19 @@ wait_for (struct serial *scb, int timeout)
 #endif
 
     if (set_tty_state (scb, &state))
-      fprintf_unfiltered (gdb_stderr, "set_tty_state failed: %s\n", safe_strerror (errno));
+      fprintf_unfiltered (gdb_stderr, "set_tty_state failed: %s\n",
+			  safe_strerror (errno));
 
     return 0;
   }
 #endif /* HAVE_TERMIO || HAVE_TERMIOS */
 }
 
-/* Read a character with user-specified timeout.  TIMEOUT is number of seconds
-   to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
-   char if successful.  Returns SERIAL_TIMEOUT if timeout expired, EOF if line
-   dropped dead, or SERIAL_ERROR for any other error (see errno in that case).  */
+/* Read a character with user-specified timeout.  TIMEOUT is number of
+   seconds to wait, or -1 to wait forever.  Use timeout of 0 to effect
+   a poll.  Returns char if successful.  Returns SERIAL_TIMEOUT if
+   timeout expired, EOF if line dropped dead, or SERIAL_ERROR for any
+   other error (see errno in that case).  */
 
 /* FIXME: cagney/1999-09-16: Don't replace this with the equivalent
    ser_base*() until the old TERMIOS/SGTTY/... timer code has been
@@ -631,7 +636,7 @@ do_hardwire_readchar (struct serial *scb, int timeout)
 	  else if (errno == EINTR)
 	    continue;
 	  else
-	    return SERIAL_ERROR;	/* Got an error from read */
+	    return SERIAL_ERROR;	/* Got an error from read.  */
 	}
 
       scb->bufcnt = status;
@@ -773,13 +778,14 @@ rate_to_code (int rate)
 	    {
 	      if (i)
 	        {
-	          warning (_("Invalid baud rate %d.  Closest values are %d and %d."),
-	                    rate, baudtab[i - 1].rate, baudtab[i].rate);
+	          warning (_("Invalid baud rate %d.  "
+			     "Closest values are %d and %d."),
+			   rate, baudtab[i - 1].rate, baudtab[i].rate);
 		}
 	      else
 	        {
 	          warning (_("Invalid baud rate %d.  Minimum value is %d."),
-	                    rate, baudtab[0].rate);
+			   rate, baudtab[0].rate);
 		}
 	      return -1;
 	    }

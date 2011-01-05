@@ -51,8 +51,8 @@ extern void
 
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
 extern int
-  default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
-					struct displaced_step_closure *closure);
+  default_displaced_step_hw_singlestep (struct gdbarch *,
+					struct displaced_step_closure *);
 
 /* Possible value for gdbarch_displaced_step_location:
    Place displaced instructions at the program's entry point,
@@ -74,7 +74,8 @@ extern int no_op_reg_to_regnum (struct gdbarch *gdbarch, int reg);
 
 /* Do nothing version of elf_make_msymbol_special.  */
 
-void default_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym);
+void default_elf_make_msymbol_special (asymbol *sym,
+				       struct minimal_symbol *msym);
 
 /* Do nothing version of coff_make_msymbol_special.  */
 
@@ -100,7 +101,8 @@ extern CORE_ADDR generic_skip_solib_resolver (struct gdbarch *gdbarch,
 extern int generic_in_solib_return_trampoline (struct gdbarch *gdbarch,
 					       CORE_ADDR pc, char *name);
 
-extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch,
+					   CORE_ADDR pc);
 
 /* By default, registers are not convertible.  */
 extern int generic_convert_register_p (struct gdbarch *gdbarch, int regnum,

@@ -425,7 +425,8 @@ terminal_ours_1 (int output_only)
 	     used to check for an error here, so perhaps there are other
 	     such situations as well.  */
 	  if (result == -1)
-	    fprintf_unfiltered (gdb_stderr, "[tcsetpgrp failed in terminal_ours: %s]\n",
+	    fprintf_unfiltered (gdb_stderr,
+				"[tcsetpgrp failed in terminal_ours: %s]\n",
 				safe_strerror (errno));
 #endif
 #endif /* termios */
@@ -551,7 +552,8 @@ child_terminal_info (char *args, int from_tty)
   inf = current_inferior ();
   tinfo = get_inflow_inferior_data (inf);
 
-  printf_filtered (_("Inferior's terminal status (currently saved by GDB):\n"));
+  printf_filtered (_("Inferior's terminal status "
+		     "(currently saved by GDB):\n"));
 
   /* First the fcntl flags.  */
   {

@@ -365,7 +365,7 @@ struct sym_fns
 };
 
 extern struct section_addr_info *
-	   build_section_addr_info_from_objfile (const struct objfile *objfile);
+  build_section_addr_info_from_objfile (const struct objfile *objfile);
 
 extern void relative_addr_info_to_section_offsets
   (struct section_offsets *section_offsets, int num_sections,
@@ -454,9 +454,10 @@ extern void free_section_addr_info (struct section_addr_info *);
 
 extern char *obsavestring (const char *, int, struct obstack *);
 
-/* Concatenate NULL terminated variable argument list of `const char *' strings;
-   return the new string.  Space is found in the OBSTACKP.  Argument list must
-   be terminated by a sentinel expression `(char *) NULL'.  */
+/* Concatenate NULL terminated variable argument list of `const char
+   *' strings; return the new string.  Space is found in the OBSTACKP.
+   Argument list must be terminated by a sentinel expression `(char *)
+   NULL'.  */
 
 extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
 

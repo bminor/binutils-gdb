@@ -326,7 +326,8 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 		       field_name);
       if (data->current_type_size != 0)
 	gdb_xml_error (parser,
-		       _("Explicitly sized type can not contain non-bitfield \"%s\""), 
+		       _("Explicitly sized type can not "
+			 "contain non-bitfield \"%s\""), 
 		       field_name);
 
       field_type = tdesc_named_type (data->current_feature, field_type_id);
@@ -347,12 +348,14 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 	{
 	  if (data->current_type_size == 0)
 	    gdb_xml_error (parser,
-			   _("Implicitly sized type can not contain bitfield \"%s\""), 
+			   _("Implicitly sized type can "
+			     "not contain bitfield \"%s\""), 
 			   field_name);
 
 	  if (end >= 64)
 	    gdb_xml_error (parser,
-			   _("Bitfield \"%s\" goes past 64 bits (unsupported)"),
+			   _("Bitfield \"%s\" goes past "
+			     "64 bits (unsupported)"),
 			   field_name);
 
 	  /* Assume that the bit numbering in XML is "lsb-zero".  Most
@@ -364,7 +367,8 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 			   field_name);
 
 	  if (end >= data->current_type_size * TARGET_CHAR_BIT)
-	    gdb_xml_error (parser, _("Bitfield \"%s\" does not fit in struct"));
+	    gdb_xml_error (parser,
+			   _("Bitfield \"%s\" does not fit in struct"));
 
 	  tdesc_add_bitfield (t, field_name, start, end);
 	}

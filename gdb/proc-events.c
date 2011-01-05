@@ -1515,7 +1515,8 @@ static struct trans signal_table[] =
   { SIGIO, "SIGIO", "Socket I/O possible" },	/* alias for SIGPOLL */
 #endif
 #ifdef SIGSTOP
-  { SIGSTOP, "SIGSTOP", "Stop, not from tty" },	/* cannot be caught or ignored */
+  { SIGSTOP, "SIGSTOP", "Stop, not from tty" },	/* cannot be caught or
+						   ignored */
 #endif
 #ifdef SIGTSTP
   { SIGTSTP, "SIGTSTP", "User stop from tty" },

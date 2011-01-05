@@ -1049,7 +1049,8 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	    LONGEST value;
 
 	    if (obstack_object_size (&output) != TYPE_LENGTH (type))
-	      error (_("Could not convert character constant to target character set"));
+	      error (_("Could not convert character "
+		       "constant to target character set"));
 	    value = unpack_long (type, obstack_base (&output));
 	    result = value_from_longest (type, value);
 	  }

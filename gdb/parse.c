@@ -903,7 +903,8 @@ operator_length_standard (const struct expression *expr, int endpos,
     case OP_REGISTER:
     case OP_M2_STRING:
     case OP_STRING:
-    case OP_OBJC_NSSTRING:	/* Objective C Foundation Class NSString constant */
+    case OP_OBJC_NSSTRING:	/* Objective C Foundation Class
+				   NSString constant */
     case OP_OBJC_SELECTOR:	/* Objective C "@selector" pseudo-op */
     case OP_NAME:
       oplen = longest_to_int (expr->elts[endpos - 2].longconst);
@@ -1628,18 +1629,20 @@ _initialize_parse (void)
     xmalloc (type_stack_size * sizeof (*type_stack));
 
   add_setshow_zinteger_cmd ("expression", class_maintenance,
-			    &expressiondebug, _("\
-Set expression debugging."), _("\
-Show expression debugging."), _("\
-When non-zero, the internal representation of expressions will be printed."),
+			    &expressiondebug,
+			    _("Set expression debugging."),
+			    _("Show expression debugging."),
+			    _("When non-zero, the internal representation "
+			      "of expressions will be printed."),
 			    NULL,
 			    show_expressiondebug,
 			    &setdebuglist, &showdebuglist);
   add_setshow_boolean_cmd ("parser", class_maintenance,
-			    &parser_debug, _("\
-Set parser debugging."), _("\
-Show parser debugging."), _("\
-When non-zero, expression parser tracing will be enabled."),
+			    &parser_debug,
+			   _("Set parser debugging."),
+			   _("Show parser debugging."),
+			   _("When non-zero, expression parser "
+			     "tracing will be enabled."),
 			    NULL,
 			    show_parserdebug,
 			    &setdebuglist, &showdebuglist);

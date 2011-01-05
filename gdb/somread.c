@@ -430,15 +430,14 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 static const struct sym_fns som_sym_fns =
 {
   bfd_target_som_flavour,
-  som_new_init,			/* sym_new_init: init anything gbl to entire symtab */
-  som_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
-  som_symfile_read,		/* sym_read: read a symbol file into symtab */
-  som_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  som_symfile_offsets,		/* sym_offsets:  Translate ext. to int. relocation */
-  default_symfile_segments,	/* sym_segments: Get segment information from
-				   a file.  */
-  NULL,                         /* sym_read_linetable */
-  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  som_new_init,			/* init anything gbl to entire symtab */
+  som_symfile_init,		/* read initial info, setup for sym_read() */
+  som_symfile_read,		/* read a symbol file into symtab */
+  som_symfile_finish,		/* finished with file, cleanup */
+  som_symfile_offsets,		/* Translate ext. to int. relocation */
+  default_symfile_segments,	/* Get segment information from a file.  */
+  NULL,
+  default_symfile_relocate,	/* Relocate a debug section.  */
   &psym_functions
 };
 

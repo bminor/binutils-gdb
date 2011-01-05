@@ -205,7 +205,8 @@ print_subexp_standard (struct expression *exp, int *pos,
       fprintf_unfiltered (stream, "B'<unimplemented>'");
       return;
 
-    case OP_OBJC_NSSTRING:	/* Objective-C Foundation Class NSString constant.  */
+    case OP_OBJC_NSSTRING:	/* Objective-C Foundation Class
+				   NSString constant.  */
       {
 	struct value_print_options opts;
 

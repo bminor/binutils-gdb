@@ -150,8 +150,8 @@ struct frame_unwind
    that override earlier calls.  This allows, for instance, an OSABI
    to install a a more specific sigtramp unwinder that overrides the
    traditional brute-force unwinder.  */
-extern void frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
-					   const struct frame_unwind *unwinder);
+extern void frame_unwind_prepend_unwinder (struct gdbarch *,
+					   const struct frame_unwind *);
 
 /* Add a frame sniffer to the list.  The predicates are polled in the
    order that they are appended.  The initial list contains the dummy

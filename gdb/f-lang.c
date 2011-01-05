@@ -45,8 +45,9 @@ struct saved_fcn
 
 struct saved_bf_symnum
   {
-    long symnum_fcn;		/* Symnum of function (i.e. .function directive) */
-    long symnum_bf;		/* Symnum of .bf for this function */
+    long symnum_fcn;		/* Symnum of function (i.e. .function
+				   directive).  */
+    long symnum_bf;		/* Symnum of .bf for this function.  */
     struct saved_bf_symnum *next;
   };
 
@@ -333,7 +334,8 @@ f_word_break_characters (void)
   return retval;
 }
 
-/* Consider the modules separator :: as a valid symbol name character class.  */
+/* Consider the modules separator :: as a valid symbol name character
+   class.  */
 
 static char **
 f_make_symbol_completion_list (char *text, char *word)
@@ -371,7 +373,8 @@ const struct language_defn f_language_defn =
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
-  NULL,				/* Language specific class_name_from_physname */
+  NULL,				/* Language specific
+				   class_name_from_physname */
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
@@ -504,8 +507,8 @@ SAVED_F77_COMMON_PTR current_common = NULL;	/* Ptr to current COMMON */
 static SAVED_BF_PTR saved_bf_list = NULL;	/* Ptr to (.bf,function) 
 						   list */
 static SAVED_BF_PTR saved_bf_list_end = NULL;	/* Ptr to above list's end */
-static SAVED_BF_PTR current_head_bf_list = NULL;	/* Current head of above list
-							 */
+static SAVED_BF_PTR current_head_bf_list = NULL;    /* Current head of
+						       above list.  */
 
 static SAVED_BF_PTR tmp_bf_ptr;	/* Generic temporary for use 
 				   in macros */

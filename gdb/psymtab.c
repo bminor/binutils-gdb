@@ -556,7 +556,8 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  center = bottom + (top - bottom) / 2;
 	  if (!(center < top))
-	    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+	    internal_error (__FILE__, __LINE__,
+			    _("failed internal consistency check"));
 	  if (!do_linear_search
 	      && SYMBOL_LANGUAGE (*center) == language_java)
 	    {
@@ -572,7 +573,8 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    }
 	}
       if (!(top == bottom))
-	internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+	internal_error (__FILE__, __LINE__,
+			_("failed internal consistency check"));
 
       while (top <= real_top
 	     && SYMBOL_MATCHES_SEARCH_NAME (*top, name))
@@ -1119,8 +1121,10 @@ map_matching_symbols_psymtab (const char *name, domain_enum namespace,
 
 static void
 expand_symtabs_matching_via_partial (struct objfile *objfile,
-				     int (*file_matcher) (const char *, void *),
-				     int (*name_matcher) (const char *, void *),
+				     int (*file_matcher) (const char *,
+							  void *),
+				     int (*name_matcher) (const char *,
+							  void *),
 				     domain_enum kind,
 				     void *data)
 {
@@ -1138,8 +1142,10 @@ expand_symtabs_matching_via_partial (struct objfile *objfile,
       if (! (*file_matcher) (ps->filename, data))
 	continue;
 
-      gbound = objfile->global_psymbols.list + ps->globals_offset + ps->n_global_syms;
-      sbound = objfile->static_psymbols.list + ps->statics_offset + ps->n_static_syms;
+      gbound = objfile->global_psymbols.list
+	+ ps->globals_offset + ps->n_global_syms;
+      sbound = objfile->static_psymbols.list
+	+ ps->statics_offset + ps->n_static_syms;
       bound = gbound;
 
       /* Go through all of the symbols stored in a partial
@@ -1584,7 +1590,8 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   if (args == NULL)
     {
-      error (_("print-psymbols takes an output file name and optional symbol file name"));
+      error (_("\
+print-psymbols takes an output file name and optional symbol file name"));
     }
   argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
@@ -1659,7 +1666,8 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 	      printf_filtered ("    readin %s\n",
 			       psymtab->readin ? "yes" : "no");
 	      printf_filtered ("    fullname %s\n",
-			       psymtab->fullname ? psymtab->fullname : "(null)");
+			       psymtab->fullname
+			       ? psymtab->fullname : "(null)");
 	      printf_filtered ("    text addresses ");
 	      fputs_filtered (paddress (gdbarch, psymtab->textlow),
 			      gdb_stdout);

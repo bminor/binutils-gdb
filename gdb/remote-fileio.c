@@ -578,8 +578,8 @@ remote_fileio_badfd (void)
 static void
 remote_fileio_return_errno (int retcode)
 {
-  remote_fileio_reply (retcode,
-		       retcode < 0 ? remote_fileio_errno_to_target (errno) : 0);
+  remote_fileio_reply (retcode, retcode < 0
+		       ? remote_fileio_errno_to_target (errno) : 0);
 }
 
 static void
@@ -821,7 +821,8 @@ remote_fileio_func_read (char *buf)
     {
       retlength = remote_fileio_write_bytes (ptrval, buffer, ret);
       if (retlength != ret)
-	ret = -1; /* errno has been set to EIO in remote_fileio_write_bytes() */
+	ret = -1; /* errno has been set to EIO in
+		     remote_fileio_write_bytes() */
     }
 
   if (ret < 0)
@@ -894,7 +895,8 @@ remote_fileio_func_write (char *buf)
       default:
 	ret = write (fd, buffer, length);
 	if (ret < 0 && errno == EACCES)
-	  errno = EBADF; /* Cygwin returns EACCESS when writing to a R/O file.*/
+	  errno = EBADF; /* Cygwin returns EACCESS when writing to a
+			    R/O file.*/
 	break;
     }
 
@@ -1234,7 +1236,8 @@ remote_fileio_func_fstat (char *buf)
     {
       remote_fileio_to_fio_stat (&st, &fst);
 
-      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &fst, sizeof fst);
+      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &fst,
+					     sizeof fst);
       if (retlength != sizeof fst)
 	{
 	  remote_fileio_return_errno (-1);
@@ -1286,7 +1289,8 @@ remote_fileio_func_gettimeofday (char *buf)
     {
       remote_fileio_to_fio_timeval (&tv, &ftv);
 
-      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &ftv, sizeof ftv);
+      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &ftv,
+					     sizeof ftv);
       if (retlength != sizeof ftv)
 	{
 	  remote_fileio_return_errno (-1);
@@ -1492,7 +1496,8 @@ static void
 show_system_call_allowed (char *args, int from_tty)
 {
   if (args)
-    error (_("Garbage after \"show remote system-call-allowed\" command: `%s'"), args);
+    error (_("Garbage after \"show remote "
+	     "system-call-allowed\" command: `%s'"), args);
   printf_unfiltered ("Calling host system(3) call from target is %sallowed\n",
 		     remote_fio_system_call_allowed ? "" : "not ");
 }

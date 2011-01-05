@@ -102,8 +102,8 @@ static void
 show_caution (struct ui_file *file, int from_tty,
 	      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Whether to confirm potentially dangerous operations is %s.\n"),
+  fprintf_filtered (file, _("Whether to confirm potentially "
+			    "dangerous operations is %s.\n"),
 		    value);
 }
 
@@ -657,8 +657,8 @@ static void
 show_history_filename (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-The filename in which to record the command history is \"%s\".\n"),
+  fprintf_filtered (file, _("The filename in which to record "
+			    "the command history is \"%s\".\n"),
 		    value);
 }
 
@@ -990,7 +990,8 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	  if (expanded < 0)
 	    {
 	      xfree (history_value);
-	      return command_line_input (prompt_arg, repeat, annotation_suffix);
+	      return command_line_input (prompt_arg, repeat,
+					 annotation_suffix);
 	    }
 	  if (strlen (history_value) > linelength)
 	    {
@@ -1054,7 +1055,8 @@ print_gdb_version (struct ui_file *stream)
 
   /* Second line is a copyright notice.  */
 
-  fprintf_filtered (stream, "Copyright (C) 2011 Free Software Foundation, Inc.\n");
+  fprintf_filtered (stream,
+		    "Copyright (C) 2011 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
@@ -1062,8 +1064,8 @@ print_gdb_version (struct ui_file *stream)
      there is no warranty.  */
 
   fprintf_filtered (stream, "\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
-This is free software: you are free to change and redistribute it.\n\
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\
+\nThis is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\"\n\
 and \"show warranty\" for details.\n");
 
@@ -1072,7 +1074,8 @@ and \"show warranty\" for details.\n");
   fprintf_filtered (stream, "This GDB was configured as \"");
   if (strcmp (host_name, target_name) != 0)
     {
-      fprintf_filtered (stream, "--host=%s --target=%s", host_name, target_name);
+      fprintf_filtered (stream, "--host=%s --target=%s",
+			host_name, target_name);
     }
   else
     {
@@ -1276,8 +1279,8 @@ show_interactive_mode (struct ui_file *file, int from_tty,
                        const char *value)
 {
   if (interactive_mode == AUTO_BOOLEAN_AUTO)
-    fprintf_filtered (file, "\
-Debugger's interactive mode is %s (currently %s).\n",
+    fprintf_filtered (file, "Debugger's interactive mode "
+		      "is %s (currently %s).\n",
                       value, input_from_terminal_p () ? "on" : "off");
   else
     fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
@@ -1409,7 +1412,8 @@ set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 void
 set_history (char *args, int from_tty)
 {
-  printf_unfiltered (_("\"set history\" must be followed by the name of a history subcommand.\n"));
+  printf_unfiltered (_("\"set history\" must be followed "
+		       "by the name of a history subcommand.\n"));
   help_list (sethistlist, "set history ", -1, gdb_stdout);
 }
 
@@ -1491,8 +1495,8 @@ static void
 show_async_command_editing_p (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Editing of command lines as they are typed is %s.\n"),
+  fprintf_filtered (file, _("Editing of command lines as "
+			    "they are typed is %s.\n"),
 		    value);
 }
 
@@ -1507,8 +1511,8 @@ static void
 show_exec_done_display_p (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Notification of completion for asynchronous execution commands is %s.\n"),
+  fprintf_filtered (file, _("Notification of completion for "
+			    "asynchronous execution commands is %s.\n"),
 		    value);
 }
 static void
@@ -1550,16 +1554,16 @@ init_main (void)
   rl_add_defun ("operate-and-get-next", gdb_rl_operate_and_get_next, 15);
 
   add_setshow_string_cmd ("prompt", class_support,
-			  &new_async_prompt, _("\
-Set gdb's prompt"), _("\
-Show gdb's prompt"), NULL,
-			  set_async_prompt,
+			  &new_async_prompt,
+			  _("Set gdb's prompt"),
+			  _("Show gdb's prompt"),
+			  NULL, set_async_prompt,
 			  show_new_async_prompt,
 			  &setlist, &showlist);
 
   add_com ("dont-repeat", class_support, dont_repeat_command, _("\
-Don't repeat this command.\n\
-Primarily used inside of user-defined commands that should not be repeated when\n\
+Don't repeat this command.\nPrimarily \
+used inside of user-defined commands that should not be repeated when\n\
 hitting return."));
 
   add_setshow_boolean_cmd ("editing", class_support,

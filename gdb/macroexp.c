@@ -902,7 +902,8 @@ find_parameter (const struct macro_buffer *tok,
     return -1;
 
   for (i = 0; i < argc; ++i)
-    if (tok->len == strlen (argv[i]) && ! memcmp (tok->text, argv[i], tok->len))
+    if (tok->len == strlen (argv[i]) 
+	&& !memcmp (tok->text, argv[i], tok->len))
       return i;
 
   if (is_varargs && tok->len == va_arg_name->len

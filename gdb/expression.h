@@ -153,14 +153,16 @@ enum exp_opcode
        Thus, the operation occupies four exp_elements.  */
     OP_LONG,
 
-    /* OP_DOUBLE is similar but takes a DOUBLEST constant instead of a long.  */
+    /* OP_DOUBLE is similar but takes a DOUBLEST constant instead of a
+       long.  */
     OP_DOUBLE,
 
     /* OP_VAR_VALUE takes one struct block * in the following element,
-       and one struct symbol * in the following exp_element, followed by
-       another OP_VAR_VALUE, making four exp_elements.  If the block is
-       non-NULL, evaluate the symbol relative to the innermost frame
-       executing in that block; if the block is NULL use the selected frame.  */
+       and one struct symbol * in the following exp_element, followed
+       by another OP_VAR_VALUE, making four exp_elements.  If the
+       block is non-NULL, evaluate the symbol relative to the
+       innermost frame executing in that block; if the block is NULL
+       use the selected frame.  */
     OP_VAR_VALUE,
 
     /* OP_LAST is followed by an integer in the next exp_element.
@@ -173,8 +175,9 @@ enum exp_opcode
        This is the name of a register to fetch.  */
     OP_REGISTER,
 
-    /* OP_INTERNALVAR is followed by an internalvar ptr in the next exp_element.
-       With another OP_INTERNALVAR at the end, this makes three exp_elements.  */
+    /* OP_INTERNALVAR is followed by an internalvar ptr in the next
+       exp_element.  With another OP_INTERNALVAR at the end, this
+       makes three exp_elements.  */
     OP_INTERNALVAR,
 
     /* OP_FUNCALL is followed by an integer in the next exp_element.
@@ -185,10 +188,11 @@ enum exp_opcode
        making three exp_elements.  */
     OP_FUNCALL,
 
-    /* OP_OBJC_MSGCALL is followed by a string in the next exp_element and then an
-       integer.  The string is the selector string.  The integer is the number
-       of arguments to the message call.  That many plus one values are used, 
-       the first one being the object pointer.  This is an Objective C message */
+    /* OP_OBJC_MSGCALL is followed by a string in the next exp_element
+       and then an integer.  The string is the selector string.  The
+       integer is the number of arguments to the message call.  That
+       many plus one values are used, the first one being the object
+       pointer.  This is an Objective C message */
     OP_OBJC_MSGCALL,
 
     /* This is EXACTLY like OP_FUNCALL but is semantically different.  
@@ -298,8 +302,9 @@ enum exp_opcode
        It just comes in a tight (OP_THIS, OP_THIS) pair.  */
     OP_THIS,
 
-    /* Objective-C: OP_OBJC_SELF is just a placeholder for the class instance
-       variable.  It just comes in a tight (OP_OBJC_SELF, OP_OBJC_SELF) pair.  */
+    /* Objective-C: OP_OBJC_SELF is just a placeholder for the class
+       instance variable.  It just comes in a tight (OP_OBJC_SELF,
+       OP_OBJC_SELF) pair.  */
     OP_OBJC_SELF,
 
     /* Objective C: "@selector" pseudo-operator */
@@ -388,7 +393,8 @@ union exp_element
 
 struct expression
   {
-    const struct language_defn *language_defn;	/* language it was entered in */
+    const struct language_defn *language_defn;	/* language it was
+						   entered in */
     struct gdbarch *gdbarch;  /* architecture it was parsed in */
     int nelts;
     union exp_element elts[1];
@@ -447,7 +453,8 @@ extern void print_expression (struct expression *, struct ui_file *);
 
 extern char *op_string (enum exp_opcode);
 
-extern void dump_raw_expression (struct expression *, struct ui_file *, char *);
+extern void dump_raw_expression (struct expression *,
+				 struct ui_file *, char *);
 extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 #endif /* !defined (EXPRESSION_H) */

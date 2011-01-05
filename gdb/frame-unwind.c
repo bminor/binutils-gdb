@@ -54,7 +54,8 @@ frame_unwind_init (struct obstack *obstack)
      can't override this.  */
   table->list = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
   table->list->unwinder = &dummy_frame_unwind;
-  table->list->next = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
+  table->list->next = OBSTACK_ZALLOC (obstack,
+				      struct frame_unwind_table_entry);
   table->list->next->unwinder = &inline_frame_unwind;
   /* The insertion point for OSABI sniffers.  */
   table->osabi_head = &table->list->next->next;
@@ -146,7 +147,8 @@ frame_unwind_got_optimized (struct frame_info *frame, int regnum)
    register NEW_REGNUM.  */
 
 struct value *
-frame_unwind_got_register (struct frame_info *frame, int regnum, int new_regnum)
+frame_unwind_got_register (struct frame_info *frame,
+			   int regnum, int new_regnum)
 {
   return value_of_register_lazy (frame, new_regnum);
 }
@@ -209,7 +211,8 @@ frame_unwind_got_address (struct frame_info *frame, int regnum,
   return reg_val;
 }
 
-extern initialize_file_ftype _initialize_frame_unwind; /* -Wmissing-prototypes */
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_frame_unwind;
 
 void
 _initialize_frame_unwind (void)

@@ -482,11 +482,14 @@ extern void puts_debug (char *prefix, char *string, char *suffix);
 
 extern void vprintf_filtered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
-extern void vfprintf_filtered (struct ui_file *, const char *, va_list) ATTRIBUTE_PRINTF (2, 0);
+extern void vfprintf_filtered (struct ui_file *, const char *, va_list)
+  ATTRIBUTE_PRINTF (2, 0);
 
-extern void fprintf_filtered (struct ui_file *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
+extern void fprintf_filtered (struct ui_file *, const char *, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
-extern void fprintfi_filtered (int, struct ui_file *, const char *, ...) ATTRIBUTE_PRINTF (3, 4);
+extern void fprintfi_filtered (int, struct ui_file *, const char *, ...)
+  ATTRIBUTE_PRINTF (3, 4);
 
 extern void printf_filtered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
@@ -494,9 +497,11 @@ extern void printfi_filtered (int, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 extern void vprintf_unfiltered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
-extern void vfprintf_unfiltered (struct ui_file *, const char *, va_list) ATTRIBUTE_PRINTF (2, 0);
+extern void vfprintf_unfiltered (struct ui_file *, const char *, va_list)
+  ATTRIBUTE_PRINTF (2, 0);
 
-extern void fprintf_unfiltered (struct ui_file *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
+extern void fprintf_unfiltered (struct ui_file *, const char *, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 extern void printf_unfiltered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
@@ -506,13 +511,17 @@ extern void print_spaces_filtered (int, struct ui_file *);
 
 extern char *n_spaces (int);
 
-extern void fputstr_filtered (const char *str, int quotr, struct ui_file * stream);
+extern void fputstr_filtered (const char *str, int quotr,
+			      struct ui_file * stream);
 
-extern void fputstr_unfiltered (const char *str, int quotr, struct ui_file * stream);
+extern void fputstr_unfiltered (const char *str, int quotr,
+				struct ui_file * stream);
 
-extern void fputstrn_filtered (const char *str, int n, int quotr, struct ui_file * stream);
+extern void fputstrn_filtered (const char *str, int n, int quotr,
+			       struct ui_file * stream);
 
-extern void fputstrn_unfiltered (const char *str, int n, int quotr, struct ui_file * stream);
+extern void fputstrn_unfiltered (const char *str, int n, int quotr,
+				 struct ui_file * stream);
 
 /* Display the host ADDR on STREAM formatted as ``0x%x''. */
 extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
@@ -889,7 +898,8 @@ extern void *xzalloc (size_t);
 
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
-extern void xasprintf (char **ret, const char *format, ...) ATTRIBUTE_PRINTF (2, 3);
+extern void xasprintf (char **ret, const char *format, ...)
+     ATTRIBUTE_PRINTF (2, 3);
 extern void xvasprintf (char **ret, const char *format, va_list ap)
      ATTRIBUTE_PRINTF (2, 0);
 
@@ -1112,7 +1122,8 @@ extern void (*deprecated_show_load_progress) (const char *section,
 					      unsigned long total_sent, 
 					      unsigned long total_size);
 extern void (*deprecated_print_frame_info_listing_hook) (struct symtab * s,
-							 int line, int stopline,
+							 int line,
+							 int stopline,
 							 int noerror);
 extern int (*deprecated_query_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);

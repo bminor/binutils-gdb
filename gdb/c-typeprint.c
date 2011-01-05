@@ -843,7 +843,8 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		    {
 		      len = TYPE_FN_FIELDLIST_LENGTH (type, j);
 		      for (i = 0; i < len; i++)
-			if (!TYPE_FN_FIELD_PRIVATE (TYPE_FN_FIELDLIST1 (type, j), i))
+			if (!TYPE_FN_FIELD_PRIVATE (TYPE_FN_FIELDLIST1 (type,
+									j), i))
 			  {
 			    need_access_label = 1;
 			    break;
@@ -873,8 +874,11 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		      QUIT;
 		      len = TYPE_FN_FIELDLIST_LENGTH (type, j);
 		      for (i = 0; i < len; i++)
-			if (TYPE_FN_FIELD_PRIVATE (TYPE_FN_FIELDLIST1 (type, j), i)
-			    || TYPE_FN_FIELD_PROTECTED (TYPE_FN_FIELDLIST1 (type, j), i))
+			if (TYPE_FN_FIELD_PROTECTED (TYPE_FN_FIELDLIST1 (type,
+									 j), i)
+			    || TYPE_FN_FIELD_PRIVATE (TYPE_FN_FIELDLIST1 (type,
+									  j),
+						      i))
 			  {
 			    need_access_label = 1;
 			    break;

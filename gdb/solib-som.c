@@ -49,7 +49,8 @@
 
 struct lm_info
   {
-    /* Version of this structure (it is expected to change again in hpux10).  */
+    /* Version of this structure (it is expected to change again in
+       hpux10).  */
     unsigned char struct_version;
 
     /* Binding mode for this library.  */
@@ -224,10 +225,9 @@ som_solib_create_inferior_hook (int from_tty)
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {
-      warning (_("\
-Unable to write __d_pid.\n\
-Suggest linking with /opt/langtools/lib/end.o.\n\
-GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("Unable to write __d_pid.\n"
+		 "Suggest linking with /opt/langtools/lib/end.o.\n"
+		 "GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
 
@@ -245,10 +245,9 @@ GDB will be unable to track shl_load/shl_unload calls"));
     msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning (_("\
-Unable to find _DLD_HOOK symbol in object file.\n\
-Suggest linking with /opt/langtools/lib/end.o.\n\
-GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("Unable to find _DLD_HOOK symbol in object file.\n"
+		 "Suggest linking with /opt/langtools/lib/end.o.\n"
+		 "GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -268,10 +267,9 @@ GDB will be unable to track shl_load/shl_unload calls"));
   msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning (_("\
-Unable to find __dld_hook symbol in object file.\n\
-Suggest linking with /opt/langtools/lib/end.o.\n\
-GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("Unable to find __dld_hook symbol in object file.\n"
+		 "Suggest linking with /opt/langtools/lib/end.o.\n"
+		 "GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -282,10 +280,9 @@ GDB will be unable to track shl_load/shl_unload calls"));
   msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning (_("\
-Unable to find __dld_d_trap symbol in object file.\n\
-Suggest linking with /opt/langtools/lib/end.o.\n\
-GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("Unable to find __dld_d_trap symbol in object file.\n"
+		 "Suggest linking with /opt/langtools/lib/end.o.\n"
+		 "GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   create_solib_event_breakpoint (target_gdbarch,
@@ -768,8 +765,9 @@ som_solib_get_got_by_pc (CORE_ADDR addr)
   return got_value;
 }
 
-/* Return the address of the handle of the shared library in which ADDR belongs.
-   If ADDR isn't in any known shared library, return zero.  */
+/* Return the address of the handle of the shared library in which
+   ADDR belongs.  If ADDR isn't in any known shared library, return
+   zero.  */
 /* this function is used in initialize_hp_cxx_exception_support in 
    hppa-hpux-tdep.c  */
 
