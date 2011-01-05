@@ -248,6 +248,7 @@ static const struct rx_reloc_map rx_reloc_map [] =
   { BFD_RELOC_RX_RELAX,		R_RX_RH_RELAX },
   { BFD_RELOC_RX_SYM,		R_RX_SYM },
   { BFD_RELOC_RX_OP_SUBTRACT,	R_RX_OPsub },
+  { BFD_RELOC_RX_OP_NEG,	R_RX_OPneg },
   { BFD_RELOC_RX_ABS8,		R_RX_ABS8 },
   { BFD_RELOC_RX_ABS16,		R_RX_ABS16 },
   { BFD_RELOC_RX_ABS16_REV,	R_RX_ABS16_REV },

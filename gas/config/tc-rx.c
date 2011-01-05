@@ -2405,6 +2405,24 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       reloc[4] = NULL;
       break;
 
+    case BFD_RELOC_RX_NEG32:
+      reloc[0]->howto         = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_SYM);
+
+      reloc[1]		    = (arelent *) xmalloc (sizeof (arelent));
+      reloc[1]->howto       = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_OP_NEG);
+      reloc[1]->addend      = 0;
+      reloc[1]->sym_ptr_ptr = reloc[0]->sym_ptr_ptr;
+      reloc[1]->address     = fixp->fx_frag->fr_address + fixp->fx_where;
+
+      reloc[2]		    = (arelent *) xmalloc (sizeof (arelent));
+      reloc[2]->howto       = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS32);
+      reloc[2]->addend      = 0;
+      reloc[2]->sym_ptr_ptr = reloc[0]->sym_ptr_ptr;
+      reloc[2]->address     = fixp->fx_frag->fr_address + fixp->fx_where;
+
+      reloc[3] = NULL;
+      break;
+
     default:
       reloc[0]->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
       reloc[1] = NULL;

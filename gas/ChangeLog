@@ -1,3 +1,8 @@
+2011-01-05  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rx.c (tc_gen_reloc): Emit an RX_OP_NEG expression
+	instead of an RH_NEG32 one.
+
 2011-01-05  Jonathan Wakely  <jwakely.gcc@gmail.com>
 
 	* doc/c-i386.texi: Clarify --n32.

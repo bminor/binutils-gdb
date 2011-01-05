@@ -1,3 +1,10 @@
+2011-01-05  DJ Delorie  <dj@redhat.com>
+
+	* reloc.c: Add BFD_RELOC_RX_OP_NEG.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* elf32-rx.c: Add it to the list, corresponding to R_RX_OPneg.
+
 2011-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* cpu-i386.c (bfd_i386_compatible): New.
