@@ -321,7 +321,8 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
     value = value_ind (value);
 
   str_obj = gdbpy_create_lazy_string_object (value_address (value), length,
-					     user_encoding, value_type (value));
+					     user_encoding,
+					     value_type (value));
 
   return (PyObject *) str_obj;
 }
@@ -1178,7 +1179,8 @@ convert_value_from_python (PyObject *obj)
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
-	PyErr_Format (PyExc_TypeError, _("Could not convert Python object: %s."),
+	PyErr_Format (PyExc_TypeError,
+		      _("Could not convert Python object: %s."),
 		      PyString_AsString (PyObject_Str (obj)));
     }
   if (except.reason < 0)
@@ -1238,7 +1240,8 @@ static PyGetSetDef value_object_getset[] = {
   { "address", valpy_get_address, NULL, "The address of the value.",
     NULL },
   { "is_optimized_out", valpy_get_is_optimized_out, NULL,
-    "Boolean telling whether the value is optimized out (i.e., not available).",
+    "Boolean telling whether the value is optimized "
+    "out (i.e., not available).",
     NULL },
   { "type", valpy_get_type, NULL, "Type of the value.", NULL },
   { "dynamic_type", valpy_get_dynamic_type, NULL,
@@ -1258,7 +1261,8 @@ Cast the value to the supplied type, as if by the C++\n\
 reinterpret_cast operator."
   },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
-  { "lazy_string", (PyCFunction) valpy_lazy_string, METH_VARARGS | METH_KEYWORDS,
+  { "lazy_string", (PyCFunction) valpy_lazy_string,
+    METH_VARARGS | METH_KEYWORDS,
     "lazy_string ([encoding]  [, length]) -> lazy_string\n\
 Return a lazy string representation of the value." },
   { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
@@ -1320,7 +1324,8 @@ PyTypeObject value_object_type = {
   0,				  /*tp_getattro*/
   0,				  /*tp_setattro*/
   0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES
+  | Py_TPFLAGS_BASETYPE,	  /*tp_flags*/
   "GDB value object",		  /* tp_doc */
   0,				  /* tp_traverse */
   0,				  /* tp_clear */

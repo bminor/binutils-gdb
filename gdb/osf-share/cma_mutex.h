@@ -50,7 +50,8 @@ typedef struct CMA__T_INT_MUTEX {
     struct CMA__T_INT_MUTEX *int_lock;	/* Internal protection for mutex */
     cma__t_atomic_bit	event;		/* Clear when unlock requires action */
     cma__t_atomic_bit	waiters;	/* Clear when threads are waiting */
-    cma__t_atomic_bit	bitbucket;	/* Fake bit to keep friendlies locked */
+    cma__t_atomic_bit	bitbucket;	/* Fake bit to keep friendlies
+					   locked */
     cma_t_mutex_kind	mutex_kind;	/* Kind of mutex */
     cma__t_semaphore	semaphore;	/* Semaphore for low-level wait */
     } cma__t_int_mutex;
@@ -144,7 +145,8 @@ typedef struct CMA__T_INT_MUTEX {
 	cma__assert_warn ( \
 		(__utcb__ == ((cma__t_int_mutex *)mutex)->owner), \
 		"attempt to release mutx owned by another thread"); \
-	((cma__t_int_mutex *)mutex)->owner = (cma__t_int_tcb *)cma_c_null_ptr; \
+	((cma__t_int_mutex *) mutex)->owner			    \
+	  = (cma__t_int_tcb *)cma_c_null_ptr;	\
 	} \
     cma__unset (((cma__t_int_mutex *)mutex)->unlock); \
     if (!cma__test_and_set (&((cma__t_int_mutex *)mutex)->event)) { \

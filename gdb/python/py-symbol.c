@@ -339,7 +339,8 @@ gdbpy_initialize_symbols (void)
   PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_BLOCK", LOC_BLOCK);
   PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_CONST_BYTES",
 			   LOC_CONST_BYTES);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNRESOLVED", LOC_UNRESOLVED);
+  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNRESOLVED",
+			   LOC_UNRESOLVED);
   PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_OPTIMIZED_OUT",
 			   LOC_OPTIMIZED_OUT);
   PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_COMPUTED", LOC_COMPUTED);
@@ -367,7 +368,8 @@ static PyGetSetDef symbol_object_getset[] = {
   { "name", sympy_get_name, NULL,
     "Name of the symbol, as it appears in the source code.", NULL },
   { "linkage_name", sympy_get_linkage_name, NULL,
-    "Name of the symbol, as used by the linker (i.e., may be mangled).", NULL },
+    "Name of the symbol, as used by the linker (i.e., may be mangled).",
+    NULL },
   { "print_name", sympy_get_print_name, NULL,
     "Name of the symbol in a form suitable for output.\n\
 This is either name or linkage_name, depending on whether the user asked GDB\n\

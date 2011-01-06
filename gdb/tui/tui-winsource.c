@@ -328,7 +328,8 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 
       if (win_info->generic.type == SRC_WIN)
 	{
-	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+	  struct symtab_and_line cursal
+	    = get_current_source_symtab_and_line ();
 
 	  if (cursal.symtab == NULL)
 	    s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
@@ -337,11 +338,12 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 	}
 
       if (direction == LEFT_SCROLL)
-	offset = win_info->detail.source_info.horizontal_offset + num_to_scroll;
+	offset = win_info->detail.source_info.horizontal_offset
+	  + num_to_scroll;
       else
 	{
-	  if ((offset =
-	     win_info->detail.source_info.horizontal_offset - num_to_scroll) < 0)
+	  if ((offset = win_info->detail.source_info.horizontal_offset
+	       - num_to_scroll) < 0)
 	    offset = 0;
 	}
       win_info->detail.source_info.horizontal_offset = offset;
@@ -436,7 +438,8 @@ tui_update_breakpoint_info (struct tui_win_info *win,
       int mode;
       struct tui_source_element *line;
 
-      line = &((struct tui_win_element *) win->generic.content[i])->which_element.source;
+      line = &((struct tui_win_element *)
+	       win->generic.content[i])->which_element.source;
       if (current_only && !line->is_exec_point)
          continue;
 
@@ -490,9 +493,11 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
 {
   enum tui_status ret = TUI_SUCCESS;
 
-  if (win_info->detail.source_info.execution_info != (struct tui_gen_win_info *) NULL)
+  if (win_info->detail.source_info.execution_info
+      != (struct tui_gen_win_info *) NULL)
     {
-      struct tui_gen_win_info *exec_info_ptr = win_info->detail.source_info.execution_info;
+      struct tui_gen_win_info *exec_info_ptr
+	= win_info->detail.source_info.execution_info;
 
       if (exec_info_ptr->content == NULL)
 	exec_info_ptr->content =
@@ -510,7 +515,8 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
               int mode;
 
 	      element = (struct tui_win_element *) exec_info_ptr->content[i];
-	      src_element = (struct tui_win_element *) win_info->generic.content[i];
+	      src_element = (struct tui_win_element *)
+		win_info->generic.content[i];
 
               memset(element->which_element.simple_string, ' ',
                      sizeof(element->which_element.simple_string));
@@ -547,7 +553,8 @@ tui_set_exec_info_content (struct tui_win_info *win_info)
 void
 tui_show_exec_info_content (struct tui_win_info *win_info)
 {
-  struct tui_gen_win_info *exec_info = win_info->detail.source_info.execution_info;
+  struct tui_gen_win_info *exec_info
+    = win_info->detail.source_info.execution_info;
   int cur_line;
 
   werase (exec_info->handle);
@@ -566,7 +573,8 @@ tui_show_exec_info_content (struct tui_win_info *win_info)
 void
 tui_erase_exec_info_content (struct tui_win_info *win_info)
 {
-  struct tui_gen_win_info *exec_info = win_info->detail.source_info.execution_info;
+  struct tui_gen_win_info *exec_info
+    = win_info->detail.source_info.execution_info;
 
   werase (exec_info->handle);
   tui_refresh_win (exec_info);
@@ -608,7 +616,8 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
 	xmalloc ((max_lines * line_width) * sizeof (char));
       if (src_line_buf == (char *) NULL)
 	{
-	  fputs_unfiltered ("Unable to Allocate Memory for Source or Disassembly Display.\n",
+	  fputs_unfiltered ("Unable to Allocate Memory for "
+			    "Source or Disassembly Display.\n",
 			    gdb_stderr);
 	  return TUI_FAILURE;
 	}
@@ -617,7 +626,8 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
 	   (void **) tui_alloc_content (max_lines, SRC_WIN)) == NULL)
 	{
 	  xfree (src_line_buf);
-	  fputs_unfiltered ("Unable to Allocate Memory for Source or Disassembly Display.\n",
+	  fputs_unfiltered ("Unable to Allocate Memory for "
+			    "Source or Disassembly Display.\n",
 			    gdb_stderr);
 	  return TUI_FAILURE;
 	}

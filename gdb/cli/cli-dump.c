@@ -668,13 +668,13 @@ _initialize_cli_dump (void)
 {
   struct cmd_list_element *c;
 
-  add_prefix_cmd ("dump", class_vars, dump_command, _("\
-Dump target code/data to a local file."),
+  add_prefix_cmd ("dump", class_vars, dump_command,
+		  _("Dump target code/data to a local file."),
 		  &dump_cmdlist, "dump ",
 		  0/*allow-unknown*/,
 		  &cmdlist);
-  add_prefix_cmd ("append", class_vars, append_command, _("\
-Append target code/data to a local file."),
+  add_prefix_cmd ("append", class_vars, append_command,
+		  _("Append target code/data to a local file."),
 		  &append_cmdlist, "append ",
 		  0/*allow-unknown*/,
 		  &cmdlist);
@@ -689,32 +689,32 @@ Write the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION to\n\
 the specified FILE in raw target ordered bytes.");
 
-  add_prefix_cmd ("srec", all_commands, srec_dump_command, _("\
-Write target code/data to an srec file."),
+  add_prefix_cmd ("srec", all_commands, srec_dump_command,
+		  _("Write target code/data to an srec file."),
 		  &srec_cmdlist, "dump srec ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("ihex", all_commands, ihex_dump_command, _("\
-Write target code/data to an intel hex file."),
+  add_prefix_cmd ("ihex", all_commands, ihex_dump_command,
+		  _("Write target code/data to an intel hex file."),
 		  &ihex_cmdlist, "dump ihex ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("tekhex", all_commands, tekhex_dump_command, _("\
-Write target code/data to a tekhex file."),
+  add_prefix_cmd ("tekhex", all_commands, tekhex_dump_command,
+		  _("Write target code/data to a tekhex file."),
 		  &tekhex_cmdlist, "dump tekhex ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("binary", all_commands, binary_dump_command, _("\
-Write target code/data to a raw binary file."),
+  add_prefix_cmd ("binary", all_commands, binary_dump_command,
+		  _("Write target code/data to a raw binary file."),
 		  &binary_dump_cmdlist, "dump binary ", 
 		  0 /*allow-unknown*/, 
 		  &dump_cmdlist);
 
-  add_prefix_cmd ("binary", all_commands, binary_append_command, _("\
-Append target code/data to a raw binary file."),
+  add_prefix_cmd ("binary", all_commands, binary_append_command,
+		  _("Append target code/data to a raw binary file."),
 		  &binary_append_cmdlist, "append binary ", 
 		  0 /*allow-unknown*/, 
 		  &append_cmdlist);

@@ -175,21 +175,25 @@ typedef enum CMA_T_DEBUG_SET {
 /* 
  * Routine to register with the CMA debug dispatcher.
  */
-extern void     cma_debug_register (cma_t_address,cma_t_key,cma_t_integer,cma_t_boolean);
+extern void cma_debug_register (cma_t_address, 
+				cma_t_key,cma_t_integer, cma_t_boolean);
 
 /* 
  * Routine to get get thread state needed by the CMA debug client.
  */
-extern void     cma_debug_get (cma_t_thread *,cma_t_debug_get,cma_t_address,cma_t_integer);
+extern void cma_debug_get (cma_t_thread *,
+			   cma_t_debug_get, cma_t_address,cma_t_integer);
 
 /* 
  * Get thread context given an sp and a key 
  */
-extern void cma_debug_get_sp_context    (cma_t_address,cma_t_key,cma_t_address *);
+extern void cma_debug_get_sp_context (cma_t_address,
+				      cma_t_key, cma_t_address *);
 
 /* 
  * Routine to set thread state as needed by the CMA debug client.
  */
-extern void     cma_debug_set (cma_t_thread *,cma_t_debug_set,cma_t_address,cma_t_integer);
+extern void cma_debug_set (cma_t_thread *,
+			   cma_t_debug_set, cma_t_address,cma_t_integer);
 
 #endif

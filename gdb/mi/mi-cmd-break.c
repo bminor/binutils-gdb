@@ -103,7 +103,8 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 
   while (1)
     {
-      int opt = mi_getopt ("mi_cmd_break_insert", argc, argv, opts, &optind, &optarg);
+      int opt = mi_getopt ("mi_cmd_break_insert", argc, argv,
+			   opts, &optind, &optarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)

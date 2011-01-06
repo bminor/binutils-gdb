@@ -221,7 +221,8 @@ error_no_arg (char *why)
 static void
 info_command (char *arg, int from_tty)
 {
-  printf_unfiltered (_("\"info\" must be followed by the name of an info command.\n"));
+  printf_unfiltered (_("\"info\" must be followed by "
+		       "the name of an info command.\n"));
   help_list (infolist, "info ", -1, gdb_stdout);
 }
 
@@ -468,8 +469,8 @@ static void
 show_script_ext_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Script filename extension recognition is \"%s\".\n"),
+  fprintf_filtered (file,
+		    _("Script filename extension recognition is \"%s\".\n"),
 		    value);
 }
 
@@ -899,7 +900,8 @@ list_command (char *arg, int from_tty)
   if (strcmp (arg, "-") == 0)
     {
       print_source_lines (cursal.symtab,
-			  max (get_first_line_listed () - get_lines_to_list (), 1),
+			  max (get_first_line_listed () 
+			       - get_lines_to_list (), 1),
 			  get_first_line_listed (), 0);
       return;
     }
@@ -1293,7 +1295,8 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 static void
 set_debug (char *arg, int from_tty)
 {
-  printf_unfiltered (_("\"set debug\" must be followed by the name of a debug subcommand.\n"));
+  printf_unfiltered (_("\"set debug\" must be followed by "
+		       "the name of a debug subcommand.\n"));
   help_list (setdebuglist, "set debug ", -1, gdb_stdout);
 }
 
@@ -1338,8 +1341,9 @@ show_info_verbose (struct ui_file *file, int from_tty,
 		   const char *value)
 {
   if (info_verbose)
-    fprintf_filtered (file, _("\
-Verbose printing of informational messages is %s.\n"), value);
+    fprintf_filtered (file,
+		      _("Verbose printing of informational messages is %s.\n"),
+		      value);
   else
     fprintf_filtered (file, _("Verbosity is %s.\n"), value);
 }
@@ -1372,8 +1376,8 @@ static void
 show_remote_timeout (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Timeout limit to wait for target to respond is %s.\n"),
+  fprintf_filtered (file,
+		    _("Timeout limit to wait for target to respond is %s.\n"),
 		    value);
 }
 
@@ -1381,8 +1385,8 @@ static void
 show_max_user_call_depth (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-The max call depth for user-defined commands is %s.\n"),
+  fprintf_filtered (file,
+		    _("The max call depth for user-defined commands is %s.\n"),
 		    value);
 }
 
@@ -1403,7 +1407,8 @@ These commands are subject to frequent change, and may not be as\n\
 well documented as user commands."),
 	   &cmdlist);
   add_cmd ("obscure", class_obscure, NULL, _("Obscure features."), &cmdlist);
-  add_cmd ("aliases", class_alias, NULL, _("Aliases of other commands."), &cmdlist);
+  add_cmd ("aliases", class_alias, NULL,
+	   _("Aliases of other commands."), &cmdlist);
   add_cmd ("user-defined", class_user, NULL, _("\
 User-defined commands.\n\
 The commands in this class are those defined by the user.\n\
@@ -1616,7 +1621,8 @@ Lines can be specified in these ways:\n\
   FUNCTION, to list around beginning of that function,\n\
   FILE:FUNCTION, to distinguish among like-named static functions.\n\
   *ADDRESS, to list around the line containing that address.\n\
-With two args if one is empty it stands for ten lines away from the other arg."));
+With two args if one is empty it stands for ten lines away from \
+the other arg."));
 
   if (!xdb_commands)
     add_com_alias ("l", "list", class_files, 1);

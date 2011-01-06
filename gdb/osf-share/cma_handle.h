@@ -165,18 +165,21 @@ typedef struct CMA__T_INT_HANDLE {
 
 extern void cma__clear_handle (cma_t_handle *);
 
-extern void cma__object_to_handle (cma__t_object *,cma_t_handle *);
+extern void cma__object_to_handle (cma__t_object *, cma_t_handle *);
 
 extern cma__t_int_attr * cma__validate_default_attr (cma_t_handle *);
 
-extern cma_t_status cma__val_defattr_stat (cma_t_handle *,cma__t_int_attr **);
+extern cma_t_status cma__val_defattr_stat (cma_t_handle *, cma__t_int_attr **);
 
-extern cma__t_object * cma__validate_handle (cma_t_handle *,cma_t_natural );
+extern cma__t_object * cma__validate_handle (cma_t_handle *, cma_t_natural );
 
-extern cma_t_status cma__val_hand_stat (cma_t_handle *,cma_t_natural,cma__t_object **);
+extern cma_t_status cma__val_hand_stat (cma_t_handle *,
+					cma_t_natural, cma__t_object **);
 
-extern 	cma__t_object	*cma__validate_handle_null (cma_t_handle *,cma_t_natural);
+extern cma__t_object *cma__validate_handle_null (cma_t_handle *,
+						 cma_t_natural);
 
-extern cma_t_status cma__val_handnull_stat (cma_t_handle *,cma_t_natural,cma__t_object **);
+extern cma_t_status cma__val_handnull_stat (cma_t_handle *,
+					    cma_t_natural, cma__t_object **);
 
 #endif

@@ -170,7 +170,8 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 	  /* An error occurred computing the string representation of the
 	     error message.  This is rare, but we should inform the user.  */
 	  printf_filtered (_("An error occurred in a Python command\n"
-			     "and then another occurred computing the error message.\n"));
+			     "and then another occurred computing the "
+			     "error message.\n"));
 	  gdbpy_print_stack ();
 	}
 
@@ -420,7 +421,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       return -1;
     }
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "si|iO", keywords, &name, &cmdtype,
+  if (! PyArg_ParseTupleAndKeywords (args, kw, "si|iO",
+				     keywords, &name, &cmdtype,
 			  &completetype, &is_prefix))
     return -1;
 
@@ -437,7 +439,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
   if (completetype < -1 || completetype >= (int) N_COMPLETERS)
     {
-      PyErr_Format (PyExc_RuntimeError, _("Invalid completion type argument."));
+      PyErr_Format (PyExc_RuntimeError,
+		    _("Invalid completion type argument."));
       return -1;
     }
 

@@ -468,8 +468,10 @@ tui_set_layout_for_display_command (const char *layout_name)
 		 up this code.  - edie epstein  */
 	      if (subset_compare (buf_ptr, TUI_FLOAT_REGS_NAME))
 		{
-		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type != TUI_SFLOAT_REGS
-		      && TUI_DATA_WIN->detail.data_display_info.regs_display_type != TUI_DFLOAT_REGS)
+		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type
+		      != TUI_SFLOAT_REGS
+		      && TUI_DATA_WIN->detail.data_display_info.regs_display_type
+		      != TUI_DFLOAT_REGS)
 		    dpy_type = TUI_SFLOAT_REGS;
 		  else
 		    dpy_type =
@@ -484,8 +486,8 @@ tui_set_layout_for_display_command (const char *layout_name)
 		dpy_type = TUI_SPECIAL_REGS;
 	      else if (TUI_DATA_WIN)
 		{
-		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type !=
-		      TUI_UNDEFINED_REGS)
+		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type
+		      != TUI_UNDEFINED_REGS)
 		    dpy_type =
 		      TUI_DATA_WIN->detail.data_display_info.regs_display_type;
 		  else

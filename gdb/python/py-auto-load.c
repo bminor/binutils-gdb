@@ -486,7 +486,8 @@ an executable or shared library."),
 			   &setlist,
 			   &showlist);
 
-  add_cmd ("section-scripts", class_maintenance, maintenance_print_section_scripts,
+  add_cmd ("section-scripts", class_maintenance,
+	   maintenance_print_section_scripts,
 	   _("Print dump of auto-loaded section scripts matching REGEXP."),
 	   &maintenanceprintlist);
 }

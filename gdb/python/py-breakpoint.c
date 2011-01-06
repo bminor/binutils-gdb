@@ -58,7 +58,8 @@ struct breakpoint_object
 #define BPPY_REQUIRE_VALID(Breakpoint)					\
     do {								\
       if ((Breakpoint)->bp == NULL)					\
-	return PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
+	return PyErr_Format (PyExc_RuntimeError,                        \
+			     _("Breakpoint %d is invalid."),		\
 			     (Breakpoint)->number);			\
     } while (0)
 
@@ -66,7 +67,7 @@ struct breakpoint_object
    exception if it is invalid.  This macro is for use in setter functions.  */
 #define BPPY_SET_REQUIRE_VALID(Breakpoint)				\
     do {								\
-      if ((Breakpoint)->bp == NULL)						\
+      if ((Breakpoint)->bp == NULL)					\
         {								\
 	  PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
 			(Breakpoint)->number);				\

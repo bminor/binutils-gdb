@@ -20,8 +20,9 @@
 #ifndef MI_COMMON_H
 #define MI_COMMON_H
 
-/* Represents the reason why GDB is sending an asynchronous command to the
-   front end.  NOTE: When modifing this, don't forget to update gdb.texinfo!  */
+/* Represents the reason why GDB is sending an asynchronous command to
+   the front end.  NOTE: When modifing this, don't forget to update
+   gdb.texinfo!  */
 enum async_reply_reason
 {
   EXEC_ASYNC_BREAKPOINT_HIT = 0,

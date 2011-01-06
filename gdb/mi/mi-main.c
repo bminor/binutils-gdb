@@ -96,7 +96,7 @@ static void mi_cmd_execute (struct mi_parse *parse);
 static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
 static void mi_execute_async_cli_command (char *cli_command, 
-							char **argv, int argc);
+					  char **argv, int argc);
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
 static void get_register (struct frame_info *, int regnum, int format);
@@ -240,7 +240,9 @@ exec_continue (char **argv, int argc)
 
 	  if (!current_context->all)
 	    {
-	      struct inferior *inf = find_inferior_id (current_context->thread_group);
+	      struct inferior *inf
+		= find_inferior_id (current_context->thread_group);
+
 	      pid = inf->pid;
 	    }
 	  iterate_over_threads (proceed_thread_callback, &pid);
@@ -830,7 +832,8 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 	  else if (strcmp (optarg, "1") == 0)
 	    recurse = 1;
 	  else
-	    error ("only '0' and '1' are valid values for the '--recurse' option");
+	    error ("only '0' and '1' are valid values "
+		   "for the '--recurse' option");
 	  break;
 	}
     }
@@ -981,7 +984,8 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	    continue;
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
-	    error ("mi_cmd_data_list_changed_registers: Unable to read register contents.");
+	    error ("mi_cmd_data_list_changed_registers: "
+		   "Unable to read register contents.");
 	  else if (changed)
 	    ui_out_field_int (uiout, NULL, regnum);
 	}
@@ -999,7 +1003,8 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	{
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
-	    error ("mi_cmd_data_list_register_change: Unable to read register contents.");
+	    error ("mi_cmd_data_list_register_change: "
+		   "Unable to read register contents.");
 	  else if (changed)
 	    ui_out_field_int (uiout, NULL, regnum);
 	}
@@ -1058,7 +1063,8 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
      upon the particular processor being debugged.  */
 
   if (argc == 0)
-    error ("mi_cmd_data_list_register_values: Usage: -data-list-register-values <format> [<regnum1>...<regnumN>]");
+    error ("mi_cmd_data_list_register_values: Usage: "
+	   "-data-list-register-values <format> [<regnum1>...<regnumN>]");
 
   format = (int) argv[0][0];
 
@@ -1160,7 +1166,8 @@ get_register (struct frame_info *frame, int regnum, int format)
 
 /* Write given values into registers. The registers and values are
    given as pairs.  The corresponding MI command is 
-   -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]*/
+   -data-write-register-values <format>
+                               [<regnum1> <value1>...<regnumN> <valueN>] */
 void
 mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 {
@@ -1180,7 +1187,8 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   if (argc == 0)
-    error ("mi_cmd_data_write_register_values: Usage: -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]");
+    error ("mi_cmd_data_write_register_values: Usage: -data-write-register-"
+	   "values <format> [<regnum1> <value1>...<regnumN> <valueN>]");
 
   format = (int) argv[0][0];
 
@@ -1191,7 +1199,8 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
     error ("mi_cmd_data_write_register_values: No regs and values specified.");
 
   if ((argc - 1) % 2)
-    error ("mi_cmd_data_write_register_values: Regs and vals are not in pairs.");
+    error ("mi_cmd_data_write_register_values: "
+	   "Regs and vals are not in pairs.");
 
   for (i = 1; i < argc; i = i + 2)
     {
@@ -1231,7 +1240,8 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   if (argc != 1)
     {
       ui_out_stream_delete (stb);
-      error ("mi_cmd_data_evaluate_expression: Usage: -data-evaluate-expression expression");
+      error ("mi_cmd_data_evaluate_expression: "
+	     "Usage: -data-evaluate-expression expression");
     }
 
   expr = parse_expression (argv[0]);
@@ -1317,7 +1327,8 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   argc -= optind;
 
   if (argc < 5 || argc > 6)
-    error ("mi_cmd_data_read_memory: Usage: ADDR WORD-FORMAT WORD-SIZE NR-ROWS NR-COLS [ASCHAR].");
+    error ("mi_cmd_data_read_memory: Usage: "
+	   "ADDR WORD-FORMAT WORD-SIZE NR-ROWS NR-COLS [ASCHAR].");
 
   /* Extract all the arguments. */
 
@@ -1410,7 +1421,8 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
 	cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	ui_out_field_core_addr (uiout, "addr", gdbarch, addr + row_byte);
-	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
+	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr +
+	   row_byte); */
 	cleanup_list_data = make_cleanup_ui_out_list_begin_end (uiout, "data");
 	get_formatted_print_options (&opts, word_format);
 	for (col = 0, col_byte = row_byte;
@@ -1435,7 +1447,8 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	    int byte;
 
 	    ui_file_rewind (stream->stream);
-	    for (byte = row_byte; byte < row_byte + word_size * nr_cols; byte++)
+	    for (byte = row_byte;
+		 byte < row_byte + word_size * nr_cols; byte++)
 	      {
 		if (byte >= nr_bytes)
 		  {
@@ -1600,7 +1613,8 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   argc -= optind;
 
   if (argc != 4)
-    error ("mi_cmd_data_write_memory: Usage: [-o COLUMN_OFFSET] ADDR FORMAT WORD-SIZE VALUE.");
+    error ("mi_cmd_data_write_memory: Usage: "
+	   "[-o COLUMN_OFFSET] ADDR FORMAT WORD-SIZE VALUE.");
 
   /* Extract all the arguments.  */
   /* Start address of the memory dump.  */

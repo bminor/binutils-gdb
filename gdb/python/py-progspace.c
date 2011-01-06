@@ -185,7 +185,8 @@ gdbpy_initialize_pspace (void)
     return;
 
   Py_INCREF (&pspace_object_type);
-  PyModule_AddObject (gdb_module, "Progspace", (PyObject *) &pspace_object_type);
+  PyModule_AddObject (gdb_module, "Progspace",
+		      (PyObject *) &pspace_object_type);
 }
 
 

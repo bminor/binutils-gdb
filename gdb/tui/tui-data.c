@@ -503,7 +503,8 @@ init_content_element (struct tui_win_element *element,
     case DATA_WIN:
       tui_init_generic_part (&element->which_element.data_window);
       element->which_element.data_window.type = DATA_ITEM_WIN;
-      ((struct tui_gen_win_info *) & element->which_element.data_window)->content =
+      ((struct tui_gen_win_info *)
+       &element->which_element.data_window)->content =
 	(void **) tui_alloc_content (1, DATA_ITEM_WIN);
       ((struct tui_gen_win_info *)
        & element->which_element.data_window)->content_size = 1;
@@ -544,7 +545,8 @@ init_win_info (struct tui_win_info *win_info)
     {
     case SRC_WIN:
     case DISASSEM_WIN:
-      win_info->detail.source_info.execution_info = (struct tui_gen_win_info *) NULL;
+      win_info->detail.source_info.execution_info
+	= (struct tui_gen_win_info *) NULL;
       win_info->detail.source_info.has_locator = FALSE;
       win_info->detail.source_info.horizontal_offset = 0;
       win_info->detail.source_info.gdbarch = NULL;
@@ -646,7 +648,8 @@ tui_add_content_elements (struct tui_gen_win_info *win_info,
 
   if (win_info->content == NULL)
     {
-      win_info->content = (void **) tui_alloc_content (num_elements, win_info->type);
+      win_info->content = (void **) tui_alloc_content (num_elements,
+						       win_info->type);
       index_start = 0;
     }
   else
@@ -831,7 +834,8 @@ tui_del_data_windows (tui_win_content content,
      element.  */
   for (i = 0; i < content_size; i++)
     {
-      struct tui_gen_win_info *generic_win = &content[i]->which_element.data_window;
+      struct tui_gen_win_info *generic_win
+	= &content[i]->which_element.data_window;
 
       if (generic_win != (struct tui_gen_win_info *) NULL)
 	{
@@ -854,7 +858,8 @@ tui_free_data_content (tui_win_content content,
      element.  */
   for (i = 0; i < content_size; i++)
     {
-      struct tui_gen_win_info *generic_win = &content[i]->which_element.data_window;
+      struct tui_gen_win_info *generic_win
+	= &content[i]->which_element.data_window;
 
       if (generic_win != (struct tui_gen_win_info *) NULL)
 	{

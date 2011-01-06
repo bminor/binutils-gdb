@@ -151,6 +151,54 @@
 	* xml-syscall.c: Ditto.
 	* xml-tdesc.c: Ditto.
 
+2011-01-05  Michael Snyder  <msnyder@vmware.com>
+
+	* cli/cli-cmds.c: Shorten lines of >= 80 columns.
+	* cli/cli-decode.c: Ditto.
+	* cli/cli-dump.c: Ditto.
+	* cli/cli-logging.c: Ditto.
+	* cli/cli-script.c: Ditto.
+	* cli/cli-setshow.c: Ditto.
+	* common/signals.c: Ditto.
+	* mi/mi-cmd-break.c: Ditto.
+	* mi/mi-cmd-disas.c: Ditto.
+	* mi/mi-cmd-stack.c: Ditto.
+	* mi/mi-cmd-var.c: Ditto.
+	* mi/mi-cmds.c: Ditto.
+	* mi/mi-common.h: Ditto.
+	* mi/mi-console.c: Ditto.
+	* mi/mi-interp.c: Ditto.
+	* mi/mi-main.c: Ditto.
+	* osf-share/cma_attr.c: Ditto.
+	* osf-share/cma_deb_core.h: Ditto.
+	* osf-share/cma_debug_client.h: Ditto.
+	* osf-share/cma_handle.h: Ditto.
+	* osf-share/cma_mutex.h: Ditto.
+	* osf-share/cma_stack_int.h: Ditto.
+	* osf-share/cma_tcb_defs.h: Ditto.
+	* python/py-auto-load.c: Ditto.
+	* python/py-breakpoint.c: Ditto.
+	* python/py-cmd.c: Ditto.
+	* python/py-frame.c: Ditto.
+	* python/py-objfile.c: Ditto.
+	* python/py-param.c: Ditto.
+	* python/py-progspace.c: Ditto.
+	* python/py-symbol.c: Ditto.
+	* python/py-value.c: Ditto.
+	* python/python-internal.h: Ditto.
+	* python/python.c: Ditto.
+	* tui/tui-data.c: Ditto.
+	* tui/tui-disasm.c: Ditto.
+	* tui/tui-hooks.c: Ditto.
+	* tui/tui-io.c: Ditto.
+	* tui/tui-layout.c: Ditto.
+	* tui/tui-regs.c: Ditto.
+	* tui/tui-source.c: Ditto.
+	* tui/tui-stack.c: Ditto.
+	* tui/tui-win.c: Ditto.
+	* tui/tui-windata.c: Ditto.
+	* tui/tui-winsource.c: Ditto.
+
 2011-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac, gdb.1: Copyright year update.

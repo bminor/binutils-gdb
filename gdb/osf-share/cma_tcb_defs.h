@@ -100,7 +100,8 @@ typedef struct CMA__T_TCB_TIME {
 typedef enum CMA__T_DEBEVT {
 	cma__c_debevt_activating = 1,	/* First transition to running */
 	cma__c_debevt_running = 2,	/* Any transition to running */
-	cma__c_debevt_preempting = 3,	/* Preemted (replaced) another thread */
+	cma__c_debevt_preempting = 3,	/* Preemted (replaced) another
+					   thread */
 	cma__c_debevt_blocking = 4,	/* Any transition to blocked */
 	cma__c_debevt_terminating = 5,	/* Final state transition */
 	cma__c_debevt_term_alert = 6,	/* Terminated due to alert/cancel */
@@ -135,7 +136,8 @@ typedef enum CMA__T_SUBSTATE {
  * Per-thread state for the debugger
  */
 typedef struct CMA__T_TCB_DEBUG {
-    cma_t_boolean	on_hold;	/* Thread was put on hold by debugger */
+    cma_t_boolean	on_hold;	/* Thread was put on hold by
+					   debugger */
     cma_t_boolean	activated;	/* Activation event was reported */
     cma_t_boolean	did_preempt;	/* Thread preempted prior one */
     cma_t_address	start_pc;	/* Start routine address */
@@ -151,7 +153,8 @@ typedef struct CMA__T_TCB_DEBUG {
     } cma__t_tcb_debug;
 
 typedef struct CMA__T_TCB_SCHED {
-    cma_t_integer	adj_time;	/* Abs. time in ticks of last prio adj */
+    cma_t_integer	adj_time;	/* Abs. time in ticks of last
+					   prio adj */
     cma_t_integer	tot_time;	/* Weighted ave in ticks (scaled) */
     cma_t_integer	time_stamp;	/* Abs. time in ticks of last update */
     cma_t_integer	cpu_time;	/* Weighted average in ticks */
@@ -160,7 +163,8 @@ typedef struct CMA__T_TCB_SCHED {
     cma_t_priority	priority;	/* Thread priority */
     cma_t_sched_policy  policy;         /* Scheduling policy of thread */
     cma_t_boolean	rtb;		/* "Run 'Till Block" scheduling */
-    cma_t_boolean	spp;		/* "Strict Priority Preemption" sched */
+    cma_t_boolean	spp;		/* "Strict Priority
+					   Preemption" sched */
     cma_t_boolean	fixed_prio;	/* Fixed priority */
     cma__t_sched_class	class;		/* Scheduling class */
     struct CMA__T_VP	*processor;	/* Current processor (if running) */
@@ -194,9 +198,10 @@ typedef enum CMA__T_THKIND {
 #define cma__c_thkind__dim (cma__c_thkind__last + 1)
 
 typedef enum CMA__T_SYSCALL_STATE {
-	cma__c_syscall_ok = 1,                      /* syscall was not interrupted */
-	cma__c_syscall_intintrpt = 1,       /* syscall was interrupted by VTALRM */
-	cma__c_syscall_extintrpt = 2        /* syscall was interrupted by external signal */
+	cma__c_syscall_ok = 1,          /* syscall was not interrupted */
+	cma__c_syscall_intintrpt = 1,   /* syscall was interrupted by VTALRM */
+	cma__c_syscall_extintrpt = 2    /* syscall was interrupted by
+					   external signal */
 	} cma__t_syscall_state;
 
 
@@ -210,7 +215,8 @@ typedef struct CMA__T_INT_TCB {
      */
     cma__t_object	header;		/* Common object header */
     cma__t_tcb_pad	pad1;		/* Pad required to align prolog */
-    cma_t_tcb_prolog	prolog;		/* Standard prolog for tasks, threads */
+    cma_t_tcb_prolog	prolog;		/* Standard prolog for tasks,
+					   threads */
 
     /* 
      * Floating part of TCB (fields here on are free to be moved and resized).
@@ -224,7 +230,8 @@ typedef struct CMA__T_INT_TCB {
     struct CMA__T_INT_CV 
 			*term_cv;	/* CV for join */
     struct CMA__T_INT_MUTEX 
-			*tswait_mutex;	/* Mutex for thread-synchronous waits */
+			*tswait_mutex;	/* Mutex for
+					   thread-synchronous waits */
     struct CMA__T_INT_CV 
 			*tswait_cv;	/* CV for thread-synchronous waits */
     cma_t_start_routine	start_code;	/* Address of start routine */
@@ -246,10 +253,13 @@ typedef struct CMA__T_INT_TCB {
 # endif
     struct sigaction	sigaction_data[NSIG];
 #endif
-    cma_t_natural       syscall_state; /* set if one of the cma wrapped syscalls was interrupted. */
+    cma_t_natural       syscall_state; /* set if one of the cma
+					  wrapped syscalls was
+					  interrupted. */
     cma_t_boolean	detached;	/* Set if already detached */
     cma_t_boolean	terminated;	/* Set if terminated */
-    cma_t_integer	joiners;	/* Count of joiners, for zombie frees */
+    cma_t_integer	joiners;	/* Count of joiners, for
+					   zombie frees */
     cma__t_int_alert	alert;		/* Current alert state info */
     struct CMA__T_INT_CV 
 			*wait_cv;	/* CV thread is currently waiting on */

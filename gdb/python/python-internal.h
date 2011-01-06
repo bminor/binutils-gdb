@@ -114,7 +114,8 @@ PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
 PyObject *gdbpy_block_for_pc (PyObject *self, PyObject *args);
 PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
-					   const char *encoding, struct type *type);
+					   const char *encoding,
+					   struct type *type);
 PyObject *gdbpy_inferiors (PyObject *unused, PyObject *unused2);
 PyObject *gdbpy_selected_thread (PyObject *self, PyObject *args);
 PyObject *gdbpy_string_to_argv (PyObject *self, PyObject *args);

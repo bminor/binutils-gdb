@@ -61,8 +61,9 @@ static void
 show_logging_overwrite (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("\
-Whether logging overwrites or appends to the log file is %s.\n"),
+  fprintf_filtered (file,
+		    _("Whether logging overwrites or "
+		      "appends to the log file is %s.\n"),
 		    value);
 }
 
@@ -258,13 +259,12 @@ set_logging_off (char *args, int from_tty)
 static void
 set_logging_command (char *args, int from_tty)
 {
-  printf_unfiltered (_("\
-\"set logging\" lets you log output to a file.\n\
-Usage: set logging on [FILENAME]\n\
-       set logging off\n\
-       set logging file FILENAME\n\
-       set logging overwrite [on|off]\n\
-       set logging redirect [on|off]\n"));
+  printf_unfiltered (_("\"set logging\" lets you log output to a file.\n"
+		       "Usage: set logging on [FILENAME]\n"
+		       "       set logging off\n"
+		       "       set logging file FILENAME\n"
+		       "       set logging overwrite [on|off]\n"
+		       "       set logging redirect [on|off]\n"));
 }
 
 static void

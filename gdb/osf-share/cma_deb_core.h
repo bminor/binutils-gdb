@@ -87,7 +87,8 @@ typedef struct CMA__T_DEBUG_STATE {
     cma__t_int_mutex	*mutex;		    /* Mutex for registering clients */
     cma_t_integer	client_count;	    /* Count of debug clients */
     cma__t_deb_registry	clients[cma__c_deb_max_clients+1];
-					    /* Array of current debug clients */
+					    /* Array of current debug
+					       clients */
     } cma__t_debug_state;
 
 
@@ -122,30 +123,36 @@ extern cma__t_known_object	cma__g_known_threads;
  */
 
 /* Get information while in debugger context */
-extern void cma__deb_get 
-           (cma__t_int_tcb *,cma_t_debug_get,cma_t_address,cma_t_integer,cma_t_integer);
+extern void cma__deb_get (cma__t_int_tcb *,
+			  cma_t_debug_get,
+			  cma_t_address,
+			  cma_t_integer,cma_t_integer);
 
 /* Set information while in debugger context */
-extern void cma__deb_set (cma__t_int_tcb *,cma_t_debug_set,cma_t_address,cma_t_integer);
+extern void cma__deb_set (cma__t_int_tcb *, cma_t_debug_set,
+			  cma_t_address, cma_t_integer);
 
 extern void cma__init_debug (void);
 
 extern void cma__reinit_debug (cma_t_integer);
 
-extern void cma__deb_anytcb_to_tcb (cma_t_tcb_header *,cma__t_int_tcb **);
+extern void cma__deb_anytcb_to_tcb (cma_t_tcb_header *, cma__t_int_tcb **);
 
-extern void cma__deb_fac_to_client (cma_t_integer,cma_t_key *);
+extern void cma__deb_fac_to_client (cma_t_integer, cma_t_key *);
 
-extern void cma__deb_get_client_info (cma_t_key,cma_t_address *,cma_t_boolean *);
+extern void cma__deb_get_client_info (cma_t_key, cma_t_address *, 
+				      cma_t_boolean *);
 
-extern void cma__deb_get_context (cma__t_int_tcb *,cma_t_key,cma_t_address *);
+extern void cma__deb_get_context (cma__t_int_tcb *, cma_t_key,cma_t_address *);
 
 extern cma__t_int_tcb *cma__deb_get_self_tcb (void);
 
 extern void cma__deb_get_time_slice (cma_t_interval *);
 
-extern cma__t_int_tcb *cma__deb_next_tcb 
-            (cma__t_int_tcb *,cma_t_integer *,cma_t_integer *,cma_t_boolean *);
+extern cma__t_int_tcb *cma__deb_next_tcb (cma__t_int_tcb *,
+					  cma_t_integer *,
+					  cma_t_integer *,
+					  cma_t_boolean *);
 
 extern cma_t_boolean cma__deb_set_alert (cma__t_int_tcb *);
 
@@ -155,10 +162,13 @@ extern void cma__deb_set_force_dispatch (cma_t_address );
 
 extern void cma__deb_set_time_slice (cma_t_interval);
 
-extern void cma__deb_show_thread 
-     (cma__t_int_tcb *,cma_t_boolean,cma_t_boolean,cma___t_debug_ctx,cma__t_eol_routine,
-                cma__t_eol_routine,cma__t_print_symbol);
+extern void cma__deb_show_thread (cma__t_int_tcb *, cma_t_boolean,
+				  cma_t_boolean, cma___t_debug_ctx,
+				  cma__t_eol_routine,
+				  cma__t_eol_routine, cma__t_print_symbol);
 
 extern void
-cma__deb_show_stats (cma__t_int_tcb *,cma_t_boolean,cma_t_boolean,cma__t_eol_routine,cma__t_eol_routine,cma__t_print_symbol);
+cma__deb_show_stats (cma__t_int_tcb *, cma_t_boolean,
+		     cma_t_boolean, cma__t_eol_routine,
+		     cma__t_eol_routine, cma__t_print_symbol);
 #endif

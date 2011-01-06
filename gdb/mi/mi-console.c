@@ -104,7 +104,8 @@ mi_console_raw_packet (void *data,
       if (mi_console->quote)
 	{
 	  fputs_unfiltered ("\"", mi_console->raw);
-	  fputstrn_unfiltered (buf, length_buf, mi_console->quote, mi_console->raw);
+	  fputstrn_unfiltered (buf, length_buf,
+			       mi_console->quote, mi_console->raw);
 	  fputs_unfiltered ("\"\n", mi_console->raw);
 	}
       else

@@ -513,7 +513,8 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
       && parmclass != var_optional_filename && parmclass != var_filename
       && parmclass != var_zinteger && parmclass != var_enum)
     {
-      PyErr_SetString (PyExc_RuntimeError, _("Invalid parameter class argument."));
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Invalid parameter class argument."));
       return -1;
     }
 

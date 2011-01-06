@@ -35,7 +35,8 @@
  */
 
 #define cma___c_first_free_chunk	0
-#define cma___c_min_count	2	/* Smallest number of chunks to leave */
+#define cma___c_min_count	2	/* Smallest number of chunks
+					   to leave */
 #define cma___c_end		(-1)	/* End of free list (flag) */
 #define cma__c_yellow_size	0
 
@@ -111,7 +112,8 @@ typedef struct CMA___T_INT_HOLE {
 #endif
 
 typedef struct CMA__T_INT_STACK {
-    cma__t_object	header;		/* Common header (sequence, type info */
+    cma__t_object	header;		/* Common header (sequence,
+					   type info */
     cma__t_int_attr	*attributes;	/* Backpointer to attr obj */
     cma___t_cluster	*cluster;	/* Stack's cluster */
     cma_t_address	stack_base;	/* base address of stack */

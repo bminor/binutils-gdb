@@ -40,7 +40,8 @@
 /*
  *  FUNCTIONAL DESCRIPTION:
  *
- *	cma__int_attr_get_priority -  Performs the work of cma_attr_get_priority
+ *	cma__int_attr_get_priority -  Performs the work of 
+ *                                    cma_attr_get_priority
  *
  *  FORMAL PARAMETERS:
  *
@@ -139,7 +140,8 @@
     (_int_att_) = cma__validate_default_attr (_att_); \
     cma__int_lock ((_int_att_)->mutex); \
     (*(_setting_)) \
-        = ((_int_att_)->inherit_sched ? cma_c_sched_inherit : cma_c_sched_use_default); \
+      = ((_int_att_)->inherit_sched \
+	 ? cma_c_sched_inherit : cma_c_sched_use_default);	\
     cma__int_unlock ((_int_att_)->mutex); \
     }
 
@@ -304,7 +306,8 @@ typedef struct CMA__T_CACHE {
 typedef struct CMA__T_INT_ATTR {
     cma__t_object		header;		/* Common header */
     struct CMA__T_INT_ATTR	*attributes;	/* Point to controlling attr */
-    struct CMA__T_INT_MUTEX	*mutex;		/* Serialize access to object */
+    struct CMA__T_INT_MUTEX	*mutex;		/* Serialize access to
+						   object */
     cma_t_priority		priority;	/* Priority of new thread */
     cma_t_sched_policy		policy;		/* Sched policy of thread */
     cma_t_boolean		inherit_sched;	/* Is scheduling inherited? */

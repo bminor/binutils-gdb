@@ -436,7 +436,8 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_decode_line (PyObject *self, PyObject *args)
 {
-  struct symtabs_and_lines sals = { NULL, 0 }; /* Initialize to appease gcc.  */
+  struct symtabs_and_lines sals = { NULL, 0 }; /* Initialize to
+						  appease gcc.  */
   struct symtab_and_line sal;
   char *arg = NULL;
   char *copy = NULL;
@@ -960,7 +961,8 @@ Enables or disables printing of Python stack traces."),
   /* The casts to (char*) are for python 2.4.  */
   PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version);
   PyModule_AddStringConstant (gdb_module, "HOST_CONFIG", (char*) host_name);
-  PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG", (char*) target_name);
+  PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG",
+			      (char*) target_name);
 
   /* gdb.parameter ("data-directory") doesn't necessarily exist when the python
      script below is run (depending on order of _initialize_* functions).

@@ -254,8 +254,10 @@ void
 tui_install_hooks (void)
 {
   deprecated_target_wait_hook = tui_target_wait_hook;
-  deprecated_selected_frame_level_changed_hook = tui_selected_frame_level_changed_hook;
-  deprecated_print_frame_info_listing_hook = tui_print_frame_info_listing_hook;
+  deprecated_selected_frame_level_changed_hook
+    = tui_selected_frame_level_changed_hook;
+  deprecated_print_frame_info_listing_hook
+    = tui_print_frame_info_listing_hook;
 
   deprecated_query_hook = tui_query_hook;
 

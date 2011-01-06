@@ -282,8 +282,8 @@ tui_show_register_group (struct reggroup *group,
 
 	  data_item_win =
             &display_info->regs_content[pos]->which_element.data_window;
-          data =
-            &((struct tui_win_element *) data_item_win->content[0])->which_element.data;
+          data = &((struct tui_win_element *)
+		   data_item_win->content[0])->which_element.data;
           if (data)
             {
               if (!refresh_values_only)
@@ -331,7 +331,8 @@ tui_display_registers_from (int start_element_no)
           char *p;
           int len;
 
-          data_item_win = &display_info->regs_content[i]->which_element.data_window;
+          data_item_win
+	    = &display_info->regs_content[i]->which_element.data_window;
           data = &((struct tui_win_element *)
                    data_item_win->content[0])->which_element.data;
           len = 0;
@@ -376,7 +377,7 @@ tui_display_registers_from (int start_element_no)
 	      data_item_win = &display_info->regs_content[i]
                 ->which_element.data_window;
 	      data_element_ptr = &((struct tui_win_element *)
-				 data_item_win->content[0])->which_element.data;
+				   data_item_win->content[0])->which_element.data;
               if (data_item_win->handle != (WINDOW*) NULL
                   && (data_item_win->height != 1
                       || data_item_win->width != item_win_width
@@ -417,7 +418,8 @@ static void
 tui_display_reg_element_at_line (int start_element_no,
 				 int start_line_no)
 {
-  if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL
+  if (TUI_DATA_WIN->detail.data_display_info.regs_content
+      != (tui_win_content) NULL
       && TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
       int element_no = start_element_no;
@@ -427,7 +429,8 @@ tui_display_reg_element_at_line (int start_element_no,
 	  int last_line_no, first_line_on_last_page;
 
 	  last_line_no = tui_last_regs_line_no ();
-	  first_line_on_last_page = last_line_no - (TUI_DATA_WIN->generic.height - 2);
+	  first_line_on_last_page
+	    = last_line_no - (TUI_DATA_WIN->generic.height - 2);
 	  if (first_line_on_last_page < 0)
 	    first_line_on_last_page = 0;
 
@@ -437,7 +440,8 @@ tui_display_reg_element_at_line (int start_element_no,
 	     display at.  */
 	  if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0
 	      && start_line_no > first_line_on_last_page)
-	    element_no = tui_first_reg_element_no_inline (first_line_on_last_page);
+	    element_no
+	      = tui_first_reg_element_no_inline (first_line_on_last_page);
 	}
       tui_display_registers_from (element_no);
     }
@@ -475,7 +479,8 @@ tui_display_registers_from_line (int line_no,
 	line = line_no;
 
       element_no = tui_first_reg_element_no_inline (line);
-      if (element_no < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
+      if (element_no
+	  < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
 	tui_display_reg_element_at_line (element_no, line);
       else
 	line = (-1);

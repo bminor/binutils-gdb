@@ -279,7 +279,8 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
    containing that list.  */
 
 struct cmd_list_element *
-add_prefix_cmd (char *name, enum command_class class, void (*fun) (char *, int),
+add_prefix_cmd (char *name, enum command_class class,
+		void (*fun) (char *, int),
 		char *doc, struct cmd_list_element **prefixlist,
 		char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)
@@ -1378,7 +1379,8 @@ lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
 	  for (c = local_list; c; c = c->next)
 	    if (!strncmp (*line, c->name, amb_len))
 	      {
-		if (strlen (ambbuf) + strlen (c->name) + 6 < (int) sizeof ambbuf)
+		if (strlen (ambbuf) + strlen (c->name) + 6
+		    < (int) sizeof ambbuf)
 		  {
 		    if (strlen (ambbuf))
 		      strcat (ambbuf, ", ");
@@ -1751,7 +1753,7 @@ complete_on_enum (const char *enumlist[],
   else
     {
       matchlist = (char **) xrealloc ((char *) matchlist, ((matches + 1)
-							* sizeof (char *)));
+							   * sizeof (char *)));
       matchlist[matches] = (char *) 0;
     }
 

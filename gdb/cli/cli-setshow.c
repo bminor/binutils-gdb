@@ -352,7 +352,8 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	      break;
 	    default:
 	      internal_error (__FILE__, __LINE__,
-			      _("do_setshow_command: invalid var_auto_boolean"));
+			      _("do_setshow_command: "
+				"invalid var_auto_boolean"));
 	      break;
 	    }
 	  break;

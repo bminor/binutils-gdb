@@ -186,7 +186,8 @@ tui_puts (const char *string)
     }
   getyx (w, TUI_CMD_WIN->detail.command_info.cur_line,
          TUI_CMD_WIN->detail.command_info.curch);
-  TUI_CMD_WIN->detail.command_info.start_line = TUI_CMD_WIN->detail.command_info.cur_line;
+  TUI_CMD_WIN->detail.command_info.start_line
+    = TUI_CMD_WIN->detail.command_info.cur_line;
 
   /* We could defer the following.  */
   wrefresh (w);
@@ -328,7 +329,8 @@ printable_part (char *pathname)
 {
   char *temp;
 
-  temp = rl_filename_completion_desired ? strrchr (pathname, '/') : (char *)NULL;
+  temp = rl_filename_completion_desired
+    ? strrchr (pathname, '/') : (char *)NULL;
 #if defined (__MSDOS__)
   if (rl_filename_completion_desired 
       && temp == 0 && isalpha (pathname[0]) 

@@ -128,12 +128,12 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   if (!((line_seen && file_seen && num_seen && !start_seen && !end_seen)
 	|| (line_seen && file_seen && !num_seen && !start_seen && !end_seen)
 	|| (!line_seen && !file_seen && !num_seen && start_seen && end_seen)))
-    error
-      ("mi_cmd_disassemble: Usage: ( [-f filename -l linenum [-n howmany]] | [-s startaddr -e endaddr]) [--] mixed_mode.");
+    error ("mi_cmd_disassemble: Usage: ( [-f filename -l linenum [-n "
+	   "howmany]] | [-s startaddr -e endaddr]) [--] mixed_mode.");
 
   if (argc != 1)
-    error
-      ("mi_cmd_disassemble: Usage: [-f filename -l linenum [-n howmany]] [-s startaddr -e endaddr] [--] mixed_mode.");
+    error ("mi_cmd_disassemble: Usage: [-f filename -l "
+	   "linenum [-n howmany]] [-s startaddr -e endaddr] [--] mixed_mode.");
 
   mixed_source_and_assembly = atoi (argv[0]);
   if ((mixed_source_and_assembly != 0) && (mixed_source_and_assembly != 1))
@@ -151,7 +151,8 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
       if (!find_line_pc (s, line_num, &start))
 	error (_("mi_cmd_disassemble: Invalid line number"));
       if (find_pc_partial_function (start, NULL, &low, &high) == 0)
-	error (_("mi_cmd_disassemble: No function contains specified address"));
+	error (_("mi_cmd_disassemble: "
+		 "No function contains specified address"));
     }
 
   gdb_disassembly (gdbarch, uiout,
