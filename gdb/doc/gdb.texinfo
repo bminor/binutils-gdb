@@ -22536,9 +22536,30 @@ obtained.
 @end defmethod
 
 @defmethod Frame type
-Returns the type of the frame.  The value can be one of
-@code{gdb.NORMAL_FRAME}, @code{gdb.DUMMY_FRAME}, @code{gdb.SIGTRAMP_FRAME}
-or @code{gdb.SENTINEL_FRAME}.
+Returns the type of the frame.  The value can be one of:
+@table @code
+@item gdb.NORMAL_FRAME
+An ordinary stack frame.
+
+@item gdb.DUMMY_FRAME
+A fake stack frame that was created by @value{GDBN} when performing an
+inferior function call.
+
+@item gdb.INLINE_FRAME
+A frame representing an inlined function.  The function was inlined
+into a @code{gdb.NORMAL_FRAME} that is older than this one.
+
+@item gdb.SIGTRAMP_FRAME
+A signal trampoline frame.  This is the frame created by the OS when
+it calls into a signal handler.
+
+@item gdb.ARCH_FRAME
+A fake stack frame representing a cross-architecture call.
+
+@item gdb.SENTINEL_FRAME
+This is like @code{gdb.NORMAL_FRAME}, but it is only used for the
+newest frame.
+@end table
 @end defmethod
 
 @defmethod Frame unwind_stop_reason

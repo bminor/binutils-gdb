@@ -1,3 +1,9 @@
+2011-01-06  Tom Tromey  <tromey@redhat.com>
+
+	PR python/12133:
+	* gdb.texinfo (Frames In Python): Document various frame
+	constants.
+
 2011-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* doc/agentexpr.texi, doc/all-cfg.texi, doc/annotate.texinfo,

@@ -204,7 +204,7 @@ enum frame_type
      call.  */
   DUMMY_FRAME,
   /* A frame representing an inlined function, associated with an
-     upcoming (next, inner, younger) NORMAL_FRAME.  */
+     upcoming (prev, outer, older) NORMAL_FRAME.  */
   INLINE_FRAME,
   /* In a signal handler, various OSs handle this in various ways.
      The main thing is that the frame may be far from normal.  */
