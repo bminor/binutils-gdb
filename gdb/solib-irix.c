@@ -572,8 +572,8 @@ irix_current_sos (void)
 	  if (name_size >= SO_NAME_MAX_PATH_SIZE)
 	    {
 	      name_size = SO_NAME_MAX_PATH_SIZE - 1;
-	      warning ("current_sos: truncating name of "
-		       "%d characters to only %d characters",
+	      warning (_("current_sos: truncating name of "
+		         "%d characters to only %d characters"),
 		       lm.pathname_len, name_size);
 	    }
 

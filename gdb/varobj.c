@@ -2060,8 +2060,8 @@ uninstall_variable (struct varobj *var)
 	    }
 	  if (cr == NULL)
 	    {
-	      warning ("Assertion failed: Could not find "
-		       "varobj \"%s\" in root list",
+	      warning (_("Assertion failed: Could not find "
+		         "varobj \"%s\" in root list"),
 		       var->obj_name);
 	      return;
 	    }

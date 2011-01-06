@@ -1,5 +1,12 @@
 2011-01-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* linespec.c (decode_compound, find_method): Remove trailing \n
+	at end of error string.
+	* solib-irix.c (irix_current_sos): Likewise.
+	* varobj.c (uninstall_variable): Likewise.
+
+2011-01-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py: New script.
 	* copyright.sh (byhand): Add *.ads, *.adb, *.gpr and *.inc.
 	Launch emacs without exec'ing. Call copyright.py afterwards.

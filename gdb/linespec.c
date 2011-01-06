@@ -1460,7 +1460,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	    {
 	      xfree (values.sals);
 	      error (_("the class `%s' does not have "
-		       "any method instance named %s\n"),
+		       "any method instance named %s"),
 		     SYMBOL_PRINT_NAME (sym_class), copy);
 	    }
 	}
@@ -1625,7 +1625,7 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 	    }
 
 	  error (_("the class `%s' does not have "
-		   "any method instance named %s\n"),
+		   "any method instance named %s"),
 		 SYMBOL_PRINT_NAME (sym_class), copy);
 	}
 
