@@ -1563,7 +1563,7 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_EXT_V6T2, 0xf0009000, 0xf800d000, "b%c.w\t%B%x"},
 
   /* These have been 32-bit since the invention of Thumb.  */
-  {ARM_EXT_V4T,  0xf000c000, 0xf800d000, "blx%c\t%B%x"},
+  {ARM_EXT_V4T,  0xf000c000, 0xf800d001, "blx%c\t%B%x"},
   {ARM_EXT_V4T,  0xf000d000, 0xf800d000, "bl%c\t%B%x"},
 
   /* Fallback.  */
