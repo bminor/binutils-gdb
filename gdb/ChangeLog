@@ -1,5 +1,11 @@
 2011-01-06  Joel Brobecker  <brobecker@adacore.com>
 
+	Do not stop on SIGPRIO signals by default
+	* infrun.c (_initialize_infrun): Unset signal_stop and
+	signal_print for TARGET_SIGNAL_PRIO.
+
+2011-01-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c: Fix style violation in comment.
 
 2011-01-06  Joel Brobecker  <brobecker@adacore.com>

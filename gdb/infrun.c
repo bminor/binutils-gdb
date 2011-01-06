@@ -6927,6 +6927,8 @@ leave it stopped or free to run as needed."),
   signal_print[TARGET_SIGNAL_URG] = 0;
   signal_stop[TARGET_SIGNAL_WINCH] = 0;
   signal_print[TARGET_SIGNAL_WINCH] = 0;
+  signal_stop[TARGET_SIGNAL_PRIO] = 0;
+  signal_print[TARGET_SIGNAL_PRIO] = 0;
 
   /* These signals are used internally by user-level thread
      implementations.  (See signal(5) on Solaris.)  Like the above
