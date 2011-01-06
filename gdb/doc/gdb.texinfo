@@ -19955,6 +19955,11 @@ The default is off.  @file{infrun.c} contains GDB's runtime state machine used
 for implementing operations such as single-stepping the inferior.
 @item show debug infrun
 Displays the current state of @value{GDBN} inferior debugging.
+@item set debug jit
+@cindex just-in-time compilation, debugging messages
+Turns on or off debugging messages from JIT debug support.
+@item show debug jit
+Displays the current state of @value{GDBN} JIT debugging.
 @item set debug lin-lwp
 @cindex @sc{gnu}/Linux LWP debug messages
 @cindex Linux lightweight processes

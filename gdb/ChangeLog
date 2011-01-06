@@ -1,3 +1,13 @@
+2010-01-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* jit.h (struct jit_code_entry): use ULONGEST for symfile_size.
+	* jit.c (jit_debug): New variable.
+	(show_jit_debug): New function.
+	(struct target_buffer): Use ULONGEST.
+	(bfd_open_from_target_memory): Likewise.
+	(jit_register_code, jit_inferior_init): Add debug output.
+	(_initialize_jit): Register "debug jit" command.
+
 2011-01-06  Tom Tromey  <tromey@redhat.com>
 
 	* frame.h (enum frame_type) <INLINE_FRAME>: Fix comment.

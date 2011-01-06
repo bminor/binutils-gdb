@@ -42,7 +42,7 @@ struct jit_code_entry
   CORE_ADDR next_entry;
   CORE_ADDR prev_entry;
   CORE_ADDR symfile_addr;
-  uint64_t symfile_size;
+  ULONGEST symfile_size;
 };
 
 /* This is the global descriptor that the inferior uses to communicate

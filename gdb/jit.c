@@ -21,6 +21,8 @@
 
 #include "jit.h"
 #include "breakpoint.h"
+#include "command.h"
+#include "gdbcmd.h"
 #include "gdbcore.h"
 #include "observer.h"
 #include "objfiles.h"
@@ -48,6 +50,17 @@ static CORE_ADDR jit_descriptor_addr = 0;
 
 static int registering_code = 0;
 
+/* Non-zero if we want to see trace of jit level stuff.  */
+
+static int jit_debug = 0;
+
+static void
+show_jit_debug (struct ui_file *file, int from_tty,
+		struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("JIT debugging is %s.\n"), value);
+}
+
 /* Helper cleanup function to clear an integer flag like the one above.  */
 
 static void
@@ -59,7 +72,7 @@ clear_int (void *int_addr)
 struct target_buffer
 {
   CORE_ADDR base;
-  size_t size;
+  ULONGEST size;
 };
 
 /* Openning the file is a no-op.  */
@@ -118,7 +131,7 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 /* Open a BFD from the target's memory.  */
 
 static struct bfd *
-bfd_open_from_target_memory (CORE_ADDR addr, size_t size, char *target)
+bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
 {
   const char *filename = xstrdup ("<in-memory>");
   struct target_buffer *buffer = xmalloc (sizeof (struct target_buffer));
@@ -219,6 +232,13 @@ jit_register_code (struct gdbarch *gdbarch,
   const struct bfd_arch_info *b;
   CORE_ADDR *entry_addr_ptr;
 
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"jit_register_code, symfile_addr = %s, "
+			"symfile_size = %s\n",
+			paddress (gdbarch, code_entry->symfile_addr),
+			pulongest (code_entry->symfile_size));
+
   nbfd = bfd_open_from_target_memory (code_entry->symfile_addr,
                                       code_entry->symfile_size, gnutarget);
   old_cleanups = make_cleanup_bfd_close (nbfd);
@@ -314,6 +334,11 @@ jit_inferior_init (struct gdbarch *gdbarch)
   struct jit_code_entry cur_entry;
   CORE_ADDR cur_entry_addr;
 
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"jit_inferior_init, registering_code = %d\n",
+			registering_code);
+
   /* When we register code, GDB resets its breakpoints in case symbols have
      changed.  That in turn calls this handler, which makes us look for new
      code again.  To avoid being re-entered, we check this flag.  */
@@ -329,6 +354,10 @@ jit_inferior_init (struct gdbarch *gdbarch)
   if (reg_addr == 0)
     return;
 
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog, "jit_inferior_init, reg_addr = %s\n",
+			paddress (gdbarch, reg_addr));
+
   /* Lookup the descriptor symbol and cache the addr.  If it is missing, we
      assume we are not attached to a JIT and return early.  */
   desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL, NULL);
@@ -337,6 +366,11 @@ jit_inferior_init (struct gdbarch *gdbarch)
   jit_descriptor_addr = SYMBOL_VALUE_ADDRESS (desc_symbol);
   if (jit_descriptor_addr == 0)
     return;
+
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"jit_inferior_init, jit_descriptor_addr = %s\n",
+			paddress (gdbarch, jit_descriptor_addr));
 
   /* Read the descriptor so we can check the version number and load any already
      JITed functions.  */
@@ -453,6 +487,14 @@ extern void _initialize_jit (void);
 void
 _initialize_jit (void)
 {
+  add_setshow_zinteger_cmd ("jit", class_maintenance, &jit_debug, _("\
+Set JIT debugging."), _("\
+Show JIT debugging."), _("\
+When non-zero, JIT debugging is enabled."),
+			    NULL,
+			    show_jit_debug,
+			    &setdebuglist, &showdebuglist);
+
   observer_attach_inferior_created (jit_inferior_created_observer);
   observer_attach_inferior_exit (jit_inferior_exit_hook);
   jit_objfile_data = register_objfile_data ();

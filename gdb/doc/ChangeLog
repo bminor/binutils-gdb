@@ -1,3 +1,7 @@
+2010-01-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+       * gdb.texinfo (Debugging Output): Document "set debug jit".
+
 2011-01-06  Tom Tromey  <tromey@redhat.com>
 
 	PR python/12133:
