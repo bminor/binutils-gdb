@@ -44,7 +44,8 @@
 #  tex (%)
 #  *.defs as C
 #   man
-# So these need to be done by hand, as needed
+# So these need to be done either by hand, as needed, or by the copyright.py
+# script.
 byhand="
 *.s
 *.f
@@ -56,6 +57,10 @@ byhand="
 *.tex
 *.defs
 *.1
+*.ads
+*.adb
+*.gpr
+*.inc
 "
 
 # Files which should not be modified, either because they are
@@ -160,4 +165,6 @@ cat >> copytmp.el <<EOF
 (kill-emacs)
 EOF
 
-exec $EMACS --no-site-file -q -l ./copytmp.el
+$EMACS --no-site-file -q -l ./copytmp.el
+
+python $dir/copyright.py
