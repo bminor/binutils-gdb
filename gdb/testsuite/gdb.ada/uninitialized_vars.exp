@@ -39,14 +39,8 @@ gdb_load ${binfile}
 
 # Start the program; we should land in the program main procedure, before
 # variable initialization.
-if { [gdb_start_cmd] < 0 } {
-    untested start
-    return -1
-}
-
-gdb_test "" \
-         "parse \\(\\) at .*parse.adb.*" \
-         "start"
+set bp_location [gdb_get_line_number "START" ${testdir}/parse.adb]
+runto "parse.adb:$bp_location"
 
 # Check that printing uninitialized variables does not crash the debugger.
 gdb_test "info locals" \

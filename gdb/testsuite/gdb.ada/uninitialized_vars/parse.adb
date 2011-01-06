@@ -19,7 +19,7 @@
 
 with Parse_Controlled;
 
-procedure Parse is
+procedure Parse is -- START
 
    A  : aliased Integer := 1;
 

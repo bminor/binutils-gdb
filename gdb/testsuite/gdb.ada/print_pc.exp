@@ -34,14 +34,8 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-if { [gdb_start_cmd] < 0 } {
-    untested start
-    return -1
-}
-
-gdb_test "" \
-         "dummy \\(\\) at .*dummy.adb:.*" \
-         "start inferior"
+set bp_location [gdb_get_line_number "START" ${testdir}/dummy.adb]
+runto "dummy.adb:$bp_location"
 
 gdb_test "p /x \$pc" \
          "= 0x\[0-9a-zA-Z\]+" \

@@ -19,6 +19,6 @@ with Bar; use Bar;
 procedure Null_Record is
    E : Void_Star := new Empty;
 begin
-   Do_Nothing (E);
+   Do_Nothing (E);  -- START
 end Null_Record;
 

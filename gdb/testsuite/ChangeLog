@@ -1,5 +1,20 @@
 2011-01-06  Joel Brobecker  <brobecker@adacore.com>
 
+	Add marker to be used as anchor for inserting breakpoints.
+	* gdb.ada/null_record/null_record.adb: Add "-- START" comment.
+	* gdb.ada/start/dummy.adb, gdb.ada/uninitialized_vars/parse.adb:
+	Likewise.
+
+	Remove uses of gdb_start_cmd.
+	* gdb.ada/null_record.exp: Remove use of gdb_start_cmd.
+	* gdb.ada/print_pc.exp, gdb.ada/uninitialized_vars.exp: Ditto.
+
+	Do not run testcase if testing with GDBserver.
+	* gdb.ada/exec_changed.exp, gdb.ada/start.exp: Abort as untested
+	if testing with GDBserver.
+
+2011-01-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/complete/foo.adb, gdb.ada/complete/pck.adb,
 	gdb.ada/complete/pck.ads, gdb.ada/print_chars/foo.adb: Add
 	copyright header.

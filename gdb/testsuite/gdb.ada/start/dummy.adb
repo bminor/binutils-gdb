@@ -16,5 +16,5 @@
 
 procedure Dummy is
 begin
-   null;
+   null;  -- START
 end Dummy;
