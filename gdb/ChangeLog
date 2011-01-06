@@ -1,3 +1,7 @@
+2011-01-06  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-frame.c (frapy_block): Use get_frame_block.
+
 2011-01-06  Joel Brobecker  <brobecker@adacore.com>
 
 	Do not stop on SIGPRIO signals by default

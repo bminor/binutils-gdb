@@ -211,20 +211,22 @@ static PyObject *
 frapy_block (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  struct block *block = NULL;
+  struct block *block = NULL, *fn_block;
   volatile struct gdb_exception except;
-  struct symtab_and_line sal;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       FRAPY_REQUIRE_VALID ((frame_object *) self, frame);
-
-      find_frame_sal (frame, &sal);
-      block = block_for_pc (get_frame_address_in_block (frame));
+      block = get_frame_block (frame, NULL);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  if (!sal.symtab || !sal.symtab->objfile)
+  for (fn_block = block;
+       fn_block != NULL && BLOCK_FUNCTION (fn_block) == NULL;
+       fn_block = BLOCK_SUPERBLOCK (fn_block))
+    ;
+
+  if (block == NULL || fn_block == NULL || BLOCK_FUNCTION (fn_block) == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Cannot locate object file for block."));
@@ -232,7 +234,12 @@ frapy_block (PyObject *self, PyObject *args)
     }
 
   if (block)
-    return block_to_block_object (block, sal.symtab->objfile);
+    {
+      struct symtab *symt;
+
+      symt = SYMBOL_SYMTAB (BLOCK_FUNCTION (fn_block));
+      return block_to_block_object (block, symt->objfile);
+    }
 
   Py_RETURN_NONE;
 }
