@@ -1,12 +1,12 @@
         .section .text.foo,"ax",@progbits
         .type foo, @function
 foo:
-        .global foo
-        movl ifunc@GOTPCREL(%rip), %eax
-        movl ifunc(%rip), %eax
+        movl ifunc@GOT(%ecx), %eax
+        movl ifunc@GOTOFF(%ecx), %eax
 	call ifunc@PLT
 	call ifunc
-        movl xxx(%rip), %eax
+        movl xxx@GOT(%ecx), %eax
+        movl xxx, %eax
         ret
 
         .section .text.bar,"ax",@progbits
@@ -22,4 +22,4 @@ ifunc:
 
         .section .data.foo,"aw",@progbits
 xxx:
-	.quad ifunc 
+	.long ifunc 

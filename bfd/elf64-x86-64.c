@@ -1684,23 +1684,10 @@ elf_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
       r_symndx = htab->r_sym (rel->r_info);
       if (r_symndx >= symtab_hdr->sh_info)
 	{
-	  struct elf_x86_64_link_hash_entry *eh;
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  eh = (struct elf_x86_64_link_hash_entry *) h;
-
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	    if (p->sec == sec)
-	      {
-		/* Everything must go for SEC.  */
-		*pp = p->next;
-		break;
-	      }
 	}
       else
 	{
@@ -1718,6 +1705,23 @@ elf_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	      if (h == NULL)
 		abort ();
 	    }
+	}
+
+      if (h)
+	{
+	  struct elf_x86_64_link_hash_entry *eh;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
+
+	  eh = (struct elf_x86_64_link_hash_entry *) h;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1771,7 +1775,8 @@ elf_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
 	case R_X86_64_PC64:
-	  if (info->shared)
+	  if (info->shared
+	      && (h == NULL || h->type != STT_GNU_IFUNC))
 	    break;
 	  /* Fall thru */
 

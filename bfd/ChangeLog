@@ -1,3 +1,16 @@
+2012-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12366
+	PR ld/12371
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Properly
+	handle symbols marked with regular reference, but not non-GOT
+	reference when building shared library.
+
+	* elf32-i386.c (elf_i386_gc_sweep_hook): Properly handle
+	local and global STT_GNU_IFUNC symols when building shared
+	library.
+	* elf64-x86-64.c (elf_x86_64_gc_sweep_hook): Likewise.
+
 2011-01-05  DJ Delorie  <dj@redhat.com>
 
 	* reloc.c: Add BFD_RELOC_RX_OP_NEG.

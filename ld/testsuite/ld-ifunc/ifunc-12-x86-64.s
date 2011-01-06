@@ -1,7 +1,6 @@
         .section .text.foo,"ax",@progbits
         .type foo, @function
 foo:
-        .global foo
         movl ifunc@GOTPCREL(%rip), %eax
         movl ifunc(%rip), %eax
 	call ifunc@PLT

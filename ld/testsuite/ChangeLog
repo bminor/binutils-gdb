@@ -1,3 +1,23 @@
+2012-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12366
+	PR ld/12371
+	* ld-ifunc/ifunc-10-i386.s: Add more tests.
+	* ld-ifunc/ifunc-10-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-11-i386.s: Likewise.
+	* ld-ifunc/ifunc-11-x86-64.s: Likewise.
+
+	* ld-ifunc/ifunc-12-i386.d: New.
+	* ld-ifunc/ifunc-12-i386.s: Likewise.
+	* ld-ifunc/ifunc-12-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-12-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-13-i386.d: Likewise.
+	* ld-ifunc/ifunc-13-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-13a-i386.s: Likewise.
+	* ld-ifunc/ifunc-13a-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-13b-i386.s: Likewise.
+	* ld-ifunc/ifunc-13b-x86-64.s: Likewise.
+
 2011-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/dummy.s: New.
