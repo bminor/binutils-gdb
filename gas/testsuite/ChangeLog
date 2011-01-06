@@ -1,5 +1,10 @@
 2011-01-06  Paul Koning  <ni1d@arrl.net>
 
+	* gas/pdp11/absreloc.s: New.
+	* gas/pdp11/absreloc.d: New.
+
+2011-01-06  Paul Koning  <ni1d@arrl.net>
+
 	* gas/pdp11/opcode.d: Fix expected output for sec instruction.
 
 2011-01-05  Nathan Sidwell  <nathan@codesourcery.com>
