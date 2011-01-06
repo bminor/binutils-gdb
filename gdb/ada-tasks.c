@@ -29,7 +29,7 @@
    Block of each task is stored.  */
 #define KNOWN_TASKS_NAME "system__tasking__debug__known_tasks"
 
-/* The maximum number of tasks known to the Ada runtime */
+/* The maximum number of tasks known to the Ada runtime.  */
 static const int MAX_NUMBER_OF_KNOWN_TASKS = 1000;
 
 enum task_states
