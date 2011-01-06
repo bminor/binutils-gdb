@@ -29,10 +29,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional
   return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${testfile}
 
 # Some global variables used to simplify the maintenance of some of
 # the regular expressions below.

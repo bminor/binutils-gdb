@@ -33,10 +33,7 @@ if {[gdb_compile_ada "${adasrcfile}" "${binfile}" executable [list debug]] != ""
   return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.c]
 runto "foo.c:$bp_location"
