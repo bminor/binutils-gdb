@@ -1,3 +1,9 @@
+2011-01-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/complete/foo.adb, gdb.ada/complete/pck.adb,
+	gdb.ada/complete/pck.ads, gdb.ada/print_chars/foo.adb: Add
+	copyright header.
+
 2011-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* testsuite/configure.ac, testsuite/gdb.arch/gdb1291.s,
