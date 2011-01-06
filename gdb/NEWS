@@ -43,6 +43,9 @@
 
   ** gdb.parameter("directories") is now available.
 
+  ** New function gdb.newest_frame returns the newest frame in the
+     selected thread.
+
 * C++ Improvements:
 
   ** GDB now puts template parameters in scope when debugging in an

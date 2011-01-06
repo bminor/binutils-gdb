@@ -1121,6 +1121,9 @@ static PyMethodDef GdbMethods[] =
   { "objfiles", gdbpy_objfiles, METH_NOARGS,
     "Return a sequence of all loaded objfiles." },
 
+  { "newest_frame", gdbpy_newest_frame, METH_NOARGS,
+    "newest_frame () -> gdb.Frame.\n\
+Return the newest frame object." },
   { "selected_frame", gdbpy_selected_frame, METH_NOARGS,
     "selected_frame () -> gdb.Frame.\n\
 Return the selected frame object." },

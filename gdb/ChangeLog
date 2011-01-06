@@ -1,3 +1,11 @@
+2011-01-06  Tom Tromey  <tromey@redhat.com>
+
+	PR python/12367:
+	* NEWS: Add item.
+	* python/python.c (GdbMethods): Add "newest_frame" method.
+	* python/python-internal.h (gdbpy_newest_frame): Declare.
+	* python/py-frame.c (gdbpy_newest_frame): New function.
+
 2010-01-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* jit.h (struct jit_code_entry): use ULONGEST for symfile_size.

@@ -22519,6 +22519,11 @@ The following frame-related functions are available in the @code{gdb} module:
 Return the selected frame object.  (@pxref{Selection,,Selecting a Frame}).
 @end defun
 
+@findex gdb.newest_frame
+@defun newest_frame
+Return the newest frame object for the selected thread.
+@end defun
+
 @defun frame_stop_reason_string reason
 Return a string explaining the reason why @value{GDBN} stopped unwinding
 frames, as expressed by the given @var{reason} code (an integer, see the

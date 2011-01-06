@@ -498,6 +498,26 @@ frapy_select (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* Implementation of gdb.newest_frame () -> gdb.Frame.
+   Returns the newest frame object.  */
+
+PyObject *
+gdbpy_newest_frame (PyObject *self, PyObject *args)
+{
+  struct frame_info *frame;
+  PyObject *frame_obj = NULL;   /* Initialize to appease gcc warning.  */
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      frame = get_current_frame ();
+      frame_obj = frame_info_to_frame_object (frame);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return frame_obj;
+}
+
 /* Implementation of gdb.selected_frame () -> gdb.Frame.
    Returns the selected frame object.  */
 
