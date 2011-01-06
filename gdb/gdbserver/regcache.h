@@ -93,6 +93,7 @@ void collect_register (struct regcache *regcache, int n, void *buf);
 
 void collect_register_as_string (struct regcache *regcache, int n, char *buf);
 
-void collect_register_by_name (struct regcache *regcache, const char *name, void *buf);
+void collect_register_by_name (struct regcache *regcache,
+			       const char *name, void *buf);
 
 #endif /* REGCACHE_H */

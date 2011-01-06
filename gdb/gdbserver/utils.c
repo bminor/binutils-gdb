@@ -40,7 +40,8 @@ static void malloc_failure (size_t size) ATTR_NORETURN;
 static void
 malloc_failure (size_t size)
 {
-  fprintf (stderr, PREFIX "ran out of memory while trying to allocate %lu bytes\n",
+  fprintf (stderr,
+	   PREFIX "ran out of memory while trying to allocate %lu bytes\n",
 	   (unsigned long) size);
   exit (1);
 }

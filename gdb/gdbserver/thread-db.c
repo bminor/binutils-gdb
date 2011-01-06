@@ -428,7 +428,8 @@ thread_db_find_new_threads (void)
       err = thread_db->td_ta_thr_iter_p (thread_db->thread_agent,
 					 find_new_threads_callback,
 					 &new_thread_count,
-					 TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
+					 TD_THR_ANY_STATE,
+					 TD_THR_LOWEST_PRIORITY,
 					 TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
       if (debug_threads)
 	fprintf (stderr, "Found %d threads in iteration %d.\n",

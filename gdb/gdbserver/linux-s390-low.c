@@ -73,10 +73,14 @@ static int s390_regmap[] = {
 static int s390_regmap_3264[] = {
   PT_PSWMASK, PT_PSWADDR,
 
-  PT_GPR0, PT_GPR0, PT_GPR1, PT_GPR1, PT_GPR2, PT_GPR2, PT_GPR3, PT_GPR3,
-  PT_GPR4, PT_GPR4, PT_GPR5, PT_GPR5, PT_GPR6, PT_GPR6, PT_GPR7, PT_GPR7,
-  PT_GPR8, PT_GPR8, PT_GPR9, PT_GPR9, PT_GPR10, PT_GPR10, PT_GPR11, PT_GPR11,
-  PT_GPR12, PT_GPR12, PT_GPR13, PT_GPR13, PT_GPR14, PT_GPR14, PT_GPR15, PT_GPR15,
+  PT_GPR0, PT_GPR0, PT_GPR1, PT_GPR1,
+  PT_GPR2, PT_GPR2, PT_GPR3, PT_GPR3,
+  PT_GPR4, PT_GPR4, PT_GPR5, PT_GPR5,
+  PT_GPR6, PT_GPR6, PT_GPR7, PT_GPR7,
+  PT_GPR8, PT_GPR8, PT_GPR9, PT_GPR9,
+  PT_GPR10, PT_GPR10, PT_GPR11, PT_GPR11,
+  PT_GPR12, PT_GPR12, PT_GPR13, PT_GPR13,
+  PT_GPR14, PT_GPR14, PT_GPR15, PT_GPR15,
 
   PT_ACR0, PT_ACR1, PT_ACR2, PT_ACR3,
   PT_ACR4, PT_ACR5, PT_ACR6, PT_ACR7,
@@ -138,7 +142,8 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 }
 
 static void
-s390_supply_ptrace_register (struct regcache *regcache, int regno, const char *buf)
+s390_supply_ptrace_register (struct regcache *regcache,
+			     int regno, const char *buf)
 {
   int size = register_size (regno);
   if (size < sizeof (long))

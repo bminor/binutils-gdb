@@ -635,7 +635,8 @@ nto_fetch_registers (struct regcache *regcache, int regno)
 	    {
 	      const unsigned int registeroffset
 		= the_low_target.register_offset (regno);
-	      supply_register (regcache, regno, ((char *)&greg) + registeroffset);
+	      supply_register (regcache, regno,
+			       ((char *)&greg) + registeroffset);
 	    }
 	}
       else

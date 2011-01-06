@@ -1,3 +1,23 @@
+2011-01-05  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* gdbreplay.c: Shorten lines of >= 80 columns.
+	* linux-low.c: Ditto.
+	* linux-ppc-low.c: Ditto.
+	* linux-s390-low.c: Ditto.
+	* linux-sparc-low.c: Ditto.
+	* linux-x86-low.c: Ditto.
+	* linux-xtensa-low.c: Ditto.
+	* mem-break.c: Ditto.
+	* nto-low.c: Ditto.
+	* regcache.h: Ditto.
+	* remote-utils.c: Ditto.
+	* server.c: Ditto.
+	* server.h: Ditto.
+	* thread-db.c: Ditto.
+	* tracepoint.c: Ditto.
+	* utils.c: Ditto.
+	* win32-low.h: Ditto.
+
 2011-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbserver/configure.ac, gdbserver/gdbserver.1: Copyright year

@@ -654,7 +654,8 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 	  if (gdb_read_memory (read_addr, search_buf + keep_len,
 			       nr_to_read) != 0)
 	    {
-	      warning ("Unable to access target memory at 0x%lx, halting search.",
+	      warning ("Unable to access target memory "
+		       "at 0x%lx, halting search.",
 		       (long) read_addr);
 	      return -1;
 	    }
@@ -1638,7 +1639,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
-  if (strncmp ("qSearch:memory:", own_buf, sizeof ("qSearch:memory:") - 1) == 0)
+  if (strncmp ("qSearch:memory:", own_buf,
+	       sizeof ("qSearch:memory:") - 1) == 0)
     {
       require_running (own_buf);
       handle_search_memory (own_buf, packet_len);
@@ -2164,7 +2166,8 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
       if (thread_stopped (thread))
 	{
 	  if (debug_threads)
-	    fprintf (stderr, "Reporting thread %s as already stopped with %s\n",
+	    fprintf (stderr,
+		     "Reporting thread %s as already stopped with %s\n",
 		     target_pid_to_str (entry->id),
 		     target_waitstatus_to_string (&thread->last_status));
 
@@ -2264,7 +2267,8 @@ gdbserver_version (void)
 {
   printf ("GNU gdbserver %s%s\n"
 	  "Copyright (C) 2011 Free Software Foundation, Inc.\n"
-	  "gdbserver is free software, covered by the GNU General Public License.\n"
+	  "gdbserver is free software, covered by the "
+	  "GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",
 	  PKGVERSION, version, host_name);
 }
@@ -2295,7 +2299,8 @@ gdbserver_show_disableable (FILE *stream)
 	   "  vCont       \tAll vCont packets\n"
 	   "  qC          \tQuerying the current thread\n"
 	   "  qfThreadInfo\tThread listing\n"
-	   "  Tthread     \tPassing the thread specifier in the T stop reply packet\n"
+	   "  Tthread     \tPassing the thread specifier in the "
+	   "T stop reply packet\n"
 	   "  threads     \tAll of the above\n");
 }
 

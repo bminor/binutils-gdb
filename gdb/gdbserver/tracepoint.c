@@ -130,8 +130,10 @@ trace_vdebug (const char *fmt, ...)
 # define traceframes_created gdb_agent_traceframes_created
 # define trace_state_variables gdb_agent_trace_state_variables
 # define get_raw_reg gdb_agent_get_raw_reg
-# define get_trace_state_variable_value gdb_agent_get_trace_state_variable_value
-# define set_trace_state_variable_value gdb_agent_set_trace_state_variable_value
+# define get_trace_state_variable_value \
+  gdb_agent_get_trace_state_variable_value
+# define set_trace_state_variable_value \
+  gdb_agent_set_trace_state_variable_value
 # define ust_loaded gdb_agent_ust_loaded
 # define helper_thread_id gdb_agent_helper_thread_id
 # define cmd_buf gdb_agent_cmd_buf
@@ -175,7 +177,7 @@ struct ipa_sym_addresses
 
 #define STRINGIZE_1(STR) #STR
 #define STRINGIZE(STR) STRINGIZE_1(STR)
-#define IPA_SYM(SYM)				\
+#define IPA_SYM(SYM)					\
   {							\
     STRINGIZE (gdb_agent_ ## SYM),			\
     offsetof (struct ipa_sym_addresses, addr_ ## SYM)	\
@@ -4070,7 +4072,9 @@ get_context_regcache (struct tracepoint_hit_ctx *ctx)
 #ifdef HAVE_UST
   if (ctx->type == static_tracepoint)
     {
-      struct static_tracepoint_ctx *sctx = (struct static_tracepoint_ctx *) ctx;
+      struct static_tracepoint_ctx *sctx
+	= (struct static_tracepoint_ctx *) ctx;
+
       if (!sctx->regcache_initted)
 	{
 	  sctx->regcache_initted = 1;
@@ -4895,7 +4899,8 @@ traceframe_read_mem (int tfnum, CORE_ADDR addr,
 
   /* Iterate through a traceframe's blocks, looking for memory.  */
   while ((dataptr = traceframe_find_block_type (dataptr,
-						datasize - (dataptr - database),
+						datasize
+						- (dataptr - database),
 						tfnum, 'M')) != NULL)
     {
       memcpy (&maddr, dataptr, sizeof (maddr));
@@ -4957,7 +4962,8 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
 
   /* Iterate through a traceframe's blocks, looking for the tsv.  */
   while ((dataptr = traceframe_find_block_type (dataptr,
-						datasize - (dataptr - database),
+						datasize
+						- (dataptr - database),
 						tfnum, 'V')) != NULL)
     {
       memcpy (&vnum, dataptr, sizeof (vnum));
@@ -5149,7 +5155,8 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 				  &ipa_gdb_jump_pad_buffer_end))
     fatal ("error extracting `gdb_jump_pad_buffer_end'");
 
-  if (ipa_gdb_jump_pad_buffer <= stop_pc && stop_pc < ipa_gdb_jump_pad_buffer_end)
+  if (ipa_gdb_jump_pad_buffer <= stop_pc
+      && stop_pc < ipa_gdb_jump_pad_buffer_end)
     {
       /* We can tell which tracepoint(s) the thread is collecting by
 	 matching the jump pad address back to the tracepoint.  */
@@ -5539,7 +5546,8 @@ emit_void_call_2 (CORE_ADDR fn, int arg1)
 static enum eval_result_type compile_bytecodes (struct agent_expr *aexpr);
 
 static void
-compile_tracepoint_condition (struct tracepoint *tpoint, CORE_ADDR *jump_entry)
+compile_tracepoint_condition (struct tracepoint *tpoint,
+			      CORE_ADDR *jump_entry)
 {
   CORE_ADDR entry_point = *jump_entry;
   enum eval_result_type err;
@@ -6183,8 +6191,9 @@ download_trace_state_variables (void)
   if (prev_ptr != 0)
     {
       /* Fixup the next pointer in the last item in the list.  */
-      write_inferior_data_ptr (prev_ptr + offsetof (struct trace_state_variable,
-						    next), 0);
+      write_inferior_data_ptr (prev_ptr
+			       + offsetof (struct trace_state_variable,
+					   next), 0);
     }
 }
 
@@ -6222,8 +6231,10 @@ upload_fast_traceframes (void)
     return;
 
   trace_debug ("ipa_traceframe_count (racy area): %d (w=%d, r=%d)",
-	       ipa_traceframe_write_count_racy - ipa_traceframe_read_count_racy,
-	       ipa_traceframe_write_count_racy, ipa_traceframe_read_count_racy);
+	       ipa_traceframe_write_count_racy
+	       - ipa_traceframe_read_count_racy,
+	       ipa_traceframe_write_count_racy,
+	       ipa_traceframe_read_count_racy);
 
   if (ipa_traceframe_write_count_racy == ipa_traceframe_read_count_racy)
     return;
@@ -6368,7 +6379,8 @@ upload_fast_traceframes (void)
 	  block = add_traceframe_block (tframe, ipa_tframe.data_size);
 	  if (block != NULL)
 	    {
-	      if (read_inferior_memory (tf + offsetof (struct traceframe, data),
+	      if (read_inferior_memory (tf
+					+ offsetof (struct traceframe, data),
 					block, ipa_tframe.data_size))
 		error ("Uploading: Couldn't read traceframe data at %s\n",
 		       paddress (tf + offsetof (struct traceframe, data)));
@@ -6416,7 +6428,8 @@ upload_fast_traceframes (void)
 		   curr_tbctrl_idx,
 		   (int) (ipa_trace_buffer_ctrl.start - ipa_trace_buffer_lo),
 		   (int) (ipa_trace_buffer_ctrl.free - ipa_trace_buffer_lo),
-		   (int) (ipa_trace_buffer_ctrl.end_free - ipa_trace_buffer_lo),
+		   (int) (ipa_trace_buffer_ctrl.end_free
+			  - ipa_trace_buffer_lo),
 		   (int) (ipa_trace_buffer_ctrl.wrap - ipa_trace_buffer_lo),
 		   (int) (ipa_trace_buffer_hi - ipa_trace_buffer_lo));
     }
@@ -7137,7 +7150,8 @@ probe_marker_at (char *packet)
 		     "ltt_marker_connect (marker = %s/%s)",
 		     m->channel, m->name);
 
-	result = USTF(ltt_marker_connect) (m->channel, m->name, GDB_PROBE_NAME);
+	result = USTF(ltt_marker_connect) (m->channel, m->name,
+					   GDB_PROBE_NAME);
 	if (result && result != -EEXIST)
 	  trace_debug ("ltt_marker_connect (marker = %s/%s, errno = %d)",
 		       m->channel, m->name, -result);

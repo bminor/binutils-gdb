@@ -71,7 +71,8 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #endif
 
 #ifndef ATTR_NORETURN
-#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
+#if defined(__GNUC__) && (__GNUC__ > 2 \
+			  || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
 #define ATTR_NORETURN __attribute__ ((noreturn))
 #else
 #define ATTR_NORETURN           /* nothing */
@@ -79,7 +80,8 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #endif
 
 #ifndef ATTR_FORMAT
-#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
+#if defined(__GNUC__) && (__GNUC__ > 2 \
+			  || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
 #define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
 #else
 #define ATTR_FORMAT(type, x, y) /* nothing */
@@ -427,7 +429,8 @@ int decode_xfer_write (char *buf, int packet_len, char **annex,
 int decode_search_memory_packet (const char *buf, int packet_len,
 				 CORE_ADDR *start_addrp,
 				 CORE_ADDR *search_space_lenp,
-				 gdb_byte *pattern, unsigned int *pattern_lenp);
+				 gdb_byte *pattern,
+				 unsigned int *pattern_lenp);
 
 int unhexify (char *bin, const char *hex, int count);
 int hexify (char *hex, const char *bin, int count);

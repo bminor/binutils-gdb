@@ -328,7 +328,8 @@ remote_open (char *name)
       if (port == 0)
 	{
 	  socklen_t len = sizeof (sockaddr);
-	  if (getsockname (listen_desc, (struct sockaddr *) &sockaddr, &len) < 0
+	  if (getsockname (listen_desc,
+			   (struct sockaddr *) &sockaddr, &len) < 0
 	      || len < sizeof (sockaddr))
 	    perror_with_name ("Can't determine port");
 	  port = ntohs (sockaddr.sin_port);
@@ -971,7 +972,8 @@ readchar (void)
 
   if (readchar_bufcnt == 0)
     {
-      readchar_bufcnt = read (remote_desc, readchar_buf, sizeof (readchar_buf));
+      readchar_bufcnt = read (remote_desc, readchar_buf,
+			      sizeof (readchar_buf));
 
       if (readchar_bufcnt <= 0)
 	{
@@ -1083,7 +1085,9 @@ getpkt (char *buf)
 
       if (noack_mode)
 	{
-	  fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s [no-ack-mode, Bad medium?]\n",
+	  fprintf (stderr,
+		   "Bad checksum, sentsum=0x%x, csum=0x%x, "
+		   "buf=%s [no-ack-mode, Bad medium?]\n",
 		   (c1 << 4) + c2, csum, buf);
 	  /* Not much we can do, GDB wasn't expecting an ack/nac.  */
 	  break;

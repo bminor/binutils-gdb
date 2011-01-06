@@ -255,7 +255,8 @@ ppc_get_pc (struct regcache *regcache)
     {
       unsigned int pc;
       (*the_target->read_memory) (addr, (unsigned char *) &pc, 4);
-      return ((CORE_ADDR)1 << 63) | ((CORE_ADDR)fd << 32) | (CORE_ADDR) (pc - 4);
+      return ((CORE_ADDR)1 << 63)
+	| ((CORE_ADDR)fd << 32) | (CORE_ADDR) (pc - 4);
     }
   else if (register_size (0) == 4)
     {

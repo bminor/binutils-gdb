@@ -243,7 +243,8 @@ remote_open (char *name)
 
       /* Enable TCP keep alive process. */
       tmp = 1;
-      setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp, sizeof (tmp));
+      setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE,
+		  (char *) &tmp, sizeof (tmp));
 
       /* Tell TCP not to delay small packets.  This greatly speeds up
 	 interactive response. */
@@ -254,8 +255,9 @@ remote_open (char *name)
 #ifndef USE_WIN32API
       close (tmp_desc);		/* No longer need this */
 
-      signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbreplay simply
-					   exits when the remote side dies.  */
+      signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then
+					   gdbreplay simply exits when
+					   the remote side dies.  */
 #else
       closesocket (tmp_desc);	/* No longer need this */
 #endif
@@ -419,7 +421,8 @@ gdbreplay_version (void)
 {
   printf ("GNU gdbreplay %s%s\n"
 	  "Copyright (C) 2011 Free Software Foundation, Inc.\n"
-	  "gdbreplay is free software, covered by the GNU General Public License.\n"
+	  "gdbreplay is free software, covered by "
+	  "the GNU General Public License.\n"
 	  "This gdbreplay was configured as \"%s\"\n",
 	  PKGVERSION, version, host_name);
 }

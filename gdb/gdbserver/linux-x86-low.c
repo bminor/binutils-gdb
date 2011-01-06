@@ -232,7 +232,8 @@ x86_get_thread_area (int lwpid, CORE_ADDR *addr)
     idx = gs >> reg_thread_area;
 
     if (ptrace (PTRACE_GET_THREAD_AREA,
-		lwpid_of (lwp), (void *) (long) idx, (unsigned long) &desc) < 0)
+		lwpid_of (lwp),
+		(void *) (long) idx, (unsigned long) &desc) < 0)
       return -1;
 
     *addr = desc[1];
@@ -659,7 +660,8 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
       int i;
       int pid = ptid_get_pid (ptid);
       struct process_info *proc = find_process_pid (pid);
-      struct i386_debug_reg_state *state = &proc->private->arch_private->debug_reg_state;
+      struct i386_debug_reg_state *state
+	= &proc->private->arch_private->debug_reg_state;
 
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 	x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
@@ -1544,7 +1546,7 @@ add_insns (unsigned char *start, int len)
     {									\
       extern unsigned char start_ ## NAME, end_ ## NAME;		\
       add_insns (&start_ ## NAME, &end_ ## NAME - &start_ ## NAME);	\
-      __asm__ ("jmp end_" #NAME "\n"				\
+      __asm__ ("jmp end_" #NAME "\n"					\
 	       "\t" "start_" #NAME ":"					\
 	       "\t" INSNS "\n"						\
 	       "\t" "end_" #NAME ":");					\

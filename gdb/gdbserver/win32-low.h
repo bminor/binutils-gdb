@@ -55,10 +55,12 @@ struct win32_target_ops
   void (*initial_stuff) (void);
 
   /* Fetch the context from the inferior.  */
-  void (*get_thread_context) (win32_thread_info *th, DEBUG_EVENT *current_event);
+  void (*get_thread_context) (win32_thread_info *th,
+			      DEBUG_EVENT *current_event);
 
   /* Flush the context back to the inferior.  */
-  void (*set_thread_context) (win32_thread_info *th, DEBUG_EVENT *current_event);
+  void (*set_thread_context) (win32_thread_info *th,
+			      DEBUG_EVENT *current_event);
 
   /* Called when a thread was added.  */
   void (*thread_added) (win32_thread_info *th);

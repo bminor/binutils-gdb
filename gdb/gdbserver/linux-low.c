@@ -1668,7 +1668,8 @@ linux_wait_for_event (ptid_t ptid, int *wstat, int options)
       if (event_pid > 0
 	  && ptid_is_pid (ptid) && ptid_get_pid (ptid) != event_pid)
 	{
-	  struct lwp_info *event_child = find_lwp_pid (pid_to_ptid (event_pid));
+	  struct lwp_info *event_child
+	    = find_lwp_pid (pid_to_ptid (event_pid));
 
 	  if (! WIFSTOPPED (*wstat))
 	    mark_lwp_dead (event_child, *wstat);
@@ -2064,7 +2065,9 @@ retry:
 	      ourstatus->value.integer = WEXITSTATUS (w);
 
 	      if (debug_threads)
-		fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
+		fprintf (stderr,
+			 "\nChild exited with retcode = %x \n",
+			 WEXITSTATUS (w));
 	    }
 	  else
 	    {
@@ -2072,7 +2075,9 @@ retry:
 	      ourstatus->value.sig = target_signal_from_host (WTERMSIG (w));
 
 	      if (debug_threads)
-		fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
+		fprintf (stderr,
+			 "\nChild terminated with signal = %x \n",
+			 WTERMSIG (w));
 
 	    }
 
@@ -2296,7 +2301,8 @@ Check if we're already there.\n",
   report_to_gdb = (!maybe_internal_trap
 		   || current_inferior->last_resume_kind == resume_step
 		   || event_child->stopped_by_watchpoint
-		   || (!step_over_finished && !bp_explains_trap && !trace_event)
+		   || (!step_over_finished
+		       && !bp_explains_trap && !trace_event)
 		   || gdb_breakpoint_here (event_child->stop_pc));
 
   /* We found no reason GDB would want us to stop.  We either hit one
@@ -3176,7 +3182,8 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
 	{
 	  if (debug_threads)
 	    fprintf (stderr,
-		     "Need step over [LWP %ld]? yes, found breakpoint at 0x%s\n",
+		     "Need step over [LWP %ld]? yes, "
+		     "found breakpoint at 0x%s\n",
 		     lwpid_of (lwp), paddress (pc));
 
 	  /* We've found an lwp that needs stepping over --- return 1 so
@@ -4045,9 +4052,13 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
   register int count
-  = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1) / sizeof (PTRACE_XFER_TYPE);
+    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
+    / sizeof (PTRACE_XFER_TYPE);
+
   /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+  register PTRACE_XFER_TYPE *buffer = (PTRACE_XFER_TYPE *)
+    alloca (count * sizeof (PTRACE_XFER_TYPE));
+
   int pid = lwpid_of (get_thread_lwp (current_inferior));
 
   if (debug_threads)
@@ -4090,7 +4101,8 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 
   /* Copy data to be written over corresponding part of buffer.  */
 
-  memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), myaddr, len);
+  memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+	  myaddr, len);
 
   /* Write the entire buffer.  */
 
