@@ -342,8 +342,9 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 	  + num_to_scroll;
       else
 	{
-	  if ((offset = win_info->detail.source_info.horizontal_offset
-	       - num_to_scroll) < 0)
+	  offset = win_info->detail.source_info.horizontal_offset
+	    - num_to_scroll;
+	  if (offset < 0)
 	    offset = 0;
 	}
       win_info->detail.source_info.horizontal_offset = offset;

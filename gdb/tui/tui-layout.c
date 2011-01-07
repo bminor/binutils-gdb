@@ -488,8 +488,8 @@ tui_set_layout_for_display_command (const char *layout_name)
 		{
 		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type
 		      != TUI_UNDEFINED_REGS)
-		    dpy_type =
-		      TUI_DATA_WIN->detail.data_display_info.regs_display_type;
+		    dpy_type
+		      = TUI_DATA_WIN->detail.data_display_info.regs_display_type;
 		  else
 		    dpy_type = TUI_GENERAL_REGS;
 		}

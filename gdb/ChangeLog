@@ -1,5 +1,14 @@
 2011-01-07  Michael Snyder  <msnyder@vmware.com>
 
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Mark up error message
+	for i18n.
+	* tui/tui-layout.c (tui_set_layout_for_display_command): 
+	Split line so that operator goes to beginning of line.
+	* tui/tui-winsource.c (tui_horizontal_source_scroll): Move
+	assignment out of if statement.
+
+2011-01-07  Michael Snyder  <msnyder@vmware.com>
+
 	* ada-lang.c: Comment cleanup, mostly periods and spaces.
 	* ada-lang.h: Ditto.
 	* ada-tasks.c: Ditto.
