@@ -1,5 +1,9 @@
 2011-01-06  Paul Koning  <ni1d@arrl.net>
 
+	* gas/pdp11/pdp11.exp: Add run of absreloc.
+	
+2011-01-06  Paul Koning  <ni1d@arrl.net>
+
 	* gas/pdp11/absreloc.s: New.
 	* gas/pdp11/absreloc.d: New.
 
