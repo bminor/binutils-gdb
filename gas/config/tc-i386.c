@@ -725,6 +725,8 @@ static const arch_entry cpu_arch[] =
     CPU_SSE4A_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".abm"), PROCESSOR_UNKNOWN,
     CPU_ABM_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".bmi"), PROCESSOR_UNKNOWN,
+    CPU_BMI_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF

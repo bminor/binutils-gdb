@@ -29,6 +29,7 @@
 .*:58: Error: .*
 .*:60: Error: .*
 .*:62: Error: .*
+.*:64: Error: .*
 GAS LISTING .*
 
 
@@ -98,3 +99,5 @@ GAS LISTING .*
 [ 	]*60[ 	]+xstorerng
 [ 	]*61[ 	]+\# nop
 [ 	]*62[ 	]+nopl \(%eax\)
+[ 	]*63[ 	]+\# BMI
+[ 	]*64[ 	]+blsr %ecx,%ebx

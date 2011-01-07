@@ -1,3 +1,14 @@
+2011-01-07  Quentin Neill  <quentin.neill@amd.com>
+
+	* gas/i386/arch-10.s: Add a BMI instruction.
+	* gas/i386/x86-64-arch-2.s: Likewise.
+	* gas/i386/arch-10.d: Add bmi flag and BMI instruction pattern.
+	* gas/i386/x86-64-arch-2.d: Likewise.
+	* gas/i386/arch-10-1.l: Add BMI instruction pattern.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+
 2011-01-06  Paul Koning  <ni1d@arrl.net>
 
 	* gas/pdp11/pdp11.exp: Add run of absreloc.

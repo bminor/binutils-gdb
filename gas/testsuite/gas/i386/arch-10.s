@@ -60,3 +60,5 @@ lzcnt %ecx,%ebx
 xstorerng
 # nop
 nopl (%eax)
+# BMI
+blsr %ecx,%ebx

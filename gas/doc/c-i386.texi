@@ -35,6 +35,7 @@ extending the Intel architecture to 64-bits.
 * i386-Float::                  Floating Point
 * i386-SIMD::                   Intel's MMX and AMD's 3DNow! SIMD Operations
 * i386-LWP::                    AMD's Lightweight Profiling Instructions
+* i386-BMI::                    Bit Manipulation Instruction
 * i386-16bit::                  Writing 16-bit Code
 * i386-Arch::                   Specifying an x86 CPU architecture
 * i386-Bugs::                   AT&T Syntax bugs
@@ -844,6 +845,21 @@ LWP can be used in both 64-bit and legacy 32-bit modes.
 For detailed information on the LWP instruction set, see the
 @cite{AMD Lightweight Profiling Specification} available at
 @uref{http://developer.amd.com/cpu/LWP,Lightweight Profiling Specification}.
+
+@node i386-BMI
+@section Bit Manipulation Instructions
+
+@cindex BMI, i386
+@cindex BMI, x86-64
+
+@code{@value{AS}} supports the Bit Manipulation (BMI) instruction set.
+
+BMI instructions provide several instructions implementing individual
+bit manipulation operations such as isolation, masking, setting, or
+resetting.  
+
+@c Need to add a specification citation here when available.
+
 
 @node i386-16bit
 @section Writing 16-bit Code
