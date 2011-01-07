@@ -400,7 +400,7 @@ symbol_read_needs_frame (struct symbol *sym)
 
 /* Given a struct symbol for a variable,
    and a stack frame id, read the value of the variable
-   and return a (pointer to a) struct value containing the value. 
+   and return a (pointer to a) struct value containing the value.
    If the variable cannot be found, return a zero pointer.  */
 
 struct value *

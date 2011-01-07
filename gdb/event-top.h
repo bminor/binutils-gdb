@@ -73,7 +73,7 @@ struct prompts
 #define PREFIX(X) the_prompts.prompt_stack[the_prompts.top + X].prefix
 #define SUFFIX(X) the_prompts.prompt_stack[the_prompts.top + X].suffix
 
-/* Exported functions from event-top.c. 
+/* Exported functions from event-top.c.
    FIXME: these should really go into top.h.  */
 
 extern void display_gdb_prompt (char *new_prompt);

@@ -175,7 +175,7 @@ unset_in_environ (struct gdb_environ *e, char *var)
 	  xfree (s);
 	  /* Walk through the vector, shuffling args down by one, including
 	     the NULL terminator.  Can't use memcpy() here since the regions
-	     overlap, and memmove() might not be available. */
+	     overlap, and memmove() might not be available.  */
 	  while ((vector[0] = vector[1]) != NULL)
 	    {
 	      vector++;

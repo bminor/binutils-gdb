@@ -253,7 +253,7 @@ static struct dwarf2_per_objfile *dwarf2_per_objfile;
 
 /* local data types */
 
-/* We hold several abbreviation tables in memory at the same time. */
+/* We hold several abbreviation tables in memory at the same time.  */
 #ifndef ABBREV_HASH_SIZE
 #define ABBREV_HASH_SIZE 121
 #endif
@@ -464,11 +464,11 @@ struct signatured_type
   struct dwarf2_per_cu_data per_cu;
 };
 
-/* Struct used to pass misc. parameters to read_die_and_children, et. al.
-   which are used for both .debug_info and .debug_types dies.
-   All parameters here are unchanging for the life of the call.
-   This struct exists to abstract away the constant parameters of
-   die reading.  */
+/* Struct used to pass misc. parameters to read_die_and_children, et
+   al.  which are used for both .debug_info and .debug_types dies.
+   All parameters here are unchanging for the life of the call.  This
+   struct exists to abstract away the constant parameters of die
+   reading.  */
 
 struct die_reader_specs
 {
@@ -531,7 +531,7 @@ struct line_header
 };
 
 /* When we construct a partial symbol table entry we only
-   need this much information. */
+   need this much information.  */
 struct partial_die_info
   {
     /* Offset of this DIE.  */
@@ -596,7 +596,7 @@ struct partial_die_info
     struct partial_die_info *die_parent, *die_child, *die_sibling;
   };
 
-/* This data structure holds the information of an abbrev. */
+/* This data structure holds the information of an abbrev.  */
 struct abbrev_info
   {
     unsigned int number;	/* number identifying abbrev */
@@ -613,7 +613,7 @@ struct attr_abbrev
     ENUM_BITFIELD(dwarf_form) form : 16;
   };
 
-/* Attributes have a name and a value */
+/* Attributes have a name and a value.  */
 struct attribute
   {
     ENUM_BITFIELD(dwarf_attribute) name : 16;
@@ -636,7 +636,7 @@ struct attribute
     u;
   };
 
-/* This data structure holds a complete die structure. */
+/* This data structure holds a complete die structure.  */
 struct die_info
   {
     /* DWARF-2 tag for this DIE.  */
@@ -677,7 +677,7 @@ struct function_range
   struct function_range *next;
 };
 
-/* Get at parts of an attribute structure */
+/* Get at parts of an attribute structure.  */
 
 #define DW_STRING(attr)    ((attr)->u.str)
 #define DW_STRING_IS_CANONICAL(attr) ((attr)->string_is_canonical)
@@ -687,7 +687,7 @@ struct function_range
 #define DW_ADDR(attr)	   ((attr)->u.addr)
 #define DW_SIGNATURED_TYPE(attr) ((attr)->u.signatured_type)
 
-/* Blocks are a bunch of untyped bytes. */
+/* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
   {
     unsigned int size;
@@ -713,7 +713,7 @@ static int bits_per_byte = 8;
    in an instance of a field_info structure, as defined below.  */
 struct field_info
   {
-    /* List of data member and baseclasses fields. */
+    /* List of data member and baseclasses fields.  */
     struct nextfield
       {
 	struct nextfield *next;
@@ -793,7 +793,7 @@ show_dwarf2_max_cache_age (struct ui_file *file, int from_tty,
 }
 
 
-/* Various complaints about symbol reading that don't abort the process */
+/* Various complaints about symbol reading that don't abort the process.  */
 
 static void
 dwarf2_statement_list_fits_in_line_number_section_complaint (void)
@@ -1593,7 +1593,7 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
 }
 
 /* Fill in SECTP, BUFP and SIZEP with section info, given OBJFILE and
-   SECTION_NAME. */
+   SECTION_NAME.  */
 
 void
 dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
@@ -3241,7 +3241,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  /* Store the function that reads in the rest of the symbol table */
+  /* Store the function that reads in the rest of the symbol table.  */
   pst->read_symtab = dwarf2_psymtab_to_symtab;
 
   this_cu->v.psymtab = pst;
@@ -3261,7 +3261,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
 
   /* Check if comp unit has_children.
      If so, read the rest of the partial symbols from this comp unit.
-     If not, there's no more debug_info for this comp unit. */
+     If not, there's no more debug_info for this comp unit.  */
   if (has_children)
     {
       struct partial_die_info *first_die;
@@ -3495,7 +3495,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
 
   /* Check if comp unit has_children.
      If so, read the rest of the partial symbols from this comp unit.
-     If not, there's no more debug_info for this comp unit. */
+     If not, there's no more debug_info for this comp unit.  */
   if (has_children)
     load_partial_dies (abfd, dwarf2_per_objfile->info.buffer, info_ptr, 0, cu);
 
@@ -3886,7 +3886,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  /* Static Variable. Skip symbols without location descriptors.  */
+	  /* Static Variable.  Skip symbols without location descriptors.  */
 	  if (pdi->locdesc == NULL)
 	    {
 	      if (built_actual_name)
@@ -4409,7 +4409,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
             fputs_filtered ("and ", gdb_stdout);
             wrap_here ("");
             printf_filtered ("%s...", pst->dependencies[i]->filename);
-            wrap_here ("");     /* Flush output */
+            wrap_here ("");     /* Flush output.  */
             gdb_flush (gdb_stdout);
           }
         psymtab_to_symtab_1 (pst->dependencies[i]);
@@ -4968,7 +4968,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 	      if (cu->language == language_java)
 		{
 		  /* For java, we must append the return type to method
-		     names. */
+		     names.  */
 		  if (die->tag == DW_TAG_subprogram)
 		    java_print_type (TYPE_TARGET_TYPE (type), "", buf,
 				     0, 0);
@@ -5014,7 +5014,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
    not have a name.  NAME may either be from a previous call to
    dwarf2_name or NULL.
 
-   The output string will be canonicalized (if C++/Java). */
+   The output string will be canonicalized (if C++/Java).  */
 
 static const char *
 dwarf2_full_name (char *name, struct die_info *die, struct dwarf2_cu *cu)
@@ -5238,7 +5238,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->producer && strstr (cu->producer, "IBM XL C for OpenCL") != NULL)
     cu->language = language_opencl;
 
-  /* We assume that we're processing GCC output. */
+  /* We assume that we're processing GCC output.  */
   processing_gcc_compilation = 2;
 
   processing_has_namespace_info = 0;
@@ -5341,7 +5341,7 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     cu->producer = DW_STRING (attr);
 
-  /* We assume that we're processing GCC output. */
+  /* We assume that we're processing GCC output.  */
   processing_gcc_compilation = 2;
 
   processing_has_namespace_info = 0;
@@ -6046,7 +6046,7 @@ get_scope_pc_bounds (struct die_info *die,
 	      }
 	    break;
 	  default:
-	    /* Ignore. */
+	    /* Ignore.  */
 	    break;
 	  }
 
@@ -6557,7 +6557,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
     }
 
   /* Create a new member function field and chain it to the field list
-     entry. */
+     entry.  */
   new_fnfield = (struct nextfnfield *) xmalloc (sizeof (struct nextfnfield));
   make_cleanup (xfree, new_fnfield);
   memset (new_fnfield, 0, sizeof (struct nextfnfield));
@@ -6596,10 +6596,10 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
       /* Handle static member functions.
          Dwarf2 has no clean way to discern C++ static and non-static
-         member functions. G++ helps GDB by marking the first
-         parameter for non-static member functions (which is the
-         this pointer) as artificial. We obtain this information
-         from read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
+         member functions.  G++ helps GDB by marking the first
+         parameter for non-static member functions (which is the this
+         pointer) as artificial.  We obtain this information from
+         read_subroutine_type via TYPE_FIELD_ARTIFICIAL.  */
       if (nparams == 0 || TYPE_FIELD_ARTIFICIAL (this_type, 0) == 0)
 	fnp->voffset = VOFFSET_STATIC;
     }
@@ -6914,7 +6914,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 
   /* We need to add the type field to the die immediately so we don't
      infinitely recurse when dealing with pointers to the structure
-     type within the structure itself. */
+     type within the structure itself.  */
   set_die_type (die, type, cu);
 
   /* set_die_type should be already done.  */
@@ -6962,7 +6962,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  else if (child_die->tag == DW_TAG_subprogram)
 	    {
-	      /* C++ member function. */
+	      /* C++ member function.  */
 	      dwarf2_add_member_fn (&fi, child_die, type, cu);
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
@@ -7307,8 +7307,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
           if (child_type != NULL)
             {
-	      /* The range type was succesfully read. Save it for
-                 the array type creation.  */
+	      /* The range type was succesfully read.  Save it for the
+                 array type creation.  */
               if ((ndim % DW_FIELD_ALLOC_CHUNK) == 0)
                 {
                   range_types = (struct type **)
@@ -7369,7 +7369,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name)
     TYPE_NAME (type) = name;
 
-  /* Install the type in the die. */
+  /* Install the type in the die.  */
   set_die_type (die, type, cu);
 
   /* set_die_type should be already done.  */
@@ -7389,14 +7389,12 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
 
   if (attr) return DW_SND (attr);
 
-  /*
-    GNU F77 is a special case, as at 08/2004 array type info is the
-    opposite order to the dwarf2 specification, but data is still
-    laid out as per normal fortran.
+  /* GNU F77 is a special case, as at 08/2004 array type info is the
+     opposite order to the dwarf2 specification, but data is still
+     laid out as per normal fortran.
 
-    FIXME: dsl/2004-8-20: If G77 is ever fixed, this will also need
-    version checking.
-  */
+     FIXME: dsl/2004-8-20: If G77 is ever fixed, this will also need
+     version checking.  */
 
   if (cu->language == language_fortran
       && cu->producer && strstr (cu->producer, "GNU F77"))
@@ -7415,7 +7413,7 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 /* Extract all information from a DW_TAG_set_type DIE and put it in
-   the DIE's type field. */
+   the DIE's type field.  */
 
 static struct type *
 read_set_type (struct die_info *die, struct dwarf2_cu *cu)
@@ -7452,7 +7450,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_location, cu);
   if (attr)
     {
-      /* Support the .debug_loc offsets */
+      /* Support the .debug_loc offsets.  */
       if (attr_form_is_block (attr))
         {
           base = decode_locdesc (DW_BLOCK (attr), cu);
@@ -7844,7 +7842,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
     }
   else
     {
-      /* check for the DW_AT_byte_size attribute */
+      /* Check for the DW_AT_byte_size attribute.  */
       attr = dwarf2_attr (die, DW_AT_byte_size, cu);
       if (attr)
         {
@@ -7872,14 +7870,13 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
    int b;
    };
 
-   ('funcp' generates a DW_TAG_subroutine_type DIE)
- */
+   ('funcp' generates a DW_TAG_subroutine_type DIE).  */
 
 static struct type *
 read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct type *type;		/* Type that this function returns */
-  struct type *ftype;		/* Function that returns above type */
+  struct type *type;		/* Type that this function returns.  */
+  struct type *ftype;		/* Function that returns above type.  */
   struct attribute *attr;
 
   type = die_type (die, cu);
@@ -7913,7 +7910,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 
   /* We need to add the subroutine type to the die immediately so
      we don't infinitely recurse when dealing with parameters
-     declared as the same subroutine type. */
+     declared as the same subroutine type.  */
   set_die_type (die, ftype, cu);
 
   if (die->child != NULL)
@@ -8208,8 +8205,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      For the following C code: `extern char gdb_int [];'
      GCC produces an empty range DIE.
      FIXME: muller/2010-05-28: Possible references to object for low bound,
-     high bound or count are not yet handled by this code.
-  */
+     high bound or count are not yet handled by this code.  */
   if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
     {
       struct objfile *objfile = cu->objfile;
@@ -8506,7 +8502,7 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   struct attr_abbrev *cur_attrs;
   unsigned int allocated_attrs;
 
-  /* Initialize dwarf2 abbrevs */
+  /* Initialize dwarf2 abbrevs.  */
   obstack_init (&cu->abbrev_obstack);
   cu->dwarf2_abbrevs = obstack_alloc (&cu->abbrev_obstack,
 				      (ABBREV_HASH_SIZE
@@ -8523,7 +8519,7 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   allocated_attrs = ATTR_ALLOC_CHUNK;
   cur_attrs = xmalloc (allocated_attrs * sizeof (struct attr_abbrev));
 
-  /* loop until we reach an abbrev number of 0 */
+  /* Loop until we reach an abbrev number of 0.  */
   while (abbrev_number)
     {
       cur_abbrev = dwarf_alloc_abbrev (cu);
@@ -8996,7 +8992,7 @@ read_partial_die (struct partial_die_info *part_die,
 	  part_die->highpc = DW_ADDR (&attr);
 	  break;
 	case DW_AT_location:
-          /* Support the .debug_loc offsets */
+          /* Support the .debug_loc offsets.  */
           if (attr_form_is_block (&attr))
             {
 	       part_die->locdesc = DW_BLOCK (&attr);
@@ -9459,7 +9455,7 @@ read_attribute (struct attribute *attr, struct attr_abbrev *abbrev,
   return read_attribute_value (attr, abbrev->form, abfd, info_ptr, cu);
 }
 
-/* read dwarf information from a buffer */
+/* Read dwarf information from a buffer.  */
 
 static unsigned int
 read_1_byte (bfd *abfd, gdb_byte *buf)
@@ -10864,9 +10860,9 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_constant:
 	case DW_TAG_variable:
 	case DW_TAG_member:
-	  /* Compilation with minimal debug info may result in variables
-	     with missing type entries. Change the misleading `void' type
-	     to something sensible.  */
+	  /* Compilation with minimal debug info may result in
+	     variables with missing type entries.  Change the
+	     misleading `void' type to something sensible.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
 	    SYMBOL_TYPE (sym)
 	      = objfile_type (objfile)->nodebug_data_symbol;
@@ -11075,7 +11071,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  /* Not a tag we recognize.  Hopefully we aren't processing
 	     trash data, but since we must specifically ignore things
 	     we don't recognize, there is nothing else we should do at
-	     this point. */
+	     this point.  */
 	  complaint (&symfile_complaints, _("unsupported tag: '%s'"),
 		     dwarf_tag_name (die->tag));
 	  break;
@@ -12835,7 +12831,7 @@ dwarf_type_encoding_name (unsigned enc)
     }
 }
 
-/* Convert a DWARF call frame info operation to its string name. */
+/* Convert a DWARF call frame info operation to its string name.  */
 
 #if 0
 static char *
@@ -13003,8 +12999,8 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, "flag: TRUE");
 	  break;
 	case DW_FORM_indirect:
-	  /* the reader will have reduced the indirect form to
-	     the "base form" so this form should not occur */
+	  /* The reader will have reduced the indirect form to
+	     the "base form" so this form should not occur.  */
 	  fprintf_unfiltered (f, 
 			      "unexpected attribute form: DW_FORM_indirect");
 	  break;
@@ -14273,7 +14269,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 }
 
 /* Check if the attribute's form is a DW_FORM_block*
-   if so return true else false. */
+   if so return true else false.  */
 static int
 attr_form_is_block (struct attribute *attr)
 {
@@ -15344,7 +15340,7 @@ struct addrmap_index_data
   int previous_valid;
   /* Index of the CU in the table of all CUs in the index file.  */
   unsigned int previous_cu_index;
-  /* Start address of the CU. */
+  /* Start address of the CU.  */
   CORE_ADDR previous_cu_start;
 };
 

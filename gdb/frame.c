@@ -499,7 +499,7 @@ frame_id_eq (struct frame_id l, struct frame_id r)
    to sigaltstack).
 
    However, it can be used as safety net to discover invalid frame
-   IDs in certain circumstances. Assuming that NEXT is the immediate
+   IDs in certain circumstances.  Assuming that NEXT is the immediate
    inner frame to THIS and that NEXT and THIS are both NORMAL frames:
 
    * The stack address of NEXT must be inner-than-or-equal to the stack
@@ -519,7 +519,7 @@ frame_id_eq (struct frame_id l, struct frame_id r)
    is involved, because signal handlers might be executed on a different
    stack than the stack used by the routine that caused the signal
    to be raised.  This can happen for instance when a thread exceeds
-   its maximum stack size. In this case, certain compilers implement
+   its maximum stack size.  In this case, certain compilers implement
    a stack overflow strategy that cause the handler to be run on a
    different stack.  */
 
@@ -1123,7 +1123,7 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
   return frame;
 }
 
-/* Info about the innermost stack frame (contents of FP register) */
+/* Info about the innermost stack frame (contents of FP register).  */
 
 static struct frame_info *current_frame;
 
@@ -1279,7 +1279,7 @@ select_frame (struct frame_info *fi)
 
      Once we have frame-parameterized frame (and frame-related) commands,
      the event notification can be moved here, since this function will only
-     be called when the user's selected frame is being changed. */
+     be called when the user's selected frame is being changed.  */
 
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
@@ -1387,7 +1387,7 @@ reinit_frame_cache (void)
 	fi->base->unwind->dealloc_cache (fi, fi->base_cache);
     }
 
-  /* Since we can't really be sure what the first object allocated was */
+  /* Since we can't really be sure what the first object allocated was.  */
   obstack_free (&frame_cache_obstack, 0);
   obstack_init (&frame_cache_obstack);
 
@@ -2287,7 +2287,7 @@ Zero is unlimited."),
 			   &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
-  /* Debug this files internals. */
+  /* Debug this files internals.  */
   add_setshow_zinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
 Set frame debugging."), _("\
 Show frame debugging."), _("\

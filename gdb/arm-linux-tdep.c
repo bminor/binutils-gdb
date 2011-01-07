@@ -105,7 +105,7 @@ static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
    GOT = global offset table
 
    As much as possible, ELF dynamic linking defers the resolution of
-   jump/call addresses until the last minute. The technique used is
+   jump/call addresses until the last minute.  The technique used is
    inspired by the i386 ELF design, and is based on the following
    constraints.
 
@@ -147,9 +147,9 @@ static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
 
    2) In the PLT:
 
-   The PLT is a synthetic area, created by the linker. It exists in
-   both executables and libraries. It is an array of stubs, one per
-   imported function call. It looks like this:
+   The PLT is a synthetic area, created by the linker.  It exists in
+   both executables and libraries.  It is an array of stubs, one per
+   imported function call.  It looks like this:
 
    PLT[0]:
    str     lr, [sp, #-4]!       @push the return address (lr)
@@ -171,7 +171,7 @@ static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
    lr = &GOT[0] + 8
    = &GOT[2]
 
-   NOTE: PLT[0] borrows an offset .word from PLT[1]. This is a little
+   NOTE: PLT[0] borrows an offset .word from PLT[1].  This is a little
    "tight", but allows us to keep all the PLT entries the same size.
 
    PLT[n+1]:
@@ -188,12 +188,12 @@ static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
    3) In the GOT:
 
    The GOT contains helper pointers for both code (PLT) fixups and
-   data fixups.  The first 3 entries of the GOT are special. The next
+   data fixups.  The first 3 entries of the GOT are special.  The next
    M entries (where M is the number of entries in the PLT) belong to
-   the PLT fixups. The next D (all remaining) entries belong to
-   various data fixups. The actual size of the GOT is 3 + M + D.
+   the PLT fixups.  The next D (all remaining) entries belong to
+   various data fixups.  The actual size of the GOT is 3 + M + D.
 
-   The GOT is also a synthetic area, created by the linker. It exists
+   The GOT is also a synthetic area, created by the linker.  It exists
    in both executables and libraries.  When the GOT is first
    initialized , all the GOT entries relating to PLT fixups are
    pointing to code back at PLT[0].
@@ -784,11 +784,11 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
 
 	  if (debug_displaced)
 	    fprintf_unfiltered (gdb_stdlog, "displaced: found "
-	      "sigreturn/rt_sigreturn SVC call. PC in frame = %lx\n",
+	      "sigreturn/rt_sigreturn SVC call.  PC in frame = %lx\n",
 	      (unsigned long) get_frame_pc (frame));
 
 	  if (debug_displaced)
-	    fprintf_unfiltered (gdb_stdlog, "displaced: unwind pc = %lx. "
+	    fprintf_unfiltered (gdb_stdlog, "displaced: unwind pc = %lx.  "
 	      "Setting momentary breakpoint.\n", (unsigned long) return_to);
 
 	  gdb_assert (inferior_thread ()->control.step_resume_breakpoint

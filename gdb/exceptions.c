@@ -89,7 +89,7 @@ exceptions_state_mc_init (struct ui_out *func_uiout,
   uiout = func_uiout;
 
   /* Prevent error/quit during FUNC from calling cleanups established
-     prior to here. */
+     prior to here.  */
   new_catcher->saved_cleanup_chain = save_cleanups ();
 
   /* Push this new catcher on the top.  */
@@ -108,7 +108,7 @@ catcher_pop (void)
   current_catcher = old_catcher->prev;
 
   /* Restore the cleanup chain, the error/quit messages, and the uiout
-     builder, to their original states. */
+     builder, to their original states.  */
 
   restore_cleanups (old_catcher->saved_cleanup_chain);
 
@@ -186,7 +186,7 @@ exceptions_state_mc (enum catcher_action action)
 	      }
 	    /* The caller didn't request that the event be caught,
 	       relay the event to the next containing
-	       catch_errors(). */
+	       catch_errors().  */
 	    catcher_pop ();
 	    throw_exception (exception);
 	  }
@@ -227,7 +227,7 @@ throw_exception (struct gdb_exception exception)
      I can think of a reason why that is vital, though).  */
   if (tp != NULL)
     {
-      /* Clear queued breakpoint commands */
+      /* Clear queued breakpoint commands.  */
       bpstat_clear_actions (tp->control.stop_bpstat);
     }
 
@@ -236,7 +236,7 @@ throw_exception (struct gdb_exception exception)
 
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
-     be zero, by definition in defs.h. */
+     be zero, by definition in defs.h.  */
   exceptions_state_mc (CATCH_THROWING);
   *current_catcher->exception = exception;
   EXCEPTIONS_SIGLONGJMP (current_catcher->buf, exception.reason);
@@ -370,7 +370,7 @@ print_any_exception (struct ui_file *file, const char *prefix,
   if (e.reason < 0 && e.message != NULL)
     {
       target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output */
+      wrap_here ("");		/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
       annotate_error_begin ();
 
@@ -442,12 +442,12 @@ throw_error (enum errors error, const char *fmt, ...)
    be replaced by judicious use of QUIT.  */
 
 /* MAYBE: cagney/1999-11-05: catch_errors() in conjunction with
-   error() et.al. could maintain a set of flags that indicate the the
+   error() et al. could maintain a set of flags that indicate the the
    current state of each of the longjmp buffers.  This would give the
    longjmp code the chance to detect a longjmp botch (before it gets
    to longjmperror()).  Prior to 1999-11-05 this wasn't possible as
    code also randomly used a SET_TOP_LEVEL macro that directly
-   initialize the longjmp buffers. */
+   initialized the longjmp buffers.  */
 
 int
 catch_exceptions (struct ui_out *uiout,

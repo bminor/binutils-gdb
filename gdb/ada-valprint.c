@@ -296,7 +296,7 @@ char_at (const gdb_byte *string, int i, int type_len,
     return (int) extract_unsigned_integer (string + 2 * i, 2, byte_order);
 }
 
-/* Wrapper around memcpy to make it legal argument to ui_file_put */
+/* Wrapper around memcpy to make it legal argument to ui_file_put.  */
 static void
 ui_memcpy (void *dest, const char *buffer, long len)
 {
@@ -454,8 +454,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
    Printing stops early if the number hits print_max; repeat counts
    are printed as appropriate.  Print ellipses at the end if we
    had to stop before printing LENGTH characters, or if
-   FORCE_ELLIPSES.   TYPE_LEN is the length (1 or 2) of the character type.
- */
+   FORCE_ELLIPSES.   TYPE_LEN is the length (1 or 2) of the character type.  */
 
 static void
 printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
@@ -549,8 +548,9 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 }
 
 void
-ada_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
-	      unsigned int length, const char *encoding, int force_ellipses,
+ada_printstr (struct ui_file *stream, struct type *type,
+	      const gdb_byte *string, unsigned int length,
+	      const char *encoding, int force_ellipses,
 	      const struct value_print_options *options)
 {
   printstr (stream, type, string, length, force_ellipses, TYPE_LENGTH (type),
@@ -761,7 +761,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	  else
 	    return ada_val_print_1 (TYPE_TARGET_TYPE (type),
 				    valaddr0, embedded_offset,
-				    address, stream, recurse, original_value, options);
+				    address, stream, recurse,
+				    original_value, options);
 	}
       else
 	{
@@ -909,7 +910,8 @@ static int
 print_variant_part (struct type *type, int field_num, const gdb_byte *valaddr,
 		    struct ui_file *stream, int recurse,
 		    const struct value *val,
-		    const struct value_print_options *options, int comma_needed,
+		    const struct value_print_options *options,
+		    int comma_needed,
 		    struct type *outer_type, const gdb_byte *outer_valaddr)
 {
   struct type *var_type = TYPE_FIELD_TYPE (type, field_num);

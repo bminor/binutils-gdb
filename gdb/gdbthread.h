@@ -52,7 +52,7 @@ struct thread_control_state
      step for a single instruction (FIXME: it might clean up
      wait_for_inferior in a minor way if this were changed to the
      address of the instruction and that address plus one.  But maybe
-     not.).  */
+     not).  */
   CORE_ADDR step_range_start;	/* Inclusive */
   CORE_ADDR step_range_end;	/* Exclusive */
 
@@ -247,10 +247,10 @@ extern void delete_thread (ptid_t);
    exited, for example.  */
 extern void delete_thread_silent (ptid_t);
 
-/* Delete a step_resume_breakpoint from the thread database. */
+/* Delete a step_resume_breakpoint from the thread database.  */
 extern void delete_step_resume_breakpoint (struct thread_info *);
 
-/* Delete an exception_resume_breakpoint from the thread database. */
+/* Delete an exception_resume_breakpoint from the thread database.  */
 extern void delete_exception_resume_breakpoint (struct thread_info *);
 
 /* Translate the integer thread id (GDB's homegrown id, not the system's)

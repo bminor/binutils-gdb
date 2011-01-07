@@ -36,7 +36,7 @@
 #include <sys/utsname.h>
 #include <sys/procfs.h>
 
-/* Prototypes for supply_gregset etc. */
+/* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
 /* Defines ps_err_e, struct ps_prochandle.  */
@@ -72,7 +72,7 @@
 static int arm_linux_has_wmmx_registers;
 
 /* The number of 64-bit VFP registers we have (expect this to be 0,
-   16, or 32). */
+   16, or 32).  */
 static int arm_linux_vfp_register_count;
 
 extern int arm_apcs_32;

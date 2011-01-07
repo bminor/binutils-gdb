@@ -205,7 +205,7 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
  	     uc_mcontext within struct ucontext is derived as follows: 
  	     stack_t is a 12-byte struct and struct sigcontext is
  	     8-byte aligned.  This gives an offset of 8 + 12 + 4 (for
- 	     padding) = 24.) */
+ 	     padding) = 24.)  */
 	  if (target_read_memory (sp + 12, buf, sizeof buf) != 0)
 	    {
 	      warning (_("Can't read realtime sigtramp frame."));
@@ -240,7 +240,7 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
        sc_addr + 32 is syscallno, the syscall number or -1.
        sc_addr + 36 is orig_gr8, the original syscall arg #1.
        sc_addr + 40 is gner[0].
-       sc_addr + 44 is gner[1]. */
+       sc_addr + 44 is gner[1].  */
     case iacc0h_regnum :
       return sc_addr + 48;
     case iacc0l_regnum :
@@ -251,14 +251,15 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
       else if (first_fpr_regnum <= regno && regno <= last_fpr_regnum)
 	return sc_addr + 312 + 4 * (regno - first_fpr_regnum);
       else
-	return -1;  /* not saved. */
+	return -1;  /* not saved.  */
     }
 }
 
 /* Signal trampolines.  */
 
 static struct trad_frame_cache *
-frv_linux_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
+frv_linux_sigtramp_frame_cache (struct frame_info *this_frame,
+				void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -297,11 +298,12 @@ frv_linux_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache
 }
 
 static void
-frv_linux_sigtramp_frame_this_id (struct frame_info *this_frame, void **this_cache,
-			     struct frame_id *this_id)
+frv_linux_sigtramp_frame_this_id (struct frame_info *this_frame,
+				  void **this_cache,
+				  struct frame_id *this_id)
 {
-  struct trad_frame_cache *cache =
-    frv_linux_sigtramp_frame_cache (this_frame, this_cache);
+  struct trad_frame_cache *cache
+    = frv_linux_sigtramp_frame_cache (this_frame, this_cache);
   trad_frame_get_id (cache, this_id);
 }
 
@@ -310,8 +312,8 @@ frv_linux_sigtramp_frame_prev_register (struct frame_info *this_frame,
 					void **this_cache, int regnum)
 {
   /* Make sure we've initialized the cache.  */
-  struct trad_frame_cache *cache =
-    frv_linux_sigtramp_frame_cache (this_frame, this_cache);
+  struct trad_frame_cache *cache
+    = frv_linux_sigtramp_frame_cache (this_frame, this_cache);
   return trad_frame_get_register (cache, this_frame, regnum);
 }
 
@@ -372,7 +374,7 @@ typedef struct
 #define FRV_PT_IACC0L 13
 
 /* Note: Only 32 of the GRs will be found in the corefile.  */
-#define FRV_PT_GR(j)	( 14 + (j))	/* GRj for 0<=j<=63. */
+#define FRV_PT_GR(j)	( 14 + (j))	/* GRj for 0<=j<=63.  */
 
 #define FRV_PT_TBR FRV_PT_GR(0)		/* gr0 is always 0, so TBR is stuffed
 					   there.  */
@@ -412,7 +414,8 @@ frv_linux_supply_gregset (const struct regset *regset,
 	regcache_raw_supply (regcache, regi, zerobuf);
       else
 	regcache_raw_supply (regcache, regi,
-			     gregsetp->reg[FRV_PT_GR (regi - first_gpr_regnum)]);
+			     gregsetp->reg[FRV_PT_GR (regi
+						      - first_gpr_regnum)]);
     }
 
   regcache_raw_supply (regcache, pc_regnum, gregsetp->reg[FRV_PT_PC]);
@@ -441,7 +444,8 @@ frv_linux_supply_fpregset (const struct regset *regset,
   const frv_elf_fpregset_t *fpregsetp = gregs;
 
   for (regi = first_fpr_regnum; regi <= last_fpr_regnum; regi++)
-    regcache_raw_supply (regcache, regi, fpregsetp->fr[regi - first_fpr_regnum]);
+    regcache_raw_supply (regcache, regi,
+			 fpregsetp->fr[regi - first_fpr_regnum]);
 
   regcache_raw_supply (regcache, fner0_regnum, fpregsetp->fner[0]);
   regcache_raw_supply (regcache, fner1_regnum, fpregsetp->fner[1]);
@@ -522,7 +526,8 @@ void _initialize_frv_linux_tdep (void);
 void
 _initialize_frv_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_frv, 0, GDB_OSABI_LINUX, frv_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_frv, 0, GDB_OSABI_LINUX,
+			  frv_linux_init_abi);
   gdbarch_register_osabi_sniffer (bfd_arch_frv,
 				  bfd_target_elf_flavour,
 				  frv_linux_elf_osabi_sniffer);

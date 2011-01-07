@@ -544,7 +544,7 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 
       address = prev_address + prev_size;
 
-      /* Check to see if address space has wrapped around. */
+      /* Check to see if address space has wrapped around.  */
       if (address == 0)
         print = done = 1;
 

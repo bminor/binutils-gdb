@@ -149,7 +149,7 @@ int exceptions_state_mc_action_iter_1 (void);
 
 
 /* If E is an exception, print it's error message on the specified
-   stream. for _fprintf, prefix the message with PREFIX...  */
+   stream.  For _fprintf, prefix the message with PREFIX...  */
 extern void exception_print (struct ui_file *file, struct gdb_exception e);
 extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
 			       const char *prefix,
@@ -236,9 +236,9 @@ extern struct gdb_exception catch_exception (struct ui_out *uiout,
 					     return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
-   otherwize the result from CATCH_ERRORS_FTYPE is returned. It is
+   otherwize the result from CATCH_ERRORS_FTYPE is returned.  It is
    probably useful for CATCH_ERRORS_FTYPE to always return a non-zero
-   value. It's unfortunate that, catch_errors() does not return an
+   value.  It's unfortunate that, catch_errors() does not return an
    indication of the exact exception that it caught - quit_flag might
    help.
 
@@ -248,7 +248,7 @@ typedef int (catch_errors_ftype) (void *);
 extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
 
 /* Template to catch_errors() that wraps calls to command
-   functions. */
+   functions.  */
 
 typedef void (catch_command_errors_ftype) (char *, int);
 extern int catch_command_errors (catch_command_errors_ftype *func,

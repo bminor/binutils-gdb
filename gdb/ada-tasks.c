@@ -126,7 +126,7 @@ struct tcb_fieldnos
 };
 
 /* The type description for the ATCB record and subrecords, and
-   the associated tcb_fieldnos. For efficiency reasons, these are made
+   the associated tcb_fieldnos.  For efficiency reasons, these are made
    static globals so that we can compute them only once the first time
    and reuse them later.  Set to NULL if the types haven't been computed
    yet, or if they may be obsolete (for instance after having loaded
@@ -305,7 +305,7 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
 
    In order to provide a fast response time, this function caches
    the Known_Tasks array address after the lookup during the first
-   call. Subsequent calls will simply return this cached address.  */
+   call.  Subsequent calls will simply return this cached address.  */
 
 static CORE_ADDR
 get_known_tasks_addr (void)
@@ -327,21 +327,21 @@ get_known_tasks_addr (void)
 
       /* FIXME: brobecker 2003-03-05: Here would be a much better place
          to attach the ada-tasks observers, instead of doing this
-         unconditionaly in _initialize_tasks. This would avoid an
+         unconditionaly in _initialize_tasks.  This would avoid an
          unecessary notification when the inferior does not use tasking
          or as long as the user does not use the ada-tasks commands.
          Unfortunately, this is not possible for the moment: the current
          code resets ada__tasks_check_symbol_table back to 1 whenever
-         symbols for a new program are being loaded. If we place the
+         symbols for a new program are being loaded.  If we place the
          observers intialization here, we will end up adding new observers
          everytime we do the check for Ada tasking-related symbols
-         above. This would currently have benign effects, but is still
-         undesirable. The cleanest approach is probably to create a new
+         above.  This would currently have benign effects, but is still
+         undesirable.  The cleanest approach is probably to create a new
          observer to notify us when the user is debugging a new program.
          We would then reset ada__tasks_check_symbol_table back to 1
          during the notification, but also detach all observers.
          BTW: observers are probably not reentrant, so detaching during
-         a notification may not be the safest thing to do... Sigh...
+         a notification may not be the safest thing to do...  Sigh...
          But creating the new observer would be a good idea in any case,
          since this allow us to make ada__tasks_check_symbol_table
          static, which is a good bonus.  */
@@ -380,7 +380,7 @@ get_tcb_types_info (struct type **atcb_type,
   const char *private_data_name = "system__task_primitives__private_data";
   const char *entry_call_record_name = "system__tasking__entry_call_record";
 
-  /* ATCB symbols may be found in several compilation units. As we
+  /* ATCB symbols may be found in several compilation units.  As we
      are only interested in one instance, use standard (literal,
      C-like) lookups to get the first match.  */
 
@@ -521,14 +521,14 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
      Depending on the GNAT version used, the task image is either a fat
      string, or a thin array of characters.  Older versions of GNAT used
      to use fat strings, and therefore did not need an extra field in
-     the ATCB to store the string length. For efficiency reasons, newer
+     the ATCB to store the string length.  For efficiency reasons, newer
      versions of GNAT replaced the fat string by a static buffer, but this
      also required the addition of a new field named "Image_Len" containing
-     the length of the task name. The method used to extract the task name
+     the length of the task name.  The method used to extract the task name
      is selected depending on the existence of this field.
 
      In some run-time libs (e.g. Ravenscar), the name is not in the ATCB;
-     we may want to get it from the first user frame of the stack. For now,
+     we may want to get it from the first user frame of the stack.  For now,
      we just give a dummy name.  */
 
   if (fieldno.image_len == -1)
@@ -762,7 +762,7 @@ short_task_info (int taskno)
 }
 
 /* Print a list containing a short description of all Ada tasks.  */
-/* FIXME: Shouldn't we be using ui_out??? */
+/* FIXME: Shouldn't we be using ui_out???  */
 
 static void
 info_tasks (int from_tty)

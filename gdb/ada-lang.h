@@ -30,7 +30,7 @@ struct frame_info;
 /* Names of specific files known to be part of the runtime
    system and that might consider (confusing) debugging information.
    Each name (a basic regular expression string) is followed by a
-   comma.  FIXME: Should be part of a configuration file. */
+   comma.  FIXME: Should be part of a configuration file.  */
 #if defined(__alpha__) && defined(__osf__)
 #define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
    "^[agis]-.*\\.ad[bs]$", \
@@ -48,26 +48,26 @@ struct frame_info;
 #endif
 
 /* Names of compiler-generated auxiliary functions probably of no
-   interest to users. Each name (a basic regular expression string)
-   is followed by a comma. */
+   interest to users.  Each name (a basic regular expression string)
+   is followed by a comma.  */
 #define ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS \
    "___clean[.$a-zA-Z0-9_]*$", \
    "___finalizer[.$a-zA-Z0-9_]*$",
 
 /* The maximum number of frame levels searched for non-local,
  * non-global symbols.  This limit exists as a precaution to prevent
- * infinite search loops when the stack is screwed up. */
+ * infinite search loops when the stack is screwed up.  */
 #define MAX_ENCLOSING_FRAME_LEVELS 7
 
 /* Maximum number of steps followed in looking for the ultimate
    referent of a renaming.  This prevents certain infinite loops that
-   can otherwise result. */
+   can otherwise result.  */
 #define MAX_RENAMING_CHAIN_LENGTH 10
 
 struct block;
 
 /* Corresponding encoded/decoded names and opcodes for Ada user-definable
-   operators. */
+   operators.  */
 struct ada_opname_map
 {
   const char *encoded;
@@ -75,12 +75,12 @@ struct ada_opname_map
   enum exp_opcode op;
 };
 
-/* Table of Ada operators in encoded and decoded forms. */
+/* Table of Ada operators in encoded and decoded forms.  */
 /* Defined in ada-lang.c */
 extern const struct ada_opname_map ada_opname_table[];
 
 /* A tuple, (symbol, block), representing one instance of a 
- * symbol-lookup operation. */
+ * symbol-lookup operation.  */
 struct ada_symbol_info {
   struct symbol* sym;
   struct block* block;
@@ -141,9 +141,9 @@ struct ada_task_info
 };
 
 /* Assuming V points to an array of S objects,  make sure that it contains at
-   least M objects, updating V and S as necessary. */
+   least M objects, updating V and S as necessary.  */
 
-#define GROW_VECT(v, s, m)                                              \
+#define GROW_VECT(v, s, m)                                    \
    if ((s) < (m)) (v) = grow_vect (v, &(s), m, sizeof *(v));
 
 extern void *grow_vect (void *, size_t *, size_t, int);

@@ -77,7 +77,7 @@ struct dwarf2_cie
   /* Target address size in bytes.  */
   int addr_size;
 
-  /* Target pointer size in bytes. */
+  /* Target pointer size in bytes.  */
   int ptr_size;
 
   /* True if a 'z' augmentation existed.  */
@@ -1697,7 +1697,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
   buf += bytes_read;
   end = buf + length;
 
-  /* Are we still within the section? */
+  /* Are we still within the section?  */
   if (end > unit->dwarf_frame_buffer + unit->dwarf_frame_size)
     return NULL;
 
@@ -1796,7 +1796,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
       /* Address values in .eh_frame sections are defined to have the
 	 target's pointer size.  Watchout: This breaks frame info for
 	 targets with pointer size < address size, unless a .debug_frame
-	 section exists as well. */
+	 section exists as well.  */
       if (eh_frame_p)
 	cie->ptr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
       else

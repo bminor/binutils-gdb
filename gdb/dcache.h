@@ -24,16 +24,16 @@
 
 typedef struct dcache_struct DCACHE;
 
-/* Invalidate DCACHE. */
+/* Invalidate DCACHE.  */
 void dcache_invalidate (DCACHE *dcache);
 
-/* Initialize DCACHE. */
+/* Initialize DCACHE.  */
 DCACHE *dcache_init (void);
 
-/* Free a DCACHE */
+/* Free a DCACHE.  */
 void dcache_free (DCACHE *);
 
-/* Simple to call from <remote>_xfer_memory */
+/* Simple to call from <remote>_xfer_memory.  */
 
 int dcache_xfer_memory (struct target_ops *ops, DCACHE *cache, CORE_ADDR mem,
 			gdb_byte *my, int len, int should_write);

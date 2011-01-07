@@ -773,7 +773,7 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
       if (TYPE_NFIELDS (type) > 0)
 	{
 	  /* The enums may not be sorted by value, so search all
-	     entries */
+	     entries.  */
 	  int i;
 
 	  *lowp = *highp = TYPE_FIELD_BITPOS (type, 0);
@@ -828,7 +828,7 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
    and lower bound.  Save the low bound into LOW_BOUND if not NULL.
    Save the high bound into HIGH_BOUND if not NULL.
 
-   Return 1 if the operation was successful. Return zero otherwise,
+   Return 1 if the operation was successful.  Return zero otherwise,
    in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.
 
    We now simply use get_discrete_bounds call to get the values
@@ -908,7 +908,7 @@ create_array_type (struct type *result_type,
   TYPE_INDEX_TYPE (result_type) = range_type;
   TYPE_VPTR_FIELDNO (result_type) = -1;
 
-  /* TYPE_FLAG_TARGET_STUB will take care of zero length arrays */
+  /* TYPE_FLAG_TARGET_STUB will take care of zero length arrays.  */
   if (TYPE_LENGTH (result_type) == 0)
     TYPE_TARGET_STUB (result_type) = 1;
 
@@ -1246,7 +1246,7 @@ lookup_template_type (char *name, struct type *type,
   strcpy (nam, name);
   strcat (nam, "<");
   strcat (nam, TYPE_NAME (type));
-  strcat (nam, " >");	/* FIXME, extra space still introduced in gcc? */
+  strcat (nam, " >");	/* FIXME, extra space still introduced in gcc?  */
 
   sym = lookup_symbol (nam, block, VAR_DOMAIN, 0);
 
@@ -1300,7 +1300,7 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
 #if 0
   /* FIXME: This change put in by Michael seems incorrect for the case
      where the structure tag name is the same as the member name.
-     I.E. when doing "ptype bell->bar" for "struct foo { int bar; int
+     I.e. when doing "ptype bell->bar" for "struct foo { int bar; int
      foo; } bell;" Disabled by fnf.  */
   {
     char *typename;
@@ -1384,7 +1384,7 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
 	  if (fieldno >= 0)
 	    {
 	      /* If the type comes from a different objfile we can't cache
-		 it, it may have a different lifetime. PR 2384 */
+		 it, it may have a different lifetime.  PR 2384 */
 	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (basetype))
 		{
 		  TYPE_VPTR_FIELDNO (type) = fieldno;
@@ -1430,7 +1430,7 @@ stub_noname_complaint (void)
    the target type.
 
    If this is a stubbed struct (i.e. declared as struct foo *), see if
-   we can find a full definition in some other file. If so, copy this
+   we can find a full definition in some other file.  If so, copy this
    definition, so we can use it in future.  There used to be a comment
    (but not any code) that if we don't find a full definition, we'd
    set a flag so we don't spend time in the future checking the same
@@ -1592,7 +1592,7 @@ check_typedef (struct type *type)
 	  /* Now recompute the length of the array type, based on its
 	     number of elements and the target type's length.
 	     Watch out for Ada null Ada arrays where the high bound
-	     is smaller than the low bound. */
+	     is smaller than the low bound.  */
 	  const LONGEST low_bound = TYPE_LOW_BOUND (range_type);
 	  const LONGEST high_bound = TYPE_HIGH_BOUND (range_type);
 	  ULONGEST len;
@@ -1606,12 +1606,12 @@ check_typedef (struct type *type)
 		 that for x < 0, (ULONGEST) x == -x + ULONGEST_MAX + 1,
 		 which is technically not guaranteed by C, but is usually true
 		 (because it would be true if x were unsigned with its
-		 high-order bit on). It uses the fact that
+		 high-order bit on).  It uses the fact that
 		 high_bound-low_bound is always representable in
 		 ULONGEST and that if high_bound-low_bound+1 overflows,
 		 it overflows to 0.  We must change these tests if we 
 		 decide to increase the representation of TYPE_LENGTH
-		 from unsigned int to ULONGEST. */
+		 from unsigned int to ULONGEST.  */
 	      ULONGEST ulow = low_bound, uhigh = high_bound;
 	      ULONGEST tlen = TYPE_LENGTH (target_type);
 
@@ -1736,7 +1736,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
       argcount = 1;
     }
 
-  if (*p != ')')		/* () means no args, skip while */
+  if (*p != ')')		/* () means no args, skip while.  */
     {
       depth = 0;
       while (*p)
@@ -1986,7 +1986,7 @@ class_types_same_p (const struct type *a, const struct type *b)
    of DCLASS.
    Eg:
 
-   distance_to_ancestor (A, D, 1) = -1  */
+   distance_to_ancestor (A, D, 1) = -1.  */
 
 static int
 distance_to_ancestor (struct type *base, struct type *dclass, int public)
@@ -2128,11 +2128,11 @@ compare_ranks (struct rank a, struct rank b)
   if (a.rank < b.rank)
     return 1;
 
-  /* a.rank > b.rank  */
+  /* a.rank > b.rank */
   return -1;
 }
 
-/* Functions for overload resolution begin here */
+/* Functions for overload resolution begin here.  */
 
 /* Compare two badness vectors A and B and return the result.
    0 => A and B are identical
@@ -2193,7 +2193,7 @@ rank_function (struct type **parms, int nparms,
   int min_len = nparms < nargs ? nparms : nargs;
 
   bv = xmalloc (sizeof (struct badness_vector));
-  bv->length = nargs + 1;	/* add 1 for the length-match rank */
+  bv->length = nargs + 1;	/* add 1 for the length-match rank.  */
   bv->rank = xmalloc ((nargs + 1) * sizeof (int));
 
   /* First compare the lengths of the supplied lists.
@@ -2207,11 +2207,11 @@ rank_function (struct type **parms, int nparms,
 		      ? LENGTH_MISMATCH_BADNESS
 		      : EXACT_MATCH_BADNESS;
 
-  /* Now rank all the parameters of the candidate function */
+  /* Now rank all the parameters of the candidate function.  */
   for (i = 1; i <= min_len; i++)
     bv->rank[i] = rank_one_type (parms[i-1], args[i-1]);
 
-  /* If more arguments than parameters, add dummy entries */
+  /* If more arguments than parameters, add dummy entries.  */
   for (i = min_len + 1; i <= nargs; i++)
     bv->rank[i] = TOO_FEW_PARAMS_BADNESS;
 
@@ -2288,12 +2288,10 @@ types_equal (struct type *a, struct type *b)
     return types_equal (TYPE_TARGET_TYPE (a),
                         TYPE_TARGET_TYPE (b));
 
-  /*
-     Well, damnit, if the names are exactly the same, I'll say they
+  /* Well, damnit, if the names are exactly the same, I'll say they
      are exactly the same.  This happens when we generate method
      stubs.  The types won't point to the same address, but they
-     really are the same.
-  */
+     really are the same.  */
 
   if (TYPE_NAME (a) && TYPE_NAME (b)
       && strcmp (TYPE_NAME (a), TYPE_NAME (b)) == 0)
@@ -2345,7 +2343,7 @@ rank_one_type (struct type *parm, struct type *arg)
 		      TYPE_NAME (arg), TYPE_CODE (arg), 
 		      TYPE_NAME (parm), TYPE_CODE (parm));
 
-  /* x -> y means arg of type x being supplied for parameter of type y */
+  /* x -> y means arg of type x being supplied for parameter of type y.  */
 
   switch (TYPE_CODE (parm))
     {
@@ -2411,7 +2409,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	         signed and unsigned ints.  */
 	      if (TYPE_NOSIGN (parm))
 		{
-		  /* This case only for character types */
+		  /* This case only for character types.  */
 		  if (TYPE_NOSIGN (arg))
 		    return EXACT_MATCH_BADNESS;	/* plain char -> plain char */
 		  else		/* signed/unsigned char -> plain char */
@@ -2602,7 +2600,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	}
       break;
     case TYPE_CODE_STRUCT:
-      /* currently same as TYPE_CODE_CLASS */
+      /* currently same as TYPE_CODE_CLASS.  */
       switch (TYPE_CODE (arg))
 	{
 	case TYPE_CODE_STRUCT:
@@ -2665,7 +2663,7 @@ rank_one_type (struct type *parm, struct type *arg)
 }
 
 
-/* End of functions for overload resolution */
+/* End of functions for overload resolution.  */
 
 static void
 print_bit_vector (B_TYPE *bits, int nbits)
@@ -3303,7 +3301,7 @@ copy_type_recursive (struct objfile *objfile,
 	}
     }
 
-  /* For range types, copy the bounds information. */
+  /* For range types, copy the bounds information.  */
   if (TYPE_CODE (type) == TYPE_CODE_RANGE)
     {
       TYPE_RANGE_DATA (new_type) = xmalloc (sizeof (struct range_bounds));

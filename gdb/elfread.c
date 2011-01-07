@@ -152,7 +152,7 @@ elf_symfile_segments (bfd *abfd)
 
    FIXME: The section names should not be hardwired strings (what
    should they be?  I don't think most object file formats have enough
-   section flags to specify what kind of debug section it is
+   section flags to specify what kind of debug section it is.
    -kingdon).  */
 
 static void
@@ -249,7 +249,7 @@ elf_symtab_read (struct objfile *objfile, int type,
       if (sym->name == NULL || *sym->name == '\0')
 	{
 	  /* Skip names that don't exist (shouldn't happen), or names
-	     that are null strings (may happen). */
+	     that are null strings (may happen).  */
 	  continue;
 	}
 
@@ -278,7 +278,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 	     of the corresponding entry in the procedure linkage table,
 	     plus the desired section offset.
 	     If its value is zero then the dynamic linker has to resolve
-	     the symbol. We are unable to find any meaningful address
+	     the symbol.  We are unable to find any meaningful address
 	     for this symbol in the executable file, so we skip it.  */
 	  symaddr = sym->value;
 	  if (symaddr == 0)
@@ -339,8 +339,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 
 	  /* Select global/local/weak symbols.  Note that bfd puts abs
 	     symbols in their own section, so all symbols we are
-	     interested in will have a section. */
-	  /* Bfd symbols are section relative. */
+	     interested in will have a section.  */
+	  /* Bfd symbols are section relative.  */
 	  symaddr = sym->value + sym->section->vma;
 	  /* Relocate all non-absolute and non-TLS symbols by the
 	     section offset.  */
@@ -351,7 +351,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 	    }
 	  /* For non-absolute symbols, use the type of the section
 	     they are relative to, to intuit text/data.  Bfd provides
-	     no way of figuring this out for absolute symbols. */
+	     no way of figuring this out for absolute symbols.  */
 	  if (sym->section == &bfd_abs_section)
 	    {
 	      /* This is a hack to get the minimal symbol type
@@ -379,7 +379,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 		}
 
 	      /* If it is an Irix dynamic symbol, skip section name
-		 symbols, relocate all others by section offset. */
+		 symbols, relocate all others by section offset.  */
 	      if (ms_type != mst_abs)
 		{
 		  if (sym->name[0] == '.')
@@ -518,7 +518,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 		 hob with actions like finding what function the PC
 		 is in.  Ignore them if they aren't text, data, or bss.  */
 	      /* ms_type = mst_unknown; */
-	      continue;	/* Skip this symbol. */
+	      continue;	/* Skip this symbol.  */
 	    }
 	  msym = record_minimal_symbol
 	    (sym->name, strlen (sym->name), copy_names, symaddr,
@@ -759,7 +759,7 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 
   memset ((char *) &ei, 0, sizeof (ei));
 
-  /* Allocate struct to keep track of the symfile */
+  /* Allocate struct to keep track of the symfile.  */
   objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
     xmalloc (sizeof (struct dbx_symfile_info));
   memset ((char *) objfile->deprecated_sym_stab_info,
@@ -845,9 +845,9 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   do_cleanups (back_to);
 
   /* Now process debugging information, which is contained in
-     special ELF sections. */
+     special ELF sections.  */
 
-  /* We first have to find them... */
+  /* We first have to find them...  */
   bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
 
   /* ELF debugging information is inserted into the psymtab in the
@@ -860,7 +860,7 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
      and .debug_info (DWARF2) sections then .mdebug is inserted first
      (searched last) and DWARF2 is inserted last (searched first).  If
      we don't do this then the XCOFF info is found first - for code in
-     an included file XCOFF info is useless. */
+     an included file XCOFF info is useless.  */
 
   if (ei.mdebugsect)
     {
@@ -954,7 +954,7 @@ elf_new_init (struct objfile *ignore)
 /* Perform any local cleanups required when we are done with a particular
    objfile.  I.E, we are in the process of discarding all symbol information
    for an objfile, freeing up all memory held for it, and unlinking the
-   objfile struct from the global list of known objfiles. */
+   objfile struct from the global list of known objfiles.  */
 
 static void
 elf_symfile_finish (struct objfile *objfile)
@@ -974,7 +974,7 @@ elf_symfile_finish (struct objfile *objfile)
    a pointer to "private data" which we can fill with goodies.
 
    For now at least, we have nothing in particular to do, so this function is
-   just a stub. */
+   just a stub.  */
 
 static void
 elf_symfile_init (struct objfile *objfile)
@@ -1010,7 +1010,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 
   /* FIXME:  This linear search could speed up significantly
      if it was chained in the right order to match how we search it,
-     and if we unchained when we found a match. */
+     and if we unchained when we found a match.  */
   for (; maybe; maybe = maybe->next)
     {
       if (filename[0] == maybe->filename[0]

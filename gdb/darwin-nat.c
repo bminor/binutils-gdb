@@ -129,7 +129,7 @@ mach_port_t darwin_ex_port;
 /* Port set.  */
 mach_port_t darwin_port_set;
 
-/* Page size. */
+/* Page size.  */
 static vm_size_t mach_page_size;
 
 /* If Set, catch all mach exceptions (before they are converted to signals
@@ -914,7 +914,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	case EXC_BREAKPOINT:
 	  /* Many internal GDB routines expect breakpoints to be reported
 	     as TARGET_SIGNAL_TRAP, and will report TARGET_EXC_BREAKPOINT
-	     as a spurious signal. */
+	     as a spurious signal.  */
 	  status->value.sig = TARGET_SIGNAL_TRAP;
 	  break;
 	default:
@@ -980,7 +980,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 static int
 cancel_breakpoint (ptid_t ptid)
 {
-  /* Arrange for a breakpoint to be hit again later. We will handle
+  /* Arrange for a breakpoint to be hit again later.  We will handle
      the current event, eventually we will resume this thread, and this
      breakpoint will trap again.
 
@@ -1655,7 +1655,7 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
   inferior_debug (8, _("darwin_read_write_inferior(task=%x, %s, len=%d)\n"),
 		  task, core_addr_to_string (addr), length);
 
-  /* Get memory from inferior with page aligned addresses */
+  /* Get memory from inferior with page aligned addresses.  */
   kret = mach_vm_read (task, low_address, aligned_length,
 		      &copied, &copy_count);
   if (kret != KERN_SUCCESS)
@@ -1707,10 +1707,10 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 	 core_addr_to_string (region_start),
 	 core_addr_to_string (region_length));
 
-      /* Check for holes in memory */
+      /* Check for holes in memory.  */
       if (region_start > region_address)
 	{
-	  warning (_("No memory at %s (vs %s+0x%x). Nothing written"),
+	  warning (_("No memory at %s (vs %s+0x%x).  Nothing written"),
 		   core_addr_to_string (region_address),
 		   core_addr_to_string (region_start),
 		   (unsigned)region_length);
@@ -1768,7 +1768,7 @@ out:
 
 
 /* Return 0 on failure, number of bytes handled otherwise.  TARGET
-   is ignored. */
+   is ignored.  */
 static int
 darwin_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		    struct mem_attrib *attrib, struct target_ops *target)

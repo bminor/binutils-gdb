@@ -895,7 +895,7 @@ cat <<EOF
    If editing this file, please also run gdbarch.sh and merge any
    changes into that script. Conversely, when making sweeping changes
    to this file, modifying gdbarch.sh and using its output may prove
-   easier. */
+   easier.  */
 
 EOF
 }
@@ -946,21 +946,21 @@ EOF
 # function typedef's
 printf "\n"
 printf "\n"
-printf "/* The following are pre-initialized by GDBARCH. */\n"
+printf "/* The following are pre-initialized by GDBARCH.  */\n"
 function_list | while do_read
 do
     if class_is_info_p
     then
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
-	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized. */\n"
+	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized.  */\n"
     fi
 done
 
 # function typedef's
 printf "\n"
 printf "\n"
-printf "/* The following are initialized by the target dependent code. */\n"
+printf "/* The following are initialized by the target dependent code.  */\n"
 function_list | while do_read
 do
     if [ -n "${comment}" ]
@@ -1034,7 +1034,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    data for all the various GDB components was also considered.  Since
    GDB is built from a variable number of (fairly independent)
    components it was determined that the global aproach was not
-   applicable. */
+   applicable.  */
 
 
 /* Register a new architectural family with GDB.
@@ -1068,7 +1068,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
    The DUMP_TDEP function shall print out all target specific values.
    Care should be taken to ensure that the function works in both the
-   multi-arch and non- multi-arch cases. */
+   multi-arch and non- multi-arch cases.  */
 
 struct gdbarch_list
 {
@@ -1078,7 +1078,7 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
-  /* Use default: NULL (ZERO). */
+  /* Use default: NULL (ZERO).  */
   const struct bfd_arch_info *bfd_arch_info;
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
@@ -1086,10 +1086,10 @@ struct gdbarch_info
 
   int byte_order_for_code;
 
-  /* Use default: NULL (ZERO). */
+  /* Use default: NULL (ZERO).  */
   bfd *abfd;
 
-  /* Use default: NULL (ZERO). */
+  /* Use default: NULL (ZERO).  */
   struct gdbarch_tdep_info *tdep_info;
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
@@ -1113,13 +1113,13 @@ extern void gdbarch_register (enum bfd_architecture architecture,
 /* Return a freshly allocated, NULL terminated, array of the valid
    architecture names.  Since architectures are registered during the
    _initialize phase this function only returns useful information
-   once initialization has been completed. */
+   once initialization has been completed.  */
 
 extern const char **gdbarch_printable_names (void);
 
 
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
-   matches the information provided by INFO. */
+   matches the information provided by INFO.  */
 
 extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches, const struct gdbarch_info *info);
 
@@ -1127,14 +1127,14 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 /* Helper function.  Create a preliminary \`\`struct gdbarch''.  Perform
    basic initialization using values obtained from the INFO and TDEP
    parameters.  set_gdbarch_*() functions are called to complete the
-   initialization of the object. */
+   initialization of the object.  */
 
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep *tdep);
 
 
 /* Helper function.  Free a partially-constructed \`\`struct gdbarch''.
    It is assumed that the caller freeds the \`\`struct
-   gdbarch_tdep''. */
+   gdbarch_tdep''.  */
 
 extern void gdbarch_free (struct gdbarch *);
 
@@ -1148,14 +1148,14 @@ extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
 #define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
 
 
-/* Helper function. Force an update of the current architecture.
+/* Helper function.  Force an update of the current architecture.
 
    The actual architecture selected is determined by INFO, \`\`(gdb) set
    architecture'' et.al., the existing architecture and BFD's default
    architecture.  INFO should be initialized to zero and then selected
    fields should be updated.
 
-   Returns non-zero if the update succeeds */
+   Returns non-zero if the update succeeds.  */
 
 extern int gdbarch_update_p (struct gdbarch_info info);
 
@@ -1213,7 +1213,7 @@ extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,
-   byte-order, ...) using information found in the BFD */
+   byte-order, ...) using information found in the BFD.  */
 
 extern void set_gdbarch_from_file (bfd *);
 
@@ -1299,7 +1299,7 @@ EOF
 
 # gdbarch open the gdbarch object
 printf "\n"
-printf "/* Maintain the struct gdbarch object */\n"
+printf "/* Maintain the struct gdbarch object.  */\n"
 printf "\n"
 printf "struct gdbarch\n"
 printf "{\n"
@@ -1309,7 +1309,7 @@ printf "\n"
 printf "  /* An obstack bound to the lifetime of the architecture.  */\n"
 printf "  struct obstack *obstack;\n"
 printf "\n"
-printf "  /* basic architectural information */\n"
+printf "  /* basic architectural information.  */\n"
 function_list | while do_read
 do
     if class_is_info_p
@@ -1318,15 +1318,15 @@ do
     fi
 done
 printf "\n"
-printf "  /* target specific vector. */\n"
+printf "  /* target specific vector.  */\n"
 printf "  struct gdbarch_tdep *tdep;\n"
 printf "  gdbarch_dump_tdep_ftype *dump_tdep;\n"
 printf "\n"
-printf "  /* per-architecture data-pointers */\n"
+printf "  /* per-architecture data-pointers.  */\n"
 printf "  unsigned nr_data;\n"
 printf "  void **data;\n"
 printf "\n"
-printf "  /* per-architecture swap-regions */\n"
+printf "  /* per-architecture swap-regions.  */\n"
 printf "  struct gdbarch_swap *swap;\n"
 printf "\n"
 cat <<EOF
@@ -1374,7 +1374,7 @@ printf "\n"
 printf "\n"
 cat <<EOF
 /* The default architecture uses host values (for want of a better
-   choice). */
+   choice).  */
 EOF
 printf "\n"
 printf "extern const struct bfd_arch_info bfd_default_arch_struct;\n"
@@ -1383,7 +1383,7 @@ printf "struct gdbarch startup_gdbarch =\n"
 printf "{\n"
 printf "  1, /* Always initialized.  */\n"
 printf "  NULL, /* The obstack.  */\n"
-printf "  /* basic architecture information */\n"
+printf "  /* basic architecture information.  */\n"
 function_list | while do_read
 do
     if class_is_info_p
@@ -1392,9 +1392,9 @@ do
     fi
 done
 cat <<EOF
-  /* target specific vector and its dump routine */
+  /* target specific vector and its dump routine.  */
   NULL, NULL,
-  /*per-architecture data-pointers and swap regions */
+  /*per-architecture data-pointers and swap regions.  */
   0, NULL, NULL,
   /* Multi-arch values */
 EOF
@@ -1416,7 +1416,7 @@ EOF
 cat <<EOF
 
 /* Create a new \`\`struct gdbarch'' based on information provided by
-   \`\`struct gdbarch_info''. */
+   \`\`struct gdbarch_info''.  */
 EOF
 printf "\n"
 cat <<EOF
@@ -1447,7 +1447,7 @@ do
     fi
 done
 printf "\n"
-printf "  /* Force the explicit initialization of these. */\n"
+printf "  /* Force the explicit initialization of these.  */\n"
 function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
@@ -1521,7 +1521,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tbyte-order");
   if (gdbarch->bfd_arch_info == NULL)
     fprintf_unfiltered (log, "\n\tbfd_arch_info");
-  /* Check those that need to be defined for the given multi-arch level. */
+  /* Check those that need to be defined for the given multi-arch level.  */
 EOF
 function_list | while do_read
 do
@@ -1532,7 +1532,7 @@ do
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
 	elif class_is_predicate_p
 	then
-	    printf "  /* Skip verify of ${function}, has predicate */\n"
+	    printf "  /* Skip verify of ${function}, has predicate.  */\n"
 	# FIXME: See do_read for potential simplification
  	elif [ -n "${invalid_p}" -a -n "${postdefault}" ]
 	then
@@ -1572,7 +1572,7 @@ EOF
 printf "\n"
 printf "\n"
 cat <<EOF
-/* Print out the details of the current architecture. */
+/* Print out the details of the current architecture.  */
 
 void
 gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
@@ -1751,7 +1751,7 @@ cat <<EOF
 
 
 /* Keep a registry of per-architecture data-pointers required by GDB
-   modules. */
+   modules.  */
 
 struct gdbarch_data
 {
@@ -1810,7 +1810,7 @@ gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *post_init)
   return gdbarch_data_register (NULL, post_init);
 }
 
-/* Create/delete the gdbarch data vector. */
+/* Create/delete the gdbarch data vector.  */
 
 static void
 alloc_gdbarch_data (struct gdbarch *gdbarch)
@@ -1821,7 +1821,7 @@ alloc_gdbarch_data (struct gdbarch *gdbarch)
 }
 
 /* Initialize the current value of the specified per-architecture
-   data-pointer. */
+   data-pointer.  */
 
 void
 deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
@@ -1835,7 +1835,7 @@ deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
 }
 
 /* Return the current value of the specified per-architecture
-   data-pointer. */
+   data-pointer.  */
 
 void *
 gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
@@ -1874,7 +1874,7 @@ gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 }
 
 
-/* Keep a registry of the architectures known by GDB. */
+/* Keep a registry of the architectures known by GDB.  */
 
 struct gdbarch_registration
 {
@@ -1899,7 +1899,7 @@ const char **
 gdbarch_printable_names (void)
 {
   /* Accumulate a list of names based on the registed list of
-     architectures. */
+     architectures.  */
   int nr_arches = 0;
   const char **arches = NULL;
   struct gdbarch_registration *rego;
@@ -1938,17 +1938,19 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   if (bfd_arch_info == NULL)
     {
       internal_error (__FILE__, __LINE__,
-                      _("gdbarch: Attempt to register unknown architecture (%d)"),
+                      _("gdbarch: Attempt to register "
+			"unknown architecture (%d)"),
                       bfd_architecture);
     }
-  /* Check that we haven't seen this architecture before */
+  /* Check that we haven't seen this architecture before.  */
   for (curr = &gdbarch_registry;
        (*curr) != NULL;
        curr = &(*curr)->next)
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
 	internal_error (__FILE__, __LINE__,
-                        _("gdbarch: Duplicate registraration of architecture (%s)"),
+                        _("gdbarch: Duplicate registraration "
+			  "of architecture (%s)"),
 	                bfd_arch_info->printable_name);
     }
   /* log it */
@@ -2009,7 +2011,7 @@ gdbarch_find_by_info (struct gdbarch_info info)
      defaults.  */
   gdbarch_info_fill (&info);
 
-  /* Must have found some sort of architecture. */
+  /* Must have found some sort of architecture.  */
   gdb_assert (info.bfd_arch_info != NULL);
 
   if (gdbarch_debug)

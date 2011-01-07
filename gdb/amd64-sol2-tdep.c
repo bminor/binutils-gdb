@@ -46,7 +46,7 @@ static int amd64_sol2_gregset_reg_offset[] = {
   8 * 8,			/* %rdi */
   10 * 8,			/* %rbp */
   20 * 8,			/* %rsp */
-  7 * 8,			/* %r8 ... */
+  7 * 8,			/* %r8 ...  */
   6 * 8,
   5 * 8,
   4 * 8,

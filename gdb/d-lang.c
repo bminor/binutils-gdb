@@ -253,7 +253,8 @@ static const struct language_defn d_language_defn =
   c_printstr,			/* Function to print string constant.  */
   c_emit_char,			/* Print a single char.  */
   c_print_type,			/* Print a type using appropriate syntax.  */
-  c_print_typedef,		/* Print a typedef using appropriate syntax.  */
+  c_print_typedef,		/* Print a typedef using appropriate
+				   syntax.  */
   d_val_print,			/* Print a value using appropriate syntax.  */
   c_value_print,		/* Print a top-level value.  */
   NULL,				/* Language specific skip_trampoline.  */
@@ -261,7 +262,8 @@ static const struct language_defn d_language_defn =
   basic_lookup_symbol_nonlocal, 
   basic_lookup_transparent_type,
   d_demangle,			/* Language specific symbol demangler.  */
-  NULL,				/* Language specific class_name_from_physname.  */
+  NULL,				/* Language specific
+				   class_name_from_physname.  */
   d_op_print_tab,		/* Expression operators for printing.  */
   1,				/* C-style arrays.  */
   0,				/* String lower bound.  */

@@ -164,7 +164,7 @@ extern struct frame_id frame_id_build (CORE_ADDR stack_addr,
 /* Construct a special frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), the second is the
    frame's constant code address (typically the entry point),
-   and the third parameter is the frame's special identifier address. */
+   and the third parameter is the frame's special identifier address.  */
 extern struct frame_id frame_id_build_special (CORE_ADDR stack_addr,
 					       CORE_ADDR code_addr,
 					       CORE_ADDR special_addr);
@@ -574,14 +574,14 @@ extern struct gdbarch *frame_unwind_caller_arch (struct frame_info *frame);
 /* Values for the source flag to be used in print_frame_info_base().  */
 enum print_what
   { 
-    /* Print only the source line, like in stepi. */
+    /* Print only the source line, like in stepi.  */
     SRC_LINE = -1, 
     /* Print only the location, i.e. level, address (sometimes)
-       function, args, file, line, line num. */
+       function, args, file, line, line num.  */
     LOCATION,
-    /* Print both of the above. */
+    /* Print both of the above.  */
     SRC_AND_LOC, 
-    /* Print location only, but always include the address. */
+    /* Print location only, but always include the address.  */
     LOC_AND_ADDRESS 
   };
 

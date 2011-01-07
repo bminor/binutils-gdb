@@ -652,7 +652,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	    if (ctx->stack_len < 2)
 	       error (_("Not enough elements for "
-			"DW_OP_swap. Need 2, have %d."),
+			"DW_OP_swap.  Need 2, have %d."),
 		      ctx->stack_len);
 	    t1 = ctx->stack[ctx->stack_len - 1];
 	    t2 = ctx->stack[ctx->stack_len - 2];
@@ -671,7 +671,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    struct dwarf_stack_value t1, t2, t3;
 
 	    if (ctx->stack_len < 3)
-	       error (_("Not enough elements for DW_OP_rot. Need 3, have %d."),
+	       error (_("Not enough elements for "
+			"DW_OP_rot.  Need 3, have %d."),
 		      ctx->stack_len);
 	    t1 = ctx->stack[ctx->stack_len - 1];
 	    t2 = ctx->stack[ctx->stack_len - 2];
@@ -821,7 +822,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_GNU_push_tls_address:
 	  /* Variable is at a constant offset in the thread-local
 	  storage block into the objfile for the current thread and
-	  the dynamic linker module containing this expression. Here
+	  the dynamic linker module containing this expression.  Here
 	  we return returns the offset from that base.  The top of the
 	  stack has the offset from the beginning of the thread
 	  control block at which the variable is located.  Nothing

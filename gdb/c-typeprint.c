@@ -81,7 +81,7 @@ c_print_type (struct type *type,
       fputs_filtered (varstring, stream);
 
       /* For demangled function names, we have the arglist as part of
-         the name, so don't print an additional pair of ()'s */
+         the name, so don't print an additional pair of ()'s.  */
 
       demangled_args = strchr (varstring, '(') != NULL;
       c_type_print_varspec_suffix (type, stream, show,
@@ -509,10 +509,10 @@ is_type_conversion_operator (struct type *type, int i, int j)
 static char *
 remove_qualifiers (char *qid)
 {
-  int quoted = 0;	/* zero if we're not in quotes;
+  int quoted = 0;	/* Zero if we're not in quotes;
 			   '"' if we're in a double-quoted string;
 			   '\'' if we're in a single-quoted string.  */
-  int depth = 0;	/* number of unclosed parens we've seen */
+  int depth = 0;	/* Number of unclosed parens we've seen.  */
   char *parenstack = (char *) alloca (strlen (qid));
   char *scan;
   char *last = 0;	/* The character after the rightmost
@@ -974,7 +974,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 	  if (real_len > 0 && section_type != s_none)
 	    fprintf_filtered (stream, "\n");
 
-	  /* C++: print out the methods */
+	  /* C++: print out the methods.  */
 	  for (i = 0; i < len; i++)
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
@@ -1207,7 +1207,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_RANGE:
-      /* This should not occur */
+      /* This should not occur.  */
       fprintf_filtered (stream, _("<range type>"));
       break;
 

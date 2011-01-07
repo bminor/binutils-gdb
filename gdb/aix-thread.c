@@ -384,7 +384,7 @@ pdc_read_regs (pthdb_user_t user,
 }
 
 /* Write register function should be able to write requested context
-   information to specified debuggee's kernel thread id. 
+   information to specified debuggee's kernel thread id.
    If successful return 0, else non-zero is returned.  */
 
 static int
@@ -839,7 +839,7 @@ pd_update (int set_infpid)
   return ptid;
 }
 
-/* Try to start debugging threads in the current process. 
+/* Try to start debugging threads in the current process.
    If successful and SET_INFPID, set inferior_ptid to reflect the
    current thread.  */
 
@@ -1512,7 +1512,8 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
 
   status = pthdb_pthread_setcontext (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
-    error (_("aix-thread: store_registers: pthdb_pthread_setcontext returned %s"),
+    error (_("aix-thread: store_registers: "
+	     "pthdb_pthread_setcontext returned %s"),
            pd_status2str (status));
 }
 
@@ -1660,7 +1661,8 @@ aix_thread_store_registers (struct target_ops *ops,
 static LONGEST
 aix_thread_xfer_partial (struct target_ops *ops, enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
-			 const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+			 const gdb_byte *writebuf,
+			 ULONGEST offset, LONGEST len)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
   LONGEST xfer;
@@ -1826,9 +1828,11 @@ _initialize_aix_thread (void)
   observer_attach_new_objfile (new_objfile);
 
   add_setshow_boolean_cmd ("aix-thread", class_maintenance, &debug_aix_thread,
-			    _("Set debugging of AIX thread module."),
-			    _("Show debugging of AIX thread module."),
-			    _("Enables debugging output (used to debug GDB)."),
-			    NULL, NULL, /* FIXME: i18n: Debugging of AIX thread module is \"%d\".  */
-			    &setdebuglist, &showdebuglist);
+			   _("Set debugging of AIX thread module."),
+			   _("Show debugging of AIX thread module."),
+			   _("Enables debugging output (used to debug GDB)."),
+			   NULL, NULL,
+			   /* FIXME: i18n: Debugging of AIX thread
+			      module is \"%d\".  */
+			   &setdebuglist, &showdebuglist);
 }

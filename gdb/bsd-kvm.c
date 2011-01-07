@@ -248,7 +248,7 @@ bsd_kvm_fetch_registers (struct target_ops *ops,
     }
 #endif
 
-  /* i18n: PCB == "Process Control Block" */
+  /* i18n: PCB == "Process Control Block".  */
   error (_("Cannot find a valid PCB"));
 }
 
@@ -297,7 +297,7 @@ static void
 bsd_kvm_pcb_cmd (char *arg, int fromtty)
 {
   if (arg == NULL)
-    /* i18n: PCB == "Process Control Block" */
+    /* i18n: PCB == "Process Control Block".  */
     error_no_arg (_("pcb address"));
 
   if (core_kd == NULL)
@@ -370,7 +370,7 @@ Generic command for manipulating the kernel memory interface."),
 	   _("Set current context from proc address"), &bsd_kvm_cmdlist);
 #endif
   add_cmd ("pcb", class_obscure, bsd_kvm_pcb_cmd,
-	   /* i18n: PCB == "Process Control Block" */
+	   /* i18n: PCB == "Process Control Block".  */
 	   _("Set current context from pcb address"), &bsd_kvm_cmdlist);
 
   /* Some notes on the ptid usage on this target.
@@ -385,7 +385,7 @@ Generic command for manipulating the kernel memory interface."),
      ptid (1, 1, 0) -> kvm inferior 1, in kernel
      ptid (1, 1, 1) -> kvm inferior 1, process 1
      ptid (1, 1, 2) -> kvm inferior 1, process 2
-     ptid (1, 1, n) -> kvm inferior 1, process n
-  */
+     ptid (1, 1, n) -> kvm inferior 1, process n  */
+
   bsd_kvm_ptid = ptid_build (1, 1, 0);
 }

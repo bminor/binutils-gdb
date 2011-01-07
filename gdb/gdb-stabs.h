@@ -36,7 +36,7 @@ struct stab_section_info
   {
     char *filename;
     struct stab_section_info *next;
-    int found;			/* Count of times it's found in searching */
+    int found;			/* Count of times it's found in searching.  */
     size_t num_sections;
     CORE_ADDR sections[1];
   };
@@ -58,7 +58,7 @@ struct dbx_symfile_info
 						       of the original .o files
 						       before linking.  */
 
-    /* See stabsread.h for the use of the following. */
+    /* See stabsread.h for the use of the following.  */
     struct header_file *header_files;
     int n_header_files;
     int n_allocated_header_files;

@@ -55,7 +55,7 @@ int amd64_darwin_thread_state_reg_offset[] =
   4 * 8,			/* %rdi */
   6 * 8,			/* %rbp */
   7 * 8,			/* %rsp */
-  8 * 8,			/* %r8 ... */
+  8 * 8,			/* %r8 ...  */
   9 * 8,
   10 * 8,
   11 * 8,

@@ -66,7 +66,8 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 }
 
 void
-fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       fpregset_t *fpregsetp, int regno)
 {
   alphabsd_fill_fpreg (regcache, (char *) fpregsetp, regno);
 }
@@ -100,7 +101,8 @@ alphabsd_fetch_inferior_registers (struct target_ops *ops,
 	return;
     }
 
-  if (regno == -1 || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  if (regno == -1
+      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
     {
       struct fpreg fpregs;
 
@@ -136,7 +138,8 @@ alphabsd_store_inferior_registers (struct target_ops *ops,
 	return;
     }
 
-  if (regno == -1 || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  if (regno == -1
+      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
     {
       struct fpreg fpregs;
 

@@ -29,7 +29,7 @@
 
 /* Disassemble functions.
    FIXME: We should get rid of all the duplicate code in gdb that does
-   the same thing: disassemble_command() and the gdbtk variation. */
+   the same thing: disassemble_command() and the gdbtk variation.  */
 
 /* This Structure is used to store line number information.
    We need a different sort of line table from the normal one cuz we can't
@@ -121,7 +121,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 				   &line, &unmapped))
 	{
 	  /* We don't care now about line, filename and
-	     unmapped. But we might in the future. */
+	     unmapped. But we might in the future.  */
 	  ui_out_text (uiout, " <");
 	  if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
 	    ui_out_field_string (uiout, "func-name", name);
@@ -168,6 +168,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
    function to the user.  This means that things are presented
    in source order, with (possibly) out of order assembly
    immediately following.  */
+
 static void
 do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 			      struct disassemble_info *di, int nlines,
@@ -203,7 +204,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   for (; i < nlines - 1 && le[i].pc < high; i++)
     {
       if (le[i].line == le[i + 1].line && le[i].pc == le[i + 1].pc)
-	continue;		/* Ignore duplicates */
+	continue;		/* Ignore duplicates.  */
 
       /* Skip any end-of-function markers.  */
       if (le[i].line == 0)
@@ -230,7 +231,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
     }
 
   /* Now, sort mle by line #s (and, then by addresses within
-     lines). */
+     lines).  */
 
   if (out_of_order)
     qsort (mle, newlines, sizeof (struct dis_line_entry), compare_lines);
@@ -248,7 +249,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 	{
 	  if (next_line != 0)
 	    {
-	      /* Just one line to print. */
+	      /* Just one line to print.  */
 	      if (next_line == mle[i].line)
 		{
 		  ui_out_tuple_chain
@@ -258,7 +259,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		}
 	      else
 		{
-		  /* Several source lines w/o asm instructions associated. */
+		  /* Several source lines w/o asm instructions associated.  */
 		  for (; next_line < mle[i].line; next_line++)
 		    {
 		      struct cleanup *ui_out_list_chain_line;
@@ -276,7 +277,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		      do_cleanups (ui_out_tuple_chain_line);
 		    }
 		  /* Print the last line and leave list open for
-		     asm instructions to be added. */
+		     asm instructions to be added.  */
 		  ui_out_tuple_chain
 		    = make_cleanup_ui_out_tuple_begin_end (uiout,
 							   "src_and_asm_line");
@@ -384,12 +385,12 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
   struct disassemble_info di = gdb_disassemble_info (gdbarch, stb->stream);
-  /* To collect the instruction outputted from opcodes. */
+  /* To collect the instruction outputted from opcodes.  */
   struct symtab *symtab = NULL;
   struct linetable_entry *le = NULL;
   int nlines = -1;
 
-  /* Assume symtab is valid for whole PC range */
+  /* Assume symtab is valid for whole PC range.  */
   symtab = find_pc_symtab (low);
 
   if (symtab != NULL && symtab->linetable != NULL)

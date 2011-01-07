@@ -42,8 +42,7 @@
    REG_ADDR is the offset from u.u_ar0 to the register values relative to
    core_reg_sect.  This is used with old-fashioned core files to
    locate the registers in a large upage-plus-stack ".reg" section.
-   Original upage address X is at location core_reg_sect+x+reg_addr.
- */
+   Original upage address X is at location core_reg_sect+x+reg_addr.  */
 
 static void
 fetch_osf_core_registers (struct regcache *regcache,
@@ -68,10 +67,14 @@ fetch_osf_core_registers (struct regcache *regcache,
     CF_T7, CF_S0, CF_S1, CF_S2, CF_S3, CF_S4, CF_S5, CF_S6,
     CF_A0, CF_A1, CF_A2, CF_A3, CF_A4, CF_A5, CF_T8, CF_T9,
     CF_T10, CF_T11, CF_RA, CF_T12, CF_AT, CF_GP, CF_SP, -1,
-    EFL + 0, EFL + 1, EFL + 2, EFL + 3, EFL + 4, EFL + 5, EFL + 6, EFL + 7,
-    EFL + 8, EFL + 9, EFL + 10, EFL + 11, EFL + 12, EFL + 13, EFL + 14, EFL + 15,
-    EFL + 16, EFL + 17, EFL + 18, EFL + 19, EFL + 20, EFL + 21, EFL + 22, EFL + 23,
-    EFL + 24, EFL + 25, EFL + 26, EFL + 27, EFL + 28, EFL + 29, EFL + 30, EFL + 31,
+    EFL + 0, EFL + 1, EFL + 2, EFL + 3,
+    EFL + 4, EFL + 5, EFL + 6, EFL + 7,
+    EFL + 8, EFL + 9, EFL + 10, EFL + 11,
+    EFL + 12, EFL + 13, EFL + 14, EFL + 15,
+    EFL + 16, EFL + 17, EFL + 18, EFL + 19,
+    EFL + 20, EFL + 21, EFL + 22, EFL + 23,
+    EFL + 24, EFL + 25, EFL + 26, EFL + 27,
+    EFL + 28, EFL + 29, EFL + 30, EFL + 31,
     CF_PC, -1, -1
 #else
 #define EFL (EF_SIZE / 8)
@@ -79,10 +82,14 @@ fetch_osf_core_registers (struct regcache *regcache,
     EF_T7, EF_S0, EF_S1, EF_S2, EF_S3, EF_S4, EF_S5, EF_S6,
     EF_A0, EF_A1, EF_A2, EF_A3, EF_A4, EF_A5, EF_T8, EF_T9,
     EF_T10, EF_T11, EF_RA, EF_T12, EF_AT, EF_GP, EF_SP, -1,
-    EFL + 0, EFL + 1, EFL + 2, EFL + 3, EFL + 4, EFL + 5, EFL + 6, EFL + 7,
-    EFL + 8, EFL + 9, EFL + 10, EFL + 11, EFL + 12, EFL + 13, EFL + 14, EFL + 15,
-    EFL + 16, EFL + 17, EFL + 18, EFL + 19, EFL + 20, EFL + 21, EFL + 22, EFL + 23,
-    EFL + 24, EFL + 25, EFL + 26, EFL + 27, EFL + 28, EFL + 29, EFL + 30, EFL + 31,
+    EFL + 0, EFL + 1, EFL + 2, EFL + 3,
+    EFL + 4, EFL + 5, EFL + 6, EFL + 7,
+    EFL + 8, EFL + 9, EFL + 10, EFL + 11,
+    EFL + 12, EFL + 13, EFL + 14, EFL + 15,
+    EFL + 16, EFL + 17, EFL + 18, EFL + 19,
+    EFL + 20, EFL + 21, EFL + 22, EFL + 23,
+    EFL + 24, EFL + 25, EFL + 26, EFL + 27,
+    EFL + 28, EFL + 29, EFL + 30, EFL + 31,
     EF_PC, -1, -1
 #endif
   };
@@ -120,12 +127,11 @@ fetch_osf_core_registers (struct regcache *regcache,
 
 
 #include <sys/procfs.h>
-/* Prototypes for supply_gregset etc. */
+/* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
-/*
- * See the comment in m68k-tdep.c regarding the utility of these functions.
- */
+/* See the comment in m68k-tdep.c regarding the utility of these
+   functions.  */
 
 void
 supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
@@ -146,10 +152,8 @@ fill_gregset (const struct regcache *regcache,
   alpha_fill_int_regs (regcache, regno, regp, regp + 31, NULL);
 }
 
-/*
- * Now we do the same thing for floating-point registers.
- * Again, see the comments in m68k-tdep.c.
- */
+/* Now we do the same thing for floating-point registers.
+   Again, see the comments in m68k-tdep.c.  */
 
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
@@ -171,7 +175,7 @@ fill_fpregset (const struct regcache *regcache,
 }
 
 
-/* Register that we are able to handle alpha core file formats. */
+/* Register that we are able to handle alpha core file formats.  */
 
 static struct core_fns alpha_osf_core_fns =
 {

@@ -58,9 +58,9 @@ struct regcache;
    
    The virtual argument pointer is pointing to the bottom of the argument
    transfer area, which is located immediately below the virtual frame
-   pointer. Its size is fixed for the native compiler, it is either zero
+   pointer.  Its size is fixed for the native compiler, it is either zero
    (for the no arguments case) or large enough to hold all argument registers.
-   gcc uses a variable sized argument transfer area. As it has
+   gcc uses a variable sized argument transfer area.  As it has
    to stay compatible with the native debugging tools it has to use the same
    virtual argument pointer and adjust the argument offsets accordingly.
    
@@ -99,7 +99,7 @@ struct gdbarch_tdep
   int jb_pc;			/* Offset to PC value in jump buffer.
 				   If htis is negative, longjmp support
 				   will be disabled.  */
-  size_t jb_elt_size;		/* And the size of each entry in the buf. */
+  size_t jb_elt_size;		/* And the size of each entry in the buf.  */
 };
 
 extern unsigned int alpha_read_insn (struct gdbarch *gdbarch, CORE_ADDR pc);

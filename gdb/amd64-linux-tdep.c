@@ -72,7 +72,7 @@ int amd64_linux_gregset_reg_offset[] =
   14 * 8,			/* %rdi */
   4 * 8,			/* %rbp */
   19 * 8,			/* %rsp */
-  9 * 8,			/* %r8 ... */
+  9 * 8,			/* %r8 ...  */
   8 * 8,
   7 * 8,
   6 * 8,
@@ -1544,7 +1544,7 @@ _initialize_amd64_linux_tdep (void)
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_LINUX, amd64_linux_init_abi);
 
-  /* Initialize the Linux target description  */
+  /* Initialize the Linux target description.  */
   initialize_tdesc_amd64_linux ();
   initialize_tdesc_amd64_avx_linux ();
 }

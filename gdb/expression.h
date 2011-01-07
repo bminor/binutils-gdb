@@ -22,7 +22,7 @@
 #define EXPRESSION_H 1
 
 
-#include "symtab.h"		/* Needed for "struct block" type. */
+#include "symtab.h"		/* Needed for "struct block" type.  */
 #include "doublest.h"		/* Needed for DOUBLEST.  */
 
 
@@ -81,7 +81,7 @@ enum exp_opcode
     BINOP_MAX,			/* >? */
 
     /* STRUCTOP_MEMBER is used for pointer-to-member constructs.
-       X . * Y translates into X STRUCTOP_MEMBER Y.  */
+       X .  * Y translates into X STRUCTOP_MEMBER Y.  */
     STRUCTOP_MEMBER,
 
     /* STRUCTOP_MPTR is used for pointer-to-member constructs
@@ -92,12 +92,12 @@ enum exp_opcode
        type instantiation for overloaded methods/functions.
 
        The format is:
-       TYPE_INSTANCE num_types type0 ... typeN num_types TYPE_INSTANCE  */
+       TYPE_INSTANCE num_types type0 ... typeN num_types TYPE_INSTANCE.  */
     TYPE_INSTANCE,
 
     /* end of C++.  */
 
-    /* For Modula-2 integer division DIV */
+    /* For Modula-2 integer division DIV.  */
     BINOP_INTDIV,
 
     BINOP_ASSIGN_MODIFY,	/* +=, -=, *=, and so on.
@@ -106,19 +106,19 @@ enum exp_opcode
 				   Then comes another BINOP_ASSIGN_MODIFY,
 				   making three exp_elements in total.  */
 
-    /* Modula-2 standard (binary) procedures */
+    /* Modula-2 standard (binary) procedures.  */
     BINOP_VAL,
 
     /* Concatenate two operands, such as character strings or bitstrings.
        If the first operand is a integer expression, then it means concatenate
-       the second operand with itself that many times. */
+       the second operand with itself that many times.  */
     BINOP_CONCAT,
 
-    /* For (the deleted) Chill and Pascal. */
-    BINOP_IN,			/* Returns 1 iff ARG1 IN ARG2. */
+    /* For (the deleted) Chill and Pascal.  */
+    BINOP_IN,			/* Returns 1 iff ARG1 IN ARG2.  */
 
     /* This is the "colon operator" used various places in (the
-       deleted) Chill. */
+       deleted) Chill.  */
     BINOP_RANGE,
 
     /* This must be the highest BINOP_ value, for expprint.c.  */
@@ -133,14 +133,14 @@ enum exp_opcode
 
     /* A sub-string/sub-array.  (The deleted) Chill syntax: OP1(OP2 UP
        OP3).  Return OP3 elements of OP1, starting with element
-       OP2. */
+       OP2.  */
     TERNOP_SLICE_COUNT,
 
     /* Multidimensional subscript operator, such as Modula-2 x[a,b,...].
        The dimensionality is encoded in the operator, like the number of
        function arguments in OP_FUNCALL, I.E. <OP><dimension><OP>.
        The value of the first following subexpression is subscripted
-       by each of the next following subexpressions, one per dimension. */
+       by each of the next following subexpressions, one per dimension.  */
     MULTI_SUBSCRIPT,
 
     /* The OP_... series take immediate following arguments.
@@ -192,19 +192,20 @@ enum exp_opcode
        and then an integer.  The string is the selector string.  The
        integer is the number of arguments to the message call.  That
        many plus one values are used, the first one being the object
-       pointer.  This is an Objective C message */
+       pointer.  This is an Objective C message.  */
     OP_OBJC_MSGCALL,
 
-    /* This is EXACTLY like OP_FUNCALL but is semantically different.  
-       In F77, array subscript expressions, substring expressions
-       and function calls are  all exactly the same syntactically. They may 
-       only be disambiguated at runtime.  Thus this operator, which 
-       indicates that we have found something of the form <name> ( <stuff> ) */
+    /* This is EXACTLY like OP_FUNCALL but is semantically different.
+       In F77, array subscript expressions, substring expressions and
+       function calls are all exactly the same syntactically.  They
+       may only be disambiguated at runtime.  Thus this operator,
+       which indicates that we have found something of the form
+       <name> ( <stuff> ).  */
     OP_F77_UNDETERMINED_ARGLIST,
 
     /* OP_COMPLEX takes a type in the following element, followed by another
        OP_COMPLEX, making three exp_elements.  It is followed by two double
-       args, and converts them into a complex number of the given type. */
+       args, and converts them into a complex number of the given type.  */
     OP_COMPLEX,
 
     /* OP_STRING represents a string constant.
@@ -227,7 +228,7 @@ enum exp_opcode
        The bounds are used to compute the number of following subexpressions
        to consume, as well as setting the bounds in the created array constant.
        The type of the elements is taken from the type of the first subexp,
-       and they must all match. */
+       and they must all match.  */
     OP_ARRAY,
 
     /* UNOP_CAST is followed by a type pointer in the next exp_element.
@@ -307,7 +308,7 @@ enum exp_opcode
        OP_OBJC_SELF) pair.  */
     OP_OBJC_SELF,
 
-    /* Objective C: "@selector" pseudo-operator */
+    /* Objective C: "@selector" pseudo-operator.  */
     OP_OBJC_SELECTOR,
 
     /* OP_SCOPE surrounds a type name and a field name.  The type
@@ -325,18 +326,18 @@ enum exp_opcode
        represented as if it were .NAME1:(.NAME2:VALUE) (though that is
        not valid (the deleted) Chill syntax).
 
-       The NAME is represented as for STRUCTOP_STRUCT;  VALUE follows. */
+       The NAME is represented as for STRUCTOP_STRUCT;  VALUE follows.  */
     OP_LABELED,
 
     /* OP_TYPE is for parsing types, and used with the "ptype" command
        so we can look up types that are qualified by scope, either with
-       the GDB "::" operator, or the Modula-2 '.' operator. */
+       the GDB "::" operator, or the Modula-2 '.' operator.  */
     OP_TYPE,
 
-    /* An un-looked-up identifier. */
+    /* An un-looked-up identifier.  */
     OP_NAME,
 
-    /* An Objective C Foundation Class NSString constant */
+    /* An Objective C Foundation Class NSString constant.  */
     OP_OBJC_NSSTRING,
 
     /* A F90 array range operator (for "exp:exp", "exp:", ":exp" and ":").  */
@@ -360,13 +361,13 @@ enum exp_opcode
     OP_EXTENDED0,
   
     /* Last possible extension operator.  Defined to provide an
-       explicit and finite number of extended operators. */
+       explicit and finite number of extended operators.  */
     OP_EXTENDED_LAST = 0xff,
     /* NOTE: Eventually, we expect to convert to an object-oriented 
        formulation for expression operators that does away with the
        need for these extension operators, and indeed for this
        entire enumeration type.  Therefore, consider the OP_EXTENDED
-       definitions to be a temporary measure. */
+       definitions to be a temporary measure.  */
 
     /* Each language specific set of operators starts at OP_EXTENDED0.  */
 #include "ada-operator.inc"
@@ -394,14 +395,14 @@ union exp_element
 struct expression
   {
     const struct language_defn *language_defn;	/* language it was
-						   entered in */
-    struct gdbarch *gdbarch;  /* architecture it was parsed in */
+						   entered in.  */
+    struct gdbarch *gdbarch;  /* architecture it was parsed in.  */
     int nelts;
     union exp_element elts[1];
   };
 
 /* Macros for converting between number of expression elements and bytes
-   to store that many expression elements. */
+   to store that many expression elements.  */
 
 #define EXP_ELEM_TO_BYTES(elements) \
     ((elements) * sizeof (union exp_element))

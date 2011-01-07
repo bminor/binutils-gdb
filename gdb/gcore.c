@@ -427,7 +427,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 	      && !(bfd_get_file_flags (abfd) & BFD_IN_MEMORY))
 	    {
 	      flags &= ~(SEC_LOAD | SEC_HAS_CONTENTS);
-	      goto keep;	/* break out of two nested for loops */
+	      goto keep;	/* Break out of two nested for loops.  */
 	    }
 	}
 
@@ -498,7 +498,7 @@ objfile_find_memory_regions (find_memory_region_ftype func, void *obfd)
 	     0, /* Stack section will not be executable.  */
 	     obfd);
 
-  /* Make a heap segment. */
+  /* Make a heap segment.  */
   if (derive_heap_segment (exec_bfd, &temp_bottom, &temp_top))
     (*func) (temp_bottom, temp_top - temp_bottom,
 	     1, /* Heap section will be readable.  */

@@ -181,7 +181,7 @@ struct gdbarch_tdep
   const char *thumb2_breakpoint;
   int thumb2_breakpoint_size;
 
-  int jb_pc;			/* Offset to PC value in jump buffer. 
+  int jb_pc;			/* Offset to PC value in jump buffer.
 				   If this is negative, longjmp support
 				   will be disabled.  */
   size_t jb_elt_size;		/* And the size of each entry in the buf.  */

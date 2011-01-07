@@ -121,8 +121,8 @@
 #include <langinfo.h>
 
 #if __DJGPP_MINOR__ < 3
-/* This code will be provided from DJGPP 2.03 on. Until then I code it
-   here */
+/* This code will be provided from DJGPP 2.03 on.  Until then I code it
+   here.  */
 typedef struct
   {
     unsigned short sig0;
@@ -149,8 +149,8 @@ NPX;
 
 static NPX npx;
 
-static void save_npx (void);	/* Save the FPU of the debugged program */
-static void load_npx (void);	/* Restore the FPU of the debugged program */
+static void save_npx (void);	/* Save the FPU of the debugged program.  */
+static void load_npx (void);	/* Restore the FPU of the debugged program.  */
 
 /* ------------------------------------------------------------------------- */
 /* Store the contents of the NPX in the global variable `npx'.  */
@@ -423,7 +423,7 @@ go32_wait (struct target_ops *ops,
   unsigned long INT3_addr = 0;
   int stepping_over_INT = 0;
 
-  a_tss.tss_eflags &= 0xfeff;	/* reset the single-step flag (TF) */
+  a_tss.tss_eflags &= 0xfeff;	/* Reset the single-step flag (TF).  */
   if (resume_is_step)
     {
       /* If the next instruction is INT xx or INTO, we need to handle
@@ -464,7 +464,7 @@ go32_wait (struct target_ops *ops,
     }
   else
     {
-      a_tss.tss_trap = 0xffff;	/* run_child looks for this */
+      a_tss.tss_trap = 0xffff;	/* run_child looks for this.  */
       a_tss.tss_irqn = resume_signal;
     }
 
@@ -477,7 +477,7 @@ go32_wait (struct target_ops *ops,
      run it.  */
   /* Initialize child_cwd, before the first call to run_child and not
      in the initialization, so the child get also the changed directory
-     set with the gdb-command "cd ..." */
+     set with the gdb-command "cd ..."  */
   if (!*child_cwd)
     /* Initialize child's cwd with the current one.  */
     getcwd (child_cwd, sizeof (child_cwd));
@@ -496,7 +496,7 @@ go32_wait (struct target_ops *ops,
   if (stepping_over_INT && a_tss.tss_eip == INT3_addr + 1)
     {
       /* Restore the original opcode.  */
-      a_tss.tss_eip--;	/* EIP points *after* the INT3 instruction */
+      a_tss.tss_eip--;	/* EIP points *after* the INT3 instruction.  */
       write_child (a_tss.tss_eip, &saved_opcode, 1);
       /* Simulate a TRAP exception.  */
       a_tss.tss_irqn = 1;
@@ -540,7 +540,8 @@ fetch_register (struct regcache *regcache, int regno)
   if (regno < gdbarch_fp0_regnum (gdbarch))
     regcache_raw_supply (regcache, regno,
 			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
-  else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch, regno))
+  else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch,
+								   regno))
     i387_supply_fsave (regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
@@ -570,7 +571,8 @@ store_register (const struct regcache *regcache, int regno)
   if (regno < gdbarch_fp0_regnum (gdbarch))
     regcache_raw_collect (regcache, regno,
 			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
-  else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch, regno))
+  else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch,
+								   regno))
     i387_collect_fsave (regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
@@ -626,7 +628,7 @@ go32_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
     }
 }
 
-static cmdline_t child_cmd;	/* parsed child's command line kept here */
+static cmdline_t child_cmd;	/* Parsed child's command line kept here.  */
 
 static void
 go32_files_info (struct target_ops *target)
@@ -666,7 +668,8 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   /* Init command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
     internal_error (__FILE__, __LINE__,
-		    _("Cannot allocate redirection storage: not enough memory.\n"));
+		    _("Cannot allocate redirection storage: "
+		      "not enough memory.\n"));
 
   /* Parse the command line and create redirections.  */
   if (strpbrk (args, "<>"))
@@ -696,7 +699,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
       cmdline[cmdlen + 1] = 13;
     }
   else
-    cmdline[0] = 0xff;	/* signal v2loadimage it's a long command */
+    cmdline[0] = 0xff;	/* Signal v2loadimage it's a long command.  */
 
   environ = env;
 
@@ -819,11 +822,11 @@ device_mode (int fd, int raw_p)
   else
     newmode &= ~0x20;
 
-  if (oldmode & 0x80)	/* Only for character dev */
+  if (oldmode & 0x80)	/* Only for character dev.  */
   {
     regs.x.ax = 0x4401;
     regs.x.bx = fd;
-    regs.x.dx = newmode & 0xff;   /* Force upper byte zero, else it fails */
+    regs.x.dx = newmode & 0xff;   /* Force upper byte zero, else it fails.  */
     __dpmi_int (0x21, &regs);
     if (regs.x.flags & 1)
       return -1;
@@ -844,7 +847,7 @@ static int terminal_is_ours = 1;
 static void
 go32_terminal_init (void)
 {
-  inf_mode_valid = 0;	/* reinitialize, in case they are restarting child */
+  inf_mode_valid = 0;	/* Reinitialize, in case they are restarting child.  */
   terminal_is_ours = 1;
 }
 
@@ -889,8 +892,8 @@ go32_terminal_inferior (void)
     error (_("Cannot redirect standard handles for program: %s."),
 	   safe_strerror (errno));
   }
-  /* set the console device of the inferior to whatever mode
-     (raw or cooked) we found it last time */
+  /* Set the console device of the inferior to whatever mode
+     (raw or cooked) we found it last time.  */
   if (terminal_is_ours)
   {
     if (inf_mode_valid)
@@ -903,7 +906,7 @@ static void
 go32_terminal_ours (void)
 {
   /* Switch to cooked mode on the gdb terminal and save the inferior
-     terminal mode to be restored when it is resumed */
+     terminal mode to be restored when it is resumed.  */
   if (!terminal_is_ours)
   {
     inf_terminal_mode = device_mode (0, 0);
@@ -994,7 +997,8 @@ init_go32_ops (void)
   /* Initialize child's command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
     internal_error (__FILE__, __LINE__,
-		    _("Cannot allocate redirection storage: not enough memory.\n"));
+		    _("Cannot allocate redirection storage: "
+		      "not enough memory.\n"));
 
   /* We are always processing GCC-compiled programs.  */
   processing_gcc_compilation = 2;
@@ -1032,7 +1036,7 @@ nl_langinfo (nl_item item)
 	  int blen = sizeof (buf);
 	  int needed = snprintf (buf, blen, "CP%d", dos_codepage ());
 
-	  if (needed > blen)	/* should never happen */
+	  if (needed > blen)	/* Should never happen.  */
 	    buf[0] = 0;
 	  retval = xstrdup (buf);
 	}
@@ -1256,7 +1260,7 @@ go32_sysinfo (char *arg, int from_tty)
 	  /* We only list features which might be useful in the DPMI
 	     environment.  */
 	  if ((cpuid_edx & 1) == 0)
-	    puts_filtered ("No FPU "); /* it's unusual to not have an FPU */
+	    puts_filtered ("No FPU "); /* It's unusual to not have an FPU.  */
 	  if ((cpuid_edx & (1 << 1)) != 0)
 	    puts_filtered ("VME ");
 	  if ((cpuid_edx & (1 << 2)) != 0)
@@ -1325,7 +1329,8 @@ go32_sysinfo (char *arg, int from_tty)
       printf_filtered ("%s)\n", windows_flavor);
     }
   else if (true_dos_version == 0x532 && advertized_dos_version == 0x500)
-    printf_filtered ("Windows Version................Windows NT family (W2K/XP/W2K3/Vista/W2K8)\n");
+    printf_filtered ("Windows Version................"
+		     "Windows NT family (W2K/XP/W2K3/Vista/W2K8)\n");
   puts_filtered ("\n");
   /* On some versions of Windows, __dpmi_get_capabilities returns
      zero, but the buffer is not filled with info, so we fill the
@@ -1341,7 +1346,8 @@ go32_sysinfo (char *arg, int from_tty)
 	 I don't trust the vendors to follow that...  */
       if (!memchr (&dpmi_vendor_info[2], 0, 126))
 	dpmi_vendor_info[128] = '\0';
-      printf_filtered ("DPMI Host......................%s v%d.%d (capabilities: %#x)\n",
+      printf_filtered ("DPMI Host......................"
+		       "%s v%d.%d (capabilities: %#x)\n",
 		       &dpmi_vendor_info[2],
 		       (unsigned)dpmi_vendor_info[0],
 		       (unsigned)dpmi_vendor_info[1],
@@ -1352,7 +1358,8 @@ go32_sysinfo (char *arg, int from_tty)
   __dpmi_get_version (&dpmi_version_data);
   printf_filtered ("DPMI Version...................%d.%02d\n",
 		   dpmi_version_data.major, dpmi_version_data.minor);
-  printf_filtered ("DPMI Info......................%s-bit DPMI, with%s Virtual Memory support\n",
+  printf_filtered ("DPMI Info......................"
+		   "%s-bit DPMI, with%s Virtual Memory support\n",
 		   (dpmi_version_data.flags & 1) ? "32" : "16",
 		   (dpmi_version_data.flags & 4) ? "" : "out");
   printfi_filtered (31, "Interrupts reflected to %s mode\n",
@@ -1366,7 +1373,8 @@ go32_sysinfo (char *arg, int from_tty)
   if (prog_has_started)
     {
       __asm__ __volatile__ ("pushfl ; popl %0" : "=g" (eflags));
-      printf_filtered ("Protection.....................Ring %d (in %s), with%s I/O protection\n",
+      printf_filtered ("Protection....................."
+		       "Ring %d (in %s), with%s I/O protection\n",
 		       a_tss.tss_cs & 3, (a_tss.tss_cs & 4) ? "LDT" : "GDT",
 		       (a_tss.tss_cs & 3) > ((eflags >> 12) & 3) ? "" : "out");
     }
@@ -1617,7 +1625,8 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 	      case 23:
 		printf_filtered (" %s-bit Data (%s Exp-%s%s)",
 				 descr.bit32 ? "32" : "16",
-				 descr.stype & 2 ? "Read/Write," : "Read-Only, ",
+				 descr.stype & 2
+				 ? "Read/Write," : "Read-Only, ",
 				 descr.stype & 4 ? "down" : "up",
 				 descr.stype & 1 ? "" : ", N.Acc");
 		break;
@@ -1747,7 +1756,8 @@ go32_sgdt (char *arg, int from_tty)
 	{
 	  gdt_entry = parse_and_eval_long (arg);
 	  if (gdt_entry < 0 || (gdt_entry & 7) != 0)
-	    error (_("Invalid GDT entry 0x%03lx: not an integral multiple of 8."),
+	    error (_("Invalid GDT entry 0x%03lx: "
+		     "not an integral multiple of 8."),
 		   (unsigned long)gdt_entry);
 	}
     }
@@ -1794,7 +1804,7 @@ go32_sidt (char *arg, int from_tty)
 
   __asm__ __volatile__ ("sidt   %0" : "=m" (idtr) : /* no inputs */ );
   max_entry = (idtr.limit + 1) / 8;
-  if (max_entry > 0x100)	/* no more than 256 entries */
+  if (max_entry > 0x100)	/* No more than 256 entries.  */
     max_entry = 0x100;
 
   if (idt_entry >= 0)
@@ -1857,7 +1867,7 @@ get_cr3 (void)
   cr3 = _farnspeekl (taskbase + 0x1c) & ~0xfff;
   if (cr3 > 0xfffff)
     {
-#if 0  /* not fullly supported yet */
+#if 0  /* Not fullly supported yet.  */
       /* The Page Directory is in UMBs.  In that case, CWSDPMI puts
 	 the first Page Table right below the Page Directory.  Thus,
 	 the first Page Table's entry for its own address and the Page
@@ -1911,7 +1921,7 @@ get_pte (unsigned long pde, int n)
      page tables, for now.  */
   if ((pde & 1) && !(pde & 0x80) && n >= 0 && n < 1024)
     {
-      pde &= ~0xfff;	/* clear non-address bits */
+      pde &= ~0xfff;	/* Clear non-address bits.  */
       pte = _farpeekl (_dos_ds, pde + 4*n);
     }
   return pte;
@@ -1965,7 +1975,8 @@ go32_pde (char *arg, int from_tty)
 
   pdbr = get_cr3 ();
   if (!pdbr)
-    puts_filtered ("Access to Page Directories is not supported on this system.\n");
+    puts_filtered ("Access to Page Directories is "
+		   "not supported on this system.\n");
   else if (pde_idx >= 0)
     display_ptable_entry (get_pde (pde_idx), 1, 1, 0);
   else
@@ -1985,7 +1996,8 @@ display_page_table (long n, int force)
     {
       int i;
 
-      printf_filtered ("Page Table pointed to by Page Directory entry 0x%lx:\n", n);
+      printf_filtered ("Page Table pointed to by "
+		       "Page Directory entry 0x%lx:\n", n);
       for (i = 0; i < 1024; i++)
 	display_ptable_entry (get_pte (pde, i), 0, 0, 0);
       puts_filtered ("\n");

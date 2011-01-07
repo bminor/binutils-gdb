@@ -130,7 +130,7 @@ exec_close_1 (int quitting)
       nxt = vp->nxt;
 
       /* if there is an objfile associated with this bfd,
-         free_objfile() will do proper cleanup of objfile *and* bfd. */
+         free_objfile() will do proper cleanup of objfile *and* bfd.  */
 
       if (vp->objfile)
 	{
@@ -247,7 +247,7 @@ exec_file_attach (char *filename, int from_tty)
       /* At this point, scratch_pathname and exec_bfd->name both point to the
          same malloc'd string.  However exec_close() will attempt to free it
          via the exec_bfd->name pointer, so we need to make another copy and
-         leave exec_bfd as the new owner of the original copy. */
+         leave exec_bfd as the new owner of the original copy.  */
       scratch_pathname = xstrdup (scratch_pathname);
       cleanups = make_cleanup (xfree, scratch_pathname);
 
@@ -264,7 +264,7 @@ exec_file_attach (char *filename, int from_tty)
       /* FIXME - This should only be run for RS6000, but the ifdef is a poor
          way to accomplish.  */
 #ifdef DEPRECATED_IBM6000_TARGET
-      /* Setup initial vmap. */
+      /* Setup initial vmap.  */
 
       map_vmap (exec_bfd, 0);
       if (vmap == NULL)
@@ -314,7 +314,7 @@ exec_file_attach (char *filename, int from_tty)
    be called from file_command(), which also calls symbol_file_command()
    which can take multiple args.
    
-   If ARGS is NULL, we just want to close the exec file. */
+   If ARGS is NULL, we just want to close the exec file.  */
 
 static void
 exec_file_command (char *args, int from_tty)
@@ -353,7 +353,7 @@ exec_file_command (char *args, int from_tty)
     exec_file_attach (NULL, from_tty);
 }
 
-/* Set both the exec file and the symbol file, in one command.  
+/* Set both the exec file and the symbol file, in one command.
    What a novelty.  Why did GDB go through four major releases before this
    command was added?  */
 
@@ -369,7 +369,7 @@ file_command (char *arg, int from_tty)
 }
 
 
-/* Locate all mappable sections of a BFD file. 
+/* Locate all mappable sections of a BFD file.
    table_pp_char is a char * to get it through bfd_map_over_sections;
    we cast it back to its proper type.  */
 
@@ -540,7 +540,7 @@ bfdsec_to_vmap (struct bfd *abfd, struct bfd_section *sect, void *arg3)
       vp->dend = vp->dstart + bfd_section_size (abfd, sect);
       vp->dvma = bfd_section_vma (abfd, sect);
     }
-  /* Silently ignore other types of sections. (FIXME?)  */
+  /* Silently ignore other types of sections.  (FIXME?)  */
 }
 
 /* Make a vmap for ABFD which might be a member of the archive ARCH.
@@ -563,7 +563,7 @@ map_vmap (bfd *abfd, bfd *arch)
   vmap_bfd.pvmap = vp;
   bfd_map_over_sections (abfd, bfdsec_to_vmap, &vmap_bfd);
 
-  /* Find the end of the list and append. */
+  /* Find the end of the list and append.  */
   for (vpp = &vmap; *vpp; vpp = &(*vpp)->nxt)
     ;
   *vpp = vp;
@@ -591,7 +591,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   for (p = sections; p < sections_end; p++)
     {
       if (section_name && strcmp (section_name, p->the_bfd_section->name) != 0)
-	continue;		/* not the section we need */
+	continue;		/* not the section we need.  */
       if (memaddr >= p->addr)
         {
 	  if (memend <= p->endaddr)
@@ -629,7 +629,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
         }
     }
 
-  return 0;			/* We can't help */
+  return 0;			/* We can't help.  */
 }
 
 struct target_section_table *
@@ -768,11 +768,11 @@ set_section_command (char *args, int from_tty)
   if (args == 0)
     error (_("Must specify section name and its virtual address"));
 
-  /* Parse out section name */
+  /* Parse out section name.  */
   for (secname = args; !isspace (*args); args++);
   seclen = args - secname;
 
-  /* Parse out new virtual address */
+  /* Parse out new virtual address.  */
   secaddr = parse_and_eval_address (args);
 
   table = current_target_sections;
@@ -837,7 +837,7 @@ exec_has_memory (struct target_ops *ops)
 	  != current_target_sections->sections_end);
 }
 
-/* Find mapped memory. */
+/* Find mapped memory.  */
 
 extern void
 exec_set_find_memory_regions (int (*func) (find_memory_region_ftype, void *))

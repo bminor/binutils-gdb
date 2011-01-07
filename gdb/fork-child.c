@@ -129,7 +129,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   char *shell_command;
   static char default_shell_file[] = SHELL_FILE;
   int len;
-  /* Set debug_fork then attach to the child while it sleeps, to debug. */
+  /* Set debug_fork then attach to the child while it sleeps, to debug.  */
   static int debug_fork = 0;
   /* This is set to the result of setpgrp, which if vforked, will be visible
      to you in the parent process.  It's only used by humans for debugging.  */
@@ -273,7 +273,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   /* It is generally good practice to flush any possible pending stdio
      output prior to doing a fork, to avoid the possibility of both
-     the parent and child flushing the same data after the fork. */
+     the parent and child flushing the same data after the fork.  */
   gdb_flush (gdb_stdout);
   gdb_flush (gdb_stderr);
 
@@ -329,7 +329,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
          initialize_signals for how we get the right signal handlers
          for the inferior.  */
 
-      /* "Trace me, Dr. Memory!" */
+      /* "Trace me, Dr. Memory!"  */
       (*traceme_fun) ();
 
       /* The call above set this process (the "child") as debuggable

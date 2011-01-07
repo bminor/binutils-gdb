@@ -18,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-   Contributed by Raoul M. Gough (RaoulGough@yahoo.co.uk). */
+   Contributed by Raoul M. Gough (RaoulGough@yahoo.co.uk).  */
 
 #if !defined (COFF_PE_READ_H)
 #define COFF_PE_READ_H

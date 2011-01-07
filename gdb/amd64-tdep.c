@@ -587,7 +587,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *func_type,
 
   /* 2. If the type has class MEMORY, then the caller provides space
      for the return value and passes the address of this storage in
-     %rdi as if it were the first argument to the function. In effect,
+     %rdi as if it were the first argument to the function.  In effect,
      this address becomes a hidden first argument.
 
      On return %rax will contain the address that has been passed in
@@ -1564,7 +1564,7 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
 
       /* Where "ret" in the original code will return to.  */
       ret_addr = oldloc + insn_length;
-      push_buf[0] = 0x68; /* pushq $... */
+      push_buf[0] = 0x68; /* pushq $...  */
       memcpy (&push_buf[1], &ret_addr, 4);
       /* Push the push.  */
       append_insns (to, 5, push_buf);

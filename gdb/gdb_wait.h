@@ -55,7 +55,7 @@
 /* Unfortunately, the above comment (about being compatible in all Unix 
    systems) is not quite correct for AIX, sigh.  And AIX 3.2 can generate
    status words like 0x57c (sigtrap received after load), and gdb would
-   choke on it. */
+   choke on it.  */
 
 #define WIFSTOPPED(w)	((w)&0x40)
 

@@ -74,10 +74,10 @@ dbug_supply_register (struct regcache *regcache, char *regname,
   monitor_supply_register (regcache, regno, val);
 }
 
-/* This array of registers needs to match the indexes used by GDB. The
-   whole reason this exists is because the various ROM monitors use
-   different names than GDB does, and don't support all the registers
-   either. So, typing "info reg sp" becomes an "A7". */
+/* This array of registers needs to match the indexes used by GDB.
+   The whole reason this exists is because the various ROM monitors
+   use different names than GDB does, and don't support all the
+   registers either.  So, typing "info reg sp" becomes an "A7".  */
 
 static const char *
 dbug_regname (int index)

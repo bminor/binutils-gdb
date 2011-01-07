@@ -64,7 +64,7 @@
    yacc generated parsers in gdb.  Note that these are only the variables
    produced by yacc.  If other parser generators (bison, byacc, etc) produce
    additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list. */
+   generators need to be fixed instead of adding those names to this list.  */
 
 #define	yymaxdepth f_maxdepth
 #define	yyparse	f_parse
@@ -794,7 +794,7 @@ parse_number (p, len, parsed_float, putithere)
   putithere->typed_val.val = n;
   
   /* If the high bit of the worked out type is set then this number
-     has to be unsigned. */
+     has to be unsigned.  */
   
   if (unsigned_p || (n & high_bit)) 
     putithere->typed_val.type = unsigned_type;
@@ -875,7 +875,7 @@ static const struct token f77_keywords[] =
 
 /* Implementation of a dynamically expandable buffer for processing input
    characters acquired through lexptr and building a value to return in
-   yylval. Ripped off from ch-exp.y */ 
+   yylval.  Ripped off from ch-exp.y */ 
 
 static char *tempbuf;		/* Current buffer contents */
 static int tempbufsize;		/* Size of allocated buffer */
@@ -892,8 +892,8 @@ static int tempbufindex;	/* Current index into buffer */
   } while (0);
 
 
-/* Grow the static temp buffer if necessary, including allocating the first one
-   on demand. */
+/* Grow the static temp buffer if necessary, including allocating the
+   first one on demand.  */
 
 static void
 growbuf_by_size (count)
@@ -910,7 +910,7 @@ growbuf_by_size (count)
 }
 
 /* Blatantly ripped off from ch-exp.y. This routine recognizes F77 
-   string-literals. 
+   string-literals.
    
    Recognize a string literal.  A string literal is a nonzero sequence
    of characters enclosed in matching single quotes, except that
@@ -984,7 +984,8 @@ yylex ()
   /* See if it is a special .foo. operator.  */
   
   for (i = 0; dot_ops[i].operator != NULL; i++)
-    if (strncmp (tokstart, dot_ops[i].operator, strlen (dot_ops[i].operator)) == 0)
+    if (strncmp (tokstart, dot_ops[i].operator,
+		 strlen (dot_ops[i].operator)) == 0)
       {
 	lexptr += strlen (dot_ops[i].operator);
 	yylval.opcode = dot_ops[i].opcode;
@@ -1038,7 +1039,7 @@ yylex ()
     case '.':
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
-	goto symbol;		/* Nope, must be a symbol. */
+	goto symbol;		/* Nope, must be a symbol.  */
       /* FALL THRU into number case.  */
       
     case '0':
@@ -1062,7 +1063,8 @@ yylex ()
 	    p += 2;
 	    hex = 1;
 	  }
-	else if (c == '0' && (p[1]=='t' || p[1]=='T' || p[1]=='d' || p[1]=='D'))
+	else if (c == '0' && (p[1]=='t' || p[1]=='T'
+			      || p[1]=='d' || p[1]=='D'))
 	  {
 	    p += 2;
 	    hex = 0;

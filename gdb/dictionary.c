@@ -83,9 +83,7 @@
 
    * Define a function dict_<op> that looks up <op> in the dict_vector
    and calls the appropriate function.  Add a declaration for
-   dict_<op> to dictionary.h.
-   
-*/
+   dict_<op> to dictionary.h.  */
 
 /* An enum representing the various implementations of dictionaries.
    Used only for debugging.  */

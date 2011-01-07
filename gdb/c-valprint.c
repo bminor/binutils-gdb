@@ -404,7 +404,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	}
       /* Fall through.  */
     case TYPE_CODE_STRUCT:
-      /*FIXME: Abstract this away */
+      /*FIXME: Abstract this away.  */
       if (options->vtblprint && cp_is_vtbl_ptr_type (type))
 	{
 	  /* Print the unmangled name if desired.  */

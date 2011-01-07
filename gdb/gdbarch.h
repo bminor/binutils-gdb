@@ -30,7 +30,7 @@
    If editing this file, please also run gdbarch.sh and merge any
    changes into that script. Conversely, when making sweeping changes
    to this file, modifying gdbarch.sh and using its output may prove
-   easier. */
+   easier.  */
 
 #ifndef GDBARCH_H
 #define GDBARCH_H
@@ -68,25 +68,25 @@ struct agent_expr;
 extern struct gdbarch *target_gdbarch;
 
 
-/* The following are pre-initialized by GDBARCH. */
+/* The following are pre-initialized by GDBARCH.  */
 
 extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbarch);
-/* set_gdbarch_bfd_arch_info() - not applicable - pre-initialized. */
+/* set_gdbarch_bfd_arch_info() - not applicable - pre-initialized.  */
 
 extern int gdbarch_byte_order (struct gdbarch *gdbarch);
-/* set_gdbarch_byte_order() - not applicable - pre-initialized. */
+/* set_gdbarch_byte_order() - not applicable - pre-initialized.  */
 
 extern int gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
-/* set_gdbarch_byte_order_for_code() - not applicable - pre-initialized. */
+/* set_gdbarch_byte_order_for_code() - not applicable - pre-initialized.  */
 
 extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
-/* set_gdbarch_osabi() - not applicable - pre-initialized. */
+/* set_gdbarch_osabi() - not applicable - pre-initialized.  */
 
 extern const struct target_desc * gdbarch_target_desc (struct gdbarch *gdbarch);
-/* set_gdbarch_target_desc() - not applicable - pre-initialized. */
+/* set_gdbarch_target_desc() - not applicable - pre-initialized.  */
 
 
-/* The following are initialized by the target dependent code. */
+/* The following are initialized by the target dependent code.  */
 
 /* The bit byte-order has to do just with numbering of bits in debugging symbols
    and such.  Conceptually, it's quite separate from byte/word byte order. */
@@ -1030,7 +1030,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    data for all the various GDB components was also considered.  Since
    GDB is built from a variable number of (fairly independent)
    components it was determined that the global aproach was not
-   applicable. */
+   applicable.  */
 
 
 /* Register a new architectural family with GDB.
@@ -1064,7 +1064,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
    The DUMP_TDEP function shall print out all target specific values.
    Care should be taken to ensure that the function works in both the
-   multi-arch and non- multi-arch cases. */
+   multi-arch and non- multi-arch cases.  */
 
 struct gdbarch_list
 {
@@ -1074,7 +1074,7 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
-  /* Use default: NULL (ZERO). */
+  /* Use default: NULL (ZERO).  */
   const struct bfd_arch_info *bfd_arch_info;
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
@@ -1082,10 +1082,10 @@ struct gdbarch_info
 
   int byte_order_for_code;
 
-  /* Use default: NULL (ZERO). */
+  /* Use default: NULL (ZERO).  */
   bfd *abfd;
 
-  /* Use default: NULL (ZERO). */
+  /* Use default: NULL (ZERO).  */
   struct gdbarch_tdep_info *tdep_info;
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
@@ -1109,13 +1109,13 @@ extern void gdbarch_register (enum bfd_architecture architecture,
 /* Return a freshly allocated, NULL terminated, array of the valid
    architecture names.  Since architectures are registered during the
    _initialize phase this function only returns useful information
-   once initialization has been completed. */
+   once initialization has been completed.  */
 
 extern const char **gdbarch_printable_names (void);
 
 
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
-   matches the information provided by INFO. */
+   matches the information provided by INFO.  */
 
 extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches, const struct gdbarch_info *info);
 
@@ -1123,14 +1123,14 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
 /* Helper function.  Create a preliminary ``struct gdbarch''.  Perform
    basic initialization using values obtained from the INFO and TDEP
    parameters.  set_gdbarch_*() functions are called to complete the
-   initialization of the object. */
+   initialization of the object.  */
 
 extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep *tdep);
 
 
 /* Helper function.  Free a partially-constructed ``struct gdbarch''.
    It is assumed that the caller freeds the ``struct
-   gdbarch_tdep''. */
+   gdbarch_tdep''.  */
 
 extern void gdbarch_free (struct gdbarch *);
 
@@ -1144,14 +1144,14 @@ extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
 #define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
 
 
-/* Helper function. Force an update of the current architecture.
+/* Helper function.  Force an update of the current architecture.
 
    The actual architecture selected is determined by INFO, ``(gdb) set
    architecture'' et.al., the existing architecture and BFD's default
    architecture.  INFO should be initialized to zero and then selected
    fields should be updated.
 
-   Returns non-zero if the update succeeds */
+   Returns non-zero if the update succeeds.  */
 
 extern int gdbarch_update_p (struct gdbarch_info info);
 
@@ -1209,7 +1209,7 @@ extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,
-   byte-order, ...) using information found in the BFD */
+   byte-order, ...) using information found in the BFD.  */
 
 extern void set_gdbarch_from_file (bfd *);
 

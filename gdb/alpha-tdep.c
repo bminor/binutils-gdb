@@ -81,7 +81,7 @@ static const int subq_function = 0x29;
 /* Return the name of the REGNO register.
 
    An empty name corresponds to a register number that used to
-   be used for a virtual register. That virtual register has
+   be used for a virtual register.  That virtual register has
    been removed, but the index is still reserved to maintain
    compatibility with existing remote alpha targets.  */
 
@@ -229,10 +229,11 @@ alpha_sts (struct gdbarch *gdbarch, void *out, const void *in)
    register is a floating point register and memory format is float, as the
    register format must be double or memory format is an integer with 4
    bytes or less, as the representation of integers in floating point
-   registers is different. */
+   registers is different.  */
 
 static int
-alpha_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
+alpha_convert_register_p (struct gdbarch *gdbarch, int regno,
+			  struct type *type)
 {
   return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31
 	  && TYPE_LENGTH (type) != 8);
@@ -493,7 +494,8 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
+	  internal_error (__FILE__, __LINE__,
+			  _("unknown floating point width"));
 	}
       break;
 
@@ -516,7 +518,8 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
+	  internal_error (__FILE__, __LINE__,
+			  _("unknown floating point width"));
 	}
       break;
 
@@ -561,7 +564,8 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  error (_("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
+	  internal_error (__FILE__, __LINE__,
+			  _("unknown floating point width"));
 	}
       break;
 
@@ -585,7 +589,8 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  error (_("Cannot set a 128-bit long double return value."));
 
 	default:
-	  internal_error (__FILE__, __LINE__, _("unknown floating point width"));
+	  internal_error (__FILE__, __LINE__,
+			  _("unknown floating point width"));
 	}
       break;
 
@@ -719,7 +724,7 @@ alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Can't determine prologue from the symbol table, need to examine
      instructions.  */
 
-  /* Skip the typical prologue instructions. These are the stack adjustment
+  /* Skip the typical prologue instructions.  These are the stack adjustment
      instruction and the instructions that save registers on the stack
      or in the gcc frame.  */
   for (offset = 0; offset < 100; offset += ALPHA_INSN_SIZE)
@@ -1059,8 +1064,7 @@ alpha_heuristic_analyze_probing_loop (struct gdbarch *gdbarch, CORE_ADDR *pc,
 
      If anything different is found, the function returns without
      changing PC and FRAME_SIZE.  Otherwise, PC will point immediately
-     after this sequence, and FRAME_SIZE will be updated.
-  */
+     after this sequence, and FRAME_SIZE will be updated.  */
 
   /* lda     REG_INDEX,NB_OF_ITERATIONS */
 
@@ -1176,7 +1180,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 	      if (word & 0x8000)
 		{
 		  /* Consider only the first stack allocation instruction
-		     to contain the static size of the frame. */
+		     to contain the static size of the frame.  */
 		  if (frame_size == 0)
 		    frame_size = (-word) & 0xffff;
 		}
@@ -1235,7 +1239,8 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 		 the return address register from it.
 
 		 FIXME: Rewriting GDB to access the procedure descriptors,
-		 e.g. via the minimal symbol table, might obviate this hack.  */
+		 e.g. via the minimal symbol table, might obviate this
+		 hack.  */
 	      if (return_reg == -1
 		  && cur_pc < (start_pc + 80)
 		  && (reg == ALPHA_T7_REGNUM
@@ -1511,7 +1516,7 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
 
   insn = alpha_read_insn (gdbarch, pc);
 
-  /* Opcode is top 6 bits. */
+  /* Opcode is top 6 bits.  */
   op = (insn >> 26) & 0x3f;
 
   if (op == 0x1a)
@@ -1674,7 +1679,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sc_regs_offset = 4 * 8;
   tdep->sc_fpregs_offset = tdep->sc_regs_offset + 32 * 8 + 8;
 
-  tdep->jb_pc = -1;	/* longjmp support not enabled by default  */
+  tdep->jb_pc = -1;	/* longjmp support not enabled by default.  */
 
   tdep->return_in_memory = alpha_return_in_memory_always;
 
@@ -1780,6 +1785,7 @@ If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
 search.  The only need to set it is when debugging a stripped executable."),
 			    reinit_frame_cache_sfunc,
-			    NULL, /* FIXME: i18n: The distance searched for the start of a function is \"%d\".  */
+			    NULL, /* FIXME: i18n: The distance searched for
+				     the start of a function is \"%d\".  */
 			    &setlist, &showlist);
 }

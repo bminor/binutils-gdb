@@ -24,7 +24,7 @@
 #ifdef STDC_HEADERS
 #include <string.h>
 #ifdef HAVE_STRINGS_H
-#include <strings.h> /* strcasecmp etc.. */
+#include <strings.h> /* strcasecmp etc..  */
 #endif
 #else
 #ifdef HAVE_STRING_H

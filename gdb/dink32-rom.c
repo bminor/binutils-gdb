@@ -96,10 +96,10 @@ dink32_supply_register (struct regcache *regcache, char *regname,
   monitor_supply_register (regcache, regno, val);
 }
 
-/* This array of registers needs to match the indexes used by GDB. The
-   whole reason this exists is because the various ROM monitors use
-   different names than GDB does, and don't support all the registers
-   either.  */
+/* This array of registers needs to match the indexes used by GDB.
+   The whole reason this exists is because the various ROM monitors
+   use different names than GDB does, and don't support all the
+   registers either.  */
 
 static char *dink32_regnames[] =
 {
@@ -134,13 +134,17 @@ extern initialize_file_ftype _initialize_dink32_rom; /* -Wmissing-prototypes */
 void
 _initialize_dink32_rom (void)
 {
-  dink32_cmds.flags = MO_HEX_PREFIX | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR | MO_HANDLE_NL | MO_32_REGS_PAIRED | MO_SETREG_INTERACTIVE | MO_SETMEM_INTERACTIVE | MO_GETMEM_16_BOUNDARY | MO_CLR_BREAK_1_BASED | MO_SREC_ACK | MO_SREC_ACK_ROTATE;
+  dink32_cmds.flags = MO_HEX_PREFIX | MO_GETMEM_NEEDS_RANGE
+    | MO_FILL_USES_ADDR | MO_HANDLE_NL | MO_32_REGS_PAIRED
+    | MO_SETREG_INTERACTIVE | MO_SETMEM_INTERACTIVE
+    | MO_GETMEM_16_BOUNDARY | MO_CLR_BREAK_1_BASED | MO_SREC_ACK
+    | MO_SREC_ACK_ROTATE;
   dink32_cmds.init = dink32_inits;
   dink32_cmds.cont = "go +\r";
   dink32_cmds.step = "tr +\r";
   dink32_cmds.set_break = "bp 0x%x\r";
   dink32_cmds.clr_break = "bp %d\r";
-#if 0				/* Would need to follow strict alignment rules.. */
+#if 0			/* Would need to follow strict alignment rules..  */
   dink32_cmds.fill = "mf %x %x %x\r";
 #endif
   dink32_cmds.setmem.cmdb = "mm -b %x\r";

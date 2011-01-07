@@ -1090,7 +1090,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  else if (strcmp (cs->c_name, ".eb") == 0)
 	    {
 	      if (context_stack_depth <= 0)
-		{	/* We attempted to pop an empty context stack. */
+		{	/* We attempted to pop an empty context stack.  */
 		  complaint (&symfile_complaints,
 			     _("`.eb' symbol without matching `.bb' "
 			       "symbol ignored starting at symnum %d"),
@@ -1652,7 +1652,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
-	  /* If type has no name, give it one */
+	  /* If type has no name, give it one.  */
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	    {
 	      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR

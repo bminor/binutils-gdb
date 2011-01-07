@@ -40,7 +40,7 @@
    <asm/ptrace.h> because the latter redefines FS and GS for no apparent
    reason, and those definitions don't match the ones that libpthread_db
    uses, which come from <sys/reg.h>.  */
-/* ezannoni-2003-07-09: I think this is fixed. The extraneous defs have
+/* ezannoni-2003-07-09: I think this is fixed.  The extraneous defs have
    been removed from ptrace.h in the kernel.  However, better safe than
    sorry.  */
 #include <asm/ptrace.h>

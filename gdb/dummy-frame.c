@@ -121,7 +121,7 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
   restore_infcall_suspend_state ((*dummy_ptr)->caller_state);
 
   /* restore_infcall_control_state frees inf_state,
-     all that remains is to pop *dummy_ptr */
+     all that remains is to pop *dummy_ptr.  */
   dummy = *dummy_ptr;
   *dummy_ptr = dummy->next;
   xfree (dummy);

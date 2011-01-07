@@ -102,7 +102,7 @@ fetch_register (struct regcache *regcache, int regno)
       break;
 
     case ARM_PC_REGNUM:
-      /* This is ok: we're running native... */
+      /* This is ok: we're running native...  */
       inferior_registers.r_pc = gdbarch_addr_bits_remove
 				  (get_regcache_arch (regcache),
 				   inferior_registers.r_pc);

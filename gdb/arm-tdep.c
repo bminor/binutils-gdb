@@ -19,7 +19,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <ctype.h>		/* XXX for isupper () */
+#include <ctype.h>		/* XXX for isupper ().  */
 
 #include "defs.h"
 #include "frame.h"
@@ -27,7 +27,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "gdb_string.h"
-#include "dis-asm.h"		/* For register styles. */
+#include "dis-asm.h"		/* For register styles.  */
 #include "regcache.h"
 #include "reggroups.h"
 #include "doublest.h"
@@ -65,7 +65,7 @@ static int arm_debug;
    MSYMBOL_SET_SPECIAL	Actually sets the "special" bit.
    MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.  */
 
-#define MSYMBOL_SET_SPECIAL(msym)					\
+#define MSYMBOL_SET_SPECIAL(msym)				\
 	MSYMBOL_TARGET_FLAG_1 (msym) = 1
 
 #define MSYMBOL_IS_SPECIAL(msym)				\
@@ -845,7 +845,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 		break;
 	    }
 
-	  else if ((insn & 0xffd0) == 0xe900    /* stmdb Rn{!}, { registers } */
+	  else if ((insn & 0xffd0) == 0xe900    /* stmdb Rn{!},
+						   { registers } */
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
 	    {
 	      pv_t addr = regs[bits (insn, 0, 3)];
@@ -866,7 +867,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 		regs[bits (insn, 0, 3)] = addr;
 	    }
 
-	  else if ((insn & 0xff50) == 0xe940	/* strd Rt, Rt2, [Rn, #+/-imm]{!} */
+	  else if ((insn & 0xff50) == 0xe940	/* strd Rt, Rt2,
+						   [Rn, #+/-imm]{!} */
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
 	    {
 	      int regno1 = bits (inst2, 12, 15);
@@ -938,14 +940,16 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	    /* Ignore stores of argument registers to the stack.  */
 	    ;
 
-	  else if ((insn & 0xffd0) == 0xe890	/* ldmia Rn[!], { registers } */
+	  else if ((insn & 0xffd0) == 0xe890	/* ldmia Rn[!],
+						   { registers } */
 		   && (inst2 & 0x8000) == 0x0000
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
 	    /* Ignore block loads from the stack, potentially copying
 	       parameters from memory.  */
 	    ;
 
-	  else if ((insn & 0xffb0) == 0xe950	/* ldrd Rt, Rt2, [Rn, #+/-imm] */
+	  else if ((insn & 0xffb0) == 0xe950	/* ldrd Rt, Rt2,
+						   [Rn, #+/-imm] */
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
 	    /* Similarly ignore dual loads from the stack.  */
 	    ;
@@ -1223,8 +1227,8 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
 }
 
 /* Try to skip a sequence of instructions used for stack protector.  If PC
-   points to the first instruction of this sequence, return the address of first
-   instruction after this sequence, otherwise, return original PC.
+   points to the first instruction of this sequence, return the address of
+   first instruction after this sequence, otherwise, return original PC.
 
    On arm, this sequence of instructions is composed of mainly three steps,
      Step 1: load symbol __stack_chk_guard,
@@ -1338,7 +1342,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
    [stfe        f6, [sp, #-12]!]
    [stfe        f5, [sp, #-12]!]
    [stfe        f4, [sp, #-12]!]
-   sub fp, ip, #nn @@ nn == 20 or 4 depending on second insn */
+   sub fp, ip, #nn @@ nn == 20 or 4 depending on second insn.  */
 
 static CORE_ADDR
 arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
@@ -1408,7 +1412,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Find an upper limit on the function prologue using the debug
      information.  If the debug information could not be used to provide
      that bound, then use an arbitrary large number as the upper bound.  */
-  /* Like arm_scan_prologue, stop no later than pc + 64. */
+  /* Like arm_scan_prologue, stop no later than pc + 64.  */
   limit_pc = skip_prologue_using_sal (gdbarch, pc);
   if (limit_pc == 0)
     limit_pc = pc + 64;          /* Magic.  */
@@ -1475,7 +1479,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       break;
     }
 
-  return skip_pc;		/* End of prologue */
+  return skip_pc;		/* End of prologue.  */
 }
 
 /* *INDENT-OFF* */
@@ -1494,7 +1498,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      R7 ->       0  local variables (16 bytes)
      SP ->     -12  additional stack space (12 bytes)
    The frame size would thus be 36 bytes, and the frame offset would be
-   12 bytes.  The frame register is R7. 
+   12 bytes.  The frame register is R7.
    
    The comments for thumb_skip_prolog() describe the algorithm we use
    to detect the end of the prolog.  */
@@ -1692,7 +1696,8 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  regs[rd] = pv_add_constant (regs[bits (insn, 16, 19)], -imm);
 	  continue;
 	}
-      else if ((insn & 0xffff0fff) == 0xe52d0004)	/* str Rd, [sp, #-4]! */
+      else if ((insn & 0xffff0fff) == 0xe52d0004)	/* str Rd,
+							   [sp, #-4]! */
 	{
 	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
 	    break;
@@ -1715,7 +1720,8 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  for (regno = ARM_PC_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
 	      {
-		regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -4);
+		regs[ARM_SP_REGNUM]
+		  = pv_add_constant (regs[ARM_SP_REGNUM], -4);
 		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
 	      }
 	}
@@ -1733,7 +1739,8 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  /* No need to add this to saved_regs -- it's just an arg reg.  */
 	  continue;
 	}
-      else if ((insn & 0xfff00000) == 0xe8800000	/* stm Rn, { registers } */
+      else if ((insn & 0xfff00000) == 0xe8800000	/* stm Rn,
+							   { registers } */
 	       && pv_is_register (regs[bits (insn, 16, 19)], ARM_SP_REGNUM))
 	{
 	  /* No need to add this to saved_regs -- it's just arg regs.  */
@@ -1753,7 +1760,8 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  imm = (imm >> rot) | (imm << (32 - rot));
 	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -imm);
 	}
-      else if ((insn & 0xffff7fff) == 0xed6d0103	/* stfe f?, [sp, -#c]! */
+      else if ((insn & 0xffff7fff) == 0xed6d0103	/* stfe f?,
+							   [sp, -#c]! */
 	       && gdbarch_tdep (gdbarch)->have_fpa_registers)
 	{
 	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
@@ -1763,7 +1771,8 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
 	  pv_area_store (stack, regs[ARM_SP_REGNUM], 12, regs[regno]);
 	}
-      else if ((insn & 0xffbf0fff) == 0xec2d0200	/* sfmfd f0, 4, [sp!] */
+      else if ((insn & 0xffbf0fff) == 0xec2d0200	/* sfmfd f0, 4,
+							   [sp!] */
 	       && gdbarch_tdep (gdbarch)->have_fpa_registers)
 	{
 	  int n_saved_fp_regs;
@@ -1809,7 +1818,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	    break;
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
-	break;			/* Condition not true, exit early */
+	break;			/* Condition not true, exit early.  */
       else if (arm_instruction_changes_pc (insn))
 	/* Don't scan past anything that might change control flow.  */
 	break;
@@ -2186,7 +2195,8 @@ struct frame_base arm_normal_base = {
 static struct frame_id
 arm_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (get_frame_register_unsigned (this_frame, ARM_SP_REGNUM),
+  return frame_id_build (get_frame_register_unsigned (this_frame,
+						      ARM_SP_REGNUM),
 			 get_frame_pc (this_frame));
 }
 
@@ -2355,7 +2365,7 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
      exception of return itself, updates the stack pointer, we need to
      scan backwards for at most one instruction.  Try either a 16-bit or
      a 32-bit instruction.  This is just a heuristic, so we do not worry
-     too much about false positives.*/
+     too much about false positives.  */
 
   if (!found_stack_adjust)
     {
@@ -3396,7 +3406,7 @@ bitcount (unsigned long val)
 {
   int nbits;
   for (nbits = 0; val != 0; nbits++)
-    val &= val - 1;		/* delete rightmost 1-bit in val */
+    val &= val - 1;		/* Delete rightmost 1-bit in val.  */
   return nbits;
 }
 
@@ -3441,7 +3451,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1;
-  CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
+  CORE_ADDR nextpc = pc + 2;		/* Default is next instruction.  */
   unsigned long offset;
   ULONGEST status, itstate;
 
@@ -3481,7 +3491,8 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 
 	  while (itstate != 0 && ! condition_true (itstate >> 4, status))
 	    {
-	      inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+	      inst1 = read_memory_unsigned_integer (pc, 2,
+						    byte_order_for_code);
 	      pc += thumb_insn_size (inst1);
 	      itstate = thumb_advance_itstate (itstate);
 	    }
@@ -3499,7 +3510,8 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 
 	      while (itstate != 0 && ! condition_true (itstate >> 4, status))
 		{
-		  inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+		  inst1 = read_memory_unsigned_integer (pc, 2, 
+							byte_order_for_code);
 		  pc += thumb_insn_size (inst1);
 		  itstate = thumb_advance_itstate (itstate);
 		}
@@ -3540,7 +3552,8 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 		 the instruction after the IT block.  */
 	      do
 		{
-		  inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+		  inst1 = read_memory_unsigned_integer (pc, 2,
+							byte_order_for_code);
 		  pc += thumb_insn_size (inst1);
 		  itstate = thumb_advance_itstate (itstate);
 		}
@@ -3807,8 +3820,8 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
    The value returned has the execution state of the next instruction 
    encoded in it.  Use IS_THUMB_ADDR () to see whether the instruction is
    in Thumb-State, and gdbarch_addr_bits_remove () to get the plain memory
-   address.
-*/
+   address.  */
+
 static CORE_ADDR
 arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 {
@@ -3879,7 +3892,7 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 		return nextpc;
 	      }
 
-	    /* Multiply into PC */
+	    /* Multiply into PC.  */
 	    c = (status & FLAG_C) ? 1 : 0;
 	    rn = bits (this_instr, 16, 19);
 	    operand1 = (rn == 15) ? pc_val + 8
@@ -3892,8 +3905,9 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 		operand2 = ((immval >> rotate) | (immval << (32 - rotate)))
 		  & 0xffffffff;
 	      }
-	    else		/* operand 2 is a shifted register */
-	      operand2 = shifted_reg_val (frame, this_instr, c, pc_val, status);
+	    else		/* operand 2 is a shifted register.  */
+	      operand2 = shifted_reg_val (frame, this_instr, c,
+					  pc_val, status);
 
 	    switch (bits (this_instr, 21, 24))
 	      {
@@ -4235,7 +4249,8 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 	 known boundary.  */
       if (! definite)
 	{
-	  buf = extend_buffer_earlier (buf, bpaddr, buf_len, bpaddr - boundary);
+	  buf = extend_buffer_earlier (buf, bpaddr, buf_len,
+				       bpaddr - boundary);
 	  if (buf == NULL)
 	    return bpaddr;
 	  buf_len = bpaddr - boundary;
@@ -4296,7 +4311,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
       arm_process_displaced_insn (called from arm_displaced_step_copy_insn).
       Depending on the type of instruction, it is then copied to a scratch
       location, possibly in a modified form.  The copy_* set of functions
-      performs such modification, as necessary. A breakpoint is placed after
+      performs such modification, as necessary.  A breakpoint is placed after
       the modified instruction in the scratch space to return control to GDB.
       Note in particular that instructions which modify the PC will no longer
       do so after modification.
@@ -4358,9 +4373,11 @@ branch_write_pc (struct regcache *regs, ULONGEST val)
   if (displaced_in_arm_mode (regs))
     /* Note: If bits 0/1 are set, this branch would be unpredictable for
        architecture versions < 6.  */
-    regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM, val & ~(ULONGEST) 0x3);
+    regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM,
+				    val & ~(ULONGEST) 0x3);
   else
-    regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM, val & ~(ULONGEST) 0x1);
+    regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM,
+				    val & ~(ULONGEST) 0x1);
 }
 
 /* Write to the PC as from a branch-exchange instruction.  */
@@ -4469,9 +4486,9 @@ displaced_write_reg (struct regcache *regs, struct displaced_step_closure *dsc,
 
 /* This function is used to concisely determine if an instruction INSN
    references PC.  Register fields of interest in INSN should have the
-   corresponding fields of BITMASK set to 0b1111.  The function returns return 1
-   if any of these fields in INSN reference the PC (also 0b1111, r15), else it
-   returns 0.  */
+   corresponding fields of BITMASK set to 0b1111.  The function
+   returns return 1 if any of these fields in INSN reference the PC
+   (also 0b1111, r15), else it returns 0.  */
 
 static int
 insn_references_pc (uint32_t insn, uint32_t bitmask)
@@ -4564,7 +4581,8 @@ copy_preload (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
 /* Preload instructions with register offset.  */
 
 static int
-copy_preload_reg (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
+copy_preload_reg (struct gdbarch *gdbarch, uint32_t insn,
+		  struct regcache *regs,
 		  struct displaced_step_closure *dsc)
 {
   unsigned int rn = bits (insn, 16, 19);
@@ -4741,7 +4759,8 @@ copy_bx_blx_reg (struct gdbarch *gdbarch, uint32_t insn,
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: copying %s register insn "
-			"%.8lx\n", (link) ? "blx" : "bx", (unsigned long) insn);
+			"%.8lx\n", (link) ? "blx" : "bx",
+			(unsigned long) insn);
 
   /* Implement {BX,BLX}<cond> <reg>" as:
 
@@ -4764,7 +4783,7 @@ copy_bx_blx_reg (struct gdbarch *gdbarch, uint32_t insn,
   return 0;
 }
 
-/* Copy/cleanup arithmetic/logic instruction with immediate RHS. */
+/* Copy/cleanup arithmetic/logic instruction with immediate RHS.  */
 
 static void
 cleanup_alu_imm (struct gdbarch *gdbarch,
@@ -4912,7 +4931,8 @@ cleanup_alu_shifted_reg (struct gdbarch *gdbarch,
 
 static int
 copy_alu_shifted_reg (struct gdbarch *gdbarch, uint32_t insn,
-		      struct regcache *regs, struct displaced_step_closure *dsc)
+		      struct regcache *regs,
+		      struct displaced_step_closure *dsc)
 {
   unsigned int rn = bits (insn, 16, 19);
   unsigned int rm = bits (insn, 0, 3);
@@ -5426,13 +5446,15 @@ copy_block_xfer (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
   int rn = bits (insn, 16, 19);
   CORE_ADDR from = dsc->insn_addr;
 
-  /* Block transfers which don't mention PC can be run directly out-of-line.  */
+  /* Block transfers which don't mention PC can be run directly
+     out-of-line.  */
   if (rn != 15 && (insn & 0x8000) == 0)
     return copy_unmodified (gdbarch, insn, "ldm/stm", dsc);
 
   if (rn == 15)
     {
-      warning (_("displaced: Unpredictable LDM or STM with base register r15"));
+      warning (_("displaced: Unpredictable LDM or STM with "
+		 "base register r15"));
       return copy_unmodified (gdbarch, insn, "unpredictable ldm/stm", dsc);
     }
 
@@ -5578,7 +5600,8 @@ copy_undef (struct gdbarch *gdbarch, uint32_t insn,
 	    struct displaced_step_closure *dsc)
 {
   if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: copying undefined insn %.8lx\n",
+    fprintf_unfiltered (gdb_stdlog,
+			"displaced: copying undefined insn %.8lx\n",
 			(unsigned long) insn);
 
   dsc->modinsn[0] = insn;
@@ -5665,7 +5688,8 @@ decode_misc_memhint_neon (struct gdbarch *gdbarch, uint32_t insn,
 
 static int
 decode_unconditional (struct gdbarch *gdbarch, uint32_t insn,
-		      struct regcache *regs, struct displaced_step_closure *dsc)
+		      struct regcache *regs,
+		      struct displaced_step_closure *dsc)
 {
   if (bit (insn, 27) == 0)
     return decode_misc_memhint_neon (gdbarch, insn, regs, dsc);
@@ -5749,7 +5773,8 @@ decode_unconditional (struct gdbarch *gdbarch, uint32_t insn,
 
 static int
 decode_miscellaneous (struct gdbarch *gdbarch, uint32_t insn,
-		      struct regcache *regs, struct displaced_step_closure *dsc)
+		      struct regcache *regs,
+		      struct displaced_step_closure *dsc)
 {
   unsigned int op2 = bits (insn, 4, 6);
   unsigned int op = bits (insn, 21, 22);
@@ -5777,7 +5802,8 @@ decode_miscellaneous (struct gdbarch *gdbarch, uint32_t insn,
 
     case 0x3:
       if (op == 0x1)
-	return copy_bx_blx_reg (gdbarch, insn, regs, dsc);  /* blx register.  */
+	return copy_bx_blx_reg (gdbarch, insn,
+				regs, dsc);  /* blx register.  */
       else
 	return copy_undef (gdbarch, insn, dsc);
 
@@ -5947,7 +5973,8 @@ decode_b_bl_ldmstm (struct gdbarch *gdbarch, int32_t insn,
 
 static int
 decode_ext_reg_ld_st (struct gdbarch *gdbarch, uint32_t insn,
-		      struct regcache *regs, struct displaced_step_closure *dsc)
+		      struct regcache *regs,
+		      struct displaced_step_closure *dsc)
 {
   unsigned int opcode = bits (insn, 20, 24);
 
@@ -6023,7 +6050,8 @@ decode_svc_copro (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
 
 void
 arm_process_displaced_insn (struct gdbarch *gdbarch, uint32_t insn,
-			    CORE_ADDR from, CORE_ADDR to, struct regcache *regs,
+			    CORE_ADDR from, CORE_ADDR to,
+			    struct regcache *regs,
 			    struct displaced_step_closure *dsc)
 {
   int err = 0;
@@ -6205,7 +6233,7 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
    C C C C 0 1 1 x x x x x x x x x x x x x x x x x x x x 1 x x x x
    
-   Even this may only true if the condition predicate is true. The
+   Even this may only true if the condition predicate is true.  The
    following use a condition predicate of ALWAYS so it is always TRUE.
    
    There are other ways of forcing a breakpoint.  GNU/Linux, RISC iX,
@@ -6322,9 +6350,9 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	  break;
 
 	default:
-	  internal_error
-	    (__FILE__, __LINE__,
-	     _("arm_extract_return_value: Floating point model not supported"));
+	  internal_error (__FILE__, __LINE__,
+			  _("arm_extract_return_value: "
+			    "Floating point model not supported"));
 	  break;
 	}
     }
@@ -6449,7 +6477,8 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
       for (i = 0; i < TYPE_NFIELDS (type); i++)
 	{
 	  enum type_code field_type_code;
-	  field_type_code = TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, i)));
+	  field_type_code = TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type,
+								       i)));
 
 	  /* Is it a floating point type field?  */
 	  if (field_type_code == TYPE_CODE_FLT)
@@ -6841,8 +6870,9 @@ arm_show_fallback_mode (struct ui_file *file, int from_tty,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
 
-  fprintf_filtered (file, _("\
-The current execution mode assumed (when symbols are unavailable) is \"%s\".\n"),
+  fprintf_filtered (file,
+		    _("The current execution mode assumed "
+		      "(when symbols are unavailable) is \"%s\".\n"),
 		    arm_fallback_mode_string);
 }
 
@@ -6852,8 +6882,9 @@ arm_show_force_mode (struct ui_file *file, int from_tty,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
 
-  fprintf_filtered (file, _("\
-The current execution mode assumed (even when symbols are available) is \"%s\".\n"),
+  fprintf_filtered (file,
+		    _("The current execution mode assumed "
+		      "(even when symbols are available) is \"%s\".\n"),
 		    arm_force_mode_string);
 }
 
@@ -7333,7 +7364,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 not.  */
 	      attr_arch = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
 						    Tag_CPU_arch);
-	      attr_profile = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+	      attr_profile = bfd_elf_get_obj_attr_int (info.abfd,
+						       OBJ_ATTR_PROC,
 						       Tag_CPU_arch_profile);
 	      /* GCC specifies the profile for v6-M; RealView only
 		 specifies the profile for architectures starting with
@@ -7875,7 +7907,8 @@ _initialize_arm_tdep (void)
 		       _("Show the disassembly style."),
 		       helptext,
 		       set_disassembly_style_sfunc,
-		       NULL, /* FIXME: i18n: The disassembly style is \"%s\".  */
+		       NULL, /* FIXME: i18n: The disassembly style is
+				\"%s\".  */
 		       &setarmcmdlist, &showarmcmdlist);
 
   add_setshow_boolean_cmd ("apcs32", no_class, &arm_apcs_32,
@@ -7883,7 +7916,8 @@ _initialize_arm_tdep (void)
 			   _("Show usage of ARM 32-bit mode."),
 			   _("When off, a 26-bit PC will be used."),
 			   NULL,
-			   NULL, /* FIXME: i18n: Usage of ARM 32-bit mode is %s.  */
+			   NULL, /* FIXME: i18n: Usage of ARM 32-bit
+				    mode is %s.  */
 			   &setarmcmdlist, &showarmcmdlist);
 
   /* Add a command to allow the user to force the FPU model.  */

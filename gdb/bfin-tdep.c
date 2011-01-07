@@ -581,7 +581,8 @@ bfin_reg_to_regnum (struct gdbarch *gdbarch, int reg)
    the breakpoint should be inserted.  */
 
 static const unsigned char *
-bfin_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
+bfin_breakpoint_from_pc (struct gdbarch *gdbarch,
+			 CORE_ADDR *pcptr, int *lenptr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned short iw;
