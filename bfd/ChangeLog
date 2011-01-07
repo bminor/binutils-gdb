@@ -1,5 +1,9 @@
 2011-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Optimized.
+
+2011-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/12366
 	PR ld/12371
 	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Properly
