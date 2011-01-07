@@ -1094,8 +1094,9 @@ gen_ptrdiff (struct agent_expr *ax, struct axs_value *value,
 
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (value1->type))
       != TYPE_LENGTH (TYPE_TARGET_TYPE (value2->type)))
-    error (_("First argument of `-' is a pointer, but second argument "
-	     "is neither\nan integer nor a pointer of the same type."));
+    error (_("\
+First argument of `-' is a pointer, but second argument is neither\n\
+an integer nor a pointer of the same type."));
 
   ax_simple (ax, aop_sub);
   gen_scale (ax, aop_div_unsigned, value1->type);

@@ -1623,11 +1623,10 @@ resume (int step, enum target_signal sig)
       if (gdbarch_skip_permanent_breakpoint_p (gdbarch))
 	gdbarch_skip_permanent_breakpoint (gdbarch, regcache);
       else
-	error (_("The program is stopped at a permanent "
-		 "breakpoint, but GDB does not know\n"
-		 "how to step past a permanent breakpoint "
-		 "on this architecture.  Try using\na command "
-		 "like `return' or `jump' to continue execution."));
+	error (_("\
+The program is stopped at a permanent breakpoint, but GDB does not know\n\
+how to step past a permanent breakpoint on this architecture.  Try using\n\
+a command like `return' or `jump' to continue execution."));
     }
 
   /* If enabled, step over breakpoints by executing a copy of the

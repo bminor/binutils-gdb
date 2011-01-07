@@ -981,8 +981,8 @@ Set the host character set."), _("\
 Show the host character set."), _("\
 The `host character set' is the one used by the system GDB is running on.\n\
 You may only use supersets of ASCII for your host character set; GDB does\n\
-not support any others.\nTo see a list of the character sets GDB supports, \
-type `set host-charset <TAB>'."),
+not support any others.\n\
+To see a list of the character sets GDB supports, type `set host-charset <TAB>'."),
 			set_host_charset_sfunc,
 			show_host_charset_name,
 			&setlist, &showlist);
@@ -993,8 +993,8 @@ Set the target character set."), _("\
 Show the target character set."), _("\
 The `target character set' is the one used by the program being debugged.\n\
 GDB translates characters and strings between the host and target\n\
-character sets as needed.\nTo see a list of the character sets GDB supports, \
-type `set target-charset'<TAB>"),
+character sets as needed.\n
+To see a list of the character sets GDB supports, type `set target-charset'<TAB>"),
 			set_target_charset_sfunc,
 			show_target_charset_name,
 			&setlist, &showlist);

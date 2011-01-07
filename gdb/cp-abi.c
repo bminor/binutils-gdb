@@ -309,9 +309,9 @@ _initialize_cp_abi (void)
   register_cp_abi (&auto_cp_abi);
   switch_to_cp_abi ("auto");
 
-  add_cmd ("cp-abi", class_obscure, set_cp_abi_cmd,
-	   _("Set the ABI used for inspecting C++ objects.\n\"set cp-abi\" "
-	     "with no arguments will list the available ABIs."),
+  add_cmd ("cp-abi", class_obscure, set_cp_abi_cmd, _("\
+Set the ABI used for inspecting C++ objects.\n\
+\"set cp-abi\" with no arguments will list the available ABIs."),
 	   &setlist);
 
   add_cmd ("cp-abi", class_obscure, show_cp_abi_cmd,

@@ -360,10 +360,11 @@ pa64_solib_create_inferior_hook (int from_tty)
   /* If the libraries were not mapped private, warn the user.  */
   if ((dld_cache.dld_flags & DT_HP_DEBUG_PRIVATE) == 0)
     warning
-      (_("Private mapping of shared library text was not specified\n"
-	 "by the executable; setting a breakpoint in a shared library which\n"
-	 "is not privately mapped will not work.  See the HP-UX 11i v3 chatr\n"
-	 "manpage for methods to privately map shared library text."));
+      (_("\
+Private mapping of shared library text was not specified\n\
+by the executable; setting a breakpoint in a shared library which\n\
+is not privately mapped will not work.  See the HP-UX 11i v3 chatr\n\
+manpage for methods to privately map shared library text."));
 
   /* Turn on the flags we care about.  */
   dld_cache.dld_flags |= DT_HP_DEBUG_CALLBACK;

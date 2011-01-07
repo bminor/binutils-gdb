@@ -1538,9 +1538,9 @@ update_watchpoint (struct breakpoint *b, int reparse)
     }
   else if (!within_current_scope)
     {
-      printf_filtered (_("Watchpoint %d deleted because "
-			 "the program has left the block\n"
-			 "in which its expression is valid.\n"),
+      printf_filtered (_("\
+Watchpoint %d deleted because the program has left the block\n\
+in which its expression is valid.\n"),
 		       b->number);
       if (b->related_breakpoint)
 	{

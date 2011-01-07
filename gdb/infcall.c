@@ -825,12 +825,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       switch (e.reason)
 	{
 	case RETURN_ERROR:
-	  throw_error (e.error,
-		       _("%s\nAn error occurred while in a "
-			 "function called from GDB.\n Evaluation "
-			 "of the expression containing the function\n	"
-			 "(%s) will be abandoned.\nWhen the function "
-			 "is done executing, GDB will silently stop."),
+	  throw_error (e.error, _("%s\n\
+An error occurred while in a function called from GDB.\n\
+Evaluation of the expression containing the function\n\
+(%s) will be abandoned.\n\
+When the function is done executing, GDB will silently stop."),
 		       e.message, name);
 	case RETURN_QUIT:
 	default:
@@ -874,18 +873,19 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       /* Keep the dummy frame record, if the user switches back to the
 	 thread with the hand-call, we'll need it.  */
       if (stopped_by_random_signal)
-	error (_("The program received a signal in another thread while\n"
-		 "making a function call from GDB.\nEvaluation "
-		 "of the expression containing the function\n"
-		 "(%s) will be abandoned.\nWhen the function "
-		 "is done executing, GDB will silently stop."),
+	error (_("\
+The program received a signal in another thread while\n\
+making a function call from GDB.\n\
+Evaluation of the expression containing the function\n\
+(%s) will be abandoned.\n\
+When the function is done executing, GDB will silently stop."),
 	       name);
       else
-	error (_("The program stopped in another thread while making "
-		 "a function call from GDB.\nEvaluation "
-		 "of the expression containing the function\n"
-		 "(%s) will be abandoned.\nWhen the function "
-		 "is done executing, GDB will silently stop."),
+	error (_("\
+The program stopped in another thread while making a function call from GDB.\n\
+Evaluation of the expression containing the function\n\
+(%s) will be abandoned.\n\
+When the function is done executing, GDB will silently stop."),
 	       name);
     }
 
@@ -914,12 +914,12 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
-	      error (_("The program being debugged was signaled while "
-		       "in a function called from GDB.\nGDB has restored "
-		       "the context to what it was before the call.\n "
-		       "To change this behavior use \"set unwindonsignal "
-		       "off\".\nEvaluation of the expression containing "
-		       "the function\n(%s) will be abandoned."),
+	      error (_("\
+The program being debugged was signaled while in a function called from GDB.\n\
+GDB has restored the context to what it was before the call.\n\
+To change this behavior use \"set unwindonsignal off\".\n\
+Evaluation of the expression containing the function\n\
+(%s) will be abandoned."),
 		     name);
 	    }
 	  else
@@ -932,14 +932,13 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
-	      error (_("The program being debugged was signaled while "
-		       "in a function called from GDB.\nGDB remains in "
-		       "the frame where the signal was received.\nTo change "
-		       "this behavior use \"set unwindonsignal on\".\n"
-		       "Evaluation of the expression containing the "
-		       "function\n(%s) will be abandoned.\n"
-		       "When the function is done executing, GDB will "
-		       "silently stop."),
+	      error (_("\
+The program being debugged was signaled while in a function called from GDB.\n\
+GDB remains in the frame where the signal was received.\n\
+To change this behavior use \"set unwindonsignal on\".\n\
+Evaluation of the expression containing the function\n\
+(%s) will be abandoned.\n\
+When the function is done executing, GDB will silently stop."),
 		     name);
 	    }
 	}
@@ -954,18 +953,14 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	     the dummy call.  */
 	  restore_infcall_control_state (inf_status);
 
-	  error (_("The program being debugged entered a "
-		   "std::terminate call, most likely\n"
-		   "caused by an unhandled C++ exception.  "
-		   "GDB blocked this call in order\n"
-		   "to prevent the program from being "
-		   "terminated, and has restored the\n"
-		   "context to its original state before the call.\n"
-		   "To change this behaviour use \"set "
-		   "unwind-on-terminating-exception off\".\n"
-		   "Evaluation of the expression "
-		   "containing the function (%s)\n"
-		   "will be abandoned."),
+	  error (_("\
+The program being debugged entered a std::terminate call, most likely\n\
+caused by an unhandled C++ exception.  GDB blocked this call in order\n\
+to prevent the program from being terminated, and has restored the\n\
+context to its original state before the call.\n\
+To change this behaviour use \"set unwind-on-terminating-exception off\".\n\
+Evaluation of the expression containing the function (%s)\n\
+will be abandoned."),
 		 name);
 	}
       else if (stop_stack_dummy == STOP_NONE)
@@ -985,13 +980,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	     someday this will be implemented (it would not be easy).  */
 	  /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
 	     a C++ name with arguments and stuff.  */
-	  error (_("The program being debugged stopped "
-		   "while in a function called from GDB.\n"
-		   "Evaluation of the expression "
-		   "containing the function\n"
-		   "(%s) will be abandoned.\n"
-		   "When the function is done executing, "
-		   "GDB will silently stop."),
+	  error (_("\
+The program being debugged stopped while in a function called from GDB.\n\
+Evaluation of the expression containing the function\n\
+(%s) will be abandoned.\n\
+When the function is done executing, GDB will silently stop."),
 		 name);
 	}
 

@@ -225,9 +225,10 @@ som_solib_create_inferior_hook (int from_tty)
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {
-      warning (_("Unable to write __d_pid.\n"
-		 "Suggest linking with /opt/langtools/lib/end.o.\n"
-		 "GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("\
+Unable to write __d_pid.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
 
@@ -245,9 +246,10 @@ som_solib_create_inferior_hook (int from_tty)
     msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning (_("Unable to find _DLD_HOOK symbol in object file.\n"
-		 "Suggest linking with /opt/langtools/lib/end.o.\n"
-		 "GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("\
+Unable to find _DLD_HOOK symbol in object file.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -267,9 +269,10 @@ som_solib_create_inferior_hook (int from_tty)
   msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning (_("Unable to find __dld_hook symbol in object file.\n"
-		 "Suggest linking with /opt/langtools/lib/end.o.\n"
-		 "GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("\
+Unable to find __dld_hook symbol in object file.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -280,9 +283,10 @@ som_solib_create_inferior_hook (int from_tty)
   msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning (_("Unable to find __dld_d_trap symbol in object file.\n"
-		 "Suggest linking with /opt/langtools/lib/end.o.\n"
-		 "GDB will be unable to track shl_load/shl_unload calls"));
+      warning (_("\
+Unable to find __dld_d_trap symbol in object file.\n\
+Suggest linking with /opt/langtools/lib/end.o.\n\
+GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   create_solib_event_breakpoint (target_gdbarch,
@@ -318,10 +322,11 @@ keep_going:
       && (dl_header.flags & SHLIB_TEXT_PRIVATE_ENABLE) == 0
       && (dld_flags & DLD_FLAGS_MAPPRIVATE) == 0)
     warning
-      (_("Private mapping of shared library text was not specified\n"
-	 "by the executable; setting a breakpoint in a shared library which\n"
-	 "is not privately mapped will not work.  See the HP-UX 11i v3 chatr\n"
-	 "manpage for methods to privately map shared library text."));
+      (_("\
+Private mapping of shared library text was not specified\n\
+by the executable; setting a breakpoint in a shared library which\n\
+is not privately mapped will not work.  See the HP-UX 11i v3 chatr\n\
+manpage for methods to privately map shared library text."));
 
   /* Turn on the flags we care about.  */
   if (get_hpux_major_release () < 11)
