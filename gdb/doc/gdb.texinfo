@@ -20710,8 +20710,8 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 
 @menu
 * Basic Python::                Basic Python Functions.
-* Exception Handling::
-* Values From Inferior::
+* Exception Handling::          How Python exceptions are translated.
+* Values From Inferior::        Python representation of values.
 * Types In Python::             Python representation of types.
 * Pretty Printing API::         Pretty-printing values.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
