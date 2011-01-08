@@ -1,3 +1,7 @@
+2011-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-tdep.h (BFIN_A0_DOT_W_REGNUM): Fix typo in name.
+
 2011-01-08  Robert Millan  <rmh@gnu.org>
 
 	* fbsd-nat.c (fbsd_find_memory_regions): Fix typo.
