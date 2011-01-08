@@ -1,5 +1,10 @@
 2011-01-08  Nick Clifton  <nickc@redhat.com>
 
+	* ld-misc/defsym1.d: Add a -e linker command line option.
+	* ld-misc/dummy.s: Remove text.
+
+2011-01-08  Nick Clifton  <nickc@redhat.com>
+
 	PR ld/12358
 	PR ld/12359
 	* ld-elf/textaddr2.d: Fix regexp to work with hppa64 targets.

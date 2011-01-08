@@ -1,4 +1,4 @@
-#ld: --defsym foo=1 tmpdir/start.o tmpdir/libfoo.a
+#ld: -e 0 --defsym foo=1 tmpdir/start.o tmpdir/libfoo.a
 #nm: -B
 #source: dummy.s
 
