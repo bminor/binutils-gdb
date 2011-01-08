@@ -993,7 +993,7 @@ Set the target character set."), _("\
 Show the target character set."), _("\
 The `target character set' is the one used by the program being debugged.\n\
 GDB translates characters and strings between the host and target\n\
-character sets as needed.\n
+character sets as needed.\n\
 To see a list of the character sets GDB supports, type `set target-charset'<TAB>"),
 			set_target_charset_sfunc,
 			show_target_charset_name,

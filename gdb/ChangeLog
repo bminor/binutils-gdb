@@ -1,5 +1,9 @@
 2011-01-07  Michael Snyder  <msnyder@vmware.com>
 
+	* charset.c (_initialize_charset): Fix typo in string.
+
+2011-01-07  Michael Snyder  <msnyder@vmware.com>
+
 	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Mark up error message
 	for i18n.
 	* tui/tui-layout.c (tui_set_layout_for_display_command): 
