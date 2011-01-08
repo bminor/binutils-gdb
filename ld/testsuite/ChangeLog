@@ -1,7 +1,7 @@
 2011-01-08  Nick Clifton  <nickc@redhat.com>
 
-	PR ld/13258
-	PR ld/13259
+	PR ld/12358
+	PR ld/12359
 	* ld-elf/textaddr2.d: Fix regexp to work with hppa64 targets.
 	* ld-elf/textaddr6.d: Fix regexp to work with hppa64 targets.
 
