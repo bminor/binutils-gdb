@@ -284,7 +284,7 @@ runto spin
 gdb_test "info address a_global" \
 	".*a_global.*static storage at address.*" "info address a_global"
 
-gdb_test "info address me" ".*me.*is a complex DWARF expression:.*" \
+gdb_test "info address me" ".*me.*is a (complex DWARF expression:|variable).*" \
     "info address me"
 
 
