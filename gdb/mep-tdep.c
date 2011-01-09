@@ -1271,7 +1271,7 @@ mep_pseudo_register_write (struct gdbarch *gdbarch,
 /* Disassembly.  */
 
 /* The mep disassembler needs to know about the section in order to
-   work correctly. */
+   work correctly.  */
 static int
 mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
 {
@@ -1325,7 +1325,7 @@ mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
      Every bundle is four bytes long, and naturally aligned, and can hold
      one or two instructions:
      - 16-bit core instruction; 16-bit coprocessor instruction
-       These execute in parallel.       
+       These execute in parallel.
      - 32-bit core instruction
      - 32-bit coprocessor instruction
 
@@ -1333,9 +1333,9 @@ mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
      Every bundle is eight bytes long, and naturally aligned, and can hold
      one or two instructions:
      - 16-bit core instruction; 48-bit (!) coprocessor instruction
-       These execute in parallel.       
+       These execute in parallel.
      - 32-bit core instruction; 32-bit coprocessor instruction
-       These execute in parallel.       
+       These execute in parallel.
      - 64-bit coprocessor instruction
 
    Now, the MeP manual doesn't define any 48- or 64-bit coprocessor
@@ -1825,7 +1825,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
 	     body, gcc 4.x will use a BRA instruction to branch to the
 	     loop condition checking code.  This BRA instruction is
 	     marked as part of the prologue.  We therefore set next_pc
-	     to this branch target and also stop the prologue scan. 
+	     to this branch target and also stop the prologue scan.
 	     The instructions at and beyond the branch target should
 	     no longer be associated with the prologue.
 	     
@@ -2145,7 +2145,7 @@ mep_extract_return_value (struct gdbarch *arch,
   else
     offset = 0;
 
-  /* Return values that do fit in a single register are returned in R0. */
+  /* Return values that do fit in a single register are returned in R0.  */
   regcache_cooked_read_part (regcache, MEP_R0_REGNUM,
                              offset, TYPE_LENGTH (type),
                              valbuf);
@@ -2180,7 +2180,7 @@ mep_store_return_value (struct gdbarch *arch,
 
   /* Return values larger than a single register are returned in
      memory, pointed to by R0.  Unfortunately, we can't count on R0
-     pointing to the return buffer, so we raise an error here. */
+     pointing to the return buffer, so we raise an error here.  */
   else
     error ("GDB cannot set return values larger than four bytes; "
            "the Media Processor's\n"
@@ -2209,7 +2209,7 @@ mep_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	{
 	  /* Return values larger than a single register are returned in
 	     memory, pointed to by R0.  Unfortunately, we can't count on R0
-	     pointing to the return buffer, so we raise an error here. */
+	     pointing to the return buffer, so we raise an error here.  */
 	  error ("GDB cannot set return values larger than four bytes; "
 		 "the Media Processor's\n"
 		 "calling conventions do not provide enough information "
@@ -2246,15 +2246,15 @@ mep_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
    4.2.1 Core register conventions
 
    - Parameters should be evaluated from left to right, and they
-     should be held in $1,$2,$3,$4 in order. The fifth parameter or
-     after should be held in the stack. If the size is larger than 4
+     should be held in $1,$2,$3,$4 in order.  The fifth parameter or
+     after should be held in the stack.  If the size is larger than 4
      bytes in the first four parameters, the pointer should be held in
-     the registers instead. If the size is larger than 4 bytes in the
+     the registers instead.  If the size is larger than 4 bytes in the
      fifth parameter or after, the pointer should be held in the stack.
 
-   - Return value of a function should be held in register $0. If the
+   - Return value of a function should be held in register $0.  If the
      size of return value is larger than 4 bytes, $1 should hold the
-     pointer pointing memory that would hold the return value. In this
+     pointer pointing memory that would hold the return value.  In this
      case, the first parameter should be held in $2, the second one in
      $3, and the third one in $4, and the forth parameter or after
      should be held in the stack.

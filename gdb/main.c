@@ -186,7 +186,7 @@ get_init_files (char **system_gdbinit,
 
       /* If the .gdbinit file in the current directory is the same as
 	 the $HOME/.gdbinit file, it should not be sourced.  homebuf
-	 and cwdbuf are used in that purpose. Make sure that the stats
+	 and cwdbuf are used in that purpose.  Make sure that the stats
 	 are zero in case one of them fails (this guarantees that they
 	 won't match if either exists).  */
 
@@ -235,7 +235,7 @@ captured_command_loop (void *data)
      check to detect bad FUNCs code.  */
   do_cleanups (ALL_CLEANUPS);
   /* If the command_loop returned, normally (rather than threw an
-     error) we try to quit. If the quit is aborted, catch_errors()
+     error) we try to quit.  If the quit is aborted, catch_errors()
      which called this catch the signal and restart the command
      loop.  */
   quit_command (NULL, instream == stdin);
@@ -515,7 +515,8 @@ captured_main (void *data)
 	    break;
 	  case 'f':
 	    annotation_level = 1;
-/* We have probably been invoked from emacs.  Disable window interface.  */
+	    /* We have probably been invoked from emacs.  Disable
+	       window interface.  */
 	    use_windows = 0;
 	    break;
 	  case 's':
@@ -714,7 +715,7 @@ captured_main (void *data)
 			    (optind == argc - 1) ? "" : " ...");
     }
 
-  /* Lookup gdbinit files. Note that the gdbinit file name may be
+  /* Lookup gdbinit files.  Note that the gdbinit file name may be
      overriden during file initialization, so get_init_files should be
      called after gdb_init.  */
   get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);

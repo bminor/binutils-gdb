@@ -44,8 +44,8 @@ static int mach_o_debug_level = 0;
    during the link.
    Each time an oso (other source) is found in the executable, the reader
    creates such a structure.  They are read after the processing of the
-   executable.
-*/
+   executable.  */
+
 typedef struct oso_el
 {
   /* Object file name.  */
@@ -206,7 +206,7 @@ macho_symtab_read (struct objfile *objfile,
       if (sym->name == NULL || *sym->name == '\0')
 	{
 	  /* Skip names that don't exist (shouldn't happen), or names
-	     that are null strings (may happen). */
+	     that are null strings (may happen).  */
 	  continue;
 	}
 
@@ -215,12 +215,12 @@ macho_symtab_read (struct objfile *objfile,
 	  struct minimal_symbol *msym;
 	  CORE_ADDR symaddr;
 
-	  /* Bfd symbols are section relative. */
+	  /* Bfd symbols are section relative.  */
 	  symaddr = sym->value + sym->section->vma;
 
 	  /* Select global/local/weak symbols.  Note that bfd puts abs
 	     symbols in their own section, so all symbols we are
-	     interested in will have a section. */
+	     interested in will have a section.  */
 	  /* Relocate all non-absolute and non-TLS symbols by the
 	     section offset.  */
 	  if (sym->section != &bfd_abs_section
@@ -258,7 +258,7 @@ macho_symtab_read (struct objfile *objfile,
 		ms_type = mst_unknown;
 	    }
 	  else
-	    continue;	/* Skip this symbol. */
+	    continue;	/* Skip this symbol.  */
 
 	  gdb_assert (sym->section->index < nbr_sections);
 	  if (oso_file != NULL

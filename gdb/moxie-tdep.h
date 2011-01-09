@@ -22,7 +22,7 @@
 
 struct gdbarch_tdep
 {
-  /* gdbarch target dependent data here. Currently unused for MOXIE. */
+  /* gdbarch target dependent data here.  Currently unused for MOXIE.  */
 };
 
 enum moxie_regnum

@@ -176,7 +176,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   struct mem_region new;
   int i, ix;
 
-  /* lo == hi is a useless empty region */
+  /* lo == hi is a useless empty region.  */
   if (lo >= hi && hi != 0)
     {
       printf_unfiltered (_("invalid memory region: low >= high\n"));
@@ -302,7 +302,7 @@ invalidate_target_mem_regions (void)
     mem_region_list = NULL;
 }
 
-/* Clear memory region list */
+/* Clear memory region list.  */
 
 static void
 mem_clear (void)
@@ -542,7 +542,7 @@ mem_info_command (char *args, int from_tty)
 }
 
 
-/* Enable the memory region number NUM. */
+/* Enable the memory region number NUM.  */
 
 static void
 mem_enable (int num)
@@ -596,7 +596,7 @@ mem_enable_command (char *args, int from_tty)
 }
 
 
-/* Disable the memory region number NUM. */
+/* Disable the memory region number NUM.  */
 
 static void
 mem_disable (int num)
@@ -649,7 +649,7 @@ mem_disable_command (char *args, int from_tty)
       }
 }
 
-/* Delete the memory region number NUM. */
+/* Delete the memory region number NUM.  */
 
 static void
 mem_delete (int num)

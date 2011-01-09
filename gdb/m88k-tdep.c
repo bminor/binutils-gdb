@@ -68,7 +68,7 @@ m88k_register_name (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Return the GDB type object for the "standard" data type of data in
-   register REGNUM. */
+   register REGNUM.  */
 
 static struct type *
 m88k_register_type (struct gdbarch *gdbarch, int regnum)
@@ -859,7 +859,7 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, m88k_push_dummy_call);
   set_gdbarch_dummy_id (gdbarch, m88k_dummy_id);
 
-  /* Return value info */
+  /* Return value info.  */
   set_gdbarch_return_value (gdbarch, m88k_return_value);
 
   set_gdbarch_addr_bits_remove (gdbarch, m88k_addr_bits_remove);

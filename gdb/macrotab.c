@@ -160,7 +160,7 @@ struct macro_key
   struct macro_table *table;
 
   /* The name of the macro.  This is in the table's bcache, if it has
-     one. */
+     one.  */
   const char *name;
 
   /* The source file and line number where the definition's scope

@@ -23,7 +23,7 @@
 
 struct gdbarch;
 
-/* All the possible MIPS ABIs. */
+/* All the possible MIPS ABIs.  */
 enum mips_abi
   {
     MIPS_ABI_UNKNOWN = 0,
@@ -67,7 +67,7 @@ enum mips_fpu_type
   MIPS_FPU_NONE			/* No floating point.  */
 };
 
-/* MIPS specific per-architecture information */
+/* MIPS specific per-architecture information.  */
 struct gdbarch_tdep
 {
   /* from the elf header */
@@ -117,7 +117,7 @@ enum
   MIPS_ZERO_REGNUM = 0,		/* Read-only register, always 0.  */
   MIPS_AT_REGNUM = 1,
   MIPS_V0_REGNUM = 2,		/* Function integer return value.  */
-  MIPS_A0_REGNUM = 4,		/* Loc of first arg during a subr call */
+  MIPS_A0_REGNUM = 4,		/* Loc of first arg during a subr call.  */
   MIPS_T9_REGNUM = 25,		/* Contains address of callee in PIC.  */
   MIPS_SP_REGNUM = 29,
   MIPS_RA_REGNUM = 31,
@@ -128,13 +128,13 @@ enum
   MIPS_EMBED_CAUSE_REGNUM = 36,
   MIPS_EMBED_PC_REGNUM = 37,
   MIPS_EMBED_FP0_REGNUM = 38,
-  MIPS_UNUSED_REGNUM = 73,	/* Never used, FIXME */
+  MIPS_UNUSED_REGNUM = 73,	/* Never used, FIXME.  */
   MIPS_FIRST_EMBED_REGNUM = 74,	/* First CP0 register for embedded use.  */
   MIPS_PRID_REGNUM = 89,	/* Processor ID.  */
   MIPS_LAST_EMBED_REGNUM = 89	/* Last one.  */
 };
 
-/* Defined in mips-tdep.c and used in remote-mips.c */
+/* Defined in mips-tdep.c and used in remote-mips.c.  */
 extern void deprecated_mips_set_processor_regs_hack (void);
 
 /* Instruction sizes and other useful constants.  */
@@ -153,7 +153,7 @@ extern int mips_software_single_step (struct frame_info *frame);
    function.  */
 extern int mips_pc_is_mips16 (bfd_vma memaddr);
 
-/* Return the currently configured (or set) saved register size. */
+/* Return the currently configured (or set) saved register size.  */
 extern unsigned int mips_abi_regsize (struct gdbarch *gdbarch);
 
 /* Target descriptions which only indicate the size of general

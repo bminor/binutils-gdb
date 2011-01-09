@@ -57,7 +57,7 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 
 /* Breakpoints
  
-   The little endian mode of M32R is unique. In most of architectures,
+   The little endian mode of M32R is unique.  In most of architectures,
    two 16-bit instructions, A and B, are placed as the following:
   
    Big endian:
@@ -76,7 +76,7 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   
    This is because M32R always fetches instructions in 32-bit.
   
-   The following functions take care of this behavior. */
+   The following functions take care of this behavior.  */
 
 static int
 m32r_memory_insert_breakpoint (struct gdbarch *gdbarch,
@@ -168,10 +168,15 @@ m32r_memory_remove_breakpoint (struct gdbarch *gdbarch,
 }
 
 static const gdb_byte *
-m32r_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
+m32r_breakpoint_from_pc (struct gdbarch *gdbarch,
+			 CORE_ADDR *pcptr, int *lenptr)
 {
-  static gdb_byte be_bp_entry[] = { 0x10, 0xf1, 0x70, 0x00 };	/* dpt -> nop */
-  static gdb_byte le_bp_entry[] = { 0x00, 0x70, 0xf1, 0x10 };	/* dpt -> nop */
+  static gdb_byte be_bp_entry[] = {
+    0x10, 0xf1, 0x70, 0x00
+  };	/* dpt -> nop */
+  static gdb_byte le_bp_entry[] = {
+    0x00, 0x70, 0xf1, 0x10
+  };	/* dpt -> nop */
   gdb_byte *bp;
 
   /* Determine appropriate breakpoint.  */
@@ -240,9 +245,9 @@ m32r_register_type (struct gdbarch *gdbarch, int reg_nr)
 
 
 /* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  
+   of type TYPE, given in virtual format.
 
-   Things always get returned in RET1_REGNUM, RET2_REGNUM. */
+   Things always get returned in RET1_REGNUM, RET2_REGNUM.  */
 
 static void
 m32r_store_return_value (struct type *type, struct regcache *regcache,
@@ -264,7 +269,7 @@ m32r_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-/* This is required by skip_prologue. The results of decoding a prologue
+/* This is required by skip_prologue.  The results of decoding a prologue
    should be cached because this thrashing is getting nuts.  */
 
 static int
@@ -287,7 +292,7 @@ decode_prologue (struct gdbarch *gdbarch,
 
   for (current_pc = start_pc; current_pc < scan_limit; current_pc += 2)
     {
-      /* Check if current pc's location is readable. */
+      /* Check if current pc's location is readable.  */
       if (!safe_read_memory_integer (current_pc, 2, byte_order, &return_value))
 	return -1;
 
@@ -297,10 +302,10 @@ decode_prologue (struct gdbarch *gdbarch,
 	break;
 
       /* If this is a 32 bit instruction, we dont want to examine its
-         immediate data as though it were an instruction */
+         immediate data as though it were an instruction.  */
       if (current_pc & 0x02)
 	{
-	  /* decode this instruction further */
+	  /* Decode this instruction further.  */
 	  insn &= 0x7fff;
 	}
       else
@@ -312,7 +317,7 @@ decode_prologue (struct gdbarch *gdbarch,
 
 	      current_pc += 2;	/* skip the immediate data */
 
-	      /* Check if current pc's location is readable. */
+	      /* Check if current pc's location is readable.  */
 	      if (!safe_read_memory_integer (current_pc, 2, byte_order,
 					     &return_value))
 		return -1;
@@ -326,15 +331,15 @@ decode_prologue (struct gdbarch *gdbarch,
 		}
 	      else
 		{
-		  if (((insn >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
+		  if (((insn >> 8) == 0xe4) /* ld24 r4, xxxxxx; sub sp, r4 */
 		      && safe_read_memory_integer (current_pc + 2,
 						   2, byte_order,
 						   &return_value)
 		      && read_memory_unsigned_integer (current_pc + 2,
 						       2, byte_order)
 			 == 0x0f24)
-		    /* subtract 24 bit sign-extended negative-offset */
 		    {
+		      /* Subtract 24 bit sign-extended negative-offset.  */
 		      insn = read_memory_unsigned_integer (current_pc - 2,
 							   4, byte_order);
 		      if (insn & 0x00800000)	/* sign extend */
@@ -348,7 +353,7 @@ decode_prologue (struct gdbarch *gdbarch,
 	      continue;
 	    }
 	}
-      op1 = insn & 0xf000;	/* isolate just the first nibble */
+      op1 = insn & 0xf000;	/* Isolate just the first nibble.  */
 
       if ((insn & 0xf0ff) == 0x207f)
 	{			/* st reg, @-sp */
@@ -359,7 +364,7 @@ decode_prologue (struct gdbarch *gdbarch,
 	  continue;
 	}
       if ((insn >> 8) == 0x4f)	/* addi sp, xx */
-	/* add 8 bit sign-extended offset */
+	/* Add 8 bit sign-extended offset.  */
 	{
 	  int stack_adjust = (signed char) (insn & 0xff);
 
@@ -384,25 +389,25 @@ decode_prologue (struct gdbarch *gdbarch,
 	  break;		/* end of stack adjustments */
 	}
 
-      /* Nop looks like a branch, continue explicitly */
+      /* Nop looks like a branch, continue explicitly.  */
       if (insn == 0x7000)
 	{
 	  after_prologue = current_pc + 2;
-	  continue;		/* nop occurs between pushes */
+	  continue;		/* nop occurs between pushes.  */
 	}
-      /* End of prolog if any of these are trap instructions */
+      /* End of prolog if any of these are trap instructions.  */
       if ((insn & 0xfff0) == 0x10f0)
 	{
 	  after_prologue = current_pc;
 	  break;
 	}
-      /* End of prolog if any of these are branch instructions */
+      /* End of prolog if any of these are branch instructions.  */
       if ((op1 == 0x7000) || (op1 == 0xb000) || (op1 == 0xf000))
 	{
 	  after_prologue = current_pc;
 	  continue;
 	}
-      /* Some of the branch instructions are mixed with other types */
+      /* Some of the branch instructions are mixed with other types.  */
       if (op1 == 0x1000)
 	{
 	  int subop = insn & 0x0ff0;
@@ -424,22 +429,23 @@ decode_prologue (struct gdbarch *gdbarch,
 	  if (after_stack_adjust != 0)
 	    /* We did not find a "mv fp,sp", but we DID find
 	       a stack_adjust.  Is it safe to use that as the
-	       end of the prologue?  I just don't know. */
+	       end of the prologue?  I just don't know.  */
 	    {
 	      *pl_endptr = after_stack_adjust;
 	    }
 	  else if (after_push != 0)
 	    /* We did not find a "mv fp,sp", but we DID find
 	       a push.  Is it safe to use that as the
-	       end of the prologue?  I just don't know. */
+	       end of the prologue?  I just don't know.  */
 	    {
 	      *pl_endptr = after_push;
 	    }
 	  else
 	    /* We reached the end of the loop without finding the end
-	       of the prologue.  No way to win -- we should report failure.  
-	       The way we do that is to return the original start_pc.
-	       GDB will set a breakpoint at the start of the function (etc.) */
+	       of the prologue.  No way to win -- we should report
+	       failure.  The way we do that is to return the original
+	       start_pc.  GDB will set a breakpoint at the start of
+	       the function (etc.)  */
 	    *pl_endptr = start_pc;
 	}
       return 0;
@@ -455,7 +461,7 @@ decode_prologue (struct gdbarch *gdbarch,
 }				/*  decode_prologue */
 
 /* Function: skip_prologue
-   Find end of function prologue */
+   Find end of function prologue.  */
 
 #define DEFAULT_SEARCH_LIMIT 128
 
@@ -467,7 +473,7 @@ m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   struct symtab_and_line sal;
   LONGEST return_value;
 
-  /* See what the symbol table says */
+  /* See what the symbol table says.  */
 
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
@@ -488,7 +494,7 @@ m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   else
     func_end = pc + DEFAULT_SEARCH_LIMIT;
 
-  /* If pc's location is not readable, just quit. */
+  /* If pc's location is not readable, just quit.  */
   if (!safe_read_memory_integer (pc, 4, byte_order, &return_value))
     return pc;
 
@@ -521,7 +527,7 @@ struct m32r_unwind_cache
    the saved registers of frame described by FRAME_INFO.  This
    includes special registers such as pc and fp saved in special ways
    in the stack frame.  sp is even more special: the address we return
-   for it IS the sp for the next frame. */
+   for it IS the sp for the next frame.  */
 
 static struct m32r_unwind_cache *
 m32r_frame_unwind_cache (struct frame_info *this_frame,
@@ -603,8 +609,8 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
 	}
       else if ((op & 0xfff0) == 0x10f0)
 	{
-	  /* end of prologue if this is a trap instruction */
-	  break;		/* end of stack adjustments */
+	  /* End of prologue if this is a trap instruction.  */
+	  break;		/* End of stack adjustments.  */
 	}
     }
 
@@ -692,7 +698,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int len;
   int odd_sized_struct;
 
-  /* first force sp to a 4-byte alignment */
+  /* First force sp to a 4-byte alignment.  */
   sp = sp & ~3;
 
   /* Set the return address.  For the m32r, the return breakpoint is
@@ -708,10 +714,10 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       argreg++;
     }
 
-  /* Now make sure there's space on the stack */
+  /* Now make sure there's space on the stack.  */
   for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
     stack_alloc += ((TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3);
-  sp -= stack_alloc;		/* make room on stack for args */
+  sp -= stack_alloc;		/* Make room on stack for args.  */
 
   for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
     {
@@ -733,7 +739,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else if (len < 4)
 	{
-	  /* value gets right-justified in the register or stack word */
+	  /* Value gets right-justified in the register or stack word.  */
 	  memcpy (valbuf + (register_size (gdbarch, argreg) - len),
 		  (gdb_byte *) value_contents (args[argnum]), len);
 	  val = valbuf;
@@ -745,13 +751,13 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  if (argreg > ARGN_REGNUM)
 	    {
-	      /* must go on the stack */
+	      /* Must go on the stack.  */
 	      write_memory (sp + stack_offset, val, 4);
 	      stack_offset += 4;
 	    }
 	  else if (argreg <= ARGN_REGNUM)
 	    {
-	      /* there's room in a register */
+	      /* There's room in a register.  */
 	      regval =
 		extract_unsigned_integer (val,
 					  register_size (gdbarch, argreg),
@@ -793,7 +799,7 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
   store_unsigned_integer (valbuf, (len > 4 ? len - 4 : len), byte_order, tmp);
 
   /* Ignore return values more than 8 bytes in size because the m32r
-     returns anything more than 8 bytes in the stack. */
+     returns anything more than 8 bytes in the stack.  */
   if (len > 4)
     {
       regcache_cooked_read_unsigned (regcache, RET1_REGNUM + 1, &tmp);
@@ -924,7 +930,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, m32r_write_pc);
   set_gdbarch_unwind_sp (gdbarch, m32r_unwind_sp);
 
-  set_gdbarch_num_regs (gdbarch, M32R_NUM_REGS);
+
   set_gdbarch_sp_regnum (gdbarch, M32R_SP_REGNUM);
   set_gdbarch_register_name (gdbarch, m32r_register_name);
   set_gdbarch_register_type (gdbarch, m32r_register_type);

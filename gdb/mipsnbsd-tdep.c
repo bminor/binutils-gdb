@@ -173,7 +173,8 @@ mipsnbsd_fill_reg (const struct regcache *regcache, char *regs, int regno)
 }
 
 void
-mipsnbsd_supply_fpreg (struct regcache *regcache, const char *fpregs, int regno)
+mipsnbsd_supply_fpreg (struct regcache *regcache,
+		       const char *fpregs, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;

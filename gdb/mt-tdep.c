@@ -456,7 +456,7 @@ mt_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    instruction in the instruction set.
 
    The BP for ms1 is defined as 0x68000000 (BREAK).
-   The BP for ms2 is defined as 0x69000000 (illegal)  */
+   The BP for ms2 is defined as 0x69000000 (illegal).  */
 
 static const gdb_byte *
 mt_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
@@ -483,7 +483,7 @@ mt_select_coprocessor (struct gdbarch *gdbarch,
   unsigned index, base;
   gdb_byte copro[4];
 
-  /* Get the copro pseudo regnum. */
+  /* Get the copro pseudo regnum.  */
   regcache_raw_read (regcache, MT_COPRO_REGNUM, copro);
   base = ((extract_signed_integer (&copro[0], 2, byte_order)
 	   * MT_COPRO_PSEUDOREG_DIM_2)
@@ -877,7 +877,7 @@ mt_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 struct mt_unwind_cache
 {
-  /* The previous frame's inner most stack address.  
+  /* The previous frame's inner most stack address.
      Used as this frame ID's stack_addr.  */
   CORE_ADDR prev_sp;
   CORE_ADDR frame_base;
@@ -915,7 +915,7 @@ mt_frame_unwind_cache (struct frame_info *this_frame,
   info->frameless_p = 1;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  /* Grab the frame-relative values of SP and FP, needed below. 
+  /* Grab the frame-relative values of SP and FP, needed below.
      The frame_saved_register function will find them on the
      stack or in the registers as appropriate.  */
   sp = get_frame_register_unsigned (this_frame, MT_SP_REGNUM);
@@ -933,17 +933,17 @@ mt_frame_unwind_cache (struct frame_info *this_frame,
   for (next_addr = start_addr; next_addr < end_addr; next_addr += 4)
     {
       instr = get_frame_memory_unsigned (this_frame, next_addr, 4);
-      if (delayed_store)	/* previous instr was a push */
+      if (delayed_store)	/* Previous instr was a push.  */
 	{
 	  upper_half = delayed_store >> 16;
 	  regnum = upper_half & 0xf;
 	  offset = delayed_store & 0xffff;
 	  switch (upper_half & 0xfff0)
 	    {
-	    case 0x43c0:	/* push using frame pointer */
+	    case 0x43c0:	/* push using frame pointer.  */
 	      info->saved_regs[regnum].addr = offset;
 	      break;
-	    case 0x43d0:	/* push using stack pointer */
+	    case 0x43d0:	/* push using stack pointer.  */
 	      info->saved_regs[regnum].addr = offset;
 	      break;
 	    default:		/* lint */
@@ -957,7 +957,8 @@ mt_frame_unwind_cache (struct frame_info *this_frame,
 	case 0x12000000:	/* NO-OP */
 	  continue;
 	case 0x12ddc000:	/* copy sp into fp */
-	  info->frameless_p = 0;	/* Record that the frame pointer is in use.  */
+	  info->frameless_p = 0;	/* Record that the frame
+					   pointer is in use.  */
 	  continue;
 	default:
 	  upper_half = instr >> 16;
@@ -990,9 +991,9 @@ mt_frame_unwind_cache (struct frame_info *this_frame,
 	     keep scanning until we reach it (or we reach end_addr).  */
 
 	  if (prologue_end_addr && (prologue_end_addr > (next_addr + 4)))
-	    continue;		/* Keep scanning, recording saved_regs etc.  */
+	    continue;	/* Keep scanning, recording saved_regs etc.  */
 	  else
-	    break;		/* Quit scanning: breakpoint can be set here.  */
+	    break;	/* Quit scanning: breakpoint can be set here.  */
 	}
     }
 
@@ -1185,7 +1186,7 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, mt_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, mt_unwind_sp);
 
-  /* Methods for saving / extracting a dummy frame's ID.  
+  /* Methods for saving / extracting a dummy frame's ID.
      The ID's stack address must match the SP value returned by
      PUSH_DUMMY_CALL, and saved by generic_save_dummy_frame_tos.  */
   set_gdbarch_dummy_id (gdbarch, mt_dummy_id);

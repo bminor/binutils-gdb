@@ -117,7 +117,7 @@ maintenance_dump_me (char *args, int from_tty)
 /* Stimulate the internal error mechanism that GDB uses when an
    internal problem is detected.  Allows testing of the mechanism.
    Also useful when the user wants to drop a core file but not exit
-   GDB. */
+   GDB.  */
 
 static void
 maintenance_internal_error (char *args, int from_tty)
@@ -128,7 +128,7 @@ maintenance_internal_error (char *args, int from_tty)
 /* Stimulate the internal error mechanism that GDB uses when an
    internal problem is detected.  Allows testing of the mechanism.
    Also useful when the user wants to drop a core file but not exit
-   GDB. */
+   GDB.  */
 
 static void
 maintenance_internal_warning (char *args, int from_tty)
@@ -142,7 +142,7 @@ maintenance_internal_warning (char *args, int from_tty)
    debuggee's process space, and have gdb fetch and demangle that
    string.  If we have a char* pointer "ptr" that points to a string,
    we might want to be able to given just the name and have GDB
-   demangle and print what it points to, etc.  (FIXME) */
+   demangle and print what it points to, etc.  (FIXME)  */
 
 static void
 maintenance_demangle (char *args, int from_tty)
@@ -210,12 +210,12 @@ match_substring (const char *string, const char *substr)
 
   while ((tok = strstr (string, substr)) != NULL)
     {
-      /* Got a partial match.  Is it a whole word? */
+      /* Got a partial match.  Is it a whole word?  */
       if (tok == string
 	  || tok[-1] == ' '
 	  || tok[-1] == '\t')
       {
-	/* Token is delimited at the front... */
+	/* Token is delimited at the front...  */
 	if (tok[substr_len] == ' '
 	    || tok[substr_len] == '\t'
 	    || tok[substr_len] == '\0')
@@ -449,8 +449,7 @@ maintenance_print_command (char *arg, int from_tty)
 /* The "maintenance translate-address" command converts a section and address
    to a symbol.  This can be called in two ways:
    maintenance translate-address <secname> <addr>
-   or   maintenance translate-address <addr>
- */
+   or   maintenance translate-address <addr>.  */
 
 static void
 maintenance_translate_address (char *arg, int from_tty)
@@ -468,14 +467,14 @@ maintenance_translate_address (char *arg, int from_tty)
   p = arg;
 
   if (!isdigit (*p))
-    {				/* See if we have a valid section name */
-      while (*p && !isspace (*p))	/* Find end of section name */
+    {				/* See if we have a valid section name.  */
+      while (*p && !isspace (*p))	/* Find end of section name.  */
 	p++;
-      if (*p == '\000')		/* End of command? */
+      if (*p == '\000')		/* End of command?  */
 	error (_("Need to specify <section-name> and <address>"));
       *p++ = '\000';
       while (isspace (*p))
-	p++;			/* Skip whitespace */
+	p++;			/* Skip whitespace.  */
 
       ALL_OBJSECTIONS (objfile, sect)
       {
@@ -535,7 +534,7 @@ maintenance_translate_address (char *arg, int from_tty)
 
 /* When a command is deprecated the user will be warned the first time
    the command is used.  If possible, a replacement will be
-   offered. */
+   offered.  */
 
 static void
 maintenance_deprecate (char *args, int from_tty)
@@ -565,7 +564,7 @@ the command you want to undeprecate.\n"));
 
 }
 
-/* You really shouldn't be using this. It is just for the testsuite.
+/* You really shouldn't be using this.  It is just for the testsuite.
    Rather, you should use deprecate_cmd() when the command is created
    in _initialize_blah().
 
@@ -595,7 +594,7 @@ maintenance_do_deprecate (char *text, int deprecate)
 
   if (deprecate)
     {
-      /* look for a replacement command */
+      /* Look for a replacement command.  */
       start_ptr = strchr (text, '\"');
       if (start_ptr != NULL)
 	{
@@ -618,7 +617,7 @@ maintenance_do_deprecate (char *text, int deprecate)
 
      Note the MALLOCED_REPLACEMENT test.  If the command's replacement
      string was allocated at compile time we don't want to free the
-     memory. */
+     memory.  */
   if (alias)
     {
       if (alias->flags & MALLOCED_REPLACEMENT)

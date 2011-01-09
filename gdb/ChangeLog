@@ -51,6 +51,55 @@
 	* linux-thread-db.c: Ditto.
 	* lm32-tdep.c: Ditto.
 
+2011-01-08  Michael Snyder  <msnyder@vmware.com>
+
+	* m2-exp.y: Comment cleanup, mostly periods and spaces.
+	* m2-lang.c: Ditto.
+	* m2-typeprint.c: Ditto.
+	* m2-valprint.c: Ditto.
+	* m32c-tdep.c: Ditto.
+	* m32r-linux-nat.c: Ditto.
+	* m32r-rom.c: Ditto.
+	* m32r-tdep.c: Ditto.
+	* m32r-tdep.h: Ditto.
+	* m68hc11-tdep.c: Ditto.
+	* m58klinux-nat.c: Ditto.
+	* m68k-tdep.c: Ditto.
+	* m88k-tdep.c: Ditto.
+	* m88k-tdep.h: Ditto.
+	* machoread.c: Ditto.
+	* macrocmd.c: Ditto.
+	* macroexp.c: Ditto.
+	* macrotab.c: Ditto.
+	* main.c: Ditto.
+	* maint.c: Ditto.
+	* mdebugread.c: Ditto.
+	* mdebugread.h: Ditto.
+	* memattr.c: Ditto.
+	* memattr.h: Ditto.
+	* memory-map.h: Ditto.
+	* mep-tdep.c: Ditto.
+	* microblaze-rom.c: Ditto.
+	* microblaze-tdep.c: Ditto.
+	* minsyms.c: Ditto.
+	* mips-irix-tdep.c: Ditto.
+	* mips-linux-nat.c: Ditto.
+	* mips-linux-tdep.c: Ditto.
+	* mips-linux-tdep.h: Ditto.
+	* mipsnbsd-nat.c: Ditto.
+	* mipsnbsd-tdep.c: Ditto.
+	* mipsread.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* mips-tdep.h: Ditto.
+	* mn10300-linux-tdep.c: Ditto.
+	* mn10300-tdep.c: Ditto.
+	* mn10300-tdep.h: Ditto.
+	* monitor.c: Ditto.
+	* monitor.h: Ditto.
+	* moxie-tdep.c: Ditto.
+	* moxie-tdep.h: Ditto.
+	* mt-tdep.c: Ditto.
+
 2011-01-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-tdep.h (BFIN_A0_DOT_W_REGNUM): Fix typo in name.

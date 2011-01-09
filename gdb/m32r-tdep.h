@@ -23,10 +23,10 @@
 
 struct gdbarch_tdep
 {
-  /* gdbarch target dependent data here. Currently unused for M32R. */
+  /* gdbarch target dependent data here.  Currently unused for M32R.  */
 };
 
-/* m32r register names. */
+/* m32r register names.  */
 
 enum m32r_regnum
 {
@@ -40,7 +40,7 @@ enum m32r_regnum
   SPU_REGNUM = 18,
   SPI_REGNUM = 19,
   M32R_PC_REGNUM = 21,
-  /* m32r calling convention. */
+  /* m32r calling convention.  */
   ARG1_REGNUM = R0_REGNUM,
   ARGN_REGNUM = R3_REGNUM,
   RET1_REGNUM = R0_REGNUM,

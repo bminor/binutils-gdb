@@ -29,8 +29,8 @@
 
 struct mdebug_extra_func_info
 {
-  long numargs;		/* number of args to procedure (was iopt) */
-  PDR pdr;			/* Procedure descriptor record */
+  long numargs;		/* Number of args to procedure (was iopt).  */
+  PDR pdr;		/* Procedure descriptor record.  */
 };
 
 /* Special symbol found in blocks associated with routines.  We can

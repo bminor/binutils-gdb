@@ -57,7 +57,8 @@ mipsnbsd_fetch_inferior_registers (struct target_ops *ops,
 	return;
     }
 
-  if (regno == -1 || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  if (regno == -1
+      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
     {
       struct fpreg fpregs;
 
@@ -92,7 +93,8 @@ mipsnbsd_store_inferior_registers (struct target_ops *ops,
 	return;
     }
 
-  if (regno == -1 || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  if (regno == -1
+      || regno >= gdbarch_fp0_regnum (get_regcache_arch (regcache)))
     {
       struct fpreg fpregs; 
 

@@ -69,7 +69,7 @@ mips_irix_elf_osabi_sniffer (bfd *abfd)
       /* When elfosabi is ELFOSABI_NONE (0), then the ELF structures in the
 	 file are conforming to the base specification for that machine 
 	 (there are no OS-specific extensions).  In order to determine the 
-	 real OS in use we must look for OS notes that have been added.  
+	 real OS in use we must look for OS notes that have been added.
 	 
 	 For IRIX, we simply look for sections named with .MIPS. as
 	 prefixes.  */

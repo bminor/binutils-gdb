@@ -34,7 +34,7 @@
    generator.  Doing this with #defines and trying to control the interaction
    with include files (<malloc.h> and <stdlib.h> for example) just became
    too messy, particularly when such includes can be inserted at random
-   times by the parser generator. */
+   times by the parser generator.  */
    
 %{
 
@@ -58,7 +58,7 @@
    yacc generated parsers in gdb.  Note that these are only the variables
    produced by yacc.  If other parser generators (bison, byacc, etc) produce
    additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list. */
+   generators need to be fixed instead of adding those names to this list.  */
 
 #define	yymaxdepth m2_maxdepth
 #define	yyparse	m2_parse
@@ -119,7 +119,7 @@ static char *make_qualname (char *, char *);
 
 static int parse_number (int);
 
-/* The sign of the number being parsed. */
+/* The sign of the number being parsed.  */
 static int number_sign = 1;
 
 /* The block that the module specified by the qualifer on an identifer is
@@ -543,7 +543,7 @@ exp	:	STRING
 			  write_exp_elt_opcode (OP_M2_STRING); }
 	;
 
-/* This will be used for extensions later.  Like adding modules. */
+/* This will be used for extensions later.  Like adding modules.  */
 block	:	fblock	
 			{ $$ = SYMBOL_BLOCK_VALUE($1); }
 	;
@@ -596,7 +596,7 @@ variable:	block COLONCOLON NAME
 			  write_exp_elt_opcode (OP_VAR_VALUE); }
 	;
 
-/* Base case for variables. */
+/* Base case for variables.  */
 variable:	NAME
 			{ struct symbol *sym;
 			  int is_a_field_of_this;
@@ -718,7 +718,7 @@ parse_number (olen)
       if(!unsigned_p && number_sign == 1 && (prevn >= n))
 	 unsigned_p=1;		/* Try something unsigned */
       /* Don't do the range check if n==i and i==0, since that special
-	 case will give an overflow error. */
+	 case will give an overflow error.  */
       if(RANGE_CHECK && n!=i && i)
       {
 	 if((unsigned_p && (unsigned)prevn >= (unsigned)n) ||
@@ -1051,7 +1051,7 @@ yylex ()
     }
     else
     {
-       /* Built-in BOOLEAN type.  This is sort of a hack. */
+       /* Built-in BOOLEAN type.  This is sort of a hack.  */
        if (strncmp (tokstart, "TRUE", 4) == 0)
        {
 	  yylval.ulval = 1;
@@ -1064,7 +1064,7 @@ yylex ()
        }
     }
 
-    /* Must be another type of name... */
+    /* Must be another type of name...  */
     return NAME;
  }
 }

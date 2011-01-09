@@ -63,7 +63,7 @@ enum movm_register_bits {
   movm_d2_bit      = 0x80
 };
 
-/* Values for frame_info.status */
+/* Values for frame_info.status.  */
 
 enum frame_kind {
   MY_FRAME_IN_SP = 0x1,
@@ -71,7 +71,7 @@ enum frame_kind {
   NO_MORE_FRAMES = 0x4
 };
 
-/* mn10300 private data */
+/* mn10300 private data.  */
 struct gdbarch_tdep
 {
   int am33_mode;

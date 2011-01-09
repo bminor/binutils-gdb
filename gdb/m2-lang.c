@@ -42,7 +42,7 @@ static void
 m2_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
 
-  c &= 0xFF;			/* Avoid sign bit follies */
+  c &= 0xFF;			/* Avoid sign bit follies.  */
 
   if (PRINT_LITERAL_FORM (c))
     {
@@ -243,7 +243,8 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 	  type = TYPE_FIELD_TYPE (type, 0);
 	  if (type == NULL || (TYPE_CODE (type) != TYPE_CODE_PTR))
 	    {
-	      warning (_("internal error: unbounded array structure is unknown"));
+	      warning (_("internal error: unbounded "
+			 "array structure is unknown"));
 	      return evaluate_subexp_standard (expect_type, exp, pos, noside);
 	    }
 	  /* i18n: Do not translate the "_m2_contents" part!  */
@@ -389,7 +390,8 @@ const struct language_defn m2_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
-  NULL,				/* Language specific class_name_from_physname */
+  NULL,				/* Language specific
+				   class_name_from_physname */
   m2_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */

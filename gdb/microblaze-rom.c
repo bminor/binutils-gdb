@@ -31,7 +31,7 @@ static char *picobug_inits[] =
 static struct target_ops picobug_ops;
 static struct monitor_ops picobug_cmds;
 
-/* Picobug only supports a subset of registers from MCore. In reality,
+/* Picobug only supports a subset of registers from MCore.  In reality,
    it doesn't support ss1, either.  */
 static char *picobug_regnames[] = {
   "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
@@ -81,7 +81,7 @@ picobug_dumpregs (struct regcache *regcache)
     {
       if (strchr (p, '-'))
 	{
-	  /* got a range. either r0-r7, r8-r15 or ss0-ss4.  */
+	  /* Got a range.  Either r0-r7, r8-r15 or ss0-ss4.  */
 	  if (strncmp (p, "r0", 2) == 0 || strncmp (p, "r8", 2) == 0)
 	    {
 	      int rn = (p[1] == '0' ? 0 : 8);
@@ -98,7 +98,7 @@ picobug_dumpregs (struct regcache *regcache)
 	    }
 	  else if (strncmp (p, "ss", 2) == 0)
 	    {
-	      /* get the next five values, ignoring the first.  */
+	      /* Get the next five values, ignoring the first.  */
 	      int rn;
 	      p = strtok (NULL, " \t\r\n");
 	      for (rn = 39; rn < 43; rn++)

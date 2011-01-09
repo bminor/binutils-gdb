@@ -21,7 +21,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This module defines communication with the Renesas m32r monitor */
+/* This module defines communication with the Renesas m32r monitor.  */
 
 #include "defs.h"
 #include "gdbcore.h"
@@ -36,7 +36,7 @@
 #include <sys/time.h>
 #include <time.h>		/* for time_t */
 #include "gdb_string.h"
-#include "objfiles.h"		/* for ALL_OBJFILES etc. */
+#include "objfiles.h"		/* for ALL_OBJFILES etc.  */
 #include "inferior.h"
 #include <ctype.h>
 #include "regcache.h"
@@ -174,19 +174,19 @@ m32r_load (char *filename, int from_tty)
   print_transfer_performance (gdb_stdout, data_count, 0, &start_time,
 			      &end_time);
 
-  /* Finally, make the PC point at the start address */
+  /* Finally, make the PC point at the start address.  */
   if (exec_bfd)
     regcache_write_pc (get_current_regcache (),
 		       bfd_get_start_address (exec_bfd));
 
-  inferior_ptid = null_ptid;	/* No process now */
+  inferior_ptid = null_ptid;	/* No process now.  */
 
   /* This is necessary because many things were based on the PC at the
      time that we attached to the monitor, which is no longer valid
      now that we have loaded new code (and just changed the PC).
      Another way to do this might be to call normal_stop, except that
      the stack may not be valid, and things would get horribly
-     confused... */
+     confused...  */
 
   clear_symtab_users (0);
 }
@@ -200,10 +200,10 @@ m32r_load_gen (char *filename, int from_tty)
 static void m32r_open (char *args, int from_tty);
 static void mon2000_open (char *args, int from_tty);
 
-/* This array of registers needs to match the indexes used by GDB. The
+/* This array of registers needs to match the indexes used by GDB.  The
    whole reason this exists is because the various ROM monitors use
    different names than GDB does, and don't support all the registers
-   either. So, typing "info reg sp" becomes an "A7". */
+   either.  So, typing "info reg sp" becomes an "A7".  */
 
 static char *m32r_regnames[] =
   { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -227,9 +227,9 @@ m32r_supply_register (struct regcache *regcache, char *regname,
     return;			/* no match */
 
   if (regno == ACCL_REGNUM)
-    {				/* special handling for 64-bit acc reg */
+    {				/* Special handling for 64-bit acc reg.  */
       monitor_supply_register (regcache, ACCH_REGNUM, val);
-      val = strchr (val, ':');	/* skip past ':' to get 2nd word */
+      val = strchr (val, ':');	/* Skip past ':' to get 2nd word.  */
       if (val != NULL)
 	monitor_supply_register (regcache, ACCL_REGNUM, val + 1);
     }
@@ -243,37 +243,45 @@ m32r_supply_register (struct regcache *regcache, char *regname,
 
 #ifdef SM_REGNUM
 	  /* Stack mode bit */
-	  monitor_supply_register (regcache, SM_REGNUM, (psw & 0x80) ? one : zero);
+	  monitor_supply_register (regcache, SM_REGNUM,
+				   (psw & 0x80) ? one : zero);
 #endif
 #ifdef BSM_REGNUM
 	  /* Backup stack mode bit */
-	  monitor_supply_register (regcache, BSM_REGNUM, (psw & 0x8000) ? one : zero);
+	  monitor_supply_register (regcache, BSM_REGNUM,
+				   (psw & 0x8000) ? one : zero);
 #endif
 #ifdef IE_REGNUM
 	  /* Interrupt enable bit */
-	  monitor_supply_register (regcache, IE_REGNUM, (psw & 0x40) ? one : zero);
+	  monitor_supply_register (regcache, IE_REGNUM,
+				   (psw & 0x40) ? one : zero);
 #endif
 #ifdef BIE_REGNUM
 	  /* Backup interrupt enable bit */
-	  monitor_supply_register (regcache, BIE_REGNUM, (psw & 0x4000) ? one : zero);
+	  monitor_supply_register (regcache, BIE_REGNUM,
+				   (psw & 0x4000) ? one : zero);
 #endif
 #ifdef COND_REGNUM
 	  /* Condition bit (carry etc.) */
-	  monitor_supply_register (regcache, COND_REGNUM, (psw & 0x1) ? one : zero);
+	  monitor_supply_register (regcache, COND_REGNUM,
+				   (psw & 0x1) ? one : zero);
 #endif
 #ifdef CBR_REGNUM
-	  monitor_supply_register (regcache, CBR_REGNUM, (psw & 0x1) ? one : zero);
+	  monitor_supply_register (regcache, CBR_REGNUM,
+				   (psw & 0x1) ? one : zero);
 #endif
 #ifdef BPC_REGNUM
-	  monitor_supply_register (regcache, BPC_REGNUM, zero);	/* KLUDGE:   (???????) */
+	  monitor_supply_register (regcache, BPC_REGNUM,
+				   zero);	/* KLUDGE:   (???????) */
 #endif
 #ifdef BCARRY_REGNUM
-	  monitor_supply_register (regcache, BCARRY_REGNUM, zero);	/* KLUDGE: (??????) */
+	  monitor_supply_register (regcache, BCARRY_REGNUM,
+				   zero);	/* KLUDGE: (??????) */
 #endif
 	}
 
       if (regno == SPI_REGNUM || regno == SPU_REGNUM)
-	{			/* special handling for stack pointer (spu or spi) */
+	{	/* special handling for stack pointer (spu or spi).  */
 	  ULONGEST stackmode, psw;
 	  regcache_cooked_read_unsigned (regcache, PSW_REGNUM, &psw);
 	  stackmode = psw & 0x80;
@@ -331,7 +339,8 @@ init_m32r_cmds (void)
   m32r_cmds.getreg.term = NULL;	/* getreg.term */
   m32r_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
   m32r_cmds.dump_registers = ".reg\r";	/* dump_registers */
-  m32r_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";	/* register_pattern */
+  					/* register_pattern */
+  m32r_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";
   m32r_cmds.supply_register = m32r_supply_register;
   m32r_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   m32r_cmds.load = NULL;	/* download command */
@@ -391,7 +400,8 @@ init_mon2000_cmds (void)
   mon2000_cmds.getreg.term = NULL;	/* getreg.term */
   mon2000_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
   mon2000_cmds.dump_registers = ".reg\r";	/* dump_registers */
-  mon2000_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";	/* register_pattern */
+						/* register_pattern */
+  mon2000_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";
   mon2000_cmds.supply_register = m32r_supply_register;
   mon2000_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   mon2000_cmds.load = NULL;	/* download command */
@@ -422,7 +432,7 @@ m32r_upload_command (char *args, int from_tty)
   struct hostent *hostent;
   struct in_addr inet_addr;
 
-  /* first check to see if there's an ethernet port! */
+  /* First check to see if there's an ethernet port!  */
   monitor_printf ("ust\r");
   resp_len = monitor_expect_prompt (buf, sizeof (buf));
   if (!strchr (buf, ':'))
@@ -430,15 +440,15 @@ m32r_upload_command (char *args, int from_tty)
 
   if (board_addr == 0)
     {
-      /* scan second colon in the output from the "ust" command */
+      /* Scan second colon in the output from the "ust" command.  */
       char *myIPaddress = strchr (strchr (buf, ':') + 1, ':') + 1;
 
       while (isspace (*myIPaddress))
 	myIPaddress++;
 
       if (!strncmp (myIPaddress, "0.0.", 4))	/* empty */
-	error
-	  ("Please use 'set board-address' to set the M32R-EVA board's IP address.");
+	error ("Please use 'set board-address' to "
+	       "set the M32R-EVA board's IP address.");
       if (strchr (myIPaddress, '('))
 	*(strchr (myIPaddress, '(')) = '\0';	/* delete trailing junk */
       board_addr = xstrdup (myIPaddress);
@@ -447,7 +457,7 @@ m32r_upload_command (char *args, int from_tty)
     {
 #ifdef __MINGW32__
       WSADATA wd;
-      /* Winsock initialization. */
+      /* Winsock initialization.  */
       if (WSAStartup (MAKEWORD (1, 1), &wd))
 	error (_("Couldn't initialize WINSOCK."));
 #endif
@@ -468,12 +478,13 @@ m32r_upload_command (char *args, int from_tty)
 #endif
 	    }
 	}
-      if (server_addr == 0)	/* failed? */
-	error
-	  ("Need to know gdb host computer's IP address (use 'set server-address')");
+      if (server_addr == 0)	/* failed?  */
+	error ("Need to know gdb host computer's "
+	       "IP address (use 'set server-address')");
     }
 
-  if (args == 0 || args[0] == 0)	/* no args: upload the current file */
+  if (args == 0 || args[0] == 0)	/* No args: upload the current
+					   file.  */
     args = get_exec_file (1);
 
   if (args[0] != '/' && download_path == 0)
@@ -481,30 +492,30 @@ m32r_upload_command (char *args, int from_tty)
       if (current_directory)
 	download_path = xstrdup (current_directory);
       else
-	error
-	  ("Need to know default download path (use 'set download-path')");
+	error ("Need to know default download "
+	       "path (use 'set download-path')");
     }
 
   gettimeofday (&start_time, NULL);
   monitor_printf ("uhip %s\r", server_addr);
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result?  */
   monitor_printf ("ulip %s\r", board_addr);
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result?  */
   if (args[0] != '/')
     monitor_printf ("up %s\r", download_path);	/* use default path */
   else
     monitor_printf ("up\r");	/* rooted filename/path */
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result?  */
 
   if (strrchr (args, '.') && !strcmp (strrchr (args, '.'), ".srec"))
     monitor_printf ("ul %s\r", args);
   else				/* add ".srec" suffix */
     monitor_printf ("ul %s.srec\r", args);
-  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
+  resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result?  */
 
   if (buf[0] == 0 || strstr (buf, "complete") == 0)
-    error
-      ("Upload file not found: %s.srec\nCheck IP addresses and download path.",
+    error ("Upload file not found: %s.srec\n"
+	   "Check IP addresses and download path.",
        args);
   else
     printf_filtered (" -- Ethernet load complete.\n");
@@ -512,7 +523,7 @@ m32r_upload_command (char *args, int from_tty)
   gettimeofday (&end_time, NULL);
   abfd = bfd_openr (args, 0);
   if (abfd != NULL)
-    {				/* Download is done -- print section statistics */
+    {		/* Download is done -- print section statistics.  */
       if (bfd_check_format (abfd, bfd_object) == 0)
 	{
 	  printf_filtered ("File is not an object file\n");
@@ -534,7 +545,7 @@ m32r_upload_command (char *args, int from_tty)
 	    printf_filtered ("\n");
 	    gdb_flush (gdb_stdout);
 	  }
-      /* Finally, make the PC point at the start address */
+      /* Finally, make the PC point at the start address.  */
       regcache_write_pc (get_current_regcache (),
 			 bfd_get_start_address (abfd));
       printf_filtered ("Start address 0x%lx\n", 
@@ -542,14 +553,14 @@ m32r_upload_command (char *args, int from_tty)
       print_transfer_performance (gdb_stdout, data_count, 0, &start_time,
 				  &end_time);
     }
-  inferior_ptid = null_ptid;	/* No process now */
+  inferior_ptid = null_ptid;	/* No process now.  */
 
   /* This is necessary because many things were based on the PC at the
      time that we attached to the monitor, which is no longer valid
      now that we have loaded new code (and just changed the PC).
      Another way to do this might be to call normal_stop, except that
      the stack may not be valid, and things would get horribly
-     confused... */
+     confused...  */
 
   clear_symtab_users (0);
 }
@@ -560,13 +571,14 @@ extern initialize_file_ftype _initialize_m32r_rom;
 void
 _initialize_m32r_rom (void)
 {
-  /* Initialize m32r RevC monitor target */
+  /* Initialize m32r RevC monitor target.  */
   init_m32r_cmds ();
   init_monitor_ops (&m32r_ops);
 
   m32r_ops.to_shortname = "m32r";
   m32r_ops.to_longname = "m32r monitor";
-  m32r_ops.to_load = m32r_load_gen;	/* monitor lacks a download command */
+  m32r_ops.to_load = m32r_load_gen;	/* Monitor lacks a download
+					   command.  */
   m32r_ops.to_doc = "Debug via the m32r monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
   m32r_ops.to_open = m32r_open;
@@ -578,7 +590,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
 
   mon2000_ops.to_shortname = "mon2000";
   mon2000_ops.to_longname = "Mon2000 monitor";
-  mon2000_ops.to_load = m32r_load_gen;	/* monitor lacks a download command */
+  mon2000_ops.to_load = m32r_load_gen;	/* Monitor lacks a download
+					   command.  */
   mon2000_ops.to_doc = "Debug via the Mon2000 monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
   mon2000_ops.to_open = mon2000_open;
@@ -589,7 +602,8 @@ Set the default path for downloadable SREC files."), _("\
 Show the default path for downloadable SREC files."), _("\
 Determines the default path for downloadable SREC files."),
 			  NULL,
-			  NULL, /* FIXME: i18n: The default path for downloadable SREC files is %s.  */
+			  NULL, /* FIXME: i18n: The default path for
+				   downloadable SREC files is %s.  */
 			  &setlist, &showlist);
 
   add_setshow_string_cmd ("board-address", class_obscure, &board_addr, _("\
@@ -597,7 +611,8 @@ Set IP address for M32R-EVA target board."), _("\
 Show IP address for M32R-EVA target board."), _("\
 Determine the IP address for M32R-EVA target board."),
 			  NULL,
-			  NULL, /* FIXME: i18n: IP address for M32R-EVA target board is %s.  */
+			  NULL, /* FIXME: i18n: IP address for
+				   M32R-EVA target board is %s.  */
 			  &setlist, &showlist);
 
   add_setshow_string_cmd ("server-address", class_obscure, &server_addr, _("\
@@ -605,7 +620,9 @@ Set IP address for download server (GDB's host computer)."), _("\
 Show IP address for download server (GDB's host computer)."), _("\
 Determine the IP address for download server (GDB's host computer)."),
 			  NULL,
-			  NULL, /* FIXME: i18n: IP address for download server (GDB's host computer) is %s.  */
+			  NULL, /* FIXME: i18n: IP address for
+				   download server (GDB's host
+				   computer) is %s.  */
 			  &setlist, &showlist);
 
   add_com ("upload", class_obscure, m32r_upload_command, _("\

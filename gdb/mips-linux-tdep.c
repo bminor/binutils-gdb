@@ -413,7 +413,8 @@ mips64_fill_gregset (const struct regcache *regcache,
       mips64_fill_gregset (regcache, gregsetp, mips_regnum (gdbarch)->lo);
       mips64_fill_gregset (regcache, gregsetp, mips_regnum (gdbarch)->hi);
       mips64_fill_gregset (regcache, gregsetp, mips_regnum (gdbarch)->pc);
-      mips64_fill_gregset (regcache, gregsetp, mips_regnum (gdbarch)->badvaddr);
+      mips64_fill_gregset (regcache, gregsetp,
+			   mips_regnum (gdbarch)->badvaddr);
       mips64_fill_gregset (regcache, gregsetp, MIPS_PS_REGNUM);
       mips64_fill_gregset (regcache, gregsetp,  mips_regnum (gdbarch)->cause);
       mips64_fill_gregset (regcache, gregsetp, MIPS_RESTART_REGNUM);
@@ -538,7 +539,8 @@ mips64_fill_fpregset (const struct regcache *regcache,
 	}
       else
 	{
-	  to = (gdb_byte *) (*fpregsetp + regno - gdbarch_fp0_regnum (gdbarch));
+	  to = (gdb_byte *) (*fpregsetp + regno
+			     - gdbarch_fp0_regnum (gdbarch));
 	  regcache_raw_collect (regcache, regno, to);
 	}
     }

@@ -83,7 +83,7 @@ typedef struct
    Given a section name and size, create a struct reg object
    with a supply_register and a collect_register method.  */
 
-/* Copy register value of REGNUM from regset to regcache.  
+/* Copy register value of REGNUM from regset to regcache.
    If REGNUM is -1, do this for all gp registers in regset.  */
 
 static void
@@ -240,8 +240,8 @@ am33_supply_gregset_method (const struct regset *regset,
   return;
 }
 
-/* Copy fp register value of REGNUM from regset to regcache.  
-   If REGNUM is -1, do this for all fp registers in regset. */
+/* Copy fp register value of REGNUM from regset to regcache.
+   If REGNUM is -1, do this for all fp registers in regset.  */
 
 static void
 am33_supply_fpregset_method (const struct regset *regset, 
@@ -265,7 +265,8 @@ am33_supply_fpregset_method (const struct regset *regset,
   else if (regnum == E_FPCR_REGNUM)
     regcache_raw_supply (regcache, E_FPCR_REGNUM, 
 			 &fpregset->fpcr);
-  else if (E_FS0_REGNUM <= regnum && regnum < E_FS0_REGNUM + MN10300_ELF_NFPREG)
+  else if (E_FS0_REGNUM <= regnum
+	   && regnum < E_FS0_REGNUM + MN10300_ELF_NFPREG)
     regcache_raw_supply (regcache, regnum, 
 			 &fpregset->fpregs[regnum - E_FS0_REGNUM]);
 
@@ -692,7 +693,8 @@ am33_linux_sigframe_cache_init (const struct tramp_frame *self,
                            sc_base + AM33_SIGCONTEXT_PC);
 
   fpubase = get_frame_memory_unsigned (this_frame,
-                                       sc_base + AM33_SIGCONTEXT_FPUCONTEXT, 4);
+                                       sc_base + AM33_SIGCONTEXT_FPUCONTEXT,
+				       4);
   if (fpubase)
     {
       for (i = 0; i < 32; i++)

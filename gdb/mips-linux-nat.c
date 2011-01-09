@@ -182,7 +182,8 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
   if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
     mips_supply_fpregset (regcache, (const mips_elf_fpregset_t *) fpregsetp);
   else
-    mips64_supply_fpregset (regcache, (const mips64_elf_fpregset_t *) fpregsetp);
+    mips64_supply_fpregset (regcache,
+			    (const mips64_elf_fpregset_t *) fpregsetp);
 }
 
 void
@@ -192,7 +193,8 @@ fill_fpregset (const struct regcache *regcache,
   if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
     mips_fill_fpregset (regcache, (mips_elf_fpregset_t *) fpregsetp, regno);
   else
-    mips64_fill_fpregset (regcache, (mips64_elf_fpregset_t *) fpregsetp, regno);
+    mips64_fill_fpregset (regcache,
+			  (mips64_elf_fpregset_t *) fpregsetp, regno);
 }
 
 
@@ -262,7 +264,8 @@ mips64_linux_regsets_fetch_registers (struct regcache *regcache, int regno)
    using PTRACE_SETREGS et al.  */
 
 static void
-mips64_linux_regsets_store_registers (const struct regcache *regcache, int regno)
+mips64_linux_regsets_store_registers (const struct regcache *regcache,
+				      int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int is_fp;
@@ -393,12 +396,12 @@ enum pt_watch_style {
 
 #define MAX_DEBUG_REGISTER 8
 
-/* A value of zero in a watchlo indicates that it is available. */
+/* A value of zero in a watchlo indicates that it is available.  */
 
 struct mips32_watch_regs
 {
   uint32_t watchlo[MAX_DEBUG_REGISTER];
-  /* Lower 16 bits of watchhi. */
+  /* Lower 16 bits of watchhi.  */
   uint16_t watchhi[MAX_DEBUG_REGISTER];
   /* Valid mask and I R W bits.
    * bit 0 -- 1 if W bit is usable.
@@ -710,7 +713,7 @@ mips_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
 
 /* Target to_stopped_by_watchpoint implementation.  Return 1 if
    stopped by watchpoint.  The watchhi R and W bits indicate the watch
-   register triggered. */
+   register triggered.  */
 
 static int
 mips_linux_stopped_by_watchpoint (void)

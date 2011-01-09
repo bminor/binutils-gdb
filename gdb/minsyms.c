@@ -35,7 +35,7 @@
    Even when a file contains enough debugging information to build a full
    symbol table, these minimal symbols are still useful for quickly mapping
    between names and addresses, and vice versa.  They are also sometimes used
-   to figure out what full symbol table entries need to be read in. */
+   to figure out what full symbol table entries need to be read in.  */
 
 
 #include "defs.h"
@@ -205,7 +205,7 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	sfile = p + 1;
     }
 
-  /* For C++, canonicalize the input name. */
+  /* For C++, canonicalize the input name.  */
   modified_name = name;
   if (current_language->la_language == language_cplus)
     {
@@ -267,9 +267,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
                       case mst_solib_trampoline:
 
                         /* If a trampoline symbol is found, we prefer to
-                           keep looking for the *real* symbol. If the
+                           keep looking for the *real* symbol.  If the
                            actual symbol is not found, then we'll use the
-                           trampoline entry. */
+                           trampoline entry.  */
                         if (trampoline_symbol == NULL)
                           trampoline_symbol = msymbol;
                         break;
@@ -489,7 +489,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
          a binary search.  Note that a minimal symbol table always consists
          of at least two symbols, a "real" symbol and the terminating
          "null symbol".  If there are no real symbols, then there is no
-         minimal symbol table at all. */
+         minimal symbol table at all.  */
 
       if (objfile->minimal_symbol_count > 0)
 	{
@@ -515,15 +515,15 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 	     terminates.  In essence, we are iterating the test interval
 	     down until the pc value is pushed out of it from the high end.
 
-	     Warning: this code is trickier than it would appear at first. */
+	     Warning: this code is trickier than it would appear at first.  */
 
-	  /* Should also require that pc is <= end of objfile.  FIXME! */
+	  /* Should also require that pc is <= end of objfile.  FIXME!  */
 	  if (pc >= SYMBOL_VALUE_ADDRESS (&msymbol[lo]))
 	    {
 	      while (SYMBOL_VALUE_ADDRESS (&msymbol[hi]) > pc)
 		{
-		  /* pc is still strictly less than highest address */
-		  /* Note "new" will always be >= lo */
+		  /* pc is still strictly less than highest address.  */
+		  /* Note "new" will always be >= lo.  */
 		  new = (lo + hi) / 2;
 		  if ((SYMBOL_VALUE_ADDRESS (&msymbol[new]) >= pc) ||
 		      (lo == new))
@@ -662,7 +662,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 
 	      /* The minimal symbol indexed by hi now is the best one in this
 	         objfile's minimal symbol table.  See if it is the best one
-	         overall. */
+	         overall.  */
 
 	      if (hi >= 0
 		  && ((best_symbol == NULL) ||
@@ -693,7 +693,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, struct obj_section *section)
 }
 
 /* Backward compatibility: search through the minimal symbol table 
-   for a matching PC (no section given) */
+   for a matching PC (no section given).  */
 
 struct minimal_symbol *
 lookup_minimal_symbol_by_pc (CORE_ADDR pc)
@@ -733,7 +733,7 @@ lookup_minimal_symbol_and_objfile (const char *name,
 }
 
 
-/* Return leading symbol character for a BFD. If BFD is NULL,
+/* Return leading symbol character for a BFD.  If BFD is NULL,
    return the leading symbol character from the main objfile.  */
 
 static int get_symbol_leading_char (bfd *);
@@ -750,7 +750,7 @@ get_symbol_leading_char (bfd *abfd)
 
 /* Prepare to start collecting minimal symbols.  Note that presetting
    msym_bunch_index to BUNCH_SIZE causes the first call to save a minimal
-   symbol to allocate the memory for the first bunch. */
+   symbol to allocate the memory for the first bunch.  */
 
 void
 init_minimal_symbol_collection (void)
@@ -816,7 +816,7 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
     return (NULL);
 
   /* It's safe to strip the leading char here once, since the name
-     is also stored stripped in the minimal symbol table. */
+     is also stored stripped in the minimal symbol table.  */
   if (name[0] == get_symbol_leading_char (objfile->obfd))
     {
       ++name;
@@ -858,7 +858,7 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
   MSYMBOL_SIZE (msymbol) = 0;
 
   /* The hash pointers must be cleared! If they're not,
-     add_minsym_to_hash_table will NOT add this msymbol to the hash table. */
+     add_minsym_to_hash_table will NOT add this msymbol to the hash table.  */
   msymbol->hash_next = NULL;
   msymbol->demangled_hash_next = NULL;
 
@@ -884,7 +884,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 }
 
 /* Compare two minimal symbols by address and return a signed result based
-   on unsigned comparisons, so that we sort into unsigned numeric order.  
+   on unsigned comparisons, so that we sort into unsigned numeric order.
    Within groups with the same address, sort by name.  */
 
 static int
@@ -898,11 +898,11 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
 
   if (SYMBOL_VALUE_ADDRESS (fn1) < SYMBOL_VALUE_ADDRESS (fn2))
     {
-      return (-1);		/* addr 1 is less than addr 2 */
+      return (-1);		/* addr 1 is less than addr 2.  */
     }
   else if (SYMBOL_VALUE_ADDRESS (fn1) > SYMBOL_VALUE_ADDRESS (fn2))
     {
-      return (1);		/* addr 1 is greater than addr 2 */
+      return (1);		/* addr 1 is greater than addr 2.  */
     }
   else
     /* addrs are equal: sort by name */
@@ -913,11 +913,11 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
       if (name1 && name2)	/* both have names */
 	return strcmp (name1, name2);
       else if (name2)
-	return 1;		/* fn1 has no name, so it is "less" */
-      else if (name1)		/* fn2 has no name, so it is "less" */
+	return 1;		/* fn1 has no name, so it is "less".  */
+      else if (name1)		/* fn2 has no name, so it is "less".  */
 	return -1;
       else
-	return (0);		/* neither has a name, so they're equal. */
+	return (0);		/* Neither has a name, so they're equal.  */
     }
 }
 
@@ -927,7 +927,7 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
 
    FIXME:  We could allocate the minimal symbol bunches on their own
    obstack and then simply blow the obstack away when we are done with
-   it.  Is it worth the extra trouble though? */
+   it.  Is it worth the extra trouble though?  */
 
 static void
 do_discard_minimal_symbols_cleanup (void *arg)
@@ -1020,7 +1020,7 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 
 /* Build (or rebuild) the minimal symbol hash tables.  This is necessary
    after compacting or sorting the table since the entries move around
-   thus causing the internal minimal_symbol pointers to become jumbled. */
+   thus causing the internal minimal_symbol pointers to become jumbled.  */
   
 static void
 build_minimal_symbol_hash_tables (struct objfile *objfile)
@@ -1028,14 +1028,14 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
   int i;
   struct minimal_symbol *msym;
 
-  /* Clear the hash tables. */
+  /* Clear the hash tables.  */
   for (i = 0; i < MINIMAL_SYMBOL_HASH_SIZE; i++)
     {
       objfile->msymbol_hash[i] = 0;
       objfile->msymbol_demangled_hash[i] = 0;
     }
 
-  /* Now, (re)insert the actual entries. */
+  /* Now, (re)insert the actual entries.  */
   for (i = objfile->minimal_symbol_count, msym = objfile->msymbols;
        i > 0;
        i--, msym++)
@@ -1071,7 +1071,7 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
    to demangle it, and if successful, record it as a language_cplus symbol
    and cache the demangled form on the symbol obstack.  Symbols which don't
    demangle are marked as language_unknown symbols, which inhibits future
-   attempts to demangle them if we later add more minimal symbols. */
+   attempts to demangle them if we later add more minimal symbols.  */
 
 void
 install_minimal_symbols (struct objfile *objfile)
@@ -1105,7 +1105,7 @@ install_minimal_symbols (struct objfile *objfile)
          to the new contiguous array of symbols.  Note that we start with the
          current, possibly partially filled bunch (thus we use the current
          msym_bunch_index for the first bunch we copy over), and thereafter
-         each bunch is full. */
+         each bunch is full.  */
 
       mcount = objfile->minimal_symbol_count;
 
@@ -1137,7 +1137,7 @@ install_minimal_symbols (struct objfile *objfile)
          to some symbol in the middle of it.  Zero out the fields in the
          "null symbol" allocated at the end of the array.  Note that the
          symbol count does *not* include this null symbol, which is why it
-         is indexed by mcount and not mcount-1. */
+         is indexed by mcount and not mcount-1.  */
 
       SYMBOL_LINKAGE_NAME (&msymbols[mcount]) = NULL;
       SYMBOL_VALUE_ADDRESS (&msymbols[mcount]) = 0;
@@ -1180,7 +1180,7 @@ install_minimal_symbols (struct objfile *objfile)
       /* Now build the hash tables; we can't do this incrementally
          at an earlier point since we weren't finished with the obstack
 	 yet.  (And if the msymbol obstack gets moved, all the internal
-	 pointers to other msymbols need to be adjusted.) */
+	 pointers to other msymbols need to be adjusted.)  */
       build_minimal_symbol_hash_tables (objfile);
     }
 }
@@ -1221,7 +1221,7 @@ lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 
    We may fail to find the right function if a function with the
    same name is defined in more than one shared library, but this
-   is considered bad programming style. We could return 0 if we find
+   is considered bad programming style.  We could return 0 if we find
    a duplicate function in case this matters someday.  */
 
 CORE_ADDR

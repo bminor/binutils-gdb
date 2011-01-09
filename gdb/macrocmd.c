@@ -299,7 +299,7 @@ macro_define_command (char *exp, int from_tty)
 	    {
 	      alloced *= 2;
 	      argv = (char **) xrealloc (argv, alloced * sizeof (char *));
-	      /* Must update new_macro as well... */
+	      /* Must update new_macro as well...  */
 	      new_macro.argv = (const char * const *) argv;
 	    }
 	  argv[new_macro.argc] = extract_identifier (&exp, 1);

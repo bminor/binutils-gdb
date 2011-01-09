@@ -206,7 +206,7 @@ set_token (struct macro_buffer *tok, char *start, char *end)
   init_shared_buffer (tok, start, end - start);
   tok->last_token = 0;
 
-  /* Presumed; get_identifier may overwrite this. */
+  /* Presumed; get_identifier may overwrite this.  */
   tok->is_identifier = 0;
 }
 
@@ -704,7 +704,7 @@ struct macro_name_list {
    particular macro, and otherwise delegates the decision to another
    function/baton pair.  But that makes the linked list of excluded
    macros chained through untyped baton pointers, which will make it
-   harder to debug.  :( */
+   harder to debug.  :(  */
 static int
 currently_rescanning (struct macro_name_list *list, const char *name)
 {
@@ -1141,7 +1141,7 @@ substitute_args (struct macro_buffer *dest,
    its expansion to DEST.  SRC is the input text following the ID
    token.  We are currently rescanning the expansions of the macros
    named in NO_LOOP; don't re-expand them.  Use LOOKUP_FUNC and
-   LOOKUP_BATON to find definitions for any nested macro references.  
+   LOOKUP_BATON to find definitions for any nested macro references.
 
    Return 1 if we decided to expand it, zero otherwise.  (If it's a
    function-like macro name that isn't followed by an argument list,

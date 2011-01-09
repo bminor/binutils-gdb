@@ -92,7 +92,7 @@ mipscoff_symfile_read (struct objfile *objfile, int symfile_flags)
   read_alphacoff_dynamic_symtab (objfile->section_offsets, objfile);
 
   /* Install any minimal symbols that have been collected as the current
-     minimal symbols for this objfile. */
+     minimal symbols for this objfile.  */
 
   install_minimal_symbols (objfile);
   do_cleanups (back_to);
@@ -110,7 +110,7 @@ mipscoff_symfile_finish (struct objfile *objfile)
    standard COFF section.  The ELF format for the symbols differs from
    the format defined in elf/external.h.  It seems that a normal ELF
    32-bit format is used, and the representation only changes because
-   longs are 64-bit on the alpha. In addition, the handling of
+   longs are 64-bit on the alpha.  In addition, the handling of
    text/data section indices for symbols is different from the ELF
    ABI.  As the BFD linker currently does not support dynamic linking
    on the alpha, there seems to be no reason to pollute BFD with
@@ -341,7 +341,7 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
 	}
       else
 	{
-	  /* Symbols defined in the executable itself. We only care
+	  /* Symbols defined in the executable itself.  We only care
 	     about them if this is a stripped executable, otherwise
 	     they have been retrieved from the normal symbol table
 	     already.  */
@@ -393,15 +393,14 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
 static const struct sym_fns ecoff_sym_fns =
 {
   bfd_target_ecoff_flavour,
-  mipscoff_new_init,		/* sym_new_init: init anything gbl to entire symtab */
-  mipscoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
-  mipscoff_symfile_read,	/* sym_read: read a symbol file into symtab */
-  mipscoff_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,	/* sym_offsets: dummy FIXME til implem sym reloc */
-  default_symfile_segments,	/* sym_segments: Get segment information from
-				   a file.  */
-  NULL,                         /* sym_read_linetable */
-  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  mipscoff_new_init,		/* init anything gbl to entire symtab */
+  mipscoff_symfile_init,	/* read initial info, setup for sym_read() */
+  mipscoff_symfile_read,	/* read a symbol file into symtab */
+  mipscoff_symfile_finish,	/* finished with file, cleanup */
+  default_symfile_offsets,	/* dummy FIXME til implem sym reloc */
+  default_symfile_segments,	/* Get segment information from a file.  */
+  NULL,
+  default_symfile_relocate,	/* Relocate a debug section.  */
   &psym_functions
 };
 

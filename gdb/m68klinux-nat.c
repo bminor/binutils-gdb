@@ -50,7 +50,7 @@
 
 #include "target.h"
 
-/* Prototypes for supply_gregset etc. */
+/* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
 /* This table must line up with gdbarch_register_name in "m68k-tdep.c".  */
@@ -106,10 +106,11 @@ fetch_register (struct regcache *regcache, int regno)
   char buf[MAX_REGISTER_SIZE];
   int tid;
 
-  /* Overload thread id onto process id */
+  /* Overload thread id onto process id.  */
   tid = TIDGET (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
+    tid = PIDGET (inferior_ptid);	/* no thread id, just use
+					   process id.  */
 
   regaddr = 4 * regmap[regno];
   for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
@@ -127,7 +128,7 @@ fetch_register (struct regcache *regcache, int regno)
 
 /* Fetch register values from the inferior.
    If REGNO is negative, do this for all registers.
-   Otherwise, REGNO specifies which register (so we can save time). */
+   Otherwise, REGNO specifies which register (so we can save time).  */
 
 static void
 old_fetch_inferior_registers (struct regcache *regcache, int regno)
@@ -147,7 +148,7 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
     }
 }
 
-/* Store one register. */
+/* Store one register.  */
 
 static void
 store_register (const struct regcache *regcache, int regno)
@@ -158,17 +159,18 @@ store_register (const struct regcache *regcache, int regno)
   int tid;
   char buf[MAX_REGISTER_SIZE];
 
-  /* Overload thread id onto process id */
+  /* Overload thread id onto process id.  */
   tid = TIDGET (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
+    tid = PIDGET (inferior_ptid);	/* no thread id, just use
+					   process id.  */
 
   regaddr = 4 * regmap[regno];
 
-  /* Put the contents of regno into a local buffer */
+  /* Put the contents of regno into a local buffer.  */
   regcache_raw_collect (regcache, regno, buf);
 
-  /* Store the local buffer into the inferior a chunk at the time. */
+  /* Store the local buffer into the inferior a chunk at the time.  */
   for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
     {
       errno = 0;
@@ -205,7 +207,7 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
 
 /*  Given a pointer to a general register set in /proc format
    (elf_gregset_t *), unpack the register contents and supply
-   them as gdb's idea of the current register values. */
+   them as gdb's idea of the current register values.  */
 
 void
 supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
@@ -284,8 +286,13 @@ store_regs (const struct regcache *regcache, int tid, int regno)
 
 #else
 
-static void fetch_regs (struct regcache *regcache, int tid) {}
-static void store_regs (const struct regcache *regcache, int tid, int regno) {}
+static void fetch_regs (struct regcache *regcache, int tid)
+{
+}
+
+static void store_regs (const struct regcache *regcache, int tid, int regno)
+{
+}
 
 #endif
 
@@ -375,8 +382,13 @@ store_fpregs (const struct regcache *regcache, int tid, int regno)
 
 #else
 
-static void fetch_fpregs (struct regcache *regcache, int tid) {}
-static void store_fpregs (const struct regcache *regcache, int tid, int regno) {}
+static void fetch_fpregs (struct regcache *regcache, int tid)
+{
+}
+
+static void store_fpregs (const struct regcache *regcache, int tid, int regno)
+{
+}
 
 #endif
 
@@ -403,7 +415,7 @@ m68k_linux_fetch_inferior_registers (struct target_ops *ops,
   /* GNU/Linux LWP ID's are process ID's.  */
   tid = TIDGET (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);		/* Not a threaded program.  */
+    tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the

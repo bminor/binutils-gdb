@@ -323,7 +323,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  unsigned int i = 0;	/* Number of characters printed */
+  unsigned int i = 0;	/* Number of characters printed.  */
   unsigned len;
   struct type *elttype;
   unsigned eltlen;
@@ -354,7 +354,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		{
 		  unsigned int temp_len;
 
-		  /* Look for a NULL char. */
+		  /* Look for a NULL char.  */
 		  for (temp_len = 0;
 		       (valaddr + embedded_offset)[temp_len]
 			 && temp_len < len && temp_len < options->print_max;
@@ -371,7 +371,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      fprintf_filtered (stream, "{");
 	      val_print_array_elements (type, valaddr + embedded_offset,
-					address, stream, recurse, original_value,
+					address, stream,
+					recurse, original_value,
 					options, 0);
 	      fprintf_filtered (stream, "}");
 	    }
