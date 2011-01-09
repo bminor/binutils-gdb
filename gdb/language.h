@@ -24,7 +24,7 @@
 #if !defined (LANGUAGE_H)
 #define LANGUAGE_H 1
 
-/* Forward decls for prototypes */
+/* Forward decls for prototypes.  */
 struct value;
 struct objfile;
 struct frame_info;
@@ -32,7 +32,7 @@ struct expression;
 struct ui_file;
 struct value_print_options;
 
-#define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims */
+#define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
 /* range_mode ==
    range_mode_auto:   range_check set automatically to default of language.
@@ -56,8 +56,8 @@ extern enum range_check
 range_check;
 
 /* type_mode ==
-   type_mode_auto:   type_check set automatically to default of language
-   type_mode_manual: type_check set manually by user. */
+   type_mode_auto:   type_check set automatically to default of language.
+   type_mode_manual: type_check set manually by user.  */
 
 extern enum type_mode
   {
@@ -77,7 +77,7 @@ extern enum type_check
 type_check;
 
 /* case_mode ==
-   case_mode_auto:   case_sensitivity set upon selection of scope 
+   case_mode_auto:   case_sensitivity set upon selection of scope.
    case_mode_manual: case_sensitivity set only by user.  */
 
 extern enum case_mode
@@ -87,8 +87,8 @@ extern enum case_mode
 case_mode;
 
 /* array_ordering ==
-   array_row_major:     Arrays are in row major order
-   array_column_major:  Arrays are in column major order.*/
+   array_row_major:     Arrays are in row major order.
+   array_column_major:  Arrays are in column major order.  */
 
 extern enum array_ordering
   {
@@ -98,8 +98,8 @@ array_ordering;
 
 
 /* case_sensitivity ==
-   case_sensitive_on:   Case sensitivity in name matching is used
-   case_sensitive_off:  Case sensitivity in name matching is not used  */
+   case_sensitive_on:   Case sensitivity in name matching is used.
+   case_sensitive_off:  Case sensitivity in name matching is not used.  */
 
 extern enum case_sensitivity
   {
@@ -109,8 +109,8 @@ case_sensitivity;
 
 
 /* macro_expansion ==
-   macro_expansion_no:  No macro expansion is available
-   macro_expansion_c:   C-like macro expansion is available  */
+   macro_expansion_no:  No macro expansion is available.
+   macro_expansion_c:   C-like macro expansion is available.  */
 
 enum macro_expansion
   {
@@ -127,7 +127,7 @@ struct language_arch_info
      expressions, regardless of whether the program being debugged
      actually defines such a type.  */
   struct type **primitive_type_vector;
-  /* Type of elements of strings. */
+  /* Type of elements of strings.  */
   struct type *string_char_type;
 
   /* Symbol name of type to use as boolean type, if defined.  */
@@ -140,41 +140,41 @@ struct language_arch_info
 
 struct language_defn
   {
-    /* Name of the language */
+    /* Name of the language.  */
 
     char *la_name;
 
-    /* its symtab language-enum (defs.h) */
+    /* its symtab language-enum (defs.h).  */
 
     enum language la_language;
 
-    /* Default range checking */
+    /* Default range checking.  */
 
     enum range_check la_range_check;
 
-    /* Default type checking */
+    /* Default type checking.  */
 
     enum type_check la_type_check;
 
-    /* Default case sensitivity */
+    /* Default case sensitivity.  */
     enum case_sensitivity la_case_sensitivity;
 
-    /* Multi-dimensional array ordering */
+    /* Multi-dimensional array ordering.  */
     enum array_ordering la_array_ordering;
 
     /* Style of macro expansion, if any, supported by this language.  */
     enum macro_expansion la_macro_expansion;
 
     /* Definitions related to expression printing, prefixifying, and
-       dumping */
+       dumping.  */
 
     const struct exp_descriptor *la_exp_desc;
 
-    /* Parser function. */
+    /* Parser function.  */
 
     int (*la_parser) (void);
 
-    /* Parser error function */
+    /* Parser error function.  */
 
     void (*la_error) (char *);
 
@@ -197,7 +197,7 @@ struct language_defn
     void (*la_emitchar) (int ch, struct type *chtype,
 			 struct ui_file * stream, int quoter);
 
-    /* Print a type using syntax appropriate for this language. */
+    /* Print a type using syntax appropriate for this language.  */
 
     void (*la_print_type) (struct type *, const char *, struct ui_file *, int,
 			   int);
@@ -237,7 +237,7 @@ struct language_defn
 			 const struct value *val,
 			 const struct value_print_options *options);
 
-    /* Print a top-level value using syntax appropriate for this language. */
+    /* Print a top-level value using syntax appropriate for this language.  */
 
     int (*la_value_print) (struct value *, struct ui_file *,
 			   const struct value_print_options *);
@@ -272,16 +272,16 @@ struct language_defn
     /* Return class name of a mangled method name or NULL.  */
     char *(*la_class_name_from_physname) (const char *physname);
 
-    /* Table for printing expressions */
+    /* Table for printing expressions.  */
 
     const struct op_print *la_op_print_tab;
 
     /* Zero if the language has first-class arrays.  True if there are no
-       array values, and array objects decay to pointers, as in C. */
+       array values, and array objects decay to pointers, as in C.  */
 
     char c_style_arrays;
 
-    /* Index to use for extracting the first element of a string. */
+    /* Index to use for extracting the first element of a string.  */
     char string_lower_bound;
 
     /* The list of characters forming word boundaries.  */
@@ -318,8 +318,8 @@ struct language_defn
     void (*la_get_string) (struct value *value, gdb_byte **buffer, int *length,
 			   struct type **chartype, const char **charset);
 
-    /* Add fields above this point, so the magic number is always last. */
-    /* Magic number for compat checking */
+    /* Add fields above this point, so the magic number is always last.  */
+    /* Magic number for compat checking.  */
 
     long la_magic;
 
@@ -375,14 +375,14 @@ struct type *language_lookup_primitive_type_by_name (const struct language_defn 
 /* These macros define the behaviour of the expression 
    evaluator.  */
 
-/* Should we strictly type check expressions? */
+/* Should we strictly type check expressions?  */
 #define STRICT_TYPE (type_check != type_check_off)
 
-/* Should we range check values against the domain of their type? */
+/* Should we range check values against the domain of their type?  */
 #define RANGE_CHECK (range_check != range_check_off)
 
-/* "cast" really means conversion */
-/* FIXME -- should be a setting in language_defn */
+/* "cast" really means conversion.  */
+/* FIXME -- should be a setting in language_defn.  */
 #define CAST_IS_CONVERSION(LANG) ((LANG)->la_language == language_c  || \
 				  (LANG)->la_language == language_cplus || \
 				  (LANG)->la_language == language_objc)
@@ -395,7 +395,7 @@ extern enum language set_language (enum language);
 /* This page contains functions that return things that are
    specific to languages.  Each of these functions is based on
    the current setting of working_lang, which the user sets
-   with the "set language" command. */
+   with the "set language" command.  */
 
 #define LA_PRINT_TYPE(type,varstring,stream,show,level) \
   (current_language->la_print_type(type,varstring,stream,show,level))
@@ -426,7 +426,7 @@ extern enum language set_language (enum language);
    or needs to be printed in another representation.  For example,
    in C the literal form of the character with octal value 141 is 'a'
    and the "other representation" is '\141'.  The "other representation"
-   is program language dependent. */
+   is program language dependent.  */
 
 #define PRINT_LITERAL_FORM(c)		\
   ((c) >= 0x20				\
@@ -455,8 +455,8 @@ extern int pointer_type (struct type *);
 
 extern int structured_type (struct type *);
 
-/* Checks Binary and Unary operations for semantic type correctness */
-/* FIXME:  Does not appear to be used */
+/* Checks Binary and Unary operations for semantic type correctness.  */
+/* FIXME:  Does not appear to be used.  */
 #define unop_type_check(v,o) binop_type_check((v),NULL,(o))
 
 extern void binop_type_check (struct value *, struct value *, int);
@@ -485,7 +485,7 @@ extern void add_language (const struct language_defn *);
 
 extern enum language get_frame_language (void);	/* In stack.c */
 
-/* Check for a language-specific trampoline. */
+/* Check for a language-specific trampoline.  */
 
 extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
 

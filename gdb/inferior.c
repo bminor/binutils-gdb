@@ -830,7 +830,7 @@ add_inferior_command (char *args, int from_tty)
       if (exec != NULL)
 	{
 	  /* Switch over temporarily, while reading executable and
-	     symbols.q  */
+	     symbols.q.  */
 	  set_current_program_space (inf->pspace);
 	  set_current_inferior (inf);
 	  switch_to_thread (null_ptid);

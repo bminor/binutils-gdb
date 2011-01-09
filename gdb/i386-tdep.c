@@ -445,17 +445,17 @@ i386_skip_prefixes (gdb_byte *insn, size_t max_len)
 static int
 i386_absolute_jmp_p (const gdb_byte *insn)
 {
-  /* jmp far (absolute address in operand) */
+  /* jmp far (absolute address in operand).  */
   if (insn[0] == 0xea)
     return 1;
 
   if (insn[0] == 0xff)
     {
-      /* jump near, absolute indirect (/4) */
+      /* jump near, absolute indirect (/4).  */
       if ((insn[1] & 0x38) == 0x20)
         return 1;
 
-      /* jump far, absolute indirect (/5) */
+      /* jump far, absolute indirect (/5).  */
       if ((insn[1] & 0x38) == 0x28)
         return 1;
     }
@@ -466,17 +466,17 @@ i386_absolute_jmp_p (const gdb_byte *insn)
 static int
 i386_absolute_call_p (const gdb_byte *insn)
 {
-  /* call far, absolute */
+  /* call far, absolute.  */
   if (insn[0] == 0x9a)
     return 1;
 
   if (insn[0] == 0xff)
     {
-      /* Call near, absolute indirect (/2) */
+      /* Call near, absolute indirect (/2).  */
       if ((insn[1] & 0x38) == 0x10)
         return 1;
 
-      /* Call far, absolute indirect (/3) */
+      /* Call far, absolute indirect (/3).  */
       if ((insn[1] & 0x38) == 0x18)
         return 1;
     }
@@ -489,9 +489,9 @@ i386_ret_p (const gdb_byte *insn)
 {
   switch (insn[0])
     {
-    case 0xc2: /* ret near, pop N bytes */
+    case 0xc2: /* ret near, pop N bytes.  */
     case 0xc3: /* ret near */
-    case 0xca: /* ret far, pop N bytes */
+    case 0xca: /* ret far, pop N bytes.  */
     case 0xcb: /* ret far */
     case 0xcf: /* iret */
       return 1;
@@ -507,7 +507,7 @@ i386_call_p (const gdb_byte *insn)
   if (i386_absolute_call_p (insn))
     return 1;
 
-  /* call near, relative */
+  /* call near, relative.  */
   if (insn[0] == 0xe8)
     return 1;
 
@@ -736,7 +736,7 @@ i386_relocate_instruction (struct gdbarch *gdbarch,
 
       /* Where "ret" in the original code will return to.  */
       ret_addr = oldloc + insn_length;
-      push_buf[0] = 0x68; /* pushq $... */
+      push_buf[0] = 0x68; /* pushq $...  */
       memcpy (&push_buf[1], &ret_addr, 4);
       /* Push the push.  */
       append_insns (to, 5, push_buf);
@@ -1157,7 +1157,7 @@ i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
 
 struct i386_insn i386_frame_setup_skip_insns[] =
 {
-  /* Check for `movb imm8, r' and `movl imm32, r'. 
+  /* Check for `movb imm8, r' and `movl imm32, r'.
     
      ??? Should we handle 16-bit operand-sizes here?  */
 
@@ -2171,7 +2171,8 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else
 	internal_error (__FILE__, __LINE__,
-			_("Cannot extract return value of %d bytes long."), len);
+			_("Cannot extract return value of %d bytes long."),
+			len);
     }
 }
 
@@ -2467,7 +2468,7 @@ i386_mmx_type (struct gdbarch *gdbarch)
 }
 
 /* Return the GDB type object for the "standard" data type of data in
-   register REGNUM. */
+   register REGNUM.  */
 
 static struct type *
 i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
@@ -2531,7 +2532,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	{
 	  regnum -= tdep->ymm0_regnum;
 
-	  /* Extract (always little endian).  Read lower 128bits. */
+	  /* Extract (always little endian).  Read lower 128bits.  */
 	  regcache_raw_read (regcache,
 			     I387_XMM0_REGNUM (tdep) + regnum,
 			     raw_buf);
@@ -2671,7 +2672,8 @@ i386_next_regnum (int regnum)
    needs any special handling.  */
 
 static int
-i386_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
+i386_convert_register_p (struct gdbarch *gdbarch,
+			 int regnum, struct type *type)
 {
   int len = TYPE_LENGTH (type);
 
@@ -3235,7 +3237,7 @@ struct i386_record_s
 };
 
 /* Parse "modrm" part in current memory address that irp->addr point to
-   Return -1 if something wrong. */
+   Return -1 if something wrong.  */
 
 static int
 i386_record_modrm (struct i386_record_s *irp)
@@ -3260,7 +3262,7 @@ i386_record_modrm (struct i386_record_s *irp)
 
 /* Get the memory address that current instruction  write to and set it to
    the argument "addr".
-   Return -1 if something wrong. */
+   Return -1 if something wrong.  */
 
 static int
 i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
@@ -3493,7 +3495,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 
 /* Record the value of the memory that willbe changed in current instruction
    to "record_arch_list".
-   Return -1 if something wrong. */
+   Return -1 if something wrong.  */
 
 static int
 i386_record_lea_modrm (struct i386_record_s *irp)
@@ -3531,7 +3533,7 @@ Do you want to stop the program?"),
 }
 
 /* Record the push operation to "record_arch_list".
-   Return -1 if something wrong. */
+   Return -1 if something wrong.  */
 
 static int
 i386_record_push (struct i386_record_s *irp, int size)
@@ -3556,9 +3558,9 @@ i386_record_push (struct i386_record_s *irp, int size)
 #define I386_SAVE_FPU_ENV               0xfffe
 #define I386_SAVE_FPU_ENV_REG_STACK     0xffff
 
-/* Record the value of floating point registers which will be changed by the
-   current instruction to "record_arch_list".  Return -1 if something is wrong.
-*/
+/* Record the value of floating point registers which will be changed
+   by the current instruction to "record_arch_list".  Return -1 if
+   something is wrong.  */
 
 static int i386_record_floats (struct gdbarch *gdbarch,
                                struct i386_record_s *ir,
@@ -3620,7 +3622,7 @@ static int i386_record_floats (struct gdbarch *gdbarch,
 
 /* Parse the current instruction and record the values of the registers and
    memory that will be changed in current instruction to "record_arch_list".
-   Return -1 if something wrong. */
+   Return -1 if something wrong.  */
 
 #define I386_RECORD_ARCH_LIST_ADD_REG(regnum) \
     record_arch_list_add_reg (ir.regcache, ir.regmap[(regnum)])
@@ -3753,7 +3755,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   else if (ir.regmap[X86_RECORD_R8_REGNUM])
     ir.aflag = 2;
 
-  /* now check op code */
+  /* Now check op code.  */
   opcode = (uint32_t) opcode8;
  reswitch:
   switch (opcode)
@@ -4636,7 +4638,7 @@ Do you want to stop the program?"),
       ir.reg |= ((opcode & 7) << 3);
       if (ir.mod != 3)
 	{
-	  /* Memory. */
+	  /* Memory.  */
 	  uint64_t addr64;
 
 	  if (i386_record_lea_modrm_addr (&ir, &addr64))
@@ -6456,7 +6458,8 @@ reswitch_prefix_add:
                   || opcode == 0x0f17 || opcode == 0x660f17)
                 goto no_support;
               ir.rm |= ir.rex_b;
-              if (!i386_xmm_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+              if (!i386_xmm_regnum_p (gdbarch,
+				      I387_XMM0_REGNUM (tdep) + ir.rm))
                 goto no_support;
               record_arch_list_add_reg (ir.regcache,
                                         I387_XMM0_REGNUM (tdep) + ir.rm);
@@ -6688,7 +6691,8 @@ reswitch_prefix_add:
           if (ir.mod == 3)
             {
               ir.rm |= ir.rex_b;
-              if (!i386_xmm_regnum_p (gdbarch, I387_XMM0_REGNUM (tdep) + ir.rm))
+              if (!i386_xmm_regnum_p (gdbarch,
+				      I387_XMM0_REGNUM (tdep) + ir.rm))
                 goto no_support;
               record_arch_list_add_reg (ir.regcache,
                                         I387_XMM0_REGNUM (tdep) + ir.rm);
@@ -6791,7 +6795,8 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
       /* Return a bit of target-specific detail to add to the caller's
 	 generic failure message.  */
       if (msg)
-	*msg = xstrprintf (_("; instruction is only %d bytes long, need at least %d bytes for the jump"),
+	*msg = xstrprintf (_("; instruction is only %d bytes long, "
+			     "need at least %d bytes for the jump"),
 			   len, jumplen);
       return 0;
     }

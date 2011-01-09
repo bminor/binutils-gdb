@@ -57,7 +57,7 @@
    yacc generated parsers in gdb.  Note that these are only the variables
    produced by yacc.  If other parser generators (bison, byacc, etc) produce
    additional global names that conflict at link time, then those parser
-   generators need to be fixed instead of adding those names to this list. */
+   generators need to be fixed instead of adding those names to this list.  */
 
 #define	yymaxdepth java_maxdepth
 #define	yyparse	java_parse
@@ -337,7 +337,7 @@ QualifiedName:
 		{ $$.length = $1.length + $3.length + 1;
 		  if ($1.ptr + $1.length + 1 == $3.ptr
 		      && $1.ptr[$1.length] == '.')
-		    $$.ptr = $1.ptr;  /* Optimization. */
+		    $$.ptr = $1.ptr;  /* Optimization.  */
 		  else
 		    {
 		      $$.ptr = (char *) malloc ($$.length + 1);
@@ -495,7 +495,7 @@ PostfixExpression:
 |	Name
 		{ push_expression_name ($1); }
 |	VARIABLE
-		/* Already written by write_dollar_variable. */
+		/* Already written by write_dollar_variable.  */
 |	PostIncrementExpression
 |	PostDecrementExpression
 ;
@@ -555,7 +555,7 @@ CastExpression:
 		    error (_("Invalid cast expression"));
 		  type = expout->elts[base+1].type;
 		  /* Remove the 'Expression' and slide the
-		     UnaryExpressionNotPlusMinus down to replace it. */
+		     UnaryExpressionNotPlusMinus down to replace it.  */
 		  for (i = 0;  i < last_exp_size;  i++)
 		    expout->elts[base + i] = expout->elts[base + i + 3];
 		  expout_ptr -= 3;
@@ -673,7 +673,7 @@ LeftHandSide:
 	ForcedName
 		{ push_expression_name ($1); }
 |	VARIABLE
-		/* Already written by write_dollar_variable. */
+		/* Already written by write_dollar_variable.  */
 |	FieldAccess
 |	ArrayAccess
 ;
@@ -763,7 +763,7 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
       }
 
   c = p[len-1];
-  /* A paranoid calculation of (1<<64)-1. */
+  /* A paranoid calculation of (1<<64)-1.  */
   limit = (ULONGEST)0xffffffff;
   limit = ((limit << 16) << 16) | limit;
   if (c == 'l' || c == 'L')
@@ -896,7 +896,7 @@ yylex (void)
     case '\'':
       /* We either have a character constant ('0' or '\177' for example)
 	 or we have a quoted symbol reference ('foo(int,int)' in C++
-	 for example). */
+	 for example).  */
       lexptr++;
       c = *lexptr++;
       if (c == '\\')
@@ -945,7 +945,7 @@ yylex (void)
     case '.':
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
-	goto symbol;		/* Nope, must be a symbol. */
+	goto symbol;		/* Nope, must be a symbol.  */
       /* FALL THRU into number case.  */
 
     case '0':
@@ -1050,7 +1050,7 @@ yylex (void)
 
       do {
 	/* Grow the static temp buffer if necessary, including allocating
-	   the first one on demand. */
+	   the first one on demand.  */
 	if (tempbufindex + 1 >= tempbufsize)
 	  {
 	    tempbuf = (char *) realloc (tempbuf, tempbufsize += 64);
@@ -1059,7 +1059,7 @@ yylex (void)
 	  {
 	  case '\0':
 	  case '"':
-	    /* Do nothing, loop will terminate. */
+	    /* Do nothing, loop will terminate.  */
 	    break;
 	  case '\\':
 	    tokptr++;
@@ -1216,7 +1216,7 @@ java_type_from_name (struct stoken name)
 }
 
 /* If NAME is a valid variable name in this scope, push it and return 1.
-   Otherwise, return 0. */
+   Otherwise, return 0.  */
 
 static int
 push_variable (struct stoken name)
@@ -1262,7 +1262,7 @@ push_variable (struct stoken name)
 
 /* Assuming a reference expression has been pushed, emit the
    STRUCTOP_PTR ops to access the field named NAME.  If NAME is a
-   qualified name (has '.'), generate a field access for each part. */
+   qualified name (has '.'), generate a field access for each part.  */
 
 static void
 push_fieldnames (struct stoken name)
@@ -1274,7 +1274,7 @@ push_fieldnames (struct stoken name)
     {
       if (i == name.length || name.ptr[i] == '.')
 	{
-	  /* token.ptr is start of current field name. */
+	  /* token.ptr is start of current field name.  */
 	  token.length = &name.ptr[i] - token.ptr;
 	  write_exp_elt_opcode (STRUCTOP_PTR);
 	  write_exp_string (token);
@@ -1353,7 +1353,7 @@ push_qualified_expression_name (struct stoken name, int dot_index)
 }
 
 /* Handle Name in an expression (or LHS).
-   Handle VAR, TYPE, TYPE.FIELD1....FIELDN and VAR.FIELD1....FIELDN. */
+   Handle VAR, TYPE, TYPE.FIELD1....FIELDN and VAR.FIELD1....FIELDN.  */
 
 static void
 push_expression_name (struct stoken name)
@@ -1366,13 +1366,13 @@ push_expression_name (struct stoken name)
     {
       if (name.ptr[i] == '.')
 	{
-	  /* It's a Qualified Expression Name. */
+	  /* It's a Qualified Expression Name.  */
 	  push_qualified_expression_name (name, i);
 	  return;
 	}
     }
 
-  /* It's a Simple Expression Name. */
+  /* It's a Simple Expression Name.  */
   
   if (push_variable (name))
     return;

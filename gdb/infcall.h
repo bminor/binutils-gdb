@@ -34,7 +34,7 @@ extern CORE_ADDR find_function_addr (struct value *function,
    representing what the function returned.  May fail to return, if a
    breakpoint or signal is hit during the execution of the function.
 
-   ARGS is modified to contain coerced values. */
+   ARGS is modified to contain coerced values.  */
 
 extern struct value *call_function_by_hand (struct value *function, int nargs,
 					    struct value **args);

@@ -60,7 +60,7 @@ static int amd64_sol2_gregset64_reg_offset[] = {
   8 * 8,			/* %rdi */
   10 * 8,			/* %rbp */
   20 * 8,			/* %rsp */
-  7 * 8,			/* %r8 ... */
+  7 * 8,			/* %r8 ...  */
   6 * 8,
   5 * 8,
   4 * 8,
@@ -142,7 +142,7 @@ _initialize_amd64_sol2_nat (void)
   /* Fill in the generic procfs methods.  */
   t = procfs_target ();
 
-#ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints */
+#ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints.  */
   procfs_use_watchpoints (t);
 #endif
 

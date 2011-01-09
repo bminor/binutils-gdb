@@ -35,7 +35,7 @@
 
 #include "hppa-tdep.h"
 
-/* Prototypes for supply_gregset etc. */
+/* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
 /* These must match the order of the register names.
@@ -239,7 +239,7 @@ fetch_register (struct regcache *regcache, int regno)
   regcache_raw_supply (regcache, regno, &val);
 }
 
-/* Store one register. */
+/* Store one register.  */
 
 static void
 store_register (const struct regcache *regcache, int regno)
@@ -346,7 +346,7 @@ fill_gregset (const struct regcache *regcache,
 
 /*  Given a pointer to a floating point register set in /proc format
    (fpregset_t *), unpack the register contents and supply them as gdb's
-   idea of the current floating point register values. */
+   idea of the current floating point register values.  */
 
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
@@ -365,7 +365,7 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 /*  Given a pointer to a floating point register set in /proc format
    (fpregset_t *), update the register specified by REGNO from gdb's idea
    of the current floating point register set.  If REGNO is -1, update
-   them all. */
+   them all.  */
 
 void
 fill_fpregset (const struct regcache *regcache,

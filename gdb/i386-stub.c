@@ -532,7 +532,7 @@ putpacket (unsigned char *buffer)
   int count;
   char ch;
 
-  /*  $<packet info>#<checksum>. */
+  /*  $<packet info>#<checksum>.  */
   do
     {
       putDebugChar ('$');
@@ -942,7 +942,7 @@ set_debug_traps (void)
 /* This function will generate a breakpoint exception.  It is used at the
    beginning of a program to sync up with a debugger and can be used
    otherwise as a quick means to stop program execution and "break" into
-   the debugger. */
+   the debugger.  */
 
 void
 breakpoint (void)

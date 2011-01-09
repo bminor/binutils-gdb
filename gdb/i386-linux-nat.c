@@ -170,7 +170,7 @@ fetch_register (struct regcache *regcache, int regno)
   regcache_raw_supply (regcache, regno, &val);
 }
 
-/* Store one register. */
+/* Store one register.  */
 
 static void
 store_register (const struct regcache *regcache, int regno)
@@ -216,8 +216,8 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 
   if (I386_LINUX_ORIG_EAX_REGNUM
 	< gdbarch_num_regs (get_regcache_arch (regcache)))
-    regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM,
-			  regp + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
+    regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM, regp
+			 + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -239,8 +239,8 @@ fill_gregset (const struct regcache *regcache,
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
       && I386_LINUX_ORIG_EAX_REGNUM
 	   < gdbarch_num_regs (get_regcache_arch (regcache)))
-    regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM,
-			  regp + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
+    regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM, regp
+			  + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -352,8 +352,15 @@ store_fpregs (const struct regcache *regcache, int tid, int regno)
 
 #else
 
-static void fetch_fpregs (struct regcache *regcache, int tid) {}
-static void store_fpregs (const struct regcache *regcache, int tid, int regno) {}
+static void
+fetch_fpregs (struct regcache *regcache, int tid)
+{
+}
+
+static void
+store_fpregs (const struct regcache *regcache, int tid, int regno)
+{
+}
 
 #endif
 
@@ -473,8 +480,17 @@ store_fpxregs (const struct regcache *regcache, int tid, int regno)
 
 #else
 
-static int fetch_fpxregs (struct regcache *regcache, int tid) { return 0; }
-static int store_fpxregs (const struct regcache *regcache, int tid, int regno) { return 0; }
+static int
+fetch_fpxregs (struct regcache *regcache, int tid)
+{
+  return 0;
+}
+
+static int
+store_fpxregs (const struct regcache *regcache, int tid, int regno)
+{
+  return 0;
+}
 
 #endif /* HAVE_PTRACE_GETFPXREGS */
 

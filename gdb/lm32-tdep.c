@@ -48,7 +48,7 @@
 
 struct gdbarch_tdep
 {
-  /* gdbarch target dependent data here. Currently unused for LM32.  */
+  /* gdbarch target dependent data here.  Currently unused for LM32.  */
 };
 
 struct lm32_frame_cache
@@ -144,7 +144,7 @@ lm32_analyze_prologue (struct gdbarch *gdbarch,
       if ((LM32_OPCODE (instruction) == OP_SW)
 	  && (LM32_REG0 (instruction) == SIM_LM32_SP_REGNUM))
 	{
-	  /* Any stack displaced store is likely part of the prologue.  
+	  /* Any stack displaced store is likely part of the prologue.
 	     Record that the register is being saved, and the offset 
 	     into the stack.  */
 	  info->saved_regs[LM32_REG1 (instruction)].addr =
@@ -153,7 +153,7 @@ lm32_analyze_prologue (struct gdbarch *gdbarch,
       else if ((LM32_OPCODE (instruction) == OP_ADDI)
 	       && (LM32_REG1 (instruction) == SIM_LM32_SP_REGNUM))
 	{
-	  /* An add to the SP is likely to be part of the prologue.  
+	  /* An add to the SP is likely to be part of the prologue.
 	     Adjust stack size by whatever the instruction adds to the sp.  */
 	  info->size -= LM32_IMM16 (instruction);
 	}
@@ -172,7 +172,8 @@ lm32_analyze_prologue (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  /* Any other instruction is likely not to be part of the prologue.  */
+	  /* Any other instruction is likely not to be part of the
+	     prologue.  */
 	  break;
 	}
     }
@@ -336,8 +337,8 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
     }
   else
     {
-      /* Aggregate types greater than a single register are returned in memory. 
-         FIXME: Unless they are only 2 regs?.  */
+      /* Aggregate types greater than a single register are returned
+         in memory.  FIXME: Unless they are only 2 regs?.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
       return_buffer = l;
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
@@ -463,7 +464,8 @@ lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
      converted into a request for the RA register.  */
   info->saved_regs[SIM_LM32_PC_REGNUM] = info->saved_regs[SIM_LM32_RA_REGNUM];
 
-  /* The previous frame's SP needed to be computed.  Save the computed value. */
+  /* The previous frame's SP needed to be computed.  Save the computed
+     value.  */
   trad_frame_set_value (info->saved_regs, SIM_LM32_SP_REGNUM, prev_sp);
 
   return info;

@@ -31,12 +31,12 @@
 /* The sigtramp code is in a non-readable (executable-only) region
    of memory called the ``gate page''.  The addresses in question
    were determined by examining the system headers.  They are
-   overly generous to allow for different pages sizes. */
+   overly generous to allow for different pages sizes.  */
 
 #define GATE_AREA_START 0xa000000000000100LL
 #define GATE_AREA_END   0xa000000000020000LL
 
-/* Offset to sigcontext structure from frame of handler */
+/* Offset to sigcontext structure from frame of handler.  */
 #define IA64_LINUX_SIGCONTEXT_OFFSET 192
 
 static int
@@ -48,7 +48,7 @@ ia64_linux_pc_in_sigtramp (CORE_ADDR pc)
 /* IA-64 GNU/Linux specific function which, given a frame address and
    a register number, returns the address at which that register may be
    found.  0 is returned for registers which aren't stored in the the
-   sigcontext structure. */
+   sigcontext structure.  */
 
 static CORE_ADDR
 ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch,
@@ -58,7 +58,8 @@ ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch,
   char buf[8];
   CORE_ADDR sigcontext_addr = 0;
 
-  /* The address of the sigcontext area is found at offset 16 in the sigframe.  */
+  /* The address of the sigcontext area is found at offset 16 in the
+     sigframe.  */
   read_memory (sp + 16, buf, 8);
   sigcontext_addr = extract_unsigned_integer (buf, 8, byte_order);
 
@@ -79,7 +80,7 @@ ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch,
 	return sigcontext_addr + 56;		/* user mask only */
       /* sc_ar_rsc is provided, from which we could compute bspstore, but
 	 I don't think it's worth it.  Anyway, if we want it, it's at offset
-	 64 */
+	 64.  */
       case IA64_BSP_REGNUM :
 	return sigcontext_addr + 72;
       case IA64_RNAT_REGNUM :

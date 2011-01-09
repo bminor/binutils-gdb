@@ -36,7 +36,7 @@
 #include <sys/procfs.h>
 #include <setjmp.h>		/* For JB_XXX.  */
 
-/* Prototypes for supply_gregset etc. */
+/* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 #include "mips-tdep.h"
 
@@ -147,7 +147,7 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
   char fsrbuf[8];
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
-  /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
+  /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs.  */
 
   for (regi = 0; regi < 32; regi++)
     regcache_raw_supply (regcache, gdbarch_fp0_regnum (gdbarch) + regi,
@@ -164,20 +164,21 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
   regcache_raw_supply (regcache,
 		       mips_regnum (gdbarch)->fp_control_status, fsrbuf);
 
-  /* FIXME: how can we supply FCRIR?  SGI doesn't tell us. */
+  /* FIXME: how can we supply FCRIR?  SGI doesn't tell us.  */
   regcache_raw_supply (regcache,
 		       mips_regnum (gdbarch)->fp_implementation_revision,
 		       zerobuf);
 }
 
 void
-fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno)
+fill_fpregset (const struct regcache *regcache,
+	       fpregset_t *fpregsetp, int regno)
 {
   int regi;
   char *from, *to;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
-  /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
+  /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs.  */
 
   for (regi = gdbarch_fp0_regnum (gdbarch);
        regi < gdbarch_fp0_regnum (gdbarch) + 32; regi++)
@@ -248,7 +249,7 @@ fetch_core_registers (struct regcache *regcache,
 }
 
 /* Register that we are able to handle irix5 core file formats.
-   This really is bfd_target_unknown_flavour */
+   This really is bfd_target_unknown_flavour.  */
 
 static struct core_fns irix5_core_fns =
 {

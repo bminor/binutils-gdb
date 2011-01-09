@@ -129,7 +129,7 @@ void _initialize_infcmd (void);
 /* Scratch area where string containing arguments to give to the
    program will be stored by 'set args'.  As soon as anything is
    stored, notice_args_set will move it into per-inferior storage.
-   Arguments are separated by spaces. Empty string (pointer to '\0')
+   Arguments are separated by spaces.  Empty string (pointer to '\0')
    means no args.  */
 
 static char *inferior_args_scratch;
@@ -165,7 +165,7 @@ enum stop_stack_kind stop_stack_dummy;
 int stopped_by_random_signal;
 
 
-/* Accessor routines. */
+/* Accessor routines.  */
 
 /* Set the io terminal for the current inferior.  Ownership of
    TERMINAL_NAME is not transferred.  */
@@ -360,8 +360,8 @@ construct_inferior_arguments (int argc, char **argv)
 
 /* This function detects whether or not a '&' character (indicating
    background execution) has been added as *the last* of the arguments ARGS
-   of a command. If it has, it removes it and returns 1. Otherwise it
-   does nothing and returns 0. */
+   of a command.  If it has, it removes it and returns 1.  Otherwise it
+   does nothing and returns 0.  */
 static int
 strip_bg_char (char **args)
 {
@@ -473,7 +473,7 @@ Start it from the beginning? ")))
     }
 }
 
-/* Implement the "run" command. If TBREAK_AT_MAIN is set, then insert
+/* Implement the "run" command.  If TBREAK_AT_MAIN is set, then insert
    a temporary breakpoint at the begining of the main program before
    running the program.  */
 
@@ -532,19 +532,19 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
       int async_exec = strip_bg_char (&args);
 
       /* If we get a request for running in the bg but the target
-         doesn't support it, error out. */
+         doesn't support it, error out.  */
       if (async_exec && !target_can_async_p ())
 	error (_("Asynchronous execution not supported on this target."));
 
       /* If we don't get a request of running in the bg, then we need
-         to simulate synchronous (fg) execution. */
+         to simulate synchronous (fg) execution.  */
       if (!async_exec && target_can_async_p ())
 	{
-	  /* Simulate synchronous execution */
+	  /* Simulate synchronous execution.  */
 	  async_disable_stdin ();
 	}
 
-      /* If there were other args, beside '&', process them. */
+      /* If there were other args, beside '&', process them.  */
       if (args)
 	set_inferior_args (args);
     }
@@ -653,7 +653,7 @@ ensure_valid_thread (void)
 }
 
 /* If the user is looking at trace frames, any resumption of execution
-   is likely to mix up recorded and live target data. So simply
+   is likely to mix up recorded and live target data.  So simply
    disallow those commands.  */
 
 void
@@ -700,20 +700,20 @@ continue_command (char *args, int from_tty)
   int all_threads = 0;
   ERROR_NO_INFERIOR;
 
-  /* Find out whether we must run in the background. */
+  /* Find out whether we must run in the background.  */
   if (args != NULL)
     async_exec = strip_bg_char (&args);
 
   /* If we must run in the background, but the target can't do it,
-     error out. */
+     error out.  */
   if (async_exec && !target_can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
-     foreground, synchronously. */
+     foreground, synchronously.  */
   if (!async_exec && target_can_async_p ())
     {
-      /* Simulate synchronous execution */
+      /* Simulate synchronous execution.  */
       async_disable_stdin ();
     }
 
@@ -848,21 +848,21 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
     async_exec = strip_bg_char (&count_string);
 
   /* If we get a request for running in the bg but the target
-     doesn't support it, error out. */
+     doesn't support it, error out.  */
   if (async_exec && !target_can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
 
   /* If we don't get a request of running in the bg, then we need
-     to simulate synchronous (fg) execution. */
+     to simulate synchronous (fg) execution.  */
   if (!async_exec && target_can_async_p ())
     {
-      /* Simulate synchronous execution */
+      /* Simulate synchronous execution.  */
       async_disable_stdin ();
     }
 
   count = count_string ? parse_and_eval_long (count_string) : 1;
 
-  if (!single_inst || skip_subroutines)		/* leave si command alone */
+  if (!single_inst || skip_subroutines)		/* Leave si command alone.  */
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -926,9 +926,9 @@ struct step_1_continuation_args
 
 /* Called after we are done with one step operation, to check whether
    we need to step again, before we print the prompt and return control
-   to the user. If count is > 1, we will need to do one more call to
-   proceed(), via step_once(). Basically it is like step_once and
-   step_1_continuation are co-recursive. */
+   to the user.  If count is > 1, we will need to do one more call to
+   proceed(), via step_once().  Basically it is like step_once and
+   step_1_continuation are co-recursive.  */
 static void
 step_1_continuation (void *args)
 {
@@ -1072,12 +1072,12 @@ jump_command (char *arg, int from_tty)
   ensure_valid_thread ();
   ensure_not_running ();
 
-  /* Find out whether we must run in the background. */
+  /* Find out whether we must run in the background.  */
   if (arg != NULL)
     async_exec = strip_bg_char (&arg);
 
   /* If we must run in the background, but the target can't do it,
-     error out. */
+     error out.  */
   if (async_exec && !target_can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
 
@@ -1096,9 +1096,9 @@ jump_command (char *arg, int from_tty)
   if (sal.symtab == 0 && sal.pc == 0)
     error (_("No source file has been specified."));
 
-  resolve_sal_pc (&sal);	/* May error out */
+  resolve_sal_pc (&sal);	/* May error out.  */
 
-  /* See if we are trying to jump to another function. */
+  /* See if we are trying to jump to another function.  */
   fn = get_frame_function (get_current_frame ());
   sfn = find_pc_function (sal.pc);
   if (fn != NULL && sfn != fn)
@@ -1136,10 +1136,10 @@ jump_command (char *arg, int from_tty)
     }
 
   /* If we are not asked to run in the bg, then prepare to run in the
-     foreground, synchronously. */
+     foreground, synchronously.  */
   if (!async_exec && target_can_async_p ())
     {
-      /* Simulate synchronous execution */
+      /* Simulate synchronous execution.  */
       async_disable_stdin ();
     }
 
@@ -1148,7 +1148,7 @@ jump_command (char *arg, int from_tty)
 }
 
 
-/* Go to line or address in current procedure */
+/* Go to line or address in current procedure.  */
 static void
 go_command (char *line_no, int from_tty)
 {
@@ -1261,7 +1261,7 @@ until_next_command (int from_tty)
 
   /* Step until either exited from this function or greater
      than the current line (if in symbolic section) or pc (if
-     not). */
+     not).  */
 
   pc = get_frame_pc (frame);
   func = find_pc_function (pc);
@@ -1312,20 +1312,20 @@ until_command (char *arg, int from_tty)
   ensure_valid_thread ();
   ensure_not_running ();
 
-  /* Find out whether we must run in the background. */
+  /* Find out whether we must run in the background.  */
   if (arg != NULL)
     async_exec = strip_bg_char (&arg);
 
   /* If we must run in the background, but the target can't do it,
-     error out. */
+     error out.  */
   if (async_exec && !target_can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
-     foreground, synchronously. */
+     foreground, synchronously.  */
   if (!async_exec && target_can_async_p ())
     {
-      /* Simulate synchronous execution */
+      /* Simulate synchronous execution.  */
       async_disable_stdin ();
     }
 
@@ -1437,7 +1437,7 @@ print_return_value (struct type *func_type, struct type *value_type)
    impossible to do all the stuff as part of the finish_command
    function itself.  The only chance we have to complete this command
    is in fetch_inferior_event, which is called by the event loop as
-   soon as it detects that the target has stopped. This function is
+   soon as it detects that the target has stopped.  This function is
    called via the cmd_continuation pointer.  */
 
 struct finish_command_continuation_args
@@ -1816,7 +1816,7 @@ set_environment_command (char *arg, int from_tty)
   if (arg == 0)
     error_no_arg (_("environment variable and value"));
 
-  /* Find seperation between variable name and value */
+  /* Find seperation between variable name and value.  */
   p = (char *) strchr (arg, '=');
   val = (char *) strchr (arg, ' ');
 
@@ -1824,7 +1824,7 @@ set_environment_command (char *arg, int from_tty)
     {
       /* We have both a space and an equals.  If the space is before the
          equals, walk forward over the spaces til we see a nonspace 
-         (possibly the equals). */
+         (possibly the equals).  */
       if (p > val)
 	while (*val == ' ')
 	  val++;
@@ -1844,11 +1844,11 @@ set_environment_command (char *arg, int from_tty)
     {
       nullset = 1;
       if (p == 0)
-	p = arg + strlen (arg);	/* So that savestring below will work */
+	p = arg + strlen (arg);	/* So that savestring below will work.  */
     }
   else
     {
-      /* Not setting variable value to null */
+      /* Not setting variable value to null.  */
       val = p + 1;
       while (*val == ' ' || *val == '\t')
 	val++;
@@ -1887,7 +1887,7 @@ unset_environment_command (char *var, int from_tty)
     unset_in_environ (current_inferior ()->environment, var);
 }
 
-/* Handle the execution path (PATH variable) */
+/* Handle the execution path (PATH variable).  */
 
 static const char path_var_name[] = "PATH";
 
@@ -1910,7 +1910,7 @@ path_command (char *dirname, int from_tty)
 
   dont_repeat ();
   env = get_in_environ (current_inferior ()->environment, path_var_name);
-  /* Can be null if path is not set */
+  /* Can be null if path is not set.  */
   if (!env)
     env = "";
   exec_path = xstrdup (env);
@@ -1922,7 +1922,7 @@ path_command (char *dirname, int from_tty)
 }
 
 
-/* Print out the machine register regnum. If regnum is -1, print all
+/* Print out the machine register regnum.  If regnum is -1, print all
    registers (print_all == 1) or all non-float and non-vector
    registers (print_all == 0).
 
@@ -2203,7 +2203,7 @@ kill_command (char *arg, int from_tty)
 {
   /* FIXME:  This should not really be inferior_ptid (or target_has_execution).
      It should be a distinct flag that indicates that a target is active, cuz
-     some targets don't have processes! */
+     some targets don't have processes!  */
 
   if (ptid_equal (inferior_ptid, null_ptid))
     error (_("The program is not being run."));
@@ -2215,7 +2215,7 @@ kill_command (char *arg, int from_tty)
      with their threads.  */
   if (!have_inferiors ())
     {
-      init_thread_list ();		/* Destroy thread info */
+      init_thread_list ();		/* Destroy thread info.  */
 
       /* Killing off the inferior can leave us with a core file.  If
 	 so, print the state we are left in.  */
@@ -2280,8 +2280,7 @@ proceed_after_attach (int pid)
  * This only needs to be done if we are attaching to a process.
  */
 
-/*
-   attach_command --
+/* attach_command --
    takes a program started up outside of gdb and ``attaches'' to it.
    This stops it cold in its tracks and allows us to start debugging it.
    and wait for the trace-trap that results from attaching.  */
@@ -2310,8 +2309,8 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 
 	     Attempt to qualify the filename against the source path.
 	     (If that fails, we'll just fall back on the original
-	     filename.  Not much more we can do...)
-	   */
+	     filename.  Not much more we can do...)  */
+
 	  if (!source_full_path_of (exec_file, &full_exec_path))
 	    full_exec_path = xstrdup (exec_file);
 
@@ -2434,7 +2433,7 @@ attach_command (char *args, int from_tty)
       async_exec = strip_bg_char (&args);
 
       /* If we get a request for running in the bg but the target
-         doesn't support it, error out. */
+         doesn't support it, error out.  */
       if (async_exec && !target_can_async_p ())
 	error (_("Asynchronous execution not supported on this target."));
     }
@@ -2443,7 +2442,7 @@ attach_command (char *args, int from_tty)
      to simulate synchronous (fg) execution.  */
   if (!async_exec && target_can_async_p ())
     {
-      /* Simulate synchronous execution */
+      /* Simulate synchronous execution.  */
       async_disable_stdin ();
       make_cleanup ((make_cleanup_ftype *)async_enable_stdin, NULL);
     }
@@ -2480,7 +2479,7 @@ attach_command (char *args, int from_tty)
     {
       struct inferior *inferior = current_inferior ();
 
-      /* Careful here. See comments in inferior.h.  Basically some
+      /* Careful here.  See comments in inferior.h.  Basically some
 	 OSes don't ignore SIGSTOPs on continue requests anymore.  We
 	 need a way for handle_inferior_event to reset the stop_signal
 	 variable after an attach, and this is what
@@ -2623,7 +2622,7 @@ detach_command (char *args, int from_tty)
 static void
 disconnect_command (char *args, int from_tty)
 {
-  dont_repeat ();		/* Not for the faint of heart */
+  dont_repeat ();		/* Not for the faint of heart.  */
   target_disconnect (args, from_tty);
   no_shared_libraries (NULL, from_tty);
   init_thread_list ();
@@ -2665,7 +2664,7 @@ interrupt_target_command (char *args, int from_tty)
     {
       int all_threads = 0;
 
-      dont_repeat ();		/* Not for the faint of heart */
+      dont_repeat ();		/* Not for the faint of heart.  */
 
       if (args != NULL
 	  && strncmp (args, "-a", sizeof ("-a") - 1) == 0)
@@ -2730,7 +2729,7 @@ _initialize_infcmd (void)
 {
   struct cmd_list_element *c = NULL;
 
-  /* add the filename of the terminal connected to inferior I/O */
+  /* Add the filename of the terminal connected to inferior I/O.  */
   add_setshow_filename_cmd ("inferior-tty", class_run,
 			    &inferior_io_terminal_scratch, _("\
 Set terminal for future runs of program being debugged."), _("\

@@ -24,12 +24,10 @@
    provide access to the HPUX user-mode thread implementation.
 
    HPUX threads are true user-mode threads, which are invoked via the cma_*
-   and pthread_* (DCE and Posix respectivly) interfaces.  These are mostly
+   and pthread_* (DCE and Posix respectively) interfaces.  These are mostly
    implemented in user-space, with all thread context kept in various
    structures that live in the user's heap.  For the most part, the kernel has
-   no knowlege of these threads.
-
- */
+   no knowlege of these threads.  */
 
 #include "defs.h"
 
@@ -114,7 +112,8 @@ find_tcb (ptid_t ptid)
 
       tcb_ptr = cma__base (queue_ptr, threads, cma__t_int_tcb);
 
-      read_memory ((CORE_ADDR) tcb_ptr, (char *) &cached_tcb, sizeof cached_tcb);
+      read_memory ((CORE_ADDR) tcb_ptr, (char *) &cached_tcb,
+		   sizeof cached_tcb);
 
       if (cached_tcb.header.type == cma__c_obj_tcb)
 	if (cma_thread_get_unique (&cached_tcb.prolog.client_thread) == thread)
@@ -145,7 +144,7 @@ hpux_thread_attach (struct target_ops *ops, char *args, int from_tty)
 {
   deprecated_child_ops.to_attach (&deprecated_child_ops, args, from_tty);
 
-  /* XXX - might want to iterate over all the threads and register them. */
+  /* XXX - might want to iterate over all the threads and register them.  */
 }
 
 /* Take a program previously attached to and detaches it.
@@ -189,8 +188,8 @@ hpux_thread_resume (struct target_ops *ops,
    to a LWP id, and vice versa on the way out.  */
 
 static ptid_t
-hpux_thread_wait (struct target_ops *ops,
-		  ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+hpux_thread_wait (struct target_ops *ops, ptid_t ptid,
+		  struct target_waitstatus *ourstatus, int options)
 {
   ptid_t rtnval;
   struct cleanup *old_chain;
@@ -289,7 +288,7 @@ hpux_thread_fetch_registers (struct target_ops *ops,
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
 
 	  if (regno == HPPA_FLAGS_REGNUM)
-	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
+	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL.  */
 	    memset (buf, '\000', register_size (gdbarch, regno));
 	  else if (regno == HPPA_SP_REGNUM)
 	    store_unsigned_integer (buf, sizeof sp, byte_order, sp);
@@ -356,7 +355,7 @@ hpux_thread_store_registers (struct target_ops *ops,
 
 	  if (regno == HPPA_FLAGS_REGNUM)
 	    {
-	      /* Let lower layer handle this... */
+	      /* Let lower layer handle this...  */
 	      deprecated_child_ops.to_store_registers
 		(&deprecated_child_ops, regcache, regno);
 	    }
@@ -411,7 +410,8 @@ hpux_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
   inferior_ptid = main_ptid;
 
   retval = 
-    deprecated_child_ops.deprecated_xfer_memory (memaddr, myaddr, len, dowrite, attribs, target);
+    deprecated_child_ops.deprecated_xfer_memory (memaddr, myaddr, len,
+						 dowrite, attribs, target);
 
   do_cleanups (old_chain);
 
@@ -501,7 +501,8 @@ hpux_thread_mourn_inferior (void)
   deprecated_child_ops.to_mourn_inferior (&deprecated_child_ops);
 }
 
-/* Mark our target-struct as eligible for stray "run" and "attach" commands.  */
+/* Mark our target-struct as eligible for stray "run" and "attach"
+   commands.  */
 
 static int
 hpux_thread_can_run (void)
@@ -521,7 +522,7 @@ hpux_thread_stop (ptid_t ptid)
   deprecated_child_ops.to_stop (ptid);
 }
 
-/* Convert a pid to printable form. */
+/* Convert a pid to printable form.  */
 
 char *
 hpux_pid_to_str (ptid_t ptid)

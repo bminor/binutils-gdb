@@ -24,7 +24,7 @@
 
 /* This file contains functions that return things that are specific
    to languages.  Each function should examine current_language if necessary,
-   and return the appropriate result. */
+   and return the appropriate result.  */
 
 /* FIXME:  Most of these would be better organized as macros which
    return data out of a "language-specific" struct pointer that is set
@@ -87,7 +87,7 @@ enum type_check type_check = type_check_off;
 enum case_mode case_mode = case_mode_auto;
 enum case_sensitivity case_sensitivity = case_sensitive_on;
 
-/* The current language and language_mode (see language.h) */
+/* The current language and language_mode (see language.h).  */
 
 const struct language_defn *current_language = &unknown_language_defn;
 enum language_mode language_mode = language_mode_auto;
@@ -112,20 +112,20 @@ static const char *range;
 static const char *case_sensitive;
 
 /* Warning issued when current_language and the language of the current
-   frame do not match. */
+   frame do not match.  */
 char lang_frame_mismatch_warn[] =
 "Warning: the current language does not match this frame.";
 
 /* This page contains the functions corresponding to GDB commands
-   and their helpers. */
+   and their helpers.  */
 
 /* Show command.  Display a warning if the language set
-   does not match the frame. */
+   does not match the frame.  */
 static void
 show_language_command (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  enum language flang;		/* The language of the current frame */
+  enum language flang;		/* The language of the current frame.  */
 
   if (language_mode == language_mode_auto)
     fprintf_filtered (gdb_stdout,
@@ -144,7 +144,7 @@ show_language_command (struct ui_file *file, int from_tty,
     printf_filtered ("%s\n", lang_frame_mismatch_warn);
 }
 
-/* Set command.  Change the current working language. */
+/* Set command.  Change the current working language.  */
 static void
 set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
@@ -188,7 +188,7 @@ set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 }
 
 /* Show command.  Display a warning if the type setting does
-   not match the current language. */
+   not match the current language.  */
 static void
 show_type_command (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
@@ -226,7 +226,7 @@ show_type_command (struct ui_file *file, int from_tty,
 	       " does not match the language.\n"));
 }
 
-/* Set command.  Change the setting for type checking. */
+/* Set command.  Change the setting for type checking.  */
 static void
 set_type_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
@@ -261,7 +261,7 @@ set_type_command (char *ignore, int from_tty, struct cmd_list_element *c)
 }
 
 /* Show command.  Display a warning if the range setting does
-   not match the current language. */
+   not match the current language.  */
 static void
 show_range_command (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
@@ -299,7 +299,7 @@ show_range_command (struct ui_file *file, int from_tty,
 	       "does not match the language.\n"));
 }
 
-/* Set command.  Change the setting for range checking. */
+/* Set command.  Change the setting for range checking.  */
 static void
 set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
@@ -335,7 +335,7 @@ set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
 }
 
 /* Show command.  Display a warning if the case sensitivity setting does
-   not match the current language. */
+   not match the current language.  */
 static void
 show_case_command (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
@@ -408,7 +408,7 @@ set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
 /* Set the status of range and type checking and case sensitivity based on
    the current modes and the current language.
    If SHOW is non-zero, then print out the current language,
-   type and range checking status. */
+   type and range checking status.  */
 static void
 set_type_range_case (void)
 {
@@ -422,7 +422,8 @@ set_type_range_case (void)
     case_sensitivity = current_language->la_case_sensitivity;
 }
 
-/* Set current language to (enum language) LANG.  Returns previous language. */
+/* Set current language to (enum language) LANG.  Returns previous
+   language.  */
 
 enum language
 set_language (enum language lang)
@@ -470,7 +471,7 @@ language_info (int quietly)
     }
 }
 
-/* Return the result of a binary operation. */
+/* Return the result of a binary operation.  */
 
 #if 0				/* Currently unused */
 
@@ -506,7 +507,7 @@ binop_result_type (struct value *v1, struct value *v2)
       break;
     case language_m2:
       /* If we are doing type-checking, l1 should equal l2, so this is
-         not needed. */
+         not needed.  */
       return l1 > l2 ? VALUE_TYPE (v1) : VALUE_TYPE (v2);
       break;
     }
@@ -528,11 +529,11 @@ binop_result_type (struct value *v1, struct value *v2)
    Note that some of them are not currently dependent upon which language
    is currently being parsed.  For example, floats are the same in
    C and Modula-2 (ie. the only floating point type has TYPE_CODE of
-   TYPE_CODE_FLT), while booleans are different. */
+   TYPE_CODE_FLT), while booleans are different.  */
 
 /* Returns non-zero if its argument is a simple type.  This is the same for
    both Modula-2 and for C.  In the C case, TYPE_CODE_CHAR will never occur,
-   and thus will never cause the failure of the test. */
+   and thus will never cause the failure of the test.  */
 int
 simple_type (struct type *type)
 {
@@ -555,7 +556,7 @@ simple_type (struct type *type)
 /* Returns non-zero if its argument is of an ordered type.
    An ordered type is one in which the elements can be tested for the
    properties of "greater than", "less than", etc, or for which the
-   operations "increment" or "decrement" make sense. */
+   operations "increment" or "decrement" make sense.  */
 int
 ordered_type (struct type *type)
 {
@@ -574,14 +575,14 @@ ordered_type (struct type *type)
     }
 }
 
-/* Returns non-zero if the two types are the same */
+/* Returns non-zero if the two types are the same.  */
 int
 same_type (struct type *arg1, struct type *arg2)
 {
   CHECK_TYPEDEF (type);
   if (structured_type (arg1)
       ? !structured_type (arg2) : structured_type (arg2))
-    /* One is structured and one isn't */
+    /* One is structured and one isn't.  */
     return 0;
   else if (structured_type (arg1) && structured_type (arg2))
     return arg1 == arg2;
@@ -593,7 +594,7 @@ same_type (struct type *arg1, struct type *arg2)
     return arg1 == arg2;
 }
 
-/* Returns non-zero if the type is integral */
+/* Returns non-zero if the type is integral.  */
 int
 integral_type (struct type *type)
 {
@@ -614,7 +615,7 @@ integral_type (struct type *type)
     }
 }
 
-/* Returns non-zero if the value is numeric */
+/* Returns non-zero if the value is numeric.  */
 int
 numeric_type (struct type *type)
 {
@@ -630,7 +631,7 @@ numeric_type (struct type *type)
     }
 }
 
-/* Returns non-zero if the value is a character type */
+/* Returns non-zero if the value is a character type.  */
 int
 character_type (struct type *type)
 {
@@ -653,7 +654,7 @@ character_type (struct type *type)
     }
 }
 
-/* Returns non-zero if the value is a string type */
+/* Returns non-zero if the value is a string type.  */
 int
 string_type (struct type *type)
 {
@@ -668,14 +669,14 @@ string_type (struct type *type)
     case language_cplus:
     case language_d:
     case language_objc:
-      /* C does not have distinct string type. */
+      /* C does not have distinct string type.  */
       return (0);
     default:
       return (0);
     }
 }
 
-/* Returns non-zero if the value is a boolean type */
+/* Returns non-zero if the value is a boolean type.  */
 int
 boolean_type (struct type *type)
 {
@@ -699,7 +700,7 @@ boolean_type (struct type *type)
   return 0;
 }
 
-/* Returns non-zero if the value is a floating-point type */
+/* Returns non-zero if the value is a floating-point type.  */
 int
 float_type (struct type *type)
 {
@@ -708,7 +709,7 @@ float_type (struct type *type)
 }
 #endif
 
-/* Returns non-zero if the value is a pointer type */
+/* Returns non-zero if the value is a pointer type.  */
 int
 pointer_type (struct type *type)
 {
@@ -717,7 +718,7 @@ pointer_type (struct type *type)
 }
 
 #if 0
-/* Returns non-zero if the value is a structured type */
+/* Returns non-zero if the value is a structured type.  */
 int
 structured_type (struct type *type)
 {
@@ -747,9 +748,9 @@ structured_type (struct type *type)
 #endif
 
 /* This page contains functions that return info about
-   (struct value) values used in GDB. */
+   (struct value) values used in GDB.  */
 
-/* Returns non-zero if the value VAL represents a true value. */
+/* Returns non-zero if the value VAL represents a true value.  */
 int
 value_true (struct value *val)
 {
@@ -764,14 +765,14 @@ value_true (struct value *val)
 
 /* This page contains functions for the printing out of
    error messages that occur during type- and range-
-   checking. */
+   checking.  */
 
 /* These are called when a language fails a type- or range-check.  The
    first argument should be a printf()-style format string, and the
    rest of the arguments should be its arguments.  If
    [type|range]_check is [type|range]_check_on, an error is printed;
    if [type|range]_check_warn, a warning; otherwise just the
-   message. */
+   message.  */
 
 void
 type_error (const char *string,...)
@@ -826,9 +827,9 @@ range_error (const char *string,...)
 }
 
 
-/* This page contains miscellaneous functions */
+/* This page contains miscellaneous functions.  */
 
-/* Return the language enum for a given language string. */
+/* Return the language enum for a given language string.  */
 
 enum language
 language_enum (char *str)
@@ -842,7 +843,7 @@ language_enum (char *str)
   return language_unknown;
 }
 
-/* Return the language struct for a given language enum. */
+/* Return the language struct for a given language enum.  */
 
 const struct language_defn *
 language_def (enum language lang)
@@ -859,7 +860,7 @@ language_def (enum language lang)
   return NULL;
 }
 
-/* Return the language as a string */
+/* Return the language as a string.  */
 char *
 language_str (enum language lang)
 {
@@ -996,10 +997,10 @@ skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
   return 0;
 }
 
-/* Return demangled language symbol, or NULL.  
+/* Return demangled language symbol, or NULL.
    FIXME: Options are only useful for certain languages and ignored
    by others, so it would be better to remove them here and have a
-   more flexible demangler for the languages that need it.  
+   more flexible demangler for the languages that need it.
    FIXME: Sometimes the demangler is invoked when we don't know the
    language, so we can't use this everywhere.  */
 char *
@@ -1013,7 +1014,7 @@ language_demangle (const struct language_defn *current_language,
 
 /* Return class name from physname or NULL.  */
 char *
-language_class_name_from_physname (const struct language_defn *current_language,
+language_class_name_from_physname (const struct language_defn *curr_language,
 				   const char *physname)
 {
   if (current_language != NULL
@@ -1203,7 +1204,8 @@ const struct language_defn unknown_language_defn =
   LANG_MAGIC
 };
 
-/* These two structs define fake entries for the "local" and "auto" options. */
+/* These two structs define fake entries for the "local" and "auto"
+   options.  */
 const struct language_defn auto_language_defn =
 {
   "auto",
@@ -1364,7 +1366,7 @@ language_lookup_primitive_type_by_name (const struct language_defn *la,
   return (NULL);
 }
 
-/* Initialize the language routines */
+/* Initialize the language routines.  */
 
 void
 _initialize_language (void)
@@ -1378,7 +1380,7 @@ _initialize_language (void)
   language_gdbarch_data
     = gdbarch_data_register_post_init (language_gdbarch_post_init);
 
-  /* GDB commands for language specific stuff */
+  /* GDB commands for language specific stuff.  */
 
   add_prefix_cmd ("check", no_class, set_check,
 		  _("Set the status of the type/range checker."),
@@ -1425,6 +1427,6 @@ For Fortran the default is off; for other languages the default is on."),
   range = xstrdup ("auto");
   case_sensitive = xstrdup ("auto");
 
-  /* Have the above take effect */
+  /* Have the above take effect.  */
   set_language (language_auto);
 }

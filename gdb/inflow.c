@@ -409,8 +409,8 @@ terminal_ours_1 (int output_only)
          mode, to avoid flushing input.  We need to do the same thing
          regardless of output_only, because we don't have separate
          terminal_is_ours and terminal_is_ours_for_output flags.  It's OK,
-         though, since readline will deal with raw mode when/if it needs to.
-       */
+         though, since readline will deal with raw mode when/if it needs
+         to.  */
 
       serial_noflush_set_tty_state (stdin_serial, our_terminal_info.ttystate,
 				    tinfo->ttystate);
@@ -566,7 +566,7 @@ child_terminal_info (char *args, int from_tty)
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
-    /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
+    /* (O_ACCMODE) parens are to avoid Ultrix header file bug.  */
     switch (flags & (O_ACCMODE))
       {
       case O_RDONLY:
@@ -661,7 +661,7 @@ new_tty (void)
 #ifdef TIOCNOTTY
   /* Disconnect the child process from our controlling terminal.  On some
      systems (SVR4 for example), this may cause a SIGTTOU, so temporarily
-     ignore SIGTTOU. */
+     ignore SIGTTOU.  */
   tty = open ("/dev/tty", O_RDWR);
   if (tty > 0)
     {
@@ -732,7 +732,7 @@ new_tty_postfork (void)
 
 
 /* Call set_sigint_trap when you need to pass a signal on to an attached
-   process when handling SIGINT */
+   process when handling SIGINT.  */
 
 static void
 pass_signal (int signo)
@@ -867,7 +867,7 @@ _initialize_inflow (void)
 #ifdef _SC_JOB_CONTROL
   job_control = sysconf (_SC_JOB_CONTROL);
 #else
-  job_control = 0;		/* have to assume the worst */
+  job_control = 0;		/* Have to assume the worst.  */
 #endif /* _SC_JOB_CONTROL */
 #endif /* _POSIX_JOB_CONTROL */
 #endif /* HAVE_TERMIOS */

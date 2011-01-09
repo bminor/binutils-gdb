@@ -246,7 +246,7 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
       reg_offset = i386nbsd_sc_reg_offset;
       num_regs = ARRAY_SIZE (i386nbsd_sc_reg_offset);
 
-      /* Read in the sigcontext address */
+      /* Read in the sigcontext address.  */
       base = read_memory_unsigned_integer (sp + 8, 4, byte_order);
     }
   else
@@ -254,7 +254,7 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
       reg_offset = i386nbsd_mc_reg_offset;
       num_regs = ARRAY_SIZE (i386nbsd_mc_reg_offset);
 
-      /* Read in the ucontext address */
+      /* Read in the ucontext address.  */
       base = read_memory_unsigned_integer (sp + 8, 4, byte_order);
       /* offsetof(ucontext_t, uc_mcontext) == 36 */
       base += 36;
@@ -285,7 +285,7 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* NetBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;
 
-  /* NetBSD uses tramp_frame sniffers for signal trampolines. */
+  /* NetBSD uses tramp_frame sniffers for signal trampolines.  */
   tdep->sigcontext_addr= 0;
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;

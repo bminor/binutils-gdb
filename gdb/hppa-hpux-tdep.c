@@ -164,7 +164,7 @@ hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
   /* PA64 has a completely different stub/trampoline scheme.  Is it
      better?  Maybe.  It's certainly harder to determine with any
      certainty that we are in a stub because we can not refer to the
-     unwinders to help. 
+     unwinders to help.
 
      The heuristic is simple.  Try to lookup the current PC value in th
      minimal symbol table.  If that fails, then assume we are not in a
@@ -192,7 +192,7 @@ hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
       return 0;
 
   /* We might be in a stub.  Peek at the instructions.  Stubs are 3
-     instructions long. */
+     instructions long.  */
   insn = read_memory_integer (pc, 4, byte_order);
 
   /* Find out where we think we are within the stub.  */
@@ -325,7 +325,8 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
          the PLT entry for this function, not the address of the function
          itself.  Bit 31 has meaning too, but only for MPE.  */
       if (pc & 0x2)
-	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, word_size, byte_order);
+	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, word_size,
+					      byte_order);
     }
   if (pc == hppa_symbol_address("$$dyncall_external"))
     {
@@ -344,25 +345,25 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   /* If this isn't a linker stub, then return now.  */
   /* elz: attention here! (FIXME) because of a compiler/linker 
      error, some stubs which should have a non zero stub_unwind.stub_type 
-     have unfortunately a value of zero. So this function would return here
-     as if we were not in a trampoline. To fix this, we go look at the partial
+     have unfortunately a value of zero.  So this function would return here
+     as if we were not in a trampoline.  To fix this, we go look at the partial
      symbol information, which reports this guy as a stub.
      (FIXME): Unfortunately, we are not that lucky: it turns out that the 
-     partial symbol information is also wrong sometimes. This is because 
+     partial symbol information is also wrong sometimes.  This is because 
      when it is entered (somread.c::som_symtab_read()) it can happen that
      if the type of the symbol (from the som) is Entry, and the symbol is
-     in a shared library, then it can also be a trampoline.  This would
-     be OK, except that I believe the way they decide if we are ina shared library
-     does not work. SOOOO..., even if we have a regular function w/o trampolines
-     its minimal symbol can be assigned type mst_solib_trampoline.
+     in a shared library, then it can also be a trampoline.  This would be OK,
+     except that I believe the way they decide if we are ina shared library
+     does not work.  SOOOO..., even if we have a regular function w/o
+     trampolines its minimal symbol can be assigned type mst_solib_trampoline.
      Also, if we find that the symbol is a real stub, then we fix the unwind
      descriptor, and define the stub type to be EXPORT.
-     Hopefully this is correct most of the times. */
+     Hopefully this is correct most of the times.  */
   if (u->stub_unwind.stub_type == 0)
     {
 
 /* elz: NOTE (FIXME!) once the problem with the unwind information is fixed
-   we can delete all the code which appears between the lines */
+   we can delete all the code which appears between the lines.  */
 /*--------------------------------------------------------------------------*/
       msym = lookup_minimal_symbol_by_pc (pc);
 
@@ -375,10 +376,10 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  struct minimal_symbol *msymbol;
 	  int function_found = 0;
 
-	  /* go look if there is another minimal symbol with the same name as 
-	     this one, but with type mst_text. This would happen if the msym
+	  /* Go look if there is another minimal symbol with the same name as 
+	     this one, but with type mst_text.  This would happen if the msym
 	     is an actual trampoline, in which case there would be another
-	     symbol with the same name corresponding to the real function */
+	     symbol with the same name corresponding to the real function.  */
 
 	  ALL_MSYMBOLS (objfile, msymbol)
 	  {
@@ -392,14 +393,14 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  }
 
 	  if (function_found)
-	    /* the type of msym is correct (mst_solib_trampoline), but
-	       the unwind info is wrong, so set it to the correct value */
+	    /* The type of msym is correct (mst_solib_trampoline), but
+	       the unwind info is wrong, so set it to the correct value.  */
 	    u->stub_unwind.stub_type = EXPORT;
 	  else
-	    /* the stub type info in the unwind is correct (this is not a
+	    /* The stub type info in the unwind is correct (this is not a
 	       trampoline), but the msym type information is wrong, it
-	       should be mst_text. So we need to fix the msym, and also
-	       get out of this function */
+	       should be mst_text.  So we need to fix the msym, and also
+	       get out of this function.  */
 	    {
 	      MSYMBOL_TYPE (msym) = mst_text;
 	      return orig_pc == pc ? 0 : pc & ~0x3;
@@ -436,10 +437,12 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  /* Yup.  See if the previous instruction loaded
 	     a value into %r1.  If so compute and return the jump address.  */
 	  if ((prev_inst & 0xffe00000) == 0x20200000)
-	    return (hppa_extract_21 (prev_inst) + hppa_extract_17 (curr_inst)) & ~0x3;
+	    return (hppa_extract_21 (prev_inst) 
+		    + hppa_extract_17 (curr_inst)) & ~0x3;
 	  else
 	    {
-	      warning (_("Unable to find ldil X,%%r1 before ble Y(%%sr4,%%r1)."));
+	      warning (_("Unable to find ldil X,%%r1 "
+			 "before ble Y(%%sr4,%%r1)."));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 	}
@@ -479,7 +482,8 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  libsym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (stubsym), NULL, NULL);
+	  libsym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (stubsym),
+					  NULL, NULL);
 	  if (libsym == NULL)
 	    {
 	      warning (_("Unable to find library symbol for %s."),
@@ -574,7 +578,8 @@ hppa_skip_permanent_breakpoint (struct regcache *regcache)
   regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_HEAD_REGNUM, pcoq_tail);
   regcache_cooked_write_unsigned (regcache, HPPA_PCSQ_HEAD_REGNUM, pcsq_tail);
 
-  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_TAIL_REGNUM, pcoq_tail + 4);
+  regcache_cooked_write_unsigned (regcache,
+				  HPPA_PCOQ_TAIL_REGNUM, pcoq_tail + 4);
   /* We can leave the tail's space the same, since there's no jump.  */
 }
 
@@ -647,22 +652,22 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 
   off = scptr;
 
-  /* See /usr/include/machine/save_state.h for the structure of the save_state_t
-     structure. */
+  /* See /usr/include/machine/save_state.h for the structure of the
+     save_state_t structure.  */
   
   flag = read_memory_unsigned_integer (scptr + HPPA_HPUX_SS_FLAGS_OFFSET,
 				       4, byte_order);
 
   if (!(flag & HPPA_HPUX_SS_WIDEREGS))
     {
-      /* Narrow registers. */
+      /* Narrow registers.  */
       off = scptr + HPPA_HPUX_SS_NARROW_OFFSET;
       incr = 4;
       szoff = 0;
     }
   else
     {
-      /* Wide registers. */
+      /* Wide registers.  */
       off = scptr + HPPA_HPUX_SS_WIDE_OFFSET + 8;
       incr = 8;
       szoff = (tdep->bytes_per_address == 4 ? 4 : 0);
@@ -708,7 +713,8 @@ hppa_hpux_sigtramp_frame_prev_register (struct frame_info *this_frame,
   struct hppa_hpux_sigtramp_unwind_cache *info
     = hppa_hpux_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
 
-  return hppa_frame_prev_register_helper (this_frame, info->saved_regs, regnum);
+  return hppa_frame_prev_register_helper (this_frame,
+					  info->saved_regs, regnum);
 }
 
 static int
@@ -1087,7 +1093,7 @@ hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
   if (sec)
     {
       /* First try the lowest address in the section; we can use it as long
-         as it is "regular" code (i.e. not a stub) */
+         as it is "regular" code (i.e. not a stub).  */
       u = find_unwind_entry (obj_section_addr (sec));
       if (!u || u->stub_unwind.stub_type == 0)
         return obj_section_addr (sec);
@@ -1195,9 +1201,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
      - point the sequence at the trampoline
      - set the return address of the trampoline to the current space 
        (see hppa_hpux_find_dummy_call_bpaddr)
-     - set the continuing address of the "dummy code" as the sequence.
-
-*/
+     - set the continuing address of the "dummy code" as the sequence.  */
 
   if (IS_32BIT_TARGET (gdbarch))
     {
@@ -1446,8 +1450,8 @@ hppa_hpux_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 /* Given the current value of the pc, check to see if it is inside a stub, and
    if so, change the value of the pc to point to the caller of the stub.
    THIS_FRAME is the current frame in the current list of frames.
-   BASE contains to stack frame base of the current frame. 
-   SAVE_REGS is the register file stored in the frame cache. */
+   BASE contains to stack frame base of the current frame.
+   SAVE_REGS is the register file stored in the frame cache.  */
 static void
 hppa_hpux_unwind_adjust_stub (struct frame_info *this_frame, CORE_ADDR base,
 			      struct trad_frame_saved_reg *saved_regs)

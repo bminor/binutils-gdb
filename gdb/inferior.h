@@ -67,7 +67,7 @@ extern struct regcache *
    or a "don't care" condition, i.e, "run all threads."  */
 extern ptid_t minus_one_ptid;
 
-/* The null or zero ptid, often used to indicate no process. */
+/* The null or zero ptid, often used to indicate no process.  */
 extern ptid_t null_ptid;
 
 /* Attempt to find and return an existing ptid with the given PID, LWP,
@@ -75,19 +75,19 @@ extern ptid_t null_ptid;
    that.  */
 ptid_t ptid_build (int pid, long lwp, long tid);
 
-/* Find/Create a ptid from just a pid. */
+/* Find/Create a ptid from just a pid.  */
 ptid_t pid_to_ptid (int pid);
 
-/* Fetch the pid (process id) component from a ptid. */
+/* Fetch the pid (process id) component from a ptid.  */
 int ptid_get_pid (ptid_t ptid);
 
-/* Fetch the lwp (lightweight process) component from a ptid. */
+/* Fetch the lwp (lightweight process) component from a ptid.  */
 long ptid_get_lwp (ptid_t ptid);
 
-/* Fetch the tid (thread id) component from a ptid. */
+/* Fetch the tid (thread id) component from a ptid.  */
 long ptid_get_tid (ptid_t ptid);
 
-/* Compare two ptids to see if they are equal */
+/* Compare two ptids to see if they are equal.  */
 extern int ptid_equal (ptid_t p1, ptid_t p2);
 
 /* Return true if PTID represents a process id.  */
@@ -118,16 +118,16 @@ extern void set_inferior_io_terminal (const char *terminal_name);
 extern const char *get_inferior_io_terminal (void);
 
 /* Collected pid, tid, etc. of the debugged inferior.  When there's
-   no inferior, PIDGET (inferior_ptid) will be 0. */
+   no inferior, PIDGET (inferior_ptid) will be 0.  */
 
 extern ptid_t inferior_ptid;
 
 /* Are we simulating synchronous execution? This is used in async gdb
    to implement the 'run', 'continue' etc commands, which will not
-   redisplay the prompt until the execution is actually over. */
+   redisplay the prompt until the execution is actually over.  */
 extern int sync_execution;
 
-/* Inferior environment. */
+/* Inferior environment.  */
 
 extern void clear_proceed_status (void);
 
@@ -316,10 +316,10 @@ enum step_over_calls_kind
    setting up a remote connection; it is like STOP_QUIETLY_NO_SIGSTOP
    except that there is no need to hide a signal.  */
 
-/* It is also used after attach, due to attaching to a process. This
+/* It is also used after attach, due to attaching to a process.  This
    is a bit trickier.  When doing an attach, the kernel stops the
    debuggee with a SIGSTOP.  On newer GNU/Linux kernels (>= 2.5.61)
-   the handling of SIGSTOP for a ptraced process has changed. Earlier
+   the handling of SIGSTOP for a ptraced process has changed.  Earlier
    versions of the kernel would ignore these SIGSTOPs, while now
    SIGSTOP is treated like any other signal, i.e. it is not muffled.
    
@@ -327,7 +327,7 @@ enum step_over_calls_kind
    the global variable stop_signal (which stores the signal from the
    attach, SIGSTOP) to the ptrace(PTRACE_CONT,...)  call.  This is
    problematic, because the kernel doesn't ignore such SIGSTOP
-   now. I.e. it is reported back to gdb, which in turn presents it
+   now.  I.e. it is reported back to gdb, which in turn presents it
    back to the user.
  
    To avoid the problem, we use STOP_QUIETLY_NO_SIGSTOP, which allows
@@ -374,7 +374,7 @@ void displaced_step_dump_bytes (struct ui_file *file,
 
 /* If STARTUP_WITH_SHELL is set, GDB's "run"
    will attempts to start up the debugee under a shell.
-   This is in order for argument-expansion to occur. E.g.,
+   This is in order for argument-expansion to occur.  E.g.,
    (gdb) run *
    The "*" gets expanded by the shell into a list of files.
    While this is a nice feature, it turns out to interact badly
@@ -387,7 +387,7 @@ void displaced_step_dump_bytes (struct ui_file *file,
    be 1 if target is not started up with a shell, 2 if it is.
    - RT
    If you disable this, you need to decrement
-   START_INFERIOR_TRAPS_EXPECTED in tm.h. */
+   START_INFERIOR_TRAPS_EXPECTED in tm.h.  */
 #define STARTUP_WITH_SHELL 1
 #if !defined(START_INFERIOR_TRAPS_EXPECTED)
 #define START_INFERIOR_TRAPS_EXPECTED	2

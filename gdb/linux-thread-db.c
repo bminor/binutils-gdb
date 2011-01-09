@@ -864,8 +864,7 @@ thread_db_load_search (void)
 }
 
 /* Attempt to load and initialize libthread_db.
-   Return 1 on success.
- */
+   Return 1 on success.  */
 
 static int
 thread_db_load (void)
@@ -1707,7 +1706,7 @@ _initialize_thread_db (void)
      executable -- there could be mutiple versions of glibc,
      compiled with LinuxThreads or NPTL, and until there is
      a running inferior, we can't tell which libthread_db is
-     the correct one to load. */
+     the correct one to load.  */
 
   libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
 

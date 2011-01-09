@@ -157,8 +157,8 @@ struct gdbarch_tdep
   int num_xmm_regs;
 
   /* Bits of the extended control register 0 (the XFEATURE_ENABLED_MASK
-     register), excluding the x87 bit, which are supported by this GDB.
-   */
+     register), excluding the x87 bit, which are supported by this GDB.  */
+
   uint64_t xcr0;
 
   /* Offset of XCR0 in XSAVE extended state.  */
@@ -320,8 +320,8 @@ extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
 
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */
-#define I386_SEL_UPL	0x0003	/* User Privilige Level. */
-#define I386_SEL_KPL	0x0000	/* Kernel Privilige Level. */
+#define I386_SEL_UPL	0x0003	/* User Privilige Level.  */
+#define I386_SEL_KPL	0x0000	/* Kernel Privilige Level.  */
 
 /* The length of the longest i386 instruction (according to
    include/asm-i386/kprobes.h in Linux 2.6.  */
@@ -330,7 +330,8 @@ extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
 /* Functions exported from i386-tdep.c.  */
 extern CORE_ADDR i386_pe_skip_trampoline_code (struct frame_info *frame,
 					       CORE_ADDR pc, char *name);
-extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch,
+					  CORE_ADDR pc);
 
 /* Return whether the THIS_FRAME corresponds to a sigtramp routine.  */
 extern int i386_sigtramp_p (struct frame_info *this_frame);

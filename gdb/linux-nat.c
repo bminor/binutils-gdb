@@ -38,12 +38,12 @@
 #include "inf-ptrace.h"
 #include "auxv.h"
 #include <sys/param.h>		/* for MAXPATHLEN */
-#include <sys/procfs.h>		/* for elf_gregset etc. */
+#include <sys/procfs.h>		/* for elf_gregset etc.  */
 #include "elf-bfd.h"		/* for elfcore_write_* */
 #include "gregset.h"		/* for gregset */
 #include "gdbcore.h"		/* for get_exec_file */
 #include <ctype.h>		/* for isdigit */
-#include "gdbthread.h"		/* for struct thread_info etc. */
+#include "gdbthread.h"		/* for struct thread_info etc.  */
 #include "gdb_stat.h"		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
 #include "inf-loop.h"
@@ -68,7 +68,7 @@
 # endif
 #endif /* HAVE_PERSONALITY */
 
-/* This comment documents high-level logic of this file. 
+/* This comment documents high-level logic of this file.
 
 Waiting for events in sync mode
 ===============================
@@ -76,12 +76,12 @@ Waiting for events in sync mode
 When waiting for an event in a specific thread, we just use waitpid, passing
 the specific pid, and not passing WNOHANG.
 
-When waiting for an event in all threads, waitpid is not quite good. Prior to
+When waiting for an event in all threads, waitpid is not quite good.  Prior to
 version 2.4, Linux can either wait for event in main thread, or in secondary
-threads. (2.4 has the __WALL flag).  So, if we use blocking waitpid, we might
+threads.  (2.4 has the __WALL flag).  So, if we use blocking waitpid, we might
 miss an event.  The solution is to use non-blocking waitpid, together with
 sigsuspend.  First, we use non-blocking waitpid to get an event in the main 
-process, if any. Second, we use non-blocking waitpid with the __WCLONED
+process, if any.  Second, we use non-blocking waitpid with the __WCLONED
 flag to check for events in cloned processes.  If nothing is found, we use
 sigsuspend to wait for SIGCHLD.  When SIGCHLD arrives, it means something
 happened to a child process -- and SIGCHLD will be delivered both for events
@@ -90,7 +90,7 @@ an event, we get back to calling nonblocking waitpid with and without
 __WCLONED.
 
 Note that SIGCHLD should be blocked between waitpid and sigsuspend calls,
-so that we don't miss a signal. If SIGCHLD arrives in between, when it's
+so that we don't miss a signal.  If SIGCHLD arrives in between, when it's
 blocked, the signal becomes pending and sigsuspend immediately
 notices it and returns.
 
@@ -167,7 +167,7 @@ blocked.  */
 #define PTRACE_SETOPTIONS	0x4200
 #define PTRACE_GETEVENTMSG	0x4201
 
-/* options set using PTRACE_SETOPTIONS */
+/* Options set using PTRACE_SETOPTIONS.  */
 #define PTRACE_O_TRACESYSGOOD	0x00000001
 #define PTRACE_O_TRACEFORK	0x00000002
 #define PTRACE_O_TRACEVFORK	0x00000004
@@ -297,7 +297,7 @@ static int linux_supports_tracesysgood_flag = -1;
 
 static int linux_supports_tracevforkdone_flag = -1;
 
-/* Async mode support */
+/* Async mode support.  */
 
 /* Zero if the async mode, although enabled, is masked, which means
    linux_nat_wait should behave as if async mode was off.  */
@@ -698,7 +698,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
     {
       struct lwp_info *child_lp = NULL;
 
-      /* We're already attached to the parent, by default. */
+      /* We're already attached to the parent, by default.  */
 
       /* Detach new forked process?  */
       if (detach_fork)
@@ -2726,7 +2726,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
 	      save_sigtrap (lp);
 
-	      /* Now resume this LWP and get the SIGSTOP event. */
+	      /* Now resume this LWP and get the SIGSTOP event.  */
 	      errno = 0;
 	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
 	      if (debug_linux_nat)
@@ -2741,12 +2741,12 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 				      target_pid_to_str (lp->ptid));
 		}
 	      /* Hold this event/waitstatus while we check to see if
-		 there are any more (we still want to get that SIGSTOP). */
+		 there are any more (we still want to get that SIGSTOP).  */
 	      stop_wait_callback (lp, NULL);
 
 	      /* Hold the SIGTRAP for handling by linux_nat_wait.  If
 		 there's another event, throw it back into the
-		 queue. */
+		 queue.  */
 	      if (lp->status)
 		{
 		  if (debug_linux_nat)
@@ -2757,14 +2757,14 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		  kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (lp->status));
 		}
 
-	      /* Save the sigtrap event. */
+	      /* Save the sigtrap event.  */
 	      lp->status = status;
 	      return 0;
 	    }
 	  else
 	    {
 	      /* The thread was stopped with a signal other than
-	         SIGSTOP, and didn't accidentally trip a breakpoint. */
+	         SIGSTOP, and didn't accidentally trip a breakpoint.  */
 
 	      if (debug_linux_nat)
 		{
@@ -2773,7 +2773,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 				      status_to_str ((int) status),
 				      target_pid_to_str (lp->ptid));
 		}
-	      /* Now resume this LWP and get the SIGSTOP event. */
+	      /* Now resume this LWP and get the SIGSTOP event.  */
 	      errno = 0;
 	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
 	      if (debug_linux_nat)
@@ -2783,7 +2783,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 				    errno ? safe_strerror (errno) : "OK");
 
 	      /* Hold this event/waitstatus while we check to see if
-	         there are any more (we still want to get that SIGSTOP). */
+	         there are any more (we still want to get that SIGSTOP).  */
 	      stop_wait_callback (lp, NULL);
 
 	      /* If the lp->status field is still empty, use it to
@@ -2887,7 +2887,7 @@ select_event_lwp_callback (struct lwp_info *lp, void *data)
 
   gdb_assert (selector != NULL);
 
-  /* Select only resumed LWPs that have a SIGTRAP event pending. */
+  /* Select only resumed LWPs that have a SIGTRAP event pending.  */
   if (lp->resumed && linux_nat_lp_status_is_event (lp))
     if ((*selector)-- == 0)
       return 1;
@@ -3065,7 +3065,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
     }
 
   /* Make sure we don't report an event for the exit of an LWP not in
-     our list, i.e.  not part of the current process.  This can happen
+     our list, i.e. not part of the current process.  This can happen
      if we detach from a program we original forked and then it
      exits.  */
   if (!WIFSTOPPED (status) && !lp)
@@ -4569,7 +4569,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	}
       else
 	{
-	  /* [...] (future options here) */
+	  /* [...] (future options here).  */
 	}
       argv++;
     }
@@ -4769,9 +4769,9 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	    printf_filtered (_("Start of stack: 0x%lx\n"), ltmp);
 #if 0	/* Don't know how architecture-dependent the rest is...
 	   Anyway the signal bitmap info is available from "status".  */
-	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch?  */
 	    printf_filtered (_("Kernel stack pointer: 0x%lx\n"), ltmp);
-	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch?  */
 	    printf_filtered (_("Kernel instr pointer: 0x%lx\n"), ltmp);
 	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
 	    printf_filtered (_("Pending signals bitmap: 0x%lx\n"), ltmp);
@@ -4781,7 +4781,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	    printf_filtered (_("Ignored signals bitmap: 0x%lx\n"), ltmp);
 	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
 	    printf_filtered (_("Catched signals bitmap: 0x%lx\n"), ltmp);
-	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch?  */
 	    printf_filtered (_("wchan (system call): 0x%lx\n"), ltmp);
 #endif
 	  do_cleanups (cleanup);

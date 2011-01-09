@@ -1,3 +1,56 @@
+2011-01-08  Michael Snyder  <msnyder@vmware.com>
+
+	* h8300-tdep.c: Comment cleanup, mostly periods and spaces.
+	* hppa-hpux-tdep.c: Ditto.
+	* hppa-linux-nat.c: Ditto.
+	* hppa-linux-tdep.c: Ditto.
+	* hppanbsd-tdep.c: Ditto.
+	* hppa-tdep.c: Ditto.
+	* hppa-tdep.h: Ditto.
+	* hpux-thread.c: Ditto.
+	* i386-cygwin-tdep.c: Ditto.
+	* i386-darwin-nat.c: Ditto.
+	* i386gnu-nat.c: Ditto.
+	* i386-linux-nat.c: Ditto.
+	* i386-linux-tdep.c: Ditto.
+	* i386-nat.c: Ditto.
+	* i386-nat.h: Ditto.
+	* i386nbsd-tdep.c: Ditto.
+	* i386-sol2-nat.c: Ditto.
+	* i386-stub.c: Ditto.
+	* i386-tdep.c: Ditto.
+	* i386-tdep.h: Ditto.
+	* i387-tdep.c: Ditto.
+	* ia64-linux-nat.c: Ditto.
+	* ia64-linux-tdep.c: Ditto.
+	* ia64-tdep.c: Ditto.
+	* infcall.c: Ditto.
+	* infcall.h: Ditto.
+	* infcmd.c: Ditto.
+	* inferior.c: Ditto.
+	* inferior.h: Ditto.
+	* infloop.c: Ditto.
+	* inflow.c: Ditto.
+	* infrun.c: Ditto.
+	* interps.c: Ditto.
+	* interps.h: Ditto.
+	* iq2000-tdep.c: Ditto.
+	* irix5-nat.c: Ditto.
+	* jit.c: Ditto.
+	* jit.h: Ditto.
+	* jv-exp.y: Ditto.
+	* jv-lang.c: Ditto.
+	* jv-lang.h: Ditto.
+	* jv-typeprint.c: Ditto.
+	* jv-valprint.c: Ditto.
+	* language.c: Ditto.
+	* language.h: Ditto.
+	* linespec.c: Ditto.
+	* linux-fork.c: Ditto.
+	* linux-nat.c: Ditto.
+	* linux-thread-db.c: Ditto.
+	* lm32-tdep.c: Ditto.
+
 2011-01-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-tdep.h (BFIN_A0_DOT_W_REGNUM): Fix typo in name.

@@ -42,11 +42,11 @@
 #include "target.h"
 #include "arch-utils.h"
 
-/* We share this one with symtab.c, but it is not exported widely. */
+/* We share this one with symtab.c, but it is not exported widely.  */
 
 extern char *operator_chars (char *, char **);
 
-/* Prototypes for local functions */
+/* Prototypes for local functions.  */
 
 static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
@@ -142,7 +142,7 @@ static struct
 symtabs_and_lines minsym_found (int funfirstline,
 				struct minimal_symbol *msymbol);
 
-/* Helper functions. */
+/* Helper functions.  */
 
 /* Issue a helpful hint on using the command completion feature on
    single quoted demangled C++ symbols as part of the completion
@@ -178,7 +178,7 @@ cplusplus_error (const char *name, const char *fmt, ...)
 }
 
 /* Return the number of methods described for TYPE, including the
-   methods from types it derives from. This can't be done in the symbol
+   methods from types it derives from.  This can't be done in the symbol
    reader because the type of the baseclass might still be stubbed
    when the definition of the derived class is parsed.  */
 
@@ -321,11 +321,11 @@ add_matching_methods (int method_counter, struct type *t,
       else
 	{
 	  /* This error message gets printed, but the method
-	     still seems to be found
+	     still seems to be found.
 	     fputs_filtered("(Cannot find method ", gdb_stdout);
 	     fprintf_symbol_filtered (gdb_stdout, phys_name,
-	     language_cplus,
-	     DMGL_PARAMS | DMGL_ANSI);
+	                              language_cplus,
+	                              DMGL_PARAMS | DMGL_ANSI);
 	     fputs_filtered(" - possibly inlined.)\n", gdb_stdout);
 	  */
 	}
@@ -457,7 +457,7 @@ find_toplevel_char (char *s, char c)
 }
 
 /* Determines if the gives string corresponds to an Objective-C method
-   representation, such as -[Foo bar:] or +[Foo bar]. Objective-C symbols
+   representation, such as -[Foo bar:] or +[Foo bar].  Objective-C symbols
    are allowed to have spaces and parentheses in them.  */
 
 static int 
@@ -664,7 +664,7 @@ find_method_overload_end (char *p)
   return p;
 }
 
-/* The parser of linespec itself. */
+/* The parser of linespec itself.  */
 
 /* Parse a string that specifies a line number.
    Pass the address of a char * variable; that variable will be
@@ -695,9 +695,9 @@ find_method_overload_end (char *p)
    DEFAULT_LINE specifies the line number to use for relative
    line numbers (that start with signs).  Defaults to current_source_line.
    If CANONICAL is non-NULL, store an array of strings containing the canonical
-   line specs there if necessary. Currently overloaded member functions and
+   line specs there if necessary.  Currently overloaded member functions and
    line numbers or static functions without a filename yield a canonical
-   line spec. The array and the line spec strings are allocated on the heap,
+   line spec.  The array and the line spec strings are allocated on the heap,
    it is the callers responsibility to free them.
 
    Note that it is possible to return zero for the symtab
@@ -760,8 +760,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Locate the end of the first half of the linespec.
      After the call, for instance, if the argptr string is "foo.c:123"
      p will point at "123".  If there is only one part, like "foo", p
-     will point to "". If this is a C++ name, like "A::B::foo", p will
-     point to "::B::foo". Argptr is not changed by this call.  */
+     will point to "".  If this is a C++ name, like "A::B::foo", p will
+     point to "::B::foo".  Argptr is not changed by this call.  */
 
   first_half = p = locate_first_half (argptr, &is_quote_enclosed);
 
@@ -787,10 +787,10 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     {
       /* Is it a C++ or Java compound data structure?
 	 The check on p[1] == ':' is capturing the case of "::",
-	 since p[0]==':' was checked above.  
+	 since p[0]==':' was checked above.
 	 Note that the call to decode_compound does everything
 	 for us, including the lookup on the symbol table, so we
-	 can return now. */
+	 can return now.  */
 	
       if (p[0] == '.' || p[1] == ':')
 	{
@@ -863,7 +863,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     }
   else if (is_objc_method)
     {
-      /* allow word separators in method names for Obj-C */
+      /* allow word separators in method names for Obj-C.  */
       p = skip_quoted_chars (*argptr, NULL, "");
     }
   else
@@ -871,7 +871,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       p = skip_quoted (*argptr);
     }
 
-  /* Keep any template parameters */
+  /* Keep any template parameters.  */
   if (*p == '<')
     p = find_template_name_end (p);
 
@@ -879,7 +879,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (*p == '(')
     p = find_method_overload_end (p);
 
-  /* Make sure we keep important kewords like "const" */
+  /* Make sure we keep important kewords like "const".  */
   if (strncmp (p, " const", 6) == 0)
     p += 6;
 
@@ -960,7 +960,7 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
     {
       /* Use whatever we have for the default source line.  We don't use
          get_current_or_default_symtab_and_line as it can recurse and call
-	 us back! */
+	 us back!  */
       struct symtab_and_line cursal = 
 	get_current_source_symtab_and_line ();
       
@@ -1021,7 +1021,7 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
   has_comma = (ii != 0);
 
   /* Temporarily zap out second half to not confuse the code below.
-     This is undone below. Do not change ii!!  */
+     This is undone below.  Do not change ii!!  */
   if (has_comma)
     {
       *ii = '\0';
@@ -1058,7 +1058,7 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	  p = temp_end;
 	}
       /* Check for a colon and a plus or minus and a [ (which
-         indicates an Objective-C method) */
+         indicates an Objective-C method).  */
       if (is_objc_method_format (p))
 	{
 	  break;
@@ -1147,7 +1147,8 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
     
   if (i1 > 0)
     {
-      sym_arr = (struct symbol **) alloca ((i1 + 1) * sizeof (struct symbol *));
+      sym_arr = (struct symbol **)
+	alloca ((i1 + 1) * sizeof (struct symbol *));
       sym_arr[i1] = NULL;
 
       copy = find_imps (file_symtab, block, *argptr, sym_arr, &i1, &i2); 
@@ -1211,7 +1212,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 
   if (i1 > 1)
     {
-      /* More than one match. The user must choose one or more.  */
+      /* More than one match.  The user must choose one or more.  */
       return decode_line_2 (sym_arr, i2, funfirstline, canonical);
     }
 
@@ -1240,7 +1241,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   /* First check for "global" namespace specification, of the form
      "::foo".  If found, skip over the colons and jump to normal
      symbol processing.  I.e. the whole line specification starts with
-     "::" (note the condition that *argptr == p). */
+     "::" (note the condition that *argptr == p).  */
   if (p[0] == ':' 
       && ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t')))
     saved_arg2 += 2;
@@ -1261,16 +1262,16 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 
   p2 = p;		/* Save for restart.  */
 
-  /* This is very messy. Following the example above we have now the
+  /* This is very messy.  Following the example above we have now the
      following pointers:
      p -> "::inA::fun"
      argptr -> "AAA::inA::fun
      saved_arg -> "AAA::inA::fun
      saved_arg2 -> "AAA::inA::fun
-     p2 -> "::inA::fun". */
+     p2 -> "::inA::fun".  */
 
   /* In the loop below, with these strings, we'll make 2 passes, each
-     is marked in comments.*/
+     is marked in comments.  */
 
   while (1)
     {
@@ -1280,7 +1281,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 
       /* PASS1: at this point p2->"::inA::fun", so p->":inA::fun",
 	 i.e. if there is a double-colon, p will now point to the
-	 second colon. */
+	 second colon.  */
       /* PASS2: p2->"::fun", p->":fun" */
 
       /* Move pointer ahead to next double-colon.  */
@@ -1300,12 +1301,12 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	  /* Note that, since, at the start of this loop, p would be
 	     pointing to the second colon in a double-colon, we only
 	     satisfy the condition below if there is another
-	     double-colon to the right (after). I.e. there is another
-	     component that can be a class or a namespace. I.e, if at
+	     double-colon to the right (after).  I.e. there is another
+	     component that can be a class or a namespace.  I.e, if at
 	     the beginning of this loop (PASS1), we had
 	     p->":inA::fun", we'll trigger this when p has been
 	     advanced to point to "::fun".  */
-	  /* PASS2: we will not trigger this. */
+	  /* PASS2: we will not trigger this.  */
 	  else if ((p[0] == ':') && (p[1] == ':'))
 	    break;	/* Found double-colon.  */
 	  else
@@ -1318,10 +1319,10 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	break;		/* Out of the while (1).  This would happen
 			   for instance if we have looked up
 			   unsuccessfully all the components of the
-			   string, and p->""(PASS2)  */
+			   string, and p->""(PASS2).  */
 
       /* We get here if p points to ' ', '\t', '\'', "::" or ""(i.e
-	 string ended). */
+	 string ended).  */
       /* Save restart for next time around.  */
       p2 = p;
       /* Restore argptr as it was on entry to this function.  */
@@ -1333,10 +1334,10 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
     }			/* while (1) */
 
 
-  /* Start of lookup in the symbol tables. */
+  /* Start of lookup in the symbol tables.  */
 
   /* Lookup in the symbol table the substring between argptr and
-     p. Note, this call changes the value of argptr.  */
+     p.  Note, this call changes the value of argptr.  */
   /* Before the call, argptr->"AAA::inA::fun",
      p->"", p2->"::fun".  After the call: argptr->"fun", p, p2
      unchanged.  */
@@ -1380,7 +1381,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	      p += cp_validate_operator (p - 8) - 8;
 	    }
 
-	  /* Keep any template parameters */
+	  /* Keep any template parameters.  */
 	  if (*p == '<')
 	    p = find_template_name_end (p);
 
@@ -1389,7 +1390,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	  if (a != NULL)
 	    p = find_method_overload_end (a);
 
-	  /* Make sure we keep important kewords like "const" */
+	  /* Make sure we keep important kewords like "const".  */
 	  if (strncmp (p, " const", 6) == 0)
 	    p += 6;
 
@@ -1419,7 +1420,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	}
 
       /* Allocate our own copy of the substring between argptr and
-	 p. */
+	 p.  */
       copy = (char *) alloca (p - *argptr + 1);
       memcpy (copy, *argptr, p - *argptr);
       copy[p - *argptr] = '\0';
@@ -1429,7 +1430,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 		     copy[p - *argptr - 1]) != NULL)
 	copy[p - *argptr - 1] = '\0';
 
-      /* At this point copy->"fun", p->"" */
+      /* At this point copy->"fun", p->"".  */
 
       /* No line number may be specified.  */
       while (*p == ' ' || *p == '\t')
@@ -1437,11 +1438,11 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
       *argptr = p;
       /* At this point arptr->"".  */
 
-      /* Look for copy as a method of sym_class. */
+      /* Look for copy as a method of sym_class.  */
       /* At this point copy->"fun", sym_class is "AAA:inA",
 	 saved_arg->"AAA::inA::fun".  This concludes the scanning of
 	 the string for possible components matches.  If we find it
-	 here, we return. If not, and we are at the and of the string,
+	 here, we return.  If not, and we are at the and of the string,
 	 we'll lookup the whole string in the symbol tables.  */
 
       values = find_method (funfirstline, canonical, saved_arg,
@@ -1465,7 +1466,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	    }
 	}
       return values;
-    } /* End if symbol found */
+    } /* End if symbol found.  */
 
 
   /* We couldn't find a class, so we're in case 2 above.  We check the
@@ -1479,7 +1480,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   /* Set argptr to skip over the name.  */
   *argptr = (*p == '\'') ? p + 1 : p;
 
-  /* Look up entire name */
+  /* Look up entire name.  */
   sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0);
   if (sym)
     return symbol_found (funfirstline, canonical, copy, sym, NULL);
@@ -1525,7 +1526,7 @@ lookup_prefix_sym (char **argptr, char *p)
   *argptr = p;
 
   /* At this point p1->"::inA::fun", p->"inA::fun" copy->"AAA",
-     argptr->"inA::fun" */
+     argptr->"inA::fun".  */
 
   sym = lookup_symbol (copy, 0, STRUCT_DOMAIN, 0);
   if (sym == NULL)
@@ -1942,7 +1943,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
   
   if (SYMBOL_CLASS (sym) == LOC_BLOCK)
     {
-      /* Arg is the name of a function */
+      /* Arg is the name of a function.  */
       values.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));
       values.sals[0] = find_function_start_sal (sym, funfirstline);

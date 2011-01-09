@@ -146,7 +146,8 @@ bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
                           mem_bfd_iovec_stat);
 }
 
-/* Helper function for reading the global JIT descriptor from remote memory.  */
+/* Helper function for reading the global JIT descriptor from remote
+   memory.  */
 
 static void
 jit_read_descriptor (struct gdbarch *gdbarch,
@@ -296,7 +297,8 @@ JITed symbol file is not an object file, ignoring it.\n"));
   discard_cleanups (old_cleanups);
 }
 
-/* This function unregisters JITed code and frees the corresponding objfile.  */
+/* This function unregisters JITed code and frees the corresponding
+   objfile.  */
 
 static void
 jit_unregister_code (struct objfile *objfile)
@@ -372,8 +374,8 @@ jit_inferior_init (struct gdbarch *gdbarch)
 			"jit_inferior_init, jit_descriptor_addr = %s\n",
 			paddress (gdbarch, jit_descriptor_addr));
 
-  /* Read the descriptor so we can check the version number and load any already
-     JITed functions.  */
+  /* Read the descriptor so we can check the version number and load
+     any already JITed functions.  */
   jit_read_descriptor (gdbarch, &descriptor);
 
   /* Check that the version number agrees with that we support.  */
@@ -383,8 +385,8 @@ jit_inferior_init (struct gdbarch *gdbarch)
   /* Put a breakpoint in the registration symbol.  */
   create_jit_event_breakpoint (gdbarch, reg_addr);
 
-  /* If we've attached to a running program, we need to check the descriptor to
-     register any functions that were already generated.  */
+  /* If we've attached to a running program, we need to check the descriptor
+     to register any functions that were already generated.  */
   for (cur_entry_addr = descriptor.first_entry;
        cur_entry_addr != 0;
        cur_entry_addr = cur_entry.next_entry)
@@ -425,9 +427,9 @@ jit_inferior_created_observer (struct target_ops *objfile, int from_tty)
   jit_inferior_init (target_gdbarch);
 }
 
-/* This function cleans up any code entries left over when the inferior exits.
-   We get left over code when the inferior exits without unregistering its code,
-   for example when it crashes.  */
+/* This function cleans up any code entries left over when the
+   inferior exits.  We get left over code when the inferior exits
+   without unregistering its code, for example when it crashes.  */
 
 static void
 jit_inferior_exit_hook (struct inferior *inf)
@@ -456,7 +458,7 @@ jit_event_handler (struct gdbarch *gdbarch)
   jit_read_descriptor (gdbarch, &descriptor);
   entry_addr = descriptor.relevant_entry;
 
-  /* Do the corresponding action. */
+  /* Do the corresponding action.  */
   switch (descriptor.action_flag)
     {
     case JIT_NOACTION:
@@ -468,7 +470,8 @@ jit_event_handler (struct gdbarch *gdbarch)
     case JIT_UNREGISTER:
       objf = jit_find_objf_with_entry_addr (entry_addr);
       if (objf == NULL)
-	printf_unfiltered (_("Unable to find JITed code entry at address: %s\n"),
+	printf_unfiltered (_("Unable to find JITed code "
+			     "entry at address: %s\n"),
 			   paddress (gdbarch, entry_addr));
       else
         jit_unregister_code (objf);
@@ -487,10 +490,10 @@ extern void _initialize_jit (void);
 void
 _initialize_jit (void)
 {
-  add_setshow_zinteger_cmd ("jit", class_maintenance, &jit_debug, _("\
-Set JIT debugging."), _("\
-Show JIT debugging."), _("\
-When non-zero, JIT debugging is enabled."),
+  add_setshow_zinteger_cmd ("jit", class_maintenance, &jit_debug,
+			    _("Set JIT debugging."),
+			    _("Show JIT debugging."),
+			    _("When non-zero, JIT debugging is enabled."),
 			    NULL,
 			    show_jit_debug,
 			    &setdebuglist, &showdebuglist);

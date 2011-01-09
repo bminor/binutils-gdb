@@ -232,7 +232,8 @@ gnu_store_registers (struct target_ops *ops,
       state = proc_get_state (thread, 1);
       if (!state)
 	{
-	  warning (_("Couldn't store registers into %s"), proc_string (thread));
+	  warning (_("Couldn't store registers into %s"),
+		   proc_string (thread));
 	  return;
 	}
 
@@ -259,7 +260,8 @@ gnu_store_registers (struct target_ops *ops,
 		  regcache_raw_supply (regcache, check_regno,
 				       REG_ADDR (state, check_regno));
 		else
-		  warning (_("... also writing this register!  Suspicious..."));
+		  warning (_("... also writing this register!  "
+			     "Suspicious..."));
 	      }
 	}
 

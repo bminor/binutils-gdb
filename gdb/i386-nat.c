@@ -46,7 +46,7 @@ struct i386_dr_low_type i386_dr_low;
 /* Debug registers' indices.  */
 #define DR_NADDR	4	/* The number of debug address registers.  */
 #define DR_STATUS	6	/* Index of debug status register (DR6).  */
-#define DR_CONTROL	7	/* Index of debug control register (DR7). */
+#define DR_CONTROL	7	/* Index of debug control register (DR7).  */
 
 /* DR7 Debug Control register fields.  */
 
@@ -269,7 +269,8 @@ i386_length_and_rw_bits (int len, enum target_hw_bp_type type)
 	break;
       case hw_read:
 	internal_error (__FILE__, __LINE__,
-			_("The i386 doesn't support data-read watchpoints.\n"));
+			_("The i386 doesn't support "
+			  "data-read watchpoints.\n"));
       case hw_access:
 	rw = DR_RW_READ;
 	break;
@@ -386,7 +387,7 @@ i386_remove_aligned_watchpoint (CORE_ADDR addr, unsigned len_rw_bits)
 	  && dr_mirror[i] == addr
 	  && I386_DR_GET_RW_LEN (i) == len_rw_bits)
 	{
-	  if (--dr_ref_count[i] == 0) /* no longer in use? */
+	  if (--dr_ref_count[i] == 0) /* no longer in use?  */
 	    {
 	      /* Reset our mirror.  */
 	      dr_mirror[i] = 0;
@@ -548,7 +549,7 @@ i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
 }
 
 /* If the inferior has some watchpoint that triggered, set the
-   address associated with that watchpoint and return non-zero.  
+   address associated with that watchpoint and return non-zero.
    Otherwise, return zero.  */
 
 static int

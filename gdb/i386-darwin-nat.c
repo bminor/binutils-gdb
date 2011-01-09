@@ -69,7 +69,9 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
              &gp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for GP registers for thread 0x%ulx"), current_thread);
+	      printf_unfiltered (_("Error calling thread_get_state for "
+				   "GP registers for thread 0x%ulx"),
+				 current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  amd64_supply_native_gregset (regcache, &gp_regs.uts, -1);
@@ -87,7 +89,9 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
              &fp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for float registers for thread 0x%ulx"), current_thread);
+	      printf_unfiltered (_("Error calling thread_get_state for "
+				   "float registers for thread 0x%ulx"),
+				 current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
           amd64_supply_fxsave (regcache, -1, &fp_regs.ufs.fs64.__fpu_fcw);
@@ -109,7 +113,9 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
              &gp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for GP registers for thread 0x%ulx"), current_thread);
+	      printf_unfiltered (_("Error calling thread_get_state for "
+				   "GP registers for thread 0x%ulx"),
+				 current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  for (i = 0; i < I386_NUM_GREGS; i++)
@@ -132,7 +138,9 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
              &fp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
-	      printf_unfiltered (_("Error calling thread_get_state for float registers for thread 0x%ulx"), current_thread);
+	      printf_unfiltered (_("Error calling thread_get_state for "
+				   "float registers for thread 0x%ulx"),
+				 current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
           i387_supply_fxsave (regcache, -1, &fp_regs.__fpu_fcw);
@@ -293,7 +301,9 @@ i386_darwin_dr_set (int regnum, uint32_t value)
 
   if (ret != KERN_SUCCESS)
     {
-      printf_unfiltered (_("Error reading debug registers thread 0x%x via thread_get_state\n"), (int) current_thread);
+      printf_unfiltered (_("Error reading debug registers "
+			   "thread 0x%x via thread_get_state\n"),
+			 (int) current_thread);
       MACH_CHECK_ERROR (ret);
     }
 
@@ -330,7 +340,9 @@ i386_darwin_dr_set (int regnum, uint32_t value)
 
   if (ret != KERN_SUCCESS)
     {
-      printf_unfiltered (_("Error writing debug registers thread 0x%x via thread_get_state\n"), (int) current_thread);
+      printf_unfiltered (_("Error writing debug registers "
+			   "thread 0x%x via thread_get_state\n"),
+			 (int) current_thread);
       MACH_CHECK_ERROR (ret);
     }
 }
@@ -355,7 +367,9 @@ i386_darwin_dr_get (int regnum)
 
   if (ret != KERN_SUCCESS)
     {
-      printf_unfiltered (_("Error reading debug registers thread 0x%x via thread_get_state\n"), (int) current_thread);
+      printf_unfiltered (_("Error reading debug registers "
+			   "thread 0x%x via thread_get_state\n"),
+			 (int) current_thread);
       MACH_CHECK_ERROR (ret);
     }
 
@@ -542,7 +556,8 @@ darwin_set_sstep (thread_t thread, int enable)
 	  return;
 	if ((regs.uts.ts32.__eflags & X86_EFLAGS_T) == bit)
 	  return;
-	regs.uts.ts32.__eflags = (regs.uts.ts32.__eflags & ~X86_EFLAGS_T) | bit;
+	regs.uts.ts32.__eflags
+	  = (regs.uts.ts32.__eflags & ~X86_EFLAGS_T) | bit;
 	kret = thread_set_state (thread, x86_THREAD_STATE, 
 				 (thread_state_t) &regs, count);
 	MACH_CHECK_ERROR (kret);
@@ -557,7 +572,8 @@ darwin_set_sstep (thread_t thread, int enable)
 	  return;
 	if ((regs.uts.ts64.__rflags & X86_EFLAGS_T) == bit)
 	  return;
-	regs.uts.ts64.__rflags = (regs.uts.ts64.__rflags & ~X86_EFLAGS_T) | bit;
+	regs.uts.ts64.__rflags
+	  = (regs.uts.ts64.__rflags & ~X86_EFLAGS_T) | bit;
 	kret = thread_set_state (thread, x86_THREAD_STATE, 
 				 (thread_state_t) &regs, count);
 	MACH_CHECK_ERROR (kret);

@@ -53,7 +53,7 @@ java_value_print (struct value *val, struct ui_file *stream,
     {
       CORE_ADDR obj_addr;
 
-      /* Get the run-time type, and cast the object into that */
+      /* Get the run-time type, and cast the object into that.  */
 
       obj_addr = unpack_pointer (type, value_contents (val));
 
@@ -89,9 +89,9 @@ java_value_print (struct value *val, struct ui_file *stream,
       if (el_type == NULL)
 	{
 	  CORE_ADDR element;
-	  CORE_ADDR next_element = -1; /* dummy initial value */
+	  CORE_ADDR next_element = -1; /* Dummy initial value.  */
 
-	  /* Skip object header and length. */
+	  /* Skip object header and length.  */
 	  address += get_java_object_header_size (gdbarch) + 4;
 
 	  while (i < length && things_printed < options->print_max)
@@ -177,7 +177,8 @@ java_value_print (struct value *val, struct ui_file *stream,
 	      for (reps = 1; i + reps < length; reps++)
 		{
 		  set_value_lazy (next_v, 1);
-		  set_value_offset (next_v, value_offset (next_v) + TYPE_LENGTH (el_type));
+		  set_value_offset (next_v, value_offset (next_v)
+				    + TYPE_LENGTH (el_type));
 		  if (memcmp (value_contents (v), value_contents (next_v),
 			      TYPE_LENGTH (el_type)) != 0)
 		    break;
@@ -205,7 +206,7 @@ java_value_print (struct value *val, struct ui_file *stream,
       return 0;
     }
 
-  /* If it's type String, print it */
+  /* If it's type String, print it.  */
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR
       && TYPE_TARGET_TYPE (type)
@@ -225,7 +226,7 @@ java_value_print (struct value *val, struct ui_file *stream,
       unsigned long count;
       struct value *mark;
 
-      mark = value_mark ();	/* Remember start of new values */
+      mark = value_mark ();	/* Remember start of new values.  */
 
       data_val = value_struct_elt (&val, NULL, "data", NULL, NULL);
       data = value_as_address (data_val);
@@ -236,7 +237,7 @@ java_value_print (struct value *val, struct ui_file *stream,
       count_val = value_struct_elt (&val, NULL, "count", NULL, NULL);
       count = value_as_address (count_val);
 
-      value_free_to_mark (mark);	/* Release unnecessary values */
+      value_free_to_mark (mark);	/* Release unnecessary values.  */
 
       char_type = builtin_java_type (gdbarch)->builtin_char;
       val_print_string (char_type, NULL, data + boffset, count, stream,
@@ -486,7 +487,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 		const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  unsigned int i = 0;	/* Number of characters printed */
+  unsigned int i = 0;	/* Number of characters printed.  */
   struct type *target_type;
   CORE_ADDR addr;
 
@@ -504,10 +505,11 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 	{
 	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if we ARE using
-	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
+	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.)  */
 	  /* Extract an address, assume that it is unsigned.  */
 	  print_address_demangle (gdbarch,
-				  extract_unsigned_integer (valaddr, TYPE_LENGTH (type)),
+				  extract_unsigned_integer (valaddr,
+							    TYPE_LENGTH (type)),
 				  stream, demangle);
 	  break;
 	}
