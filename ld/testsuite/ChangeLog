@@ -1,3 +1,10 @@
+2011-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/assert.exp: Run assert2.
+
+	* ld-scripts/assert2.d: New.
+	* ld-scripts/assert2.t: Likewise.
+
 2011-01-10  Nathan Sidwell  <nathan@codesourcery.com>
 	    Glauber de Oliveira Costa  <glommer@gmail.com>
 
