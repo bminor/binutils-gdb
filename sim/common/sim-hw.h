@@ -49,7 +49,7 @@ void sim_hw_abort
 (SIM_DESC sd,
  struct hw *hw,
  const char *fmt,
- ...) __attribute__ ((format (printf, 3, 4)));
+ ...) __attribute__ ((format (printf, 3, 4), noreturn));
 
 
 

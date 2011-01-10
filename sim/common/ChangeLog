@@ -1,3 +1,8 @@
+2010-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* hw-device.h (hw_abort, hw_vabort, hw_halt): Add noreturn attribute.
+	* sim-hw.h (sim_hw_abort): Likewise.
+
 2011-01-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-load.c (sim_load_file): Change buffer type to unsigned char *.

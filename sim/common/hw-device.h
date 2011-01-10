@@ -433,17 +433,17 @@ int hw_ioctl
 void hw_abort
 (struct hw *me,
  const char *fmt,
- ...) __attribute__ ((format (printf, 2, 3)));
+ ...) __attribute__ ((format (printf, 2, 3), noreturn));
 
 void hw_vabort
 (struct hw *me,
  const char *fmt,
- va_list ap);
+ va_list ap) __attribute__ ((noreturn));
 
 void hw_halt
 (struct hw *me,
  int reason,
- int status);
+ int status) __attribute__ ((noreturn));
 
 
 #define hw_trace_p(hw) ((hw)->trace_of_hw_p + 0)
