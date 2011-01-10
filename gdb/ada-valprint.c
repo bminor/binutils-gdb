@@ -453,8 +453,8 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 /* Print the character string STRING, printing at most LENGTH characters.
    Printing stops early if the number hits print_max; repeat counts
    are printed as appropriate.  Print ellipses at the end if we
-   had to stop before printing LENGTH characters, or if
-   FORCE_ELLIPSES.   TYPE_LEN is the length (1 or 2) of the character type.  */
+   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.
+   TYPE_LEN is the length (1 or 2) of the character type.  */
 
 static void
 printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
