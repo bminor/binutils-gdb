@@ -53,24 +53,6 @@ gdb_test_multiple "python print 23" "verify python support" {
     -re "$gdb_prompt $"	{}
 }
 
-# Usage: gdb_py_test_multiple NAME INPUT RESULT {INPUT RESULT}...
-# Run a test named NAME, consisting of multiple lines of input.
-# After each input line INPUT, search for result line RESULT.
-# Succeed if all results are seen; fail otherwise.
-proc gdb_py_test_multiple {name args} {
-    global gdb_prompt
-    foreach {input result} $args {
-	if {[gdb_test_multiple $input "$name - $input" {
-	    -re "\[\r\n\]*($result)\[\r\n\]+($gdb_prompt | *>)$" {
-		pass "$name - $input"
-	    }
-	}]} {
-	    return 1
-	}
-    }
-    return 0
-}
-
 gdb_py_test_multiple "multi-line python command" \
   "python" "" \
   "print 23" "" \

@@ -1,3 +1,10 @@
+2011-01-10  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-cmd.exp: Remove gdb_py_test_multiple function.
+	Use load_lib gdb-python.exp.
+	* gdb.python/python.exp: Ditto.
+	* gdb.python/py-function.exp: Ditto.
+
 2011-01-09  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* gdb.threads/tls.exp ("info address me"): Fix expected output.
