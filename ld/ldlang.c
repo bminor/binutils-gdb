@@ -55,7 +55,6 @@ static struct obstack map_obstack;
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
-static const char *startup_file;
 static const char *entry_symbol_default = "start";
 static bfd_boolean placed_commons = FALSE;
 static bfd_boolean stripped_excluded_sections = FALSE;
@@ -6705,15 +6704,13 @@ lang_add_attribute (enum statement_enum attribute)
 void
 lang_startup (const char *name)
 {
-  if (startup_file != NULL)
+  if (first_file->filename != NULL)
     {
       einfo (_("%P%F: multiple STARTUP files\n"));
     }
   first_file->filename = name;
   first_file->local_sym_name = name;
   first_file->real = TRUE;
-
-  startup_file = name;
 }
 
 void

@@ -1,3 +1,8 @@
+2011-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (startup_file): Removed.
+	(lang_startup): Updated.
+
 2011-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12364
