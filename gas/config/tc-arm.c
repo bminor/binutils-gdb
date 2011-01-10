@@ -4275,7 +4275,6 @@ s_arm_eabi_attribute (int ignored ATTRIBUTE_UNUSED)
   if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
     attributes_set_explicitly[tag] = 1;
 }
-#endif /* OBJ_ELF */
 
 /* Emit a tls fix for the symbol.  */
 
@@ -4300,6 +4299,7 @@ s_arm_tls_descseq (int ignored ATTRIBUTE_UNUSED)
 	       thumb_mode ? BFD_RELOC_ARM_THM_TLS_DESCSEQ
 	       : BFD_RELOC_ARM_TLS_DESCSEQ);
 }
+#endif /* OBJ_ELF */
 
 static void s_arm_arch (int);
 static void s_arm_object_arch (int);
