@@ -447,8 +447,8 @@ m32r_upload_command (char *args, int from_tty)
 	myIPaddress++;
 
       if (!strncmp (myIPaddress, "0.0.", 4))	/* empty */
-	error ("Please use 'set board-address' to "
-	       "set the M32R-EVA board's IP address.");
+	error (_("Please use 'set board-address' to "
+		 "set the M32R-EVA board's IP address."));
       if (strchr (myIPaddress, '('))
 	*(strchr (myIPaddress, '(')) = '\0';	/* delete trailing junk */
       board_addr = xstrdup (myIPaddress);
@@ -479,8 +479,8 @@ m32r_upload_command (char *args, int from_tty)
 	    }
 	}
       if (server_addr == 0)	/* failed?  */
-	error ("Need to know gdb host computer's "
-	       "IP address (use 'set server-address')");
+	error (_("Need to know gdb host computer's "
+		 "IP address (use 'set server-address')"));
     }
 
   if (args == 0 || args[0] == 0)	/* No args: upload the current
@@ -492,8 +492,8 @@ m32r_upload_command (char *args, int from_tty)
       if (current_directory)
 	download_path = xstrdup (current_directory);
       else
-	error ("Need to know default download "
-	       "path (use 'set download-path')");
+	error (_("Need to know default download "
+		 "path (use 'set download-path')"));
     }
 
   gettimeofday (&start_time, NULL);
@@ -514,9 +514,9 @@ m32r_upload_command (char *args, int from_tty)
   resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result?  */
 
   if (buf[0] == 0 || strstr (buf, "complete") == 0)
-    error ("Upload file not found: %s.srec\n"
-	   "Check IP addresses and download path.",
-       args);
+    error (_("Upload file not found: %s.srec\n"
+	     "Check IP addresses and download path."),
+	   args);
   else
     printf_filtered (" -- Ethernet load complete.\n");
 

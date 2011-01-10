@@ -1,5 +1,10 @@
 2011-01-08  Michael Snyder  <msnyder@vmware.com>
 
+	* m32r-rom.c (m32r_upload_command): Fix up ARI warnings for _
+	markup.
+
+2011-01-08  Michael Snyder  <msnyder@vmware.com>
+
 	* h8300-tdep.c: Comment cleanup, mostly periods and spaces.
 	* hppa-hpux-tdep.c: Ditto.
 	* hppa-linux-nat.c: Ditto.
