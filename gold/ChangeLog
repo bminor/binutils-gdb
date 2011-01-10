@@ -1,3 +1,10 @@
+2011-01-10  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::layout_eh_frame): Mark a writable .eh_frame
+	section as relro.
+	(Layout::set_segment_offsets): Reset increase_relro before calling
+	set_section_addresses a second time.
+
 2011-01-04  Cary Coutant  <ccoutant@google.com>
 
 	* script-sections.cc (Sort_output_sections::operator()): Sort TLS
