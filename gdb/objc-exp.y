@@ -178,7 +178,7 @@ parse_number (char *, int, int, YYSTYPE *);
 %token <sval> STRING
 %token <sval> NSSTRING		/* ObjC Foundation "NSString" literal */
 %token <sval> SELECTOR		/* ObjC "@selector" pseudo-operator   */
-%token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
+%token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence.  */
 %token <tsym> TYPENAME
 %token <class> CLASSNAME	/* ObjC Class name */
 %type <sval> name
@@ -544,10 +544,12 @@ exp	:	INT
 
 exp	:	NAME_OR_INT
 			{ YYSTYPE val;
-			  parse_number ($1.stoken.ptr, $1.stoken.length, 0, &val);
+			  parse_number ($1.stoken.ptr,
+					$1.stoken.length, 0, &val);
 			  write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (val.typed_val_int.type);
-			  write_exp_elt_longcst ((LONGEST)val.typed_val_int.val);
+			  write_exp_elt_longcst ((LONGEST) 
+						 val.typed_val_int.val);
 			  write_exp_elt_opcode (OP_LONG);
 			}
 	;
@@ -624,7 +626,8 @@ block	:	BLOCKNAME
 			      struct symtab *tem =
 				  lookup_symtab (copy_name ($1.stoken));
 			      if (tem)
-				$$ = BLOCKVECTOR_BLOCK (BLOCKVECTOR (tem), STATIC_BLOCK);
+				$$ = BLOCKVECTOR_BLOCK (BLOCKVECTOR (tem),
+							STATIC_BLOCK);
 			      else
 				error ("No file or function \"%s\".",
 				       copy_name ($1.stoken));
@@ -717,10 +720,13 @@ variable:	qualified_name
 			  msymbol = lookup_minimal_symbol (name, NULL, NULL);
 			  if (msymbol != NULL)
 			    write_exp_msymbol (msymbol);
-			  else if (!have_full_symbols () && !have_partial_symbols ())
-			    error ("No symbol table is loaded.  Use the \"file\" command.");
+			  else if (!have_full_symbols ()
+				   && !have_partial_symbols ())
+			    error ("No symbol table is loaded.  "
+				   "Use the \"file\" command.");
 			  else
-			    error ("No symbol \"%s\" in current context.", name);
+			    error ("No symbol \"%s\" in current context.",
+				   name);
 			}
 	;
 
@@ -770,7 +776,8 @@ variable:	name_not_typename
 				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols () && 
 				       !have_partial_symbols ())
-				error ("No symbol table is loaded.  Use the \"file\" command.");
+				error ("No symbol table is loaded.  "
+				       "Use the \"file\" command.");
 			      else
 				error ("No symbol \"%s\" in current context.",
 				       copy_name ($1.stoken));
@@ -1120,7 +1127,8 @@ parse_number (p, len, parsed_float, putithere)
   if (long_p == 0
       && (un >> (gdbarch_int_bit (parse_gdbarch) - 2)) == 0)
     {
-      high_bit = ((unsigned LONGEST)1) << (gdbarch_int_bit (parse_gdbarch) - 1);
+      high_bit
+	= ((unsigned LONGEST)1) << (gdbarch_int_bit (parse_gdbarch) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -1134,7 +1142,8 @@ parse_number (p, len, parsed_float, putithere)
   else if (long_p <= 1
 	   && (un >> (gdbarch_long_bit (parse_gdbarch) - 2)) == 0)
     {
-      high_bit = ((unsigned LONGEST)1) << (gdbarch_long_bit (parse_gdbarch) - 1);
+      high_bit
+	= ((unsigned LONGEST)1) << (gdbarch_long_bit (parse_gdbarch) - 1);
       unsigned_type = parse_type->builtin_unsigned_long;
       signed_type = parse_type->builtin_long;
     }
@@ -1331,7 +1340,8 @@ yylex ()
 	    hex = 1;
 	    local_radix = 16;
 	  }
-	else if (tokchr == '0' && (p[1]=='t' || p[1]=='T' || p[1]=='d' || p[1]=='D'))
+	else if (tokchr == '0' && (p[1]=='t' || p[1]=='T'
+				   || p[1]=='d' || p[1]=='D'))
 	  {
 	    p += 2;
 	    hex = 0;

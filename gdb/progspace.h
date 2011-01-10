@@ -174,7 +174,7 @@ struct program_space
     struct objfile *symfile_object_file;
 
     /* All known objfiles are kept in a linked list.  This points to
-       the head of this list. */
+       the head of this list.  */
     struct objfile *objfiles;
 
     /* The set of target sections matching the sections mapped into
@@ -196,7 +196,7 @@ struct program_space
 #define symfile_objfile current_program_space->symfile_object_file
 
 /* All known objfiles are kept in a linked list.  This points to the
-   root of this list. */
+   root of this list.  */
 #define object_files current_program_space->objfiles
 
 /* The set of target sections matching the sections mapped into the

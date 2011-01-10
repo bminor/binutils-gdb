@@ -122,7 +122,7 @@ static const char *powerpc_vector_strings[] =
 static enum powerpc_vector_abi powerpc_vector_abi_global = POWERPC_VEC_AUTO;
 static const char *powerpc_vector_abi_string = "auto";
 
-/* To be used by skip_prologue. */
+/* To be used by skip_prologue.  */
 
 struct rs6000_framedata
   {
@@ -135,8 +135,8 @@ struct rs6000_framedata
     int saved_vr;               /* smallest # of saved vr */
     int saved_ev;               /* smallest # of saved ev */
     int alloca_reg;		/* alloca register number (frame ptr) */
-    char frameless;		/* true if frameless functions. */
-    char nosavedpc;		/* true if pc not saved. */
+    char frameless;		/* true if frameless functions.  */
+    char nosavedpc;		/* true if pc not saved.  */
     char used_bl;		/* true if link register clobbered */
     int gpr_offset;		/* offset of saved gprs from prev sp */
     int fpr_offset;		/* offset of saved fprs from prev sp */
@@ -1017,7 +1017,8 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 		   paddress (gdbarch, insn), paddress (gdbarch, current_pc),
 		   paddress (gdbarch, from + offset));
 
-	      regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+	      regcache_cooked_write_unsigned (regs,
+					      gdbarch_pc_regnum (gdbarch),
 					      from + offset);
 	    }
 	}
@@ -1275,7 +1276,7 @@ bl_to_blrl_insn_p (CORE_ADDR pc, int insn, enum bfd_endian byte_order)
   return 0;
 }
 
-/* Masks for decoding a branch-and-link (bl) instruction.  
+/* Masks for decoding a branch-and-link (bl) instruction.
 
    BL_MASK and BL_INSTRUCTION are used in combination with each other.
    The former is anded with the opcode in question; if the result of
@@ -1317,8 +1318,7 @@ rs6000_skip_stack_check (struct gdbarch *gdbarch, const CORE_ADDR start_pc)
 
   /* First possible sequence: A small number of probes.
          stw 0, -<some immediate>(1)
-         [repeat this instruction any (small) number of times]
-  */
+         [repeat this instruction any (small) number of times].  */
   
   if ((op & 0xffff0000) == 0x90010000)
     {
@@ -1340,8 +1340,7 @@ rs6000_skip_stack_check (struct gdbarch *gdbarch, const CORE_ADDR start_pc)
          addi 12,12,-<some immediate>
          stw 0,0(12)
          b <disp>
-         [possibly one last probe: stw 0,<some immediate>(12)]
-  */
+         [possibly one last probe: stw 0,<some immediate>(12)].  */
 
   while (1)
     {
@@ -1397,7 +1396,7 @@ rs6000_skip_stack_check (struct gdbarch *gdbarch, const CORE_ADDR start_pc)
       if ((op & 0xfc000001) != 0x48000000)
         break;
 
-      /* [possibly one last probe: stw 0,<some immediate>(12)] */
+      /* [possibly one last probe: stw 0,<some immediate>(12)].  */
       pc = pc + 4;
       op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xffff0000) == 0x900c0000)
@@ -1491,8 +1490,7 @@ rs6000_skip_stack_check (struct gdbarch *gdbarch, const CORE_ADDR start_pc)
    - ev_offset is the offset of the first saved ev from the previous frame.
    - lr_offset is the offset of the saved lr
    - cr_offset is the offset of the saved cr
-   - vrsave_offset is the offset of the saved vrsave register
- */
+   - vrsave_offset is the offset of the saved vrsave register.  */
 
 static CORE_ADDR
 skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
@@ -1540,7 +1538,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
       /* Sometimes it isn't clear if an instruction is a prologue
          instruction or not.  When we encounter one of these ambiguous
 	 cases, we'll set prev_insn_was_prologue_insn to 0 (false).
-	 Otherwise, we'll assume that it really is a prologue instruction. */
+	 Otherwise, we'll assume that it really is a prologue instruction.  */
       if (prev_insn_was_prologue_insn)
 	last_prologue_pc = pc;
 
@@ -1625,7 +1623,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  /* nop */
 	  /* Allow nops in the prologue, but do not consider them to
 	     be part of the prologue unless followed by other prologue
-	     instructions. */
+	     instructions.  */
 	  prev_insn_was_prologue_insn = 0;
 	  continue;
 
@@ -1719,7 +1717,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	}
       else if ((op & 0xfc000001) == 0x48000001)
 	{			/* bl foo, 
-				   to save fprs??? */
+				   to save fprs???  */
 
 	  fdata->frameless = 0;
 
@@ -1741,7 +1739,8 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	      struct symtab_and_line prologue_sal = find_pc_line (orig_pc, 0);
 	      struct symtab_and_line this_sal = find_pc_line (pc, 0);
 
-	      if ((prologue_sal.line == 0) || (prologue_sal.line != this_sal.line))
+	      if ((prologue_sal.line == 0)
+		  || (prologue_sal.line != this_sal.line))
 		break;
 	    }
 
@@ -1750,11 +1749,11 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  /* At this point, make sure this is not a trampoline
 	     function (a function that simply calls another functions,
 	     and nothing else).  If the next is not a nop, this branch
-	     was part of the function prologue. */
+	     was part of the function prologue.  */
 
 	  if (op == 0x4def7b82 || op == 0)	/* crorc 15, 15, 15 */
-	    break;		/* don't skip over 
-				   this branch */
+	    break;		/* Don't skip over 
+				   this branch.  */
 
 	  fdata->used_bl = 1;
 	  continue;
@@ -1769,7 +1768,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	}
       else if ((op & 0xfc1f016a) == 0x7c01016e)
 	{			/* stwux rX,r1,rY */
-	  /* no way to figure out what r1 is going to be */
+	  /* No way to figure out what r1 is going to be.  */
 	  fdata->frameless = 0;
 	  offset = fdata->offset;
 	  continue;
@@ -1783,7 +1782,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	}
       else if ((op & 0xfc1f016a) == 0x7c01016a)
 	{			/* stdux rX,r1,rY */
-	  /* no way to figure out what r1 is going to be */
+	  /* No way to figure out what r1 is going to be.  */
 	  fdata->frameless = 0;
 	  offset = fdata->offset;
 	  continue;
@@ -1797,8 +1796,8 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
  	}
       /* Load up minimal toc pointer.  Do not treat an epilogue restore
 	 of r31 as a minimal TOC load.  */
-      else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,... */
-	       (op >> 22) == 0x3af)		/* ld r31,... or ld r30,... */
+      else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,...  */
+	       (op >> 22) == 0x3af)		/* ld r31,... or ld r30,...  */
 	       && !framep
 	       && !minimal_toc_loaded)
 	{
@@ -1811,7 +1810,8 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
       else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
                (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
                (((op >> 21) & 31) <= 10) &&
-               ((long) ((op >> 16) & 31) >= fdata->saved_gpr)) /* Rx: local var reg */
+               ((long) ((op >> 16) & 31)
+		>= fdata->saved_gpr)) /* Rx: local var reg */
 	{
 	  continue;
 
@@ -1893,7 +1893,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  vr_saved_offset = SIGNED_SHORT (op);
 
           /* This insn by itself is not part of the prologue, unless
-             if part of the pair of insns mentioned above. So do not
+             if part of the pair of insns mentioned above.  So do not
              record this insn as part of the prologue yet.  */
           prev_insn_was_prologue_insn = 0;
 	}
@@ -2051,7 +2051,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 #if 0
 /* I have problems with skipping over __main() that I need to address
- * sometime. Previously, I used to use misc_function_vector which
+ * sometime.  Previously, I used to use misc_function_vector which
  * didn't work as well as I wanted to be.  -MGO */
 
   /* If the first thing after skipping a prolog is a branch to a function,
@@ -2062,7 +2062,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 
   if ((op & 0xfc000001) == 0x48000001)
-    {				/* bl foo, an initializer function? */
+    {				/* bl foo, an initializer function?  */
       op = read_memory_integer (pc + 4, 4, byte_order);
 
       if (op == 0x4def7b82)
@@ -2256,7 +2256,8 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
       if (op != trampoline_code[ii])
 	return 0;
     }
-  ii = get_frame_register_unsigned (frame, 11);	/* r11 holds destination addr   */
+  ii = get_frame_register_unsigned (frame, 11);	/* r11 holds destination
+						   addr.  */
   pc = read_memory_unsigned_integer (ii, tdep->wordsize, byte_order);
   return pc;
 }
@@ -2734,7 +2735,8 @@ efpr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 static void
-rs6000_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+rs6000_pseudo_register_read (struct gdbarch *gdbarch,
+			     struct regcache *regcache,
 			     int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch *regcache_arch = get_regcache_arch (regcache);
@@ -3194,7 +3196,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
     }
 
   /* if != -1, fdata.saved_ev is the smallest number of saved_ev.
-     All vr's from saved_ev to ev31 are saved. ????? */
+     All vr's from saved_ev to ev31 are saved. ?????  */
   if (tdep->ppc_ev0_regnum != -1)
     {
       if (fdata.saved_ev >= 0)
@@ -3213,12 +3215,14 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* If != 0, fdata.cr_offset is the offset from the frame that
      holds the CR.  */
   if (fdata.cr_offset != 0)
-    cache->saved_regs[tdep->ppc_cr_regnum].addr = cache->base + fdata.cr_offset;
+    cache->saved_regs[tdep->ppc_cr_regnum].addr
+      = cache->base + fdata.cr_offset;
 
   /* If != 0, fdata.lr_offset is the offset from the frame that
      holds the LR.  */
   if (fdata.lr_offset != 0)
-    cache->saved_regs[tdep->ppc_lr_regnum].addr = cache->base + fdata.lr_offset;
+    cache->saved_regs[tdep->ppc_lr_regnum].addr
+      = cache->base + fdata.lr_offset;
   else if (fdata.lr_register != -1)
     cache->saved_regs[tdep->ppc_lr_regnum].realreg = fdata.lr_register;
   /* The PC is found in the link register.  */
@@ -3228,7 +3232,8 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* If != 0, fdata.vrsave_offset is the offset from the frame that
      holds the VRSAVE.  */
   if (fdata.vrsave_offset != 0)
-    cache->saved_regs[tdep->ppc_vrsave_regnum].addr = cache->base + fdata.vrsave_offset;
+    cache->saved_regs[tdep->ppc_vrsave_regnum].addr
+      = cache->base + fdata.vrsave_offset;
 
   if (fdata.alloca_reg < 0)
     /* If no alloca register used, then fi->frame is the value of the
@@ -3950,7 +3955,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (have_spe || have_dfp || have_vsx)
     {
       set_gdbarch_pseudo_register_read (gdbarch, rs6000_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch, rs6000_pseudo_register_write);
+      set_gdbarch_pseudo_register_write (gdbarch,
+					 rs6000_pseudo_register_write);
     }
 
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
@@ -4008,13 +4014,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
 
   /* The value of symbols of type N_SO and N_FUN maybe null when
-     it shouldn't be. */
+     it shouldn't be.  */
   set_gdbarch_sofun_address_maybe_missing (gdbarch, 1);
 
   /* Handles single stepping of atomic sequences.  */
   set_gdbarch_software_single_step (gdbarch, ppc_deal_with_atomic_sequence);
   
-  /* Not sure on this. FIXMEmgo */
+  /* Not sure on this.  FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
   /* Helpers for function argument information.  */
@@ -4179,7 +4185,8 @@ powerpc_set_vector_abi (char *args, int from_tty,
 
 /* Initialization code.  */
 
-extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-prototypes */
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_rs6000_tdep;
 
 void
 _initialize_rs6000_tdep (void)

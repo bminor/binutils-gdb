@@ -95,10 +95,10 @@ ppcbug_supply_register (struct regcache *regcache, char *regname,
 }
 
 /*
- * This array of registers needs to match the indexes used by GDB. The
+ * This array of registers needs to match the indexes used by GDB.  The
  * whole reason this exists is because the various ROM monitors use
  * different names than GDB does, and don't support all the
- * registers either. So, typing "info reg sp" becomes an "A7".
+ * registers either.  So, typing "info reg sp" becomes an "A7".
  */
 
 static char *ppcbug_regnames[] =
@@ -118,9 +118,9 @@ static char *ppcbug_regnames[] =
 };
 
 /*
- * Define the monitor command strings. Since these are passed directly
+ * Define the monitor command strings.  Since these are passed directly
  * through to a printf style function, we need can include formatting
- * strings. We also need a CR or LF on the end.
+ * strings.  We also need a CR or LF on the end.
  */
 
 static struct target_ops ppcbug_ops0;
@@ -165,7 +165,8 @@ init_ppc_cmds (char *LOAD_CMD,
   OPS->getreg.resp_delim = "=";	/* getreg.resp_delim */
   OPS->getreg.term = NULL;	/* getreg.term */
   OPS->getreg.term_cmd = NULL;	/* getreg.term_cmd */
-  OPS->register_pattern = "\\(\\w+\\) +=\\([0-9a-fA-F]+\\b\\)";		/* register_pattern */
+				/* register_pattern */
+  OPS->register_pattern = "\\(\\w+\\) +=\\([0-9a-fA-F]+\\b\\)";
   OPS->supply_register = ppcbug_supply_register;
   OPS->dump_registers = "rd\r";	/* dump all registers */
   OPS->load_routine = NULL;	/* load_routine (defaults to SRECs) */

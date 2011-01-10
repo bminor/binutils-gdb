@@ -495,7 +495,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
 			"record list.\n",
 			paddress (target_gdbarch, addr), len);
 
-  if (!addr)	/* FIXME: Why?  Some arch must permit it... */
+  if (!addr)	/* FIXME: Why?  Some arch must permit it...  */
     return 0;
 
   rec = record_mem_alloc (addr, len);

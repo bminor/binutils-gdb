@@ -825,7 +825,8 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	     Therefore we evaluate it once using EVAL_AVOID_SIDE_EFFECTS.  */
 	  int oldpos = *pos;
 
-	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
+				  EVAL_AVOID_SIDE_EFFECTS);
 	  *pos = oldpos;
 	  type1 = check_typedef (value_type (arg1));
 	  type2 = check_typedef (value_type (arg2));
@@ -1094,7 +1095,8 @@ const struct language_defn opencl_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
-  NULL,				/* Language specific class_name_from_physname */
+  NULL,				/* Language specific
+				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */

@@ -34,7 +34,7 @@ extern void getpkt (char **buf, long *sizeof_buf, int forever);
    of the packet is in BUF.  The string in BUF can be at most PBUFSIZ
    - 5 to account for the $, # and checksum, and for a possible /0 if
    we are debugging (remote_debug) and want to print the sent packet
-   as a string */
+   as a string.  */
 
 extern int putpkt (char *buf);
 

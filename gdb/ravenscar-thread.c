@@ -52,7 +52,8 @@ static const char running_thread_name[] = "__gnat_running_thread_table";
 
 static const char known_tasks_name[] = "system__tasking__debug__known_tasks";
 
-static const char ravenscar_runtime_initializer[] = "system__bb__threads__initialize";
+static const char ravenscar_runtime_initializer[] =
+  "system__bb__threads__initialize";
 
 static struct observer *update_target_observer = NULL;
 
@@ -329,7 +330,7 @@ ravenscar_register_arch_ops (struct ravenscar_arch_ops *ops)
      architectures, just like in remote-wtx-hw.c.  However, for now the
      only Ravenscar run-time for bare board that is implemented in
      GNAT is for only one architecture: erc32-elf.  So no need to care about
-     that for now...*/
+     that for now...  */
   current_arch_ops = ops;
 }
 

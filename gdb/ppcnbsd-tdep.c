@@ -74,7 +74,7 @@ ppcnbsd_regset_from_core_section (struct gdbarch *gdbarch,
 
 /* NetBSD is confused.  It appears that 1.5 was using the correct SVR4
    convention but, 1.6 switched to the below broken convention.  For
-   the moment use the broken convention.  Ulgh!.  */
+   the moment use the broken convention.  Ulgh!  */
 
 static enum return_value_convention
 ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *func_type,
@@ -133,7 +133,7 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
   trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum, addr);
   addr += tdep->wordsize;
   trad_frame_set_reg_addr (this_cache, gdbarch_pc_regnum (gdbarch),
-			   addr); /* SRR0? */
+			   addr); /* SRR0?  */
   addr += tdep->wordsize;
 
   /* Construct the frame ID using the function start.  */

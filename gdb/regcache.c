@@ -37,7 +37,7 @@
  */
 
 /* Per-architecture object describing the layout of a register cache.
-   Computed once when the architecture is created */
+   Computed once when the architecture is created.  */
 
 struct gdbarch_data *regcache_descr_handle;
 
@@ -555,7 +555,7 @@ registers_changed_ptid (ptid_t ptid)
   current_thread_ptid = null_ptid;
   current_thread_arch = NULL;
 
-  /* Need to forget about any frames we have cached, too. */
+  /* Need to forget about any frames we have cached, too.  */
   reinit_frame_cache ();
 
   /* Force cleanup of any alloca areas if using C alloca instead of
@@ -754,7 +754,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
     return;
 
   /* If we have a valid copy of the register, and new value == old
-     value, then don't bother doing the actual store. */
+     value, then don't bother doing the actual store.  */
   if (regcache_valid_p (regcache, regnum)
       && (memcmp (register_buffer (regcache, regnum), buf,
 		  regcache->descr->sizeof_register[regnum]) == 0))
@@ -809,7 +809,7 @@ regcache_xfer_part (struct regcache *regcache, int regnum,
   /* Something to do?  */
   if (offset + len == 0)
     return;
-  /* Read (when needed) ... */
+  /* Read (when needed) ...  */
   if (in != NULL
       || offset > 0
       || offset + len < descr->sizeof_register[regnum])
@@ -817,7 +817,7 @@ regcache_xfer_part (struct regcache *regcache, int regnum,
       gdb_assert (read != NULL);
       read (regcache, regnum, reg);
     }
-  /* ... modify ... */
+  /* ... modify ...  */
   if (in != NULL)
     memcpy (in, reg + offset, len);
   if (out != NULL)

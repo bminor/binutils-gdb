@@ -43,7 +43,7 @@ extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
 extern struct address_space *get_regcache_aspace (const struct regcache *);
 
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
-   regcache. */
+   regcache.  */
 
 void regcache_raw_read (struct regcache *regcache, int rawnum, gdb_byte *buf);
 void regcache_raw_write (struct regcache *regcache, int rawnum,

@@ -38,14 +38,14 @@
 #include "exceptions.h"
 
 /* Hook for determining the TOC address when calling functions in the
-   inferior under AIX. The initialization code in rs6000-nat.c sets
+   inferior under AIX.  The initialization code in rs6000-nat.c sets
    this hook to point to find_toc_address.  */
 
 CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR) = NULL;
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
-   the address of the sigcontext in an argument register. Usually
+   the address of the sigcontext in an argument register.  Usually
    the signal handler doesn't save this register, so we have to
    access the sigcontext structure via an offset from the signal handler
    frame.
@@ -122,7 +122,7 @@ rs6000_aix_supply_regset (const struct regset *regset,
 }
 
 /* Collect register REGNUM in the general-purpose register set
-   REGSET. from register cache REGCACHE into the buffer specified by
+   REGSET, from register cache REGCACHE into the buffer specified by
    GREGS and LEN.  If REGNUM is -1, do this for all registers in
    REGSET.  */
 
@@ -173,10 +173,10 @@ rs6000_aix_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
-/* Pass the arguments in either registers, or in the stack. In RS/6000,
+/* Pass the arguments in either registers, or in the stack.  In RS/6000,
    the first eight words of the argument list (that might be less than
    eight parameters if some parameters occupy more than one word) are
-   passed in r3..r10 registers.  float and double parameters are
+   passed in r3..r10 registers.  Float and double parameters are
    passed in fpr's, in addition to that.  Rest of the parameters if any
    are passed in user stack.  There might be cases in which half of the
    parameter is copied into registers, the other half is pushed into
@@ -231,8 +231,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       ii++;
     }
 
-/* 
-   effectively indirect call... gcc does...
+/* effectively indirect call... gcc does...
 
    return_val example( float, int);
 
@@ -245,10 +244,9 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    offset of stack on overflow different 
    both: 
    return in r3 or f0.  If no float, must study how gcc emulates floats;
-   pay attention to arg promotion.  
+   pay attention to arg promotion.
    User may have to cast\args to handle promotion correctly 
-   since gdb won't know if prototype supplied or not.
- */
+   since gdb won't know if prototype supplied or not.  */
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
     {
@@ -262,7 +260,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 
 	  /* Floating point arguments are passed in fpr's, as well as gpr's.
-	     There are 13 fpr's reserved for passing parameters. At this point
+	     There are 13 fpr's reserved for passing parameters.  At this point
 	     there is no way we would run out of them.  */
 
 	  gdb_assert (len <= 8);
@@ -351,7 +349,7 @@ ran_out_of_registers_for_arguments:
       sp -= space;
 
       /* This is another instance we need to be concerned about
-         securing our stack space. If we write anything underneath %sp
+         securing our stack space.  If we write anything underneath %sp
          (r1), we might conflict with the kernel who thinks he is free
          to use this area.  So, update %sp first before doing anything
          else.  */
@@ -456,7 +454,7 @@ rs6000_return_value (struct gdbarch *gdbarch, struct type *func_type,
   /* If the called subprogram returns an aggregate, there exists an
      implicit first argument, whose value is the address of a caller-
      allocated buffer into which the callee is assumed to store its
-     return value. All explicit parameters are appropriately
+     return value.  All explicit parameters are appropriately
      relabeled.  */
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION
@@ -551,8 +549,8 @@ rs6000_return_value (struct gdbarch *gdbarch, struct type *func_type,
 /* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG).
 
    Usually a function pointer's representation is simply the address
-   of the function. On the RS/6000 however, a function pointer is
-   represented by a pointer to an OPD entry. This OPD entry contains
+   of the function.  On the RS/6000 however, a function pointer is
+   represented by a pointer to an OPD entry.  This OPD entry contains
    three words, the first word is the address of the function, the
    second word is the TOC pointer (r2), and the third word is the
    static chain value.  Throughout GDB it is currently assumed that a
@@ -662,13 +660,15 @@ branch_dest (struct frame_info *frame, int opcode, int instr,
 
       else if (ext_op == 528)	/* br cond to count reg */
 	{
-          dest = get_frame_register_unsigned (frame, tdep->ppc_ctr_regnum) & ~3;
+          dest = get_frame_register_unsigned (frame,
+					      tdep->ppc_ctr_regnum) & ~3;
 
 	  /* If we are about to execute a system call, dest is something
 	     like 0x22fc or 0x3b00.  Upon completion the system call
 	     will return to the address in the link register.  */
 	  if (dest < AIX_TEXT_SEGMENT_BASE)
-            dest = get_frame_register_unsigned (frame, tdep->ppc_lr_regnum) & ~3;
+            dest = get_frame_register_unsigned (frame,
+						tdep->ppc_lr_regnum) & ~3;
 	}
       else
 	return -1;
@@ -704,19 +704,19 @@ rs6000_software_single_step (struct frame_info *frame)
   opcode = insn >> 26;
   breaks[1] = branch_dest (frame, opcode, insn, loc, breaks[0]);
 
-  /* Don't put two breakpoints on the same address. */
+  /* Don't put two breakpoints on the same address.  */
   if (breaks[1] == breaks[0])
     breaks[1] = -1;
 
   for (ii = 0; ii < 2; ++ii)
     {
-      /* ignore invalid breakpoint. */
+      /* ignore invalid breakpoint.  */
       if (breaks[ii] == -1)
 	continue;
       insert_single_step_breakpoint (gdbarch, aspace, breaks[ii]);
     }
 
-  errno = 0;			/* FIXME, don't ignore errors! */
+  errno = 0;			/* FIXME, don't ignore errors!  */
   /* What errors?  {read,write}_memory call error().  */
   return 1;
 }

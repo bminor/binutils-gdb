@@ -31,16 +31,16 @@
 #include "objfiles.h"
 #include "infcall.h"
 
-/* Pass the arguments in either registers, or in the stack. Using the
+/* Pass the arguments in either registers, or in the stack.  Using the
    ppc sysv ABI, the first eight words of the argument list (that might
    be less than eight parameters if some parameters occupy more than one
    word) are passed in r3..r10 registers.  float and double parameters are
-   passed in fpr's, in addition to that. Rest of the parameters if any
-   are passed in user stack. 
+   passed in fpr's, in addition to that.  Rest of the parameters if any
+   are passed in user stack.
 
    If the function is returning a structure, then the return address is passed
    in r3, then the first 7 words of the parametes can be passed in registers,
-   starting from r4. */
+   starting from r4.  */
 
 CORE_ADDR
 ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
@@ -387,7 +387,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  || TYPE_CODE (type) == TYPE_CODE_UNION)
 		{
 		  /* Structs and large values are put in an
-		     aligned stack slot ... */
+		     aligned stack slot ...  */
 		  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
 		      && TYPE_VECTOR (type)
 		      && len >= 16)
@@ -443,7 +443,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* The psABI says that "A caller of a function that takes a
 	 variable argument list shall set condition register bit 6 to
 	 1 if it passes one or more arguments in the floating-point
-	 registers. It is strongly recommended that the caller set the
+	 registers.  It is strongly recommended that the caller set the
 	 bit to 0 otherwise..."  Doing this for normal functions too
 	 shouldn't hurt.  */
       if (write_pass)
@@ -587,7 +587,8 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
   if (TYPE_CODE (type) == TYPE_CODE_FLT
       && TYPE_LENGTH (type) == 16
       && !tdep->soft_float
-      && (gdbarch_long_double_format (gdbarch) == floatformats_ibm_long_double))
+      && (gdbarch_long_double_format (gdbarch)
+	  == floatformats_ibm_long_double))
     {
       /* IBM long double stored in f1 and f2.  */
       if (readbuf)
@@ -606,7 +607,8 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
     }
   if (TYPE_LENGTH (type) == 16
       && ((TYPE_CODE (type) == TYPE_CODE_FLT
-	   && (gdbarch_long_double_format (gdbarch) == floatformats_ibm_long_double))
+	   && (gdbarch_long_double_format (gdbarch)
+	       == floatformats_ibm_long_double))
 	  || (TYPE_CODE (type) == TYPE_CODE_DECFLOAT && tdep->soft_float)))
     {
       /* Soft-float IBM long double or _Decimal128 stored in r3, r4,
@@ -880,15 +882,16 @@ convert_code_addr_to_desc_addr (CORE_ADDR code_addr, CORE_ADDR *desc_addr)
   return 1;
 }
 
-/* Pass the arguments in either registers, or in the stack. Using the
+/* Pass the arguments in either registers, or in the stack.  Using the
    ppc 64 bit SysV ABI.
 
    This implements a dumbed down version of the ABI.  It always writes
    values to memory, GPR and FPR, even when not necessary.  Doing this
-   greatly simplifies the logic. */
+   greatly simplifies the logic.  */
 
 CORE_ADDR
-ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
+				struct value *function,
 				struct regcache *regcache, CORE_ADDR bp_addr,
 				int nargs, struct value **args, CORE_ADDR sp,
 				int struct_return, CORE_ADDR struct_addr)
@@ -906,7 +909,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      in the for-loop below.  */
   LONGEST gparam_size = 0;
   /* Kevin writes ... I don't mind seeing tdep->wordsize used in the
-     calls to align_up(), align_down(), etc.  because this makes it
+     calls to align_up(), align_down(), etc. because this makes it
      easier to reuse this code (in a copy/paste sense) in the future,
      but it is a 64-bit ABI and asserting that the wordsize is 8 bytes
      at some point makes it easier to verify that this function is
@@ -1452,7 +1455,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
           if (readbuf)
             regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, readbuf);
           if (writebuf)
-            regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, writebuf);
+            regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2,
+				   writebuf);
           return RETURN_VALUE_REGISTER_CONVENTION;
         }
     }

@@ -33,8 +33,8 @@ static void ravenscar_sparc_store_registers (struct regcache *regcache,
 static void ravenscar_sparc_prepare_to_store (struct regcache *regcache);
 
 /* Register offsets from a referenced address (exempli gratia the
-   Thread_Descriptor). The referenced address depends on the register
-   number. The Thread_Descriptor layout and the stack layout are documented
+   Thread_Descriptor).  The referenced address depends on the register
+   number.  The Thread_Descriptor layout and the stack layout are documented
    in the GNAT sources, in sparc-bb.h.  */
 
 static const int sparc_register_offsets[] =

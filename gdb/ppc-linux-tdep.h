@@ -22,7 +22,7 @@
 
 struct regset;
 
-/* From ppc-linux-tdep.c ... */
+/* From ppc-linux-tdep.c ...  */
 const struct regset *ppc_linux_gregset (int);
 const struct regset *ppc_linux_fpregset (void);
 

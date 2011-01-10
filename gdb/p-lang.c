@@ -36,7 +36,7 @@ extern void _initialize_pascal_language (void);
 
 
 /* All GPC versions until now (2007-09-27) also define a symbol called
-   '_p_initialize'. Check for the presence of this symbol first.  */
+   '_p_initialize'.  Check for the presence of this symbol first.  */
 static const char GPC_P_INITIALIZE[] = "_p_initialize";
 
 /* The name of the symbol that GPC uses as the name of the main
@@ -54,7 +54,7 @@ static const char GPC_MAIN_PROGRAM_NAME_2[] = "pascal_main_program";
    so that it finds the even if the program was compiled
    without debugging information.
    According to information supplied by Waldeck Hebisch,
-   this should work for all versions posterior to June 2000. */
+   this should work for all versions posterior to June 2000.  */
 
 const char *
 pascal_main_name (void)
@@ -137,7 +137,7 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	    *length_size = TYPE_LENGTH (TYPE_FIELD_TYPE (type, 1));
 	  if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
-          /* FIXME: how can I detect wide chars in GPC ?? */
+          /* FIXME: how can I detect wide chars in GPC ??  */
           if (char_type)
 	    {
 	      *char_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 2));
@@ -157,7 +157,7 @@ static void pascal_one_char (int, struct ui_file *, int *);
 
 /* Print the character C on STREAM as part of the contents of a literal
    string.
-   In_quotes is reset to 0 if a char is written with #4 notation */
+   In_quotes is reset to 0 if a char is written with #4 notation.  */
 
 static void
 pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
@@ -188,7 +188,7 @@ static void pascal_emit_char (int c, struct type *type,
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
-   characters and strings is language specific. */
+   characters and strings is language specific.  */
 
 static void
 pascal_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)

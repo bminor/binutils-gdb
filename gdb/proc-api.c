@@ -44,7 +44,7 @@
 #ifdef HAVE_SYS_USER_H
 #include <sys/user.h>	/* for struct user */
 #endif
-#include <fcntl.h>	/* for O_RDWR etc. */
+#include <fcntl.h>	/* for O_RDWR etc.  */
 #include "gdb_wait.h"
 
 #include "proc-utils.h"
@@ -52,7 +52,7 @@
 /*  Much of the information used in the /proc interface, particularly for
     printing status information, is kept as tables of structures of the
     following form.  These tables can be used to map numeric values to
-    their symbolic names and to a string that describes their specific use. */
+    their symbolic names and to a string that describes their specific use.  */
 
 struct trans {
   long value;                   /* The numeric value */

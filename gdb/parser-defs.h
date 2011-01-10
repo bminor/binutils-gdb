@@ -50,7 +50,7 @@ extern struct block *expression_context_block;
 extern CORE_ADDR expression_context_pc;
 
 /* The innermost context required by the stack and register variables
-   we've encountered so far. */
+   we've encountered so far.  */
 extern struct block *innermost_block;
 
 /* The block in which the most recently discovered symbol was found.
@@ -62,13 +62,13 @@ extern struct block *block_found;
 extern int arglist_len;
 
 /* A string token, either a char-string or bit-string.  Char-strings are
-   used, for example, for the names of symbols. */
+   used, for example, for the names of symbols.  */
 
 struct stoken
   {
-    /* Pointer to first byte of char-string or first bit of bit-string */
+    /* Pointer to first byte of char-string or first bit of bit-string.  */
     char *ptr;
-    /* Length of string in bytes for char-string or bits for bit-string */
+    /* Length of string in bytes for char-string or bits for bit-string.  */
     int length;
   };
 
@@ -76,9 +76,9 @@ struct typed_stoken
   {
     /* A language-specific type field.  */
     int type;
-    /* Pointer to first byte of char-string or first bit of bit-string */
+    /* Pointer to first byte of char-string or first bit of bit-string.  */
     char *ptr;
-    /* Length of string in bytes for char-string or bits for bit-string */
+    /* Length of string in bytes for char-string or bits for bit-string.  */
     int length;
   };
 
@@ -215,7 +215,7 @@ extern int parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
 
 extern char *lexptr;
 
-/* After a token has been recognized, this variable points to it.  
+/* After a token has been recognized, this variable points to it.
    Currently used only for error reporting.  */
 extern char *prev_lexptr;
 
@@ -265,7 +265,7 @@ struct op_print
     enum precedence precedence;
 
     /* For a binary operator:  1 iff right associate.
-       For a unary operator:  1 iff postfix. */
+       For a unary operator:  1 iff postfix.  */
     int right_assoc;
   };
 

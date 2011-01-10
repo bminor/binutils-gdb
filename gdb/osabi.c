@@ -184,7 +184,7 @@ gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
 }
 
 
-/* Sniffer to find the OS ABI for a given file's architecture and flavour. 
+/* Sniffer to find the OS ABI for a given file's architecture and flavour.
    It is legal to have multiple sniffers for each arch/flavour pair, to
    disambiguate one OS's a.out from another, for example.  The first sniffer
    to return something other than GDB_OSABI_UNKNOWN wins, so a sniffer should

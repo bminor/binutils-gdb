@@ -32,7 +32,7 @@
 #include "inf-child.h"
 
 #if defined (NEW_PROC_API)
-#define _STRUCTURED_PROC 1	/* Should be done by configure script. */
+#define _STRUCTURED_PROC 1	/* Should be done by configure script.  */
 #endif
 
 #include <sys/procfs.h>
@@ -338,7 +338,7 @@ typedef struct siginfo gdb_siginfo_t;
    There will be a separate procinfo structure for use by the (not yet
    implemented) "info proc" command, so that we can print useful
    information about any random process without interfering with the
-   inferior's procinfo information. */
+   inferior's procinfo information.  */
 
 #ifdef NEW_PROC_API
 /* format strings for /proc paths */
@@ -363,7 +363,7 @@ typedef lwpstatus_t gdb_lwpstatus_t;
 #  define STATUS_PROC_NAME_FMT "/proc/%05d"
 #  define MAX_PROC_NAME_SIZE sizeof("/proc/ttttppppp")
 # endif
-/* the name of the proc status struct depends on the implementation */
+/* The name of the proc status struct depends on the implementation.  */
 typedef prstatus_t gdb_prstatus_t;
 typedef prstatus_t gdb_lwpstatus_t;
 #endif /* NEW_PROC_API */
@@ -589,8 +589,7 @@ open_procinfo_files (procinfo *pi, int which)
 	 These do not even have their own independent file descriptor.
 	 All operations are carried out on the file descriptor of the
 	 parent process.  Therefore we just call open again for each
-	 thread, getting a new handle for the same 'file'.
-   */
+	 thread, getting a new handle for the same 'file'.  */
 
 #ifdef NEW_PROC_API
   /* In this case, there are several different file descriptors that
@@ -599,7 +598,7 @@ open_procinfo_files (procinfo *pi, int which)
      needed.  */
 
   strcpy (tmp, pi->pathname);
-  switch (which) {	/* which file descriptor to open? */
+  switch (which) {	/* Which file descriptor to open?  */
   case FD_CTL:
     if (pi->tid)
       strcat (tmp, "/lwpctl");
@@ -612,7 +611,7 @@ open_procinfo_files (procinfo *pi, int which)
     break;
   case FD_AS:
     if (pi->tid)
-      return 0;		/* there is no 'as' file descriptor for an lwp */
+      return 0;		/* There is no 'as' file descriptor for an lwp.  */
     strcat (tmp, "/as");
     fd = open_with_retry (tmp, O_RDWR);
     if (fd <= 0)
@@ -646,10 +645,10 @@ open_procinfo_files (procinfo *pi, int which)
 
 
 #ifdef PIOCTSTATUS	/* OSF */
-  /* Only one FD; just open it. */
+  /* Only one FD; just open it.  */
   if ((fd = open_with_retry (pi->pathname, O_RDWR)) == 0)
     return 0;
-#else			/* Sol 2.5, Irix, other? */
+#else			/* Sol 2.5, Irix, other?  */
   if (pi->tid == 0)	/* Master procinfo for the process */
     {
       fd = open_with_retry (pi->pathname, O_RDWR);
@@ -662,15 +661,15 @@ open_procinfo_files (procinfo *pi, int which)
       procinfo *process;
       int lwpid = pi->tid;
 
-      /* Find the procinfo for the entire process. */
+      /* Find the procinfo for the entire process.  */
       if ((process = find_procinfo (pi->pid, 0)) == NULL)
 	return 0;	/* fail */
 
-      /* Now obtain the file descriptor for the LWP. */
+      /* Now obtain the file descriptor for the LWP.  */
       if ((fd = ioctl (process->ctl_fd, PIOCOPENLWP, &lwpid)) <= 0)
 	return 0;	/* fail */
-#else			/* Irix, other? */
-      return 0;		/* Don't know how to open threads */
+#else			/* Irix, other?  */
+      return 0;		/* Don't know how to open threads.  */
 #endif	/* Sol 2.5 PIOCOPENLWP */
     }
 #endif	/* OSF     PIOCTSTATUS */
@@ -690,13 +689,13 @@ create_procinfo (int pid, int tid)
   procinfo *pi, *parent = NULL;
 
   if ((pi = find_procinfo (pid, tid)))
-    return pi;			/* Already exists, nothing to do. */
+    return pi;			/* Already exists, nothing to do.  */
 
-  /* find parent before doing malloc, to save having to cleanup */
+  /* Find parent before doing malloc, to save having to cleanup.  */
   if (tid != 0)
     parent = find_procinfo_or_die (pid, 0);	/* FIXME: should I
 						   create it if it
-						   doesn't exist yet? */
+						   doesn't exist yet?  */
 
   pi = (procinfo *) xmalloc (sizeof (procinfo));
   memset (pi, 0, sizeof (procinfo));
@@ -781,12 +780,12 @@ destroy_procinfo (procinfo *pi)
 {
   procinfo *tmp;
 
-  if (pi->tid != 0)	/* destroy a thread procinfo */
+  if (pi->tid != 0)	/* Destroy a thread procinfo.  */
     {
-      tmp = find_procinfo (pi->pid, 0);	/* find the parent process */
+      tmp = find_procinfo (pi->pid, 0);	/* Find the parent process.  */
       destroy_one_procinfo (&tmp->thread_list, pi);
     }
-  else			/* destroy a process procinfo and all its threads */
+  else			/* Destroy a process procinfo and all its threads.  */
     {
       /* First destroy the children, if any; */
       while (pi->thread_list != NULL)
@@ -866,7 +865,7 @@ sysset_t_alloc (procinfo * pi)
 /* Extract syscall numbers and names from /proc/<pid>/sysent.  Initialize
    pi->num_syscalls with the number of syscalls and pi->syscall_names
    with the names.  (Certain numbers may be skipped in which case the
-   names for these numbers will be left as NULL.) */
+   names for these numbers will be left as NULL.)  */
 
 #define MAX_SYSCALL_NAME_LENGTH 256
 #define MAX_SYSCALLS 65536
@@ -915,7 +914,7 @@ load_syscalls (procinfo *pi)
   /* Find maximum syscall number.  This may not be the same as
      pr_nsyscalls since that value refers to the number of entries
      in the table.  (Also, the docs indicate that some system
-     call numbers may be skipped.) */
+     call numbers may be skipped.)  */
 
   maxcall = syscalls[0].pr_number;
 
@@ -953,7 +952,7 @@ load_syscalls (procinfo *pi)
 
       if (pi->syscall_names[callnum] != NULL)
 	{
-	  /* FIXME: Generate warning */
+	  /* FIXME: Generate warning.  */
 	  continue;
 	}
 
@@ -1090,7 +1089,7 @@ proc_error (procinfo *pi, char *func, int line)
 int
 proc_get_status (procinfo *pi)
 {
-  /* Status file descriptor is opened "lazily" */
+  /* Status file descriptor is opened "lazily".  */
   if (pi->status_fd == 0 &&
       open_procinfo_files (pi, FD_STATUS) == 0)
     {
@@ -1104,7 +1103,7 @@ proc_get_status (procinfo *pi)
   else
     {
       /* Sigh... I have to read a different data structure,
-	 depending on whether this is a main process or an LWP. */
+	 depending on whether this is a main process or an LWP.  */
       if (pi->tid)
 	pi->status_valid = (read (pi->status_fd,
 				  (char *) &pi->prstatus.pr_lwp,
@@ -1120,7 +1119,7 @@ proc_get_status (procinfo *pi)
 	  if (pi->status_valid &&
 	      (pi->prstatus.pr_lwp.pr_flags & PR_ISTOP) &&
 	      pi->prstatus.pr_lwp.pr_why == PR_REQUESTED)
-	    /* Unixware peculiarity -- read the damn thing again! */
+	    /* Unixware peculiarity -- read the damn thing again!  */
 	    pi->status_valid = (read (pi->status_fd,
 				      (char *) &pi->prstatus,
 				      sizeof (gdb_prstatus_t))
@@ -1132,7 +1131,7 @@ proc_get_status (procinfo *pi)
 #ifdef PIOCTSTATUS	/* osf */
   if (pi->tid == 0)	/* main process */
     {
-      /* Just read the danged status.  Now isn't that simple? */
+      /* Just read the danged status.  Now isn't that simple?  */
       pi->status_valid =
 	(ioctl (pi->status_fd, PIOCSTATUS, &pi->prstatus) >= 0);
     }
@@ -1186,7 +1185,7 @@ proc_flags (procinfo *pi)
 {
   if (!pi->status_valid)
     if (!proc_get_status (pi))
-      return 0;	/* FIXME: not a good failure value (but what is?) */
+      return 0;	/* FIXME: not a good failure value (but what is?)  */
 
 #ifdef NEW_PROC_API
 # ifdef UNIXWARE
@@ -1209,7 +1208,7 @@ proc_why (procinfo *pi)
 {
   if (!pi->status_valid)
     if (!proc_get_status (pi))
-      return 0;	/* FIXME: not a good failure value (but what is?) */
+      return 0;	/* FIXME: not a good failure value (but what is?)  */
 
 #ifdef NEW_PROC_API
   return pi->prstatus.pr_lwp.pr_why;
@@ -1225,7 +1224,7 @@ proc_what (procinfo *pi)
 {
   if (!pi->status_valid)
     if (!proc_get_status (pi))
-      return 0;	/* FIXME: not a good failure value (but what is?) */
+      return 0;	/* FIXME: not a good failure value (but what is?)  */
 
 #ifdef NEW_PROC_API
   return pi->prstatus.pr_lwp.pr_what;
@@ -1319,7 +1318,7 @@ proc_cursig (struct procinfo *pi)
 {
   if (!pi->status_valid)
     if (!proc_get_status (pi))
-      return 0;	/* FIXME: not a good failure value (but what is?) */
+      return 0;	/* FIXME: not a good failure value (but what is?)  */
 
 #ifdef NEW_PROC_API
   return pi->prstatus.pr_lwp.pr_cursig;
@@ -1373,7 +1372,7 @@ proc_modify_flag (procinfo *pi, long flag, long mode)
   if (pi->pid != 0)
     pi = find_procinfo_or_die (pi->pid, 0);
 
-#ifdef NEW_PROC_API	/* Newest method: UnixWare and newer Solarii */
+#ifdef NEW_PROC_API	/* Newest method: UnixWare and newer Solarii.  */
   /* First normalize the PCUNSET/PCRESET command opcode
      (which for no obvious reason has a different definition
      from one operating system to the next...)  */
@@ -1387,9 +1386,9 @@ proc_modify_flag (procinfo *pi, long flag, long mode)
   {
     procfs_ctl_t arg[2];
 
-    if (mode == FLAG_SET)	/* Set the flag (RLC, FORK, or ASYNC) */
+    if (mode == FLAG_SET)	/* Set the flag (RLC, FORK, or ASYNC).  */
       arg[0] = PCSET;
-    else			/* Reset the flag */
+    else			/* Reset the flag.  */
       arg[0] = GDBRESET;
 
     arg[1] = flag;
@@ -1397,11 +1396,11 @@ proc_modify_flag (procinfo *pi, long flag, long mode)
   }
 #else
 #ifdef PIOCSET		/* Irix/Sol5 method */
-  if (mode == FLAG_SET)	/* Set the flag (hopefully RLC, FORK, or ASYNC) */
+  if (mode == FLAG_SET)	/* Set the flag (hopefully RLC, FORK, or ASYNC).  */
     {
       win = (ioctl (pi->ctl_fd, PIOCSET, &flag)   >= 0);
     }
-  else			/* Reset the flag */
+  else			/* Reset the flag.  */
     {
       win = (ioctl (pi->ctl_fd, PIOCRESET, &flag) >= 0);
     }
@@ -1430,7 +1429,7 @@ proc_modify_flag (procinfo *pi, long flag, long mode)
       }
     break;
   default:
-    win = 0;		/* fail -- unknown flag (can't do PR_ASYNC) */
+    win = 0;		/* Fail -- unknown flag (can't do PR_ASYNC).  */
     break;
   }
 #endif
@@ -1654,12 +1653,12 @@ proc_run_process (procinfo *pi, int step, int signo)
       return 0;
     }
 
-  runflags    = PRCFAULT;	/* always clear current fault  */
+  runflags    = PRCFAULT;	/* Always clear current fault.  */
   if (step)
     runflags |= PRSTEP;
   if (signo == 0)
     runflags |= PRCSIG;
-  else if (signo != -1)		/* -1 means do nothing W.R.T. signals */
+  else if (signo != -1)		/* -1 means do nothing W.R.T. signals.  */
     proc_set_current_signal (pi, signo);
 
 #ifdef NEW_PROC_API
@@ -1715,7 +1714,7 @@ proc_set_traced_signals (procinfo *pi, gdb_sigset_t *sigset)
 #else	/* ioctl method */
   win = (ioctl (pi->ctl_fd, PIOCSTRACE, sigset) >= 0);
 #endif
-  /* The above operation renders the procinfo's cached pstatus obsolete. */
+  /* The above operation renders the procinfo's cached pstatus obsolete.  */
   pi->status_valid = 0;
 
   if (!win)
@@ -1755,7 +1754,7 @@ proc_set_traced_faults (procinfo *pi, fltset_t *fltset)
 #else	/* ioctl method */
   win = (ioctl (pi->ctl_fd, PIOCSFAULT, fltset) >= 0);
 #endif
-  /* The above operation renders the procinfo's cached pstatus obsolete. */
+  /* The above operation renders the procinfo's cached pstatus obsolete.  */
   pi->status_valid = 0;
 
   return win;
@@ -2319,7 +2318,7 @@ proc_set_current_signal (procinfo *pi, int signo)
      bug.  */
   if (signo > 0 &&
       signo == proc_cursig (pi))
-    return 1;           /* I assume this is a success? */
+    return 1;           /* I assume this is a success?  */
 #endif
 
   /* The pointer is just a type alias.  */
@@ -2625,7 +2624,7 @@ proc_kill (procinfo *pi, int signo)
       win = (write (pi->ctl_fd, (char *) &cmd, sizeof (cmd)) == sizeof (cmd));
 #else   /* ioctl method */
       /* FIXME: do I need the Alpha OSF fixups present in
-	 procfs.c/unconditionally_kill_inferior?  Perhaps only for SIGKILL? */
+	 procfs.c/unconditionally_kill_inferior?  Perhaps only for SIGKILL?  */
       win = (ioctl (pi->ctl_fd, PIOCKILL, &signo) >= 0);
 #endif
   }
@@ -2681,8 +2680,8 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
      systems.  */
   return 0;
 #else
-/* Horrible hack!  Detect Solaris 2.5, because this doesn't work on 2.5 */
-#if defined (PIOCOPENLWP) || defined (UNIXWARE)	/* Solaris 2.5: bail out */
+/* Horrible hack!  Detect Solaris 2.5, because this doesn't work on 2.5.  */
+#if defined (PIOCOPENLWP) || defined (UNIXWARE)	/* Solaris 2.5: bail out.  */
   return 0;
 #else
   struct {
@@ -2745,7 +2744,7 @@ proc_get_LDT_entry (procinfo *pi, int key)
       proc_warn (pi, "proc_get_LDT_entry (open)", __LINE__);
       return NULL;
     }
-  /* Make sure it gets closed again! */
+  /* Make sure it gets closed again!  */
   old_chain = make_cleanup_close (fd);
 
   /* Now 'read' thru the table, find a match and return it.  */
@@ -2756,11 +2755,11 @@ proc_get_LDT_entry (procinfo *pi, int key)
 	  ldt_entry->acc1 == 0 &&
 	  ldt_entry->acc2 == 0)
 	break;	/* end of table */
-      /* If key matches, return this entry. */
+      /* If key matches, return this entry.  */
       if (ldt_entry->sel == key)
 	return ldt_entry;
     }
-  /* Loop ended, match not found. */
+  /* Loop ended, match not found.  */
   return NULL;
 #else
   int nldt, i;
@@ -2773,8 +2772,8 @@ proc_get_LDT_entry (procinfo *pi, int key)
       return NULL;
     }
 
-  /* Allocate space for the number of LDT entries. */
-  /* This alloc has to persist, 'cause we return a pointer to it. */
+  /* Allocate space for the number of LDT entries.  */
+  /* This alloc has to persist, 'cause we return a pointer to it.  */
   if (nldt > nalloc)
     {
       ldt_entry = (struct ssd *)
@@ -2789,12 +2788,12 @@ proc_get_LDT_entry (procinfo *pi, int key)
       return NULL;
     }
 
-  /* Search the table and return the (first) entry matching 'key'. */
+  /* Search the table and return the (first) entry matching 'key'.  */
   for (i = 0; i < nldt; i++)
     if (ldt_entry[i].sel == key)
       return &ldt_entry[i];
 
-  /* Loop ended, match not found. */
+  /* Loop ended, match not found.  */
   return NULL;
 #endif
 }
@@ -2808,24 +2807,24 @@ procfs_find_LDT_entry (ptid_t ptid)
   int            key;
   procinfo      *pi;
 
-  /* Find procinfo for the lwp. */
+  /* Find procinfo for the lwp.  */
   if ((pi = find_procinfo (PIDGET (ptid), TIDGET (ptid))) == NULL)
     {
       warning (_("procfs_find_LDT_entry: could not find procinfo for %d:%ld."),
 	       PIDGET (ptid), TIDGET (ptid));
       return NULL;
     }
-  /* get its general registers. */
+  /* get its general registers.  */
   if ((gregs = proc_get_gregs (pi)) == NULL)
     {
       warning (_("procfs_find_LDT_entry: could not read gregs for %d:%ld."),
 	       PIDGET (ptid), TIDGET (ptid));
       return NULL;
     }
-  /* Now extract the GS register's lower 16 bits. */
+  /* Now extract the GS register's lower 16 bits.  */
   key = (*gregs)[GS] & 0xffff;
 
-  /* Find the matching entry and return it. */
+  /* Find the matching entry and return it.  */
   return proc_get_LDT_entry (pi, key);
 }
 
@@ -2866,7 +2865,7 @@ proc_get_nthreads (procinfo *pi)
   /* NEW_PROC_API: only works for the process procinfo, because the
      LWP procinfos do not get prstatus filled in.  */
 #ifdef NEW_PROC_API
-  if (pi->tid != 0)	/* find the parent process procinfo */
+  if (pi->tid != 0)	/* Find the parent process procinfo.  */
     pi = find_procinfo_or_die (pi->pid, 0);
 #endif
   return pi->prstatus.pr_nlwp;
@@ -2919,7 +2918,7 @@ proc_get_current_thread (procinfo *pi)
 int
 proc_get_current_thread (procinfo *pi)
 {
-#if 0	/* FIXME: not ready for prime time? */
+#if 0	/* FIXME: not ready for prime time?  */
   return pi->prstatus.pr_tid;
 #else
   return 0;
@@ -2998,7 +2997,7 @@ proc_update_threads (procinfo *pi)
 }
 #else
 #ifdef NEW_PROC_API
-/* Unixware and Solaris 6 (and later) version */
+/* Unixware and Solaris 6 (and later) version.  */
 static void
 do_closedir_cleanup (void *dir)
 {
@@ -3071,7 +3070,7 @@ proc_update_threads (procinfo *pi)
 
   nthreads = proc_get_nthreads (pi);
   if (nthreads < 2)
-    return 0;		/* nothing to do for 1 or fewer threads */
+    return 0;		/* Nothing to do for 1 or fewer threads.  */
 
   threads = xmalloc (nthreads * sizeof (tid_t));
 
@@ -3129,7 +3128,7 @@ proc_iterate_over_threads (procinfo *pi,
 
   for (thread = pi->thread_list; thread != NULL; thread = next)
     {
-      next = thread->next;	/* in case thread is destroyed */
+      next = thread->next;	/* In case thread is destroyed.  */
       if ((retval = (*func) (pi, thread, ptr)) != 0)
 	break;
     }
@@ -3177,17 +3176,17 @@ procfs_debug_inferior (procinfo *pi)
 #ifdef PROCFS_DONT_TRACE_FAULTS
   /* On some systems (OSF), we don't trace hardware faults.
      Apparently it's enough that we catch them as signals.
-     Wonder why we don't just do that in general? */
-  premptyset (&traced_faults);		/* don't trace faults. */
+     Wonder why we don't just do that in general?  */
+  premptyset (&traced_faults);		/* don't trace faults.  */
 #else
-  /* Register to trace hardware faults in the child. */
-  prfillset (&traced_faults);		/* trace all faults... */
+  /* Register to trace hardware faults in the child.  */
+  prfillset (&traced_faults);		/* trace all faults...  */
   gdb_prdelset  (&traced_faults, FLTPAGE);	/* except page fault.  */
 #endif
   if (!proc_set_traced_faults  (pi, &traced_faults))
     return __LINE__;
 
-  /* Register to trace selected signals in the child. */
+  /* Register to trace selected signals in the child.  */
   premptyset (&traced_signals);
   if (!register_gdb_signals (pi, &traced_signals))
     return __LINE__;
@@ -3200,7 +3199,7 @@ procfs_debug_inferior (procinfo *pi)
   gdb_praddsysset (traced_syscall_entries, SYS_exit);
 #endif
 #ifdef SYS_lwpexit
-  gdb_praddsysset (traced_syscall_entries, SYS_lwpexit);	/* And _lwp_exit... */
+  gdb_praddsysset (traced_syscall_entries, SYS_lwpexit);/* And _lwp_exit...  */
 #endif
 #ifdef SYS_lwp_exit
   gdb_praddsysset (traced_syscall_entries, SYS_lwp_exit);
@@ -3223,7 +3222,7 @@ procfs_debug_inferior (procinfo *pi)
   /* OSF method for tracing exec syscalls.  Quoting:
      Under Alpha OSF/1 we have to use a PIOCSSPCACT ioctl to trace
      exits from exec system calls because of the user level loader.  */
-  /* FIXME: make nice and maybe move into an access function. */
+  /* FIXME: make nice and maybe move into an access function.  */
   {
     int prfs_flags;
 
@@ -3236,11 +3235,11 @@ procfs_debug_inferior (procinfo *pi)
       return __LINE__;
   }
 #else /* not PRFS_STOPEXEC */
-  /* Everyone else's (except OSF) method for tracing exec syscalls */
+  /* Everyone else's (except OSF) method for tracing exec syscalls.  */
   /* GW: Rationale...
      Not all systems with /proc have all the exec* syscalls with the same
      names.  On the SGI, for example, there is no SYS_exec, but there
-     *is* a SYS_execv.  So, we try to account for that. */
+     *is* a SYS_execv.  So, we try to account for that.  */
 
   traced_syscall_exits = sysset_t_alloc (pi);
   gdb_premptysysset (traced_syscall_exits);
@@ -3259,7 +3258,7 @@ procfs_debug_inferior (procinfo *pi)
   gdb_praddsysset (traced_syscall_exits, SYS_lwpexit);
 #endif
 
-#ifdef SYS_lwp_create	/* FIXME: once only, please */
+#ifdef SYS_lwp_create	/* FIXME: once only, please.  */
   gdb_praddsysset (traced_syscall_exits, SYS_lwp_create);
   gdb_praddsysset (traced_syscall_exits, SYS_lwp_exit);
 #endif
@@ -3374,7 +3373,7 @@ do_attach (ptid_t ptid)
       if (!proc_set_run_on_last_close (pi))
 	dead_procinfo (pi, "do_attach: couldn't set RLC.", NOKILL);
 
-      /* Now stop the process. */
+      /* Now stop the process.  */
       if (!proc_stop_process (pi))
 	dead_procinfo (pi, "do_attach: couldn't stop the process.", NOKILL);
       pi->ignore_next_sigstop = 1;
@@ -3417,7 +3416,7 @@ do_detach (int signo)
 {
   procinfo *pi;
 
-  /* Find procinfo for the main process */
+  /* Find procinfo for the main process.  */
   pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0); /* FIXME: threads */
   if (signo)
     if (!proc_set_current_signal (pi, signo))
@@ -3681,7 +3680,7 @@ dbx_link_addr (bfd *abfd)
 }
 
 /* Search the symbol table of the file referenced by FD for a symbol
-   named __dbx_link(). If found, then insert a breakpoint at this location,
+   named __dbx_link().  If found, then insert a breakpoint at this location,
    and return nonzero.  Return zero otherwise.  */
 
 static int
@@ -3812,7 +3811,7 @@ static ptid_t
 procfs_wait (struct target_ops *ops,
 	     ptid_t ptid, struct target_waitstatus *status, int options)
 {
-  /* First cut: loosely based on original version 2.1 */
+  /* First cut: loosely based on original version 2.1.  */
   procinfo *pi;
   int       wstat;
   int       temp_tid;
@@ -3826,46 +3825,46 @@ wait_again:
   wstat    = 0;
   retval   = pid_to_ptid (-1);
 
-  /* Find procinfo for main process */
+  /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
   if (pi)
     {
-      /* We must assume that the status is stale now... */
+      /* We must assume that the status is stale now...  */
       pi->status_valid = 0;
       pi->gregs_valid  = 0;
       pi->fpregs_valid = 0;
 
-#if 0	/* just try this out... */
+#if 0	/* just try this out...  */
       flags = proc_flags (pi);
       why   = proc_why (pi);
       if ((flags & PR_STOPPED) && (why == PR_REQUESTED))
-	pi->status_valid = 0;	/* re-read again, IMMEDIATELY... */
+	pi->status_valid = 0;	/* re-read again, IMMEDIATELY...  */
 #endif
       /* If child is not stopped, wait for it to stop.  */
       if (!(proc_flags (pi) & (PR_STOPPED | PR_ISTOP)) &&
 	  !proc_wait_for_stop (pi))
 	{
-	  /* wait_for_stop failed: has the child terminated? */
+	  /* wait_for_stop failed: has the child terminated?  */
 	  if (errno == ENOENT)
 	    {
 	      int wait_retval;
 
-	      /* /proc file not found; presumably child has terminated. */
-	      wait_retval = wait (&wstat); /* "wait" for the child's exit  */
+	      /* /proc file not found; presumably child has terminated.  */
+	      wait_retval = wait (&wstat); /* "wait" for the child's exit.  */
 
-	      if (wait_retval != PIDGET (inferior_ptid)) /* wrong child? */
+	      if (wait_retval != PIDGET (inferior_ptid)) /* wrong child?  */
 		error (_("procfs: couldn't stop "
 			 "process %d: wait returned %d."),
 		       PIDGET (inferior_ptid), wait_retval);
 	      /* FIXME: might I not just use waitpid?
-		 Or try find_procinfo to see if I know about this child? */
+		 Or try find_procinfo to see if I know about this child?  */
 	      retval = pid_to_ptid (wait_retval);
 	    }
 	  else if (errno == EINTR)
 	    goto wait_again;
 	  else
 	    {
-	      /* Unknown error from wait_for_stop. */
+	      /* Unknown error from wait_for_stop.  */
 	      proc_error (pi, "target_wait (wait_for_stop)", __LINE__);
 	    }
 	}
@@ -3920,7 +3919,7 @@ wait_again:
 		  {
 		    struct inferior *inf;
 
-		    /* Handle SYS_exit call only */
+		    /* Handle SYS_exit call only.  */
 		    /* Stopped at entry to SYS_exit.
 		       Make it runnable, resume it, then use
 		       the wait system call to get its exit code.
@@ -3954,7 +3953,8 @@ wait_again:
 			   somehow, I could get its termination event
 			   here.  */
 
-			/* If wait returns -1, that's what we return to GDB. */
+			/* If wait returns -1, that's what we return
+			   to GDB.  */
 			if (temp < 0)
 			  retval = pid_to_ptid (temp);
 		      }
@@ -3982,7 +3982,8 @@ wait_again:
 #endif
 		    if (status)
 		      {
-			/* How to exit gracefully, returning "unknown event" */
+			/* How to exit gracefully, returning "unknown
+			   event".  */
 			status->kind = TARGET_WAITKIND_SPURIOUS;
 			return inferior_ptid;
 		      }
@@ -4000,7 +4001,7 @@ wait_again:
 		    /* Hopefully this is our own "fork-child" execing
 		       the real child.  Hoax this event into a trap, and
 		       GDB will see the child about to execute its start
-		       address. */
+		       address.  */
 		    wstat = (SIGTRAP << 8) | 0177;
 		  }
 #ifdef SYS_syssgi
@@ -4039,7 +4040,7 @@ wait_again:
 		    if (!in_thread_list (temp_ptid))
 		      add_thread (temp_ptid);
 
-		    /* Return to WFI, but tell it to immediately resume. */
+		    /* Return to WFI, but tell it to immediately resume.  */
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return inferior_ptid;
 		  }
@@ -4128,15 +4129,15 @@ wait_again:
 		  wstat = (SIGTRAP << 8) | 0177;
 		  break;
 #endif
-		  /* FIXME: use si_signo where possible. */
+		  /* FIXME: use si_signo where possible.  */
 		case FLTPRIV:
-#if (FLTILL != FLTPRIV)		/* avoid "duplicate case" error */
+#if (FLTILL != FLTPRIV)		/* Avoid "duplicate case" error.  */
 		case FLTILL:
 #endif
 		  wstat = (SIGILL << 8) | 0177;
 		  break;
 		case FLTBPT:
-#if (FLTTRACE != FLTBPT)	/* avoid "duplicate case" error */
+#if (FLTTRACE != FLTBPT)	/* Avoid "duplicate case" error.  */
 		case FLTTRACE:
 #endif
 		  /* If we hit our __dbx_link() internal breakpoint,
@@ -4151,20 +4152,21 @@ wait_again:
 		  break;
 		case FLTSTACK:
 		case FLTACCESS:
-#if (FLTBOUNDS != FLTSTACK)	/* avoid "duplicate case" error */
+#if (FLTBOUNDS != FLTSTACK)	/* Avoid "duplicate case" error.  */
 		case FLTBOUNDS:
 #endif
 		  wstat = (SIGSEGV << 8) | 0177;
 		  break;
 		case FLTIOVF:
 		case FLTIZDIV:
-#if (FLTFPE != FLTIOVF)		/* avoid "duplicate case" error */
+#if (FLTFPE != FLTIOVF)		/* Avoid "duplicate case" error.  */
 		case FLTFPE:
 #endif
 		  wstat = (SIGFPE << 8) | 0177;
 		  break;
 		case FLTPAGE:	/* Recoverable page fault */
-		default:	/* FIXME: use si_signo if possible for fault */
+		default:	/* FIXME: use si_signo if possible for
+				   fault.  */
 		  retval = pid_to_ptid (-1);
 		  printf_filtered ("procfs:%d -- ", __LINE__);
 		  printf_filtered (_("child stopped for unknown reason:\n"));
@@ -4194,9 +4196,9 @@ wait_again:
 		    create_procinfo (PIDGET (retval), TIDGET (retval));
 		}
 	    }
-	  else	/* flags do not indicate STOPPED */
+	  else	/* Flags do not indicate STOPPED.  */
 	    {
-	      /* surely this can't happen... */
+	      /* surely this can't happen...  */
 	      printf_filtered ("procfs:%d -- process not stopped.\n",
 			       __LINE__);
 	      proc_prettyprint_flags (flags, 1);
@@ -4253,7 +4255,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
    transferred.  Otherwise, it will be a positive value which
    indicates the number of bytes transferred between gdb and the
    target.  (Note that the interface also makes provisions for
-   negative values, but this capability isn't implemented here.) */
+   negative values, but this capability isn't implemented here.)  */
 
 static int
 procfs_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int dowrite,
@@ -4262,7 +4264,7 @@ procfs_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int dowrite,
   procinfo *pi;
   int nbytes = 0;
 
-  /* Find procinfo for main process */
+  /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
   if (pi->as_fd == 0 &&
       open_procinfo_files (pi, FD_AS) == 0)
@@ -4405,7 +4407,7 @@ procfs_resume (struct target_ops *ops,
      So basically PR_STEP is the sole argument that must be passed
      to proc_run_process (for use in the prrun struct by ioctl).  */
 
-  /* Find procinfo for main process */
+  /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
 
   /* First cut: ignore pid argument.  */
@@ -4446,7 +4448,8 @@ procfs_resume (struct target_ops *ops,
 					 make_signal_thread_runnable,
 					 NULL);
 #endif
-	      pi = thread;	/* substitute the thread's procinfo for run */
+	      pi = thread;	/* Substitute the thread's procinfo
+				   for run.  */
 	    }
 	}
     }
@@ -4531,7 +4534,7 @@ unconditionally_kill_inferior (procinfo *pi)
 
   parent_pid = proc_parent_pid (pi);
 #ifdef PROCFS_NEED_CLEAR_CURSIG_FOR_KILL
-  /* FIXME: use access functions */
+  /* FIXME: use access functions.  */
   /* Alpha OSF/1-3.x procfs needs a clear of the current signal
      before the PIOCKILL, otherwise it might generate a corrupted core
      file for the inferior.  */
@@ -4555,7 +4558,7 @@ unconditionally_kill_inferior (procinfo *pi)
     newsiginfo.si_errno = 0;
     newsiginfo.si_pid = getpid ();
     newsiginfo.si_uid = getuid ();
-    /* FIXME: use proc_set_current_signal */
+    /* FIXME: use proc_set_current_signal.  */
     ioctl (pi->ctl_fd, PIOCSSIG, &newsiginfo);
   }
 #else /* PROCFS_NEED_PIOCSSIG_FOR_KILL */
@@ -4587,7 +4590,7 @@ procfs_kill_inferior (struct target_ops *ops)
 {
   if (!ptid_equal (inferior_ptid, null_ptid)) /* ? */
     {
-      /* Find procinfo for main process */
+      /* Find procinfo for main process.  */
       procinfo *pi = find_procinfo (PIDGET (inferior_ptid), 0);
 
       if (pi)
@@ -4605,7 +4608,7 @@ procfs_mourn_inferior (struct target_ops *ops)
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
-      /* Find procinfo for main process */
+      /* Find procinfo for main process.  */
       pi = find_procinfo (PIDGET (inferior_ptid), 0);
       if (pi)
 	destroy_procinfo (pi);
@@ -4664,7 +4667,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
 
   /* Save some of the /proc state to be restored if we detach.  */
   /* FIXME: Why?  In case another debugger was debugging it?
-     We're it's parent, for Ghu's sake! */
+     We're it's parent, for Ghu's sake!  */
   if (!proc_get_traced_signals  (pi, &pi->saved_sigset))
     proc_error (pi, "init_inferior, get_traced_signals", __LINE__);
   if (!proc_get_held_signals    (pi, &pi->saved_sighold))
@@ -4720,7 +4723,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
      So what we need to do is to insert a breakpoint in the runtime
      loader (rld), more precisely in __dbx_link().  This procedure is
      called by rld once all shared libraries have been mapped, but before
-     the -init code is executed. Unfortuantely, this is not straightforward,
+     the -init code is executed.  Unfortuantely, this is not straightforward,
      as rld is not part of the executable we are running, and thus we need
      the inferior to run until rld itself has been mapped in memory.
 
@@ -4827,7 +4830,7 @@ procfs_set_exec_trap (void)
     }
 #endif /* PRFS_STOPEXEC */
 
-  /* FIXME: should this be done in the parent instead? */
+  /* FIXME: should this be done in the parent instead?  */
   /* Turn off inherit on fork flag so that all grand-children
      of gdb start with tracing flags cleared.  */
   if (!proc_unset_inherit_on_fork (pi))
@@ -4840,7 +4843,7 @@ procfs_set_exec_trap (void)
     proc_warn (pi, "set_exec_trap, unset_RLC", __LINE__);
 
   /* FIXME: No need to destroy the procinfo --
-     we have our own address space, and we're about to do an exec! */
+     we have our own address space, and we're about to do an exec!  */
   /*destroy_procinfo (pi);*/
 }
 
@@ -4982,7 +4985,7 @@ procfs_find_new_threads (struct target_ops *ops)
 {
   procinfo *pi;
 
-  /* Find procinfo for main process */
+  /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
   proc_update_threads (pi);
   proc_iterate_over_threads (pi, procfs_notice_thread, NULL);
@@ -5000,7 +5003,7 @@ procfs_thread_alive (struct target_ops *ops, ptid_t ptid)
 
   proc    = PIDGET (ptid);
   thread  = TIDGET (ptid);
-  /* If I don't know it, it ain't alive! */
+  /* If I don't know it, it ain't alive!  */
   if ((pi = find_procinfo (proc, thread)) == NULL)
     return 0;
 
@@ -5046,10 +5049,10 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
   pi = find_procinfo_or_die (PIDGET (ptid) == -1 ?
 			     PIDGET (inferior_ptid) : PIDGET (ptid), 0);
 
-  /* Translate from GDB's flags to /proc's */
-  if (len > 0)	/* len == 0 means delete watchpoint */
+  /* Translate from GDB's flags to /proc's.  */
+  if (len > 0)	/* len == 0 means delete watchpoint.  */
     {
-      switch (rwflag) {		/* FIXME: need an enum! */
+      switch (rwflag) {		/* FIXME: need an enum!  */
       case hw_write:		/* default watchpoint (write) */
 	pflags = WRITE_WATCHFLAG;
 	break;
@@ -5062,16 +5065,16 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
       case hw_execute:		/* execution HW breakpoint */
 	pflags = EXEC_WATCHFLAG;
 	break;
-      default:			/* Something weird.  Return error. */
+      default:			/* Something weird.  Return error.  */
 	return -1;
       }
-      if (after)		/* Stop after r/w access is completed. */
+      if (after)		/* Stop after r/w access is completed.  */
 	pflags |= AFTER_WATCHFLAG;
     }
 
   if (!proc_set_watchpoint (pi, addr, len, pflags))
     {
-      if (errno == E2BIG)	/* Typical error for no resources */
+      if (errno == E2BIG)	/* Typical error for no resources.  */
 	return -1;		/* fail */
       /* GDB may try to remove the same watchpoint twice.
 	 If a remove request returns no match, don't error.  */
@@ -5241,12 +5244,12 @@ iterate_over_mappings (procinfo *pi, find_memory_region_ftype child_func,
   /* Get the number of mappings, allocate space,
      and read the mappings into prmaps.  */
 #ifdef NEW_PROC_API
-  /* Open map fd. */
+  /* Open map fd.  */
   sprintf (pathname, "/proc/%d/map", pi->pid);
   if ((map_fd = open (pathname, O_RDONLY)) < 0)
     proc_error (pi, "iterate_over_mappings (open)", __LINE__);
 
-  /* Make sure it gets closed again. */
+  /* Make sure it gets closed again.  */
   make_cleanup_close (map_fd);
 
   /* Use stat to determine the file size, and compute
@@ -5379,7 +5382,7 @@ static void
 info_proc_mappings (procinfo *pi, int summary)
 {
   if (summary)
-    return;	/* No output for summary mode. */
+    return;	/* No output for summary mode.  */
 
   printf_filtered (_("Mapped address spaces:\n\n"));
   if (gdbarch_ptr_bit (target_gdbarch) == 32)
@@ -5450,7 +5453,7 @@ info_proc_cmd (char *args, int from_tty)
   else
     {
       /* Have pid, will travel.
-	 First see if it's a process we're already debugging. */
+	 First see if it's a process we're already debugging.  */
       process = find_procinfo (pid, 0);
        if (process == NULL)
 	 {
@@ -5495,9 +5498,9 @@ info_proc_cmd (char *args, int from_tty)
    the set of syscalls that are currently traced/debugged.
 
    If ENTRY_OR_EXIT is set to PR_SYSENTRY, then the entry syscalls set
-   will be updated. Otherwise, the exit syscalls set will be updated.
+   will be updated.  Otherwise, the exit syscalls set will be updated.
 
-   If MODE is FLAG_SET, then traces will be enabled. Otherwise, they
+   If MODE is FLAG_SET, then traces will be enabled.  Otherwise, they
    will be disabled.  */
 
 static void
@@ -5633,7 +5636,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   /* This part is the old method for fetching registers.
      It should be replaced by the newer one using regsets
      once it is implemented in this platform:
-     gdbarch_regset_from_core_section() and regset->collect_regset(). */
+     gdbarch_regset_from_core_section() and regset->collect_regset().  */
 
   old_chain = save_inferior_ptid ();
   inferior_ptid = ptid;

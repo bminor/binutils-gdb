@@ -68,7 +68,7 @@
 #include "ax.h"
 #include "ax-gdb.h"
 
-/* temp hacks for tracepoint encoding migration */
+/* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
 static long target_buf_size;
 /*static*/ void
@@ -435,7 +435,7 @@ remote_get_noisy_reply (char **buf_p,
     {
       char *buf;
 
-      QUIT;			/* allow user to bail out with ^C */
+      QUIT;			/* Allow user to bail out with ^C.  */
       getpkt (buf_p, sizeof_buf, 0);
       buf = *buf_p;
       if (buf[0] == 'E')
@@ -492,7 +492,7 @@ remote_get_noisy_reply (char **buf_p,
       else if (buf[0] == 'O' && buf[1] != 'K')
 	remote_console_output (buf + 1);	/* 'O' message from stub */
       else
-	return buf;		/* here's the actual reply */
+	return buf;		/* Here's the actual reply.  */
     }
   while (1);
 }
@@ -589,7 +589,7 @@ init_remote_state (struct gdbarch *gdbarch)
      to be smaller.  */
   rsa->sizeof_g_packet = offset;
 
-  /* Default maximum number of characters in a packet body. Many
+  /* Default maximum number of characters in a packet body.  Many
      remote stubs have a hardwired buffer size of 400 bytes
      (c.f. BUFMAX in m68k-stub.c and i386-stub.c).  BUFMAX-1 is used
      as the maximum packet-size to ensure that the packet and an extra
@@ -602,9 +602,9 @@ init_remote_state (struct gdbarch *gdbarch)
   rsa->actual_register_packet_size = 0;
 
   /* Should rsa->sizeof_g_packet needs more space than the
-     default, adjust the size accordingly. Remember that each byte is
-     encoded as two characters. 32 is the overhead for the packet
-     header / footer. NOTE: cagney/1999-10-26: I suspect that 8
+     default, adjust the size accordingly.  Remember that each byte is
+     encoded as two characters.  32 is the overhead for the packet
+     header / footer.  NOTE: cagney/1999-10-26: I suspect that 8
      (``$NN:G...#NN'') is a better guess, the below has been padded a
      little.  */
   if (rsa->sizeof_g_packet > ((rsa->remote_packet_size - 32) / 2))
@@ -768,7 +768,7 @@ static struct serial *remote_desc = NULL;
 
 /* This variable sets the number of bits in an address that are to be
    sent in a memory ("M" or "m") packet.  Normally, after stripping
-   leading zeros, the entire address would be sent. This variable
+   leading zeros, the entire address would be sent.  This variable
    restricts the address to REMOTE_ADDRESS_SIZE bits.  HISTORY: The
    initial implementation of remote.c restricted the address sent in
    memory packets to ``host::sizeof long'' bytes - (typically 32
@@ -864,7 +864,7 @@ get_memory_packet_size (struct memory_packet_config *config)
   return what_they_get;
 }
 
-/* Update the size of a read/write packet. If they user wants
+/* Update the size of a read/write packet.  If they user wants
    something really big then do a sanity check.  */
 
 static void
@@ -977,7 +977,7 @@ get_memory_read_packet_size (void)
 
 
 /* Generic configuration support for packets the stub optionally
-   supports. Allows the user to specify the use of the packet as well
+   supports.  Allows the user to specify the use of the packet as well
    as allowing GDB to auto-detect support in the remote stub.  */
 
 enum packet_support
@@ -1540,8 +1540,7 @@ demand_private_info (ptid_t ptid)
 /* Call this function as a result of
    1) A halt indication (T packet) containing a thread id
    2) A direct query of currthread
-   3) Successful execution of set thread
- */
+   3) Successful execution of set thread */
 
 static void
 record_currthread (ptid_t currthread)
@@ -1728,12 +1727,11 @@ remote_thread_alive (struct target_ops *ops, ptid_t ptid)
 typedef unsigned char threadref[OPAQUETHREADBYTES];
 
 /* WARNING: This threadref data structure comes from the remote O.S.,
-   libstub protocol encoding, and remote.c. it is not particularly
+   libstub protocol encoding, and remote.c.  It is not particularly
    changable.  */
 
 /* Right now, the internal structure is int. We want it to be bigger.
-   Plan to fix this.
- */
+   Plan to fix this.  */
 
 typedef int gdb_threadref;	/* Internal GDB thread reference.  */
 
@@ -1755,8 +1753,7 @@ struct gdb_ext_thread_info
 /* The volume of remote transfers can be limited by submitting
    a mask containing bits specifying the desired information.
    Use a union of these values as the 'selection' parameter to
-   get_thread_info. FIXME: Make these TAG names more thread specific.
- */
+   get_thread_info.  FIXME: Make these TAG names more thread specific.  */
 
 #define TAG_THREADID 1
 #define TAG_EXISTS 2
@@ -2083,7 +2080,7 @@ unpack_threadid (char *inbuf, threadref *id)
 }
 
 /* Externally, threadrefs are 64 bits but internally, they are still
-   ints. This is due to a mismatch of specifications.  We would like
+   ints.  This is due to a mismatch of specifications.  We would like
    to use 64bit thread references internally.  This is an adapter
    function.  */
 
@@ -4024,9 +4021,9 @@ remote_open_1 (char *name, int from_tty,
 
       /* FIXME: cagney/1999-09-23: During the initial connection it is
 	 assumed that the target is already ready and able to respond to
-	 requests. Unfortunately remote_start_remote() eventually calls
+	 requests.  Unfortunately remote_start_remote() eventually calls
 	 wait_for_inferior() with no timeout.  wait_forever_enabled_p gets
-	 around this. Eventually a mechanism that allows
+	 around this.  Eventually a mechanism that allows
 	 wait_for_inferior() to expect/get timeouts will be
 	 implemented.  */
       wait_forever_enabled_p = 0;
@@ -4569,8 +4566,8 @@ remote_resume (struct target_ops *ops,
 
  done:
   /* We are about to start executing the inferior, let's register it
-     with the event loop. NOTE: this is the one place where all the
-     execution commands end up. We could alternatively do this in each
+     with the event loop.  NOTE: this is the one place where all the
+     execution commands end up.  We could alternatively do this in each
      of the execution commands in infcmd.c.  */
   /* FIXME: ezannoni 1999-09-28: We may need to move this out of here
      into infcmd.c in order to allow inferior function calls to work
@@ -4627,7 +4624,7 @@ async_remote_interrupt (gdb_client_data arg)
   target_stop (inferior_ptid);
 }
 
-/* Perform interrupt, if the first attempt did not succeed. Just give
+/* Perform interrupt, if the first attempt did not succeed.  Just give
    up on the target alltogether.  */
 void
 async_remote_interrupt_twice (gdb_client_data arg)
@@ -4650,9 +4647,9 @@ cleanup_sigint_signal_handler (void *dummy)
    packet.  */
 static void (*ofunc) (int);
 
-/* The command line interface's stop routine. This function is installed
-   as a signal handler for SIGINT. The first time a user requests a
-   stop, we call remote_stop to send a break or ^C. If there is no
+/* The command line interface's stop routine.  This function is installed
+   as a signal handler for SIGINT.  The first time a user requests a
+   stop, we call remote_stop to send a break or ^C.  If there is no
    response from the target (it didn't stop when the user requested it),
    we ask the user if he'd like to detach from the target.  */
 static void
@@ -4746,7 +4743,7 @@ remote_stop_as (ptid_t ptid)
   send_interrupt_sequence ();
 }
 
-/* This is the generic stop called via the target vector. When a target
+/* This is the generic stop called via the target vector.  When a target
    interrupt is requested, either by the command line or the GUI, we
    will eventually end up here.  */
 
@@ -5962,7 +5959,7 @@ remote_store_registers (struct target_ops *ops,
       /* For now, don't complain if we have no way to write the
 	 register.  GDB loses track of unavailable registers too
 	 easily.  Some day, this may be an error.  We don't have
-	 any way to read the register, either... */
+	 any way to read the register, either...  */
       if (!reg->in_g_packet)
 	return;
 
@@ -6139,7 +6136,7 @@ remote_unescape_input (const gdb_byte *buffer, int len,
    remote_write_bytes.
 
    NOTE: This can still lose if the serial line is not eight-bit
-   clean. In cases like this, the user should clear "remote
+   clean.  In cases like this, the user should clear "remote
    X-packet".  */
 
 static void
@@ -6237,11 +6234,11 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   rs->buf[0] = '\0';
 
   /* Compute the size of the actual payload by subtracting out the
-     packet header and footer overhead: "$M<memaddr>,<len>:...#nn".
-     */
+     packet header and footer overhead: "$M<memaddr>,<len>:...#nn".  */
+
   payload_size -= strlen ("$,:#NN");
   if (!use_length)
-    /* The comma won't be used. */
+    /* The comma won't be used.  */
     payload_size += 1;
   header_length = strlen (header);
   payload_size -= header_length;
@@ -6433,7 +6430,7 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
       int todo;
       int i;
 
-      todo = min (len, max_buf_size / 2);	/* num bytes that will fit */
+      todo = min (len, max_buf_size / 2);	/* num bytes that will fit.  */
 
       /* construct "m"<memaddr>","<len>" */
       /* sprintf (rs->buf, "m%lx,%x", (unsigned long) memaddr, todo); */
@@ -7943,17 +7940,17 @@ compare_sections_command (char *args, int from_tty)
   for (s = exec_bfd->sections; s; s = s->next)
     {
       if (!(s->flags & SEC_LOAD))
-	continue;		/* skip non-loadable section */
+	continue;		/* Skip non-loadable section.  */
 
       size = bfd_get_section_size (s);
       if (size == 0)
-	continue;		/* skip zero-length section */
+	continue;		/* Skip zero-length section.  */
 
       sectname = bfd_get_section_name (exec_bfd, s);
       if (args && strcmp (args, sectname) != 0)
-	continue;		/* not the section selected by user */
+	continue;		/* Not the section selected by user.  */
 
-      matched = 1;		/* do this section */
+      matched = 1;		/* Do this section.  */
       lma = s->lma;
 
       sectdata = xmalloc (size);
@@ -8148,7 +8145,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 	return -1;
     }
 
-  /* Handle SPU memory using qxfer packets. */
+  /* Handle SPU memory using qxfer packets.  */
   if (object == TARGET_OBJECT_SPU)
     {
       if (readbuf)
@@ -8256,7 +8253,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
      buffer size.  */
   if (offset == 0 && len == 0)
     return (get_remote_packet_size ());
-  /* Minimum outbuf size is get_remote_packet_size (). If LEN is not
+  /* Minimum outbuf size is get_remote_packet_size ().  If LEN is not
      large enough let the caller deal with it.  */
   if (len < get_remote_packet_size ())
     return -1;
@@ -8310,10 +8307,10 @@ remote_search_memory (struct target_ops* ops,
   int max_size = get_memory_write_packet_size ();
   struct packet_config *packet =
     &remote_protocol_packets[PACKET_qSearch_memory];
-  /* number of packet bytes used to encode the pattern,
-     this could be more than PATTERN_LEN due to escape characters */
+  /* Number of packet bytes used to encode the pattern;
+     this could be more than PATTERN_LEN due to escape characters.  */
   int escaped_pattern_len;
-  /* amount of pattern that was encodable in the packet */
+  /* Amount of pattern that was encodable in the packet.  */
   int used_pattern_len;
   int i;
   int found;
@@ -9674,7 +9671,7 @@ remote_download_command_source (int num, ULONGEST addr,
 
   for (cmd = cmds; cmd; cmd = cmd->next)
     {
-      QUIT;	/* allow user to bail out with ^C */
+      QUIT;	/* Allow user to bail out with ^C.  */
       strcpy (rs->buf, "QTDPsrc:");
       encode_source_string (num, addr, "cmd", cmd->line,
 			    rs->buf + strlen (rs->buf),
@@ -9689,7 +9686,7 @@ remote_download_command_source (int num, ULONGEST addr,
 	{
 	  remote_download_command_source (num, addr, *cmd->body_list);
 
-	  QUIT;	/* allow user to bail out with ^C */
+	  QUIT;	/* Allow user to bail out with ^C.  */
 	  strcpy (rs->buf, "QTDPsrc:");
 	  encode_source_string (num, addr, "cmd", "end",
 				rs->buf + strlen (rs->buf),
@@ -9814,7 +9811,7 @@ remote_download_tracepoint (struct breakpoint *t)
 	{
 	  for (ndx = 0; tdp_actions[ndx]; ndx++)
 	    {
-	      QUIT;	/* allow user to bail out with ^C */
+	      QUIT;	/* Allow user to bail out with ^C.  */
 	      sprintf (buf, "QTDP:-%x:%s:%s%c",
 		       t->number, addrbuf, /* address */
 		       tdp_actions[ndx],
@@ -9831,7 +9828,7 @@ remote_download_tracepoint (struct breakpoint *t)
 	{
 	  for (ndx = 0; stepping_actions[ndx]; ndx++)
 	    {
-	      QUIT;	/* allow user to bail out with ^C */
+	      QUIT;	/* Allow user to bail out with ^C.  */
 	      sprintf (buf, "QTDP:-%x:%s:%s%s%s",
 		       t->number, addrbuf, /* address */
 		       ((ndx == 0) ? "S" : ""),
@@ -9917,7 +9914,7 @@ remote_trace_set_readonly_regions (void)
       char tmp1[40], tmp2[40];
 
       if ((s->flags & SEC_LOAD) == 0 ||
-      /* (s->flags & SEC_CODE)     == 0 || */
+      /*  (s->flags & SEC_CODE) == 0 || */
 	  (s->flags & SEC_READONLY) == 0)
 	continue;
 
@@ -9951,7 +9948,7 @@ static int
 remote_get_trace_status (struct trace_status *ts)
 {
   char *p;
-  /* FIXME we need to get register block size some other way */
+  /* FIXME we need to get register block size some other way.  */
   extern int trace_regblock_size;
 
   trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;

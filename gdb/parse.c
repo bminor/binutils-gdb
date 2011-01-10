@@ -196,7 +196,7 @@ free_funcalls (void *ignore)
 /* Add one element to the end of the expression.  */
 
 /* To avoid a bug in the Sun 4 compiler, we pass things that can fit into
-   a register through here */
+   a register through here.  */
 
 void
 write_exp_elt (union exp_element expelt)
@@ -309,7 +309,7 @@ write_exp_elt_intern (struct internalvar *expelt)
    that contains the length of the string, then stuffing the string
    constant itself into however many expression elements are needed
    to hold it, and then writing another expression element that contains
-   the length of the string.  I.E. an expression element at each end of
+   the length of the string.  I.e. an expression element at each end of
    the string records the string length, so you can skip over the 
    expression elements containing the actual string bytes from either
    end of the string.  Note that this also allows gdb to handle
@@ -321,7 +321,7 @@ write_exp_elt_intern (struct internalvar *expelt)
    actual length is recorded in expression elements at each end of the
    string.  The null byte is taken into consideration when computing how
    many expression elements are required to hold the string constant, of
-   course. */
+   course.  */
 
 
 void
@@ -334,12 +334,12 @@ write_exp_string (struct stoken str)
   /* Compute the number of expression elements required to hold the string
      (including a null byte terminator), along with one expression element
      at each end to record the actual string length (not including the
-     null byte terminator). */
+     null byte terminator).  */
 
   lenelt = 2 + BYTES_TO_EXP_ELEM (len + 1);
 
   /* Ensure that we have enough available expression elements to store
-     everything. */
+     everything.  */
 
   if ((expout_ptr + lenelt) >= expout_size)
     {
@@ -352,7 +352,7 @@ write_exp_string (struct stoken str)
   /* Write the leading length expression element (which advances the current
      expression element index), then write the string constant followed by a
      terminating null byte, and then write the trailing length expression
-     element. */
+     element.  */
 
   write_exp_elt_longcst ((LONGEST) len);
   strdata = (char *) &expout->elts[expout_ptr];
@@ -427,10 +427,10 @@ write_exp_string_vector (int type, struct stoken_vector *vec)
    that contains the length of the bitstring (in bits), then stuffing the
    bitstring constant itself into however many expression elements are
    needed to hold it, and then writing another expression element that
-   contains the length of the bitstring.  I.E. an expression element at
+   contains the length of the bitstring.  I.e. an expression element at
    each end of the bitstring records the bitstring length, so you can skip
    over the expression elements containing the actual bitstring bytes from
-   either end of the bitstring. */
+   either end of the bitstring.  */
 
 void
 write_exp_bitstring (struct stoken str)
@@ -442,12 +442,12 @@ write_exp_bitstring (struct stoken str)
 
   /* Compute the number of expression elements required to hold the bitstring,
      along with one expression element at each end to record the actual
-     bitstring length in bits. */
+     bitstring length in bits.  */
 
   lenelt = 2 + BYTES_TO_EXP_ELEM (len);
 
   /* Ensure that we have enough available expression elements to store
-     everything. */
+     everything.  */
 
   if ((expout_ptr + lenelt) >= expout_size)
     {
@@ -459,7 +459,7 @@ write_exp_bitstring (struct stoken str)
 
   /* Write the leading length expression element (which advances the current
      expression element index), then write the bitstring constant, and then
-     write the trailing length expression element. */
+     write the trailing length expression element.  */
 
   write_exp_elt_longcst ((LONGEST) bits);
   strdata = (char *) &expout->elts[expout_ptr];
@@ -557,16 +557,14 @@ mark_struct_expression (void)
    from the first value which has index 1.
 
    $$digits     Value history with index <digits> relative
-   to the last value.  I.E. $$0 is the last
+   to the last value.  I.e. $$0 is the last
    value, $$1 is the one previous to that, $$2
    is the one previous to $$1, etc.
 
    $ | $0 | $$0 The last value in the value history.
 
    $$           An abbreviation for the second to the last
-   value in the value history, I.E. $$1
-
- */
+   value in the value history, I.e. $$1  */
 
 void
 write_dollar_variable (struct stoken str)
@@ -576,7 +574,7 @@ write_dollar_variable (struct stoken str)
   struct internalvar *isym = NULL;
 
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
-     and $$digits (equivalent to $<-digits> if you could type that). */
+     and $$digits (equivalent to $<-digits> if you could type that).  */
 
   int negate = 0;
   int i = 1;
@@ -589,7 +587,7 @@ write_dollar_variable (struct stoken str)
     }
   if (i == str.length)
     {
-      /* Just dollars (one or two) */
+      /* Just dollars (one or two).  */
       i = -negate;
       goto handle_last;
     }
@@ -624,7 +622,7 @@ write_dollar_variable (struct stoken str)
     }
 
   /* On some systems, such as HP-UX and hppa-linux, certain system routines 
-     have names beginning with $ or $$.  Check for those, first. */
+     have names beginning with $ or $$.  Check for those, first.  */
 
   sym = lookup_symbol (copy_name (str), (struct block *) NULL,
 		       VAR_DOMAIN, (int *) NULL);
@@ -683,7 +681,7 @@ find_template_name_end (char *p)
 	case '\"':
 	case '{':
 	case '}':
-	  /* In future, may want to allow these?? */
+	  /* In future, may want to allow these??  */
 	  return 0;
 	case '<':
 	  depth++;		/* start nested template */
@@ -852,7 +850,7 @@ operator_length_standard (const struct expression *expr, int endpos,
       args = 1;
       break;
 
-    case OP_OBJC_MSGCALL:	/* Objective C message (method) call */
+    case OP_OBJC_MSGCALL:	/* Objective C message (method) call.  */
       oplen = 4;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
@@ -904,8 +902,8 @@ operator_length_standard (const struct expression *expr, int endpos,
     case OP_M2_STRING:
     case OP_STRING:
     case OP_OBJC_NSSTRING:	/* Objective C Foundation Class
-				   NSString constant */
-    case OP_OBJC_SELECTOR:	/* Objective C "@selector" pseudo-op */
+				   NSString constant.  */
+    case OP_OBJC_SELECTOR:	/* Objective C "@selector" pseudo-op.  */
     case OP_NAME:
       oplen = longest_to_int (expr->elts[endpos - 2].longconst);
       oplen = 4 + BYTES_TO_EXP_ELEM (oplen + 1);
@@ -1117,9 +1115,9 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
          startup phase to re-parse breakpoint expressions after
          a new shared library has been loaded.  The language associated
          to the current frame at this moment is not relevant for
-         the breakpoint. Using it would therefore be silly, so it seems
+         the breakpoint.  Using it would therefore be silly, so it seems
          better to rely on the current language rather than relying on
-         the current frame language to parse the expression. That's why
+         the current frame language to parse the expression.  That's why
          we do the following language detection only if the context block
          has been specifically provided.  */
       struct symbol *func = block_linkage_function (block);
@@ -1157,7 +1155,7 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
 
   /* Record the actual number of expression elements, and then
      reallocate the expression memory so that we free up any
-     excess elements. */
+     excess elements.  */
 
   expout->nelts = expout_ptr;
   expout = (struct expression *)
@@ -1165,7 +1163,7 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
 	      sizeof (struct expression) + EXP_ELEM_TO_BYTES (expout_ptr));;
 
   /* Convert expression from postfix form as generated by yacc
-     parser, to a prefix form. */
+     parser, to a prefix form.  */
 
   if (expressiondebug)
     dump_raw_expression (expout, gdb_stdlog,
@@ -1245,7 +1243,7 @@ parse_field_expression (char *string, char **name)
   return value_type (val);
 }
 
-/* A post-parser that does nothing */
+/* A post-parser that does nothing.  */
 
 void
 null_post_parser (struct expression **exp, int void_context_p)

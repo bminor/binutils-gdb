@@ -57,7 +57,7 @@ ppcobsd_supply_gregset (const struct regset *regset,
 }
 
 /* Collect register REGNUM in the general-purpose register set
-   REGSET. from register cache REGCACHE into the buffer specified by
+   REGSET, from register cache REGCACHE into the buffer specified by
    GREGS and LEN.  If REGNUM is -1, do this for all registers in
    REGSET.  */
 
@@ -208,7 +208,7 @@ ppcobsd_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   trad_frame_set_reg_addr (cache, tdep->ppc_ctr_regnum, addr);
   addr += tdep->wordsize;
   trad_frame_set_reg_addr (cache, gdbarch_pc_regnum (gdbarch), addr);
-  /* SRR0? */
+  /* SRR0?  */
   addr += tdep->wordsize;
 
   /* Construct the frame ID using the function start.  */

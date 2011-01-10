@@ -147,7 +147,7 @@
 	Now we've hit the breakpoint at shr1.  (The breakpoint was
 	reset from the PLT entry to the actual shr1 function after the
 	shared library was loaded.) Note that the PLT entry has been
-	resolved to contain a branch that takes us directly to shr1. 
+	resolved to contain a branch that takes us directly to shr1.
 	(The real one, not the PLT entry.)
 
 	    (gdb) x/2i 0x100409d4
@@ -158,7 +158,7 @@
    changed twice.
 
    Now the problem should be obvious.  GDB places a breakpoint (a
-   trap instruction) on the zero value of the PLT entry for shr1. 
+   trap instruction) on the zero value of the PLT entry for shr1.
    Later on, after the shared library had been loaded and the PLT
    initialized, GDB gets a signal indicating this fact and attempts
    (as it always does when it stops) to remove all the breakpoints.
@@ -181,7 +181,7 @@
    that the latter does not is check to make sure that the breakpoint
    location actually contains a breakpoint (trap instruction) prior
    to attempting to write back the old contents.  If it does contain
-   a trap instruction, we allow the old contents to be written back. 
+   a trap instruction, we allow the old contents to be written back.
    Otherwise, we silently do nothing.
 
    The big question is whether memory_remove_breakpoint () should be
@@ -216,7 +216,7 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
   /* If our breakpoint is no longer at the address, this means that the
      program modified the code on us, so it is wrong to put back the
-     old value */
+     old value.  */
   if (val == 0 && memcmp (bp, old_contents, bplen) == 0)
     val = target_write_memory (addr, bp_tgt->shadow_contents, bplen);
 
@@ -284,8 +284,8 @@ read_insn (CORE_ADDR pc)
 /* An instruction to match.  */
 struct insn_pattern
 {
-  unsigned int mask;            /* mask the insn with this... */
-  unsigned int data;            /* ...and see if it matches this. */
+  unsigned int mask;            /* mask the insn with this...  */
+  unsigned int data;            /* ...and see if it matches this.  */
   int optional;                 /* If non-zero, this insn may be absent.  */
 };
 
@@ -912,7 +912,8 @@ ppc_linux_sigtramp_cache (struct frame_info *this_frame,
   for (i = 0; i < 32; i++)
     {
       int regnum = i + tdep->ppc_gp0_regnum;
-      trad_frame_set_reg_addr (this_cache, regnum, gpregs + i * tdep->wordsize);
+      trad_frame_set_reg_addr (this_cache,
+			       regnum, gpregs + i * tdep->wordsize);
     }
   trad_frame_set_reg_addr (this_cache,
 			   gdbarch_pc_regnum (gdbarch),
@@ -1526,8 +1527,10 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_xml_syscall_file_name (XML_SYSCALL_FILENAME_PPC);
 
       /* Trampolines.  */
-      tramp_frame_prepend_unwinder (gdbarch, &ppc32_linux_sigaction_tramp_frame);
-      tramp_frame_prepend_unwinder (gdbarch, &ppc32_linux_sighandler_tramp_frame);
+      tramp_frame_prepend_unwinder (gdbarch,
+				    &ppc32_linux_sigaction_tramp_frame);
+      tramp_frame_prepend_unwinder (gdbarch,
+				    &ppc32_linux_sighandler_tramp_frame);
 
       /* BFD target for core files.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
@@ -1565,8 +1568,10 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_xml_syscall_file_name (XML_SYSCALL_FILENAME_PPC64);
 
       /* Trampolines.  */
-      tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sigaction_tramp_frame);
-      tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sighandler_tramp_frame);
+      tramp_frame_prepend_unwinder (gdbarch,
+				    &ppc64_linux_sigaction_tramp_frame);
+      tramp_frame_prepend_unwinder (gdbarch,
+				    &ppc64_linux_sighandler_tramp_frame);
 
       /* BFD target for core files.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
@@ -1587,7 +1592,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_core_regset_sections (gdbarch,
 					  ppc64_linux_fp_regset_sections);
     }
-  set_gdbarch_regset_from_core_section (gdbarch, ppc_linux_regset_from_core_section);
+  set_gdbarch_regset_from_core_section (gdbarch,
+					ppc_linux_regset_from_core_section);
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
 
   /* Enable TLS support.  */

@@ -27,7 +27,7 @@
 
 /* The strerror() function can return NULL for errno values that are
    out of range.  Provide a "safe" version that always returns a
-   printable string. */
+   printable string.  */
 
 char *
 safe_strerror (int errnum)
