@@ -176,7 +176,7 @@ spu_register_type (struct gdbarch *gdbarch, int reg_nr)
       return builtin_type (gdbarch)->builtin_uint32;
 
     default:
-      internal_error (__FILE__, __LINE__, "invalid regnum");
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
 }
 
@@ -1462,7 +1462,7 @@ spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:
-	  error ("Cannot set function return value.");
+	  error (_("Cannot set function return value."));
 	  break;
 	}
     }
@@ -1475,7 +1475,7 @@ spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:
-	  error ("Function return value unknown.");
+	  error (_("Function return value unknown."));
 	  break;
 	}
     }

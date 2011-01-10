@@ -2182,11 +2182,10 @@ mep_store_return_value (struct gdbarch *arch,
      memory, pointed to by R0.  Unfortunately, we can't count on R0
      pointing to the return buffer, so we raise an error here.  */
   else
-    error ("GDB cannot set return values larger than four bytes; "
-           "the Media Processor's\n"
-           "calling conventions do not provide enough information "
-           "to do this.\n"
-           "Try using the 'return' command with no argument.");
+    error (_("\
+GDB cannot set return values larger than four bytes; the Media Processor's\n\
+calling conventions do not provide enough information to do this.\n\
+Try using the 'return' command with no argument."));
 }
 
 static enum return_value_convention
@@ -2210,11 +2209,10 @@ mep_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	  /* Return values larger than a single register are returned in
 	     memory, pointed to by R0.  Unfortunately, we can't count on R0
 	     pointing to the return buffer, so we raise an error here.  */
-	  error ("GDB cannot set return values larger than four bytes; "
-		 "the Media Processor's\n"
-		 "calling conventions do not provide enough information "
-		 "to do this.\n"
-		 "Try using the 'return' command with no argument.");
+	  error (_("\
+GDB cannot set return values larger than four bytes; the Media Processor's\n\
+calling conventions do not provide enough information to do this.\n\
+Try using the 'return' command with no argument."));
 	}
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
     }
@@ -2427,14 +2425,14 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
           
           fputc_unfiltered ('\n', gdb_stderr);
           if (module_name)
-            warning ("the MeP module '%s' is %s-endian, but the executable\n"
-                     "%s is %s-endian.",
+            warning (_("the MeP module '%s' is %s-endian, but the executable\n"
+		       "%s is %s-endian."),
                      module_name, module_endianness,
                      file_name, file_endianness);
           else
-            warning ("the selected MeP module is %s-endian, but the "
-                     "executable\n"
-                     "%s is %s-endian.",
+            warning (_("the selected MeP module is %s-endian, but the "
+		       "executable\n"
+		       "%s is %s-endian."),
                      module_endianness, file_name, file_endianness);
         }
     }

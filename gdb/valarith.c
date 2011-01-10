@@ -1731,7 +1731,7 @@ value_pos (struct value *arg1)
     }
   else
     {
-      error ("Argument to positive operation not a number.");
+      error (_("Argument to positive operation not a number."));
       return 0;			/* For lint -- never reached */
     }
 }

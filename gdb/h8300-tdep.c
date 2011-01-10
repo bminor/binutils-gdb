@@ -771,7 +771,7 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
 	}
       else
 	{
-	  error ("I don't know how this 8 byte value is returned.");
+	  error (_("I don't know how this 8 byte value is returned."));
 	}
       break;
     }
@@ -805,7 +805,7 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
 	}
       else
 	{
-	  error ("I don't know how this 8 byte value is returned.");
+	  error (_("I don't know how this 8 byte value is returned."));
 	}
       break;
     }
@@ -869,7 +869,7 @@ h8300_store_return_value (struct type *type, struct regcache *regcache,
     case 8:			/* long long, double and long double
 				   are all defined as 4 byte types so
 				   far so this shouldn't happen.  */
-      error ("I don't know how to return an 8 byte value.");
+      error (_("I don't know how to return an 8 byte value."));
       break;
     }
 }
@@ -954,7 +954,8 @@ h8300_register_name (struct gdbarch *gdbarch, int regno)
   if (regno < 0
       || regno >= (sizeof (register_names) / sizeof (*register_names)))
     internal_error (__FILE__, __LINE__,
-		    "h8300_register_name: illegal register number %d", regno);
+		    _("h8300_register_name: illegal register number %d"),
+		    regno);
   else
     return register_names[regno];
 }
@@ -971,7 +972,7 @@ h8300s_register_name (struct gdbarch *gdbarch, int regno)
   if (regno < 0
       || regno >= (sizeof (register_names) / sizeof (*register_names)))
     internal_error (__FILE__, __LINE__,
-		    "h8300s_register_name: illegal register number %d",
+		    _("h8300s_register_name: illegal register number %d"),
 		    regno);
   else
     return register_names[regno];
@@ -989,7 +990,7 @@ h8300sx_register_name (struct gdbarch *gdbarch, int regno)
   if (regno < 0
       || regno >= (sizeof (register_names) / sizeof (*register_names)))
     internal_error (__FILE__, __LINE__,
-		    "h8300sx_register_name: illegal register number %d",
+		    _("h8300sx_register_name: illegal register number %d"),
 		    regno);
   else
     return register_names[regno];
@@ -1125,7 +1126,8 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
   if (regno < 0 || regno >= gdbarch_num_regs (gdbarch)
 			    + gdbarch_num_pseudo_regs (gdbarch))
     internal_error (__FILE__, __LINE__,
-		    "h8300_register_type: illegal register number %d", regno);
+		    _("h8300_register_type: illegal register number %d"),
+		    regno);
   else
     {
       switch (regno)

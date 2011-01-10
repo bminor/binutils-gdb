@@ -485,7 +485,7 @@ iq2000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
   static const unsigned char little_breakpoint[] = { 0x0d, 0x00, 0x00, 0x00 };
 
   if ((*pcptr & 3) != 0)
-    error ("breakpoint_from_pc: invalid breakpoint address 0x%lx",
+    error (_("breakpoint_from_pc: invalid breakpoint address 0x%lx"),
 	   (long) *pcptr);
 
   *lenptr = 4;

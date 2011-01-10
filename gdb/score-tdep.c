@@ -155,7 +155,7 @@ score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, char *memblock)
       ret = target_read_memory (addr & ~0x3, buf, SCORE_INSTLEN);
       if (ret)
         {
-          error ("Error: target_read_memory in file:%s, line:%d!",
+          error (_("Error: target_read_memory in file:%s, line:%d!"),
                   __FILE__, __LINE__);
           return 0;
         }
@@ -248,7 +248,7 @@ score3_adjust_pc_and_fetch_inst (CORE_ADDR *pcptr, int *lenptr,
           buf[i][0] = '\0';
           buf[i][1] = '\0';
 	  if (i == 2)
-            error ("Error: target_read_memory in file:%s, line:%d!",
+            error (_("Error: target_read_memory in file:%s, line:%d!"),
 		   __FILE__, __LINE__);
         }
 
@@ -318,7 +318,7 @@ score7_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 
   if ((ret = target_read_memory (*pcptr & ~0x3, buf, SCORE_INSTLEN)) != 0)
     {
-      error ("Error: target_read_memory in file:%s, line:%d!",
+      error (_("Error: target_read_memory in file:%s, line:%d!"),
              __FILE__, __LINE__);
     }
   raw = extract_unsigned_integer (buf, SCORE_INSTLEN, byte_order);
@@ -435,7 +435,7 @@ score_xfer_register (struct regcache *regcache, int regnum, int length,
       reg_offset = 0;
       break;
     default:
-      error ("Error: score_xfer_register in file:%s, line:%d!",
+      error (_("Error: score_xfer_register in file:%s, line:%d!"),
              __FILE__, __LINE__);
     }
 
@@ -811,7 +811,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
 
   if (size < 0)
     {
-      error ("Error: malloc size < 0 in file:%s, line:%d!",
+      error (_("Error: malloc size < 0 in file:%s, line:%d!"),
              __FILE__, __LINE__);
       return NULL;
     }
@@ -823,7 +823,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
   ret = target_read_memory (addr & ~0x3, memblock, size);
   if (ret)
     {
-      error ("Error: target_read_memory in file:%s, line:%d!",
+      error (_("Error: target_read_memory in file:%s, line:%d!"),
              __FILE__, __LINE__);
       return NULL;
     }

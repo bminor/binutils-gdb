@@ -840,7 +840,7 @@ pipe_windows_open (struct serial *scb, const char *name)
   back_to = make_cleanup_freeargv (argv);
 
   if (! argv[0] || argv[0][0] == '\0')
-    error ("missing child command");
+    error (_("missing child command"));
 
   ps = make_pipe_state ();
   make_cleanup (cleanup_pipe_state, ps);
@@ -867,10 +867,10 @@ pipe_windows_open (struct serial *scb, const char *name)
            all the same information here, plus err_msg provided by
            pex_run, so we just raise the error here.  */
         if (err)
-          error ("error starting child process '%s': %s: %s",
+          error (_("error starting child process '%s': %s: %s"),
                  name, err_msg, safe_strerror (err));
         else
-          error ("error starting child process '%s': %s",
+          error (_("error starting child process '%s': %s"),
                  name, err_msg);
       }
   }

@@ -2042,7 +2042,7 @@ trace_find_command (char *args, int from_tty)
   int frameno = -1;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
-    error ("May not look at trace frames while trace is running.");
+    error (_("May not look at trace frames while trace is running."));
   
   if (args == 0 || *args == 0)
     { /* TFIND with no args means find NEXT trace frame.  */
@@ -2100,7 +2100,7 @@ trace_find_pc_command (char *args, int from_tty)
   CORE_ADDR pc;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
-    error ("May not look at trace frames while trace is running.");
+    error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
     pc = regcache_read_pc (get_current_regcache ());
@@ -2118,7 +2118,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
   struct breakpoint *tp;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
-    error ("May not look at trace frames while trace is running.");
+    error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
     {
@@ -2157,7 +2157,7 @@ trace_find_line_command (char *args, int from_tty)
   struct cleanup *old_chain;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
-    error ("May not look at trace frames while trace is running.");
+    error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
     {
@@ -2221,7 +2221,7 @@ trace_find_range_command (char *args, int from_tty)
   char *tmp;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
-    error ("May not look at trace frames while trace is running.");
+    error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
     { /* XXX FIXME: what should default behavior be?  */
@@ -2254,7 +2254,7 @@ trace_find_outside_command (char *args, int from_tty)
   char *tmp;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
-    error ("May not look at trace frames while trace is running.");
+    error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
     { /* XXX FIXME: what should default behavior be? */
@@ -3326,7 +3326,7 @@ tfile_open (char *filename, int from_tty)
     error (_("No register block size recorded in trace file"));
   if (ts->traceframe_count <= 0)
     {
-      warning ("No traceframes present in this file.");
+      warning (_("No traceframes present in this file."));
       return;
     }
 
@@ -3373,7 +3373,7 @@ tfile_interp_line (char *line,
       parse_tsv_definition (p, utsvp);
     }
   else
-    warning ("Ignoring trace file definition \"%s\"", line);
+    warning (_("Ignoring trace file definition \"%s\""), line);
 }
 
 /* Parse the part of trace status syntax that is shared between
@@ -3878,7 +3878,7 @@ tfile_fetch_registers (struct target_ops *ops,
 	  pos += (4 + 8);
 	  break;
 	default:
-	  error ("Unknown block type '%c' (0x%x) in trace frame",
+	  error (_("Unknown block type '%c' (0x%x) in trace frame"),
 		 block_type, block_type);
 	  break;
 	}
@@ -3903,15 +3903,16 @@ tfile_fetch_registers (struct target_ops *ops,
 	  /* But don't try to guess if tracepoint is multi-location...  */
 	  if (tp->loc->next)
 	    {
-	      warning ("Tracepoint %d has multiple "
-		       "locations, cannot infer $pc",
+	      warning (_("Tracepoint %d has multiple "
+			 "locations, cannot infer $pc"),
 		       tp->number);
 	      return;
 	    }
 	  /* ... or does while-stepping.  */
 	  if (tp->step_count > 0)
 	    {
-	      warning ("Tracepoint %d does while-stepping, cannot infer $pc",
+	      warning (_("Tracepoint %d does while-stepping, "
+			 "cannot infer $pc"),
 		       tp->number);
 	      return;
 	    }
@@ -3939,7 +3940,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
     return -1;
 
   if (readbuf == NULL)
-    error ("tfile_xfer_partial: trace file is read-only");
+    error (_("tfile_xfer_partial: trace file is read-only"));
 
   lseek (trace_fd, cur_offset, SEEK_SET);
   pos = 0;
@@ -4003,7 +4004,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	  pos += (4 + 8);
 	  break;
 	default:
-	  error ("Unknown block type '%c' (0x%x) in traceframe",
+	  error (_("Unknown block type '%c' (0x%x) in traceframe"),
 		 block_type, block_type);
 	  break;
 	}
@@ -4109,7 +4110,7 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	  pos += (4 + 8);
 	  break;
 	default:
-	  error ("Unknown block type '%c' (0x%x) in traceframe",
+	  error (_("Unknown block type '%c' (0x%x) in traceframe"),
 		 block_type, block_type);
 	  break;
 	}

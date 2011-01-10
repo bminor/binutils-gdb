@@ -324,13 +324,13 @@ validate (struct gdbarch *gdbarch)
 
   desc = iconv_open (target_wide_cset, host_cset);
   if (desc == (iconv_t) -1)
-    error ("Cannot convert between character sets `%s' and `%s'",
+    error (_("Cannot convert between character sets `%s' and `%s'"),
 	   target_wide_cset, host_cset);
   iconv_close (desc);
 
   desc = iconv_open (target_cset, host_cset);
   if (desc == (iconv_t) -1)
-    error ("Cannot convert between character sets `%s' and `%s'",
+    error (_("Cannot convert between character sets `%s' and `%s'"),
 	   target_cset, host_cset);
   iconv_close (desc);
 

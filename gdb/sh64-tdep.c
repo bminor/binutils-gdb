@@ -1258,7 +1258,7 @@ sh64_extract_return_value (struct type *type, struct regcache *regcache,
 	  memcpy (valbuf, buf + offset, len);
 	}
       else
-	error ("bad size for return value");
+	error (_("bad size for return value"));
     }
 }
 
@@ -1572,7 +1572,8 @@ sh64_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
       store_typed_floating (to, type, val);
     }
   else
-    error ("sh64_register_convert_to_virtual called with non DR register number");
+    error (_("sh64_register_convert_to_virtual "
+	     "called with non DR register number"));
 }
 
 static void
@@ -1596,7 +1597,8 @@ sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
 				 &val, to);
     }
   else
-    error ("sh64_register_convert_to_raw called with non DR register number");
+    error (_("sh64_register_convert_to_raw called "
+	     "with non DR register number"));
 }
 
 static void
@@ -2002,7 +2004,7 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   /* Get the data in raw format.  */
   if (!frame_register_read (frame, regnum, raw_buffer))
-    error ("can't read register %d (%s)",
+    error (_("can't read register %d (%s)"),
 	   regnum, gdbarch_register_name (gdbarch, regnum));
 
   /* Get the register as a number */ 
@@ -2161,7 +2163,7 @@ sh64_media_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
   if (regnum != -1)		/* do one specified register */
     {
       if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
-	error ("Not a valid register for the current processor type");
+	error (_("Not a valid register for the current processor type"));
 
       sh64_print_register (gdbarch, file, frame, regnum);
     }
@@ -2219,10 +2221,10 @@ sh64_compact_print_registers_info (struct gdbarch *gdbarch,
   if (regnum != -1)		/* do one specified register */
     {
       if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
-	error ("Not a valid register for the current processor type");
+	error (_("Not a valid register for the current processor type"));
 
       if (regnum >= 0 && regnum < R0_C_REGNUM)
-        error ("Not a valid register for the current processor mode.");
+        error (_("Not a valid register for the current processor mode."));
 
       sh64_print_register (gdbarch, file, frame, regnum);
     }

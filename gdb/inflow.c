@@ -700,7 +700,7 @@ new_tty (void)
   if (ioctl (tty, TIOCSCTTY, 0) == -1)
     /* Mention GDB in warning because it will appear in the inferior's
        terminal instead of GDB's.  */
-    warning ("GDB: Failed to set controlling terminal: %s",
+    warning (_("GDB: Failed to set controlling terminal: %s"),
 	     safe_strerror (errno));
 #endif
 
@@ -789,7 +789,7 @@ create_tty_session (void)
 
   ret = setsid ();
   if (ret == -1)
-    warning ("Failed to create new terminal session: setsid: %s",
+    warning (_("Failed to create new terminal session: setsid: %s"),
 	     safe_strerror (errno));
 
   return ret;

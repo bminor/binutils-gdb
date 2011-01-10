@@ -2219,9 +2219,9 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    = lookup_minimal_symbol ("mem0", NULL, NULL);
 
 	  if (! mem0)
-	    error ("The return value is stored in memory at 'mem0', "
-		   "but GDB cannot find\n"
-		   "its address.");
+	    error (_("The return value is stored in memory at 'mem0', "
+		     "but GDB cannot find\n"
+		     "its address."));
 	  read_memory (SYMBOL_VALUE_ADDRESS (mem0), readbuf, valtype_len);
 	}
     }
@@ -2251,9 +2251,9 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    = lookup_minimal_symbol ("mem0", NULL, NULL);
 
 	  if (! mem0)
-	    error ("The return value is stored in memory at 'mem0', "
-		   "but GDB cannot find\n"
-		   " its address.");
+	    error (_("The return value is stored in memory at 'mem0', "
+		     "but GDB cannot find\n"
+		     " its address."));
 	  write_memory (SYMBOL_VALUE_ADDRESS (mem0),
                         (char *) writebuf, valtype_len);
 	}
