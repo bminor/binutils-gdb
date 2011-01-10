@@ -1,5 +1,10 @@
 2011-01-10  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-i386.c (x86_elf_abi): Only define for targets that use
+	it.
+
+2011-01-10  Nick Clifton  <nickc@redhat.com>
+
 	* config/tc-arm.c (s_arm_tls_desceq): Move code into ELF-only
 	part of the file.
 

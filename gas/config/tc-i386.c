@@ -391,6 +391,10 @@ static enum flag_code flag_code;
 static unsigned int object_64bit;
 static int use_rela_relocations = 0;
 
+#if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
+     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
+     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
+
 /* The ELF ABI to use.  */
 enum x86_elf_abi
 {
@@ -400,6 +404,7 @@ enum x86_elf_abi
 };
 
 static enum x86_elf_abi x86_elf_abi = I386_ABI;
+#endif
 
 /* The names used to print error messages.  */
 static const char *flag_code_names[] =
