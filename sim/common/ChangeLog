@@ -1,4 +1,9 @@
-2010-01-10  Mike Frysinger  <vapier@gentoo.org>
+2011-01-10  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Set $hardware to $2 when $2 is
+	not empty, and always append $3 to $hardware.
+
+2011-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* hw-device.h (hw_abort, hw_vabort, hw_halt): Add noreturn attribute.
 	* sim-hw.h (sim_hw_abort): Likewise.

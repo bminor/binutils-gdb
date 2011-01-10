@@ -571,10 +571,11 @@ else
   sim_hw_p=no
 fi
 if test "[$2]"; then
-  hardware="core pal glue"
+  hardware="[$2]"
 else
-  hardware="core pal glue [$3]"
+  hardware="core pal glue"
 fi
+hardware="$hardware [$3]"
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
