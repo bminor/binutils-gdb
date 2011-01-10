@@ -1,3 +1,19 @@
+2011-01-10  Nathan Sidwell  <nathan@codesourcery.com>
+	    Glauber de Oliveira Costa  <glommer@gmail.com>
+
+	* doc/c-arm.texi: Document TLSDESC and TLSCALL relocations, and
+	.tlsdescseq directive.
+	* config/tc-arm.c (arm_typed_reg_parse): Check for potential reloc
+	following a symbol.
+	(s_arm_tls_descseq): New directive.
+	(md_pseudo_table): Add it.
+	(encode_branch): Allow TLS_CALL relocs too.
+	(do_t_blx, do_t_branch23): Use encode_branch.
+	(reloc_names): Add tlsdesc and tlscall.
+	(md_apply_fix): Process tls desc relocations.
+	(tc_gen_reloc): Likewise.
+	(arm_fix_adjustable): Likewise.
+
 2011-01-07  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add CPU_BMI_FLAGS.

@@ -1472,6 +1472,10 @@ arm_typed_reg_parse (char **ccp, enum arm_reg_type type,
   if (reg == FAIL)
     return FAIL;
 
+  /* Do not allow regname(... to parse as a register.  */
+  if (*str == '(')
+    return FAIL;
+
   /* Do not allow a scalar (reg+index) to parse as a register.  */
   if ((atype.defined & NTA_HASINDEX) != 0)
     {
@@ -4273,6 +4277,30 @@ s_arm_eabi_attribute (int ignored ATTRIBUTE_UNUSED)
 }
 #endif /* OBJ_ELF */
 
+/* Emit a tls fix for the symbol.  */
+
+static void
+s_arm_tls_descseq (int ignored ATTRIBUTE_UNUSED)
+{
+  char *p;
+  expressionS exp;
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+#ifdef md_cons_align
+  md_cons_align (4);
+#endif
+
+  /* Since we're just labelling the code, there's no need to define a
+     mapping symbol.  */
+  expression (&exp);
+  p = obstack_next_free (&frchain_now->frch_obstack);
+  fix_new_arm (frag_now, p - frag_now->fr_literal, 4, &exp, 0,
+	       thumb_mode ? BFD_RELOC_ARM_THM_TLS_DESCSEQ
+	       : BFD_RELOC_ARM_TLS_DESCSEQ);
+}
+
 static void s_arm_arch (int);
 static void s_arm_object_arch (int);
 static void s_arm_cpu (int);
@@ -4352,6 +4380,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "setfp",		s_arm_unwind_setfp,	0 },
   { "unwind_raw",	s_arm_unwind_raw,	0 },
   { "eabi_attribute",	s_arm_eabi_attribute,	0 },
+  { "tlsdescseq",	s_arm_tls_descseq,      0 },
 #else
   { "word",	   cons, 4},
 
@@ -7281,9 +7310,12 @@ encode_branch (int default_reloc)
 {
   if (inst.operands[0].hasreloc)
     {
-      constraint (inst.operands[0].imm != BFD_RELOC_ARM_PLT32,
-		  _("the only suffix valid here is '(plt)'"));
-      inst.reloc.type  = BFD_RELOC_ARM_PLT32;
+      constraint (inst.operands[0].imm != BFD_RELOC_ARM_PLT32
+		  && inst.operands[0].imm != BFD_RELOC_ARM_TLS_CALL,
+		  _("the only valid suffixes here are '(plt)' and '(tlscall)'"));
+      inst.reloc.type = inst.operands[0].imm == BFD_RELOC_ARM_PLT32
+	? BFD_RELOC_ARM_PLT32
+	: thumb_mode ? BFD_RELOC_ARM_THM_TLS_CALL : BFD_RELOC_ARM_TLS_CALL;
     }
   else
     inst.reloc.type = (bfd_reloc_code_real_type) default_reloc;
@@ -9655,8 +9687,7 @@ do_t_blx (void)
     {
       /* No register.  This must be BLX(1).  */
       inst.instruction = 0xf000e800;
-      inst.reloc.type = BFD_RELOC_THUMB_PCREL_BLX;
-      inst.reloc.pc_rel = 1;
+      encode_branch (BFD_RELOC_THUMB_PCREL_BLX);
     }
 }
 
@@ -9734,8 +9765,15 @@ static void
 do_t_branch23 (void)
 {
   set_it_insn_type_last ();
-  inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BRANCH23;
-  inst.reloc.pc_rel = 1;
+  encode_branch (BFD_RELOC_THUMB_PCREL_BRANCH23);
+  
+  /* md_apply_fix blows up with 'bl foo(PLT)' where foo is defined in
+     this file.  We used to simply ignore the PLT reloc type here --
+     the branch encoding is now needed to deal with TLSCALL relocs.
+     So if we see a PLT reloc now, put it back to how it used to be to
+     keep the preexisting behaviour.  */
+  if (inst.reloc.type == BFD_RELOC_ARM_PLT32)
+    inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH23;
 
 #if defined(OBJ_COFF)
   /* If the destination of the branch is a defined symbol which does not have
@@ -16517,7 +16555,13 @@ static struct reloc_entry reloc_names[] =
   { "tlsldo",  BFD_RELOC_ARM_TLS_LDO32}, { "TLSLDO",  BFD_RELOC_ARM_TLS_LDO32},
   { "gottpoff",BFD_RELOC_ARM_TLS_IE32},  { "GOTTPOFF",BFD_RELOC_ARM_TLS_IE32},
   { "tpoff",   BFD_RELOC_ARM_TLS_LE32},  { "TPOFF",   BFD_RELOC_ARM_TLS_LE32},
-  { "got_prel", BFD_RELOC_ARM_GOT_PREL}, { "GOT_PREL", BFD_RELOC_ARM_GOT_PREL}
+  { "got_prel", BFD_RELOC_ARM_GOT_PREL}, { "GOT_PREL", BFD_RELOC_ARM_GOT_PREL},
+  { "tlsdesc", BFD_RELOC_ARM_TLS_GOTDESC},
+  	{ "TLSDESC", BFD_RELOC_ARM_TLS_GOTDESC},
+  { "tlscall", BFD_RELOC_ARM_TLS_CALL},
+  	{ "TLSCALL", BFD_RELOC_ARM_TLS_CALL},
+  { "tlsdescseq", BFD_RELOC_ARM_TLS_DESCSEQ},
+  	{ "TLSDESCSEQ", BFD_RELOC_ARM_TLS_DESCSEQ}
 };
 #endif
 
@@ -20835,6 +20879,14 @@ md_apply_fix (fixS *	fixP,
       break;
 
 #ifdef OBJ_ELF
+    case BFD_RELOC_ARM_TLS_CALL:
+    case BFD_RELOC_ARM_THM_TLS_CALL:
+    case BFD_RELOC_ARM_TLS_DESCSEQ:
+    case BFD_RELOC_ARM_THM_TLS_DESCSEQ:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      break;
+
+    case BFD_RELOC_ARM_TLS_GOTDESC:
     case BFD_RELOC_ARM_TLS_GD32:
     case BFD_RELOC_ARM_TLS_LE32:
     case BFD_RELOC_ARM_TLS_IE32:
@@ -21436,6 +21488,10 @@ tc_gen_reloc (asection *section, fixS *fixp)
       return NULL;
 
 #ifdef OBJ_ELF
+    case BFD_RELOC_ARM_TLS_CALL:
+    case BFD_RELOC_ARM_THM_TLS_CALL:
+    case BFD_RELOC_ARM_TLS_DESCSEQ:
+    case BFD_RELOC_ARM_THM_TLS_DESCSEQ:
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
     case BFD_RELOC_ARM_GOT_PREL:
@@ -21481,6 +21537,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
       code = fixp->fx_r_type;
       break;
 
+    case BFD_RELOC_ARM_TLS_GOTDESC:
     case BFD_RELOC_ARM_TLS_GD32:
     case BFD_RELOC_ARM_TLS_IE32:
     case BFD_RELOC_ARM_TLS_LDM32:
@@ -21742,6 +21799,11 @@ arm_fix_adjustable (fixS * fixP)
       || fixP->fx_r_type == BFD_RELOC_ARM_TLS_IE32
       || fixP->fx_r_type == BFD_RELOC_ARM_TLS_LDM32
       || fixP->fx_r_type == BFD_RELOC_ARM_TLS_LDO32
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_GOTDESC
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_CALL
+      || fixP->fx_r_type == BFD_RELOC_ARM_THM_TLS_CALL
+      || fixP->fx_r_type == BFD_RELOC_ARM_TLS_DESCSEQ
+      || fixP->fx_r_type == BFD_RELOC_ARM_THM_TLS_DESCSEQ
       || fixP->fx_r_type == BFD_RELOC_ARM_TARGET2)
     return FALSE;
 

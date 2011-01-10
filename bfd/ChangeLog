@@ -1,3 +1,54 @@
+2011-01-10  Nathan Sidwell  <nathan@codesourcery.com>
+	    Glauber de Oliveira Costa  <glommer@gmail.com>
+
+	* reloc.c (BFD_RELOC_ARM_TLS_GOTDESC, BFD_RELOC_ARM_TLS_CALL,
+	BFD_RELOC_ARM_THM_TLS_CALL, BFD_RELOC_ARM_TLS_DESCSEQ,
+	BFD_RELOC_ARM_THM_TLS_DESCSEQ, BFD_RELOC_ARM_TLS_DESC): New
+	relocations.
+	* libbfd.h: Rebuilt.
+	* bfd-in2.h: Rebuilt.
+	* elf32-arm.c (elf32_arm_howto_table_1): Add new relocations.
+	(elf32_arm_reloc_map): Likewise.
+	(tls_trampoline, dl_tlsdesc_lazy_trampoline): New PLT templates.
+	(elf32_arm_stub_long_branch_any_tls_pic,
+	elf32_arm_stub_long_branch_v4t_thumb_tls_pic): New stub templates.
+	(DEF_STUBS): Add new stubs.
+	(struct_elf_arm_obj_data): Add local_tlsdesc_gotent field.
+	(elf32_arm_local_tlsdesc_gotent): New.
+	(GOT_TLS_GDESC): New mask.
+	(GOT_TLS_GD_ANY): Define.
+	(struct elf32_arm_link_hash_entry): Add tlsdesc_got field.
+	(elf32_arm_compute_jump_table_size): New.
+	(struct elf32_arm_link_hash_table): Add next_tls_desc_index,
+	num_tls_desc, dt_tlsdesc_plt, dt_tlsdesc_got, tls_trampoline,
+	sgotplt_jump_table_size fields.
+	(elf32_arm_link_hash_newfunc): Initialize tlsdesc_got field.
+	(elf32_arm_link_hash_table_create): Initialize new fields.
+	(arm_type_of_stub): Check TLS desc relocs too.
+	(elf32_arm_stub_name): TLS desc relocs can be shared.
+	(elf32_arm_tls_transition): Determine relaxation.
+	(arm_stub_required_alignment): Add tls stubs.
+	(elf32_arm_size_stubs): Likewise.
+	(elf32_arm_tls_relax): Perform TLS relaxing.
+	(elf32_arm_final_link_relocate): Process TLS DESC relocations.
+	(IS_ARM_TLS_GNU_RELOC): New.
+	(IS_ARM_TLS_RELOC): Use it.
+	(elf32_arm_relocate_section): Perform TLS relaxing.
+	(elf32_arm_check_relocs): Anticipate TLS relaxing, process tls
+	desc relocations.
+	(allocate_dynrelocs): Allocate tls desc relcoations.
+	(elf32_arm_output_arch_local_syms): Emit tls trampoline mapping
+	symbols.
+	(elf32_arm_size_dynamic_sections): Allocate tls trampolines and
+	got slots.
+	(elf32_arm_always_size_sections): New. Create _TLS_MODULE_BASE
+	symbol.
+	(elf32_arm_finish_dynamic_symbol): Adjust.
+	(arm_put_trampoline): New.
+	(elf32_arm_finish_dynamic_sections): Emit new dynamic tags and tls
+	trampolines.
+	(elf_backend_always_size_sections): Define.
+
 2011-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Optimized.

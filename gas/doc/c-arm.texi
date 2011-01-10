@@ -478,6 +478,8 @@ The following relocations are supported:
 @code{TLSGD},
 @code{TLSLDM},
 @code{TLSLDO},
+@code{TLSDESC},
+@code{TLSCALL},
 @code{GOTTPOFF},
 @code{GOT_PREL}
 and
@@ -863,6 +865,12 @@ creates a symbol which is an alias for another symbol (possibly not yet
 defined).  This directive also has the added property in that it marks
 the aliased symbol as being a thumb function entry point, in the same
 way that the @code{.thumb_func} directive does.
+
+@cindex @code{.tlsdescseq} directive, ARM
+@item .tlsdescseq @var{tls-variable}
+This directive is used to annotate parts of an inlined TLS descriptor
+trampoline.  Normally the trampoline is provided by the linker, and
+this directive is not needed.
 
 @c UUUUUUUUUUUUUUUUUUUUUUUUUU
 

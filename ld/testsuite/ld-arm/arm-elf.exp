@@ -135,6 +135,39 @@ set armelftests {
     {"TLS dynamic application" "-T arm-dyn.ld tmpdir/tls-lib.so" "" {tls-app.s}
      {{objdump -fdw tls-app.d} {objdump -Rw tls-app.r}}
      "tls-app"}
+    {"TLS gnu shared library got" "-shared -T arm-dyn.ld" "" {tls-gdesc-got.s}
+     {{objdump "-fDR -j .got" tls-gdesc-got.d}}
+     "tls-lib2-got.so"}
+    {"TLS gnu shared library inlined trampoline" "-shared -T arm-dyn.ld" "" {tls-descseq.s}
+     {{objdump -fdw tls-descseq.d} {objdump -Rw tls-descseq.r}}
+     "tls-lib2inline.so"}
+    {"TLS shared library gdesc local" "-shared -T arm-dyn.ld" "" {tls-lib-loc.s}
+     {{objdump -fdw tls-lib-loc.d} {objdump -Rw tls-lib-loc.r}}
+     "tls-lib-loc.so"}
+    {"TLS gnu GD to IE relaxation" "-static -T arm-dyn.ld" "" {tls-gdierelax.s}
+     {{objdump -fdw tls-gdierelax.d}}
+     "tls-app-rel-ie"}
+    {"TLS gnu GD to IE shared relaxation" "-shared -T arm-dyn.ld" "" {tls-gdierelax2.s}
+     {{objdump -fdw tls-gdierelax2.d}}
+     "tls-app-rel-ie2"}
+    {"TLS gnu GD to LE relaxation" "-T arm-dyn.ld" "" {tls-gdlerelax.s}
+     {{objdump -fdw tls-gdlerelax.d}}
+     "tls-app-rel-le"}
+    {"TLS mixed models shared lib" "-shared -T arm-dyn.ld" "" {tls-mixed.s}
+     {{objdump -Rw tls-mixed.r}}
+     "tls-mixed.so"}
+    {"TLS descseq relaxation" "-T arm-dyn.ld" "" {tls-descrelax.s}
+     {{objdump -fdw tls-descrelax.d}}
+     "tls-descrelax"}
+    {"TLS descseq relaxation v7" "-T arm-dyn.ld" "" {tls-descrelax-v7.s}
+     {{objdump -fdw tls-descrelax-v7.d}}
+     "tls-descrelax-v7"}
+    {"TLS descseq relaxation BE8" "-T arm-dyn.ld -EB --be8" "-mbig-endian" {tls-descrelax-be8.s}
+     {{objdump -fdw tls-descrelax-be8.d}}
+     "tls-descrelax-be8"}
+    {"TLS descseq relaxation BE32" "-T arm-dyn.ld -EB" "-mbig-endian" {tls-descrelax-be32.s}
+     {{objdump -fdw tls-descrelax-be32.d}}
+     "tls-descrelax-be32"}
     {"Thumb entry point" "-T arm.ld" "" {thumb-entry.s}
      {{readelf -h thumb-entry.d}}
      "thumb-entry"}
@@ -481,6 +514,21 @@ set armeabitests {
      {jump-reloc-veneers.s}
      {{objdump -d jump-reloc-veneers-long.d}}
      "jump-reloc-veneers-long"}
+    {"TLS gnu shared library" "-shared -T arm-dyn.ld" "" {tls-gdesc.s}
+     {{objdump -fdw tls-gdesc.d} {objdump -Rw tls-gdesc.r}}
+     "tls-lib2.so"}
+    {"TLS gnu shared library non-lazy" "-z now -shared -T arm-dyn.ld" "" {tls-gdesc.s}
+     {{readelf "-x .got" tls-gdesc-nlazy.g}}
+     "tls-lib2-nlazy.so"}
+    {"TLS long plt library" "-shared -T arm-dyn.ld --section-start .foo=0x4001000" "" {tls-longplt-lib.s}
+     {{objdump -fdw tls-longplt-lib.d}}
+     "tls-longplt-lib.so"}
+    {"TLS long plt" "-T arm-dyn.ld --section-start .foo=0x4001000 tmpdir/tls-longplt-lib.so" "" {tls-longplt.s}
+     {{objdump -fdw tls-longplt.d}}
+     "tls-longplt"}
+    {"TLS thumb1" "-shared -T arm-dyn.ld --section-start .foo=0x4001000" "" {tls-thumb1.s}
+     {{objdump -fdw tls-thumb1.d}}
+     "tls-thumb1"}
 }
 
 run_ld_link_tests $armeabitests

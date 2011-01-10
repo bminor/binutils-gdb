@@ -1,3 +1,45 @@
+2011-01-10  Nathan Sidwell  <nathan@codesourcery.com>
+	    Glauber de Oliveira Costa  <glommer@gmail.com>
+
+	* ld-arm/arm-elf.exp: Added tests for new TLS handling
+	relocations.
+	* ld-arm/tls-descrelax-be32.d: New.
+	* ld-arm/tls-descrelax-be32.s: New.
+	* ld-arm/tls-descrelax-be8.d: New.
+	* ld-arm/tls-descrelax-be8.s: New.
+	* ld-arm/tls-descrelax-v7.d: New.
+	* ld-arm/tls-descrelax-v7.s: New.
+	* ld-arm/tls-descrelax.d: New.
+	* ld-arm/tls-descrelax.s: New.
+	* ld-arm/tls-descseq.d: New.
+	* ld-arm/tls-descseq.r: New.
+	* ld-arm/tls-descseq.s: New.
+	* ld-arm/tls-gdesc-got.d: New.
+	* ld-arm/tls-gdesc-got.s: New.
+	* ld-arm/tls-gdesc-nlazy.g: New.
+	* ld-arm/tls-gdesc-nlazy.s: New.
+	* ld-arm/tls-gdesc.d: New.
+	* ld-arm/tls-gdesc.r: New.
+	* ld-arm/tls-gdesc.s: New.
+	* ld-arm/tls-gdierelax.d: New.
+	* ld-arm/tls-gdierelax.s: New.
+	* ld-arm/tls-gdierelax2.d: New.
+	* ld-arm/tls-gdierelax2.s: New.
+	* ld-arm/tls-gdlerelax.d: New.
+	* ld-arm/tls-gdlerelax.s: New.
+	* ld-arm/tls-lib-loc.d: New.
+	* ld-arm/tls-lib-loc.r: New.
+	* ld-arm/tls-lib-loc.s: New.
+	* ld-arm/tls-longplt-lib.d: New.
+	* ld-arm/tls-longplt-lib.s: New.
+	* ld-arm/tls-longplt.d: New.
+	* ld-arm/tls-longplt.s: New.
+	* ld-arm/tls-mixed.r: New.
+	* ld-arm/tls-mixed.s: New.
+	* ld-arm/tls-thumb1.d: New.
+	* ld-arm/tls-thumb1.s: New.
+	* ld-arm/arm-elf.exp: New.
+
 2011-01-08  Nick Clifton  <nickc@redhat.com>
 
 	* ld-misc/defsym1.d: Add a -e linker command line option.
