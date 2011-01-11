@@ -1,3 +1,8 @@
+2011-01-11  Andrew Burgess  <aburgess@broadcom.com>
+
+	* interf.c (sim_store_register): Update return value to
+	match new API.
+
 2010-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* sis.h: Remove #include <stdint.h>.

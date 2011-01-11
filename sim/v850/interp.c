@@ -327,7 +327,7 @@ sim_store_register (sd, rn, memory, length)
      int length;
 {
   State.regs[rn] = T2H_4 (*(unsigned32*)memory);
-  return -1;
+  return length;
 }
 
 void

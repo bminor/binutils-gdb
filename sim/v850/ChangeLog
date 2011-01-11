@@ -1,3 +1,8 @@
+2011-01-11  Andrew Burgess  <aburgess@broadcom.com>
+
+	* interp.c (sim_store_register): Update return value to
+	match new API.
+
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (interrupt_names): Add const to pointer type.

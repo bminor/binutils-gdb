@@ -406,7 +406,7 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
   check_desc (sd);
 
   if (!check_regno (regno))
-    return 0;
+    return -1;
 
   size = reg_size (regno);
 
@@ -503,7 +503,7 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
 	default:
 	  fprintf (stderr, "m32c minisim: unrecognized register number: %d\n",
 		   regno);
-	  return -1;
+	  return 0;
 	}
     }
 

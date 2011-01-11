@@ -330,7 +330,7 @@ sim_store_register(sd, regno, value, length)
 	regval = (value[3] << 24) | (value[2] << 16)
 		 | (value[1] << 8) | value[0];
     set_regi(&sregs, regno, regval);
-    return -1;
+    return length;
 }
 
 

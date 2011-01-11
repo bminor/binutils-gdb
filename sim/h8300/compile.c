@@ -4715,7 +4715,7 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
       h8_set_ticks (sd, longval);
       break;
     }
-  return -1;
+  return length;
 }
 
 int

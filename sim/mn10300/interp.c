@@ -410,7 +410,7 @@ sim_store_register (SIM_DESC sd,
 		    int length)
 {
   State.regs[rn] = get_word (memory);
-  return -1;
+  return length;
 }
 
 

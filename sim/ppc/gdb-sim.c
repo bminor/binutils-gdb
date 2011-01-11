@@ -1290,7 +1290,7 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
   const char *regname = regnum2name (regno);
 
   if (simulator == NULL || regname == NULL)
-    return -1;
+    return 0;
 
   TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%lx)\n",
 		    regno, regname, (long)buf));

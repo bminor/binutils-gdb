@@ -1,3 +1,8 @@
+2011-01-11  Andrew Burgess  <aburgess@broadcom.com>
+
+	* remote-sim.c (gdbsim_store_register): Update API to
+	sim_store_register to check more error conditions.
+
 2011-01-10  Michael Snyder  <msnyder@vmware.com>
 
 	* nto-procfs.c: Comment cleanup, mostly periods and spaces.
