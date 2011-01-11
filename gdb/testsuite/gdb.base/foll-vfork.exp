@@ -74,7 +74,7 @@ proc check_vfork_catchpoints {} {
   gdb_test "catch vfork" "Catchpoint \[0-9\]* \\(vfork\\)" "insert first vfork catchpoint"
   set has_vfork_catchpoints 0
   gdb_test_multiple "continue" "continue to first vfork catchpoint" {
-    -re ".*Your system does not support vfork catchpoints.*$gdb_prompt $" {
+    -re ".*Your system does not support this type\r\nof catchpoint.*$gdb_prompt $" {
       unsupported "continue to first vfork catchpoint"
     }
     -re ".*Catchpoint.*$gdb_prompt $" {

@@ -1,3 +1,11 @@
+2010-01-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Convert hardware watchpoints to use breakpoint_ops.
+	* gdb.base/foll-exec.exp: Adapt to new error string when the catchpoint
+	type is not supported.
+	* gdb.base/foll-fork.exp: Likewise.
+	* gdb.base/foll-vfork.exp: Likewise.
+
 2011-01-10  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-cmd.exp: Remove gdb_py_test_multiple function.

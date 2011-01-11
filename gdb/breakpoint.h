@@ -368,16 +368,18 @@ struct bp_location
    will be called instead of the performing the default action for this
    bptype.  */
 
-struct breakpoint_ops 
+struct breakpoint_ops
 {
-  /* Insert the breakpoint or activate the catchpoint.  Should raise
-     an exception if the operation failed.  */
-  void (*insert) (struct breakpoint *);
+  /* Insert the breakpoint or watchpoint or activate the catchpoint.
+     Return 0 for success, 1 if the breakpoint, watchpoint or catchpoint
+     type is not supported, -1 for failure.  */
+  int (*insert_location) (struct bp_location *);
 
   /* Remove the breakpoint/catchpoint that was previously inserted
-     with the "insert" method above.  Return non-zero if the operation
-     succeeded.  */
-  int (*remove) (struct breakpoint *);
+     with the "insert" method above.  Return 0 for success, 1 if the
+     breakpoint, watchpoint or catchpoint type is not supported,
+     -1 for failure.  */
+  int (*remove_location) (struct bp_location *);
 
   /* Return non-zero if the debugger should tell the user that this
      breakpoint was hit.  */

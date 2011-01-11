@@ -779,26 +779,26 @@ update_current_target (void)
 	    (void (*) (ptid_t))
 	    target_ignore);
   de_fault (to_insert_fork_catchpoint,
-	    (void (*) (int))
-	    tcomplain);
+	    (int (*) (int))
+	    return_one);
   de_fault (to_remove_fork_catchpoint,
 	    (int (*) (int))
-	    tcomplain);
+	    return_one);
   de_fault (to_insert_vfork_catchpoint,
-	    (void (*) (int))
-	    tcomplain);
+	    (int (*) (int))
+	    return_one);
   de_fault (to_remove_vfork_catchpoint,
 	    (int (*) (int))
-	    tcomplain);
+	    return_one);
   de_fault (to_insert_exec_catchpoint,
-	    (void (*) (int))
-	    tcomplain);
+	    (int (*) (int))
+	    return_one);
   de_fault (to_remove_exec_catchpoint,
 	    (int (*) (int))
-	    tcomplain);
+	    return_one);
   de_fault (to_set_syscall_catchpoint,
 	    (int (*) (int, int, int, int, int *))
-	    tcomplain);
+	    return_one);
   de_fault (to_has_exited,
 	    (int (*) (int, int, int *))
 	    return_zero);
@@ -3661,13 +3661,17 @@ debug_to_post_startup_inferior (ptid_t ptid)
 		      PIDGET (ptid));
 }
 
-static void
+static int
 debug_to_insert_fork_catchpoint (int pid)
 {
-  debug_target.to_insert_fork_catchpoint (pid);
+  int retval;
 
-  fprintf_unfiltered (gdb_stdlog, "target_insert_fork_catchpoint (%d)\n",
-		      pid);
+  retval = debug_target.to_insert_fork_catchpoint (pid);
+
+  fprintf_unfiltered (gdb_stdlog, "target_insert_fork_catchpoint (%d) = %d\n",
+		      pid, retval);
+
+  return retval;
 }
 
 static int
@@ -3683,13 +3687,17 @@ debug_to_remove_fork_catchpoint (int pid)
   return retval;
 }
 
-static void
+static int
 debug_to_insert_vfork_catchpoint (int pid)
 {
-  debug_target.to_insert_vfork_catchpoint (pid);
+  int retval;
 
-  fprintf_unfiltered (gdb_stdlog, "target_insert_vfork_catchpoint (%d)\n",
-		      pid);
+  retval = debug_target.to_insert_vfork_catchpoint (pid);
+
+  fprintf_unfiltered (gdb_stdlog, "target_insert_vfork_catchpoint (%d) = %d\n",
+		      pid, retval);
+
+  return retval;
 }
 
 static int
@@ -3705,13 +3713,17 @@ debug_to_remove_vfork_catchpoint (int pid)
   return retval;
 }
 
-static void
+static int
 debug_to_insert_exec_catchpoint (int pid)
 {
-  debug_target.to_insert_exec_catchpoint (pid);
+  int retval;
 
-  fprintf_unfiltered (gdb_stdlog, "target_insert_exec_catchpoint (%d)\n",
-		      pid);
+  retval = debug_target.to_insert_exec_catchpoint (pid);
+
+  fprintf_unfiltered (gdb_stdlog, "target_insert_exec_catchpoint (%d) = %d\n",
+		      pid, retval);
+
+  return retval;
 }
 
 static int

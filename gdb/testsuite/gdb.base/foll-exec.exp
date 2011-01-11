@@ -89,7 +89,7 @@ proc do_exec_tests {} {
    gdb_test "catch exec" "Catchpoint \[0-9\]* \\(exec\\)" "insert first exec catchpoint"
    set has_exec_catchpoints 0
    gdb_test_multiple "continue" "continue to first exec catchpoint" {
-     -re ".*Your system does not support exec catchpoints.*$gdb_prompt $" {
+     -re ".*Your system does not support this type\r\nof catchpoint.*$gdb_prompt $" {
        unsupported "continue to first exec catchpoint"
      }
      -re ".*Catchpoint.*$gdb_prompt $" {

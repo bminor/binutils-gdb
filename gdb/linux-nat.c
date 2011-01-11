@@ -974,36 +974,34 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 }
 
 
-static void
+static int
 linux_child_insert_fork_catchpoint (int pid)
 {
-  if (! linux_supports_tracefork (pid))
-    error (_("Your system does not support fork catchpoints."));
+  return !linux_supports_tracefork (pid);
 }
 
-static void
+static int
 linux_child_insert_vfork_catchpoint (int pid)
 {
-  if (!linux_supports_tracefork (pid))
-    error (_("Your system does not support vfork catchpoints."));
+  return !linux_supports_tracefork (pid);
 }
 
-static void
+static int
 linux_child_insert_exec_catchpoint (int pid)
 {
-  if (!linux_supports_tracefork (pid))
-    error (_("Your system does not support exec catchpoints."));
+  return !linux_supports_tracefork (pid);
 }
 
 static int
 linux_child_set_syscall_catchpoint (int pid, int needed, int any_count,
 				    int table_size, int *table)
 {
-  if (! linux_supports_tracesysgood (pid))
-    error (_("Your system does not support syscall catchpoints."));
+  if (!linux_supports_tracesysgood (pid))
+    return 1;
+
   /* On GNU/Linux, we ignore the arguments.  It means that we only
      enable the syscall catchpoints, but do not disable them.
-     
+
      Also, we do not use the `table' information because we do not
      filter system calls here.  We let GDB do the logic for us.  */
   return 0;

@@ -468,12 +468,12 @@ struct target_ops
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);
-    void (*to_insert_fork_catchpoint) (int);
+    int (*to_insert_fork_catchpoint) (int);
     int (*to_remove_fork_catchpoint) (int);
-    void (*to_insert_vfork_catchpoint) (int);
+    int (*to_insert_vfork_catchpoint) (int);
     int (*to_remove_vfork_catchpoint) (int);
     int (*to_follow_fork) (struct target_ops *, int);
-    void (*to_insert_exec_catchpoint) (int);
+    int (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
     int (*to_set_syscall_catchpoint) (int, int, int, int, int *);
     int (*to_has_exited) (int, int, int *);
@@ -1029,7 +1029,8 @@ void target_create_inferior (char *exec_file, char *args,
 
 /* On some targets, we can catch an inferior fork or vfork event when
    it occurs.  These functions insert/remove an already-created
-   catchpoint for such events.  */
+   catchpoint for such events.  They return  0 for success, 1 if the
+   catchpoint type is not supported and -1 for failure.  */
 
 #define target_insert_fork_catchpoint(pid) \
      (*current_target.to_insert_fork_catchpoint) (pid)
@@ -1055,7 +1056,8 @@ int target_follow_fork (int follow_child);
 
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created
-   catchpoint for such events.  */
+   catchpoint for such events.  They return  0 for success, 1 if the
+   catchpoint type is not supported and -1 for failure.  */
 
 #define target_insert_exec_catchpoint(pid) \
      (*current_target.to_insert_exec_catchpoint) (pid)
@@ -1078,7 +1080,10 @@ int target_follow_fork (int follow_child);
 
    TABLE is an array of ints, indexed by syscall number.  An element in
    this array is nonzero if that syscall should be caught.  This argument
-   only matters if ANY_COUNT is zero.  */
+   only matters if ANY_COUNT is zero.
+
+   Return 0 for success, 1 if syscall catchpoints are not supported or -1
+   for failure.  */
 
 #define target_set_syscall_catchpoint(pid, needed, any_count, table_size, table) \
      (*current_target.to_set_syscall_catchpoint) (pid, needed, any_count, \

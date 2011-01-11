@@ -45,7 +45,7 @@ proc check_fork_catchpoints {} {
   gdb_test "catch fork" "Catchpoint \[0-9\]* \\(fork\\)" "insert first fork catchpoint"
   set has_fork_catchpoints 0
   gdb_test_multiple "continue" "continue to first fork catchpoint" {
-    -re ".*Your system does not support fork catchpoints.*$gdb_prompt $" {
+    -re ".*Your system does not support this type\r\nof catchpoint.*$gdb_prompt $" {
       unsupported "continue to first fork catchpoint"
     }
     -re ".*Catchpoint.*$gdb_prompt $" {

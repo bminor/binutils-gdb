@@ -1,3 +1,41 @@
+2010-01-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Convert hardware watchpoints to use breakpoint_ops.
+	* breakpoint.h (breakpoint_ops) <insert>: Rename to...
+	<insert_location>: ... this.  Return int instead of void.
+	Accept pointer to struct bp_location instead of pointer to
+	struct breakpoint.  Adapt all implementations.
+	(breakpoint_ops) <remove>: Rename to... 
+	<remove_location>: ... this.  Accept pointer to struct bp_location
+	instead of pointer to struct breakpoint.  Adapt all implementations.
+	* breakpoint.c (insert_catchpoint): Delete function.
+	(insert_bp_location): Call the watchpoint or catchpoint's
+	breakpoint_ops.insert method.
+	(remove_breakpoint_1): Call the watchpoint or catchpoint's
+	breakpoint_ops.remove method.
+	(insert_watchpoint, remove_watchpoint): New functions.
+	(watchpoint_breakpoint_ops): New structure.
+	(watch_command_1): Initialize the OPS field.
+	* inf-child.c (inf_child_insert_fork_catchpoint)
+	(inf_child_remove_fork_catchpoint, inf_child_insert_vfork_catchpoint)
+	(inf_child_remove_vfork_catchpoint, inf_child_insert_exec_catchpoint)
+	(inf_child_remove_exec_catchpoint, inf_child_set_syscall_catchpoint):
+	Delete functions.
+	(inf_child_target): Remove initialization of to_insert_fork_catchpoint,
+	to_remove_fork_catchpoint, to_insert_vfork_catchpoint,
+	to_remove_vfork_catchpoint, to_insert_exec_catchpoint,
+	to_remove_exec_catchpoint and to_set_syscall_catchpoint.
+	* target.c (update_current_target): Change default implementation of
+	to_insert_fork_catchpoint, to_remove_fork_catchpoint,
+	to_insert_vfork_catchpoint, to_remove_vfork_catchpoint,
+	to_insert_exec_catchpoint, to_remove_exec_catchpoint and
+	to_set_syscall_catchpoint to return_one.
+	(debug_to_insert_fork_catchpoint, debug_to_insert_vfork_catchpoint)
+	(debug_to_insert_exec_catchpoint): Report return value.
+	* target.h (to_insert_fork_catchpoint, to_insert_vfork_catchpoint)
+	(to_insert_exec_catchpoint): Change declaration to return int instead
+	of void.
+
 2011-01-11  Michael Snyder  <msnyder@vmware.com>
 
 	* arm-tdep.c: Internationalization.

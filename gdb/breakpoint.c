@@ -1228,18 +1228,6 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
 }
 
 
-/* A wrapper function for inserting catchpoints.  */
-static void
-insert_catchpoint (struct ui_out *uo, void *args)
-{
-  struct breakpoint *b = (struct breakpoint *) args;
-
-  gdb_assert (b->type == bp_catchpoint);
-  gdb_assert (b->ops != NULL && b->ops->insert != NULL);
-
-  b->ops->insert (b);
-}
-
 /* Return true if BPT is of any hardware watchpoint kind.  */
 
 static int
@@ -1790,10 +1778,10 @@ insert_bp_location (struct bp_location *bl,
 	      watchpoints.  It's not clear that it's necessary...  */
 	   && bl->owner->disposition != disp_del_at_next_stop)
     {
-      val = target_insert_watchpoint (bl->address,
-				      bl->length,
-				      bl->watchpoint_type,
-				      bl->owner->cond_exp);
+      gdb_assert (bl->owner->ops != NULL
+		  && bl->owner->ops->insert_location != NULL);
+
+      val = bl->owner->ops->insert_location (bl);
 
       /* If trying to set a read-watchpoint, and it turns out it's not
 	 supported, try emulating one with an access watchpoint.  */
@@ -1819,12 +1807,12 @@ insert_bp_location (struct bp_location *bl,
 
 	  if (val == 1)
 	    {
-	      val = target_insert_watchpoint (bl->address,
-					      bl->length,
-					      hw_access,
-					      bl->owner->cond_exp);
-	      if (val == 0)
-		bl->watchpoint_type = hw_access;
+	      bl->watchpoint_type = hw_access;
+	      val = bl->owner->ops->insert_location (bl);
+
+	      if (val)
+		/* Back to the original value.  */
+		bl->watchpoint_type = hw_read;
 	    }
 	}
 
@@ -1833,14 +1821,23 @@ insert_bp_location (struct bp_location *bl,
 
   else if (bl->owner->type == bp_catchpoint)
     {
-      struct gdb_exception e = catch_exception (uiout, insert_catchpoint,
-						bl->owner, RETURN_MASK_ERROR);
-      exception_fprintf (gdb_stderr, e, "warning: inserting catchpoint %d: ",
-			 bl->owner->number);
-      if (e.reason < 0)
-	bl->owner->enable_state = bp_disabled;
-      else
-	bl->inserted = 1;
+      gdb_assert (bl->owner->ops != NULL
+		  && bl->owner->ops->insert_location != NULL);
+
+      val = bl->owner->ops->insert_location (bl);
+      if (val)
+	{
+	  bl->owner->enable_state = bp_disabled;
+
+	  if (val == 1)
+	    warning (_("\
+Error inserting catchpoint %d: Your system does not support this type\n\
+of catchpoint."), bl->owner->number);
+	  else
+	    warning (_("Error inserting catchpoint %d."), bl->owner->number);
+	}
+
+      bl->inserted = (val == 0);
 
       /* We've already printed an error message if there was a problem
 	 inserting this catchpoint, and we've disabled the catchpoint,
@@ -2537,10 +2534,11 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
     }
   else if (bl->loc_type == bp_loc_hardware_watchpoint)
     {
+      gdb_assert (bl->owner->ops != NULL
+		  && bl->owner->ops->remove_location != NULL);
+
       bl->inserted = (is == mark_inserted);
-      val = target_remove_watchpoint (bl->address, bl->length,
-				      bl->watchpoint_type, 
-				      bl->owner->cond_exp);
+      bl->owner->ops->remove_location (bl);
 
       /* Failure to remove any of the hardware watchpoints comes here.  */
       if ((is == mark_uninserted) && (bl->inserted))
@@ -2551,11 +2549,13 @@ remove_breakpoint_1 (struct bp_location *bl, insertion_state_t is)
            && breakpoint_enabled (bl->owner)
            && !bl->duplicate)
     {
-      gdb_assert (bl->owner->ops != NULL && bl->owner->ops->remove != NULL);
+      gdb_assert (bl->owner->ops != NULL
+		  && bl->owner->ops->remove_location != NULL);
 
-      val = bl->owner->ops->remove (bl->owner);
+      val = bl->owner->ops->remove_location (bl);
       if (val)
 	return val;
+
       bl->inserted = (is == mark_inserted);
     }
 
@@ -5997,17 +5997,17 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 /* Implement the "insert" breakpoint_ops method for fork
    catchpoints.  */
 
-static void
-insert_catch_fork (struct breakpoint *b)
+static int
+insert_catch_fork (struct bp_location *bl)
 {
-  target_insert_fork_catchpoint (PIDGET (inferior_ptid));
+  return target_insert_fork_catchpoint (PIDGET (inferior_ptid));
 }
 
 /* Implement the "remove" breakpoint_ops method for fork
    catchpoints.  */
 
 static int
-remove_catch_fork (struct breakpoint *b)
+remove_catch_fork (struct bp_location *bl)
 {
   return target_remove_fork_catchpoint (PIDGET (inferior_ptid));
 }
@@ -6093,17 +6093,17 @@ static struct breakpoint_ops catch_fork_breakpoint_ops =
 /* Implement the "insert" breakpoint_ops method for vfork
    catchpoints.  */
 
-static void
-insert_catch_vfork (struct breakpoint *b)
+static int
+insert_catch_vfork (struct bp_location *bl)
 {
-  target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+  return target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
 }
 
 /* Implement the "remove" breakpoint_ops method for vfork
    catchpoints.  */
 
 static int
-remove_catch_vfork (struct breakpoint *b)
+remove_catch_vfork (struct bp_location *bl)
 {
   return target_remove_vfork_catchpoint (PIDGET (inferior_ptid));
 }
@@ -6188,20 +6188,20 @@ static struct breakpoint_ops catch_vfork_breakpoint_ops =
 /* Implement the "insert" breakpoint_ops method for syscall
    catchpoints.  */
 
-static void
-insert_catch_syscall (struct breakpoint *b)
+static int
+insert_catch_syscall (struct bp_location *bl)
 {
   struct inferior *inf = current_inferior ();
 
   ++inf->total_syscalls_count;
-  if (!b->syscalls_to_be_caught)
+  if (!bl->owner->syscalls_to_be_caught)
     ++inf->any_syscall_count;
   else
     {
       int i, iter;
 
       for (i = 0;
-           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, bl->owner->syscalls_to_be_caught, i, iter);
            i++)
 	{
           int elem;
@@ -6223,30 +6223,30 @@ insert_catch_syscall (struct breakpoint *b)
 	}
     }
 
-  target_set_syscall_catchpoint (PIDGET (inferior_ptid),
-				 inf->total_syscalls_count != 0,
-				 inf->any_syscall_count,
-				 VEC_length (int, inf->syscalls_counts),
-				 VEC_address (int, inf->syscalls_counts));
+  return target_set_syscall_catchpoint (PIDGET (inferior_ptid),
+					inf->total_syscalls_count != 0,
+					inf->any_syscall_count,
+					VEC_length (int, inf->syscalls_counts),
+					VEC_address (int, inf->syscalls_counts));
 }
 
 /* Implement the "remove" breakpoint_ops method for syscall
    catchpoints.  */
 
 static int
-remove_catch_syscall (struct breakpoint *b)
+remove_catch_syscall (struct bp_location *bl)
 {
   struct inferior *inf = current_inferior ();
 
   --inf->total_syscalls_count;
-  if (!b->syscalls_to_be_caught)
+  if (!bl->owner->syscalls_to_be_caught)
     --inf->any_syscall_count;
   else
     {
       int i, iter;
 
       for (i = 0;
-           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, bl->owner->syscalls_to_be_caught, i, iter);
            i++)
 	{
           int elem;
@@ -6546,14 +6546,14 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 
 /* Exec catchpoints.  */
 
-static void
-insert_catch_exec (struct breakpoint *b)
+static int
+insert_catch_exec (struct bp_location *bl)
 {
-  target_insert_exec_catchpoint (PIDGET (inferior_ptid));
+  return target_insert_exec_catchpoint (PIDGET (inferior_ptid));
 }
 
 static int
-remove_catch_exec (struct breakpoint *b)
+remove_catch_exec (struct bp_location *bl)
 {
   return target_remove_exec_catchpoint (PIDGET (inferior_ptid));
 }
@@ -8211,6 +8211,37 @@ watchpoint_exp_is_const (const struct expression *exp)
   return 1;
 }
 
+/* Implement the "insert" breakpoint_ops method for hardware watchpoints.  */
+
+static int
+insert_watchpoint (struct bp_location *bl)
+{
+  return target_insert_watchpoint (bl->address, bl->length,
+				   bl->watchpoint_type, bl->owner->cond_exp);
+}
+
+/* Implement the "remove" breakpoint_ops method for hardware watchpoints.  */
+
+static int
+remove_watchpoint (struct bp_location *bl)
+{
+  return target_remove_watchpoint (bl->address, bl->length,
+				   bl->watchpoint_type, bl->owner->cond_exp);
+}
+
+/* The breakpoint_ops structure to be used in hardware watchpoints.  */
+
+static struct breakpoint_ops watchpoint_breakpoint_ops =
+{
+  insert_watchpoint,
+  remove_watchpoint,
+  NULL, /* breakpoint_hit */
+  NULL, /* print_it */
+  NULL, /* print_one */
+  NULL, /* print_mention */
+  NULL  /* print_recreate */
+};
+
 /* accessflag:  hw_write:  watch write, 
                 hw_read:   watch read, 
 		hw_access: watch access (read or write) */
@@ -8454,6 +8485,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
     b->exp_string = savestring (exp_start, exp_end - exp_start);
   b->val = val;
   b->val_valid = 1;
+  b->ops = &watchpoint_breakpoint_ops;
+
   if (cond_start)
     b->cond_string = savestring (cond_start, cond_end - cond_start);
   else
