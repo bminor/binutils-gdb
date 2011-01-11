@@ -1,3 +1,8 @@
+2011-01-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (update_watchpoint): Decide on using a software or
+	hardware watchpoint after the bp_locations are created.
+
 2010-01-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Convert hardware watchpoints to use breakpoint_ops.

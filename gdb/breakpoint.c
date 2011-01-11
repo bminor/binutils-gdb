@@ -1426,43 +1426,10 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	  b->val_valid = 1;
 	}
 
-	/* Change the type of breakpoint between hardware assisted or
-	   an ordinary watchpoint depending on the hardware support
-	   and free hardware slots.  REPARSE is set when the inferior
-	   is started.  */
-	if ((b->type == bp_watchpoint || b->type == bp_hardware_watchpoint)
-	    && reparse)
-	  {
-	    int i, mem_cnt, other_type_used;
-
-	    /* We need to determine how many resources are already
-	       used for all other hardware watchpoints to see if we
-	       still have enough resources to also fit this watchpoint
-	       in as well.  To avoid the hw_watchpoint_used_count call
-	       below from counting this watchpoint, make sure that it
-	       is marked as a software watchpoint.  */
-	    b->type = bp_watchpoint;
-	    i = hw_watchpoint_used_count (bp_hardware_watchpoint,
-					  &other_type_used);
-	    mem_cnt = can_use_hardware_watchpoint (val_chain);
-
-	    if (!mem_cnt)
-	      b->type = bp_watchpoint;
-	    else
-	      {
-		int target_resources_ok = target_can_use_hardware_watchpoint
-		  (bp_hardware_watchpoint, i + mem_cnt, other_type_used);
-		if (target_resources_ok <= 0)
-		  b->type = bp_watchpoint;
-		else
-		  b->type = bp_hardware_watchpoint;
-	      }
-	  }
-
       frame_pspace = get_frame_program_space (get_selected_frame (NULL));
 
       /* Look at each value on the value chain.  */
-      for (v = val_chain; v; v = next)
+      for (v = val_chain; v; v = value_next (v))
 	{
 	  /* If it's a memory location, and GDB actually needed
 	     its contents to evaluate the expression, then we
@@ -1505,7 +1472,50 @@ update_watchpoint (struct breakpoint *b, int reparse)
 		  loc->watchpoint_type = type;
 		}
 	    }
+	}
 
+      /* Change the type of breakpoint between hardware assisted or
+	 an ordinary watchpoint depending on the hardware support
+	 and free hardware slots.  REPARSE is set when the inferior
+	 is started.  */
+      if ((b->type == bp_watchpoint || b->type == bp_hardware_watchpoint)
+	  && reparse)
+	{
+	  int mem_cnt;
+	  enum bp_loc_type loc_type;
+	  struct bp_location *bl;
+
+	  mem_cnt = can_use_hardware_watchpoint (val_chain);
+	  if (mem_cnt)
+	    {
+	      int i, target_resources_ok, other_type_used;
+
+	      /* We need to determine how many resources are already
+		 used for all other hardware watchpoints to see if we
+		 still have enough resources to also fit this watchpoint
+		 in as well.  To avoid the hw_watchpoint_used_count call
+		 below from counting this watchpoint, make sure that it
+		 is marked as a software watchpoint.  */
+	      b->type = bp_watchpoint;
+	      i = hw_watchpoint_used_count (bp_hardware_watchpoint,
+					    &other_type_used);
+	      target_resources_ok = target_can_use_hardware_watchpoint
+		    (bp_hardware_watchpoint, i + mem_cnt, other_type_used);
+
+	      if (target_resources_ok > 0)
+		b->type = bp_hardware_watchpoint;
+	    }
+	  else
+	    b->type = bp_watchpoint;
+
+	  loc_type = (b->type == bp_watchpoint? bp_loc_other
+		      : bp_loc_hardware_watchpoint);
+	  for (bl = b->loc; bl; bl = bl->next)
+	    bl->loc_type = loc_type;
+	}
+
+      for (v = val_chain; v; v = next)
+	{
 	  next = value_next (v);
 	  if (v != b->val)
 	    value_free (v);
