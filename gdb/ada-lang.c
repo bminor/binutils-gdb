@@ -10901,6 +10901,7 @@ static struct breakpoint_ops catch_exception_breakpoint_ops =
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
+  NULL, /* resources_needed */
   print_it_catch_exception,
   print_one_catch_exception,
   print_mention_catch_exception,
@@ -10939,6 +10940,7 @@ static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
+  NULL, /* resources_needed */
   print_it_catch_exception_unhandled,
   print_one_catch_exception_unhandled,
   print_mention_catch_exception_unhandled,
@@ -10975,6 +10977,7 @@ static struct breakpoint_ops catch_assert_breakpoint_ops = {
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
+  NULL, /* resources_needed */
   print_it_catch_assert,
   print_one_catch_assert,
   print_mention_catch_assert,

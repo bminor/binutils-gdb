@@ -1955,6 +1955,68 @@ is_integral_type (struct type *t)
 	 || (TYPE_CODE (t) == TYPE_CODE_BOOL)));
 }
 
+/* Return true if TYPE is scalar.  */
+
+static int
+is_scalar_type (struct type *type)
+{
+  CHECK_TYPEDEF (type);
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
+      return 0;
+    default:
+      return 1;
+    }
+}
+
+/* Return true if T is scalar, or a composite type which in practice has
+   the memory layout of a scalar type. E.g., an array or struct with only one
+   scalar element inside it, or a union with only scalar elements.  */
+
+int
+is_scalar_type_recursive (struct type *t)
+{
+  CHECK_TYPEDEF (t);
+
+  if (is_scalar_type (t))
+    return 1;
+  /* Are we dealing with an array or string of known dimensions?  */
+  else if ((TYPE_CODE (t) == TYPE_CODE_ARRAY
+	    || TYPE_CODE (t) == TYPE_CODE_STRING) && TYPE_NFIELDS (t) == 1
+	   && TYPE_CODE (TYPE_INDEX_TYPE (t)) == TYPE_CODE_RANGE)
+    {
+      LONGEST low_bound, high_bound;
+      struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (t));
+
+      get_discrete_bounds (TYPE_INDEX_TYPE (t), &low_bound, &high_bound);
+
+      return high_bound == low_bound && is_scalar_type_recursive (elt_type);
+    }
+  /* Are we dealing with a struct with one element?  */
+  else if (TYPE_CODE (t) == TYPE_CODE_STRUCT && TYPE_NFIELDS (t) == 1)
+    return is_scalar_type_recursive (TYPE_FIELD_TYPE (t, 0));
+  else if (TYPE_CODE (t) == TYPE_CODE_UNION)
+    {
+      int i, n = TYPE_NFIELDS (t);
+
+      /* If all elements of the union are scalar, then the union is scalar.  */
+      for (i = 0; i < n; i++)
+	if (!is_scalar_type_recursive (TYPE_FIELD_TYPE (t, i)))
+	  return 0;
+
+      return 1;
+    }
+
+  return 0;
+}
+
 /* A helper function which returns true if types A and B represent the
    "same" class type.  This is true if the types have the same main
    type, or the same name.  */

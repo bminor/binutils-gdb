@@ -1,3 +1,45 @@
+2011-01-11  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Implement support for PowerPC BookE ranged watchpoints.
+	* breakpoint.h 
+	(struct breakpoint_ops) <resources_needed>: New method.
+	Initialize to NULL in all existing breakpoint_ops instances.
+	(struct breakpoint) <exact>: New field.
+	(target_exact_watchpoints): Declare external global.
+	* breakpoint.c (target_exact_watchpoints): New global flag.
+	(update_watchpoint): Set b->type to bp_hardware_watchpoint and
+	b->enable_state to bp_enabled before calling
+	hw_watchpoint_used_count.
+	(hw_watchpoint_used_count): Iterate over all bp_locations in a
+	watchpoint.  Call breakpoint's breakpoint_ops.resources_needed
+	if available.
+	(insert_watchpoint, remove_watchpoint): Use fixed length of 1 byte
+	if the watchpoint is exact.
+	(resources_needed_watchpoint): New function.
+	(watchpoint_breakpoint_ops): Add resources_needed_watchpoint.
+	(watch_command_1): Set b->exact if the user asked for an exact
+	watchpoint and one can be set.
+	(can_use_hardware_watchpoint): Add exact_watchpoints argument.
+	Pass fixed length of 1 to target_region_ok_for_hw_watchpoint if
+	the user asks for an exact watchpoint and one can be set.  Return
+	number of needed debug registers to watch the expression.
+	* gdbtypes.c (is_scalar_type): New function, based on
+	valprint.c:scalar_type_p.
+	(is_scalar_type_recursive): New function.
+	* gdbtypes.h (is_scalar_type_recursive): Declare.
+	* ppc-linux-nat.c (ppc_linux_region_ok_for_hw_watchpoint): Always
+	handle regions when ranged watchpoints are available.
+	(create_watchpoint_request): New function.
+	(ppc_linux_insert_watchpoint, ppc_linux_remove_watchpoint): Use
+	create_watchpoint_request.
+	* rs6000-tdep.c (show_powerpc_exact_watchpoints): New function.
+	(_initialize_rs6000_tdep): Add `exact-watchpoints' boolean to the
+	`set powerpc' and `show powerpc' commands.
+	* target.h (struct target_ops) <to_region_ok_for_hw_watchpoint>:
+	Mention documentation comment in the target macro.
+	(target_region_ok_for_hw_watchpoint): Document return value.
+
 2011-01-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (update_watchpoint): Decide on using a software or

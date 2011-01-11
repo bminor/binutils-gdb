@@ -1,3 +1,10 @@
+2011-01-11  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Implement support for PowerPC BookE ranged watchpoints.
+	* gdb.texinfo (PowerPC Embedded): Document ranged watchpoints and
+	the "set powerpc exact-watchpoints" flag.
+
 2011-01-07  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Python API): Add descriptions to @menu items.
@@ -8,7 +15,7 @@
 
 2010-01-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
-       * gdb.texinfo (Debugging Output): Document "set debug jit".
+	* gdb.texinfo (Debugging Output): Document "set debug jit".
 
 2011-01-06  Tom Tromey  <tromey@redhat.com>
 

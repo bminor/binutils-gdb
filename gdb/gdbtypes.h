@@ -1476,6 +1476,8 @@ extern int can_dereference (struct type *);
 
 extern int is_integral_type (struct type *);
 
+extern int is_scalar_type_recursive (struct type *);
+
 extern void maintenance_print_type (char *, int);
 
 extern htab_t create_copied_types_hash (struct objfile *objfile);

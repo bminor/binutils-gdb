@@ -1497,9 +1497,16 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
      to determine the hardcoded watchable region for watchpoints.  */
   if (have_ptrace_booke_interface ())
     {
-      if (booke_debug_info.data_bp_alignment
-	  && (addr + len > (addr & ~(booke_debug_info.data_bp_alignment - 1))
-	      + booke_debug_info.data_bp_alignment))
+      /* DAC-based processors (i.e., embedded processors), like the PowerPC 440
+	 have ranged watchpoints and can watch any access within an arbitrary
+	 memory region.  This is useful to watch arrays and structs, for
+	 instance.  It takes two hardware watchpoints though.  */
+      if (len > 1
+	  && booke_debug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE)
+	return 2;
+      else if (booke_debug_info.data_bp_alignment
+	       && (addr + len > (addr & ~(booke_debug_info.data_bp_alignment - 1))
+		   + booke_debug_info.data_bp_alignment))
 	return 0;
     }
   /* addr+len must fall in the 8 byte watchable region for DABR-based
@@ -1889,6 +1896,55 @@ ppc_linux_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
 	  && check_condition (addr, cond, &data_value));
 }
 
+/* Set up P with the parameters necessary to request a watchpoint covering
+   LEN bytes starting at ADDR and if possible with condition expression COND
+   evaluated by hardware.  INSERT tells if we are creating a request for
+   inserting or removing the watchpoint.  */
+
+static void
+create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
+			   int len, int rw, struct expression *cond,
+			   int insert)
+{
+  if (len == 1)
+    {
+      int use_condition;
+      CORE_ADDR data_value;
+
+      use_condition = (insert? can_use_watchpoint_cond_accel ()
+			: booke_debug_info.num_condition_regs > 0);
+      if (cond && use_condition && check_condition (addr, cond, &data_value))
+	calculate_dvc (addr, len, data_value, &p->condition_mode,
+		       &p->condition_value);
+      else
+	{
+	  p->condition_mode = PPC_BREAKPOINT_CONDITION_NONE;
+	  p->condition_value = 0;
+	}
+
+      p->addr_mode = PPC_BREAKPOINT_MODE_EXACT;
+      p->addr2 = 0;
+    }
+  else
+    {
+      p->addr_mode = PPC_BREAKPOINT_MODE_RANGE_INCLUSIVE;
+      p->condition_mode = PPC_BREAKPOINT_CONDITION_NONE;
+      p->condition_value = 0;
+
+      /* The watchpoint will trigger if the address of the memory access is
+	 within the defined range, as follows: p->addr <= address < p->addr2.
+
+	 Note that the above sentence just documents how ptrace interprets
+	 its arguments; the watchpoint is set to watch the range defined by
+	 the user _inclusively_, as specified by the user interface.  */
+      p->addr2 = (uint64_t) addr + len;
+    }
+
+  p->version = PPC_DEBUG_CURRENT_VERSION;
+  p->trigger_type = get_trigger_type (rw);
+  p->addr = (uint64_t) addr;
+}
+
 static int
 ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
@@ -1900,23 +1956,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
   if (have_ptrace_booke_interface ())
     {
       struct ppc_hw_breakpoint p;
-      CORE_ADDR data_value;
 
-      if (cond && can_use_watchpoint_cond_accel ()
-	  && check_condition (addr, cond, &data_value))
-	calculate_dvc (addr, len, data_value, &p.condition_mode,
-		       &p.condition_value);
-      else
-	{
-	  p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
-	  p.condition_value = 0;
-	}
-
-      p.version         = PPC_DEBUG_CURRENT_VERSION;
-      p.trigger_type    = get_trigger_type (rw);
-      p.addr_mode       = PPC_BREAKPOINT_MODE_EXACT;
-      p.addr            = (uint64_t) addr;
-      p.addr2           = 0;
+      create_watchpoint_request (&p, addr, len, rw, cond, 1);
 
       ALL_LWPS (lp, ptid)
 	booke_insert_point (&p, TIDGET (ptid));
@@ -1984,23 +2025,8 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
   if (have_ptrace_booke_interface ())
     {
       struct ppc_hw_breakpoint p;
-      CORE_ADDR data_value;
 
-      if (cond && booke_debug_info.num_condition_regs > 0
-	  && check_condition (addr, cond, &data_value))
-	calculate_dvc (addr, len, data_value, &p.condition_mode,
-		       &p.condition_value);
-      else
-	{
-	  p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
-	  p.condition_value = 0;
-	}
-
-      p.version         = PPC_DEBUG_CURRENT_VERSION;
-      p.trigger_type    = get_trigger_type (rw);
-      p.addr_mode       = PPC_BREAKPOINT_MODE_EXACT;
-      p.addr            = (uint64_t) addr;
-      p.addr2           = 0;
+      create_watchpoint_request (&p, addr, len, rw, cond, 0);
 
       ALL_LWPS (lp, ptid)
 	booke_remove_point (&p, TIDGET (ptid));

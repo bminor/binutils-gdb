@@ -4183,6 +4183,16 @@ powerpc_set_vector_abi (char *args, int from_tty,
     internal_error (__FILE__, __LINE__, _("could not update architecture"));
 }
 
+/* Show the current setting of the exact watchpoints flag.  */
+
+static void
+show_powerpc_exact_watchpoints (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c,
+				const char *value)
+{
+  fprintf_filtered (file, _("Use of exact watchpoints is %s.\n"), value);
+}
+
 /* Initialization code.  */
 
 /* -Wmissing-prototypes */
@@ -4240,4 +4250,17 @@ _initialize_rs6000_tdep (void)
 			_("Show the vector ABI."),
 			NULL, powerpc_set_vector_abi, NULL,
 			&setpowerpccmdlist, &showpowerpccmdlist);
+
+  add_setshow_boolean_cmd ("exact-watchpoints", class_support,
+			   &target_exact_watchpoints,
+			   _("\
+Set whether to use just one debug register for watchpoints on scalars."),
+			   _("\
+Show whether to use just one debug register for watchpoints on scalars."),
+			   _("\
+If true, GDB will use only one debug register when watching a variable of\n\
+scalar type, thus assuming that the variable is accessed through the address\n\
+of its first byte."),
+			   NULL, show_powerpc_exact_watchpoints,
+			   &setpowerpccmdlist, &showpowerpccmdlist);
 }

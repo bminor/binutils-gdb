@@ -18721,9 +18721,25 @@ implement in hardware simple hardware watchpoint conditions of the form:
   if  @var{ADDRESS|VARIABLE} == @var{CONSTANT EXPRESSION}
 @end smallexample
 
-The DVC register will be automatically used whenever @value{GDBN} detects
-such pattern in a condition expression.  This feature is available in native
-@value{GDBN} running on a Linux kernel version 2.6.34 or newer.
+The DVC register will be automatically used when @value{GDBN} detects
+such pattern in a condition expression, and the created watchpoint uses one
+debug register (either the @code{exact-watchpoints} option is on and the
+variable is scalar, or the variable has a length of one byte).  This feature
+is available in native @value{GDBN} running on a Linux kernel version 2.6.34
+or newer.
+
+When running on PowerPC embedded processors, @value{GDBN} automatically uses
+ranged hardware watchpoints, unless the @code{exact-watchpoints} option is on,
+in which case watchpoints using only one debug register are created when
+watching variables of scalar types.
+
+You can create an artificial array to watch an arbitrary memory
+region using one of the following commands (@pxref{Expressions}):
+
+@smallexample
+(@value{GDBP}) watch *((char *) @var{address})@@@var{length}
+(@value{GDBP}) watch @{char[@var{length}]@} @var{address}
+@end smallexample
 
 @value{GDBN} provides the following PowerPC-specific commands:
 
@@ -18743,6 +18759,12 @@ arguments and return values.  The valid options are @samp{auto};
 @samp{altivec}, to use AltiVec registers; and @samp{spe} to use SPE
 registers.  By default, @value{GDBN} selects the calling convention
 based on the selected architecture and the provided executable file.
+
+@item set powerpc exact-watchpoints
+@itemx show powerpc exact-watchpoints
+Allow @value{GDBN} to use only one debug register when watching a variable
+of scalar type, thus assuming that the variable is accessed through the
+address of its first byte.
 
 @kindex target dink32
 @item target dink32 @var{dev}

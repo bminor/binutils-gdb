@@ -453,7 +453,11 @@ struct target_ops
     int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
     int (*to_watchpoint_addr_within_range) (struct target_ops *,
 					    CORE_ADDR, CORE_ADDR, int);
+
+    /* Documentation of this routine is provided with the corresponding
+       target_* macro.  */
     int (*to_region_ok_for_hw_watchpoint) (CORE_ADDR, int);
+
     int (*to_can_accel_watchpoint_condition) (CORE_ADDR, int, int,
 					      struct expression *);
     void (*to_terminal_init) (void);
@@ -1307,6 +1311,9 @@ extern char *normal_pid_to_str (ptid_t ptid);
 
 #define target_can_use_hardware_watchpoint(TYPE,CNT,OTHERTYPE) \
  (*current_target.to_can_use_hw_breakpoint) (TYPE, CNT, OTHERTYPE);
+
+/* Returns the number of debug registers needed to watch the given
+   memory region, or zero if not supported.  */
 
 #define target_region_ok_for_hw_watchpoint(addr, len) \
     (*current_target.to_region_ok_for_hw_watchpoint) (addr, len)
