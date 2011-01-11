@@ -53,6 +53,23 @@
 	* rs6000-nat.c: Ditto.
 	* rs6000-tdep.c: Ditto.
 
+2011-01-10  Michael Snyder  <msnyder@vmware.com>
+
+	* charset.c (validate): Internationalization.
+	* coffread.c (read_one_sym): Ditto.
+	* dwarf2read.c (dwarf2_attach_fields_to_type): Ditto.
+	* h8300-tdep.c (H8300_extract_return_value): Ditto.
+	* inflow.c (new_tty): Ditto.
+	* iq2000-tdep.c (iq2000_breakpoint_from_pc): Ditto.
+	* m32c-tdep.c (m32c_return_value): Ditto.
+	* mep-tdep.c (mep_store_return_value): Ditto.
+	* score-tdep.c (score7_fetch_insn): Ditto.
+	* ser-mingw.c (pipe_windows_open): Ditto.
+	* sh64-tdep.c (sh64_extract_return_value): Ditto.
+	* spu-tdep.c (spu_register_type): Ditto.
+	* tracepoint.c (trace_find_command): Ditto.
+	* valarith.c (value_pos): Ditto.
+
 2011-01-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-valprint.c (printstr): Minor comment reformatting.
