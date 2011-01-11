@@ -8278,9 +8278,9 @@ remove_watchpoint (struct bp_location *bl)
 static int
 resources_needed_watchpoint (const struct bp_location *bl)
 {
-    int length = bl->owner->exact? 1 : bl->length;
+  int length = bl->owner->exact? 1 : bl->length;
 
-    return target_region_ok_for_hw_watchpoint (bl->address, length);
+  return target_region_ok_for_hw_watchpoint (bl->address, length);
 }
 
 /* The breakpoint_ops structure to be used in hardware watchpoints.  */

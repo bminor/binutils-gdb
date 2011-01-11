@@ -1977,8 +1977,8 @@ is_scalar_type (struct type *type)
 }
 
 /* Return true if T is scalar, or a composite type which in practice has
-   the memory layout of a scalar type. E.g., an array or struct with only one
-   scalar element inside it, or a union with only scalar elements.  */
+   the memory layout of a scalar type.  E.g., an array or struct with only
+   one scalar element inside it, or a union with only scalar elements.  */
 
 int
 is_scalar_type_recursive (struct type *t)
