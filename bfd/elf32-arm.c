@@ -6985,8 +6985,11 @@ elf32_arm_abs12_reloc (bfd *abfd, void *data, bfd_vma value)
 
    Return bfd_reloc_ok if we're done, bfd_reloc_continue if the caller
    is to then call final_link_relocate.  Return other values in the
-   case of error.  */
- 
+   case of error.
+
+   FIXME:When --emit-relocs is in effect, we'll emit relocs describing
+   the pre-relaxed code.  It would be nice if the relocs were updated
+   to match the optimization.   */
 
 static bfd_reloc_status_type 
 elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
