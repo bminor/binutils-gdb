@@ -493,7 +493,7 @@ target_create_inferior (char *exec_file, char *args,
     }
 
   internal_error (__FILE__, __LINE__,
-		  "could not find a target to create inferior");
+		  _("could not find a target to create inferior"));
 }
 
 void
@@ -965,7 +965,7 @@ unpush_target (struct target_ops *t)
 
   if (t->to_stratum == dummy_stratum)
     internal_error (__FILE__, __LINE__,
-		    "Attempt to unpush the dummy target");
+		    _("Attempt to unpush the dummy target"));
 
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack. */
@@ -2343,7 +2343,7 @@ target_detach (char *args, int from_tty)
 	}
     }
 
-  internal_error (__FILE__, __LINE__, "could not find a target to detach");
+  internal_error (__FILE__, __LINE__, _("could not find a target to detach"));
 }
 
 void
@@ -2464,7 +2464,7 @@ target_follow_fork (int follow_child)
 
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
-		  "could not find a target to follow fork");
+		  _("could not find a target to follow fork"));
 }
 
 void
@@ -2490,7 +2490,7 @@ target_mourn_inferior (void)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "could not find a target to follow mourn inferior");
+		  _("could not find a target to follow mourn inferior"));
 }
 
 /* Look for a target which can describe architectural features, starting
@@ -2603,7 +2603,8 @@ simple_search_memory (struct target_ops *ops,
 			   search_buf + keep_len, read_addr,
 			   nr_to_read) != nr_to_read)
 	    {
-	      warning (_("Unable to access target memory at %s, halting search."),
+	      warning (_("Unable to access target "
+			 "memory at %s, halting search."),
 		       hex_string (read_addr));
 	      do_cleanups (old_cleanups);
 	      return -1;
@@ -2699,7 +2700,7 @@ target_require_runnable (void)
   /* This function is only called if the target is running.  In that
      case there should have been a process_stratum target and it
      should either know how to create inferiors, or not... */
-  internal_error (__FILE__, __LINE__, "No targets found");
+  internal_error (__FILE__, __LINE__, _("No targets found"));
 }
 
 /* Look through the list of possible targets for a target that can
@@ -2864,7 +2865,8 @@ target_thread_address_space (ptid_t ptid)
 
   if (inf == NULL || inf->aspace == NULL)
     internal_error (__FILE__, __LINE__,
-		    "Can't determine the current address space of thread %s\n",
+		    _("Can't determine the current "
+		      "address space of thread %s\n"),
 		    target_pid_to_str (ptid));
 
   return inf->aspace;
@@ -3113,7 +3115,7 @@ target_attach (char *args, int from_tty)
     }
 
   internal_error (__FILE__, __LINE__,
-		  "could not find a target to attach");
+		  _("could not find a target to attach"));
 }
 
 int

@@ -1620,7 +1620,7 @@ arm_instruction_changes_pc (uint32_t this_instr)
 	return 0;
 
       default:
-	internal_error (__FILE__, __LINE__, "bad value in switch");
+	internal_error (__FILE__, __LINE__, _("bad value in switch"));
       }
 }
 
@@ -6540,9 +6540,9 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  break;
 
 	default:
-	  internal_error
-	    (__FILE__, __LINE__,
-	     _("arm_store_return_value: Floating point model not supported"));
+	  internal_error (__FILE__, __LINE__,
+			  _("arm_store_return_value: Floating "
+			    "point model not supported"));
 	  break;
 	}
     }
@@ -6788,7 +6788,7 @@ arm_update_current_architecture (void)
   gdbarch_info_init (&info);
 
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, "could not update architecture");
+    internal_error (__FILE__, __LINE__, _("could not update architecture"));
 }
 
 static void

@@ -1256,7 +1256,7 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, "bad kind");
+      internal_error (__FILE__, __LINE__, _("bad kind"));
     }
 
   /* Change the VALUE_LVAL to lval_internalvar so that future operations
@@ -1336,7 +1336,7 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 
     default:
       /* We can never get a component of any other kind.  */
-      internal_error (__FILE__, __LINE__, "set_internalvar_component");
+      internal_error (__FILE__, __LINE__, _("set_internalvar_component"));
     }
 }
 

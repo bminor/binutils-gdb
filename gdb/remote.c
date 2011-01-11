@@ -1245,7 +1245,7 @@ set_remote_protocol_packet_cmd (char *args, int from_tty,
 	  return;
 	}
     }
-  internal_error (__FILE__, __LINE__, "Could not find config for %s",
+  internal_error (__FILE__, __LINE__, _("Could not find config for %s"),
 		  c->name);
 }
 
@@ -1266,7 +1266,7 @@ show_remote_protocol_packet_cmd (struct ui_file *file, int from_tty,
 	  return;
 	}
     }
-  internal_error (__FILE__, __LINE__, "Could not find config for %s",
+  internal_error (__FILE__, __LINE__, _("Could not find config for %s"),
 		  c->name);
 }
 
@@ -3212,7 +3212,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       getpkt (&rs->buf, &rs->buf_size, 0);
 
       if (strcmp (rs->buf, "OK") != 0)
-	error ("Remote refused setting non-stop mode with: %s", rs->buf);
+	error (_("Remote refused setting non-stop mode with: %s"), rs->buf);
 
       /* Find about threads and processes the stub is already
 	 controlling.  We default to adding them in the running state.
@@ -3228,7 +3228,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       getpkt (&rs->buf, &rs->buf_size, 0);
 
       if (strcmp (rs->buf, "OK") != 0)
-	error ("Remote refused setting all-stop mode with: %s", rs->buf);
+	error (_("Remote refused setting all-stop mode with: %s"), rs->buf);
     }
 
   /* Check whether the target is running now.  */
@@ -5737,7 +5737,7 @@ process_g_packet (struct regcache *regcache)
       if (p[0] == 0 || p[1] == 0)
 	/* This shouldn't happen - we adjusted sizeof_g_packet above.  */
 	internal_error (__FILE__, __LINE__,
-			"unexpected end of 'g' packet reply");
+			_("unexpected end of 'g' packet reply"));
 
       if (p[0] == 'x' && p[1] == 'x')
 	regs[i] = 0;		/* 'x' */
@@ -5755,7 +5755,7 @@ process_g_packet (struct regcache *regcache)
 	  if (r->offset * 2 >= strlen (rs->buf))
 	    /* This shouldn't happen - we adjusted in_g_packet above.  */
 	    internal_error (__FILE__, __LINE__,
-			    "unexpected end of 'g' packet reply");
+			    _("unexpected end of 'g' packet reply"));
 	  else if (rs->buf[r->offset * 2] == 'x')
 	    {
 	      gdb_assert (r->offset * 2 < strlen (rs->buf));
@@ -6222,7 +6222,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 
   if (packet_format != 'X' && packet_format != 'M')
     internal_error (__FILE__, __LINE__,
-		    "remote_write_bytes_aux: bad packet format");
+		    _("remote_write_bytes_aux: bad packet format"));
 
   if (len <= 0)
     return 0;
@@ -6558,7 +6558,7 @@ remote_send_printf (const char *format, ...)
 
   rs->buf[0] = '\0';
   if (vsnprintf (rs->buf, max_size, format, ap) >= max_size)
-    internal_error (__FILE__, __LINE__, "Too long remote packet.");
+    internal_error (__FILE__, __LINE__, _("Too long remote packet."));
 
   if (putpkt (rs->buf) < 0)
     error (_("Communication problem with target."));
@@ -8352,7 +8352,7 @@ remote_search_memory (struct target_ops* ops,
 
   /* Bail if the pattern is too large.  */
   if (used_pattern_len != pattern_len)
-    error ("Pattern is too large to transmit to remote target.");
+    error (_("Pattern is too large to transmit to remote target."));
 
   if (putpkt_binary (rs->buf, i + escaped_pattern_len) < 0
       || getpkt_sane (&rs->buf, &rs->buf_size, 0) < 0
@@ -8810,7 +8810,7 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
        ix++)
     if (guess->bytes == bytes)
       internal_error (__FILE__, __LINE__,
-		      "Duplicate g packet description added for size %d",
+		      _("Duplicate g packet description added for size %d"),
 		      bytes);
 
   new_guess.bytes = bytes;
@@ -9749,7 +9749,8 @@ remote_download_tracepoint (struct breakpoint *t)
 		/* If it passed validation at definition but fails now,
 		   something is very wrong.  */
 		internal_error (__FILE__, __LINE__,
-				"Fast tracepoint not valid during download");
+				_("Fast tracepoint not "
+				  "valid during download"));
 	    }
 	  else
 	    /* Fast tracepoints are functionally identical to regular
@@ -10018,7 +10019,7 @@ remote_trace_find (enum trace_find_type type, int num,
       sprintf (p, "outside:%s:%s", phex_nz (addr1, 0), phex_nz (addr2, 0));
       break;
     default:
-      error ("Unknown trace find type %d", type);
+      error (_("Unknown trace find type %d"), type);
     }
 
   putpkt (rs->buf);

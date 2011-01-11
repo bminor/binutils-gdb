@@ -4643,7 +4643,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
   push_target (ops);
 
   if ((pi = create_procinfo (pid, 0)) == NULL)
-    perror ("procfs: out of memory in 'init_inferior'");
+    perror (_("procfs: out of memory in 'init_inferior'"));
 
   if (!open_procinfo_files (pi, FD_CTL))
     proc_error (pi, "init_inferior, open_proc_files", __LINE__);

@@ -1009,7 +1009,7 @@ procfs_resume (struct target_ops *ops,
   errno = devctl (ctl_fd, DCMD_PROC_RUN, &run, sizeof (run), 0);
   if (errno != EOK)
     {
-      perror ("run error!\n");
+      perror (_("run error!\n"));
       return;
     }
 }
@@ -1494,7 +1494,7 @@ procfs_hw_watchpoint (int addr, int len, int type)
   errno = devctl (ctl_fd, DCMD_PROC_BREAK, &brk, sizeof (brk), 0);
   if (errno != EOK)
     {
-      perror ("Failed to set hardware watchpoint");
+      perror (_("Failed to set hardware watchpoint"));
       return -1;
     }
   return 0;

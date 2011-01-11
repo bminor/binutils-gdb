@@ -271,12 +271,12 @@ mi_cmd_var_set_visualizer (char *command, char **argv, int argc)
   struct varobj *var;
 
   if (argc != 2)
-    error ("Usage: NAME VISUALIZER_FUNCTION.");
+    error (_("Usage: NAME VISUALIZER_FUNCTION."));
 
   var = varobj_get_handle (argv[0]);
 
   if (var == NULL)
-    error ("Variable object not found");
+    error (_("Variable object not found"));
 
   varobj_set_visualizer (var, argv[1]);
 }

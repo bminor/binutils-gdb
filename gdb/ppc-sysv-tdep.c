@@ -531,7 +531,7 @@ get_decimal_float_return_value (struct gdbarch *gdbarch, struct type *valtype,
     }
   else
     /* Can't happen.  */
-    internal_error (__FILE__, __LINE__, "Unknown decimal float size.");
+    internal_error (__FILE__, __LINE__, _("Unknown decimal float size."));
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }

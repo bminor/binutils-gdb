@@ -420,7 +420,7 @@ void
 mi_cmd_target_detach (char *command, char **argv, int argc)
 {
   if (argc != 0 && argc != 1)
-    error ("Usage: -target-detach [pid | thread-group]");
+    error (_("Usage: -target-detach [pid | thread-group]"));
 
   if (argc == 1)
     {
@@ -471,7 +471,7 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
   char *mi_error_message;
 
   if (argc != 1)
-    error ("mi_cmd_thread_select: USAGE: threadnum.");
+    error (_("mi_cmd_thread_select: USAGE: threadnum."));
 
   rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
 

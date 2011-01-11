@@ -300,19 +300,19 @@ mi_cmd_break_commands (char *command, char **argv, int argc)
   struct breakpoint *b;
 
   if (argc < 1)
-    error ("USAGE: %s <BKPT> [<COMMAND> [<COMMAND>...]]", command);
+    error (_("USAGE: %s <BKPT> [<COMMAND> [<COMMAND>...]]"), command);
 
   bnum = strtol (argv[0], &endptr, 0);
   if (endptr == argv[0])
-    error ("breakpoint number argument \"%s\" is not a number.",
+    error (_("breakpoint number argument \"%s\" is not a number."),
 	   argv[0]);
   else if (*endptr != '\0')
-    error ("junk at the end of breakpoint number argument \"%s\".",
+    error (_("junk at the end of breakpoint number argument \"%s\"."),
 	   argv[0]);
 
   b = get_breakpoint (bnum);
   if (b == NULL)
-    error ("breakpoint %d not found.", bnum);
+    error (_("breakpoint %d not found."), bnum);
 
   mi_command_line_array = argv;
   mi_command_line_array_ptr = 1;

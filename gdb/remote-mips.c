@@ -672,7 +672,7 @@ mips_readchar (int timeout)
   if (ch == SERIAL_TIMEOUT && timeout == -1)	/* Watchdog went off.  */
     {
       target_mourn_inferior ();
-      error ("Watchdog has expired.  Target detached.\n");
+      error (_("Watchdog has expired.  Target detached.\n"));
     }
 
   if (ch == SERIAL_EOF)
@@ -713,7 +713,7 @@ mips_readchar (int timeout)
       /* At this point, about the only thing we can do is abort the command
          in progress and get back to command level as quickly as possible.  */
 
-      error ("Remote board reset, debug protocol re-initialized.");
+      error (_("Remote board reset, debug protocol re-initialized."));
     }
 
   if (ch == mips_monitor_prompt[state])
@@ -1598,7 +1598,7 @@ seen from the board via TFTP, specify that name as the third parameter.\n"));
 	{
 	  udp_desc = serial_open (remote_name);
 	  if (!udp_desc)
-	    perror_with_name ("Unable to open UDP port");
+	    perror_with_name (_("Unable to open UDP port"));
 	  udp_in_use = 1;
 	}
       else
@@ -1741,7 +1741,7 @@ static void
 mips_detach (struct target_ops *ops, char *args, int from_tty)
 {
   if (args)
-    error ("Argument given to \"detach\" when remotely debugging.");
+    error (_("Argument given to \"detach\" when remotely debugging."));
 
   pop_target ();
 
@@ -2326,7 +2326,7 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
     }
 
   if (execfile == 0 || exec_bfd == 0)
-    error ("No executable file specified");
+    error (_("No executable file specified"));
 
   entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 
@@ -2593,8 +2593,8 @@ mips_common_breakpoint: Attempt to clear bogus breakpoint at %s\n",
 
 	  nfields = sscanf (buf, "0x%x b 0x0 0x%x", &rpid, &rerrflg);
 	  if (nfields != 2)
-	    mips_error ("\
-mips_common_breakpoint: Bad response from remote board: %s",
+	    mips_error ("mips_common_breakpoint: "
+			"Bad response from remote board: %s",
 			buf);
 
 	  return (mips_check_lsi_error (addr, rerrflg));
@@ -2646,8 +2646,8 @@ mips_common_breakpoint: Bad response from remote board: %s",
 	  nfields = sscanf (buf, "0x%x %c 0x%x 0x%x",
 			    &rpid, &rcmd, &rresponse, &rerrflg);
 	  if (nfields != 4 || rcmd != cmd || rresponse > 255)
-	    mips_error ("\
-mips_common_breakpoint: Bad response from remote board: %s",
+	    mips_error ("mips_common_breakpoint: "
+			"Bad response from remote board: %s",
 			buf);
 
 	  if (rerrflg != 0)
@@ -2718,8 +2718,8 @@ mips_common_breakpoint: Bad response from remote board: %s",
 			&rpid, &rcmd, &rerrflg, &rresponse);
 
       if (nfields != 4 || rcmd != cmd)
-	mips_error ("\
-mips_common_breakpoint: Bad response from remote board: %s",
+	mips_error ("mips_common_breakpoint: "
+		    "Bad response from remote board: %s",
 		    buf);
 
       if (rerrflg != 0)
@@ -2757,7 +2757,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
       switch (ch)
 	{
 	case SERIAL_TIMEOUT:
-	  error ("Timeout during download.");
+	  error (_("Timeout during download."));
 	  break;
 	case 0x6:		/* ACK */
 	  return;
@@ -2767,7 +2767,8 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 			      paddress (target_gdbarch, addr));
 	  continue;
 	default:
-	  error ("Download got unexpected ack char: 0x%x, retrying.\n", ch);
+	  error (_("Download got unexpected ack char: 0x%x, retrying.\n"),
+		 ch);
 	}
     }
 }
@@ -3509,7 +3510,7 @@ mips_load (char *file, int from_tty)
 
   /* Get the board out of remote debugging mode.  */
   if (mips_exit_debug ())
-    error ("mips_load:  Couldn't get into monitor mode.");
+    error (_("mips_load:  Couldn't get into monitor mode."));
 
   if (mips_monitor != MON_IDT)
     pmon_load_fast (file);

@@ -315,7 +315,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	     in a separate process group.  */
 	  debug_setpgrp = gdb_setpgid ();
 	  if (debug_setpgrp == -1)
-	    perror ("setpgrp failed in child");
+	    perror (_("setpgrp failed in child"));
 	}
 
       /* Ask the tty subsystem to switch to the one we specified

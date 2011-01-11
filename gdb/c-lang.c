@@ -65,7 +65,7 @@ charset_for_string_type (enum c_string_type str_type,
       else
 	return "UTF-32LE";
     }
-  internal_error (__FILE__, __LINE__, "unhandled c_string_type");
+  internal_error (__FILE__, __LINE__, _("unhandled c_string_type"));
 }
 
 /* Classify ELTTYPE according to what kind of character it is.  Return
@@ -1008,7 +1008,7 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 				    "char32_t", NULL, 0);
 	    break;
 	  default:
-	    internal_error (__FILE__, __LINE__, "unhandled c_string_type");
+	    internal_error (__FILE__, __LINE__, _("unhandled c_string_type"));
 	  }
 
 	/* Ensure TYPE_LENGTH is valid for TYPE.  */

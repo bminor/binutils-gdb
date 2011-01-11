@@ -192,16 +192,17 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   struct cleanup *old_chain;
 
   if (argc < 2)
-    error ("mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command");
+    error (_("mi_cmd_interpreter_exec: "
+	     "Usage: -interpreter-exec interp command"));
 
   interp_to_use = interp_lookup (argv[0]);
   if (interp_to_use == NULL)
-    error ("mi_cmd_interpreter_exec: could not find interpreter \"%s\"",
+    error (_("mi_cmd_interpreter_exec: could not find interpreter \"%s\""),
 	   argv[0]);
 
   if (!interp_exec_p (interp_to_use))
-    error ("mi_cmd_interpreter_exec: interpreter \"%s\" "
-	   "does not support command execution",
+    error (_("mi_cmd_interpreter_exec: interpreter \"%s\" "
+	     "does not support command execution"),
 	      argv[0]);
 
   /* Insert the MI out hooks, making sure to also call the interpreter's hooks

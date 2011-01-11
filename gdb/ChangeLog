@@ -1,3 +1,25 @@
+2011-01-11  Michael Snyder  <msnyder@vmware.com>
+
+	* arm-tdep.c: Internationalization.
+	* c-lang.c: Ditto.
+	* charset.c: Ditto.
+	* fork-child.c: Ditto.
+	* nto-procfs.c: Ditto.
+	* ppc-sysv-tdep.c: Ditto.
+	* procfs.c: Ditto.
+	* remote-mips.c: Ditto.
+	* remote.c: Ditto.
+	* rs6000-nat.c: Ditto.
+	* rs6000-tdep.c: Ditto.
+	* target.c: Ditto.
+	* valops.c: Ditto.
+	* value.c: Ditto.
+	* xml-support.c: Ditto.
+	* mi/mi-cmd-break.c: Ditto.
+	* mi/mi-cmd-var.c: Ditto.
+	* mi/mi-interp.c: Ditto.
+	* mi/mi-main.c: Ditto.
+
 2011-01-11  Andrew Burgess  <aburgess@broadcom.com>
 
 	* remote-sim.c (gdbsim_store_register): Update API to

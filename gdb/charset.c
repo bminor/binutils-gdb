@@ -486,7 +486,7 @@ convert_between_encodings (const char *from, const char *to,
 
   desc = iconv_open (to, from);
   if (desc == (iconv_t) -1)
-    perror_with_name ("Converting character sets");
+    perror_with_name (_("Converting character sets"));
   cleanups = make_cleanup (cleanup_iconv, &desc);
 
   inleft = num_bytes;
@@ -553,8 +553,8 @@ convert_between_encodings (const char *from, const char *to,
 	      break;
 
 	    default:
-	      perror_with_name ("Internal error while "
-				"converting character sets");
+	      perror_with_name (_("Internal error while "
+				  "converting character sets"));
 	    }
 	}
     }
@@ -593,7 +593,7 @@ make_wchar_iterator (const gdb_byte *input, size_t bytes,
 
   desc = iconv_open (INTERMEDIATE_ENCODING, charset);
   if (desc == (iconv_t) -1)
-    perror_with_name ("Converting character sets");
+    perror_with_name (_("Converting character sets"));
 
   result = XNEW (struct wchar_iterator);
   result->desc = desc;
@@ -694,8 +694,8 @@ wchar_iterate (struct wchar_iterator *iter,
 	      return 0;
 
 	    default:
-	      perror_with_name ("Internal error while "
-				"converting character sets");
+	      perror_with_name (_("Internal error while "
+				  "converting character sets"));
 	    }
 	}
 

@@ -259,7 +259,7 @@ fetch_register (struct regcache *regcache, int regno)
     {
 #if 0
       /* FIXME: this happens 3 times at the start of each 64-bit program.  */
-      perror ("ptrace read");
+      perror (_("ptrace read"));
 #endif
       errno = 0;
     }
@@ -327,7 +327,7 @@ store_register (struct regcache *regcache, int regno)
 
   if (errno)
     {
-      perror ("ptrace write");
+      perror (_("ptrace write"));
       errno = 0;
     }
 }
@@ -610,7 +610,7 @@ exec_one_dummy_insn (struct regcache *regcache)
 			   (int *) 1, 0, NULL);
 
   if (ret != 0)
-    perror ("pt_continue");
+    perror (_("pt_continue"));
 
   do
     {
