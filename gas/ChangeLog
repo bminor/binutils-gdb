@@ -1,3 +1,8 @@
+2011-01-11  Mingjie Xing  <mingjie.xing@gmail.com>
+
+	* config/tc-mips.c (mips_ip): Update error messages.  Take an
+	unadjusted offset for "+c" argument.
+
 2011-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-i386.c (x86_elf_abi): Only define for targets that use

@@ -1,3 +1,8 @@
+2011-01-11  Mingjie Xing  <mingjie.xing@gmail.com>
+
+	* mips/loongson-3a-2.s, mips/loongson-3a-2.d: Use the real offset
+	value in assembly.
+
 2011-01-10  Nathan Sidwell  <nathan@codesourcery.com>
 	    Glauber de Oliveira Costa  <glommer@gmail.com>
 

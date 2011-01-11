@@ -9321,7 +9321,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  if (imm_expr.X_add_number < min_range
 		      || imm_expr.X_add_number > max_range)
 		    {
-		      as_bad (_("immediate not in range %ld..%ld (%ld)"),
+		      as_bad (_("Offset not in range %ld..%ld (%ld)"),
 		              (long) min_range, (long) max_range,
 		              (long) imm_expr.X_add_number);
 		    }
@@ -9338,7 +9338,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  if (imm_expr.X_add_number < min_range
 		      || imm_expr.X_add_number > max_range)
 		    {
-		      as_bad (_("immediate not in range %ld..%ld (%ld)"),
+		      as_bad (_("Offset not in range %ld..%ld (%ld)"),
 		              (long) min_range, (long) max_range,
 		              (long) imm_expr.X_add_number);
 		    }
@@ -9352,14 +9352,23 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  check_absolute_expr (ip, &imm_expr);
 		  min_range = -((OP_MASK_OFFSET_C + 1) >> 1);
 		  max_range = ((OP_MASK_OFFSET_C + 1) >> 1) - 1;
+		  /* We check the offset range before adjusted.  */
+		  min_range <<= 4;
+		  max_range <<= 4;
 		  if (imm_expr.X_add_number < min_range
 		      || imm_expr.X_add_number > max_range)
 		    {
-		      as_bad (_("immediate not in range %ld..%ld (%ld)"),
+		      as_bad (_("Offset not in range %ld..%ld (%ld)"),
 		              (long) min_range, (long) max_range,
 		              (long) imm_expr.X_add_number);
 		    }
-		  INSERT_OPERAND (OFFSET_C, *ip, imm_expr.X_add_number);
+		  if (imm_expr.X_add_number & 0xf)
+		    {
+		      as_bad (_("Offset not 16 bytes alignment (%ld)"),
+			      (long) imm_expr.X_add_number);
+		    }
+		  /* Right shift 4 bits to adjust the offset operand.  */
+		  INSERT_OPERAND (OFFSET_C, *ip, imm_expr.X_add_number >> 4);
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
 		  continue;

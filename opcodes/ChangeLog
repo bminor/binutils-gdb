@@ -1,3 +1,8 @@
+2011-01-11  Mingjie Xing  <mingjie.xing@gmail.com>
+
+	* mips-dis.c (print_insn_args): Adjust the value to print the real
+	offset for "+c" argument.
+
 2011-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.

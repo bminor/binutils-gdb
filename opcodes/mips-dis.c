@@ -991,7 +991,8 @@ print_insn_args (const char *d,
 	      delta = (l >> OP_SH_OFFSET_C) & OP_MASK_OFFSET_C;
 	      if (delta & 0x100)
 		delta |= ~OP_MASK_OFFSET_C;
-	      (*info->fprintf_func) (info->stream, "%d", delta);
+	      /* Left shift 4 bits to print the real offset.  */
+	      (*info->fprintf_func) (info->stream, "%d", delta << 4);
 	      break;
 
 	    case 'z':
