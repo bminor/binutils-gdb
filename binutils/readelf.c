@@ -1,6 +1,6 @@
 /* readelf.c -- display contents of an ELF format file
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010
+   2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
@@ -380,15 +380,16 @@ print_vma (bfd_vma vma, print_mode mode)
    Returns the number of emitted characters.  */
 
 static unsigned int
-print_symbol (int width, const char * symbol)
+print_symbol (int width, const char *symbol)
 {
-  const char * c;
+  const char *c;
   bfd_boolean extra_padding = FALSE;
   unsigned int num_printed = 0;
 
   if (do_wide)
     {
-      /* Set the width to a very large value.  This simplifies the code below.  */
+      /* Set the width to a very large value.  This simplifies the
+	 code below.  */
       width = INT_MAX;
     }
   else if (width < 0)
@@ -407,7 +408,7 @@ print_symbol (int width, const char * symbol)
       /* Look for non-printing symbols inside the symbol's name.
 	 This test is triggered in particular by the names generated
 	 by the assembler for local labels.  */
-      while (ISPRINT (* c))
+      while (ISPRINT (*c))
 	c++;
 
       len = c - symbol;
@@ -423,12 +424,12 @@ print_symbol (int width, const char * symbol)
 	  num_printed += len;
 	}
 
-      if (* c == 0 || width == 0)
+      if (*c == 0 || width == 0)
 	break;
 
       /* Now display the non-printing character, if
 	 there is room left in which to dipslay it.  */
-      if (*c < 32)
+      if ((unsigned char) *c < 32)
 	{
 	  if (width < 2)
 	    break;
@@ -443,7 +444,7 @@ print_symbol (int width, const char * symbol)
 	  if (width < 6)
 	    break;
 
-	  printf ("<0x%.2x>", *c);
+	  printf ("<0x%.2x>", (unsigned char) *c);
 
 	  width -= 6;
 	  num_printed += 6;

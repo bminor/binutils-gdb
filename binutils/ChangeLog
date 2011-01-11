@@ -1,3 +1,8 @@
+2011-01-11  Andreas Schwab  <schwab@redhat.com>
+
+	* readelf.c (print_symbol): Handle symbol characters as unsigned.
+	Whitespace fixes.
+
 2011-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.
