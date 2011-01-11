@@ -20,6 +20,8 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+load_lib gdb-python.exp
+
 set testfile "py-infthread"
 set srcfile ${testfile}.c
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
