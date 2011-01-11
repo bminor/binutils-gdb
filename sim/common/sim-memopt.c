@@ -154,7 +154,27 @@ do_memopt_add (SIM_DESC sd,
       /* Allocate new well-aligned buffer, just as sim_core_attach(). */
       void *aligned_buffer;
       int padding = (addr % sizeof (unsigned64));
-      unsigned long bytes = (modulo == 0 ? nr_bytes : modulo) + padding;
+      unsigned long bytes;
+
+#ifdef HAVE_MMAP
+      struct stat s;
+
+      if (mmap_next_fd >= 0)
+	{
+	  /* Check that given file is big enough. */
+	  int rc = fstat (mmap_next_fd, &s);
+
+	  if (rc < 0)
+	    sim_io_error (sd, "Error, unable to stat file: %s\n",
+			  strerror (errno));
+
+	  /* Autosize the mapping to the file length.  */
+	  if (nr_bytes == 0)
+	    nr_bytes = s.st_size;
+	}
+#endif
+
+      bytes = (modulo == 0 ? nr_bytes : modulo) + padding;
 
       free_buffer = NULL;
       free_length = bytes;
@@ -163,14 +183,9 @@ do_memopt_add (SIM_DESC sd,
       /* Memory map or malloc(). */
       if (mmap_next_fd >= 0)
 	{
-	  /* Check that given file is big enough. */
-	  struct stat s;
-	  int rc;
-
 	  /* Some kernels will SIGBUS the application if mmap'd file
 	     is not large enough.  */ 
-	  rc = fstat (mmap_next_fd, &s);
-	  if (rc < 0 || s.st_size < bytes)
+	  if (s.st_size < bytes)
 	    {
 	      sim_io_error (sd,
 			    "Error, cannot confirm that mmap file is large enough "
@@ -383,10 +398,15 @@ memory_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	chp = parse_addr (chp, &level, &space, &addr);
 	if (*chp != ',')
 	  {
-	    sim_io_eprintf (sd, "Missing size for memory-region\n");
-	    return SIM_RC_FAIL;
+	    /* let the file autosize */
+	    if (mmap_next_fd == -1)
+	      {
+		sim_io_eprintf (sd, "Missing size for memory-region\n");
+		return SIM_RC_FAIL;
+	      }
 	  }
-	chp = parse_size (chp + 1, &nr_bytes, &modulo);
+	else
+	  chp = parse_size (chp + 1, &nr_bytes, &modulo);
 	/* old style */
 	if (*chp == ',')
 	  modulo = strtoul (chp + 1, &chp, 0);

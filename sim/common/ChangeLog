@@ -1,3 +1,11 @@
+2011-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-memopt.c (do_memopt_add): Set nr_bytes to s.st_size before
+	bytes has been calculated and when mmap_next_fd is valid and
+	nr_bytes is 0.
+	(memory_option_handler): Allow missing size when mmap_next_fd is
+	valid.
+
 2011-01-10  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Set $hardware to $2 when $2 is
