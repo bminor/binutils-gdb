@@ -40,8 +40,8 @@
 /* These ought to be defined in some public interface, but aren't.  They
    define the meaning of the various bits in the distinguished __dld_flags
    variable that is declared in every debuggable a.out on HP-UX, and that
-   is shared between the debugger and the dynamic linker.
- */
+   is shared between the debugger and the dynamic linker.  */
+
 #define DLD_FLAGS_MAPPRIVATE    0x1
 #define DLD_FLAGS_HOOKVALID     0x2
 #define DLD_FLAGS_LISTVALID     0x4
@@ -88,8 +88,8 @@ struct lm_info
   };
 
 /* These addresses should be filled in by som_solib_create_inferior_hook.
-   They are also used elsewhere in this module.
- */
+   They are also used elsewhere in this module.  */
+
 typedef struct
   {
     CORE_ADDR address;
@@ -97,7 +97,7 @@ typedef struct
   }
 addr_and_unwind_t;
 
-/* When adding fields, be sure to clear them in _initialize_som_solib. */
+/* When adding fields, be sure to clear them in _initialize_som_solib.  */
 static struct
   {
     int is_valid;
@@ -239,8 +239,8 @@ GDB will be unable to track shl_load/shl_unload calls"));
      Note that the above is the pre-HP-UX 9.0 behaviour.  At 9.0 and above,
      the dld provides an export stub named "__d_trap" as well as the
      function named "__d_trap" itself, but doesn't provide "_DLD_HOOK".
-     We'll look first for the old flavor and then the new.
-   */
+     We'll look first for the old flavor and then the new.  */
+
   msymbol = lookup_minimal_symbol ("_DLD_HOOK", NULL, symfile_objfile);
   if (msymbol == NULL)
     msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
@@ -338,7 +338,7 @@ manpage for methods to privately map shared library text."));
   if (status != 0)
     error (_("Unable to write __dld_flags."));
 
-  /* Now find the address of _start and set a breakpoint there. 
+  /* Now find the address of _start and set a breakpoint there.
      We still need this code for two reasons:
 
      * Not all sites have /opt/langtools/lib/end.o, so it's not always
@@ -375,8 +375,8 @@ som_solib_desire_dynamic_linker_symbols (void)
      we've no work to do.
 
      (If you add clauses to this test, be sure to likewise update the
-     test within the loop.)
-   */
+     test within the loop.)  */
+
   if (dld_cache.is_valid)
     return;
 
@@ -415,8 +415,8 @@ som_solib_desire_dynamic_linker_symbols (void)
 	   cover the body of "shl_unload", the second being 4 bytes past
 	   the end of the first.  This is a large hack to handle that
 	   case, but since I don't seem to have any legitimate way to
-	   look for this thing via the symbol table...
-	 */
+	   look for this thing via the symbol table...  */
+
 	if (dld_cache.unload.unwind != NULL)
 	  {
 	    u = find_unwind_entry (dld_cache.unload.unwind->region_end + 4);
@@ -443,7 +443,7 @@ som_solib_desire_dynamic_linker_symbols (void)
 	  }
       }
 
-    /* Did we find everything we were looking for?  If so, stop. */
+    /* Did we find everything we were looking for?  If so, stop.  */
     if ((dld_cache.load.address != 0)
 	&& (dld_cache.load_stub.address != 0)
 	&& (dld_cache.unload.address != 0)
@@ -458,8 +458,7 @@ som_solib_desire_dynamic_linker_symbols (void)
   dld_cache.hook_stub.unwind = find_unwind_entry (dld_cache.hook_stub.address);
 
   /* We're prepared not to find some of these symbols, which is why
-     this function is a "desire" operation, and not a "require".
-   */
+     this function is a "desire" operation, and not a "require".  */
 }
 
 static int
@@ -475,17 +474,17 @@ som_in_dynsym_resolve_code (CORE_ADDR pc)
      weren't mapped to a (writeable) private region.  However, in
      that case the debugger probably isn't able to set the fundamental
      breakpoint in the dld callback anyways, so this hack should be
-     safe.
-   */
+     safe.  */
+
   if ((pc & (CORE_ADDR) 0xc0000000) == (CORE_ADDR) 0xc0000000)
     return 1;
 
   /* Cache the address of some symbols that are part of the dynamic
-     linker, if not already known.
-   */
+     linker, if not already known.  */
+
   som_solib_desire_dynamic_linker_symbols ();
 
-  /* Are we in the dld callback?  Or its export stub? */
+  /* Are we in the dld callback?  Or its export stub?  */
   u_pc = find_unwind_entry (pc);
   if (u_pc == NULL)
     return 0;
@@ -493,7 +492,7 @@ som_in_dynsym_resolve_code (CORE_ADDR pc)
   if ((u_pc == dld_cache.hook.unwind) || (u_pc == dld_cache.hook_stub.unwind))
     return 1;
 
-  /* Or the interface of the dld (i.e., "shl_load" or friends)? */
+  /* Or the interface of the dld (i.e., "shl_load" or friends)?  */
   if ((u_pc == dld_cache.load.unwind)
       || (u_pc == dld_cache.unload.unwind)
       || (u_pc == dld_cache.unload2.unwind)
@@ -501,7 +500,7 @@ som_in_dynsym_resolve_code (CORE_ADDR pc)
       || (u_pc == dld_cache.unload_stub.unwind))
     return 1;
 
-  /* Apparently this address isn't part of the dld's text. */
+  /* Apparently this address isn't part of the dld's text.  */
   return 0;
 }
 
@@ -567,7 +566,7 @@ link_map_start (void)
   return extract_unsigned_integer (buf, 4, byte_order);
 }
 
-/* Does this so's name match the main binary? */
+/* Does this so's name match the main binary?  */
 static int
 match_main (const char *name)
 {
@@ -707,7 +706,7 @@ som_open_symbol_file_object (void *from_ttyp)
 
   /* First link map member should be the executable.  */
   if ((lm = link_map_start ()) == 0)
-    return 0;	/* failed somehow... */
+    return 0;	/* failed somehow...  */
 
   /* Read address of name from target memory to GDB.  */
   read_memory (lm + offsetof (struct dld_list, name), buf, 4);
@@ -773,8 +772,8 @@ som_solib_get_got_by_pc (CORE_ADDR addr)
 /* Return the address of the handle of the shared library in which
    ADDR belongs.  If ADDR isn't in any known shared library, return
    zero.  */
-/* this function is used in initialize_hp_cxx_exception_support in 
-   hppa-hpux-tdep.c  */
+/* This function is used in initialize_hp_cxx_exception_support in 
+   hppa-hpux-tdep.c.  */
 
 static CORE_ADDR
 som_solib_get_solib_by_pc (CORE_ADDR addr)
@@ -827,7 +826,7 @@ som_solib_select (struct gdbarch *gdbarch)
 }
 
 /* The rest of these functions are not part of the solib interface; they 
-   are used by somread.c or hppa-hpux-tdep.c */
+   are used by somread.c or hppa-hpux-tdep.c.  */
 
 int
 som_solib_section_offsets (struct objfile *objfile,

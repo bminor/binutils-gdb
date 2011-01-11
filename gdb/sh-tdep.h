@@ -20,9 +20,9 @@
 #ifndef SH_TDEP_H
 #define SH_TDEP_H
 
-/* Contributed by Steve Chamberlain sac@cygnus.com */
+/* Contributed by Steve Chamberlain sac@cygnus.com.  */
 
-/* Registers for all SH variants.  Used also by sh3-rom.c. */
+/* Registers for all SH variants.  Used also by sh3-rom.c.  */
 enum
   {
     R0_REGNUM = 0,

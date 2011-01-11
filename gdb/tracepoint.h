@@ -24,10 +24,10 @@
 #include "target.h"
 
 /* A trace state variable is a value managed by a target being
-   traced. A trace state variable (or tsv for short) can be accessed
+   traced.  A trace state variable (or tsv for short) can be accessed
    and assigned to by tracepoint actions and conditionals, but is not
    part of the program being traced, and it doesn't have to be
-   collected. Effectively the variables are scratch space for
+   collected.  Effectively the variables are scratch space for
    tracepoints.  */
 
 struct trace_state_variable

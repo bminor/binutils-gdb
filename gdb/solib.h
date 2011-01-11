@@ -28,11 +28,11 @@ struct target_so_ops;
 struct program_space;
 
 /* Called when we free all symtabs, to free the shared library information
-   as well. */
+   as well.  */
 
 extern void clear_solib (void);
 
-/* Called to add symbols from a shared library to gdb's symbol table. */
+/* Called to add symbols from a shared library to gdb's symbol table.  */
 
 extern void solib_add (char *, int, struct target_ops *, int);
 extern int solib_read_symbols (struct so_list *, int);
@@ -65,7 +65,7 @@ extern int solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size);
 
 extern int in_solib_dynsym_resolve_code (CORE_ADDR);
 
-/* Discard symbols that were auto-loaded from shared libraries. */
+/* Discard symbols that were auto-loaded from shared libraries.  */
 
 extern void no_shared_libraries (char *ignored, int from_tty);
 

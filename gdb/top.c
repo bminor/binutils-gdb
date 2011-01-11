@@ -250,7 +250,7 @@ void (*deprecated_detach_hook) (void);
 
 void (*deprecated_interactive_hook) (void);
 
-/* Tell the GUI someone changed the register REGNO. -1 means
+/* Tell the GUI someone changed the register REGNO.  -1 means
    that the caller does not know which register changed or
    that several registers have changed (see value_assign).  */
 void (*deprecated_register_changed_hook) (int regno);
@@ -282,7 +282,7 @@ void (*deprecated_context_hook) (int id);
 #ifdef SIGHUP
 /* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
+   event-top.c into this file, top.c.  */
 /* static */ int
 quit_cover (void *s)
 {
@@ -297,13 +297,13 @@ quit_cover (void *s)
 /* Line number we are currently in in a file which is being sourced.  */
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
+   event-top.c into this file, top.c.  */
 /* static */ int source_line_number;
 
 /* Name of the file we are sourcing.  */
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
+   event-top.c into this file, top.c.  */
 /* static */ const char *source_file_name;
 
 /* Clean up on error during a "source" command (or execution of a
@@ -528,7 +528,7 @@ command_loop (void)
 	reinitialize_more_filter ();
       old_chain = make_cleanup (null_cleanup, 0);
 
-      /* Get a command-line. This calls the readline package.  */
+      /* Get a command-line.  This calls the readline package.  */
       command = command_line_input (instream == stdin ?
 				    get_prompt () : (char *) NULL,
 				    instream == stdin, "prompt");
@@ -630,7 +630,7 @@ static int command_editing_p;
 
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
+   event-top.c into this file, top.c.  */
 
 /* static */ int history_expansion_p;
 
@@ -1692,7 +1692,7 @@ gdb_init (char *argv0)
   set_language (language_c);
   expected_language = current_language;	/* Don't warn about the change.  */
 
-  /* Allow another UI to initialize. If the UI fails to initialize,
+  /* Allow another UI to initialize.  If the UI fails to initialize,
      and it wants GDB to revert to the CLI, it should clear
      deprecated_init_ui_hook.  */
   if (deprecated_init_ui_hook)

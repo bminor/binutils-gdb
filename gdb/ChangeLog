@@ -1,3 +1,66 @@
+2011-01-11  Michael Snyder  <msnyder@vmware.com>
+
+	* s390-tdep.c: Comment cleanup, mostly periods and spaces.
+	* score-tdep.c: Ditto.
+	* score-tdep.h: Ditto.
+	* ser-base.c: Ditto.
+	* ser-go32.c: Ditto.
+	* serial.c: Ditto.
+	* serial.h: Ditto.
+	* ser-mingw.c: Ditto.
+	* ser-pipe.c: Ditto.
+	* ser-tcp.c: Ditto.
+	* ser-unix.c: Ditto.
+	* sh64-tdep.c: Ditto.
+	* shnbsd-nat.c: Ditto.
+	* sh-tdep.c: Ditto.
+	* sh-tdep.h: Ditto.
+	* solib.c: Ditto.
+	* solib-darwin.c: Ditto.
+	* solib-frv.c: Ditto.
+	* solib.h: Ditto.
+	* solib-irix.c: Ditto.
+	* solib-osf.c: Ditto.
+	* solib-pa64.c: Ditto.
+	* solib-som.c: Ditto.
+	* solib-spu.c: Ditto.
+	* solib-sunos.c: Ditto.
+	* solib-svr4.c: Ditto.
+	* solist.h: Ditto.
+	* sol-thread.c: Ditto.
+	* somread.c: Ditto.
+	* source.c: Ditto.
+	* source.h: Ditto.
+	* sparc64-linux-tdep.c: Ditto.
+	* sparc64-tdep.c: Ditto.
+	* sparc-linux-nat.c: Ditto.
+	* sparc-linux-tdep.c: Ditto.
+	* sparc-sol2-nat.c: Ditto.
+	* sparc-sol2-tdep.c: Ditto.
+	* sparc-tdep.c: Ditto.
+	* sparc-tdep.h: Ditto.
+	* spu-tdep.c: Ditto.
+	* stabsread.c: Ditto.
+	* stabsread.h: Ditto.
+	* stack.c: Ditto.
+	* symfile.c: Ditto.
+	* symfile.h: Ditto.
+	* symmisc.c: Ditto.
+	* symtab.c: Ditto.
+	* symtab.h: Ditto.
+	* target.c: Ditto.
+	* target-descriptions.c: Ditto.
+	* target-descriptions.h: Ditto.
+	* target.h: Ditto.
+	* target-memory.c: Ditto.
+	* terminal.h: Ditto.
+	* thread.c: Ditto.
+	* top.c: Ditto.
+	* tracepoint.c: Ditto.
+	* tracepoint.h: Ditto.
+	* trad-frame.h: Ditto.
+	* typeprint.c: Ditto.
+
 2011-01-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (resources_needed_watchpoint): Fix indentation.

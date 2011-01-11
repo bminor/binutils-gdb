@@ -57,7 +57,7 @@ const struct sparc_gregset sparc32_sol2_gregset =
    `ucontext_t', which has a member `uc_mcontext' that contains the
    saved registers.  Incidentally, the kernel passes the `ucontext_t'
    pointer as the third argument of the signal trampoline too, and
-   `sigacthandler' simply passes it on. However, if you link your
+   `sigacthandler' simply passes it on.  However, if you link your
    program with "-L/usr/ucblib -R/usr/ucblib -lucb", the function
    `ucbsigvechandler' will be used, which invokes the using the BSD
    convention, where the third argument is a pointer to an instance of

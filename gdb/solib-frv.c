@@ -202,7 +202,7 @@ struct ext_link_map
   ext_ptr l_next, l_prev;	/* struct link_map *l_next, *l_prev; */
 };
 
-/* Link map info to include in an allocated so_list entry */
+/* Link map info to include in an allocated so_list entry.  */
 
 struct lm_info
   {
@@ -225,7 +225,7 @@ struct lm_info
        caching of the dynamic relocations could be dispensed with.  */
     asymbol **dyn_syms;
     arelent **dyn_relocs;
-    int dyn_reloc_count;	/* number of dynamic relocs.  */
+    int dyn_reloc_count;	/* Number of dynamic relocs.  */
 
   };
 
@@ -284,7 +284,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
 	  sym = *symbol_table++;
 	  if (strcmp (sym->name, symname) == 0)
 	    {
-	      /* Bfd symbols are section relative. */
+	      /* Bfd symbols are section relative.  */
 	      symaddr = sym->value + sym->section->vma;
 	      break;
 	    }
@@ -310,7 +310,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
 	  sym = *symbol_table++;
 	  if (strcmp (sym->name, symname) == 0)
 	    {
-	      /* Bfd symbols are section relative. */
+	      /* Bfd symbols are section relative.  */
 	      symaddr = sym->value + sym->section->vma;
 	      break;
 	    }
@@ -340,7 +340,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   If FROM_TTYP dereferences to a non-zero integer, allow messages to
   be printed.  This parameter is a pointer rather than an int because
   open_symbol_file_object() is called via catch_errors() and
-  catch_errors() requires a pointer argument. */
+  catch_errors() requires a pointer argument.  */
 
 static int
 open_symbol_file_object (void *from_ttyp)
@@ -905,7 +905,7 @@ enable_break (void)
 static void
 frv_special_symbol_handling (void)
 {
-  /* Nothing needed (yet) for FRV. */
+  /* Nothing needed (yet) for FRV.  */
 }
 
 static void

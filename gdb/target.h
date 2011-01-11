@@ -127,7 +127,7 @@ enum target_waitkind
 
     /* The program has entered or returned from a system call.  On
        HP-UX, this is used in the hardware watchpoint implementation.
-       The syscall's unique integer ID number is in value.syscall_id */
+       The syscall's unique integer ID number is in value.syscall_id.  */
 
     TARGET_WAITKIND_SYSCALL_ENTRY,
     TARGET_WAITKIND_SYSCALL_RETURN,
@@ -140,11 +140,11 @@ enum target_waitkind
     /* An event has occured, but we should wait again.
        Remote_async_wait() returns this when there is an event
        on the inferior, but the rest of the world is not interested in
-       it. The inferior has not stopped, but has just sent some output
-       to the console, for instance. In this case, we want to go back
+       it.  The inferior has not stopped, but has just sent some output
+       to the console, for instance.  In this case, we want to go back
        to the event loop and wait there for another event from the
        inferior, rather than being stuck in the remote_async_wait()
-       function. This way the event loop is responsive to other events,
+       function. sThis way the event loop is responsive to other events,
        like for instance the user typing.  */
     TARGET_WAITKIND_IGNORE,
 
@@ -213,7 +213,7 @@ enum inferior_event_type
     INF_EXEC_COMPLETE,
     /* We are called to do some stuff after the inferior stops, but we
        are expected to reenter the proceed() and
-       handle_inferior_event() functions. This is used only in case of
+       handle_inferior_event() functions.  This is used only in case of
        'step n' like commands.  */
     INF_EXEC_CONTINUE
   };
@@ -266,7 +266,7 @@ enum target_object
   TARGET_OBJECT_THREADS,
   /* Collected static trace data.  */
   TARGET_OBJECT_STATIC_TRACE_DATA,
-  /* Possible future objects: TARGET_OBJECT_FILE, ... */
+  /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
 /* Enumeration of the kinds of traceframe searches that a target may
@@ -302,7 +302,7 @@ extern LONGEST target_read (struct target_ops *ops,
 
 struct memory_read_result
   {
-    /* First address that was read. */
+    /* First address that was read.  */
     ULONGEST begin;
     /* Past-the-end address.  */
     ULONGEST end;
@@ -563,7 +563,7 @@ struct target_ops
        RAM.  The returned memory regions should not overlap.
 
        The order of regions does not matter; target_memory_map will
-       sort regions by starting address. For that reason, this
+       sort regions by starting address.  For that reason, this
        function should not be called directly except via
        target_memory_map.
 
@@ -669,7 +669,7 @@ struct target_ops
    /* Ask the target to find a trace frame of the given type TYPE,
       using NUM, ADDR1, and ADDR2 as search parameters.  Returns the
       number of the trace frame, and also the tracepoint number at
-      TPP.  If no trace frame matches, return -1. May throw if the
+      TPP.  If no trace frame matches, return -1.  May throw if the
       operation fails.  */
     int (*to_trace_find) (enum trace_find_type type, int num,
 			  ULONGEST addr1, ULONGEST addr2, int *tpp);
@@ -871,11 +871,11 @@ void target_flash_done (void);
 /* Describes a request for a memory write operation.  */
 struct memory_write_request
   {
-    /* Begining address that must be written. */
+    /* Begining address that must be written.  */
     ULONGEST begin;
-    /* Past-the-end address. */
+    /* Past-the-end address.  */
     ULONGEST end;
-    /* The data to write. */
+    /* The data to write.  */
     gdb_byte *data;
     /* A callback baton for progress reporting for this request.  */
     void *baton;
@@ -1193,27 +1193,27 @@ extern int default_child_has_execution (struct target_ops *ops);
    cludge until async mode is a strict superset of sync mode.  */
 extern int target_async_permitted;
 
-/* Can the target support asynchronous execution? */
+/* Can the target support asynchronous execution?  */
 #define target_can_async_p() (current_target.to_can_async_p ())
 
-/* Is the target in asynchronous execution mode? */
+/* Is the target in asynchronous execution mode?  */
 #define target_is_async_p() (current_target.to_is_async_p ())
 
 int target_supports_non_stop (void);
 
-/* Put the target in async mode with the specified callback function. */
+/* Put the target in async mode with the specified callback function.  */
 #define target_async(CALLBACK,CONTEXT) \
      (current_target.to_async ((CALLBACK), (CONTEXT)))
 
-/* This is to be used ONLY within call_function_by_hand(). It provides
+/* This is to be used ONLY within call_function_by_hand().  It provides
    a workaround, to have inferior function calls done in sychronous
-   mode, even though the target is asynchronous. After
+   mode, even though the target is asynchronous.  After
    target_async_mask(0) is called, calls to target_can_async_p() will
    return FALSE , so that target_resume() will not try to start the
-   target asynchronously. After the inferior stops, we IMMEDIATELY
+   target asynchronously.  After the inferior stops, we IMMEDIATELY
    restore the previous nature of the target, by calling
-   target_async_mask(1). After that, target_can_async_p() will return
-   TRUE. ANY OTHER USE OF THIS FEATURE IS DEPRECATED.
+   target_async_mask(1).  After that, target_can_async_p() will return
+   TRUE.  ANY OTHER USE OF THIS FEATURE IS DEPRECATED.
 
    FIXME ezannoni 1999-12-13: we won't need this once we move
    the turning async on and off to the single execution commands,
@@ -1586,7 +1586,7 @@ extern int remote_debug;
 
 /* Speed in bits per second, or -1 which means don't mess with the speed.  */
 extern int baud_rate;
-/* Timeout limit for response from target. */
+/* Timeout limit for response from target.  */
 extern int remote_timeout;
 
 
@@ -1619,9 +1619,9 @@ extern int may_stop;
 extern void update_target_permissions (void);
 
 
-/* Imported from machine dependent code */
+/* Imported from machine dependent code.  */
 
-/* Blank target vector entries are initialized to target_ignore. */
+/* Blank target vector entries are initialized to target_ignore.  */
 void target_ignore (void);
 
 extern struct target_ops deprecated_child_ops;

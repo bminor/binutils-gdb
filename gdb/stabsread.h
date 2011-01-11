@@ -57,11 +57,11 @@ struct pending_stabs
 EXTERN struct pending_stabs *global_stabs;
 
 /* The type code that process_one_symbol saw on its previous invocation.
-   Used to detect pairs of N_SO symbols. */
+   Used to detect pairs of N_SO symbols.  */
 
 EXTERN int previous_stab_code;
 
-/* Support for Sun changes to dbx symbol format */
+/* Support for Sun changes to dbx symbol format.  */
 
 /* For each identified header file, we have a table of types defined
    in that header file.
@@ -90,7 +90,7 @@ struct header_file
 
     /* Numeric code distinguishing instances of one header file that
        produced different results when included.  It comes from the
-       N_BINCL or N_EXCL. */
+       N_BINCL or N_EXCL.  */
 
     int instance;
 
@@ -104,13 +104,13 @@ struct header_file
 
   };
 
-/* The table of header_files of this OBJFILE. */
+/* The table of header_files of this OBJFILE.  */
 #define HEADER_FILES(OBJFILE) (DBX_SYMFILE_INFO (OBJFILE)->header_files)
 
-/* The actual length of HEADER_FILES. */
+/* The actual length of HEADER_FILES.  */
 #define N_HEADER_FILES(OBJFILE) (DBX_SYMFILE_INFO (OBJFILE)->n_header_files)
 
-/* The allocated lengh of HEADER_FILES. */
+/* The allocated lengh of HEADER_FILES.  */
 #define N_ALLOCATED_HEADER_FILES(OBJFILE) \
   (DBX_SYMFILE_INFO (OBJFILE)->n_allocated_header_files)
 

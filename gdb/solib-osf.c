@@ -28,7 +28,7 @@
 
    1) Peek around in the runtime loader structures.
    These are not documented, and they are not defined in the system
-   header files. The definitions below were obtained by experimentation,
+   header files.  The definitions below were obtained by experimentation,
    but they seem stable enough.
 
    2) Use the libxproc.a library, which contains the equivalent ldr_*
@@ -73,8 +73,8 @@ typedef struct
     CORE_ADDR previous;
     CORE_ADDR unknown1;
     CORE_ADDR module_name;
-    CORE_ADDR modinfo_addr;	/* used by next_link_map_member() to detect
-				   the end of the shared module list */
+    CORE_ADDR modinfo_addr;	/* Used by next_link_map_member() to detect
+				   the end of the shared module list.  */
     long module_id;
     CORE_ADDR unknown2;
     CORE_ADDR unknown3;
@@ -287,7 +287,7 @@ osf_clear_solib (void)
    instructions.
 
    For a statically bound executable, the inferior's first instruction is the
-   one at "_start", or a similar text label. No further processing is needed
+   one at "_start", or a similar text label.  No further processing is needed
    in that case.
 
    For a dynamically bound executable, this first instruction is somewhere
@@ -352,7 +352,7 @@ osf_solib_create_inferior_hook (int from_tty)
 
   /*  solib_add will call reinit_frame_cache.
      But we are stopped in the runtime loader and we do not have symbols
-     for the runtime loader. So heuristic_proc_start will be called
+     for the runtime loader.  So heuristic_proc_start will be called
      and will put out an annoying warning.
      Delaying the resetting of stop_soon until after symbol loading
      suppresses the warning.  */
@@ -611,12 +611,12 @@ osf_open_symbol_file_object (void *from_ttyp)
 static int
 osf_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  /* This function currently always return False. This is a temporary
+  /* This function currently always return False.  This is a temporary
      solution which only consequence is to introduce a minor incovenience
      for the user: When stepping inside a subprogram located in a shared
      library, gdb might stop inside the dynamic loader code instead of
-     inside the subprogram itself. See the explanations in infrun.c about
-     the in_solib_dynsym_resolve_code() function for more details. */
+     inside the subprogram itself.  See the explanations in infrun.c about
+     the in_solib_dynsym_resolve_code() function for more details.  */
   return 0;
 }
 
@@ -635,6 +635,6 @@ _initialize_osf_solib (void)
   osf_so_ops.in_dynsym_resolve_code = osf_in_dynsym_resolve_code;
   osf_so_ops.bfd_open = solib_bfd_open;
 
-  /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
+  /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops.  */
   current_target_so_ops = &osf_so_ops;
 }

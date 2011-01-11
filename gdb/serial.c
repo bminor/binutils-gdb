@@ -27,24 +27,24 @@
 
 extern void _initialize_serial (void);
 
-/* Is serial being debugged? */
+/* Is serial being debugged?  */
 
 static int global_serial_debug_p;
 
-/* Linked list of serial I/O handlers */
+/* Linked list of serial I/O handlers.  */
 
 static struct serial_ops *serial_ops_list = NULL;
 
-/* This is the last serial stream opened.  Used by connect command. */
+/* This is the last serial stream opened.  Used by connect command.  */
 
 static struct serial *last_serial_opened = NULL;
 
-/* Pointer to list of scb's. */
+/* Pointer to list of scb's.  */
 
 static struct serial *scb_base;
 
 /* Non-NULL gives filename which contains a recording of the remote session,
-   suitable for playback by gdbserver. */
+   suitable for playback by gdbserver.  */
 
 static char *serial_logfile = NULL;
 static struct ui_file *serial_logfp = NULL;
@@ -62,7 +62,7 @@ static const char *serial_logbase = logbase_ascii;
 
 static int serial_current_type = 0;
 
-/* Log char CH of type CHTYPE, with TIMEOUT */
+/* Log char CH of type CHTYPE, with TIMEOUT.  */
 
 /* Define bogus char to represent a BREAK.  Should be careful to choose a value
    that can't be confused with a normal char, or an error code.  */
@@ -143,7 +143,7 @@ serial_log_command (const char *cmd)
   fputs_unfiltered (cmd, serial_logfp);
 
   /* Make sure that the log file is as up-to-date as possible,
-     in case we are getting ready to dump core or something. */
+     in case we are getting ready to dump core or something.  */
   gdb_flush (serial_logfp);
 }
 
@@ -167,7 +167,7 @@ serial_add_interface (struct serial_ops *optable)
   serial_ops_list = optable;
 }
 
-/* Open up a device or a network socket, depending upon the syntax of NAME. */
+/* Open up a device or a network socket, depending upon the syntax of NAME.  */
 
 struct serial *
 serial_open (const char *name)
@@ -327,7 +327,7 @@ do_serial_close (struct serial *scb, int really_close)
       fputs_unfiltered ("\nEnd of log\n", serial_logfp);
       serial_current_type = 0;
 
-      /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr? */
+      /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr?  */
       ui_file_delete (serial_logfp);
       serial_logfp = NULL;
     }
@@ -342,7 +342,7 @@ do_serial_close (struct serial *scb, int really_close)
   if (scb->refcnt > 0)
     return;
 
-  /* ensure that the FD has been taken out of async mode */
+  /* ensure that the FD has been taken out of async mode.  */
   if (scb->async_handler != NULL)
     serial_async (scb, NULL, NULL);
 
@@ -385,7 +385,7 @@ serial_readchar (struct serial *scb, int timeout)
   int ch;
 
   /* FIXME: cagney/1999-10-11: Don't enable this check until the ASYNC
-     code is finished. */
+     code is finished.  */
   if (0 && serial_is_async_p (scb) && timeout < 0)
     internal_error (__FILE__, __LINE__,
 		    _("serial_readchar: blocking read in async mode"));
@@ -396,7 +396,7 @@ serial_readchar (struct serial *scb, int timeout)
       serial_logchar (serial_logfp, 'r', ch, timeout);
 
       /* Make sure that the log file is as up-to-date as possible,
-         in case we are getting ready to dump core or something. */
+         in case we are getting ready to dump core or something.  */
       gdb_flush (serial_logfp);
     }
   if (serial_debug_p (scb))
@@ -421,7 +421,7 @@ serial_write (struct serial *scb, const char *str, int len)
 	serial_logchar (serial_logfp, 'w', str[count] & 0xff, 0);
 
       /* Make sure that the log file is as up-to-date as possible,
-         in case we are getting ready to dump core or something. */
+         in case we are getting ready to dump core or something.  */
       gdb_flush (serial_logfp);
     }
   if (serial_debug_p (scb))
@@ -557,7 +557,7 @@ int
 deprecated_serial_fd (struct serial *scb)
 {
   /* FIXME: should this output a warning that deprecated code is being
-     called? */
+     called?  */
   if (scb->fd < 0)
     {
       internal_error (__FILE__, __LINE__,

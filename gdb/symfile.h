@@ -80,7 +80,7 @@ struct section_addr_info
   /* The number of sections for which address information is
      available.  */
   size_t num_sections;
-  /* Sections whose names are file format dependent. */
+  /* Sections whose names are file format dependent.  */
   struct other_sections
   {
     CORE_ADDR addr;
@@ -223,7 +223,7 @@ struct quick_symbol_functions
   /* Find global or static symbols in all tables that are in NAMESPACE 
      and for which MATCH (symbol name, NAME) == 0, passing each to 
      CALLBACK, reading in partial symbol symbol tables as needed.  Look
-     through global symbols if GLOBAL and otherwise static symbols.  
+     through global symbols if GLOBAL and otherwise static symbols.
      Passes NAME, NAMESPACE, and DATA to CALLBACK with each symbol
      found.  After each block is processed, passes NULL to CALLBACK.
      MATCH must be weaker than strcmp_iw in the sense that
@@ -233,7 +233,7 @@ struct quick_symbol_functions
             strcmp(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0 
      and 
             strcmp(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
-     (allowing strcmp(x,y) < 0 while ORDERED_COMPARE(x, y) == 0). 
+     (allowing strcmp(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
      CALLBACK returns 0 to indicate that the scan should continue, or
      non-zero to indicate that the scan should be terminated.  */
 

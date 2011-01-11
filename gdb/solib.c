@@ -345,12 +345,12 @@ solib_find (char *in_pathname, int *fd)
 			target_lbasename (fskind, in_pathname),
 			O_RDONLY | O_BINARY, &temp_pathname);
 
-  /* If not found, try to use target supplied solib search method */
+  /* If not found, try to use target supplied solib search method.  */
   if (found_file < 0 && ops->find_and_open_solib)
     found_file = ops->find_and_open_solib (in_pathname, O_RDONLY | O_BINARY,
 					   &temp_pathname);
 
-  /* If not found, next search the inferior's $PATH environment variable. */
+  /* If not found, next search the inferior's $PATH environment variable.  */
   if (found_file < 0 && gdb_sysroot_is_empty)
     found_file = openp (get_in_environ (current_inferior ()->environment,
 					"PATH"),
@@ -358,7 +358,7 @@ solib_find (char *in_pathname, int *fd)
 			&temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH
-     environment variable. */
+     environment variable.  */
   if (found_file < 0 && gdb_sysroot_is_empty)
     found_file = openp (get_in_environ (current_inferior ()->environment,
 					"LD_LIBRARY_PATH"),
@@ -500,7 +500,7 @@ solib_map_sections (struct so_list *so)
   so->abfd = gdb_bfd_ref (abfd);
 
   /* copy full path name into so_name, so that later symbol_file_add
-     can find it */
+     can find it.  */
   if (strlen (bfd_get_filename (abfd)) >= SO_NAME_MAX_PATH_SIZE)
     error (_("Shared library file name is too long."));
   strcpy (so->so_name, bfd_get_filename (abfd));
@@ -515,7 +515,7 @@ solib_map_sections (struct so_list *so)
     {
       /* Relocate the section binding addresses as recorded in the shared
          object's file by the base address to which the object was actually
-         mapped. */
+         mapped.  */
       ops->relocate_section_addresses (so, p);
 
       /* If the target didn't provide information about the address
@@ -580,7 +580,7 @@ free_so_symbols (struct so_list *so)
    DESCRIPTION
 
    Free the storage associated with the `struct so_list' object SO.
-   If we have opened a BFD for SO, close it.  
+   If we have opened a BFD for SO, close it.
 
    The caller is responsible for removing SO from whatever list it is
    a member of.  If we have placed SO's sections in some target's
@@ -1377,7 +1377,7 @@ reload_shared_libraries (char *ignored, int from_tty,
 
   ops = solib_ops (target_gdbarch);
 
-  /* Creating inferior hooks here has two purposes. First, if we reload 
+  /* Creating inferior hooks here has two purposes.  First, if we reload 
      shared libraries then the address of solib breakpoint we've computed
      previously might be no longer valid.  For example, if we forgot to set
      solib-absolute-prefix and are setting it right now, then the previous

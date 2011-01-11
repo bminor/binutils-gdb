@@ -948,7 +948,7 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
 	  else if (reg->bitsize == gdbarch_long_long_bit (gdbarch))
 	    arch_reg->type = builtin_type (gdbarch)->builtin_long_long;
 	  else if (reg->bitsize == gdbarch_ptr_bit (gdbarch))
-	  /* A bit desperate by this point... */
+	  /* A bit desperate by this point...  */
 	    arch_reg->type = builtin_type (gdbarch)->builtin_data_ptr;
 	  else
 	    {

@@ -47,28 +47,29 @@ enum gdb_regnum
 #define SCORE_INSTLEN          4
 #define SCORE16_INSTLEN        2
 
-/* Forward declarations. */
+/* Forward declarations.  */
 struct regset;
 
 /* Target-dependent structure in gdbarch */
 struct gdbarch_tdep
 {
-    /* Cached core file helpers. */
+    /* Cached core file helpers.  */
     struct regset *gregset;
 };
 
 /* Linux Core file support (dirty hack)
   
-   S+core Linux register set definition, copy from S+core Linux */
+   S+core Linux register set definition, copy from S+core Linux.  */
 struct pt_regs {
-    /* Pad bytes for argument save space on the stack. */
-    unsigned long pad0[6]; /* may be 4,MIPS accept 6var,SCore accepts 4 Var--yuchen */
+    /* Pad bytes for argument save space on the stack.  */
+    unsigned long pad0[6]; /* may be 4, MIPS accept 6var, SCore
+			      accepts 4 Var--yuchen */
 
-    /* Saved main processor registers. */
+    /* Saved main processor registers.  */
     unsigned long orig_r4;
     unsigned long regs[32];
 
-    /* Other saved registers. */
+    /* Other saved registers.  */
     unsigned long cel;
     unsigned long ceh;
 

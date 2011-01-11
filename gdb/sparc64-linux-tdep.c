@@ -157,7 +157,8 @@ sparc64_linux_supply_core_gregset (const struct regset *regset,
 				   struct regcache *regcache,
 				   int regnum, const void *gregs, size_t len)
 {
-  sparc64_supply_gregset (&sparc64_linux_core_gregset, regcache, regnum, gregs);
+  sparc64_supply_gregset (&sparc64_linux_core_gregset,
+			  regcache, regnum, gregs);
 }
 
 static void
@@ -165,7 +166,8 @@ sparc64_linux_collect_core_gregset (const struct regset *regset,
 				    const struct regcache *regcache,
 				    int regnum, void *gregs, size_t len)
 {
-  sparc64_collect_gregset (&sparc64_linux_core_gregset, regcache, regnum, gregs);
+  sparc64_collect_gregset (&sparc64_linux_core_gregset,
+			   regcache, regnum, gregs);
 }
 
 static void

@@ -109,7 +109,7 @@ free_symtab (struct symtab *s)
   if (s->free_func != NULL)
     s->free_func (s);
 
-  /* Free source-related stuff */
+  /* Free source-related stuff.  */
   if (s->line_charpos != NULL)
     xfree (s->line_charpos);
   if (s->fullname != NULL)
@@ -352,7 +352,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	}
     }
   /* Now print the block info, but only for primary symtabs since we will
-     print lots of duplicate info otherwise. */
+     print lots of duplicate info otherwise.  */
   if (symtab->primary)
     {
       fprintf_filtered (outfile, "\nBlockvector:\n\n");
@@ -458,7 +458,7 @@ maintenance_print_symbols (char *args, int from_tty)
   if (argv[0] != NULL)
     {
       filename = argv[0];
-      /* If a second arg is supplied, it is a source file name to match on */
+      /* If a second arg is supplied, it is a source file name to match on.  */
       if (argv[1] != NULL)
 	{
 	  symname = argv[1];
@@ -678,7 +678,7 @@ maintenance_print_msymbols (char *args, int from_tty)
   if (argv[0] != NULL)
     {
       filename = argv[0];
-      /* If a second arg is supplied, it is a source file name to match on */
+      /* If a second arg is supplied, it is a source file name to match on.  */
       if (argv[1] != NULL)
 	{
 	  symname = xfullpath (argv[1]);
@@ -800,7 +800,7 @@ block_depth (struct block *block)
 }
 
 
-/* Do early runtime initializations. */
+/* Do early runtime initializations.  */
 void
 _initialize_symmisc (void)
 {

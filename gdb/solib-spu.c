@@ -227,7 +227,7 @@ spu_current_sos (void)
       link_ptr = &new->next;
     }
 
-  /* Append OpenCL sos. */
+  /* Append OpenCL sos.  */
   append_ocl_sos (link_ptr);
 
   return head;

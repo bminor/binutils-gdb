@@ -145,7 +145,7 @@ sparc_is_unimp_insn (CORE_ADDR pc)
 
    More information on StackGuard can be found on in:
 
-   Mike Frantzen and Mike Shuey. "StackGhost: Hardware Facilitated
+   Mike Frantzen and Mike Shuey.  "StackGhost: Hardware Facilitated
    Stack Protection."  2001.  Published in USENIX Security Symposium
    '01.  */
 
@@ -347,7 +347,7 @@ sparc_fsr_type (struct gdbarch *gdbarch)
 }
 
 /* Return the GDB type object for the "standard" data type of data in
-   register REGNUM. */
+   register REGNUM.  */
 
 static struct type *
 sparc32_register_type (struct gdbarch *gdbarch, int regnum)

@@ -48,7 +48,8 @@ fill_gregset (const struct regcache *regcache, prgregset_t *gregs, int regnum)
 }
 
 void
-fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs, int regnum)
+fill_fpregset (const struct regcache *regcache,
+	       prfpregset_t *fpregs, int regnum)
 {
   sparc32_collect_fpregset (regcache, regnum, fpregs);
 }

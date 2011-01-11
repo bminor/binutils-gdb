@@ -814,7 +814,7 @@ spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
     }
   else
     {
-      /* ??? We don't really know ... */
+      /* ??? We don't really know ...  */
       *reg = SPU_SP_REGNUM;
       *offset = 0;
     }
@@ -1007,7 +1007,8 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
 	{
 	  /* Assume the link register is saved into its slot.  */
 	  if (backchain + 16 <= lslr)
-	    info->saved_regs[SPU_LR_REGNUM].addr = SPUADDR (id, backchain + 16);
+	    info->saved_regs[SPU_LR_REGNUM].addr = SPUADDR (id,
+							    backchain + 16);
 
           /* Frame bases.  */
 	  info->frame_base = SPUADDR (id, backchain);
@@ -1487,7 +1488,8 @@ spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
 /* Breakpoints.  */
 
 static const gdb_byte *
-spu_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
+spu_breakpoint_from_pc (struct gdbarch *gdbarch,
+			CORE_ADDR * pcptr, int *lenptr)
 {
   static const gdb_byte breakpoint[] = { 0x00, 0x00, 0x3f, 0xff };
 
@@ -1628,8 +1630,9 @@ spu_dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 static int
 gdb_print_insn_spu (bfd_vma memaddr, struct disassemble_info *info)
 {
-  /* The opcodes disassembler does 18-bit address arithmetic.  Make sure the
-     SPU ID encoded in the high bits is added back when we call print_address.  */
+  /* The opcodes disassembler does 18-bit address arithmetic.  Make
+     sure the SPU ID encoded in the high bits is added back when we
+     call print_address.  */
   struct disassemble_info spu_info = *info;
   struct spu_dis_asm_data data;
   data.gdbarch = info->application_data;
@@ -1663,11 +1666,12 @@ gdb_print_insn_spu (bfd_vma memaddr, struct disassemble_info *info)
 
    _ovly_table should never change.
 
-   Both tables are aligned to a 16-byte boundary, the symbols _ovly_table
-   and _ovly_buf_table are of type STT_OBJECT and their size set to the size
-   of the respective array. buf in _ovly_table is an index into _ovly_buf_table.
+   Both tables are aligned to a 16-byte boundary, the symbols
+   _ovly_table and _ovly_buf_table are of type STT_OBJECT and their
+   size set to the size of the respective array. buf in _ovly_table is
+   an index into _ovly_buf_table.
 
-   mapped is an index into _ovly_table. Both the mapped and buf indices start
+   mapped is an index into _ovly_table.  Both the mapped and buf indices start
    from one to reference the first entry in their respective tables.  */
 
 /* Using the per-objfile private data mechanism, we store for each
@@ -1710,7 +1714,8 @@ spu_get_overlay_table (struct objfile *objfile)
   if (!ovly_table_msym)
     return NULL;
 
-  ovly_buf_table_msym = lookup_minimal_symbol ("_ovly_buf_table", NULL, objfile);
+  ovly_buf_table_msym = lookup_minimal_symbol ("_ovly_buf_table",
+					       NULL, objfile);
   if (!ovly_buf_table_msym)
     return NULL;
 
@@ -2532,7 +2537,8 @@ info_spu_proxydma_command (char *args, int from_tty)
 static void
 info_spu_command (char *args, int from_tty)
 {
-  printf_unfiltered (_("\"info spu\" must be followed by the name of an SPU facility.\n"));
+  printf_unfiltered (_("\"info spu\" must be followed by "
+		       "the name of an SPU facility.\n"));
   help_list (infospucmdlist, "info spu ", -1, gdb_stdout);
 }
 

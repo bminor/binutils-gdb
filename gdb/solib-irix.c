@@ -158,7 +158,7 @@ fetch_lm_info (CORE_ADDR addr)
   if (extract_unsigned_integer (buf.magic.b, sizeof (buf.magic), byte_order)
       != 0xffffffff)
     {
-      /* Use buf.ol32... */
+      /* Use buf.ol32...  */
       char obj_buf[432];
       CORE_ADDR obj_addr = extract_mips_address (&buf.ol32.data,
 						 sizeof (buf.ol32.data),
@@ -242,7 +242,7 @@ fetch_lm_info (CORE_ADDR addr)
 
 static void *base_breakpoint;
 
-static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
+static CORE_ADDR debug_base;	/* Base of dynamic linker structures.  */
 
 /*
 
@@ -328,7 +328,7 @@ disable_break (void)
   int status = 1;
 
   /* Note that breakpoint address and original contents are in our address
-     space, so we just need to write the original contents back. */
+     space, so we just need to write the original contents back.  */
 
   if (deprecated_remove_raw_breakpoint (target_gdbarch, base_breakpoint) != 0)
     {
@@ -463,7 +463,7 @@ irix_solib_create_inferior_hook (int from_tty)
   /* Now run the target.  It will eventually hit the breakpoint, at
      which point all of the libraries will have been mapped in and we
      can go groveling around in the dynamic linker structures to find
-     out what we need to know about them. */
+     out what we need to know about them.  */
 
   tp = inferior_thread ();
 
@@ -482,7 +482,7 @@ irix_solib_create_inferior_hook (int from_tty)
   /* We are now either at the "mapping complete" breakpoint (or somewhere
      else, a condition we aren't prepared to deal with anyway), so adjust
      the PC as necessary after a breakpoint, disable the breakpoint, and
-     add any shared libraries that were mapped in. */
+     add any shared libraries that were mapped in.  */
 
   if (!disable_break ())
     {
@@ -623,7 +623,7 @@ irix_current_sos (void)
   If FROM_TTYP dereferences to a non-zero integer, allow messages to
   be printed.  This parameter is a pointer rather than an int because
   open_symbol_file_object() is called via catch_errors() and
-  catch_errors() requires a pointer argument. */
+  catch_errors() requires a pointer argument.  */
 
 static int
 irix_open_symbol_file_object (void *from_ttyp)

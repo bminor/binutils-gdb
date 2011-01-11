@@ -146,7 +146,7 @@ struct sparc_frame_cache
   /* Do we have a frame?  */
   int frameless_p;
 
-  /* Do we have a Structure, Union or Quad-Precision return value?.  */
+  /* Do we have a Structure, Union or Quad-Precision return value?  */
   int struct_return_p;
 
   /* Table of saved registers.  */

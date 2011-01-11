@@ -37,9 +37,9 @@ typedef void *serial_ttystate;
 struct serial;
 
 /* Try to open NAME.  Returns a new `struct serial *' on success, NULL
-   on failure. Note that some open calls can block and, if possible, 
+   on failure.  Note that some open calls can block and, if possible, 
    should be  written to be non-blocking, with calls to ui_look_hook 
-   so they can be cancelled. An async interface for open could be
+   so they can be cancelled.  An async interface for open could be
    added to GDB if necessary.  */
 
 extern struct serial *serial_open (const char *name);
@@ -75,7 +75,7 @@ extern void serial_un_fdopen (struct serial *scb);
 
 /* Read one char from the serial device with TIMEOUT seconds to wait
    or -1 to wait forever.  Use timeout of 0 to effect a poll.
-   Infinite waits are not permitted. Returns unsigned char if ok, else
+   Infinite waits are not permitted.  Returns unsigned char if ok, else
    one of the following codes.  Note that all error return-codes are
    guaranteed to be < 0.  */
 
@@ -137,7 +137,7 @@ extern serial_ttystate serial_get_tty_state (struct serial *scb);
 extern int serial_set_tty_state (struct serial *scb, serial_ttystate ttystate);
 
 /* printf_filtered a user-comprehensible description of ttystate on
-   the specified STREAM. FIXME: At present this sends output to the
+   the specified STREAM.  FIXME: At present this sends output to the
    default stream - GDB_STDOUT.  */
 
 extern void serial_print_tty_state (struct serial *scb,
@@ -170,11 +170,11 @@ extern int serial_setstopbits (struct serial *scb, int num);
 
 /* Asynchronous serial interface: */
 
-/* Can the serial device support asynchronous mode? */
+/* Can the serial device support asynchronous mode?  */
 
 extern int serial_can_async_p (struct serial *scb);
 
-/* Has the serial device been put in asynchronous mode? */
+/* Has the serial device been put in asynchronous mode?  */
 
 extern int serial_is_async_p (struct serial *scb);
 
@@ -188,7 +188,7 @@ extern void serial_async (struct serial *scb,
 
 /* Provide direct access to the underlying FD (if any) used to
    implement the serial device.  This interface is clearly
-   deprecated. Will call internal_error() if the operation isn't
+   deprecated.  Will call internal_error() if the operation isn't
    applicable to the current serial device.  */
 
 extern int deprecated_serial_fd (struct serial *scb);
@@ -203,7 +203,7 @@ extern void serial_debug (struct serial *scb, int debug_p);
 extern int serial_debug_p (struct serial *scb);
 
 
-/* Details of an instance of a serial object */
+/* Details of an instance of a serial object.  */
 
 struct serial
   {
@@ -257,7 +257,7 @@ struct serial_ops
 				  serial_ttystate);
     int (*setbaudrate) (struct serial *, int rate);
     int (*setstopbits) (struct serial *, int num);
-    /* Wait for output to drain */
+    /* Wait for output to drain.  */
     int (*drain_output) (struct serial *);
     /* Change the serial device into/out of asynchronous mode, call
        the specified function when ever there is something
@@ -284,11 +284,11 @@ struct serial_ops
 #endif /* USE_WIN32API */
   };
 
-/* Add a new serial interface to the interface list */
+/* Add a new serial interface to the interface list.  */
 
 extern void serial_add_interface (struct serial_ops * optable);
 
-/* File in which to record the remote debugging session */
+/* File in which to record the remote debugging session.  */
 
 extern void serial_log_command (const char *);
 

@@ -204,7 +204,7 @@ open_symbol_file_object (void *from_ttyp)
   return 0;
 }
 
-/* Build a list of currently loaded shared objects.  See solib-svr4.c  */
+/* Build a list of currently loaded shared objects.  See solib-svr4.c.  */
 
 static struct so_list *
 darwin_current_sos (void)
@@ -293,7 +293,7 @@ darwin_special_symbol_handling (void)
 {
 }
 
-/* Shared library startup support.  See documentation in solib-svr4.c  */
+/* Shared library startup support.  See documentation in solib-svr4.c.  */
 
 static void
 darwin_solib_create_inferior_hook (int from_tty)

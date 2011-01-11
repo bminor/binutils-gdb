@@ -49,7 +49,7 @@ static void whatis_exp (char *, int);
 
 /* Print a description of a type in the format of a 
    typedef for the current language.
-   NEW is the new name for a type TYPE. */
+   NEW is the new name for a type TYPE.  */
 
 void
 typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
@@ -290,13 +290,13 @@ maintenance_print_type (char *typename, int from_tty)
       old_chain = make_cleanup (free_current_contents, &expr);
       if (expr->elts[0].opcode == OP_TYPE)
 	{
-	  /* The user expression names a type directly, just use that type. */
+	  /* The user expression names a type directly, just use that type.  */
 	  type = expr->elts[1].type;
 	}
       else
 	{
 	  /* The user expression may name a type indirectly by naming an
-	     object of that type.  Find that indirectly named type. */
+	     object of that type.  Find that indirectly named type.  */
 	  val = evaluate_type (expr);
 	  type = value_type (val);
 	}

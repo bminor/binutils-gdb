@@ -959,7 +959,8 @@ s390_load (struct s390_prologue_data *data,
    register was saved, record its offset in the reg_offset table in
    PROLOGUE_UNTYPED.  */
 static void
-s390_check_for_saved (void *data_untyped, pv_t addr, CORE_ADDR size, pv_t value)
+s390_check_for_saved (void *data_untyped, pv_t addr,
+		      CORE_ADDR size, pv_t value)
 {
   struct s390_prologue_data *data = data_untyped;
   int i, offset;
@@ -1118,7 +1119,8 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 	s390_store (data, d2, x2, b2, data->fpr_size, data->fpr[r1]);
 
       /* STM r1, r3, d2(b2) --- store multiple.  */
-      /* STMY r1, r3, d2(b2) --- store multiple (long-displacement version).  */
+      /* STMY r1, r3, d2(b2) --- store multiple (long-displacement
+	 version).  */
       /* STMG r1, r3, d2(b2) --- store multiple (64-bit version).  */
       else if (is_rs (insn32, op_stm, &r1, &r3, &d2, &b2)
 	       || is_rsy (insn32, op1_stmy, op2_stmy, &r1, &r3, &d2, &b2)
@@ -1532,7 +1534,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
 
   /* If we've detected a function with stack frame, we'll still have to 
      treat it as frameless if we're currently within the function epilog 
-     code at a point where the frame pointer has already been restored.  
+     code at a point where the frame pointer has already been restored.
      This can only happen in an innermost frame.  */
   /* FIXME: cagney/2004-05-01: This sanity check shouldn't be needed,
      instead the code should simpliy rely on its analysis.  */
@@ -1865,7 +1867,7 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   /* New-style RT frame:
 	retcode + alignment (8 bytes)
 	siginfo (128 bytes)
-	ucontext (contains sigregs at offset 5 words)  */
+	ucontext (contains sigregs at offset 5 words).  */
   if (next_ra == next_cfa)
     {
       sigreg_ptr = next_cfa + 8 + 128 + align_up (5*word_size, 8);
@@ -1876,7 +1878,7 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 
   /* Old-style RT frame and all non-RT frames:
 	old signal mask (8 bytes)
-	pointer to sigregs  */
+	pointer to sigregs.  */
   else
     {
       sigreg_ptr = read_memory_unsigned_integer (next_cfa + 8,
@@ -2454,7 +2456,8 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      {
 		/* Integer arguments are always extended to word size.  */
 		regcache_cooked_write_signed (regcache, S390_R0_REGNUM + gr,
-					      extend_simple_arg (gdbarch, arg));
+					      extend_simple_arg (gdbarch,
+								 arg));
 		gr++;
 	      }
 	    else
@@ -2634,7 +2637,8 @@ s390_return_value (struct gdbarch *gdbarch, struct type *func_type,
 /* Breakpoints.  */
 
 static const gdb_byte *
-s390_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
+s390_breakpoint_from_pc (struct gdbarch *gdbarch,
+			 CORE_ADDR *pcptr, int *lenptr)
 {
   static const gdb_byte breakpoint[] = { 0x0, 0x1 };
 
@@ -2670,7 +2674,8 @@ s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
 }
 
 static int
-s390_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name,
+s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
+				       const char *name,
 				       int *type_flags_ptr)
 {
   if (strcmp (name, "mode32") == 0)

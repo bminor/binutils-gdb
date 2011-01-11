@@ -52,7 +52,7 @@ static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
 static void svr4_relocate_main_executable (void);
 
-/* Link map info to include in an allocated so_list entry */
+/* Link map info to include in an allocated so_list entry.  */
 
 struct lm_info
   {
@@ -140,7 +140,7 @@ svr4_same (struct so_list *gdb, struct so_list *inferior)
   return (svr4_same_1 (gdb->so_original_name, inferior->so_original_name));
 }
 
-/* link map access functions */
+/* link map access functions.  */
 
 static CORE_ADDR
 LM_ADDR_FROM_LINK_MAP (struct so_list *so)
@@ -306,7 +306,7 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 
 struct svr4_info
 {
-  CORE_ADDR debug_base;	/* Base of dynamic linker structures */
+  CORE_ADDR debug_base;	/* Base of dynamic linker structures.  */
 
   /* Validity flag for debug_loader_offset.  */
   int debug_loader_offset_p;
@@ -594,7 +594,7 @@ find_program_interpreter (void)
 }
 
 
-/* Scan for DYNTAG in .dynamic section of ABFD. If DYNTAG is found 1 is
+/* Scan for DYNTAG in .dynamic section of ABFD.  If DYNTAG is found 1 is
    returned and the corresponding PTR is set.  */
 
 static int
@@ -992,7 +992,7 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   If FROM_TTYP dereferences to a non-zero integer, allow messages to
   be printed.  This parameter is a pointer rather than an int because
   open_symbol_file_object() is called via catch_errors() and
-  catch_errors() requires a pointer argument. */
+  catch_errors() requires a pointer argument.  */
 
 static int
 open_symbol_file_object (void *from_ttyp)
@@ -1015,12 +1015,12 @@ open_symbol_file_object (void *from_ttyp)
   /* Always locate the debug struct, in case it has moved.  */
   info->debug_base = 0;
   if (locate_base (info) == 0)
-    return 0;	/* failed somehow... */
+    return 0;	/* failed somehow...  */
 
   /* First link map member should be the executable.  */
   lm = solib_svr4_r_map (info);
   if (lm == 0)
-    return 0;	/* failed somehow... */
+    return 0;	/* failed somehow...  */
 
   /* Read address of name from target memory to GDB.  */
   read_memory (lm + lmo->l_name_offset, l_name_buf, l_name_size);
@@ -1160,7 +1160,7 @@ svr4_current_sos (void)
          inferior executable, so we must ignore it.  For some versions of
          SVR4, it has no name.  For others (Solaris 2.3 for example), it
          does have a name, so we can no longer use a missing name to
-         decide when to ignore it. */
+         decide when to ignore it.  */
       else if (IGNORE_FIRST_LINK_MAP_ENTRY (new) && ldsomap == 0)
 	{
 	  info->main_lm_addr = new->lm_info->lm_addr;
@@ -1686,7 +1686,7 @@ read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
    exec_bfd.  Otherwise return 0.
 
    We relocate all of the sections by the same amount.  This
-   behavior is mandated by recent editions of the System V ABI. 
+   behavior is mandated by recent editions of the System V ABI.
    According to the System V Application Binary Interface,
    Edition 4.1, page 5-5:
 
@@ -2045,7 +2045,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 }
 
 /* Relocate the main executable.  This function should be called upon
-   stopping the inferior process at the entry point to the program. 
+   stopping the inferior process at the entry point to the program.
    The entry point from BFD is compared to the AT_ENTRY of AUXV and if they are
    different, the main executable is relocated by the proper amount.  */
 
@@ -2078,8 +2078,7 @@ svr4_relocate_main_executable (void)
 	 the `qOffsets' packet.
 
        - The section offsets were not reset earlier, and the best we can
-	 hope is that the old offsets are still applicable to the new run.
-   */
+	 hope is that the old offsets are still applicable to the new run.  */
 
   if (! svr4_exec_displacement (&displacement))
     return;
@@ -2191,7 +2190,7 @@ svr4_solib_create_inferior_hook (int from_tty)
      Now run the target.  It will eventually hit the breakpoint, at
      which point all of the libraries will have been mapped in and we
      can go groveling around in the dynamic linker structures to find
-     out what we need to know about them. */
+     out what we need to know about them.  */
 
   inf = current_inferior ();
   tp = inferior_thread ();
@@ -2395,7 +2394,7 @@ svr4_lp64_fetch_link_map_offsets (void)
 
 struct target_so_ops svr4_so_ops;
 
-/* Lookup global symbol for ELF DSOs linked with -Bsymbolic. Those DSOs have a
+/* Lookup global symbol for ELF DSOs linked with -Bsymbolic.  Those DSOs have a
    different rule for symbol lookup.  The lookup begins here in the DSO, not in
    the main executable.  */
 

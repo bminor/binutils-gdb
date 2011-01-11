@@ -64,7 +64,7 @@ static const char *print_frame_arguments_choices[] =
   {"all", "scalars", "none", NULL};
 static const char *print_frame_arguments = "scalars";
 
-/* Prototypes for local functions. */
+/* Prototypes for local functions.  */
 
 static void print_frame_local_vars (struct frame_info *, int,
 				    struct ui_file *);
@@ -629,12 +629,12 @@ print_frame_info (struct frame_info *frame, int print_level,
 
 	      get_user_print_options (&opts);
 	      /* We used to do this earlier, but that is clearly
-		 wrong. This function is used by many different
+		 wrong.  This function is used by many different
 		 parts of gdb, including normal_stop in infrun.c,
 		 which uses this to print out the current PC
 		 when we stepi/nexti into the middle of a source
-		 line. Only the command line really wants this
-		 behavior. Other UIs probably would like the
+		 line.  Only the command line really wants this
+		 behavior.  Other UIs probably would like the
 		 ability to decide for themselves if it is desired.  */
 	      if (opts.addressprint && mid_statement)
 		{
@@ -808,7 +808,7 @@ print_frame (struct frame_info *frame, int print_level,
       args.stream = gdb_stdout;
       args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ERROR);
-      /* FIXME: ARGS must be a list. If one argument is a string it
+      /* FIXME: ARGS must be a list.  If one argument is a string it
 	  will have " that will not be properly escaped.  */
       /* Invoke ui_out_tuple_end.  */
       do_cleanups (args_list_chain);
@@ -934,7 +934,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 
       fid = find_relative_frame (get_current_frame (), &level);
       if (level == 0)
-	/* find_relative_frame was successful */
+	/* find_relative_frame was successful.  */
 	return fid;
     }
 
@@ -1582,7 +1582,7 @@ struct print_variable_and_value_data
   int values_printed;
 };
 
-/* The callback for the locals and args iterators  */
+/* The callback for the locals and args iterators.  */
 
 static void
 do_print_variable_and_value (const char *print_name,
@@ -2075,7 +2075,7 @@ return_command (char *retval_exp, int from_tty)
 }
 
 /* Sets the scope to input function name, provided that the function
-   is within the current stack frame */
+   is within the current stack frame.  */
 
 struct function_bounds
 {

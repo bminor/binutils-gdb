@@ -19,10 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/*
-   Contributed by Steve Chamberlain
-   sac@cygnus.com
- */
+/* Contributed by Steve Chamberlain
+   sac@cygnus.com.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -54,7 +52,7 @@
 /* sh flags */
 #include "elf/sh.h"
 #include "dwarf2.h"
-/* registers numbers shared with the simulator */
+/* registers numbers shared with the simulator.  */
 #include "gdb/sim-sh.h"
 
 /* List of "set sh ..." and "show sh ..." commands.  */
@@ -82,7 +80,7 @@ struct sh_frame_cache
   LONGEST sp_offset;
   CORE_ADDR pc;
 
-  /* Flag showing that a frame has been created in the prologue code. */
+  /* Flag showing that a frame has been created in the prologue code.  */
   int uses_fp;
 
   /* Saved registers.  */
@@ -203,7 +201,7 @@ sh_sh2a_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* 41, 42 */
     "", "",
     /* 43 - 62.  Banked registers.  The bank number used is determined by
-       the bank register (63). */
+       the bank register (63).  */
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
     "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b",
     "machb", "ivnb", "prb", "gbrb", "maclb",
@@ -243,7 +241,7 @@ sh_sh2a_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* 41, 42 */
     "", "",
     /* 43 - 62.  Banked registers.  The bank number used is determined by
-       the bank register (63). */
+       the bank register (63).  */
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
     "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b",
     "machb", "ivnb", "prb", "gbrb", "maclb",
@@ -332,7 +330,7 @@ sh_sh4_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* bank 1 51 - 58 */
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
     "", "", "", "", "", "", "", "",
-    /* pseudo bank register. */
+    /* pseudo bank register.  */
     "",
     /* double precision (pseudo) 59 - 66 */
     "dr0", "dr2", "dr4", "dr6", "dr8", "dr10", "dr12", "dr14",
@@ -369,7 +367,7 @@ sh_sh4_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* bank 1 51 - 58 */
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
     "", "", "", "", "", "", "", "",
-    /* pseudo bank register. */
+    /* pseudo bank register.  */
     "",
     /* double precision (pseudo) 59 - 66 -- not for nofpu target */
     "", "", "", "", "", "", "", "",
@@ -409,7 +407,7 @@ sh_sh4al_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
 static const unsigned char *
 sh_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
-  /* 0xc3c3 is trapa #c3, and it works in big and little endian modes */
+  /* 0xc3c3 is trapa #c3, and it works in big and little endian modes.  */
   static unsigned char breakpoint[] = { 0xc3, 0xc3 };
 
   /* For remote stub targets, trapa #20 is used.  */
@@ -441,8 +439,7 @@ sh_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
    sub		<room_for_loca_vars>,r15
    mov		r15,r14
 
-   Actually it can be more complicated than this but that's it, basically.
- */
+   Actually it can be more complicated than this but that's it, basically.  */
 
 #define GET_SOURCE_REG(x)  	(((x) >> 4) & 0xf)
 #define GET_TARGET_REG(x)  	(((x) >> 8) & 0xf)
@@ -481,7 +478,7 @@ sh_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
    FMOV DRm,@-Rn    Rn-8-->Rn, DRm-->(Rn)     1111nnnnmmm01011
    FMOV XDm,@-Rn    Rn-8-->Rn, XDm-->(Rn)     1111nnnnmmm11011 */
 /* CV, 2003-08-28: Only suitable with Rn == SP, therefore name changed to
-		   make this entirely clear. */
+		   make this entirely clear.  */
 /* #define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b) */
 #define IS_FPUSH(x)		(((x) & 0xff0f) == 0xff0b)
 
@@ -512,7 +509,7 @@ sh_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 
 #define FPSCR_SZ		(1 << 20)
 
-/* The following instructions are used for epilogue testing. */
+/* The following instructions are used for epilogue testing.  */
 #define IS_RESTORE_FP(x)	((x) == 0x6ef6)
 #define IS_RTS(x)		((x) == 0x000b)
 #define IS_LDS(x)  		((x) == 0x4f26)
@@ -541,7 +538,7 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
   for (opc = pc + (2 * 28); pc < opc; pc += 2)
     {
       inst = read_memory_unsigned_integer (pc, 2, byte_order);
-      /* See where the registers will be saved to */
+      /* See where the registers will be saved to.  */
       if (IS_PUSH (inst))
 	{
 	  cache->saved_regs[GET_SOURCE_REG (inst)] = cache->sp_offset;
@@ -612,7 +609,7 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 	        {
 		  sav_reg = reg;
 		  sav_offset = GET_SOURCE_REG (inst) << 16;
-		  /* MOVI20 is a 32 bit instruction! */
+		  /* MOVI20 is a 32 bit instruction!  */
 		  pc += 2;
 		  sav_offset
 		    |= read_memory_unsigned_integer (pc, 2, byte_order);
@@ -650,7 +647,7 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 	     registers or argument register moves to @(X,fp) which are
 	     moving the register arguments onto the stack area allocated
 	     by a former add somenumber to SP call.  Don't allow moving
-	     to an fp indirect address above fp + cache->sp_offset. */
+	     to an fp indirect address above fp + cache->sp_offset.  */
 	  pc += 2;
 	  for (opc = pc + 12; pc < opc; pc += 2)
 	    {
@@ -683,15 +680,16 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 	     appear to be called after the function it is calling via the
 	     jsr, which will be very confusing.  Most likely the next
 	     instruction is going to be IS_MOV_SP_FP in the delay slot.  If
-	     so, note that before returning the current pc. */
+	     so, note that before returning the current pc.  */
 	  inst = read_memory_integer (pc + 2, 2, byte_order);
 	  if (IS_MOV_SP_FP (inst))
 	    cache->uses_fp = 1;
 	  break;
 	}
-#if 0				/* This used to just stop when it found an instruction that
-				   was not considered part of the prologue.  Now, we just
-				   keep going looking for likely instructions. */
+#if 0		/* This used to just stop when it found an instruction
+		   that was not considered part of the prologue.  Now,
+		   we just keep going looking for likely
+		   instructions.  */
       else
 	break;
 #endif
@@ -700,10 +698,10 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
   return pc;
 }
 
-/* Skip any prologue before the guts of a function */
+/* Skip any prologue before the guts of a function.  */
 
-/* Skip the prologue using the debug information. If this fails we'll
-   fall back on the 'guess' method below. */
+/* Skip the prologue using the debug information.  If this fails we'll
+   fall back on the 'guess' method below.  */
 static CORE_ADDR
 after_prologue (CORE_ADDR pc)
 {
@@ -742,7 +740,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   pc = after_prologue (start_pc);
 
   /* If after_prologue returned a useful address, then use it.  Else
-     fall back on the instruction skipping code. */
+     fall back on the instruction skipping code.  */
   if (pc)
     return max (pc, start_pc);
 
@@ -767,16 +765,16 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
    When an aggregate type is returned in R0 and R1, R0 contains the
    first four bytes of the aggregate, and R1 contains the
-   remainder. If the size of the aggregate type is not a multiple of 4
+   remainder.  If the size of the aggregate type is not a multiple of 4
    bytes, the aggregate is tail-padded up to a multiple of 4
-   bytes. The value of the padding is undefined. For little-endian
+   bytes.  The value of the padding is undefined.  For little-endian
    targets the padding will appear at the most significant end of the
    last element, for big-endian targets the padding appears at the
    least significant end of the last element.
 
-   All other aggregate types are returned by address. The caller
+   All other aggregate types are returned by address.  The caller
    function passes the address of an area large enough to hold the
-   aggregate value in R2. The called function stores the result in
+   aggregate value in R2.  The called function stores the result in
    this location.
 
    To reiterate, structs smaller than 8 bytes could also be returned
@@ -799,9 +797,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
    because a struct containing two chars has alignment 1, that matches
    type char, but size 2, that matches type short.  There's no integer
    type that has alignment 1 and size 2, so the struct is returned in
-   memory.
-
-*/
+   memory.  */
 
 static int
 sh_use_struct_convention (int renesas_abi, struct type *type)
@@ -874,7 +870,7 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
    Arguments that are larger than 4 bytes may be split between two or 
    more registers.  If there are not enough registers free, an argument
    may be passed partly in a register (or registers), and partly on the
-   stack.  This includes doubles, long longs, and larger aggregates. 
+   stack.  This includes doubles, long longs, and larger aggregates.
    As far as I know, there is no upper limit to the size of aggregates 
    that will be passed in this way; in other words, the convention of 
    passing a pointer to a large aggregate instead of a copy is not used.
@@ -904,9 +900,9 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
    is greater than one byte).  In this case, a pointer to the return 
    value location is passed into the callee in register R2, which does 
    not displace any of the other arguments passed in via registers R4
-   to R7.   */
+   to R7.  */
 
-/* Helper function to justify value in register according to endianess. */
+/* Helper function to justify value in register according to endianess.  */
 static char *
 sh_justify_value_in_reg (struct gdbarch *gdbarch, struct value *val, int len)
 {
@@ -915,7 +911,7 @@ sh_justify_value_in_reg (struct gdbarch *gdbarch, struct value *val, int len)
   memset (valbuf, 0, sizeof (valbuf));
   if (len < 4)
     {
-      /* value gets right-justified in the register or stack word */
+      /* value gets right-justified in the register or stack word.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	memcpy (valbuf + (4 - len), (char *) value_contents (val), len);
       else
@@ -925,7 +921,7 @@ sh_justify_value_in_reg (struct gdbarch *gdbarch, struct value *val, int len)
   return (char *) value_contents (val);
 }
 
-/* Helper function to eval number of bytes to allocate on stack. */
+/* Helper function to eval number of bytes to allocate on stack.  */
 static CORE_ADDR
 sh_stack_allocsize (int nargs, struct value **args)
 {
@@ -937,12 +933,12 @@ sh_stack_allocsize (int nargs, struct value **args)
 
 /* Helper functions for getting the float arguments right.  Registers usage
    depends on the ABI and the endianess.  The comments should enlighten how
-   it's intended to work. */
+   it's intended to work.  */
 
-/* This array stores which of the float arg registers are already in use. */
+/* This array stores which of the float arg registers are already in use.  */
 static int flt_argreg_array[FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM + 1];
 
-/* This function just resets the above array to "no reg used so far". */
+/* This function just resets the above array to "no reg used so far".  */
 static void
 sh_init_flt_argreg (void)
 {
@@ -957,25 +953,25 @@ sh_init_flt_argreg (void)
    Note that register number 0 in flt_argreg_array corresponds with the
    real float register fr4.  In contrast to FLOAT_ARG0_REGNUM (value is
    29) the parity of the register number is preserved, which is important
-   for the double register passing test (see the "argreg & 1" test below). */
+   for the double register passing test (see the "argreg & 1" test below).  */
 static int
 sh_next_flt_argreg (struct gdbarch *gdbarch, int len, struct type *func_type)
 {
   int argreg;
 
-  /* First search for the next free register. */
+  /* First search for the next free register.  */
   for (argreg = 0; argreg <= FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM;
        ++argreg)
     if (!flt_argreg_array[argreg])
       break;
 
-  /* No register left? */
+  /* No register left?  */
   if (argreg > FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM)
     return FLOAT_ARGLAST_REGNUM + 1;
 
   if (len == 8)
     {
-      /* Doubles are always starting in a even register number. */
+      /* Doubles are always starting in a even register number.  */
       if (argreg & 1)
 	{
 	  /* In gcc ABI, the skipped register is lost for further argument
@@ -985,17 +981,17 @@ sh_next_flt_argreg (struct gdbarch *gdbarch, int len, struct type *func_type)
 
 	  ++argreg;
 
-	  /* No register left? */
+	  /* No register left?  */
 	  if (argreg > FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM)
 	    return FLOAT_ARGLAST_REGNUM + 1;
 	}
-      /* Also mark the next register as used. */
+      /* Also mark the next register as used.  */
       flt_argreg_array[argreg + 1] = 1;
     }
   else if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE
 	   && !sh_is_renesas_calling_convention (func_type))
     {
-      /* In little endian, gcc passes floats like this: f5, f4, f7, f6, ... */
+      /* In little endian, gcc passes floats like this: f5, f4, f7, f6, ...  */
       if (!flt_argreg_array[argreg + 1])
 	++argreg;
     }
@@ -1082,13 +1078,13 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
       && TYPE_VARARGS (func_type))
     last_reg_arg = TYPE_NFIELDS (func_type) - 2;
 
-  /* first force sp to a 4-byte alignment */
+  /* First force sp to a 4-byte alignment.  */
   sp = sh_frame_align (gdbarch, sp);
 
-  /* make room on stack for args */
+  /* Make room on stack for args.  */
   sp -= sh_stack_allocsize (nargs, args);
 
-  /* Initialize float argument mechanism. */
+  /* Initialize float argument mechanism.  */
   sh_init_flt_argreg ();
 
   /* Now load as many as possible of the first arguments into
@@ -1101,10 +1097,10 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
-         This also differs in different ABIs. */
+         This also differs in different ABIs.  */
       pass_on_stack = 0;
 
-      /* Find out the next register to use for a floating point value. */
+      /* Find out the next register to use for a floating point value.  */
       treat_as_flt = sh_treat_as_flt_p (type);
       if (treat_as_flt)
 	flt_argreg = sh_next_flt_argreg (gdbarch, len, func_type);
@@ -1128,7 +1124,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 	                            || pass_on_stack))
 	      || argnum > last_reg_arg)
 	    {
-	      /* The data goes entirely on the stack, 4-byte aligned. */
+	      /* The data goes entirely on the stack, 4-byte aligned.  */
 	      reg_size = (len + 3) & ~3;
 	      write_memory (sp + stack_offset, val, reg_size);
 	      stack_offset += reg_size;
@@ -1144,7 +1140,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 		 code first writes the first 32 bits in the next but one
 		 register, increments the val and len values accordingly
 		 and then proceeds as normal by writing the second 32 bits
-		 into the next register. */
+		 into the next register.  */
 	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE
 	          && TYPE_LENGTH (type) == 2 * reg_size)
 	        {
@@ -1152,7 +1148,8 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 						  regval);
 		  val += reg_size;
 		  len -= reg_size;
-		  regval = extract_unsigned_integer (val, reg_size, byte_order);
+		  regval = extract_unsigned_integer (val, reg_size,
+						     byte_order);
 		}
 	      regcache_cooked_write_unsigned (regcache, flt_argreg++, regval);
 	    }
@@ -1163,7 +1160,8 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 	      regval = extract_unsigned_integer (val, reg_size, byte_order);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
-	  /* Store the value one register at a time or in one step on stack.  */
+	  /* Store the value one register at a time or in one step on
+	     stack.  */
 	  len -= reg_size;
 	  val += reg_size;
 	}
@@ -1182,7 +1180,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 					STRUCT_RETURN_REGNUM, struct_addr);
     }
 
-  /* Store return address. */
+  /* Store return address.  */
   regcache_cooked_write_unsigned (regcache, PR_REGNUM, bp_addr);
 
   /* Update stack pointer.  */
@@ -1220,10 +1218,10 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
       && TYPE_VARARGS (func_type))
     last_reg_arg = TYPE_NFIELDS (func_type) - 2;
 
-  /* first force sp to a 4-byte alignment */
+  /* First force sp to a 4-byte alignment.  */
   sp = sh_frame_align (gdbarch, sp);
 
-  /* make room on stack for args */
+  /* Make room on stack for args.  */
   sp -= sh_stack_allocsize (nargs, args);
 
   /* Now load as many as possible of the first arguments into
@@ -1236,7 +1234,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
-	 This also differs in different ABIs. */
+	 This also differs in different ABIs.  */
       pass_on_stack = 0;
       /* Renesas ABI pushes doubles and long longs entirely on stack.
 	 Same goes for aggregate types.  */
@@ -1252,14 +1250,14 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 	      || argnum > last_reg_arg)
 	    {
 	      /* The remainder of the data goes entirely on the stack,
-	         4-byte aligned. */
+	         4-byte aligned.  */
 	      reg_size = (len + 3) & ~3;
 	      write_memory (sp + stack_offset, val, reg_size);
 	      stack_offset += reg_size;
 	    }
 	  else if (argreg <= ARGLAST_REGNUM)
 	    {
-	      /* there's room in a register */
+	      /* There's room in a register.  */
 	      reg_size = register_size (gdbarch, argreg);
 	      regval = extract_unsigned_integer (val, reg_size, byte_order);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
@@ -1285,7 +1283,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 					STRUCT_RETURN_REGNUM, struct_addr);
     }
 
-  /* Store return address. */
+  /* Store return address.  */
   regcache_cooked_write_unsigned (regcache, PR_REGNUM, bp_addr);
 
   /* Update stack pointer.  */
@@ -1337,7 +1335,8 @@ sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
       int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
 	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
-	  regcache_raw_read (regcache, regnum++, (char *) valbuf + len - 4 - i);
+	  regcache_raw_read (regcache, regnum++,
+			     (char *) valbuf + len - 4 - i);
 	else
 	  regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
     }
@@ -1349,8 +1348,8 @@ sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
    of type TYPE, given in virtual format.
    If the architecture is sh4 or sh3e, store a function's return value
    in the R0 general register or in the FP0 floating point register,
-   depending on the type of the return value. In all the other cases
-   the result is stored in r0, left-justified. */
+   depending on the type of the return value.  In all the other cases
+   the result is stored in r0, left-justified.  */
 static void
 sh_store_return_value_nofpu (struct type *type, struct regcache *regcache,
 			     const void *valbuf)
@@ -1423,7 +1422,7 @@ sh_return_value_fpu (struct gdbarch *gdbarch, struct type *func_type,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-/* Print the registers in a form similar to the E7000 */
+/* Print the registers in a form similar to the E7000.  */
 
 static void
 sh_generic_show_regs (struct frame_info *frame)
@@ -2224,7 +2223,7 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 /* On the sh4, the DRi pseudo registers are problematic if the target
-   is little endian. When the user writes one of those registers, for
+   is little endian.  When the user writes one of those registers, for
    instance with 'ser var $dr0=1', we want the double to be stored
    like this: 
    fr0 = 0x00 0x00 0x00 0x00 0x00 0xf0 0x3f 
@@ -2247,7 +2246,7 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    fr1 = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
 
    The other pseudo registers (the FVs) also don't pose a problem
-   because they are stored as 4 individual FP elements. */
+   because they are stored as 4 individual FP elements.  */
 
 static void
 sh_register_convert_to_virtual (int regnum, struct type *type,
@@ -2279,7 +2278,7 @@ sh_register_convert_to_raw (struct type *type, int regnum,
     error (_("sh_register_convert_to_raw called with non DR register number"));
 }
 
-/* For vectors of 4 floating point registers. */
+/* For vectors of 4 floating point registers.  */
 static int
 fv_reg_base_num (struct gdbarch *gdbarch, int fv_regnum)
 {
@@ -2290,7 +2289,7 @@ fv_reg_base_num (struct gdbarch *gdbarch, int fv_regnum)
   return fp_regnum;
 }
 
-/* For double precision floating point registers, i.e 2 fp regs.*/
+/* For double precision floating point registers, i.e 2 fp regs.  */
 static int
 dr_reg_base_num (struct gdbarch *gdbarch, int dr_regnum)
 {
@@ -2315,14 +2314,14 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
-      /* Build the value in the provided buffer. */
+      /* Build the value in the provided buffer.  */
       /* Read the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
 	regcache_raw_read (regcache, base_regnum + portion,
 			   (temp_buffer
 			    + register_size (gdbarch,
 					     base_regnum) * portion));
-      /* We must pay attention to the endiannes. */
+      /* We must pay attention to the endiannes.  */
       sh_register_convert_to_virtual (reg_nr,
 				      register_type (gdbarch, reg_nr),
 				      temp_buffer, buffer);
@@ -2351,7 +2350,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       /* When the bank register is written to, the whole register bank
          is switched and all values in the bank registers must be read
-	 from the target/sim again. We're just invalidating the regcache
+	 from the target/sim again.  We're just invalidating the regcache
 	 so that a re-read happens next time it's necessary.  */
       int bregnum;
 
@@ -2363,7 +2362,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
-      /* We must pay attention to the endiannes. */
+      /* We must pay attention to the endiannes.  */
       sh_register_convert_to_raw (register_type (gdbarch, reg_nr),
 				  reg_nr, buffer, temp_buffer);
 
@@ -2531,7 +2530,7 @@ sh_frame_cache (struct frame_info *this_frame, void **this_cache)
      which holds the base address for the current stack frame.
      However, for functions that don't need it, the frame pointer is
      optional.  For these "frameless" functions the frame pointer is
-     actually the frame pointer of the calling frame. */
+     actually the frame pointer of the calling frame.  */
   cache->base = get_frame_register_unsigned (this_frame, FP_REGNUM);
   if (cache->base == 0)
     return cache;
@@ -2656,7 +2655,7 @@ static const struct frame_base sh_frame_base = {
 
 /* The epilogue is defined here as the area at the end of a function,
    either on the `ret' instruction itself or after an instruction which
-   destroys the function's stack frame. */
+   destroys the function's stack frame.  */
 static int
 sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
@@ -2669,14 +2668,14 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       /* The sh epilogue is max. 14 bytes long.  Give another 14 bytes
          for a nop and some fixed data (e.g. big offsets) which are
          unfortunately also treated as part of the function (which
-         means, they are below func_end. */
+         means, they are below func_end.  */
       CORE_ADDR addr = func_end - 28;
       if (addr < func_addr + 4)
 	addr = func_addr + 4;
       if (pc < addr)
 	return 0;
 
-      /* First search forward until hitting an rts. */
+      /* First search forward until hitting an rts.  */
       while (addr < func_end
 	     && !IS_RTS (read_memory_unsigned_integer (addr, 2, byte_order)))
 	addr += 2;
@@ -2685,7 +2684,7 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       /* At this point we should find a mov.l @r15+,r14 instruction,
          either before or after the rts.  If not, then the function has
-         probably no "normal" epilogue and we bail out here. */
+         probably no "normal" epilogue and we bail out here.  */
       inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
       if (IS_RESTORE_FP (read_memory_unsigned_integer (addr - 2, 2,
 						       byte_order)))
@@ -2696,21 +2695,21 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 
-      /* Step over possible lds.l @r15+,macl. */
+      /* Step over possible lds.l @r15+,macl.  */
       if (IS_MACL_LDS (inst))
 	{
 	  addr -= 2;
 	  inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 	}
 
-      /* Step over possible lds.l @r15+,pr. */
+      /* Step over possible lds.l @r15+,pr.  */
       if (IS_LDS (inst))
 	{
 	  addr -= 2;
 	  inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 	}
 
-      /* Step over possible mov r14,r15. */
+      /* Step over possible mov r14,r15.  */
       if (IS_MOV_FP_SP (inst))
 	{
 	  addr -= 2;
@@ -2718,7 +2717,7 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
 
       /* Now check for FP adjustments, using add #imm,r14 or add rX, r14
-         instructions. */
+         instructions.  */
       while (addr > func_addr + 4
 	     && (IS_ADD_REG_TO_FP (inst) || IS_ADD_IMM_FP (inst)))
 	{
@@ -2880,7 +2879,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     case bfd_mach_sh5:
       sh_show_regs = sh64_show_regs;
-      /* SH5 is handled entirely in sh64-tdep.c */
+      /* SH5 is handled entirely in sh64-tdep.c.  */
       return sh64_gdbarch_init (info, arches);
     }
 
@@ -2890,7 +2889,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* None found, create a new architecture from the information
-     provided. */
+     provided.  */
   tdep = XZALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
@@ -2949,7 +2948,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_sh2e:
-      /* doubles on sh2e and sh3e are actually 4 byte. */
+      /* doubles on sh2e and sh3e are actually 4 byte.  */
       set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
       set_gdbarch_register_name (gdbarch, sh_sh2e_register_name);
@@ -2994,7 +2993,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     case bfd_mach_sh3e:
     case bfd_mach_sh2a_or_sh3e:
-      /* doubles on sh2e and sh3e are actually 4 byte. */
+      /* doubles on sh2e and sh3e are actually 4 byte.  */
       set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
       set_gdbarch_register_name (gdbarch, sh_sh3e_register_name);
@@ -3062,7 +3061,7 @@ set_sh_command (char *args, int from_tty)
   help_list (setshcmdlist, "set sh ", all_commands, gdb_stdout);
 }
 
-extern initialize_file_ftype _initialize_sh_tdep;	/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_sh_tdep;  /* -Wmissing-prototypes */
 
 void
 _initialize_sh_tdep (void)

@@ -339,7 +339,7 @@ target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 	 sizeof (struct memory_write_request), compare_block_starting_address);
 
   /* Split blocks into list of regular memory blocks,
-     and list of flash memory blocks. */
+     and list of flash memory blocks.  */
   make_cleanup (cleanup_write_requests_vector, &regular);
   make_cleanup (cleanup_write_requests_vector, &flash);
   split_regular_and_flash_blocks (blocks, &regular, &flash);

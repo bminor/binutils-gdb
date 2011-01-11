@@ -380,7 +380,7 @@ struct ser_console_state
      the started state.  */
   HANDLE start_select;
   /* Signaled by the main program to tell the select thread to enter
-     the stopped state. */
+     the stopped state.  */
   HANDLE stop_select;
   /* Signaled by the main program to tell the select thread to
      exit.  */
