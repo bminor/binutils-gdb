@@ -24,8 +24,8 @@
 #define arch_abi bfin_abi
 #define ARCH_ABI_FDPIC BFIN_ABI_FDPIC
 #define R_ARCH_FUNCDESC R_BFIN_FUNCDESC
-#define FDPIC_INTERP_REGNUM BFIN_FDPIC_INTERP_REGNUM
-#define FDPIC_EXEC_REGNUM BFIN_FDPIC_EXEC_REGNUM
+#define FDPIC_INTERP_REGNUM 0 /*BFIN_FDPIC_INTERP_REGNUM*/
+#define FDPIC_EXEC_REGNUM 1 /*BFIN_FDPIC_EXEC_REGNUM*/
 #define LINKER_SYM(sym) "_"sym
 
 /* Provide a prototype to silence -Wmissing-prototypes and for init.c.  */
