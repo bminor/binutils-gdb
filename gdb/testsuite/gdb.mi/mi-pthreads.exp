@@ -41,7 +41,7 @@ proc check_mi_thread_command_set {} {
   set thread_list [get_mi_thread_list "in check_mi_thread_command_set"]
   
   mi_gdb_test "-thread-select" \
-    {\^error,msg="mi_cmd_thread_select: USAGE: threadnum."} \
+    {\^error,msg="-thread-select: USAGE: threadnum."} \
     "check_mi_thread_command_set: -thread-select"
 
   mi_gdb_test "-thread-select 123456789" \

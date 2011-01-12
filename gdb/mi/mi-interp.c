@@ -192,16 +192,16 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   struct cleanup *old_chain;
 
   if (argc < 2)
-    error (_("mi_cmd_interpreter_exec: "
+    error (_("-interpreter-exec: "
 	     "Usage: -interpreter-exec interp command"));
 
   interp_to_use = interp_lookup (argv[0]);
   if (interp_to_use == NULL)
-    error (_("mi_cmd_interpreter_exec: could not find interpreter \"%s\""),
+    error (_("-interpreter-exec: could not find interpreter \"%s\""),
 	   argv[0]);
 
   if (!interp_exec_p (interp_to_use))
-    error (_("mi_cmd_interpreter_exec: interpreter \"%s\" "
+    error (_("-interpreter-exec: interpreter \"%s\" "
 	     "does not support command execution"),
 	      argv[0]);
 

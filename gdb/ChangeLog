@@ -1,3 +1,55 @@
+2011-01-12  Tom Tromey  <tromey@redhat.com>
+
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Fix error
+	messages.
+	* mi/mi-main.c (mi_cmd_thread_select): Fix error messages.
+	(mi_cmd_thread_list_ids): Likewise.
+	(mi_cmd_data_list_changed_registers): Likewise.
+	(mi_cmd_data_list_register_values): Likewise.
+	(mi_cmd_data_write_register_values): Likewise.
+	(mi_cmd_data_evaluate_expression): Likewise.
+	(mi_cmd_data_read_memory): Likewise.
+	(mi_cmd_data_read_memory_bytes): Likewise.
+	(mi_cmd_data_write_memory): Likewise.
+	(mi_cmd_enable_timings): Likewise.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Fix error messages.
+	* mi/mi-cmd-var.c (mi_cmd_var_create): Fix error messages.
+	(mi_cmd_var_delete): Likewise.
+	(mi_cmd_var_set_format): Likewise.
+	(mi_cmd_var_show_format): Likewise.
+	(mi_cmd_var_info_num_children): Likewise.
+	(mi_cmd_var_list_children): Likewise.
+	(mi_cmd_var_info_type): Likewise.
+	(mi_cmd_var_info_expression): Likewise.
+	(mi_cmd_var_show_attributes): Likewise.
+	(mi_cmd_var_assign): Likewise.
+	(mi_cmd_var_update): Likewise.
+	(mi_cmd_enable_pretty_printing): Likewise.
+	(mi_cmd_var_set_update_range): Likewise.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_get): Fix error
+	messages.
+	(mi_cmd_target_file_put): Likewise.
+	(mi_cmd_target_file_delete): Likewise.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Fix error
+	messages.
+	(mi_cmd_stack_info_depth): Likewise.
+	(mi_cmd_stack_list_locals): Likewise.
+	(mi_cmd_stack_list_args): Likewise.
+	(mi_cmd_stack_select_frame): Likewise.
+	(mi_cmd_stack_select_frame): Likewise.
+	(mi_cmd_stack_info_frame): Likewise.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file): Fix error
+	messages.
+	(mi_cmd_file_list_exec_source_files): Likewise.
+	* mi/mi-cmd-env.c (mi_cmd_env_pwd): Fix error messages.
+	(mi_cmd_env_cd): Likewise.
+	(mi_cmd_env_path): Likewise.
+	(mi_cmd_env_dir): Likewise.
+	(mi_cmd_inferior_tty_show): Likewise.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Fix error messages.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Fix error messages.
+	(mi_cmd_break_watch): Likewise.
+
 2011-01-12  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-linux-nat.c (booke_cmp_hw_point): Fix whitespace.

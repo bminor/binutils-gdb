@@ -1,3 +1,21 @@
+2011-01-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.mi/gdb2549.exp: Update for error message changes.
+	* gdb.mi/mi-cli.exp: Likewise.
+	* gdb.mi/mi-disassemble.exp: Likewise.
+	* gdb.mi/mi-pthreads.exp: Likewise.
+	* gdb.mi/mi-regs.exp: Likewise.
+	* gdb.mi/mi-stack.exp: Likewise.
+	* gdb.mi/mi-var-block.exp: Likewise.
+	* gdb.mi/mi-var-cmd.exp: Likewise.
+	* gdb.mi/mi2-cli.exp: Likewise.
+	* gdb.mi/mi2-disassemble.exp: Likewise.
+	* gdb.mi/mi2-pthreads.exp: Likewise.
+	* gdb.mi/mi2-regs.exp: Likewise.
+	* gdb.mi/mi2-stack.exp: Likewise.
+	* gdb.mi/mi2-var-block.exp: Likewise.
+	* gdb.mi/mi2-var-cmd.exp: Likewise.
+
 2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

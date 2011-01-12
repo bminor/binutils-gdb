@@ -471,7 +471,7 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
   char *mi_error_message;
 
   if (argc != 1)
-    error (_("mi_cmd_thread_select: USAGE: threadnum."));
+    error (_("-thread-select: USAGE: threadnum."));
 
   rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
 
@@ -489,7 +489,7 @@ mi_cmd_thread_list_ids (char *command, char **argv, int argc)
   char *mi_error_message;
 
   if (argc != 0)
-    error ("mi_cmd_thread_list_ids: No arguments required.");
+    error ("-thread-list-ids: No arguments required.");
 
   rc = gdb_list_thread_ids (uiout, &mi_error_message);
 
@@ -984,7 +984,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	    continue;
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
-	    error ("mi_cmd_data_list_changed_registers: "
+	    error ("-data-list-changed-registers: "
 		   "Unable to read register contents.");
 	  else if (changed)
 	    ui_out_field_int (uiout, NULL, regnum);
@@ -1003,7 +1003,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	{
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
-	    error ("mi_cmd_data_list_register_change: "
+	    error ("-data-list-changed-registers: "
 		   "Unable to read register contents.");
 	  else if (changed)
 	    ui_out_field_int (uiout, NULL, regnum);
@@ -1063,7 +1063,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
      upon the particular processor being debugged.  */
 
   if (argc == 0)
-    error ("mi_cmd_data_list_register_values: Usage: "
+    error ("-data-list-register-values: Usage: "
 	   "-data-list-register-values <format> [<regnum1>...<regnumN>]");
 
   format = (int) argv[0][0];
@@ -1187,19 +1187,19 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   if (argc == 0)
-    error ("mi_cmd_data_write_register_values: Usage: -data-write-register-"
+    error ("-data-write-register-values: Usage: -data-write-register-"
 	   "values <format> [<regnum1> <value1>...<regnumN> <valueN>]");
 
   format = (int) argv[0][0];
 
   if (!target_has_registers)
-    error ("mi_cmd_data_write_register_values: No registers.");
+    error ("-data-write-register-values: No registers.");
 
   if (!(argc - 1))
-    error ("mi_cmd_data_write_register_values: No regs and values specified.");
+    error ("-data-write-register-values: No regs and values specified.");
 
   if ((argc - 1) % 2)
-    error ("mi_cmd_data_write_register_values: "
+    error ("-data-write-register-values: "
 	   "Regs and vals are not in pairs.");
 
   for (i = 1; i < argc; i = i + 2)
@@ -1240,7 +1240,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   if (argc != 1)
     {
       ui_out_stream_delete (stb);
-      error ("mi_cmd_data_evaluate_expression: "
+      error ("-data-evaluate-expression: "
 	     "Usage: -data-evaluate-expression expression");
     }
 
@@ -1311,7 +1311,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
   while (1)
     {
-      int opt = mi_getopt ("mi_cmd_data_read_memory", argc, argv, opts,
+      int opt = mi_getopt ("-data-read-memory", argc, argv, opts,
 			   &optind, &optarg);
 
       if (opt < 0)
@@ -1327,7 +1327,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   argc -= optind;
 
   if (argc < 5 || argc > 6)
-    error ("mi_cmd_data_read_memory: Usage: "
+    error ("-data-read-memory: Usage: "
 	   "ADDR WORD-FORMAT WORD-SIZE NR-ROWS NR-COLS [ASCHAR].");
 
   /* Extract all the arguments. */
@@ -1364,12 +1364,12 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   /* The number of rows.  */
   nr_rows = atol (argv[3]);
   if (nr_rows <= 0)
-    error ("mi_cmd_data_read_memory: invalid number of rows.");
+    error ("-data-read-memory: invalid number of rows.");
 
   /* Number of bytes per row.  */
   nr_cols = atol (argv[4]);
   if (nr_cols <= 0)
-    error ("mi_cmd_data_read_memory: invalid number of columns.");
+    error ("-data-read-memory: invalid number of columns.");
 
   /* The un-printable character when printing ascii.  */
   if (argc == 6)
@@ -1496,7 +1496,7 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
 
   while (1)
     {
-      int opt = mi_getopt ("mi_cmd_data_read_memory_bytes", argc, argv, opts,
+      int opt = mi_getopt ("-data-read-memory-bytes", argc, argv, opts,
 			   &optind, &optarg);
       if (opt < 0)
 	break;
@@ -1597,7 +1597,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
 
   while (1)
     {
-      int opt = mi_getopt ("mi_cmd_data_write_memory", argc, argv, opts,
+      int opt = mi_getopt ("-data-write-memory", argc, argv, opts,
 			   &optind, &optarg);
 
       if (opt < 0)
@@ -1613,7 +1613,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   argc -= optind;
 
   if (argc != 4)
-    error ("mi_cmd_data_write_memory: Usage: "
+    error ("-data-write-memory: Usage: "
 	   "[-o COLUMN_OFFSET] ADDR FORMAT WORD-SIZE VALUE.");
 
   /* Extract all the arguments.  */
@@ -1698,7 +1698,7 @@ mi_cmd_enable_timings (char *command, char **argv, int argc)
   return;
 
  usage_error:
-  error ("mi_cmd_enable_timings: Usage: %s {yes|no}", command);
+  error ("-enable-timings: Usage: %s {yes|no}", command);
 }
 
 void

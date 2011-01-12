@@ -94,7 +94,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
      encountered. */
   while (1)
     {
-      int opt = mi_getopt ("mi_cmd_disassemble", argc, argv, opts,
+      int opt = mi_getopt ("-data-disassemble", argc, argv, opts,
 			   &optind, &optarg);
       if (opt < 0)
 	break;
@@ -131,16 +131,16 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   if (!((line_seen && file_seen && num_seen && !start_seen && !end_seen)
 	|| (line_seen && file_seen && !num_seen && !start_seen && !end_seen)
 	|| (!line_seen && !file_seen && !num_seen && start_seen && end_seen)))
-    error (_("mi_cmd_disassemble: Usage: ( [-f filename -l linenum [-n "
+    error (_("-data-disassemble: Usage: ( [-f filename -l linenum [-n "
 	     "howmany]] | [-s startaddr -e endaddr]) [--] mode."));
 
   if (argc != 1)
-    error (_("mi_cmd_disassemble: Usage: [-f filename -l linenum "
+    error (_("-data-disassemble: Usage: [-f filename -l linenum "
 	     "[-n howmany]] [-s startaddr -e endaddr] [--] mode."));
 
   mode = atoi (argv[0]);
   if (mode < 0 || mode > 3)
-    error (_("mi_cmd_disassemble: Mode argument must be 0, 1, 2, or 3."));
+    error (_("-data-disassemble: Mode argument must be 0, 1, 2, or 3."));
 
   /* Convert the mode into a set of disassembly flags */
 
@@ -157,11 +157,11 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
     {
       s = lookup_symtab (file_string);
       if (s == NULL)
-	error (_("mi_cmd_disassemble: Invalid filename."));
+	error (_("-data-disassemble: Invalid filename."));
       if (!find_line_pc (s, line_num, &start))
-	error (_("mi_cmd_disassemble: Invalid line number"));
+	error (_("-data-disassemble: Invalid line number"));
       if (find_pc_partial_function (start, NULL, &low, &high) == 0)
-	error (_("mi_cmd_disassemble: "
+	error (_("-data-disassemble: "
 		 "No function contains specified address"));
     }
 

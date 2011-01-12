@@ -37,15 +37,15 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 }
 
 mi_gdb_test "-interpreter-exec" \
-  {\^error,msg="mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command"} \
+  {\^error,msg="-interpreter-exec: Usage: -interpreter-exec interp command"} \
   "-interpreter-exec with no arguments"
 
 mi_gdb_test "-interpreter-exec console" \
-  {\^error,msg="mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command"} \
+  {\^error,msg="-interpreter-exec: Usage: -interpreter-exec interp command"} \
   "-interpreter-exec with one argument"
 
 mi_gdb_test "-interpreter-exec bogus command" \
-  {\^error,msg="mi_cmd_interpreter_exec: could not find interpreter \\\"bogus\\\""} \
+  {\^error,msg="-interpreter-exec: could not find interpreter \\\"bogus\\\""} \
   "-interpreter-exec with bogus interpreter"
 
 set msg {Undefined command: \\\"bogus\\\"\.  Try \\\"help\\\"\.}
