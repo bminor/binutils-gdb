@@ -143,6 +143,13 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
           CORE_ADDR old_pc = pc;
           bfd_byte data;
           int status;
+          const char *spacer = "";
+
+          /* Build the opcodes using a temporary stream so we can
+             write them out in a single go for the MI.  */
+          struct ui_stream *opcode_stream = ui_out_stream_new (uiout);
+          struct cleanup *cleanups =
+            make_cleanup_ui_out_stream_delete (opcode_stream);
 
           pc += gdbarch_print_insn (gdbarch, pc, di);
           for (;old_pc < pc; old_pc++)
@@ -150,9 +157,14 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
               status = (*di->read_memory_func) (old_pc, &data, 1, di);
               if (status != 0)
                 (*di->memory_error_func) (status, old_pc, di);
-              ui_out_message (uiout, 0, " %02x", (unsigned)data);
+              fprintf_filtered (opcode_stream->stream, "%s%02x",
+                                spacer, (unsigned) data);
+              spacer = " ";
             }
+          ui_out_field_stream (uiout, "opcodes", opcode_stream);
           ui_out_text (uiout, "\t");
+
+          do_cleanups (cleanups);
         }
       else
         pc += gdbarch_print_insn (gdbarch, pc, di);

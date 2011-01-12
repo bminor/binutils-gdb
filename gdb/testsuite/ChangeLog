@@ -1,3 +1,9 @@
+2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.mi/mi-disassemble.exp, gdb.mi/mi2-disassemble.exp: Update
+	expected output to reflect changes in gdb/mi/mi-cmd-disas.c and
+	add new tests for opcode dumping.
+
 2011-01-11  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-infthread.exp: Load gdb-python.exp.

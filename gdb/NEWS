@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.2
 
+* The -data-disassemble MI command now supports modes 2 and 3 for
+  dumping the instruction opcodes.
+
 * New command line options
 
 -data-directory DIR	Specify DIR as the "data-directory".

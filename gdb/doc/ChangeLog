@@ -1,3 +1,8 @@
+2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Update to reflect
+	changes in mi/mi-cmd-disas.c
+
 2011-01-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Threads): Remove duplicate text.  Update examples.

@@ -27621,8 +27621,9 @@ displayed; if @var{lines} is higher than the number of lines between
 @var{start-addr} and @var{end-addr}, only the lines up to @var{end-addr}
 are displayed.
 @item @var{mode}
-is either 0 (meaning only disassembly) or 1 (meaning mixed source and
-disassembly).
+is either 0 (meaning only disassembly), 1 (meaning mixed source and
+disassembly), 2 (meaning disassembly with raw opcodes), or 3 (meaning
+mixed source and disassembly with raw opcodes).
 @end table
 
 @subsubheading Result
