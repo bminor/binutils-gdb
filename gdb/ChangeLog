@@ -1,3 +1,8 @@
+2011-01-09  Robert Millan  <rmh@gnu.org>  (tiny patch)
+
+	* configure.tgt: Detect GNU/kFreeBSD and set `gdb_osabi'
+	appropiately.
+
 2011-01-11  Tom Tromey  <tromey@redhat.com>
 
 	* thread.c (do_captured_thread_select): Emit newline before

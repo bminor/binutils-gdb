@@ -629,7 +629,8 @@ esac
 # map target onto default OS ABI
 
 case "${targ}" in
-*-*-freebsd*)	gdb_osabi=GDB_OSABI_FREEBSD_ELF ;;
+*-*-freebsd* | *-*-kfreebsd*-gnu)
+		gdb_osabi=GDB_OSABI_FREEBSD_ELF ;;
 *-*-linux*)	gdb_osabi=GDB_OSABI_LINUX ;;
 *-*-nto*)	gdb_osabi=GDB_OSABI_QNXNTO ;;
 m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
