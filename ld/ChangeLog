@@ -1,3 +1,18 @@
+2011-01-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12380
+	* ldexp.h (enum phase_enum): Comment.  Add exp_dataseg_done.
+	* ldexp.c (fold_unary <DATA_SEGMENT_END>): Rearrange code.  Test
+	for exp_dataseg_done rather than expld.phase == lang_final_phase_enum
+	to detect when we've finished sizing sections.
+	(fold_binary <DATA_SEGMENT_ALIGN>): Likewise.
+	(fold_binary <DATA_SEGMENT_RELRO_END>): Likewise.  Also test
+	that we are not inside an output section statement.
+	* ldlang.c (lang_size_sections): Set exp_dataseg_done on exit if
+	not exp_dataseg_relro_adjust or exp_dataseg_adjust.  Don't set
+	lang_final_phase_enum here.
+	(lang_process): Set lang_final_phase_enum here.
+
 2011-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.

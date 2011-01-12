@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -5425,9 +5425,11 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	  lang_reset_memory_regions ();
 	  one_lang_size_sections_pass (relax, check_regions);
 	}
+      else
+	expld.dataseg.phase = exp_dataseg_done;
     }
-
-  expld.phase = lang_final_phase_enum;
+  else
+    expld.dataseg.phase = exp_dataseg_done;
 }
 
 /* Worker function for lang_do_assignments.  Recursiveness goes here.  */
@@ -6520,7 +6522,7 @@ lang_process (void)
 
   /* Do all the assignments, now that we know the final resting places
      of all the symbols.  */
-
+  expld.phase = lang_final_phase_enum;
   lang_do_assignments ();
 
   ldemul_finish ();

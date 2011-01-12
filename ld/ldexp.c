@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -259,20 +259,22 @@ fold_unary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_END:
-	  if (expld.phase != lang_first_phase_enum
-	      && expld.section == bfd_abs_section_ptr
-	      && (expld.dataseg.phase == exp_dataseg_align_seen
-		  || expld.dataseg.phase == exp_dataseg_relro_seen
-		  || expld.dataseg.phase == exp_dataseg_adjust
-		  || expld.dataseg.phase == exp_dataseg_relro_adjust
-		  || expld.phase == lang_final_phase_enum))
+	  if (expld.phase == lang_first_phase_enum
+	      || expld.section != bfd_abs_section_ptr)
 	    {
-	      if (expld.dataseg.phase == exp_dataseg_align_seen
-		  || expld.dataseg.phase == exp_dataseg_relro_seen)
-		{
-		  expld.dataseg.phase = exp_dataseg_end_seen;
-		  expld.dataseg.end = expld.result.value;
-		}
+	      expld.result.valid_p = FALSE;
+	    }
+	  else if (expld.dataseg.phase == exp_dataseg_align_seen
+		   || expld.dataseg.phase == exp_dataseg_relro_seen)
+	    {
+	      expld.dataseg.phase = exp_dataseg_end_seen;
+	      expld.dataseg.end = expld.result.value;
+	    }
+	  else if (expld.dataseg.phase == exp_dataseg_done
+		   || expld.dataseg.phase == exp_dataseg_adjust
+		   || expld.dataseg.phase == exp_dataseg_relro_adjust)
+	    {
+	      /* OK.  */
 	    }
 	  else
 	    expld.result.valid_p = FALSE;
@@ -402,12 +404,10 @@ fold_binary (etree_type *tree)
 
 	case DATA_SEGMENT_ALIGN:
 	  expld.dataseg.relro = exp_dataseg_relro_start;
-	  if (expld.phase != lang_first_phase_enum
-	      && expld.section == bfd_abs_section_ptr
-	      && (expld.dataseg.phase == exp_dataseg_none
-		  || expld.dataseg.phase == exp_dataseg_adjust
-		  || expld.dataseg.phase == exp_dataseg_relro_adjust
-		  || expld.phase == lang_final_phase_enum))
+	  if (expld.phase == lang_first_phase_enum
+	      || expld.section != bfd_abs_section_ptr)
+	    expld.result.valid_p = FALSE;
+	  else
 	    {
 	      bfd_vma maxpage = lhs.value;
 	      bfd_vma commonpage = expld.result.value;
@@ -415,10 +415,20 @@ fold_binary (etree_type *tree)
 	      expld.result.value = align_n (expld.dot, maxpage);
 	      if (expld.dataseg.phase == exp_dataseg_relro_adjust)
 		expld.result.value = expld.dataseg.base;
-	      else if (expld.dataseg.phase != exp_dataseg_adjust)
+	      else if (expld.dataseg.phase == exp_dataseg_adjust)
+		{
+		  if (commonpage < maxpage)
+		    expld.result.value += ((expld.dot + commonpage - 1)
+					   & (maxpage - commonpage));
+		}
+	      else
 		{
 		  expld.result.value += expld.dot & (maxpage - 1);
-		  if (expld.phase == lang_allocating_phase_enum)
+		  if (expld.dataseg.phase == exp_dataseg_done)
+		    {
+		      /* OK.  */
+		    }
+		  else if (expld.dataseg.phase == exp_dataseg_none)
 		    {
 		      expld.dataseg.phase = exp_dataseg_align_seen;
 		      expld.dataseg.min_base = expld.dot;
@@ -427,22 +437,21 @@ fold_binary (etree_type *tree)
 		      expld.dataseg.maxpagesize = maxpage;
 		      expld.dataseg.relro_end = 0;
 		    }
+		  else
+		    expld.result.valid_p = FALSE;
 		}
-	      else if (commonpage < maxpage)
-		expld.result.value += ((expld.dot + commonpage - 1)
-				       & (maxpage - commonpage));
 	    }
-	  else
-	    expld.result.valid_p = FALSE;
 	  break;
 
 	case DATA_SEGMENT_RELRO_END:
 	  expld.dataseg.relro = exp_dataseg_relro_end;
-	  if (expld.phase != lang_first_phase_enum
-	      && (expld.dataseg.phase == exp_dataseg_align_seen
-		  || expld.dataseg.phase == exp_dataseg_adjust
-		  || expld.dataseg.phase == exp_dataseg_relro_adjust
-		  || expld.phase == lang_final_phase_enum))
+	  if (expld.phase == lang_first_phase_enum
+	      || expld.section != bfd_abs_section_ptr)
+	    expld.result.valid_p = FALSE;
+	  else if (expld.dataseg.phase == exp_dataseg_align_seen
+		   || expld.dataseg.phase == exp_dataseg_adjust
+		   || expld.dataseg.phase == exp_dataseg_relro_adjust
+		   || expld.dataseg.phase == exp_dataseg_done)
 	    {
 	      if (expld.dataseg.phase == exp_dataseg_align_seen
 		  || expld.dataseg.phase == exp_dataseg_relro_adjust)
