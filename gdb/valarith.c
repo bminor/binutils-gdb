@@ -205,12 +205,14 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
 			     && elt_offs >= TYPE_LENGTH (array_type)))
     error (_("no such vector element"));
 
-  v = allocate_value (elt_type);
   if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
-    set_value_lazy (v, 1);
+    v = allocate_value_lazy (elt_type);
   else
-    memcpy (value_contents_writeable (v),
-	    value_contents (array) + elt_offs, elt_size);
+    {
+      v = allocate_value (elt_type);
+      memcpy (value_contents_writeable (v),
+	      value_contents (array) + elt_offs, elt_size);
+    }
 
   set_value_component_location (v, array);
   VALUE_REGNUM (v) = VALUE_REGNUM (array);

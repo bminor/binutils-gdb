@@ -1123,9 +1123,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    CORE_ADDR address = dwarf_expr_fetch_address (ctx, 0);
 	    int in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
 
-	    retval = allocate_value (type);
+	    retval = allocate_value_lazy (type);
 	    VALUE_LVAL (retval) = lval_memory;
-	    set_value_lazy (retval, 1);
 	    if (in_stack_memory)
 	      set_value_stack (retval, 1);
 	    set_value_address (retval, address + byte_offset);

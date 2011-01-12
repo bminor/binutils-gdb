@@ -1,3 +1,27 @@
+2011-01-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Make value allocations more lazy.
+	* ada-lang.c (coerce_unspec_val_to_type): Use allocate_value_lazy
+	instead of allocate_value and set_value_lazy when possible.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Use allocate_value_lazy 
+	instead of allocate_value and set_value_lazy.
+	* findvar.c (value_of_register_lazy): Likewise.
+	(read_var_value): Remove V preallocation, call just check_typedef in
+	advance.  Move allocate_value to LOC_CONST, LOC_LABEL, 
+	LOC_CONST_BYTES.  Use allocate_value_lazy in LOC_STATIC, LOC_ARG,
+	LOC_REF_ARG, LOC_LOCAL, LOC_BLOCK.  Set ADDR instead of
+	set_value_address and break in LOC_BLOCK.  Use allocate_value_lazy and
+	remove lval_memory set in LOC_REGPARM_ADDR.  Use allocate_value_lazy
+	in LOC_UNRESOLVED and LOC_OPTIMIZED_OUT.  Add setting lval_memory at
+	the end, remove set_value_lazy there.
+	* valarith.c (value_subscripted_rvalue): Use allocate_value_lazy
+	instead of allocate_value and set_value_lazy when possible.
+	* valops.c (value_fetch_lazy): Do nop for value_optimized_out VAL.
+	* value.c (allocate_computed_value): Use allocate_value_lazy instead
+	of allocate_value and set_value_lazy.
+	(value_from_contents_and_address): Use allocate_value_lazy instead of
+	allocate_value and set_value_lazy when possible.
+
 2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
 
 	* disasm.c (dump_insns): Support dumping opcodes for MI.

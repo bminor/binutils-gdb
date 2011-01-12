@@ -332,12 +332,11 @@ allocate_computed_value (struct type *type,
                          struct lval_funcs *funcs,
                          void *closure)
 {
-  struct value *v = allocate_value (type);
+  struct value *v = allocate_value_lazy (type);
 
   VALUE_LVAL (v) = lval_computed;
   v->location.computed.funcs = funcs;
   v->location.computed.closure = closure;
-  set_value_lazy (v, 1);
 
   return v;
 }
@@ -2400,12 +2399,15 @@ value_from_contents_and_address (struct type *type,
 				 const gdb_byte *valaddr,
 				 CORE_ADDR address)
 {
-  struct value *v = allocate_value (type);
+  struct value *v;
 
   if (valaddr == NULL)
-    set_value_lazy (v, 1);
+    v = allocate_value_lazy (type);
   else
-    memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
+    {
+      v = allocate_value (type);
+      memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
+    }
   set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
   return v;
