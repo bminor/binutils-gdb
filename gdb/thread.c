@@ -1309,7 +1309,10 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   if (tp->state_ == THREAD_RUNNING)
     ui_out_text (uiout, "(running)\n");
   else
-    print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+    {
+      ui_out_text (uiout, "\n");
+      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+    }
 
   /* Since the current thread may have changed, see if there is any
      exited thread we can now delete.  */

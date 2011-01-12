@@ -1,3 +1,8 @@
+2011-01-11  Tom Tromey  <tromey@redhat.com>
+
+	* thread.c (do_captured_thread_select): Emit newline before
+	printing frame.
+
 2011-01-11  Michael Snyder  <msnyder@vmware.com>
 
 	* s390-tdep.c: Comment cleanup, mostly periods and spaces.
