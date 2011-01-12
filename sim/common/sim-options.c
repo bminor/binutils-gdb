@@ -621,7 +621,12 @@ sim_parse_args (SIM_DESC sd, char **argv)
 		char *name;
 		*lp = opt->opt;
 		/* Prepend --<cpuname>- to the option.  */
-		asprintf (&name, "%s-%s", CPU_NAME (cpu), lp->name);
+		if (asprintf (&name, "%s-%s", CPU_NAME (cpu), lp->name) < 0)
+		  {
+		    sim_io_eprintf (sd, "internal error, out of memory");
+		    result = SIM_RC_FAIL;
+		    break;
+		  }
 		lp->name = name;
 		/* Dynamically assign `val' numbers for long options. */
 		lp->val = i++;

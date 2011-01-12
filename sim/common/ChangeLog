@@ -1,3 +1,14 @@
+2011-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-module.c (sim_pre_argv_init): Return SIM_RC_FAIL when asprintf
+	fails.
+	* sim-options.c (sim_parse_args): Issue an error and return SIM_RC_FAIL
+	when asprintf fails.
+	* sim-utils.c (sim_do_commandf): Issue an error and return when
+	asprintf fails.
+	* sim-watch.c (sim_watchpoint_install): Return SIM_RC_FAIL when
+	asprintf fails.
+
 2011-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-memopt.c (do_memopt_add): Set nr_bytes to s.st_size before
