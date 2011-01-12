@@ -319,7 +319,7 @@ sim_hw_init (struct sim_state *sd)
 static void
 sim_hw_uninstall (struct sim_state *sd)
 {
-  /* hw_tree_delete (STATE_HW (sd)->tree); */
+  hw_tree_delete (STATE_HW (sd)->tree);
   zfree (STATE_HW (sd));
   STATE_HW (sd) = NULL;
 }
