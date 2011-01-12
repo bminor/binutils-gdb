@@ -1,4 +1,11 @@
 2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR fortran/11104 and DWARF unbound arrays detection.
+	* gdb.fortran/multi-dim.exp: New file.
+	* gdb.fortran/multi-dim.f90: New file.
+
+2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.mi/mi-disassemble.exp, gdb.mi/mi2-disassemble.exp: Update
 	expected output to reflect changes in gdb/mi/mi-cmd-disas.c and

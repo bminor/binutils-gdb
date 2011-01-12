@@ -2354,16 +2354,13 @@ evaluate_subexp_standard (struct type *expect_type,
 
     multi_f77_subscript:
       {
-	int subscript_array[MAX_FORTRAN_DIMS];
-	int array_size_array[MAX_FORTRAN_DIMS];
+	LONGEST subscript_array[MAX_FORTRAN_DIMS];
 	int ndimensions = 1, i;
-	struct type *tmp_type;
-	int offset_item;	/* The array offset where the item lives.  */
+	struct value *array = arg1;
 
 	if (nargs > MAX_FORTRAN_DIMS)
 	  error (_("Too many subscripts for F77 (%d Max)"), MAX_FORTRAN_DIMS);
 
-	tmp_type = check_typedef (value_type (arg1));
 	ndimensions = calc_f77_array_dims (type);
 
 	if (nargs != ndimensions)
@@ -2374,59 +2371,28 @@ evaluate_subexp_standard (struct type *expect_type,
 	/* Now that we know we have a legal array subscript expression 
 	   let us actually find out where this element exists in the array.  */
 
-	offset_item = 0;
 	/* Take array indices left to right.  */
 	for (i = 0; i < nargs; i++)
 	  {
 	    /* Evaluate each subscript; it must be a legal integer in F77.  */
 	    arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
 
-	    /* Fill in the subscript and array size arrays.  */
+	    /* Fill in the subscript array.  */
 
 	    subscript_array[i] = value_as_long (arg2);
 	  }
 
 	/* Internal type of array is arranged right to left.  */
-	for (i = 0; i < nargs; i++)
+	for (i = nargs; i > 0; i--)
 	  {
-	    upper = f77_get_upperbound (tmp_type);
-	    lower = f77_get_lowerbound (tmp_type);
+	    struct type *array_type = check_typedef (value_type (array));
+	    LONGEST index = subscript_array[i - 1];
 
-	    array_size_array[nargs - i - 1] = upper - lower + 1;
-
-	    /* Zero-normalize subscripts so that offsetting will work.  */
-
-	    subscript_array[nargs - i - 1] -= lower;
-
-	    /* If we are at the bottom of a multidimensional 
-	       array type then keep a ptr to the last ARRAY
-	       type around for use when calling value_subscript()
-	       below.  This is done because we pretend to value_subscript
-	       that we actually have a one-dimensional array 
-	       of base element type that we apply a simple 
-	       offset to.  */
-
-	    if (i < nargs - 1)
-	      tmp_type = check_typedef (TYPE_TARGET_TYPE (tmp_type));
+	    lower = f77_get_lowerbound (array_type);
+	    array = value_subscripted_rvalue (array, index, lower);
 	  }
 
-	/* Now let us calculate the offset for this item.  */
-
-	offset_item = subscript_array[ndimensions - 1];
-
-	for (i = ndimensions - 1; i > 0; --i)
-	  offset_item =
-	    array_size_array[i - 1] * offset_item + subscript_array[i - 1];
-
-	/* Let us now play a dirty trick: we will take arg1 
-	   which is a value node pointing to the topmost level
-	   of the multidimensional array-set and pretend
-	   that it is actually a array of the final element 
-	   type, this will ensure that value_subscript()
-	   returns the correct type value.  */
-
-	deprecated_set_value_type (arg1, tmp_type);
-	return value_subscripted_rvalue (arg1, offset_item, 0);
+	return array;
       }
 
     case BINOP_LOGICAL_AND:

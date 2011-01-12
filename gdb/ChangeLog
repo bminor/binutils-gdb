@@ -1,3 +1,16 @@
+2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR fortran/11104 and DWARF unbound arrays detection.
+	* dwarf2read.c (read_subrange_type): Set zero length on unspecified
+	upper bound.  Set TYPE_HIGH_BOUND_UNDEFINED if not language_ada on
+	unspecified upper bound.
+	* eval.c (evaluate_subexp_standard) <multi_f77_subscript>: Remove
+	variables array_size_array, tmp_type and offset_item.  New variable
+	array.  Remove call to f77_get_upperbound.  New variables array_type
+	and index.  Call value_subscripted_rvalue for each dimenasion.  Remove
+	the final call to deprecated_set_value_type.
+
 2011-01-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Make value allocations more lazy.

@@ -8192,6 +8192,11 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	  int count = dwarf2_get_attr_constant_value (attr, 1);
 	  high = low + count - 1;
 	}
+      else
+	{
+	  /* Unspecified array length.  */
+	  high = low - 1;
+	}
     }
 
   /* Dwarf-2 specifications explicitly allows to create subrange types
@@ -8245,6 +8250,10 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      length.  GDB could check the boundary but before it gets implemented at
      least allow accessing the array elements.  */
   if (attr && attr->form == DW_FORM_block1)
+    TYPE_HIGH_BOUND_UNDEFINED (range_type) = 1;
+
+  /* Ada expects an empty array on no boundary attributes.  */
+  if (attr == NULL && cu->language != language_ada)
     TYPE_HIGH_BOUND_UNDEFINED (range_type) = 1;
 
   name = dwarf2_name (die, cu);
