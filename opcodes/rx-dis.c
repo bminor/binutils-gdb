@@ -167,6 +167,7 @@ print_insn_rx (bfd_vma addr, disassemble_info * dis)
 		      PR (PS, "%d", oper->addend);
 		    break;
 		  case RX_Operand_Register:
+		  case RX_Operand_TwoReg:
 		    PR (PS, "%s", register_names[oper->reg]);
 		    break;
 		  case RX_Operand_Indirect:

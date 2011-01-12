@@ -1,3 +1,7 @@
+2011-01-12  DJ Delorie  <dj@redhat.com>
+
+	* rx-dis.c (print_insn_rx): Support RX_Operand_TwoReg.
+
 2011-01-11  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* mips-dis.c (print_insn_args): Adjust the value to print the real
