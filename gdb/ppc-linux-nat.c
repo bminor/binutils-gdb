@@ -1526,11 +1526,11 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 static int
 booke_cmp_hw_point (struct ppc_hw_breakpoint *a, struct ppc_hw_breakpoint *b)
 {
-  return (a->trigger_type       == b->trigger_type
-	  && a->addr_mode       == b->addr_mode
-	  && a->condition_mode  == b->condition_mode
-	  && a->addr            == b->addr
-	  && a->addr2           == b->addr2
+  return (a->trigger_type == b->trigger_type
+	  && a->addr_mode == b->addr_mode
+	  && a->condition_mode == b->condition_mode
+	  && a->addr == b->addr
+	  && a->addr2 == b->addr2
 	  && a->condition_value == b->condition_value);
 }
 
@@ -1648,12 +1648,12 @@ ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
   if (!have_ptrace_booke_interface ())
     return -1;
 
-  p.version         = PPC_DEBUG_CURRENT_VERSION;
-  p.trigger_type    = PPC_BREAKPOINT_TRIGGER_EXECUTE;
-  p.addr_mode       = PPC_BREAKPOINT_MODE_EXACT;
-  p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
-  p.addr            = (uint64_t) bp_tgt->placed_address;
-  p.addr2           = 0;
+  p.version = PPC_DEBUG_CURRENT_VERSION;
+  p.trigger_type = PPC_BREAKPOINT_TRIGGER_EXECUTE;
+  p.addr_mode = PPC_BREAKPOINT_MODE_EXACT;
+  p.condition_mode = PPC_BREAKPOINT_CONDITION_NONE;
+  p.addr = (uint64_t) bp_tgt->placed_address;
+  p.addr2 = 0;
   p.condition_value = 0;
 
   ALL_LWPS (lp, ptid)
@@ -1673,12 +1673,12 @@ ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
   if (!have_ptrace_booke_interface ())
     return -1;
 
-  p.version         = PPC_DEBUG_CURRENT_VERSION;
-  p.trigger_type    = PPC_BREAKPOINT_TRIGGER_EXECUTE;
-  p.addr_mode       = PPC_BREAKPOINT_MODE_EXACT;
-  p.condition_mode  = PPC_BREAKPOINT_CONDITION_NONE;
-  p.addr            = (uint64_t) bp_tgt->placed_address;
-  p.addr2           = 0;
+  p.version = PPC_DEBUG_CURRENT_VERSION;
+  p.trigger_type = PPC_BREAKPOINT_TRIGGER_EXECUTE;
+  p.addr_mode = PPC_BREAKPOINT_MODE_EXACT;
+  p.condition_mode = PPC_BREAKPOINT_CONDITION_NONE;
+  p.addr = (uint64_t) bp_tgt->placed_address;
+  p.addr2 = 0;
   p.condition_value = 0;
 
   ALL_LWPS (lp, ptid)
@@ -1973,14 +1973,14 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 	{
 	  /* PowerPC 440 requires only the read/write flags to be passed
 	     to the kernel.  */
-	  read_mode  = 1;
+	  read_mode = 1;
 	  write_mode = 2;
 	}
       else
 	{
 	  /* PowerPC 970 and other DABR-based processors are required to pass
 	     the Breakpoint Translation bit together with the flags.  */
-	  read_mode  = 5;
+	  read_mode = 5;
 	  write_mode = 6;
 	}
 

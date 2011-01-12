@@ -1,3 +1,10 @@
+2011-01-12  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-linux-nat.c (booke_cmp_hw_point): Fix whitespace.
+	(ppc_linux_insert_hw_breakpoint): Likewise.
+	(ppc_linux_remove_hw_breakpoint): Likewise.
+	(ppc_linux_insert_watchpoint): Likewise.
+
 2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
