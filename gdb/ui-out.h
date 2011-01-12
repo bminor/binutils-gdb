@@ -32,7 +32,7 @@ struct ui_file;
 /* the current ui_out */
 
 /* FIXME: This should not be a global but something passed down from main.c
-   or top.c */
+   or top.c.  */
 extern struct ui_out *uiout;
 
 /* alignment enum */
@@ -52,7 +52,7 @@ enum ui_flags
   };
 
 
-/* The ui_out stream structure. */
+/* The ui_out stream structure.  */
 /* NOTE: cagney/2000-02-01: The ui_stream object can be subsumed by
    the more generic ui_file object.  */
 
@@ -63,10 +63,10 @@ struct ui_stream
   };
 
 
-/* Prototypes for ui-out API. */
+/* Prototypes for ui-out API.  */
 
 /* A result is a recursive data structure consisting of lists and
-   tuples. */
+   tuples.  */
 
 enum ui_out_type
   {
@@ -86,8 +86,8 @@ extern struct cleanup *ui_out_begin_cleanup_end (struct ui_out *uiout,
 
 /* A table can be considered a special tuple/list combination with the
    implied structure: ``table = { hdr = { header, ... } , body = [ {
-   field, ... }, ... ] }''. If NR_ROWS is negative then there is at
-   least one row. */
+   field, ... }, ... ] }''.  If NR_ROWS is negative then there is at
+   least one row.  */
 extern void ui_out_table_header (struct ui_out *uiout, int width,
 				 enum ui_align align, const char *col_name,
 				 const char *colhdr);
@@ -189,11 +189,11 @@ extern int ui_out_is_mi_like_p (struct ui_out *uiout);
 
 /* From here on we have things that are only needed by implementation
    routines and main.c.   We should pehaps have a separate file for that,
-   like a  ui-out-impl.h  file */
+   like a  ui-out-impl.h  file.  */
 
 /* User Interface Output Implementation Function Table */
 
-/* Type definition of all implementation functions. */
+/* Type definition of all implementation functions.  */
 
 typedef void (table_begin_ftype) (struct ui_out * uiout,
 				  int nbrofcols, int nr_rows,
@@ -204,7 +204,7 @@ typedef void (table_header_ftype) (struct ui_out * uiout, int width,
 				   enum ui_align align, const char *col_name,
 				   const char *colhdr);
 /* Note: level 0 is the top-level so LEVEL is always greater than
-   zero. */
+   zero.  */
 typedef void (ui_out_begin_ftype) (struct ui_out *uiout,
 				   enum ui_out_type type,
 				   int level, const char *id);
@@ -240,7 +240,7 @@ typedef int (redirect_ftype) (struct ui_out * uiout,
 /* ui-out-impl */
 
 /* IMPORTANT: If you change this structure, make sure to change the default
-   initialization in ui-out.c */
+   initialization in ui-out.c.  */
 
 struct ui_out_impl
   {

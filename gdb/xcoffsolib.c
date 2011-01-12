@@ -124,7 +124,7 @@ sharedlibrary_command (char *pattern, int from_tty)
     if (!vp)
       return;
 
-    /* skip over the first vmap, it is the main program, always loaded. */
+    /* skip over the first vmap, it is the main program, always loaded.  */
     for (vp = vp->nxt; vp; vp = vp->nxt)
       if (! pattern
 	    || re_exec (vp->name)

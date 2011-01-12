@@ -82,7 +82,7 @@ typedef enum
 } xtensa_target_flags_t;
 
 
-/* Xtensa ELF core file register set representation ('.reg' section). 
+/* Xtensa ELF core file register set representation ('.reg' section).
    Copied from target-side ELF header <xtensa/elf.h>.  */
 
 typedef unsigned long xtensa_elf_greg_t;
@@ -145,7 +145,7 @@ typedef struct
 
 /*  For xtensa-config.c to expand to the structure above.  */
 #define XTREG(index,ofs,bsz,sz,al,tnum,flg,cp,ty,gr,name,fet,sto,mas,ct,x,y) \
-	{#name, ofs, ty, ((gr)|((xtRegisterGroupNCP>>2)<<(cp+2))), \
+	{#name, ofs, ty, ((gr) | ((xtRegisterGroupNCP >> 2) << (cp + 2))), \
 	 ct, bsz, sz, al, tnum, flg, cp, mas, fet, sto},
 #define XTREG_END {0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
 

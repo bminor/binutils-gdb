@@ -23,19 +23,19 @@
 struct obstack;
 struct ui_file;
 
-/* Create a generic ui_file object with null methods. */
+/* Create a generic ui_file object with null methods.  */
 
 extern struct ui_file *ui_file_new (void);
 
 /* Override methods used by specific implementations of a UI_FILE
-   object. */
+   object.  */
 
 typedef void (ui_file_flush_ftype) (struct ui_file *stream);
 extern void set_ui_file_flush (struct ui_file *stream,
 			       ui_file_flush_ftype *flush);
 
-/* NOTE: Both fputs and write methods are available. Default
-   implementations that mapping one onto the other are included. */
+/* NOTE: Both fputs and write methods are available.  Default
+   implementations that mapping one onto the other are included.  */
 typedef void (ui_file_write_ftype) (struct ui_file *stream,
 				    const char *buf, long length_buf);
 extern void set_ui_file_write (struct ui_file *stream,
@@ -83,14 +83,14 @@ extern int ui_file_isatty (struct ui_file *);
 extern void ui_file_write (struct ui_file *file, const char *buf,
 			   long length_buf);
 
-/* NOTE: copies left to right */
+/* NOTE: copies left to right.  */
 extern void ui_file_put (struct ui_file *src,
 			 ui_file_put_method_ftype *write, void *dest);
 
 /* Returns a freshly allocated buffer containing the entire contents
    of FILE (as determined by ui_file_put()) with a NUL character
    appended.  LENGTH, if not NULL, is set to the size of the buffer
-   minus that appended NUL. */
+   minus that appended NUL.  */
 extern char *ui_file_xstrdup (struct ui_file *file, long *length);
 
 /* Similar to ui_file_xstrdup, but return a new string allocated on
@@ -100,16 +100,16 @@ extern char *ui_file_obsavestring (struct ui_file *file,
 
 extern long ui_file_read (struct ui_file *file, char *buf, long length_buf);
 
-/* Create/open a memory based file. Can be used as a scratch buffer
-   for collecting output. */
+/* Create/open a memory based file.  Can be used as a scratch buffer
+   for collecting output.  */
 extern struct ui_file *mem_fileopen (void);
 
 
 
-/* Open/create a an STDIO based UI_FILE using the already open FILE. */
+/* Open/create a an STDIO based UI_FILE using the already open FILE.  */
 extern struct ui_file *stdio_fileopen (FILE *file);
 
-/* Open NAME returning an STDIO based UI_FILE. */
+/* Open NAME returning an STDIO based UI_FILE.  */
 extern struct ui_file *gdb_fopen (char *name, char *mode);
 
 /* Create a file which writes to both ONE and TWO.  CLOSE_ONE

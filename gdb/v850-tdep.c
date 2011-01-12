@@ -250,8 +250,9 @@ v850_use_struct_convention (struct type *type)
       return 0;
     }
     
-  /* The value is a union which contains at least one field which would be
-     returned in registers according to these rules -> returned in register.  */
+  /* The value is a union which contains at least one field which
+     would be returned in registers according to these rules ->
+     returned in register.  */
   if (TYPE_CODE (type) == TYPE_CODE_UNION)
     {
       for (i = 0; i < TYPE_NFIELDS (type); ++i)
@@ -438,7 +439,7 @@ v850_is_save_register (int reg)
 {
  /* The caller-save registers are R2, R20 - R29 and R31.  All other
     registers are either special purpose (PC, SP), argument registers,
-    or just considered free for use in the caller. */
+    or just considered free for use in the caller.  */
  return reg == E_R2_REGNUM
 	|| (reg >= E_R20_REGNUM && reg <= E_R29_REGNUM)
 	|| reg == E_R31_REGNUM;
@@ -492,7 +493,7 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
 
       insn = read_memory_integer (current_pc, 2, byte_order);
       current_pc += 2;
-      if ((insn & 0x0780) >= 0x0600)	/* Four byte instruction? */
+      if ((insn & 0x0780) >= 0x0600)	/* Four byte instruction?  */
 	{
 	  insn2 = read_memory_integer (current_pc, 2, byte_order);
 	  current_pc += 2;
@@ -558,7 +559,7 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
 	       || (insn & 0xffe0) == 0x0060	/* jmp */
 	       || (insn & 0x0780) == 0x0580)	/* branch */
 	{
-	  break;		/* Ran into end of prologue */
+	  break;		/* Ran into end of prologue.  */
 	}
 
       else if ((insn & 0xffe0) == ((E_SP_REGNUM << 11) | 0x0240))
@@ -628,7 +629,7 @@ v850_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
 
-  /* See what the symbol table says */
+  /* See what the symbol table says.  */
 
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
@@ -644,7 +645,8 @@ v850_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       return pc;
     }
 
-  /* We can't find the start of this function, so there's nothing we can do.  */
+  /* We can't find the start of this function, so there's nothing we
+     can do.  */
   return pc;
 }
 

@@ -23,10 +23,10 @@
 /* Version number of GDB, as a string.  */
 extern const char version[];
 
-/* Canonical host name as a string. */
+/* Canonical host name as a string.  */
 extern const char host_name[];
 
-/* Canonical target name as a string. */
+/* Canonical target name as a string.  */
 extern const char target_name[];
 
 #endif /* #ifndef VERSION_H */

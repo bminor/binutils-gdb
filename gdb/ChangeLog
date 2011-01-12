@@ -61,6 +61,35 @@
 	* trad-frame.h: Ditto.
 	* typeprint.c: Ditto.
 
+2011-01-11  Michael Snyder  <msnyder@vmware.com>
+
+	* ui-file.c: Comment cleanup, mostly periods and spaces.
+	* ui-file.h: Ditto.
+	* ui-out.c: Ditto.
+	* ui-out.h: Ditto.
+	* utils.c: Ditto.
+	* v850-tdep.c: Ditto.
+	* valarith.c: Ditto.
+	* valops.c: Ditto.
+	* valprint.c: Ditto.
+	* valprint.h: Ditto.
+	* value.c: Ditto.
+	* value.h: Ditto.
+	* varobj.c: Ditto.
+	* varobj.h: Ditto.
+	* vax-tdep.c: Ditto.
+	* vec.c: Ditto.
+	* vec.h: Ditto.
+	* version.h: Ditto.
+	* windows-nat.c: Ditto.
+	* windows-tdep.c: Ditto.
+	* xcoffread.c: Ditto.
+	* xcoffsolib.c: Ditto.
+	* xml-support.c: Ditto.
+	* xstormy16-tdep.c: Ditto.
+	* xtensa-tdep.c: Ditto.
+	* xtensa-tdep.h: Ditto.
+
 2011-01-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (resources_needed_watchpoint): Fix indentation.

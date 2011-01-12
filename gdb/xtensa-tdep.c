@@ -116,7 +116,8 @@ static int xtensa_debug_level = 0;
 #define PS_WOE			(1<<18)
 #define PS_EXC			(1<<4)
 
-/* Convert a live A-register number to the corresponding AR-register number.  */
+/* Convert a live A-register number to the corresponding AR-register
+   number.  */
 static int
 arreg_number (struct gdbarch *gdbarch, int a_regnum, ULONGEST wb)
 {
@@ -890,10 +891,11 @@ typedef struct xtensa_windowed_frame_cache
 {
   int wb;		/* WINDOWBASE of the previous frame.  */
   int callsize;		/* Call size of this frame.  */
-  int ws;		/* WINDOWSTART of the previous frame.  It keeps track of
-			   life windows only.  If there is no bit set for the
-			   window, that means it had been already spilled
-			   because of window overflow.  */
+  int ws;		/* WINDOWSTART of the previous frame.  It
+			   keeps track of life windows only.  If there
+			   is no bit set for the window, that means it
+			   had been already spilled because of window
+			   overflow.  */
 
   /* Spilled A-registers from the previous frame.
      AREGS[i] == -1, if corresponding AR is alive.  */
@@ -902,7 +904,8 @@ typedef struct xtensa_windowed_frame_cache
 
 /* Call0 ABI Definitions.  */
 
-#define C0_MAXOPDS  3	/* Maximum number of operands for prologue analysis.  */
+#define C0_MAXOPDS  3	/* Maximum number of operands for prologue
+			   analysis.  */
 #define C0_NREGS   16	/* Number of A-registers to track.  */
 #define C0_CLESV   12	/* Callee-saved registers are here and up.  */
 #define C0_SP	    1	/* Register used as SP.  */
@@ -929,8 +932,9 @@ typedef struct xtensa_c0reg
     int	    fr_reg;	/* original register from which register content
 			   is derived, or C0_CONST, or C0_INEXP.  */
     int	    fr_ofs;	/* constant offset from reg, or immediate value.  */
-    int	    to_stk;	/* offset from original SP to register (4-byte aligned),
-			   or C0_NOSTK if register has not been saved.  */
+    int	    to_stk;	/* offset from original SP to register (4-byte
+			   aligned), or C0_NOSTK if register has not
+			   been saved.  */
 } xtensa_c0reg_t;
 
 
@@ -938,7 +942,8 @@ typedef struct xtensa_c0reg
 typedef struct xtensa_call0_frame_cache
 {
   int c0_frmsz;				/* Stack frame size.  */
-  int c0_hasfp;				/* Current frame uses frame pointer.  */
+  int c0_hasfp;				/* Current frame uses frame
+					   pointer.  */
   int fp_regnum;			/* A-register used as FP.  */
   int c0_fp;				/* Actual value of frame pointer.  */
   xtensa_c0reg_t c0_rt[C0_NREGS];	/* Register tracking information.  */
@@ -1116,7 +1121,7 @@ xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
 	      unsigned int register_operand;
 
 	      /* Possible candidate for setting frame pointer
-		 from A1. This is what we are looking for.  */
+		 from A1.  This is what we are looking for.  */
 
 	      if (xtensa_operand_get_field (isa, opc, 1, ifmt, 
 					    is, slot, &register_operand) != 0)
@@ -1132,7 +1137,8 @@ xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
 					     &register_operand) != 0)
 		    RETURN_FP;
 
-		  fp_regnum = gdbarch_tdep (gdbarch)->a0_base + register_operand;
+		  fp_regnum
+		    = gdbarch_tdep (gdbarch)->a0_base + register_operand;
 		  RETURN_FP;
 		}
 	    }
@@ -1166,8 +1172,7 @@ done:
 
 	cache->base    = SP (or best guess about FP) of this frame;
 	cache->pc      = entry-PC (entry point of the frame function);
-	cache->prev_sp = SP of the previous frame.
-*/
+	cache->prev_sp = SP of the previous frame.  */
 
 static void
 call0_frame_cache (struct frame_info *this_frame,
@@ -1278,8 +1283,9 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	}
 
       if ((cache->prev_sp == 0) && ( ra != 0 ))
-	/* If RA is equal to 0 this frame is an outermost frame.  Leave
-	   cache->prev_sp unchanged marking the boundary of the frame stack.  */
+	/* If RA is equal to 0 this frame is an outermost frame.
+	   Leave cache->prev_sp unchanged marking the boundary of the
+	   frame stack.  */
 	{
 	  if ((cache->wd.ws & (1 << cache->wd.wb)) == 0)
 	    {
@@ -1296,7 +1302,8 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 			     (gdbarch, gdbarch_tdep (gdbarch)->a0_base + 1,
 			      cache->wd.wb);
 
-	      cache->prev_sp = get_frame_register_unsigned (this_frame, regnum);
+	      cache->prev_sp = get_frame_register_unsigned (this_frame,
+							    regnum);
 	    }
 	}
     }
@@ -1406,7 +1413,8 @@ xtensa_frame_prev_register (struct frame_info *this_frame,
 	      spe = cache->c0.c0_fp
 		- cache->c0.c0_rt[cache->c0.fp_regnum].fr_ofs;
 
-	      return frame_unwind_got_memory (this_frame, regnum, spe + stkofs);
+	      return frame_unwind_got_memory (this_frame, regnum,
+					      spe + stkofs);
 	    }
 	}
     }
@@ -1472,7 +1480,8 @@ xtensa_extract_return_value (struct type *type,
       /* On Xtensa, we can return up to 4 words (or 2 for call12).  */
       if (len > (callsize > 8 ? 8 : 16))
 	internal_error (__FILE__, __LINE__,
-			_("cannot extract return value of %d bytes long"), len);
+			_("cannot extract return value of %d bytes long"),
+			len);
 
       /* Get the register offset of the return
 	 register (A2) in the caller window.  */
@@ -1612,8 +1621,8 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
     int align;			/* alignment */
     union
     {
-      int offset;		/* stack offset if on stack */
-      int regno;		/* regno if in register */
+      int offset;		/* stack offset if on stack.  */
+      int regno;		/* regno if in register.  */
     } u;
   };
 
@@ -1912,7 +1921,8 @@ typedef enum {
   c0opc_mov,	       /* Moving a register to a register.  */
   c0opc_movi,	       /* Moving an immediate to a register.  */
   c0opc_l32r,	       /* Loading a literal.  */
-  c0opc_s32i,	       /* Storing word at fixed offset from a base register.  */
+  c0opc_s32i,	       /* Storing word at fixed offset from a base
+			  register.  */
   c0opc_NrOf	       /* Number of opcode classifications.  */
 } xtensa_insn_kind;
 
@@ -2216,7 +2226,8 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	    goto done;
 
 	  opc = xtensa_opcode_decode (isa, ifmt, is, slot);
-	  DEBUGVERB ("[call0_analyze_prologue] instr addr = 0x%08x, opc = %d\n", 
+	  DEBUGVERB ("[call0_analyze_prologue] instr "
+		     "addr = 0x%08x, opc = %d\n", 
 		     (unsigned)ia, opc);
 	  if (opc == XTENSA_UNDEFINED) 
 	    opclass = c0opc_illegal;
@@ -2302,7 +2313,8 @@ done:
 
 static void
 call0_frame_cache (struct frame_info *this_frame,
-		   xtensa_frame_cache_t *cache, CORE_ADDR pc, CORE_ADDR litbase)
+		   xtensa_frame_cache_t *cache,
+		   CORE_ADDR pc, CORE_ADDR litbase)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2382,21 +2394,23 @@ analysis failed in this frame. GDB command execution stopped."));
   else if (cache->c0.c0_rt[C0_RA].fr_reg == C0_CONST
 	   && cache->c0.c0_rt[C0_RA].fr_ofs == 0)
     {
-      /* Special case for terminating backtrace at a function that wants to
-	 be seen as the outermost.  Such a function will clear it's RA (A0)
-	 register to 0 in the prologue instead of saving its original value.  */
+      /* Special case for terminating backtrace at a function that
+	 wants to be seen as the outermost.  Such a function will
+	 clear it's RA (A0) register to 0 in the prologue instead of
+	 saving its original value.  */
       ra = 0;
     }
   else
     {
-      /* RA was copied to another register or (before any function call) may
-	 still be in the original RA register.  This is not always reliable:
-	 even in a leaf function, register tracking stops after prologue, and
-	 even in prologue, non-prologue instructions (not tracked) may overwrite
-	 RA or any register it was copied to.  If likely in prologue or before
-	 any call, use retracking info and hope for the best (compiler should
-	 have saved RA in stack if not in a leaf function).  If not in prologue,
-	 too bad.  */
+      /* RA was copied to another register or (before any function
+	 call) may still be in the original RA register.  This is not
+	 always reliable: even in a leaf function, register tracking
+	 stops after prologue, and even in prologue, non-prologue
+	 instructions (not tracked) may overwrite RA or any register
+	 it was copied to.  If likely in prologue or before any call,
+	 use retracking info and hope for the best (compiler should
+	 have saved RA in stack if not in a leaf function).  If not in
+	 prologue, too bad.  */
 
       int i;
       for (i = 0; 
@@ -2667,7 +2681,7 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, xtensa_register_name);
   set_gdbarch_register_type (gdbarch, xtensa_register_type);
 
-  /* To call functions from GDB using dummy frame */
+  /* To call functions from GDB using dummy frame.  */
   set_gdbarch_push_dummy_call (gdbarch, xtensa_push_dummy_call);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
@@ -2736,9 +2750,9 @@ _initialize_xtensa_tdep (void)
 
   add_setshow_zinteger_cmd ("xtensa",
 			    class_maintenance,
-			    &xtensa_debug_level, _("\
-Set Xtensa debugging."), _("\
-Show Xtensa debugging."), _("\
+			    &xtensa_debug_level,
+			    _("Set Xtensa debugging."),
+			    _("Show Xtensa debugging."), _("\
 When non-zero, Xtensa-specific debugging is enabled. \
 Can be 1, 2, 3, or 4 indicating the level of debugging."),
 			    NULL,

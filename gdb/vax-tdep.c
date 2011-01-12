@@ -57,7 +57,7 @@ vax_register_name (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Return the GDB type object for the "standard" data type of data in
-   register REGNUM. */
+   register REGNUM.  */
 
 static struct type *
 vax_register_type (struct gdbarch *gdbarch, int regnum)

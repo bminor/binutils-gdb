@@ -368,7 +368,7 @@ value_cast (struct type *type, struct value *arg2)
   if (code1 == TYPE_CODE_REF)
     {
       /* We dereference type; then we recurse and finally
-         we generate value of the given reference. Nothing wrong with 
+         we generate value of the given reference.  Nothing wrong with 
 	 that.  */
       struct type *t1 = check_typedef (type);
       struct type *dereftype = check_typedef (TYPE_TARGET_TYPE (t1));
@@ -1420,7 +1420,7 @@ address_of_variable (struct symbol *var, struct block *b)
   struct value *val;
 
   /* Evaluate it first; if the result is a memory address, we're fine.
-     Lazy evaluation pays off here. */
+     Lazy evaluation pays off here.  */
 
   val = value_of_variable (var, b);
 
@@ -1528,8 +1528,7 @@ value_coerce_to_target (struct value *val)
    other than array subscripting, where the caller would get back a
    value that had an address somewhere before the actual first element
    of the array, and the information about the lower bound would be
-   lost because of the coercion to pointer type.
- */
+   lost because of the coercion to pointer type.  */
 
 struct value *
 value_coerce_array (struct value *arg1)
@@ -1593,7 +1592,7 @@ value_addr (struct value *arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error (_("Attempt to take address of value not located in memory."));
 
-  /* Get target memory address */
+  /* Get target memory address.  */
   arg2 = value_from_pointer (lookup_pointer_type (value_type (arg1)),
 			     (value_address (arg1)
 			      + value_embedded_offset (arg1)));
@@ -1667,7 +1666,7 @@ value_ind (struct value *arg1)
 	arg2 = value_at_lazy (enc_type, 
 			      find_function_addr (arg1, NULL));
       else
-	/* Retrieve the enclosing object pointed to */
+	/* Retrieve the enclosing object pointed to.  */
 	arg2 = value_at_lazy (enc_type, 
 			      (value_as_address (arg1)
 			       - value_pointed_to_offset (arg1)));
@@ -1891,7 +1890,7 @@ typecmp (int staticp, int varargs, int nargs,
 }
 
 /* Helper function used by value_struct_elt to recurse through
-   baseclasses.  Look for a field NAME in ARG1. Adjust the address of
+   baseclasses.  Look for a field NAME in ARG1.  Adjust the address of
    ARG1 by OFFSET bytes, and search in it assuming it has (class) type
    TYPE.  If found, return value, else return NULL.
 
@@ -2006,7 +2005,7 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 	    error (_("virtual baseclass botch"));
 
 	  /* The virtual base class pointer might have been clobbered
-	     by the user program. Make sure that it still points to a
+	     by the user program.  Make sure that it still points to a
 	     valid memory location.  */
 
 	  boffset += value_embedded_offset (arg1) + offset;
@@ -2051,7 +2050,7 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 }
 
 /* Helper function used by value_struct_elt to recurse through
-   baseclasses.  Look for a field NAME in ARG1. Adjust the address of
+   baseclasses.  Look for a field NAME in ARG1.  Adjust the address of
    ARG1 by OFFSET bytes, and search in it assuming it has (class) type
    TYPE.
 
@@ -2073,7 +2072,7 @@ search_struct_method (const char *name, struct value **arg1p,
     {
       char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
 
-      /* FIXME!  May need to check for ARM demangling here */
+      /* FIXME!  May need to check for ARM demangling here.  */
       if (strncmp (t_field_name, "__", 2) == 0 ||
 	  strncmp (t_field_name, "op", 2) == 0 ||
 	  strncmp (t_field_name, "type", 4) == 0)
@@ -2132,7 +2131,7 @@ search_struct_method (const char *name, struct value **arg1p,
 	  const gdb_byte *base_valaddr;
 
 	  /* The virtual base class pointer might have been
-	     clobbered by the user program. Make sure that it
+	     clobbered by the user program.  Make sure that it
 	    still points to a valid memory location.  */
 
 	  if (offset < 0 || offset >= TYPE_LENGTH (type))
@@ -2181,7 +2180,7 @@ search_struct_method (const char *name, struct value **arg1p,
    ERR is used in the error message if *ARGP's type is wrong.
 
    C++: ARGS is a list of argument types to aid in the selection of
-   an appropriate method. Also, handle derived types.
+   an appropriate method.  Also, handle derived types.
 
    STATIC_MEMFUNCP, if non-NULL, points to a caller-supplied location
    where the truthvalue of whether the function that was resolved was
@@ -2286,8 +2285,7 @@ value_struct_elt (struct value **argp, struct value **args,
    NUM_FNS is the number of overloaded instances.
    BASETYPE is set to the actual type of the subobject where the
       method is found.
-   BOFFSET is the offset of the base subobject where the method is found.
-*/
+   BOFFSET is the offset of the base subobject where the method is found.  */
 
 static struct fn_field *
 find_method_list (struct value **argp, const char *method,
@@ -2358,8 +2356,7 @@ find_method_list (struct value **argp, const char *method,
    NUM_FNS is the number of overloaded instances.
    BASETYPE is set to the type of the base subobject that defines the
       method.
-   BOFFSET is the offset of the base subobject which defines the method. 
-*/
+   BOFFSET is the offset of the base subobject which defines the method.  */
 
 struct fn_field *
 value_find_oload_method_list (struct value **argp, const char *method,
@@ -2402,7 +2399,7 @@ value_find_oload_method_list (struct value **argp, const char *method,
      METHOD: for member functions.
      BOTH: used for overload resolution of operators where the
        candidates are expected to be either member or non member
-       functions. In this case the first argument ARGTYPES
+       functions.  In this case the first argument ARGTYPES
        (representing 'this') is expected to be a reference to the
        target object, and will be dereferenced when attempting the
        non-member search.
@@ -2429,8 +2426,7 @@ value_find_oload_method_list (struct value **argp, const char *method,
 
    Note: This function does *not* check the value of
    overload_resolution.  Caller must check it to see whether overload
-   resolution is permitted.
-*/
+   resolution is permitted.  */
 
 int
 find_overload_match (struct type **arg_types, int nargs, 
@@ -2770,7 +2766,7 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
   *oload_syms = NULL;
   *oload_champ_bv = NULL;
 
-  /* First, see if we have a deeper namespace we can search in.  
+  /* First, see if we have a deeper namespace we can search in.
      If we get a good match there, use it.  */
 
   if (qualified_name[next_namespace_len] == ':')
@@ -3103,7 +3099,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
     ++start;
 
   /* If skipping artificial fields, find the first real field
-     in T1. */
+     in T1.  */
   if (skip_artificial)
     {
       while (start < TYPE_NFIELDS (t1)
@@ -3111,7 +3107,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 	++start;
     }
 
-  /* Now compare parameters */
+  /* Now compare parameters.  */
 
   /* Special case: a method taking void.  T1 will contain no
      non-artificial fields, and T2 will contain TYPE_CODE_VOID.  */
@@ -3464,7 +3460,7 @@ value_full_object (struct value *argp,
       return argp;
     }
 
-  /* Check if object is in memory */
+  /* Check if object is in memory.  */
   if (VALUE_LVAL (argp) != lval_memory)
     {
       warning (_("Couldn't retrieve complete object of RTTI "

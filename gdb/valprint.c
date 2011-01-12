@@ -62,7 +62,7 @@ static void set_output_radix_1 (int, unsigned);
 
 void _initialize_valprint (void);
 
-#define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value. */
+#define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value.  */
 
 struct value_print_options user_print_options =
 {
@@ -158,7 +158,7 @@ show_print_array_indexes (struct ui_file *file, int from_tty,
 
 /* Print repeat counts if there are more than this many repetitions of an
    element in an array.  Referenced by the low level language dependent
-   print routines. */
+   print routines.  */
 
 static void
 show_repeat_count_threshold (struct ui_file *file, int from_tty,
@@ -168,7 +168,7 @@ show_repeat_count_threshold (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* If nonzero, stops printing of char arrays at first null. */
+/* If nonzero, stops printing of char arrays at first null.  */
 
 static void
 show_stop_print_at_null (struct ui_file *file, int from_tty,
@@ -180,7 +180,7 @@ show_stop_print_at_null (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Controls pretty printing of structures. */
+/* Controls pretty printing of structures.  */
 
 static void
 show_prettyprint_structs (struct ui_file *file, int from_tty,
@@ -199,7 +199,7 @@ show_prettyprint_arrays (struct ui_file *file, int from_tty,
 }
 
 /* If nonzero, causes unions inside structures or other unions to be
-   printed. */
+   printed.  */
 
 static void
 show_unionprint (struct ui_file *file, int from_tty,
@@ -210,7 +210,7 @@ show_unionprint (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* If nonzero, causes machine addresses to be printed in certain contexts. */
+/* If nonzero, causes machine addresses to be printed in certain contexts.  */
 
 static void
 show_addressprint (struct ui_file *file, int from_tty,
@@ -299,7 +299,7 @@ valprint_check_validity (struct ui_file *stream,
    for (specific CPU type and thus specific target byte ordering), then
    either the print routines are going to have to take this into account,
    or the data is going to have to be passed into here already converted
-   to the host byte ordering, whichever is more convenient. */
+   to the host byte ordering, whichever is more convenient.  */
 
 
 int
@@ -512,9 +512,9 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 
 /* Print a number according to FORMAT which is one of d,u,x,o,b,h,w,g.
    The raison d'etre of this function is to consolidate printing of 
-   LONG_LONG's into this one function. The format chars b,h,w,g are 
+   LONG_LONG's into this one function.  The format chars b,h,w,g are 
    from print_scalar_formatted().  Numbers are printed using C
-   format. 
+   format.
 
    USE_C_FORMAT means to use C format in all cases.  Without it, 
    'o' and 'x' format do not include the standard C radix prefix
@@ -527,7 +527,7 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
    the integer is a protocol thing, not a user-visible thing).  The
    parameter remains to preserve the information of what things might
    be printed with language-specific format, should we ever resurrect
-   that capability. */
+   that capability.  */
 
 void
 print_longest (struct ui_file *stream, int format, int use_c_format,
@@ -570,10 +570,10 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
 int
 longest_to_int (LONGEST arg)
 {
-  /* Let the compiler do the work */
+  /* Let the compiler do the work.  */
   int rtnval = (int) arg;
 
-  /* Check for overflows or underflows */
+  /* Check for overflows or underflows.  */
   if (sizeof (LONGEST) > sizeof (int))
     {
       if (rtnval != arg)
@@ -685,8 +685,8 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
   int b;
 
   /* Declared "int" so it will be signed.
-   * This ensures that right shift will shift in zeros.
-   */
+     This ensures that right shift will shift in zeros.  */
+
   const int mask = 0x080;
 
   /* FIXME: We should be not printing leading zeroes in most cases.  */
@@ -698,8 +698,8 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	   p++)
 	{
 	  /* Every byte has 8 binary characters; peel off
-	   * and print from the MSB end.
-	   */
+	     and print from the MSB end.  */
+
 	  for (i = 0; i < (BITS_IN_BYTES * sizeof (*p)); i++)
 	    {
 	      if (*p & (mask >> i))
@@ -731,8 +731,8 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 }
 
 /* VALADDR points to an integer of LEN bytes.
- * Print it in octal on stream or format it in buf.
- */
+   Print it in octal on stream or format it in buf.  */
+
 void
 print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		   unsigned len, enum bfd_endian byte_order)
@@ -772,8 +772,8 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 #define LOW_TWO       0007
 
   /* For 32 we start in cycle 2, with two bits and one bit carry;
-   * for 64 in cycle in cycle 1, with one bit and a two bit carry.
-   */
+     for 64 in cycle in cycle 1, with one bit and a two bit carry.  */
+
   cycle = (len * BITS_IN_BYTES) % BITS_IN_OCTAL;
   carry = 0;
 
@@ -787,8 +787,8 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	  switch (cycle)
 	    {
 	    case 0:
-	      /* No carry in, carry out two bits.
-	       */
+	      /* No carry in, carry out two bits.  */
+
 	      octa1 = (HIGH_ZERO & *p) >> 5;
 	      octa2 = (LOW_ZERO & *p) >> 2;
 	      carry = (CARRY_ZERO & *p);
@@ -797,8 +797,8 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	      break;
 
 	    case 1:
-	      /* Carry in two bits, carry out one bit.
-	       */
+	      /* Carry in two bits, carry out one bit.  */
+
 	      octa1 = (carry << 1) | ((HIGH_ONE & *p) >> 7);
 	      octa2 = (MID_ONE & *p) >> 4;
 	      octa3 = (LOW_ONE & *p) >> 1;
@@ -809,8 +809,8 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	      break;
 
 	    case 2:
-	      /* Carry in one bit, no carry out.
-	       */
+	      /* Carry in one bit, no carry out.  */
+
 	      octa1 = (carry << 2) | ((HIGH_TWO & *p) >> 6);
 	      octa2 = (MID_TWO & *p) >> 3;
 	      octa3 = (LOW_TWO & *p);
@@ -838,6 +838,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	    {
 	    case 0:
 	      /* Carry out, no carry in */
+
 	      octa1 = (HIGH_ZERO & *p) >> 5;
 	      octa2 = (LOW_ZERO & *p) >> 2;
 	      carry = (CARRY_ZERO & *p);
@@ -847,6 +848,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 	    case 1:
 	      /* Carry in, carry out */
+
 	      octa1 = (carry << 1) | ((HIGH_ONE & *p) >> 7);
 	      octa2 = (MID_ONE & *p) >> 4;
 	      octa3 = (LOW_ONE & *p) >> 1;
@@ -858,6 +860,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 	    case 2:
 	      /* Carry in, no carry out */
+
 	      octa1 = (carry << 2) | ((HIGH_TWO & *p) >> 6);
 	      octa2 = (MID_TWO & *p) >> 3;
 	      octa3 = (LOW_TWO & *p);
@@ -879,8 +882,8 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 }
 
 /* VALADDR points to an integer of LEN bytes.
- * Print it in decimal on stream or format it in buf.
- */
+   Print it in decimal on stream or format it in buf.  */
+
 void
 print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		     unsigned len, enum bfd_endian byte_order)
@@ -901,8 +904,8 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   int flip;
 
   /* Base-ten number is less than twice as many digits
-   * as the base 16 number, which is 2 digits per byte.
-   */
+     as the base 16 number, which is 2 digits per byte.  */
+
   decimal_len = len * 2 * 2;
   digits = xmalloc (decimal_len);
 
@@ -919,7 +922,7 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
    * the nibbles by 16, add Y and re-decimalize.  Repeat with Z.
    *
    * The trick is that "digits" holds a base-10 number, but sometimes
-   * the individual digits are > 10. 
+   * the individual digits are > 10.
    *
    * Outer loop is per nibble (hex digit) of input, from MSD end to
    * LSD end.
@@ -947,15 +950,15 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
        */
       if (flip == 0)
 	{
-	  /* Take top nibble.
-	   */
+	  /* Take top nibble.  */
+
 	  digits[0] += HIGH_NIBBLE (*p);
 	  flip = 1;
 	}
       else
 	{
-	  /* Take low nibble and bump our pointer "p".
-	   */
+	  /* Take low nibble and bump our pointer "p".  */
+
 	  digits[0] += LOW_NIBBLE (*p);
           if (byte_order == BFD_ENDIAN_BIG)
 	    p++;
@@ -1001,8 +1004,8 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
     }
 
   /* Ok, now "digits" is the decimal representation, with
-   * the "decimal_digits" actual digits.  Print!
-   */
+     the "decimal_digits" actual digits.  Print!  */
+
   for (i = decimal_digits - 1; i >= 0; i--)
     {
       fprintf_filtered (stream, "%1d", digits[i]);
@@ -1042,7 +1045,7 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
 }
 
 /* VALADDR points to a char integer of LEN bytes.
-   Print it out in appropriate language form on stream.  
+   Print it out in appropriate language form on stream.
    Omit any leading zero chars.  */
 
 void
@@ -1102,8 +1105,7 @@ maybe_print_array_index (struct type *index_type, LONGEST index,
    (FIXME?)  Assumes array element separator is a comma, which is correct
    for all languages currently handled.
    (FIXME?)  Some languages have a notation for repeated array elements,
-   perhaps we should try to use that notation when appropriate.
- */
+   perhaps we should try to use that notation when appropriate.  */
 
 void
 val_print_array_elements (struct type *type, const gdb_byte *valaddr,
@@ -1205,7 +1207,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns a count of the bytes
    actually read, and optionally an errno value in the location
-   pointed to by ERRNOPTR if ERRNOPTR is non-null. */
+   pointed to by ERRNOPTR if ERRNOPTR is non-null.  */
 
 /* FIXME: cagney/1999-10-14: Only used by val_print_string.  Can this
    function be eliminated.  */
@@ -1214,24 +1216,24 @@ static int
 partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 		     int len, int *errnoptr)
 {
-  int nread;			/* Number of bytes actually read. */
-  int errcode;			/* Error from last read. */
+  int nread;			/* Number of bytes actually read.  */
+  int errcode;			/* Error from last read.  */
 
-  /* First try a complete read. */
+  /* First try a complete read.  */
   errcode = target_read_memory (memaddr, myaddr, len);
   if (errcode == 0)
     {
-      /* Got it all. */
+      /* Got it all.  */
       nread = len;
     }
   else
     {
-      /* Loop, reading one byte at a time until we get as much as we can. */
+      /* Loop, reading one byte at a time until we get as much as we can.  */
       for (errcode = 0, nread = 0; len > 0 && errcode == 0; nread++, len--)
 	{
 	  errcode = target_read_memory (memaddr++, myaddr++, 1);
 	}
-      /* If an error, the last read was unsuccessful, so adjust count. */
+      /* If an error, the last read was unsuccessful, so adjust count.  */
       if (errcode != 0)
 	{
 	  nread--;
@@ -1262,7 +1264,7 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 
    Note: There was a FIXME asking to make this code use target_read_string,
    but this function is more general (can read past null characters, up to
-   given LEN). Besides, it is used much more often than target_read_string
+   given LEN).  Besides, it is used much more often than target_read_string
    so it is more tested.  Perhaps callers of target_read_string should use
    this function instead?  */
 
@@ -1392,7 +1394,7 @@ val_print_string (struct type *elttype, const char *encoding,
 {
   int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero.  */
   int errcode;			/* Errno returned from bad reads.  */
-  int found_nul;		/* Non-zero if we found the nul char */
+  int found_nul;		/* Non-zero if we found the nul char.  */
   unsigned int fetchlimit;	/* Maximum number of chars to print.  */
   int bytes_read;
   gdb_byte *buffer = NULL;	/* Dynamically growable fetch buffer.  */
@@ -1507,7 +1509,7 @@ set_input_radix_1 (int from_tty, unsigned radix)
      radix greater than 1, even if we don't have unique digits for every
      value from 0 to radix-1, but in practice we lose on large radix values.
      We should either fix the lossage or restrict the radix range more.
-     (FIXME). */
+     (FIXME).  */
 
   if (radix < 2)
     {
@@ -1540,7 +1542,7 @@ static void
 set_output_radix_1 (int from_tty, unsigned radix)
 {
   /* Validate the radix and disallow ones that we aren't prepared to
-     handle correctly, leaving the radix unchanged. */
+     handle correctly, leaving the radix unchanged.  */
   switch (radix)
     {
     case 16:
@@ -1573,7 +1575,7 @@ set_output_radix_1 (int from_tty, unsigned radix)
 
    It may be useful to have an unusual input radix.  If the user wishes to
    set an input radix that is not valid as an output radix, he needs to use
-   the 'set input-radix' command. */
+   the 'set input-radix' command.  */
 
 static void
 set_radix (char *arg, int from_tty)
@@ -1591,7 +1593,7 @@ set_radix (char *arg, int from_tty)
     }
 }
 
-/* Show both the input and output radices. */
+/* Show both the input and output radices.  */
 
 static void
 show_radix (char *arg, int from_tty)
@@ -1638,7 +1640,7 @@ _initialize_valprint (void)
 		  _("Generic command for setting how things print."),
 		  &setprintlist, "set print ", 0, &setlist);
   add_alias_cmd ("p", "print", no_class, 1, &setlist);
-  /* prefer set print to set prompt */
+  /* Prefer set print to set prompt.  */
   add_alias_cmd ("pr", "print", no_class, 1, &setlist);
 
   add_prefix_cmd ("print", no_class, show_print,
@@ -1725,7 +1727,7 @@ Show default output radix for printing of values."), NULL,
      they are like normal set and show commands but allow two normally
      independent variables to be either set or shown with a single
      command.  So the usual deprecated_add_set_cmd() and [deleted]
-     add_show_from_set() commands aren't really appropriate. */
+     add_show_from_set() commands aren't really appropriate.  */
   /* FIXME: i18n: With the new add_setshow_integer command, that is no
      longer true - show can display anything.  */
   add_cmd ("radix", class_support, set_radix, _("\

@@ -56,7 +56,7 @@ calculate_allocation (const struct vec_prefix *pfx, int reserve)
     alloc = num + -reserve;
   else
     {
-      /* Exponential growth. */
+      /* Exponential growth.  */
       if (!alloc)
 	alloc = 4;
       else if (alloc < 16)
@@ -66,7 +66,7 @@ calculate_allocation (const struct vec_prefix *pfx, int reserve)
 	/* Grow slower when large.  */
 	alloc = (alloc * 3 / 2);
 
-      /* If this is still too small, set it to the right size. */
+      /* If this is still too small, set it to the right size.  */
       if (alloc < num + reserve)
 	alloc = num + reserve;
     }
@@ -75,7 +75,7 @@ calculate_allocation (const struct vec_prefix *pfx, int reserve)
 
 /* Ensure there are at least abs(RESERVE) free slots in VEC.  If
    RESERVE < 0 grow exactly, else grow exponentially.  As a special
-   case, if VEC is NULL, and RESERVE is 0, no vector will be created. */
+   case, if VEC is NULL, and RESERVE is 0, no vector will be created.  */
 
 void *
 vec_p_reserve (void *vec, int reserve)

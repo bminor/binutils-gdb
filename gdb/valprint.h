@@ -50,7 +50,7 @@ struct value_print_options
   /* Maximum number of chars to print for a string pointer value or vector
      contents, or UINT_MAX for no limit.  Note that "set print elements 0"
      stores UINT_MAX in print_max, which displays in a show command as
-     "unlimited". */
+     "unlimited".  */
   unsigned int print_max;
 
   /* Print repeat counts if there are more than this many repetitions

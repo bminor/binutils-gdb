@@ -44,10 +44,10 @@ enum gdb_regnum
   /* Xstormy16 has 16 general purpose registers (R0-R15) plus PC.
      Functions will return their values in register R2-R7 as they fit.
      Otherwise a hidden pointer to an big enough area is given as argument
-     to the function in r2. Further arguments are beginning in r3 then.
+     to the function in r2.  Further arguments are beginning in r3 then.
      R13 is used as frame pointer when GCC compiles w/o optimization
      R14 is used as "PSW", displaying the CPU status.
-     R15 is used implicitely as stack pointer. */
+     R15 is used implicitely as stack pointer.  */
   E_R0_REGNUM,
   E_R1_REGNUM,
   E_R2_REGNUM, E_1ST_ARG_REGNUM = E_R2_REGNUM, E_PTR_RET_REGNUM = E_R2_REGNUM,
@@ -82,7 +82,7 @@ struct xstormy16_frame_cache
   CORE_ADDR saved_sp;
 };
 
-/* Size of instructions, registers, etc. */
+/* Size of instructions, registers, etc.  */
 enum
 {
   xstormy16_inst_size = 2,
@@ -90,11 +90,11 @@ enum
   xstormy16_pc_size = 4
 };
 
-/* Size of return datatype which fits into the remaining return registers. */
+/* Size of return datatype which fits into the remaining return registers.  */
 #define E_MAX_RETTYPE_SIZE(regnum)	((E_LST_ARG_REGNUM - (regnum) + 1) \
 					* xstormy16_reg_size)
 
-/* Size of return datatype which fits into all return registers. */
+/* Size of return datatype which fits into all return registers.  */
 enum
 {
   E_MAX_RETTYPE_SIZE_IN_REGS = E_MAX_RETTYPE_SIZE (E_R2_REGNUM)
@@ -181,7 +181,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
 {
   if (TYPE_LENGTH (type) == 1)
     {    
-      /* Add leading zeros to the value. */
+      /* Add leading zeros to the value.  */
       char buf[xstormy16_reg_size];
       memset (buf, 0, xstormy16_reg_size);
       memcpy (buf, valbuf, 1);
@@ -249,7 +249,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
       argreg++;
     }
 
-  /* Arguments are passed in R2-R7 as they fit. If an argument doesn't
+  /* Arguments are passed in R2-R7 as they fit.  If an argument doesn't
      fit in the remaining registers we're switching over to the stack.
      No argument is put on stack partially and as soon as we switched
      over to stack no further argument is put in a register even if it
@@ -260,7 +260,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
       if (typelen > E_MAX_RETTYPE_SIZE (argreg))
 	break;
 
-      /* Put argument into registers wordwise. */
+      /* Put argument into registers wordwise.  */
       val = value_contents (args[i]);
       for (j = 0; j < typelen; j += xstormy16_reg_size)
 	regcache_cooked_write_unsigned (regcache, argreg++,
@@ -286,7 +286,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
       memcpy (val, value_contents (args[j]), typelen);
       memset (val + typelen, 0, slacklen);
 
-      /* Now write this data to the stack. The stack grows upwards. */
+      /* Now write this data to the stack.  The stack grows upwards.  */
       write_memory (stack_dest, val, typelen + slacklen);
       stack_dest += typelen + slacklen;
     }
@@ -322,7 +322,7 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
   LONGEST offset;
   int regnum;
 
-  /* Initialize framesize with size of PC put on stack by CALLF inst. */
+  /* Initialize framesize with size of PC put on stack by CALLF inst.  */
   cache->saved_regs[E_PC_REGNUM] = 0;
   cache->framesize = xstormy16_pc_size;
 
@@ -344,8 +344,8 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
 	  cache->framesize += xstormy16_reg_size;
 	}
 
-      /* optional stack allocation for args and local vars <= 4 byte */
-      else if (inst == 0x301f || inst == 0x303f)	/* inc r15, #0x1/#0x3 */
+      /* Optional stack allocation for args and local vars <= 4 byte.  */
+      else if (inst == 0x301f || inst == 0x303f)       /* inc r15, #0x1/#0x3 */
 	{
 	  cache->framesize += ((inst & 0x0030) >> 4) + 1;
 	}
@@ -356,8 +356,8 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
 	  cache->framesize += (inst & 0x00f0) >> 4;
 	}
 
-      /* optional stack allocation for args and local vars >= 16 byte */
-      else if (inst == 0x314f && inst2 >= 0x0010)	/* 314f HHHH  add r15, #0xH */
+      /* Optional stack allocation for args and local vars >= 16 byte.  */
+      else if (inst == 0x314f && inst2 >= 0x0010) /* 314f HHHH add r15, #0xH */
 	{
 	  cache->framesize += inst2;
 	  next_addr += xstormy16_inst_size;
@@ -368,21 +368,22 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
 	  cache->uses_fp = 1;
 	}
 
-      /* optional copying of args in r2-r7 to r10-r13 */
-      /* Probably only in optimized case but legal action for prologue */
+      /* optional copying of args in r2-r7 to r10-r13.  */
+      /* Probably only in optimized case but legal action for prologue.  */
       else if ((inst & 0xff00) == 0x4600	/* 46SD   mov rD, rS */
 	       && (inst & 0x00f0) >= 0x0020 && (inst & 0x00f0) <= 0x0070
 	       && (inst & 0x000f) >= 0x00a0 && (inst & 0x000f) <= 0x000d)
 	;
 
-      /* optional copying of args in r2-r7 to stack */
-      /* 72DS HHHH   mov.b (rD, 0xHHHH), r(S-8) (bit3 always 1, bit2-0 = reg) */
+      /* Optional copying of args in r2-r7 to stack.  */
+      /* 72DS HHHH   mov.b (rD, 0xHHHH), r(S-8) 
+	 (bit3 always 1, bit2-0 = reg) */
       /* 73DS HHHH   mov.w (rD, 0xHHHH), r(S-8) */
       else if ((inst & 0xfed8) == 0x72d8 && (inst & 0x0007) >= 2)
 	{
 	  regnum = inst & 0x0007;
 	  /* Only 12 of 16 bits of the argument are used for the
-	     signed offset. */
+	     signed offset.  */
 	  offset = (LONGEST) (inst2 & 0x0fff);
 	  if (offset & 0x0800)
 	    offset -= 0x1000;
@@ -391,7 +392,7 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
 	  next_addr += xstormy16_inst_size;
 	}
 
-      else			/* Not a prologue instruction. */
+      else			/* Not a prologue instruction.  */
 	break;
     }
 
@@ -423,7 +424,7 @@ xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       memset (&cache, 0, sizeof cache);
 
-      /* Don't trust line number debug info in frameless functions. */
+      /* Don't trust line number debug info in frameless functions.  */
       plg_end = xstormy16_analyze_prologue (gdbarch, func_addr, func_end,
 					    &cache, NULL);
       if (!cache.uses_fp)
@@ -431,7 +432,7 @@ xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       /* Found a function.  */
       sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL);
-      /* Don't use line number debug info for assembly source files. */
+      /* Don't use line number debug info for assembly source files.  */
       if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
 	{
 	  sal = find_pc_line (func_addr, 0);
@@ -441,18 +442,18 @@ xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	      return sal.end;
 	    }
 	}
-      /* No useable line symbol.  Use result of prologue parsing method. */
+      /* No useable line symbol.  Use result of prologue parsing method.  */
       return plg_end;
     }
 
-  /* No function symbol -- just return the PC. */
+  /* No function symbol -- just return the PC.  */
 
   return (CORE_ADDR) pc;
 }
 
 /* The epilogue is defined here as the area at the end of a function,
    either on the `ret' instruction itself or after an instruction which
-   destroys the function's stack frame. */
+   destroys the function's stack frame.  */
 static int
 xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
@@ -464,12 +465,12 @@ xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       ULONGEST inst, inst2;
       CORE_ADDR addr = func_end - xstormy16_inst_size;
 
-      /* The Xstormy16 epilogue is max. 14 bytes long. */
+      /* The Xstormy16 epilogue is max. 14 bytes long.  */
       if (pc < func_end - 7 * xstormy16_inst_size)
 	return 0;
 
       /* Check if we're on a `ret' instruction.  Otherwise it's
-         too dangerous to proceed. */
+         too dangerous to proceed.  */
       inst = read_memory_unsigned_integer (addr,
 					   xstormy16_inst_size, byte_order);
       if (inst != 0x0003)
@@ -478,14 +479,16 @@ xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       while ((addr -= xstormy16_inst_size) >= func_addr)
 	{
 	  inst = read_memory_unsigned_integer (addr,
-					       xstormy16_inst_size, byte_order);
+					       xstormy16_inst_size,
+					       byte_order);
 	  if (inst >= 0x009a && inst <= 0x009d)	/* pop r10...r13 */
 	    continue;
 	  if (inst == 0x305f || inst == 0x307f)	/* dec r15, #0x1/#0x3 */
 	    break;
 	  inst2 = read_memory_unsigned_integer (addr - xstormy16_inst_size,
-						xstormy16_inst_size, byte_order);
-	  if (inst2 == 0x314f && inst >= 0x8000)	/* add r15, neg. value */
+						xstormy16_inst_size,
+						byte_order);
+	  if (inst2 == 0x314f && inst >= 0x8000)      /* add r15, neg. value */
 	    {
 	      addr -= xstormy16_inst_size;
 	      break;
@@ -508,7 +511,7 @@ xstormy16_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 }
 
 /* Given a pointer to a jump table entry, return the address
-   of the function it jumps to.  Return 0 if not found. */
+   of the function it jumps to.  Return 0 if not found.  */
 static CORE_ADDR
 xstormy16_resolve_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 {
@@ -520,7 +523,7 @@ xstormy16_resolve_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
       LONGEST inst, inst2, addr;
       char buf[2 * xstormy16_inst_size];
 
-      /* Return faddr if it's not pointing into the jump table. */
+      /* Return faddr if it's not pointing into the jump table.  */
       if (strcmp (faddr_sect->the_bfd_section->name, ".plt"))
 	return faddr;
 
@@ -539,7 +542,7 @@ xstormy16_resolve_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 
 /* Given a function's address, attempt to find (and return) the
    address of the corresponding jump table entry.  Return 0 if
-   not found. */
+   not found.  */
 static CORE_ADDR
 xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 {
@@ -550,7 +553,7 @@ xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
     {
       struct obj_section *osect;
 
-      /* Return faddr if it's already a pointer to a jump table entry. */
+      /* Return faddr if it's already a pointer to a jump table entry.  */
       if (!strcmp (faddr_sect->the_bfd_section->name, ".plt"))
 	return faddr;
 
@@ -575,9 +578,11 @@ xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 	      if (target_read_memory (addr, buf, sizeof buf))
 		return 0;
 	      inst = extract_unsigned_integer (buf,
-					       xstormy16_inst_size, byte_order);
+					       xstormy16_inst_size,
+					       byte_order);
 	      inst2 = extract_unsigned_integer (buf + xstormy16_inst_size,
-					        xstormy16_inst_size, byte_order);
+					        xstormy16_inst_size,
+						byte_order);
 	      faddr2 = inst2 << 8 | (inst & 0xff);
 	      if (faddr == faddr2)
 		return addr;
@@ -772,14 +777,14 @@ xstormy16_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 
 /* Function: xstormy16_gdbarch_init
    Initializer function for the xstormy16 gdbarch vector.
-   Called by gdbarch.  Sets up the gdbarch vector(s) for this target. */
+   Called by gdbarch.  Sets up the gdbarch vector(s) for this target.  */
 
 static struct gdbarch *
 xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
 
-  /* find a candidate among the list of pre-declared architectures. */
+  /* find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return (arches->gdbarch);
@@ -814,7 +819,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_address_to_pointer (gdbarch, xstormy16_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, xstormy16_pointer_to_address);
 
-  /* Stack grows up. */
+  /* Stack grows up.  */
   set_gdbarch_inner_than (gdbarch, core_addr_greaterthan);
 
   /*
@@ -849,9 +854,10 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Function: _initialize_xstormy16_tdep
    Initializer function for the Sanyo Xstormy16a module.
-   Called by gdb at start-up. */
+   Called by gdb at start-up.  */
 
-extern initialize_file_ftype _initialize_xstormy16_tdep; /* -Wmissing-prototypes */
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_xstormy16_tdep;
 
 void
 _initialize_xstormy16_tdep (void)

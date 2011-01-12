@@ -38,7 +38,7 @@
 #include <pc.h>
 #endif
 
-/* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun. */
+/* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun.  */
 #ifdef reg
 #undef reg
 #endif
@@ -113,7 +113,7 @@ static int debug_timestamp = 0;
 static struct cleanup *cleanup_chain;	/* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain;	/* cleaned up when gdb exits */
 
-/* Nonzero if we have job control. */
+/* Nonzero if we have job control.  */
 
 int job_control;
 
@@ -584,7 +584,7 @@ free_current_contents (void *ptr)
    use the cleanup chain for handling normal cleanups as well as dealing
    with cleanups that need to be done as a result of a call to error().
    In such cases, we may not be certain where the first cleanup is, unless
-   we have a do-nothing one to always use as the base. */
+   we have a do-nothing one to always use as the base.  */
 
 void
 null_cleanup (void *arg)
@@ -629,8 +629,8 @@ set_display_space (int new_value)
 
 /* As indicated by display_time and display_space, report GDB's elapsed time
    and space usage from the base time and space provided in ARG, which
-   must be a pointer to a struct cmd_stat. This function is intended
-   to be called as a cleanup. */
+   must be a pointer to a struct cmd_stat.  This function is intended
+   to be called as a cleanup.  */
 static void
 report_command_stats (void *arg)
 {
@@ -889,13 +889,13 @@ add_intermediate_continuation (struct thread_info *thread,
 }
 
 /* Walk down the cmd_continuation list, and execute all the
-   continuations. There is a problem though. In some cases new
+   continuations.  There is a problem though.  In some cases new
    continuations may be added while we are in the middle of this
-   loop. If this happens they will be added in the front, and done
+   loop.  If this happens they will be added in the front, and done
    before we have a chance of exhausting those that were already
-   there. We need to then save the beginning of the list in a pointer
+   there.  We need to then save the beginning of the list in a pointer
    and do the continuations from there on, instead of using the
-   global beginning of list as our iteration pointer.*/
+   global beginning of list as our iteration pointer.  */
 static int
 do_all_intermediate_continuations_thread_callback (struct thread_info *thread,
 						   void *data)
@@ -963,7 +963,7 @@ vwarning (const char *string, va_list args)
   else
     {
       target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output */
+      wrap_here ("");		/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
@@ -1092,7 +1092,7 @@ static const char *internal_problem_modes[] =
   NULL
 };
 
-/* Print a message reporting an internal error/warning. Ask the user
+/* Print a message reporting an internal error/warning.  Ask the user
    if they want to continue, dump core, or just exit.  Return
    something to indicate a quit.  */
 
@@ -1385,7 +1385,7 @@ perror_with_name (const char *string)
 
   /* I understand setting these is a matter of taste.  Still, some people
      may clear errno but not know about bfd_error.  Doing this here is not
-     unreasonable. */
+     unreasonable.  */
   bfd_set_error (bfd_error_no_error);
   errno = 0;
 
@@ -1435,7 +1435,7 @@ quit (void)
 
 
 /* Called when a memory allocation fails, with the number of bytes of
-   memory requested in SIZE. */
+   memory requested in SIZE.  */
 
 void
 nomem (long size)
@@ -1533,7 +1533,7 @@ xfree (void *ptr)
 
 
 /* Like asprintf/vasprintf but get an internal_error if the call
-   fails. */
+   fails.  */
 
 char *
 xstrprintf (const char *format, ...)
@@ -1721,7 +1721,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   while (1)
     {
-      wrap_here ("");		/* Flush any buffered output */
+      wrap_here ("");		/* Flush any buffered output.  */
       gdb_flush (gdb_stdout);
 
       if (annotation_level > 1)
@@ -1763,7 +1763,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 	  retval = def_value;
 	  break;
 	}
-      /* Eat rest of input line, to EOF or newline */
+      /* Eat rest of input line, to EOF or newline.  */
       if (answer != '\n')
 	do
 	  {
@@ -1897,7 +1897,7 @@ host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
 int
 parse_escape (struct gdbarch *gdbarch, char **string_ptr)
 {
-  int target_char = -2;	/* initialize to avoid GCC warnings */
+  int target_char = -2;	/* Initialize to avoid GCC warnings.  */
   int c = *(*string_ptr)++;
 
   switch (c)
@@ -1973,7 +1973,7 @@ parse_escape (struct gdbarch *gdbarch, char **string_ptr)
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that this routine should only
    be call for printing things which are independent of the language
-   of the program being debugged. */
+   of the program being debugged.  */
 
 static void
 printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
@@ -2025,7 +2025,7 @@ printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
 /* Print the character C on STREAM as part of the contents of a
    literal string whose delimiter is QUOTER.  Note that these routines
    should only be call for printing things which are independent of
-   the language of the program being debugged. */
+   the language of the program being debugged.  */
 
 void
 fputstr_filtered (const char *str, int quoter, struct ui_file *stream)
@@ -2310,7 +2310,7 @@ prompt_for_continue (void)
      need to save the ---Type <return>--- line at the top of the screen.  */
   reinitialize_more_filter ();
 
-  dont_repeat ();		/* Forget prev cmd -- CR won't repeat it. */
+  dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
 }
 
 /* Reinitialize filter; ie. tell it to reset to original values.  */
@@ -2323,7 +2323,7 @@ reinitialize_more_filter (void)
 }
 
 /* Indicate that if the next sequence of characters overflows the line,
-   a newline should be inserted here rather than when it hits the end. 
+   a newline should be inserted here rather than when it hits the end.
    If INDENT is non-null, it is a string to be printed to indent the
    wrapped part on the next line.  INDENT must remain accessible until
    the next call to wrap_here() or until a newline is printed through
@@ -2346,7 +2346,7 @@ reinitialize_more_filter (void)
 void
 wrap_here (char *indent)
 {
-  /* This should have been allocated, but be paranoid anyway. */
+  /* This should have been allocated, but be paranoid anyway.  */
   if (!wrap_buffer)
     internal_error (__FILE__, __LINE__,
 		    _("failed internal consistency check"));
@@ -2380,11 +2380,11 @@ wrap_here (char *indent)
 }
 
 /* Print input string to gdb_stdout, filtered, with wrap, 
-   arranging strings in columns of n chars. String can be
+   arranging strings in columns of n chars.  String can be
    right or left justified in the column.  Never prints 
    trailing spaces.  String should never be longer than
    width.  FIXME: this could be useful for the EXAMINE 
-   command, which currently doesn't tabulate very well */
+   command, which currently doesn't tabulate very well.  */
 
 void
 puts_filtered_tabular (char *string, int width, int right)
@@ -2425,9 +2425,9 @@ puts_filtered_tabular (char *string, int width, int right)
 
 
 /* Ensure that whatever gets printed next, using the filtered output
-   commands, starts at the beginning of the line.  I.E. if there is
+   commands, starts at the beginning of the line.  I.e. if there is
    any pending output for the current line, flush it and start a new
-   line.  Otherwise do nothing. */
+   line.  Otherwise do nothing.  */
 
 void
 begin_line (void)
@@ -2525,16 +2525,16 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (lines_printed >= lines_per_page - 1)
 		prompt_for_continue ();
 
-	      /* Now output indentation and wrapped string */
+	      /* Now output indentation and wrapped string.  */
 	      if (wrap_column)
 		{
 		  fputs_unfiltered (wrap_indent, stream);
-		  *wrap_pointer = '\0';	/* Null-terminate saved stuff */
-		  fputs_unfiltered (wrap_buffer, stream);   /* and eject it */
+		  *wrap_pointer = '\0';	/* Null-terminate saved stuff, */
+		  fputs_unfiltered (wrap_buffer, stream); /* and eject it.  */
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
-		     longer than (the user settable) chars_per_line. 
+		     longer than (the user settable) chars_per_line.
 		     Note also that this can set chars_printed > chars_per_line
 		     if we are printing a long string.  */
 		  chars_printed = strlen (wrap_indent)
@@ -2888,7 +2888,7 @@ print_spaces_filtered (int n, struct ui_file *stream)
 /* fprintf_symbol_filtered attempts to demangle NAME, a symbol in language
    LANG, using demangling args ARG_MODE, and print it filtered to STREAM.
    If the name is not mangled, or the language for the name is unknown, or
-   demangling is off, the name is printed in its "raw" form. */
+   demangling is off, the name is printed in its "raw" form.  */
 
 void
 fprintf_symbol_filtered (struct ui_file *stream, char *name,
@@ -2922,7 +2922,7 @@ fprintf_symbol_filtered (struct ui_file *stream, char *name,
    As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
    This "feature" is useful when searching for matching C++ function names
    (such as if the user types 'break FOO', where FOO is a mangled C++
-   function). */
+   function).  */
 
 int
 strcmp_iw (const char *string1, const char *string2)
@@ -3148,13 +3148,13 @@ When set, debugging messages will be marked with seconds and microseconds."),
 			   &setdebuglist, &showdebuglist);
 }
 
-/* Machine specific function to handle SIGWINCH signal. */
+/* Machine specific function to handle SIGWINCH signal.  */
 
 #ifdef  SIGWINCH_HANDLER_BODY
 SIGWINCH_HANDLER_BODY
 #endif
-/* print routines to handle variable size regs, etc. */
-/* temporary storage using circular buffer */
+/* Print routines to handle variable size regs, etc.  */
+/* Temporary storage using circular buffer.  */
 #define NUMCELLS 16
 #define CELLSIZE 50
 static char *
@@ -3174,7 +3174,7 @@ paddress (struct gdbarch *gdbarch, CORE_ADDR addr)
   /* Truncate address to the size of a target address, avoiding shifts
      larger or equal than the width of a CORE_ADDR.  The local
      variable ADDR_BIT stops the compiler reporting a shift overflow
-     when it won't occur. */
+     when it won't occur.  */
   /* NOTE: This assumes that the significant address information is
      kept in the least significant bits of ADDR - the upper bits were
      either zero or sign extended.  Should gdbarch_address_to_pointer or
@@ -3191,7 +3191,7 @@ static char *
 decimal2str (char *sign, ULONGEST addr, int width)
 {
   /* Steal code from valprint.c:print_decimal().  Should this worry
-     about the real size of addr as the above does? */
+     about the real size of addr as the above does?  */
   unsigned long temp[3];
   char *str = get_cell ();
   int i = 0;
@@ -3396,7 +3396,7 @@ hex_string_custom: insufficient space to store result"));
  * otherwise VAL is interpreted as unsigned.  If WIDTH is supplied, 
  * it is the minimum width (0-padded if needed).  USE_C_FORMAT means
  * to use C format in all cases.  If it is false, then 'x' 
- * and 'o' formats do not include a prefix (0x or leading 0). */
+ * and 'o' formats do not include a prefix (0x or leading 0).  */
 
 char *
 int_string (LONGEST val, int radix, int is_signed, int width, 
@@ -3594,14 +3594,14 @@ xfullpath (const char *filename)
   char *result;
 
   /* Extract the basename of filename, and return immediately 
-     a copy of filename if it does not contain any directory prefix. */
+     a copy of filename if it does not contain any directory prefix.  */
   if (base_name == filename)
     return xstrdup (filename);
 
   dir_name = alloca ((size_t) (base_name - filename + 2));
   /* Allocate enough space to store the dir_name + plus one extra
      character sometimes needed under Windows (see below), and
-     then the closing \000 character */
+     then the closing \000 character.  */
   strncpy (dir_name, filename, base_name - filename);
   dir_name[base_name - filename] = '\000';
 
@@ -3616,7 +3616,7 @@ xfullpath (const char *filename)
 #endif
 
   /* Canonicalize the directory prefix, and build the resulting
-     filename. If the dirname realpath already contains an ending
+     filename.  If the dirname realpath already contains an ending
      directory separator, avoid doubling it.  */
   real_path = gdb_realpath (dir_name);
   if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
