@@ -1,5 +1,18 @@
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	Add support for ia64-hpux.
+	* config/ia64/hpux.mh, ia64-hpux-nat.c, ia64-hpux-tdep.c,
+	ia64-hpux-tdep.h, solib-ia64-hpux.c, solib-ia64-hpux.h: New files.
+
+	* configure.host: Add handling for ia64-hpux hosts.  Add associated
+	floatformats.
+	* configure.tgt: Add handling for ia64-hpux targets.
+	* Makefile.in (ALL_64_TARGET_OBS): Add ia64-hpux-tdep.o.
+	(HFILES_NO_SRCDIR): Add ia64-hpux-tdep.h.
+	(ALLDEPFILES): Add ia64-hpux-nat.c ia64-hpux-tdep.c.
+
+2011-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	[ttrace] Compute thread list immediately after attach.
 	* inf_ttrace_attach (inf_ttrace_create_threads_after_attach):
 	New subprogram.
