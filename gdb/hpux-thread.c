@@ -522,19 +522,6 @@ hpux_thread_stop (ptid_t ptid)
   deprecated_child_ops.to_stop (ptid);
 }
 
-/* Convert a pid to printable form.  */
-
-char *
-hpux_pid_to_str (ptid_t ptid)
-{
-  static char buf[100];
-  int pid = PIDGET (ptid);
-
-  sprintf (buf, "Thread %ld", ptid_get_tid (ptid));
-
-  return buf;
-}
-
 static void
 init_hpux_thread_ops (void)
 {

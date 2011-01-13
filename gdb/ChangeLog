@@ -1,5 +1,9 @@
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* hpux-thread.c (hpux_pid_to_str): Delete.
+
+2011-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_emit_char): Remove strange code.
 	Check that c is <= UCHAR_MAX before passing it to isascii.
 	(char_at): Do not assume that TYPE_LEN is either 1 or 2.
