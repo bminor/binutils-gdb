@@ -134,6 +134,7 @@ static int error_index;
 %token INCLUDE
 %token MEMORY
 %token REGION_ALIAS
+%token LD_FEATURE
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> NEXT
@@ -357,6 +358,8 @@ ifile_p1:
 		{ lang_add_insert ($3, 1); }
 	|	REGION_ALIAS '(' NAME ',' NAME ')'
 		{ lang_memory_region_alias ($3, $5); }
+	|	LD_FEATURE '(' NAME ')'
+		{ lang_ld_feature ($3); }
 	;
 
 input_list:

@@ -3344,6 +3344,13 @@ of the names used by the BFD library (@pxref{BFD}).  You can see the
 architecture of an object file by using the @code{objdump} program with
 the @samp{-f} option.
 @end ifclear
+
+@item LD_FEATURE(@var{string})
+@kindex LD_FEATURE(@var{string})
+This command may be used to modify @command{ld} behavior.  If
+@var{string} is @code{"SANE_EXPR"} then absolute symbols and numbers
+in a script are simply treated as numbers everywhere.
+@xref{Expression Section}.
 @end table
 
 @node Assignments
@@ -5503,15 +5510,15 @@ section relative symbols and for builtin functions that return an
 address, such as @code{ADDR}, @code{LOADADDR}, @code{ORIGIN} and
 @code{SEGMENT_START}.  Other terms are simply numbers, or are builtin
 functions that return a non-address value, such as @code{LENGTH}.
-One complication is that unless you assign @code{__ld_compatibility}
-a value of 221 or larger, numbers and absolute symbols are treated
+One complication is that unless you set @code{LD_FEATURE ("SANE_EXPR")}
+(@pxref{Miscellaneous Commands}), numbers and absolute symbols are treated
 differently depending on their location, for compatibility with older
 versions of @code{ld}.  Expressions appearing outside an output
 section definition treat all numbers as absolute addresses.
 Expressions appearing inside an output section definition treat
-absolute symbols as numbers.  If @code{__ld_compatibility} is assigned
-a value larger than 221, then absolute symbols and numbers are simply
-treated as numbers everywhere.
+absolute symbols as numbers.  If @code{LD_FEATURE ("SANE_EXPR")} is
+given, then absolute symbols and numbers are simply treated as numbers
+everywhere.
 
 In the following simple example,
 

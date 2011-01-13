@@ -1,6 +1,24 @@
 2011-01-13  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12356
+	* ld.texinfo (Miscellaneous Commands): Describe LD_FEATURE.
+	(Expression Section): Update.
+	* ld.h (ld_config_type): Add sane_expr.
+	* ldgram.y (ifile_p1): Add LD_FEATURE.
+	* ldlex.l (LD_FEATYRE): New.
+	* ldemul.c (after_parse_default): Delete code handling ld_compatibility.
+	* ldexp.h (struct ldexp_control): Delete uses_defined.
+	* ldexp.c: Remove all uses of uses_defined.
+	(fold_name): Test config.sane_expr rather than ld_compatibility.
+	(exp_fold_tree_1): Likewise.  Adjust handling of assignments
+	during first phase.
+	* ldlang.h (ld_compatibility): Delete.
+	(lang_ld_feature): Declare.
+	* ldlang.c (ld_compatibility): Delete.
+	(open_input_bfds): Only handle assignments for --defsym.
+	(lang_ld_feature): New function.
+
+	PR ld/12356
 	* ldexp.h (exp_assop): Delete.
 	(exp_assign, exp_defsym): Declare.
 	* ldexp.c (exp_assop): Make static, handle all assignment variations.

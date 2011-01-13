@@ -469,7 +469,6 @@ extern bfd_boolean entry_from_cmdline;
 extern lang_statement_list_type file_chain;
 extern lang_statement_list_type input_file_chain;
 
-extern int ld_compatibility;
 extern int lang_statement_iteration;
 extern bfd_boolean missing_file;
 
@@ -650,5 +649,8 @@ extern bfd_boolean load_symbols
 extern bfd_boolean
 ldlang_override_segment_assignment
   (struct bfd_link_info *, bfd *, asection *, asection *, bfd_boolean);
+
+extern void
+lang_ld_feature (char *);
 
 #endif
