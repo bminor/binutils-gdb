@@ -3420,7 +3420,8 @@ slot_alignment_is_next_even (struct type *t)
    d_un.d_ptr value is the global pointer.  */
 
 static CORE_ADDR
-ia64_find_global_pointer (struct gdbarch *gdbarch, CORE_ADDR faddr)
+ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
+					       CORE_ADDR faddr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *faddr_sect;
@@ -3476,6 +3477,24 @@ ia64_find_global_pointer (struct gdbarch *gdbarch, CORE_ADDR faddr)
 	}
     }
   return 0;
+}
+
+/* Attempt to find (and return) the global pointer for the given
+   function.  We first try the find_global_pointer_from_solib routine
+   from the gdbarch tdep vector, if provided.  And if that does not
+   work, then we try ia64_find_global_pointer_from_dynamic_section.  */
+
+static CORE_ADDR
+ia64_find_global_pointer (struct gdbarch *gdbarch, CORE_ADDR faddr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR addr = 0;
+
+  if (tdep->find_global_pointer_from_solib)
+    addr = tdep->find_global_pointer_from_solib (gdbarch, faddr);
+  if (addr == 0)
+    addr = ia64_find_global_pointer_from_dynamic_section (gdbarch, faddr);
+  return addr;
 }
 
 /* Given a function's address, attempt to find (and return) the
@@ -3617,12 +3636,53 @@ ia64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   return sp & ~0xfLL;
 }
 
+/* The default "allocate_new_rse_frame" ia64_infcall_ops routine for ia64.  */
+
+static void
+ia64_allocate_new_rse_frame (struct regcache *regcache, ULONGEST bsp, int sof)
+{
+  ULONGEST cfm, pfs, new_bsp;
+
+  regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
+
+  new_bsp = rse_address_add (bsp, sof);
+  regcache_cooked_write_unsigned (regcache, IA64_BSP_REGNUM, new_bsp);
+
+  regcache_cooked_read_unsigned (regcache, IA64_PFS_REGNUM, &pfs);
+  pfs &= 0xc000000000000000LL;
+  pfs |= (cfm & 0xffffffffffffLL);
+  regcache_cooked_write_unsigned (regcache, IA64_PFS_REGNUM, pfs);
+
+  cfm &= 0xc000000000000000LL;
+  cfm |= sof;
+  regcache_cooked_write_unsigned (regcache, IA64_CFM_REGNUM, cfm);
+}
+
+/* The default "store_argument_in_slot" ia64_infcall_ops routine for
+   ia64.  */
+
+static void
+ia64_store_argument_in_slot (struct regcache *regcache, CORE_ADDR bsp,
+			     int slotnum, gdb_byte *buf)
+{
+  write_memory (rse_address_add (bsp, slotnum), buf, 8);
+}
+
+/* The default "set_function_addr" ia64_infcall_ops routine for ia64.  */
+
+static void
+ia64_set_function_addr (struct regcache *regcache, CORE_ADDR func_addr)
+{
+  /* Nothing needed.  */
+}
+
 static CORE_ADDR
 ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argno;
   struct value *arg;
@@ -3630,7 +3690,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int len, argoffset;
   int nslots, rseslots, memslots, slotnum, nfuncargs;
   int floatreg;
-  ULONGEST bsp, cfm, pfs, new_bsp;
+  ULONGEST bsp;
   CORE_ADDR funcdescaddr, pc, global_pointer;
   CORE_ADDR func_addr = find_function_addr (function, NULL);
 
@@ -3657,20 +3717,8 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   memslots = nslots - rseslots;
 
   /* Allocate a new RSE frame.  */
-  regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
-
   regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
-  new_bsp = rse_address_add (bsp, rseslots);
-  regcache_cooked_write_unsigned (regcache, IA64_BSP_REGNUM, new_bsp);
-
-  regcache_cooked_read_unsigned (regcache, IA64_PFS_REGNUM, &pfs);
-  pfs &= 0xc000000000000000LL;
-  pfs |= (cfm & 0xffffffffffffLL);
-  regcache_cooked_write_unsigned (regcache, IA64_PFS_REGNUM, pfs);
-
-  cfm &= 0xc000000000000000LL;
-  cfm |= rseslots;
-  regcache_cooked_write_unsigned (regcache, IA64_CFM_REGNUM, cfm);
+  tdep->infcall_ops.allocate_new_rse_frame (regcache, bsp, rseslots);
   
   /* We will attempt to find function descriptors in the .opd segment,
      but if we can't we'll construct them ourselves.  That being the
@@ -3710,7 +3758,8 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				  find_func_descr (regcache, faddr,
 						   &funcdescaddr));
 	  if (slotnum < rseslots)
-	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
+	    tdep->infcall_ops.store_argument_in_slot (regcache, bsp,
+						      slotnum, val_buf);
 	  else
 	    write_memory (sp + 16 + 8 * (slotnum - rseslots), val_buf, 8);
 	  slotnum++;
@@ -3755,7 +3804,8 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
             }
 
 	  if (slotnum < rseslots)
-	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
+	    tdep->infcall_ops.store_argument_in_slot (regcache, bsp,
+						      slotnum, val_buf);
 	  else
 	    write_memory (sp + 16 + 8 * (slotnum - rseslots), val_buf, 8);
 
@@ -3796,12 +3846,26 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (global_pointer != 0)
     regcache_cooked_write_unsigned (regcache, IA64_GR1_REGNUM, global_pointer);
 
+  /* The following is not necessary on HP-UX, because we're using
+     a dummy code sequence pushed on the stack to make the call, and
+     this sequence doesn't need b0 to be set in order for our dummy
+     breakpoint to be hit.  Nonetheless, this doesn't interfere, and
+     it's needed for other OSes, so we do this unconditionaly.  */
   regcache_cooked_write_unsigned (regcache, IA64_BR0_REGNUM, bp_addr);
 
   regcache_cooked_write_unsigned (regcache, sp_regnum, sp);
 
+  tdep->infcall_ops.set_function_addr (regcache, func_addr);
+
   return sp;
 }
+
+static const struct ia64_infcall_ops ia64_infcall_ops =
+{
+  ia64_allocate_new_rse_frame,
+  ia64_store_argument_in_slot,
+  ia64_set_function_addr
+};
 
 static struct frame_id
 ia64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
@@ -3922,6 +3986,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, ia64_push_dummy_call);
+  tdep->infcall_ops = ia64_infcall_ops;
   set_gdbarch_frame_align (gdbarch, ia64_frame_align);
   set_gdbarch_dummy_id (gdbarch, ia64_dummy_id);
 

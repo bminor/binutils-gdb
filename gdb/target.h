@@ -269,6 +269,12 @@ enum target_object
   /* The HP-UX registers (those that can be obtained or modified by using
      the TT_LWP_RUREGS/TT_LWP_WUREGS ttrace requests).  */
   TARGET_OBJECT_HPUX_UREGS,
+  /* The HP-UX shared library linkage pointer.  ANNEX should be a string
+     image of the code address whose linkage pointer we are looking for.
+
+     The size of the data transfered is always 8 bytes (the size of an
+     address on ia64).  */
+  TARGET_OBJECT_HPUX_SOLIB_GOT,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
