@@ -23,6 +23,17 @@
 #include "osabi.h"
 #include "gdbtypes.h"
 #include "solib.h"
+#include "target.h"
+#include "frame.h"
+
+/* The offset to be used in order to get the __reason pseudo-register
+   when using one of the *UREGS ttrace requests (see system header file
+   /usr/include/ia64/sys/uregs.h for more details).
+
+   The documentation for this pseudo-register says that a nonzero value
+   indicates that the thread stopped due to a fault, trap, or interrupt.
+   A null value indicates a stop inside a syscall.  */
+#define IA64_HPUX_UREG_REASON 0x00070000
 
 /* Return nonzero if the value of the register identified by REGNUM
    can be modified.  */
@@ -74,6 +85,47 @@ ia64_hpux_cannot_store_register (struct gdbarch *gdbarch, int regnum)
   return 0;
 }
 
+/* Return nonzero if the inferior is stopped inside a system call.  */
+
+static int
+ia64_hpux_stopped_in_syscall (struct gdbarch *gdbarch)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct target_ops *ops = &current_target;
+  gdb_byte buf[8];
+  int len;
+
+  len = target_read (ops, TARGET_OBJECT_HPUX_UREGS, NULL,
+		     buf, IA64_HPUX_UREG_REASON, sizeof (buf));
+  if (len == -1)
+    /* The target wasn't able to tell us.  Assume we are not stopped
+       in a system call, which is the normal situation.  */
+    return 0;
+  gdb_assert (len == 8);
+
+  return (extract_unsigned_integer (buf, len, byte_order) == 0);
+}
+
+/* The "size_of_register_frame" gdbarch_tdep routine for ia64-hpux.  */
+
+static int
+ia64_hpux_size_of_register_frame (struct frame_info *this_frame,
+				  ULONGEST cfm)
+{
+  int sof;
+
+  if (frame_relative_level (this_frame) == 0
+      && ia64_hpux_stopped_in_syscall (get_frame_arch (this_frame)))
+    /* If the inferior stopped in a system call, the base address
+       of the register frame is at BSP - SOL instead of BSP - SOF.
+       This is an HP-UX exception.  */
+    sof = (cfm & 0x3f80) >> 7;
+  else
+    sof = (cfm & 0x7f);
+
+  return sof;
+}
+
 /* Should be set to non-NULL if the ia64-hpux solib module is linked in.
    This may not be the case because the shared library support code can
    only be compiled on ia64-hpux.  */
@@ -83,6 +135,10 @@ struct target_so_ops *ia64_hpux_so_ops = NULL;
 static void
 ia64_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->size_of_register_frame = ia64_hpux_size_of_register_frame;
+
   set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
   set_gdbarch_cannot_store_register (gdbarch, ia64_hpux_cannot_store_register);
 

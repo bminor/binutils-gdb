@@ -195,10 +195,19 @@
 #define IA64_NAT32_REGNUM	(IA64_NAT0_REGNUM + 32)
 #define IA64_NAT127_REGNUM	(IA64_NAT0_REGNUM + 127)
 
+struct frame_info;
+
 struct gdbarch_tdep
 {
   CORE_ADDR (*sigcontext_register_address) (struct gdbarch *, CORE_ADDR, int);
   int (*pc_in_sigtramp) (CORE_ADDR);
+
+  /* Return the total size of THIS_FRAME's register frame.
+     CFM is THIS_FRAME's cfm register value.
+
+     Normally, the size of the register frame is always obtained by
+     extracting the lowest 7 bits ("cfm & 0x7f").  */
+  int (*size_of_register_frame) (struct frame_info *this_frame, ULONGEST cfm);
 
   /* ISA-specific data types.  */
   struct type *ia64_ext_type;

@@ -266,6 +266,9 @@ enum target_object
   TARGET_OBJECT_THREADS,
   /* Collected static trace data.  */
   TARGET_OBJECT_STATIC_TRACE_DATA,
+  /* The HP-UX registers (those that can be obtained or modified by using
+     the TT_LWP_RUREGS/TT_LWP_WUREGS ttrace requests).  */
+  TARGET_OBJECT_HPUX_UREGS,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

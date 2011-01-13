@@ -568,6 +568,28 @@ ia64_hpux_xfer_memory (struct target_ops *ops, const char *annex,
   return len;
 }
 
+/* Handle the transfer of TARGET_OBJECT_HPUX_UREGS objects on ia64-hpux.
+   ANNEX is currently ignored.
+
+   The current implementation does not support write transfers (because
+   we do not currently do not need these transfers), and will raise
+   a failed assertion if WRITEBUF is not NULL.  */
+
+static LONGEST
+ia64_hpux_xfer_uregs (struct target_ops *ops, const char *annex,
+		      gdb_byte *readbuf, const gdb_byte *writebuf,
+		      ULONGEST offset, LONGEST len)
+{
+  int status;
+
+  gdb_assert (writebuf == NULL);
+
+  status = ia64_hpux_read_register_from_save_state_t (offset, readbuf, len);
+  if (status < 0)
+    return -1;
+  return len;
+}
+
 /* The "to_xfer_partial" target_ops routine for ia64-hpux.  */
 
 static LONGEST
@@ -579,6 +601,8 @@ ia64_hpux_xfer_partial (struct target_ops *ops, enum target_object object,
 
   if (object == TARGET_OBJECT_MEMORY)
     val = ia64_hpux_xfer_memory (ops, annex, readbuf, writebuf, offset, len);
+  else if (object == TARGET_OBJECT_HPUX_UREGS)
+    val = ia64_hpux_xfer_uregs (ops, annex, readbuf, writebuf, offset, len);
   else
     val = super_xfer_partial (ops, object, annex, readbuf, writebuf, offset,
 			      len);

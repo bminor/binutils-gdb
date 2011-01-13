@@ -2452,7 +2452,7 @@ ia64_is_fpreg (int uw_regnum)
 {
   return unw_is_fpreg (uw_regnum);
 }
-  
+
 /* Libunwind callback accessor function for general registers.  */
 static int
 ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val, 
@@ -2490,7 +2490,7 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 	bsp = extract_unsigned_integer (buf, 8, byte_order);
 	get_frame_register (this_frame, IA64_CFM_REGNUM, buf);
 	cfm = extract_unsigned_integer (buf, 8, byte_order);
-	sof = (cfm & 0x7f);
+	sof = gdbarch_tdep (gdbarch)->size_of_register_frame (this_frame, cfm);
 	*val = ia64_rse_skip_regs (bsp, -sof);
 	break;
 
@@ -3848,6 +3848,14 @@ ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
   return print_insn_ia64 (memaddr, info);
 }
 
+/* The default "size_of_register_frame" gdbarch_tdep routine for ia64.  */
+
+static int
+ia64_size_of_register_frame (struct frame_info *this_frame, ULONGEST cfm)
+{
+  return (cfm & 0x7f);
+}
+
 static struct gdbarch *
 ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -3861,6 +3869,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep = xzalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->size_of_register_frame = ia64_size_of_register_frame;
 
   /* According to the ia64 specs, instructions that store long double
      floats in memory use a long-double format different than that

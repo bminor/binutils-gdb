@@ -1,5 +1,23 @@
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* target.h (enum target_object): Add TARGET_OBJECT_HPUX_UREGS.
+	* ia64-tdep.h (struct frame_info): forward declaration.
+	(struct gdbarch_tdep): Add field size_of_register_frame.
+	* ia64-tdep.c (ia64_access_reg): Use tdep->size_of_register_frame
+	to determine the size of the register frame.
+	(ia64_size_of_register_frame): New function.
+	(ia64_gdbarch_init): Set tdep->size_of_register_frame.
+	* ia64-hpux-tdep.c: Include "target.h" and "frame.h".
+	(IA64_HPUX_UREG_REASON): New macro.
+	(ia64_hpux_stopped_in_syscall, ia64_hpux_size_of_register_frame):
+	New functions.
+	(ia64_hpux_init_abi): Set tdep->size_of_register_frame.
+	* ia64-hpux-nat.c (ia64_hpux_xfer_uregs): New function.
+	(ia64_hpux_xfer_partial): Add handling of TARGET_OBJECT_HPUX_UREGS
+	objects.
+
+2011-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	Add support for ia64-hpux.
 	* config/ia64/hpux.mh, ia64-hpux-nat.c, ia64-hpux-tdep.c,
 	ia64-hpux-tdep.h, solib-ia64-hpux.c, solib-ia64-hpux.h: New files.
