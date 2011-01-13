@@ -1,3 +1,10 @@
+2011-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/defined4.d: Xfail rs6000-*-aix*.  Skip mips*-*-*
+	and mmix-*-*.
+
+	* ld-scripts/expr2.d: Xfail rs6000-*-aix* and arm-*-*aout.
+
 2011-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/assert.exp: Run assert2.
