@@ -683,6 +683,53 @@ inf_ttrace_mourn_inferior (struct target_ops *ops)
   generic_mourn_inferior ();
 }
 
+/* Assuming we just attached the debugger to a new inferior, create
+   a new thread_info structure for each thread, and add it to our
+   list of threads.  */
+
+static void
+inf_ttrace_create_threads_after_attach (int pid)
+{
+  int status;
+  ptid_t ptid;
+  ttstate_t tts;
+  struct thread_info *ti;
+
+  status = ttrace (TT_PROC_GET_FIRST_LWP_STATE, pid, 0,
+		   (uintptr_t) &tts, sizeof (ttstate_t), 0);
+  if (status < 0)
+    perror_with_name (_("TT_PROC_GET_FIRST_LWP_STATE ttrace call failed"));
+  gdb_assert (tts.tts_pid == pid);
+
+  /* Add the stopped thread.  */
+  ptid = ptid_build (pid, tts.tts_lwpid, 0);
+  ti = add_thread (ptid);
+  ti->private = xzalloc (sizeof (struct inf_ttrace_private_thread_info));
+  inf_ttrace_num_lwps++;
+
+  /* We use the "first stopped thread" as the currently active thread.  */
+  inferior_ptid = ptid;
+
+  /* Iterative over all the remaining threads.  */
+
+  for (;;)
+    {
+      ptid_t ptid;
+
+      status = ttrace (TT_PROC_GET_NEXT_LWP_STATE, pid, 0,
+		       (uintptr_t) &tts, sizeof (ttstate_t), 0);
+      if (status < 0)
+	perror_with_name (_("TT_PROC_GET_NEXT_LWP_STATE ttrace call failed"));
+      if (status == 0)
+        break;  /* End of list.  */
+
+      ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
+      ti = add_thread (ptid);
+      ti->private = xzalloc (sizeof (struct inf_ttrace_private_thread_info));
+      inf_ttrace_num_lwps++;
+    }
+}
+
 static void
 inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
 {
@@ -735,11 +782,7 @@ inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
 
   push_target (ops);
 
-  /* We'll bump inf_ttrace_num_lwps up and add the private data to the
-     thread as soon as we get to inf_ttrace_wait.  At this point, we
-     don't have lwpid info yet.  */
-  inferior_ptid = pid_to_ptid (pid);
-  add_thread_silent (inferior_ptid);
+  inf_ttrace_create_threads_after_attach (pid);
 }
 
 static void
