@@ -3177,6 +3177,15 @@ ia64_use_struct_convention (struct type *type)
   return TYPE_LENGTH (type) > 32;
 }
 
+/* Return non-zero if TYPE is a structure or union type.  */
+
+static int
+ia64_struct_type_p (const struct type *type)
+{
+  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+          || TYPE_CODE (type) == TYPE_CODE_UNION);
+}
+
 static void
 ia64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
@@ -3200,6 +3209,21 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
 	  offset += TYPE_LENGTH (float_elt_type);
 	  regnum++;
 	}
+    }
+  else if (!ia64_struct_type_p (type) && TYPE_LENGTH (type) < 8)
+    {
+      /* This is an integral value, and its size is less than 8 bytes.
+         These values are LSB-aligned, so extract the relevant bytes,
+         and copy them into VALBUF.  */
+      /* brobecker/2005-12-30: Actually, all integral values are LSB aligned,
+	 so I suppose we should also add handling here for integral values
+	 whose size is greater than 8.  But I wasn't able to create such
+	 a type, neither in C nor in Ada, so not worrying about these yet.  */
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      ULONGEST val;
+
+      regcache_cooked_read_unsigned (regcache, IA64_GR8_REGNUM, &val);
+      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, val);
     }
   else
     {
@@ -3705,8 +3729,30 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  char val_buf[8];
 
 	  memset (val_buf, 0, 8);
-	  memcpy (val_buf, value_contents (arg) + argoffset,
-		  (len > 8) ? 8 : len);
+          if (!ia64_struct_type_p (type) && len < 8)
+            {
+              /* Integral types are LSB-aligned, so we have to be careful
+                 to insert the argument on the correct side of the buffer.
+                 This is why we use store_unsigned_integer.  */
+              store_unsigned_integer
+                (val_buf, 8, byte_order,
+                 extract_unsigned_integer (value_contents (arg), len,
+					   byte_order));
+            }
+          else
+            {
+              /* This is either an 8bit integral type, or an aggregate.
+                 For 8bit integral type, there is no problem, we just
+                 copy the value over.
+
+                 For aggregates, the only potentially tricky portion
+                 is to write the last one if it is less than 8 bytes.
+                 In this case, the data is Byte0-aligned.  Happy news,
+                 this means that we don't need to differentiate the
+                 handling of 8byte blocks and less-than-8bytes blocks.  */
+              memcpy (val_buf, value_contents (arg) + argoffset,
+                      (len > 8) ? 8 : len);
+            }
 
 	  if (slotnum < rseslots)
 	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);

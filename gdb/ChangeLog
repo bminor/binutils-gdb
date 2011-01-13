@@ -1,5 +1,12 @@
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* ia64-tdep.c (ia64_struct_type_p): New function.
+	(ia64_extract_return_value): Handle integral values that are
+	less than 8 bytes long.
+	(ia64_push_dummy_call): Likewise.
+
+2011-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* ia64-tdep.c (floatformat_ia64_ext_little): Renames
 	floatformat_ia64_ext.
 	(floatformat_ia64_ext_big): New static const.
