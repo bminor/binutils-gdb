@@ -41,6 +41,16 @@
 
 #include "complaints.h"
 
+/* The following two macros are normally defined in <endian.h>.
+   But systems such as ia64-hpux do not provide such header, so
+   we just define them here if not already defined.  */
+#ifndef __LITTLE_ENDIAN
+#define __LITTLE_ENDIAN 1234
+#endif
+#ifndef __BIG_ENDIAN
+#define __BIG_ENDIAN    4321
+#endif
+
 static int libunwind_initialized;
 static struct gdbarch_data *libunwind_descr_handle;
 

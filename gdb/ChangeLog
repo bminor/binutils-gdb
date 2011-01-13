@@ -1,5 +1,10 @@
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* libunwind-frame.c (__LITTLE_ENDIAN, __BIG_ENDIAN): Define if
+	not already defined.
+
+2011-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* ia64-tdep.c (ia64_struct_type_p): New function.
 	(ia64_extract_return_value): Handle integral values that are
 	less than 8 bytes long.
