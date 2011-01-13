@@ -1,5 +1,11 @@
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* libunwind-frame.c (libunwind_frame_cache): Do not return NULL
+	if we could not determine the frame's function address.  Instead,
+	use the frame's PC, and then continue.
+
+2011-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* libunwind-frame.c (__LITTLE_ENDIAN, __BIG_ENDIAN): Define if
 	not already defined.
 

@@ -162,14 +162,20 @@ libunwind_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* Allocate a new cache.  */
   cache = FRAME_OBSTACK_ZALLOC (struct libunwind_frame_cache);
 
-  /* We can assume we are unwinding a normal frame.  Even if this is
-     for a signal trampoline, ia64 signal "trampolines" use a normal
-     subroutine call to start the signal handler.  */
   cache->func_addr = get_frame_func (this_frame);
-  if (cache->func_addr == 0
-      && get_next_frame (this_frame)
-      && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME)
-    return NULL;
+  if (cache->func_addr == 0)
+    /* This can happen when the frame corresponds to a function for which
+       there is no debugging information nor any entry in the symbol table.
+       This is probably a static function for which an entry in the symbol
+       table was not created when the objfile got linked (observed in
+       libpthread.so on ia64-hpux).
+
+       The best we can do, in that case, is use the frame PC as the function
+       address.  We don't need to give up since we still have the unwind
+       record to help us perform the unwinding.  There is also another
+       compelling to continue, because abandonning now means stopping
+       the backtrace, which can never be helpful for the user.  */
+    cache->func_addr = get_frame_pc (this_frame);
 
   /* Get a libunwind cursor to the previous frame.
   
