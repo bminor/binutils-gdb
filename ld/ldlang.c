@@ -1809,7 +1809,7 @@ lang_insert_orphan (asection *s,
 	  sprintf (symname + (symname[0] != 0), "__start_%s", secname);
 	  e_align = exp_unop (ALIGN_K,
 			      exp_intop ((bfd_vma) 1 << s->alignment_power));
-	  lang_add_assignment (exp_assop ('=', ".", e_align));
+	  lang_add_assignment (exp_assign (".", e_align));
 	  lang_add_assignment (exp_provide (symname,
 					    exp_unop (ABSOLUTE,
 						      exp_nameop (NAME, ".")),
@@ -7229,7 +7229,7 @@ lang_leave_overlay (etree_type *lma_expr,
      overlay region.  */
   if (overlay_list != NULL)
     overlay_list->os->update_dot_tree
-      = exp_assop ('=', ".", exp_binop ('+', overlay_vma, overlay_max));
+      = exp_assign (".", exp_binop ('+', overlay_vma, overlay_max));
 
   l = overlay_list;
   while (l != NULL)

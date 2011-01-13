@@ -1,3 +1,16 @@
+2011-01-13  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12356
+	* ldexp.h (exp_assop): Delete.
+	(exp_assign, exp_defsym): Declare.
+	* ldexp.c (exp_assop): Make static, handle all assignment variations.
+	(exp_assign, exp_defsym): New functions.
+	(exp_provide): Use exp_assop.
+	* ldgram.y (defsym_expr): Use exp_defsym.
+	* ldctor.c, * ldgram.y, * ldlang.c, * mri.c, * emultempl/beos.em,
+	* emultempl/pe.em, * emultempl/pep.em, * emultempl/spuelf.em,
+	* emultempl/xtensaelf.em: Update exp_assop -> exp_assign.
+
 2011-01-12  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12380

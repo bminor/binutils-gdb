@@ -974,18 +974,34 @@ exp_nameop (int code, const char *name)
 
 }
 
-etree_type *
-exp_assop (int code, const char *dst, etree_type *src)
+static etree_type *
+exp_assop (const char *dst,
+	   etree_type *src,
+	   enum node_tree_enum class,
+	   bfd_boolean hidden)
 {
-  etree_type *new_e;
+  etree_type *n;
 
-  new_e = (etree_type *) stat_alloc (sizeof (new_e->assign));
-  new_e->type.node_code = code;
-  new_e->type.lineno = src->type.lineno;
-  new_e->type.node_class = etree_assign;
-  new_e->assign.src = src;
-  new_e->assign.dst = dst;
-  return new_e;
+  n = (etree_type *) stat_alloc (sizeof (n->assign));
+  n->assign.type.node_code = '=';
+  n->assign.type.lineno = src->type.lineno;
+  n->assign.type.node_class = class;
+  n->assign.src = src;
+  n->assign.dst = dst;
+  n->assign.hidden = hidden;
+  return n;
+}
+
+etree_type *
+exp_assign (const char *dst, etree_type *src)
+{
+  return exp_assop (dst, src, etree_assign, FALSE);
+}
+
+etree_type *
+exp_defsym (const char *dst, etree_type *src)
+{
+  return exp_assop (dst, src, etree_assign, TRUE);
 }
 
 /* Handle PROVIDE.  */
@@ -993,16 +1009,7 @@ exp_assop (int code, const char *dst, etree_type *src)
 etree_type *
 exp_provide (const char *dst, etree_type *src, bfd_boolean hidden)
 {
-  etree_type *n;
-
-  n = (etree_type *) stat_alloc (sizeof (n->assign));
-  n->assign.type.node_code = '=';
-  n->assign.type.lineno = src->type.lineno;
-  n->assign.type.node_class = etree_provide;
-  n->assign.src = src;
-  n->assign.dst = dst;
-  n->assign.hidden = hidden;
-  return n;
+  return exp_assop (dst, src, etree_provide, hidden);
 }
 
 /* Handle ASSERT.  */
