@@ -290,16 +290,22 @@ floatformat_valid (const struct floatformat *fmt, const void *from)
   return 1;
 }
 
-static const struct floatformat floatformat_ia64_ext =
+static const struct floatformat floatformat_ia64_ext_little =
 {
   floatformat_little, 82, 0, 1, 17, 65535, 0x1ffff, 18, 64,
-  floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid, NULL
+  floatformat_intbit_yes, "floatformat_ia64_ext_little", floatformat_valid, NULL
+};
+
+static const struct floatformat floatformat_ia64_ext_big =
+{
+  floatformat_big, 82, 46, 47, 17, 65535, 0x1ffff, 64, 64,
+  floatformat_intbit_yes, "floatformat_ia64_ext_big", floatformat_valid
 };
 
 static const struct floatformat *floatformats_ia64_ext[2] =
 {
-  &floatformat_ia64_ext,
-  &floatformat_ia64_ext
+  &floatformat_ia64_ext_big,
+  &floatformat_ia64_ext_little
 };
 
 static struct type *
