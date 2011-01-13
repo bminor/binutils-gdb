@@ -261,18 +261,19 @@ printable_val_type (struct type *type, const gdb_byte *valaddr)
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  TYPE_LEN is the length in bytes
-   (1 or 2) of the character.  */
+   of the character.  */
 
 void
 ada_emit_char (int c, struct type *type, struct ui_file *stream,
 	       int quoter, int type_len)
 {
-  if (type_len != 2)
-    type_len = 1;
-
-  c &= (1 << (type_len * TARGET_CHAR_BIT)) - 1;
-
-  if (isascii (c) && isprint (c))
+  /* If this character fits in the normal ASCII range, and is
+     a printable character, then print the character as if it was
+     an ASCII character, even if this is a wide character.
+     The UCHAR_MAX check is necessary because the isascii function
+     requires that its argument have a value of an unsigned char,
+     or EOF (EOF is obviously not printable).  */
+  if (c <= UCHAR_MAX && isascii (c) && isprint (c))
     {
       if (c == quoter && c == '"')
 	fprintf_filtered (stream, "\"\"");
@@ -283,8 +284,8 @@ ada_emit_char (int c, struct type *type, struct ui_file *stream,
     fprintf_filtered (stream, "[\"%0*x\"]", type_len * 2, c);
 }
 
-/* Character #I of STRING, given that TYPE_LEN is the size in bytes (1
-   or 2) of a character.  */
+/* Character #I of STRING, given that TYPE_LEN is the size in bytes
+   of a character.  */
 
 static int
 char_at (const gdb_byte *string, int i, int type_len,
@@ -293,7 +294,8 @@ char_at (const gdb_byte *string, int i, int type_len,
   if (type_len == 1)
     return string[i];
   else
-    return (int) extract_unsigned_integer (string + 2 * i, 2, byte_order);
+    return (int) extract_unsigned_integer (string + type_len * i,
+                                           type_len, byte_order);
 }
 
 /* Wrapper around memcpy to make it legal argument to ui_file_put.  */
