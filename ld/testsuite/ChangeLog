@@ -1,5 +1,14 @@
 2011-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/12356
+	* ld-scripts/defined.exp: Run defined5.
+
+	* ld-scripts/defined5.d: New.
+	* ld-scripts/defined5.s: Likewise.
+	* ld-scripts/defined5.t: Likewise.
+
+2011-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-scripts/defined4.d: Xfail rs6000-*-aix*.  Skip mips*-*-*
 	and mmix-*-*.
 
