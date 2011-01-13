@@ -1,5 +1,10 @@
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* top.c (input_from_terminal_p): Restrict the use of interactive_mode
+	to the case where instream is stdin.
+
+2011-01-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* ia64-tdep.h (struct regcache): Forward declare.
 	(struct ia64_infcall_ops): New struct type.
 	(struct gdbarch_tdep): New fields "find_global_pointer_from_solib"

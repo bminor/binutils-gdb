@@ -1292,7 +1292,7 @@ show_interactive_mode (struct ui_file *file, int from_tty,
 int
 input_from_terminal_p (void)
 {
-  if (interactive_mode != AUTO_BOOLEAN_AUTO)
+  if (interactive_mode != AUTO_BOOLEAN_AUTO && instream == stdin)
     return interactive_mode == AUTO_BOOLEAN_TRUE;
 
   if (batch_flag)
