@@ -1,3 +1,8 @@
+2011-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_register_reggroup_p): FPS register is in
+	save_reggroup, restore_reggroup and all_reggroup.
+
 2011-01-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-valprint. (ada_printchar): Use the correct type length

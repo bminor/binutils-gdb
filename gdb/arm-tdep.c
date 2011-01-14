@@ -7234,9 +7234,14 @@ static int
 arm_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
-  /* FPS register's type is INT, but belongs to float_group.  */
+  /* FPS register's type is INT, but belongs to float_reggroup.  Beside
+     this, FPS register belongs to save_regroup, restore_reggroup, and
+     all_reggroup, of course.  */
   if (regnum == ARM_FPS_REGNUM)
-    return (group == float_reggroup);
+    return (group == float_reggroup
+	    || group == save_reggroup
+	    || group == restore_reggroup
+	    || group == all_reggroup);
   else
     return default_register_reggroup_p (gdbarch, regnum, group);
 }
