@@ -1,3 +1,9 @@
+2011-01-14  J. Park  <grassman@gmail.com>
+
+	PR ld/12339
+	* elf32-arm.c (allocate_dynrelocs): Don't set up eh before
+	following bfd_link_hash_warning symbol link.
+
 2011-01-10  Nathan Sidwell  <nathan@codesourcery.com>
 	    Glauber de Oliveira Costa  <glommer@gmail.com>
 
