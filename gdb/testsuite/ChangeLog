@@ -1,5 +1,9 @@
 2011-01-14  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/wchar.c, gdb.base/wchar.exp: New testcases.
+
+2011-01-14  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/widewide: New testcase.
 
 2011-01-13  Joel Brobecker  <brobecker@adacore.com>
