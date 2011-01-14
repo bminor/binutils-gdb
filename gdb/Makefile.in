@@ -1504,11 +1504,6 @@ ALLDEPFILES = \
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
 
-hpux-thread.o: $(srcdir)/hpux-thread.c
-	$(COMPILE) -I$(srcdir)/osf-share -I$(srcdir)/osf-share/HP800 \
-		-I/usr/include/dce $(srcdir)/hpux-thread.c
-	$(POSTCOMPILE)
-
 # main.o needs an explicit build rule to get TARGET_SYSTEM_ROOT and BINDIR.
 main.o: $(srcdir)/main.c
 	$(COMPILE) $(TARGET_SYSTEM_ROOT_DEFINE) -DBINDIR=\"$(bindir)\" $(srcdir)/main.c

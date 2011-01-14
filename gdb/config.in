@@ -190,9 +190,6 @@
 /* Define if <sys/procfs.h> has gregset_t. */
 #undef HAVE_GREGSET_T
 
-/* Define if you have HPUX threads */
-#undef HAVE_HPUX_THREAD_SUPPORT
-
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
 

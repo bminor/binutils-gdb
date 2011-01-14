@@ -14328,27 +14328,6 @@ $as_echo "$found" >&6; }
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
-   hpux*)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HPUX/OSF thread support" >&5
-$as_echo_n "checking for HPUX/OSF thread support... " >&6; }
-      if test -f /usr/include/dce/cma_config.h ; then
-         if test "$GCC" = "yes" ; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-$as_echo "#define HAVE_HPUX_THREAD_SUPPORT 1" >>confdefs.h
-
-            CONFIG_OBS="${CONFIG_OBS} hpux-thread.o"
-            CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
-         else
-            { $as_echo "$as_me:${as_lineno-$LINENO}: result: no (suppressed because you are not using GCC)" >&5
-$as_echo "no (suppressed because you are not using GCC)" >&6; }
-         fi
-      else
-         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      fi
-      ;;
    solaris*)
       # See if thread_db library is around for Solaris thread debugging.
       # Note that we must explicitly test for version 1 of the library

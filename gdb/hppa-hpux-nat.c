@@ -35,9 +35,6 @@
 #include "inf-ptrace.h"
 #include "inf-ttrace.h"
 
-/* Non-zero if we should pretend not to be a runnable target.  */
-int child_suppress_run = 0;
-
 /* Return the offset of register REGNUM within `struct save_state'.
    The offset returns depends on the flags in the "flags" register and
    the register size (32-bit or 64-bit).  These are taken from
@@ -236,15 +233,6 @@ hppa_hpux_store_inferior_registers (struct target_ops *ops,
     hppa_hpux_store_register (regcache, regnum);
 }
 
-static int
-hppa_hpux_child_can_run (void)
-{
-  /* This variable is controlled by modules that layer their own
-     process structure atop that provided here.  The code in
-     hpux-thread.c does this to support the HP-UX user-mode DCE
-     threads.  */
-  return !child_suppress_run;
-}
 
 
 /* Prevent warning from -Wmissing-prototypes.  */
@@ -263,7 +251,6 @@ _initialize_hppa_hpux_nat (void)
 
   t->to_fetch_registers = hppa_hpux_fetch_inferior_registers;
   t->to_store_registers = hppa_hpux_store_inferior_registers;
-  t->to_can_run = hppa_hpux_child_can_run;
 
   add_target (t);
 }
