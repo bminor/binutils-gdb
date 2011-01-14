@@ -1528,22 +1528,6 @@ dnl and not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
-   hpux*)
-      AC_MSG_CHECKING(for HPUX/OSF thread support)
-      if test -f /usr/include/dce/cma_config.h ; then
-         if test "$GCC" = "yes" ; then
-            AC_MSG_RESULT(yes)
-            AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT, 1,
-	    [Define if you have HPUX threads])
-            CONFIG_OBS="${CONFIG_OBS} hpux-thread.o"
-            CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
-         else
-            AC_MSG_RESULT(no (suppressed because you are not using GCC))
-         fi
-      else
-         AC_MSG_RESULT(no)
-      fi
-      ;;
    solaris*)
       # See if thread_db library is around for Solaris thread debugging.
       # Note that we must explicitly test for version 1 of the library
