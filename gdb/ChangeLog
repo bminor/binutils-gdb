@@ -1,3 +1,9 @@
+2011-01-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint. (ada_printchar): Use the correct type length
+	in call to ada_emit_char.
+	* c-valprint.c (c_val_print): Remove cast in call to LA_PRINT_CHAR.
+
 2011-01-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* solib-som.h (hpux_major_release): Declare variable here.
