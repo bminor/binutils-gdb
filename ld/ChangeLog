@@ -1,3 +1,11 @@
+2011-01-14  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am: Sort emulation rules.
+	(eelf32am33lin.c): Delete.
+	(ALL_EMULATION_SOURCES): Sort, add missing entries.
+	(ALL_64_EMULATION_SOURCES): Likewise.
+	* Makefile.in: Regenerate.
+
 2011-01-13  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12356
