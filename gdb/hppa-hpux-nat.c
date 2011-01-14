@@ -25,6 +25,7 @@
 
 #include "gdb_assert.h"
 #include <sys/ptrace.h>
+#include <sys/utsname.h>
 #include <machine/save_state.h>
 
 #ifdef HAVE_TTRACE
@@ -32,6 +33,7 @@
 #endif
 
 #include "hppa-tdep.h"
+#include "solib-som.h"
 #include "inf-ptrace.h"
 #include "inf-ttrace.h"
 
@@ -233,6 +235,21 @@ hppa_hpux_store_inferior_registers (struct target_ops *ops,
     hppa_hpux_store_register (regcache, regnum);
 }
 
+/* Set hpux_major_release variable to the value retrieved from a call to
+   uname function.  */
+
+static void
+set_hpux_major_release (void)
+{
+  struct utsname x;
+  char *p;
+
+  uname (&x);
+  p = strchr (x.release, '.');
+  if (p)
+    hpux_major_release = atoi (p + 1);
+}
+
 
 
 /* Prevent warning from -Wmissing-prototypes.  */
@@ -242,6 +259,8 @@ void
 _initialize_hppa_hpux_nat (void)
 {
   struct target_ops *t;
+
+  set_hpux_major_release ();
 
 #ifdef HAVE_TTRACE
   t = inf_ttrace_target ();

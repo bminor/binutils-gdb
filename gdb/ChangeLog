@@ -1,3 +1,16 @@
+2011-01-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* solib-som.h (hpux_major_release): Declare variable here.
+	* solib-som.c:  Remove <sys/utsname.h> header.
+	(DEFAULT_HPUX_MAJOR_RELEASE): New macro.
+	(hpux_major_release): Make global, change default value to
+	DEFAULT_HPUX_MAJOR_RELEASE.
+	(get_hpux_major_release): Simply return HPUX_MAJOR_RELEASE. 
+	* hppa-hpux-nat.c: Add <sys/utsname.h> include.
+	Add "solib-som.h" header.
+	(set_hpux_major_release): New function.
+	(_initialize_hppa_hpux_nat): Call set_hpux_major_release.
+
 2011-01-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt (*-*-uclinux*): Match more Linux os targets

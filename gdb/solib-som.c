@@ -32,7 +32,6 @@
 #include "solib.h"
 #include "solib-som.h"
 
-#include <sys/utsname.h>
 #include <string.h>
 
 #undef SOLIB_SOM_DBG 
@@ -131,24 +130,23 @@ som_relocate_section_addresses (struct so_list *so,
     ;
 }
 
-/* Get HP-UX major release number.  Returns zero if the
-   release is not known.  */
+
+/* Variable storing HP-UX major release number.
+
+   On non-native system, simply assume that the major release number
+   is 11.  On native systems, hppa-hpux-nat.c initialization code
+   sets this number to the real one on startup.
+   
+   We cannot compute this value here, because we need to make a native
+   call to "uname".  We are are not allowed to do that from here, as
+   this file is used for both native and cross debugging.  */
+
+#define DEFAULT_HPUX_MAJOR_RELEASE 11
+int hpux_major_release = DEFAULT_HPUX_MAJOR_RELEASE;
 
 static int
 get_hpux_major_release (void)
 {
-  static int hpux_major_release = -1;
-
-  if (hpux_major_release == -1)
-    {
-      struct utsname x;
-      char *p;
-
-      uname (&x);
-      p = strchr (x.release, '.');
-      hpux_major_release = p ? atoi (p + 1) : 0;
-    }
-
   return hpux_major_release;
 }
 

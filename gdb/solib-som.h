@@ -25,6 +25,8 @@ struct objfile;
 struct section_offsets;
 struct gdbarch;
 
+extern int hpux_major_release;
+
 void som_solib_select (struct gdbarch *gdbarch);
 
 int som_solib_section_offsets (struct objfile *objfile,
