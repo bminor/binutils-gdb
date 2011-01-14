@@ -1,5 +1,11 @@
 2011-01-14  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint. (ada_printchar): Use the correct type length
+	in call to ada_emit_char.
+	* c-valprint.c (c_val_print): Remove cast in call to LA_PRINT_CHAR.
+
+2011-01-14  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_emit_char): Remove strange code.
 	Check that c is <= UCHAR_MAX before passing it to isascii.
 	(char_at): Do not assume that TYPE_LEN is either 1 or 2.

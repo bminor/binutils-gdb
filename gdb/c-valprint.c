@@ -507,7 +507,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (c_textual_element_type (unresolved_type, options->format))
 	    {
 	      fputs_filtered (" ", stream);
-	      LA_PRINT_CHAR ((unsigned char) unpack_long (type, valaddr + embedded_offset),
+	      LA_PRINT_CHAR (unpack_long (type, valaddr + embedded_offset),
 			     unresolved_type, stream);
 	    }
 	}
@@ -530,7 +530,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  else
 	    fprintf_filtered (stream, "%d", (int) val);
 	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR ((unsigned char) val, unresolved_type, stream);
+	  LA_PRINT_CHAR (val, unresolved_type, stream);
 	}
       break;
 

@@ -368,7 +368,7 @@ void
 ada_printchar (int c, struct type *type, struct ui_file *stream)
 {
   fputs_filtered ("'", stream);
-  ada_emit_char (c, type, stream, '\'', 1);
+  ada_emit_char (c, type, stream, '\'', TYPE_LENGTH (type));
   fputs_filtered ("'", stream);
 }
 
