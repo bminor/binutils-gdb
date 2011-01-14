@@ -1,6 +1,6 @@
 /* PEF support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+   2009, 2011  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -516,8 +516,8 @@ bfd_pef_scan (abfd, header, mdata)
   bfd_pef_convert_architecture (header->architecture, &cputype, &cpusubtype);
   if (cputype == bfd_arch_unknown)
     {
-      fprintf (stderr, "bfd_pef_scan: unknown architecture 0x%lx\n",
-	       header->architecture);
+      (*_bfd_error_handler) (_("bfd_pef_scan: unknown architecture 0x%lx"),
+			       header->architecture);
       return -1;
     }
   bfd_set_arch_mach (abfd, cputype, cpusubtype);

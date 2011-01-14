@@ -1,3 +1,22 @@
+2011-01-14  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (bfd_perror): Flush stdout before and stderr after printing
+	error.
+	(_bfd_default_error_handler): Likewise.
+	* elf.c (print_segment_map): Likewise.
+	* libbfd.c (warn_deprecated): Likewise.
+	* som.c (som_sizeof_headers): No need to do so here.
+	* coff-i860.c: Replace use of printf for error messages with
+	_bfd_error_handler.
+	* coff-ppc.c: Likewise.
+	* coff-sh.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-mep.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* mach-o.c: Likewise.
+	* pef.c: Likewise.
+
 2011-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_link_hash_table): Remove

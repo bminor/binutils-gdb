@@ -1,6 +1,6 @@
 /* BFD back-end for PowerPC Microsoft Portable Executable files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Original version pieced together by Kim Knuttila (krk@cygnus.com)
@@ -1843,10 +1843,9 @@ ppc_coff_rtype2howto (relent, internal)
 	howto = ppc_coff_howto_table + IMAGE_REL_PPC_TOCREL16;
       break;
     default:
-      fprintf (stderr,
-	      _("Warning: Unsupported reloc %s [%d] used -- it may not work.\n"),
-	      ppc_coff_howto_table[r_type].name,
-	      r_type);
+      (*_bfd_error_handler) (_("warning: unsupported reloc %s [%d] used -- it may not work"),
+			     ppc_coff_howto_table[r_type].name,
+			     r_type);
       howto = ppc_coff_howto_table + r_type;
       break;
     }
@@ -1916,10 +1915,9 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
       howto = ppc_coff_howto_table + r_type;
       break;
     default:
-      fprintf (stderr,
-	      _("Warning: Unsupported reloc %s [%d] used -- it may not work.\n"),
-	      ppc_coff_howto_table[r_type].name,
-	      r_type);
+      (*_bfd_error_handler) (_("warning: unsupported reloc %s [%d] used -- it may not work"),
+			     ppc_coff_howto_table[r_type].name,
+			     r_type);
       howto = ppc_coff_howto_table + r_type;
       break;
     }

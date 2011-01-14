@@ -1,6 +1,6 @@
 /* Generic BFD library interface and support routines.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -523,10 +523,12 @@ DESCRIPTION
 void
 bfd_perror (const char *message)
 {
+  fflush (stdout);
   if (message == NULL || *message == '\0')
     fprintf (stderr, "%s\n", bfd_errmsg (bfd_get_error ()));
   else
     fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
+  fflush (stderr);
 }
 
 /*
@@ -723,6 +725,7 @@ _bfd_default_error_handler (const char *fmt, ...)
   va_end (ap);
 
   putc ('\n', stderr);
+  fflush (stderr);
 }
 
 /* This is a function pointer to the routine which should handle BFD

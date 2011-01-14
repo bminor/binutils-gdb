@@ -1,5 +1,5 @@
 /* ADI Blackfin BFD support for 32-bit ELF.
-   Copyright 2005, 2006, 2007, 2008, 2009, 2010
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -104,7 +104,7 @@ bfin_pcrel24_reloc (bfd *abfd,
   /* if rightshift is 1 and the number odd, return error.  */
   if (howto->rightshift && (relocation & 0x01))
     {
-      fprintf(stderr, "relocation should be even number\n");
+      (*_bfd_error_handler) (_("relocation should be even number"));
       return bfd_reloc_overflow;
     }
 
@@ -360,7 +360,7 @@ bfin_bfd_reloc (bfd *abfd,
   /* If rightshift is 1 and the number odd, return error.  */
   if (howto->rightshift && (relocation & 0x01))
     {
-      fprintf(stderr, "relocation should be even number\n");
+      (*_bfd_error_handler) (_("relocation should be even number"));
       return bfd_reloc_overflow;
     }
 
@@ -5276,7 +5276,8 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
 	  && (info->symbolic
 	      || h->dynindx == -1 || h->forced_local) && h->def_regular)
 	{
-	  fprintf(stderr, "*** check this relocation %s\n", __FUNCTION__);
+	  (*_bfd_error_handler) (_("*** check this relocation %s"),
+				 __FUNCTION__);
 	  rela.r_info = ELF32_R_INFO (0, R_BFIN_PCREL24);
 	  rela.r_addend = bfd_get_signed_32 (output_bfd,
 					     (sgot->contents
