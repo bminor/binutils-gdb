@@ -495,6 +495,7 @@ struct elf_x86_64_link_hash_table
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
+  unsigned int pointer_r_type;
   const char *dynamic_interpreter;
   int dynamic_interpreter_size;
 
@@ -658,6 +659,7 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
     {
       ret->r_info = elf64_r_info;
       ret->r_sym = elf64_r_sym;
+      ret->pointer_r_type = R_X86_64_64;
       ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
     }
@@ -665,6 +667,7 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
     {
       ret->r_info = elf32_r_info;
       ret->r_sym = elf32_r_sym;
+      ret->pointer_r_type = R_X86_64_32;
       ret->dynamic_interpreter = ELF32_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF32_DYNAMIC_INTERPRETER;
     }
@@ -1232,6 +1235,9 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 
+		case R_X86_64_32:
+		  if (ABI_64_P (abfd))
+		    goto not_pointer;
 		case R_X86_64_64:
 		  h->non_got_ref = 1;
 		  h->pointer_equality_needed = 1;
@@ -1249,9 +1255,9 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  break;
 
 		case R_X86_64_32S:
-		case R_X86_64_32:
 		case R_X86_64_PC32:
 		case R_X86_64_PC64:
+not_pointer:
 		  h->non_got_ref = 1;
 		  if (r_type != R_X86_64_PC32
 		      && r_type != R_X86_64_PC64)
@@ -1448,16 +1454,17 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    }
 	  goto create_got;
 
+	case R_X86_64_32:
+	  if (!ABI_64_P (abfd))
+	    goto pointer;
 	case R_X86_64_8:
 	case R_X86_64_16:
-	case R_X86_64_32:
 	case R_X86_64_32S:
 	  /* Let's help debug shared library creation.  These relocs
 	     cannot be used in shared libs.  Don't error out for
 	     sections we don't care about, such as debug sections or
 	     non-constant sections.  */
 	  if (info->shared
-	      && ABI_64_P (abfd)
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
@@ -1478,6 +1485,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_PC32:
 	case R_X86_64_PC64:
 	case R_X86_64_64:
+pointer:
 	  if (h != NULL && info->executable)
 	    {
 	      /* If this reloc is in a read-only section, we might
@@ -2830,6 +2838,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		abort ();
 	      goto do_relocation;
 
+	    case R_X86_64_32:
+	      if (ABI_64_P (output_bfd))
+		goto do_relocation;
 	    case R_X86_64_64: 
 	      if (rel->r_addend != 0)
 		{
@@ -2894,7 +2905,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  continue;
 		}
 
-	    case R_X86_64_32:
 	    case R_X86_64_PC32:
 	    case R_X86_64_PC64:
 	    case R_X86_64_PLT32:
@@ -3307,7 +3317,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  /* This symbol is local, or marked to become local.  */
-		  if (r_type == R_X86_64_64)
+		  if (r_type == htab->pointer_r_type)
 		    {
 		      relocate = TRUE;
 		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);

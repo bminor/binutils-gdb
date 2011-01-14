@@ -1,3 +1,13 @@
+2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add pointer_r_type.
+	(elf_x86_64_link_hash_table_create): Set pointer_r_type.
+	(elf_x86_64_check_relocs): Handle R_X86_64_32 like R_X86_64_64
+	for ILP32.  Remove ABI_64_P PIC check for R_X86_64_8,
+	R_X86_64_16, R_X86_64_32 and R_X86_64_32S.
+	(elf_x86_64_relocate_section):  Handle R_X86_64_32 like R_X86_64_64
+	for ILP32.
+
 2011-01-14  Alan Modra  <amodra@gmail.com>
 
 	* bfd.c (bfd_perror): Flush stdout before and stderr after printing
