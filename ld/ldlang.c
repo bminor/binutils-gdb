@@ -2089,6 +2089,9 @@ static bfd_boolean
 sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
 		 void *info ATTRIBUTE_UNUSED)
 {
+  if (hash_entry->type == bfd_link_hash_warning)
+    hash_entry = (struct bfd_link_hash_entry *) hash_entry->u.i.link;
+
   if (hash_entry->type == bfd_link_hash_defined
       || hash_entry->type == bfd_link_hash_defweak)
     {

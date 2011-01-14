@@ -1,3 +1,8 @@
+2011-01-14  J. Park  <grassman@gmail.com>
+
+	PR ld/12339
+	* ldlang.c (sort_def_symbol): Handle bfd_link_hash_warning symbols.
+
 2011-01-14  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Sort emulation rules.
