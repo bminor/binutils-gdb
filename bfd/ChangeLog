@@ -1,3 +1,17 @@
+2011-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Remove
+	swap_reloca_out.
+	(elf_x86_64_link_hash_table_create): Don't set swap_reloca_out.
+	(elf_x86_64_check_relocs): Align relocation section to 4 byte
+	for 32bit.
+	(elf_x86_64_gc_sweep_hook): Replace ELF64_ST_TYPE with
+	ELF_ST_TYPE.
+	(elf_x86_64_finish_dynamic_symbol): Updated.
+	(elf_x86_64_finish_dynamic_sections): Don't use
+	Elf64_External_Dyn, bfd_elf64_swap_dyn_in, nor
+	bfd_elf64_swap_dyn_out.
+
 2011-01-14  J. Park  <grassman@gmail.com>
 
 	PR ld/12339

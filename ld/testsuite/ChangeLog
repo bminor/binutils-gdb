@@ -1,5 +1,11 @@
 2011-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-x86-64/ilp32-4.d: New.
+
+	* ld-x86-64/x86-64.exp: Run ilp32-4.
+
+2011-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/12356
 	* ld-scripts/defined.exp: Run defined5.
 
