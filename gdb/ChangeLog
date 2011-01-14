@@ -1,3 +1,7 @@
+2011-01-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (*-*-uclinux*): Match more Linux os targets
+
 2011-01-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* ia64-hpux-nat.c (ia64_hpux_fetch_register): Remove trailing
