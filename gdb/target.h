@@ -1633,6 +1633,4 @@ extern void update_target_permissions (void);
 /* Blank target vector entries are initialized to target_ignore.  */
 void target_ignore (void);
 
-extern struct target_ops deprecated_child_ops;
-
 #endif /* !defined (TARGET_H) */

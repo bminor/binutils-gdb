@@ -157,12 +157,6 @@ static void debug_to_notice_signals (ptid_t);
 
 static void debug_to_stop (ptid_t);
 
-/* NOTE: cagney/2004-09-29: Many targets reference this variable in
-   wierd and mysterious ways.  Putting the variable here lets those
-   wierd and mysterious ways keep building while they are being
-   converted to the inferior inheritance structure.  */
-struct target_ops deprecated_child_ops;
-
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the
    array.  */

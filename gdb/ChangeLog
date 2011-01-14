@@ -1,5 +1,10 @@
 2011-01-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (deprecated_child_ops): Delete declaration.
+	* target.c (deprecated_child_ops): Delete definition.
+
+2011-01-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* Makefile.in (hpux-thread.o): Delete rule.
 	* configure.ac: Don't check for HPUX DCE threads support.
 	* configure, config.in: Regenerate.
