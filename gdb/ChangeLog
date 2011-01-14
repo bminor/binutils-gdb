@@ -1,3 +1,9 @@
+2011-01-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (ada_emit_char): Remove strange code.
+	Check that c is <= UCHAR_MAX before passing it to isascii.
+	(char_at): Do not assume that TYPE_LEN is either 1 or 2.
+
 2010-12-30  Hui Zhu  <teawater@gmail.com>
 
 	* ax-gdb.c (gen_expr): Change error message.
