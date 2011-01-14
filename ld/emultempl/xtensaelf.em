@@ -1817,8 +1817,10 @@ ld_local_file_relocations_fit (lang_statement_union_type *statement,
 		  bfd_vma target_addr = e->tgt->output_offset & ~3;
 		  if (l32r_addr < target_addr)
 		    {
+		      fflush (stdout);
 		      fprintf (stderr, "Warning: "
 			       "l32r target section before l32r\n");
+		      fflush (stderr);
 		      return FALSE;
 		    }
 

@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright 2010 Free Software Foundation, Inc.
+   Copyright 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -596,7 +596,9 @@ message (int level, const char *format, ...)
 	  char *newfmt = ACONCAT ((level == LDPL_FATAL
 				   ? "%P%F: " : "%P%X: ",
 				   format, "\n", NULL));
+	  fflush (stdout);
 	  vfinfo (stderr, newfmt, args, TRUE);
+	  fflush (stderr);
 	}
       break;
     }
