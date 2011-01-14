@@ -57,13 +57,13 @@ dependent options:
 @table @gcctabopt
 @cindex @samp{--32} option, i386
 @cindex @samp{--32} option, x86-64
-@cindex @samp{--n32} option, i386
-@cindex @samp{--n32} option, x86-64
+@cindex @samp{--x32} option, i386
+@cindex @samp{--x32} option, x86-64
 @cindex @samp{--64} option, i386
 @cindex @samp{--64} option, x86-64
-@item --32 | --n32 | --64
+@item --32 | --x32 | --64
 Select the word size, either 32 bits or 64 bits.  @samp{--32}
-implies Intel i386 architecture, while @samp{--n32} and @samp{--64}
+implies Intel i386 architecture, while @samp{--x32} and @samp{--64}
 imply AMD x86-64 architecture with 32-bit or 64-bit word-size
 respectively.
 

@@ -1,3 +1,10 @@
+2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/ilp32/cfi/ilp32.exp: Replace --n32 with --x32.
+	* gas/i386/ilp32/elf/ilp32.exp: Likewise.
+	* gas/i386/ilp32/ilp32.exp: Likewise.
+	* gas/i386/ilp32/lns/ilp32.exp: Likewise.
+
 2011-01-11  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* mips/loongson-3a-2.s, mips/loongson-3a-2.d: Use the real offset

@@ -8152,7 +8152,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
 #define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
 #define OPTION_MAVXSCALAR (OPTION_MD_BASE + 12)
-#define OPTION_N32 (OPTION_MD_BASE + 13)
+#define OPTION_X32 (OPTION_MD_BASE + 13)
 
 struct option md_longopts[] =
 {
@@ -8162,7 +8162,7 @@ struct option md_longopts[] =
   {"64", no_argument, NULL, OPTION_64},
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  {"n32", no_argument, NULL, OPTION_N32},
+  {"x32", no_argument, NULL, OPTION_X32},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
   {"march", required_argument, NULL, OPTION_MARCH},
@@ -8239,7 +8239,7 @@ md_parse_option (int c, char *arg)
 #endif
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-    case OPTION_N32:
+    case OPTION_X32:
       if (IS_ELF)
 	{
 	  const char **list, **l;
@@ -8523,7 +8523,7 @@ md_show_usage (FILE *stream)
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
      || defined (TE_PE) || defined (TE_PEP))
   fprintf (stream, _("\
-  --32/--64/--n32         generate 32bit/64bit/n32bit code\n"));
+  --32/--64/--x32         generate 32bit/64bit/x32 code\n"));
 #endif
 #ifdef SVR4_COMMENT_CHARS
   fprintf (stream, _("\

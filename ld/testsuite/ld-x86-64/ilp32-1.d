@@ -1,6 +1,6 @@
 #source: dummy.s
-#as: --n32
-#ld: -m elf32_x86_64 tmpdir/startn32.o tmpdir/foon32.o
+#as: --x32
+#ld: -m elf32_x86_64 tmpdir/startx32.o tmpdir/foox32.o
 #readelf: -h
 
 ELF Header:

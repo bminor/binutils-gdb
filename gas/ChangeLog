@@ -1,3 +1,13 @@
+2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (OPTION_N32): Renamed to ...
+	(OPTION_X32): This.
+	(md_longopts): Replace n32 with x32.
+	(md_parse_option): Updated.
+	(md_show_usage): Likewise.
+
+	* doc/c-i386.texi: Replace n32 with x32.
+
 2011-01-11  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* config/tc-mips.c (mips_ip): Update error messages.  Take an

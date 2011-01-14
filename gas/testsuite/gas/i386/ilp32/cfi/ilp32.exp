@@ -13,7 +13,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check] &&
 
     global ASFLAGS
     set old_ASFLAGS "$ASFLAGS"
-    set ASFLAGS "$ASFLAGS --n32"
+    set ASFLAGS "$ASFLAGS --x32"
 
     foreach test [lsort [glob -nocomplain $srcdir/$subdir/*.d]] {
 	if { [runtest_file_p $runtests $test] } {

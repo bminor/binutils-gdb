@@ -1,4 +1,4 @@
-#as: --n32
+#as: --x32
 #ld: -m elf32_x86_64 -shared
 #readelf: -r --wide
 
