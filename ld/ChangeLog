@@ -1,3 +1,9 @@
+2011-01-14  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	attempt to put non-alloc orphans before debug sections, just place
+	them after .comment.
+
 2011-01-14  J. Park  <grassman@gmail.com>
 
 	PR ld/12339
