@@ -36,11 +36,11 @@
    prior to the call, but this does not include stacked registers because
    they are seen by GDB as pseudo registers.
 
-   On Linux, these stacked registers can be saved by simply creating
-   a new register frame, or in other words by moving the BSP.  But the
-   HP/UX kernel does not allow this.  So we rely on this code instead,
-   that makes functions calls whose only purpose is to create new
-   register frames.
+   With Linux kernels, these stacked registers can be saved by simply
+   creating a new register frame, or in other words by moving the BSP.
+   But the HP/UX kernel does not allow this.  So we rely on this code
+   instead, that makes functions calls whose only purpose is to create
+   new register frames.
 
    The array below is the result obtained after assembling the code
    shown below. It's an array of bytes in order to make it independent

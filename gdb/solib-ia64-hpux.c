@@ -310,7 +310,7 @@ ia64_hpux_find_start_vma (bfd *abfd, CORE_ADDR *text_start,
 
   for (i = 0; i < i_ehdrp->e_phnum; i++)
     {
-      if (bfd_bread ((PTR) & phdr, sizeof (phdr), abfd) != sizeof (phdr))
+      if (bfd_bread (&phdr, sizeof (phdr), abfd) != sizeof (phdr))
         error (_("failed to read segment %d in %s"), i, abfd->filename);
 
       if (phdr.p_flags & PF_X
@@ -416,7 +416,7 @@ ia64_hpux_get_load_info_addr (void)
 
 struct dld_info
 {
-  long long dld_flags;
+  ULONGEST dld_flags;
   CORE_ADDR load_map;
 };
 

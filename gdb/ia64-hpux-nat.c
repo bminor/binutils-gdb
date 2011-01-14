@@ -252,7 +252,7 @@ ia64_hpux_fetch_register (struct regcache *regcache, int regnum)
   buf = alloca (len * sizeof (gdb_byte));
   status = ia64_hpux_read_register_from_save_state_t (offset, buf, len);
   if (status < 0)
-    warning (_("Failed to read register value for %s.\n"),
+    warning (_("Failed to read register value for %s."),
              gdbarch_register_name (gdbarch, regnum));
 
   regcache_raw_supply (regcache, regnum, buf);
@@ -312,7 +312,7 @@ ia64_hpux_store_register (const struct regcache *regcache, int regnum)
   status = ia64_hpux_write_register_to_saved_state_t (offset, buf, len);
 
   if (status < 0)
-    error (_("failed to write register value for %s.\n"),
+    error (_("failed to write register value for %s."),
            gdbarch_register_name (gdbarch, regnum));
 }
 
