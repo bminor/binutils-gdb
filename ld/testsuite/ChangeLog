@@ -1,10 +1,12 @@
 2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* ld-x86-64/ilp32-1.d: Replace --n32 with --x32.
+	* ld-x86-64/ia32-2.d: Replace --n32 with --x32.
+	* ld-x86-64/ilp32-1.d: Likewise.
 	* ld-x86-64/ilp32-2.d: Likewise.
 	* ld-x86-64/ilp32-3.d: Likewise.
 	* ld-x86-64/ilp32-4.d: Likewise.
 	* ld-x86-64/ilp32-5.d: Likewise.
+	* ld-x86-64/lp64-3.d: Likewise.
 	* ld-x86-64/x86-64.exp: Likewise.
 
 2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
