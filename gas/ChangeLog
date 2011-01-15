@@ -14,7 +14,7 @@
 	(md_parse_option): Updated.
 	(md_show_usage): Likewise.
 
-	* doc/c-i386.texi: Replace n32 with x32.
+	* doc/c-i386.texi: Replace --n32 with --x32.
 
 2011-01-11  Mingjie Xing  <mingjie.xing@gmail.com>
 
