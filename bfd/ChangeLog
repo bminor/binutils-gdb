@@ -1,3 +1,8 @@
+2011-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Check invalid x32
+	relocations.
+
 2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add pointer_r_type.

@@ -1179,6 +1179,39 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
+      /* Check invalid x32 relocations.  */
+      if (!ABI_64_P (abfd))
+	switch (r_type)
+	  {
+	  default:
+	    break;
+
+	  case R_X86_64_64:
+	  case R_X86_64_DTPOFF64:
+	  case R_X86_64_TPOFF64:
+	  case R_X86_64_PC64:
+	  case R_X86_64_GOTOFF64:
+	  case R_X86_64_GOT64:
+	  case R_X86_64_GOTPCREL64:
+	  case R_X86_64_GOTPC64:
+	  case R_X86_64_GOTPLT64:
+	  case R_X86_64_PLTOFF64:
+	      {
+		if (h)
+		  name = h->root.root.string;
+		else
+		  name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
+					   NULL);
+		(*_bfd_error_handler)
+		  (_("%B: relocation %s against symbol `%s' isn't "
+		     "supported in x32 mode"), abfd,
+		   x86_64_elf_howto_table[r_type].name, name);
+		bfd_set_error (bfd_error_bad_value);
+		return FALSE;
+	      }
+	    break;
+	  }
+
       if (h != NULL)
 	{
 	  /* Create the ifunc sections for static executables.  If we
