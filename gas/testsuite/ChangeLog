@@ -1,3 +1,13 @@
+2011-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/ilp32/ilp32.exp: Run inval.
+
+	* gas/i386/ilp32/inval.l: New.
+	* gas/i386/ilp32/inval.s: Likewise.
+	* gas/i386/ilp32/x86-64.s: Likewise.
+
+	* gas/i386/ilp32/x86-64.d: Don't use ../x86_64.s.  Updated.
+
 2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/cfi/ilp32.exp: Replace --n32 with --x32.

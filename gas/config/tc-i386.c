@@ -389,6 +389,7 @@ enum flag_code {
 
 static enum flag_code flag_code;
 static unsigned int object_64bit;
+static unsigned int disallow_64bit_disp;
 static int use_rela_relocations = 0;
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
@@ -399,8 +400,8 @@ static int use_rela_relocations = 0;
 enum x86_elf_abi
 {
   I386_ABI,
-  X86_64_LP64_ABI,
-  X86_64_ILP32_ABI
+  X86_64_ABI,
+  X86_64_X32_ABI
 };
 
 static enum x86_elf_abi x86_elf_abi = I386_ABI;
@@ -3005,10 +3006,21 @@ md_assemble (char *line)
   /* Don't optimize displacement for movabs since it only takes 64bit
      displacement.  */
   if (i.disp_operands
-      && !i.disp32_encoding
-      && (flag_code != CODE_64BIT
-	  || strcmp (mnemonic, "movabs") != 0))
-    optimize_disp ();
+      && !i.disp32_encoding)
+    {
+      if (flag_code == CODE_64BIT)
+	{
+	  if (strcmp (mnemonic, "movabs") == 0)
+	    {
+	      if (disallow_64bit_disp)
+		as_bad (_("'movabs' isn't supported in x32 mode"));
+	    }
+	  else
+	    optimize_disp ();
+	}
+      else
+	optimize_disp ();
+    }
 
   /* Next, we find a template that matches the given insn,
      making sure the overlap of the given operands types is consistent
@@ -8575,9 +8587,9 @@ i386_target_format (void)
     {
       update_code_flag (CODE_64BIT, 1);
       if (default_arch[6] == '\0')
-	x86_elf_abi = X86_64_LP64_ABI;
+	x86_elf_abi = X86_64_ABI;
       else
-	x86_elf_abi = X86_64_ILP32_ABI;
+	x86_elf_abi = X86_64_X32_ABI;
     }
   else if (!strcmp (default_arch, "i386"))
     update_code_flag (CODE_32BIT, 1);
@@ -8617,20 +8629,21 @@ i386_target_format (void)
 	  default:
 	    format = ELF_TARGET_FORMAT;
 	    break;
-	  case X86_64_LP64_ABI:
+	  case X86_64_ABI:
 	    use_rela_relocations = 1;
 	    object_64bit = 1;
 	    format = ELF_TARGET_FORMAT64;
 	    break;
-	  case X86_64_ILP32_ABI:
+	  case X86_64_X32_ABI:
 	    use_rela_relocations = 1;
 	    object_64bit = 1;
+	    disallow_64bit_disp = 1;
 	    format = ELF_TARGET_FORMAT32;
 	    break;
 	  }
 	if (cpu_arch_isa == PROCESSOR_L1OM)
 	  {
-	    if (x86_elf_abi != X86_64_LP64_ABI)
+	    if (x86_elf_abi != X86_64_ABI)
 	      as_fatal (_("Intel L1OM is 64bit only"));
 	    return ELF_TARGET_L1OM_FORMAT;
 	  }

@@ -1,3 +1,11 @@
+2011-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (disallow_64bit_disp): New.
+	(x86_elf_abi): Replace X86_64_LP64_ABI/X86_64_ILP32_ABI with
+	X86_64_ABI/X86_64_X32_ABI.
+	(md_assemble): Don't allow movabs with relocation in x32 mode.
+	(i386_target_format): Updated.
+
 2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (OPTION_N32): Renamed to ...
