@@ -389,7 +389,7 @@ enum flag_code {
 
 static enum flag_code flag_code;
 static unsigned int object_64bit;
-static unsigned int disallow_64bit_disp;
+static unsigned int disallow_64bit_reloc;
 static int use_rela_relocations = 0;
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
@@ -3006,21 +3006,10 @@ md_assemble (char *line)
   /* Don't optimize displacement for movabs since it only takes 64bit
      displacement.  */
   if (i.disp_operands
-      && !i.disp32_encoding)
-    {
-      if (flag_code == CODE_64BIT)
-	{
-	  if (strcmp (mnemonic, "movabs") == 0)
-	    {
-	      if (disallow_64bit_disp)
-		as_bad (_("'movabs' isn't supported in x32 mode"));
-	    }
-	  else
-	    optimize_disp ();
-	}
-      else
-	optimize_disp ();
-    }
+      && !i.disp32_encoding
+      && (flag_code != CODE_64BIT
+	  || strcmp (mnemonic, "movabs") != 0))
+    optimize_disp ();
 
   /* Next, we find a template that matches the given insn,
      making sure the overlap of the given operands types is consistent
@@ -8637,7 +8626,7 @@ i386_target_format (void)
 	  case X86_64_X32_ABI:
 	    use_rela_relocations = 1;
 	    object_64bit = 1;
-	    disallow_64bit_disp = 1;
+	    disallow_64bit_reloc = 1;
 	    format = ELF_TARGET_FORMAT32;
 	    break;
 	  }
@@ -8939,6 +8928,27 @@ tc_gen_reloc (section, fixp)
   /* Use the rela in 64bit mode.  */
   else
     {
+      if (disallow_64bit_reloc)
+	switch (code)
+	  {
+	  case BFD_RELOC_64:
+	  case BFD_RELOC_X86_64_DTPOFF64:
+	  case BFD_RELOC_X86_64_TPOFF64:
+	  case BFD_RELOC_64_PCREL:
+	  case BFD_RELOC_X86_64_GOTOFF64:
+	  case BFD_RELOC_X86_64_GOT64:
+	  case BFD_RELOC_X86_64_GOTPCREL64:
+	  case BFD_RELOC_X86_64_GOTPC64:
+	  case BFD_RELOC_X86_64_GOTPLT64:
+	  case BFD_RELOC_X86_64_PLTOFF64:
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  _("cannot represent relocation type %s in x32 mode"),
+			  bfd_get_reloc_code_name (code));
+	    break;
+	  default:
+	    break;
+	  }
+
       if (!fixp->fx_pcrel)
 	rel->addend = fixp->fx_offset;
       else

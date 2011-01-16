@@ -1,4 +1,3 @@
-#source: ../immed64.s
 #objdump: -dw
 #name: x86-64 (ILP32) immed
 
@@ -24,7 +23,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-fA-F]+:[ 	]+b8 00 00 00 00[ 	]+movl? +\$0x0,%eax
 [ 	]*[0-9a-fA-F]+:[ 	]+48 b8 04 00 00 00 00 00 00 00[ 	]+movabsq? +\$0x4,%rax
 [ 	]*[0-9a-fA-F]+:[ 	]+48 b8 08 00 00 00 00 00 00 00[ 	]+movabsq? +\$0x8,%rax
-[ 	]*[0-9a-fA-F]+:[ 	]+48 b8 00 00 00 00 00 00 00 00[ 	]+movabsq? +\$0x0,%rax
 [ 	]*[0-9a-fA-F]+:[ 	]+04 04[ 	]+addb? +\$0x4,%al
 [ 	]*[0-9a-fA-F]+:[ 	]+04 08[ 	]+addb? +\$0x8,%al
 [ 	]*[0-9a-fA-F]+:[ 	]+04 00[ 	]+addb? +\$0x0,%al

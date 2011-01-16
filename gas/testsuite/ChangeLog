@@ -1,3 +1,16 @@
+2011-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/ilp32/immed64.s: New.
+	* gas/i386/ilp32/reloc64.s: Likewise.
+	* gas/i386/ilp32/x86-64-pcrel.s: Likewise.
+
+	* gas/i386/ilp32/inval.s: Add more tests.
+
+	* gas/i386/ilp32/immed64.d: Updated.
+	* gas/i386/ilp32/inval.l: Likewise.
+	* gas/i386/ilp32/reloc64.d: Likewise.
+	* gas/i386/ilp32/x86-64-pcrel.d: Likewise.
+
 2011-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/ilp32.exp: Run inval.

@@ -1,3 +1,11 @@
+2011-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (disallow_64bit_disp): Renamed to ...
+	(disallow_64bit_reloc): This.
+	(md_assemble): Don't check movabs for x32 mode here.
+	(i386_target_format): Updated.
+	(tc_gen_reloc): Check if 64bit relocations are allowed.
+
 2011-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (disallow_64bit_disp): New.
