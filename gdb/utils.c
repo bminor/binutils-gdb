@@ -73,6 +73,7 @@
 
 #include "gdb_usleep.h"
 #include "interps.h"
+#include "gdb_regex.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -1641,6 +1642,37 @@ gdb_print_host_address (const void *addr, struct ui_file *stream)
 {
   fprintf_filtered (stream, "%s", host_address_to_string (addr));
 }
+
+
+/* A cleanup function that calls regfree.  */
+
+static void
+do_regfree_cleanup (void *r)
+{
+  regfree (r);
+}
+
+/* Create a new cleanup that frees the compiled regular expression R.  */
+
+struct cleanup *
+make_regfree_cleanup (regex_t *r)
+{
+  return make_cleanup (do_regfree_cleanup, r);
+}
+
+/* Return an xmalloc'd error message resulting from a regular
+   expression compilation failure.  */
+
+char *
+get_regcomp_error (int code, regex_t *rx)
+{
+  size_t length = regerror (code, rx, NULL, 0);
+  char *result = xmalloc (length);
+
+  regerror (code, rx, result, length);
+  return result;
+}
+
 
 
 /* This function supports the query, nquery, and yquery functions.

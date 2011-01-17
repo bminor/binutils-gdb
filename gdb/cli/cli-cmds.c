@@ -1254,18 +1254,26 @@ void
 apropos_command (char *searchstr, int from_tty)
 {
   regex_t pattern;
-  char errorbuffer[512];
+  int code;
 
   if (searchstr == NULL)
     error (_("REGEXP string is empty"));
 
-  if (regcomp (&pattern, searchstr, REG_ICASE) == 0)
-    apropos_cmd (gdb_stdout, cmdlist, &pattern, "");
+  code = regcomp (&pattern, searchstr, REG_ICASE);
+  if (code == 0)
+    {
+      struct cleanup *cleanups;
+
+      cleanups = make_regfree_cleanup (&pattern);
+      apropos_cmd (gdb_stdout, cmdlist, &pattern, "");
+      do_cleanups (cleanups);
+    }
   else
     {
-      regerror (regcomp (&pattern, searchstr, REG_ICASE), NULL,
-		errorbuffer, 512);
-      error (_("Error in regular expression: %s"), errorbuffer);
+      char *err = get_regcomp_error (code, &pattern);
+
+      make_cleanup (xfree, err);
+      error (_("Error in regular expression: %s"), err);
     }
 }
 

@@ -28,4 +28,8 @@
 # include <regex.h>
 #endif
 
+/* From utils.c.  */
+struct cleanup *make_regfree_cleanup (regex_t *);
+char *get_regcomp_error (int, regex_t *);
+
 #endif /* not GDB_REGEX_H */

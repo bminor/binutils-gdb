@@ -1,5 +1,15 @@
 2011-01-17  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-cmds.c (apropos_command): Free the compiled regex.  Use
+	get_regcomp_error.
+	* utils.c: Include gdb_regex.h.
+	(do_regfree_cleanup): New function.
+	(make_regfree_cleanup): Likewise.
+	(get_regcomp_error): Likewise.
+	* gdb_regex.h (make_regfree_cleanup, get_regcomp_error): Declare.
+
+2011-01-17  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-cmds.c (apropos_command): Fix formatting.  Don't call
 	re_compile_fastmap.
 
