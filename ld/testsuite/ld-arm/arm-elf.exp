@@ -126,6 +126,9 @@ set armelftests {
     {"arm-rel31" "-static -T arm.ld" "" {arm-rel31.s}
      {{objdump -s arm-rel31.d}}
      "arm-rel31"}
+    {"arm-rel32" "-shared -T arm-dyn.ld" "" {arm-rel32.s}
+     {{objdump -Rsj.data arm-rel32.d}}
+     "arm-rel32"}
     {"arm-call" "-static -T arm.ld" "-meabi=4" {arm-call1.s arm-call2.s}
      {{objdump -d arm-call.d}}
      "arm-call"}

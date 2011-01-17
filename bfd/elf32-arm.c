@@ -11576,7 +11576,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if ((info->shared || htab->root.is_relocatable_executable)
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& ((r_type == R_ARM_ABS32 || r_type == R_ARM_ABS32_NOI)
-		    || (h != NULL && ! h->needs_plt
+		    || (h != NULL && ! needs_plt
 			&& (! info->symbolic || ! h->def_regular))))
 	      {
 		struct elf_dyn_relocs *p, **head;

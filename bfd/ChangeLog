@@ -1,5 +1,10 @@
 2011-01-17  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* elf32-arm.c (elf32_arm_check_relocs): Check needs_plt rather than
+	h->needs_plt when deciding whether to record a possible dynamic reloc.
+
+2011-01-17  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* elf32-arm.c (elf32_arm_gc_sweep_hook): Remove all registered
 	dynamic relocs for the removed section.
 

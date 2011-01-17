@@ -1,5 +1,10 @@
 2011-01-17  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* ld-arm/arm-rel32.s, ld-arm/arm-rel32.d: New testcase.
+	* ld-arm/arm-elf.exp: Run it.
+
+2011-01-17  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* ld-arm/gc-thumb-lib.s, ld-arm/gc-thumb.s,
 	ld-arm/gc-thumb.d: New test.
 	* ld-arm/arm-elf.exp: Run it.
