@@ -1,3 +1,9 @@
+2011-01-17  Quentin Neill  <quentin.neill@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add CPU_TBM_FLAGS.
+
+	* doc/c-i386.texi (i386-TBM): New section.
+
 2011-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (disallow_64bit_disp): Renamed to ...

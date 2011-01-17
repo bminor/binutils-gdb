@@ -62,3 +62,5 @@ xstorerng
 nopl (%eax)
 # BMI
 blsr %ecx,%ebx
+# TBM
+blcfill %ecx,%ebx

@@ -601,7 +601,9 @@ enum
   REG_VEX_0FAE,
   REG_VEX_0F38F3,
   REG_XOP_LWPCB,
-  REG_XOP_LWP
+  REG_XOP_LWP,
+  REG_XOP_TBM_01,
+  REG_XOP_TBM_02
 };
 
 enum
@@ -2778,6 +2780,27 @@ static const struct dis386 reg_table[][8] = {
   {
     { "lwpins", { { OP_LWP_E, 0 }, Ed, Iq } },
     { "lwpval",	{ { OP_LWP_E, 0 }, Ed, Iq } },
+  },
+  /* REG_XOP_TBM_01 */
+  {
+    { Bad_Opcode },
+    { "blcfill",	{ { OP_LWP_E, 0 }, Ev } },
+    { "blsfill",	{ { OP_LWP_E, 0 }, Ev } },
+    { "blcs",	{ { OP_LWP_E, 0 }, Ev } },
+    { "tzmsk",	{ { OP_LWP_E, 0 }, Ev } },
+    { "blcic",	{ { OP_LWP_E, 0 }, Ev } },
+    { "blsic",	{ { OP_LWP_E, 0 }, Ev } },
+    { "t1mskc",	{ { OP_LWP_E, 0 }, Ev } },
+  },
+  /* REG_XOP_TBM_02 */
+  {
+    { Bad_Opcode },
+    { "blcmsk",	{ { OP_LWP_E, 0 }, Ev } },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "blci",	{ { OP_LWP_E, 0 }, Ev } },
   },
 };
 
@@ -6459,7 +6482,7 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 10 */
-    { Bad_Opcode },
+    { "bextr",	{ Gv, Ev, Iq } },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6733,8 +6756,8 @@ static const struct dis386 xop_table[][256] = {
   {
     /* 00 */
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { REG_TABLE (REG_XOP_TBM_01) },
+    { REG_TABLE (REG_XOP_TBM_02) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7041,7 +7064,7 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 10 */
-    { Bad_Opcode },
+    { "bextr",	{ Gv, Ev, Iq } },
     { Bad_Opcode },
     { REG_TABLE (REG_XOP_LWP) },
     { Bad_Opcode },

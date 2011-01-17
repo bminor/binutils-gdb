@@ -112,6 +112,8 @@ enum
   CpuLWP,
   /* BMI support required */
   CpuBMI,
+  /* TBM support required */
+  CpuTBM,
   /* MOVBE Instruction support required */
   CpuMovbe,
   /* EPT Instructions required */
@@ -189,6 +191,7 @@ typedef union i386_cpu_flags
       unsigned int cpuxop:1;
       unsigned int cpulwp:1;
       unsigned int cpubmi:1;
+      unsigned int cputbm:1;
       unsigned int cpumovbe:1;
       unsigned int cpuept:1;
       unsigned int cpurdtscp:1;

@@ -36,6 +36,7 @@ extending the Intel architecture to 64-bits.
 * i386-SIMD::                   Intel's MMX and AMD's 3DNow! SIMD Operations
 * i386-LWP::                    AMD's Lightweight Profiling Instructions
 * i386-BMI::                    Bit Manipulation Instruction
+* i386-TBM::                    AMD's Trailing Bit Manipulation Instructions
 * i386-16bit::                  Writing 16-bit Code
 * i386-Arch::                   Specifying an x86 CPU architecture
 * i386-Bugs::                   AT&T Syntax bugs
@@ -860,6 +861,21 @@ resetting.
 
 @c Need to add a specification citation here when available.
 
+@node i386-TBM
+@section AMD's Trailing Bit Manipulation Instructions
+
+@cindex TBM, i386
+@cindex TBM, x86-64
+
+@code{@value{AS}} supports AMD's Trailing Bit Manipulation (TBM)
+instruction set, available on AMD's BDVER2 processors (Trinity and
+Viperfish).
+
+TBM instructions provide instructions implementing individual bit
+manipulation operations such as isolating, masking, setting, resetting,
+complementing, and operations on trailing zeros and ones.
+
+@c Need to add a specification citation here when available.
 
 @node i386-16bit
 @section Writing 16-bit Code

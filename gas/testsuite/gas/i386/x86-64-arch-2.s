@@ -60,3 +60,5 @@ lzcnt %ecx,%ebx
 xstorerng
 # BMI
 blsr %ecx,%ebx
+# TBM
+blcfill %ecx,%ebx

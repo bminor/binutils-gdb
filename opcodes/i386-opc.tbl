@@ -2742,6 +2742,18 @@ blsmsk, 2, 0xf3, 0x2, 1, CpuBMI, Modrm|CheckRegSize|Vex=3|VexOpcode=1|VexVVVV=2|
 blsr, 2, 0xf3, 0x1, 1, CpuBMI, Modrm|CheckRegSize|Vex=3|VexOpcode=1|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64 }
 tzcnt, 2, 0xf30fbc, None, 2, CpuBMI, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 
+// TBM instructions
+bextr,  3, 0x10,   None, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=5|VexVVVV=0|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Imm32|Imm32S, Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+blcfill, 2, 0x01,   0x1, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+blci,  2, 0x02,   0x6, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+blcic,  2, 0x01,   0x5, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+blcmsk, 2, 0x02,   0x1, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+blcs,  2, 0x01,   0x3, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+blsfill, 2, 0x01,   0x2, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+blsic,  2, 0x01,   0x6, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+t1mskc, 2, 0x01,   0x7, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+tzmsk,  2, 0x01,   0x4, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=2|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32|Reg64 }
+
 // AMD 3DNow! instructions.
 
 prefetch, 1, 0xf0d, 0x0, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
