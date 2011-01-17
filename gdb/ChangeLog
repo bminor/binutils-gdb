@@ -1,3 +1,8 @@
+2011-01-17  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-cmds.c (apropos_command): Fix formatting.  Don't call
+	re_compile_fastmap.
+
 2011-01-17  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y (intvar): New static variable, used to set CURRENT_TYPE
