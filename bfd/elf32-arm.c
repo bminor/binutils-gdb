@@ -11277,21 +11277,13 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 		    eh->plt_thumb_refcount--;
 		}
 
-	      if (r_type == R_ARM_ABS32
-		  || r_type == R_ARM_REL32
-                  || r_type == R_ARM_ABS32_NOI
-                  || r_type == R_ARM_REL32_NOI)
-		for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		  if (p->sec == sec)
-		    {
-		      p->count -= 1;
-		      if (ELF32_R_TYPE (rel->r_info) == R_ARM_REL32
-			  || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32_NOI)
-			p->pc_count -= 1;
-		      if (p->count == 0)
-			*pp = p->next;
-		      break;
-		    }
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+		if (p->sec == sec)
+		  {
+		    /* Everything must go for SEC.  */
+		    *pp = p->next;
+		    break;
+		  }
 	    }
 	  break;
 

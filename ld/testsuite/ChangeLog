@@ -1,3 +1,9 @@
+2011-01-17  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* ld-arm/gc-thumb-lib.s, ld-arm/gc-thumb.s,
+	ld-arm/gc-thumb.d: New test.
+	* ld-arm/arm-elf.exp: Run it.
+
 2011-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/ia32-2.d: Replace --n32 with --x32.

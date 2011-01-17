@@ -261,6 +261,12 @@ set armelftests {
     {"Unwinding and -gc-sections" "-gc-sections" "" {gc-unwind.s}
      {{objdump -sj.data gc-unwind.d}}
      "gc-unwind"}
+    {"Thumb and -gc-sections" "-shared -T arm-dyn.ld" "" {gc-thumb-lib.s}
+     {}
+     "gc-thumb-lib.so"}
+    {"Thumb and -gc-sections" "-pie -T arm.ld -gc-sections tmpdir/gc-thumb-lib.so" "" {gc-thumb.s}
+     {{readelf --relocs gc-thumb.d}}
+     "gc-thumb"}
     {"arm-pic-veneer" "-static -T arm.ld --pic-veneer" "" {arm-pic-veneer.s}
      {{objdump -d arm-pic-veneer.d}}
      "arm-pic-veneer"}
