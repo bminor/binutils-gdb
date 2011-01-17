@@ -1,3 +1,15 @@
+2011-01-17  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y (intvar): New static variable, used to set CURRENT_TYPE
+	for internal variables.
+	(last_was_structop): New static variable.
+	(COMPLETE): New token.
+	(field_exp): New rule to group all '.' suffix handling.
+	Add mark_struct_expression calls when approriate to be able
+	to correctly find fields for completion.
+	(yylex): Adapt to handle field completion and set INTVAR when
+	required.
+
 2011-01-14  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (arm_register_reggroup_p): FPS register is in

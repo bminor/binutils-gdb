@@ -158,6 +158,7 @@ static int
 parse_number (char *, int, int, YYSTYPE *);
 
 static struct type *current_type;
+static struct internalvar *intvar;
 static int leftdiv_is_integer;
 static void push_current_type (void);
 static void pop_current_type (void);
@@ -184,6 +185,7 @@ static int search_field;
 
 %token <sval> STRING 
 %token <sval> FIELDNAME
+%token <voidval> COMPLETE
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence.  */
 %token <tsym> TYPENAME
 %type <sval> name
@@ -233,6 +235,7 @@ static int search_field;
 %%
 
 start   :	{ current_type = NULL;
+		  intvar = NULL;
 		  search_field = 0;
 		  leftdiv_is_integer = 0;
 		}
@@ -285,19 +288,56 @@ exp	:	DECREMENT  '(' exp ')'   %prec UNARY
 			{ write_exp_elt_opcode (UNOP_PREDECREMENT); }
 	;
 
-exp	:	exp '.' { search_field = 1; } 
-		FIELDNAME 
-		/* name */
+
+field_exp	:	exp '.'	%prec UNARY
+			{ search_field = 1; } 
+	;
+
+exp	:	field_exp FIELDNAME 
 			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_string ($4); 
+			  write_exp_string ($2); 
 			  write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  search_field = 0; 
 			  if (current_type)
-			    { while (TYPE_CODE (current_type) == TYPE_CODE_PTR)
-				current_type = TYPE_TARGET_TYPE (current_type);
+			    { 
+			      while (TYPE_CODE (current_type)
+				     == TYPE_CODE_PTR)
+				current_type =
+				  TYPE_TARGET_TYPE (current_type);
 			      current_type = lookup_struct_elt_type (
-				current_type, $4.ptr, 0); };
-			 } ; 
+				current_type, $2.ptr, 0);
+			    }
+			 }
+	; 
+
+exp	:	field_exp name
+			{ mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_exp_string ($2);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  search_field = 0; 
+			  if (current_type)
+			    { 
+			      while (TYPE_CODE (current_type)
+				     == TYPE_CODE_PTR)
+				current_type =
+				  TYPE_TARGET_TYPE (current_type);
+			      current_type = lookup_struct_elt_type (
+				current_type, $2.ptr, 0);
+			    }
+			}
+	;
+
+exp	:	field_exp COMPLETE
+			{ struct stoken s;
+			  mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  s.ptr = "";
+			  s.length = 0;
+			  write_exp_string (s);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+	;
+
 exp	:	exp '['
 			/* We need to save the current_type value.  */
 			{ char *arrayname; 
@@ -516,8 +556,19 @@ exp	:	variable
 	;
 
 exp	:	VARIABLE
-			/* Already written by write_dollar_variable.  */
-	;
+			/* Already written by write_dollar_variable.
+			   Handle current_type.  */
+ 			{  if (intvar) {
+ 			     struct value * val, * mark;
+
+			     mark = value_mark ();
+ 			     val = value_of_internalvar (parse_gdbarch,
+ 							 intvar);
+ 			     current_type = value_type (val);
+			     value_release_to_mark (mark);
+ 			   }
+ 			}
+ 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
@@ -1060,8 +1111,13 @@ static char * uptok (tokstart, namelen)
   uptokstart[namelen]='\0';
   return uptokstart;
 }
-/* Read one token, getting characters through lexptr.  */
 
+/* This is set if the previously-returned token was a structure
+   operator  '.'.  This is used only when parsing to
+   do field name completion.  */
+static int last_was_structop;
+
+/* Read one token, getting characters through lexptr.  */
 
 static int
 yylex ()
@@ -1075,7 +1131,9 @@ yylex ()
   int explen, tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
-
+  int saw_structop = last_was_structop;
+ 
+  last_was_structop = 0;
  retry:
 
   prev_lexptr = lexptr;
@@ -1111,7 +1169,10 @@ yylex ()
   switch (c = *tokstart)
     {
     case 0:
-      return 0;
+      if (saw_structop && search_field)
+	return COMPLETE;
+      else
+       return 0;
 
     case ' ':
     case '\t':
@@ -1172,7 +1233,12 @@ yylex ()
     case '.':
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
-	goto symbol;		/* Nope, must be a symbol.  */
+	{
+	  if (in_parse_field)
+	    last_was_structop = 1;
+	  goto symbol;		/* Nope, must be a symbol.  */
+	}
+
       /* FALL THRU into number case.  */
 
     case '0':
@@ -1430,11 +1496,17 @@ yylex ()
 
   if (*tokstart == '$')
     {
+      char c;
       /* $ is the normal prefix for pascal hexadecimal values
         but this conflicts with the GDB use for debugger variables
         so in expression to enter hexadecimal values
         we still need to use C syntax with 0xff  */
       write_dollar_variable (yylval.sval);
+      c = tokstart[namelen];
+      tokstart[namelen] = 0;
+      intvar = lookup_only_internalvar (++tokstart);
+      --tokstart;
+      tokstart[namelen] = c;
       free (uptokstart);
       return VARIABLE;
     }
@@ -1454,7 +1526,7 @@ yylex ()
 
     if (search_field && current_type)
       is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-    if (is_a_field)
+    if (is_a_field || in_parse_field)
       sym = NULL;
     else
       sym = lookup_symbol (tmp, expression_context_block,
@@ -1469,7 +1541,7 @@ yylex ()
          }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-       if (is_a_field)
+       if (is_a_field || in_parse_field)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
@@ -1497,7 +1569,7 @@ yylex ()
           }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-       if (is_a_field)
+       if (is_a_field || in_parse_field)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
