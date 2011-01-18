@@ -1,4 +1,5 @@
-@c Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000, 2003, 2006
+@c Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000, 2003,
+@c 2006, 2011
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -145,6 +146,25 @@ lda  #23
 bset 2,x #4
 brclr *bot #8 foo
 @end smallexample
+
+@cindex line comment character, M68HC11
+@cindex M68HC11 line comment character
+The presence of a @samp{;} character or a @samp{!} character anywhere
+on a line indicates the start of a comment that extends to the end of
+that line.
+
+A @samp{*} or a @samp{#} character at the start of a line also
+introduces a line comment, but these characters do not work elsewhere
+on the line.  If the first character of the line is a @samp{#} then as
+well as starting a comment, the line could also be logical line number
+directive (@pxref{Comments}) or a preprocessor control command
+(@pxref{Preprocessing}).
+
+@cindex line separator, M68HC11
+@cindex statement separator, M68HC11
+@cindex M68HC11 line separator
+The M68HC11 assembler does not currently support a line separator
+character.
 
 @cindex M68HC11 addressing modes
 @cindex addressing modes, M68HC11

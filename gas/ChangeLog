@@ -1,3 +1,51 @@
+2011-01-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12390
+	* doc/all.texi: Add NS32K
+	* doc/as.texinfo: Remove target specific details of which
+	characters act as comment initiators and statement separators into
+	individual target specific files.
+	* doc/c-alpha.texi (Alpha-Chars): Document special behaviour of
+	the hash character at the start of a line.
+	* doc/c-arm.texi (ARM-Chars): Likewise.
+	* doc/c-avr.texi (AVR-Chars): Likewise.
+	* doc/c-d10v.texi (D10V-Chars): Likewise.
+	* doc/c-d30v.texi (D30V-Chars):	Likewise.
+	* doc/c-mmix.texi (MMIX-Chars): Likewise.
+	* doc/c-s390.texi (s390 characters): Likewise.
+	* doc/c-sh.texi (SH-Chars): Likewise.
+	* doc/c-sh64.texi (SH64-Chars): Likewise.
+	* doc/c-sparc.texi (SPARC-Chars): Likewise.
+	* doc/c-tic6x.texi (TIC6X Syntax): Likewise.
+	* doc/c-xtensa.texi (Xtensa Syntax): Likewise.
+	* doc/c-z80.texi (Z80-Chars): Likewise.
+	* doc/c-z8k.texi (Z8000-Chars): Likewise.
+	* doc/c-pdp11.texi (PDP11-Syntax): Document line separator character.
+	* doc/c-arc.texi (ARC-Chars): Fill in this subsection.
+	* doc/c-bfin.texi (Blackfin Syntax): Document line comment and
+	line separator characters.
+	* doc/c-cr16.texi (CR16 Syntax): Likewise.
+	* doc/c-i386.texi (i386-Chars): Likewise.
+	* doc/c-i860.texi (i860-Chars):	Likewise.
+	* doc/c-i960.texi (i960-Chars):	Likewise.
+	* doc/c-ip2k.texi (IP2K-Chars):	Likewise.
+	* doc/c-lm32.texi (LM32-Chars):	likewise.
+	* doc/c-m32c.texi (M32C-Chars): Likewise.
+	* doc/c-m68hc11.texi (M68HC11-syntax): Likewise.
+	* doc/c-m68k.texi (M68K-Chars): Likewise.
+	* doc/c-microblaze.texi (MicroBlaze-Chars): Likewise.
+	* doc/c-msp430.texi (MSP430-Chars): Likewise.
+	* doc/c-mt.texi (MT-Chars): Likewise.
+	* doc/c-ns32k.texi (NS32K-Chars): Likewise.
+	* doc/c-pj.texi (PJ-Chars): Likewise.
+	* doc/c-ppc.texi (PowerPC-Chars): Likewise.
+	* doc/c-rx.texi (RX-Chars): Likewise.
+	* doc/c-score.texi (SCORE-Chars): Likewise.
+	* doc/c-tic54x.texi (TIC54X-Chars): Likewise.
+	* doc/c-v850.texi (V850-Chars): Likewise.
+	* doc/c-vax.texi (VAX-Chars): Likewise.
+	* doc/c-xc16x.texi (xc16x-Chars): Likewise.
+
 2011-01-17  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add CPU_TBM_FLAGS.

@@ -1,6 +1,6 @@
 \input texinfo @c                               -*-Texinfo-*-
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 @c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
@@ -103,7 +103,8 @@ This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
+Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -153,7 +154,8 @@ done.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
+Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -2236,7 +2238,7 @@ assembler, except that @command{@value{AS}} does not assemble Vax bit-fields.
 @end ifset
 
 @menu
-* Preprocessing::              Preprocessing
+* Preprocessing::               Preprocessing
 * Whitespace::                  Whitespace
 * Comments::                    Comments
 * Symbol Intro::                Symbols
@@ -2321,98 +2323,18 @@ This means you may not nest these comments.
 @end smallexample
 
 @cindex line comment character
-Anything from the @dfn{line comment} character to the next newline
-is considered a comment and is ignored.  The line comment character is
-@ifset ARC
-@samp{;} on the ARC;
-@end ifset
-@ifset ARM
-@samp{@@} on the ARM;
-@end ifset
-@ifset H8/300
-@samp{;} for the H8/300 family;
-@end ifset
-@ifset HPPA
-@samp{;} for the HPPA;
-@end ifset
-@ifset I80386
-@samp{#} on the i386 and x86-64;
-@end ifset
-@ifset I960
-@samp{#} on the i960;
-@end ifset
-@ifset PDP11
-@samp{;} for the PDP-11;
-@end ifset
-@ifset PJ
-@samp{;} for picoJava;
-@end ifset
-@ifset PPC
-@samp{#} for Motorola PowerPC;
-@end ifset
-@ifset S390
-@samp{#} for IBM S/390;
-@end ifset
-@ifset SCORE
-@samp{#} for the Sunplus SCORE;
-@end ifset
-@ifset SH
-@samp{!} for the Renesas / SuperH SH;
-@end ifset
-@ifset SPARC
-@samp{!} on the SPARC;
-@end ifset
-@ifset IP2K
-@samp{#} on the ip2k;
-@end ifset
-@ifset M32C
-@samp{#} on the m32c;
-@end ifset
-@ifset M32R
-@samp{#} on the m32r;
-@end ifset
-@ifset M680X0
-@samp{|} on the 680x0;
-@end ifset
-@ifset M68HC11
-@samp{#} on the 68HC11 and 68HC12;
-@end ifset
-@ifset RX
-@samp{#} on the RX;
-@end ifset
-@ifset TIC6X
-@samp{;} on the TMS320C6X;
-@end ifset
-@ifset VAX
-@samp{#} on the Vax;
-@end ifset
-@ifset Z80
-@samp{;} for the Z80;
-@end ifset
-@ifset Z8000
-@samp{!} for the Z8000;
-@end ifset
-@ifset V850
-@samp{#} on the V850;
-@end ifset
-@ifset XTENSA
-@samp{#} for Xtensa systems;
-@end ifset
-see @ref{Machine Dependencies}.  @refill
-@c FIXME What about i860?
+Anything from a @dfn{line comment} character up to the next newline is
+considered a comment and is ignored.  The line comment character is target
+specific, and some targets multiple comment characters.  Some targets also have
+line comment characters that only work if they are the first character on a
+line.  Some targets use a sequence of two characters to introduce a line
+comment.  Some targets can also change their line comment characters depending
+upon command line options that have been used.  For more details see the
+@emph{Syntax} section in the documentation for individual targets.
 
-@ifset GENERIC
-On some machines there are two different line comment characters.  One
-character only begins a comment if it is the first non-whitespace character on
-a line, while the other always begins a comment.
-@end ifset
-
-@ifset V850
-The V850 assembler also supports a double dash as starting a comment that
-extends to the end of the line.
-
-@samp{--};
-@end ifset
+If the line comment character is the hash sign (@samp{#}) then it still has the
+special ability to enable and disable preprocessing (@pxref{Preprocessing}) and
+to specify logical line numbers:
 
 @kindex #
 @cindex lines starting with @code{#}
@@ -2470,37 +2392,14 @@ not a possible symbol delimiter).  @xref{Symbols}.
 @cindex statements, structure of
 @cindex line separator character
 @cindex statement separator character
-@ifclear GENERIC
-@ifclear abnormal-separator
-A @dfn{statement} ends at a newline character (@samp{\n}) or at a
-semicolon (@samp{;}).  The newline or semicolon is considered part of
-the preceding statement.  Newlines and semicolons within character
-constants are an exception: they do not end statements.
-@end ifclear
-@ifset abnormal-separator
-@ifset HPPA
-A @dfn{statement} ends at a newline character (@samp{\n}) or an exclamation
-point (@samp{!}).  The newline or exclamation point is considered part of the
-preceding statement.  Newlines and exclamation points within character
-constants are an exception: they do not end statements.
-@end ifset
-@ifset H8
-A @dfn{statement} ends at a newline character (@samp{\n}); or (for the
-H8/300) a dollar sign (@samp{$}); or (for the Renesas-SH) a semicolon
-(@samp{;}).  The newline or separator character is considered part of
-the preceding statement.  Newlines and separators within character
-constants are an exception: they do not end statements.
-@end ifset
-@end ifset
-@end ifclear
-@ifset GENERIC
-A @dfn{statement} ends at a newline character (@samp{\n}) or line
-separator character.  (The line separator is usually @samp{;}, unless this
-conflicts with the comment character; see @ref{Machine Dependencies}.)  The
-newline or separator character is considered part of the preceding
-statement.  Newlines and separators within character constants are an
+
+A @dfn{statement} ends at a newline character (@samp{\n}) or a
+@dfn{line separator character}.  The line separator character is target
+specific and described in the @emph{Syntax} section of each
+target's documentation.  Not all targets support a line separator character.
+The newline or line separator character is considered to be part of the
+preceding statement.  Newlines and separators within character constants are an
 exception: they do not end statements.
-@end ifset
 
 @cindex newline, required at file end
 @cindex EOF, newline must precede
@@ -6914,6 +6813,9 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset MSP430
 * MSP430-Dependent::		MSP430 Dependent Features
+@end ifset
+@ifset NS32K
+* NS32K-Dependent::		NS32K Dependent Features
 @end ifset
 @ifset SH
 * SH-Dependent::                Renesas / SuperH SH Dependent Features

@@ -1,5 +1,5 @@
 @c Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999, 2000,
-@c 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+@c 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -26,7 +26,7 @@ extending the Intel architecture to 64-bits.
 @menu
 * i386-Options::                Options
 * i386-Directives::             X86 specific directives
-* i386-Syntax::                 AT&T Syntax versus Intel Syntax
+* i386-Syntax::                 Syntactical considerations
 * i386-Mnemonics::              Instruction Naming
 * i386-Regs::                   Register Naming
 * i386-Prefixes::               Instruction Prefixes
@@ -261,7 +261,14 @@ This directive is only available for COFF based x86 targets.
 @end table
 
 @node i386-Syntax
-@section AT&T Syntax versus Intel Syntax
+@section i386 Syntactical Considerations
+@menu
+* i386-Variations::           AT&T Syntax versus Intel Syntax
+* i386-Chars::                Special Characters
+@end menu
+
+@node i386-Variations
+@subsection AT&T Syntax versus Intel Syntax
 
 @cindex i386 intel_syntax pseudo op
 @cindex intel_syntax pseudo op, i386
@@ -361,6 +368,29 @@ is @samp{lret $@var{stack-adjust}} in AT&T syntax; Intel syntax is
 The AT&T assembler does not provide support for multiple section
 programs.  Unix style systems expect all programs to be single sections.
 @end itemize
+
+@node i386-Chars
+@subsection Special Characters
+
+@cindex line comment character, i386
+@cindex i386 line comment character
+The presence of a @samp{#} appearing anywhere on a line indicates the
+start of a comment that extends to the end of that line.
+
+If a @samp{#} appears as the first character of a line then the whole
+line is treated as a comment, but in this case the line can also be a
+logical line number directive (@pxref{Comments}) or a preprocessor
+control command (@pxref{Preprocessing}).
+
+If the @option{--divide} command line option has not been specified
+then the @samp{/} character appearing anywhere on a line also
+introduces a line comment.
+
+@cindex line separator, i386
+@cindex statement separator, i386
+@cindex i386 line separator
+The @samp{;} character can be used to separate statements on the same
+line.
 
 @node i386-Mnemonics
 @section Instruction Naming

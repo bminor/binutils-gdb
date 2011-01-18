@@ -1,4 +1,4 @@
-@c Copyright 2010 Free Software Foundation, Inc.
+@c Copyright 2010, 2011 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c man end
@@ -107,7 +107,10 @@ little-endian.
 The presence of a @samp{;} on a line indicates the start of a comment
 that extends to the end of the current line.  If a @samp{#} or
 @samp{*} appears as the first character of a line, the whole line is
-treated as a comment.
+treated as a comment.  Note that if a line starts with a @samp{#}
+character then it can also be a logical line number directive
+(@pxref{Comments}) or a preprocessor control command
+(@pxref{Preprocessing}).
 
 @cindex line separator, TIC6X
 @cindex statement separator, TIC6X
