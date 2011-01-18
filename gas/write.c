@@ -1359,6 +1359,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   flagword flags = bfd_get_section_flags (abfd, sec);
 
   if (seginfo == NULL
+      || sec->size == 0
       || (flags & (SEC_ALLOC | SEC_HAS_CONTENTS)) == SEC_ALLOC)
     return;
 

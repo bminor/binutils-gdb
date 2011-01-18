@@ -1,3 +1,8 @@
+2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/12409
+	* write.c (compress_debug): Return if section size is 0.
+
 2011-01-18  Mingfeng Wu  <mingfeng@faraday-tech.com>
 
 	* config/tc-arm.c (arm_cpus): Add Faraday ARMv5TE compatible
