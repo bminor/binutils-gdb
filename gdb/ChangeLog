@@ -1,3 +1,10 @@
+2011-01-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* rs6000-tdep.c (rs6000_skip_prologue): Make sure that the prologue
+	upper limit address is not greater than the function end address
+	when the upper limit could not be computed using the debugging
+	info.
+
 2011-01-17  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-cmds.c (apropos_command): Free the compiled regex.  Use

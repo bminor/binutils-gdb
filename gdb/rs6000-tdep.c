@@ -2090,12 +2090,12 @@ static CORE_ADDR
 rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct rs6000_framedata frame;
-  CORE_ADDR limit_pc, func_addr;
+  CORE_ADDR limit_pc, func_addr, func_end_addr = 0;
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
-  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end_addr))
     {
       CORE_ADDR post_prologue_pc
 	= skip_prologue_using_sal (gdbarch, func_addr);
@@ -2112,6 +2112,11 @@ rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   limit_pc = skip_prologue_using_sal (gdbarch, pc);
   if (limit_pc == 0)
     limit_pc = pc + 100;          /* Magic.  */
+
+  /* Do not allow limit_pc to be past the function end, if we know
+     where that end is...  */
+  if (func_end_addr && limit_pc > func_end_addr)
+    limit_pc = func_end_addr;
 
   pc = skip_prologue (gdbarch, pc, limit_pc, &frame);
   return pc;
