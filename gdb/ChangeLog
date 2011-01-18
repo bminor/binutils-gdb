@@ -1,3 +1,8 @@
+2011-01-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (ada_print_scalar): Remove unsigned char downcast.
+	(ada_val_print_1): Likewise.
+
 2011-01-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-valprint. (ada_printchar): Use the correct type length
