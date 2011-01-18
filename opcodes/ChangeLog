@@ -1,3 +1,11 @@
+2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (sIbT): New.
+	(b_T_mode): Likewise.
+	(dis386): Replace sIb with sIbT on "pushT".
+	(x86_64_table): Replace sIb with Ib on "aam" and "aad".
+	(OP_sI): Handle b_T_mode.  Properly sign-extend byte.
+
 2011-01-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* i386-init.h: Regenerated.
