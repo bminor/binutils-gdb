@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "bfd_stdint.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/rx.h"

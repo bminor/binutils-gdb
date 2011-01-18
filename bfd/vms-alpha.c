@@ -1709,7 +1709,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 #if VMS_DEBUG
       _bfd_vms_debug (4, "etir: %s(%d)\n",
                       _bfd_vms_etir_name (cmd), cmd);
-      _bfd_hexdump (8, ptr, cmd_length - 4, (long) ptr);
+      _bfd_hexdump (8, ptr, cmd_length - 4, (intptr_t) ptr);
 #endif
 
       switch (cmd)
