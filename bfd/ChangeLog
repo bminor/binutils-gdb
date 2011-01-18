@@ -1,8 +1,7 @@
 2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* elf64-x86-64.c (elf_backend_static_tls_alignment): Undefine
-	after Solaris target.
-	(elf_backend_want_plt_sym): Redefine to 0 after Solaris target.
+	* elf64-x86-64.c (elf_backend_want_plt_sym): Redefine to 0 after
+	Solaris target.
 
 2011-01-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 

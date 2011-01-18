@@ -4719,9 +4719,6 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #undef  elf_backend_post_process_headers
 #undef  elf_backend_static_tls_alignment
 
-/* Undo Solaris damages.  */
-#undef elf_backend_static_tls_alignment
-
 #undef elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	    0
 
