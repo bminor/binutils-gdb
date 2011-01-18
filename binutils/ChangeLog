@@ -1,3 +1,9 @@
+2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12408
+	* readelf.c (process_archive): Free and reset dump_sects
+	after processing each archive member.
+
 2011-01-11  Andreas Schwab  <schwab@redhat.com>
 
 	* readelf.c (print_symbol): Handle symbol characters as unsigned.

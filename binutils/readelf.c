@@ -12640,6 +12640,13 @@ process_archive (char * file_name, FILE * file, bfd_boolean is_thin_archive)
           ret |= process_object (qualified_name, file);
         }
 
+      if (dump_sects != NULL)
+	{
+	  free (dump_sects);
+	  dump_sects = NULL;
+	  num_dump_sects = 0;
+	}
+
       free (qualified_name);
     }
 
