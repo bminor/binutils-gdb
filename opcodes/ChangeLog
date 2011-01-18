@@ -1,3 +1,8 @@
+2011-01-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Regenerated
+
 2011-01-17  Quentin Neill  <quentin.neill@amd.com>
 
 	* i386-dis.c (REG_XOP_TBM_01): New.
@@ -14,9 +19,6 @@
 
 	* i386-opc.tbl: Add bextr, blcfill, blci, blcic, blcmsk,
 	blcs, blsfill, blsic, t1mskc, and tzmsk.
-
-	* i386-init.h: Regenerated.
-	* i386-tbl.h: Regenerated
 
 2011-01-12  DJ Delorie  <dj@redhat.com>
 
