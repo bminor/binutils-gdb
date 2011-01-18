@@ -417,7 +417,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_CHAR:
-      LA_PRINT_CHAR ((unsigned char) val, type, stream);
+      LA_PRINT_CHAR (val, type, stream);
       break;
 
     case TYPE_CODE_BOOL:
@@ -801,8 +801,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	      if (ada_is_character_type (type))
 		{
 		  fputs_filtered (" ", stream);
-		  ada_printchar ((unsigned char) unpack_long (type, valaddr),
-				 type, stream);
+		  ada_printchar (unpack_long (type, valaddr), type, stream);
 		}
 	    }
 	  return 0;
