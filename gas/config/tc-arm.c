@@ -1,6 +1,6 @@
 /* tc-arm.c -- Assemble for the ARM
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -22600,7 +22600,10 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"arm1022e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1026ejs",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, "ARM1026EJ-S"},
   {"arm1026ej-s",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, NULL},
-  {"fa626te",		ARM_ARCH_V5TE,	 FPU_NONE,	  NULL},
+  {"fa606te",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"fa616te",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2, NULL},
+  {"fa626te",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2, NULL},
+  {"fmp626",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2, NULL},
   {"fa726te",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1136js",		ARM_ARCH_V6,	 FPU_NONE,	  "ARM1136J-S"},
   {"arm1136j-s",	ARM_ARCH_V6,	 FPU_NONE,	  NULL},

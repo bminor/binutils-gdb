@@ -1,3 +1,10 @@
+2011-01-18  Mingfeng Wu  <mingfeng@faraday-tech.com>
+
+	* config/tc-arm.c (arm_cpus): Add Faraday ARMv5TE compatible
+	cores: fa606te, fa616te, fmp626.  Modify the VFP of fa626te.
+	* doc/c-arm.texi (ARM Options): Add -mcpu={fa606te, fa616te,
+	fmp626} options.
+
 2011-01-18  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/12390
