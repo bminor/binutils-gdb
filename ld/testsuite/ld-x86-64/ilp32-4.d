@@ -15,8 +15,8 @@ Section Headers:
   \[ 5\] .text             PROGBITS        00000160 000160 000005 00  AX  0   0  4
   \[ 6\] .dynamic          DYNAMIC         00200168 000168 000078 08  WA  3   0  4
   \[ 7\] .shstrtab         STRTAB          00000000 0001e0 00004a 00      0   0  1
-  \[ 8\] .symtab           SYMTAB          00000000 0003bc 0000f0 10      9  10  4
-  \[ 9\] .strtab           STRTAB          00000000 0004ac 00005d 00      0   0  1
+  \[ 8\] .symtab           SYMTAB          00000000 0003bc 0000e0 10      9   9  4
+  \[ 9\] .strtab           STRTAB          00000000 00049c 000043 00      0   0  1
 Key to Flags:
   W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\), l \(large\)
   I \(info\), L \(link order\), G \(group\), T \(TLS\), E \(exclude\), x \(unknown\)
