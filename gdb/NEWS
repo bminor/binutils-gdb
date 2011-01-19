@@ -130,6 +130,10 @@
 
   ** GDBserver is now supported on Blackfin Linux.
 
+* New native configurations
+
+ia64 HP-UX                      ia64-*-hpux*
+
 * New targets:
 
 Analog Devices, Inc. Blackfin Processor	bfin-*
