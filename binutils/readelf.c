@@ -12405,6 +12405,12 @@ process_object (char * file_name, FILE * file)
       dynamic_syminfo = NULL;
     }
 
+  if (dynamic_section)
+    {
+      free (dynamic_section);
+      dynamic_section = NULL;
+    }
+
   if (section_headers_groups)
     {
       free (section_headers_groups);

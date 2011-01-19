@@ -1,3 +1,7 @@
+2011-01-19  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* readelf.c (process_object): Free dynamic_section after use.
+
 2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/12408
