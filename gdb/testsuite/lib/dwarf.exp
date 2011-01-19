@@ -16,15 +16,15 @@
 # Return true if the target supports DWARF-2 and uses gas.
 # For now pick a sampling of likely targets.
 proc dwarf2_support {} {
-    if {![istarget *-*-linux*]
-	&& ![istarget *-*-gnu*]
-	&& ![istarget *-*-elf*]
-	&& ![istarget *-*-openbsd*]
-	&& ![istarget arm*-*-eabi*]
-	&& ![istarget arm*-*-symbianelf*]
-	&& ![istarget powerpc-*-eabi*]} {
-	return 0
+    if {[istarget *-*-linux*]
+	|| [istarget *-*-gnu*]
+	|| [istarget *-*-elf*]
+	|| [istarget *-*-openbsd*]
+	|| [istarget arm*-*-eabi*]
+	|| [istarget arm*-*-symbianelf*]
+	|| [istarget powerpc-*-eabi*]} {
+	return 1
     }
 
-    return 1
+    return 0
 }

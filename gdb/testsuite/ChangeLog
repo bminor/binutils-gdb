@@ -1,5 +1,10 @@
 2011-01-19  Yao Qi  <yao@codesourcery.com>
 
+	* lib/dwarf.exp (dwarf2_support): Change supported targets to a
+	positve list.
+
+2011-01-19  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.asm/asm-source.exp: Replace ARM target triplet with a
 	canonical form.
 	Remove "xscale-*-*"
